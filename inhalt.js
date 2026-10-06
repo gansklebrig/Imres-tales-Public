@@ -97,6 +97,14 @@ window.INHALT = {
     }
   ],
 
+  /* ---------- HINWEIS VOR DER CHRONIK ---------- */
+  erzaehler: {
+    name: "Barradin",
+    bild: "barradin.jpg",
+    label: "Ein Wort vorab",
+    text: "Diese Chronik wird euch erzählt von Barradin: Barde, Elf und bescheidener Held. Wie es sich für einen Barden gehört, erinnert er sich nicht an jedes Detail ganz genau, und das eine oder andere hat er vielleicht ein klein wenig schöner gedichtet, als es tatsächlich war. Wer es genau wissen will, fragt Imre."
+  },
+
   /* ---------- DIE CHRONIK ----------
      Ein Absatz, der mit "## " beginnt, wird zur Zwischenüberschrift.
      "station" verweist auf die Nummer der Station auf der Karte (1 = erste). */
