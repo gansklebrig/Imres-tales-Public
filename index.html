@@ -25,6 +25,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: auto; }
 body {
   background: var(--night);
@@ -65,6 +66,13 @@ p { margin: 0; }
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .hero .lede { max-width: 40rem; margin-top: 1.4rem; font-size: 1.2rem; color: var(--ash); font-style: italic; }
+
+.gm {
+  margin-top: 1.6rem; max-width: 40rem; padding: .2rem 0 .2rem 1.2rem;
+  border-left: 3px solid var(--ember); display: grid; gap: .35rem;
+}
+.gm p:last-child { font-family: var(--name); font-size: clamp(1.15rem, 2.6vw, 1.4rem); line-height: 1.5; }
+.gm strong { color: var(--ember); font-weight: 400; }
 
 /* Fries der Gruppe */
 .frieze {
@@ -271,6 +279,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="wrap hero">
     <p class="label">Eine Pen-&amp;-Paper-Kampagne</p>
     <h1>Imres Tales</h1>
+    <div class="gm" id="intro" hidden><p class="label" id="intro-label"></p><p id="intro-text"></p></div>
     <p class="lede">Ein Barde mit goldener Zunge. Ein Waldläufer mit ruhiger Hand. Ein Druide mit Feuer im Herzen. Ein Schurke voller Geheimnisse. Und ein Hund, der sie alle zusammenhält.</p>
     <div class="frieze" id="frieze"></div>
     <p class="frieze-hint">Tippe auf ein Porträt, um mehr über den Helden zu erfahren.</p>
@@ -363,6 +372,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     document.querySelectorAll(".spotlight").forEach(x => x.classList.remove("spotlight"));
     ziel.classList.add("spotlight");
     setTimeout(() => ziel.classList.remove("spotlight"), 2400);
+  }
+
+  /* ---------- Intro ---------- */
+  if (D.intro && D.intro.text) {
+    $("intro-label").textContent = D.intro.label || "";
+    $("intro-text").innerHTML = D.intro.text;
+    $("intro").hidden = false;
   }
 
   /* ---------- Fries ---------- */
