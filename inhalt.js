@@ -14,7 +14,7 @@ window.INHALT = {
   /* ---------- INTRO (oben auf der Seite) ---------- */
   intro: {
     label: "Unser Spielleiter",
-    text: "Jede Welt braucht jemanden, der sie erschafft. Unsere hat <strong>Imre</strong>. Als grandioser Spielleiter erfindet er jede Taverne, jeden Drachen und jede Falle, in die wir garantiert hineinlaufen. Das hier sind Imres Geschichten. Wir würfeln nur mit."
+    text: "Eine Welt. Vier Helden. Ein Hund. Und <strong>Imre</strong>, unser grandioser Spielleiter, Herr über Würfel, Welten und Schicksale. Ohne ihn gäbe es keine Hafenstadt, keine magische Schmiede und keinen einzigen gescheiterten Rettungswurf. Was hier geschrieben steht, hat er erschaffen. Wir haben es nur überlebt. Bisher."
   },
 
   /* ---------- DIE GEFÄHRTEN ---------- */
