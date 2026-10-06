@@ -29,10 +29,10 @@ window.INHALT = {
       bildtext: "Barradin in seinem Element: Feuer, Publikum und ein breites Grinsen.",
       fries: "50% 30%",
       absaetze: [
-        "Wo der elfische Barde Barradin auftaucht, wird es nicht leise. Er singt Balladen, wirbelt brennende Fackeln durch die Luft und schlägt Saltos, bis die Menge jubelt. Dass er gut ist, weiß er selbst am besten, und er sagt es auch gern. Doch genau dieses Selbstbewusstsein ist ansteckend: Hat Barradin erst einmal Feuer gefangen, reißt er die ganze Gruppe mit.",
+        "Wo der elfische Barde Barradin auftaucht, wird es nicht leise. Er singt Balladen, wirbelt brennende Fackeln durch die Luft und schlägt Saltos, bis die Menge jubelt. Dass er gut ist, weiß er selbst am besten, und er sagt es auch gern. Sein Selbstbewusstsein ist ansteckend: Hat Barradin erst einmal Feuer gefangen, reißt er die ganze Gruppe mit.",
         "Seine schärfste Waffe ist seine Zunge. Mit Spott und Witz bringt er Gegner aus der Fassung, und schon so mancher Feind ist unter seinen Versen buchstäblich zusammengebrochen. Dass er im Eifer des Gefechts auch mal über die eigenen Füße stolpert, gehört zu seinem Charme.",
         "Aufgewachsen ist Barradin im Haus seines Vaters, eines eifrigen Mitglieds der <em>Alternative für Elfen</em>. Heute geht er bewusst einen anderen Weg. An der Seite eines Menschen, eines Druiden, eines Darkin und eines Hundes hat er gelernt, dass Herkunft nichts über den Wert eines Gefährten sagt, und dafür steht er mit voller Stimme ein.",
-        "Zwischen zwei Auftritten findet man ihn meist mit seiner Pfeife in der Hand, umgeben von einer Wolke aus duftendem Kraut."
+        "Man findet ihn meist mit seiner Pfeife in der Hand, umgeben von einer Wolke aus duftendem Kraut."
       ]
     },
     {
@@ -46,8 +46,8 @@ window.INHALT = {
       fries: "52% 30%",
       absaetze: [
         "Friedrich ist ein Mensch, ein Waldläufer und der ruhende Pol der Gruppe. Wo andere schon die Waffen ziehen, sucht er zuerst das Gespräch und einen Weg, der ohne Blutvergießen auskommt. Er ist ehrlich, verlässlich und hat ein feines Gespür dafür, was richtig ist.",
-        "Mit seinem Langbogen ist er ein wahrer Meister. Ein Blatt im Wind, ein fliehender Hase, ein Schurke hinter der Burgmauer: Friedrichs Pfeile finden ihr Ziel. Wer seine ausgestreckte Hand ausschlägt, lernt schnell, dass Friedfertigkeit nicht Schwäche bedeutet. Muss er handeln, dann zögert er keinen Augenblick, und ein einziger Pfeil beendet den Kampf.",
-        "An seiner Seite ist immer Rex, sein treuer Hund. Die beiden verstehen sich ohne Worte, und wer Friedrich kennenlernt, lernt auch Rex kennen."
+        "Mit seinem Langbogen ist er ein wahrer Meister. Egal ob Blatt im Wind, ein fliehender Hase oder ein Schurke hinter der Burgmauer: Friedrichs Pfeile finden ihr Ziel. Wer seine ausgestreckte Hand ausschlägt, lernt schnell, dass Friedfertigkeit nicht Schwäche bedeutet. Muss er handeln, dann zögert er keinen Augenblick und beendet häufig mit nur einem einzigen Pfeil den Kampf.",
+        "An seiner Seite ist immer Rex, sein treuer Hund."
       ],
       begleiter: {
         id: "rex",
@@ -117,8 +117,9 @@ window.INHALT = {
         "Statt einfach weiterzufahren, beschloss die Gruppe, den Spuren in den Wald zu folgen. In Thunderlin würde man ihnen für das Ende der Goblinplage sicher dankbar sein, und Beute gab es bestimmt auch.",
         "Am Eingang der Höhle stießen sie auf mehrere angebundene Wölfe, die sie kurzerhand befreiten. Dann stürmten sie das Goblinnest, teils lautlos aus dem Schatten, teils mit allem anderen als Zurückhaltung. Am Ende lagen der Anführer und seine gesamte Bande am Boden, und die Gefährten traten siegreich wieder ans Tageslicht.",
         "## Thunderlin und die Roten Roben",
-        "Schließlich erreichten sie Thunderlin, ein kleines Dorf, in dem schnell klar wurde, dass hier nicht alles mit rechten Dingen zugeht. Eine kriminelle Bande, die sich die Roten Roben nennt, hielt die Bewohner in Atem. Ihr Versteck sollte Schloss Cragmore sein, ein kleines Schloss etwas außerhalb des Dorfes.",
-        "## Schloss Cragmore",
+        "Schließlich erreichten die Gefährten Thunderlin, ein kleines Dorf. Sie streiften durch die Gassen, sprachen mit den Bewohnern und versuchten herauszufinden, was hier vor sich ging. Doch die Leute blieben wortkarg, und schnell war klar: Hier geht nicht alles mit rechten Dingen zu.",
+        "Den Durchbruch brachte Barradin. In der Taverne stimmte er ein Lied an und sang, bis er die Einheimischen ganz in seinen Bann gezogen hatte. Nun lösten sich die Zungen: Eine Bande, die sich die Roten Roben nennt, presst den Bewohnern Schutzgeld ab und hat sich in Schloss Crackmore verschanzt, gleich am Rand des Dorfes.",
+        "## Schloss Crackmore",
         "Die Gruppe verschaffte sich Zugang zum Schloss. Zuerst befreiten sie einen Gefangenen und erbeuteten dabei einige rote Roben, die ihnen fortan als Tarnung dienten. So drangen sie immer tiefer in das Gemäuer vor und stellten die Bande in mehreren Kämpfen, einen nach dem anderen. Auch ihr Anführer Glasstab fiel.",
         "Mit seinem letzten Atemzug sprach Glasstab von einer gewissen Spinne, der er offenbar diente. Ist es eine Person, eine Macht, eine geheime Organisation? Bisher weiß es niemand.",
         "Siegreich kehrten die Gefährten nach Thunderlin zurück. Die Frage nach der Spinne aber lässt sie seitdem nicht mehr los."
@@ -135,21 +136,15 @@ window.INHALT = {
     karte: null,
     stationen: [
       { name: "Die kleine Hafenstadt", x: 8, y: 76, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
-      { name: "Hinterhalt auf der Straße", x: 27, y: 64, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Ein zerstörter Wagen versperrt den Weg. Die Goblins, die aus dem Wald springen, haben keine Chance." },
-      { name: "Die Goblinhöhle", x: 45, y: 52, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
-      { name: "Thunderlin", x: 58, y: 66, kapitel: "I", abschnitt: "Thunderlin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben." },
-      { name: "Schloss Cragmore", x: 67, y: 45, kapitel: "I", abschnitt: "Schloss Cragmore", text: "Das Versteck der Roten Roben. Glasstab fällt und spricht von der Spinne." }
+      { name: "Hinterhalt auf der Straße", x: 30, y: 66, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Ein zerstörter Wagen versperrt den Weg. Die Goblins, die aus dem Wald springen, haben keine Chance." },
+      { name: "Die Goblinhöhle", x: 30, y: 54, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
+      { name: "Thunderlin", x: 58, y: 64, kapitel: "I", abschnitt: "Thunderlin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." }
     ]
   },
 
   /* ---------- DAS BESTIARIUM ----------
      status: "besiegt", "gesichtet" oder "geruecht" (nur davon gehört)
-     bild ist optional, z. B. bild: "goblin.jpg" */
-  bestiarium: [
-    { name: "Goblins", status: "besiegt", ort: "Die Straße nach Thunderlin und die Goblinhöhle", text: "Klein, gemein und gern im Hinterhalt. Lauerten der Gruppe an einem überfallenen Wagen auf und hausten in einer Höhle im Wald." },
-    { name: "Der Goblin-Anführer", status: "besiegt", ort: "Die Goblinhöhle", text: "Herrscher über das Goblinnest. Fiel, als die Gefährten die Höhle stürmten." },
-    { name: "Die Roten Roben", status: "besiegt", ort: "Schloss Cragmore bei Thunderlin", text: "Eine kriminelle Bande, die Thunderlin in Angst hielt. Ihre eigenen Roben wurden ihnen zum Verhängnis." },
-    { name: "Glasstab", status: "besiegt", ort: "Schloss Cragmore", text: "Anführer der Roten Roben. Sprach im Sterben von der Spinne." },
-    { name: "Die Spinne", status: "geruecht", ort: "Unbekannt", text: "Nur ein Name aus dem Mund eines Sterbenden. Eine Person, eine Macht oder eine Organisation? Niemand weiß es." }
-  ]
+     bild ist optional. Beispiel:
+     { name: "Goblin", bild: "goblin.jpg", status: "besiegt", ort: "Die Straße", text: "Klein und gemein." } */
+  bestiarium: []
 };
