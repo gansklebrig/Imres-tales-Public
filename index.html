@@ -231,6 +231,17 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .stops li:not(.current) .go { display: none; }
 .empty-hidden[hidden] { display: none !important; }
 
+.chapter .sub { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .3rem 1rem; margin: 1.8rem 0 .2rem; scroll-margin-top: 4.5rem; }
+.chapter .sub h4 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.35rem; color: var(--ember); text-wrap: balance; }
+.chapter .sub.spotlight h4 { text-decoration: underline; text-underline-offset: 6px; }
+.maplink { background: none; border: 0; padding: 0; font: inherit; font-size: .82rem; color: var(--ash); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.maplink:hover { color: var(--ember); }
+.tag.rumor { color: var(--ash); border-color: var(--ash); border-style: dashed; }
+.beast-seal {
+  aspect-ratio: 4 / 3; display: grid; place-items: center; font-family: var(--display); font-size: 4.5rem; color: var(--ember);
+  background: radial-gradient(circle at 50% 45%, rgba(224,160,70,.14), transparent 65%); border-bottom: 1px solid var(--line);
+}
+
 /* Bestiarium-Einträge */
 .beasts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 1.5rem; }
 .beast { background: var(--hall); border: 1px solid var(--line); display: grid; align-content: start; }
@@ -361,6 +372,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const absaetze = list => (list || []).map(p => "<p>" + p + "</p>").join("");
+  const slug = t => String(t).toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const abschnittId = (nr, titel) => "kapitel-" + slug(nr) + "-" + slug(titel);
 
   /* ---------- Sprung mit Hervorhebung ---------- */
   function springe(ziel) {
@@ -415,14 +428,25 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   /* ---------- Chronik ---------- */
   const stationen = (D.reise && D.reise.stationen) || [];
+  const stationFuer = (nr, titel) => stationen.findIndex(s => String(s.kapitel) === String(nr) && s.abschnitt === titel);
+  const hatAbschnittLinks = k => (k.absaetze || []).some(p => p.indexOf("## ") === 0 && stationFuer(k.nummer, p.slice(3).trim()) > -1);
+  function kapitelText(k) {
+    return (k.absaetze || []).map(p => {
+      if (p.indexOf("## ") !== 0) return "<p>" + p + "</p>";
+      const t = p.slice(3).trim();
+      const i = stationFuer(k.nummer, t);
+      return '<div class="sub" id="' + abschnittId(k.nummer, t) + '"><h4>' + esc(t) + "</h4>" +
+        (i > -1 ? '<button type="button" class="maplink" data-station="' + i + '">Auf der Karte · ' + (i + 1) + "</button>" : "") + "</div>";
+    }).join("");
+  }
   if (!D.kapitel.length) $("chapters-empty").hidden = false;
   $("chapters").innerHTML = D.kapitel.map(k =>
     '<article class="chapter" id="kapitel-' + esc(k.nummer) + '">' +
       '<p class="label">Kapitel ' + esc(k.nummer) + "</p>" +
       "<h3>" + esc(k.titel) + "</h3>" +
       (k.bild ? '<figure><img src="' + esc(k.bild) + '" alt="' + esc(k.bildAlt || k.titel) + '">' + (k.bildtext ? "<figcaption>" + esc(k.bildtext) + "</figcaption>" : "") + "</figure>" : "") +
-      '<div class="prose">' + absaetze(k.absaetze) + "</div>" +
-      (k.station && stationen[k.station - 1] ? '<button type="button" class="linkbtn" data-station="' + (k.station - 1) + '">Auf der Karte zeigen</button>' : "") +
+      '<div class="prose">' + kapitelText(k) + "</div>" +
+      (!hatAbschnittLinks(k) && k.station && stationen[k.station - 1] ? '<button type="button" class="linkbtn" data-station="' + (k.station - 1) + '">Auf der Karte zeigen</button>' : "") +
       (k.fortsetzung ? '<p class="to-be">' + esc(k.fortsetzung) + "</p>" : "") +
     "</article>"
   ).join("");
@@ -497,12 +521,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   list.innerHTML = stationen.map((s, i) =>
     '<li><button type="button" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><span><b>' + esc(s.name) + '</b><span class="t">' + esc(s.text) + "</span></span></button>" +
-    (s.kapitel ? '<button type="button" class="go" data-kapitel="' + esc(s.kapitel) + '">Zu Kapitel ' + esc(s.kapitel) + " lesen</button>" : "") +
+    (s.kapitel ? '<button type="button" class="go" data-kapitel="' + esc(s.kapitel) + '" data-abschnitt="' + esc(s.abschnitt || "") + '">In Kapitel ' + esc(s.kapitel) + " nachlesen</button>" : "") +
     "</li>"
   ).join("");
   list.addEventListener("click", e => {
     const k = e.target.closest("[data-kapitel]");
-    if (k) { springe($("kapitel-" + k.dataset.kapitel)); return; }
+    if (k) { springe((k.dataset.abschnitt && $(abschnittId(k.dataset.kapitel, k.dataset.abschnitt))) || $("kapitel-" + k.dataset.kapitel)); return; }
     const b = e.target.closest("[data-i]");
     if (b) waehlen(+b.dataset.i);
   });
@@ -522,8 +546,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   const tiere = D.bestiarium || [];
   if (!tiere.length) $("beasts-empty").hidden = false;
   $("beasts").innerHTML = tiere.map(t =>
-    '<article class="beast">' + (t.bild ? '<img src="' + esc(t.bild) + '" alt="' + esc(t.name) + '">' : "") +
-    "<div>" + '<span class="tag ' + (t.status === "besiegt" ? "slain\">Besiegt" : "seen\">Gesichtet") + "</span>" +
+    '<article class="beast">' + (t.bild ? '<img src="' + esc(t.bild) + '" alt="' + esc(t.name) + '">' : '<div class="beast-seal" aria-hidden="true">' + esc(String(t.name).replace(/^(Der|Die|Das) /, "").charAt(0)) + "</div>") +
+    "<div>" + '<span class="tag ' + ({ besiegt: "slain\">Besiegt", geruecht: "rumor\">Nur ein Gerücht" }[t.status] || "seen\">Gesichtet") + "</span>" +
     "<h3>" + esc(t.name) + "</h3>" + (t.ort ? '<p class="ort">' + esc(t.ort) + "</p>" : "") +
     (t.text ? "<p>" + esc(t.text) + "</p>" : "") + "</div></article>"
   ).join("");

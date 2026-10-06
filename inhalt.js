@@ -98,15 +98,30 @@ window.INHALT = {
   ],
 
   /* ---------- DIE CHRONIK ----------
+     Ein Absatz, der mit "## " beginnt, wird zur Zwischenüberschrift.
      "station" verweist auf die Nummer der Station auf der Karte (1 = erste). */
   kapitel: [
     {
       nummer: "I",
-      titel: "Ankunft in der Hafenstadt",
+      titel: "Der Weg nach Thunderlin",
       station: 1,
       absaetze: [
-        "Die Geschichte beginnt in einer kleinen Hafenstadt am Meer. Viel mehr als ein paar windschiefe Häuser, ein Kai voller Fischerboote und der Geruch von Salz und Teer gibt es hier nicht. Und doch nahm genau an diesem unscheinbaren Ort alles seinen Anfang.",
-        "Hier trafen die Gefährten auf Gundren, einen Zwerg und Händler, der offenbar jeden kennt, der etwas zu sagen hat. Er hatte ein Angebot im Gepäck: Irgendwo da draußen soll eine magische Schmiede liegen, verborgen und längst vergessen. Gundren will sie finden, und er braucht dafür Leute, die mutig genug sind, sich auf die Suche zu machen."
+        "## Die Einladung",
+        "Es begann mit einem Brief. Jeder der Helden erhielt eine Einladung von Gundren, einem Zwerg und Händler, der offenbar jeden kennt, der etwas zu sagen hat. Der Treffpunkt war eine kleine Hafenstadt am Meer: ein paar windschiefe Häuser, ein Kai voller Fischerboote und der Geruch von Salz und Teer.",
+        "Dort standen sie nun beieinander, ein Elf mit Pfeife, ein Mensch mit Bogen und Hund, ein gehörnter Druide und ein schweigsamer Darkin. Die Vorstellungsrunde verlief, vorsichtig gesagt, etwas holprig.",
+        "Gundren kam schnell zur Sache. Irgendwo in der Wildnis soll eine magische Schmiede liegen, in der einst magische Gegenstände geschaffen wurden. Einige mächtige Lords interessieren sich brennend dafür, und Gundren wittert die Chance, sein Exportgeschäft kräftig zu erweitern. Wie genau, behielt er für sich.",
+        "Der erste Auftrag klang harmlos: einen Karren mit Waren sicher nach Thunderlin bringen. Und wer dort Elmar Barton aufspürt, dem winkt eine Extraportion Gold.",
+        "## Hinterhalt auf der Straße",
+        "Mehrere Tage lang rollte der Karren friedlich dahin. Dann war der Weg plötzlich versperrt: Ein überfallener, halb niedergebrannter Wagen lag quer auf der Straße. Die Gefährten ahnten sofort, dass hier etwas faul war. Als kurz darauf eine Handvoll Goblins aus dem Wald sprang, waren sie bereit, und der Kampf war vorbei, bevor er richtig begonnen hatte.",
+        "## Die Goblinhöhle",
+        "Statt einfach weiterzufahren, beschloss die Gruppe, den Spuren in den Wald zu folgen. In Thunderlin würde man ihnen für das Ende der Goblinplage sicher dankbar sein, und Beute gab es bestimmt auch.",
+        "Am Eingang der Höhle stießen sie auf mehrere angebundene Wölfe, die sie kurzerhand befreiten. Dann stürmten sie das Goblinnest, teils lautlos aus dem Schatten, teils mit allem anderen als Zurückhaltung. Am Ende lagen der Anführer und seine gesamte Bande am Boden, und die Gefährten traten siegreich wieder ans Tageslicht.",
+        "## Thunderlin und die Roten Roben",
+        "Schließlich erreichten sie Thunderlin, ein kleines Dorf, in dem schnell klar wurde, dass hier nicht alles mit rechten Dingen zugeht. Eine kriminelle Bande, die sich die Roten Roben nennt, hielt die Bewohner in Atem. Ihr Versteck sollte Schloss Cragmore sein, ein kleines Schloss etwas außerhalb des Dorfes.",
+        "## Schloss Cragmore",
+        "Die Gruppe verschaffte sich Zugang zum Schloss. Zuerst befreiten sie einen Gefangenen und erbeuteten dabei einige rote Roben, die ihnen fortan als Tarnung dienten. So drangen sie immer tiefer in das Gemäuer vor und stellten die Bande in mehreren Kämpfen, einen nach dem anderen. Auch ihr Anführer Glasstab fiel.",
+        "Mit seinem letzten Atemzug sprach Glasstab von einer gewissen Spinne, der er offenbar diente. Ist es eine Person, eine Macht, eine geheime Organisation? Bisher weiß es niemand.",
+        "Siegreich kehrten die Gefährten nach Thunderlin zurück. Die Frage nach der Spinne aber lässt sie seitdem nicht mehr los."
       ],
       fortsetzung: "Fortsetzung folgt …"
     }
@@ -114,17 +129,27 @@ window.INHALT = {
 
   /* ---------- DIE REISE ----------
      karte: Dateiname der Weltkarte, z. B. "weltkarte.jpg" (null = Platzhalter)
-     x / y: Position in Prozent von links / von oben (0 bis 100) */
+     x / y: Position in Prozent von links / von oben (0 bis 100)
+     abschnitt: Zwischenüberschrift im Kapitel, zu der die Station springt */
   reise: {
     karte: null,
     stationen: [
-      { name: "Die kleine Hafenstadt", x: 8, y: 76, text: "Ausgangspunkt der Reise. Hier bot der Zwerg Gundren der Gruppe an, nach einer magischen Schmiede zu suchen.", kapitel: "I" }
+      { name: "Die kleine Hafenstadt", x: 8, y: 76, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
+      { name: "Hinterhalt auf der Straße", x: 27, y: 64, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Ein zerstörter Wagen versperrt den Weg. Die Goblins, die aus dem Wald springen, haben keine Chance." },
+      { name: "Die Goblinhöhle", x: 45, y: 52, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
+      { name: "Thunderlin", x: 58, y: 66, kapitel: "I", abschnitt: "Thunderlin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben." },
+      { name: "Schloss Cragmore", x: 67, y: 45, kapitel: "I", abschnitt: "Schloss Cragmore", text: "Das Versteck der Roten Roben. Glasstab fällt und spricht von der Spinne." }
     ]
   },
 
   /* ---------- DAS BESTIARIUM ----------
-     status: "besiegt" oder "gesichtet"
-     Beispiel:
-     { name: "Goblin", bild: "goblin.jpg", status: "besiegt", ort: "Die Küstenstraße", text: "Klein, gemein und in Gruppen unterwegs." } */
-  bestiarium: []
+     status: "besiegt", "gesichtet" oder "geruecht" (nur davon gehört)
+     bild ist optional, z. B. bild: "goblin.jpg" */
+  bestiarium: [
+    { name: "Goblins", status: "besiegt", ort: "Die Straße nach Thunderlin und die Goblinhöhle", text: "Klein, gemein und gern im Hinterhalt. Lauerten der Gruppe an einem überfallenen Wagen auf und hausten in einer Höhle im Wald." },
+    { name: "Der Goblin-Anführer", status: "besiegt", ort: "Die Goblinhöhle", text: "Herrscher über das Goblinnest. Fiel, als die Gefährten die Höhle stürmten." },
+    { name: "Die Roten Roben", status: "besiegt", ort: "Schloss Cragmore bei Thunderlin", text: "Eine kriminelle Bande, die Thunderlin in Angst hielt. Ihre eigenen Roben wurden ihnen zum Verhängnis." },
+    { name: "Glasstab", status: "besiegt", ort: "Schloss Cragmore", text: "Anführer der Roten Roben. Sprach im Sterben von der Spinne." },
+    { name: "Die Spinne", status: "geruecht", ort: "Unbekannt", text: "Nur ein Name aus dem Mund eines Sterbenden. Eine Person, eine Macht oder eine Organisation? Niemand weiß es." }
+  ]
 };
