@@ -149,7 +149,38 @@ window.INHALT_EN = {
         "It did not go entirely by protocol. Somewhat clumsily and rather boldly, the companions marched straight past the guards to the head of the Alliance, Captain Dolgrimson. He, however, put them off: there would be time for a conversation only later.",
         "So they wandered the streets of Neverwinter, listening in taverns and at market stalls and trying to catch rumours. Without success. <em class=\"aside\">I think. Or I have forgotten the rumours. Both are possible.</em>",
         "## The Lords' Alliance",
-        "At last they returned to the Alliance. After a long conversation the companions made their decision: they would join the Lords' Alliance and lend it their strength."
+        "At last they returned to the Alliance. After a long conversation the companions made their decision: they would join the Lords' Alliance and lend it their strength.",
+        "## Thundertree",
+        "No sooner had they joined the Alliance than their first assignment awaited. Captain Dolgrimson sent the companions to Thundertree, a small, abandoned village a little east of Neverwinter. They were to look into matters there and find out whether anything was going on that ought not to be.",
+        "Thundertree greeted them with silence: a handful of houses that seemed deserted, and towering over them all a large, half-ruined watchtower, its walls gnawed by moss and rot.",
+        "## The Dragon in the Tower",
+        "The companions entered the tower, searched it floor by floor and climbed ever higher. On the topmost platform, fate struck: a dragon attacked, a poison-breathing horror named Venomfang.",
+        "The fight was brutal. Then came Barradin's great moment: with his magic he drew the dragon into a hypnotic trance, and the party seized the chance to get into position. <em class=\"aside\">I mention this only for the sake of completeness. And because it was magnificent.</em> In the end Venomfang fell, but his poison breath had dealt the companions a nasty blow.",
+        "First things first: catch their breath, bind their wounds and, of course, gather the loot. Echo, as you might imagine, was particularly thorough.",
+        "## The Abandoned Village",
+        "Then they turned to the village. Zombies lurked in some of the seemingly empty houses. In front of one house stood a statue that stopped Ezekiel in his tracks: he recognised it as his uncle. <em class=\"aside\">He said nothing more about it. Of course he didn't.</em>",
+        "More fights followed, against blights, against two giant spiders and against yet more blights, until Echo unleashed an enormous fireball and solved the problem his own way.",
+        "In the last house they finally met a druid who introduced herself as Ilvara. Dressed all in green, a fox upon her shoulders, she looked like a guardian of the forest. Nobody suspected anything when she invited the companions into her home."
+      ],
+      fortsetzung: "Continued in Chapter II …"
+    },
+    {
+      nummer: "II",
+      titel: "The Underdark",
+      absaetze: [
+        "## The Herbal Mist",
+        "The moment the companions stepped into Ilvara's house, a poisonous vapour filled the air. One after another they sank to the floor and lost consciousness. The friendly druid was in truth a shapeshifter who had drugged them with an herbal mist, and she carried off the entire party.",
+        "## Captured",
+        "Nobody knew how much time had passed when they came to. <em class=\"aside\">A few hours? Days? Either way, I slept splendidly.</em> They lay in chains, deep beneath the earth, in a prison-like chamber under lock and key. Guards stood outside the bars, glaring in grimly.",
+        "Then Echo had a brilliant idea: he turned into a rat, slipped out of the cell unnoticed and found the party's gear in a neighbouring room. Still in animal form, he brought everything back to the cell. <em class=\"aside\">A rat. Or a mouse. They look the same to me.</em>",
+        "## The Breakout",
+        "As soon as everyone was armed again, Barradin did not hesitate. He insulted the guards so thoroughly that they charged at the companions in a blind rage. Only now did it become clear that most of the enemies had been out of sight: they were waiting next door, beyond bridges on another platform, heard the clash of battle and came storming in.",
+        "And then, out of nowhere, demons appeared in the middle of the fight. A flying, insect-like abomination with several wings and a long stinger swooped down on the companions, while a second demon fell upon their enemies.",
+        "The fight was hard, but in the end the demons and the guards lay on the ground. <em class=\"aside\">To be honest, the second demon took care of most of the guards. But we cheered him on very enthusiastically.</em>",
+        "Only one escaped: the drow, the shapeshifter. She leapt from the bridge into the river rushing far below and was gone.",
+        "## Through the Webs",
+        "The companions pressed deeper into the Underdark. Thick spider webs blocked the way, and in places they even had to balance across them. A few spiders stood in their way and were slain.",
+        "In one of the spider cocoons they made a surprising discovery: a gnome named Fagas, captured but still alive. He told them of a magical temple, the Temple of Arafil of the Red Seat, one of the wizards."
       ],
       fortsetzung: "To be continued …"
     }
@@ -165,7 +196,9 @@ window.INHALT_EN = {
       { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin and the Red Robes", text: "A small village in the grip of the Red Robes. At its edge lies Castle Crackmore, where Glasstaff falls and speaks of the Spider." },
       { name: "The Watchtower", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "The Prisoner in the Watchtower", text: "A bugbear falls, a drow escapes, and the prisoner turns out to be Gundren's twin brother Nundro." },
       { name: "The Magic Forge", x: 71.3, y: 75, kapitel: "I", abschnitt: "The Magic Forge", text: "Hidden deep within an old, abandoned mine. After hard-fought battles, it belongs to the party." },
-      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Back in the great city. Here the companions join the Lords' Alliance." }
+      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Back in the great city. Here the companions join the Lords' Alliance." },
+      { name: "Thundertree", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Thundertree", text: "An abandoned village with a crumbling watchtower. A poison dragon, zombies, blights and a druid who is not what she seems." },
+      { name: "The Underdark", x: 41, y: 51, kapitel: "II", abschnitt: "Captured", text: "Somewhere deep beneath the earth. Exactly where, nobody knows, since the companions were unconscious." }
     ]
   },
 

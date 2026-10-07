@@ -156,7 +156,38 @@ window.INHALT = {
         "Ganz nach Protokoll lief das nicht. Etwas plump und ziemlich forsch marschierten die Gefährten an den Wachen vorbei, geradewegs zum Leiter der Allianz, Captain Dolgrimson. Der jedoch vertröstete sie: Für ein Gespräch habe man erst später Zeit.",
         "Also streiften sie durch die Straßen von Neverwinter, lauschten in Tavernen und auf Marktplätzen und versuchten, Gerüchte aufzuschnappen. Ohne Erfolg. <em class=\"aside\">Glaube ich. Oder ich habe die Gerüchte vergessen. Beides möglich.</em>",
         "## Die Allianz der Lords",
-        "Schließlich kehrten sie zur Allianz zurück. Nach einem langen Gespräch fassten die Gefährten einen Entschluss: Sie würden der Allianz der Lords beitreten und ihre Kräfte stärken."
+        "Schließlich kehrten sie zur Allianz zurück. Nach einem langen Gespräch fassten die Gefährten einen Entschluss: Sie würden der Allianz der Lords beitreten und ihre Kräfte stärken.",
+        "## Donnerbaum",
+        "Kaum waren sie Mitglieder der Allianz, wartete auch schon der erste Auftrag. Captain Dolgrimson schickte die Gefährten nach Donnerbaum, einem kleinen, verlassenen Dorf etwas östlich von Neverwinter. Sie sollten dort nach dem Rechten sehen und herausfinden, ob dort Dinge vor sich gehen, die nicht mit rechten Dingen zugehen.",
+        "Donnerbaum empfing sie mit Stille: ein paar Häuser, die verlassen wirkten, und über allem ein großer, halb verfallener Wachturm, an dessen Mauern Moos und Moder nagten.",
+        "## Der Drache im Turm",
+        "Die Gefährten betraten den Turm, durchsuchten ihn Stockwerk um Stockwerk und stiegen immer weiter hinauf. Oben auf dem höchsten Plateau schlug das Schicksal zu: Ein Drache griff an, ein giftspeiendes Ungetüm namens Venomfang.",
+        "Der Kampf war brutal. Dann kam Barradins großer Moment: Er zog den Drachen mit seiner Magie in einen hypnotischen Bann, und die Gruppe nutzte die Gelegenheit, um sich in Stellung zu bringen. <em class=\"aside\">Ich erwähne das nur der Vollständigkeit halber. Und weil es großartig war.</em> Am Ende fiel Venomfang, doch sein Giftatem hatte den Gefährten übel zugesetzt.",
+        "Erst einmal hieß es durchatmen, Wunden verbinden und natürlich die Beute einsammeln. Echo war dabei, wie man sich denken kann, besonders gründlich.",
+        "## Das verlassene Dorf",
+        "Dann nahmen sie sich das Dorf vor. In einigen der vermeintlich leeren Häuser lauerten Zombies. Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt: Er erkannte darin seinen Onkel. <em class=\"aside\">Mehr hat er dazu nicht gesagt. Natürlich nicht.</em>",
+        "Es folgten weitere Kämpfe gegen Blights, gegen zwei riesige Spinnen und gegen noch mehr Blights, bis Echo einen gewaltigen Feuerball losließ und das Problem auf seine Weise löste.",
+        "Im letzten Haus trafen sie schließlich auf eine Druidin, die sich als Ilvara vorstellte. Ganz in Grün gekleidet, einen Fuchs auf den Schultern, wirkte sie wie eine Hüterin des Waldes. Niemand ahnte etwas Böses, als sie die Gefährten in ihr Haus bat."
+      ],
+      fortsetzung: "Weiter in Kapitel II …"
+    },
+    {
+      nummer: "II",
+      titel: "Das Unterreich",
+      absaetze: [
+        "## Der Kräuternebel",
+        "Kaum hatten die Gefährten Ilvaras Haus betreten, lag plötzlich ein giftiger Dampf in der Luft. Einer nach dem anderen sank zu Boden und verlor das Bewusstsein. Die freundliche Druidin war in Wahrheit eine Gestaltwandlerin, die sie mit einem Kräuternebel betäubt hatte, und sie verschleppte die ganze Gruppe.",
+        "## Gefangen",
+        "Wie viel Zeit vergangen war, wusste niemand, als sie wieder zu sich kamen. <em class=\"aside\">Ein paar Stunden? Tage? Ich habe jedenfalls hervorragend geschlafen.</em> Sie lagen in Ketten, tief unter der Erde, in einem gefängnisartigen Raum hinter Schloss und Riegel. Vor den Gitterstäben standen Wachen und starrten grimmig herein.",
+        "Dann hatte Echo eine geniale Idee: Er verwandelte sich in eine Ratte, schlüpfte unbemerkt aus der Zelle und fand in einem Nebenraum die Ausrüstung der Gruppe. Immer noch in Tiergestalt schaffte er alles zurück in die Zelle. <em class=\"aside\">Eine Ratte. Oder eine Maus. Für mich sehen die gleich aus.</em>",
+        "## Der Ausbruch",
+        "Kaum waren alle wieder bewaffnet, zögerte Barradin nicht lange. Er beleidigte die Wachen so ausgiebig, dass sie wutentbrannt auf die Gefährten losgingen. Erst jetzt zeigte sich, dass die meisten Gegner gar nicht zu sehen gewesen waren: Sie warteten nebenan, hinter Brücken auf einem anderen Plateau, hörten den Kampflärm und stürmten heran.",
+        "Und dann, wie aus dem Nichts, tauchten mitten im Kampf Dämonen auf. Ein fliegendes, insektenartiges Scheusal mit mehreren Flügeln und einem langen Stachel stürzte sich auf die Gefährten, während sich ein zweiter Dämon über ihre Gegner hermachte.",
+        "Der Kampf war hart, doch am Ende lagen die Dämonen und die Wachen am Boden. <em class=\"aside\">Wenn ich ehrlich bin, hat der zweite Dämon den Großteil der Wachen erledigt. Wir haben ihn dabei aber sehr tatkräftig angefeuert.</em>",
+        "Nur eine entkam: die Drow, die Gestaltwandlerin. Sie sprang von der Brücke in den Fluss, der tief darunter rauschte, und war verschwunden.",
+        "## Durch die Spinnweben",
+        "Die Gefährten drangen tiefer ins Unterreich vor. Dichte Spinnweben versperrten den Weg, und stellenweise mussten sie sogar auf ihnen balancieren. Ein paar Spinnen stellten sich ihnen entgegen und wurden erschlagen.",
+        "In einem der Spinnenkokons machten sie einen überraschenden Fund: einen Gnom namens Fagas, gefangen, aber noch am Leben. Er erzählte ihnen von einem magischen Tempel, dem Tempel von Arafil des Roten Sitzes, einem der Magier."
       ],
       fortsetzung: "Fortsetzung folgt …"
     }
@@ -175,7 +206,9 @@ window.INHALT = {
       { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
       { name: "Der Wachturm", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder Nundro." },
       { name: "Die magische Schmiede", x: 71.3, y: 75, kapitel: "I", abschnitt: "Die magische Schmiede", text: "Tief in einer alten, verlassenen Mine verborgen. Nach harten Kämpfen gehört sie der Gruppe." },
-      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Zurück in der großen Stadt. Hier treten die Gefährten der Allianz der Lords bei." }
+      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Zurück in der großen Stadt. Hier treten die Gefährten der Allianz der Lords bei." },
+      { name: "Donnerbaum", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Donnerbaum", text: "Ein verlassenes Dorf mit verfallenem Wachturm. Ein Giftdrache, Zombies, Blights und eine Druidin, die nicht ist, was sie scheint." },
+      { name: "Das Unterreich", x: 41, y: 51, kapitel: "II", abschnitt: "Gefangen", text: "Irgendwo tief unter der Erde. Wo genau, weiß niemand, denn die Gefährten waren bewusstlos." }
     ]
   },
 
