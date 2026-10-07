@@ -166,9 +166,9 @@ window.INHALT = {
         "Erst einmal hieß es durchatmen, Wunden verbinden und natürlich die Beute einsammeln. Echo war dabei, wie man sich denken kann, besonders gründlich.",
         "!venomfang-besiegt.jpg|Venomfang ist besiegt. Barradin genießt seine Pfeife, und Rex hat sich seinen Anteil an der Beute schon gesichert.",
         "## Das verlassene Dorf",
+        "!ilvara-druidin.webp|Ilvara, wie sie sich den Gefährten zeigte: ehrwürdig, freundlich und mit Fuchs. Was sollte da schon schiefgehen?|schmal",
         "Dann nahmen sie sich das Dorf vor. In einigen der vermeintlich leeren Häuser lauerten Zombies. Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt: Er erkannte darin seinen Onkel. <em class=\"aside\">Mehr hat er dazu nicht gesagt. Natürlich nicht.</em>",
         "Es folgten weitere Kämpfe gegen Blights, gegen zwei riesige Spinnen und gegen noch mehr Blights, bis Echo einen gewaltigen Feuerball losließ und das Problem auf seine Weise löste.",
-        "!ilvara-druidin.jpg|Ilvara, wie sie sich den Gefährten zeigte: ehrwürdig, freundlich und mit Fuchs. Was sollte da schon schiefgehen?|schmal",
         "Im letzten Haus trafen sie schließlich auf eine Druidin, die sich als Ilvara vorstellte. Ganz in Grün gekleidet, einen Fuchs auf den Schultern, wirkte sie wie eine Hüterin des Waldes. Niemand ahnte etwas Böses, als sie die Gefährten in ihr Haus bat."
       ],
       fortsetzung: "Weiter in Kapitel II …"
@@ -178,8 +178,8 @@ window.INHALT = {
       titel: "Das Unterreich",
       absaetze: [
         "## Der Kräuternebel",
+        "!ilvara-wahr.webp|Ilvara Mizzrym in ihrer wahren Gestalt. Von der Hüterin des Waldes ist nicht viel übrig.|schmal links",
         "Kaum hatten die Gefährten Ilvaras Haus betreten, lag plötzlich ein giftiger Dampf in der Luft. Einer nach dem anderen sank zu Boden und verlor das Bewusstsein. Die freundliche Druidin war in Wahrheit eine Gestaltwandlerin, die sie mit einem Kräuternebel betäubt hatte, und sie verschleppte die ganze Gruppe. Ihr wahres Gesicht sollten die Gefährten erst später sehen: Ilvara Mizzrym, eine Drow.",
-        "!ilvara.jpg|Ilvara Mizzrym in ihrer wahren Gestalt. Von der Hüterin des Waldes ist nicht viel übrig.",
         "## Gefangen",
         "Wie viel Zeit vergangen war, wusste niemand, als sie wieder zu sich kamen. <em class=\"aside\">Ein paar Stunden? Tage? Ich habe jedenfalls hervorragend geschlafen.</em> Sie lagen in Ketten, tief unter der Erde, in einem gefängnisartigen Raum hinter Schloss und Riegel. Vor den Gitterstäben standen Wachen und starrten grimmig herein.",
         "Dann hatte Echo eine geniale Idee: Er verwandelte sich in eine Ratte, schlüpfte unbemerkt aus der Zelle und fand in einem Nebenraum die Ausrüstung der Gruppe. Immer noch in Tiergestalt schaffte er alles zurück in die Zelle. <em class=\"aside\">Eine Ratte. Oder eine Maus. Für mich sehen die gleich aus.</em>",

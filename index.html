@@ -264,10 +264,13 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .chapter .prose figure { margin: 1.4rem 0; }
 .chapter .prose figure img { width: 100%; display: block; border: 1px solid var(--line); }
 .chapter .prose figure figcaption { font-size: .82rem; color: var(--ash); font-style: italic; margin-top: .5rem; }
-.chapter .prose figure.schmal { float: right; width: min(15rem, 45%); margin: .3rem 0 1rem 1.5rem; }
-.chapter .sub, .chapter .to-be { clear: both; }
-.chapter .prose figure.schmal + p { margin-top: .9rem; }
+.chapter .prose figure.schmal { float: right; width: min(10rem, 38%); margin: .2rem 0 .8rem 1.4rem; }
+.chapter .prose figure.schmal.links { float: left; width: min(13rem, 42%); margin: .2rem 1.4rem .8rem 0; }
+.chapter .prose figure.schmal img { border: 0; filter: drop-shadow(0 6px 18px rgba(0,0,0,.55)); }
+.chapter .prose figure.schmal figcaption { font-size: .76rem; line-height: 1.45; }
+.chapter .to-be { clear: both; }
 .chapter .prose::after { content: ""; display: block; clear: both; }
+.chapter .prose .sub { overflow: hidden; }
 .chapter .prose em.aside { color: var(--ash); }
 
 /* Bestiarium-Einträge */

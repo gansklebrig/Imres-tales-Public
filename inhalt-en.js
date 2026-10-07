@@ -159,9 +159,9 @@ window.INHALT_EN = {
         "First things first: catch their breath, bind their wounds and, of course, gather the loot. Echo, as you might imagine, was particularly thorough.",
         "!venomfang-besiegt.jpg|Venomfang is defeated. Barradin enjoys his pipe, and Rex has already claimed his share of the loot.",
         "## The Abandoned Village",
+        "!ilvara-druidin.webp|Ilvara as she appeared to the companions: venerable, kindly and with a fox. What could possibly go wrong?|schmal",
         "Then they turned to the village. Zombies lurked in some of the seemingly empty houses. In front of one house stood a statue that stopped Ezekiel in his tracks: he recognised it as his uncle. <em class=\"aside\">He said nothing more about it. Of course he didn't.</em>",
         "More fights followed, against blights, against two giant spiders and against yet more blights, until Echo unleashed an enormous fireball and solved the problem his own way.",
-        "!ilvara-druidin.jpg|Ilvara as she appeared to the companions: venerable, kindly and with a fox. What could possibly go wrong?|schmal",
         "In the last house they finally met a druid who introduced herself as Ilvara. Dressed all in green, a fox upon her shoulders, she looked like a guardian of the forest. Nobody suspected anything when she invited the companions into her home."
       ],
       fortsetzung: "Continued in Chapter II …"
@@ -171,8 +171,8 @@ window.INHALT_EN = {
       titel: "The Underdark",
       absaetze: [
         "## The Herbal Mist",
+        "!ilvara-wahr.webp|Ilvara Mizzrym in her true form. Not much left of the guardian of the forest.|schmal links",
         "The moment the companions stepped into Ilvara's house, a poisonous vapour filled the air. One after another they sank to the floor and lost consciousness. The friendly druid was in truth a shapeshifter who had drugged them with an herbal mist, and she carried off the entire party. Her true face the companions would only see later: Ilvara Mizzrym, a drow.",
-        "!ilvara.jpg|Ilvara Mizzrym in her true form. Not much left of the guardian of the forest.",
         "## Captured",
         "Nobody knew how much time had passed when they came to. <em class=\"aside\">A few hours? Days? Either way, I slept splendidly.</em> They lay in chains, deep beneath the earth, in a prison-like chamber under lock and key. Guards stood outside the bars, glaring in grimly.",
         "Then Echo had a brilliant idea: he turned into a rat, slipped out of the cell unnoticed and found the party's gear in a neighbouring room. Still in animal form, he brought everything back to the cell. <em class=\"aside\">A rat. Or a mouse. They look the same to me.</em>",
