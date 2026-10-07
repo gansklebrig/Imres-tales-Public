@@ -128,6 +128,7 @@ window.INHALT_EN = {
         "!glasstab-besiegt.jpg|After the victory over Glasstaff, still wearing the captured red robes.",
         "With his last breath, Glasstaff spoke of a certain Spider whom he apparently served. Is it a person, a power, a secret order? To this day, nobody knows.",
         "Back in Thunderlin the companions spread the good news and, while they were at it, tried to drive their reward up a little further. Then the tavern saw a wild celebration. Yet however loud it got, one thought would not let them go: the Spider, whatever may lie behind that name.",
+        "!siegesfeier.jpg|The victory feast in Thunderlin. Barradin's horn is filled with milk, by the way. Or so he says.",
         "After the celebration they went to the mayor to collect their reward, and it proved just as awkward as their first visit. <em class=\"aside\">Let us put it this way: he will not be inviting us back any time soon.</em>",
         "## The Prisoner in the Watchtower",
         "At this point your narrator must confess: his memory of the days that followed is a little … hazy. <em class=\"aside\">Perhaps it was the herb in my pipe.</em>",

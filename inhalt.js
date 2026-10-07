@@ -135,6 +135,7 @@ window.INHALT = {
         "!glasstab-besiegt.jpg|Nach dem Sieg über Glasstab, noch in den erbeuteten roten Roben.",
         "Mit seinem letzten Atemzug sprach Glasstab von einer gewissen Spinne, der er offenbar diente. Ist es eine Person, eine Macht, eine geheime Organisation? Bisher weiß es niemand.",
         "Zurück in Thunderlin verbreiteten die Gefährten die frohe Kunde und versuchten nebenbei, ihre Belohnung noch ein wenig in die Höhe zu treiben. Danach wurde in der Taverne ausgelassen gefeiert. Doch so laut es auch wurde, ein Gedanke ließ sie nicht los: die Spinne, was auch immer sich dahinter verbergen mag.",
+        "!siegesfeier.jpg|Die Siegesfeier in Thunderlin. Barradins Horn ist übrigens mit Milch gefüllt. Sagt er.",
         "Nach der Feier ging es zum Bürgermeister, um die Belohnung abzuholen, und das wurde ähnlich unangenehm wie beim ersten Besuch. <em class=\"aside\">Sagen wir so: Er wird uns so schnell nicht wieder einladen.</em>",
         "## Der Gefangene im Wachturm",
         "An dieser Stelle muss euer Erzähler gestehen: Seine Erinnerung an die folgenden Tage ist ein wenig … nebelig. <em class=\"aside\">Vielleicht lag es am Kraut in meiner Pfeife.</em>",
