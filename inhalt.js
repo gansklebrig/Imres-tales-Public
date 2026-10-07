@@ -201,15 +201,20 @@ window.INHALT = {
         "Als sie ihn betätigten, erschien eine geisterhafte Gestalt und sprach in unverständlichen Worten. Dann formte unheilige Energie einen furchterregenden Gegner: einen Wraith. Nach einem harten Kampf war er besiegt, und die Gefährten fanden eine Waffe, von der schon Legenden erzählen: Dawnbringer, ein magisches Schwert.",
         "## Der unterirdische See",
         "Nachdem sie das Grab verlassen hatten, ging es über weitere Spinnweben noch tiefer in die Höhlen hinein, bis sie schließlich an einen unterirdischen See gelangten. Am Ufer trafen sie auf eine Gruppe Kuo-Toa, ein Volk von Fischmenschen.",
-        "Ihr Anführer war Blublupin, ein Erzpriester. <em class=\"aside\">Blublupin. Oder Bloblupin. Fischnamen sind nicht meine Stärke.</em> Er bat die Gefährten um Hilfe: Ein Teil seiner Stadt am Rand des Sees bete einen falschen Gott an, Lermu-Gorgon. Nach einiger Diskussion beschloss die Gruppe, ihm zu vertrauen.",
-        "Blublupins Plan: Er wollte die Gefährten zum Schein fesseln und so in die Stadt schmuggeln. Der Plan ging auf, zumindest bis sie das Stadtzentrum erreichten.",
+        "Ihr Anführer war Ploopploopeen, ein Erzpriester. <em class=\"aside\">Ploopploopeen. Ich hatte ihn eine ganze Weile Blublupin genannt. Er hat es mir nicht übelgenommen. Glaube ich.</em> Er bat die Gefährten um Hilfe: Ein Teil seiner Stadt am Rand des Sees bete einen falschen Gott an, Lermu-Gorgon. Nach einiger Diskussion beschloss die Gruppe, ihm zu vertrauen.",
+        "Ploopploopeens Plan: Er wollte die Gefährten zum Schein fesseln und so in die Stadt schmuggeln. Der Plan ging auf, zumindest bis sie das Stadtzentrum erreichten.",
         "## Demogorgon",
-        "Dort brach sofort ein Kampf unter den Kuo-Toa aus. Die falsche Erzpriesterin griff Blublupin an, weitere Fischmenschen mischten sich ein, und binnen Augenblicken herrschte das reinste Chaos.",
+        "Dort brach sofort ein Kampf unter den Kuo-Toa aus. Die falsche Erzpriesterin griff Ploopploopeen an, weitere Fischmenschen mischten sich ein, und binnen Augenblicken herrschte das reinste Chaos.",
+        "!kuo-toa-stadt.jpg|Chaos in der Stadt der Kuo-Toa. Barradin liefert die passende Musik dazu.",
         "Mitten im Getümmel entdeckten die Gefährten zwischen den Gegnern einen gefesselten Zwerg. Sie konnten ihn noch während des Kampfes befreien. Sein Name war Kardal, und er behauptete, ein Späher seiner Stadt zu sein, den die Fischmenschen gefangen genommen hatten.",
+        "!demogorgon.webp|Demogorgon, Fürst der Dämonen.|frei",
         "Dann stieg etwas aus dem See empor: Demogorgon. Ein Dämonenfürst, ein wahrhaftiger Dämonengott. Zwei Köpfe, zwei Arme mit je zwei Tentakeln, ein langer Schwanz und zwei Beine, die die Erde erzittern ließen. Er stieß einen gottlos lauten, grauenhaften Schrei aus, alle Magie erlosch, und den Gefährten schlotterten die Knie. <em class=\"aside\">Ich gebe zu: Meine schlotterten nur aus Solidarität.</em>",
+        "Friedrich ließ sich davon nicht beirren, legte an und schoss einen Pfeil auf Demogorgon. Die Wirkung: keine. Absolut keine. Trotzdem behauptet Friedrich seitdem steif und fest, er habe einen Gott geboxt.",
         "Das Ungeheuer machte sich daran, die Stadt zu zerstören. Mit seinen Tentakelarmen zermalmte es Gebäude, Gegner und Verbündete gleichermaßen. Mit viel Glück gelang den Gefährten die Flucht zu einem Boot, und Kardal entkam mit ihnen.",
+        "!flucht-see.jpg|Die Flucht über den See. Friedrich ist bis heute sehr stolz auf sich.",
         "## Gracklstugh",
-        "Die Flucht über den See führte sie schließlich zu einem atemberaubenden Anblick: einer in den Fels gehauenen Festung, die hinter gewaltigen Stadtmauern über der Stadt Gracklstugh emporragte."
+        "Die Flucht über den See führte sie schließlich zu einem atemberaubenden Anblick: einer in den Fels gehauenen Festung, die hinter gewaltigen Stadtmauern über der Stadt Gracklstugh emporragte.",
+        "!gracklstugh.jpg|Ankunft vor Gracklstugh. Kardal zeigt den Weg."
       ],
       fortsetzung: "Fortsetzung folgt …"
     }
@@ -241,6 +246,9 @@ window.INHALT = {
   bestiarium: [
     { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "Der Wachturm von Donnerbaum", text: "Ein grüner Giftdrache, der sich im verfallenen Wachturm eingenistet hatte. Sein Giftatem setzte der Gruppe übel zu, bis Barradins Hypnose den entscheidenden Vorteil brachte." },
     { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein fliegender, insektenartiger Dämon mit mehreren Flügeln und einem langen Stachel. Tauchte mitten im Ausbruch aus dem Nichts auf und stürzte sich auf die Gefährten." },
-    { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein geierartiger Dämon mit zerzausten Schwingen. Erledigte einen Großteil der Wachen, bevor die Gefährten auch ihn niederstreckten." }
+    { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein geierartiger Dämon mit zerzausten Schwingen. Erledigte einen Großteil der Wachen, bevor die Gefährten auch ihn niederstreckten." },
+    { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "besiegt", ort: "Die Stadt am unterirdischen See", text: "Ein Volk von Fischmenschen, das am Ufer eines unterirdischen Sees lebt. Ein Teil von ihnen betet einen falschen Gott an. Im Stadtzentrum gingen sie aufeinander und auf die Gefährten los." },
+    { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gesichtet", ort: "Die Stadt am unterirdischen See", text: "Erzpriester der Kuo-Toa. Bat die Gefährten um Hilfe gegen die Anhänger eines falschen Gottes und schmuggelte sie zum Schein gefesselt in seine Stadt. Was aus ihm wurde, als Demogorgon die Stadt verwüstete, ist ungewiss." },
+    { name: "Demogorgon", bild: "demogorgon-karte.webp", status: "gesichtet", ort: "Der unterirdische See", text: "Ein Dämonenfürst mit zwei Köpfen, Tentakelarmen und einem langen Schwanz. Sein Schrei ließ alle Magie erlöschen, und die Gefährten entkamen nur mit Glück. Friedrich hat ihn trotzdem geboxt. Sagt er." }
   ]
 };

@@ -194,15 +194,20 @@ window.INHALT_EN = {
         "When they pulled it, a spectral figure appeared and spoke in unintelligible words. Then unholy energy formed a terrifying foe: a wraith. After a hard fight it was defeated, and the companions found a weapon of which legends already speak: Dawnbringer, a magic sword.",
         "## The Underground Lake",
         "After leaving the tomb they crossed yet more webs, ever deeper into the caves, until at last they reached an underground lake. On its shore they met a group of kuo-toa, a race of fish folk.",
-        "Their leader was Blublupin, an archpriest. <em class=\"aside\">Blublupin. Or Bloblupin. Fish names are not my strong suit.</em> He asked the companions for help: part of his city at the edge of the lake was worshipping a false god, Lermu-Gorgon. After some discussion the party decided to trust him.",
-        "Blublupin's plan: he would pretend to tie up the companions and smuggle them into the city. The plan worked, at least until they reached the city centre.",
+        "Their leader was Ploopploopeen, an archpriest. <em class=\"aside\">Ploopploopeen. For quite a while I called him Blublupin. He did not hold it against me. I think.</em> He asked the companions for help: part of his city at the edge of the lake was worshipping a false god, Lermu-Gorgon. After some discussion the party decided to trust him.",
+        "Ploopploopeen's plan: he would pretend to tie up the companions and smuggle them into the city. The plan worked, at least until they reached the city centre.",
         "## Demogorgon",
-        "There a fight broke out among the kuo-toa at once. The false archpriestess attacked Blublupin, more fish folk joined in, and within moments there was utter chaos.",
+        "There a fight broke out among the kuo-toa at once. The false archpriestess attacked Ploopploopeen, more fish folk joined in, and within moments there was utter chaos.",
+        "!kuo-toa-stadt.jpg|Chaos in the city of the kuo-toa. Barradin provides the fitting soundtrack.",
         "In the middle of the melee the companions spotted a bound dwarf among the enemies. They managed to free him while the fight was still raging. His name was Kardal, and he claimed to be a scout of his city who had been captured by the fish folk.",
+        "!demogorgon.webp|Demogorgon, Prince of Demons.|frei",
         "Then something rose from the lake: Demogorgon. A demon prince, a true demon god. Two heads, two arms with two tentacles each, a long tail and two legs that made the ground tremble. He let out an ungodly, terrifying scream, all magic was snuffed out, and the companions' knees began to shake. <em class=\"aside\">I admit: mine were only shaking out of solidarity.</em>",
+        "Friedrich was not deterred. He drew his bow and loosed an arrow at Demogorgon. The effect: none. Absolutely none. Nevertheless, Friedrich has insisted ever since that he punched a god.",
         "The monster set about destroying the city. With its tentacle arms it crushed buildings, foes and allies alike. With a great deal of luck the companions escaped to a boat, and Kardal fled with them.",
+        "!flucht-see.jpg|Fleeing across the lake. Friedrich is still very proud of himself to this day.",
         "## Gracklstugh",
-        "Their flight across the lake finally brought them to a breathtaking sight: a fortress hewn into the rock, towering behind mighty city walls above the city of Gracklstugh."
+        "Their flight across the lake finally brought them to a breathtaking sight: a fortress hewn into the rock, towering behind mighty city walls above the city of Gracklstugh.",
+        "!gracklstugh.jpg|Arriving at Gracklstugh. Kardal leads the way."
       ],
       fortsetzung: "To be continued …"
     }
@@ -228,6 +233,9 @@ window.INHALT_EN = {
   bestiarium: [
     { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "The watchtower of Thundertree", text: "A green poison dragon that had made its lair in the crumbling watchtower. Its poison breath dealt the party a nasty blow until Barradin's hypnosis turned the tide." },
     { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A flying, insect-like demon with several wings and a long stinger. Appeared out of nowhere in the middle of the breakout and swooped down on the companions." },
-    { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A vulture-like demon with ragged wings. Took down most of the guards before the companions struck it down as well." }
+    { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A vulture-like demon with ragged wings. Took down most of the guards before the companions struck it down as well." },
+    { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "besiegt", ort: "The city by the underground lake", text: "A race of fish folk living on the shore of an underground lake. Some of them worship a false god. In the city centre they turned on each other and on the companions." },
+    { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gesichtet", ort: "The city by the underground lake", text: "Archpriest of the kuo-toa. Asked the companions for help against the followers of a false god and smuggled them into his city as fake prisoners. What became of him when Demogorgon ravaged the city is uncertain." },
+    { name: "Demogorgon", bild: "demogorgon-karte.webp", status: "gesichtet", ort: "The underground lake", text: "A demon prince with two heads, tentacle arms and a long tail. His scream snuffed out all magic, and the companions escaped only by luck. Friedrich punched him anyway. Or so he says." }
   ]
 };
