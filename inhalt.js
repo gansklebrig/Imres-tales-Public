@@ -168,6 +168,7 @@ window.INHALT = {
         "## Das verlassene Dorf",
         "Dann nahmen sie sich das Dorf vor. In einigen der vermeintlich leeren Häuser lauerten Zombies. Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt: Er erkannte darin seinen Onkel. <em class=\"aside\">Mehr hat er dazu nicht gesagt. Natürlich nicht.</em>",
         "Es folgten weitere Kämpfe gegen Blights, gegen zwei riesige Spinnen und gegen noch mehr Blights, bis Echo einen gewaltigen Feuerball losließ und das Problem auf seine Weise löste.",
+        "!ilvara-druidin.jpg|Ilvara, wie sie sich den Gefährten zeigte: ehrwürdig, freundlich und mit Fuchs. Was sollte da schon schiefgehen?|schmal",
         "Im letzten Haus trafen sie schließlich auf eine Druidin, die sich als Ilvara vorstellte. Ganz in Grün gekleidet, einen Fuchs auf den Schultern, wirkte sie wie eine Hüterin des Waldes. Niemand ahnte etwas Böses, als sie die Gefährten in ihr Haus bat."
       ],
       fortsetzung: "Weiter in Kapitel II …"

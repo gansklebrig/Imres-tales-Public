@@ -161,6 +161,7 @@ window.INHALT_EN = {
         "## The Abandoned Village",
         "Then they turned to the village. Zombies lurked in some of the seemingly empty houses. In front of one house stood a statue that stopped Ezekiel in his tracks: he recognised it as his uncle. <em class=\"aside\">He said nothing more about it. Of course he didn't.</em>",
         "More fights followed, against blights, against two giant spiders and against yet more blights, until Echo unleashed an enormous fireball and solved the problem his own way.",
+        "!ilvara-druidin.jpg|Ilvara as she appeared to the companions: venerable, kindly and with a fox. What could possibly go wrong?|schmal",
         "In the last house they finally met a druid who introduced herself as Ilvara. Dressed all in green, a fox upon her shoulders, she looked like a guardian of the forest. Nobody suspected anything when she invited the companions into her home."
       ],
       fortsetzung: "Continued in Chapter II …"
