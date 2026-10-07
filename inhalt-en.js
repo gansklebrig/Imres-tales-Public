@@ -170,7 +170,8 @@ window.INHALT_EN = {
       titel: "The Underdark",
       absaetze: [
         "## The Herbal Mist",
-        "The moment the companions stepped into Ilvara's house, a poisonous vapour filled the air. One after another they sank to the floor and lost consciousness. The friendly druid was in truth a shapeshifter who had drugged them with an herbal mist, and she carried off the entire party.",
+        "The moment the companions stepped into Ilvara's house, a poisonous vapour filled the air. One after another they sank to the floor and lost consciousness. The friendly druid was in truth a shapeshifter who had drugged them with an herbal mist, and she carried off the entire party. Her true face the companions would only see later: Ilvara Mizzrym, a drow.",
+        "!ilvara.jpg|Ilvara Mizzrym in her true form. Not much left of the guardian of the forest.",
         "## Captured",
         "Nobody knew how much time had passed when they came to. <em class=\"aside\">A few hours? Days? Either way, I slept splendidly.</em> They lay in chains, deep beneath the earth, in a prison-like chamber under lock and key. Guards stood outside the bars, glaring in grimly.",
         "Then Echo had a brilliant idea: he turned into a rat, slipped out of the cell unnoticed and found the party's gear in a neighbouring room. Still in animal form, he brought everything back to the cell. <em class=\"aside\">A rat. Or a mouse. They look the same to me.</em>",
@@ -178,7 +179,7 @@ window.INHALT_EN = {
         "As soon as everyone was armed again, Barradin did not hesitate. He insulted the guards so thoroughly that they charged at the companions in a blind rage. Only now did it become clear that most of the enemies had been out of sight: they were waiting next door, beyond bridges on another platform, heard the clash of battle and came storming in.",
         "And then, out of nowhere, demons appeared in the middle of the fight. A flying, insect-like abomination with several wings and a long stinger swooped down on the companions, while a second demon fell upon their enemies.",
         "The fight was hard, but in the end the demons and the guards lay on the ground. <em class=\"aside\">To be honest, the second demon took care of most of the guards. But we cheered him on very enthusiastically.</em>",
-        "Only one escaped: the drow, the shapeshifter. She leapt from the bridge into the river rushing far below and was gone.",
+        "Only one escaped: Ilvara, the drow shapeshifter. She leapt from the bridge into the river rushing far below and was gone.",
         "## Through the Webs",
         "The companions pressed deeper into the Underdark. Thick spider webs blocked the way, and in places they even had to balance across them. A few spiders stood in their way and were slain.",
         "!unterreich-spinnweben.jpg|Making our way through the webs of the Underdark. Perfectly relaxed, as you can see.",

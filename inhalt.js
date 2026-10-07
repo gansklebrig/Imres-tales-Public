@@ -177,7 +177,8 @@ window.INHALT = {
       titel: "Das Unterreich",
       absaetze: [
         "## Der Kräuternebel",
-        "Kaum hatten die Gefährten Ilvaras Haus betreten, lag plötzlich ein giftiger Dampf in der Luft. Einer nach dem anderen sank zu Boden und verlor das Bewusstsein. Die freundliche Druidin war in Wahrheit eine Gestaltwandlerin, die sie mit einem Kräuternebel betäubt hatte, und sie verschleppte die ganze Gruppe.",
+        "Kaum hatten die Gefährten Ilvaras Haus betreten, lag plötzlich ein giftiger Dampf in der Luft. Einer nach dem anderen sank zu Boden und verlor das Bewusstsein. Die freundliche Druidin war in Wahrheit eine Gestaltwandlerin, die sie mit einem Kräuternebel betäubt hatte, und sie verschleppte die ganze Gruppe. Ihr wahres Gesicht sollten die Gefährten erst später sehen: Ilvara Mizzrym, eine Drow.",
+        "!ilvara.jpg|Ilvara Mizzrym in ihrer wahren Gestalt. Von der Hüterin des Waldes ist nicht viel übrig.",
         "## Gefangen",
         "Wie viel Zeit vergangen war, wusste niemand, als sie wieder zu sich kamen. <em class=\"aside\">Ein paar Stunden? Tage? Ich habe jedenfalls hervorragend geschlafen.</em> Sie lagen in Ketten, tief unter der Erde, in einem gefängnisartigen Raum hinter Schloss und Riegel. Vor den Gitterstäben standen Wachen und starrten grimmig herein.",
         "Dann hatte Echo eine geniale Idee: Er verwandelte sich in eine Ratte, schlüpfte unbemerkt aus der Zelle und fand in einem Nebenraum die Ausrüstung der Gruppe. Immer noch in Tiergestalt schaffte er alles zurück in die Zelle. <em class=\"aside\">Eine Ratte. Oder eine Maus. Für mich sehen die gleich aus.</em>",
@@ -185,7 +186,7 @@ window.INHALT = {
         "Kaum waren alle wieder bewaffnet, zögerte Barradin nicht lange. Er beleidigte die Wachen so ausgiebig, dass sie wutentbrannt auf die Gefährten losgingen. Erst jetzt zeigte sich, dass die meisten Gegner gar nicht zu sehen gewesen waren: Sie warteten nebenan, hinter Brücken auf einem anderen Plateau, hörten den Kampflärm und stürmten heran.",
         "Und dann, wie aus dem Nichts, tauchten mitten im Kampf Dämonen auf. Ein fliegendes, insektenartiges Scheusal mit mehreren Flügeln und einem langen Stachel stürzte sich auf die Gefährten, während sich ein zweiter Dämon über ihre Gegner hermachte.",
         "Der Kampf war hart, doch am Ende lagen die Dämonen und die Wachen am Boden. <em class=\"aside\">Wenn ich ehrlich bin, hat der zweite Dämon den Großteil der Wachen erledigt. Wir haben ihn dabei aber sehr tatkräftig angefeuert.</em>",
-        "Nur eine entkam: die Drow, die Gestaltwandlerin. Sie sprang von der Brücke in den Fluss, der tief darunter rauschte, und war verschwunden.",
+        "Nur eine entkam: Ilvara, die Drow und Gestaltwandlerin. Sie sprang von der Brücke in den Fluss, der tief darunter rauschte, und war verschwunden.",
         "## Durch die Spinnweben",
         "Die Gefährten drangen tiefer ins Unterreich vor. Dichte Spinnweben versperrten den Weg, und stellenweise mussten sie sogar auf ihnen balancieren. Ein paar Spinnen stellten sich ihnen entgegen und wurden erschlagen.",
         "!unterreich-spinnweben.jpg|Unterwegs durch die Spinnweben des Unterreichs. Ganz entspannt, wie man sieht.",
