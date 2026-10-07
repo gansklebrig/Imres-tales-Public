@@ -112,30 +112,30 @@ window.INHALT = {
   kapitel: [
     {
       nummer: "I",
-      titel: "Der Weg nach Thunderlin",
+      titel: "Der Weg nach Phandalin",
       station: 1,
       absaetze: [
         "## Die Einladung",
-        "Es begann mit einem Brief. Jeder der Helden erhielt eine Einladung von Gundren, einem Zwerg und Händler, der offenbar jeden kennt, der etwas zu sagen hat. Der Treffpunkt war eine kleine Hafenstadt am Meer: ein paar windschiefe Häuser, ein Kai voller Fischerboote und der Geruch von Salz und Teer.",
+        "Es begann mit einem Brief. Jeder der Helden erhielt eine Einladung von Gundren, einem Zwerg und Händler, der offenbar jeden kennt, der etwas zu sagen hat. Der Treffpunkt war der Hafen von Neverwinter: knarrende Stege, Fischerboote, Händler und Matrosen und über allem der Geruch von Salz und Teer.",
         "Dort standen sie nun beieinander, ein Elf mit Pfeife, ein Mensch mit Bogen und Hund, ein gehörnter Druide und ein schweigsamer Darkin. Die Vorstellungsrunde verlief, vorsichtig gesagt, etwas holprig. <em class=\"aside\">Ich erinnere mich vor allem daran, dass ich mich hervorragend vorgestellt habe.</em>",
         "Gundren kam schnell zur Sache. In einer alten, verlassenen Mine soll eine magische Schmiede liegen, in der einst magische Gegenstände geschaffen wurden. Einige mächtige Lords interessieren sich brennend dafür, und Gundren wittert die Chance, sein Exportgeschäft kräftig zu erweitern. Wie genau, behielt er für sich.",
-        "Der erste Auftrag klang harmlos: einen Karren mit Waren sicher nach Thunderlin bringen. Und wer dort Elmar Barton aufspürt, dem winkt eine Extraportion Gold.",
+        "Der erste Auftrag klang harmlos: einen Karren mit Waren sicher nach Phandalin bringen. Und wer dort Elmar Barton aufspürt, dem winkt eine Extraportion Gold.",
         "## Hinterhalt auf der Straße",
         "Mehrere Tage lang rollte der Karren friedlich dahin. Dann war der Weg plötzlich versperrt: Ein überfallener, halb niedergebrannter Wagen lag quer auf der Straße. Die Gefährten ahnten sofort, dass hier etwas faul war. Als kurz darauf eine Handvoll Goblins aus dem Wald sprang, waren sie bereit, und der Kampf war vorbei, bevor er richtig begonnen hatte.",
         "## Die Goblinhöhle",
-        "Statt einfach weiterzufahren, beschloss die Gruppe, den Spuren in den Wald zu folgen. In Thunderlin würde man ihnen für das Ende der Goblinplage sicher dankbar sein, und Beute gab es bestimmt auch.",
+        "Statt einfach weiterzufahren, beschloss die Gruppe, den Spuren in den Wald zu folgen. In Phandalin würde man ihnen für das Ende der Goblinplage sicher dankbar sein, und Beute gab es bestimmt auch.",
         "Am Eingang der Höhle stießen sie auf mehrere angebundene Wölfe, die sie kurzerhand befreiten. Dann stürmten sie das Goblinnest, teils lautlos aus dem Schatten, teils mit allem anderen als Zurückhaltung. <em class=\"aside\">Welcher Teil davon meiner war, lasse ich lieber offen.</em> Am Ende lagen der Anführer und seine gesamte Bande am Boden, und die Gefährten traten siegreich wieder ans Tageslicht.",
-        "## Thunderlin und die Roten Roben",
-        "Schließlich erreichten die Gefährten Thunderlin, ein kleines Dorf. Das Wichtigste zuerst: Sie kehrten in die Taverne ein, aßen und tranken nach Herzenslust und feilschten den Wirt auf äußerst günstige Zimmer herunter. Erst danach machten sie sich auf die Suche nach Informationen. Sie streiften durch die Gassen, sprachen mit den Bewohnern und versuchten herauszufinden, was hier vor sich ging. Doch die Leute blieben wortkarg, und schnell war klar: Hier geht nicht alles mit rechten Dingen zu.",
+        "## Phandalin und die Roten Roben",
+        "Schließlich erreichten die Gefährten Phandalin, ein kleines Dorf. Das Wichtigste zuerst: Sie kehrten in die Taverne ein, aßen und tranken nach Herzenslust und feilschten den Wirt auf äußerst günstige Zimmer herunter. Erst danach machten sie sich auf die Suche nach Informationen. Sie streiften durch die Gassen, sprachen mit den Bewohnern und versuchten herauszufinden, was hier vor sich ging. Doch die Leute blieben wortkarg, und schnell war klar: Hier geht nicht alles mit rechten Dingen zu.",
         "Den Durchbruch brachte Barradin. In der Taverne stimmte er ein Lied an und sang, bis er die Einheimischen ganz in seinen Bann gezogen hatte. Nun lösten sich die Zungen: Eine Bande, die sich die Roten Roben nennt, presst den Bewohnern Schutzgeld ab und hat sich in Schloss Crackmore verschanzt, gleich am Rand des Dorfes.",
-        "Bevor sie gegen die Bande vorgingen, statteten die Gefährten noch dem Bürgermeister von Thunderlin einen Besuch ab. Ihr Ziel: eine Belohnung aushandeln, und zwar eine ordentliche. Das Gespräch geriet allerdings äußerst unangenehm. Die Forderungen waren, vorsichtig gesagt, übertrieben, die Stimmung kippte, und beinahe wäre das Ganze in einem handfesten Streit geendet. <em class=\"aside\">Ich würde es eher selbstbewusst nennen.</em>",
+        "Bevor sie gegen die Bande vorgingen, statteten die Gefährten noch dem Bürgermeister von Phandalin einen Besuch ab. Ihr Ziel: eine Belohnung aushandeln, und zwar eine ordentliche. Das Gespräch geriet allerdings äußerst unangenehm. Die Forderungen waren, vorsichtig gesagt, übertrieben, die Stimmung kippte, und beinahe wäre das Ganze in einem handfesten Streit geendet. <em class=\"aside\">Ich würde es eher selbstbewusst nennen.</em>",
         "## Schloss Crackmore",
         "Die Gruppe verschaffte sich Zugang zum Schloss. Zuerst befreiten sie einen Gefangenen und erbeuteten dabei einige rote Roben, die ihnen fortan als Tarnung dienten. <em class=\"aside\">Wobei Ezekiel in seiner scharlachroten Rüstung vermutlich auch vorher schon nicht weiter aufgefallen wäre.</em> So drangen sie immer tiefer in das Gemäuer vor und stellten die Bande in mehreren Kämpfen, einen nach dem anderen. <em class=\"aside\">Wie viele Kämpfe es waren, weiß ich nicht mehr genau. Ich war damit beschäftigt, in der roten Robe gut auszusehen.</em>",
         "Zuletzt stellten sie ihren Anführer Glasstab. Als sich der Kampf gegen ihn wendete, versuchte er, durch einen geheimen Tunnel zu entkommen. Doch Barradin bekam ihn gerade noch zu packen und zerrte ihn zurück in den Raum, wo Friedrich ihn mit einem perfekten Kopfschuss niederstreckte.",
         "!glasstab-besiegt.jpg|Nach dem Sieg über Glasstab, noch in den erbeuteten roten Roben.",
         "Mit seinem letzten Atemzug sprach Glasstab von einer gewissen Spinne, der er offenbar diente. Ist es eine Person, eine Macht, eine geheime Organisation? Bisher weiß es niemand.",
-        "Zurück in Thunderlin verbreiteten die Gefährten die frohe Kunde und versuchten nebenbei, ihre Belohnung noch ein wenig in die Höhe zu treiben. Danach wurde in der Taverne ausgelassen gefeiert. Doch so laut es auch wurde, ein Gedanke ließ sie nicht los: die Spinne, was auch immer sich dahinter verbergen mag.",
-        "!siegesfeier.jpg|Die Siegesfeier in Thunderlin. Barradins Horn ist übrigens mit Milch gefüllt. Sagt er.",
+        "Zurück in Phandalin verbreiteten die Gefährten die frohe Kunde und versuchten nebenbei, ihre Belohnung noch ein wenig in die Höhe zu treiben. Danach wurde in der Taverne ausgelassen gefeiert. Doch so laut es auch wurde, ein Gedanke ließ sie nicht los: die Spinne, was auch immer sich dahinter verbergen mag.",
+        "!siegesfeier.jpg|Die Siegesfeier in Phandalin. In Barradins Horn ist übrigens nur Saft.",
         "Nach der Feier ging es zum Bürgermeister, um die Belohnung abzuholen, und das wurde ähnlich unangenehm wie beim ersten Besuch. <em class=\"aside\">Sagen wir so: Er wird uns so schnell nicht wieder einladen.</em>",
         "## Der Gefangene im Wachturm",
         "An dieser Stelle muss euer Erzähler gestehen: Seine Erinnerung an die folgenden Tage ist ein wenig … nebelig. <em class=\"aside\">Vielleicht lag es am Kraut in meiner Pfeife.</em>",
@@ -152,7 +152,7 @@ window.INHALT = {
         "Doch am Ende standen sie vor ihr: der magischen Schmiede, umgeben von leuchtenden Runen. Die Gefährten räumten die letzten Wächter aus dem Weg, bis die Schmiede ihnen gehörte, und kehrten zu Gundren zurück, um ihm die gute Nachricht zu überbringen.",
         "!magische-schmiede.jpg|Rast vor der magischen Schmiede. Barradin besteht darauf, dass er nicht angegeben hat.",
         "## Neverwinter",
-        "Erst danach zog es die Gruppe nach Neverwinter. Wer große Taten vollbringt, sollte schließlich auch davon erzählen, und wo ginge das besser als in der großen Stadt? Kaum hatten sie sich ein Zimmer in einem Gasthof gesichert, baten sie um eine Audienz bei der Allianz der Lords.",
+        "Erst danach kehrte die Gruppe nach Neverwinter zurück, in die Stadt, in deren Hafen alles begonnen hatte. Wer große Taten vollbringt, sollte schließlich auch davon erzählen, und wo ginge das besser als in der großen Stadt? Kaum hatten sie sich ein Zimmer in einem Gasthof gesichert, baten sie um eine Audienz bei der Allianz der Lords.",
         "Ganz nach Protokoll lief das nicht. Etwas plump und ziemlich forsch marschierten die Gefährten an den Wachen vorbei, geradewegs zum Leiter der Allianz, Captain Dolgrimson. Der jedoch vertröstete sie: Für ein Gespräch habe man erst später Zeit.",
         "Also streiften sie durch die Straßen von Neverwinter, lauschten in Tavernen und auf Marktplätzen und versuchten, Gerüchte aufzuschnappen. Ohne Erfolg. <em class=\"aside\">Glaube ich. Oder ich habe die Gerüchte vergessen. Beides möglich.</em>",
         "## Die Allianz der Lords",
@@ -167,15 +167,15 @@ window.INHALT = {
      x / y: Position in Prozent von links / von oben (0 bis 100)
      abschnitt: Zwischenüberschrift im Kapitel, zu der die Station springt */
   reise: {
-    karte: null,
+    karte: "weltkarte.jpg",
     stationen: [
-      { name: "Die kleine Hafenstadt", x: 8, y: 76, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
-      { name: "Hinterhalt auf der Straße", x: 30, y: 66, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Ein zerstörter Wagen versperrt den Weg. Die Goblins, die aus dem Wald springen, haben keine Chance." },
-      { name: "Die Goblinhöhle", x: 30, y: 54, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
-      { name: "Thunderlin", x: 58, y: 64, kapitel: "I", abschnitt: "Thunderlin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
-      { name: "Der Wachturm", x: 80, y: 40, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder Nundro." },
-      { name: "Die magische Schmiede", x: 68, y: 22, kapitel: "I", abschnitt: "Die magische Schmiede", text: "Tief in einer alten, verlassenen Mine verborgen. Nach harten Kämpfen gehört sie der Gruppe." },
-      { name: "Neverwinter", x: 24, y: 26, kapitel: "I", abschnitt: "Neverwinter", text: "Die große Stadt. Hier treten die Gefährten der Allianz der Lords bei." }
+      { name: "Der Hafen von Neverwinter", x: 21.5, y: 46, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
+      { name: "Hinterhalt auf der Straße", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Kurz nach der Abzweigung von der High Road Richtung Phandalin. Die Goblins, die aus dem Wald springen, haben keine Chance." },
+      { name: "Die Goblinhöhle", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
+      { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
+      { name: "Der Wachturm", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder Nundro." },
+      { name: "Die magische Schmiede", x: 71.3, y: 75, kapitel: "I", abschnitt: "Die magische Schmiede", text: "Tief in einer alten, verlassenen Mine verborgen. Nach harten Kämpfen gehört sie der Gruppe." },
+      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Zurück in der großen Stadt. Hier treten die Gefährten der Allianz der Lords bei." }
     ]
   },
 

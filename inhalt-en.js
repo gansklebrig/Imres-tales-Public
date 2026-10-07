@@ -105,30 +105,30 @@ window.INHALT_EN = {
   kapitel: [
     {
       nummer: "I",
-      titel: "The Road to Thunderlin",
+      titel: "The Road to Phandalin",
       station: 1,
       absaetze: [
         "## The Invitation",
-        "It began with a letter. Each of the heroes received an invitation from Gundren, a dwarf and merchant who seems to know everyone worth knowing. The meeting place was a small harbour town by the sea: a few crooked houses, a quay full of fishing boats and the smell of salt and tar.",
+        "It began with a letter. Each of the heroes received an invitation from Gundren, a dwarf and merchant who seems to know everyone worth knowing. The meeting place was the harbour of Neverwinter: creaking piers, fishing boats, merchants and sailors, and over it all the smell of salt and tar.",
         "And so there they stood together: an elf with a pipe, a human with a bow and a dog, a horned druid and a silent Darkin. The round of introductions went, to put it kindly, a little bumpily. <em class=\"aside\">Mostly I remember introducing myself splendidly.</em>",
         "Gundren came straight to the point. Deep within an old, abandoned mine lies a magic forge where magical items were once crafted. Several powerful lords are burning with interest in it, and Gundren smells a chance to expand his export business considerably. How exactly, he kept to himself.",
-        "The first job sounded harmless: escort a cart of goods safely to Thunderlin. And whoever tracked down Elmar Barton there could look forward to an extra helping of gold.",
+        "The first job sounded harmless: escort a cart of goods safely to Phandalin. And whoever tracked down Elmar Barton there could look forward to an extra helping of gold.",
         "## Ambush on the Road",
         "For several days the cart rolled along peacefully. Then the way was suddenly blocked: a raided, half-burned wagon lay across the road. The companions sensed at once that something was amiss. When a handful of goblins leapt out of the woods moments later, they were ready, and the fight was over before it had properly begun.",
         "## The Goblin Cave",
-        "Instead of simply moving on, the party decided to follow the tracks into the forest. Thunderlin would surely be grateful to see an end to the goblin plague, and there was bound to be loot as well.",
+        "Instead of simply moving on, the party decided to follow the tracks into the forest. Phandalin would surely be grateful to see an end to the goblin plague, and there was bound to be loot as well.",
         "At the mouth of the cave they came upon several tethered wolves, which they promptly set free. Then they stormed the goblin nest, partly in silence from the shadows, partly with anything but restraint. <em class=\"aside\">Which part of that was mine, I would rather leave open.</em> In the end the chieftain and his entire band lay on the ground, and the companions stepped victorious back into the daylight.",
-        "## Thunderlin and the Red Robes",
-        "At last the companions reached Thunderlin, a small village. First things first: they settled into the tavern, ate and drank to their hearts' content and haggled the innkeeper down to remarkably cheap rooms. Only then did they set out in search of information. They roamed its lanes, spoke with its people and tried to find out what was going on. But the villagers were tight-lipped, and it soon became clear that all was not well here.",
+        "## Phandalin and the Red Robes",
+        "At last the companions reached Phandalin, a small village. First things first: they settled into the tavern, ate and drank to their hearts' content and haggled the innkeeper down to remarkably cheap rooms. Only then did they set out in search of information. They roamed its lanes, spoke with its people and tried to find out what was going on. But the villagers were tight-lipped, and it soon became clear that all was not well here.",
         "The breakthrough came from Barradin. In the tavern he struck up a song and sang until he had the locals completely under his spell. Then tongues loosened: a gang calling itself the Red Robes was extorting protection money from the townsfolk and had dug itself in at Castle Crackmore, right at the edge of the village.",
-        "Before moving against the gang, the companions paid a visit to the mayor of Thunderlin. Their goal: to negotiate a reward, and a handsome one at that. The conversation, however, turned extremely awkward. Their demands were, to put it gently, excessive, the mood soured, and the whole affair very nearly ended in an outright quarrel. <em class=\"aside\">I would call it confident.</em>",
+        "Before moving against the gang, the companions paid a visit to the mayor of Phandalin. Their goal: to negotiate a reward, and a handsome one at that. The conversation, however, turned extremely awkward. Their demands were, to put it gently, excessive, the mood soured, and the whole affair very nearly ended in an outright quarrel. <em class=\"aside\">I would call it confident.</em>",
         "## Castle Crackmore",
         "The party gained entry to the castle. First they freed a prisoner and, in doing so, seized a few red robes, which from then on served as their disguise. <em class=\"aside\">Although Ezekiel, in his scarlet armour, probably would not have stood out much even before.</em> In this way they pushed ever deeper into the old walls and took on the gang in several fights, one after another. <em class=\"aside\">How many fights there were, I no longer recall exactly. I was busy looking good in my red robe.</em>",
         "Last of all they confronted their leader, Glasstaff. When the fight turned against him, he tried to escape through a secret tunnel. But Barradin caught hold of him at the very last moment and hauled him back into the room, where Friedrich brought him down with a perfect headshot.",
         "!glasstab-besiegt.jpg|After the victory over Glasstaff, still wearing the captured red robes.",
         "With his last breath, Glasstaff spoke of a certain Spider whom he apparently served. Is it a person, a power, a secret order? To this day, nobody knows.",
-        "Back in Thunderlin the companions spread the good news and, while they were at it, tried to drive their reward up a little further. Then the tavern saw a wild celebration. Yet however loud it got, one thought would not let them go: the Spider, whatever may lie behind that name.",
-        "!siegesfeier.jpg|The victory feast in Thunderlin. Barradin's horn is filled with milk, by the way. Or so he says.",
+        "Back in Phandalin the companions spread the good news and, while they were at it, tried to drive their reward up a little further. Then the tavern saw a wild celebration. Yet however loud it got, one thought would not let them go: the Spider, whatever may lie behind that name.",
+        "!siegesfeier.jpg|The victory feast in Phandalin. Barradin's horn holds nothing but juice, by the way.",
         "After the celebration they went to the mayor to collect their reward, and it proved just as awkward as their first visit. <em class=\"aside\">Let us put it this way: he will not be inviting us back any time soon.</em>",
         "## The Prisoner in the Watchtower",
         "At this point your narrator must confess: his memory of the days that followed is a little … hazy. <em class=\"aside\">Perhaps it was the herb in my pipe.</em>",
@@ -145,7 +145,7 @@ window.INHALT_EN = {
         "But in the end they stood before it: the magic forge, surrounded by glowing runes. The companions cleared the last guardians out of the way until the forge was theirs, then returned to Gundren to bring him the good news.",
         "!magische-schmiede.jpg|A rest before the magic forge. Barradin insists he was not showing off.",
         "## Neverwinter",
-        "Only then did the party set out for Neverwinter. Whoever performs great deeds ought to tell of them, after all, and where better than in the great city? No sooner had they secured a room at an inn than they requested an audience with the Lords' Alliance.",
+        "Only then did the party return to Neverwinter, the city in whose harbour it had all begun. Whoever performs great deeds ought to tell of them, after all, and where better than in the great city? No sooner had they secured a room at an inn than they requested an audience with the Lords' Alliance.",
         "It did not go entirely by protocol. Somewhat clumsily and rather boldly, the companions marched straight past the guards to the head of the Alliance, Captain Dolgrimson. He, however, put them off: there would be time for a conversation only later.",
         "So they wandered the streets of Neverwinter, listening in taverns and at market stalls and trying to catch rumours. Without success. <em class=\"aside\">I think. Or I have forgotten the rumours. Both are possible.</em>",
         "## The Lords' Alliance",
@@ -157,15 +157,15 @@ window.INHALT_EN = {
 
   /* ---------- THE JOURNEY ---------- */
   reise: {
-    karte: null,
+    karte: "weltkarte.jpg",
     stationen: [
-      { name: "The Little Harbour Town", x: 8, y: 76, kapitel: "I", abschnitt: "The Invitation", text: "Gundren invites the heroes and offers them the search for a magic forge." },
-      { name: "Ambush on the Road", x: 30, y: 66, kapitel: "I", abschnitt: "Ambush on the Road", text: "A wrecked wagon blocks the way. The goblins leaping from the woods never stand a chance." },
-      { name: "The Goblin Cave", x: 30, y: 54, kapitel: "I", abschnitt: "The Goblin Cave", text: "Separated from the site of the ambush by just a small stretch of forest. Wolves freed, nest stormed, chieftain slain." },
-      { name: "Thunderlin", x: 58, y: 64, kapitel: "I", abschnitt: "Thunderlin and the Red Robes", text: "A small village in the grip of the Red Robes. At its edge lies Castle Crackmore, where Glasstaff falls and speaks of the Spider." },
-      { name: "The Watchtower", x: 80, y: 40, kapitel: "I", abschnitt: "The Prisoner in the Watchtower", text: "A bugbear falls, a drow escapes, and the prisoner turns out to be Gundren's twin brother Nundro." },
-      { name: "The Magic Forge", x: 68, y: 22, kapitel: "I", abschnitt: "The Magic Forge", text: "Hidden deep within an old, abandoned mine. After hard-fought battles, it belongs to the party." },
-      { name: "Neverwinter", x: 24, y: 26, kapitel: "I", abschnitt: "Neverwinter", text: "The great city. Here the companions join the Lords' Alliance." }
+      { name: "The Harbour of Neverwinter", x: 21.5, y: 46, kapitel: "I", abschnitt: "The Invitation", text: "Gundren invites the heroes and offers them the search for a magic forge." },
+      { name: "Ambush on the Road", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Ambush on the Road", text: "Just after turning off the High Road towards Phandalin. The goblins leaping from the woods never stand a chance." },
+      { name: "The Goblin Cave", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "The Goblin Cave", text: "Separated from the site of the ambush by just a small stretch of forest. Wolves freed, nest stormed, chieftain slain." },
+      { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin and the Red Robes", text: "A small village in the grip of the Red Robes. At its edge lies Castle Crackmore, where Glasstaff falls and speaks of the Spider." },
+      { name: "The Watchtower", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "The Prisoner in the Watchtower", text: "A bugbear falls, a drow escapes, and the prisoner turns out to be Gundren's twin brother Nundro." },
+      { name: "The Magic Forge", x: 71.3, y: 75, kapitel: "I", abschnitt: "The Magic Forge", text: "Hidden deep within an old, abandoned mine. After hard-fought battles, it belongs to the party." },
+      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Back in the great city. Here the companions join the Lords' Alliance." }
     ]
   },
 

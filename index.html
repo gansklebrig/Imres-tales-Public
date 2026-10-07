@@ -140,7 +140,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .route-done { animation: march 1.2s linear infinite; }
 @keyframes march { to { stroke-dashoffset: -11; } }
 .stop circle { fill: var(--night); stroke: var(--ember); stroke-width: 3; transition: fill .2s; }
-.stop text { fill: var(--vellum); font-family: var(--body); font-size: 15px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.stop text { fill: var(--vellum); font-family: var(--body); font-size: 19px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .stop { cursor: pointer; }
 .stop:hover circle, .stop.active circle { fill: var(--blood); }
 .stop:focus-visible circle { stroke: var(--vellum); stroke-width: 4; }
@@ -514,7 +514,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     }
     pts.forEach((p, i) => {
       const g = el("g", { class: "stop" + (i === aktiv ? " active" : ""), tabindex: 0, role: "button", "aria-label": (i + 1) + ". " + stationen[i].name, "data-stop": i });
-      g.appendChild(el("circle", { cx: p[0], cy: p[1], r: 17 }));
+      g.appendChild(el("circle", { cx: p[0], cy: p[1], r: 22 }));
       const t = el("text", { x: p[0], y: p[1] });
       t.textContent = i + 1;
       g.appendChild(t);
