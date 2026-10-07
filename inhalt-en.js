@@ -177,8 +177,8 @@ window.INHALT_EN = {
         "Then Echo had a brilliant idea: he turned into a rat, slipped out of the cell unnoticed and found the party's gear in a neighbouring room. Still in animal form, he brought everything back to the cell. <em class=\"aside\">A rat. Or a mouse. They look the same to me.</em>",
         "## The Breakout",
         "As soon as everyone was armed again, Barradin did not hesitate. He insulted the guards so thoroughly that they charged at the companions in a blind rage. Only now did it become clear that most of the enemies had been out of sight: they were waiting next door, beyond bridges on another platform, heard the clash of battle and came storming in.",
-        "And then, out of nowhere, demons appeared in the middle of the fight. A flying, insect-like abomination with several wings and a long stinger swooped down on the companions, while a second demon fell upon their enemies.",
-        "The fight was hard, but in the end the demons and the guards lay on the ground. <em class=\"aside\">To be honest, the second demon took care of most of the guards. But we cheered him on very enthusiastically.</em>",
+        "And then, out of nowhere, demons appeared in the middle of the fight. A chasme, a flying, insect-like abomination with several wings and a long stinger, swooped down on the companions, while a vrock, a vulture-like demon, fell upon their enemies.",
+        "The fight was hard. The demons may have taken down most of the enemies, but in the end it was the companions who struck down both demons.",
         "Only one escaped: Ilvara, the drow shapeshifter. She leapt from the bridge into the river rushing far below and was gone.",
         "## Through the Webs",
         "The companions pressed deeper into the Underdark. Thick spider webs blocked the way, and in places they even had to balance across them. A few spiders stood in their way and were slain.",
@@ -206,5 +206,9 @@ window.INHALT_EN = {
   },
 
   /* ---------- THE BESTIARY ---------- */
-  bestiarium: []
+  bestiarium: [
+    { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "The watchtower of Thundertree", text: "A green poison dragon that had made its lair in the crumbling watchtower. Its poison breath dealt the party a nasty blow until Barradin's hypnosis turned the tide." },
+    { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A flying, insect-like demon with several wings and a long stinger. Appeared out of nowhere in the middle of the breakout and swooped down on the companions." },
+    { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A vulture-like demon with ragged wings. Took down most of the guards before the companions struck it down as well." }
+  ]
 };

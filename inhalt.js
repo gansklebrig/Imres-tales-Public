@@ -184,8 +184,8 @@ window.INHALT = {
         "Dann hatte Echo eine geniale Idee: Er verwandelte sich in eine Ratte, schlüpfte unbemerkt aus der Zelle und fand in einem Nebenraum die Ausrüstung der Gruppe. Immer noch in Tiergestalt schaffte er alles zurück in die Zelle. <em class=\"aside\">Eine Ratte. Oder eine Maus. Für mich sehen die gleich aus.</em>",
         "## Der Ausbruch",
         "Kaum waren alle wieder bewaffnet, zögerte Barradin nicht lange. Er beleidigte die Wachen so ausgiebig, dass sie wutentbrannt auf die Gefährten losgingen. Erst jetzt zeigte sich, dass die meisten Gegner gar nicht zu sehen gewesen waren: Sie warteten nebenan, hinter Brücken auf einem anderen Plateau, hörten den Kampflärm und stürmten heran.",
-        "Und dann, wie aus dem Nichts, tauchten mitten im Kampf Dämonen auf. Ein fliegendes, insektenartiges Scheusal mit mehreren Flügeln und einem langen Stachel stürzte sich auf die Gefährten, während sich ein zweiter Dämon über ihre Gegner hermachte.",
-        "Der Kampf war hart, doch am Ende lagen die Dämonen und die Wachen am Boden. <em class=\"aside\">Wenn ich ehrlich bin, hat der zweite Dämon den Großteil der Wachen erledigt. Wir haben ihn dabei aber sehr tatkräftig angefeuert.</em>",
+        "Und dann, wie aus dem Nichts, tauchten mitten im Kampf Dämonen auf. Ein Chasme, ein fliegendes, insektenartiges Scheusal mit mehreren Flügeln und einem langen Stachel, stürzte sich auf die Gefährten, während sich ein Vrock, ein geierartiger Dämon, über ihre Gegner hermachte.",
+        "Der Kampf war hart. Die Dämonen hatten zwar einen Großteil der Gegner erledigt, doch am Ende waren es die Gefährten, die die beiden Dämonen niederstreckten.",
         "Nur eine entkam: Ilvara, die Drow und Gestaltwandlerin. Sie sprang von der Brücke in den Fluss, der tief darunter rauschte, und war verschwunden.",
         "## Durch die Spinnweben",
         "Die Gefährten drangen tiefer ins Unterreich vor. Dichte Spinnweben versperrten den Weg, und stellenweise mussten sie sogar auf ihnen balancieren. Ein paar Spinnen stellten sich ihnen entgegen und wurden erschlagen.",
@@ -219,5 +219,9 @@ window.INHALT = {
      status: "besiegt", "gesichtet" oder "geruecht" (nur davon gehört)
      bild ist optional. Beispiel:
      { name: "Goblin", bild: "goblin.jpg", status: "besiegt", ort: "Die Straße", text: "Klein und gemein." } */
-  bestiarium: []
+  bestiarium: [
+    { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "Der Wachturm von Donnerbaum", text: "Ein grüner Giftdrache, der sich im verfallenen Wachturm eingenistet hatte. Sein Giftatem setzte der Gruppe übel zu, bis Barradins Hypnose den entscheidenden Vorteil brachte." },
+    { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein fliegender, insektenartiger Dämon mit mehreren Flügeln und einem langen Stachel. Tauchte mitten im Ausbruch aus dem Nichts auf und stürzte sich auf die Gefährten." },
+    { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein geierartiger Dämon mit zerzausten Schwingen. Erledigte einen Großteil der Wachen, bevor die Gefährten auch ihn niederstreckten." }
+  ]
 };
