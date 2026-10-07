@@ -10,7 +10,7 @@ window.INHALT_EN = {
   /* ---------- INTRO ---------- */
   intro: {
     label: "Our Dungeon Master",
-    text: "One world. Four heroes. One dog. And <strong>Imre</strong>, our magnificent Dungeon Master, lord of dice, worlds and fates. Without him there would be no harbour town, no magic forge and not a single failed saving throw. What is written here, he created. We merely survived it … so far, at least …"
+    text: "The world, created by <strong>Imre</strong>, our magnificent Dungeon Master, lord of dice, worlds and fates. Without him there would be no harbour town, no magic forge and not a single failed saving throw. What is written here, he created. We merely survived it … so far, at least …"
   },
 
   /* ---------- THE COMPANIONS ---------- */
