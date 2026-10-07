@@ -210,7 +210,7 @@ window.INHALT = {
         "!demogorgon.webp|Demogorgon, Fürst der Dämonen.|frei",
         "Dann stieg etwas aus dem See empor: Demogorgon. Ein Dämonenfürst, ein wahrhaftiger Dämonengott. Zwei Köpfe, zwei Arme mit je zwei Tentakeln, ein langer Schwanz und zwei Beine, die die Erde erzittern ließen. Er stieß einen gottlos lauten, grauenhaften Schrei aus, alle Magie erlosch, und den Gefährten schlotterten die Knie. <em class=\"aside\">Ich gebe zu: Meine schlotterten nur aus Solidarität.</em>",
         "Friedrich ließ sich davon nicht beirren, legte an und schoss einen Pfeil auf Demogorgon. Die Wirkung: keine. Absolut keine. Trotzdem behauptet Friedrich seitdem steif und fest, er habe einen Gott geboxt.",
-        "Das Ungeheuer machte sich daran, die Stadt zu zerstören. Mit seinen Tentakelarmen zermalmte es Gebäude, Gegner und Verbündete gleichermaßen. Mit viel Glück gelang den Gefährten die Flucht zu einem Boot, und Kardal entkam mit ihnen.",
+        "Das Ungeheuer machte sich daran, die Stadt zu zerstören. Mit seinen Tentakelarmen zermalmte es Gebäude, Gegner und Verbündete gleichermaßen. Mit viel Glück gelang den Gefährten die Flucht zu einem Boot, und Kardal entkam mit ihnen. Ploopploopeen und alle anderen Kuo-Toa fanden den Tod, und von ihrer Stadt blieben nur ein paar Ruinen.",
         "!flucht-see.jpg|Die Flucht über den See. Friedrich ist bis heute sehr stolz auf sich.",
         "## Gracklstugh",
         "Die Flucht über den See führte sie schließlich zu einem atemberaubenden Anblick: einer in den Fels gehauenen Festung, die hinter gewaltigen Stadtmauern über der Stadt Gracklstugh emporragte.",
@@ -225,30 +225,46 @@ window.INHALT = {
      x / y: Position in Prozent von links / von oben (0 bis 100)
      abschnitt: Zwischenüberschrift im Kapitel, zu der die Station springt */
   reise: {
-    karte: "weltkarte.jpg",
-    stationen: [
-      { name: "Der Hafen von Neverwinter", x: 21.5, y: 46, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
-      { name: "Hinterhalt auf der Straße", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Kurz nach der Abzweigung von der High Road Richtung Phandalin. Die Goblins, die aus dem Wald springen, haben keine Chance." },
-      { name: "Die Goblinhöhle", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
-      { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
-      { name: "Der Wachturm", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder Nundro." },
-      { name: "Die magische Schmiede", x: 71.3, y: 75, kapitel: "I", abschnitt: "Die magische Schmiede", text: "Tief in einer alten, verlassenen Mine verborgen. Nach harten Kämpfen gehört sie der Gruppe." },
-      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Zurück in der großen Stadt. Hier treten die Gefährten der Allianz der Lords bei." },
-      { name: "Donnerbaum", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Donnerbaum", text: "Ein verlassenes Dorf mit verfallenem Wachturm. Ein Giftdrache, Zombies, Blights und eine Druidin, die nicht ist, was sie scheint." },
-      { name: "Das Unterreich", x: 41, y: 51, kapitel: "II", abschnitt: "Gefangen", text: "Irgendwo tief unter der Erde. Wo genau, weiß niemand, denn die Gefährten waren bewusstlos." }
+    karten: [
+      {
+        titel: "Die Oberwelt",
+        karte: "weltkarte.jpg",
+        stationen: [
+          { name: "Der Hafen von Neverwinter", x: 21.5, y: 46, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
+          { name: "Hinterhalt auf der Straße", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Kurz nach der Abzweigung von der High Road Richtung Phandalin. Die Goblins, die aus dem Wald springen, haben keine Chance." },
+          { name: "Die Goblinhöhle", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
+          { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
+          { name: "Der Wachturm", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder Nundro." },
+          { name: "Die magische Schmiede", x: 71.3, y: 75, kapitel: "I", abschnitt: "Die magische Schmiede", text: "Tief in einer alten, verlassenen Mine verborgen. Nach harten Kämpfen gehört sie der Gruppe." },
+          { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Zurück in der großen Stadt. Hier treten die Gefährten der Allianz der Lords bei." },
+          { name: "Donnerbaum", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Donnerbaum", text: "Ein verlassenes Dorf mit verfallenem Wachturm. Ein Giftdrache, Zombies, Blights und eine Druidin, die nicht ist, was sie scheint." }
+        ]
+      },
+      {
+        titel: "Das Unterreich",
+        karte: "unterreich-karte.svg",
+        stationen: [
+          { name: "Der Kerker", x: 15, y: 20.8, kapitel: "II", abschnitt: "Gefangen", text: "Hier erwachen die Gefährten in Ketten. Echo holt als Ratte die Ausrüstung, dann folgen Ausbruch und Dämonen." },
+          { name: "Die Spinnweben", x: 30, y: 41, kapitel: "II", abschnitt: "Durch die Spinnweben", text: "Balancieren über Spinnennetze. In einem Kokon wartet der Gnom Fagas." },
+          { name: "Das Grab der Magierin", x: 43, y: 27.8, kapitel: "II", abschnitt: "Das Grab der Magierin", text: "Hinter einer verunstalteten Spinnenstatue: ein Wraith und das Schwert Dawnbringer." },
+          { name: "Der unterirdische See", x: 46.5, y: 52.8, kapitel: "II", abschnitt: "Der unterirdische See", text: "Am Ufer bittet Ploopploopeen, Erzpriester der Kuo-Toa, um Hilfe." },
+          { name: "Die Ruinen der Kuo-Toa", x: 62.5, y: 75, kapitel: "II", abschnitt: "Demogorgon", text: "Hier stieg Demogorgon aus dem See. Von der Stadt sind nur Ruinen geblieben." },
+          { name: "Gracklstugh", x: 88, y: 58.3, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels am anderen Ufer des Sees." }
+        ]
+      }
     ]
   },
 
   /* ---------- DAS BESTIARIUM ----------
-     status: "besiegt", "gesichtet" oder "geruecht" (nur davon gehört)
+     status: "besiegt", "gesichtet", "geruecht" (nur davon gehört) oder "gefallen" (tot, aber nicht durch uns)
      bild ist optional. Beispiel:
      { name: "Goblin", bild: "goblin.jpg", status: "besiegt", ort: "Die Straße", text: "Klein und gemein." } */
   bestiarium: [
     { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "Der Wachturm von Donnerbaum", text: "Ein grüner Giftdrache, der sich im verfallenen Wachturm eingenistet hatte. Sein Giftatem setzte der Gruppe übel zu, bis Barradins Hypnose den entscheidenden Vorteil brachte." },
     { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein fliegender, insektenartiger Dämon mit mehreren Flügeln und einem langen Stachel. Tauchte mitten im Ausbruch aus dem Nichts auf und stürzte sich auf die Gefährten." },
     { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein geierartiger Dämon mit zerzausten Schwingen. Erledigte einen Großteil der Wachen, bevor die Gefährten auch ihn niederstreckten." },
-    { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "besiegt", ort: "Die Stadt am unterirdischen See", text: "Ein Volk von Fischmenschen, das am Ufer eines unterirdischen Sees lebt. Ein Teil von ihnen betet einen falschen Gott an. Im Stadtzentrum gingen sie aufeinander und auf die Gefährten los." },
-    { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gesichtet", ort: "Die Stadt am unterirdischen See", text: "Erzpriester der Kuo-Toa. Bat die Gefährten um Hilfe gegen die Anhänger eines falschen Gottes und schmuggelte sie zum Schein gefesselt in seine Stadt. Was aus ihm wurde, als Demogorgon die Stadt verwüstete, ist ungewiss." },
+    { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "gefallen", ort: "Die Stadt am unterirdischen See", text: "Ein Volk von Fischmenschen, das am Ufer eines unterirdischen Sees lebte. Ein Teil von ihnen betete einen falschen Gott an, und im Stadtzentrum gingen sie aufeinander und auf die Gefährten los. Als Demogorgon kam, starben sie alle, und von ihrer Stadt blieben nur Ruinen." },
+    { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gefallen", ort: "Die Stadt am unterirdischen See", text: "Erzpriester der Kuo-Toa. Bat die Gefährten um Hilfe gegen die Anhänger eines falschen Gottes und schmuggelte sie zum Schein gefesselt in seine Stadt. Er starb, als Demogorgon die Stadt zerstörte." },
     { name: "Demogorgon", bild: "demogorgon-karte.webp", status: "gesichtet", ort: "Der unterirdische See", text: "Ein Dämonenfürst mit zwei Köpfen, Tentakelarmen und einem langen Schwanz. Sein Schrei ließ alle Magie erlöschen, und die Gefährten entkamen nur mit Glück. Friedrich hat ihn trotzdem geboxt. Sagt er." }
   ]
 };

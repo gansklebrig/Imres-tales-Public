@@ -203,7 +203,7 @@ window.INHALT_EN = {
         "!demogorgon.webp|Demogorgon, Prince of Demons.|frei",
         "Then something rose from the lake: Demogorgon. A demon prince, a true demon god. Two heads, two arms with two tentacles each, a long tail and two legs that made the ground tremble. He let out an ungodly, terrifying scream, all magic was snuffed out, and the companions' knees began to shake. <em class=\"aside\">I admit: mine were only shaking out of solidarity.</em>",
         "Friedrich was not deterred. He drew his bow and loosed an arrow at Demogorgon. The effect: none. Absolutely none. Nevertheless, Friedrich has insisted ever since that he punched a god.",
-        "The monster set about destroying the city. With its tentacle arms it crushed buildings, foes and allies alike. With a great deal of luck the companions escaped to a boat, and Kardal fled with them.",
+        "The monster set about destroying the city. With its tentacle arms it crushed buildings, foes and allies alike. With a great deal of luck the companions escaped to a boat, and Kardal fled with them. Ploopploopeen and all the other kuo-toa perished, and nothing remained of their city but a few ruins.",
         "!flucht-see.jpg|Fleeing across the lake. Friedrich is still very proud of himself to this day.",
         "## Gracklstugh",
         "Their flight across the lake finally brought them to a breathtaking sight: a fortress hewn into the rock, towering behind mighty city walls above the city of Gracklstugh.",
@@ -215,17 +215,33 @@ window.INHALT_EN = {
 
   /* ---------- THE JOURNEY ---------- */
   reise: {
-    karte: "weltkarte.jpg",
-    stationen: [
-      { name: "The Harbour of Neverwinter", x: 21.5, y: 46, kapitel: "I", abschnitt: "The Invitation", text: "Gundren invites the heroes and offers them the search for a magic forge." },
-      { name: "Ambush on the Road", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Ambush on the Road", text: "Just after turning off the High Road towards Phandalin. The goblins leaping from the woods never stand a chance." },
-      { name: "The Goblin Cave", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "The Goblin Cave", text: "Separated from the site of the ambush by just a small stretch of forest. Wolves freed, nest stormed, chieftain slain." },
-      { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin and the Red Robes", text: "A small village in the grip of the Red Robes. At its edge lies Castle Crackmore, where Glasstaff falls and speaks of the Spider." },
-      { name: "The Watchtower", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "The Prisoner in the Watchtower", text: "A bugbear falls, a drow escapes, and the prisoner turns out to be Gundren's twin brother Nundro." },
-      { name: "The Magic Forge", x: 71.3, y: 75, kapitel: "I", abschnitt: "The Magic Forge", text: "Hidden deep within an old, abandoned mine. After hard-fought battles, it belongs to the party." },
-      { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Back in the great city. Here the companions join the Lords' Alliance." },
-      { name: "Thundertree", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Thundertree", text: "An abandoned village with a crumbling watchtower. A poison dragon, zombies, blights and a druid who is not what she seems." },
-      { name: "The Underdark", x: 41, y: 51, kapitel: "II", abschnitt: "Captured", text: "Somewhere deep beneath the earth. Exactly where, nobody knows, since the companions were unconscious." }
+    karten: [
+      {
+        titel: "The Surface",
+        karte: "weltkarte.jpg",
+        stationen: [
+          { name: "The Harbour of Neverwinter", x: 21.5, y: 46, kapitel: "I", abschnitt: "The Invitation", text: "Gundren invites the heroes and offers them the search for a magic forge." },
+          { name: "Ambush on the Road", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Ambush on the Road", text: "Just after turning off the High Road towards Phandalin. The goblins leaping from the woods never stand a chance." },
+          { name: "The Goblin Cave", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "The Goblin Cave", text: "Separated from the site of the ambush by just a small stretch of forest. Wolves freed, nest stormed, chieftain slain." },
+          { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin and the Red Robes", text: "A small village in the grip of the Red Robes. At its edge lies Castle Crackmore, where Glasstaff falls and speaks of the Spider." },
+          { name: "The Watchtower", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "The Prisoner in the Watchtower", text: "A bugbear falls, a drow escapes, and the prisoner turns out to be Gundren's twin brother Nundro." },
+          { name: "The Magic Forge", x: 71.3, y: 75, kapitel: "I", abschnitt: "The Magic Forge", text: "Hidden deep within an old, abandoned mine. After hard-fought battles, it belongs to the party." },
+          { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Back in the great city. Here the companions join the Lords' Alliance." },
+          { name: "Thundertree", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Thundertree", text: "An abandoned village with a crumbling watchtower. A poison dragon, zombies, blights and a druid who is not what she seems." }
+        ]
+      },
+      {
+        titel: "The Underdark",
+        karte: "unterreich-karte.svg",
+        stationen: [
+          { name: "The Dungeon", x: 15, y: 20.8, kapitel: "II", abschnitt: "Captured", text: "The companions wake here in chains. Echo fetches the gear as a rat, then come the breakout and the demons." },
+          { name: "The Webs", x: 30, y: 41, kapitel: "II", abschnitt: "Through the Webs", text: "Balancing across spider webs. The gnome Fagas waits in a cocoon." },
+          { name: "The Wizard's Tomb", x: 43, y: 27.8, kapitel: "II", abschnitt: "The Wizard's Tomb", text: "Behind a defaced spider statue: a wraith and the sword Dawnbringer." },
+          { name: "The Underground Lake", x: 46.5, y: 52.8, kapitel: "II", abschnitt: "The Underground Lake", text: "On the shore, Ploopploopeen, archpriest of the kuo-toa, asks for help." },
+          { name: "The Kuo-Toa Ruins", x: 62.5, y: 75, kapitel: "II", abschnitt: "Demogorgon", text: "Here Demogorgon rose from the lake. Only ruins remain of the city." },
+          { name: "Gracklstugh", x: 88, y: 58.3, kapitel: "II", abschnitt: "Gracklstugh", text: "The fortress in the rock on the far shore of the lake." }
+        ]
+      }
     ]
   },
 
@@ -234,8 +250,8 @@ window.INHALT_EN = {
     { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "The watchtower of Thundertree", text: "A green poison dragon that had made its lair in the crumbling watchtower. Its poison breath dealt the party a nasty blow until Barradin's hypnosis turned the tide." },
     { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A flying, insect-like demon with several wings and a long stinger. Appeared out of nowhere in the middle of the breakout and swooped down on the companions." },
     { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A vulture-like demon with ragged wings. Took down most of the guards before the companions struck it down as well." },
-    { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "besiegt", ort: "The city by the underground lake", text: "A race of fish folk living on the shore of an underground lake. Some of them worship a false god. In the city centre they turned on each other and on the companions." },
-    { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gesichtet", ort: "The city by the underground lake", text: "Archpriest of the kuo-toa. Asked the companions for help against the followers of a false god and smuggled them into his city as fake prisoners. What became of him when Demogorgon ravaged the city is uncertain." },
+    { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "gefallen", ort: "The city by the underground lake", text: "A race of fish folk who lived on the shore of an underground lake. Some of them worshipped a false god, and in the city centre they turned on each other and on the companions. When Demogorgon came, they all perished, and nothing remained of their city but ruins." },
+    { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gefallen", ort: "The city by the underground lake", text: "Archpriest of the kuo-toa. Asked the companions for help against the followers of a false god and smuggled them into his city as fake prisoners. He died when Demogorgon destroyed the city." },
     { name: "Demogorgon", bild: "demogorgon-karte.webp", status: "gesichtet", ort: "The underground lake", text: "A demon prince with two heads, tentacle arms and a long tail. His scream snuffed out all magic, and the companions escaped only by luck. Friedrich punched him anyway. Or so he says." }
   ]
 };

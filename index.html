@@ -128,6 +128,13 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .tome li::before { content: "✦"; position: absolute; left: 0; color: var(--ember); font-size: .8rem; top: .2rem; }
 
 /* ---------- Reisekarte ---------- */
+.map-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.map-tabs button {
+  font: inherit; font-size: .85rem; letter-spacing: .06em; padding: .4rem .95rem; cursor: pointer;
+  background: transparent; color: var(--ash); border: 1px solid var(--line);
+}
+.map-tabs button:hover { color: var(--vellum); }
+.map-tabs button[aria-selected="true"] { background: var(--ember); color: var(--night); border-color: var(--ember); }
 .journey { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2rem); align-items: start; }
 .map-frame { position: relative; border: 1px solid var(--line); background: var(--hall); overflow: hidden; aspect-ratio: 16 / 10; max-width: 100%; }
 .map-frame img, .map-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -255,6 +262,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .chapter .sub.spotlight h4 { text-decoration: underline; text-underline-offset: 6px; }
 .maplink { background: none; border: 0; padding: 0; font: inherit; font-size: .82rem; color: var(--ash); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .maplink:hover { color: var(--ember); }
+.tag.fallen { color: var(--ash); border-color: var(--ash); }
 .tag.rumor { color: var(--ash); border-color: var(--ash); border-style: dashed; }
 .beast-seal {
   aspect-ratio: 4 / 5; display: grid; place-items: center; font-family: var(--display); font-size: 4.5rem; color: var(--ember);
@@ -356,9 +364,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="wrap">
       <div class="part-head">
         <p class="label" data-i18n="reiseLabel">Die Reise</p>
-        <h2 data-i18n="reiseTitle">Auf der Weltkarte</h2>
+        <h2 data-i18n="reiseTitle">Auf der Karte</h2>
         <p data-i18n="reiseText">Jede Station der Gruppe als Punkt auf der Karte. Tippe auf eine Station und spring von dort zum passenden Kapitel.</p>
       </div>
+      <div class="map-tabs" id="map-tabs" role="tablist" hidden></div>
       <div class="journey">
         <div class="map-frame" id="map-frame"></div>
         <ol class="stops" id="stops"></ol>
@@ -423,7 +432,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       chronikLabel: "Die Chronik", chronikTitle: "Das Abenteuer",
       chronikText: "Die Geschichte der Gruppe, Kapitel für Kapitel. Jedes Kapitel lässt sich auf der Reisekarte wiederfinden.",
       chapterSoon: "Kapitel folgt", inkTitle: "Die Tinte ist noch feucht", inkText: "Das erste Kapitel wird gerade niedergeschrieben.",
-      reiseLabel: "Die Reise", reiseTitle: "Auf der Weltkarte",
+      reiseLabel: "Die Reise", reiseTitle: "Auf der Karte",
       reiseText: "Jede Station der Gruppe als Punkt auf der Karte. Tippe auf eine Station und spring von dort zum passenden Kapitel.",
       heldenLabel: "Die Heldengruppe", heldenTitle: "Die Gefährten",
       heldenText: "Vier Helden und ein Hund. Selten einer Meinung, aber immer zur Stelle, wenn es darauf ankommt.",
@@ -431,7 +440,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       bestText: "Alles, was der Gruppe auf ihren Reisen begegnet ist. Die einen liegen besiegt am Wegesrand, die anderen lauern noch irgendwo da draußen.",
       bestNone: "Noch kein Eintrag", bestEmptyTitle: "Die Seiten sind noch leer",
       bestEmptyText: "Sobald die ersten Gegner eingetragen sind, bekommt jede Kreatur hier ihre eigene Seite mit Bild, Fundort und Beschreibung.",
-      tagSlain: "Besiegt", tagSeen: "Gesichtet", tagRumor: "Nur ein Gerücht",
+      tagSlain: "Besiegt", tagSeen: "Gesichtet", tagRumor: "Nur ein Gerücht", tagFallen: "Gefallen",
       footer: "Eine Pen-&amp;-Paper-Kampagne unter Freunden",
       kapitel: "Kapitel", aufKarte: "Auf der Karte zeigen", aufKarteKurz: "Auf der Karte",
       nachlesen: nr => "In Kapitel " + nr + " nachlesen",
@@ -450,7 +459,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       chronikLabel: "The Chronicle", chronikTitle: "The Adventure",
       chronikText: "The tale of the party, chapter by chapter. Every chapter can be found again on the journey map.",
       chapterSoon: "Chapter to come", inkTitle: "The ink is still wet", inkText: "The first chapter is being written as we speak.",
-      reiseLabel: "The Journey", reiseTitle: "On the World Map",
+      reiseLabel: "The Journey", reiseTitle: "On the Map",
       reiseText: "Every stop of the party as a point on the map. Tap a stop to jump to the matching chapter.",
       heldenLabel: "The Heroes", heldenTitle: "The Companions",
       heldenText: "Four heroes and a dog. Rarely of one mind, but always there when it counts.",
@@ -458,7 +467,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       bestText: "Everything the party has encountered on its travels. Some lie defeated by the wayside, others still lurk somewhere out there.",
       bestNone: "No entries yet", bestEmptyTitle: "The pages are still blank",
       bestEmptyText: "As soon as the first foes are recorded, each creature will get its own page here with a picture, where it was found and a description.",
-      tagSlain: "Slain", tagSeen: "Sighted", tagRumor: "Only a rumour",
+      tagSlain: "Slain", tagSeen: "Sighted", tagRumor: "Only a rumour", tagFallen: "Fallen",
       footer: "A pen &amp; paper campaign among friends",
       kapitel: "Chapter", aufKarte: "Show on the map", aufKarteKurz: "On the map",
       nachlesen: nr => "Read in Chapter " + nr,
@@ -515,41 +524,63 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     return g;
   }
 
+  /* Mehrere Karten: jede Station kennt ihre Karte (k) und ihre Nummer auf dieser Karte (nr) */
+  let karten = [], aktKarte = -1;
+  const aufKarte = () => stationen.filter(s => s.k === aktKarte);
+
   function punkte() {
     if (!routeG) return;
     routeG.innerHTML = "";
-    const pts = stationen.map(s => [s.x / 100 * W, s.y / 100 * H]);
+    const hier = aufKarte();
+    const pts = hier.map(s => [s.x / 100 * W, s.y / 100 * H]);
     if (pts.length > 1) {
       routeG.appendChild(el("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" "), class: "route route-done" }));
     }
-    pts.forEach((p, i) => {
-      const g = el("g", { class: "stop" + (i === aktiv ? " active" : ""), tabindex: 0, role: "button", "aria-label": (i + 1) + ". " + stationen[i].name, "data-stop": i });
+    hier.forEach((s, i) => {
+      const p = pts[i];
+      const g = el("g", { class: "stop" + (s.i === aktiv ? " active" : ""), tabindex: 0, role: "button", "aria-label": s.nr + ". " + s.name, "data-stop": s.i });
       g.appendChild(el("circle", { cx: p[0], cy: p[1], r: 22 }));
       const t = el("text", { x: p[0], y: p[1] });
-      t.textContent = i + 1;
+      t.textContent = s.nr;
       g.appendChild(t);
       routeG.appendChild(g);
     });
   }
 
   function waehlen(i) {
+    if (!stationen[i]) return;
     aktiv = i;
+    if (stationen[i].k !== aktKarte) { aktKarte = stationen[i].k; karteZeichnen(); return; }
     punkte();
-    list.querySelectorAll("li").forEach((li, j) => {
-      li.classList.toggle("current", j === i);
-      li.querySelector("[data-i]").setAttribute("aria-current", j === i ? "true" : "false");
+    list.querySelectorAll("li").forEach(li => {
+      const on = +li.dataset.i === i;
+      li.classList.toggle("current", on);
+      li.querySelector("[data-i]").setAttribute("aria-current", on ? "true" : "false");
     });
   }
 
+  function tabsZeichnen() {
+    const tabs = $("map-tabs");
+    if (!tabs) return;
+    tabs.hidden = karten.length < 2;
+    tabs.innerHTML = karten.map((k, j) =>
+      '<button type="button" role="tab" data-karte="' + j + '" aria-selected="' + (j === aktKarte) + '">' + esc(k.titel || (T.kapitel + " " + (j + 1))) + "</button>"
+    ).join("");
+  }
+
   function karteZeichnen() {
-    if (aktiv < 0 || aktiv > stationen.length - 1) aktiv = Math.max(0, stationen.length - 1);
-    const karte = D.reise && D.reise.karte;
+    if (aktKarte < 0 || aktKarte > karten.length - 1) aktKarte = karten.length - 1;
+    const hier = aufKarte();
+    if (!stationen[aktiv] || stationen[aktiv].k !== aktKarte) aktiv = hier.length ? hier[hier.length - 1].i : -1;
+    const karte = karten[aktKarte] && karten[aktKarte].karte;
+    tabsZeichnen();
     frame.innerHTML = "";
+    frame.style.aspectRatio = "";
+    H = 625;
     svg = el("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none", role: "img", "aria-label": T.route });
     routeG = el("g", {});
     if (karte) {
       const img = document.createElement("img");
-      img.src = karte;
       img.alt = T.mapAlt;
       img.addEventListener("load", () => {
         frame.style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
@@ -557,6 +588,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         svg.setAttribute("viewBox", "0 0 " + W + " " + H);
         punkte();
       }, { once: true });
+      img.src = karte;
       frame.appendChild(img);
     } else {
       const flag = document.createElement("span");
@@ -568,12 +600,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     svg.appendChild(routeG);
     frame.appendChild(svg);
 
-    list.innerHTML = stationen.map((s, i) =>
-      '<li><button type="button" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><span><b>' + esc(s.name) + '</b><span class="t">' + esc(s.text) + "</span></span></button>" +
+    list.innerHTML = hier.map(s =>
+      '<li data-i="' + s.i + '"><button type="button" data-i="' + s.i + '"><span class="n">' + s.nr + '</span><span><b>' + esc(s.name) + '</b><span class="t">' + esc(s.text) + "</span></span></button>" +
       (s.kapitel ? '<button type="button" class="go" data-kapitel="' + esc(s.kapitel) + '" data-abschnitt="' + esc(s.abschnitt || "") + '">' + esc(T.nachlesen(s.kapitel)) + "</button>" : "") +
       "</li>"
     ).join("");
-    waehlen(aktiv);
+    punkte();
+    list.querySelectorAll("li").forEach(li => {
+      const on = +li.dataset.i === aktiv;
+      li.classList.toggle("current", on);
+      li.querySelector("[data-i]").setAttribute("aria-current", on ? "true" : "false");
+    });
     note.textContent = karte ? "" : T.mapNote;
   }
 
@@ -628,7 +665,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     } else { $("narrator").hidden = true; }
 
     /* Chronik */
-    stationen = (D.reise && D.reise.stationen) || [];
+    const r = D.reise || {};
+    karten = r.karten || [{ titel: "", karte: r.karte, stationen: r.stationen || [] }];
+    stationen = [];
+    karten.forEach((k, j) => (k.stationen || []).forEach((st, n) => stationen.push(Object.assign({}, st, { k: j, nr: n + 1, i: stationen.length }))));
     const stationFuer = (nr, titel) => stationen.findIndex(s => String(s.kapitel) === String(nr) && s.abschnitt === titel);
     const hatAbschnittLinks = k => (k.absaetze || []).some(p => p.indexOf("## ") === 0 && stationFuer(k.nummer, p.slice(3).trim()) > -1);
     const kapitelText = k => (k.absaetze || []).map(p => {
@@ -641,7 +681,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       const t = p.slice(3).trim();
       const i = stationFuer(k.nummer, t);
       return '<div class="sub" id="' + abschnittId(k.nummer, t) + '"><h4>' + esc(t) + "</h4>" +
-        (i > -1 ? '<button type="button" class="maplink" data-station="' + i + '">' + esc(T.aufKarteKurz) + " · " + (i + 1) + "</button>" : "") + "</div>";
+        (i > -1 ? '<button type="button" class="maplink" data-station="' + i + '">' + esc(T.aufKarteKurz) + " · " + stationen[i].nr + "</button>" : "") + "</div>";
     }).join("");
     $("chapters-empty").hidden = D.kapitel.length > 0;
     $("chapters").innerHTML = D.kapitel.map(k =>
@@ -661,7 +701,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     /* Bestiarium */
     const tiere = D.bestiarium || [];
     $("beasts-empty").hidden = tiere.length > 0;
-    const tag = s => ({ besiegt: ["slain", T.tagSlain], geruecht: ["rumor", T.tagRumor] }[s] || ["seen", T.tagSeen]);
+    const tag = s => ({ besiegt: ["slain", T.tagSlain], geruecht: ["rumor", T.tagRumor], gefallen: ["fallen", T.tagFallen] }[s] || ["seen", T.tagSeen]);
     $("beasts").innerHTML = tiere.map(t => {
       const g = tag(t.status);
       return '<article class="beast">' + (t.bild ? '<img src="' + esc(t.bild) + '" alt="' + esc(t.name) + '">' : '<div class="beast-seal" aria-hidden="true">' + esc(String(t.name).replace(/^(Der|Die|Das|The) /, "").charAt(0)) + "</div>") +
@@ -683,6 +723,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     if (!b) return;
     waehlen(+b.dataset.station);
     springe($("reise"));
+  });
+  $("map-tabs").addEventListener("click", e => {
+    const b = e.target.closest("[data-karte]");
+    if (!b || +b.dataset.karte === aktKarte) return;
+    aktKarte = +b.dataset.karte;
+    karteZeichnen();
   });
   frame.addEventListener("click", e => {
     const g = e.target.closest("[data-stop]");
