@@ -98,7 +98,7 @@ window.INHALT_EN = {
     name: "Barradin",
     bild: "barradin.jpg",
     label: "A word before we begin",
-    text: "This chronicle is told to you by Barradin: bard, elf and humble hero. As befits a bard, he does not remember every detail quite exactly, and he may have embellished one thing or another just a little, or even left it out … Imre alone knows the true story … but this one will hopefully enchant you all the same!"
+    text: "This chronicle is told to you by Barradin, and as befits a bard, he does not remember every detail quite exactly … He may have embellished one thing or another just a little, wildly exaggerated it or even left it out entirely … Imre alone knows the true story … but this one will hopefully enchant you all the same!"
   },
 
   /* ---------- THE CHRONICLE ---------- */
