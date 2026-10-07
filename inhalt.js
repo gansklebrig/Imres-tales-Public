@@ -102,7 +102,7 @@ window.INHALT = {
     name: "Barradin",
     bild: "barradin.jpg",
     label: "Ein Wort vorab",
-    text: "Diese Chronik wird euch erzählt von Barradin: Barde, Elf und bescheidener Held. Wie es sich für einen Barden gehört, erinnert er sich nicht an jedes Detail ganz genau, und das eine oder andere hat er vielleicht ein klein wenig schöngedichtet oder gar ausgelassen … Imre allein kennt die wahre Geschichte. Diese hier wird euch hoffentlich trotzdem verzaubern!"
+    text: "Diese Chronik wird euch erzählt von Barradin: Barde, Elf und bescheidener Held. Wie es sich für einen Barden gehört, erinnert er sich nicht an jedes Detail ganz genau, und das eine oder andere hat er vielleicht ein klein wenig schöngedichtet oder gar ausgelassen … Imre allein kennt die wahre Geschichte … Diese hier wird euch hoffentlich trotzdem verzaubern!"
   },
 
   /* ---------- DIE CHRONIK ----------

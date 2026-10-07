@@ -58,6 +58,15 @@ p { margin: 0; }
 .top nav a { color: var(--ash); text-decoration: none; font-size: .9rem; letter-spacing: .05em; white-space: nowrap; }
 .top nav a:hover { color: var(--ember); }
 
+.lang { display: flex; gap: .35rem; align-items: center; }
+.lang button {
+  display: block; padding: 2px; background: none; border: 1px solid transparent; border-radius: 2px;
+  cursor: pointer; opacity: .45; transition: opacity .2s, border-color .2s; line-height: 0;
+}
+.lang button:hover { opacity: .85; }
+.lang button[aria-pressed="true"] { opacity: 1; border-color: var(--line); }
+.lang svg { width: 20px; height: 12px; display: block; }
+
 .hero { padding-block: clamp(2.5rem, 7vw, 5rem) 2rem; }
 .hero .label { margin-bottom: .9rem; }
 .hero h1 {
@@ -237,7 +246,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
   padding: 0; font-family: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
 }
 .stops li { display: grid; }
-.stops li .go { margin: -.3rem 0 .4rem 3.4rem; }
+.stops li .go { margin: -.3rem 0 .4rem 3.4rem; justify-self: start; max-width: calc(100% - 3.4rem); }
 .stops li:not(.current) .go { display: none; }
 .empty-hidden[hidden] { display: none !important; }
 
@@ -277,7 +286,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   .frieze span { padding: 1.6rem .35rem .4rem; }
   .frieze span small { display: none; }
   .companion { grid-template-columns: 6rem minmax(0, 1fr); }
-  .top .wrap { flex-wrap: wrap; row-gap: .3rem; }
+  .top .wrap { flex-wrap: wrap; row-gap: .35rem; }
+  .top nav { order: 3; flex: 1 1 100%; min-width: 0; }
+  .lang { order: 2; }
   .tome .seal { max-width: 14rem; }
 }
 @media (max-width: 420px) { .frieze span { font-size: .7rem; } }
@@ -292,37 +303,41 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#start">Imres Tales</a>
-    <nav aria-label="Hauptnavigation">
-      <a href="#chronik">Chronik</a>
-      <a href="#reise">Reise</a>
-      <a href="#gefaehrten">Gefährten</a>
-      <a href="#bestiarium">Bestiarium</a>
+    <nav aria-label="Hauptnavigation" data-i18n-aria="navLabel">
+      <a href="#chronik" data-i18n="navChronik">Chronik</a>
+      <a href="#reise" data-i18n="navReise">Reise</a>
+      <a href="#gefaehrten" data-i18n="navGefaehrten">Gefährten</a>
+      <a href="#bestiarium" data-i18n="navBestiarium">Bestiarium</a>
     </nav>
+    <div class="lang" role="group" aria-label="Sprache / Language">
+      <button type="button" data-lang="de" title="Deutsch" aria-label="Deutsch"><svg viewBox="0 0 5 3" aria-hidden="true"><rect width="5" height="1" y="0" fill="#000"/><rect width="5" height="1" y="1" fill="#DD0000"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg></button>
+      <button type="button" data-lang="en" title="English" aria-label="English"><svg viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true"><clipPath id="uk-clip"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><rect width="60" height="30" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-clip)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></svg></button>
+    </div>
   </div>
 </header>
 
 <main id="start">
   <div class="wrap hero">
-    <p class="label">Eine Pen-&amp;-Paper-Kampagne</p>
+    <p class="label" data-i18n="heroLabel">Eine Pen-&amp;-Paper-Kampagne</p>
     <h1>Imres Tales</h1>
     <div class="gm" id="intro" hidden><p class="label" id="intro-label"></p><p id="intro-text"></p></div>
-    <p class="lede">Ein Barde mit goldener Zunge. Ein Waldläufer mit ruhiger Hand. Ein Druide mit Feuer im Herzen. Ein Schurke voller Geheimnisse. Und ein Hund, der sie alle zusammenhält.</p>
+    <p class="lede" data-i18n="lede">Ein Barde mit goldener Zunge. Ein Waldläufer mit ruhiger Hand. Ein Druide mit Feuer im Herzen. Ein Schurke voller Geheimnisse. Und ein Hund, der sie alle zusammenhält.</p>
     <div class="frieze" id="frieze"></div>
-    <p class="frieze-hint">Tippe auf ein Porträt, um mehr über den Helden zu erfahren.</p>
+    <p class="frieze-hint" data-i18n="friezeHint">Tippe auf ein Porträt, um mehr über den Helden zu erfahren.</p>
   </div>
 
   <section class="part" id="chronik">
     <div class="wrap">
       <div class="part-head">
-        <p class="label">Die Chronik</p>
-        <h2>Das Abenteuer</h2>
-        <p>Die Geschichte der Gruppe, Kapitel für Kapitel. Jedes Kapitel lässt sich auf der Reisekarte wiederfinden.</p>
+        <p class="label" data-i18n="chronikLabel">Die Chronik</p>
+        <h2 data-i18n="chronikTitle">Das Abenteuer</h2>
+        <p data-i18n="chronikText">Die Geschichte der Gruppe, Kapitel für Kapitel. Jedes Kapitel lässt sich auf der Reisekarte wiederfinden.</p>
       </div>
       <aside class="narrator" id="narrator" hidden><img id="narrator-img" alt=""><div><p class="label" id="narrator-label"></p><p id="narrator-text"></p></div></aside>
       <div class="chapters" id="chapters"></div>
       <div class="tome" id="chapters-empty" hidden>
-        <div class="seal"><div><b>I</b><small>Kapitel folgt</small></div></div>
-        <div><h3>Die Tinte ist noch feucht</h3><p>Das erste Kapitel wird gerade niedergeschrieben.</p></div>
+        <div class="seal"><div><b>I</b><small data-i18n="chapterSoon">Kapitel folgt</small></div></div>
+        <div><h3 data-i18n="inkTitle">Die Tinte ist noch feucht</h3><p data-i18n="inkText">Das erste Kapitel wird gerade niedergeschrieben.</p></div>
       </div>
     </div>
   </section>
@@ -330,9 +345,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <section class="part" id="reise">
     <div class="wrap">
       <div class="part-head">
-        <p class="label">Die Reise</p>
-        <h2>Auf der Weltkarte</h2>
-        <p>Jede Station der Gruppe als Punkt auf der Karte. Tippe auf eine Station und spring von dort zum passenden Kapitel.</p>
+        <p class="label" data-i18n="reiseLabel">Die Reise</p>
+        <h2 data-i18n="reiseTitle">Auf der Weltkarte</h2>
+        <p data-i18n="reiseText">Jede Station der Gruppe als Punkt auf der Karte. Tippe auf eine Station und spring von dort zum passenden Kapitel.</p>
       </div>
       <div class="journey">
         <div class="map-frame" id="map-frame"></div>
@@ -345,9 +360,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <section class="part" id="gefaehrten">
     <div class="wrap">
       <div class="part-head">
-        <p class="label">Die Heldengruppe</p>
-        <h2>Die Gefährten</h2>
-        <p>Vier Helden und ein Hund. Selten einer Meinung, aber immer zur Stelle, wenn es darauf ankommt.</p>
+        <p class="label" data-i18n="heldenLabel">Die Heldengruppe</p>
+        <h2 data-i18n="heldenTitle">Die Gefährten</h2>
+        <p data-i18n="heldenText">Vier Helden und ein Hund. Selten einer Meinung, aber immer zur Stelle, wenn es darauf ankommt.</p>
       </div>
       <div id="heroes"></div>
     </div>
@@ -356,17 +371,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <section class="part" id="bestiarium">
     <div class="wrap">
       <div class="part-head">
-        <p class="label">Das Bestiarium</p>
-        <h2>Gegner &amp; Kreaturen</h2>
-        <p>Alles, was der Gruppe auf ihren Reisen begegnet ist. Die einen liegen besiegt am Wegesrand, die anderen lauern noch irgendwo da draußen.</p>
+        <p class="label" data-i18n="bestLabel">Das Bestiarium</p>
+        <h2 data-i18n="bestTitle">Gegner &amp; Kreaturen</h2>
+        <p data-i18n="bestText">Alles, was der Gruppe auf ihren Reisen begegnet ist. Die einen liegen besiegt am Wegesrand, die anderen lauern noch irgendwo da draußen.</p>
       </div>
       <div class="beasts" id="beasts"></div>
       <div class="tome" id="beasts-empty" hidden>
-        <div class="seal skull"><div><b>?</b><small>Noch kein Eintrag</small></div></div>
+        <div class="seal skull"><div><b>?</b><small data-i18n="bestNone">Noch kein Eintrag</small></div></div>
         <div>
-          <h3>Die Seiten sind noch leer</h3>
-          <p>Sobald die ersten Gegner eingetragen sind, bekommt jede Kreatur hier ihre eigene Seite mit Bild, Fundort und Beschreibung.</p>
-          <div class="bestiary-legend"><span class="tag slain">Besiegt</span><span class="tag seen">Gesichtet</span></div>
+          <h3 data-i18n="bestEmptyTitle">Die Seiten sind noch leer</h3>
+          <p data-i18n="bestEmptyText">Sobald die ersten Gegner eingetragen sind, bekommt jede Kreatur hier ihre eigene Seite mit Bild, Fundort und Beschreibung.</p>
+          <div class="bestiary-legend"><span class="tag slain" data-i18n="tagSlain">Besiegt</span><span class="tag seen" data-i18n="tagSeen">Gesichtet</span></div>
         </div>
       </div>
     </div>
@@ -376,20 +391,89 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <footer>
   <div class="wrap">
     <span>Imres Tales · imrestales.de</span>
-    <span>Eine Pen-&amp;-Paper-Kampagne unter Freunden</span>
+    <span data-i18n="footer">Eine Pen-&amp;-Paper-Kampagne unter Freunden</span>
   </div>
 </footer>
 
-<!-- Alle Texte stehen in inhalt.js -->
-<script>document.write('<script src="inhalt.js?v=' + Date.now() + '"><\/script>');</script>
+<!-- Alle Texte stehen in inhalt.js (deutsch) und inhalt-en.js (englisch) -->
+<script>document.write('<script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
-  const D = window.INHALT || { helden: [], kapitel: [], reise: { karte: null, stationen: [] }, bestiarium: [] };
+  const LEER = { helden: [], kapitel: [], reise: { karte: null, stationen: [] }, bestiarium: [] };
+  const QUELLEN = { de: window.INHALT || LEER, en: window.INHALT_EN || window.INHALT || LEER };
+
+  /* ---------- Feste Texte der Oberfläche ---------- */
+  const UI = {
+    de: {
+      navLabel: "Hauptnavigation",
+      navChronik: "Chronik", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
+      heroLabel: "Eine Pen-&amp;-Paper-Kampagne",
+      lede: "Ein Barde mit goldener Zunge. Ein Waldläufer mit ruhiger Hand. Ein Druide mit Feuer im Herzen. Ein Schurke voller Geheimnisse. Und ein Hund, der sie alle zusammenhält.",
+      friezeHint: "Tippe auf ein Porträt, um mehr über den Helden zu erfahren.",
+      chronikLabel: "Die Chronik", chronikTitle: "Das Abenteuer",
+      chronikText: "Die Geschichte der Gruppe, Kapitel für Kapitel. Jedes Kapitel lässt sich auf der Reisekarte wiederfinden.",
+      chapterSoon: "Kapitel folgt", inkTitle: "Die Tinte ist noch feucht", inkText: "Das erste Kapitel wird gerade niedergeschrieben.",
+      reiseLabel: "Die Reise", reiseTitle: "Auf der Weltkarte",
+      reiseText: "Jede Station der Gruppe als Punkt auf der Karte. Tippe auf eine Station und spring von dort zum passenden Kapitel.",
+      heldenLabel: "Die Heldengruppe", heldenTitle: "Die Gefährten",
+      heldenText: "Vier Helden und ein Hund. Selten einer Meinung, aber immer zur Stelle, wenn es darauf ankommt.",
+      bestLabel: "Das Bestiarium", bestTitle: "Gegner &amp; Kreaturen",
+      bestText: "Alles, was der Gruppe auf ihren Reisen begegnet ist. Die einen liegen besiegt am Wegesrand, die anderen lauern noch irgendwo da draußen.",
+      bestNone: "Noch kein Eintrag", bestEmptyTitle: "Die Seiten sind noch leer",
+      bestEmptyText: "Sobald die ersten Gegner eingetragen sind, bekommt jede Kreatur hier ihre eigene Seite mit Bild, Fundort und Beschreibung.",
+      tagSlain: "Besiegt", tagSeen: "Gesichtet", tagRumor: "Nur ein Gerücht",
+      footer: "Eine Pen-&amp;-Paper-Kampagne unter Freunden",
+      kapitel: "Kapitel", aufKarte: "Auf der Karte zeigen", aufKarteKurz: "Auf der Karte",
+      nachlesen: nr => "In Kapitel " + nr + " nachlesen",
+      tierbegleiter: "Tierbegleiter",
+      mapFlag: "Platzhalter · eure Karte folgt",
+      mapNote: "Die Karte ist ein Platzhalter. Sobald eure Weltkarte da ist, sitzen die Stationen an ihren echten Orten.",
+      mapAlt: "Weltkarte der Kampagne", route: "Reiseroute",
+      description: "Imres Tales – die Chronik unserer Pen-&-Paper-Kampagne mit Barradin, Friedrich, Echo, Ezekiel und Rex."
+    },
+    en: {
+      navLabel: "Main navigation",
+      navChronik: "Chronicle", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
+      heroLabel: "A Pen &amp; Paper Campaign",
+      lede: "A bard with a silver tongue. A ranger with a steady hand. A druid with fire in his heart. A rogue full of secrets. And a dog who holds them all together.",
+      friezeHint: "Tap a portrait to learn more about the hero.",
+      chronikLabel: "The Chronicle", chronikTitle: "The Adventure",
+      chronikText: "The tale of the party, chapter by chapter. Every chapter can be found again on the journey map.",
+      chapterSoon: "Chapter to come", inkTitle: "The ink is still wet", inkText: "The first chapter is being written as we speak.",
+      reiseLabel: "The Journey", reiseTitle: "On the World Map",
+      reiseText: "Every stop of the party as a point on the map. Tap a stop to jump to the matching chapter.",
+      heldenLabel: "The Heroes", heldenTitle: "The Companions",
+      heldenText: "Four heroes and a dog. Rarely of one mind, but always there when it counts.",
+      bestLabel: "The Bestiary", bestTitle: "Foes &amp; Creatures",
+      bestText: "Everything the party has encountered on its travels. Some lie defeated by the wayside, others still lurk somewhere out there.",
+      bestNone: "No entries yet", bestEmptyTitle: "The pages are still blank",
+      bestEmptyText: "As soon as the first foes are recorded, each creature will get its own page here with a picture, where it was found and a description.",
+      tagSlain: "Slain", tagSeen: "Sighted", tagRumor: "Only a rumour",
+      footer: "A pen &amp; paper campaign among friends",
+      kapitel: "Chapter", aufKarte: "Show on the map", aufKarteKurz: "On the map",
+      nachlesen: nr => "Read in Chapter " + nr,
+      tierbegleiter: "Animal companion",
+      mapFlag: "Placeholder · your map is coming",
+      mapNote: "This map is a placeholder. Once your world map arrives, the stops will sit at their true locations.",
+      mapAlt: "World map of the campaign", route: "Travel route",
+      description: "Imres Tales – the chronicle of our pen & paper campaign with Barradin, Friedrich, Echo, Ezekiel and Rex."
+    }
+  };
+
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const absaetze = list => (list || []).map(p => "<p>" + p + "</p>").join("");
   const slug = t => String(t).toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const abschnittId = (nr, titel) => "kapitel-" + slug(nr) + "-" + slug(titel);
+
+  /* ---------- Sprache wählen ---------- */
+  function startSprache() {
+    try { const s = localStorage.getItem("imres-lang"); if (s === "de" || s === "en") return s; } catch (_) {}
+    const n = (navigator.languages && navigator.languages[0]) || navigator.language || "de";
+    return /^de\b/i.test(n) ? "de" : "en";
+  }
+  let lang = startSprache();
+  let D = QUELLEN[lang], T = UI[lang];
 
   /* ---------- Sprung mit Hervorhebung ---------- */
   function springe(ziel) {
@@ -403,96 +487,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     setTimeout(() => ziel.classList.remove("spotlight"), 2400);
   }
 
-  /* ---------- Intro ---------- */
-  if (D.intro && D.intro.text) {
-    $("intro-label").textContent = D.intro.label || "";
-    $("intro-text").innerHTML = D.intro.text;
-    $("intro").hidden = false;
-  }
-
-  /* ---------- Fries ---------- */
-  const fries = [];
-  D.helden.forEach(h => {
-    fries.push(h);
-    if (h.begleiter) fries.push(h.begleiter);
-  });
-  $("frieze").innerHTML = fries.map(h =>
-    '<a href="#' + h.id + '" data-target="' + h.id + '"><img src="' + esc(h.bild) + '" alt="' + esc(h.name) + '" style="object-position:' + esc(h.fries || "50% 30%") + '"><span>' + esc(h.name) + '<small>' + esc(h.rolle) + '</small></span></a>'
-  ).join("");
-  $("frieze").style.gridTemplateColumns = "repeat(" + fries.length + ", minmax(0, 1fr))";
-  $("frieze").addEventListener("click", e => {
-    const a = e.target.closest("a[data-target]");
-    if (!a) return;
-    e.preventDefault();
-    springe($(a.dataset.target));
-  });
-
-  /* ---------- Gefährten ---------- */
-  $("heroes").innerHTML = D.helden.map(h => {
-    let html = '<article class="hero-entry" id="' + h.id + '">' +
-      '<figure' + (h.breitbild ? ' class="wide"' : "") + '><img src="' + esc(h.bild) + '" alt="' + esc(h.bildAlt) + '">' +
-      (h.bildtext ? "<figcaption>" + esc(h.bildtext) + "</figcaption>" : "") + "</figure>" +
-      '<div class="entry-text"><h3>' + esc(h.name) + '</h3><p class="epithet">' + esc(h.beiname) + "</p>" +
-      '<div class="prose">' + absaetze(h.absaetze) + "</div>";
-    if (h.geheimnis) html += '<p class="sealed">' + esc(h.geheimnis) + "</p>";
-    if (h.begleiter) {
-      const b = h.begleiter;
-      html += '<div class="companion" id="' + b.id + '"><img src="' + esc(b.bild) + '" alt="' + esc(b.bildAlt) + '"><div><p class="label">Tierbegleiter</p><h4>' + esc(b.name) + "</h4>" + absaetze(b.absaetze) + "</div></div>";
-    }
-    return html + "</div></article>";
-  }).join("");
-
-  /* ---------- Erzähler-Hinweis ---------- */
-  if (D.erzaehler && D.erzaehler.text) {
-    const n = D.erzaehler;
-    if (n.bild) { $("narrator-img").src = n.bild; $("narrator-img").alt = n.name || ""; } else { $("narrator-img").remove(); }
-    $("narrator-label").textContent = n.label || "";
-    $("narrator-text").innerHTML = n.text;
-    $("narrator").hidden = false;
-  }
-
-  /* ---------- Chronik ---------- */
-  const stationen = (D.reise && D.reise.stationen) || [];
-  const stationFuer = (nr, titel) => stationen.findIndex(s => String(s.kapitel) === String(nr) && s.abschnitt === titel);
-  const hatAbschnittLinks = k => (k.absaetze || []).some(p => p.indexOf("## ") === 0 && stationFuer(k.nummer, p.slice(3).trim()) > -1);
-  function kapitelText(k) {
-    return (k.absaetze || []).map(p => {
-      if (p.charAt(0) === "!") {
-        const teil = p.slice(1).split("|");
-        return '<figure><img src="' + esc(teil[0].trim()) + '" alt="' + esc(teil[1] || "") + '" loading="lazy">' + (teil[1] ? "<figcaption>" + esc(teil[1]) + "</figcaption>" : "") + "</figure>";
-      }
-      if (p.indexOf("## ") !== 0) return "<p>" + p + "</p>";
-      const t = p.slice(3).trim();
-      const i = stationFuer(k.nummer, t);
-      return '<div class="sub" id="' + abschnittId(k.nummer, t) + '"><h4>' + esc(t) + "</h4>" +
-        (i > -1 ? '<button type="button" class="maplink" data-station="' + i + '">Auf der Karte · ' + (i + 1) + "</button>" : "") + "</div>";
-    }).join("");
-  }
-  if (!D.kapitel.length) $("chapters-empty").hidden = false;
-  $("chapters").innerHTML = D.kapitel.map(k =>
-    '<article class="chapter" id="kapitel-' + esc(k.nummer) + '">' +
-      '<p class="label">Kapitel ' + esc(k.nummer) + "</p>" +
-      "<h3>" + esc(k.titel) + "</h3>" +
-      (k.bild ? '<figure><img src="' + esc(k.bild) + '" alt="' + esc(k.bildAlt || k.titel) + '">' + (k.bildtext ? "<figcaption>" + esc(k.bildtext) + "</figcaption>" : "") + "</figure>" : "") +
-      '<div class="prose">' + kapitelText(k) + "</div>" +
-      (!hatAbschnittLinks(k) && k.station && stationen[k.station - 1] ? '<button type="button" class="linkbtn" data-station="' + (k.station - 1) + '">Auf der Karte zeigen</button>' : "") +
-      (k.fortsetzung ? '<p class="to-be">' + esc(k.fortsetzung) + "</p>" : "") +
-    "</article>"
-  ).join("");
-  $("chapters").addEventListener("click", e => {
-    const b = e.target.closest("[data-station]");
-    if (!b) return;
-    waehlen(+b.dataset.station);
-    springe($("reise"));
-  });
-
-  /* ---------- Reisekarte ---------- */
+  /* ---------- Reisekarte (Zustand) ---------- */
   const frame = $("map-frame"), list = $("stops"), note = $("journey-note");
-  const karte = D.reise && D.reise.karte;
   const NS = "http://www.w3.org/2000/svg";
   const W = 1000;
-  let H = 625;
-  let aktiv = stationen.length - 1;
+  let H = 625, aktiv = -1, stationen = [], svg = null, routeG = null;
   const el = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); return n; };
 
   function platzhalter() {
@@ -506,59 +505,22 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     return g;
   }
 
-  const svg = el("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none", role: "img", "aria-label": "Reiseroute" });
-  const routeG = el("g", {});
-
   function punkte() {
+    if (!routeG) return;
     routeG.innerHTML = "";
     const pts = stationen.map(s => [s.x / 100 * W, s.y / 100 * H]);
     if (pts.length > 1) {
       routeG.appendChild(el("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" "), class: "route route-done" }));
     }
     pts.forEach((p, i) => {
-      const g = el("g", { class: "stop" + (i === aktiv ? " active" : ""), tabindex: 0, role: "button", "aria-label": (i + 1) + ". " + stationen[i].name });
+      const g = el("g", { class: "stop" + (i === aktiv ? " active" : ""), tabindex: 0, role: "button", "aria-label": (i + 1) + ". " + stationen[i].name, "data-stop": i });
       g.appendChild(el("circle", { cx: p[0], cy: p[1], r: 17 }));
       const t = el("text", { x: p[0], y: p[1] });
       t.textContent = i + 1;
       g.appendChild(t);
-      g.addEventListener("click", () => waehlen(i));
-      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); waehlen(i); } });
       routeG.appendChild(g);
     });
   }
-
-  if (karte) {
-    const img = document.createElement("img");
-    img.src = karte;
-    img.alt = "Weltkarte der Kampagne";
-    img.addEventListener("load", () => {
-      frame.style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
-      H = Math.round(W * img.naturalHeight / img.naturalWidth);
-      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-      punkte();
-    }, { once: true });
-    frame.appendChild(img);
-  } else {
-    const flag = document.createElement("span");
-    flag.className = "map-flag";
-    flag.textContent = "Platzhalter · eure Karte folgt";
-    frame.appendChild(flag);
-    svg.appendChild(platzhalter());
-  }
-  svg.appendChild(routeG);
-  frame.appendChild(svg);
-
-  list.innerHTML = stationen.map((s, i) =>
-    '<li><button type="button" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><span><b>' + esc(s.name) + '</b><span class="t">' + esc(s.text) + "</span></span></button>" +
-    (s.kapitel ? '<button type="button" class="go" data-kapitel="' + esc(s.kapitel) + '" data-abschnitt="' + esc(s.abschnitt || "") + '">In Kapitel ' + esc(s.kapitel) + " nachlesen</button>" : "") +
-    "</li>"
-  ).join("");
-  list.addEventListener("click", e => {
-    const k = e.target.closest("[data-kapitel]");
-    if (k) { springe((k.dataset.abschnitt && $(abschnittId(k.dataset.kapitel, k.dataset.abschnitt))) || $("kapitel-" + k.dataset.kapitel)); return; }
-    const b = e.target.closest("[data-i]");
-    if (b) waehlen(+b.dataset.i);
-  });
 
   function waehlen(i) {
     aktiv = i;
@@ -568,18 +530,171 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       li.querySelector("[data-i]").setAttribute("aria-current", j === i ? "true" : "false");
     });
   }
-  waehlen(aktiv);
-  note.textContent = karte ? "" : "Die Karte ist ein Platzhalter. Sobald eure Weltkarte da ist, sitzen die Stationen an ihren echten Orten.";
 
-  /* ---------- Bestiarium ---------- */
-  const tiere = D.bestiarium || [];
-  if (!tiere.length) $("beasts-empty").hidden = false;
-  $("beasts").innerHTML = tiere.map(t =>
-    '<article class="beast">' + (t.bild ? '<img src="' + esc(t.bild) + '" alt="' + esc(t.name) + '">' : '<div class="beast-seal" aria-hidden="true">' + esc(String(t.name).replace(/^(Der|Die|Das) /, "").charAt(0)) + "</div>") +
-    "<div>" + '<span class="tag ' + ({ besiegt: "slain\">Besiegt", geruecht: "rumor\">Nur ein Gerücht" }[t.status] || "seen\">Gesichtet") + "</span>" +
-    "<h3>" + esc(t.name) + "</h3>" + (t.ort ? '<p class="ort">' + esc(t.ort) + "</p>" : "") +
-    (t.text ? "<p>" + esc(t.text) + "</p>" : "") + "</div></article>"
-  ).join("");
+  function karteZeichnen() {
+    if (aktiv < 0 || aktiv > stationen.length - 1) aktiv = Math.max(0, stationen.length - 1);
+    const karte = D.reise && D.reise.karte;
+    frame.innerHTML = "";
+    svg = el("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none", role: "img", "aria-label": T.route });
+    routeG = el("g", {});
+    if (karte) {
+      const img = document.createElement("img");
+      img.src = karte;
+      img.alt = T.mapAlt;
+      img.addEventListener("load", () => {
+        frame.style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
+        H = Math.round(W * img.naturalHeight / img.naturalWidth);
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        punkte();
+      }, { once: true });
+      frame.appendChild(img);
+    } else {
+      const flag = document.createElement("span");
+      flag.className = "map-flag";
+      flag.textContent = T.mapFlag;
+      frame.appendChild(flag);
+      svg.appendChild(platzhalter());
+    }
+    svg.appendChild(routeG);
+    frame.appendChild(svg);
+
+    list.innerHTML = stationen.map((s, i) =>
+      '<li><button type="button" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><span><b>' + esc(s.name) + '</b><span class="t">' + esc(s.text) + "</span></span></button>" +
+      (s.kapitel ? '<button type="button" class="go" data-kapitel="' + esc(s.kapitel) + '" data-abschnitt="' + esc(s.abschnitt || "") + '">' + esc(T.nachlesen(s.kapitel)) + "</button>" : "") +
+      "</li>"
+    ).join("");
+    waehlen(aktiv);
+    note.textContent = karte ? "" : T.mapNote;
+  }
+
+  /* ---------- Alles zeichnen ---------- */
+  function render() {
+    D = QUELLEN[lang]; T = UI[lang];
+    document.documentElement.lang = lang;
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", T.description);
+
+    document.querySelectorAll("[data-i18n]").forEach(n => { const v = T[n.dataset.i18n]; if (typeof v === "string") n.innerHTML = v; });
+    document.querySelectorAll("[data-i18n-aria]").forEach(n => n.setAttribute("aria-label", T[n.dataset.i18nAria]));
+    document.querySelectorAll(".lang [data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang ? "true" : "false"));
+
+    /* Intro */
+    if (D.intro && D.intro.text) {
+      $("intro-label").textContent = D.intro.label || "";
+      $("intro-text").innerHTML = D.intro.text;
+      $("intro").hidden = false;
+    } else { $("intro").hidden = true; }
+
+    /* Fries */
+    const fries = [];
+    D.helden.forEach(h => { fries.push(h); if (h.begleiter) fries.push(h.begleiter); });
+    $("frieze").innerHTML = fries.map(h =>
+      '<a href="#' + h.id + '" data-target="' + h.id + '"><img src="' + esc(h.bild) + '" alt="' + esc(h.name) + '" style="object-position:' + esc(h.fries || "50% 30%") + '"><span>' + esc(h.name) + '<small>' + esc(h.rolle) + '</small></span></a>'
+    ).join("");
+    $("frieze").style.gridTemplateColumns = "repeat(" + fries.length + ", minmax(0, 1fr))";
+
+    /* Gefährten */
+    $("heroes").innerHTML = D.helden.map(h => {
+      let html = '<article class="hero-entry" id="' + h.id + '">' +
+        '<figure' + (h.breitbild ? ' class="wide"' : "") + '><img src="' + esc(h.bild) + '" alt="' + esc(h.bildAlt) + '">' +
+        (h.bildtext ? "<figcaption>" + esc(h.bildtext) + "</figcaption>" : "") + "</figure>" +
+        '<div class="entry-text"><h3>' + esc(h.name) + '</h3><p class="epithet">' + esc(h.beiname) + "</p>" +
+        '<div class="prose">' + absaetze(h.absaetze) + "</div>";
+      if (h.geheimnis) html += '<p class="sealed">' + esc(h.geheimnis) + "</p>";
+      if (h.begleiter) {
+        const b = h.begleiter;
+        html += '<div class="companion" id="' + b.id + '"><img src="' + esc(b.bild) + '" alt="' + esc(b.bildAlt) + '"><div><p class="label">' + esc(T.tierbegleiter) + "</p><h4>" + esc(b.name) + "</h4>" + absaetze(b.absaetze) + "</div></div>";
+      }
+      return html + "</div></article>";
+    }).join("");
+
+    /* Erzähler-Hinweis */
+    if (D.erzaehler && D.erzaehler.text) {
+      const n = D.erzaehler, img = $("narrator-img");
+      if (n.bild) { img.src = n.bild; img.alt = n.name || ""; img.hidden = false; } else { img.hidden = true; }
+      $("narrator-label").textContent = n.label || "";
+      $("narrator-text").innerHTML = n.text;
+      $("narrator").hidden = false;
+    } else { $("narrator").hidden = true; }
+
+    /* Chronik */
+    stationen = (D.reise && D.reise.stationen) || [];
+    const stationFuer = (nr, titel) => stationen.findIndex(s => String(s.kapitel) === String(nr) && s.abschnitt === titel);
+    const hatAbschnittLinks = k => (k.absaetze || []).some(p => p.indexOf("## ") === 0 && stationFuer(k.nummer, p.slice(3).trim()) > -1);
+    const kapitelText = k => (k.absaetze || []).map(p => {
+      if (p.charAt(0) === "!") {
+        const teil = p.slice(1).split("|");
+        return '<figure><img src="' + esc(teil[0].trim()) + '" alt="' + esc(teil[1] || "") + '" loading="lazy">' + (teil[1] ? "<figcaption>" + esc(teil[1]) + "</figcaption>" : "") + "</figure>";
+      }
+      if (p.indexOf("## ") !== 0) return "<p>" + p + "</p>";
+      const t = p.slice(3).trim();
+      const i = stationFuer(k.nummer, t);
+      return '<div class="sub" id="' + abschnittId(k.nummer, t) + '"><h4>' + esc(t) + "</h4>" +
+        (i > -1 ? '<button type="button" class="maplink" data-station="' + i + '">' + esc(T.aufKarteKurz) + " · " + (i + 1) + "</button>" : "") + "</div>";
+    }).join("");
+    $("chapters-empty").hidden = D.kapitel.length > 0;
+    $("chapters").innerHTML = D.kapitel.map(k =>
+      '<article class="chapter" id="kapitel-' + esc(k.nummer) + '">' +
+        '<p class="label">' + esc(T.kapitel) + " " + esc(k.nummer) + "</p>" +
+        "<h3>" + esc(k.titel) + "</h3>" +
+        (k.bild ? '<figure><img src="' + esc(k.bild) + '" alt="' + esc(k.bildAlt || k.titel) + '">' + (k.bildtext ? "<figcaption>" + esc(k.bildtext) + "</figcaption>" : "") + "</figure>" : "") +
+        '<div class="prose">' + kapitelText(k) + "</div>" +
+        (!hatAbschnittLinks(k) && k.station && stationen[k.station - 1] ? '<button type="button" class="linkbtn" data-station="' + (k.station - 1) + '">' + esc(T.aufKarte) + "</button>" : "") +
+        (k.fortsetzung ? '<p class="to-be">' + esc(k.fortsetzung) + "</p>" : "") +
+      "</article>"
+    ).join("");
+
+    /* Karte */
+    karteZeichnen();
+
+    /* Bestiarium */
+    const tiere = D.bestiarium || [];
+    $("beasts-empty").hidden = tiere.length > 0;
+    const tag = s => ({ besiegt: ["slain", T.tagSlain], geruecht: ["rumor", T.tagRumor] }[s] || ["seen", T.tagSeen]);
+    $("beasts").innerHTML = tiere.map(t => {
+      const g = tag(t.status);
+      return '<article class="beast">' + (t.bild ? '<img src="' + esc(t.bild) + '" alt="' + esc(t.name) + '">' : '<div class="beast-seal" aria-hidden="true">' + esc(String(t.name).replace(/^(Der|Die|Das|The) /, "").charAt(0)) + "</div>") +
+        '<div><span class="tag ' + g[0] + '">' + esc(g[1]) + "</span>" +
+        "<h3>" + esc(t.name) + "</h3>" + (t.ort ? '<p class="ort">' + esc(t.ort) + "</p>" : "") +
+        (t.text ? "<p>" + esc(t.text) + "</p>" : "") + "</div></article>";
+    }).join("");
+  }
+
+  /* ---------- Klicks (einmal angemeldet) ---------- */
+  $("frieze").addEventListener("click", e => {
+    const a = e.target.closest("a[data-target]");
+    if (!a) return;
+    e.preventDefault();
+    springe($(a.dataset.target));
+  });
+  $("chapters").addEventListener("click", e => {
+    const b = e.target.closest("[data-station]");
+    if (!b) return;
+    waehlen(+b.dataset.station);
+    springe($("reise"));
+  });
+  frame.addEventListener("click", e => {
+    const g = e.target.closest("[data-stop]");
+    if (g) waehlen(+g.getAttribute("data-stop"));
+  });
+  frame.addEventListener("keydown", e => {
+    const g = e.target.closest && e.target.closest("[data-stop]");
+    if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); waehlen(+g.getAttribute("data-stop")); }
+  });
+  list.addEventListener("click", e => {
+    const k = e.target.closest("[data-kapitel]");
+    if (k) { springe((k.dataset.abschnitt && $(abschnittId(k.dataset.kapitel, k.dataset.abschnitt))) || $("kapitel-" + k.dataset.kapitel)); return; }
+    const b = e.target.closest("[data-i]");
+    if (b) waehlen(+b.dataset.i);
+  });
+  document.querySelectorAll(".lang [data-lang]").forEach(b => b.addEventListener("click", () => {
+    if (b.dataset.lang === lang) return;
+    lang = b.dataset.lang;
+    try { localStorage.setItem("imres-lang", lang); } catch (_) {}
+    render();
+  }));
+
+  render();
 })();
 
 </script>
