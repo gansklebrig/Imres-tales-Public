@@ -130,7 +130,22 @@ window.INHALT = {
         "## Schloss Crackmore",
         "Die Gruppe verschaffte sich Zugang zum Schloss. Zuerst befreiten sie einen Gefangenen und erbeuteten dabei einige rote Roben, die ihnen fortan als Tarnung dienten. So drangen sie immer tiefer in das Gemäuer vor und stellten die Bande in mehreren Kämpfen, einen nach dem anderen. Auch ihr Anführer Glasstab fiel.",
         "Mit seinem letzten Atemzug sprach Glasstab von einer gewissen Spinne, der er offenbar diente. Ist es eine Person, eine Macht, eine geheime Organisation? Bisher weiß es niemand.",
-        "Siegreich kehrten die Gefährten nach Thunderlin zurück. Die Frage nach der Spinne aber lässt sie seitdem nicht mehr los."
+        "Siegreich kehrten die Gefährten nach Thunderlin zurück. Die Frage nach der Spinne aber lässt sie seitdem nicht mehr los.",
+        "## Der Gefangene im Wachturm",
+        "An dieser Stelle muss euer Erzähler gestehen: Seine Erinnerung an die folgenden Tage ist ein wenig … nebelig. <em class=\"aside\">Vielleicht lag es am Kraut in meiner Pfeife.</em>",
+        "Nach dem Sieg über die Roten Roben erhielten die Gefährten jedenfalls einen neuen Auftrag. Von wem und warum? <em class=\"aside\">Ich glaube, es war wichtig. Sehr wichtig sogar.</em> Sie sollten einen Gefangenen aus einem Wachturm befreien, über den niemand etwas wusste, nicht einmal seinen Namen.",
+        "Zuerst umrundeten sie den Turm, um sich einen Überblick zu verschaffen, und stiegen dann an einer günstigen Stelle ein. Die Überraschung gelang, <em class=\"aside\">zumindest glaube ich das,</em> und die Gefährten stellten die Wachen, bevor diese wussten, wie ihnen geschah.",
+        "Doch dann stand ihnen ein riesiger Bugbär gegenüber, der ihnen gehörig zusetzte. <em class=\"aside\">In meiner Erinnerung war er mindestens drei Meter groß. Mindestens.</em> Am Ende ging aber auch er zu Boden.",
+        "Und dann die nächste Überraschung: Eine der Gegnerinnen war nicht, wer sie zu sein schien. Eine Gestaltwandlerin, eine Drow, ließ ihre Tarnung fallen und floh. Im Verschwinden sprach auch sie von der Spinne. <em class=\"aside\">Ich bin mir ziemlich sicher, dass sie „die Spinne“ gesagt hat. Ziemlich.</em>",
+        "## Gundrens Bruder",
+        "Der Gefangene war gerettet, und als er sich vorstellte, staunten die Gefährten nicht schlecht: Es war Gundrens Zwillingsbruder Nando. <em class=\"aside\">Oder so ähnlich. Ich glaube, Nando. Er hat es mir bestimmt gesagt.</em>",
+        "Gemeinsam mit ihm kehrten sie zu Gundren zurück und berichteten von ihren Erfolgen. <em class=\"aside\">Ich meine mich zu erinnern, dass er sehr erleichtert war. Wer wäre das nicht?</em>",
+        "## Neverwinter",
+        "Danach zog es die Gruppe nach Neverwinter. Wer große Taten vollbringt, sollte schließlich auch davon erzählen, und wo ginge das besser als in der großen Stadt? Kaum hatten sie sich ein Zimmer in einem Gasthof gesichert, baten sie um eine Audienz bei der Allianz der Lords.",
+        "Ganz nach Protokoll lief das nicht. <em class=\"aside\">Wenn ich mich recht entsinne, waren wir ein klein wenig … entschlossen.</em> Etwas plump und ziemlich forsch marschierten die Gefährten an den Wachen vorbei, geradewegs zum Leiter der Allianz. Der jedoch vertröstete sie: Für ein Gespräch habe man erst später Zeit.",
+        "Also streiften sie durch die Straßen von Neverwinter, lauschten in Tavernen und auf Marktplätzen und versuchten, Gerüchte aufzuschnappen. Ohne Erfolg. <em class=\"aside\">Glaube ich. Oder ich habe die Gerüchte vergessen. Beides möglich.</em>",
+        "## Die Allianz der Lords",
+        "Schließlich kehrten sie zur Allianz zurück. Nach einem langen Gespräch fassten die Gefährten einen Entschluss: Sie würden der Allianz der Lords beitreten und ihre Kräfte stärken. <em class=\"aside\">Und ich bin sicher, die Lords waren überglücklich, uns zu haben. Na ja, ziemlich sicher.</em>"
       ],
       fortsetzung: "Fortsetzung folgt …"
     }
@@ -146,7 +161,9 @@ window.INHALT = {
       { name: "Die kleine Hafenstadt", x: 8, y: 76, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
       { name: "Hinterhalt auf der Straße", x: 30, y: 66, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Ein zerstörter Wagen versperrt den Weg. Die Goblins, die aus dem Wald springen, haben keine Chance." },
       { name: "Die Goblinhöhle", x: 30, y: 54, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
-      { name: "Thunderlin", x: 58, y: 64, kapitel: "I", abschnitt: "Thunderlin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." }
+      { name: "Thunderlin", x: 58, y: 64, kapitel: "I", abschnitt: "Thunderlin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
+      { name: "Der Wachturm", x: 80, y: 40, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder." },
+      { name: "Neverwinter", x: 24, y: 26, kapitel: "I", abschnitt: "Neverwinter", text: "Die große Stadt. Hier treten die Gefährten der Allianz der Lords bei." }
     ]
   },
 
