@@ -164,6 +164,7 @@ window.INHALT = {
         "Die Gefährten betraten den Turm, durchsuchten ihn Stockwerk um Stockwerk und stiegen immer weiter hinauf. Oben auf dem höchsten Plateau schlug das Schicksal zu: Ein Drache griff an, ein giftspeiendes Ungetüm namens Venomfang.",
         "Der Kampf war brutal. Dann kam Barradins großer Moment: Er zog den Drachen mit seiner Magie in einen hypnotischen Bann, und die Gruppe nutzte die Gelegenheit, um sich in Stellung zu bringen. <em class=\"aside\">Ich erwähne das nur der Vollständigkeit halber. Und weil es großartig war.</em> Am Ende fiel Venomfang, doch sein Giftatem hatte den Gefährten übel zugesetzt.",
         "Erst einmal hieß es durchatmen, Wunden verbinden und natürlich die Beute einsammeln. Echo war dabei, wie man sich denken kann, besonders gründlich.",
+        "!venomfang-besiegt.jpg|Venomfang ist besiegt. Barradin genießt seine Pfeife, und Rex hat sich seinen Anteil an der Beute schon gesichert.",
         "## Das verlassene Dorf",
         "Dann nahmen sie sich das Dorf vor. In einigen der vermeintlich leeren Häuser lauerten Zombies. Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt: Er erkannte darin seinen Onkel. <em class=\"aside\">Mehr hat er dazu nicht gesagt. Natürlich nicht.</em>",
         "Es folgten weitere Kämpfe gegen Blights, gegen zwei riesige Spinnen und gegen noch mehr Blights, bis Echo einen gewaltigen Feuerball losließ und das Problem auf seine Weise löste.",
@@ -187,6 +188,7 @@ window.INHALT = {
         "Nur eine entkam: die Drow, die Gestaltwandlerin. Sie sprang von der Brücke in den Fluss, der tief darunter rauschte, und war verschwunden.",
         "## Durch die Spinnweben",
         "Die Gefährten drangen tiefer ins Unterreich vor. Dichte Spinnweben versperrten den Weg, und stellenweise mussten sie sogar auf ihnen balancieren. Ein paar Spinnen stellten sich ihnen entgegen und wurden erschlagen.",
+        "!unterreich-spinnweben.jpg|Unterwegs durch die Spinnweben des Unterreichs. Ganz entspannt, wie man sieht.",
         "In einem der Spinnenkokons machten sie einen überraschenden Fund: einen Gnom namens Fagas, gefangen, aber noch am Leben. Er erzählte ihnen von einem magischen Tempel, dem Tempel von Arafil des Roten Sitzes, einem der Magier."
       ],
       fortsetzung: "Fortsetzung folgt …"

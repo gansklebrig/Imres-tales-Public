@@ -157,6 +157,7 @@ window.INHALT_EN = {
         "The companions entered the tower, searched it floor by floor and climbed ever higher. On the topmost platform, fate struck: a dragon attacked, a poison-breathing horror named Venomfang.",
         "The fight was brutal. Then came Barradin's great moment: with his magic he drew the dragon into a hypnotic trance, and the party seized the chance to get into position. <em class=\"aside\">I mention this only for the sake of completeness. And because it was magnificent.</em> In the end Venomfang fell, but his poison breath had dealt the companions a nasty blow.",
         "First things first: catch their breath, bind their wounds and, of course, gather the loot. Echo, as you might imagine, was particularly thorough.",
+        "!venomfang-besiegt.jpg|Venomfang is defeated. Barradin enjoys his pipe, and Rex has already claimed his share of the loot.",
         "## The Abandoned Village",
         "Then they turned to the village. Zombies lurked in some of the seemingly empty houses. In front of one house stood a statue that stopped Ezekiel in his tracks: he recognised it as his uncle. <em class=\"aside\">He said nothing more about it. Of course he didn't.</em>",
         "More fights followed, against blights, against two giant spiders and against yet more blights, until Echo unleashed an enormous fireball and solved the problem his own way.",
@@ -180,6 +181,7 @@ window.INHALT_EN = {
         "Only one escaped: the drow, the shapeshifter. She leapt from the bridge into the river rushing far below and was gone.",
         "## Through the Webs",
         "The companions pressed deeper into the Underdark. Thick spider webs blocked the way, and in places they even had to balance across them. A few spiders stood in their way and were slain.",
+        "!unterreich-spinnweben.jpg|Making our way through the webs of the Underdark. Perfectly relaxed, as you can see.",
         "In one of the spider cocoons they made a surprising discovery: a gnome named Fagas, captured but still alive. He told them of a magical temple, the Temple of Arafil of the Red Seat, one of the wizards."
       ],
       fortsetzung: "To be continued …"
