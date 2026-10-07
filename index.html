@@ -252,6 +252,9 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
   background: radial-gradient(circle at 50% 45%, rgba(224,160,70,.14), transparent 65%); border-bottom: 1px solid var(--line);
 }
 
+.chapter .prose figure { margin: 1.4rem 0; }
+.chapter .prose figure img { width: 100%; display: block; border: 1px solid var(--line); }
+.chapter .prose figure figcaption { font-size: .82rem; color: var(--ash); font-style: italic; margin-top: .5rem; }
 .chapter .prose em.aside { color: var(--ash); }
 
 /* Bestiarium-Einträge */
@@ -454,6 +457,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   const hatAbschnittLinks = k => (k.absaetze || []).some(p => p.indexOf("## ") === 0 && stationFuer(k.nummer, p.slice(3).trim()) > -1);
   function kapitelText(k) {
     return (k.absaetze || []).map(p => {
+      if (p.charAt(0) === "!") {
+        const teil = p.slice(1).split("|");
+        return '<figure><img src="' + esc(teil[0].trim()) + '" alt="' + esc(teil[1] || "") + '" loading="lazy">' + (teil[1] ? "<figcaption>" + esc(teil[1]) + "</figcaption>" : "") + "</figure>";
+      }
       if (p.indexOf("## ") !== 0) return "<p>" + p + "</p>";
       const t = p.slice(3).trim();
       const i = stationFuer(k.nummer, t);
