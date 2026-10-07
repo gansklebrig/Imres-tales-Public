@@ -232,14 +232,14 @@ window.INHALT_EN = {
       },
       {
         titel: "The Underdark",
-        karte: "unterreich-karte.svg",
+        karte: "unterreich-karte.jpg",
         stationen: [
-          { name: "The Dungeon", x: 15, y: 20.8, kapitel: "II", abschnitt: "Captured", text: "The companions wake here in chains. Echo fetches the gear as a rat, then come the breakout and the demons." },
-          { name: "The Webs", x: 30, y: 41, kapitel: "II", abschnitt: "Through the Webs", text: "Balancing across spider webs. The gnome Fagas waits in a cocoon." },
-          { name: "The Wizard's Tomb", x: 43, y: 27.8, kapitel: "II", abschnitt: "The Wizard's Tomb", text: "Behind a defaced spider statue: a wraith and the sword Dawnbringer." },
-          { name: "The Underground Lake", x: 46.5, y: 52.8, kapitel: "II", abschnitt: "The Underground Lake", text: "On the shore, Ploopploopeen, archpriest of the kuo-toa, asks for help." },
-          { name: "The Kuo-Toa Ruins", x: 62.5, y: 75, kapitel: "II", abschnitt: "Demogorgon", text: "Here Demogorgon rose from the lake. Only ruins remain of the city." },
-          { name: "Gracklstugh", x: 88, y: 58.3, kapitel: "II", abschnitt: "Gracklstugh", text: "The fortress in the rock on the far shore of the lake." }
+          { name: "The Dungeon", x: 8.0, y: 48.3, kapitel: "II", abschnitt: "Captured", text: "The companions wake here in chains. Echo fetches the gear as a rat, then come the breakout and the demons." },
+          { name: "The Webs", x: 12.0, y: 40.7, kapitel: "II", abschnitt: "Through the Webs", text: "Balancing across spider webs. The gnome Fagas waits in a cocoon." },
+          { name: "The Wizard's Tomb", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "The Wizard's Tomb", text: "Behind a defaced spider statue: a wraith and the sword Dawnbringer." },
+          { name: "The Underground Lake", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "The Underground Lake", text: "On the shore, Ploopploopeen, archpriest of the kuo-toa, asks for help." },
+          { name: "The Kuo-Toa Ruins", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Here Demogorgon rose from the lake. Only ruins remain of the city." },
+          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "The fortress in the rock on the far shore of the lake." }
         ]
       }
     ]

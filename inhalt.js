@@ -242,14 +242,14 @@ window.INHALT = {
       },
       {
         titel: "Das Unterreich",
-        karte: "unterreich-karte.svg",
+        karte: "unterreich-karte.jpg",
         stationen: [
-          { name: "Der Kerker", x: 15, y: 20.8, kapitel: "II", abschnitt: "Gefangen", text: "Hier erwachen die Gefährten in Ketten. Echo holt als Ratte die Ausrüstung, dann folgen Ausbruch und Dämonen." },
-          { name: "Die Spinnweben", x: 30, y: 41, kapitel: "II", abschnitt: "Durch die Spinnweben", text: "Balancieren über Spinnennetze. In einem Kokon wartet der Gnom Fagas." },
-          { name: "Das Grab der Magierin", x: 43, y: 27.8, kapitel: "II", abschnitt: "Das Grab der Magierin", text: "Hinter einer verunstalteten Spinnenstatue: ein Wraith und das Schwert Dawnbringer." },
-          { name: "Der unterirdische See", x: 46.5, y: 52.8, kapitel: "II", abschnitt: "Der unterirdische See", text: "Am Ufer bittet Ploopploopeen, Erzpriester der Kuo-Toa, um Hilfe." },
-          { name: "Die Ruinen der Kuo-Toa", x: 62.5, y: 75, kapitel: "II", abschnitt: "Demogorgon", text: "Hier stieg Demogorgon aus dem See. Von der Stadt sind nur Ruinen geblieben." },
-          { name: "Gracklstugh", x: 88, y: 58.3, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels am anderen Ufer des Sees." }
+          { name: "Der Kerker", x: 8.0, y: 48.3, kapitel: "II", abschnitt: "Gefangen", text: "Hier erwachen die Gefährten in Ketten. Echo holt als Ratte die Ausrüstung, dann folgen Ausbruch und Dämonen." },
+          { name: "Die Spinnweben", x: 12.0, y: 40.7, kapitel: "II", abschnitt: "Durch die Spinnweben", text: "Balancieren über Spinnennetze. In einem Kokon wartet der Gnom Fagas." },
+          { name: "Das Grab der Magierin", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "Das Grab der Magierin", text: "Hinter einer verunstalteten Spinnenstatue: ein Wraith und das Schwert Dawnbringer." },
+          { name: "Der unterirdische See", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "Der unterirdische See", text: "Am Ufer bittet Ploopploopeen, Erzpriester der Kuo-Toa, um Hilfe." },
+          { name: "Die Ruinen der Kuo-Toa", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Hier stieg Demogorgon aus dem See. Von der Stadt sind nur Ruinen geblieben." },
+          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels am anderen Ufer des Sees." }
         ]
       }
     ]

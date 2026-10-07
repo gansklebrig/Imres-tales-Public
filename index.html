@@ -143,6 +143,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
   position: absolute; top: .7rem; left: .7rem; z-index: 2; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
   background: rgba(16,14,21,.85); color: var(--ember); border: 1px solid var(--line); padding: .2rem .6rem;
 }
+.route-shadow { fill: none; stroke: rgba(16,14,21,.75); stroke-width: 7; stroke-linecap: round; }
 .route { fill: none; stroke: var(--ember); stroke-width: 3; stroke-dasharray: 2 9; stroke-linecap: round; }
 .route-done { animation: march 1.2s linear infinite; }
 @keyframes march { to { stroke-dashoffset: -11; } }
@@ -534,7 +535,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     const hier = aufKarte();
     const pts = hier.map(s => [s.x / 100 * W, s.y / 100 * H]);
     if (pts.length > 1) {
-      routeG.appendChild(el("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" "), class: "route route-done" }));
+      const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+      routeG.appendChild(el("path", { d, class: "route-shadow" }));
+      routeG.appendChild(el("path", { d, class: "route route-done" }));
     }
     hier.forEach((s, i) => {
       const p = pts[i];
