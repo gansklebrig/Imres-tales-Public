@@ -262,67 +262,85 @@ window.INHALT_EN = {
   ],
 
   /* ---------- THE QUEST BOARD (same structure as inhalt.js; abschnitt = English "## " heading) ---------- */
-  quests: [
-    {
-      id: "spinne",
-      haupt: true,
-      label: "Above all else",
-      titel: "Who is the Spider?",
-      text: "A person, a power, a secret order? Ever since Castle Crackmore this question has not let us go, and the deeper we dig, the more often we run into eight legs.",
-      hinweise: [
-        "Glasstaff, leader of the Red Robes, served the Spider. He spoke of it with his last breath.",
-        "The drow Nezna spoke of the Spider too, before she slipped away as a small animal.",
-        "Spider statues stood in the drow hideout in the Underdark and in a temple along the way. Both now bear our artwork.",
-        "Friedrich is the one it bothers most."
-      ],
-      kapitel: "I",
-      abschnitt: "Castle Crackmore"
-    },
-    {
-      id: "gracklstugh",
-      label: "Up next",
-      titel: "What is going on in Gracklstugh?",
-      text: "After our escape across the lake, the fortress in the rock looked like something out of a dream. But a city this deep in the Underdark has its own rules and its own secrets.",
-      hinweise: [
-        "Kardal led us here. He knows the way remarkably well.",
-        "Who is in charge here, and what the city wants from us, is still entirely open."
-      ],
-      kapitel: "II",
-      abschnitt: "Gracklstugh"
-    },
-    {
-      id: "demogorgon",
-      label: "Ominous",
-      titel: "Why did Demogorgon awaken?",
-      text: "A demon prince rose from the lake and razed the city of the kuo-toa. Friedrich punched him. It did not stop him.",
-      hinweise: [
-        "Some of the kuo-toa worshipped a false god: Lermu-Gorgon. Sounds suspiciously similar, doesn't it?",
-        "Demons already appeared out of nowhere during our breakout.",
-        "Where he went afterwards, nobody knows."
-      ],
-      kapitel: "II",
-      abschnitt: "Demogorgon"
-    },
-    {
-      id: "kardal",
-      label: "Suspicious",
-      titel: "Prince Kardal?",
-      text: "We found him bound in the middle of the kuo-toa chaos. He said he was merely a scout of his city. But is that really the whole truth?",
-      hinweise: [
-        "Escaped across the lake with us in the boat.",
-        "Led us straight to Gracklstugh."
-      ],
-      kapitel: "II",
-      abschnitt: "Demogorgon"
-    }
-  ],
-
-  faeden: [
-    "<strong>Ilvara Mizzrym</strong> leapt from the bridge into the river. None of us believes that was the end of her.",
-    "<strong>Nezna</strong> slipped away from us in the watchtower as a small animal.",
-    "<strong>The statue in Thundertree</strong> in which Ezekiel recognised his uncle. He has never explained it.",
-    "<strong>Arafil of the Red Seat</strong>, the wizard who sent Fagas into the Underdark to find Karim's tomb."
-  ],
+  questtafel: {
+    karten: [
+      { id: "glasstab", x: 4, y: 4, b: 26, dreh: -5,
+        kurz: "Glasstaff †<small>“the Spider …”</small>",
+        label: "Clue", titel: "Glasstaff",
+        text: "Leader of the Red Robes in Phandalin. Before he fell to Friedrich's arrow, he spoke with his last breath of the Spider, whom he apparently served.",
+        kapitel: "I", abschnitt: "Castle Crackmore" },
+      { id: "nezna", x: 38, y: 3, b: 24, dreh: 3,
+        kurz: "Nezna<small>Drow · got away!</small>",
+        label: "Clue", titel: "Nezna",
+        text: "A dark elf who fought us fiercely in the watchtower. When the battle was lost, she turned into a small animal and escaped. Before that, she too spoke of the Spider.",
+        kapitel: "I", abschnitt: "The Prisoner in the Watchtower" },
+      { id: "statuen", x: 70, y: 5, b: 26, dreh: -2,
+        kurz: "Spider statues<small>(now with beards)</small>",
+        label: "Clue", titel: "The Spider Statues",
+        text: "One stood in our captors' hideout, another in a temple-like house in the Underdark. Both received a fresh coat of paint from us, and behind the second one a secret passage promptly opened.",
+        kapitel: "II", abschnitt: "The Breakout" },
+      { id: "spinne", haupt: true, skizze: "spinne", x: 31, y: 21, b: 38, dreh: -1,
+        kurz: "Who is the Spider?",
+        label: "Above all else", titel: "Who is the Spider?",
+        text: "A person, a power, a secret order? Ever since Castle Crackmore this question has not let us go, and the deeper we dig, the more often we run into eight legs.",
+        hinweise: [
+          "Glasstaff, leader of the Red Robes, served the Spider.",
+          "The drow Nezna spoke of the Spider too.",
+          "Spider statues crossed our path twice in the Underdark.",
+          "Friedrich is the one it bothers most."
+        ],
+        kapitel: "I", abschnitt: "Castle Crackmore" },
+      { id: "onkel", lose: true, x: 4, y: 31, b: 24, dreh: 4,
+        kurz: "Ezekiel's uncle?<small>Statue in Thundertree</small>",
+        label: "Loose thread", titel: "Ezekiel's Uncle",
+        text: "In front of one of the houses in Thundertree stood a statue in which Ezekiel recognised his uncle. He has said nothing more about it. Of course not.",
+        kapitel: "I", abschnitt: "The Abandoned Village" },
+      { id: "ilvara", bild: "ilvara-wahr.webp", format: "4/5", pos: "50% 6%", x: 73, y: 25, b: 23, dreh: 4,
+        kurz: "Ilvara Mizzrym",
+        label: "Escaped", titel: "Ilvara Mizzrym",
+        text: "Posed as a friendly druid in Thundertree, knocked us out with a herbal mist and dragged us into the Underdark. During our breakout she leapt from the bridge into the river. None of us believes that was the end of her.",
+        kapitel: "II", abschnitt: "The Breakout" },
+      { id: "kardal", skizze: "krone", x: 5, y: 55, b: 26, dreh: -3,
+        kurz: "Prince Kardal?",
+        label: "Suspicious", titel: "Prince Kardal?",
+        text: "We found him bound in the middle of the kuo-toa chaos. He said he was merely a scout of his city. But is that really the whole truth?",
+        hinweise: ["Escaped across the lake with us in the boat.", "Led us straight to Gracklstugh."],
+        kapitel: "II", abschnitt: "Demogorgon" },
+      { id: "demogorgon", bild: "demogorgon.webp", format: "6/5", pos: "50% 35%", x: 38, y: 53, b: 30, dreh: 2,
+        kurz: "Demogorgon<small>Why did he wake?</small>",
+        label: "Ominous", titel: "Why did Demogorgon awaken?",
+        text: "A demon prince rose from the lake and razed the city of the kuo-toa. Friedrich punched him. It did not stop him.",
+        hinweise: ["His scream snuffed out all magic.", "Where he went afterwards, nobody knows."],
+        kapitel: "II", abschnitt: "Demogorgon" },
+      { id: "lermu", x: 73, y: 60, b: 24, dreh: -4,
+        kurz: "Lermu-Gorgon<small>= Demogorgon??</small>",
+        label: "Clue", titel: "Lermu-Gorgon",
+        text: "The false god some of the kuo-toa worshipped. Shortly afterwards, Demogorgon rose from the lake. Sounds suspiciously similar, doesn't it?",
+        kapitel: "II", abschnitt: "The Underground Lake" },
+      { id: "gracklstugh", bild: "gracklstugh.jpg", format: "16/9", pos: "50% 50%", x: 6, y: 77, b: 32, dreh: 2,
+        kurz: "Gracklstugh<small>What's going on?</small>",
+        label: "Up next", titel: "What is going on in Gracklstugh?",
+        text: "After our escape across the lake, the fortress in the rock looked like something out of a dream. But a city this deep in the Underdark has its own rules and its own secrets.",
+        hinweise: ["Kardal led us here. He knows the way remarkably well.", "Who is in charge here, and what the city wants from us, is still entirely open."],
+        kapitel: "II", abschnitt: "Gracklstugh" },
+      { id: "arafil", lose: true, x: 68, y: 83, b: 27, dreh: -3,
+        kurz: "Arafil of the Red Seat<small>Who is he?</small>",
+        label: "Loose thread", titel: "Arafil of the Red Seat",
+        text: "The wizard who sent the gnome Fagas and his troop into the Underdark to find the tomb of the wizard Karim. What he is really after, we do not know.",
+        kapitel: "II", abschnitt: "Through the Webs" }
+    ],
+    faeden: [
+      { von: "spinne", nach: "glasstab", grund: "served the Spider and spoke of it with his last breath." },
+      { von: "spinne", nach: "nezna", grund: "spoke of the Spider as well." },
+      { von: "spinne", nach: "statuen", grund: "twice on our path." },
+      { von: "statuen", nach: "ilvara", grund: "one of the statues stood in her hideout." },
+      { von: "nezna", nach: "ilvara", grund: "both drow, both shapeshifters. Coincidence?" },
+      { von: "ilvara", nach: "demogorgon", grund: "demons appeared out of nowhere during our breakout from her dungeon." },
+      { von: "demogorgon", nach: "lermu", grund: "the kuo-toa prayed to Lermu-Gorgon, then Demogorgon rose from the lake." },
+      { von: "demogorgon", nach: "kardal", grund: "Kardal was right in the chaos when Demogorgon came." },
+      { von: "kardal", nach: "gracklstugh", grund: "Kardal led us to Gracklstugh." }
+    ]
+  },
 
   /* ---------- THE NPC DIRECTORY ---------- */
   nsc: [

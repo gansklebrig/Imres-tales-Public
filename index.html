@@ -22,7 +22,7 @@
 <meta name="theme-color" content="#100e15">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <style>
 /* Layout: ein nächtliches Gasthaus-Buch. Gruppenbild als Fries oben, dann Chronik, Reisekarte, Gefährten als abwechselnde Doppelseiten und das Bestiarium. Bewusst nur dunkel. */
 :root {
@@ -37,6 +37,7 @@
   --display: "IM Fell English SC", "Palatino Linotype", Palatino, Georgia, serif;
   --name: "IM Fell English", "Palatino Linotype", Palatino, Georgia, serif;
   --body: "Spectral", Georgia, "Times New Roman", serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -309,49 +310,94 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .beast .ort { font-size: .85rem; color: var(--ash); font-style: italic; }
 .beast .tag { justify-self: start; }
 
-/* ---------- Questtafel: angepinnte Pergamentzettel ---------- */
-.board {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: clamp(1.4rem, 3vw, 2rem);
-  padding: clamp(1.4rem, 4vw, 2.4rem) clamp(1rem, 3vw, 2rem);
-  background: repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0 3px, transparent 3px 9px), #1d1812;
-  border: 1px solid var(--line); box-shadow: inset 0 0 60px rgba(0,0,0,.55);
+/* ---------- Questtafel: Holzbrett mit Zetteln und roten Fäden ---------- */
+.board-frame {
+  position: relative; max-width: 38rem; margin-inline: auto; padding: clamp(8px, 2.2vw, 16px); border-radius: 4px;
+  background: linear-gradient(135deg, #3a2414, #24160c 45%, #3d2616 70%, #1f130a);
+  box-shadow: 0 22px 50px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,220,170,.12);
 }
-.note {
-  position: relative; display: grid; gap: .7rem; align-content: start; scroll-margin-top: 5rem;
-  background: linear-gradient(170deg, #efe5cd, #ddcfae); color: #2a2118;
-  padding: 1.9rem 1.3rem 1.3rem; box-shadow: 0 10px 24px rgba(0,0,0,.5);
-  transform: rotate(var(--tilt, 0deg)); transition: transform .3s ease;
+.board-frame::before, .board-frame::after {
+  content: ""; position: absolute; width: 9px; height: 9px; border-radius: 50%; z-index: 1;
+  background: radial-gradient(circle at 35% 35%, #b9a68a, #5e4c38 70%); box-shadow: 0 1px 2px rgba(0,0,0,.7);
 }
-.note:nth-child(3n+2) { --tilt: .8deg; }
-.note:nth-child(3n+3) { --tilt: -1deg; }
-.note:nth-child(3n+4) { --tilt: .5deg; }
-.note:hover { transform: rotate(0deg); }
-.note::before {
-  content: ""; position: absolute; top: .55rem; left: 50%; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #d16a58, var(--blood) 60%, #5c1f18); box-shadow: 0 2px 4px rgba(0,0,0,.5);
+.board-frame::before { top: 4px; left: 4px; } .board-frame::after { bottom: 4px; right: 4px; }
+.board { position: relative; aspect-ratio: 3 / 4; container-type: inline-size; overflow: hidden; background: #7a4f2c; box-shadow: inset 0 0 40px rgba(0,0,0,.55); }
+.board .wood, .board .strings { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.board .strings { z-index: 4; pointer-events: none; filter: drop-shadow(0 2px 1.5px rgba(0,0,0,.55)); overflow: visible; }
+.string { fill: none; stroke: #b3261e; stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; transition: opacity .3s, stroke-width .3s; }
+.board.fokus .string { opacity: .22; }
+.board.fokus .string.an { opacity: 1; stroke-width: 3.2; stroke: #d0352a; }
+
+.pin-note {
+  position: absolute; z-index: 2; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: calc(var(--b) * 1%);
+  transform: rotate(var(--dreh, 0deg)); transform-origin: 50% 0;
+  padding: 0; margin: 0; border: 0; background: none; font: inherit; color: #2a2118; text-align: center; cursor: pointer;
+  transition: transform .25s ease, opacity .3s, filter .3s; -webkit-tap-highlight-color: transparent;
 }
-.note.main { grid-column: 1 / -1; --tilt: -.4deg; padding: 2.3rem clamp(1.3rem, 4vw, 2.4rem) 1.6rem; }
-.note .label { color: var(--blood); }
-.note h3 { font-family: var(--name); font-size: clamp(1.7rem, 4.5vw, 2.1rem); line-height: 1.05; color: #1d1610; }
-.note.main h3 { font-size: clamp(2.1rem, 6vw, 3rem); }
-.note p { font-size: 1rem; line-height: 1.6; }
-.note .clues-head { font-size: .7rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #6b5a44; margin-top: .2rem; }
-.note ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .35rem; }
-.note li { position: relative; padding-left: 1.2rem; font-size: .95rem; line-height: 1.5; color: #3d3226; }
-.note li::before { content: "✦"; position: absolute; left: 0; top: .1rem; font-size: .7rem; color: var(--blood); }
-.note.main ul { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); column-gap: 1.6rem; }
-.note .go {
-  justify-self: start; margin-top: .3rem; background: none; border: 0; padding: 0; font: inherit; font-size: .88rem;
-  color: var(--blood); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+.pin-note:hover, .pin-note:focus-visible { transform: rotate(0deg) scale(1.06); z-index: 3; }
+.pin-note:focus-visible { outline: none; }
+.pin-note:focus-visible .paper { box-shadow: 0 0 0 3px var(--ember), 0 1cqw 2cqw rgba(0,0,0,.6); }
+.pin-note .paper {
+  display: block; padding: 5% 5% 4%; background: linear-gradient(172deg, #f2e9d2, #dccba6);
+  box-shadow: 0 .9cqw 2cqw rgba(0,0,0,.55), inset 0 0 1.4cqw rgba(120,90,50,.25);
 }
-.note .go:hover { color: #5c1f18; }
-.note.spotlight { box-shadow: 0 0 0 3px var(--ember), 0 10px 30px rgba(224,160,70,.4); }
-.threads { margin-top: clamp(1.8rem, 4vw, 2.4rem); max-width: 44rem; }
-.threads h3 { font-family: var(--display); font-size: 1.35rem; color: var(--ember); margin-bottom: .7rem; }
-.threads ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; }
-.threads li { position: relative; padding-left: 1.4rem; color: var(--ash); }
-.threads li::before { content: "~"; position: absolute; left: .1rem; color: var(--ember); }
-.threads li strong { color: var(--vellum); font-weight: 500; }
+.pin-note.zettel .paper {
+  padding: 13% 9% 12%; background: linear-gradient(175deg, #efe3c4, #d8c49a);
+  clip-path: polygon(0 3%, 22% 0, 55% 2%, 100% 0, 98% 52%, 100% 100%, 74% 97%, 46% 100%, 18% 96%, 0 99%, 2% 50%);
+}
+.pin-note img, .pin-note .skizze {
+  display: block; width: 100%; aspect-ratio: var(--format, 1 / 1); object-fit: cover; object-position: var(--pos, 50% 30%);
+}
+.pin-note img { filter: grayscale(1) sepia(.6) contrast(1.4) brightness(1.06); mix-blend-mode: multiply; }
+.pin-note .kurz { display: block; margin-top: 4%; font-family: var(--hand); font-weight: 600; font-size: clamp(12px, 3.9cqw, 22px); line-height: 1.02; }
+.pin-note.zettel .kurz { margin-top: 0; }
+.pin-note.haupt .kurz { font-size: clamp(16px, 5.6cqw, 32px); color: #7d2a20; }
+.pin-note small { display: block; font-family: var(--hand); font-weight: 500; font-size: .8em; color: #5b4a36; }
+.board.fokus .pin-note:not(.an) { opacity: .45; filter: saturate(.5) brightness(.8); }
+
+.pinhead {
+  position: absolute; z-index: 5; pointer-events: none; width: clamp(10px, 3.4cqw, 18px); aspect-ratio: 1; border-radius: 50%;
+  transform: translate(-50%, -50%); background: radial-gradient(circle at 34% 30%, #f08a78, #b3261e 48%, #5c140e);
+  box-shadow: 0 .5cqw .7cqw rgba(0,0,0,.6);
+}
+.board-hint { text-align: center; margin-top: .9rem; font-size: .88rem; color: var(--ash); font-style: italic; }
+
+/* Detail-Zettel beim Antippen */
+.quest-dialog {
+  width: min(32rem, calc(100vw - 32px)); max-height: min(85vh, 46rem); padding: 0; border: 0; overflow: auto;
+  background: linear-gradient(172deg, #f1e7cf, #ddcca8); color: #2a2118; box-shadow: 0 30px 70px rgba(0,0,0,.7);
+}
+.quest-dialog::backdrop { background: rgba(10,8,14,.72); backdrop-filter: blur(3px); }
+.qd-inner { padding: 2.2rem clamp(1.2rem, 5vw, 2rem) 1.6rem; display: grid; gap: .8rem; position: relative; }
+.qd-inner::before {
+  content: ""; position: absolute; top: .7rem; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #f08a78, #b3261e 48%, #5c140e); box-shadow: 0 2px 4px rgba(0,0,0,.5);
+}
+.qd-close {
+  position: absolute; top: .3rem; right: .4rem; z-index: 1; width: 2.6rem; height: 2.6rem; border: 0; background: none;
+  font-size: 1.8rem; line-height: 1; color: #6b5a44; cursor: pointer;
+}
+.qd-close:hover { color: var(--blood); }
+.quest-dialog .label { color: var(--blood); }
+.quest-dialog h3 { font-family: var(--name); font-size: clamp(1.9rem, 6vw, 2.5rem); line-height: 1.05; color: #1d1610; margin-right: 1.5rem; }
+.quest-dialog .qd-bild { justify-self: center; width: min(11rem, 55%); margin: 0; }
+.quest-dialog .qd-bild img { width: 100%; display: block; filter: grayscale(1) sepia(.6) contrast(1.3); mix-blend-mode: multiply; }
+.quest-dialog p { font-size: 1rem; line-height: 1.6; }
+.qd-head { font-size: .7rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #6b5a44; margin-top: .3rem; clear: both; }
+.quest-dialog ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .4rem; }
+.quest-dialog li { position: relative; padding-left: 1.2rem; font-size: .96rem; line-height: 1.5; color: #3d3226; }
+.quest-dialog li::before { content: "✦"; position: absolute; left: 0; top: .1rem; font-size: .7rem; color: var(--blood); }
+.qd-links li::before { content: ""; top: .72rem; width: .8rem; height: 2px; background: #b3261e; }
+.qd-links button {
+  background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--blood); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.qd-lose { font-family: var(--hand); font-size: 1.25rem !important; color: #7d2a20; }
+.qd-go {
+  justify-self: start; margin-top: .3rem; background: none; border: 1px solid var(--blood); color: var(--blood);
+  font: inherit; font-size: .9rem; padding: .4rem .85rem; cursor: pointer;
+}
+.qd-go:hover { background: var(--blood); color: #f1e7cf; }
 
 /* ---------- NSC-Verzeichnis ---------- */
 .npc-group + .npc-group { margin-top: clamp(2rem, 5vw, 3rem); }
@@ -452,10 +498,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <div class="part-head">
         <p class="label" data-i18n="questLabel">Die Questtafel</p>
         <h2 data-i18n="questTitle">Offene Fragen</h2>
-        <p data-i18n="questText">Was die Gruppe gerade umtreibt. Lose Enden, ungelöste Rätsel und alles, was noch eine Antwort schuldig ist.</p>
+        <p data-i18n="questText">Was die Gruppe gerade umtreibt. Die roten Fäden zeigen, was womöglich zusammenhängt.</p>
       </div>
-      <div class="board" id="quests"></div>
-      <div class="threads" id="threads" hidden><h3 data-i18n="threadsTitle">Weitere lose Fäden</h3><ul id="threads-list"></ul></div>
+      <div class="board-frame"><div class="board" id="quests"></div></div>
+      <p class="board-hint" data-i18n="boardHint">Tippe auf einen Zettel, um mehr zu erfahren.</p>
+      <dialog class="quest-dialog" id="quest-dialog" aria-labelledby="qd-title">
+        <form method="dialog"><button class="qd-close" aria-label="Schließen" data-i18n-aria="schliessen">×</button></form>
+        <div class="qd-inner" id="qd-body"></div>
+      </dialog>
     </div>
   </section>
 
@@ -538,8 +588,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navChronik: "Chronik", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
       navQuests: "Quests", navNsc: "NSC",
       questLabel: "Die Questtafel", questTitle: "Offene Fragen",
-      questText: "Was die Gruppe gerade umtreibt. Lose Enden, ungelöste Rätsel und alles, was noch eine Antwort schuldig ist.",
-      threadsTitle: "Weitere lose Fäden", wasWirWissen: "Was wir wissen",
+      questText: "Was die Gruppe gerade umtreibt. Die roten Fäden zeigen, was womöglich zusammenhängt.",
+      boardHint: "Tippe auf einen Zettel, um mehr zu erfahren.", wasWirWissen: "Was wir wissen",
+      roteFaeden: "Rote Fäden", loserFaden: "Dieser Faden hängt noch lose …", schliessen: "Schließen", questtafelBild: "Questtafel",
       nscLabel: "Bekanntschaften", nscTitle: "Freund, Feind &amp; Fragezeichen",
       nscText: "Wer der Gruppe unterwegs begegnet ist, geholfen hat oder ihr noch etwas schuldet.",
       nscStatus: { verbuendet: "Verbündet", feindlich: "Feindlich", unklar: "Undurchsichtig", neutral: "Neutral", tot: "Tot" },
@@ -572,8 +623,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navChronik: "Chronicle", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
       navQuests: "Quests", navNsc: "NPCs",
       questLabel: "The Quest Board", questTitle: "Open Questions",
-      questText: "What keeps the party up at night. Loose ends, unsolved riddles and everything that still owes us an answer.",
-      threadsTitle: "More loose threads", wasWirWissen: "What we know",
+      questText: "What keeps the party up at night. The red threads show what might be connected.",
+      boardHint: "Tap a note to learn more.", wasWirWissen: "What we know",
+      roteFaeden: "Red threads", loserFaden: "This thread is still hanging loose …", schliessen: "Close", questtafelBild: "Quest board",
       nscLabel: "Acquaintances", nscTitle: "Friend, Foe &amp; Question Mark",
       nscText: "Everyone the party has met on the road, who helped us, or who still owes us something.",
       nscStatus: { verbuendet: "Ally", feindlich: "Hostile", unklar: "Shady", neutral: "Neutral", tot: "Dead" },
@@ -740,6 +792,104 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     note.textContent = karte ? "" : T.mapNote;
   }
 
+  /* ---------- Questtafel ---------- */
+  let qKarten = [], qFaeden = [];
+  const SKIZZEN = {
+    spinne: '<svg class="skizze" viewBox="0 0 120 90" aria-hidden="true" style="--format:4/3"><g fill="none" stroke="#2a2118" stroke-linecap="round" stroke-linejoin="round">' +
+      '<g stroke-opacity=".3" stroke-width=".8"><path d="M60 46 L4 2 M60 46 L116 2 M60 46 L2 86 M60 46 L118 86 M60 46 L60 0"/><path d="M36 26 Q48 22 60 21 Q72 22 84 26 M22 14 Q40 6 60 5 Q80 6 98 14 M30 70 Q45 76 60 77 Q75 76 90 70"/></g>' +
+      '<g stroke-width="1.7"><g id="sp-bein"><path d="M54 33 L42 16 L33 5"/><path d="M53 36 L35 26 L18 30"/><path d="M53 40 L36 46 L22 61"/><path d="M55 43 L44 61 L39 82"/></g>' +
+      '<use href="#sp-bein" transform="translate(120 0) scale(-1 1)"/></g></g>' +
+      '<ellipse cx="60" cy="36" rx="8" ry="7" fill="#2a2118"/><ellipse cx="60" cy="55" rx="12.5" ry="15" fill="#2a2118"/>' +
+      '<path d="M56 49 L64 49 L60 55 L64 61 L56 61 L60 55 Z" fill="#9b3a2f"/></svg>',
+    krone: '<svg class="skizze" viewBox="0 0 120 90" aria-hidden="true" style="--format:4/3"><g fill="none" stroke="#2a2118" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">' +
+      '<path d="M26 64 L20 28 L40 46 L54 18 L68 46 L88 28 L82 64 Z" fill="rgba(42,33,24,.08)"/><path d="M26 64 L82 64 L82 74 L26 74 Z"/>' +
+      '<path d="M30 69 L78 69" stroke-dasharray="2 4"/><circle cx="20" cy="26" r="3"/><circle cx="54" cy="16" r="3"/><circle cx="88" cy="26" r="3"/></g>' +
+      '<circle cx="54" cy="56" r="4" fill="#9b3a2f"/><text x="104" y="52" font-size="38" font-family="Caveat, cursive" font-weight="600" fill="#9b3a2f" text-anchor="middle">?</text></svg>'
+  };
+  const PIN_Y = 1.3;
+  const pinPunkt = k => [(+k.x + k.b / 2) * 3, (+k.y + PIN_Y) * 4];
+
+  function tafelZeichnen() {
+    const brett = $("quests");
+    const holz =
+      '<svg class="wood" viewBox="0 0 300 400" preserveAspectRatio="none" aria-hidden="true"><defs>' +
+      '<filter id="maserung" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.11 0.007" numOctaves="4" seed="11"/>' +
+      '<feColorMatrix values="0 0 0 0 .16  0 0 0 0 .09  0 0 0 0 .04  2.6 0 0 0 -1.05"/></filter>' +
+      '<radialGradient id="licht" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient></defs>' +
+      '<rect width="300" height="400" fill="#7d522e"/><rect x="75" width="75" height="400" fill="#000" opacity=".07"/><rect x="225" width="75" height="400" fill="#000" opacity=".1"/>' +
+      '<rect x="150" width="75" height="400" fill="#fff" opacity=".03"/><rect width="300" height="400" filter="url(#maserung)"/>' +
+      '<g stroke="#1f130a" stroke-width="1.6" opacity=".75"><path d="M75 0V400M150 0V400M225 0V400"/></g>' +
+      '<g stroke="#e6b98a" stroke-width=".5" opacity=".18"><path d="M76.4 0V400M151.4 0V400M226.4 0V400"/></g>' +
+      '<g fill="#2b1a0e" opacity=".5"><ellipse cx="112" cy="312" rx="4" ry="7"/><ellipse cx="262" cy="148" rx="3" ry="5"/><ellipse cx="34" cy="206" rx="2.5" ry="4"/></g>' +
+      '<rect width="300" height="400" fill="url(#licht)"/></svg>';
+
+    const nachId = {};
+    qKarten.forEach(k => { nachId[k.id] = k; });
+    let faeden = "";
+    qFaeden.forEach((f, i) => {
+      const a = nachId[f.von], b = nachId[f.nach];
+      if (!a || !b) return;
+      const [x1, y1] = pinPunkt(a), [x2, y2] = pinPunkt(b);
+      const durchhang = Math.hypot(x2 - x1, y2 - y1) * .14;
+      faeden += '<path class="string" data-von="' + esc(f.von) + '" data-nach="' + esc(f.nach) + '" d="M' + x1.toFixed(1) + " " + y1.toFixed(1) +
+        " Q" + ((x1 + x2) / 2).toFixed(1) + " " + ((y1 + y2) / 2 + durchhang).toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1) + '"/>';
+    });
+    qKarten.forEach(k => {
+      if (!k.lose) return;
+      const [x, y] = pinPunkt(k);
+      faeden += '<path class="string" data-von="' + esc(k.id) + '" d="M' + x.toFixed(1) + " " + y.toFixed(1) + " q-9 14 -5 30 q3 10 -6 18 m6 -18 q4 8 1 14\"/>";
+    });
+
+    const zettel = qKarten.map(k => {
+      const art = k.skizze ? "skizze" : (k.bild ? "bild" : "zettel");
+      const stil = "--x:" + k.x + ";--y:" + k.y + ";--b:" + k.b + ";--dreh:" + (k.dreh || 0) + "deg" +
+        (k.format ? ";--format:" + k.format : "") + (k.pos ? ";--pos:" + k.pos : "");
+      const inhalt = k.skizze ? (SKIZZEN[k.skizze] || "") :
+        k.bild ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy">' : "";
+      return '<button type="button" class="pin-note ' + art + (k.haupt ? " haupt" : "") + '" id="quest-' + esc(k.id) + '" data-q="' + esc(k.id) + '" style="' + esc(stil) + '" aria-haspopup="dialog" aria-label="' + esc(k.titel) + '">' +
+        '<span class="paper">' + inhalt + '<span class="kurz">' + (k.kurz || esc(k.titel)) + "</span></span></button>";
+    }).join("");
+    const pins = qKarten.map(k => { const [x, y] = pinPunkt(k); return '<span class="pinhead" style="left:' + (x / 3).toFixed(2) + "%;top:" + (y / 4).toFixed(2) + '%"></span>'; }).join("");
+
+    brett.setAttribute("role", "group");
+    brett.setAttribute("aria-label", T.questtafelBild);
+    brett.innerHTML = holz + zettel + '<svg class="strings" viewBox="0 0 300 400" preserveAspectRatio="none" aria-hidden="true">' + faeden + "</svg>" + pins;
+  }
+
+  function hervorheben(id) {
+    const brett = $("quests");
+    brett.classList.toggle("fokus", !!id);
+    const an = new Set(id ? [id] : []);
+    brett.querySelectorAll(".string").forEach(p => {
+      const ja = !!id && (p.dataset.von === id || p.dataset.nach === id);
+      p.classList.toggle("an", ja);
+      if (ja) { an.add(p.dataset.von); if (p.dataset.nach) an.add(p.dataset.nach); }
+    });
+    brett.querySelectorAll(".pin-note").forEach(n => n.classList.toggle("an", an.has(n.dataset.q)));
+  }
+
+  function questOeffnen(id) {
+    const k = qKarten.find(x => x.id === id);
+    if (!k) return;
+    const verbunden = qFaeden.filter(f => f.von === id || f.nach === id).map(f => {
+      const ander = qKarten.find(x => x.id === (f.von === id ? f.nach : f.von));
+      return ander ? '<li><button type="button" data-q="' + esc(ander.id) + '">' + esc(ander.titel) + "</button> · " + (f.grund || "") + "</li>" : "";
+    }).join("");
+    $("qd-body").innerHTML =
+      (k.label ? '<p class="label">' + esc(k.label) + "</p>" : "") +
+      '<h3 id="qd-title">' + esc(k.titel) + "</h3>" +
+      (k.bild ? '<figure class="qd-bild"><img src="' + esc(k.bild) + '" alt=""></figure>' : "") +
+      (k.text ? "<p>" + k.text + "</p>" : "") +
+      (k.hinweise && k.hinweise.length ? '<p class="qd-head">' + esc(T.wasWirWissen) + "</p><ul>" + k.hinweise.map(h => "<li>" + h + "</li>").join("") + "</ul>" : "") +
+      (verbunden ? '<p class="qd-head">' + esc(T.roteFaeden) + '</p><ul class="qd-links">' + verbunden + "</ul>" : "") +
+      (k.lose ? '<p class="qd-lose">' + esc(T.loserFaden) + "</p>" : "") +
+      (k.kapitel ? '<button type="button" class="qd-go" data-kapitel="' + esc(k.kapitel) + '" data-abschnitt="' + esc(k.abschnitt || "") + '">' + esc(T.nachlesen(k.kapitel)) + "</button>" : "");
+    hervorheben(id);
+    const dlg = $("quest-dialog");
+    if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); }
+    dlg.scrollTop = 0;
+  }
+
   /* ---------- Alles zeichnen ---------- */
   function render() {
     D = QUELLEN[lang]; T = UI[lang];
@@ -837,20 +987,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     }).join("");
 
     /* Questtafel */
-    const quests = D.quests || [];
-    $("questtafel").hidden = quests.length === 0;
-    $("quests").innerHTML = quests.map((q, i) =>
-      '<article class="note' + (q.haupt ? " main" : "") + '" id="quest-' + slug(q.id || q.titel) + '">' +
-        (q.label ? '<p class="label">' + esc(q.label) + "</p>" : "") +
-        "<h3>" + esc(q.titel) + "</h3>" +
-        (q.text ? "<p>" + q.text + "</p>" : "") +
-        (q.hinweise && q.hinweise.length ? '<p class="clues-head">' + esc(T.wasWirWissen) + "</p><ul>" + q.hinweise.map(h => "<li>" + h + "</li>").join("") + "</ul>" : "") +
-        (q.kapitel ? '<button type="button" class="go" data-kapitel="' + esc(q.kapitel) + '" data-abschnitt="' + esc(q.abschnitt || "") + '">' + esc(T.nachlesen(q.kapitel)) + "</button>" : "") +
-      "</article>"
-    ).join("");
-    const faeden = D.faeden || [];
-    $("threads").hidden = faeden.length === 0;
-    $("threads-list").innerHTML = faeden.map(f => "<li>" + f + "</li>").join("");
+    const tafel = D.questtafel || {};
+    qKarten = tafel.karten || [];
+    qFaeden = tafel.faeden || [];
+    $("questtafel").hidden = qKarten.length === 0;
+    tafelZeichnen();
 
     /* NSC-Verzeichnis */
     const nsc = D.nsc || [];
@@ -892,9 +1033,23 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     springe($("reise"));
   });
   $("quests").addEventListener("click", e => {
-    const k = e.target.closest("[data-kapitel]");
-    if (k) springe((k.dataset.abschnitt && $(abschnittId(k.dataset.kapitel, k.dataset.abschnitt))) || $("kapitel-" + k.dataset.kapitel));
+    const n = e.target.closest("[data-q]");
+    if (n) questOeffnen(n.dataset.q);
   });
+  $("quests").addEventListener("mouseover", e => {
+    const n = e.target.closest("[data-q]");
+    if (n && !$("quest-dialog").open) hervorheben(n.dataset.q);
+  });
+  $("quests").addEventListener("mouseleave", () => { if (!$("quest-dialog").open) hervorheben(null); });
+  $("quest-dialog").addEventListener("click", e => {
+    const dlg = $("quest-dialog");
+    if (e.target === dlg) { dlg.close(); return; }
+    const q = e.target.closest("[data-q]");
+    if (q) { questOeffnen(q.dataset.q); return; }
+    const k = e.target.closest("[data-kapitel]");
+    if (k) { dlg.close(); springe((k.dataset.abschnitt && $(abschnittId(k.dataset.kapitel, k.dataset.abschnitt))) || $("kapitel-" + k.dataset.kapitel)); }
+  });
+  $("quest-dialog").addEventListener("close", () => hervorheben(null));
   $("map-tabs").addEventListener("click", e => {
     const b = e.target.closest("[data-karte]");
     if (!b || +b.dataset.karte === aktKarte) return;
