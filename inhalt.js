@@ -272,5 +272,90 @@ window.INHALT = {
     { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "gefallen", ort: "Die Stadt am unterirdischen See", text: "Ein Volk von Fischmenschen, das am Ufer eines unterirdischen Sees lebte. Ein Teil von ihnen betete einen falschen Gott an, und im Stadtzentrum gingen sie aufeinander und auf die Gefährten los. Als Demogorgon kam, starben sie alle, und von ihrer Stadt blieben nur Ruinen." },
     { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gefallen", ort: "Die Stadt am unterirdischen See", text: "Erzpriester der Kuo-Toa. Bat die Gefährten um Hilfe gegen die Anhänger eines falschen Gottes und schmuggelte sie zum Schein gefesselt in seine Stadt. Er starb, als Demogorgon die Stadt zerstörte." },
     { name: "Demogorgon", bild: "demogorgon-karte.webp", status: "gesichtet", ort: "Der unterirdische See", text: "Ein Dämonenfürst mit zwei Köpfen, Tentakelarmen und einem langen Schwanz. Sein Schrei ließ alle Magie erlöschen, und die Gefährten entkamen nur mit Glück. Friedrich hat ihn trotzdem geboxt. Sagt er." }
+  ],
+
+  /* ---------- DIE QUESTTAFEL ----------
+     Jeder Zettel ist eine offene Frage. haupt: true macht ihn zum großen Zettel ganz oben.
+     hinweise: kurze Stichpunkte unter „Was wir wissen“.
+     kapitel + abschnitt: wohin der Link „In Kapitel … nachlesen“ springt (abschnitt = Zwischenüberschrift).
+     Ist eine Frage gelöst, einfach den ganzen Zettel löschen. */
+  quests: [
+    {
+      id: "spinne",
+      haupt: true,
+      label: "Über allem",
+      titel: "Wer ist die Spinne?",
+      text: "Eine Person, eine Macht, ein geheimer Orden? Seit Schloss Crackmore lässt uns diese Frage nicht mehr los, und je tiefer wir graben, desto öfter stoßen wir auf acht Beine.",
+      hinweise: [
+        "Glasstab, der Anführer der Roten Roben, diente ihr. Mit seinem letzten Atemzug sprach er von ihr.",
+        "Auch die Drow Nezna sprach von der Spinne, bevor sie als kleines Tier entwischte.",
+        "Im Unterschlupf der Drow im Unterreich und in einem Tempel unterwegs standen Spinnenstatuen. Beide tragen inzwischen unsere Bemalung.",
+        "Friedrich lässt das Thema am wenigsten los."
+      ],
+      kapitel: "I",
+      abschnitt: "Schloss Crackmore"
+    },
+    {
+      id: "gracklstugh",
+      label: "Als Nächstes",
+      titel: "Was geht in Gracklstugh vor sich?",
+      text: "Nach der Flucht über den See war die Festung im Fels ein Anblick wie aus einem Traum. Doch eine Stadt so tief im Unterreich hat ihre eigenen Regeln und ihre eigenen Geheimnisse.",
+      hinweise: [
+        "Kardal hat uns hierhergeführt. Er kennt den Weg auffällig gut.",
+        "Wer hier das Sagen hat und was die Stadt von uns will, ist noch völlig offen."
+      ],
+      kapitel: "II",
+      abschnitt: "Gracklstugh"
+    },
+    {
+      id: "demogorgon",
+      label: "Bedrohlich",
+      titel: "Warum ist Demogorgon erwacht?",
+      text: "Ein Dämonenfürst stieg aus dem See und machte die Stadt der Kuo-Toa dem Erdboden gleich. Friedrich hat ihn geboxt. Aufgehalten hat ihn das nicht.",
+      hinweise: [
+        "Ein Teil der Kuo-Toa betete einen falschen Gott an: Lermu-Gorgon. Klingt verdächtig ähnlich, oder?",
+        "Schon bei unserem Ausbruch tauchten wie aus dem Nichts Dämonen auf.",
+        "Wohin er danach verschwunden ist, weiß niemand."
+      ],
+      kapitel: "II",
+      abschnitt: "Demogorgon"
+    },
+    {
+      id: "kardal",
+      label: "Verdächtig",
+      titel: "Prinz Kardal?",
+      text: "Wir fanden ihn gefesselt mitten im Chaos der Kuo-Toa. Er sagte, er sei bloß ein Späher seiner Stadt. Aber ist das wirklich die ganze Wahrheit?",
+      hinweise: [
+        "Entkam mit uns im Boot über den See.",
+        "Führte uns geradewegs nach Gracklstugh."
+      ],
+      kapitel: "II",
+      abschnitt: "Demogorgon"
+    }
+  ],
+
+  /* Kleinere lose Enden, eine Zeile pro Faden. */
+  faeden: [
+    "<strong>Ilvara Mizzrym</strong> sprang von der Brücke in den Fluss. Dass sie das nicht überlebt hat, glaubt keiner von uns.",
+    "<strong>Nezna</strong> ist uns im Wachturm als kleines Tier entwischt.",
+    "<strong>Die Statue in Donnerbaum</strong>, in der Ezekiel seinen Onkel erkannte. Erklärt hat er es bis heute nicht.",
+    "<strong>Arafil des Roten Sitzes</strong>, der Magier, der Fagas ins Unterreich geschickt hat, um das Grab der Karim zu finden."
+  ],
+
+  /* ---------- DAS NSC-VERZEICHNIS ----------
+     status: "verbuendet", "feindlich", "unklar", "neutral" oder "tot"
+     gruppe: Überschrift, unter der die Person steht. bild ist optional (sonst erscheint der Anfangsbuchstabe).
+     bildPos: welcher Bildausschnitt im runden Porträt zu sehen ist (optional). */
+  nsc: [
+    { gruppe: "Die Oberwelt", name: "Gundren", status: "verbuendet", rolle: "Zwerg, Händler und unser erster Auftraggeber", text: "Hat uns mit einem Brief zusammengetrommelt und uns auf die Spur der magischen Schmiede gesetzt. Kennt jeden, der etwas zu sagen hat." },
+    { gruppe: "Die Oberwelt", name: "Nundro", status: "verbuendet", rolle: "Gundrens Zwillingsbruder", text: "Saß namenlos im Wachturm gefangen, bis wir ihn befreit haben. Nundro, nicht Nando." },
+    { gruppe: "Die Oberwelt", name: "Captain Dolgrimson", status: "verbuendet", rolle: "Leiter der Allianz der Lords, Neverwinter", text: "Hat uns erst vertröstet, dann in die Allianz aufgenommen und prompt nach Donnerbaum geschickt." },
+    { gruppe: "Die Oberwelt", name: "Der Bürgermeister von Phandalin", status: "neutral", rolle: "Phandalin", text: "Hat am Ende bezahlt. Uns wiedersehen will er vermutlich trotzdem nicht." },
+    { gruppe: "Die Oberwelt", name: "Glasstab", status: "tot", rolle: "Anführer der Roten Roben", text: "Hielt Phandalin in Angst und diente der Spinne. Fiel durch Friedrichs Pfeil, nachdem Barradin ihn aus dem Geheimgang zurückgezerrt hatte." },
+    { gruppe: "Die Oberwelt", name: "Nezna", status: "feindlich", rolle: "Drow und Gestaltwandlerin", text: "Kämpfte im Wachturm erbittert gegen uns, sprach von der Spinne und entkam als kleines Tier." },
+    { gruppe: "Das Unterreich", name: "Ilvara Mizzrym", bild: "ilvara-wahr.webp", bildPos: "50% 8%", status: "feindlich", rolle: "Drow und Gestaltwandlerin", text: "Gab sich in Donnerbaum als freundliche Druidin aus, betäubte uns mit einem Kräuternebel und verschleppte uns ins Unterreich. Entkam mit einem Sprung in den Fluss." },
+    { gruppe: "Das Unterreich", name: "Fagas", status: "verbuendet", rolle: "Gnom, aus einem Spinnenkokon gerettet", text: "Erzählte uns vom Grab der Magierin Karim, zu dem Arafil des Roten Sitzes ihn und seinen Trupp geschickt hatte." },
+    { gruppe: "Das Unterreich", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Erzpriester der Kuo-Toa", text: "Schmuggelte uns zum Schein gefesselt in seine Stadt und starb, als Demogorgon sie zerstörte. Barradin hat ihn lange Blublupin genannt." },
+    { gruppe: "Das Unterreich", name: "Kardal", status: "unklar", rolle: "Zwerg, angeblich ein Späher. Oder ein Prinz?", text: "Gefesselt bei den Kuo-Toa gefunden, mit uns über den See geflohen und unser Führer nach Gracklstugh." }
   ]
 };

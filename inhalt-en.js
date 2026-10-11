@@ -259,5 +259,82 @@ window.INHALT_EN = {
     { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "gefallen", ort: "The city by the underground lake", text: "A race of fish folk who lived on the shore of an underground lake. Some of them worshipped a false god, and in the city centre they turned on each other and on the companions. When Demogorgon came, they all perished, and nothing remained of their city but ruins." },
     { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gefallen", ort: "The city by the underground lake", text: "Archpriest of the kuo-toa. Asked the companions for help against the followers of a false god and smuggled them into his city as fake prisoners. He died when Demogorgon destroyed the city." },
     { name: "Demogorgon", bild: "demogorgon-karte.webp", status: "gesichtet", ort: "The underground lake", text: "A demon prince with two heads, tentacle arms and a long tail. His scream snuffed out all magic, and the companions escaped only by luck. Friedrich punched him anyway. Or so he says." }
+  ],
+
+  /* ---------- THE QUEST BOARD (same structure as inhalt.js; abschnitt = English "## " heading) ---------- */
+  quests: [
+    {
+      id: "spinne",
+      haupt: true,
+      label: "Above all else",
+      titel: "Who is the Spider?",
+      text: "A person, a power, a secret order? Ever since Castle Crackmore this question has not let us go, and the deeper we dig, the more often we run into eight legs.",
+      hinweise: [
+        "Glasstaff, leader of the Red Robes, served the Spider. He spoke of it with his last breath.",
+        "The drow Nezna spoke of the Spider too, before she slipped away as a small animal.",
+        "Spider statues stood in the drow hideout in the Underdark and in a temple along the way. Both now bear our artwork.",
+        "Friedrich is the one it bothers most."
+      ],
+      kapitel: "I",
+      abschnitt: "Castle Crackmore"
+    },
+    {
+      id: "gracklstugh",
+      label: "Up next",
+      titel: "What is going on in Gracklstugh?",
+      text: "After our escape across the lake, the fortress in the rock looked like something out of a dream. But a city this deep in the Underdark has its own rules and its own secrets.",
+      hinweise: [
+        "Kardal led us here. He knows the way remarkably well.",
+        "Who is in charge here, and what the city wants from us, is still entirely open."
+      ],
+      kapitel: "II",
+      abschnitt: "Gracklstugh"
+    },
+    {
+      id: "demogorgon",
+      label: "Ominous",
+      titel: "Why did Demogorgon awaken?",
+      text: "A demon prince rose from the lake and razed the city of the kuo-toa. Friedrich punched him. It did not stop him.",
+      hinweise: [
+        "Some of the kuo-toa worshipped a false god: Lermu-Gorgon. Sounds suspiciously similar, doesn't it?",
+        "Demons already appeared out of nowhere during our breakout.",
+        "Where he went afterwards, nobody knows."
+      ],
+      kapitel: "II",
+      abschnitt: "Demogorgon"
+    },
+    {
+      id: "kardal",
+      label: "Suspicious",
+      titel: "Prince Kardal?",
+      text: "We found him bound in the middle of the kuo-toa chaos. He said he was merely a scout of his city. But is that really the whole truth?",
+      hinweise: [
+        "Escaped across the lake with us in the boat.",
+        "Led us straight to Gracklstugh."
+      ],
+      kapitel: "II",
+      abschnitt: "Demogorgon"
+    }
+  ],
+
+  faeden: [
+    "<strong>Ilvara Mizzrym</strong> leapt from the bridge into the river. None of us believes that was the end of her.",
+    "<strong>Nezna</strong> slipped away from us in the watchtower as a small animal.",
+    "<strong>The statue in Thundertree</strong> in which Ezekiel recognised his uncle. He has never explained it.",
+    "<strong>Arafil of the Red Seat</strong>, the wizard who sent Fagas into the Underdark to find Karim's tomb."
+  ],
+
+  /* ---------- THE NPC DIRECTORY ---------- */
+  nsc: [
+    { gruppe: "The Surface", name: "Gundren", status: "verbuendet", rolle: "Dwarf, merchant and our first employer", text: "Rounded us up with a letter and set us on the trail of the magic forge. Knows everyone who matters." },
+    { gruppe: "The Surface", name: "Nundro", status: "verbuendet", rolle: "Gundren's twin brother", text: "Sat nameless in the watchtower until we freed him. Nundro, not Nando." },
+    { gruppe: "The Surface", name: "Captain Dolgrimson", status: "verbuendet", rolle: "Head of the Lords' Alliance, Neverwinter", text: "First put us off, then welcomed us into the Alliance and promptly sent us to Thundertree." },
+    { gruppe: "The Surface", name: "The Mayor of Phandalin", status: "neutral", rolle: "Phandalin", text: "Paid up in the end. Probably never wants to see us again, though." },
+    { gruppe: "The Surface", name: "Glasstaff", status: "tot", rolle: "Leader of the Red Robes", text: "Kept Phandalin in fear and served the Spider. Fell to Friedrich's arrow after Barradin dragged him back out of the secret passage." },
+    { gruppe: "The Surface", name: "Nezna", status: "feindlich", rolle: "Drow and shapeshifter", text: "Fought us fiercely in the watchtower, spoke of the Spider and escaped as a small animal." },
+    { gruppe: "The Underdark", name: "Ilvara Mizzrym", bild: "ilvara-wahr.webp", bildPos: "50% 8%", status: "feindlich", rolle: "Drow and shapeshifter", text: "Posed as a friendly druid in Thundertree, knocked us out with a herbal mist and dragged us into the Underdark. Escaped with a leap into the river." },
+    { gruppe: "The Underdark", name: "Fagas", status: "verbuendet", rolle: "Gnome, rescued from a spider cocoon", text: "Told us about the tomb of the wizard Karim, to which Arafil of the Red Seat had sent him and his troop." },
+    { gruppe: "The Underdark", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Archpriest of the kuo-toa", text: "Smuggled us into his city as fake prisoners and died when Demogorgon destroyed it. Barradin called him Blublupin for quite a while." },
+    { gruppe: "The Underdark", name: "Kardal", status: "unklar", rolle: "Dwarf, supposedly a scout. Or a prince?", text: "Found bound among the kuo-toa, fled across the lake with us and became our guide to Gracklstugh." }
   ]
 };

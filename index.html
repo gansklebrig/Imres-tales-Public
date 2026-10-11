@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Imres Tales – die Chronik unserer Pen-&-Paper-Kampagne mit Barradin, Friedrich, Echo, Ezekiel und Rex.">
 <title>Imres Tales</title>
+<!-- Link-Vorschau für Discord, WhatsApp & Co. (Bild: vorschau.jpg, 1200 × 630) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Imres Tales">
+<meta property="og:title" content="Imres Tales">
+<meta property="og:description" content="Die Chronik unserer Pen-&amp;-Paper-Kampagne: ein Barde, ein Waldläufer, ein Druide, ein Schurke und ein Hund – auf der Spur der Spinne, tief im Unterreich.">
+<meta property="og:url" content="https://imrestales.de/">
+<meta property="og:image" content="https://imrestales.de/vorschau.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Die fünf Gefährten Barradin, Friedrich, Echo, Ezekiel und Rex unter dem Schriftzug Imres Tales">
+<meta property="og:locale" content="de_DE">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://imrestales.de/vorschau.jpg">
+<meta name="theme-color" content="#100e15">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap">
@@ -294,6 +309,75 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .beast .ort { font-size: .85rem; color: var(--ash); font-style: italic; }
 .beast .tag { justify-self: start; }
 
+/* ---------- Questtafel: angepinnte Pergamentzettel ---------- */
+.board {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: clamp(1.4rem, 3vw, 2rem);
+  padding: clamp(1.4rem, 4vw, 2.4rem) clamp(1rem, 3vw, 2rem);
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0 3px, transparent 3px 9px), #1d1812;
+  border: 1px solid var(--line); box-shadow: inset 0 0 60px rgba(0,0,0,.55);
+}
+.note {
+  position: relative; display: grid; gap: .7rem; align-content: start; scroll-margin-top: 5rem;
+  background: linear-gradient(170deg, #efe5cd, #ddcfae); color: #2a2118;
+  padding: 1.9rem 1.3rem 1.3rem; box-shadow: 0 10px 24px rgba(0,0,0,.5);
+  transform: rotate(var(--tilt, 0deg)); transition: transform .3s ease;
+}
+.note:nth-child(3n+2) { --tilt: .8deg; }
+.note:nth-child(3n+3) { --tilt: -1deg; }
+.note:nth-child(3n+4) { --tilt: .5deg; }
+.note:hover { transform: rotate(0deg); }
+.note::before {
+  content: ""; position: absolute; top: .55rem; left: 50%; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d16a58, var(--blood) 60%, #5c1f18); box-shadow: 0 2px 4px rgba(0,0,0,.5);
+}
+.note.main { grid-column: 1 / -1; --tilt: -.4deg; padding: 2.3rem clamp(1.3rem, 4vw, 2.4rem) 1.6rem; }
+.note .label { color: var(--blood); }
+.note h3 { font-family: var(--name); font-size: clamp(1.7rem, 4.5vw, 2.1rem); line-height: 1.05; color: #1d1610; }
+.note.main h3 { font-size: clamp(2.1rem, 6vw, 3rem); }
+.note p { font-size: 1rem; line-height: 1.6; }
+.note .clues-head { font-size: .7rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #6b5a44; margin-top: .2rem; }
+.note ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .35rem; }
+.note li { position: relative; padding-left: 1.2rem; font-size: .95rem; line-height: 1.5; color: #3d3226; }
+.note li::before { content: "✦"; position: absolute; left: 0; top: .1rem; font-size: .7rem; color: var(--blood); }
+.note.main ul { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); column-gap: 1.6rem; }
+.note .go {
+  justify-self: start; margin-top: .3rem; background: none; border: 0; padding: 0; font: inherit; font-size: .88rem;
+  color: var(--blood); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+}
+.note .go:hover { color: #5c1f18; }
+.note.spotlight { box-shadow: 0 0 0 3px var(--ember), 0 10px 30px rgba(224,160,70,.4); }
+.threads { margin-top: clamp(1.8rem, 4vw, 2.4rem); max-width: 44rem; }
+.threads h3 { font-family: var(--display); font-size: 1.35rem; color: var(--ember); margin-bottom: .7rem; }
+.threads ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; }
+.threads li { position: relative; padding-left: 1.4rem; color: var(--ash); }
+.threads li::before { content: "~"; position: absolute; left: .1rem; color: var(--ember); }
+.threads li strong { color: var(--vellum); font-weight: 500; }
+
+/* ---------- NSC-Verzeichnis ---------- */
+.npc-group + .npc-group { margin-top: clamp(2rem, 5vw, 3rem); }
+.npc-group > h3 { font-family: var(--display); font-size: 1.5rem; color: var(--ember); margin-bottom: 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+.npcs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; }
+.npc {
+  display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: 1rem; align-items: start;
+  background: var(--hall); border: 1px solid var(--line); padding: 1rem; scroll-margin-top: 5rem;
+}
+.npc .face {
+  width: 100%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--line); overflow: hidden;
+  display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, rgba(224,160,70,.16), transparent 70%);
+  font-family: var(--display); font-size: 2rem; color: var(--ember);
+}
+.npc .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.npc.tot .face { filter: grayscale(.85); opacity: .75; }
+.npc > div:last-child { display: grid; gap: .3rem; min-width: 0; }
+.npc h4 { margin: 0; font-family: var(--name); font-weight: 400; font-size: 1.45rem; line-height: 1.1; }
+.npc .rolle { font-size: .85rem; color: var(--ash); font-style: italic; }
+.npc p { font-size: .97rem; line-height: 1.55; }
+.npc .tag { justify-self: start; font-size: .64rem; }
+.tag.ally { color: var(--moss); border-color: var(--moss); }
+.tag.foe { color: #c7574a; border-color: #c7574a; }
+.tag.unclear { color: var(--ember); border-color: var(--ember); border-style: dashed; }
+.tag.neutral, .tag.dead { color: var(--ash); border-color: var(--ash); }
+
 footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; color: var(--ash); font-size: .9rem; }
 footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
 
@@ -324,8 +408,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <a class="brand" href="#start">Imres Tales</a>
     <nav aria-label="Hauptnavigation" data-i18n-aria="navLabel">
       <a href="#chronik" data-i18n="navChronik">Chronik</a>
+      <a href="#questtafel" data-i18n="navQuests">Quests</a>
       <a href="#reise" data-i18n="navReise">Reise</a>
       <a href="#gefaehrten" data-i18n="navGefaehrten">Gefährten</a>
+      <a href="#nsc" data-i18n="navNsc">NSC</a>
       <a href="#bestiarium" data-i18n="navBestiarium">Bestiarium</a>
     </nav>
     <div class="lang" role="group" aria-label="Sprache / Language">
@@ -361,6 +447,18 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     </div>
   </section>
 
+  <section class="part" id="questtafel" hidden>
+    <div class="wrap">
+      <div class="part-head">
+        <p class="label" data-i18n="questLabel">Die Questtafel</p>
+        <h2 data-i18n="questTitle">Offene Fragen</h2>
+        <p data-i18n="questText">Was die Gruppe gerade umtreibt. Lose Enden, ungelöste Rätsel und alles, was noch eine Antwort schuldig ist.</p>
+      </div>
+      <div class="board" id="quests"></div>
+      <div class="threads" id="threads" hidden><h3 data-i18n="threadsTitle">Weitere lose Fäden</h3><ul id="threads-list"></ul></div>
+    </div>
+  </section>
+
   <section class="part" id="reise">
     <div class="wrap">
       <div class="part-head">
@@ -385,6 +483,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <p data-i18n="heldenText">Vier Helden und ein Hund. Selten einer Meinung, aber immer zur Stelle, wenn es darauf ankommt.</p>
       </div>
       <div id="heroes"></div>
+    </div>
+  </section>
+
+  <section class="part" id="nsc" hidden>
+    <div class="wrap">
+      <div class="part-head">
+        <p class="label" data-i18n="nscLabel">Bekanntschaften</p>
+        <h2 data-i18n="nscTitle">Freund, Feind &amp; Fragezeichen</h2>
+        <p data-i18n="nscText">Wer der Gruppe unterwegs begegnet ist, geholfen hat oder ihr noch etwas schuldet.</p>
+      </div>
+      <div id="npcs"></div>
     </div>
   </section>
 
@@ -427,6 +536,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     de: {
       navLabel: "Hauptnavigation",
       navChronik: "Chronik", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
+      navQuests: "Quests", navNsc: "NSC",
+      questLabel: "Die Questtafel", questTitle: "Offene Fragen",
+      questText: "Was die Gruppe gerade umtreibt. Lose Enden, ungelöste Rätsel und alles, was noch eine Antwort schuldig ist.",
+      threadsTitle: "Weitere lose Fäden", wasWirWissen: "Was wir wissen",
+      nscLabel: "Bekanntschaften", nscTitle: "Freund, Feind &amp; Fragezeichen",
+      nscText: "Wer der Gruppe unterwegs begegnet ist, geholfen hat oder ihr noch etwas schuldet.",
+      nscStatus: { verbuendet: "Verbündet", feindlich: "Feindlich", unklar: "Undurchsichtig", neutral: "Neutral", tot: "Tot" },
       heroLabel: "Eine Pen-&amp;-Paper-Kampagne",
       lede: "Ein Barde mit goldener Zunge und ein Waldläufer mit ruhiger Hand. Ein Druide mit Feuer im Herzen, ein Schurke voller Geheimnisse, ein Hund und die Quest, die uns alle vereint.",
       friezeHint: "Tippe auf ein Porträt, um mehr über den Helden zu erfahren.",
@@ -454,6 +570,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     en: {
       navLabel: "Main navigation",
       navChronik: "Chronicle", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
+      navQuests: "Quests", navNsc: "NPCs",
+      questLabel: "The Quest Board", questTitle: "Open Questions",
+      questText: "What keeps the party up at night. Loose ends, unsolved riddles and everything that still owes us an answer.",
+      threadsTitle: "More loose threads", wasWirWissen: "What we know",
+      nscLabel: "Acquaintances", nscTitle: "Friend, Foe &amp; Question Mark",
+      nscText: "Everyone the party has met on the road, who helped us, or who still owes us something.",
+      nscStatus: { verbuendet: "Ally", feindlich: "Hostile", unklar: "Shady", neutral: "Neutral", tot: "Dead" },
       heroLabel: "A Pen &amp; Paper Campaign",
       lede: "A bard with a silver tongue and a ranger with a steady hand. A druid with fire in his heart, a rogue full of secrets, a dog, and the quest that unites us all.",
       friezeHint: "Tap a portrait to learn more about the hero.",
@@ -712,6 +835,47 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         "<h3>" + esc(t.name) + "</h3>" + (t.ort ? '<p class="ort">' + esc(t.ort) + "</p>" : "") +
         (t.text ? "<p>" + esc(t.text) + "</p>" : "") + "</div></article>";
     }).join("");
+
+    /* Questtafel */
+    const quests = D.quests || [];
+    $("questtafel").hidden = quests.length === 0;
+    $("quests").innerHTML = quests.map((q, i) =>
+      '<article class="note' + (q.haupt ? " main" : "") + '" id="quest-' + slug(q.id || q.titel) + '">' +
+        (q.label ? '<p class="label">' + esc(q.label) + "</p>" : "") +
+        "<h3>" + esc(q.titel) + "</h3>" +
+        (q.text ? "<p>" + q.text + "</p>" : "") +
+        (q.hinweise && q.hinweise.length ? '<p class="clues-head">' + esc(T.wasWirWissen) + "</p><ul>" + q.hinweise.map(h => "<li>" + h + "</li>").join("") + "</ul>" : "") +
+        (q.kapitel ? '<button type="button" class="go" data-kapitel="' + esc(q.kapitel) + '" data-abschnitt="' + esc(q.abschnitt || "") + '">' + esc(T.nachlesen(q.kapitel)) + "</button>" : "") +
+      "</article>"
+    ).join("");
+    const faeden = D.faeden || [];
+    $("threads").hidden = faeden.length === 0;
+    $("threads-list").innerHTML = faeden.map(f => "<li>" + f + "</li>").join("");
+
+    /* NSC-Verzeichnis */
+    const nsc = D.nsc || [];
+    $("nsc").hidden = nsc.length === 0;
+    const gruppen = [];
+    nsc.forEach(n => {
+      let g = gruppen.find(x => x.name === (n.gruppe || ""));
+      if (!g) { g = { name: n.gruppe || "", leute: [] }; gruppen.push(g); }
+      g.leute.push(n);
+    });
+    const statusKlasse = { verbuendet: "ally", feindlich: "foe", unklar: "unclear", neutral: "neutral", tot: "dead" };
+    $("npcs").innerHTML = gruppen.map(g =>
+      '<div class="npc-group">' + (g.name ? "<h3>" + esc(g.name) + "</h3>" : "") + '<div class="npcs">' +
+      g.leute.map(n =>
+        '<article class="npc ' + esc(n.status || "") + '" id="nsc-' + slug(n.name) + '">' +
+          '<div class="face"' + (n.bild ? "" : ' aria-hidden="true"') + ">" +
+            (n.bild ? '<img src="' + esc(n.bild) + '" alt="' + esc(n.name) + '" loading="lazy" style="object-position:' + esc(n.bildPos || "50% 20%") + '">' : esc(String(n.name).replace(/^(Der|Die|Das|The|Captain) /, "").charAt(0))) +
+          "</div><div>" +
+          (n.status ? '<span class="tag ' + (statusKlasse[n.status] || "neutral") + '">' + esc(T.nscStatus[n.status] || n.status) + "</span>" : "") +
+          "<h4>" + esc(n.name) + "</h4>" +
+          (n.rolle ? '<p class="rolle">' + esc(n.rolle) + "</p>" : "") +
+          (n.text ? "<p>" + n.text + "</p>" : "") +
+        "</div></article>"
+      ).join("") + "</div></div>"
+    ).join("");
   }
 
   /* ---------- Klicks (einmal angemeldet) ---------- */
@@ -726,6 +890,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     if (!b) return;
     waehlen(+b.dataset.station);
     springe($("reise"));
+  });
+  $("quests").addEventListener("click", e => {
+    const k = e.target.closest("[data-kapitel]");
+    if (k) springe((k.dataset.abschnitt && $(abschnittId(k.dataset.kapitel, k.dataset.abschnitt))) || $("kapitel-" + k.dataset.kapitel));
   });
   $("map-tabs").addEventListener("click", e => {
     const b = e.target.closest("[data-karte]");
