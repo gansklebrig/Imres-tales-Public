@@ -191,7 +191,7 @@ window.INHALT_EN = {
         "## Through the Webs",
         "Ever deeper the path led into the Underdark. Thick spider webs blocked the way, and in places we even had to balance across them. A few spiders did stand in our way, but Ezekiel and Friedrich quickly secured victory over the eight-legged foes with a handful of perfect hits.",
         "In one of the spider cocoons a surprise was waiting: a gnome named Fagas, captured but still alive. He told us of a magical temple to which Arafil of the Red Seat, a wizard, had sent him and his troop.",
-        "Fagas went on to explain that his group had been sent to find a mysterious tomb: the resting place of the wizard Karim, a Netherese mage who had lived some 3,000 years ago. A master of the magical Weave from a long-vanished high civilisation. Echo immediately smelled treasure.",
+        "Fagas went on to explain that his group had been sent to find a mysterious tomb: the resting place of the wizard Khaem, a Netherese mage who had lived some 3,000 years ago. A master of the magical Weave from a long-vanished high civilisation. Echo immediately smelled treasure.",
         "## The Wizard's Tomb",
         "Our way through the Underdark now revealed a surprisingly beautiful side: sparkling rivers, glowing mushrooms, an entire realm bathed in soft light. For a moment I almost forgot where we were. It was not long, however, before first spider monsters and later ettercaps stood in our way. The heroes slew them all and fought their way deeper into the depths.",
         "One of the fights took place in a ruin: a half-collapsed settlement that had vanished into the deep black of the abyss, save for its last few houses. Only thick spider webs still held those last houses in place. One wrong step, and it would have been a long fall into nothing.",
@@ -214,7 +214,20 @@ window.INHALT_EN = {
         "!flucht-see.jpg|Fleeing across the lake. Friedrich is still very proud of himself to this day.",
         "## Gracklstugh",
         "Our flight across the lake finally brought us to a breathtaking sight: a fortress hewn into the rock, towering behind mighty city walls above the city of Gracklstugh. After everything that lay behind us, it was almost too beautiful to be true.",
-        "!gracklstugh.jpg|Arriving at Gracklstugh. Kardal leads the way."
+        "!gracklstugh.jpg|Arriving at Gracklstugh. Kardal leads the way.",
+        "## The King's Son",
+        "Grim guards stood at the city gate, but after Kardal had exchanged a few words with them, they let us pass without further ado. That alone should have made me suspicious.",
+        "Beyond the gate lay a marketplace, one of the city's great trading squares. We did not linger there for long, but headed straight for a tavern and first of all ate long and very well. <em class=\"aside\">After fish folk, a demon god and a flight across the lake, we had honestly earned it.</em>",
+        "In the middle of our meal, four armoured figures suddenly entered, marched up to our table and saluted. To Kardal. And so the truth came out: our humble scout is in fact the king's son! <em class=\"aside\">A prince. I had suspected as much. Well, almost.</em>",
+        "## At the Court of King Horgar",
+        "The soldiers brought us to a keep, before King Horgar Stahl V. As befits a bard, I struck up a song and told the king of Demogorgon and of how we had rescued his son. The king granted us leave to stay in the city. <em class=\"aside\">Whether that was down to the song or to the rescue of his son, let us leave open.</em>",
+        "The stay was not easy on us, though. The air down here took its toll, on Echo most of all, who woke with clear signs of exhaustion.",
+        "## Shopping in Gracklstugh",
+        "What does a band of heroes do in a strange city? Exactly: go shopping. We stocked up on healing potions, and I acquired a flute of illusions and a few magic potions besides. <em class=\"aside\">You never know when you will need to enchant an audience. Or an enemy.</em>",
+        "## The Raging Giant",
+        "Suddenly we heard screams and the crash of houses, and already a giant stood before us and attacked. With our combined strength we managed to stun him and tie him up.",
+        "Shortly afterwards a second giant appeared, but this one thanked us. He could not explain his kinsman's outburst. Apparently voices in his head had driven him to it. Voices in his head … a chill ran down my spine.",
+        "As thanks, he invited us to speak with the Stonespeaker. What an honour!"
       ],
       fortsetzung: "To be continued …"
     }
@@ -246,7 +259,7 @@ window.INHALT_EN = {
           { name: "The Wizard's Tomb", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "The Wizard's Tomb", text: "Behind a defaced spider statue: a wraith and the sword Dawnbringer." },
           { name: "The Underground Lake", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "The Underground Lake", text: "On the shore, Ploopploopeen, archpriest of the kuo-toa, asks for help." },
           { name: "The Kuo-Toa Ruins", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Here Demogorgon rose from the lake. Only ruins remain of the city." },
-          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "The fortress in the rock on the far shore of the lake." }
+          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "The fortress in the rock. Kardal turns out to be a prince, the king grants us hospitality, and a giant rampages through the city." }
         ]
       }
     ]
@@ -285,29 +298,34 @@ window.INHALT_EN = {
           "Friedrich is the one it bothers most."
         ],
         kapitel: "I", abschnitt: "Castle Crackmore" },
-      { id: "ilvara", bild: "ilvara-wahr.webp", format: "4/5", pos: "50% 6%", x: 3, y: 54, b: 13, dreh: -2,
+      { id: "ilvara", bild: "skizze-ilvara.webp", zeichnung: true, format: "2/3", pos: "50% 0%", x: 3, y: 52, b: 13, dreh: -2,
         kurz: "Ilvara Mizzrym",
         label: "Escaped", titel: "Ilvara Mizzrym",
         text: "Posed as a friendly druid in Thundertree, knocked us out with a herbal mist and dragged us into the Underdark. During our breakout she leapt from the bridge into the river. None of us believes that was the end of her.",
         kapitel: "II", abschnitt: "The Breakout" },
-      { id: "demogorgon", bild: "demogorgon.webp", format: "6/5", pos: "50% 35%", x: 74, y: 37, b: 18, dreh: 3,
+      { id: "demogorgon", bild: "skizze-demogorgon.webp", zeichnung: true, format: "4/3", pos: "50% 50%", x: 73, y: 36, b: 20, dreh: 3,
         kurz: "Demogorgon<small>Why did he wake?</small>",
         label: "Ominous", titel: "Why did Demogorgon awaken?",
         text: "A demon prince rose from the lake and razed the city of the kuo-toa. Friedrich punched him. It did not stop him.",
-        hinweise: ["His scream snuffed out all magic.", "Where he went afterwards, nobody knows."],
+        hinweise: ["Some of the kuo-toa worshipped him as a false god.", "His scream snuffed out all magic.", "Demons already appeared out of nowhere during our breakout.", "Where he went afterwards, nobody knows."],
         kapitel: "II", abschnitt: "Demogorgon" },
       { id: "gracklstugh", bild: "gracklstugh.jpg", format: "16/9", pos: "50% 50%", x: 36, y: 57, b: 25, dreh: 1,
         kurz: "Gracklstugh<small>What's going on?</small>",
-        label: "Up next", titel: "What is going on in Gracklstugh?",
-        text: "After our escape across the lake, the fortress in the rock looked like something out of a dream. But a city this deep in the Underdark has its own rules and its own secrets.",
-        hinweise: ["Kardal led us here. He knows the way remarkably well.", "Who is in charge here, and what the city wants from us, is still entirely open."],
-        kapitel: "II", abschnitt: "Gracklstugh" },
+        label: "We are here", titel: "What is going on in Gracklstugh?",
+        text: "The king has granted us hospitality, but we do not entirely trust this city.",
+        hinweise: ["The air down here wears on us, on Echo most of all.", "A giant attacked us, driven by voices in his head.", "A second giant invited us to speak with the Stonespeaker."],
+        kapitel: "II", abschnitt: "At the Court of King Horgar" },
       { id: "kardal", skizze: "krone", x: 57, y: 63, b: 13, dreh: 5,
-        kurz: "Prince Kardal?",
-        label: "Suspicious", titel: "Prince Kardal?",
-        text: "We found him bound in the middle of the kuo-toa chaos. He said he was merely a scout of his city. But is that really the whole truth?",
-        hinweise: ["Escaped across the lake with us in the boat.", "Led us straight to Gracklstugh."],
-        kapitel: "II", abschnitt: "Demogorgon" },
+        kurz: "Prince Kardal",
+        label: "Solved", titel: "Prince Kardal",
+        text: "We found him bound in the middle of the kuo-toa chaos, and he passed himself off as a simple scout of his city. Then, in Gracklstugh, four soldiers saluted him: Kardal is the king's son.",
+        hinweise: ["Escaped across the lake with us in the boat.", "Because of him, the guards let us into the city.", "His father is King Horgar Stahl V."],
+        kapitel: "II", abschnitt: "The King's Son" },
+      { id: "riese", bild: "skizze-riese.webp", zeichnung: true, format: "4/5", pos: "50% 8%", x: 80, y: 68, b: 12, dreh: -3,
+        kurz: "Voices in his head?",
+        label: "Puzzling", titel: "Voices in His Head",
+        text: "A giant attacked us in the middle of Gracklstugh. A second giant could not explain the outburst; apparently voices in his head had driven him. Whose voices?",
+        kapitel: "II", abschnitt: "The Raging Giant" },
     ],
     faeden: [
       { von: "spinne", nach: "glasstab", grund: "served the Spider and spoke of it with his last breath." },
@@ -315,14 +333,15 @@ window.INHALT_EN = {
       { von: "kardal", nach: "demogorgon", grund: "Kardal was right in the chaos when Demogorgon came." },
       { von: "nezna", nach: "ilvara", schnur: false, grund: "both drow, both shapeshifters. Coincidence?" },
       { von: "glasstab", nach: "nezna", schnur: false, grund: "both spoke of the Spider." },
-      { von: "kardal", nach: "gracklstugh", schnur: false, grund: "Kardal led us to Gracklstugh." },
+      { von: "kardal", nach: "gracklstugh", schnur: false, grund: "Kardal is the son of Gracklstugh's king." },
+      { von: "riese", nach: "gracklstugh", schnur: false, grund: "the attack happened in the middle of the city." },
       { von: "ilvara", nach: "demogorgon", schnur: false, grund: "demons appeared out of nowhere during our breakout from her dungeon." }
     ],
     notizen: [
       { text: "both:<br>“the Spider”!", x: 18, y: 17, b: 10, dreh: 7 },
       { text: "both drow &amp; shape&shy;shifters?!", x: 17, y: 42, b: 11, dreh: -5 },
       { text: "???", gross: true, x: 61, y: 40, b: 7, dreh: 8 },
-      { text: "next stop!", x: 31, y: 50, b: 10, dreh: -8 },
+      { text: "Invited to the Stone&shy;speaker!", x: 30, y: 49, b: 10, dreh: -8 },
       { text: "!!!", gross: true, x: 92, y: 33, b: 7, dreh: 10 },
     ]
   },
@@ -336,8 +355,22 @@ window.INHALT_EN = {
     { gruppe: "The Surface", name: "Glasstaff", status: "tot", rolle: "Leader of the Red Robes", text: "Kept Phandalin in fear and served the Spider. Fell to Friedrich's arrow after Barradin dragged him back out of the secret passage." },
     { gruppe: "The Surface", name: "Nezna", status: "tot", rolle: "Drow and shapeshifter", text: "Fought us fiercely in the watchtower, spoke of the Spider and escaped as a small animal. We cornered her again in the mine of the magic forge, and this time she fell." },
     { gruppe: "The Underdark", name: "Ilvara Mizzrym", bild: "ilvara-wahr.webp", bildPos: "50% 8%", status: "feindlich", rolle: "Drow and shapeshifter", text: "Posed as a friendly druid in Thundertree, knocked us out with a herbal mist and dragged us into the Underdark. Escaped with a leap into the river." },
-    { gruppe: "The Underdark", name: "Fagas", status: "verbuendet", rolle: "Gnome, rescued from a spider cocoon", text: "Told us about the tomb of the wizard Karim, to which Arafil of the Red Seat had sent him and his troop." },
+    { gruppe: "The Underdark", name: "Fagas", status: "verbuendet", rolle: "Gnome, rescued from a spider cocoon", text: "Told us about the tomb of the wizard Khaem, to which Arafil of the Red Seat had sent him and his troop." },
     { gruppe: "The Underdark", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Archpriest of the kuo-toa", text: "Smuggled us into his city as fake prisoners and died when Demogorgon destroyed it. Barradin called him Blublupin for quite a while." },
-    { gruppe: "The Underdark", name: "Kardal", status: "unklar", rolle: "Dwarf, supposedly a scout. Or a prince?", text: "Found bound among the kuo-toa, fled across the lake with us and became our guide to Gracklstugh." }
+    { gruppe: "The Underdark", name: "Kardal", status: "verbuendet", rolle: "Dwarf, son of the king of Gracklstugh", text: "Found bound among the kuo-toa, passed himself off as a scout and fled across the lake with us. In Gracklstugh it came out that he is the king's son." },
+    { gruppe: "The Underdark", name: "King Horgar Stahl V", status: "neutral", rolle: "King of Gracklstugh, Kardal's father", text: "Listened to Barradin's song about Demogorgon and the rescue of his son, and granted us leave to stay in the city." },
+    { gruppe: "The Underdark", name: "The Raging Giant", bild: "skizze-riese.webp", bildPos: "50% 6%", status: "unklar", rolle: "Giant in Gracklstugh", text: "Attacked us in the middle of the city until we managed to stun him and tie him up. Another giant believes voices in his head drove him to it." }
+  ],
+
+  kunst: [
+    { bild: "skizze-demogorgon.webp", titel: "Demogorgon", text: "Seen at the underground lake. Friedrich punched him." },
+    { bild: "skizze-ilvara.webp", titel: "Ilvara", text: "The “druid” of Thundertree, with her lynx." },
+    { bild: "skizze-ploopploopeen.webp", titel: "Ploopploopeen", text: "Archpriest of the kuo-toa." },
+    { bild: "skizze-ettercap.webp", titel: "Ettercap", text: "One of many in the webs of the Underdark." },
+    { bild: "skizze-riese.webp", titel: "The Raging Giant", text: "Gracklstugh. Voices in his head?" },
+    { bild: "skizze-chasme.webp", titel: "Chasme", text: "Appeared out of nowhere in the middle of our breakout." },
+    { bild: "skizze-turm.webp", titel: "The Tower of Thundertree", text: "Where Venomfang was waiting." },
+    { bild: "skizze-ketten.webp", titel: "In Chains", text: "How we woke up in the Underdark." },
+    { bild: "skizze-laute.webp", titel: "Barradin's Lute", text: "The party's most important weapon." }
   ]
 };

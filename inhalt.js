@@ -198,7 +198,7 @@ window.INHALT = {
         "## Durch die Spinnweben",
         "Immer tiefer führte der Weg ins Unterreich. Dichte Spinnweben versperrten den Weg, und stellenweise mussten wir sogar auf ihnen balancieren. Ein paar Spinnen stellten sich uns zwar entgegen, doch Ezekiel und Friedrich sorgten mit einigen perfekten Treffern schnell für den Sieg über die Achtbeiner.",
         "In einem der Spinnenkokons wartete eine Überraschung: einen Gnom namens Fagas, gefangen, aber noch am Leben. Er erzählte uns von einem magischen Tempel, zu dem Arafil des Roten Sitzes, ein Magier, ihn und seinen Trupp entsandt hatte.",
-        "Seine Gruppe, so erzählte Fagas weiter, war ausgesandt worden, um ein geheimnisvolles Grab zu finden: die Ruhestätte der Magierin Karim, einer Netherese, die vor rund 3000 Jahren gelebt hatte. Eine Meisterin des magischen Fadens aus einer längst vergangenen Hochkultur. Echo witterte sofort einen Schatz.",
+        "Seine Gruppe, so erzählte Fagas weiter, war ausgesandt worden, um ein geheimnisvolles Grab zu finden: die Ruhestätte der Magierin Khaem, einer Netherese, die vor rund 3000 Jahren gelebt hatte. Eine Meisterin des magischen Fadens aus einer längst vergangenen Hochkultur. Echo witterte sofort einen Schatz.",
         "## Das Grab der Magierin",
         "Der Weg durch das Unterreich zeigte sich nun von einer überraschend schönen Seite: funkelnde Flüsse, leuchtende Pilze, ein ganzes Reich in sanftem Licht. Für einen Augenblick vergaß ich fast, wo wir waren. Es dauerte jedoch nicht lange, bis sich uns zuerst Spinnenmonster und später auch noch Ettercaps in den Weg stellten. Die Helden erschlugen sie alle und kämpften sich ihren Weg tiefer in die Unterwelt.",
         "Einer der Kämpfe fand in einer Ruine statt: einer halb eingebrochenen Siedlung, die bis auf die letzten Häuser im tiefen Schwarz des Abgrunds verschwunden war. Nur dicke Spinnennetze hielten diese letzten Häuser noch fest. Ein falscher Schritt, und es wäre hinab ins Nichts gegangen.",
@@ -221,7 +221,20 @@ window.INHALT = {
         "!flucht-see.jpg|Die Flucht über den See. Friedrich ist bis heute sehr stolz auf sich.",
         "## Gracklstugh",
         "Die Flucht über den See führte uns schließlich zu einem atemberaubenden Anblick: einer in den Fels gehauenen Festung, die hinter gewaltigen Stadtmauern über der Stadt Gracklstugh emporragte. Nach allem, was hinter uns lag, war es fast zu schön, um wahr zu sein.",
-        "!gracklstugh.jpg|Ankunft vor Gracklstugh. Kardal zeigt den Weg."
+        "!gracklstugh.jpg|Ankunft vor Gracklstugh. Kardal zeigt den Weg.",
+        "## Der Sohn des Königs",
+        "Am Stadttor standen grimmige Wachen, doch nachdem Kardal ein paar Worte mit ihnen gewechselt hatte, ließen sie uns ohne Weiteres passieren. Schon das hätte mich stutzig machen sollen.",
+        "Hinter dem Tor lag ein Marktplatz, einer der großen Handelsplätze der Stadt. Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und aßen erst einmal ausgiebig und richtig lecker. <em class=\"aside\">Nach Fischmenschen, Dämonengott und Flucht über den See hatten wir uns das redlich verdient.</em>",
+        "Mitten im Essen traten plötzlich vier gerüstete Gestalten ein, marschierten auf unseren Tisch zu und salutierten. Vor Kardal. Da kam die Wahrheit ans Licht: Unser bescheidener Späher ist in Wahrheit der Sohn des Königs! <em class=\"aside\">Ein Prinz. Ich hatte es ja geahnt. Also, fast.</em>",
+        "## Am Hof von König Horgar",
+        "Die Soldaten brachten uns in eine Feste, vor König Horgar Stahl V. Wie es sich für einen Barden gehört, stimmte ich einen Gesang an und erzählte dem König von Demogorgon und davon, wie wir seinen Sohn gerettet hatten. Der König gewährte uns, in der Stadt zu verweilen. <em class=\"aside\">Ob das am Gesang lag oder an der Rettung seines Sohnes, lassen wir einfach offen.</em>",
+        "Leicht fiel uns der Aufenthalt allerdings nicht. Die Luft hier unten setzte uns zu, vor allem Echo, der mit deutlichen Zeichen von Erschöpfung aufwachte.",
+        "## Einkaufen in Gracklstugh",
+        "Was tut eine Heldengruppe in einer fremden Stadt? Richtig: einkaufen. Wir deckten uns mit Heiltränken ein, und ich erstand eine Flöte der Illusionen und dazu ein paar Zaubertränke. <em class=\"aside\">Man weiß nie, wann man ein Publikum verzaubern muss. Oder einen Gegner.</em>",
+        "## Der rasende Riese",
+        "Plötzlich hörten wir Schreie und das Krachen von Häusern, und schon stand ein Riese vor uns und griff an. Mit vereinten Kräften gelang es uns, ihn zu betäuben und zu fesseln.",
+        "Kurz darauf erschien ein zweiter Riese, doch dieser dankte uns. Den Ausfall seines Artgenossen konnte er sich nicht erklären. Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben. Stimmen im Kopf … mir lief es kalt den Rücken hinunter.",
+        "Zum Dank lud er uns ein, mit dem Steinsprecher zu reden. Welch eine Ehre!"
       ],
       fortsetzung: "Fortsetzung folgt …"
     }
@@ -256,7 +269,7 @@ window.INHALT = {
           { name: "Das Grab der Magierin", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "Das Grab der Magierin", text: "Hinter einer verunstalteten Spinnenstatue: ein Wraith und das Schwert Dawnbringer." },
           { name: "Der unterirdische See", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "Der unterirdische See", text: "Am Ufer bittet Ploopploopeen, Erzpriester der Kuo-Toa, um Hilfe." },
           { name: "Die Ruinen der Kuo-Toa", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Hier stieg Demogorgon aus dem See. Von der Stadt sind nur Ruinen geblieben." },
-          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels am anderen Ufer des Sees." }
+          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels. Kardal entpuppt sich als Prinz, der König gewährt uns Gastrecht, und ein Riese rast durch die Stadt." }
         ]
       }
     ]
@@ -305,29 +318,34 @@ window.INHALT = {
           "Friedrich lässt das Thema am wenigsten los."
         ],
         kapitel: "I", abschnitt: "Schloss Crackmore" },
-      { id: "ilvara", bild: "ilvara-wahr.webp", format: "4/5", pos: "50% 6%", x: 3, y: 54, b: 13, dreh: -2,
+      { id: "ilvara", bild: "skizze-ilvara.webp", zeichnung: true, format: "2/3", pos: "50% 0%", x: 3, y: 52, b: 13, dreh: -2,
         kurz: "Ilvara Mizzrym",
         label: "Entkommen", titel: "Ilvara Mizzrym",
         text: "Gab sich in Donnerbaum als freundliche Druidin aus, betäubte uns mit einem Kräuternebel und verschleppte uns ins Unterreich. Beim Ausbruch sprang sie von der Brücke in den Fluss. Dass sie das nicht überlebt hat, glaubt keiner von uns.",
         kapitel: "II", abschnitt: "Der Ausbruch" },
-      { id: "demogorgon", bild: "demogorgon.webp", format: "6/5", pos: "50% 35%", x: 74, y: 37, b: 18, dreh: 3,
+      { id: "demogorgon", bild: "skizze-demogorgon.webp", zeichnung: true, format: "4/3", pos: "50% 50%", x: 73, y: 36, b: 20, dreh: 3,
         kurz: "Demogorgon<small>Warum erwacht?</small>",
         label: "Bedrohlich", titel: "Warum ist Demogorgon erwacht?",
         text: "Ein Dämonenfürst stieg aus dem See und machte die Stadt der Kuo-Toa dem Erdboden gleich. Friedrich hat ihn geboxt. Aufgehalten hat ihn das nicht.",
-        hinweise: ["Sein Schrei ließ alle Magie erlöschen.", "Schon bei unserem Ausbruch tauchten wie aus dem Nichts Dämonen auf.", "Wohin er danach verschwunden ist, weiß niemand."],
+        hinweise: ["Ein Teil der Kuo-Toa betete ihn als falschen Gott an.", "Sein Schrei ließ alle Magie erlöschen.", "Schon bei unserem Ausbruch tauchten wie aus dem Nichts Dämonen auf.", "Wohin er danach verschwunden ist, weiß niemand."],
         kapitel: "II", abschnitt: "Demogorgon" },
       { id: "gracklstugh", bild: "gracklstugh.jpg", format: "16/9", pos: "50% 50%", x: 36, y: 57, b: 25, dreh: 1,
         kurz: "Gracklstugh<small>Was geht hier vor?</small>",
-        label: "Als Nächstes", titel: "Was geht in Gracklstugh vor sich?",
-        text: "Nach der Flucht über den See war die Festung im Fels ein Anblick wie aus einem Traum. Doch eine Stadt so tief im Unterreich hat ihre eigenen Regeln und ihre eigenen Geheimnisse.",
-        hinweise: ["Kardal hat uns hierhergeführt. Er kennt den Weg auffällig gut.", "Wer hier das Sagen hat und was die Stadt von uns will, ist noch völlig offen."],
-        kapitel: "II", abschnitt: "Gracklstugh" },
+        label: "Hier sind wir", titel: "Was geht in Gracklstugh vor sich?",
+        text: "Der König hat uns Gastrecht gewährt, doch ganz geheuer ist uns die Stadt nicht.",
+        hinweise: ["Die Luft hier unten zehrt an uns, vor allem an Echo.", "Ein Riese griff uns an, getrieben von Stimmen in seinem Kopf.", "Ein zweiter Riese lud uns ein, mit dem Steinsprecher zu reden."],
+        kapitel: "II", abschnitt: "Am Hof von König Horgar" },
       { id: "kardal", skizze: "krone", x: 57, y: 63, b: 13, dreh: 5,
-        kurz: "Prinz Kardal?",
-        label: "Verdächtig", titel: "Prinz Kardal?",
-        text: "Wir fanden ihn gefesselt mitten im Chaos der Kuo-Toa. Er sagte, er sei bloß ein Späher seiner Stadt. Aber ist das wirklich die ganze Wahrheit?",
-        hinweise: ["Entkam mit uns im Boot über den See.", "Führte uns geradewegs nach Gracklstugh."],
-        kapitel: "II", abschnitt: "Demogorgon" },
+        kurz: "Prinz Kardal",
+        label: "Aufgeklärt", titel: "Prinz Kardal",
+        text: "Wir fanden ihn gefesselt mitten im Chaos der Kuo-Toa, und er gab sich als einfacher Späher seiner Stadt aus. In Gracklstugh salutierten dann vier Soldaten vor ihm: Kardal ist der Sohn des Königs.",
+        hinweise: ["Entkam mit uns im Boot über den See.", "Seinetwegen ließen uns die Wachen in die Stadt.", "Sein Vater ist König Horgar Stahl V."],
+        kapitel: "II", abschnitt: "Der Sohn des Königs" },
+      { id: "riese", bild: "skizze-riese.webp", zeichnung: true, format: "4/5", pos: "50% 8%", x: 80, y: 68, b: 12, dreh: -3,
+        kurz: "Stimmen im Kopf?",
+        label: "Rätselhaft", titel: "Stimmen im Kopf",
+        text: "Ein Riese griff uns mitten in Gracklstugh an. Ein zweiter Riese konnte sich den Ausfall nicht erklären, offenbar hatten ihn Stimmen in seinem Kopf getrieben. Wessen Stimmen?",
+        kapitel: "II", abschnitt: "Der rasende Riese" },
     ],
     /* schnur: false = kein roter Faden, steht aber im Detailtext unter „Zusammenhänge“ (die Zettel hängen dann nebeneinander). */
     faeden: [
@@ -336,7 +354,8 @@ window.INHALT = {
       { von: "kardal", nach: "demogorgon", grund: "Kardal war mitten im Chaos, als Demogorgon kam." },
       { von: "nezna", nach: "ilvara", schnur: false, grund: "beide Drow, beide Gestaltwandlerinnen. Zufall?" },
       { von: "glasstab", nach: "nezna", schnur: false, grund: "beide sprachen von der Spinne." },
-      { von: "kardal", nach: "gracklstugh", schnur: false, grund: "Kardal führte uns nach Gracklstugh." },
+      { von: "kardal", nach: "gracklstugh", schnur: false, grund: "Kardal ist der Sohn des Königs von Gracklstugh." },
+      { von: "riese", nach: "gracklstugh", schnur: false, grund: "der Angriff geschah mitten in der Stadt." },
       { von: "ilvara", nach: "demogorgon", schnur: false, grund: "beim Ausbruch aus ihrem Kerker tauchten wie aus dem Nichts Dämonen auf." }
     ],
     /* Gelbe Randnotizen, nur zur Deko (nicht anklickbar). gross: true = große Schrift. */
@@ -344,7 +363,7 @@ window.INHALT = {
       { text: "beide:<br>„die Spinne“!", x: 18, y: 17, b: 10, dreh: 7 },
       { text: "beide Drow &amp; Gestalt&shy;wandler?!", x: 17, y: 42, b: 11, dreh: -5 },
       { text: "???", gross: true, x: 61, y: 40, b: 7, dreh: 8 },
-      { text: "nächstes Ziel!", x: 31, y: 50, b: 10, dreh: -8 },
+      { text: "Einladung zum Stein&shy;sprecher!", x: 30, y: 49, b: 10, dreh: -8 },
       { text: "!!!", gross: true, x: 92, y: 33, b: 7, dreh: 10 },
     ]
   },
@@ -361,8 +380,24 @@ window.INHALT = {
     { gruppe: "Die Oberwelt", name: "Glasstab", status: "tot", rolle: "Anführer der Roten Roben", text: "Hielt Phandalin in Angst und diente der Spinne. Fiel durch Friedrichs Pfeil, nachdem Barradin ihn aus dem Geheimgang zurückgezerrt hatte." },
     { gruppe: "Die Oberwelt", name: "Nezna", status: "tot", rolle: "Drow und Gestaltwandlerin", text: "Kämpfte im Wachturm erbittert gegen uns, sprach von der Spinne und entkam als kleines Tier. In der Mine der magischen Schmiede stellten wir sie erneut, und diesmal fiel sie." },
     { gruppe: "Das Unterreich", name: "Ilvara Mizzrym", bild: "ilvara-wahr.webp", bildPos: "50% 8%", status: "feindlich", rolle: "Drow und Gestaltwandlerin", text: "Gab sich in Donnerbaum als freundliche Druidin aus, betäubte uns mit einem Kräuternebel und verschleppte uns ins Unterreich. Entkam mit einem Sprung in den Fluss." },
-    { gruppe: "Das Unterreich", name: "Fagas", status: "verbuendet", rolle: "Gnom, aus einem Spinnenkokon gerettet", text: "Erzählte uns vom Grab der Magierin Karim, zu dem Arafil des Roten Sitzes ihn und seinen Trupp geschickt hatte." },
+    { gruppe: "Das Unterreich", name: "Fagas", status: "verbuendet", rolle: "Gnom, aus einem Spinnenkokon gerettet", text: "Erzählte uns vom Grab der Magierin Khaem, zu dem Arafil des Roten Sitzes ihn und seinen Trupp geschickt hatte." },
     { gruppe: "Das Unterreich", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Erzpriester der Kuo-Toa", text: "Schmuggelte uns zum Schein gefesselt in seine Stadt und starb, als Demogorgon sie zerstörte. Barradin hat ihn lange Blublupin genannt." },
-    { gruppe: "Das Unterreich", name: "Kardal", status: "unklar", rolle: "Zwerg, angeblich ein Späher. Oder ein Prinz?", text: "Gefesselt bei den Kuo-Toa gefunden, mit uns über den See geflohen und unser Führer nach Gracklstugh." }
+    { gruppe: "Das Unterreich", name: "Kardal", status: "verbuendet", rolle: "Zwerg, Sohn des Königs von Gracklstugh", text: "Gefesselt bei den Kuo-Toa gefunden, gab sich als Späher aus und floh mit uns über den See. In Gracklstugh kam heraus, dass er der Sohn des Königs ist." },
+    { gruppe: "Das Unterreich", name: "König Horgar Stahl V.", status: "neutral", rolle: "König von Gracklstugh, Kardals Vater", text: "Hörte sich Barradins Gesang über Demogorgon und die Rettung seines Sohnes an und gewährte uns, in der Stadt zu verweilen." },
+    { gruppe: "Das Unterreich", name: "Der rasende Riese", bild: "skizze-riese.webp", bildPos: "50% 6%", status: "unklar", rolle: "Riese in Gracklstugh", text: "Griff uns mitten in der Stadt an, bis wir ihn betäuben und fesseln konnten. Ein anderer Riese meint, Stimmen in seinem Kopf hätten ihn dazu getrieben." }
+  ],
+
+  /* ---------- BARRADINS KÜNSTE ----------
+     Barradins eigene Zeichnungen aus dem Notizbuch. Neue Zeichnung: Datei neben die anderen legen und hier eintragen. */
+  kunst: [
+    { bild: "skizze-demogorgon.webp", titel: "Demogorgon", text: "Gesehen am unterirdischen See. Friedrich hat ihn geboxt." },
+    { bild: "skizze-ilvara.webp", titel: "Ilvara", text: "Die „Druidin“ von Donnerbaum, mit ihrem Luchs." },
+    { bild: "skizze-ploopploopeen.webp", titel: "Ploopploopeen", text: "Erzpriester der Kuo-Toa." },
+    { bild: "skizze-ettercap.webp", titel: "Ettercap", text: "Einer von vielen in den Spinnweben des Unterreichs." },
+    { bild: "skizze-riese.webp", titel: "Der rasende Riese", text: "Gracklstugh. Stimmen im Kopf?" },
+    { bild: "skizze-chasme.webp", titel: "Chasme", text: "Tauchte mitten im Ausbruch aus dem Nichts auf." },
+    { bild: "skizze-turm.webp", titel: "Der Turm von Donnerbaum", text: "Hier wartete Venomfang." },
+    { bild: "skizze-ketten.webp", titel: "In Ketten", text: "So sind wir im Unterreich aufgewacht." },
+    { bild: "skizze-laute.webp", titel: "Barradins Laute", text: "Die wichtigste Waffe der Gruppe." }
   ]
 };

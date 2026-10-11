@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="Barradins Notizbuch – die handgeschriebenen Originalseiten zur Kampagne Imres Tales.">
+<title>Barradins Notizbuch</title>
+<meta name="theme-color" content="#100e15">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Versteckte Seite: Barradins handgeschriebene Notizbuchseiten. Gleiche Farben wie index.html, bewusst nur dunkel. */
+:root {
+  --night: #100e15; --hall: #19161f; --vellum: #ebe2cc; --ash: #a89f8f; --ember: #e0a046;
+  --line: rgba(224,160,70,.28);
+  --display: "IM Fell English SC", "Palatino Linotype", Palatino, Georgia, serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --body: "Spectral", Georgia, "Times New Roman", serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--night); color: var(--vellum); font-family: var(--body); font-size: 1.0625rem; line-height: 1.7; }
+a { color: var(--ember); }
+.wrap { max-width: 56rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--night) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-block: .7rem; }
+.top a { text-decoration: none; }
+.brand { font-family: var(--display); font-size: 1.3rem; color: var(--vellum); }
+.back { font-size: .9rem; }
+header.kopf { padding-block: clamp(2.5rem, 7vw, 4.5rem) 1.5rem; }
+.label { font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ember); margin: 0 0 .6rem; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: .95; margin: 0; }
+.lede { color: var(--ash); font-style: italic; max-width: 38rem; margin: 1rem 0 0; }
+.seiten { display: grid; gap: clamp(2.5rem, 7vw, 4rem); padding-block: 1rem 4rem; }
+.seite { margin: 0; display: grid; gap: .7rem; }
+.seite a { display: block; transform: rotate(var(--dreh, 0deg)); transition: transform .3s ease; }
+.seite a:hover { transform: rotate(0deg); }
+.seite img { width: 100%; display: block; border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(0,0,0,.6); }
+.seite figcaption { font-family: var(--hand); font-size: 1.35rem; line-height: 1.2; color: var(--vellum); }
+.seite figcaption small { display: block; font-family: var(--body); font-size: .85rem; color: var(--ash); font-style: italic; }
+footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; color: var(--ash); font-size: .9rem; }
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <a class="brand" href="./">Imres Tales</a>
+  <a class="back" href="./#chronik" id="zurueck">← Zurück zur Chronik</a>
+</div></div>
+
+<main class="wrap">
+  <header class="kopf">
+    <p class="label" id="label">Streng vertraulich</p>
+    <h1 id="titel">Barradins Notizbuch</h1>
+    <p class="lede" id="lede">Die Originalseiten, so wie Barradin sie am Spieltisch vollgekritzelt hat. Nicht alles ist lesbar, und manches ist falsch geschrieben. Die Chronik ist die aufgeräumte Fassung. Tippe auf eine Seite, um sie in voller Größe zu öffnen.</p>
+  </header>
+  <div class="seiten" id="seiten"></div>
+</main>
+
+<footer><div class="wrap">Imres Tales · imrestales.de</div></footer>
+
+<script>
+(function () {
+  var lang = "de";
+  try { if (localStorage.getItem("imres-lang") === "en") lang = "en"; } catch (e) {}
+  var SEITEN = {
+    de: [
+      ["Die Einladung", "Gundrens Brief, die magische Schmiede, Phandalin, die Roten Roben und Glasstab."],
+      ["Donnerbaum und der Kerker", "Der Drachenturm, Ilvara, die Ketten und der Ausbruch."],
+      ["Das Grab und der See", "Ettercaps, der Wraith, das Schwert und die Kuo-Toa."],
+      ["Demogorgon", "Ploopploopeen, Demogorgon und die Flucht nach Gracklstugh."],
+      ["Gracklstugh", "Prinz Kardal, König Horgar und der rasende Riese."]
+    ],
+    en: [
+      ["The Invitation", "Gundren's letter, the magic forge, Phandalin, the Red Robes and Glasstaff."],
+      ["Thundertree and the Dungeon", "The dragon tower, Ilvara, the chains and the breakout."],
+      ["The Tomb and the Lake", "Ettercaps, the wraith, the sword and the kuo-toa."],
+      ["Demogorgon", "Ploopploopeen, Demogorgon and the flight to Gracklstugh."],
+      ["Gracklstugh", "Prince Kardal, King Horgar and the raging giant."]
+    ]
+  };
+  if (lang === "en") {
+    document.documentElement.lang = "en";
+    document.title = "Barradin's Notebook";
+    document.getElementById("label").textContent = "Strictly confidential";
+    document.getElementById("titel").textContent = "Barradin's Notebook";
+    document.getElementById("lede").textContent = "The original pages, just as Barradin scribbled them at the table. Not everything is legible, and some of it is misspelt. The chronicle is the tidy version. Tap a page to open it at full size.";
+    document.getElementById("zurueck").textContent = "← Back to the chronicle";
+  }
+  var kipp = [-1, .8, -.6, 1, -.8];
+  var seite = lang === "en" ? "Page " : "Seite ";
+  document.getElementById("seiten").innerHTML = SEITEN[lang].map(function (s, i) {
+    var bild = "notizbuch-" + (i + 1) + ".jpg";
+    return '<figure class="seite"><a href="' + bild + '" style="--dreh:' + kipp[i % kipp.length] + 'deg"><img src="' + bild + '" alt="' + seite + (i + 1) + ': ' + s[0] + '" loading="lazy"></a>' +
+      "<figcaption>" + seite + (i + 1) + " · " + s[0] + "<small>" + s[1] + "</small></figcaption></figure>";
+  }).join("");
+})();
+</script>
+</body>
+</html>

@@ -343,6 +343,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 }
 .pin-note img, .pin-note .skizze { display: block; width: 100%; aspect-ratio: var(--format, 1 / 1); object-fit: cover; object-position: var(--pos, 50% 30%); }
 .pin-note img { filter: grayscale(1) sepia(.55) contrast(1.45) brightness(1.05); mix-blend-mode: multiply; }
+.pin-note img.zeichnung, .quest-dialog .qd-bild img.zeichnung { filter: contrast(1.08); }
 .pin-note .kurz { display: block; margin-top: 4%; font-family: var(--hand); font-weight: 600; font-size: clamp(11px, 2.6cqw, 19px); line-height: 1.02; }
 .pin-note.zettel .kurz { margin-top: 0; }
 .pin-note.haupt .kurz { font-size: clamp(14px, 3.7cqw, 27px); color: #7d1c14; }
@@ -431,6 +432,33 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .tag.unclear { color: var(--ember); border-color: var(--ember); border-style: dashed; }
 .tag.neutral, .tag.dead { color: var(--ash); border-color: var(--ash); }
 
+/* ---------- Barradins Künste ---------- */
+.kunst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(46%, 13rem), 1fr)); gap: clamp(.8rem, 2.5vw, 1.4rem); }
+.kunst-blatt {
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: .5rem; padding: .9rem .9rem .8rem; cursor: zoom-in; text-align: left;
+  border: 0; font: inherit; color: #2a2118; aspect-ratio: 4 / 5;
+  background: linear-gradient(172deg, #f1e7cf, #ddcca8); box-shadow: 0 10px 24px rgba(0,0,0,.45);
+  transform: rotate(var(--dreh, 0deg)); transition: transform .25s ease;
+}
+.kunst-blatt:hover, .kunst-blatt:focus-visible { transform: rotate(0deg) translateY(-4px); }
+.kunst-blatt:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+.kunst-blatt img { width: 100%; height: 100%; min-height: 0; object-fit: contain; mix-blend-mode: multiply; }
+.kunst-blatt b { font-family: var(--hand); font-weight: 600; font-size: 1.3rem; line-height: 1; color: #1d1610; }
+.kunst-dialog {
+  width: min(40rem, calc(100vw - 24px)); max-height: 92vh; padding: 0; border: 0; overflow: auto;
+  background: linear-gradient(172deg, #f1e7cf, #ddcca8); color: #2a2118; box-shadow: 0 30px 70px rgba(0,0,0,.7);
+}
+.kunst-dialog::backdrop { background: rgba(10,8,14,.8); backdrop-filter: blur(3px); }
+.kunst-dialog .inner { padding: 2.4rem clamp(1rem, 4vw, 2rem) 1.4rem; display: grid; gap: .6rem; justify-items: center; text-align: center; }
+.kunst-dialog img { max-width: 100%; max-height: 66vh; object-fit: contain; mix-blend-mode: multiply; }
+.kunst-dialog h3 { font-family: var(--hand); font-weight: 600; font-size: 2rem; line-height: 1; color: #1d1610; }
+.kunst-dialog p { color: #4a3d2e; }
+.notizbuch-link {
+  display: inline-flex; align-items: center; gap: .55rem; margin-top: 1.4rem; padding: .55rem 1rem;
+  border: 1px dashed var(--ember); color: var(--ember); text-decoration: none; font-size: .92rem; letter-spacing: .03em;
+}
+.notizbuch-link:hover { background: var(--ember); color: var(--night); border-style: solid; }
+
 footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; color: var(--ash); font-size: .9rem; }
 footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
 
@@ -466,6 +494,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#gefaehrten" data-i18n="navGefaehrten">Gefährten</a>
       <a href="#nsc" data-i18n="navNsc">NSC</a>
       <a href="#bestiarium" data-i18n="navBestiarium">Bestiarium</a>
+      <a href="#kuenste" data-i18n="navKunst">Künste</a>
     </nav>
     <div class="lang" role="group" aria-label="Sprache / Language">
       <button type="button" data-lang="de" title="Deutsch" aria-label="Deutsch"><svg viewBox="0 0 5 3" aria-hidden="true"><rect width="5" height="1" y="0" fill="#000"/><rect width="5" height="1" y="1" fill="#DD0000"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg></button>
@@ -493,6 +522,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       </div>
       <aside class="narrator" id="narrator" hidden><img id="narrator-img" alt=""><div><p class="label" id="narrator-label"></p><p id="narrator-text"></p></div></aside>
       <div class="chapters" id="chapters"></div>
+      <a class="notizbuch-link" href="notizbuch.html" data-i18n="notizbuchChronik">📖 Aus Barradins Notizbuch: die Originalseiten</a>
       <div class="tome" id="chapters-empty" hidden>
         <div class="seal"><div><b>I</b><small data-i18n="chapterSoon">Kapitel folgt</small></div></div>
         <div><h3 data-i18n="inkTitle">Die Tinte ist noch feucht</h3><p data-i18n="inkText">Das erste Kapitel wird gerade niedergeschrieben.</p></div>
@@ -572,6 +602,21 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       </div>
     </div>
   </section>
+<section class="part" id="kuenste" hidden>
+    <div class="wrap">
+      <div class="part-head">
+        <p class="label" data-i18n="kunstLabel">Aus dem Skizzenbuch</p>
+        <h2 data-i18n="kunstTitle">Barradins Künste</h2>
+        <p data-i18n="kunstText">Zwischen zwei Abenteuern greift Barradin zur Feder. Was er unterwegs gesehen hat, landet in seinem Notizbuch. Tippe auf eine Zeichnung, um sie groß zu sehen.</p>
+      </div>
+      <div class="kunst-grid" id="kunst"></div>
+      <a class="notizbuch-link" href="notizbuch.html" data-i18n="notizbuchLink">📖 Barradins Notizbuch durchblättern</a>
+      <dialog class="kunst-dialog" id="kunst-dialog" aria-labelledby="kd-title">
+        <form method="dialog"><button class="qd-close" aria-label="Schließen" data-i18n-aria="schliessen">×</button></form>
+        <div class="inner" id="kd-body"></div>
+      </dialog>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -593,7 +638,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     de: {
       navLabel: "Hauptnavigation",
       navChronik: "Chronik", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
-      navQuests: "Quests", navNsc: "NSC",
+      navQuests: "Quests", navNsc: "NSC", navKunst: "Künste",
+      kunstLabel: "Aus dem Skizzenbuch", kunstTitle: "Barradins Künste",
+      kunstText: "Zwischen zwei Abenteuern greift Barradin zur Feder. Was er unterwegs gesehen hat, landet in seinem Notizbuch. Tippe auf eine Zeichnung, um sie groß zu sehen.",
+      notizbuchLink: "📖 Barradins Notizbuch durchblättern", notizbuchChronik: "📖 Aus Barradins Notizbuch: die Originalseiten",
       questLabel: "Die Questtafel", questTitle: "Offene Fragen",
       questText: "Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.",
       wischHint: "← Wische, um dich auf der Tafel umzusehen →", wasWirWissen: "Was wir wissen",
@@ -628,7 +676,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     en: {
       navLabel: "Main navigation",
       navChronik: "Chronicle", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
-      navQuests: "Quests", navNsc: "NPCs",
+      navQuests: "Quests", navNsc: "NPCs", navKunst: "Art",
+      kunstLabel: "From the sketchbook", kunstTitle: "Barradin's Art",
+      kunstText: "Between two adventures, Barradin reaches for his quill. Whatever he sees along the way ends up in his notebook. Tap a drawing to see it large.",
+      notizbuchLink: "📖 Leaf through Barradin's notebook", notizbuchChronik: "📖 From Barradin's notebook: the original pages",
       questLabel: "The Quest Board", questTitle: "Open Questions",
       questText: "What keeps the party up at night. Tap a note to learn more.",
       wischHint: "← Swipe to look around the board →", wasWirWissen: "What we know",
@@ -822,9 +873,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       '<circle cx="77" cy="53" r="1.1" fill="#b3261e"/><circle cx="83" cy="53" r="1.1" fill="#b3261e"/></svg>',
     krone: '<svg class="skizze" viewBox="0 0 120 90" aria-hidden="true" style="--format:4/3"><defs>' + KOHLE.replace('id="kohle"', 'id="kohle2"') + '</defs>' +
       '<g filter="url(#kohle2)" fill="none" stroke="#1a130d" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">' +
-      '<path d="M26 64 L20 28 L40 46 L54 18 L68 46 L88 28 L82 64 Z" fill="rgba(26,19,13,.1)"/><path d="M26 64 L82 64 L82 74 L26 74 Z"/>' +
+      '<path transform="translate(6 0)" d="M26 64 L20 28 L40 46 L54 18 L68 46 L88 28 L82 64 Z" fill="rgba(26,19,13,.1)"/><path d="M26 64 L82 64 L82 74 L26 74 Z"/>' +
       '<path d="M30 69 L78 69" stroke-dasharray="2 4"/><circle cx="20" cy="26" r="3"/><circle cx="54" cy="16" r="3"/><circle cx="88" cy="26" r="3"/></g>' +
-      '<circle cx="54" cy="56" r="4" fill="#8e1f17"/><text x="104" y="54" font-size="40" font-family="Caveat, cursive" font-weight="600" fill="#a3221a" text-anchor="middle">?</text></svg>'
+      '<circle cx="54" cy="56" r="4" fill="#8e1f17"/></svg>'
   };
   const PIN_Y = 1.8, SEITE = 1.4375;
   const pinPunkt = k => [(+k.x + k.b / 2) * SEITE, +k.y + PIN_Y];
@@ -856,7 +907,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       const art = k.skizze ? "skizze" : (k.bild ? "bild" : "zettel");
       const stil = "--x:" + k.x + ";--y:" + k.y + ";--b:" + k.b + ";--dreh:" + (k.dreh || 0) + "deg" +
         (k.format ? ";--format:" + k.format : "") + (k.pos ? ";--pos:" + k.pos : "");
-      const inhalt = k.skizze ? (SKIZZEN[k.skizze] || "") : k.bild ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy">' : "";
+      const inhalt = k.skizze ? (SKIZZEN[k.skizze] || "") : k.bild ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy"' + (k.zeichnung ? ' class="zeichnung"' : "") + ">" : "";
       return '<button type="button" class="pin-note ' + art + (k.haupt ? " haupt" : "") + '" id="quest-' + esc(k.id) + '" data-q="' + esc(k.id) + '" style="' + esc(stil) + '" aria-haspopup="dialog" aria-label="' + esc(k.titel) + '">' +
         (gepinnt.has(k.id) ? "" : '<span class="band"></span>') +
         '<span class="paper">' + inhalt + '<span class="kurz">' + (k.kurz || esc(k.titel)) + "</span></span></button>";
@@ -899,7 +950,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     $("qd-body").innerHTML =
       (k.label ? '<p class="label">' + esc(k.label) + "</p>" : "") +
       '<h3 id="qd-title">' + esc(k.titel) + "</h3>" +
-      (k.bild ? '<figure class="qd-bild"><img src="' + esc(k.bild) + '" alt=""></figure>' : "") +
+      (k.bild ? '<figure class="qd-bild"><img src="' + esc(k.bild) + '" alt=""' + (k.zeichnung ? ' class="zeichnung"' : "") + "></figure>" : "") +
       (k.text ? "<p>" + k.text + "</p>" : "") +
       (k.hinweise && k.hinweise.length ? '<p class="qd-head">' + esc(T.wasWirWissen) + "</p><ul>" + k.hinweise.map(h => "<li>" + h + "</li>").join("") + "</ul>" : "") +
       (verbunden ? '<p class="qd-head">' + esc(T.roteFaeden) + '</p><ul class="qd-links">' + verbunden + "</ul>" : "") +
@@ -1015,6 +1066,15 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     $("questtafel").hidden = qKarten.length === 0;
     tafelZeichnen();
 
+    /* Barradins Künste */
+    const kunst = D.kunst || [];
+    $("kuenste").hidden = kunst.length === 0;
+    const kipp = [-1.5, 1, -0.5, 1.5, -1, 0.5];
+    $("kunst").innerHTML = kunst.map((k, i) =>
+      '<button type="button" class="kunst-blatt" data-kunst="' + i + '" style="--dreh:' + kipp[i % kipp.length] + 'deg">' +
+        '<img src="' + esc(k.bild) + '" alt="' + esc(k.titel) + '" loading="lazy"><b>' + esc(k.titel) + "</b></button>"
+    ).join("");
+
     /* NSC-Verzeichnis */
     const nsc = D.nsc || [];
     $("nsc").hidden = nsc.length === 0;
@@ -1072,6 +1132,16 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     if (k) { dlg.close(); springe((k.dataset.abschnitt && $(abschnittId(k.dataset.kapitel, k.dataset.abschnitt))) || $("kapitel-" + k.dataset.kapitel)); }
   });
   $("quest-dialog").addEventListener("close", () => hervorheben(null));
+  $("kunst").addEventListener("click", e => {
+    const b = e.target.closest("[data-kunst]");
+    if (!b) return;
+    const k = (D.kunst || [])[+b.dataset.kunst];
+    if (!k) return;
+    $("kd-body").innerHTML = '<img src="' + esc(k.bild) + '" alt="' + esc(k.titel) + '"><h3 id="kd-title">' + esc(k.titel) + "</h3>" + (k.text ? "<p>" + esc(k.text) + "</p>" : "");
+    const dlg = $("kunst-dialog");
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  });
+  $("kunst-dialog").addEventListener("click", e => { if (e.target === $("kunst-dialog")) $("kunst-dialog").close(); });
   $("map-tabs").addEventListener("click", e => {
     const b = e.target.closest("[data-karte]");
     if (!b || +b.dataset.karte === aktKarte) return;
