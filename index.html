@@ -310,23 +310,19 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .beast .ort { font-size: .85rem; color: var(--ash); font-style: italic; }
 .beast .tag { justify-self: start; }
 
-/* ---------- Questtafel: Holzbrett mit Zetteln und roten Fäden ---------- */
-.board-frame {
-  position: relative; max-width: 38rem; margin-inline: auto; padding: clamp(8px, 2.2vw, 16px); border-radius: 4px;
-  background: linear-gradient(135deg, #3a2414, #24160c 45%, #3d2616 70%, #1f130a);
-  box-shadow: 0 22px 50px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,220,170,.12);
+/* ---------- Questtafel: Brett an der Tavernenwand, Zettel und rote Fäden ---------- */
+.tafel-scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; -webkit-overflow-scrolling: touch; margin-inline: calc(-1 * clamp(16px, 4vw, 40px)); padding-inline: clamp(16px, 4vw, 40px); }
+.tafel-szene {
+  position: relative; aspect-ratio: 940 / 743; min-width: 720px; max-width: 62rem; margin-inline: auto;
+  background: #1c120a url("questtafel-wand.jpg") center / cover no-repeat; box-shadow: 0 20px 50px rgba(0,0,0,.6);
 }
-.board-frame::before, .board-frame::after {
-  content: ""; position: absolute; width: 9px; height: 9px; border-radius: 50%; z-index: 1;
-  background: radial-gradient(circle at 35% 35%, #b9a68a, #5e4c38 70%); box-shadow: 0 1px 2px rgba(0,0,0,.7);
-}
-.board-frame::before { top: 4px; left: 4px; } .board-frame::after { bottom: 4px; right: 4px; }
-.board { position: relative; aspect-ratio: 3 / 4; container-type: inline-size; overflow: hidden; background: #7a4f2c; box-shadow: inset 0 0 40px rgba(0,0,0,.55); }
-.board .wood, .board .strings { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.board .strings { z-index: 4; pointer-events: none; filter: drop-shadow(0 2px 1.5px rgba(0,0,0,.55)); overflow: visible; }
+.tafel-flaeche { position: absolute; left: 9.36%; top: 10.77%; width: 73.4%; height: 64.6%; container-type: inline-size; }
+.tafel-flaeche .strings { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; overflow: visible; filter: drop-shadow(0 2px 1.5px rgba(0,0,0,.6)); }
 .string { fill: none; stroke: #b3261e; stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; transition: opacity .3s, stroke-width .3s; }
-.board.fokus .string { opacity: .22; }
-.board.fokus .string.an { opacity: 1; stroke-width: 3.2; stroke: #d0352a; }
+.tafel-flaeche.fokus .string { opacity: .2; }
+.tafel-flaeche.fokus .string.an { opacity: 1; stroke-width: 3.2; stroke: #d0352a; }
+.tafel-hint { display: none; text-align: center; margin-top: .7rem; font-size: .85rem; color: var(--ash); font-style: italic; }
+@media (max-width: 760px) { .tafel-hint { display: block; } }
 
 .pin-note {
   position: absolute; z-index: 2; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: calc(var(--b) * 1%);
@@ -334,33 +330,44 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
   padding: 0; margin: 0; border: 0; background: none; font: inherit; color: #2a2118; text-align: center; cursor: pointer;
   transition: transform .25s ease, opacity .3s, filter .3s; -webkit-tap-highlight-color: transparent;
 }
-.pin-note:hover, .pin-note:focus-visible { transform: rotate(0deg) scale(1.06); z-index: 3; }
+.pin-note:hover, .pin-note:focus-visible { transform: rotate(0deg) scale(1.08); z-index: 3; }
 .pin-note:focus-visible { outline: none; }
-.pin-note:focus-visible .paper { box-shadow: 0 0 0 3px var(--ember), 0 1cqw 2cqw rgba(0,0,0,.6); }
+.pin-note:focus-visible .paper { box-shadow: 0 0 0 3px var(--ember), 0 .8cqw 1.6cqw rgba(0,0,0,.6); }
 .pin-note .paper {
-  display: block; padding: 5% 5% 4%; background: linear-gradient(172deg, #f2e9d2, #dccba6);
-  box-shadow: 0 .9cqw 2cqw rgba(0,0,0,.55), inset 0 0 1.4cqw rgba(120,90,50,.25);
+  display: block; padding: 6% 6% 5%; background: linear-gradient(172deg, #f2e9d2, #d9c7a1);
+  box-shadow: 0 .7cqw 1.5cqw rgba(0,0,0,.6), inset 0 0 1.2cqw rgba(110,80,40,.28);
 }
 .pin-note.zettel .paper {
-  padding: 13% 9% 12%; background: linear-gradient(175deg, #efe3c4, #d8c49a);
+  padding: 13% 9% 12%; background: linear-gradient(175deg, #eee1c1, #d4bf93);
   clip-path: polygon(0 3%, 22% 0, 55% 2%, 100% 0, 98% 52%, 100% 100%, 74% 97%, 46% 100%, 18% 96%, 0 99%, 2% 50%);
 }
-.pin-note img, .pin-note .skizze {
-  display: block; width: 100%; aspect-ratio: var(--format, 1 / 1); object-fit: cover; object-position: var(--pos, 50% 30%);
-}
-.pin-note img { filter: grayscale(1) sepia(.6) contrast(1.4) brightness(1.06); mix-blend-mode: multiply; }
-.pin-note .kurz { display: block; margin-top: 4%; font-family: var(--hand); font-weight: 600; font-size: clamp(12px, 3.9cqw, 22px); line-height: 1.02; }
+.pin-note img, .pin-note .skizze { display: block; width: 100%; aspect-ratio: var(--format, 1 / 1); object-fit: cover; object-position: var(--pos, 50% 30%); }
+.pin-note img { filter: grayscale(1) sepia(.55) contrast(1.45) brightness(1.05); mix-blend-mode: multiply; }
+.pin-note .kurz { display: block; margin-top: 4%; font-family: var(--hand); font-weight: 600; font-size: clamp(11px, 2.6cqw, 19px); line-height: 1.02; }
 .pin-note.zettel .kurz { margin-top: 0; }
-.pin-note.haupt .kurz { font-size: clamp(16px, 5.6cqw, 32px); color: #7d2a20; }
-.pin-note small { display: block; font-family: var(--hand); font-weight: 500; font-size: .8em; color: #5b4a36; }
-.board.fokus .pin-note:not(.an) { opacity: .45; filter: saturate(.5) brightness(.8); }
+.pin-note.haupt .kurz { font-size: clamp(14px, 3.7cqw, 27px); color: #7d1c14; }
+.pin-note small { display: block; font-family: var(--hand); font-weight: 500; font-size: .82em; color: #5b4a36; }
+.tafel-flaeche.fokus .pin-note:not(.an), .tafel-flaeche.fokus .sticky { opacity: .4; filter: saturate(.5) brightness(.75); }
 
-.pinhead {
-  position: absolute; z-index: 5; pointer-events: none; width: clamp(10px, 3.4cqw, 18px); aspect-ratio: 1; border-radius: 50%;
-  transform: translate(-50%, -50%); background: radial-gradient(circle at 34% 30%, #f08a78, #b3261e 48%, #5c140e);
-  box-shadow: 0 .5cqw .7cqw rgba(0,0,0,.6);
+/* Klebeband und Reißzwecken */
+.band {
+  position: absolute; top: -.9cqw; left: 50%; width: 42%; height: 2.4cqw; min-height: 9px; transform: translateX(-50%) rotate(-3deg); z-index: 1;
+  background: rgba(232,222,190,.55); box-shadow: 0 1px 2px rgba(0,0,0,.25); backdrop-filter: blur(1px);
 }
-.board-hint { text-align: center; margin-top: .9rem; font-size: .88rem; color: var(--ash); font-style: italic; }
+.pinhead {
+  position: absolute; z-index: 5; pointer-events: none; width: clamp(9px, 2.2cqw, 16px); aspect-ratio: 1; border-radius: 50%;
+  transform: translate(-50%, -50%); background: radial-gradient(circle at 34% 30%, #f08a78, #b3261e 48%, #5c140e);
+  box-shadow: 0 .4cqw .6cqw rgba(0,0,0,.6);
+}
+/* Gelbe Randnotizen (nur Deko) */
+.sticky {
+  position: absolute; z-index: 2; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: calc(var(--b) * 1%);
+  transform: rotate(var(--dreh, 0deg)); pointer-events: none; padding: 1.3cqw .9cqw 1.4cqw; text-align: center;
+  background: linear-gradient(170deg, #f3dd8a, #e3c766); box-shadow: 0 .5cqw 1.1cqw rgba(0,0,0,.5);
+  font-family: var(--hand); font-weight: 600; font-size: clamp(10px, 2.1cqw, 16px); line-height: 1.05; color: #a3221a;
+  transition: opacity .3s, filter .3s;
+}
+.sticky.gross { font-size: clamp(14px, 3.4cqw, 26px); }
 
 /* Detail-Zettel beim Antippen */
 .quest-dialog {
@@ -498,10 +505,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <div class="part-head">
         <p class="label" data-i18n="questLabel">Die Questtafel</p>
         <h2 data-i18n="questTitle">Offene Fragen</h2>
-        <p data-i18n="questText">Was die Gruppe gerade umtreibt. Die roten Fäden zeigen, was womöglich zusammenhängt.</p>
+        <p data-i18n="questText">Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.</p>
       </div>
-      <div class="board-frame"><div class="board" id="quests"></div></div>
-      <p class="board-hint" data-i18n="boardHint">Tippe auf einen Zettel, um mehr zu erfahren.</p>
+      <div class="tafel-scroll" id="tafel-scroll"><div class="tafel-szene"><div class="tafel-flaeche" id="quests"></div></div></div>
+      <p class="tafel-hint" data-i18n="wischHint">← Wische, um dich auf der Tafel umzusehen →</p>
       <dialog class="quest-dialog" id="quest-dialog" aria-labelledby="qd-title">
         <form method="dialog"><button class="qd-close" aria-label="Schließen" data-i18n-aria="schliessen">×</button></form>
         <div class="qd-inner" id="qd-body"></div>
@@ -588,9 +595,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navChronik: "Chronik", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
       navQuests: "Quests", navNsc: "NSC",
       questLabel: "Die Questtafel", questTitle: "Offene Fragen",
-      questText: "Was die Gruppe gerade umtreibt. Die roten Fäden zeigen, was womöglich zusammenhängt.",
-      boardHint: "Tippe auf einen Zettel, um mehr zu erfahren.", wasWirWissen: "Was wir wissen",
-      roteFaeden: "Rote Fäden", loserFaden: "Dieser Faden hängt noch lose …", schliessen: "Schließen", questtafelBild: "Questtafel",
+      questText: "Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.",
+      wischHint: "← Wische, um dich auf der Tafel umzusehen →", wasWirWissen: "Was wir wissen",
+      roteFaeden: "Zusammenhänge", loserFaden: "Dieser Faden hängt noch lose …", schliessen: "Schließen", questtafelBild: "Questtafel",
       nscLabel: "Bekanntschaften", nscTitle: "Freund, Feind &amp; Fragezeichen",
       nscText: "Wer der Gruppe unterwegs begegnet ist, geholfen hat oder ihr noch etwas schuldet.",
       nscStatus: { verbuendet: "Verbündet", feindlich: "Feindlich", unklar: "Undurchsichtig", neutral: "Neutral", tot: "Tot" },
@@ -623,9 +630,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navChronik: "Chronicle", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
       navQuests: "Quests", navNsc: "NPCs",
       questLabel: "The Quest Board", questTitle: "Open Questions",
-      questText: "What keeps the party up at night. The red threads show what might be connected.",
-      boardHint: "Tap a note to learn more.", wasWirWissen: "What we know",
-      roteFaeden: "Red threads", loserFaden: "This thread is still hanging loose …", schliessen: "Close", questtafelBild: "Quest board",
+      questText: "What keeps the party up at night. Tap a note to learn more.",
+      wischHint: "← Swipe to look around the board →", wasWirWissen: "What we know",
+      roteFaeden: "Connections", loserFaden: "This thread is still hanging loose …", schliessen: "Close", questtafelBild: "Quest board",
       nscLabel: "Acquaintances", nscTitle: "Friend, Foe &amp; Question Mark",
       nscText: "Everyone the party has met on the road, who helped us, or who still owes us something.",
       nscStatus: { verbuendet: "Ally", feindlich: "Hostile", unklar: "Shady", neutral: "Neutral", tot: "Dead" },
@@ -793,78 +800,92 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   }
 
   /* ---------- Questtafel ---------- */
-  let qKarten = [], qFaeden = [];
+  let qKarten = [], qFaeden = [], qNotizen = [];
+  const KOHLE = '<filter id="kohle" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>';
   const SKIZZEN = {
-    spinne: '<svg class="skizze" viewBox="0 0 120 90" aria-hidden="true" style="--format:4/3"><g fill="none" stroke="#2a2118" stroke-linecap="round" stroke-linejoin="round">' +
-      '<g stroke-opacity=".3" stroke-width=".8"><path d="M60 46 L4 2 M60 46 L116 2 M60 46 L2 86 M60 46 L118 86 M60 46 L60 0"/><path d="M36 26 Q48 22 60 21 Q72 22 84 26 M22 14 Q40 6 60 5 Q80 6 98 14 M30 70 Q45 76 60 77 Q75 76 90 70"/></g>' +
-      '<g stroke-width="1.7"><g id="sp-bein"><path d="M54 33 L42 16 L33 5"/><path d="M53 36 L35 26 L18 30"/><path d="M53 40 L36 46 L22 61"/><path d="M55 43 L44 61 L39 82"/></g>' +
-      '<use href="#sp-bein" transform="translate(120 0) scale(-1 1)"/></g></g>' +
-      '<ellipse cx="60" cy="36" rx="8" ry="7" fill="#2a2118"/><ellipse cx="60" cy="55" rx="12.5" ry="15" fill="#2a2118"/>' +
-      '<path d="M56 49 L64 49 L60 55 L64 61 L56 61 L60 55 Z" fill="#9b3a2f"/></svg>',
-    krone: '<svg class="skizze" viewBox="0 0 120 90" aria-hidden="true" style="--format:4/3"><g fill="none" stroke="#2a2118" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">' +
-      '<path d="M26 64 L20 28 L40 46 L54 18 L68 46 L88 28 L82 64 Z" fill="rgba(42,33,24,.08)"/><path d="M26 64 L82 64 L82 74 L26 74 Z"/>' +
+    spinne: '<svg class="skizze" viewBox="0 0 160 120" aria-hidden="true" style="--format:4/3"><defs>' + KOHLE +
+      '<radialGradient id="schmier" cx="50%" cy="58%" r="55%"><stop offset="0" stop-color="#1a130d" stop-opacity=".42"/><stop offset=".6" stop-color="#1a130d" stop-opacity=".12"/><stop offset="1" stop-color="#1a130d" stop-opacity="0"/></radialGradient>' +
+      '<pattern id="schraffur" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(38)"><path d="M0 0V2.6" stroke="#1a130d" stroke-width="1.15"/></pattern></defs>' +
+      '<rect width="160" height="120" fill="url(#schmier)"/>' +
+      '<g filter="url(#kohle)" fill="none" stroke="#1a130d" stroke-linecap="round" stroke-linejoin="round">' +
+      '<g stroke-opacity=".28" stroke-width=".7"><path d="M80 66 L2 2 M80 66 L158 2 M80 66 L0 118 M80 66 L160 118 M80 66 L0 64 M80 66 L160 64"/>' +
+      '<path d="M44 36 Q62 46 80 40 Q98 46 116 36 M20 18 Q50 32 80 22 Q110 32 140 18 M40 96 Q60 86 80 94 Q100 86 120 96"/></g>' +
+      '<path d="M80 0 L80 49" stroke-width=".9" stroke-opacity=".8"/>' +
+      '<g id="sp-bein" stroke-width="2.3"><path d="M74 53 L60 34 L48 16 L44 6"/><path d="M73 57 L52 46 L32 45 L18 52"/><path d="M73 62 L52 68 L34 83 L24 100"/><path d="M75 66 L62 86 L56 104 L54 116"/>' +
+      '<path d="M74 54 L61 35 L49 17" stroke-width=".8" stroke-opacity=".55" transform="translate(1 .6)"/><path d="M73 62 L52 69 L35 84" stroke-width=".8" stroke-opacity=".55" transform="translate(.8 1)"/></g>' +
+      '<use href="#sp-bein" transform="translate(160 0) scale(-1 1)"/>' +
+      '<path d="M76 50 Q72 46 74 43 M84 50 Q88 46 86 43" stroke-width="1.6"/>' +
+      '<ellipse cx="80" cy="56" rx="9.5" ry="8.5" fill="url(#schraffur)" stroke-width="1.8"/>' +
+      '<ellipse cx="80" cy="80" rx="15.5" ry="19.5" fill="url(#schraffur)" stroke-width="2"/></g>' +
+      '<ellipse cx="80" cy="81" rx="14" ry="18" fill="#1a130d" opacity=".6" filter="url(#kohle)"/>' +
+      '<path d="M75.5 72 L84.5 72 L80 80 L84.5 88 L75.5 88 L80 80 Z" fill="#8e1f17" filter="url(#kohle)"/>' +
+      '<circle cx="77" cy="53" r="1.1" fill="#b3261e"/><circle cx="83" cy="53" r="1.1" fill="#b3261e"/></svg>',
+    krone: '<svg class="skizze" viewBox="0 0 120 90" aria-hidden="true" style="--format:4/3"><defs>' + KOHLE.replace('id="kohle"', 'id="kohle2"') + '</defs>' +
+      '<g filter="url(#kohle2)" fill="none" stroke="#1a130d" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">' +
+      '<path d="M26 64 L20 28 L40 46 L54 18 L68 46 L88 28 L82 64 Z" fill="rgba(26,19,13,.1)"/><path d="M26 64 L82 64 L82 74 L26 74 Z"/>' +
       '<path d="M30 69 L78 69" stroke-dasharray="2 4"/><circle cx="20" cy="26" r="3"/><circle cx="54" cy="16" r="3"/><circle cx="88" cy="26" r="3"/></g>' +
-      '<circle cx="54" cy="56" r="4" fill="#9b3a2f"/><text x="104" y="52" font-size="38" font-family="Caveat, cursive" font-weight="600" fill="#9b3a2f" text-anchor="middle">?</text></svg>'
+      '<circle cx="54" cy="56" r="4" fill="#8e1f17"/><text x="104" y="54" font-size="40" font-family="Caveat, cursive" font-weight="600" fill="#a3221a" text-anchor="middle">?</text></svg>'
   };
-  const PIN_Y = 1.3;
-  const pinPunkt = k => [(+k.x + k.b / 2) * 3, (+k.y + PIN_Y) * 4];
+  const PIN_Y = 1.8, SEITE = 1.4375;
+  const pinPunkt = k => [(+k.x + k.b / 2) * SEITE, +k.y + PIN_Y];
+  let tafelZentriert = false;
 
   function tafelZeichnen() {
     const brett = $("quests");
-    const holz =
-      '<svg class="wood" viewBox="0 0 300 400" preserveAspectRatio="none" aria-hidden="true"><defs>' +
-      '<filter id="maserung" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.11 0.007" numOctaves="4" seed="11"/>' +
-      '<feColorMatrix values="0 0 0 0 .16  0 0 0 0 .09  0 0 0 0 .04  2.6 0 0 0 -1.05"/></filter>' +
-      '<radialGradient id="licht" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient></defs>' +
-      '<rect width="300" height="400" fill="#7d522e"/><rect x="75" width="75" height="400" fill="#000" opacity=".07"/><rect x="225" width="75" height="400" fill="#000" opacity=".1"/>' +
-      '<rect x="150" width="75" height="400" fill="#fff" opacity=".03"/><rect width="300" height="400" filter="url(#maserung)"/>' +
-      '<g stroke="#1f130a" stroke-width="1.6" opacity=".75"><path d="M75 0V400M150 0V400M225 0V400"/></g>' +
-      '<g stroke="#e6b98a" stroke-width=".5" opacity=".18"><path d="M76.4 0V400M151.4 0V400M226.4 0V400"/></g>' +
-      '<g fill="#2b1a0e" opacity=".5"><ellipse cx="112" cy="312" rx="4" ry="7"/><ellipse cx="262" cy="148" rx="3" ry="5"/><ellipse cx="34" cy="206" rx="2.5" ry="4"/></g>' +
-      '<rect width="300" height="400" fill="url(#licht)"/></svg>';
-
     const nachId = {};
     qKarten.forEach(k => { nachId[k.id] = k; });
+    const gepinnt = new Set();
     let faeden = "";
-    qFaeden.forEach((f, i) => {
+    qFaeden.forEach(f => {
       const a = nachId[f.von], b = nachId[f.nach];
-      if (!a || !b) return;
+      if (!a || !b || f.schnur === false) return;
+      gepinnt.add(f.von); gepinnt.add(f.nach);
       const [x1, y1] = pinPunkt(a), [x2, y2] = pinPunkt(b);
-      const durchhang = Math.hypot(x2 - x1, y2 - y1) * .14;
-      faeden += '<path class="string" data-von="' + esc(f.von) + '" data-nach="' + esc(f.nach) + '" d="M' + x1.toFixed(1) + " " + y1.toFixed(1) +
-        " Q" + ((x1 + x2) / 2).toFixed(1) + " " + ((y1 + y2) / 2 + durchhang).toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1) + '"/>';
+      const durchhang = Math.hypot(x2 - x1, y2 - y1) * .12;
+      faeden += '<path class="string" data-von="' + esc(f.von) + '" data-nach="' + esc(f.nach) + '" d="M' + x1.toFixed(2) + " " + y1.toFixed(2) +
+        " Q" + ((x1 + x2) / 2).toFixed(2) + " " + ((y1 + y2) / 2 + durchhang).toFixed(2) + " " + x2.toFixed(2) + " " + y2.toFixed(2) + '"/>';
     });
     qKarten.forEach(k => {
       if (!k.lose) return;
+      gepinnt.add(k.id);
       const [x, y] = pinPunkt(k);
-      faeden += '<path class="string" data-von="' + esc(k.id) + '" d="M' + x.toFixed(1) + " " + y.toFixed(1) + " q-9 14 -5 30 q3 10 -6 18 m6 -18 q4 8 1 14\"/>";
+      faeden += '<path class="string" data-von="' + esc(k.id) + '" d="M' + x.toFixed(2) + " " + y.toFixed(2) + ' q-2.6 4 -1.4 8.5 q.9 3 -1.8 5.2 m1.8 -5.2 q1.2 2.2 .3 4.2"/>';
     });
 
     const zettel = qKarten.map(k => {
       const art = k.skizze ? "skizze" : (k.bild ? "bild" : "zettel");
       const stil = "--x:" + k.x + ";--y:" + k.y + ";--b:" + k.b + ";--dreh:" + (k.dreh || 0) + "deg" +
         (k.format ? ";--format:" + k.format : "") + (k.pos ? ";--pos:" + k.pos : "");
-      const inhalt = k.skizze ? (SKIZZEN[k.skizze] || "") :
-        k.bild ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy">' : "";
+      const inhalt = k.skizze ? (SKIZZEN[k.skizze] || "") : k.bild ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy">' : "";
       return '<button type="button" class="pin-note ' + art + (k.haupt ? " haupt" : "") + '" id="quest-' + esc(k.id) + '" data-q="' + esc(k.id) + '" style="' + esc(stil) + '" aria-haspopup="dialog" aria-label="' + esc(k.titel) + '">' +
+        (gepinnt.has(k.id) ? "" : '<span class="band"></span>') +
         '<span class="paper">' + inhalt + '<span class="kurz">' + (k.kurz || esc(k.titel)) + "</span></span></button>";
     }).join("");
-    const pins = qKarten.map(k => { const [x, y] = pinPunkt(k); return '<span class="pinhead" style="left:' + (x / 3).toFixed(2) + "%;top:" + (y / 4).toFixed(2) + '%"></span>'; }).join("");
+    const notizen = qNotizen.map(n =>
+      '<div class="sticky' + (n.gross ? " gross" : "") + '" aria-hidden="true" style="--x:' + n.x + ";--y:" + n.y + ";--b:" + n.b + ";--dreh:" + (n.dreh || 0) + 'deg"><span class="band"></span>' + n.text + "</div>"
+    ).join("");
+    const pins = qKarten.filter(k => gepinnt.has(k.id)).map(k => {
+      const [x, y] = pinPunkt(k);
+      return '<span class="pinhead" style="left:' + (x / SEITE).toFixed(2) + "%;top:" + y.toFixed(2) + '%"></span>';
+    }).join("");
 
     brett.setAttribute("role", "group");
     brett.setAttribute("aria-label", T.questtafelBild);
-    brett.innerHTML = holz + zettel + '<svg class="strings" viewBox="0 0 300 400" preserveAspectRatio="none" aria-hidden="true">' + faeden + "</svg>" + pins;
+    brett.innerHTML = zettel + notizen + '<svg class="strings" viewBox="0 0 ' + (100 * SEITE) + ' 100" preserveAspectRatio="none" aria-hidden="true">' + faeden + "</svg>" + pins;
+
+    if (!tafelZentriert) {
+      const sc = $("tafel-scroll");
+      requestAnimationFrame(() => { if (sc.scrollWidth > sc.clientWidth) sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; });
+      tafelZentriert = true;
+    }
   }
 
   function hervorheben(id) {
     const brett = $("quests");
     brett.classList.toggle("fokus", !!id);
     const an = new Set(id ? [id] : []);
-    brett.querySelectorAll(".string").forEach(p => {
-      const ja = !!id && (p.dataset.von === id || p.dataset.nach === id);
-      p.classList.toggle("an", ja);
-      if (ja) { an.add(p.dataset.von); if (p.dataset.nach) an.add(p.dataset.nach); }
-    });
+    brett.querySelectorAll(".string").forEach(p => p.classList.toggle("an", !!id && (p.dataset.von === id || p.dataset.nach === id)));
+    if (id) qFaeden.forEach(f => { if (f.von === id) an.add(f.nach); if (f.nach === id) an.add(f.von); });
     brett.querySelectorAll(".pin-note").forEach(n => n.classList.toggle("an", an.has(n.dataset.q)));
   }
 
@@ -990,6 +1011,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     const tafel = D.questtafel || {};
     qKarten = tafel.karten || [];
     qFaeden = tafel.faeden || [];
+    qNotizen = tafel.notizen || [];
     $("questtafel").hidden = qKarten.length === 0;
     tafelZeichnen();
 

@@ -276,30 +276,30 @@ window.INHALT = {
 
   /* ---------- DIE QUESTTAFEL ----------
      Ein Holzbrett mit angepinnten Zetteln. Antippen öffnet den ganzen Text.
-     Position auf dem Brett: x / y = linke obere Ecke in Prozent, b = Breite in Prozent, dreh = Schräglage in Grad.
+     Position auf dem Brett (Holzfläche im Bild): x / y = linke obere Ecke in Prozent, b = Breite in Prozent, dreh = Schräglage in Grad.
      Aussehen: bild (Bilddatei, wird wie eine Zeichnung eingefärbt), skizze ("spinne" oder "krone") oder nichts (einfacher Notizzettel).
      kurz: was handschriftlich auf dem Zettel steht (<br> = neue Zeile, <small> = kleiner).
      haupt: true = rot und groß. lose: true = ein loser roter Faden hängt am Zettel.
-     faeden: rote Schnüre zwischen zwei Zetteln (von / nach = id), grund = Erklärung im Detailtext.
+     faeden: Zusammenhänge zwischen zwei Zetteln (von / nach = id), grund = Erklärung im Detailtext.
      Ist eine Frage gelöst, einfach den Zettel und seine Fäden löschen. */
   questtafel: {
     karten: [
-      { id: "glasstab", x: 4, y: 4, b: 26, dreh: -5,
+      { id: "glasstab", x: 2, y: 4, b: 17, dreh: -4,
         kurz: "Glasstab †<small>„die Spinne …“</small>",
         label: "Hinweis", titel: "Glasstab",
         text: "Anführer der Roten Roben in Phandalin. Bevor er durch Friedrichs Pfeil fiel, sprach er mit seinem letzten Atemzug von der Spinne, der er offenbar diente.",
         kapitel: "I", abschnitt: "Schloss Crackmore" },
-      { id: "nezna", x: 38, y: 3, b: 24, dreh: 3,
+      { id: "nezna", x: 3, y: 29, b: 16, dreh: 3,
         kurz: "Nezna<small>Drow · entwischt!</small>",
         label: "Hinweis", titel: "Nezna",
         text: "Eine Dunkelelfe, die im Wachturm erbittert gegen uns kämpfte. Als der Kampf verloren war, verwandelte sie sich in ein kleines Tier und entkam. Zuvor sprach auch sie von der Spinne.",
         kapitel: "I", abschnitt: "Der Gefangene im Wachturm" },
-      { id: "statuen", x: 70, y: 5, b: 26, dreh: -2,
+      { id: "statuen", x: 19, y: 65, b: 15, dreh: -3,
         kurz: "Spinnen&shy;statuen<small>(jetzt mit Bart)</small>",
         label: "Hinweis", titel: "Die Spinnenstatuen",
         text: "Eine stand im Unterschlupf unserer Entführer, eine weitere in einem tempelähnlichen Haus im Unterreich. Beide haben von uns eine neue Bemalung bekommen, und hinter der zweiten tat sich prompt ein Geheimgang auf.",
         kapitel: "II", abschnitt: "Der Ausbruch" },
-      { id: "spinne", haupt: true, skizze: "spinne", x: 31, y: 21, b: 38, dreh: -1,
+      { id: "spinne", haupt: true, skizze: "spinne", x: 36, y: 5, b: 28, dreh: -1,
         kurz: "Wer ist die Spinne?",
         label: "Über allem", titel: "Wer ist die Spinne?",
         text: "Eine Person, eine Macht, ein geheimer Orden? Seit Schloss Crackmore lässt uns diese Frage nicht mehr los, und je tiefer wir graben, desto öfter stoßen wir auf acht Beine.",
@@ -310,55 +310,66 @@ window.INHALT = {
           "Friedrich lässt das Thema am wenigsten los."
         ],
         kapitel: "I", abschnitt: "Schloss Crackmore" },
-      { id: "onkel", lose: true, x: 4, y: 31, b: 24, dreh: 4,
+      { id: "onkel", lose: true, x: 65, y: 13, b: 15, dreh: 3,
         kurz: "Ezekiels Onkel?<small>Statue in Donnerbaum</small>",
         label: "Loser Faden", titel: "Ezekiels Onkel",
         text: "Vor einem der Häuser in Donnerbaum stand eine Statue, in der Ezekiel seinen Onkel erkannte. Mehr hat er dazu nicht gesagt. Natürlich nicht.",
         kapitel: "I", abschnitt: "Das verlassene Dorf" },
-      { id: "ilvara", bild: "ilvara-wahr.webp", format: "4/5", pos: "50% 6%", x: 73, y: 25, b: 23, dreh: 4,
+      { id: "ilvara", bild: "ilvara-wahr.webp", format: "4/5", pos: "50% 6%", x: 3, y: 54, b: 13, dreh: -2,
         kurz: "Ilvara Mizzrym",
         label: "Entkommen", titel: "Ilvara Mizzrym",
         text: "Gab sich in Donnerbaum als freundliche Druidin aus, betäubte uns mit einem Kräuternebel und verschleppte uns ins Unterreich. Beim Ausbruch sprang sie von der Brücke in den Fluss. Dass sie das nicht überlebt hat, glaubt keiner von uns.",
         kapitel: "II", abschnitt: "Der Ausbruch" },
-      { id: "kardal", skizze: "krone", x: 5, y: 55, b: 26, dreh: -3,
-        kurz: "Prinz Kardal?",
-        label: "Verdächtig", titel: "Prinz Kardal?",
-        text: "Wir fanden ihn gefesselt mitten im Chaos der Kuo-Toa. Er sagte, er sei bloß ein Späher seiner Stadt. Aber ist das wirklich die ganze Wahrheit?",
-        hinweise: ["Entkam mit uns im Boot über den See.", "Führte uns geradewegs nach Gracklstugh."],
-        kapitel: "II", abschnitt: "Demogorgon" },
-      { id: "demogorgon", bild: "demogorgon.webp", format: "6/5", pos: "50% 35%", x: 38, y: 53, b: 30, dreh: 2,
+      { id: "demogorgon", bild: "demogorgon.webp", format: "6/5", pos: "50% 35%", x: 74, y: 37, b: 18, dreh: 3,
         kurz: "Demogorgon<small>Warum erwacht?</small>",
         label: "Bedrohlich", titel: "Warum ist Demogorgon erwacht?",
         text: "Ein Dämonenfürst stieg aus dem See und machte die Stadt der Kuo-Toa dem Erdboden gleich. Friedrich hat ihn geboxt. Aufgehalten hat ihn das nicht.",
-        hinweise: ["Sein Schrei ließ alle Magie erlöschen.", "Wohin er danach verschwunden ist, weiß niemand."],
+        hinweise: ["Sein Schrei ließ alle Magie erlöschen.", "Schon bei unserem Ausbruch tauchten wie aus dem Nichts Dämonen auf.", "Wohin er danach verschwunden ist, weiß niemand."],
         kapitel: "II", abschnitt: "Demogorgon" },
-      { id: "lermu", x: 73, y: 60, b: 24, dreh: -4,
+      { id: "lermu", x: 77, y: 70, b: 17, dreh: -4,
         kurz: "Lermu-Gorgon<small>= Demogorgon??</small>",
         label: "Hinweis", titel: "Lermu-Gorgon",
         text: "Der falsche Gott, den ein Teil der Kuo-Toa anbetete. Kurz darauf stieg Demogorgon aus dem See. Klingt verdächtig ähnlich, oder?",
         kapitel: "II", abschnitt: "Der unterirdische See" },
-      { id: "gracklstugh", bild: "gracklstugh.jpg", format: "16/9", pos: "50% 50%", x: 6, y: 77, b: 32, dreh: 2,
+      { id: "gracklstugh", bild: "gracklstugh.jpg", format: "16/9", pos: "50% 50%", x: 36, y: 57, b: 25, dreh: 1,
         kurz: "Gracklstugh<small>Was geht hier vor?</small>",
         label: "Als Nächstes", titel: "Was geht in Gracklstugh vor sich?",
         text: "Nach der Flucht über den See war die Festung im Fels ein Anblick wie aus einem Traum. Doch eine Stadt so tief im Unterreich hat ihre eigenen Regeln und ihre eigenen Geheimnisse.",
         hinweise: ["Kardal hat uns hierhergeführt. Er kennt den Weg auffällig gut.", "Wer hier das Sagen hat und was die Stadt von uns will, ist noch völlig offen."],
         kapitel: "II", abschnitt: "Gracklstugh" },
-      { id: "arafil", lose: true, x: 68, y: 83, b: 27, dreh: -3,
+      { id: "kardal", skizze: "krone", x: 57, y: 63, b: 13, dreh: 5,
+        kurz: "Prinz Kardal?",
+        label: "Verdächtig", titel: "Prinz Kardal?",
+        text: "Wir fanden ihn gefesselt mitten im Chaos der Kuo-Toa. Er sagte, er sei bloß ein Späher seiner Stadt. Aber ist das wirklich die ganze Wahrheit?",
+        hinweise: ["Entkam mit uns im Boot über den See.", "Führte uns geradewegs nach Gracklstugh."],
+        kapitel: "II", abschnitt: "Demogorgon" },
+      { id: "arafil", lose: true, x: 81, y: 6, b: 17, dreh: -3,
         kurz: "Arafil des Roten Sitzes<small>Wer ist das?</small>",
         label: "Loser Faden", titel: "Arafil des Roten Sitzes",
         text: "Der Magier, der den Gnom Fagas und seinen Trupp ins Unterreich geschickt hat, um das Grab der Magierin Karim zu finden. Was er dort wirklich sucht, wissen wir nicht.",
         kapitel: "II", abschnitt: "Durch die Spinnweben" }
     ],
+    /* schnur: false = kein roter Faden, steht aber im Detailtext unter „Zusammenhänge“ (die Zettel hängen dann nebeneinander). */
     faeden: [
       { von: "spinne", nach: "glasstab", grund: "diente der Spinne und sprach mit seinem letzten Atemzug von ihr." },
       { von: "spinne", nach: "nezna", grund: "sprach ebenfalls von der Spinne." },
       { von: "spinne", nach: "statuen", grund: "gleich zweimal auf unserem Weg." },
-      { von: "statuen", nach: "ilvara", grund: "eine der Statuen stand in ihrem Unterschlupf." },
-      { von: "nezna", nach: "ilvara", grund: "beide Drow, beide Gestaltwandlerinnen. Zufall?" },
-      { von: "ilvara", nach: "demogorgon", grund: "beim Ausbruch aus ihrem Kerker tauchten wie aus dem Nichts Dämonen auf." },
-      { von: "demogorgon", nach: "lermu", grund: "die Kuo-Toa beteten zu Lermu-Gorgon, dann stieg Demogorgon aus dem See." },
-      { von: "demogorgon", nach: "kardal", grund: "Kardal war mitten im Chaos, als Demogorgon kam." },
-      { von: "kardal", nach: "gracklstugh", grund: "Kardal führte uns nach Gracklstugh." }
+      { von: "kardal", nach: "demogorgon", grund: "Kardal war mitten im Chaos, als Demogorgon kam." },
+      { von: "nezna", nach: "ilvara", schnur: false, grund: "beide Drow, beide Gestaltwandlerinnen. Zufall?" },
+      { von: "statuen", nach: "ilvara", schnur: false, grund: "eine der Statuen stand in ihrem Unterschlupf." },
+      { von: "glasstab", nach: "nezna", schnur: false, grund: "beide sprachen von der Spinne." },
+      { von: "kardal", nach: "gracklstugh", schnur: false, grund: "Kardal führte uns nach Gracklstugh." },
+      { von: "demogorgon", nach: "lermu", schnur: false, grund: "die Kuo-Toa beteten zu Lermu-Gorgon, dann stieg Demogorgon aus dem See." },
+      { von: "ilvara", nach: "demogorgon", schnur: false, grund: "beim Ausbruch aus ihrem Kerker tauchten wie aus dem Nichts Dämonen auf." }
+    ],
+    /* Gelbe Randnotizen, nur zur Deko (nicht anklickbar). gross: true = große Schrift. */
+    notizen: [
+      { text: "beide:<br>„die Spinne“!", x: 18, y: 17, b: 10, dreh: 7 },
+      { text: "beide Drow &amp; Gestalt&shy;wandler?!", x: 17, y: 42, b: 11, dreh: -5 },
+      { text: "???", gross: true, x: 61, y: 40, b: 7, dreh: 8 },
+      { text: "nächstes Ziel!", x: 26, y: 55, b: 10, dreh: -8 },
+      { text: "!!!", gross: true, x: 92, y: 33, b: 7, dreh: 10 },
+      { text: "Lose Fäden", x: 66, y: 2, b: 11, dreh: -4 }
     ]
   },
 
