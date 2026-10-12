@@ -73,6 +73,31 @@ p { margin: 0; }
 .top nav { display: flex; gap: 1.1rem; overflow-x: auto; }
 .top nav a { color: var(--ash); text-decoration: none; font-size: .9rem; letter-spacing: .05em; white-space: nowrap; }
 .top nav a:hover { color: var(--ember); }
+.navdrop { display: inline-flex; align-items: center; gap: .1rem; }
+.navdrop-btn {
+  background: none; border: 0; color: var(--ash); cursor: pointer;
+  padding: .15rem .2rem; line-height: 0; border-radius: 2px;
+}
+.navdrop-btn:hover, .navdrop-btn[aria-expanded="true"] { color: var(--ember); }
+.navdrop-btn svg { width: .62rem; height: .62rem; transition: transform .2s; }
+.navdrop-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.navdrop-menu {
+  position: fixed; z-index: 30; min-width: 15rem; max-width: calc(100vw - 32px);
+  background: var(--night); border: 1px solid var(--line); border-radius: 2px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.5); padding: .35rem 0;
+}
+.navdrop-menu .navdrop-head {
+  margin: 0; padding: .35rem 1rem .4rem; font-size: .68rem; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ash);
+}
+.navdrop-menu a {
+  display: flex; gap: .7rem; align-items: baseline; padding: .55rem 1rem;
+  color: var(--vellum); text-decoration: none; font-size: .95rem;
+}
+.navdrop-menu a:hover, .navdrop-menu a:focus-visible {
+  background: color-mix(in srgb, var(--ember) 14%, transparent); color: var(--ember); outline: none;
+}
+.navdrop-menu .nr { font-family: var(--display); color: var(--ember); min-width: 1.8rem; letter-spacing: .06em; }
 
 .lang { display: flex; gap: .35rem; align-items: center; }
 .lang button {
@@ -488,7 +513,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="wrap">
     <a class="brand" href="#start">Imres Tales</a>
     <nav aria-label="Hauptnavigation" data-i18n-aria="navLabel">
-      <a href="#chronik" data-i18n="navChronik">Chronik</a>
+      <span class="navdrop"><a href="#chronik" data-i18n="navChronik">Chronik</a><button type="button" class="navdrop-btn" aria-haspopup="true" aria-expanded="false" aria-controls="kapitel-menu" aria-label="Kapitel wählen" data-i18n-aria="navKapitelWahl"><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></span>
       <a href="#questtafel" data-i18n="navQuests">Quests</a>
       <a href="#reise" data-i18n="navReise">Reise</a>
       <a href="#gefaehrten" data-i18n="navGefaehrten">Gefährten</a>
@@ -496,6 +521,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#bestiarium" data-i18n="navBestiarium">Bestiarium</a>
       <a href="#kuenste" data-i18n="navKunst">Künste</a>
     </nav>
+    <div class="navdrop-menu" id="kapitel-menu" hidden></div>
     <div class="lang" role="group" aria-label="Sprache / Language">
       <button type="button" data-lang="de" title="Deutsch" aria-label="Deutsch"><svg viewBox="0 0 5 3" aria-hidden="true"><rect width="5" height="1" y="0" fill="#000"/><rect width="5" height="1" y="1" fill="#DD0000"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg></button>
       <button type="button" data-lang="en" title="English" aria-label="English"><svg viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true"><clipPath id="uk-clip"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><rect width="60" height="30" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-clip)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></svg></button>
@@ -637,7 +663,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   const UI = {
     de: {
       navLabel: "Hauptnavigation",
-      navChronik: "Chronik", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
+      navChronik: "Chronik", navKapitelWahl: "Kapitel wählen", kapitelSprung: "Direkt zum Kapitel", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
       navQuests: "Quests", navNsc: "NSC", navKunst: "Künste",
       kunstLabel: "Aus dem Skizzenbuch", kunstTitle: "Barradins Künste",
       kunstText: "Zwischen zwei Abenteuern greift Barradin zur Feder. Was er unterwegs gesehen hat, landet in seinem Notizbuch. Tippe auf eine Zeichnung, um sie groß zu sehen.",
@@ -675,7 +701,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     },
     en: {
       navLabel: "Main navigation",
-      navChronik: "Chronicle", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
+      navChronik: "Chronicle", navKapitelWahl: "Choose a chapter", kapitelSprung: "Jump to chapter", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
       navQuests: "Quests", navNsc: "NPCs", navKunst: "Art",
       kunstLabel: "From the sketchbook", kunstTitle: "Barradin's Art",
       kunstText: "Between two adventures, Barradin reaches for his quill. Whatever he sees along the way ends up in his notebook. Tap a drawing to see it large.",
@@ -1032,6 +1058,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         (i > -1 ? '<button type="button" class="maplink" data-station="' + i + '">' + esc(T.aufKarteKurz) + " · " + stationen[i].nr + "</button>" : "") + "</div>";
     }).join("");
     $("chapters-empty").hidden = D.kapitel.length > 0;
+    $("kapitel-menu").innerHTML = '<p class="navdrop-head">' + esc(T.kapitelSprung) + "</p>" + D.kapitel.map(k =>
+      '<a href="#kapitel-' + esc(k.nummer) + '" data-kap="' + esc(k.nummer) + '"><span class="nr">' + esc(k.nummer) + "</span><span>" + esc(k.titel) + "</span></a>"
+    ).join("");
     $("chapters").innerHTML = D.kapitel.map(k =>
       '<article class="chapter" id="kapitel-' + esc(k.nummer) + '">' +
         '<p class="label">' + esc(T.kapitel) + " " + esc(k.nummer) + "</p>" +
@@ -1168,6 +1197,29 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     try { localStorage.setItem("imres-lang", lang); } catch (_) {}
     render();
   }));
+
+  /* ---------- Kapitel-Auswahl im Kopf ---------- */
+  const dropBtn = document.querySelector(".navdrop-btn"), menu = $("kapitel-menu");
+  function menuZu() { menu.hidden = true; dropBtn.setAttribute("aria-expanded", "false"); }
+  function menuAuf() {
+    menu.hidden = false;
+    const r = dropBtn.closest(".navdrop").getBoundingClientRect();
+    const links = Math.max(16, Math.min(r.left - 12, window.innerWidth - menu.offsetWidth - 16));
+    menu.style.left = links + "px";
+    menu.style.top = (dropBtn.getBoundingClientRect().bottom + 10) + "px";
+    dropBtn.setAttribute("aria-expanded", "true");
+  }
+  dropBtn.addEventListener("click", e => { e.stopPropagation(); menu.hidden ? menuAuf() : menuZu(); });
+  menu.addEventListener("click", e => {
+    const a = e.target.closest("[data-kap]");
+    if (!a) return;
+    e.preventDefault(); menuZu();
+    springe($("kapitel-" + a.dataset.kap));
+  });
+  document.addEventListener("click", e => { if (!menu.hidden && !menu.contains(e.target)) menuZu(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { menuZu(); dropBtn.focus(); } });
+  window.addEventListener("resize", () => { if (!menu.hidden) menuZu(); });
+  document.querySelector(".top nav").addEventListener("scroll", () => { if (!menu.hidden) menuZu(); });
 
   render();
 })();
