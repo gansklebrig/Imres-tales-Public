@@ -99,6 +99,41 @@ p { margin: 0; }
 }
 .navdrop-menu .nr { font-family: var(--display); color: var(--ember); min-width: 1.8rem; letter-spacing: .06em; }
 
+/* ---------- Suche ---------- */
+.tools { display: flex; align-items: center; gap: .7rem; }
+.such-btn {
+  background: none; border: 1px solid transparent; border-radius: 2px; color: var(--ash);
+  cursor: pointer; padding: .3rem; line-height: 0;
+}
+.such-btn:hover, .such-btn[aria-expanded="true"] { color: var(--ember); border-color: var(--line); }
+.such-btn svg { width: 1.05rem; height: 1.05rem; }
+.such-panel {
+  position: fixed; z-index: 30; width: min(27rem, calc(100vw - 32px));
+  background: var(--night); border: 1px solid var(--line); border-radius: 2px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.5);
+}
+.such-panel input {
+  display: block; width: 100%; box-sizing: border-box; border: 0; border-bottom: 1px solid var(--line);
+  background: transparent; color: var(--vellum); font: inherit; font-size: 1rem; padding: .85rem 1rem;
+}
+.such-panel input:focus { outline: none; border-bottom-color: var(--ember); }
+.such-panel input::placeholder { color: var(--ash); opacity: .8; }
+.such-status { margin: 0; padding: .5rem 1rem .3rem; font-size: .68rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ash); }
+.such-status:empty { display: none; }
+.such-liste { list-style: none; margin: 0; padding: 0 0 .35rem; max-height: min(60vh, 30rem); overflow-y: auto; }
+.such-liste button {
+  display: block; width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  padding: .6rem 1rem; color: var(--vellum); font: inherit;
+}
+.such-liste button:hover, .such-liste button:focus-visible, .such-liste button.aktiv {
+  background: color-mix(in srgb, var(--ember) 14%, transparent); outline: none;
+}
+.such-liste .wo { display: block; font-size: .72rem; letter-spacing: .08em; color: var(--ember); margin-bottom: .15rem; }
+.such-liste .was { display: block; font-size: .9rem; line-height: 1.45; color: var(--ash); }
+.such-liste mark { background: none; color: var(--vellum); font-weight: 700; }
+::highlight(suche) { background-color: rgba(224,160,70,.42); color: inherit; }
+.such-treffer { outline: 2px solid var(--ember); outline-offset: 6px; border-radius: 2px; transition: outline-color 1.2s; }
+
 .lang { display: flex; gap: .35rem; align-items: center; }
 .lang button {
   display: block; padding: 2px; background: none; border: 1px solid transparent; border-radius: 2px;
@@ -498,6 +533,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   .top .wrap { flex-wrap: wrap; row-gap: .35rem; }
   .top nav { order: 3; flex: 1 1 100%; min-width: 0; }
   .lang { order: 2; }
+  .tools { order: 2; }
   .tome .seal { max-width: 14rem; }
 }
 @media (max-width: 420px) { .frieze span { font-size: .7rem; } }
@@ -522,9 +558,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#kuenste" data-i18n="navKunst">Künste</a>
     </nav>
     <div class="navdrop-menu" id="kapitel-menu" hidden></div>
+    <div class="tools">
+    <button type="button" class="such-btn" aria-expanded="false" aria-controls="such-panel" aria-label="Suchen" data-i18n-aria="suche"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12.6 12.6L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    <div class="such-panel" id="such-panel" role="search" hidden>
+      <input type="search" id="such-feld" autocomplete="off" spellcheck="false">
+      <p class="such-status" id="such-status" aria-live="polite"></p>
+      <ul class="such-liste" id="such-liste"></ul>
+    </div>
     <div class="lang" role="group" aria-label="Sprache / Language">
       <button type="button" data-lang="de" title="Deutsch" aria-label="Deutsch"><svg viewBox="0 0 5 3" aria-hidden="true"><rect width="5" height="1" y="0" fill="#000"/><rect width="5" height="1" y="1" fill="#DD0000"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg></button>
       <button type="button" data-lang="en" title="English" aria-label="English"><svg viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true"><clipPath id="uk-clip"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><rect width="60" height="30" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-clip)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></svg></button>
+    </div>
     </div>
   </div>
 </header>
@@ -665,6 +709,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navLabel: "Hauptnavigation",
       navChronik: "Chronik", navKapitelWahl: "Kapitel wählen", kapitelSprung: "Direkt zum Kapitel", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
       navQuests: "Quests", navNsc: "NSC", navKunst: "Künste",
+      suche: "Suchen", suchePlatz: "Name, Ort, Stichwort …", sucheNichts: "Nichts gefunden. Vielleicht hat Barradin es ausgelassen.", sucheTreffer: "Treffer", sucheMehr: "Weitere Treffer: Suche genauer eingrenzen", sucheEinleitung: "Einleitung",
       kunstLabel: "Aus dem Skizzenbuch", kunstTitle: "Barradins Künste",
       kunstText: "Zwischen zwei Abenteuern greift Barradin zur Feder. Was er unterwegs gesehen hat, landet in seinem Notizbuch. Tippe auf eine Zeichnung, um sie groß zu sehen.",
       notizbuchLink: "📖 Barradins Notizbuch durchblättern", notizbuchChronik: "📖 Aus Barradins Notizbuch: die Originalseiten",
@@ -703,6 +748,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navLabel: "Main navigation",
       navChronik: "Chronicle", navKapitelWahl: "Choose a chapter", kapitelSprung: "Jump to chapter", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
       navQuests: "Quests", navNsc: "NPCs", navKunst: "Art",
+      suche: "Search", suchePlatz: "Name, place, keyword …", sucheNichts: "Nothing found. Perhaps Barradin left it out.", sucheTreffer: "results", sucheMehr: "More results: narrow your search", sucheEinleitung: "Introduction",
       kunstLabel: "From the sketchbook", kunstTitle: "Barradin's Art",
       kunstText: "Between two adventures, Barradin reaches for his quill. Whatever he sees along the way ends up in his notebook. Tap a drawing to see it large.",
       notizbuchLink: "📖 Leaf through Barradin's notebook", notizbuchChronik: "📖 From Barradin's notebook: the original pages",
@@ -1058,6 +1104,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         (i > -1 ? '<button type="button" class="maplink" data-station="' + i + '">' + esc(T.aufKarteKurz) + " · " + stationen[i].nr + "</button>" : "") + "</div>";
     }).join("");
     $("chapters-empty").hidden = D.kapitel.length > 0;
+    $("such-feld").placeholder = T.suchePlatz;
+    if (!$("such-panel").hidden) suchen();
     $("kapitel-menu").innerHTML = '<p class="navdrop-head">' + esc(T.kapitelSprung) + "</p>" + D.kapitel.map(k =>
       '<a href="#kapitel-' + esc(k.nummer) + '" data-kap="' + esc(k.nummer) + '"><span class="nr">' + esc(k.nummer) + "</span><span>" + esc(k.titel) + "</span></a>"
     ).join("");
@@ -1208,6 +1256,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     menu.style.left = links + "px";
     menu.style.top = (dropBtn.getBoundingClientRect().bottom + 10) + "px";
     dropBtn.setAttribute("aria-expanded", "true");
+    sucheZu();
   }
   dropBtn.addEventListener("click", e => { e.stopPropagation(); menu.hidden ? menuAuf() : menuZu(); });
   menu.addEventListener("click", e => {
@@ -1220,6 +1269,111 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { menuZu(); dropBtn.focus(); } });
   window.addEventListener("resize", () => { if (!menu.hidden) menuZu(); });
   document.querySelector(".top nav").addEventListener("scroll", () => { if (!menu.hidden) menuZu(); });
+
+  /* ---------- Suche ---------- */
+  const suchBtn = document.querySelector(".such-btn"), suchPanel = $("such-panel"), suchFeld = $("such-feld");
+  const falte = t => t.toLowerCase().replace(/[äöüß]/g, c => ({ "ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss" }[c])).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // gefalteter Text mit Rückverweis auf die Originalpositionen
+  function gefaltet(t) {
+    let f = "", map = [];
+    for (let i = 0; i < t.length; i++) { const c = falte(t[i]); for (let j = 0; j < c.length; j++) { f += c[j]; map.push(i); } }
+    map.push(t.length);
+    return { f, map };
+  }
+  const SUCH_ORTE = "#intro-text, #narrator-text, #chapters h3, #chapters .prose > p, #chapters figcaption, #quests .pin-note, #stops li > button:first-child, #heroes h3, #heroes .epithet, #heroes .prose p, #heroes figcaption, #npcs h4, #npcs p, #beasts h3, #beasts p, #kunst .kunst-blatt";
+  function woLabel(el) {
+    const ch = el.closest(".chapter");
+    if (ch) {
+      let sub = "", n = el.closest(".prose > *") || el;
+      while (n && (n = n.previousElementSibling)) if (n.classList.contains("sub")) { sub = n.querySelector("h4").textContent; break; }
+      return T.kapitel + " " + ch.id.replace("kapitel-", "") + " · " + (sub || ch.querySelector("h3").textContent);
+    }
+    const box = el.closest(".hero-entry, .npc, .beast");
+    const sek = el.closest("section");
+    const nav = { questtafel: T.navQuests, reise: T.navReise, gefaehrten: T.navGefaehrten, nsc: T.navNsc, bestiarium: T.navBestiarium, kuenste: T.navKunst }[sek && sek.id] || T.sucheEinleitung;
+    const name = box && box.querySelector("h3, h4");
+    return nav + (name ? " · " + name.textContent : "");
+  }
+  let treffer = [], suchAktiv = -1;
+  function suchen() {
+    const q = falte(suchFeld.value.trim());
+    const liste = $("such-liste"), status = $("such-status");
+    treffer = []; suchAktiv = -1;
+    if (q.length < 2) { liste.innerHTML = ""; status.textContent = ""; return; }
+    document.querySelectorAll(SUCH_ORTE).forEach(el => {
+      if (el.closest("[hidden]")) return;
+      const text = el.textContent.replace(/\s+/g, " ").trim();
+      const g = gefaltet(text), pos = g.f.indexOf(q);
+      if (pos < 0) return;
+      const a = g.map[pos], b = g.map[pos + q.length];
+      let von = Math.max(0, a - 45), bis = Math.min(text.length, b + 70);
+      if (von > 0) { const sp = text.indexOf(" ", von); if (sp > -1 && sp < a) von = sp + 1; }
+      if (bis < text.length) { const sp = text.lastIndexOf(" ", bis); if (sp > b) bis = sp; }
+      const snip = (von > 0 ? "… " : "") + esc(text.slice(von, a)) + "<mark>" + esc(text.slice(a, b)) + "</mark>" + esc(text.slice(b, bis)) + (bis < text.length ? " …" : "");
+      treffer.push({ el, wo: woLabel(el), snip });
+    });
+    const MAX = 40;
+    status.textContent = treffer.length ? treffer.length + " " + T.sucheTreffer : T.sucheNichts;
+    liste.innerHTML = treffer.slice(0, MAX).map((t, i) =>
+      '<li><button type="button" data-t="' + i + '"><span class="wo">' + esc(t.wo) + '</span><span class="was">' + t.snip + "</span></button></li>"
+    ).join("") + (treffer.length > MAX ? '<li><p class="such-status">' + esc(T.sucheMehr) + "</p></li>" : "");
+  }
+  function markiere(el, q) {
+    if (!(window.CSS && CSS.highlights && window.Highlight)) return;
+    const ranges = [], walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const g = gefaltet(node.nodeValue);
+      let pos = g.f.indexOf(q);
+      while (pos > -1) {
+        const r = new Range(); r.setStart(node, g.map[pos]); r.setEnd(node, g.map[pos + q.length]); ranges.push(r);
+        pos = g.f.indexOf(q, pos + q.length);
+      }
+    }
+    CSS.highlights.set("suche", new Highlight(...ranges));
+    clearTimeout(markiere.t);
+    markiere.t = setTimeout(() => CSS.highlights.delete("suche"), 6000);
+  }
+  function oeffneTreffer(i) {
+    const t = treffer[i]; if (!t) return;
+    const q = falte(suchFeld.value.trim());
+    sucheZu();
+    const el = t.el;
+    if (el.matches(".pin-note, .kunst-blatt, #stops button")) el.click();
+    const kopf = document.querySelector(".top").offsetHeight + 24;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - kopf, behavior: "instant" });
+    markiere(el, q);
+    el.classList.add("such-treffer");
+    setTimeout(() => el.classList.remove("such-treffer"), 2200);
+  }
+  function sucheAuf() {
+    suchPanel.hidden = false; menuZu();
+    const r = suchBtn.getBoundingClientRect();
+    suchPanel.style.top = (document.querySelector(".top").getBoundingClientRect().bottom + 8) + "px";
+    suchPanel.style.left = Math.max(16, Math.min(r.right - suchPanel.offsetWidth, window.innerWidth - suchPanel.offsetWidth - 16)) + "px";
+    suchBtn.setAttribute("aria-expanded", "true");
+    suchFeld.focus(); suchFeld.select();
+    if (suchFeld.value) suchen();
+  }
+  function sucheZu() { suchPanel.hidden = true; suchBtn.setAttribute("aria-expanded", "false"); }
+  suchBtn.addEventListener("click", e => { e.stopPropagation(); suchPanel.hidden ? sucheAuf() : sucheZu(); });
+  suchFeld.addEventListener("input", suchen);
+  suchFeld.addEventListener("keydown", e => {
+    const knoepfe = $("such-liste").querySelectorAll("button");
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault(); if (!knoepfe.length) return;
+      suchAktiv = (suchAktiv + (e.key === "ArrowDown" ? 1 : -1) + knoepfe.length) % knoepfe.length;
+      knoepfe.forEach((k, i) => k.classList.toggle("aktiv", i === suchAktiv));
+      knoepfe[suchAktiv].scrollIntoView({ block: "nearest" });
+    } else if (e.key === "Enter") { e.preventDefault(); oeffneTreffer(suchAktiv > -1 ? suchAktiv : 0); }
+  });
+  $("such-liste").addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (b) oeffneTreffer(+b.dataset.t); });
+  document.addEventListener("click", e => { if (!suchPanel.hidden && !suchPanel.contains(e.target)) sucheZu(); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !suchPanel.hidden) { sucheZu(); suchBtn.focus(); }
+    else if (e.key === "/" && suchPanel.hidden && !/input|textarea/i.test(document.activeElement.tagName)) { e.preventDefault(); sucheAuf(); }
+  });
+  window.addEventListener("resize", () => { if (!suchPanel.hidden && document.activeElement !== suchFeld) sucheZu(); });
 
   render();
 })();
