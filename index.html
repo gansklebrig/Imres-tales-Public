@@ -773,7 +773,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <script>
 (function () {
   /* Gemeinsame Questtafel: Zugangsdaten des Supabase-Projekts (leer = jeder Browser speichert für sich) */
-  const TAFEL_SERVER = { url: "", key: "" };
+  const TAFEL_SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
   const LEER = { helden: [], kapitel: [], reise: { karte: null, stationen: [] }, bestiarium: [] };
   const QUELLEN = { de: window.INHALT || LEER, en: window.INHALT_EN || window.INHALT || LEER };
 
@@ -1464,7 +1464,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   }
   $("faden-modus").addEventListener("click", () => {
     if (!bearbeiten) {
-      anmelden().then(ok => { if (!ok) return; bearbeiten = true; hervorheben(null); fadenLeiste(); });
+      anmelden().then(ok => {
+        if (!ok) return;
+        bearbeiten = true; hervorheben(null); fadenLeiste();
+        // Erstbefüllung: Ist die gemeinsame Tafel noch leer, wird der bisher lokal gespeicherte Stand übernommen.
+        if (SERVER && zuletztGeladen === "{}") {
+          try {
+            const lokal = JSON.parse(localStorage.getItem("imres-tafel") || localStorage.getItem("imres-faeden") || "null");
+            if (lokal && Array.isArray(lokal.hinzu)) { tafelEdit = Object.assign(TAFEL_LEER(), lokal); kartenLaden(); tafelZeichnen(); tafelSpeichern(); }
+          } catch (_) {}
+        }
+      });
       return;
     }
     bearbeiten = false;
