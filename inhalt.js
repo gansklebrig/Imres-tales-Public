@@ -29,10 +29,10 @@ window.INHALT = {
       bildtext: "Barradin in seinem Element: Feuer, Publikum und ein breites Grinsen.",
       fries: "50% 30%",
       absaetze: [
-        "Wo der elfische Barde Barradin auftaucht, wird es nicht leise. Er singt Balladen, wirbelt brennende Fackeln durch die Luft und schlägt Saltos, bis die Menge jubelt. Dass er gut ist, weiß er selbst am besten, und er sagt es auch gern. Sein Selbstbewusstsein ist ansteckend: Hat Barradin erst einmal Feuer gefangen, reißt er die ganze Gruppe mit.",
-        "Seine schärfste Waffe ist seine Zunge. Mit Spott und Witz bringt er Gegner aus der Fassung, und schon so mancher Feind ist unter seinen Versen buchstäblich zusammengebrochen. Dass er im Eifer des Gefechts auch mal über die eigenen Füße stolpert, gehört zu seinem Charme.",
+        "Wo der elfische Barde Barradin auftaucht, wird es nicht leise. Er singt Balladen, wirbelt brennende Fackeln durch die Luft und schlägt Saltos, bis die Menge jubelt. Dass er gut ist, weiß er und sein Selbstbewusstsein ist ansteckend.",
+        "Seine schärfste Waffe ist seine Zunge. Mit Spott und Witz bringt er Gegner aus der Fassung, und schon so mancher Feind ist unter seinen Beschimpfungen buchstäblich zusammengebrochen. Dass er, tollpatschig wie eh und je, im Eifer des Gefechts auch mal über die eigenen Füße stolpert, gehört zu seinem Charme.",
         "Aufgewachsen ist Barradin im Haus seines Vaters, eines eifrigen Mitglieds der <em>Alternative für Elfen</em>. Heute geht er bewusst einen anderen Weg. An der Seite eines Menschen, eines Druiden, eines Darkin und eines Hundes hat er gelernt, dass Herkunft nichts über den Wert eines Gefährten sagt, und dafür steht er mit voller Stimme ein.",
-        "Man findet ihn meist mit seiner Pfeife in der Hand, umgeben von einer Wolke aus duftendem Kraut."
+        "Man findet ihn meist mit seiner Pfeife in der Hand, umgeben von einer Wolke aus duftendem Kraut und einem breiten Grinsen im Gesicht."
       ]
     },
     {

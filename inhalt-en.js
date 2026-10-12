@@ -25,10 +25,10 @@ window.INHALT_EN = {
       bildtext: "Barradin in his element: fire, an audience and a wide grin.",
       fries: "50% 30%",
       absaetze: [
-        "Wherever the elven bard Barradin appears, silence does not last. He sings ballads, whirls flaming torches through the air and turns somersaults until the crowd roars. Nobody knows better than he does how good he is, and he is happy to say so. Yet his confidence is contagious: once Barradin catches fire, he carries the whole party with him.",
-        "His sharpest weapon is his tongue. With mockery and wit he throws his foes off balance, and more than one enemy has quite literally collapsed beneath his verses. That he occasionally trips over his own feet in the heat of battle is all part of his charm.",
-        "Barradin grew up in the house of his father, a zealous member of the <em>Alternative for Elves</em>. Today he has deliberately chosen a different path. At the side of a human, a druid, a Darkin and a dog, he has learned that where someone comes from says nothing about their worth as a companion, and he stands up for that at the top of his voice.",
-        "You will usually find him pipe in hand, wrapped in a cloud of fragrant herb."
+        "Wherever the elven bard Barradin turns up, things do not stay quiet. He sings ballads, whirls burning torches through the air and turns somersaults until the crowd cheers. He knows he is good, and his self-confidence is contagious.",
+        "His sharpest weapon is his tongue. With mockery and wit he throws opponents off balance, and many a foe has quite literally collapsed under his insults. That he, clumsy as ever, sometimes trips over his own feet in the heat of battle is all part of his charm.",
+        "Barradin grew up in the house of his father, a zealous member of the <em>Alternative for Elves</em>. Today he deliberately walks a different path. At the side of a human, a druid, a Darkin and a dog, he has learned that origin says nothing about a companion's worth, and he stands up for that with his full voice.",
+        "You will usually find him pipe in hand, surrounded by a cloud of fragrant herb and with a broad grin on his face."
       ]
     },
     {
