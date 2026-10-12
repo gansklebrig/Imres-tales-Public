@@ -479,8 +479,9 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 }
 /* Gelbe Randnotizen (nur Deko) */
 .sticky {
-  position: absolute; z-index: 2; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: calc(var(--b) * 1%);
-  transform: rotate(var(--dreh, 0deg)); pointer-events: none; padding: 1.3cqw .9cqw 1.4cqw; text-align: center; min-height: 2.5em;
+  position: absolute; z-index: 2; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%);
+  width: calc(var(--b) * 1%); box-sizing: border-box; text-wrap: balance; overflow-wrap: normal;
+  transform: rotate(var(--dreh, 0deg)); pointer-events: none; padding: 1.4cqw 1.3cqw 1.5cqw; text-align: center;
   background: linear-gradient(170deg, #f3dd8a, #e3c766); box-shadow: 0 .5cqw 1.1cqw rgba(0,0,0,.5);
   font-family: var(--hand); font-weight: 600; font-size: clamp(10px, 2.1cqw, 16px); line-height: 1.05; color: #a3221a;
   transition: opacity .3s, filter .3s;
@@ -1195,6 +1196,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     brett.setAttribute("role", "group");
     brett.setAttribute("aria-label", T.questtafelBild);
     brett.innerHTML = zettel + notizen + '<svg class="strings" viewBox="0 0 ' + (100 * SEITE) + ' 100" preserveAspectRatio="none" aria-hidden="true"></svg><div class="pins" id="tafel-pins"></div>';
+    notizGroesse();
     fadenZeichnen();
 
     if (!tafelZentriert) {
@@ -1224,6 +1226,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     const dx = px * Math.cos(th) + py * Math.sin(th), dy = -px * Math.sin(th) + py * Math.cos(th);
     const klemm = v => Math.min(.97, Math.max(.03, v));
     return [+klemm(dx / w + .5).toFixed(3), +klemm(dy / h).toFixed(3)];
+  }
+
+  /* Notizzettel so breit machen, dass sie ungefähr quadratisch sind und kein Wort übersteht */
+  function notizGroesse(nur) {
+    const liste = nur ? [nur] : $("quests").querySelectorAll(".sticky");
+    liste.forEach(el => {
+      for (let w = 6; w <= 26; w += .5) {
+        el.style.width = w + "%";
+        if (el.offsetHeight <= el.offsetWidth * .85 && el.scrollWidth <= el.offsetWidth + 1) break;
+      }
+    });
   }
 
   function fadenZeichnen() {
@@ -1519,6 +1532,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     if (!text) { notizWeg(id); return; }
     notizSetzen(id, { text, eigen: true });
     t.innerHTML = textAlsHtml(text);
+    notizGroesse(t.closest(".sticky"));
   });
   $("quests").addEventListener("keydown", e => {
     if (e.key === "Escape" && e.target.isContentEditable) { e.preventDefault(); e.target.blur(); }
@@ -1591,13 +1605,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   }
   document.addEventListener("pointerup", zugEnde);
   document.addEventListener("pointercancel", zugEnde);
-  if (window.ResizeObserver) new ResizeObserver(() => fadenZeichnen()).observe($("quests"));
+  if (window.ResizeObserver) new ResizeObserver(() => { notizGroesse(); fadenZeichnen(); }).observe($("quests"));
+  $("quests").addEventListener("input", e => { const st = e.target.closest && e.target.closest(".sticky"); if (st) notizGroesse(st); });
   if (SERVER) {
     tafelVomServer();
     setInterval(() => { if (!document.hidden) tafelVomServer(); }, 30000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) tafelVomServer(); });
   }
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fadenZeichnen());
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { notizGroesse(); fadenZeichnen(); });
   $("quests").addEventListener("click", e => {
     if (bearbeiten) {
       const w = e.target.closest("[data-weg]");
