@@ -219,12 +219,14 @@ window.INHALT_EN = {
         "Grim guards stood at the city gate, but after Kardal had exchanged a few words with them, they let us pass without further ado. That alone should have made me suspicious.",
         "Beyond the gate lay a marketplace, one of the city's great trading squares. We did not linger there for long, but headed straight for a tavern and first of all ate long and very well. <em class=\"aside\">After fish folk, a demon god and a flight across the lake, we had honestly earned it.</em>",
         "In the middle of our meal, four armoured figures suddenly entered, marched up to our table and saluted. To Kardal. And so the truth came out: our humble scout is in fact the king's son! <em class=\"aside\">A prince. I had suspected as much. Well, almost.</em>",
-        "## At the Court of King Horgar",
-        "The soldiers brought us to a keep, before King Horgar Stahl V. As befits a bard, I struck up a song and told the king of Demogorgon and of how we had rescued his son. The king granted us leave to stay in the city. <em class=\"aside\">Whether that was down to the song or to the rescue of his son, let us leave open.</em>",
+        "## At the Court of King Horga",
+        "!koenig-horga.webp|King Horga Stahl V. His beard alone has more dignity than all of Phandalin.|schmal",
+        "The soldiers brought us to a keep, before King Horga Stahl V. As befits a bard, I struck up a song and told the king of Demogorgon and of how we had rescued his son. The king granted us leave to stay in the city. <em class=\"aside\">Whether that was down to the song or to the rescue of his son, let us leave open.</em>",
         "The stay was not easy on us, though. The air down here took its toll, on Echo most of all, who woke with clear signs of exhaustion.",
         "## Shopping in Gracklstugh",
         "What does a band of heroes do in a strange city? Exactly: go shopping. We stocked up on healing potions, and I acquired a flute of illusions and a few magic potions besides. <em class=\"aside\">You never know when you will need to enchant an audience. Or an enemy.</em>",
         "## The Raging Giant",
+        "!riese.webp|The giant, shortly before we calmed him down. Judging by his look, he still hears the voices.|frei",
         "Suddenly we heard screams and the crash of houses, and already a giant stood before us and attacked. With our combined strength we managed to stun him and tie him up.",
         "Shortly afterwards a second giant appeared, but this one thanked us. He could not explain his kinsman's outburst. Apparently voices in his head had driven him to it. Voices in his head … a chill ran down my spine.",
         "As thanks, he invited us to speak with the Stonespeaker. What an honour!"
@@ -314,12 +316,12 @@ window.INHALT_EN = {
         label: "We are here", titel: "What is going on in Gracklstugh?",
         text: "The king has granted us hospitality, but we do not entirely trust this city.",
         hinweise: ["The air down here wears on us, on Echo most of all.", "A giant attacked us, driven by voices in his head.", "A second giant invited us to speak with the Stonespeaker."],
-        kapitel: "II", abschnitt: "At the Court of King Horgar" },
+        kapitel: "II", abschnitt: "At the Court of King Horga" },
       { id: "kardal", skizze: "krone", x: 57, y: 63, b: 13, dreh: 5,
         kurz: "Prince Kardal",
         label: "Solved", titel: "Prince Kardal",
         text: "We found him bound in the middle of the kuo-toa chaos, and he passed himself off as a simple scout of his city. Then, in Gracklstugh, four soldiers saluted him: Kardal is the king's son.",
-        hinweise: ["Escaped across the lake with us in the boat.", "Because of him, the guards let us into the city.", "His father is King Horgar Stahl V."],
+        hinweise: ["Escaped across the lake with us in the boat.", "Because of him, the guards let us into the city.", "His father is King Horga Stahl V."],
         kapitel: "II", abschnitt: "The King's Son" },
       { id: "riese", bild: "skizze-riese.webp", zeichnung: true, format: "4/5", pos: "50% 8%", x: 80, y: 68, b: 12, dreh: -3,
         kurz: "Voices in his head?",
@@ -358,8 +360,8 @@ window.INHALT_EN = {
     { gruppe: "The Underdark", name: "Fagas", status: "verbuendet", rolle: "Gnome, rescued from a spider cocoon", text: "Told us about the tomb of the wizard Khaem, to which Arafil of the Red Seat had sent him and his troop." },
     { gruppe: "The Underdark", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Archpriest of the kuo-toa", text: "Smuggled us into his city as fake prisoners and died when Demogorgon destroyed it. Barradin called him Blublupin for quite a while." },
     { gruppe: "The Underdark", name: "Kardal", status: "verbuendet", rolle: "Dwarf, son of the king of Gracklstugh", text: "Found bound among the kuo-toa, passed himself off as a scout and fled across the lake with us. In Gracklstugh it came out that he is the king's son." },
-    { gruppe: "The Underdark", name: "King Horgar Stahl V", status: "neutral", rolle: "King of Gracklstugh, Kardal's father", text: "Listened to Barradin's song about Demogorgon and the rescue of his son, and granted us leave to stay in the city." },
-    { gruppe: "The Underdark", name: "The Raging Giant", bild: "skizze-riese.webp", bildPos: "50% 6%", status: "unklar", rolle: "Giant in Gracklstugh", text: "Attacked us in the middle of the city until we managed to stun him and tie him up. Another giant believes voices in his head drove him to it." }
+    { gruppe: "The Underdark", name: "King Horga Stahl V", bild: "portrait-koenig.jpg", bildPos: "50% 50%", status: "neutral", rolle: "King of Gracklstugh, Kardal's father", text: "Listened to Barradin's song about Demogorgon and the rescue of his son, and granted us leave to stay in the city." },
+    { gruppe: "The Underdark", name: "The Raging Giant", bild: "portrait-riese.jpg", bildPos: "50% 50%", status: "unklar", rolle: "Giant in Gracklstugh", text: "Attacked us in the middle of the city until we managed to stun him and tie him up. Another giant believes voices in his head drove him to it." }
   ],
 
   kunst: [

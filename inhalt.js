@@ -226,12 +226,14 @@ window.INHALT = {
         "Am Stadttor standen grimmige Wachen, doch nachdem Kardal ein paar Worte mit ihnen gewechselt hatte, ließen sie uns ohne Weiteres passieren. Schon das hätte mich stutzig machen sollen.",
         "Hinter dem Tor lag ein Marktplatz, einer der großen Handelsplätze der Stadt. Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und aßen erst einmal ausgiebig und richtig lecker. <em class=\"aside\">Nach Fischmenschen, Dämonengott und Flucht über den See hatten wir uns das redlich verdient.</em>",
         "Mitten im Essen traten plötzlich vier gerüstete Gestalten ein, marschierten auf unseren Tisch zu und salutierten. Vor Kardal. Da kam die Wahrheit ans Licht: Unser bescheidener Späher ist in Wahrheit der Sohn des Königs! <em class=\"aside\">Ein Prinz. Ich hatte es ja geahnt. Also, fast.</em>",
-        "## Am Hof von König Horgar",
-        "Die Soldaten brachten uns in eine Feste, vor König Horgar Stahl V. Wie es sich für einen Barden gehört, stimmte ich einen Gesang an und erzählte dem König von Demogorgon und davon, wie wir seinen Sohn gerettet hatten. Der König gewährte uns, in der Stadt zu verweilen. <em class=\"aside\">Ob das am Gesang lag oder an der Rettung seines Sohnes, lassen wir einfach offen.</em>",
+        "## Am Hof von König Horga",
+        "!koenig-horga.webp|König Horga Stahl V. Sein Bart allein hat mehr Würde als ganz Phandalin.|schmal",
+        "Die Soldaten brachten uns in eine Feste, vor König Horga Stahl V. Wie es sich für einen Barden gehört, stimmte ich einen Gesang an und erzählte dem König von Demogorgon und davon, wie wir seinen Sohn gerettet hatten. Der König gewährte uns, in der Stadt zu verweilen. <em class=\"aside\">Ob das am Gesang lag oder an der Rettung seines Sohnes, lassen wir einfach offen.</em>",
         "Leicht fiel uns der Aufenthalt allerdings nicht. Die Luft hier unten setzte uns zu, vor allem Echo, der mit deutlichen Zeichen von Erschöpfung aufwachte.",
         "## Einkaufen in Gracklstugh",
         "Was tut eine Heldengruppe in einer fremden Stadt? Richtig: einkaufen. Wir deckten uns mit Heiltränken ein, und ich erstand eine Flöte der Illusionen und dazu ein paar Zaubertränke. <em class=\"aside\">Man weiß nie, wann man ein Publikum verzaubern muss. Oder einen Gegner.</em>",
         "## Der rasende Riese",
+        "!riese.webp|Der Riese, kurz bevor wir ihn zur Ruhe gebracht haben. Seinem Blick nach hört er die Stimmen noch.|frei",
         "Plötzlich hörten wir Schreie und das Krachen von Häusern, und schon stand ein Riese vor uns und griff an. Mit vereinten Kräften gelang es uns, ihn zu betäuben und zu fesseln.",
         "Kurz darauf erschien ein zweiter Riese, doch dieser dankte uns. Den Ausfall seines Artgenossen konnte er sich nicht erklären. Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben. Stimmen im Kopf … mir lief es kalt den Rücken hinunter.",
         "Zum Dank lud er uns ein, mit dem Steinsprecher zu reden. Welch eine Ehre!"
@@ -334,12 +336,12 @@ window.INHALT = {
         label: "Hier sind wir", titel: "Was geht in Gracklstugh vor sich?",
         text: "Der König hat uns Gastrecht gewährt, doch ganz geheuer ist uns die Stadt nicht.",
         hinweise: ["Die Luft hier unten zehrt an uns, vor allem an Echo.", "Ein Riese griff uns an, getrieben von Stimmen in seinem Kopf.", "Ein zweiter Riese lud uns ein, mit dem Steinsprecher zu reden."],
-        kapitel: "II", abschnitt: "Am Hof von König Horgar" },
+        kapitel: "II", abschnitt: "Am Hof von König Horga" },
       { id: "kardal", skizze: "krone", x: 57, y: 63, b: 13, dreh: 5,
         kurz: "Prinz Kardal",
         label: "Aufgeklärt", titel: "Prinz Kardal",
         text: "Wir fanden ihn gefesselt mitten im Chaos der Kuo-Toa, und er gab sich als einfacher Späher seiner Stadt aus. In Gracklstugh salutierten dann vier Soldaten vor ihm: Kardal ist der Sohn des Königs.",
-        hinweise: ["Entkam mit uns im Boot über den See.", "Seinetwegen ließen uns die Wachen in die Stadt.", "Sein Vater ist König Horgar Stahl V."],
+        hinweise: ["Entkam mit uns im Boot über den See.", "Seinetwegen ließen uns die Wachen in die Stadt.", "Sein Vater ist König Horga Stahl V."],
         kapitel: "II", abschnitt: "Der Sohn des Königs" },
       { id: "riese", bild: "skizze-riese.webp", zeichnung: true, format: "4/5", pos: "50% 8%", x: 80, y: 68, b: 12, dreh: -3,
         kurz: "Stimmen im Kopf?",
@@ -383,8 +385,8 @@ window.INHALT = {
     { gruppe: "Das Unterreich", name: "Fagas", status: "verbuendet", rolle: "Gnom, aus einem Spinnenkokon gerettet", text: "Erzählte uns vom Grab der Magierin Khaem, zu dem Arafil des Roten Sitzes ihn und seinen Trupp geschickt hatte." },
     { gruppe: "Das Unterreich", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Erzpriester der Kuo-Toa", text: "Schmuggelte uns zum Schein gefesselt in seine Stadt und starb, als Demogorgon sie zerstörte. Barradin hat ihn lange Blublupin genannt." },
     { gruppe: "Das Unterreich", name: "Kardal", status: "verbuendet", rolle: "Zwerg, Sohn des Königs von Gracklstugh", text: "Gefesselt bei den Kuo-Toa gefunden, gab sich als Späher aus und floh mit uns über den See. In Gracklstugh kam heraus, dass er der Sohn des Königs ist." },
-    { gruppe: "Das Unterreich", name: "König Horgar Stahl V.", status: "neutral", rolle: "König von Gracklstugh, Kardals Vater", text: "Hörte sich Barradins Gesang über Demogorgon und die Rettung seines Sohnes an und gewährte uns, in der Stadt zu verweilen." },
-    { gruppe: "Das Unterreich", name: "Der rasende Riese", bild: "skizze-riese.webp", bildPos: "50% 6%", status: "unklar", rolle: "Riese in Gracklstugh", text: "Griff uns mitten in der Stadt an, bis wir ihn betäuben und fesseln konnten. Ein anderer Riese meint, Stimmen in seinem Kopf hätten ihn dazu getrieben." }
+    { gruppe: "Das Unterreich", name: "König Horga Stahl V.", bild: "portrait-koenig.jpg", bildPos: "50% 50%", status: "neutral", rolle: "König von Gracklstugh, Kardals Vater", text: "Hörte sich Barradins Gesang über Demogorgon und die Rettung seines Sohnes an und gewährte uns, in der Stadt zu verweilen." },
+    { gruppe: "Das Unterreich", name: "Der rasende Riese", bild: "portrait-riese.jpg", bildPos: "50% 50%", status: "unklar", rolle: "Riese in Gracklstugh", text: "Griff uns mitten in der Stadt an, bis wir ihn betäuben und fesseln konnten. Ein anderer Riese meint, Stimmen in seinem Kopf hätten ihn dazu getrieben." }
   ],
 
   /* ---------- BARRADINS KÜNSTE ----------
