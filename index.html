@@ -1467,13 +1467,6 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       anmelden().then(ok => {
         if (!ok) return;
         bearbeiten = true; hervorheben(null); fadenLeiste();
-        // Erstbefüllung: Ist die gemeinsame Tafel noch leer, wird der bisher lokal gespeicherte Stand übernommen.
-        if (SERVER && zuletztGeladen === "{}") {
-          try {
-            const lokal = JSON.parse(localStorage.getItem("imres-tafel") || localStorage.getItem("imres-faeden") || "null");
-            if (lokal && Array.isArray(lokal.hinzu)) { tafelEdit = Object.assign(TAFEL_LEER(), lokal); kartenLaden(); tafelZeichnen(); tafelSpeichern(); }
-          } catch (_) {}
-        }
       });
       return;
     }
