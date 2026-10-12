@@ -380,7 +380,31 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .tafel-flaeche .strings { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; overflow: visible; filter: drop-shadow(0 2px 1.5px rgba(0,0,0,.6)); }
 .string { fill: none; stroke: #b3261e; stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; transition: opacity .3s, stroke-width .3s; }
 .tafel-flaeche.fokus .string { opacity: .2; }
-.tafel-flaeche.fokus .string.an { opacity: 1; stroke-width: 3.2; stroke: #d0352a; }
+.tafel-flaeche.fokus .string.an { opacity: 1; stroke-width: 3.2; }
+.string-hit { fill: none; stroke: transparent; stroke-width: 18; vector-effect: non-scaling-stroke; pointer-events: none; }
+.tafel-flaeche.bearbeiten .string-hit { pointer-events: stroke; cursor: pointer; }
+.tafel-flaeche.bearbeiten .faden:hover .string { stroke-dasharray: 5 4; stroke-width: 3; opacity: .75; }
+.string.zieh, .tafel-flaeche.fokus .string.zieh { stroke-dasharray: 6 4; opacity: .95; stroke-width: 2.6; }
+.tafel-flaeche.bearbeiten { -webkit-user-select: none; user-select: none; }
+.tafel-flaeche.bearbeiten .pin-note { cursor: crosshair; touch-action: none; }
+.tafel-flaeche.bearbeiten .pin-note img { -webkit-user-drag: none; }
+.faden-leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem 1rem; margin-top: 1rem; }
+.faden-modus, .faden-klein {
+  background: none; border: 1px solid var(--line); color: var(--vellum); font: inherit; cursor: pointer;
+  padding: .45rem .95rem; border-radius: 2px; font-size: .9rem; letter-spacing: .03em;
+}
+.faden-modus:hover, .faden-klein:hover { border-color: var(--ember); color: var(--ember); }
+.faden-modus[aria-pressed="true"] { background: var(--ember); border-color: var(--ember); color: var(--night); }
+.faden-klein { font-size: .8rem; padding: .35rem .7rem; color: var(--ash); }
+.faden-werkzeug { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem; }
+.faden-werkzeug[hidden] { display: none; }
+.faden-farben { display: flex; gap: .45rem; }
+.faden-farben button {
+  width: 1.7rem; height: 1.7rem; border-radius: 50%; border: 2px solid rgba(255,255,255,.18); cursor: pointer; padding: 0;
+  background: var(--f); box-shadow: inset 0 -3px 5px rgba(0,0,0,.35); transition: transform .15s;
+}
+.faden-farben button[aria-checked="true"] { border-color: var(--vellum); transform: scale(1.15); box-shadow: 0 0 0 2px var(--night), 0 0 0 4px var(--ember); }
+.faden-tipp { text-align: center; margin-top: .6rem; font-size: .85rem; color: var(--ash); font-style: italic; }
 .tafel-hint { display: none; text-align: center; margin-top: .7rem; font-size: .85rem; color: var(--ash); font-style: italic; }
 @media (max-width: 760px) { .tafel-hint { display: block; } }
 
@@ -608,6 +632,15 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <p data-i18n="questText">Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.</p>
       </div>
       <div class="tafel-scroll" id="tafel-scroll"><div class="tafel-szene"><div class="tafel-flaeche" id="quests"></div></div></div>
+      <div class="faden-leiste">
+        <button type="button" class="faden-modus" id="faden-modus" aria-pressed="false">Fäden spannen</button>
+        <div class="faden-werkzeug" id="faden-werkzeug" hidden>
+          <div class="faden-farben" id="faden-farben" role="radiogroup"></div>
+          <button type="button" class="faden-klein" id="faden-kopieren" data-i18n="fadenKopieren">Fäden kopieren</button>
+          <button type="button" class="faden-klein" id="faden-reset" data-i18n="fadenReset">Zurücksetzen</button>
+        </div>
+      </div>
+      <p class="faden-tipp" id="faden-tipp" hidden data-i18n="fadenTipp"></p>
       <p class="tafel-hint" data-i18n="wischHint">← Wische, um dich auf der Tafel umzusehen →</p>
       <dialog class="quest-dialog" id="quest-dialog" aria-labelledby="qd-title">
         <form method="dialog"><button class="qd-close" aria-label="Schließen" data-i18n-aria="schliessen">×</button></form>
@@ -716,6 +749,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       questLabel: "Die Questtafel", questTitle: "Offene Fragen",
       questText: "Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.",
       wischHint: "← Wische, um dich auf der Tafel umzusehen →", wasWirWissen: "Was wir wissen",
+      fadenModus: "Fäden spannen", fadenFertig: "Fertig", fadenKopieren: "Fäden kopieren", fadenKopiert: "Kopiert!", fadenReset: "Zurücksetzen", fadenResetFrage: "Alle eigenen Fäden entfernen und die ursprüngliche Tafel wiederherstellen?", fadenFarbe: "Fadenfarbe", fadenTipp: "Ziehe mit der Maus oder dem Finger von einem Zettel zum anderen, um einen Faden zu spannen. Ein Klick auf einen Faden entfernt ihn. Deine Fäden werden in diesem Browser gespeichert.", farbNamen: { rot: "Rot", blau: "Blau", gruen: "Grün", gelb: "Gelb", schwarz: "Schwarz" },
       roteFaeden: "Zusammenhänge", loserFaden: "Dieser Faden hängt noch lose …", schliessen: "Schließen", questtafelBild: "Questtafel",
       nscLabel: "Bekanntschaften", nscTitle: "Freund, Feind &amp; Fragezeichen",
       nscText: "Wer der Gruppe unterwegs begegnet ist, geholfen hat oder ihr noch etwas schuldet.",
@@ -755,6 +789,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       questLabel: "The Quest Board", questTitle: "Open Questions",
       questText: "What keeps the party up at night. Tap a note to learn more.",
       wischHint: "← Swipe to look around the board →", wasWirWissen: "What we know",
+      fadenModus: "Pin threads", fadenFertig: "Done", fadenKopieren: "Copy threads", fadenKopiert: "Copied!", fadenReset: "Reset", fadenResetFrage: "Remove all your own threads and restore the original board?", fadenFarbe: "Thread colour", fadenTipp: "Drag with your mouse or finger from one note to another to pin a thread. Click a thread to remove it. Your threads are saved in this browser.", farbNamen: { rot: "Red", blau: "Blue", gruen: "Green", gelb: "Yellow", schwarz: "Black" },
       roteFaeden: "Connections", loserFaden: "This thread is still hanging loose …", schliessen: "Close", questtafelBild: "Quest board",
       nscLabel: "Acquaintances", nscTitle: "Friend, Foe &amp; Question Mark",
       nscText: "Everyone the party has met on the road, who helped us, or who still owes us something.",
@@ -924,6 +959,37 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   /* ---------- Questtafel ---------- */
   let qKarten = [], qFaeden = [], qNotizen = [];
+  /* Fäden, die Besucher selbst spannen (nur in diesem Browser gespeichert) */
+  const FARBEN = { rot: "#b3261e", blau: "#2f5fa8", gruen: "#3d7d3a", gelb: "#d6a21e", schwarz: "#221d18" };
+  const paarKey = (a, b) => [a, b].sort().join("|");
+  let fadenEdit = { hinzu: [], weg: [] }, fadenModus = false, fadenFarbe = "rot";
+  try { const g = JSON.parse(localStorage.getItem("imres-faeden") || "null"); if (g && Array.isArray(g.hinzu) && Array.isArray(g.weg)) fadenEdit = g; } catch (_) {}
+  function fadenSpeichern() { try { localStorage.setItem("imres-faeden", JSON.stringify(fadenEdit)); } catch (_) {} }
+  function alleFaeden() {
+    const weg = new Set(fadenEdit.weg), pos = new Map(), out = [];
+    qFaeden.forEach(f => { const k = paarKey(f.von, f.nach); if (weg.has(k)) return; pos.set(k, out.length); out.push(Object.assign({ farbe: "rot" }, f)); });
+    const ids = new Set(qKarten.map(k => k.id));
+    fadenEdit.hinzu.forEach(f => {
+      if (!ids.has(f.von) || !ids.has(f.nach)) return;
+      const k = paarKey(f.von, f.nach);
+      if (pos.has(k)) { const o = out[pos.get(k)]; o.farbe = f.farbe; o.schnur = true; }
+      else { pos.set(k, out.length); out.push({ von: f.von, nach: f.nach, farbe: f.farbe }); }
+    });
+    return out;
+  }
+  function fadenHinzu(von, nach) {
+    const k = paarKey(von, nach);
+    fadenEdit.weg = fadenEdit.weg.filter(x => x !== k);
+    fadenEdit.hinzu = fadenEdit.hinzu.filter(f => paarKey(f.von, f.nach) !== k);
+    fadenEdit.hinzu.push({ von, nach, farbe: fadenFarbe });
+    fadenSpeichern(); tafelZeichnen();
+  }
+  function fadenWeg(k) {
+    const vorher = fadenEdit.hinzu.length;
+    fadenEdit.hinzu = fadenEdit.hinzu.filter(f => paarKey(f.von, f.nach) !== k);
+    if (fadenEdit.hinzu.length === vorher && !fadenEdit.weg.includes(k)) fadenEdit.weg.push(k);
+    fadenSpeichern(); tafelZeichnen();
+  }
   const KOHLE = '<filter id="kohle" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>';
   const SKIZZEN = {
     spinne: '<svg class="skizze" viewBox="0 0 160 120" aria-hidden="true" style="--format:4/3"><defs>' + KOHLE +
@@ -952,6 +1018,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   const PIN_Y = 1.8, SEITE = 1.4375;
   const pinPunkt = k => [(+k.x + k.b / 2) * SEITE, +k.y + PIN_Y];
   let tafelZentriert = false;
+  function fadenPfad(x1, y1, x2, y2) {
+    const durchhang = Math.hypot(x2 - x1, y2 - y1) * .12;
+    return "M" + x1.toFixed(2) + " " + y1.toFixed(2) + " Q" + ((x1 + x2) / 2).toFixed(2) + " " + ((y1 + y2) / 2 + durchhang).toFixed(2) + " " + x2.toFixed(2) + " " + y2.toFixed(2);
+  }
 
   function tafelZeichnen() {
     const brett = $("quests");
@@ -959,14 +1029,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     qKarten.forEach(k => { nachId[k.id] = k; });
     const gepinnt = new Set();
     let faeden = "";
-    qFaeden.forEach(f => {
+    alleFaeden().forEach(f => {
       const a = nachId[f.von], b = nachId[f.nach];
       if (!a || !b || f.schnur === false) return;
       gepinnt.add(f.von); gepinnt.add(f.nach);
       const [x1, y1] = pinPunkt(a), [x2, y2] = pinPunkt(b);
-      const durchhang = Math.hypot(x2 - x1, y2 - y1) * .12;
-      faeden += '<path class="string" data-von="' + esc(f.von) + '" data-nach="' + esc(f.nach) + '" d="M' + x1.toFixed(2) + " " + y1.toFixed(2) +
-        " Q" + ((x1 + x2) / 2).toFixed(2) + " " + ((y1 + y2) / 2 + durchhang).toFixed(2) + " " + x2.toFixed(2) + " " + y2.toFixed(2) + '"/>';
+      const d = fadenPfad(x1, y1, x2, y2);
+      faeden += '<g class="faden" data-key="' + esc(paarKey(f.von, f.nach)) + '"><path class="string" style="stroke:' + (FARBEN[f.farbe] || FARBEN.rot) + '" data-von="' + esc(f.von) + '" data-nach="' + esc(f.nach) + '" d="' + d + '"/>' +
+        '<path class="string-hit" d="' + d + '"/></g>';
     });
     qKarten.forEach(k => {
       if (!k.lose) return;
@@ -994,7 +1064,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
     brett.setAttribute("role", "group");
     brett.setAttribute("aria-label", T.questtafelBild);
-    brett.innerHTML = zettel + notizen + '<svg class="strings" viewBox="0 0 ' + (100 * SEITE) + ' 100" preserveAspectRatio="none" aria-hidden="true">' + faeden + "</svg>" + pins;
+    brett.innerHTML = zettel + notizen + '<svg class="strings" viewBox="0 0 ' + (100 * SEITE) + ' 100" preserveAspectRatio="none" aria-hidden="true">' + faeden + '<path class="string zieh" id="faden-zieh" d=""/></svg>' + pins;
 
     if (!tafelZentriert) {
       const sc = $("tafel-scroll");
@@ -1008,16 +1078,16 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     brett.classList.toggle("fokus", !!id);
     const an = new Set(id ? [id] : []);
     brett.querySelectorAll(".string").forEach(p => p.classList.toggle("an", !!id && (p.dataset.von === id || p.dataset.nach === id)));
-    if (id) qFaeden.forEach(f => { if (f.von === id) an.add(f.nach); if (f.nach === id) an.add(f.von); });
+    if (id) alleFaeden().forEach(f => { if (f.von === id) an.add(f.nach); if (f.nach === id) an.add(f.von); });
     brett.querySelectorAll(".pin-note").forEach(n => n.classList.toggle("an", an.has(n.dataset.q)));
   }
 
   function questOeffnen(id) {
     const k = qKarten.find(x => x.id === id);
     if (!k) return;
-    const verbunden = qFaeden.filter(f => f.von === id || f.nach === id).map(f => {
+    const verbunden = alleFaeden().filter(f => f.von === id || f.nach === id).map(f => {
       const ander = qKarten.find(x => x.id === (f.von === id ? f.nach : f.von));
-      return ander ? '<li><button type="button" data-q="' + esc(ander.id) + '">' + esc(ander.titel) + "</button> · " + (f.grund || "") + "</li>" : "";
+      return ander ? '<li><button type="button" data-q="' + esc(ander.id) + '">' + esc(ander.titel) + "</button>" + (f.grund ? " · " + f.grund : "") + "</li>" : "";
     }).join("");
     $("qd-body").innerHTML =
       (k.label ? '<p class="label">' + esc(k.label) + "</p>" : "") +
@@ -1142,6 +1212,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     qNotizen = tafel.notizen || [];
     $("questtafel").hidden = qKarten.length === 0;
     tafelZeichnen();
+    fadenLeiste();
 
     /* Barradins Künste */
     const kunst = D.kunst || [];
@@ -1191,15 +1262,80 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     waehlen(+b.dataset.station);
     springe($("reise"));
   });
+  /* ---------- Fäden spannen ---------- */
+  function fadenLeiste() {
+    $("faden-modus").textContent = fadenModus ? T.fadenFertig : T.fadenModus;
+    $("faden-modus").setAttribute("aria-pressed", fadenModus ? "true" : "false");
+    $("faden-werkzeug").hidden = !fadenModus;
+    $("faden-tipp").hidden = !fadenModus;
+    $("quests").classList.toggle("bearbeiten", fadenModus);
+    $("faden-farben").setAttribute("aria-label", T.fadenFarbe);
+    $("faden-farben").innerHTML = Object.keys(FARBEN).map(f =>
+      '<button type="button" role="radio" data-farbe="' + f + '" aria-checked="' + (f === fadenFarbe) + '" aria-label="' + esc(T.farbNamen[f]) + '" title="' + esc(T.farbNamen[f]) + '" style="--f:' + FARBEN[f] + '"></button>'
+    ).join("");
+  }
+  $("faden-modus").addEventListener("click", () => { fadenModus = !fadenModus; hervorheben(null); fadenLeiste(); });
+  $("faden-farben").addEventListener("click", e => { const b = e.target.closest("[data-farbe]"); if (b) { fadenFarbe = b.dataset.farbe; fadenLeiste(); } });
+  $("faden-reset").addEventListener("click", () => {
+    if (!confirm(T.fadenResetFrage)) return;
+    fadenEdit = { hinzu: [], weg: [] }; fadenSpeichern(); tafelZeichnen();
+  });
+  $("faden-kopieren").addEventListener("click", () => {
+    const text = alleFaeden().filter(f => f.schnur !== false).map(f => '{ von: "' + f.von + '", nach: "' + f.nach + '", farbe: "' + f.farbe + '" },').join("\n");
+    const fertig = () => { const b = $("faden-kopieren"); b.textContent = T.fadenKopiert; setTimeout(() => { b.textContent = T.fadenKopieren; }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(fertig, () => prompt("", text));
+    else prompt("", text);
+  });
+  let zug = null, klickSperre = false;
+  function brettPunkt(e) {
+    const r = $("quests").querySelector(".strings").getBoundingClientRect();
+    return [(e.clientX - r.left) / r.width * 100 * SEITE, (e.clientY - r.top) / r.height * 100];
+  }
+  $("quests").addEventListener("pointerdown", e => {
+    if (!fadenModus || e.button > 0) return;
+    const n = e.target.closest(".pin-note");
+    if (!n) return;
+    e.preventDefault();
+    const k = qKarten.find(x => x.id === n.dataset.q);
+    zug = { von: n.dataset.q, start: pinPunkt(k), pid: e.pointerId };
+    try { n.releasePointerCapture(e.pointerId); } catch (_) {}
+    hervorheben(zug.von);
+  });
+  document.addEventListener("pointermove", e => {
+    if (!zug || e.pointerId !== zug.pid) return;
+    const [x, y] = brettPunkt(e), p = $("faden-zieh");
+    p.setAttribute("d", fadenPfad(zug.start[0], zug.start[1], x, y));
+    p.style.stroke = FARBEN[fadenFarbe];
+    const ziel = document.elementFromPoint(e.clientX, e.clientY);
+    const n = ziel && ziel.closest && ziel.closest(".pin-note");
+    $("quests").querySelectorAll(".pin-note").forEach(x => x.classList.toggle("an", x.dataset.q === zug.von || x === n));
+  });
+  function zugEnde(e) {
+    if (!zug || e.pointerId !== zug.pid) return;
+    const von = zug.von; zug = null;
+    $("faden-zieh").setAttribute("d", "");
+    hervorheben(null);
+    const ziel = e.type === "pointerup" && document.elementFromPoint(e.clientX, e.clientY);
+    const n = ziel && ziel.closest && ziel.closest(".pin-note");
+    klickSperre = true; setTimeout(() => { klickSperre = false; }, 50);
+    if (n && n.dataset.q !== von) fadenHinzu(von, n.dataset.q);
+  }
+  document.addEventListener("pointerup", zugEnde);
+  document.addEventListener("pointercancel", zugEnde);
   $("quests").addEventListener("click", e => {
+    if (fadenModus) {
+      const f = e.target.closest(".faden");
+      if (f && !klickSperre) fadenWeg(f.dataset.key);
+      return;
+    }
     const n = e.target.closest("[data-q]");
     if (n) questOeffnen(n.dataset.q);
   });
   $("quests").addEventListener("mouseover", e => {
     const n = e.target.closest("[data-q]");
-    if (n && !$("quest-dialog").open) hervorheben(n.dataset.q);
+    if (n && !fadenModus && !$("quest-dialog").open) hervorheben(n.dataset.q);
   });
-  $("quests").addEventListener("mouseleave", () => { if (!$("quest-dialog").open) hervorheben(null); });
+  $("quests").addEventListener("mouseleave", () => { if (!zug && !$("quest-dialog").open) hervorheben(null); });
   $("quest-dialog").addEventListener("click", e => {
     const dlg = $("quest-dialog");
     if (e.target === dlg) { dlg.close(); return; }
