@@ -200,6 +200,7 @@ window.INHALT = {
         "!ilvara-wahr.webp|Ilvara Mizzrym in ihrer wahren Gestalt. Von der Hüterin des Waldes ist nicht viel übrig.|schmal links",
         "Kaum hatten wir Ilvaras Haus betreten, lag plötzlich ein süßlicher, giftiger Dampf in der Luft. Einer nach dem anderen sanken die Helden zu Boden, und mir wurde schwarz vor Augen. Die freundliche Druidin war in Wahrheit eine Gestaltwandlerin, die uns mit einem Kräuternebel betäubt hatte, und sie verschleppte uns alle. Ihr wahres Gesicht sollten wir erst später sehen: Ilvara Mizzrym, eine Drow.",
         "## Gefangen",
+        "!gefangen-kerker.jpg|Das böse Erwachen: hinter Gittern, gefesselt und bewacht. Selbst Rex schaut nicht begeistert.|schmal",
         "Wie viel Zeit vergangen war, wusste keiner von uns, als wir wieder zu uns kamen. <em class=\"aside\">Ein paar Stunden? Tage? Ich habe jedenfalls hervorragend geschlafen.</em> Die ganze Truppe lag in Ketten, tief unter der Erde, in einem gefängnisartigen Raum hinter Schloss und Riegel. Vor den Gitterstäben standen Wachen und starrten grimmig herein. Zum ersten Mal auf dieser Reise hatte ich wirklich Angst.",
         "Dann hatte Echo eine geniale Idee: Er verwandelte sich in eine Ratte, schlüpfte unbemerkt aus der Zelle und fand in einem Nebenraum unsere Ausrüstung. Immer noch in Tiergestalt schaffte er alles zurück zu uns. <em class=\"aside\">Einfach genial, Echo!</em>",
         "## Der Ausbruch",

@@ -193,6 +193,7 @@ window.INHALT_EN = {
         "!ilvara-wahr.webp|Ilvara Mizzrym in her true form. Not much left of the guardian of the forest.|schmal links",
         "The moment we stepped into Ilvara's house, a sweet, poisonous vapour filled the air. One after another the heroes sank to the floor, and everything went black before my eyes. The friendly druid was in truth a shapeshifter who had drugged us with an herbal mist, and she carried us all off. Her true face we would only see later: Ilvara Mizzrym, a drow.",
         "## Captured",
+        "!gefangen-kerker.jpg|A rude awakening: behind bars, bound and guarded. Even Rex does not look pleased.|schmal",
         "None of us knew how much time had passed when we came to. <em class=\"aside\">A few hours? Days? Either way, I slept splendidly.</em> The whole band lay in chains, deep beneath the earth, in a prison-like chamber under lock and key. Guards stood outside the bars, glaring in grimly. For the first time on this journey, I was truly afraid.",
         "Then Echo had a brilliant idea: he turned into a rat, slipped out of the cell unnoticed and found our gear in a neighbouring room. Still in animal form, he brought everything back to us. <em class=\"aside\">Simply brilliant, Echo!</em>",
         "## The Breakout",
