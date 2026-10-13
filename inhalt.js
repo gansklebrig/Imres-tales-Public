@@ -182,7 +182,7 @@ window.INHALT = {
         "Der Kampf war brutal. Dann kam mein großer Moment: Ich zog den Drachen mit meiner Magie in einen hypnotischen Bann, und meine Gefährten nutzten die Gelegenheit, um sich in Stellung zu bringen. <em class=\"aside\">Ich erwähne das nur der Vollständigkeit halber. Und weil es großartig war.</em> Am Ende fiel der Venomfang durch unsere vereinten Kräfte und etliche gezielte Angriffe!",
         "Sein Giftatem hatte uns jedoch übel zugesetzt. Meine Lunge brannte noch Stunden danach, und auch die anderen waren von dem brutalen Kampf gezeichnet. Echo und Ezekiel hatte der Drache mit seinem Gift direkt getroffen und schwere Wunden hinterlassen, und Friedrich wurde beinahe von einer Kralle skalpiert.",
         "Wir überlebten also nur knapp, und die Priorität war gerade, erst einmal durchzuatmen, sich um die Wunden zu kümmern, meine Pfeife zu stopfen und dann natürlich die Beute einzusammeln. Echo war dabei, wie man sich denken kann, besonders gründlich.",
-        "!venomfang-besiegt.jpg|Venomfang ist besiegt. Ich gönne mir eine Pfeife, und Rex hat sich seinen Anteil an der Beute schon gesichert.",
+        "!venomfang-besiegt.jpg|Der Venomfang ist besiegt. Ich gönne mir eine Pfeife, und Rex hat sich seinen Anteil an der Beute schon gesichert.",
         "## Das verlassene Dorf",
         "!ilvara-druidin.webp|Ilvara, wie sie sich uns zeigte: ehrwürdig, freundlich und mit Fuchs. Was sollte da schon schiefgehen?|schmal",
         "Dann war das Dorf an der Reihe. In einigen der vermeintlich leeren Häuser lauerten Zombies. Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt: Er erkannte darin seinen Onkel. <em class=\"aside\">Mehr hat er dazu nicht gesagt. Natürlich nicht.</em>",
@@ -294,7 +294,7 @@ window.INHALT = {
      bild ist optional. Beispiel:
      { name: "Goblin", bild: "goblin.jpg", status: "besiegt", ort: "Die Straße", text: "Klein und gemein." } */
   bestiarium: [
-    { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "Der Wachturm von Donnerbaum", text: "Ein grüner Giftdrache, der sich im verfallenen Wachturm eingenistet hatte. Sein Giftatem setzte der Gruppe übel zu, bis Barradins Hypnose den entscheidenden Vorteil brachte." },
+    { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "Der Wachturm von Donnerbaum", text: "Eine Art junger grüner Giftdrachen. Dieser hier hatte sich im verfallenen Wachturm eingenistet. Sein Giftatem setzte der Gruppe übel zu, bis Barradins Hypnose den entscheidenden Vorteil brachte." },
     { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein fliegender, insektenartiger Dämon mit mehreren Flügeln und einem langen Stachel. Tauchte mitten im Ausbruch aus dem Nichts auf und stürzte sich auf die Gefährten." },
     { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "Das Gefängnis im Unterreich", text: "Ein geierartiger Dämon mit zerzausten Schwingen. Erledigte einen Großteil der Wachen, bevor die Gefährten auch ihn niederstreckten." },
     { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "gefallen", ort: "Die Stadt am unterirdischen See", text: "Ein Volk von Fischmenschen, das am Ufer eines unterirdischen Sees lebte. Ein Teil von ihnen betete einen falschen Gott an, und im Stadtzentrum gingen sie aufeinander und auf die Gefährten los. Als Demogorgon kam, starben sie alle, und von ihrer Stadt blieben nur Ruinen." },
@@ -411,7 +411,7 @@ window.INHALT = {
     { bild: "skizze-ettercap.webp", titel: "Ettercap", text: "Einer von vielen in den Spinnweben des Unterreichs." },
     { bild: "skizze-riese.webp", titel: "Der rasende Riese", text: "Gracklstugh. Stimmen im Kopf?" },
     { bild: "skizze-chasme.webp", titel: "Chasme", text: "Tauchte mitten im Ausbruch aus dem Nichts auf." },
-    { bild: "skizze-turm.webp", titel: "Der Turm von Donnerbaum", text: "Hier wartete Venomfang." },
+    { bild: "skizze-turm.webp", titel: "Der Turm von Donnerbaum", text: "Hier wartete der Venomfang." },
     { bild: "skizze-ketten.webp", titel: "In Ketten", text: "So sind wir im Unterreich aufgewacht." },
     { bild: "skizze-laute.webp", titel: "Barradins Laute", text: "Die wichtigste Waffe der Gruppe." }
   ]

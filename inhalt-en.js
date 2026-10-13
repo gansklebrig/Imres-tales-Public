@@ -175,7 +175,7 @@ window.INHALT_EN = {
         "The fight was brutal. Then came my great moment: with my magic I drew the dragon into a hypnotic trance, and my companions seized the chance to get into position. <em class=\"aside\">I mention this only for the sake of completeness. And because it was magnificent.</em> In the end the Venomfang fell to our combined strength and many well-aimed attacks!",
         "But his poison breath had dealt us a nasty blow. My lungs were still burning hours later, and the others bore the marks of that brutal fight too. The dragon's poison had struck Echo and Ezekiel head-on and left grievous wounds, and Friedrich was very nearly scalped by a claw.",
         "So we survived only by a hair, and the priority right then was to catch our breath, tend to our wounds, fill my pipe and then, of course, gather the loot. Echo, as you might imagine, was particularly thorough.",
-        "!venomfang-besiegt.jpg|Venomfang is defeated. I treat myself to a pipe, and Rex has already claimed his share of the loot.",
+        "!venomfang-besiegt.jpg|The Venomfang is defeated. I treat myself to a pipe, and Rex has already claimed his share of the loot.",
         "## The Abandoned Village",
         "!ilvara-druidin.webp|Ilvara as she appeared to us: venerable, kindly and with a fox. What could possibly go wrong?|schmal",
         "Then it was the village's turn. Zombies lurked in some of the seemingly empty houses. In front of one house stood a statue that stopped Ezekiel in his tracks: he recognised it as his uncle. <em class=\"aside\">He said nothing more about it. Of course he didn't.</em>",
@@ -281,7 +281,7 @@ window.INHALT_EN = {
 
   /* ---------- THE BESTIARY ---------- */
   bestiarium: [
-    { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "The watchtower of Thundertree", text: "A green poison dragon that had made its lair in the crumbling watchtower. Its poison breath dealt the party a nasty blow until Barradin's hypnosis turned the tide." },
+    { name: "Venomfang", bild: "venomfang.jpg", status: "besiegt", ort: "The watchtower of Thundertree", text: "A kind of young green poison dragon. This one had made its lair in the crumbling watchtower. Its poison breath dealt the party a nasty blow until Barradin's hypnosis turned the tide." },
     { name: "Chasme", bild: "chasme.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A flying, insect-like demon with several wings and a long stinger. Appeared out of nowhere in the middle of the breakout and swooped down on the companions." },
     { name: "Vrock", bild: "vrock.jpg", status: "besiegt", ort: "The prison in the Underdark", text: "A vulture-like demon with ragged wings. Took down most of the guards before the companions struck it down as well." },
     { name: "Kuo-Toa", bild: "kuo-toa.jpg", status: "gefallen", ort: "The city by the underground lake", text: "A race of fish folk who lived on the shore of an underground lake. Some of them worshipped a false god, and in the city centre they turned on each other and on the companions. When Demogorgon came, they all perished, and nothing remained of their city but ruins." },
@@ -384,7 +384,7 @@ window.INHALT_EN = {
     { bild: "skizze-ettercap.webp", titel: "Ettercap", text: "One of many in the webs of the Underdark." },
     { bild: "skizze-riese.webp", titel: "The Raging Giant", text: "Gracklstugh. Voices in his head?" },
     { bild: "skizze-chasme.webp", titel: "Chasme", text: "Appeared out of nowhere in the middle of our breakout." },
-    { bild: "skizze-turm.webp", titel: "The Tower of Thundertree", text: "Where Venomfang was waiting." },
+    { bild: "skizze-turm.webp", titel: "The Tower of Thundertree", text: "Where the Venomfang was waiting." },
     { bild: "skizze-ketten.webp", titel: "In Chains", text: "How we woke up in the Underdark." },
     { bild: "skizze-laute.webp", titel: "Barradin's Lute", text: "The party's most important weapon." }
   ]
