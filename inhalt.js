@@ -184,10 +184,11 @@ window.INHALT = {
         "Wir überlebten also nur knapp, und die Priorität war gerade, erst einmal durchzuatmen, sich um die Wunden zu kümmern, meine Pfeife zu stopfen und dann natürlich die Beute einzusammeln. Echo war dabei, wie man sich denken kann, besonders gründlich.",
         "!venomfang-besiegt.jpg|Der Venomfang ist besiegt. Ich gönne mir eine Pfeife, und Rex hat sich seinen Anteil an der Beute schon gesichert.",
         "## Das verlassene Dorf",
-        "!ilvara-druidin.webp|Ilvara, wie sie sich uns zeigte: ehrwürdig, freundlich und mit Fuchs. Was sollte da schon schiefgehen?|schmal",
-        "Dann war das Dorf an der Reihe. In einigen der vermeintlich leeren Häuser lauerten Zombies. Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt: Er erkannte darin seinen Onkel. <em class=\"aside\">Mehr hat er dazu nicht gesagt. Natürlich nicht.</em>",
+        "Dann war der Rest des Dorfes an der Reihe. In einigen der vermeintlich leeren Häuser lauerten Zombies, die uns dank der langen Rast nur noch kaum zusetzen konnten. Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt: Er erkannte darin seinen Onkel. Mehr hat er dazu nicht gesagt. Natürlich nicht.",
         "Es folgten weitere Kämpfe gegen Blights, gegen zwei riesige Spinnen und gegen noch mehr Blights, bis Echo einen gewaltigen Feuerball losließ und das Problem auf seine Weise löste. Die Hitze spüre ich heute noch im Gesicht.",
-        "Im letzten Haus wartete schließlich eine Druidin, die sich als Ilvara vorstellte. Ganz in Grün gekleidet, einen Fuchs auf den Schultern, wirkte sie wie eine Hüterin des Waldes. Keiner von uns ahnte etwas Böses, als sie uns in ihr Haus bat. Heute ärgert mich das mehr, als ich zugeben möchte."
+        "!ilvara-druidin.webp|Ilvara, wie sie sich uns zeigte: ehrwürdig, freundlich und mit Fuchs. Was sollte da schon schiefgehen?|schmal",
+        "Im letzten Haus wartete schließlich eine Druidin, die sich als Ilvara vorstellte. Ganz in Grün gekleidet, einen Fuchs auf den Schultern und einen Sitz auf dem Fuß, wirkte sie wie eine Hüterin des Waldes. Es roch nach Eintopf, und wir entdeckten einen kochenden Topf und hofften auf eine warme Speise. Der Rest des Raumes war gefüllt mit gesammelten Kräutern, Tinkturen und handschriftlichen Notizen über die Natur und die Tiere in diesem Teil des Waldes, der an das Dorf angrenzte.",
+        "Keiner von uns ahnte etwas Böses, als sie uns in ihr Haus bat … <em class=\"aside\">Heute ärgert mich das mehr, als ich zugeben möchte.</em>"
       ],
       fortsetzung: "Weiter in Kapitel II …"
     },
