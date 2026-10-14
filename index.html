@@ -638,13 +638,24 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 </header>
 
 <main id="start">
-  <div class="wrap hero">
-    <p class="label" data-i18n="heroLabel">Eine Pen-&amp;-Paper-Kampagne</p>
-    <h1>Imres Tales</h1>
-    <div class="gm" id="intro" hidden><p class="label" id="intro-label"></p><p id="intro-text"></p></div>
-    <p class="lede" data-i18n="lede">Ein Barde mit goldener Zunge und ein Waldläufer mit ruhiger Hand. Ein Druide mit Feuer im Herzen, ein Schurke voller Geheimnisse, ein Hund und die Quest, die uns alle vereint.</p>
-    <div class="frieze" id="frieze"></div>
-    <p class="frieze-hint" data-i18n="friezeHint">Tippe auf ein Porträt, um mehr über den Helden zu erfahren.</p>
+  <!-- Startseite: Halle der Gefährten und Übersicht (wird von seiten.js befüllt) -->
+  <div id="startseite">
+    <section class="halle-start" aria-label="Imres Tales">
+      <div class="halle" id="halle"></div>
+      <div class="halle-titel">
+        <p class="label" data-i18n="heroLabel">Eine Pen-&amp;-Paper-Kampagne</p>
+        <h1>Imres Tales</h1>
+        <p class="halle-namen" id="halle-namen"></p>
+      </div>
+      <a class="halle-runter" href="#uebersicht" aria-label="Zur Übersicht">⌄</a>
+    </section>
+    <div class="wrap start-rest" id="uebersicht">
+      <div class="gm" id="intro" hidden><p class="label" id="intro-label"></p><p id="intro-text"></p></div>
+      <p class="lede" data-i18n="lede">Ein Barde mit goldener Zunge und ein Waldläufer mit ruhiger Hand. Ein Druide mit Feuer im Herzen, ein Schurke voller Geheimnisse, ein Hund und die Quest, die uns alle vereint.</p>
+      <a class="weiterlesen" id="weiterlesen" href="#chronik" hidden></a>
+      <div class="kacheln" id="kacheln"></div>
+    </div>
+    <div hidden><div class="frieze" id="frieze"></div><p class="frieze-hint" data-i18n="friezeHint"></p></div>
   </div>
 
   <section class="part" id="chronik">
@@ -818,6 +829,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 </footer>
 
 <!-- Alle Texte stehen in inhalt.js (deutsch) und inhalt-en.js (englisch) -->
+<script src="seiten.js" defer></script>
 <script src="reime.js" defer></script>
 <script src="spott.js" defer></script>
 <script src="extras.js" defer></script>
@@ -946,6 +958,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   /* ---------- Sprung mit Hervorhebung ---------- */
   function springe(ziel) {
     if (!ziel) return;
+    if (window.ImresAnsicht) window.ImresAnsicht.zeige(ziel);
     const kopf = document.querySelector(".top").offsetHeight + 12;
     const y = ziel.getBoundingClientRect().top + window.pageYOffset - kopf;
     window.scrollTo({ top: y, behavior: "instant" });
@@ -1845,6 +1858,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     const q = falte(suchFeld.value.trim());
     sucheZu();
     const el = t.el;
+    if (window.ImresAnsicht) window.ImresAnsicht.zeige(el);
     if (el.matches(".pin-note, .kunst-blatt, #stops button")) el.click();
     const kopf = document.querySelector(".top").offsetHeight + 24;
     window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - kopf, behavior: "instant" });

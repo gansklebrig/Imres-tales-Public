@@ -440,7 +440,9 @@ main.beben { animation: beben .7s linear; }
     linear-gradient(rgba(6,9,22,.52), rgba(6,9,22,.58)); } }
 .mondnacht.an { opacity: 1; }
 
-#tinten-ebene { position: absolute; top: 0; left: 0; width: 100%; height: 0; z-index: 9; pointer-events: none; }
+#tinten-ebene { position: absolute; top: 0; left: 0; width: 100%; height: 0; z-index: 9; pointer-events: none; overflow: clip; }
+.mondlicht #tinten-ebene { overflow: visible; }
+html, body { overflow-x: clip; }
 .tinte {
   position: absolute; padding: 0; border: 0; background: none; cursor: pointer; aspect-ratio: 1;
   opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 1.8s ease, visibility 0s 1.8s, transform .4s;
@@ -882,7 +884,7 @@ main.beben { animation: beben .7s linear; }
       if (!r.width) { b.hidden = true; return; }
       b.hidden = false;
       const w = breit && rand ? 150 : Math.min(110, window.innerWidth * .28);
-      const x = breit && rand ? r.right + 40 : r.right - w + 12;
+      const x = Math.min(breit && rand ? r.right + 40 : r.right - w + 12, document.documentElement.clientWidth - w - 4);
       let y = r.top + (breit && rand ? 0 : -8);
       for (let n = 0; n < 4; n++) { /* nicht über Bilder legen */
         const f = bilder.find(f => x < f.right && x + w > f.left && y < f.bottom && y + w > f.top);

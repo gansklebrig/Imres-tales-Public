@@ -275,14 +275,15 @@
   const saitenCache = new Map();
   function audioStart() {
     if (!ctx) {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const AC = window.AudioContext || window.webkitAudioContext;
+      try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { ctx = new AC(); } /* größerer Puffer = keine Aussetzer auf dem Handy */
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor();
       komp.threshold.value = -20; komp.knee.value = 10; komp.ratio.value = 3; komp.attack.value = .005; komp.release.value = .2;
       const ausgang = ctx.createGain(); ausgang.gain.value = .6;
       const limiter = ctx.createDynamicsCompressor();
-      limiter.threshold.value = -6; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = .001; limiter.release.value = .1;
+      limiter.threshold.value = -4; limiter.knee.value = 2; limiter.ratio.value = 20; limiter.attack.value = .003; limiter.release.value = .25;
       master = ctx.createGain(); master.gain.value = .45;
       master.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
       IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
@@ -311,6 +312,13 @@
     }
     saitenCache.set(key, buf);
     return buf;
+  }
+  /* Alle Saitenklänge der aktuellen Tonleiter vorab berechnen,
+     damit beim Spielen nichts mehr gerechnet werden muss (verhindert Hänger) */
+  function saitenVorbereiten() {
+    if (!ctx) return;
+    for (let z = 0; z < 8; z++) saite(midiHz(tonMidi("melodie", z, S)), "mel");
+    for (let z = 0; z < BASS_STUFEN.length; z++) saite(midiHz(tonMidi("bass", z, S)), "bass");
   }
   function zupf(freq, zeit, art, laut) {
     const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -476,7 +484,7 @@
   const anzeige = [];
   const schrittDauer = () => 60 / S.tempo / 4;
   function planen() {
-    const vorlauf = document.hidden ? 1.6 : .12; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
+    const vorlauf = document.hidden ? 1.6 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     while (naechste < ctx.currentTime + vorlauf) {
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
       const v = S.variation / 10, letzterTakt = abschnitt % S.ablauf.length === S.ablauf.length - 1;
@@ -499,8 +507,9 @@
   }
   function start() {
     audioStart();
-    laeuft = true; schritt = 0; abschnitt = 0; naechste = ctx.currentTime + .06; anzeige.length = 0;
-    planen(); timer = setInterval(planen, 25);
+    saitenVorbereiten();
+    laeuft = true; schritt = 0; abschnitt = 0; naechste = ctx.currentTime + .1; anzeige.length = 0;
+    planen(); timer = setInterval(planen, 30);
     bordunAn();
     requestAnimationFrame(malen);
     knoepfe();
@@ -521,9 +530,31 @@
     root.querySelectorAll("[data-teil]").forEach(b => b.classList.toggle("spielt", b.dataset.teil === teilName));
   }
   const buehne = () => root.querySelector(".lw-buehne");
-  function zucken(klasse) {
-    const b = buehne(); if (!b || ruhig) return;
-    b.classList.remove(klasse); void b.offsetWidth; b.classList.add(klasse);
+  /* Bewegungen der Band über die Web-Animations-Schnittstelle (ruckelt nicht) */
+  const BEWEGUNG = {
+    klopf: [[".barradin .kopf", "rotate(6deg) translateY(2px)", 280], [".barradin .arm-schlag", "rotate(-9deg) translate(2px, 4px)", 180], [".barradin .laute", "rotate(-1.5deg)", 200]],
+    schelle: [[".barradin .fuss", "rotate(-8deg)", 200]],
+    bass: [[".barradin .arm-schlag", "rotate(5deg)", 220]],
+    mel: [[".barradin .hand-griff", "translate(-6px, 4px) scale(1.15)", 250]],
+    trommel: [[".friedrich .f-arm", "rotate(14deg)", 200], [".friedrich .f-kopf", "rotate(6deg) translateY(2px)", 280]],
+    floete: [[".echo .e-koerper", "rotate(-2.5deg)", 500]],
+    ketten: [[".ezekiel .kette", "rotate(9deg)", 300], [".ezekiel .z-kopf", "rotate(6deg) translateY(2px)", 300]],
+    wuff: [[".rex .r-kopf", "rotate(-14deg) translateY(-2px)", 250]],
+    heul: [[".rex .r-kopf", "rotate(-32deg) translate(-2px, -3px)", 1300]]
+  };
+  const LEUCHTEN = { mel: ".barradin .saiten", bass: ".barradin .saiten", trommel: ".friedrich .trommelfell", schelle: ".barradin .schellring", ketten: ".ezekiel .augen" };
+  let figurCache = {};
+  const figur = sel => figurCache[sel] || (figurCache[sel] = root.querySelector(".lw-buehne " + sel));
+  function zucken(art) {
+    if (ruhig) return;
+    (BEWEGUNG[art] || []).forEach(([sel, ziel, dauer]) => {
+      const el = figur(sel); if (!el || !el.animate) return;
+      el.animate(art === "heul"
+        ? [{ transform: "none" }, { transform: ziel, offset: .15 }, { transform: ziel, offset: .8 }, { transform: "none" }]
+        : [{ transform: "none" }, { transform: ziel, offset: .4 }, { transform: "none" }], { duration: dauer, easing: "ease-out" });
+    });
+    const l = LEUCHTEN[art] && figur(LEUCHTEN[art]);
+    if (l && l.animate) l.animate([{ filter: "drop-shadow(0 0 4px #ffd27a) brightness(1.6)" }, { filter: "none" }], { duration: 300 });
   }
   /* Positionen auf der Bühne (in Prozent der Breite) */
   const ORT = { laute: 44, bass: 38, floete: 70, trommel: 14, ketten: 88, rex: 66 };
@@ -750,6 +781,7 @@
 
     spalten = Array.from({ length: SCHRITTE }, (_, i) => Array.from(root.querySelectorAll('.lw-zelle[data-s="' + i + '"]')));
     aktiv = -1;
+    figurCache = {};
   }
   function knoepfe() {
     const b = root.querySelector(".lw-play");
@@ -847,7 +879,7 @@
       else if (k === "zufall") S = zufallsLied();
       else S = pruefen(ausVorlage(k, mix));
       bearbeite = "A";
-      merken(); neuGezeichnet();
+      merken(); neuGezeichnet(); saitenVorbereiten();
       return;
     }
     if (e.target.closest(".lw-teilen")) {
@@ -867,8 +899,8 @@
   });
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
-    if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); }
-    if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); }
+    if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
+    if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
     if (f === "ablauf") { S.ablauf = e.target.value; merken(); }
   });
   document.addEventListener("visibilitychange", () => {
