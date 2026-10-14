@@ -109,67 +109,49 @@
   };
   const t = () => TX[sprache()];
 
-  /* ---------- Barradins Reime ({n} = Name) ---------- */
-  const REIME = {
-    de: {
-      patzer: [
-        "Oh {n}, du bist so … äh … groß?\nUnd deine Schuhe … sind famos?\nDie Saite reißt, der Ton zerbricht –\nich glaube, das war kein Gedicht.",
-        "Ein Hoch auf {n}! Ein Hoch auf … Moment,\nwie ging der Reim? Wer hat das Lied verbrennt?\nIch fang nochmal an … nein, lieber nicht.\nDer Barde verbeugt sich. Und fällt aufs Gesicht."
-      ],
-      schwach: [
-        "{n}, {n}, du bist da,\nund das ist … wirklich wunderbar.\nMehr fällt mir gerade nicht ein,\ndoch es soll ein Loblied sein.",
-        "Wer ist toll? {n} ist toll!\nDas Lied ist kurz, das Herz ist voll.\nDer Reim ist schief, die Laute auch,\nso ist das eben Bardenbrauch."
-      ],
-      maessig: [
-        "Hört, ihr Leut', beim Kerzenschein:\nHeut soll {n} gepriesen sein!\nIn Schenke, Schlacht und Kerkerloch\nwar auf {n} Verlass – und ist es noch.",
-        "Ein Krug, ein Lied, ein lauter Toast\nauf {n}, den Stolz der ganzen … Kost?\nÄh, Truppe! Ja! Und hört gut zu:\nSo treu wie {n} ist keiner – nicht mal du."
-      ],
-      gut: [
-        "Die Barden singen's in jedem Land,\nvon Neverwinter bis zum Unterreich-Rand:\nKein Herz so kühn, so treu, so rein –\nwie {n} wird keiner jemals sein!",
-        "Wenn Dunkelheit die Welt umhüllt\nund Furcht die tiefsten Hallen füllt,\ndann tritt hervor, der Feinde Schreck:\n{n}! Und alles Böse rennt weg."
-      ],
-      stark: [
-        "Die Sterne neigen sich vor dir,\no {n}, des Abenteuers Zier!\nSelbst Drachen flüstern voller Neid:\nSo viel Glanz in einer einz'gen Zeit?",
-        "Selbst Demogorgon zog mit Grauen\nsich zurück, um {n} nicht anzuschauen.\nZwei Köpfe hat er, doch kein Mut –\ndenn {n} kämpft mit Herz und Glut!"
-      ],
-      legende: [
-        "Gebt mir die Laute, gebt mir Licht!\nEin solches Lied vergisst man nicht:\nVon Phandalin bis tief hinab\nerzählt man's bis ans letzte Grab.\nDie Berge beben, Meere schweigen,\ndie Götter sich vor {n} verneigen.\nUnd fragt man einst in ferner Zeit,\nwer war der Größte weit und breit,\nso ruft ein jedes Kind ganz laut:\n„Es war {n}!“ – Wer hätt's nicht geglaubt?",
-        "Im Feuerschein, beim Lautenklang,\nerhebt sich heut mein schönster Sang:\nWo {n} geht, da blüht das Land,\nda weicht die Nacht, da fällt die Wand,\nda lacht das Glück, da ruht das Schwert,\nda wird der schlimmste Feind bekehrt.\nIhr Götter, hört's und schreibt es ein:\nKein Held wird je wie {n} sein!"
-      ],
-      krit: [
-        "Ihr Sterne, schweigt! Ihr Winde, ruht!\nHier singt der Barde voller Glut!\nVon {n} will ich heute künden,\nkein größ'rer Held ist je zu finden.\nDie Drachen weinen, Dämonen fliehn,\ndie Götter knien vor {n} hin.\nUnd jedes Bier im ganzen Land\nträgt {n}s Namen fortan am Rand!"
-      ]
-    },
-    en: {
-      patzer: [
-        "Oh {n}, you are so … um … tall?\nAnd your boots are … nice … and that is all?\nA string goes snap, the chord falls flat –\nI don't think that was a song. That's that.",
-        "Hail to {n}! Hail to … wait,\nhow did it go? Is it too late?\nI'll start again … no, better not.\nThe bard takes a bow. And trips on the spot."
-      ],
-      schwach: [
-        "{n}, {n}, you are here,\nand that is … great, it's very clear.\nI can't think of anything more,\nbut it's a hymn, of that I'm sure.",
-        "Who is great? {n} is great!\nThe song is short, the heart is straight.\nThe rhyme is bent, the lute is too –\nthat's just what we bards tend to do."
-      ],
-      maessig: [
-        "Hear ye, hear ye, by candle's glow:\ntonight to {n} our praise shall go!\nIn tavern, battle, dungeon pit,\n{n} has never failed one bit.",
-        "A mug, a song, a hearty toast\nto {n}, pride of all the … roast?\nThe party! Yes! And hear it true:\nnone's as loyal as {n} – not even you."
-      ],
-      gut: [
-        "The bards all sing it far and wide,\nfrom Neverwinter to the Underdark's side:\nno heart so bold, so true, so bright –\n{n} outshines the stars at night!",
-        "When darkness falls upon the land\nand fear creeps in on every hand,\nthen forth there steps the foe's worst dread:\n{n}! And evil runs ahead."
-      ],
-      stark: [
-        "The stars themselves bow down to you,\no {n}, so brave, so wise, so true!\nEven dragons whisper, green with spite:\nhow can one shine so very bright?",
-        "Even Demogorgon turned in fright\nand fled from {n}'s dazzling sight.\nTwo heads he has, but not one spark\nof {n}'s courage in the dark!"
-      ],
-      legende: [
-        "Give me my lute, give me the light!\nA song like this will last the night:\nfrom Phandalin to depths below\nthey'll sing it wherever bards may go.\nThe mountains quake, the oceans hush,\nthe gods themselves before {n} blush.\nAnd when they ask in years to be\nwho was the greatest, all agree –\neach child will shout it, loud and proud:\n\"It was {n}!\" across the crowd.",
-        "By firelight and lute's sweet ring\nthe finest song I'll ever sing:\nwhere {n} walks, the meadows bloom,\nthe night gives way, there lifts the gloom,\nthe luck comes smiling, swords lie still,\nthe fiercest foe bends to that will.\nYe gods, take note and write it down:\nno hero matches {n}'s renown!"
-      ],
-      krit: [
-        "Hush, ye stars, and rest, ye breeze!\nThe bard now sings with fire and ease!\nOf {n} I shall tell today –\nno greater hero comes our way.\nThe dragons weep, the demons flee,\nthe gods kneel down on bended knee,\nand every ale in every land\nshall bear {n}'s name upon the stand!"
-      ]
+  /* ---------- Barradins Reime: stehen in reime.js, hier werden sie zusammengesetzt ---------- */
+  const letzteLieder = [];
+  function dichte(stufe, name) {
+    const R = (window.BARRADIN_REIME || {})[sprache()];
+    if (!R) return name + "!";
+    const hoch = !(stufe === "patzer" || stufe === "schwach");
+    const lage = hoch ? "hoch" : "tief";
+    const pool = stufe === "krit" ? "legende" : stufe;
+    const key = String(name).toLowerCase().replace(/[^a-zäöüßéèêáàâíìóòúùñ]/g, "");
+    let reime = R.namen[key] && R.namen[key][lage];
+    if (!reime) {
+      const e = R.endungen.find(([m]) => new RegExp("(" + m + ")$").test(key));
+      reime = e && e[1][lage];
     }
-  };
+    const namensTeil = () => reime && reime.length && Math.random() < .85
+      ? zufall(R.namensZeilen[lage]) + "\n" + zufall(reime)
+      : zufall(R.namensPaare[lage]);
+    const paare = (n) => {
+      const liste = (R.paare[pool] || []).slice().sort(() => Math.random() - .5);
+      return liste.slice(0, n);
+    };
+    let teile;
+    if (Math.random() < .2 && R.ganz[stufe] && R.ganz[stufe].length) {
+      teile = [zufall(R.ganz[stufe])];
+    } else if (stufe === "legende" || stufe === "krit") {
+      const [p1, p2] = paare(2);
+      teile = [p1, p2, namensTeil(), zufall(R.schluss)];
+    } else if (stufe === "stark") {
+      const [p1, p2] = paare(2);
+      teile = [p1, namensTeil(), p2];
+    } else {
+      const [p1] = paare(1);
+      teile = Math.random() < .5 ? [p1, namensTeil()] : [namensTeil(), p1];
+    }
+    const text = teile.filter(Boolean).join("\n").split("{n}").join(name);
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+  function neuesLied(stufe, name) {
+    let text = dichte(stufe, name);
+    for (let i = 0; i < 6 && letzteLieder.includes(text); i++) text = dichte(stufe, name);
+    letzteLieder.push(text); if (letzteLieder.length > 8) letzteLieder.shift();
+    return text;
+  }
   const BONUS = 7; /* Barradins Auftreten-Bonus */
   const ZIELE = ["Friedrich", "Echo", "Ezekiel", "Rex", "Imre", "Barradin"];
 
@@ -703,8 +685,8 @@ main.beben { animation: beben .7s linear; }
       return;
     }
     const T = t(), w = letzterWurf, s = w.stufe;
-    const verse = REIME[sprache()][s];
-    const vers = verse[w.vers % verse.length].split("{n}").join(esc(w.name));
+    if (neu || w.sprache !== sprache()) { w.text = neuesLied(s, w.name); w.sprache = sprache(); }
+    const vers = esc(w.text);
     $("w20-gross").textContent = T.stufen[s];
     $("w20-klein").textContent = w.wurf + " + " + BONUS + " " + T.probeAuftreten + (w.insp ? " + " + w.insp + " " + T.probeInspiration : "") + " = " + w.summe;
     const box = $("lied");
@@ -726,7 +708,7 @@ main.beben { animation: beben .7s linear; }
       zahl.textContent = wurf;
       if (wurf === 20) btn.classList.add("krit");
       if (wurf === 1) btn.classList.add("patzer");
-      letzterWurf = { wurf, insp, summe, stufe: stufe(wurf, summe), vers: Math.floor(Math.random() * 10), name: zielName() };
+      letzterWurf = { wurf, insp, summe, stufe: stufe(wurf, summe), name: zielName() };
       liedZeigen(true);
       inspirationZeigen();
       const r = btn.getBoundingClientRect();
