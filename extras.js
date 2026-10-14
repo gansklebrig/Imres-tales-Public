@@ -139,12 +139,15 @@
     const lage = hoch ? "hoch" : "tief";
     const pool = stufe === "krit" ? "legende" : stufe;
     const key = String(name).toLowerCase().replace(/[^a-zäöüßéèêáàâíìóòúùñ]/g, "");
+    const eigenePaare = R.namen[key] && R.namen[key].paare && R.namen[key].paare[lage];
     let reime = R.namen[key] && R.namen[key][lage];
     if (!reime) {
       const e = R.endungen.find(([m]) => new RegExp("(" + m + ")$").test(key));
       reime = e && e[1][lage];
     }
-    const namensTeil = () => reime && reime.length && Math.random() < .85
+    const namensTeil = () => eigenePaare && eigenePaare.length && Math.random() < .6
+      ? zufall(eigenePaare)
+      : reime && reime.length && Math.random() < .85
       ? zufall(R.namensZeilen[lage]) + "\n" + zufall(reime)
       : zufall(R.namensPaare[lage]);
     const paare = (n) => {

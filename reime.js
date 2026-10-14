@@ -14,7 +14,8 @@
      ganz          fertige Lieder, die ab und zu komplett gesungen werden
      paare         zwei Zeilen, die sich reimen (ohne Namen)
      namensZeilen  eine Zeile, die auf den Namen ENDET
-     namen         passende Reimzeilen für bekannte Namen (reimen auf den Namen)
+     namen         bekannte Namen: „paare“ = fertige Zweizeiler mit dem Namen
+                   im Reim, „hoch“/„tief“ = Zeilen, die auf den Namen reimen
      endungen      Reimzeilen für alle anderen Namen, sortiert nach Namensendung
      namensPaare   Ersatz, wenn sich auf einen Namen nichts reimt
      schluss       krönender Abschluss für legendäre Lieder
@@ -59,6 +60,8 @@ window.BARRADIN_REIME = {
 
     paare: {
       patzer: [
+        "Ich hol tief Luft, ich setz zum Singen an –\nund niese mitten rein. Na dann.",
+        "Die erste Strophe … die zweite … die drei …\nWo war ich? Ach, egal. Vorbei.",
         "Ich stimm' die Laute … Moment … wo ist sie hin?\nAch, da liegt sie … nein, das ist mein Kinn.",
         "Hört, hört! Ich sing … ich sing … von … was?\nWer hat mir eben nachgeschenkt dies Glas?",
         "Die Saite reißt, die Pfeife fällt in den Wein,\ndas sollte heut ein Meisterwerk sein.",
@@ -66,6 +69,8 @@ window.BARRADIN_REIME = {
         "Ich steig auf den Tisch – der Tisch bricht ein,\nich glaub, ich sing ab jetzt im Liegen. Fein."
       ],
       schwach: [
+        "Ich reime Herz auf Schmerz und Mut auf gut,\nmehr fällt mir nicht ein. Na, das tut's.",
+        "Das Lied ist kurz, die Stimme rau,\nich bin seit gestern Abend blau.",
         "Ein Lied, ein Lied, ich sing euch jetzt ein Lied,\nweil das ein Barde halt so macht. Und so geschieht's.",
         "Die Laute klingt ein bisschen schief,\nich glaub, ich hab noch nicht genug geschlief … geschlafen.",
         "Wer tapfer ist und manchmal auch nicht,\nder kriegt von mir ein kleines Gedicht.",
@@ -73,6 +78,8 @@ window.BARRADIN_REIME = {
         "Der Wirt schaut grimmig, der Hund schaut weg,\ndas Lied ist leider nur so … ein Fleck."
       ],
       maessig: [
+        "Vom Hafen bis zur Zwergenstadt\nkennt man den Helden, früh und spat.",
+        "Hebt die Krüge, schlagt den Takt,\nhier kommt ein Lied, das jeden packt!",
         "Hört, ihr Leut', beim Kerzenschein,\nein Lied soll heut gesungen sein!",
         "Der Krug ist voll, der Abend jung,\ndrum sing ich mit Begeisterung!",
         "In Phandalin und tief im Unterreich\nist keiner diesem Helden gleich.",
@@ -80,6 +87,8 @@ window.BARRADIN_REIME = {
         "Mit Pfeife, Laute, Bier und Brot\nbesing ich Helden in der Not."
       ],
       gut: [
+        "Wo andre zögern, zittern, fliehn,\nsieht man den Helden vorwärts ziehn.",
+        "Kein Kerker hält, kein Schloss, kein Riegel –\nein Held wie dieser sprengt jedes Siegel.",
         "Von Neverwinter bis zum fernsten Strand\nkennt man den Namen in jedem Land.",
         "Die Schurken zittern, wenn sie hören,\nwer kommt, um ihre Pläne zu zerstören.",
         "Wo Dunkelheit die Welt umhüllt,\nwird jeder Feind mit Furcht erfüllt.",
@@ -87,6 +96,8 @@ window.BARRADIN_REIME = {
         "Selbst Venomfang mit seinem Gift\nwar machtlos, wenn ihn dieser Held trifft."
       ],
       stark: [
+        "Selbst Ilvara in ihrem Drowpalast\nhat vor dem Helden heimlich Angst gefasst.",
+        "Die Riesen in den Hallen tief im Stein\nverneigen sich – und fühlen sich ganz klein.",
         "Die Sterne neigen sich bei Nacht\nund staunen ob der Heldenpracht.",
         "Selbst Demogorgon, riesengroß,\nversteckt sich lieber. Ganz famos.",
         "Die Drachen flüstern voller Neid:\nSo viel Glanz in einer Zeit?",
@@ -94,6 +105,8 @@ window.BARRADIN_REIME = {
         "Und wenn die Spinne Fäden webt,\nist's dieser Held, der sie zerlegt."
       ],
       legende: [
+        "Ein Name, der durch alle Zeiten hallt,\nin jeder Taverne, jedem Wald.",
+        "Wenn Barden später Lieder schreiben,\nwird dieser Name ewig bleiben.",
         "Ihr Götter, hört! Ihr Sterne, schaut!\nHier wird ein Heldenlied gebaut!",
         "Die Berge beben, Meere schweigen,\ndie Götter sich vor Ehrfurcht neigen.",
         "Von Phandalin bis tief hinab\nerzählt man es bis an das Grab.",
@@ -105,6 +118,8 @@ window.BARRADIN_REIME = {
 
     namensZeilen: {
       hoch: [
+        "Kein Held ist größer als {n}!",
+        "Die Sterne funkeln nur für {n}!",
         "Ein Hoch, ein Hoch, ein Hoch auf {n}!",
         "Und über allen strahlt nur {n}!",
         "Der Held der Helden heißt nur {n}!",
@@ -115,6 +130,7 @@ window.BARRADIN_REIME = {
         "So stark, so schön, so klug ist {n}!"
       ],
       tief: [
+        "Und jetzt ein Lied … für … ja … für {n}.",
         "Und da wär' noch … äh … {n}?",
         "Ich sing jetzt mal … für … {n}!",
         "Ein Lied, ein Lied, ein Lied für {n} …",
@@ -125,6 +141,16 @@ window.BARRADIN_REIME = {
 
     namen: {
       friedrich: {
+        paare: {
+          hoch: [
+            "Sein Pfeil fliegt gerade, still und ehrlich –\nsein Herz ist rein: Hoch lebe Friedrich!",
+            "Mit Bogen, Hund und Rechtschaffenheit gefährlich\nfür jeden Feind: der Waldläufer Friedrich!",
+            "Selbst Demogorgon boxt er, unbeschwerlich –\nwer sonst wär' so verrückt? Na, Friedrich!"
+          ],
+          tief: [
+            "Da war noch wer … mit Bogen … und so … herrlich …\nwie hieß der gleich? Ach, Friedrich. Natürlich."
+          ]
+        },
         hoch: [
           "sein Bogen trifft – ganz sicherlich!",
           "so rechtschaffen und so ritterlich!",
@@ -138,6 +164,16 @@ window.BARRADIN_REIME = {
         ]
       },
       echo: {
+        paare: {
+          hoch: [
+            "Die Feinde brennen lichterloh,\nund einer lacht dazu: der Druide Echo!",
+            "Wo Blitze zucken, hell und roh,\nsteht hörnergekrönt und stolz: Echo!",
+            "Und ruft man laut in den Wald hinein, so\nhallt es zurück: Ein Hoch auf Echo! … Echo … Echo …"
+          ],
+          tief: [
+            "Der … hat Hörner … und … na ja … so.\nIch glaub, er heißt … wart … Echo? Echo? … Echo."
+          ]
+        },
         hoch: [
           "sein Feuerball brennt lichterloh!",
           "wo Blitze zucken, wird er froh!",
@@ -150,6 +186,16 @@ window.BARRADIN_REIME = {
         ]
       },
       ezekiel: {
+        paare: {
+          hoch: [
+            "Er stach der Chasme ins Auge, und sie fiel –\nein Hoch auf den Darkin mit Stil: Ezekiel!",
+            "Für ihn ist jeder Kampf ein Spiel,\nund jeder Dolchstoß sitzt: Ezekiel!",
+            "Wo Schatten fallen, kalt und viel,\nda lauert der Destroyer: Ezekiel!"
+          ],
+          tief: [
+            "Der zerstört … halt … Sachen … ziemlich viel.\nIch sag nichts Falsches! Hallo, Ezekiel!"
+          ]
+        },
         hoch: [
           "sein Dolch trifft immer jedes Ziel!",
           "der Darkin mit dem meisten Stil!",
@@ -162,6 +208,16 @@ window.BARRADIN_REIME = {
         ]
       },
       rex: {
+        paare: {
+          hoch: [
+            "Dem besten Hund gebührt der beste Keks:\nEin Hoch auf unsern tapfern Rex!",
+            "Kein Dämon ist ihm zu komplex,\ner beißt einfach zu: der gute Rex!",
+            "Er wittert Fallen, Gift und Klecks –\nkein Spürhund ist so gut wie Rex!"
+          ],
+          tief: [
+            "Ein Hund … mit Fell … und einem Klecks …\ner will kein Lied. Er will 'nen Keks. Der Rex."
+          ]
+        },
         hoch: [
           "der beste Hund – verdient sich jeden Keks!",
           "so treu, so flink, ein Blitzreflex!",
@@ -173,17 +229,40 @@ window.BARRADIN_REIME = {
         ]
       },
       imre: {
+        paare: {
+          hoch: [
+            "Damit kein Würfel je mein Los verschlimmre,\nsing ich ein Loblied auf den gnäd'gen Imre!",
+            "Die ganze Welt, in der ich kämpf' und zimmre,\nerschuf allein der große Meister Imre!",
+            "Ich heb mein Glas, dass es im Feuer schimmre:\nAuf unsern Spielleiter, den großen Imre!",
+            "Wenn mir ein Rettungswurf misslingt, dann wimmre\nich leis' – und doch, ich liebe dich, o Imre!",
+            "Von Phandalin bis tief hinab, wo's glimmre,\nschuf jeden Stein und jede Höhle: Imre!"
+          ],
+          tief: [
+            "Ein Lied für Imre? Puh … worauf reimt sich Imre?\nIch geb es auf und wimmre. Leise. Wimmre.",
+            "Ich sing … für … wen? Ach ja, ich glaub, für Imre …\nder Reim ist schwer. Ich … zimm… ich zimmre? Glimmre?"
+          ]
+        },
         hoch: [
-          "der Herr der Würfel – heut und immer!",
-          "er schuf die Welt mit Glanz und Schimmer!",
-          "ganz ohne ihn wär' alles schlimmer!"
+          "auf dass sein Würfel nie mein Los verschlimmre!",
+          "der Welten baut, wie ich mir Lieder zimmre!",
+          "durch den die ganze Welt in Gold erschimmre!"
         ],
         tief: [
-          "der … würfelt … gegen uns. Und das immer.",
-          "wir überleben … oder … nimmer?"
+          "und ich … ich find kein Reimwort. Ich … wimmre.",
+          "der Reim ist schwer … ich zimm… ich glimm… ich wimmre."
         ]
       },
       barradin: {
+        paare: {
+          hoch: [
+            "Wer singt so schön, wer hat das schönste Kinn?\nDer Größte bin – natürlich! – Barradin!",
+            "Die Herzen schmelzen, alle sinken hin,\nwenn er die Laute zupft: Barradin!",
+            "Mit Pfeife, Feuer, Laute und Gewinn –\ndas Beste an der Gruppe? Barradin!"
+          ],
+          tief: [
+            "Ein Lied auf mich? Na gut … wo fang ich an … hin …\nich hab den Faden verloren. Ich bin Barradin."
+          ]
+        },
         hoch: [
           "der schönste Elf mit markantem Kinn!",
           "der Barde, dem die Herzen schmelzen hin!",
@@ -278,6 +357,8 @@ window.BARRADIN_REIME = {
 
     paare: {
       patzer: [
+        "I take a breath, I start to sing –\nand sneeze right in. A lovely thing.",
+        "The first verse … second … verse three …\nwhere was I? Never mind. Not me.",
         "I tune my lute … wait, where did it go?\nOh, there it is … no, that's my toe.",
         "Hear, hear! I'll sing … I'll sing … of … what?\nWho poured this ale? I've lost the plot.",
         "The string goes snap, my pipe falls in the wine –\nthis was supposed to be my finest line.",
@@ -285,6 +366,8 @@ window.BARRADIN_REIME = {
         "I climb the table – the table breaks,\nI'll sing from down here. For all our sakes."
       ],
       schwach: [
+        "I rhyme heart with part and true with blue,\nthat's all I've got. That'll have to do.",
+        "My voice is rough, my song is short,\nI've had too much of the tavern's port.",
         "A song, a song, I'll sing a song,\nbecause that's what bards do … all along.",
         "My lute sounds slightly out of tune,\nI should have slept … till … afternoon.",
         "Whoever's brave and sometimes not\ngets this small rhyme. It's all I've got.",
@@ -292,6 +375,8 @@ window.BARRADIN_REIME = {
         "The innkeeper glares, the dog looks away,\nthis song is … well … it's a song, I'd say."
       ],
       maessig: [
+        "From harbour town to dwarven hall\nthis hero's known by one and all.",
+        "Raise your mugs and stamp your feet,\nhere comes a song with a merry beat!",
         "Hear ye, hear ye, by candlelight,\na song of praise for you tonight!",
         "The mug is full, the night is young,\nso let the hero's song be sung!",
         "In Phandalin and the Underdark deep\nthis hero's name is the one we keep.",
@@ -299,6 +384,8 @@ window.BARRADIN_REIME = {
         "Wherever the Red Robes lurk and scheme,\nthis hero shatters every dream."
       ],
       gut: [
+        "Where others falter, freeze and flee,\nthe hero marches on, carefree.",
+        "No dungeon holds, no lock, no chain –\nthis hero breaks them all again.",
         "From Neverwinter to the farthest shore\nthey speak this name and ask for more.",
         "The villains tremble when they hear\nwho comes to make their plans disappear.",
         "Where darkness falls on every hall,\nthe hero stands above them all.",
@@ -306,6 +393,8 @@ window.BARRADIN_REIME = {
         "Even Venomfang with poisoned breath\nwas no match – and met his death."
       ],
       stark: [
+        "Even Ilvara, cruel and cold,\nfears this hero, brave and bold.",
+        "The giants deep in halls of stone\nbow down and whisper: we're outshone.",
         "The stars lean down to watch at night\nand marvel at this hero's light.",
         "Even Demogorgon, vast and grey,\ndecided he'd just stay away.",
         "The dragons whisper, green with spite:\nhow can one shine so very bright?",
@@ -313,6 +402,8 @@ window.BARRADIN_REIME = {
         "And when the Spider spins her thread,\nthis hero cuts it through instead."
       ],
       legende: [
+        "A name that echoes through all time,\nin every tavern, every rhyme.",
+        "When future bards compose their lays,\nthis name will shine through all their days.",
         "Ye gods, now listen! Stars, behold:\na hero's song in purest gold!",
         "The mountains quake, the oceans still,\nthe gods bow down of their own will.",
         "From Phandalin to depths below\nthey'll tell this tale wherever bards go.",
@@ -324,6 +415,8 @@ window.BARRADIN_REIME = {
 
     namensZeilen: {
       hoch: [
+        "No hero's greater than {n}!",
+        "The stars all twinkle just for {n}!",
         "Raise your mugs, my friends, to {n}!",
         "The gods themselves are jealous of {n}!",
         "The hero of all heroes: {n}!",
@@ -333,6 +426,7 @@ window.BARRADIN_REIME = {
         "And high above them all shines {n}!"
       ],
       tief: [
+        "And now a song … for … yes … for {n}.",
         "And then there's … um … who? Oh: {n}.",
         "This song is for … for … {n}?",
         "A song, a song, a song for {n} …",
@@ -342,6 +436,15 @@ window.BARRADIN_REIME = {
 
     namen: {
       friedrich: {
+        paare: {
+          hoch: [
+            "His arrow flies, his aim is slick:\nthe finest ranger – Friedrich!",
+            "He punched a demon lord – some trick!\nThe boxing ranger: Friedrich!"
+          ],
+          tief: [
+            "There was a guy … a bow … a stick …\nwhat was his name? Oh. Friedrich."
+          ]
+        },
         hoch: [
           "his arrows fly so true and quick!",
           "he punched a demon lord – some trick!",
@@ -354,6 +457,15 @@ window.BARRADIN_REIME = {
         ]
       },
       echo: {
+        paare: {
+          hoch: [
+            "Shout through the forest, loud and slow,\nand back it rings: Hail Echo! … Echo … Echo …",
+            "The fireballs burst, the foes all glow,\nand one man grins: the druid Echo!"
+          ],
+          tief: [
+            "He has some horns … and … well … so …\nwhat's his name again? Echo? Echo? … Echo."
+          ]
+        },
         hoch: [
           "his fireballs set the sky aglow!",
           "the lightning's his – and down goes the foe!",
@@ -366,6 +478,15 @@ window.BARRADIN_REIME = {
         ]
       },
       ezekiel: {
+        paare: {
+          hoch: [
+            "He stabbed the chasme with deadly zeal –\nthe Darkin blade: Ezekiel!",
+            "Where shadows fall, as cold as steel,\nthere lurks the Destroyer: Ezekiel!"
+          ],
+          tief: [
+            "He breaks … stuff. A lot. That's the deal.\nI'm saying nothing bad! Hi, Ezekiel!"
+          ]
+        },
         hoch: [
           "his dagger strikes with deadly zeal!",
           "a Darkin heart of burning steel!",
@@ -378,6 +499,15 @@ window.BARRADIN_REIME = {
         ]
       },
       rex: {
+        paare: {
+          hoch: [
+            "The finest dog deserves the finest specs –\nno, snacks! A treat for brave old Rex!",
+            "No demon foe is too complex –\nhe simply bites it: good boy Rex!"
+          ],
+          tief: [
+            "A dog … with fur … and spots and flecks …\nhe wants no song. He wants a snack. That's Rex."
+          ]
+        },
         hoch: [
           "the finest dog, with paws that flex!",
           "no demon foe is too complex!",
@@ -389,6 +519,16 @@ window.BARRADIN_REIME = {
         ]
       },
       imre: {
+        paare: {
+          hoch: [
+            "So that no die may ever make things grimmer,\nI sing my praise to merciful old Imre!",
+            "The world we fight in, all its gold and glimmer,\nwas built by one great master: mighty Imre!",
+            "My glass held high, I watch the candles shimmer:\na toast to our Dungeon Master, Imre!"
+          ],
+          tief: [
+            "A song for Imre? Ugh, what rhymes with Imre?\nI'll give up now and quietly … whimper."
+          ]
+        },
         hoch: [
           "he built the world with gold and glimmer!",
           "without him every night grows dimmer!",
@@ -400,6 +540,15 @@ window.BARRADIN_REIME = {
         ]
       },
       barradin: {
+        paare: {
+          hoch: [
+            "Who sings so sweet, who has the finest chin?\nThe greatest bard of all: Barradin!",
+            "When hearts all melt and kingdoms spin,\nhe strums his lute: Barradin!"
+          ],
+          tief: [
+            "A song for me? Alright … where to begin …\nI've lost my place. I'm Barradin."
+          ]
+        },
         hoch: [
           "the fairest elf with the finest chin!",
           "the bard whose songs make kingdoms spin!",
