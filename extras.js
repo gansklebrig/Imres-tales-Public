@@ -10,7 +10,7 @@
       · 7× schnell auf „Imres Tales“ oben links tippen, oder der Konami-Code
         (↑ ↑ ↓ ↓ ← → ← → B A), öffnet das Geheimarchiv (Barradins Notizbuch)
       · Wer lange bleibt, dem wachsen Echos Ranken an den Seitenrand
-      · Die Kerze unten links auspusten (antippen): Die Seite wird nachtdunkel,
+      · Die Kerze unten rechts auspusten (antippen): Die Seite wird nachtdunkel,
         und Barradins Skizzen glühen im Mondlicht neben den passenden
         Absätzen der Chronik. Antippen sammelt sie im geheimen Skizzenbuch.
    3. Die Taverne: Barradins Loblied (W20-Auftreten-Probe) und Bestiarium-Memory
@@ -181,8 +181,8 @@
   css.textContent = `
 #hintergrund, #kerzenschein, #ranken { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 #kerzenschein {
-  background: radial-gradient(ellipse 70% 45% at 12% 100%, rgba(224,160,70,.10), transparent 70%),
-              radial-gradient(ellipse 55% 35% at 92% 0%, rgba(224,160,70,.06), transparent 70%);
+  background: radial-gradient(ellipse 70% 45% at 92% 100%, rgba(224,160,70,.10), transparent 70%),
+              radial-gradient(ellipse 55% 35% at 8% 0%, rgba(224,160,70,.06), transparent 70%);
   animation: flackern 7s infinite;
 }
 @keyframes flackern {
@@ -345,8 +345,8 @@ main.beben { animation: beben .7s linear; }
 #kerzenschein { transition: opacity 1.5s; }
 .mondlicht #kerzenschein { opacity: 0 !important; animation: none; }
 .kerze {
-  position: fixed; left: 6px; bottom: calc(4px + env(safe-area-inset-bottom, 0px)); z-index: 40;
-  width: 34px; height: 63px; padding: 0; border: 0; background: none; cursor: pointer; opacity: .62;
+  position: fixed; right: 4px; bottom: calc(4px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  width: 24px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer; opacity: .62;
   transition: opacity .4s; -webkit-tap-highlight-color: transparent;
 }
 .kerze:hover, .kerze:focus-visible { opacity: .95; }
@@ -396,7 +396,7 @@ main.beben { animation: beben .7s linear; }
 @keyframes mondglanz { 50% { filter: brightness(1.25); } }
 
 .mond-buch {
-  position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  position: fixed; right: 38px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 40;
   border: 1px solid rgba(190,205,245,.7); background: rgba(16,18,32,.9); color: #dfe6ff; font: inherit; font-size: .9rem;
   padding: .45rem .85rem; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,.5);
   opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .6s, transform .6s;
