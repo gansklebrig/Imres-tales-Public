@@ -773,10 +773,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       </div>
       <div class="taverne">
         <article class="tav-karte" id="barden-probe">
-          <p class="label" data-i18n="probeLabel">Auftreten-Probe</p>
-          <h3 data-i18n="probeTitle">Barradins Loblied</h3>
-          <p class="tav-info" data-i18n="probeText">Wähle, wen Barradin besingen soll, und wirf den W20. Je höher der Wurf, desto prächtiger der Reim und desto dicker die Schmeichelei.</p>
-          <div class="ziel-wahl" id="ziel-wahl" role="radiogroup" aria-label="Wen besingen?" data-i18n-aria="probeZiel"></div>
+          <div class="probe-modus" id="probe-modus" role="tablist"></div>
+          <p class="label" id="probe-label">Auftreten-Probe</p>
+          <h3 id="probe-titel">Barradins Loblied</h3>
+          <p class="tav-info" id="probe-text">Wähle, wen Barradin besingen soll, und wirf den W20. Je höher der Wurf, desto prächtiger der Reim und desto dicker die Schmeichelei.</p>
+          <div class="ziel-wahl" id="ziel-wahl" role="radiogroup" aria-label="Wen besingen?"></div>
           <input type="text" class="ziel-name" id="ziel-name" maxlength="30" autocomplete="off" hidden>
           <div class="w20-zeile">
             <button type="button" class="w20" id="w20" aria-label="W20 werfen" data-i18n-aria="probeWurf">
@@ -817,6 +818,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <!-- Alle Texte stehen in inhalt.js (deutsch) und inhalt-en.js (englisch) -->
 <script src="reime.js" defer></script>
+<script src="spott.js" defer></script>
 <script src="extras.js" defer></script>
 <script>document.write('<script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
 <script>

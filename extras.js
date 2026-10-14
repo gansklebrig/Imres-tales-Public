@@ -13,7 +13,8 @@
       · Die Kerze unten rechts auspusten (antippen): Die Seite wird nachtdunkel,
         und Barradins Skizzen glühen im Mondlicht neben den passenden
         Absätzen der Chronik. Antippen sammelt sie im geheimen Skizzenbuch.
-   3. Die Taverne: Barradins Loblied (W20-Auftreten-Probe) und Bestiarium-Memory
+   3. Die Taverne: Barradins Loblied bzw. Spott (W20-Probe) und Bestiarium-Memory
+      Reime stehen in reime.js, Beleidigungen in spott.js
 
    LÖSUNG der Lauten-Melodie: C – A – F – E  (Barradins Lieblingsort)
    ===================================================================== */
@@ -56,6 +57,14 @@
       alleSkizzen: "Alle Skizzen gefunden! Das geheime Skizzenbuch ist vollständig.",
       noten: ["C", "D", "E", "F", "G", "A", "H"],
       probeWuerfeln: "W20 werfen", probeNochmal: "Nochmal würfeln", probeTipp: "Wirf den Würfel!",
+      modusLob: "♪ Loblied", modusSpott: "⚔ Spott",
+      lobLabel: "Auftreten-Probe", lobTitel: "Barradins Loblied", lobZiel: "Wen besingen?",
+      lobText: "Wähle, wen Barradin besingen soll, und wirf den W20. Je höher der Wurf, desto prächtiger der Reim und desto dicker die Schmeichelei.",
+      spottLabel: "Gehässiger Spott", spottTitel: "Barradins Spott", spottZiel: "Wen verspotten?",
+      spottText: "Wähle einen Gegner und wirf den W20. Je höher der Wurf, desto vernichtender die Beleidigung. Aber Vorsicht bei einer 1 …",
+      spottGegen: n => "Gehässiger Spott gegen " + n, spottEigentor: "Eigentor!",
+      schaden: x => "⚔ " + x + " psychischer Schaden", schadenKrit: x => "⚔ " + x + " psychischer Schaden (kritisch!)",
+      schadenKein: "Rettungswurf geschafft – kein Schaden", schadenSelbst: x => "⚔ " + x + " psychischer Schaden – an Barradin selbst",
       probeAuftreten: "Auftreten", probeInspiration: "Inspiration",
       probeAndere: "Jemand anderes …", probeNamePlatz: "Name eintragen",
       probeAuf: n => "Ein Loblied auf " + n,
@@ -104,6 +113,14 @@
       alleSkizzen: "Every sketch found! The secret sketchbook is complete.",
       noten: ["C", "D", "E", "F", "G", "A", "B"],
       probeWuerfeln: "Roll the d20", probeNochmal: "Roll again", probeTipp: "Roll the die!",
+      modusLob: "♪ Praise", modusSpott: "⚔ Mockery",
+      lobLabel: "Performance check", lobTitel: "Barradin's Song of Praise", lobZiel: "Who should he praise?",
+      lobText: "Pick who Barradin should sing about and roll the d20. The higher the roll, the grander the rhyme and the thicker the flattery.",
+      spottLabel: "Vicious Mockery", spottTitel: "Barradin's Mockery", spottZiel: "Who should he mock?",
+      spottText: "Pick a foe and roll the d20. The higher the roll, the more devastating the insult. But beware of a 1 …",
+      spottGegen: n => "Vicious mockery against " + n, spottEigentor: "Own goal!",
+      schaden: x => "⚔ " + x + " psychic damage", schadenKrit: x => "⚔ " + x + " psychic damage (critical!)",
+      schadenKein: "Saving throw succeeded – no damage", schadenSelbst: x => "⚔ " + x + " psychic damage – to Barradin himself",
       probeAuftreten: "Performance", probeInspiration: "Inspiration",
       probeAndere: "Someone else …", probeNamePlatz: "Enter a name",
       probeAuf: n => "A song in praise of " + n,
@@ -176,6 +193,31 @@
     letzteLieder.push(text); if (letzteLieder.length > 8) letzteLieder.shift();
     return text;
   }
+  const SPOTT_ZIELE_EXTRA = { de: ["Ilvara", "Glasstab"], en: ["Ilvara", "Glasstaff"] };
+  const schluessel = n => String(n).toLowerCase().replace(/[^a-zäöüßéèêáàâíìóòúùñ]/g, "");
+  function spotte(stufe, name) {
+    const S = (window.BARRADIN_SPOTT || {})[sprache()];
+    if (!S) return name + "!";
+    if (stufe === "patzer") return zufall(S.eigentor);
+    const key = schluessel(name);
+    const k = Object.keys(S.kreaturen).find(x => key === x || key.indexOf(x) > -1);
+    const eigen = k ? S.kreaturen[k] : null;
+    const allg = S.allgemein[stufe] || S.allgemein.gut;
+    let text;
+    if (stufe === "schwach") text = zufall(allg);
+    else if (stufe === "maessig" || stufe === "gut") text = eigen && Math.random() < .5 ? zufall(eigen) : zufall(allg);
+    else if (stufe === "stark") text = eigen && Math.random() < .5 ? zufall(eigen) + " " + zufall(allg) : zufall(allg);
+    else text = (eigen && Math.random() < .5 ? zufall(eigen) + "\n\n" : "") + zufall(allg);
+    return text.split("{n}").join(name);
+  }
+  function neuerSpott(stufe, name) {
+    let text = spotte(stufe, name);
+    for (let i = 0; i < 6 && letzteLieder.includes(text); i++) text = spotte(stufe, name);
+    letzteLieder.push(text); if (letzteLieder.length > 8) letzteLieder.shift();
+    return text;
+  }
+  const w4 = n => { let x = 0; for (let i = 0; i < n; i++) x += 1 + Math.floor(Math.random() * 4); return x; };
+
   const BONUS = 7; /* Barradins Auftreten-Bonus */
   const ZIELE = ["Friedrich", "Echo", "Ezekiel", "Rex", "Imre", "Barradin"];
 
@@ -279,6 +321,15 @@ main.beben { animation: beben .7s linear; }
 .tav-karte { border: 1px solid var(--line); background: color-mix(in srgb, var(--hall) 80%, transparent); padding: clamp(1.2rem, 4vw, 2rem); display: grid; gap: .8rem; }
 .tav-karte h3 { font-family: var(--name); font-size: clamp(1.7rem, 5vw, 2.2rem); line-height: 1.05; }
 .tav-info { color: var(--ash); }
+.probe-modus { display: inline-flex; justify-self: start; border: 1px solid var(--line); margin-bottom: .3rem; }
+.probe-modus button { border: 0; background: none; color: var(--ash); font: inherit; font-size: .88rem; padding: .4rem .9rem; cursor: pointer; }
+.probe-modus button[aria-selected="true"] { background: var(--ember); color: var(--night); }
+#barden-probe.spott .probe-modus button[aria-selected="true"] { background: var(--blood); color: var(--vellum); }
+#barden-probe.spott .ziel-wahl button[aria-checked="true"] { background: var(--blood); border-color: var(--blood); color: var(--vellum); }
+#barden-probe.spott .w20 .flaeche { stroke: #c4564a; }
+.lied.spott { background: linear-gradient(172deg, #efe3cf, #d8c3a3); }
+.lied.spott p.vers { font-size: 1.35rem; }
+.lied p.schaden { margin-top: .5rem; font-family: var(--display); font-size: 1rem; letter-spacing: .04em; color: #7a1d16; }
 .ziel-wahl { display: flex; flex-wrap: wrap; gap: .4rem; }
 .ziel-wahl button {
   border: 1px solid var(--line); background: none; color: var(--ash); font: inherit; font-size: .88rem;
@@ -963,8 +1014,27 @@ main.beben { animation: beben .7s linear; }
      ===================================================================== */
 
   /* --- Barradins Loblied --- */
-  let ziel = ZIELE[0], eigenerName = "";
+  let modus = "lob";
+  const zielWahl = { lob: ZIELE[0], spott: null };
+  let eigenerName = "";
   let letzterWurf = null;
+  let ziel = ZIELE[0];
+  function spottZiele() {
+    const namen = bestien().map(b => b.name);
+    (SPOTT_ZIELE_EXTRA[sprache()] || []).forEach(n => { if (!namen.includes(n)) namen.push(n); });
+    return namen;
+  }
+  function modusZeichnen() {
+    const T = t(), box = $("probe-modus");
+    if (!box) return;
+    box.innerHTML = ["lob", "spott"].map(m => '<button type="button" role="tab" data-modus="' + m + '" aria-selected="' + (modus === m) + '">' + esc(m === "lob" ? T.modusLob : T.modusSpott) + "</button>").join("");
+    const lob = modus === "lob";
+    $("probe-label").textContent = lob ? T.lobLabel : T.spottLabel;
+    $("probe-titel").textContent = lob ? T.lobTitel : T.spottTitel;
+    $("probe-text").textContent = lob ? T.lobText : T.spottText;
+    $("ziel-wahl").setAttribute("aria-label", lob ? T.lobZiel : T.spottZiel);
+    $("barden-probe").classList.toggle("spott", !lob);
+  }
   function inspirationZeigen() {
     const el = $("inspiration");
     if (el) { el.hidden = lies("imres-inspiration", "0") !== "1"; el.textContent = t().inspirationBereit; }
@@ -973,7 +1043,9 @@ main.beben { animation: beben .7s linear; }
   function zieleZeichnen() {
     const box = $("ziel-wahl");
     if (!box) return;
-    box.innerHTML = ZIELE.map(n => '<button type="button" role="radio" data-ziel="' + n + '" aria-checked="' + (ziel === n) + '">' + n + "</button>").join("") +
+    const liste = modus === "lob" ? ZIELE : spottZiele();
+    if (ziel !== "*" && !liste.includes(ziel)) ziel = liste[0];
+    box.innerHTML = liste.map(n => '<button type="button" role="radio" data-ziel="' + esc(n) + '" aria-checked="' + (ziel === n) + '">' + esc(n) + "</button>").join("") +
       '<button type="button" role="radio" data-ziel="*" aria-checked="' + (ziel === "*") + '">' + esc(t().probeAndere) + "</button>";
     $("ziel-name").placeholder = t().probeNamePlatz;
     $("ziel-name").hidden = ziel !== "*";
@@ -992,14 +1064,23 @@ main.beben { animation: beben .7s linear; }
       if ($("w20-gross")) { $("w20-gross").textContent = t().probeTipp; $("w20-klein").textContent = "+" + BONUS + " " + t().probeAuftreten; }
       return;
     }
-    const T = t(), w = letzterWurf, s = w.stufe;
-    if (neu || w.sprache !== sprache()) { w.text = neuesLied(s, w.name); w.sprache = sprache(); }
+    const T = t(), w = letzterWurf, s = w.stufe, spott = w.modus === "spott";
+    if (neu || w.sprache !== sprache()) { w.text = spott ? neuerSpott(s, w.name) : neuesLied(s, w.name); w.sprache = sprache(); }
     const vers = esc(w.text);
-    $("w20-gross").textContent = T.stufen[s];
+    const titel = spott && s === "patzer" ? T.spottEigentor : T.stufen[s];
+    $("w20-gross").textContent = titel;
     $("w20-klein").textContent = w.wurf + " + " + BONUS + " " + T.probeAuftreten + (w.insp ? " + " + w.insp + " " + T.probeInspiration : "") + " = " + w.summe;
     const box = $("lied");
     box.hidden = false;
-    box.innerHTML = '<p class="label">' + esc(T.stufen[s]) + "</p><h4>" + esc(T.probeAuf(w.name)) + '</h4><p class="vers">' + vers + '</p><p class="buehne">' + esc(T.buehne[s]) + "</p>";
+    box.classList.toggle("spott", spott);
+    let unten;
+    if (spott) {
+      const S = (window.BARRADIN_SPOTT || {})[sprache()];
+      const reaktion = S ? S.reaktion[s].split("{n}").join(w.name) : "";
+      const schaden = s === "patzer" ? T.schadenSelbst(w.schaden) : s === "schwach" ? T.schadenKein : s === "krit" ? T.schadenKrit(w.schaden) : T.schaden(w.schaden);
+      unten = '<p class="buehne">' + esc(reaktion) + '</p><p class="schaden">' + esc(schaden) + "</p>";
+    } else unten = '<p class="buehne">' + esc(T.buehne[s]) + "</p>";
+    box.innerHTML = '<p class="label">' + esc(titel) + "</p><h4>" + esc(spott ? T.spottGegen(w.name) : T.probeAuf(w.name)) + '</h4><p class="vers">' + vers + "</p>" + unten;
     if (neu) { box.classList.remove("neu"); void box.offsetWidth; box.classList.add("neu"); }
     $("w20-los").textContent = T.probeNochmal;
   }
@@ -1016,11 +1097,12 @@ main.beben { animation: beben .7s linear; }
       zahl.textContent = wurf;
       if (wurf === 20) btn.classList.add("krit");
       if (wurf === 1) btn.classList.add("patzer");
-      letzterWurf = { wurf, insp, summe, stufe: stufe(wurf, summe), name: zielName() };
+      const st = stufe(wurf, summe);
+      letzterWurf = { wurf, insp, summe, stufe: st, name: zielName(), modus, schaden: st === "patzer" ? w4(1) : st === "krit" ? w4(4) : w4(2) };
       liedZeigen(true);
       inspirationZeigen();
       const r = btn.getBoundingClientRect();
-      if (wurf === 20 || letzterWurf.stufe === "legende") konfetti(r.left + r.width / 2, r.top + r.height / 2, null, wurf === 20 ? 44 : 24);
+      if (wurf === 20 || letzterWurf.stufe === "legende") konfetti(r.left + r.width / 2, r.top + r.height / 2, modus === "spott" ? ["💥", "⚡", "✦", "☠"] : null, wurf === 20 ? 44 : 24);
       if (wurf === 1 && !ruhig) btn.animate([{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(0)" }], { duration: 300, iterations: 2 });
     };
     if (ruhig) { fertig(); return; }
@@ -1033,7 +1115,16 @@ main.beben { animation: beben .7s linear; }
   }
   function lobliedStarten() {
     if (!$("w20")) return;
+    modusZeichnen();
     zieleZeichnen();
+    $("probe-modus").addEventListener("click", e => {
+      const b = e.target.closest("[data-modus]");
+      if (!b || b.dataset.modus === modus) return;
+      zielWahl[modus] = ziel;
+      modus = b.dataset.modus;
+      ziel = zielWahl[modus] || (modus === "lob" ? ZIELE[0] : spottZiele()[0]);
+      modusZeichnen(); zieleZeichnen();
+    });
     $("ziel-wahl").addEventListener("click", e => {
       const b = e.target.closest("[data-ziel]");
       if (!b) return;
@@ -1132,6 +1223,8 @@ main.beben { animation: beben .7s linear; }
 
   /* ---------- Sprachwechsel ---------- */
   function sprachwechsel() {
+    if ($("probe-modus")) modusZeichnen();
+    if (modus === "spott" && ziel !== "*" && !spottZiele().includes(ziel)) ziel = spottZiele()[0];
     zieleZeichnen();
     if ($("w20-los")) $("w20-los").textContent = letzterWurf ? t().probeNochmal : t().probeWuerfeln;
     liedZeigen(false);
