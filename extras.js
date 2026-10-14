@@ -5,7 +5,7 @@
    1. Hintergrund: aufsteigende Funken, Kerzenschein, nachts Sterne + Mond
    2. Easter Eggs:
       · Rex schaut ab und zu vom Bildschirmrand herein (antippen!)
-      · Barradins Laute im Fuß der Seite – die richtige Melodie hat Folgen
+      · Barradins Laute neben seinem Beinamen bei den Gefährten – die richtige Melodie hat Folgen
       · „destroyer“ tippen (oder in die Suche schreiben) weckt Ezekiel
       · 7× schnell auf „Imres Tales“ oben links tippen, oder der Konami-Code
         (↑ ↑ ↓ ↓ ← → ← → B A), öffnet das Geheimarchiv (Barradins Notizbuch)
@@ -234,9 +234,14 @@ main.beben { animation: beben .7s linear; }
 }
 
 /* Laute im Fuß */
-.laute-knopf { background: none; border: 0; padding: 0; cursor: pointer; opacity: .35; transition: opacity .3s, transform .3s; line-height: 0; }
-.laute-knopf:hover, .laute-knopf:focus-visible { opacity: .8; transform: rotate(-8deg); }
-.laute-knopf img { width: 30px; height: 30px; filter: invert(1) sepia(1) saturate(2) hue-rotate(5deg); }
+.laute-knopf {
+  display: inline-block; vertical-align: middle; margin-left: .45rem; background: none; border: 0; padding: .2rem; cursor: pointer;
+  opacity: .75; transition: opacity .3s, transform .3s; line-height: 0; -webkit-tap-highlight-color: transparent;
+  animation: lautewippen 6s ease-in-out infinite;
+}
+.laute-knopf:hover, .laute-knopf:focus-visible { opacity: 1; transform: rotate(-10deg) scale(1.1); animation: none; }
+.laute-knopf img { width: 32px; height: 32px; filter: invert(1) sepia(1) saturate(3) hue-rotate(-5deg) brightness(1.6); }
+@keyframes lautewippen { 0%, 88%, 100% { transform: none; } 92% { transform: rotate(-12deg); } 96% { transform: rotate(8deg); } }
 .ex-geheim { flex-basis: 100%; display: flex; align-items: center; gap: .7rem; font-style: italic; font-size: .82rem; color: var(--ash); opacity: .75; }
 .laute-dialog .laute-bild { width: min(9rem, 40%); justify-self: center; mix-blend-mode: multiply; transform: rotate(-12deg); }
 .saiten { display: grid; gap: .25rem; margin-top: .3rem; }
@@ -416,7 +421,7 @@ main.beben { animation: beben .7s linear; }
 @media (prefers-reduced-motion: reduce) {
   #kerzenschein, .kerze .flamme, .kerze .flamme-kern, .kerze .schein, .mondlicht .tinte { animation: none; }
   .rex-guckt { transition: none; }
-  main.beben, .w20.rollt svg, .lied.neu, .archiv-siegel, .saite.zupf i { animation: none; }
+  .laute-knopf, main.beben, .w20.rollt svg, .lied.neu, .archiv-siegel, .saite.zupf i { animation: none; }
   .mem-karte .innen { transition: none; }
 }`;
   document.head.appendChild(css);
@@ -705,14 +710,21 @@ main.beben { animation: beben .7s linear; }
     } catch (_) {}
   }
   function laute() {
-    const fuss = document.querySelector("footer .wrap");
-    if (!fuss) return;
-    const zeile = document.createElement("div");
-    zeile.className = "ex-geheim";
-    zeile.innerHTML = '<button type="button" class="laute-knopf" aria-label="' + esc(t().lauteKnopf) + '"><img src="skizze-laute.webp" alt=""></button><span class="geheim-text">' + esc(t().geheimHinweis) + '</span>';
-    fuss.appendChild(zeile);
-    const knopf = zeile.querySelector(".laute-knopf");
-    knopf.addEventListener("click", () => {
+    /* Die Laute hängt unauffällig an Barradins Beinamen bei den Gefährten */
+    const einbauen = () => {
+      const zeile = document.querySelector("#barradin .epithet");
+      if (!zeile || zeile.querySelector(".laute-knopf")) return;
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "laute-knopf";
+      b.setAttribute("aria-label", t().lauteKnopf);
+      b.innerHTML = '<img src="skizze-laute.webp" alt="">';
+      zeile.appendChild(b);
+    };
+    einbauen();
+    const helden = $("heroes");
+    if (helden) new MutationObserver(einbauen).observe(helden, { childList: true });
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".laute-knopf")) return;
       const T = t();
       const d = pergament("laute-dialog",
         '<img class="laute-bild" src="skizze-laute.webp" alt="">' +
@@ -1124,7 +1136,6 @@ main.beben { animation: beben .7s linear; }
     if ($("memory") && mem.karten.length) { namenSetzen(); memoryStatus(); if (mem.paare === mem.gesamt && mem.gesamt) $("memory-sieg").textContent = t().memSieg(mem.zuege); }
     const r = document.querySelector(".rex-guckt"); if (r) r.setAttribute("aria-label", t().rexLabel);
     const l = document.querySelector(".laute-knopf"); if (l) l.setAttribute("aria-label", t().lauteKnopf);
-    const g = document.querySelector(".geheim-text"); if (g) g.textContent = t().geheimHinweis;
     skizzenVerstecken(); buchKnopfAktualisieren();
   }
 
