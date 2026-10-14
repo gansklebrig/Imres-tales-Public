@@ -1,14 +1,20 @@
 /* =====================================================================
    BARRADINS LAUTENWERK – eine kleine mittelalterliche Beat-Maschine
    ---------------------------------------------------------------------
-   Vier Spuren mit je 16 Schritten:
-     Klopfen   Barradin klopft auf den Lautenkorpus (Beat)
-     Schellen  der Schellenring an seinem Stiefel
-     Bass      tiefe Töne, mit dem Daumen gezupft
-     Melodie   die Lautenmelodie
-   Dazu: Tempo, Tonart (transponieren), Kirchentonart, Tanzschritt (Swing)
-   und ein Bordun (Halteton wie bei einer Drehleier).
-   Lieder werden im Browser gemerkt und lassen sich als Link teilen.
+   Die ganze Gruppe spielt als Band, jede Spur hat 16 Schritte:
+     Barradin   Klopfen (auf den Korpus), Schellen (am Stiefel),
+                Bass (Daumen) und Melodie (Laute)
+     Friedrich  Trommel
+     Echo       Flöte
+     Ezekiel    Ketten
+     Rex        Wuff! und Heulen
+   Jedes Lied hat zwei Teile (A = Strophe, B = Refrain) und einen Ablauf,
+   z. B. A-A-B-A. Der Variations-Regler lässt die Band frei improvisieren:
+   Noten wandern, Trommelwirbel kommen dazu – ideal als endlose
+   Hintergrundmusik (siehe „Stimmungen“).
+   Dazu: Tempo, Tonart, Kirchentonart, Tanzschritt (Swing), Bordun,
+   Stumm und Lautstärke pro Spur. Lieder werden im Browser gemerkt und
+   lassen sich als Link teilen.
    ===================================================================== */
 (function () {
   "use strict";
@@ -18,39 +24,66 @@
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const zufall = l => l[Math.floor(Math.random() * l.length)];
   const SCHRITTE = 16;
+
+  /* ---------- Spuren ---------- */
+  /* art "an" = nur an/aus, art "ton" = eine Zeile pro Ton */
+  const SPUREN = [
+    { id: "klopf", wer: "barradin", art: "an", sym: "✊" },
+    { id: "schelle", wer: "barradin", art: "an", sym: "🔔" },
+    { id: "bass", wer: "barradin", art: "ton", zeilen: 5 },
+    { id: "melodie", wer: "barradin", art: "ton", zeilen: 8 },
+    { id: "trommel", wer: "friedrich", art: "an", sym: "🥁" },
+    { id: "floete", wer: "echo", art: "ton", zeilen: 8 },
+    { id: "ketten", wer: "ezekiel", art: "an", sym: "⛓" },
+    { id: "rex", wer: "rex", art: "ton", zeilen: 2 }
+  ];
+  const IDS = SPUREN.map(s => s.id);
+  const SPUR = Object.fromEntries(SPUREN.map(s => [s.id, s]));
+  const ABLAEUFE = ["A", "AB", "AABB", "AABA", "ABAB", "AAAB"];
 
   /* ---------- Texte ---------- */
   const TX = {
     de: {
       label: "Spielmannskunst", titel: "Barradins Lautenwerk",
-      text: "Barradin spielt, du bestimmst wie. Tippe in die Raster: Wann er auf die Laute klopft, wann die Schellen am Stiefel klingeln, was der Daumen im Bass zupft und welche Melodie er spielt.",
+      text: "Die Gefährten spielen auf, du bestimmst wie. Tippe in die Raster: Barradin klopft, klingelt, zupft Bass und Melodie, Friedrich trommelt, Echo flötet, Ezekiel rasselt mit den Ketten – und Rex gibt seinen Senf dazu.",
       spielen: "▶ Spielen", stopp: "■ Anhalten", tempo: "Tempo", tonart: "Tonart", modus: "Tonleiter",
-      swing: "Tanzschritt", bordun: "Bordun", an: "an", aus: "aus",
-      spuren: { klopf: "Klopfen", schelle: "Schellen", bass: "Bass", melodie: "Melodie" },
-      spurInfo: { klopf: "auf den Korpus", schelle: "am Stiefel", bass: "mit dem Daumen", melodie: "auf der Laute" },
-      vorlagen: "Vorlagen", zufall: "🎲 Improvisieren", leeren: "Leeren",
-      stumm: "Stumm schalten", lautstaerke: "Lautstärke",
+      swing: "Tanzschritt", bordun: "Bordun", variation: "Variation",
+      wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
+      spuren: { klopf: "Klopfen", schelle: "Schellen", bass: "Bass", melodie: "Laute", trommel: "Trommel", floete: "Flöte", ketten: "Ketten", rex: "Rex" },
+      rexZeilen: ["Wuff", "Heulen"], rexLaut: ["Wuff!", "Auuuuu!"],
+      teil: "Teil bearbeiten", ablauf: "Ablauf", kopieren: "A → B kopieren", kopiert2: "Teil A wurde nach B kopiert.",
+      lieder: "Lieder", stimmungen: "Stimmungen für Imre",
+      vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
+        kampf: "⚔ Kampf", unterreich: "🕯 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg" },
+      zufall: "🎲 Improvisieren", leeren: "Leeren",
+      stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
       teilen: "🔗 Lied teilen", kopiert: "Link kopiert – schick ihn an die Gruppe!", geteilt: "Geteilt!",
       geladen: "Ein geteiltes Lied wurde geladen.",
+      stimmungTipp: "Stimmungen laufen endlos und spielen mit Variation jedes Mal ein bisschen anders – perfekt als Hintergrund für eure Sessions.",
       modi: { dorisch: "Dorisch", mixolydisch: "Mixolydisch", aeolisch: "Äolisch", phrygisch: "Phrygisch" },
-      lieder: { taverne: "Tavernentanz", saltarello: "Saltarello", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B", "H"],
       wischen: "← wischen →"
     },
     en: {
       label: "Minstrelsy", titel: "Barradin's Lute Machine",
-      text: "Barradin plays, you decide how. Tap the grids: when he knocks on the lute, when the bells on his boot jingle, what his thumb plucks in the bass and which melody he plays.",
+      text: "The companions strike up, you decide how. Tap the grids: Barradin knocks, jingles, plucks bass and melody, Friedrich drums, Echo plays the flute, Ezekiel rattles his chains – and Rex adds his two cents.",
       spielen: "▶ Play", stopp: "■ Stop", tempo: "Tempo", tonart: "Key", modus: "Mode",
-      swing: "Dance step", bordun: "Drone", an: "on", aus: "off",
-      spuren: { klopf: "Knock", schelle: "Bells", bass: "Bass", melodie: "Melody" },
-      spurInfo: { klopf: "on the body", schelle: "on the boot", bass: "with the thumb", melodie: "on the lute" },
-      vorlagen: "Presets", zufall: "🎲 Improvise", leeren: "Clear",
-      stumm: "Mute", lautstaerke: "Volume",
+      swing: "Dance step", bordun: "Drone", variation: "Variation",
+      wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
+      spuren: { klopf: "Knock", schelle: "Bells", bass: "Bass", melodie: "Lute", trommel: "Drum", floete: "Flute", ketten: "Chains", rex: "Rex" },
+      rexZeilen: ["Woof", "Howl"], rexLaut: ["Woof!", "Awooooo!"],
+      teil: "Edit part", ablauf: "Order", kopieren: "Copy A → B", kopiert2: "Part A was copied to B.",
+      lieder: "Songs", stimmungen: "Moods for Imre",
+      vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
+        kampf: "⚔ Battle", unterreich: "🕯 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory" },
+      zufall: "🎲 Improvise", leeren: "Clear",
+      stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
       teilen: "🔗 Share song", kopiert: "Link copied – send it to the party!", geteilt: "Shared!",
       geladen: "A shared song has been loaded.",
+      stimmungTipp: "Moods loop endlessly and, with variation, play a little differently every time – perfect as background music for your sessions.",
       modi: { dorisch: "Dorian", mixolydisch: "Mixolydian", aeolisch: "Aeolian", phrygisch: "Phrygian" },
-      lieder: { taverne: "Tavern dance", saltarello: "Saltarello", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"],
       wischen: "← swipe →"
     }
@@ -66,72 +99,163 @@
   };
   const MODUS_LISTE = Object.keys(MODI);
   const BASS_STUFEN = [0, 2, 3, 4, 6]; /* Grundton, Terz, Quarte, Quinte, Septime */
-  const MEL_GRUND = 62, BASS_GRUND = 50; /* D4 und D3 */
+  const MEL_GRUND = 62, BASS_GRUND = 50, FLOETE_GRUND = 74; /* D4, D3, D5 */
   const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
-  const melMidi = (stufe, s) => MEL_GRUND + s.transpose + MODI[s.modus][stufe];
-  const bassMidi = (zeile, s) => BASS_GRUND + s.transpose + MODI[s.modus][BASS_STUFEN[zeile]];
+  const tonMidi = (spur, zeile, s) => {
+    const sk = MODI[s.modus];
+    if (spur === "bass") return BASS_GRUND + s.transpose + sk[BASS_STUFEN[zeile]];
+    if (spur === "floete") return FLOETE_GRUND + s.transpose + sk[zeile];
+    return MEL_GRUND + s.transpose + sk[zeile];
+  };
   const notenName = m => t().noten[((m % 12) + 12) % 12];
 
   /* ---------- Vorlagen ---------- */
   const leer = () => Array(SCHRITTE).fill(-1);
-  const an = (liste) => { const a = Array(SCHRITTE).fill(0); liste.forEach(i => a[i] = 1); return a; };
-  const folge = (paare) => { const a = leer(); Object.keys(paare).forEach(i => a[+i] = paare[i]); return a; };
+  const an = liste => { const a = leer(); liste.forEach(i => a[i] = 0); return a; };
+  const folge = paare => { const a = leer(); Object.keys(paare).forEach(i => a[+i] = paare[i]); return a; };
+  const teilLeer = () => Object.fromEntries(IDS.map(k => [k, leer()]));
+  const teil = o => Object.assign(teilLeer(), o);
   const VORLAGEN = {
-    taverne: { tempo: 112, transpose: 0, modus: "dorisch", swing: 0, bordun: 1,
-      klopf: an([0, 4, 8, 12, 14]), schelle: an([2, 6, 10, 15]),
-      bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3, 14: 2 }),
-      melodie: folge({ 0: 4, 2: 5, 3: 4, 4: 3, 6: 2, 7: 3, 8: 4, 10: 7, 11: 6, 12: 4, 13: 3, 14: 1, 15: 0 }) },
-    saltarello: { tempo: 126, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1,
-      klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 5, 10, 13]),
-      bass: folge({ 0: 0, 6: 3, 8: 0, 14: 3 }),
-      melodie: folge({ 0: 0, 1: 2, 2: 4, 3: 5, 4: 4, 5: 2, 6: 3, 7: 1, 8: 0, 9: 2, 10: 4, 11: 7, 12: 6, 13: 4, 14: 5, 15: 4 }) },
-    trauer: { tempo: 70, transpose: -2, modus: "aeolisch", swing: 0, bordun: 1,
-      klopf: an([0, 8]), schelle: an([]),
-      bass: folge({ 0: 0, 8: 2, 12: 3 }),
-      melodie: folge({ 0: 4, 3: 3, 4: 2, 6: 1, 8: 2, 11: 1, 12: 0 }) },
-    schlacht: { tempo: 138, transpose: 2, modus: "phrygisch", swing: 0, bordun: 1,
-      klopf: an([0, 3, 6, 8, 10, 11, 14]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]),
-      bass: folge({ 0: 0, 3: 0, 6: 0, 8: 0, 11: 0, 14: 1 }),
-      melodie: folge({ 0: 0, 1: 1, 2: 0, 4: 4, 6: 3, 7: 1, 8: 0, 10: 5, 12: 4, 14: 1, 15: 0 }) },
-    wiegen: { tempo: 84, transpose: 0, modus: "mixolydisch", swing: 1, bordun: 0,
-      klopf: an([0, 8]), schelle: an([12]),
-      bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3 }),
-      melodie: folge({ 0: 4, 2: 4, 4: 5, 6: 4, 8: 2, 10: 3, 12: 1, 14: 0 }) }
+    taverne: { tempo: 112, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABA",
+      A: teil({ klopf: an([0, 4, 8, 12, 14]), schelle: an([2, 6, 10, 15]), trommel: an([0, 8]),
+        bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3, 14: 2 }),
+        melodie: folge({ 0: 4, 2: 5, 3: 4, 4: 3, 6: 2, 7: 3, 8: 4, 10: 7, 11: 6, 12: 4, 13: 3, 14: 1, 15: 0 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 6, 8, 12, 14]),
+        bass: folge({ 0: 2, 4: 0, 8: 3, 12: 0 }),
+        melodie: folge({ 0: 7, 2: 6, 4: 5, 6: 4, 8: 5, 10: 4, 12: 3, 14: 1, 15: 0 }),
+        floete: folge({ 0: 4, 4: 5, 8: 4, 12: 2 }), rex: folge({ 15: 0 }) }) },
+    saltarello: { tempo: 126, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1, variation: 2, ablauf: "AB",
+      A: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 5, 10, 13]), trommel: an([0, 6, 8, 14]),
+        bass: folge({ 0: 0, 6: 3, 8: 0, 14: 3 }),
+        melodie: folge({ 0: 0, 1: 2, 2: 4, 3: 5, 4: 4, 5: 2, 6: 3, 7: 1, 8: 0, 9: 2, 10: 4, 11: 7, 12: 6, 13: 4, 14: 5, 15: 4 }) }),
+      B: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 5, 10, 13]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([3, 11]),
+        bass: folge({ 0: 3, 6: 0, 8: 3, 14: 0 }),
+        melodie: folge({ 0: 7, 1: 6, 2: 5, 3: 4, 4: 5, 5: 4, 6: 3, 7: 2, 8: 4, 9: 3, 10: 2, 11: 1, 12: 2, 13: 1, 14: 0 }),
+        floete: folge({ 0: 4, 2: 5, 4: 6, 6: 4, 8: 2, 10: 3, 12: 1, 14: 0 }) }) },
+    trauer: { tempo: 70, transpose: -2, modus: "aeolisch", swing: 0, bordun: 1, variation: 1, ablauf: "AB",
+      A: teil({ klopf: an([0, 8]), bass: folge({ 0: 0, 8: 2, 12: 3 }),
+        melodie: folge({ 0: 4, 3: 3, 4: 2, 6: 1, 8: 2, 11: 1, 12: 0 }) }),
+      B: teil({ trommel: an([0]), bass: folge({ 0: 0, 8: 3 }),
+        melodie: folge({ 0: 0, 2: 2, 4: 4, 6: 2, 8: 1, 10: 3, 12: 0 }),
+        floete: folge({ 0: 4, 2: 5, 4: 4, 6: 2, 8: 3, 10: 1, 12: 0 }), rex: folge({ 12: 1 }) }) },
+    schlacht: { tempo: 138, transpose: 2, modus: "phrygisch", swing: 0, bordun: 1, variation: 3, ablauf: "AABB",
+      A: teil({ klopf: an([0, 3, 6, 8, 10, 11, 14]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 4, 6, 8, 10, 12, 14]), ketten: an([4, 12]),
+        bass: folge({ 0: 0, 3: 0, 6: 0, 8: 0, 11: 0, 14: 1 }),
+        melodie: folge({ 0: 0, 1: 1, 2: 0, 4: 4, 6: 3, 7: 1, 8: 0, 10: 5, 12: 4, 14: 1, 15: 0 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 3, 4, 6, 8, 10, 11, 12, 13, 14, 15]), ketten: an([0, 4, 8, 12]),
+        bass: folge({ 0: 0, 4: 0, 8: 1, 12: 0 }),
+        melodie: folge({ 0: 4, 2: 5, 4: 4, 6: 3, 8: 4, 10: 5, 12: 7, 14: 4 }),
+        floete: folge({ 0: 7, 4: 7, 8: 5, 12: 4 }), rex: folge({ 8: 0 }) }) },
+    wiegen: { tempo: 84, transpose: 0, modus: "mixolydisch", swing: 1, bordun: 0, variation: 1, ablauf: "AB",
+      A: teil({ klopf: an([0, 8]), schelle: an([12]), bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3 }),
+        melodie: folge({ 0: 4, 2: 4, 4: 5, 6: 4, 8: 2, 10: 3, 12: 1, 14: 0 }) }),
+      B: teil({ klopf: an([0, 8]), bass: folge({ 0: 2, 8: 0 }),
+        melodie: folge({ 0: 2, 2: 3, 4: 2, 6: 1, 8: 0, 12: 0 }),
+        floete: folge({ 0: 4, 4: 5, 8: 4, 12: 2 }) }) },
+    /* Stimmungen für die Spielleitung: viel Variation, laufen endlos */
+    kampf: { tempo: 150, transpose: 0, modus: "phrygisch", swing: 0, bordun: 1, variation: 6, ablauf: "AABA",
+      A: teil({ klopf: an([0, 4, 8, 12]), trommel: an([0, 2, 3, 6, 8, 10, 11, 14]), ketten: an([4, 12]), schelle: an([2, 6, 10, 14]),
+        bass: folge({ 0: 0, 2: 0, 4: 0, 6: 1, 8: 0, 10: 0, 12: 0, 14: 1 }),
+        melodie: folge({ 0: 4, 2: 5, 3: 4, 4: 1, 8: 4, 10: 5, 11: 7, 12: 5 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), trommel: an([0, 1, 2, 4, 6, 8, 9, 10, 12, 13, 14, 15]), ketten: an([0, 6, 8, 14]), schelle: an([0, 4, 8, 12]),
+        bass: folge({ 0: 0, 4: 2, 8: 3, 12: 1 }),
+        floete: folge({ 0: 7, 2: 6, 4: 5, 6: 4, 8: 5, 12: 1 }), rex: folge({ 14: 0 }) }) },
+    unterreich: { tempo: 64, transpose: -3, modus: "phrygisch", swing: 0, bordun: 1, variation: 5, ablauf: "AB",
+      A: teil({ trommel: an([0]), ketten: an([7]), bass: folge({ 0: 0, 10: 1 }),
+        melodie: folge({ 4: 1, 6: 0, 12: 3 }) }),
+      B: teil({ trommel: an([0, 12]), ketten: an([5, 13]), bass: folge({ 0: 0, 8: 0 }),
+        floete: folge({ 0: 4, 6: 5, 8: 4, 14: 1 }) }) },
+    reise: { tempo: 100, transpose: 2, modus: "mixolydisch", swing: 1, bordun: 1, variation: 4, ablauf: "AABA",
+      A: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 8]),
+        bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3 }),
+        melodie: folge({ 0: 0, 2: 2, 4: 4, 6: 5, 8: 4, 10: 2, 12: 3, 14: 1 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 6, 8, 14]),
+        bass: folge({ 0: 2, 4: 3, 8: 0, 12: 3 }),
+        floete: folge({ 0: 7, 2: 6, 4: 5, 6: 4, 8: 5, 10: 6, 12: 7 }), melodie: folge({ 0: 4, 8: 2, 12: 0 }) }) },
+    spannung: { tempo: 90, transpose: 0, modus: "aeolisch", swing: 0, bordun: 0, variation: 5, ablauf: "AAAB",
+      A: teil({ klopf: an([0, 6, 12]), ketten: an([10]),
+        bass: folge({ 0: 0, 2: 0, 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 14: 1 }) }),
+      B: teil({ klopf: an([0, 6, 12]), trommel: an([0, 4, 8, 12, 14, 15]), ketten: an([2, 10]),
+        bass: folge({ 0: 0, 2: 0, 4: 0, 6: 0, 8: 1, 10: 1, 12: 1, 14: 2 }),
+        melodie: folge({ 0: 5, 4: 4, 8: 5, 12: 7 }) }) },
+    sieg: { tempo: 132, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1, variation: 4, ablauf: "AB",
+      A: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 4, 6, 8, 12, 14]),
+        bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3 }),
+        melodie: folge({ 0: 0, 1: 2, 2: 4, 4: 7, 6: 4, 8: 5, 9: 4, 10: 2, 12: 4 }),
+        floete: folge({ 0: 4, 4: 7, 8: 6, 12: 7 }), rex: folge({ 14: 0 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 4, 6, 8, 10, 12, 13, 14, 15]), ketten: an([8]),
+        bass: folge({ 0: 2, 4: 3, 8: 0, 12: 3 }),
+        melodie: folge({ 0: 7, 2: 6, 4: 7, 6: 5, 8: 4, 10: 5, 12: 7 }),
+        floete: folge({ 0: 7, 2: 7, 4: 7, 8: 5, 12: 7 }), rex: folge({ 12: 1 }) }) }
   };
+  const LIEDER = ["taverne", "saltarello", "trauer", "schlacht", "wiegen"];
+  const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg"];
   const kopie = o => JSON.parse(JSON.stringify(o));
 
   /* ---------- Zustand (gemerkt im Browser) ---------- */
-  const SPUREN = ["klopf", "schelle", "bass", "melodie"];
-  const MIX_START = () => ({ vol: { klopf: 8, schelle: 6, bass: 8, melodie: 8 }, mute: { klopf: 0, schelle: 0, bass: 0, melodie: 0 } });
-  let S = Object.assign(kopie(VORLAGEN.taverne), MIX_START());
-  try { const g = JSON.parse(localStorage.getItem("imres-lautenwerk") || "null"); if (g && g.klopf) S = Object.assign(S, g); } catch (_) {}
-  const mixPruefen = () => { const m = MIX_START(); S.vol = Object.assign(m.vol, S.vol || {}); S.mute = Object.assign(m.mute, S.mute || {}); };
-  mixPruefen();
-  const merken = () => { try { localStorage.setItem("imres-lautenwerk", JSON.stringify(S)); } catch (_) {} };
-
-  /* Lied als kurzer Code für den Link */
-  const hex = a => { let n = 0; a.forEach((v, i) => { if (v) n |= 1 << i; }); return n.toString(16).padStart(4, "0"); };
-  const unhex = h => { const n = parseInt(h, 16) || 0; return Array.from({ length: SCHRITTE }, (_, i) => (n >> i) & 1); };
-  const kodieren = () => [S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, hex(S.klopf), hex(S.schelle),
-    S.bass.map(v => v < 0 ? "." : v).join(""), S.melodie.map(v => v < 0 ? "." : v).join(""),
-    SPUREN.map(k => (S.mute[k] ? "m" : "") + S.vol[k]).join("")].join("-");
-  function mixAusCode(c) {
+  const MIX_START = () => ({
+    vol: { klopf: 8, schelle: 6, bass: 8, melodie: 8, trommel: 7, floete: 6, ketten: 6, rex: 6 },
+    mute: Object.fromEntries(IDS.map(k => [k, 0]))
+  });
+  const ausVorlage = (k, mix) => {
+    const v = kopie(VORLAGEN[k]);
+    return { tempo: v.tempo, transpose: v.transpose, modus: v.modus, swing: v.swing, bordun: v.bordun, variation: v.variation,
+      ablauf: v.ablauf, teile: { A: v.A, B: v.B }, ...(mix || MIX_START()) };
+  };
+  function pruefen(s) {
     const m = MIX_START();
-    const teile = String(c || "").match(/m?\d/g);
-    if (teile && teile.length === 4) SPUREN.forEach((k, i) => { m.mute[k] = teile[i][0] === "m" ? 1 : 0; m.vol[k] = +teile[i].slice(-1); });
-    return m;
+    s.vol = Object.assign(m.vol, s.vol || {}); s.mute = Object.assign(m.mute, s.mute || {});
+    s.teile = s.teile || {};
+    ["A", "B"].forEach(p => { s.teile[p] = Object.assign(teilLeer(), s.teile[p] || {}); });
+    if (!ABLAEUFE.includes(s.ablauf)) s.ablauf = "A";
+    if (typeof s.variation !== "number") s.variation = 0;
+    return s;
   }
+  let S = ausVorlage("taverne");
+  try {
+    const g = JSON.parse(localStorage.getItem("imres-lautenwerk2") || "null");
+    if (g && g.teile) S = pruefen(g);
+  } catch (_) {}
+  let zugeklappt = {};
+  try { zugeklappt = JSON.parse(localStorage.getItem("imres-lautenwerk-zu") || "{}") || {}; } catch (_) {}
+  let bearbeite = "A";
+  const merken = () => { try { localStorage.setItem("imres-lautenwerk2", JSON.stringify(S)); } catch (_) {} };
+
+  /* ---------- Lied als kurzer Code für den Link ---------- */
+  const hex = a => { let n = 0; a.forEach((v, i) => { if (v >= 0) n |= 1 << i; }); return n.toString(16).padStart(4, "0"); };
+  const unhex = h => { const n = parseInt(h, 16) || 0; return Array.from({ length: SCHRITTE }, (_, i) => ((n >> i) & 1) ? 0 : -1); };
+  const ziffern = a => a.map(v => v < 0 ? "." : v).join("");
+  const unziffern = (str, max) => String(str || "").padEnd(SCHRITTE, ".").slice(0, SCHRITTE).split("").map(c => { const n = parseInt(c, 10); return isNaN(n) || n > max ? -1 : n; });
+  const zahl = (x, min, max, d) => { const n = parseInt(x, 10); return isNaN(n) ? d : Math.max(min, Math.min(max, n)); };
+  const kodieren = () => ["2", S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, S.variation, ABLAEUFE.indexOf(S.ablauf),
+    IDS.map(k => (S.mute[k] ? "m" : "") + S.vol[k]).join("")]
+    .concat(...["A", "B"].map(p => SPUREN.map(sp => sp.art === "an" ? hex(S.teile[p][sp.id]) : ziffern(S.teile[p][sp.id]))))
+    .join("-");
   function dekodieren(code) {
     const p = String(code).split("-");
-    if ((p.length !== 9 && p.length !== 10) || p[7].length !== SCHRITTE || p[8].length !== SCHRITTE) return null;
-    const zahl = (x, min, max, d) => { const n = parseInt(x, 10); return isNaN(n) ? d : Math.max(min, Math.min(max, n)); };
-    const zeichen = (str, max) => str.split("").map(c => { const n = parseInt(c, 10); return isNaN(n) || n > max ? -1 : n; });
-    return {
-      tempo: zahl(p[0], 50, 180, 110), transpose: zahl(p[1], -5, 6, 0), modus: MODUS_LISTE[zahl(p[2], 0, 3, 0)],
-      swing: zahl(p[3], 0, 1, 0), bordun: zahl(p[4], 0, 1, 1), klopf: unhex(p[5]), schelle: unhex(p[6]),
-      bass: zeichen(p[7], 4), melodie: zeichen(p[8], 7),
-      ...mixAusCode(p[9])
-    };
+    if (p[0] === "2" && p.length === 9 + 2 * SPUREN.length) {
+      const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, 3, 0)],
+        swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: ABLAEUFE[zahl(p[7], 0, ABLAEUFE.length - 1, 0)],
+        ...MIX_START(), teile: {} };
+      const mix = p[8].match(/m?\d/g);
+      if (mix && mix.length === IDS.length) IDS.forEach((k, i) => { s.mute[k] = mix[i][0] === "m" ? 1 : 0; s.vol[k] = +mix[i].slice(-1); });
+      ["A", "B"].forEach((teilName, ti) => {
+        s.teile[teilName] = {};
+        SPUREN.forEach((sp, si) => {
+          const feld = p[9 + ti * SPUREN.length + si];
+          s.teile[teilName][sp.id] = sp.art === "an" ? unhex(feld) : unziffern(feld, sp.zeilen - 1);
+        });
+      });
+      return pruefen(s);
+    }
+    /* alte Links (nur Barradin, ein Teil) */
+    if ((p.length === 9 || p.length === 10) && p[7].length === SCHRITTE && p[8].length === SCHRITTE) {
+      const s = { tempo: zahl(p[0], 50, 180, 110), transpose: zahl(p[1], -5, 6, 0), modus: MODUS_LISTE[zahl(p[2], 0, 3, 0)],
+        swing: zahl(p[3], 0, 1, 0), bordun: zahl(p[4], 0, 1, 1), variation: 0, ablauf: "A", ...MIX_START(),
+        teile: { A: teil({ klopf: unhex(p[5]), schelle: unhex(p[6]), bass: unziffern(p[7], 4), melodie: unziffern(p[8], 7) }), B: teilLeer() } };
+      return pruefen(s);
+    }
+    return null;
   }
   let ausLink = false;
   try {
@@ -146,7 +270,7 @@
   const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6) * 1.25;
   function mixAnwenden() {
     if (!ctx) return;
-    SPUREN.forEach(k => spurGain[k] && spurGain[k].gain.setTargetAtTime(spurPegel(k), ctx.currentTime, .03));
+    IDS.forEach(k => spurGain[k] && spurGain[k].gain.setTargetAtTime(spurPegel(k), ctx.currentTime, .03));
   }
   const saitenCache = new Map();
   function audioStart() {
@@ -154,9 +278,9 @@
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       const komp = ctx.createDynamicsCompressor();
       komp.threshold.value = -14; komp.ratio.value = 4;
-      master = ctx.createGain(); master.gain.value = .8;
+      master = ctx.createGain(); master.gain.value = .75;
       master.connect(komp); komp.connect(ctx.destination);
-      SPUREN.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
+      IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
       mixAnwenden();
       const n = ctx.sampleRate;
       rauschen = ctx.createBuffer(1, n, ctx.sampleRate);
@@ -191,30 +315,91 @@
     src.connect(f); f.connect(g); g.connect(spurGain[art === "bass" ? "bass" : "melodie"]);
     src.start(zeit);
   }
-  function klopfen(zeit, betont) {
-    const o = ctx.createOscillator(), g = ctx.createGain();
+  function rauschStoss(zeit, ziel, typ, freq, q, laut, dauer, start) {
+    const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain();
+    r.buffer = rauschen; b.type = typ; b.frequency.value = freq; b.Q.value = q;
+    g.gain.setValueAtTime(laut, zeit); g.gain.exponentialRampToValueAtTime(.001, zeit + dauer);
+    r.connect(b); b.connect(g); g.connect(ziel); r.start(zeit, start == null ? Math.random() * .5 : start, dauer + .02);
+  }
+  function klopfen(zeit, betont, laut) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), l = laut || 1;
     o.type = "triangle";
     o.frequency.setValueAtTime(betont ? 170 : 150, zeit);
     o.frequency.exponentialRampToValueAtTime(65, zeit + .08);
-    g.gain.setValueAtTime(betont ? 1 : .7, zeit);
+    g.gain.setValueAtTime((betont ? 1 : .7) * l, zeit);
     g.gain.exponentialRampToValueAtTime(.001, zeit + .16);
     o.connect(g); g.connect(spurGain.klopf); o.start(zeit); o.stop(zeit + .2);
-    const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), rg = ctx.createGain();
-    r.buffer = rauschen; b.type = "bandpass"; b.frequency.value = 1300; b.Q.value = 1.5;
-    rg.gain.setValueAtTime(betont ? .35 : .22, zeit); rg.gain.exponentialRampToValueAtTime(.001, zeit + .035);
-    r.connect(b); b.connect(rg); rg.connect(spurGain.klopf); r.start(zeit, Math.random() * .5, .05);
+    rauschStoss(zeit, spurGain.klopf, "bandpass", 1300, 1.5, (betont ? .35 : .22) * l, .035);
   }
-  function schellen(zeit) {
-    const r = ctx.createBufferSource(), h = ctx.createBiquadFilter(), g = ctx.createGain();
-    r.buffer = rauschen; h.type = "highpass"; h.frequency.value = 6500;
-    g.gain.setValueAtTime(.32, zeit); g.gain.exponentialRampToValueAtTime(.001, zeit + .2);
-    r.connect(h); h.connect(g); g.connect(spurGain.schelle); r.start(zeit, Math.random() * .5, .22);
+  function schellen(zeit, laut) {
+    const l = laut || 1;
+    rauschStoss(zeit, spurGain.schelle, "highpass", 6500, .7, .32 * l, .2);
     for (let i = 0; i < 3; i++) {
       const o = ctx.createOscillator(), og = ctx.createGain(), z = zeit + i * .012;
       o.type = "sine"; o.frequency.value = 4200 + Math.random() * 3200;
-      og.gain.setValueAtTime(.05, z); og.gain.exponentialRampToValueAtTime(.0005, z + .09);
+      og.gain.setValueAtTime(.05 * l, z); og.gain.exponentialRampToValueAtTime(.0005, z + .09);
       o.connect(og); og.connect(spurGain.schelle); o.start(z); o.stop(z + .1);
     }
+  }
+  function trommeln(zeit, betont, laut) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), l = laut || 1;
+    o.type = "sine";
+    o.frequency.setValueAtTime(betont ? 105 : 92, zeit);
+    o.frequency.exponentialRampToValueAtTime(46, zeit + .2);
+    g.gain.setValueAtTime((betont ? 1.15 : .85) * l, zeit);
+    g.gain.exponentialRampToValueAtTime(.001, zeit + .38);
+    o.connect(g); g.connect(spurGain.trommel); o.start(zeit); o.stop(zeit + .4);
+    rauschStoss(zeit, spurGain.trommel, "lowpass", 500, .7, .5 * l, .08);
+    rauschStoss(zeit, spurGain.trommel, "bandpass", 2200, 1, .12 * l, .025);
+  }
+  function floete(freq, zeit, dauer, laut) {
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    const lfo = ctx.createOscillator(), lg = ctx.createGain(), l = laut || 1, ende = zeit + Math.max(.12, dauer);
+    o.type = "triangle"; o.frequency.value = freq;
+    o2.type = "sine"; o2.frequency.value = freq * 2;
+    lfo.frequency.value = 5.2; lg.gain.setValueAtTime(0, zeit); lg.gain.linearRampToValueAtTime(freq * .006, zeit + .25);
+    lfo.connect(lg); lg.connect(o.frequency); lg.connect(o2.frequency);
+    const g2 = ctx.createGain(); g2.gain.value = .18; o2.connect(g2); g2.connect(f);
+    f.type = "lowpass"; f.frequency.value = 2600;
+    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(.32 * l, zeit + .05);
+    g.gain.setValueAtTime(.28 * l, ende - .06); g.gain.linearRampToValueAtTime(0, ende + .08);
+    o.connect(f); f.connect(g); g.connect(spurGain.floete);
+    [o, o2, lfo].forEach(x => { x.start(zeit); x.stop(ende + .1); });
+    rauschStoss(zeit, spurGain.floete, "bandpass", freq * 1.5, 3, .07 * l, .09);
+  }
+  function kettenRasseln(zeit, laut) {
+    const l = laut || 1;
+    for (let i = 0; i < 5; i++) {
+      const z = zeit + i * (.011 + Math.random() * .012);
+      rauschStoss(z, spurGain.ketten, "bandpass", 2600 + Math.random() * 3600, 9, (.38 - i * .05) * l, .035);
+    }
+    [3150, 4720].forEach(fr => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = fr * (1 + Math.random() * .03);
+      g.gain.setValueAtTime(.04 * l, zeit); g.gain.exponentialRampToValueAtTime(.0005, zeit + .15);
+      o.connect(g); g.connect(spurGain.ketten); o.start(zeit); o.stop(zeit + .16);
+    });
+  }
+  function rexLaut(zeit, art, laut) {
+    const o = ctx.createOscillator(), b = ctx.createBiquadFilter(), g = ctx.createGain(), l = laut || 1;
+    o.type = "sawtooth";
+    b.type = "bandpass"; b.Q.value = art ? 4 : 1.6;
+    if (!art) { /* Wuff! */
+      o.frequency.setValueAtTime(560, zeit); o.frequency.exponentialRampToValueAtTime(260, zeit + .11);
+      b.frequency.setValueAtTime(1100, zeit); b.frequency.exponentialRampToValueAtTime(600, zeit + .11);
+      g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(.55 * l, zeit + .01); g.gain.exponentialRampToValueAtTime(.001, zeit + .16);
+      o.start(zeit); o.stop(zeit + .18);
+      rauschStoss(zeit, spurGain.rex, "bandpass", 900, 1, .25 * l, .06);
+    } else { /* Auuuuu! */
+      o.frequency.setValueAtTime(390, zeit); o.frequency.linearRampToValueAtTime(640, zeit + .35);
+      o.frequency.linearRampToValueAtTime(600, zeit + .9); o.frequency.linearRampToValueAtTime(440, zeit + 1.3);
+      b.frequency.value = 900;
+      const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 6; lg.gain.value = 9;
+      lfo.connect(lg); lg.connect(o.frequency); lfo.start(zeit); lfo.stop(zeit + 1.4);
+      g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(.3 * l, zeit + .2); g.gain.setValueAtTime(.28 * l, zeit + 1); g.gain.linearRampToValueAtTime(0, zeit + 1.35);
+      o.start(zeit); o.stop(zeit + 1.4);
+    }
+    o.connect(b); b.connect(g); g.connect(spurGain.rex);
   }
   let bordunTeile = null;
   function bordunAn() {
@@ -222,7 +407,7 @@
     const f = ctx.createBiquadFilter(), g = ctx.createGain();
     f.type = "lowpass"; f.frequency.value = 650; f.Q.value = .5;
     g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(.05, ctx.currentTime + .8);
-    const oscs = [0, 7].map(iv => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.connect(f); o.start(); return o; });
+    const oscs = [0, 7].map(() => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.connect(f); o.start(); return o; });
     f.connect(g); g.connect(master);
     bordunTeile = { oscs, g };
     bordunStimmen();
@@ -238,27 +423,78 @@
     oscs.forEach(o => o.stop(jetzt + .45));
     bordunTeile = null;
   }
+  function spielen(spur, zeile, zeit, schritt, laut, dauer) {
+    const betont = schritt % 4 === 0;
+    if (spur === "klopf") klopfen(zeit, betont, laut);
+    else if (spur === "schelle") schellen(zeit, laut);
+    else if (spur === "trommel") trommeln(zeit, betont, laut);
+    else if (spur === "ketten") kettenRasseln(zeit, laut);
+    else if (spur === "rex") rexLaut(zeit, zeile, laut);
+    else if (spur === "floete") floete(midiHz(tonMidi("floete", zeile, S)), zeit, dauer || .25, laut);
+    else zupf(midiHz(tonMidi(spur, zeile, S)), zeit, spur === "bass" ? "bass" : "mel", laut);
+  }
+
+  /* ---------- Variation: die Band improvisiert beim Spielen ---------- */
+  function variiert(spur, wert, i, daten, v, letzterTakt) {
+    if (v <= 0) return wert;
+    const sp = SPUR[spur];
+    const r = Math.random();
+    if (sp.art === "an") {
+      if (spur === "rex") return wert;
+      if (wert >= 0) return i % 4 !== 0 && r < v * .15 ? -1 : wert;
+      if (spur === "trommel" && letzterTakt && i >= 12 && r < v * .7) return 0; /* Trommelwirbel am Ende */
+      if (r < v * (spur === "ketten" ? .05 : .12) && i % 2 === 0) return 0;
+      return -1;
+    }
+    if (spur === "rex") return wert >= 0 ? wert : (r < v * .012 ? 0 : -1);
+    const max = sp.zeilen - 1;
+    if (wert >= 0) {
+      if (i !== 0 && r < v * .12) return -1;
+      if (r < v * .4) return Math.max(0, Math.min(max, wert + (Math.random() < .5 ? -1 : 1) * (spur === "bass" ? 3 : 1)));
+      return wert;
+    }
+    if ((spur === "melodie" || spur === "floete") && r < v * .25) {
+      const vor = daten[(i + SCHRITTE - 1) % SCHRITTE], nach = daten[(i + 1) % SCHRITTE];
+      if (vor >= 0 && nach >= 0) return Math.round((vor + nach) / 2);
+      if (vor >= 0) return Math.max(0, Math.min(max, vor + (Math.random() < .5 ? -1 : 1)));
+    }
+    return -1;
+  }
+  function notenLaenge(daten, i) {
+    let n = 1;
+    while (n < 4 && daten[(i + n) % SCHRITTE] < 0) n++;
+    return n;
+  }
 
   /* ---------- Taktgeber ---------- */
-  let laeuft = false, schritt = 0, naechste = 0, timer = null;
+  let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
   const schrittDauer = () => 60 / S.tempo / 4;
   function planen() {
-    while (naechste < ctx.currentTime + .12) {
-      const versatz = S.swing && schritt % 2 === 1 ? schrittDauer() * .33 : 0, z = naechste + versatz;
-      const ev = { schritt, zeit: z, klopf: 0, schelle: 0, bass: 0, mel: 0 };
-      if (S.klopf[schritt] && !S.mute.klopf) { klopfen(z, schritt % 4 === 0); ev.klopf = 1; }
-      if (S.schelle[schritt] && !S.mute.schelle) { schellen(z); ev.schelle = 1; }
-      if (S.bass[schritt] >= 0 && !S.mute.bass) { zupf(midiHz(bassMidi(S.bass[schritt], S)), z, "bass"); ev.bass = 1; }
-      if (S.melodie[schritt] >= 0 && !S.mute.melodie) { zupf(midiHz(melMidi(S.melodie[schritt], S)), z, "mel"); ev.mel = 1; }
+    const vorlauf = document.hidden ? 1.6 : .12; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
+    while (naechste < ctx.currentTime + vorlauf) {
+      const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
+      const v = S.variation / 10, letzterTakt = abschnitt % S.ablauf.length === S.ablauf.length - 1;
+      const versatz = S.swing && schritt % 2 === 1 ? schrittDauer() * .33 : 0;
+      const ev = { schritt, teil: teilName, zeit: naechste + versatz, spuren: {} };
+      IDS.forEach(k => {
+        if (S.mute[k]) return;
+        const wert = variiert(k, daten[k][schritt], schritt, daten[k], v, letzterTakt);
+        if (wert < 0) return;
+        const wackel = v ? (Math.random() - .5) * .012 * v : 0;
+        const laut = v ? 1 - Math.random() * .25 * v : 1;
+        spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, k === "floete" ? notenLaenge(daten[k], schritt) * schrittDauer() * .95 : 0);
+        ev.spuren[k] = wert;
+      });
       anzeige.push(ev);
       naechste += schrittDauer();
       schritt = (schritt + 1) % SCHRITTE;
+      if (schritt === 0) abschnitt = (abschnitt + 1) % S.ablauf.length;
     }
   }
   function start() {
     audioStart();
-    laeuft = true; schritt = 0; naechste = ctx.currentTime + .06; anzeige.length = 0;
+    laeuft = true; schritt = 0; abschnitt = 0; naechste = ctx.currentTime + .06; anzeige.length = 0;
     planen(); timer = setInterval(planen, 25);
     bordunAn();
     requestAnimationFrame(malen);
@@ -266,7 +502,7 @@
   }
   function stopp() {
     laeuft = false; clearInterval(timer); bordunAus();
-    spalte(-1); knoepfe();
+    spalte(-1); teilAnzeige(null); knoepfe();
   }
 
   /* ---------- Anzeige im Takt ---------- */
@@ -276,93 +512,182 @@
     aktiv = i;
     if (i >= 0 && spalten[i]) spalten[i].forEach(z => z.classList.add("jetzt"));
   }
+  function teilAnzeige(teilName) {
+    root.querySelectorAll("[data-teil]").forEach(b => b.classList.toggle("spielt", b.dataset.teil === teilName));
+  }
   const buehne = () => root.querySelector(".lw-buehne");
   function zucken(klasse) {
     const b = buehne(); if (!b || ruhig) return;
     b.classList.remove(klasse); void b.offsetWidth; b.classList.add(klasse);
   }
-  function note(zeichen, bass) {
+  /* Positionen auf der Bühne (in Prozent der Breite) */
+  const ORT = { laute: 44, bass: 38, floete: 70, trommel: 14, ketten: 88, rex: 66 };
+  function schweben(text, ort, klasse, hoehe) {
     const b = buehne(); if (!b || ruhig) return;
     const n = document.createElement("span");
-    n.className = "lw-note" + (bass ? " tief" : "");
-    n.textContent = zeichen;
-    n.style.left = (bass ? 52 : 62) + Math.random() * 14 + "%";
-    n.style.setProperty("--dx", (Math.random() * 40 - 10) + "px");
+    n.className = "lw-note " + (klasse || "");
+    n.textContent = text;
+    n.style.left = ort + Math.random() * 6 - 3 + "%";
+    if (hoehe != null) n.style.bottom = hoehe + "%";
+    n.style.setProperty("--dx", (Math.random() * 30 - 10) + "px");
     b.appendChild(n);
-    setTimeout(() => n.remove(), 1600);
+    setTimeout(() => n.remove(), 1700);
   }
   function malen() {
     if (!laeuft) return;
     const jetzt = ctx.currentTime;
     while (anzeige.length && anzeige[0].zeit <= jetzt) {
-      const ev = anzeige.shift();
-      spalte(ev.schritt);
-      if (ev.klopf) zucken("klopf");
-      if (ev.schelle) zucken("schelle");
-      if (ev.bass) { zucken("bass"); if (Math.random() < .5) note("♩", true); }
-      if (ev.mel) { zucken("mel"); note(Math.random() < .5 ? "♪" : "♫"); }
+      const ev = anzeige.shift(), sp = ev.spuren;
+      teilAnzeige(ev.teil);
+      spalte(ev.teil === bearbeite ? ev.schritt : -1);
+      if ("klopf" in sp) zucken("klopf");
+      if ("schelle" in sp) zucken("schelle");
+      if ("bass" in sp) { zucken("bass"); if (Math.random() < .4) schweben("♩", ORT.bass, "tief"); }
+      if ("melodie" in sp) { zucken("mel"); schweben(Math.random() < .5 ? "♪" : "♫", ORT.laute); }
+      if ("trommel" in sp) zucken("trommel");
+      if ("floete" in sp) { zucken("floete"); if (Math.random() < .7) schweben("♪", ORT.floete, "floete", 62); }
+      if ("ketten" in sp) zucken("ketten");
+      if ("rex" in sp) { zucken(sp.rex ? "heul" : "wuff"); schweben(t().rexLaut[sp.rex], ORT.rex, "blase", 36); }
     }
     requestAnimationFrame(malen);
   }
 
-  /* ---------- Barradin ---------- */
-  const BARRADIN = `
-<svg class="lw-figur" viewBox="0 0 280 200" aria-hidden="true">
+  /* ---------- Die Band ---------- */
+  const BUEHNE = `
+<svg class="lw-figur" viewBox="0 0 660 210" aria-hidden="true">
+ <!-- Friedrich mit Trommel -->
+ <svg x="0" y="10" width="130" height="200" viewBox="0 0 130 200" class="friedrich" overflow="visible">
+  <ellipse cx="66" cy="192" rx="52" ry="5" fill="rgba(0,0,0,.45)"/>
+  <path d="M48 150 L46 189 M62 150 L64 189" stroke="#3b3326" stroke-width="10" stroke-linecap="round"/>
+  <path d="M38 190 h14 M58 190 h14" stroke="#2a1d14" stroke-width="6" stroke-linecap="round"/>
+  <path d="M40 104 Q46 124 68 128" fill="none" stroke="#344b29" stroke-width="8" stroke-linecap="round"/>
+  <path d="M34 152 Q30 120 38 98 Q50 88 66 92 Q76 110 72 152 Z" fill="#3f5a32" stroke="#6f8a5a" stroke-width="1.5"/>
+  <path d="M36 128 H72" stroke="#6b4423" stroke-width="3"/>
+  <path d="M47 84 h10 v10 h-10 Z" fill="#c48c66"/>
+  <g class="f-kopf">
+   <circle cx="52" cy="74" r="13" fill="#d9a07a"/>
+   <path d="M38 74 Q36 56 52 56 Q68 56 66 72 Q60 64 52 64 Q44 64 40 76 Z" fill="#6b4423"/>
+   <path d="M43 80 Q52 92 62 80 Q60 88 52 90 Q44 88 43 80 Z" fill="#6b4423"/>
+   <circle cx="56" cy="73" r="1.4" fill="#2a1a10"/>
+  </g>
+  <path d="M83 150 L74 192 M97 150 L97 192 M111 150 L120 192" stroke="#5a3a20" stroke-width="2.5"/>
+  <path d="M71 138 L71 150 Q97 160 123 150 L123 138 Q97 146 71 138 Z" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
+  <ellipse class="trommelfell" cx="97" cy="138" rx="26" ry="8" fill="#e8d9b5" stroke="#8a5a32" stroke-width="1.5"/>
+  <circle cx="68" cy="129" r="5" fill="#d9a07a"/><path d="M68 129 L82 139" stroke="#d8c49a" stroke-width="2.5" stroke-linecap="round"/>
+  <g class="f-arm"><path d="M64 100 Q84 110 90 124" fill="none" stroke="#3f5a32" stroke-width="9" stroke-linecap="round"/>
+   <circle cx="91" cy="126" r="5" fill="#d9a07a"/><path d="M91 126 L104 136" stroke="#d8c49a" stroke-width="2.5" stroke-linecap="round"/></g>
+ </svg>
+ <!-- Barradin -->
+ <svg x="95" y="10" width="280" height="200" viewBox="0 0 280 200" class="barradin" overflow="visible">
   <ellipse cx="125" cy="192" rx="80" ry="6" fill="rgba(0,0,0,.45)"/>
-  <!-- Fass -->
   <g class="fass"><path d="M78 150 Q74 172 80 194 L132 194 Q138 172 134 150 Z" fill="#3a2a1c" stroke="#8a6a44" stroke-width="2"/>
-    <path d="M77 162 H135 M77 182 H135" stroke="#6b5130" stroke-width="3"/></g>
-  <!-- Beine -->
+   <path d="M77 162 H135 M77 182 H135" stroke="#6b5130" stroke-width="3"/></g>
   <path d="M104 150 Q130 146 150 152 L156 186" fill="none" stroke="#2a2230" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
   <g class="fuss"><path d="M126 154 Q150 156 166 160 L170 188" fill="none" stroke="#231c29" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M162 186 Q172 183 186 190 L186 194 L160 194 Z" fill="#1b1512" stroke="#8a6a44" stroke-width="1.5"/>
-    <g class="schellring"><circle cx="164" cy="181" r="2.4" fill="#e0a046"/><circle cx="170" cy="182" r="2.4" fill="#e0a046"/><circle cx="176" cy="181" r="2.4" fill="#e0a046"/></g></g>
+   <path d="M162 186 Q172 183 186 190 L186 194 L160 194 Z" fill="#1b1512" stroke="#8a6a44" stroke-width="1.5"/>
+   <g class="schellring"><circle cx="164" cy="181" r="2.4" fill="#e0a046"/><circle cx="170" cy="182" r="2.4" fill="#e0a046"/><circle cx="176" cy="181" r="2.4" fill="#e0a046"/></g></g>
   <path d="M150 186 Q160 183 172 190 L172 194 L146 194 Z" fill="#1b1512" stroke="#8a6a44" stroke-width="1.5"/>
-  <!-- Körper -->
   <g class="koerper">
-    <path d="M96 150 Q92 118 100 96 Q110 84 126 88 Q136 104 132 150 Z" fill="#1d1820" stroke="#e0a046" stroke-width="1.6"/>
-    <path d="M112 92 L114 148" stroke="#e0a046" stroke-width="1.2" stroke-dasharray="3 4"/>
-    <!-- hinterer Arm (greift den Hals) -->
-    <path class="arm-griff" d="M122 96 Q160 92 196 84" fill="none" stroke="#1d1820" stroke-width="10" stroke-linecap="round"/>
-    <path d="M108 74 L109 92 L121 92 L121 74 Z" fill="#b8865f"/>
-    <path d="M100 96 Q112 86 128 92" fill="none" stroke="#e0a046" stroke-width="2.4" stroke-linecap="round"/>
-    <g class="kopf"><g transform="translate(0 6)">
-      <path d="M100 70 Q96 50 112 44 Q128 40 132 56 Q134 70 124 76 Q110 80 100 70 Z" fill="#c99872"/>
-      <path d="M103 60 L90 50 L104 66 Z" fill="#c99872" stroke="#9a7254" stroke-width="1"/>
-      <path d="M98 58 Q92 36 112 32 Q134 28 138 48 Q142 40 136 34 Q146 44 134 58 Q130 46 120 46 Q112 46 106 56 Q104 50 98 58 Z" fill="#7a3f1d"/>
-      <path d="M119 62 q3 -2 6 0" stroke="#2a1a10" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-      <path d="M118 70 q6 4 11 -1" stroke="#5a2a18" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-      <path d="M126 72 L140 76 L142 70" fill="none" stroke="#3a2a1c" stroke-width="2.4" stroke-linecap="round"/>
-    </g></g>
+   <path d="M96 150 Q92 118 100 96 Q110 84 126 88 Q136 104 132 150 Z" fill="#1d1820" stroke="#e0a046" stroke-width="1.6"/>
+   <path d="M112 92 L114 148" stroke="#e0a046" stroke-width="1.2" stroke-dasharray="3 4"/>
+   <path class="arm-griff" d="M122 96 Q160 92 196 84" fill="none" stroke="#1d1820" stroke-width="10" stroke-linecap="round"/>
+   <path d="M108 74 L109 92 L121 92 L121 74 Z" fill="#b8865f"/>
+   <path d="M100 96 Q112 86 128 92" fill="none" stroke="#e0a046" stroke-width="2.4" stroke-linecap="round"/>
+   <g class="kopf"><g transform="translate(0 6)">
+    <path d="M100 70 Q96 50 112 44 Q128 40 132 56 Q134 70 124 76 Q110 80 100 70 Z" fill="#c99872"/>
+    <path d="M103 60 L90 50 L104 66 Z" fill="#c99872" stroke="#9a7254" stroke-width="1"/>
+    <path d="M98 58 Q92 36 112 32 Q134 28 138 48 Q142 40 136 34 Q146 44 134 58 Q130 46 120 46 Q112 46 106 56 Q104 50 98 58 Z" fill="#7a3f1d"/>
+    <path d="M119 62 q3 -2 6 0" stroke="#2a1a10" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M118 70 q6 4 11 -1" stroke="#5a2a18" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M126 72 L140 76 L142 70" fill="none" stroke="#3a2a1c" stroke-width="2.4" stroke-linecap="round"/>
+   </g></g>
   </g>
-  <!-- Laute -->
   <g class="laute">
-    <path class="hals" d="M164 122 L232 70 L238 77 L172 130 Z" fill="#5a3a20" stroke="#2a1a10" stroke-width="1.2"/>
-    <path d="M232 70 L250 74 L252 82 L238 77 Z" fill="#4a2e18" stroke="#2a1a10" stroke-width="1.2"/>
-    <g fill="#e0a046"><circle cx="242" cy="72" r="1.6"/><circle cx="247" cy="74" r="1.6"/><circle cx="244" cy="79" r="1.6"/><circle cx="249" cy="80" r="1.6"/></g>
-    <ellipse class="korpus" cx="150" cy="140" rx="36" ry="25" transform="rotate(-38 150 140)" fill="#a8743c" stroke="#5a3a20" stroke-width="2"/>
-    <circle cx="156" cy="134" r="8" fill="#2a1a10" stroke="#e0a046" stroke-width="1.2"/>
-    <path class="saiten" d="M132 154 L236 74 M134 156 L238 76 M136 158 L240 78" stroke="#ebe2cc" stroke-width=".7" opacity=".85"/>
-    <path d="M130 150 L138 160" stroke="#2a1a10" stroke-width="3" stroke-linecap="round"/>
+   <path d="M164 122 L232 70 L238 77 L172 130 Z" fill="#5a3a20" stroke="#2a1a10" stroke-width="1.2"/>
+   <path d="M232 70 L250 74 L252 82 L238 77 Z" fill="#4a2e18" stroke="#2a1a10" stroke-width="1.2"/>
+   <g fill="#e0a046"><circle cx="242" cy="72" r="1.6"/><circle cx="247" cy="74" r="1.6"/><circle cx="244" cy="79" r="1.6"/><circle cx="249" cy="80" r="1.6"/></g>
+   <ellipse cx="150" cy="140" rx="36" ry="25" transform="rotate(-38 150 140)" fill="#a8743c" stroke="#5a3a20" stroke-width="2"/>
+   <circle cx="156" cy="134" r="8" fill="#2a1a10" stroke="#e0a046" stroke-width="1.2"/>
+   <path class="saiten" d="M132 154 L236 74 M134 156 L238 76 M136 158 L240 78" stroke="#ebe2cc" stroke-width=".7" opacity=".85"/>
+   <path d="M130 150 L138 160" stroke="#2a1a10" stroke-width="3" stroke-linecap="round"/>
   </g>
-  <!-- Griffhand -->
   <circle class="hand-griff" cx="200" cy="85" r="6" fill="#c99872"/>
-  <!-- vorderer Arm (schlägt/zupft) -->
   <g class="arm-schlag"><path d="M118 98 Q106 126 132 140" fill="none" stroke="#231c29" stroke-width="11" stroke-linecap="round"/>
-    <path d="M118 98 Q106 126 132 140" fill="none" stroke="#e0a046" stroke-width="1" stroke-dasharray="2 5"/>
-    <circle class="hand-schlag" cx="136" cy="142" r="6.5" fill="#c99872"/></g>
+   <path d="M118 98 Q106 126 132 140" fill="none" stroke="#e0a046" stroke-width="1" stroke-dasharray="2 5"/>
+   <circle cx="136" cy="142" r="6.5" fill="#c99872"/></g>
   <circle class="rauchwolke" cx="146" cy="68" r="5" fill="rgba(220,215,230,.25)"/>
+ </svg>
+ <!-- Echo mit Flöte -->
+ <svg x="360" y="10" width="110" height="200" viewBox="0 0 110 200" class="echo" overflow="visible">
+  <ellipse cx="54" cy="192" rx="42" ry="5" fill="rgba(0,0,0,.45)"/>
+  <g class="e-koerper">
+   <path d="M44 66 Q34 92 40 124 L48 84 Z M64 66 Q72 92 66 120 L60 84 Z" fill="#e9e6dc"/>
+   <path d="M38 98 Q30 140 22 192 L86 192 Q78 140 70 98 Q54 90 38 98 Z" fill="#cfcabb" stroke="#8a8676" stroke-width="1.2"/>
+   <path d="M40 120 Q54 128 68 118" fill="none" stroke="#6f8a5a" stroke-width="4"/>
+   <path d="M30 170 Q54 178 80 168" fill="none" stroke="#8a8676" stroke-width="1" stroke-dasharray="3 4"/>
+   <g class="e-kopf">
+    <path d="M38 50 Q30 36 34 24 M34 34 Q24 30 22 22 M36 28 Q40 18 38 10 M70 50 Q78 36 74 24 M74 34 Q84 30 86 22 M72 28 Q68 18 70 10" fill="none" stroke="#8a6a44" stroke-width="3.4" stroke-linecap="round"/>
+    <circle cx="54" cy="70" r="12.5" fill="#cbb9a6"/>
+    <path d="M41 66 Q42 52 54 52 Q67 52 67 66 Q60 58 54 58 Q47 58 41 66 Z" fill="#f2efe6"/>
+    <path d="M44 76 Q54 96 64 76 Q60 88 54 90 Q48 88 44 76 Z" fill="#f2efe6"/>
+    <path d="M57 69 h4" stroke="#3a2a1c" stroke-width="1.4" stroke-linecap="round"/>
+   </g>
+   <path d="M60 79 L104 96" stroke="#6b4a2a" stroke-width="4" stroke-linecap="round"/>
+   <g fill="#2a1a10"><circle cx="78" cy="86" r="1"/><circle cx="85" cy="89" r="1"/><circle cx="92" cy="91" r="1"/></g>
+   <path d="M42 100 Q56 112 74 88" fill="none" stroke="#cfcabb" stroke-width="8" stroke-linecap="round"/>
+   <path d="M66 100 Q84 104 90 92" fill="none" stroke="#bdb8a8" stroke-width="7" stroke-linecap="round"/>
+   <circle cx="74" cy="87" r="4.5" fill="#cbb9a6"/><circle cx="90" cy="92" r="4.5" fill="#cbb9a6"/>
+  </g>
+ </svg>
+ <!-- Rex -->
+ <svg x="450" y="112" width="90" height="98" viewBox="0 0 90 98" class="rex" overflow="visible">
+  <ellipse cx="46" cy="92" rx="30" ry="4" fill="rgba(0,0,0,.45)"/>
+  <path d="M64 86 Q84 80 80 62" fill="none" stroke="#26262b" stroke-width="6" stroke-linecap="round"/>
+  <path d="M30 92 Q22 62 38 48 Q56 42 64 62 Q70 80 66 92 Z" fill="#26262b"/>
+  <path d="M34 56 Q44 64 42 92 L32 92 Q28 70 34 56 Z" fill="#ece6da"/>
+  <path d="M36 74 L36 92 M44 74 L44 92" stroke="#ece6da" stroke-width="5" stroke-linecap="round"/>
+  <g class="r-kopf">
+   <path d="M40 22 L36 34 L46 32 Z M52 24 L46 34 L54 36 Z" fill="#26262b"/>
+   <ellipse cx="40" cy="40" rx="14" ry="12" fill="#26262b"/>
+   <path d="M36 28 Q34 40 30 46 L38 46 Q38 36 40 28 Z" fill="#ece6da"/>
+   <ellipse cx="25" cy="46" rx="9" ry="6" fill="#ece6da"/>
+   <circle cx="17" cy="45" r="2.8" fill="#111"/>
+   <circle cx="34" cy="37" r="2" fill="#2a1a10"/><circle cx="34" cy="33" r="1.4" fill="#b8743c"/><circle cx="45" cy="36" r="1.6" fill="#b8743c"/>
+   <path class="maul" d="M18 50 Q24 53 30 50" fill="none" stroke="#111" stroke-width="1.3"/>
+  </g>
+ </svg>
+ <!-- Ezekiel mit Ketten -->
+ <svg x="530" y="10" width="130" height="200" viewBox="0 0 130 200" class="ezekiel" overflow="visible">
+  <ellipse cx="64" cy="192" rx="50" ry="5" fill="rgba(0,0,0,.45)"/>
+  <path d="M50 150 L46 189 M78 150 L82 189" stroke="#1a0e0e" stroke-width="13" stroke-linecap="round"/>
+  <path d="M36 190 h16 M76 190 h16" stroke="#3a1a14" stroke-width="7" stroke-linecap="round"/>
+  <path d="M30 104 Q18 124 22 140" fill="none" stroke="#2a1414" stroke-width="10" stroke-linecap="round"/>
+  <path d="M30 100 Q24 140 36 154 L94 154 Q104 140 98 100 Q64 84 30 100 Z" fill="#2a1414" stroke="#9b3a2f" stroke-width="1.6"/>
+  <path d="M30 100 L22 88 L40 96 Z M98 100 L106 88 L88 96 Z" fill="#3a1a14" stroke="#9b3a2f" stroke-width="1"/>
+  <path class="glut" d="M50 108 L58 120 L54 132 M76 106 L70 122 L78 136 M60 140 L66 150" fill="none" stroke="#ff5a2e" stroke-width="1.4" opacity=".75"/>
+  <g class="z-kopf">
+   <path d="M52 64 Q34 52 36 34 Q42 46 54 58 Z M76 64 Q94 52 92 34 Q86 46 74 58 Z" fill="#3a1a14" stroke="#9b3a2f" stroke-width="1"/>
+   <circle cx="64" cy="74" r="15" fill="#1a0d0d" stroke="#9b3a2f" stroke-width="1.4"/>
+   <path class="augen" d="M56 72 l6 2 M66 74 l6 -2" stroke="#ff4a2a" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+  <path d="M96 104 Q110 120 104 136" fill="none" stroke="#2a1414" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="104" cy="138" r="5.5" fill="#3a1a14"/>
+  <g class="kette"><path d="M104 140 Q112 166 96 178 Q78 186 80 164 Q82 150 98 146" fill="none" stroke="#b8b0a0" stroke-width="3.2" stroke-dasharray="4.5 2.5" stroke-linecap="round"/></g>
+ </svg>
 </svg>`;
 
   /* ---------- Oberfläche ---------- */
+  function zeilenName(spur, z) {
+    if (spur === "rex") return t().rexZeilen[z];
+    return notenName(tonMidi(spur, z, S));
+  }
   function rasterZeile(spur, zeile, beschriftung, klasse) {
+    const daten = S.teile[bearbeite][spur];
     let html = '<div class="lw-name ' + (klasse || "") + '">' + beschriftung + "</div>";
     for (let i = 0; i < SCHRITTE; i++) {
-      let an = false;
-      if (spur === "klopf" || spur === "schelle") an = !!S[spur][i];
-      else an = S[spur][i] === zeile;
-      html += '<button type="button" class="lw-zelle s-' + spur + (S.mute[spur] ? " stumm" : "") + (i % 4 === 0 ? " takt" : "") + (an ? " an" : "") +
-        '" data-spur="' + spur + '" data-zeile="' + zeile + '" data-s="' + i + '" aria-pressed="' + an + '"></button>';
+      const istAn = SPUR[spur].art === "an" ? daten[i] >= 0 : daten[i] === zeile;
+      html += '<button type="button" class="lw-zelle s-' + spur + (S.mute[spur] ? " stumm" : "") + (i % 4 === 0 ? " takt" : "") + (istAn ? " an" : "") +
+        '" data-spur="' + spur + '" data-zeile="' + zeile + '" data-s="' + i + '" aria-pressed="' + istAn + '"></button>';
     }
     return html;
   }
@@ -370,32 +695,49 @@
     const T = t();
     const tonarten = Array.from({ length: 12 }, (_, i) => i - 5).map(tr => '<option value="' + tr + '"' + (tr === S.transpose ? " selected" : "") + ">" + notenName(MEL_GRUND + tr) + "</option>").join("");
     const modi = MODUS_LISTE.map(m => '<option value="' + m + '"' + (m === S.modus ? " selected" : "") + ">" + T.modi[m] + "</option>").join("");
-    const kopf = k => '<div class="lw-kopf' + (S.mute[k] ? " stumm" : "") + '" data-kopf="' + k + '"><div class="lw-kopf-in">' +
-      '<span class="lw-spurname">' + T.spuren[k] + " <small>· " + T.spurInfo[k] + "</small></span>" +
-      '<button type="button" class="lw-mute" data-mute="' + k + '" aria-pressed="' + !!S.mute[k] + '" aria-label="' + esc(T.stumm + " " + T.spuren[k]) + '" title="' + esc(T.stumm) + '">' + (S.mute[k] ? "🔇" : "🔊") + "</button>" +
-      '<input type="range" class="lw-fader" min="0" max="9" step="1" value="' + S.vol[k] + '" data-vol="' + k + '" aria-label="' + esc(T.lautstaerke + " " + T.spuren[k]) + '">' +
-      "</div></div>";
-    let raster = kopf("klopf") + rasterZeile("klopf", 0, "✊", "sym");
-    raster += kopf("schelle") + rasterZeile("schelle", 0, "🔔", "sym");
-    raster += kopf("bass");
-    for (let z = BASS_STUFEN.length - 1; z >= 0; z--) raster += rasterZeile("bass", z, notenName(bassMidi(z, S)), z === 0 ? "grund" : "");
-    raster += kopf("melodie");
-    for (let z = 7; z >= 0; z--) raster += rasterZeile("melodie", z, notenName(melMidi(z, S)), z === 0 || z === 7 ? "grund" : "");
+    const ablaeufe = ABLAEUFE.map(a => '<option value="' + a + '"' + (a === S.ablauf ? " selected" : "") + ">" + a.split("").join(" – ") + "</option>").join("");
+    const kopf = k => {
+      const zu = !!zugeklappt[k];
+      return '<div class="lw-kopf' + (S.mute[k] ? " stumm" : "") + '" data-kopf="' + k + '"><div class="lw-kopf-in">' +
+        '<button type="button" class="lw-spurname" data-zu="' + k + '" aria-expanded="' + !zu + '" title="' + esc(T.zuklappen) + '">' + (zu ? "▸ " : "▾ ") +
+          T.wer[SPUR[k].wer] + " <small>· " + T.spuren[k] + "</small></button>" +
+        '<button type="button" class="lw-mute" data-mute="' + k + '" aria-pressed="' + !!S.mute[k] + '" aria-label="' + esc(T.stumm + " " + T.spuren[k]) + '" title="' + esc(T.stumm) + '">' + (S.mute[k] ? "🔇" : "🔊") + "</button>" +
+        '<input type="range" class="lw-fader" min="0" max="9" step="1" value="' + S.vol[k] + '" data-vol="' + k + '" aria-label="' + esc(T.lautstaerke + " " + T.spuren[k]) + '">' +
+        "</div></div>";
+    };
+    let raster = "";
+    SPUREN.forEach(sp => {
+      raster += kopf(sp.id);
+      if (zugeklappt[sp.id]) return;
+      if (sp.art === "an") raster += rasterZeile(sp.id, 0, sp.sym, "sym");
+      else for (let z = sp.zeilen - 1; z >= 0; z--) raster += rasterZeile(sp.id, z, zeilenName(sp.id, z), (z === 0 || z === 7) && sp.id !== "rex" ? "grund" : (sp.id === "rex" ? "sym klein" : ""));
+    });
 
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.text + "</p>" +
-      '<div class="lw-buehne">' + BARRADIN + "</div>" +
+      '<div class="lw-buehne">' + BUEHNE + "</div>" +
       '<div class="lw-steuer">' +
         '<button type="button" class="lw-play">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
-        '<label class="lw-feld lw-tempo"><span>' + T.tempo + ' <b class="lw-bpm">' + S.tempo + '</b></span><input type="range" min="50" max="180" step="2" value="' + S.tempo + '" data-feld="tempo"></label>' +
+        '<label class="lw-feld lw-regler"><span>' + T.tempo + ' <b class="lw-bpm">' + S.tempo + '</b></span><input type="range" min="50" max="180" step="2" value="' + S.tempo + '" data-feld="tempo"></label>' +
+        '<label class="lw-feld lw-regler"><span>' + T.variation + ' <b class="lw-var">' + S.variation * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.variation + '" data-feld="variation"></label>' +
         '<label class="lw-feld"><span>' + T.tonart + '</span><select data-feld="transpose">' + tonarten + "</select></label>" +
         '<label class="lw-feld"><span>' + T.modus + '</span><select data-feld="modus">' + modi + "</select></label>" +
         '<button type="button" class="lw-schalter" data-feld="swing" aria-pressed="' + !!S.swing + '">' + T.swing + "</button>" +
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
       "</div>" +
-      '<div class="lw-vorlagen"><span>' + T.vorlagen + ":</span>" +
-        Object.keys(VORLAGEN).map(k => '<button type="button" data-vorlage="' + k + '">' + T.lieder[k] + "</button>").join("") +
+      '<div class="lw-teile">' +
+        '<span class="lw-teile-label">' + T.teil + ":</span>" +
+        ["A", "B"].map(p => '<button type="button" class="lw-teil" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") +
+        '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><select data-feld="ablauf">' + ablaeufe + "</select></label>" +
+        '<button type="button" class="lw-klein" data-aktion="kopieren">' + T.kopieren + "</button>" +
+      "</div>" +
+      '<div class="lw-vorlagen"><span>' + T.lieder + ":</span>" +
+        LIEDER.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
         '<button type="button" data-vorlage="zufall">' + T.zufall + '</button><button type="button" data-vorlage="leer">' + T.leeren + "</button>" +
+      "</div>" +
+      '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
+        STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
+        '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
       "</div>" +
       '<div class="lw-scroll"><div class="lw-raster">' + raster + "</div></div>" +
       '<p class="lw-wisch">' + T.wischen + "</p>" +
@@ -415,46 +757,50 @@
     clearTimeout(status.t); status.t = setTimeout(() => { s.textContent = ""; }, 3500);
   }
 
-  function zufallsLied() {
-    const s = kopie(S);
-    s.klopf = an([0, 8].concat(Math.random() < .6 ? [4, 12] : [6, 14]).concat(Math.random() < .5 ? [14] : [3, 11]));
-    s.schelle = an([2, 6, 10, 14].filter(() => Math.random() < .7));
-    s.bass = leer(); [0, 4, 8, 12].forEach(i => { if (i % 8 === 0 || Math.random() < .6) s.bass[i] = i % 8 === 0 ? 0 : [2, 3, 3, 1][Math.floor(Math.random() * 4)]; });
-    s.melodie = leer();
-    let stufe = 4;
+  /* ---------- Improvisieren ---------- */
+  function zufallsMelodie(dichte, start) {
+    const a = leer();
+    let stufe = start;
     for (let i = 0; i < SCHRITTE; i++) {
-      if (i % 2 === 1 && Math.random() < .45) continue;
-      stufe = Math.max(0, Math.min(7, stufe + [-2, -1, -1, 0, 1, 1, 2][Math.floor(Math.random() * 7)]));
-      s.melodie[i] = stufe;
+      if ((i % 2 === 1 && Math.random() < .55) || Math.random() > dichte) continue;
+      stufe = Math.max(0, Math.min(7, stufe + zufall([-2, -1, -1, 0, 1, 1, 2])));
+      a[i] = stufe;
     }
-    s.melodie[0] = s.melodie[0] < 0 ? 4 : s.melodie[0];
-    s.melodie[14] = 1; s.melodie[15] = 0;
-    s.modus = MODUS_LISTE[Math.floor(Math.random() * MODUS_LISTE.length)];
-    s.tempo = 80 + Math.floor(Math.random() * 25) * 2;
-    return s;
+    return a;
+  }
+  function zufallsTeil(b) {
+    const p = teilLeer();
+    p.klopf = an([0, 8].concat(Math.random() < .6 ? [4, 12] : [6, 14]).concat(Math.random() < .5 ? [14] : [3, 11]));
+    p.schelle = an([2, 6, 10, 14].filter(() => Math.random() < .7));
+    p.trommel = an([0, 8].concat(b ? [6, 12, 14] : []).filter(i => i === 0 || Math.random() < .8));
+    p.ketten = Math.random() < .5 ? an([zufall([4, 7, 12])]) : leer();
+    [0, 4, 8, 12].forEach(i => { if (i % 8 === 0 || Math.random() < .6) p.bass[i] = i % 8 === 0 ? (b && i === 0 ? 2 : 0) : zufall([2, 3, 3, 1]); });
+    p.melodie = zufallsMelodie(b ? .55 : .8, b ? 6 : 4);
+    p.melodie[14] = 1; p.melodie[15] = 0;
+    if (b || Math.random() < .4) p.floete = zufallsMelodie(.35, 4);
+    if (Math.random() < .3) p.rex[15] = Math.random() < .7 ? 0 : 1;
+    return p;
+  }
+  function zufallsLied() {
+    return pruefen({ tempo: 80 + Math.floor(Math.random() * 25) * 2, transpose: S.transpose, modus: zufall(MODUS_LISTE),
+      swing: Math.random() < .3 ? 1 : 0, bordun: Math.random() < .7 ? 1 : 0, variation: S.variation, ablauf: zufall(["AB", "AABA", "AABB"]),
+      teile: { A: zufallsTeil(false), B: zufallsTeil(true) }, vol: S.vol, mute: S.mute });
   }
 
+  /* ---------- Bedienung ---------- */
   function antippen(z) {
-    const spur = z.dataset.spur, i = +z.dataset.s, zeile = +z.dataset.zeile;
-    if (spur === "klopf" || spur === "schelle") S[spur][i] = S[spur][i] ? 0 : 1;
-    else S[spur][i] = S[spur][i] === zeile ? -1 : zeile;
+    const spur = z.dataset.spur, i = +z.dataset.s, zeile = +z.dataset.zeile, daten = S.teile[bearbeite][spur];
+    if (SPUR[spur].art === "an") daten[i] = daten[i] >= 0 ? -1 : 0;
+    else daten[i] = daten[i] === zeile ? -1 : zeile;
     root.querySelectorAll('.lw-zelle[data-spur="' + spur + '"][data-s="' + i + '"]').forEach(c => {
-      const an = spur === "klopf" || spur === "schelle" ? !!S[spur][i] : S[spur][i] === +c.dataset.zeile;
-      c.classList.toggle("an", an); c.setAttribute("aria-pressed", an);
+      const istAn = SPUR[spur].art === "an" ? daten[i] >= 0 : daten[i] === +c.dataset.zeile;
+      c.classList.toggle("an", istAn); c.setAttribute("aria-pressed", istAn);
     });
     merken();
-    /* Vorhören */
-    const istAn = spur === "klopf" || spur === "schelle" ? S[spur][i] : S[spur][i] >= 0;
-    if (!istAn) return;
-    try {
-      audioStart();
-      const jetzt = ctx.currentTime + .01;
-      if (spur === "klopf") klopfen(jetzt, i % 4 === 0);
-      else if (spur === "schelle") schellen(jetzt);
-      else if (spur === "bass") zupf(midiHz(bassMidi(zeile, S)), jetzt, "bass");
-      else zupf(midiHz(melMidi(zeile, S)), jetzt, "mel");
-    } catch (_) {}
+    if (daten[i] < 0) return;
+    try { audioStart(); spielen(spur, daten[i], ctx.currentTime + .01, i, 1, .3); } catch (_) {}
   }
+  function neuGezeichnet() { zeichnen(); knoepfe(); if (laeuft) { bordunAus(); bordunAn(); } }
 
   root.addEventListener("click", e => {
     const z = e.target.closest(".lw-zelle");
@@ -467,7 +813,22 @@
       root.querySelectorAll('.lw-zelle[data-spur="' + k + '"]').forEach(c => c.classList.toggle("stumm", !!S.mute[k]));
       return;
     }
+    const zu = e.target.closest("[data-zu]");
+    if (zu) {
+      const k = zu.dataset.zu; zugeklappt[k] = !zugeklappt[k];
+      try { localStorage.setItem("imres-lautenwerk-zu", JSON.stringify(zugeklappt)); } catch (_) {}
+      const y = zu.getBoundingClientRect().top;
+      zeichnen(); knoepfe();
+      const neu = root.querySelector('[data-zu="' + k + '"]');
+      if (neu) window.scrollBy(0, neu.getBoundingClientRect().top - y);
+      return;
+    }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
+    const tl = e.target.closest(".lw-teil");
+    if (tl) { bearbeite = tl.dataset.teil; zeichnen(); knoepfe(); return; }
+    if (e.target.closest('[data-aktion="kopieren"]')) {
+      S.teile.B = kopie(S.teile.A); merken(); bearbeite = "B"; zeichnen(); knoepfe(); status(t().kopiert2); return;
+    }
     const sch = e.target.closest(".lw-schalter");
     if (sch) {
       const f = sch.dataset.feld; S[f] = S[f] ? 0 : 1; sch.setAttribute("aria-pressed", !!S[f]); merken();
@@ -476,12 +837,12 @@
     }
     const v = e.target.closest("[data-vorlage]");
     if (v) {
-      const k = v.dataset.vorlage;
-      if (k === "leer") S = Object.assign(S, { klopf: Array(SCHRITTE).fill(0), schelle: Array(SCHRITTE).fill(0), bass: leer(), melodie: leer() });
+      const k = v.dataset.vorlage, mix = { vol: S.vol, mute: S.mute };
+      if (k === "leer") S.teile = { A: teilLeer(), B: teilLeer() };
       else if (k === "zufall") S = zufallsLied();
-      else S = Object.assign(kopie(VORLAGEN[k]), { vol: S.vol, mute: S.mute });
-      merken(); zeichnen(); knoepfe();
-      if (laeuft) { bordunAus(); bordunAn(); }
+      else S = pruefen(ausVorlage(k, mix));
+      bearbeite = "A";
+      merken(); neuGezeichnet();
       return;
     }
     if (e.target.closest(".lw-teilen")) {
@@ -494,32 +855,45 @@
     }
   });
   root.addEventListener("input", e => {
-    const f = e.target.dataset && e.target.dataset.feld;
-    const v = e.target.dataset && e.target.dataset.vol;
-    if (v) { S.vol[v] = +e.target.value; merken(); mixAnwenden(); return; }
-    if (f === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
+    const d = e.target.dataset || {};
+    if (d.vol) { S.vol[d.vol] = +e.target.value; merken(); mixAnwenden(); return; }
+    if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
+    if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
   });
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
     if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); }
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); }
+    if (f === "ablauf") { S.ablauf = e.target.value; merken(); }
   });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && laeuft) stopp(); });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && laeuft) { const jetzt = ctx.currentTime; while (anzeige.length && anzeige[0].zeit < jetzt - .05) anzeige.shift(); requestAnimationFrame(malen); }
+  });
 
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");
   css.textContent = `
 .lautenwerk { grid-column: 1 / -1; }
-.lw-buehne { position: relative; height: clamp(150px, 34vw, 230px); display: grid; place-items: center; overflow: hidden;
+.lw-buehne { position: relative; height: clamp(170px, 32vw, 250px); overflow: hidden;
   background: radial-gradient(ellipse at 45% 85%, rgba(224,160,70,.16), transparent 65%); border-bottom: 1px solid var(--line); margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); }
-.lw-figur { position: absolute; inset: 6px 0 0; width: 100%; height: calc(100% - 6px); overflow: visible; }
-.lw-figur .kopf, .lw-figur .arm-schlag, .lw-figur .fuss, .lw-figur .laute, .lw-figur .hand-griff { transform-box: view-box; }
+.lw-figur { position: absolute; inset: 4px 4px 0; width: calc(100% - 8px); height: calc(100% - 4px); overflow: visible; }
+.lw-figur g, .lw-figur path, .lw-figur circle, .lw-figur ellipse { transform-box: view-box; }
 .lw-figur .kopf { transform-origin: 114px 84px; }
 .lw-figur .arm-schlag { transform-origin: 118px 98px; }
 .lw-figur .fuss { transform-origin: 130px 155px; }
 .lw-figur .laute { transform-origin: 150px 140px; }
 .lw-figur .hand-griff { transform-origin: 200px 85px; }
-.lw-figur .rauchwolke { animation: lwrauch 4s ease-in-out infinite; }
+.lw-figur .f-arm { transform-origin: 64px 100px; }
+.lw-figur .f-kopf { transform-origin: 52px 88px; }
+.lw-figur .e-koerper { transform-origin: 54px 190px; }
+.lw-figur .e-kopf { transform-origin: 54px 82px; }
+.lw-figur .kette { transform-origin: 104px 140px; }
+.lw-figur .z-kopf { transform-origin: 64px 88px; }
+.lw-figur .r-kopf { transform-origin: 44px 50px; }
+.lw-figur .rauchwolke { transform-origin: 146px 68px; animation: lwrauch 4s ease-in-out infinite; }
+.lw-figur .augen { filter: drop-shadow(0 0 3px #ff4a2a); }
+.lw-figur .glut { animation: lwglut 3s ease-in-out infinite; }
+@keyframes lwglut { 50% { opacity: .35 } }
 @keyframes lwrauch { 0% { transform: translate(0,0); opacity: 0 } 30% { opacity: .9 } 100% { transform: translate(10px,-26px) scale(2); opacity: 0 } }
 .lw-buehne.klopf .kopf { animation: lwnick .28s ease-out; }
 .lw-buehne.klopf .arm-schlag { animation: lwklopf .18s ease-out; }
@@ -529,6 +903,15 @@
 .lw-buehne.bass .arm-schlag { animation: lwzupf .22s ease-out; }
 .lw-buehne.mel .hand-griff { animation: lwgriff .25s ease-out; }
 .lw-buehne.mel .saiten, .lw-buehne.bass .saiten { animation: lwsaite .3s ease-out; }
+.lw-buehne.trommel .f-arm { animation: lwschlag .2s ease-out; }
+.lw-buehne.trommel .f-kopf { animation: lwnick .28s ease-out; }
+.lw-buehne.trommel .trommelfell { animation: lwfell .25s ease-out; }
+.lw-buehne.floete .e-koerper { animation: lwwiegen .5s ease-in-out; }
+.lw-buehne.ketten .kette { animation: lwkette .3s ease-out; }
+.lw-buehne.ketten .z-kopf { animation: lwnick .3s ease-out; }
+.lw-buehne.ketten .augen { animation: lwaugen .35s ease-out; }
+.lw-buehne.wuff .r-kopf { animation: lwwuff .25s ease-out; }
+.lw-buehne.heul .r-kopf { animation: lwheul 1.3s ease-in-out; }
 @keyframes lwnick { 40% { transform: rotate(6deg) translateY(2px) } }
 @keyframes lwklopf { 40% { transform: rotate(-9deg) translate(2px, 4px) } }
 @keyframes lwwackel { 40% { transform: rotate(-1.5deg) } }
@@ -537,9 +920,19 @@
 @keyframes lwzupf { 40% { transform: rotate(5deg) } }
 @keyframes lwgriff { 40% { transform: translate(-6px, 4px) scale(1.15) } }
 @keyframes lwsaite { 0% { stroke: #ffd27a; opacity: 1; filter: drop-shadow(0 0 3px #ffd27a) } }
-.lw-note { position: absolute; bottom: 38%; font-size: 1.4rem; color: var(--ember); pointer-events: none; animation: lwnote 1.5s ease-out forwards; text-shadow: 0 0 8px rgba(224,160,70,.6); }
-.lw-note.tief { color: var(--vellum); font-size: 1.1rem; }
-@keyframes lwnote { from { transform: translate(0, 0); opacity: 1 } to { transform: translate(var(--dx, 10px), -90px) rotate(15deg); opacity: 0 } }
+@keyframes lwschlag { 35% { transform: rotate(14deg) } }
+@keyframes lwfell { 30% { fill: #fff6d8; filter: drop-shadow(0 0 5px #ffd27a) } }
+@keyframes lwwiegen { 50% { transform: rotate(-2.5deg) } }
+@keyframes lwkette { 25% { transform: rotate(9deg) } 60% { transform: rotate(-7deg) } }
+@keyframes lwaugen { 40% { filter: drop-shadow(0 0 7px #ff4a2a) brightness(1.8) } }
+@keyframes lwwuff { 40% { transform: rotate(-14deg) translateY(-2px) } }
+@keyframes lwheul { 15%, 80% { transform: rotate(-32deg) translate(-2px, -3px) } }
+.lw-note { position: absolute; bottom: 42%; font-size: 1.35rem; color: var(--ember); pointer-events: none; animation: lwnote 1.6s ease-out forwards; text-shadow: 0 0 8px rgba(224,160,70,.6); }
+.lw-note.tief { color: var(--vellum); font-size: 1.05rem; }
+.lw-note.floete { color: #cfe3c0; font-size: 1.1rem; text-shadow: 0 0 8px rgba(160,210,140,.6); }
+.lw-note.blase { animation-name: lwblase; font-family: var(--hand); font-size: 1.3rem; color: var(--vellum); background: rgba(16,14,21,.85); border: 1px solid var(--line); padding: 0 .45rem; border-radius: 10px; white-space: nowrap; transform-origin: left bottom; }
+@keyframes lwblase { 0% { transform: scale(.6); opacity: 0 } 15% { transform: scale(1); opacity: 1 } 75% { opacity: 1 } 100% { transform: translateY(-14px); opacity: 0 } }
+@keyframes lwnote { from { transform: translate(0, 0); opacity: 1 } to { transform: translate(var(--dx, 10px), -80px) rotate(10deg); opacity: 0 } }
 
 .lw-steuer { display: flex; flex-wrap: wrap; align-items: end; gap: .7rem 1rem; }
 .lw-play { border: 1px solid var(--ember); background: var(--ember); color: var(--night); font: inherit; font-weight: 600; padding: .55rem 1.2rem; cursor: pointer; min-width: 8.5rem; }
@@ -547,31 +940,40 @@
 .lw-feld { display: grid; gap: .2rem; font-size: .78rem; letter-spacing: .06em; color: var(--ash); }
 .lw-feld b { color: var(--vellum); font-weight: 600; }
 .lw-feld select { font: inherit; font-size: .9rem; letter-spacing: 0; background: var(--night); color: var(--vellum); border: 1px solid var(--line); padding: .35rem .5rem; }
-.lw-tempo input { width: 9rem; accent-color: #e0a046; }
+.lw-regler input { width: 8.5rem; accent-color: #e0a046; }
 .lw-schalter { border: 1px solid var(--line); background: none; color: var(--ash); font: inherit; font-size: .85rem; padding: .4rem .8rem; cursor: pointer; border-radius: 999px; }
 .lw-schalter[aria-pressed="true"] { border-color: var(--ember); color: var(--ember); }
 .lw-schalter[aria-pressed="true"]::before { content: "✓ "; }
+.lw-teile { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem .7rem; }
+.lw-teile-label { font-size: .78rem; letter-spacing: .06em; color: var(--ash); align-self: center; }
+.lw-teil { position: relative; width: 2.6rem; height: 2.3rem; border: 1px solid var(--line); background: none; color: var(--vellum); font-family: var(--display); font-size: 1.15rem; cursor: pointer; }
+.lw-teil[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
+.lw-teil.spielt::after { content: ""; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #7fd36b; box-shadow: 0 0 6px #7fd36b; }
+.lw-klein { border: 1px solid var(--line); background: none; color: var(--ash); font: inherit; font-size: .82rem; padding: .35rem .7rem; cursor: pointer; }
+.lw-klein:hover { color: var(--ember); border-color: var(--ember); }
 .lw-vorlagen { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; font-size: .85rem; color: var(--ash); }
 .lw-vorlagen button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .82rem; padding: .25rem .7rem; cursor: pointer; }
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
+.lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
+.lw-tipp { flex-basis: 100%; margin: .2rem 0 0; font-size: .8rem; font-style: italic; color: var(--ash); }
 
 .lw-scroll { overflow-x: auto; margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); padding-inline: clamp(1.2rem, 4vw, 2rem); -webkit-overflow-scrolling: touch; }
-.lw-raster { display: grid; grid-template-columns: 3.2rem repeat(16, minmax(1.75rem, 1fr)); gap: 3px; min-width: 36rem; }
+.lw-raster { display: grid; grid-template-columns: 3.4rem repeat(16, minmax(1.75rem, 1fr)); gap: 3px; min-width: 36rem; }
 .lw-kopf { grid-column: 1 / -1; margin-top: .8rem; }
+.lw-kopf:first-child { margin-top: 0; }
 .lw-kopf-in { position: sticky; left: 0; display: inline-flex; align-items: center; gap: .55rem; max-width: calc(100vw - 2.5rem); }
-.lw-spurname { font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); white-space: nowrap; }
+.lw-spurname { border: 0; background: none; padding: .15rem 0; cursor: pointer; font: inherit; font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); white-space: nowrap; }
 .lw-spurname small { font-size: inherit; font-weight: 400; color: var(--ash); letter-spacing: .08em; }
-@media (max-width: 480px) { .lw-spurname small { display: none; } }
 .lw-mute { border: 1px solid var(--line); background: none; font-size: .85rem; line-height: 1; padding: .2rem .35rem; cursor: pointer; border-radius: 3px; }
 .lw-mute[aria-pressed="true"] { border-color: var(--blood); background: rgba(155,58,47,.25); }
 .lw-fader { width: 6.5rem; accent-color: #e0a046; }
 .lw-kopf.stumm .lw-spurname, .lw-kopf.stumm .lw-fader { opacity: .4; }
 .lw-zelle.stumm { opacity: .35; }
-.lw-kopf:first-child { margin-top: 0; }
 .lw-name { position: sticky; left: 0; z-index: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: .45rem;
   font-family: var(--display); font-size: .82rem; color: var(--ash); background: var(--hall); }
 .lw-name.grund { color: var(--vellum); }
 .lw-name.sym { font-family: inherit; }
+.lw-name.klein { font-size: .7rem; }
 .lw-zelle { height: 1.75rem; padding: 0; border: 1px solid rgba(224,160,70,.14); background: rgba(235,226,204,.035); cursor: pointer; border-radius: 3px; transition: background .12s; -webkit-tap-highlight-color: transparent; }
 .lw-zelle.takt { background: rgba(235,226,204,.08); }
 .lw-zelle:hover { border-color: rgba(224,160,70,.5); }
@@ -579,6 +981,10 @@
 .lw-zelle.s-schelle.an { background: #f0d48a; border-color: #f0d48a; }
 .lw-zelle.s-bass.an { background: #b5643c; border-color: #b5643c; }
 .lw-zelle.s-klopf.an { background: #c98a3a; border-color: #c98a3a; }
+.lw-zelle.s-trommel.an { background: #7d9a5f; border-color: #7d9a5f; }
+.lw-zelle.s-floete.an { background: #cfe3c0; border-color: #cfe3c0; }
+.lw-zelle.s-ketten.an { background: #c4564a; border-color: #c4564a; }
+.lw-zelle.s-rex.an { background: #b8743c; border-color: #b8743c; }
 .lw-zelle.jetzt { outline: 1px solid rgba(235,226,204,.55); outline-offset: 0; }
 .lw-zelle.jetzt.an { filter: brightness(1.35); box-shadow: 0 0 14px rgba(255,210,122,.8); }
 .lw-wisch { display: none; font-size: .78rem; color: var(--ash); text-align: center; margin-top: -.3rem; }
@@ -587,7 +993,7 @@
 .lw-teilen { border: 1px solid var(--ember); background: none; color: var(--ember); font: inherit; font-size: .9rem; padding: .45rem 1rem; cursor: pointer; }
 .lw-teilen:hover { background: var(--ember); color: var(--night); }
 .lw-status { font-family: var(--hand); font-size: 1.3rem; color: var(--ember); }
-@media (prefers-reduced-motion: reduce) { .lw-figur .rauchwolke { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .lw-figur .rauchwolke, .lw-figur .glut { animation: none; } }
 `;
   document.head.appendChild(css);
 
