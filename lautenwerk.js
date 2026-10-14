@@ -267,7 +267,7 @@
   /* ---------- Klang ---------- */
   let ctx = null, master = null, rauschen = null;
   const spurGain = {};
-  const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6) * 1.25;
+  const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6);
   function mixAnwenden() {
     if (!ctx) return;
     IDS.forEach(k => spurGain[k] && spurGain[k].gain.setTargetAtTime(spurPegel(k), ctx.currentTime, .03));
@@ -276,10 +276,15 @@
   function audioStart() {
     if (!ctx) {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
+      /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
+         Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor();
-      komp.threshold.value = -14; komp.ratio.value = 4;
-      master = ctx.createGain(); master.gain.value = .75;
-      master.connect(komp); komp.connect(ctx.destination);
+      komp.threshold.value = -20; komp.knee.value = 10; komp.ratio.value = 3; komp.attack.value = .005; komp.release.value = .2;
+      const ausgang = ctx.createGain(); ausgang.gain.value = .6;
+      const limiter = ctx.createDynamicsCompressor();
+      limiter.threshold.value = -6; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = .001; limiter.release.value = .1;
+      master = ctx.createGain(); master.gain.value = .45;
+      master.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
       IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
       mixAnwenden();
       const n = ctx.sampleRate;
