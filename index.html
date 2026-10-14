@@ -619,7 +619,6 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#gefaehrten" data-i18n="navGefaehrten">Gefährten</a>
       <a href="#nsc" data-i18n="navNsc">NSC</a>
       <a href="#bestiarium" data-i18n="navBestiarium">Bestiarium</a>
-      <a href="#kuenste" data-i18n="navKunst">Künste</a>
       <a href="#taverne" data-i18n="navTaverne">Taverne</a>
     </nav>
     <div class="navdrop-menu" id="kapitel-menu" hidden></div>
@@ -1472,7 +1471,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
     /* Barradins Künste */
     const kunst = D.kunst || [];
-    $("kuenste").hidden = kunst.length === 0;
+    $("kuenste").hidden = true; /* Skizzen sind jetzt ein Easter Egg */
     const kipp = [-1.5, 1, -0.5, 1.5, -1, 0.5];
     $("kunst").innerHTML = kunst.map((k, i) =>
       '<button type="button" class="kunst-blatt" data-kunst="' + i + '" style="--dreh:' + kipp[i % kipp.length] + 'deg">' +
@@ -1783,7 +1782,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     map.push(t.length);
     return { f, map };
   }
-  const SUCH_ORTE = "#intro-text, #narrator-text, #chapters h3, #chapters .prose > p, #chapters figcaption, #quests .pin-note, #stops li > button:first-child, #heroes h3, #heroes .epithet, #heroes .prose p, #heroes figcaption, #npcs h4, #npcs p, #beasts h3, #beasts p, #kunst .kunst-blatt";
+  const SUCH_ORTE = "#intro-text, #narrator-text, #chapters h3, #chapters .prose > p, #chapters figcaption, #quests .pin-note, #stops li > button:first-child, #heroes h3, #heroes .epithet, #heroes .prose p, #heroes figcaption, #npcs h4, #npcs p, #beasts h3, #beasts p";
   function woLabel(el) {
     const ch = el.closest(".chapter");
     if (ch) {
