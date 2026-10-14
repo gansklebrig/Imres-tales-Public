@@ -10,10 +10,9 @@
       · 7× schnell auf „Imres Tales“ oben links tippen, oder der Konami-Code
         (↑ ↑ ↓ ↓ ← → ← → B A), öffnet das Geheimarchiv (Barradins Notizbuch)
       · Wer lange bleibt, dem wachsen Echos Ranken an den Seitenrand
-      · Barradins Skizzen stecken als unsichtbare Tinte in der Chronik. Kaum
-        sichtbar am Rand der passenden Absätze – mit der Kerze im Fuß der
-        Seite (neben der Laute) leuchten sie auf. Antippen sammelt sie im
-        geheimen Skizzenbuch.
+      · Die Kerze unten links auspusten (antippen): Die Seite wird nachtdunkel,
+        und Barradins Skizzen glühen im Mondlicht neben den passenden
+        Absätzen der Chronik. Antippen sammelt sie im geheimen Skizzenbuch.
    3. Die Taverne: Barradins Loblied (W20-Auftreten-Probe) und Bestiarium-Memory
 
    LÖSUNG der Lauten-Melodie: C – A – F – E  (Barradins Lieblingsort)
@@ -46,9 +45,9 @@
       lauteErfolg: "Die Laute erklingt wie von selbst! Barradin schenkt dir eine <strong>Bardische Inspiration</strong>: Deine nächste Loblied-Probe bekommt +1W6.",
       lauteKnopf: "Barradins Laute",
       geheimHinweis: "Manche Geheimnisse dieser Seite verraten sich nur den Neugierigen.",
-      kerzeKnopf: "Barradins Kerze",
-      laterneAn: "Die Kerze flackert auf. Leuchte die Chronik ab – Barradin schreibt manchmal mit unsichtbarer Tinte …",
-      laterneAus: "Kerze löschen",
+      kerzeAuspusten: "Kerze auspusten", kerzeAnzuenden: "Kerze wieder anzünden",
+      mondAn: "Die Kerze ist aus. Im Mondlicht schimmert Barradins unsichtbare Tinte …",
+      kerzeWiederAn: "Die Kerze brennt wieder.",
       skizzeGefunden: (titel, n, g) => "Skizze gefunden: " + titel + "<br><small>" + n + " von " + g + " im geheimen Skizzenbuch</small>",
       skizzenbuchLabel: "Unsichtbare Tinte", skizzenbuchTitel: "Barradins geheimes Skizzenbuch",
       skizzenbuchText: (n, g) => n === g ? "Alle Skizzen gefunden! Barradin ist beeindruckt – und ein kleines bisschen beunruhigt, wie gründlich du in seinen Sachen stöberst." : n + " von " + g + " Skizzen gefunden. Der Rest ist noch irgendwo zwischen den Zeilen versteckt.",
@@ -94,9 +93,9 @@
       lauteErfolg: "The lute starts playing all by itself! Barradin grants you <strong>Bardic Inspiration</strong>: your next song check gets +1d6.",
       lauteKnopf: "Barradin's lute",
       geheimHinweis: "Some secrets of this page only reveal themselves to the curious.",
-      kerzeKnopf: "Barradin's candle",
-      laterneAn: "The candle flickers to life. Search the chronicle by its light – Barradin sometimes writes in invisible ink …",
-      laterneAus: "Snuff the candle",
+      kerzeAuspusten: "Blow out the candle", kerzeAnzuenden: "Light the candle again",
+      mondAn: "The candle is out. In the moonlight, Barradin's invisible ink begins to shimmer …",
+      kerzeWiederAn: "The candle is burning again.",
       skizzeGefunden: (titel, n, g) => "Sketch found: " + titel + "<br><small>" + n + " of " + g + " in the secret sketchbook</small>",
       skizzenbuchLabel: "Invisible ink", skizzenbuchTitel: "Barradin's Secret Sketchbook",
       skizzenbuchText: (n, g) => n === g ? "Every sketch found! Barradin is impressed – and a little worried at how thoroughly you rummage through his things." : n + " of " + g + " sketches found. The rest are still hidden somewhere between the lines.",
@@ -337,42 +336,68 @@ main.beben { animation: beben .7s linear; }
 .tav-knopf { border-color: var(--ember); background: none; color: var(--ember); font-size: .92rem; padding: .45rem 1rem; }
 .tav-knopf:hover { background: var(--ember); color: var(--night); }
 
-/* Unsichtbare Tinte & Kerze */
-.hat-skizze { position: relative; isolation: isolate; }
+/* Kerze & Mondlicht: Barradins Skizzen glühen in unsichtbarer Tinte */
+#kerzenschein { transition: opacity 1.5s; }
+.mondlicht #kerzenschein { opacity: 0 !important; animation: none; }
+.kerze {
+  position: fixed; left: 6px; bottom: calc(4px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  width: 34px; height: 63px; padding: 0; border: 0; background: none; cursor: pointer; opacity: .62;
+  transition: opacity .4s; -webkit-tap-highlight-color: transparent;
+}
+.kerze:hover, .kerze:focus-visible { opacity: .95; }
+.kerze svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.kerze .schein { fill: rgba(224,160,70,.18); filter: blur(4px); transition: opacity 1s; animation: kerzenatem 3.4s ease-in-out infinite; }
+.kerze .flamme { fill: #e0a046; transform-origin: 20px 22px; animation: flamme 1.7s ease-in-out infinite; transition: opacity .25s, transform .25s; }
+.kerze .flamme-kern { fill: #fff1c9; transform-origin: 20px 21px; animation: flamme 1.3s ease-in-out infinite reverse; transition: opacity .2s; }
+.kerze .docht { stroke: #2a2118; stroke-width: 1.4; stroke-linecap: round; }
+.kerze .wachs { fill: #e9dfc8; stroke: #b9a988; stroke-width: 1; }
+.kerze .tropfen { fill: none; stroke: #cbbd9f; stroke-width: 1.2; stroke-linecap: round; }
+.kerze .teller { stroke: #8a7556; stroke-width: 2; stroke-linecap: round; }
+@keyframes flamme { 50% { transform: scale(.88, 1.08) rotate(3deg); } }
+@keyframes kerzenatem { 50% { opacity: .6; } }
+.mondlicht .kerze .flamme, .mondlicht .kerze .flamme-kern, .mondlicht .kerze .schein { opacity: 0; animation: none; }
+.mondlicht .kerze .docht { stroke: #6b5a44; }
+.kerze .rauch {
+  position: absolute; left: 50%; top: 14px; width: 10px; height: 26px; margin-left: -5px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(200,200,215,.55), transparent 70%); filter: blur(2px); pointer-events: none;
+  animation: rauch 2.5s ease-out forwards;
+}
+@keyframes rauch { to { transform: translate(8px, -70px) scale(2.6, 3); opacity: 0; } }
+
+.mondnacht {
+  position: fixed; inset: 0; z-index: 8; pointer-events: none; opacity: 0; transition: opacity 1.6s ease;
+  background:
+    radial-gradient(circle at calc(100% - 34px) 128px, rgba(236,240,255,.5) 0 11px, rgba(190,205,245,.2) 13px, rgba(150,170,230,.08) 45px, rgba(120,140,210,.04) 150px, transparent 300px),
+    linear-gradient(rgba(6,9,22,.52), rgba(6,9,22,.58));
+}
+@media (min-width: 900px) { .mondnacht { background:
+    radial-gradient(circle at calc(100% - 120px) 130px, rgba(236,240,255,.92) 0 26px, rgba(190,205,245,.35) 28px, rgba(150,170,230,.12) 80px, rgba(120,140,210,.05) 240px, transparent 480px),
+    linear-gradient(rgba(6,9,22,.52), rgba(6,9,22,.58)); } }
+.mondnacht.an { opacity: 1; }
+
+#tinten-ebene { position: absolute; top: 0; left: 0; width: 100%; height: 0; z-index: 9; pointer-events: none; }
 .tinte {
-  position: absolute; z-index: -1; top: -.4rem; right: -10px; width: 96px; aspect-ratio: 1; padding: 0; border: 0; background: none; cursor: pointer;
-  opacity: .07; transition: opacity .8s, transform .4s; -webkit-tap-highlight-color: transparent;
+  position: absolute; padding: 0; border: 0; background: none; cursor: pointer; aspect-ratio: 1;
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 1.8s ease, visibility 0s 1.8s, transform .4s;
+  -webkit-tap-highlight-color: transparent;
 }
-.tinte img { width: 100%; height: 100%; object-fit: contain; display: block; filter: invert(1) sepia(1) saturate(2.5) hue-rotate(-8deg) brightness(1.1); transform: rotate(var(--dreh, -6deg)); }
-.tinte.gefunden { opacity: .035; }
-@media (min-width: 1100px) { .tinte.rand { right: auto; left: calc(100% + 2.5rem); width: 150px; top: 0; } }
-.laterne-an .tinte { z-index: 2; opacity: .95; mix-blend-mode: screen; }
-.laterne-an .tinte img { filter: invert(1) sepia(1) saturate(3) hue-rotate(-8deg) brightness(1.25) drop-shadow(0 0 6px rgba(224,160,70,.8)); }
-.laterne-an .tinte.gefunden { opacity: .35; }
-.tinte.weg { transform: scale(1.6); opacity: 0 !important; }
-.laterne {
-  position: fixed; inset: 0; z-index: 45; pointer-events: none; background: rgba(6,5,9,.9);
-  --x: 50vw; --y: 50vh; --r: 150px;
-  -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0, transparent 45%, #000 100%);
-  mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0, transparent 45%, #000 100%);
-  opacity: 0; transition: opacity .7s;
+.tinte img {
+  width: 100%; height: 100%; object-fit: contain; display: block; transform: rotate(var(--dreh, -6deg));
+  filter: invert(1) grayscale(1) brightness(1.35) sepia(.25) hue-rotate(180deg) drop-shadow(0 0 5px rgba(170,195,255,.75)) drop-shadow(0 0 14px rgba(140,170,255,.35));
 }
-.laterne.an { opacity: 1; }
-@media (min-width: 900px) { .laterne { --r: 210px; } }
-.laterne-leiste {
-  position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; gap: .4rem;
+.mondlicht .tinte { opacity: .9; visibility: visible; pointer-events: auto; transition: opacity 2.2s ease .6s, visibility 0s, transform .4s; animation: mondglanz 5s ease-in-out infinite; }
+.mondlicht .tinte.gefunden { opacity: .38; animation: none; }
+.tinte.weg { transform: scale(1.5); opacity: 0 !important; }
+@keyframes mondglanz { 50% { filter: brightness(1.25); } }
+
+.mond-buch {
+  position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  border: 1px solid rgba(190,205,245,.7); background: rgba(16,18,32,.9); color: #dfe6ff; font: inherit; font-size: .9rem;
+  padding: .45rem .85rem; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,.5);
+  opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .6s, transform .6s;
 }
-.laterne-leiste button {
-  border: 1px solid var(--ember); background: var(--hall); color: var(--ember); font: inherit; font-size: .88rem;
-  padding: .45rem .8rem; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,.5);
-}
-.laterne-leiste button:hover { background: var(--ember); color: var(--night); }
-.laterne-an .ex-toast { bottom: calc(4.2rem + env(safe-area-inset-bottom, 0px)); }
-.kerze-knopf { background: none; border: 0; padding: 0; cursor: pointer; opacity: .35; line-height: 0; transition: opacity .3s; }
-.kerze-knopf:hover, .kerze-knopf:focus-visible { opacity: .85; }
-.kerze-knopf svg { width: 22px; height: 30px; display: block; }
-.kerze-knopf .flamme { fill: var(--ember); transform-origin: 11px 9px; animation: flamme 1.6s ease-in-out infinite; }
-@keyframes flamme { 50% { transform: scale(.85, 1.1) rotate(4deg); } }
+.mond-buch.an { opacity: 1; transform: none; pointer-events: auto; }
+.mondlicht .ex-toast { border-color: rgba(190,205,245,.7); }
 .skizzenbuch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
 .skizzenbuch button {
   display: grid; gap: .2rem; justify-items: center; align-content: start; padding: .3rem; border: 1px dashed rgba(107,90,68,.35);
@@ -389,7 +414,7 @@ main.beben { animation: beben .7s linear; }
 .konfetti { position: fixed; z-index: 58; pointer-events: none; font-size: 1.4rem; color: var(--ember); will-change: transform, opacity; }
 
 @media (prefers-reduced-motion: reduce) {
-  #kerzenschein, .kerze-knopf .flamme { animation: none; }
+  #kerzenschein, .kerze .flamme, .kerze .flamme-kern, .kerze .schein, .mondlicht .tinte { animation: none; }
   .rex-guckt { transition: none; }
   main.beben, .w20.rollt svg, .lied.neu, .archiv-siegel, .saite.zupf i { animation: none; }
   .mem-karte .innen { transition: none; }
@@ -684,9 +709,8 @@ main.beben { animation: beben .7s linear; }
     if (!fuss) return;
     const zeile = document.createElement("div");
     zeile.className = "ex-geheim";
-    zeile.innerHTML = '<button type="button" class="laute-knopf" aria-label="' + esc(t().lauteKnopf) + '"><img src="skizze-laute.webp" alt=""></button><button type="button" class="kerze-knopf" aria-label="' + esc(t().kerzeKnopf) + '"><svg viewBox="0 0 22 30" aria-hidden="true"><path class="flamme" d="M11 1C13.5 5 14.5 7.5 11 11 7.5 7.5 8.5 5 11 1Z"/><rect x="7" y="12" width="8" height="15" rx="1.5" fill="none" stroke="var(--vellum)" stroke-width="1.4"/><path d="M4 28h14" stroke="var(--vellum)" stroke-width="1.4" stroke-linecap="round"/></svg></button><span class="geheim-text">' + esc(t().geheimHinweis) + '</span>';
+    zeile.innerHTML = '<button type="button" class="laute-knopf" aria-label="' + esc(t().lauteKnopf) + '"><img src="skizze-laute.webp" alt=""></button><span class="geheim-text">' + esc(t().geheimHinweis) + '</span>';
     fuss.appendChild(zeile);
-    zeile.querySelector(".kerze-knopf").addEventListener("click", () => laterne(!laterneAn));
     const knopf = zeile.querySelector(".laute-knopf");
     knopf.addEventListener("click", () => {
       const T = t();
@@ -739,11 +763,13 @@ main.beben { animation: beben .7s linear; }
     return ((q && q.kunst) || []).filter(k => k.bild);
   };
   const gefundeneSkizzen = () => { try { return JSON.parse(lies("imres-skizzen", "[]")) || []; } catch (_) { return []; } };
-  let laterneAn = false;
+  let mondAn = false;
+  const anker = new Map(); /* Skizze → Absatz, an dem sie hängt */
 
   function skizzenVerstecken() {
-    document.querySelectorAll(".tinte").forEach(el => el.remove());
-    document.querySelectorAll(".hat-skizze").forEach(el => el.classList.remove("hat-skizze"));
+    let ebene = $("tinten-ebene");
+    if (!ebene) { ebene = document.createElement("div"); ebene.id = "tinten-ebene"; ebene.setAttribute("aria-hidden", mondAn ? "false" : "true"); document.body.appendChild(ebene); }
+    ebene.innerHTML = ""; anker.clear();
     const absaetze = Array.from(document.querySelectorAll("#chapters .prose > p"));
     const benutzt = new Set(), gefunden = gefundeneSkizzen();
     skizzenListe().forEach((k, i) => {
@@ -761,15 +787,39 @@ main.beben { animation: beben .7s linear; }
       }
       if (!p) return;
       benutzt.add(p);
-      p.classList.add("hat-skizze");
       const b = document.createElement("button");
       b.type = "button";
-      b.className = "tinte" + (rand ? " rand" : "") + (gefunden.includes(k.bild) ? " gefunden" : "");
+      b.className = "tinte" + (gefunden.includes(k.bild) ? " gefunden" : "");
       b.dataset.bild = k.bild;
+      b.tabIndex = mondAn ? 0 : -1;
       b.style.setProperty("--dreh", ((i % 2 ? 1 : -1) * (4 + (i * 3) % 7)) + "deg");
+      b.style.animationDelay = (-i * .7) + "s";
       b.setAttribute("aria-label", k.titel || "");
       b.innerHTML = '<img src="' + esc(k.bild) + '" alt="" loading="lazy">';
-      p.appendChild(b);
+      ebene.appendChild(b);
+      anker.set(b, { p, rand });
+    });
+    if (mondAn) skizzenPlatzieren();
+  }
+
+  function skizzenPlatzieren() {
+    const breit = window.innerWidth >= 1100, sx = window.scrollX, sy = window.scrollY;
+    const bilder = Array.from(document.querySelectorAll("#chapters figure, #heroes figure")).map(f => f.getBoundingClientRect()).filter(r => r.width);
+    anker.forEach(({ p, rand }, b) => {
+      const r = p.getBoundingClientRect();
+      if (!r.width) { b.hidden = true; return; }
+      b.hidden = false;
+      const w = breit && rand ? 150 : Math.min(110, window.innerWidth * .28);
+      const x = breit && rand ? r.right + 40 : r.right - w + 12;
+      let y = r.top + (breit && rand ? 0 : -8);
+      for (let n = 0; n < 4; n++) { /* nicht über Bilder legen */
+        const f = bilder.find(f => x < f.right && x + w > f.left && y < f.bottom && y + w > f.top);
+        if (!f) break;
+        y = f.bottom + 6;
+      }
+      b.style.width = w + "px";
+      b.style.left = Math.round(x + sx) + "px";
+      b.style.top = Math.round(y + sy) + "px";
     });
   }
 
@@ -780,50 +830,67 @@ main.beben { animation: beben .7s linear; }
     if (gefunden.includes(bild)) { skizzenbuch(bild); return; }
     gefunden.push(bild); schreib("imres-skizzen", JSON.stringify(gefunden));
     const r = el.getBoundingClientRect();
-    konfetti(r.left + r.width / 2, r.top + r.height / 2, ["✎", "✦", "✧"], 16);
+    konfetti(r.left + r.width / 2, r.top + r.height / 2, ["✦", "✧", "☾"], 16);
     el.classList.add("weg");
     setTimeout(() => { el.classList.remove("weg"); el.classList.add("gefunden"); }, 700);
     const g = liste.length, n = gefunden.filter(b => liste.some(x => x.bild === b)).length;
     toast(n === g ? t().alleSkizzen : t().skizzeGefunden(esc(k.titel), n, g), 4200);
-    leisteAktualisieren();
+    buchKnopfAktualisieren();
     if (n === g) setTimeout(() => skizzenbuch(), 1200);
   }
 
-  function leisteAktualisieren() {
-    const b = document.querySelector(".laterne-leiste .buch");
-    if (!b) return;
-    const liste = skizzenListe(), n = gefundeneSkizzen().filter(x => liste.some(k => k.bild === x)).length;
-    b.textContent = t().skizzenbuchKnopf(n, liste.length);
-    document.querySelector(".laterne-leiste .aus").textContent = t().laterneAus;
+  function buchKnopfAktualisieren() {
+    const b = document.querySelector(".mond-buch");
+    if (b) {
+      const liste = skizzenListe(), n = gefundeneSkizzen().filter(x => liste.some(k => k.bild === x)).length;
+      b.textContent = t().skizzenbuchKnopf(n, liste.length);
+    }
+    const k = document.querySelector(".kerze");
+    if (k) k.setAttribute("aria-label", mondAn ? t().kerzeAnzuenden : t().kerzeAuspusten);
   }
 
-  function laterne(an) {
-    laterneAn = an;
-    let l = document.querySelector(".laterne"), leiste = document.querySelector(".laterne-leiste");
-    if (an) {
-      if (!l) {
-        l = document.createElement("div"); l.className = "laterne"; l.setAttribute("aria-hidden", "true");
-        document.body.appendChild(l);
-        leiste = document.createElement("div"); leiste.className = "laterne-leiste";
-        leiste.innerHTML = '<button type="button" class="buch"></button><button type="button" class="aus"></button>';
-        document.body.appendChild(leiste);
-        leiste.querySelector(".buch").addEventListener("click", () => skizzenbuch());
-        leiste.querySelector(".aus").addEventListener("click", () => laterne(false));
-      }
-      document.documentElement.classList.add("laterne-an");
-      requestAnimationFrame(() => l.classList.add("an"));
-      leisteAktualisieren();
-      toast(t().laterneAn, 4500);
-      const c = $("chronik"); if (c) c.scrollIntoView({ behavior: ruhig ? "auto" : "smooth" });
-    } else {
-      document.documentElement.classList.remove("laterne-an");
-      if (l) { l.classList.remove("an"); setTimeout(() => { if (!laterneAn) { l.remove(); if (leiste) leiste.remove(); } }, 700); }
-    }
+  function puff() {
+    if (ruhig) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === "suspended") audio.resume();
+      const n = Math.round(audio.sampleRate * .35), buf = audio.createBuffer(1, n, audio.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2);
+      const src = audio.createBufferSource(), f = audio.createBiquadFilter(), g = audio.createGain();
+      f.type = "lowpass"; f.frequency.value = 900; g.gain.value = .35;
+      src.buffer = buf; src.connect(f); f.connect(g); g.connect(audio.destination); src.start();
+    } catch (_) {}
   }
-  function lichtFolgen(x, y) {
-    const l = document.querySelector(".laterne");
-    if (!l) return;
-    l.style.setProperty("--x", x + "px"); l.style.setProperty("--y", y + "px");
+
+  function mondlicht(an) {
+    mondAn = an;
+    const html = document.documentElement, kerze = document.querySelector(".kerze");
+    let nacht = document.querySelector(".mondnacht"), buch = document.querySelector(".mond-buch");
+    if (an) {
+      if (!nacht) { nacht = document.createElement("div"); nacht.className = "mondnacht"; nacht.setAttribute("aria-hidden", "true"); document.body.appendChild(nacht); }
+      if (!buch) {
+        buch = document.createElement("button"); buch.type = "button"; buch.className = "mond-buch";
+        buch.addEventListener("click", () => skizzenbuch());
+        document.body.appendChild(buch);
+      }
+      if (kerze) {
+        const r = document.createElement("span"); r.className = "rauch"; kerze.appendChild(r);
+        setTimeout(() => r.remove(), 2600);
+      }
+      puff();
+      html.classList.add("mondlicht");
+      skizzenPlatzieren();
+      requestAnimationFrame(() => { nacht.classList.add("an"); buch.classList.add("an"); });
+      toast(t().mondAn, 4800);
+    } else {
+      html.classList.remove("mondlicht");
+      if (nacht) nacht.classList.remove("an");
+      if (buch) buch.classList.remove("an");
+      toast(t().kerzeWiederAn, 2200);
+    }
+    const ebene = $("tinten-ebene");
+    if (ebene) { ebene.setAttribute("aria-hidden", an ? "false" : "true"); ebene.querySelectorAll(".tinte").forEach(b => b.tabIndex = an ? 0 : -1); }
+    buchKnopfAktualisieren();
   }
 
   function skizzenbuch(offen) {
@@ -849,19 +916,32 @@ main.beben { animation: beben .7s linear; }
   }
 
   function tinteStarten() {
+    const kerze = document.createElement("button");
+    kerze.type = "button"; kerze.className = "kerze";
+    kerze.innerHTML = '<svg viewBox="0 0 40 74" aria-hidden="true">' +
+      '<ellipse class="schein" cx="20" cy="18" rx="18" ry="18"/>' +
+      '<path class="flamme" d="M20 6C24 13 25.5 17 20 23 14.5 17 16 13 20 6Z"/>' +
+      '<path class="flamme-kern" d="M20 13C21.6 16 22 18 20 21 18 18 18.4 16 20 13Z"/>' +
+      '<path class="docht" d="M20 22v4" />' +
+      '<path class="wachs" d="M12 27h16v36H12z"/><path class="tropfen" d="M24 27c0 6 2 7 2 10s-3 3-3 0"/>' +
+      '<path class="teller" d="M4 66h32M7 63h26"/></svg>';
+    document.body.appendChild(kerze);
+    kerze.addEventListener("click", () => mondlicht(!mondAn));
+    buchKnopfAktualisieren();
+
     skizzenVerstecken();
     document.addEventListener("click", e => { const el = e.target.closest(".tinte"); if (el) { e.preventDefault(); skizzeFinden(el); } });
-    document.addEventListener("pointermove", e => { if (laterneAn) lichtFolgen(e.clientX, e.clientY); }, { passive: true });
-    document.addEventListener("pointerdown", e => { if (laterneAn) lichtFolgen(e.clientX, e.clientY); }, { passive: true });
-    document.addEventListener("touchmove", e => { if (laterneAn && e.touches[0]) lichtFolgen(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    let rt;
+    const neuPlatzieren = () => { if (!mondAn) return; clearTimeout(rt); rt = setTimeout(skizzenPlatzieren, 60); };
+    window.addEventListener("resize", neuPlatzieren);
+    if (window.ResizeObserver) new ResizeObserver(neuPlatzieren).observe(document.body);
     const kap = $("chapters");
     if (kap) {
       let wt;
-      new MutationObserver(m => {
-        if (m.some(x => Array.from(x.addedNodes).some(n => n.nodeType === 1 && !n.classList.contains("tinte")))) { clearTimeout(wt); wt = setTimeout(skizzenVerstecken, 50); }
-      }).observe(kap, { childList: true });
+      new MutationObserver(() => { clearTimeout(wt); wt = setTimeout(skizzenVerstecken, 50); }).observe(kap, { childList: true });
     }
   }
+
 
   /* =====================================================================
      3. DIE TAVERNE
@@ -1045,8 +1125,7 @@ main.beben { animation: beben .7s linear; }
     const r = document.querySelector(".rex-guckt"); if (r) r.setAttribute("aria-label", t().rexLabel);
     const l = document.querySelector(".laute-knopf"); if (l) l.setAttribute("aria-label", t().lauteKnopf);
     const g = document.querySelector(".geheim-text"); if (g) g.textContent = t().geheimHinweis;
-    const kz = document.querySelector(".kerze-knopf"); if (kz) kz.setAttribute("aria-label", t().kerzeKnopf);
-    skizzenVerstecken(); leisteAktualisieren();
+    skizzenVerstecken(); buchKnopfAktualisieren();
   }
 
   /* ---------- Start ---------- */
