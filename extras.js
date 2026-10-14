@@ -10,6 +10,10 @@
       · 7× schnell auf „Imres Tales“ oben links tippen, oder der Konami-Code
         (↑ ↑ ↓ ↓ ← → ← → B A), öffnet das Geheimarchiv (Barradins Notizbuch)
       · Wer lange bleibt, dem wachsen Echos Ranken an den Seitenrand
+      · Barradins Skizzen stecken als unsichtbare Tinte in der Chronik. Kaum
+        sichtbar am Rand der passenden Absätze – mit der Kerze im Fuß der
+        Seite (neben der Laute) leuchten sie auf. Antippen sammelt sie im
+        geheimen Skizzenbuch.
    3. Die Taverne: Barradins Loblied (W20-Auftreten-Probe) und Bestiarium-Memory
 
    LÖSUNG der Lauten-Melodie: C – A – F – E  (Barradins Lieblingsort)
@@ -42,6 +46,15 @@
       lauteErfolg: "Die Laute erklingt wie von selbst! Barradin schenkt dir eine <strong>Bardische Inspiration</strong>: Deine nächste Loblied-Probe bekommt +1W6.",
       lauteKnopf: "Barradins Laute",
       geheimHinweis: "Manche Geheimnisse dieser Seite verraten sich nur den Neugierigen.",
+      kerzeKnopf: "Barradins Kerze",
+      laterneAn: "Die Kerze flackert auf. Leuchte die Chronik ab – Barradin schreibt manchmal mit unsichtbarer Tinte …",
+      laterneAus: "Kerze löschen",
+      skizzeGefunden: (titel, n, g) => "Skizze gefunden: " + titel + "<br><small>" + n + " von " + g + " im geheimen Skizzenbuch</small>",
+      skizzenbuchLabel: "Unsichtbare Tinte", skizzenbuchTitel: "Barradins geheimes Skizzenbuch",
+      skizzenbuchText: (n, g) => n === g ? "Alle Skizzen gefunden! Barradin ist beeindruckt – und ein kleines bisschen beunruhigt, wie gründlich du in seinen Sachen stöberst." : n + " von " + g + " Skizzen gefunden. Der Rest ist noch irgendwo zwischen den Zeilen versteckt.",
+      skizzeUnbekannt: "Noch nicht gefunden",
+      skizzenbuchKnopf: (n, g) => "📖 " + n + "/" + g,
+      alleSkizzen: "Alle Skizzen gefunden! Das geheime Skizzenbuch ist vollständig.",
       noten: ["C", "D", "E", "F", "G", "A", "H"],
       probeWuerfeln: "W20 werfen", probeNochmal: "Nochmal würfeln", probeTipp: "Wirf den Würfel!",
       probeAuftreten: "Auftreten", probeInspiration: "Inspiration",
@@ -81,6 +94,15 @@
       lauteErfolg: "The lute starts playing all by itself! Barradin grants you <strong>Bardic Inspiration</strong>: your next song check gets +1d6.",
       lauteKnopf: "Barradin's lute",
       geheimHinweis: "Some secrets of this page only reveal themselves to the curious.",
+      kerzeKnopf: "Barradin's candle",
+      laterneAn: "The candle flickers to life. Search the chronicle by its light – Barradin sometimes writes in invisible ink …",
+      laterneAus: "Snuff the candle",
+      skizzeGefunden: (titel, n, g) => "Sketch found: " + titel + "<br><small>" + n + " of " + g + " in the secret sketchbook</small>",
+      skizzenbuchLabel: "Invisible ink", skizzenbuchTitel: "Barradin's Secret Sketchbook",
+      skizzenbuchText: (n, g) => n === g ? "Every sketch found! Barradin is impressed – and a little worried at how thoroughly you rummage through his things." : n + " of " + g + " sketches found. The rest are still hidden somewhere between the lines.",
+      skizzeUnbekannt: "Not found yet",
+      skizzenbuchKnopf: (n, g) => "📖 " + n + "/" + g,
+      alleSkizzen: "Every sketch found! The secret sketchbook is complete.",
       noten: ["C", "D", "E", "F", "G", "A", "B"],
       probeWuerfeln: "Roll the d20", probeNochmal: "Roll again", probeTipp: "Roll the die!",
       probeAuftreten: "Performance", probeInspiration: "Inspiration",
@@ -315,10 +337,59 @@ main.beben { animation: beben .7s linear; }
 .tav-knopf { border-color: var(--ember); background: none; color: var(--ember); font-size: .92rem; padding: .45rem 1rem; }
 .tav-knopf:hover { background: var(--ember); color: var(--night); }
 
+/* Unsichtbare Tinte & Kerze */
+.hat-skizze { position: relative; isolation: isolate; }
+.tinte {
+  position: absolute; z-index: -1; top: -.4rem; right: -10px; width: 96px; aspect-ratio: 1; padding: 0; border: 0; background: none; cursor: pointer;
+  opacity: .07; transition: opacity .8s, transform .4s; -webkit-tap-highlight-color: transparent;
+}
+.tinte img { width: 100%; height: 100%; object-fit: contain; display: block; filter: invert(1) sepia(1) saturate(2.5) hue-rotate(-8deg) brightness(1.1); transform: rotate(var(--dreh, -6deg)); }
+.tinte.gefunden { opacity: .035; }
+@media (min-width: 1100px) { .tinte.rand { right: auto; left: calc(100% + 2.5rem); width: 150px; top: 0; } }
+.laterne-an .tinte { z-index: 2; opacity: .95; mix-blend-mode: screen; }
+.laterne-an .tinte img { filter: invert(1) sepia(1) saturate(3) hue-rotate(-8deg) brightness(1.25) drop-shadow(0 0 6px rgba(224,160,70,.8)); }
+.laterne-an .tinte.gefunden { opacity: .35; }
+.tinte.weg { transform: scale(1.6); opacity: 0 !important; }
+.laterne {
+  position: fixed; inset: 0; z-index: 45; pointer-events: none; background: rgba(6,5,9,.9);
+  --x: 50vw; --y: 50vh; --r: 150px;
+  -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0, transparent 45%, #000 100%);
+  mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0, transparent 45%, #000 100%);
+  opacity: 0; transition: opacity .7s;
+}
+.laterne.an { opacity: 1; }
+@media (min-width: 900px) { .laterne { --r: 210px; } }
+.laterne-leiste {
+  position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; gap: .4rem;
+}
+.laterne-leiste button {
+  border: 1px solid var(--ember); background: var(--hall); color: var(--ember); font: inherit; font-size: .88rem;
+  padding: .45rem .8rem; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,.5);
+}
+.laterne-leiste button:hover { background: var(--ember); color: var(--night); }
+.laterne-an .ex-toast { bottom: calc(4.2rem + env(safe-area-inset-bottom, 0px)); }
+.kerze-knopf { background: none; border: 0; padding: 0; cursor: pointer; opacity: .35; line-height: 0; transition: opacity .3s; }
+.kerze-knopf:hover, .kerze-knopf:focus-visible { opacity: .85; }
+.kerze-knopf svg { width: 22px; height: 30px; display: block; }
+.kerze-knopf .flamme { fill: var(--ember); transform-origin: 11px 9px; animation: flamme 1.6s ease-in-out infinite; }
+@keyframes flamme { 50% { transform: scale(.85, 1.1) rotate(4deg); } }
+.skizzenbuch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
+.skizzenbuch button {
+  display: grid; gap: .2rem; justify-items: center; align-content: start; padding: .3rem; border: 1px dashed rgba(107,90,68,.35);
+  background: none; cursor: pointer; font: inherit; color: #2a2118;
+}
+.skizzenbuch img { width: 100%; aspect-ratio: 1; object-fit: contain; mix-blend-mode: multiply; }
+.skizzenbuch span { font-family: var(--hand); font-size: 1.05rem; line-height: 1.05; text-align: center; max-width: 100%; overflow-wrap: anywhere; hyphens: auto; }
+.skizzenbuch .leer { display: grid; place-items: center; width: 100%; aspect-ratio: 1; font-family: var(--display); font-size: 1.6rem; color: rgba(107,90,68,.4); }
+.skizze-gross { display: grid; gap: .4rem; justify-items: center; text-align: center; }
+.skizze-gross img { width: min(100%, 22rem); mix-blend-mode: multiply; }
+.skizze-gross h4 { font-family: var(--hand); font-weight: 600; font-size: 1.9rem; line-height: 1; color: #1d1610; margin: 0; }
+.skizze-gross p { color: #4a3d2e; }
+
 .konfetti { position: fixed; z-index: 58; pointer-events: none; font-size: 1.4rem; color: var(--ember); will-change: transform, opacity; }
 
 @media (prefers-reduced-motion: reduce) {
-  #kerzenschein { animation: none; }
+  #kerzenschein, .kerze-knopf .flamme { animation: none; }
   .rex-guckt { transition: none; }
   main.beben, .w20.rollt svg, .lied.neu, .archiv-siegel, .saite.zupf i { animation: none; }
   .mem-karte .innen { transition: none; }
@@ -613,9 +684,10 @@ main.beben { animation: beben .7s linear; }
     if (!fuss) return;
     const zeile = document.createElement("div");
     zeile.className = "ex-geheim";
-    zeile.innerHTML = '<button type="button" class="laute-knopf" aria-label="' + esc(t().lauteKnopf) + '"><img src="skizze-laute.webp" alt=""></button><span class="geheim-text">' + esc(t().geheimHinweis) + '</span>';
+    zeile.innerHTML = '<button type="button" class="laute-knopf" aria-label="' + esc(t().lauteKnopf) + '"><img src="skizze-laute.webp" alt=""></button><button type="button" class="kerze-knopf" aria-label="' + esc(t().kerzeKnopf) + '"><svg viewBox="0 0 22 30" aria-hidden="true"><path class="flamme" d="M11 1C13.5 5 14.5 7.5 11 11 7.5 7.5 8.5 5 11 1Z"/><rect x="7" y="12" width="8" height="15" rx="1.5" fill="none" stroke="var(--vellum)" stroke-width="1.4"/><path d="M4 28h14" stroke="var(--vellum)" stroke-width="1.4" stroke-linecap="round"/></svg></button><span class="geheim-text">' + esc(t().geheimHinweis) + '</span>';
     fuss.appendChild(zeile);
-    const knopf = zeile.querySelector("button");
+    zeile.querySelector(".kerze-knopf").addEventListener("click", () => laterne(!laterneAn));
+    const knopf = zeile.querySelector(".laute-knopf");
     knopf.addEventListener("click", () => {
       const T = t();
       const d = pergament("laute-dialog",
@@ -648,6 +720,147 @@ main.beben { animation: beben .7s linear; }
         }
       });
     });
+  }
+
+  /* --- Unsichtbare Tinte: Barradins Skizzen sind in der Chronik versteckt --- */
+  const SKIZZEN_ORTE = {
+    "skizze-demogorgon.webp": /demogorgon/i,
+    "skizze-ilvara.webp": /ilvara/i,
+    "skizze-ploopploopeen.webp": /ploopploopeen/i,
+    "skizze-ettercap.webp": /ettercap/i,
+    "skizze-riese.webp": /\briesen?\b|\bgiant/i,
+    "skizze-chasme.webp": /chasme/i,
+    "skizze-turm.webp": /venomfang/i,
+    "skizze-ketten.webp": /\bketten\b|\bchains\b/i,
+    "skizze-laute.webp": "#barradin"
+  };
+  const skizzenListe = () => {
+    const q = sprache() === "en" ? (window.INHALT_EN || window.INHALT) : window.INHALT;
+    return ((q && q.kunst) || []).filter(k => k.bild);
+  };
+  const gefundeneSkizzen = () => { try { return JSON.parse(lies("imres-skizzen", "[]")) || []; } catch (_) { return []; } };
+  let laterneAn = false;
+
+  function skizzenVerstecken() {
+    document.querySelectorAll(".tinte").forEach(el => el.remove());
+    document.querySelectorAll(".hat-skizze").forEach(el => el.classList.remove("hat-skizze"));
+    const absaetze = Array.from(document.querySelectorAll("#chapters .prose > p"));
+    const benutzt = new Set(), gefunden = gefundeneSkizzen();
+    skizzenListe().forEach((k, i) => {
+      const ort = SKIZZEN_ORTE[k.bild];
+      let p = null, rand = true;
+      if (typeof ort === "string") {
+        const box = document.querySelector(ort);
+        const ps = box ? box.querySelectorAll(".prose p") : [];
+        p = ps[1] || ps[0] || null; rand = false;
+      } else if (ort) {
+        const frei = a => !benutzt.has(a) && !benutzt.has(a.previousElementSibling) && !benutzt.has(a.nextElementSibling);
+        const treffer = absaetze.filter(a => !benutzt.has(a) && ort.test(a.textContent));
+        const ueberschrift = a => { let e = a; while ((e = e.previousElementSibling)) { if (e.matches(".sub, h3, h4")) return e.textContent; } const c = a.closest(".chapter"); const h = c && c.querySelector("h3"); return h ? h.textContent : ""; };
+        p = treffer.find(a => frei(a) && ort.test(ueberschrift(a))) || treffer.find(frei) || treffer[0] || null;
+      }
+      if (!p) return;
+      benutzt.add(p);
+      p.classList.add("hat-skizze");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "tinte" + (rand ? " rand" : "") + (gefunden.includes(k.bild) ? " gefunden" : "");
+      b.dataset.bild = k.bild;
+      b.style.setProperty("--dreh", ((i % 2 ? 1 : -1) * (4 + (i * 3) % 7)) + "deg");
+      b.setAttribute("aria-label", k.titel || "");
+      b.innerHTML = '<img src="' + esc(k.bild) + '" alt="" loading="lazy">';
+      p.appendChild(b);
+    });
+  }
+
+  function skizzeFinden(el) {
+    const bild = el.dataset.bild, liste = skizzenListe(), gefunden = gefundeneSkizzen();
+    const k = liste.find(x => x.bild === bild);
+    if (!k) return;
+    if (gefunden.includes(bild)) { skizzenbuch(bild); return; }
+    gefunden.push(bild); schreib("imres-skizzen", JSON.stringify(gefunden));
+    const r = el.getBoundingClientRect();
+    konfetti(r.left + r.width / 2, r.top + r.height / 2, ["✎", "✦", "✧"], 16);
+    el.classList.add("weg");
+    setTimeout(() => { el.classList.remove("weg"); el.classList.add("gefunden"); }, 700);
+    const g = liste.length, n = gefunden.filter(b => liste.some(x => x.bild === b)).length;
+    toast(n === g ? t().alleSkizzen : t().skizzeGefunden(esc(k.titel), n, g), 4200);
+    leisteAktualisieren();
+    if (n === g) setTimeout(() => skizzenbuch(), 1200);
+  }
+
+  function leisteAktualisieren() {
+    const b = document.querySelector(".laterne-leiste .buch");
+    if (!b) return;
+    const liste = skizzenListe(), n = gefundeneSkizzen().filter(x => liste.some(k => k.bild === x)).length;
+    b.textContent = t().skizzenbuchKnopf(n, liste.length);
+    document.querySelector(".laterne-leiste .aus").textContent = t().laterneAus;
+  }
+
+  function laterne(an) {
+    laterneAn = an;
+    let l = document.querySelector(".laterne"), leiste = document.querySelector(".laterne-leiste");
+    if (an) {
+      if (!l) {
+        l = document.createElement("div"); l.className = "laterne"; l.setAttribute("aria-hidden", "true");
+        document.body.appendChild(l);
+        leiste = document.createElement("div"); leiste.className = "laterne-leiste";
+        leiste.innerHTML = '<button type="button" class="buch"></button><button type="button" class="aus"></button>';
+        document.body.appendChild(leiste);
+        leiste.querySelector(".buch").addEventListener("click", () => skizzenbuch());
+        leiste.querySelector(".aus").addEventListener("click", () => laterne(false));
+      }
+      document.documentElement.classList.add("laterne-an");
+      requestAnimationFrame(() => l.classList.add("an"));
+      leisteAktualisieren();
+      toast(t().laterneAn, 4500);
+      const c = $("chronik"); if (c) c.scrollIntoView({ behavior: ruhig ? "auto" : "smooth" });
+    } else {
+      document.documentElement.classList.remove("laterne-an");
+      if (l) { l.classList.remove("an"); setTimeout(() => { if (!laterneAn) { l.remove(); if (leiste) leiste.remove(); } }, 700); }
+    }
+  }
+  function lichtFolgen(x, y) {
+    const l = document.querySelector(".laterne");
+    if (!l) return;
+    l.style.setProperty("--x", x + "px"); l.style.setProperty("--y", y + "px");
+  }
+
+  function skizzenbuch(offen) {
+    if (dialogOffen()) return;
+    const T = t(), liste = skizzenListe(), gefunden = gefundeneSkizzen();
+    const n = liste.filter(k => gefunden.includes(k.bild)).length;
+    const d = pergament("skizzenbuch-dialog",
+      '<p class="label">' + esc(T.skizzenbuchLabel) + "</p><h3>" + esc(T.skizzenbuchTitel) + "</h3>" +
+      "<p>" + esc(T.skizzenbuchText(n, liste.length)) + '</p><div class="skizze-gross" hidden></div><div class="skizzenbuch">' +
+      liste.map(k => gefunden.includes(k.bild)
+        ? '<button type="button" data-bild="' + esc(k.bild) + '"><img src="' + esc(k.bild) + '" alt=""><span>' + esc(k.titel) + "</span></button>"
+        : '<button type="button" disabled aria-label="' + esc(T.skizzeUnbekannt) + '"><span class="leer">?</span></button>').join("") + "</div>");
+    const gross = d.querySelector(".skizze-gross");
+    const zeige = bild => {
+      const k = liste.find(x => x.bild === bild);
+      if (!k) return;
+      gross.hidden = false;
+      gross.innerHTML = '<img src="' + esc(k.bild) + '" alt=""><h4>' + esc(k.titel) + "</h4>" + (k.text ? "<p>" + esc(k.text) + "</p>" : "");
+      gross.scrollIntoView({ block: "nearest" });
+    };
+    d.querySelector(".skizzenbuch").addEventListener("click", e => { const b = e.target.closest("[data-bild]"); if (b) zeige(b.dataset.bild); });
+    if (offen) zeige(offen);
+  }
+
+  function tinteStarten() {
+    skizzenVerstecken();
+    document.addEventListener("click", e => { const el = e.target.closest(".tinte"); if (el) { e.preventDefault(); skizzeFinden(el); } });
+    document.addEventListener("pointermove", e => { if (laterneAn) lichtFolgen(e.clientX, e.clientY); }, { passive: true });
+    document.addEventListener("pointerdown", e => { if (laterneAn) lichtFolgen(e.clientX, e.clientY); }, { passive: true });
+    document.addEventListener("touchmove", e => { if (laterneAn && e.touches[0]) lichtFolgen(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    const kap = $("chapters");
+    if (kap) {
+      let wt;
+      new MutationObserver(m => {
+        if (m.some(x => Array.from(x.addedNodes).some(n => n.nodeType === 1 && !n.classList.contains("tinte")))) { clearTimeout(wt); wt = setTimeout(skizzenVerstecken, 50); }
+      }).observe(kap, { childList: true });
+    }
   }
 
   /* =====================================================================
@@ -832,6 +1045,8 @@ main.beben { animation: beben .7s linear; }
     const r = document.querySelector(".rex-guckt"); if (r) r.setAttribute("aria-label", t().rexLabel);
     const l = document.querySelector(".laute-knopf"); if (l) l.setAttribute("aria-label", t().lauteKnopf);
     const g = document.querySelector(".geheim-text"); if (g) g.textContent = t().geheimHinweis;
+    const kz = document.querySelector(".kerze-knopf"); if (kz) kz.setAttribute("aria-label", t().kerzeKnopf);
+    skizzenVerstecken(); leisteAktualisieren();
   }
 
   /* ---------- Start ---------- */
@@ -841,6 +1056,7 @@ main.beben { animation: beben .7s linear; }
     rex();
     tastatur();
     laute();
+    tinteStarten();
     lobliedStarten();
     memoryStarten();
     new MutationObserver(sprachwechsel).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
