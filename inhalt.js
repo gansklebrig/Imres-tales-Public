@@ -270,6 +270,8 @@ window.INHALT = {
 
   /* ---------- DIE REISE ----------
      karte: Dateiname der Weltkarte, z. B. "weltkarte.jpg" (null = Platzhalter)
+     lager: wo die Gruppe an dieser Station rastet – "wald", "festung", "taverne" oder "hoehle"
+            (die letzte Station bestimmt die Lagerfeuer-Szene auf der Startseite)
      x / y: Position in Prozent von links / von oben (0 bis 100)
      abschnitt: Zwischenüberschrift im Kapitel, zu der die Station springt */
   reise: {
@@ -278,26 +280,26 @@ window.INHALT = {
         titel: "Die Oberwelt",
         karte: "weltkarte.jpg",
         stationen: [
-          { name: "Der Hafen von Neverwinter", x: 21.5, y: 46, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
-          { name: "Hinterhalt auf der Straße", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Kurz nach der Abzweigung von der High Road Richtung Phandalin. Die Goblins, die aus dem Wald springen, haben keine Chance." },
-          { name: "Die Goblinhöhle", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
-          { name: "Phandalin", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
-          { name: "Der Wachturm", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder Nundro." },
-          { name: "Die magische Schmiede", x: 71.3, y: 75, kapitel: "I", abschnitt: "Die magische Schmiede", text: "Tief in einer alten, verlassenen Mine verborgen. Unterwegs fällt Nezna, und nach harten Kämpfen gehört die Schmiede der Gruppe." },
-          { name: "Neverwinter", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Zurück in der großen Stadt. Hier treten die Gefährten der Allianz der Lords bei." },
-          { name: "Donnerbaum", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Donnerbaum", text: "Ein verlassenes Dorf mit verfallenem Wachturm. Ein Giftdrache, Zombies, Blights und eine Druidin, die nicht ist, was sie scheint." }
+          { name: "Der Hafen von Neverwinter", lager: "taverne", x: 21.5, y: 46, kapitel: "I", abschnitt: "Die Einladung", text: "Gundren lädt die Helden ein und bietet ihnen die Suche nach einer magischen Schmiede an." },
+          { name: "Hinterhalt auf der Straße", lager: "wald", x: 44.4, y: 72.9, kapitel: "I", abschnitt: "Hinterhalt auf der Straße", text: "Kurz nach der Abzweigung von der High Road Richtung Phandalin. Die Goblins, die aus dem Wald springen, haben keine Chance." },
+          { name: "Die Goblinhöhle", lager: "hoehle", x: 45.7, y: 66.8, kapitel: "I", abschnitt: "Die Goblinhöhle", text: "Nur durch ein kleines Waldstück vom Ort des Überfalls getrennt. Wölfe befreit, Nest gestürmt, Anführer erschlagen." },
+          { name: "Phandalin", lager: "taverne", x: 57.8, y: 76.4, kapitel: "I", abschnitt: "Phandalin und die Roten Roben", text: "Ein kleines Dorf in den Fängen der Roten Roben. Am Dorfrand liegt Schloss Crackmore, wo Glasstab fällt und von der Spinne spricht." },
+          { name: "Der Wachturm", lager: "festung", x: 67.7, y: 67.8, kapitel: "I", abschnitt: "Der Gefangene im Wachturm", text: "Ein Bugbär fällt, eine Drow flieht, und der Gefangene entpuppt sich als Gundrens Zwillingsbruder Nundro." },
+          { name: "Die magische Schmiede", lager: "hoehle", x: 71.3, y: 75, kapitel: "I", abschnitt: "Die magische Schmiede", text: "Tief in einer alten, verlassenen Mine verborgen. Unterwegs fällt Nezna, und nach harten Kämpfen gehört die Schmiede der Gruppe." },
+          { name: "Neverwinter", lager: "taverne", x: 25.5, y: 43.8, kapitel: "I", abschnitt: "Neverwinter", text: "Zurück in der großen Stadt. Hier treten die Gefährten der Allianz der Lords bei." },
+          { name: "Donnerbaum", lager: "wald", x: 37.6, y: 45.8, kapitel: "I", abschnitt: "Donnerbaum", text: "Ein verlassenes Dorf mit verfallenem Wachturm. Ein Giftdrache, Zombies, Blights und eine Druidin, die nicht ist, was sie scheint." }
         ]
       },
       {
         titel: "Das Unterreich",
         karte: "unterreich-karte.jpg",
         stationen: [
-          { name: "Der Kerker", x: 8.0, y: 48.3, kapitel: "II", abschnitt: "Gefangen", text: "Hier erwachen die Gefährten in Ketten. Echo holt als Ratte die Ausrüstung, dann folgen Ausbruch und Dämonen." },
-          { name: "Die Spinnweben", x: 12.0, y: 40.7, kapitel: "II", abschnitt: "Durch die Spinnweben", text: "Balancieren über Spinnennetze. In einem Kokon wartet der Gnom Fagas." },
-          { name: "Das Grab der Magierin", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "Das Grab der Magierin", text: "Hinter einer verunstalteten Spinnenstatue: ein Wraith und das Schwert Dawnbringer." },
-          { name: "Der unterirdische See", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "Der unterirdische See", text: "Am Ufer bittet Ploopploopeen, Erzpriester der Kuo-Toa, um Hilfe." },
-          { name: "Die Ruinen der Kuo-Toa", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Hier stieg Demogorgon aus dem See. Von der Stadt sind nur Ruinen geblieben." },
-          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels. Kardal entpuppt sich als Prinz, der König gewährt uns Gastrecht, und ein Riese rast durch die Stadt." }
+          { name: "Der Kerker", lager: "festung", x: 8.0, y: 48.3, kapitel: "II", abschnitt: "Gefangen", text: "Hier erwachen die Gefährten in Ketten. Echo holt als Ratte die Ausrüstung, dann folgen Ausbruch und Dämonen." },
+          { name: "Die Spinnweben", lager: "hoehle", x: 12.0, y: 40.7, kapitel: "II", abschnitt: "Durch die Spinnweben", text: "Balancieren über Spinnennetze. In einem Kokon wartet der Gnom Fagas." },
+          { name: "Das Grab der Magierin", lager: "hoehle", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "Das Grab der Magierin", text: "Hinter einer verunstalteten Spinnenstatue: ein Wraith und das Schwert Dawnbringer." },
+          { name: "Der unterirdische See", lager: "hoehle", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "Der unterirdische See", text: "Am Ufer bittet Ploopploopeen, Erzpriester der Kuo-Toa, um Hilfe." },
+          { name: "Die Ruinen der Kuo-Toa", lager: "hoehle", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Hier stieg Demogorgon aus dem See. Von der Stadt sind nur Ruinen geblieben." },
+          { name: "Gracklstugh", lager: "festung", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels. Kardal entpuppt sich als Prinz, der König gewährt uns Gastrecht, und ein Riese rast durch die Stadt." }
         ]
       }
     ]
@@ -316,6 +318,16 @@ window.INHALT = {
     { name: "Ploopploopeen", bild: "ploopploopeen.jpg", status: "gefallen", ort: "Die Stadt am unterirdischen See", text: "Erzpriester der Kuo-Toa. Bat die Gefährten um Hilfe gegen die Anhänger eines falschen Gottes und schmuggelte sie zum Schein gefesselt in seine Stadt. Er starb, als Demogorgon die Stadt zerstörte." },
     { name: "Demogorgon", bild: "demogorgon-karte.webp", status: "gesichtet", ort: "Der unterirdische See", text: "Ein Dämonenfürst mit zwei Köpfen, Tentakelarmen und einem langen Schwanz. Sein Schrei ließ alle Magie erlöschen, und die Gefährten entkamen nur mit Glück. Friedrich hat ihn trotzdem geboxt. Sagt er." }
   ],
+
+  /* ---------- AM LAGERFEUER (Startseite) ----------
+     Die Szene richtet sich automatisch nach der letzten Station der Reise
+     (Feld „lager“: "wald", "festung", "taverne" oder "hoehle").
+     szene: eine feste Szene erzwingen, z. B. "taverne" (null = automatisch)
+     hintergruende: eigenes Hintergrundbild je Szene (null = gezeichnete Szene) */
+  lagerfeuer: {
+    szene: null,
+    hintergruende: { wald: null, festung: null, taverne: null, hoehle: null }
+  },
 
   /* ---------- DIE QUESTTAFEL ----------
      Ein Holzbrett mit angepinnten Zetteln. Antippen öffnet den ganzen Text.
