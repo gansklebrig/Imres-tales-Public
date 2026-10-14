@@ -620,6 +620,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#nsc" data-i18n="navNsc">NSC</a>
       <a href="#bestiarium" data-i18n="navBestiarium">Bestiarium</a>
       <a href="#kuenste" data-i18n="navKunst">Künste</a>
+      <a href="#taverne" data-i18n="navTaverne">Taverne</a>
     </nav>
     <div class="navdrop-menu" id="kapitel-menu" hidden></div>
     <div class="tools">
@@ -766,6 +767,48 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       </dialog>
     </div>
   </section>
+  <section class="part" id="taverne">
+    <div class="wrap">
+      <div class="part-head">
+        <p class="label" data-i18n="tavLabel">Zeitvertreib</p>
+        <h2 data-i18n="tavTitle">Die Taverne</h2>
+        <p data-i18n="tavText">Zwischen zwei Abenteuern wird gewürfelt, gesungen und geraten. Lass Barradin ein Loblied improvisieren oder teste dein Gedächtnis am Bestiarium.</p>
+      </div>
+      <div class="taverne">
+        <article class="tav-karte" id="barden-probe">
+          <p class="label" data-i18n="probeLabel">Auftreten-Probe</p>
+          <h3 data-i18n="probeTitle">Barradins Loblied</h3>
+          <p class="tav-info" data-i18n="probeText">Wähle, wen Barradin besingen soll, und wirf den W20. Je höher der Wurf, desto prächtiger der Reim und desto dicker die Schmeichelei.</p>
+          <div class="ziel-wahl" id="ziel-wahl" role="radiogroup" aria-label="Wen besingen?" data-i18n-aria="probeZiel"></div>
+          <input type="text" class="ziel-name" id="ziel-name" maxlength="30" autocomplete="off" hidden>
+          <div class="w20-zeile">
+            <button type="button" class="w20" id="w20" aria-label="W20 werfen" data-i18n-aria="probeWurf">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <polygon class="flaeche" points="50,3 91,26.5 91,73.5 50,97 9,73.5 9,26.5"/>
+                <path class="kante" d="M50,22 L78,69 L22,69 Z M50,3 L50,22 M9,26.5 L50,22 L91,26.5 M9,26.5 L22,69 L9,73.5 M91,26.5 L78,69 L91,73.5 M22,69 L50,97 L78,69"/>
+                <text class="zahl" id="w20-zahl" x="50" y="59">20</text>
+              </svg>
+            </button>
+            <div class="w20-text">
+              <span class="gross" id="w20-gross">Wirf den Würfel!</span>
+              <small id="w20-klein">+7 Auftreten</small>
+              <button type="button" class="tav-knopf" id="w20-los">W20 werfen</button>
+            </div>
+          </div>
+          <p class="inspiration" id="inspiration" hidden></p>
+          <div class="lied" id="lied" aria-live="polite" hidden></div>
+        </article>
+        <article class="tav-karte" id="memory-karte">
+          <p class="label" data-i18n="memLabel">Bestiarium-Memory</p>
+          <h3 data-i18n="memTitle">Finde die Paare</h3>
+          <p class="tav-info" data-i18n="memText">Unter den Karten lauern die Kreaturen aus dem Bestiarium. Decke immer zwei auf und finde alle Paare in möglichst wenigen Zügen.</p>
+          <div class="memory-kopf"><strong id="memory-zuege"></strong><span id="memory-paare"></span><span id="memory-rekord"></span></div>
+          <div class="memory" id="memory"></div>
+          <div class="memory-fuss"><p class="memory-sieg" id="memory-sieg" aria-live="polite"></p><button type="button" class="tav-knopf" id="memory-neu">Neu mischen</button></div>
+        </article>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -776,6 +819,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 </footer>
 
 <!-- Alle Texte stehen in inhalt.js (deutsch) und inhalt-en.js (englisch) -->
+<script src="extras.js" defer></script>
 <script>document.write('<script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
@@ -790,6 +834,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navLabel: "Hauptnavigation",
       navChronik: "Chronik", navKapitelWahl: "Kapitel wählen", kapitelSprung: "Direkt zum Kapitel", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
       navQuests: "Quests", navNsc: "NSC", navKunst: "Künste",
+      navTaverne: "Taverne", tavLabel: "Zeitvertreib", tavTitle: "Die Taverne",
+      tavText: "Zwischen zwei Abenteuern wird gewürfelt, gesungen und geraten. Lass Barradin ein Loblied improvisieren oder teste dein Gedächtnis am Bestiarium.",
+      probeLabel: "Auftreten-Probe", probeTitle: "Barradins Loblied", probeZiel: "Wen besingen?", probeWurf: "W20 werfen", probeTipp: "Wirf den Würfel!",
+      probeText: "Wähle, wen Barradin besingen soll, und wirf den W20. Je höher der Wurf, desto prächtiger der Reim und desto dicker die Schmeichelei.",
+      memLabel: "Bestiarium-Memory", memTitle: "Finde die Paare",
+      memText: "Unter den Karten lauern die Kreaturen aus dem Bestiarium. Decke immer zwei auf und finde alle Paare in möglichst wenigen Zügen.",
       suche: "Suchen", suchePlatz: "Name, Ort, Stichwort …", sucheNichts: "Nichts gefunden. Vielleicht hat Barradin es ausgelassen.", sucheTreffer: "Treffer", sucheMehr: "Weitere Treffer: Suche genauer eingrenzen", sucheEinleitung: "Einleitung",
       kunstLabel: "Aus dem Skizzenbuch", kunstTitle: "Barradins Künste",
       kunstText: "Zwischen zwei Abenteuern greift Barradin zur Feder. Was er unterwegs gesehen hat, landet in seinem Notizbuch. Tippe auf eine Zeichnung, um sie groß zu sehen.",
@@ -831,6 +881,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       navLabel: "Main navigation",
       navChronik: "Chronicle", navKapitelWahl: "Choose a chapter", kapitelSprung: "Jump to chapter", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
       navQuests: "Quests", navNsc: "NPCs", navKunst: "Art",
+      navTaverne: "Tavern", tavLabel: "Pastimes", tavTitle: "The Tavern",
+      tavText: "Between two adventures there is rolling, singing and guessing. Let Barradin improvise a song of praise or test your memory on the bestiary.",
+      probeLabel: "Performance check", probeTitle: "Barradin's Song of Praise", probeZiel: "Who should he praise?", probeWurf: "Roll the d20", probeTipp: "Roll the die!",
+      probeText: "Pick who Barradin should sing about and roll the d20. The higher the roll, the grander the rhyme and the thicker the flattery.",
+      memLabel: "Bestiary memory", memTitle: "Find the pairs",
+      memText: "The creatures of the bestiary lurk beneath these cards. Turn over two at a time and find every pair in as few moves as you can.",
       suche: "Search", suchePlatz: "Name, place, keyword …", sucheNichts: "Nothing found. Perhaps Barradin left it out.", sucheTreffer: "results", sucheMehr: "More results: narrow your search", sucheEinleitung: "Introduction",
       kunstLabel: "From the sketchbook", kunstTitle: "Barradin's Art",
       kunstText: "Between two adventures, Barradin reaches for his quill. Whatever he sees along the way ends up in his notebook. Tap a drawing to see it large.",
