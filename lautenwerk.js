@@ -30,6 +30,7 @@
       spuren: { klopf: "Klopfen", schelle: "Schellen", bass: "Bass", melodie: "Melodie" },
       spurInfo: { klopf: "auf den Korpus", schelle: "am Stiefel", bass: "mit dem Daumen", melodie: "auf der Laute" },
       vorlagen: "Vorlagen", zufall: "🎲 Improvisieren", leeren: "Leeren",
+      stumm: "Stumm schalten", lautstaerke: "Lautstärke",
       teilen: "🔗 Lied teilen", kopiert: "Link kopiert – schick ihn an die Gruppe!", geteilt: "Geteilt!",
       geladen: "Ein geteiltes Lied wurde geladen.",
       modi: { dorisch: "Dorisch", mixolydisch: "Mixolydisch", aeolisch: "Äolisch", phrygisch: "Phrygisch" },
@@ -45,6 +46,7 @@
       spuren: { klopf: "Knock", schelle: "Bells", bass: "Bass", melodie: "Melody" },
       spurInfo: { klopf: "on the body", schelle: "on the boot", bass: "with the thumb", melodie: "on the lute" },
       vorlagen: "Presets", zufall: "🎲 Improvise", leeren: "Clear",
+      stumm: "Mute", lautstaerke: "Volume",
       teilen: "🔗 Share song", kopiert: "Link copied – send it to the party!", geteilt: "Shared!",
       geladen: "A shared song has been loaded.",
       modi: { dorisch: "Dorian", mixolydisch: "Mixolydian", aeolisch: "Aeolian", phrygisch: "Phrygian" },
@@ -99,24 +101,36 @@
   const kopie = o => JSON.parse(JSON.stringify(o));
 
   /* ---------- Zustand (gemerkt im Browser) ---------- */
-  let S = kopie(VORLAGEN.taverne);
+  const SPUREN = ["klopf", "schelle", "bass", "melodie"];
+  const MIX_START = () => ({ vol: { klopf: 8, schelle: 6, bass: 8, melodie: 8 }, mute: { klopf: 0, schelle: 0, bass: 0, melodie: 0 } });
+  let S = Object.assign(kopie(VORLAGEN.taverne), MIX_START());
   try { const g = JSON.parse(localStorage.getItem("imres-lautenwerk") || "null"); if (g && g.klopf) S = Object.assign(S, g); } catch (_) {}
+  const mixPruefen = () => { const m = MIX_START(); S.vol = Object.assign(m.vol, S.vol || {}); S.mute = Object.assign(m.mute, S.mute || {}); };
+  mixPruefen();
   const merken = () => { try { localStorage.setItem("imres-lautenwerk", JSON.stringify(S)); } catch (_) {} };
 
   /* Lied als kurzer Code für den Link */
   const hex = a => { let n = 0; a.forEach((v, i) => { if (v) n |= 1 << i; }); return n.toString(16).padStart(4, "0"); };
   const unhex = h => { const n = parseInt(h, 16) || 0; return Array.from({ length: SCHRITTE }, (_, i) => (n >> i) & 1); };
   const kodieren = () => [S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, hex(S.klopf), hex(S.schelle),
-    S.bass.map(v => v < 0 ? "." : v).join(""), S.melodie.map(v => v < 0 ? "." : v).join("")].join("-");
+    S.bass.map(v => v < 0 ? "." : v).join(""), S.melodie.map(v => v < 0 ? "." : v).join(""),
+    SPUREN.map(k => (S.mute[k] ? "m" : "") + S.vol[k]).join("")].join("-");
+  function mixAusCode(c) {
+    const m = MIX_START();
+    const teile = String(c || "").match(/m?\d/g);
+    if (teile && teile.length === 4) SPUREN.forEach((k, i) => { m.mute[k] = teile[i][0] === "m" ? 1 : 0; m.vol[k] = +teile[i].slice(-1); });
+    return m;
+  }
   function dekodieren(code) {
     const p = String(code).split("-");
-    if (p.length !== 9 || p[7].length !== SCHRITTE || p[8].length !== SCHRITTE) return null;
+    if ((p.length !== 9 && p.length !== 10) || p[7].length !== SCHRITTE || p[8].length !== SCHRITTE) return null;
     const zahl = (x, min, max, d) => { const n = parseInt(x, 10); return isNaN(n) ? d : Math.max(min, Math.min(max, n)); };
     const zeichen = (str, max) => str.split("").map(c => { const n = parseInt(c, 10); return isNaN(n) || n > max ? -1 : n; });
     return {
       tempo: zahl(p[0], 50, 180, 110), transpose: zahl(p[1], -5, 6, 0), modus: MODUS_LISTE[zahl(p[2], 0, 3, 0)],
       swing: zahl(p[3], 0, 1, 0), bordun: zahl(p[4], 0, 1, 1), klopf: unhex(p[5]), schelle: unhex(p[6]),
-      bass: zeichen(p[7], 4), melodie: zeichen(p[8], 7)
+      bass: zeichen(p[7], 4), melodie: zeichen(p[8], 7),
+      ...mixAusCode(p[9])
     };
   }
   let ausLink = false;
@@ -128,6 +142,12 @@
 
   /* ---------- Klang ---------- */
   let ctx = null, master = null, rauschen = null;
+  const spurGain = {};
+  const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6) * 1.25;
+  function mixAnwenden() {
+    if (!ctx) return;
+    SPUREN.forEach(k => spurGain[k] && spurGain[k].gain.setTargetAtTime(spurPegel(k), ctx.currentTime, .03));
+  }
   const saitenCache = new Map();
   function audioStart() {
     if (!ctx) {
@@ -136,6 +156,8 @@
       komp.threshold.value = -14; komp.ratio.value = 4;
       master = ctx.createGain(); master.gain.value = .8;
       master.connect(komp); komp.connect(ctx.destination);
+      SPUREN.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
+      mixAnwenden();
       const n = ctx.sampleRate;
       rauschen = ctx.createBuffer(1, n, ctx.sampleRate);
       const d = rauschen.getChannelData(0);
@@ -166,7 +188,7 @@
     src.buffer = saite(freq, art);
     f.type = "lowpass"; f.frequency.value = art === "bass" ? 1100 : 3400; f.Q.value = .7;
     g.gain.value = (laut || 1) * (art === "bass" ? .9 : .55);
-    src.connect(f); f.connect(g); g.connect(master);
+    src.connect(f); f.connect(g); g.connect(spurGain[art === "bass" ? "bass" : "melodie"]);
     src.start(zeit);
   }
   function klopfen(zeit, betont) {
@@ -176,22 +198,22 @@
     o.frequency.exponentialRampToValueAtTime(65, zeit + .08);
     g.gain.setValueAtTime(betont ? 1 : .7, zeit);
     g.gain.exponentialRampToValueAtTime(.001, zeit + .16);
-    o.connect(g); g.connect(master); o.start(zeit); o.stop(zeit + .2);
+    o.connect(g); g.connect(spurGain.klopf); o.start(zeit); o.stop(zeit + .2);
     const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), rg = ctx.createGain();
     r.buffer = rauschen; b.type = "bandpass"; b.frequency.value = 1300; b.Q.value = 1.5;
     rg.gain.setValueAtTime(betont ? .35 : .22, zeit); rg.gain.exponentialRampToValueAtTime(.001, zeit + .035);
-    r.connect(b); b.connect(rg); rg.connect(master); r.start(zeit, Math.random() * .5, .05);
+    r.connect(b); b.connect(rg); rg.connect(spurGain.klopf); r.start(zeit, Math.random() * .5, .05);
   }
   function schellen(zeit) {
     const r = ctx.createBufferSource(), h = ctx.createBiquadFilter(), g = ctx.createGain();
     r.buffer = rauschen; h.type = "highpass"; h.frequency.value = 6500;
     g.gain.setValueAtTime(.32, zeit); g.gain.exponentialRampToValueAtTime(.001, zeit + .2);
-    r.connect(h); h.connect(g); g.connect(master); r.start(zeit, Math.random() * .5, .22);
+    r.connect(h); h.connect(g); g.connect(spurGain.schelle); r.start(zeit, Math.random() * .5, .22);
     for (let i = 0; i < 3; i++) {
       const o = ctx.createOscillator(), og = ctx.createGain(), z = zeit + i * .012;
       o.type = "sine"; o.frequency.value = 4200 + Math.random() * 3200;
       og.gain.setValueAtTime(.05, z); og.gain.exponentialRampToValueAtTime(.0005, z + .09);
-      o.connect(og); og.connect(master); o.start(z); o.stop(z + .1);
+      o.connect(og); og.connect(spurGain.schelle); o.start(z); o.stop(z + .1);
     }
   }
   let bordunTeile = null;
@@ -225,10 +247,10 @@
     while (naechste < ctx.currentTime + .12) {
       const versatz = S.swing && schritt % 2 === 1 ? schrittDauer() * .33 : 0, z = naechste + versatz;
       const ev = { schritt, zeit: z, klopf: 0, schelle: 0, bass: 0, mel: 0 };
-      if (S.klopf[schritt]) { klopfen(z, schritt % 4 === 0); ev.klopf = 1; }
-      if (S.schelle[schritt]) { schellen(z); ev.schelle = 1; }
-      if (S.bass[schritt] >= 0) { zupf(midiHz(bassMidi(S.bass[schritt], S)), z, "bass"); ev.bass = 1; }
-      if (S.melodie[schritt] >= 0) { zupf(midiHz(melMidi(S.melodie[schritt], S)), z, "mel"); ev.mel = 1; }
+      if (S.klopf[schritt] && !S.mute.klopf) { klopfen(z, schritt % 4 === 0); ev.klopf = 1; }
+      if (S.schelle[schritt] && !S.mute.schelle) { schellen(z); ev.schelle = 1; }
+      if (S.bass[schritt] >= 0 && !S.mute.bass) { zupf(midiHz(bassMidi(S.bass[schritt], S)), z, "bass"); ev.bass = 1; }
+      if (S.melodie[schritt] >= 0 && !S.mute.melodie) { zupf(midiHz(melMidi(S.melodie[schritt], S)), z, "mel"); ev.mel = 1; }
       anzeige.push(ev);
       naechste += schrittDauer();
       schritt = (schritt + 1) % SCHRITTE;
@@ -339,7 +361,7 @@
       let an = false;
       if (spur === "klopf" || spur === "schelle") an = !!S[spur][i];
       else an = S[spur][i] === zeile;
-      html += '<button type="button" class="lw-zelle s-' + spur + (i % 4 === 0 ? " takt" : "") + (an ? " an" : "") +
+      html += '<button type="button" class="lw-zelle s-' + spur + (S.mute[spur] ? " stumm" : "") + (i % 4 === 0 ? " takt" : "") + (an ? " an" : "") +
         '" data-spur="' + spur + '" data-zeile="' + zeile + '" data-s="' + i + '" aria-pressed="' + an + '"></button>';
     }
     return html;
@@ -348,11 +370,16 @@
     const T = t();
     const tonarten = Array.from({ length: 12 }, (_, i) => i - 5).map(tr => '<option value="' + tr + '"' + (tr === S.transpose ? " selected" : "") + ">" + notenName(MEL_GRUND + tr) + "</option>").join("");
     const modi = MODUS_LISTE.map(m => '<option value="' + m + '"' + (m === S.modus ? " selected" : "") + ">" + T.modi[m] + "</option>").join("");
-    let raster = '<div class="lw-kopf">' + T.spuren.klopf + " · " + T.spurInfo.klopf + "</div>" + rasterZeile("klopf", 0, "✊", "sym");
-    raster += '<div class="lw-kopf">' + T.spuren.schelle + " · " + T.spurInfo.schelle + "</div>" + rasterZeile("schelle", 0, "🔔", "sym");
-    raster += '<div class="lw-kopf">' + T.spuren.bass + " · " + T.spurInfo.bass + "</div>";
+    const kopf = k => '<div class="lw-kopf' + (S.mute[k] ? " stumm" : "") + '" data-kopf="' + k + '"><div class="lw-kopf-in">' +
+      '<span class="lw-spurname">' + T.spuren[k] + " <small>· " + T.spurInfo[k] + "</small></span>" +
+      '<button type="button" class="lw-mute" data-mute="' + k + '" aria-pressed="' + !!S.mute[k] + '" aria-label="' + esc(T.stumm + " " + T.spuren[k]) + '" title="' + esc(T.stumm) + '">' + (S.mute[k] ? "🔇" : "🔊") + "</button>" +
+      '<input type="range" class="lw-fader" min="0" max="9" step="1" value="' + S.vol[k] + '" data-vol="' + k + '" aria-label="' + esc(T.lautstaerke + " " + T.spuren[k]) + '">' +
+      "</div></div>";
+    let raster = kopf("klopf") + rasterZeile("klopf", 0, "✊", "sym");
+    raster += kopf("schelle") + rasterZeile("schelle", 0, "🔔", "sym");
+    raster += kopf("bass");
     for (let z = BASS_STUFEN.length - 1; z >= 0; z--) raster += rasterZeile("bass", z, notenName(bassMidi(z, S)), z === 0 ? "grund" : "");
-    raster += '<div class="lw-kopf">' + T.spuren.melodie + " · " + T.spurInfo.melodie + "</div>";
+    raster += kopf("melodie");
     for (let z = 7; z >= 0; z--) raster += rasterZeile("melodie", z, notenName(melMidi(z, S)), z === 0 || z === 7 ? "grund" : "");
 
     root.innerHTML =
@@ -432,6 +459,14 @@
   root.addEventListener("click", e => {
     const z = e.target.closest(".lw-zelle");
     if (z) { antippen(z); return; }
+    const mu = e.target.closest("[data-mute]");
+    if (mu) {
+      const k = mu.dataset.mute; S.mute[k] = S.mute[k] ? 0 : 1; merken(); mixAnwenden();
+      mu.setAttribute("aria-pressed", !!S.mute[k]); mu.textContent = S.mute[k] ? "🔇" : "🔊";
+      root.querySelector('[data-kopf="' + k + '"]').classList.toggle("stumm", !!S.mute[k]);
+      root.querySelectorAll('.lw-zelle[data-spur="' + k + '"]').forEach(c => c.classList.toggle("stumm", !!S.mute[k]));
+      return;
+    }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
     const sch = e.target.closest(".lw-schalter");
     if (sch) {
@@ -444,7 +479,7 @@
       const k = v.dataset.vorlage;
       if (k === "leer") S = Object.assign(S, { klopf: Array(SCHRITTE).fill(0), schelle: Array(SCHRITTE).fill(0), bass: leer(), melodie: leer() });
       else if (k === "zufall") S = zufallsLied();
-      else S = kopie(VORLAGEN[k]);
+      else S = Object.assign(kopie(VORLAGEN[k]), { vol: S.vol, mute: S.mute });
       merken(); zeichnen(); knoepfe();
       if (laeuft) { bordunAus(); bordunAn(); }
       return;
@@ -460,6 +495,8 @@
   });
   root.addEventListener("input", e => {
     const f = e.target.dataset && e.target.dataset.feld;
+    const v = e.target.dataset && e.target.dataset.vol;
+    if (v) { S.vol[v] = +e.target.value; merken(); mixAnwenden(); return; }
     if (f === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
   });
   root.addEventListener("change", e => {
@@ -520,7 +557,16 @@
 
 .lw-scroll { overflow-x: auto; margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); padding-inline: clamp(1.2rem, 4vw, 2rem); -webkit-overflow-scrolling: touch; }
 .lw-raster { display: grid; grid-template-columns: 3.2rem repeat(16, minmax(1.75rem, 1fr)); gap: 3px; min-width: 36rem; }
-.lw-kopf { grid-column: 1 / -1; font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); margin-top: .7rem; }
+.lw-kopf { grid-column: 1 / -1; margin-top: .8rem; }
+.lw-kopf-in { position: sticky; left: 0; display: inline-flex; align-items: center; gap: .55rem; max-width: calc(100vw - 2.5rem); }
+.lw-spurname { font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); white-space: nowrap; }
+.lw-spurname small { font-size: inherit; font-weight: 400; color: var(--ash); letter-spacing: .08em; }
+@media (max-width: 480px) { .lw-spurname small { display: none; } }
+.lw-mute { border: 1px solid var(--line); background: none; font-size: .85rem; line-height: 1; padding: .2rem .35rem; cursor: pointer; border-radius: 3px; }
+.lw-mute[aria-pressed="true"] { border-color: var(--blood); background: rgba(155,58,47,.25); }
+.lw-fader { width: 6.5rem; accent-color: #e0a046; }
+.lw-kopf.stumm .lw-spurname, .lw-kopf.stumm .lw-fader { opacity: .4; }
+.lw-zelle.stumm { opacity: .35; }
 .lw-kopf:first-child { margin-top: 0; }
 .lw-name { position: sticky; left: 0; z-index: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: .45rem;
   font-family: var(--display); font-size: .82rem; color: var(--ash); background: var(--hall); }
