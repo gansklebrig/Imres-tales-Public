@@ -198,16 +198,22 @@
   function spotte(stufe, name) {
     const S = (window.BARRADIN_SPOTT || {})[sprache()];
     if (!S) return name + "!";
-    if (stufe === "patzer") return zufall(S.eigentor);
+    if (stufe === "patzer") return zufall(S.eigentor.concat(S.eigentorReime || []));
     const key = schluessel(name);
-    const k = Object.keys(S.kreaturen).find(x => key === x || key.indexOf(x) > -1);
-    const eigen = k ? S.kreaturen[k] : null;
+    const finde = obj => { const k = obj && Object.keys(obj).find(x => key === x || key.indexOf(x) > -1); return k ? obj[k] : null; };
+    const eigen = finde(S.kreaturen), eigenReim = finde(S.kreaturReime);
     const allg = S.allgemein[stufe] || S.allgemein.gut;
+    const gereimt = (S.reime && S.reime[stufe]) || [];
+    const r = Math.random();
     let text;
-    if (stufe === "schwach") text = zufall(allg);
-    else if (stufe === "maessig" || stufe === "gut") text = eigen && Math.random() < .5 ? zufall(eigen) : zufall(allg);
-    else if (stufe === "stark") text = eigen && Math.random() < .5 ? zufall(eigen) + " " + zufall(allg) : zufall(allg);
-    else text = (eigen && Math.random() < .5 ? zufall(eigen) + "\n\n" : "") + zufall(allg);
+    if (stufe === "schwach") text = gereimt.length && r < .5 ? zufall(gereimt) : zufall(allg);
+    else if (stufe === "legende" || stufe === "krit") {
+      const vorne = eigenReim && r < .3 ? zufall(eigenReim) : eigen && r < .45 ? zufall(eigen) : "";
+      text = (vorne ? vorne + "\n\n" : "") + zufall(allg.concat(gereimt));
+    } else if (eigenReim && r < .3) text = zufall(eigenReim);
+    else if (eigen && r < .45) text = zufall(eigen) + (stufe === "stark" ? " " + zufall(allg) : "");
+    else if (gereimt.length && r < .8) text = zufall(gereimt);
+    else text = zufall(allg);
     return text.split("{n}").join(name);
   }
   function neuerSpott(stufe, name) {

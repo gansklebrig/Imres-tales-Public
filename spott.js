@@ -13,6 +13,7 @@
      allgemein  Beleidigungen für jeden Gegner, nach Stufe
      kreaturen  maßgeschneiderter Spott für bestimmte Gegner (Name klein,
                 ohne Leer- und Sonderzeichen: „Kuo-Toa“ → kuotoa)
+     reime / kreaturReime / eigentorReime   dasselbe in Reimform
      reaktion   wie der Gegner reagiert, nach Stufe
 
    Neue Beleidigungen: einfach eine Zeile in Anführungszeichen ergänzen,
@@ -122,6 +123,85 @@ window.BARRADIN_SPOTT = {
       riese: [
         "So groß, {n}, und trotzdem so ein kleines Hirn.",
         "{n}, die Stimmen in deinem Kopf haben sich über dich beschwert."
+      ]
+    },
+
+    /* Gereimte Beleidigungen – Barradin liebt sie */
+    eigentorReime: [
+      "Du eitler Pfau mit Pfeife, Laut' und Kinn,\ndu … du … Moment. Ich weiß, wer ich bin.",
+      "Dein Reim ist schief, dein Lied ist schlecht,\nund … oh. Das war mein Lied. Na, das ist gerecht."
+    ],
+
+    reime: {
+      schwach: [
+        "{n}, du bist … wie sag ich's … krumm,\nund … äh … ein bisschen dumm? Na, darum.",
+        "Du riechst nach Käse, {n}, und nach Socken –\nmehr Reime hab ich nicht. Ich bleib hier hocken.",
+        "{n}, du bist hässlich wie … ein Huhn?\nDas Huhn ist eigentlich ganz hübsch. Was nun?"
+      ],
+      maessig: [
+        "{n}, dein Gesicht – ein Graus, ein Schreck,\nselbst Schnecken kriechen schneller davon vom Fleck.",
+        "{n}, du bist zäh wie altes Leder\nund klug wie eine Gänsefeder.",
+        "Man sagt, du seist gefährlich, {n}, und gemein –\nich glaub, du bist nur hässlich. Und allein.",
+        "Du kämpfst so wild wie nasser Teig, {n},\nund denkst so flink wie ein morscher Zweig."
+      ],
+      gut: [
+        "Die Mutter weinte, als sie dich gebar, {n},\nund weint noch heut – das ist doch sonnenklar.",
+        "{n}, du bist ein Fehler im Gewebe der Welt,\nein Zaubertrick, der niemandem gefällt.",
+        "Wenn Dummheit Gold wär', {n}, wärst du reich,\nein König gar im ganzen Unterreich.",
+        "Dein Hirn, {n}, ist eine leere Truhe,\nund selbst die Motten darin finden keine Ruhe."
+      ],
+      stark: [
+        "{n}, du bist kein Albtraum, nur ein schlechter Traum,\nwie kalter Brei mit einem Haar im Schaum.",
+        "Selbst Demogorgon wirkt neben dir charmant, {n} –\nund der hat Tentakel statt Verstand.",
+        "Wo andre Schatten werfen, wirfst du Scham,\n{n}, du Häufchen Elend, lahm und zahm.",
+        "Du bist so finster, {n}, so voller Hass –\nund doch so lächerlich wie ein umgekipptes Fass."
+      ],
+      legende: [
+        "O {n}, du Ausgeburt von Mief und Schleim,\ndu bist zu schlecht für jeden guten Reim!\nDrum reim ich schlecht, das passt zu dir genau:\nDu bist ein Witz. Und ich bin furchtbar schlau.",
+        "Hört her, ihr Leut', ich sing vom kleinsten Wicht:\nEr heißt {n} und hat kein Gesicht –\nnur einen Fleck, wo andre eines tragen,\nund selbst der Fleck will nichts mehr dazu sagen.",
+        "{n}, man sagt, du seist ein Schrecken alter Zeit –\nich sag: ein Schrecken nur für deine Eitelkeit.\nDein Spiegel ist zerbrochen – nicht verkehrt,\ner hat sich bloß aus Notwehr gewehrt."
+      ],
+      krit: [
+        "Ich, Barradin, verkünde laut und klar:\n{n} ist das Hässlichste, das je geschah!\nDie Drachen lachen, die Dämonen auch,\nund selbst dein Schatten flieht mit flauem Bauch!",
+        "Ein Lied, so scharf wie Ezekiels Klinge:\n{n}, du bist das kläglichste der Dinge!\nDu kriechst, du stinkst, du jammerst wie ein Kind –\nnun renn nach Haus, so schnell wie Wind!"
+      ]
+    },
+
+    kreaturReime: {
+      demogorgon: [
+        "Zwei Köpfe, {n}, und doch kein einz'ger Plan –\nund Friedrich haute dir eins auf den Zahn!",
+        "Ein Dämonenfürst? Ach bitte, sei doch still, {n}:\nDu bist ein Tintenfisch, der Fürst sein will!"
+      ],
+      venomfang: [
+        "Ein grüner Drache, {n}? Eher grüner Schleim,\nhypnotisiert vom Barden – das ist mein Reim!",
+        "Dein Giftatem, {n}, ist bloß Mundgeruch,\nich hab ihn notiert in meinem Fluchbuch."
+      ],
+      blight: [
+        "{n}, du bist Gestrüpp mit roten Augen,\nzu nichts als Feuerholz scheinst du zu taugen."
+      ],
+      chasme: [
+        "Du summst und brummst, {n}, und stichst im Kreis –\ndoch Ezekiels Dolch im Aug', das war dein Preis!"
+      ],
+      vrock: [
+        "Ein Geier, {n}, der sich für schrecklich hält,\ndoch Echos Blitz hat dich ganz schnell gefällt!"
+      ],
+      kuotoa: [
+        "Ihr Fischgesichter, {n}, glotzt so stumpf und blöd,\nselbst euer Gott war ausgedacht – wie öd!"
+      ],
+      ploopploopeen: [
+        "Ploopploopeen, Blublupin – egal, wie man dich nennt:\nDein Name klingt nach Frosch, der durch die Pfütze rennt."
+      ],
+      ilvara: [
+        "Du Druidin aus Lügen, {n}, so falsch wie Gift im Tee,\nsprangst von der Brücke – und keiner rief: oh weh."
+      ],
+      glasstab: [
+        "Glasstab, so zerbrechlich, so dünn und so klar –\nein Pfeil von Friedrich, und weg warst du. Wunderbar."
+      ],
+      riese: [
+        "So groß, {n}, und doch so klein im Kopf –\nein Riesenkessel mit 'nem leeren Topf."
+      ],
+      ettercap: [
+        "{n}, du webst dein Netz so schief und krumm,\nselbst Spinnen schauen weg und sagen: dumm."
       ]
     },
 
@@ -240,6 +320,84 @@ window.BARRADIN_SPOTT = {
       giant: [
         "So big, {n}, and yet such a tiny brain.",
         "{n}, the voices in your head have filed a complaint about you."
+      ]
+    },
+
+    /* Gereimte Beleidigungen – Barradin liebt sie */
+    eigentorReime: [
+      "You vain old peacock with pipe and lute and chin,\nyou … you … wait. I know the state I'm in.",
+      "Your rhyme is crooked, your song is bad,\nand … oh. That's my song. Well, that's sad."
+    ],
+
+    reime: {
+      schwach: [
+        "{n}, you're … how do I say it … grim?\nAnd also … um … your head is dim? Hmm.",
+        "You smell like cheese, {n}, and like socks –\nthat's all I've got. I'll sit here on these rocks.",
+        "{n}, you're as ugly as … a hen?\nNo, hens are pretty. Let me start again."
+      ],
+      maessig: [
+        "{n}, your face – a fright, a scare,\neven snails would hurry out of there.",
+        "{n}, you're tough as an old boot\nand clever as a turnip root.",
+        "They say you're dangerous, {n}, and mean –\nI say you're just the ugliest thing I've seen.",
+        "You fight as wild as soggy dough, {n},\nand think as fast as a rotting log, you know."
+      ],
+      gut: [
+        "Your mother wept the day that you were born, {n},\nand still weeps every single morn.",
+        "{n}, you're a flaw in the weave of the world,\na cantrip that should never have been hurled.",
+        "If stupidity were gold, {n}, you'd be rich,\nthe Underdark's own king without a hitch.",
+        "Your brain, {n}, is an empty chest –\neven the moths inside can't get any rest."
+      ],
+      stark: [
+        "{n}, you're not a nightmare, just a bad dream,\nlike cold porridge with a hair in the cream.",
+        "Next to you, {n}, even Demogorgon seems charming –\nand he's got tentacles where brains should be. Alarming.",
+        "Where others cast a shadow, you cast shame,\n{n}, you sad and sorry, limping, lame old game.",
+        "You're so dark, {n}, so full of spite –\nand yet as silly as a toppled barrel at night."
+      ],
+      legende: [
+        "O {n}, you spawn of mould and slime,\nyou're far too bad for any decent rhyme!\nSo I'll rhyme badly – that suits you just fine:\nyou're a joke. And this whole stage is mine.",
+        "Hear, hear, good folk, I sing of the smallest wight:\nhis name is {n}, and he's a sorry sight –\nwhere others have a face, he has a stain,\nand even that stain wants to leave again.",
+        "{n}, they say you're a terror of ancient days –\nI say you terrify mirrors in a hundred ways.\nYours shattered, and that wasn't wrong:\nit just defended itself. Took it long."
+      ],
+      krit: [
+        "I, Barradin, proclaim it loud and clear:\n{n} is the ugliest thing that's ever been here!\nThe dragons laugh, the demons do as well,\nand even your own shadow says: farewell!",
+        "A song as sharp as Ezekiel's blade:\n{n}, you're the sorriest thing ever made!\nYou crawl, you stink, you whimper like a child –\nnow run off home, all weeping, wet and wild!"
+      ]
+    },
+
+    kreaturReime: {
+      demogorgon: [
+        "Two heads, {n}, and still not one plan –\nand Friedrich punched you, like a proper man!",
+        "A demon prince? Oh hush, {n}, be still:\nyou're just a squid with a crown and no skill."
+      ],
+      venomfang: [
+        "A green dragon, {n}? More like green goo,\nhypnotised by a bard – that's me, not you!"
+      ],
+      blight: [
+        "{n}, you're shrubbery with ruby eyes,\nthe perfect kindling – what a nice surprise!"
+      ],
+      chasme: [
+        "You buzz and hum, {n}, and sting in a ring –\nbut Ezekiel's dagger in your eye? Now that stings!"
+      ],
+      vrock: [
+        "A vulture, {n}, who thinks it's oh so grim,\nbut Echo's lightning fried you, limb by limb!"
+      ],
+      kuotoa: [
+        "You fish-faced fools, {n}, so dull and so dense,\neven your god was made up – no offence."
+      ],
+      ploopploopeen: [
+        "Ploopploopeen, Blublupin – whatever, who cares:\nyour name sounds like a frog falling down the stairs."
+      ],
+      ilvara: [
+        "A druid made of lies, {n}, as false as poisoned tea,\nyou jumped off a bridge – and nobody cried, not me."
+      ],
+      glasstaff: [
+        "Glasstaff, so fragile, so thin and so clear –\none arrow from Friedrich, and you disappeared."
+      ],
+      giant: [
+        "So tall, {n}, and yet so small inside your head –\nthe voices in there would rather talk to me instead."
+      ],
+      ettercap: [
+        "{n}, you weave your web so crooked and so thin,\neven spiders look away and won't come in."
       ]
     },
 
