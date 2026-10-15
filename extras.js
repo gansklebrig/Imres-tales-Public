@@ -264,10 +264,10 @@
 .rex-guckt img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 6px 14px rgba(0,0,0,.6)); }
 .rex-guckt.unten { bottom: 0; transform: translateY(100%); }
 .rex-guckt.unten.da { transform: translateY(42%); }
-.rex-guckt.links { left: 0; transform: translateX(-100%) rotate(25deg); }
-.rex-guckt.links.da { transform: translateX(-38%) rotate(25deg); }
-.rex-guckt.rechts { right: 0; transform: translateX(100%) rotate(-25deg); }
-.rex-guckt.rechts.da { transform: translateX(38%) rotate(-25deg); }
+.rex-guckt.links { left: 0; transform: translateX(-115%) rotate(10deg); }
+.rex-guckt.links.da { transform: translateX(-16%) rotate(10deg); }
+.rex-guckt.rechts { right: 0; transform: translateX(115%) rotate(-10deg); }
+.rex-guckt.rechts.da { transform: translateX(16%) rotate(-10deg); }
 .rex-guckt.hops img { animation: hops .45s ease; }
 @keyframes hops { 40% { transform: translateY(-14px) } }
 
