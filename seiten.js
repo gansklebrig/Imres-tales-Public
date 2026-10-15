@@ -240,7 +240,10 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 @keyframes kenburns { from { transform: scale(1.04) translate(0, 0); } to { transform: scale(1.14) translate(-2%, -1.5%); } }
 .halle-tafel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(16,14,21,.15) 35%, rgba(16,14,21,.92) 100%); }
 .halle-name {
-  position: absolute; z-index: 1; left: 0; right: 0; top: 4.2rem; text-align: center; padding: 0 .4rem;
+  position: absolute; z-index: 1; left: 0; right: 0; top: 4.2rem; text-align: center; padding: .5rem .9rem .55rem;
+  width: fit-content; max-width: calc(100% - .8rem); margin: 0 auto; box-sizing: border-box;
+  border: 1px solid rgba(224,160,70,.7); background: rgba(16,14,21,.6); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  box-shadow: inset 0 0 0 3px rgba(16,14,21,.35), 0 4px 18px rgba(0,0,0,.45);
   font-family: var(--display); font-size: clamp(1rem, 2.4vw, 1.7rem); color: var(--vellum); line-height: 1.05;
   opacity: 0; transform: translateY(-8px); transition: opacity .6s .15s, transform .6s .15s; text-shadow: 0 2px 10px rgba(0,0,0,.8);
 }
