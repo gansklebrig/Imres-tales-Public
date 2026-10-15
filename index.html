@@ -252,7 +252,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .hero-entry + .hero-entry { margin-top: clamp(4rem, 10vw, 7rem); }
 .hero-entry:nth-of-type(even) figure { order: 2; }
 .hero-entry figure { margin: 0; position: sticky; top: 4.5rem; }
-.hero-entry figure img { width: 100%; display: block; border: 1px solid var(--line); transition: box-shadow .8s ease; }
+.hero-entry figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line); transition: box-shadow .8s ease; }
 .hero-entry figure.wide img { aspect-ratio: 4 / 5; object-fit: cover; object-position: 56% 50%; }
 .hero-entry figure figcaption { font-size: .8rem; color: var(--ash); font-style: italic; margin-top: .5rem; }
 .spotlight figure img, .companion.spotlight img { box-shadow: 0 0 0 2px var(--ember), 0 0 40px rgba(224,160,70,.45); }
@@ -347,7 +347,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 }
 
 .chapter .prose figure { margin: 1.4rem 0; }
-.chapter .prose figure img { width: 100%; display: block; border: 1px solid var(--line); }
+.chapter .prose figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
 .chapter .prose figure figcaption { font-size: .82rem; color: var(--ash); font-style: italic; margin-top: .5rem; }
 .chapter .prose figure.schmal { float: right; width: min(10rem, 38%); margin: .2rem 0 .8rem 1.4rem; }
 .chapter .prose figure.schmal.links { float: left; width: min(13rem, 42%); margin: .2rem 1.4rem .8rem 0; }
@@ -834,7 +834,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <script src="spott.js" defer></script>
 <script src="extras.js" defer></script>
 <script src="lautenwerk.js" defer></script>
-<script>document.write('<script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="bildmasse.js?v=' + Date.now() + '"><\/script><script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
   /* Gemeinsame Questtafel: Zugangsdaten des Supabase-Projekts (leer = jeder Browser speichert für sich) */
@@ -942,6 +942,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  /* Breite/Höhe bekannter Bilder, damit beim Nachladen nichts springt */
+  const masse = f => { const m = (window.BILDMASSE || {})[f]; return m ? ' width="' + m[0] + '" height="' + m[1] + '"' : ""; };
+  /* Bilder schon weit vor dem Sichtbereich laden, damit sie beim Scrollen bereit sind */
+  const vorlader = window.IntersectionObserver ? new IntersectionObserver(eintraege => eintraege.forEach(e => {
+    if (e.isIntersecting) { e.target.loading = "eager"; vorlader.unobserve(e.target); }
+  }), { rootMargin: "2500px 0px 2500px 0px" }) : null;
+  function vorladen(wurzel) { if (vorlader && wurzel) wurzel.querySelectorAll('img[loading="lazy"]').forEach(i => vorlader.observe(i)); }
   const absaetze = list => (list || []).map(p => "<p>" + p + "</p>").join("");
   const slug = t => String(t).toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const abschnittId = (nr, titel) => "kapitel-" + slug(nr) + "-" + slug(titel);
@@ -1404,14 +1411,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     /* Gefährten */
     $("heroes").innerHTML = D.helden.map(h => {
       let html = '<article class="hero-entry" id="' + h.id + '">' +
-        '<figure' + (h.breitbild ? ' class="wide"' : "") + '><img src="' + esc(h.bild) + '" alt="' + esc(h.bildAlt) + '">' +
+        '<figure' + (h.breitbild ? ' class="wide"' : "") + '><img src="' + esc(h.bild) + '" alt="' + esc(h.bildAlt) + '"' + masse(h.bild) + ' loading="lazy" decoding="async">' +
         (h.bildtext ? "<figcaption>" + esc(h.bildtext) + "</figcaption>" : "") + "</figure>" +
         '<div class="entry-text"><h3>' + esc(h.name) + '</h3><p class="epithet">' + esc(h.beiname) + "</p>" +
         '<div class="prose">' + absaetze(h.absaetze) + "</div>";
       if (h.geheimnis) html += '<p class="sealed">' + esc(h.geheimnis) + "</p>";
       if (h.begleiter) {
         const b = h.begleiter;
-        html += '<div class="companion" id="' + b.id + '"><img src="' + esc(b.bild) + '" alt="' + esc(b.bildAlt) + '"><div><p class="label">' + esc(T.tierbegleiter) + "</p><h4>" + esc(b.name) + "</h4>" + absaetze(b.absaetze) + "</div></div>";
+        html += '<div class="companion" id="' + b.id + '"><img src="' + esc(b.bild) + '" alt="' + esc(b.bildAlt) + '" loading="lazy" decoding="async"><div><p class="label">' + esc(T.tierbegleiter) + "</p><h4>" + esc(b.name) + "</h4>" + absaetze(b.absaetze) + "</div></div>";
       }
       return html + "</div></article>";
     }).join("");
@@ -1436,7 +1443,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       if (p.charAt(0) === "!") {
         const teil = p.slice(1).split("|");
         const art = (teil[2] || "").trim();
-        return '<figure' + (art ? ' class="' + esc(art) + '"' : "") + '><img src="' + esc(teil[0].trim()) + '" alt="' + esc(teil[1] || "") + '" loading="lazy">' + (teil[1] ? "<figcaption>" + esc(teil[1]) + "</figcaption>" : "") + "</figure>";
+        return '<figure' + (art ? ' class="' + esc(art) + '"' : "") + '><img src="' + esc(teil[0].trim()) + '" alt="' + esc(teil[1] || "") + '"' + masse(teil[0].trim()) + ' loading="lazy" decoding="async">' + (teil[1] ? "<figcaption>" + esc(teil[1]) + "</figcaption>" : "") + "</figure>";
       }
       if (p.indexOf("## ") !== 0) return "<p>" + p + "</p>";
       const t = p.slice(3).trim();
@@ -1470,7 +1477,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     const tag = s => ({ besiegt: ["slain", T.tagSlain], geruecht: ["rumor", T.tagRumor], gefallen: ["fallen", T.tagFallen] }[s] || ["seen", T.tagSeen]);
     $("beasts").innerHTML = tiere.map(t => {
       const g = tag(t.status);
-      return '<article class="beast">' + (t.bild ? '<img src="' + esc(t.bild) + '" alt="' + esc(t.name) + '">' : '<div class="beast-seal" aria-hidden="true">' + esc(String(t.name).replace(/^(Der|Die|Das|The) /, "").charAt(0)) + "</div>") +
+      return '<article class="beast">' + (t.bild ? '<img src="' + esc(t.bild) + '" alt="' + esc(t.name) + '" loading="lazy" decoding="async">' : '<div class="beast-seal" aria-hidden="true">' + esc(String(t.name).replace(/^(Der|Die|Das|The) /, "").charAt(0)) + "</div>") +
         '<div><span class="tag ' + g[0] + '">' + esc(g[1]) + "</span>" +
         "<h3>" + esc(t.name) + "</h3>" + (t.ort ? '<p class="ort">' + esc(t.ort) + "</p>" : "") +
         (t.text ? "<p>" + esc(t.text) + "</p>" : "") + "</div></article>";
@@ -1519,6 +1526,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         "</div></article>"
       ).join("") + "</div></div>"
     ).join("");
+    ["chapters", "heroes", "beasts", "npcs", "kunst"].forEach(id => vorladen($(id)));
   }
 
   /* ---------- Klicks (einmal angemeldet) ---------- */
