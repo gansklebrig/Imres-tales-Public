@@ -308,6 +308,58 @@
     }
     if (ctx.state === "suspended") ctx.resume();
   }
+  /* ---------- Vorberechnete Klänge ----------
+     Aufwendige Instrumente werden einmal im Hintergrund (OfflineAudioContext) gerendert
+     und danach nur noch als fertiger Puffer abgespielt – das spart pro Note dutzende Knoten. */
+  const klangCache = new Map(), inArbeit = new Set();
+  let rendert = false;
+  function vorrendern(key, laenge, bauen, spitze) {
+    if (!ctx || rendert || klangCache.has(key) || inArbeit.has(key)) return;
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OAC) return;
+    inArbeit.add(key);
+    const sr = ctx.sampleRate, off = new OAC(1, Math.ceil(sr * laenge), sr);
+    const altCtx = ctx, altGain = Object.assign({}, spurGain), altEcho = illusionEcho;
+    ctx = off; rendert = true; illusionEcho = null;
+    const ziel = off.createGain(); ziel.connect(off.destination);
+    IDS.forEach(k => { spurGain[k] = ziel; });
+    try { bauen(); } catch (_) {} finally { ctx = altCtx; Object.assign(spurGain, altGain); illusionEcho = altEcho; rendert = false; }
+    const fertig = buf => {
+      if (buf) { /* auf feste Spitzenlautstärke bringen – so kann kein Instrument übersteuern */
+        const d = buf.getChannelData(0); let max = 0;
+        for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > max) max = a; }
+        if (max > 0) { const f = spitze / max; for (let i = 0; i < d.length; i++) d[i] *= f; }
+        klangCache.set(key, buf);
+      }
+      inArbeit.delete(key);
+    };
+    const pr = off.startRendering();
+    if (pr && pr.then) pr.then(fertig, () => inArbeit.delete(key));
+    else off.oncomplete = e => fertig(e.renderedBuffer);
+  }
+  function abspielen(buf, zeit, ziel, laut, dauer) {
+    const src = ctx.createBufferSource(), g = ctx.createGain();
+    src.buffer = buf; g.gain.value = laut;
+    src.connect(g); g.connect(ziel); src.start(zeit);
+    if (dauer) {
+      const ende = Math.min(zeit + dauer, zeit + buf.duration - .15);
+      g.gain.setValueAtTime(laut, ende); g.gain.linearRampToValueAtTime(0, ende + .12);
+      src.stop(ende + .15);
+    }
+    return g;
+  }
+  const MEL_SPITZE = { glocken: .3, fidel: .26, drehleier: .22, schalmei: .2, dudelsack: .22, illusion: .26 };
+  const MEL_LAENGE = { glocken: 1.6, fidel: 3.4, drehleier: 3.3, schalmei: 3.3, dudelsack: 3.3, illusion: 3.5 };
+  function klaengeVorbereiten() {
+    if (!ctx) return;
+    const art = S.instrument;
+    if (MEL_LAENGE[art]) for (let z = 0; z < 8; z++) {
+      const f = midiHz(tonMidi("melodie", z, S));
+      vorrendern(art + "|" + f.toFixed(2), MEL_LAENGE[art], () => melodieSpielen(f, 0, 3, 1), MEL_SPITZE[art]);
+    }
+    for (let v = 0; v < 4; v++) vorrendern("kette" + v, .9, () => kettenRasselnLive(0, 1), .38);
+    [.32, 1.75, .9].forEach((l, a) => vorrendern("rex" + a, l, () => rexLautLive(0, a, 1), [.42, .34, .4][a]));
+  }
   function saite(freq, art) {
     const key = art + freq.toFixed(2);
     if (saitenCache.has(key)) return saitenCache.get(key);
@@ -334,6 +386,7 @@
     const sa = { laute: "mel", harfe: "harfe", mandoline: "mandoline" }[S.instrument];
     if (sa) for (let z = 0; z < 8; z++) saite(midiHz(tonMidi("melodie", z, S)), sa);
     for (let z = 0; z < BASS_STUFEN.length; z++) saite(midiHz(tonMidi("bass", z, S)), "bass");
+    klaengeVorbereiten();
   }
   function zupf(freq, zeit, art, laut) {
     const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -421,9 +474,18 @@
     const l = laut || 1, ziel = spurGain.melodie, art = S.instrument;
     if (art === "laute" || art === "harfe") { zupf(freq, zeit, art === "harfe" ? "harfe" : "mel", l); return; }
     if (art === "mandoline") { /* Tremolo: schnell wiederholt angeschlagen */
-      const n = Math.max(1, Math.min(8, Math.round(Math.max(.12, dauer || .2) / .07)));
-      for (let k = 0; k < n; k++) zupf(freq, zeit + k * .07, "mandoline", l * (k ? .7 : 1));
+      const n = Math.max(1, Math.min(6, Math.round(Math.max(.12, dauer || .2) / .08)));
+      for (let k = 0; k < n; k++) zupf(freq, zeit + k * .08, "mandoline", l * (k ? .7 : 1));
       return;
+    }
+    if (!rendert) {
+      const buf = klangCache.get(art + "|" + freq.toFixed(2));
+      if (buf) {
+        const g = abspielen(buf, zeit, ziel, l, art === "glocken" ? 0 : Math.max(.18, dauer || .3));
+        if (art === "illusion" && illusionEcho) g.connect(illusionEcho);
+        return;
+      }
+      klaengeVorbereiten();
     }
     if (art === "glocken") {
       [[1, .5, 1.4], [2.76, .18, .5], [5.4, .08, .25], [8.93, .04, .12]].forEach(([v, a, d]) => {
@@ -435,14 +497,15 @@
       return;
     }
     const d = Math.max(.18, dauer || .3);
-    const g = ctx.createGain(), sum = ctx.createGain(), lp = ctx.createBiquadFilter();
-    lp.type = "lowpass"; sum.connect(lp); lp.connect(g); g.connect(ziel);
+    const g = ctx.createGain(), sum = ctx.createGain(), lp = ctx.createBiquadFilter(), leise = ctx.createGain();
+    leise.gain.value = rendert ? 1 : .35;
+    lp.type = "lowpass"; sum.connect(lp); lp.connect(g); g.connect(leise); leise.connect(ziel);
     let oscs = [], ende;
     if (art === "fidel") { /* gestrichen: Sägezahn mit Korpus-Resonanzen und Vibrato */
       const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = freq; oscs = [o];
       const roh = ctx.createGain(); roh.gain.value = .5; o.connect(roh);
       formant(roh, sum, [[280, 1.2, 1.1], [520, 1.5, 1.2], [1400, 2, .9], [3000, 2.5, .5]]);
-      lp.frequency.value = 4500;
+      lp.frequency.value = 3200;
       ende = huelle(g, zeit, d, .42 * l, .09, .16);
       vibrato(oscs, zeit, ende, 5.6, freq * .007, .25);
       rauschStoss(zeit, ziel, "bandpass", 2400, 2, .05 * l, .12);
@@ -451,26 +514,26 @@
       o.frequency.value = freq; o2.frequency.value = freq * 1.004; oscs = [o, o2];
       const roh = ctx.createGain(); roh.gain.value = .32; o.connect(roh); o2.connect(roh);
       const schnarr = ctx.createGain(), tr = ctx.createOscillator(), tg = ctx.createGain();
-      tr.type = "square"; tr.frequency.value = 28; tg.gain.value = .35; schnarr.gain.value = .65;
+      tr.type = "sine"; tr.frequency.value = 28; tg.gain.value = .18; schnarr.gain.value = .65;
       tr.connect(tg); tg.connect(schnarr.gain); roh.connect(schnarr);
       formant(schnarr, sum, [[700, 1.4, 1], [1250, 3, 1.3], [2600, 3, .6]]);
-      lp.frequency.value = 3800;
+      lp.frequency.value = 2600;
       ende = huelle(g, zeit, d, .4 * l, .04, .1);
       tr.start(zeit); tr.stop(ende);
     } else if (art === "schalmei") { /* Doppelrohrblatt: näselnd und kräftig */
       const o = ctx.createOscillator(), o2 = ctx.createOscillator(); o.type = "square"; o2.type = "sawtooth";
       o.frequency.value = freq; o2.frequency.value = freq; oscs = [o, o2];
       const roh = ctx.createGain(); roh.gain.value = .28; o.connect(roh); o2.connect(roh);
-      formant(roh, sum, [[1100, 4, 1.6], [2400, 4, .9]]);
-      lp.frequency.value = 3600;
+      formant(roh, sum, [[1100, 3, 1.1], [2400, 3, .5]]);
+      lp.frequency.value = 2600;
       ende = huelle(g, zeit, d, .36 * l, .025, .06);
       vibrato(oscs, zeit, ende, 6.2, freq * .004, .15);
     } else if (art === "dudelsack") { /* Spielpfeife mit kleinem Vorschlag */
       const o = ctx.createOscillator(); o.type = "sawtooth"; oscs = [o];
       o.frequency.setValueAtTime(freq * 1.335, zeit); o.frequency.setValueAtTime(freq, zeit + .035);
       const roh = ctx.createGain(); roh.gain.value = .45; o.connect(roh);
-      formant(roh, sum, [[900, 3, 1.3], [1900, 3.5, 1], [3300, 4, .5]]);
-      lp.frequency.value = 4200;
+      formant(roh, sum, [[900, 2.5, 1.1], [1900, 3, .7], [3300, 3, .25]]);
+      lp.frequency.value = 3000;
       ende = huelle(g, zeit, d, .38 * l, .012, .03);
     } else { /* Flöte der Illusionen: weich, schimmernd und mit Echo */
       const o = ctx.createOscillator(), o2 = ctx.createOscillator(); o.type = "sine"; o2.type = "triangle";
@@ -485,29 +548,41 @@
     oscs.forEach(o => { o.start(zeit); o.stop(ende); });
   }
 
-  /* Ketten: viele kleine Metallglieder, die gegeneinanderschlagen (inharmonische Teiltöne) */
+  /* Ketten: schwere Eisenglieder – tiefe, inharmonische Teiltöne, dumpfer Anschlag */
   function kettenGlied(zeit, grund, laut) {
-    [[1, 1, .09], [2.76, .55, .06], [5.4, .3, .04], [8.93, .16, .025]].forEach(([v, a, d]) => {
+    [[1, 1, .22], [2.32, .6, .16], [4.25, .32, .1], [6.63, .14, .06]].forEach(([v, a, d]) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = "sine"; o.frequency.value = grund * v * (1 + (Math.random() - .5) * .02);
-      g.gain.setValueAtTime(a * laut, zeit); g.gain.exponentialRampToValueAtTime(.0004, zeit + d * (1 + Math.random() * .6));
-      o.connect(g); g.connect(spurGain.ketten); o.start(zeit); o.stop(zeit + d * 1.7 + .02);
+      o.type = "sine"; o.frequency.value = grund * v * (1 + (Math.random() - .5) * .03);
+      g.gain.setValueAtTime(a * laut, zeit); g.gain.exponentialRampToValueAtTime(.0004, zeit + d * (1 + Math.random() * .5));
+      o.connect(g); g.connect(spurGain.ketten); o.start(zeit); o.stop(zeit + d * 1.6 + .02);
     });
-    rauschStoss(zeit, spurGain.ketten, "highpass", 5000, .7, .12 * laut, .012);
+    rauschStoss(zeit, spurGain.ketten, "bandpass", 1800, 1.2, .2 * laut, .02);
   }
   function kettenRasseln(zeit, laut) {
-    const l = laut || 1, n = 6 + Math.floor(Math.random() * 4);
+    const v = klangCache.get("kette" + Math.floor(Math.random() * 4)) || klangCache.get("kette0");
+    if (v) abspielen(v, zeit, spurGain.ketten, laut || 1, 0); else { kettenRasselnLive(zeit, laut); klaengeVorbereiten(); }
+  }
+  function kettenRasselnLive(zeit, laut) {
+    const l = laut || 1, n = 4 + Math.floor(Math.random() * 3);
     let z = zeit;
     for (let i = 0; i < n; i++) {
-      kettenGlied(z, 1500 + Math.random() * 1700, (.16 - i * .012) * l);
-      z += .012 + Math.random() * .03;
+      kettenGlied(z, 320 + Math.random() * 380, (.2 - i * .02) * l);
+      z += .035 + Math.random() * .05;
     }
-    /* dumpfes Schleifen der schweren Glieder */
-    rauschStoss(zeit, spurGain.ketten, "bandpass", 700, 1.2, .1 * l, .18);
+    /* dumpfes Aufschlagen und Schleifen der schweren Glieder */
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(140, zeit); o.frequency.exponentialRampToValueAtTime(70, zeit + .15);
+    g.gain.setValueAtTime(.5 * l, zeit); g.gain.exponentialRampToValueAtTime(.001, zeit + .2);
+    o.connect(g); g.connect(spurGain.ketten); o.start(zeit); o.stop(zeit + .22);
+    rauschStoss(zeit, spurGain.ketten, "bandpass", 450, 1, .16 * l, .3);
   }
 
   /* Rex: Bellen mit Kehl-Formanten, langgezogenes Heulen, tiefes Knurren */
   function rexLaut(zeit, art, laut) {
+    const b = klangCache.get("rex" + art);
+    if (b) abspielen(b, zeit, spurGain.rex, laut || 1, 0); else { rexLautLive(zeit, art, laut); klaengeVorbereiten(); }
+  }
+  function rexLautLive(zeit, art, laut) {
     const l = laut || 1, ziel = spurGain.rex;
     if (art === 1) { /* Auuuuu! */
       const o = ctx.createOscillator(), o2 = ctx.createOscillator(), sum = ctx.createGain(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
