@@ -255,6 +255,7 @@ window.INHALT = {
         "## Am Hof von König Horga",
         "!koenig-horga.webp|König Horga Stahl V. Sein Bart allein hat mehr Würde als ganz Phandalin.|schmal",
         "Die Soldaten brachten uns in eine Feste, vor König Horga Stahl V. Wie es sich für einen Barden gehört, stimmte ich einen Gesang an und erzählte dem König von Demogorgon und davon, wie wir seinen Sohn gerettet hatten. Der König gewährte uns, in der Stadt zu verweilen. <em class=\"aside\">Ob das am Gesang lag oder an der Rettung seines Sohnes, lassen wir einfach offen.</em>",
+        "!audienz-horga.jpg|Audienz bei König Horga Stahl V. Kardal kniet vor seinem Vater, und wir versuchen, nicht allzu staubig auszusehen.",
         "Leicht fiel uns der Aufenthalt allerdings nicht. Die Luft hier unten setzte uns zu, vor allem Echo, der mit deutlichen Zeichen von Erschöpfung aufwachte.",
         "## Einkaufen in Gracklstugh",
         "Was tut eine Heldengruppe in einer fremden Stadt? Richtig: einkaufen. Wir deckten uns mit Heiltränken ein, und ich erstand eine Flöte der Illusionen und dazu ein paar Zaubertränke. <em class=\"aside\">Man weiß nie, wann man ein Publikum verzaubern muss. Oder einen Gegner.</em>",

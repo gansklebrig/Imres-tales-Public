@@ -248,6 +248,7 @@ window.INHALT_EN = {
         "## At the Court of King Horga",
         "!koenig-horga.webp|King Horga Stahl V. His beard alone has more dignity than all of Phandalin.|schmal",
         "The soldiers brought us to a keep, before King Horga Stahl V. As befits a bard, I struck up a song and told the king of Demogorgon and of how we had rescued his son. The king granted us leave to stay in the city. <em class=\"aside\">Whether that was down to the song or to the rescue of his son, let us leave open.</em>",
+        "!audienz-horga.jpg|An audience with King Horga Stahl V. Kardal kneels before his father, and we try not to look too dusty.",
         "The stay was not easy on us, though. The air down here took its toll, on Echo most of all, who woke with clear signs of exhaustion.",
         "## Shopping in Gracklstugh",
         "What does a band of heroes do in a strange city? Exactly: go shopping. We stocked up on healing potions, and I acquired a flute of illusions and a few magic potions besides. <em class=\"aside\">You never know when you will need to enchant an audience. Or an enemy.</em>",
