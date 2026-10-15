@@ -165,8 +165,7 @@ window.INHALT = {
         "Echo wollte ihr schon nachsetzen und die Verfolgung beginnen, doch ich hielt ihn zurück und deutete auf seine blutverschmierte Schulter und danach in Richtung der beiden Gefangenen.",
         "Während Echo anfing, seine Wunden zu heilen, schnitt Friedrich die beiden Gefangenen los. Beide sahen sehr glücklich aus, befreit worden zu sein, und sie erzählten uns, dass sie seit Tagen hier gefangen gehalten wurden, um Informationen über Gundren und die Allianz der Lords herauszufinden! Der Gefangene stellte sich als Gundrens Zwillingsbruder Nundro heraus. <em class=\"aside\">Die beiden sehen wirklich exakt gleich aus und tragen sogar dieselbe Kleidung!</em> Die andere Gefangene stellte sich als Zilda vor, eine Söldnerin, die für Gundren arbeitete.",
         "## Gundrens Bruder",
-        "Der Gefangene war gerettet, und als er sich vorstellte, staunte die ganze Truppe nicht schlecht: Es war Nundro, Gundrens Zwillingsbruder. <em class=\"aside\">Nundro, nicht Nando … oder?</em>",
-        "Gemeinsam mit ihm kehrten wir zu Gundren zurück, und der schloss seinen Bruder überglücklich in die Arme. Ich gebe zu, bei diesem Anblick wurde selbst mir ein wenig warm ums Herz.",
+        "Gemeinsam mit Nundro kehrten wir zu Gundren zurück, und der schloss seinen Bruder überglücklich in die Arme. Ich gebe zu, bei diesem Anblick wurde selbst mir ein wenig warm ums Herz.",
         "## Die magische Schmiede",
         "Dann wurde es ernst. Gundren gab uns den Auftrag, auf den alles hinausgelaufen war: Wir sollten die magische Schmiede finden.",
         "Der Weg führte uns in die alte, verlassene Mine, in der sie verborgen sein sollte. Wir fanden unseren Weg durch die riesige Höhle, kletterten Schluchten hinab und schlichen durch bröcklige, spinnwebenverhangene Gänge, die vor langer Zeit gebaut wurden.",
@@ -418,6 +417,7 @@ window.INHALT = {
   nsc: [
     { gruppe: "Die Oberwelt", name: "Gundren", status: "verbuendet", rolle: "Zwerg, Händler und unser erster Auftraggeber", text: "Hat uns mit einem Brief zusammengetrommelt und uns auf die Spur der magischen Schmiede gesetzt. Kennt jeden, der etwas zu sagen hat." },
     { gruppe: "Die Oberwelt", name: "Nundro", status: "verbuendet", rolle: "Gundrens Zwillingsbruder", text: "Saß namenlos im Wachturm gefangen, bis wir ihn befreit haben. Nundro, nicht Nando." },
+    { gruppe: "Die Oberwelt", name: "Zilda", status: "verbuendet", rolle: "Söldnerin in Gundrens Diensten", text: "Saß zusammen mit Nundro im Wachturm gefesselt, wo beide tagelang über Gundren und die Allianz der Lords ausgefragt wurden. Bis wir die Tür aufstießen." },
     { gruppe: "Die Oberwelt", name: "Captain Dolgrimson", status: "verbuendet", rolle: "Leiter der Allianz der Lords, Neverwinter", text: "Hat uns erst vertröstet, dann in die Allianz aufgenommen und prompt nach Donnerbaum geschickt." },
     { gruppe: "Die Oberwelt", name: "Der Bürgermeister von Phandalin", status: "neutral", rolle: "Phandalin", text: "Hat am Ende bezahlt. Uns wiedersehen will er vermutlich trotzdem nicht." },
     { gruppe: "Die Oberwelt", name: "Glasstab", status: "tot", rolle: "Anführer der Roten Roben", text: "Hielt Phandalin in Angst und diente der Spinne. Fiel durch Friedrichs Pfeil, nachdem Barradin ihn aus dem Geheimgang zurückgezerrt hatte." },

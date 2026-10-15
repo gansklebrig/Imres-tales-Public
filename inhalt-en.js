@@ -158,8 +158,7 @@ window.INHALT_EN = {
         "Echo wanted to go after her and start the chase, but I held him back and pointed at his bloodied shoulder and then towards the two prisoners.",
         "While Echo began to heal his wounds, Friedrich cut the two prisoners loose. Both looked very happy to have been freed, and they told us that they had been held here for days so that their captors could find out about Gundren and the Lords' Alliance! The prisoner turned out to be Gundren's twin brother Nundro. <em class=\"aside\">The two really do look exactly alike and even wear the same clothes!</em> The other prisoner introduced herself as Zilda, a mercenary who worked for Gundren.",
         "## Gundren's Brother",
-        "The prisoner was saved, and when he introduced himself, the whole band was astonished: it was Nundro, Gundren's twin brother. <em class=\"aside\">Nundro, not Nando … right?</em>",
-        "Together with him we returned to Gundren, who swept his brother into his arms with overflowing joy. I admit, even I felt a little warm around the heart at the sight.",
+        "Together with Nundro we returned to Gundren, who swept his brother into his arms with overflowing joy. I admit, even I felt a little warm around the heart at the sight.",
         "## The Magic Forge",
         "Then things got serious. Gundren gave us the task everything had been leading up to: we were to find the magic forge.",
         "The way led us into the old, abandoned mine where it was said to be hidden. We found our way through the enormous cavern, climbed down ravines and crept through crumbling, cobweb-draped corridors built long, long ago.",
@@ -393,6 +392,7 @@ window.INHALT_EN = {
   nsc: [
     { gruppe: "The Surface", name: "Gundren", status: "verbuendet", rolle: "Dwarf, merchant and our first employer", text: "Rounded us up with a letter and set us on the trail of the magic forge. Knows everyone who matters." },
     { gruppe: "The Surface", name: "Nundro", status: "verbuendet", rolle: "Gundren's twin brother", text: "Sat nameless in the watchtower until we freed him. Nundro, not Nando." },
+    { gruppe: "The Surface", name: "Zilda", status: "verbuendet", rolle: "Mercenary in Gundren's service", text: "Sat bound in the watchtower alongside Nundro, where both were questioned for days about Gundren and the Lords' Alliance. Until we kicked the door in." },
     { gruppe: "The Surface", name: "Captain Dolgrimson", status: "verbuendet", rolle: "Head of the Lords' Alliance, Neverwinter", text: "First put us off, then welcomed us into the Alliance and promptly sent us to Thundertree." },
     { gruppe: "The Surface", name: "The Mayor of Phandalin", status: "neutral", rolle: "Phandalin", text: "Paid up in the end. Probably never wants to see us again, though." },
     { gruppe: "The Surface", name: "Glasstaff", status: "tot", rolle: "Leader of the Red Robes", text: "Kept Phandalin in fear and served the Spider. Fell to Friedrich's arrow after Barradin dragged him back out of the secret passage." },
