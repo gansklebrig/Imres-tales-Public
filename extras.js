@@ -264,10 +264,10 @@
 .rex-guckt img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 6px 14px rgba(0,0,0,.6)); }
 .rex-guckt.unten { bottom: 0; transform: translateY(100%); }
 .rex-guckt.unten.da { transform: translateY(42%); }
-.rex-guckt.links { left: 0; transform: translateX(-115%) rotate(10deg); }
-.rex-guckt.links.da { transform: translateX(-16%) rotate(10deg); }
-.rex-guckt.rechts { right: 0; transform: translateX(115%) rotate(-10deg); }
-.rex-guckt.rechts.da { transform: translateX(16%) rotate(-10deg); }
+.rex-guckt.links { left: 0; transform: translateX(-100%) rotate(25deg); }
+.rex-guckt.links.da { transform: translateX(-38%) rotate(25deg); }
+.rex-guckt.rechts { right: 0; transform: translateX(100%) rotate(-25deg); }
+.rex-guckt.rechts.da { transform: translateX(38%) rotate(-25deg); }
 .rex-guckt.hops img { animation: hops .45s ease; }
 @keyframes hops { 40% { transform: translateY(-14px) } }
 
@@ -658,8 +658,19 @@ html, body { overflow-x: clip; }
     const b = document.createElement("button");
     b.type = "button"; b.className = "rex-guckt unten"; b.hidden = true;
     b.setAttribute("aria-label", t().rexLabel);
-    b.innerHTML = '<img src="rex-guckt.webp" alt="" width="88" height="88">';
+    b.innerHTML = '<img src="rex-guckt.webp" alt="" width="88" height="88" loading="eager" decoding="sync">';
     document.body.appendChild(b);
+    const bild = b.querySelector("img");
+    /* Rex erst zeigen, wenn sein Bild wirklich geladen und dekodiert ist –
+       sonst schiebt sich nur ein leerer, durchsichtiger Rahmen ins Bild */
+    let bereit = false;
+    const laden = () => {
+      const tmp = new Image();
+      tmp.onload = () => { bild.src = tmp.src; (bild.decode ? bild.decode() : Promise.resolve()).then(() => { bereit = true; }, () => { bereit = true; }); };
+      tmp.onerror = () => { bereit = false; };
+      tmp.src = "rex-guckt.webp" + (laden.n++ ? "?v=" + laden.n : "");
+    };
+    laden.n = 0; laden();
     let wegTimer, gefunden = parseInt(lies("imres-rex", "0"), 10) || 0;
 
     function weg() {
@@ -668,6 +679,7 @@ html, body { overflow-x: clip; }
     }
     function gucken() {
       if (document.hidden || dialogOffen()) { plane(); return; }
+      if (!bereit || !bild.complete || !bild.naturalWidth) { bereit = false; laden(); setTimeout(gucken, 8000); return; }
       b.className = "rex-guckt " + zufall(["unten", "unten", "links", "rechts"]);
       b.style.left = b.style.right = b.style.top = b.style.bottom = "";
       if (b.classList.contains("unten")) b.style.left = Math.round(10 + Math.random() * (window.innerWidth - 120)) + "px";
