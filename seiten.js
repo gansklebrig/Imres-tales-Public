@@ -23,6 +23,7 @@
     de: {
       uebersicht: "← Übersicht", zurueck: "Zurück", weiter: "Weiter",
       weiterlesen: (nr, titel) => "<small>Zuletzt geschehen</small>Kapitel " + nr + " · " + titel + "<b>Weiterlesen →</b>",
+      zuletzt: "Zuletzt geschehen", kapitelWort: "Kapitel", weiterWort: "Weiterlesen →",
       runter: "Zur Übersicht",
       namen: { chronik: "Die Chronik", questtafel: "Die Questtafel", reise: "Die Reise", gefaehrten: "Die Gefährten", nsc: "Bekanntschaften", bestiarium: "Das Bestiarium", taverne: "Die Taverne", lautenwerk: "Barradins Lautenwerk" },
       texte: {
@@ -40,6 +41,7 @@
     en: {
       uebersicht: "← Overview", zurueck: "Back", weiter: "Next",
       weiterlesen: (nr, titel) => "<small>Most recently</small>Chapter " + nr + " · " + titel + "<b>Read on →</b>",
+      zuletzt: "Most recently", kapitelWort: "Chapter", weiterWort: "Read on →",
       runter: "To the overview",
       namen: { chronik: "The Chronicle", questtafel: "The Quest Board", reise: "The Journey", gefaehrten: "The Companions", nsc: "Acquaintances", bestiarium: "The Bestiary", taverne: "The Tavern", lautenwerk: "Barradin's Lute Machine" },
       texte: {
@@ -126,7 +128,7 @@
   window.addEventListener("hashchange", () => route(location.hash));
 
   /* ---------- Halle der Gefährten ---------- */
-  let halleTimer = null, halleAktiv = 0, halleHover = false;
+  let halleTimer = null, halleAktiv = 0, halleHover = false, halleHelden = [];
   function halleBauen() {
     const D = daten(), box = $("halle");
     const helden = [];
@@ -136,8 +138,16 @@
     box.innerHTML = helden.map((h, i) =>
       '<a class="halle-tafel" href="#' + esc(h.id) + '" style="--i:' + i + '">' +
         '<img src="' + esc(h.bild) + '" alt="' + esc(h.name) + '" style="object-position:' + esc(h.fries || "50% 30%") + '">' +
-        '<span class="halle-name">' + esc(h.name) + "<small>" + esc(h.rolle || "") + "</small></span></a>").join("");
-    $("halle-namen").textContent = helden.map(h => h.name).join(" · ");
+        "</a>").join("");
+    halleHelden = helden;
+    $("halle-namen").innerHTML = '<span class="hn-zeile">' + helden.map((h, i) =>
+      '<a class="hn" href="#' + esc(h.id) + '" data-i="' + i + '">' + esc(h.name) + "</a>").join('<span class="hn-punkt"> · </span>') +
+      '</span><span class="hn-rolle" id="halle-rolle" aria-live="polite"></span>';
+    $("halle-namen").querySelectorAll(".hn").forEach(a => {
+      a.addEventListener("mouseenter", () => { halleHover = true; halleAktiv = +a.dataset.i; halleMarkieren(); });
+      a.addEventListener("mouseleave", () => { halleHover = false; });
+      a.addEventListener("focus", () => { halleAktiv = +a.dataset.i; halleMarkieren(); });
+    });
     halleAktiv = Math.min(halleAktiv, Math.max(0, helden.length - 1));
     halleMarkieren();
     box.onmouseenter = () => { halleHover = true; };
@@ -150,6 +160,12 @@
   }
   function halleMarkieren() {
     document.querySelectorAll("#halle .halle-tafel").forEach((a, i) => a.classList.toggle("vorn", i === halleAktiv));
+    document.querySelectorAll("#halle-namen .hn").forEach((a, i) => a.classList.toggle("an", i === halleAktiv));
+    const r = $("halle-rolle"), h = halleHelden[halleAktiv];
+    if (r && h && r.dataset.wer !== h.id + ":" + (h.rolle || "")) {
+      r.dataset.wer = h.id + ":" + (h.rolle || "");
+      r.classList.remove("rein"); void r.offsetWidth; r.textContent = h.rolle || ""; r.classList.add("rein");
+    }
   }
   function halleStarten() {
     if (halleTimer || ruhig) return;
@@ -161,6 +177,26 @@
     }, 3600);
   }
   function halleAnhalten() { clearInterval(halleTimer); halleTimer = null; }
+
+  /* ---------- Zuletzt geschehen: der neueste Abschnitt der Chronik ---------- */
+  const slug = x => String(x).toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  function zuletztGeschehen(k) {
+    const abs = k.absaetze || [];
+    let start = -1;
+    abs.forEach((p, i) => { if (p.indexOf("## ") === 0) start = i; });
+    const titel = start > -1 ? abs[start].slice(3).trim() : "";
+    const teil = abs.slice(start + 1);
+    const bildVon = p => p.slice(1).split("|")[0].trim();
+    let bild = (teil.find(p => p.charAt(0) === "!") || "");
+    if (!bild) for (let i = start; i >= 0; i--) if (abs[i].charAt(0) === "!") { bild = abs[i]; break; }
+    const roh = teil.filter(p => p.charAt(0) !== "!").map(p => p.replace(/<[^>]+>/g, "")).join(" ").replace(/\s+/g, " ").trim();
+    let text = roh;
+    if (text.length > 260) {
+      const cut = text.slice(0, 260), ende = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
+      text = ende > 120 ? cut.slice(0, ende + 1) : cut.replace(/\s+\S*$/, "") + " …";
+    }
+    return { titel, text, bild: bild ? bildVon(bild) : "", id: titel ? "kapitel-" + slug(k.nummer) + "-" + slug(titel) : "" };
+  }
 
   /* ---------- Übersicht ---------- */
   function anzahl(id) {
@@ -178,8 +214,14 @@
     const wl = $("weiterlesen");
     if (letztes) {
       wl.hidden = false;
-      wl.href = "#kapitel-" + letztes.nummer;
-      wl.innerHTML = T.weiterlesen(esc(letztes.nummer), esc(letztes.titel));
+      const z = zuletztGeschehen(letztes);
+      wl.href = z.id ? "#" + z.id : "#kapitel-" + letztes.nummer;
+      wl.classList.toggle("mit-bild", !!z.bild);
+      wl.innerHTML = (z.bild ? '<span class="zl-bild"><img src="' + esc(z.bild) + '" alt="" loading="lazy" decoding="async"></span>' : "") +
+        '<span class="zl-text"><small>' + esc(T.zuletzt) + " · " + esc(T.kapitelWort) + " " + esc(letztes.nummer) + " · " + esc(letztes.titel) + "</small>" +
+        '<span class="zl-titel">' + esc(z.titel || letztes.titel) + "</span>" +
+        (z.text ? '<span class="zl-auszug">' + esc(z.text) + "</span>" : "") +
+        "<b>" + esc(T.weiterWort) + "</b></span>";
     } else wl.hidden = true;
     const kacheln = BEREICHE.filter(vorhanden).concat($("lautenwerk") ? ["lautenwerk"] : []);
     const bild = id => id === "chronik" ? ((letztes && letztes.bild) || "aufbruch-neverwinter.jpg") : BILDER[id];
@@ -237,7 +279,7 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 @keyframes tafelauf { to { opacity: 1; transform: none; } }
 .halle-tafel.vorn { flex-grow: 2.3; filter: saturate(1.05) brightness(.95); }
 .halle-tafel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: kenburns 18s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -3.4s); }
-@keyframes kenburns { from { transform: scale(1.04) translate(0, 0); } to { transform: scale(1.14) translate(-2%, -1.5%); } }
+@keyframes kenburns { from { transform: scale(1.02) translate(0, 0); } to { transform: scale(1.07) translate(-1%, -.5%); } }
 .halle-tafel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(16,14,21,.15) 35%, rgba(16,14,21,.92) 100%); }
 .halle-name {
   position: absolute; z-index: 1; left: 0; right: 0; top: 4.2rem; text-align: center; padding: .5rem .9rem .55rem;
@@ -264,7 +306,15 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 }
 @keyframes schimmer { 0% { background-position: 100% 0; } 45%, 100% { background-position: -50% 0; } }
 @keyframes einblenden { to { opacity: 1; } }
-.halle-namen { font-family: var(--name); font-style: italic; font-size: clamp(.95rem, 2.4vw, 1.3rem); color: var(--ash); opacity: 0; animation: einblenden 1s 1.2s forwards; }
+.halle-namen { display: grid; justify-items: center; gap: .35rem; font-family: var(--name); font-style: italic; font-size: clamp(.95rem, 2.4vw, 1.3rem); color: var(--ash); opacity: 0; animation: einblenden 1s 1.2s forwards; }
+.halle-namen .hn { pointer-events: auto; color: inherit; text-decoration: none; padding: .1rem .05rem; transition: color .5s, text-shadow .5s, opacity .5s; opacity: .75; }
+.halle-namen .hn.an { color: var(--ember); opacity: 1; text-shadow: 0 0 14px rgba(224,160,70,.55); }
+.halle-namen .hn:hover, .halle-namen .hn:focus-visible { color: var(--vellum); opacity: 1; }
+.halle-namen .hn-punkt { opacity: .5; }
+.hn-rolle { display: block; min-height: 1.2em; font-family: var(--body); font-style: normal; font-size: .62em; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--vellum); opacity: .85; }
+.hn-rolle.rein { animation: rolleRein .6s ease both; }
+@keyframes rolleRein { from { opacity: 0; transform: translateY(4px); } to { opacity: .85; transform: none; } }
+.halle-name { display: none; }
 .halle-runter {
   position: absolute; z-index: 3; left: 50%; bottom: .4rem; transform: translateX(-50%);
   font-size: 2rem; line-height: 1; color: var(--ember); text-decoration: none; animation: huepfen 2.2s ease-in-out infinite;
@@ -283,6 +333,15 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .weiterlesen b { font-family: var(--body); font-weight: 600; font-size: .9rem; color: var(--ember); margin-top: .2rem; }
 .weiterlesen::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,230,180,.12) 50%, transparent 70%); transform: translateX(-100%); animation: glanz 5s 1.5s ease-in-out infinite; }
 @keyframes glanz { 30%, 100% { transform: translateX(100%); } }
+.weiterlesen.mit-bild { grid-template-columns: minmax(8rem, 15rem) 1fr; gap: 0; padding: 0; justify-items: stretch; }
+.zl-bild { position: relative; overflow: hidden; min-height: 9rem; }
+.zl-bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; transition: transform 1.2s ease; }
+.weiterlesen:hover .zl-bild img { transform: scale(1.05); }
+.zl-text { display: grid; gap: .3rem; justify-items: start; align-content: center; padding: 1.1rem 1.3rem; }
+.weiterlesen.mit-bild .zl-text { padding: 1.1rem 1.4rem 1.2rem; }
+.zl-titel { font-family: var(--name); font-size: clamp(1.3rem, 3.4vw, 1.8rem); line-height: 1.15; color: var(--vellum); }
+.zl-auszug { font-family: var(--body); font-size: 1rem; line-height: 1.55; color: var(--ash); max-width: 38rem; }
+@media (max-width: 560px) { .weiterlesen.mit-bild { grid-template-columns: 1fr; } .zl-bild { min-height: 10rem; } }
 .weiterlesen:hover { background: linear-gradient(100deg, rgba(224,160,70,.28), rgba(224,160,70,.06) 70%); }
 
 .kacheln { display: grid; gap: clamp(.7rem, 2vw, 1.1rem); grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -314,7 +373,7 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .bereich-weiter a:hover { color: var(--ember); }
 
 @media (max-width: 560px) {
-  .halle-name { top: 3.2rem; font-size: .95rem; }
+  .halle-namen { font-size: .95rem; }
   .halle-tafel.vorn { flex-grow: 3.2; }
 }
 @media (prefers-reduced-motion: reduce) {
