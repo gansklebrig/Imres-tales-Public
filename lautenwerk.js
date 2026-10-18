@@ -174,7 +174,7 @@
      Echos zweite Stimme liegt meist eine Terz oder Sexte daneben. */
   const VORLAGEN = {
     taverne: { instrument: "laute", band: { trommel: "bodhran", floete: "floete", ketten: "klatschen" },
-      tempo: 112, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABACADD",
+      tempo: 104, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABACADD",
       A: teil({ klopf: an([0, 6, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([4, 12]),
         bass: folge({ 0: 0, 4: 0, 8: 4, 12: 3 }),
         melodie: folge({ 0: 4, 2: 2, 3: 3, 4: 4, 6: 7, 7: 6, 8: 6, 10: 3, 11: 4, 12: 4, 13: 3, 14: 1, 15: 2 }) }),
@@ -193,7 +193,7 @@
         floete: folge({ 0: 4, 2: 4, 4: 3, 6: 5, 8: 6, 10: 4, 12: 4, 14: 2 }), rex: folge({ 15: 0 }) }) },
     /* Saltarello: italienischer Springtanz im 3-3-2, die Schalmei springt, Echo antwortet */
     saltarello: { instrument: "schalmei", band: { trommel: "tamburin", floete: "floete", ketten: "stampfen" },
-      tempo: 132, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABBCCDD",
+      tempo: 120, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABBCCDD",
       A: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([0, 6, 8, 14]),
         bass: folge({ 0: 0, 6: 0, 8: 4, 14: 4 }),
         melodie: folge({ 0: 7, 1: 6, 2: 7, 3: 4, 4: 2, 6: 4, 7: 5, 8: 6, 9: 5, 10: 6, 11: 3, 12: 1, 14: 3, 15: 4 }) }),
@@ -239,7 +239,7 @@
         melodie: folge({ 0: 5, 2: 3, 4: 4, 6: 6, 8: 7, 10: 4, 12: 2, 14: 0 }),
         floete: folge({ 0: 3, 4: 6, 8: 4, 12: 4 }) }) },
     schlacht: { instrument: "dudelsack", band: { trommel: "pauke", floete: "horn", ketten: "stampfen" },
-      tempo: 138, transpose: 2, modus: "phrygisch", swing: 0, bordun: 1, variation: 3, ablauf: "AABCDD",
+      tempo: 128, transpose: 2, modus: "phrygisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABCDD",
       A: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 6, 10, 14]), trommel: an([0, 4, 8, 12]), ketten: an([0, 8]),
         bass: folge({ 0: 0, 2: 0, 4: 0, 6: 0, 8: 0, 10: 0, 12: 4, 14: 4 }),
         melodie: folge({ 0: 4, 2: 4, 3: 5, 4: 4, 6: 2, 7: 1, 8: 0, 10: 4, 11: 5, 12: 6, 14: 3, 15: 1 }) }),
@@ -307,7 +307,7 @@
         floete: folge({ 0: 7, 4: 3, 8: 7, 12: 4, 14: 2 }) }) },
     /* Marktgewusel: synkopierter Ohrwurm, Löffel-Spieler und ein bellender Marktköter */
     markt: { instrument: "mandoline", band: { trommel: "tamburin", floete: "floete", ketten: "loeffel" },
-      tempo: 132, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 0, variation: 3, ablauf: "AABBCCDD",
+      tempo: 120, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 0, variation: 2, ablauf: "AABBCCDD",
       A: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([4, 12]), trommel: an([0, 4, 8, 12]), ketten: an([2, 6, 10, 14]),
         bass: folge({ 0: 0, 3: 0, 6: 4, 8: 2, 11: 2, 14: 4 }),
         melodie: folge({ 0: 4, 2: 4, 3: 5, 4: 4, 6: 3, 8: 5, 10: 5, 11: 7, 12: 5, 14: 3 }),
@@ -394,7 +394,7 @@
      B variiert es über andere Akkorde, C gehört Echo, D bringt das Motiv mit voller Besetzung zurück.
      Auf den Zählzeiten liegen immer Akkordtöne – so klingt es auch zufällig noch nach Musik. */
   const STIL = {
-    kampf: { modus: ["phrygisch", "aeolisch"], tempo: [144, 160], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 3,
+    kampf: { modus: ["phrygisch", "aeolisch"], tempo: [132, 146], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 3,
       instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn"], ketten: ["ketten", "stampfen"] },
       ablauf: ["AABACA", "AABCDD", "ABACABAD"], akkorde: [[0, 0, 4, 0], [0, 2, 3, 4], [0, 4, 2, 3], [0, 0, 2, 3], [2, 2, 3, 4]],
       bass: ["puls", "galopp"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6]], lage: 3, dichte: 1, echo: "lang",
@@ -415,7 +415,7 @@
       ablauf: ["AAAB", "AABA", "AABC"], akkorde: [[0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 2, 2], [0, 1, 0, 4]],
       bass: ["puls"], rhythmus: [[0, 4], [0, 6], [4]], lage: 5, dichte: .45, echo: "fern", schraeg: .25,
       klopf: [[]], schelle: [[]], trommel: [[0, 2], [0, 2, 8, 10]], ketten: [[0, 4, 8, 12]], rex: [2] },
-    sieg: { modus: ["mixolydisch"], tempo: [126, 138], transpose: [0, 2], swing: 0, bordun: 1, variation: 3,
+    sieg: { modus: ["mixolydisch"], tempo: [116, 128], transpose: [0, 2], swing: 0, bordun: 1, variation: 3,
       instrument: ["laute", "dudelsack", "mandoline"], band: { trommel: ["tamburin", "trommel"], floete: ["horn", "floete"], ketten: ["klatschen", "stampfen"] },
       ablauf: ["AABB", "AABBCD", "ABACAD"], akkorde: [[0, 2, 4, 0], [0, 4, 2, 0], [2, 0, 4, 0], [0, 0, 2, 4]],
       bass: ["viertel", "puls"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 4, 6], [0, 2, 3, 4]], lage: 4, dichte: 1, echo: "lang",
@@ -478,7 +478,10 @@
     return a;
   }
   function stimmungTeile(st, alt) {
-    const p1 = zufall(st.akkorde), p2 = zufall(st.akkorde.filter(x => x !== p1)) || p1, p3 = zufall(st.akkorde);
+    /* ruhigerer Harmonierhythmus: eine Akkordfolge verteilt sich über zwei Teile (A = erste Hälfte, B = zweite) */
+    const halb = (f, h) => [f[2 * h], f[2 * h], f[2 * h + 1], f[2 * h + 1]];
+    const folge1 = zufall(st.akkorde), folge2 = zufall(st.akkorde);
+    const p1 = halb(folge1, 0), p2 = halb(folge1, 1), p3 = halb(folge2, Math.random() < .5 ? 0 : 1);
     const bArt = zufall(st.bass), motiv = motivBauen(st), motiv2 = motivBauen(st);
     const rhy = (liste, i) => an(liste[Math.min(i, liste.length - 1)] || []);
     const teilVon = (akk, mel, fl, stufe) => {
@@ -486,7 +489,7 @@
       t.bass = bassBauen(akk, bArt);
       t.melodie = mel; t.floete = fl;
       t.klopf = rhy(st.klopf, stufe); t.schelle = rhy(st.schelle, stufe); t.trommel = rhy(st.trommel, stufe); t.ketten = rhy(st.ketten, stufe);
-      if (Math.random() < .35) t.rex[15] = zufall(st.rex);
+      if (stufe === 1 && Math.random() < .3) t.rex[15] = zufall(st.rex);
       return t;
     };
     const b1 = bassBauen(p1, bArt), b2 = bassBauen(p2, bArt), b3 = bassBauen(p3, bArt);
@@ -512,7 +515,7 @@
 
   /* ---------- Zustand (gemerkt im Browser) ---------- */
   const MIX_START = () => ({
-    vol: { klopf: 8, schelle: 6, bass: 8, melodie: 8, trommel: 7, floete: 6, ketten: 6, rex: 6 },
+    vol: { klopf: 7, schelle: 5, bass: 8, melodie: 8, trommel: 7, floete: 6, ketten: 6, rex: 5 },
     mute: Object.fromEntries(IDS.map(k => [k, 0]))
   });
   const ausVorlage = (k, mix) => {
@@ -699,7 +702,7 @@
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor();
-      komp.threshold.value = -20; komp.knee.value = 10; komp.ratio.value = 3; komp.attack.value = .005; komp.release.value = .2;
+      komp.threshold.value = -16; komp.knee.value = 12; komp.ratio.value = 2; komp.attack.value = .01; komp.release.value = .3;
       ausgang = ctx.createGain(); ausgang.gain.value = .6 * masterPegel();
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -4; limiter.knee.value = 2; limiter.ratio.value = 20; limiter.attack.value = .003; limiter.release.value = .25;
@@ -867,7 +870,7 @@
   function friedrichSpielen(zeit, betont, laut) {
     const l = laut || 1, z = spurGain.trommel, art = S.band.trommel;
     if (art === "pauke") { /* tief und lang nachhallend */
-      schlagTon(z, "sine", betont ? 92 : 84, betont ? 58 : 54, betont ? 1.1 : .8, (betont ? 1.2 : .9) * l, zeit, .25);
+      schlagTon(z, "sine", betont ? 92 : 84, betont ? 60 : 56, betont ? .7 : .5, (betont ? 1 : .75) * l, zeit, .2);
       schlagTon(z, "sine", 140, 120, .4, .25 * l, zeit);
       rauschStoss(zeit, z, "lowpass", 380, .7, .35 * l, .12);
     } else if (art === "bodhran") { /* trocken, mit Fellklatscher */
@@ -904,7 +907,7 @@
       g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(.45 * l, zeit + .025); g.gain.exponentialRampToValueAtTime(.001, zeit + .13);
       r.connect(b); b.connect(g); g.connect(z); r.start(zeit, Math.random() * .5, .15);
     } else if (art === "stampfen") { /* Fuß auf Holzdielen */
-      schlagTon(z, "sine", 95, 45, .28, .9 * l, zeit, .12);
+      schlagTon(z, "sine", 95, 45, .22, .7 * l, zeit, .1);
       rauschStoss(zeit, z, "lowpass", 320, .8, .35 * l, .09);
       rauschStoss(zeit + .004, z, "bandpass", 650, 2, .12 * l, .05);
     } else if (art === "loeffel") { /* zwei Löffel gegeneinander */
@@ -1165,16 +1168,22 @@
   function bordunAn() {
     if (!ctx || bordunTeile || !S.bordun) return;
     const f = ctx.createBiquadFilter(), g = ctx.createGain();
-    f.type = "lowpass"; f.frequency.value = 650; f.Q.value = .5;
-    g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(.05, ctx.currentTime + .8);
-    const oscs = [0, 7].map(() => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.connect(f); o.start(); return o; });
+    f.type = "lowpass"; f.frequency.value = 480; f.Q.value = .3;
+    g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(.06, ctx.currentTime + 1.2);
+    const oscs = [0, 7].map(() => { const o = ctx.createOscillator(); o.type = "triangle"; o.connect(f); o.start(); return o; });
     f.connect(g); g.connect(master);
     bordunTeile = { oscs, g };
-    bordunStimmen();
+    bordunStimmen(0, ctx.currentTime);
   }
-  function bordunStimmen() {
+  /* Der Bordun wandert mit dem Bass: Grundton und – nur wenn sie rein ist – Quinte des klingenden Akkords.
+     Ein starrer Dauerton würde sich sonst bei jedem Akkordwechsel reiben. */
+  function bordunStimmen(bassZeile, zeit) {
     if (!bordunTeile) return;
-    [0, 7].forEach((iv, i) => bordunTeile.oscs[i].frequency.setTargetAtTime(midiHz(BASS_GRUND - 12 + S.transpose + iv), ctx.currentTime, .05));
+    const sk = MODI[S.modus], stufe = BASS_STUFEN[bassZeile || 0];
+    const grund = BASS_GRUND - 12 + S.transpose + sk[stufe];
+    const quinte = (((sk[(stufe + 4) % 7] + (stufe + 4 >= 7 ? 12 : 0)) - sk[stufe]) === 7) ? grund + 7 : grund + 12;
+    const z = Math.max(zeit || 0, ctx.currentTime);
+    [grund, quinte].forEach((m, i) => bordunTeile.oscs[i].frequency.setTargetAtTime(midiHz(m), z, .06));
   }
   function bordunAus() {
     if (!bordunTeile) return;
@@ -1247,6 +1256,7 @@
         const laut = v ? 1 - Math.random() * .25 * v : 1;
         const haelt = k === "floete" || (k === "melodie" && (GEHALTEN[S.instrument] || S.instrument === "mandoline"));
         spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(daten[k], schritt) * schrittDauer() * .95 : 0);
+        if (k === "bass") bordunStimmen(wert, ev.zeit);
         ev.spuren[k] = wert;
       });
       anzeige.push(ev);
