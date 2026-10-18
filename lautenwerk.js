@@ -104,7 +104,7 @@
       geladen: "Ein geteiltes Lied wurde geladen.",
       stimmungTipp: "Jeder Klick komponiert ein neues Stück im Stil der Stimmung. Solange es läuft, wandelt es sich nach jedem Durchgang weiter – perfekt als Hintergrund für eure Sessions. Sobald du im Raster etwas änderst, bleibt es so, wie es ist.",
       wandelt: k => "♪ " + k + " wandelt sich weiter …",
-      master: "Gesamtlautstärke", hall: "Hall", raum: "Raum",
+      master: "Musik", fxLaut: "Effekte", hall: "Hall", raum: "Raum",
       wechselGleich: n => "→ „" + n + "“ beginnt mit dem nächsten Takt …",
       kulisse: "Geräuschkulisse", kulisseLaut: "Kulisse",
       kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Meer", sturm: "⛈ Sturm" },
@@ -118,7 +118,7 @@
       hTitel: "Imres Musik", hText: "Hier läuft, was Imre am Spieltisch spielt – Musik, Geräuschkulisse und Effekte. Tippe auf „Zuhören“, Lautstärke stellst du selbst ein.",
       hZuhoeren: "🎧 Zuhören", hAus: "❚❚ Stumm", hWarte: "Imre spielt gerade nichts – sobald er startet, hörst du es.", hVerbunden: "Verbunden", hVerbinde: "Verbinde mit Imres Pult …",
       hSelbst: "Selbst spielen statt zuhören", hLaut: "Meine Lautstärke",
-      pult: "🎛 Spielleiter-Pult", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
+      pult: "🎛 Spielleiter-Pult", pultGross: "Spielleiter-Pult öffnen", pultUnter: "Stimmungen, Geräuschkulisse und Effekte für den Spieltisch – mit einem Fingertipp", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
@@ -155,7 +155,7 @@
       geladen: "A shared song has been loaded.",
       stimmungTipp: "Every click composes a new piece in the style of the mood. While it plays, it keeps changing after every round – perfect as background music for your sessions. As soon as you change something in the grid, it stays as it is.",
       wandelt: k => "♪ " + k + " keeps evolving …",
-      master: "Master volume", hall: "Reverb", raum: "Room",
+      master: "Music", fxLaut: "Effects", hall: "Reverb", raum: "Room",
       wechselGleich: n => "→ “" + n + "” starts with the next bar …",
       kulisse: "Ambience", kulisseLaut: "Ambience",
       kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Sea", sturm: "⛈ Storm" },
@@ -169,7 +169,7 @@
       hTitel: "Imre's music", hText: "This plays whatever Imre plays at the table – music, ambience and effects. Tap “Listen”; you set the volume yourself.",
       hZuhoeren: "🎧 Listen", hAus: "❚❚ Mute", hWarte: "Imre isn't playing anything right now – you'll hear it as soon as he starts.", hVerbunden: "Connected", hVerbinde: "Connecting to Imre's console …",
       hSelbst: "Play yourself instead of listening", hLaut: "My volume",
-      pult: "🎛 GM console", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
+      pult: "🎛 GM console", pultGross: "Open the GM console", pultUnter: "Moods, ambience and effects for the gaming table – one tap away", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
@@ -609,6 +609,7 @@
     if (!KULISSEN.includes(s.kulisse)) s.kulisse = "keine";
     if (typeof s.kulisseVol !== "number") s.kulisseVol = 5;
     if (typeof s.intensitaet !== "number") s.intensitaet = 5;
+    if (typeof s.fxVol !== "number") s.fxVol = 8;
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
     if (typeof s.variation !== "number") s.variation = 0;
@@ -756,6 +757,9 @@
     hallFilter.frequency.setTargetAtTime(RAEUME[S.raum].hell, ctx.currentTime, .05);
   }
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
+  /* Effekte und Spieltisch-Momente haben ihren eigenen Pegel – unabhängig von der Musik */
+  const fxPegel = () => .34 * Math.pow((typeof S.fxVol === "number" ? S.fxVol : 8) / 10, 1.5);
+  let fxAusgang = null;
   const hallPegel = () => Math.pow(S.hall / 10, 1.3) * 1.6;
   /* ---------- Geräuschkulisse ---------- */
   let kul = null, kulRauschen = null, sfxBus = null;
@@ -904,6 +908,7 @@
     if (!ctx) return;
     const j = ctx.currentTime;
     if (ausgang) ausgang.gain.setTargetAtTime(.6 * masterPegel(), j, .05);
+    if (fxAusgang) fxAusgang.gain.setTargetAtTime(fxPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
     if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
     IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : 1, j, .05));
@@ -932,7 +937,8 @@
       hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
       kulRauschen = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
       { const d = kulRauschen.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
-      sfxBus = ctx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(master); setTimeout(fxVorwaermen, 1500);
+      sfxBus = ctx.createGain(); sfxBus.gain.value = 1;
+      fxAusgang = ctx.createGain(); fxAusgang.gain.value = fxPegel(); sfxBus.connect(fxAusgang); fxAusgang.connect(limiter); setTimeout(fxVorwaermen, 1500);
       { const s2 = ctx.createGain(); s2.gain.value = .5; sfxBus.connect(s2); s2.connect(hallEin); }
       hallFilter = ctx.createBiquadFilter(); hallFilter.type = "lowpass"; hallFilter.frequency.value = RAEUME[S.raum].hell;
       hallEin.connect(hallFilter); hallNass.connect(komp);
@@ -1944,6 +1950,7 @@
     '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
     raumWahl(T);
+  const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   function pultZeichnen(T) {
     root.innerHTML =
@@ -1962,7 +1969,7 @@
           KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
           '<label class="lw-feld lw-regler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label></section>' +
         '<section><h4>' + T.effekte + '</h4><div class="lw-pult-gitter lw-pult-fx">' + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
-        '<section><h4>🎭 ' + T.momente + '</h4><div class="lw-pult-gitter lw-pult-fx">' + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
+        '<section><h4>🎭 ' + T.momente + '</h4><div class="lw-pult-gitter lw-pult-fx">' + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" + fxRegler(T) + "</section>" +
         '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
@@ -2049,7 +2056,7 @@
       '<div class="lw-pult"><div class="lw-pult-kopf"><button type="button" class="lw-play-gross lw-hoeren' + (hoerer.an ? " an" : "") + '" data-aktion="hoeren">' + (hoerer.an ? T.hAus : T.hZuhoeren) + "</button>" +
         '<span class="lw-pult-titel">' + esc(z && z.titel ? z.titel : "") + "</span></div>" +
         '<p class="lw-funk-status">' + esc(stat) + "</p>" +
-        '<section class="lw-pult-mix"><label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.hLaut + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label></section>' +
+        '<section class="lw-pult-mix"><label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.hLaut + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' + fxRegler(T) + '</section>' +
         '<p class="lw-tipp"><a href="' + esc(location.pathname) + '#taverne">' + T.hSelbst + "</a></p>" +
       "</div>" + '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
@@ -2114,6 +2121,7 @@
 
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.text + "</p>" +
+      '<button type="button" class="lw-pultbanner" data-aktion="pult"><span class="lw-pb-icon">🎛</span><span><b>' + T.pultGross + "</b><small>" + T.pultUnter + '</small></span><span class="lw-pb-pfeil">→</span></button>' +
       '<div class="lw-buehne" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
       '<div class="lw-steuer">' +
         '<button type="button" class="lw-play">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
@@ -2123,7 +2131,6 @@
         '<label class="lw-feld"><span>' + T.modus + '</span><select data-feld="modus">' + modi + "</select></label>" +
         '<button type="button" class="lw-schalter" data-feld="swing" aria-pressed="' + !!S.swing + '">' + T.swing + "</button>" +
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
-        '<button type="button" class="lw-schalter lw-pultknopf" data-aktion="pult">' + T.pult + "</button>" +
       "</div>" +
       '<div class="lw-vorlagen"><span>' + T.lieder + ":</span>" +
         LIEDER.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
@@ -2140,7 +2147,7 @@
         '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
       "</div>" +
       '<div class="lw-vorlagen lw-effekte"><span>' + T.effekte + ":</span>" + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
-      '<div class="lw-vorlagen lw-effekte"><span>🎭 ' + T.momente + ":</span>" + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
+      '<div class="lw-vorlagen lw-effekte"><span>🎭 ' + T.momente + ":</span>" + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + fxRegler(T) + "</div>" +
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
         (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
@@ -2248,7 +2255,7 @@
   }
   function vorlageWaehlen(k) {
     const mix = { vol: S.vol, mute: S.mute };
-    const behalten = { intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
+    const behalten = { fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
     else if (k === "zufall") neu = zufallsLied();
@@ -2393,6 +2400,7 @@
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
     if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = S.master * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "intensitaet") {
       S.intensitaet = +e.target.value;
       root.querySelectorAll(".lw-ival").forEach(x => x.textContent = t().intStufen[S.intensitaet]);
@@ -2530,7 +2538,15 @@
 .lw-vorlagen button.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
 .lw-effekte button.blitz, .lw-pult-fx button.blitz { animation: lwblitz .5s ease-out; }
 @keyframes lwblitz { 0% { background: var(--ember); color: var(--night); } }
-.lw-pultknopf { border-color: var(--ember); color: var(--ember); }
+.lw-pultbanner { display: flex; align-items: center; gap: .9rem; width: 100%; text-align: left; margin: .2rem 0 1rem; padding: .85rem 1.1rem;
+  border: 2px solid var(--ember); background: linear-gradient(100deg, rgba(224,160,70,.28), rgba(224,160,70,.08)); color: var(--vellum); font: inherit; cursor: pointer;
+  box-shadow: 0 0 18px rgba(224,160,70,.18); transition: background .2s, transform .15s; }
+.lw-pultbanner:hover { background: linear-gradient(100deg, rgba(224,160,70,.42), rgba(224,160,70,.14)); transform: translateY(-1px); }
+.lw-pultbanner b { display: block; font-family: var(--display); font-size: 1.15rem; letter-spacing: .04em; color: var(--ember); }
+.lw-pultbanner small { display: block; font-size: .85rem; color: var(--vellum); opacity: .85; margin-top: .15rem; }
+.lw-pb-icon { font-size: 2rem; line-height: 1; }
+.lw-pb-pfeil { margin-left: auto; font-size: 1.5rem; color: var(--ember); }
+.lw-fxregler { margin-top: .6rem; }
 .lw-buehne-klein { height: clamp(130px, 24vw, 190px); }
 .lw-pult { display: grid; gap: 1.1rem; }
 .lw-pult section { display: grid; gap: .55rem; padding: .8rem .9rem; border: 1px solid var(--line); background: rgba(235,226,204,.025); }
