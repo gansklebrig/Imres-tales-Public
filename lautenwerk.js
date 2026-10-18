@@ -20,6 +20,9 @@
   "use strict";
   const root = document.getElementById("lautenwerk");
   if (!root) return;
+  /* Mitlauschen: ?lauschen=CODE macht diese Seite zum Zuhörer */
+  let hoerer = null, funk = null;
+  try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, verbunden: false, zuletzt: null }; } catch (_) {}
 
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
@@ -104,6 +107,12 @@
       kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Meer", sturm: "⛈ Sturm" },
       effekte: "Effekte",
       sfx: { drache: "🐉 Drachenbrüllen", schwert: "⚔ Schwertklirren", tuer: "🚪 Knarrende Tür", donner: "⚡ Donner", schrei: "😱 Ferner Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Kriegshorn", jubel: "🍻 Jubel" },
+      funk: "📡 Mitlauschen", funkTipp: "Alle anderen öffnen den Link und tippen auf „Zuhören“ – die Musik entsteht dann bei jedem selbst im Browser, Stimmungen, Kulisse und Effekte folgen deinem Pult.",
+      funkStart: "📡 Für alle übertragen", funkStopp: "Übertragung beenden", funkKopieren: "🔗 Link kopieren", funkKopiert: "Link kopiert – ab damit in den Discord!",
+      funkVerbinde: "Verbinde …", funkFehler: "Keine Verbindung – versuche es erneut …", funkZuhoerer: n => n === 1 ? "1 hört zu" : n + " hören zu", funkLaeuft: "Übertragung läuft",
+      hTitel: "Imres Musik", hText: "Hier läuft, was Imre am Spieltisch spielt – Musik, Geräuschkulisse und Effekte. Tippe auf „Zuhören“, Lautstärke stellst du selbst ein.",
+      hZuhoeren: "🎧 Zuhören", hAus: "❚❚ Stumm", hWarte: "Imre spielt gerade nichts – sobald er startet, hörst du es.", hVerbunden: "Verbunden", hVerbinde: "Verbinde mit Imres Pult …",
+      hSelbst: "Selbst spielen statt zuhören", hLaut: "Meine Lautstärke",
       pult: "🎛 Spielleiter-Pult", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
@@ -147,6 +156,12 @@
       kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Sea", sturm: "⛈ Storm" },
       effekte: "Effects",
       sfx: { drache: "🐉 Dragon roar", schwert: "⚔ Sword clash", tuer: "🚪 Creaking door", donner: "⚡ Thunder", schrei: "😱 Distant scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 War horn", jubel: "🍻 Cheers" },
+      funk: "📡 Listen in", funkTipp: "Everyone else opens the link and taps “Listen” – the music is then created in each browser, and moods, ambience and effects follow your console.",
+      funkStart: "📡 Broadcast to everyone", funkStopp: "Stop broadcast", funkKopieren: "🔗 Copy link", funkKopiert: "Link copied – drop it into Discord!",
+      funkVerbinde: "Connecting …", funkFehler: "No connection – retrying …", funkZuhoerer: n => n === 1 ? "1 listening" : n + " listening", funkLaeuft: "Broadcast running",
+      hTitel: "Imre's music", hText: "This plays whatever Imre plays at the table – music, ambience and effects. Tap “Listen”; you set the volume yourself.",
+      hZuhoeren: "🎧 Listen", hAus: "❚❚ Mute", hWarte: "Imre isn't playing anything right now – you'll hear it as soon as he starts.", hVerbunden: "Connected", hVerbinde: "Connecting to Imre's console …",
+      hSelbst: "Play yourself instead of listening", hLaut: "My volume",
       pult: "🎛 GM console", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
@@ -641,7 +656,7 @@
       });
     });
   }
-  const merken = () => { try { localStorage.setItem("imres-lautenwerk2", JSON.stringify(S)); } catch (_) {} };
+  const merken = () => { if (hoerer) return; try { localStorage.setItem("imres-lautenwerk2", JSON.stringify(S)); } catch (_) {} funkAenderung(); };
 
   /* ---------- Lied als kurzer Code für den Link ---------- */
   const hex = a => { let n = 0; a.forEach((v, i) => { if (v >= 0) n |= 1 << i; }); return n.toString(16).padStart(4, "0"); };
@@ -1485,7 +1500,7 @@
       if (schritt === 0) {
         abschnitt = (abschnitt + 1) % S.ablauf.length;
         /* Stimmung: nach jedem Durchgang ein leicht abgewandeltes neues Stück */
-        if (abschnitt === 0 && S.stimmung && STIL[S.stimmung]) setTimeout(stimmungWeiter, 0);
+        if (abschnitt === 0 && S.stimmung && STIL[S.stimmung] && !hoerer) setTimeout(stimmungWeiter, 0);
       }
     }
   }
@@ -1505,11 +1520,11 @@
     planen(); timer = setInterval(planen, 30);
     bordunAn();
     requestAnimationFrame(malen);
-    knoepfe();
+    knoepfe(); funkAenderung();
   }
   function stopp(pause) {
     laeuft = false; pausiert = !!pause; clearInterval(timer); bordunAus(); kulisseStop(); wechsel = null;
-    spalte(-1); teilAnzeige(null); knoepfe();
+    spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
   }
 
   /* ---------- Anzeige im Takt ---------- */
@@ -1908,12 +1923,128 @@
           KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
           '<label class="lw-feld lw-regler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label></section>' +
         '<section><h4>' + T.effekte + '</h4><div class="lw-pult-gitter lw-pult-fx">' + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
+        '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
   }
+  /* ---------- Mitlauschen: Supabase Realtime (Broadcast + Presence) über einen schlichten WebSocket ---------- */
+  function funkKanal(raum, rolle, beiNachricht, beiStatus) {
+    let ws = null, ref = 0, joinRef = null, herz = null, zu = false, leute = {};
+    const topic = "realtime:imres-lautenwerk-" + raum;
+    const roh = (event, payload, t) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ topic: t || topic, event, payload, ref: String(++ref), join_ref: t ? undefined : joinRef })); };
+    const zaehlen = () => beiStatus("ok", Object.values(leute).filter(r => r === "hoerer").length);
+    function auf() {
+      beiStatus("verbinde");
+      try { ws = new WebSocket(LIED_SERVER.url.replace(/^http/, "ws") + "/realtime/v1/websocket?apikey=" + encodeURIComponent(LIED_SERVER.key) + "&vsn=1.0.0"); }
+      catch (_) { beiStatus("fehler"); setTimeout(() => zu || auf(), 4000); return; }
+      ws.onopen = () => {
+        joinRef = String(++ref);
+        ws.send(JSON.stringify({ topic, event: "phx_join", ref: joinRef, join_ref: joinRef,
+          payload: { config: { broadcast: { self: false, ack: false }, presence: { key: rolle + "-" + Math.random().toString(36).slice(2, 8) }, private: false } } }));
+        herz = setInterval(() => roh("heartbeat", {}, "phoenix"), 25000);
+      };
+      ws.onmessage = e => {
+        let m; try { m = JSON.parse(e.data); } catch (_) { return; }
+        if (m.topic !== topic) return;
+        if (m.event === "phx_reply" && m.ref === joinRef) {
+          if (m.payload && m.payload.status === "ok") { leute = {}; zaehlen(); roh("presence", { type: "presence", event: "track", payload: { rolle } }); beiNachricht("_offen", {}); }
+          else beiStatus("fehler");
+        } else if (m.event === "broadcast" && m.payload) beiNachricht(m.payload.event, m.payload.payload || {});
+        else if (m.event === "presence_state") { leute = {}; Object.keys(m.payload || {}).forEach(k => { leute[k] = k.split("-")[0]; }); zaehlen(); }
+        else if (m.event === "presence_diff") {
+          Object.keys((m.payload && m.payload.joins) || {}).forEach(k => { leute[k] = k.split("-")[0]; });
+          Object.keys((m.payload && m.payload.leaves) || {}).forEach(k => { delete leute[k]; });
+          zaehlen();
+        }
+      };
+      ws.onclose = () => { clearInterval(herz); if (!zu) { beiStatus("fehler"); setTimeout(() => zu || auf(), 3000); } };
+      ws.onerror = () => { try { ws.close(); } catch (_) {} };
+    }
+    auf();
+    return {
+      senden: (ev, daten) => roh("broadcast", { type: "broadcast", event: ev, payload: daten }),
+      schliessen: () => { zu = true; clearInterval(herz); try { roh("phx_leave", {}); ws.close(); } catch (_) {} }
+    };
+  }
+  function funkRaum() {
+    let r = null; try { r = localStorage.getItem("imres-funk-raum"); } catch (_) {}
+    if (!r || !/^[a-z0-9]{4,16}$/.test(r)) { r = Math.random().toString(36).slice(2, 10); try { localStorage.setItem("imres-funk-raum", r); } catch (_) {} }
+    return r;
+  }
+  const funkLink = () => location.origin + location.pathname + "?lauschen=" + funkRaum() + "#taverne";
+  function funkTeil(T) {
+    if (!funk) return '<p class="lw-tipp">' + T.funkTipp + '</p><button type="button" class="lw-schalter" data-aktion="funk">' + T.funkStart + "</button>";
+    return '<p class="lw-tipp">' + T.funkTipp + '</p><div class="lw-funk-zeile"><input type="text" readonly class="lw-funk-link" value="' + esc(funkLink()) + '">' +
+      '<button type="button" class="lw-schalter" data-aktion="funkkopie">' + T.funkKopieren + "</button></div>" +
+      '<p class="lw-funk-status">' + esc(funkStatusText(T)) + '</p><button type="button" class="lw-schalter" data-aktion="funk">' + T.funkStopp + "</button>";
+  }
+  const funkStatusText = T => !funk ? "" : funk.status === "ok" ? "🟢 " + T.funkLaeuft + " · " + T.funkZuhoerer(funk.zahl || 0) : funk.status === "fehler" ? "🔴 " + T.funkFehler : "🟡 " + T.funkVerbinde;
+  function funkAnzeigen() { const el = root.querySelector(".lw-funk-status"); if (el) el.textContent = funkStatusText(t()); }
+  function funkZustand() {
+    return { lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
+      hall: S.hall, raum: S.raum, hallAus: S.hallAus, laeuft };
+  }
+  function funkSenden(ev, daten) { if (funk && funk.kanal) funk.kanal.senden(ev, daten); }
+  function funkAenderung() {
+    if (!funk) return;
+    clearTimeout(funk.warte); funk.warte = setTimeout(() => funkSenden("zustand", funkZustand()), 250);
+  }
+  function funkUmschalten() {
+    if (funk) { funk.kanal.schliessen(); clearInterval(funk.puls); funk = null; return; }
+    funk = { status: "verbinde", zahl: 0 };
+    funk.kanal = funkKanal(funkRaum(), "pult", (ev) => {
+      if (ev === "_offen" || ev === "hallo") funkSenden("zustand", funkZustand());
+    }, (st, n) => { if (!funk) return; funk.status = st; if (n != null) funk.zahl = n; funkAnzeigen(); });
+    funk.puls = setInterval(() => funkSenden("zustand", funkZustand()), 15000); /* falls jemand etwas verpasst */
+  }
+
+  /* ---------- Zuhörer-Ansicht ---------- */
+  function hoererZeichnen(T) {
+    const z = hoerer.zuletzt;
+    const stat = !hoerer.verbunden ? T.hVerbinde : (z && z.laeuft ? "🟢 " + T.hVerbunden : T.hWarte);
+    root.innerHTML =
+      '<p class="label">' + T.funk + "</p><h3>" + T.hTitel + '</h3><p class="tav-info">' + T.hText + "</p>" +
+      '<div class="lw-buehne lw-buehne-klein" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
+      '<div class="lw-pult"><div class="lw-pult-kopf"><button type="button" class="lw-play-gross lw-hoeren' + (hoerer.an ? " an" : "") + '" data-aktion="hoeren">' + (hoerer.an ? T.hAus : T.hZuhoeren) + "</button>" +
+        '<span class="lw-pult-titel">' + esc(z && z.titel ? z.titel : "") + "</span></div>" +
+        '<p class="lw-funk-status">' + esc(stat) + "</p>" +
+        '<section class="lw-pult-mix"><label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.hLaut + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label></section>' +
+        '<p class="lw-tipp"><a href="' + esc(location.pathname) + '#taverne">' + T.hSelbst + "</a></p>" +
+      "</div>" + '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
+    spalten = []; aktiv = -1; figurCache = {};
+  }
+  function hoererEmpfang(ev, d) {
+    if (ev === "_offen") { hoerer.verbunden = true; funkHoererKanal.senden("hallo", {}); zeichnen(); return; }
+    if (ev === "fx") { if (hoerer.an && ctx && EFFEKTE.includes(d.art)) effekt(d.art); return; }
+    if (ev !== "zustand") return;
+    const neu = dekodieren(d.lied); if (!neu) return;
+    const alt = hoerer.zuletzt; hoerer.zuletzt = d;
+    Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
+      kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
+      raum: RAEUME[d.raum] ? d.raum : "taverne", hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
+    const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun].join();
+    const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
+    if (laeuft && kern(neu) !== kern(S)) {
+      wechsel = pruefen(neu);
+      const a2 = S; S = wechsel; try { saitenVorbereiten(); } catch (_) {} S = a2;
+    } else {
+      const kulAlt = S.kulisse, raumAlt = S.raum;
+      Object.assign(S, neu);
+      if (ctx) { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); if (laeuft && kulAlt !== S.kulisse) kulisseStart(); }
+    }
+    if (hoerer.an && d.laeuft && !laeuft) start();
+    if (laeuft && !d.laeuft) stopp();
+    if (titelNeu) { zeichnen(); knoepfe(); }
+  }
+  let funkHoererKanal = null;
+  if (hoerer) funkHoererKanal = funkKanal(hoerer.raum, "hoerer", hoererEmpfang, st => {
+    if (st === "fehler" && hoerer.verbunden) { hoerer.verbunden = false; zeichnen(); }
+  });
+
   function zeichnen() {
     const T = t();
+    if (hoerer) { hoererZeichnen(T); return; }
     if (S.pult) { pultZeichnen(T); return; }
     const tonarten = Array.from({ length: 12 }, (_, i) => i - 5).map(tr => '<option value="' + tr + '"' + (tr === S.transpose ? " selected" : "") + ">" + notenName(MEL_GRUND + tr) + "</option>").join("");
     const modi = MODUS_LISTE.map(m => '<option value="' + m + '"' + (m === S.modus ? " selected" : "") + ">" + T.modi[m] + "</option>").join("");
@@ -1999,7 +2130,10 @@
     mini.className = "lw-mini"; mini.hidden = true;
     mini.innerHTML = '<a class="lw-mini-titel" href="#taverne"><span class="lw-mini-note">♪</span><span class="lw-mini-name"></span></a><button type="button" class="lw-mini-knopf"></button>';
     tools.insertBefore(mini, tools.firstChild);
-    mini.querySelector(".lw-mini-knopf").addEventListener("click", () => { laeuft ? stopp(true) : start(true); });
+    mini.querySelector(".lw-mini-knopf").addEventListener("click", () => {
+      if (hoerer) { const b = root.querySelector('[data-aktion="hoeren"]'); if (b) b.click(); return; }
+      laeuft ? stopp(true) : start(true);
+    });
     if (window.IntersectionObserver) new IntersectionObserver(e => { lautenwerkSichtbar = e[e.length - 1].isIntersecting; miniAnzeigen(); }).observe(root);
   }
   function miniAnzeigen() {
@@ -2122,6 +2256,23 @@
       return;
     }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
+    const fk = e.target.closest('[data-aktion="funk"], [data-aktion="funkkopie"], [data-aktion="hoeren"]');
+    if (fk) {
+      const a = fk.dataset.aktion;
+      if (a === "funk") { funkUmschalten(); zeichnen(); knoepfe(); }
+      if (a === "funkkopie") {
+        const url = funkLink();
+        if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => status(t().funkKopiert), () => window.prompt(t().funkKopieren, url));
+        else window.prompt(t().funkKopieren, url);
+      }
+      if (a === "hoeren") {
+        hoerer.an = !hoerer.an;
+        if (hoerer.an) { audioStart(); saitenVorbereiten(); if (hoerer.zuletzt && hoerer.zuletzt.laeuft) start(); }
+        else if (laeuft) stopp();
+        zeichnen(); knoepfe();
+      }
+      return;
+    }
     const tl = e.target.closest(".lw-teil");
     if (tl) { bearbeite = tl.dataset.teil; kopierZiel = null; zeichnen(); knoepfe(); return; }
     const ak = e.target.closest("[data-aktion]");
@@ -2181,7 +2332,7 @@
     const kb = e.target.closest("[data-kulisse]");
     if (kb) { audioStart(); S.kulisse = kb.dataset.kulisse; merken(); kulisseStart(true); zeichnen(); knoepfe(); return; }
     const fx = e.target.closest("[data-sfx]");
-    if (fx) { try { audioStart(); effekt(fx.dataset.sfx); fx.classList.remove("blitz"); void fx.offsetWidth; fx.classList.add("blitz"); } catch (_) {} return; }
+    if (fx) { try { audioStart(); effekt(fx.dataset.sfx); funkSenden("fx", { art: fx.dataset.sfx }); fx.classList.remove("blitz"); void fx.offsetWidth; fx.classList.add("blitz"); } catch (_) {} return; }
     if (e.target.closest('[data-aktion="pult"]')) { S.pult = !S.pult; merken(); zeichnen(); knoepfe(); root.scrollIntoView({ block: "start" }); return; }
     if (e.target.closest('[data-aktion="kulisse"]')) { audioStart(); kul ? kulisseStop() : kulisseStart(true); zeichnen(); knoepfe(); return; }
     if (e.target.closest(".lw-teilen")) {
@@ -2344,6 +2495,11 @@
 .lw-pult h4 { margin: 0; font-family: var(--body); font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ember); }
 .lw-pult-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
 .lw-play-gross { font-size: 1.1rem; padding: .8rem 1.6rem; min-width: 10rem; }
+.lw-hoeren { border: 1px solid var(--ember); background: var(--ember); color: var(--night); font: inherit; font-weight: 600; cursor: pointer; }
+.lw-hoeren.an { background: none; color: var(--ember); }
+.lw-funk-zeile { display: flex; flex-wrap: wrap; gap: .5rem; margin: .4rem 0; }
+.lw-funk-link { flex: 1 1 14rem; min-width: 0; background: rgba(0,0,0,.3); border: 1px solid var(--line); color: inherit; font: inherit; font-size: .85rem; padding: .45rem .6rem; }
+.lw-funk-status { margin: .5rem 0; font-size: .95rem; }
 .lw-pult-titel { font-family: var(--name); font-size: 1.3rem; color: var(--vellum); flex: 1; }
 .lw-pult-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
 .lw-pult-gitter button { border: 1px solid var(--line); background: rgba(16,14,21,.6); color: var(--vellum); font: inherit; font-size: .95rem; padding: .75rem .6rem; cursor: pointer; text-align: left; }
@@ -2423,6 +2579,7 @@
   gruppeLaden().then(() => { if (gruppeOk) { zeichnen(); knoepfe(); } });
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); zeichnen(); knoepfe(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  if (hoerer) setTimeout(() => root.scrollIntoView({ block: "start" }), 400);
   if (ausLink) {
     setTimeout(() => {
       root.scrollIntoView({ block: "start" });
