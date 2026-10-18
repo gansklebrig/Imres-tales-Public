@@ -432,7 +432,7 @@
     const st = e.target.closest("[data-stufe]");
     if (st && !spiel) { stufe = st.dataset.stufe; try { localStorage.setItem("imres-auftritt-stufe", stufe); } catch (_) {} ergebnis = null; zeichnen(); bestenLaden(); return; }
     const ld = e.target.closest("[data-lied]");
-    if (ld && !spiel) { liedWahl = ld.dataset.lied; if (liedWahl === "neu") erfunden = liedErfinden(); try { localStorage.setItem("imres-auftritt-lied", liedWahl); } catch (_) {} ergebnis = null; zeichnen(); return; }
+    if (ld && !spiel) { liedWahl = ld.dataset.lied; if (liedWahl === "neu") erfunden = liedErfinden(); try { localStorage.setItem("imres-auftritt-lied", liedWahl); } catch (_) {} ergebnis = null; zeichnen(); bestenLaden(); return; }
     if (e.target.closest(".at-eintragen")) { eintragen(); return; }
     if (e.target.closest(".at-start")) { spiel ? abbrechen() : starten(); }
   });
@@ -447,22 +447,27 @@
       .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
   }
   const besten = {}; let serverOk = null, meinEintrag = null;
+  /* jede Liste gehört zu Publikum + Lied; alle erfundenen Lieder teilen sich eine Liste */
+  const listenSchluessel = () => stufe + "|" + liedWahl;
+  const liedFilter = () => liedWahl === "neu" ? "lied=like." + encodeURIComponent("neu|*") : "lied=eq." + liedWahl;
+  const liedAnzeige = (feld, T) => String(feld || "").startsWith("neu|") ? String(feld).slice(4) : (T.lieder[feld] || feld);
   const lokalLesen = () => { try { return JSON.parse(localStorage.getItem("imres-auftritt-liste") || "{}") || {}; } catch (_) { return {}; } };
   const sortieren = l => l.sort((a, b) => b.prozent - a.prozent || b.serie - a.serie || String(a.erstellt).localeCompare(String(b.erstellt)));
   function bestenLaden() {
-    const st = stufe;
-    return server("/rest/v1/auftritt_bestenliste?select=name,lied,prozent,wurf,serie,erstellt&stufe=eq." + st + "&order=prozent.desc,serie.desc,erstellt.asc&limit=10")
-      .then(l => { besten[st] = Array.isArray(l) ? l : []; serverOk = true; })
-      .catch(() => { serverOk = false; besten[st] = sortieren(lokalLesen()[st] || []).slice(0, 10); })
+    const k = listenSchluessel();
+    return server("/rest/v1/auftritt_bestenliste?select=name,lied,prozent,wurf,serie,erstellt&stufe=eq." + stufe + "&" + liedFilter() + "&order=prozent.desc,serie.desc,erstellt.asc&limit=10")
+      .then(l => { besten[k] = Array.isArray(l) ? l : []; serverOk = true; })
+      .catch(() => { serverOk = false; besten[k] = sortieren(lokalLesen()[k] || []).slice(0, 10); })
       .then(listeNeu);
   }
   function listeNeu() { const el = root.querySelector(".at-liste"); if (el) el.innerHTML = listeHtml(t()); }
   function listeHtml(T) {
-    const l = besten[stufe];
+    const l = besten[listenSchluessel()];
     if (!l) return "";
-    return '<h4>' + T.bestenliste + " · " + esc(T.stufen[stufe]) + "</h4>" +
-      (l.length ? '<table><thead><tr>' + T.spalten.map(x => "<th>" + x + "</th>").join("") + "</tr></thead><tbody>" +
-        l.map((e, i) => '<tr' + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + e.prozent + " %</td><td>" + e.wurf + "</td><td>" + esc(e.lied) + "</td></tr>").join("") +
+    const mitLied = liedWahl === "neu", sp = mitLied ? T.spalten : T.spalten.slice(0, 4);
+    return '<h4>' + T.bestenliste + " · " + esc(T.stufen[stufe]) + " · " + esc(liedWahl === "neu" ? T.neuesLied : T.lieder[liedWahl]) + "</h4>" +
+      (l.length ? '<table><thead><tr>' + sp.map(x => "<th>" + x + "</th>").join("") + "</tr></thead><tbody>" +
+        l.map((e, i) => '<tr' + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + e.prozent + " %</td><td>" + e.wurf + "</td>" + (mitLied ? "<td>" + esc(liedAnzeige(e.lied, T)) + "</td>" : "") + "</tr>").join("") +
         "</tbody></table>" : '<p class="at-leer">' + T.leer + "</p>") +
       (serverOk === false ? '<p class="at-leer">' + T.nurHier + "</p>" : "");
   }
@@ -477,17 +482,17 @@
     const feld = root.querySelector(".at-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
     if (!name) { if (feld) feld.focus(); return; }
     try { localStorage.setItem("imres-auftritt-name", name); } catch (_) {}
-    const T = t(), e = { name, lied: liedName(ergebnis.lied, T).slice(0, 40), prozent: ergebnis.prozent, wurf: ergebnis.summe, serie: ergebnis.serie, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(); lok[stufe] = sortieren((lok[stufe] || []).concat([e])).slice(0, 10);
+    const T = t(), e = { name, lied: ergebnis.lied.key ? ergebnis.lied.key : "neu|" + liedName(ergebnis.lied, T).slice(0, 36), prozent: ergebnis.prozent, wurf: ergebnis.summe, serie: ergebnis.serie, erstellt: new Date().toISOString() };
+    const lok = lokalLesen(), k = listenSchluessel(); lok[k] = sortieren((lok[k] || []).concat([e])).slice(0, 10);
     try { localStorage.setItem("imres-auftritt-liste", JSON.stringify(lok)); } catch (_) {}
-    ergebnis.sendet = true;
+    const erg = ergebnis, k2 = listenSchluessel(); erg.sendet = true;
     const fertig = () => {
-      ergebnis.sendet = false;
-      const l = besten[stufe] || [];
+      erg.sendet = false;
+      const l = besten[k2] || [];
       const platz = l.findIndex(x => x.name === e.name && x.prozent === e.prozent && x.serie === e.serie) + 1;
       if (platz) meinEintrag = l[platz - 1].erstellt;
-      ergebnis.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
-      zeichnen();
+      erg.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
+      if (ergebnis === erg && !spiel) zeichnen(); else listeNeu();
     };
     server("/rest/v1/rpc/auftritt_eintragen", { p_name: e.name, p_stufe: stufe, p_lied: e.lied, p_prozent: e.prozent, p_wurf: e.wurf, p_serie: e.serie })
       .catch(() => {}).then(bestenLaden).then(fertig);
