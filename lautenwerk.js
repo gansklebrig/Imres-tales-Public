@@ -78,12 +78,18 @@
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
       lieder: "Lieder", stimmungen: "Stimmungen für Imre",
       vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Marktgewusel", schmiede: "⚒ Zwergenschmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
-        kampf: "⚔ Kampf", unterreich: "🕯 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg" },
+        kampf: "⚔ Kampf", unterreich: "🕯 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lagerfeuer" },
       zufall: "🎲 Improvisieren", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
       teilen: "🔗 Lied teilen", kopiert: "Link kopiert – schick ihn an die Gruppe!", geteilt: "Geteilt!",
       geladen: "Ein geteiltes Lied wurde geladen.",
-      stimmungTipp: "Stimmungen laufen endlos und spielen mit Variation jedes Mal ein bisschen anders – perfekt als Hintergrund für eure Sessions.",
+      stimmungTipp: "Jeder Klick komponiert ein neues Stück im Stil der Stimmung. Solange es läuft, wandelt es sich nach jedem Durchgang weiter – perfekt als Hintergrund für eure Sessions. Sobald du im Raster etwas änderst, bleibt es so, wie es ist.",
+      wandelt: k => "♪ " + k + " wandelt sich weiter …",
+      eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
+      speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
+      gespeichertOk: n => "„" + n + "“ wurde gespeichert.", geloescht: n => "„" + n + "“ wurde gelöscht.", liedGeladen: n => "„" + n + "“ geladen.",
+      pwFrage: "Passwort der Questtafel (für gemeinsame Lieder):", pwFalsch: "Das Passwort stimmt nicht.", serverFehler: "Der Server ist gerade nicht erreichbar.",
+      loeschenFrage: n => "„" + n + "“ wirklich löschen?", keinName: "Bitte gib dem Lied einen Namen.",
       modi: { dorisch: "Dorisch", mixolydisch: "Mixolydisch", aeolisch: "Äolisch", phrygisch: "Phrygisch" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B", "H"],
       wischen: "← wischen →"
@@ -106,12 +112,18 @@
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
       lieder: "Songs", stimmungen: "Moods for Imre",
       vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market bustle", schmiede: "⚒ Dwarven forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
-        kampf: "⚔ Battle", unterreich: "🕯 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory" },
+        kampf: "⚔ Battle", unterreich: "🕯 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Campfire" },
       zufall: "🎲 Improvise", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
       teilen: "🔗 Share song", kopiert: "Link copied – send it to the party!", geteilt: "Shared!",
       geladen: "A shared song has been loaded.",
-      stimmungTipp: "Moods loop endlessly and, with variation, play a little differently every time – perfect as background music for your sessions.",
+      stimmungTipp: "Every click composes a new piece in the style of the mood. While it plays, it keeps changing after every round – perfect as background music for your sessions. As soon as you change something in the grid, it stays as it is.",
+      wandelt: k => "♪ " + k + " keeps evolving …",
+      eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
+      speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
+      gespeichertOk: n => "“" + n + "” was saved.", geloescht: n => "“" + n + "” was deleted.", liedGeladen: n => "“" + n + "” loaded.",
+      pwFrage: "Quest board password (for shared songs):", pwFalsch: "That password is wrong.", serverFehler: "The server can't be reached right now.",
+      loeschenFrage: n => "Really delete “" + n + "”?", keinName: "Please give the song a name.",
       modi: { dorisch: "Dorian", mixolydisch: "Mixolydian", aeolisch: "Aeolian", phrygisch: "Phrygian" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"],
       wischen: "← swipe →"
@@ -167,25 +179,26 @@
         bass: folge({ 0: 0, 4: 2, 8: 3, 12: 0 }),
         melodie: folge({ 0: 7, 1: 6, 2: 7, 4: 5, 5: 4, 6: 3, 8: 4, 9: 5, 10: 6, 12: 7, 14: 7 }),
         floete: folge({ 0: 4, 2: 4, 4: 3, 6: 5, 8: 6, 10: 4, 12: 4, 14: 2 }), rex: folge({ 15: 0 }) }) },
+    /* Saltarello: italienischer Springtanz im 3-3-2, die Schalmei springt, Echo antwortet */
     saltarello: { instrument: "schalmei", band: { trommel: "tamburin", floete: "floete", ketten: "stampfen" },
-      tempo: 126, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABBCCDD",
-      A: teil({ klopf: an([0, 6, 8, 14]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([4, 12]),
+      tempo: 132, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABBCCDD",
+      A: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([0, 6, 8, 14]),
         bass: folge({ 0: 0, 6: 0, 8: 4, 14: 4 }),
-        melodie: folge({ 0: 4, 2: 2, 3: 3, 4: 4, 6: 2, 7: 1, 8: 1, 10: 3, 11: 5, 12: 6, 14: 3, 15: 5 }) }),
-      B: teil({ klopf: an([0, 6, 8, 14]), schelle: an([3, 11]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([4, 12]),
-        bass: folge({ 0: 0, 4: 2, 8: 3, 12: 0 }),
-        melodie: folge({ 0: 7, 2: 4, 3: 5, 4: 5, 6: 3, 7: 4, 8: 4, 10: 6, 11: 5, 12: 4, 14: 2, 15: 1 }),
-        floete: folge({ 0: 4, 4: 7, 8: 6, 12: 4 }) }),
-      /* C: Ruf und Antwort – die Schalmei ruft, Echo antwortet */
-      C: teil({ klopf: an([0, 6, 8, 14]), trommel: an([0, 6, 8, 14]), ketten: an([4, 12]),
+        melodie: folge({ 0: 7, 1: 6, 2: 7, 3: 4, 4: 2, 6: 4, 7: 5, 8: 6, 9: 5, 10: 6, 11: 3, 12: 1, 14: 3, 15: 4 }) }),
+      B: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([0, 6, 8, 14]),
+        bass: folge({ 0: 2, 6: 2, 8: 0, 12: 3 }),
+        melodie: folge({ 0: 5, 1: 4, 2: 3, 3: 5, 4: 7, 6: 5, 7: 4, 8: 4, 9: 3, 10: 2, 11: 1, 12: 1, 14: 4, 15: 6 }),
+        floete: folge({ 0: 3, 6: 3, 8: 2, 12: 6, 14: 6 }) }),
+      /* C: Echo ruft mit dem Motiv, die Schalmei antwortet */
+      C: teil({ klopf: an([0, 8]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([0, 8]),
         bass: folge({ 0: 4, 8: 2 }),
-        melodie: folge({ 0: 6, 2: 3, 3: 1, 4: 3, 6: 6 }),
-        floete: folge({ 8: 5, 10: 3, 11: 2, 12: 3, 14: 0 }) }),
-      /* D: das Wirbeln zum Schluss */
-      D: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 5, 10, 13]), trommel: an([0, 2, 3, 6, 8, 10, 11, 14]), ketten: an([0, 4, 8, 12]),
-        bass: folge({ 0: 0, 4: 4, 8: 2, 12: 0, 14: 3 }),
-        melodie: folge({ 0: 4, 1: 5, 2: 4, 3: 2, 4: 3, 5: 1, 6: 6, 7: 4, 8: 5, 9: 4, 10: 3, 11: 5, 12: 2, 13: 4, 14: 1, 15: 2 }),
-        floete: folge({ 0: 7, 4: 6, 8: 7, 12: 4, 14: 6 }), rex: folge({ 15: 0 }) }) },
+        floete: folge({ 0: 6, 1: 5, 2: 6, 3: 3, 4: 1, 6: 3 }),
+        melodie: folge({ 8: 5, 9: 4, 10: 3, 11: 5, 12: 7, 14: 5 }) }),
+      /* D: alle springen mit – Melodie oben, Echo in Terzen */
+      D: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 4, 10, 12]), trommel: an([0, 2, 3, 6, 8, 10, 11, 14]), ketten: an([0, 3, 6, 8, 11, 14]),
+        bass: folge({ 0: 0, 4: 4, 8: 2, 12: 3 }),
+        melodie: folge({ 0: 7, 1: 6, 2: 7, 3: 4, 4: 6, 5: 4, 6: 3, 7: 4, 8: 5, 9: 4, 10: 3, 11: 2, 12: 4, 13: 5, 14: 6, 15: 7 }),
+        floete: folge({ 0: 4, 2: 4, 4: 3, 8: 3, 10: 5, 12: 6, 14: 4 }), rex: folge({ 15: 0 }) }) },
     ballade: { instrument: "laute", band: { trommel: "bodhran", floete: "gesang", ketten: "schnipsen" },
       tempo: 96, transpose: 0, modus: "dorisch", swing: 1, bordun: 0, variation: 2, ablauf: "ABCABCD",
       A: teil({ klopf: an([0, 8]), ketten: an([4, 12]), bass: folge({ 0: 0, 8: 4 }),
@@ -361,7 +374,128 @@
         floete: folge({ 0: 5, 4: 4, 8: 3, 12: 4 }), rex: folge({ 14: 0 }) }) }
   };
   const LIEDER = ["taverne", "saltarello", "ballade", "hafen", "wald", "markt", "schmiede", "trauer", "schlacht", "wiegen"];
-  const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg"];
+  const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg", "rast"];
+
+  /* ---------- Stimmungs-Generatoren ----------
+     Jede Stimmung ist ein Stil: Tonleiter, Tempo, Besetzung, Akkordfolgen (Bass-Zeilen je Viertel),
+     Rhythmen. Daraus wird bei jedem Aufruf ein neues Stück komponiert: Teil A stellt ein Motiv vor,
+     B variiert es über andere Akkorde, C gehört Echo, D bringt das Motiv mit voller Besetzung zurück.
+     Auf den Zählzeiten liegen immer Akkordtöne – so klingt es auch zufällig noch nach Musik. */
+  const STIL = {
+    kampf: { modus: ["phrygisch", "aeolisch"], tempo: [144, 160], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 3,
+      instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn"], ketten: ["ketten", "stampfen"] },
+      ablauf: ["AABACA", "AABCDD", "ABACABAD"], akkorde: [[0, 0, 4, 0], [0, 2, 3, 4], [0, 4, 2, 3], [0, 0, 2, 3], [2, 2, 3, 4]],
+      bass: ["puls", "galopp"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6]], lage: 3, dichte: 1, echo: "lang",
+      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], []], trommel: [[0, 3, 6, 8, 11, 14], [0, 2, 4, 6, 8, 10, 12, 13, 14, 15]],
+      ketten: [[4, 12], [0, 6, 8, 14]], rex: [0, 2] },
+    unterreich: { modus: ["phrygisch"], tempo: [58, 70], transpose: [-3, -5], swing: 0, bordun: 1, variation: 4,
+      instrument: ["drehleier", "glocken", "illusion"], band: { trommel: ["pauke"], floete: ["okarina", "gesang"], ketten: ["ketten"] },
+      ablauf: ["AB", "ABAC", "AABC"], akkorde: [[0, 0, 0, 1], [0, 0, 4, 0], [0, 0, 2, 0]],
+      bass: ["orgel", "halbe"], rhythmus: [[0, 6], [2, 8], [0, 4]], lage: 2, dichte: .5, echo: "fern", schraeg: .35,
+      klopf: [[]], schelle: [[]], trommel: [[0], [0, 12]], ketten: [[7], [5, 13], []], rex: [1, 2] },
+    reise: { modus: ["mixolydisch", "dorisch"], tempo: [96, 108], transpose: [0, 2, -3], swing: 1, bordun: 1, variation: 3,
+      instrument: ["mandoline", "laute", "harfe"], band: { trommel: ["bodhran", "trommel"], floete: ["panfloete", "floete"], ketten: ["rassel", "stampfen"] },
+      ablauf: ["AABA", "AABACA", "ABABCD"], akkorde: [[0, 4, 2, 0], [2, 0, 4, 0], [0, 0, 4, 2], [0, 2, 4, 0]],
+      bass: ["viertel", "halbe"], rhythmus: [[0, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6, 7]], lage: 3, dichte: .9, echo: "antwort",
+      klopf: [[0, 8]], schelle: [[4, 12], [2, 6, 10, 14]], trommel: [[0, 6, 8, 14], [0, 8]], ketten: [[2, 6, 10, 14]], rex: [0] },
+    spannung: { modus: ["aeolisch", "phrygisch"], tempo: [84, 96], transpose: [0, -2], swing: 0, bordun: 0, variation: 4,
+      instrument: ["glocken", "harfe", "illusion"], band: { trommel: ["pauke"], floete: ["okarina"], ketten: ["schnipsen", "rassel"] },
+      ablauf: ["AAAB", "AABA", "AABC"], akkorde: [[0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 2, 2], [0, 1, 0, 4]],
+      bass: ["puls"], rhythmus: [[0, 4], [0, 6], [4]], lage: 5, dichte: .45, echo: "fern", schraeg: .25,
+      klopf: [[]], schelle: [[]], trommel: [[0, 2], [0, 2, 8, 10]], ketten: [[0, 4, 8, 12]], rex: [2] },
+    sieg: { modus: ["mixolydisch"], tempo: [126, 138], transpose: [0, 2], swing: 0, bordun: 1, variation: 3,
+      instrument: ["laute", "dudelsack", "mandoline"], band: { trommel: ["tamburin", "trommel"], floete: ["horn", "floete"], ketten: ["klatschen", "stampfen"] },
+      ablauf: ["AABB", "AABBCD", "ABACAD"], akkorde: [[0, 2, 4, 0], [0, 4, 2, 0], [2, 0, 4, 0], [0, 0, 2, 4]],
+      bass: ["viertel", "puls"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 4, 6], [0, 2, 3, 4]], lage: 4, dichte: 1, echo: "lang",
+      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [0, 2, 4, 6, 8, 10, 12, 14]], trommel: [[0, 4, 6, 8, 12, 14], [0, 2, 4, 6, 8, 10, 12, 13, 14, 15]],
+      ketten: [[4, 12]], rex: [0, 1] },
+    rast: { modus: ["dorisch", "mixolydisch"], tempo: [76, 88], transpose: [0, 5, -2], swing: 1, bordun: 0, variation: 2,
+      instrument: ["harfe", "laute"], band: { trommel: ["bodhran"], floete: ["okarina", "gesang", "panfloete"], ketten: ["rassel", "schnipsen"] },
+      ablauf: ["AABB", "ABAC", "AABBCD"], akkorde: [[0, 0, 4, 4], [2, 2, 0, 0], [0, 0, 2, 0], [4, 4, 0, 0]],
+      bass: ["halbe"], rhythmus: [[0, 2, 4, 6], [0, 4, 6], [0, 3, 4]], lage: 3, dichte: .6, echo: "antwort",
+      klopf: [[0, 8], []], schelle: [[], [12]], trommel: [[0], []], ketten: [[4, 12], []], rex: [2] }
+  };
+  const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
+  const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
+  const naechsterTon = (ziel, erlaubt) => {
+    let best = null;
+    for (let r = 0; r <= 7; r++) if (erlaubt.includes(r % 7) && (best === null || Math.abs(r - ziel) < Math.abs(best - ziel) || (Math.abs(r - ziel) === Math.abs(best - ziel) && Math.random() < .5))) best = r;
+    return best;
+  };
+  function bassBauen(akk, art) {
+    const a = leer(), schritte = { puls: [0, 2, 4, 6, 8, 10, 12, 14], viertel: [0, 4, 8, 12], halbe: [0, 8], galopp: [0, 3, 6, 8, 11, 14], orgel: [0] }[art];
+    schritte.forEach(i => { a[i] = akk[Math.floor(i / 4)]; });
+    if (art === "halbe" || art === "orgel") [4, 12].forEach(i => { if (akk[i / 4] !== akk[i / 4 - 1]) a[i] = akk[i / 4]; });
+    return a;
+  }
+  /* Motiv: Rhythmus für eine halbe Taktlänge + Kontur; die zweite Hälfte wiederholt die Kontur über den neuen Akkorden */
+  function motivBauen(st) {
+    return { rhythmus: zufall(st.rhythmus), kontur: Array.from({ length: 6 }, () => zufall([-2, -1, -1, 1, 1, 2, 0])), start: st.lage + zufall([-1, 0, 1]) };
+  }
+  /* der Akkord, der an Schritt i wirklich klingt (letzter Basston davor) */
+  const klingt = (bass, i) => { for (let k = 0; k < SCHRITTE; k++) { const v = bass[(i - k + SCHRITTE) % SCHRITTE]; if (v >= 0) return v; } return 0; };
+  function melodieBauen(bass, motiv, st, versatz) {
+    const a = leer();
+    let ton = Math.max(0, Math.min(7, motiv.start + (versatz || 0)));
+    [0, 8].forEach((halb, h) => {
+      motiv.rhythmus.forEach((r, k) => {
+        const i = halb + r; if (i >= SCHRITTE) return;
+        if (h === 1 && k === motiv.rhythmus.length - 1 && Math.random() < .3) return; /* kleine Atempause am Ende */
+        if (st.dichte < 1 && k > 0 && Math.random() > st.dichte) return;
+        const wunsch = ton + motiv.kontur[k % motiv.kontur.length];
+        if (i % 2 === 0) ton = naechsterTon(wunsch, akkordToene(klingt(bass, i)));
+        else ton = Math.max(0, Math.min(7, wunsch));
+        if (st.schraeg && i % 2 === 1 && Math.random() < st.schraeg) ton = 1; /* die kleine Sekunde: unheimlich */
+        a[i] = ton;
+      });
+    });
+    return a;
+  }
+  /* Echos Stimme: lange Töne, Antworten in den Pausen oder ferne Einzeltöne – meist eine Terz neben der Melodie */
+  function echoBauen(bass, mel, art) {
+    const a = leer();
+    const setze = i => {
+      const toene = akkordToene(klingt(bass, i)), m = mel[i];
+      let wahl = toene.filter(t => m < 0 || (((t - m % 7) + 7) % 7 === 2 || ((t - m % 7) + 7) % 7 === 5));
+      if (!wahl.length) wahl = toene;
+      a[i] = naechsterTon(4, wahl);
+    };
+    if (art === "lang") [0, 4, 8, 12].forEach(i => { if (i % 8 === 0 || Math.random() < .6) setze(i); });
+    else if (art === "fern") [0, 8].forEach(i => { if (Math.random() < .7) setze(i); });
+    else for (let i = 0; i < SCHRITTE; i += 2) if (mel[i] < 0 && mel[(i + 15) % 16] < 0 && Math.random() < .8) setze(i);
+    return a;
+  }
+  function stimmungTeile(st, alt) {
+    const p1 = zufall(st.akkorde), p2 = zufall(st.akkorde.filter(x => x !== p1)) || p1, p3 = zufall(st.akkorde);
+    const bArt = zufall(st.bass), motiv = motivBauen(st), motiv2 = motivBauen(st);
+    const rhy = (liste, i) => an(liste[Math.min(i, liste.length - 1)] || []);
+    const teilVon = (akk, mel, fl, stufe) => {
+      const t = teilLeer();
+      t.bass = bassBauen(akk, bArt);
+      t.melodie = mel; t.floete = fl;
+      t.klopf = rhy(st.klopf, stufe); t.schelle = rhy(st.schelle, stufe); t.trommel = rhy(st.trommel, stufe); t.ketten = rhy(st.ketten, stufe);
+      if (Math.random() < .35) t.rex[15] = zufall(st.rex);
+      return t;
+    };
+    const b1 = bassBauen(p1, bArt), b2 = bassBauen(p2, bArt), b3 = bassBauen(p3, bArt);
+    const melA = melodieBauen(b1, motiv, st), melB = melodieBauen(b2, motiv, st, 1);
+    const A = teilVon(p1, melA, st.echo === "antwort" ? echoBauen(b1, melA, "antwort") : leer(), 0);
+    const B = teilVon(p2, melB, echoBauen(b2, melB, st.echo), 0);
+    const flC = melodieBauen(b3, motiv2, st, 1);
+    const C = teilVon(p3, leer(), flC, 0); C.melodie = b3.map((v, i) => i % 8 === 0 ? BASS_STUFEN[klingt(b3, i)] % 7 : -1);
+    C.klopf = leer(); C.schelle = leer();
+    const melD = melodieBauen(b1, motiv, st, 1);
+    const D = teilVon(p1, melD, echoBauen(b1, melD, "lang"), 1);
+    return { A, B, C, D };
+  }
+  function stimmungLied(k, behalten) {
+    const st = STIL[k];
+    const basis = behalten ? { tempo: S.tempo, transpose: S.transpose, modus: S.modus, instrument: S.instrument, band: S.band, ablauf: S.ablauf, swing: S.swing, bordun: S.bordun }
+      : { tempo: zwischen(st.tempo), transpose: zufall(st.transpose), modus: zufall(st.modus), instrument: zufall(st.instrument),
+          band: { trommel: zufall(st.band.trommel), floete: zufall(st.band.floete), ketten: zufall(st.band.ketten) },
+          ablauf: zufall(st.ablauf), swing: st.swing, bordun: st.bordun };
+    return pruefen(Object.assign(basis, { variation: st.variation, teile: stimmungTeile(st), vol: S.vol, mute: S.mute, stimmung: k }));
+  }
   const kopie = o => JSON.parse(JSON.stringify(o));
 
   /* ---------- Zustand (gemerkt im Browser) ---------- */
@@ -395,6 +529,46 @@
   let zugeklappt = {};
   try { zugeklappt = JSON.parse(localStorage.getItem("imres-lautenwerk-zu") || "{}") || {}; } catch (_) {}
   let bearbeite = "A", kopierZiel = null;
+  /* ---------- Eigene Lieder: lokal im Browser oder gemeinsam auf dem Server der Questtafel ---------- */
+  const LIED_SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
+  let lokaleLieder = [], gruppenLieder = [], gruppeOk = false, geladen = null, speicherForm = null;
+  try { lokaleLieder = JSON.parse(localStorage.getItem("imres-lautenwerk-lieder") || "[]") || []; } catch (_) {}
+  const lokalMerken = () => { try { localStorage.setItem("imres-lautenwerk-lieder", JSON.stringify(lokaleLieder)); } catch (_) {} };
+  function liedServer(pfad, body) {
+    const h = { apikey: LIED_SERVER.key, "Content-Type": "application/json" };
+    if (/^eyJ/.test(LIED_SERVER.key)) h.Authorization = "Bearer " + LIED_SERVER.key;
+    return fetch(LIED_SERVER.url + pfad, body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) })
+      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
+  }
+  function gruppeLaden() {
+    return liedServer("/rest/v1/lieder?select=id,name,code,erstellt&order=erstellt.desc&limit=200")
+      .then(l => { gruppenLieder = Array.isArray(l) ? l : []; gruppeOk = true; neuAuswahl(); })
+      .catch(() => { gruppeOk = false; });
+  }
+  function eigeneAuswahl(T) {
+    const opt = (q, l) => '<option value="' + q + ":" + esc(l.id) + '"' + (geladen && geladen.quelle === q && String(geladen.id) === String(l.id) ? " selected" : "") + ">" + esc(l.name) + "</option>";
+    return '<select class="lw-gespeichert" data-feld="gespeichert" aria-label="' + esc(T.gespeichert(lokaleLieder.length + gruppenLieder.length)) + '">' +
+      '<option value="">' + T.gespeichert(lokaleLieder.length + gruppenLieder.length) + "</option>" +
+      (gruppenLieder.length ? '<optgroup label="' + esc(T.gruppe) + '">' + gruppenLieder.map(l => opt("g", l)).join("") + "</optgroup>" : "") +
+      (lokaleLieder.length ? '<optgroup label="' + esc(T.lokal) + '">' + lokaleLieder.map(l => opt("l", l)).join("") + "</optgroup>" : "") +
+      "</select>";
+  }
+  function neuAuswahl() { const alt = root.querySelector(".lw-gespeichert"); if (alt) alt.outerHTML = eigeneAuswahl(t()); }
+  let liedPw = "";
+  try { liedPw = localStorage.getItem("imres-tafel-pw") || ""; } catch (_) {}
+  function passwort() {
+    const pruefe = pw => liedServer("/rest/v1/rpc/tafel_pruefen", { passwort: pw }).then(ok => ok === true);
+    return (liedPw ? pruefe(liedPw) : Promise.resolve(false)).then(ok => {
+      if (ok) return liedPw;
+      const pw = window.prompt(t().pwFrage, "");
+      if (!pw) return null;
+      return pruefe(pw).then(ok2 => {
+        if (!ok2) { window.alert(t().pwFalsch); return null; }
+        liedPw = pw; try { localStorage.setItem("imres-tafel-pw", pw); } catch (_) {}
+        return pw;
+      });
+    });
+  }
   const merken = () => { try { localStorage.setItem("imres-lautenwerk2", JSON.stringify(S)); } catch (_) {} };
 
   /* ---------- Lied als kurzer Code für den Link ---------- */
@@ -1022,8 +1196,18 @@
       anzeige.push(ev);
       naechste += schrittDauer();
       schritt = (schritt + 1) % SCHRITTE;
-      if (schritt === 0) abschnitt = (abschnitt + 1) % S.ablauf.length;
+      if (schritt === 0) {
+        abschnitt = (abschnitt + 1) % S.ablauf.length;
+        /* Stimmung: nach jedem Durchgang ein leicht abgewandeltes neues Stück */
+        if (abschnitt === 0 && S.stimmung && STIL[S.stimmung]) setTimeout(stimmungWeiter, 0);
+      }
     }
+  }
+  function stimmungWeiter() {
+    if (!S.stimmung || !STIL[S.stimmung]) return;
+    const neu = stimmungLied(S.stimmung, true);
+    S.teile = neu.teile;
+    merken(); zeichnen(); knoepfe();
   }
   function start() {
     audioStart();
@@ -1359,8 +1543,16 @@
         LIEDER.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
         '<button type="button" data-vorlage="zufall">' + T.zufall + '</button><button type="button" data-vorlage="leer">' + T.leeren + "</button>" +
       "</div>" +
+      '<div class="lw-vorlagen lw-eigene"><span>' + T.eigene + ":</span>" + eigeneAuswahl(T) +
+        '<button type="button" data-aktion="speichern">' + T.speichern + "</button>" +
+        (geladen ? '<button type="button" data-aktion="loeschen">' + T.loeschen + "</button>" : "") +
+        (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
+          (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
+          '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") +
+      "</div>" +
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
-        STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
+        STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
+        (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
         '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
       "</div>" +
       '<div class="lw-scroll"><div class="lw-raster">' + raster + "</div></div>" +
@@ -1418,6 +1610,7 @@
   /* ---------- Bedienung ---------- */
   function antippen(z) {
     const spur = z.dataset.spur, i = +z.dataset.s, zeile = +z.dataset.zeile, daten = S.teile[bearbeite][spur];
+    if (S.stimmung) { S.stimmung = null; const w = root.querySelector(".lw-wandelt"); if (w) w.remove(); root.querySelectorAll(".lw-stimmungen [data-vorlage]").forEach(b => b.classList.remove("an")); }
     if (SPUR[spur].art === "an") daten[i] = daten[i] >= 0 ? -1 : 0;
     else daten[i] = daten[i] === zeile ? -1 : zeile;
     root.querySelectorAll('.lw-zelle[data-spur="' + spur + '"][data-s="' + i + '"]').forEach(c => {
@@ -1454,6 +1647,44 @@
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
     const tl = e.target.closest(".lw-teil");
     if (tl) { bearbeite = tl.dataset.teil; kopierZiel = null; zeichnen(); knoepfe(); return; }
+    const ak = e.target.closest("[data-aktion]");
+    if (ak && ["speichern", "abbrechen", "nurhier", "fueralle", "loeschen"].includes(ak.dataset.aktion)) {
+      const a = ak.dataset.aktion, T = t();
+      const nameFeld = root.querySelector(".lw-liedname"), name = nameFeld ? nameFeld.value.trim().slice(0, 60) : "";
+      if (a === "speichern") { speicherForm = { name: geladen ? geladen.name : "" }; zeichnen(); knoepfe(); const f = root.querySelector(".lw-liedname"); if (f) f.focus(); return; }
+      if (a === "abbrechen") { speicherForm = null; zeichnen(); knoepfe(); return; }
+      if ((a === "nurhier" || a === "fueralle") && !name) { status(T.keinName); return; }
+      if (a === "nurhier") {
+        const id = Date.now().toString(36);
+        lokaleLieder.unshift({ id, name, code: kodieren() }); lokalMerken();
+        geladen = { quelle: "l", id, name }; speicherForm = null; zeichnen(); knoepfe(); status(T.gespeichertOk(name)); return;
+      }
+      if (a === "fueralle") {
+        const code = kodieren();
+        passwort().then(pw => {
+          if (!pw) return;
+          return liedServer("/rest/v1/rpc/lied_speichern", { passwort: pw, titel: name, liedcode: code }).then(id => {
+            geladen = { quelle: "g", id, name }; speicherForm = null;
+            return gruppeLaden().then(() => { zeichnen(); knoepfe(); status(T.gespeichertOk(name)); });
+          });
+        }).catch(() => status(T.serverFehler));
+        return;
+      }
+      if (a === "loeschen" && geladen) {
+        if (!window.confirm(T.loeschenFrage(geladen.name))) return;
+        const g = geladen;
+        if (g.quelle === "l") {
+          lokaleLieder = lokaleLieder.filter(l => l.id !== g.id); lokalMerken();
+          geladen = null; zeichnen(); knoepfe(); status(T.geloescht(g.name)); return;
+        }
+        passwort().then(pw => {
+          if (!pw) return;
+          return liedServer("/rest/v1/rpc/lied_loeschen", { passwort: pw, lied_id: g.id })
+            .then(() => gruppeLaden()).then(() => { geladen = null; zeichnen(); knoepfe(); status(T.geloescht(g.name)); });
+        }).catch(() => status(T.serverFehler));
+        return;
+      }
+    }
     const kp = e.target.closest("[data-kopiere]");
     if (kp) {
       const von = bearbeite, nach = kp.dataset.kopiere;
@@ -1473,7 +1704,10 @@
       const k = v.dataset.vorlage, mix = { vol: S.vol, mute: S.mute };
       if (k === "leer") S.teile = { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() };
       else if (k === "zufall") S = zufallsLied();
+      else if (STIL[k]) S = stimmungLied(k);
       else S = pruefen(ausVorlage(k, mix));
+      geladen = null;
+      if (k !== "leer" && !STIL[k]) S.stimmung = null;
       bearbeite = "A";
       merken(); neuGezeichnet(); saitenVorbereiten();
       return;
@@ -1498,6 +1732,14 @@
     if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
     if (f === "ablauf") { S.ablauf = e.target.value; merken(); }
+    if (f === "gespeichert" && e.target.value) {
+      const [q, id] = e.target.value.split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
+      const d = l && dekodieren(l.code);
+      if (d) {
+        d.vol = S.vol; d.mute = S.mute; S = d; S.stimmung = null; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
+        merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
+      }
+    }
     if (f === "instrument") {
       const spur = e.target.dataset.spur || "melodie";
       if (spur === "melodie") S.instrument = e.target.value; else S.band[spur] = e.target.value;
@@ -1604,6 +1846,12 @@
 .lw-vorlagen button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .82rem; padding: .25rem .7rem; cursor: pointer; }
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
+.lw-vorlagen button.an { border-color: var(--ember); color: var(--night); background: var(--ember); }
+.lw-wandelt { font-family: var(--hand); font-size: 1.15rem; color: var(--ember); margin-left: .3rem; animation: lwpuls 2.4s ease-in-out infinite; }
+@keyframes lwpuls { 50% { opacity: .45; } }
+.lw-gespeichert { font: inherit; font-size: .82rem; background: var(--night); color: var(--vellum); border: 1px solid var(--line); padding: .25rem .4rem; max-width: 16rem; }
+.lw-speicherform { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+.lw-liedname { font: inherit; font-size: .85rem; background: var(--night); color: var(--vellum); border: 1px solid var(--ember); padding: .25rem .45rem; width: 12rem; }
 .lw-tipp { flex-basis: 100%; margin: .2rem 0 0; font-size: .8rem; font-style: italic; color: var(--ash); }
 
 .lw-scroll { overflow-x: auto; margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); padding-inline: clamp(1.2rem, 4vw, 2rem); -webkit-overflow-scrolling: touch; }
@@ -1648,6 +1896,7 @@
   document.head.appendChild(css);
 
   zeichnen();
+  gruppeLaden().then(() => { if (gruppeOk) { zeichnen(); knoepfe(); } });
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); zeichnen(); knoepfe(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   if (ausLink) {
