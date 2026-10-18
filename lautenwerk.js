@@ -66,7 +66,8 @@
   const KULISSEN = ["keine", "taverne", "feuer", "regen", "wald", "hoehle", "meer", "sturm"];
   const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "wald", spannung: "hoehle", sieg: "taverne", kampf: "keine",
     taverne: "taverne", hafen: "meer", wald: "wald", markt: "taverne", schmiede: "feuer", wiegen: "feuer", trauer: "regen",
-    ballade: "taverne", saltarello: "taverne", schlacht: "sturm" };
+    ballade: "taverne", saltarello: "taverne", schlacht: "sturm",
+    auenland: "wald", elben: "wald", zwerge: "hoehle", reiter: "keine", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   /* lustige Spieltisch-Momente */
   const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk"];
@@ -97,7 +98,9 @@
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
       lieder: "Lieder", stimmungen: "Stimmungen für Imre", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
       vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Marktgewusel", schmiede: "⚒ Zwergenschmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
-        kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lagerfeuer" },
+        kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lagerfeuer",
+        auenland: "🌿 Auenland", elben: "✨ Elbenhalle", zwerge: "⛏ Zwergenbinge", reiter: "🐎 Ritt der Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kaminballade", shanty: "🌊 Seemannslied", pilger: "⛪ Pilgerweg" },
+      klangwelten: "Klangwelten", klangTipp: "Volksmusik und Fantasy-Klänge – jedes Mal neu komponiert, im Stil vertraut, aber immer eigene Melodien.",
       zufall: "🎲 Improvisieren", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
       teilen: "🔗 Lied teilen", kopiert: "Link kopiert – schick ihn an die Gruppe!", geteilt: "Geteilt!",
@@ -126,7 +129,7 @@
       gespeichertOk: n => "„" + n + "“ wurde gespeichert.", geloescht: n => "„" + n + "“ wurde gelöscht.", liedGeladen: n => "„" + n + "“ geladen.",
       pwFrage: "Passwort der Questtafel (für gemeinsame Lieder):", pwFalsch: "Das Passwort stimmt nicht.", serverFehler: "Der Server ist gerade nicht erreichbar.",
       loeschenFrage: n => "„" + n + "“ wirklich löschen?", keinName: "Bitte gib dem Lied einen Namen.",
-      modi: { dorisch: "Dorisch", mixolydisch: "Mixolydisch", aeolisch: "Äolisch", phrygisch: "Phrygisch" },
+      modi: { dorisch: "Dorisch", mixolydisch: "Mixolydisch", aeolisch: "Äolisch", phrygisch: "Phrygisch", ionisch: "Dur", lydisch: "Lydisch" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B", "H"],
       wischen: "← wischen →"
     },
@@ -148,7 +151,9 @@
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
       lieder: "Songs", stimmungen: "Moods for Imre", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
       vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market bustle", schmiede: "⚒ Dwarven forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
-        kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Campfire" },
+        kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Campfire",
+        auenland: "🌿 Shire green", elben: "✨ Elven hall", zwerge: "⛏ Dwarven deep", reiter: "🐎 Ride of the riders", dorffest: "💃 Village fair", kamin: "🕯 Fireside ballad", shanty: "🌊 Sea shanty", pilger: "⛪ Pilgrim's way" },
+      klangwelten: "Soundscapes", klangTipp: "Folk music and fantasy sounds – freshly composed every time, familiar in style but always with original melodies.",
       zufall: "🎲 Improvise", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
       teilen: "🔗 Share song", kopiert: "Link copied – send it to the party!", geteilt: "Shared!",
@@ -177,7 +182,7 @@
       gespeichertOk: n => "“" + n + "” was saved.", geloescht: n => "“" + n + "” was deleted.", liedGeladen: n => "“" + n + "” loaded.",
       pwFrage: "Quest board password (for shared songs):", pwFalsch: "That password is wrong.", serverFehler: "The server can't be reached right now.",
       loeschenFrage: n => "Really delete “" + n + "”?", keinName: "Please give the song a name.",
-      modi: { dorisch: "Dorian", mixolydisch: "Mixolydian", aeolisch: "Aeolian", phrygisch: "Phrygian" },
+      modi: { dorisch: "Dorian", mixolydisch: "Mixolydian", aeolisch: "Aeolian", phrygisch: "Phrygian", ionisch: "Major", lydisch: "Lydian" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"],
       wischen: "← swipe →"
     }
@@ -189,7 +194,9 @@
     dorisch: [0, 2, 3, 5, 7, 9, 10, 12],
     mixolydisch: [0, 2, 4, 5, 7, 9, 10, 12],
     aeolisch: [0, 2, 3, 5, 7, 8, 10, 12],
-    phrygisch: [0, 1, 3, 5, 7, 8, 10, 12]
+    phrygisch: [0, 1, 3, 5, 7, 8, 10, 12],
+    ionisch: [0, 2, 4, 5, 7, 9, 11, 12],
+    lydisch: [0, 2, 4, 6, 7, 9, 11, 12]
   };
   const MODUS_LISTE = Object.keys(MODI);
   const BASS_STUFEN = [0, 2, 3, 4, 6]; /* Grundton, Terz, Quarte, Quinte, Septime */
@@ -428,6 +435,7 @@
   };
   const LIEDER = ["taverne", "saltarello", "ballade", "hafen", "wald", "markt", "schmiede", "trauer", "schlacht", "wiegen"];
   const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg", "rast"];
+  const KLANGWELTEN = ["auenland", "elben", "zwerge", "reiter", "dorffest", "kamin", "shanty", "pilger"];
 
   /* ---------- Stimmungs-Generatoren ----------
      Jede Stimmung ist ein Stil: Tonleiter, Tempo, Besetzung, Akkordfolgen (Bass-Zeilen je Viertel),
@@ -466,7 +474,56 @@
       instrument: ["harfe", "laute"], band: { trommel: ["bodhran"], floete: ["okarina", "gesang", "panfloete"], ketten: ["rassel", "schnipsen"] },
       ablauf: ["AABB", "ABAC", "AABBCD"], akkorde: [[0, 0, 4, 4], [2, 2, 0, 0], [0, 0, 2, 0], [4, 4, 0, 0]],
       bass: ["halbe"], rhythmus: [[0, 2, 4, 6], [0, 4, 6], [0, 3, 4]], lage: 3, dichte: .6, echo: "antwort",
-      klopf: [[0, 8], []], schelle: [[], [12]], trommel: [[0], []], ketten: [[4, 12], []], rex: [2] }
+      klopf: [[0, 8], []], schelle: [[], [12]], trommel: [[0], []], ketten: [[4, 12], []], rex: [2] },
+    /* ---- Klangwelten: Volksmusik und Fantasy-Stile (eigene Melodien, nur der Charakter erinnert) ---- */
+    /* grünes Hügelland: Dur, hüpfend, Flöte antwortet */
+    auenland: { modus: ["ionisch"], tempo: [104, 116], transpose: [0, 2, -3], swing: 1, bordun: 1, variation: 3,
+      instrument: ["mandoline", "harfe", "laute"], band: { trommel: ["bodhran"], floete: ["floete", "panfloete"], ketten: ["klatschen", "loeffel", "schnipsen"] },
+      ablauf: ["AABA", "AABBCD", "ABACAD"], akkorde: [[0, 2, 0, 3], [0, 3, 2, 0], [2, 0, 3, 0], [0, 1, 2, 3], [0, 0, 2, 3]],
+      bass: ["viertel", "halbe"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 3, 4, 6, 7], [0, 2, 4, 5, 6]], lage: 4, dichte: .9, echo: "antwort",
+      klopf: [[0, 8], [0, 6, 8, 14]], schelle: [[], [4, 12]], trommel: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
+    /* Halle der Elben: lydisch schwebend, langsam, Harfe und Gesang */
+    elben: { modus: ["lydisch", "aeolisch"], tempo: [60, 72], transpose: [0, 2, -2], swing: 0, bordun: 1, variation: 2,
+      instrument: ["harfe", "glocken", "illusion"], band: { trommel: ["pauke"], floete: ["gesang", "floete"], ketten: ["schnipsen"] },
+      ablauf: ["AB", "AABC", "ABAC"], akkorde: [[0, 0, 3, 3], [0, 1, 0, 4], [0, 3, 1, 0], [0, 0, 4, 4]],
+      bass: ["orgel", "halbe"], rhythmus: [[0, 4], [0, 4, 6], [0, 2, 4], [0, 6]], lage: 5, dichte: .55, echo: "lang",
+      klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[], [12]], rex: [2] },
+    /* Hallen unter dem Berg: tief, schwer, Hörner, Hammer im 3-3-2 */
+    zwerge: { modus: ["aeolisch", "dorisch"], tempo: [84, 96], transpose: [-3, -5, -2], swing: 0, bordun: 1, variation: 3,
+      instrument: ["drehleier", "fidel", "laute"], band: { trommel: ["pauke", "trommel"], floete: ["horn", "gesang"], ketten: ["stampfen", "ketten", "loeffel"] },
+      ablauf: ["AABACA", "AABB", "AABCDD"], akkorde: [[0, 0, 4, 0], [0, 2, 0, 4], [0, 4, 2, 3], [0, 0, 2, 4]],
+      bass: ["galopp", "halbe"], rhythmus: [[0, 3, 4, 6], [0, 2, 4, 6], [0, 3, 6]], lage: 2, dichte: .8, echo: "lang",
+      klopf: [[0, 8]], schelle: [[]], trommel: [[0, 3, 6, 8, 11, 14], [0, 8]], ketten: [[0, 3, 6, 8, 11, 14], [3, 11]], rex: [0, 2] },
+    /* Reiter über die Ebene: galoppierend, heroisch, Horn und Fidel */
+    reiter: { modus: ["dorisch", "aeolisch"], tempo: [126, 138], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 3,
+      instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["trommel", "bodhran"], floete: ["horn", "floete"], ketten: ["stampfen", "rassel"] },
+      ablauf: ["AABA", "AABCDD", "ABACAD"], akkorde: [[0, 4, 2, 0], [0, 4, 3, 0], [0, 2, 4, 0], [0, 4, 0, 3]],
+      bass: ["galopp"], rhythmus: [[0, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 3, 4, 6]], lage: 4, dichte: .95, echo: "lang",
+      klopf: [[0, 8]], schelle: [[]], trommel: [[0, 3, 4, 8, 11, 12], [0, 2, 3, 4, 8, 10, 11, 12]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0] },
+    /* Volkstanz auf dem Dorfplatz: flott, Fiedel, Klatschen und Stampfen */
+    dorffest: { modus: ["mixolydisch"], tempo: [120, 134], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 3,
+      instrument: ["fidel", "dudelsack", "drehleier"], band: { trommel: ["bodhran", "tamburin"], floete: ["floete"], ketten: ["klatschen", "stampfen", "krug"] },
+      ablauf: ["AABB", "AABBCD", "ABABCD"], akkorde: [[0, 4, 0, 3], [0, 2, 3, 0], [0, 0, 4, 3], [0, 2, 0, 3]],
+      bass: ["viertel", "puls"], rhythmus: [[0, 1, 2, 3, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 2, 4, 5, 6]], lage: 4, dichte: 1, echo: "antwort",
+      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [4, 12]], trommel: [[0, 4, 6, 8, 12, 14], [0, 2, 4, 6, 8, 10, 12, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0, 1] },
+    /* Ballade am Kamin: ruhig erzählend, Laute und leise Stimme */
+    kamin: { modus: ["aeolisch", "dorisch"], tempo: [70, 80], transpose: [0, -2, 3], swing: 1, bordun: 0, variation: 2,
+      instrument: ["laute", "harfe"], band: { trommel: ["bodhran"], floete: ["gesang", "okarina"], ketten: ["schnipsen"] },
+      ablauf: ["AABA", "ABAB", "AABC"], akkorde: [[0, 4, 2, 0], [0, 2, 3, 0], [0, 4, 0, 3], [0, 1, 2, 3]],
+      bass: ["halbe"], rhythmus: [[0, 2, 4, 6], [0, 3, 4, 6], [0, 4, 6]], lage: 3, dichte: .7, echo: "antwort",
+      klopf: [[], [0, 8]], schelle: [[]], trommel: [[], [0]], ketten: [[]], rex: [2] },
+    /* Seemannslied: wiegend, die Mannschaft antwortet, Krüge auf dem Tisch */
+    shanty: { modus: ["dorisch", "aeolisch"], tempo: [96, 108], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 3,
+      instrument: ["mandoline", "laute", "drehleier"], band: { trommel: ["trommel", "bodhran"], floete: ["gesang", "horn"], ketten: ["krug", "stampfen"] },
+      ablauf: ["AABA", "ABAB", "AABBCD"], akkorde: [[0, 4, 0, 3], [0, 0, 4, 0], [0, 2, 0, 3], [0, 4, 2, 0]],
+      bass: ["viertel"], rhythmus: [[0, 2, 4, 6], [0, 3, 4, 6], [0, 2, 3, 4]], lage: 3, dichte: .85, echo: "antwort",
+      klopf: [[0, 8]], schelle: [[]], trommel: [[0, 8], [0, 6, 8]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0] },
+    /* Pilgerweg: getragen wie ein alter Choral, Gesang über Orgelpunkt */
+    pilger: { modus: ["dorisch", "aeolisch", "mixolydisch"], tempo: [62, 72], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 2,
+      instrument: ["drehleier", "glocken", "harfe"], band: { trommel: ["pauke"], floete: ["gesang"], ketten: ["schnipsen"] },
+      ablauf: ["AB", "AABA", "ABAC"], akkorde: [[0, 4, 0, 0], [0, 2, 0, 3], [0, 0, 4, 0]],
+      bass: ["orgel", "halbe"], rhythmus: [[0, 4], [0, 4, 6], [0, 2, 4]], lage: 4, dichte: .6, echo: "lang",
+      klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[]], rex: [2] }
   };
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
@@ -681,7 +738,7 @@
     /* negative Tonart (z. B. -2) steht als "--2" im Code – vor dem Zerlegen schützen */
     const p = String(code).replace(/--(\d)/g, "-~$1").split("-").map(x => x.replace(/^~/, "-"));
     if (p[0] === "4" && p.length === 10 + 4 * SPUREN.length) {
-      const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, 3, 0)],
+      const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, MODUS_LISTE.length - 1, 0)],
         swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: String(p[7]).toUpperCase(),
         ...MIX_START(), teile: {}, band: BAND_START() };
       const mix = p[8].match(/m?\d/g);
@@ -699,7 +756,7 @@
       return pruefen(s);
     }
     if ((p[0] === "2" && p.length === 9 + 2 * SPUREN.length) || (p[0] === "3" && p.length === 10 + 2 * SPUREN.length)) {
-      const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, 3, 0)],
+      const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, MODUS_LISTE.length - 1, 0)],
         swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: ABLAEUFE[zahl(p[7], 0, ABLAEUFE.length - 1, 0)],
         ...MIX_START(), teile: {} };
       const mix = p[8].match(/m?\d/g);
@@ -716,7 +773,7 @@
     }
     /* alte Links (nur Barradin, ein Teil) */
     if ((p.length === 9 || p.length === 10) && p[7].length === SCHRITTE && p[8].length === SCHRITTE) {
-      const s = { tempo: zahl(p[0], 50, 180, 110), transpose: zahl(p[1], -5, 6, 0), modus: MODUS_LISTE[zahl(p[2], 0, 3, 0)],
+      const s = { tempo: zahl(p[0], 50, 180, 110), transpose: zahl(p[1], -5, 6, 0), modus: MODUS_LISTE[zahl(p[2], 0, MODUS_LISTE.length - 1, 0)],
         swing: zahl(p[3], 0, 1, 0), bordun: zahl(p[4], 0, 1, 1), variation: 0, ablauf: "A", ...MIX_START(),
         teile: { A: teil({ klopf: unhex(p[5]), schelle: unhex(p[6]), bass: unziffern(p[7], 4), melodie: unziffern(p[8], 7) }), B: teilLeer() } };
       return pruefen(s);
@@ -2021,6 +2078,8 @@
           STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div>" + intRegler(T) +
           '<select class="lw-gespeichert lw-pult-lieder" data-feld="liedwahl"><option value="">' + T.liedWaehlen + "</option>" +
             LIEDER.map(k => '<option value="' + k + '">' + T.vorlagen[k] + "</option>").join("") + "</select></section>" +
+        '<section><h4>🌍 ' + T.klangwelten + '</h4><div class="lw-pult-gitter">' +
+          KLANGWELTEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div></section>" +
         '<section class="lw-pult-mix">' + mixRegler(T) + "</section>" +
         '<section><h4>' + T.kulisse + '</h4><div class="lw-pult-gitter">' +
           KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
@@ -2247,6 +2306,8 @@
       '<div class="lw-vorlagen lw-effekte"><span>🎭 ' + T.momente + ":</span>" + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + fxRegler(T) + "</div>" +
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
+        '<span class="lw-klangwelt-titel">🌍 ' + T.klangwelten + ":</span>" +
+        KLANGWELTEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
         (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
         intRegler(T) + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>" + '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
       "</div>" +
@@ -2633,6 +2694,7 @@
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
 .lw-intensitaet { flex: 1 1 100%; margin-top: .5rem; }
+.lw-klangwelt-titel { flex: 1 1 100%; margin-top: .3rem; font-size: .85rem; color: var(--ash); }
 .lw-stimm-mix { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: flex-end; margin-top: .4rem; }
 .lw-intensitaet input { width: 100%; accent-color: #c0502a; }
 .lw-master input, .lw-hallregler input, .lw-kulregler input { width: 7rem; }
