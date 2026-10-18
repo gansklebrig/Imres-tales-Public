@@ -250,51 +250,57 @@
       return normieren(a, .9);
     },
     tuer(sr) {
-      const knarr = zz(1.6, 2.3), a = new Float32Array(Math.floor((knarr + 1) * sr));
-      /* Knarren = Haftgleiten: einzelne Rucke regen die Holzresonanzen an */
-      const R = [[zz(420, 520), 12, 1], [zz(1050, 1250), 16, .7], [zz(2200, 2500), 20, .4], [zz(3400, 3800), 22, .2]].map(([f, q, g]) => { const F = new SVF(sr); F.setze(f, q); F.g = g; return F; });
-      let rate = zz(40, 70), zielRate = rate, phase = 0, i = 0, abschnitt = 0;
-      const n = Math.floor(knarr * sr), pausen = [zz(.25, .35), zz(.6, .75)].map(x => [x * n, x * n + zz(.04, .12) * sr]);
-      for (; i < n; i++) {
-        if (i % 1200 === 0) zielRate = zz(25, 160);
-        rate += (zielRate - rate) * .0015;
-        const r = i / n, pause = pausen.some(([p0, p1]) => i > p0 && i < p1);
-        phase += rate / sr;
+      const knarr = zz(1.7, 2.3), a = new Float32Array(Math.floor((knarr + 1) * sr)), n = Math.floor(knarr * sr);
+      /* Knarren = Haftgleiten der Angel: die Ruckrate IST die gehörte Tonhöhe (tiefes Ächzen bis hohes Quietschen),
+         die Holzresonanzen färben sie */
+      const R = [[zz(380, 460), 14, 1], [zz(900, 1100), 18, .8], [zz(1900, 2300), 22, .5], [zz(3100, 3500), 25, .25]].map(([f, q, g]) => { const F = new SVF(sr); F.setze(f, q); F.g = g; return F; });
+      const punkte = [], teile = 3 + Math.floor(Math.random() * 2);
+      for (let k = 0; k <= teile; k++) punkte.push(k === 0 ? zz(90, 160) : Math.random() < .5 ? zz(110, 220) : zz(260, 520));
+      let phase = 0, mod = 0, modZiel = 1;
+      for (let i = 0; i < n; i++) {
+        const r = i / n, pos = r * teile, k = Math.floor(pos), f = pos - k, w = f * f * (3 - 2 * f);
+        const rate = punkte[k] + (punkte[Math.min(k + 1, teile)] - punkte[k]) * w;
+        if (i % 600 === 0) modZiel = zz(.45, 1);
+        mod += (modZiel - mod) * .003;
+        phase += rate * (1 + zz(-.04, .04)) / sr;
         let x = 0;
-        if (phase >= 1) { phase -= 1; if (!pause) x = zz(.4, 1) * (Math.random() < .1 ? 1.6 : 1); }
+        if (phase >= 1) { phase -= 1; x = zz(.6, 1); }
         let y = 0; R.forEach(F => { y += F.tick(x) * F.g; });
-        a[i] = y * Math.min(1, r * 12, (1 - r) * 8);
-        abschnitt = r;
+        a[i] = y * mod * Math.min(1, r * 10, (1 - r) * 6);
       }
-      /* zufallen: dumpfer Schlag, Holz, Riegel */
+      /* Knarren für sich auf kräftigen Pegel bringen, dann zufallen lassen */
+      let q = 0; for (let i = 0; i < n; i++) q += a[i] * a[i];
+      const f = .22 / Math.sqrt(q / n); for (let i = 0; i < n; i++) a[i] = Math.tanh(a[i] * f * 1.4);
       const z = knarr + .05;
-      mode(a, sr, z, zz(62, 75), .09, 1.1); mode(a, sr, z, zz(140, 170), .04, .6); mode(a, sr, z, zz(330, 380), .02, .3);
-      stoss(a, sr, z, 400, .8, .9, .06);
-      mode(a, sr, z + zz(.04, .08), zz(2300, 2800), .015, .25); stoss(a, sr, z + .06, 3500, 2, .2, .01);
-      tiefpass(a, sr, 6000);
-      return normieren(a, .9);
+      mode(a, sr, z, zz(62, 75), .09, .9); mode(a, sr, z, zz(140, 170), .05, .7); mode(a, sr, z, zz(300, 360), .03, .5);
+      stoss(a, sr, z, 500, .8, 1.2, .07);
+      mode(a, sr, z + zz(.05, .08), zz(2300, 2800), .012, .3); stoss(a, sr, z + .07, 3500, 2, .25, .01);
+      tiefpass(a, sr, 6500);
+      return normieren(a, .95);
     },
     donner(sr) {
       const D = zz(5.5, 7), a = new Float32Array(Math.floor(D * sr));
-      /* Krachen: ein dichter Schwarm scharfer Risse */
-      for (let k = 0; k < 40; k++) { const t = Math.pow(Math.random(), 2) * .35; stoss(a, sr, t, zz(1500, 5000), .7, zz(.2, .8) * (1 - t * 2), zz(.004, .02)); }
-      /* Grollen: tiefes Rauschen mit vielen einzelnen Rollwellen */
+      /* Krachen: ein reißendes Knattern über die erste halbe Sekunde, kräftig im Mittenbereich */
+      for (let k = 0; k < 70; k++) {
+        const t = Math.pow(Math.random(), 1.6) * .6;
+        stoss(a, sr, t, zz(400, 3200), .8, zz(.4, 1) * (1 - t), zz(.01, .05));
+      }
+      /* Grollen: viele Rollwellen, Rauschen mit Schwerpunkt um 100–400 Hz (hörbar auch auf kleinen Lautsprechern) */
       const env = new Float32Array(a.length);
-      for (let k = 0; k < 16; k++) {
-        const mitte = .15 + Math.pow(Math.random(), 1.5) * (D - 1.5), breite = zz(.3, 1.2), h = zz(.35, 1) * Math.exp(-mitte / 2.4);
+      for (let k = 0; k < 18; k++) {
+        const mitte = .2 + Math.pow(Math.random(), 1.4) * (D - 1.6), breite = zz(.25, 1), h = zz(.4, 1) * Math.exp(-mitte / 2.6);
         const i0 = Math.max(0, Math.floor((mitte - breite * 2) * sr)), i1 = Math.min(a.length, Math.floor((mitte + breite * 2) * sr));
         for (let i = i0; i < i1; i++) { const x = (i / sr - mitte) / breite; env[i] += h * Math.exp(-x * x * 2); }
       }
-      const F = new SVF(sr), M = new SVF(sr); F.setze(110, .7); M.setze(380, .6);
-      let braun = 0;
+      const T1 = new SVF(sr), T2 = new SVF(sr), M = new SVF(sr); T1.setze(90, .8); T2.setze(220, .7); M.setze(450, .7);
       for (let i = 0; i < a.length; i++) {
-        braun = braun * .995 + (Math.random() * 2 - 1) * .08;
-        const t = i / sr;
-        F.tick(braun); M.tick(Math.random() * 2 - 1);
-        const knall = t < 1.2 ? Math.exp(-t * 3) : 0;
-        a[i] += F.lp * 6 * (env[i] + knall * 1.4) + M.lp * .4 * knall + M.lp * .08 * env[i];
+        const t = i / sr, w = Math.random() * 2 - 1, knall = t < 1.5 ? Math.exp(-t * 2.2) : 0;
+        T1.tick(w); T2.tick(w); M.tick(w);
+        const e = env[i] + knall;
+        a[i] += (T1.lp * 2.2 + T2.bp * 1.6 + M.lp * .7) * e * 1.4;
       }
-      blenden(a, sr, .001, 1.2);
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 1.5);
+      blenden(a, sr, .001, 1.4);
       return normieren(a, .95);
     },
     schrei(sr) {

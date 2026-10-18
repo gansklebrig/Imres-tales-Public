@@ -885,7 +885,7 @@
   }
   function kulFx(art, z, laut) { const k = kul; if (k) fxAbspielen(art, k.g, z, laut, zz(.94, 1.06)); }
   /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
-  const FX_PEGEL = { drache: .6, schwert: .45, tuer: .9, donner: .65, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55 };
+  const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55 };
   function fxVorwaermen() { if (kwWorker !== false) EFFEKTE.forEach((f, i) => setTimeout(() => fxNachfuellen(f), 200 * i)); }
   function effekt(art, staerke, zeit) {
     if (!ctx) return;
