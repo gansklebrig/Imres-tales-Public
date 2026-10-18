@@ -18,14 +18,14 @@
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const daten = () => (sprache() === "en" ? (window.INHALT_EN || window.INHALT) : window.INHALT) || {};
 
-  const BEREICHE = ["chronik", "questtafel", "reise", "gefaehrten", "nsc", "bestiarium", "taverne"];
+  const BEREICHE = ["chronik", "questtafel", "reise", "gefaehrten", "nsc", "bestiarium", "taverne", "buehne"];
   const TX = {
     de: {
       uebersicht: "← Übersicht", zurueck: "Zurück", weiter: "Weiter",
       weiterlesen: (nr, titel) => "<small>Zuletzt geschehen</small>Kapitel " + nr + " · " + titel + "<b>Weiterlesen →</b>",
       zuletzt: "Zuletzt geschehen", kapitelWort: "Kapitel", weiterWort: "Weiterlesen →",
       runter: "Zur Übersicht",
-      namen: { chronik: "Die Chronik", questtafel: "Die Questtafel", reise: "Die Reise", gefaehrten: "Die Gefährten", nsc: "Bekanntschaften", bestiarium: "Das Bestiarium", taverne: "Die Taverne", lautenwerk: "Barradins Lautenwerk" },
+      namen: { chronik: "Die Chronik", questtafel: "Die Questtafel", reise: "Die Reise", gefaehrten: "Die Gefährten", nsc: "Bekanntschaften", bestiarium: "Das Bestiarium", taverne: "Die Taverne", buehne: "Barradins Bühne" },
       texte: {
         chronik: "Das ganze Abenteuer, Kapitel für Kapitel nacherzählt.",
         questtafel: "Offene Fragen, Hinweise und rote Fäden.",
@@ -34,16 +34,16 @@
         nsc: "Freund, Feind und Fragezeichen.",
         bestiarium: "Alles, was uns fressen wollte.",
         taverne: "Würfeln, Spotten, Loblieder und Memory.",
-        lautenwerk: "Baue Bardenbeats mit der ganzen Band."
+        buehne: "Lautenwerk, Spielleiter-Pult und Barradins Auftritt."
       },
-      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "4 Spiele", lautenwerk: () => "♪ Neu" }
+      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "2 Spiele", buehne: () => "♪ Musik" }
     },
     en: {
       uebersicht: "← Overview", zurueck: "Back", weiter: "Next",
       weiterlesen: (nr, titel) => "<small>Most recently</small>Chapter " + nr + " · " + titel + "<b>Read on →</b>",
       zuletzt: "Most recently", kapitelWort: "Chapter", weiterWort: "Read on →",
       runter: "To the overview",
-      namen: { chronik: "The Chronicle", questtafel: "The Quest Board", reise: "The Journey", gefaehrten: "The Companions", nsc: "Acquaintances", bestiarium: "The Bestiary", taverne: "The Tavern", lautenwerk: "Barradin's Lute Machine" },
+      namen: { chronik: "The Chronicle", questtafel: "The Quest Board", reise: "The Journey", gefaehrten: "The Companions", nsc: "Acquaintances", bestiarium: "The Bestiary", taverne: "The Tavern", buehne: "Barradin's Stage" },
       texte: {
         chronik: "The whole adventure, retold chapter by chapter.",
         questtafel: "Open questions, clues and red threads.",
@@ -52,15 +52,15 @@
         nsc: "Friend, foe and question mark.",
         bestiarium: "Everything that wanted to eat us.",
         taverne: "Dice, mockery, songs of praise and memory.",
-        lautenwerk: "Build bardic beats with the whole band."
+        buehne: "Lute machine, GM console and Barradin's performance."
       },
-      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "4 games", lautenwerk: () => "♪ New" }
+      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "2 games", buehne: () => "♪ Music" }
     }
   };
   const t = () => TX[sprache()];
   const BILDER = {
     questtafel: "questtafel-wand.jpg", reise: "unterreich-karte.jpg", gefaehrten: "gundren-treffen.jpg",
-    nsc: "buergermeister-streit.jpg", bestiarium: "demogorgon-karte.webp", taverne: "siegesfeier.jpg", lautenwerk: "kuo-toa-stadt.jpg"
+    nsc: "buergermeister-streit.jpg", bestiarium: "demogorgon-karte.webp", taverne: "siegesfeier.jpg", buehne: "kuo-toa-stadt.jpg"
   };
 
   /* ---------- Ansichten ---------- */
@@ -223,7 +223,7 @@
         (z.text ? '<span class="zl-auszug">' + esc(z.text) + "</span>" : "") +
         "<b>" + esc(T.weiterWort) + "</b></span>";
     } else wl.hidden = true;
-    const kacheln = BEREICHE.filter(vorhanden).concat($("lautenwerk") ? ["lautenwerk"] : []);
+    const kacheln = BEREICHE.filter(vorhanden);
     const bild = id => id === "chronik" ? ((letztes && letztes.bild) || "aufbruch-neverwinter.jpg") : BILDER[id];
     $("kacheln").innerHTML = kacheln.map((id, i) =>
       '<a class="kachel k-' + id + '" href="#' + id + '" style="--i:' + i + '">' +
@@ -362,7 +362,7 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .kachel.k-chronik .kachel-text b { font-size: clamp(1.5rem, 4vw, 2.6rem); }
 .kachel-text small { font-size: .82rem; line-height: 1.35; color: var(--ash); }
 .kachel-zahl { justify-self: start; font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--night); background: var(--ember); padding: .1rem .45rem; margin-bottom: .25rem; }
-.kachel.k-lautenwerk .kachel-zahl { background: #7fd36b; }
+.kachel.k-buehne .kachel-zahl { background: #7fd36b; }
 
 .bereich-zurueck { display: inline-block; margin-bottom: 1.2rem; font-size: .88rem; color: var(--ash); text-decoration: none; }
 .bereich-zurueck:hover { color: var(--ember); }

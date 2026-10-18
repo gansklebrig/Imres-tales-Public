@@ -2037,7 +2037,7 @@
     if (!r || !/^[a-z0-9]{4,16}$/.test(r)) { r = Math.random().toString(36).slice(2, 10); try { localStorage.setItem("imres-funk-raum", r); } catch (_) {} }
     return r;
   }
-  const funkLink = () => location.origin + location.pathname + "?lauschen=" + funkRaum() + "#taverne";
+  const funkLink = () => location.origin + location.pathname + "?lauschen=" + funkRaum() + "#lautenwerk";
   function funkTeil(T) {
     if (!funk) return '<p class="lw-tipp">' + T.funkTipp + '</p><button type="button" class="lw-schalter" data-aktion="funk">' + T.funkStart + "</button>";
     return '<p class="lw-tipp">' + T.funkTipp + '</p><div class="lw-funk-zeile"><input type="text" readonly class="lw-funk-link" value="' + esc(funkLink()) + '">' +
@@ -2076,7 +2076,7 @@
         '<p class="lw-funk-status">' + esc(stat) + "</p>" + '<p class="lw-diagnose"></p>' +
         '<section class="lw-pult-mix"><label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.hLaut + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' + fxRegler(T) + '</section>' +
         '<p class="lw-tipp">' + T.hIphone + "</p>" +
-        '<p class="lw-tipp"><a href="' + esc(location.pathname) + '#taverne">' + T.hSelbst + "</a></p>" +
+        '<p class="lw-tipp"><a href="' + esc(location.pathname) + '#lautenwerk">' + T.hSelbst + "</a></p>" +
       "</div>" + '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
   }
@@ -2203,7 +2203,7 @@
     if (!tools || mini) return;
     mini = document.createElement("div");
     mini.className = "lw-mini"; mini.hidden = true;
-    mini.innerHTML = '<a class="lw-mini-titel" href="#taverne"><span class="lw-mini-note">♪</span><span class="lw-mini-name"></span></a><button type="button" class="lw-mini-knopf"></button>';
+    mini.innerHTML = '<a class="lw-mini-titel" href="#lautenwerk"><span class="lw-mini-note">♪</span><span class="lw-mini-name"></span></a><button type="button" class="lw-mini-knopf"></button>';
     tools.insertBefore(mini, tools.firstChild);
     mini.querySelector(".lw-mini-knopf").addEventListener("click", () => {
       if (hoerer) { const b = root.querySelector('[data-aktion="hoeren"]'); if (b) b.click(); return; }
@@ -2415,7 +2415,7 @@
     if (e.target.closest('[data-aktion="pult"]')) { S.pult = !S.pult; merken(); zeichnen(); knoepfe(); root.scrollIntoView({ block: "start" }); return; }
     if (e.target.closest('[data-aktion="kulisse"]')) { audioStart(); kul ? kulisseStop() : kulisseStart(true); zeichnen(); knoepfe(); return; }
     if (e.target.closest(".lw-teilen")) {
-      const url = location.origin + location.pathname + "?lied=" + kodieren() + "#taverne";
+      const url = location.origin + location.pathname + "?lied=" + kodieren() + "#lautenwerk";
       if (navigator.share) {
         navigator.share({ title: t().titel, url }).then(() => status(t().geteilt)).catch(() => {});
       } else if (navigator.clipboard) {
@@ -2588,6 +2588,8 @@
 .lw-funk-zeile { display: flex; flex-wrap: wrap; gap: .5rem; margin: .4rem 0; }
 .lw-funk-link { flex: 1 1 14rem; min-width: 0; background: rgba(0,0,0,.3); border: 1px solid var(--line); color: inherit; font: inherit; font-size: .85rem; padding: .45rem .6rem; }
 .lw-funk-status { margin: .5rem 0; font-size: .95rem; }
+/* Zuhörer per Link: nur das Lautenwerk zeigen */
+body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #auftritt, body.lw-nur-zuhoeren #buehne .bereich-weiter { display: none; }
 .lw-diagnose { margin: 0 0 .4rem; font-size: .75rem; color: var(--ash); }
 .lw-pult-titel { font-family: var(--name); font-size: 1.3rem; color: var(--vellum); flex: 1; }
 .lw-pult-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
@@ -2668,7 +2670,9 @@
   gruppeLaden().then(() => { if (gruppeOk) { zeichnen(); knoepfe(); } });
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); zeichnen(); knoepfe(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (hoerer) setTimeout(() => root.scrollIntoView({ block: "start" }), 400);
+  if (hoerer) document.body.classList.add("lw-nur-zuhoeren");
+  /* ältere Links zeigten auf die Taverne – das Lautenwerk wohnt jetzt auf der Bühne */
+  if ((hoerer || ausLink) && location.hash !== "#lautenwerk") { try { location.replace(location.pathname + location.search + "#lautenwerk"); } catch (_) {} }
   if (ausLink) {
     setTimeout(() => {
       root.scrollIntoView({ block: "start" });
