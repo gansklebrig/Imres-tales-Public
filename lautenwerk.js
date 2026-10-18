@@ -89,7 +89,7 @@
       },
       teil: "Teil bearbeiten", ablauf: "Ablauf", kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
-      lieder: "Lieder", stimmungen: "Stimmungen für Imre",
+      lieder: "Lieder", stimmungen: "Stimmungen für Imre", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
       vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Marktgewusel", schmiede: "⚒ Zwergenschmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lagerfeuer" },
       zufall: "🎲 Improvisieren", leeren: "Leeren",
@@ -132,7 +132,7 @@
       },
       teil: "Edit part", ablauf: "Order", kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
-      lieder: "Songs", stimmungen: "Moods for Imre",
+      lieder: "Songs", stimmungen: "Moods for Imre", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
       vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market bustle", schmiede: "⚒ Dwarven forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Campfire" },
       zufall: "🎲 Improvise", leeren: "Clear",
@@ -473,6 +473,7 @@
         const i = halb + r; if (i >= SCHRITTE) return;
         if (h === 1 && k === motiv.rhythmus.length - 1 && Math.random() < .3) return; /* kleine Atempause am Ende */
         if (st.dichte < 1 && k > 0 && Math.random() > st.dichte) return;
+        if (st.fuell && i % 2 === 0 && k < motiv.rhythmus.length - 1 && motiv.rhythmus[k + 1] - r > 1 && Math.random() < st.fuell) a[i + 1] = -2; /* Platzhalter für Durchgangston */
         const wunsch = ton + motiv.kontur[k % motiv.kontur.length];
         if (i % 2 === 0) ton = naechsterTon(wunsch, akkordToene(klingt(bass, i)));
         else ton = Math.max(0, Math.min(7, wunsch));
@@ -480,6 +481,11 @@
         a[i] = ton;
       });
     });
+    /* Durchgangstöne bei hoher Intensität: zwischen zwei Tönen auf den Achteln */
+    for (let i = 0; i < SCHRITTE; i++) if (a[i] === -2) {
+      const vor = a[i - 1] >= 0 ? a[i - 1] : a[i - 2], nach = a.slice(i + 1).find(x => x >= 0);
+      a[i] = vor >= 0 && nach >= 0 && nach !== vor ? Math.max(0, Math.min(7, vor + Math.sign(nach - vor))) : (vor >= 0 ? Math.min(7, vor + 1) : -1);
+    }
     return a;
   }
   /* Echos Stimme: lange Töne, Antworten in den Pausen oder ferne Einzeltöne – meist eine Terz neben der Melodie */
@@ -496,6 +502,31 @@
     else for (let i = 0; i < SCHRITTE; i += 2) if (mel[i] < 0 && mel[(i + 15) % 16] < 0 && Math.random() < .8) setze(i);
     return a;
   }
+  /* Intensität 0–10 (5 = wie komponiert): verdünnt oder verdichtet Melodie, Bass, Schlagwerk und Echo */
+  function mitIntensitaet(st, stufe) {
+    const x = (stufe == null ? 5 : stufe) / 10, o = Object.assign({}, st);
+    o.dichte = x < .5 ? st.dichte * (.3 + 1.4 * x) : st.dichte;
+    o.fuell = x > .5 ? (x - .5) * 1.1 : 0;
+    const bassReihe = ["orgel", "halbe", "viertel", "puls", "galopp"];
+    if (x <= .2) o.bass = ["orgel", "halbe"].filter(b => st.bass.includes(b)).concat(["halbe"]).slice(0, 1);
+    else if (x <= .35) o.bass = st.bass.map(b => bassReihe[Math.max(1, bassReihe.indexOf(b) - 1)]);
+    else if (x >= .8) o.bass = st.bass.map(b => b === "orgel" ? "halbe" : b === "halbe" ? "viertel" : b === "viertel" ? "puls" : b);
+    const muster = liste => liste.map(m => {
+      let n = m.slice();
+      if (x < .5) n = n.filter(i => i === 0 || (i % 8 === 0 && x > .15) || (i % 4 === 0 && x > .3) || Math.random() < (x - .1) * 1.6);
+      if (x > .6 && n.length) for (let i = 0; i < SCHRITTE; i += 2) if (!n.includes(i) && Math.random() < (x - .6) * (i % 4 === 0 ? 1.6 : .9)) n.push(i);
+      if (x > .9 && n.length) for (let i = 1; i < SCHRITTE; i += 2) if (!n.includes(i) && Math.random() < .25) n.push(i);
+      return n.sort((a, b) => a - b);
+    });
+    ["schelle", "trommel", "ketten"].forEach(k => { o[k] = muster(st[k]); });
+    o.klopf = x < .25 ? [[]] : st.klopf;
+    if (x < .3) o.echo = "fern"; else if (x > .75 && st.echo === "fern") o.echo = "antwort";
+    o.rex = x < .3 ? [] : st.rex;
+    o.schwung = x;
+    return o;
+  }
+  /* Tempo zur Intensität: von etwas unter bis etwas über dem Stil-Rahmen */
+  const tempoFuer = (st, stufe) => { const [a, b] = st.tempo, x = (stufe == null ? 5 : stufe) / 10; return Math.round((a - 8 + (b - a + 16) * x) / 2) * 2; };
   function stimmungTeile(st, alt) {
     /* ruhigerer Harmonierhythmus: eine Akkordfolge verteilt sich über zwei Teile (A = erste Hälfte, B = zweite) */
     const halb = (f, h) => [f[2 * h], f[2 * h], f[2 * h + 1], f[2 * h + 1]];
@@ -508,7 +539,7 @@
       t.bass = bassBauen(akk, bArt);
       t.melodie = mel; t.floete = fl;
       t.klopf = rhy(st.klopf, stufe); t.schelle = rhy(st.schelle, stufe); t.trommel = rhy(st.trommel, stufe); t.ketten = rhy(st.ketten, stufe);
-      if (stufe === 1 && Math.random() < .3) t.rex[15] = zufall(st.rex);
+      if (stufe === 1 && st.rex.length && Math.random() < .3) t.rex[15] = zufall(st.rex);
       return t;
     };
     const b1 = bassBauen(p1, bArt), b2 = bassBauen(p2, bArt), b3 = bassBauen(p3, bArt);
@@ -522,13 +553,13 @@
     const D = teilVon(p1, melD, echoBauen(b1, melD, "lang"), 1);
     return { A, B, C, D };
   }
-  function stimmungLied(k, behalten) {
-    const st = STIL[k];
+  function stimmungLied(k, behalten, stufe) {
+    const roh = STIL[k], ist = stufe != null ? stufe : (typeof S.intensitaet === "number" ? S.intensitaet : 5), st = mitIntensitaet(roh, ist);
     const basis = behalten ? { tempo: S.tempo, transpose: S.transpose, modus: S.modus, instrument: S.instrument, band: S.band, ablauf: S.ablauf, swing: S.swing, bordun: S.bordun }
-      : { tempo: zwischen(st.tempo), transpose: zufall(st.transpose), modus: zufall(st.modus), instrument: zufall(st.instrument),
+      : { tempo: tempoFuer(roh, ist) + zufall([-2, 0, 2]), transpose: zufall(st.transpose), modus: zufall(st.modus), instrument: zufall(st.instrument),
           band: { trommel: zufall(st.band.trommel), floete: zufall(st.band.floete), ketten: zufall(st.band.ketten) },
           ablauf: zufall(st.ablauf), swing: st.swing, bordun: st.bordun };
-    return pruefen(Object.assign(basis, { variation: st.variation, teile: stimmungTeile(st), vol: S.vol, mute: S.mute, stimmung: k }));
+    return pruefen(Object.assign(basis, { variation: st.variation, teile: stimmungTeile(st), vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist }));
   }
   const kopie = o => JSON.parse(JSON.stringify(o));
 
@@ -555,6 +586,7 @@
     if (!RAEUME[s.raum]) s.raum = "taverne";
     if (!KULISSEN.includes(s.kulisse)) s.kulisse = "keine";
     if (typeof s.kulisseVol !== "number") s.kulisseVol = 5;
+    if (typeof s.intensitaet !== "number") s.intensitaet = 5;
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
     if (typeof s.variation !== "number") s.variation = 0;
@@ -734,17 +766,15 @@
   /* Ereignisse je Kulisse: [mindestens, höchstens Sekunden bis zum nächsten, Funktion] */
   const KUL_EREIGNIS = {
     regen: [[.015, .07, z => kulStoss(z, "bandpass", zz(2500, 6500), 6, zz(.04, .16), .015)]],
-    feuer: [[.03, .22, z => kulStoss(z, "highpass", zz(1500, 4000), .8, zz(.2, 1.2), zz(.003, .012))],
-            [1, 3.5, z => kulStoss(z, "lowpass", 900, .8, 1, .04)]],
+    feuer: [[5, 13, z => { kulStoss(z, "bandpass", zz(600, 1100), 3, .5, .03); kulStoss(z + .04, "bandpass", zz(1200, 2000), 4, .2, .02); }]],
     hoehle: [[1.2, 4, z => { const f = zz(1300, 2100); kulTon(z, f, f * .55, .07, .45); }]],
-    taverne: [[1.5, 5, z => { const f = zz(2500, 4000); kulTon(z, f, f, .3, .12); kulTon(z + .02, f * 1.33, f * 1.33, .25, .08); }],
-              [3, 8, z => { kulTon(z, 170, 90, .12, .7); kulStoss(z, "bandpass", 520, 1.4, .4, .06); }]],
+    taverne: [[3.5, 11, z => kulFx("lachen", z, zz(.3, .75))], [1.8, 6, z => kulFx("krug", z, zz(.15, .45))]],
     wald: [[1.5, 5.5, z => { const f = zz(2600, 4200), n = 2 + Math.floor(Math.random() * 4); for (let i = 0; i < n; i++) kulTon(z + i * .11, f, f * 1.3, .06, .14); }]],
     meer: [[6, 14, z => { for (let i = 0; i < 2 + Math.floor(Math.random() * 2); i++) kulTon(z + i * .45, 1700, 1150, .35, .045, "triangle"); }]],
     sturm: [[12, 25, z => effekt("donner", .7, z)]]
   };
   const KUL_BETT = {
-    regen: [[["bandpass", 2500, .5]], .5, [.13, .25]], feuer: [[["lowpass", 300, .7]], 1, [.3, .4]],
+    regen: [[["bandpass", 2500, .5]], .5, [.13, .25]], feuer: null,
     hoehle: [[["bandpass", 250, .8]], .9, [.06, .6]], wald: [[["lowpass", 700, .7]], .8, [.1, .7]],
     meer: [[["lowpass", 500, .7]], .55, [.11, .9]], sturm: [[["bandpass", 600, .5]], .5, [.17, .8]],
     taverne: null
@@ -761,7 +791,8 @@
     kul = { art, g, knoten: [], naechst: {} };
     const bett = KUL_BETT[art];
     if (bett) kul.knoten.push(...kulBett(g, bett[0], bett[1], bett[2]));
-    if (art === "taverne") [[350, 3.1], [600, 4.3], [950, 5.2]].forEach(([f, am]) => kul.knoten.push(...kulBett(g, [["bandpass", f, 1.2]], .65, [am, .7])));
+    if (art === "taverne") kulSchleife("gemurmel", 22050, 1.1);
+    if (art === "feuer") kulSchleife("feuer", 32000, .7);
     if (art === "regen") kul.knoten.push(...kulBett(g, [["lowpass", 900, .7]], .2, null));
     if (art === "meer") kul.knoten.push(...kulBett(g, [["highpass", 2500, .7]], .12, [.11, .9]));
     if (art === "sturm") kul.knoten.push(...kulBett(g, [["highpass", 1500, .7]], .25, null));
@@ -784,82 +815,67 @@
   }
 
   /* ---------- Soundeffekte für den Spielleiter ---------- */
-  function fxTon(ziel, typ, punkte, laut, ende) {
-    const o = ctx.createOscillator(); o.type = typ;
-    punkte.forEach(([z, f], i) => i ? o.frequency.exponentialRampToValueAtTime(f, z) : o.frequency.setValueAtTime(f, z));
-    o.connect(ziel); o.start(punkte[0][0]); o.stop(ende); return o;
+  /* ---------- gerechnete Klänge (klangwerk.js, im Hintergrund-Worker) ---------- */
+  let kwWorker = null, kwNr = 0;
+  const kwWarten = new Map(), kulPufferCache = {}, fxVorrat = {};
+  function kwSync(gruppe, art, sr) {
+    const K = window.Klangwerk;
+    try { return K ? (gruppe === "kulisse" ? K.KULISSE : K.EFFEKT)[art](sr) : null; } catch (_) { return null; }
   }
-  function fxHuelle(z, a, halten, ab, laut, ziel) {
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, z); g.gain.linearRampToValueAtTime(laut, z + a); g.gain.setValueAtTime(laut, z + a + halten); g.gain.exponentialRampToValueAtTime(.0005, z + a + halten + ab);
-    g.connect(ziel || sfxBus); return g;
+  function kwStart() {
+    try {
+      const sk = document.querySelector('script[src*="klangwerk"]');
+      kwWorker = new Worker(sk ? sk.src : "klangwerk.js");
+      kwWorker.onmessage = e => { const w = kwWarten.get(e.data.id); if (!w) return; kwWarten.delete(e.data.id); w.fertig(e.data.daten); };
+      kwWorker.onerror = ev => {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        kwWorker = false; const alle = [...kwWarten.values()]; kwWarten.clear();
+        alle.forEach((w, i) => setTimeout(() => w.fertig(kwSync(w.gruppe, w.art, w.sr)), 30 * i));
+      };
+    } catch (_) { kwWorker = false; }
   }
-  function fxRausch(z, typ, f, q, laut, dauer, ziel, f2) {
-    const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain();
-    r.buffer = kulRauschen; b.type = typ; b.frequency.setValueAtTime(f, z); if (f2) b.frequency.exponentialRampToValueAtTime(f2, z + dauer); b.Q.value = q;
-    g.gain.setValueAtTime(laut, z); g.gain.exponentialRampToValueAtTime(.0005, z + dauer);
-    r.connect(b); b.connect(g); g.connect(ziel || sfxBus); r.start(z, Math.random() * 2, dauer + .05);
+  function kwRechnen(gruppe, art, sr) {
+    return new Promise(res => {
+      const fertig = d => { if (!d || !ctx) return res(null); const b = ctx.createBuffer(1, d.length, sr); b.getChannelData(0).set(d); res(b); };
+      if (kwWorker === null) kwStart();
+      if (!kwWorker) { setTimeout(() => fertig(kwSync(gruppe, art, sr)), 0); return; }
+      const id = ++kwNr; kwWarten.set(id, { gruppe, art, sr, fertig }); kwWorker.postMessage({ id, gruppe, art, sr });
+    });
   }
+  const kulPuffer = (name, sr) => kulPufferCache[name] || (kulPufferCache[name] = kwRechnen("kulisse", name, sr).then(b => { if (!b) delete kulPufferCache[name]; return b; }));
+  function kulSchleife(name, sr, laut) {
+    const k = kul;
+    kulPuffer(name, sr).then(b => {
+      if (!b || kul !== k) return;
+      const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b; q.loop = true; g.gain.value = laut;
+      q.connect(g); g.connect(k.g); q.start(ctx.currentTime + .05, Math.random() * b.duration); k.knoten.push(q);
+    });
+  }
+  /* je Effekt liegen zwei fertige Varianten bereit; nach dem Abspielen wird eine neue gerechnet */
+  function fxNachfuellen(art) {
+    const v = fxVorrat[art] = fxVorrat[art] || { liste: [], rechnet: 0 };
+    while (v.liste.length + v.rechnet < 2) { v.rechnet++; kwRechnen("effekt", art, 32000).then(b => { v.rechnet--; if (b) v.liste.push(b); }); }
+  }
+  function fxPuffer(art) {
+    const v = fxVorrat[art];
+    if (v && v.liste.length) { const b = v.liste.splice(Math.floor(Math.random() * v.liste.length), 1)[0]; fxNachfuellen(art); return Promise.resolve(b); }
+    const p = kwRechnen("effekt", art, 32000); fxNachfuellen(art); return p;
+  }
+  function fxAbspielen(art, ziel, zeit, laut, tempo) {
+    return fxPuffer(art).then(b => {
+      if (!b || !ctx) return;
+      const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b; q.playbackRate.value = tempo || 1; g.gain.value = laut;
+      q.connect(g); g.connect(ziel); q.start(Math.max(zeit, ctx.currentTime + .01));
+    });
+  }
+  function kulFx(art, z, laut) { const k = kul; if (k) fxAbspielen(art, k.g, z, laut, zz(.94, 1.06)); }
+  /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
+  const FX_PEGEL = { drache: .6, schwert: .45, tuer: .9, donner: .65, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55 };
+  function fxVorwaermen() { if (kwWorker !== false) EFFEKTE.forEach((f, i) => setTimeout(() => fxNachfuellen(f), 200 * i)); }
   function effekt(art, staerke, zeit) {
     if (!ctx) return;
     const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
-    if (art === "drache") {
-      const g = fxHuelle(z, .18, 1.1, .9, .55 * l), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 1100; f.connect(g);
-      const am = ctx.createOscillator(), ag = ctx.createGain(), roh = ctx.createGain(); am.frequency.value = 23; ag.gain.value = .5; roh.gain.value = .6; am.connect(ag); ag.connect(roh.gain); roh.connect(f);
-      [1, 1.5, 2.02].forEach((m, i) => fxTon(roh, "sawtooth", [[z, 75 * m], [z + .4, 105 * m], [z + 2.2, 48 * m]], 1, z + 2.3));
-      am.start(z); am.stop(z + 2.3);
-      fxRausch(z, "bandpass", 600, .8, .35 * l, 2.1, null, 250);
-    } else if (art === "schwert") {
-      [[1, 1, 1.4], [2.41, .6, .9], [3.93, .4, .6], [5.62, .25, .4], [7.1, .15, .25]].forEach(([v, a, d]) => {
-        const g = fxHuelle(z, .002, 0, d, .12 * a * l); fxTon(g, "sine", [[z, 1250 * v]], 1, z + d + .1);
-      });
-      fxRausch(z, "highpass", 3500, .8, .35 * l, .06);
-      fxRausch(z + .05, "bandpass", 3000, 3, .12 * l, .4, null, 8000);
-    } else if (art === "tuer") {
-      const g = fxHuelle(z, .05, 1.2, .2, .22 * l), b = ctx.createBiquadFilter(); b.type = "bandpass"; b.frequency.value = 900; b.Q.value = 4; b.connect(g);
-      const o = ctx.createOscillator(); o.type = "sawtooth"; o.connect(b);
-      for (let i = 0; i <= 24; i++) o.frequency.setValueAtTime(zz(70, 190), z + i * .055);
-      o.start(z); o.stop(z + 1.5);
-      const g2 = fxHuelle(z + 1.4, .005, 0, .35, .7 * l); fxTon(g2, "sine", [[z + 1.4, 85], [z + 1.6, 50]], 1, z + 1.8);
-      fxRausch(z + 1.4, "lowpass", 400, .8, .4 * l, .12);
-    } else if (art === "donner") {
-      fxRausch(z, "highpass", 1200, .6, .5 * l, .12);
-      const g = ctx.createGain(); g.connect(sfxBus);
-      g.gain.setValueAtTime(0, z); [.12, .5, 1.1, 1.8, 2.6].forEach((d, i) => g.gain.linearRampToValueAtTime((i % 2 ? .45 : .9) * l * (1 - i * .15), z + d));
-      g.gain.exponentialRampToValueAtTime(.0005, z + 4.2);
-      const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(); r.buffer = kulRauschen; b.type = "lowpass"; b.frequency.value = 160; b.Q.value = .8;
-      r.connect(b); b.connect(g); r.start(z, Math.random() * 2, 4.3);
-    } else if (art === "schrei") {
-      const g = fxHuelle(z, .12, .7, .6, .3 * l), roh = ctx.createGain(); roh.gain.value = 1;
-      formant(roh, g, [[900, 5, 1.2], [1400, 6, .8], [2800, 7, .3]]);
-      const o = fxTon(roh, "sawtooth", [[z, 620], [z + .3, 1050], [z + 1.2, 500]], 1, z + 1.5);
-      vibrato([o], z, z + 1.5, 6.5, 18, .2);
-    } else if (art === "wuerfel") {
-      let t0 = z;
-      for (let i = 0; i < 9; i++) {
-        fxRausch(t0, "bandpass", zz(2000, 3500), 3, (1.5 - i * .12) * l, .03);
-        const g = fxHuelle(t0, .001, 0, .05, .25 * l); fxTon(g, "sine", [[t0, zz(1600, 2400)]], 1, t0 + .07);
-        t0 += .14 - i * .012;
-      }
-    } else if (art === "zauber") {
-      [0, 4, 7, 11, 12, 16, 19, 24].forEach((iv, i) => {
-        const t0 = z + i * .07, g = fxHuelle(t0, .01, .1, .9, .06 * l);
-        fxTon(g, "sine", [[t0, midiHz(84 + iv)]], 1, t0 + 1.1);
-      });
-      fxRausch(z, "bandpass", 2000, 2, .15 * l, 1.2, null, 9000);
-    } else if (art === "horn") {
-      const g = fxHuelle(z, .25, 1.6, .5, .3 * l), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.Q.value = 2; f.connect(g);
-      f.frequency.setValueAtTime(300, z); f.frequency.linearRampToValueAtTime(1300, z + .4); f.frequency.linearRampToValueAtTime(900, z + 2.2);
-      const o = fxTon(f, "sawtooth", [[z, 92], [z + .12, 98], [z + 1.8, 98], [z + 2.1, 87]], 1, z + 2.4);
-      vibrato([o], z, z + 2.4, 5, 1.5, .6);
-    } else if (art === "jubel") {
-      for (let i = 0; i < 7; i++) {
-        const t0 = z + zz(0, .3), g = fxHuelle(t0, .3, zz(.8, 1.4), .8, .25 * l), b = ctx.createBiquadFilter();
-        b.type = "bandpass"; b.frequency.value = zz(500, 1400); b.Q.value = 2; b.connect(g);
-        const r = ctx.createBufferSource(); r.buffer = kulRauschen; r.connect(b); r.start(t0, Math.random() * 2, 2.6);
-      }
-      for (let i = 0; i < 26; i++) fxRausch(z + zz(.1, 2.2), "bandpass", zz(1000, 1800), 1.2, zz(.15, .4) * l, .03);
-    }
+    fxAbspielen(art, sfxBus, z, (FX_PEGEL[art] || .7) * l);
   }
   function effekteAnwenden() {
     if (!ctx) return;
@@ -893,7 +909,7 @@
       hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
       kulRauschen = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
       { const d = kulRauschen.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
-      sfxBus = ctx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(master);
+      sfxBus = ctx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(master); setTimeout(fxVorwaermen, 1500);
       { const s2 = ctx.createGain(); s2.gain.value = .5; sfxBus.connect(s2); s2.connect(hallEin); }
       hallFilter = ctx.createBiquadFilter(); hallFilter.type = "lowpass"; hallFilter.frequency.value = RAEUME[S.raum].hell;
       hallEin.connect(hallFilter); hallNass.connect(komp);
@@ -1424,7 +1440,7 @@
   let pausiert = false;
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
-  let wechsel = null, tempoJetzt = 0;
+  let wechsel = null, tempoJetzt = 0, intensitaetNeu = false;
   const schrittDauer = () => 60 / (tempoJetzt || S.tempo) / 4;
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
   function wechselAnwenden(zeit) {
@@ -1446,6 +1462,7 @@
     const vorlauf = document.hidden ? 1.6 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     while (naechste < ctx.currentTime + vorlauf) {
       if (schritt === 0 && wechsel) wechselAnwenden(naechste);
+      else if (schritt === 0 && intensitaetNeu) { intensitaetNeu = false; stimmungWeiter(); }
       tempoJetzt = tempoJetzt ? tempoJetzt + (S.tempo - tempoJetzt) * .1 : S.tempo;
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
       const v = S.variation / 10, letzterTakt = abschnitt % S.ablauf.length === S.ablauf.length - 1;
@@ -1456,7 +1473,7 @@
         const wert = variiert(k, daten[k][schritt], schritt, daten[k], v, letzterTakt);
         if (wert < 0) return;
         const wackel = v ? (Math.random() - .5) * .012 * v : 0;
-        const laut = v ? 1 - Math.random() * .25 * v : 1;
+        const laut = (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1);
         const haelt = k === "floete" || (k === "melodie" && (GEHALTEN[S.instrument] || S.instrument === "mandoline"));
         spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(daten[k], schritt) * schrittDauer() * .95 : 0);
         if (k === "bass") bordunStimmen(wert, ev.zeit);
@@ -1475,8 +1492,8 @@
   function stimmungWeiter() {
     if (!S.stimmung || !STIL[S.stimmung]) return;
     const neu = stimmungLied(S.stimmung, true);
-    S.teile = neu.teile;
-    merken(); zeichnen(); knoepfe();
+    S.teile = neu.teile; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
+    merken(); if (!S.pult) { zeichnen(); knoepfe(); }
   }
   function start(weiter) {
     audioStart();
@@ -1868,6 +1885,7 @@
   const raumWahl = T => '<label class="lw-feld"><span>' + T.raum + '</span><select data-feld="raum">' + Object.keys(RAEUME).map(r => '<option value="' + r + '"' + (r === S.raum ? " selected" : "") + ">" + T.raeume[r] + "</option>").join("") + "</select></label>";
   const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KULISSEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
     '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
+  const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   function pultZeichnen(T) {
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.pultTipp + "</p>" +
@@ -1877,7 +1895,7 @@
           '<span class="lw-pult-titel">' + esc(S.titel || T.eigenesLied) + "</span>" +
           '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></div>" +
         '<section><h4>' + T.stimmungen + '</h4><div class="lw-pult-gitter">' +
-          STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div>" +
+          STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div>" + intRegler(T) +
           '<select class="lw-gespeichert lw-pult-lieder" data-feld="liedwahl"><option value="">' + T.liedWaehlen + "</option>" +
             LIEDER.map(k => '<option value="' + k + '">' + T.vorlagen[k] + "</option>").join("") + "</select></section>" +
         '<section><h4>' + T.kulisse + '</h4><div class="lw-pult-gitter">' +
@@ -1962,7 +1980,7 @@
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
         (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
-        '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
+        intRegler(T) + '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
       "</div>" +
       '<div class="lw-scroll"><div class="lw-raster">' + raster + "</div></div>" +
       '<p class="lw-wisch">' + T.wischen + "</p>" +
@@ -2055,7 +2073,7 @@
   }
   function vorlageWaehlen(k) {
     const mix = { vol: S.vol, mute: S.mute };
-    const behalten = { master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
+    const behalten = { intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
     else if (k === "zufall") neu = zufallsLied();
@@ -2183,10 +2201,16 @@
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
     if (d.feld === "master") { S.master = +e.target.value; root.querySelector(".lw-mval").textContent = S.master * 10 + " %"; merken(); effekteAnwenden(); }
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "intensitaet") {
+      S.intensitaet = +e.target.value;
+      root.querySelectorAll(".lw-ival").forEach(x => x.textContent = t().intStufen[S.intensitaet]);
+      merken();
+    }
     if (d.feld === "hall") { S.hall = +e.target.value; root.querySelector(".lw-hval").textContent = S.hall * 10 + " %"; merken(); effekteAnwenden(); }
   });
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
+    if (f === "intensitaet" && S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetNeu = true; else stimmungWeiter(); }
     if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
     if (f === "ablauf") { S.ablauf = e.target.value; merken(); }
@@ -2307,6 +2331,8 @@
 .lw-vorlagen button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .82rem; padding: .25rem .7rem; cursor: pointer; }
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
+.lw-intensitaet { flex: 1 1 100%; margin-top: .5rem; }
+.lw-intensitaet input { width: 100%; accent-color: #c0502a; }
 .lw-master input, .lw-hallregler input, .lw-kulregler input { width: 7rem; }
 .lw-vorlagen button.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
 .lw-effekte button.blitz, .lw-pult-fx button.blitz { animation: lwblitz .5s ease-out; }
