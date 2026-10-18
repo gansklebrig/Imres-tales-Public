@@ -60,6 +60,11 @@
     palast:  { dauer: 4.4, kurve: 2.9, vor: .045, hell: 6200, frueh: [[.048, .45], [.075, .35], [.102, .28], [.13, .2]] },
     hoehle:  { dauer: 6.5, kurve: 2.3, vor: .07, hell: 2600, frueh: [[.14, .5], [.29, .34], [.45, .22], [.62, .14]] }
   };
+  const KULISSEN = ["keine", "taverne", "feuer", "regen", "wald", "hoehle", "meer", "sturm"];
+  const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "wald", spannung: "hoehle", sieg: "taverne", kampf: "keine",
+    taverne: "taverne", hafen: "meer", wald: "wald", markt: "taverne", schmiede: "feuer", wiegen: "feuer", trauer: "regen",
+    ballade: "taverne", saltarello: "taverne", schlacht: "sturm" };
+  const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
     trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢" },
@@ -86,7 +91,7 @@
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
       lieder: "Lieder", stimmungen: "Stimmungen für Imre",
       vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Marktgewusel", schmiede: "⚒ Zwergenschmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
-        kampf: "⚔ Kampf", unterreich: "🕯 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lagerfeuer" },
+        kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lagerfeuer" },
       zufall: "🎲 Improvisieren", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
       teilen: "🔗 Lied teilen", kopiert: "Link kopiert – schick ihn an die Gruppe!", geteilt: "Geteilt!",
@@ -94,6 +99,13 @@
       stimmungTipp: "Jeder Klick komponiert ein neues Stück im Stil der Stimmung. Solange es läuft, wandelt es sich nach jedem Durchgang weiter – perfekt als Hintergrund für eure Sessions. Sobald du im Raster etwas änderst, bleibt es so, wie es ist.",
       wandelt: k => "♪ " + k + " wandelt sich weiter …",
       master: "Gesamtlautstärke", hall: "Hall", raum: "Raum",
+      wechselGleich: n => "→ „" + n + "“ beginnt mit dem nächsten Takt …",
+      kulisse: "Geräuschkulisse", kulisseLaut: "Kulisse",
+      kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Meer", sturm: "⛈ Sturm" },
+      effekte: "Effekte",
+      sfx: { drache: "🐉 Drachenbrüllen", schwert: "⚔ Schwertklirren", tuer: "🚪 Knarrende Tür", donner: "⚡ Donner", schrei: "😱 Ferner Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Kriegshorn", jubel: "🍻 Jubel" },
+      pult: "🎛 Spielleiter-Pult", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
+      liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
@@ -122,7 +134,7 @@
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
       lieder: "Songs", stimmungen: "Moods for Imre",
       vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market bustle", schmiede: "⚒ Dwarven forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
-        kampf: "⚔ Battle", unterreich: "🕯 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Campfire" },
+        kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Campfire" },
       zufall: "🎲 Improvise", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
       teilen: "🔗 Share song", kopiert: "Link copied – send it to the party!", geteilt: "Shared!",
@@ -130,6 +142,13 @@
       stimmungTipp: "Every click composes a new piece in the style of the mood. While it plays, it keeps changing after every round – perfect as background music for your sessions. As soon as you change something in the grid, it stays as it is.",
       wandelt: k => "♪ " + k + " keeps evolving …",
       master: "Master volume", hall: "Reverb", raum: "Room",
+      wechselGleich: n => "→ “" + n + "” starts with the next bar …",
+      kulisse: "Ambience", kulisseLaut: "Ambience",
+      kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Sea", sturm: "⛈ Storm" },
+      effekte: "Effects",
+      sfx: { drache: "🐉 Dragon roar", schwert: "⚔ Sword clash", tuer: "🚪 Creaking door", donner: "⚡ Thunder", schrei: "😱 Distant scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 War horn", jubel: "🍻 Cheers" },
+      pult: "🎛 GM console", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
+      liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
@@ -534,6 +553,8 @@
     if (typeof s.master !== "number") s.master = 8;
     if (typeof s.hall !== "number") s.hall = 0;
     if (!RAEUME[s.raum]) s.raum = "taverne";
+    if (!KULISSEN.includes(s.kulisse)) s.kulisse = "keine";
+    if (typeof s.kulisseVol !== "number") s.kulisseVol = 5;
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
     if (typeof s.variation !== "number") s.variation = 0;
@@ -682,11 +703,170 @@
   }
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
   const hallPegel = () => Math.pow(S.hall / 10, 1.3) * 1.6;
+  /* ---------- Geräuschkulisse ---------- */
+  let kul = null, kulRauschen = null, sfxBus = null;
+  const kulPegel = () => Math.pow(S.kulisseVol / 10, 1.5) * .9;
+  const zz = (a, b) => a + Math.random() * (b - a);
+  function kulBett(ziel, filter, laut, lfo) {
+    const r = ctx.createBufferSource(); r.buffer = kulRauschen; r.loop = true; r.loopStart = Math.random(); r.loopEnd = 3.9;
+    let letzter = r;
+    filter.forEach(([typ, f, q]) => { const b = ctx.createBiquadFilter(); b.type = typ; b.frequency.value = f; b.Q.value = q || .7; letzter.connect(b); letzter = b; });
+    const g = ctx.createGain(); g.gain.value = laut; letzter.connect(g); g.connect(ziel);
+    const knoten = [r];
+    if (lfo) {
+      const o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.value = lfo[0]; og.gain.value = laut * lfo[1];
+      o.connect(og); og.connect(g.gain); o.start(); knoten.push(o);
+    }
+    r.start(ctx.currentTime, Math.random() * 3); return knoten;
+  }
+  function kulStoss(zeit, typ, f, q, laut, dauer) {
+    const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain();
+    r.buffer = kulRauschen; b.type = typ; b.frequency.value = f; b.Q.value = q;
+    g.gain.setValueAtTime(laut, zeit); g.gain.exponentialRampToValueAtTime(.0005, zeit + dauer);
+    r.connect(b); b.connect(g); g.connect(kul.g); r.start(zeit, Math.random() * 3, dauer + .02);
+  }
+  function kulTon(zeit, f0, f1, dauer, laut, typ) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = typ || "sine";
+    o.frequency.setValueAtTime(f0, zeit); o.frequency.exponentialRampToValueAtTime(f1, zeit + dauer);
+    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(laut, zeit + .008); g.gain.exponentialRampToValueAtTime(.0005, zeit + dauer + .05);
+    o.connect(g); g.connect(kul.g); o.start(zeit); o.stop(zeit + dauer + .08);
+  }
+  /* Ereignisse je Kulisse: [mindestens, höchstens Sekunden bis zum nächsten, Funktion] */
+  const KUL_EREIGNIS = {
+    regen: [[.015, .07, z => kulStoss(z, "bandpass", zz(2500, 6500), 6, zz(.04, .16), .015)]],
+    feuer: [[.03, .22, z => kulStoss(z, "highpass", zz(1500, 4000), .8, zz(.2, 1.2), zz(.003, .012))],
+            [1, 3.5, z => kulStoss(z, "lowpass", 900, .8, 1, .04)]],
+    hoehle: [[1.2, 4, z => { const f = zz(1300, 2100); kulTon(z, f, f * .55, .07, .45); }]],
+    taverne: [[1.5, 5, z => { const f = zz(2500, 4000); kulTon(z, f, f, .3, .12); kulTon(z + .02, f * 1.33, f * 1.33, .25, .08); }],
+              [3, 8, z => { kulTon(z, 170, 90, .12, .7); kulStoss(z, "bandpass", 520, 1.4, .4, .06); }]],
+    wald: [[1.5, 5.5, z => { const f = zz(2600, 4200), n = 2 + Math.floor(Math.random() * 4); for (let i = 0; i < n; i++) kulTon(z + i * .11, f, f * 1.3, .06, .14); }]],
+    meer: [[6, 14, z => { for (let i = 0; i < 2 + Math.floor(Math.random() * 2); i++) kulTon(z + i * .45, 1700, 1150, .35, .045, "triangle"); }]],
+    sturm: [[12, 25, z => effekt("donner", .7, z)]]
+  };
+  const KUL_BETT = {
+    regen: [[["bandpass", 2500, .5]], .5, [.13, .25]], feuer: [[["lowpass", 300, .7]], 1, [.3, .4]],
+    hoehle: [[["bandpass", 250, .8]], .9, [.06, .6]], wald: [[["lowpass", 700, .7]], .8, [.1, .7]],
+    meer: [[["lowpass", 500, .7]], .55, [.11, .9]], sturm: [[["bandpass", 600, .5]], .5, [.17, .8]],
+    taverne: null
+  };
+  function kulisseStart(sofort) {
+    if (!ctx) return;
+    kulisseStop();
+    const art = S.kulisse;
+    if (art === "keine" || (!laeuft && !sofort)) return;
+    const g = ctx.createGain(), j = ctx.currentTime;
+    g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(kulPegel(), j + 2.5);
+    g.connect(master);
+    const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
+    kul = { art, g, knoten: [], naechst: {} };
+    const bett = KUL_BETT[art];
+    if (bett) kul.knoten.push(...kulBett(g, bett[0], bett[1], bett[2]));
+    if (art === "taverne") [[350, 3.1], [600, 4.3], [950, 5.2]].forEach(([f, am]) => kul.knoten.push(...kulBett(g, [["bandpass", f, 1.2]], .65, [am, .7])));
+    if (art === "regen") kul.knoten.push(...kulBett(g, [["lowpass", 900, .7]], .2, null));
+    if (art === "meer") kul.knoten.push(...kulBett(g, [["highpass", 2500, .7]], .12, [.11, .9]));
+    if (art === "sturm") kul.knoten.push(...kulBett(g, [["highpass", 1500, .7]], .25, null));
+    const ev = KUL_EREIGNIS[art] || [];
+    kul.timer = setInterval(() => {
+      if (!kul) return;
+      const jetzt = ctx.currentTime;
+      ev.forEach(([a, b, f], i) => {
+        if (kul.naechst[i] == null) kul.naechst[i] = jetzt + zz(a, b);
+        while (kul.naechst[i] < jetzt + .3) { try { f(Math.max(jetzt, kul.naechst[i])); } catch (_) {} kul.naechst[i] += zz(a, b); }
+      });
+    }, 100);
+  }
+  function kulisseStop() {
+    if (!kul) return;
+    const k = kul; kul = null; clearInterval(k.timer);
+    const j = ctx.currentTime;
+    k.g.gain.cancelScheduledValues(j); k.g.gain.setValueAtTime(k.g.gain.value, j); k.g.gain.linearRampToValueAtTime(0, j + 1.5);
+    setTimeout(() => { k.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { k.g.disconnect(); } catch (_) {} }, 1700);
+  }
+
+  /* ---------- Soundeffekte für den Spielleiter ---------- */
+  function fxTon(ziel, typ, punkte, laut, ende) {
+    const o = ctx.createOscillator(); o.type = typ;
+    punkte.forEach(([z, f], i) => i ? o.frequency.exponentialRampToValueAtTime(f, z) : o.frequency.setValueAtTime(f, z));
+    o.connect(ziel); o.start(punkte[0][0]); o.stop(ende); return o;
+  }
+  function fxHuelle(z, a, halten, ab, laut, ziel) {
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, z); g.gain.linearRampToValueAtTime(laut, z + a); g.gain.setValueAtTime(laut, z + a + halten); g.gain.exponentialRampToValueAtTime(.0005, z + a + halten + ab);
+    g.connect(ziel || sfxBus); return g;
+  }
+  function fxRausch(z, typ, f, q, laut, dauer, ziel, f2) {
+    const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain();
+    r.buffer = kulRauschen; b.type = typ; b.frequency.setValueAtTime(f, z); if (f2) b.frequency.exponentialRampToValueAtTime(f2, z + dauer); b.Q.value = q;
+    g.gain.setValueAtTime(laut, z); g.gain.exponentialRampToValueAtTime(.0005, z + dauer);
+    r.connect(b); b.connect(g); g.connect(ziel || sfxBus); r.start(z, Math.random() * 2, dauer + .05);
+  }
+  function effekt(art, staerke, zeit) {
+    if (!ctx) return;
+    const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
+    if (art === "drache") {
+      const g = fxHuelle(z, .18, 1.1, .9, .55 * l), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 1100; f.connect(g);
+      const am = ctx.createOscillator(), ag = ctx.createGain(), roh = ctx.createGain(); am.frequency.value = 23; ag.gain.value = .5; roh.gain.value = .6; am.connect(ag); ag.connect(roh.gain); roh.connect(f);
+      [1, 1.5, 2.02].forEach((m, i) => fxTon(roh, "sawtooth", [[z, 75 * m], [z + .4, 105 * m], [z + 2.2, 48 * m]], 1, z + 2.3));
+      am.start(z); am.stop(z + 2.3);
+      fxRausch(z, "bandpass", 600, .8, .35 * l, 2.1, null, 250);
+    } else if (art === "schwert") {
+      [[1, 1, 1.4], [2.41, .6, .9], [3.93, .4, .6], [5.62, .25, .4], [7.1, .15, .25]].forEach(([v, a, d]) => {
+        const g = fxHuelle(z, .002, 0, d, .12 * a * l); fxTon(g, "sine", [[z, 1250 * v]], 1, z + d + .1);
+      });
+      fxRausch(z, "highpass", 3500, .8, .35 * l, .06);
+      fxRausch(z + .05, "bandpass", 3000, 3, .12 * l, .4, null, 8000);
+    } else if (art === "tuer") {
+      const g = fxHuelle(z, .05, 1.2, .2, .22 * l), b = ctx.createBiquadFilter(); b.type = "bandpass"; b.frequency.value = 900; b.Q.value = 4; b.connect(g);
+      const o = ctx.createOscillator(); o.type = "sawtooth"; o.connect(b);
+      for (let i = 0; i <= 24; i++) o.frequency.setValueAtTime(zz(70, 190), z + i * .055);
+      o.start(z); o.stop(z + 1.5);
+      const g2 = fxHuelle(z + 1.4, .005, 0, .35, .7 * l); fxTon(g2, "sine", [[z + 1.4, 85], [z + 1.6, 50]], 1, z + 1.8);
+      fxRausch(z + 1.4, "lowpass", 400, .8, .4 * l, .12);
+    } else if (art === "donner") {
+      fxRausch(z, "highpass", 1200, .6, .5 * l, .12);
+      const g = ctx.createGain(); g.connect(sfxBus);
+      g.gain.setValueAtTime(0, z); [.12, .5, 1.1, 1.8, 2.6].forEach((d, i) => g.gain.linearRampToValueAtTime((i % 2 ? .45 : .9) * l * (1 - i * .15), z + d));
+      g.gain.exponentialRampToValueAtTime(.0005, z + 4.2);
+      const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(); r.buffer = kulRauschen; b.type = "lowpass"; b.frequency.value = 160; b.Q.value = .8;
+      r.connect(b); b.connect(g); r.start(z, Math.random() * 2, 4.3);
+    } else if (art === "schrei") {
+      const g = fxHuelle(z, .12, .7, .6, .3 * l), roh = ctx.createGain(); roh.gain.value = 1;
+      formant(roh, g, [[900, 5, 1.2], [1400, 6, .8], [2800, 7, .3]]);
+      const o = fxTon(roh, "sawtooth", [[z, 620], [z + .3, 1050], [z + 1.2, 500]], 1, z + 1.5);
+      vibrato([o], z, z + 1.5, 6.5, 18, .2);
+    } else if (art === "wuerfel") {
+      let t0 = z;
+      for (let i = 0; i < 9; i++) {
+        fxRausch(t0, "bandpass", zz(2000, 3500), 3, (1.5 - i * .12) * l, .03);
+        const g = fxHuelle(t0, .001, 0, .05, .25 * l); fxTon(g, "sine", [[t0, zz(1600, 2400)]], 1, t0 + .07);
+        t0 += .14 - i * .012;
+      }
+    } else if (art === "zauber") {
+      [0, 4, 7, 11, 12, 16, 19, 24].forEach((iv, i) => {
+        const t0 = z + i * .07, g = fxHuelle(t0, .01, .1, .9, .06 * l);
+        fxTon(g, "sine", [[t0, midiHz(84 + iv)]], 1, t0 + 1.1);
+      });
+      fxRausch(z, "bandpass", 2000, 2, .15 * l, 1.2, null, 9000);
+    } else if (art === "horn") {
+      const g = fxHuelle(z, .25, 1.6, .5, .3 * l), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.Q.value = 2; f.connect(g);
+      f.frequency.setValueAtTime(300, z); f.frequency.linearRampToValueAtTime(1300, z + .4); f.frequency.linearRampToValueAtTime(900, z + 2.2);
+      const o = fxTon(f, "sawtooth", [[z, 92], [z + .12, 98], [z + 1.8, 98], [z + 2.1, 87]], 1, z + 2.4);
+      vibrato([o], z, z + 2.4, 5, 1.5, .6);
+    } else if (art === "jubel") {
+      for (let i = 0; i < 7; i++) {
+        const t0 = z + zz(0, .3), g = fxHuelle(t0, .3, zz(.8, 1.4), .8, .25 * l), b = ctx.createBiquadFilter();
+        b.type = "bandpass"; b.frequency.value = zz(500, 1400); b.Q.value = 2; b.connect(g);
+        const r = ctx.createBufferSource(); r.buffer = kulRauschen; r.connect(b); r.start(t0, Math.random() * 2, 2.6);
+      }
+      for (let i = 0; i < 26; i++) fxRausch(z + zz(.1, 2.2), "bandpass", zz(1000, 1800), 1.2, zz(.15, .4) * l, .03);
+    }
+  }
   function effekteAnwenden() {
     if (!ctx) return;
     const j = ctx.currentTime;
     if (ausgang) ausgang.gain.setTargetAtTime(.6 * masterPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
+    if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
     IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : 1, j, .05));
   }
   const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6);
@@ -711,6 +891,10 @@
       IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
       /* Raumhall: jede Spur schickt einen Teil in einen Faltungshall (selbst erzeugter Raum, ca. 2,8 s) */
       hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
+      kulRauschen = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
+      { const d = kulRauschen.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+      sfxBus = ctx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(master);
+      { const s2 = ctx.createGain(); s2.gain.value = .5; sfxBus.connect(s2); s2.connect(hallEin); }
       hallFilter = ctx.createBiquadFilter(); hallFilter.type = "lowpass"; hallFilter.frequency.value = RAEUME[S.raum].hell;
       hallEin.connect(hallFilter); hallNass.connect(komp);
       raumAnwenden();
@@ -1240,10 +1424,29 @@
   let pausiert = false;
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
-  const schrittDauer = () => 60 / S.tempo / 4;
+  let wechsel = null, tempoJetzt = 0;
+  const schrittDauer = () => 60 / (tempoJetzt || S.tempo) / 4;
+  /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
+  function wechselAnwenden(zeit) {
+    const neu = wechsel; wechsel = null;
+    S = neu; abschnitt = 0;
+    if (ausgang) {
+      const ziel = .6 * masterPegel();
+      ausgang.gain.cancelScheduledValues(zeit - .3);
+      ausgang.gain.setTargetAtTime(ziel * .72, Math.max(ctx.currentTime, zeit - .25), .08);
+      ausgang.gain.setTargetAtTime(ziel, zeit + .05, .6);
+    }
+    setTimeout(() => {
+      merken(); zeichnen(); knoepfe();
+      bordunAus(); if (S.bordun) setTimeout(bordunAn, 450);
+      kulisseStart();
+    }, 0);
+  }
   function planen() {
     const vorlauf = document.hidden ? 1.6 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     while (naechste < ctx.currentTime + vorlauf) {
+      if (schritt === 0 && wechsel) wechselAnwenden(naechste);
+      tempoJetzt = tempoJetzt ? tempoJetzt + (S.tempo - tempoJetzt) * .1 : S.tempo;
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
       const v = S.variation / 10, letzterTakt = abschnitt % S.ablauf.length === S.ablauf.length - 1;
       const versatz = S.swing && schritt % 2 === 1 ? schrittDauer() * .33 : 0;
@@ -1279,6 +1482,8 @@
     audioStart();
     saitenVorbereiten();
     if (!weiter) { schritt = 0; abschnitt = 0; }
+    tempoJetzt = S.tempo; wechsel = null;
+    kulisseStart();
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
     planen(); timer = setInterval(planen, 30);
     bordunAn();
@@ -1286,7 +1491,7 @@
     knoepfe();
   }
   function stopp(pause) {
-    laeuft = false; pausiert = !!pause; clearInterval(timer); bordunAus();
+    laeuft = false; pausiert = !!pause; clearInterval(timer); bordunAus(); kulisseStop(); wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe();
   }
 
@@ -1309,11 +1514,11 @@
     mel: [[".barradin .hand-griff", "translate(-6px, 4px) scale(1.15)", 250]],
     trommel: [[".friedrich .f-arm", "rotate(14deg)", 200], [".friedrich .f-kopf", "rotate(6deg) translateY(2px)", 280]],
     floete: [[".echo .e-koerper", "rotate(-2.5deg)", 500]],
-    ketten: [[".ezekiel .kette", "rotate(9deg)", 300], [".ezekiel .z-kopf", "rotate(6deg) translateY(2px)", 300]],
+    ketten: [[".ezekiel .z-req", "rotate(8deg)", 280], [".ezekiel .z-kopf", "rotate(6deg) translateY(2px)", 300]],
     wuff: [[".rex .r-kopf", "rotate(-14deg) translateY(-2px)", 250]],
     heul: [[".rex .r-kopf", "rotate(-32deg) translate(-2px, -3px)", 1300]]
   };
-  const LEUCHTEN = { mel: ".barradin .saiten", bass: ".barradin .saiten", trommel: ".friedrich .trommelfell", schelle: ".barradin .schellring", ketten: ".ezekiel .augen" };
+  const LEUCHTEN = { mel: ".barradin .saiten", bass: ".barradin .saiten", trommel: ".friedrich .f-req", schelle: ".barradin .schellring", ketten: ".ezekiel .augen" };
   let figurCache = {};
   const figur = sel => figurCache[sel] || (figurCache[sel] = root.querySelector(".lw-buehne " + sel));
   function zucken(art) {
@@ -1395,10 +1600,32 @@
    <path d="M44 67 q2.5 -2 5 0 M55 67 q2.5 -2 5 0" stroke="#4a2e18" stroke-width="1.6" fill="none"/>
    <path d="M47.5 82 Q52 86 56.5 82" fill="none" stroke="#f2e6d6" stroke-width="1.6" stroke-linecap="round"/>
   </g>
-  <path d="M83 150 L74 192 M97 150 L97 192 M111 150 L120 192" stroke="#5a3a20" stroke-width="2.5"/>
-  <path d="M71 138 L71 150 Q97 160 123 150 L123 138 Q97 146 71 138 Z" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
-  <path d="M75 141 L80 152 L86 143 L92 154 L98 145 L104 154 L110 143 L116 152 L120 141" fill="none" stroke="#d8c49a" stroke-width="1"/>
-  <ellipse class="trommelfell" cx="97" cy="138" rx="26" ry="8" fill="#e8d9b5" stroke="#8a5a32" stroke-width="1.5"/>
+  <g class="f-req">
+  <g class="req f-trommel">
+   <path d="M83 150 L74 192 M97 150 L97 192 M111 150 L120 192" stroke="#5a3a20" stroke-width="2.5"/>
+   <path d="M71 138 L71 150 Q97 160 123 150 L123 138 Q97 146 71 138 Z" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
+   <path d="M75 141 L80 152 L86 143 L92 154 L98 145 L104 154 L110 143 L116 152 L120 141" fill="none" stroke="#d8c49a" stroke-width="1"/>
+   <ellipse class="trommelfell" cx="97" cy="138" rx="26" ry="8" fill="#e8d9b5" stroke="#8a5a32" stroke-width="1.5"/></g>
+  <g class="req f-bodhran">
+   <path d="M83 144 L74 192 M97 144 L97 192 M111 144 L120 192" stroke="#5a3a20" stroke-width="2.5"/>
+   <path d="M70 137 L70 142 Q97 151 124 142 L124 137 Q97 146 70 137 Z" fill="#5a3a20" stroke="#2a1a10" stroke-width="1"/>
+   <ellipse cx="97" cy="137" rx="27" ry="8.5" fill="#efe2c2" stroke="#5a3a20" stroke-width="1.5"/>
+   <path d="M89 137 q8 -6 16 0 q-8 6 -16 0 Z M93 134 q4 6 8 0" fill="none" stroke="#3f5a32" stroke-width="1"/></g>
+  <g class="req f-pauke">
+   <path d="M78 168 L72 192 M116 168 L122 192" stroke="#5a3a20" stroke-width="3"/>
+   <path d="M68 138 Q70 174 97 177 Q124 174 126 138 Q97 147 68 138 Z" fill="#b87333" stroke="#6b3f1a" stroke-width="1.2"/>
+   <path d="M74 150 Q97 158 120 150 M79 164 Q97 170 115 164" fill="none" stroke="#e0a05a" stroke-width="1" opacity=".7"/>
+   <ellipse cx="97" cy="138" rx="29" ry="8.5" fill="#efe2c2" stroke="#6b3f1a" stroke-width="1.6"/></g>
+  <g class="req f-tamburin">
+   <path d="M83 142 L74 192 M97 142 L97 192 M111 142 L120 192" stroke="#5a3a20" stroke-width="2.5"/>
+   <ellipse cx="97" cy="138" rx="22" ry="7" fill="#efe2c2" stroke="#8a5a32" stroke-width="4"/>
+   <g fill="#e0a046" stroke="#8a6a24" stroke-width=".5"><circle cx="76" cy="138" r="2.2"/><circle cx="84" cy="143" r="2.2"/><circle cx="97" cy="145.5" r="2.2"/><circle cx="110" cy="143" r="2.2"/><circle cx="118" cy="138" r="2.2"/><circle cx="97" cy="131" r="2"/></g></g>
+  <g class="req f-stoecke">
+   <path d="M86 142 L80 192 M108 142 L114 192" stroke="#5a3a20" stroke-width="2.5"/>
+   <rect x="78" y="130" width="38" height="13" rx="5" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
+   <ellipse cx="116" cy="136.5" rx="3" ry="6.2" fill="#c9934f" stroke="#3a2412" stroke-width=".8"/>
+   <path d="M84 134 h20 M82 139 h26" stroke="#6b4423" stroke-width=".8"/></g>
+  </g>
   <path d="M40 104 Q46 124 66 129" fill="none" stroke="#6b4627" stroke-width="8" stroke-linecap="round"/>
   <circle cx="68" cy="129" r="5" fill="#d9a07a"/><path d="M68 129 L82 139" stroke="#d8c49a" stroke-width="2.5" stroke-linecap="round"/>
   <g class="f-arm"><path d="M64 100 Q84 110 90 124" fill="none" stroke="#6b4627" stroke-width="9" stroke-linecap="round"/>
@@ -1443,7 +1670,7 @@
     <circle cx="146" cy="62" r="2.4" fill="#3a2a1c"/><circle cx="146" cy="61" r="1.1" fill="#ff8a3a"/>
    </g></g>
   </g>
-  <g class="laute">
+  <g class="laute req m-laute">
    <path d="M164 122 L232 70 L238 77 L172 130 Z" fill="#5a3a20" stroke="#2a1a10" stroke-width="1.2"/>
    <path d="M232 70 L250 74 L252 82 L238 77 Z" fill="#4a2e18" stroke="#2a1a10" stroke-width="1.2"/>
    <g fill="#e0a046"><circle cx="242" cy="72" r="1.6"/><circle cx="247" cy="74" r="1.6"/><circle cx="244" cy="79" r="1.6"/><circle cx="249" cy="80" r="1.6"/></g>
@@ -1453,6 +1680,53 @@
    <path class="saiten" d="M132 154 L236 74 M134 156 L238 76 M136 158 L240 78" stroke="#ebe2cc" stroke-width=".7" opacity=".85"/>
    <path d="M130 150 L138 160" stroke="#2a1a10" stroke-width="3" stroke-linecap="round"/>
   </g>
+  <g class="req m-mandoline">
+   <path d="M160 124 L200 86 L205 92 L166 130 Z" fill="#4a2e18" stroke="#2a1a10" stroke-width="1"/>
+   <path d="M200 86 L212 83 L214 91 L205 92 Z" fill="#3a2414" stroke="#2a1a10" stroke-width="1"/>
+   <ellipse cx="150" cy="138" rx="27" ry="20" transform="rotate(-38 150 138)" fill="#7a3a1c" stroke="#3a1a0c" stroke-width="2"/>
+   <path d="M136 146 Q150 128 166 124" fill="none" stroke="#c9934f" stroke-width="1" opacity=".6"/>
+   <circle cx="154" cy="133" r="5" fill="#2a1a10" stroke="#e0a046" stroke-width="1"/>
+   <path d="M138 152 L206 88 M140 154 L208 90" stroke="#ebe2cc" stroke-width=".7" opacity=".85"/></g>
+  <g class="req m-harfe">
+   <path d="M140 154 L202 94" stroke="#8a5a32" stroke-width="9" stroke-linecap="round"/>
+   <path d="M140 154 L168 58" stroke="#6b4423" stroke-width="5" stroke-linecap="round"/>
+   <path d="M168 58 Q196 58 202 94" fill="none" stroke="#6b4423" stroke-width="5" stroke-linecap="round"/>
+   <g stroke="#f0d48a" stroke-width=".8"><path d="M154 70 L150 142 M162 64 L158 134 M170 61 L167 126 M178 61 L176 118 M186 64 L185 110 M194 72 L193 102"/></g>
+   <circle cx="168" cy="58" r="3" fill="#e0a046"/></g>
+  <g class="req m-fidel">
+   <path d="M164 122 L200 86 L205 91 L170 128 Z" fill="#3a2414" stroke="#2a1a10" stroke-width="1"/>
+   <path d="M200 86 Q208 80 212 86 Q210 92 205 91 Z" fill="#3a2414"/>
+   <ellipse cx="146" cy="144" rx="17" ry="12" transform="rotate(-38 146 144)" fill="#9a4a22" stroke="#4a1a0a" stroke-width="1.5"/>
+   <ellipse cx="160" cy="128" rx="13" ry="10" transform="rotate(-38 160 128)" fill="#9a4a22" stroke="#4a1a0a" stroke-width="1.5"/>
+   <path d="M146 134 q2 3 0 6 M156 140 q2 3 0 6" stroke="#2a1a10" stroke-width="1.6" fill="none"/>
+   <path d="M140 150 L206 88" stroke="#ebe2cc" stroke-width=".7" opacity=".85"/>
+   <path d="M116 120 L162 178" stroke="#6b4423" stroke-width="2.2" stroke-linecap="round"/><path d="M119 119 L165 177" stroke="#f2ead8" stroke-width=".9"/></g>
+  <g class="req m-drehleier">
+   <path d="M136 142 L190 116 L198 128 L144 156 Z" fill="#8a5a32" stroke="#3a2412" stroke-width="1.2"/>
+   <path d="M152 132 L186 115 L190 121 L156 138 Z" fill="#5a3a20" stroke="#2a1a10" stroke-width="1"/>
+   <g fill="#efe2c2"><rect x="160" y="125" width="3" height="5" transform="rotate(-27 161 127)"/><rect x="168" y="121" width="3" height="5" transform="rotate(-27 169 123)"/><rect x="176" y="117" width="3" height="5" transform="rotate(-27 177 119)"/></g>
+   <circle cx="146" cy="148" r="7" fill="#c9934f" stroke="#3a2412" stroke-width="1"/>
+   <path d="M141 152 L131 158" stroke="#3a2412" stroke-width="2.4" stroke-linecap="round"/><circle cx="130.5" cy="158.5" r="2.6" fill="#e0a046"/></g>
+  <g class="req m-schalmei">
+   <path d="M129 74 L200 92" stroke="#6b4423" stroke-width="4.5" stroke-linecap="round"/>
+   <path d="M200 92 L214 95 L212 102 Z" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
+   <g fill="#2a1a10"><circle cx="160" cy="82" r="1.2"/><circle cx="168" cy="84" r="1.2"/><circle cx="176" cy="86" r="1.2"/><circle cx="184" cy="88" r="1.2"/></g></g>
+  <g class="req m-dudelsack">
+   <path d="M112 108 L80 62 M115 106 L86 56 M118 106 L93 62" stroke="#3a2414" stroke-width="3.4" stroke-linecap="round"/>
+   <g fill="#e0a046"><circle cx="79.5" cy="61" r="2.6"/><circle cx="85.5" cy="55" r="2.6"/><circle cx="92.5" cy="61" r="2.6"/></g>
+   <ellipse cx="126" cy="120" rx="16" ry="11" transform="rotate(-20 126 120)" fill="#8a2a22" stroke="#3a0a08" stroke-width="1.2"/>
+   <path d="M114 114 L138 124 M116 122 L136 116" stroke="#2a3a5a" stroke-width="2" opacity=".7"/>
+   <path d="M124 110 L127 76" stroke="#3a2414" stroke-width="2.4"/>
+   <path d="M136 126 L156 156" stroke="#3a2414" stroke-width="4" stroke-linecap="round"/></g>
+  <g class="req m-glocken">
+   <path d="M138 130 L196 112 L200 124 L144 144 Z" fill="#3a2414" stroke="#2a1a10" stroke-width="1"/>
+   <g stroke-width="3" stroke-linecap="round"><path d="M148 133 L150 139" stroke="#e0c070"/><path d="M156 130 L158 137" stroke="#d8dce6"/><path d="M164 127 L166 134" stroke="#e0c070"/><path d="M172 124 L174 131" stroke="#d8dce6"/><path d="M180 121 L182 128" stroke="#e0c070"/><path d="M188 118 L190 125" stroke="#d8dce6"/></g>
+   <path d="M136 142 L152 126" stroke="#c9934f" stroke-width="1.8"/><circle cx="153" cy="125" r="3" fill="#9b3a2f"/>
+   <path d="M200 85 L186 114" stroke="#c9934f" stroke-width="1.8"/><circle cx="185.5" cy="116" r="3" fill="#9b3a2f"/></g>
+  <g class="req m-illusion">
+   <path d="M129 74 L202 90" stroke="#b98cff" stroke-width="3.6" stroke-linecap="round"/>
+   <path d="M129 74 L202 90" stroke="#efe2ff" stroke-width="1" stroke-linecap="round"/>
+   <g fill="#e6d4ff"><circle cx="214" cy="84" r="1.6"/><circle cx="220" cy="94" r="1.2"/><circle cx="210" cy="98" r="1"/><circle cx="224" cy="86" r="1"/></g></g>
   <circle class="hand-griff" cx="200" cy="85" r="6" fill="#e0ad86"/>
   <g class="arm-schlag"><path d="M118 98 Q106 126 132 140" fill="none" stroke="#17131a" stroke-width="11" stroke-linecap="round"/>
    <path d="M114 112 q2 4 6 4 M118 126 q3 3 7 2" fill="none" stroke="#c9a24a" stroke-width="1.4"/>
@@ -1483,8 +1757,18 @@
     <path d="M43 74 Q44 100 54 104 Q64 100 65 74 Q60 82 54 81 Q48 82 43 74 Z" fill="#f6f4ee" stroke="#d8d2c4" stroke-width=".8"/>
     <path d="M50 78 Q54 76 58 78" stroke="#bdb2a4" stroke-width="1" fill="none"/>
    </g>
-   <path d="M58 79 L104 96" stroke="#6b4a2a" stroke-width="4" stroke-linecap="round"/>
-   <g fill="#2a1a10"><circle cx="78" cy="86" r="1"/><circle cx="85" cy="89" r="1"/><circle cx="92" cy="91" r="1"/></g>
+   <g class="req e-floete"><path d="M58 79 L104 96" stroke="#6b4a2a" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#2a1a10"><circle cx="78" cy="86" r="1"/><circle cx="85" cy="89" r="1"/><circle cx="92" cy="91" r="1"/></g></g>
+   <g class="req e-panfloete" stroke="#7a5a2a" stroke-width=".8" fill="#d6b273">
+    <rect x="57" y="76" width="4.5" height="30" rx="1.5"/><rect x="62" y="76" width="4.5" height="26" rx="1.5"/><rect x="67" y="76" width="4.5" height="22" rx="1.5"/>
+    <rect x="72" y="76" width="4.5" height="18" rx="1.5"/><rect x="77" y="76" width="4.5" height="14" rx="1.5"/>
+    <path d="M56 84 H83" stroke="#6b3a1a" stroke-width="2"/></g>
+   <g class="req e-okarina"><ellipse cx="72" cy="86" rx="12" ry="7.5" fill="#b5653c" stroke="#6b3a1a" stroke-width="1"/>
+    <path d="M60 81 L63 85" stroke="#b5653c" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#3a1a0c"><circle cx="70" cy="84" r="1.2"/><circle cx="75" cy="85" r="1.2"/><circle cx="79" cy="87" r="1.2"/></g></g>
+   <g class="req e-horn"><path d="M58 80 Q76 94 92 82 Q100 74 102 64" fill="none" stroke="#e2d2a8" stroke-width="5" stroke-linecap="round"/>
+    <path d="M58 80 Q76 94 92 82" fill="none" stroke="#8a7350" stroke-width="1.2" stroke-dasharray="2 4"/>
+    <ellipse cx="102.5" cy="62" rx="6" ry="3.2" transform="rotate(-70 102.5 62)" fill="#4a3a28" stroke="#e2d2a8" stroke-width="1.5"/></g>
    <path d="M42 100 Q56 112 74 88" fill="none" stroke="#e9e6dc" stroke-width="8" stroke-linecap="round"/>
    <path d="M66 100 Q84 104 90 92" fill="none" stroke="#d8d3c4" stroke-width="7" stroke-linecap="round"/>
    <circle cx="74" cy="87" r="4.5" fill="#cdbfb0"/><circle cx="90" cy="92" r="4.5" fill="#cdbfb0"/>
@@ -1523,7 +1807,7 @@
   <path d="M50 150 L46 189 M78 150 L82 189" stroke="#1a0e0e" stroke-width="13" stroke-linecap="round"/>
   <path d="M42 160 l-6 2 M86 160 l6 2 M44 176 l-6 2 M84 176 l6 2" stroke="#3a1a14" stroke-width="3" stroke-linecap="round"/>
   <path d="M36 190 h16 M76 190 h16" stroke="#3a1a14" stroke-width="7" stroke-linecap="round"/>
-  <path d="M30 104 Q18 124 22 140" fill="none" stroke="#2a1414" stroke-width="10" stroke-linecap="round"/>
+  <path class="z-links-std" d="M30 104 Q18 124 22 140" fill="none" stroke="#2a1414" stroke-width="10" stroke-linecap="round"/>
   <path d="M30 100 Q24 140 36 154 L94 154 Q104 140 98 100 Q64 84 30 100 Z" fill="#241010" stroke="#9b3a2f" stroke-width="1.4"/>
   <path d="M40 112 Q64 120 88 112 M38 128 Q64 136 90 128 M40 144 Q64 150 88 144" fill="none" stroke="#3a1a14" stroke-width="2"/>
   <path d="M64 98 L64 152" stroke="#3a1a14" stroke-width="2.4"/>
@@ -1539,9 +1823,30 @@
    <path d="M48 92 Q46 70 54 60 Q64 54 74 60 Q82 70 80 92 Q72 86 64 86 Q56 86 48 92 Z" fill="#0d0606"/>
    <path class="augen" d="M55 72 l7 2 M66 74 l7 -2" stroke="#ff4a2a" stroke-width="2.8" stroke-linecap="round"/>
   </g>
-  <path d="M96 104 Q110 120 104 136" fill="none" stroke="#2a1414" stroke-width="10" stroke-linecap="round"/>
-  <circle cx="104" cy="138" r="5.5" fill="#3a1a14"/>
-  <g class="kette"><path d="M104 140 Q112 166 96 178 Q78 186 80 164 Q82 150 98 146" fill="none" stroke="#b8b0a0" stroke-width="3.2" stroke-dasharray="4.5 2.5" stroke-linecap="round"/></g>
+  <g class="z-rechts-std"><path d="M96 104 Q110 120 104 136" fill="none" stroke="#2a1414" stroke-width="10" stroke-linecap="round"/>
+   <circle cx="104" cy="138" r="5.5" fill="#3a1a14"/></g>
+  <g class="z-req">
+   <g class="req z-ketten kette"><path d="M104 140 Q112 166 96 178 Q78 186 80 164 Q82 150 98 146" fill="none" stroke="#b8b0a0" stroke-width="3.2" stroke-dasharray="4.5 2.5" stroke-linecap="round"/></g>
+   <g class="req z-klatschen">
+    <path d="M32 104 Q36 126 56 122 M96 104 Q92 126 72 120" fill="none" stroke="#9b3a2f" stroke-width="12" stroke-linecap="round"/>
+    <path d="M32 104 Q36 126 56 122 M96 104 Q92 126 72 120" fill="none" stroke="#2a1414" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="60" cy="120" r="6" fill="#5a2a22" stroke="#c4564a" stroke-width="1.4"/><circle cx="68" cy="119" r="6" fill="#5a2a22" stroke="#c4564a" stroke-width="1.4"/>
+    <path d="M56 110 l-3 -5 M64 108 l0 -6 M72 110 l3 -5" stroke="#ff7a4a" stroke-width="1.4" stroke-linecap="round"/></g>
+   <g class="req z-schnipsen">
+    <path d="M96 104 Q114 98 110 80" fill="none" stroke="#2a1414" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="110" cy="77" r="5.5" fill="#3a1a14"/>
+    <path d="M116 70 l5 -4 M118 77 l6 0 M116 84 l5 4" stroke="#ff7a4a" stroke-width="1.4" stroke-linecap="round"/></g>
+   <g class="req z-rassel"><ellipse cx="107" cy="142" rx="4.5" ry="5.8" fill="#efe2c2" stroke="#8a7350" stroke-width="1"/>
+    <path d="M113 136 l4 -3 M114 143 l5 0" stroke="#efe2c2" stroke-width="1.2" stroke-linecap="round" opacity=".7"/></g>
+   <g class="req z-stampfen" stroke="#d8c49a" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".8">
+    <path d="M70 186 q-4 -4 -2 -9 M96 186 q4 -4 2 -9 M66 192 h-6 M98 192 h6"/></g>
+   <g class="req z-loeffel" stroke="#d8dce6" stroke-width="2" stroke-linecap="round">
+    <path d="M104 140 L112 158 M106 139 L116 155"/><ellipse cx="113.5" cy="161" rx="2.6" ry="4" transform="rotate(-25 113.5 161)" fill="#d8dce6" stroke="none"/>
+    <ellipse cx="118" cy="158" rx="2.6" ry="4" transform="rotate(-35 118 158)" fill="#d8dce6" stroke="none"/></g>
+   <g class="req z-krug"><rect x="99" y="131" width="13" height="16" rx="2" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
+    <path d="M112 134 q6 1 5 6 q-1 4 -5 4" fill="none" stroke="#3a2412" stroke-width="2"/>
+    <path d="M98 131 q3 -5 7 -2 q3 -4 7 0 q2 1 0 3 Z" fill="#fbf4e2"/><path d="M101 137 h9 M101 142 h9" stroke="#c9934f" stroke-width="1"/></g>
+  </g>
  </svg>
 </svg>`;
 
@@ -1560,8 +1865,36 @@
     }
     return html;
   }
+  const raumWahl = T => '<label class="lw-feld"><span>' + T.raum + '</span><select data-feld="raum">' + Object.keys(RAEUME).map(r => '<option value="' + r + '"' + (r === S.raum ? " selected" : "") + ">" + T.raeume[r] + "</option>").join("") + "</select></label>";
+  const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KULISSEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
+    '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
+  function pultZeichnen(T) {
+    root.innerHTML =
+      '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.pultTipp + "</p>" +
+      '<div class="lw-buehne lw-buehne-klein" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
+      '<div class="lw-pult">' +
+        '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
+          '<span class="lw-pult-titel">' + esc(S.titel || T.eigenesLied) + "</span>" +
+          '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></div>" +
+        '<section><h4>' + T.stimmungen + '</h4><div class="lw-pult-gitter">' +
+          STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div>" +
+          '<select class="lw-gespeichert lw-pult-lieder" data-feld="liedwahl"><option value="">' + T.liedWaehlen + "</option>" +
+            LIEDER.map(k => '<option value="' + k + '">' + T.vorlagen[k] + "</option>").join("") + "</select></section>" +
+        '<section><h4>' + T.kulisse + '</h4><div class="lw-pult-gitter">' +
+          KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
+          '<label class="lw-feld lw-regler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label></section>' +
+        '<section><h4>' + T.effekte + '</h4><div class="lw-pult-gitter lw-pult-fx">' + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
+        '<section class="lw-pult-mix">' +
+          '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
+          '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
+          raumWahl(T) + "</section>" +
+      "</div>" +
+      '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
+    spalten = []; aktiv = -1; figurCache = {};
+  }
   function zeichnen() {
     const T = t();
+    if (S.pult) { pultZeichnen(T); return; }
     const tonarten = Array.from({ length: 12 }, (_, i) => i - 5).map(tr => '<option value="' + tr + '"' + (tr === S.transpose ? " selected" : "") + ">" + notenName(MEL_GRUND + tr) + "</option>").join("");
     const modi = MODUS_LISTE.map(m => '<option value="' + m + '"' + (m === S.modus ? " selected" : "") + ">" + T.modi[m] + "</option>").join("");
     const ablaeufe = (ABLAEUFE.includes(S.ablauf) ? ABLAEUFE : ABLAEUFE.concat([S.ablauf])).map(a => '<option value="' + a + '"' + (a === S.ablauf ? " selected" : "") + ">" + a.split("").join(" – ") + "</option>").join("");
@@ -1589,7 +1922,7 @@
 
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.text + "</p>" +
-      '<div class="lw-buehne">' + BUEHNE + "</div>" +
+      '<div class="lw-buehne" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
       '<div class="lw-steuer">' +
         '<button type="button" class="lw-play">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
         '<label class="lw-feld lw-regler"><span>' + T.tempo + ' <b class="lw-bpm">' + S.tempo + '</b></span><input type="range" min="50" max="180" step="2" value="' + S.tempo + '" data-feld="tempo"></label>' +
@@ -1600,7 +1933,8 @@
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
         '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
         '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
-        '<label class="lw-feld"><span>' + T.raum + '</span><select data-feld="raum">' + Object.keys(RAEUME).map(r => '<option value="' + r + '"' + (r === S.raum ? " selected" : "") + ">" + T.raeume[r] + "</option>").join("") + "</select></label>" +
+        raumWahl(T) +
+        '<button type="button" class="lw-schalter lw-pultknopf" data-aktion="pult">' + T.pult + "</button>" +
       "</div>" +
       '<div class="lw-teile">' +
         '<span class="lw-teile-label">' + T.teil + ":</span>" +
@@ -1621,6 +1955,10 @@
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") +
       "</div>" +
+      '<div class="lw-vorlagen lw-kulisse"><span>' + T.kulisse + ":</span>" + kulisseWahl(T) +
+        '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
+      "</div>" +
+      '<div class="lw-vorlagen lw-effekte"><span>' + T.effekte + ":</span>" + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
         (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
@@ -1715,6 +2053,32 @@
     if (daten[i] < 0) return;
     try { audioStart(); spielen(spur, daten[i], ctx.currentTime + .01, i, 1, .3); } catch (_) {}
   }
+  function vorlageWaehlen(k) {
+    const mix = { vol: S.vol, mute: S.mute };
+    const behalten = { master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
+    let neu;
+    if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
+    else if (k === "zufall") neu = zufallsLied();
+    else if (STIL[k]) neu = stimmungLied(k);
+    else neu = pruefen(ausVorlage(k, mix));
+    Object.assign(neu, behalten);
+    if (k !== "leer") {
+      neu.titel = k === "zufall" ? t().zufall.replace(/^\S+\s/, "") : t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "");
+      if (KULISSE_ZU[k]) neu.kulisse = KULISSE_ZU[k];
+    }
+    if (k !== "leer" && !STIL[k]) neu.stimmung = null;
+    geladen = null; bearbeite = "A";
+    if (laeuft && k !== "leer") {
+      /* sanft: erst am nächsten Taktanfang wechseln; Klänge schon jetzt vorbereiten */
+      wechsel = neu;
+      const alt = S; S = neu; try { saitenVorbereiten(); } catch (_) {} S = alt;
+      root.querySelectorAll("[data-vorlage]").forEach(b => b.classList.toggle("wartet", b.dataset.vorlage === k));
+      status(t().wechselGleich(neu.titel || ""));
+      return;
+    }
+    S = neu;
+    merken(); neuGezeichnet(); saitenVorbereiten();
+  }
   function neuGezeichnet() { zeichnen(); knoepfe(); if (laeuft) { bordunAus(); bordunAn(); } }
 
   root.addEventListener("click", e => {
@@ -1789,28 +2153,20 @@
       S.teile[nach] = kopie(S.teile[von]); merken(); bearbeite = nach; zeichnen(); knoepfe(); status(t().kopiert2(von, nach)); return;
     }
     if (kopierZiel && !e.target.closest(".lw-zelle")) { kopierZiel = null; }
-    const sch = e.target.closest(".lw-schalter");
+    const sch = e.target.closest(".lw-schalter[data-feld]");
     if (sch) {
       const f = sch.dataset.feld; S[f] = S[f] ? 0 : 1; sch.setAttribute("aria-pressed", !!S[f]); merken();
       if (f === "bordun" && laeuft) { S.bordun ? bordunAn() : bordunAus(); }
       return;
     }
     const v = e.target.closest("[data-vorlage]");
-    if (v) {
-      const k = v.dataset.vorlage, mix = { vol: S.vol, mute: S.mute };
-      if (k === "leer") { S.teile = { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }; S.titel = ""; }
-      const behalten = { master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum };
-      if (k === "zufall") S = zufallsLied();
-      else if (STIL[k]) S = stimmungLied(k);
-      else if (k !== "leer") S = pruefen(ausVorlage(k, mix));
-      Object.assign(S, behalten);
-      if (k !== "leer") S.titel = k === "zufall" ? t().zufall.replace(/^\S+\s/, "") : t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "");
-      geladen = null;
-      if (k !== "leer" && !STIL[k]) S.stimmung = null;
-      bearbeite = "A";
-      merken(); neuGezeichnet(); saitenVorbereiten();
-      return;
-    }
+    if (v) { vorlageWaehlen(v.dataset.vorlage); return; }
+    const kb = e.target.closest("[data-kulisse]");
+    if (kb) { audioStart(); S.kulisse = kb.dataset.kulisse; merken(); kulisseStart(true); zeichnen(); knoepfe(); return; }
+    const fx = e.target.closest("[data-sfx]");
+    if (fx) { try { audioStart(); effekt(fx.dataset.sfx); fx.classList.remove("blitz"); void fx.offsetWidth; fx.classList.add("blitz"); } catch (_) {} return; }
+    if (e.target.closest('[data-aktion="pult"]')) { S.pult = !S.pult; merken(); zeichnen(); knoepfe(); root.scrollIntoView({ block: "start" }); return; }
+    if (e.target.closest('[data-aktion="kulisse"]')) { audioStart(); kul ? kulisseStop() : kulisseStart(true); zeichnen(); knoepfe(); return; }
     if (e.target.closest(".lw-teilen")) {
       const url = location.origin + location.pathname + "?lied=" + kodieren() + "#taverne";
       if (navigator.share) {
@@ -1826,6 +2182,7 @@
     if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
     if (d.feld === "master") { S.master = +e.target.value; root.querySelector(".lw-mval").textContent = S.master * 10 + " %"; merken(); effekteAnwenden(); }
+    if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "hall") { S.hall = +e.target.value; root.querySelector(".lw-hval").textContent = S.hall * 10 + " %"; merken(); effekteAnwenden(); }
   });
   root.addEventListener("change", e => {
@@ -1833,12 +2190,14 @@
     if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
     if (f === "ablauf") { S.ablauf = e.target.value; merken(); }
+    if (f === "kulisse") { audioStart(); S.kulisse = e.target.value; merken(); kulisseStart(true); zeichnen(); knoepfe(); }
+    if (f === "liedwahl" && e.target.value) { vorlageWaehlen(e.target.value); }
     if (f === "raum") { S.raum = e.target.value; if (!S.hall) { S.hall = 5; const r = root.querySelector('[data-feld="hall"]'); if (r) r.value = 5; root.querySelector(".lw-hval").textContent = "50 %"; effekteAnwenden(); } merken(); raumAnwenden(); }
     if (f === "gespeichert" && e.target.value) {
       const [q, id] = e.target.value.split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
       const d = l && dekodieren(l.code);
       if (d) {
-        d.vol = S.vol; d.mute = S.mute; d.master = S.master; d.hall = S.hall; d.hallAus = S.hallAus; d.raum = S.raum; S = d; S.stimmung = null; S.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
+        d.vol = S.vol; d.mute = S.mute; d.master = S.master; d.hall = S.hall; d.hallAus = S.hallAus; d.raum = S.raum; d.kulisse = S.kulisse; d.kulisseVol = S.kulisseVol; d.pult = S.pult; S = d; S.stimmung = null; S.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
         merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
       }
     }
@@ -1877,7 +2236,7 @@
 .lw-figur .f-kopf { transform-origin: 52px 88px; }
 .lw-figur .e-koerper { transform-origin: 54px 190px; }
 .lw-figur .e-kopf { transform-origin: 54px 82px; }
-.lw-figur .kette { transform-origin: 104px 140px; }
+.lw-figur .kette, .lw-figur .z-req { transform-origin: 104px 140px; }
 .lw-figur .z-kopf { transform-origin: 64px 88px; }
 .lw-figur .r-kopf { transform-origin: 44px 50px; }
 .lw-figur .rauchwolke { transform-origin: 146px 68px; animation: lwrauch 4s ease-in-out infinite; }
@@ -1948,7 +2307,25 @@
 .lw-vorlagen button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .82rem; padding: .25rem .7rem; cursor: pointer; }
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
-.lw-master input, .lw-hallregler input { width: 7rem; }
+.lw-master input, .lw-hallregler input, .lw-kulregler input { width: 7rem; }
+.lw-vorlagen button.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
+.lw-effekte button.blitz, .lw-pult-fx button.blitz { animation: lwblitz .5s ease-out; }
+@keyframes lwblitz { 0% { background: var(--ember); color: var(--night); } }
+.lw-pultknopf { border-color: var(--ember); color: var(--ember); }
+.lw-buehne-klein { height: clamp(130px, 24vw, 190px); }
+.lw-pult { display: grid; gap: 1.1rem; }
+.lw-pult section { display: grid; gap: .55rem; padding: .8rem .9rem; border: 1px solid var(--line); background: rgba(235,226,204,.025); }
+.lw-pult h4 { margin: 0; font-family: var(--body); font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ember); }
+.lw-pult-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
+.lw-play-gross { font-size: 1.1rem; padding: .8rem 1.6rem; min-width: 10rem; }
+.lw-pult-titel { font-family: var(--name); font-size: 1.3rem; color: var(--vellum); flex: 1; }
+.lw-pult-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
+.lw-pult-gitter button { border: 1px solid var(--line); background: rgba(16,14,21,.6); color: var(--vellum); font: inherit; font-size: .95rem; padding: .75rem .6rem; cursor: pointer; text-align: left; }
+.lw-pult-gitter button:hover { border-color: var(--ember); color: var(--ember); }
+.lw-pult-gitter button.an { background: var(--ember); border-color: var(--ember); color: var(--night); }
+.lw-pult-mix { display: flex !important; flex-wrap: wrap; align-items: end; gap: 1rem; }
+.lw-pult-lieder { max-width: 100%; font-size: .9rem; padding: .45rem; }
+@media (max-width: 560px) { .lw-pult-gitter { grid-template-columns: 1fr 1fr; } .lw-pult-gitter button { font-size: .85rem; padding: .6rem .45rem; } }
 .lw-hallknopf { border: 1px solid var(--line); background: none; font-size: .78rem; line-height: 1; padding: .2rem .35rem; cursor: pointer; border-radius: 3px; opacity: .45; filter: grayscale(1); }
 .lw-hallknopf[aria-pressed="true"] { opacity: 1; filter: none; border-color: rgba(224,160,70,.6); }
 .lw-mini { display: inline-flex; align-items: center; gap: .35rem; margin-right: .6rem; padding: .15rem .25rem .15rem .55rem; border: 1px solid rgba(224,160,70,.6); border-radius: 999px; background: rgba(16,14,21,.7); }
@@ -2006,6 +2383,13 @@
 .lw-status { font-family: var(--hand); font-size: 1.3rem; color: var(--ember); }
 @media (prefers-reduced-motion: reduce) { .lw-figur .rauchwolke, .lw-figur .glut { animation: none; } }
 `;
+  /* Requisiten: nur das gewählte Instrument ist sichtbar */
+  css.textContent += ".lw-figur .req { display: none; }\n" +
+    INSTRUMENTE.map(i => '.lw-buehne[data-mel="' + i + '"] .m-' + (i === "laute" ? "laute" : i) + " { display: inline; }").join("\n") + "\n" +
+    BAND.trommel.map(i => '.lw-buehne[data-tr="' + i + '"] .f-' + i + " { display: inline; }").join("\n") + "\n" +
+    BAND.floete.map(i => '.lw-buehne[data-fl="' + i + '"] .e-' + i + " { display: inline; }").join("\n") + "\n" +
+    BAND.ketten.map(i => '.lw-buehne[data-ez="' + i + '"] .z-' + i + " { display: inline; }").join("\n") + "\n" +
+    '.lw-buehne[data-ez="klatschen"] .z-links-std, .lw-buehne[data-ez="klatschen"] .z-rechts-std, .lw-buehne[data-ez="schnipsen"] .z-rechts-std { display: none; }\n';
   document.head.appendChild(css);
 
   zeichnen();
