@@ -117,7 +117,7 @@
       funkVerbinde: "Verbinde …", funkFehler: "Keine Verbindung – versuche es erneut …", funkZuhoerer: n => n === 1 ? "1 hört zu" : n + " hören zu", funkLaeuft: "Übertragung läuft",
       hTitel: "Imres Musik", hText: "Hier läuft, was Imre am Spieltisch spielt – Musik, Geräuschkulisse und Effekte. Tippe auf „Zuhören“, Lautstärke stellst du selbst ein.",
       hZuhoeren: "🎧 Zuhören", hAus: "❚❚ Stumm", hWarte: "Imre spielt gerade nichts – sobald er startet, hörst du es.", hVerbunden: "Verbunden", hVerbinde: "Verbinde mit Imres Pult …",
-      hSelbst: "Selbst spielen statt zuhören", hLaut: "Meine Lautstärke",
+      hSelbst: "Selbst spielen statt zuhören", hSignal: (n, s) => "📶 " + n + " Signale von Imre" + (s == null ? "" : " · zuletzt vor " + s + " s"), hIphone: "iPhone: Falls nichts zu hören ist, Lautlos-Schalter prüfen und Lautstärke hochdrehen.", hLaut: "Meine Lautstärke",
       pult: "🎛 Spielleiter-Pult", pultGross: "Spielleiter-Pult öffnen", pultUnter: "Stimmungen, Geräuschkulisse und Effekte für den Spieltisch – mit einem Fingertipp", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
@@ -168,7 +168,7 @@
       funkVerbinde: "Connecting …", funkFehler: "No connection – retrying …", funkZuhoerer: n => n === 1 ? "1 listening" : n + " listening", funkLaeuft: "Broadcast running",
       hTitel: "Imre's music", hText: "This plays whatever Imre plays at the table – music, ambience and effects. Tap “Listen”; you set the volume yourself.",
       hZuhoeren: "🎧 Listen", hAus: "❚❚ Mute", hWarte: "Imre isn't playing anything right now – you'll hear it as soon as he starts.", hVerbunden: "Connected", hVerbinde: "Connecting to Imre's console …",
-      hSelbst: "Play yourself instead of listening", hLaut: "My volume",
+      hSelbst: "Play yourself instead of listening", hSignal: (n, s) => "📶 " + n + " signals from Imre" + (s == null ? "" : " · last " + s + " s ago"), hIphone: "iPhone: if you hear nothing, check the silent switch and turn the volume up.", hLaut: "My volume",
       pult: "🎛 GM console", pultGross: "Open the GM console", pultUnter: "Moods, ambience and effects for the gaming table – one tap away", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
@@ -919,6 +919,22 @@
     IDS.forEach(k => spurGain[k] && spurGain[k].gain.setTargetAtTime(spurPegel(k), ctx.currentTime, .03));
   }
   const saitenCache = new Map();
+  /* iPhone: Web-Audio verstummt sonst beim Lautlos-Schalter. Wiedergabe-Sitzung anmelden und ein stummes
+     <audio> mitlaufen lassen – dann gilt die Musik als „Medienwiedergabe" wie ein Video. */
+  let stummAudio = null;
+  function stummschalterUmgehen() {
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
+    if (stummAudio) { if (stummAudio.paused) stummAudio.play().catch(() => {}); return; }
+    try {
+      const n = 800, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
+      w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, "data"); v.setUint32(40, n, true);
+      for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+      let bin = ""; new Uint8Array(b).forEach(x => { bin += String.fromCharCode(x); });
+      stummAudio = new Audio("data:audio/wav;base64," + btoa(bin)); stummAudio.loop = true; stummAudio.setAttribute("playsinline", "");
+      stummAudio.play().catch(() => {});
+    } catch (_) {}
+  }
   function audioStart() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -956,6 +972,7 @@
       for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
     }
     if (ctx.state === "suspended") ctx.resume();
+    stummschalterUmgehen();
   }
   /* ---------- Vorberechnete Klänge ----------
      Aufwendige Instrumente werden einmal im Hintergrund (OfflineAudioContext) gerendert
@@ -2055,13 +2072,20 @@
       '<div class="lw-buehne lw-buehne-klein" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
       '<div class="lw-pult"><div class="lw-pult-kopf"><button type="button" class="lw-play-gross lw-hoeren' + (hoerer.an ? " an" : "") + '" data-aktion="hoeren">' + (hoerer.an ? T.hAus : T.hZuhoeren) + "</button>" +
         '<span class="lw-pult-titel">' + esc(z && z.titel ? z.titel : "") + "</span></div>" +
-        '<p class="lw-funk-status">' + esc(stat) + "</p>" +
+        '<p class="lw-funk-status">' + esc(stat) + "</p>" + '<p class="lw-diagnose"></p>' +
         '<section class="lw-pult-mix"><label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.hLaut + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' + fxRegler(T) + '</section>' +
+        '<p class="lw-tipp">' + T.hIphone + "</p>" +
         '<p class="lw-tipp"><a href="' + esc(location.pathname) + '#taverne">' + T.hSelbst + "</a></p>" +
       "</div>" + '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
   }
+  function hoererDiagnose() {
+    const el = root.querySelector(".lw-diagnose"); if (!el || !hoerer) return;
+    const T = t(), seit = hoerer.letztes ? Math.round((Date.now() - hoerer.letztes) / 1000) : null;
+    el.textContent = T.hSignal(hoerer.nachrichten || 0, seit) + (ctx ? " · Audio: " + ctx.state : "");
+  }
   function hoererEmpfang(ev, d) {
+    if (ev !== "_offen") { hoerer.nachrichten = (hoerer.nachrichten || 0) + 1; hoerer.letztes = Date.now(); hoererDiagnose(); }
     if (ev === "_offen") { hoerer.verbunden = true; funkHoererKanal.senden("hallo", {}); zeichnen(); return; }
     if (ev === "fx") { if (hoerer.an && ctx && ALLE_FX.includes(d.art)) effekt(d.art); return; }
     if (ev !== "zustand") return;
@@ -2085,6 +2109,7 @@
     if (titelNeu) { zeichnen(); knoepfe(); }
   }
   let funkHoererKanal = null;
+  if (hoerer) setInterval(hoererDiagnose, 1000);
   if (hoerer) funkHoererKanal = funkKanal(hoerer.raum, "hoerer", hoererEmpfang, st => {
     if (st === "fehler" && hoerer.verbunden) { hoerer.verbunden = false; zeichnen(); }
   });
@@ -2316,7 +2341,11 @@
       }
       if (a === "hoeren") {
         hoerer.an = !hoerer.an;
-        if (hoerer.an) { audioStart(); saitenVorbereiten(); if (hoerer.zuletzt && hoerer.zuletzt.laeuft) start(); }
+        if (hoerer.an) {
+          audioStart(); saitenVorbereiten();
+          try { const z = ctx.currentTime + .03; [0, .09].forEach((d, i) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = i ? 1320 : 990; g.gain.setValueAtTime(.12, z + d); g.gain.exponentialRampToValueAtTime(.001, z + d + .25); o.connect(g); g.connect(sfxBus); o.start(z + d); o.stop(z + d + .3); }); } catch (_) {}
+          if (hoerer.zuletzt && hoerer.zuletzt.laeuft) start();
+        }
         else if (laeuft) stopp();
         zeichnen(); knoepfe();
       }
@@ -2558,6 +2587,7 @@
 .lw-funk-zeile { display: flex; flex-wrap: wrap; gap: .5rem; margin: .4rem 0; }
 .lw-funk-link { flex: 1 1 14rem; min-width: 0; background: rgba(0,0,0,.3); border: 1px solid var(--line); color: inherit; font: inherit; font-size: .85rem; padding: .45rem .6rem; }
 .lw-funk-status { margin: .5rem 0; font-size: .95rem; }
+.lw-diagnose { margin: 0 0 .4rem; font-size: .75rem; color: var(--ash); }
 .lw-pult-titel { font-family: var(--name); font-size: 1.3rem; color: var(--vellum); flex: 1; }
 .lw-pult-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
 .lw-pult-gitter button { border: 1px solid var(--line); background: rgba(16,14,21,.6); color: var(--vellum); font: inherit; font-size: .95rem; padding: .75rem .6rem; cursor: pointer; text-align: left; }
