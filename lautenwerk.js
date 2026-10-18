@@ -98,10 +98,10 @@
       },
       teil: "Teil bearbeiten", ablauf: "Ablauf", kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
-      lieder: "Lieder", stimmungen: "Stimmungen für Imre", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
+      lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
       vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Marktgewusel", schmiede: "⚒ Zwergenschmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
-        kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lagerfeuer",
-        auenland: "🌿 Auenland", elben: "✨ Elbenhalle", zwerge: "⛏ Zwergenbinge", reiter: "🐎 Ritt der Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kaminballade", shanty: "🌊 Seemannslied", pilger: "⛪ Pilgerweg" },
+        kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lager",
+        auenland: "🌿 Auenland", elben: "✨ Elben", zwerge: "⛏ Zwerge", reiter: "🐎 Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kamin", shanty: "🌊 Shanty", pilger: "⛪ Pilger" },
       klangwelten: "Klangwelten", klangTipp: "Volksmusik und Fantasy-Klänge – jedes Mal neu komponiert, im Stil vertraut, aber immer eigene Melodien.",
       zufall: "🎲 Improvisieren", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
@@ -114,11 +114,11 @@
       kulisse: "Geräuschkulisse", kulisseLaut: "Kulisse",
       kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Meer", sturm: "⛈ Sturm" },
       effekte: "Effekte",
-      sfx: { drache: "🐉 Drachenbrüllen", schwert: "⚔ Schwertklirren", tuer: "🚪 Knarrende Tür", donner: "⚡ Donner", schrei: "😱 Ferner Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Kriegshorn", jubel: "🍻 Jubel",
-        tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah-waah", krit: "🌟 Natürliche 20", dramatisch: "😨 Dun-dun-DUUUN", grillen: "🦗 Peinliche Stille",
-        ooh: "😮 Ooooh!", muenzen: "💰 Münzen", ruelpser: "🍺 Rülpser", schnarchen: "😴 Schnarchen", bonk: "🔨 Bonk",
-        bogen: "🏹 Bogenschuss", pfeil: "🎯 Pfeiltreffer", hieb: "🗡 Schwerthieb", verfehlt: "💨 Verfehlt", block: "🛡 Schildblock", wucht: "🔨 Wuchtschlag",
-        schmerz: "😫 Schmerzensschrei", sterben: "💀 Todesröcheln", feuerball: "🔥 Feuerball", blitz: "⚡ Blitzschlag", heiltrank: "🧪 Heiltrank" }, momente: "Spieltisch-Momente", kampfFx: "Kampf",
+      sfx: { drache: "🐉 Drache", schwert: "⚔ Klingen", tuer: "🚪 Tür", donner: "⚡ Donner", schrei: "😱 Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Horn", jubel: "🍻 Jubel",
+        tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Stille",
+        ooh: "😮 Ooooh!", muenzen: "💰 Münzen", ruelpser: "🍺 Rülpser", schnarchen: "😴 Zzz", bonk: "🔨 Bonk",
+        bogen: "🏹 Bogen", pfeil: "🎯 Pfeil", hieb: "🗡 Hieb", verfehlt: "💨 Verfehlt", block: "🛡 Block", wucht: "🔨 Wucht",
+        schmerz: "😫 Aua", sterben: "💀 Tod", feuerball: "🔥 Feuerball", blitz: "⚡ Blitz", heiltrank: "🧪 Trank" }, momente: "Spieltisch-Momente", kampfFx: "Kampf",
       funk: "📡 Mitlauschen", funkTipp: "Alle anderen öffnen den Link und tippen auf „Zuhören“ – die Musik entsteht dann bei jedem selbst im Browser, Stimmungen, Kulisse und Effekte folgen deinem Pult.",
       funkStart: "📡 Für alle übertragen", funkStopp: "Übertragung beenden", funkKopieren: "🔗 Link kopieren", funkKopiert: "Link kopiert – ab damit in den Discord!",
       funkVerbinde: "Verbinde …", funkFehler: "Keine Verbindung – versuche es erneut …", funkZuhoerer: n => n === 1 ? "1 hört zu" : n + " hören zu", funkLaeuft: "Übertragung läuft",
@@ -153,10 +153,10 @@
       },
       teil: "Edit part", ablauf: "Order", kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
-      lieder: "Songs", stimmungen: "Moods for Imre", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
+      lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
       vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market bustle", schmiede: "⚒ Dwarven forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
-        kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Campfire",
-        auenland: "🌿 Shire green", elben: "✨ Elven hall", zwerge: "⛏ Dwarven deep", reiter: "🐎 Ride of the riders", dorffest: "💃 Village fair", kamin: "🕯 Fireside ballad", shanty: "🌊 Sea shanty", pilger: "⛪ Pilgrim's way" },
+        kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Camp",
+        auenland: "🌿 Shire", elben: "✨ Elves", zwerge: "⛏ Dwarves", reiter: "🐎 Riders", dorffest: "💃 Fair", kamin: "🕯 Fireside", shanty: "🌊 Shanty", pilger: "⛪ Pilgrim" },
       klangwelten: "Soundscapes", klangTipp: "Folk music and fantasy sounds – freshly composed every time, familiar in style but always with original melodies.",
       zufall: "🎲 Improvise", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
@@ -169,11 +169,11 @@
       kulisse: "Ambience", kulisseLaut: "Ambience",
       kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Sea", sturm: "⛈ Storm" },
       effekte: "Effects",
-      sfx: { drache: "🐉 Dragon roar", schwert: "⚔ Sword clash", tuer: "🚪 Creaking door", donner: "⚡ Thunder", schrei: "😱 Distant scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 War horn", jubel: "🍻 Cheers",
-        tusch: "🥁 Ba-dum-tss", posaune: "🎺 Sad trombone", krit: "🌟 Natural 20", dramatisch: "😨 Dun-dun-DUNNN", grillen: "🦗 Awkward silence",
-        ooh: "😮 Ooooh!", muenzen: "💰 Coins", ruelpser: "🍺 Burp", schnarchen: "😴 Snoring", bonk: "🔨 Bonk",
-        bogen: "🏹 Bow shot", pfeil: "🎯 Arrow hit", hieb: "🗡 Sword slash", verfehlt: "💨 Miss", block: "🛡 Shield block", wucht: "🔨 Heavy blow",
-        schmerz: "😫 Cry of pain", sterben: "💀 Death rattle", feuerball: "🔥 Fireball", blitz: "⚡ Lightning bolt", heiltrank: "🧪 Healing potion" }, momente: "Table moments", kampfFx: "Combat",
+      sfx: { drache: "🐉 Dragon", schwert: "⚔ Blades", tuer: "🚪 Door", donner: "⚡ Thunder", schrei: "😱 Scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 Horn", jubel: "🍻 Cheers",
+        tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Silence",
+        ooh: "😮 Ooooh!", muenzen: "💰 Coins", ruelpser: "🍺 Burp", schnarchen: "😴 Zzz", bonk: "🔨 Bonk",
+        bogen: "🏹 Bow", pfeil: "🎯 Arrow", hieb: "🗡 Slash", verfehlt: "💨 Miss", block: "🛡 Block", wucht: "🔨 Smash",
+        schmerz: "😫 Ouch", sterben: "💀 Death", feuerball: "🔥 Fireball", blitz: "⚡ Lightning", heiltrank: "🧪 Potion" }, momente: "Table moments", kampfFx: "Combat",
       funk: "📡 Listen in", funkTipp: "Everyone else opens the link and taps “Listen” – the music is then created in each browser, and moods, ambience and effects follow your console.",
       funkStart: "📡 Broadcast to everyone", funkStopp: "Stop broadcast", funkKopieren: "🔗 Copy link", funkKopiert: "Link copied – drop it into Discord!",
       funkVerbinde: "Connecting …", funkFehler: "No connection – retrying …", funkZuhoerer: n => n === 1 ? "1 listening" : n + " listening", funkLaeuft: "Broadcast running",
@@ -440,8 +440,7 @@
         floete: folge({ 0: 5, 4: 4, 8: 3, 12: 4 }), rex: folge({ 14: 0 }) }) }
   };
   const LIEDER = ["taverne", "saltarello", "ballade", "hafen", "wald", "markt", "schmiede", "trauer", "schlacht", "wiegen"];
-  const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg", "rast"];
-  const KLANGWELTEN = ["auenland", "elben", "zwerge", "reiter", "dorffest", "kamin", "shanty", "pilger"];
+  const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg", "rast", "auenland", "elben", "zwerge", "reiter", "dorffest", "kamin", "shanty", "pilger"];
 
   /* ---------- Stimmungs-Generatoren ----------
      Jede Stimmung ist ein Stil: Tonleiter, Tempo, Besetzung, Akkordfolgen (Bass-Zeilen je Viertel),
@@ -2085,8 +2084,6 @@
           STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div>" + intRegler(T) +
           '<select class="lw-gespeichert lw-pult-lieder" data-feld="liedwahl"><option value="">' + T.liedWaehlen + "</option>" +
             LIEDER.map(k => '<option value="' + k + '">' + T.vorlagen[k] + "</option>").join("") + "</select></section>" +
-        '<section><h4>🌍 ' + T.klangwelten + '</h4><div class="lw-pult-gitter">' +
-          KLANGWELTEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div></section>" +
         '<section class="lw-pult-mix">' + mixRegler(T) + "</section>" +
         '<section><h4>' + T.kulisse + '</h4><div class="lw-pult-gitter">' +
           KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
@@ -2315,8 +2312,6 @@
       '<div class="lw-vorlagen lw-effekte"><span>🎭 ' + T.momente + ":</span>" + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + fxRegler(T) + "</div>" +
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
-        '<span class="lw-klangwelt-titel">🌍 ' + T.klangwelten + ":</span>" +
-        KLANGWELTEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
         (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
         intRegler(T) + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>" + '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
       "</div>" +
@@ -2734,13 +2729,13 @@
 body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-weiter { display: none; }
 .lw-diagnose { margin: 0 0 .4rem; font-size: .75rem; color: var(--ash); }
 .lw-pult-titel { font-family: var(--name); font-size: 1.3rem; color: var(--vellum); flex: 1; }
-.lw-pult-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
-.lw-pult-gitter button { border: 1px solid var(--line); background: rgba(16,14,21,.6); color: var(--vellum); font: inherit; font-size: .95rem; padding: .75rem .6rem; cursor: pointer; text-align: left; }
+.lw-pult-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.6rem, 1fr)); gap: .35rem; }
+.lw-pult-gitter button { border: 1px solid var(--line); background: rgba(16,14,21,.6); color: var(--vellum); font: inherit; font-size: .9rem; padding: .55rem .5rem; cursor: pointer; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lw-pult-gitter button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-pult-gitter button.an { background: var(--ember); border-color: var(--ember); color: var(--night); }
 .lw-pult-mix { display: flex !important; flex-wrap: wrap; align-items: end; gap: 1rem; }
 .lw-pult-lieder { max-width: 100%; font-size: .9rem; padding: .45rem; }
-@media (max-width: 560px) { .lw-pult-gitter { grid-template-columns: 1fr 1fr; } .lw-pult-gitter button { font-size: .85rem; padding: .6rem .45rem; } }
+@media (max-width: 560px) { .lw-pult-gitter { grid-template-columns: repeat(3, 1fr); } .lw-pult-gitter button { font-size: .8rem; padding: .55rem .35rem; } }
 .lw-hallknopf { border: 1px solid var(--line); background: none; font-size: .78rem; line-height: 1; padding: .2rem .35rem; cursor: pointer; border-radius: 3px; opacity: .45; filter: grayscale(1); }
 .lw-hallknopf[aria-pressed="true"] { opacity: 1; filter: none; border-color: rgba(224,160,70,.6); }
 .lw-mini { display: inline-flex; align-items: center; gap: .35rem; margin-right: .6rem; padding: .15rem .25rem .15rem .55rem; border: 1px solid rgba(224,160,70,.6); border-radius: 999px; background: rgba(16,14,21,.7); }
