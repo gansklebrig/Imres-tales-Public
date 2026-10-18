@@ -71,7 +71,9 @@
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   /* lustige Spieltisch-Momente */
   const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk"];
-  const ALLE_FX = EFFEKTE.concat(MOMENTE);
+  /* Kampfgeräusche */
+  const KAMPF_FX = ["bogen", "pfeil", "hieb", "verfehlt", "block", "wucht", "schmerz", "sterben", "feuerball", "blitz", "heiltrank"];
+  const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE);
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
     trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢" },
@@ -114,7 +116,9 @@
       effekte: "Effekte",
       sfx: { drache: "🐉 Drachenbrüllen", schwert: "⚔ Schwertklirren", tuer: "🚪 Knarrende Tür", donner: "⚡ Donner", schrei: "😱 Ferner Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Kriegshorn", jubel: "🍻 Jubel",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah-waah", krit: "🌟 Natürliche 20", dramatisch: "😨 Dun-dun-DUUUN", grillen: "🦗 Peinliche Stille",
-        ooh: "😮 Ooooh!", muenzen: "💰 Münzen", ruelpser: "🍺 Rülpser", schnarchen: "😴 Schnarchen", bonk: "🔨 Bonk" }, momente: "Spieltisch-Momente",
+        ooh: "😮 Ooooh!", muenzen: "💰 Münzen", ruelpser: "🍺 Rülpser", schnarchen: "😴 Schnarchen", bonk: "🔨 Bonk",
+        bogen: "🏹 Bogenschuss", pfeil: "🎯 Pfeiltreffer", hieb: "🗡 Schwerthieb", verfehlt: "💨 Verfehlt", block: "🛡 Schildblock", wucht: "🔨 Wuchtschlag",
+        schmerz: "😫 Schmerzensschrei", sterben: "💀 Todesröcheln", feuerball: "🔥 Feuerball", blitz: "⚡ Blitzschlag", heiltrank: "🧪 Heiltrank" }, momente: "Spieltisch-Momente", kampfFx: "Kampf",
       funk: "📡 Mitlauschen", funkTipp: "Alle anderen öffnen den Link und tippen auf „Zuhören“ – die Musik entsteht dann bei jedem selbst im Browser, Stimmungen, Kulisse und Effekte folgen deinem Pult.",
       funkStart: "📡 Für alle übertragen", funkStopp: "Übertragung beenden", funkKopieren: "🔗 Link kopieren", funkKopiert: "Link kopiert – ab damit in den Discord!",
       funkVerbinde: "Verbinde …", funkFehler: "Keine Verbindung – versuche es erneut …", funkZuhoerer: n => n === 1 ? "1 hört zu" : n + " hören zu", funkLaeuft: "Übertragung läuft",
@@ -167,7 +171,9 @@
       effekte: "Effects",
       sfx: { drache: "🐉 Dragon roar", schwert: "⚔ Sword clash", tuer: "🚪 Creaking door", donner: "⚡ Thunder", schrei: "😱 Distant scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 War horn", jubel: "🍻 Cheers",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Sad trombone", krit: "🌟 Natural 20", dramatisch: "😨 Dun-dun-DUNNN", grillen: "🦗 Awkward silence",
-        ooh: "😮 Ooooh!", muenzen: "💰 Coins", ruelpser: "🍺 Burp", schnarchen: "😴 Snoring", bonk: "🔨 Bonk" }, momente: "Table moments",
+        ooh: "😮 Ooooh!", muenzen: "💰 Coins", ruelpser: "🍺 Burp", schnarchen: "😴 Snoring", bonk: "🔨 Bonk",
+        bogen: "🏹 Bow shot", pfeil: "🎯 Arrow hit", hieb: "🗡 Sword slash", verfehlt: "💨 Miss", block: "🛡 Shield block", wucht: "🔨 Heavy blow",
+        schmerz: "😫 Cry of pain", sterben: "💀 Death rattle", feuerball: "🔥 Fireball", blitz: "⚡ Lightning bolt", heiltrank: "🧪 Healing potion" }, momente: "Table moments", kampfFx: "Combat",
       funk: "📡 Listen in", funkTipp: "Everyone else opens the link and taps “Listen” – the music is then created in each browser, and moods, ambience and effects follow your console.",
       funkStart: "📡 Broadcast to everyone", funkStopp: "Stop broadcast", funkKopieren: "🔗 Copy link", funkKopiert: "Link copied – drop it into Discord!",
       funkVerbinde: "Connecting …", funkFehler: "No connection – retrying …", funkZuhoerer: n => n === 1 ? "1 listening" : n + " listening", funkLaeuft: "Broadcast running",
@@ -993,6 +999,7 @@
   }
   /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
   const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55,
+    bogen: .7, pfeil: .8, hieb: .7, verfehlt: .5, block: .8, wucht: .8, schmerz: .45, sterben: .5, feuerball: .7, blitz: .5, heiltrank: .55,
     tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8 };
   function fxVorwaermen() { if (kwWorker !== false) ALLE_FX.forEach((f, i) => setTimeout(() => fxNachfuellen(f), 200 * i)); }
   function effekt(art, staerke, zeit) {
@@ -2085,6 +2092,7 @@
           KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
           '<label class="lw-feld lw-regler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label></section>' +
         '<section><h4>' + T.effekte + '</h4><div class="lw-pult-gitter lw-pult-fx">' + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
+        '<section><h4>⚔ ' + T.kampfFx + '</h4><div class="lw-pult-gitter lw-pult-fx">' + KAMPF_FX.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
         '<section><h4>🎭 ' + T.momente + '</h4><div class="lw-pult-gitter lw-pult-fx">' + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" + fxRegler(T) + "</section>" +
         '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
@@ -2303,6 +2311,7 @@
         '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
       "</div>" +
       '<div class="lw-vorlagen lw-effekte"><span>' + T.effekte + ":</span>" + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
+      '<div class="lw-vorlagen lw-effekte"><span>⚔ ' + T.kampfFx + ":</span>" + KAMPF_FX.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
       '<div class="lw-vorlagen lw-effekte"><span>🎭 ' + T.momente + ":</span>" + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + fxRegler(T) + "</div>" +
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +

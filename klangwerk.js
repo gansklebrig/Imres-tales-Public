@@ -224,6 +224,129 @@
       hochpass(a, sr, 180); tiefpass(a, sr, 2200, 2);
       return normieren(raum(a, sr, [[.023, .3], [.041, .22], [.067, .15]]), .9);
     },
+    /* ---------- Kampf ---------- */
+    /* Rauschen, dessen Bandpass über die Zeit wandert: Luftzischen, Schwünge, Flammen */
+    bogen(sr) {
+      const a = new Float32Array(Math.floor(1.4 * sr)), f = zz(95, 130);
+      /* Sehne schnellt: tiefer, schnarrender Ton mit Obertönen, Tonhöhe fällt etwas */
+      [[1, 1, .25], [2, .55, .18], [3, .35, .12], [4.1, .2, .08], [5.3, .12, .05]].forEach(([m, g, d]) => {
+        const i0 = Math.floor(.02 * sr), n = Math.floor(d * 6 * sr); let p = Math.random() * TAU;
+        for (let i = 0; i < n && i0 + i < a.length; i++) { const t = i / sr; p += TAU * f * m * (1 - .06 * Math.min(1, t / .1)) / sr; a[i0 + i] += Math.sin(p) * g * .5 * Math.exp(-t / d) * (1 + .3 * Math.sin(TAU * 31 * t)); }
+      });
+      stoss(a, sr, .02, 1800, 1.2, .5, .015); mode(a, sr, .02, zz(180, 240), .03, .4);
+      /* Pfeil zischt davon */
+      const F = new SVF(sr), i0 = Math.floor(.05 * sr), n = Math.floor(.5 * sr);
+      for (let i = 0; i < n; i++) { const r = i / n; if ((i & 31) === 0) F.setze(2600 - 1700 * r, 5); F.tick(Math.random() * 2 - 1); a[i0 + i] += F.bp * .35 * Math.pow(1 - r, 2) * Math.min(1, r * 20); }
+      return normieren(a, .9);
+    },
+    pfeil(sr) {
+      const a = new Float32Array(Math.floor(1.3 * sr)), F = new SVF(sr), n = Math.floor(.28 * sr);
+      for (let i = 0; i < n; i++) { const r = i / n; if ((i & 31) === 0) F.setze(700 + 2200 * r, 5); F.tick(Math.random() * 2 - 1); a[i] += F.bp * .4 * r * r; }   /* heran */
+      const z = .28;
+      mode(a, sr, z, zz(160, 200), .05, 1); mode(a, sr, z, zz(480, 560), .03, .6); mode(a, sr, z, zz(1050, 1250), .015, .4);
+      stoss(a, sr, z, 2200, 1, .9, .02);
+      /* Schaft zittert nach */
+      const i0 = Math.floor((z + .01) * sr), m = Math.floor(.45 * sr), f = zz(260, 340); let p = 0;
+      for (let i = 0; i < m; i++) { const t = i / sr; p += TAU * f / sr; a[i0 + i] += Math.sin(p) * .22 * Math.exp(-t * 7) * (.5 + .5 * Math.sin(TAU * 22 * t)); }
+      return normieren(a, .9);
+    },
+    hieb(sr) {
+      const a = new Float32Array(Math.floor(1.1 * sr)), F = new SVF(sr), n = Math.floor(zz(.22, .3) * sr);
+      for (let i = 0; i < n; i++) { const r = i / n; if ((i & 31) === 0) F.setze(350 + 2200 * Math.sin(Math.PI * r), 3); F.tick(Math.random() * 2 - 1); a[i] += F.bp * .6 * Math.pow(Math.sin(Math.PI * r), 2); }
+      const z = n / sr - .02;
+      stoss(a, sr, z, 3000, .7, .9, .05); stoss(a, sr, z, 900, .8, .9, .08);          /* Schnitt */
+      mode(a, sr, z, zz(90, 130), .07, .9); mode(a, sr, z, zz(240, 300), .04, .5);    /* Treffer */
+      [2900, 4300, 6100].forEach((f, k) => mode(a, sr, z, f * zz(.97, 1.03), .25 - k * .06, .06, Math.random() * TAU)); /* Klinge klingt */
+      return normieren(a, .9);
+    },
+    block(sr) {
+      const a = new Float32Array(Math.floor(1.6 * sr)), z = .01;
+      mode(a, sr, z, zz(120, 150), .09, 1); mode(a, sr, z, zz(300, 360), .06, .8); mode(a, sr, z, zz(650, 760), .03, .6);   /* Holzschild */
+      [[1850, .5], [2730, .4], [3910, .3], [5200, .2]].forEach(([f, d]) => { mode(a, sr, z, f * zz(.97, 1.03), d, .12, Math.random() * TAU); mode(a, sr, z, f * 1.004, d, .1); }); /* Metallrand */
+      stoss(a, sr, z, 1500, .7, 1.4, .05); stoss(a, sr, z, 400, .8, 1, .08);
+      mode(a, sr, z + zz(.08, .12), zz(130, 160), .04, .25);                           /* Nachwackeln */
+      return normieren(raum(a, sr, [[.03, .25], [.07, .12]]), .92);
+    },
+    wucht(sr) {
+      const a = new Float32Array(Math.floor(1.3 * sr)), F = new SVF(sr), n = Math.floor(.2 * sr);
+      for (let i = 0; i < n; i++) { const r = i / n; if ((i & 31) === 0) F.setze(200 + 600 * r, 2); F.tick(Math.random() * 2 - 1); a[i] += F.bp * .5 * r * r; }  /* Ausholen */
+      const z = .2, i0 = Math.floor(z * sr), m = Math.floor(.4 * sr); let p = 0;
+      for (let i = 0; i < m; i++) { const t = i / sr; p += TAU * (40 + 50 * Math.exp(-t * 25)) / sr; a[i0 + i] += Math.sin(p) * 1.2 * Math.exp(-t * 9); }
+      stoss(a, sr, z, 350, .8, 1.3, .1); stoss(a, sr, z, 1300, 1, .9, .035);
+      for (let k = 0; k < 8; k++) mode(a, sr, z + .005 + Math.random() * .06, zz(900, 2800), .006, zz(.15, .4));  /* Knirschen */
+      return normieren(a, .92);
+    },
+    schmerz(sr) {
+      const a = new Float32Array(Math.floor(1.3 * sr)), f = zz(140, 190);
+      stimme(a, sr, .02, [{ d: .07, v: "ae", f0: f, f1: f * 1.4, laut: .7, hauch: .6, abfall: .01 }, { d: zz(.4, .6), v: wahl(["a", "ae"]), f0: f * 1.45, f1: f * .85, laut: 1, abfall: .55 }],
+        { jitter: .06, rau: .7, hauchBasis: .1, q: [5, 7, 9] });
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 3.5);
+      hochpass(a, sr, 120); tiefpass(a, sr, 4000);
+      return normieren(raum(a, sr, [[.03, .2], [.07, .1]]), .9);
+    },
+    sterben(sr) {
+      const a = new Float32Array(Math.floor(2.8 * sr)), f = zz(115, 140);
+      stimme(a, sr, .02, [{ d: .5, v: "o", f0: f * 1.15, f1: f, laut: .9, abfall: .1 }, { d: .9, v: "u", f0: f, f1: f * .62, laut: .8, abfall: .7 },
+        { d: .7, v: "ae", f0: f * .6, f1: f * .55, laut: .35, hauch: 1, abfall: .9 }], { jitter: .08, rau: .8, hauchBasis: .14, q: [5, 7, 8] });
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 2.5);
+      hochpass(a, sr, 90); tiefpass(a, sr, 3200);
+      return normieren(raum(a, sr, [[.03, .2], [.08, .1]]), .9);
+    },
+    feuerball(sr) {
+      const D = 3.6, a = new Float32Array(Math.floor(D * sr)), F = new SVF(sr), n = Math.floor(.7 * sr);
+      for (let i = 0; i < n; i++) { const r = i / n; if ((i & 31) === 0) F.setze(300 * Math.pow(8, r), 2.5); F.tick(Math.random() * 2 - 1); a[i] += F.bp * .5 * r * r; }  /* Flamme sammelt sich */
+      const z = .7, i0 = Math.floor(z * sr), m = a.length - i0, L = new SVF(sr), M = new SVF(sr); L.setze(120, .7); M.setze(900, .6);
+      let p = 0, braun = 0;
+      for (let i = 0; i < m; i++) {
+        const t = i / sr; p += TAU * (30 + 70 * Math.exp(-t * 6)) / sr; braun = braun * .99 + (Math.random() * 2 - 1) * .1;
+        const w = Math.random() * 2 - 1; L.tick(braun); M.tick(w);
+        a[i0 + i] += Math.sin(p) * Math.exp(-t * 2.5) * 1.1 + L.lp * 5 * Math.exp(-t * 1.6) + M.lp * 1.3 * Math.exp(-t * 1.2) + M.bp * .7 * Math.exp(-t * 4);
+      }
+      for (let k = 0; k < 60; k++) { const t = z + .2 + Math.pow(Math.random(), 1.5) * 2.4; mode(a, sr, t, zz(800, 2500), .003, zz(.05, .2) * Math.exp(-(t - z) * .8)); } /* Nachknistern */
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 1.3);
+      blenden(a, sr, .01, .8);
+      return normieren(raum(a, sr, [[.06, .3], [.13, .2], [.25, .1]]), .95);
+    },
+    blitz(sr) {
+      const a = new Float32Array(Math.floor(2.4 * sr)), n = Math.floor(.7 * sr), F = new SVF(sr); F.setze(2500, .7);
+      let p = 0;
+      for (let i = 0; i < n; i++) {
+        const t = i / sr, r = i / n; p += (55 + 20 * Math.random()) / sr; if (p >= 1) p -= 1;
+        const brumm = (p < .1 ? 1 : -.1) * .5, knister = Math.random() < .02 ? zz(-1, 1) * 2 : 0;
+        F.tick(Math.random() * 2 - 1);
+        a[i] += (brumm + knister + F.hp * .4) * (r < .05 ? r / .05 : 1) * (1 - r * .6) * (.6 + .4 * Math.sin(TAU * 9 * t));
+      }
+      /* Einschlag: scharfer Knall, kurzes Grollen */
+      const z = .7; stoss(a, sr, z, 3000, .5, 1.6, .05); stoss(a, sr, z, 500, .7, 1.2, .25);
+      const L = new SVF(sr); L.setze(150, .7); let braun = 0; const i0 = Math.floor(z * sr);
+      for (let i = 0; i < a.length - i0; i++) { braun = braun * .99 + (Math.random() * 2 - 1) * .1; L.tick(braun); a[i0 + i] += L.lp * 4 * Math.exp(-i / sr * 2.2); }
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 1.5);
+      return normieren(a, .92);
+    },
+    heiltrank(sr) {
+      const a = new Float32Array(Math.floor(3 * sr));
+      /* Korken */
+      const n = Math.floor(.05 * sr); let p = 0;
+      for (let i = 0; i < n; i++) { const r = i / n; p += TAU * (500 + 900 * r) / sr; a[i] += Math.sin(p) * Math.exp(-r * 3) * .8; }
+      stoss(a, sr, 0, 2500, 1, .5, .01);
+      /* Glucksen beim Trinken */
+      let t = .45;
+      for (let k = 0; k < 3 + Math.floor(Math.random() * 2); k++) {
+        const i0 = Math.floor(t * sr), m = Math.floor(.12 * sr), f = zz(140, 200); let q = 0;
+        for (let i = 0; i < m; i++) { const r = i / m; q += TAU * f * (1 + .6 * r) / sr; a[i0 + i] += (Math.sin(q) * .7 + (Math.random() * 2 - 1) * .1) * Math.sin(Math.PI * r); }
+        mode(a, sr, t + .05, zz(700, 1000), .015, .2);
+        t += zz(.28, .36);
+      }
+      /* „Aaah" und Heilschimmer */
+      stimme(a, sr, t + .05, [{ d: .6, v: "a", f0: 150, f1: 120, laut: .5, hauch: .5, abfall: .7 }], { jitter: .02, hauchBasis: .15 });
+      [0, 4, 7, 12, 16].forEach((iv, k) => { const f = 880 * Math.pow(2, iv / 12); mode(a, sr, t + .1 + k * .07, f, .7, .12); mode(a, sr, t + .1 + k * .07, f * 2.76, .3, .04); });
+      return normieren(a, .9);
+    },
+    verfehlt(sr) {
+      const a = new Float32Array(Math.floor(.9 * sr)), F = new SVF(sr), G = new SVF(sr), n = Math.floor(zz(.35, .5) * sr);
+      for (let i = 0; i < n; i++) { const r = i / n, h = Math.pow(Math.sin(Math.PI * r), 2); if ((i & 31) === 0) { F.setze(500 + 1800 * h, 3); G.setze(250 + 600 * h, 2); } const w = Math.random() * 2 - 1; a[i] += (F.tick(w) * .6 + G.tick(w) * .5) * h; }
+      return normieren(a, .85);
+    },
     /* ---------- Spieltisch-Momente ---------- */
     tusch(sr) {
       const a = new Float32Array(Math.floor(2 * sr));
