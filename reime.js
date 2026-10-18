@@ -143,54 +143,55 @@ window.BARRADIN_REIME = {
       friedrich: {
         paare: {
           hoch: [
-            "Sein Pfeil fliegt gerade, still und ehrlich –\nsein Herz ist rein: Hoch lebe Friedrich!",
-            "Mit Bogen, Hund und Rechtschaffenheit gefährlich\nfür jeden Feind: der Waldläufer Friedrich!",
-            "Selbst Demogorgon boxt er, unbeschwerlich –\nwer sonst wär' so verrückt? Na, Friedrich!"
+            "Im Wald ist er sanft und still und friedlich –\ndoch wehe den Feinden! Hoch lebe Friedrich!",
+            "Sein Pfeil knackt jedes Schloss, ganz wie ein Dietrich –\nkein Feind ist sicher vor dem Waldläufer Friedrich!",
+            "Mit Rex an der Seite sieht er aus so niedlich –\ndoch selbst Demogorgon boxt er: unser Friedrich!",
+            "Er führt uns voran wie ein tapferer Fähnrich –\nmit Bogen und Herz: der Waldläufer Friedrich!"
           ],
           tief: [
-            "Da war noch wer … mit Bogen … und so … herrlich …\nwie hieß der gleich? Ach, Friedrich. Natürlich."
+            "Da war noch wer … mit Bogen … ziemlich … niedlich …\nwie hieß der gleich? Ach ja! Der Friedrich."
           ]
         },
         hoch: [
-          "sein Bogen trifft – ganz sicherlich!",
-          "so rechtschaffen und so ritterlich!",
-          "selbst Demogorgon boxt er – fürchterlich!",
-          "mit Rex an seiner Seite: herrlich!",
-          "der Waldläufer, kühn und königlich!"
+          "im Wald ganz still – im Kampf nicht friedlich!",
+          "mit Rex an seiner Seite – wie niedlich!",
+          "sein Pfeil knackt jedes Schloss wie ein Dietrich!",
+          "er führt uns voran wie ein tapferer Fähnrich!"
         ],
         tief: [
-          "der ist … ganz okay … so … ordentlich?",
-          "der hat 'nen Bogen. Glaube ich."
+          "der ist … ganz … niedlich?",
+          "der hat 'nen Bogen. Und ist … friedlich?"
         ]
       },
       echo: {
         paare: {
           hoch: [
-            "Die Feinde brennen lichterloh,\nund einer lacht dazu: der Druide Echo!",
-            "Wo Blitze zucken, hell und roh,\nsteht hörnergekrönt und stolz: Echo!",
-            "Und ruft man laut in den Wald hinein, so\nhallt es zurück: Ein Hoch auf Echo! … Echo … Echo …"
+            "Der Fuchs, der Spatz, der Hirsch und selbst der Gecko\nverneigen sich vor dem Druiden Echo!",
+            "Die Blights sind Asche, die Spinnen im Dreck, oh –\nein Hoch auf den Druiden mit Geweih: Echo!",
+            "„Wer ist der Größte?“, ruf ich in den Wald – und keck, oh,\nhallt es zurück: „Echo!“ … Echo … Echo …"
           ],
           tief: [
-            "Der … hat Hörner … und … na ja … so.\nIch glaub, er heißt … wart … Echo? Echo? … Echo."
+            "Der … hat ein Geweih … und … ist weg, oh …\nich glaub, er heißt … wart … Echo? Echo? … Echo."
           ]
         },
         hoch: [
-          "sein Feuerball brennt lichterloh!",
-          "wo Blitze zucken, wird er froh!",
-          "so mächtig glüht kein Druide sonst irgendwo!",
-          "die Hörner glänzen, die Feinde fliehn – und wir sind froh!"
+          "selbst Drachen kriechen ins Versteck, oh!",
+          "sein Feuerball fegt alle Feinde weg, oh!",
+          "die Feinde liegen flach im Dreck, oh!",
+          "vor seinem Blitz wird jeder Dämon klein wie ein Gecko!"
         ],
         tief: [
-          "der … hat … Hörner … und … so?",
-          "äh … wo ist der eigentlich? Irgendwo?"
+          "der … hat ein Geweih … und ist … weg, oh?",
+          "äh … wo ist der? Im Versteck, oh?"
         ]
       },
       ezekiel: {
         paare: {
           hoch: [
             "Er stach der Chasme ins Auge, und sie fiel –\nein Hoch auf den Darkin mit Stil: Ezekiel!",
-            "Für ihn ist jeder Kampf ein Spiel,\nund jeder Dolchstoß sitzt: Ezekiel!",
-            "Wo Schatten fallen, kalt und viel,\nda lauert der Destroyer: Ezekiel!"
+            "Ein Schatten, ein Dolch, ein lautloses Spiel –\nund schon ist es vorbei: Ezekiel!",
+            "Sein Dolch trifft immer und überall sein Ziel –\ndas ist der Destroyer: Ezekiel!",
+            "Glühende Augen, die Rüstung subtil …\nna gut, nicht subtil. Doch mit Stil: Ezekiel!"
           ],
           tief: [
             "Der zerstört … halt … Sachen … ziemlich viel.\nIch sag nichts Falsches! Hallo, Ezekiel!"
@@ -200,7 +201,8 @@ window.BARRADIN_REIME = {
           "sein Dolch trifft immer jedes Ziel!",
           "der Darkin mit dem meisten Stil!",
           "für ihn ist jeder Kampf ein Spiel!",
-          "der Chasme stach er ins Auge – sie fiel!"
+          "der Chasme stach er ins Auge – sie fiel!",
+          "kein Schatten ist ihm zu subtil!"
         ],
         tief: [
           "der … zerstört … halt … ziemlich viel.",
@@ -439,7 +441,8 @@ window.BARRADIN_REIME = {
         paare: {
           hoch: [
             "His arrow flies, his aim is slick:\nthe finest ranger – Friedrich!",
-            "He punched a demon lord – some trick!\nThe boxing ranger: Friedrich!"
+            "He punched a demon lord – some trick!\nThe boxing ranger: Friedrich!",
+            "Through forest, fog and thorny thicket,\nno one tracks like Friedrich!"
           ],
           tief: [
             "There was a guy … a bow … a stick …\nwhat was his name? Oh. Friedrich."
@@ -459,29 +462,31 @@ window.BARRADIN_REIME = {
       echo: {
         paare: {
           hoch: [
-            "Shout through the forest, loud and slow,\nand back it rings: Hail Echo! … Echo … Echo …",
-            "The fireballs burst, the foes all glow,\nand one man grins: the druid Echo!"
+            "The fox, the bird, the deer, and even the gecko\nbow down before the druid Echo!",
+            "The blights are ashes, the spiders a wreck, oh –\nall hail the antlered druid: Echo!",
+            "“Who's the greatest?” I shout through the trees – and, what the heck, oh,\nback it rings: “Echo!” … Echo … Echo …"
           ],
           tief: [
-            "He has some horns … and … well … so …\nwhat's his name again? Echo? Echo? … Echo."
+            "He … has antlers … and … what the heck, oh …\nI think he's called … Echo? Echo? … Echo."
           ]
         },
         hoch: [
-          "his fireballs set the sky aglow!",
-          "the lightning's his – and down goes the foe!",
-          "no druid burns as bright, you know!",
-          "his horns shine bright, his flames burn so!"
+          "the dragon cowers, small as a gecko!",
+          "his lightning leaves the foes a wreck, oh!",
+          "his fireball? Foes gone in a sec, oh!",
+          "the beasts all bow – from bear to gecko!"
         ],
         tief: [
-          "he has … some horns … and … so?",
-          "where is he? Um … I don't know."
+          "he has … some antlers … and … what the heck, oh?",
+          "where is he? Hiding like a gecko?"
         ]
       },
       ezekiel: {
         paare: {
           hoch: [
             "He stabbed the chasme with deadly zeal –\nthe Darkin blade: Ezekiel!",
-            "Where shadows fall, as cold as steel,\nthere lurks the Destroyer: Ezekiel!"
+            "Where shadows fall, as cold as steel,\nthere lurks the Destroyer: Ezekiel!",
+            "One shadow, one dagger, one silent deal –\nand it's over: Ezekiel!"
           ],
           tief: [
             "He breaks … stuff. A lot. That's the deal.\nI'm saying nothing bad! Hi, Ezekiel!"
@@ -490,7 +495,7 @@ window.BARRADIN_REIME = {
         hoch: [
           "his dagger strikes with deadly zeal!",
           "a Darkin heart of burning steel!",
-          "the chasme fell, and so did its squeal!",
+          "one silent stab – and that's the deal!",
           "the foes all tremble, the cowards kneel!"
         ],
         tief: [
