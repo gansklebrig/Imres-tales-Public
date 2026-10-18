@@ -1525,9 +1525,9 @@
   const buehne = () => root.querySelector(".lw-buehne");
   /* Bewegungen der Band über die Web-Animations-Schnittstelle (ruckelt nicht) */
   const BEWEGUNG = {
-    klopf: [[".barradin .kopf", "rotate(6deg) translateY(2px)", 280], [".barradin .arm-schlag", "rotate(-9deg) translate(2px, 4px)", 180], [".barradin .laute", "rotate(-1.5deg)", 200]],
+    klopf: [[".barradin .kopf", "rotate(6deg) translateY(2px)", 280], [".barradin .arm-schlag", "translate(-1px, 4px)", 180], [".barradin .laute", "rotate(-1.5deg)", 200]],
     schelle: [[".barradin .fuss", "rotate(-8deg)", 200]],
-    bass: [[".barradin .arm-schlag", "rotate(5deg)", 220]],
+    bass: [[".barradin .arm-schlag", "translate(4px, 5px) rotate(-2deg)", 220]],
     mel: [[".barradin .hand-griff", "translate(-6px, 4px) scale(1.15)", 250]],
     trommel: [[".friedrich .f-arm", "rotate(14deg)", 200], [".friedrich .f-kopf", "rotate(6deg) translateY(2px)", 280]],
     floete: [[".echo .e-koerper", "rotate(-2.5deg)", 500]],
@@ -1717,13 +1717,13 @@
    <ellipse cx="160" cy="128" rx="13" ry="10" transform="rotate(-38 160 128)" fill="#9a4a22" stroke="#4a1a0a" stroke-width="1.5"/>
    <path d="M146 134 q2 3 0 6 M156 140 q2 3 0 6" stroke="#2a1a10" stroke-width="1.6" fill="none"/>
    <path d="M140 150 L206 88" stroke="#ebe2cc" stroke-width=".7" opacity=".85"/>
-   <path d="M116 120 L162 178" stroke="#6b4423" stroke-width="2.2" stroke-linecap="round"/><path d="M119 119 L165 177" stroke="#f2ead8" stroke-width=".9"/></g>
+   <path d="M166 122 L118 172" stroke="#6b4423" stroke-width="2.2" stroke-linecap="round"/><path d="M168 125 L121 174" stroke="#f2ead8" stroke-width=".9"/></g>
   <g class="req m-drehleier">
    <path d="M136 142 L190 116 L198 128 L144 156 Z" fill="#8a5a32" stroke="#3a2412" stroke-width="1.2"/>
    <path d="M152 132 L186 115 L190 121 L156 138 Z" fill="#5a3a20" stroke="#2a1a10" stroke-width="1"/>
    <g fill="#efe2c2"><rect x="160" y="125" width="3" height="5" transform="rotate(-27 161 127)"/><rect x="168" y="121" width="3" height="5" transform="rotate(-27 169 123)"/><rect x="176" y="117" width="3" height="5" transform="rotate(-27 177 119)"/></g>
    <circle cx="146" cy="148" r="7" fill="#c9934f" stroke="#3a2412" stroke-width="1"/>
-   <path d="M141 152 L131 158" stroke="#3a2412" stroke-width="2.4" stroke-linecap="round"/><circle cx="130.5" cy="158.5" r="2.6" fill="#e0a046"/></g>
+   <path d="M148 143 L159 129" stroke="#3a2412" stroke-width="2.4" stroke-linecap="round"/><circle cx="160" cy="128" r="2.6" fill="#e0a046"/></g>
   <g class="req m-schalmei">
    <path d="M129 74 L200 92" stroke="#6b4423" stroke-width="4.5" stroke-linecap="round"/>
    <path d="M200 92 L214 95 L212 102 Z" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
@@ -1734,21 +1734,22 @@
    <ellipse cx="126" cy="120" rx="16" ry="11" transform="rotate(-20 126 120)" fill="#8a2a22" stroke="#3a0a08" stroke-width="1.2"/>
    <path d="M114 114 L138 124 M116 122 L136 116" stroke="#2a3a5a" stroke-width="2" opacity=".7"/>
    <path d="M124 110 L127 76" stroke="#3a2414" stroke-width="2.4"/>
-   <path d="M136 126 L156 156" stroke="#3a2414" stroke-width="4" stroke-linecap="round"/></g>
+   <path d="M138 122 L178 142" stroke="#3a2414" stroke-width="4" stroke-linecap="round"/><circle cx="179" cy="143" r="3" fill="#3a2414"/></g>
   <g class="req m-glocken">
    <path d="M138 130 L196 112 L200 124 L144 144 Z" fill="#3a2414" stroke="#2a1a10" stroke-width="1"/>
    <g stroke-width="3" stroke-linecap="round"><path d="M148 133 L150 139" stroke="#e0c070"/><path d="M156 130 L158 137" stroke="#d8dce6"/><path d="M164 127 L166 134" stroke="#e0c070"/><path d="M172 124 L174 131" stroke="#d8dce6"/><path d="M180 121 L182 128" stroke="#e0c070"/><path d="M188 118 L190 125" stroke="#d8dce6"/></g>
-   <path d="M136 142 L152 126" stroke="#c9934f" stroke-width="1.8"/><circle cx="153" cy="125" r="3" fill="#9b3a2f"/>
+   <path d="M162 128 L170 120" stroke="#c9934f" stroke-width="1.8"/><circle cx="171" cy="119" r="3" fill="#9b3a2f"/>
    <path d="M200 85 L186 114" stroke="#c9934f" stroke-width="1.8"/><circle cx="185.5" cy="116" r="3" fill="#9b3a2f"/></g>
   <g class="req m-illusion">
    <path d="M129 74 L202 90" stroke="#b98cff" stroke-width="3.6" stroke-linecap="round"/>
    <path d="M129 74 L202 90" stroke="#efe2ff" stroke-width="1" stroke-linecap="round"/>
    <g fill="#e6d4ff"><circle cx="214" cy="84" r="1.6"/><circle cx="220" cy="94" r="1.2"/><circle cx="210" cy="98" r="1"/><circle cx="224" cy="86" r="1"/></g></g>
   <circle class="hand-griff" cx="200" cy="85" r="6" fill="#e0ad86"/>
-  <g class="arm-schlag"><path d="M118 98 Q106 126 132 140" fill="none" stroke="#17131a" stroke-width="11" stroke-linecap="round"/>
-   <path d="M114 112 q2 4 6 4 M118 126 q3 3 7 2" fill="none" stroke="#c9a24a" stroke-width="1.4"/>
-   <path d="M127 136 l6 5" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
-   <circle cx="136" cy="142" r="6.5" fill="#e0ad86"/></g>
+  <g class="arm-schlag"><path d="M118 98 Q104 124 118 128 L156 126" fill="none" stroke="#17131a" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+   <path d="M110 110 q3 3 7 2 M128 124 q2 4 0 7" fill="none" stroke="#c9a24a" stroke-width="1.4"/>
+   <path d="M150 122 l0 8" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
+   <circle cx="161" cy="126" r="6.5" fill="#e0ad86"/>
+   <path d="M164 121 q4 1 5 4 M165 126 q4 1 5 4" fill="none" stroke="#b07e5c" stroke-width="1" stroke-linecap="round"/></g>
   <circle class="rauchwolke" cx="148" cy="62" r="5" fill="rgba(220,215,230,.25)"/>
  </svg>
  <!-- Echo: weißes Haar und Bart, Geweih, Elfenohren, weiße Robe mit Pelz – mit Flöte -->
@@ -1885,6 +1886,10 @@
   const raumWahl = T => '<label class="lw-feld"><span>' + T.raum + '</span><select data-feld="raum">' + Object.keys(RAEUME).map(r => '<option value="' + r + '"' + (r === S.raum ? " selected" : "") + ">" + T.raeume[r] + "</option>").join("") + "</select></label>";
   const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KULISSEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
     '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
+  const mixRegler = T =>
+    '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
+    '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
+    raumWahl(T);
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   function pultZeichnen(T) {
     root.innerHTML =
@@ -1898,14 +1903,11 @@
           STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div>" + intRegler(T) +
           '<select class="lw-gespeichert lw-pult-lieder" data-feld="liedwahl"><option value="">' + T.liedWaehlen + "</option>" +
             LIEDER.map(k => '<option value="' + k + '">' + T.vorlagen[k] + "</option>").join("") + "</select></section>" +
+        '<section class="lw-pult-mix">' + mixRegler(T) + "</section>" +
         '<section><h4>' + T.kulisse + '</h4><div class="lw-pult-gitter">' +
           KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
           '<label class="lw-feld lw-regler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label></section>' +
         '<section><h4>' + T.effekte + '</h4><div class="lw-pult-gitter lw-pult-fx">' + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
-        '<section class="lw-pult-mix">' +
-          '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
-          '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
-          raumWahl(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
@@ -1949,18 +1951,7 @@
         '<label class="lw-feld"><span>' + T.modus + '</span><select data-feld="modus">' + modi + "</select></label>" +
         '<button type="button" class="lw-schalter" data-feld="swing" aria-pressed="' + !!S.swing + '">' + T.swing + "</button>" +
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
-        '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
-        '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
-        raumWahl(T) +
         '<button type="button" class="lw-schalter lw-pultknopf" data-aktion="pult">' + T.pult + "</button>" +
-      "</div>" +
-      '<div class="lw-teile">' +
-        '<span class="lw-teile-label">' + T.teil + ":</span>" +
-        TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") +
-        '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><select data-feld="ablauf">' + ablaeufe + "</select></label>" +
-        '<span class="lw-kopieren"><span class="lw-teile-label">' + T.kopierenNach(bearbeite) + ":</span>" +
-          TEILE.filter(z => z !== bearbeite).map(z => '<button type="button" class="lw-klein' + (kopierZiel === z ? " warnung" : "") + '" data-kopiere="' + z + '">' +
-            (kopierZiel === z ? T.ueberschreiben(z) : "→ " + z) + "</button>").join("") + "</span>" +
       "</div>" +
       '<div class="lw-vorlagen"><span>' + T.lieder + ":</span>" +
         LIEDER.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
@@ -1980,7 +1971,15 @@
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
         (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
-        intRegler(T) + '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
+        intRegler(T) + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>" + '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
+      "</div>" +
+      '<div class="lw-teile">' +
+        '<span class="lw-teile-label">' + T.teil + ":</span>" +
+        TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") +
+        '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><select data-feld="ablauf">' + ablaeufe + "</select></label>" +
+        '<span class="lw-kopieren"><span class="lw-teile-label">' + T.kopierenNach(bearbeite) + ":</span>" +
+          TEILE.filter(z => z !== bearbeite).map(z => '<button type="button" class="lw-klein' + (kopierZiel === z ? " warnung" : "") + '" data-kopiere="' + z + '">' +
+            (kopierZiel === z ? T.ueberschreiben(z) : "→ " + z) + "</button>").join("") + "</span>" +
       "</div>" +
       '<div class="lw-scroll"><div class="lw-raster">' + raster + "</div></div>" +
       '<p class="lw-wisch">' + T.wischen + "</p>" +
@@ -2199,14 +2198,14 @@
     if (d.vol) { S.vol[d.vol] = +e.target.value; merken(); mixAnwenden(); return; }
     if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
-    if (d.feld === "master") { S.master = +e.target.value; root.querySelector(".lw-mval").textContent = S.master * 10 + " %"; merken(); effekteAnwenden(); }
+    if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = S.master * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "intensitaet") {
       S.intensitaet = +e.target.value;
       root.querySelectorAll(".lw-ival").forEach(x => x.textContent = t().intStufen[S.intensitaet]);
       merken();
     }
-    if (d.feld === "hall") { S.hall = +e.target.value; root.querySelector(".lw-hval").textContent = S.hall * 10 + " %"; merken(); effekteAnwenden(); }
+    if (d.feld === "hall") { S.hall = +e.target.value; root.querySelectorAll(".lw-hval").forEach(x => x.textContent = S.hall * 10 + " %"); merken(); effekteAnwenden(); }
   });
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
@@ -2286,11 +2285,11 @@
 .lw-buehne.wuff .r-kopf { animation: lwwuff .25s ease-out; }
 .lw-buehne.heul .r-kopf { animation: lwheul 1.3s ease-in-out; }
 @keyframes lwnick { 40% { transform: rotate(6deg) translateY(2px) } }
-@keyframes lwklopf { 40% { transform: rotate(-9deg) translate(2px, 4px) } }
+@keyframes lwklopf { 40% { transform: translate(-1px, 4px) } }
 @keyframes lwwackel { 40% { transform: rotate(-1.5deg) } }
 @keyframes lwfuss { 40% { transform: rotate(-8deg) } }
 @keyframes lwbling { 40% { filter: drop-shadow(0 0 4px #ffd27a) brightness(1.6) } }
-@keyframes lwzupf { 40% { transform: rotate(5deg) } }
+@keyframes lwzupf { 40% { transform: translate(4px, 5px) rotate(-2deg) } }
 @keyframes lwgriff { 40% { transform: translate(-6px, 4px) scale(1.15) } }
 @keyframes lwsaite { 0% { stroke: #ffd27a; opacity: 1; filter: drop-shadow(0 0 3px #ffd27a) } }
 @keyframes lwschlag { 35% { transform: rotate(14deg) } }
@@ -2332,6 +2331,7 @@
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
 .lw-intensitaet { flex: 1 1 100%; margin-top: .5rem; }
+.lw-stimm-mix { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: flex-end; margin-top: .4rem; }
 .lw-intensitaet input { width: 100%; accent-color: #c0502a; }
 .lw-master input, .lw-hallregler input, .lw-kulregler input { width: 7rem; }
 .lw-vorlagen button.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
