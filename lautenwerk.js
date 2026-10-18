@@ -2622,7 +2622,7 @@
 .lw-funk-link { flex: 1 1 14rem; min-width: 0; background: rgba(0,0,0,.3); border: 1px solid var(--line); color: inherit; font: inherit; font-size: .85rem; padding: .45rem .6rem; }
 .lw-funk-status { margin: .5rem 0; font-size: .95rem; }
 /* Zuhörer per Link: nur das Lautenwerk zeigen */
-body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #auftritt, body.lw-nur-zuhoeren #buehne .bereich-weiter { display: none; }
+body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-weiter { display: none; }
 .lw-diagnose { margin: 0 0 .4rem; font-size: .75rem; color: var(--ash); }
 .lw-pult-titel { font-family: var(--name); font-size: 1.3rem; color: var(--vellum); flex: 1; }
 .lw-pult-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
