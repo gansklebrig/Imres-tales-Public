@@ -85,6 +85,7 @@
       geladen: "Ein geteiltes Lied wurde geladen.",
       stimmungTipp: "Jeder Klick komponiert ein neues Stück im Stil der Stimmung. Solange es läuft, wandelt es sich nach jedem Durchgang weiter – perfekt als Hintergrund für eure Sessions. Sobald du im Raster etwas änderst, bleibt es so, wie es ist.",
       wandelt: k => "♪ " + k + " wandelt sich weiter …",
+      master: "Gesamtlautstärke", hall: "Hall", hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
       gespeichertOk: n => "„" + n + "“ wurde gespeichert.", geloescht: n => "„" + n + "“ wurde gelöscht.", liedGeladen: n => "„" + n + "“ geladen.",
@@ -119,6 +120,7 @@
       geladen: "A shared song has been loaded.",
       stimmungTipp: "Every click composes a new piece in the style of the mood. While it plays, it keeps changing after every round – perfect as background music for your sessions. As soon as you change something in the grid, it stays as it is.",
       wandelt: k => "♪ " + k + " keeps evolving …",
+      master: "Master volume", hall: "Reverb", hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
       gespeichertOk: n => "“" + n + "” was saved.", geloescht: n => "“" + n + "” was deleted.", liedGeladen: n => "“" + n + "” loaded.",
@@ -516,12 +518,15 @@
     TEILE.forEach(p => { s.teile[p] = Object.assign(teilLeer(), s.teile[p] || {}); });
     if (!/^[ABCD]{1,8}$/.test(s.ablauf || "")) s.ablauf = "A";
     s.band = Object.assign(BAND_START(), s.band || {});
+    if (typeof s.master !== "number") s.master = 8;
+    if (typeof s.hall !== "number") s.hall = 0;
+    s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
     if (typeof s.variation !== "number") s.variation = 0;
     if (!INSTRUMENTE.includes(s.instrument)) s.instrument = "laute";
     return s;
   }
-  let S = ausVorlage("taverne");
+  let S = pruefen(ausVorlage("taverne"));
   try {
     const g = JSON.parse(localStorage.getItem("imres-lautenwerk2") || "null");
     if (g && g.teile) S = pruefen(g);
@@ -636,7 +641,17 @@
 
   /* ---------- Klang ---------- */
   let ctx = null, master = null, rauschen = null, illusionEcho = null;
-  const spurGain = {};
+  const spurGain = {}, hallSend = {};
+  let ausgang = null, hallEin = null, hallNass = null;
+  const masterPegel = () => Math.pow(S.master / 10, 1.5);
+  const hallPegel = () => Math.pow(S.hall / 10, 1.3) * 1.6;
+  function effekteAnwenden() {
+    if (!ctx) return;
+    const j = ctx.currentTime;
+    if (ausgang) ausgang.gain.setTargetAtTime(.6 * masterPegel(), j, .05);
+    if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
+    IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : 1, j, .05));
+  }
   const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6);
   function mixAnwenden() {
     if (!ctx) return;
@@ -651,12 +666,23 @@
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor();
       komp.threshold.value = -20; komp.knee.value = 10; komp.ratio.value = 3; komp.attack.value = .005; komp.release.value = .2;
-      const ausgang = ctx.createGain(); ausgang.gain.value = .6;
+      ausgang = ctx.createGain(); ausgang.gain.value = .6 * masterPegel();
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -4; limiter.knee.value = 2; limiter.ratio.value = 20; limiter.attack.value = .003; limiter.release.value = .25;
       master = ctx.createGain(); master.gain.value = .45;
       master.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
       IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
+      /* Raumhall: jede Spur schickt einen Teil in einen Faltungshall (selbst erzeugter Raum, ca. 2,8 s) */
+      hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
+      const hall = ctx.createConvolver(), sr = ctx.sampleRate, len = Math.floor(sr * 2.8), ir = ctx.createBuffer(2, len, sr);
+      for (let c = 0; c < 2; c++) {
+        const d = ir.getChannelData(c), vor = Math.floor(sr * .022);
+        for (let i = vor; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - (i - vor) / (len - vor), 3.2) * (i < vor + sr * .08 ? 1.4 : 1);
+      }
+      hall.buffer = ir;
+      const hallFilter = ctx.createBiquadFilter(); hallFilter.type = "lowpass"; hallFilter.frequency.value = 5200;
+      hallEin.connect(hallFilter); hallFilter.connect(hall); hall.connect(hallNass); hallNass.connect(komp);
+      IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : 1; spurGain[k].connect(g); g.connect(hallEin); hallSend[k] = g; });
       /* Echo für die Flöte der Illusionen */
       illusionEcho = ctx.createDelay(1); illusionEcho.delayTime.value = .23;
       const rueck = ctx.createGain(); rueck.gain.value = .42;
@@ -1173,6 +1199,7 @@
   }
 
   /* ---------- Taktgeber ---------- */
+  let pausiert = false;
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
   const schrittDauer = () => 60 / S.tempo / 4;
@@ -1209,17 +1236,18 @@
     S.teile = neu.teile;
     merken(); zeichnen(); knoepfe();
   }
-  function start() {
+  function start(weiter) {
     audioStart();
     saitenVorbereiten();
-    laeuft = true; schritt = 0; abschnitt = 0; naechste = ctx.currentTime + .1; anzeige.length = 0;
+    if (!weiter) { schritt = 0; abschnitt = 0; }
+    laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
     planen(); timer = setInterval(planen, 30);
     bordunAn();
     requestAnimationFrame(malen);
     knoepfe();
   }
-  function stopp() {
-    laeuft = false; clearInterval(timer); bordunAus();
+  function stopp(pause) {
+    laeuft = false; pausiert = !!pause; clearInterval(timer); bordunAus();
     spalte(-1); teilAnzeige(null); knoepfe();
   }
 
@@ -1507,6 +1535,7 @@
           T.wer[SPUR[k].wer] + " <small>· " + (wahl(k) ? wahl(k).namen[wahl(k).wert] : T.spuren[k]) + "</small></button>" +
         '<button type="button" class="lw-mute" data-mute="' + k + '" aria-pressed="' + !!S.mute[k] + '" aria-label="' + esc(T.stumm + " " + T.spuren[k]) + '" title="' + esc(T.stumm) + '">' + (S.mute[k] ? "🔇" : "🔊") + "</button>" +
         '<input type="range" class="lw-fader" min="0" max="9" step="1" value="' + S.vol[k] + '" data-vol="' + k + '" aria-label="' + esc(T.lautstaerke + " " + T.spuren[k]) + '">' +
+        '<button type="button" class="lw-hallknopf" data-hall="' + k + '" aria-pressed="' + !S.hallAus[k] + '" title="' + esc(T.hallSpur) + '" aria-label="' + esc(T.hallSpur + " – " + T.spuren[k]) + '">🏛</button>' +
         (wahl(k) ? '<select class="lw-instrument" data-feld="instrument" data-spur="' + k + '" aria-label="' + esc(T.instrument + " " + T.wer[SPUR[k].wer]) + '">' +
           wahl(k).liste.map(n => '<option value="' + n + '"' + (n === wahl(k).wert ? " selected" : "") + ">" + esc(wahl(k).namen[n]) + "</option>").join("") + "</select>" : "") +
         "</div></div>";
@@ -1530,6 +1559,8 @@
         '<label class="lw-feld"><span>' + T.modus + '</span><select data-feld="modus">' + modi + "</select></label>" +
         '<button type="button" class="lw-schalter" data-feld="swing" aria-pressed="' + !!S.swing + '">' + T.swing + "</button>" +
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
+        '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
+        '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
       "</div>" +
       '<div class="lw-teile">' +
         '<span class="lw-teile-label">' + T.teil + ":</span>" +
@@ -1564,7 +1595,30 @@
     figurCache = {};
   }
   const teilBenutzt = p => IDS.some(k => S.teile[p][k].some(v => v >= 0));
+  /* ---------- Mini-Player oben: erscheint, wenn die Musik läuft und das Lautenwerk nicht zu sehen ist ---------- */
+  let mini = null, lautenwerkSichtbar = true;
+  function miniBauen() {
+    const tools = document.querySelector("header.top .tools");
+    if (!tools || mini) return;
+    mini = document.createElement("div");
+    mini.className = "lw-mini"; mini.hidden = true;
+    mini.innerHTML = '<a class="lw-mini-titel" href="#taverne"><span class="lw-mini-note">♪</span><span class="lw-mini-name"></span></a><button type="button" class="lw-mini-knopf"></button>';
+    tools.insertBefore(mini, tools.firstChild);
+    mini.querySelector(".lw-mini-knopf").addEventListener("click", () => { laeuft ? stopp(true) : start(true); });
+    if (window.IntersectionObserver) new IntersectionObserver(e => { lautenwerkSichtbar = e[e.length - 1].isIntersecting; miniAnzeigen(); }).observe(root);
+  }
+  function miniAnzeigen() {
+    if (!mini) return;
+    const T = t();
+    mini.hidden = !((laeuft || pausiert) && !lautenwerkSichtbar);
+    mini.classList.toggle("spielt", laeuft);
+    mini.querySelector(".lw-mini-name").textContent = S.titel || T.eigenesLied;
+    mini.querySelector(".lw-mini-titel").title = T.miniZur;
+    const k = mini.querySelector(".lw-mini-knopf");
+    k.textContent = laeuft ? "❚❚" : "▶"; k.setAttribute("aria-label", laeuft ? T.miniPause : T.miniWeiter); k.title = k.getAttribute("aria-label");
+  }
   function knoepfe() {
+    miniAnzeigen();
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
   }
@@ -1626,6 +1680,8 @@
   root.addEventListener("click", e => {
     const z = e.target.closest(".lw-zelle");
     if (z) { antippen(z); return; }
+    const hk = e.target.closest("[data-hall]");
+    if (hk) { const k = hk.dataset.hall; S.hallAus[k] = S.hallAus[k] ? 0 : 1; hk.setAttribute("aria-pressed", !S.hallAus[k]); merken(); effekteAnwenden(); return; }
     const mu = e.target.closest("[data-mute]");
     if (mu) {
       const k = mu.dataset.mute; S.mute[k] = S.mute[k] ? 0 : 1; merken(); mixAnwenden();
@@ -1702,10 +1758,13 @@
     const v = e.target.closest("[data-vorlage]");
     if (v) {
       const k = v.dataset.vorlage, mix = { vol: S.vol, mute: S.mute };
-      if (k === "leer") S.teile = { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() };
-      else if (k === "zufall") S = zufallsLied();
+      if (k === "leer") { S.teile = { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }; S.titel = ""; }
+      const behalten = { master: S.master, hall: S.hall, hallAus: S.hallAus };
+      if (k === "zufall") S = zufallsLied();
       else if (STIL[k]) S = stimmungLied(k);
-      else S = pruefen(ausVorlage(k, mix));
+      else if (k !== "leer") S = pruefen(ausVorlage(k, mix));
+      Object.assign(S, behalten);
+      if (k !== "leer") S.titel = k === "zufall" ? t().zufall.replace(/^\S+\s/, "") : t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "");
       geladen = null;
       if (k !== "leer" && !STIL[k]) S.stimmung = null;
       bearbeite = "A";
@@ -1726,6 +1785,8 @@
     if (d.vol) { S.vol[d.vol] = +e.target.value; merken(); mixAnwenden(); return; }
     if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
+    if (d.feld === "master") { S.master = +e.target.value; root.querySelector(".lw-mval").textContent = S.master * 10 + " %"; merken(); effekteAnwenden(); }
+    if (d.feld === "hall") { S.hall = +e.target.value; root.querySelector(".lw-hval").textContent = S.hall * 10 + " %"; merken(); effekteAnwenden(); }
   });
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
@@ -1736,7 +1797,7 @@
       const [q, id] = e.target.value.split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
       const d = l && dekodieren(l.code);
       if (d) {
-        d.vol = S.vol; d.mute = S.mute; S = d; S.stimmung = null; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
+        d.vol = S.vol; d.mute = S.mute; d.master = S.master; d.hall = S.hall; d.hallAus = S.hallAus; S = d; S.stimmung = null; S.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
         merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
       }
     }
@@ -1846,6 +1907,17 @@
 .lw-vorlagen button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .82rem; padding: .25rem .7rem; cursor: pointer; }
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
+.lw-master input, .lw-hallregler input { width: 7rem; }
+.lw-hallknopf { border: 1px solid var(--line); background: none; font-size: .78rem; line-height: 1; padding: .2rem .35rem; cursor: pointer; border-radius: 3px; opacity: .45; filter: grayscale(1); }
+.lw-hallknopf[aria-pressed="true"] { opacity: 1; filter: none; border-color: rgba(224,160,70,.6); }
+.lw-mini { display: inline-flex; align-items: center; gap: .35rem; margin-right: .6rem; padding: .15rem .25rem .15rem .55rem; border: 1px solid rgba(224,160,70,.6); border-radius: 999px; background: rgba(16,14,21,.7); }
+.lw-mini[hidden] { display: none; }
+.lw-mini-titel { display: inline-flex; align-items: center; gap: .35rem; color: var(--vellum); text-decoration: none; font-size: .8rem; max-width: 11rem; }
+.lw-mini-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lw-mini-note { color: var(--ember); }
+.lw-mini.spielt .lw-mini-note { animation: lwpuls 1.2s ease-in-out infinite; }
+.lw-mini-knopf { width: 1.9rem; height: 1.9rem; border-radius: 50%; border: 1px solid var(--ember); background: var(--ember); color: var(--night); font-size: .7rem; cursor: pointer; display: grid; place-items: center; padding: 0; }
+@media (max-width: 640px) { .lw-mini-name { display: none; } .lw-mini { margin-right: .3rem; } }
 .lw-vorlagen button.an { border-color: var(--ember); color: var(--night); background: var(--ember); }
 .lw-wandelt { font-family: var(--hand); font-size: 1.15rem; color: var(--ember); margin-left: .3rem; animation: lwpuls 2.4s ease-in-out infinite; }
 @keyframes lwpuls { 50% { opacity: .45; } }
@@ -1896,6 +1968,7 @@
   document.head.appendChild(css);
 
   zeichnen();
+  miniBauen();
   gruppeLaden().then(() => { if (gruppeOk) { zeichnen(); knoepfe(); } });
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); zeichnen(); knoepfe(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
