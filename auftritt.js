@@ -23,7 +23,8 @@
       urteil: { perfekt: "Meisterhaft!", gut: "Gut!", knapp: "Knapp …", daneben: "Daneben!" },
       serie: n => n + "er-Serie", punkte: "Punkte",
       ergebnis: "Der Auftrittswurf", treffer: (a, b) => a + " von " + b + " Noten getroffen", beste: n => "Beste Serie: " + n,
-      genau: p => "Treffsicherheit: " + p + " %", rekord: n => "Bisher bester Wurf hier: " + n, neuRekord: "Neuer Rekord vor diesem Publikum!",
+      genau: p => "Treffsicherheit: " + p + " %", fehlgriffe: n => n + " Fehlgriffe",
+      tipp: "Tipp: Lieber eine Note auslassen als wild zu hämmern – jeder Fehlgriff kostet. Getroffene Noten spielen die Melodie, also hör auf das Lied!", rekord: n => "Bisher bester Wurf hier: " + n, neuRekord: "Neuer Rekord vor diesem Publikum!",
       wurf: (w, s) => "W20: " + w + " + 7 Auftreten = " + s,
       stimmen: {
         patzer: ["Ich … habe gerade mit der Laute nach einer Fliege geschlagen. Und sie getroffen. Das Lied nicht.", "Eine 1. Die Laute weint. Ich weine. Der Wirt schenkt mir aus Mitleid nach."],
@@ -46,7 +47,8 @@
       urteil: { perfekt: "Masterful!", gut: "Good!", knapp: "Close …", daneben: "Missed!" },
       serie: n => n + " streak", punkte: "points",
       ergebnis: "The performance check", treffer: (a, b) => a + " of " + b + " notes hit", beste: n => "Best streak: " + n,
-      genau: p => "Accuracy: " + p + " %", rekord: n => "Best roll here so far: " + n, neuRekord: "New record in front of this audience!",
+      genau: p => "Accuracy: " + p + " %", fehlgriffe: n => n + " misplays",
+      tipp: "Tip: better to skip a note than to mash – every misplay costs. The notes you hit play the melody, so listen to the song!", rekord: n => "Best roll here so far: " + n, neuRekord: "New record in front of this audience!",
       wurf: (w, s) => "d20: " + w + " + 7 Performance = " + s,
       stimmen: {
         patzer: ["I … just swatted a fly with my lute. Hit the fly. Not the song.", "A 1. The lute weeps. I weep. The innkeeper pours me another out of pity."],
@@ -61,65 +63,86 @@
   };
   const t = () => TX[sprache()];
 
-  /* ---------- Schwierigkeit ---------- */
+  /* ---------- Schwierigkeit ----------
+     Je Stufe: Tempo, Flugzeit der Noten (länger = mehr Abstand, besser lesbar), Liedlänge,
+     Rhythmus-Motive der Laute, Bass- und Schellenschläge, ob Doppelnoten erlaubt sind. */
   const STUFEN = {
-    leicht: { tempo: 92, flug: 1.7, takte: 10, raster: 2, schelle: .25, akkord: 0 },
-    mittel: { tempo: 108, flug: 1.4, takte: 12, raster: 2, schelle: .6, akkord: .1 },
-    schwer: { tempo: 124, flug: 1.15, takte: 12, raster: 1, schelle: .8, akkord: .3 }
+    leicht: { tempo: 80, flug: 2.4, takte: 8, motive: [[4, 8, 12], [4, 8], [4, 10, 12], [4, 6, 8, 12]], bass: [0], schelle: [], akkord: false },
+    mittel: { tempo: 92, flug: 2.1, takte: 12, motive: [[2, 4, 6, 12], [4, 6, 10, 12], [2, 4, 10, 12, 14], [4, 6, 12, 14]], bass: [0, 8], schelle: [14], akkord: false },
+    schwer: { tempo: 104, flug: 1.8, takte: 16, motive: [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 10, 12], [2, 4, 6, 8, 10, 12, 14], [0, 4, 6, 8, 12, 14]], bass: [0, 8], schelle: [6, 14], akkord: true }
   };
-  const FENSTER = { perfekt: .055, gut: .11, knapp: .16 };
-  const PUNKTE = { perfekt: 100, gut: 70, knapp: 40 };
+  const FENSTER = { perfekt: .05, gut: .1, knapp: .14 };
+  const PUNKTE = { perfekt: 100, gut: 75, knapp: 45 };
+  const FEHLGRIFF = 50; /* Abzug je Tipp ins Leere – Hämmern lohnt sich nicht */
   const FARBEN = ["#b5643c", "#e0a046", "#f0d48a"];
   const ZEICHEN = ["♩", "♪", "🔔"];
+  const TASTEN_ANZEIGE = ["A", "S", "D"];
 
-  /* ---------- Noten: dorisch in D, Akkordfolge i – VII – IV – i ---------- */
-  const SKALA = [0, 2, 3, 5, 7, 9, 10, 12, 14, 15];
+  /* ---------- Lied: D-dorisch, i – VII – IV – i | i – VII – IV – v ----------
+     Ein Motiv pro Phrase, das sich wiederholt – so wird die Melodie wiedererkennbar. */
+  const SKALA = [0, 2, 3, 5, 7, 9, 10, 12, 14, 15, 17];
   const FOLGE = [0, 6, 3, 0, 0, 6, 3, 4];
-  const MOTIVE = [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 10, 12], [0, 2, 4, 8, 10, 14], [0, 4, 6, 8, 12, 14]];
+  const akkordToene = g => [g % 7, (g + 2) % 7, (g + 4) % 7];
+  const nah = (ziel, erlaubt) => { let b = null; for (let r = 0; r <= 9; r++) if (erlaubt(r) && (b === null || Math.abs(r - ziel) < Math.abs(b - ziel))) b = r; return b; };
   function noten(stufe) {
-    const st = STUFEN[stufe], schritt = 60 / st.tempo / 4, vor = 16 * schritt, liste = [];
-    const motivFolge = [0, 0, 1, 0, 2, 2, 3, 1, 0, 0, 1, 3];
+    const st = STUFEN[stufe], schritt = 60 / st.tempo / 4, vor = 16 * schritt, liste = [], akkorde = [];
+    /* Phrasen: Motiv a, b, a, Schluss – die Kontur jedes Motivs wird einmal erfunden und dann wiederholt */
+    const konturen = st.motive.map(m => m.map(() => zufall([-2, -1, -1, 1, 1, 2])));
+    const plan = [0, 1, 0, 2, 3, 3, 0, 2];
+    let ton = 4;
     for (let takt = 0; takt < st.takte; takt++) {
-      const grund = FOLGE[takt % FOLGE.length], motiv = MOTIVE[motivFolge[takt % motivFolge.length]];
+      const letzter = takt === st.takte - 1;
+      const grund = letzter ? 0 : FOLGE[takt % FOLGE.length]; akkorde.push(grund);
+      const mi = plan[takt % plan.length], motiv = st.motive[mi], kontur = konturen[mi];
       const belegt = {};
-      const setze = (s, spur, ton) => {
-        if (st.raster === 2 && s % 2) return;
-        if (!st.akkord && belegt[s] != null) return;
-        if (belegt[s] === spur) return;
-        belegt[s] = spur;
-        liste.push({ zeit: vor + (takt * 16 + s) * schritt, spur, ton, status: null });
-      };
-      /* Bass auf den Schlägen, im letzten Takt eine Abschlussnote */
-      [0, 8].concat(stufe === "leicht" ? [] : [4, 12]).forEach(s => { if (s === 0 || Math.random() < .7) setze(s, 0, grund); });
-      /* Laute: das Motiv, Tonhöhen wandern über die Akkordtöne */
-      let ton = grund + 4;
-      motiv.forEach(s => { if (belegt[s] === 0 && !st.akkord) return; ton = Math.max(0, Math.min(9, ton + zufall([-2, -1, 1, 2, 0]))); setze(s, 1, ton); });
-      /* Schellen auf den Nachschlägen */
-      [2, 6, 10, 14].forEach(s => { if (Math.random() < st.schelle && belegt[s] == null) setze(s, 2, 0); });
+      const setze = (s, spur, n) => { liste.push({ zeit: vor + (takt * 16 + s) * schritt, spur, ton: n, status: null }); belegt[s] = (belegt[s] || 0) + 1; };
+      st.bass.forEach(s => { if (!letzter || s === 0) setze(s, 0, grund); });
+      if (letzter) { /* Schlussakkord: Laute auf dem Grundton */ setze(st.akkord ? 0 : 4, 1, 7); continue; }
+      if (takt % 4 === 0) ton = 4;
+      motiv.forEach((s, k) => {
+        if (!st.akkord && belegt[s]) return;
+        const ziel = ton + kontur[k];
+        ton = s % 4 === 0 ? nah(ziel, r => akkordToene(grund).includes(r % 7)) : nah(ziel, () => true);
+        setze(s, 1, ton);
+      });
+      st.schelle.forEach(s => { if ((takt % 2 === 1 || st.akkord) && (!belegt[s] || st.akkord)) setze(s, 2, 0); });
     }
     liste.sort((a, b) => a.zeit - b.zeit);
-    return { liste, ende: vor + st.takte * 16 * schritt + 1.2, schritt, vor };
+    return { liste, ende: vor + st.takte * 16 * schritt + 1.5, schritt, vor, akkorde };
   }
 
-  /* ---------- Klang ---------- */
+  /* ---------- Klang: gezupfte Saiten (Karplus-Strong) statt Piepser ---------- */
   let ctx = null, ausg = null, rausch = null;
+  const saiten = new Map();
   function audio() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       ctx = new AC();
-      const komp = ctx.createDynamicsCompressor(); komp.threshold.value = -14; komp.ratio.value = 3;
-      ausg = ctx.createGain(); ausg.gain.value = .55; ausg.connect(komp); komp.connect(ctx.destination);
+      const komp = ctx.createDynamicsCompressor(); komp.threshold.value = -16; komp.ratio.value = 2.5;
+      ausg = ctx.createGain(); ausg.gain.value = .7; ausg.connect(komp); komp.connect(ctx.destination);
       rausch = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
       const d = rausch.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     }
     if (ctx.state === "suspended") ctx.resume();
   }
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-  function zupf(f, z, laut, dauer, typ) {
-    const o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
-    o.type = typ || "triangle"; o.frequency.value = f; lp.type = "lowpass"; lp.frequency.setValueAtTime(f * 6, z); lp.frequency.exponentialRampToValueAtTime(f * 1.5, z + dauer);
-    g.gain.setValueAtTime(laut, z); g.gain.exponentialRampToValueAtTime(.0008, z + dauer);
-    o.connect(lp); lp.connect(g); g.connect(ausg); o.start(z); o.stop(z + dauer + .05);
+  function saite(f, dauer, daempf) {
+    const key = f.toFixed(1) + "|" + dauer;
+    if (saiten.has(key)) return saiten.get(key);
+    const sr = ctx.sampleRate, n = Math.round(sr * dauer), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+    const p = Math.max(2, Math.round(sr / f)), ring = new Float32Array(p);
+    for (let j = 0; j < p; j++) ring[j] = Math.random() * 2 - 1;
+    for (let k = 0; k < 2; k++) for (let j = 0; j < p; j++) ring[j] = (ring[j] + ring[(j + 1) % p]) / 2;
+    let idx = 0;
+    for (let j = 0; j < n; j++) { const a = ring[idx], b = ring[(idx + 1) % p]; d[j] = a; ring[idx] = (a + b) * daempf; idx = (idx + 1) % p; }
+    saiten.set(key, buf); return buf;
+  }
+  const melHz = n => hz(62 + SKALA[n]), bassHz = n => hz(38 + SKALA[n % 7]);
+  function zupfen(f, z, laut, bass) {
+    const src = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = bass ? saite(f, 1.8, .4986) : saite(f, 1.4, .4979);
+    lp.type = "lowpass"; lp.frequency.value = bass ? 1100 : 4200; lp.Q.value = .6;
+    g.gain.value = laut; src.connect(lp); lp.connect(g); g.connect(ausg); src.start(z);
   }
   function rauschen(z, typ, f, laut, dauer) {
     const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -127,36 +150,44 @@
     g.gain.setValueAtTime(laut, z); g.gain.exponentialRampToValueAtTime(.0008, z + dauer);
     r.connect(b); b.connect(g); g.connect(ausg); r.start(z, Math.random() * .5, dauer + .02);
   }
+  function schlag(z, f0, f1, laut, dauer) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(f0, z); o.frequency.exponentialRampToValueAtTime(f1, z + dauer * .6);
+    g.gain.setValueAtTime(laut, z); g.gain.exponentialRampToValueAtTime(.001, z + dauer);
+    o.connect(g); g.connect(ausg); o.start(z); o.stop(z + dauer + .02);
+  }
   const ton = (spur, n, z) => {
-    if (spur === 0) zupf(hz(38 + SKALA[n % 7]), z, .7, .5, "triangle");
-    else if (spur === 1) { zupf(hz(62 + SKALA[n]), z, .45, .7, "triangle"); zupf(hz(62 + SKALA[n]) * 2, z, .08, .3, "sine"); }
-    else { rauschen(z, "highpass", 6500, .25, .15); zupf(5200 + Math.random() * 2000, z, .03, .08, "sine"); }
+    if (spur === 0) zupfen(bassHz(n), z, 1.1, true);
+    else if (spur === 1) zupfen(melHz(n), z, .8, false);
+    else { rauschen(z, "highpass", 6800, .32, .18); for (let i = 0; i < 3; i++) schlag(z + i * .01, 5200 + Math.random() * 2500, 5000, .025, .1); }
   };
-  const daneben = z => { zupf(hz(49), z, .3, .25, "sawtooth"); rauschen(z, "lowpass", 300, .25, .08); };
+  /* Fehlgriff: gedämpfte, schnarrende Saite */
+  const daneben = z => { rauschen(z, "bandpass", 900, .35, .05); zupfen(hz(45), z, .25, true); };
+  /* Begleitung: Rahmentrommel und ein weicher Akkord-Teppich – so klingt es auch zwischen den Treffern nach Musik */
   function begleitung(daten, start) {
-    /* Trommel und Bordun halten den Takt, damit man ihn spürt */
-    const n = Math.round((daten.ende - 1.2) / daten.schritt);
-    for (let i = 0; i < n; i += 4) {
-      const z = start + i * daten.schritt, betont = i % 16 === 0;
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.frequency.setValueAtTime(betont ? 110 : 90, z); o.frequency.exponentialRampToValueAtTime(48, z + .15);
-      g.gain.setValueAtTime(betont ? .5 : .28, z); g.gain.exponentialRampToValueAtTime(.001, z + .25);
-      o.connect(g); g.connect(ausg); o.start(z); o.stop(z + .3);
-      if (i < 16) rauschen(z, "bandpass", 1800, .25, .04); /* Einzähler */
-    }
-    const bo = ctx.createOscillator(), bg = ctx.createGain(), bl = ctx.createBiquadFilter();
-    bo.type = "triangle"; bo.frequency.value = hz(38); bl.type = "lowpass"; bl.frequency.value = 400;
-    bg.gain.setValueAtTime(0, start); bg.gain.linearRampToValueAtTime(.06, start + daten.vor); bg.gain.setValueAtTime(.06, start + daten.ende - 1.5); bg.gain.linearRampToValueAtTime(0, start + daten.ende);
-    bo.connect(bl); bl.connect(bg); bg.connect(ausg); bo.start(start); bo.stop(start + daten.ende + .1);
-    return [bo];
+    const knoten = [], s = daten.schritt;
+    for (let i = 0; i < 4; i++) { rauschen(start + i * 4 * s, "bandpass", 2200, .35, .04); schlag(start + i * 4 * s, 900, 700, .05, .05); }
+    daten.akkorde.forEach((g, takt) => {
+      const z = start + daten.vor + takt * 16 * s, dauer = 16 * s;
+      schlag(z, 105, 46, .55, .32); schlag(z + 8 * s, 95, 46, .4, .28);
+      rauschen(z + 4 * s, "bandpass", 1300, .12, .05); rauschen(z + 12 * s, "bandpass", 1300, .12, .05);
+      akkordToene(g).forEach((st, k) => {
+        const o = ctx.createOscillator(), gg = ctx.createGain(), lp = ctx.createBiquadFilter();
+        o.type = "triangle"; o.frequency.value = hz(50 + SKALA[st] + (k && SKALA[st] < SKALA[g % 7] ? 12 : 0));
+        lp.type = "lowpass"; lp.frequency.value = 900;
+        gg.gain.setValueAtTime(0, z); gg.gain.linearRampToValueAtTime(.035, z + .25); gg.gain.setValueAtTime(.035, z + dauer - .2); gg.gain.linearRampToValueAtTime(0, z + dauer + .1);
+        o.connect(lp); lp.connect(gg); gg.connect(ausg); o.start(z); o.stop(z + dauer + .15); knoten.push(o);
+      });
+    });
+    return knoten;
   }
   function publikum(gut) {
     const z = ctx.currentTime + .1;
     if (gut) {
       for (let i = 0; i < 40; i++) rauschen(z + Math.random() * 2.2, "bandpass", 1100 + Math.random() * 800, .25 + Math.random() * .3, .03);
-      for (let i = 0; i < 5; i++) { const s = z + Math.random() * .4; rauschen(s, "bandpass", 700 + Math.random() * 600, .12, 2); }
+      for (let i = 0; i < 5; i++) { const s0 = z + Math.random() * .4; rauschen(s0, "bandpass", 700 + Math.random() * 600, .12, 2); }
     } else {
-      for (let k = 0; k < 4; k++) for (let i = 0; i < 3; i++) zupf(4300, z + k * .6 + i * .07, .05, .05, "sine"); /* Grillen … */
+      for (let k = 0; k < 4; k++) for (let i = 0; i < 3; i++) schlag(z + k * .6 + i * .07, 4300, 4300, .05, .05); /* Grillen … */
     }
   }
 
@@ -176,7 +207,7 @@
         Object.keys(STUFEN).map(k => '<button type="button" data-stufe="' + k + '" aria-pressed="' + (k === stufe) + '">' + T.stufen[k] + "</button>").join("") + "</div>" +
       '<div class="at-buehne"><canvas class="at-canvas" width="560" height="380" aria-label="' + esc(T.titel) + '"></canvas>' +
         '<div class="at-ergebnis" ' + (ergebnis ? "" : "hidden") + ">" + (ergebnis ? ergebnisHtml(T) : "") + "</div></div>" +
-      '<p class="at-steuer">' + T.steuerung + "</p>" +
+      '<p class="at-steuer">' + T.steuerung + "<br>" + T.tipp + "</p>" +
       '<div class="at-fuss"><button type="button" class="tav-knopf at-start">' + (spiel ? T.abbrechen : (ergebnis ? T.nochmal : T.start)) + "</button></div>";
     malenRuhe();
   }
@@ -186,7 +217,7 @@
       '<div class="at-w20' + (e.w20 === 20 ? " krit" : e.w20 === 1 ? " patzer" : "") + '">' + e.w20 + "</div>" +
       '<p class="at-summe">' + T.wurf(e.w20, e.summe) + "</p>" +
       '<p class="at-zitat">„' + esc(e.zitat) + "“</p>" +
-      '<p class="at-werte">' + T.genau(e.prozent) + " · " + T.treffer(e.getroffen, e.gesamt) + " · " + T.beste(e.serie) + "</p>" +
+      '<p class="at-werte">' + T.genau(e.prozent) + " · " + T.treffer(e.getroffen, e.gesamt) + " · " + T.fehlgriffe(e.streu) + " · " + T.beste(e.serie) + "</p>" +
       '<p class="at-rekord">' + (e.neu ? T.neuRekord : T.rekord(e.rekord)) + "</p>";
   }
   const canvas = () => root.querySelector(".at-canvas");
@@ -211,7 +242,11 @@
     const y = h * .82;
     g.strokeStyle = "#e0a046"; g.lineWidth = 3 * dpr; g.shadowColor = "#e0a046"; g.shadowBlur = 12 * dpr;
     g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); g.shadowBlur = 0;
-    for (let i = 0; i < 3; i++) { g.strokeStyle = "rgba(224,160,70,.6)"; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 16 * dpr, 0, Math.PI * 2); g.stroke(); }
+    for (let i = 0; i < 3; i++) {
+      g.strokeStyle = "rgba(224,160,70,.6)"; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 18 * dpr, 0, Math.PI * 2); g.stroke();
+      g.fillStyle = "rgba(235,226,204,.55)"; g.font = "bold " + (13 * dpr) + "px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillText(TASTEN_ANZEIGE[i], i * bahn + bahn / 2, y + 1); g.textBaseline = "alphabetic";
+    }
     return y;
   }
   function malenRuhe() {
@@ -229,6 +264,15 @@
     const { w, h, dpr } = maße(c), g = c.getContext("2d"), jetzt = ctx.currentTime - spiel.start;
     spiel.blitz = spiel.blitz.map(b => Math.max(0, b - .06));
     const y = grund(g, w, h, dpr, spiel.blitz), bahn = w / 3, flug = STUFEN[stufe].flug;
+    /* Taktlinien wandern mit – so sieht man den Rhythmus kommen */
+    const d0 = spiel.daten, schlagDauer = 4 * d0.schritt;
+    for (let k = Math.floor((jetzt - d0.vor) / schlagDauer); ; k++) {
+      const zt = d0.vor + k * schlagDauer, dt = zt - jetzt;
+      if (dt > flug) break; if (dt < -.1 || zt > d0.ende) continue;
+      const ly = y - (dt / flug) * y;
+      g.strokeStyle = k % 4 === 0 ? "rgba(224,160,70,.28)" : "rgba(235,226,204,.08)"; g.lineWidth = (k % 4 === 0 ? 2 : 1) * dpr;
+      g.beginPath(); g.moveTo(0, ly); g.lineTo(w, ly); g.stroke();
+    }
     spiel.daten.liste.forEach(n => {
       if (n.status && n.status !== "daneben") return;
       const dt = n.zeit - jetzt; if (dt > flug || dt < -.4) return;
@@ -261,7 +305,9 @@
     audio();
     ergebnis = null;
     const daten = noten(stufe);
-    spiel = { daten, start: ctx.currentTime + .25, punkte: 0, serie: 0, besteSerie: 0, blitz: [0, 0, 0], urteil: null };
+    daten.liste.forEach(n => { if (n.spur === 0) saite(bassHz(n.ton), 1.8, .4986); else if (n.spur === 1) saite(melHz(n.ton), 1.4, .4979); });
+    saite(hz(45), 1.8, .4986);
+    spiel = { daten, start: ctx.currentTime + .35, punkte: 0, serie: 0, besteSerie: 0, streu: 0, blitz: [0, 0, 0], urteil: null };
     spiel.knoten = begleitung(daten, spiel.start);
     zeichnen();
     requestAnimationFrame(malen);
@@ -278,26 +324,28 @@
     spiel.blitz[spur] = 1;
     let best = null;
     spiel.daten.liste.forEach(n => { if (n.spur === spur && !n.status && Math.abs(n.zeit - jetzt) <= FENSTER.knapp && (!best || Math.abs(n.zeit - jetzt) < Math.abs(best.zeit - jetzt))) best = n; });
-    if (!best) { daneben(ctx.currentTime); spiel.serie = 0; zeigeUrteil("daneben", spur); spiel.punkte = Math.max(0, spiel.punkte - 10); return; }
+    if (!best) { daneben(ctx.currentTime); spiel.serie = 0; spiel.streu++; zeigeUrteil("daneben", spur); spiel.punkte = Math.max(0, spiel.punkte - FEHLGRIFF); return; }
     const d = Math.abs(best.zeit - jetzt), art = d <= FENSTER.perfekt ? "perfekt" : d <= FENSTER.gut ? "gut" : "knapp";
     best.status = art; spiel.serie++; spiel.besteSerie = Math.max(spiel.besteSerie, spiel.serie);
     spiel.punkte += PUNKTE[art] * (1 + Math.min(spiel.serie, 20) * .025);
-    ton(spur, best.ton, ctx.currentTime);
+    /* zu früh getippt? Dann erklingt der Ton trotzdem genau im Takt */
+    ton(spur, best.ton, Math.max(ctx.currentTime, spiel.start + best.zeit));
     zeigeUrteil(art, spur);
   }
   function beenden() {
     const T = t(), liste = spiel.daten.liste;
-    const summe = liste.reduce((a, n) => a + (PUNKTE[n.status] || 0), 0), prozent = Math.round(summe / (liste.length * 100) * 100);
+    const summe = liste.reduce((a, n) => a + (PUNKTE[n.status] || 0), 0) - spiel.streu * FEHLGRIFF;
+    const prozent = Math.max(0, Math.round(summe / (liste.length * 100) * 100));
     const getroffen = liste.filter(n => PUNKTE[n.status]).length;
-    let w20 = Math.round(1 + (prozent / 100) * 19 + (Math.random() * 4 - 2));
+    let w20 = Math.round(1 + (prozent / 100) * 19 + (Math.random() * 2 - 1));
     w20 = Math.max(1, Math.min(20, w20));
-    if (prozent >= 96 && Math.random() < .5) w20 = 20;
-    if (prozent < 15) w20 = 1;
+    if (prozent >= 95 && Math.random() < .6) w20 = 20;
+    if (prozent < 20) w20 = 1;
     const ges = w20 + 7;
     const stufeText = w20 === 20 ? "krit" : w20 === 1 ? "patzer" : ges <= 11 ? "schwach" : ges <= 16 ? "maessig" : ges <= 21 ? "gut" : ges <= 25 ? "stark" : "legende";
     const rek = rekordLesen(), alt = rek[stufe] || 0, neu = ges > alt;
     if (neu) { rek[stufe] = ges; try { localStorage.setItem("imres-auftritt-rekord", JSON.stringify(rek)); } catch (_) {} }
-    ergebnis = { w20, summe: ges, prozent, getroffen, gesamt: liste.length, serie: spiel.besteSerie, zitat: zufall(T.stimmen[stufeText]), neu: neu && alt > 0, rekord: Math.max(alt, ges) };
+    ergebnis = { w20, summe: ges, prozent, getroffen, gesamt: liste.length, serie: spiel.besteSerie, streu: spiel.streu, zitat: zufall(T.stimmen[stufeText]), neu: neu && alt > 0, rekord: Math.max(alt, ges) };
     spiel = null;
     publikum(ges >= 17);
     zeichnen();
