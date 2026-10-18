@@ -1508,6 +1508,7 @@
   function planen() {
     const vorlauf = document.hidden ? 1.6 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     while (naechste < ctx.currentTime + vorlauf) {
+      if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && wechsel) wechselAnwenden(naechste);
       else if (schritt === 0 && intensitaetNeu) { intensitaetNeu = false; stimmungWeiter(); }
       tempoJetzt = tempoJetzt ? tempoJetzt + (S.tempo - tempoJetzt) * .1 : S.tempo;
@@ -2047,7 +2048,9 @@
   const funkStatusText = T => !funk ? "" : funk.status === "ok" ? "🟢 " + T.funkLaeuft + " · " + T.funkZuhoerer(funk.zahl || 0) : funk.status === "fehler" ? "🔴 " + T.funkFehler : "🟡 " + T.funkVerbinde;
   function funkAnzeigen() { const el = root.querySelector(".lw-funk-status"); if (el) el.textContent = funkStatusText(t()); }
   function funkZustand() {
-    return { lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
+    const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
+      ablauf: S.ablauf, vol: S.vol, mute: S.mute, teile: S.teile, instrument: S.instrument, band: S.band };
+    return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
       hall: S.hall, raum: S.raum, hallAus: S.hallAus, laeuft };
   }
   function funkSenden(ev, daten) { if (funk && funk.kanal) funk.kanal.senden(ev, daten); }
@@ -2080,18 +2083,49 @@
       "</div>" + '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
   }
+  /* geschätzte Stelle, an der Imre gerade ist */
+  function funkAusrichten(sofort) {
+    if (!hoerer || !funkPos || performance.now() - funkPos.t > 20000) return;
+    const vergangen = (performance.now() - funkPos.t) / 1000 / schrittDauer();
+    const gesamt = funkPos.schritt + vergangen, L = S.ablauf.length || 1;
+    /* am Taktanfang auf den nächstgelegenen Takt runden – kleine Netzverzögerungen springen so nicht um einen Teil daneben */
+    const takte = sofort ? Math.floor(gesamt / SCHRITTE) : Math.round(gesamt / SCHRITTE);
+    const ziel = ((funkPos.abschnitt + takte) % L + L) % L;
+    if (sofort) { abschnitt = ziel; schritt = Math.floor(gesamt) % SCHRITTE; }
+    else abschnitt = ziel;
+  }
   function hoererDiagnose() {
     const el = root.querySelector(".lw-diagnose"); if (!el || !hoerer) return;
     const T = t(), seit = hoerer.letztes ? Math.round((Date.now() - hoerer.letztes) / 1000) : null;
     el.textContent = T.hSignal(hoerer.nachrichten || 0, seit) + (ctx ? " · Audio: " + ctx.state : "");
   }
+  /* Lied vom Pult übernehmen – jedes Feld wird geprüft, damit kaputte Daten nichts anrichten */
+  function liedAusFunk(x) {
+    if (!x || typeof x !== "object" || !x.teile) return null;
+    const zahlFeld = (a, n, max) => Array.from({ length: SCHRITTE }, (_, i) => { const v = Array.isArray(a) ? a[i] : -1; return Number.isInteger(v) && v >= 0 && v <= max ? v : -1; });
+    const teile = {};
+    TEILE.forEach(p => { const t = x.teile[p] || {}; teile[p] = {}; SPUREN.forEach(sp => { teile[p][sp.id] = zahlFeld(t[sp.id], SCHRITTE, sp.art === "an" ? 0 : sp.zeilen - 1); }); });
+    const vol = {}, mute = {};
+    IDS.forEach(k => { vol[k] = zahl(x.vol && x.vol[k], 0, 10, 7); mute[k] = x.mute && x.mute[k] ? 1 : 0; });
+    return pruefen({ tempo: zahl(x.tempo, 40, 200, 110), transpose: zahl(x.transpose, -7, 7, 0), modus: MODUS_LISTE.includes(x.modus) ? x.modus : MODUS_LISTE[0],
+      swing: x.swing ? 1 : 0, bordun: x.bordun ? 1 : 0, variation: zahl(x.variation, 0, 10, 0), ablauf: String(x.ablauf || "A"),
+      vol, mute, teile, instrument: String(x.instrument || ""), band: Object.assign({}, x.band || {}) });
+  }
+  /* Position des Pults merken: an jedem Taktanfang springt der Zuhörer in denselben Teil wie Imre */
+  let funkPos = null;
   function hoererEmpfang(ev, d) {
     if (ev !== "_offen") { hoerer.nachrichten = (hoerer.nachrichten || 0) + 1; hoerer.letztes = Date.now(); hoererDiagnose(); }
     if (ev === "_offen") { hoerer.verbunden = true; funkHoererKanal.senden("hallo", {}); zeichnen(); return; }
     if (ev === "fx") { if (hoerer.an && ctx && ALLE_FX.includes(d.art)) effekt(d.art); return; }
     if (ev !== "zustand") return;
-    const neu = dekodieren(d.lied); if (!neu) return;
     const alt = hoerer.zuletzt; hoerer.zuletzt = d;
+    if (d.pos && Number.isInteger(d.pos.abschnitt) && Number.isInteger(d.pos.schritt)) funkPos = { abschnitt: d.pos.abschnitt, schritt: d.pos.schritt, t: performance.now() };
+    /* Stopp zuerst – das darf nie an einem kaputten Lied scheitern */
+    if (laeuft && !d.laeuft) { stopp(); zeichnen(); knoepfe(); }
+    let neu = null;
+    try { neu = liedAusFunk(d.s); } catch (_) {}
+    if (!neu) neu = dekodieren(d.lied);
+    if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
       kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
       raum: RAEUME[d.raum] ? d.raum : "taverne", hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
@@ -2105,8 +2139,7 @@
       Object.assign(S, neu);
       if (ctx) { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); if (laeuft && kulAlt !== S.kulisse) kulisseStart(); }
     }
-    if (hoerer.an && d.laeuft && !laeuft) start();
-    if (laeuft && !d.laeuft) stopp();
+    if (hoerer.an && d.laeuft && !laeuft) { start(); funkAusrichten(true); }
     if (titelNeu) { zeichnen(); knoepfe(); }
   }
   let funkHoererKanal = null;
