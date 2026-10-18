@@ -338,6 +338,130 @@
       }
       return normieren(a, .9);
     },
+    /* ---------- Ereignisse für die Geräuschkulissen ---------- */
+    moewe(sr) {
+      const a = new Float32Array(Math.floor(2.4 * sr)), n = 2 + Math.floor(Math.random() * 3), f = zz(950, 1250);
+      let t = .02;
+      for (let k = 0; k < n; k++) {
+        const d = k === n - 1 ? zz(.35, .5) : zz(.18, .26);
+        stimme(a, sr, t, [{ d, v: "ae", f0: f * zz(1.05, 1.15), f1: f * zz(.6, .7), laut: 1 - k * .12, abfall: .4 }], { skala: 1.7, jitter: .03, rau: .35, hauchBasis: .05, q: [8, 10, 12] });
+        t += d + zz(.08, .16);
+      }
+      hochpass(a, sr, 500);
+      return normieren(raum(a, sr, [[.12, .18], [.25, .08]]), .9);
+    },
+    vogel(sr) {
+      const a = new Float32Array(Math.floor(2.2 * sr)), art = Math.floor(Math.random() * 4);
+      const pfiff = (t, f0, f1, d, g) => { const i0 = Math.floor(t * sr), n = Math.floor(d * sr); let p = 0;
+        for (let i = 0; i < n && i0 + i < a.length; i++) { const r = i / n; p += (f0 + (f1 - f0) * r) / sr; a[i0 + i] += (Math.sin(TAU * p) + .15 * Math.sin(2 * TAU * p)) * g * Math.sin(Math.PI * r); } };
+      if (art === 0) { const f = zz(3200, 4500); for (let k = 0; k < 10 + Math.random() * 12; k++) pfiff(.02 + k * .045, f * zz(.95, 1.05), f * zz(1.1, 1.25), .03, .5); }      /* Triller */
+      else if (art === 1) { let t = .02; for (let k = 0; k < 4 + Math.random() * 4; k++) { const f0 = zz(2200, 4200), d = zz(.06, .16); pfiff(t, f0, f0 * zz(.7, 1.4), d, .6); t += d + zz(.02, .08); } } /* Melodie */
+      else if (art === 2) { const f = zz(560, 680); pfiff(.02, f * 1.2, f * 1.18, .22, .7); pfiff(.32, f, f * .98, .3, .6); }                                             /* Kuckuck */
+      else { const f = zz(5000, 6500); for (let k = 0; k < 3; k++) pfiff(.02 + k * .18, f, f * .8, .07, .4); }                                                                 /* Meise */
+      return normieren(raum(a, sr, [[.09, .2], [.2, .1]]), .85);
+    },
+    specht(sr) {
+      const a = new Float32Array(Math.floor(1.8 * sr)), f = zz(900, 1300), n = 12 + Math.floor(Math.random() * 10);
+      let t = .02, abst = .065;
+      for (let k = 0; k < n; k++) { const g = Math.min(1, (k + 2) / 4) * (1 - k / (n * 1.3)); mode(a, sr, t, f * zz(.97, 1.03), .012, g * .6); mode(a, sr, t, f * .42, .02, g * .5); stoss(a, sr, t, 2500, 1, g * .3, .004); t += abst; abst *= .985; }
+      return normieren(raum(a, sr, [[.1, .25], [.22, .12]]), .85);
+    },
+    eule(sr) {
+      const a = new Float32Array(Math.floor(3 * sr)), f = zz(340, 420);
+      const huu = (t, d, g, glide) => { const i0 = Math.floor(t * sr), n = Math.floor(d * sr); let p = 0;
+        for (let i = 0; i < n; i++) { const r = i / n; p += f * (1 + glide * Math.sin(Math.PI * r)) / sr; const h = Math.min(1, r * 6, (1 - r) * 3);
+          a[i0 + i] += (Math.sin(TAU * p) + (Math.random() * 2 - 1) * .06) * g * h; } };
+      huu(.05, .55, .9, .04); huu(.95, .16, .5, .02); huu(1.15, .16, .5, .02); huu(1.4, .9, .8, .06);
+      tiefpass(a, sr, 1500);
+      return normieren(raum(a, sr, [[.15, .3], [.33, .15]]), .85);
+    },
+    knacken(sr) {
+      const a = new Float32Array(Math.floor(.8 * sr)); let t = .02;
+      for (let k = 0; k < 2 + Math.random() * 4; k++) { mode(a, sr, t, zz(1200, 2600), .008, zz(.4, 1)); mode(a, sr, t, zz(400, 700), .012, zz(.2, .5)); stoss(a, sr, t, 3000, 1, .3, .006); t += zz(.02, .09); }
+      return normieren(a, .85);
+    },
+    rascheln(sr) {
+      const D = zz(1.5, 3), a = new Float32Array(Math.floor(D * sr)), F = new SVF(sr); F.setze(zz(3000, 5000), 1);
+      for (let i = 0; i < a.length; i++) { const r = i / a.length, korn = Math.random() < .004 ? zz(2, 5) : 1; F.tick((Math.random() * 2 - 1) * korn); a[i] = F.bp * Math.sin(Math.PI * r) * (.6 + .4 * Math.sin(TAU * 3.1 * i / sr)); }
+      return normieren(a, .8);
+    },
+    boe(sr) {
+      const D = zz(3, 6), a = new Float32Array(Math.floor(D * sr)), F = new SVF(sr), P = new SVF(sr), f0 = zz(250, 400), f1 = zz(700, 1300), pf = zz(500, 900);
+      let braun = 0;
+      for (let i = 0; i < a.length; i++) {
+        const r = i / a.length, h = Math.pow(Math.sin(Math.PI * Math.pow(r, .7)), 1.5);
+        if ((i & 63) === 0) { F.setze(f0 + (f1 - f0) * h, 1.6); P.setze(pf * (1 + .25 * h), 14); }
+        braun = braun * .97 + (Math.random() * 2 - 1) * .2;
+        const x = braun + (Math.random() * 2 - 1) * .4;
+        a[i] = (F.tick(x) + P.tick(x) * .5) * h;
+      }
+      return normieren(a, .9);
+    },
+    fensterladen(sr) {
+      const a = new Float32Array(Math.floor(1.4 * sr));
+      const klapp = (t, g) => { mode(a, sr, t, zz(130, 170), .05, g); mode(a, sr, t, zz(380, 460), .03, g * .7); mode(a, sr, t, zz(1000, 1300), .012, g * .4); stoss(a, sr, t, 900, .8, g * .8, .04); };
+      klapp(.02, 1); let t = .02 + zz(.12, .2);
+      for (let k = 0; k < 1 + Math.random() * 3; k++) { klapp(t, zz(.15, .4)); t += zz(.06, .14); }
+      return normieren(raum(a, sr, [[.04, .3], [.09, .15]]), .9);
+    },
+    welle(sr) {
+      const D = zz(5, 8), a = new Float32Array(Math.floor(D * sr)), L = new SVF(sr), H = new SVF(sr), spitze = zz(.3, .45);
+      let braun = 0;
+      for (let i = 0; i < a.length; i++) {
+        const r = i / a.length, auf = r < spitze ? Math.pow(r / spitze, 2) : Math.exp(-(r - spitze) * 4);
+        if ((i & 63) === 0) { L.setze(200 + 900 * auf, .7); H.setze(1500 + 3000 * auf, .7); }
+        braun = braun * .98 + (Math.random() * 2 - 1) * .15; const w = Math.random() * 2 - 1;
+        L.tick(braun + w * .3); H.tick(w);
+        const schaum = r > spitze ? Math.exp(-(r - spitze) * 2.2) * (.7 + .3 * Math.random()) : 0;
+        a[i] = L.lp * auf * 1.6 + H.bp * (auf * .4 + schaum * .5);
+      }
+      blenden(a, sr, .2, 1);
+      return normieren(a, .9);
+    },
+    glocke(sr) {
+      const a = new Float32Array(Math.floor(4 * sr)), f = zz(600, 820), n = Math.random() < .5 ? 1 : 2;
+      for (let k = 0; k < n; k++) [[1, 1, 2.5], [2.01, .5, 1.6], [2.76, .4, 1.2], [5.4, .15, .5]].forEach(([m, g, d]) => { mode(a, sr, .02 + k * .9, f * m, d, g * .4, Math.random()); mode(a, sr, .02 + k * .9, f * m * 1.004, d, g * .3, 1); });
+      tiefpass(a, sr, 2500);
+      return normieren(raum(a, sr, [[.2, .3], [.45, .15]]), .8);
+    },
+    knarren(sr) {
+      const D = zz(1, 1.8), a = new Float32Array(Math.floor(D * sr)), n = a.length;
+      const R = [[zz(180, 240), 10, 1], [zz(500, 650), 14, .6], [zz(1200, 1500), 18, .3]].map(([f, q, g]) => { const F = new SVF(sr); F.setze(f, q); F.g = g; return F; });
+      let phase = 0; const r0 = zz(30, 60), r1 = zz(60, 140);
+      for (let i = 0; i < n; i++) { const r = i / n; phase += (r0 + (r1 - r0) * Math.sin(Math.PI * r)) / sr; let x = 0; if (phase >= 1) { phase -= 1; x = zz(.5, 1); }
+        let y = 0; R.forEach(F => { y += F.tick(x) * F.g; }); a[i] = y * Math.sin(Math.PI * r); }
+      return normieren(a, .85);
+    },
+    steinschlag(sr) {
+      const a = new Float32Array(Math.floor(2.4 * sr)); let t = .02, abst = zz(.1, .2), g = 1;
+      for (let k = 0; k < 6 + Math.random() * 8; k++) {
+        mode(a, sr, t, zz(600, 1400), .02, g * .6); mode(a, sr, t, zz(1800, 3200), .008, g * .4); mode(a, sr, t, zz(120, 220), .05, g * .5);
+        if (Math.random() < .4) mode(a, sr, t + zz(.01, .03), zz(900, 2000), .01, g * .3);
+        t += abst * zz(.5, 1.4); abst *= .85; g *= zz(.7, .95);
+      }
+      return normieren(raum(a, sr, [[.11, .4], [.23, .25], [.4, .12]]), .9);
+    },
+    tropfen(sr) {
+      const a = new Float32Array(Math.floor(1.6 * sr)), f = zz(900, 1700), i0 = Math.floor(.02 * sr), n = Math.floor(.09 * sr); let p = 0;
+      for (let i = 0; i < n; i++) { const r = i / n; p += f * (1 + 1.2 * r) / sr; a[i0 + i] += Math.sin(TAU * p) * Math.exp(-r * 4) * Math.min(1, r * 30); }
+      return normieren(raum(a, sr, [[.13, .45], [.27, .3], [.41, .18], [.6, .1]]), .85);
+    },
+    fledermaus(sr) {
+      const a = new Float32Array(Math.floor(1.2 * sr)); let t = .02;
+      for (let k = 0; k < 3 + Math.random() * 5; k++) { const f = zz(7000, 9500), i0 = Math.floor(t * sr), n = Math.floor(.025 * sr); let p = 0;
+        for (let i = 0; i < n; i++) { const r = i / n; p += f * (1 - .3 * r) / sr; a[i0 + i] += Math.sin(TAU * p) * Math.sin(Math.PI * r) * .6; } t += zz(.05, .15); }
+      for (let i = 0; i < a.length; i++) a[i] += (Math.random() * 2 - 1) * .05 * Math.max(0, Math.sin(TAU * 11 * i / sr)) * Math.sin(Math.PI * i / a.length);
+      return normieren(a, .7);
+    },
+    stuhl(sr) {
+      const D = zz(.4, .8), a = new Float32Array(Math.floor(D * sr)), n = a.length;
+      const R = [[zz(300, 380), 8, 1], [zz(800, 950), 12, .6], [zz(1800, 2200), 14, .3]].map(([f, q, g]) => { const F = new SVF(sr); F.setze(f, q); F.g = g; return F; });
+      let phase = 0; const rate = zz(90, 220);
+      for (let i = 0; i < n; i++) { const r = i / n; phase += rate * (1 + .3 * Math.sin(TAU * 3 * r)) / sr; let x = 0; if (phase >= 1) { phase -= 1; x = zz(.4, 1); }
+        let y = 0; R.forEach(F => { y += F.tick(x) * F.g; }); a[i] = y * Math.sin(Math.PI * r); }
+      tiefpass(a, sr, 3000);
+      return normieren(a, .85);
+    },
     /* Krug auf den Tisch, Krüge stoßen an */
     krug(sr) {
       const a = new Float32Array(Math.floor(.9 * sr));

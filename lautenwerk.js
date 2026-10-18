@@ -766,11 +766,13 @@
   let kul = null, kulRauschen = null, sfxBus = null;
   const kulPegel = () => Math.pow(S.kulisseVol / 10, 1.5) * .9;
   const zz = (a, b) => a + Math.random() * (b - a);
-  function kulBett(ziel, filter, laut, lfo) {
+  /* Rauschbett; opt.wandern lässt die Filter langsam wandern (heulender Wind), opt.schwanken die Lautstärke */
+  function kulBett(ziel, filter, laut, lfo, opt) {
     const r = ctx.createBufferSource(); r.buffer = kulRauschen; r.loop = true; r.loopStart = Math.random(); r.loopEnd = 3.9;
-    let letzter = r;
-    filter.forEach(([typ, f, q]) => { const b = ctx.createBiquadFilter(); b.type = typ; b.frequency.value = f; b.Q.value = q || .7; letzter.connect(b); letzter = b; });
+    let letzter = r; const filt = [];
+    filter.forEach(([typ, f, q]) => { const b = ctx.createBiquadFilter(); b.type = typ; b.frequency.value = f; b.Q.value = q || .7; letzter.connect(b); letzter = b; filt.push([b, f]); });
     const g = ctx.createGain(); g.gain.value = laut; letzter.connect(g); g.connect(ziel);
+    if (kul) kul.schichten.push({ g, laut, filt, wandern: (opt && opt.wandern) || .15, schwanken: (opt && opt.schwanken) || [.6, 1.25], naechst: 0 });
     const knoten = [r];
     if (lfo) {
       const o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.value = lfo[0]; og.gain.value = laut * lfo[1];
@@ -791,21 +793,43 @@
     o.connect(g); g.connect(kul.g); o.start(zeit); o.stop(zeit + dauer + .08);
   }
   /* Ereignisse je Kulisse: [mindestens, höchstens Sekunden bis zum nächsten, Funktion] */
+  const ferne = () => { const d = Math.random(); return { tief: 600 + 7000 * Math.pow(1 - d, 2), laut: 1 - d * .7 }; };
   const KUL_EREIGNIS = {
-    regen: [[.015, .07, z => kulStoss(z, "bandpass", zz(2500, 6500), 6, zz(.04, .16), .015)]],
-    feuer: [[5, 13, z => { kulStoss(z, "bandpass", zz(600, 1100), 3, .5, .03); kulStoss(z + .04, "bandpass", zz(1200, 2000), 4, .2, .02); }]],
-    hoehle: [[1.2, 4, z => { const f = zz(1300, 2100); kulTon(z, f, f * .55, .07, .45); }]],
-    taverne: [[3.5, 11, z => kulFx("lachen", z, zz(.3, .75))], [1.8, 6, z => kulFx("krug", z, zz(.15, .45))]],
-    wald: [[1.5, 5.5, z => { const f = zz(2600, 4200), n = 2 + Math.floor(Math.random() * 4); for (let i = 0; i < n; i++) kulTon(z + i * .11, f, f * 1.3, .06, .14); }]],
-    meer: [[6, 14, z => { for (let i = 0; i < 2 + Math.floor(Math.random() * 2); i++) kulTon(z + i * .45, 1700, 1150, .35, .045, "triangle"); }]],
-    sturm: [[12, 25, z => effekt("donner", .7, z)]]
+    regen: [[.015, .07, z => kulStoss(z, "bandpass", zz(2500, 6500), 6, zz(.04, .16) * (kul.phase || 1), .015)],
+            [5, 14, z => kulFx("tropfen", z, zz(.08, .2))], [20, 45, z => kulFx("boe", z, zz(.1, .25))]],
+    feuer: [[5, 13, z => { kulStoss(z, "bandpass", zz(600, 1100), 3, .5, .03); kulStoss(z + .04, "bandpass", zz(1200, 2000), 4, .2, .02); }],
+            [9, 22, z => kulFx("knacken", z, zz(.15, .35))], [40, 90, z => kulFx("eule", z, zz(.08, .16), { tief: 1500 })], [25, 60, z => kulFx("rascheln", z, zz(.08, .15))]],
+    hoehle: [[1.2, 5, z => kulFx("tropfen", z, zz(.15, .5))], [.6, 3, z => { const f = zz(1300, 2100); kulTon(z, f, f * .55, .07, zz(.15, .4)); }],
+             [25, 70, z => kulFx("steinschlag", z, zz(.2, .45), { tief: zz(1500, 4000) })], [18, 50, z => kulFx("fledermaus", z, zz(.08, .16))]],
+    taverne: [[3.5, 11, z => kulFx("lachen", z, zz(.3, .75))], [1.8, 6, z => kulFx("krug", z, zz(.15, .45))],
+              [7, 20, z => kulFx("stuhl", z, zz(.12, .28))], [15, 40, z => kulFx("knarren", z, zz(.08, .16))],
+              [45, 100, z => kulFx("jubel", z, zz(.1, .18), { tief: 1800 })]],
+    wald: [[2, 7, z => kulFx("vogel", z, zz(.15, .45))], [3, 9, z => kulFx("vogel", z, zz(.08, .2), { tief: 3000 })],
+           [25, 60, z => kulFx("specht", z, zz(.15, .3), { tief: zz(2500, 6000) })], [15, 40, z => kulFx("knacken", z, zz(.12, .25))],
+           [10, 25, z => kulFx("rascheln", z, zz(.15, .3))]],
+    meer: [[3.5, 8, z => kulFx("welle", z, zz(.65, 1.2), { tempo: zz(.85, 1.1) })], [8, 22, z => kulFx("moewe", z, zz(.15, .4))],
+           [40, 90, z => kulFx("glocke", z, zz(.08, .16), { tief: 2000 })], [14, 30, z => kulFx("knarren", z, zz(.12, .22))]],
+    sturm: [[3, 9, z => kulFx("boe", z, zz(.35, .8), { tempo: zz(.8, 1.15) })],
+            [8, 28, z => { const f = ferne(); kulFx("donner", z, 1.1 * f.laut, { tief: f.tief, tempo: zz(.85, 1.05) }); }],
+            [12, 35, z => kulFx("fensterladen", z, zz(.2, .45))],
+            [.02, .08, z => kulStoss(z, "bandpass", zz(2500, 6000), 5, zz(.03, .1) * (kul.phase || 1), .012)]]
   };
+  /* Rauschbetten: [Filter], Pegel, LFO, Optionen */
   const KUL_BETT = {
-    regen: [[["bandpass", 2500, .5]], .5, [.13, .25]], feuer: null,
-    hoehle: [[["bandpass", 250, .8]], .9, [.06, .6]], wald: [[["lowpass", 700, .7]], .8, [.1, .7]],
-    meer: [[["lowpass", 500, .7]], .55, [.11, .9]], sturm: [[["bandpass", 600, .5]], .5, [.17, .8]],
-    taverne: null
+    regen: [[[["bandpass", 2500, .5]], .7, [.13, .25]], [[["lowpass", 900, .7]], .3, null]],
+    feuer: [],
+    hoehle: [[[["bandpass", 250, .8]], .9, [.06, .6]], [[["bandpass", 420, 5]], .14, null, { wandern: .35, schwanken: [.2, 1.3] }]],
+    wald: [[[["lowpass", 700, .7]], .8, [.1, .7]], [[["bandpass", 3500, .8]], .1, null, { wandern: .25, schwanken: [.2, 1.6] }]],
+    meer: [[[["lowpass", 500, .7]], .45, null], [[["highpass", 2500, .7]], .08, null]],
+    sturm: [[[["lowpass", 450, .7]], .55, null, { schwanken: [.4, 1.4] }],
+            [[["bandpass", 700, 6]], .32, null, { wandern: .45, schwanken: [.2, 1.5] }],
+            [[["bandpass", 1150, 8]], .18, null, { wandern: .45, schwanken: [.1, 1.6] }],
+            [[["bandpass", 2600, .5]], .25, null, { schwanken: [.5, 1.3] }],
+            [[["highpass", 1500, .7]], .14, null]],
+    taverne: []
   };
+  /* Stärke-Phasen: mal Flaute, mal Höhepunkt – je Kulisse unterschiedlich weit */
+  const KUL_PHASE = { sturm: [.35, 1.3], meer: [.6, 1.2], regen: [.6, 1.3], wald: [.7, 1.15], hoehle: [.7, 1.15], feuer: [.75, 1.15], taverne: [.75, 1.2] };
   function kulisseStart(sofort) {
     if (!ctx) return;
     kulisseStop();
@@ -815,18 +839,22 @@
     g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(kulPegel(), j + 2.5);
     g.connect(master);
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
-    kul = { art, g, knoten: [], naechst: {} };
-    const bett = KUL_BETT[art];
-    if (bett) kul.knoten.push(...kulBett(g, bett[0], bett[1], bett[2]));
+    kul = { art, g, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0 };
+    (KUL_BETT[art] || []).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
     if (art === "taverne") kulSchleife("gemurmel", 22050, 1.1);
     if (art === "feuer") kulSchleife("feuer", 32000, .7);
-    if (art === "regen") kul.knoten.push(...kulBett(g, [["lowpass", 900, .7]], .2, null));
-    if (art === "meer") kul.knoten.push(...kulBett(g, [["highpass", 2500, .7]], .12, [.11, .9]));
-    if (art === "sturm") kul.knoten.push(...kulBett(g, [["highpass", 1500, .7]], .25, null));
     const ev = KUL_EREIGNIS[art] || [];
     kul.timer = setInterval(() => {
       if (!kul) return;
       const jetzt = ctx.currentTime;
+      /* langsame Stärke-Phasen und Schwankungen jeder Schicht – nichts klingt zweimal gleich */
+      if (jetzt > kul.phaseNaechst) { const [a, b] = KUL_PHASE[art] || [.8, 1.1]; kul.phase = zz(a, b); kul.phaseNaechst = jetzt + zz(12, 35); }
+      kul.schichten.forEach(sch => {
+        if (jetzt < sch.naechst) return;
+        sch.naechst = jetzt + zz(2.5, 8);
+        sch.g.gain.setTargetAtTime(sch.laut * kul.phase * zz(sch.schwanken[0], sch.schwanken[1]), jetzt, zz(1, 3.5));
+        sch.filt.forEach(([b, f]) => b.frequency.setTargetAtTime(f * zz(1 - sch.wandern, 1 + sch.wandern), jetzt, zz(1.5, 4)));
+      });
       ev.forEach(([a, b, f], i) => {
         if (kul.naechst[i] == null) kul.naechst[i] = jetzt + zz(a, b);
         while (kul.naechst[i] < jetzt + .3) { try { f(Math.max(jetzt, kul.naechst[i])); } catch (_) {} kul.naechst[i] += zz(a, b); }
@@ -895,7 +923,17 @@
       q.connect(g); g.connect(ziel); q.start(Math.max(zeit, ctx.currentTime + .01));
     });
   }
-  function kulFx(art, z, laut) { const k = kul; if (k) fxAbspielen(art, k.g, z, laut, zz(.94, 1.06)); }
+  /* Ereignis der Kulisse: mal links, mal rechts, mal weit weg (dumpfer) */
+  function kulFx(art, z, laut, opt) {
+    const k = kul; if (!k) return;
+    opt = opt || {};
+    let ziel = k.g;
+    try {
+      if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = opt.pan != null ? opt.pan : zz(-.75, .75); pn.connect(ziel); ziel = pn; }
+      if (opt.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = opt.tief; lp.connect(ziel); ziel = lp; }
+    } catch (_) {}
+    fxAbspielen(art, ziel, z, laut * (k.phase || 1), opt.tempo || zz(.94, 1.06));
+  }
   /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
   const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55,
     tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8 };
