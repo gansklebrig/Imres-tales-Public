@@ -678,7 +678,8 @@
     .concat([INSTRUMENTE.indexOf(S.instrument) + ["trommel", "floete", "ketten"].map(k => BAND[k].indexOf(S.band[k])).join("")])
     .join("-");
   function dekodieren(code) {
-    const p = String(code).split("-");
+    /* negative Tonart (z. B. -2) steht als "--2" im Code – vor dem Zerlegen schützen */
+    const p = String(code).replace(/--(\d)/g, "-~$1").split("-").map(x => x.replace(/^~/, "-"));
     if (p[0] === "4" && p.length === 10 + 4 * SPUREN.length) {
       const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, 3, 0)],
         swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: String(p[7]).toUpperCase(),
