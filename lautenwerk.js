@@ -41,25 +41,42 @@
   ];
   const IDS = SPUREN.map(s => s.id);
   const SPUR = Object.fromEntries(SPUREN.map(s => [s.id, s]));
-  const ABLAEUFE = ["A", "AB", "AABB", "AABA", "ABAB", "AAAB"];
+  const TEILE = ["A", "B", "C", "D"];
+  const ABLAEUFE = ["A", "AB", "AABB", "AABA", "ABAB", "AAAB", "ABC", "ABAC", "AABC", "ABCB", "AABACA", "AABBCC", "ABCD", "ABCABCD", "ABACABAD", "AABBCCDD"];
   /* Barradins Instrumente für die Melodie-Spur */
   const INSTRUMENTE = ["laute", "harfe", "mandoline", "fidel", "drehleier", "schalmei", "dudelsack", "glocken", "illusion"];
   const GEHALTEN = { fidel: 1, drehleier: 1, schalmei: 1, dudelsack: 1, illusion: 1 };
+  /* Die Instrumente der übrigen Band */
+  const BAND = {
+    trommel: ["trommel", "pauke", "bodhran", "tamburin", "stoecke"],
+    floete: ["floete", "panfloete", "okarina", "gesang", "horn"],
+    ketten: ["ketten", "klatschen", "schnipsen", "rassel", "stampfen", "loeffel", "krug"]
+  };
+  const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
+  const SYMBOL = {
+    trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢" },
+    ketten: { ketten: "⛓", klatschen: "👏", schnipsen: "👌", rassel: "🥚", stampfen: "🦶", loeffel: "🥄", krug: "🍺" }
+  };
 
   /* ---------- Texte ---------- */
   const TX = {
     de: {
       label: "Spielmannskunst", titel: "Barradins Lautenwerk",
-      text: "Die Gefährten spielen auf, du bestimmst wie. Tippe in die Raster: Barradin klopft, klingelt, zupft den Bass und spielt die Melodie auf dem Instrument deiner Wahl, Friedrich trommelt, Echo flötet, Ezekiel rasselt mit den Ketten – und Rex gibt seinen Senf dazu.",
+      text: "Die Gefährten spielen auf, du bestimmst wie. Tippe in die Raster: Barradin klopft, klingelt, zupft den Bass und spielt die Melodie, Friedrich schlägt den Takt, Echo spielt die zweite Stimme, Ezekiel sorgt für den Rhythmus – und Rex gibt seinen Senf dazu. Bei jedem Gefährten kannst du das Instrument wählen.",
       spielen: "▶ Spielen", stopp: "■ Anhalten", tempo: "Tempo", tonart: "Tonart", modus: "Tonleiter",
       swing: "Tanzschritt", bordun: "Bordun", variation: "Variation",
       wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
       spuren: { klopf: "Klopfen", schelle: "Schellen", bass: "Bass", melodie: "Laute", trommel: "Trommel", floete: "Flöte", ketten: "Ketten", rex: "Rex" },
       rexZeilen: ["Wuff", "Heulen", "Knurren"], rexLaut: ["Wuff!", "Auuuuu!", "Grrrr …"],
       instrument: "Instrument", instrumente: { laute: "Laute", harfe: "Harfe", mandoline: "Mandoline", fidel: "Fidel", drehleier: "Drehleier", schalmei: "Schalmei", dudelsack: "Dudelsack", glocken: "Glockenspiel", illusion: "Flöte der Illusionen" },
-      teil: "Teil bearbeiten", ablauf: "Ablauf", kopieren: "A → B kopieren", kopiert2: "Teil A wurde nach B kopiert.",
+      band: {
+        trommel: { trommel: "Landsknechttrommel", pauke: "Kesselpauke", bodhran: "Bodhrán", tamburin: "Schellentrommel", stoecke: "Holzstöcke" },
+        floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn" },
+        ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch" }
+      },
+      teil: "Teil bearbeiten", ablauf: "Ablauf", kopieren: (a, b) => a + " → " + b + " kopieren", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       lieder: "Lieder", stimmungen: "Stimmungen für Imre",
-      vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
+      vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🕯 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg" },
       zufall: "🎲 Improvisieren", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
@@ -72,16 +89,21 @@
     },
     en: {
       label: "Minstrelsy", titel: "Barradin's Lute Machine",
-      text: "The companions strike up, you decide how. Tap the grids: Barradin knocks, jingles, plucks the bass and plays the melody on the instrument of your choice, Friedrich drums, Echo plays the flute, Ezekiel rattles his chains – and Rex adds his two cents.",
+      text: "The companions strike up, you decide how. Tap the grids: Barradin knocks, jingles, plucks the bass and plays the melody, Friedrich keeps the beat, Echo plays the second voice, Ezekiel adds the rhythm – and Rex adds his two cents. You can pick the instrument for every companion.",
       spielen: "▶ Play", stopp: "■ Stop", tempo: "Tempo", tonart: "Key", modus: "Mode",
       swing: "Dance step", bordun: "Drone", variation: "Variation",
       wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
       spuren: { klopf: "Knock", schelle: "Bells", bass: "Bass", melodie: "Lute", trommel: "Drum", floete: "Flute", ketten: "Chains", rex: "Rex" },
       rexZeilen: ["Woof", "Howl", "Growl"], rexLaut: ["Woof!", "Awooooo!", "Grrrr …"],
       instrument: "Instrument", instrumente: { laute: "Lute", harfe: "Harp", mandoline: "Mandolin", fidel: "Fiddle", drehleier: "Hurdy-gurdy", schalmei: "Shawm", dudelsack: "Bagpipes", glocken: "Glockenspiel", illusion: "Flute of Illusions" },
-      teil: "Edit part", ablauf: "Order", kopieren: "Copy A → B", kopiert2: "Part A was copied to B.",
+      band: {
+        trommel: { trommel: "Field drum", pauke: "Kettledrum", bodhran: "Bodhrán", tamburin: "Tambourine", stoecke: "Wooden sticks" },
+        floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn" },
+        ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table" }
+      },
+      teil: "Edit part", ablauf: "Order", kopieren: (a, b) => "Copy " + a + " → " + b, kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       lieder: "Songs", stimmungen: "Moods for Imre",
-      vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
+      vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🕯 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory" },
       zufall: "🎲 Improvise", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
@@ -120,80 +142,117 @@
   const folge = paare => { const a = leer(); Object.keys(paare).forEach(i => a[+i] = paare[i]); return a; };
   const teilLeer = () => Object.fromEntries(IDS.map(k => [k, leer()]));
   const teil = o => Object.assign(teilLeer(), o);
+  /* Zeilen der Ton-Spuren sind Tonleiterstufen (0 = Grundton, 7 = Oktave).
+     Bass-Zeilen: 0 = I, 1 = III, 2 = IV, 3 = V, 4 = VII.
+     Die Melodien setzen auf den Zählzeiten Akkordtöne des jeweiligen Basstons,
+     Echos zweite Stimme liegt meist eine Terz oder Sexte daneben. */
   const VORLAGEN = {
-    taverne: { tempo: 112, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABA",
-      A: teil({ klopf: an([0, 4, 8, 12, 14]), schelle: an([2, 6, 10, 15]), trommel: an([0, 8]),
-        bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3, 14: 2 }),
-        melodie: folge({ 0: 4, 2: 5, 3: 4, 4: 3, 6: 2, 7: 3, 8: 4, 10: 7, 11: 6, 12: 4, 13: 3, 14: 1, 15: 0 }) }),
-      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 6, 8, 12, 14]),
-        bass: folge({ 0: 2, 4: 0, 8: 3, 12: 0 }),
-        melodie: folge({ 0: 7, 2: 6, 4: 5, 6: 4, 8: 5, 10: 4, 12: 3, 14: 1, 15: 0 }),
-        floete: folge({ 0: 4, 4: 5, 8: 4, 12: 2 }), rex: folge({ 15: 0 }) }) },
-    saltarello: { instrument: "schalmei", tempo: 126, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1, variation: 2, ablauf: "AB",
-      A: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 5, 10, 13]), trommel: an([0, 6, 8, 14]),
-        bass: folge({ 0: 0, 6: 3, 8: 0, 14: 3 }),
-        melodie: folge({ 0: 0, 1: 2, 2: 4, 3: 5, 4: 4, 5: 2, 6: 3, 7: 1, 8: 0, 9: 2, 10: 4, 11: 7, 12: 6, 13: 4, 14: 5, 15: 4 }) }),
-      B: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 5, 10, 13]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([3, 11]),
-        bass: folge({ 0: 3, 6: 0, 8: 3, 14: 0 }),
-        melodie: folge({ 0: 7, 1: 6, 2: 5, 3: 4, 4: 5, 5: 4, 6: 3, 7: 2, 8: 4, 9: 3, 10: 2, 11: 1, 12: 2, 13: 1, 14: 0 }),
-        floete: folge({ 0: 4, 2: 5, 4: 6, 6: 4, 8: 2, 10: 3, 12: 1, 14: 0 }) }) },
-    trauer: { instrument: "fidel", tempo: 70, transpose: -2, modus: "aeolisch", swing: 0, bordun: 1, variation: 1, ablauf: "AB",
+    taverne: { instrument: "laute", band: { trommel: "bodhran", floete: "floete", ketten: "klatschen" },
+      tempo: 112, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABACA",
+      A: teil({ klopf: an([0, 6, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([4, 12]),
+        bass: folge({ 0: 0, 4: 0, 8: 4, 12: 3 }),
+        melodie: folge({ 0: 4, 2: 2, 3: 3, 4: 4, 6: 7, 7: 6, 8: 6, 10: 3, 11: 4, 12: 4, 13: 3, 14: 1, 15: 2 }) }),
+      B: teil({ klopf: an([0, 6, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 3, 6, 8, 11, 12, 14]), ketten: an([4, 12]),
+        bass: folge({ 0: 0, 4: 2, 8: 0, 12: 3, 14: 3 }),
+        melodie: folge({ 0: 7, 2: 4, 3: 5, 4: 5, 6: 3, 7: 4, 8: 2, 10: 0, 11: 2, 12: 1, 13: 2, 14: 4 }),
+        floete: folge({ 0: 4, 4: 3, 8: 4, 12: 4 }), rex: folge({ 15: 0 }) }),
+      C: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 8]), ketten: an([4, 10, 12]),
+        bass: folge({ 0: 4, 4: 4, 8: 2, 12: 3 }),
+        melodie: folge({ 0: 1, 4: 3, 8: 0, 12: 1 }),
+        floete: folge({ 0: 3, 2: 1, 4: 6, 6: 3, 8: 5, 10: 3, 12: 4, 14: 6 }) }) },
+    saltarello: { instrument: "schalmei", band: { trommel: "tamburin", floete: "floete", ketten: "stampfen" },
+      tempo: 126, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABB",
+      A: teil({ klopf: an([0, 6, 8, 14]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([4, 12]),
+        bass: folge({ 0: 0, 6: 0, 8: 4, 14: 4 }),
+        melodie: folge({ 0: 4, 2: 2, 3: 3, 4: 4, 6: 2, 7: 1, 8: 1, 10: 3, 11: 5, 12: 6, 14: 3, 15: 5 }) }),
+      B: teil({ klopf: an([0, 6, 8, 14]), schelle: an([3, 11]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([4, 12]),
+        bass: folge({ 0: 0, 4: 2, 8: 3, 12: 0 }),
+        melodie: folge({ 0: 7, 2: 4, 3: 5, 4: 5, 6: 3, 7: 4, 8: 4, 10: 6, 11: 5, 12: 4, 14: 2, 15: 1 }),
+        floete: folge({ 0: 4, 4: 7, 8: 6, 12: 4 }) }) },
+    ballade: { instrument: "laute", band: { trommel: "bodhran", floete: "gesang", ketten: "schnipsen" },
+      tempo: 96, transpose: 0, modus: "dorisch", swing: 1, bordun: 0, variation: 2, ablauf: "ABCABCD",
+      A: teil({ klopf: an([0, 8]), ketten: an([4, 12]), bass: folge({ 0: 0, 8: 4 }),
+        melodie: folge({ 0: 0, 2: 2, 4: 4, 6: 2, 8: 3, 10: 1, 12: 3, 14: 6 }) }),
+      B: teil({ klopf: an([0, 8]), ketten: an([4, 12]), bass: folge({ 0: 2, 8: 3 }),
+        melodie: folge({ 0: 3, 2: 5, 4: 7, 6: 5, 8: 4, 10: 6, 12: 4, 14: 1 }) }),
+      C: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 6, 8, 14]), ketten: an([4, 12]),
+        bass: folge({ 0: 0, 4: 2, 8: 4, 12: 3 }),
+        melodie: folge({ 0: 2, 4: 3, 8: 1, 12: 6 }),
+        floete: folge({ 0: 4, 2: 4, 4: 5, 6: 3, 8: 6, 10: 3, 12: 4, 14: 1 }) }),
+      D: teil({ klopf: an([0]), bass: folge({ 0: 4, 8: 0 }),
+        melodie: folge({ 0: 6, 4: 3, 8: 2, 10: 4, 12: 0 }),
+        floete: folge({ 0: 3, 8: 4 }), rex: folge({ 12: 1 }) }) },
+    trauer: { instrument: "fidel", band: { trommel: "pauke", floete: "gesang", ketten: "ketten" },
+      tempo: 70, transpose: -2, modus: "aeolisch", swing: 0, bordun: 1, variation: 1, ablauf: "AABB",
       A: teil({ klopf: an([0, 8]), bass: folge({ 0: 0, 8: 2, 12: 3 }),
-        melodie: folge({ 0: 4, 3: 3, 4: 2, 6: 1, 8: 2, 11: 1, 12: 0 }) }),
-      B: teil({ trommel: an([0]), bass: folge({ 0: 0, 8: 3 }),
-        melodie: folge({ 0: 0, 2: 2, 4: 4, 6: 2, 8: 1, 10: 3, 12: 0 }),
-        floete: folge({ 0: 4, 2: 5, 4: 4, 6: 2, 8: 3, 10: 1, 12: 0 }), rex: folge({ 12: 1 }) }) },
-    schlacht: { instrument: "dudelsack", tempo: 138, transpose: 2, modus: "phrygisch", swing: 0, bordun: 1, variation: 3, ablauf: "AABB",
-      A: teil({ klopf: an([0, 3, 6, 8, 10, 11, 14]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 4, 6, 8, 10, 12, 14]), ketten: an([4, 12]),
-        bass: folge({ 0: 0, 3: 0, 6: 0, 8: 0, 11: 0, 14: 1 }),
-        melodie: folge({ 0: 0, 1: 1, 2: 0, 4: 4, 6: 3, 7: 1, 8: 0, 10: 5, 12: 4, 14: 1, 15: 0 }) }),
-      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 3, 4, 6, 8, 10, 11, 12, 13, 14, 15]), ketten: an([0, 4, 8, 12]),
-        bass: folge({ 0: 0, 4: 0, 8: 1, 12: 0 }),
-        melodie: folge({ 0: 4, 2: 5, 4: 4, 6: 3, 8: 4, 10: 5, 12: 7, 14: 4 }),
-        floete: folge({ 0: 7, 4: 7, 8: 5, 12: 4 }), rex: folge({ 8: 0 }) }) },
-    wiegen: { instrument: "harfe", tempo: 84, transpose: 0, modus: "mixolydisch", swing: 1, bordun: 0, variation: 1, ablauf: "AB",
-      A: teil({ klopf: an([0, 8]), schelle: an([12]), bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3 }),
-        melodie: folge({ 0: 4, 2: 4, 4: 5, 6: 4, 8: 2, 10: 3, 12: 1, 14: 0 }) }),
-      B: teil({ klopf: an([0, 8]), bass: folge({ 0: 2, 8: 0 }),
-        melodie: folge({ 0: 2, 2: 3, 4: 2, 6: 1, 8: 0, 12: 0 }),
-        floete: folge({ 0: 4, 4: 5, 8: 4, 12: 2 }) }) },
+        melodie: folge({ 0: 4, 4: 2, 6: 0, 8: 3, 10: 5, 12: 1 }) }),
+      B: teil({ trommel: an([0]), bass: folge({ 0: 4, 4: 1, 8: 2, 12: 3 }),
+        melodie: folge({ 0: 6, 3: 5, 4: 4, 6: 2, 8: 0, 10: 3, 12: 1, 14: 4 }),
+        floete: folge({ 0: 3, 4: 6, 8: 5, 12: 4 }), rex: folge({ 14: 1 }) }) },
+    schlacht: { instrument: "dudelsack", band: { trommel: "pauke", floete: "horn", ketten: "stampfen" },
+      tempo: 138, transpose: 2, modus: "phrygisch", swing: 0, bordun: 1, variation: 3, ablauf: "AABC",
+      A: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 6, 10, 14]), trommel: an([0, 4, 8, 12]), ketten: an([0, 8]),
+        bass: folge({ 0: 0, 2: 0, 4: 0, 6: 0, 8: 0, 10: 0, 12: 4, 14: 4 }),
+        melodie: folge({ 0: 4, 2: 4, 3: 5, 4: 4, 6: 2, 7: 1, 8: 0, 10: 4, 11: 5, 12: 6, 14: 3, 15: 1 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 4, 8, 10, 12, 14]), ketten: an([0, 4, 8, 12]),
+        bass: folge({ 0: 0, 4: 2, 8: 3, 12: 4 }),
+        melodie: folge({ 0: 7, 2: 4, 4: 5, 6: 3, 8: 4, 10: 6, 12: 6, 14: 1, 15: 0 }),
+        floete: folge({ 0: 4, 4: 3, 8: 4, 12: 3 }), rex: folge({ 15: 0 }) }),
+      C: teil({ klopf: an([0, 8]), trommel: an([0, 4, 8, 10, 12, 13, 14, 15]), ketten: an([0, 4, 8, 12]),
+        bass: folge({ 0: 0, 8: 0 }), floete: folge({ 0: 4, 6: 4, 8: 7 }), rex: folge({ 12: 2 }) }) },
+    wiegen: { instrument: "harfe", band: { trommel: "trommel", floete: "okarina", ketten: "rassel" },
+      tempo: 84, transpose: 0, modus: "mixolydisch", swing: 1, bordun: 0, variation: 1, ablauf: "AABB",
+      A: teil({ klopf: an([0, 8]), ketten: an([4, 12]), bass: folge({ 0: 0, 8: 2 }),
+        melodie: folge({ 0: 4, 2: 2, 4: 4, 6: 2, 8: 3, 10: 5, 12: 3, 14: 0 }) }),
+      B: teil({ klopf: an([0, 8]), schelle: an([12]), ketten: an([4, 12]), bass: folge({ 0: 4, 8: 0 }),
+        melodie: folge({ 0: 6, 2: 3, 4: 1, 6: 3, 8: 2, 10: 4, 12: 0 }),
+        floete: folge({ 0: 1, 4: 3, 8: 4, 12: 2 }) }) },
     /* Stimmungen für die Spielleitung: viel Variation, laufen endlos */
-    kampf: { tempo: 150, transpose: 0, modus: "phrygisch", swing: 0, bordun: 1, variation: 6, ablauf: "AABA",
-      A: teil({ klopf: an([0, 4, 8, 12]), trommel: an([0, 2, 3, 6, 8, 10, 11, 14]), ketten: an([4, 12]), schelle: an([2, 6, 10, 14]),
-        bass: folge({ 0: 0, 2: 0, 4: 0, 6: 1, 8: 0, 10: 0, 12: 0, 14: 1 }),
-        melodie: folge({ 0: 4, 2: 5, 3: 4, 4: 1, 8: 4, 10: 5, 11: 7, 12: 5 }) }),
-      B: teil({ klopf: an([0, 4, 8, 12]), trommel: an([0, 1, 2, 4, 6, 8, 9, 10, 12, 13, 14, 15]), ketten: an([0, 6, 8, 14]), schelle: an([0, 4, 8, 12]),
-        bass: folge({ 0: 0, 4: 2, 8: 3, 12: 1 }),
-        floete: folge({ 0: 7, 2: 6, 4: 5, 6: 4, 8: 5, 12: 1 }), rex: folge({ 14: 0 }) }) },
-    unterreich: { instrument: "drehleier", tempo: 64, transpose: -3, modus: "phrygisch", swing: 0, bordun: 1, variation: 5, ablauf: "AB",
+    kampf: { instrument: "fidel", band: { trommel: "pauke", floete: "horn", ketten: "ketten" },
+      tempo: 150, transpose: 0, modus: "phrygisch", swing: 0, bordun: 1, variation: 6, ablauf: "AABACA",
+      A: teil({ klopf: an([0, 4, 8, 12]), trommel: an([0, 3, 6, 8, 11, 14]), ketten: an([4, 12]), schelle: an([2, 6, 10, 14]),
+        bass: folge({ 0: 0, 3: 0, 6: 0, 8: 0, 11: 0, 14: 0 }),
+        melodie: folge({ 0: 0, 1: 1, 2: 0, 4: 4, 6: 2, 7: 1, 8: 0, 10: 4, 11: 5, 12: 4, 14: 2, 15: 1 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), trommel: an([0, 2, 4, 6, 8, 10, 12, 13, 14, 15]), ketten: an([0, 6, 8, 14]), schelle: an([0, 4, 8, 12]),
+        bass: folge({ 0: 2, 4: 2, 8: 3, 12: 4 }),
+        melodie: folge({ 0: 5, 2: 3, 4: 5, 6: 7, 8: 6, 10: 4, 12: 6, 14: 3 }),
+        floete: folge({ 0: 3, 8: 4, 12: 3 }), rex: folge({ 14: 0 }) }),
+      C: teil({ klopf: an([0, 4, 8, 12]), trommel: an([0, 2, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15]), ketten: an([0, 8]),
+        bass: folge({ 0: 0, 4: 0, 8: 0, 12: 0 }), floete: folge({ 0: 4, 4: 4, 6: 7, 8: 4 }), rex: folge({ 14: 2 }) }) },
+    unterreich: { instrument: "drehleier", band: { trommel: "pauke", floete: "okarina", ketten: "ketten" },
+      tempo: 64, transpose: -3, modus: "phrygisch", swing: 0, bordun: 1, variation: 5, ablauf: "AB",
       A: teil({ trommel: an([0]), ketten: an([7]), bass: folge({ 0: 0, 10: 1 }),
-        melodie: folge({ 4: 1, 6: 0, 12: 3 }) }),
+        melodie: folge({ 4: 1, 6: 0, 12: 2 }) }),
       B: teil({ trommel: an([0, 12]), ketten: an([5, 13]), bass: folge({ 0: 0, 8: 0 }),
-        floete: folge({ 0: 4, 6: 5, 8: 4, 14: 1 }) }) },
-    reise: { tempo: 100, transpose: 2, modus: "mixolydisch", swing: 1, bordun: 1, variation: 4, ablauf: "AABA",
-      A: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 8]),
-        bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3 }),
-        melodie: folge({ 0: 0, 2: 2, 4: 4, 6: 5, 8: 4, 10: 2, 12: 3, 14: 1 }) }),
-      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 6, 8, 14]),
-        bass: folge({ 0: 2, 4: 3, 8: 0, 12: 3 }),
-        floete: folge({ 0: 7, 2: 6, 4: 5, 6: 4, 8: 5, 10: 6, 12: 7 }), melodie: folge({ 0: 4, 8: 2, 12: 0 }) }) },
-    spannung: { instrument: "glocken", tempo: 90, transpose: 0, modus: "aeolisch", swing: 0, bordun: 0, variation: 5, ablauf: "AAAB",
-      A: teil({ klopf: an([0, 6, 12]), ketten: an([10]),
+        floete: folge({ 0: 4, 4: 2, 8: 1, 12: 0 }) }) },
+    reise: { instrument: "mandoline", band: { trommel: "bodhran", floete: "panfloete", ketten: "rassel" },
+      tempo: 100, transpose: 2, modus: "mixolydisch", swing: 1, bordun: 1, variation: 4, ablauf: "AABA",
+      A: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 6, 8, 14]), ketten: an([2, 6, 10, 14]),
+        bass: folge({ 0: 0, 4: 4, 8: 2, 12: 0 }),
+        melodie: folge({ 0: 2, 2: 4, 4: 6, 6: 3, 8: 3, 10: 5, 12: 4, 14: 2 }) }),
+      B: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 6, 8, 14]), ketten: an([2, 6, 10, 14]),
+        bass: folge({ 0: 2, 4: 0, 8: 4, 12: 0 }),
+        melodie: folge({ 0: 3, 4: 2, 8: 1, 12: 0 }),
+        floete: folge({ 0: 5, 2: 7, 4: 4, 6: 2, 8: 6, 10: 3, 12: 4, 14: 7 }) }) },
+    spannung: { instrument: "glocken", band: { trommel: "pauke", floete: "okarina", ketten: "schnipsen" },
+      tempo: 90, transpose: 0, modus: "aeolisch", swing: 0, bordun: 0, variation: 5, ablauf: "AAAB",
+      A: teil({ trommel: an([0, 2]), ketten: an([0, 4, 8, 12]),
         bass: folge({ 0: 0, 2: 0, 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 14: 1 }) }),
-      B: teil({ klopf: an([0, 6, 12]), trommel: an([0, 4, 8, 12, 14, 15]), ketten: an([2, 10]),
+      B: teil({ trommel: an([0, 2, 8, 10, 12, 14, 15]), ketten: an([0, 2, 4, 6, 8, 10, 12, 14]),
         bass: folge({ 0: 0, 2: 0, 4: 0, 6: 0, 8: 1, 10: 1, 12: 1, 14: 2 }),
-        melodie: folge({ 0: 5, 4: 4, 8: 5, 12: 7 }) }) },
-    sieg: { tempo: 132, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1, variation: 4, ablauf: "AB",
-      A: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 4, 6, 8, 12, 14]),
-        bass: folge({ 0: 0, 4: 3, 8: 0, 12: 3 }),
-        melodie: folge({ 0: 0, 1: 2, 2: 4, 4: 7, 6: 4, 8: 5, 9: 4, 10: 2, 12: 4 }),
-        floete: folge({ 0: 4, 4: 7, 8: 6, 12: 7 }), rex: folge({ 14: 0 }) }),
-      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 4, 6, 8, 10, 12, 13, 14, 15]), ketten: an([8]),
-        bass: folge({ 0: 2, 4: 3, 8: 0, 12: 3 }),
-        melodie: folge({ 0: 7, 2: 6, 4: 7, 6: 5, 8: 4, 10: 5, 12: 7 }),
-        floete: folge({ 0: 7, 2: 7, 4: 7, 8: 5, 12: 7 }), rex: folge({ 12: 1 }) }) }
+        melodie: folge({ 0: 5, 4: 4, 8: 5, 12: 7 }), floete: folge({ 8: 2, 12: 3 }) }) },
+    sieg: { instrument: "laute", band: { trommel: "tamburin", floete: "horn", ketten: "klatschen" },
+      tempo: 132, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 1, variation: 4, ablauf: "AABB",
+      A: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 4, 6, 8, 12, 14]), ketten: an([4, 12]),
+        bass: folge({ 0: 0, 4: 2, 8: 4, 12: 0 }),
+        melodie: folge({ 0: 0, 1: 2, 2: 4, 4: 5, 6: 3, 8: 6, 9: 4, 10: 3, 12: 4, 14: 7 }),
+        floete: folge({ 0: 4, 4: 7, 8: 6, 12: 7 }) }),
+      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 4, 6, 8, 10, 12, 13, 14, 15]), ketten: an([4, 12]),
+        bass: folge({ 0: 2, 4: 0, 8: 4, 12: 0 }),
+        melodie: folge({ 0: 7, 2: 5, 4: 4, 6: 2, 8: 6, 10: 1, 12: 2, 14: 0 }),
+        floete: folge({ 0: 5, 4: 4, 8: 3, 12: 4 }), rex: folge({ 14: 0 }) }) }
   };
-  const LIEDER = ["taverne", "saltarello", "trauer", "schlacht", "wiegen"];
+  const LIEDER = ["taverne", "saltarello", "ballade", "trauer", "schlacht", "wiegen"];
   const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg"];
   const kopie = o => JSON.parse(JSON.stringify(o));
 
@@ -205,14 +264,17 @@
   const ausVorlage = (k, mix) => {
     const v = kopie(VORLAGEN[k]);
     return { tempo: v.tempo, transpose: v.transpose, modus: v.modus, swing: v.swing, bordun: v.bordun, variation: v.variation, instrument: v.instrument || "laute",
-      ablauf: v.ablauf, teile: { A: v.A, B: v.B }, ...(mix || MIX_START()) };
+      band: Object.assign(BAND_START(), v.band || {}),
+      ablauf: v.ablauf, teile: { A: v.A || teilLeer(), B: v.B || teilLeer(), C: v.C || teilLeer(), D: v.D || teilLeer() }, ...(mix || MIX_START()) };
   };
   function pruefen(s) {
     const m = MIX_START();
     s.vol = Object.assign(m.vol, s.vol || {}); s.mute = Object.assign(m.mute, s.mute || {});
     s.teile = s.teile || {};
-    ["A", "B"].forEach(p => { s.teile[p] = Object.assign(teilLeer(), s.teile[p] || {}); });
-    if (!ABLAEUFE.includes(s.ablauf)) s.ablauf = "A";
+    TEILE.forEach(p => { s.teile[p] = Object.assign(teilLeer(), s.teile[p] || {}); });
+    if (!/^[ABCD]{1,8}$/.test(s.ablauf || "")) s.ablauf = "A";
+    s.band = Object.assign(BAND_START(), s.band || {});
+    Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
     if (typeof s.variation !== "number") s.variation = 0;
     if (!INSTRUMENTE.includes(s.instrument)) s.instrument = "laute";
     return s;
@@ -233,13 +295,31 @@
   const ziffern = a => a.map(v => v < 0 ? "." : v).join("");
   const unziffern = (str, max) => String(str || "").padEnd(SCHRITTE, ".").slice(0, SCHRITTE).split("").map(c => { const n = parseInt(c, 10); return isNaN(n) || n > max ? -1 : n; });
   const zahl = (x, min, max, d) => { const n = parseInt(x, 10); return isNaN(n) ? d : Math.max(min, Math.min(max, n)); };
-  const kodieren = () => ["3", S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, S.variation, ABLAEUFE.indexOf(S.ablauf),
+  const kodieren = () => ["4", S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, S.variation, S.ablauf,
     IDS.map(k => (S.mute[k] ? "m" : "") + S.vol[k]).join("")]
-    .concat(...["A", "B"].map(p => SPUREN.map(sp => sp.art === "an" ? hex(S.teile[p][sp.id]) : ziffern(S.teile[p][sp.id]))))
-    .concat([INSTRUMENTE.indexOf(S.instrument)])
+    .concat(...TEILE.map(p => SPUREN.map(sp => sp.art === "an" ? hex(S.teile[p][sp.id]) : ziffern(S.teile[p][sp.id]))))
+    .concat([INSTRUMENTE.indexOf(S.instrument) + ["trommel", "floete", "ketten"].map(k => BAND[k].indexOf(S.band[k])).join("")])
     .join("-");
   function dekodieren(code) {
     const p = String(code).split("-");
+    if (p[0] === "4" && p.length === 10 + 4 * SPUREN.length) {
+      const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, 3, 0)],
+        swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: String(p[7]).toUpperCase(),
+        ...MIX_START(), teile: {}, band: BAND_START() };
+      const mix = p[8].match(/m?\d/g);
+      if (mix && mix.length === IDS.length) IDS.forEach((k, i) => { s.mute[k] = mix[i][0] === "m" ? 1 : 0; s.vol[k] = +mix[i].slice(-1); });
+      TEILE.forEach((teilName, ti) => {
+        s.teile[teilName] = {};
+        SPUREN.forEach((sp, si) => {
+          const feld = p[9 + ti * SPUREN.length + si];
+          s.teile[teilName][sp.id] = sp.art === "an" ? unhex(feld) : unziffern(feld, sp.zeilen - 1);
+        });
+      });
+      const ins = String(p[9 + 4 * SPUREN.length] || "");
+      s.instrument = INSTRUMENTE[zahl(ins[0], 0, INSTRUMENTE.length - 1, 0)];
+      ["trommel", "floete", "ketten"].forEach((k, i) => { s.band[k] = BAND[k][zahl(ins[i + 1], 0, BAND[k].length - 1, 0)]; });
+      return pruefen(s);
+    }
     if ((p[0] === "2" && p.length === 9 + 2 * SPUREN.length) || (p[0] === "3" && p.length === 10 + 2 * SPUREN.length)) {
       const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, 3, 0)],
         swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: ABLAEUFE[zahl(p[7], 0, ABLAEUFE.length - 1, 0)],
@@ -348,7 +428,9 @@
     }
     return g;
   }
-  const MEL_SPITZE = { glocken: .3, fidel: .26, drehleier: .22, schalmei: .2, dudelsack: .22, illusion: .26 };
+  const MEL_SPITZE = { glocken: .3, fidel: .26, drehleier: .3, schalmei: .2, dudelsack: .22, illusion: .26 };
+  const ECHO_SPITZE = { panfloete: .3, okarina: .32, gesang: .27, horn: .27 };
+  const ECHO_LAENGE = { panfloete: 3.4, okarina: 3.4, gesang: 3.6, horn: 3.4 };
   const MEL_LAENGE = { glocken: 1.6, fidel: 3.4, drehleier: 3.3, schalmei: 3.3, dudelsack: 3.3, illusion: 3.5 };
   function klaengeVorbereiten() {
     if (!ctx) return;
@@ -357,7 +439,12 @@
       const f = midiHz(tonMidi("melodie", z, S));
       vorrendern(art + "|" + f.toFixed(2), MEL_LAENGE[art], () => melodieSpielen(f, 0, 3, 1), MEL_SPITZE[art]);
     }
-    for (let v = 0; v < 4; v++) vorrendern("kette" + v, .9, () => kettenRasselnLive(0, 1), .38);
+    const ea = S.band.floete;
+    if (ECHO_LAENGE[ea]) for (let z = 0; z < 8; z++) {
+      const f = midiHz(tonMidi("floete", z, S));
+      vorrendern("echo|" + ea + "|" + f.toFixed(2), ECHO_LAENGE[ea], () => echoSpielen(f, 0, 3, 1), ECHO_SPITZE[ea]);
+    }
+    if (S.band.ketten === "ketten") for (let v = 0; v < 4; v++) vorrendern("kette" + v, .9, () => kettenRasselnLive(0, 1), .38);
     [.32, 1.75, .9].forEach((l, a) => vorrendern("rex" + a, l, () => rexLautLive(0, a, 1), [.42, .34, .4][a]));
   }
   function saite(freq, art) {
@@ -433,6 +520,118 @@
     rauschStoss(zeit, spurGain.trommel, "lowpass", 500, .7, .5 * l, .08);
     rauschStoss(zeit, spurGain.trommel, "bandpass", 2200, 1, .12 * l, .025);
   }
+  /* ---------- Friedrichs Trommeln ---------- */
+  function schlagTon(ziel, typ, f0, f1, abfall, laut, zeit, kurve) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = typ; o.frequency.setValueAtTime(f0, zeit); o.frequency.exponentialRampToValueAtTime(f1, zeit + (kurve || abfall * .5));
+    g.gain.setValueAtTime(laut, zeit); g.gain.exponentialRampToValueAtTime(.001, zeit + abfall);
+    o.connect(g); g.connect(ziel); o.start(zeit); o.stop(zeit + abfall + .02);
+  }
+  function friedrichSpielen(zeit, betont, laut) {
+    const l = laut || 1, z = spurGain.trommel, art = S.band.trommel;
+    if (art === "pauke") { /* tief und lang nachhallend */
+      schlagTon(z, "sine", betont ? 92 : 84, betont ? 58 : 54, betont ? 1.1 : .8, (betont ? 1.2 : .9) * l, zeit, .25);
+      schlagTon(z, "sine", 140, 120, .4, .25 * l, zeit);
+      rauschStoss(zeit, z, "lowpass", 380, .7, .35 * l, .12);
+    } else if (art === "bodhran") { /* trocken, mit Fellklatscher */
+      schlagTon(z, "sine", betont ? 130 : 160, betont ? 70 : 90, .2, (betont ? 1 : .75) * l, zeit, .08);
+      rauschStoss(zeit, z, "bandpass", betont ? 700 : 1100, 1.2, .3 * l, .04);
+    } else if (art === "tamburin") { /* Fell plus Schellen */
+      schlagTon(z, "triangle", 260, 160, .09, .45 * l, zeit);
+      rauschStoss(zeit, z, "highpass", 7000, .7, (betont ? .4 : .3) * l, .18);
+      for (let i = 0; i < 4; i++) {
+        const o = ctx.createOscillator(), g = ctx.createGain(), t0 = zeit + i * .009;
+        o.type = "sine"; o.frequency.value = 5200 + Math.random() * 2600;
+        g.gain.setValueAtTime(.045 * l, t0); g.gain.exponentialRampToValueAtTime(.0005, t0 + .14);
+        o.connect(g); g.connect(z); o.start(t0); o.stop(t0 + .15);
+      }
+    } else if (art === "stoecke") { /* zwei Holzstöcke, hell und knackig */
+      schlagTon(z, "sine", betont ? 2300 : 2600, betont ? 2200 : 2500, .07, .5 * l, zeit);
+      rauschStoss(zeit, z, "bandpass", 3000, 2, .25 * l, .02);
+    } else trommeln(zeit, betont, l);
+  }
+
+  /* ---------- Ezekiels Rhythmus: Dinge, die jeder kann ---------- */
+  function ezekielSpielen(zeit, laut) {
+    const l = laut || 1, z = spurGain.ketten, art = S.band.ketten;
+    if (art === "ketten") { kettenRasseln(zeit, l); return; }
+    if (art === "klatschen") { /* mehrere Hände, minimal versetzt */
+      [0, .007, .015].forEach((d, i) => rauschStoss(zeit + d, z, "bandpass", 1100 + i * 250, 1.1, (2 - i * .4) * l, .02));
+      rauschStoss(zeit + .02, z, "bandpass", 1400, .9, .8 * l, .12);
+    } else if (art === "schnipsen") {
+      rauschStoss(zeit, z, "bandpass", 2900, 3, 1.5 * l, .03);
+      schlagTon(z, "sine", 2400, 2100, .05, .32 * l, zeit);
+    } else if (art === "rassel") { /* Eier-Rassel: kurzes Schütteln */
+      const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain();
+      r.buffer = rauschen; b.type = "highpass"; b.frequency.value = 5200; b.Q.value = .6;
+      g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(.45 * l, zeit + .025); g.gain.exponentialRampToValueAtTime(.001, zeit + .13);
+      r.connect(b); b.connect(g); g.connect(z); r.start(zeit, Math.random() * .5, .15);
+    } else if (art === "stampfen") { /* Fuß auf Holzdielen */
+      schlagTon(z, "sine", 95, 45, .28, .9 * l, zeit, .12);
+      rauschStoss(zeit, z, "lowpass", 320, .8, .35 * l, .09);
+      rauschStoss(zeit + .004, z, "bandpass", 650, 2, .12 * l, .05);
+    } else if (art === "loeffel") { /* zwei Löffel gegeneinander */
+      [0, .028].forEach((d, i) => {
+        schlagTon(z, "sine", i ? 2700 : 1900, i ? 2650 : 1850, .05, .42 * l, zeit + d);
+        rauschStoss(zeit + d, z, "highpass", 4000, .8, .32 * l, .025);
+      });
+    } else { /* Krug auf den Tisch */
+      schlagTon(z, "sine", 170, 90, .14, .8 * l, zeit, .06);
+      rauschStoss(zeit, z, "bandpass", 520, 1.4, .35 * l, .07);
+      schlagTon(z, "sine", 920, 900, .25, .05 * l, zeit);
+    }
+  }
+
+  /* ---------- Echos Instrumente ---------- */
+  function echoSpielen(freq, zeit, dauer, laut) {
+    const l = laut || 1, art = S.band.floete, ziel = spurGain.floete;
+    if (art === "floete") { floete(freq, zeit, dauer || .25, l); return; }
+    if (!rendert) {
+      const buf = klangCache.get("echo|" + art + "|" + freq.toFixed(2));
+      if (buf) { abspielen(buf, zeit, ziel, l, Math.max(.18, dauer || .3)); return; }
+      klaengeVorbereiten();
+    }
+    const d = Math.max(.18, dauer || .3);
+    const g = ctx.createGain(), sum = ctx.createGain(), lp = ctx.createBiquadFilter(), leise = ctx.createGain();
+    leise.gain.value = rendert ? 1 : .35;
+    lp.type = "lowpass"; sum.connect(lp); lp.connect(g); g.connect(leise); leise.connect(ziel);
+    let oscs = [], ende;
+    if (art === "panfloete") { /* viel Luft, leicht von unten angeblasen */
+      const o = ctx.createOscillator(); o.type = "sine"; oscs = [o];
+      o.frequency.setValueAtTime(freq * .985, zeit); o.frequency.linearRampToValueAtTime(freq, zeit + .07);
+      o.connect(sum); lp.frequency.value = 3000;
+      ende = huelle(g, zeit, d, .32 * l, .05, .12);
+      const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), rg = ctx.createGain();
+      r.buffer = rauschen; r.loop = true; b.type = "bandpass"; b.frequency.value = freq; b.Q.value = 6;
+      rg.gain.setValueAtTime(0, zeit); rg.gain.linearRampToValueAtTime(.5 * l, zeit + .03); rg.gain.linearRampToValueAtTime(.18 * l, zeit + .2); rg.gain.linearRampToValueAtTime(0, ende);
+      r.connect(b); b.connect(rg); rg.connect(g); r.start(zeit); r.stop(ende);
+      rauschStoss(zeit, ziel, "bandpass", freq * 2, 2, .08 * l, .08);
+    } else if (art === "okarina") { /* rund und weich */
+      const o = ctx.createOscillator(), o3 = ctx.createOscillator(), g3 = ctx.createGain(); o.type = "sine"; o3.type = "sine";
+      o.frequency.value = freq; o3.frequency.value = freq * 3; g3.gain.value = .05; oscs = [o, o3];
+      o.connect(sum); o3.connect(g3); g3.connect(sum); lp.frequency.value = 2200;
+      ende = huelle(g, zeit, d, .34 * l, .06, .14);
+      vibrato(oscs, zeit, ende, 4.8, freq * .005, .3);
+    } else if (art === "gesang") { /* Echo summt und singt – eine Oktave tiefer */
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(); o.type = "sawtooth"; o2.type = "sawtooth";
+      o.frequency.value = freq / 2; o2.frequency.value = freq / 2 * 1.003; oscs = [o, o2];
+      const roh = ctx.createGain(); roh.gain.value = .35; o.connect(roh); o2.connect(roh);
+      formant(roh, sum, [[600, 6, 1.4], [1000, 7, .9], [2500, 8, .35]]); /* „oh“ */
+      lp.frequency.value = 3200;
+      ende = huelle(g, zeit, d, .4 * l, .12, .2);
+      vibrato(oscs, zeit, ende, 5.4, freq / 2 * .012, .35);
+      rauschStoss(zeit, ziel, "bandpass", 1800, 1, .03 * l, .1);
+    } else { /* Hirtenhorn: blechern, von unten angeschliffen */
+      const o = ctx.createOscillator(); o.type = "sawtooth"; oscs = [o];
+      o.frequency.setValueAtTime(freq / 2 * .97, zeit); o.frequency.linearRampToValueAtTime(freq / 2, zeit + .06);
+      o.connect(sum); lp.Q.value = 1.5;
+      lp.frequency.setValueAtTime(500, zeit); lp.frequency.linearRampToValueAtTime(2200, zeit + .08); lp.frequency.linearRampToValueAtTime(1300, zeit + .4);
+      ende = huelle(g, zeit, d, .32 * l, .05, .1);
+      vibrato(oscs, zeit, ende, 5, freq / 2 * .004, .4);
+    }
+    oscs.forEach(o => { o.start(zeit); o.stop(ende); });
+  }
+
   function floete(freq, zeit, dauer, laut) {
     const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
     const lfo = ctx.createOscillator(), lg = ctx.createGain(), l = laut || 1, ende = zeit + Math.max(.12, dauer);
@@ -651,10 +850,10 @@
     const betont = schritt % 4 === 0;
     if (spur === "klopf") klopfen(zeit, betont, laut);
     else if (spur === "schelle") schellen(zeit, laut);
-    else if (spur === "trommel") trommeln(zeit, betont, laut);
-    else if (spur === "ketten") kettenRasseln(zeit, laut);
+    else if (spur === "trommel") friedrichSpielen(zeit, betont, laut);
+    else if (spur === "ketten") ezekielSpielen(zeit, laut);
     else if (spur === "rex") rexLaut(zeit, zeile, laut);
-    else if (spur === "floete") floete(midiHz(tonMidi("floete", zeile, S)), zeit, dauer || .25, laut);
+    else if (spur === "floete") echoSpielen(midiHz(tonMidi("floete", zeile, S)), zeit, dauer || .25, laut);
     else if (spur === "melodie") melodieSpielen(midiHz(tonMidi("melodie", zeile, S)), zeit, dauer, laut);
     else zupf(midiHz(tonMidi(spur, zeile, S)), zeit, "bass", laut);
   }
@@ -944,23 +1143,26 @@
     const T = t();
     const tonarten = Array.from({ length: 12 }, (_, i) => i - 5).map(tr => '<option value="' + tr + '"' + (tr === S.transpose ? " selected" : "") + ">" + notenName(MEL_GRUND + tr) + "</option>").join("");
     const modi = MODUS_LISTE.map(m => '<option value="' + m + '"' + (m === S.modus ? " selected" : "") + ">" + T.modi[m] + "</option>").join("");
-    const ablaeufe = ABLAEUFE.map(a => '<option value="' + a + '"' + (a === S.ablauf ? " selected" : "") + ">" + a.split("").join(" – ") + "</option>").join("");
+    const ablaeufe = (ABLAEUFE.includes(S.ablauf) ? ABLAEUFE : ABLAEUFE.concat([S.ablauf])).map(a => '<option value="' + a + '"' + (a === S.ablauf ? " selected" : "") + ">" + a.split("").join(" – ") + "</option>").join("");
+    const naechster = TEILE[(TEILE.indexOf(bearbeite) + 1) % TEILE.length];
+    const wahl = k => k === "melodie" ? { liste: INSTRUMENTE, wert: S.instrument, namen: T.instrumente }
+      : BAND[k] ? { liste: BAND[k], wert: S.band[k], namen: T.band[k] } : null;
     const kopf = k => {
       const zu = !!zugeklappt[k];
       return '<div class="lw-kopf' + (S.mute[k] ? " stumm" : "") + '" data-kopf="' + k + '"><div class="lw-kopf-in">' +
         '<button type="button" class="lw-spurname" data-zu="' + k + '" aria-expanded="' + !zu + '" title="' + esc(T.zuklappen) + '">' + (zu ? "▸ " : "▾ ") +
-          T.wer[SPUR[k].wer] + " <small>· " + (k === "melodie" ? T.instrumente[S.instrument] : T.spuren[k]) + "</small></button>" +
+          T.wer[SPUR[k].wer] + " <small>· " + (wahl(k) ? wahl(k).namen[wahl(k).wert] : T.spuren[k]) + "</small></button>" +
         '<button type="button" class="lw-mute" data-mute="' + k + '" aria-pressed="' + !!S.mute[k] + '" aria-label="' + esc(T.stumm + " " + T.spuren[k]) + '" title="' + esc(T.stumm) + '">' + (S.mute[k] ? "🔇" : "🔊") + "</button>" +
         '<input type="range" class="lw-fader" min="0" max="9" step="1" value="' + S.vol[k] + '" data-vol="' + k + '" aria-label="' + esc(T.lautstaerke + " " + T.spuren[k]) + '">' +
-        (k === "melodie" ? '<select class="lw-instrument" data-feld="instrument" aria-label="' + esc(T.instrument) + '">' +
-          INSTRUMENTE.map(n => '<option value="' + n + '"' + (n === S.instrument ? " selected" : "") + ">" + esc(T.instrumente[n]) + "</option>").join("") + "</select>" : "") +
+        (wahl(k) ? '<select class="lw-instrument" data-feld="instrument" data-spur="' + k + '" aria-label="' + esc(T.instrument + " " + T.wer[SPUR[k].wer]) + '">' +
+          wahl(k).liste.map(n => '<option value="' + n + '"' + (n === wahl(k).wert ? " selected" : "") + ">" + esc(wahl(k).namen[n]) + "</option>").join("") + "</select>" : "") +
         "</div></div>";
     };
     let raster = "";
     SPUREN.forEach(sp => {
       raster += kopf(sp.id);
       if (zugeklappt[sp.id]) return;
-      if (sp.art === "an") raster += rasterZeile(sp.id, 0, sp.sym, "sym");
+      if (sp.art === "an") raster += rasterZeile(sp.id, 0, (SYMBOL[sp.id] && SYMBOL[sp.id][S.band[sp.id]]) || sp.sym, "sym");
       else for (let z = sp.zeilen - 1; z >= 0; z--) raster += rasterZeile(sp.id, z, zeilenName(sp.id, z), (z === 0 || z === 7) && sp.id !== "rex" ? "grund" : (sp.id === "rex" ? "sym klein" : ""));
     });
 
@@ -978,9 +1180,9 @@
       "</div>" +
       '<div class="lw-teile">' +
         '<span class="lw-teile-label">' + T.teil + ":</span>" +
-        ["A", "B"].map(p => '<button type="button" class="lw-teil" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") +
+        TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") +
         '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><select data-feld="ablauf">' + ablaeufe + "</select></label>" +
-        '<button type="button" class="lw-klein" data-aktion="kopieren">' + T.kopieren + "</button>" +
+        '<button type="button" class="lw-klein" data-aktion="kopieren">' + T.kopieren(bearbeite, naechster) + "</button>" +
       "</div>" +
       '<div class="lw-vorlagen"><span>' + T.lieder + ":</span>" +
         LIEDER.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
@@ -998,6 +1200,7 @@
     aktiv = -1;
     figurCache = {};
   }
+  const teilBenutzt = p => IDS.some(k => S.teile[p][k].some(v => v >= 0));
   function knoepfe() {
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
@@ -1034,9 +1237,11 @@
     return p;
   }
   function zufallsLied() {
+    const ablauf = zufall(["AB", "AABA", "AABB", "ABAC", "AABC"]);
     return pruefen({ tempo: 80 + Math.floor(Math.random() * 25) * 2, transpose: S.transpose, modus: zufall(MODUS_LISTE), instrument: zufall(INSTRUMENTE),
-      swing: Math.random() < .3 ? 1 : 0, bordun: Math.random() < .7 ? 1 : 0, variation: S.variation, ablauf: zufall(["AB", "AABA", "AABB"]),
-      teile: { A: zufallsTeil(false), B: zufallsTeil(true) }, vol: S.vol, mute: S.mute });
+      band: { trommel: zufall(BAND.trommel), floete: zufall(BAND.floete), ketten: zufall(BAND.ketten) },
+      swing: Math.random() < .3 ? 1 : 0, bordun: Math.random() < .7 ? 1 : 0, variation: S.variation, ablauf,
+      teile: { A: zufallsTeil(false), B: zufallsTeil(true), C: ablauf.includes("C") ? zufallsTeil(true) : teilLeer(), D: teilLeer() }, vol: S.vol, mute: S.mute });
   }
 
   /* ---------- Bedienung ---------- */
@@ -1079,7 +1284,8 @@
     const tl = e.target.closest(".lw-teil");
     if (tl) { bearbeite = tl.dataset.teil; zeichnen(); knoepfe(); return; }
     if (e.target.closest('[data-aktion="kopieren"]')) {
-      S.teile.B = kopie(S.teile.A); merken(); bearbeite = "B"; zeichnen(); knoepfe(); status(t().kopiert2); return;
+      const von = bearbeite, nach = TEILE[(TEILE.indexOf(von) + 1) % TEILE.length];
+      S.teile[nach] = kopie(S.teile[von]); merken(); bearbeite = nach; zeichnen(); knoepfe(); status(t().kopiert2(von, nach)); return;
     }
     const sch = e.target.closest(".lw-schalter");
     if (sch) {
@@ -1090,7 +1296,7 @@
     const v = e.target.closest("[data-vorlage]");
     if (v) {
       const k = v.dataset.vorlage, mix = { vol: S.vol, mute: S.mute };
-      if (k === "leer") S.teile = { A: teilLeer(), B: teilLeer() };
+      if (k === "leer") S.teile = { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() };
       else if (k === "zufall") S = zufallsLied();
       else S = pruefen(ausVorlage(k, mix));
       bearbeite = "A";
@@ -1118,8 +1324,17 @@
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
     if (f === "ablauf") { S.ablauf = e.target.value; merken(); }
     if (f === "instrument") {
-      S.instrument = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten();
-      try { audioStart(); melodieSpielen(midiHz(tonMidi("melodie", 4, S)), ctx.currentTime + .02, .45, 1); } catch (_) {}
+      const spur = e.target.dataset.spur || "melodie";
+      if (spur === "melodie") S.instrument = e.target.value; else S.band[spur] = e.target.value;
+      merken(); zeichnen(); knoepfe(); saitenVorbereiten();
+      try {
+        audioStart();
+        const jetzt = ctx.currentTime + .02;
+        if (spur === "melodie") melodieSpielen(midiHz(tonMidi("melodie", 4, S)), jetzt, .45, 1);
+        else if (spur === "floete") echoSpielen(midiHz(tonMidi("floete", 4, S)), jetzt, .5, 1);
+        else if (spur === "trommel") { friedrichSpielen(jetzt, true, 1); friedrichSpielen(jetzt + .25, false, 1); }
+        else { ezekielSpielen(jetzt, 1); ezekielSpielen(jetzt + .25, 1); }
+      } catch (_) {}
     }
   });
   document.addEventListener("visibilitychange", () => {
@@ -1203,6 +1418,7 @@
 .lw-teile { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem .7rem; }
 .lw-teile-label { font-size: .78rem; letter-spacing: .06em; color: var(--ash); align-self: center; }
 .lw-teil { position: relative; width: 2.6rem; height: 2.3rem; border: 1px solid var(--line); background: none; color: var(--vellum); font-family: var(--display); font-size: 1.15rem; cursor: pointer; }
+.lw-teil.leer { color: var(--ash); border-style: dashed; }
 .lw-teil[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
 .lw-teil.spielt::after { content: ""; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #7fd36b; box-shadow: 0 0 6px #7fd36b; }
 .lw-klein { border: 1px solid var(--line); background: none; color: var(--ash); font: inherit; font-size: .82rem; padding: .35rem .7rem; cursor: pointer; }
