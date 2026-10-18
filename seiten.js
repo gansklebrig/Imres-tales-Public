@@ -36,7 +36,7 @@
         taverne: "Würfeln, Spotten, Loblieder und Memory.",
         lautenwerk: "Baue Bardenbeats mit der ganzen Band."
       },
-      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "3 Spiele", lautenwerk: () => "♪ Neu" }
+      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "4 Spiele", lautenwerk: () => "♪ Neu" }
     },
     en: {
       uebersicht: "← Overview", zurueck: "Back", weiter: "Next",
@@ -54,7 +54,7 @@
         taverne: "Dice, mockery, songs of praise and memory.",
         lautenwerk: "Build bardic beats with the whole band."
       },
-      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "3 games", lautenwerk: () => "♪ New" }
+      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "4 games", lautenwerk: () => "♪ New" }
     }
   };
   const t = () => TX[sprache()];
