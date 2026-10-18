@@ -68,6 +68,9 @@
     taverne: "taverne", hafen: "meer", wald: "wald", markt: "taverne", schmiede: "feuer", wiegen: "feuer", trauer: "regen",
     ballade: "taverne", saltarello: "taverne", schlacht: "sturm" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
+  /* lustige Spieltisch-Momente */
+  const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk"];
+  const ALLE_FX = EFFEKTE.concat(MOMENTE);
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
     trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢" },
@@ -106,7 +109,9 @@
       kulisse: "Geräuschkulisse", kulisseLaut: "Kulisse",
       kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Meer", sturm: "⛈ Sturm" },
       effekte: "Effekte",
-      sfx: { drache: "🐉 Drachenbrüllen", schwert: "⚔ Schwertklirren", tuer: "🚪 Knarrende Tür", donner: "⚡ Donner", schrei: "😱 Ferner Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Kriegshorn", jubel: "🍻 Jubel" },
+      sfx: { drache: "🐉 Drachenbrüllen", schwert: "⚔ Schwertklirren", tuer: "🚪 Knarrende Tür", donner: "⚡ Donner", schrei: "😱 Ferner Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Kriegshorn", jubel: "🍻 Jubel",
+        tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah-waah", krit: "🌟 Natürliche 20", dramatisch: "😨 Dun-dun-DUUUN", grillen: "🦗 Peinliche Stille",
+        ooh: "😮 Ooooh!", muenzen: "💰 Münzen", ruelpser: "🍺 Rülpser", schnarchen: "😴 Schnarchen", bonk: "🔨 Bonk" }, momente: "Spieltisch-Momente",
       funk: "📡 Mitlauschen", funkTipp: "Alle anderen öffnen den Link und tippen auf „Zuhören“ – die Musik entsteht dann bei jedem selbst im Browser, Stimmungen, Kulisse und Effekte folgen deinem Pult.",
       funkStart: "📡 Für alle übertragen", funkStopp: "Übertragung beenden", funkKopieren: "🔗 Link kopieren", funkKopiert: "Link kopiert – ab damit in den Discord!",
       funkVerbinde: "Verbinde …", funkFehler: "Keine Verbindung – versuche es erneut …", funkZuhoerer: n => n === 1 ? "1 hört zu" : n + " hören zu", funkLaeuft: "Übertragung läuft",
@@ -155,7 +160,9 @@
       kulisse: "Ambience", kulisseLaut: "Ambience",
       kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Sea", sturm: "⛈ Storm" },
       effekte: "Effects",
-      sfx: { drache: "🐉 Dragon roar", schwert: "⚔ Sword clash", tuer: "🚪 Creaking door", donner: "⚡ Thunder", schrei: "😱 Distant scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 War horn", jubel: "🍻 Cheers" },
+      sfx: { drache: "🐉 Dragon roar", schwert: "⚔ Sword clash", tuer: "🚪 Creaking door", donner: "⚡ Thunder", schrei: "😱 Distant scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 War horn", jubel: "🍻 Cheers",
+        tusch: "🥁 Ba-dum-tss", posaune: "🎺 Sad trombone", krit: "🌟 Natural 20", dramatisch: "😨 Dun-dun-DUNNN", grillen: "🦗 Awkward silence",
+        ooh: "😮 Ooooh!", muenzen: "💰 Coins", ruelpser: "🍺 Burp", schnarchen: "😴 Snoring", bonk: "🔨 Bonk" }, momente: "Table moments",
       funk: "📡 Listen in", funkTipp: "Everyone else opens the link and taps “Listen” – the music is then created in each browser, and moods, ambience and effects follow your console.",
       funkStart: "📡 Broadcast to everyone", funkStopp: "Stop broadcast", funkKopieren: "🔗 Copy link", funkKopiert: "Link copied – drop it into Discord!",
       funkVerbinde: "Connecting …", funkFehler: "No connection – retrying …", funkZuhoerer: n => n === 1 ? "1 listening" : n + " listening", funkLaeuft: "Broadcast running",
@@ -885,8 +892,9 @@
   }
   function kulFx(art, z, laut) { const k = kul; if (k) fxAbspielen(art, k.g, z, laut, zz(.94, 1.06)); }
   /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
-  const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55 };
-  function fxVorwaermen() { if (kwWorker !== false) EFFEKTE.forEach((f, i) => setTimeout(() => fxNachfuellen(f), 200 * i)); }
+  const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55,
+    tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8 };
+  function fxVorwaermen() { if (kwWorker !== false) ALLE_FX.forEach((f, i) => setTimeout(() => fxNachfuellen(f), 200 * i)); }
   function effekt(art, staerke, zeit) {
     if (!ctx) return;
     const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
@@ -1538,6 +1546,36 @@
     root.querySelectorAll("[data-teil]").forEach(b => b.classList.toggle("spielt", b.dataset.teil === teilName));
   }
   const buehne = () => root.querySelector(".lw-buehne");
+  /* Barradins Hände je Instrument: [Greifhand x, y, Bogen des Arms], [Schlaghand x, y, Ellbogen-Pfad], eigene Bewegungen */
+  const ARME = {
+    laute: { griff: [205, 96, "Q165 100"], schlag: [161, 126, "Q104 124 118 128 L"] },
+    mandoline: { griff: [192, 100, "Q160 104"], schlag: [158, 132, "Q104 126 118 132 L"] },
+    harfe: { griff: [182, 92, "Q155 90"], schlag: [162, 118, "Q104 120 118 124 L"] },
+    fidel: { griff: [196, 97, "Q160 102"], schlag: [163, 125, "Q104 124 118 128 L"],
+      bewegung: { bass: [[".barradin .arm-schlag", "translate(-7px, 7px)", 260]], klopf: [[".barradin .arm-schlag", "translate(5px, -5px)", 220]] } },
+    drehleier: { griff: [176, 118, "Q150 116"], schlag: [160, 128, "Q104 126 118 132 L"],
+      bewegung: { bass: [[".barradin .arm-schlag", "translate(-3px, 5px)", 260]] } },
+    schalmei: { griff: [163, 83, "Q140 96"], schlag: [185, 89, "Q112 128 148 114 L"],
+      bewegung: { bass: [[".barradin .arm-schlag", "translate(0, 1.5px)", 160]], klopf: [[".barradin .arm-schlag", "translate(0, 1.5px)", 160]], mel: [[".barradin .hand-griff", "translate(0, 1.5px)", 160]] } },
+    illusion: { griff: [163, 83, "Q140 96"], schlag: [185, 89, "Q112 128 148 114 L"],
+      bewegung: { bass: [[".barradin .arm-schlag", "translate(0, 1.5px)", 160]], klopf: [[".barradin .arm-schlag", "translate(0, 1.5px)", 160]], mel: [[".barradin .hand-griff", "translate(0, 1.5px)", 160]] } },
+    dudelsack: { griff: [150, 128, "Q118 126"], schlag: [168, 137, "Q104 132 120 138 L"],
+      bewegung: { bass: [[".barradin .arm-schlag", "translate(0, 2px)", 160]], klopf: [[".barradin .arm-griff", "translate(1px, 2px)", 220]], mel: [[".barradin .hand-griff", "translate(0, 2px)", 160]] } },
+    glocken: { griff: [197, 99, "Q160 104"], schlag: [160, 128, "Q104 126 118 132 L"],
+      bewegung: { mel: [[".barradin .hand-griff", "translate(-2px, 6px)", 200]] } }
+  };
+  function armeSetzen() {
+    const fig = root.querySelector(".lw-buehne .barradin"); if (!fig) return;
+    const a = ARME[S.instrument] || ARME.laute, [gx, gy, gb] = a.griff, [sx, sy, sb] = a.schlag;
+    const q = sel => fig.querySelector(sel);
+    q(".arm-griff").setAttribute("d", "M122 96 " + gb + " " + (gx - 4) + " " + gy);
+    q(".griff-deko").setAttribute("d", "M" + (gx - 16) + " " + (gy - 4) + " l0 8");
+    const h = q(".hand-griff"); h.setAttribute("cx", gx); h.setAttribute("cy", gy); h.style.transformOrigin = gx + "px " + gy + "px";
+    q(".schlag-arm").setAttribute("d", "M118 98 " + sb + " " + (sx - 5) + " " + sy);
+    q(".schlag-deko").setAttribute("d", "M" + (sx - 11) + " " + (sy - 4) + " l0 8");
+    const sh = q(".schlag-hand"); sh.setAttribute("cx", sx); sh.setAttribute("cy", sy);
+    q(".schlag-finger").setAttribute("d", "M" + (sx + 3) + " " + (sy - 5) + " q4 1 5 4 M" + (sx + 4) + " " + sy + " q4 1 5 4");
+  }
   /* Bewegungen der Band über die Web-Animations-Schnittstelle (ruckelt nicht) */
   const BEWEGUNG = {
     klopf: [[".barradin .kopf", "rotate(6deg) translateY(2px)", 280], [".barradin .arm-schlag", "translate(-1px, 4px)", 180], [".barradin .laute", "rotate(-1.5deg)", 200]],
@@ -1555,7 +1593,8 @@
   const figur = sel => figurCache[sel] || (figurCache[sel] = root.querySelector(".lw-buehne " + sel));
   function zucken(art) {
     if (ruhig) return;
-    (BEWEGUNG[art] || []).forEach(([sel, ziel, dauer]) => {
+    const eigen = ARME[S.instrument] && ARME[S.instrument].bewegung;
+    ((eigen && eigen[art]) || BEWEGUNG[art] || []).forEach(([sel, ziel, dauer]) => {
       const el = figur(sel); if (!el || !el.animate) return;
       el.animate(art === "heul"
         ? [{ transform: "none" }, { transform: ziel, offset: .15 }, { transform: ziel, offset: .8 }, { transform: "none" }]
@@ -1682,7 +1721,7 @@
    <path d="M106 94 Q114 112 122 94" fill="none" stroke="#e0b24a" stroke-width="1.6"/>
    <path d="M108 94 Q114 118 120 94" fill="none" stroke="#e0b24a" stroke-width="1" opacity=".8"/>
    <path class="arm-griff" d="M122 96 Q160 92 196 84" fill="none" stroke="#17131a" stroke-width="10" stroke-linecap="round"/>
-   <path d="M150 92 l6 -1 M170 89 l6 -1" stroke="#c9a24a" stroke-width="2.2"/>
+   <path class="griff-deko" d="M150 92 l6 -1 M170 89 l6 -1" stroke="#c9a24a" stroke-width="2.2"/>
    <path d="M95 98 Q98 88 110 88 L108 100 Q100 102 95 98 Z M134 98 Q130 88 120 88 L122 100 Q130 101 134 98 Z" fill="#a8823a" stroke="#e0b24a" stroke-width="1"/>
    <path d="M108 74 L109 90 L121 90 L121 74 Z" fill="#d6a37c"/>
    <g class="kopf"><g transform="translate(0 6)">
@@ -1754,17 +1793,17 @@
    <path d="M138 130 L196 112 L200 124 L144 144 Z" fill="#3a2414" stroke="#2a1a10" stroke-width="1"/>
    <g stroke-width="3" stroke-linecap="round"><path d="M148 133 L150 139" stroke="#e0c070"/><path d="M156 130 L158 137" stroke="#d8dce6"/><path d="M164 127 L166 134" stroke="#e0c070"/><path d="M172 124 L174 131" stroke="#d8dce6"/><path d="M180 121 L182 128" stroke="#e0c070"/><path d="M188 118 L190 125" stroke="#d8dce6"/></g>
    <path d="M162 128 L170 120" stroke="#c9934f" stroke-width="1.8"/><circle cx="171" cy="119" r="3" fill="#9b3a2f"/>
-   <path d="M200 85 L186 114" stroke="#c9934f" stroke-width="1.8"/><circle cx="185.5" cy="116" r="3" fill="#9b3a2f"/></g>
+   <path d="M196 100 L188 114" stroke="#c9934f" stroke-width="1.8"/><circle cx="187.5" cy="116" r="3" fill="#9b3a2f"/></g>
   <g class="req m-illusion">
    <path d="M129 74 L202 90" stroke="#b98cff" stroke-width="3.6" stroke-linecap="round"/>
    <path d="M129 74 L202 90" stroke="#efe2ff" stroke-width="1" stroke-linecap="round"/>
    <g fill="#e6d4ff"><circle cx="214" cy="84" r="1.6"/><circle cx="220" cy="94" r="1.2"/><circle cx="210" cy="98" r="1"/><circle cx="224" cy="86" r="1"/></g></g>
   <circle class="hand-griff" cx="200" cy="85" r="6" fill="#e0ad86"/>
-  <g class="arm-schlag"><path d="M118 98 Q104 124 118 128 L156 126" fill="none" stroke="#17131a" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-   <path d="M110 110 q3 3 7 2 M128 124 q2 4 0 7" fill="none" stroke="#c9a24a" stroke-width="1.4"/>
-   <path d="M150 122 l0 8" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
-   <circle cx="161" cy="126" r="6.5" fill="#e0ad86"/>
-   <path d="M164 121 q4 1 5 4 M165 126 q4 1 5 4" fill="none" stroke="#b07e5c" stroke-width="1" stroke-linecap="round"/></g>
+  <g class="arm-schlag"><path class="schlag-arm" d="M118 98 Q104 124 118 128 L156 126" fill="none" stroke="#17131a" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+   <path d="M110 110 q3 3 7 2" fill="none" stroke="#c9a24a" stroke-width="1.4"/>
+   <path class="schlag-deko" d="M150 122 l0 8" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
+   <circle class="schlag-hand" cx="161" cy="126" r="6.5" fill="#e0ad86"/>
+   <path class="schlag-finger" d="M164 121 q4 1 5 4 M165 126 q4 1 5 4" fill="none" stroke="#b07e5c" stroke-width="1" stroke-linecap="round"/></g>
   <circle class="rauchwolke" cx="148" cy="62" r="5" fill="rgba(220,215,230,.25)"/>
  </svg>
  <!-- Echo: weißes Haar und Bart, Geweih, Elfenohren, weiße Robe mit Pelz – mit Flöte -->
@@ -1923,6 +1962,7 @@
           KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
           '<label class="lw-feld lw-regler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label></section>' +
         '<section><h4>' + T.effekte + '</h4><div class="lw-pult-gitter lw-pult-fx">' + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
+        '<section><h4>🎭 ' + T.momente + '</h4><div class="lw-pult-gitter lw-pult-fx">' + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
         '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
@@ -2016,7 +2056,7 @@
   }
   function hoererEmpfang(ev, d) {
     if (ev === "_offen") { hoerer.verbunden = true; funkHoererKanal.senden("hallo", {}); zeichnen(); return; }
-    if (ev === "fx") { if (hoerer.an && ctx && EFFEKTE.includes(d.art)) effekt(d.art); return; }
+    if (ev === "fx") { if (hoerer.an && ctx && ALLE_FX.includes(d.art)) effekt(d.art); return; }
     if (ev !== "zustand") return;
     const neu = dekodieren(d.lied); if (!neu) return;
     const alt = hoerer.zuletzt; hoerer.zuletzt = d;
@@ -2042,7 +2082,8 @@
     if (st === "fehler" && hoerer.verbunden) { hoerer.verbunden = false; zeichnen(); }
   });
 
-  function zeichnen() {
+  function zeichnen() { zeichnenInnen(); armeSetzen(); }
+  function zeichnenInnen() {
     const T = t();
     if (hoerer) { hoererZeichnen(T); return; }
     if (S.pult) { pultZeichnen(T); return; }
@@ -2099,6 +2140,7 @@
         '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
       "</div>" +
       '<div class="lw-vorlagen lw-effekte"><span>' + T.effekte + ":</span>" + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
+      '<div class="lw-vorlagen lw-effekte"><span>🎭 ' + T.momente + ":</span>" + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
       '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
         STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
         (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +

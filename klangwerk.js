@@ -180,6 +180,38 @@
     }
   };
 
+  /* Blechbläser-Ton: Sägezahn durch einen Tiefpass, der mit der Lautstärke aufgeht (so klingen Hörner und Posaunen) */
+  function blech(a, sr, t0, dauer, f, o) {
+    o = o || {};
+    const i0 = Math.floor(t0 * sr), n = Math.min(a.length - i0, Math.floor(dauer * sr)), F = new SVF(sr);
+    const ein = o.ein || .05, aus = o.aus || .12, hell = o.hell || 1800, laut = o.laut || 1;
+    let p = Math.random(), p2 = Math.random();
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      const h = t < ein ? t / ein : t > dauer - aus ? Math.max(0, (dauer - t) / aus) : 1;
+      let ff = f * (o.gleit ? Math.pow(o.gleit, t / dauer) : 1);
+      if (o.vib) ff *= 1 + o.vib * Math.sin(TAU * 5.5 * t) * Math.min(1, t / .25);
+      p += ff / sr; if (p >= 1) p -= 1; p2 += ff * 1.004 / sr; if (p2 >= 1) p2 -= 1;
+      const wah = o.wah ? .35 + .65 * Math.pow(Math.sin(Math.PI * Math.min(1, t / (dauer * .7))), 1.5) : 1;
+      if ((i & 31) === 0) F.setze(150 + hell * Math.pow(h, 1.5) * wah, .9);
+      F.tick((2 * p - 1) + (2 * p2 - 1) * .6);
+      a[i0 + i] += Math.tanh(F.lp * 1.3) * h * laut;
+    }
+  }
+  /* Becken: dichter Schwarm unharmonischer Teiltöne plus zischendes Rauschen */
+  function becken(a, sr, t0, laut, dauer) {
+    for (let k = 0; k < 40; k++) mode(a, sr, t0, zz(3000, 11000), dauer * zz(.3, 1), laut * zz(.02, .06), Math.random() * TAU);
+    const i0 = Math.floor(t0 * sr), n = Math.min(a.length - i0, Math.floor(dauer * 2 * sr)), F = new SVF(sr); F.setze(8000, .7);
+    for (let i = 0; i < n; i++) { F.tick(Math.random() * 2 - 1); a[i0 + i] += F.hp * laut * .5 * Math.exp(-i / sr / (dauer * .45)); }
+  }
+  /* Trommelschlag: Tonhöhe fällt, dazu Fellrauschen */
+  function trommel(a, sr, t0, f0, f1, laut, dauer) {
+    const i0 = Math.floor(t0 * sr), n = Math.min(a.length - i0, Math.floor(dauer * sr)); let p = 0;
+    for (let i = 0; i < n; i++) { const r = i / n; p += (f1 + (f0 - f1) * Math.exp(-r * 6)) / sr; a[i0 + i] += Math.sin(TAU * p) * laut * Math.exp(-r * 5); }
+    stoss(a, sr, t0, 1800, .8, laut * .45, .05);
+  }
+  const midi = m => 440 * Math.pow(2, (m - 69) / 12);
+
   /* ---------- Effekte (je Aufruf eine neue Variante) ---------- */
   const EFFEKT = {
     lachen(sr) {
@@ -191,6 +223,120 @@
       }
       hochpass(a, sr, 180); tiefpass(a, sr, 2200, 2);
       return normieren(raum(a, sr, [[.023, .3], [.041, .22], [.067, .15]]), .9);
+    },
+    /* ---------- Spieltisch-Momente ---------- */
+    tusch(sr) {
+      const a = new Float32Array(Math.floor(2 * sr));
+      trommel(a, sr, .01, 260, 170, .8, .25); stoss(a, sr, .01, 3500, .6, .5, .12);   /* ba */
+      trommel(a, sr, .19, 170, 105, 1, .35);                                           /* dum */
+      trommel(a, sr, .38, 90, 50, .7, .3); stoss(a, sr, .38, 2500, .7, .35, .1);
+      becken(a, sr, .38, .9, 1.1);                                                     /* tss */
+      return normieren(a, .9);
+    },
+    posaune(sr) {
+      const a = new Float32Array(Math.floor(3.6 * sr)), b = zz(53, 56);
+      [[0, .5, 0], [.55, .5, -1], [1.1, .5, -2], [1.65, 1.6, -3]].forEach(([t, d, iv], k) =>
+        blech(a, sr, t, d, midi(b + iv), { wah: true, hell: 1000, ein: .04, aus: k === 3 ? .5 : .08, vib: k === 3 ? .025 : 0, gleit: k === 3 ? .97 : 1 }));
+      tiefpass(a, sr, 3200);
+      return normieren(raum(a, sr, [[.05, .2], [.09, .12]]), .9);
+    },
+    krit(sr) {
+      const a = new Float32Array(Math.floor(3.6 * sr)), g = zz(58, 61);
+      /* Fanfare: Dreiklang hinauf, dann der volle Akkord */
+      [[0, .14, 0], [.15, .14, 4], [.3, .14, 7], [.45, 2.4, 12]].forEach(([t, d, iv]) => blech(a, sr, t, d, midi(g + iv), { hell: 2600, laut: .8, aus: .5 }));
+      [0, 4, 7].forEach(iv => blech(a, sr, .45, 2.4, midi(g - 12 + iv), { hell: 1400, laut: .5, aus: .6 }));
+      /* Chor: „Aaah!" */
+      [0, 4, 7, 12].forEach((iv, k) => {
+        const f = midi(g + iv);
+        stimme(a, sr, .45 + k * .02, [{ d: 2.6, v: "a", f0: f, f1: f, laut: .55, abfall: .4 }], { skala: k > 1 ? 1.15 : 1, jitter: .006, hauchBasis: .03, vibrato: [5.2, .012] });
+      });
+      becken(a, sr, .45, .7, 2);
+      trommel(a, sr, .45, 120, 60, .8, .6);
+      return normieren(raum(a, sr, [[.04, .3], [.08, .2], [.15, .12]]), .92);
+    },
+    dramatisch(sr) {
+      const a = new Float32Array(Math.floor(4.2 * sr)), g = zz(48, 51);
+      const stab = (t, d, akk, laut) => akk.forEach(iv => { blech(a, sr, t, d, midi(g + iv), { hell: 2200, laut, ein: .02, aus: d > 1 ? .9 : .07 }); blech(a, sr, t, d, midi(g + iv - 12), { hell: 900, laut: laut * .7, ein: .02, aus: d > 1 ? .9 : .07 }); });
+      stab(0, .28, [0, 3, 7], .5); trommel(a, sr, 0, 90, 55, .8, .4);
+      stab(.36, .28, [0, 3, 7], .5); trommel(a, sr, .36, 90, 55, .8, .4);
+      stab(.78, 3.2, [-1, 2, 5, 8], .55); trommel(a, sr, .78, 75, 42, 1.2, 1.2);
+      /* Pauken-Wirbel im Nachklang */
+      for (let t = 1.2; t < 3.4; t += zz(.05, .07)) trommel(a, sr, t, 70, 45, .2 * (1 - (t - 1.2) / 2.4), .2);
+      return normieren(raum(a, sr, [[.05, .3], [.11, .22], [.2, .14]]), .92);
+    },
+    grillen(sr) {
+      const a = new Float32Array(Math.floor(4.4 * sr));
+      [[zz(4300, 4600), 0, .55, 1], [zz(4800, 5200), .27, .7, .6]].forEach(([f, start, abst, laut]) => {
+        for (let t = start; t < 3.6; t += abst * zz(.92, 1.08)) {
+          for (let k = 0; k < 3; k++) {
+            const i0 = Math.floor((t + k * .034) * sr), n = Math.floor(.022 * sr);
+            for (let i = 0; i < n && i0 + i < a.length; i++) a[i0 + i] += Math.sin(TAU * f * i / sr) * Math.sin(Math.PI * i / n) * .25 * laut;
+          }
+        }
+      });
+      /* … und irgendwer hüstelt verlegen */
+      [3.75, 3.98].forEach((t, k) => stimme(a, sr, t, [{ d: .14, v: "ae", f0: 140, f1: 120, laut: .9 - k * .3, hauch: 1, abfall: .7 }], { jitter: .05, hauchBasis: .2 }));
+      return normieren(a, .85);
+    },
+    ooh(sr) {
+      const a = new Float32Array(Math.floor(2.6 * sr));
+      for (let v = 0; v < 12; v++) {
+        const frau = Math.random() < .45, g = (frau ? zz(220, 300) : zz(110, 160)), t = zz(0, .15);
+        stimme(a, sr, t, [{ d: .5, v: "o", f0: g * .9, f1: g * 1.35, laut: zz(.5, 1), abfall: .05 }, { d: zz(1.1, 1.5), v: "u", f0: g * 1.35, f1: g * .85, laut: zz(.5, 1), abfall: .6 }],
+          { skala: frau ? 1.15 : 1, jitter: .02, hauchBasis: .08 });
+      }
+      hochpass(a, sr, 120); tiefpass(a, sr, 3000);
+      return normieren(raum(a, sr, [[.021, .3], [.037, .25], [.061, .15]]), .9);
+    },
+    muenzen(sr) {
+      const a = new Float32Array(Math.floor(2 * sr));
+      const klirr = (t, g) => {
+        const f = zz(2600, 4200);
+        [[1, 1, .18], [2.21, .7, .12], [3.73, .45, .08], [5.4, .3, .05]].forEach(([m, gg, d]) => { mode(a, sr, t, f * m, d, g * gg * .3, Math.random() * TAU); mode(a, sr, t, f * m * 1.003, d, g * gg * .2, Math.random() * TAU); });
+        stoss(a, sr, t, 5000, 1, g * .3, .006);
+      };
+      let t = .02;
+      for (let k = 0; k < 22; k++) { klirr(t, zz(.4, 1) * (1 - k / 30)); t += Math.random() < .3 ? zz(.005, .02) : zz(.03, .09); }
+      for (let k = 0; k < 5; k++) { klirr(t, zz(.2, .4)); t += zz(.04, .08); }
+      return normieren(a, .9);
+    },
+    ruelpser(sr) {
+      const a = new Float32Array(Math.floor(1.6 * sr)), f = zz(68, 90);
+      stimme(a, sr, .02, [{ d: zz(.55, .8), v: "oe", f0: f * 1.15, f1: f * .85, laut: 1, abfall: .3 }, { d: .18, v: "ae", f0: f * .85, f1: f * .7, laut: .6, abfall: .9 }],
+        { jitter: .25, rau: .9, hauchBasis: .1, q: [4, 6, 8] });
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 4);
+      tiefpass(a, sr, 2400);
+      return normieren(raum(a, sr, [[.03, .25], [.06, .15]]), .9);
+    },
+    schnarchen(sr) {
+      const a = new Float32Array(Math.floor(4.8 * sr));
+      [0, 2.3].forEach(t0 => {
+        /* einatmen: rasselndes Gaumensegel */
+        const n = Math.floor(1.3 * sr), F1 = new SVF(sr), F2 = new SVF(sr), i0 = Math.floor(t0 * sr); F1.setze(500, 3); F2.setze(1200, 4);
+        let p = 0;
+        for (let i = 0; i < n; i++) {
+          const r = i / n, f = 28 + 10 * r; p += f / sr; if (p >= 1) p -= 1;
+          const puls = p < .25 ? 1 : 0, x = puls * zz(.6, 1) + (Math.random() * 2 - 1) * .25;
+          a[i0 + i] += (F1.tick(x) + F2.tick(x) * .5) * Math.sin(Math.PI * Math.min(1, r * 1.15)) * 1.2;
+        }
+        /* ausatmen: „pfüüü" */
+        stoss(a, sr, t0 + 1.45, zz(900, 1300), 3, .25, .75, "weich");
+      });
+      tiefpass(a, sr, 2200, 2);
+      return normieren(a, .9);
+    },
+    bonk(sr) {
+      const a = new Float32Array(Math.floor(2.2 * sr));
+      [[zz(300, 360), .12, 1], [zz(820, 900), .07, .6], [zz(1400, 1500), .04, .35]].forEach(([f, d, g]) => mode(a, sr, .01, f, d, g * .7));
+      stoss(a, sr, .01, 1200, 1, .6, .02);
+      let p = 0; const n = Math.floor(.22 * sr);
+      for (let i = 0; i < n; i++) { const r = i / n; p += (950 * Math.pow(.32, r)) / sr; a[i] += Math.sin(TAU * p) * .35 * (1 - r); }
+      /* Vögelchen kreisen um den Kopf */
+      for (let k = 0; k < 6; k++) {
+        const t0 = .45 + k * .2, f = k % 2 ? 3100 : 2600, i0 = Math.floor(t0 * sr), m = Math.floor(.09 * sr); let q = 0;
+        for (let i = 0; i < m; i++) { const r = i / m; q += f * (1 + .25 * Math.sin(Math.PI * r)) / sr; a[i0 + i] += Math.sin(TAU * q) * .12 * Math.sin(Math.PI * r) * (1 - k / 8); }
+      }
+      return normieren(a, .9);
     },
     /* Krug auf den Tisch, Krüge stoßen an */
     krug(sr) {
