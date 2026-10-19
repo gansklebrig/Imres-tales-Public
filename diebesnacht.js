@@ -1580,8 +1580,27 @@
     if (p.betet && p.abgelenkt) { ctx.fillStyle = "rgba(224,160,70,.35)"; ctx.beginPath(); ctx.arc(px, py, r * 1.1, p.ang - 0.5, p.ang + 0.5); ctx.lineTo(px, py); ctx.fill(); }
   }
   function gastMarken() {
+    const grenze = [1.35, 0.95, 0.55][Math.min(2, S.gaben.finger)];
     S.gaeste.forEach(p => {
       const px = PX(p.x), py = PY(p.y);
+      const r = C * ((WTYP[p.typ] || {}).r || 0.31);
+      const schlaeft = p.schlaeft && !p.wach;
+      const lohnt = p.gold > 0 || p.key;
+      // Blickfächer: Hier bemerkt der Gast dich. Fehlt er, ist der Gast gerade abgelenkt.
+      if (lohnt && !schlaeft && (!p.abgelenkt || p.wachsam > 0)) {
+        const rr = C * 0.98, rot = p.wachsam > 0;
+        const g = ctx.createRadialGradient(px, py, r * 0.6, px, py, rr);
+        g.addColorStop(0, rot ? "rgba(196,86,74,.5)" : "rgba(235,226,204,.34)"); g.addColorStop(1, rot ? "rgba(196,86,74,0)" : "rgba(235,226,204,0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(px, py); ctx.arc(px, py, rr, p.ang - grenze, p.ang + grenze); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = rot ? "rgba(196,86,74,.55)" : "rgba(235,226,204,.3)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(px, py, rr * 0.92, p.ang - grenze, p.ang + grenze); ctx.stroke();
+      }
+      // Augen, auch im Dunkeln sichtbar
+      if (!schlaeft) {
+        const ax = px + Math.cos(p.ang) * r * 0.5, ay = py + Math.sin(p.ang) * r * 0.5, qx = Math.cos(p.ang + Math.PI / 2), qy = Math.sin(p.ang + Math.PI / 2);
+        ctx.fillStyle = p.abgelenkt && p.wachsam <= 0 ? "rgba(235,226,204,.45)" : "#f1e7cf";
+        [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(ax + qx * s * r * 0.22, ay + qy * s * r * 0.22, 1.5, 0, 7); ctx.fill(); });
+      }
       if (p.gold > 0) { ctx.fillStyle = "rgba(224,160,70,.85)"; ctx.beginPath(); ctx.arc(px - C * 0.28, py + C * 0.22, 3, 0, 7); ctx.fill(); ctx.strokeStyle = "#5a3a20"; ctx.lineWidth = 0.8; ctx.stroke(); }
       if (p.key && (S.def.schluesselZeigen || S.gaben.sinne || abstand(p, E) < 2.6)) {
         const gl = 0.6 + 0.4 * Math.sin(S.zeit * 5);
