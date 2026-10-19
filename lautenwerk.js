@@ -84,7 +84,8 @@
   /* gemeinfreie Klassiker, von der eigenen Band mit echten Instrumenten gespielt */
   const KLASSIKER = ["zirkus", "trauermarsch", "toccata", "zarathustra", "bergkoenig", "walkuere", "galopp", "hochzeit",
     "elise", "nachtmusik", "freude", "diesirae", "wiegenlied", "morgen", "zapfenstreich", "angriff"];
-  const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE, KLASSIKER);
+  const COVER_LISTE = ["matrose", "scarborough", "greensleeves", "korobeiniki", "auldlangsyne", "shchedryk"];
+  const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE, KLASSIKER, COVER_LISTE);
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
     trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢" },
@@ -132,6 +133,7 @@
         boing: "🌀 Boing", hupe: "🤡 Hup-hup", halleluja: "😇 Halleluja", levelup: "⬆️ Level up!", schock: "😱 Schock", wirbel: "🥁 Trommelwirbel",
         zirkus: "🤡 Zirkus", trauermarsch: "⚰️ Trauermarsch", toccata: "🦇 Schurken-Orgel", zarathustra: "🌅 Zarathustra", bergkoenig: "👺 Bergkönig",
         walkuere: "🐎 Walkürenritt", galopp: "🏇 Galopp", hochzeit: "💍 Hochzeitsmarsch", elise: "🎹 Für Elise", nachtmusik: "🎩 Nachtmusik",
+        matrose: "⚓ Drunken Sailor", scarborough: "🌿 Scarborough Fair", greensleeves: "💚 Greensleeves", korobeiniki: "🧱 Korobeiniki", auldlangsyne: "🥂 Auld Lang Syne", shchedryk: "🔔 Schtschedryk",
         freude: "🇪🇺 Ode an die Freude", diesirae: "💀 Dies irae", wiegenlied: "🌙 Wiegenlied", morgen: "☀️ Morgenstimmung", zapfenstreich: "🎺 Zapfenstreich", angriff: "📯 Angriff!",
         bogen: "🏹 Bogen", pfeil: "🎯 Pfeil", hieb: "🗡 Hieb", verfehlt: "💨 Verfehlt", block: "🛡 Block", wucht: "🔨 Wucht",
         schmerz: "😫 Aua", sterben: "💀 Tod", feuerball: "🔥 Feuerball", blitz: "⚡ Blitz", heiltrank: "🧪 Trank" }, momente: "Spieltisch-Momente", kampfFx: "Kampf",
@@ -146,7 +148,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
-      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker",
+      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
@@ -196,6 +198,7 @@
         boing: "🌀 Boing", hupe: "🤡 Honk honk", halleluja: "😇 Hallelujah", levelup: "⬆️ Level up!", schock: "😱 Shock", wirbel: "🥁 Drum roll",
         zirkus: "🤡 Circus", trauermarsch: "⚰️ Funeral march", toccata: "🦇 Villain organ", zarathustra: "🌅 Zarathustra", bergkoenig: "👺 Mountain King",
         walkuere: "🐎 Valkyries", galopp: "🏇 Gallop", hochzeit: "💍 Wedding march", elise: "🎹 Für Elise", nachtmusik: "🎩 Night music",
+        matrose: "⚓ Drunken Sailor", scarborough: "🌿 Scarborough Fair", greensleeves: "💚 Greensleeves", korobeiniki: "🧱 Korobeiniki", auldlangsyne: "🥂 Auld Lang Syne", shchedryk: "🔔 Carol of the Bells",
         freude: "🇪🇺 Ode to Joy", diesirae: "💀 Dies irae", wiegenlied: "🌙 Lullaby", morgen: "☀️ Morning mood", zapfenstreich: "🎺 Taps", angriff: "📯 Charge!",
         bogen: "🏹 Bow", pfeil: "🎯 Arrow", hieb: "🗡 Slash", verfehlt: "💨 Miss", block: "🛡 Block", wucht: "🔨 Smash",
         schmerz: "😫 Ouch", sterben: "💀 Death", feuerball: "🔥 Fireball", blitz: "⚡ Lightning", heiltrank: "🧪 Potion" }, momente: "Table moments", kampfFx: "Combat",
@@ -210,7 +213,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
-      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics",
+      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
@@ -1883,9 +1886,10 @@
   function planen() {
     const vorlauf = document.hidden ? 1 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     if (ausklingt) return;
+    if (musikPauseAb && naechste >= musikPauseAb) { if (naechste < ctx.currentTime) naechste = ctx.currentTime; return; }
     if (wechsel && !wechselAb) brueckeStarten();
     if (ausklangAb === -1) ausklangAb = taktEnde();
-    while (naechste < ctx.currentTime + vorlauf) {
+    while (naechste < ctx.currentTime + vorlauf && !(musikPauseAb && naechste >= musikPauseAb)) {
       if (schritt === 0 && ausklangAb && naechste >= ausklangAb - 2 * schrittDauer()) { schlussAkkord(naechste); return; }
       if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && wechsel && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
@@ -1968,6 +1972,7 @@
     saitenVorbereiten();
     if (!weiter) { schritt = 0; abschnitt = 0; }
     tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1;
+    if (klassikLauf) musikPauseAb = ctx.currentTime + .05;
     if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.value = .38; }
     musikWieder(); orchVorladen();
     kulisseStart();
@@ -1978,7 +1983,7 @@
     knoepfe(); funkAenderung();
   }
   function stopp(pause) {
-    laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; if (klassikLauf) klassikStopp(true);
+    laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; musikPauseAb = 0; if (klassikLauf) klassikStopp(true);
     /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
     if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop(); wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
@@ -2441,15 +2446,141 @@
       ["C4", "E4", "G4", "C5"].forEach(x => n("trp", ton(x), 3.1, 1.2, .2)); n("crash", 0, 3.1, 0, .35); n("bd", 0, 3.1, 0, .4); n("timp1", 0, 3.1, 0, .4);
     }
   };
+  /* ---------- Cover der Band: gemeinfreie Volkslieder, von Barradin & Co. gespielt ---------- */
+  const AKK = { Dm: ["D3", "F3", "A3"], C: ["C3", "E3", "G3"], Am: ["A2", "E3", "A3", "C4"], G: ["G2", "D3", "G3", "B3"], E: ["E2", "B2", "E3", "G#3"], F: ["F2", "C3", "F3", "A3"],
+    Bb: ["Bb2", "D3", "F3", "Bb3"], Gm: ["G2", "D3", "G3", "Bb3"], D: ["D3", "A3", "D4", "F#3"], Eb: ["Eb3", "G3", "Bb3"], A: ["A2", "E3", "A3", "C#4"] };
+  /* Laute schlägt den Akkord: Bass auf der Eins, Akkord auf den übrigen Schlägen */
+  function laute(n, t, folge, schlag, proTakt, l) {
+    folge.forEach(name => {
+      const a = AKK[name];
+      for (let b = 0; b < proTakt; b++) {
+        const z = t + b * schlag;
+        if (b === 0) { n("gitarre", ton(a[0]), z, schlag * 1.5, l * 1.1); n("kb", ton(a[0]), z, schlag * 1.2, l * .7); }
+        else if (proTakt === 3 || b % 2 === 1 || proTakt === 2) a.slice(1).forEach((x, i) => n("gitarre", ton(x) + 12, z + i * .012, schlag * .9, l * .55));
+        else n("gitarre", ton(a[a.length > 3 ? 1 : 2]), z, schlag, l * .8);
+      }
+      t += proTakt * schlag;
+    });
+    return t;
+  }
+  const coverTrommel = (n, t0, t1, schlag, art, l) => { for (let z = t0, k = 0; z < t1 - .01; z += schlag, k++) n(art === "tamb" ? (k % 2 ? "tamb2" : "tamb1") : (k % 2 ? "bodh2" : "bodh1"), 0, z, 0, l); };
+  const COVER_STUECKE = {
+    matrose(n) { /* „What shall we do with the drunken sailor“ – Seemannslied */
+      const q = .4;
+      const zeile = (a, b, c) => [[a, 1], [a, .5], [a, .5], [a, 1], [a, .5], [a, .5], [a, 1], [b[0], 1], [b[1], 1], [b[2], 1]];
+      const strophe = zeile("A4", ["D4", "F4", "A4"], 0).concat(zeile("G4", ["C4", "E4", "G4"]), zeile("A4", ["B4", "C5", "D5"]), [["C5", 1], ["A4", 1], ["G4", 1], ["E4", 1], ["D4", 2], ["D4", 2]]);
+      const chorz = (a, b) => [[a, 2], [a, 1.5], [a, .5], [a, 1], [b[0], 1], [b[1], 1], [b[2], 1]];
+      const refrain = chorz("A4", ["D4", "F4", "A4"]).concat(chorz("G4", ["C4", "E4", "G4"]), chorz("A4", ["B4", "C5", "D5"]), [["C5", 1], ["A4", 1], ["G4", 1], ["E4", 1], ["D4", 2], ["D4", 2]]);
+      const akk = ["Dm", "Dm", "C", "C", "Dm", "Dm", "C", "Dm"];
+      let t = laute(n, 0, ["Dm", "Dm"], q, 4, .3); coverTrommel(n, 0, t, q, "bodh", .5);
+      [[strophe, "geige", .4], [refrain, "dudel", .32], [strophe, "fl", .4], [refrain, "dudel", .32]].forEach(([m, gr, l], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m, q), l, { leg: .9 });
+        if (i % 2) { linie(n, "stimme", t0, achtel(m, q), .2, { leg: .95 }); coverTrommel(n, t0 + q / 2, t, q, "tamb", .35); }
+        laute(n, t0, akk, q, 4, .3); coverTrommel(n, t0, t, q, "bodh", .55);
+      });
+      ["D3", "A3", "D4", "F4"].forEach(x => n("gitarre", ton(x), t, 1.5, .4)); n("dudel", ton("D5"), t, 1.2, .3); n("bodh1", 0, t, 0, .7);
+    },
+    scarborough(n) { /* „Scarborough Fair“ – englische Ballade */
+      const b = .52;
+      const m = [["D4", 2], ["D4", 1], ["A4", 2], ["A4", 1], ["E4", 1.5], ["F4", .5], ["E4", 1], ["D4", 3],
+        [null, 1], ["A4", 1], ["C5", 1], ["D5", 2], ["C5", 1], ["A4", 1], ["B4", 1], ["G4", 1], ["A4", 3],
+        ["D5", 2], ["D5", 1], ["C5", 2], ["A4", 1], ["A4", 1], ["G4", 1], ["F4", 1], ["E4", 1], ["C4", 2],
+        ["D4", 2], ["A4", 1], ["G4", 2], ["F4", 1], ["E4", 1], ["D4", 1], ["C4", 1], ["D4", 3]];
+      const akk = ["Dm", "Dm", "C", "Dm", "Dm", "F", "C", "Dm", "F", "C", "Dm", "Dm", "C", "Dm", "C", "Dm"];
+      const harfe = (t0) => akk.forEach((a, k) => AKK[a].concat([okt(AKK[a][1], 1)]).forEach((x, i) => n("harfe", ton(x) + (i ? 0 : 0), t0 + k * 3 * b + i * b * .75, 1.4, .25)));
+      let t = 0;
+      [["fl", .4], ["stimme", .32], ["geige", .4]].forEach(([gr, l], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m, b), l, { leg: .95 }); harfe(t0);
+        if (i === 2) { linie(n, "fl", t0, achtel(m.map(([x, d]) => [okt(x, 1), d]), b), .15, { leg: .95 }); akk.forEach((a, k) => n("vc", ton(AKK[a][0]), t0 + k * 3 * b, 3 * b, .18)); }
+      });
+      ["D3", "A3", "D4", "F4", "A4"].forEach((x, i) => n("harfe", ton(x), t + i * .12, 2.5, .3));
+    },
+    greensleeves(n) { /* „Greensleeves“ – englisches Lied aus dem 16. Jahrhundert */
+      const e = .2;
+      const s = [["A4", 1], ["C5", 2], ["D5", 1], ["E5", 1.5], ["F5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 2], ["A4", 1], ["A4", 1.5], ["G#4", .5], ["A4", 1], ["B4", 2], ["G#4", 1], ["E4", 2],
+        ["A4", 1], ["C5", 2], ["D5", 1], ["E5", 1.5], ["F5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 1.5], ["B4", .5], ["A4", 1], ["G#4", 1.5], ["F#4", .5], ["G#4", 1], ["A4", 3], ["A4", 2]];
+      const r = [[null, 1], ["G5", 3], ["G5", 1.5], ["F#5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 2], ["A4", 1], ["A4", 1.5], ["G#4", .5], ["A4", 1], ["B4", 2], ["G#4", 1], ["E4", 3],
+        ["G5", 3], ["G5", 1.5], ["F#5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 1.5], ["B4", .5], ["A4", 1], ["G#4", 1.5], ["F#4", .5], ["G#4", 1], ["A4", 3], ["A4", 2]];
+      const akkS = ["Am", "G", "Am", "E", "Am", "G", "Am", "E", "Am"], akkR = ["C", "G", "Am", "E", "C", "G", "Am", "E", "Am"];
+      const harfe = (t0, folge) => folge.forEach((a, k) => AKK[a].forEach((x, i) => n(i ? "harfe" : "gitarre", ton(x), t0 + e + k * 6 * e + i * e * 1.2, 1.4, .22)));
+      let t = 0;
+      [[s, akkS, "geige", .38], [r, akkR, "geige", .38], [s, akkS, "fl", .4], [r, akkR, "oboe", .34]].forEach(([m, folge, gr, l], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m, e), l, { leg: .95 }); harfe(t0, folge);
+        if (i === 3) { linie(n, "fl", t0, achtel(m, e), .2, { leg: .95 }); folge.forEach((a, k) => n("vc", ton(AKK[a][0]), t0 + e + k * 6 * e, 6 * e, .15)); }
+      });
+      AKK.Am.forEach((x, i) => n("harfe", ton(x) + 12, t + i * .1, 2.5, .28));
+    },
+    korobeiniki(n) { /* „Korobeiniki“ – russisches Volkslied (die Melodie, die man aus Tetris kennt) */
+      const A = [["E5", 1], ["B4", .5], ["C5", .5], ["D5", 1], ["C5", .5], ["B4", .5], ["A4", 1], ["A4", .5], ["C5", .5], ["E5", 1], ["D5", .5], ["C5", .5], ["B4", 1.5], ["C5", .5], ["D5", 1], ["E5", 1], ["C5", 1], ["A4", 1], ["A4", 2],
+        [null, .5], ["D5", 1], ["F5", .5], ["A5", 1], ["G5", .5], ["F5", .5], ["E5", 1.5], ["C5", .5], ["E5", 1], ["D5", .5], ["C5", .5], ["B4", 1], ["B4", .5], ["C5", .5], ["D5", 1], ["E5", 1], ["C5", 1], ["A4", 1], ["A4", 2]];
+      const B = [["E5", 2], ["C5", 2], ["D5", 2], ["B4", 2], ["C5", 2], ["A4", 2], ["G#4", 2], ["B4", 2], ["E5", 2], ["C5", 2], ["D5", 2], ["B4", 2], ["C5", 1], ["E5", 1], ["A5", 2], ["G#5", 4]];
+      const akkA = ["E", "Am", "E", "Am", "Dm", "C", "E", "Am"], akkB = ["Am", "E", "Am", "E", "Am", "E", "Am", "E"];
+      let t = 0;
+      [[A, akkA, "geigest", .42, .36], [A, akkA, "geige", .4, .36], [B, akkB, "oboe", .36, .42], [A, akkA, "geigest", .42, .3], [A, akkA, "geigest", .44, .26]].forEach(([m, folge, gr, l, q], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m, q), l, { kurz: gr === "geigest" ? 1 : 0, leg: gr === "geigest" ? .7 : .92 });
+        laute(n, t0, folge, q, 4, .28);
+        if (i >= 3) { linie(n, "klar", t0, achtel(m.map(([x, d]) => [okt(x, -1), d]), q), .2, { leg: .8 }); coverTrommel(n, t0, t, q, "bodh", .5); coverTrommel(n, t0 + q / 2, t, q, "tamb", .3); }
+        if (i === 4) n("crash", 0, t0, 0, .2);
+      });
+      ["A3", "E4", "A4", "C5"].forEach(x => n("gitarre", ton(x), t, 1.4, .35)); n("geige", ton("A5"), t, 1.2, .3); n("bodh1", 0, t, 0, .7); n("crash", 0, t, 0, .25);
+    },
+    auldlangsyne(n) { /* „Auld Lang Syne“ – schottisches Abschiedslied */
+      const q = .5;
+      const s = [["C4", 1], ["F4", 1.5], ["F4", .5], ["F4", 1], ["A4", 1], ["G4", 1.5], ["F4", .5], ["G4", 1], ["A4", .5], ["G4", .5], ["F4", 1.5], ["F4", .5], ["A4", 1], ["C5", 1], ["D5", 3],
+        ["D5", 1], ["C5", 1.5], ["A4", .5], ["A4", 1], ["F4", 1], ["G4", 1.5], ["F4", .5], ["G4", 1], ["A4", .5], ["G4", .5], ["F4", 1.5], ["D4", .5], ["D4", 1], ["C4", 1], ["F4", 3]];
+      const akk = ["F", "F", "C", "C", "F", "F", "Bb", "Bb", "F", "F", "C", "C", "Dm", "Bb", "F", "F"];
+      let t = 0;
+      [["fl", .4], ["stimme", .34], ["geige", .4]].forEach(([gr, l], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(s, q), l, { leg: .95 });
+        akk.forEach((a, k) => { const z = t0 + q + k * 2 * q; AKK[a].forEach((x, j) => n("gitarre", ton(x) + (j ? 12 : 0), z + j * .02, 2 * q, .2)); n("kb", ton(AKK[a][0]), z, 2 * q, .25); });
+        if (i === 2) { linie(n, "stimme", t0, achtel(s, q), .25, { leg: .95 }); linie(n, "horn", t0, achtel(s.map(([x, d]) => [okt(x, -1), d]), q), .15); }
+      });
+      AKK.F.forEach((x, i) => { n("gitarre", ton(x), t + i * .03, 2.5, .3); n("stimme", ton(x) + 12, t, 2.5, .12); });
+    },
+    shchedryk(n) { /* „Schtschedryk“ – ukrainisches Neujahrslied (Leontowytsch), bekannt als „Carol of the Bells“ */
+      const e = .19, takt = 6 * e;
+      const ost = [["Bb4", 2], ["A4", 1], ["Bb4", 1], ["G4", 2]];
+      const takte = 24; let t = 0;
+      for (let k = 0; k < takte; k++) {
+        const z = k * takt, staerke = k < 4 ? .3 : k < 20 ? .38 : .3;
+        linie(n, k < 8 ? "harfe" : "geigest", z, achtel(ost, e), staerke, { kurz: k >= 8 ? 1 : 0, leg: .8 });
+        if (k >= 4 && k < 22) n("vc", ton(["G2", "F2", "Eb2", "D2"][k % 4]), z, takt, .22);
+        if (k >= 8 && k < 20) n("vln", ton(["D5", "C5", "Bb4", "A4"][k % 4]), z, takt, .14);
+        if (k >= 12 && k < 20 && k % 2 === 0) linie(n, "trp", z, achtel([["G5", 1], ["G5", 1], ["G5", 1], ["F5", 1], ["Eb5", 1], ["D5", 1]], e).map(([x, d]) => [okt(x, -1), d]), .25, { kurz: 1, leg: .7 });
+        if (k >= 16 && k < 20) { linie(n, "stimme", z, achtel([["D5", 3], ["C5", 3]], e), .2); n("timp1", 0, z, 0, .3); }
+        if (k === 16) n("crash", 0, z, 0, .2);
+        t = z + takt;
+      }
+      n("harfe", ton("G3"), t, 2.5, .3); n("harfe", ton("D4"), t + .05, 2.5, .25); n("harfe", ton("G4"), t + .1, 2.5, .3); n("vc", ton("G2"), t, 2.2, .2);
+    }
+  };
+  const COVER = Object.keys(COVER_STUECKE);
+  Object.assign(KLASSIK, COVER_STUECKE);
   /* Abspielen: die Partitur wird vorab gelesen, die Aufnahmen geladen, dann Stück für Stück eingeplant.
      Ein zweiter Druck auf denselben Knopf (oder ■ Anhalten) beendet das Stück weich. */
-  let klassikLauf = null;
+  let klassikLauf = null, musikPauseAb = 0;
+  /* Läuft Musik, blendet sie für das Stück weich aus und hält am Taktende an – danach setzt sie weich wieder ein */
+  function musikPausieren() {
+    if (!laeuft || musikPauseAb) return 0;
+    const j = ctx.currentTime; musikPauseAb = j + 1.1;
+    ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .3);
+    setTimeout(bordunAus, 900);
+    return 1;
+  }
+  function musikFortsetzen() {
+    if (!musikPauseAb) return;
+    musikPauseAb = 0;
+    if (!laeuft || !ctx) return;
+    const j = ctx.currentTime; schritt = 0; naechste = j + .15; padAkkord = -1;
+    ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(0, j); ducken.gain.setTargetAtTime(1, j + .1, .6); musikStumm = false;
+    if (S.bordun) setTimeout(bordunAn, 300);
+  }
   function klassikStopp(sanft) {
     const k = klassikLauf; if (!k) return;
     klassikLauf = null; clearInterval(k.timer);
     const j = ctx.currentTime; k.bus.gain.cancelScheduledValues(j); k.bus.gain.setTargetAtTime(0, j, sanft ? .25 : .06);
     setTimeout(() => { try { k.bus.disconnect(); } catch (_) {} }, 1500);
-    musikDucken(j, .1); klassikKnoepfe();
+    setTimeout(musikFortsetzen, sanft ? 500 : 100); klassikKnoepfe();
   }
   function klassikKnoepfe() { root.querySelectorAll("[data-sfx]").forEach(b => b.classList.toggle("spielt", !!klassikLauf && klassikLauf.art === b.dataset.sfx)); }
   async function klassikSpielen(art, laut) {
@@ -2462,8 +2593,9 @@
     await Promise.all([...namen].map(sampleLaden));
     if (klassikLauf !== lauf) return;
     lauf.bus.connect(sfxBus);
+    const pause = musikPausieren();
     const ende = noten.reduce((s, x) => Math.max(s, x[0] + (x[3] || 2)), 0);
-    const z = ctx.currentTime + .08, l = (laut || 1) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
+    const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
     let i = 0;
     const planen2 = () => {
       const bis = ctx.currentTime + 1.2 - z;
@@ -2472,10 +2604,10 @@
         if (!SAMPLE_KARTE[gr]) probe(gr, 0, z + t, lauf.bus, g * l);
         else probe(gr, m, z + t, lauf.bus, g * l, o && o.kurz ? { dauer: Math.max(.08, d), aus: .04 } : { ein: .02, aus: Math.min(.25, d * .3), dauer: d + .05 });
       }
-      if (i >= noten.length && ctx.currentTime > z + ende + 1) { clearInterval(lauf.timer); if (klassikLauf === lauf) { klassikLauf = null; klassikKnoepfe(); } }
+      if (i >= noten.length && ctx.currentTime > z + ende - .6) { clearInterval(lauf.timer); if (klassikLauf === lauf) { klassikLauf = null; klassikKnoepfe(); musikFortsetzen(); } }
     };
     planen2(); lauf.timer = setInterval(planen2, 250);
-    musikDucken(z, ende + .4);
+    if (!pause) musikDucken(z, ende + .4);
   }
 
   /* ---------- Anzeige im Takt ---------- */
@@ -2900,7 +3032,8 @@
   function musikBox(T, voll) {
     let kacheln;
     if (musikTab === "lieder") kacheln = LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "")))
-      .concat([kachel("data-vorlage", "zufall", T.zufall)], voll ? [kachel("data-vorlage", "leer", T.leeren)] : []).join("");
+      .concat([kachel("data-vorlage", "zufall", T.zufall)], voll ? [kachel("data-vorlage", "leer", T.leeren)] : [],
+        ['<p class="lw-trenner">' + T.coverTitel + "</p>"], COVER_LISTE.map(k => kachel("data-sfx", k, T.sfx[k]))).join("");
     else if (musikTab === "eigene") {
       const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
       kacheln = alle.length ? alle.map(([q, l]) => kachel("data-eigen", q + ":" + l.id, (q === "g" ? "👥 " : "📱 ") + esc(l.name), geladen && geladen.quelle === q && String(geladen.id) === String(l.id))).join("")
@@ -3530,8 +3663,9 @@
 .lw-steuer { display: flex; flex-wrap: wrap; align-items: end; gap: .7rem 1rem; }
 .lw-play { border: 1px solid var(--ember); background: var(--ember); color: var(--night); font: inherit; font-weight: 600; padding: .55rem 1.2rem; cursor: pointer; min-width: 8.5rem; }
 .lw-play.laeuft { background: none; color: var(--ember); }
-.lw-pult-fx [data-sfx].spielt { border-color: var(--ember); background: rgba(224,160,70,.2); color: var(--ember); }
-.lw-pult-fx [data-sfx].spielt::after { content: " ■"; font-size: .8em; }
+.lw-trenner { grid-column: 1 / -1; margin: .5rem 0 0; font-size: .78rem; letter-spacing: .08em; color: var(--ash); }
+.lw-pult-gitter [data-sfx].spielt, .lw-pult-fx [data-sfx].spielt { border-color: var(--ember); background: rgba(224,160,70,.2); color: var(--ember); }
+.lw-pult-gitter [data-sfx].spielt::after, .lw-pult-fx [data-sfx].spielt::after { content: " ■"; font-size: .8em; }
 .lw-ausklang { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; padding: .55rem 1rem; cursor: pointer; }
 .lw-ausklang:hover:not(:disabled) { border-color: var(--ember); color: var(--ember); }
 .lw-ausklang:disabled { opacity: .5; cursor: default; }
