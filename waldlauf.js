@@ -4,8 +4,10 @@
    Bestiarium ziehen vorbei (Goblins & Banditen sind selbst gemalt).
    Ziehen & loslassen spannt den Bogen (wie eine Schleuder). Rex bellt,
    bevor etwas auftaucht. Nach jeder Welle wählt man eine Gabe
-   (Doppelschuss, Feuerpfeile, Rex packt zu …). Welle 6: Demogorgon.
-   Danach geht die Nacht endlos weiter, bis das Lager fällt.
+   (Doppelschuss, Feuerpfeile, Rex packt zu …). Welle 4: Bugbear-Anführer,
+   Welle 10: Demogorgon. Danach geht die Nacht endlos weiter.
+   Drei Schwierigkeitsstufen, Pause-Knopf, Bonusziele (Hase, Blatt im Wind)
+   und eine gemeinsame Bestenliste (Supabase-Tabelle jagd_bestenliste).
    ===================================================================== */
 (function () {
   "use strict";
@@ -29,10 +31,18 @@
       start: "▶ Auf die Jagd", weiter: "▶ Weiter", nochmal: "↻ Neue Jagd", beenden: "Jagd beenden",
       pause: "Kurze Rast", pauseText: "Die Jagd wartet auf dich.",
       welle: n => "Welle " + n, serie: n => "Serie ×" + n,
-      wellen: ["Goblins auf der Straße", "Banditen im Hinterhalt", "Etwas raschelt im Unterholz", "Schwingen und schwere Schritte", "Ein Summen in der Luft", "Der Dämonenfürst"],
+      wellen: ["Goblins auf der Straße", "Banditen im Hinterhalt", "Die Goblinhöhle", "Der Wachturm", "Etwas raschelt im Unterholz", "Das verlassene Dorf", "Schwingen über den Wipfeln", "Ein Summen in der Luft", "Die Pforten des Unterreichs", "Der Dämonenfürst"],
       endlos: "Die Nacht wird länger",
       wuff: "Wuff!", grr: "Grrr!", entkommen: "Entkommen!", doppel: "Doppeltreffer!", dreifach: "Dreifachtreffer!",
-      bossFaellt: "Demogorgon fällt!", bossRuft: "Demogorgon brüllt!",
+      bossFaellt: { demogorgon: "Demogorgon fällt!", anfuehrer: "Der Anführer fällt!" },
+      bossRuft: { demogorgon: "Demogorgon brüllt!", anfuehrer: "Ein Bugbear-Anführer!" },
+      bonus: { hase: "Fliehender Hase", blatt: "Blatt im Wind" }, bonusDa: { hase: "Ein Hase! Schnell!", blatt: "Ein Blatt im Wind …" },
+      stufenTitel: "Schwierigkeit", stufen: { lehrling: "🌱 Lehrling", waldlaeufer: "🏹 Waldläufer", legende: "🐉 Legende" },
+      stufenText: { lehrling: "Langsamere Gegner, 7 Leben.", waldlaeufer: "Die Jagd, wie Friedrich sie kennt. 5 Leben.", legende: "Schnell, gnadenlos, 4 Leben." },
+      pauseKnopf: "Pause",
+      bestenliste: "🏆 Bestenliste", nurHier: "Noch nur auf diesem Gerät gespeichert.", leer: "Noch niemand – sei die erste Legende!",
+      eintragen: "🏆 Eintragen", deinName: "Dein Name", eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!",
+      spalten: ["#", "Name", "Punkte", "Welle"],
       rast: "Rast am Lagerfeuer", rastText: "Wähle eine Gabe für die nächste Welle.",
       bossSieg: "Demogorgon ist besiegt! Die Nacht ist aber noch nicht vorbei …",
       stufe: (a, b) => "Stufe " + a + "/" + b,
@@ -48,9 +58,9 @@
         barradin: [["Barradins Inspiration", "Ein Lied im Ohr: Serien bringen doppelt so viele Punkte."]]
       },
       ende: "Das Lager ist gefallen", endeText: "Die Kreaturen haben das Feuer erreicht.",
-      punkte: "Punkte", wert: { welle: "Welle erreicht", erlegt: "Kreaturen erlegt", genau: "Treffsicherheit", serie: "Beste Serie", boss: "Demogorgon" },
+      punkte: "Punkte", wert: { welle: "Welle", erlegt: "Erlegt", genau: "Treffsicherheit", bonus: "Bonusziele" },
       bossJa: "besiegt ✓", bossNein: "–",
-      rekord: n => "Bester Jagdzug hier: " + n + " Punkte", neuRekord: "Neuer Rekord!",
+      rekord: (n, st) => "Dein Rekord (" + st + "): " + n + " Punkte", neuRekord: "Neuer Rekord!",
       ton: ["🔊 Ton an", "🔈 Ton aus"],
       spruch: {
         schwach: ["Der Wald war heute lauter als mein Bogen. Morgen wieder.", "Rex hat mehr erwischt als ich. Sagt es nicht weiter.", "Manchmal ist es klüger, das Lager zu räumen. Heute war so ein Tag."],
@@ -67,10 +77,18 @@
       start: "▶ Begin the hunt", weiter: "▶ Continue", nochmal: "↻ New hunt", beenden: "End the hunt",
       pause: "A short rest", pauseText: "The hunt is waiting for you.",
       welle: n => "Wave " + n, serie: n => "Streak ×" + n,
-      wellen: ["Goblins on the road", "Bandits lying in ambush", "Something rustles in the undergrowth", "Wings and heavy footsteps", "A buzzing in the air", "The Demon Prince"],
+      wellen: ["Goblins on the road", "Bandits lying in ambush", "The goblin cave", "The watchtower", "Something rustles in the undergrowth", "The abandoned village", "Wings above the treetops", "A buzzing in the air", "The gates of the Underdark", "The Demon Prince"],
       endlos: "The night grows longer",
       wuff: "Woof!", grr: "Grrr!", entkommen: "Escaped!", doppel: "Double hit!", dreifach: "Triple hit!",
-      bossFaellt: "Demogorgon falls!", bossRuft: "Demogorgon roars!",
+      bossFaellt: { demogorgon: "Demogorgon falls!", anfuehrer: "The leader falls!" },
+      bossRuft: { demogorgon: "Demogorgon roars!", anfuehrer: "A bugbear leader!" },
+      bonus: { hase: "Fleeing hare", blatt: "Leaf in the wind" }, bonusDa: { hase: "A hare! Quick!", blatt: "A leaf in the wind …" },
+      stufenTitel: "Difficulty", stufen: { lehrling: "🌱 Apprentice", waldlaeufer: "🏹 Ranger", legende: "🐉 Legend" },
+      stufenText: { lehrling: "Slower enemies, 7 lives.", waldlaeufer: "The hunt as Friedrich knows it. 5 lives.", legende: "Fast, merciless, 4 lives." },
+      pauseKnopf: "Pause",
+      bestenliste: "🏆 Leaderboard", nurHier: "Only saved on this device for now.", leer: "Nobody yet – be the first legend!",
+      eintragen: "🏆 Submit", deinName: "Your name", eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!",
+      spalten: ["#", "Name", "Points", "Wave"],
       rast: "Rest at the campfire", rastText: "Choose a gift for the next wave.",
       bossSieg: "Demogorgon is defeated! But the night isn't over yet …",
       stufe: (a, b) => "Level " + a + "/" + b,
@@ -86,9 +104,9 @@
         barradin: [["Barradin's inspiration", "A song in your ear: streaks score twice as much."]]
       },
       ende: "The camp has fallen", endeText: "The creatures have reached the fire.",
-      punkte: "points", wert: { welle: "Wave reached", erlegt: "Creatures slain", genau: "Accuracy", serie: "Best streak", boss: "Demogorgon" },
+      punkte: "points", wert: { welle: "Wave", erlegt: "Slain", genau: "Accuracy", bonus: "Bonus targets" },
       bossJa: "defeated ✓", bossNein: "–",
-      rekord: n => "Best hunt here: " + n + " points", neuRekord: "New record!",
+      rekord: (n, st) => "Your record (" + st + "): " + n + " points", neuRekord: "New record!",
       ton: ["🔊 Sound on", "🔈 Sound off"],
       spruch: {
         schwach: ["The forest was louder than my bow today. Tomorrow again.", "Rex caught more than I did. Don't tell anyone.", "Sometimes it's wiser to break camp. Today was such a day."],
@@ -116,8 +134,17 @@
     bugbear:    { bild: "bugbear-frei.webp", hoehe: 92, hp: 3, tempo: 33, punkte: 30, art: "boden", blick: -1, splitter: ["#9b3a2f", "#a8783e", "#5a4430"] },
     vrock:      { bild: "vrock-frei.webp", hoehe: 80, hp: 2, tempo: 62, punkte: 20, art: "flug", blick: 1, hell: 1.35, splitter: ["#a89f8f", "#6a6256", "#3a352f"] },
     chasme:     { bild: "chasme-frei.webp", hoehe: 64, hp: 1, tempo: 100, punkte: 25, art: "flug", blick: 1, splitter: ["#c4564a", "#2b3550", "#9b3a2f"] },
-    demogorgon: { bild: "demogorgon.webp", hoehe: 196, hp: 28, tempo: 15, punkte: 400, art: "boss", blick: -1, splitter: ["#e0a046", "#9b3a2f", "#c98a3a"] }
+    demogorgon: { bild: "demogorgon.webp", hoehe: 196, hp: 28, tempo: 15, punkte: 400, art: "boss", blick: -1, verlust: 3, glut: "rgba(196,86,74,.55)", splitter: ["#e0a046", "#9b3a2f", "#c98a3a"] },
+    anfuehrer:  { sprite: "bugbear", hoehe: 140, hp: 12, tempo: 21, punkte: 150, art: "boss", mini: true, blick: -1, verlust: 2, glut: "rgba(224,160,70,.5)", splitter: ["#9b3a2f", "#a8783e", "#e0a046"] },
+    hase:       { malen: "hase", hoehe: 34, hp: 1, tempo: 165, punkte: 60, art: "bonus", blick: -1, hell: 1, splitter: ["#8a6a4a", "#ebe2cc", "#5a4430"] },
+    blatt:      { malen: "blatt", hoehe: 30, hp: 1, tempo: 0, punkte: 90, art: "bonus", blick: -1, hell: 1, splitter: ["#e0a046", "#ffcf7a", "#c4564a"] }
   };
+  const STUFEN = {
+    lehrling:    { tempo: 0.75, leben: 7, abstand: 1.35 },
+    waldlaeufer: { tempo: 1, leben: 5, abstand: 1 },
+    legende:     { tempo: 1.22, leben: 4, abstand: 0.82 }
+  };
+  let stufeWahl = STUFEN[lies("imres-waldlauf-stufe", "")] ? lies("imres-waldlauf-stufe", "") : "waldlaeufer";
 
   const GABEN = { mehrfach: 2, feuer: 2, zug: 3, durchschlag: 2, rex: 2, adler: 1, echo: 2, rast: 99, barradin: 1 };
   const GABE_SYM = { mehrfach: "🏹", feuer: "🔥", zug: "⚡", durchschlag: "🎯", rex: "🐕", adler: "🦅", echo: "🌿", rast: "🍖", barradin: "🎶" };
@@ -152,6 +179,7 @@
   function bilderLaden() {
     Object.keys(ARTEN).forEach(k => {
       const a = ARTEN[k];
+      if (a.sprite) return;
       if (a.malen) { const c = MALER[a.malen](); SPRITES[k] = vorbereiten(c, null, 260, 1, true); return; }
       laden(a.bild, img => { SPRITES[k] = vorbereiten(img, a.quelle, k === "demogorgon" ? 440 : 260, a.hell || 1.15); });
     });
@@ -256,6 +284,53 @@
       g = x.createLinearGradient(4, 50, 22, 96); g.addColorStop(0, "#e2ded2"); g.addColorStop(1, "#8a8577");
       x.strokeStyle = g; x.lineWidth = 4.5; x.beginPath(); x.moveTo(21, 97); x.lineTo(5, 54); x.stroke();
       return c;
+    },
+    hase() {
+      const [c, x] = malGrund(130, 90);
+      // Hinterlauf (gestreckt, im Sprung)
+      x.fillStyle = "#6b4f35";
+      x.beginPath(); x.moveTo(84, 54); x.quadraticCurveTo(118, 62, 126, 80); x.lineTo(112, 80); x.quadraticCurveTo(98, 70, 80, 66); x.closePath(); x.fill();
+      // Körper
+      let g = x.createLinearGradient(40, 30, 100, 80); g.addColorStop(0, "#a8835c"); g.addColorStop(1, "#5e4530");
+      x.fillStyle = g; x.beginPath(); x.ellipse(70, 54, 34, 20, -0.12, 0, Math.PI * 2); x.fill();
+      x.fillStyle = "#d8cbb0"; x.beginPath(); x.ellipse(64, 66, 20, 7, -0.1, 0, Math.PI * 2); x.fill();
+      // Blume (weißer Schwanz)
+      x.fillStyle = "#f1e7cf"; oval(x, 104, 46, 7, 6.5);
+      // Vorderläufe
+      x.strokeStyle = "#7a5b3e"; x.lineWidth = 5;
+      x.beginPath(); x.moveTo(44, 62); x.lineTo(24, 74); x.stroke();
+      x.beginPath(); x.moveTo(50, 66); x.lineTo(34, 82); x.stroke();
+      // Kopf
+      x.fillStyle = "#9a7650"; oval(x, 34, 40, 15, 12);
+      x.fillStyle = "#b08c64"; oval(x, 24, 44, 7, 6);
+      // Ohren
+      x.fillStyle = "#8a6a4a";
+      x.beginPath(); x.ellipse(52, 18, 5.5, 20, 1.15, 0, Math.PI * 2); x.fill();
+      x.fillStyle = "#6b4f35";
+      x.beginPath(); x.ellipse(48, 22, 5, 18, 0.95, 0, Math.PI * 2); x.fill();
+      x.fillStyle = "#2a1c12"; x.beginPath(); x.ellipse(60, 12, 3, 5, 1.15, 0, Math.PI * 2); x.fill();
+      // Auge & Nase
+      x.fillStyle = "#1a1210"; oval(x, 30, 37, 2.6, 2.6);
+      x.fillStyle = "#ebe2cc"; oval(x, 29.2, 36.2, 0.8, 0.8);
+      x.fillStyle = "#3a2420"; oval(x, 18, 44, 2, 1.6);
+      x.strokeStyle = "rgba(235,226,204,.5)"; x.lineWidth = 0.8;
+      x.beginPath(); x.moveTo(20, 46); x.lineTo(8, 44); x.moveTo(20, 47); x.lineTo(9, 50); x.stroke();
+      return c;
+    },
+    blatt() {
+      const [c, x] = malGrund(80, 80);
+      x.translate(40, 42);
+      x.save(); x.shadowColor = "rgba(224,160,70,.9)"; x.shadowBlur = 10;
+      const g = x.createLinearGradient(-30, -30, 30, 30); g.addColorStop(0, "#ffcf7a"); g.addColorStop(0.55, "#e0a046"); g.addColorStop(1, "#b5502f");
+      x.fillStyle = g;
+      // Ahornblatt aus fünf Lappen
+      x.beginPath();
+      const pkt = [[0, -32], [7, -16], [24, -22], [18, -6], [32, 2], [14, 8], [18, 24], [3, 14], [0, 26], [-3, 14], [-18, 24], [-14, 8], [-32, 2], [-18, -6], [-24, -22], [-7, -16]];
+      pkt.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py));
+      x.closePath(); x.fill(); x.restore();
+      x.strokeStyle = "rgba(122,47,38,.65)"; x.lineWidth = 1.2;
+      x.beginPath(); x.moveTo(0, 34); x.lineTo(0, -26); x.moveTo(0, 6); x.lineTo(26, -2); x.moveTo(0, 6); x.lineTo(-26, -2); x.moveTo(0, 0); x.lineTo(18, -18); x.moveTo(0, 0); x.lineTo(-18, -18); x.stroke();
+      return c;
     }
   };
 
@@ -304,6 +379,7 @@
     entkommen: () => ton("sine", 320, 110, 0.45, 0.14),
     gabe: () => [523, 659, 784, 1046].forEach((f, i) => ton("triangle", f, f, 0.18, 0.12, i * 0.09)),
     bruellen: () => { knistern(1.2, 0.3, "lowpass", 320); ton("sawtooth", 72, 40, 1.2, 0.22, 0, ["lowpass", 400, 1]); },
+    glocke: treffer => (treffer ? [880, 1175, 1568] : [1175, 1568]).forEach((f, i) => ton("sine", f, f, 0.3, 0.07, i * 0.07)),
     ende: () => [392, 330, 262, 196].forEach((f, i) => ton("triangle", f, f * 0.98, 0.35, 0.12, i * 0.22))
   };
 
@@ -312,7 +388,8 @@
   let S = null;
   function neuesSpiel() {
     S = {
-      welle: 0, leben: 5, punkte: 0, combo: 0, besteCombo: 0, erlegt: 0, salven: 0, salvenTreffer: 0, bossBesiegt: false,
+      stufe: stufeWahl, maxLeben: STUFEN[stufeWahl].leben,
+      welle: 0, leben: STUFEN[stufeWahl].leben, punkte: 0, combo: 0, besteCombo: 0, erlegt: 0, bonus: 0, bonusT: 10, salven: 0, salvenTreffer: 0, bossBesiegt: false,
       gaben: { mehrfach: 0, feuer: 0, zug: 0, durchschlag: 0, rex: 0, adler: 0, echo: 0, rast: 0, barradin: 0 },
       pfeile: [], gegner: [], teilchen: [], texte: [], blasen: [],
       warte: [], abstand: 1.5, spawnT: 0, gebellt: false, bossWelle: false, bossRufT: 0, eskorteT: 0, eskorte2T: 0,
@@ -325,18 +402,23 @@
   function welleBauen(n) {
     const l = [], add = (typ, k) => { for (let i = 0; i < k; i++) l.push(typ); };
     let abstand = 1.5;
-    if (n === 1) { add("goblin", 9); abstand = 1.55; }
-    else if (n === 2) { add("goblin", 7); add("bandit", 5); abstand = 1.4; }
-    else if (n === 3) { add("blight", 7); add("goblin", 4); add("bandit", 2); abstand = 1.3; }
-    else if (n === 4) { add("vrock", 4); add("bugbear", 3); add("goblin", 4); add("blight", 3); abstand = 1.2; }
-    else if (n === 5) { add("chasme", 5); add("vrock", 3); add("bugbear", 2); add("bandit", 3); add("blight", 3); abstand = 1.1; }
-    else if (n === 6) return { liste: ["demogorgon"], abstand: 0, boss: true };
+    if (n === 1) { add("goblin", 8); abstand = 1.7; }
+    else if (n === 2) { add("goblin", 7); add("bandit", 4); abstand = 1.55; }
+    else if (n === 3) { add("goblin", 11); add("bandit", 3); abstand = 1.3; }
+    else if (n === 4) return { liste: ["goblin", "anfuehrer"], abstand: 2.5, boss: true };
+    else if (n === 5) { add("blight", 9); add("goblin", 2); abstand = 1.45; }
+    else if (n === 6) { add("blight", 6); add("goblin", 4); add("bandit", 3); add("bugbear", 2); abstand = 1.35; }
+    else if (n === 7) { add("vrock", 5); add("blight", 4); add("bandit", 2); abstand = 1.35; }
+    else if (n === 8) { add("chasme", 5); add("vrock", 3); add("bugbear", 2); add("blight", 3); abstand = 1.25; }
+    else if (n === 9) { add("goblin", 4); add("bandit", 3); add("blight", 4); add("vrock", 3); add("bugbear", 3); add("chasme", 4); abstand = 1.1; }
+    else if (n === 10) return { liste: ["demogorgon"], abstand: 0, boss: true };
     else {
-      const k = n - 6;
+      const k = n - 10;
       add("goblin", 3 + k); add("bandit", 2 + Math.ceil(k / 2)); add("blight", 4 + k); add("vrock", 3 + k); add("bugbear", 2 + Math.ceil(k / 2)); add("chasme", 3 + k);
-      abstand = Math.max(0.55, 1.05 - 0.06 * k);
+      abstand = Math.max(0.55, 1.05 - 0.05 * k);
       mischen(l);
-      if (k % 3 === 0) { l.splice(Math.floor(l.length / 2), 0, "demogorgon"); return { liste: l, abstand, boss: true }; }
+      if (k % 4 === 0) { l.splice(Math.floor(l.length / 2), 0, "demogorgon"); return { liste: l, abstand, boss: true }; }
+      if (k % 4 === 2) { l.splice(Math.floor(l.length / 2), 0, "anfuehrer"); return { liste: l, abstand, boss: true }; }
       return { liste: l, abstand };
     }
     const erste = [l[0], l[0]];
@@ -347,33 +429,37 @@
     S.welle = n;
     const w = welleBauen(n);
     S.warte = w.liste.map(typ => ({ typ, dir: Math.random() < 0.5 ? 1 : -1 }));
-    S.abstand = w.abstand; S.bossWelle = !!w.boss;
+    S.abstand = w.abstand * STUFEN[S.stufe].abstand; S.bossWelle = !!w.boss;
+    S.gegner = S.gegner.filter(e => e.a.art !== "bonus"); S.bonusT = 6 + Math.random() * 8;
     S.spawnT = 2.2; S.gebellt = false; S.welleFertigT = -1;
     S.eskorteT = 5; S.eskorte2T = 9;
     const tx = t();
-    S.banner = { titel: tx.welle(n), unter: n <= 6 ? tx.wellen[n - 1] : tx.endlos, t: 0, dauer: 2.2 };
+    S.banner = { titel: tx.welle(n), unter: n <= 10 ? tx.wellen[n - 1] : tx.endlos, t: 0, dauer: 2.2 };
     zustand = "spiel";
     schleierZu();
   }
 
-  function tempoFaktor() { return Math.pow(0.85, S.gaben.echo) * (1 + 0.07 * Math.max(0, S.welle - 6)); }
+  function tempoFaktor() { return STUFEN[S.stufe].tempo * Math.pow(0.85, S.gaben.echo) * (1 + 0.06 * Math.max(0, S.welle - 10)); }
 
   function spawnen(e) {
-    const a = ARTEN[e.typ], sp = SPRITES[e.typ];
+    const a = ARTEN[e.typ], sp = SPRITES[a.sprite || e.typ];
     const verh = sp ? sp.verh : 0.8;
     let y, s, bahn = -1;
-    if (a.art === "boden") { bahn = Math.floor(Math.random() * 3); y = BAHNEN[bahn].y; s = BAHNEN[bahn].s; }
+    if (a.art === "boden" || e.typ === "hase") { bahn = e.typ === "hase" ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 3); y = BAHNEN[bahn].y; s = BAHNEN[bahn].s; }
     else if (a.art === "flug") { y = 120 + Math.random() * 150; s = 0.72 + (y - 120) / 150 * 0.28; }
+    else if (e.typ === "blatt") { y = 60; s = 1; }
     else { bahn = 1; y = BAHNEN[1].y + 10; s = 1; }
     const h = a.hoehe * s, w = h * verh;
-    const extra = S.welle > 6 ? Math.floor((S.welle - 6) / 3) : 0;
-    const hp = a.art === "boss" ? a.hp + 10 * extra : a.hp + (a.hp > 1 ? extra : 0);
+    const extra = S.welle > 10 ? Math.floor((S.welle - 10) / 3) : 0;
+    const hp = a.art === "boss" ? a.hp + (a.mini ? 4 : 10) * extra : a.hp + (a.hp > 1 && a.art !== "bonus" ? extra : 0);
+    const startX = e.typ === "blatt" ? 70 + Math.random() * 260 : e.dir === 1 ? -w / 2 : W + w / 2;
     S.gegner.push({
-      typ: e.typ, a, x: e.dir === 1 ? -w / 2 : W + w / 2, y, basisY: y, s, h, w, dir: e.dir, bahn,
+      typ: e.typ, a, sp: a.sprite || e.typ, x: startX, basisX: startX, y, basisY: y, s, h, w, dir: e.dir, bahn,
       hp, maxHp: hp, t: 0, phase: Math.random() * 6, tempo: a.tempo * (0.9 + Math.random() * 0.2),
       tot: 0, blitz: 0, gehalten: false, getroffenVon: {}
     });
-    if (a.art === "boss") { KLANG.bruellen(); S.beben = 0.7; S.bossRufT = 4; textAuf(W / 2, 200, t().bossRuft, "#c4564a", 26, 1.6); }
+    if (a.art === "boss") { KLANG.bruellen(); S.beben = a.mini ? 0.4 : 0.7; S.bossRufT = 4; S.eskorteT = 3; S.eskorte2T = 7; textAuf(W / 2, 200, t().bossRuft[e.typ], a.mini ? "#e0a046" : "#c4564a", 26, 1.6); }
+    if (a.art === "bonus") { textAuf(W / 2, 92, t().bonusDa[e.typ], "#ebe2cc", 19, 1.6); KLANG.glocke(); if (e.typ === "hase") S.rex.hops = 0.35; }
   }
 
   /* ---------- Schießen ---------- */
@@ -427,19 +513,30 @@
       e.tot = 0.001;
       const mult = 1 + Math.min(S.combo, 20) * 0.1 * (S.gaben.barradin ? 2 : 1);
       const p = Math.round(e.a.punkte * mult);
-      S.punkte += p; S.erlegt++;
-      if (salve) salve.kills++;
+      S.punkte += p;
       const m = mitte(e);
+      if (e.a.art === "bonus") {
+        S.bonus++;
+        textAuf(m.x, m.y - 14, t().bonus[e.typ] + " +" + p, "#ffcf7a", 20, 1.4);
+        glut(m.x, m.y, ruhig ? 8 : 24); KLANG.glocke(true);
+        return true;
+      }
+      S.erlegt++;
+      if (salve) salve.kills++;
       textAuf(m.x, m.y - 10, "+" + p, "#ebe2cc", e.a.art === "boss" ? 30 : 18, 0.9);
-      funken(m.x, m.y, e.a.splitter, e.a.art === "boss" ? 70 : 16);
+      funken(m.x, m.y, e.a.splitter, e.a.art === "boss" ? (e.a.mini ? 40 : 70) : 16);
       KLANG.tod();
-      if (e.a.art === "boss") { S.bossBesiegt = true; S.beben = 1; KLANG.bruellen(); textAuf(W / 2, 180, t().bossFaellt, "#e0a046", 30, 2.2); }
+      if (e.a.art === "boss") {
+        if (!e.a.mini) S.bossBesiegt = true;
+        S.beben = e.a.mini ? 0.6 : 1; KLANG.bruellen();
+        textAuf(W / 2, 180, t().bossFaellt[e.typ], "#e0a046", 30, 2.2);
+      }
       return true;
     }
     return false;
   }
   function mitte(e) { return { x: e.x, y: e.y - e.h * (e.a.art === "boss" ? 0.55 : 0.5) }; }
-  function radius(e) { return Math.min(e.w, e.h) * (e.a.art === "boss" ? 0.4 : 0.38) + 3; }
+  function radius(e) { return Math.min(e.w, e.h) * (e.a.art === "boss" ? 0.4 : e.a.art === "bonus" ? 0.5 : 0.38) + (e.a.art === "bonus" ? 7 : 3); }
 
   /* ---------- Teilchen & Texte ---------- */
   function funken(x, y, farben, n) {
@@ -525,28 +622,45 @@
       }
     }
 
-    // Demogorgon ruft Verstärkung
+    // Bosse rufen Verstärkung
     const boss = S.gegner.find(e => e.a.art === "boss" && !e.tot);
     if (boss) {
       S.eskorteT -= dt; S.eskorte2T -= dt;
-      if (S.eskorteT <= 0) { S.eskorteT = 3.8; S.warte.unshift({ typ: zufall(["blight", "blight", "goblin"]), dir: Math.random() < 0.5 ? 1 : -1 }); S.spawnT = Math.min(S.spawnT, 1); S.gebellt = false; }
-      if (S.eskorte2T <= 0) { S.eskorte2T = 7; S.warte.unshift({ typ: S.welle > 6 ? zufall(["chasme", "vrock", "bandit"]) : "chasme", dir: Math.random() < 0.5 ? 1 : -1 }); S.spawnT = Math.min(S.spawnT, 1); S.gebellt = false; }
+      const mini = boss.a.mini, ruf = typ => { S.warte.unshift({ typ, dir: Math.random() < 0.5 ? 1 : -1 }); S.spawnT = Math.min(S.spawnT, 1); S.gebellt = false; };
+      if (S.eskorteT <= 0) { S.eskorteT = (mini ? 3.4 : 3.8) / STUFEN[S.stufe].tempo; ruf(mini ? "goblin" : zufall(["blight", "blight", "goblin"])); }
+      if (S.eskorte2T <= 0) { S.eskorte2T = 7 / STUFEN[S.stufe].tempo; ruf(mini ? "bandit" : S.welle > 10 ? zufall(["chasme", "vrock", "bandit"]) : "chasme"); }
       S.bossRufT -= dt;
-      if (S.bossRufT <= 0) { S.bossRufT = 9; S.beben = 0.5; KLANG.bruellen(); }
+      if (S.bossRufT <= 0) { S.bossRufT = 9; S.beben = mini ? 0.3 : 0.5; KLANG.bruellen(); }
+    }
+
+    // Bonusziele: ein fliehender Hase oder ein Blatt im Wind
+    if (S.warte.length || S.gegner.some(e => e.a.art !== "bonus")) {
+      S.bonusT -= dt;
+      if (S.bonusT <= 0 && !S.gegner.some(e => e.a.art === "bonus")) {
+        S.bonusT = 13 + Math.random() * 9;
+        spawnen({ typ: Math.random() < 0.55 ? "hase" : "blatt", dir: Math.random() < 0.5 ? 1 : -1 });
+      }
     }
 
     const tf = tempoFaktor();
     S.gegner.forEach(e => {
       e.t += dt; e.blitz = Math.max(0, e.blitz - dt);
       if (e.tot) { e.tot += dt; return; }
-      if (!e.gehalten) e.x += e.dir * e.tempo * tf * dt;
-      if (e.a.art === "boden") e.y = e.basisY + Math.sin(e.t * 9 + e.phase) * 1.4 * e.s;
+      if (e.typ === "blatt") {
+        e.y += 34 * dt; e.x = e.basisX + Math.sin(e.t * 1.7 + e.phase) * 42;
+        if (e.y > BAHNEN[0].y - 6) e.weg = true;
+        return;
+      }
+      if (!e.gehalten) e.x += e.dir * e.tempo * (e.a.art === "bonus" ? 1 : tf) * dt;
+      if (e.typ === "hase") e.y = e.basisY - Math.abs(Math.sin(e.t * 10 + e.phase)) * 10 * e.s;
+      else if (e.a.art === "boden") e.y = e.basisY + Math.sin(e.t * 9 + e.phase) * 1.4 * e.s;
       else if (e.typ === "vrock") e.y = e.basisY + Math.sin(e.t * 2.1 + e.phase) * 28 * e.s;
       else if (e.typ === "chasme") e.y = e.basisY + Math.sin(e.t * 5.2 + e.phase) * 34 * e.s + Math.sin(e.t * 1.3) * 18;
       else e.y = e.basisY + Math.sin(e.t * 1.6) * 3;
       if ((e.dir === 1 && e.x - e.w / 2 > W) || (e.dir === -1 && e.x + e.w / 2 < 0)) {
         e.weg = true;
-        const verlust = e.a.art === "boss" ? 3 : 1;
+        if (e.a.art === "bonus") return;
+        const verlust = e.a.verlust || 1;
         S.leben = Math.max(0, S.leben - verlust); S.combo = 0; S.beben = Math.max(S.beben, 0.35);
         textAuf(e.dir === 1 ? W - 60 : 60, Math.min(e.y - e.h / 2, 420), t().entkommen, "#c4564a", 18, 1.1);
         KLANG.entkommen();
@@ -601,7 +715,7 @@
 
     if (S.leben <= 0) { S.endeT += dt; if (S.endeT > 0.9) spielEnde(); return; }
 
-    if (!S.warte.length && !S.gegner.length && S.welleFertigT < 0) S.welleFertigT = 0;
+    if (!S.warte.length && !S.gegner.some(e => e.a.art !== "bonus") && S.welleFertigT < 0) S.welleFertigT = 0;
     if (S.welleFertigT >= 0) { S.welleFertigT += dt; if (S.welleFertigT > 1.1 && !S.pfeile.length) gabenZeigen(); }
   }
 
@@ -658,7 +772,7 @@
   }
 
   function gegnerZeichnen(e) {
-    const sp = SPRITES[e.typ];
+    const sp = SPRITES[e.sp];
     let alpha = 1, dy = 0, dreh = 0;
     if (e.tot) { const k = e.tot / 0.5; alpha = 1 - k; dy = k * 18; dreh = e.dir * k * 0.5; }
     if (e.a.art === "boden" && e.t < 0.35) dy += (1 - e.t / 0.35) * e.h * 0.6;
@@ -666,11 +780,12 @@
     ctx.save();
     ctx.globalAlpha = alpha * (e.blitz > 0 ? 0.55 : 1);
     ctx.translate(e.x + wackel, e.y + dy);
+    if (e.typ === "blatt") { ctx.translate(0, -e.h / 2); ctx.rotate(Math.sin(e.t * 2.3 + e.phase) * 0.9); ctx.translate(0, e.h / 2); }
     if (dreh) ctx.rotate(dreh);
     if (e.typ === "vrock" || e.typ === "chasme") ctx.rotate(Math.sin(e.t * 3 + e.phase) * 0.06);
     if (sp) {
       const img = (e.dir === e.a.blick) ? sp.normal : sp.gespiegelt;
-      ctx.shadowColor = e.a.art === "boss" ? "rgba(196,86,74,.55)" : "rgba(235,226,204,.38)"; ctx.shadowBlur = e.a.art === "boss" ? 18 : 9;
+      ctx.shadowColor = e.a.glut || (e.a.art === "bonus" ? "rgba(255,207,122,.8)" : "rgba(235,226,204,.38)"); ctx.shadowBlur = e.a.art === "boss" ? 18 : e.a.art === "bonus" ? 14 : 9;
       ctx.drawImage(img, -e.w / 2, -e.h, e.w, e.h);
       ctx.shadowBlur = 0;
     } else {
@@ -680,7 +795,7 @@
     if (!e.tot && e.maxHp > 1) {
       const bw = e.a.art === "boss" ? 120 : Math.max(26, e.w * 0.55), bx = e.x - bw / 2, by = e.y - e.h - 8;
       ctx.fillStyle = "rgba(16,14,21,.75)"; ctx.fillRect(bx - 1, by - 1, bw + 2, 5);
-      ctx.fillStyle = e.a.art === "boss" ? "#c4564a" : "#e0a046"; ctx.fillRect(bx, by, bw * Math.max(0, e.hp / e.maxHp), 3);
+      ctx.fillStyle = e.a.art === "boss" && !e.a.mini ? "#c4564a" : "#e0a046"; ctx.fillRect(bx, by, bw * Math.max(0, e.hp / e.maxHp), 3);
     }
   }
 
@@ -784,9 +899,9 @@
     ctx.textAlign = "center"; ctx.fillStyle = "#e0a046"; ctx.font = "22px " + FONT_D;
     ctx.fillText(String(S.punkte), W / 2, 6);
     ctx.textAlign = "right"; ctx.font = "16px " + FONT_D;
-    let hs = ""; for (let i = 0; i < 5; i++) hs += i < S.leben ? "♥" : "♡";
+    let hs = ""; for (let i = 0; i < S.maxLeben; i++) hs += i < S.leben ? "♥" : "♡";
+    ctx.font = (S.maxLeben > 5 ? 14 : 16) + "px " + FONT_D;
     ctx.fillStyle = S.leben <= 1 ? "#c4564a" : "#e0a046"; ctx.fillText(hs, W - 10, 9);
-    if (S.leben > 5) { ctx.font = "12px " + FONT_D; ctx.fillText("+" + (S.leben - 5), W - 10, 25); }
     if (S.combo >= 2) {
       ctx.textAlign = "center"; ctx.font = "600 18px " + FONT_H; ctx.fillStyle = "#ebe2cc";
       ctx.fillText(tx.serie(S.combo), W / 2, 37);
@@ -855,7 +970,7 @@
     }
     ctx.restore();
     if (S && zustand !== "start") hudZeichnen();
-    if (S) bannerZeichnen();
+    if (S && zustand === "spiel") bannerZeichnen();
   }
 
   /* ---------- Schleife ---------- */
@@ -875,7 +990,11 @@
   function anwerfen() { if (!rafId && sichtbar && !document.hidden) { letzte = 0; rafId = requestAnimationFrame(schleife); } }
 
   /* ---------- DOM & Overlays ---------- */
-  let buehne, schleier, tafel, fussRekord, tonKnopf;
+  let buehne, schleier, tafel, fussRekord, tonKnopf, pauseKnopf, listeEl;
+  const rekordKey = st => "imres-waldlauf-rekord-" + st;
+  (function altenRekordUebernehmen() { const alt = lies("imres-waldlauf-rekord", ""); if (alt && !lies(rekordKey("waldlaeufer"), "")) schreib(rekordKey("waldlaeufer"), alt); })();
+  const aktuelleStufe = () => (S && zustand !== "start" ? S.stufe : stufeWahl);
+
   function aufbauen() {
     const tx = t();
     root.innerHTML =
@@ -883,8 +1002,9 @@
       '<h3 id="wl-titel">' + esc(tx.titel) + '</h3>' +
       '<p class="tav-info" id="wl-text">' + esc(tx.text) + '</p>' +
       '<p class="wl-steuerung" id="wl-steuerung">' + esc(tx.steuerung) + '</p>' +
-      '<div class="wl-buehne"><div class="wl-schleier"><div class="wl-tafel"></div></div></div>' +
-      '<div class="wl-fuss"><span class="wl-rekord"></span><button type="button" class="wl-ton"></button></div>';
+      '<div class="wl-buehne"><button type="button" class="wl-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><div class="wl-schleier"><div class="wl-tafel"></div></div></div>' +
+      '<div class="wl-fuss"><span class="wl-rekord"></span><button type="button" class="wl-ton"></button></div>' +
+      '<div class="wl-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".wl-buehne");
     buehne.insertBefore(leinwand, buehne.firstChild);
     leinwand.setAttribute("aria-label", tx.titel);
@@ -892,15 +1012,20 @@
     tafel = root.querySelector(".wl-tafel");
     fussRekord = root.querySelector(".wl-rekord");
     tonKnopf = root.querySelector(".wl-ton");
+    pauseKnopf = root.querySelector(".wl-pause");
+    listeEl = root.querySelector(".wl-liste");
     tonKnopf.addEventListener("click", () => { tonAn = !tonAn; schreib("imres-waldlauf-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.bellen(); });
+    pauseKnopf.addEventListener("click", pausieren);
     tafel.addEventListener("click", tafelKlick);
+    tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".wl-name")) { e.preventDefault(); eintragen(); } });
     fussSetzen();
   }
   function fussSetzen() {
-    const tx = t(), r = parseInt(lies("imres-waldlauf-rekord", "0"), 10);
-    fussRekord.textContent = r ? tx.rekord(r) : "";
+    const tx = t(), st = aktuelleStufe(), r = parseInt(lies(rekordKey(st), "0"), 10);
+    fussRekord.textContent = r ? tx.rekord(r, tx.stufen[st]) : "";
     tonKnopf.textContent = tonAn ? tx.ton[0] : tx.ton[1];
     tonKnopf.setAttribute("aria-pressed", String(tonAn));
+    pauseKnopf.setAttribute("aria-label", tx.pauseKnopf);
   }
   function texteSetzen() {
     const tx = t();
@@ -909,7 +1034,7 @@
     root.querySelector("#wl-text").textContent = tx.text;
     root.querySelector("#wl-steuerung").textContent = tx.steuerung;
     leinwand.setAttribute("aria-label", tx.titel);
-    fussSetzen();
+    fussSetzen(); listeNeu();
     if (zustand === "start") startZeigen();
     else if (zustand === "pause") pauseZeigen();
     else if (zustand === "wahl") gabenZeigen(true);
@@ -919,13 +1044,20 @@
   function schleierAuf(html) { tafel.innerHTML = html; schleier.hidden = false; buehne.classList.remove("laeuft"); }
   function schleierZu() { schleier.hidden = true; buehne.classList.add("laeuft"); }
 
+  function stufenHtml(tx) {
+    return '<div class="wl-stufen" role="radiogroup" aria-label="' + esc(tx.stufenTitel) + '">' +
+      Object.keys(STUFEN).map(k => '<button type="button" role="radio" data-stufe="' + k + '" aria-checked="' + (k === stufeWahl) + '">' + esc(tx.stufen[k]) + '</button>').join("") +
+      '</div><p class="wl-stufen-text">' + esc(tx.stufenText[stufeWahl]) + '</p>';
+  }
   function startZeigen() {
     const tx = t();
-    schleierAuf('<h4>' + esc(tx.titel) + '</h4><p>' + esc(tx.steuerung) + '</p><button type="button" class="tav-knopf wl-haupt" data-tun="start">' + esc(tx.start) + '</button>');
+    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + stufenHtml(tx) +
+      '<button type="button" class="tav-knopf wl-haupt" data-tun="start">' + esc(tx.start) + '</button>');
   }
   function pauseZeigen() {
     const tx = t();
-    schleierAuf('<h4>' + esc(tx.pause) + '</h4><p>' + esc(tx.pauseText) + '</p><button type="button" class="tav-knopf wl-haupt" data-tun="weiter">' + esc(tx.weiter) + '</button>');
+    schleierAuf('<h4>' + esc(tx.pause) + '</h4><p>' + esc(tx.pauseText) + '</p><button type="button" class="tav-knopf wl-haupt" data-tun="weiter">' + esc(tx.weiter) + '</button>' +
+      '<button type="button" class="wl-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>');
   }
 
   let angebot = [];
@@ -933,7 +1065,8 @@
     const tx = t();
     if (!nurNeuZeichnen) {
       zustand = "wahl"; zielen = null; S.vorgemerkt = null;
-      const moegl = Object.keys(GABEN).filter(k => k === "rast" ? S.leben < 5 : S.gaben[k] < GABEN[k]);
+      S.gegner = S.gegner.filter(e => e.a.art !== "bonus");
+      const moegl = Object.keys(GABEN).filter(k => k === "rast" ? S.leben < S.maxLeben : S.gaben[k] < GABEN[k]);
       const ohneRast = moegl.filter(k => k !== "rast");
       const rastRein = moegl.includes("rast") && (S.leben <= 2 || Math.random() < 0.35);
       angebot = mischen(ohneRast).slice(0, rastRein ? 2 : 3);
@@ -947,59 +1080,67 @@
       const stufe = GABEN[k] > 1 && GABEN[k] < 99 ? '<span class="stufe">' + esc(tx.stufe(lvl + 1, GABEN[k])) + '</span>' : "";
       return '<button type="button" class="wl-gabe" data-gabe="' + k + '" style="--dreh:' + dreh[i] + 'deg"><span class="sym" aria-hidden="true">' + GABE_SYM[k] + '</span><span class="wl-gabe-text"><strong>' + esc(name) + stufe + '</strong><small>' + esc(text) + '</small></span></button>';
     }).join("");
-    const nachBoss = S.bossBesiegt && S.welle === 6;
+    const nachBoss = S.bossBesiegt && S.welle === 10;
     schleierAuf('<h4>' + esc(tx.rast) + '</h4>' + (nachBoss ? '<p class="wl-spruch">' + esc(tx.bossSieg) + '</p>' : '<p>' + esc(tx.rastText) + '</p>') +
       '<div class="wl-gaben">' + karten + '</div>' +
-      (S.welle >= 6 ? '<button type="button" class="wl-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>' : ""));
+      (S.welle >= 3 ? '<button type="button" class="wl-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>' : ""));
   }
 
-  let letzterSpruch = "";
   function spielEnde(nurNeuZeichnen) {
     const tx = t();
     if (!nurNeuZeichnen) {
       zustand = "ende"; zielen = null;
       KLANG.ende();
-      const alt = parseInt(lies("imres-waldlauf-rekord", "0"), 10);
+      const alt = parseInt(lies(rekordKey(S.stufe), "0"), 10);
       S.neuerRekord = S.punkte > alt && S.punkte > 0;
-      if (S.neuerRekord) schreib("imres-waldlauf-rekord", String(S.punkte));
+      if (S.neuerRekord) schreib(rekordKey(S.stufe), String(S.punkte));
       S.altRekord = alt;
-      const stufe = S.welle >= 10 ? "legende" : S.bossBesiegt ? "boss" : S.welle >= 4 ? "gut" : S.welle >= 2 ? "mittel" : "schwach";
-      S.spruchStufe = stufe; S.spruchIdx = Math.floor(Math.random() * 3);
+      S.genau = S.salven ? Math.round(S.salvenTreffer / S.salven * 100) : 0;
+      S.spruchStufe = S.welle >= 14 ? "legende" : S.bossBesiegt ? "boss" : S.welle >= 6 ? "gut" : S.welle >= 3 ? "mittel" : "schwach";
+      S.spruchIdx = Math.floor(Math.random() * 3);
+      S.eingetragen = ""; S.sendet = false;
     }
-    letzterSpruch = tx.spruch[S.spruchStufe][S.spruchIdx];
-    const genau = S.salven ? Math.round(S.salvenTreffer / S.salven * 100) : 0;
+    const spruch = tx.spruch[S.spruchStufe][S.spruchIdx];
     const freiwillig = S.leben > 0;
     schleierAuf(
       '<h4>' + esc(freiwillig ? tx.titel : tx.ende) + '</h4>' +
-      '<p class="wl-gross">' + S.punkte + ' <span>' + esc(tx.punkte) + '</span></p>' +
+      '<p class="wl-gross">' + S.punkte + ' <span>' + esc(tx.punkte) + ' · ' + esc(tx.stufen[S.stufe]) + '</span></p>' +
       (S.neuerRekord && S.altRekord ? '<p class="wl-neu">' + esc(tx.neuRekord) + '</p>' : "") +
       '<dl class="wl-werte">' +
       '<dt>' + esc(tx.wert.welle) + '</dt><dd>' + S.welle + '</dd>' +
       '<dt>' + esc(tx.wert.erlegt) + '</dt><dd>' + S.erlegt + '</dd>' +
-      '<dt>' + esc(tx.wert.genau) + '</dt><dd>' + genau + ' %</dd>' +
-      '<dt>' + esc(tx.wert.serie) + '</dt><dd>' + S.besteCombo + '</dd>' +
-      '<dt>' + esc(tx.wert.boss) + '</dt><dd>' + esc(S.bossBesiegt ? tx.bossJa : tx.bossNein) + '</dd>' +
+      '<dt>' + esc(tx.wert.genau) + '</dt><dd>' + S.genau + ' %</dd>' +
+      '<dt>' + esc(tx.wert.bonus) + '</dt><dd>' + S.bonus + '</dd>' +
       '</dl>' +
-      '<p class="wl-spruch">„' + esc(letzterSpruch) + '“ <span>– Friedrich</span></p>' +
-      '<button type="button" class="tav-knopf wl-haupt" data-tun="start">' + esc(tx.nochmal) + '</button>');
-    fussSetzen();
+      '<p class="wl-spruch">„' + esc(spruch) + '“ <span>– Friedrich</span></p>' +
+      eintragHtml(tx) +
+      '<button type="button" class="tav-knopf wl-haupt" data-tun="neu">' + esc(tx.nochmal) + '</button>');
+    fussSetzen(); listeNeu();
   }
 
   function tafelKlick(e) {
+    const st = e.target.closest("[data-stufe]");
+    if (st && zustand === "start") {
+      stufeWahl = st.dataset.stufe; schreib("imres-waldlauf-stufe", stufeWahl);
+      startZeigen(); fussSetzen(); bestenLaden(stufeWahl);
+      return;
+    }
     const g = e.target.closest("[data-gabe]");
     if (g && zustand === "wahl") {
       const k = g.dataset.gabe;
-      if (k === "rast") S.leben = Math.min(5, S.leben + 2); else S.gaben[k]++;
+      if (k === "rast") S.leben = Math.min(S.maxLeben, S.leben + 2); else S.gaben[k]++;
       if (k === "rex") S.rex.cd = 1.5;
       audio();
       welleStarten(S.welle + 1);
       anwerfen();
       return;
     }
+    if (e.target.closest(".wl-eintragen")) { eintragen(); return; }
     const b = e.target.closest("[data-tun]"); if (!b) return;
     const tun = b.dataset.tun;
     audio();
-    if (tun === "start") { neuesSpiel(); welleStarten(1); anwerfen(); }
+    if (tun === "start") { neuesSpiel(); welleStarten(1); fussSetzen(); listeNeu(); anwerfen(); }
+    else if (tun === "neu") { zustand = "start"; S = null; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); zeichnen(performance.now()); }
     else if (tun === "weiter") { zustand = "spiel"; schleierZu(); anwerfen(); }
     else if (tun === "beenden") spielEnde();
   }
@@ -1008,6 +1149,64 @@
     if (zustand !== "spiel") return;
     zustand = "pause"; zielen = null; S.vorgemerkt = null;
     pauseZeigen();
+  }
+  document.addEventListener("keydown", e => {
+    if (zustand !== "spiel" || !sichtbar) return;
+    if (e.key === "Escape" || e.key === "p" || e.key === "P") { e.preventDefault(); pausieren(); }
+  });
+
+  /* ---------- Bestenliste: gemeinsam über Supabase (wie beim Auftritt), sonst auf diesem Gerät ---------- */
+  const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
+  function server(pfad, body) {
+    const h = { apikey: SERVER.key, "Content-Type": "application/json" };
+    return fetch(SERVER.url + pfad, body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) })
+      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
+  }
+  const besten = {}, serverOk = {}; let meinEintrag = null;
+  const lokalLesen = () => { try { return JSON.parse(localStorage.getItem("imres-waldlauf-liste") || "{}") || {}; } catch (_) { return {}; } };
+  const sortieren = l => l.sort((a, b) => b.punkte - a.punkte || b.welle - a.welle || String(a.erstellt).localeCompare(String(b.erstellt)));
+  function bestenLaden(st) {
+    return server("/rest/v1/jagd_bestenliste?select=name,punkte,welle,genauigkeit,erstellt&stufe=eq." + st + "&order=punkte.desc,welle.desc,erstellt.asc&limit=10")
+      .then(l => { besten[st] = Array.isArray(l) ? l : []; serverOk[st] = true; })
+      .catch(() => { serverOk[st] = false; besten[st] = sortieren(lokalLesen()[st] || []).slice(0, 10); })
+      .then(listeNeu);
+  }
+  function listeNeu() {
+    if (!listeEl) return;
+    const T = t(), st = aktuelleStufe(), l = besten[st];
+    if (!l) { listeEl.innerHTML = ""; return; }
+    listeEl.innerHTML = '<h4>' + T.bestenliste + " · " + esc(T.stufen[st]) + "</h4>" +
+      (l.length ? "<table><thead><tr>" + T.spalten.map(x => "<th>" + esc(x) + "</th>").join("") + "</tr></thead><tbody>" +
+        l.map((e, i) => "<tr" + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + e.punkte + "</td><td>" + e.welle + "</td></tr>").join("") +
+        "</tbody></table>" : '<p class="wl-leer">' + esc(T.leer) + "</p>") +
+      (serverOk[st] === false ? '<p class="wl-leer">' + esc(T.nurHier) + "</p>" : "");
+  }
+  function eintragHtml(T) {
+    if (!S || S.punkte <= 0) return "";
+    if (S.eingetragen) return '<p class="wl-eingetragen">' + esc(S.eingetragen) + "</p>";
+    const name = lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
+    return '<div class="wl-eintrag"><input type="text" class="wl-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '">' +
+      '<button type="button" class="tav-knopf wl-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(T.eintragen) + "</button></div>";
+  }
+  function eintragen() {
+    if (!S || zustand !== "ende" || S.eingetragen || S.sendet) return;
+    const feld = tafel.querySelector(".wl-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
+    if (!name) { if (feld) feld.focus(); return; }
+    schreib("imres-waldlauf-name", name);
+    const T = t(), st = S.stufe, spiel = S;
+    const e = { name, punkte: S.punkte, welle: S.welle, genauigkeit: S.genau, erstellt: new Date().toISOString() };
+    const lok = lokalLesen(); lok[st] = sortieren((lok[st] || []).concat([e])).slice(0, 10);
+    schreib("imres-waldlauf-liste", JSON.stringify(lok));
+    spiel.sendet = true;
+    server("/rest/v1/rpc/jagd_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_welle: e.welle, p_genauigkeit: e.genauigkeit })
+      .catch(() => {}).then(() => bestenLaden(st)).then(() => {
+        spiel.sendet = false;
+        const l = besten[st] || [];
+        const platz = l.findIndex(x => x.name === name && x.punkte === e.punkte && x.welle === e.welle) + 1;
+        if (platz) meinEintrag = l[platz - 1].erstellt;
+        spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
+        if (S === spiel && zustand === "ende") spielEnde(true); else listeNeu();
+      });
   }
 
   /* ---------- Eingabe ---------- */
@@ -1058,6 +1257,7 @@
 .wl-tafel { display: grid; gap: .55rem; justify-items: center; width: 100%; max-width: 30rem; }
 .wl-tafel h4 { font-family: var(--name); font-weight: 400; font-size: clamp(1.45rem, 5.5vw, 2rem); line-height: 1.05; color: var(--vellum); }
 .wl-tafel p { color: var(--ash); font-size: .92rem; margin: 0; }
+.wl-tafel .tav-knopf { justify-self: center; }
 .wl-tafel .wl-haupt { font-size: 1rem; padding: .55rem 1.3rem; background: color-mix(in srgb, var(--ember) 14%, transparent); }
 .wl-tafel .wl-gross { font-family: var(--display); font-size: clamp(2.2rem, 9vw, 3rem); color: var(--ember) !important; line-height: 1; }
 .wl-gross span { font-size: .4em; color: var(--ash); }
@@ -1092,6 +1292,26 @@
   .wl-tafel .wl-haupt { padding: .4rem 1.1rem; font-size: .95rem; }
 }
 .wl-leise { background: none; border: 0; color: var(--ash); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: .2rem; }
+.wl-pause { position: absolute; top: 9%; right: 8px; z-index: 2; display: none; width: 2.3rem; height: 2.3rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.55); color: var(--vellum); font-size: .8rem; letter-spacing: -.1em; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.wl-pause:hover, .wl-pause:focus-visible { border-color: var(--ember); color: var(--ember); }
+.wl-buehne.laeuft .wl-pause { display: grid; place-items: center; }
+.wl-stufen { display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem; }
+.wl-stufen button { border: 1px solid var(--line); background: rgba(9,8,15,.4); color: var(--vellum); font: inherit; font-size: .82rem; padding: .38rem .55rem; white-space: nowrap; cursor: pointer; }
+.wl-stufen button[aria-checked="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
+.wl-tafel .wl-stufen-text { font-style: italic; font-size: .85rem; min-height: 1.3em; }
+.wl-eintrag { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; }
+.wl-name { background: rgba(0,0,0,.35); border: 1px solid var(--line); color: var(--vellum); font: inherit; font-size: .9rem; padding: .4rem .6rem; width: 10.5rem; min-width: 0; }
+.wl-eintrag .tav-knopf { font-size: .88rem; padding: .4rem .8rem; }
+.wl-tafel .wl-eingetragen { color: var(--ember); }
+.wl-liste { width: 100%; max-width: min(100%, calc(76vh * .8)); justify-self: center; }
+.wl-liste:empty { display: none; }
+.wl-liste h4 { font-family: var(--display); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); margin: .2rem 0 .4rem; font-weight: 400; }
+.wl-liste table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.wl-liste th { text-align: left; font-weight: normal; color: var(--ash); font-size: .75rem; border-bottom: 1px solid var(--line); padding: .25rem .4rem; }
+.wl-liste td { padding: .3rem .4rem; border-bottom: 1px solid rgba(235,226,204,.06); }
+.wl-liste td:nth-child(3), .wl-liste th:nth-child(3), .wl-liste td:nth-child(4), .wl-liste th:nth-child(4) { text-align: right; }
+.wl-liste tr.mein td { color: var(--ember); }
+.wl-leer { color: var(--ash); font-size: .85rem; font-style: italic; margin: .3rem 0 0; }
 .wl-fuss { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; font-size: .88rem; color: var(--ash); }
 .wl-ton { background: none; border: 1px solid var(--line); color: var(--ash); font: inherit; font-size: .84rem; padding: .3rem .75rem; cursor: pointer; }
 .wl-ton:hover { color: var(--vellum); border-color: var(--ember); }
@@ -1101,6 +1321,7 @@
 
   /* ---------- Start ---------- */
   aufbauen();
+  bestenLaden(stufeWahl);
   bilderLaden();
   hintergrundBauen();
   startZeigen();
