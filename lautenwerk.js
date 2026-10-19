@@ -206,7 +206,7 @@
   };
   const MODUS_LISTE = Object.keys(MODI);
   const BASS_STUFEN = [0, 2, 3, 4, 6]; /* Grundton, Terz, Quarte, Quinte, Septime */
-  const MEL_GRUND = 62, BASS_GRUND = 50, FLOETE_GRUND = 74; /* D4, D3, D5 */
+  const MEL_GRUND = 62, BASS_GRUND = 38, FLOETE_GRUND = 74; /* D4, D2, D5 */
   const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
   const tonMidi = (spur, zeile, s) => {
     const sk = MODI[s.modus];
@@ -969,9 +969,9 @@
     });
   }
   /* je Effekt liegen zwei fertige Varianten bereit; nach dem Abspielen wird eine neue gerechnet */
-  function fxNachfuellen(art) {
+  function fxNachfuellen(art, ziel) {
     const v = fxVorrat[art] = fxVorrat[art] || { liste: [], rechnet: 0 };
-    while (v.liste.length + v.rechnet < 2) { v.rechnet++; kwRechnen("effekt", art, 32000).then(b => { v.rechnet--; if (b) v.liste.push(b); }); }
+    while (v.liste.length + v.rechnet < (ziel || 2)) { v.rechnet++; kwRechnen("effekt", art, 32000).then(b => { v.rechnet--; if (b) v.liste.push(b); }); }
   }
   function fxPuffer(art) {
     const v = fxVorrat[art];
@@ -1000,7 +1000,8 @@
   const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55,
     bogen: .7, pfeil: .8, hieb: .7, verfehlt: .5, block: .8, wucht: .8, schmerz: .45, sterben: .5, feuerball: .7, blitz: .5, heiltrank: .55,
     tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8 };
-  function fxVorwaermen() { if (kwWorker !== false) ALLE_FX.forEach((f, i) => setTimeout(() => fxNachfuellen(f), 200 * i)); }
+  /* sanft vorrechnen: je Effekt erst eine Variante, mit Abstand – damit schwächere Geräte nicht ins Stocken geraten */
+  function fxVorwaermen() { if (kwWorker !== false) ALLE_FX.forEach((f, i) => setTimeout(() => fxNachfuellen(f, 1), 2500 + 600 * i)); }
   function effekt(art, staerke, zeit) {
     if (!ctx) return;
     const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
@@ -1044,11 +1045,11 @@
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor();
-      komp.threshold.value = -16; komp.knee.value = 12; komp.ratio.value = 2; komp.attack.value = .01; komp.release.value = .3;
+      komp.threshold.value = -20; komp.knee.value = 10; komp.ratio.value = 2; komp.attack.value = .006; komp.release.value = .25;
       ausgang = ctx.createGain(); ausgang.gain.value = .6 * masterPegel();
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -4; limiter.knee.value = 2; limiter.ratio.value = 20; limiter.attack.value = .003; limiter.release.value = .25;
-      master = ctx.createGain(); master.gain.value = .45;
+      master = ctx.createGain(); master.gain.value = .38;
       master.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
       IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
       /* Raumhall: jede Spur schickt einen Teil in einen Faltungshall (selbst erzeugter Raum, ca. 2,8 s) */
@@ -1135,9 +1136,34 @@
     if (S.band.ketten === "ketten") for (let v = 0; v < 4; v++) vorrendern("kette" + v, .9, () => kettenRasselnLive(0, 1), .38);
     [.32, 1.75, .9].forEach((l, a) => vorrendern("rex" + a, l, () => rexLautLive(0, a, 1), [.42, .34, .4][a]));
   }
+  /* Bass: gezupfte tiefe Saite mit vollem Körper – Grundton, kräftige Obertöne (hörbar auch auf kleinen
+     Lautsprechern), Anschlag mit leichtem Tonhöhen-Ruck, dazu ein weicher Daumen-„Plopp". Fest auf gleiche Spitze gebracht. */
+  function bassSaite(freq) {
+    const sr = ctx.sampleRate, n = Math.round(sr * 1.9), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+    const AMP = [1, .62, .42, .26, .16, .1, .06, .035], pos = .2;
+    AMP.forEach((a0, k) => {
+      const h = k + 1, fh = freq * h * (1 + .0003 * h * h);
+      if (fh > sr * .45) return;
+      const a = a0 * Math.abs(Math.sin(Math.PI * h * pos)) / Math.sin(Math.PI * pos), tau = 1.5 / (1 + k * .7);
+      let ph = Math.random() * .3;
+      for (let j = 0; j < n; j++) {
+        const t = j / sr, ruck = 1 + .012 * Math.exp(-t / .035);
+        ph += 2 * Math.PI * fh * ruck / sr;
+        d[j] += Math.sin(ph) * a * Math.exp(-t / tau) * Math.min(1, t / .004);
+      }
+    });
+    /* Daumen-Anschlag */
+    let lp = 0; const c = 1 - Math.exp(-2 * Math.PI * 400 / sr);
+    for (let j = 0; j < Math.round(sr * .03); j++) { lp += c * ((Math.random() * 2 - 1) - lp); d[j] += lp * 1.2 * (1 - j / (sr * .03)); }
+    let max = 0; for (let j = 0; j < n; j++) max = Math.max(max, Math.abs(d[j]));
+    const f = .85 / (max || 1), aus = Math.round(sr * .06);
+    for (let j = 0; j < n; j++) d[j] *= f * (j > n - aus ? (n - j) / aus : 1);
+    return buf;
+  }
   function saite(freq, art) {
     const key = art + freq.toFixed(2);
     if (saitenCache.has(key)) return saitenCache.get(key);
+    if (art === "bass") { const b = bassSaite(freq); saitenCache.set(key, b); return b; }
     const sr = ctx.sampleRate, dauer = art === "bass" ? 1.8 : art === "harfe" ? 2.6 : art === "mandoline" ? .9 : 1.4, n = Math.round(sr * dauer);
     const buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
     const p = Math.max(2, Math.round(sr / freq)), ring = new Float32Array(p);
@@ -1166,8 +1192,8 @@
   function zupf(freq, zeit, art, laut) {
     const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     src.buffer = saite(freq, art);
-    f.type = "lowpass"; f.frequency.value = art === "bass" ? 1100 : art === "harfe" ? 4200 : art === "mandoline" ? 4800 : 3400; f.Q.value = .7;
-    g.gain.value = (laut || 1) * (art === "bass" ? .9 : art === "harfe" ? .6 : art === "mandoline" ? .38 : .55);
+    f.type = "lowpass"; f.frequency.value = art === "bass" ? 1800 : art === "harfe" ? 4200 : art === "mandoline" ? 4800 : 3400; f.Q.value = .7;
+    g.gain.value = (laut || 1) * (art === "bass" ? .55 : art === "harfe" ? .6 : art === "mandoline" ? .38 : .55);
     src.connect(f); f.connect(g); g.connect(spurGain[art === "bass" ? "bass" : "melodie"]);
     src.start(zeit);
   }
@@ -1528,7 +1554,7 @@
   function bordunStimmen(bassZeile, zeit) {
     if (!bordunTeile) return;
     const sk = MODI[S.modus], stufe = BASS_STUFEN[bassZeile || 0];
-    const grund = BASS_GRUND - 12 + S.transpose + sk[stufe];
+    const grund = BASS_GRUND + S.transpose + sk[stufe];
     const quinte = (((sk[(stufe + 4) % 7] + (stufe + 4 >= 7 ? 12 : 0)) - sk[stufe]) === 7) ? grund + 7 : grund + 12;
     const z = Math.max(zeit || 0, ctx.currentTime);
     [grund, quinte].forEach((m, i) => bordunTeile.oscs[i].frequency.setTargetAtTime(midiHz(m), z, .06));
