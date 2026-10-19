@@ -1535,6 +1535,11 @@
     const l = laut || 1, ziel = spurGain.melodie, art = S.instrument;
     if (art === "harfe" && probe("harfe", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, .55 * l, { dauer: 2.6, aus: .4 })) return;
     if (art === "glocken" && probe("glock", Math.round(69 + 12 * Math.log2(freq / 440)) + 12, zeit, ziel, .32 * l)) return;
+    if ((art === "fidel" || art === "schalmei") && !rendert) {
+      const m = Math.round(69 + 12 * Math.log2(freq / 440)), d = Math.max(.18, dauer || .25), lang = d >= .32;
+      const g = art === "fidel" ? (lang ? "geige" : "geigest") : (lang ? "oboe" : "oboest");
+      if (probe(g, m, zeit, ziel, (art === "fidel" ? (lang ? .9 : .54) : .32) * l, lang ? { ein: .06, aus: .16, dauer: d + .08 } : { dauer: Math.max(.22, d), aus: .07 })) return;
+    }
     if (art === "laute" || art === "harfe") { zupf(freq, zeit, art === "harfe" ? "harfe" : "mel", l); return; }
     if (art === "mandoline") { /* Tremolo: schnell wiederholt angeschlagen */
       const n = Math.max(1, Math.min(6, Math.round(Math.max(.12, dauer || .2) / .08)));
@@ -1730,6 +1735,7 @@
     if (spur === "klopf") perk("klopf", "klopf", betont, zeit, laut, (z, l) => klopfen(z, betont, l));
     else if (spur === "schelle") perk("schelle", "schelle", false, zeit, laut, (z, l) => schellen(z, l));
     else if (spur === "trommel") {
+      if (S.band.trommel === "tamburin" && probe(betont ? "tamb1" : "tamb2", 0, zeit, spurGain.trommel, (betont ? .75 : .54) * (laut || 1), { dauer: .7, aus: .2 })) return;
       if (S.band.trommel === "pauke" && probe(betont ? "timp1" : "timp3", 0, zeit, spurGain.trommel, (betont ? .8 : .55) * (laut || 1), { dauer: betont ? 1.6 : 1, aus: .4 })) return;
       perk("trommel", S.band.trommel, betont, zeit, laut, (z, l) => friedrichSpielen(z, betont, l));
     }
@@ -1737,7 +1743,12 @@
     else if (spur === "rex") rexLaut(zeit, zeile, laut);
     else if (spur === "floete") echoSpielen(midiHz(tonMidi("floete", zeile, S)), zeit, dauer || .25, laut);
     else if (spur === "melodie") melodieSpielen(midiHz(tonMidi("melodie", zeile, S)), zeit, dauer, laut);
-    else zupf(midiHz(tonMidi(spur, zeile, S)), zeit, "bass", laut);
+    else {
+      /* in den Stimmungen zupft ein echter Kontrabass, in den Tavernenliedern bleibt Barradins Basssaite */
+      const pr = orchProfil(), m = tonMidi(spur, zeile, S);
+      if (pr && !pr.volk && probe("kb", m, zeit, spurGain.bass, .66 * (laut || 1), { dauer: 1.4, aus: .3 })) return;
+      zupf(midiHz(m), zeit, "bass", laut);
+    }
   }
 
   /* ---------- Variation: die Band improvisiert beim Spielen ---------- */
@@ -1874,7 +1885,8 @@
   const SAMPLE_KARTE = { vln: [55, 57, 59, 62, 66, 69, 72, 76, 79, 83, 86], vc: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77],
     spic: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77], horn: [36, 39, 43, 46, 50, 53, 57, 60],
     fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], flst: [69, 72, 76, 81, 84, 88, 93, 96],
-    harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101], glock: [79, 84, 91, 96, 103, 108] };
+    harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101], glock: [79, 84, 91, 96, 103, 108],
+    fag: [34,  37,  41,  45,  46,  48,  55,  60,  63,  68,  69,  72], pos: [34,  37,  39,  41,  46,  50,  53,  60,  61,  63,  65], vctrem: [36,  40,  43,  50,  53,  57,  59,  60,  64,  67,  71,  74,  77], trp: [53,  57,  60,  63,  67,  70,  74,  77,  81,  84], oboest: [58,  62,  65,  70,  74,  77,  82,  89], kb: [28,  30,  31,  34,  36,  38,  40,  42,  44,  45,  49,  52,  56,  59], geigest: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], geige: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], tuba: [34,  39,  41,  46,  50,  53,  58], klar: [50,  53,  58,  62,  65,  70,  74,  77,  82,  86,  90], orgel: [36,  42,  48,  54,  60,  66,  72,  78,  84,  90,  96], vlntrem: [55,  57,  59,  62,  69,  72,  76,  79,  83,  86], oboe: [58,  62,  65,  70,  74,  77,  82,  86,  89] };
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
   function sampleLaden(name) {
@@ -1916,19 +1928,24 @@
   /* ---------- Orchester: Streicherteppich, treibende Celli, Hörner und große Schläge ----------
      Je Stimmung ein Profil. Über die Teile eines Durchgangs baut sich das Orchester auf und gipfelt im
      Höhepunkt (Teil D bzw. dem letzten Teil): davor Paukenwirbel und anschwellendes Becken, darauf Becken und große Trommel. */
+  /* pad = Teppich (Stärke), farbe = welche Instrumente ihn spielen, ost = treibende Celli, horn/trp/pos = Blech im Höhepunkt,
+     tuba = tiefes Fundament, amboss = Schmiedeschläge, glanz = Glöckchen, gross = große Schläge (2 Becken+Trommel, 1 Gong bzw. Pauke) */
   const ORCH = {
-    kampf: { pad: .8, ost: 1, horn: 1, gross: 2 }, sieg: { pad: .8, horn: 1, gross: 2 }, reiter: { pad: .7, ost: 1, horn: 1, gross: 2 },
-    zwerge: { pad: .7, horn: 1, gross: 2, tief: 1 }, spannung: { pad: .6, ost: 1, gross: 1 }, unterreich: { pad: .6, tief: 1, gross: 1 },
-    elben: { pad: .7, hoch: 1 }, pilger: { pad: .7 }, reise: { pad: .5, gross: 1 }, auenland: { pad: .4 }, shanty: { pad: .35 },
-    rast: { pad: .35 }, kamin: { pad: .3 }, dorffest: { pad: 0 }
+    kampf: { pad: .8, ost: 1, horn: 1, trp: 1, pos: 1, gross: 2 }, sieg: { pad: .8, horn: 1, trp: 1, gross: 2 },
+    reiter: { pad: .7, ost: 1, horn: 1, trp: 1, gross: 2 }, zwerge: { pad: .7, horn: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1 },
+    spannung: { pad: .6, farbe: "trem", ost: 1, gross: 1 }, unterreich: { pad: .6, farbe: "trem", tief: 1, tuba: 1, gross: 1, gong: 1 },
+    elben: { pad: .7, hoch: 1, glanz: 1 }, pilger: { pad: .6, farbe: "orgel" }, reise: { pad: .5, gross: 1 },
+    auenland: { pad: .45, farbe: "holz" }, shanty: { pad: .4, farbe: "holz" }, rast: { pad: .4, farbe: "holz" }, kamin: { pad: .35, farbe: "holz" },
+    dorffest: { pad: 0, volk: 1 }
   };
+  const PAD_FARBE = { trem: ["vctrem", "vlntrem"], orgel: ["orgel", "orgel"], holz: ["fag", "klar"] };
   const orchProfil = () => S.orchester !== 0 && S.stimmung && ORCH[S.stimmung] ? ORCH[S.stimmung] : null;
   let orchBus = null, orchPan = {}, padAkkord = -1, padEnde = 0;
   function orchAufbauen() {
     if (orchBus || !ctx) return;
     orchBus = ctx.createGain(); orchBus.gain.value = 1; orchBus.connect(master);
     const hs = ctx.createGain(); hs.gain.value = .7; orchBus.connect(hs); hs.connect(hallEin);
-    [["vln", -.35], ["vc", .3], ["horn", .12], ["gross", 0]].forEach(([k, p]) => {
+    [["vln", -.35], ["vc", .3], ["horn", .12], ["blech", .22], ["holz", -.18], ["gross", 0]].forEach(([k, p]) => {
       let n = ctx.createGain();
       if (!spar && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = p; pn.connect(orchBus); n.connect(pn); } else n.connect(orchBus);
       orchPan[k] = n;
@@ -1938,13 +1955,23 @@
     const pr = orchProfil();
     if (S.instrument === "harfe") probenLaden("harfe");
     if (S.instrument === "glocken") probenLaden("glock");
+    if (S.instrument === "fidel") { probenLaden("geige"); probenLaden("geigest"); }
+    if (S.instrument === "schalmei") { probenLaden("oboe"); probenLaden("oboest"); }
+    if (S.band.trommel === "tamburin") { sampleLaden("tamb1"); sampleLaden("tamb2"); }
     if (S.band.floete === "floete") { probenLaden("fl"); probenLaden("flst"); }
     if (S.band.floete === "horn") probenLaden("horn");
     if (S.band.trommel === "pauke") { sampleLaden("timp1"); sampleLaden("timp3"); }
     if (!pr) return;
-    if (pr.pad) { probenLaden("vc"); probenLaden("vln"); }
+    if (!pr.volk) probenLaden("kb");
+    if (pr.pad) (PAD_FARBE[pr.farbe] || ["vc", "vln"]).forEach(probenLaden);
     if (pr.ost) probenLaden("spic");
     if (pr.horn) probenLaden("horn");
+    if (pr.trp) probenLaden("trp");
+    if (pr.pos) probenLaden("pos");
+    if (pr.tuba) probenLaden("tuba");
+    if (pr.amboss) sampleLaden("amboss");
+    if (pr.glanz) sampleLaden("gloeckchen");
+    if (pr.gong) { sampleLaden("gong"); sampleLaden("bogen"); }
     if (pr.gross) ["timproll", "crash", "swell", "bd", "timp1"].forEach(sampleLaden);
   }
   /* Akkordtöne zur Bass-Zeile: Grundton, Terz, Quinte als MIDI-Noten */
@@ -1968,9 +1995,11 @@
     if (pr.pad && x >= .25 && (schritt % 8 === 0 || zeile !== padAkkord) && (zeile !== padAkkord || schritt === 0 || zeit >= padEnde - .05)) {
       let n = 1; while (n < SCHRITTE - schritt && klingt(daten.bass, schritt + n) === zeile) n++;
       const dauer = n * sd + .35, l = pr.pad * (.5 + .5 * x) * (.6 + .5 * int);
-      const vl = pr.tief ? -12 : pr.hoch ? 12 : 0;
-      probe("vc", ak.grund, zeit, orchPan.vc, .3 * l, { ein: .28, aus: .45, dauer });
-      if (!pr.tief || x > .6) { probe("vln", ak.terz + vl, zeit, orchPan.vln, .2 * l, { ein: .32, aus: .5, dauer }); probe("vln", ak.quinte + vl, zeit, orchPan.vln, .18 * l, { ein: .36, aus: .5, dauer }); }
+      const vl = pr.tief ? -12 : pr.hoch ? 12 : 0, [tief, hoch] = PAD_FARBE[pr.farbe] || ["vc", "vln"];
+      const pt = pr.farbe === "holz" ? orchPan.holz : orchPan.vc, ph = pr.farbe === "holz" ? orchPan.holz : orchPan.vln;
+      const fk = pr.farbe === "orgel" ? .45 : pr.farbe === "holz" ? .8 : 1, hk = pr.farbe === "holz" ? -12 : 0;
+      probe(tief, ak.grund, zeit, pt, .3 * l * fk, { ein: .28, aus: .45, dauer });
+      if (!pr.tief || x > .6) { probe(hoch, ak.terz + vl + hk, zeit, ph, .2 * l * fk, { ein: .32, aus: .5, dauer }); probe(hoch, ak.quinte + vl + hk, zeit, ph, .18 * l * fk, { ein: .36, aus: .5, dauer }); }
       padAkkord = zeile; padEnde = zeit + dauer;
     }
     /* treibende Celli (Spiccato-Achtel) ab der Hälfte des Aufbaus */
@@ -1983,18 +2012,32 @@
       probe("horn", ak.grund - 12 + 12, zeit, orchPan.horn, .26 * (.6 + .5 * int), { ein: .12, aus: .35, dauer: 8 * sd + .2 });
       probe("horn", ak.q2, zeit, orchPan.horn, .18 * (.6 + .5 * int), { ein: .14, aus: .35, dauer: 8 * sd + .2 });
     }
+    /* Blech im Höhepunkt: Trompeten auf Terz und Quinte, Posaune auf dem Grundton */
+    if (ab === c && schritt % 8 === 0 && (pr.trp || pr.pos)) {
+      const bl = .2 * (.6 + .5 * int), d8 = 8 * sd + .15;
+      if (pr.trp) { probe("trp", ak.terz, zeit, orchPan.blech, bl * 1.3, { ein: .05, aus: .3, dauer: d8 }); probe("trp", ak.quinte, zeit, orchPan.blech, bl * 1.1, { ein: .05, aus: .3, dauer: d8 }); }
+      if (pr.pos) probe("pos", ak.grund, zeit, orchPan.blech, bl * 1.1, { ein: .06, aus: .3, dauer: d8 });
+    }
+    /* Tuba als tiefes Fundament, sobald sich das Stück aufgebaut hat */
+    if (pr.tuba && x >= .5 && schritt === 0) probe("tuba", ak.grund - 12, zeit, orchPan.blech, .26 * (.6 + .5 * int), { ein: .12, aus: .4, dauer: bar + .1 });
+    /* Zwergenschmiede: Amboss auf Eins und Drei */
+    if (pr.amboss && x >= .5 && schritt % 8 === 0) probe("amboss", 0, zeit, orchPan.vc, (schritt === 0 ? .2 : .14) * (.6 + .5 * int));
+    /* Elben: ab und zu ein Schimmer aus Glöckchen */
+    if (pr.glanz && schritt === 0 && Math.random() < .35) probe("gloeckchen", 0, zeit, orchPan.vln, .18);
     /* große Momente: Takt vor dem Höhepunkt Wirbel und Schwellen, auf der Eins des Höhepunkts der Schlag */
     if (pr.gross && schritt === 0) {
       const L = S.ablauf.length, vorher = (c - 1 + L) % L;
       if (ab === vorher && L > 1) {
         probe("timproll", 0, zeit, orchPan.gross, pr.gross > 1 ? .5 : .3, { ein: .4, dauer: bar, aus: .1 });
         const sw = sampleBuf.get("swell");
+        if (pr.gong) probe("bogen", 0, zeit, orchPan.gross, .22, { ein: .6, dauer: bar + .05, aus: .05 });
         if (sw && pr.gross > 1) { const v = Math.max(0, sw._spitze - sw._start - bar); probe("swell", 0, zeit, orchPan.gross, .32, { ein: .05, dauer: bar + .05, aus: .05, versatz: v }); }
         else if (!sw) sampleLaden("swell");
       }
       if (ab === c && L > 1) {
         if (pr.gross > 1) { probe("crash", 0, zeit, orchPan.gross, .38); probe("bd", 0, zeit, orchPan.gross, .55); }
         probe("timp1", 0, zeit, orchPan.gross, pr.gross > 1 ? .55 : .35);
+        if (pr.gong) probe("gong", 0, zeit, orchPan.gross, .32);
       }
     }
   }
