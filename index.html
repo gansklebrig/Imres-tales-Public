@@ -794,7 +794,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       <div class="part-head">
         <p class="label" data-i18n="tavLabel">Zeitvertreib</p>
         <h2 data-i18n="tavTitle">Die Taverne</h2>
-        <p data-i18n="tavText">Zwischen zwei Abenteuern wird gewürfelt, gesungen und geraten. Lass Barradin ein Loblied improvisieren, spiel bei seinem Auftritt mit oder teste dein Gedächtnis am Bestiarium.</p>
+        <p data-i18n="tavText">Zwischen zwei Abenteuern wird gewürfelt, gesungen und geraten. Lass Barradin ein Loblied improvisieren, spiel bei seinem Auftritt mit, geh mit Friedrich und Rex auf die Jagd oder teste dein Gedächtnis am Bestiarium.</p>
       </div>
       <div class="taverne">
         <article class="tav-karte" id="barden-probe">
@@ -830,6 +830,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
           <div class="memory-fuss"><p class="memory-sieg" id="memory-sieg" aria-live="polite"></p><button type="button" class="tav-knopf" id="memory-neu">Neu mischen</button></div>
         </article>
         <article class="tav-karte auftritt" id="auftritt"></article>
+        <article class="tav-karte waldlauf" id="waldlauf"></article>
       </div>
     </div>
   </section>
@@ -870,6 +871,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
 <script src="klangwerk.js?v=20261020h" defer></script>
 <script src="lautenwerk.js?v=20261020h" defer></script>
 <script src="auftritt.js?v=20261020h" defer></script>
+<script src="waldlauf.js?v=20261020h" defer></script>
 <script>document.write('<script src="bildmasse.js?v=' + Date.now() + '"><\/script><script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
@@ -885,7 +887,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       navChronik: "Chronik", navKapitelWahl: "Kapitel wählen", kapitelSprung: "Direkt zum Kapitel", navReise: "Reise", navGefaehrten: "Gefährten", navBestiarium: "Bestiarium",
       navQuests: "Quests", navNsc: "NSC", navKunst: "Künste",
       navTaverne: "Taverne", tavLabel: "Zeitvertreib", tavTitle: "Die Taverne",
-      tavText: "Zwischen zwei Abenteuern wird gewürfelt, gesungen und geraten. Lass Barradin ein Loblied improvisieren, spiel bei seinem Auftritt mit oder teste dein Gedächtnis am Bestiarium.",
+      tavText: "Zwischen zwei Abenteuern wird gewürfelt, gesungen und geraten. Lass Barradin ein Loblied improvisieren, spiel bei seinem Auftritt mit, geh mit Friedrich und Rex auf die Jagd oder teste dein Gedächtnis am Bestiarium.",
       navBuehne: "Bühne", buehneLabel: "Spielmannskunst", buehneTitle: "Barradins Bühne",
       buehneText: "Hier spielt die Musik: Komponiere mit der ganzen Band oder steuere als Spielleiter Stimmungen, Geräuschkulisse und Effekte für den Spieltisch.",
       probeLabel: "Auftreten-Probe", probeTitle: "Barradins Loblied", probeZiel: "Wen besingen?", probeWurf: "W20 werfen", probeTipp: "Wirf den Würfel!",
@@ -944,7 +946,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       navChronik: "Chronicle", navKapitelWahl: "Choose a chapter", kapitelSprung: "Jump to chapter", navReise: "Journey", navGefaehrten: "Companions", navBestiarium: "Bestiary",
       navQuests: "Quests", navNsc: "NPCs", navKunst: "Art",
       navTaverne: "Tavern", tavLabel: "Pastimes", tavTitle: "The Tavern",
-      tavText: "Between two adventures there is rolling, singing and guessing. Let Barradin improvise a song of praise, play along at his performance or test your memory on the bestiary.",
+      tavText: "Between two adventures there is rolling, singing and guessing. Let Barradin improvise a song of praise, play along at his performance, go hunting with Friedrich and Rex or test your memory on the bestiary.",
       navBuehne: "Stage", buehneLabel: "Minstrelsy", buehneTitle: "Barradin's Stage",
       buehneText: "This is where the music plays: compose with the whole band or run moods, ambience and effects for the gaming table as GM.",
       probeLabel: "Performance check", probeTitle: "Barradin's Song of Praise", probeZiel: "Who should he praise?", probeWurf: "Roll the d20", probeTipp: "Roll the die!",
