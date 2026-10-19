@@ -1434,6 +1434,10 @@
         : d >= .32 ? probe("fl", m, zeit, ziel, .42 * l, { ein: .05, aus: .2, dauer: d + .08 }) : probe("flst", m, zeit, ziel, .45 * l, { dauer: Math.max(.25, d), aus: .08 });
       if (ok) return;
     }
+    if ((art === "panfloete" || art === "okarina") && !rendert) {
+      const d = Math.max(.18, dauer || .25);
+      if (probe(art === "panfloete" ? "pan" : "oka", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, PEGEL_ECHT[art] * l, { ein: .03, aus: .15, dauer: d + .08 })) return;
+    }
     if (art === "floete") {
       const key = "echo|floete|" + freq.toFixed(2), buf = !rendert && klangCache.get(key);
       if (buf) { abspielen(buf, zeit, ziel, l, Math.max(.18, dauer || .25)); return; }
@@ -1543,6 +1547,11 @@
       const m = Math.round(69 + 12 * Math.log2(freq / 440)), d = Math.max(.18, dauer || .25), lang = d >= .32;
       const g = art === "fidel" ? (lang ? "geige" : "geigest") : (lang ? "oboe" : "oboest");
       if (probe(g, m, zeit, ziel, (art === "fidel" ? (lang ? .9 : .54) : .32) * l, lang ? { ein: .06, aus: .16, dauer: d + .08 } : { dauer: Math.max(.22, d), aus: .07 })) return;
+    }
+    if (art === "laute" && !rendert && probe("gitarre", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, PEGEL_ECHT.laute * l, { dauer: 2.4, aus: .35 })) return;
+    if (art === "dudelsack" && !rendert) {
+      const d = Math.max(.18, dauer || .3);
+      if (probe("dudel", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, PEGEL_ECHT.dudelsack * l, { ein: .02, aus: .08, dauer: d + .05 })) return;
     }
     if (art === "laute" || art === "harfe") { zupf(freq, zeit, art === "harfe" ? "harfe" : "mel", l); return; }
     if (art === "mandoline") { /* Tremolo: schnell wiederholt angeschlagen */
@@ -1751,6 +1760,7 @@
       /* in den Stimmungen zupft ein echter Kontrabass, in den Tavernenliedern bleibt Barradins Basssaite */
       const pr = orchProfil(), m = tonMidi(spur, zeile, S);
       if (pr && !pr.volk && probe("kb", m, zeit, spurGain.bass, .66 * (laut || 1), { dauer: 1.4, aus: .3 })) return;
+      if ((!pr || pr.volk) && probe("gitarre", m, zeit, spurGain.bass, PEGEL_ECHT.bass * (laut || 1), { dauer: 1.6, aus: .3 })) return;
       zupf(midiHz(m), zeit, "bass", laut);
     }
   }
@@ -1951,6 +1961,8 @@
     spic: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77], horn: [36, 39, 43, 46, 50, 53, 57, 60],
     fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], flst: [69, 72, 76, 81, 84, 88, 93, 96],
     harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101], glock: [79, 84, 91, 96, 103, 108],
+    gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], dudel: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87],
+    pan: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90], oka: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90],
     fag: [34,  37,  41,  45,  46,  48,  55,  60,  63,  68,  69,  72], pos: [34,  37,  39,  41,  46,  50,  53,  60,  61,  63,  65], vctrem: [36,  40,  43,  50,  53,  57,  59,  60,  64,  67,  71,  74,  77], trp: [53,  57,  60,  63,  67,  70,  74,  77,  81,  84], oboest: [58,  62,  65,  70,  74,  77,  82,  89], kb: [28,  30,  31,  34,  36,  38,  40,  42,  44,  45,  49,  52,  56,  59], geigest: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], geige: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], tuba: [34,  39,  41,  46,  50,  53,  58], klar: [50,  53,  58,  62,  65,  70,  74,  77,  82,  86,  90], orgel: [36,  42,  48,  54,  60,  66,  72,  78,  84,  90,  96], vlntrem: [55,  57,  59,  62,  69,  72,  76,  79,  83,  86], oboe: [58,  62,  65,  70,  74,  77,  82,  86,  89] };
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
@@ -1971,6 +1983,8 @@
       }).catch(() => { sampleLaedt.delete(name); return null; });
     sampleLaedt.set(name, pr); return pr;
   }
+  /* Lautstärke der Aufnahmen aus dem FluidR3-Klangsatz, abgestimmt auf die bisherigen Klänge */
+  const PEGEL_ECHT = { laute: .5, dudelsack: .45, panfloete: .3, okarina: .3, bass: .6 };
   const naechsteProbe = (gruppe, midi) => (SAMPLE_KARTE[gruppe] || []).reduce((b, m) => b == null || Math.abs(m - midi) < Math.abs(b - midi) ? m : b, null);
   function probenLaden(gruppe) { (SAMPLE_KARTE[gruppe] || [gruppe]).forEach(m => sampleLaden(SAMPLE_KARTE[gruppe] ? gruppe + "_" + m : gruppe)); }
   /* eine Aufnahme spielen: o = { ein, aus, dauer, pan } – gibt false zurück, wenn sie noch nicht geladen ist */
@@ -2021,6 +2035,11 @@
     if (S.instrument === "harfe") probenLaden("harfe");
     if (S.instrument === "glocken") probenLaden("glock");
     if (S.instrument === "fidel") { probenLaden("geige"); probenLaden("geigest"); }
+    if (S.instrument === "laute") probenLaden("gitarre");
+    if (S.instrument === "dudelsack") probenLaden("dudel");
+    if (!pr || pr.volk) probenLaden("gitarre"); /* Barradins Basssaiten in den Liedern */
+    if (S.band.floete === "panfloete") probenLaden("pan");
+    if (S.band.floete === "okarina") probenLaden("oka");
     if (S.instrument === "schalmei") { probenLaden("oboe"); probenLaden("oboest"); }
     if (S.band.trommel === "tamburin") { sampleLaden("tamb1"); sampleLaden("tamb2"); }
     if (S.band.floete === "floete") { probenLaden("fl"); probenLaden("flst"); }

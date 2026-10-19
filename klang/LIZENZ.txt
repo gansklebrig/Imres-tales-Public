@@ -5,3 +5,8 @@ Lizenz: CC0 1.0 Universal (gemeinfrei). Für Imres Tales gekürzt und als MP3 um
 
 Die Orgel (orgel_*.mp3) wurde von Simon Dalzell (Ivy Audio) aufgenommen, Winter 2015/16;
 Versilian Studios erlaubt die Weitergabe. Dank an beide.
+
+Laute (gitarre_*), Dudelsack (dudel_*), Panflöte (pan_*) und Okarina (oka_*) stammen aus dem
+Fluid-R3-GM-Klangsatz von Frank Wen, als Einzeltöne aufbereitet von Benjamin Gleitzman
+(https://github.com/gleitz/midi-js-soundfonts). Lizenz: Creative Commons Namensnennung 3.0
+(https://creativecommons.org/licenses/by/3.0/). Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.
