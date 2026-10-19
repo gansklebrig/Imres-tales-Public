@@ -888,7 +888,7 @@
   }
   /* Während ein Effekt läuft, tritt die Musik sanft etwas zurück (gut 3 dB) und kommt danach weich wieder */
   function musikDucken(start, dauer) {
-    if (!ducken) return;
+    if (!ducken || musikPauseAb) return;
     const jetzt = ctx.currentTime, ende = Math.max(duckEnde, start + Math.max(.4, dauer * .85));
     const p = ducken.gain;
     if (musikStumm) return;
@@ -1961,7 +1961,8 @@
     saitenVorbereiten();
     if (!weiter) { schritt = 0; abschnitt = 0; }
     tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1;
-    if (klassikLauf) musikPauseAb = ctx.currentTime + .05;
+    if (klassikLauf) klassikStopp(true, true);
+    clearTimeout(fortsetzTimer); musikPauseAb = 0;
     if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.value = .38; }
     musikWieder(); orchVorladen();
     kulisseStart();
@@ -2652,34 +2653,40 @@
   Object.assign(KLASSIK, COVER_STUECKE);
   /* Abspielen: die Partitur wird vorab gelesen, die Aufnahmen geladen, dann Stück für Stück eingeplant.
      Ein zweiter Druck auf denselben Knopf (oder ■ Anhalten) beendet das Stück weich. */
-  let klassikLauf = null, musikPauseAb = 0;
+  let klassikLauf = null, musikPauseAb = 0, fortsetzTimer = 0;
   /* Läuft Musik, blendet sie für das Stück weich aus und hält am Taktende an – danach setzt sie weich wieder ein */
   function musikPausieren() {
-    if (!laeuft || musikPauseAb) return 0;
+    clearTimeout(fortsetzTimer);
+    if (!laeuft) return 0;
+    if (musikPauseAb) return 1; /* schon pausiert – z. B. weil gerade ein anderes Stück lief */
     const j = ctx.currentTime; musikPauseAb = j + 1.1;
     ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .3);
     setTimeout(bordunAus, 900);
     return 1;
   }
   function musikFortsetzen() {
-    if (!musikPauseAb) return;
+    clearTimeout(fortsetzTimer);
+    if (!musikPauseAb || klassikLauf) return;
     musikPauseAb = 0;
     if (!laeuft || !ctx) return;
     const j = ctx.currentTime; schritt = 0; naechste = j + .15; padAkkord = -1;
     ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(0, j); ducken.gain.setTargetAtTime(1, j + .1, .6); musikStumm = false;
     if (S.bordun) setTimeout(bordunAn, 300);
   }
-  function klassikStopp(sanft) {
+  /* ersetzt = gleich folgt ein anderes Stück: dann bleibt die Musik pausiert */
+  function klassikStopp(sanft, ersetzt) {
     const k = klassikLauf; if (!k) return;
     klassikLauf = null; clearInterval(k.timer);
     const j = ctx.currentTime; k.bus.gain.cancelScheduledValues(j); k.bus.gain.setTargetAtTime(0, j, sanft ? .25 : .06);
     setTimeout(() => { try { k.bus.disconnect(); } catch (_) {} }, 1500);
-    setTimeout(musikFortsetzen, sanft ? 500 : 100); klassikKnoepfe();
+    clearTimeout(fortsetzTimer);
+    if (!ersetzt) fortsetzTimer = setTimeout(musikFortsetzen, sanft ? 500 : 100);
+    klassikKnoepfe();
   }
   function klassikKnoepfe() { root.querySelectorAll("[data-sfx]").forEach(b => b.classList.toggle("spielt", !!klassikLauf && klassikLauf.art === b.dataset.sfx)); }
   async function klassikSpielen(art, laut) {
     const f = KLASSIK[art]; if (!f || !ctx) return;
-    if (klassikLauf) { const war = klassikLauf.art; klassikStopp(true); if (war === art) return; }
+    if (klassikLauf) { const war = klassikLauf.art; klassikStopp(true, war !== art); if (war === art) return; }
     const noten = [], namen = new Set();
     f((gr, m, t, d, g, o) => { const k = SAMPLE_KARTE[gr] ? gr + "_" + naechsteProbe(gr, m) : gr; namen.add(k); noten.push([t, gr, m, d, g, o]); });
     noten.sort((a, b) => a[0] - b[0]);
@@ -3155,6 +3162,7 @@
   function boxNeu(welche) {
     const T = t(), alt = root.querySelector(welche === "musik" ? ".lw-musik" : ".lw-klang");
     if (alt) alt.outerHTML = welche === "musik" ? musikBox(T, !S.pult && !hoerer) : klangBox(T);
+    klassikKnoepfe();
   }
   function eigenLaden(wert) {
     const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
@@ -3302,7 +3310,15 @@
   function hoererEmpfang(ev, d) {
     if (ev !== "_offen") { hoerer.nachrichten = (hoerer.nachrichten || 0) + 1; hoerer.letztes = Date.now(); hoererDiagnose(); }
     if (ev === "_offen") { hoerer.verbunden = true; funkHoererKanal.senden("hallo", {}); zeichnen(); return; }
-    if (ev === "fx") { if (hoerer.an && ctx && ALLE_FX.includes(d.art)) effekt(d.art); return; }
+    if (ev === "fx") {
+      if (!hoerer.an || !ctx || !ALLE_FX.includes(d.art)) return;
+      if (KLASSIK[d.art] && typeof d.an === "boolean") {
+        const spielt = !!(klassikLauf && klassikLauf.art === d.art);
+        if (d.an !== spielt) effekt(d.art);
+        return;
+      }
+      effekt(d.art); return;
+    }
     if (ev !== "zustand") return;
     const alt = hoerer.zuletzt; hoerer.zuletzt = d;
     if (d.pos && Number.isInteger(d.pos.abschnitt) && Number.isInteger(d.pos.schritt)) funkPos = { abschnitt: d.pos.abschnitt, schritt: d.pos.schritt, t: performance.now() };
@@ -3334,7 +3350,7 @@
     if (st === "fehler" && hoerer.verbunden) { hoerer.verbunden = false; zeichnen(); }
   });
 
-  function zeichnen() { zeichnenInnen(); armeSetzen(); }
+  function zeichnen() { zeichnenInnen(); armeSetzen(); klassikKnoepfe(); }
   function zeichnenInnen() {
     const T = t();
     if (hoerer) { hoererZeichnen(T); return; }
@@ -3627,7 +3643,7 @@
     const kb = e.target.closest("[data-kulisse]");
     if (kb) { audioStart(); S.kulisse = kb.dataset.kulisse; merken(); kulisseStart(true); zeichnen(); knoepfe(); return; }
     const fx = e.target.closest("[data-sfx]");
-    if (fx) { try { audioStart(); effekt(fx.dataset.sfx); funkSenden("fx", { art: fx.dataset.sfx }); fx.classList.remove("blitz"); void fx.offsetWidth; fx.classList.add("blitz"); } catch (_) {} return; }
+    if (fx) { try { audioStart(); effekt(fx.dataset.sfx); funkSenden("fx", KLASSIK[fx.dataset.sfx] ? { art: fx.dataset.sfx, an: !!(klassikLauf && klassikLauf.art === fx.dataset.sfx) } : { art: fx.dataset.sfx }); fx.classList.remove("blitz"); void fx.offsetWidth; fx.classList.add("blitz"); } catch (_) {} return; }
     if (e.target.closest('[data-aktion="pult"]')) { S.pult = !S.pult; merken(); zeichnen(); knoepfe(); root.scrollIntoView({ block: "start" }); return; }
     if (e.target.closest('[data-aktion="kulisse"]')) { audioStart(); kul ? kulisseStop() : kulisseStart(true); zeichnen(); knoepfe(); return; }
     if (e.target.closest(".lw-teilen")) {
