@@ -571,7 +571,7 @@
     const gx = p.x / C, gy = (p.y - OY) / C, zx = Math.floor(gx), zy = Math.floor(gy);
     if (S.zielModus) { werfen(gx, gy); return; }
     // Figuren zuerst
-    let best = null, bd = 0.7;
+    let best = null, bd = 0.62;
     const pruef = (e, art) => { const d = Math.hypot(e.x - gx, e.y - gy); if (d < bd) { bd = d; best = { art, ref: e }; } };
     S.gaeste.forEach(g => pruef(g, "klauen"));
     S.wachen.forEach(g => { if (g.zustand !== "aus") pruef(g, "aus"); });
@@ -591,14 +591,21 @@
       return;
     }
     E.absicht = null;
+    let ziel = { x: zx, y: zy };
     if (!begehbar(zx, zy, false) && !(zx === Math.floor(E.x) && zy === Math.floor(E.y))) {
-      // auf Möbel getippt: zum nächsten freien Nachbarfeld
-      const p2 = pfadSuchen(Math.floor(E.x), Math.floor(E.y), neben({ x: zx, y: zy }), false);
-      if (p2 && zeichen(zx, zy) !== "#") E.pfad = p2;
-      return;
+      // Finger knapp daneben (Wand, Tisch, Tresen …): das nächste freie Feld am Tipp-Punkt nehmen
+      let bw = 1.25; ziel = null;
+      for (let y = zy - 1; y <= zy + 1; y++) for (let x = zx - 1; x <= zx + 1; x++) {
+        if (!begehbar(x, y, false) && !(x === Math.floor(E.x) && y === Math.floor(E.y))) continue;
+        const w = Math.hypot(x + 0.5 - gx, y + 0.5 - gy);
+        if (w < bw) { bw = w; ziel = { x, y }; }
+      }
+      if (!ziel) { S.marke.nein = true; return; }
+      S.marke = { x: ziel.x + 0.5, y: ziel.y + 0.5, t: 0 };
     }
-    const p2 = pfadSuchen(Math.floor(E.x), Math.floor(E.y), genau({ x: zx, y: zy }), false);
-    if (p2) E.pfad = p2; else textAuf(E.x, E.y - 0.8, t().keinWeg, "#a89f8f", 16);
+    if (ziel.x === Math.floor(E.x) && ziel.y === Math.floor(E.y)) { E.pfad = [{ x: ziel.x, y: ziel.y }]; return; }
+    const p2 = pfadSuchen(Math.floor(E.x), Math.floor(E.y), genau(ziel), false);
+    if (p2) E.pfad = p2; else { S.marke.nein = true; textAuf(E.x, E.y - 0.8, t().keinWeg, "#a89f8f", 16); }
   }
   function betreten(x, y) {
     const z = zeichen(x, y), key = x + "," + y;
@@ -1513,7 +1520,12 @@
     freundeZeichnen();
     lichterZeichnen();
     kegelAlle();
-    if (S.marke) { const a = 1 - S.marke.t / 0.6; ctx.strokeStyle = "rgba(224,160,70," + a.toFixed(2) + ")"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(PX(S.marke.x), PY(S.marke.y), C * (0.2 + S.marke.t * 0.4), 0, 7); ctx.stroke(); }
+    if (S.marke) {
+      const a = 1 - S.marke.t / 0.6, mx = PX(S.marke.x), my = PY(S.marke.y);
+      ctx.strokeStyle = (S.marke.nein ? "rgba(168,159,143," : "rgba(224,160,70,") + a.toFixed(2) + ")"; ctx.lineWidth = 1.5;
+      if (S.marke.nein) { const k = C * 0.2; ctx.beginPath(); ctx.moveTo(mx - k, my - k); ctx.lineTo(mx + k, my + k); ctx.moveTo(mx + k, my - k); ctx.lineTo(mx - k, my + k); ctx.stroke(); }
+      else { ctx.beginPath(); ctx.arc(mx, my, C * (0.2 + S.marke.t * 0.4), 0, 7); ctx.stroke(); }
+    }
     ezekielAugen();
     gastMarken(); wachenMarken(); dracheZzz();
     if (S.muenzFlug) { const m = S.muenzFlug, k = m.t, x = m.x0 + (m.x1 - m.x0) * k, y = m.y0 + (m.y1 - m.y0) * k - Math.sin(k * Math.PI) * 1.4; ctx.fillStyle = "#ffcf7a"; ctx.shadowColor = "#e0a046"; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(PX(x), PY(y), 3.5, 0, 7); ctx.fill(); ctx.shadowBlur = 0; }
@@ -1819,22 +1831,23 @@
     const r = leinwand.getBoundingClientRect();
     return { x: (ev.clientX - r.left) * W / r.width, y: (ev.clientY - r.top) * H / r.height };
   }
-  let druck = null;
+  const druecke = new Map();
   leinwand.addEventListener("pointerdown", ev => {
     if (zustand !== "spiel") return;
     ev.preventDefault();
-    druck = { id: ev.pointerId, x: ev.clientX, y: ev.clientY };
+    druecke.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, t: performance.now() });
     audio();
   });
   leinwand.addEventListener("pointerup", ev => {
-    if (!druck || ev.pointerId !== druck.id) return;
-    const weit = Math.hypot(ev.clientX - druck.x, ev.clientY - druck.y) > 16;
-    druck = null;
-    if (weit || zustand !== "spiel") return;
-    tippen(punkt(ev));
+    const d = druecke.get(ev.pointerId); druecke.delete(ev.pointerId);
+    if (!d || zustand !== "spiel") return;
+    // leicht verrutschte Finger zählen trotzdem; nur deutliches Wischen wird ignoriert
+    const weg = Math.hypot(ev.clientX - d.x, ev.clientY - d.y), lang = performance.now() - d.t;
+    if (weg > 40 || (weg > 24 && lang > 450)) return;
+    tippen(punkt({ clientX: (ev.clientX + d.x) / 2, clientY: (ev.clientY + d.y) / 2 }));
     muenzKnopfSetzen();
   });
-  leinwand.addEventListener("pointercancel", () => { druck = null; });
+  leinwand.addEventListener("pointercancel", ev => { druecke.delete(ev.pointerId); });
   leinwand.addEventListener("contextmenu", ev => ev.preventDefault());
 
   /* ---------- Größe ---------- */
