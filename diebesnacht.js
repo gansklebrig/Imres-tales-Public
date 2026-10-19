@@ -63,7 +63,15 @@
       barradin: ["Psst – ich lenke sie ab!", "Eine Strophe nur für dich!", "Ich singe später über dich. Ganz leise."],
       ezekielStumm: ["…", "Hm."],
       geschafft: "Stufe geschafft", beute: "Beute", ungesehen: "Ungesehen", ungesehenBonus: n => "Ungesehen: +" + n,
-      nachtGeschafft: n => "Nacht " + n + " überstanden.", alleGeschafft: "Alle fünf Nächte überstanden! Aber die Nacht nimmt kein Ende …",
+      nachtGeschafft: n => "Nacht " + n + " überstanden.", alleGeschafft: "Alle Nächte überstanden! Neue folgen, sobald die Gruppe weiterzieht – bis dahin nimmt die Nacht kein Ende …",
+      zorn: "THE DESTROYER!", zornBereit: "Darkin-Zorn bereit!", zornKnopf: "Darkin-Zorn entfesseln", zornTipp: "Darkin-Zorn ist voll: Tippe unten auf 😈, um für ein paar Sekunden zum Destroyer zu werden.",
+      zahm: "Braver Hund.", knurr: "Grrr!", keinHund: "Ezekiel tut keinem Hund was.",
+      fauch: "Fauch!", fauchDrow: "Du schon wieder!", entlarvt: "Nezna entlarvt!", spinne: "„Die Spinne wird euch holen …“",
+      neznaHinweis: "Gerücht: Eine schwarze Katze mit violetten Augen streift hier herum. Fang sie von hinten.", neznaDrow: "Nezna ist hier – diesmal ohne Verkleidung. Ezekiel kennt ihren Rücken.",
+      hundHinweis: "Wachhunde riechen dich – sogar im Fass. Tippe sie an, bevor sie anschlagen, und Ezekiel füttert sie.",
+      sterne: ["Ungesehen", "Alles Gold", "Ohne Blut"], neu: "neu!", sterneBonus: (a, b) => (a ? "Alles Gold: +" + a : "") + (a && b ? " · " : "") + (b ? "Ohne Blut: +" + b : ""),
+      sterneGesamt: (a, b) => "★ " + a + " von " + b + " Sternen", neznaZahl: (a, b) => "🐈‍⬛ Nezna entlarvt: " + a + " von " + b,
+      folgt: "Weitere Nächte folgen mit der Kampagne.",
       rast: "Atempause im Schatten", rastText: "Wähle eine Gabe für die nächste Stufe.",
       stufenTitel: "Schwierigkeit", stufen: { lehrling: "🕯 Lehrling", schurke: "🗡 Schurke", legende: "😈 Destroyer" },
       stufenText: { lehrling: "Langsamere, kurzsichtige Wachen. 5 Leben.", schurke: "Die Nacht, wie Ezekiel sie kennt. 3 Leben.", legende: "Wache Augen, schnelle Beine. 2 Leben." },
@@ -82,7 +90,8 @@
         ranken: [["Echos Ranken", "Wurzeln bremsen alle Wachen."], ["Dichte Ranken", "Die Wachen werden noch langsamer."]],
         sinne: [["Darkin-Sinne", "Du spürst immer, wer den Schlüssel trägt."]],
         lied: [["Barradins Ballade", "Barradin besingt dich überall: Aufsehen verfliegt mit der Zeit."]],
-        rast: [["Heiltrank", "+1 Leben."]]
+        rast: [["Heiltrank", "+1 Leben."]],
+        blutdurst: [["Blutdurst", "Darkin-Zorn füllt sich schneller und hält länger."]]
       },
       ende: "Ezekiel wurde gefasst", punkte: "Gold",
       wert: { stufe: "Erreicht", bestohlen: "Bestohlen", aus: "Ausgeschaltet", geist: "Ungesehen" },
@@ -132,7 +141,15 @@
       barradin: ["Psst – I'll distract them!", "A verse just for you!", "I'll sing about you later. Very quietly."],
       ezekielStumm: ["…", "Hm."],
       geschafft: "Stage cleared", beute: "Loot", ungesehen: "Unseen", ungesehenBonus: n => "Unseen: +" + n,
-      nachtGeschafft: n => "Night " + n + " survived.", alleGeschafft: "All five nights survived! But the night never ends …",
+      nachtGeschafft: n => "Night " + n + " survived.", alleGeschafft: "All nights survived! More follow as the party moves on – until then, the night never ends …",
+      zorn: "THE DESTROYER!", zornBereit: "Darkin rage ready!", zornKnopf: "Unleash Darkin rage", zornTipp: "Darkin rage is full: tap 😈 below to become the Destroyer for a few seconds.",
+      zahm: "Good dog.", knurr: "Grrr!", keinHund: "Ezekiel would never hurt a dog.",
+      fauch: "Hiss!", fauchDrow: "You again!", entlarvt: "Nezna unmasked!", spinne: "\"The spider will come for you …\"",
+      neznaHinweis: "Rumour: a black cat with violet eyes prowls here. Catch her from behind.", neznaDrow: "Nezna is here – this time without disguise. Ezekiel knows her back.",
+      hundHinweis: "Guard dogs smell you – even in a barrel. Tap them before they bark and Ezekiel feeds them.",
+      sterne: ["Unseen", "All the gold", "No blood"], neu: "new!", sterneBonus: (a, b) => (a ? "All the gold: +" + a : "") + (a && b ? " · " : "") + (b ? "No blood: +" + b : ""),
+      sterneGesamt: (a, b) => "★ " + a + " of " + b + " stars", neznaZahl: (a, b) => "🐈‍⬛ Nezna unmasked: " + a + " of " + b,
+      folgt: "More nights follow with the campaign.",
       rast: "A breather in the shadows", rastText: "Choose a gift for the next stage.",
       stufenTitel: "Difficulty", stufen: { lehrling: "🕯 Apprentice", schurke: "🗡 Rogue", legende: "😈 Destroyer" },
       stufenText: { lehrling: "Slower, short-sighted guards. 5 lives.", schurke: "The night as Ezekiel knows it. 3 lives.", legende: "Sharp eyes, quick legs. 2 lives." },
@@ -151,7 +168,8 @@
         ranken: [["Echo's vines", "Roots slow down all guards."], ["Dense vines", "The guards get even slower."]],
         sinne: [["Darkin senses", "You always sense who carries the key."]],
         lied: [["Barradin's ballad", "Barradin sings of you everywhere: attention fades over time."]],
-        rast: [["Healing potion", "+1 life."]]
+        rast: [["Healing potion", "+1 life."]],
+        blutdurst: [["Bloodlust", "Darkin rage fills faster and lasts longer."]]
       },
       ende: "Ezekiel was caught", punkte: "gold",
       wert: { stufe: "Reached", bestohlen: "Pickpocketed", aus: "Taken down", geist: "Unseen" },
@@ -182,6 +200,7 @@
     bugbear:   { sicht: 5.0, halb: 0.5, tempo: 0.9, jagd: 1.9, dunkel: 1.8, r: 0.44, mantel: "#7a5530", kopf: "#a8783e", gross: true },
     duergar:   { sicht: 4.7, halb: 0.58, tempo: 1.15, jagd: 2.15, dunkel: 2.0, r: 0.33, mantel: "#5c5754", kopf: "#8c8580", bart: true },
     drow:      { sicht: 4.4, halb: 0.6, tempo: 1.3, jagd: 2.35, dunkel: 3.2, r: 0.32, mantel: "#2c2238", kopf: "#4a4160", haar: "#ece8f4" },
+    hund:      { sicht: 2.8, halb: 0.9, tempo: 1.7, jagd: 3.0, dunkel: 2.2, r: 0.27, mantel: "#7a5e44", kopf: "#8e6e50", hund: true, nase: 1.75 },
     wirt:      { sicht: 2.8, halb: 0.85, tempo: 0, jagd: 0, dunkel: 1.3, r: 0.33, mantel: "#cfc4ad", kopf: "#c99c78", ruft: true, schuerze: true }
   };
   const STUFEN = {
@@ -191,10 +210,16 @@
   };
   let stufeWahl = STUFEN[lies("imres-diebesnacht-stufe", "")] ? lies("imres-diebesnacht-stufe", "") : "schurke";
   let nachtWahl = 1;
-  const freiNaechte = () => Math.max(1, Math.min(5, parseInt(lies("imres-diebesnacht-nacht", "1"), 10) || 1));
+  /* Neue Nächte: einfach drei weitere Karten an LEVELS anhängen (n = neue Nachtnummer) und in TX
+     „naechte“ und „lv“ Namen und Tipps ergänzen. Nachtauswahl, Sterne und Freischalten passen sich an. */
+  const NAECHTE = () => Math.floor(LEVELS.length / 3);
+  const freiNaechte = () => Math.max(1, Math.min(NAECHTE(), parseInt(lies("imres-diebesnacht-nacht", "1"), 10) || 1));
+  const sterneLesen = () => { try { const v = JSON.parse(localStorage.getItem("imres-diebesnacht-sterne") || "[]"); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
+  const neznaLesen = () => parseInt(lies("imres-diebesnacht-nezna", "0"), 10) || 0;
+  const bits = n => (n & 1) + (n >> 1 & 1) + (n >> 2 & 1);
 
-  const GABEN = { umhang: 2, sohlen: 2, finger: 2, muenze: 3, klinge: 1, schritt: 1, ranken: 2, sinne: 1, lied: 1, rast: 99 };
-  const GABE_SYM = { umhang: "🌑", sohlen: "👣", finger: "✋", muenze: "🪙", klinge: "🗡️", schritt: "💨", ranken: "🌿", sinne: "👁️", lied: "🎶", rast: "🧪" };
+  const GABEN = { umhang: 2, sohlen: 2, finger: 2, muenze: 3, klinge: 1, schritt: 1, ranken: 2, sinne: 1, lied: 1, blutdurst: 1, rast: 99 };
+  const GABE_SYM = { umhang: "🌑", sohlen: "👣", finger: "✋", muenze: "🪙", klinge: "🗡️", schritt: "💨", ranken: "🌿", sinne: "👁️", lied: "🎶", blutdurst: "🩸", rast: "🧪" };
 
   /* ---------- Karten ----------
      #  Wand          .  Boden        S  Start        A  Ausgang (öffnet sich, sobald das Ziel erfüllt ist)
@@ -211,7 +236,7 @@
     { n: 1, boden: "stein", ziel: "frei",
       karte: ["############", "#S..O.#$..O#", "#.....#....#", "#..c..#.c..#", "#.....#....#", "##.####.####", "#.........O#", "#O...L.....#", "#..........#", "####.##.####", "#$...O#..c.#", "#..c..#....#", "#....K#...O#", "########A###"],
       wachen: [{ typ: "rotmantel", weg: [[9, 8], [1, 8], [1, 6], [9, 6]] }, { typ: "rotmantel", weg: [[8, 11]], blicke: ["u", "l", "d"] }, { typ: "rotmantel", weg: [[10, 4], [7, 4], [7, 2], [10, 2]] }],
-      truhe: { gold: 40, pins: 3 } },
+      truhe: { gold: 40, pins: 3 }, nezna: "katze" },
     { n: 1, boden: "holz", ziel: "truhe",
       karte: ["############", "#O..c.#...K#", "#.....#....#", "#.o...#c...#", "#.....###.##", "#..........#", "###.##..O..#", "#O...#.....#", "#....#.L...#", "#.c..#...o.#", "#....#.....#", "#..........#", "#S...O...c.A", "############"],
       wachen: [{ typ: "rotmantel", weg: [[10, 5], [1, 5]] }, { typ: "rotmantel", weg: [[10, 11], [6, 11], [6, 7], [10, 7]] }, { typ: "rotmantel", weg: [[8, 2]], blicke: ["d", "l", "r"] }],
@@ -220,7 +245,7 @@
     { n: 2, boden: "stein", ziel: "schluessel",
       karte: ["############", "#R...#..c..#", "#....#.o.o.#", "#.O..#.....#", "#....#.o.o.#", "##.###.....#", "#.....c....#", "#..........#", "#O...###.###", "#....#.....#", "#.c..#..O..#", "#....#.....A", "#S...#.....#", "############"],
       wachen: [{ typ: "rotrobe", weg: [[10, 7], [1, 7]] }, { typ: "rotrobe", weg: [[10, 12], [6, 12], [6, 9], [10, 9]] }, { typ: "rotrobe", weg: [[10, 1]], blicke: ["d", "l"] }],
-      gaeste: [{ x: 6, y: 2, dir: "r", gold: 14, typ: "rotrobe", betrunken: true }, { x: 7, y: 3, dir: "u", gold: 16, typ: "rotrobe", betrunken: true }, { x: 8, y: 4, dir: "r", gold: 18, typ: "rotrobe", betrunken: true }, { x: 10, y: 2, dir: "l", gold: 12, typ: "rotrobe", betrunken: true, key: true }] },
+      gaeste: [{ x: 6, y: 2, dir: "r", gold: 14, typ: "rotrobe", betrunken: true }, { x: 7, y: 3, dir: "u", gold: 16, typ: "rotrobe", betrunken: true }, { x: 8, y: 4, dir: "r", gold: 18, typ: "rotrobe", betrunken: true }, { x: 10, y: 2, dir: "l", gold: 12, typ: "rotrobe", betrunken: true, key: true }], nezna: "katze" },
     { n: 2, boden: "stein", ziel: "frei",
       karte: ["############", "#S.#......$#", "#..#.c.....#", "#.O#..##.O.#", "#..#..##...#", "#..........#", "##.##..##.##", "#.....L....#", "#.O........#", "##.##..##.##", "#..........#", "#.c..##..O.#", "#$...##....A", "############"],
       wachen: [{ typ: "rotrobe", weg: [[10, 5], [1, 5]] }, { typ: "rotrobe", weg: [[10, 8], [1, 8], [1, 7], [10, 7]] }, { typ: "rotrobe", weg: [[1, 10], [10, 10]] }, { typ: "rotrobe", weg: [[8, 2]], blicke: ["l", "d", "r"] }] },
@@ -231,11 +256,11 @@
       truhe: { gold: 90, pins: 4, ziel: true } },
     { n: 3, boden: "stein", ziel: "frei",
       karte: ["############", "#S..~~...O.#", "#...~~.....#", "#.###..###.#", "#.#.....c#.#", "#.#.~~~..#.#", "#...~O~....#", "#.#.~~~..#.#", "#.#......#.#", "#.###..###.#", "#.....$....#", "#O...~~...O#", "#....~~....#", "#####A######"],
-      wachen: [{ typ: "goblin", weg: [[10, 2], [10, 12]] }, { typ: "goblin", weg: [[8, 8], [3, 8], [3, 4], [7, 4]] }, { typ: "goblin", weg: [[9, 12], [1, 12]] }] },
+      wachen: [{ typ: "goblin", weg: [[10, 2], [10, 12]] }, { typ: "goblin", weg: [[8, 8], [3, 8], [3, 4], [7, 4]] }, { typ: "goblin", weg: [[9, 12], [1, 12]] }, { typ: "hund", weg: [[1, 10], [1, 4]] }] },
     { n: 3, boden: "holz", ziel: "schluessel",
       karte: ["############", "#.c..#..O..#", "#....#.....#", "#.o.......c#", "#....#.....#", "##.###~~####", "#.....~~...#", "#O.........#", "#...L...O..#", "###.####.###", "#.....#....#", "#.~~..#..$.#", "#S....#....A", "############"],
       wachen: [{ typ: "goblin", weg: [[10, 6], [10, 8], [1, 8], [1, 6]] }, { typ: "goblin", weg: [[9, 10]], blicke: ["l", "d", "r"] }],
-      gaeste: [{ x: 1, y: 3, dir: "r", gold: 8, typ: "goblin" }, { x: 3, y: 3, dir: "l", gold: 9, typ: "goblin" }, { x: 2, y: 4, dir: "u", gold: 7, typ: "goblin" }, { x: 8, y: 3, dir: "d", gold: 30, typ: "bugbear", schlaeft: true, key: true }] },
+      gaeste: [{ x: 1, y: 3, dir: "r", gold: 8, typ: "goblin" }, { x: 3, y: 3, dir: "l", gold: 9, typ: "goblin" }, { x: 2, y: 4, dir: "u", gold: 7, typ: "goblin" }, { x: 8, y: 3, dir: "d", gold: 30, typ: "bugbear", schlaeft: true, key: true }], nezna: "katze" },
     { n: 3, boden: "fels", ziel: "truhe",
       karte: ["############", "#$...c....$#", "#..........#", "#...##.....#", "#..........#", "#.$........#", "#......K...#", "#....DD..$.#", "#....DD....#", "#..........#", "#O..$...O..#", "##.####.####", "#S.........A", "############"],
       wachen: [{ typ: "goblin", weg: [[10, 2], [1, 2], [1, 9], [10, 9]] }],
@@ -243,24 +268,24 @@
     { n: 4, boden: "schmiede", ziel: "schluessel",
       karte: ["############", "#F..c...=..#", "#.......=..#", "#.o..o..=..#", "#..........#", "#O.o..o...O#", "#..........#", "###.####.###", "#....#.....#", "#.c..#..o..#", "#....#.....#", "#O.......~~#", "#S...#..~~.A", "############"],
       wachen: [{ typ: "duergar", weg: [[10, 6], [4, 6], [4, 4], [10, 4]] }, { typ: "duergar", weg: [[10, 8], [6, 8], [6, 11], [10, 11]] }, { typ: "wirt", weg: [[9, 2]], blicke: ["l"] }],
-      gaeste: [{ x: 2, y: 4, dir: "u", gold: 14, typ: "duergar" }, { x: 6, y: 3, dir: "l", gold: 16 }, { x: 7, y: 5, dir: "l", gold: 15, typ: "duergar", key: true }, { x: 3, y: 6, dir: "u", gold: 12 }, { x: 8, y: 10, dir: "u", gold: 18, typ: "duergar" }, { x: 9, y: 6, gold: 22, wandert: true, typ: "duergar" }] },
+      gaeste: [{ x: 2, y: 4, dir: "u", gold: 14, typ: "duergar" }, { x: 6, y: 3, dir: "l", gold: 16 }, { x: 7, y: 5, dir: "l", gold: 15, typ: "duergar", key: true }, { x: 3, y: 6, dir: "u", gold: 12 }, { x: 8, y: 10, dir: "u", gold: 18, typ: "duergar" }, { x: 9, y: 6, gold: 22, wandert: true, typ: "duergar" }], nezna: "katze" },
     { n: 4, boden: "schmiede", ziel: "frei",
       karte: ["############", "#S...#F#...#", "#....#.#.O.#", "#.O..~~~...#", "#....#.#...#", "###.##.###.#", "#~~.....L..#", "#~~..F.....#", "#......~~..#", "#.###.##.###", "#...#..$...#", "#.O.#.F..O.#", "#.....~~...#", "##########A#"],
-      wachen: [{ typ: "duergar", weg: [[10, 4], [8, 4], [8, 1], [10, 1]] }, { typ: "duergar", weg: [[10, 8], [1, 8], [3, 6], [10, 6]] }, { typ: "duergar", weg: [[10, 12], [1, 12]] }, { typ: "duergar", weg: [[8, 10]], blicke: ["l", "d", "r"] }] },
+      wachen: [{ typ: "duergar", weg: [[10, 4], [8, 4], [8, 1], [10, 1]] }, { typ: "duergar", weg: [[10, 8], [1, 8], [3, 6], [10, 6]] }, { typ: "duergar", weg: [[10, 12], [1, 12]] }, { typ: "duergar", weg: [[8, 10]], blicke: ["l", "d", "r"] }, { typ: "hund", weg: [[3, 10], [1, 12]] }] },
     { n: 4, boden: "schmiede", ziel: "truhe",
       karte: ["############", "#....F.F...#", "#..........#", "#.O..===...#", "#....=K=..O#", "#..........#", "#.c......c.#", "##.##..##.##", "#....~~....#", "#.O..~~..O.#", "#..........#", "###.####.###", "#S.........A", "############"],
       wachen: [{ typ: "duergar", weg: [[1, 2], [10, 2], [10, 5], [1, 5]] }, { typ: "duergar", weg: [[4, 6]], blicke: ["r", "u", "l"] }, { typ: "duergar", weg: [[10, 10], [1, 10], [1, 8], [10, 8]] }],
-      truhe: { gold: 150, pins: 5, runen: true, ziel: true } },
+      truhe: { gold: 150, pins: 5, runen: true, ziel: true }, nezna: "katze" },
     { n: 5, boden: "unterreich", ziel: "schluessel",
       karte: ["############", "#.O#.....$.#", "#S.#.c.....#", "#..#..###..#", "#........o.#", "#..#.......#", "##.####.####", "#..........#", "#.#.#.#.#.##", "#..........#", "####.##.####", "#....#....O#", "#.c..#.L...A", "############"],
-      wachen: [{ typ: "drow", weg: [[10, 1], [10, 3], [4, 5], [4, 1]] }, { typ: "drow", weg: [[10, 9], [1, 9], [1, 7], [10, 7]] }, { typ: "drow", weg: [[8, 11]], blicke: ["l", "r", "u"] }],
-      gaeste: [{ x: 9, y: 5, dir: "u", gold: 20, typ: "drow", key: true }] },
+      wachen: [{ typ: "drow", weg: [[10, 1], [10, 3], [4, 5], [4, 1]] }, { typ: "drow", weg: [[10, 9], [1, 9], [1, 7], [10, 7]] }, { typ: "drow", weg: [[8, 11]], blicke: ["l", "r", "u"] }, { typ: "hund", weg: [[1, 11], [4, 12]] }],
+      gaeste: [{ x: 9, y: 5, dir: "u", gold: 20, typ: "drow", key: true }], nezna: "drow" },
     { n: 5, boden: "unterreich", ziel: "frei",
       karte: ["############", "#S..w....O.#", "#...ww.....#", "#.##.w##.c.#", "#..w....w..#", "#O.www.....#", "##..w.####.#", "#....w...$.#", "#.w.....ww.#", "#.##.c.##..#", "#....w.....#", "#.ww....w.O#", "#$....ww...A", "############"],
       wachen: [{ typ: "drow", weg: [[10, 5], [6, 4], [6, 1], [10, 1]] }, { typ: "drow", weg: [[10, 10], [1, 10], [1, 7], [8, 7]] }, { typ: "drow", weg: [[10, 12], [2, 12]] }] },
     { n: 5, boden: "unterreich", ziel: "schwert",
       karte: ["############", "#.c.#.X.#.c#", "#...#...#..#", "#O..##.##..#", "#..........#", "#.==....==.#", "#..........#", "#.==.L..==.#", "#..........#", "##.##..##.##", "#O...c....O#", "#..........#", "#S.........A", "############"],
-      wachen: [{ typ: "drow", weg: [[10, 8], [1, 8], [1, 4], [10, 4]] }, { typ: "drow", weg: [[6, 4]], blicke: ["d", "l", "r"] }, { typ: "drow", weg: [[9, 11], [2, 11]] }],
+      wachen: [{ typ: "drow", weg: [[10, 8], [1, 8], [1, 4], [10, 4]] }, { typ: "drow", weg: [[6, 4]], blicke: ["d", "l", "r"] }, { typ: "drow", weg: [[9, 11], [2, 11]] }, { typ: "hund", weg: [[1, 6], [10, 6]] }],
       truhe: { gold: 200, pins: 6, runen: true, ziel: true, schwert: true } }
   ];
 
@@ -341,8 +366,8 @@
     const st = STUFEN[stufeWahl];
     S = {
       stufe: stufeWahl, maxLeben: st.leben, leben: st.leben, punkte: 0, aufsehen: 0,
-      klau: 0, aus: 0, geist: 0, erreicht: 0, startNacht: nachtWahl,
-      gaben: { umhang: 0, sohlen: 0, finger: 0, muenze: 0, klinge: 0, schritt: 0, ranken: 0, sinne: 0, lied: 0, rast: 0 },
+      klau: 0, aus: 0, geist: 0, erreicht: 0, startNacht: nachtWahl, zorn: 0, zornT: 0, sterneRun: 0, neznaRun: 0,
+      gaben: { umhang: 0, sohlen: 0, finger: 0, muenze: 0, klinge: 0, schritt: 0, ranken: 0, sinne: 0, lied: 0, blutdurst: 0, rast: 0 },
       texte: [], teilchen: [], wachen: [], gaeste: [], kerzen: [], lichter: []
     };
   }
@@ -475,9 +500,11 @@
       g.zielAng = g.ang;
       return g;
     });
+    S.zornT = 0;
+    neznaSetzen();
     hintergrundBauen();
     lichtBerechnen();
-    muenzKnopfSetzen();
+    muenzKnopfSetzen(); zornKnopfSetzen();
   }
 
   const GAST_FARBEN = ["#6b4a30", "#3f5a6e", "#6e5a2c", "#4f3d5c", "#2f5240", "#7a5a3e", "#5c2e2a", "#4a4a3a"];
@@ -489,6 +516,7 @@
     const l = S.lichter.filter(q => q.an && !(q.art === "schwert" && S.truhe && S.truhe.offen)).map(q => ({ x: q.x + 0.5, y: q.y + 0.5, r: q.r }));
     S.wachen.forEach(g => { if (g.T.fackel && g.zustand !== "aus") l.push({ x: g.x + Math.cos(g.ang) * 0.3, y: g.y + Math.sin(g.ang) * 0.3, r: 1.95 }); });
     if (E.glut) l.push({ x: E.x, y: E.y, r: 2.5 });
+    if (S.zornT > 0) l.push({ x: E.x, y: E.y, r: 1.6 });
     return l;
   }
   function lichtBerechnen() {
@@ -512,6 +540,11 @@
     if (zustand !== "spiel" || g.zustand === "aus" || g.cd > 0) return 0;
     const T = g.T, dx = E.x - g.x, dy = E.y - g.y, d = Math.hypot(dx, dy);
     const R = T.sicht * S.mod.sicht * (1 + S.aufsehen / 300);
+    if (T.nase && d <= T.nase && sichtFrei(g.x, g.y, E.x, E.y)) { // riecht ihn – auch im Dunkeln und im Fass
+      let rn = 0.95 * S.mod.rate * Math.pow(0.88, S.gaben.umhang);
+      if (g.zustand === "jagd") rn *= 3;
+      return rn;
+    }
     if (d > R) return 0;
     if (d > 0.45 && Math.abs(winkelDiff(g.ang, Math.atan2(dy, dx))) > T.halb * (g.zustand === "jagd" ? 1.6 : 1)) return 0;
     if (E.versteckt && !(g.zustand === "jagd" && d < 1.5)) return 0;
@@ -528,7 +561,7 @@
   function aufsehen(n) { S.aufsehen = Math.max(0, Math.min(100, S.aufsehen + n)); }
   function laerm(qx, qy, r, zx, zy, a0) {
     S.wachen.forEach(g => {
-      if (g.zustand === "aus" || g.zustand === "jagd" || !g.T.tempo) return;
+      if (g.zustand === "aus" || g.zustand === "jagd" || g.zustand === "flucht" || !g.T.tempo) return;
       if (Math.hypot(g.x - qx, g.y - qy) > r) return;
       g.zustand = "horchen"; g.ziel = { x: zx, y: zy }; g.pfad = []; g.t = 2.6; g.a = Math.max(g.a, a0 || 0.3);
       textAuf(g.x, g.y - 0.7, "?", "#e0a046", 22, 1);
@@ -550,15 +583,15 @@
   /* ---------- Ezekiel ---------- */
   function absichtZiel(a) {
     if (!a) return null;
-    if (a.art === "klauen" || a.art === "aus" || a.art === "freund") return a.ref;
+    if (a.art === "klauen" || a.art === "aus" || a.art === "freund" || a.art === "nezna") return a.ref;
     return { x: a.ref.x + 0.5, y: a.ref.y + 0.5 };
   }
   function zuAbsicht() {
     const a = E.absicht, z = absichtZiel(a); if (!z) return false;
     const zz = zelle(z), n = neben(zz), sx = Math.floor(E.x), sy = Math.floor(E.y);
     let p = null;
-    if (a.art === "klauen" || a.art === "aus") { // möglichst von hinten anschleichen
-      const grenze = a.art === "klauen" ? [1.35, 0.95, 0.55][Math.min(2, S.gaben.finger)] : 1.3;
+    if (a.art === "klauen" || a.art === "aus" || a.art === "nezna") { // möglichst von hinten anschleichen
+      const grenze = a.art === "klauen" ? [1.35, 0.95, 0.55][Math.min(2, S.gaben.finger)] : a.art === "nezna" ? 1.1 : 1.3;
       p = pfadSuchen(sx, sy, (x, y) => n(x, y) && Math.abs(winkelDiff(a.ref.ang, Math.atan2(y + 0.5 - a.ref.y, x + 0.5 - a.ref.x))) > grenze, false);
     }
     if (!p) p = pfadSuchen(sx, sy, n, false);
@@ -575,6 +608,7 @@
     const pruef = (e, art) => { const d = Math.hypot(e.x - gx, e.y - gy); if (d < bd) { bd = d; best = { art, ref: e }; } };
     S.gaeste.forEach(g => pruef(g, "klauen"));
     S.wachen.forEach(g => { if (g.zustand !== "aus") pruef(g, "aus"); });
+    if (S.nezna && !S.nezna.gefangen) pruef(S.nezna, "nezna");
     Object.keys(S.freunde).forEach(n => pruef(S.freunde[n], "freund"));
     if (S.drache && Math.hypot(S.drache.x - gx, S.drache.y - gy) < 1.3) best = { art: "drache", ref: S.drache };
     if (!best) {
@@ -617,15 +651,15 @@
     if (S.schloss) { E.versteckt = false; return; }
     if (E.absicht) {
       const z = absichtZiel(E.absicht);
-      if (!z || (E.absicht.art === "aus" && E.absicht.ref.zustand === "aus")) E.absicht = null;
+      if (!z || (E.absicht.art === "aus" && E.absicht.ref.zustand === "aus") || (E.absicht.art === "nezna" && E.absicht.ref.gefangen)) E.absicht = null;
       else if (cheb(E, z) <= 1 && Math.hypot(E.x - Math.floor(E.x) - 0.5, E.y - Math.floor(E.y) - 0.5) < 0.1 && sichtFrei(E.x, E.y, z.x, z.y)) { E.pfad = []; handeln(); }
-      else if ((E.absicht.art === "klauen" && E.absicht.ref.wandert) || E.absicht.art === "aus") {
+      else if ((E.absicht.art === "klauen" && E.absicht.ref.wandert) || E.absicht.art === "aus" || E.absicht.art === "nezna") {
         E.repfad -= dt;
         if (E.repfad <= 0) { E.repfad = 0.35; if (!zuAbsicht() && !E.pfad.length) E.absicht = null; }
       } else if (!E.pfad.length && !zuAbsicht()) E.absicht = null;
     }
     const netz = zeichen(Math.floor(E.x), Math.floor(E.y)) === "w";
-    const tempo = 2.7 * (1 + 0.16 * S.gaben.sohlen) * (netz ? 0.42 : 1);
+    const tempo = 2.7 * (1 + 0.16 * S.gaben.sohlen) * (netz ? 0.42 : 1) * (S.zornT > 0 ? 1.6 : 1);
     laufen(E, tempo, dt, betreten);
     E.versteckt = !E.pfad.length && zeichen(Math.floor(E.x), Math.floor(E.y)) === "O" && Math.hypot(E.x - Math.floor(E.x) - 0.5, E.y - Math.floor(E.y) - 0.5) < 0.05;
     drehen(E, E.zielAng, 10 * dt);
@@ -650,6 +684,7 @@
     else if (a.art === "kerze") kerze(a.ref);
     else if (a.art === "truhe") schlossStart(a.ref);
     else if (a.art === "freund") freund(a.ref);
+    else if (a.art === "nezna") neznaFangen(a.ref);
   }
   function klauen(p) {
     const tx = t();
@@ -670,12 +705,58 @@
   function ausschalten(g) {
     const tx = t();
     if (g.T.ruft) { textAuf(g.x, g.y - 0.7, tx.wirtNein, "#ebe2cc", 15, 1.6); return; }
-    if (g.T.gross) { textAuf(g.x, g.y - 0.8, tx.zuGross, "#ebe2cc", 18); g.a = Math.max(g.a, 0.5); return; }
-    if (g.zustand === "jagd" || sichtRate(g) > 0) { g.a = 1; jagdStart(g); return; }
+    if (g.T.hund) { // Hunde werden gefüttert, nicht ausgeschaltet
+      if (g.zustand === "jagd" && S.zornT <= 0) { textAuf(g.x, g.y - 0.7, tx.knurr, "#c4564a", 18); return; }
+      g.zustand = "aus"; g.zahm = true; g.aT = 0; g.pfad = [];
+      textAuf(g.x, g.y - 0.7, S.zornT > 0 ? tx.keinHund : tx.zahm, "#ebe2cc", 16, 1.4); funken(g.x, g.y - 0.2, ["#c4564a", "#e0a046"], 6, 0.5); KLANG.klau();
+      return;
+    }
+    const zorn = S.zornT > 0;
+    if (!zorn && g.T.gross) { textAuf(g.x, g.y - 0.8, tx.zuGross, "#ebe2cc", 18); g.a = Math.max(g.a, 0.5); return; }
+    if (!zorn && (g.zustand === "jagd" || sichtRate(g) > 0)) { g.a = 1; jagdStart(g); return; }
     g.zustand = "aus"; g.aT = 0; g.pfad = []; S.lvAus++;
-    textAuf(g.x, g.y - 0.7, tx.aus, "#c4564a", 18); KLANG.aus(); funken(g.x, g.y, ["#9b3a2f", "#c4564a", "#5a1712"], 12);
-    if (!S.gaben.klinge) laerm(g.x, g.y, 3.3, g.x, g.y, 0.35);
+    textAuf(g.x, g.y - 0.7, tx.aus, "#c4564a", 18); KLANG.aus(); funken(g.x, g.y, ["#9b3a2f", "#c4564a", "#5a1712"], zorn ? 22 : 12);
+    if (!S.gaben.klinge) laerm(g.x, g.y, zorn ? 4.5 : 3.3, g.x, g.y, 0.35);
     aufsehen(5);
+    if (!zorn) zornPlus(S.gaben.blutdurst ? 0.75 : 0.5);
+  }
+  /* ---------- Darkin-Zorn ---------- */
+  function zornPlus(n) {
+    const vorher = S.zorn;
+    S.zorn = Math.min(1, S.zorn + n);
+    if (S.zorn >= 1 && vorher < 1) {
+      textAuf(E.x, E.y - 1.1, t().zornBereit, "#c4564a", 20, 1.8);
+      if (!lies("imres-diebesnacht-zorn-tipp", "")) { schreib("imres-diebesnacht-zorn-tipp", "1"); textAuf(W / 2 / C, ROWS - 1.6, t().zornTipp, "#ebe2cc", 15, 4.5); }
+    }
+    zornKnopfSetzen();
+  }
+  function zornStarten() {
+    if (zustand !== "spiel" || S.zorn < 1 || S.zornT > 0) return;
+    S.zorn = 0; S.zornT = 6 + 2 * S.gaben.blutdurst; S.schloss = null; S.zielModus = false;
+    KLANG.bruellen(); KLANG.entdeckt(); S.beben = 0.6;
+    textAuf(E.x, E.y - 1.1, t().zorn, "#c4564a", 26, 1.8);
+    funken(E.x, E.y, ["#c4564a", "#ff6a3a", "#9b3a2f"], 26, 1.6);
+    aufsehen(10);
+    S.wachen.forEach(g => { if (g.zustand === "jagd" || g.zustand === "verdacht") fliehen(g); });
+    zornKnopfSetzen(); muenzKnopfSetzen();
+  }
+  function zornKnopfSetzen() {
+    if (!zornKnopf) return;
+    const an = !!(S && S.zornT > 0), f = S ? (an ? S.zornT / (6 + 2 * S.gaben.blutdurst) : S.zorn) : 0;
+    zornKnopf.hidden = !(S && (S.zorn > 0 || an));
+    zornKnopf.style.setProperty("--f", Math.round(f * 100) + "%");
+    zornKnopf.classList.toggle("bereit", !!(S && S.zorn >= 1 && !an));
+    zornKnopf.classList.toggle("an", an);
+  }
+  function fluchtWeg(e) {
+    let best = null, bw = -1;
+    pfadSuchen(Math.floor(e.x), Math.floor(e.y), (x, y) => { const w = Math.hypot(x + 0.5 - E.x, y + 0.5 - E.y); if (w > bw) { bw = w; best = { x, y }; } return false; }, true);
+    return best ? (pfadSuchen(Math.floor(e.x), Math.floor(e.y), genau(best), true) || []) : [];
+  }
+  function fliehen(g) {
+    if (g.zustand === "aus" || !g.T.tempo) return;
+    g.zustand = "flucht"; g.pfad = fluchtWeg(g); g.repfad = 1; g.a = 0.6;
+    textAuf(g.x, g.y - 0.75, "!", "#ebe2cc", 22, 0.8);
   }
   function kerze(k) {
     if (!k.an) return;
@@ -813,7 +894,8 @@
   function jagdStart(g) {
     if (g.zustand === "jagd") return;
     g.zustand = "jagd"; g.repfad = 0; g.a = 1; g.pfad = []; g.blind = 0; g.zuletzt = { x: E.x, y: E.y };
-    textAuf(g.x, g.y - 0.75, "!", "#c4564a", 28, 1.1); KLANG.entdeckt();
+    textAuf(g.x, g.y - 0.75, g.T.hund ? t().wuff : "!", "#c4564a", g.T.hund ? 22 : 28, 1.1); KLANG.entdeckt();
+    if (g.T.hund) { KLANG.bellen(); laerm(g.x, g.y, 6, E.x, E.y, 0.6); }
     S.lvGesehen = true; aufsehen(15);
     S.schloss = null;
   }
@@ -823,6 +905,7 @@
     aufsehen(10); laerm(g.x, g.y, 11, E.x, E.y, 0.6);
   }
   function kerzenPruefen(g) {
+    if (g.T.hund) return;
     const R = g.T.sicht * S.mod.sicht;
     for (const k of S.kerzen) {
       if (k.an || k.wird) continue;
@@ -840,7 +923,8 @@
     if (g.cd > 0) g.cd -= dt;
     if (g.sieht) { g.a = Math.min(1, g.a + rate * dt); g.zuletzt = { x: E.x, y: E.y }; g.blind = 0; }
     else { g.blind += dt; if (g.zustand !== "jagd" && g.zustand !== "horchen") g.a = Math.max(0, g.a - 0.2 * dt); }
-    if (g.zustand !== "jagd" && g.sieht) {
+    if (S.zornT > 0 && g.sieht && T.tempo && !T.ruft) { if (g.zustand !== "flucht") fliehen(g); }
+    else if (g.zustand !== "jagd" && g.zustand !== "flucht" && g.sieht) {
       if (g.a >= 1) { if (T.ruft) wirtRuft(g); else jagdStart(g); }
       else if (g.a >= 0.42 && g.zustand !== "verdacht" && T.tempo) { g.zustand = "verdacht"; g.pfad = []; g.t = 0; textAuf(g.x, g.y - 0.75, "?", "#e0a046", 24, 0.9); }
     }
@@ -853,6 +937,11 @@
     }
     const lauf = (tp) => { laufen(g, tp, dt); drehen(g, g.zielAng, 6 * dt); };
     switch (g.zustand) {
+      case "flucht":
+        if (g.pfad.length) { laufen(g, jtempo, dt); drehen(g, g.zielAng, 8 * dt); }
+        else if (S.zornT > 0) { g.repfad -= dt; drehen(g, Math.atan2(E.y - g.y, E.x - g.x), 4 * dt); if (g.repfad <= 0) { g.pfad = fluchtWeg(g); g.repfad = 1; } }
+        else { g.zustand = "suche"; g.ziel = null; g.t = 2.2; }
+        break;
       case "patrouille":
         if (g.weg.length === 1) {
           if (!aufZelle(g, g.weg[0])) { g.zustand = "zurueck"; g.pfad = []; break; }
@@ -957,9 +1046,67 @@
     }
   }
 
+  /* ---------- Nezna ---------- */
+  const NEZNA_LEVELS = LEVELS.map((l, i) => l.nezna ? i : -1).filter(i => i >= 0);
+  function neznaSetzen() {
+    S.nezna = null;
+    const art = S.def.nezna || (endlosK() && Math.random() < 0.3 ? "katze" : null);
+    if (!art) return;
+    const kand = [];
+    pfadSuchen(S.start.x, S.start.y, (x, y) => { if (Math.hypot(x - S.start.x, y - S.start.y) >= 6 && zeichen(x, y) !== "~") kand.push({ x, y }); return false; }, true);
+    if (!kand.length) return;
+    const z = zufall(kand);
+    S.nezna = { x: z.x + 0.5, y: z.y + 0.5, ang: Math.random() * 6, zielAng: 0, pfad: [], form: art, pause: 1, a: 0, cd: 0, flucht: 0, gefangen: false, sieht: false };
+  }
+  function neznaUpdate(dt) {
+    const n = S.nezna; if (!n || n.gefangen) return;
+    const drow = n.form === "drow", R = drow ? 3.4 : 2.6, dx = E.x - n.x, dy = E.y - n.y, d = Math.hypot(dx, dy);
+    n.cd = Math.max(0, n.cd - dt);
+    n.sieht = n.cd <= 0 && !E.versteckt && d < R && Math.abs(winkelDiff(n.ang, Math.atan2(dy, dx))) < 0.9 && sichtFrei(n.x, n.y, E.x, E.y) && (lichtBei(E.x, E.y) >= 0.3 || d < 1.6 || (drow && d < 3) || E.glut);
+    if (n.sieht) { n.a += dt * 1.8 * S.mod.rate; if (n.a >= 1) neznaFaucht(n); }
+    else n.a = Math.max(0, n.a - dt * 0.6);
+    if (n.flucht > 0) { n.flucht -= dt; laufen(n, 3, dt); }
+    else if (n.pfad.length) laufen(n, drow ? 1.15 : 1.35, dt);
+    else {
+      n.pause -= dt;
+      if (n.pause <= 0) {
+        const ziel = { x: 1 + Math.floor(Math.random() * (COLS - 2)), y: 1 + Math.floor(Math.random() * (ROWS - 2)) };
+        if (begehbar(ziel.x, ziel.y, true)) n.pfad = (pfadSuchen(Math.floor(n.x), Math.floor(n.y), genau(ziel), true) || []).slice(0, 6);
+        n.pause = 1.2 + Math.random() * 2.5;
+      }
+      if (Math.random() < dt * 0.6) n.zielAng = n.ang + (Math.random() - 0.5) * 3;
+    }
+    drehen(n, n.zielAng, 5 * dt);
+  }
+  function neznaFaucht(n) {
+    const tx = t();
+    n.a = 0; n.cd = 4.5; n.flucht = 3; n.pfad = fluchtWeg(n); S.lvGesehen = true;
+    textAuf(n.x, n.y - 0.7, n.form === "drow" ? tx.fauchDrow : tx.fauch, "#b48ad8", 20, 1.2); KLANG.he();
+    aufsehen(8); laerm(n.x, n.y, 6, E.x, E.y, 0.5);
+  }
+  function neznaFangen(n) {
+    if (n.gefangen) return;
+    const diff = Math.abs(winkelDiff(n.ang, Math.atan2(E.y - n.y, E.x - n.x)));
+    if (S.zornT <= 0 && (n.sieht || diff < 1.0)) { neznaFaucht(n); return; }
+    const tx = t(), gold = n.form === "drow" ? 100 : 60;
+    n.gefangen = true; S.lvGold += gold; S.neznaRun++;
+    rauch(n.x, n.y, 12); funken(n.x, n.y, ["#b48ad8", "#e0a046"], 12);
+    textAuf(n.x, n.y - 0.7, tx.entlarvt, "#b48ad8", 21, 1.8); textAuf(n.x, n.y - 0.2, tx.gold(gold), "#e0a046", 18, 1.6);
+    if (n.form === "drow") textAuf(n.x, n.y - 1.3, tx.spinne, "#ebe2cc", 15, 3);
+    KLANG.schluessel();
+    if (S.lvIdx < LEVELS.length) schreib("imres-diebesnacht-nezna", String(neznaLesen() | (1 << S.lvIdx)));
+    if (S.zornT <= 0) zornPlus(0.5);
+  }
+
+  /* ---------- Sterne ---------- */
+  function allesGold() {
+    return S.gaeste.every(p => p.gold <= 0) && !Object.keys(S.gold).length && (!S.truhe || S.truhe.offen);
+  }
+  function sterneJetzt() { return (S.lvGesehen ? 0 : 1) | (allesGold() ? 2 : 0) | (S.lvAus ? 0 : 4); }
+
   /* ---------- Gefasst / geschafft ---------- */
   function gefasst(g) {
-    if (zustand !== "spiel") return;
+    if (zustand !== "spiel" || S.zornT > 0) return;
     S.schloss = null; E.absicht = null; E.pfad = [];
     if (S.schrittFrei) { schattenschritt(); return; }
     zustand = "gefasst"; S.gefasstT = 0; S.faenger = g;
@@ -986,7 +1133,15 @@
     zustand = "wahl"; KLANG.sieg();
     const bonus = S.lvGesehen ? 0 : 40 + 10 * Math.min(5, Math.floor(S.lvIdx / 3));
     S.lvBonus = bonus;
-    S.punkte += S.lvGold + bonus;
+    const st = sterneJetzt();
+    S.lvSterne = st; S.lvGoldBonus = st & 2 ? 25 + 5 * S.def.n : 0; S.lvBlutBonus = st & 4 ? 20 : 0;
+    S.sterneRun += bits(st);
+    if (S.lvIdx < LEVELS.length) {
+      const alle = sterneLesen(), alt = alle[S.lvIdx] || 0;
+      S.lvSterneNeu = st & ~alt; alle[S.lvIdx] = alt | st;
+      try { localStorage.setItem("imres-diebesnacht-sterne", JSON.stringify(alle)); } catch (_) {}
+    } else S.lvSterneNeu = 0;
+    S.punkte += S.lvGold + bonus + S.lvGoldBonus + S.lvBlutBonus;
     S.klau += S.lvKlau; S.aus += S.lvAus; if (!S.lvGesehen) S.geist++;
     S.erreicht = S.lvIdx + 1;
     S.nachtEnde = (S.lvIdx + 1) % 3 === 0;
@@ -1010,6 +1165,13 @@
     for (const g of S.wachen) { wacheUpdate(g, dt); if (zustand !== "spiel") return; }
     dracheUpdate(dt);
     if (zustand !== "spiel") return;
+    neznaUpdate(dt);
+    if (S.zornT > 0) {
+      S.zornT -= dt;
+      if (Math.random() < dt * 22) S.teilchen.push({ x: E.x + (Math.random() - 0.5) * 0.6, y: E.y + (Math.random() - 0.5) * 0.6, vx: (Math.random() - 0.5) * 0.4, vy: -0.7, leben: 0.6, max: 0.6, farbe: zufall(["#c4564a", "#ff6a3a", "#e0a046"]), gr: 2.2 });
+      if (S.zornT <= 0) S.zornT = 0;
+      if (Math.floor(S.zornT * 4) !== S.zornAlt) { S.zornAlt = Math.floor(S.zornT * 4); zornKnopfSetzen(); }
+    }
     schlossUpdate(dt);
     if (S.muenzFlug) {
       const m = S.muenzFlug; m.t += dt / 0.55;
@@ -1241,9 +1403,13 @@
     S.wachen.forEach(g => {
       if (g.zustand === "aus" || g.cd > 0) return;
       const R = g.T.sicht * S.mod.sicht * (1 + S.aufsehen / 300);
+      if (g.zustand === "flucht") return;
       const farbe = g.zustand === "jagd" ? "rgba(196,86,74,A)" : g.a > 0.4 ? "rgba(232,150,70,A)" : "rgba(224,190,110,A)";
       kegelZeichnen(g.x, g.y, g.ang, g.T.halb * (g.zustand === "jagd" ? 1.6 : 1), R, farbe);
+      if (g.T.nase) { ctx.strokeStyle = "rgba(224,190,110,.35)"; ctx.lineWidth = 1; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.arc(PX(g.x), PY(g.y), g.T.nase * C, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
     });
+    const nz = S.nezna;
+    if (nz && !nz.gefangen && nz.cd <= 0) kegelZeichnen(nz.x, nz.y, nz.ang, 0.9, nz.form === "drow" ? 3.4 : 2.6, "rgba(180,138,216,A)");
     const d = S.drache;
     if (d && d.wach) { const k = dracheKopf(); kegelZeichnen(k.x, k.y, d.ang, 0.62, 5.6 * S.mod.sicht, d.a > 0.3 ? "rgba(196,86,74,A)" : "rgba(160,200,90,A)"); }
     S.gaeste.forEach(p => { if (p.schlaeft && p.wach > 0) kegelZeichnen(p.x, p.y, p.ang, 0.8, 3.2, "rgba(224,190,110,A)"); });
@@ -1283,6 +1449,12 @@
   }
   function ezekielAugen() {
     const px = PX(E.x), py = PY(E.y), r = C * 0.36;
+    if (S.zornT > 0) {
+      const p = 0.75 + 0.25 * Math.sin(S.zeit * 12), rr = C * (0.75 + 0.1 * p);
+      const g = ctx.createRadialGradient(px, py, r * 0.6, px, py, rr);
+      g.addColorStop(0, "rgba(196,40,30,0)"); g.addColorStop(0.6, "rgba(196,40,30," + (0.35 * p).toFixed(2) + ")"); g.addColorStop(1, "rgba(196,40,30,0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, rr, 0, 7); ctx.fill();
+    }
     ctx.save(); ctx.translate(px, py); ctx.rotate(E.ang);
     ctx.fillStyle = "#ff6a3a"; ctx.shadowColor = "#ff3a1a"; ctx.shadowBlur = 8;
     [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(r * 0.45, s * r * 0.17, 1.7, 0, 7); ctx.fill(); });
@@ -1293,6 +1465,7 @@
   }
   function wacheZeichnen(g) {
     const T = g.T, px = PX(g.x), py = PY(g.y), r = C * T.r;
+    if (T.hund) { hundZeichnen(g, px, py, r); return; }
     if (g.zustand === "aus") {
       ctx.save(); ctx.globalAlpha = Math.max(0.35, 1 - g.aT * 0.3); ctx.translate(px, py); ctx.rotate(g.ang + Math.PI / 2);
       ctx.fillStyle = "rgba(90,23,18,.55)"; ctx.beginPath(); ctx.ellipse(3, 4, r * 1.1, r * 0.7, 0.3, 0, 7); ctx.fill();
@@ -1319,11 +1492,64 @@
     ctx.restore();
     if (T.fackel) flamme(px + Math.cos(g.ang) * r * 1.15 + Math.cos(g.ang + 1.57) * r * 0.55, py + Math.sin(g.ang) * r * 1.15 + Math.sin(g.ang + 1.57) * r * 0.55, 3.4, g.x * 3);
   }
+  function hundZeichnen(g, px, py, r) {
+    const T = g.T, zahm = g.zahm, lauf = (g.pfad && g.pfad.length) ? Math.sin(S.zeit * 16) * 0.25 : 0;
+    const farbe = S.def.n >= 5 ? "#6a6070" : S.def.n === 3 ? "#7e7a72" : T.mantel, kopf = S.def.n >= 5 ? "#7e7488" : S.def.n === 3 ? "#949088" : T.kopf;
+    schatten(px, py, r * 1.1);
+    ctx.save(); ctx.translate(px, py); ctx.rotate(g.ang);
+    ctx.strokeStyle = farbe; ctx.lineWidth = 3; ctx.lineCap = "round";
+    const wedel = zahm ? Math.sin(S.zeit * 14) * 0.6 : lauf;
+    ctx.beginPath(); ctx.moveTo(-r * 1.1, 0); ctx.quadraticCurveTo(-r * 1.6, r * 0.2, -r * 1.75 + wedel * 3, r * 0.5 * (zahm ? Math.sin(S.zeit * 14) : 1)); ctx.stroke();
+    ctx.fillStyle = farbe; ctx.beginPath(); ctx.ellipse(-r * 0.2, 0, r * 1.15, r * 0.62, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = kopf; ctx.beginPath(); ctx.arc(r * 0.95, 0, r * 0.5, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(r * 1.45, 0, r * 0.32, r * 0.24, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = "#14100c"; ctx.beginPath(); ctx.arc(r * 1.72, 0, 1.6, 0, 7); ctx.fill();
+    ctx.fillStyle = farbe; [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(r * 0.9, s * r * 0.25); ctx.lineTo(r * 0.55, s * r * 0.75); ctx.lineTo(r * 1.15, s * r * 0.45); ctx.fill(); });
+    ctx.restore();
+    if (zahm && Math.sin(S.zeit * 2 + g.x) > 0.6) { ctx.font = "12px " + FONT_D; ctx.fillStyle = "#c4564a"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("♥", px, py - r * 1.8); }
+  }
+  function neznaZeichnen() {
+    const n = S.nezna; if (!n || n.gefangen) return;
+    const px = PX(n.x), py = PY(n.y);
+    if (n.form === "drow") {
+      const r = C * 0.31; schatten(px, py, r);
+      ctx.save(); ctx.translate(px, py); ctx.rotate(n.ang);
+      ctx.fillStyle = "#3a1f4a"; ctx.beginPath(); ctx.ellipse(-r * 0.08, 0, r * 0.74, r, 0, 0, 7); ctx.fill();
+      ctx.strokeStyle = "rgba(180,138,216,.6)"; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.fillStyle = "#4a4160"; ctx.beginPath(); ctx.arc(r * 0.12, 0, r * 0.5, 0, 7); ctx.fill();
+      ctx.fillStyle = "#ece8f4"; ctx.beginPath(); ctx.ellipse(-r * 0.15, 0, r * 0.45, r * 0.4, 0, 0, 7); ctx.fill();
+      ctx.restore(); return;
+    }
+    const r = C * 0.22, k = n.flucht > 0 || n.pfad.length ? Math.sin(S.zeit * 14) * 0.4 : Math.sin(S.zeit * 2) * 0.3;
+    schatten(px, py, r);
+    ctx.save(); ctx.translate(px, py); ctx.rotate(n.ang);
+    ctx.strokeStyle = "#141018"; ctx.lineWidth = 2.6; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(-r * 0.9, 0); ctx.quadraticCurveTo(-r * 1.8, k * r * 2, -r * 2.1, k * r * 3); ctx.stroke();
+    ctx.fillStyle = "#141018"; ctx.beginPath(); ctx.ellipse(-r * 0.1, 0, r * 1.05, r * 0.62, 0, 0, 7); ctx.fill();
+    ctx.strokeStyle = "rgba(180,138,216,.45)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(r * 0.95, 0, r * 0.55, 0, 7); ctx.fill();
+    [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(r * 0.9, s * r * 0.2); ctx.lineTo(r * 0.75, s * r * 0.85); ctx.lineTo(r * 1.25, s * r * 0.45); ctx.fill(); });
+    ctx.restore();
+  }
+  function neznaAugen() {
+    const n = S.nezna; if (!n || n.gefangen) return;
+    const r = C * (n.form === "drow" ? 0.31 : 0.22), ax = PX(n.x) + Math.cos(n.ang) * r * (n.form === "drow" ? 0.45 : 1.15), ay = PY(n.y) + Math.sin(n.ang) * r * (n.form === "drow" ? 0.45 : 1.15);
+    ctx.save(); ctx.fillStyle = "#c79bff"; ctx.shadowColor = "#a46bff"; ctx.shadowBlur = 7;
+    [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(ax + Math.cos(n.ang + Math.PI / 2) * s * 2.4, ay + Math.sin(n.ang + Math.PI / 2) * s * 2.4, 1.3, 0, 7); ctx.fill(); });
+    ctx.restore();
+    if (n.a > 0.05) { const px = PX(n.x), py = PY(n.y) - C * 0.55; ctx.fillStyle = "rgba(9,8,15,.6)"; ctx.fillRect(px - 8, py - 2, 16, 3); ctx.fillStyle = "#b48ad8"; ctx.fillRect(px - 8, py - 2, 16 * Math.min(1, n.a), 3); }
+  }
+  function sternPfad(x, y, ra) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? ra * 0.45 : ra; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+    ctx.closePath();
+  }
   function wachenMarken() {
     S.wachen.forEach(g => {
       if (g.zustand === "aus") return;
       const px = PX(g.x), py = PY(g.y) - C * 0.62;
       if (g.zustand === "jagd") { ctx.font = "bold 20px " + FONT_D; ctx.fillStyle = "#c4564a"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("!", px, py); }
+      else if (g.zustand === "flucht") { ctx.font = "bold 16px " + FONT_D; ctx.fillStyle = "#ebe2cc"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("!!", px, py); }
       else if (g.a > 0.05) {
         ctx.fillStyle = "rgba(9,8,15,.6)"; ctx.fillRect(px - 9, py - 2, 18, 4);
         ctx.fillStyle = g.a >= 0.42 ? "#e0a046" : "#a89f8f"; ctx.fillRect(px - 9, py - 2, 18 * g.a, 4);
@@ -1475,6 +1701,14 @@
     ctx.textBaseline = "top"; ctx.font = "14px " + FONT_D; ctx.fillStyle = "#a89f8f"; ctx.textAlign = "left";
     const k = endlosK();
     ctx.fillText(k ? tx.kurzEndlos(k) : tx.kurz(S.def.n, S.lvIdx % 3 + 1), 9, 8);
+    const lw = ctx.measureText(k ? tx.kurzEndlos(k) : tx.kurz(S.def.n, S.lvIdx % 3 + 1)).width, st = sterneJetzt();
+    [1, 2, 4].forEach((b, i) => {
+      const sx = 9 + lw + 12 + i * 14, ok = st & b;
+      sternPfad(sx, 15, 5.2);
+      if (ok) { ctx.fillStyle = "#e0a046"; ctx.fill(); }
+      else if (b === 2) { ctx.strokeStyle = "rgba(224,160,70,.6)"; ctx.lineWidth = 1; ctx.stroke(); }
+      else { ctx.fillStyle = "rgba(168,159,143,.25)"; ctx.fill(); }
+    });
     ctx.textAlign = "center"; ctx.fillStyle = "#e0a046"; ctx.font = "21px " + FONT_D;
     ctx.fillText(String(S.punkte + S.lvGold), W / 2 + 8, 4);
     const tw = ctx.measureText(String(S.punkte + S.lvGold)).width;
@@ -1515,6 +1749,7 @@
     S.wachen.forEach(g => figs.push([g.zustand === "aus" ? -1 : g.y, () => wacheZeichnen(g)]));
     figs.push([E.y, ezekielZeichnen]);
     if (S.drache) figs.push([S.drache.y, dracheZeichnen]);
+    if (S.nezna && !S.nezna.gefangen) figs.push([S.nezna.y, neznaZeichnen]);
     figs.sort((a, b) => a[0] - b[0]).forEach(f => f[1]());
     dunkelZeichnen();
     freundeZeichnen();
@@ -1526,7 +1761,7 @@
       if (S.marke.nein) { const k = C * 0.2; ctx.beginPath(); ctx.moveTo(mx - k, my - k); ctx.lineTo(mx + k, my + k); ctx.moveTo(mx + k, my - k); ctx.lineTo(mx - k, my + k); ctx.stroke(); }
       else { ctx.beginPath(); ctx.arc(mx, my, C * (0.2 + S.marke.t * 0.4), 0, 7); ctx.stroke(); }
     }
-    ezekielAugen();
+    ezekielAugen(); neznaAugen();
     gastMarken(); wachenMarken(); dracheZzz();
     if (S.muenzFlug) { const m = S.muenzFlug, k = m.t, x = m.x0 + (m.x1 - m.x0) * k, y = m.y0 + (m.y1 - m.y0) * k - Math.sin(k * Math.PI) * 1.4; ctx.fillStyle = "#ffcf7a"; ctx.shadowColor = "#e0a046"; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(PX(x), PY(y), 3.5, 0, 7); ctx.fill(); ctx.shadowBlur = 0; }
     S.teilchen.forEach(q => {
@@ -1541,11 +1776,12 @@
     S.texte.forEach(x => {
       ctx.globalAlpha = Math.max(0, 1 - x.t / x.dauer);
       ctx.font = (x.gr > 21 ? "" : "600 ") + x.gr + "px " + (x.gr > 21 ? FONT_D : FONT_H);
-      const px = Math.max(40, Math.min(W - 40, PX(x.x))), py = PY(x.y);
+      const hw = Math.min(W - 20, ctx.measureText(x.text).width) / 2 + 6, px = Math.max(hw, Math.min(W - hw, PX(x.x))), py = PY(x.y);
       ctx.fillStyle = "rgba(9,8,15,.7)"; ctx.fillText(x.text, px + 1, py + 1, W - 20);
       ctx.fillStyle = x.farbe; ctx.fillText(x.text, px, py, W - 20);
     });
     ctx.globalAlpha = 1;
+    if (S.zornT > 0) { const g = ctx.createRadialGradient(W / 2, OY + GH / 2, GH * 0.3, W / 2, OY + GH / 2, GH * 0.75); g.addColorStop(0, "rgba(155,30,20,0)"); g.addColorStop(1, "rgba(155,30,20," + (0.25 + 0.1 * Math.sin(S.zeit * 10)).toFixed(2) + ")"); ctx.fillStyle = g; ctx.fillRect(0, OY, W, GH); }
     if (zustand === "gefasst" || zustand === "erwischt") { const g = ctx.createRadialGradient(W / 2, OY + GH / 2, GH * 0.2, W / 2, OY + GH / 2, GH * 0.75); g.addColorStop(0, "rgba(155,58,47,0)"); g.addColorStop(1, "rgba(155,58,47,.45)"); ctx.fillStyle = g; ctx.fillRect(0, OY, W, GH); }
     schlossZeichnen();
     ctx.restore();
@@ -1574,7 +1810,7 @@
   function anwerfen() { if (!rafId && sichtbar && !document.hidden) { letzte = 0; rafId = requestAnimationFrame(schleife); } }
 
   /* ---------- DOM & Overlays ---------- */
-  let buehne, schleier, tafel, fussRekord, tonKnopf, pauseKnopf, muenzKnopf, listeEl;
+  let buehne, schleier, tafel, fussRekord, tonKnopf, pauseKnopf, muenzKnopf, zornKnopf, listeEl;
   const rekordKey = st => "imres-diebesnacht-rekord-" + st;
   const aktuelleStufe = () => (S && zustand !== "start" ? S.stufe : stufeWahl);
 
@@ -1585,7 +1821,7 @@
       '<h3 id="dn-titel">' + esc(tx.titel) + '</h3>' +
       '<p class="tav-info" id="dn-text">' + esc(tx.text) + '</p>' +
       '<p class="dn-steuerung" id="dn-steuerung">' + esc(tx.steuerung) + '</p>' +
-      '<div class="dn-buehne"><div class="dn-knoepfe"><button type="button" class="dn-muenze" hidden><span>0</span></button><button type="button" class="dn-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button></div><div class="dn-schleier"><div class="dn-tafel"></div></div></div>' +
+      '<div class="dn-buehne"><div class="dn-knoepfe"><button type="button" class="dn-zorn" hidden><span aria-hidden="true">😈</span></button><button type="button" class="dn-muenze" hidden><span>0</span></button><button type="button" class="dn-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button></div><div class="dn-schleier"><div class="dn-tafel"></div></div></div>' +
       '<div class="dn-fuss"><span class="dn-rekord"></span><button type="button" class="dn-ton"></button></div>' +
       '<div class="dn-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".dn-buehne");
@@ -1597,6 +1833,8 @@
     tonKnopf = root.querySelector(".dn-ton");
     pauseKnopf = root.querySelector(".dn-pause");
     muenzKnopf = root.querySelector(".dn-muenze");
+    zornKnopf = root.querySelector(".dn-zorn");
+    zornKnopf.addEventListener("click", zornStarten);
     listeEl = root.querySelector(".dn-liste");
     tonKnopf.addEventListener("click", () => { tonAn = !tonAn; schreib("imres-diebesnacht-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.klau(); });
     pauseKnopf.addEventListener("click", pausieren);
@@ -1612,6 +1850,7 @@
     tonKnopf.setAttribute("aria-pressed", String(tonAn));
     pauseKnopf.setAttribute("aria-label", tx.pauseKnopf);
     muenzKnopf.setAttribute("aria-label", tx.muenzeKnopf);
+    zornKnopf.setAttribute("aria-label", tx.zornKnopf); zornKnopf.title = tx.zornKnopf;
     muenzKnopf.firstChild && (muenzKnopf.title = tx.muenzeKnopf);
   }
   function texteSetzen() {
@@ -1638,7 +1877,16 @@
     return '<div class="dn-stufen" role="radiogroup" aria-label="' + esc(tx.stufenTitel) + '">' +
       Object.keys(STUFEN).map(k => '<button type="button" role="radio" data-stufe="' + k + '" aria-checked="' + (k === stufeWahl) + '">' + esc(tx.stufen[k]) + '</button>').join("") +
       '</div><p class="dn-stufen-text">' + esc(tx.stufenText[stufeWahl]) + '</p>' +
-      (frei > 1 ? '<div class="dn-naechte"><span>' + esc(tx.nachtWahl) + '</span>' + [1, 2, 3, 4, 5].map(n => '<button type="button" data-nacht="' + n + '" aria-pressed="' + (n === nachtWahl) + '"' + (n > frei ? " disabled" : "") + ' title="' + esc(tx.naechte[n - 1][0]) + '">' + n + '</button>').join("") + '</div>' : "");
+      (frei > 1 ? '<div class="dn-naechte"><span>' + esc(tx.nachtWahl) + '</span>' + Array.from({ length: NAECHTE() }, (_, i) => i + 1).map(n => '<button type="button" data-nacht="' + n + '" aria-pressed="' + (n === nachtWahl) + '"' + (n > frei ? " disabled" : "") + ' title="' + esc(tx.naechte[n - 1][0]) + '">' + n + '</button>').join("") + '<button type="button" disabled title="' + esc(tx.folgt) + '">?</button></div>' : "") +
+      sammlungHtml(tx);
+  }
+  function sammlungHtml(tx) {
+    const st = sterneLesen().reduce((a, b) => a + bits(b || 0), 0), nz = NEZNA_LEVELS.filter(i => neznaLesen() & (1 << i)).length;
+    if (!st && !nz) return "";
+    return '<p class="dn-sammlung">' + esc(tx.sterneGesamt(st, LEVELS.length * 3)) + (nz ? " · " + esc(tx.neznaZahl(nz, NEZNA_LEVELS.length)) : "") + '</p>';
+  }
+  function sterneHtml(tx, st, neu) {
+    return '<p class="dn-sterne">' + tx.sterne.map((n, i) => { const b = 1 << i; return '<span class="' + (st & b ? "an" : "") + (neu & b ? " neu" : "") + '" data-neu="' + esc(tx.neu) + '">' + (st & b ? "★" : "☆") + " " + esc(n) + '</span>'; }).join("") + '</p>';
   }
   function startZeigen() {
     const tx = t();
@@ -1652,7 +1900,10 @@
       '<h4>' + esc(titel) + '</h4>' +
       '<p class="dn-ort">' + esc(k ? tx.endlosUnter : nacht[1] + " · " + tx.stufe(S.lvIdx % 3 + 1, 3)) + '</p>' +
       '<p class="dn-tipp">' + esc(tipp) + '</p>' +
+      (S.wachen.some(g => g.T.hund) ? '<p class="dn-extra">' + esc(tx.hundHinweis) + '</p>' : "") +
+      (S.nezna ? '<p class="dn-extra">' + esc(S.nezna.form === "drow" ? tx.neznaDrow : tx.neznaHinweis) + '</p>' : "") +
       '<p class="dn-zielzeile">' + esc(tx.zielWort + tx.ziel[S.def.ziel]) + '</p>' +
+      (!k ? sterneHtml(tx, sterneLesen()[S.lvIdx] || 0, 0) : "") +
       '<button type="button" class="tav-knopf dn-haupt" data-tun="los">' + esc(tx.los) + '</button>');
   }
   function pauseZeigen() {
@@ -1689,7 +1940,9 @@
     }).join("");
     const nachtTxt = S.nachtEnde ? (S.lvIdx + 1 === LEVELS.length ? tx.alleGeschafft : tx.nachtGeschafft(S.def.n)) : "";
     schleierAuf('<h4>' + esc(tx.geschafft) + '</h4>' +
-      '<p class="dn-bilanz">' + esc(tx.beute) + ': <b>+' + S.lvGold + '</b>' + (S.lvBonus ? ' · ' + esc(tx.ungesehenBonus(S.lvBonus)) : "") + '</p>' +
+      sterneHtml(tx, S.lvSterne, S.lvSterneNeu) +
+      '<p class="dn-bilanz">' + esc(tx.beute) + ': <b>+' + S.lvGold + '</b>' + (S.lvBonus ? ' · ' + esc(tx.ungesehenBonus(S.lvBonus)) : "") +
+      (S.lvGoldBonus || S.lvBlutBonus ? '<br>' + esc(tx.sterneBonus(S.lvGoldBonus, S.lvBlutBonus)) : "") + '</p>' +
       (nachtTxt ? '<p class="dn-spruch">' + esc(nachtTxt) + '</p>' : "") +
       '<p>' + esc(tx.rastText) + '</p>' +
       '<div class="dn-gaben">' + karten + '</div>' +
@@ -1720,6 +1973,8 @@
       '<dt>' + esc(tx.wert.bestohlen) + '</dt><dd>' + S.klau + '</dd>' +
       '<dt>' + esc(tx.wert.aus) + '</dt><dd>' + S.aus + '</dd>' +
       '<dt>' + esc(tx.wert.geist) + '</dt><dd>' + S.geist + '</dd>' +
+      '<dt>★</dt><dd>' + S.sterneRun + '</dd>' +
+      (S.neznaRun ? '<dt>🐈‍⬛</dt><dd>' + S.neznaRun + '</dd>' : "") +
       '</dl>' +
       '<p class="dn-spruch">„' + esc(spruch) + '“ <span>– Ezekiel</span></p>' +
       eintragHtml(tx) +
@@ -1919,6 +2174,17 @@
 .dn-knoepfe button[hidden] { display: none; }
 .dn-knoepfe .dn-pause { letter-spacing: -.1em; aspect-ratio: 1; padding: 0; }
 .dn-knoepfe .dn-muenze::before { content: "🪙 "; }
+.dn-knoepfe .dn-zorn { font-size: 1.05rem; background: linear-gradient(to top, rgba(155,58,47,.85) var(--f, 0%), rgba(9,8,15,.7) var(--f, 0%)); }
+.dn-knoepfe .dn-zorn:not(.bereit):not(.an) { opacity: .75; }
+.dn-knoepfe .dn-zorn.bereit { border-color: #c4564a; box-shadow: 0 0 12px rgba(196,86,74,.8); animation: dn-puls 1s ease-in-out infinite; }
+.dn-knoepfe .dn-zorn.an { border-color: #ff6a3a; }
+@keyframes dn-puls { 50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(196,86,74,1); } }
+.dn-sterne { display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem .7rem; font-size: .85rem; margin: 0; }
+.dn-sterne span { color: var(--ash); opacity: .55; white-space: nowrap; }
+.dn-sterne span.an { color: var(--ember); opacity: 1; }
+.dn-sterne span.neu::after { content: attr(data-neu); margin-left: .25rem; font-family: var(--hand); font-size: 1.05rem; color: var(--vellum); }
+.dn-tafel .dn-sammlung { font-size: .82rem; color: var(--ash); }
+.dn-tafel .dn-extra { font-size: .86rem; color: #c9b0e8 !important; font-style: italic; max-width: 24rem; }
 .dn-knoepfe .dn-muenze.an { border-color: var(--ember); color: var(--ember); background: rgba(224,160,70,.18); }
 .dn-knoepfe button:hover, .dn-knoepfe button:focus-visible { border-color: var(--ember); color: var(--ember); }
 .dn-stufen { display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem; }
@@ -1944,7 +2210,7 @@
 .dn-fuss { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; font-size: .88rem; color: var(--ash); }
 .dn-ton { background: none; border: 1px solid var(--line); color: var(--ash); font: inherit; font-size: .84rem; padding: .3rem .75rem; cursor: pointer; }
 .dn-ton:hover { color: var(--vellum); border-color: var(--ember); }
-@media (prefers-reduced-motion: reduce) { .dn-gabe { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .dn-gabe { transition: none; } .dn-knoepfe .dn-zorn.bereit { animation: none; } }
 `;
   document.head.appendChild(css);
 
