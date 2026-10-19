@@ -826,7 +826,17 @@
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
   /* Effekte und Spieltisch-Momente haben ihren eigenen Pegel – unabhängig von der Musik */
   const fxPegel = () => .34 * Math.pow((typeof S.fxVol === "number" ? S.fxVol : 8) / 10, 1.5);
-  let fxAusgang = null;
+  let fxAusgang = null, ducken = null, duckEnde = 0;
+  /* Während ein Effekt läuft, tritt die Musik sanft etwas zurück (gut 3 dB) und kommt danach weich wieder */
+  function musikDucken(start, dauer) {
+    if (!ducken) return;
+    const jetzt = ctx.currentTime, ende = Math.max(duckEnde, start + Math.max(.4, dauer * .85));
+    const p = ducken.gain;
+    p.cancelScheduledValues(jetzt); p.setValueAtTime(p.value, jetzt);
+    p.setTargetAtTime(.68, Math.max(jetzt, start - .08), .12);
+    p.setTargetAtTime(1, ende, .45);
+    duckEnde = ende;
+  }
   const hallPegel = () => Math.pow(S.hall / 10, 1.3) * 1.6;
   /* ---------- Geräuschkulisse ---------- */
   let kul = null, kulRauschen = null, sfxBus = null;
@@ -986,7 +996,9 @@
     return fxPuffer(art).then(b => {
       if (!b || !ctx) return;
       const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b; q.playbackRate.value = tempo || 1; g.gain.value = laut;
-      q.connect(g); g.connect(ziel); q.start(Math.max(zeit, ctx.currentTime + .01));
+      const st = Math.max(zeit, ctx.currentTime + .01);
+      q.connect(g); g.connect(ziel); q.start(st);
+      return { start: st, dauer: b.duration / (tempo || 1) };
     });
   }
   /* Ereignis der Kulisse: mal links, mal rechts, mal weit weg (dumpfer) */
@@ -1009,7 +1021,7 @@
   function effekt(art, staerke, zeit) {
     if (!ctx) return;
     const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
-    fxAbspielen(art, sfxBus, z, (FX_PEGEL[art] || .7) * l);
+    fxAbspielen(art, sfxBus, z, (FX_PEGEL[art] || .7) * l).then(r => { if (r) musikDucken(r.start, r.dauer); });
   }
   function effekteAnwenden() {
     if (!ctx) return;
@@ -1054,7 +1066,8 @@
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -4; limiter.knee.value = 2; limiter.ratio.value = 20; limiter.attack.value = .003; limiter.release.value = .25;
       master = ctx.createGain(); master.gain.value = .38;
-      master.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
+      ducken = ctx.createGain(); ducken.gain.value = 1;
+      master.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
       IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
       /* Raumhall: jede Spur schickt einen Teil in einen Faltungshall (selbst erzeugter Raum, ca. 2,8 s) */
       hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
