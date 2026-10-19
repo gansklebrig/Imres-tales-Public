@@ -22,6 +22,9 @@
   if (!root) return;
   /* Mitlauschen: ?lauschen=CODE macht diese Seite zum Zuhörer */
   let hoerer = null, funk = null;
+  /* Sparmodus für Handys: größerer Audiopuffer, vorgerechnete Klänge, schlankere Kulissen */
+  let spar = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+  try { const v = localStorage.getItem("imres-lw-spar"); if (v === "1" || v === "0") spar = v === "1"; } catch (_) {}
   try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, verbunden: false, zuletzt: null }; } catch (_) {}
 
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -128,6 +131,7 @@
       pult: "🎛 Spielleiter-Pult", pultGross: "Spielleiter-Pult öffnen", pultUnter: "Stimmungen, Geräuschkulisse und Effekte für den Spieltisch – mit einem Fingertipp", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
+      spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
@@ -185,6 +189,7 @@
       pult: "🎛 GM console", pultGross: "Open the GM console", pultUnter: "Moods, ambience and effects for the gaming table – one tap away", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
+      spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
@@ -870,6 +875,7 @@
     r.start(ctx.currentTime, Math.random() * 3); return knoten;
   }
   function kulStoss(zeit, typ, f, q, laut, dauer) {
+    if (spar && dauer < .02 && Math.random() < .6) return; /* Sparmodus: weniger einzelne Regentropfen */
     const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain();
     r.buffer = kulRauschen; b.type = typ; b.frequency.value = f; b.Q.value = q;
     g.gain.setValueAtTime(laut, zeit); g.gain.exponentialRampToValueAtTime(.0005, zeit + dauer);
@@ -930,7 +936,7 @@
     g.connect(master);
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
     kul = { art, g, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0 };
-    (KUL_BETT[art] || []).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
+    (KUL_BETT[art] || []).slice(0, spar ? 2 : 9).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
     if (art === "taverne") kulSchleife("gemurmel", 22050, 1.1);
     if (art === "feuer") kulSchleife("feuer", 32000, .7);
     const ev = KUL_EREIGNIS[art] || [];
@@ -1021,7 +1027,7 @@
     opt = opt || {};
     let ziel = k.g;
     try {
-      if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = opt.pan != null ? opt.pan : zz(-.75, .75); pn.connect(ziel); ziel = pn; }
+      if (ctx.createStereoPanner && !spar) { const pn = ctx.createStereoPanner(); pn.pan.value = opt.pan != null ? opt.pan : zz(-.75, .75); pn.connect(ziel); ziel = pn; }
       if (opt.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = opt.tief; lp.connect(ziel); ziel = lp; }
     } catch (_) {}
     fxAbspielen(art, ziel, z, laut * (k.phase || 1), opt.tempo || zz(.94, 1.06));
@@ -1031,7 +1037,7 @@
     bogen: .7, pfeil: .8, hieb: .7, verfehlt: .5, block: .8, wucht: .8, schmerz: .45, sterben: .5, feuerball: .7, blitz: .5, heiltrank: .55,
     tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8 };
   /* sanft vorrechnen: je Effekt erst eine Variante, mit Abstand – damit schwächere Geräte nicht ins Stocken geraten */
-  function fxVorwaermen() { if (kwWorker !== false) ALLE_FX.forEach((f, i) => setTimeout(() => fxNachfuellen(f, 1), 2500 + 600 * i)); }
+  function fxVorwaermen() { if (kwWorker !== false && !spar) ALLE_FX.forEach((f, i) => setTimeout(() => fxNachfuellen(f, 1), 2500 + 600 * i)); }
   function effekt(art, staerke, zeit) {
     if (!ctx) return;
     const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
@@ -1072,7 +1078,7 @@
   function audioStart() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
-      try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { ctx = new AC(); } /* größerer Puffer = keine Aussetzer auf dem Handy */
+      try { ctx = new AC({ latencyHint: spar ? .25 : "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor();
@@ -1129,14 +1135,24 @@
       if (buf) { /* auf feste Spitzenlautstärke bringen – so kann kein Instrument übersteuern */
         const d = buf.getChannelData(0); let max = 0;
         for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > max) max = a; }
-        if (max > 0) { const f = spitze / max; for (let i = 0; i < d.length; i++) d[i] *= f; }
+        if (max > 0 && spitze != null) { const f = spitze / max; for (let i = 0; i < d.length; i++) d[i] *= f; }
         klangCache.set(key, buf);
       }
       inArbeit.delete(key);
     };
-    const pr = off.startRendering();
-    if (pr && pr.then) pr.then(fertig, () => inArbeit.delete(key));
-    else off.oncomplete = e => fertig(e.renderedBuffer);
+    /* immer nur eine Vorberechnung gleichzeitig – sonst konkurriert sie auf dem Handy mit der laufenden Musik */
+    renderSchlange.push(() => new Promise(fertigGesamt => {
+      const ok = b => { fertig(b); fertigGesamt(); }, nein = () => { inArbeit.delete(key); fertigGesamt(); };
+      const pr = off.startRendering();
+      if (pr && pr.then) pr.then(ok, nein); else off.oncomplete = e => ok(e.renderedBuffer);
+    }));
+    schlangeWeiter();
+  }
+  const renderSchlange = []; let schlangeLaeuft = false;
+  function schlangeWeiter() {
+    if (schlangeLaeuft || !renderSchlange.length) return;
+    schlangeLaeuft = true;
+    renderSchlange.shift()().then(() => { schlangeLaeuft = false; setTimeout(schlangeWeiter, spar ? 40 : 0); });
   }
   function abspielen(buf, zeit, ziel, laut, dauer) {
     const src = ctx.createBufferSource(), g = ctx.createGain();
@@ -1226,7 +1242,8 @@
     src.buffer = saite(freq, art);
     f.type = "lowpass"; f.frequency.value = art === "bass" ? 1800 : art === "harfe" ? 4200 : art === "mandoline" ? 4800 : 3400; f.Q.value = .7;
     g.gain.value = (laut || 1) * (art === "bass" ? .55 : art === "harfe" ? .6 : art === "mandoline" ? .38 : .55);
-    src.connect(f); f.connect(g); g.connect(spurGain[art === "bass" ? "bass" : "melodie"]);
+    if (spar && !rendert) src.connect(g); else { src.connect(f); f.connect(g); }
+    g.connect(spurGain[art === "bass" ? "bass" : "melodie"]);
     src.start(zeit);
   }
   function rauschStoss(zeit, ziel, typ, freq, q, laut, dauer, start) {
@@ -1331,7 +1348,13 @@
   /* ---------- Echos Instrumente ---------- */
   function echoSpielen(freq, zeit, dauer, laut) {
     const l = laut || 1, art = S.band.floete, ziel = spurGain.floete;
-    if (art === "floete") { floete(freq, zeit, dauer || .25, l); return; }
+    if (art === "floete") {
+      const key = "echo|floete|" + freq.toFixed(2), buf = !rendert && klangCache.get(key);
+      if (buf) { abspielen(buf, zeit, ziel, l, Math.max(.18, dauer || .25)); return; }
+      floete(freq, zeit, dauer || .25, l);
+      if (!rendert) vorrendern(key, 3.2, () => floete(freq, 0, 3, 1), null);
+      return;
+    }
     if (!rendert) {
       const buf = klangCache.get("echo|" + art + "|" + freq.toFixed(2));
       if (buf) { abspielen(buf, zeit, ziel, l, Math.max(.18, dauer || .3)); return; }
@@ -1598,12 +1621,21 @@
     oscs.forEach(o => o.stop(jetzt + .45));
     bordunTeile = null;
   }
+  /* Schlagwerk einmal vorrechnen (je drei Varianten) und danach nur noch abspielen – spart je Schlag viele Klangbausteine */
+  let perkZaehler = 0;
+  function perk(spur, art, betont, zeit, laut, live) {
+    const key = "perk|" + spur + "|" + art + "|" + (betont ? 1 : 0) + "|" + (perkZaehler++ % 3);
+    const b = !rendert && klangCache.get(key);
+    if (b) { abspielen(b, zeit, spurGain[spur], laut || 1); return; }
+    live(zeit, laut);
+    if (!rendert) vorrendern(key, art === "pauke" ? .95 : .6, () => live(0, 1), null);
+  }
   function spielen(spur, zeile, zeit, schritt, laut, dauer) {
     const betont = schritt % 4 === 0;
-    if (spur === "klopf") klopfen(zeit, betont, laut);
-    else if (spur === "schelle") schellen(zeit, laut);
-    else if (spur === "trommel") friedrichSpielen(zeit, betont, laut);
-    else if (spur === "ketten") ezekielSpielen(zeit, laut);
+    if (spur === "klopf") perk("klopf", "klopf", betont, zeit, laut, (z, l) => klopfen(z, betont, l));
+    else if (spur === "schelle") perk("schelle", "schelle", false, zeit, laut, (z, l) => schellen(z, l));
+    else if (spur === "trommel") perk("trommel", S.band.trommel, betont, zeit, laut, (z, l) => friedrichSpielen(z, betont, l));
+    else if (spur === "ketten") { if (S.band.ketten === "ketten") ezekielSpielen(zeit, laut); else perk("ketten", S.band.ketten, betont, zeit, laut, (z, l) => ezekielSpielen(z, l)); }
     else if (spur === "rex") rexLaut(zeit, zeile, laut);
     else if (spur === "floete") echoSpielen(midiHz(tonMidi("floete", zeile, S)), zeit, dauer || .25, laut);
     else if (spur === "melodie") melodieSpielen(midiHz(tonMidi("melodie", zeile, S)), zeit, dauer, laut);
@@ -2141,10 +2173,11 @@
   const raumWahl = T => '<label class="lw-feld"><span>' + T.raum + '</span><select data-feld="raum">' + Object.keys(RAEUME).map(r => '<option value="' + r + '"' + (r === S.raum ? " selected" : "") + ">" + T.raeume[r] + "</option>").join("") + "</select></label>";
   const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KULISSEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
     '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
+  const sparKnopf = T => '<button type="button" class="lw-schalter lw-spar" data-aktion="spar" aria-pressed="' + spar + '" title="' + esc(T.sparTipp) + '">' + T.spar + "</button>";
   const mixRegler = T =>
     '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
-    raumWahl(T);
+    raumWahl(T) + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
@@ -2558,6 +2591,10 @@
       return;
     }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
+    if (e.target.closest('[data-aktion="spar"]')) {
+      spar = !spar; try { localStorage.setItem("imres-lw-spar", spar ? "1" : "0"); } catch (_) {}
+      root.querySelectorAll(".lw-spar").forEach(b => b.setAttribute("aria-pressed", spar)); status(spar ? t().sparAn : t().sparAus); return;
+    }
     const mt = e.target.closest("[data-musiktab]");
     if (mt) { musikTab = mt.dataset.musiktab; try { localStorage.setItem("imres-lw-musiktab", musikTab); } catch (_) {} boxNeu("musik"); return; }
     const ft = e.target.closest("[data-fxtab]");
