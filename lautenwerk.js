@@ -74,7 +74,8 @@
   const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "wald", spannung: "hoehle", sieg: "taverne", kampf: "keine",
     taverne: "taverne", hafen: "meer", wald: "wald", markt: "taverne", schmiede: "feuer", wiegen: "feuer", trauer: "regen",
     ballade: "taverne", saltarello: "taverne", schlacht: "sturm",
-    auenland: "wald", elben: "wald", zwerge: "hoehle", reiter: "keine", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen" };
+    auenland: "wald", elben: "wald", zwerge: "hoehle", reiter: "keine", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen",
+    klage: "regen", marktplatz: "taverne", hof: "keine", grusel: "hoehle", fey: "wald", boss: "sturm" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   /* lustige Spieltisch-Momente */
   const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk",
@@ -83,8 +84,8 @@
   const KAMPF_FX = ["bogen", "pfeil", "hieb", "verfehlt", "block", "wucht", "schmerz", "sterben", "feuerball", "blitz", "heiltrank"];
   /* gemeinfreie Klassiker, von der eigenen Band mit echten Instrumenten gespielt */
   const KLASSIKER = ["zirkus", "trauermarsch", "toccata", "zarathustra", "bergkoenig", "walkuere", "galopp", "hochzeit",
-    "elise", "nachtmusik", "freude", "diesirae", "wiegenlied", "morgen", "zapfenstreich", "angriff"];
-  const COVER_LISTE = ["matrose", "scarborough", "greensleeves", "korobeiniki", "auldlangsyne", "shchedryk"];
+    "elise", "nachtmusik", "freude", "diesirae", "wiegenlied", "morgen", "zapfenstreich", "angriff", "kanon", "fruehling", "turca"];
+  const COVER_LISTE = ["matrose", "washerwoman", "scarborough", "greensleeves", "korobeiniki", "amazinggrace", "bruderjakob", "sakura", "auldlangsyne", "shchedryk"];
   const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE, KLASSIKER, COVER_LISTE);
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
@@ -113,7 +114,8 @@
       lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
       vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Markt", schmiede: "⚒ Schmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lager",
-        auenland: "🌿 Auenland", elben: "✨ Elben", zwerge: "⛏ Zwerge", reiter: "🐎 Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kamin", shanty: "🌊 Shanty", pilger: "⛪ Pilger" },
+        auenland: "🌿 Auenland", elben: "✨ Elben", zwerge: "⛏ Zwerge", reiter: "🐎 Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kamin", shanty: "🌊 Shanty", pilger: "⛪ Pilger",
+        klage: "🥀 Klage", marktplatz: "🛒 Marktplatz", hof: "👑 Königshof", grusel: "👻 Spukhaus", fey: "🧚 Feenwald", boss: "🐲 Endgegner" },
       klangwelten: "Klangwelten", klangTipp: "Volksmusik und Fantasy-Klänge – jedes Mal neu komponiert, im Stil vertraut, aber immer eigene Melodien.",
       zufall: "🎲 Zufall", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
@@ -134,6 +136,8 @@
         zirkus: "🤡 Zirkus", trauermarsch: "⚰️ Trauermarsch", toccata: "🦇 Schurken-Orgel", zarathustra: "🌅 Zarathustra", bergkoenig: "👺 Bergkönig",
         walkuere: "🐎 Walkürenritt", galopp: "🏇 Galopp", hochzeit: "💍 Hochzeitsmarsch", elise: "🎹 Für Elise", nachtmusik: "🎩 Nachtmusik",
         matrose: "⚓ Drunken Sailor", scarborough: "🌿 Scarborough Fair", greensleeves: "💚 Greensleeves", korobeiniki: "🧱 Korobeiniki", auldlangsyne: "🥂 Auld Lang Syne", shchedryk: "🔔 Schtschedryk",
+        amazinggrace: "🕊 Amazing Grace", bruderjakob: "🔁 Bruder Jakob (Kanon)", washerwoman: "☘️ Irish Washerwoman", sakura: "🌸 Sakura",
+        kanon: "👑 Pachelbel-Kanon", fruehling: "🐦 Vivaldi: Frühling", turca: "🐫 Alla turca",
         freude: "🇪🇺 Ode an die Freude", diesirae: "💀 Dies irae", wiegenlied: "🌙 Wiegenlied", morgen: "☀️ Morgenstimmung", zapfenstreich: "🎺 Zapfenstreich", angriff: "📯 Angriff!",
         bogen: "🏹 Bogen", pfeil: "🎯 Pfeil", hieb: "🗡 Hieb", verfehlt: "💨 Verfehlt", block: "🛡 Block", wucht: "🔨 Wucht",
         schmerz: "😫 Aua", sterben: "💀 Tod", feuerball: "🔥 Feuerball", blitz: "⚡ Blitz", heiltrank: "🧪 Trank" }, momente: "Spieltisch-Momente", kampfFx: "Kampf",
@@ -148,7 +152,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
-      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)",
+      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "✏️ Eigene Kompositionen – Vorlagen zum Bearbeiten im Raster",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
@@ -178,7 +182,8 @@
       lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
       vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market", schmiede: "⚒ Forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Camp",
-        auenland: "🌿 Shire", elben: "✨ Elves", zwerge: "⛏ Dwarves", reiter: "🐎 Riders", dorffest: "💃 Fair", kamin: "🕯 Fireside", shanty: "🌊 Shanty", pilger: "⛪ Pilgrim" },
+        auenland: "🌿 Shire", elben: "✨ Elves", zwerge: "⛏ Dwarves", reiter: "🐎 Riders", dorffest: "💃 Fair", kamin: "🕯 Fireside", shanty: "🌊 Shanty", pilger: "⛪ Pilgrim",
+        klage: "🥀 Lament", marktplatz: "🛒 Market square", hof: "👑 Royal court", grusel: "👻 Haunted house", fey: "🧚 Fey forest", boss: "🐲 Boss fight" },
       klangwelten: "Soundscapes", klangTipp: "Folk music and fantasy sounds – freshly composed every time, familiar in style but always with original melodies.",
       zufall: "🎲 Random", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
@@ -199,6 +204,8 @@
         zirkus: "🤡 Circus", trauermarsch: "⚰️ Funeral march", toccata: "🦇 Villain organ", zarathustra: "🌅 Zarathustra", bergkoenig: "👺 Mountain King",
         walkuere: "🐎 Valkyries", galopp: "🏇 Gallop", hochzeit: "💍 Wedding march", elise: "🎹 Für Elise", nachtmusik: "🎩 Night music",
         matrose: "⚓ Drunken Sailor", scarborough: "🌿 Scarborough Fair", greensleeves: "💚 Greensleeves", korobeiniki: "🧱 Korobeiniki", auldlangsyne: "🥂 Auld Lang Syne", shchedryk: "🔔 Carol of the Bells",
+        amazinggrace: "🕊 Amazing Grace", bruderjakob: "🔁 Frère Jacques (round)", washerwoman: "☘️ Irish Washerwoman", sakura: "🌸 Sakura",
+        kanon: "👑 Pachelbel’s Canon", fruehling: "🐦 Vivaldi: Spring", turca: "🐫 Alla turca",
         freude: "🇪🇺 Ode to Joy", diesirae: "💀 Dies irae", wiegenlied: "🌙 Lullaby", morgen: "☀️ Morning mood", zapfenstreich: "🎺 Taps", angriff: "📯 Charge!",
         bogen: "🏹 Bow", pfeil: "🎯 Arrow", hieb: "🗡 Slash", verfehlt: "💨 Miss", block: "🛡 Block", wucht: "🔨 Smash",
         schmerz: "😫 Ouch", sterben: "💀 Death", feuerball: "🔥 Fireball", blitz: "⚡ Lightning", heiltrank: "🧪 Potion" }, momente: "Table moments", kampfFx: "Combat",
@@ -213,7 +220,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
-      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)",
+      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "✏️ Own compositions – templates to edit in the grid",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
@@ -472,7 +479,7 @@
         floete: folge({ 0: 5, 4: 4, 8: 3, 12: 4 }), rex: folge({ 14: 0 }) }) }
   };
   const LIEDER = ["taverne", "saltarello", "ballade", "hafen", "wald", "markt", "schmiede", "trauer", "schlacht", "wiegen"];
-  const STIMMUNGEN = ["kampf", "unterreich", "reise", "spannung", "sieg", "rast", "auenland", "elben", "zwerge", "reiter", "dorffest", "kamin", "shanty", "pilger"];
+  const STIMMUNGEN = ["kampf", "boss", "spannung", "grusel", "unterreich", "reise", "reiter", "sieg", "rast", "kamin", "klage", "auenland", "elben", "fey", "zwerge", "dorffest", "marktplatz", "hof", "shanty", "pilger"];
 
   /* ---------- Stimmungs-Generatoren ----------
      Jede Stimmung ist ein Stil: Tonleiter, Tempo, Besetzung, Akkordfolgen (Bass-Zeilen je Viertel),
@@ -560,7 +567,45 @@
       instrument: ["drehleier", "glocken", "harfe"], band: { trommel: ["pauke"], floete: ["gesang"], ketten: ["schnipsen"] },
       ablauf: ["AB", "AABA", "ABAC"], akkorde: [[0, 4, 0, 0], [0, 2, 0, 3], [0, 0, 4, 0]],
       bass: ["orgel", "halbe"], rhythmus: [[0, 4], [0, 4, 6], [0, 2, 4]], lage: 4, dichte: .6, echo: "lang",
-      klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[]], rex: [2] }
+      klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[]], rex: [2] },
+    /* ---- weitere Stimmungen ---- */
+    /* Klage: Abschied, Begräbnis, verlorene Gefährten */
+    klage: { modus: ["aeolisch", "dorisch"], tempo: [56, 66], transpose: [0, -2, 3], swing: 0, bordun: 1, variation: 2,
+      instrument: ["fidel", "harfe", "laute"], band: { trommel: ["pauke"], floete: ["gesang", "okarina"], ketten: ["schnipsen"] },
+      ablauf: ["AB", "AABA", "ABAC"], akkorde: [[0, 4, 2, 0], [0, 2, 3, 0], [0, 1, 4, 0], [0, 0, 2, 3]],
+      bass: ["halbe", "orgel"], rhythmus: [[0, 4], [0, 4, 6], [0, 6]], lage: 3, dichte: .5, echo: "lang",
+      klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[]], rex: [2] },
+    /* Marktplatz: Feilschen, Gaukler, buntes Treiben */
+    marktplatz: { modus: ["mixolydisch", "ionisch"], tempo: [112, 124], transpose: [0, 2, -3], swing: 1, bordun: 0, variation: 3,
+      instrument: ["mandoline", "laute", "schalmei"], band: { trommel: ["tamburin", "bodhran"], floete: ["floete", "panfloete"], ketten: ["krug", "klatschen", "loeffel"] },
+      ablauf: ["AABB", "ABAC", "AABBCD"], akkorde: [[0, 3, 0, 4], [0, 2, 3, 0], [2, 3, 0, 0], [0, 4, 2, 3]],
+      bass: ["viertel"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6], [0, 2, 4, 5, 6]], lage: 4, dichte: .95, echo: "antwort",
+      klopf: [[0, 8]], schelle: [[4, 12], [2, 6, 10, 14]], trommel: [[0, 6, 8, 14], [0, 4, 8, 12]], ketten: [[2, 6, 10, 14], [4, 12]], rex: [0] },
+    /* Königshof: feierlich, höfisch, Fanfaren */
+    hof: { modus: ["ionisch", "mixolydisch"], tempo: [84, 96], transpose: [0, 2, -2], swing: 0, bordun: 0, variation: 2,
+      instrument: ["harfe", "laute", "fidel"], band: { trommel: ["pauke", "trommel"], floete: ["horn", "floete"], ketten: ["schnipsen"] },
+      ablauf: ["AABA", "AABBCD", "ABACAD"], akkorde: [[0, 3, 0, 3], [0, 2, 3, 0], [0, 1, 2, 3], [2, 3, 0, 0]],
+      bass: ["viertel", "halbe"], rhythmus: [[0, 4, 6], [0, 2, 4, 6], [0, 3, 4]], lage: 4, dichte: .75, echo: "lang",
+      klopf: [[]], schelle: [[]], trommel: [[0, 8], [0, 6, 8]], ketten: [[]], rex: [2] },
+    /* Spukhaus: Grusel, Untote, knarrende Dielen */
+    grusel: { modus: ["phrygisch"], tempo: [50, 62], transpose: [-2, -4, 0], swing: 0, bordun: 1, variation: 4,
+      instrument: ["glocken", "illusion", "drehleier"], band: { trommel: ["pauke"], floete: ["okarina", "gesang"], ketten: ["ketten", "rassel"] },
+      ablauf: ["AB", "AAAB", "ABAC"], akkorde: [[0, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 4]],
+      bass: ["orgel", "puls"], rhythmus: [[0, 6], [3, 8], [0]], lage: 2, dichte: .4, echo: "fern", schraeg: .45,
+      klopf: [[]], schelle: [[]], trommel: [[0], [0, 10]], ketten: [[7], [5, 13], []], rex: [1, 2] },
+    /* Feenwald: verspielt, glitzernd, Schabernack */
+    fey: { modus: ["lydisch", "ionisch"], tempo: [116, 128], transpose: [0, 2, 5], swing: 1, bordun: 0, variation: 3,
+      instrument: ["harfe", "glocken", "mandoline"], band: { trommel: ["tamburin", "bodhran"], floete: ["panfloete", "floete"], ketten: ["schnipsen", "rassel"] },
+      ablauf: ["AABA", "ABAC", "AABBCD"], akkorde: [[0, 1, 0, 3], [0, 3, 1, 0], [1, 0, 3, 0], [0, 0, 1, 1]],
+      bass: ["viertel", "halbe"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 3, 4, 6]], lage: 5, dichte: .9, echo: "antwort",
+      klopf: [[]], schelle: [[2, 6, 10, 14], [0, 4, 8, 12]], trommel: [[0, 8], [0, 6, 8, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
+    /* Endgegner: noch schneller und wuchtiger als der Kampf */
+    boss: { modus: ["phrygisch", "aeolisch"], tempo: [148, 160], transpose: [-2, 0, -4], swing: 0, bordun: 1, variation: 3,
+      instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn"], ketten: ["ketten", "stampfen"] },
+      ablauf: ["AABCDD", "ABACABAD", "AABBCD"], akkorde: [[0, 0, 1, 0], [0, 1, 4, 0], [0, 4, 1, 3], [0, 0, 4, 1]],
+      bass: ["galopp", "puls"], rhythmus: [[0, 1, 2, 3, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 2, 4, 5, 6]], lage: 3, dichte: 1, echo: "lang",
+      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14]], trommel: [[0, 2, 3, 6, 8, 10, 11, 14], [0, 1, 2, 4, 6, 8, 9, 10, 12, 14, 15]],
+      ketten: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], rex: [0, 2] }
   };
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
@@ -1837,7 +1882,7 @@
   const anzeige = [];
   let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
   /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
-  const DRAMA = { kampf: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1 };
+  const DRAMA = { kampf: 2, boss: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1, grusel: 1, hof: 1 };
   /* Ende des laufenden Takts – liegt er weniger als einen Schlag entfernt, das Ende des nächsten */
   function taktEnde() {
     const sd = schrittDauer(); let T = naechste + ((SCHRITTE - schritt) % SCHRITTE) * sd;
@@ -2056,7 +2101,9 @@
     kampf: { pad: .8, ost: 1, horn: 1, trp: 1, pos: 1, gross: 2 }, sieg: { pad: .8, horn: 1, trp: 1, gross: 2 },
     reiter: { pad: .7, ost: 1, horn: 1, trp: 1, gross: 2 }, zwerge: { pad: .7, horn: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1 },
     spannung: { pad: .6, farbe: "trem", ost: 1, gross: 1 }, unterreich: { pad: .6, farbe: "trem", tief: 1, tuba: 1, gross: 1, gong: 1 },
-    elben: { pad: .7, hoch: 1, glanz: 1 }, pilger: { pad: .6, farbe: "orgel" }, reise: { pad: .5, gross: 1 },
+    elben: { pad: .7, hoch: 1, glanz: 1 }, boss: { pad: .9, ost: 1, horn: 1, trp: 1, pos: 1, gross: 2, tief: 1 },
+    grusel: { pad: .55, farbe: "trem", tief: 1, gross: 1, gong: 1 }, klage: { pad: .6 }, hof: { pad: .55, horn: 1, trp: 1, gross: 1 },
+    fey: { pad: .4, hoch: 1, glanz: 1 }, marktplatz: { pad: 0, volk: 1 }, pilger: { pad: .6, farbe: "orgel" }, reise: { pad: .5, gross: 1 },
     auenland: { pad: .45, farbe: "holz" }, shanty: { pad: .4, farbe: "holz" }, rast: { pad: .4, farbe: "holz" }, kamin: { pad: .35, farbe: "holz" },
     dorffest: { pad: 0, volk: 1 }
   };
@@ -2437,6 +2484,52 @@
       linie(n, "trp", 0, [["G4", .6], ["G4", .2], ["C5", 1.6], ["G4", .6], ["C5", .2], ["E5", 1.6], ["G4", .4], ["C5", .4], ["E5", .8], ["G4", .4], ["C5", .4], ["E5", .8],
         ["G4", .4], ["C5", .4], ["E5", 1.6], ["C5", .6], ["E5", .2], ["G5", 1.6], ["E5", .6], ["C5", .2], ["G4", 1.6], ["G4", .6], ["G4", .2], ["C5", 2.6]], .4, { leg: .93 });
     },
+    kanon(n) { /* Pachelbel: Kanon in D */
+      const q = .72, bass = ["D3", "A2", "B2", "F#2", "G2", "D2", "G2", "A2"], akk = ["D", "A", "Bm", "F#m", "G", "D", "G", "A"];
+      const AK = { D: ["D4", "F#4", "A4"], A: ["C#4", "E4", "A4"], Bm: ["D4", "F#4", "B4"], "F#m": ["C#4", "F#4", "A4"], G: ["D4", "G4", "B4"] };
+      const l1 = ["F#5", "E5", "D5", "C#5", "B4", "A4", "B4", "C#5"].map(x => [x, 1]);
+      const l2 = ["D5", "C#5", "B4", "A4", "G4", "F#4", "G4", "E4"].map(x => [x, 1]);
+      const l3 = ["D4", "F#4", "A4", "G4", "F#4", "D4", "F#4", "E4", "D4", "B3", "D4", "A4", "G4", "B4", "A4", "G4"].map(x => [x, .5]);
+      const l4 = ["F#4", "D4", "E4", "C#5", "D5", "F#5", "A5", "A4", "B4", "G4", "A4", "F#4", "D4", "D5", "D5", "C#5"].map(x => [x, .5]);
+      const zyklen = 8;
+      for (let c = 0; c < zyklen; c++) {
+        const t0 = c * 8 * q;
+        bass.forEach((x, i) => { n("vc", ton(x), t0 + i * q, q * .98, .25); n("kb", ton(x), t0 + i * q, q, .25); if (c >= 1 && c < 7) AK[akk[i]] && AK[akk[i]].forEach(y => n("harfe", ton(y), t0 + i * q + .03, q, .1)); });
+        const linien = [l1, l2, l3, l4];
+        [["geige", 1], ["vln", 2], ["geige", 3]].forEach(([gr, start], v) => { const k = c - start; if (k >= 0 && k < 5) linie(n, gr, t0, achtel(linien[k % 4], q), gr === "vln" ? .16 : .32 - .04 * v, { leg: .95 }); });
+      }
+      const t = zyklen * 8 * q; ["D3", "A3", "D4", "F#4", "A4", "D5"].forEach(x => { n("vc", ton(x) - 12, t, 3, .15); n("geige", ton(x), t, 3, .15); n("harfe", ton(x), t, 3, .2); });
+    },
+    fruehling(n) { /* Vivaldi: Der Frühling */
+      const e = .23;
+      const r = [["E4", 1], ["G#4", 1], ["G#4", 1], ["G#4", 1], ["F#4", .5], ["E4", .5], ["B4", 3], ["B4", .5], ["A4", .5], ["G#4", 1], ["G#4", 1], ["G#4", 1], ["F#4", .5], ["E4", .5], ["B4", 3], ["B4", .5], ["A4", .5],
+        ["G#4", 1], ["A4", 1], ["B4", 2], ["A4", 1], ["G#4", 1], ["F#4", 2], ["D#4", 1], ["B3", 1], ["E4", 1], ["E4", 1], ["E4", 2]];
+      let t = 0;
+      [[0, .4, 1], [0, .22, 0], [0, .4, 1]].forEach(([o, l, voll], i) => {
+        const t0 = t; t = linie(n, "geige", t, achtel(r.map(([x, d]) => [okt(x, 1 + o), d]), e), l, { leg: .85 });
+        if (voll) linie(n, "vln", t0, achtel(r.map(([x, d]) => [okt(x, 1), d]), e), l * .4, { leg: .85 });
+        for (let z = t0; z < t - .05; z += 2 * e) n("spic", ton(Math.round((z - t0) / (2 * e)) % 4 < 2 ? "E3" : "B2"), z, e, voll ? .22 : .12, { kurz: 1 });
+        t += .1;
+        if (i === 1) { /* Vogelgezwitscher */
+          for (let k = 0; k < 14; k++) n("flst", ton(["E6", "F#6", "E6", "G#6"][k % 4]), t + k * .09, .08, .18, { kurz: 1 });
+          t += 1.5;
+        }
+      });
+      ["E3", "B3", "E4", "G#4", "B4", "E5"].forEach(x => n("geige", ton(x), t, 1.6, .15)); n("vc", ton("E2") + 12, t, 1.6, .25);
+    },
+    turca(n) { /* Mozart: Rondo alla turca */
+      const s = .13;
+      const m = [["B4", 1], ["A4", 1], ["G#4", 1], ["A4", 1], ["C5", 4], ["D5", 1], ["C5", 1], ["B4", 1], ["C5", 1], ["E5", 4], ["F5", 1], ["E5", 1], ["D#5", 1], ["E5", 1],
+        ["B5", 1], ["A5", 1], ["G#5", 1], ["A5", 1], ["B5", 1], ["A5", 1], ["G#5", 1], ["A5", 1], ["C6", 4], ["A5", 2], ["C6", 2], ["B5", 2], ["A5", 2], ["G5", 2], ["A5", 2],
+        ["B5", 2], ["A5", 2], ["G5", 2], ["A5", 2], ["B5", 2], ["A5", 2], ["G5", 2], ["F#5", 2], ["E5", 4]];
+      let t = 0;
+      [["flst", -1, .4], ["oboest", -1, .4], ["geigest", -1, .42]].forEach(([gr, o, l], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m.map(([x, d]) => [okt(x, o), d]), s), l, { kurz: 1, leg: .8 });
+        for (let z = t0 + 4 * s; z < t - .05; z += 2 * s) { const k = Math.round((z - t0) / (2 * s)); n(k % 2 ? "harfe" : "kb", ton(k % 4 < 2 ? "A2" : "E2") + (k % 2 ? 12 : 0), z, s * 1.5, .25, { kurz: 1 }); }
+        if (i === 2) { coverTrommel(n, t0, t, 4 * s, "bodh", .4); for (let z = t0; z < t; z += 2 * s) n("schelle1", 0, z + s, 0, .15); }
+      });
+      ["A3", "C4", "E4", "A4"].forEach(x => { n("geige", ton(x), t, .8, .2); n("harfe", ton(x), t, 1.2, .25); }); n("bodh1", 0, t, 0, .5);
+    },
     angriff(n) { /* Signal „Charge!“ – zweimal, beim zweiten Mal mit der ganzen Kapelle */
       const m = [["G4", .15], ["C5", .15], ["E5", .15], ["G5", .4], ["E5", .15], ["G5", 1]];
       linie(n, "trp", 0, m, .42, { leg: .9 });
@@ -2465,6 +2558,63 @@
   }
   const coverTrommel = (n, t0, t1, schlag, art, l) => { for (let z = t0, k = 0; z < t1 - .01; z += schlag, k++) n(art === "tamb" ? (k % 2 ? "tamb2" : "tamb1") : (k % 2 ? "bodh2" : "bodh1"), 0, z, 0, l); };
   const COVER_STUECKE = {
+    amazinggrace(n) { /* „Amazing Grace“ – Melodie „New Britain“ (1829) */
+      const b = .55;
+      const m = [["D4", 1], ["G4", 2], ["B4", .5], ["G4", .5], ["B4", 2], ["A4", 1], ["G4", 2], ["E4", 1], ["D4", 2], ["D4", 1], ["G4", 2], ["B4", .5], ["G4", .5], ["B4", 2], ["A4", 1], ["D5", 3],
+        ["D5", 2], ["B4", 1], ["D5", 2], ["B4", .5], ["D5", .5], ["B4", 2], ["A4", 1], ["G4", 2], ["E4", 1], ["D4", 2], ["D4", 1], ["G4", 2], ["B4", .5], ["G4", .5], ["B4", 2], ["A4", 1], ["G4", 3]];
+      const akk = ["G", "G", "C", "G", "G", "D", "D", "G", "G", "C", "G", "G", "D", "G"];
+      let t = 0;
+      [["fl", .4], ["dudel", .3], ["stimme", .32]].forEach(([gr, l], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m, b), l, { leg: .96 });
+        if (i === 1) { n("orgel", ton("G2"), t0, t - t0, .18); n("orgel", ton("D3"), t0, t - t0, .12); }
+        else akk.forEach((a, k) => AKK[a].forEach((x, j) => n("harfe", ton(x), t0 + b + k * 3 * b + j * .15, 1.6, .2)));
+        if (i === 2) { linie(n, "dudel", t0, achtel(m, b), .22, { leg: .96 }); akk.forEach((a, k) => n("vc", ton(AKK[a][0]), t0 + b + k * 3 * b, 3 * b, .2)); n("timp1", 0, t - 3 * b, 0, .3); }
+        t += .3;
+      });
+    },
+    bruderjakob(n) { /* „Bruder Jakob“ als vierstimmiger Kanon */
+      const q = .42;
+      const m = [["F4", 1], ["G4", 1], ["A4", 1], ["F4", 1], ["F4", 1], ["G4", 1], ["A4", 1], ["F4", 1], ["A4", 1], ["Bb4", 1], ["C5", 2], ["A4", 1], ["Bb4", 1], ["C5", 2],
+        ["C5", .5], ["D5", .5], ["C5", .5], ["Bb4", .5], ["A4", 1], ["F4", 1], ["C5", .5], ["D5", .5], ["C5", .5], ["Bb4", .5], ["A4", 1], ["F4", 1], ["F4", 1], ["C4", 1], ["F4", 2], ["F4", 1], ["C4", 1], ["F4", 2]];
+      const stimmen = [["geige", 0, .38], ["fl", 1, .3], ["oboe", 0, .3], ["fag", -1, .38]];
+      stimmen.forEach(([gr, o, l], k) => { const t0 = k * 8 * q; linie(n, gr, t0, achtel(m.concat(m).map(([x, d]) => [okt(x, o), d]), q), l, { leg: .9 }); });
+      const ende = 3 * 8 * q + 64 * q;
+      for (let z = 0; z < ende - .1; z += 2 * q) { n("gitarre", ton("F2") + 12, z, q * 1.5, .25); ["A3", "C4", "F4"].forEach(x => n("gitarre", ton(x), z + q, q, .12)); }
+      coverTrommel(n, 0, ende, q, "bodh", .35);
+    },
+    washerwoman(n) { /* „The Irish Washerwoman“ – irischer Jig */
+      const e = .15;
+      const A = [["B4", 1], ["G4", 1], ["G4", 1], ["D4", 1], ["G4", 1], ["G4", 1], ["B4", 1], ["G4", 1], ["B4", 1], ["D5", 1], ["C5", 1], ["B4", 1], ["C5", 1], ["A4", 1], ["A4", 1], ["E4", 1], ["A4", 1], ["A4", 1],
+        ["C5", 1], ["A4", 1], ["C5", 1], ["E5", 1], ["D5", 1], ["C5", 1], ["B4", 1], ["G4", 1], ["G4", 1], ["D4", 1], ["G4", 1], ["G4", 1], ["B4", 1], ["G4", 1], ["B4", 1], ["D5", 1], ["C5", 1], ["B4", 1],
+        ["C5", 1], ["B4", 1], ["C5", 1], ["A4", 1], ["D5", 1], ["C5", 1], ["B4", 1], ["G4", 1], ["G4", 1], ["G4", 2], [null, 1]];
+      const B = [["D5", 1], ["G4", 1], ["G4", 1], ["B4", 1], ["G4", 1], ["G4", 1], ["D5", 1], ["G4", 1], ["G4", 1], ["B4", 1], ["G4", 1], ["G4", 1], ["E5", 1], ["A4", 1], ["A4", 1], ["C5", 1], ["A4", 1], ["A4", 1],
+        ["E5", 1], ["A4", 1], ["A4", 1], ["C5", 1], ["A4", 1], ["A4", 1], ["D5", 1], ["G4", 1], ["G4", 1], ["B4", 1], ["G4", 1], ["G4", 1], ["D5", 1], ["E5", 1], ["D5", 1], ["C5", 1], ["B4", 1], ["A4", 1],
+        ["B4", 1], ["C5", 1], ["A4", 1], ["F#4", 1], ["A4", 1], ["D5", 1], ["B4", 1], ["G4", 1], ["G4", 1], ["G4", 2], [null, 1]];
+      const akkA = ["G", "G", "Am", "D", "G", "G", "D", "G"], akkB = ["G", "G", "Am", "Am", "G", "G", "D", "G"];
+      let t = 0;
+      [[A, akkA, "geige"], [A, akkA, "fl"], [B, akkB, "geige"], [B, akkB, "fl"], [A, akkA, "dudel"], [A, akkA, "geige"]].forEach(([m, folge, gr], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m, e), gr === "dudel" ? .3 : .38, { leg: .85 });
+        if (i >= 4) linie(n, "fl", t0, achtel(m, e), .2, { leg: .85 });
+        folge.forEach((a, k) => { const z = t0 + k * 6 * e; n("gitarre", ton(AKK[a][0]), z, 3 * e, .3); AKK[a].slice(1).forEach((x, j) => n("gitarre", ton(x) + 12, z + 3 * e + j * .01, 2 * e, .15)); });
+        coverTrommel(n, t0, t, 3 * e, "bodh", .45); if (i >= 2) coverTrommel(n, t0 + 1.5 * e, t, 3 * e, "tamb", .25);
+      });
+      ["G3", "D4", "G4", "B4"].forEach(x => n("gitarre", ton(x), t, 1.2, .3)); n("bodh1", 0, t, 0, .6);
+    },
+    sakura(n) { /* „Sakura“ – japanisches Volkslied */
+      const q = .5;
+      const m = [["A4", 1], ["A4", 1], ["B4", 2], ["A4", 1], ["A4", 1], ["B4", 2], ["A4", 1], ["B4", 1], ["C5", 1], ["B4", 1], ["A4", 1], ["B4", .5], ["A4", .5], ["F4", 2],
+        ["E4", 1], ["C4", 1], ["E4", 1], ["F4", 1], ["E4", 1], ["E4", .5], ["C4", .5], ["B3", 2], ["A4", 1], ["B4", 1], ["C5", 1], ["B4", 1], ["A4", 1], ["B4", .5], ["A4", .5], ["F4", 2],
+        ["E4", 1], ["C4", 1], ["E4", 1], ["F4", 1], ["E4", 1], ["E4", .5], ["C4", .5], ["B3", 2], ["A4", 1], ["A4", 1], ["B4", 2], ["A4", 1], ["A4", 1], ["B4", 2],
+        ["E4", 1], ["F4", 1], ["B4", .5], ["A4", .5], ["F4", 1], ["E4", 4]];
+      let t = 0;
+      [["harfe", .5], ["fl", .38]].forEach(([gr, l], i) => {
+        const t0 = t; t = linie(n, gr, t, achtel(m, q), l, { leg: .95 });
+        for (let z = t0; z < t - .1; z += 4 * q) { n("harfe", ton("A2"), z, 2, .25); n("harfe", ton("E3"), z + 2 * q, 1.5, .18); }
+        if (i === 1) linie(n, "harfe", t0, achtel(m.map(([x, d]) => [okt(x, -1), d]), q), .25);
+        t += .3;
+      });
+      n("glock", ton("E5") + 12, t - 2, 0, .2); n("gong", 0, t - 2, 0, .15);
+    },
     matrose(n) { /* „What shall we do with the drunken sailor“ – Seemannslied */
       const q = .4;
       const zeile = (a, b, c) => [[a, 1], [a, .5], [a, .5], [a, 1], [a, .5], [a, .5], [a, 1], [b[0], 1], [b[1], 1], [b[2], 1]];
@@ -2595,7 +2745,7 @@
     lauf.bus.connect(sfxBus);
     const pause = musikPausieren();
     const ende = noten.reduce((s, x) => Math.max(s, x[0] + (x[3] || 2)), 0);
-    const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
+    const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, fruehling: 2, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
     let i = 0;
     const planen2 = () => {
       const bis = ctx.currentTime + 1.2 - z;
@@ -3031,9 +3181,9 @@
     '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
   function musikBox(T, voll) {
     let kacheln;
-    if (musikTab === "lieder") kacheln = LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "")))
-      .concat([kachel("data-vorlage", "zufall", T.zufall)], voll ? [kachel("data-vorlage", "leer", T.leeren)] : [],
-        ['<p class="lw-trenner">' + T.coverTitel + "</p>"], COVER_LISTE.map(k => kachel("data-sfx", k, T.sfx[k]))).join("");
+    if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.coverTitel + "</p>"].concat(COVER_LISTE.map(k => kachel("data-sfx", k, T.sfx[k])),
+        voll ? ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
+          [kachel("data-vorlage", "zufall", T.zufall), kachel("data-vorlage", "leer", T.leeren)]) : []).join("");
     else if (musikTab === "eigene") {
       const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
       kacheln = alle.length ? alle.map(([q, l]) => kachel("data-eigen", q + ":" + l.id, (q === "g" ? "👥 " : "📱 ") + esc(l.name), geladen && geladen.quelle === q && String(geladen.id) === String(l.id))).join("")
