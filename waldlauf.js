@@ -239,7 +239,7 @@
     zombie:    { malen: ["zombie"], hoehe: 84, hp: 4, tempo: 24, punkte: 25, art: "boden", splitter: SPL.faul },
     spinne:    { malen: ["spinne"], hoehe: 44, hp: 2, tempo: 72, punkte: 18, art: "boden", seil: true, hell: 1.5, splitter: SPL.spinne },
     ettercap:  { malen: ["ettercap"], hoehe: 78, hp: 3, tempo: 40, punkte: 25, art: "boden", splitter: ["#5a5a7a", "#b4ff6a", "#2a2a3a"] },
-    kuotoa:    { malen: ["kuotoa"], hoehe: 86, hp: 2, tempo: 50, punkte: 16, art: "boden", splitter: SPL.fisch },
+    kuotoa:    { bild: "kuo-toa-frei.webp", ohneRand: true, hoehe: 86, hp: 2, tempo: 50, punkte: 16, art: "boden", splitter: SPL.fisch },
     duergar:   { malen: ["duergar"], hoehe: 68, hp: 3, tempo: 40, punkte: 22, art: "boden", stimme: true, splitter: SPL.zwerg },
     stirge:    { malen: ["fledermaus", "stirge"], hoehe: 34, hp: 1, tempo: 92, punkte: 14, art: "flug", splitter: ["#5a3a2a", "#9b3a2f", "#3e2a20"] },
     blight:    { bild: "blight-frei.webp", quelle: [400, 0, 700, 605], hoehe: 60, hp: 1, tempo: 52, punkte: 10, art: "boden", blick: 1, hell: 1.9, splitter: ["#3b4a3a", "#6f8a5a", "#2a2f26"] },
@@ -255,7 +255,7 @@
     ilvara:    { bild: "ilvara-druidin.webp", hoehe: 118, hp: 14, tempo: 22, punkte: 260, art: "boss", mini: true, maske: true, teleport: 3.4, flucht: 0.25, verlust: 1, ohneRand: true, glut: "rgba(190,140,255,.5)", eskorte: ["drowwache", "chasme", "vrock"], splitter: ["#6b5ca8", "#e8e6f0", "#1d1828"] },
     wraith:    { malen: ["wraith"], hoehe: 130, hp: 15, tempo: 16, punkte: 300, art: "boss", schwebt: true, phasen: true, verlust: 2, glut: "rgba(155,231,255,.6)", eskorte: ["spinne", "ettercap"], splitter: ["#9be7ff", "#141826", "#c8e8ff"] },
     demogorgon:{ bild: "demogorgon.webp", hoehe: 196, hp: 28, tempo: 15, punkte: 400, art: "boss", verlust: 3, glut: "rgba(196,86,74,.55)", eskorte: ["blight", "goblin", "chasme"], splitter: ["#e0a046", "#9b3a2f", "#c98a3a"] },
-    riese:     { bild: "riese.webp", freistellen: 38, hoehe: 172, hp: 26, tempo: 15, punkte: 350, art: "boss", rasen: true, verlust: 3, glut: "rgba(255,150,80,.45)", eskorte: ["duergar"], splitter: ["#c9a08a", "#7a5a4a", "#e0a046"] },
+    riese:     { bild: "riese-frei.webp", ohneRand: true, hoehe: 172, hp: 26, tempo: 15, punkte: 350, art: "boss", rasen: true, verlust: 3, glut: "rgba(255,150,80,.45)", eskorte: ["duergar"], splitter: ["#c9a08a", "#7a5a4a", "#e0a046"] },
     // Bonusziele
     hase:      { malen: ["hase"], hoehe: 34, hp: 1, tempo: 165, punkte: 60, art: "bonus", splitter: ["#8a6a4a", "#ebe2cc", "#5a4430"] },
     blatt:     { malen: ["blatt"], hoehe: 30, hp: 1, tempo: 0, punkte: 90, art: "bonus", splitter: ["#e0a046", "#ffcf7a", "#c4564a"] },
