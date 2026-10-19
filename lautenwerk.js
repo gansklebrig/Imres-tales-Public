@@ -99,11 +99,11 @@
       teil: "Teil bearbeiten", ablauf: "Ablauf", kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
       lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
-      vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Marktgewusel", schmiede: "⚒ Zwergenschmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
+      vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Markt", schmiede: "⚒ Schmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lager",
         auenland: "🌿 Auenland", elben: "✨ Elben", zwerge: "⛏ Zwerge", reiter: "🐎 Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kamin", shanty: "🌊 Shanty", pilger: "⛪ Pilger" },
       klangwelten: "Klangwelten", klangTipp: "Volksmusik und Fantasy-Klänge – jedes Mal neu komponiert, im Stil vertraut, aber immer eigene Melodien.",
-      zufall: "🎲 Improvisieren", leeren: "Leeren",
+      zufall: "🎲 Zufall", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
       teilen: "🔗 Lied teilen", kopiert: "Link kopiert – schick ihn an die Gruppe!", geteilt: "Geteilt!",
       geladen: "Ein geteiltes Lied wurde geladen.",
@@ -128,6 +128,8 @@
       pult: "🎛 Spielleiter-Pult", pultGross: "Spielleiter-Pult öffnen", pultUnter: "Stimmungen, Geräuschkulisse und Effekte für den Spieltisch – mit einem Fingertipp", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
+      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente",
+      musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
       gespeichertOk: n => "„" + n + "“ wurde gespeichert.", geloescht: n => "„" + n + "“ wurde gelöscht.", liedGeladen: n => "„" + n + "“ geladen.",
@@ -154,11 +156,11 @@
       teil: "Edit part", ablauf: "Order", kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
       lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
-      vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market bustle", schmiede: "⚒ Dwarven forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
+      vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market", schmiede: "⚒ Forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Camp",
         auenland: "🌿 Shire", elben: "✨ Elves", zwerge: "⛏ Dwarves", reiter: "🐎 Riders", dorffest: "💃 Fair", kamin: "🕯 Fireside", shanty: "🌊 Shanty", pilger: "⛪ Pilgrim" },
       klangwelten: "Soundscapes", klangTipp: "Folk music and fantasy sounds – freshly composed every time, familiar in style but always with original melodies.",
-      zufall: "🎲 Improvise", leeren: "Clear",
+      zufall: "🎲 Random", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
       teilen: "🔗 Share song", kopiert: "Link copied – send it to the party!", geteilt: "Shared!",
       geladen: "A shared song has been loaded.",
@@ -183,6 +185,8 @@
       pult: "🎛 GM console", pultGross: "Open the GM console", pultUnter: "Moods, ambience and effects for the gaming table – one tap away", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
+      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments",
+      musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
       gespeichertOk: n => "“" + n + "” was saved.", geloescht: n => "“" + n + "” was deleted.", liedGeladen: n => "“" + n + "” loaded.",
@@ -710,7 +714,7 @@
       (lokaleLieder.length ? '<optgroup label="' + esc(T.lokal) + '">' + lokaleLieder.map(l => opt("l", l)).join("") + "</optgroup>" : "") +
       "</select>";
   }
-  function neuAuswahl() { const alt = root.querySelector(".lw-gespeichert"); if (alt) alt.outerHTML = eigeneAuswahl(t()); }
+  function neuAuswahl() { if (musikTab === "eigene") boxNeu("musik"); }
   let liedPw = "";
   try { liedPw = localStorage.getItem("imres-tafel-pw") || ""; } catch (_) {}
   function passwort() {
@@ -2098,6 +2102,53 @@
     raumWahl(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
+  /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
+  let musikTab = "stimmungen", fxTab = "effekte";
+  try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; } catch (_) {}
+  const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + text + "</button>";
+  const reiter = (art, liste, aktiv, T) => '<div class="lw-tabs" role="tablist">' + liste.map(([k, txt]) =>
+    '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
+  function musikBox(T, voll) {
+    let kacheln;
+    if (musikTab === "lieder") kacheln = LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "")))
+      .concat([kachel("data-vorlage", "zufall", T.zufall)], voll ? [kachel("data-vorlage", "leer", T.leeren)] : []).join("");
+    else if (musikTab === "eigene") {
+      const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
+      kacheln = alle.length ? alle.map(([q, l]) => kachel("data-eigen", q + ":" + l.id, (q === "g" ? "👥 " : "📱 ") + esc(l.name), geladen && geladen.quelle === q && String(geladen.id) === String(l.id))).join("")
+        : '<p class="lw-tipp lw-leer">' + T.keineEigenen + "</p>";
+    } else kacheln = STIMMUNGEN.map(k => kachel("data-vorlage", k, T.vorlagen[k], S.stimmung === k)).join("");
+    return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + "</h4>" +
+        reiter("musiktab", [["stimmungen", T.tabStimmungen], ["lieder", T.tabLieder], ["eigene", T.tabEigene]], musikTab, T) + "</div>" +
+      '<div class="lw-pult-gitter">' + kacheln + "</div>" +
+      (voll && musikTab === "eigene" ? '<div class="lw-eigene-zeile">' + '<button type="button" class="lw-klein" data-aktion="speichern">' + T.speichern + "</button>" +
+        (geladen ? '<button type="button" class="lw-klein" data-aktion="loeschen">' + T.loeschen + "</button>" : "") +
+        (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
+          (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
+          '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
+      (musikTab === "stimmungen" ? intRegler(T) : "") + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div></section>";
+  }
+  function klangBox(T) {
+    const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : EFFEKTE;
+    return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + "</h4></div>" +
+      '<div class="lw-pult-gitter lw-kul-gitter">' + KULISSEN.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
+      '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
+      reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente]], fxTab, T) +
+      '<div class="lw-pult-gitter lw-pult-fx">' + liste.map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" + fxRegler(T) + "</section>";
+  }
+  const konsole = (T, voll) => '<div class="lw-konsole">' + musikBox(T, voll) + klangBox(T) + "</div>";
+  function boxNeu(welche) {
+    const T = t(), alt = root.querySelector(welche === "musik" ? ".lw-musik" : ".lw-klang");
+    if (alt) alt.outerHTML = welche === "musik" ? musikBox(T, !S.pult && !hoerer) : klangBox(T);
+  }
+  function eigenLaden(wert) {
+    const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
+    const d = l && dekodieren(l.code);
+    if (!d) return;
+    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet"].forEach(k => { d[k] = S[k]; });
+    d.stimmung = null; d.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
+    if (laeuft) { wechsel = d; const a = S; S = d; try { saitenVorbereiten(); } catch (_) {} S = a; status(t().wechselGleich(l.name)); boxNeu("musik"); return; }
+    S = d; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
+  }
   function pultZeichnen(T) {
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.pultTipp + "</p>" +
@@ -2106,17 +2157,7 @@
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<span class="lw-pult-titel">' + esc(S.titel || T.eigenesLied) + "</span>" +
           '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></div>" +
-        '<section><h4>' + T.stimmungen + '</h4><div class="lw-pult-gitter">' +
-          STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") + "</div>" + intRegler(T) +
-          '<select class="lw-gespeichert lw-pult-lieder" data-feld="liedwahl"><option value="">' + T.liedWaehlen + "</option>" +
-            LIEDER.map(k => '<option value="' + k + '">' + T.vorlagen[k] + "</option>").join("") + "</select></section>" +
-        '<section class="lw-pult-mix">' + mixRegler(T) + "</section>" +
-        '<section><h4>' + T.kulisse + '</h4><div class="lw-pult-gitter">' +
-          KULISSEN.map(k => '<button type="button" data-kulisse="' + k + '"' + (S.kulisse === k ? ' class="an"' : "") + ">" + T.kulissen[k] + "</button>").join("") + "</div>" +
-          '<label class="lw-feld lw-regler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label></section>' +
-        '<section><h4>' + T.effekte + '</h4><div class="lw-pult-gitter lw-pult-fx">' + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
-        '<section><h4>⚔ ' + T.kampfFx + '</h4><div class="lw-pult-gitter lw-pult-fx">' + KAMPF_FX.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div></section>" +
-        '<section><h4>🎭 ' + T.momente + '</h4><div class="lw-pult-gitter lw-pult-fx">' + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" + fxRegler(T) + "</section>" +
+        konsole(T, false) +
         '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
@@ -2319,28 +2360,7 @@
         '<button type="button" class="lw-schalter" data-feld="swing" aria-pressed="' + !!S.swing + '">' + T.swing + "</button>" +
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
       "</div>" +
-      '<div class="lw-vorlagen"><span>' + T.lieder + ":</span>" +
-        LIEDER.map(k => '<button type="button" data-vorlage="' + k + '">' + T.vorlagen[k] + "</button>").join("") +
-        '<button type="button" data-vorlage="zufall">' + T.zufall + '</button><button type="button" data-vorlage="leer">' + T.leeren + "</button>" +
-      "</div>" +
-      '<div class="lw-vorlagen lw-eigene"><span>' + T.eigene + ":</span>" + eigeneAuswahl(T) +
-        '<button type="button" data-aktion="speichern">' + T.speichern + "</button>" +
-        (geladen ? '<button type="button" data-aktion="loeschen">' + T.loeschen + "</button>" : "") +
-        (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
-          (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
-          '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") +
-      "</div>" +
-      '<div class="lw-vorlagen lw-kulisse"><span>' + T.kulisse + ":</span>" + kulisseWahl(T) +
-        '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
-      "</div>" +
-      '<div class="lw-vorlagen lw-effekte"><span>' + T.effekte + ":</span>" + EFFEKTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
-      '<div class="lw-vorlagen lw-effekte"><span>⚔ ' + T.kampfFx + ":</span>" + KAMPF_FX.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + "</div>" +
-      '<div class="lw-vorlagen lw-effekte"><span>🎭 ' + T.momente + ":</span>" + MOMENTE.map(f => '<button type="button" data-sfx="' + f + '">' + T.sfx[f] + "</button>").join("") + fxRegler(T) + "</div>" +
-      '<div class="lw-vorlagen lw-stimmungen"><span>' + T.stimmungen + ":</span>" +
-        STIMMUNGEN.map(k => '<button type="button" data-vorlage="' + k + '"' + (S.stimmung === k ? ' class="an"' : "") + ">" + T.vorlagen[k] + "</button>").join("") +
-        (S.stimmung ? '<span class="lw-wandelt">' + esc(T.wandelt(T.vorlagen[S.stimmung].replace(/^\S+\s/, ""))) + "</span>" : "") +
-        intRegler(T) + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>" + '<p class="lw-tipp">' + T.stimmungTipp + "</p>" +
-      "</div>" +
+      konsole(T, true) +
       '<div class="lw-teile">' +
         '<span class="lw-teile-label">' + T.teil + ":</span>" +
         TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") +
@@ -2430,7 +2450,7 @@
   /* ---------- Bedienung ---------- */
   function antippen(z) {
     const spur = z.dataset.spur, i = +z.dataset.s, zeile = +z.dataset.zeile, daten = S.teile[bearbeite][spur];
-    if (S.stimmung) { S.stimmung = null; const w = root.querySelector(".lw-wandelt"); if (w) w.remove(); root.querySelectorAll(".lw-stimmungen [data-vorlage]").forEach(b => b.classList.remove("an")); }
+    if (S.stimmung) { S.stimmung = null; const w = root.querySelector(".lw-wandelt"); if (w) w.remove(); root.querySelectorAll(".lw-musik [data-vorlage]").forEach(b => b.classList.remove("an")); }
     if (SPUR[spur].art === "an") daten[i] = daten[i] >= 0 ? -1 : 0;
     else daten[i] = daten[i] === zeile ? -1 : zeile;
     root.querySelectorAll('.lw-zelle[data-spur="' + spur + '"][data-s="' + i + '"]').forEach(c => {
@@ -2493,6 +2513,12 @@
       return;
     }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
+    const mt = e.target.closest("[data-musiktab]");
+    if (mt) { musikTab = mt.dataset.musiktab; try { localStorage.setItem("imres-lw-musiktab", musikTab); } catch (_) {} boxNeu("musik"); return; }
+    const ft = e.target.closest("[data-fxtab]");
+    if (ft) { fxTab = ft.dataset.fxtab; try { localStorage.setItem("imres-lw-fxtab", fxTab); } catch (_) {} boxNeu("klang"); return; }
+    const eg = e.target.closest("[data-eigen]");
+    if (eg) { audioStart(); eigenLaden(eg.dataset.eigen); return; }
     const fk = e.target.closest('[data-aktion="funk"], [data-aktion="funkkopie"], [data-aktion="hoeren"]');
     if (fk) {
       const a = fk.dataset.aktion;
@@ -2731,6 +2757,20 @@
 .lw-vorlagen button.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
 .lw-effekte button.blitz, .lw-pult-fx button.blitz { animation: lwblitz .5s ease-out; }
 @keyframes lwblitz { 0% { background: var(--ember); color: var(--night); } }
+/* Konsole: Musik links, Kulisse & Effekte rechts – auf schmalen Bildschirmen untereinander */
+.lw-konsole { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; align-items: start; margin: .2rem 0 .9rem; }
+@media (max-width: 760px) { .lw-konsole { grid-template-columns: 1fr; } }
+.lw-box { display: grid; gap: .55rem; padding: .75rem .8rem; border: 1px solid var(--line); background: rgba(235,226,204,.025); min-width: 0; }
+.lw-box h4 { margin: 0; font-family: var(--body); font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ember); }
+.lw-box-kopf { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem .8rem; }
+.lw-tabs { display: flex; gap: .25rem; flex-wrap: wrap; }
+.lw-tabs button { border: 1px solid var(--line); border-radius: 999px; background: none; color: var(--ash); font: inherit; font-size: .8rem; padding: .25rem .7rem; cursor: pointer; }
+.lw-tabs button[aria-selected="true"] { border-color: var(--ember); color: var(--night); background: var(--ember); }
+.lw-box .lw-stimm-mix { margin-top: 0; }
+.lw-box .lw-intensitaet { margin-top: 0; }
+.lw-leer { grid-column: 1 / -1; margin: .2rem 0; }
+.lw-eigene-zeile { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.lw-kul-gitter button { padding-top: .4rem; padding-bottom: .4rem; font-size: .82rem; }
 .lw-pultbanner { display: flex; align-items: center; gap: .9rem; width: 100%; text-align: left; margin: .2rem 0 1rem; padding: .85rem 1.1rem;
   border: 2px solid var(--ember); background: linear-gradient(100deg, rgba(224,160,70,.28), rgba(224,160,70,.08)); color: var(--vellum); font: inherit; cursor: pointer;
   box-shadow: 0 0 18px rgba(224,160,70,.18); transition: background .2s, transform .15s; }
