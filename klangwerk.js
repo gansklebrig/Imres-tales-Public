@@ -461,6 +461,125 @@
       }
       return normieren(a, .9);
     },
+    /* ---------- Meme-Klänge (alle selbst gebaut, nichts kopiert) ---------- */
+    lufthorn(sr) {
+      /* Partyhupe: mehrere leicht verstimmte Zungen, übersteuert – „BWAAA bwa-bwa BWAAAAA" */
+      const a = new Float32Array(Math.floor(2.4 * sr)), g = zz(69, 71);
+      [[0, .42], [.5, .14], [.68, .14], [.86, 1.2]].forEach(([t, d]) => [0, 4, 7, 12].forEach((iv, k) =>
+        blech(a, sr, t, d, midi(g + iv) * zz(.995, 1.005), { hell: 5200, laut: k === 0 ? .7 : .45, ein: .012, aus: .06 })));
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 2.6);
+      hochpass(a, sr, 220);
+      return normieren(raum(a, sr, [[.03, .2], [.07, .12]]), .85);
+    },
+    kratzer(sr) {
+      /* Plattennadel rutscht: Rauschen, dessen Tonhöhe vor und zurück gerissen wird – danach Stille */
+      const a = new Float32Array(Math.floor(1.1 * sr)), F = new SVF(sr), G = new SVF(sr), n = Math.floor(.55 * sr);
+      for (let i = 0; i < n; i++) {
+        const r = i / n, z = Math.sin(TAU * (1.6 * r + 2.4 * r * r)), f = 900 + 2400 * Math.abs(z);
+        if ((i & 15) === 0) { F.setze(f, 6); G.setze(f * .5, 4); }
+        const w = Math.random() * 2 - 1, h = Math.min(1, r * 30) * (1 - Math.pow(r, 3));
+        a[i] += (F.tick(w) * .9 + G.tick(w) * .5) * h * (.6 + .4 * Math.abs(z));
+      }
+      stoss(a, sr, .54, 400, 1, .4, .03);
+      return normieren(a, .85);
+    },
+    boom(sr) {
+      /* tiefer, dröhnender Schlag – der „Bwomm" für dramatische Enthüllungen */
+      const a = new Float32Array(Math.floor(2.6 * sr)), n = Math.floor(2.2 * sr); let p = 0;
+      for (let i = 0; i < n; i++) { const r = i / n; p += (38 + 85 * Math.exp(-r * 9)) / sr; a[i] += Math.sin(TAU * p) * Math.exp(-r * 3.2) * 1.2; }
+      for (let i = 0; i < n; i++) a[i] = Math.tanh(a[i] * 1.8);
+      stoss(a, sr, 0, 160, .8, .8, .12); stoss(a, sr, 0, 2400, .7, .2, .03);
+      return normieren(raum(a, sr, [[.06, .35], [.13, .25], [.23, .15]]), .9);
+    },
+    falsch(sr) {
+      /* Quiz-Summer: „Ä-äääh" */
+      const a = new Float32Array(Math.floor(1.4 * sr)), F = new SVF(sr);
+      [[0, .22], [.3, .75]].forEach(([t, d]) => {
+        const i0 = Math.floor(t * sr), n = Math.floor(d * sr); let q = 0; F.setze(900, 1.2);
+        for (let i = 0; i < n; i++) {
+          const r = i / n, f = 146 * (1 - .03 * r); q += f / sr; if (q >= 1) q -= 1;
+          const x = (q < .5 ? 1 : -1) * .6 + (2 * q - 1) * .5, h = Math.min(1, r * d * 60) * Math.min(1, (1 - r) * d * 25);
+          F.tick(x); a[i0 + i] += (F.lp + x * .15) * h;
+        }
+      });
+      return normieren(a, .8);
+    },
+    richtig(sr) {
+      /* Quiz: „Ding-ding!" */
+      const a = new Float32Array(Math.floor(2.2 * sr));
+      [[0, 84], [.16, 88]].forEach(([t, m]) => { const f = midi(m); mode(a, sr, t, f, .6, .5); mode(a, sr, t, f * 2, .35, .15); mode(a, sr, t, f * 3.01, .2, .08); stoss(a, sr, t, 6000, 1, .1, .01); });
+      return normieren(raum(a, sr, [[.04, .2], [.09, .12]]), .85);
+    },
+    rutsch(sr) {
+      /* Lotusflöte (Zugflöte) rauscht hinunter – für Stürze und Pleiten */
+      const a = new Float32Array(Math.floor(1.6 * sr)), n = Math.floor(zz(.9, 1.15) * sr), F = new SVF(sr); let p = 0;
+      const hoch = zz(1700, 2000), tief = zz(260, 320);
+      for (let i = 0; i < n; i++) {
+        const r = i / n, f = hoch * Math.pow(tief / hoch, Math.pow(r, .8)) * (1 + .012 * Math.sin(TAU * 6 * i / sr));
+        p += f / sr; if ((i & 31) === 0) F.setze(f, 2);
+        const h = Math.min(1, r * 25) * Math.min(1, (1 - r) * 12);
+        a[i] += (Math.sin(TAU * p) * .8 + F.tick(Math.random() * 2 - 1) * .25) * h;
+      }
+      return normieren(a, .8);
+    },
+    boing(sr) {
+      /* Sprungfeder: Ton schnellt hoch und schwingt wackelnd aus */
+      const a = new Float32Array(Math.floor(1.4 * sr)), n = Math.floor(1.1 * sr), f0 = zz(140, 170); let p = 0;
+      for (let i = 0; i < n; i++) {
+        const t = i / sr, f = f0 * (1 + 1.3 * (1 - Math.exp(-t * 14))) * (1 + .18 * Math.sin(TAU * 13 * t) * Math.exp(-t * 3));
+        p += f / sr; a[i] += (Math.sin(TAU * p) + .35 * Math.sin(TAU * 2 * p) + .15 * Math.sin(TAU * 3 * p)) * Math.exp(-t * 3.2) * Math.min(1, t * 200);
+      }
+      return normieren(a, .8);
+    },
+    hupe(sr) {
+      /* Clownshupe mit Gummiball: „Hup-hup!" */
+      const a = new Float32Array(Math.floor(1.2 * sr)), F1 = new SVF(sr), F2 = new SVF(sr), f0 = zz(330, 380);
+      [[0, .2], [.28, .26]].forEach(([t, d], k) => {
+        const i0 = Math.floor(t * sr), n = Math.floor(d * sr); let p = 0; F1.setze(900, 4); F2.setze(2300, 5);
+        for (let i = 0; i < n; i++) {
+          const r = i / n, f = f0 * (k ? .94 : 1) * (1 + .06 * Math.sin(Math.PI * r)); p += f / sr; if (p >= 1) p -= 1;
+          const x = 2 * p - 1 + (Math.random() - .5) * .3, h = Math.min(1, r * 25) * Math.min(1, (1 - r) * 10);
+          a[i0 + i] += (F1.tick(x) * 1.2 + F2.tick(x) * .8) * h;
+        }
+      });
+      for (let i = 0; i < a.length; i++) a[i] = Math.tanh(a[i] * 3);
+      return normieren(a, .8);
+    },
+    halleluja(sr) {
+      /* Himmelschor: Licht fällt auf den Tisch – „Aaaah!" mit Harfenglitzern */
+      const a = new Float32Array(Math.floor(4.4 * sr)), g = zz(60, 63);
+      [0, 4, 7, 12, 16, 19].forEach((iv, k) => {
+        const f = midi(g + iv - (k < 2 ? 12 : 0));
+        stimme(a, sr, .05 + k * .03, [{ d: 3.4, v: "a", f0: f, f1: f, laut: .5, abfall: .45 }], { skala: k > 2 ? 1.15 : 1, jitter: .005, hauchBasis: .04, vibrato: [5, .01] });
+      });
+      for (let k = 0; k < 14; k++) { const f = midi(g + 12 + [0, 4, 7][k % 3] + 12 * Math.floor(k / 3)); mode(a, sr, .05 + k * .05, f, .9, .06); }
+      return normieren(raum(a, sr, [[.05, .4], [.11, .3], [.19, .22], [.31, .15]]), .9);
+    },
+    levelup(sr) {
+      /* 8-Bit-Aufstieg: schnelles Rechteck-Arpeggio, dann Glitzern */
+      const a = new Float32Array(Math.floor(1.8 * sr)), g = 72;
+      const ton = (t, d, m, laut) => { const i0 = Math.floor(t * sr), n = Math.floor(d * sr), f = midi(m); for (let i = 0; i < n; i++) { const ph = (i * f / sr) % 1; a[i0 + i] += (ph < .5 ? 1 : -1) * laut * Math.min(1, (n - i) / (sr * .01)); } };
+      [0, 4, 7, 12, 7, 12, 16, 19].forEach((iv, k) => ton(k * .065, .06, g + iv, .3));
+      [12, 16, 19, 24].forEach(iv => ton(.55, .5, g + iv, .14));
+      tiefpass(a, sr, 6000);
+      return normieren(a, .7);
+    },
+    schock(sr) {
+      /* Schreckmoment: schrille, schräge Streicher und ein dumpfer Schlag */
+      const a = new Float32Array(Math.floor(2.6 * sr));
+      [86, 87, 92, 93].forEach(m => blech(a, sr, 0, 1.4, midi(m) * zz(.997, 1.003), { hell: 7000, laut: .4, ein: .01, aus: .9, vib: .02 }));
+      [50, 51].forEach(m => blech(a, sr, 0, 2.2, midi(m), { hell: 1200, laut: .45, ein: .01, aus: 1.4 }));
+      stoss(a, sr, 0, 3000, 1.5, .5, .25);
+      trommel(a, sr, 0, 70, 40, 1, 1.2);
+      return normieren(raum(a, sr, [[.04, .3], [.1, .22], [.19, .15]]), .9);
+    },
+    wirbel(sr) {
+      /* Trommelwirbel, der anschwillt – und dann der Beckenschlag */
+      const a = new Float32Array(Math.floor(4.2 * sr)), L = zz(2, 2.4);
+      for (let t = 0; t < L; t += zz(.028, .036)) { const r = t / L; trommel(a, sr, t, 230, 180, .12 + .5 * r * r, .08); stoss(a, sr, t, 4500, .7, (.1 + .35 * r * r), .05); }
+      trommel(a, sr, L, 120, 60, 1, .6); becken(a, sr, L, 1, 1.6);
+      return normieren(a, .9);
+    },
     /* ---------- Ereignisse für die Geräuschkulissen ---------- */
     moewe(sr) {
       const a = new Float32Array(Math.floor(2.4 * sr)), n = 2 + Math.floor(Math.random() * 3), f = zz(950, 1250);

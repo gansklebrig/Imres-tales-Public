@@ -77,7 +77,8 @@
     auenland: "wald", elben: "wald", zwerge: "hoehle", reiter: "keine", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   /* lustige Spieltisch-Momente */
-  const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk"];
+  const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk",
+    "lufthorn", "kratzer", "boom", "falsch", "richtig", "rutsch", "boing", "hupe", "halleluja", "levelup", "schock", "wirbel"];
   /* Kampfgeräusche */
   const KAMPF_FX = ["bogen", "pfeil", "hieb", "verfehlt", "block", "wucht", "schmerz", "sterben", "feuerball", "blitz", "heiltrank"];
   const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE);
@@ -124,6 +125,8 @@
       sfx: { drache: "🐉 Drache", schwert: "⚔ Klingen", tuer: "🚪 Tür", donner: "⚡ Donner", schrei: "😱 Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Horn", jubel: "🍻 Jubel",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Stille",
         ooh: "😮 Ooooh!", muenzen: "💰 Münzen", ruelpser: "🍺 Rülpser", schnarchen: "😴 Zzz", bonk: "🔨 Bonk",
+        lufthorn: "📯 Partyhupe", kratzer: "💿 Moment mal …", boom: "💥 Boom", falsch: "❌ Falsch!", richtig: "✅ Richtig!", rutsch: "📉 Absturz",
+        boing: "🌀 Boing", hupe: "🤡 Hup-hup", halleluja: "😇 Halleluja", levelup: "⬆️ Level up!", schock: "😱 Schock", wirbel: "🥁 Trommelwirbel",
         bogen: "🏹 Bogen", pfeil: "🎯 Pfeil", hieb: "🗡 Hieb", verfehlt: "💨 Verfehlt", block: "🛡 Block", wucht: "🔨 Wucht",
         schmerz: "😫 Aua", sterben: "💀 Tod", feuerball: "🔥 Feuerball", blitz: "⚡ Blitz", heiltrank: "🧪 Trank" }, momente: "Spieltisch-Momente", kampfFx: "Kampf",
       funk: "📡 Mitlauschen", funkTipp: "Alle anderen öffnen den Link und tippen auf „Zuhören“ – die Musik entsteht dann bei jedem selbst im Browser, Stimmungen, Kulisse und Effekte folgen deinem Pult.",
@@ -183,6 +186,8 @@
       sfx: { drache: "🐉 Dragon", schwert: "⚔ Blades", tuer: "🚪 Door", donner: "⚡ Thunder", schrei: "😱 Scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 Horn", jubel: "🍻 Cheers",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Silence",
         ooh: "😮 Ooooh!", muenzen: "💰 Coins", ruelpser: "🍺 Burp", schnarchen: "😴 Zzz", bonk: "🔨 Bonk",
+        lufthorn: "📯 Air horn", kratzer: "💿 Wait a minute …", boom: "💥 Boom", falsch: "❌ Wrong!", richtig: "✅ Correct!", rutsch: "📉 Crash",
+        boing: "🌀 Boing", hupe: "🤡 Honk honk", halleluja: "😇 Hallelujah", levelup: "⬆️ Level up!", schock: "😱 Shock", wirbel: "🥁 Drum roll",
         bogen: "🏹 Bow", pfeil: "🎯 Arrow", hieb: "🗡 Slash", verfehlt: "💨 Miss", block: "🛡 Block", wucht: "🔨 Smash",
         schmerz: "😫 Ouch", sterben: "💀 Death", feuerball: "🔥 Fireball", blitz: "⚡ Lightning", heiltrank: "🧪 Potion" }, momente: "Table moments", kampfFx: "Combat",
       funk: "📡 Listen in", funkTipp: "Everyone else opens the link and taps “Listen” – the music is then created in each browser, and moods, ambience and effects follow your console.",
@@ -1097,7 +1102,8 @@
   /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
   const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55,
     bogen: .7, pfeil: .8, hieb: .7, verfehlt: .5, block: .8, wucht: .8, schmerz: .45, sterben: .5, feuerball: .7, blitz: .5, heiltrank: .55,
-    tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8 };
+    tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8,
+    lufthorn: .38, kratzer: .65, boom: .55, falsch: .3, richtig: .6, rutsch: .25, boing: .55, hupe: .32, halleluja: .55, levelup: .33, schock: .6, wirbel: 1 };
   /* sanft vorrechnen: je Effekt erst eine Variante, mit Abstand – damit schwächere Geräte nicht ins Stocken geraten */
   function fxVorwaermen() { if (kwWorker !== false && !spar) ALLE_FX.forEach((f, i) => setTimeout(() => fxNachfuellen(f, 1), 2500 + 600 * i)); }
   function effekt(art, staerke, zeit) {
