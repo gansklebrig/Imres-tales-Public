@@ -2722,8 +2722,8 @@
       "</div>" +
       konsole(T, true) +
       '<div class="lw-teile">' +
-        '<span class="lw-teile-label">' + T.teil + ":</span>" +
-        TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") +
+        '<span class="lw-teilgruppe"><span class="lw-teile-label">' + T.teil + ':</span><span class="lw-teilknoepfe">' +
+        TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") + "</span></span>" +
         '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><select data-feld="ablauf">' + ablaeufe + "</select></label>" +
         '<span class="lw-kopieren"><span class="lw-teile-label">' + T.kopierenNach(bearbeite) + ":</span>" +
           TEILE.filter(z => z !== bearbeite).map(z => '<button type="button" class="lw-klein' + (kopierZiel === z ? " warnung" : "") + '" data-kopiere="' + z + '">' +
@@ -3105,6 +3105,8 @@
 .lw-schalter[aria-pressed="true"] { border-color: var(--ember); color: var(--ember); }
 .lw-schalter[aria-pressed="true"]::before { content: "✓ "; }
 .lw-teile { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem .7rem; }
+.lw-teilgruppe { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .5rem .7rem; }
+.lw-teilknoepfe { display: inline-flex; flex-wrap: nowrap; gap: .5rem; }
 .lw-teile-label { font-size: .78rem; letter-spacing: .06em; color: var(--ash); align-self: center; }
 .lw-teil { position: relative; width: 2.6rem; height: 2.3rem; border: 1px solid var(--line); background: none; color: var(--vellum); font-family: var(--display); font-size: 1.15rem; cursor: pointer; }
 .lw-teil.leer { color: var(--ash); border-style: dashed; }
