@@ -25,6 +25,10 @@
   /* Sparmodus für Handys: größerer Audiopuffer, vorgerechnete Klänge, schlankere Kulissen */
   let spar = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
   try { const v = localStorage.getItem("imres-lw-spar"); if (v === "1" || v === "0") spar = v === "1"; } catch (_) {}
+  /* Auf Handys und Tablets immer die leichte Bauweise für Hall und Raumklang – auch ohne Sparmodus:
+     ein gemeinsames Hall-Netz statt zwei Faltungshallen, keine Stereo-Verteilung, etwas schlankeres Orchester */
+  const mobil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
+  const leicht = () => spar || mobil;
   try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, verbunden: false, zuletzt: null }; } catch (_) {}
 
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -844,15 +848,15 @@
   let sparHallIn = null, sparAktiv = false, kompRef = null;
   /* Hall-Netz nur dann am Ausgang, wenn überhaupt ein Hall läuft – sonst spart es die Rechenzeit ganz */
   function sparAusgang() {
-    if (!spar || !hallNode || !kompRef) return;
+    if (!leicht() || !hallNode || !kompRef) return;
     const soll = S.hall > 0 || S.echoHall > 0;
     if (soll === sparAktiv) return;
     try { if (soll) hallNode.connect(kompRef); else hallNode.disconnect(); sparAktiv = soll; } catch (_) {}
   }
   function raumAnwenden() {
     if (!ctx || !hallEin) return;
-    if (spar) {
-      /* Sparmodus: EIN gemeinsames Hall-Netz für Raumhall und Echo-Hall, jeweils mit eigenem Sendepegel davor */
+    if (leicht()) {
+      /* Sparmodus und Handy: EIN gemeinsames Hall-Netz für Raumhall und Echo-Hall, jeweils mit eigenem Sendepegel davor */
       const r = RAEUME[S.raum], neu = fdnHall(Math.max(2, r.dauer * .7), r.hell);
       neu.aus.gain.value *= .1; /* auf den Pegel des Faltungshalls abgestimmt */
       if (!sparHallIn) { sparHallIn = ctx.createGain(); sparHallIn.gain.value = hallPegel(); hallFilter.connect(sparHallIn); }
@@ -1085,7 +1089,7 @@
     opt = opt || {};
     let ziel = k.g;
     try {
-      if (ctx.createStereoPanner && !spar) { const pn = ctx.createStereoPanner(); pn.pan.value = opt.pan != null ? opt.pan : zz(-.75, .75); pn.connect(ziel); ziel = pn; }
+      if (ctx.createStereoPanner && !leicht()) { const pn = ctx.createStereoPanner(); pn.pan.value = opt.pan != null ? opt.pan : zz(-.75, .75); pn.connect(ziel); ziel = pn; }
       if (opt.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = opt.tief; lp.connect(ziel); ziel = lp; }
     } catch (_) {}
     fxAbspielen(art, ziel, z, laut * (k.phase || 1), opt.tempo || zz(.94, 1.06));
@@ -1108,7 +1112,7 @@
     if (fxAusgang) fxAusgang.gain.setTargetAtTime(fxPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
     hallSchalten();
-    if (echoNass) echoNass.gain.setTargetAtTime(echoPegel() * (spar ? 10 : 1), j, .08);
+    if (echoNass) echoNass.gain.setTargetAtTime(echoPegel() * (leicht() ? 10 : 1), j, .08);
     if (sparHallIn) sparHallIn.gain.setTargetAtTime(hallPegel(), j, .08);
     sparAusgang();
     echoHallSchalten();
@@ -1156,7 +1160,7 @@
       const PAN = { klopf: -.08, schelle: .18, bass: 0, melodie: -.12, trommel: -.42, floete: .4, ketten: .5, rex: .3 };
       IDS.forEach(k => {
         const g = ctx.createGain(); spurGain[k] = g;
-        if (!spar && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = PAN[k]; g.connect(pn); pn.connect(master); } else g.connect(master);
+        if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = PAN[k]; g.connect(pn); pn.connect(master); } else g.connect(master);
       });
       /* Raumhall: jede Spur schickt einen Teil in einen Faltungshall (selbst erzeugter Raum, ca. 2,8 s) */
       hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
@@ -1171,7 +1175,7 @@
       IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : 1; spurGain[k].connect(g); g.connect(hallEin); hallSend[k] = g; });
       /* Echos eigener Hall: weiter, schwebender Raum nur für ihre Instrumente, unabhängig vom Raumhall */
       echoSend = ctx.createGain(); echoSend.gain.value = 1; echoNass = ctx.createGain(); echoNass.gain.value = echoPegel();
-      if (spar) { echoNass.gain.value = echoPegel() * 10; echoSend.connect(echoNass); if (hallNode && hallNode.ein) echoNass.connect(hallNode.ein); sparAusgang(); }
+      if (leicht()) { echoNass.gain.value = echoPegel() * 10; echoSend.connect(echoNass); if (hallNode && hallNode.ein) echoNass.connect(hallNode.ein); sparAusgang(); }
       else { echoKonv = ctx.createConvolver(); echoKonv.buffer = echoBild(); echoSend.connect(echoKonv); echoKonv.connect(echoNass); echoNass.connect(komp); }
       echoHallSchalten();
       /* Echo für die Flöte der Illusionen */
@@ -1947,7 +1951,7 @@
     const hs = ctx.createGain(); hs.gain.value = .7; orchBus.connect(hs); hs.connect(hallEin);
     [["vln", -.35], ["vc", .3], ["horn", .12], ["blech", .22], ["holz", -.18], ["gross", 0]].forEach(([k, p]) => {
       let n = ctx.createGain();
-      if (!spar && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = p; pn.connect(orchBus); n.connect(pn); } else n.connect(orchBus);
+      if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = p; pn.connect(orchBus); n.connect(pn); } else n.connect(orchBus);
       orchPan[k] = n;
     });
   }
@@ -1999,11 +2003,14 @@
       const pt = pr.farbe === "holz" ? orchPan.holz : orchPan.vc, ph = pr.farbe === "holz" ? orchPan.holz : orchPan.vln;
       const fk = pr.farbe === "orgel" ? .45 : pr.farbe === "holz" ? .8 : 1, hk = pr.farbe === "holz" ? -12 : 0;
       probe(tief, ak.grund, zeit, pt, .3 * l * fk, { ein: .28, aus: .45, dauer });
-      if (!pr.tief || x > .6) { probe(hoch, ak.terz + vl + hk, zeit, ph, .2 * l * fk, { ein: .32, aus: .5, dauer }); probe(hoch, ak.quinte + vl + hk, zeit, ph, .18 * l * fk, { ein: .36, aus: .5, dauer }); }
+      if (!pr.tief || x > .6) {
+        probe(hoch, ak.terz + vl + hk, zeit, ph, (leicht() ? .26 : .2) * l * fk, { ein: .32, aus: .5, dauer });
+        if (!leicht()) probe(hoch, ak.quinte + vl + hk, zeit, ph, .18 * l * fk, { ein: .36, aus: .5, dauer });
+      }
       padAkkord = zeile; padEnde = zeit + dauer;
     }
     /* treibende Celli (Spiccato-Achtel) ab der Hälfte des Aufbaus */
-    if (pr.ost && x >= .5 && S.intensitaet >= 3 && schritt % 2 === 0) {
+    if (pr.ost && x >= .5 && S.intensitaet >= (leicht() ? 6 : 3) && schritt % 2 === 0) {
       const ton = [ak.grund - 12, ak.grund - 12, ak.q2 - 12, ak.grund - 12][(schritt / 2) % 4];
       probe("spic", ton, zeit, orchPan.vc, (.22 + .12 * int) * (schritt % 4 === 0 ? 1 : .75), { dauer: sd * 1.8, aus: .05 });
     }
