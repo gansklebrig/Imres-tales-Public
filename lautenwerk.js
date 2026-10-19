@@ -131,6 +131,7 @@
       pult: "🎛 Spielleiter-Pult", pultGross: "Spielleiter-Pult öffnen", pultUnter: "Stimmungen, Geräuschkulisse und Effekte für den Spieltisch – mit einem Fingertipp", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
+      orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
@@ -189,6 +190,7 @@
       pult: "🎛 GM console", pultGross: "Open the GM console", pultUnter: "Moods, ambience and effects for the gaming table – one tap away", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
+      orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
@@ -682,6 +684,7 @@
     if (typeof s.intensitaet !== "number") s.intensitaet = 5;
     if (typeof s.fxVol !== "number") s.fxVol = 8;
     if (typeof s.echoHall !== "number") s.echoHall = 3;
+    if (s.orchester !== 0) s.orchester = 1;
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
     if (typeof s.variation !== "number") s.variation = 0;
@@ -1149,7 +1152,12 @@
       master = ctx.createGain(); master.gain.value = .38;
       ducken = ctx.createGain(); ducken.gain.value = 1;
       master.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
-      IDS.forEach(k => { const g = ctx.createGain(); g.connect(master); spurGain[k] = g; });
+      /* Bühne in Stereo: Friedrich links, Echo und Ezekiel rechts, Barradin in der Mitte */
+      const PAN = { klopf: -.08, schelle: .18, bass: 0, melodie: -.12, trommel: -.42, floete: .4, ketten: .5, rex: .3 };
+      IDS.forEach(k => {
+        const g = ctx.createGain(); spurGain[k] = g;
+        if (!spar && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = PAN[k]; g.connect(pn); pn.connect(master); } else g.connect(master);
+      });
       /* Raumhall: jede Spur schickt einen Teil in einen Faltungshall (selbst erzeugter Raum, ca. 2,8 s) */
       hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
       kulRauschen = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
@@ -1416,6 +1424,12 @@
     /* Flöten eine Oktave tiefer: warm und rund statt schrill – auf Dauer viel angenehmer */
     const fOrig = freq;
     if (art === "floete" || art === "panfloete" || art === "okarina") freq = freq / 2;
+    if ((art === "floete" || art === "horn") && !rendert) {
+      const m = Math.round(69 + 12 * Math.log2(freq / 440)) + (art === "horn" ? -12 : 0), d = Math.max(.18, dauer || .25);
+      const ok = art === "horn" ? probe("horn", m, zeit, ziel, .5 * l, { ein: .06, aus: .18, dauer: d + .1 })
+        : d >= .32 ? probe("fl", m, zeit, ziel, .42 * l, { ein: .05, aus: .2, dauer: d + .08 }) : probe("flst", m, zeit, ziel, .45 * l, { dauer: Math.max(.25, d), aus: .08 });
+      if (ok) return;
+    }
     if (art === "floete") {
       const key = "echo|floete|" + freq.toFixed(2), buf = !rendert && klangCache.get(key);
       if (buf) { abspielen(buf, zeit, ziel, l, Math.max(.18, dauer || .25)); return; }
@@ -1519,6 +1533,8 @@
   }
   function melodieSpielen(freq, zeit, dauer, laut) {
     const l = laut || 1, ziel = spurGain.melodie, art = S.instrument;
+    if (art === "harfe" && probe("harfe", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, .55 * l, { dauer: 2.6, aus: .4 })) return;
+    if (art === "glocken" && probe("glock", Math.round(69 + 12 * Math.log2(freq / 440)) + 12, zeit, ziel, .32 * l)) return;
     if (art === "laute" || art === "harfe") { zupf(freq, zeit, art === "harfe" ? "harfe" : "mel", l); return; }
     if (art === "mandoline") { /* Tremolo: schnell wiederholt angeschlagen */
       const n = Math.max(1, Math.min(6, Math.round(Math.max(.12, dauer || .2) / .08)));
@@ -1713,7 +1729,10 @@
     const betont = schritt % 4 === 0;
     if (spur === "klopf") perk("klopf", "klopf", betont, zeit, laut, (z, l) => klopfen(z, betont, l));
     else if (spur === "schelle") perk("schelle", "schelle", false, zeit, laut, (z, l) => schellen(z, l));
-    else if (spur === "trommel") perk("trommel", S.band.trommel, betont, zeit, laut, (z, l) => friedrichSpielen(z, betont, l));
+    else if (spur === "trommel") {
+      if (S.band.trommel === "pauke" && probe(betont ? "timp1" : "timp3", 0, zeit, spurGain.trommel, (betont ? .8 : .55) * (laut || 1), { dauer: betont ? 1.6 : 1, aus: .4 })) return;
+      perk("trommel", S.band.trommel, betont, zeit, laut, (z, l) => friedrichSpielen(z, betont, l));
+    }
     else if (spur === "ketten") { if (S.band.ketten === "ketten") ezekielSpielen(zeit, laut); else perk("ketten", S.band.ketten, betont, zeit, laut, (z, l) => ezekielSpielen(z, l)); }
     else if (spur === "rex") rexLaut(zeit, zeile, laut);
     else if (spur === "floete") echoSpielen(midiHz(tonMidi("floete", zeile, S)), zeit, dauer || .25, laut);
@@ -1762,7 +1781,7 @@
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
   function wechselAnwenden(zeit) {
     const neu = wechsel; wechsel = null;
-    S = neu; abschnitt = 0;
+    S = neu; abschnitt = 0; padAkkord = -1; orchVorladen();
     if (ausgang) {
       const ziel = .6 * masterPegel();
       ausgang.gain.cancelScheduledValues(zeit - .3);
@@ -1797,6 +1816,7 @@
         if (k === "bass") bordunStimmen(wert, ev.zeit);
         ev.spuren[k] = wert;
       });
+      try { orchesterSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
       anzeige.push(ev);
       naechste += schrittDauer();
       schritt = (schritt + 1) % SCHRITTE;
@@ -1831,8 +1851,8 @@
     audioStart();
     saitenVorbereiten();
     if (!weiter) { schritt = 0; abschnitt = 0; }
-    tempoJetzt = S.tempo; wechsel = null;
-    musikWieder();
+    tempoJetzt = S.tempo; wechsel = null; padAkkord = -1;
+    musikWieder(); orchVorladen();
     kulisseStart();
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
     planen(); timer = setInterval(planen, 30); taktgeber(true);
@@ -1845,6 +1865,138 @@
     /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
     if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop(); wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
+  }
+
+
+  /* ---------- Echte Instrumente (Aufnahmen aus der Versilian Community Sample Library, CC0) ----------
+     Jede Aufnahme liegt als kurze MP3 im Ordner klang/. Geladen wird erst, wenn ein Instrument gebraucht wird;
+     bis dahin spielt der berechnete Klang. Zwischentöne entstehen durch leichtes Umstimmen der nächsten Aufnahme. */
+  const SAMPLE_KARTE = { vln: [55, 57, 59, 62, 66, 69, 72, 76, 79, 83, 86], vc: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77],
+    spic: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77], horn: [36, 39, 43, 46, 50, 53, 57, 60],
+    fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], flst: [69, 72, 76, 81, 84, 88, 93, 96],
+    harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101], glock: [79, 84, 91, 96, 103, 108] };
+  const sampleBuf = new Map(), sampleLaedt = new Map();
+  const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
+  function sampleLaden(name) {
+    if (sampleBuf.has(name)) return Promise.resolve(sampleBuf.get(name));
+    if (sampleLaedt.has(name)) return sampleLaedt.get(name);
+    if (!ctx || rendert) return Promise.resolve(null);
+    const c = ctx;
+    const pr = fetch(sampleBasis + encodeURIComponent(name) + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(ab => new Promise((res, rej) => { const x = c.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); }))
+      .then(b => {
+        /* Einsatz suchen: MP3 bringt am Anfang etwas Stille mit – die überspringen wir, damit alles im Takt sitzt */
+        const d = b.getChannelData(0); let m = 0, i = 0, spitze = 0;
+        for (let k = 0; k < d.length; k++) { const a = Math.abs(d[k]); if (a > m) { m = a; spitze = k; } }
+        while (i < d.length && Math.abs(d[i]) < m * .02) i++;
+        b._start = Math.max(0, i - b.sampleRate * .003) / b.sampleRate; b._spitze = spitze / b.sampleRate;
+        sampleBuf.set(name, b); return b;
+      }).catch(() => { sampleLaedt.delete(name); return null; });
+    sampleLaedt.set(name, pr); return pr;
+  }
+  const naechsteProbe = (gruppe, midi) => (SAMPLE_KARTE[gruppe] || []).reduce((b, m) => b == null || Math.abs(m - midi) < Math.abs(b - midi) ? m : b, null);
+  function probenLaden(gruppe) { (SAMPLE_KARTE[gruppe] || [gruppe]).forEach(m => sampleLaden(SAMPLE_KARTE[gruppe] ? gruppe + "_" + m : gruppe)); }
+  /* eine Aufnahme spielen: o = { ein, aus, dauer, pan } – gibt false zurück, wenn sie noch nicht geladen ist */
+  function probe(gruppe, midi, zeit, ziel, laut, o) {
+    if (rendert || !ctx) return false;
+    o = o || {};
+    const m = SAMPLE_KARTE[gruppe] ? naechsteProbe(gruppe, midi) : null, name = m == null ? gruppe : gruppe + "_" + m, b = sampleBuf.get(name);
+    if (!b) { sampleLaden(name); return false; }
+    const src = ctx.createBufferSource(), g = ctx.createGain();
+    src.buffer = b; if (m != null) src.playbackRate.value = Math.pow(2, (midi - m) / 12);
+    const rate = src.playbackRate.value, lang = (b.duration - b._start) / rate, ein = o.ein || .004;
+    const dauer = Math.min(lang, o.dauer || lang), aus = Math.min(o.aus || .2, dauer * .5), ende = zeit + dauer;
+    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(laut, zeit + ein);
+    if (o.dauer && o.dauer < lang) { g.gain.setValueAtTime(laut, Math.max(zeit + ein, ende - aus)); g.gain.linearRampToValueAtTime(0, ende); }
+    src.connect(g); g.connect(ziel);
+    src.start(zeit, b._start + (o.versatz || 0)); src.stop(ende + .05);
+    return true;
+  }
+
+  /* ---------- Orchester: Streicherteppich, treibende Celli, Hörner und große Schläge ----------
+     Je Stimmung ein Profil. Über die Teile eines Durchgangs baut sich das Orchester auf und gipfelt im
+     Höhepunkt (Teil D bzw. dem letzten Teil): davor Paukenwirbel und anschwellendes Becken, darauf Becken und große Trommel. */
+  const ORCH = {
+    kampf: { pad: .8, ost: 1, horn: 1, gross: 2 }, sieg: { pad: .8, horn: 1, gross: 2 }, reiter: { pad: .7, ost: 1, horn: 1, gross: 2 },
+    zwerge: { pad: .7, horn: 1, gross: 2, tief: 1 }, spannung: { pad: .6, ost: 1, gross: 1 }, unterreich: { pad: .6, tief: 1, gross: 1 },
+    elben: { pad: .7, hoch: 1 }, pilger: { pad: .7 }, reise: { pad: .5, gross: 1 }, auenland: { pad: .4 }, shanty: { pad: .35 },
+    rast: { pad: .35 }, kamin: { pad: .3 }, dorffest: { pad: 0 }
+  };
+  const orchProfil = () => S.orchester !== 0 && S.stimmung && ORCH[S.stimmung] ? ORCH[S.stimmung] : null;
+  let orchBus = null, orchPan = {}, padAkkord = -1, padEnde = 0;
+  function orchAufbauen() {
+    if (orchBus || !ctx) return;
+    orchBus = ctx.createGain(); orchBus.gain.value = 1; orchBus.connect(master);
+    const hs = ctx.createGain(); hs.gain.value = .7; orchBus.connect(hs); hs.connect(hallEin);
+    [["vln", -.35], ["vc", .3], ["horn", .12], ["gross", 0]].forEach(([k, p]) => {
+      let n = ctx.createGain();
+      if (!spar && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = p; pn.connect(orchBus); n.connect(pn); } else n.connect(orchBus);
+      orchPan[k] = n;
+    });
+  }
+  function orchVorladen() {
+    const pr = orchProfil();
+    if (S.instrument === "harfe") probenLaden("harfe");
+    if (S.instrument === "glocken") probenLaden("glock");
+    if (S.band.floete === "floete") { probenLaden("fl"); probenLaden("flst"); }
+    if (S.band.floete === "horn") probenLaden("horn");
+    if (S.band.trommel === "pauke") { sampleLaden("timp1"); sampleLaden("timp3"); }
+    if (!pr) return;
+    if (pr.pad) { probenLaden("vc"); probenLaden("vln"); }
+    if (pr.ost) probenLaden("spic");
+    if (pr.horn) probenLaden("horn");
+    if (pr.gross) ["timproll", "crash", "swell", "bd", "timp1"].forEach(sampleLaden);
+  }
+  /* Akkordtöne zur Bass-Zeile: Grundton, Terz, Quinte als MIDI-Noten */
+  function akkordMidi(zeile) {
+    const sk = MODI[S.modus], d = BASS_STUFEN[zeile || 0], st = i => sk[i % 7] + 12 * Math.floor(i / 7);
+    return { grund: BASS_GRUND + 12 + S.transpose + st(d), terz: MEL_GRUND + S.transpose + st(d + 2), quinte: MEL_GRUND + S.transpose + st(d + 4), q2: BASS_GRUND + 12 + S.transpose + st(d + 4) };
+  }
+  function hoehepunkt() { const i = S.ablauf.indexOf("D"); return i >= 0 ? i : S.ablauf.length - 1; }
+  /* wie weit das Orchester in diesem Teil schon „aufgebaut“ ist: 0 (Anfang) … 1 (Höhepunkt) */
+  function aufbau(ab) {
+    const c = hoehepunkt(), L = S.ablauf.length;
+    if (L <= 2) return ab === c ? 1 : .6;
+    return ab < c ? .25 + .75 * ab / Math.max(1, c) : ab === c ? 1 : .7;
+  }
+  function orchesterSchritt(zeit, daten, ab) {
+    const pr = orchProfil(); if (!pr || !ctx || S.mute.bass) return;
+    orchAufbauen();
+    const x = aufbau(ab), int = S.intensitaet / 10, sd = schrittDauer(), c = hoehepunkt(), bar = SCHRITTE * sd;
+    const zeile = klingt(daten.bass, schritt), ak = akkordMidi(zeile);
+    /* Teppich: bei jedem Akkordwechsel (und zu jedem Takt) neu, gehalten bis zum nächsten Wechsel */
+    if (pr.pad && x >= .25 && (schritt % 8 === 0 || zeile !== padAkkord) && (zeile !== padAkkord || schritt === 0 || zeit >= padEnde - .05)) {
+      let n = 1; while (n < SCHRITTE - schritt && klingt(daten.bass, schritt + n) === zeile) n++;
+      const dauer = n * sd + .35, l = pr.pad * (.5 + .5 * x) * (.6 + .5 * int);
+      const vl = pr.tief ? -12 : pr.hoch ? 12 : 0;
+      probe("vc", ak.grund, zeit, orchPan.vc, .3 * l, { ein: .28, aus: .45, dauer });
+      if (!pr.tief || x > .6) { probe("vln", ak.terz + vl, zeit, orchPan.vln, .2 * l, { ein: .32, aus: .5, dauer }); probe("vln", ak.quinte + vl, zeit, orchPan.vln, .18 * l, { ein: .36, aus: .5, dauer }); }
+      padAkkord = zeile; padEnde = zeit + dauer;
+    }
+    /* treibende Celli (Spiccato-Achtel) ab der Hälfte des Aufbaus */
+    if (pr.ost && x >= .5 && S.intensitaet >= 3 && schritt % 2 === 0) {
+      const ton = [ak.grund - 12, ak.grund - 12, ak.q2 - 12, ak.grund - 12][(schritt / 2) % 4];
+      probe("spic", ton, zeit, orchPan.vc, (.22 + .12 * int) * (schritt % 4 === 0 ? 1 : .75), { dauer: sd * 1.8, aus: .05 });
+    }
+    /* Hörner im Höhepunkt (bei hoher Intensität schon früher) */
+    if (pr.horn && (ab === c || S.intensitaet >= 8) && schritt % 8 === 0) {
+      probe("horn", ak.grund - 12 + 12, zeit, orchPan.horn, .26 * (.6 + .5 * int), { ein: .12, aus: .35, dauer: 8 * sd + .2 });
+      probe("horn", ak.q2, zeit, orchPan.horn, .18 * (.6 + .5 * int), { ein: .14, aus: .35, dauer: 8 * sd + .2 });
+    }
+    /* große Momente: Takt vor dem Höhepunkt Wirbel und Schwellen, auf der Eins des Höhepunkts der Schlag */
+    if (pr.gross && schritt === 0) {
+      const L = S.ablauf.length, vorher = (c - 1 + L) % L;
+      if (ab === vorher && L > 1) {
+        probe("timproll", 0, zeit, orchPan.gross, pr.gross > 1 ? .5 : .3, { ein: .4, dauer: bar, aus: .1 });
+        const sw = sampleBuf.get("swell");
+        if (sw && pr.gross > 1) { const v = Math.max(0, sw._spitze - sw._start - bar); probe("swell", 0, zeit, orchPan.gross, .32, { ein: .05, dauer: bar + .05, aus: .05, versatz: v }); }
+        else if (!sw) sampleLaden("swell");
+      }
+      if (ab === c && L > 1) {
+        if (pr.gross > 1) { probe("crash", 0, zeit, orchPan.gross, .38); probe("bd", 0, zeit, orchPan.gross, .55); }
+        probe("timp1", 0, zeit, orchPan.gross, pr.gross > 1 ? .55 : .35);
+      }
+    }
   }
 
   /* ---------- Anzeige im Takt ---------- */
@@ -2257,7 +2409,7 @@
     '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
     '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
-    raumWahl(T) + sparKnopf(T);
+    raumWahl(T) + '<button type="button" class="lw-schalter lw-orch" data-aktion="orchester" aria-pressed="' + (S.orchester !== 0) + '" title="' + esc(T.orchTipp) + '">' + T.orchester + "</button>" + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
@@ -2302,7 +2454,7 @@
     const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
     const d = l && dekodieren(l.code);
     if (!d) return;
-    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall"].forEach(k => { d[k] = S[k]; });
+    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester"].forEach(k => { d[k] = S[k]; });
     d.stimmung = null; d.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
     if (laeuft) { wechsel = d; const a = S; S = d; try { saitenVorbereiten(); } catch (_) {} S = a; status(t().wechselGleich(l.name)); boxNeu("musik"); return; }
     S = d; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
@@ -2378,7 +2530,7 @@
     const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
       ablauf: S.ablauf, vol: S.vol, mute: S.mute, teile: S.teile, instrument: S.instrument, band: S.band };
     return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
-      hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, laeuft };
+      hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, laeuft };
   }
   function funkSenden(ev, daten) { if (funk && funk.kanal) funk.kanal.senden(ev, daten); }
   function funkAenderung() {
@@ -2455,7 +2607,7 @@
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
       kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
-      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
+      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
     if (laeuft && kern(neu) !== kern(S)) {
@@ -2621,7 +2773,7 @@
   }
   function vorlageWaehlen(k) {
     const mix = { vol: S.vol, mute: S.mute };
-    const behalten = { echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
+    const behalten = { orchester: S.orchester, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
     else if (k === "zufall") neu = zufallsLied();
@@ -2671,6 +2823,10 @@
       return;
     }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
+    if (e.target.closest('[data-aktion="orchester"]')) {
+      S.orchester = S.orchester === 0 ? 1 : 0; merken(); root.querySelectorAll(".lw-orch").forEach(b => b.setAttribute("aria-pressed", S.orchester !== 0));
+      if (ctx) orchVorladen(); return;
+    }
     if (e.target.closest('[data-aktion="spar"]')) {
       spar = !spar; try { localStorage.setItem("imres-lw-spar", spar ? "1" : "0"); } catch (_) {}
       root.querySelectorAll(".lw-spar").forEach(b => b.setAttribute("aria-pressed", spar)); status(spar ? t().sparAn : t().sparAus); return;
