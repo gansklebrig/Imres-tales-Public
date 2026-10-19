@@ -131,7 +131,7 @@
       pult: "🎛 Spielleiter-Pult", pultGross: "Spielleiter-Pult öffnen", pultUnter: "Stimmungen, Geräuschkulisse und Effekte für den Spieltisch – mit einem Fingertipp", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
-      spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
+      echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
@@ -189,7 +189,7 @@
       pult: "🎛 GM console", pultGross: "Open the GM console", pultUnter: "Moods, ambience and effects for the gaming table – one tap away", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
-      spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
+      echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
@@ -681,6 +681,7 @@
     if (typeof s.kulisseVol !== "number") s.kulisseVol = 5;
     if (typeof s.intensitaet !== "number") s.intensitaet = 5;
     if (typeof s.fxVol !== "number") s.fxVol = 8;
+    if (typeof s.echoHall !== "number") s.echoHall = 3;
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
     if (typeof s.variation !== "number") s.variation = 0;
@@ -846,6 +847,24 @@
     p.setTargetAtTime(.68, Math.max(jetzt, start - .08), .12);
     p.setTargetAtTime(1, ende, .45);
     duckEnde = ende;
+  }
+  let echoSend = null, echoKonv = null, echoNass = null, echoVerbunden = false;
+  const echoPegel = () => Math.pow((typeof S.echoHall === "number" ? S.echoHall : 3) / 10, 1.2) * 1.3;
+  function echoBild() {
+    const sr = ctx.sampleRate, dauer = spar ? 1.8 : 3.2, vor = Math.floor(sr * .035), len = Math.floor(sr * dauer) + vor, ir = ctx.createBuffer(2, len, sr);
+    for (let c = 0; c < 2; c++) {
+      const d = ir.getChannelData(c); let lp = 0;
+      for (let i = vor; i < len; i++) { const t = (i - vor) / (len - vor); lp += .35 * ((Math.random() * 2 - 1) - lp); d[i] = lp * Math.pow(1 - t, 2.2) * Math.min(1, (i - vor) / (sr * .04)); }
+      let e = 0; for (let i = 0; i < len; i++) e += d[i] * d[i];
+      const f = 1 / Math.sqrt(e / sr * 2.2); for (let i = 0; i < len; i++) d[i] *= f;
+    }
+    return ir;
+  }
+  function echoHallSchalten() {
+    if (!echoSend) return;
+    const soll = S.echoHall > 0;
+    if (soll === echoVerbunden) return;
+    try { if (soll) spurGain.floete.connect(echoSend); else spurGain.floete.disconnect(echoSend); echoVerbunden = soll; } catch (_) {}
   }
   /* Hall aus = Faltungshall ganz abgeklemmt: spart auf dem Handy viel Rechenzeit */
   let hallVerbunden = false;
@@ -1050,6 +1069,8 @@
     if (fxAusgang) fxAusgang.gain.setTargetAtTime(fxPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
     hallSchalten();
+    if (echoNass) echoNass.gain.setTargetAtTime(echoPegel(), j, .08);
+    echoHallSchalten();
     if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
     IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : 1, j, .05));
   }
@@ -1101,6 +1122,10 @@
       hallNass.connect(komp); hallSchalten();
       raumAnwenden();
       IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : 1; spurGain[k].connect(g); g.connect(hallEin); hallSend[k] = g; });
+      /* Echos eigener Hall: weiter, schwebender Raum nur für ihre Instrumente, unabhängig vom Raumhall */
+      echoSend = ctx.createGain(); echoSend.gain.value = 1; echoKonv = ctx.createConvolver(); echoNass = ctx.createGain(); echoNass.gain.value = echoPegel();
+      echoKonv.buffer = echoBild(); echoSend.connect(echoKonv); echoKonv.connect(echoNass); echoNass.connect(komp);
+      echoHallSchalten();
       /* Echo für die Flöte der Illusionen */
       illusionEcho = ctx.createDelay(1); illusionEcho.delayTime.value = .23;
       const rueck = ctx.createGain(); rueck.gain.value = .42;
@@ -1349,6 +1374,7 @@
   function echoSpielen(freq, zeit, dauer, laut) {
     const l = laut || 1, art = S.band.floete, ziel = spurGain.floete;
     /* Flöten eine Oktave tiefer: warm und rund statt schrill – auf Dauer viel angenehmer */
+    const fOrig = freq;
     if (art === "floete" || art === "panfloete" || art === "okarina") freq = freq / 2;
     if (art === "floete") {
       const key = "echo|floete|" + freq.toFixed(2), buf = !rendert && klangCache.get(key);
@@ -1358,7 +1384,7 @@
       return;
     }
     if (!rendert) {
-      const buf = klangCache.get("echo|" + art + "|" + freq.toFixed(2));
+      const buf = klangCache.get("echo|" + art + "|" + fOrig.toFixed(2));
       if (buf) { abspielen(buf, zeit, ziel, l, Math.max(.18, dauer || .3)); return; }
       klaengeVorbereiten();
     }
@@ -1384,14 +1410,17 @@
       ende = huelle(g, zeit, d, .34 * l, .06, .14);
       vibrato(oscs, zeit, ende, 4.8, freq * .005, .3);
     } else if (art === "gesang") { /* Echo summt und singt – eine Oktave tiefer */
-      const o = ctx.createOscillator(), o2 = ctx.createOscillator(); o.type = "sawtooth"; o2.type = "sawtooth";
-      o.frequency.value = freq / 2; o2.frequency.value = freq / 2 * 1.003; oscs = [o, o2];
-      const roh = ctx.createGain(); roh.gain.value = .35; o.connect(roh); o2.connect(roh);
-      formant(roh, sum, [[600, 6, 1.4], [1000, 7, .9], [2500, 8, .35]]); /* „oh“ */
-      lp.frequency.value = 3200;
-      ende = huelle(g, zeit, d, .4 * l, .12, .2);
-      vibrato(oscs, zeit, ende, 5.4, freq / 2 * .012, .35);
-      rauschStoss(zeit, ziel, "bandpass", 1800, 1, .03 * l, .1);
+      /* warmer Chor-Klang („ooh–aah“): zwei leicht verstimmte Stimmen, breite Formanten, Brustton aus einem Sinus */
+      const f0 = freq / 2, o = ctx.createOscillator(), o2 = ctx.createOscillator(), o3 = ctx.createOscillator();
+      o.type = "triangle"; o2.type = "sawtooth"; o3.type = "sine";
+      o.frequency.value = f0; o2.frequency.value = f0 * 1.004; o3.frequency.value = f0; oscs = [o, o2, o3];
+      const roh = ctx.createGain(), sg = ctx.createGain(), brust = ctx.createGain();
+      roh.gain.value = .5; sg.gain.value = .16; brust.gain.value = .55;
+      o.connect(roh); o2.connect(sg); sg.connect(roh); o3.connect(brust); brust.connect(sum);
+      formant(roh, sum, [[480, 2.5, 1.3], [850, 3, .55], [2600, 4, .12]]);
+      lp.frequency.value = 2100; lp.Q.value = .5;
+      ende = huelle(g, zeit, d, .36 * l, .18, .28);
+      vibrato(oscs, zeit, ende, 5.1, f0 * .008, .45);
     } else { /* Hirtenhorn: blechern, von unten angeschliffen */
       const o = ctx.createOscillator(); o.type = "sawtooth"; oscs = [o];
       o.frequency.setValueAtTime(freq / 2 * .97, zeit); o.frequency.linearRampToValueAtTime(freq / 2, zeit + .06);
@@ -2187,6 +2216,7 @@
   const mixRegler = T =>
     '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
+    '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
     raumWahl(T) + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
@@ -2232,7 +2262,7 @@
     const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
     const d = l && dekodieren(l.code);
     if (!d) return;
-    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet"].forEach(k => { d[k] = S[k]; });
+    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall"].forEach(k => { d[k] = S[k]; });
     d.stimmung = null; d.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
     if (laeuft) { wechsel = d; const a = S; S = d; try { saitenVorbereiten(); } catch (_) {} S = a; status(t().wechselGleich(l.name)); boxNeu("musik"); return; }
     S = d; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
@@ -2308,7 +2338,7 @@
     const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
       ablauf: S.ablauf, vol: S.vol, mute: S.mute, teile: S.teile, instrument: S.instrument, band: S.band };
     return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
-      hall: S.hall, raum: S.raum, hallAus: S.hallAus, laeuft };
+      hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, laeuft };
   }
   function funkSenden(ev, daten) { if (funk && funk.kanal) funk.kanal.senden(ev, daten); }
   function funkAenderung() {
@@ -2385,7 +2415,7 @@
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
       kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
-      raum: RAEUME[d.raum] ? d.raum : "taverne", hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
+      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
     if (laeuft && kern(neu) !== kern(S)) {
@@ -2551,7 +2581,7 @@
   }
   function vorlageWaehlen(k) {
     const mix = { vol: S.vol, mute: S.mute };
-    const behalten = { fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
+    const behalten = { echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
     else if (k === "zufall") neu = zufallsLied();
@@ -2710,6 +2740,7 @@
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
     if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = S.master * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "intensitaet") {
       S.intensitaet = +e.target.value;
