@@ -1434,6 +1434,10 @@
         : d >= .32 ? probe("fl", m, zeit, ziel, .42 * l, { ein: .05, aus: .2, dauer: d + .08 }) : probe("flst", m, zeit, ziel, .45 * l, { dauer: Math.max(.25, d), aus: .08 });
       if (ok) return;
     }
+    if (art === "gesang" && !rendert) {
+      const d = Math.max(.2, dauer || .3);
+      if (probe("stimme", Math.round(69 + 12 * Math.log2(freq / 2 / 440)), zeit, ziel, PEGEL_ECHT.gesang * l, { ein: .08, aus: .2, dauer: d + .1 })) return;
+    }
     if ((art === "panfloete" || art === "okarina") && !rendert) {
       const d = Math.max(.18, dauer || .25);
       if (probe(art === "panfloete" ? "pan" : "oka", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, PEGEL_ECHT[art] * l, { ein: .03, aus: .15, dauer: d + .08 })) return;
@@ -1554,6 +1558,16 @@
       if (probe("dudel", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, PEGEL_ECHT.dudelsack * l, { ein: .02, aus: .08, dauer: d + .05 })) return;
     }
     if (art === "laute" || art === "harfe") { zupf(freq, zeit, art === "harfe" ? "harfe" : "mel", l); return; }
+    if (art === "mandoline" && !rendert && sampleBuf.get("gitarre_" + naechsteProbe("gitarre", Math.round(69 + 12 * Math.log2(freq / 440))))) {
+      /* Tremolo mit der echten gezupften Saite */
+      const m = Math.round(69 + 12 * Math.log2(freq / 440)), n = Math.max(1, Math.min(6, Math.round(Math.max(.12, dauer || .2) / .08)));
+      for (let k = 0; k < n; k++) probe("gitarre", m, zeit + k * .08, ziel, PEGEL_ECHT.laute * .8 * l * (k ? .65 : 1), { dauer: k === n - 1 ? 1.2 : .14, aus: k === n - 1 ? .3 : .03 });
+      return;
+    }
+    if (art === "drehleier" && !rendert) {
+      const d = Math.max(.18, dauer || .3);
+      if (probe("geige", Math.round(69 + 12 * Math.log2(freq / 440)), zeit, ziel, PEGEL_ECHT.drehleier * l, { ein: .04, aus: .12, dauer: d + .06 })) return;
+    }
     if (art === "mandoline") { /* Tremolo: schnell wiederholt angeschlagen */
       const n = Math.max(1, Math.min(6, Math.round(Math.max(.12, dauer || .2) / .08)));
       for (let k = 0; k < n; k++) zupf(freq, zeit + k * .08, "mandoline", l * (k ? .7 : 1));
@@ -1745,14 +1759,15 @@
   }
   function spielen(spur, zeile, zeit, schritt, laut, dauer) {
     const betont = schritt % 4 === 0;
-    if (spur === "klopf") perk("klopf", "klopf", betont, zeit, laut, (z, l) => klopfen(z, betont, l));
-    else if (spur === "schelle") perk("schelle", "schelle", false, zeit, laut, (z, l) => schellen(z, l));
+    if (spur === "klopf") { if (!schlagProbe("klopf", betont, zeit, spurGain.klopf, laut)) perk("klopf", "klopf", betont, zeit, laut, (z, l) => klopfen(z, betont, l)); }
+    else if (spur === "schelle") { if (!schlagProbe("schelle", Math.random() < .5, zeit, spurGain.schelle, laut)) perk("schelle", "schelle", false, zeit, laut, (z, l) => schellen(z, l)); }
     else if (spur === "trommel") {
+      if (schlagProbe(S.band.trommel, betont, zeit, spurGain.trommel, laut)) return;
       if (S.band.trommel === "tamburin" && probe(betont ? "tamb1" : "tamb2", 0, zeit, spurGain.trommel, (betont ? .75 : .54) * (laut || 1), { dauer: .7, aus: .2 })) return;
       if (S.band.trommel === "pauke" && probe(betont ? "timp1" : "timp3", 0, zeit, spurGain.trommel, (betont ? .8 : .55) * (laut || 1), { dauer: betont ? 1.6 : 1, aus: .4 })) return;
       perk("trommel", S.band.trommel, betont, zeit, laut, (z, l) => friedrichSpielen(z, betont, l));
     }
-    else if (spur === "ketten") { if (S.band.ketten === "ketten") ezekielSpielen(zeit, laut); else perk("ketten", S.band.ketten, betont, zeit, laut, (z, l) => ezekielSpielen(z, l)); }
+    else if (spur === "ketten") { if (schlagProbe(S.band.ketten, betont, zeit, spurGain.ketten, laut)) return; if (S.band.ketten === "ketten") ezekielSpielen(zeit, laut); else perk("ketten", S.band.ketten, betont, zeit, laut, (z, l) => ezekielSpielen(z, l)); }
     else if (spur === "rex") rexLaut(zeit, zeile, laut);
     else if (spur === "floete") echoSpielen(midiHz(tonMidi("floete", zeile, S)), zeit, dauer || .25, laut);
     else if (spur === "melodie") melodieSpielen(midiHz(tonMidi("melodie", zeile, S)), zeit, dauer, laut);
@@ -1962,7 +1977,7 @@
     fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], flst: [69, 72, 76, 81, 84, 88, 93, 96],
     harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101], glock: [79, 84, 91, 96, 103, 108],
     gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], dudel: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87],
-    pan: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90], oka: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90],
+    pan: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90], stimme: [57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87], oka: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90],
     fag: [34,  37,  41,  45,  46,  48,  55,  60,  63,  68,  69,  72], pos: [34,  37,  39,  41,  46,  50,  53,  60,  61,  63,  65], vctrem: [36,  40,  43,  50,  53,  57,  59,  60,  64,  67,  71,  74,  77], trp: [53,  57,  60,  63,  67,  70,  74,  77,  81,  84], oboest: [58,  62,  65,  70,  74,  77,  82,  89], kb: [28,  30,  31,  34,  36,  38,  40,  42,  44,  45,  49,  52,  56,  59], geigest: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], geige: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], tuba: [34,  39,  41,  46,  50,  53,  58], klar: [50,  53,  58,  62,  65,  70,  74,  77,  82,  86,  90], orgel: [36,  42,  48,  54,  60,  66,  72,  78,  84,  90,  96], vlntrem: [55,  57,  59,  62,  69,  72,  76,  79,  83,  86], oboe: [58,  62,  65,  70,  74,  77,  82,  86,  89] };
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
@@ -1984,7 +1999,14 @@
     sampleLaedt.set(name, pr); return pr;
   }
   /* Lautstärke der Aufnahmen aus dem FluidR3-Klangsatz, abgestimmt auf die bisherigen Klänge */
-  const PEGEL_ECHT = { laute: .5, dudelsack: .45, panfloete: .3, okarina: .3, bass: .6 };
+  const PEGEL_ECHT = { laute: .5, dudelsack: .45, panfloete: .3, okarina: .3, bass: .6, gesang: .4, drehleier: .8,
+    trommel: 1.15, bodhran: 1.1, stoecke: 1.3, schelle: .5, klopf: 1, rassel: .65 };
+  /* Schlagwerk aus Aufnahmen: [betonter Schlag, normaler Schlag] */
+  const SCHLAG_PROBE = { trommel: ["snare1", "snare2"], bodhran: ["bodh1", "bodh2"], stoecke: ["clave1", "clave2"], schelle: ["schelle1", "schelle2"], klopf: ["holz1", "holz2"], rassel: ["shake", "shake"] };
+  function schlagProbe(art, betont, zeit, ziel, laut) {
+    const p = SCHLAG_PROBE[art]; if (!p || rendert) return false;
+    return probe(p[betont ? 0 : 1], 0, zeit, ziel, PEGEL_ECHT[art] * (betont ? 1 : .8) * (laut || 1), { dauer: 1.2, aus: .25 });
+  }
   const naechsteProbe = (gruppe, midi) => (SAMPLE_KARTE[gruppe] || []).reduce((b, m) => b == null || Math.abs(m - midi) < Math.abs(b - midi) ? m : b, null);
   function probenLaden(gruppe) { (SAMPLE_KARTE[gruppe] || [gruppe]).forEach(m => sampleLaden(SAMPLE_KARTE[gruppe] ? gruppe + "_" + m : gruppe)); }
   /* eine Aufnahme spielen: o = { ein, aus, dauer, pan } – gibt false zurück, wenn sie noch nicht geladen ist */
@@ -2040,6 +2062,10 @@
     if (!pr || pr.volk) probenLaden("gitarre"); /* Barradins Basssaiten in den Liedern */
     if (S.band.floete === "panfloete") probenLaden("pan");
     if (S.band.floete === "okarina") probenLaden("oka");
+    if (S.band.floete === "gesang") probenLaden("stimme");
+    if (S.instrument === "mandoline") probenLaden("gitarre");
+    if (S.instrument === "drehleier") probenLaden("geige");
+    [S.band.trommel, S.band.ketten, "schelle", "klopf"].forEach(a => (SCHLAG_PROBE[a] || []).forEach(sampleLaden));
     if (S.instrument === "schalmei") { probenLaden("oboe"); probenLaden("oboest"); }
     if (S.band.trommel === "tamburin") { sampleLaden("tamb1"); sampleLaden("tamb2"); }
     if (S.band.floete === "floete") { probenLaden("fl"); probenLaden("flst"); }
