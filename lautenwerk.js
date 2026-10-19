@@ -72,8 +72,7 @@
   };
   const KULISSEN = ["keine", "taverne", "feuer", "regen", "wald", "hoehle", "meer", "sturm"];
   const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "wald", spannung: "hoehle", sieg: "taverne", kampf: "keine",
-    taverne: "taverne", hafen: "meer", wald: "wald", markt: "taverne", schmiede: "feuer", wiegen: "feuer", trauer: "regen",
-    ballade: "taverne", saltarello: "taverne", schlacht: "sturm",
+    taverne: "taverne", hafen: "meer", wald: "wald", schmiede: "feuer", wiegen: "feuer", trauer: "regen", ballade: "taverne",
     auenland: "wald", elben: "wald", zwerge: "hoehle", reiter: "keine", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen",
     klage: "regen", marktplatz: "taverne", hof: "keine", grusel: "hoehle", fey: "wald", boss: "sturm" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
@@ -112,7 +111,7 @@
       teil: "Teil bearbeiten", ablauf: "Ablauf", kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
       lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
-      vorlagen: { taverne: "Tavernentanz", saltarello: "Saltarello", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", markt: "🏘 Markt", schmiede: "⚒ Schmiede", trauer: "Trauerlied", schlacht: "Schlachtruf", wiegen: "Wiegenlied",
+      vorlagen: { taverne: "Tavernentanz", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", schmiede: "⚒ Schmiede", trauer: "Trauerlied", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lager",
         auenland: "🌿 Auenland", elben: "✨ Elben", zwerge: "⛏ Zwerge", reiter: "🐎 Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kamin", shanty: "🌊 Shanty", pilger: "⛪ Pilger",
         klage: "🥀 Klage", marktplatz: "🛒 Marktplatz", hof: "👑 Königshof", grusel: "👻 Spukhaus", fey: "🧚 Feenwald", boss: "🐲 Endgegner" },
@@ -152,7 +151,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
-      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "✏️ Eigene Kompositionen – Vorlagen zum Bearbeiten im Raster",
+      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
@@ -180,7 +179,7 @@
       teil: "Edit part", ablauf: "Order", kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
       lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
-      vorlagen: { taverne: "Tavern dance", saltarello: "Saltarello", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", markt: "🏘 Market", schmiede: "⚒ Forge", trauer: "Lament", schlacht: "Battle cry", wiegen: "Lullaby",
+      vorlagen: { taverne: "Tavern dance", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", schmiede: "⚒ Forge", trauer: "Lament", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Camp",
         auenland: "🌿 Shire", elben: "✨ Elves", zwerge: "⛏ Dwarves", reiter: "🐎 Riders", dorffest: "💃 Fair", kamin: "🕯 Fireside", shanty: "🌊 Shanty", pilger: "⛪ Pilgrim",
         klage: "🥀 Lament", marktplatz: "🛒 Market square", hof: "👑 Royal court", grusel: "👻 Haunted house", fey: "🧚 Fey forest", boss: "🐲 Boss fight" },
@@ -220,7 +219,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
-      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "✏️ Own compositions – templates to edit in the grid",
+      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
@@ -284,26 +283,6 @@
         bass: folge({ 0: 0, 4: 2, 8: 3, 12: 0 }),
         melodie: folge({ 0: 7, 1: 6, 2: 7, 4: 5, 5: 4, 6: 3, 8: 4, 9: 5, 10: 6, 12: 7, 14: 7 }),
         floete: folge({ 0: 4, 2: 4, 4: 3, 6: 5, 8: 6, 10: 4, 12: 4, 14: 2 }), rex: folge({ 15: 0 }) }) },
-    /* Saltarello: italienischer Springtanz mit hüpfendem Lang-kurz-Rhythmus. Ein Ohrwurm (A) kehrt immer wieder,
-       B antwortet über dem hellen G-Dur-Akkord und schließt auf D, in C ruft Echo und Barradin antwortet,
-       im Finale (D) spielen Schalmei und Flöte das Thema in Oktaven, die ganze Band hüpft mit. */
-    saltarello: { instrument: "schalmei", band: { trommel: "tamburin", floete: "floete", ketten: "stampfen" },
-      tempo: 132, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 1, ablauf: "ABACABAD",
-      A: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 3, 8, 11]), ketten: an([0, 8]),
-        bass: folge({ 0: 0, 6: 0, 8: 4, 14: 4 }),
-        melodie: folge({ 0: 4, 3: 5, 4: 4, 7: 3, 8: 2, 11: 3, 12: 4 }) }),
-      B: teil({ klopf: an([0, 8]), schelle: an([4, 12]), trommel: an([0, 3, 4, 8, 11, 12]), ketten: an([0, 8]),
-        bass: folge({ 0: 2, 6: 2, 8: 3, 12: 0 }),
-        melodie: folge({ 0: 5, 3: 6, 4: 7, 7: 6, 8: 4, 11: 1, 12: 0 }),
-        floete: folge({ 0: 2, 4: 4, 8: 1 }) }),
-      C: teil({ klopf: an([0, 8]), trommel: an([0, 3, 8, 11]), ketten: an([0, 8]),
-        bass: folge({ 0: 1, 8: 4 }),
-        floete: folge({ 0: 4, 3: 3, 4: 2, 6: 4 }),
-        melodie: folge({ 8: 4, 11: 3, 12: 2, 14: 1 }) }),
-      D: teil({ klopf: an([0, 4, 8, 12]), schelle: an([2, 6, 10, 14]), trommel: an([0, 3, 4, 7, 8, 11, 12, 14, 15]), ketten: an([0, 3, 8, 11]),
-        bass: folge({ 0: 0, 4: 0, 8: 3, 12: 0 }),
-        melodie: folge({ 0: 4, 3: 5, 4: 4, 7: 3, 8: 2, 11: 1, 12: 0 }),
-        floete: folge({ 0: 4, 3: 5, 4: 4, 7: 3, 8: 2, 11: 1, 12: 0 }), rex: folge({ 15: 0 }) }) },
     ballade: { instrument: "laute", band: { trommel: "bodhran", floete: "gesang", ketten: "schnipsen" },
       tempo: 96, transpose: 0, modus: "dorisch", swing: 1, bordun: 0, variation: 2, ablauf: "ABCABCD",
       A: teil({ klopf: an([0, 8]), ketten: an([4, 12]), bass: folge({ 0: 0, 8: 4 }),
@@ -331,22 +310,6 @@
       D: teil({ klopf: an([0, 8]), trommel: an([0, 8]), ketten: an([12]), bass: folge({ 0: 2, 4: 3, 8: 0 }),
         melodie: folge({ 0: 5, 2: 3, 4: 4, 6: 6, 8: 7, 10: 4, 12: 2, 14: 0 }),
         floete: folge({ 0: 3, 4: 6, 8: 4, 12: 4 }) }) },
-    schlacht: { instrument: "dudelsack", band: { trommel: "pauke", floete: "horn", ketten: "stampfen" },
-      tempo: 128, transpose: 2, modus: "phrygisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABCDD",
-      A: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 6, 10, 14]), trommel: an([0, 4, 8, 12]), ketten: an([0, 8]),
-        bass: folge({ 0: 0, 2: 0, 4: 0, 6: 0, 8: 0, 10: 0, 12: 4, 14: 4 }),
-        melodie: folge({ 0: 4, 2: 4, 3: 5, 4: 4, 6: 2, 7: 1, 8: 0, 10: 4, 11: 5, 12: 6, 14: 3, 15: 1 }) }),
-      B: teil({ klopf: an([0, 4, 8, 12]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 4, 8, 10, 12, 14]), ketten: an([0, 4, 8, 12]),
-        bass: folge({ 0: 0, 4: 2, 8: 3, 12: 4 }),
-        melodie: folge({ 0: 7, 2: 4, 4: 5, 6: 3, 8: 4, 10: 6, 12: 6, 14: 1, 15: 0 }),
-        floete: folge({ 0: 4, 4: 3, 8: 4, 12: 3 }), rex: folge({ 15: 0 }) }),
-      C: teil({ klopf: an([0, 8]), trommel: an([0, 4, 8, 10, 12, 13, 14, 15]), ketten: an([0, 4, 8, 12]),
-        bass: folge({ 0: 0, 8: 0 }), floete: folge({ 0: 4, 6: 4, 8: 7 }), rex: folge({ 12: 2 }) }),
-      /* D: der Sturmangriff – Dudelsack und Horn im Wechsel der Akkorde */
-      D: teil({ klopf: an([0, 2, 4, 6, 8, 10, 12, 14]), schelle: an([0, 2, 4, 6, 8, 10, 12, 14]), trommel: an([0, 2, 3, 4, 6, 8, 10, 11, 12, 14, 15]), ketten: an([0, 4, 8, 12]),
-        bass: folge({ 0: 0, 2: 0, 4: 4, 6: 4, 8: 2, 10: 2, 12: 3, 14: 3 }),
-        melodie: folge({ 0: 4, 2: 2, 4: 6, 6: 3, 8: 5, 10: 3, 12: 4, 14: 1, 15: 0 }),
-        floete: folge({ 0: 7, 4: 1, 8: 7, 12: 6 }), rex: folge({ 14: 0 }) }) },
     wiegen: { instrument: "harfe", band: { trommel: "trommel", floete: "okarina", ketten: "rassel" },
       tempo: 84, transpose: 0, modus: "mixolydisch", swing: 1, bordun: 0, variation: 1, ablauf: "AABBCD",
       A: teil({ klopf: an([0, 8]), ketten: an([4, 12]), bass: folge({ 0: 0, 8: 2 }),
@@ -398,25 +361,6 @@
         bass: folge({ 0: 0, 4: 4, 8: 2, 12: 0 }),
         melodie: folge({ 0: 4, 1: 3, 2: 4, 4: 6, 5: 4, 6: 3, 8: 5, 9: 4, 10: 3, 12: 2, 13: 1, 14: 0 }),
         floete: folge({ 0: 7, 4: 3, 8: 7, 12: 4, 14: 2 }) }) },
-    /* Marktgewusel: synkopierter Ohrwurm, Löffel-Spieler und ein bellender Marktköter */
-    markt: { instrument: "mandoline", band: { trommel: "tamburin", floete: "floete", ketten: "loeffel" },
-      tempo: 120, transpose: 0, modus: "mixolydisch", swing: 0, bordun: 0, variation: 2, ablauf: "AABBCCDD",
-      A: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([4, 12]), trommel: an([0, 4, 8, 12]), ketten: an([2, 6, 10, 14]),
-        bass: folge({ 0: 0, 3: 0, 6: 4, 8: 2, 11: 2, 14: 4 }),
-        melodie: folge({ 0: 4, 2: 4, 3: 5, 4: 4, 6: 3, 8: 5, 10: 5, 11: 7, 12: 5, 14: 3 }),
-        floete: folge({ 7: 6, 15: 6 }) }),
-      B: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([4, 12]), trommel: an([0, 4, 8, 10, 12]), ketten: an([2, 6, 10, 14]),
-        bass: folge({ 0: 2, 3: 2, 6: 0, 8: 4, 11: 4, 14: 3 }),
-        melodie: folge({ 0: 7, 2: 7, 3: 5, 4: 3, 6: 4, 8: 6, 10: 6, 11: 5, 12: 3, 14: 1, 15: 2 }),
-        floete: folge({ 5: 5, 13: 4 }), rex: folge({ 15: 0 }) }),
-      C: teil({ klopf: an([0, 8]), trommel: an([0, 4, 8, 12]), ketten: an([0, 2, 4, 6, 8, 10, 12, 14]),
-        bass: folge({ 0: 0, 8: 0 }),
-        floete: folge({ 0: 4, 1: 5, 2: 7, 4: 4, 6: 2, 8: 4, 9: 5, 10: 7, 12: 7, 13: 6, 14: 4 }),
-        rex: folge({ 5: 0, 7: 0 }) }),
-      D: teil({ klopf: an([0, 3, 6, 8, 11, 14]), schelle: an([2, 4, 6, 10, 12, 14]), trommel: an([0, 2, 4, 6, 8, 10, 12, 14]), ketten: an([2, 6, 10, 14]),
-        bass: folge({ 0: 0, 3: 0, 6: 4, 8: 2, 11: 2, 14: 4 }),
-        melodie: folge({ 0: 4, 2: 4, 3: 5, 4: 4, 6: 3, 8: 5, 10: 5, 11: 7, 12: 5, 13: 4, 14: 3, 15: 4 }),
-        floete: folge({ 0: 2, 2: 2, 3: 3, 4: 2, 6: 1, 8: 3, 10: 3, 11: 5, 12: 3, 14: 1 }) }) },
     /* Zwergenschmiede: Hammer auf Amboss im 3-3-2, Hörner aus der Tiefe */
     schmiede: { instrument: "drehleier", band: { trommel: "pauke", floete: "horn", ketten: "loeffel" },
       tempo: 96, transpose: -2, modus: "aeolisch", swing: 0, bordun: 1, variation: 2, ablauf: "AABBCADD",
@@ -478,7 +422,7 @@
         melodie: folge({ 0: 7, 2: 5, 4: 4, 6: 2, 8: 6, 10: 1, 12: 2, 14: 0 }),
         floete: folge({ 0: 5, 4: 4, 8: 3, 12: 4 }), rex: folge({ 14: 0 }) }) }
   };
-  const LIEDER = ["taverne", "saltarello", "ballade", "hafen", "wald", "markt", "schmiede", "trauer", "schlacht", "wiegen"];
+  const LIEDER = ["taverne", "ballade", "hafen", "wald", "schmiede", "trauer", "wiegen"];
   const STIMMUNGEN = ["kampf", "boss", "spannung", "grusel", "unterreich", "reise", "reiter", "sieg", "rast", "kamin", "klage", "auenland", "elben", "fey", "zwerge", "dorffest", "marktplatz", "hof", "shanty", "pilger"];
 
   /* ---------- Stimmungs-Generatoren ----------
@@ -3181,9 +3125,9 @@
     '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
   function musikBox(T, voll) {
     let kacheln;
-    if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.coverTitel + "</p>"].concat(COVER_LISTE.map(k => kachel("data-sfx", k, T.sfx[k])),
-        voll ? ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
-          [kachel("data-vorlage", "zufall", T.zufall), kachel("data-vorlage", "leer", T.leeren)]) : []).join("");
+    if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
+        voll ? [kachel("data-vorlage", "zufall", T.zufall), kachel("data-vorlage", "leer", T.leeren)] : [],
+        ['<p class="lw-trenner">' + T.coverTitel + "</p>"], COVER_LISTE.map(k => kachel("data-sfx", k, T.sfx[k]))).join("");
     else if (musikTab === "eigene") {
       const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
       kacheln = alle.length ? alle.map(([q, l]) => kachel("data-eigen", q + ":" + l.id, (q === "g" ? "👥 " : "📱 ") + esc(l.name), geladen && geladen.quelle === q && String(geladen.id) === String(l.id))).join("")
