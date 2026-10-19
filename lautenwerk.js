@@ -1137,7 +1137,8 @@
   function audioStart() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
-      try { ctx = new AC({ latencyHint: spar ? .25 : "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
+      /* Sparmodus: mit halber Abtastrate rechnen (24 kHz) – halbiert die gesamte Rechenlast, Höhen bis 12 kHz bleiben */
+      try { ctx = spar ? new AC({ latencyHint: .25, sampleRate: 24000 }) : new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor(); kompRef = komp;
