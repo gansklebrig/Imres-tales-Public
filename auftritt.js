@@ -31,7 +31,7 @@
       lied: "Lied", neuesLied: "🎲 Neues Lied", erfunden: "Barradin improvisiert",
       lieder: { reigen: "Tavernenreigen", bugbear: "Der Bugbear im Fass", klage: "Phandalins Klage", schmiede: "Hammer und Amboss", seemann: "Seemannsgarn", walzer: "Demogorgons Walzer",
         schatten: "Ezekiels Schattentanz", rex: "Rex' wilde Jagd", ploop: "Ploopploopeens Tiefseeshanty", venom: "Venomfangs Odem" },
-      herausforderung: "⚔ Herausforderung", stimmen_laden: "🎻 Instrumente werden gestimmt …",
+      stimmen_laden: "🎻 Instrumente werden gestimmt …",
       erfinden: { vorlage: ["Die Ballade vom {a} {n}", "Das Lied vom {a} {n}", "Der Reigen vom {a} {n}", "Die Mär vom {a} {n}", "Die Klage vom {a} {n}"],
         adj: ["traurigen", "betrunkenen", "tanzenden", "verliebten", "singenden", "hungrigen", "verlorenen", "kichernden", "einsamen", "wütenden", "verfluchten", "goldenen"],
         nom: ["Kobold", "Zwerg", "Drachen", "Bugbear", "Wirt", "Pilz", "Hering", "Barden", "Goblin", "Oger", "Schatten", "Mond", "Krug"] },
@@ -65,7 +65,7 @@
       lied: "Song", neuesLied: "🎲 New song", erfunden: "Barradin improvises",
       lieder: { reigen: "Tavern Round", bugbear: "The Bugbear in the Barrel", klage: "Phandalin's Lament", schmiede: "Hammer and Anvil", seemann: "Sailor's Yarn", walzer: "Demogorgon's Waltz",
         schatten: "Ezekiel's Shadow Dance", rex: "Rex's Wild Hunt", ploop: "Ploopploopeen's Deep-Sea Shanty", venom: "Venomfang's Breath" },
-      herausforderung: "⚔ Challenge", stimmen_laden: "🎻 Tuning the instruments …",
+      stimmen_laden: "🎻 Tuning the instruments …",
       erfinden: { vorlage: ["The Ballad of the {a} {n}", "The Song of the {a} {n}", "The Round of the {a} {n}", "The Tale of the {a} {n}", "The Lament of the {a} {n}"],
         adj: ["Sad", "Drunken", "Dancing", "Lovesick", "Singing", "Hungry", "Lost", "Giggling", "Lonely", "Angry", "Cursed", "Golden"],
         nom: ["Kobold", "Dwarf", "Dragon", "Bugbear", "Innkeeper", "Mushroom", "Herring", "Bard", "Goblin", "Ogre", "Shadow", "Moon", "Tankard"] },
@@ -113,14 +113,14 @@
     schmiede: { modus: "phrygisch", grund: 64, tempo: 1, folge: [0, 1, 0, 6, 0, 1, 6, 0], takt: 16, bass: [0, 6, 12] },
     seemann: { modus: "mixolydisch", grund: 62, tempo: 1.05, folge: [0, 6, 0, 4, 0, 6, 3, 0], takt: 16 },
     walzer: { modus: "harmonisch", grund: 62, tempo: 1.1, folge: [0, 0, 3, 4, 0, 3, 4, 4], takt: 12 },
-    /* Herausforderungen: eigene, kniffligere Rhythmen – gelten auf jeder Publikumsstufe (das Publikum bestimmt nur noch Tempo und Länge) */
-    schatten: { kampf: 1, modus: "phrygisch", grund: 62, tempo: 1.12, folge: [0, 1, 0, 6, 0, 1, 5, 6], takt: 16, bass: [0, 6, 8, 14],
+    /* Lieder mit eigenem Rhythmus: vor Bauern gelten die einfachen Standard-Rhythmen, ab dem Hof von König Horga ihre eigenen */
+    schatten: { modus: "phrygisch", grund: 62, tempo: 1.12, folge: [0, 1, 0, 6, 0, 1, 5, 6], takt: 16, bass: [0, 6, 8, 14],
       motive: [[0, 3, 6, 10, 12], [2, 3, 6, 8, 11], [0, 3, 6, 10, 13], [3, 6, 8, 11]], floete: { g: [4, 14], u: [4, 9, 14] } },
-    rex: { kampf: 1, modus: "mixolydisch", grund: 64, tempo: 1.22, folge: [0, 6, 0, 4, 0, 6, 3, 4], takt: 16, bass: [0, 8],
+    rex: { modus: "mixolydisch", grund: 64, tempo: 1.22, folge: [0, 6, 0, 4, 0, 6, 3, 4], takt: 16, bass: [0, 8],
       motive: [[0, 2, 4, 6, 8, 10, 12], [0, 2, 4, 8, 10, 12], [0, 2, 4, 6, 8, 12], [2, 4, 6, 8, 10, 12]], floete: { g: [14], u: [7, 14] } },
-    ploop: { kampf: 1, modus: "dorisch", grund: 62, tempo: 1.18, folge: [0, 3, 0, 4, 0, 3, 6, 0], takt: 12, bass: [0, 6], puls: [3, 6, 9],
+    ploop: { modus: "dorisch", grund: 62, tempo: 1.18, folge: [0, 3, 0, 4, 0, 3, 6, 0], takt: 12, bass: [0, 6], puls: [3, 6, 9],
       motive: [[0, 3, 6, 9], [0, 2, 3, 6, 8], [0, 3, 4, 6, 9], [0, 6, 9]], floete: { g: [10], u: [4, 10] } },
-    venom: { kampf: 1, modus: "harmonisch", grund: 64, tempo: 1.08, folge: [0, 5, 3, 4, 0, 3, 5, 4], takt: 16, akkord: true, bass: [0, 8],
+    venom: { modus: "harmonisch", grund: 64, tempo: 1.08, folge: [0, 5, 3, 4, 0, 3, 5, 4], takt: 16, bass: [0, 8],
       motive: [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 11], [2, 4, 6, 10, 12], [0, 4, 6, 8, 10, 12]], floete: { g: [2, 10], u: [6, 10, 14] } }
   };
   const FOLGEN = {
@@ -145,9 +145,10 @@
   function noten(stufe, lied) {
     const st = STUFEN[stufe], L = lied.takt, schritt = 60 / (st.tempo * lied.tempo) / 4, vor = 16 * schritt, liste = [], akkorde = [];
     SK = skala(lied.modus); GRUND = lied.grund;
-    const motive = lied.motive || (L === 12 ? WALZER[stufe] : st.motive), akkord = !!(lied.akkord || st.akkord);
-    const bassSchritte = lied.bass && (stufe !== "leicht" || lied.kampf) ? lied.bass : (L === 12 ? [0] : st.bass);
-    const floete = lied.floete || (L === 12 ? FLOETE_WALZER[stufe] : st.floete);
+    const eigen = stufe !== "leicht", akkord = st.akkord;
+    const motive = lied.motive && eigen ? lied.motive : (L === 12 ? WALZER[stufe] : st.motive);
+    const bassSchritte = lied.bass && eigen ? lied.bass : (L === 12 ? [0] : st.bass);
+    const floete = lied.floete && eigen ? lied.floete : (L === 12 ? FLOETE_WALZER[stufe] : st.floete);
     let fton = 4; /* Flötenstimme: Stufe in der Tonleiter, eine Oktave über der Laute */
     /* Phrasen: Motiv a, b, a, Schluss – die Kontur jedes Motivs wird einmal erfunden und dann wiederholt */
     const konturen = motive.map(m => m.map(() => zufall([-2, -1, -1, 1, 1, 2])));
@@ -161,7 +162,7 @@
       const setze = (s, spur, n) => { liste.push({ zeit: vor + (takt * L + s) * schritt, spur, ton: n, status: null }); belegt[s] = (belegt[s] || 0) + 1; if (spur === 1) laute[s] = n; };
       bassSchritte.forEach(s => { if (!letzter || s === 0) setze(s, 0, grund); });
       if (letzter) { /* Schlussakkord: Laute auf dem Grundton, die Flöte hält die Quinte darüber */
-        setze(akkord ? 0 : 4, 1, 7); if (stufe !== "leicht" || lied.kampf) setze(8, 2, 4); continue; }
+        setze(akkord ? 0 : 4, 1, 7); if (eigen) setze(8, 2, 4); continue; }
       if (takt % 4 === 0) ton = 4;
       motiv.forEach((s, k) => {
         if (!akkord && belegt[s]) return;
@@ -341,11 +342,9 @@
       '<div class="at-stufen"><span>' + T.publikum + ":</span>" +
         Object.keys(STUFEN).map(k => '<button type="button" data-stufe="' + k + '" aria-pressed="' + (k === stufe) + '">' + T.stufen[k] + "</button>").join("") + "</div>" +
       '<div class="at-stufen at-lieder"><span>' + T.lied + ":</span>" +
-        Object.keys(LIEDER).filter(k => !LIEDER[k].kampf).map(k => '<button type="button" data-lied="' + k + '" aria-pressed="' + (k === liedWahl) + '">' + T.lieder[k] + "</button>").join("") +
+        Object.keys(LIEDER).map(k => '<button type="button" data-lied="' + k + '" aria-pressed="' + (k === liedWahl) + '">' + T.lieder[k] + "</button>").join("") +
         '<button type="button" data-lied="neu" aria-pressed="' + (liedWahl === "neu") + '">' + T.neuesLied + "</button>" +
         (liedWahl === "neu" ? '<span class="at-erfunden">♪ ' + esc(liedName(aktuellesLied(), T)) + "</span>" : "") + "</div>" +
-      '<div class="at-stufen at-lieder at-kampf"><span>' + T.herausforderung + ":</span>" +
-        Object.keys(LIEDER).filter(k => LIEDER[k].kampf).map(k => '<button type="button" data-lied="' + k + '" aria-pressed="' + (k === liedWahl) + '">' + T.lieder[k] + "</button>").join("") + "</div>" +
       '<div class="at-buehne"><canvas class="at-canvas" width="560" height="380" aria-label="' + esc(T.titel) + '"></canvas>' +
         '<div class="at-ergebnis" ' + (ergebnis ? "" : "hidden") + ">" + (ergebnis ? ergebnisHtml(T) : "") + "</div></div>" +
       '<p class="at-steuer">' + T.steuerung + "<br>" + T.tipp + "</p>" +
@@ -602,7 +601,6 @@
 .auftritt { grid-column: 1 / -1; }
 .at-stufen { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; font-size: .85rem; color: var(--ash); }
 .at-stufen button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .85rem; padding: .35rem .8rem; cursor: pointer; }
-.at-kampf button { border-color: rgba(196,86,74,.55); }
 .at-stufen button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
 .at-buehne { position: relative; max-width: 560px; width: 100%; margin: 0 auto; }
 .at-canvas { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(224,160,70,.14), transparent 70%), rgba(16,14,21,.7); border: 1px solid var(--line); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
