@@ -28,7 +28,9 @@
   /* Auf Handys und Tablets immer die leichte Bauweise für Hall und Raumklang – auch ohne Sparmodus:
      ein gemeinsames Hall-Netz statt zwei Faltungshallen, keine Stereo-Verteilung, etwas schlankeres Orchester */
   const mobil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
-  const leicht = () => spar || mobil;
+  /* einmal beim Start der Tonberechnung festgelegt – ein Umschalten des Sparmodus gilt erst nach dem Neuladen */
+  let leichtFest = null;
+  const leicht = () => leichtFest !== null ? leichtFest : (spar || mobil);
   try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, verbunden: false, zuletzt: null }; } catch (_) {}
 
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1153,6 +1155,7 @@
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       /* Sparmodus: mit halber Abtastrate rechnen (24 kHz) – halbiert die gesamte Rechenlast, Höhen bis 12 kHz bleiben */
+      leichtFest = spar || mobil;
       try { ctx = spar ? new AC({ latencyHint: .25, sampleRate: 24000 }) : new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
@@ -1975,7 +1978,10 @@
   function stopp(pause) {
     laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; musikPauseAb = 0; if (klassikLauf) klassikStopp(true);
     /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
-    if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop(); wechsel = null;
+    if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop();
+    /* ein gewählter, aber noch nicht begonnener Wechsel bleibt die Auswahl für das nächste Play */
+    if (wechsel) { S = wechsel; merken(); setTimeout(() => { zeichnen(); knoepfe(); }, 0); }
+    wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
   }
 
@@ -2693,10 +2699,11 @@
     const lauf = { art, timer: null, bus: ctx.createGain() }; klassikLauf = lauf; klassikKnoepfe();
     await Promise.all([...namen].map(sampleLaden));
     if (klassikLauf !== lauf) return;
-    lauf.bus.connect(sfxBus);
+    /* Cover sind Musik und folgen dem Musik-Regler, Klassiker-Effekte dem Effekte-Regler */
+    lauf.bus.connect(COVER_LISTE.includes(art) && kompRef ? kompRef : sfxBus);
     const pause = musikPausieren();
     const ende = noten.reduce((s, x) => Math.max(s, x[0] + (x[3] || 2)), 0);
-    const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, fruehling: 2, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
+    const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * (COVER_LISTE.includes(art) ? .55 : 1) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, fruehling: 2, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
     let i = 0;
     const planen2 = () => {
       const bis = ctx.currentTime + 1.2 - z;
