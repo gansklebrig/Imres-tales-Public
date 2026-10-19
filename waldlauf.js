@@ -1,9 +1,10 @@
 /* =====================================================================
    FRIEDRICHS JAGD – Bogenspiel in der Taverne
-   Nachts auf der Lichtung: Kreaturen aus dem Bestiarium ziehen vorbei.
+   Nachts auf der Lichtung: Goblins, Banditen und Kreaturen aus dem
+   Bestiarium ziehen vorbei (Goblins & Banditen sind selbst gemalt).
    Ziehen & loslassen spannt den Bogen (wie eine Schleuder). Rex bellt,
    bevor etwas auftaucht. Nach jeder Welle wählt man eine Gabe
-   (Doppelschuss, Feuerpfeile, Rex packt zu …). Welle 5: Demogorgon.
+   (Doppelschuss, Feuerpfeile, Rex packt zu …). Welle 6: Demogorgon.
    Danach geht die Nacht endlos weiter, bis das Lager fällt.
    ===================================================================== */
 (function () {
@@ -23,12 +24,12 @@
   const TX = {
     de: {
       label: "Waldläufer-Probe", titel: "Friedrichs Jagd",
-      text: "Nachts auf der Lichtung schleichen die Kreaturen aus dem Bestiarium ums Lager. Spann den Bogen und halte sie fern – und hör auf Rex: Er wittert sie zuerst.",
+      text: "Nachts auf der Lichtung schleichen Goblins, Banditen und die Kreaturen aus dem Bestiarium ums Lager. Spann den Bogen und halte sie fern – und hör auf Rex: Er wittert sie zuerst.",
       steuerung: "Irgendwo ins Bild tippen, zurückziehen, zielen, loslassen. Je weiter du ziehst, desto kräftiger der Schuss.",
       start: "▶ Auf die Jagd", weiter: "▶ Weiter", nochmal: "↻ Neue Jagd", beenden: "Jagd beenden",
       pause: "Kurze Rast", pauseText: "Die Jagd wartet auf dich.",
       welle: n => "Welle " + n, serie: n => "Serie ×" + n,
-      wellen: ["Etwas raschelt im Unterholz", "Schwingen über den Wipfeln", "Schwere Schritte", "Ein Summen in der Luft", "Der Dämonenfürst"],
+      wellen: ["Goblins auf der Straße", "Banditen im Hinterhalt", "Etwas raschelt im Unterholz", "Schwingen und schwere Schritte", "Ein Summen in der Luft", "Der Dämonenfürst"],
       endlos: "Die Nacht wird länger",
       wuff: "Wuff!", grr: "Grrr!", entkommen: "Entkommen!", doppel: "Doppeltreffer!", dreifach: "Dreifachtreffer!",
       bossFaellt: "Demogorgon fällt!", bossRuft: "Demogorgon brüllt!",
@@ -61,12 +62,12 @@
     },
     en: {
       label: "Ranger check", titel: "Friedrich's Hunt",
-      text: "At night in the clearing, the creatures of the bestiary creep around the camp. Draw your bow and keep them away – and listen to Rex: he smells them first.",
+      text: "At night in the clearing, goblins, bandits and the creatures of the bestiary creep around the camp. Draw your bow and keep them away – and listen to Rex: he smells them first.",
       steuerung: "Touch anywhere in the picture, pull back, aim, let go. The further you pull, the stronger the shot.",
       start: "▶ Begin the hunt", weiter: "▶ Continue", nochmal: "↻ New hunt", beenden: "End the hunt",
       pause: "A short rest", pauseText: "The hunt is waiting for you.",
       welle: n => "Wave " + n, serie: n => "Streak ×" + n,
-      wellen: ["Something rustles in the undergrowth", "Wings above the treetops", "Heavy footsteps", "A buzzing in the air", "The Demon Prince"],
+      wellen: ["Goblins on the road", "Bandits lying in ambush", "Something rustles in the undergrowth", "Wings and heavy footsteps", "A buzzing in the air", "The Demon Prince"],
       endlos: "The night grows longer",
       wuff: "Woof!", grr: "Grrr!", entkommen: "Escaped!", doppel: "Double hit!", dreifach: "Triple hit!",
       bossFaellt: "Demogorgon falls!", bossRuft: "Demogorgon roars!",
@@ -109,6 +110,8 @@
   const FONT_H = 'Caveat, "Segoe Print", cursive';
 
   const ARTEN = {
+    goblin:     { malen: "goblin", hoehe: 54, hp: 1, tempo: 62, punkte: 8, art: "boden", blick: -1, hell: 1, splitter: ["#5d6e35", "#8a9b4c", "#3b2a1b"] },
+    bandit:     { malen: "bandit", hoehe: 86, hp: 2, tempo: 42, punkte: 15, art: "boden", blick: -1, hell: 1, splitter: ["#7a2f26", "#6b4a30", "#2a2622"] },
     blight:     { bild: "blight-frei.webp", quelle: [400, 0, 700, 605], hoehe: 60, hp: 1, tempo: 52, punkte: 10, art: "boden", blick: 1, hell: 1.9, splitter: ["#3b4a3a", "#6f8a5a", "#2a2f26"] },
     bugbear:    { bild: "bugbear-frei.webp", hoehe: 92, hp: 3, tempo: 33, punkte: 30, art: "boden", blick: -1, splitter: ["#9b3a2f", "#a8783e", "#5a4430"] },
     vrock:      { bild: "vrock-frei.webp", hoehe: 80, hp: 2, tempo: 62, punkte: 20, art: "flug", blick: 1, hell: 1.35, splitter: ["#a89f8f", "#6a6256", "#3a352f"] },
@@ -123,19 +126,19 @@
   const SPRITES = {};
   let rexBild = null;
   function laden(src, cb) { const i = new Image(); i.decoding = "async"; i.onload = () => cb(i); i.src = src; }
-  function vorbereiten(img, q, maxH, hell) {
-    const [sx, sy, sw, sh] = q || [0, 0, img.naturalWidth, img.naturalHeight];
+  function vorbereiten(img, q, maxH, hell, ohneRand) {
+    const [sx, sy, sw, sh] = q || [0, 0, img.naturalWidth || img.width, img.naturalHeight || img.height];
     const f = Math.min(1, maxH / sh), w = Math.max(1, Math.round(sw * f)), h = Math.max(1, Math.round(sh * f));
     const c = document.createElement("canvas"); c.width = w; c.height = h;
     const x = c.getContext("2d");
     x.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-    try { // etwas aufhellen, damit sie sich vom nächtlichen Gebüsch abheben
+    if (hell !== 1) try { // etwas aufhellen, damit sie sich vom nächtlichen Gebüsch abheben
       const d = x.getImageData(0, 0, w, h), px = d.data;
       for (let i = 0; i < px.length; i += 4) { px[i] = Math.min(255, px[i] * hell + 14); px[i + 1] = Math.min(255, px[i + 1] * hell + 12); px[i + 2] = Math.min(255, px[i + 2] * hell + 8); }
       x.putImageData(d, 0, 0);
     } catch (_) {}
     x.globalCompositeOperation = "destination-in";
-    const fe = 0.08;
+    const fe = ohneRand ? 0.001 : 0.08;
     let g = x.createLinearGradient(0, 0, w, 0);
     g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(fe, "#000"); g.addColorStop(1 - fe, "#000"); g.addColorStop(1, "rgba(0,0,0,0)");
     x.fillStyle = g; x.fillRect(0, 0, w, h);
@@ -147,9 +150,114 @@
     return { normal: c, gespiegelt: s, verh: w / h };
   }
   function bilderLaden() {
-    Object.keys(ARTEN).forEach(k => laden(ARTEN[k].bild, img => { SPRITES[k] = vorbereiten(img, ARTEN[k].quelle, k === "demogorgon" ? 440 : 260, ARTEN[k].hell || 1.15); }));
+    Object.keys(ARTEN).forEach(k => {
+      const a = ARTEN[k];
+      if (a.malen) { const c = MALER[a.malen](); SPRITES[k] = vorbereiten(c, null, 260, 1, true); return; }
+      laden(a.bild, img => { SPRITES[k] = vorbereiten(img, a.quelle, k === "demogorgon" ? 440 : 260, a.hell || 1.15); });
+    });
     laden("rex-guckt.webp", img => { rexBild = img; });
   }
+
+
+  /* ---------- Goblin & Bandit: selbst gemalt (es gibt kein Bild auf der Seite) ---------- */
+  function malGrund(bw, bh) {
+    const c = document.createElement("canvas"); c.width = bw * 2; c.height = bh * 2;
+    const x = c.getContext("2d"); x.scale(2, 2); x.lineJoin = "round"; x.lineCap = "round";
+    return [c, x];
+  }
+  function oval(x, cx, cy, rx, ry) { x.beginPath(); x.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); x.fill(); }
+  const MALER = {
+    goblin() {
+      const [c, x] = malGrund(150, 150);
+      // Beine
+      x.lineWidth = 9;
+      x.strokeStyle = "#2b2219"; x.beginPath(); x.moveTo(84, 108); x.lineTo(94, 127); x.lineTo(90, 144); x.stroke();
+      x.strokeStyle = "#3a2d20"; x.beginPath(); x.moveTo(70, 108); x.lineTo(60, 126); x.lineTo(62, 144); x.stroke();
+      x.fillStyle = "#4d5c2a"; oval(x, 86, 146, 9, 4); oval(x, 57, 146, 9, 4);
+      // hinterer Arm
+      x.strokeStyle = "#4d5c2a"; x.lineWidth = 6; x.beginPath(); x.moveTo(92, 74); x.lineTo(104, 92); x.lineTo(100, 104); x.stroke();
+      // Körper (gebückt, zerlumpter Kittel)
+      let g = x.createLinearGradient(52, 62, 100, 116); g.addColorStop(0, "#7a5a37"); g.addColorStop(1, "#3b2a1b");
+      x.fillStyle = g;
+      x.beginPath(); x.moveTo(56, 72); x.quadraticCurveTo(46, 96, 56, 112);
+      x.lineTo(62, 118); x.lineTo(68, 111); x.lineTo(75, 119); x.lineTo(82, 111); x.lineTo(89, 118); x.lineTo(97, 110);
+      x.quadraticCurveTo(105, 86, 92, 66); x.quadraticCurveTo(74, 56, 56, 72); x.fill();
+      x.strokeStyle = "#1e1712"; x.lineWidth = 3; x.beginPath(); x.moveTo(52, 98); x.quadraticCurveTo(76, 104, 100, 96); x.stroke();
+      x.fillStyle = "#a8783e"; x.fillRect(70, 97, 6, 5);
+      // Ohren
+      x.fillStyle = "#6b7d3e";
+      x.beginPath(); x.moveTo(62, 44); x.lineTo(104, 22); x.lineTo(68, 58); x.closePath(); x.fill();
+      x.fillStyle = "#3f4b22"; x.beginPath(); x.moveTo(68, 46); x.lineTo(96, 28); x.lineTo(70, 54); x.closePath(); x.fill();
+      x.fillStyle = "#5d6e35"; x.beginPath(); x.moveTo(50, 36); x.lineTo(66, 10); x.lineTo(60, 40); x.closePath(); x.fill();
+      // Kopf
+      g = x.createRadialGradient(46, 44, 4, 52, 52, 26); g.addColorStop(0, "#9aac56"); g.addColorStop(1, "#4d5c2a");
+      x.fillStyle = g; oval(x, 52, 52, 22, 19);
+      // Nase
+      x.fillStyle = "#7d8f43"; x.beginPath(); x.moveTo(34, 49); x.lineTo(16, 61); x.lineTo(36, 61); x.closePath(); x.fill();
+      // Brauen & Augen
+      x.strokeStyle = "#2a3115"; x.lineWidth = 3; x.beginPath(); x.moveTo(33, 41); x.lineTo(50, 45); x.stroke();
+      x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 8; x.fillStyle = "#ffd34d"; oval(x, 42, 49, 5, 3.2); x.restore();
+      x.fillStyle = "#1a1408"; oval(x, 41, 49, 1.2, 2.6);
+      // Maul mit Zähnen
+      x.strokeStyle = "#2a1c12"; x.lineWidth = 2.5; x.beginPath(); x.moveTo(30, 66); x.quadraticCurveTo(40, 70, 50, 66); x.stroke();
+      x.fillStyle = "#efe6cf";
+      x.beginPath(); x.moveTo(34, 66); x.lineTo(36, 61); x.lineTo(38, 67); x.fill();
+      x.beginPath(); x.moveTo(44, 67); x.lineTo(46, 62); x.lineTo(48, 66); x.fill();
+      // vorderer Arm mit Krummsäbel
+      x.strokeStyle = "#5d6e35"; x.lineWidth = 7; x.beginPath(); x.moveTo(62, 74); x.lineTo(46, 88); x.lineTo(34, 78); x.stroke();
+      x.strokeStyle = "#5a4430"; x.lineWidth = 4; x.beginPath(); x.moveTo(36, 82); x.lineTo(30, 72); x.stroke();
+      x.strokeStyle = "#3a2d20"; x.lineWidth = 3; x.beginPath(); x.moveTo(25, 77); x.lineTo(39, 69); x.stroke();
+      g = x.createLinearGradient(10, 20, 32, 70); g.addColorStop(0, "#d6d2c4"); g.addColorStop(1, "#7f7a6c");
+      x.fillStyle = g;
+      x.beginPath(); x.moveTo(29, 72); x.quadraticCurveTo(10, 56, 8, 22); x.quadraticCurveTo(24, 44, 34, 70); x.closePath(); x.fill();
+      x.strokeStyle = "rgba(155,58,47,.7)"; x.lineWidth = 1; x.beginPath(); x.moveTo(12, 40); x.lineTo(14, 46); x.stroke();
+      return c;
+    },
+    bandit() {
+      const [c, x] = malGrund(120, 200);
+      // Umhang hinten
+      x.fillStyle = "#24211d";
+      x.beginPath(); x.moveTo(60, 56); x.quadraticCurveTo(104, 110, 100, 176); x.lineTo(90, 170); x.lineTo(82, 178); x.lineTo(72, 140); x.closePath(); x.fill();
+      // Beine & Stiefel
+      x.lineWidth = 11;
+      x.strokeStyle = "#2c2826"; x.beginPath(); x.moveTo(70, 126); x.lineTo(78, 158); x.lineTo(78, 180); x.stroke();
+      x.strokeStyle = "#35302d"; x.beginPath(); x.moveTo(56, 126); x.lineTo(48, 158); x.lineTo(46, 180); x.stroke();
+      x.strokeStyle = "#1c1611"; x.lineWidth = 12;
+      x.beginPath(); x.moveTo(78, 176); x.lineTo(78, 194); x.lineTo(68, 196); x.stroke();
+      x.beginPath(); x.moveTo(46, 176); x.lineTo(46, 194); x.lineTo(36, 196); x.stroke();
+      // Lederwams
+      let g = x.createLinearGradient(40, 60, 84, 132); g.addColorStop(0, "#7a5638"); g.addColorStop(1, "#3e2a1b");
+      x.fillStyle = g;
+      x.beginPath(); x.moveTo(44, 62); x.lineTo(78, 62); x.quadraticCurveTo(86, 96, 84, 134); x.lineTo(40, 134); x.quadraticCurveTo(38, 96, 44, 62); x.fill();
+      x.strokeStyle = "#2a1c12"; x.lineWidth = 4; x.beginPath(); x.moveTo(46, 66); x.lineTo(80, 108); x.stroke();
+      x.fillStyle = "#1e1712"; x.fillRect(40, 110, 45, 7);
+      x.fillStyle = "#c9a35a"; x.fillRect(58, 110, 7, 7);
+      x.fillStyle = "#3b2a1b"; x.fillRect(74, 117, 8, 12); // Beutel
+      // hinterer Arm mit Dolch
+      x.strokeStyle = "#4a3424"; x.lineWidth = 8; x.beginPath(); x.moveTo(76, 70); x.lineTo(86, 96); x.lineTo(84, 116); x.stroke();
+      x.strokeStyle = "#bdb9ad"; x.lineWidth = 2.5; x.beginPath(); x.moveTo(84, 118); x.lineTo(90, 134); x.stroke();
+      // Kapuze & Gesicht
+      x.fillStyle = "#2a2622";
+      x.beginPath(); x.moveTo(38, 66); x.quadraticCurveTo(34, 22, 60, 16); x.quadraticCurveTo(84, 18, 82, 50); x.quadraticCurveTo(82, 62, 78, 68); x.closePath(); x.fill();
+      x.fillStyle = "#7d5d47"; oval(x, 54, 44, 10, 12);
+      x.fillStyle = "rgba(20,16,14,.55)"; oval(x, 56, 36, 12, 6);
+      x.fillStyle = "#ebe2cc"; oval(x, 48, 42, 2, 1.4);
+      x.strokeStyle = "#1e1712"; x.lineWidth = 2; x.beginPath(); x.moveTo(44, 38); x.lineTo(53, 40); x.stroke();
+      // rotes Tuch vor Mund und Nase
+      x.fillStyle = "#7a2f26";
+      x.beginPath(); x.moveTo(42, 46); x.lineTo(66, 46); x.lineTo(64, 60); x.lineTo(56, 66); x.lineTo(44, 58); x.closePath(); x.fill();
+      x.fillStyle = "#9b3a2f"; x.beginPath(); x.moveTo(64, 50); x.lineTo(74, 58); x.lineTo(66, 60); x.closePath(); x.fill();
+      x.strokeStyle = "rgba(224,160,70,.25)"; x.lineWidth = 1.5;
+      x.beginPath(); x.moveTo(60, 16); x.quadraticCurveTo(84, 18, 82, 50); x.stroke();
+      // vorderer Arm mit Kurzschwert
+      x.strokeStyle = "#5e4230"; x.lineWidth = 9; x.beginPath(); x.moveTo(48, 70); x.lineTo(34, 94); x.lineTo(24, 98); x.stroke();
+      x.fillStyle = "#7d5d47"; oval(x, 22, 98, 4.5, 4.5);
+      x.strokeStyle = "#3a2d20"; x.lineWidth = 3; x.beginPath(); x.moveTo(14, 94); x.lineTo(28, 102); x.stroke();
+      g = x.createLinearGradient(4, 50, 22, 96); g.addColorStop(0, "#e2ded2"); g.addColorStop(1, "#8a8577");
+      x.strokeStyle = g; x.lineWidth = 4.5; x.beginPath(); x.moveTo(21, 97); x.lineTo(5, 54); x.stroke();
+      return c;
+    }
+  };
 
   /* ---------- Klang (eigene Synthese, keine Dateien) ---------- */
   let ac = null, rauschen = null, tonAn = lies("imres-waldlauf-ton", "1") === "1";
@@ -217,20 +325,21 @@
   function welleBauen(n) {
     const l = [], add = (typ, k) => { for (let i = 0; i < k; i++) l.push(typ); };
     let abstand = 1.5;
-    if (n === 1) { add("blight", 8); abstand = 1.7; }
-    else if (n === 2) { add("blight", 6); add("vrock", 4); abstand = 1.45; }
-    else if (n === 3) { add("blight", 6); add("vrock", 3); add("bugbear", 3); abstand = 1.3; }
-    else if (n === 4) { add("blight", 5); add("vrock", 3); add("bugbear", 3); add("chasme", 5); abstand = 1.15; }
-    else if (n === 5) return { liste: ["demogorgon"], abstand: 0, boss: true };
+    if (n === 1) { add("goblin", 9); abstand = 1.55; }
+    else if (n === 2) { add("goblin", 7); add("bandit", 5); abstand = 1.4; }
+    else if (n === 3) { add("blight", 7); add("goblin", 4); add("bandit", 2); abstand = 1.3; }
+    else if (n === 4) { add("vrock", 4); add("bugbear", 3); add("goblin", 4); add("blight", 3); abstand = 1.2; }
+    else if (n === 5) { add("chasme", 5); add("vrock", 3); add("bugbear", 2); add("bandit", 3); add("blight", 3); abstand = 1.1; }
+    else if (n === 6) return { liste: ["demogorgon"], abstand: 0, boss: true };
     else {
-      const k = n - 5;
-      add("blight", 5 + k); add("vrock", 3 + k); add("bugbear", 2 + Math.ceil(k / 2)); add("chasme", 3 + k);
+      const k = n - 6;
+      add("goblin", 3 + k); add("bandit", 2 + Math.ceil(k / 2)); add("blight", 4 + k); add("vrock", 3 + k); add("bugbear", 2 + Math.ceil(k / 2)); add("chasme", 3 + k);
       abstand = Math.max(0.55, 1.05 - 0.06 * k);
       mischen(l);
       if (k % 3 === 0) { l.splice(Math.floor(l.length / 2), 0, "demogorgon"); return { liste: l, abstand, boss: true }; }
       return { liste: l, abstand };
     }
-    const erste = l.slice(0, 2).map(() => "blight");
+    const erste = [l[0], l[0]];
     return { liste: erste.concat(mischen(l.slice(2))), abstand };
   }
 
@@ -242,12 +351,12 @@
     S.spawnT = 2.2; S.gebellt = false; S.welleFertigT = -1;
     S.eskorteT = 5; S.eskorte2T = 9;
     const tx = t();
-    S.banner = { titel: tx.welle(n), unter: n <= 5 ? tx.wellen[n - 1] : tx.endlos, t: 0, dauer: 2.2 };
+    S.banner = { titel: tx.welle(n), unter: n <= 6 ? tx.wellen[n - 1] : tx.endlos, t: 0, dauer: 2.2 };
     zustand = "spiel";
     schleierZu();
   }
 
-  function tempoFaktor() { return Math.pow(0.85, S.gaben.echo) * (1 + 0.07 * Math.max(0, S.welle - 5)); }
+  function tempoFaktor() { return Math.pow(0.85, S.gaben.echo) * (1 + 0.07 * Math.max(0, S.welle - 6)); }
 
   function spawnen(e) {
     const a = ARTEN[e.typ], sp = SPRITES[e.typ];
@@ -257,7 +366,7 @@
     else if (a.art === "flug") { y = 120 + Math.random() * 150; s = 0.72 + (y - 120) / 150 * 0.28; }
     else { bahn = 1; y = BAHNEN[1].y + 10; s = 1; }
     const h = a.hoehe * s, w = h * verh;
-    const extra = S.welle > 5 ? Math.floor((S.welle - 5) / 3) : 0;
+    const extra = S.welle > 6 ? Math.floor((S.welle - 6) / 3) : 0;
     const hp = a.art === "boss" ? a.hp + 10 * extra : a.hp + (a.hp > 1 ? extra : 0);
     S.gegner.push({
       typ: e.typ, a, x: e.dir === 1 ? -w / 2 : W + w / 2, y, basisY: y, s, h, w, dir: e.dir, bahn,
@@ -420,8 +529,8 @@
     const boss = S.gegner.find(e => e.a.art === "boss" && !e.tot);
     if (boss) {
       S.eskorteT -= dt; S.eskorte2T -= dt;
-      if (S.eskorteT <= 0) { S.eskorteT = 3.8; S.warte.unshift({ typ: "blight", dir: Math.random() < 0.5 ? 1 : -1 }); S.spawnT = Math.min(S.spawnT, 1); S.gebellt = false; }
-      if (S.eskorte2T <= 0) { S.eskorte2T = 7; S.warte.unshift({ typ: S.welle > 5 ? zufall(["chasme", "vrock"]) : "chasme", dir: Math.random() < 0.5 ? 1 : -1 }); S.spawnT = Math.min(S.spawnT, 1); S.gebellt = false; }
+      if (S.eskorteT <= 0) { S.eskorteT = 3.8; S.warte.unshift({ typ: zufall(["blight", "blight", "goblin"]), dir: Math.random() < 0.5 ? 1 : -1 }); S.spawnT = Math.min(S.spawnT, 1); S.gebellt = false; }
+      if (S.eskorte2T <= 0) { S.eskorte2T = 7; S.warte.unshift({ typ: S.welle > 6 ? zufall(["chasme", "vrock", "bandit"]) : "chasme", dir: Math.random() < 0.5 ? 1 : -1 }); S.spawnT = Math.min(S.spawnT, 1); S.gebellt = false; }
       S.bossRufT -= dt;
       if (S.bossRufT <= 0) { S.bossRufT = 9; S.beben = 0.5; KLANG.bruellen(); }
     }
@@ -838,10 +947,10 @@
       const stufe = GABEN[k] > 1 && GABEN[k] < 99 ? '<span class="stufe">' + esc(tx.stufe(lvl + 1, GABEN[k])) + '</span>' : "";
       return '<button type="button" class="wl-gabe" data-gabe="' + k + '" style="--dreh:' + dreh[i] + 'deg"><span class="sym" aria-hidden="true">' + GABE_SYM[k] + '</span><span class="wl-gabe-text"><strong>' + esc(name) + stufe + '</strong><small>' + esc(text) + '</small></span></button>';
     }).join("");
-    const nachBoss = S.bossBesiegt && S.welle === 5;
+    const nachBoss = S.bossBesiegt && S.welle === 6;
     schleierAuf('<h4>' + esc(tx.rast) + '</h4>' + (nachBoss ? '<p class="wl-spruch">' + esc(tx.bossSieg) + '</p>' : '<p>' + esc(tx.rastText) + '</p>') +
       '<div class="wl-gaben">' + karten + '</div>' +
-      (S.welle >= 5 ? '<button type="button" class="wl-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>' : ""));
+      (S.welle >= 6 ? '<button type="button" class="wl-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>' : ""));
   }
 
   let letzterSpruch = "";
@@ -854,7 +963,7 @@
       S.neuerRekord = S.punkte > alt && S.punkte > 0;
       if (S.neuerRekord) schreib("imres-waldlauf-rekord", String(S.punkte));
       S.altRekord = alt;
-      const stufe = S.welle >= 9 ? "legende" : S.bossBesiegt ? "boss" : S.welle >= 4 ? "gut" : S.welle >= 2 ? "mittel" : "schwach";
+      const stufe = S.welle >= 10 ? "legende" : S.bossBesiegt ? "boss" : S.welle >= 4 ? "gut" : S.welle >= 2 ? "mittel" : "schwach";
       S.spruchStufe = stufe; S.spruchIdx = Math.floor(Math.random() * 3);
     }
     letzterSpruch = tx.spruch[S.spruchStufe][S.spruchIdx];
