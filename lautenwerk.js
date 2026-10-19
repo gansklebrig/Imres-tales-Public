@@ -1166,7 +1166,7 @@
     return g;
   }
   const MEL_SPITZE = { glocken: .3, fidel: .26, drehleier: .3, schalmei: .2, dudelsack: .22, illusion: .26 };
-  const ECHO_SPITZE = { panfloete: .3, okarina: .32, gesang: .27, horn: .27 };
+  const ECHO_SPITZE = { panfloete: .24, okarina: .25, gesang: .27, horn: .27 };
   const ECHO_LAENGE = { panfloete: 3.4, okarina: 3.4, gesang: 3.6, horn: 3.4 };
   const MEL_LAENGE = { glocken: 1.6, fidel: 3.4, drehleier: 3.3, schalmei: 3.3, dudelsack: 3.3, illusion: 3.5 };
   function klaengeVorbereiten() {
@@ -1348,6 +1348,8 @@
   /* ---------- Echos Instrumente ---------- */
   function echoSpielen(freq, zeit, dauer, laut) {
     const l = laut || 1, art = S.band.floete, ziel = spurGain.floete;
+    /* Flöten eine Oktave tiefer: warm und rund statt schrill – auf Dauer viel angenehmer */
+    if (art === "floete" || art === "panfloete" || art === "okarina") freq = freq / 2;
     if (art === "floete") {
       const key = "echo|floete|" + freq.toFixed(2), buf = !rendert && klangCache.get(key);
       if (buf) { abspielen(buf, zeit, ziel, l, Math.max(.18, dauer || .25)); return; }
@@ -1368,13 +1370,13 @@
     if (art === "panfloete") { /* viel Luft, leicht von unten angeblasen */
       const o = ctx.createOscillator(); o.type = "sine"; oscs = [o];
       o.frequency.setValueAtTime(freq * .985, zeit); o.frequency.linearRampToValueAtTime(freq, zeit + .07);
-      o.connect(sum); lp.frequency.value = 3000;
-      ende = huelle(g, zeit, d, .32 * l, .05, .12);
+      o.connect(sum); lp.frequency.value = 2000;
+      ende = huelle(g, zeit, d, .28 * l, .07, .14);
       const r = ctx.createBufferSource(), b = ctx.createBiquadFilter(), rg = ctx.createGain();
       r.buffer = rauschen; r.loop = true; b.type = "bandpass"; b.frequency.value = freq; b.Q.value = 6;
-      rg.gain.setValueAtTime(0, zeit); rg.gain.linearRampToValueAtTime(.5 * l, zeit + .03); rg.gain.linearRampToValueAtTime(.18 * l, zeit + .2); rg.gain.linearRampToValueAtTime(0, ende);
+      rg.gain.setValueAtTime(0, zeit); rg.gain.linearRampToValueAtTime(.32 * l, zeit + .04); rg.gain.linearRampToValueAtTime(.1 * l, zeit + .2); rg.gain.linearRampToValueAtTime(0, ende);
       r.connect(b); b.connect(rg); rg.connect(g); r.start(zeit); r.stop(ende);
-      rauschStoss(zeit, ziel, "bandpass", freq * 2, 2, .08 * l, .08);
+      rauschStoss(zeit, ziel, "bandpass", Math.min(2400, freq * 2), 2, .04 * l, .08);
     } else if (art === "okarina") { /* rund und weich */
       const o = ctx.createOscillator(), o3 = ctx.createOscillator(), g3 = ctx.createGain(); o.type = "sine"; o3.type = "sine";
       o.frequency.value = freq; o3.frequency.value = freq * 3; g3.gain.value = .05; oscs = [o, o3];
@@ -1401,20 +1403,28 @@
     oscs.forEach(o => { o.start(zeit); o.stop(ende); });
   }
 
+  /* Holzflöte: weicher Grundton, wenig Obertöne, sanft angeblasen, Vibrato erst bei langen Tönen */
   function floete(freq, zeit, dauer, laut) {
-    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
-    const lfo = ctx.createOscillator(), lg = ctx.createGain(), l = laut || 1, ende = zeit + Math.max(.12, dauer);
-    o.type = "triangle"; o.frequency.value = freq;
-    o2.type = "sine"; o2.frequency.value = freq * 2;
-    lfo.frequency.value = 5.2; lg.gain.setValueAtTime(0, zeit); lg.gain.linearRampToValueAtTime(freq * .006, zeit + .25);
-    lfo.connect(lg); lg.connect(o.frequency); lg.connect(o2.frequency);
-    const g2 = ctx.createGain(); g2.gain.value = .18; o2.connect(g2); g2.connect(f);
-    f.type = "lowpass"; f.frequency.value = 2600;
-    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(.32 * l, zeit + .05);
-    g.gain.setValueAtTime(.28 * l, ende - .06); g.gain.linearRampToValueAtTime(0, ende + .08);
-    o.connect(f); f.connect(g); g.connect(spurGain.floete);
-    [o, o2, lfo].forEach(x => { x.start(zeit); x.stop(ende + .1); });
-    rauschStoss(zeit, spurGain.floete, "bandpass", freq * 1.5, 3, .07 * l, .09);
+    const l = laut || 1, ende = zeit + Math.max(.14, dauer);
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), o3 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = "sine"; o2.type = "sine"; o3.type = "sine";
+    o.frequency.setValueAtTime(freq * .99, zeit); o.frequency.linearRampToValueAtTime(freq, zeit + .06);
+    o2.frequency.setValueAtTime(freq * 1.98, zeit); o2.frequency.linearRampToValueAtTime(freq * 2, zeit + .06);
+    o3.frequency.value = freq * 3;
+    const g2 = ctx.createGain(), g3 = ctx.createGain(); g2.gain.value = .16; g3.gain.value = .04;
+    o.connect(f); o2.connect(g2); g2.connect(f); o3.connect(g3); g3.connect(f);
+    f.type = "lowpass"; f.frequency.value = 1900; f.Q.value = .5;
+    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(.27 * l, zeit + .07);
+    g.gain.setTargetAtTime(.22 * l, zeit + .12, .25);
+    g.gain.setValueAtTime(.22 * l, Math.max(zeit + .13, ende - .05)); g.gain.linearRampToValueAtTime(0, ende + .12);
+    f.connect(g); g.connect(spurGain.floete);
+    [o, o2, o3].forEach(x => { x.start(zeit); x.stop(ende + .15); });
+    if (dauer > .4) vibrato([o, o2, o3], zeit, ende + .15, 4.8, freq * .004, .35);
+    /* leiser, dunkler Atemhauch */
+    const r = ctx.createBufferSource(), rb = ctx.createBiquadFilter(), rg = ctx.createGain();
+    r.buffer = rauschen; r.loop = true; rb.type = "bandpass"; rb.frequency.value = Math.min(2500, freq * 2); rb.Q.value = 1.2;
+    rg.gain.setValueAtTime(0, zeit); rg.gain.linearRampToValueAtTime(.05 * l, zeit + .04); rg.gain.setTargetAtTime(.015 * l, zeit + .08, .1); rg.gain.linearRampToValueAtTime(0, ende + .1);
+    r.connect(rb); rb.connect(rg); rg.connect(spurGain.floete); r.start(zeit, Math.random() * .5); r.stop(ende + .12);
   }
   /* ---------- Barradins Melodie-Instrumente ---------- */
   function huelle(g, zeit, dauer, spitze, anstieg, abfall) {
