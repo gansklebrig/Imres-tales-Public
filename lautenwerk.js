@@ -821,8 +821,33 @@
     }
     return (hallCache[raum] = ir);
   }
+  /* Sparsamer Hall fürs Handy: vier rückgekoppelte Verzögerungen mit Dämpfung (Feedback-Delay-Netz).
+     Klingt etwas einfacher als der Faltungshall, kostet aber nur einen Bruchteil der Rechenzeit. */
+  function fdnHall(rt60, hell) {
+    const ein = ctx.createGain(), aus = ctx.createGain(), n = 4;
+    const zeiten = [.0631, .0797, .0937, .1129], linien = [];
+    for (let i = 0; i < n; i++) {
+      const d = ctx.createDelay(.5), lp = ctx.createBiquadFilter();
+      d.delayTime.value = zeiten[i]; lp.type = "lowpass"; lp.frequency.value = hell || 3500; lp.Q.value = -6; /* Q in dB: ohne Resonanzspitze, sonst schaukelt sich die Schleife auf */
+      ein.connect(d); d.connect(lp); lp.connect(aus);
+      linien.push({ d, lp, fb: .95 * Math.pow(10, -3 * zeiten[i] / Math.max(.3, rt60)) });
+    }
+    /* Householder-Mischung: jede Linie speist alle anderen – dicht, aber stabil */
+    linien.forEach((a, i) => linien.forEach((b, j) => { const g = ctx.createGain(); g.gain.value = a.fb * (i === j ? .5 : -.5); a.lp.connect(g); g.connect(b.d); }));
+    /* je länger der Nachhall, desto mehr Energie sammelt sich – das gleicht der Ausgangspegel aus */
+    aus.gain.value = .7 * (1 - Math.max(...linien.map(l => l.fb)));
+    return { ein, aus, connect: z => aus.connect(z), disconnect: () => { try { aus.disconnect(); } catch (_) {} } };
+  }
   function raumAnwenden() {
     if (!ctx || !hallEin) return;
+    if (spar) {
+      const r = RAEUME[S.raum], neu = fdnHall(r.dauer * .7, r.hell);
+      neu.aus.gain.value *= .1; /* auf den Pegel des Faltungshalls abgestimmt */
+      if (hallNode) { try { hallFilter.disconnect(hallNode.ein || hallNode); hallNode.disconnect(); } catch (_) {} }
+      hallFilter.connect(neu.ein); neu.connect(hallNass); hallNode = neu;
+      hallFilter.frequency.setTargetAtTime(r.hell, ctx.currentTime, .05);
+      return;
+    }
     const neu = ctx.createConvolver();
     neu.buffer = hallBild(S.raum);
     if (hallNode) { try { hallFilter.disconnect(hallNode); hallNode.disconnect(); } catch (_) {} }
@@ -1123,8 +1148,10 @@
       raumAnwenden();
       IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : 1; spurGain[k].connect(g); g.connect(hallEin); hallSend[k] = g; });
       /* Echos eigener Hall: weiter, schwebender Raum nur für ihre Instrumente, unabhängig vom Raumhall */
-      echoSend = ctx.createGain(); echoSend.gain.value = 1; echoKonv = ctx.createConvolver(); echoNass = ctx.createGain(); echoNass.gain.value = echoPegel();
-      echoKonv.buffer = echoBild(); echoSend.connect(echoKonv); echoKonv.connect(echoNass); echoNass.connect(komp);
+      echoSend = ctx.createGain(); echoSend.gain.value = 1; echoNass = ctx.createGain(); echoNass.gain.value = echoPegel();
+      if (spar) { echoKonv = fdnHall(2.2, 4500); echoSend.connect(echoKonv.ein); }
+      else { echoKonv = ctx.createConvolver(); echoKonv.buffer = echoBild(); echoSend.connect(echoKonv); }
+      echoKonv.connect(echoNass); echoNass.connect(komp);
       echoHallSchalten();
       /* Echo für die Flöte der Illusionen */
       illusionEcho = ctx.createDelay(1); illusionEcho.delayTime.value = .23;
