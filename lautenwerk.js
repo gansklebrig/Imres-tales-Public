@@ -838,13 +838,24 @@
     aus.gain.value = .7 * (1 - Math.max(...linien.map(l => l.fb)));
     return { ein, aus, connect: z => aus.connect(z), disconnect: () => { try { aus.disconnect(); } catch (_) {} } };
   }
+  let sparHallIn = null, sparAktiv = false, kompRef = null;
+  /* Hall-Netz nur dann am Ausgang, wenn überhaupt ein Hall läuft – sonst spart es die Rechenzeit ganz */
+  function sparAusgang() {
+    if (!spar || !hallNode || !kompRef) return;
+    const soll = S.hall > 0 || S.echoHall > 0;
+    if (soll === sparAktiv) return;
+    try { if (soll) hallNode.connect(kompRef); else hallNode.disconnect(); sparAktiv = soll; } catch (_) {}
+  }
   function raumAnwenden() {
     if (!ctx || !hallEin) return;
     if (spar) {
-      const r = RAEUME[S.raum], neu = fdnHall(r.dauer * .7, r.hell);
+      /* Sparmodus: EIN gemeinsames Hall-Netz für Raumhall und Echo-Hall, jeweils mit eigenem Sendepegel davor */
+      const r = RAEUME[S.raum], neu = fdnHall(Math.max(2, r.dauer * .7), r.hell);
       neu.aus.gain.value *= .1; /* auf den Pegel des Faltungshalls abgestimmt */
-      if (hallNode) { try { hallFilter.disconnect(hallNode.ein || hallNode); hallNode.disconnect(); } catch (_) {} }
-      hallFilter.connect(neu.ein); neu.connect(hallNass); hallNode = neu;
+      if (!sparHallIn) { sparHallIn = ctx.createGain(); sparHallIn.gain.value = hallPegel(); hallFilter.connect(sparHallIn); }
+      if (hallNode) { try { sparHallIn.disconnect(); if (echoNass) echoNass.disconnect(); hallNode.disconnect(); } catch (_) {} }
+      sparHallIn.connect(neu.ein); if (echoNass) echoNass.connect(neu.ein);
+      hallNode = neu; sparAktiv = false; sparAusgang();
       hallFilter.frequency.setTargetAtTime(r.hell, ctx.currentTime, .05);
       return;
     }
@@ -1094,7 +1105,9 @@
     if (fxAusgang) fxAusgang.gain.setTargetAtTime(fxPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
     hallSchalten();
-    if (echoNass) echoNass.gain.setTargetAtTime(echoPegel(), j, .08);
+    if (echoNass) echoNass.gain.setTargetAtTime(echoPegel() * (spar ? 10 : 1), j, .08);
+    if (sparHallIn) sparHallIn.gain.setTargetAtTime(hallPegel(), j, .08);
+    sparAusgang();
     echoHallSchalten();
     if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
     IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : 1, j, .05));
@@ -1127,7 +1140,7 @@
       try { ctx = new AC({ latencyHint: spar ? .25 : "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
-      const komp = ctx.createDynamicsCompressor();
+      const komp = ctx.createDynamicsCompressor(); kompRef = komp;
       komp.threshold.value = -20; komp.knee.value = 10; komp.ratio.value = 2; komp.attack.value = .006; komp.release.value = .25;
       ausgang = ctx.createGain(); ausgang.gain.value = .6 * masterPegel();
       const limiter = ctx.createDynamicsCompressor();
@@ -1149,9 +1162,8 @@
       IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : 1; spurGain[k].connect(g); g.connect(hallEin); hallSend[k] = g; });
       /* Echos eigener Hall: weiter, schwebender Raum nur für ihre Instrumente, unabhängig vom Raumhall */
       echoSend = ctx.createGain(); echoSend.gain.value = 1; echoNass = ctx.createGain(); echoNass.gain.value = echoPegel();
-      if (spar) { echoKonv = fdnHall(2.2, 4500); echoSend.connect(echoKonv.ein); }
-      else { echoKonv = ctx.createConvolver(); echoKonv.buffer = echoBild(); echoSend.connect(echoKonv); }
-      echoKonv.connect(echoNass); echoNass.connect(komp);
+      if (spar) { echoNass.gain.value = echoPegel() * 10; echoSend.connect(echoNass); if (hallNode && hallNode.ein) echoNass.connect(hallNode.ein); sparAusgang(); }
+      else { echoKonv = ctx.createConvolver(); echoKonv.buffer = echoBild(); echoSend.connect(echoKonv); echoKonv.connect(echoNass); echoNass.connect(komp); }
       echoHallSchalten();
       /* Echo für die Flöte der Illusionen */
       illusionEcho = ctx.createDelay(1); illusionEcho.delayTime.value = .23;
