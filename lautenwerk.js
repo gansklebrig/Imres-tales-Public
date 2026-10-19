@@ -92,7 +92,7 @@
     de: {
       label: "Spielmannskunst", titel: "Barradins Lautenwerk",
       text: "Die Gefährten spielen auf, du bestimmst wie. Tippe in die Raster: Barradin klopft, klingelt, zupft den Bass und spielt die Melodie, Friedrich schlägt den Takt, Echo spielt die zweite Stimme, Ezekiel sorgt für den Rhythmus – und Rex gibt seinen Senf dazu. Bei jedem Gefährten kannst du das Instrument wählen.",
-      spielen: "▶ Spielen", stopp: "■ Anhalten", tempo: "Tempo", tonart: "Tonart", modus: "Tonleiter",
+      spielen: "▶ Spielen", stopp: "■ Anhalten", ausklang: "🎼 Ausklang", ausklangTipp: "Spielt den Takt zu Ende und schließt mit einem Schlussakkord", ausklingt: "🎼 Die Band spielt den Schlussakkord …", tempo: "Tempo", tonart: "Tonart", modus: "Tonleiter",
       swing: "Tanzschritt", bordun: "Bordun", variation: "Variation",
       wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
       spuren: { klopf: "Klopfen", schelle: "Schellen", bass: "Bass", melodie: "Laute", trommel: "Trommel", floete: "Flöte", ketten: "Ketten", rex: "Rex" },
@@ -151,7 +151,7 @@
     en: {
       label: "Minstrelsy", titel: "Barradin's Lute Machine",
       text: "The companions strike up, you decide how. Tap the grids: Barradin knocks, jingles, plucks the bass and plays the melody, Friedrich keeps the beat, Echo plays the second voice, Ezekiel adds the rhythm – and Rex adds his two cents. You can pick the instrument for every companion.",
-      spielen: "▶ Play", stopp: "■ Stop", tempo: "Tempo", tonart: "Key", modus: "Mode",
+      spielen: "▶ Play", stopp: "■ Stop", ausklang: "🎼 Finish", ausklangTipp: "Plays to the end of the bar and closes with a final chord", ausklingt: "🎼 The band plays the final chord …", tempo: "Tempo", tonart: "Key", modus: "Mode",
       swing: "Dance step", bordun: "Drone", variation: "Variation",
       wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
       spuren: { klopf: "Knock", schelle: "Bells", bass: "Bass", melodie: "Lute", trommel: "Drum", floete: "Flute", ketten: "Chains", rex: "Rex" },
@@ -1791,17 +1791,47 @@
   let pausiert = false;
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
-  let wechsel = null, tempoJetzt = 0, intensitaetNeu = false;
+  let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
+  /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
+  const DRAMA = { kampf: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1 };
+  /* Ende des laufenden Takts – liegt er weniger als einen Schlag entfernt, das Ende des nächsten */
+  function taktEnde() {
+    const sd = schrittDauer(); let T = naechste + ((SCHRITTE - schritt) % SCHRITTE) * sd;
+    if (T - ctx.currentTime < 4 * sd) T += SCHRITTE * sd;
+    return T;
+  }
+  function brueckeZiel() {
+    if (!brueckeBus) { brueckeBus = ctx.createGain(); brueckeBus.connect(ducken); }
+    return brueckeBus;
+  }
+  /* Weicher Übergang: die alte Musik tritt bis zum Taktende zurück, bei dramatischen Zielen kündigt ein
+     Paukenwirbel (mit anschwellendem Becken) den Wechsel an; das neue Stück blendet sich auf der Eins ein. */
+  function brueckeStarten() {
+    const jetzt = ctx.currentTime, T = taktEnde(), neu = wechsel, dr = neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
+    wechselAb = T;
+    master.gain.cancelScheduledValues(jetzt); master.gain.setValueAtTime(master.gain.value, jetzt);
+    master.gain.linearRampToValueAtTime(.38 * (dr ? .3 : .45), T);
+    if (dr && !rendert) {
+      ["timproll", "swell", "crash", "timp1"].forEach(sampleLaden);
+      const z = brueckeZiel(), lang = Math.min(T - jetzt - .05, 3);
+      probe("timproll", 0, T - lang, z, dr > 1 ? .55 : .4, { ein: Math.min(.8, lang * .6), dauer: lang + .08, aus: .08 });
+      const sw = sampleBuf.get("swell");
+      if (sw && dr > 1) probe("swell", 0, T - lang, z, .3, { ein: .05, dauer: lang + .05, aus: .05, versatz: Math.max(0, sw._spitze - sw._start - lang) });
+    }
+  }
   const schrittDauer = () => 60 / (tempoJetzt || S.tempo) / 4;
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
   function wechselAnwenden(zeit) {
-    const neu = wechsel; wechsel = null;
+    const neu = wechsel; wechsel = null; wechselAb = 0;
     S = neu; abschnitt = 0; padAkkord = -1; orchVorladen();
-    if (ausgang) {
-      const ziel = .6 * masterPegel();
-      ausgang.gain.cancelScheduledValues(zeit - .3);
-      ausgang.gain.setTargetAtTime(ziel * .72, Math.max(ctx.currentTime, zeit - .25), .08);
-      ausgang.gain.setTargetAtTime(ziel, zeit + .05, .6);
+    const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
+    if (master) {
+      /* das neue Stück blendet sich ein – bei dramatischen Zielen schnell und mit Schlag auf der Eins, sonst sanft */
+      const mg = master.gain;
+      if (mg.cancelAndHoldAtTime) mg.cancelAndHoldAtTime(zeit); else { mg.cancelScheduledValues(zeit); mg.setValueAtTime(.38 * (dr ? .3 : .45), zeit); }
+      mg.setTargetAtTime(.38, zeit, dr ? .12 : .7);
+      if (dr > 1) { probe("crash", 0, zeit, brueckeZiel(), .3); probe("timp1", 0, zeit, brueckeZiel(), .5); }
+      else if (dr) probe("timp1", 0, zeit, brueckeZiel(), .4);
     }
     setTimeout(() => {
       merken(); zeichnen(); knoepfe();
@@ -1811,9 +1841,13 @@
   }
   function planen() {
     const vorlauf = document.hidden ? 1 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
+    if (ausklingt) return;
+    if (wechsel && !wechselAb) brueckeStarten();
+    if (ausklangAb === -1) ausklangAb = taktEnde();
     while (naechste < ctx.currentTime + vorlauf) {
+      if (schritt === 0 && ausklangAb && naechste >= ausklangAb - 2 * schrittDauer()) { schlussAkkord(naechste); return; }
       if (schritt === 0 && hoerer) funkAusrichten(false);
-      if (schritt === 0 && wechsel) wechselAnwenden(naechste);
+      if (schritt === 0 && wechsel && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
       else if (schritt === 0 && intensitaetNeu) { intensitaetNeu = false; stimmungWeiter(); }
       tempoJetzt = tempoJetzt ? tempoJetzt + (S.tempo - tempoJetzt) * .1 : S.tempo;
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
@@ -1862,11 +1896,38 @@
     S.teile = neu.teile; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
     merken(); if (!S.pult) { zeichnen(); knoepfe(); }
   }
+  /* Ausklang: am Taktende ein gemeinsamer Schlussakkord, dann verklingt alles und die Band hört auf */
+  function schlussAkkord(z) {
+    ausklingt = true; ausklangAb = 0;
+    const m = k => !S.mute[k], pr = orchProfil(), mid = (sp, r) => midiHz(tonMidi(sp, r, S));
+    try {
+      if (m("bass")) spielen("bass", 0, z, 0, 1);
+      if (m("melodie")) [0, 4, 7].forEach((r, i) => melodieSpielen(mid("melodie", r), z + i * .035, 2.6, .85));
+      if (m("floete")) echoSpielen(mid("floete", 0), z + .02, 2.4, .7);
+      if (m("trommel")) spielen("trommel", 0, z, 0, 1);
+      if (m("klopf")) spielen("klopf", 0, z, 0, .9);
+      if (pr && pr.pad && !S.mute.bass) {
+        orchAufbauen(); const ak = akkordMidi(0);
+        probe("vc", ak.grund, z, orchPan.vc, .3, { ein: .08, aus: 1.2, dauer: 3.6 });
+        probe("vln", ak.terz, z, orchPan.vln, .2, { ein: .1, aus: 1.2, dauer: 3.6 });
+        probe("vln", ak.quinte, z, orchPan.vln, .18, { ein: .12, aus: 1.2, dauer: 3.6 });
+        if (pr.gross > 1) probe("crash", 0, z, orchPan.gross, .25);
+        if (pr.gross) probe("timp1", 0, z, orchPan.gross, .45);
+      }
+    } catch (_) {}
+    const ende = z + 2.2;
+    if (master.gain.cancelAndHoldAtTime) master.gain.cancelAndHoldAtTime(z); else master.gain.cancelScheduledValues(z);
+    master.gain.setTargetAtTime(0, ende, .5);
+    bordunAus();
+    status(t().ausklingt);
+    setTimeout(() => { if (ausklingt) { stopp(); if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.value = .38; } } }, Math.max(0, (ende - ctx.currentTime) * 1000) + 2200);
+  }
   function start(weiter) {
     audioStart();
     saitenVorbereiten();
     if (!weiter) { schritt = 0; abschnitt = 0; }
-    tempoJetzt = S.tempo; wechsel = null; padAkkord = -1;
+    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1;
+    if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.value = .38; }
     musikWieder(); orchVorladen();
     kulisseStart();
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
@@ -1876,7 +1937,7 @@
     knoepfe(); funkAenderung();
   }
   function stopp(pause) {
-    laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false);
+    laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false;
     /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
     if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop(); wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
@@ -2515,6 +2576,7 @@
       '<div class="lw-buehne lw-buehne-klein" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
       '<div class="lw-pult">' +
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
+          '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<span class="lw-pult-titel">' + esc(S.titel || T.eigenesLied) + "</span>" +
           '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></div>" +
         konsole(T, false) +
@@ -2713,6 +2775,7 @@
       '<div class="lw-buehne" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
       '<div class="lw-steuer">' +
         '<button type="button" class="lw-play">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
+        '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
         '<label class="lw-feld lw-regler"><span>' + T.tempo + ' <b class="lw-bpm">' + S.tempo + '</b></span><input type="range" min="50" max="180" step="2" value="' + S.tempo + '" data-feld="tempo"></label>' +
         '<label class="lw-feld lw-regler"><span>' + T.variation + ' <b class="lw-var">' + S.variation * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.variation + '" data-feld="variation"></label>' +
         '<label class="lw-feld"><span>' + T.tonart + '</span><select data-feld="transpose">' + tonarten + "</select></label>" +
@@ -2767,6 +2830,7 @@
     miniAnzeigen();
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
+    root.querySelectorAll(".lw-ausklang").forEach(a => { a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; });
   }
   function status(text) {
     const s = root.querySelector(".lw-status");
@@ -2873,6 +2937,7 @@
       return;
     }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
+    if (e.target.closest('[data-aktion="ausklang"]')) { if (laeuft && !ausklingt && !ausklangAb) { ausklangAb = -1; wechsel = null; wechselAb = 0; knoepfe(); status(t().ausklingt); } return; }
     if (e.target.closest('[data-aktion="orchester"]')) {
       S.orchester = S.orchester === 0 ? 1 : 0; merken(); root.querySelectorAll(".lw-orch").forEach(b => b.setAttribute("aria-pressed", S.orchester !== 0));
       if (ctx) orchVorladen(); return;
@@ -3097,6 +3162,9 @@
 .lw-steuer { display: flex; flex-wrap: wrap; align-items: end; gap: .7rem 1rem; }
 .lw-play { border: 1px solid var(--ember); background: var(--ember); color: var(--night); font: inherit; font-weight: 600; padding: .55rem 1.2rem; cursor: pointer; min-width: 8.5rem; }
 .lw-play.laeuft { background: none; color: var(--ember); }
+.lw-ausklang { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; padding: .55rem 1rem; cursor: pointer; }
+.lw-ausklang:hover:not(:disabled) { border-color: var(--ember); color: var(--ember); }
+.lw-ausklang:disabled { opacity: .5; cursor: default; }
 .lw-feld { display: grid; gap: .2rem; font-size: .78rem; letter-spacing: .06em; color: var(--ash); }
 .lw-feld b { color: var(--vellum); font-weight: 600; }
 .lw-feld select { font: inherit; font-size: .9rem; letter-spacing: 0; background: var(--night); color: var(--vellum); border: 1px solid var(--line); padding: .35rem .5rem; }
