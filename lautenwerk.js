@@ -826,18 +826,31 @@
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
   /* Effekte und Spieltisch-Momente haben ihren eigenen Pegel – unabhängig von der Musik */
   const fxPegel = () => .34 * Math.pow((typeof S.fxVol === "number" ? S.fxVol : 8) / 10, 1.5);
-  let fxAusgang = null, ducken = null, duckEnde = 0;
+  let fxAusgang = null, ducken = null, duckEnde = 0, musikStumm = false;
+  function musikWieder() {
+    if (!ducken || !musikStumm) return;
+    const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(1, j, .05); musikStumm = false;
+  }
   /* Während ein Effekt läuft, tritt die Musik sanft etwas zurück (gut 3 dB) und kommt danach weich wieder */
   function musikDucken(start, dauer) {
     if (!ducken) return;
     const jetzt = ctx.currentTime, ende = Math.max(duckEnde, start + Math.max(.4, dauer * .85));
     const p = ducken.gain;
+    if (musikStumm) return;
     p.cancelScheduledValues(jetzt); p.setValueAtTime(p.value, jetzt);
     p.setTargetAtTime(.68, Math.max(jetzt, start - .08), .12);
     p.setTargetAtTime(1, ende, .45);
     duckEnde = ende;
   }
-  const hallPegel = () => Math.pow(S.hall / 10, 1.3) * 1.6;
+  /* Hall aus = Faltungshall ganz abgeklemmt: spart auf dem Handy viel Rechenzeit */
+  let hallVerbunden = false;
+  function hallSchalten() {
+    if (!hallEin || !hallFilter) return;
+    const soll = S.hall > 0;
+    if (soll === hallVerbunden) return;
+    try { if (soll) hallEin.connect(hallFilter); else hallEin.disconnect(hallFilter); hallVerbunden = soll; } catch (_) {}
+  }
+  const hallPegel = () => Math.pow(S.hall / 10, 1.3) * 1.05;
   /* ---------- Geräuschkulisse ---------- */
   let kul = null, kulRauschen = null, sfxBus = null;
   const kulPegel = () => Math.pow(S.kulisseVol / 10, 1.5) * .9;
@@ -911,6 +924,7 @@
     kulisseStop();
     const art = S.kulisse;
     if (art === "keine" || (!laeuft && !sofort)) return;
+    musikWieder();
     const g = ctx.createGain(), j = ctx.currentTime;
     g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(kulPegel(), j + 2.5);
     g.connect(master);
@@ -1029,6 +1043,7 @@
     if (ausgang) ausgang.gain.setTargetAtTime(.6 * masterPegel(), j, .05);
     if (fxAusgang) fxAusgang.gain.setTargetAtTime(fxPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
+    hallSchalten();
     if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
     IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : 1, j, .05));
   }
@@ -1077,7 +1092,7 @@
       fxAusgang = ctx.createGain(); fxAusgang.gain.value = fxPegel(); sfxBus.connect(fxAusgang); fxAusgang.connect(limiter); setTimeout(fxVorwaermen, 1500);
       { const s2 = ctx.createGain(); s2.gain.value = .5; sfxBus.connect(s2); s2.connect(hallEin); }
       hallFilter = ctx.createBiquadFilter(); hallFilter.type = "lowpass"; hallFilter.frequency.value = RAEUME[S.raum].hell;
-      hallEin.connect(hallFilter); hallNass.connect(komp);
+      hallNass.connect(komp); hallSchalten();
       raumAnwenden();
       IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : 1; spurGain[k].connect(g); g.connect(hallEin); hallSend[k] = g; });
       /* Echo für die Flöte der Illusionen */
@@ -1650,7 +1665,7 @@
     }, 0);
   }
   function planen() {
-    const vorlauf = document.hidden ? 1.6 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
+    const vorlauf = document.hidden ? 1 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     while (naechste < ctx.currentTime + vorlauf) {
       if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && wechsel) wechselAnwenden(naechste);
@@ -1681,6 +1696,20 @@
       }
     }
   }
+  /* Taktgeber im Hintergrund-Worker: Browser bremsen Zeitgeber in versteckten Tabs und auf dem Handy stark aus –
+     Nachrichten aus einem Worker kommen trotzdem regelmäßig an, so stockt die Musik nicht. */
+  let taktWorker = null;
+  function taktgeber(an) {
+    try {
+      if (!taktWorker) {
+        if (!an) return;
+        const url = URL.createObjectURL(new Blob(["let t=null;onmessage=e=>{clearInterval(t);if(e.data>0)t=setInterval(()=>postMessage(1),e.data);};"], { type: "text/javascript" }));
+        taktWorker = new Worker(url);
+        taktWorker.onmessage = () => { if (laeuft) planen(); };
+      }
+      taktWorker.postMessage(an ? 25 : 0);
+    } catch (_) { taktWorker = null; }
+  }
   function stimmungWeiter() {
     if (!S.stimmung || !STIL[S.stimmung]) return;
     const neu = stimmungLied(S.stimmung, true);
@@ -1692,15 +1721,18 @@
     saitenVorbereiten();
     if (!weiter) { schritt = 0; abschnitt = 0; }
     tempoJetzt = S.tempo; wechsel = null;
+    musikWieder();
     kulisseStart();
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
-    planen(); timer = setInterval(planen, 30);
+    planen(); timer = setInterval(planen, 30); taktgeber(true);
     bordunAn();
     requestAnimationFrame(malen);
     knoepfe(); funkAenderung();
   }
   function stopp(pause) {
-    laeuft = false; pausiert = !!pause; clearInterval(timer); bordunAus(); kulisseStop(); wechsel = null;
+    laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false);
+    /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
+    if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop(); wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
   }
 
