@@ -433,13 +433,13 @@
      B variiert es über andere Akkorde, C gehört Echo, D bringt das Motiv mit voller Besetzung zurück.
      Auf den Zählzeiten liegen immer Akkordtöne – so klingt es auch zufällig noch nach Musik. */
   const STIL = {
-    kampf: { modus: ["phrygisch", "aeolisch"], tempo: [132, 146], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 3,
+    kampf: { chaos: 1, modus: ["phrygisch", "aeolisch"], tempo: [132, 146], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 3,
       instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn"], ketten: ["ketten", "stampfen"] },
       ablauf: ["AABACA", "AABCDD", "ABACABAD"], akkorde: [[0, 0, 4, 0], [0, 2, 3, 4], [0, 4, 2, 3], [0, 0, 2, 3], [2, 2, 3, 4]],
       bass: ["puls", "galopp"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6]], lage: 3, dichte: 1, echo: "lang",
       klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], []], trommel: [[0, 3, 6, 8, 11, 14], [0, 2, 4, 6, 8, 10, 12, 13, 14, 15]],
       ketten: [[4, 12], [0, 6, 8, 14]], rex: [0, 2] },
-    unterreich: { modus: ["phrygisch"], tempo: [58, 70], transpose: [-3, -5], swing: 0, bordun: 1, variation: 4,
+    unterreich: { chaos: 1, modus: ["phrygisch"], tempo: [58, 70], transpose: [-3, -5], swing: 0, bordun: 1, variation: 4,
       instrument: ["drehleier", "glocken", "illusion"], band: { trommel: ["pauke"], floete: ["okarina", "gesang"], ketten: ["ketten"] },
       ablauf: ["AB", "ABAC", "AABC"], akkorde: [[0, 0, 0, 1], [0, 0, 4, 0], [0, 0, 2, 0]],
       bass: ["orgel", "halbe"], rhythmus: [[0, 6], [2, 8], [0, 4]], lage: 2, dichte: .5, echo: "fern", schraeg: .35,
@@ -449,7 +449,7 @@
       ablauf: ["AABA", "AABACA", "ABABCD"], akkorde: [[0, 4, 2, 0], [2, 0, 4, 0], [0, 0, 4, 2], [0, 2, 4, 0]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6, 7]], lage: 3, dichte: .9, echo: "antwort",
       klopf: [[0, 8]], schelle: [[4, 12], [2, 6, 10, 14]], trommel: [[0, 6, 8, 14], [0, 8]], ketten: [[2, 6, 10, 14]], rex: [0] },
-    spannung: { modus: ["aeolisch", "phrygisch"], tempo: [84, 96], transpose: [0, -2], swing: 0, bordun: 0, variation: 4,
+    spannung: { chaos: 1, modus: ["aeolisch", "phrygisch"], tempo: [84, 96], transpose: [0, -2], swing: 0, bordun: 0, variation: 4,
       instrument: ["glocken", "harfe", "illusion"], band: { trommel: ["pauke"], floete: ["okarina"], ketten: ["schnipsen", "rassel"] },
       ablauf: ["AAAB", "AABA", "AABC"], akkorde: [[0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 2, 2], [0, 1, 0, 4]],
       bass: ["puls"], rhythmus: [[0, 4], [0, 6], [4]], lage: 5, dichte: .45, echo: "fern", schraeg: .25,
@@ -534,7 +534,7 @@
       bass: ["viertel", "halbe"], rhythmus: [[0, 4, 6], [0, 2, 4, 6], [0, 3, 4]], lage: 4, dichte: .75, echo: "lang",
       klopf: [[]], schelle: [[]], trommel: [[0, 8], [0, 6, 8]], ketten: [[]], rex: [2] },
     /* Spukhaus: Grusel, Untote, knarrende Dielen */
-    grusel: { modus: ["phrygisch"], tempo: [50, 62], transpose: [-2, -4, 0], swing: 0, bordun: 1, variation: 4,
+    grusel: { chaos: 1, modus: ["phrygisch"], tempo: [50, 62], transpose: [-2, -4, 0], swing: 0, bordun: 1, variation: 4,
       instrument: ["glocken", "illusion", "drehleier"], band: { trommel: ["pauke"], floete: ["okarina", "gesang"], ketten: ["ketten", "rassel"] },
       ablauf: ["AB", "AAAB", "ABAC"], akkorde: [[0, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 4]],
       bass: ["orgel", "puls"], rhythmus: [[0, 6], [3, 8], [0]], lage: 2, dichte: .4, echo: "fern", schraeg: .45,
@@ -546,7 +546,7 @@
       bass: ["viertel", "halbe"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 3, 4, 6]], lage: 5, dichte: .9, echo: "antwort",
       klopf: [[]], schelle: [[2, 6, 10, 14], [0, 4, 8, 12]], trommel: [[0, 8], [0, 6, 8, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
     /* Endgegner: noch schneller und wuchtiger als der Kampf */
-    boss: { modus: ["phrygisch", "aeolisch"], tempo: [148, 160], transpose: [-2, 0, -4], swing: 0, bordun: 1, variation: 3,
+    boss: { chaos: 1, modus: ["phrygisch", "aeolisch"], tempo: [148, 160], transpose: [-2, 0, -4], swing: 0, bordun: 1, variation: 3,
       instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn"], ketten: ["ketten", "stampfen"] },
       ablauf: ["AABCDD", "ABACABAD", "AABBCD"], akkorde: [[0, 0, 1, 0], [0, 1, 4, 0], [0, 4, 1, 3], [0, 0, 4, 1]],
       bass: ["galopp", "puls"], rhythmus: [[0, 1, 2, 3, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 2, 4, 5, 6]], lage: 3, dichte: 1, echo: "lang",
@@ -566,33 +566,66 @@
     if (art === "halbe" || art === "orgel") [4, 12].forEach(i => { if (akk[i / 4] !== akk[i / 4 - 1]) a[i] = akk[i / 4]; });
     return a;
   }
-  /* Motiv: Rhythmus für eine halbe Taktlänge + Kontur; die zweite Hälfte wiederholt die Kontur über den neuen Akkorden */
-  function motivBauen(st) {
-    return { rhythmus: zufall(st.rhythmus), kontur: Array.from({ length: 6 }, () => zufall([-2, -1, -1, 1, 1, 2, 0])), start: st.lage + zufall([-1, 0, 1]) };
-  }
   /* der Akkord, der an Schritt i wirklich klingt (letzter Basston davor) */
   const klingt = (bass, i) => { for (let k = 0; k < SCHRITTE; k++) { const v = bass[(i - k + SCHRITTE) % SCHRITTE]; if (v >= 0) return v; } return 0; };
-  function melodieBauen(bass, motiv, st, versatz) {
-    const a = leer();
-    let ton = Math.max(0, Math.min(7, motiv.start + (versatz || 0)));
-    [0, 8].forEach((halb, h) => {
-      motiv.rhythmus.forEach((r, k) => {
-        const i = halb + r; if (i >= SCHRITTE) return;
-        if (h === 1 && k === motiv.rhythmus.length - 1 && Math.random() < .3) return; /* kleine Atempause am Ende */
-        if (st.dichte < 1 && k > 0 && Math.random() > st.dichte) return;
-        if (st.fuell && i % 2 === 0 && k < motiv.rhythmus.length - 1 && motiv.rhythmus[k + 1] - r > 1 && Math.random() < st.fuell) a[i + 1] = -2; /* Platzhalter für Durchgangston */
-        const wunsch = ton + motiv.kontur[k % motiv.kontur.length];
-        if (i % 2 === 0) ton = naechsterTon(wunsch, akkordToene(klingt(bass, i)));
-        else ton = Math.max(0, Math.min(7, wunsch));
-        if (st.schraeg && i % 2 === 1 && Math.random() < st.schraeg) ton = 1; /* die kleine Sekunde: unheimlich */
-        a[i] = ton;
-      });
+  /* ---------- Melodien mit Ohrwurm-Bauplan ----------
+     Ein kurzes Motiv (Rhythmus + Form) wird wiederholt, als Sequenz versetzt und beantwortet:
+     A = Motiv + Sequenz (endet offen), B = Motiv + Antwort (endet auf dem Grundton), D = Motiv + Schluss.
+     Starke Zählzeiten landen auf Akkordtönen, dazwischen geht die Melodie meist schrittweise. */
+  const FORMEN = {
+    bogen: [0, 1, 2, 1, 0, -1], steigend: [0, 1, 2, 3, 4, 5], fallend: [0, -1, -2, -3, -4, -5], wechsel: [0, 1, 0, -1, 0, 1],
+    sprung: [0, 2, 1, 0, -1, 0], terzen: [0, 2, 1, 3, 2, 4], ruf: [0, 0, 1, 0, -1, -2], welle: [0, -1, 0, 2, 1, 0]
+  };
+  const STIL_FORMEN = { ruhig: ["bogen", "wechsel", "fallend", "welle", "ruf"], lebhaft: ["bogen", "terzen", "sprung", "steigend", "welle", "ruf"], wild: ["steigend", "sprung", "terzen", "wechsel", "ruf"] };
+  const umkehren = f => f.map(x => -x);
+  /* naheliegender Akkordton – nur wenn er die Form höchstens um einen Schritt verbiegt */
+  const zumAkkord = (ton, bass, i) => { const z = naechsterTon(ton, akkordToene(klingt(bass, i))); return Math.abs(z - ton) <= 1 ? z : ton; };
+  const grenze = x => Math.max(0, Math.min(7, x));
+  function motivBauen(st) {
+    const sortiert = st.rhythmus.slice().sort((a, b) => a.length - b.length);
+    /* geringe Dichte (leise Stufen) = die sparsamsten Rhythmen, sonst einer der volleren */
+    const rhythmus = st.dichte < .6 ? sortiert[0] : st.dichte < .85 ? zufall(sortiert.slice(0, Math.max(1, sortiert.length - 1))) : zufall(sortiert.slice(Math.floor(sortiert.length / 2)));
+    const art = st.chaos ? "wild" : st.dichte < .7 ? "ruhig" : "lebhaft";
+    return { rhythmus, form: FORMEN[zufall(STIL_FORMEN[art])], start: st.lage + zufall([-1, 0, 0, 1]) };
+  }
+  /* eine halbe Taktlänge: Rhythmus ab Schritt „halb“, Form ab Startton; ziel = Schlusston (Zahl) oder null */
+  function halbeSetzen(a, bass, motiv, halb, start, form, ziel) {
+    const r = motiv.rhythmus, n = r.length;
+    const rel = r.map((_, k) => form[k % form.length] - form[0]), lo = Math.min(...rel), hi = Math.max(...rel);
+    /* Startton so legen, dass die ganze Form in den Tonraum passt – sonst „klebt“ sie oben oder unten fest */
+    let ton = Math.max(-lo, Math.min(7 - hi, start));
+    ton = zumAkkord(ton, bass, halb);
+    if (ton + hi > 7) ton -= ton + hi - 7; if (ton + lo < 0) ton -= ton + lo;
+    r.forEach((s, k) => {
+      const i = halb + s; if (i >= SCHRITTE) return;
+      let t = grenze(ton + rel[k]);
+      if (k === n - 1 && ziel != null) t = ziel;
+      a[i] = t;
     });
-    /* Durchgangstöne bei hoher Intensität: zwischen zwei Tönen auf den Achteln */
-    for (let i = 0; i < SCHRITTE; i++) if (a[i] === -2) {
-      const vor = a[i - 1] >= 0 ? a[i - 1] : a[i - 2], nach = a.slice(i + 1).find(x => x >= 0);
-      a[i] = vor >= 0 && nach >= 0 && nach !== vor ? Math.max(0, Math.min(7, vor + Math.sign(nach - vor))) : (vor >= 0 ? Math.min(7, vor + 1) : -1);
+    return a[halb + r[n - 1]];
+  }
+  const schlussTon = (bass, i, wunsch, offen) => {
+    const toene = akkordToene(klingt(bass, i));
+    const kand = [0, 1, 2, 3, 4, 5, 6, 7].filter(t => toene.includes(t % 7) && (offen ? t % 7 !== 0 : true));
+    const tonika = kand.filter(t => t % 7 === 0);
+    const pool = !offen && tonika.length ? tonika : (kand.length ? kand : [wunsch]);
+    return pool.reduce((b, t) => Math.abs(t - wunsch) < Math.abs(b - wunsch) ? t : b, pool[0]);
+  };
+  function phraseBauen(bass, motiv, st, art) {
+    const a = leer(), r = motiv.rhythmus, letzter = 8 + r[r.length - 1];
+    const s = motiv.start, f = motiv.form;
+    const erstes = halbeSetzen(a, bass, motiv, 0, s, f, null);
+    if (art === "frage") { /* Sequenz: dieselbe Form eine Stufe versetzt, offenes Ende */
+      const ende = a[r[r.length - 1]];
+      halbeSetzen(a, bass, motiv, 8, erstes + (ende > erstes ? -1 : 1), f, schlussTon(bass, letzter, ende + 1, true));
+    } else { /* Antwort: umgekehrte Form, landet auf dem Grundton */
+      halbeSetzen(a, bass, motiv, 8, s + 1, umkehren(f), schlussTon(bass, letzter, s - 1, false));
     }
+    /* Durchgangstöne bei hoher Intensität: nur in Lücken von genau zwei Schritten, immer gleich */
+    if (st.fuell > .2) for (let i = 1; i < SCHRITTE - 1; i++) {
+      if (a[i] < 0 && a[i - 1] >= 0 && a[i + 1] >= 0 && Math.abs(a[i + 1] - a[i - 1]) === 2 && (i % 4 === 1 || st.fuell > .45)) a[i] = (a[i - 1] + a[i + 1]) / 2;
+    }
+    if (st.schraeg) for (let i = 1; i < SCHRITTE; i += 4) if (a[i] >= 0 && a[i] % 7 === 0) a[i] = 1; /* die kleine Sekunde: unheimlich */
     return a;
   }
   /* Echos Stimme: lange Töne, Antworten in den Pausen oder ferne Einzeltöne – meist eine Terz neben der Melodie */
@@ -650,13 +683,13 @@
       return t;
     };
     const b1 = bassBauen(p1, bArt), b2 = bassBauen(p2, bArt), b3 = bassBauen(p3, bArt);
-    const melA = melodieBauen(b1, motiv, st), melB = melodieBauen(b2, motiv, st, 1);
+    const melA = phraseBauen(b1, motiv, st, "frage"), melB = phraseBauen(b2, motiv, st, "antwort");
     const A = teilVon(p1, melA, st.echo === "antwort" ? echoBauen(b1, melA, "antwort") : leer(), 0);
     const B = teilVon(p2, melB, echoBauen(b2, melB, st.echo), 0);
-    const flC = melodieBauen(b3, motiv2, st, 1);
+    const flC = phraseBauen(b3, motiv2, st, "antwort");
     const C = teilVon(p3, leer(), flC, 0); C.melodie = b3.map((v, i) => i % 8 === 0 ? BASS_STUFEN[klingt(b3, i)] % 7 : -1);
     C.klopf = leer(); C.schelle = leer();
-    const melD = melodieBauen(b1, motiv, st, 1);
+    const melD = phraseBauen(b1, motiv, st, "antwort");
     const D = teilVon(p1, melD, echoBauen(b1, melD, "lang"), 1);
     return { A, B, C, D };
   }
@@ -1792,25 +1825,29 @@
   }
 
   /* ---------- Variation: die Band improvisiert beim Spielen ---------- */
+  /* Improvisation beim Abspielen. In den Stimmungen bleibt die Melodie fast unangetastet, damit sie sich einprägt;
+     nur chaotische Stimmungen (Kampf, Endgegner, Spannung …) dürfen stärker ausschmücken. Der Bass bleibt dort immer stehen. */
+  let wirbelJetzt = false;
   function variiert(spur, wert, i, daten, v, letzterTakt) {
     if (v <= 0) return wert;
-    const sp = SPUR[spur];
+    const sp = SPUR[spur], stil = S.stimmung && STIL[S.stimmung], ton = stil ? (stil.chaos ? .45 : .12) : 1;
     const r = Math.random();
     if (sp.art === "an") {
       if (spur === "rex") return wert;
       if (wert >= 0) return i % 4 !== 0 && r < v * .15 ? -1 : wert;
-      if (spur === "trommel" && letzterTakt && i >= 12 && r < v * .7) return 0; /* Trommelwirbel am Ende */
+      if (spur === "trommel" && letzterTakt && wirbelJetzt && i >= 12) return 0; /* Trommelwirbel – nur ab und zu am Ende eines Durchgangs */
       if (r < v * (spur === "ketten" ? .05 : .12) && i % 2 === 0) return 0;
       return -1;
     }
     if (spur === "rex") return wert >= 0 ? wert : (r < v * .012 ? 0 : -1);
     const max = sp.zeilen - 1;
     if (wert >= 0) {
-      if (i !== 0 && r < v * .12) return -1;
-      if (r < v * .4) return Math.max(0, Math.min(max, wert + (Math.random() < .5 ? -1 : 1) * (spur === "bass" ? 3 : 1)));
+      if (stil && spur === "bass") return wert;
+      if (i !== 0 && i % 4 !== 0 && r < v * .12 * ton) return -1;
+      if (i % 4 !== 0 && r < v * .4 * ton) return Math.max(0, Math.min(max, wert + (Math.random() < .5 ? -1 : 1) * (spur === "bass" ? 3 : 1)));
       return wert;
     }
-    if ((spur === "melodie" || spur === "floete") && r < v * .25) {
+    if ((spur === "melodie" || spur === "floete") && r < v * .25 * ton) {
       const vor = daten[(i + SCHRITTE - 1) % SCHRITTE], nach = daten[(i + 1) % SCHRITTE];
       if (vor >= 0 && nach >= 0) return Math.round((vor + nach) / 2);
       if (vor >= 0) return Math.max(0, Math.min(max, vor + (Math.random() < .5 ? -1 : 1)));
@@ -1827,6 +1864,7 @@
   let pausiert = false;
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
+  let durchgang = 0;
   let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
   /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
   const DRAMA = { kampf: 2, boss: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1, grusel: 1, hof: 1 };
@@ -1859,7 +1897,7 @@
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
   function wechselAnwenden(zeit) {
     const neu = wechsel; wechsel = null; wechselAb = 0;
-    S = neu; abschnitt = 0; padAkkord = -1; orchVorladen();
+    S = neu; abschnitt = 0; durchgang = 0; padAkkord = -1; orchVorladen();
     const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
     if (master) {
       /* das neue Stück blendet sich ein – bei dramatischen Zielen schnell und mit Schlag auf der Eins, sonst sanft */
@@ -1909,7 +1947,13 @@
       if (schritt === 0) {
         abschnitt = (abschnitt + 1) % S.ablauf.length;
         /* Stimmung: nach jedem Durchgang ein leicht abgewandeltes neues Stück */
-        if (abschnitt === 0 && S.stimmung && STIL[S.stimmung] && !hoerer) setTimeout(stimmungWeiter, 0);
+        if (abschnitt === 0) {
+          durchgang++;
+          const st = S.stimmung && STIL[S.stimmung];
+          wirbelJetzt = Math.random() < (st ? (st.chaos ? .35 : .15) : .3);
+          /* Stimmung: das Thema darf sich einprägen – erst nach drei Durchgängen ein neues, leicht abgewandeltes Stück */
+          if (st && !hoerer && durchgang % 3 === 0) setTimeout(stimmungWeiter, 0);
+        }
       }
     }
   }
@@ -2157,7 +2201,7 @@
     /* Elben: ab und zu ein Schimmer aus Glöckchen */
     if (pr.glanz && schritt === 0 && Math.random() < .35) probe("gloeckchen", 0, zeit, orchPan.vln, .18);
     /* große Momente: Takt vor dem Höhepunkt Wirbel und Schwellen, auf der Eins des Höhepunkts der Schlag */
-    if (pr.gross && schritt === 0) {
+    if (pr.gross && schritt === 0 && durchgang % (pr.gross > 1 ? 2 : 3) === 0) {
       const L = S.ablauf.length, vorher = (c - 1 + L) % L;
       if (ab === vorher && L > 1) {
         probe("timproll", 0, zeit, orchPan.gross, pr.gross > 1 ? .5 : .3, { ein: .4, dauer: bar, aus: .1 });
