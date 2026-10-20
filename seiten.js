@@ -33,10 +33,10 @@
         gefaehrten: "Vier Helden und ein Hund – wer sie sind.",
         nsc: "Freund, Feind und Fragezeichen.",
         bestiarium: "Alles, was uns fressen wollte.",
-        taverne: "Loblieder, Spott, Barradins Auftritt und Memory.",
+        taverne: "Heldensturm, Jagd, Diebesnacht, Echos Hort, Auftritt, Loblied & Memory.",
         buehne: "Lautenwerk und Spielleiter-Pult für eure Sessions."
       },
-      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "3 Spiele", buehne: () => "♪ Musik" }
+      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "7 Spiele", buehne: () => "♪ Musik" }
     },
     en: {
       uebersicht: "← Overview", zurueck: "Back", weiter: "Next",
@@ -51,10 +51,10 @@
         gefaehrten: "Four heroes and a dog – who they are.",
         nsc: "Friend, foe and question mark.",
         bestiarium: "Everything that wanted to eat us.",
-        taverne: "Songs of praise, mockery, Barradin's performance and memory.",
+        taverne: "Heldensturm, hunt, long night, Echo's hoard, performance, praise & memory.",
         buehne: "Lute machine and GM console for your sessions."
       },
-      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "3 games", buehne: () => "♪ Music" }
+      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "7 games", buehne: () => "♪ Music" }
     }
   };
   const t = () => TX[sprache()];
