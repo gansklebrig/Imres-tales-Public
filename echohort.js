@@ -65,8 +65,8 @@
       neuFreigeschaltet: "Neu:",
       phase: { raub: "Raubzug", abwehr: "Der Zorn des Hains" },
       raubIntro: "Tippe, um die Ranke zu schleudern. Steine und Tiere ärgern Echo.",
-      abwehrIntro: "Tippe auf einen leuchtenden Pflanzplatz, um einen Wächter wachsen zu lassen. Tippe auf die Karte für einen Feuerball.",
-      hud: { zorn: "Zorn", gier: "Gier", saat: "Saat", hort: "Hort", genug: "Genug!", wild: "Wildgestalt", feuerball: "Feuerball", gegner: "Plünderer" },
+      abwehrIntro: "Tippe auf einen leuchtenden Pflanzplatz, um einen Wächter wachsen zu lassen. Tippe auf die Karte für Echos Zauber.",
+      hud: { zorn: "Zorn", gier: "Gier", saat: "Saat", hort: "Hort", genug: "Genug!", wild: "Wildgestalt", feuerball: "Echos Zauber", gegner: "Plünderer" },
       formen: {
         ranke: ["Ranke", "Zieht alles, nur Felsen nicht."],
         rabe: ["Rabe", "Blitzschnell, aber nur Leichtes."],
@@ -104,7 +104,8 @@
           eis: (w, st) => "Bis zu " + w.ziele[st] + " Splitter · bremst um " + Math.round((1 - w.bremse[st]) * 100) + " %",
           blitz: (w, st) => "Springt auf " + w.ziele[st] + " Ziele, jedes Mal etwas schwächer",
           pilz: (w, st) => w.ziele[st] + " Sporenbälle · vergiften alle im Umkreis für 3 s"
-        } },
+        },
+        kombo: { wurzel: "Kombo: Wölfe beißen Verwurzelte doppelt.", wolf: "Kombo: beißt Verwurzelte doppelt.", eis: "Kombo: Blitze treffen Gefrorene ×1,5.", blitz: "Kombo: ×1,5 gegen Gefrorene.", pilz: "Kombo: Feuer lässt Vergiftete explodieren." } },
       gesperrt: "Gesperrt",
       raubFertig: "Der Raubzug ist vorbei",
       raubWerte: { beute: "Beute", gier: "Gier", saat: "Saat", schaetze: "Schätze" },
@@ -118,6 +119,38 @@
         anfuehrer: "Goblin-Anführer", glasstab: "Glasstab", bugbaer: "Der Bugbear vom Wachturm", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "Der rasende Riese" },
       eig: { flug: "fliegt", schnell: "schnell", zaeh: "zäh", ausweichen: "weicht aus", unsichtbar: "zeitweise unsichtbar", netz: "spinnt Wächter ein", feuerSchwach: "feuerschwach", wurzelFest: "wurzelfest",
         ruft: "ruft Verstärkung", blinzeln: "nimmt Geheimgänge", gift: "Giftatem lähmt Wächter", schrei: "Schrei lähmt Wächter", wurf: "wirft Felsen auf Wächter", verwandeln: "flieht als Fledermaus", unbesiegbar: "unbesiegbar – nur aufhalten!" },
+      besonderheit: "Besonderheit:",
+      einst: { titel: "Einstellungen", knopf: "⚙ Einstellungen", effekte: "🔊 Effekte", musik: "🎵 Musik", vib: "📳 Vibration", vibNein: "Dieses Gerät oder dieser Browser kann nicht vibrieren.", aus: "aus" },
+      schatzkammer: "🏛 Schatzkammer", schatzTitel: "Echos Schatzkammer", schatzText: "Jedes Gebiet versteckt ein Relikt. Echo hebt sie alle auf. Natürlich.",
+      reliktAnzahl: n => "×" + n, unbekannt: "Noch nicht gefunden", trophaeen: "Trophäen", neuesRelikt: "Neues Relikt für die Schatzkammer!", trophaee: "Trophäe!",
+      erfolge: {
+        erster: ["Erste Beute", "Den ersten Raubzug abgeschlossen."], relikt1: ["Sammler", "Das erste Relikt gefunden."], relikt8: ["Echos Schatzkammer", "Ein Relikt aus jedem Gebiet."],
+        beute1000: ["Goldrausch", "1000 Gold in einem einzigen Raubzug."], gier5: ["Unersättlich", "Gier ×1,75 in einem Raubzug."], zorn3: ["Vulkan", "Drei Zornausbrüche in einem Raubzug."],
+        kombo: ["Druidenkunst", "50 Kombo-Treffer."], rex: ["Guter Hund", "Rex hat 5 Goldbeutel zurückgeholt."], ezekiel: ["Schattenfreund", "Ezekiel hat 25 Plünderer gemeuchelt."],
+        sparsam: ["Mit leichter Hand", "Ein Level ab Phandalin mit höchstens zwei Wächtern gewonnen."], bosse: ["Bezwinger", "Jeden besiegbaren Boss einmal besiegt."], demo: ["Nicht heute, Demogorgon", "Demogorgon überstanden, ohne Gold zu verlieren."],
+        kampagne: ["Die ganze Kampagne", "Alle Gebiete geschafft."], endlos5: ["Kein Ende in Sicht", "Endlos-Runde 5 erreicht."], sterne: ["Sternensammler", "Die Hälfte aller Sterne einer Schwierigkeit."],
+        alleSterne: ["Perfektion", "Alle Sterne einer Schwierigkeit."], hain: ["Voller Hain", "Jede Verbesserung im Hain gekauft."]
+      },
+      zauber: {
+        feuerball: ["Feuerball", "Explodiert am Ziel. Vergiftete Gegner explodieren mit."],
+        eissturm: ["Eissturm", "Friert alle im Umkreis kurz ein."],
+        mondstrahl: ["Mondstrahl", "Ein Lichtkegel verbrennt Gegner und enthüllt Unsichtbare."],
+        adler: ["Adlergestalt", "Echo stößt als Adler über die Karte und reißt Dieben die Beute ab."],
+        erdbeben: ["Erdbeben", "Schüttelt alle Gegner am Boden durch und bremst sie."]
+      },
+      zauberWahl: "Zauber für die Abwehr – wähle zwei", kombo: "Kombo!", sporenExplosion: "Sporenexplosion!",
+      regeln: {
+        goblindieb: ["Goblin-Diebe", "Goblins schleichen herein und tragen Schätze davon. Pack sie mit der Ranke, dann lassen sie alles fallen!"],
+        laterne: ["Die Wache der Roten Roben", "Wachen mit Laternen patrouillieren durch die Keller. Gerät die Ranke in ihr Licht, ist der Wurf verloren und Zeit dazu."],
+        bugbear: ["Der schlafende Bugbear", "Ein Bugbear schläft neben einem Teil des Schatzes. Steine, Fehlwürfe und Würfe in seine Nähe machen Lärm. Wacht er auf, kostet das Beute."],
+        loren: ["Die Loren der Mine", "Auf den Schienen rollen Loren mit Erz und Kristallen vorbei. Pass den richtigen Moment ab!"],
+        venomfang: ["Venomfang schläft", "Der Giftdrache schläft auf seinem Hort. Jeder Griff in seinen Schatz weckt ihn ein Stück mehr, bis er Gift speit."],
+        dunkel: ["Die Dunkelheit", "Im Unterreich siehst du nur, was Echos Stab, die Leuchtpilze und die Ranke selbst erhellen."],
+        stroemung: ["Die Strömung", "Die Beute treibt mit der Strömung durch das Wasser."],
+        geysir: ["Lavageysire", "Glühende Risse kündigen Lavafontänen an. Was dort liegt, schmilzt, und auch die Ranke verbrennt sich."]
+      },
+      rev: { erwischt: "Erwischt!", goblinFlieht: "Husch! +15", goblinWeg: "Ein Goblin entkommt mit Beute!", wache: "Die Wache sieht dich! −3 s", bugbearWach: n => "Der Bugbear erwacht! −" + n + " Gold",
+        drache: "Venomfang erwacht! Giftatem!", gift: "Gift! −2 s", geschmolzen: "Geschmolzen!", verbrannt: "Autsch! Verbrannt!" },
       vorschau: "Es kommen", traegt: n => "+" + n + " zurück!", entkommt: n => "−" + n + " Gold entkommen!", leer: "Nichts mehr da!",
       raubHinweis: "Wer Gold stiehlt, rennt damit zum Eingang zurück. Halte ihn auf, dann ist es wieder deins!",
       schnell: ["⏩ ×2", "▶ ×1"],
@@ -193,8 +226,8 @@
       neuFreigeschaltet: "New:",
       phase: { raub: "Raid", abwehr: "Wrath of the grove" },
       raubIntro: "Tap to hurl the vine. Stones and animals annoy Echo.",
-      abwehrIntro: "Tap a glowing planting spot to grow a guardian. Tap the map for a fireball.",
-      hud: { zorn: "Rage", gier: "Greed", saat: "Seeds", hort: "Hoard", genug: "Enough!", wild: "Wild shape", feuerball: "Fireball", gegner: "Plunderers" },
+      abwehrIntro: "Tap a glowing planting spot to grow a guardian. Tap the map for Echo's spell.",
+      hud: { zorn: "Rage", gier: "Greed", saat: "Seeds", hort: "Hoard", genug: "Enough!", wild: "Wild shape", feuerball: "Echo's spells", gegner: "Plunderers" },
       formen: {
         ranke: ["Vine", "Pulls anything except boulders."],
         rabe: ["Raven", "Lightning fast, light things only."],
@@ -232,7 +265,8 @@
           eis: (w, st) => "Up to " + w.ziele[st] + " shards · slows by " + Math.round((1 - w.bremse[st]) * 100) + " %",
           blitz: (w, st) => "Jumps to " + w.ziele[st] + " targets, a little weaker each time",
           pilz: (w, st) => w.ziele[st] + " spore balls · poison everyone nearby for 3 s"
-        } },
+        },
+        kombo: { wurzel: "Combo: wolves bite rooted foes twice as hard.", wolf: "Combo: double bite against rooted foes.", eis: "Combo: lightning hits frozen foes ×1.5.", blitz: "Combo: ×1.5 against frozen foes.", pilz: "Combo: fire makes poisoned foes explode." } },
       gesperrt: "Locked",
       raubFertig: "The raid is over",
       raubWerte: { beute: "Loot", gier: "Greed", saat: "Seeds", schaetze: "Treasures" },
@@ -246,6 +280,38 @@
         anfuehrer: "Goblin boss", glasstab: "Glasstaff", bugbaer: "The watchtower bugbear", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "The raging giant" },
       eig: { flug: "flies", schnell: "fast", zaeh: "tough", ausweichen: "dodges", unsichtbar: "sometimes invisible", netz: "webs guardians", feuerSchwach: "weak to fire", wurzelFest: "root-proof",
         ruft: "calls for help", blinzeln: "uses secret passages", gift: "poison breath stuns guardians", schrei: "scream stuns guardians", wurf: "throws boulders at guardians", verwandeln: "flees as a bat", unbesiegbar: "invincible – just hold him off!" },
+      besonderheit: "Special:",
+      einst: { titel: "Settings", knopf: "⚙ Settings", effekte: "🔊 Effects", musik: "🎵 Music", vib: "📳 Vibration", vibNein: "This device or browser cannot vibrate.", aus: "off" },
+      schatzkammer: "🏛 Treasury", schatzTitel: "Echo's treasury", schatzText: "Every region hides a relic. Echo keeps them all. Of course.",
+      reliktAnzahl: n => "×" + n, unbekannt: "Not found yet", trophaeen: "Trophies", neuesRelikt: "New relic for the treasury!", trophaee: "Trophy!",
+      erfolge: {
+        erster: ["First loot", "Finished the first raid."], relikt1: ["Collector", "Found the first relic."], relikt8: ["Echo's treasury", "A relic from every region."],
+        beute1000: ["Gold rush", "1000 gold in a single raid."], gier5: ["Insatiable", "Greed ×1.75 in a raid."], zorn3: ["Volcano", "Three rage outbursts in one raid."],
+        kombo: ["Druidcraft", "50 combo hits."], rex: ["Good boy", "Rex brought back 5 gold pouches."], ezekiel: ["Friend of shadows", "Ezekiel assassinated 25 plunderers."],
+        sparsam: ["Light touch", "Won a level from Phandalin on with at most two guardians."], bosse: ["Conqueror", "Defeated every beatable boss once."], demo: ["Not today, Demogorgon", "Survived Demogorgon without losing gold."],
+        kampagne: ["The whole campaign", "Finished every region."], endlos5: ["No end in sight", "Reached endless round 5."], sterne: ["Star collector", "Half of all stars on one difficulty."],
+        alleSterne: ["Perfection", "All stars on one difficulty."], hain: ["Full grove", "Bought every upgrade in the grove."]
+      },
+      zauber: {
+        feuerball: ["Fireball", "Explodes at the target. Poisoned enemies explode too."],
+        eissturm: ["Ice storm", "Briefly freezes everyone in the area."],
+        mondstrahl: ["Moonbeam", "A beam of light burns enemies and reveals the invisible."],
+        adler: ["Eagle form", "Echo swoops across the map as an eagle and snatches loot from thieves."],
+        erdbeben: ["Earthquake", "Shakes and slows every enemy on the ground."]
+      },
+      zauberWahl: "Spells for the defence – choose two", kombo: "Combo!", sporenExplosion: "Spore blast!",
+      regeln: {
+        goblindieb: ["Goblin thieves", "Goblins sneak in and carry treasures away. Grab them with the vine and they drop everything!"],
+        laterne: ["The Redbrand watch", "Guards with lanterns patrol the cellars. If the vine enters their light, the throw is lost and so is time."],
+        bugbear: ["The sleeping bugbear", "A bugbear sleeps next to part of the treasure. Stones, misses and throws near him make noise. If he wakes up, it costs loot."],
+        loren: ["The mine carts", "Carts full of ore and crystals roll past on the rails. Time it right!"],
+        venomfang: ["Venomfang sleeps", "The poison dragon sleeps on his hoard. Every grab from his treasure wakes him a little more, until he breathes poison."],
+        dunkel: ["The darkness", "In the Underdark you only see what Echo's staff, the glowing mushrooms and the vine itself light up."],
+        stroemung: ["The current", "The loot drifts through the water with the current."],
+        geysir: ["Lava geysers", "Glowing cracks announce lava fountains. Whatever lies there melts, and the vine gets burned too."]
+      },
+      rev: { erwischt: "Caught!", goblinFlieht: "Scram! +15", goblinWeg: "A goblin escapes with loot!", wache: "The guard spots you! −3 s", bugbearWach: n => "The bugbear wakes up! −" + n + " gold",
+        drache: "Venomfang wakes! Poison breath!", gift: "Poison! −2 s", geschmolzen: "Melted!", verbrannt: "Ouch! Burned!" },
       vorschau: "Coming", traegt: n => "+" + n + " back!", entkommt: n => "−" + n + " gold escaped!", leer: "Nothing left!",
       raubHinweis: "Whoever steals gold runs back to the entrance with it. Stop them and it's yours again!",
       schnell: ["⏩ ×2", "▶ ×1"],
@@ -306,7 +372,7 @@
   const LEISTE = 448;            // ab hier: Knopfleiste unten
   const DREH = { x: 200, y: 98 }; // Drehpunkt der Ranke
   const HORT = { x: 200, y: 412 };
-  const LEVEL_PRO_GEBIET = 3, GEBIETE_ANZAHL = 8, KAMPAGNE = GEBIETE_ANZAHL * LEVEL_PRO_GEBIET;
+  const LEVEL_PRO_GEBIET = 3;
 
   const STUFEN = {
     lehrling:  { zeit: 1.18, hp: 0.78, zorn: 0.8, leben: 4, tempo: 0.92 },
@@ -316,24 +382,40 @@
   let stufeWahl = STUFEN[lies("imres-echohort-stufe", "")] ? lies("imres-echohort-stufe", "") : "druide";
 
   /* Gebiete: Farben, Ressource, Tiere, Störenfriede, Gegner, Boss */
+  /* ===== DIE GEBIETE =====
+     Neues Kampagnengebiet? Einfach hier einen Eintrag anhängen und in TX (de/en) bei gebiete, res und relikt
+     je einen Eintrag ergänzen. Levelzahl, Levelwahl, Sterne, Endlosmodus und Bestenliste passen sich an.
+     k: Kennung · stil: Aussehen (horizont: tannen | daecher | turm | hoehle | ufer, deko: baeume | haeuser | steine,
+     res: Form der Ressource) · regel: Besonderheit im Raubzug (siehe REGELN) · musik: Musikprofil (siehe MUSIK)
+     relikt: Form des Relikts · tier / stoerer: Tiere und Störenfriede im Raubzug · gegner: Plünderer mit Anteil · boss
+     f: Farben */
   const GEB = [
-    { k: "wald", relikt: "krone", tier: "hase", stoerer: "wespe", gegner: [["goblin", 1]], boss: "anfuehrer",
+    { k: "wald", stil: { horizont: "tannen", wurzeln: true, deko: "baeume", res: "eicheln" }, regel: "goblindieb", musik: "wald",
+      relikt: "krone", tier: "hase", stoerer: "wespe", gegner: [["goblin", 1]], boss: "anfuehrer",
       f: { himmel: ["#0c1110", "#1a2620"], boden: ["#2a2117", "#16110c"], akzent: "#4d6b35", stein: "#5d574c", res: "#a8783e", weg: "#4a3a26", gras: "#1d2a1a" } },
-    { k: "phandalin", relikt: "kelch", tier: "hase", stoerer: "wespe", gegner: [["goblin", 0.3], ["rotrobe", 0.7]], boss: "glasstab",
+    { k: "phandalin", stil: { horizont: "daecher", deko: "haeuser", res: "kraeuter" }, regel: "laterne", musik: "dorf",
+      relikt: "kelch", tier: "hase", stoerer: "wespe", gegner: [["goblin", 0.3], ["rotrobe", 0.7]], boss: "glasstab",
       f: { himmel: ["#120d10", "#2a1a1a"], boden: ["#2b221c", "#151010"], akzent: "#9b3a2f", stein: "#625a52", res: "#6f8a5a", weg: "#57483a", gras: "#232a1c", mauer: true } },
-    { k: "wachturm", relikt: "amulett", tier: "fledermaus", stoerer: "spinne", gegner: [["goblin", 0.55], ["bandit", 0.45]], boss: "bugbaer",
+    { k: "wachturm", stil: { horizont: "turm", deko: "steine", res: "moos" }, regel: "bugbear", musik: "turm",
+      relikt: "amulett", tier: "fledermaus", stoerer: "spinne", gegner: [["goblin", 0.55], ["bandit", 0.45]], boss: "bugbaer",
       f: { himmel: ["#0c0c14", "#1c1c28"], boden: ["#26252a", "#121216"], akzent: "#6a6a86", stein: "#5a5866", res: "#5f8a4a", weg: "#3b3a40", gras: "#1d221c", mauer: true } },
-    { k: "schmiede", relikt: "hammer", tier: "fledermaus", stoerer: "spinne", gegner: [["soeldner", 0.6], ["goblin", 0.25], ["bugbear", 0.15]], boss: "nezna",
+    { k: "schmiede", stil: { horizont: "hoehle", deko: "steine", res: "kristalle" }, regel: "loren", musik: "schmiede",
+      relikt: "hammer", tier: "fledermaus", stoerer: "spinne", gegner: [["soeldner", 0.6], ["goblin", 0.25], ["bugbear", 0.15]], boss: "nezna",
       f: { himmel: ["#0d0b0a", "#1e1712"], boden: ["#2d241b", "#120e0a"], akzent: "#e0a046", stein: "#5b5249", res: "#7fd6e0", weg: "#3d3024", gras: "#221b14", schienen: true } },
-    { k: "donnerbaum", relikt: "schuppe", tier: "hase", stoerer: "spinne", gegner: [["blight", 0.55], ["zombie", 0.3], ["spinne", 0.15]], boss: "venomfang",
+    { k: "donnerbaum", stil: { horizont: "tannen", tanne: "#141a14", wurzeln: true, knochen: true, deko: "baeume", res: "wurzelholz" }, regel: "venomfang", musik: "donnerbaum",
+      relikt: "schuppe", tier: "hase", stoerer: "spinne", gegner: [["blight", 0.55], ["zombie", 0.3], ["spinne", 0.15]], boss: "venomfang",
       f: { himmel: ["#0b100c", "#18231a"], boden: ["#231d16", "#100c09"], akzent: "#6f9a3a", stein: "#55524a", res: "#8a6440", weg: "#3d3324", gras: "#1a2416" } },
-    { k: "unterreich", relikt: "idol", tier: "fledermaus", stoerer: "spinne", gegner: [["drow", 0.45], ["ettercap", 0.3], ["chasme", 0.25]], boss: "vrock",
+    { k: "unterreich", stil: { horizont: "hoehle", deko: "steine", res: "sporen" }, regel: "dunkel", musik: "unterreich",
+      relikt: "idol", tier: "fledermaus", stoerer: "spinne", gegner: [["drow", 0.45], ["ettercap", 0.3], ["chasme", 0.25]], boss: "vrock",
       f: { himmel: ["#07060c", "#120f1c"], boden: ["#1b1724", "#0b0910"], akzent: "#8a6ad0", stein: "#4a4458", res: "#c49ae0", weg: "#2b2536", gras: "#161320", pilze: true } },
-    { k: "see", relikt: "perle", tier: "fisch", stoerer: "aal", gegner: [["kuotoa", 1]], boss: "demogorgon",
+    { k: "see", stil: { horizont: "ufer", res: "muscheln" }, regel: "stroemung", musik: "see",
+      relikt: "perle", tier: "fisch", stoerer: "aal", gegner: [["kuotoa", 1]], boss: "demogorgon",
       f: { himmel: ["#06090e", "#0e1824"], boden: ["#0f2230", "#06101a"], akzent: "#4aa0b0", stein: "#3d4c58", res: "#e8c8b0", weg: "#2a3a44", gras: "#10202a", wasser: true } },
-    { k: "gracklstugh", relikt: "krone", tier: "fledermaus", stoerer: "spinne", gegner: [["duergar", 0.75], ["bugbear", 0.25]], boss: "riese",
+    { k: "gracklstugh", stil: { horizont: "hoehle", glut: true, deko: "steine", res: "feuermoos" }, regel: "geysir", musik: "gracklstugh",
+      relikt: "krone", tier: "fledermaus", stoerer: "spinne", gegner: [["duergar", 0.75], ["bugbear", 0.25]], boss: "riese",
       f: { himmel: ["#0e0808", "#24120c"], boden: ["#2a1a14", "#120a08"], akzent: "#e0602a", stein: "#584a44", res: "#ff8a3a", weg: "#3a2a22", gras: "#22140f", lava: true } }
   ];
+  const GEBIETE_ANZAHL = GEB.length, KAMPAGNE = GEBIETE_ANZAHL * LEVEL_PRO_GEBIET;
 
   /* Gegner der Abwehr. hp/tempo/klau werden mit dem Level hochskaliert. */
   const FEINDE = {
@@ -371,6 +453,16 @@
     pilz:   { ab: 15, sym: "🍄", kosten: [45, 55, 75], reich: [64, 70, 78], schaden: [10, 16, 24], rate: 1.8, typ: "gift", ziele: [2, 3, 4], farbe: "#c49ae0" }
   };
   const WACHTER_REIHE = ["dorn", "wurzel", "wolf", "eis", "blitz", "pilz"];
+
+  /* Echos Zauberbuch für die Abwehr. ab = ab welchem Level, cd = Abklingzeit in Sekunden */
+  const ZAUBER = {
+    feuerball:  { ab: 0,  sym: "☄️", cd: 9,  farbe: "#ff8a3a" },
+    eissturm:   { ab: 5,  sym: "❄️", cd: 15, farbe: "#9fd6ec" },
+    mondstrahl: { ab: 8,  sym: "🌙", cd: 17, farbe: "#e8e4ff" },
+    adler:      { ab: 11, sym: "🦅", cd: 15, farbe: "#c9a35a" },
+    erdbeben:   { ab: 17, sym: "⛰️", cd: 24, farbe: "#c98a5a" }
+  };
+  const ZAUBER_REIHE = ["feuerball", "eissturm", "mondstrahl", "adler", "erdbeben"];
 
   /* Wildgestalten. ab = ab welchem Level verfügbar */
   const FORMEN = {
@@ -426,14 +518,33 @@
     const n = [];
     FORMEN_REIHE.forEach(k => { if (FORMEN[k].ab === lv && lv > 0) n.push(FORMEN[k].sym + " " + t().formen[k][0]); });
     WACHTER_REIHE.forEach(k => { if (WACHTER[k].ab === lv && lv > 0) n.push(WACHTER[k].sym + " " + t().wachter[k][0]); });
+    ZAUBER_REIHE.forEach(k => { if (ZAUBER[k].ab === lv && lv > 0) n.push(ZAUBER[k].sym + " " + t().zauber[k][0]); });
     return n;
   }
 
-  /* ---------- Klang (eigene Synthese, keine Dateien) ---------- */
-  let ac = null, rauschen = null, tonAn = lies("imres-echohort-ton", "1") === "1";
+  /* ---------- Einstellungen: Lautstärke von Effekten und Musik, Vibration ---------- */
+  const EINST = (() => {
+    const d = { effekte: lies("imres-echohort-ton", "1") === "0" ? 0 : 0.8, musik: 0.5, vib: true };
+    try { const v = JSON.parse(localStorage.getItem("imres-echohort-einst") || "null"); if (v && typeof v === "object") Object.assign(d, v); } catch (_) {}
+    return d;
+  })();
+  const einstSichern = () => schreib("imres-echohort-einst", JSON.stringify(EINST));
+
+  /* ---------- Klang: Effekte selbst berechnet, Musik aus den echten Instrumenten des Lautenwerks ---------- */
+  let ac = null, rauschen = null, effektBus = null, musikBus = null;
+  function busseSetzen() {
+    if (!ac) return;
+    effektBus.gain.setTargetAtTime(EINST.effekte, ac.currentTime, 0.05);
+    musikBus.gain.setTargetAtTime(EINST.musik * 0.9, ac.currentTime, 0.05);
+  }
   function audio() {
-    if (!tonAn) return null;
-    if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { return null; } }
+    if (EINST.effekte <= 0 && EINST.musik <= 0) return null;
+    if (!ac) {
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { return null; }
+      effektBus = ac.createGain(); effektBus.connect(ac.destination);
+      musikBus = ac.createGain(); musikBus.connect(ac.destination);
+      effektBus.gain.value = EINST.effekte; musikBus.gain.value = EINST.musik * 0.9;
+    }
     if (ac.state === "suspended") ac.resume();
     if (!rauschen) {
       rauschen = ac.createBuffer(1, ac.sampleRate * 1.5, ac.sampleRate);
@@ -452,7 +563,8 @@
     const t0 = a.currentTime + (verz || 0);
     const o = a.createOscillator(); o.type = typ;
     o.frequency.setValueAtTime(f1, t0); o.frequency.exponentialRampToValueAtTime(f2, t0 + dauer);
-    let ziel = huelle(a, a.destination, t0, laut, dauer);
+    if (EINST.effekte <= 0) return;
+    let ziel = huelle(a, effektBus, t0, laut, dauer);
     if (filt) { const b = a.createBiquadFilter(); b.type = filt[0]; b.frequency.value = filt[1]; b.Q.value = filt[2] || 1; b.connect(ziel); ziel = b; }
     o.connect(ziel); o.start(t0); o.stop(t0 + dauer + 0.05);
   }
@@ -461,10 +573,92 @@
     const t0 = a.currentTime + (verz || 0);
     const q = a.createBufferSource(); q.buffer = rauschen;
     const b = a.createBiquadFilter(); b.type = typ; b.frequency.value = freq;
-    q.connect(b); b.connect(huelle(a, a.destination, t0, laut, dauer));
+    if (EINST.effekte <= 0) { return; }
+    q.connect(b); b.connect(huelle(a, effektBus, t0, laut, dauer));
     q.start(t0, Math.random() * 0.5); q.stop(t0 + dauer + 0.05);
   }
-  let letzterKlang = {};
+  /* ---------- Musik: für jedes Gebiet eine eigene, endlos variierende Weise ----------
+     grund = Grundton (MIDI), leiter = Tonleiter, folge = Akkordfolge (Stufen), tempo in Schlägen pro Minute,
+     arp / mel / bass = Instrumente aus klang/, schlag = Schlagwerk, dicht = wie oft Melodietöne fallen */
+  const MUSIK = {
+    wald:        { grund: 50, leiter: [0, 2, 3, 5, 7, 9, 10], folge: [0, 3, 6, 4], tempo: 88, arp: "gitarre", mel: "fl", bass: "vc", dicht: 0.55 },
+    dorf:        { grund: 55, leiter: [0, 2, 4, 5, 7, 9, 10], folge: [0, 6, 3, 0], tempo: 104, arp: "gitarre", mel: "dudel", bass: "vc", schlag: "bodh", dicht: 0.5 },
+    turm:        { grund: 57, leiter: [0, 2, 3, 5, 7, 8, 10], folge: [0, 5, 3, 4], tempo: 72, arp: "harfe", mel: "fl", bass: "vctrem", dicht: 0.45 },
+    schmiede:    { grund: 50, leiter: [0, 2, 3, 5, 7, 8, 10], folge: [0, 0, 5, 4], tempo: 80, arp: "gitarre", mel: "horn", bass: "vc", schlag: "amboss", dicht: 0.35 },
+    donnerbaum:  { grund: 52, leiter: [0, 1, 3, 5, 7, 8, 10], folge: [0, 1, 0, 6], tempo: 66, arp: "harfe", mel: "oka", bass: "vctrem", dicht: 0.4 },
+    unterreich:  { grund: 48, leiter: [0, 1, 3, 5, 6, 8, 10], folge: [0, 1, 0, 5], tempo: 58, arp: "harfe", mel: "glock", bass: "vctrem", schlag: "gong", dicht: 0.3, luecken: 0.45 },
+    see:         { grund: 53, leiter: [0, 2, 4, 6, 7, 9, 11], folge: [0, 1, 4, 0], tempo: 70, arp: "harfe", mel: "pan", bass: "vc", dicht: 0.45 },
+    gracklstugh: { grund: 50, leiter: [0, 2, 3, 5, 7, 8, 11], folge: [0, 5, 4, 0], tempo: 84, arp: "gitarre", mel: "horn", bass: "tuba", schlag: "amboss", dicht: 0.4 }
+  };
+  const PROBEN = { gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101],
+    fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], vc: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77], vctrem: [36, 40, 43, 50, 53, 57, 59, 60, 64, 67, 71, 74, 77],
+    dudel: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87], oka: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90], pan: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90],
+    glock: [79, 84, 91, 96, 103, 108], horn: [36, 39, 43, 46, 50, 53, 57, 60], tuba: [34, 39, 41, 46, 50, 53, 58], stimme: [57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87] };
+  const PEGEL = { gitarre: 0.5, harfe: 0.45, fl: 0.26, vc: 0.32, vctrem: 0.26, dudel: 0.16, oka: 0.26, pan: 0.26, glock: 0.16, horn: 0.26, tuba: 0.32, stimme: 0.22, amboss: 0.3, bodh1: 0.45, bodh2: 0.38, gong: 0.35, timp1: 0.4 };
+  const probeBasis = (() => { const sk = document.querySelector('script[src*="echohort"]'); return sk ? sk.src.replace(/echohort\.js.*$/, "klang/") : "klang/"; })();
+  const probePuffer = new Map(), probeLaedt = new Map();
+  function probeLaden(name) {
+    if (probePuffer.has(name) || probeLaedt.has(name) || !ac) return;
+    const c = ac;
+    probeLaedt.set(name, fetch(probeBasis + name + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(b => new Promise((ok, f) => { const x = c.decodeAudioData(b, ok, f); if (x && x.catch) x.catch(f); }))
+      .then(b => { const d = b.getChannelData(0); let m = 0, i = 0; for (let k = 0; k < d.length; k++) m = Math.max(m, Math.abs(d[k])); while (i < d.length && Math.abs(d[i]) < m * 0.02) i++; b._start = Math.max(0, i / b.sampleRate - 0.003); probePuffer.set(name, b); })
+      .catch(() => { probeLaedt.delete(name); }));
+  }
+  const naechste = (fam, midi) => PROBEN[fam].reduce((b, m) => Math.abs(m - midi) < Math.abs(b - midi) ? m : b, PROBEN[fam][0]);
+  function note(fam, midi, zeit, dauer, laut) {
+    if (!ac || EINST.musik <= 0) return;
+    const m = PROBEN[fam] ? naechste(fam, midi) : null, name = m == null ? fam : fam + "_" + m, b = probePuffer.get(name);
+    if (!b) { probeLaden(name); return; }
+    const q = ac.createBufferSource(), g = ac.createGain();
+    q.buffer = b; if (m != null) q.playbackRate.value = Math.pow(2, (midi - m) / 12);
+    const l = Math.min((b.duration - b._start) / q.playbackRate.value, dauer), v = (PEGEL[fam] || 0.3) * (laut || 1);
+    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(v, zeit + 0.01);
+    g.gain.setValueAtTime(v, Math.max(zeit + 0.01, zeit + l - 0.25)); g.gain.linearRampToValueAtTime(0, zeit + l);
+    q.connect(g); g.connect(musikBus); q.start(zeit, b._start); q.stop(zeit + l + 0.05);
+  }
+  const MZ = { an: false, k: "", P: null, intens: 0, naechste: 0, schritt: 0, timer: 0, melo: 7 };
+  function musikVorladen(P) {
+    const roh = [[P.arp, P.grund + 12, P.grund + 24], [P.mel, P.grund + 12, P.grund + 31], [P.bass, P.grund - 12, P.grund]];
+    roh.forEach(([fam, a, b]) => { if (!PROBEN[fam]) return; PROBEN[fam].filter(m => m >= a - 4 && m <= b + 4).forEach(m => probeLaden(fam + "_" + m)); });
+    [P.schlag === "bodh" ? "bodh1" : P.schlag, "bodh1", "bodh2", "timp1"].forEach(n => n && probeLaden(n));
+  }
+  function musikStart(k, intens) {
+    if (!audio() || !MUSIK[k]) return;
+    MZ.k = k; MZ.P = MUSIK[k]; MZ.intens = intens || 0;
+    musikVorladen(MZ.P);
+    if (MZ.an) return;
+    MZ.an = true; MZ.naechste = ac.currentTime + 0.15; MZ.schritt = 0;
+    MZ.timer = setInterval(musikTakt, 90);
+  }
+  function musikStop() { if (!MZ.an) return; MZ.an = false; clearInterval(MZ.timer); }
+  function tonDerStufe(P, stufe) { const n = P.leiter.length; return P.grund + P.leiter[((stufe % n) + n) % n] + 12 * Math.floor(stufe / n); }
+  function musikTakt() {
+    if (!ac || !MZ.an || EINST.musik <= 0) return;
+    const P = MZ.P, achtel = 60 / (P.tempo * (MZ.intens ? 1.12 : 1)) / 2;
+    while (MZ.naechste < ac.currentTime + 0.4) {
+      const i = MZ.schritt, takt = Math.floor(i / 8), pos = i % 8, z = MZ.naechste, akk = P.folge[takt % P.folge.length];
+      const akkord = [akk, akk + 2, akk + 4].map(st => tonDerStufe(P, st));
+      if (pos === 0) note(P.bass, akkord[0] - 12, z, achtel * 8, 1);
+      if (!P.luecken || Math.random() > P.luecken) {
+        const muster = [0, 1, 2, 1, 0, 2, 1, 2], ton = akkord[muster[pos]] + 12;
+        note(P.arp, ton, z, achtel * 3, pos % 2 ? 0.75 : 1);
+      }
+      if ((pos === 0 || pos === 4 || (MZ.intens && pos === 6)) && Math.random() < P.dicht) {
+        MZ.melo = klemm(MZ.melo + zufall([-2, -1, -1, 1, 1, 2, 0]), 4, 12);
+        if (Math.random() < 0.4) MZ.melo = akk + 7 + zufall([0, 2, 4]);
+        note(P.mel, tonDerStufe(P, MZ.melo) + (P.mel === "glock" ? 24 : 12), z, achtel * (pos === 6 ? 2 : 4), 1);
+      }
+      if (P.schlag === "amboss" && pos === 0 && Math.random() < 0.75) note("amboss", 0, z, 1.5, 1);
+      if (P.schlag === "gong" && pos === 0 && takt % 4 === 0) note("gong", 0, z, 4, 1);
+      if ((P.schlag === "bodh" || MZ.intens) && [0, 3, 4, 6].includes(pos)) note(pos === 0 ? "bodh1" : "bodh2", 0, z, 1, pos === 0 ? 1 : 0.7);
+      if (MZ.intens && S && S.A && S.A.boss && pos === 0 && takt % 2 === 0) note("timp1", 0, z, 2, 1);
+      MZ.naechste += achtel; MZ.schritt++;
+    }
+  }
+
+  let letzterKlang = {}, letzteVib = 0;
+  function vib(ms) { if (!EINST.vib || !navigator.vibrate) return; const j = performance.now(); if (j - letzteVib < 90) return; letzteVib = j; try { navigator.vibrate(ms); } catch (_) {} }
   function selten(k, ms) { const j = performance.now(); if (letzterKlang[k] && j - letzterKlang[k] < ms) return false; letzterKlang[k] = j; return true; }
   const KLANG = {
     wurf: () => { knistern(0.18, 0.08, "bandpass", 1800); ton("triangle", 260, 520, 0.14, 0.05); },
@@ -505,10 +699,54 @@
   const up = k => (S && S.up[k]) || 0;
   const zornFaktor = () => STUFEN[S.stufe].zorn * (1 - 0.15 * up("grummeln"));
 
+  /* ---------- Schatzkammer, Statistik und Trophäen (gelten für alle Schwierigkeiten) ---------- */
+  const ERFOLGE = [["erster", "💰"], ["relikt1", "🏺"], ["relikt8", "👑"], ["beute1000", "🪙"], ["gier5", "🤑"], ["zorn3", "🌋"], ["kombo", "⚡"], ["rex", "🐕"], ["ezekiel", "🗡️"],
+    ["sparsam", "🌱"], ["bosse", "☠️"], ["demo", "🐙"], ["kampagne", "🗺️"], ["endlos5", "♾️"], ["sterne", "⭐"], ["alleSterne", "🌟"], ["hain", "🌳"]];
+  let STAT = (() => { try { const v = JSON.parse(localStorage.getItem("imres-echohort-statistik") || "{}"); return v && typeof v === "object" ? v : {}; } catch (_) { return {}; } })();
+  ["relikte", "bosse", "erfolge"].forEach(k => { if (!STAT[k] || typeof STAT[k] !== "object") STAT[k] = {}; });
+  const statSichern = () => schreib("imres-echohort-statistik", JSON.stringify(STAT));
+  function erfolg(id) {
+    if (STAT.erfolge[id]) return;
+    STAT.erfolge[id] = new Date().toISOString().slice(0, 10); statSichern();
+    const e = ERFOLGE.find(x => x[0] === id), tx = t();
+    toast(e ? e[1] : "🏆", tx.trophaee + " " + tx.erfolge[id][0], tx.erfolge[id][1]);
+  }
+  function erfolgPruefen(id) {
+    if (id === "kombo" && (STAT.kombos || 0) >= 50) erfolg("kombo");
+    if (id === "rex" && (STAT.rex || 0) >= 5) erfolg("rex");
+    if (id === "ezekiel" && (STAT.ezekiel || 0) >= 25) erfolg("ezekiel");
+    if (id === "bosse") { const alle = GEB.map(G => G.boss).filter(b => !FEINDE[b].unbesiegbar); if (alle.every(b => STAT.bosse[b])) erfolg("bosse"); }
+    if (id === "relikte") { const n = Object.keys(STAT.relikte).filter(g => STAT.relikte[g] > 0).length; if (n >= 1) erfolg("relikt1"); if (n >= GEBIETE_ANZAHL) erfolg("relikt8"); }
+    if (id === "sterne") {
+      Object.keys(STUFEN).forEach(st => { const al = sterneLesen(st), n = Object.keys(al).reduce((a, k) => a + (al[k] || 0), 0); if (n >= KAMPAGNE * 1.5) erfolg("sterne"); if (n >= KAMPAGNE * 3) erfolg("alleSterne"); });
+    }
+    if (id === "hain" && Object.keys(UPS).every(k => (S.up[k] || 0) >= UPS[k].kosten.length || k === "heilkraut")) erfolg("hain");
+  }
+  function reliktGefunden(g) {
+    const neu = !(STAT.relikte[g] > 0);
+    STAT.relikte[g] = (STAT.relikte[g] || 0) + 1; statSichern();
+    if (neu) toast("🏺", t().neuesRelikt, t().relikt[g]);
+    erfolgPruefen("relikte");
+  }
+  let toastSchlange = [], toastAn = false;
+  function toast(sym, titel, txt) {
+    toastSchlange.push([sym, titel, txt]);
+    if (!toastAn) toastWeiter();
+  }
+  function toastWeiter() {
+    const el = root.querySelector(".eh-toast"); if (!el) return;
+    const n = toastSchlange.shift();
+    if (!n) { toastAn = false; el.classList.remove("an"); return; }
+    toastAn = true;
+    el.innerHTML = '<span class="sym" aria-hidden="true">' + n[0] + '</span><span><strong>' + esc(n[1]) + '</strong><small>' + esc(n[2]) + '</small></span>';
+    el.classList.add("an"); KLANG.edel(); vib(50);
+    setTimeout(() => { el.classList.remove("an"); setTimeout(toastWeiter, 350); }, 3000);
+  }
+
   function neuesSpiel() {
     S = {
       stufe: stufeWahl, lv: 0, leben: STUFEN[stufeWahl].leben, punkte: 0, beutel: 0,
-      goldGesamt: 0, erlegtGesamt: 0, schaetzeGesamt: 0, up: {}, phase: "raub", tafel: "", R: null, A: null, erg: null
+      goldGesamt: 0, erlegtGesamt: 0, schaetzeGesamt: 0, up: {}, phase: "raub", tafel: "", R: null, A: null, erg: null, statistik: STAT
     };
   }
   const jsonLies = (k, d) => { try { const v = JSON.parse(lies(k, "null")); return v && typeof v === "object" ? v : d; } catch (_) { return d; } };
@@ -525,7 +763,7 @@
   function speichern() {
     if (!S || S.einzel) return;
     fortschrittMerken();
-    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up };
+    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber };
     schreib(SPEICHER, JSON.stringify(k));
   }
   function gespeichert() {
@@ -555,6 +793,7 @@
   /* ================== PHASE 1: RAUBZUG ================== */
   function raubzugStarten() {
     const lv = S.lv, g = gebietVon(lv);
+    musikStart(GEB[g].musik, 0);
     const zeit = (40 + 6 * up("zeit")) * STUFEN[S.stufe].zeit;
     S.phase = "raub";
     S.texte = []; S.teilchen = []; S.banner = null; S.quip = null; S.quipT = 0; S.blitze = [];
@@ -564,6 +803,7 @@
       haken: { zustand: "schwingen", winkel: 0, laenge: 18, last: null }, endeWunsch: false, fertig: false, endeT: 0,
       ausbrueche: 0, gierSchritt: 130 + 24 * Math.min(lv, KAMPAGNE + 12)
     };
+    regelStart(S.R);
     S.R.wertGesamt = S.R.dinge.reduce((s, d) => s + (d.wert || 0), 0);
     hintergrundRaub(g);
   }
@@ -674,6 +914,7 @@
       }
     });
     R.dinge = R.dinge.filter(d => !(d.typ === "tier" && d.flieht && d.alpha <= 0));
+    regelUpdate(R, dt);
     // Haken
     const f = formDaten();
     if (h.zustand === "schwingen") {
@@ -685,7 +926,8 @@
     } else if (h.zustand === "raus") {
       h.laenge += 300 * f.schuss * dt;
       const sp = hakenSpitze(h);
-      if (sp.x < 6 || sp.x > W - 6 || sp.y > LEISTE - 6 || h.laenge > reichweite()) { h.zustand = "rein"; zornDazu(7); return; }
+      if (sp.x < 6 || sp.x > W - 6 || sp.y > LEISTE - 6 || h.laenge > reichweite()) { h.zustand = "rein"; zornDazu(7); regelLaerm(R, 12); return; }
+      if (regelHaken(R, sp)) return;
       for (const d of R.dinge) {
         if (d.flieht) continue;
         if (abst(sp.x, sp.y, d.x, d.y) > d.r + 5) continue;
@@ -727,6 +969,7 @@
     if (d.block === "netz") { d.block = null; funken(d.x, d.y, 8, ["#ebe2cc", "#bdb6a6"], 50); }
     R.dinge.splice(R.dinge.indexOf(d), 1);
     h.last = d; h.last2 = null; h.zustand = "rein"; KLANG.griff();
+    regelGriff(R, d);
     if (up("doppelgriff") && d.typ !== "stein") {
       const n = R.dinge.filter(o => ["muenze", "beutel", "nugget", "edelstein", "truhe", "res", "relikt"].includes(o.typ) && !o.block && abst(o.x, o.y, d.x, d.y) < d.r + o.r + 24 && !(f.maxGewicht && d.gewicht + o.gewicht > f.maxGewicht + 1))
         .sort((a, b) => abst(a.x, a.y, d.x, d.y) - abst(b.x, b.y, d.x, d.y))[0];
@@ -737,7 +980,7 @@
   function einsammeln(d) {
     const R = S.R, T = t(), x = DREH.x, y = DREH.y + 20;
     if (d.typ === "stein") {
-      R.beute += d.wert; text(x + 30, y, "+" + d.wert, "#a89f8f", 14); KLANG.stein(); quip("stein", 0.55); zornDazu(18); return;
+      R.beute += d.wert; text(x + 30, y, "+" + d.wert, "#a89f8f", 14); KLANG.stein(); quip("stein", 0.55); zornDazu(18); regelLaerm(R, 25); return;
     }
     if (d.typ === "res") {
       const n = Math.round(14 * (1 + 0.2 * up("ernte")));
@@ -754,7 +997,7 @@
     text(x + 34, y, "+" + d.wert, "#e0a046", d.wert >= 100 ? 20 : 16);
     funken(x, y - 10, d.wert >= 100 ? 16 : 8, ["#e0a046", "#ffd34d", "#ebe2cc"], 70);
     if (d.typ === "edelstein" || d.typ === "relikt") KLANG.edel(); else KLANG.gold();
-    if (d.typ === "relikt") text(W / 2, 150, T.relikt[R.g] + "!", "#ffd34d", 20, 1.8);
+    if (d.typ === "relikt") { text(W / 2, 150, T.relikt[R.g] + "!", "#ffd34d", 20, 1.8); reliktGefunden(R.g); }
     quip("gold", 0.3);
     const g = Math.min(5, Math.floor(R.beute / R.gierSchritt));
     if (g > R.gier) { R.gier = g; banner(T.ev.gier(g), "#ffd34d", 1.4); }
@@ -763,6 +1006,8 @@
   function ausbruchRaub() {
     const R = S.R, T = t();
     R.zorn = 25; R.ausbrueche++;
+    if (R.ausbrueche >= 3) erfolg("zorn3");
+    vib(90);
     const wh = up("wildherz");
     const wahl = [["feuerball", 30 + 5 * wh], ["blitz", 25 + 5 * wh], ["baer", 25 + 5 * wh], ["grummeln", Math.max(4, 20 - 8 * wh)]];
     let r = Math.random() * wahl.reduce((s, w) => s + w[1], 0), art = "feuerball";
@@ -799,10 +1044,304 @@
     }
   }
 
+  /* ================== GEBIETSREGELN IM RAUBZUG ================== */
+  const WERTVOLL = ["muenze", "beutel", "nugget", "edelstein", "truhe", "res", "relikt"];
+  const freiesDing = d => WERTVOLL.includes(d.typ) && !d.block && !d.lore;
+  function rings(R, cx, cy, n, rMin, rMax, yMax) {
+    const kand = R.dinge.filter(d => ["nugget", "edelstein", "beutel", "relikt", "truhe"].includes(d.typ) && !d.block).slice(0, n);
+    kand.forEach((d, i) => {
+      for (let v = 0; v < 40; v++) {
+        const w = -Math.PI * (0.05 + 0.9 * ((i + 0.5) / n)) + zw(-0.2, 0.2), r = zw(rMin, rMax);
+        const x = klemm(cx + Math.cos(w) * r, 24, W - 24), y = klemm(cy + Math.sin(w) * r * 0.8, 150, yMax);
+        if (R.dinge.every(o => o === d || abst(x, y, o.x, o.y) > o.r + d.r + 4)) { d.x = x; d.y = y; break; }
+      }
+      d.hort = true;
+    });
+    // nichts darf auf dem Schläfer liegen
+    R.dinge.forEach(d => { if (!d.hort && abst(d.x, d.y, cx, cy) < 46) d.y = Math.max(150, cy - 80 - Math.random() * 60); });
+  }
+  function regelStart(R) {
+    const G = GEB[R.g], innen = innenVon(S.lv);
+    R.regel = G.regel; R.rt = 0;
+    if (R.regel === "goblindieb") { R.dieb = null; R.diebT = zw(4, 7); }
+    else if (R.regel === "laterne") {
+      const n = 1 + (innen >= 1 ? 1 : 0) + (S.lv >= KAMPAGNE ? 1 : 0), ys = mischen([200, 270, 340, 400]).slice(0, n);
+      R.wachen = ys.map(y => ({ x: zw(40, 360), y, v: zw(32, 48) * (Math.random() < 0.5 ? -1 : 1) * (1 + innen * 0.12), r: 44 + innen * 4, alarm: 0 }));
+    } else if (R.regel === "bugbear") {
+      R.schlaefer = { x: zw(100, 300), y: 412, laerm: 0, wachT: 0 };
+      rings(R, R.schlaefer.x, R.schlaefer.y, 3, 40, 62, 430);
+    } else if (R.regel === "loren") {
+      R.loren = []; R.loreT = 0.5; R.schiene = 272;
+      R.dinge.forEach(d => { if (d.y > R.schiene - 34 && d.y < R.schiene + 26) d.y = d.y < R.schiene ? R.schiene - 40 - d.r : R.schiene + 34 + d.r; });
+    } else if (R.regel === "venomfang") {
+      R.drache = { x: zw(110, 290), y: 410, wach: 0, giftT: 0 };
+      rings(R, R.drache.x, R.drache.y, 4, 44, 70, 432);
+      R.dinge.filter(d => d.hort).forEach(d => { d.wert = Math.round(d.wert * 1.35); });
+    } else if (R.regel === "dunkel") {
+      R.pilze = [];
+      for (let i = 0; i < 6; i++) R.pilze.push({ x: zw(30, 370), y: zw(160, 430), r: zw(36, 50), ph: Math.random() * 6 });
+    } else if (R.regel === "stroemung") {
+      R.dinge.forEach(d => { d.strom = (Math.random() < 0.5 ? -1 : 1) * zw(9, 20) * (1 + innen * 0.15); });
+    } else if (R.regel === "geysir") { R.geysire = []; R.geysirT = zw(2, 3.5); }
+  }
+  function regelLaerm(R, n) {
+    if (R.regel === "bugbear" && R.schlaefer && R.schlaefer.wachT <= 0) R.schlaefer.laerm = Math.min(100, R.schlaefer.laerm + n);
+  }
+  function regelGriff(R, d) {
+    if (R.regel === "bugbear" && abst(d.x, d.y, R.schlaefer.x, R.schlaefer.y) < 80) regelLaerm(R, 18);
+    if (R.regel === "venomfang" && d.hort) R.drache.wach = Math.min(100, R.drache.wach + 26 + d.wert / 12);
+  }
+  function wegnehmen(R, d) { const i = R.dinge.indexOf(d); if (i >= 0) R.dinge.splice(i, 1); }
+  function regelUpdate(R, dt) {
+    const T = t().rev, h = R.haken, sp = hakenSpitze(h);
+    R.rt += dt;
+    if (R.regel === "goblindieb") {
+      if (!R.dieb) {
+        R.diebT -= dt;
+        const ziele = R.dinge.filter(d => freiesDing(d) && d.y > 150);
+        if (R.diebT <= 0 && ziele.length && !R.fertig) {
+          const z = zufall(ziele), links = z.x > W / 2;
+          R.dieb = { x: links ? W + 14 : -14, y: z.y, ziel: z, item: null, zustand: "hin", links, ph: 0 };
+        }
+      } else {
+        const D = R.dieb; D.ph += dt;
+        if (D.zustand === "hin") {
+          if (!R.dinge.includes(D.ziel)) { const z = R.dinge.filter(d => freiesDing(d) && d.y > 150).sort((a, b) => abst(a.x, a.y, D.x, D.y) - abst(b.x, b.y, D.x, D.y))[0]; if (!z) { D.zustand = "flucht"; return; } D.ziel = z; }
+          const dx = D.ziel.x - D.x, dy = D.ziel.y - D.y, l = Math.hypot(dx, dy), v = 48 * dt;
+          D.links = dx < 0;
+          if (l < v + 4) { wegnehmen(R, D.ziel); D.item = D.ziel; D.zustand = "weg"; D.links = D.x < W / 2; }
+          else { D.x += dx / l * v; D.y += dy / l * v; }
+        } else {
+          D.x += (D.links ? -1 : 1) * (D.zustand === "flucht" ? 120 : 52) * dt;
+          if (D.item) { D.item.x = D.x; D.item.y = D.y - 14; }
+          if (D.x < -20 || D.x > W + 20) {
+            if (D.item) { text(klemm(D.x, 80, W - 80), D.y, T.goblinWeg, "#c4564a", 13); zornDazu(10); KLANG.grummeln(); }
+            R.dieb = null; R.diebT = zw(5, 9);
+          }
+        }
+      }
+    } else if (R.regel === "laterne") {
+      R.wachen.forEach(w => { w.x += w.v * dt; if (w.x < 24 || w.x > W - 24) { w.v *= -1; w.x = klemm(w.x, 24, W - 24); } w.alarm = Math.max(0, w.alarm - dt); });
+    } else if (R.regel === "bugbear") {
+      const B = R.schlaefer;
+      if (B.wachT > 0) { B.wachT -= dt; }
+      else {
+        B.laerm = Math.max(0, B.laerm - 3 * dt);
+        if (h.zustand === "raus" && abst(sp.x, sp.y, B.x, B.y) < 55) B.laerm = Math.min(100, B.laerm + 30 * dt);
+        if (B.laerm >= 100) {
+          const n = Math.round(R.beute * 0.15); R.beute -= n; B.laerm = 0; B.wachT = 2.4;
+          banner(T.bugbearWach(n), "#c4564a", 1.8); KLANG.bruellen(); S.beben = 0.5; zornDazu(20); vib(120);
+        }
+      }
+    } else if (R.regel === "loren") {
+      R.loreT -= dt;
+      if (R.loreT <= 0 && !R.fertig) {
+        R.loreT = zw(2.6, 4.2);
+        const links = Math.random() < 0.5, v = zw(46, 70) * (1 + innenVon(S.lv) * 0.12) * (links ? 1 : -1);
+        const lore = { x: links ? -30 : W + 30, v };
+        const r = Math.random(), typ = r < 0.12 && S.lv >= 1 ? "relikt" : r < 0.42 ? "nugget" : r < 0.7 ? "edelstein" : r < 0.85 ? "res" : "beutel";
+        const a = DINGE[typ], wf = (1 + 0.07 * Math.min(S.lv, KAMPAGNE)) * (1 + 0.1 * up("goldnase"));
+        const d = { typ, x: lore.x, y: R.schiene - 14, r: a.r * (typ === "nugget" ? 0.8 : 1), gewicht: a.gewicht * (typ === "nugget" ? 0.8 : 1), wert: Math.round(zw(a.wert[0], a.wert[1]) * wf * 1.1), dreh: 0, seed: Math.random(), lore };
+        lore.item = d; R.loren.push(lore); R.dinge.push(d);
+      }
+      R.loren.forEach(L => { L.x += L.v * dt; if (L.item && R.dinge.includes(L.item)) { L.item.x = L.x; L.item.y = R.schiene - 14; } });
+      R.loren = R.loren.filter(L => { const raus = L.x < -40 || L.x > W + 40; if (raus && L.item) wegnehmen(R, L.item); return !raus; });
+    } else if (R.regel === "venomfang") {
+      const D = R.drache;
+      if (D.giftT > 0) D.giftT -= dt;
+      else {
+        D.wach = Math.max(0, D.wach - 1.5 * dt);
+        if (h.zustand === "raus" && abst(sp.x, sp.y, D.x, D.y) < 60) D.wach = Math.min(100, D.wach + 18 * dt);
+        if (D.wach >= 100) { D.giftT = 5; D.wach = 35; banner(T.drache, "#8ac24a", 1.8); KLANG.bruellen(); KLANG.puff(); S.beben = 0.4; vib(120); }
+      }
+    } else if (R.regel === "stroemung") {
+      R.dinge.forEach(d => {
+        if (!d.strom || d.typ === "tier" || d.typ === "stoerer") return;
+        d.x += d.strom * (0.75 + 0.25 * Math.sin(R.rt * 0.8 + d.y / 40)) * dt;
+        if (d.x < -d.r - 4) d.x = W + d.r; else if (d.x > W + d.r + 4) d.x = -d.r;
+      });
+    } else if (R.regel === "geysir") {
+      R.geysirT -= dt;
+      if (R.geysirT <= 0 && !R.fertig) {
+        R.geysirT = zw(2.4, 4) / (1 + innenVon(S.lv) * 0.15);
+        const ziele = R.dinge.filter(freiesDing);
+        const x = ziele.length && Math.random() < 0.65 ? klemm(zufall(ziele).x + zw(-10, 10), 24, W - 24) : zw(30, W - 30);
+        R.geysire.push({ x, t: 0, warn: 1.7, aus: 1.3, w: 36, getroffen: false });
+      }
+      R.geysire.forEach(g => {
+        g.t += dt;
+        if (g.t < g.warn || g.t > g.warn + g.aus) return;
+        if (!g.getroffen) {
+          g.getroffen = true; S.beben = 0.25; KLANG.boom(); vib(40);
+          let n = 0;
+          R.dinge.slice().forEach(d => { if (WERTVOLL.includes(d.typ) && Math.abs(d.x - g.x) < g.w / 2 + d.r * 0.4 && d.y > 110) { wegnehmen(R, d); n++; funken(d.x, d.y, 10, ["#ff8a3a", "#ffd34d", "#c4564a"], 90); } });
+          if (n) text(g.x, 200, T.geschmolzen, "#ff8a3a", 15);
+        }
+        if (h.zustand !== "schwingen" && Math.abs(sp.x - g.x) < g.w / 2 && sp.y > 110 && !h.verbrannt) {
+          h.verbrannt = true;
+          if (h.last) { funken(sp.x, sp.y, 12, ["#ff8a3a", "#ffd34d"], 90); h.last = null; h.last2 = null; }
+          h.zustand = "rein"; text(sp.x, sp.y - 16, T.verbrannt, "#ff8a3a", 15); zornDazu(12); KLANG.grummeln();
+        }
+      });
+      if (h.zustand === "schwingen") h.verbrannt = false;
+      R.geysire = R.geysire.filter(g => g.t < g.warn + g.aus + 0.3);
+    }
+  }
+  function regelHaken(R, sp) {
+    const T = t().rev, h = R.haken;
+    if (R.regel === "goblindieb" && R.dieb && R.dieb.zustand !== "flucht" && abst(sp.x, sp.y, R.dieb.x, R.dieb.y - 4) < 16) {
+      const D = R.dieb;
+      if (D.item) { h.last = D.item; h.last.lore = null; D.item = null; text(D.x, D.y - 20, T.erwischt, "#ffd34d", 15); KLANG.griff(); }
+      else { R.beute += 15; text(D.x, D.y - 20, T.goblinFlieht, "#ffd34d", 14); KLANG.gold(); }
+      D.zustand = "flucht"; D.links = D.x < W / 2; h.zustand = "rein";
+      return true;
+    }
+    if (R.regel === "laterne") {
+      for (const w of R.wachen) {
+        if (abst(sp.x, sp.y, w.x, w.y) < w.r) {
+          w.alarm = 1.2; h.zustand = "rein"; R.zeit = Math.max(0, R.zeit - 3);
+          text(sp.x, sp.y - 16, T.wache, "#e0a046", 14); zornDazu(12); KLANG.grummeln(); vib(60);
+          return true;
+        }
+      }
+    }
+    if (R.regel === "venomfang" && R.drache.giftT > 0 && abst(sp.x, sp.y, R.drache.x, R.drache.y - 50) < 100) {
+      h.zustand = "rein"; R.zeit = Math.max(0, R.zeit - 2);
+      text(sp.x, sp.y - 16, T.gift, "#8ac24a", 14); zornDazu(10); KLANG.puff();
+      return true;
+    }
+    return false;
+  }
+  function istHell(R, x, y) {
+    if (y < 110) return true;
+    const sp = hakenSpitze(R.haken);
+    if (abst(x, y, DREH.x, DREH.y + 10) < 80) return true;
+    if (R.haken.zustand !== "schwingen" && abst(x, y, sp.x, sp.y) < 46) return true;
+    return R.pilze.some(p => abst(x, y, p.x, p.y) < p.r * 0.85);
+  }
+  let dunkelLw = null;
+  function dunkelMalen(x, R, zeit) {
+    if (!dunkelLw) { dunkelLw = document.createElement("canvas"); dunkelLw.width = W; dunkelLw.height = H; }
+    const c = dunkelLw.getContext("2d");
+    c.globalCompositeOperation = "source-over"; c.clearRect(0, 0, W, H);
+    c.fillStyle = "rgba(3,2,8,.94)"; c.fillRect(0, 104, W, LEISTE - 104);
+    c.globalCompositeOperation = "destination-out";
+    const loch = (lx, ly, r) => { const g = c.createRadialGradient(lx, ly, r * 0.2, lx, ly, r); g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(0.6, "rgba(0,0,0,.85)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.beginPath(); c.arc(lx, ly, r, 0, Math.PI * 2); c.fill(); };
+    loch(DREH.x, DREH.y + 10, 95);
+    const sp = hakenSpitze(R.haken); loch(sp.x, sp.y, R.haken.zustand === "schwingen" ? 30 : 56);
+    R.pilze.forEach(p => loch(p.x, p.y, p.r * (0.92 + Math.sin(zeit * 2 + p.ph) * 0.08)));
+    R.dinge.forEach(d => { if (d.typ === "edelstein") loch(d.x, d.y, 16 + Math.sin(zeit * 3 + d.seed * 9) * 3); else if (d.typ === "relikt") loch(d.x, d.y, 20); });
+    c.globalCompositeOperation = "source-over";
+    x.drawImage(dunkelLw, 0, 0, W, H);
+  }
+  function regelMalUnten(x, R, zeit) {
+    if (R.regel === "loren") {
+      R.loren.forEach(L => {
+        x.save(); x.translate(L.x, R.schiene);
+        x.fillStyle = "#4a443c"; x.beginPath(); x.moveTo(-20, -18); x.lineTo(20, -18); x.lineTo(16, 6); x.lineTo(-16, 6); x.closePath(); x.fill();
+        x.strokeStyle = "#7a7468"; x.lineWidth = 1.5; x.stroke();
+        x.strokeStyle = "#2a2620"; x.beginPath(); x.moveTo(-18, -8); x.lineTo(18, -8); x.stroke();
+        const dreh = L.x / 7;
+        [-11, 11].forEach(wx => { x.fillStyle = "#2a2620"; kreis(x, wx, 9, 5); x.strokeStyle = "#8a8070"; x.lineWidth = 1; x.beginPath(); x.moveTo(wx + Math.cos(dreh) * 4, 9 + Math.sin(dreh) * 4); x.lineTo(wx - Math.cos(dreh) * 4, 9 - Math.sin(dreh) * 4); x.stroke(); });
+        x.restore();
+      });
+    } else if (R.regel === "bugbear") {
+      const B = R.schlaefer, wach = B.wachT > 0;
+      x.save(); x.translate(B.x, B.y + (wach ? -8 : 0));
+      x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 0, 18, 42, 8);
+      x.fillStyle = "#7a5a32"; oval(x, 0, wach ? -4 : 6, 34, wach ? 22 : 15);
+      x.fillStyle = "#8a6a3a"; oval(x, -24, wach ? -14 : 0, 15, 13);
+      x.fillStyle = "#6b4a2a"; kreis(x, -33, wach ? -25 : -10, 5); kreis(x, -16, wach ? -26 : -11, 5);
+      x.fillStyle = "#c9a878"; oval(x, -32, wach ? -9 : 4, 6, 4.5);
+      if (wach) { x.fillStyle = "#c4564a"; kreis(x, -28, -16, 2); kreis(x, -20, -16, 2); x.fillStyle = "#2a1408"; oval(x, -30, -4, 5, 3.5); x.fillStyle = "#efe6cf"; x.fillRect(-33, -6, 1.5, 3); x.fillRect(-28.5, -6, 1.5, 3); }
+      else { x.strokeStyle = "#2a1c12"; x.lineWidth = 1.4; x.beginPath(); x.arc(-28, -1, 2.2, 0.2, Math.PI - 0.2); x.stroke(); x.beginPath(); x.arc(-20, -1, 2.2, 0.2, Math.PI - 0.2); x.stroke(); }
+      x.fillStyle = "#6b4a2a"; oval(x, 24, wach ? 4 : 12, 10, 6); oval(x, -6, wach ? 10 : 15, 10, 5);
+      x.restore();
+      if (!wach) { x.font = "700 " + (11 + Math.sin(zeit * 2) * 2) + "px " + FONT_B; x.fillStyle = "rgba(235,226,204,.7)"; x.textAlign = "center"; x.fillText("z", B.x - 10, B.y - 26 - (zeit * 12 % 14)); x.fillText("Z", B.x - 2, B.y - 34 - ((zeit * 12 + 7) % 14)); }
+      laermBalken(x, B.x, B.y + 26, B.laerm / 100, "🔊", B.laerm > 70 ? "#c4564a" : "#e0a046");
+    } else if (R.regel === "venomfang") {
+      const D = R.drache, wach = D.giftT > 0, atem = Math.sin(zeit * 1.6) * 1.5;
+      x.save(); x.translate(D.x, D.y);
+      x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 0, 18, 50, 9);
+      x.strokeStyle = "#3d6a2a"; x.lineWidth = 9; x.lineCap = "round"; x.beginPath(); x.moveTo(30, 8); x.quadraticCurveTo(52, 2, 44, -12); x.stroke();
+      const g = x.createRadialGradient(-6, -6, 4, 0, 4, 40); g.addColorStop(0, "#6fa04a"); g.addColorStop(1, "#2f5022");
+      x.fillStyle = g; oval(x, 0, 4 - atem, 38, 17 + atem);
+      x.fillStyle = "#4d7a3a"; for (let i = 0; i < 5; i++) { x.beginPath(); x.moveTo(-20 + i * 10, -10 - atem); x.lineTo(-15 + i * 10, -20 - atem); x.lineTo(-10 + i * 10, -10 - atem); x.fill(); }
+      x.fillStyle = "#2f5022"; x.beginPath(); x.moveTo(-8, -8); x.quadraticCurveTo(-14, -34, 8, -30); x.lineTo(14, -18); x.closePath(); x.fill(); x.fillStyle = "rgba(111,160,74,.5)"; x.beginPath(); x.moveTo(-6, -12); x.quadraticCurveTo(-10, -28, 6, -27); x.lineTo(10, -18); x.fill();
+      x.fillStyle = "#4d7a3a"; oval(x, -34, 4, 13, 9);
+      x.fillStyle = "#2f5022"; x.beginPath(); x.moveTo(-36, -4); x.lineTo(-30, -14); x.lineTo(-28, -3); x.fill();
+      if (wach) { x.fillStyle = "#ffd34d"; oval(x, -37, 1, 2.5, 2); } else { x.strokeStyle = "#1a2a12"; x.lineWidth = 1.3; x.beginPath(); x.arc(-37, 1, 2.4, 0.2, Math.PI - 0.2); x.stroke(); }
+      x.restore();
+      if (!wach) { x.font = "700 12px " + FONT_B; x.fillStyle = "rgba(207,230,168,.7)"; x.textAlign = "center"; x.fillText("z", D.x - 44, D.y - 18 - (zeit * 10 % 14)); }
+      laermBalken(x, D.x, D.y + 28, D.wach / 100, "🐉", D.wach > 70 ? "#c4564a" : "#8ac24a");
+    } else if (R.regel === "dunkel") {
+      R.pilze.forEach(p => { x.fillStyle = "rgba(196,154,224,.35)"; kreis(x, p.x, p.y, 7); x.fillStyle = "#e8dcd0"; x.fillRect(p.x - 1, p.y - 2, 2, 6); x.fillStyle = "#c49ae0"; oval(x, p.x, p.y - 2, 5, 3); x.fillStyle = "#c49ae0"; oval(x, p.x + 7, p.y + 2, 3, 2); });
+    } else if (R.regel === "stroemung") {
+      for (let i = 0; i < 10; i++) { const bx = (i * 47 + zeit * 20 * (i % 2 ? 1 : -1)) % (W + 20), by = LEISTE - ((zeit * 25 + i * 53) % (LEISTE - 110)); x.strokeStyle = "rgba(159,214,236,.35)"; x.lineWidth = 1; x.beginPath(); x.arc((bx + W + 20) % (W + 20) - 10, by, 2 + (i % 3), 0, Math.PI * 2); x.stroke(); }
+      x.strokeStyle = "rgba(159,214,236,.08)"; x.lineWidth = 2;
+      for (let y = 150; y < LEISTE; y += 60) { x.beginPath(); for (let xx = 0; xx <= W; xx += 20) { const yy = y + Math.sin(xx / 40 + zeit * 1.5) * 4; xx ? x.lineTo(xx, yy) : x.moveTo(xx, yy); } x.stroke(); }
+    }
+  }
+  function laermBalken(x, cx, cy, u, sym, farbe) {
+    x.fillStyle = "rgba(9,8,15,.7)"; x.fillRect(cx - 34, cy - 5, 68, 10);
+    x.fillStyle = farbe; x.fillRect(cx - 20, cy - 3, 52 * klemm(u, 0, 1), 6);
+    x.font = "9px " + FONT_B; x.textAlign = "left"; x.textBaseline = "middle"; x.fillText(sym, cx - 32, cy + 0.5);
+  }
+  function regelMalOben(x, R, zeit) {
+    if (R.regel === "dunkel") dunkelMalen(x, R, zeit);
+    else if (R.regel === "goblindieb" && R.dieb) {
+      const D = R.dieb;
+      x.save(); x.translate(D.x, D.y); if (!D.links) x.scale(-1, 1);
+      const lauf = Math.sin(D.ph * 16);
+      x.strokeStyle = "#3a2d20"; x.lineWidth = 2.5; x.beginPath(); x.moveTo(-2, 4); x.lineTo(-4 + lauf * 3, 11); x.moveTo(2, 4); x.lineTo(4 - lauf * 3, 11); x.stroke();
+      x.fillStyle = "#7a5a37"; oval(x, 0, 0, 6, 7);
+      x.fillStyle = "#6b7d3e"; x.beginPath(); x.moveTo(-3, -9); x.lineTo(-12, -14); x.lineTo(-4, -6); x.fill(); x.beginPath(); x.moveTo(3, -9); x.lineTo(10, -15); x.lineTo(4, -6); x.fill();
+      x.fillStyle = "#8a9b4c"; kreis(x, 0, -8, 5); x.beginPath(); x.moveTo(-4, -8); x.lineTo(-10, -5); x.lineTo(-4, -5); x.fill();
+      x.fillStyle = "#ffd34d"; kreis(x, -2, -9, 1);
+      x.restore();
+      if (D.item) malDing(x, D.item, zeit);
+    } else if (R.regel === "laterne") {
+      R.wachen.forEach(w => {
+        const g = x.createRadialGradient(w.x, w.y, 4, w.x, w.y, w.r);
+        g.addColorStop(0, w.alarm > 0 ? "rgba(255,90,60,.5)" : "rgba(255,200,110,.42)"); g.addColorStop(0.7, w.alarm > 0 ? "rgba(255,90,60,.18)" : "rgba(255,190,90,.14)"); g.addColorStop(1, "rgba(255,190,90,0)");
+        x.fillStyle = g; x.beginPath(); x.arc(w.x, w.y, w.r, 0, Math.PI * 2); x.fill();
+        x.strokeStyle = "rgba(255,200,110,.25)"; x.setLineDash([3, 4]); x.beginPath(); x.arc(w.x, w.y, w.r, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+        x.save(); x.translate(w.x + (w.v > 0 ? -10 : 10), w.y + 4); if (w.v < 0) x.scale(-1, 1);
+        x.fillStyle = "#7a2f26"; x.beginPath(); x.moveTo(-6, -8); x.lineTo(6, -8); x.lineTo(8, 12); x.lineTo(-8, 12); x.closePath(); x.fill();
+        x.fillStyle = "#5a1f1a"; kreis(x, 0, -11, 5.5); x.fillStyle = "#c9a88a"; oval(x, 1.5, -10, 2.4, 2.8);
+        x.strokeStyle = "#3a2d20"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(5, -2); x.lineTo(10, -5); x.stroke();
+        x.restore();
+        x.save(); x.shadowColor = "#ffcf7a"; x.shadowBlur = 12; x.fillStyle = "#ffe0a0"; x.fillRect(w.x - 2.5, w.y - 3, 5, 7); x.restore();
+        x.strokeStyle = "#3a2d20"; x.lineWidth = 1; x.strokeRect(w.x - 2.5, w.y - 3, 5, 7);
+      });
+    } else if (R.regel === "venomfang" && R.drache.giftT > 0) {
+      const D = R.drache, a = Math.min(1, R.drache.giftT / 0.6);
+      for (let i = 0; i < 9; i++) { const w = i / 9 * Math.PI * 2 + zeit * 0.6, rr = 60 + Math.sin(zeit * 2 + i) * 10; x.fillStyle = "rgba(120,190,70," + 0.16 * a + ")"; kreis(x, D.x + Math.cos(w) * rr * 0.7, D.y - 50 + Math.sin(w) * rr * 0.6, 34); }
+      x.strokeStyle = "rgba(138,194,74," + 0.6 * a + ")"; x.setLineDash([4, 4]); x.beginPath(); x.arc(D.x, D.y - 50, 100, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+    } else if (R.regel === "geysir") {
+      R.geysire.forEach(g => {
+        if (g.t < g.warn) {
+          const u = g.t / g.warn, fl = 0.4 + Math.sin(zeit * 20) * 0.2;
+          x.fillStyle = "rgba(255,110,40," + (0.25 + u * 0.4) * fl * 2 + ")"; oval(x, g.x, LEISTE - 6, g.w * 0.6, 5);
+          x.strokeStyle = "rgba(255,138,58," + (0.2 + u * 0.5) + ")"; x.setLineDash([4, 6]); x.lineWidth = 1.5; x.beginPath(); x.moveTo(g.x - g.w / 2, LEISTE); x.lineTo(g.x - g.w / 2, 110); x.moveTo(g.x + g.w / 2, LEISTE); x.lineTo(g.x + g.w / 2, 110); x.stroke(); x.setLineDash([]);
+          x.font = "16px " + FONT_B; x.textAlign = "center"; x.fillText("⚠️", g.x, LEISTE - 22);
+        } else {
+          const u = (g.t - g.warn) / g.aus, hoch = Math.min(1, u * 4) * (LEISTE - 110), a = u > 0.8 ? (1 - u) / 0.2 : 1;
+          const gr = x.createLinearGradient(0, LEISTE - hoch, 0, LEISTE); gr.addColorStop(0, "rgba(255,210,120," + a + ")"); gr.addColorStop(0.5, "rgba(255,120,40," + a + ")"); gr.addColorStop(1, "rgba(180,50,20," + a + ")");
+          x.fillStyle = gr; x.beginPath(); x.moveTo(g.x - g.w / 2, LEISTE); x.quadraticCurveTo(g.x - g.w * 0.3, LEISTE - hoch * 0.5, g.x - g.w * 0.2, LEISTE - hoch); x.lineTo(g.x + g.w * 0.2, LEISTE - hoch); x.quadraticCurveTo(g.x + g.w * 0.3, LEISTE - hoch * 0.5, g.x + g.w / 2, LEISTE); x.fill();
+          if (Math.random() < 0.6) S.teilchen.push({ x: g.x + zw(-12, 12), y: LEISTE - hoch * Math.random(), vx: zw(-40, 40), vy: zw(-120, -40), t: 0, dauer: 0.6, farbe: zufall(["#ff8a3a", "#ffd34d", "#c4564a"]), gr: 3 });
+        }
+      });
+    }
+  }
+
   function raubzugEnde() {
     const R = S.R; if (R.fertig) return;
     R.fertig = true;
     S.schaetzeGesamt += R.schaetze;
+    erfolg("erster");
+    if (R.beute >= 1000) erfolg("beute1000");
+    if (R.gier >= 5) erfolg("gier5");
     nachRaubZeigen();
   }
 
@@ -881,7 +1420,7 @@
       mischen(l);
     }
     if (boss) {
-      const b = lv < KAMPAGNE ? G.boss : zufall(["anfuehrer", "glasstab", "bugbaer", "nezna", "venomfang", "vrock", "riese"]);
+      const b = lv < KAMPAGNE ? G.boss : zufall(GEB.map(G => G.boss).filter(b => !FEINDE[b].unbesiegbar));
       if (b === "demogorgon") return { liste: l, boss: b, demo: true };
       l.splice(Math.floor(l.length * 0.6), 0, b);
       return { liste: l, boss: b };
@@ -891,6 +1430,7 @@
 
   function abwehrStarten() {
     const R = S.R, lv = S.lv, g = gebietVon(lv);
+    musikStart(GEB[g].musik, 1);
     const P = pfadBauen(lv);
     const gl = R.gl || gegnerListe(lv, R.gier);
     const reserve = 20 + 30 * up("notgroschen");
@@ -899,7 +1439,7 @@
     S.A = {
       g, P, plaetze: plaetzeBauen(P), feinde: [], geschosse: [], effekte: [],
       hort: R.beute + reserve, reserve, hortStart: R.beute + reserve,
-      saat: 30 + 15 * up("ernte") + R.saat, zorn: 0, feuerCd: 0, feuerMax: 9 * Math.pow(0.85, up("funken")),
+      saat: 30 + 15 * up("ernte") + R.saat, zorn: 0, zauber: zauberWahlPruefen().map(k => ({ k, cd: 0, max: ZAUBER[k].cd * Math.pow(0.85, up("funken")) })), aktiv: 0, mond: null, adler: null,
       warte: gl.liste.slice(), boss: gl.boss || null, demo: !!gl.demo, demoT: 0, demoDauer: 70, demoWeg: false,
       spawnT: 0, abstand: Math.max(0.7, 1.75 - lv * 0.035), gespawnt: 0,
       vorT: 9, wahl: -1, baer: null, erlegt: 0, verlorenGold: 0, zurueckGold: 0, schnell: lies("imres-echohort-schnell", "") === "1",
@@ -925,7 +1465,7 @@
     if (d.boss) {
       text(W / 2, 180, t().bossRuft[typ] || "", "#c4564a", 22, 2.2);
       banner(t().bossRuft[typ] || "", "#c4564a", 2.2);
-      KLANG.boss(); quip("boss", 1);
+      KLANG.boss(); quip("boss", 1); vib([80, 60, 120]);
       if (typ === "demogorgon") { A.demoT = 0; text(W / 2, 220, t().demo.text, "#ebe2cc", 14, 4); }
     }
     A.feinde.push(e);
@@ -935,7 +1475,8 @@
   function abwehrUpdate(dt) {
     const A = S.A;
     if (S.quipT > 0) S.quipT -= dt;
-    A.feuerCd = Math.max(0, A.feuerCd - dt);
+    A.zauber.forEach(z => { z.cd = Math.max(0, z.cd - dt); });
+    zauberUpdate(dt);
     A.zorn = Math.max(0, A.zorn - dt * 1.2);
     if (A.fertig) { A.endeT += dt; if (A.endeT > 1.1 && zustand === "spiel") ergebnisZeigen(); return; }
     // Vorbereitung
@@ -980,6 +1521,7 @@
         if (!z || z.tot) { g.weg = true; funken(g.x, g.y, 3, ["#cfeaf4", "#ffffff"], 40, 1.5); return; }
         const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy), sch = 420 * dt;
         if (d <= sch + z.r) {
+          z.eisT = Math.max(z.eisT || 0, g.bremsT);
           treffen(z, g.schaden, "frost");
           if (!z.tot) { z.bremse = Math.min(z.bremse, g.bremse); z.bremsT = Math.max(z.bremsT, g.bremsT); }
           funken(z.x, z.y, 5, ["#cfeaf4", "#9fd6ec", "#ffffff"], 60, 2); g.weg = true; return;
@@ -1003,7 +1545,9 @@
           const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy);
           g.links = dx < 0;
           if (d <= v + z.r + 4) {
-            treffen(z, g.schaden, "biss");
+            const doppelt = z.wurzelT > 0;
+            treffen(z, g.schaden * (doppelt ? 2 : 1), "biss");
+            if (doppelt) kombo(z);
             S.blitze.push({ art: "biss", x: z.x, y: z.y, t: 0, dauer: 0.35 });
             KLANG.biss(); g.zustand = "zurueck"; return;
           }
@@ -1047,7 +1591,10 @@
     if (e.giftT > 0) { e.giftT -= dt; treffen(e, e.gift * dt, "gift", true); if (e.tot) return; }
     // Fähigkeiten
     e.cd -= dt;
-    if (d.unsichtbar) { e.unsichtbarZyklus += dt; e.unsT = (e.unsichtbarZyklus % 5.5) > 3.7 ? 1 : 0; }
+    if (e.enthuelltT > 0) e.enthuelltT -= dt;
+    if (e.eisT > 0) e.eisT -= dt;
+    if (e.wurzelT > 0) e.wurzelT -= dt;
+    if (d.unsichtbar) { e.unsichtbarZyklus += dt; e.unsT = (e.unsichtbarZyklus % 5.5) > 3.7 && !(e.enthuelltT > 0) ? 1 : 0; }
     if (e.cd <= 0) {
       if (d.ruft) { e.cd = 6; for (let i = 0; i < 2; i++) { const n = feindNeu(d.ruft, Math.max(0, e.s - 10 - i * 14)); A.gesamt++; n.v *= 1.1; } funken(e.x, e.y, 10, ["#6b7d3e", "#ebe2cc"], 60); }
       else if (d.blinzeln) { e.cd = 5; funken(e.x, e.y, 14, ["#8a6ad0", "#c49ae0"], 70); e.s = e.flieht ? Math.max(5, e.s - 55) : Math.min(A.P.gesamt - 30, e.s + 55); if (!A.blinzelText) { A.blinzelText = true; text(e.x, e.y - 24, t().geheimgang, "#c49ae0", 15); } KLANG.puff(); }
@@ -1095,7 +1642,7 @@
     else { e.flieht = true; e.beute = k; e.v *= 1.25; e.bremse = 1; e.festT = 0; }
     text(HORT.x + zw(-30, 30), HORT.y - 30, t().klaut(k), "#c4564a", 16);
     funken(HORT.x, HORT.y - 6, 10, ["#e0a046", "#ffd34d"], 90);
-    KLANG.klau();
+    KLANG.klau(); vib(35);
     A.zorn = klemm(A.zorn + Math.min(40, k * 0.6) * zornFaktor(), 0, 100);
     if (A.zorn >= 100) ausbruchAbwehr();
   }
@@ -1120,6 +1667,7 @@
     e.hp -= schaden; if (!still) e.treffT = 0.12;
     if (e.hp <= 0) {
       e.tot = true; A.erlegt++; S.erlegtGesamt++;
+      if (d.boss && !d.unbesiegbar) { STAT.bosse[e.typ] = 1; erfolgPruefen("bosse"); }
       if (e.beute) goldZurueck(e);
       A.punkte += d.pkt;
       const saat = Math.round(d.pkt * 0.5) + 1;
@@ -1151,6 +1699,7 @@
       KLANG.dorn();
     } else if (T.k === "wurzel") {
       ziele.forEach(e => {
+        e.wurzelT = 2.2;
         treffen(e, sch, "wurzel", true);
         S.blitze.push({ art: "wurzelstich", x: e.x, y: e.y, t: 0, dauer: 0.55, seed: Math.random() });
         if (e.d.wurzelFest) return;
@@ -1178,7 +1727,9 @@
       for (let i = 0; i < w.ziele[st] && z; i++) {
         gehabt.add(z);
         S.blitze.push({ art: "blitz", x1: x0, y1: y0, x2: z.x, y2: z.y, t: 0, dauer: 0.3, seed: Math.random() });
-        treffen(z, s, "kette");
+        const gefroren = z.eisT > 0;
+        treffen(z, s * (gefroren ? 1.5 : 1), "kette");
+        if (gefroren) kombo(z);
         funken(z.x, z.y, 4, ["#f3e27a", "#ffffff"], 60, 1.6);
         x0 = z.x; y0 = z.y; s *= 0.8;
         z = S.A.feinde.filter(e => sichtbarFuer(e) && !gehabt.has(e) && abst(x0, y0, e.x, e.y) < 85).sort((a, b) => abst(x0, y0, a.x, a.y) - abst(x0, y0, b.x, b.y))[0];
@@ -1223,7 +1774,7 @@
             text(h.x, h.y - 26, T.rexText, "#ebe2cc", 14);
             A.feinde.forEach(e => {
               if (e.tot || e.d.boss || e.d.unbesiegbar || abst(e.x, e.y, h.x, h.y) > 70) return;
-              if (e.beute) { goldZurueck(e); text(h.x, h.y - 42, T.rexSack, "#ffd34d", 13); }
+              if (e.beute) { goldZurueck(e); text(h.x, h.y - 42, T.rexSack, "#ffd34d", 13); STAT.rex = (STAT.rex || 0) + 1; erfolgPruefen("rex"); }
               if (!e.flug) e.s = e.flieht ? Math.max(1, e.s - 30) : Math.max(0, e.s - 70);
               e.bremse = Math.min(e.bremse, 0.5); e.bremsT = Math.max(e.bremsT, 2.2);
               text(e.x, e.y - 16, "!", "#ebe2cc", 15, 0.8);
@@ -1252,6 +1803,7 @@
           h.x = z.x + (z.x < W / 2 ? 12 : -12); h.y = z.y - 2; h.links = z.x < h.x; h.sichtT = 0;
           const sch = z.d.boss ? z.max * 0.16 : z.hp + 1;
           treffen(z, sch, "dolch");
+          if (z.tot) { STAT.ezekiel = (STAT.ezekiel || 0) + 1; erfolgPruefen("ezekiel"); }
           S.blitze.push({ art: "schnitt", x: z.x, y: z.y, t: 0, dauer: 0.4, seed: Math.random() });
           funken(z.x, z.y, 12, ["#c4564a", "#9b2a20", "#ffd0c0"], 110, 2.4);
           KLANG.schnitt();
@@ -1309,21 +1861,89 @@
     if (A.zorn >= 100 && durchWurf) ausbruchAbwehr();
   }
 
+  function kombo(e, txt) {
+    S.statistik.kombos = (S.statistik.kombos || 0) + 1;
+    if ((S.komboT || 0) < performance.now()) { S.komboT = performance.now() + 600; text(e.x, e.y - 24, txt || t().kombo, "#9fd6ec", 13, 0.9); }
+    erfolgPruefen("kombo");
+  }
   function explosion(x, y, r, schaden) {
-    imKreis(x, y, r).forEach(e => treffen(e, schaden, "feuer"));
+    let spore = false;
+    imKreis(x, y, r).forEach(e => {
+      if (e.giftT > 0 && !e.tot) {
+        spore = true; e.giftT = 0;
+        treffen(e, schaden * 0.5, "feuer");
+        S.A.feinde.forEach(o => { if (o !== e && !o.tot && abst(o.x, o.y, e.x, e.y) < 36) treffen(o, schaden * 0.35, "feuer"); });
+        S.blitze.push({ art: "sporenwolke", x: e.x, y: e.y, r: 30, t: 0, dauer: 0.6 });
+        funken(e.x, e.y, 10, ["#c49ae0", "#ff8a3a"], 100); kombo(e, t().sporenExplosion);
+      }
+      treffen(e, schaden, "feuer");
+    });
     S.A.feinde.filter(e => e.unsT && abst(x, y, e.x, e.y) <= r + e.r).forEach(e => treffen(e, schaden, "feuer"));
     S.blitze.push({ art: "explosion", x, y, r, t: 0, dauer: 0.55 });
     funken(x, y, 26, ["#e0a046", "#ffd34d", "#c4564a", "#ff8a3a"], 150, 3);
-    KLANG.boom(); S.beben = Math.max(S.beben || 0, 0.25);
+    KLANG.boom(); S.beben = Math.max(S.beben || 0, 0.25); vib(25);
   }
 
-  function feuerball(x, y) {
-    const A = S.A;
-    if (A.feuerCd > 0) { text(x, y, Math.ceil(A.feuerCd) + " s", "#a89f8f", 13, 0.7); return; }
+  const zauberFrei = () => ZAUBER_REIHE.filter(k => S.lv >= ZAUBER[k].ab);
+  function zauberWahlPruefen() {
+    const frei = zauberFrei();
+    let w = (S.zauber || []).filter(k => frei.includes(k));
+    frei.forEach(k => { if (w.length < Math.min(2, frei.length) && !w.includes(k)) w.push(k); });
+    S.zauber = w.slice(0, 2);
+    return S.zauber;
+  }
+  function zauberWirken(x, y) {
+    const A = S.A, z = A.zauber[A.aktiv]; if (!z) return;
+    if (z.cd > 0) { text(x, y, Math.ceil(z.cd) + " s", "#a89f8f", 13, 0.7); return; }
+    z.cd = z.max;
     const sk = 1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10);
-    A.geschosse.push({ art: "feuerball", x0: HORT.x, y0: HORT.y - 26, x1: x, y1: y, x: HORT.x, y: HORT.y - 26, t: 0, dauer: 0.38, r: 50 + 8 * up("feuer"), schaden: 70 * (1 + 0.25 * up("feuer")) * sk });
-    A.feuerCd = A.feuerMax;
-    knistern(0.3, 0.12, "bandpass", 1400);
+    if (z.k === "feuerball") {
+      A.geschosse.push({ art: "feuerball", x0: HORT.x, y0: HORT.y - 26, x1: x, y1: y, x: HORT.x, y: HORT.y - 26, t: 0, dauer: 0.38, r: 50 + 8 * up("feuer"), schaden: 70 * (1 + 0.25 * up("feuer")) * sk });
+      knistern(0.3, 0.12, "bandpass", 1400);
+    } else if (z.k === "eissturm") {
+      const r = 74;
+      A.feinde.filter(e => !e.tot && abst(x, y, e.x, e.y) <= r + e.r).forEach(e => {
+        e.eisT = 3; treffen(e, 25 * sk, "frost", true);
+        if (e.d.boss) { e.bremse = Math.min(e.bremse, 0.5); e.bremsT = Math.max(e.bremsT, 2.5); } else e.festT = Math.max(e.festT, 2.2);
+      });
+      S.blitze.push({ art: "frost", x, y, r, t: 0, dauer: 0.7 });
+      funken(x, y, 34, ["#ffffff", "#cfeaf4", "#9fd6ec"], 120, 2.5);
+      KLANG.frost(); KLANG.puff(); vib(40);
+    } else if (z.k === "mondstrahl") {
+      A.mond = { x, y, r: 38, t: 0, dauer: 4.5, dps: 52 * sk };
+      [1318, 1760, 2093].forEach((f, i) => ton("sine", f, f, 0.6, 0.04, i * 0.08));
+    } else if (z.k === "adler") {
+      const sx = HORT.x + 40, sy = HORT.y - 30, l = Math.hypot(x - sx, y - sy) || 1;
+      A.adler = { x: sx, y: sy, vx: (x - sx) / l * 540, vy: (y - sy) / l * 540, getroffen: new Set(), t: 0 };
+      ton("sawtooth", 1400, 2200, 0.25, 0.05, 0, ["bandpass", 1800, 3]);
+    } else if (z.k === "erdbeben") {
+      A.feinde.forEach(e => {
+        if (e.tot || e.flug) return;
+        treffen(e, 35 * sk, "erde", true);
+        e.bremse = Math.min(e.bremse, 0.4); e.bremsT = Math.max(e.bremsT, 3);
+        if (!e.d.boss) e.festT = Math.max(e.festT, 0.5);
+      });
+      for (let i = 0; i < 7; i++) { const q = pfadPunkt(A.P, Math.random() * A.P.gesamt); S.blitze.push({ art: "riss", x: q.x, y: q.y, t: 0, dauer: 1.2, seed: Math.random() }); }
+      S.beben = 0.9; KLANG.boom(); KLANG.bruellen(); vib(220);
+    }
+  }
+  function zauberUpdate(dt) {
+    const A = S.A;
+    if (A.mond) {
+      const M = A.mond; M.t += dt;
+      A.feinde.forEach(e => { if (!e.tot && abst(M.x, M.y, e.x, e.y) <= M.r + e.r) { e.enthuelltT = 0.3; treffen(e, M.dps * dt, "mond", true); } });
+      if (M.t > M.dauer) A.mond = null;
+    }
+    if (A.adler) {
+      const B = A.adler; B.t += dt; B.x += B.vx * dt; B.y += B.vy * dt;
+      const sk = 1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10);
+      A.feinde.forEach(e => {
+        if (e.tot || B.getroffen.has(e) || abst(B.x, B.y, e.x, e.y) > 22 + e.r) return;
+        B.getroffen.add(e); if (e.beute) goldZurueck(e);
+        treffen(e, 60 * sk, "adler"); funken(e.x, e.y, 6, ["#c9a35a", "#ebe2cc"], 70);
+      });
+      if (B.x < -30 || B.x > W + 30 || B.y < -30 || B.y > H + 30) A.adler = null;
+    }
   }
 
   function ausbruchAbwehr() {
@@ -1399,7 +2019,7 @@
       return;
     }
     if (A.wahl >= 0) { A.wahl = -1; return; }
-    feuerball(p.x, p.y);
+    zauberWirken(p.x, p.y);
   }
 
   /* ================== ZEICHNEN ================== */
@@ -1417,25 +2037,25 @@
   /* --- Hintergrund des Raubzugs: oben Echos Platz, darunter ein Querschnitt durch das Gebiet --- */
   function hintergrundRaub(g) {
     const k = "raub" + g; if (hgSchluessel === k) return; hgSchluessel = k;
-    const G = GEB[g], F = G.f, [c, x] = neueLeinwand(), r = lcg(11 + g * 7);
+    const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(11 + g * 7);
     let gr = x.createLinearGradient(0, 0, 0, 100);
     gr.addColorStop(0, F.himmel[0]); gr.addColorStop(1, F.himmel[1]);
     x.fillStyle = gr; x.fillRect(0, 0, W, 100);
     // Horizont je nach Gebiet
-    if (g === 0 || g === 4) { // Wald / Donnerbaum: Tannen
-      for (let i = 0; i < 22; i++) { const tx = i * 19 + r() * 10, h = 30 + r() * 40; x.fillStyle = g === 4 ? "#141a14" : "#132018"; x.beginPath(); x.moveTo(tx, 100 - h); x.lineTo(tx - h * 0.3, 100); x.lineTo(tx + h * 0.3, 100); x.fill(); }
-    } else if (g === 1) { // Phandalin: Dächer
+    if (ST.horizont === "tannen") {
+      for (let i = 0; i < 22; i++) { const tx = i * 19 + r() * 10, h = 30 + r() * 40; x.fillStyle = ST.tanne || "#132018"; x.beginPath(); x.moveTo(tx, 100 - h); x.lineTo(tx - h * 0.3, 100); x.lineTo(tx + h * 0.3, 100); x.fill(); }
+    } else if (ST.horizont === "daecher") {
       for (let i = 0; i < 7; i++) { const bx = i * 60 + r() * 20, bw = 40 + r() * 20, bh = 20 + r() * 20; x.fillStyle = "#1f1716"; x.fillRect(bx, 100 - bh, bw, bh); x.fillStyle = "#3a1f1c"; x.beginPath(); x.moveTo(bx - 4, 100 - bh); x.lineTo(bx + bw / 2, 100 - bh - 16); x.lineTo(bx + bw + 4, 100 - bh); x.fill(); x.fillStyle = "rgba(224,160,70,.5)"; x.fillRect(bx + bw * 0.3, 100 - bh + 6, 5, 6); }
-    } else if (g === 2) { // Wachturm
+    } else if (ST.horizont === "turm") {
       x.fillStyle = "#1c1b24"; x.fillRect(300, 10, 46, 90); for (let i = 0; i < 4; i++) x.fillRect(298 + i * 13, 2, 8, 10);
       x.fillStyle = "rgba(224,160,70,.6)"; x.fillRect(318, 40, 6, 10);
       x.fillStyle = "#16151c"; x.fillRect(0, 76, W, 24);
-    } else if (g === 3 || g === 5 || g === 7) { // Höhlendecke
+    } else if (ST.horizont === "hoehle") {
       x.fillStyle = "rgba(0,0,0,.35)"; x.fillRect(0, 0, W, 100);
       x.fillStyle = F.boden[1];
       x.beginPath(); x.moveTo(0, 0); for (let i = 0; i <= 20; i++) x.lineTo(i * 20, 10 + r() * 18 + (i % 3 === 0 ? 18 : 0)); x.lineTo(W, 0); x.fill();
-      if (g === 7) { gr = x.createLinearGradient(0, 60, 0, 100); gr.addColorStop(0, "rgba(224,96,42,0)"); gr.addColorStop(1, "rgba(224,96,42,.35)"); x.fillStyle = gr; x.fillRect(0, 60, W, 40); }
-    } else if (g === 6) { // See: Felsufer
+      if (ST.glut) { gr = x.createLinearGradient(0, 60, 0, 100); gr.addColorStop(0, "rgba(224,96,42,0)"); gr.addColorStop(1, "rgba(224,96,42,.35)"); x.fillStyle = gr; x.fillRect(0, 60, W, 40); }
+    } else if (ST.horizont === "ufer") {
       x.fillStyle = "rgba(0,0,0,.4)"; x.fillRect(0, 0, W, 100);
       x.fillStyle = "#0a1016"; x.beginPath(); x.moveTo(0, 0); for (let i = 0; i <= 20; i++) x.lineTo(i * 20, 8 + r() * 14); x.lineTo(W, 0); x.fill();
     }
@@ -1453,9 +2073,9 @@
     // Körnung
     for (let i = 0; i < 500; i++) { x.fillStyle = r() < 0.5 ? "rgba(0,0,0,.18)" : "rgba(235,226,204,.04)"; x.fillRect(r() * W, 106 + r() * (H - 106), 1 + r() * 2, 1 + r() * 2); }
     // Gebietsdetails im Boden
-    if (g === 0 || g === 4) { // Wurzeln
-      for (let i = 0; i < 9; i++) { x.strokeStyle = g === 4 ? "rgba(90,70,48,.55)" : "rgba(80,62,40,.5)"; x.lineWidth = 2 + r() * 3; x.beginPath(); let px = r() * W, py = 104; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 30 - 15; py += 14 + r() * 18; x.lineTo(px, py); } x.stroke(); }
-      if (g === 4) for (let i = 0; i < 5; i++) { x.fillStyle = "rgba(235,226,204,.12)"; const bx = r() * W, by = 200 + r() * 250; oval(x, bx, by, 6, 3, r()); oval(x, bx + 6, by + 2, 3, 3); }
+    if (ST.wurzeln) {
+      for (let i = 0; i < 9; i++) { x.strokeStyle = ST.knochen ? "rgba(90,70,48,.55)" : "rgba(80,62,40,.5)"; x.lineWidth = 2 + r() * 3; x.beginPath(); let px = r() * W, py = 104; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 30 - 15; py += 14 + r() * 18; x.lineTo(px, py); } x.stroke(); }
+      if (ST.knochen) for (let i = 0; i < 5; i++) { x.fillStyle = "rgba(235,226,204,.12)"; const bx = r() * W, by = 200 + r() * 250; oval(x, bx, by, 6, 3, r()); oval(x, bx + 6, by + 2, 3, 3); }
     }
     if (F.mauer) { // Kellermauern
       x.strokeStyle = "rgba(0,0,0,.28)"; x.lineWidth = 1.5;
@@ -1492,7 +2112,7 @@
   /* --- Hintergrund der Abwehr: Karte von oben mit Weg --- */
   function hintergrundAbwehr(g, P) {
     hgSchluessel = "abwehr" + g + ":" + S.lv;
-    const G = GEB[g], F = G.f, [c, x] = neueLeinwand(), r = lcg(31 + g * 13 + S.lv);
+    const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(31 + g * 13 + S.lv);
     let gr = x.createLinearGradient(0, 0, 0, H);
     gr.addColorStop(0, F.gras); gr.addColorStop(1, F.boden[1]);
     x.fillStyle = gr; x.fillRect(0, 0, W, H);
@@ -1504,9 +2124,9 @@
       x.strokeStyle = "rgba(159,214,236,.18)"; x.lineWidth = 1; for (let i = 0; i < 20; i++) { const wx = r() * W, wy = r() * LEISTE; x.beginPath(); x.arc(wx, wy, 6 + r() * 6, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); }
     }
     if (F.lava) { x.strokeStyle = "rgba(255,110,40,.4)"; x.lineWidth = 3; x.shadowColor = "#ff6a2a"; x.shadowBlur = 8; for (let i = 0; i < 4; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 50 - 25; py += r() * 50 - 25; x.lineTo(px, py); } x.stroke(); } x.shadowBlur = 0; }
-    if (g === 0 || g === 4) deko(26, (px, py) => { const h = 14 + r() * 12; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 4, py + 4, h * 0.7, h * 0.5); x.fillStyle = g === 4 ? "#1d2a1a" : "#1f3320"; kreis(x, px, py, h * 0.7); x.fillStyle = g === 4 ? "#26361f" : "#2b4a2a"; kreis(x, px - 3, py - 3, h * 0.45); });
-    if (g === 1) deko(10, (px, py) => { x.fillStyle = "rgba(0,0,0,.3)"; x.fillRect(px - 14, py - 10, 32, 26); x.fillStyle = "#3a1f1c"; x.fillRect(px - 16, py - 13, 32, 24); x.strokeStyle = "#5a2f28"; x.lineWidth = 1; x.beginPath(); x.moveTo(px - 16, py - 1); x.lineTo(px + 16, py - 1); x.stroke(); });
-    if (F.mauer || g === 3 || g === 5 || g === 7) deko(22, (px, py) => { x.fillStyle = F.stein; x.globalAlpha = 0.6; oval(x, px, py, 5 + r() * 8, 4 + r() * 6, r()); x.globalAlpha = 1; });
+    if (ST.deko === "baeume") deko(26, (px, py) => { const h = 14 + r() * 12; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 4, py + 4, h * 0.7, h * 0.5); x.fillStyle = ST.knochen ? "#1d2a1a" : "#1f3320"; kreis(x, px, py, h * 0.7); x.fillStyle = ST.knochen ? "#26361f" : "#2b4a2a"; kreis(x, px - 3, py - 3, h * 0.45); });
+    if (ST.deko === "haeuser") deko(10, (px, py) => { x.fillStyle = "rgba(0,0,0,.3)"; x.fillRect(px - 14, py - 10, 32, 26); x.fillStyle = "#3a1f1c"; x.fillRect(px - 16, py - 13, 32, 24); x.strokeStyle = "#5a2f28"; x.lineWidth = 1; x.beginPath(); x.moveTo(px - 16, py - 1); x.lineTo(px + 16, py - 1); x.stroke(); });
+    if (F.mauer || ST.deko === "steine") deko(22, (px, py) => { x.fillStyle = F.stein; x.globalAlpha = 0.6; oval(x, px, py, 5 + r() * 8, 4 + r() * 6, r()); x.globalAlpha = 1; });
     if (F.pilze) deko(18, (px, py) => { x.fillStyle = "rgba(196,154,224,.2)"; kreis(x, px, py, 8); x.fillStyle = "rgba(196,154,224,.65)"; kreis(x, px, py, 3); });
     if (F.schienen) { x.strokeStyle = "rgba(138,128,112,.35)"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 60); x.lineTo(W, 120); x.moveTo(0, 66); x.lineTo(W, 126); x.stroke(); }
     // Weg
@@ -1669,24 +2289,25 @@
     x.restore();
   }
   function malRessource(x, g, r, seed) {
-    if (g === 0) { // Eicheln
+    const rs = GEB[g].stil.res;
+    if (rs === "eicheln") {
       for (const [ox, oy] of [[-4, 2], [4, 0]]) { x.fillStyle = "#a8783e"; oval(x, ox, oy + 2, 4, 5.5); x.fillStyle = "#5a4430"; oval(x, ox, oy - 2.5, 4.8, 2.6); x.fillRect(ox - 0.6, oy - 6, 1.2, 2); }
-    } else if (g === 1) { // Kräuter
+    } else if (rs === "kraeuter") {
       x.strokeStyle = "#4d6b35"; x.lineWidth = 1.4; for (let i = -2; i <= 2; i++) { x.beginPath(); x.moveTo(0, 8); x.quadraticCurveTo(i * 3, 0, i * 5, -7); x.stroke(); x.fillStyle = "#6f9a3a"; oval(x, i * 5, -7, 2.4, 3.6, i * 0.3); }
       x.fillStyle = "#8a6440"; x.fillRect(-3, 6, 6, 3);
-    } else if (g === 2) { // Moos
+    } else if (rs === "moos") {
       for (let i = 0; i < 6; i++) { x.fillStyle = i % 2 ? "#5f8a4a" : "#4a7038"; kreis(x, Math.cos(i) * 5, Math.sin(i * 1.3) * 4, 4.5); }
-    } else if (g === 3) { // Leuchtkristalle
+    } else if (rs === "kristalle") {
       x.save(); x.shadowColor = "#7fd6e0"; x.shadowBlur = 10; x.fillStyle = "#7fd6e0";
       for (const [ox, h] of [[-4, 12], [1, 16], [5, 10]]) { x.beginPath(); x.moveTo(ox - 2.5, 6); x.lineTo(ox, 6 - h); x.lineTo(ox + 2.5, 6); x.fill(); }
       x.restore();
-    } else if (g === 4) { // Wurzelholz
+    } else if (rs === "wurzelholz") {
       x.strokeStyle = "#8a6440"; x.lineWidth = 3; x.lineCap = "round"; x.beginPath(); x.moveTo(-8, 4); x.quadraticCurveTo(0, -6, 8, 2); x.moveTo(-2, -1); x.lineTo(-5, -8); x.moveTo(3, 0); x.lineTo(6, -6); x.stroke();
-    } else if (g === 5) { // Sporenpilze
+    } else if (rs === "sporen") {
       x.save(); x.shadowColor = "#c49ae0"; x.shadowBlur = 8;
       for (const [ox, s] of [[-4, 1], [4, 0.8]]) { x.fillStyle = "#e8dcd0"; x.fillRect(ox - 1.2, -1, 2.4, 7 * s); x.fillStyle = "#c49ae0"; oval(x, ox, -1, 5 * s, 3.5 * s); }
       x.restore();
-    } else if (g === 6) { // Muscheln
+    } else if (rs === "muscheln") {
       x.fillStyle = "#e8c8b0"; x.beginPath(); x.moveTo(0, 6); x.lineTo(-8, -2); x.quadraticCurveTo(0, -12, 8, -2); x.closePath(); x.fill();
       x.strokeStyle = "rgba(138,100,64,.6)"; x.lineWidth = 0.8; for (let i = -2; i <= 2; i++) { x.beginPath(); x.moveTo(0, 6); x.lineTo(i * 3.5, -7); x.stroke(); }
     } else { // Feuermoos
@@ -2020,6 +2641,34 @@
     x.restore();
   }
 
+  /* --- Zauber im Bild --- */
+  function malZauber(x, A, zeit) {
+    if (A.mond) {
+      const M = A.mond, a = Math.min(1, M.t / 0.2, (M.dauer - M.t) / 0.4);
+      x.save(); x.globalAlpha = klemm(a, 0, 1);
+      const g = x.createLinearGradient(0, 0, 0, M.y); g.addColorStop(0, "rgba(232,228,255,0)"); g.addColorStop(1, "rgba(232,228,255,.35)");
+      x.fillStyle = g; x.beginPath(); x.moveTo(M.x - M.r * 0.5, 0); x.lineTo(M.x + M.r * 0.5, 0); x.lineTo(M.x + M.r, M.y); x.lineTo(M.x - M.r, M.y); x.fill();
+      const g2 = x.createRadialGradient(M.x, M.y, 2, M.x, M.y, M.r); g2.addColorStop(0, "rgba(255,255,255,.55)"); g2.addColorStop(1, "rgba(200,196,255,.08)");
+      x.fillStyle = g2; x.beginPath(); x.ellipse(M.x, M.y, M.r, M.r * 0.7, 0, 0, Math.PI * 2); x.fill();
+      for (let i = 0; i < 5; i++) { const w = zeit * 2 + i * 1.26; x.fillStyle = "rgba(255,255,255,.7)"; kreis(x, M.x + Math.cos(w) * M.r * 0.7, M.y + Math.sin(w) * M.r * 0.45 - ((zeit * 30 + i * 9) % 30), 1.4); }
+      x.restore();
+    }
+    if (A.adler) {
+      const B = A.adler, w = Math.atan2(B.vy, B.vx), fl = Math.sin(B.t * 30) * 0.5;
+      x.save(); x.translate(B.x, B.y); x.rotate(w);
+      x.fillStyle = "rgba(201,163,90,.25)"; oval(x, -26, 0, 22, 4);
+      x.fillStyle = "#6b4a2a";
+      x.beginPath(); x.moveTo(-4, 0); x.quadraticCurveTo(-6, -18 - fl * 10, -16, -22 - fl * 8); x.quadraticCurveTo(-8, -8, -12, 0); x.fill();
+      x.beginPath(); x.moveTo(-4, 0); x.quadraticCurveTo(-6, 18 + fl * 10, -16, 22 + fl * 8); x.quadraticCurveTo(-8, 8, -12, 0); x.fill();
+      x.fillStyle = "#5a3a20"; oval(x, -4, 0, 11, 4.5);
+      x.beginPath(); x.moveTo(-14, -3); x.lineTo(-22, 0); x.lineTo(-14, 3); x.fill();
+      x.fillStyle = "#f1e7cf"; kreis(x, 7, 0, 3.6);
+      x.fillStyle = "#e0a046"; x.beginPath(); x.moveTo(10, -1.4); x.lineTo(14, 0.5); x.lineTo(10, 1.4); x.fill();
+      x.fillStyle = "#1a1210"; kreis(x, 8, -1.3, 0.8);
+      x.restore();
+    }
+  }
+
   /* --- Freunde der Gruppe --- */
   const PORTRAETS = {};
   function portraetsLaden() {
@@ -2173,11 +2822,12 @@
     x.fillStyle = "rgba(255,255,255," + (0.3 + Math.sin(zeit * 3) * 0.3) + ")"; kreis(x, 6, -h * 0.7, 1.4);
     x.restore();
     malEcho(x, HORT.x + 40, HORT.y - 4, 0.85, "ranke", A.zorn, zeit);
-    // Feuerball-Ladung als Ring um Echo
-    const u = 1 - A.feuerCd / A.feuerMax;
-    x.strokeStyle = u >= 1 ? "rgba(255,138,58,.9)" : "rgba(235,226,204,.25)"; x.lineWidth = 2.5;
+    // Ladung des gewählten Zaubers als Ring um Echo
+    const z = A.zauber[A.aktiv]; if (!z) return;
+    const u = 1 - z.cd / z.max, farbe = ZAUBER[z.k].farbe;
+    x.strokeStyle = u >= 1 ? farbe : "rgba(235,226,204,.25)"; x.lineWidth = 2.5;
     x.beginPath(); x.arc(HORT.x + 40, HORT.y - 4, 26, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u); x.stroke();
-    if (u >= 1) { x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 10; x.fillStyle = "#ffb060"; kreis(x, HORT.x + 56, HORT.y - 18, 3 + Math.sin(zeit * 8)); x.restore(); }
+    if (u >= 1) { x.save(); x.shadowColor = farbe; x.shadowBlur = 10; x.fillStyle = farbe; kreis(x, HORT.x + 56, HORT.y - 18, 3 + Math.sin(zeit * 8)); x.restore(); }
   }
 
   function malBaer(x, B, zeit) {
@@ -2219,6 +2869,10 @@
           const ox = (i - 1) * 6 + (r() - 0.5) * 2, hh = h * (0.7 + r() * 0.5);
           x.fillStyle = "#6b4a30"; x.beginPath(); x.moveTo(b.x + ox - 2.6, b.y + 5); x.quadraticCurveTo(b.x + ox - 1, b.y + 5 - hh * 0.6, b.x + ox + (i - 1) * 2, b.y + 5 - hh); x.lineTo(b.x + ox + 2.6, b.y + 5); x.fill();
         }
+      } else if (b.art === "riss") {
+        const r = lcg(Math.floor(b.seed * 1e6)); x.strokeStyle = "rgba(30,20,12," + a + ")"; x.lineWidth = 2.2;
+        x.beginPath(); let px = b.x - 18, py = b.y; x.moveTo(px, py); for (let i = 0; i < 6; i++) { px += 6; py += (r() - 0.5) * 9; x.lineTo(px, py); } x.stroke();
+        x.fillStyle = "rgba(168,120,62," + a * 0.5 + ")"; for (let i = 0; i < 4; i++) kreis(x, b.x + (r() - 0.5) * 30, b.y + (r() - 0.5) * 10 - u * 10, 2);
       } else if (b.art === "schnitt") {
         x.strokeStyle = "rgba(255,90,70," + a + ")"; x.lineWidth = 2.5 * a + 0.5; x.lineCap = "round";
         const l = 9 + u * 6;
@@ -2306,7 +2960,9 @@
     return "gut";
   }
   function malZielstrahl(x, R, zeit) {
-    const z = zielInfo(R), art = zielArt(R, z.d);
+    const z = zielInfo(R);
+    if (R.regel === "dunkel" && z.d && !istHell(R, z.d.x, z.d.y)) z.d = null;
+    const art = zielArt(R, z.d);
     const farbe = { gut: "255,211,77", schlecht: "214,90,74", gesperrt: "190,182,166", leer: "235,226,204" }[art];
     const ex = DREH.x + z.dx * z.len, ey = DREH.y + z.dy * z.len;
     x.save(); x.lineCap = "round";
@@ -2339,7 +2995,9 @@
     else { x.fillStyle = "rgba(207,230,168,.25)"; kreis(x, DREH.x, 62, 10 + Math.sin(zeit * 8) * 3); }
     if (R.schmollT > 0) { x.font = "18px " + FONT_B; x.textAlign = "center"; x.fillText("💢", DREH.x + 22, 36 + Math.sin(zeit * 6) * 2); }
     // Zielhilfe
+    regelMalUnten(x, R, zeit);
     R.dinge.forEach(d => malDing(x, d, zeit));
+    regelMalOben(x, R, zeit);
     if (h.zustand === "schwingen" && !R.fertig && R.schmollT <= 0) malZielstrahl(x, R, zeit);
     malRanke(x, R, zeit);
     if (h.last) malDing(x, h.last, zeit);
@@ -2394,6 +3052,7 @@
     });
     if (A.baer) malBaer(x, A.baer, zeit);
     malHelfer(x, A, zeit);
+    malZauber(x, A, zeit);
     malEffekte(x, zeit);
     malPortrait(x, A, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, HORT.x + 60, HORT.y - 54);
@@ -2436,13 +3095,29 @@
       knopf(x, "jetzt", 8, LEISTE + 6, 220, H - LEISTE - 12, [T.jetzt], true, false, "#e0a046");
       knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
     } else {
-      const u = A.feuerCd <= 0;
-      x.font = "700 13px " + FONT_B; x.fillStyle = u ? "#ffb060" : "#a89f8f";
-      x.fillText("☄️ " + T.hud.feuerball + (u ? " ✓" : " · " + Math.ceil(A.feuerCd) + " s"), 10, LEISTE + 26);
-      x.textAlign = "center"; x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f";
-      x.fillText(levelName(A.lv), 228, LEISTE + 26, 150);
+      A.zauber.forEach((z, i) => knopfZauber(x, "zauber:" + i, 6 + i * 92, LEISTE + 4, 88, H - LEISTE - 8, z, A.aktiv === i, zeit));
+      x.textAlign = "center"; x.textBaseline = "middle"; x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f";
+      x.fillText(levelName(A.lv), 6 + A.zauber.length * 92 + (W - 92 - (6 + A.zauber.length * 92)) / 2, LEISTE + 26, W - 100 - A.zauber.length * 92);
       knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
     }
+  }
+  function knopfZauber(x, id, bx, by, bw, bh, z, an, zeit) {
+    S.knoepfe.push({ id, x: bx, y: by, w: bw, h: bh });
+    const Z = ZAUBER[z.k], u = 1 - z.cd / z.max, bereit = z.cd <= 0;
+    x.save();
+    x.fillStyle = an ? "rgba(224,160,70,.22)" : "rgba(235,226,204,.07)";
+    x.strokeStyle = an ? Z.farbe : "rgba(235,226,204,.22)"; x.lineWidth = an ? 2 : 1;
+    x.beginPath(); x.roundRect ? x.roundRect(bx, by, bw, bh, 6) : x.rect(bx, by, bw, bh); x.fill();
+    if (!bereit) { x.fillStyle = "rgba(0,0,0,.45)"; x.fillRect(bx + 1, by + 1, (bw - 2) * (1 - u), bh - 2); }
+    x.stroke();
+    if (bereit && an) { x.shadowColor = Z.farbe; x.shadowBlur = 8 + Math.sin(zeit * 6) * 4; }
+    x.font = "18px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(Z.sym, bx + 18, by + bh / 2);
+    x.shadowBlur = 0;
+    x.textAlign = "left"; x.font = "700 11px " + FONT_B; x.fillStyle = bereit ? "#ebe2cc" : "#a89f8f";
+    x.fillText(t().zauber[z.k][0], bx + 32, by + bh / 2 - 6, bw - 36);
+    x.font = "600 10px " + FONT_B; x.fillStyle = bereit ? Z.farbe : "#a89f8f";
+    x.fillText(bereit ? "✓" : Math.ceil(z.cd) + " s", bx + 32, by + bh / 2 + 8);
+    x.restore();
   }
   function knopfTurm(x, id, bx, by, bw, bh, k, st, preis, an, zuTeuer, zeit) {
     S.knoepfe.push({ id, x: bx, y: by, w: bw, h: bh });
@@ -2461,7 +3136,7 @@
   }
   function turmTafel(x, A, p, k, st, bauModus, zeit) {
     const T = t(), w = WACHTER[k], [name, info] = T.wachter[k];
-    const ph = 104, pw = W - 12, px = 6, py = p.y > LEISTE - ph - 50 ? 32 : LEISTE - ph - 4;
+    const komboTxt = T.bau.kombo[k], ph = komboTxt ? 118 : 104, pw = W - 12, px = 6, py = p.y > LEISTE - ph - 50 ? 32 : LEISTE - ph - 4;
     // Vorschau der Reichweite am Bauplatz
     if (bauModus) {
       x.save(); x.strokeStyle = "rgba(224,160,70,.65)"; x.fillStyle = "rgba(224,160,70,.07)"; x.setLineDash([5, 4]); x.lineWidth = 1.3;
@@ -2495,6 +3170,7 @@
     zeile(py + 76, T.bau.werte.tempo, jetzt.tempo, 1.7, T.bau.proSek(jetzt.tempo.toFixed(1).replace(".", sprache() === "de" ? "," : ".")), null, null);
     x.font = "italic 10.5px " + FONT_B; x.fillStyle = "#cfe6a8";
     x.fillText("✦ " + T.bau.spez[k](w, st), tx, py + 93, bauModus ? 226 : pw - 80);
+    if (komboTxt) { x.fillStyle = "#9fd6ec"; x.fillText("⚡ " + komboTxt, tx, py + 108, bauModus ? 226 : pw - 80); }
     x.restore();
     if (bauModus) {
       const c = kosten(k, 0);
@@ -2573,7 +3249,7 @@
       '<h3 id="eh-titel">' + esc(tx.titel) + '</h3>' +
       '<p class="tav-info" id="eh-text">' + esc(tx.text) + '</p>' +
       '<p class="eh-steuerung" id="eh-steuerung">' + esc(tx.steuerung) + '</p>' +
-      '<div class="eh-buehne"><button type="button" class="eh-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><div class="eh-schleier"><div class="eh-tafel"></div></div></div>' +
+      '<div class="eh-buehne"><button type="button" class="eh-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><div class="eh-schleier"><div class="eh-tafel"></div></div><div class="eh-toast" role="status" aria-live="polite"></div></div>' +
       '<div class="eh-fuss"><span class="eh-rekord"></span><button type="button" class="eh-ton"></button></div>' +
       '<div class="eh-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".eh-buehne");
@@ -2585,7 +3261,9 @@
     tonKnopf = root.querySelector(".eh-ton");
     pauseKnopf = root.querySelector(".eh-pause");
     listeEl = root.querySelector(".eh-liste");
-    tonKnopf.addEventListener("click", () => { tonAn = !tonAn; schreib("imres-echohort-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.gold(); });
+    tonKnopf.addEventListener("click", () => { if (zustand === "spiel") pausieren(); einstZeigen(); });
+    tafel.addEventListener("input", einstEingabe);
+    tafel.addEventListener("change", einstEingabe);
     pauseKnopf.addEventListener("click", pausieren);
     tafel.addEventListener("click", tafelKlick);
     tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".eh-name")) { e.preventDefault(); eintragen(); } });
@@ -2594,8 +3272,7 @@
   function fussSetzen() {
     const tx = t(), st = aktuelleStufe(), r = parseInt(lies(rekordKey(st), "0"), 10);
     fussRekord.textContent = r ? tx.rekord(r, tx.stufen[st]) : "";
-    tonKnopf.textContent = tonAn ? tx.ton[0] : tx.ton[1];
-    tonKnopf.setAttribute("aria-pressed", String(tonAn));
+    tonKnopf.textContent = tx.einst.knopf;
     pauseKnopf.setAttribute("aria-label", tx.pauseKnopf);
   }
   function texteSetzen() {
@@ -2609,7 +3286,7 @@
     if (zustand !== "spiel") tafelNeu();
   }
   function tafelNeu() {
-    ({ start: startZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true) })[tafelArt]();
+    ({ start: startZeigen, einst: einstZeigen, schatz: schatzZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true) })[tafelArt]();
   }
   function schleierAuf(html, art) {
     tafelArt = art; tafel.innerHTML = html; schleier.hidden = false; buehne.classList.remove("laeuft");
@@ -2639,12 +3316,43 @@
     const lw = frei > 0 || summe > 0 ? '<button type="button" class="tav-knopf" data-tun="levelwahl">' + esc(tx.levelwahl) + ' <small>' + esc(tx.sterneGesamt(summe, KAMPAGNE * 3)) + '</small></button>' : "";
     schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + fort + stufenHtml(tx) +
       '<button type="button" class="tav-knopf ' + (sp ? "" : "eh-haupt") + '" data-tun="neu">' + esc(tx.neu) + '</button>' + lw +
+      '<button type="button" class="tav-knopf" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>' +
       (sp ? '<p class="eh-klein">' + esc(tx.neuWarnung) + '</p>' : ""), "start");
+  }
+
+  const reliktBilder = {};
+  function reliktBild(g) {
+    if (reliktBilder[g]) return reliktBilder[g];
+    const c = document.createElement("canvas"); c.width = 96; c.height = 96;
+    const x = c.getContext("2d"); x.scale(3, 3); x.translate(16, 17);
+    const alt = S; if (!S) S = { lv: 0, up: {} };
+    malRelikt(x, GEB[g].relikt, 11, 0, 0.5);
+    S = alt;
+    return (reliktBilder[g] = c.toDataURL());
+  }
+  let schatzZurueck = "start";
+  function schatzZeigen() {
+    const tx = t();
+    if (tafelArt !== "schatz") schatzZurueck = tafelArt;
+    const karten = GEB.map((G, g) => {
+      const n = STAT.relikte[g] || 0;
+      return '<div class="eh-relikt' + (n ? "" : " fehlt") + '">' + (n ? '<img src="' + reliktBild(g) + '" alt="">' : '<span class="frage">?</span>') +
+        '<strong>' + esc(n ? tx.relikt[g] : tx.unbekannt) + '</strong><small>' + esc(tx.gebiete[g][0]) + (n ? " · " + tx.reliktAnzahl(n) : "") + '</small></div>';
+    }).join("");
+    const troph = ERFOLGE.map(([id, sym]) => {
+      const hat = STAT.erfolge[id];
+      return '<div class="eh-troph' + (hat ? " hat" : "") + '"><span class="sym" aria-hidden="true">' + (hat ? sym : "🔒") + '</span><span><strong>' + esc(tx.erfolge[id][0]) + '</strong><small>' + esc(tx.erfolge[id][1]) + '</small></span></div>';
+    }).join("");
+    const anzahl = ERFOLGE.filter(([id]) => STAT.erfolge[id]).length;
+    schleierAuf('<h4>' + esc(tx.schatzTitel) + '</h4><p>' + esc(tx.schatzText) + '</p>' +
+      '<div class="eh-relikte">' + karten + '</div>' +
+      '<h5>' + esc(tx.trophaeen) + ' · ' + anzahl + '/' + ERFOLGE.length + '</h5><div class="eh-trophs">' + troph + '</div>' +
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="schatzZurueck">' + esc(tx.zurueck) + '</button>', "schatz");
   }
 
   function levelwahlZeigen() {
     const tx = t(), st = S && S.einzel ? S.stufe : stufeWahl, frei = freiLesen(st), sterne = sterneLesen(st);
-    zustand = "start"; S = null; hgSchluessel = "";
+    zustand = "start"; S = null; hgSchluessel = ""; musikStop();
     const summe = Object.keys(sterne).reduce((a, k) => a + (sterne[k] || 0), 0);
     const zeilen = GEB.map((G, g) => '<div class="eh-lw-zeile"><span class="eh-lw-name">' + esc(tx.gebiete[g][0]) + '</span>' +
       [0, 1, 2].map(i => {
@@ -2676,6 +3384,7 @@
       '<p class="eh-ober">' + esc(unter) + (istBossLevel(lv) ? ' · ☠' : '') + '</p>' +
       '<h4>' + esc(name) + '</h4>' +
       '<p class="eh-erzaehl">' + esc(text) + '</p>' +
+      '<p class="eh-regel"><b>' + esc(tx.besonderheit) + ' ' + esc(tx.regeln[GEB[g].regel][0]) + '.</b> ' + esc(tx.regeln[GEB[g].regel][1]) + '</p>' +
       (neu.length ? '<p class="eh-neu">' + esc(tx.neuFreigeschaltet) + ' ' + neu.map(esc).join(" · ") + '</p>' : "") +
       (lv === 0 ? '<p>' + esc(tx.raubIntro) + '</p>' : "") +
       (S.einzel ? '<p class="eh-klein">' + esc(tx.einzelLabel) + ' · ' + "★".repeat(sterneLesen(S.stufe)[lv] || 0) + "☆".repeat(3 - (sterneLesen(S.stufe)[lv] || 0)) + '</p>'
@@ -2700,12 +3409,26 @@
       '<dt>' + esc(tx.raubWerte.schaetze) + '</dt><dd>' + R.schaetze + '</dd>' +
       '</dl>' +
       '<p class="eh-warn">' + esc(tx.gierWarnung(extra)) + '</p>' +
-      vorschauHtml(R.gl) +
+      vorschauHtml(R.gl) + zauberWahlHtml() +
       (S.lv <= 1 ? '<p>' + esc(tx.raubHinweis) + '</p>' : "") +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="abwehr">' + esc(tx.zurAbwehr) + '</button>', "nachRaub");
     if (!nurNeu) KLANG.gold();
   }
 
+  function zauberWahlHtml() {
+    const tx = t(), frei = zauberFrei(), wahl = zauberWahlPruefen();
+    if (frei.length < 2) return "";
+    return '<div class="eh-zauberwahl"><p class="eh-ober">' + esc(frei.length > 2 ? tx.zauberWahl : tx.hud.feuerball) + '</p><div class="eh-zw-liste">' +
+      frei.map(k => '<button type="button" class="eh-zw" data-zauber="' + k + '" aria-pressed="' + wahl.includes(k) + '"' + (frei.length <= 2 ? " disabled" : "") + '><span class="sym" aria-hidden="true">' + ZAUBER[k].sym + '</span><span><strong>' + esc(tx.zauber[k][0]) + '</strong><small>' + esc(tx.zauber[k][1]) + '</small></span></button>').join("") +
+      '</div></div>';
+  }
+  function zauberUmschalten(k) {
+    const w = zauberWahlPruefen().slice();
+    if (w.includes(k)) { if (w.length > 1) w.splice(w.indexOf(k), 1); }
+    else { if (w.length >= 2) w.shift(); w.push(k); }
+    S.zauber = w; KLANG.griff();
+    const sc = schleier.scrollTop; nachRaubZeigen(true); schleier.scrollTop = sc;
+  }
   function eigenschaften(k) {
     const d = FEINDE[k], l = [];
     if (d.unbesiegbar) return ["unbesiegbar"];
@@ -2752,6 +3475,12 @@
           const alle = sterneLesen(S.stufe);
           if (sterne > (alle[S.lv] || 0)) { alle[S.lv] = sterne; neuBest = true; schreib("imres-echohort-sterne-" + S.stufe, JSON.stringify(alle)); }
         }
+        erfolgPruefen("sterne");
+        if (A.demo && A.verlorenGold === 0 && A.hort >= A.hortStart) erfolg("demo");
+        if (S.lv >= 3 && A.plaetze.filter(p => p.turm).length <= 2) erfolg("sparsam");
+        if (!S.einzel && S.lv === KAMPAGNE - 1) erfolg("kampagne");
+        if (!S.einzel && S.lv >= KAMPAGNE + 4) erfolg("endlos5");
+        statSichern();
         S.erg = { verloren: false, gesichert, insBeutel, faktor, erlegt: A.erlegt, pkt, sieg: S.lv === KAMPAGNE - 1 && !S.einzel, ziele, sterne, neuBest, zurueck: A.zurueckGold, verlorenGold: A.verlorenGold };
         if (!S.einzel) {
           S.punkte += pkt; S.beutel += insBeutel; S.goldGesamt += gesichert;
@@ -2820,7 +3549,8 @@
       '<h4>' + esc(tx.hain) + '</h4><p>' + esc(tx.hainText) + '</p>' +
       '<p class="eh-beutel">💰 ' + esc(tx.beutel(S.beutel)) + '</p>' +
       '<div class="eh-hain">' + gruppen + '</div>' +
-      '<button type="button" class="tav-knopf eh-haupt" data-tun="weiterLevel">' + esc(tx.weiter) + '</button>', "hain");
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="weiterLevel">' + esc(tx.weiter) + '</button>' +
+      '<button type="button" class="eh-leise" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>', "hain");
   }
   function kaufen(k) {
     const u = UPS[k], st = S.up[k] || 0;
@@ -2828,6 +3558,7 @@
     if (k === "heilkraut" && S.leben >= MAX_LEBEN) return;
     S.beutel -= u.kosten[st]; S.up[k] = st + 1;
     if (k === "heilkraut") S.leben++;
+    erfolgPruefen("hain");
     KLANG.kaufen(); speichern();
     const scroll = schleier.scrollTop;
     hainZeigen(); schleier.scrollTop = scroll;
@@ -2836,12 +3567,35 @@
   function pauseZeigen() {
     const tx = t();
     schleierAuf('<h4>' + esc(tx.pause) + '</h4><p>' + esc(tx.pauseText) + '</p><button type="button" class="tav-knopf eh-haupt" data-tun="weiter">' + esc(tx.weiter) + '</button>' +
+      '<button type="button" class="tav-knopf" data-tun="einst">' + esc(tx.einst.knopf) + '</button>' +
       '<button type="button" class="eh-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>', "pause");
+  }
+  let einstZurueck = "start";
+  function einstZeigen() {
+    const tx = t(), E = tx.einst, kannVib = !!navigator.vibrate;
+    if (tafelArt !== "einst") einstZurueck = tafelArt;
+    const regler = (k, label) => '<label class="eh-regler"><span>' + esc(label) + '</span><input type="range" min="0" max="100" step="5" value="' + Math.round(EINST[k] * 100) + '" data-einst="' + k + '"><output>' + (EINST[k] > 0 ? Math.round(EINST[k] * 100) + " %" : esc(E.aus)) + '</output></label>';
+    schleierAuf('<h4>' + esc(E.titel) + '</h4>' +
+      '<div class="eh-einst">' + regler("effekte", E.effekte) + regler("musik", E.musik) +
+      '<label class="eh-schalter"><input type="checkbox" data-einst="vib"' + (EINST.vib ? " checked" : "") + (kannVib ? "" : " disabled") + '><span>' + esc(E.vib) + '</span></label>' +
+      (kannVib ? "" : '<p class="eh-klein">' + esc(E.vibNein) + '</p>') + '</div>' +
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="einstZurueck">' + esc(tx.zurueck) + '</button>', "einst");
+  }
+  function einstEingabe(e) {
+    const el = e.target.closest("[data-einst]"); if (!el) return;
+    const k = el.dataset.einst;
+    if (k === "vib") { EINST.vib = el.checked; einstSichern(); if (EINST.vib) { letzteVib = 0; vib(80); } return; }
+    EINST[k] = parseInt(el.value, 10) / 100; einstSichern();
+    const out = el.parentNode.querySelector("output"); if (out) out.textContent = EINST[k] > 0 ? Math.round(EINST[k] * 100) + " %" : t().einst.aus;
+    audio(); busseSetzen();
+    if (e.type === "change") { if (k === "effekte") KLANG.gold(); else if (k === "musik" && EINST.musik > 0 && !MZ.an) { const g = S && S.R ? GEB[S.R.g].musik : "wald"; musikStart(g, 0); setTimeout(() => { if (zustand !== "spiel" && tafelArt === "einst" && !(S && S.R)) musikStop(); }, 3500); } }
+    if (k === "musik" && EINST.musik <= 0) musikStop();
   }
 
   function spielEnde(nurNeu) {
     const tx = t();
     if (!nurNeu) {
+      musikStop();
       zustand = "ende";
       loesch(SPEICHER);
       KLANG.verloren();
@@ -2871,7 +3625,7 @@
     fussSetzen(); listeNeu();
   }
 
-  function losSpielen() { zustand = "spiel"; schleierZu(); anwerfen(); }
+  function losSpielen() { zustand = "spiel"; schleierZu(); anwerfen(); if (MZ.k && S) musikStart(MZ.k, S.phase === "abwehr" ? 1 : 0); }
 
   function tafelKlick(e) {
     const st = e.target.closest("[data-stufe]");
@@ -2882,6 +3636,8 @@
     }
     const lvb = e.target.closest("[data-level]");
     if (lvb && tafelArt === "levelwahl") { audio(); einzelStarten(parseInt(lvb.dataset.level, 10)); return; }
+    const zb = e.target.closest("[data-zauber]");
+    if (zb && tafelArt === "nachRaub") { zauberUmschalten(zb.dataset.zauber); return; }
     const kb = e.target.closest("[data-kauf]");
     if (kb && tafelArt === "hain") { kaufen(kb.dataset.kauf); return; }
     if (e.target.closest(".eh-eintragen")) { eintragen(); return; }
@@ -2898,13 +3654,17 @@
     else if (tun === "weiter") losSpielen();
     else if (tun === "beenden") { if (S && S.einzel) levelwahlZeigen(); else spielEnde(); }
     else if (tun === "levelwahl") levelwahlZeigen();
-    else if (tun === "zumStart") { S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); zeichnen(performance.now()); }
-    else if (tun === "nochmal") { zustand = "start"; S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); anwerfen(); }
+    else if (tun === "schatz") schatzZeigen();
+    else if (tun === "einst") einstZeigen();
+    else if (tun === "einstZurueck") { tafelArt = einstZurueck; tafelNeu(); }
+    else if (tun === "schatzZurueck") { tafelArt = schatzZurueck; tafelNeu(); }
+    else if (tun === "zumStart") { musikStop(); S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); zeichnen(performance.now()); }
+    else if (tun === "nochmal") { musikStop(); zustand = "start"; S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); anwerfen(); }
   }
 
   function pausieren() {
     if (zustand !== "spiel") return;
-    zustand = "pause";
+    zustand = "pause"; musikStop();
     pauseZeigen();
   }
 
@@ -2977,6 +3737,7 @@
       else if (id === "staerker") verstaerken();
       else if (id === "raus") ausreissen();
       else if (id === "jetzt") { S.A.vorT = 0.01; }
+      else if (id.startsWith("zauber:")) { S.A.aktiv = parseInt(id.slice(7), 10); KLANG.griff(); }
       else if (id === "schnell") { S.A.schnell = !S.A.schnell; schreib("imres-echohort-schnell", S.A.schnell ? "1" : ""); KLANG.griff(); }
     }
   }
@@ -3070,6 +3831,42 @@
 .eh-liste td:nth-child(3), .eh-liste th:nth-child(3), .eh-liste td:nth-child(4), .eh-liste th:nth-child(4) { text-align: right; }
 .eh-liste tr.mein td { color: var(--ember); }
 .eh-leer { color: var(--ash); font-size: .85rem; font-style: italic; margin: .3rem 0 0; }
+.eh-einst { display: grid; gap: .7rem; width: 100%; max-width: 22rem; text-align: left; }
+.eh-regler { display: grid; grid-template-columns: 7.5rem 1fr 3.2rem; gap: .5rem; align-items: center; color: var(--vellum); font-size: .92rem; }
+.eh-regler input { width: 100%; accent-color: #e0a046; }
+.eh-regler output { text-align: right; color: var(--ember); font-weight: 600; font-size: .85rem; }
+.eh-schalter { display: flex; gap: .55rem; align-items: center; color: var(--vellum); font-size: .92rem; cursor: pointer; }
+.eh-schalter input { width: 1.15rem; height: 1.15rem; accent-color: #e0a046; }
+.eh-toast { position: absolute; left: 50%; top: 12%; z-index: 5; display: flex; gap: .55rem; align-items: center; width: max-content; max-width: 88%; padding: .5rem .8rem; transform: translate(-50%, -12px); opacity: 0; pointer-events: none;
+  background: linear-gradient(172deg, #f1e7cf, #ddcca8); color: #2a2118; box-shadow: 0 10px 24px rgba(0,0,0,.5); border-left: 4px solid #e0a046; transition: opacity .3s, transform .3s; text-align: left; }
+.eh-toast.an { opacity: 1; transform: translate(-50%, 0); }
+.eh-toast .sym { font-size: 1.6rem; line-height: 1; }
+.eh-toast strong { display: block; font-family: var(--name); font-weight: 400; font-size: 1rem; color: #1d1610; }
+.eh-toast small { display: block; font-size: .78rem; color: #5a4a36; }
+.eh-relikte { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .4rem; width: 100%; }
+.eh-relikt { display: grid; justify-items: center; gap: .1rem; padding: .4rem .2rem; background: rgba(224,160,70,.08); border: 1px solid rgba(224,160,70,.35); }
+.eh-relikt img { width: 48px; height: 48px; }
+.eh-relikt .frage { width: 48px; height: 48px; display: grid; place-items: center; font-family: var(--display); font-size: 1.6rem; color: rgba(235,226,204,.25); }
+.eh-relikt strong { font-family: var(--name); font-weight: 400; font-size: .82rem; line-height: 1.05; color: var(--vellum); }
+.eh-relikt small { font-size: .66rem; color: var(--ash); line-height: 1.1; }
+.eh-relikt.fehlt { background: rgba(0,0,0,.25); border-color: var(--line); }
+.eh-relikt.fehlt strong { color: var(--ash); }
+.eh-trophs { display: grid; gap: .3rem; width: 100%; text-align: left; }
+.eh-troph { display: grid; grid-template-columns: auto 1fr; gap: .55rem; align-items: center; padding: .3rem .5rem; background: rgba(0,0,0,.25); border: 1px solid var(--line); opacity: .6; }
+.eh-troph.hat { opacity: 1; border-color: rgba(224,160,70,.5); background: rgba(224,160,70,.1); }
+.eh-troph .sym { font-size: 1.3rem; }
+.eh-troph strong { display: block; font-family: var(--name); font-weight: 400; font-size: .95rem; color: var(--vellum); }
+.eh-troph small { display: block; font-size: .74rem; color: var(--ash); }
+.eh-zauberwahl { width: 100%; display: grid; gap: .3rem; }
+.eh-zw-liste { display: grid; gap: .3rem; }
+.eh-zw { display: grid; grid-template-columns: auto 1fr; gap: .5rem; align-items: center; text-align: left; padding: .35rem .55rem; border: 1px solid var(--line); background: rgba(9,8,15,.45); color: var(--vellum); font: inherit; cursor: pointer; }
+.eh-zw[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.16); }
+.eh-zw:disabled { cursor: default; }
+.eh-zw .sym { font-size: 1.3rem; }
+.eh-zw strong { display: block; font-size: .88rem; } .eh-zw small { display: block; font-size: .74rem; color: var(--ash); }
+.eh-tafel .eh-regel { font-size: .84rem; color: #e8d8b8; background: rgba(224,160,70,.08); border-left: 3px solid var(--ember); padding: .35rem .55rem; text-align: left; }
+.eh-tafel .eh-regel b { color: var(--ember); }
+@media (max-width: 480px) { .eh-relikte { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .25rem; } .eh-relikt img, .eh-relikt .frage { width: 38px; height: 38px; } .eh-relikt strong { font-size: .72rem; } .eh-relikt small { display: none; } }
 .eh-vorschau { width: 100%; display: grid; gap: .2rem; text-align: left; background: rgba(0,0,0,.28); border: 1px solid var(--line); padding: .45rem .6rem; }
 .eh-vorschau .eh-ober { text-align: center; margin-bottom: .1rem; }
 .eh-vz { display: grid; grid-template-columns: 2.1rem auto 1fr; gap: .45rem; align-items: baseline; font-size: .84rem; }
@@ -3120,10 +3917,11 @@
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(eintraege => {
       sichtbar = eintraege[0].isIntersecting;
+      if (!sichtbar) musikStop();
       if (sichtbar) anwerfen(); else pausieren();
     }, { threshold: 0.15 }).observe(buehne);
   } else { sichtbar = true; anwerfen(); }
-  document.addEventListener("visibilitychange", () => { if (document.hidden) pausieren(); else anwerfen(); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { pausieren(); musikStop(); } else anwerfen(); });
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
