@@ -113,7 +113,18 @@
       ergWerte: { beutel: "Für den Hain", gesichert: "Gesichertes Gold", gier: "Gierfaktor", erlegt: "Erledigte Plünderer", punkte: "Punkte" },
       hain: "Echos Hain", hainText: "Hier wächst, was Echo stärker macht. Bezahlt wird mit Gold. Er tut es ungern.",
       beutel: n => n + " Gold im Beutel", kaufen: n => n + " Gold", max: "voll",
-      hainGruppen: { raub: "Raubzug", wesen: "Gemüt", abwehr: "Abwehr" },
+      hainGruppen: { raub: "Raubzug", wesen: "Gemüt", abwehr: "Abwehr", besonders: "Besonderes" },
+      feinde: { goblin: "Goblin", rotrobe: "Rote Robe", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Söldner", zombie: "Zombie", blight: "Blight", spinne: "Riesenspinne", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-Toa", duergar: "Duergar",
+        anfuehrer: "Goblin-Anführer", glasstab: "Glasstab", bugbaer: "Der Bugbear vom Wachturm", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "Der rasende Riese" },
+      eig: { flug: "fliegt", schnell: "schnell", zaeh: "zäh", ausweichen: "weicht aus", unsichtbar: "zeitweise unsichtbar", netz: "spinnt Wächter ein", feuerSchwach: "feuerschwach", wurzelFest: "wurzelfest",
+        ruft: "ruft Verstärkung", blinzeln: "nimmt Geheimgänge", gift: "Giftatem lähmt Wächter", schrei: "Schrei lähmt Wächter", wurf: "wirft Felsen auf Wächter", verwandeln: "flieht als Fledermaus", unbesiegbar: "unbesiegbar – nur aufhalten!" },
+      vorschau: "Es kommen", traegt: n => "+" + n + " zurück!", entkommt: n => "−" + n + " Gold entkommen!", leer: "Nichts mehr da!",
+      raubHinweis: "Wer Gold stiehlt, rennt damit zum Eingang zurück. Halte ihn auf, dann ist es wieder deins!",
+      schnell: ["⏩ ×2", "▶ ×1"],
+      helfer: { rex: "Rex!", rexText: "Wuff! Weg da!", rexSack: "Rex schnappt sich den Beutel!", barradin: "Barradin spielt auf!", barradinText: "Die Wächter tanzen im Takt.", ezekiel: "Ezekiel!", ezekielText: "Aus den Schatten …" },
+      sterne: { sieg: "Hort verteidigt", alles: "Kein Gold entkommen", gier: "Gier ×1,45 oder mehr" },
+      levelwahl: "★ Level wählen", levelwahlTitel: "Level wählen", levelwahlText: "Spiel ein Level noch einmal und hol dir mehr Sterne. Echos Hain ist dabei so weit gewachsen wie in deinem besten Raubzug.",
+      zurLevelwahl: "★ Zur Levelwahl", zurueck: "← Zurück", einzelLabel: "Einzelnes Level", sterneGesamt: (n, m) => "★ " + n + " von " + m,
       up: {
         ranke: ["Lange Ranke", "Die Ranke reicht weiter."],
         zug: ["Starke Ranke", "Zieht schneller hoch."],
@@ -129,7 +140,10 @@
         ernte: ["Reiche Ernte", "Mehr Saat zu Beginn und aus Funden."],
         notgroschen: ["Notgroschen", "+30 Gold Reserve im Hort."],
         baerenkraft: ["Bärenkraft", "Der Bär trifft härter und trampelt weniger."],
-        heilkraut: ["Heilkräuter", "+1 Leben."]
+        heilkraut: ["Heilkräuter", "+1 Leben."],
+        doppelgriff: ["Doppelgriff", "Die Ranke packt zwei Dinge auf einmal, wenn sie nah beieinander liegen."],
+        sanft: ["Zahmer Bär", "Echos Bärenwut zertrampelt keine Wächter mehr."],
+        freunde: ["Gute Freunde", "Rex, Barradin und Ezekiel kommen öfter vorbei."]
       },
       leben: n => "❤ " + n,
       endeTitel: "Echos Raubzug endet", sieg: "Die ganze Kampagne geplündert!", siegText: "Alle acht Gebiete. Und Echo will trotzdem mehr. Ab jetzt geht es endlos weiter.",
@@ -227,7 +241,18 @@
       ergWerte: { beutel: "For the grove", gesichert: "Gold secured", gier: "Greed factor", erlegt: "Plunderers stopped", punkte: "Points" },
       hain: "Echo's grove", hainText: "Here grows what makes Echo stronger. Paid for in gold. He does it reluctantly.",
       beutel: n => n + " gold in the pouch", kaufen: n => n + " gold", max: "maxed",
-      hainGruppen: { raub: "Raid", wesen: "Temper", abwehr: "Defence" },
+      hainGruppen: { raub: "Raid", wesen: "Temper", abwehr: "Defence", besonders: "Special" },
+      feinde: { goblin: "Goblin", rotrobe: "Redbrand", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Mercenary", zombie: "Zombie", blight: "Blight", spinne: "Giant spider", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-toa", duergar: "Duergar",
+        anfuehrer: "Goblin boss", glasstab: "Glasstaff", bugbaer: "The watchtower bugbear", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "The raging giant" },
+      eig: { flug: "flies", schnell: "fast", zaeh: "tough", ausweichen: "dodges", unsichtbar: "sometimes invisible", netz: "webs guardians", feuerSchwach: "weak to fire", wurzelFest: "root-proof",
+        ruft: "calls for help", blinzeln: "uses secret passages", gift: "poison breath stuns guardians", schrei: "scream stuns guardians", wurf: "throws boulders at guardians", verwandeln: "flees as a bat", unbesiegbar: "invincible – just hold him off!" },
+      vorschau: "Coming", traegt: n => "+" + n + " back!", entkommt: n => "−" + n + " gold escaped!", leer: "Nothing left!",
+      raubHinweis: "Whoever steals gold runs back to the entrance with it. Stop them and it's yours again!",
+      schnell: ["⏩ ×2", "▶ ×1"],
+      helfer: { rex: "Rex!", rexText: "Woof! Get lost!", rexSack: "Rex grabs the pouch!", barradin: "Barradin strikes up!", barradinText: "The guardians dance to the beat.", ezekiel: "Ezekiel!", ezekielText: "From the shadows …" },
+      sterne: { sieg: "Hoard defended", alles: "No gold escaped", gier: "Greed ×1.45 or more" },
+      levelwahl: "★ Choose level", levelwahlTitel: "Choose level", levelwahlText: "Play a level again and earn more stars. Echo's grove has grown as far as in your best raid.",
+      zurLevelwahl: "★ Back to levels", zurueck: "← Back", einzelLabel: "Single level", sterneGesamt: (n, m) => "★ " + n + " of " + m,
       up: {
         ranke: ["Long vine", "The vine reaches further."],
         zug: ["Strong vine", "Pulls up faster."],
@@ -243,7 +268,10 @@
         ernte: ["Rich harvest", "More seeds at the start and from finds."],
         notgroschen: ["Nest egg", "+30 gold reserve in the hoard."],
         baerenkraft: ["Bear strength", "The bear hits harder and tramples less."],
-        heilkraut: ["Healing herbs", "+1 life."]
+        heilkraut: ["Healing herbs", "+1 life."],
+        doppelgriff: ["Double grip", "The vine grabs two things at once when they lie close together."],
+        sanft: ["Tame bear", "Echo's bear rage no longer tramples guardians."],
+        freunde: ["Good friends", "Rex, Barradin and Ezekiel drop by more often."]
       },
       leben: n => "❤ " + n,
       endeTitel: "Echo's raid ends", sieg: "The whole campaign plundered!", siegText: "All eight regions. And Echo still wants more. From now on it goes on endlessly.",
@@ -369,7 +397,10 @@
     funken:      { gruppe: "abwehr", sym: "✨", kosten: [110, 240, 410] },
     ernte:       { gruppe: "abwehr", sym: "🌾", kosten: [100, 210, 360] },
     notgroschen: { gruppe: "abwehr", sym: "💰", kosten: [80, 180, 320] },
-    baerenkraft: { gruppe: "abwehr", sym: "🐻", kosten: [180, 380] }
+    baerenkraft: { gruppe: "abwehr", sym: "🐻", kosten: [180, 380] },
+    doppelgriff: { gruppe: "besonders", sym: "🤲", kosten: [420] },
+    sanft:       { gruppe: "besonders", sym: "🧸", kosten: [320] },
+    freunde:     { gruppe: "besonders", sym: "🐕", kosten: [200, 400] }
   };
   const MAX_LEBEN = 6;
 
@@ -461,6 +492,9 @@
     sieg: () => [523, 659, 784, 1046, 1318].forEach((f, i) => ton("triangle", f, f, 0.25, 0.1, i * 0.1)),
     verloren: () => [392, 330, 262, 196].forEach((f, i) => ton("triangle", f, f * 0.98, 0.35, 0.12, i * 0.22)),
     kaufen: () => [784, 1046].forEach((f, i) => ton("sine", f, f, 0.15, 0.08, i * 0.08)),
+    bellen: () => { ton("sawtooth", 560, 280, 0.09, 0.13, 0, ["bandpass", 900, 2]); ton("sawtooth", 600, 300, 0.1, 0.13, 0.15, ["bandpass", 900, 2]); },
+    laute: () => [392, 494, 587, 784, 587, 659, 784, 988].forEach((f, i) => ton("triangle", f, f * 0.995, 0.45, 0.06, i * 0.16)),
+    schnitt: () => { knistern(0.12, 0.2, "highpass", 3500); ton("sawtooth", 1800, 400, 0.08, 0.04); },
     verwandeln: () => { knistern(0.3, 0.1, "bandpass", 600); ton("sine", 300, 900, 0.3, 0.06); }
   };
 
@@ -477,8 +511,20 @@
       goldGesamt: 0, erlegtGesamt: 0, schaetzeGesamt: 0, up: {}, phase: "raub", tafel: "", R: null, A: null, erg: null
     };
   }
+  const jsonLies = (k, d) => { try { const v = JSON.parse(lies(k, "null")); return v && typeof v === "object" ? v : d; } catch (_) { return d; } };
+  const sterneLesen = st => jsonLies("imres-echohort-sterne-" + st, {});
+  const freiLesen = st => { const sp = gespeichert(); return Math.min(KAMPAGNE - 1, Math.max(parseInt(lies("imres-echohort-frei-" + st, "0"), 10) || 0, sp && sp.stufe === st ? sp.lv : 0)); };
+  const hainBestLesen = st => jsonLies("imres-echohort-hainbest-" + st, {});
+  const upSumme = u => Object.keys(u || {}).reduce((a, k) => a + (u[k] || 0), 0);
+  function fortschrittMerken() {
+    if (!S || S.einzel) return;
+    const st = S.stufe;
+    if (S.lv > (parseInt(lies("imres-echohort-frei-" + st, "0"), 10) || 0)) schreib("imres-echohort-frei-" + st, String(Math.min(KAMPAGNE - 1, S.lv)));
+    if (upSumme(S.up) >= upSumme(hainBestLesen(st))) schreib("imres-echohort-hainbest-" + st, JSON.stringify(S.up));
+  }
   function speichern() {
-    if (!S) return;
+    if (!S || S.einzel) return;
+    fortschrittMerken();
     const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up };
     schreib(SPEICHER, JSON.stringify(k));
   }
@@ -580,7 +626,7 @@
     if (R.fertig) return;
     if (R.schmollT > 0) { quip("stein", 0.5); return; }
     if (h.zustand !== "schwingen") return;
-    h.zustand = "raus"; h.laenge = 18;
+    h.zustand = "raus"; h.laenge = 18; R.leerlauf = 0;
     KLANG.wurf();
   }
   function formWaehlen(k) {
@@ -613,7 +659,8 @@
       if (R.zeit <= 0) { R.zeit = 0; R.endeWunsch = true; }
     }
     R.schmollT = Math.max(0, R.schmollT - dt);
-    R.zorn = Math.max(0, R.zorn - dt * 2.2);
+    R.zorn = Math.max(0, R.zorn - dt * 1.2);
+    if (R.zorn > 70 && !S.zornTipp && !lies("imres-echohort-zorntipp", "")) { S.zornTipp = true; schreib("imres-echohort-zorntipp", "1"); text(W / 2, 140, t().ausbruchTipp, "#ebe2cc", 12, 3.5); }
     // Tiere und Störenfriede bewegen sich
     R.dinge.forEach(d => {
       if (d.typ === "tier") {
@@ -632,11 +679,13 @@
     if (h.zustand === "schwingen") {
       R.schwingT += dt * (R.form === "rabe" ? 1.25 : R.form === "baer" ? 0.85 : 1);
       h.winkel = Math.sin(R.schwingT * 1.7) * 1.22;
+      R.leerlauf = (R.leerlauf || 0) + dt;
+      if (R.leerlauf > 3 && !R.fertig && R.schmollT <= 0) zornDazu(5 * dt);
       if (R.endeWunsch && !R.fertig) raubzugEnde();
     } else if (h.zustand === "raus") {
       h.laenge += 300 * f.schuss * dt;
       const sp = hakenSpitze(h);
-      if (sp.x < 6 || sp.x > W - 6 || sp.y > LEISTE - 6 || h.laenge > reichweite()) { h.zustand = "rein"; zornDazu(2.5); return; }
+      if (sp.x < 6 || sp.x > W - 6 || sp.y > LEISTE - 6 || h.laenge > reichweite()) { h.zustand = "rein"; zornDazu(7); return; }
       for (const d of R.dinge) {
         if (d.flieht) continue;
         if (abst(sp.x, sp.y, d.x, d.y) > d.r + 5) continue;
@@ -644,12 +693,13 @@
       }
     } else if (h.zustand === "rein") {
       const last = h.last;
-      const v = last ? 250 * f.zug * (1 + 0.18 * up("zug")) / (0.55 + last.gewicht * 0.42) : 560;
+      const gew = last ? last.gewicht + (h.last2 ? h.last2.gewicht * 0.8 : 0) : 0;
+      const v = last ? 250 * f.zug * (1 + 0.18 * up("zug")) / (0.55 + gew * 0.42) : 560;
       h.laenge -= v * dt;
-      if (last) { const sp = hakenSpitze(h); last.x = sp.x; last.y = sp.y + last.r * 0.6; }
+      if (last) { const sp = hakenSpitze(h); last.x = sp.x; last.y = sp.y + last.r * 0.6; if (h.last2) { h.last2.x = sp.x + last.r * 0.7; h.last2.y = sp.y + last.r * 0.6 + h.last2.r; } }
       if (h.laenge <= 18) {
         h.laenge = 18; h.zustand = "schwingen";
-        if (last) { h.last = null; einsammeln(last); }
+        if (last) { h.last = null; einsammeln(last); if (h.last2) { const l2 = h.last2; h.last2 = null; einsammeln(l2); } }
         if (R.form !== "ranke") { R.formWuerfe--; if (R.formWuerfe <= 0) { R.form = "ranke"; KLANG.verwandeln(); funken(DREH.x, 62, 10, ["#cfe6a8", "#ebe2cc"], 60); } }
         if (!R.fertig && !R.dinge.some(d => ["muenze", "beutel", "nugget", "edelstein", "truhe", "res", "relikt"].includes(d.typ))) {
           text(W / 2, 250, t().ev.alles, "#e0a046", 24, 1.8); R.endeWunsch = true;
@@ -676,13 +726,18 @@
     if (d.block === "fels") { d.block = null; d.gewicht -= 2; funken(d.x, d.y, 14, ["#7a7468", "#a8a090", "#4a4640"], 110); KLANG.stein(); }
     if (d.block === "netz") { d.block = null; funken(d.x, d.y, 8, ["#ebe2cc", "#bdb6a6"], 50); }
     R.dinge.splice(R.dinge.indexOf(d), 1);
-    h.last = d; h.zustand = "rein"; KLANG.griff();
+    h.last = d; h.last2 = null; h.zustand = "rein"; KLANG.griff();
+    if (up("doppelgriff") && d.typ !== "stein") {
+      const n = R.dinge.filter(o => ["muenze", "beutel", "nugget", "edelstein", "truhe", "res", "relikt"].includes(o.typ) && !o.block && abst(o.x, o.y, d.x, d.y) < d.r + o.r + 24 && !(f.maxGewicht && d.gewicht + o.gewicht > f.maxGewicht + 1))
+        .sort((a, b) => abst(a.x, a.y, d.x, d.y) - abst(b.x, b.y, d.x, d.y))[0];
+      if (n) { R.dinge.splice(R.dinge.indexOf(n), 1); h.last2 = n; text(d.x, d.y - 20, "×2", "#cfe6a8", 14, 0.8); }
+    }
   }
 
   function einsammeln(d) {
     const R = S.R, T = t(), x = DREH.x, y = DREH.y + 20;
     if (d.typ === "stein") {
-      R.beute += d.wert; text(x + 30, y, "+" + d.wert, "#a89f8f", 14); KLANG.stein(); quip("stein", 0.55); zornDazu(13); return;
+      R.beute += d.wert; text(x + 30, y, "+" + d.wert, "#a89f8f", 14); KLANG.stein(); quip("stein", 0.55); zornDazu(18); return;
     }
     if (d.typ === "res") {
       const n = Math.round(14 * (1 + 0.2 * up("ernte")));
@@ -837,7 +892,7 @@
   function abwehrStarten() {
     const R = S.R, lv = S.lv, g = gebietVon(lv);
     const P = pfadBauen(lv);
-    const gl = gegnerListe(lv, R.gier);
+    const gl = R.gl || gegnerListe(lv, R.gier);
     const reserve = 20 + 30 * up("notgroschen");
     S.phase = "abwehr";
     S.texte = []; S.teilchen = []; S.banner = null; S.blitze = []; S.quip = null; S.quipT = 0;
@@ -847,7 +902,8 @@
       saat: 30 + 15 * up("ernte") + R.saat, zorn: 0, feuerCd: 0, feuerMax: 9 * Math.pow(0.85, up("funken")),
       warte: gl.liste.slice(), boss: gl.boss || null, demo: !!gl.demo, demoT: 0, demoDauer: 70, demoWeg: false,
       spawnT: 0, abstand: Math.max(0.7, 1.75 - lv * 0.035), gespawnt: 0,
-      vorT: 9, wahl: -1, baer: null, erlegt: 0, punkte: 0, gesamt: gl.liste.length + (gl.demo ? 1 : 0), lv, fertig: false, endeT: 0, bossGerufen: false
+      vorT: 9, wahl: -1, baer: null, erlegt: 0, verlorenGold: 0, zurueckGold: 0, schnell: lies("imres-echohort-schnell", "") === "1",
+      helfer: [], helferT: zw(12, 18) * [1, 0.72, 0.5][up("freunde")], barradinT: 0, portrait: null, letzterHelfer: "", punkte: 0, gesamt: gl.liste.length + (gl.demo ? 1 : 0), lv, fertig: false, endeT: 0, bossGerufen: false
     };
     if (S.A.demo) S.A.gesamt = gl.liste.length;
     hintergrundAbwehr(g, P);
@@ -958,6 +1014,10 @@
           if (d <= v) { g.weg = true; if (g.turm) g.turm.draussen = Math.max(0, (g.turm.draussen || 0) - 1); return; }
           g.x += dx / d * v; g.y += dy / d * v;
         }
+      } else if (g.art === "gold") {
+        const u = Math.min(1, g.t / g.dauer);
+        g.x = g.x0 + (g.x1 - g.x0) * u; g.y = g.y0 + (g.y1 - g.y0) * u - Math.sin(u * Math.PI) * 60;
+        if (u >= 1) { g.weg = true; S.A.hort += g.n; S.A.zurueckGold += g.n; funken(HORT.x, HORT.y - 10, 12, ["#ffd34d", "#e0a046", "#fff0a0"], 90); KLANG.gold(); }
       } else if (g.art === "feuerball") {
         const u = Math.min(1, g.t / g.dauer);
         g.x = g.x0 + (g.x1 - g.x0) * u; g.y = g.y0 + (g.y1 - g.y0) * u - Math.sin(u * Math.PI) * 50;
@@ -971,8 +1031,12 @@
     A.geschosse = A.geschosse.filter(g => !g.weg);
     // Bär
     if (A.baer) baerUpdate(dt);
+    // Freunde der Gruppe
+    if (A.vorT <= 0) helferUpdate(dt);
     // Ende?
-    if (A.hort <= 0) { A.hort = 0; A.fertig = true; A.verloren = true; A.endeT = 0; return; }
+    const unterwegs = A.feinde.some(e => e.beute > 0) || A.geschosse.some(g => g.art === "gold");
+    if (A.hort <= 0 && !unterwegs) { A.hort = 0; A.fertig = true; A.verloren = true; A.endeT = 0; return; }
+    if (unterwegs) return;
     if (A.vorT <= 0 && !A.warte.length && !A.feinde.length && (!A.demo || A.demoWeg)) { A.fertig = true; A.verloren = false; A.endeT = 0; KLANG.sieg(); banner(t().sicher, "#e0a046", 2); }
   }
 
@@ -986,7 +1050,7 @@
     if (d.unsichtbar) { e.unsichtbarZyklus += dt; e.unsT = (e.unsichtbarZyklus % 5.5) > 3.7 ? 1 : 0; }
     if (e.cd <= 0) {
       if (d.ruft) { e.cd = 6; for (let i = 0; i < 2; i++) { const n = feindNeu(d.ruft, Math.max(0, e.s - 10 - i * 14)); A.gesamt++; n.v *= 1.1; } funken(e.x, e.y, 10, ["#6b7d3e", "#ebe2cc"], 60); }
-      else if (d.blinzeln) { e.cd = 5; funken(e.x, e.y, 14, ["#8a6ad0", "#c49ae0"], 70); e.s = Math.min(A.P.gesamt - 30, e.s + 55); if (!A.blinzelText) { A.blinzelText = true; text(e.x, e.y - 24, t().geheimgang, "#c49ae0", 15); } KLANG.puff(); }
+      else if (d.blinzeln) { e.cd = 5; funken(e.x, e.y, 14, ["#8a6ad0", "#c49ae0"], 70); e.s = e.flieht ? Math.max(5, e.s - 55) : Math.min(A.P.gesamt - 30, e.s + 55); if (!A.blinzelText) { A.blinzelText = true; text(e.x, e.y - 24, t().geheimgang, "#c49ae0", 15); } KLANG.puff(); }
       else if (d.gift) { e.cd = 7; giftAtem(e); }
       else if (d.schrei) { e.cd = 10; A.plaetze.forEach(p => { if (p.turm) p.turm.ausT = Math.max(p.turm.ausT, 2.5); }); banner(t().demo.schrei, "#c4564a", 1.6); KLANG.schrei(); S.beben = 0.5; }
       else if (d.wurf) { e.cd = 6.5; const ziele = A.plaetze.filter(p => p.turm); if (ziele.length) { const z = zufall(ziele); A.geschosse.push({ art: "fels", x0: e.x, y0: e.y, x1: z.x, y1: z.y, x: e.x, y: e.y, t: 0, dauer: 0.9, platz: z }); text(e.x, e.y - 30, t().wurf, "#ebe2cc", 14); } }
@@ -1001,7 +1065,18 @@
     let v = e.v * e.bremse;
     if (e.festT > 0) { e.festT -= dt; v = d.boss ? v * 0.5 : 0; }
     if (d.unbesiegbar) v = Math.max(v, e.v * 0.35);
-    if (e.flug) {
+    if (e.flieht) {
+      const aus = A.P.p[0];
+      if (e.flug) {
+        const dx = aus.x - e.x, dy = aus.y - 14 - e.y, l = Math.hypot(dx, dy);
+        if (l < 16) { entkommen(e); return; }
+        e.x += dx / l * v * dt; e.y += dy / l * v * dt;
+      } else {
+        e.s -= v * dt;
+        if (e.s <= 0) { entkommen(e); return; }
+        const q = pfadPunkt(A.P, e.s); e.x = q.x; e.y = q.y;
+      }
+    } else if (e.flug) {
       const dx = HORT.x - e.x, dy = HORT.y - 10 - e.y, l = Math.hypot(dx, dy);
       if (l < 16) { ankommen(e); return; }
       e.x += dx / l * v * dt; e.y += dy / l * v * dt;
@@ -1014,9 +1089,10 @@
 
   function ankommen(e) {
     const A = S.A;
-    e.tot = true;
     const k = Math.min(A.hort, Math.round(Math.max(e.d.klau * (1 + 0.04 * Math.min(S.lv, KAMPAGNE)), A.hortStart * (e.d.boss ? 0.22 : 0.045))));
     A.hort -= k;
+    if (e.d.unbesiegbar || k <= 0) { e.tot = true; if (k <= 0) { text(HORT.x, HORT.y - 30, t().leer, "#a89f8f", 13); funken(e.x, e.y, 6, ["#ebe2cc"], 40); return; } }
+    else { e.flieht = true; e.beute = k; e.v *= 1.25; e.bremse = 1; e.festT = 0; }
     text(HORT.x + zw(-30, 30), HORT.y - 30, t().klaut(k), "#c4564a", 16);
     funken(HORT.x, HORT.y - 6, 10, ["#e0a046", "#ffd34d"], 90);
     KLANG.klau();
@@ -1024,6 +1100,17 @@
     if (A.zorn >= 100) ausbruchAbwehr();
   }
 
+  function entkommen(e) {
+    const A = S.A; e.tot = true;
+    if (e.beute > 0) { A.verlorenGold += e.beute; text(klemm(e.x, 70, W - 70), Math.max(46, e.y + 20), t().entkommt(e.beute), "#c4564a", 15, 1.8); KLANG.klau(); }
+    e.beute = 0;
+  }
+  function goldZurueck(e) {
+    const A = S.A, n = e.beute; if (!n) return;
+    e.beute = 0;
+    A.geschosse.push({ art: "gold", x0: e.x, y0: e.y, x1: HORT.x, y1: HORT.y - 8, x: e.x, y: e.y, t: 0, dauer: 0.75, n });
+    text(e.x, e.y - 22, t().traegt(n), "#ffd34d", 15);
+  }
   function treffen(e, schaden, art, still) {
     if (e.tot) return;
     const d = e.d, A = S.A;
@@ -1033,6 +1120,7 @@
     e.hp -= schaden; if (!still) e.treffT = 0.12;
     if (e.hp <= 0) {
       e.tot = true; A.erlegt++; S.erlegtGesamt++;
+      if (e.beute) goldZurueck(e);
       A.punkte += d.pkt;
       const saat = Math.round(d.pkt * 0.5) + 1;
       A.saat += saat;
@@ -1049,7 +1137,7 @@
     T.anim = Math.max(0, (T.anim || 0) - dt);
     if (T.netz) T.netz = Math.max(0, T.netz - dt);
     if (T.ausT > 0) { T.ausT -= dt; return; }
-    T.cd -= dt; if (T.cd > 0) return;
+    T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1); if (T.cd > 0) return;
     const reich = w.reich[st], sch = w.schaden[st] * (1 + 0.045 * Math.min(S.lv, KAMPAGNE + 10));
     const ziele = imKreis(p.x, p.y, reich);
     if (!ziele.length) { T.cd = 0.1; return; }
@@ -1103,7 +1191,107 @@
       });
     }
   }
-  const fortschritt = e => e.flug ? 1000 - abst(e.x, e.y, HORT.x, HORT.y) : e.s;
+  const fortschritt = e => e.flieht ? (e.beute ? 5000 : 0) + (e.flug ? 1000 - abst(e.x, e.y, S.A.P.p[0].x, S.A.P.p[0].y) : S.A.P.gesamt - e.s) : e.flug ? 1000 - abst(e.x, e.y, HORT.x, HORT.y) : e.s;
+
+  /* ---------- Gastauftritte: Rex, Barradin, Ezekiel ---------- */
+  function helferUpdate(dt) {
+    const A = S.A, T = t().helfer;
+    A.barradinT = Math.max(0, A.barradinT - dt);
+    if (A.portrait) { A.portrait.t += dt; if (A.portrait.t > 2.8) A.portrait = null; }
+    A.helferT -= dt;
+    if (A.helferT <= 0 && !A.helfer.length) {
+      const lebend = A.feinde.filter(e => !e.tot && !e.d.unbesiegbar);
+      if (lebend.length >= 2 || lebend.some(e => e.beute)) {
+        const moegl = ["rex", "barradin", "ezekiel"].filter(k => k !== A.letzterHelfer);
+        if (lebend.some(e => e.beute)) moegl.push(A.letzterHelfer === "rex" ? "ezekiel" : "rex");
+        if (helferStart(zufall(moegl))) A.helferT = zw(18, 26) * [1, 0.72, 0.5][up("freunde")];
+        else A.helferT = 2;
+      } else A.helferT = 1.5;
+    }
+    A.helfer.forEach(h => {
+      h.t += dt;
+      if (h.art === "rex") {
+        const v = 300 * dt;
+        if (h.zustand === "hin") {
+          let z = h.ziel;
+          if (!z || z.tot) z = h.ziel = rexZiel();
+          if (!z) { h.zustand = "weg"; return; }
+          const dx = z.x - h.x, dy = z.y - h.y, d = Math.hypot(dx, dy);
+          h.links = dx < 0;
+          if (d < 16) {
+            h.zustand = "bellen"; h.bellT = 0.7; KLANG.bellen();
+            text(h.x, h.y - 26, T.rexText, "#ebe2cc", 14);
+            A.feinde.forEach(e => {
+              if (e.tot || e.d.boss || e.d.unbesiegbar || abst(e.x, e.y, h.x, h.y) > 70) return;
+              if (e.beute) { goldZurueck(e); text(h.x, h.y - 42, T.rexSack, "#ffd34d", 13); }
+              if (!e.flug) e.s = e.flieht ? Math.max(1, e.s - 30) : Math.max(0, e.s - 70);
+              e.bremse = Math.min(e.bremse, 0.5); e.bremsT = Math.max(e.bremsT, 2.2);
+              text(e.x, e.y - 16, "!", "#ebe2cc", 15, 0.8);
+            });
+            return;
+          }
+          h.x += dx / d * v; h.y += dy / d * v;
+        } else if (h.zustand === "bellen") {
+          h.bellT -= dt; if (h.bellT <= 0) { h.zustand = "weg"; h.links = h.x < W / 2; }
+        } else {
+          h.x += (h.links ? -1 : 1) * v * 1.2;
+          if (h.x < -30 || h.x > W + 30) h.fertig = true;
+        }
+      } else if (h.art === "barradin") {
+        if (h.t > 7.2) h.fertig = true;
+        h.noteT = (h.noteT || 0) - dt;
+        if (h.noteT <= 0 && h.t < 7) { h.noteT = 0.35; S.texte.push({ x: h.x + zw(-12, 12), y: h.y - 24, s: zufall(["♪", "♫", "♩"]), farbe: zufall(["#e0a046", "#ffd34d", "#cfe6a8"]), gross: 15, t: 0, dauer: 1.4 }); }
+      } else if (h.art === "ezekiel") {
+        h.schlagT -= dt;
+        if (h.schlagT <= 0) {
+          if (h.i >= h.ziele.length) { if (h.schlagT < -0.6) h.fertig = true; return; }
+          let z = h.ziele[h.i++];
+          if (!z || z.tot) z = ezekielZiele(1, h.ziele)[0];
+          if (!z) { h.schlagT = 0; return; }
+          funken(h.x, h.y, 10, ["#2a1414", "#4a1c18", "#000000"], 60, 3);
+          h.x = z.x + (z.x < W / 2 ? 12 : -12); h.y = z.y - 2; h.links = z.x < h.x; h.sichtT = 0;
+          const sch = z.d.boss ? z.max * 0.16 : z.hp + 1;
+          treffen(z, sch, "dolch");
+          S.blitze.push({ art: "schnitt", x: z.x, y: z.y, t: 0, dauer: 0.4, seed: Math.random() });
+          funken(z.x, z.y, 12, ["#c4564a", "#9b2a20", "#ffd0c0"], 110, 2.4);
+          KLANG.schnitt();
+          h.schlagT = 0.42;
+        }
+        h.sichtT = (h.sichtT || 0) + dt;
+      }
+    });
+    A.helfer = A.helfer.filter(h => !h.fertig);
+  }
+  function rexZiel() {
+    const A = S.A;
+    return A.feinde.filter(e => !e.tot && !e.d.boss && !e.d.unbesiegbar && !e.unsT)
+      .sort((a, b) => ((b.beute ? 1e4 : 0) + fortschritt(b)) - ((a.beute ? 1e4 : 0) + fortschritt(a)))[0] || null;
+  }
+  function ezekielZiele(n, ohne) {
+    return S.A.feinde.filter(e => !e.tot && !e.d.unbesiegbar && !(ohne || []).includes(e))
+      .sort((a, b) => ((b.beute ? 1e5 : 0) + (b.d.boss ? 5e4 : 0) + b.hp) - ((a.beute ? 1e5 : 0) + (a.d.boss ? 5e4 : 0) + a.hp)).slice(0, n);
+  }
+  function helferStart(art) {
+    const A = S.A, T = t().helfer;
+    if (art === "rex") {
+      const z = rexZiel(); if (!z) return false;
+      const links = z.x > W / 2;
+      A.helfer.push({ art, x: links ? W + 20 : -20, y: klemm(z.y, 40, LEISTE - 30), ziel: z, zustand: "hin", t: 0, links });
+      KLANG.bellen();
+    } else if (art === "barradin") {
+      A.barradinT = 7;
+      A.helfer.push({ art, x: HORT.x - 62, y: HORT.y - 6, t: 0 });
+      KLANG.laute(); text(W / 2, 150, T.barradinText, "#cfe6a8", 13, 2.4);
+    } else {
+      const ziele = ezekielZiele(2 + (S.lv >= 8 ? 1 : 0) + (S.lv >= 18 ? 1 : 0));
+      if (!ziele.length) return false;
+      A.helfer.push({ art, ziele, i: 0, t: 0, schlagT: 0.3, x: ziele[0].x, y: ziele[0].y, links: false, sichtT: 0 });
+      text(W / 2, 150, T.ezekielText, "#c4564a", 13, 2);
+    }
+    A.letzterHelfer = art; A.portrait = { art, t: 0 };
+    banner(T[art], art === "ezekiel" ? "#c4564a" : art === "barradin" ? "#e0a046" : "#ebe2cc", 1.5);
+    return true;
+  }
 
   function giftAtem(e) {
     const A = S.A;
@@ -1170,7 +1358,7 @@
       treffen(e, sch, "baer"); funken(e.x, e.y, 6, ["#a8783e", "#ebe2cc"], 70);
       if (!e.d.boss && !e.tot) { e.festT = Math.max(e.festT, 0.6); }
     });
-    const chance = [0.45, 0.28, 0.14][bk];
+    const chance = up("sanft") ? 0 : [0.45, 0.28, 0.14][bk];
     A.plaetze.forEach(p => {
       if (!p.turm || B.geprueft.has(p) || abst(p.x, p.y, B.x, B.y) > 46) return;
       B.geprueft.add(p);
@@ -1639,6 +1827,14 @@
     } else malFigur(x, e.typ, r, d, zeit, e);
     if (e.bremsT > 0 && e.bremse < 1) { x.strokeStyle = "rgba(159,214,236,.7)"; x.lineWidth = 1.5; x.beginPath(); x.arc(0, 0, r + 3, 0, Math.PI * 2); x.stroke(); }
     if (e.giftT > 0) { x.fillStyle = "rgba(196,154,224,.5)"; kreis(x, Math.sin(zeit * 5) * r * 0.7, -r - 3, 2); kreis(x, -Math.cos(zeit * 4) * r * 0.6, -r - 5, 1.5); }
+    if (e.beute) {
+      x.save(); x.translate(0, -r - 9 + Math.sin(zeit * 12) * 1.2);
+      x.fillStyle = "#6b4a30"; x.beginPath(); x.moveTo(-3, -5); x.quadraticCurveTo(-9, 1, -5, 6); x.lineTo(5, 6); x.quadraticCurveTo(9, 1, 3, -5); x.closePath(); x.fill();
+      x.fillStyle = "#ffd34d"; kreis(x, -1.5, -5.5, 2); kreis(x, 1.8, -6, 1.8);
+      x.fillStyle = "#e0a046"; x.font = "bold 7px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("₲", 0, 1.5);
+      x.restore();
+      x.strokeStyle = "rgba(255,211,77," + (0.5 + Math.sin(zeit * 10) * 0.3) + ")"; x.lineWidth = 1.5; x.setLineDash([3, 3]); x.beginPath(); x.arc(0, 0, r + 4, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+    }
     if (e.festT > 0) { x.strokeStyle = "#8a6440"; x.lineWidth = 2; x.beginPath(); x.moveTo(-r, r); x.quadraticCurveTo(-r * 0.5, 0, 0, r * 0.8); x.quadraticCurveTo(r * 0.5, 0, r, r); x.stroke(); }
     x.restore();
     lebensbalken(x, e);
@@ -1814,6 +2010,7 @@
       if (st < 2) { x.strokeStyle = "rgba(207,230,168,.55)"; x.setLineDash([4, 4]); x.beginPath(); x.arc(0, 0, w.reich[st + 1], 0, Math.PI * 2); x.stroke(); x.setLineDash([]); }
     }
     malTurm(x, T.k, st, T, zeit);
+    if (S.A && S.A.barradinT > 0) { x.font = "700 11px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#e0a046"; x.fillText("♪", 12, -24 + Math.sin(zeit * 6 + p.x) * 3); }
     for (let i = 0; i < 3; i++) { x.fillStyle = i <= st ? "#e0a046" : "rgba(235,226,204,.18)"; kreis(x, -6 + i * 6, 17, 2); }
     if (T.ausT > 0) {
       x.fillStyle = "rgba(20,20,24,.5)"; kreis(x, 0, -4, 19);
@@ -1821,6 +2018,96 @@
       else { x.fillStyle = "#ebe2cc"; x.font = "11px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("💤", 10, -20); }
     }
     x.restore();
+  }
+
+  /* --- Freunde der Gruppe --- */
+  const PORTRAETS = {};
+  function portraetsLaden() {
+    const q = { rex: ["rex-guckt.webp", 0.5, 0.45, 0.9], barradin: ["barradin.jpg", 0.47, 0.25, 0.34], ezekiel: ["ezekiel.jpg", 0.5, 0.16, 0.32] };
+    Object.keys(q).forEach(k => {
+      const [src, fx, fy, fs] = q[k], img = new Image(); img.decoding = "async";
+      img.onload = () => {
+        const n = 128, c = document.createElement("canvas"); c.width = n; c.height = n;
+        const x = c.getContext("2d"), w = img.naturalWidth, h = img.naturalHeight, sz = Math.min(w, h) * fs;
+        x.beginPath(); x.arc(n / 2, n / 2, n / 2, 0, Math.PI * 2); x.clip();
+        x.drawImage(img, klemm(w * fx - sz / 2, 0, w - sz), klemm(h * fy - sz / 2, 0, h - sz), sz, sz, 0, 0, n, n);
+        PORTRAETS[k] = c;
+      };
+      img.src = src;
+    });
+  }
+  function malPortrait(x, A, zeit) {
+    const P = A.portrait; if (!P) return;
+    const ein = Math.min(1, P.t / 0.25), aus = P.t > 2.4 ? 1 - (P.t - 2.4) / 0.4 : 1, a = klemm(Math.min(ein, aus), 0, 1);
+    const farbe = { rex: "#ebe2cc", barradin: "#e0a046", ezekiel: "#c4564a" }[P.art];
+    const cx = 34 - (1 - ein) * 40, cy = 64;
+    x.save(); x.globalAlpha = a;
+    x.fillStyle = "rgba(9,8,15,.75)"; x.beginPath(); x.roundRect ? x.roundRect(cx - 28, cy - 28, 128, 56, 28) : x.rect(cx - 28, cy - 28, 128, 56); x.fill();
+    if (PORTRAETS[P.art]) x.drawImage(PORTRAETS[P.art], cx - 24, cy - 24, 48, 48);
+    else { x.fillStyle = farbe; kreis(x, cx, cy, 24); }
+    x.strokeStyle = farbe; x.lineWidth = 2.5; x.beginPath(); x.arc(cx, cy, 24, 0, Math.PI * 2); x.stroke();
+    x.font = "17px " + FONT_D; x.fillStyle = farbe; x.textAlign = "left"; x.textBaseline = "middle";
+    x.fillText({ rex: "Rex", barradin: "Barradin", ezekiel: "Ezekiel" }[P.art], cx + 30, cy, 66);
+    x.restore();
+  }
+  function malBarradin(x, bx, by, zeit) {
+    const hop = Math.abs(Math.sin(zeit * 6)) * 1.5, zupf = Math.sin(zeit * 18) * 1.2;
+    x.save(); x.translate(bx, by - hop);
+    x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 0, 14 + hop, 9, 3);
+    x.fillStyle = "#2a2018"; x.fillRect(-4, 4, 3, 10); x.fillRect(1, 4, 3, 10);
+    x.fillStyle = "#3a2a1a"; x.fillRect(-5, 12, 4, 2.5); x.fillRect(1, 12, 4, 2.5);
+    // Lederwams in Schwarz und Gold
+    x.fillStyle = "#1e1a16"; x.beginPath(); x.moveTo(-6, -8); x.lineTo(6, -8); x.lineTo(7, 6); x.lineTo(-7, 6); x.closePath(); x.fill();
+    x.strokeStyle = "#c9a35a"; x.lineWidth = 1; x.beginPath(); x.moveTo(-6, -8); x.lineTo(0, -2); x.lineTo(6, -8); x.moveTo(-7, 3); x.lineTo(7, 3); x.stroke();
+    // Kopf mit Locken
+    x.fillStyle = "#d8a888"; kreis(x, 0, -12, 4.6);
+    x.fillStyle = "#6b4024"; for (const [hx, hy, r] of [[-4, -15, 2.6], [-1, -17, 2.8], [3, -16.5, 2.6], [5, -13, 2.2], [-5, -11.5, 2]]) kreis(x, hx, hy, r);
+    x.fillStyle = "#2a1c12"; kreis(x, -1.6, -12, 0.6); kreis(x, 1.6, -12, 0.6);
+    x.strokeStyle = "#8a3a2a"; x.lineWidth = 0.9; x.beginPath(); x.arc(0, -10.6, 1.8, 0.2, Math.PI - 0.2); x.stroke();
+    // Laute
+    x.save(); x.translate(3, -1); x.rotate(-0.55);
+    x.strokeStyle = "#5a3a20"; x.lineWidth = 1.8; x.beginPath(); x.moveTo(0, 0); x.lineTo(-15, 0); x.stroke();
+    x.fillStyle = "#3a2414"; x.fillRect(-18, -1.6, 3.5, 3.2);
+    x.fillStyle = "#a8703a"; oval(x, 3, 0, 6.5, 5); x.fillStyle = "#2a1a10"; kreis(x, 2, 0, 1.6);
+    x.restore();
+    x.strokeStyle = "#d8a888"; x.lineWidth = 2; x.beginPath(); x.moveTo(5, -5); x.lineTo(6, 0 + zupf); x.stroke();
+    x.restore();
+  }
+  function malEzekiel(x, ex, ey, links, a, zeit) {
+    x.save(); x.translate(ex, ey); x.globalAlpha = a; if (links) x.scale(-1, 1);
+    x.fillStyle = "rgba(0,0,0,.4)"; oval(x, 0, 12, 10, 3);
+    // Umhang
+    x.fillStyle = "#6a1814"; x.beginPath(); x.moveTo(-5, -9); x.quadraticCurveTo(-14, 2, -11, 12 + Math.sin(zeit * 9)); x.lineTo(7, 12); x.lineTo(5, -9); x.closePath(); x.fill();
+    // Rüstung
+    x.fillStyle = "#1a1414"; x.beginPath(); x.moveTo(-5, -9); x.lineTo(5, -9); x.lineTo(6, 6); x.lineTo(-6, 6); x.closePath(); x.fill();
+    x.strokeStyle = "#7a2a20"; x.lineWidth = 0.9; x.beginPath(); x.moveTo(-4, -4); x.lineTo(4, -4); x.moveTo(-5, 1); x.lineTo(5, 1); x.stroke();
+    x.fillStyle = "#1a1414"; x.fillRect(-4, 6, 3, 7); x.fillRect(1, 6, 3, 7);
+    // Kapuze mit Hörnern
+    x.fillStyle = "#9b2a20"; x.beginPath(); x.moveTo(-6, -8); x.quadraticCurveTo(-6, -19, 0, -20); x.quadraticCurveTo(6, -19, 6, -8); x.closePath(); x.fill();
+    x.fillStyle = "#0a0606"; oval(x, 0, -12, 3.6, 4);
+    x.save(); x.shadowColor = "#ff3a2a"; x.shadowBlur = 6; x.fillStyle = "#ff4a3a"; kreis(x, -1.3, -12.5, 0.8); kreis(x, 1.3, -12.5, 0.8); x.restore();
+    x.strokeStyle = "#2a1c18"; x.lineWidth = 1.8; x.lineCap = "round";
+    x.beginPath(); x.moveTo(-4, -17); x.quadraticCurveTo(-8, -21, -7, -26); x.moveTo(4, -17); x.quadraticCurveTo(8, -21, 7, -26); x.stroke();
+    // zwei gebogene Klingen
+    x.strokeStyle = "#d8d0c8"; x.lineWidth = 1.6;
+    x.beginPath(); x.moveTo(7, -2); x.quadraticCurveTo(15, -6, 13, -14); x.stroke();
+    x.beginPath(); x.moveTo(-7, 0); x.quadraticCurveTo(-15, 2, -15, -6); x.stroke();
+    x.strokeStyle = "#c4564a"; x.lineWidth = 0.9; x.beginPath(); x.moveTo(13, -13); x.lineTo(12, -10); x.stroke();
+    x.restore();
+  }
+  function malHelfer(x, A, zeit) {
+    A.helfer.forEach(h => {
+      if (h.art === "rex") {
+        malWolf(x, h.x, h.y, h.links, zeit, false, REX_FARBEN, 1.25);
+        if (h.zustand === "bellen") { x.font = "700 13px " + FONT_B; x.textAlign = "center"; x.fillStyle = "#ebe2cc"; x.fillText("Wuff!", h.x, h.y - 18 - Math.sin(zeit * 20) * 2); x.strokeStyle = "rgba(235,226,204,.5)"; x.lineWidth = 1.5; for (let r = 18; r < 70; r += 18) { x.beginPath(); x.arc(h.x, h.y, r + (zeit * 60 % 18), 0, Math.PI * 2); x.stroke(); } }
+      } else if (h.art === "barradin") {
+        const a = klemm(Math.min(h.t / 0.3, (7.2 - h.t) / 0.3), 0, 1);
+        x.save(); x.globalAlpha = a; malBarradin(x, h.x, h.y, zeit); x.restore();
+      } else if (h.art === "ezekiel" && h.i > 0) {
+        const a = klemm(Math.min(h.sichtT / 0.08, 1) * (h.i >= h.ziele.length ? klemm(1 + h.schlagT / 0.6, 0, 1) : 1), 0, 1);
+        malEzekiel(x, h.x, h.y, h.links, a, zeit);
+      }
+    });
   }
 
   /* --- Geschosse der Wächter --- */
@@ -1852,17 +2139,22 @@
       malWolf(x, g.x, g.y, g.links, zeit * (g.zustand === "hin" ? 1 : 0.8), g.zustand === "hin");
     }
   }
-  function malWolf(x, wx, wy, links, zeit, wild) {
-    x.save(); x.translate(wx, wy); if (!links) x.scale(-1, 1);
+  const WOLF_FARBEN = { bein: "#6a655c", koerper: "#8a847a", schwanz: "#6a655c", kopf: "#a8a296", ohr: "#6a655c" };
+  const REX_FARBEN = { bein: "#b07a40", koerper: "#2a2422", schwanz: "#2a2422", kopf: "#2a2422", ohr: "#1a1412", brust: "#f1e7cf", maske: "#b07a40" };
+  function malWolf(x, wx, wy, links, zeit, wild, F, gr) {
+    F = F || WOLF_FARBEN;
+    x.save(); x.translate(wx, wy); if (gr) x.scale(gr, gr); if (!links) x.scale(-1, 1);
     x.fillStyle = "rgba(0,0,0,.3)"; oval(x, 0, 6, 10, 2.5);
     const lauf = Math.sin(zeit * 26);
-    x.strokeStyle = "#6a655c"; x.lineWidth = 2; x.lineCap = "round";
+    x.strokeStyle = F.bein; x.lineWidth = 2; x.lineCap = "round";
     x.beginPath(); x.moveTo(-5, 1); x.lineTo(-7 + lauf * 3, 6); x.moveTo(-3, 1); x.lineTo(-1 - lauf * 3, 6); x.moveTo(4, 1); x.lineTo(2 + lauf * 3, 6); x.moveTo(6, 1); x.lineTo(8 - lauf * 3, 6); x.stroke();
-    x.fillStyle = "#8a847a"; oval(x, 0, -1, 8, 4);
-    x.fillStyle = "#6a655c"; x.beginPath(); x.moveTo(7, -2); x.quadraticCurveTo(13, -6 + lauf, 14, -1); x.lineTo(8, 0); x.fill();
-    x.fillStyle = "#a8a296"; kreis(x, -8, -3, 3.6);
+    x.fillStyle = F.koerper; oval(x, 0, -1, 8, 4);
+    if (F.brust) { x.fillStyle = F.brust; oval(x, -5, 0, 3.5, 3); }
+    x.fillStyle = F.schwanz; x.beginPath(); x.moveTo(7, -2); x.quadraticCurveTo(13, -6 + lauf, 14, -1); x.lineTo(8, 0); x.fill();
+    x.fillStyle = F.kopf; kreis(x, -8, -3, 3.6);
     x.beginPath(); x.moveTo(-10, -2); x.lineTo(-14.5, -1); x.lineTo(-10, 0.5); x.fill();
-    x.fillStyle = "#6a655c"; x.beginPath(); x.moveTo(-9, -5); x.lineTo(-8.5, -9); x.lineTo(-6.5, -5.5); x.fill();
+    if (F.maske) { x.fillStyle = F.brust; x.beginPath(); x.moveTo(-10, -2.5); x.lineTo(-14.5, -1); x.lineTo(-10, 0.5); x.fill(); x.fillStyle = F.maske; kreis(x, -9.3, -4.6, 1.1); }
+    x.fillStyle = F.ohr; x.beginPath(); x.moveTo(-9, -5); x.lineTo(-8.5, -9); x.lineTo(-6.5, -5.5); x.fill();
     x.fillStyle = wild ? "#ffd34d" : "#2a2118"; kreis(x, -9.5, -3.5, 0.8);
     x.restore();
   }
@@ -1927,6 +2219,10 @@
           const ox = (i - 1) * 6 + (r() - 0.5) * 2, hh = h * (0.7 + r() * 0.5);
           x.fillStyle = "#6b4a30"; x.beginPath(); x.moveTo(b.x + ox - 2.6, b.y + 5); x.quadraticCurveTo(b.x + ox - 1, b.y + 5 - hh * 0.6, b.x + ox + (i - 1) * 2, b.y + 5 - hh); x.lineTo(b.x + ox + 2.6, b.y + 5); x.fill();
         }
+      } else if (b.art === "schnitt") {
+        x.strokeStyle = "rgba(255,90,70," + a + ")"; x.lineWidth = 2.5 * a + 0.5; x.lineCap = "round";
+        const l = 9 + u * 6;
+        x.beginPath(); x.moveTo(b.x - l, b.y - l); x.lineTo(b.x + l, b.y + l); x.moveTo(b.x + l, b.y - l * 0.8); x.lineTo(b.x - l * 0.8, b.y + l); x.stroke();
       } else if (b.art === "sporenwolke") {
         for (let i = 0; i < 7; i++) { const w = i / 7 * Math.PI * 2 + b.t * 2, rr = b.r * (0.25 + u * 0.75); x.fillStyle = "rgba(196,154,224," + a * 0.45 + ")"; kreis(x, b.x + Math.cos(w) * rr * 0.6, b.y + Math.sin(w) * rr * 0.45, 7 + u * 5); }
       } else if (b.art === "gift") {
@@ -2047,6 +2343,7 @@
     if (h.zustand === "schwingen" && !R.fertig && R.schmollT <= 0) malZielstrahl(x, R, zeit);
     malRanke(x, R, zeit);
     if (h.last) malDing(x, h.last, zeit);
+    if (h.last2) malDing(x, h.last2, zeit);
     malEffekte(x, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, DREH.x + 70, 40);
     // oben: Anzeigen
@@ -2091,11 +2388,14 @@
     A.feinde.slice().sort((a, b) => a.y - b.y).forEach(e => malFeind(x, e, zeit));
     A.geschosse.forEach(g => {
       if (g.art === "dorn" || g.art === "splitter" || g.art === "spore" || g.art === "wolf") malGeschoss(x, g, zeit);
+      else if (g.art === "gold") { x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 10; x.fillStyle = "#ffd34d"; for (let i = 0; i < 4; i++) oval(x, g.x + Math.cos(zeit * 9 + i * 1.6) * 5, g.y + Math.sin(zeit * 9 + i * 1.6) * 3, 3, 1.6); x.restore(); }
       else if (g.art === "feuerball") { x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 16; x.fillStyle = "#ffd27a"; kreis(x, g.x, g.y, 6); x.fillStyle = "#ff8a3a"; kreis(x, g.x, g.y, 3.5); x.restore(); funken(g.x, g.y, 1, ["#ff8a3a", "#e0a046"], 20, 2); }
       else if (g.art === "fels") { x.fillStyle = "#6a6458"; kreis(x, g.x, g.y, 7); x.fillStyle = "#8a8476"; kreis(x, g.x - 2, g.y - 2, 3); }
     });
     if (A.baer) malBaer(x, A.baer, zeit);
+    malHelfer(x, A, zeit);
     malEffekte(x, zeit);
+    malPortrait(x, A, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, HORT.x + 60, HORT.y - 54);
     // Vorbereitung
     if (A.vorT > 0) {
@@ -2133,13 +2433,15 @@
       knopf(x, "raus", 292, LEISTE + 4, 102, H - LEISTE - 8, [T.bau.ausreissen, "+" + Math.round(p.turm.wert * 0.5) + " 🌱"], false, false);
       turmTafel(x, A, p, p.turm.k, lvl, false, zeit);
     } else if (A.vorT > 0) {
-      knopf(x, "jetzt", W / 2 - 90, LEISTE + 6, 180, H - LEISTE - 12, [T.jetzt], true, false, "#e0a046");
+      knopf(x, "jetzt", 8, LEISTE + 6, 220, H - LEISTE - 12, [T.jetzt], true, false, "#e0a046");
+      knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
     } else {
       const u = A.feuerCd <= 0;
       x.font = "700 13px " + FONT_B; x.fillStyle = u ? "#ffb060" : "#a89f8f";
       x.fillText("☄️ " + T.hud.feuerball + (u ? " ✓" : " · " + Math.ceil(A.feuerCd) + " s"), 10, LEISTE + 26);
-      x.textAlign = "right"; x.font = "600 11px " + FONT_B; x.fillStyle = "#a89f8f";
-      x.fillText(levelName(A.lv), W - 10, LEISTE + 26, 200);
+      x.textAlign = "center"; x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f";
+      x.fillText(levelName(A.lv), 228, LEISTE + 26, 150);
+      knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
     }
   }
   function knopfTurm(x, id, bx, by, bw, bh, k, st, preis, an, zuTeuer, zeit) {
@@ -2247,7 +2549,8 @@
     rafId = 0;
     const dt = letzte ? Math.min(0.05, (jetzt - letzte) / 1000) : 0;
     letzte = jetzt;
-    for (let i = 0; i < testTempo && zustand === "spiel" && S; i++) {
+    const schritte = testTempo * (S && S.phase === "abwehr" && S.A && S.A.schnell ? 2 : 1);
+    for (let i = 0; i < schritte && zustand === "spiel" && S; i++) {
       if (S.phase === "raub" && S.R) raubUpdate(dt);
       else if (S.phase === "abwehr" && S.A) abwehrUpdate(dt);
       effekteUpdate(dt);
@@ -2306,7 +2609,7 @@
     if (zustand !== "spiel") tafelNeu();
   }
   function tafelNeu() {
-    ({ start: startZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true) })[tafelArt]();
+    ({ start: startZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true) })[tafelArt]();
   }
   function schleierAuf(html, art) {
     tafelArt = art; tafel.innerHTML = html; schleier.hidden = false; buehne.classList.remove("laeuft");
@@ -2332,9 +2635,33 @@
       fort = '<button type="button" class="tav-knopf eh-haupt" data-tun="fortsetzen">' + esc(nm) + '</button>' +
         '<p class="eh-klein">' + esc(tx.stufen[sp.stufe]) + ' · ' + esc(tx.leben(sp.leben)) + ' · ' + sp.punkte + ' ' + esc(tx.punkte) + '</p>';
     }
+    const frei = freiLesen(stufeWahl), sterne = sterneLesen(stufeWahl), summe = Object.keys(sterne).reduce((a, k) => a + (sterne[k] || 0), 0);
+    const lw = frei > 0 || summe > 0 ? '<button type="button" class="tav-knopf" data-tun="levelwahl">' + esc(tx.levelwahl) + ' <small>' + esc(tx.sterneGesamt(summe, KAMPAGNE * 3)) + '</small></button>' : "";
     schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + fort + stufenHtml(tx) +
-      '<button type="button" class="tav-knopf ' + (sp ? "" : "eh-haupt") + '" data-tun="neu">' + esc(tx.neu) + '</button>' +
+      '<button type="button" class="tav-knopf ' + (sp ? "" : "eh-haupt") + '" data-tun="neu">' + esc(tx.neu) + '</button>' + lw +
       (sp ? '<p class="eh-klein">' + esc(tx.neuWarnung) + '</p>' : ""), "start");
+  }
+
+  function levelwahlZeigen() {
+    const tx = t(), st = S && S.einzel ? S.stufe : stufeWahl, frei = freiLesen(st), sterne = sterneLesen(st);
+    zustand = "start"; S = null; hgSchluessel = "";
+    const summe = Object.keys(sterne).reduce((a, k) => a + (sterne[k] || 0), 0);
+    const zeilen = GEB.map((G, g) => '<div class="eh-lw-zeile"><span class="eh-lw-name">' + esc(tx.gebiete[g][0]) + '</span>' +
+      [0, 1, 2].map(i => {
+        const lv = g * LEVEL_PRO_GEBIET + i, offen = lv <= frei, n = sterne[lv] || 0;
+        return '<button type="button" class="eh-lw" data-level="' + lv + '"' + (offen ? "" : " disabled") + '><b>' + (i + 1) + (i === 2 ? " ☠" : "") + '</b><small>' + (offen ? "★".repeat(n) + "☆".repeat(3 - n) : "🔒") + '</small></button>';
+      }).join("") + '</div>').join("");
+    schleierAuf('<h4>' + esc(tx.levelwahlTitel) + '</h4><p>' + esc(tx.levelwahlText) + '</p>' +
+      '<p class="eh-beutel">' + esc(tx.sterneGesamt(summe, KAMPAGNE * 3)) + ' · ' + esc(tx.stufen[st]) + '</p>' +
+      '<div class="eh-lw-gitter">' + zeilen + '</div>' +
+      '<button type="button" class="eh-leise" data-tun="zumStart">' + esc(tx.zurueck) + '</button>', "levelwahl");
+    zeichnen(performance.now());
+  }
+  function einzelStarten(lv) {
+    const st = stufeWahl;
+    stufeWahl = st; neuesSpiel();
+    S.einzel = true; S.lv = lv; S.leben = 1; S.up = Object.assign({}, hainBestLesen(st));
+    introZeigen();
   }
 
   function introZeigen() {
@@ -2351,8 +2678,10 @@
       '<p class="eh-erzaehl">' + esc(text) + '</p>' +
       (neu.length ? '<p class="eh-neu">' + esc(tx.neuFreigeschaltet) + ' ' + neu.map(esc).join(" · ") + '</p>' : "") +
       (lv === 0 ? '<p>' + esc(tx.raubIntro) + '</p>' : "") +
-      '<p class="eh-klein">' + esc(tx.leben(S.leben)) + ' · ' + S.punkte + ' ' + esc(tx.punkte) + ' · ' + esc(tx.beutel(S.beutel)) + '</p>' +
-      '<button type="button" class="tav-knopf eh-haupt" data-tun="raub">' + esc(tx.los) + '</button>', "intro");
+      (S.einzel ? '<p class="eh-klein">' + esc(tx.einzelLabel) + ' · ' + "★".repeat(sterneLesen(S.stufe)[lv] || 0) + "☆".repeat(3 - (sterneLesen(S.stufe)[lv] || 0)) + '</p>'
+        : '<p class="eh-klein">' + esc(tx.leben(S.leben)) + ' · ' + S.punkte + ' ' + esc(tx.punkte) + ' · ' + esc(tx.beutel(S.beutel)) + '</p>') +
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="raub">' + esc(tx.los) + '</button>' +
+      (S.einzel ? '<button type="button" class="eh-leise" data-tun="levelwahl">' + esc(tx.zurueck) + '</button>' : ""), "intro");
     zeichnen(performance.now());
   }
 
@@ -2360,6 +2689,7 @@
     const tx = t(), R = S.R;
     zustand = "tafel";
     const extra = Math.round(R.gier * 2);
+    if (!R.gl) R.gl = gegnerListe(S.lv, R.gier);
     schleierAuf(
       '<p class="eh-ober">' + esc(levelName(S.lv)) + '</p>' +
       '<h4>' + esc(tx.raubFertig) + '</h4>' +
@@ -2370,9 +2700,31 @@
       '<dt>' + esc(tx.raubWerte.schaetze) + '</dt><dd>' + R.schaetze + '</dd>' +
       '</dl>' +
       '<p class="eh-warn">' + esc(tx.gierWarnung(extra)) + '</p>' +
-      '<p>' + esc(tx.abwehrIntro) + '</p>' +
+      vorschauHtml(R.gl) +
+      (S.lv <= 1 ? '<p>' + esc(tx.raubHinweis) + '</p>' : "") +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="abwehr">' + esc(tx.zurAbwehr) + '</button>', "nachRaub");
     if (!nurNeu) KLANG.gold();
+  }
+
+  function eigenschaften(k) {
+    const d = FEINDE[k], l = [];
+    if (d.unbesiegbar) return ["unbesiegbar"];
+    if (d.flug) l.push("flug");
+    if (d.v >= 48) l.push("schnell");
+    if (d.hp >= 150 && !d.boss) l.push("zaeh");
+    ["ausweichen", "unsichtbar", "netz", "feuerSchwach", "wurzelFest", "ruft", "blinzeln", "gift", "schrei", "wurf", "verwandeln"].forEach(f => { if (d[f]) l.push(f); });
+    return l;
+  }
+  function vorschauHtml(gl) {
+    const tx = t(), zaehl = new Map();
+    gl.liste.forEach(k => zaehl.set(k, (zaehl.get(k) || 0) + 1));
+    if (gl.demo) zaehl.set("demogorgon", 1);
+    const zeilen = [...zaehl].sort((a, b) => (FEINDE[a[0]].boss ? 1 : 0) - (FEINDE[b[0]].boss ? 1 : 0)).map(([k, n]) => {
+      const d = FEINDE[k];
+      return '<div class="eh-vz' + (d.boss ? " boss" : "") + '"><span class="eh-vz-n">' + (d.boss ? "☠" : n + "×") + '</span><span class="eh-vz-name">' + esc(tx.feinde[k]) + '</span>' +
+        '<span class="eh-vz-eig">' + eigenschaften(k).map(e => esc(tx.eig[e])).join(" · ") + '</span></div>';
+    }).join("");
+    return '<div class="eh-vorschau"><p class="eh-ober">' + esc(tx.vorschau) + '</p>' + zeilen + '</div>';
   }
 
   function ergebnisZeigen(nurNeu) {
@@ -2381,32 +2733,63 @@
       const A = S.A, R = S.R;
       zustand = "tafel";
       if (A.verloren) {
-        S.leben--;
         S.erg = { verloren: true };
         KLANG.verloren();
-        if (S.leben <= 0) { loesch(SPEICHER); spielEnde(); return; }
-        speichern();
+        if (!S.einzel) {
+          S.leben--;
+          if (S.leben <= 0) { loesch(SPEICHER); spielEnde(); return; }
+          speichern();
+        }
       } else {
         const gesichert = Math.max(0, Math.round(A.hort - A.reserve));
         const faktor = 1 + 0.15 * R.gier;
         const pkt = Math.round(gesichert * faktor) + A.punkte;
         const insBeutel = Math.round(gesichert * 0.5);
-        S.punkte += pkt; S.beutel += insBeutel; S.goldGesamt += gesichert;
-        S.erg = { verloren: false, gesichert, insBeutel, faktor, erlegt: A.erlegt, pkt, sieg: S.lv === KAMPAGNE - 1 };
-        S.lv++;
-        speichern();
+        const ziele = [true, A.verlorenGold === 0, R.gier >= 3];
+        const sterne = ziele.filter(Boolean).length;
+        let neuBest = false;
+        if (S.lv < KAMPAGNE) {
+          const alle = sterneLesen(S.stufe);
+          if (sterne > (alle[S.lv] || 0)) { alle[S.lv] = sterne; neuBest = true; schreib("imres-echohort-sterne-" + S.stufe, JSON.stringify(alle)); }
+        }
+        S.erg = { verloren: false, gesichert, insBeutel, faktor, erlegt: A.erlegt, pkt, sieg: S.lv === KAMPAGNE - 1 && !S.einzel, ziele, sterne, neuBest, zurueck: A.zurueckGold, verlorenGold: A.verlorenGold };
+        if (!S.einzel) {
+          S.punkte += pkt; S.beutel += insBeutel; S.goldGesamt += gesichert;
+          S.lv++;
+          speichern();
+        } else {
+          const fr = parseInt(lies("imres-echohort-frei-" + S.stufe, "0"), 10) || 0;
+          if (S.lv + 1 > fr && S.lv + 1 < KAMPAGNE) schreib("imres-echohort-frei-" + S.stufe, String(S.lv + 1));
+        }
       }
     }
     const E = S.erg;
+    if (E.verloren && S.einzel) {
+      schleierAuf('<p class="eh-ober">' + esc(tx.einzelLabel) + '</p><h4>' + esc(tx.verloren) + '</h4>' +
+        '<button type="button" class="tav-knopf eh-haupt" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>' +
+        '<button type="button" class="tav-knopf" data-tun="levelwahl">' + esc(tx.zurLevelwahl) + '</button>', "ergebnis");
+      return;
+    }
     if (E.verloren) {
       schleierAuf('<h4>' + esc(tx.verloren) + '</h4><p>' + esc(tx.verlorenText(S.leben)) + '</p>' +
         '<button type="button" class="tav-knopf eh-haupt" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>' +
         '<button type="button" class="eh-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>', "ergebnis");
       return;
     }
+    const sternHtml = '<p class="eh-sterne" aria-label="' + E.sterne + ' / 3">' + [0, 1, 2].map(i => '<span class="' + (i < E.sterne ? "an" : "") + '">★</span>').join("") + '</p>' +
+      '<ul class="eh-ziele">' + ["sieg", "alles", "gier"].map((k, i) => '<li class="' + (E.ziele[i] ? "ja" : "") + '">' + (E.ziele[i] ? "✓ " : "✗ ") + esc(tx.sterne[k]) + '</li>').join("") + '</ul>';
+    if (S.einzel) {
+      schleierAuf('<p class="eh-ober">' + esc(tx.einzelLabel) + ' · ' + esc(levelName(S.lv)) + '</p>' +
+        '<h4>' + esc(tx.sicher) + '</h4>' + sternHtml +
+        (E.neuBest ? '<p class="eh-neu">' + esc(tx.neuRekord) + '</p>' : "") +
+        '<button type="button" class="tav-knopf eh-haupt" data-tun="levelwahl">' + esc(tx.zurLevelwahl) + '</button>' +
+        '<button type="button" class="tav-knopf" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>', "ergebnis");
+      return;
+    }
     schleierAuf(
       '<h4>' + esc(E.sieg ? tx.sieg : tx.sicher) + '</h4>' +
       (E.sieg ? '<p class="eh-erzaehl">' + esc(tx.siegText) + '</p>' : "") +
+      sternHtml +
       '<dl class="eh-werte">' +
       '<dt>' + esc(tx.ergWerte.gesichert) + '</dt><dd>💰 ' + E.gesichert + '</dd>' +
       '<dt>' + esc(tx.ergWerte.gier) + '</dt><dd>×' + E.faktor.toFixed(2) + '</dd>' +
@@ -2421,7 +2804,7 @@
   function hainZeigen() {
     const tx = t();
     zustand = "tafel";
-    const gruppen = ["raub", "wesen", "abwehr"].map(gr => {
+    const gruppen = ["raub", "wesen", "abwehr", "besonders"].map(gr => {
       const zeilen = Object.keys(UPS).filter(k => UPS[k].gruppe === gr).map(k => {
         const u = UPS[k], st = S.up[k] || 0, voll = st >= u.kosten.length || (k === "heilkraut" && S.leben >= MAX_LEBEN);
         const preis = voll ? 0 : u.kosten[st], kann = !voll && S.beutel >= preis;
@@ -2497,6 +2880,8 @@
       startZeigen(); fussSetzen(); bestenLaden(stufeWahl);
       return;
     }
+    const lvb = e.target.closest("[data-level]");
+    if (lvb && tafelArt === "levelwahl") { audio(); einzelStarten(parseInt(lvb.dataset.level, 10)); return; }
     const kb = e.target.closest("[data-kauf]");
     if (kb && tafelArt === "hain") { kaufen(kb.dataset.kauf); return; }
     if (e.target.closest(".eh-eintragen")) { eintragen(); return; }
@@ -2511,7 +2896,9 @@
     else if (tun === "weiterLevel") introZeigen();
     else if (tun === "wiederholen") introZeigen();
     else if (tun === "weiter") losSpielen();
-    else if (tun === "beenden") spielEnde();
+    else if (tun === "beenden") { if (S && S.einzel) levelwahlZeigen(); else spielEnde(); }
+    else if (tun === "levelwahl") levelwahlZeigen();
+    else if (tun === "zumStart") { S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); zeichnen(performance.now()); }
     else if (tun === "nochmal") { zustand = "start"; S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); anwerfen(); }
   }
 
@@ -2590,6 +2977,7 @@
       else if (id === "staerker") verstaerken();
       else if (id === "raus") ausreissen();
       else if (id === "jetzt") { S.A.vorT = 0.01; }
+      else if (id === "schnell") { S.A.schnell = !S.A.schnell; schreib("imres-echohort-schnell", S.A.schnell ? "1" : ""); KLANG.griff(); }
     }
   }
   leinwand.addEventListener("pointerdown", ev => {
@@ -2682,6 +3070,26 @@
 .eh-liste td:nth-child(3), .eh-liste th:nth-child(3), .eh-liste td:nth-child(4), .eh-liste th:nth-child(4) { text-align: right; }
 .eh-liste tr.mein td { color: var(--ember); }
 .eh-leer { color: var(--ash); font-size: .85rem; font-style: italic; margin: .3rem 0 0; }
+.eh-vorschau { width: 100%; display: grid; gap: .2rem; text-align: left; background: rgba(0,0,0,.28); border: 1px solid var(--line); padding: .45rem .6rem; }
+.eh-vorschau .eh-ober { text-align: center; margin-bottom: .1rem; }
+.eh-vz { display: grid; grid-template-columns: 2.1rem auto 1fr; gap: .45rem; align-items: baseline; font-size: .84rem; }
+.eh-vz-n { color: var(--ember); font-weight: 700; text-align: right; }
+.eh-vz-name { color: var(--vellum); font-weight: 600; white-space: nowrap; }
+.eh-vz-eig { color: var(--ash); font-size: .76rem; font-style: italic; }
+.eh-vz.boss .eh-vz-n, .eh-vz.boss .eh-vz-name { color: #e07a6a; }
+.eh-tafel .eh-sterne { font-size: 2rem; line-height: 1; letter-spacing: .2rem; color: rgba(235,226,204,.18); }
+.eh-sterne .an { color: #ffd34d; text-shadow: 0 0 10px rgba(255,211,77,.55); }
+.eh-ziele { list-style: none; margin: 0; padding: 0; font-size: .82rem; color: var(--ash); text-align: left; }
+.eh-ziele li.ja { color: #cfe6a8; }
+.eh-lw-gitter { display: grid; gap: .3rem; width: 100%; }
+.eh-lw-zeile { display: grid; grid-template-columns: 1fr repeat(3, 3.6rem); gap: .3rem; align-items: center; }
+.eh-lw-name { text-align: left; font-family: var(--name); font-size: .95rem; color: var(--vellum); line-height: 1.1; }
+.eh-lw { display: grid; gap: .05rem; justify-items: center; padding: .25rem .1rem; border: 1px solid var(--line); background: rgba(9,8,15,.45); color: var(--vellum); font: inherit; cursor: pointer; }
+.eh-lw b { font-size: .8rem; } .eh-lw small { font-size: .72rem; color: #ffd34d; letter-spacing: .05em; }
+.eh-lw:disabled { opacity: .4; cursor: default; }
+.eh-lw:not(:disabled):hover, .eh-lw:not(:disabled):focus-visible { border-color: var(--ember); outline: none; }
+.eh-tafel .tav-knopf small { font-size: .78em; color: #ffd34d; }
+@media (max-width: 480px) { .eh-vz { font-size: .78rem; grid-template-columns: 1.8rem auto 1fr; gap: .3rem; } .eh-vz-eig { font-size: .7rem; } .eh-lw-zeile { grid-template-columns: 1fr repeat(3, 3.1rem); } .eh-lw-name { font-size: .85rem; } }
 .eh-fuss { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; font-size: .88rem; color: var(--ash); }
 .eh-ton { background: none; border: 1px solid var(--line); color: var(--ash); font: inherit; font-size: .84rem; padding: .3rem .75rem; cursor: pointer; }
 .eh-ton:hover { color: var(--vellum); border-color: var(--ember); }
@@ -2704,6 +3112,7 @@
   aufbauen();
   bestenLaden(stufeWahl);
   medaillonLaden();
+  portraetsLaden();
   startZeigen();
   if (window.ResizeObserver) new ResizeObserver(groesse).observe(buehne); else window.addEventListener("resize", groesse);
   groesse();
@@ -2718,5 +3127,5 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu };
 })();
