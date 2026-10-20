@@ -2,6 +2,8 @@
    BARRADINS AUFTRITT – Rhythmusspiel in der Taverne
    Drei Spuren (Bass, Laute, Echos Flöte) fallen herab; im richtigen Moment
    tippen. Die Treffsicherheit wird am Ende zum Auftrittswurf (W20 + 7).
+   „Barradins Weg“: Karriere über elf Bühnen, von der Straßenkneipe bis zu den Göttern –
+   jede verlangt einen höheren Schwierigkeitsgrad beim Auftrittswurf und spielt ein schwereres Stück.
    Gespielt wird mit echten Instrumentenaufnahmen aus klang/ (Kontrabass, Laute, Flöte, Bodhrán);
    solange sie nicht geladen sind, klingt der berechnete Ersatz.
    ===================================================================== */
@@ -30,7 +32,8 @@
       wurf: (w, s) => "W20: " + w + " + 7 Auftreten = " + s,
       lied: "Lied", neuesLied: "🎲 Neues Lied", erfunden: "Barradin improvisiert",
       lieder: { reigen: "Tavernenreigen", bugbear: "Der Bugbear im Fass", klage: "Phandalins Klage", schmiede: "Hammer und Amboss", seemann: "Seemannsgarn", walzer: "Demogorgons Walzer",
-        schatten: "Ezekiels Schattentanz", rex: "Rex' wilde Jagd", ploop: "Ploopploopeens Tiefseeshanty", venom: "Venomfangs Odem" },
+        schatten: "Ezekiels Schattentanz", rex: "Rex' wilde Jagd", ploop: "Ploopploopeens Tiefseeshanty", venom: "Venomfangs Odem",
+        buerger: "Des Bürgermeisters Geldbeutel", palast: "Hymne der Krone", elfen: "Mondscheinreigen der Feen", goetter: "Das Ewige Lied" },
       stimmen_laden: "🎻 Instrumente werden gestimmt …",
       erfinden: { vorlage: ["Die Ballade vom {a} {n}", "Das Lied vom {a} {n}", "Der Reigen vom {a} {n}", "Die Mär vom {a} {n}", "Die Klage vom {a} {n}"],
         adj: ["traurigen", "betrunkenen", "tanzenden", "verliebten", "singenden", "hungrigen", "verlorenen", "kichernden", "einsamen", "wütenden", "verfluchten", "goldenen"],
@@ -46,6 +49,64 @@
         stark: ["Selbst der grimmige Zwerg in der Ecke summt mit. Ich bin eine Legende. Fast.", "Zugaberufe! Ich verbeuge mich dreimal. Viermal. Ach, ich verbeug mich einfach weiter."],
         legende: ["Man wird Lieder über dieses Lied singen. Und ich werde sie alle singen.", "Die Götter selbst lehnen sich vor, um besser zu hören. Echo hat Tränen in den Augen. Ezekiel … nickt. Einmal."],
         krit: ["EINE NATÜRLICHE 20! Die Kerzen flackern, die Wände beben, und Rex heult die zweite Stimme!", "Natürliche 20! Selbst Imre legt den Würfel zur Seite und applaudiert."]
+      },
+      modi: { lieder: "🎵 Freies Spiel", weg: "📜 Barradins Weg" },
+      weg: {
+        text: "Vom Hinterhof bis zu den Göttern: Barradin spielt sich Bühne für Bühne nach oben. Jedes Publikum ist anspruchsvoller, jedes Stück schwerer – und der Auftrittswurf muss den Schwierigkeitsgrad schaffen, sonst geht es nicht weiter.",
+        rang: "Ruf", sterne: "Sterne", station: n => "Bühne " + n, gesperrt: "Noch verschlossen",
+        publikum: "Publikum", sg: n => "SG " + n, lied: "Stück",
+        start: "▶ Auftreten", nochmal: "↻ Noch einmal versuchen", wiederholen: "↻ Noch einmal spielen", weiter: "Zur nächsten Bühne →",
+        gegen: n => "Auftrittswurf gegen SG " + n, bestanden: "Bestanden!", durchgefallen: "Nicht geschafft …",
+        neuerRang: r => "Neuer Ruf: " + r, ende: "Barradins Weg ist vollendet. Die Götter summen sein Lied.",
+        zuruecksetzen: "Weg von vorn beginnen", sicher: "Wirklich den ganzen Fortschritt löschen?",
+        unbekannt: "Unbekannter Barde",
+        raenge: ["Straßenmusikant", "Spelunkensänger", "Hafenbarde", "Gasthaussänger", "Festbarde", "Ballmusikus", "Schlossbarde", "Spielmann des Unterreichs", "Hofbarde von Neverwinter", "Liebling der Feen", "Gottgeküsster Barde"],
+        stationen: [
+          { ort: "„Zum Lahmen Esel“ – Straßenkneipe in Phandalin", publikum: "Drei Bauern, ein schlafender Hund und der Wirt",
+            intro: "Irgendwo muss eine Legende anfangen. Warum nicht hier, zwischen verschüttetem Bier und einem Hund, der sehr laut träumt?",
+            sieg: "Der Wirt schenkt mir ein Freibier aus. Ein Bauer flüstert, unten am Hafen gebe es eine Spelunke, in der nur die Mutigen spielen.",
+            pleite: "Der Hund ist aufgewacht. Und gegangen. Schnell noch ein Versuch, bevor auch die Bauern gehen." },
+          { ort: "„Zur Ersoffenen Ratte“ – Spelunke am Hafen", publikum: "Halsabschneider, Schmuggler und ein Bugbear, der niemanden ansieht",
+            intro: "Hier zahlt man mit Gold, mit Blut oder mit einem guten Lied. Ich habe nur eine Laute. Also: ein gutes Lied.",
+            sieg: "Der Bugbear nickt. Niemand wird erstochen. In dieser Spelunke ist das stehender Applaus.",
+            pleite: "Ein Messer steckt neben meinem Kopf im Balken. Das war wohl Kritik. Immerhin konstruktiv." },
+          { ort: "„Zum Seemannsgarn“ – Hafenschenke", publikum: "Eine Schiffsmannschaft auf Landgang, laut und durstig",
+            intro: "Seeleute singen mit, ob man will oder nicht. Die Kunst ist, dass sie das Richtige mitsingen.",
+            sieg: "Die ganze Mannschaft brüllt den Refrain. Der Kapitän schreibt mir eine Empfehlung für ein feines Gasthaus – auf eine Fischschuppe, aber immerhin.",
+            pleite: "Sie haben mein Lied übernommen. Mit neuem Text. Über mich. Nicht nett." },
+          { ort: "„Zum Silbernen Krug“ – ein gesittetes Gasthaus", publikum: "Händler, Reisende und eine Dame mit Monokel",
+            intro: "Tischdecken! Servietten! Niemand wirft mit Heringen. Hier muss man leise beeindrucken – mit einer Klage, die zu Herzen geht.",
+            sieg: "Der Dame fällt vor Rührung das Monokel in die Suppe. Sie kennt den Bürgermeister von Phandalin persönlich – und er sucht Musik für sein Erntefest.",
+            pleite: "Man hat höflich geschwiegen. Sehr höflich. Sehr lange." },
+          { ort: "Erntefest beim Bürgermeister von Phandalin", publikum: "Der Bürgermeister, seine Ratsherren und sein gut bewachter Geldbeutel",
+            intro: "Wir kennen uns. Er zahlt ungern. Diesmal soll er nicht nur zahlen – er soll es auch noch gern tun.",
+            sieg: "Er hat bezahlt! Ohne zu feilschen! Das hat es in Phandalin noch nie gegeben. Sein Schwager, ein Landgraf, gibt nächsten Monat einen Ball …",
+            pleite: "„Sehr schön“, sagt der Bürgermeister und hält mir eine Kupfermünze hin. Eine. Zum Teilen." },
+          { ort: "Der Ball des Landgrafen", publikum: "Tanzende Adlige, die jeden falschen Takt bemerken",
+            intro: "Ein Walzer. Hunderte Füße, die sich nach meinem Takt richten. Wenn ich stolpere, stolpert der ganze Saal.",
+            sieg: "Der Saal dreht sich, als hätte ich ihn aufgezogen. Ein bleicher Fürst in schwarzem Samt lädt mich auf sein Schloss ein. Er lächelt mit … sehr vielen Zähnen.",
+            pleite: "Ein Graf ist über seine Gräfin gestolpert. Beide schauen zu mir. Ich schaue zur Tür." },
+          { ort: "Schloss Nachtfels", publikum: "Ein bleicher Fürst und Gäste, die nie blinzeln",
+            intro: "Kerzen, die nicht flackern. Spiegel, in denen niemand steht. Ich spiele Ezekiels Schattentanz – er meinte, das käme hier gut an.",
+            sieg: "Der Fürst klatscht langsam. Dann reicht er mir einen Geleitbrief ins Unterreich, an den Hof von König Horga Stahl V. „Er schätzt Musik mit Biss.“",
+            pleite: "Die Gäste mustern mich, als wäre ich das Abendessen. Lieber schnell noch ein Versuch." },
+          { ort: "Die Feste von König Horga Stahl V.", publikum: "Ein Zwergenkönig, der nur Musik im Takt seiner Schmiedehämmer duldet",
+            intro: "Wir standen schon einmal vor ihm – als Gefangene. Diesmal komme ich freiwillig. Hammer und Amboss, im Takt seines Herzens. Hoffentlich hat er eins.",
+            sieg: "König Horga schlägt mit der Faust auf die Thronlehne – im Takt! Er schickt einen Boten an die Oberfläche: Der Palast von Neverwinter soll von mir hören.",
+            pleite: "Der König hebt eine Augenbraue. Die Wachen heben ihre Äxte. Ich hebe die Laute und fange noch einmal an." },
+          { ort: "Der Palast von Neverwinter", publikum: "Der Hof, der Kronrat und sehr viele Trompeter, die neidisch schauen",
+            intro: "Marmor, Banner, ein Saal so hoch, dass mein Echo erst morgen zurückkommt. Eine Hymne auf die Krone – kein Ton darf wackeln.",
+            sieg: "Man ernennt mich zum Hofbarden! Und in der Nacht steht eine Gestalt aus Mondlicht an meinem Fenster: Die Feenkönigin will mich hören.",
+            pleite: "Ein Trompeter grinst. Das kann ich nicht auf mir sitzen lassen." },
+          { ort: "Der Hof der Feenkönigin im Mondhain", publikum: "Feen, Dryaden und eine Königin, die seit tausend Jahren nichts Neues gehört hat",
+            intro: "Hier ist die Musik älter als die Bäume. Echo würde sich wie zu Hause fühlen. Ich fühle mich … sehr sterblich.",
+            sieg: "Die Feenkönigin weint eine einzige Träne. Sie wird zu einem Stern, und der Stern weist den Weg zu den Hallen des Ewigen Liedes.",
+            pleite: "Die Feen kichern. Eine hat meine Saiten zu Blumen verknotet. Noch einmal – mit Würde." },
+          { ort: "Die Hallen des Ewigen Liedes", publikum: "Die Götter selbst",
+            intro: "Kein Weg führt hierher, nur ein Lied. Wer hier spielt, spielt für die Ewigkeit. Keine Fehler, Barradin. Keine. Fehler.",
+            sieg: "Die Götter erheben sich. Mein Lied wird in die Sterne geschrieben, und irgendwo in Phandalin wacht ein Hund auf und wedelt mit dem Schwanz.",
+            pleite: "Ein Gott hustet. Ein anderer lächelt nachsichtig. Unsterbliche haben Zeit – und ich noch einen Versuch." }
+        ]
       }
     },
     en: {
@@ -64,7 +125,8 @@
       wurf: (w, s) => "d20: " + w + " + 7 Performance = " + s,
       lied: "Song", neuesLied: "🎲 New song", erfunden: "Barradin improvises",
       lieder: { reigen: "Tavern Round", bugbear: "The Bugbear in the Barrel", klage: "Phandalin's Lament", schmiede: "Hammer and Anvil", seemann: "Sailor's Yarn", walzer: "Demogorgon's Waltz",
-        schatten: "Ezekiel's Shadow Dance", rex: "Rex's Wild Hunt", ploop: "Ploopploopeen's Deep-Sea Shanty", venom: "Venomfang's Breath" },
+        schatten: "Ezekiel's Shadow Dance", rex: "Rex's Wild Hunt", ploop: "Ploopploopeen's Deep-Sea Shanty", venom: "Venomfang's Breath",
+        buerger: "The Mayor's Purse", palast: "Hymn of the Crown", elfen: "Moonlit Dance of the Fey", goetter: "The Eternal Song" },
       stimmen_laden: "🎻 Tuning the instruments …",
       erfinden: { vorlage: ["The Ballad of the {a} {n}", "The Song of the {a} {n}", "The Round of the {a} {n}", "The Tale of the {a} {n}", "The Lament of the {a} {n}"],
         adj: ["Sad", "Drunken", "Dancing", "Lovesick", "Singing", "Hungry", "Lost", "Giggling", "Lonely", "Angry", "Cursed", "Golden"],
@@ -80,19 +142,78 @@
         stark: ["Even the grumpy dwarf in the corner hums along. I'm a legend. Nearly.", "Encore! I bow three times. Four. Oh, I'll just keep bowing."],
         legende: ["They'll sing songs about this song. And I'll sing all of them.", "The gods themselves lean in to hear better. Echo has tears in his eyes. Ezekiel … nods. Once."],
         krit: ["A NATURAL 20! The candles flicker, the walls shake, and Rex howls the harmony!", "Natural 20! Even Imre puts down his dice and applauds."]
+      },
+      modi: { lieder: "🎵 Free play", weg: "📜 Barradin's Road" },
+      weg: {
+        text: "From the back alley to the gods: Barradin plays his way up, stage by stage. Every audience is pickier, every piece harder – and the performance check has to beat the DC, or the road ends here.",
+        rang: "Fame", sterne: "Stars", station: n => "Stage " + n, gesperrt: "Still locked",
+        publikum: "Audience", sg: n => "DC " + n, lied: "Piece",
+        start: "▶ Perform", nochmal: "↻ Try again", wiederholen: "↻ Play it again", weiter: "On to the next stage →",
+        gegen: n => "Performance check against DC " + n, bestanden: "Success!", durchgefallen: "Not quite …",
+        neuerRang: r => "New fame: " + r, ende: "Barradin's road is complete. The gods are humming his song.",
+        zuruecksetzen: "Start the road over", sicher: "Really erase all progress?",
+        unbekannt: "Unknown bard",
+        raenge: ["Street musician", "Dive singer", "Harbour bard", "Inn singer", "Festival bard", "Ballroom musician", "Castle bard", "Minstrel of the Underdark", "Court bard of Neverwinter", "Darling of the fey", "God-kissed bard"],
+        stationen: [
+          { ort: "\"The Lame Donkey\" – a street pub in Phandalin", publikum: "Three farmers, a sleeping dog and the innkeeper",
+            intro: "A legend has to start somewhere. Why not here, between spilled beer and a dog that dreams very loudly?",
+            sieg: "The innkeeper pours me a free ale. A farmer whispers that down by the harbour there's a dive where only the brave dare to play.",
+            pleite: "The dog woke up. And left. Quick, another try before the farmers leave too." },
+          { ort: "\"The Drowned Rat\" – a dive by the harbour", publikum: "Cutthroats, smugglers and a bugbear who looks at no one",
+            intro: "Here you pay with gold, with blood or with a good song. All I have is a lute. So: a good song.",
+            sieg: "The bugbear nods. Nobody gets stabbed. In this dive, that's a standing ovation.",
+            pleite: "A knife is stuck in the beam next to my head. Criticism, I suppose. Constructive, at least." },
+          { ort: "\"The Sailor's Yarn\" – a harbour tavern", publikum: "A ship's crew on shore leave, loud and thirsty",
+            intro: "Sailors sing along whether you want them to or not. The trick is getting them to sing the right thing.",
+            sieg: "The whole crew roars the chorus. The captain writes me a recommendation for a fine inn – on a fish scale, but still.",
+            pleite: "They took over my song. With new lyrics. About me. Not nice." },
+          { ort: "\"The Silver Tankard\" – a respectable inn", publikum: "Merchants, travellers and a lady with a monocle",
+            intro: "Tablecloths! Napkins! Nobody throws herrings. Here you have to impress quietly – with a lament that goes straight to the heart.",
+            sieg: "The lady is so moved her monocle drops into her soup. She knows the mayor of Phandalin personally – and he needs music for his harvest festival.",
+            pleite: "They stayed politely silent. Very politely. For a very long time." },
+          { ort: "The harvest festival of Phandalin's mayor", publikum: "The mayor, his councillors and his closely guarded purse",
+            intro: "We've met. He hates paying. This time he shouldn't just pay – he should enjoy it.",
+            sieg: "He paid! Without haggling! That has never happened in Phandalin. His brother-in-law, a landgrave, is giving a ball next month …",
+            pleite: "\"Very nice,\" says the mayor, holding out a copper coin. One. To share." },
+          { ort: "The landgrave's ball", publikum: "Dancing nobles who notice every wrong beat",
+            intro: "A waltz. Hundreds of feet following my beat. If I stumble, the whole ballroom stumbles.",
+            sieg: "The hall spins as if I had wound it up. A pale prince in black velvet invites me to his castle. He smiles with … a great many teeth.",
+            pleite: "A count tripped over his countess. Both are looking at me. I am looking at the door." },
+          { ort: "Castle Nightcrag", publikum: "A pale prince and guests who never blink",
+            intro: "Candles that don't flicker. Mirrors with no one in them. I'm playing Ezekiel's Shadow Dance – he said it would go down well here.",
+            sieg: "The prince claps slowly. Then he hands me a letter of passage to the Underdark, to the court of King Horga Stahl V. \"He likes music with a bite.\"",
+            pleite: "The guests eye me as if I were dinner. Better try again – quickly." },
+          { ort: "The stronghold of King Horga Stahl V.", publikum: "A dwarf king who only tolerates music in time with his forge hammers",
+            intro: "We've stood before him once already – as prisoners. This time I came willingly. Hammer and anvil, in time with his heart. Hopefully he has one.",
+            sieg: "King Horga pounds the armrest of his throne – in time! He sends a messenger to the surface: the palace of Neverwinter shall hear of me.",
+            pleite: "The king raises an eyebrow. The guards raise their axes. I raise my lute and start again." },
+          { ort: "The palace of Neverwinter", publikum: "The court, the crown council and a lot of jealous trumpeters",
+            intro: "Marble, banners, a hall so high my echo won't come back until tomorrow. A hymn to the crown – not a single note may waver.",
+            sieg: "They name me court bard! And that night a figure made of moonlight stands at my window: the Fey Queen wants to hear me.",
+            pleite: "A trumpeter grins. I can't let that stand." },
+          { ort: "The Fey Queen's court in the Moon Grove", publikum: "Fey, dryads and a queen who hasn't heard anything new in a thousand years",
+            intro: "Here the music is older than the trees. Echo would feel right at home. I feel … very mortal.",
+            sieg: "The Fey Queen sheds a single tear. It becomes a star, and the star points the way to the Halls of the Eternal Song.",
+            pleite: "The fey giggle. One of them has tied my strings into flowers. Once more – with dignity." },
+          { ort: "The Halls of the Eternal Song", publikum: "The gods themselves",
+            intro: "No road leads here, only a song. Whoever plays here plays for eternity. No mistakes, Barradin. No. Mistakes.",
+            sieg: "The gods rise. My song is written into the stars, and somewhere in Phandalin a dog wakes up and wags its tail.",
+            pleite: "One god coughs. Another smiles indulgently. Immortals have time – and I have another try." }
+        ]
       }
     }
   };
   const t = () => TX[sprache()];
+  const zit = x => sprache() === "en" ? "“" + esc(x) + "”" : "„" + esc(x) + "“";
 
   /* ---------- Schwierigkeit ----------
      Je Stufe: Tempo, Flugzeit der Noten (länger = mehr Abstand, besser lesbar), Liedlänge,
      Rhythmus-Motive der Laute, Bassschläge, Einsätze von Echos Flöte (in geraden/ungeraden Takten),
      ob Doppelnoten erlaubt sind. Die Flöte antwortet der Laute: sie spielt vor allem in deren Pausen. */
   const STUFEN = {
-    leicht: { tempo: 80, flug: 2.4, takte: 8, motive: [[4, 8, 12], [4, 8], [4, 10, 12], [4, 6, 8, 12]], bass: [0], floete: { g: [], u: [14] }, akkord: false },
-    mittel: { tempo: 92, flug: 2.1, takte: 12, motive: [[2, 4, 6, 12], [4, 6, 10, 12], [2, 4, 10, 12, 14], [4, 6, 12, 14]], bass: [0, 8], floete: { g: [14], u: [10, 14] }, akkord: false },
-    schwer: { tempo: 104, flug: 1.8, takte: 16, motive: [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 10, 12], [2, 4, 6, 8, 10, 12, 14], [0, 4, 6, 8, 12, 14]], bass: [0, 8], floete: { g: [6, 14], u: [6, 10, 14] }, akkord: true }
+    leicht: { basis: "leicht", tempo: 80, flug: 2.4, takte: 8, motive: [[4, 8, 12], [4, 8], [4, 10, 12], [4, 6, 8, 12]], bass: [0], floete: { g: [], u: [14] }, akkord: false },
+    mittel: { basis: "mittel", tempo: 92, flug: 2.1, takte: 12, motive: [[2, 4, 6, 12], [4, 6, 10, 12], [2, 4, 10, 12, 14], [4, 6, 12, 14]], bass: [0, 8], floete: { g: [14], u: [10, 14] }, akkord: false },
+    schwer: { basis: "schwer", tempo: 104, flug: 1.8, takte: 16, motive: [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 10, 12], [2, 4, 6, 8, 10, 12, 14], [0, 4, 6, 8, 12, 14]], bass: [0, 8], floete: { g: [6, 14], u: [6, 10, 14] }, akkord: true }
   };
   const FENSTER = { perfekt: .05, gut: .1, knapp: .14 };
   const PUNKTE = { perfekt: 100, gut: 75, knapp: 45 };
@@ -105,7 +226,7 @@
      Jedes Lied: Tonleiter, Grundton, Akkordfolge (Stufen je Takt), Tempo-Faktor, Taktart (16 = 4/4, 12 = 3/4).
      Die Melodie wird bei jedem Auftritt neu erfunden, folgt aber Akkorden und Motiven – so bleibt sie singbar. */
   const MODI = { dorisch: [0, 2, 3, 5, 7, 9, 10], ionisch: [0, 2, 4, 5, 7, 9, 11], aeolisch: [0, 2, 3, 5, 7, 8, 10],
-    phrygisch: [0, 1, 3, 5, 7, 8, 10], mixolydisch: [0, 2, 4, 5, 7, 9, 10], harmonisch: [0, 2, 3, 5, 7, 8, 11] };
+    phrygisch: [0, 1, 3, 5, 7, 8, 10], mixolydisch: [0, 2, 4, 5, 7, 9, 10], harmonisch: [0, 2, 3, 5, 7, 8, 11], lydisch: [0, 2, 4, 6, 7, 9, 11] };
   const LIEDER = {
     reigen: { modus: "dorisch", grund: 62, tempo: 1, folge: [0, 6, 3, 0, 0, 6, 3, 4], takt: 16 },
     bugbear: { modus: "ionisch", grund: 60, tempo: 1.08, folge: [0, 3, 4, 0, 5, 3, 4, 4], takt: 16 },
@@ -121,12 +242,40 @@
     ploop: { modus: "dorisch", grund: 62, tempo: 1.18, folge: [0, 3, 0, 4, 0, 3, 6, 0], takt: 12, bass: [0, 6], puls: [3, 6, 9],
       motive: [[0, 3, 6, 9], [0, 2, 3, 6, 8], [0, 3, 4, 6, 9], [0, 6, 9]], floete: { g: [10], u: [4, 10] } },
     venom: { modus: "harmonisch", grund: 64, tempo: 1.08, folge: [0, 5, 3, 4, 0, 3, 5, 4], takt: 16, bass: [0, 8],
-      motive: [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 11], [2, 4, 6, 10, 12], [0, 4, 6, 8, 10, 12]], floete: { g: [2, 10], u: [6, 10, 14] } }
+      motive: [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 11], [2, 4, 6, 10, 12], [0, 4, 6, 8, 10, 12]], floete: { g: [2, 10], u: [6, 10, 14] } },
+    /* Stücke, die es nur auf Barradins Weg gibt */
+    buerger: { nurWeg: true, modus: "ionisch", grund: 60, tempo: 1.04, folge: [0, 4, 5, 3, 0, 3, 4, 0], takt: 16, bass: [0, 8],
+      motive: [[0, 4, 6, 8, 12], [2, 4, 8, 10, 12], [0, 4, 8, 12, 14], [4, 6, 8, 10, 12]], floete: { g: [14], u: [6, 14] } },
+    palast: { nurWeg: true, modus: "ionisch", grund: 62, tempo: 1, folge: [0, 3, 4, 0, 5, 3, 1, 4], takt: 16, bass: [0, 4, 8, 12],
+      motive: [[0, 2, 4, 6, 8, 12], [0, 4, 6, 8, 10, 12], [2, 4, 6, 8, 12, 14], [0, 3, 4, 8, 10, 12]], floete: { g: [10, 14], u: [6, 10, 14] } },
+    elfen: { nurWeg: true, modus: "lydisch", grund: 64, tempo: 1.12, folge: [0, 1, 0, 4, 5, 1, 4, 0], takt: 12, bass: [0, 6], puls: [6],
+      motive: [[0, 2, 4, 6, 8, 10], [0, 4, 6, 8, 10], [2, 4, 6, 8, 10], [0, 2, 6, 8, 10]], floete: { g: [3, 9], u: [3, 7, 11] } },
+    goetter: { nurWeg: true, modus: "aeolisch", grund: 62, tempo: 1, folge: [0, 5, 6, 0, 3, 5, 6, 4], takt: 16, bass: [0, 6, 8, 12],
+      motive: [[0, 2, 4, 6, 8, 10, 12, 14], [0, 3, 4, 6, 8, 11, 12], [2, 4, 6, 8, 10, 12, 14], [0, 2, 4, 7, 8, 10, 12]], floete: { g: [5, 13], u: [3, 9, 15] } }
   };
+  /* ---------- Barradins Weg ----------
+     Elf Bühnen, jede mit eigenem Stück, eigener Schwierigkeit und einem Schwierigkeitsgrad (SG),
+     den der Auftrittswurf erreichen muss. Fehlende Angaben kommen von der Grundstufe. */
+  const station = (basis, lied, sg, mehr) => ({ lied, sg, st: Object.assign({}, STUFEN[basis], { basis }, mehr) });
+  const WEG = [
+    station("leicht", "reigen", 10, { tempo: 76, flug: 2.5, takte: 8, floete: { g: [], u: [] } }),
+    station("leicht", "bugbear", 11, { tempo: 76, flug: 2.4, takte: 8 }),
+    station("mittel", "seemann", 12, { tempo: 84, flug: 2.3, takte: 10, motive: [[4, 8, 12], [2, 4, 8, 12], [4, 6, 8, 12], [4, 10, 12, 14]], floete: { g: [], u: [14] } }),
+    station("mittel", "klage", 13, { tempo: 106, flug: 2.2, takte: 10 }),
+    station("mittel", "buerger", 14, { tempo: 90, flug: 2.1, takte: 12 }),
+    station("schwer", "walzer", 15, { tempo: 88, flug: 2.0, takte: 12, akkord: false }),
+    station("schwer", "schatten", 16, { tempo: 88, flug: 1.95, takte: 14, akkord: false }),
+    station("schwer", "schmiede", 17, { tempo: 102, flug: 1.85, takte: 14 }),
+    station("schwer", "palast", 18, { tempo: 106, flug: 1.8, takte: 16 }),
+    station("schwer", "elfen", 19, { tempo: 98, flug: 1.7, takte: 16 }),
+    station("schwer", "goetter", 21, { tempo: 114, flug: 1.6, takte: 20 })
+  ];
+  const WEG_ZEICHEN = ["🍺", "🐀", "⚓", "🕯️", "💰", "💃", "🦇", "⚒️", "👑", "🌙", "✨"];
   const FOLGEN = {
     dorisch: [[0, 6, 3, 0], [0, 3, 0, 6], [0, 6, 0, 3], [0, 4, 3, 0]], ionisch: [[0, 3, 4, 0], [0, 5, 3, 4], [0, 4, 5, 3], [0, 3, 0, 4]],
     aeolisch: [[0, 5, 2, 6], [0, 3, 6, 0], [0, 5, 3, 4], [0, 6, 5, 6]], phrygisch: [[0, 1, 0, 6], [0, 1, 6, 0], [0, 6, 5, 1]],
-    mixolydisch: [[0, 6, 3, 0], [0, 6, 0, 4], [0, 3, 6, 0]], harmonisch: [[0, 3, 4, 0], [0, 5, 3, 4], [0, 3, 0, 4]]
+    mixolydisch: [[0, 6, 3, 0], [0, 6, 0, 4], [0, 3, 6, 0]], harmonisch: [[0, 3, 4, 0], [0, 5, 3, 4], [0, 3, 0, 4]],
+    lydisch: [[0, 1, 0, 4], [0, 1, 5, 0], [0, 4, 1, 0]]
   };
   /* Walzer-Motive (12 Schritte je Takt) je Publikum */
   const WALZER = { leicht: [[4, 8], [4, 8, 10], [8], [4, 6, 8]], mittel: [[2, 4, 8], [4, 6, 8, 10], [2, 4, 6, 8], [4, 8, 10]],
@@ -142,10 +291,10 @@
   const akkordToene = g => [g % 7, (g + 2) % 7, (g + 4) % 7];
   const nah = (ziel, erlaubt) => { let b = null; for (let r = 0; r <= 9; r++) if (erlaubt(r) && (b === null || Math.abs(r - ziel) < Math.abs(b - ziel))) b = r; return b; };
   let SK = skala("dorisch"), GRUND = 62;
-  function noten(stufe, lied) {
-    const st = STUFEN[stufe], L = lied.takt, schritt = 60 / (st.tempo * lied.tempo) / 4, vor = 16 * schritt, liste = [], akkorde = [];
+  function noten(st, lied) {
+    const L = lied.takt, stufe = st.basis, schritt = 60 / (st.tempo * lied.tempo) / 4, vor = 16 * schritt, liste = [], akkorde = [];
     SK = skala(lied.modus); GRUND = lied.grund;
-    const eigen = stufe !== "leicht", akkord = st.akkord;
+    const eigen = st.basis !== "leicht", akkord = st.akkord;
     const motive = lied.motive && eigen ? lied.motive : (L === 12 ? WALZER[stufe] : st.motive);
     const bassSchritte = lied.bass && eigen ? lied.bass : (L === 12 ? [0] : st.bass);
     const floete = lied.floete && eigen ? lied.floete : (L === 12 ? FLOETE_WALZER[stufe] : st.floete);
@@ -330,35 +479,85 @@
   if (!STUFEN[stufe]) stufe = "mittel";
   let spiel = null, ergebnis = null, liedWahl = "reigen", erfunden = null;
   try { liedWahl = localStorage.getItem("imres-auftritt-lied") || "reigen"; } catch (_) {}
-  if (!LIEDER[liedWahl] && liedWahl !== "neu") liedWahl = "reigen";
+  if ((!LIEDER[liedWahl] || LIEDER[liedWahl].nurWeg) && liedWahl !== "neu") liedWahl = "reigen";
+  /* Barradins Weg: freigespielte Bühnen und Sterne je Bühne */
+  let modus = "lieder", wegStation = 0;
+  const wegLesen = () => { try { const w = JSON.parse(localStorage.getItem("imres-auftritt-weg") || "null"); if (w && Array.isArray(w.sterne)) return w; } catch (_) {} return { frei: 0, sterne: [] }; };
+  let weg = wegLesen();
+  weg.frei = Math.max(0, Math.min(WEG.length - 1, weg.frei | 0));
+  const wegSpeichern = () => { try { localStorage.setItem("imres-auftritt-weg", JSON.stringify(weg)); } catch (_) {} };
+  try { modus = localStorage.getItem("imres-auftritt-modus") === "weg" ? "weg" : "lieder"; wegStation = Math.min(weg.frei, Math.max(0, parseInt(localStorage.getItem("imres-auftritt-station"), 10) || weg.frei)); } catch (_) { wegStation = weg.frei; }
+  const geschafft = () => weg.sterne.filter(x => x > 0).length;
+  const rangName = T => { let n = -1; weg.sterne.forEach((x, i) => { if (x > 0) n = Math.max(n, i); }); return n < 0 ? T.weg.unbekannt : T.weg.raenge[n]; };
+  const sterneText = n => "★".repeat(n) + "☆".repeat(3 - n);
+  const wegLied = () => Object.assign({ key: WEG[wegStation].lied }, LIEDER[WEG[wegStation].lied]);
   const aktuellesLied = () => liedWahl === "neu" ? (erfunden || (erfunden = liedErfinden())) : Object.assign({ key: liedWahl }, LIEDER[liedWahl]);
   const rekordLesen = () => { try { return JSON.parse(localStorage.getItem("imres-auftritt-rekord") || "{}") || {}; } catch (_) { return {}; } };
 
   /* ---------- Oberfläche ---------- */
   function zeichnen() {
     const T = t();
+    const imWeg = modus === "weg";
     root.innerHTML =
-      '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.text + "</p>" +
-      '<div class="at-stufen"><span>' + T.publikum + ":</span>" +
-        Object.keys(STUFEN).map(k => '<button type="button" data-stufe="' + k + '" aria-pressed="' + (k === stufe) + '">' + T.stufen[k] + "</button>").join("") + "</div>" +
-      '<div class="at-stufen at-lieder"><span>' + T.lied + ":</span>" +
-        Object.keys(LIEDER).map(k => '<button type="button" data-lied="' + k + '" aria-pressed="' + (k === liedWahl) + '">' + T.lieder[k] + "</button>").join("") +
-        '<button type="button" data-lied="neu" aria-pressed="' + (liedWahl === "neu") + '">' + T.neuesLied + "</button>" +
-        (liedWahl === "neu" ? '<span class="at-erfunden">♪ ' + esc(liedName(aktuellesLied(), T)) + "</span>" : "") + "</div>" +
+      '<p class="label">' + T.label + "</p><h3>" + T.titel + "</h3>" +
+      '<div class="at-modus" role="tablist">' + ["lieder", "weg"].map(m => '<button type="button" role="tab" data-modus="' + m + '" aria-selected="' + (m === modus) + '">' + T.modi[m] + "</button>").join("") + "</div>" +
+      '<p class="tav-info">' + (imWeg ? T.weg.text : T.text) + "</p>" +
+      (imWeg ? wegHtml(T) : liederHtml(T)) +
       '<div class="at-buehne"><canvas class="at-canvas" width="560" height="380" aria-label="' + esc(T.titel) + '"></canvas>' +
         '<div class="at-ergebnis" ' + (ergebnis ? "" : "hidden") + ">" + (ergebnis ? ergebnisHtml(T) : "") + "</div></div>" +
       '<p class="at-steuer">' + T.steuerung + "<br>" + T.tipp + "</p>" +
-      '<div class="at-fuss"><button type="button" class="tav-knopf at-start">' + (stimmt ? T.stimmen_laden : spiel ? T.abbrechen : (ergebnis ? T.nochmal : T.start)) + "</button></div>" +
-      (ergebnis && !spiel ? eintragHtml(T) : "") +
-      '<div class="at-liste">' + listeHtml(T) + "</div>";
+      '<div class="at-fuss">' + knoepfeHtml(T) + "</div>" +
+      (imWeg ? '<div class="at-weg-fuss"><button type="button" class="at-zurueck">' + T.weg.zuruecksetzen + "</button></div>" :
+        (ergebnis && !spiel ? eintragHtml(T) : "") + '<div class="at-liste">' + listeHtml(T) + "</div>");
     malenRuhe();
+    const pf = root.querySelector(".at-pfad"), akt = pf && pf.querySelector('[aria-pressed="true"]');
+    if (akt) pf.scrollLeft = Math.max(0, akt.parentNode.offsetLeft - (pf.clientWidth - akt.parentNode.offsetWidth) / 2);
+  }
+  function liederHtml(T) {
+    return '<div class="at-stufen"><span>' + T.publikum + ":</span>" +
+        Object.keys(STUFEN).map(k => '<button type="button" data-stufe="' + k + '" aria-pressed="' + (k === stufe) + '">' + T.stufen[k] + "</button>").join("") + "</div>" +
+      '<div class="at-stufen at-lieder"><span>' + T.lied + ":</span>" +
+        Object.keys(LIEDER).filter(k => !LIEDER[k].nurWeg).map(k => '<button type="button" data-lied="' + k + '" aria-pressed="' + (k === liedWahl) + '">' + T.lieder[k] + "</button>").join("") +
+        '<button type="button" data-lied="neu" aria-pressed="' + (liedWahl === "neu") + '">' + T.neuesLied + "</button>" +
+        (liedWahl === "neu" ? '<span class="at-erfunden">♪ ' + esc(liedName(aktuellesLied(), T)) + "</span>" : "") + "</div>";
+  }
+  function wegHtml(T) {
+    const W = T.weg, s = W.stationen[wegStation], st = WEG[wegStation], stern = weg.sterne.reduce((a, b) => a + (b || 0), 0);
+    return '<div class="at-weg-kopf"><span>' + W.rang + ": <strong>" + esc(rangName(T)) + "</strong></span><span>" + W.sterne + ": <strong>" + stern + " / " + WEG.length * 3 + "</strong></span></div>" +
+      '<ol class="at-pfad">' + WEG.map((_, i) => {
+        const offen = i <= weg.frei, n = weg.sterne[i] || 0;
+        return '<li><button type="button" data-station="' + i + '"' + (offen ? "" : " disabled") + ' aria-pressed="' + (i === wegStation) + '" title="' + esc(offen ? W.station(i + 1) + " – " + W.stationen[i].ort : W.gesperrt) + '">' +
+          '<span class="sym" aria-hidden="true">' + (offen ? WEG_ZEICHEN[i] : "🔒") + '</span><span class="nr">' + (i + 1) + '</span><span class="st" aria-label="' + n + ' ' + W.sterne + '">' + (offen ? sterneText(n) : "") + "</span></button></li>";
+      }).join("") + "</ol>" +
+      (geschafft() === WEG.length ? '<p class="at-weg-ende">✨ ' + W.ende + "</p>" : "") +
+      '<div class="at-station"><p class="at-ort"><span aria-hidden="true">' + WEG_ZEICHEN[wegStation] + "</span> " + W.station(wegStation + 1) + " · " + esc(s.ort) + "</p>" +
+        '<p class="at-intro">' + zit(s.intro) + "</p>" +
+        '<p class="at-eckdaten"><span>' + W.publikum + ": " + esc(s.publikum) + "</span><span>" + W.lied + ": <em>" + esc(T.lieder[st.lied]) + "</em></span><span class=\"sg\">" + W.sg(st.sg) + "</span></p></div>";
+  }
+  function knoepfeHtml(T) {
+    if (stimmt) return '<button type="button" class="tav-knopf at-start">' + T.stimmen_laden + "</button>";
+    if (spiel) return '<button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
+    if (modus !== "weg") return '<button type="button" class="tav-knopf at-start">' + (ergebnis ? T.nochmal : T.start) + "</button>";
+    const W = T.weg, weiter = ergebnis && ergebnis.bestanden && wegStation < WEG.length - 1;
+    return (weiter ? '<button type="button" class="tav-knopf at-weiter">' + W.weiter + "</button>" : "") +
+      '<button type="button" class="tav-knopf at-start">' + (!ergebnis ? W.start : ergebnis.bestanden ? W.wiederholen : W.nochmal) + "</button>";
   }
   function ergebnisHtml(T) {
     const e = ergebnis;
+    if (e.weg) {
+      const W = T.weg, s = W.stationen[e.station];
+      return '<p class="label">' + W.gegen(e.sg) + "</p>" +
+        '<div class="at-w20' + (e.w20 === 20 ? " krit" : e.w20 === 1 ? " patzer" : "") + '">' + e.w20 + "</div>" +
+        '<p class="at-summe">' + T.wurf(e.w20, e.summe) + "</p>" +
+        '<p class="at-urteil ' + (e.bestanden ? "ja" : "nein") + '">' + (e.bestanden ? W.bestanden + ' <span class="at-sterne">' + sterneText(e.sterne) + "</span>" : W.durchgefallen) + "</p>" +
+        '<p class="at-zitat">' + zit(e.bestanden ? s.sieg : s.pleite) + "</p>" +
+        (e.neuerRang ? '<p class="at-rekord">' + W.neuerRang(W.raenge[e.station]) + "</p>" : "") +
+        '<p class="at-werte">' + T.genau(e.prozent) + " · " + T.treffer(e.getroffen, e.gesamt) + " · " + T.fehlgriffe(e.streu) + " · " + T.beste(e.serie) + "</p>";
+    }
     return '<p class="label">' + T.ergebnis + "</p>" +
       '<div class="at-w20' + (e.w20 === 20 ? " krit" : e.w20 === 1 ? " patzer" : "") + '">' + e.w20 + "</div>" +
       '<p class="at-summe">' + T.wurf(e.w20, e.summe) + "</p>" +
-      '<p class="at-zitat">„' + esc(e.zitat) + "“</p>" +
+      '<p class="at-zitat">' + zit(e.zitat) + "</p>" +
       '<p class="at-werte">' + T.genau(e.prozent) + " · " + T.treffer(e.getroffen, e.gesamt) + " · " + T.fehlgriffe(e.streu) + " · " + T.beste(e.serie) + "</p>" +
       '<p class="at-rekord">' + (e.neu ? T.neuRekord : T.rekord(e.rekord)) + "</p>";
   }
@@ -397,9 +596,10 @@
     const y = grund(g, w, h, dpr);
     if (!spiel && !ergebnis) {
       g.fillStyle = "rgba(235,226,204,.75)"; g.font = "italic " + (18 * dpr) + "px Georgia, serif"; g.textAlign = "center";
-      g.fillText("🎻  " + t().stufen[stufe], w / 2, y / 2 - 12 * dpr);
+      const T = t(), imWeg = modus === "weg";
+      g.fillText(imWeg ? WEG_ZEICHEN[wegStation] + "  " + T.weg.station(wegStation + 1) + " · " + T.weg.sg(WEG[wegStation].sg) : "🎻  " + T.stufen[stufe], w / 2, y / 2 - 12 * dpr);
       g.fillStyle = "rgba(224,160,70,.85)"; g.font = (15 * dpr) + "px Georgia, serif";
-      g.fillText("♪ " + liedName(aktuellesLied(), t()), w / 2, y / 2 + 16 * dpr);
+      g.fillText("♪ " + liedName(imWeg ? wegLied() : aktuellesLied(), T), w / 2, y / 2 + 16 * dpr);
     }
   }
   function malen() {
@@ -407,7 +607,7 @@
     const c = canvas(); if (!c) return;
     const { w, h, dpr } = maße(c), g = c.getContext("2d"), jetzt = ctx.currentTime - spiel.start;
     spiel.blitz = spiel.blitz.map(b => Math.max(0, b - .06));
-    const y = grund(g, w, h, dpr, spiel.blitz), bahn = w / 3, flug = STUFEN[stufe].flug;
+    const y = grund(g, w, h, dpr, spiel.blitz), bahn = w / 3, flug = spiel.st.flug;
     /* Taktlinien wandern mit – so sieht man den Rhythmus kommen */
     const d0 = spiel.daten, schlagDauer = 4 * d0.schritt;
     for (let k = Math.floor((jetzt - d0.vor) / schlagDauer); ; k++) {
@@ -450,8 +650,10 @@
   function starten() {
     audio();
     ergebnis = null;
-    const lied = aktuellesLied();
-    const daten = noten(stufe, lied); daten.lied = lied;
+    const imWeg = modus === "weg", st = imWeg ? WEG[wegStation].st : STUFEN[stufe];
+    const lied = imWeg ? wegLied() : aktuellesLied();
+    const daten = noten(st, lied); daten.lied = lied;
+    const ort = imWeg ? wegStation : null;
     const token = stimmt = {};
     zeichnen();
     probenFuer(daten).then(() => {
@@ -461,7 +663,7 @@
       saite(hz(45), 1.8, .4986);
       daten.liste.forEach(n => { if (n.spur === 2) return; const m = MIDI[n.spur](n.ton); if (!probeBuf.has(probeName(SPUR_PROBE[n.spur], m))) { if (n.spur === 0) saite(bassHz(n.ton), 1.8, .4986); else saite(melHz(n.ton), 1.4, .4979); } });
       bus = ctx.createGain(); bus.connect(ausg);
-      spiel = { daten, start: ctx.currentTime + .35, punkte: 0, serie: 0, besteSerie: 0, streu: 0, blitz: [0, 0, 0], urteil: null };
+      spiel = { daten, st, ort, start: ctx.currentTime + .35, punkte: 0, serie: 0, besteSerie: 0, streu: 0, blitz: [0, 0, 0], urteil: null };
       spiel.knoten = begleitung(daten, spiel.start);
       zeichnen();
       requestAnimationFrame(malen);
@@ -498,6 +700,7 @@
     if (prozent >= 95 && Math.random() < .6) w20 = 20;
     if (prozent < 20) w20 = 1;
     const ges = w20 + 7;
+    if (spiel.ort != null) { wegErgebnis(spiel.ort, { w20, ges, prozent, getroffen, gesamt: liste.length }); return; }
     const stufeText = w20 === 20 ? "krit" : w20 === 1 ? "patzer" : ges <= 11 ? "schwach" : ges <= 16 ? "maessig" : ges <= 21 ? "gut" : ges <= 25 ? "stark" : "legende";
     const rek = rekordLesen(), alt = rek[stufe] || 0, neu = ges > alt;
     if (neu) { rek[stufe] = ges; try { localStorage.setItem("imres-auftritt-rekord", JSON.stringify(rek)); } catch (_) {} }
@@ -505,6 +708,26 @@
     spiel = null; bus = null;
     if (liedWahl === "neu") erfunden = null; /* nächster Auftritt: wieder ein neues Lied */
     publikum(ges >= 17);
+    zeichnen();
+  }
+
+  function wegErgebnis(i, r) {
+    const sg = WEG[i].sg, bestanden = r.w20 === 20 || (r.w20 !== 1 && r.ges >= sg);
+    const sterne = bestanden ? (r.prozent >= 92 || r.w20 === 20 ? 3 : r.prozent >= 80 ? 2 : 1) : 0;
+    const vorher = rangName(TX.de), alt = weg.sterne[i] || 0;
+    if (sterne > alt) weg.sterne[i] = sterne;
+    for (let k = 0; k < WEG.length; k++) if (weg.sterne[k] == null) weg.sterne[k] = 0;
+    if (bestanden && i === weg.frei && weg.frei < WEG.length - 1) weg.frei++;
+    wegSpeichern();
+    ergebnis = { weg: true, station: i, sg, bestanden, sterne, w20: r.w20, summe: r.ges, prozent: r.prozent, getroffen: r.getroffen, gesamt: r.gesamt,
+      serie: spiel.besteSerie, streu: spiel.streu, neuerRang: bestanden && rangName(TX.de) !== vorher };
+    spiel = null; bus = null;
+    publikum(bestanden);
+    zeichnen();
+  }
+  function stationWaehlen(i) {
+    wegStation = Math.max(0, Math.min(weg.frei, i)); ergebnis = null;
+    try { localStorage.setItem("imres-auftritt-station", String(wegStation)); } catch (_) {}
     zeichnen();
   }
 
@@ -530,6 +753,12 @@
     if (st && !spiel && !stimmt) { stufe = st.dataset.stufe; try { localStorage.setItem("imres-auftritt-stufe", stufe); } catch (_) {} ergebnis = null; zeichnen(); bestenLaden(); return; }
     const ld = e.target.closest("[data-lied]");
     if (ld && !spiel && !stimmt) { liedWahl = ld.dataset.lied; if (liedWahl === "neu") erfunden = liedErfinden(); try { localStorage.setItem("imres-auftritt-lied", liedWahl); } catch (_) {} ergebnis = null; zeichnen(); bestenLaden(); return; }
+    const md = e.target.closest("[data-modus]");
+    if (md && !spiel && !stimmt) { if (md.dataset.modus !== modus) { modus = md.dataset.modus; ergebnis = null; try { localStorage.setItem("imres-auftritt-modus", modus); } catch (_) {} zeichnen(); if (modus === "lieder") bestenLaden(); } return; }
+    const sw = e.target.closest("[data-station]");
+    if (sw && !sw.disabled && !spiel && !stimmt) { stationWaehlen(+sw.dataset.station); return; }
+    if (e.target.closest(".at-weiter") && !spiel && !stimmt) { stationWaehlen(wegStation + 1); const b = root.querySelector(".at-station"); if (b && b.getBoundingClientRect().top < 70) b.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (e.target.closest(".at-zurueck") && !spiel && !stimmt) { if (window.confirm(t().weg.sicher)) { weg = { frei: 0, sterne: [] }; wegSpeichern(); stationWaehlen(0); } return; }
     if (e.target.closest(".at-eintragen")) { eintragen(); return; }
     if (e.target.closest(".at-start")) { spiel || stimmt ? abbrechen() : starten(); }
   });
@@ -606,6 +835,8 @@
 .at-canvas { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(224,160,70,.14), transparent 70%), rgba(16,14,21,.7); border: 1px solid var(--line); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
 .at-ergebnis { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: .45rem; padding: 1rem; text-align: center; background: rgba(16,14,21,.88); border: 1px solid var(--ember); }
 .at-ergebnis[hidden] { display: none; }
+.at-ergebnis { overflow-y: auto; }
+@media (max-width: 520px) { .at-ergebnis { gap: .3rem; padding: .7rem; } .at-ergebnis .at-zitat { font-size: .9rem; line-height: 1.35; } .at-w20 { width: 3.6rem; height: 3.6rem; font-size: 1.7rem; } }
 .at-w20 { width: 4.6rem; height: 4.6rem; display: grid; place-items: center; font-family: var(--display); font-size: 2.2rem; color: var(--night); background: var(--ember); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); animation: atroll .9s cubic-bezier(.3,1.4,.5,1); }
 .at-w20.krit { background: #ffd27a; box-shadow: 0 0 30px #ffd27a; }
 .at-w20.patzer { background: var(--blood); color: var(--vellum); }
@@ -628,6 +859,35 @@
 .at-liste td:last-child { color: var(--ash); font-size: .8rem; }
 .at-liste tr.mein td { color: var(--ember); }
 .at-leer { font-size: .82rem; color: var(--ash); margin: .3rem 0; }
+.at-modus { display: inline-flex; flex-wrap: wrap; justify-self: start; border: 1px solid var(--line); }
+.at-modus button { border: 0; background: none; color: var(--ash); font: inherit; font-size: .88rem; padding: .4rem .9rem; cursor: pointer; }
+.at-modus button[aria-selected="true"] { background: var(--ember); color: var(--night); }
+.at-weg-kopf { display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; font-size: .88rem; color: var(--ash); }
+.at-weg-kopf strong { color: var(--ember); font-weight: 600; }
+.at-pfad { list-style: none; margin: 0; padding: .2rem 0 .5rem; display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: thin; }
+.at-pfad { position: relative; }
+.at-pfad li { flex: 1 0 3.6rem; position: relative; }
+.at-pfad li + li::before { content: ""; position: absolute; left: -.35rem; top: 1.25rem; width: .35rem; border-top: 1px dashed var(--line); }
+.at-pfad button { width: 100%; display: grid; justify-items: center; gap: .1rem; padding: .35rem .2rem .3rem; border: 1px solid var(--line); background: rgba(0,0,0,.2); color: var(--vellum); font: inherit; cursor: pointer; }
+.at-pfad button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.16); box-shadow: 0 0 12px rgba(224,160,70,.25); }
+.at-pfad button:disabled { cursor: not-allowed; opacity: .4; }
+.at-pfad .sym { font-size: 1.2rem; line-height: 1.1; }
+.at-pfad .nr { font-size: .7rem; color: var(--ash); }
+.at-pfad .st { font-size: .62rem; letter-spacing: .02em; color: var(--ember); min-height: .8rem; }
+.at-weg-ende { margin: 0; text-align: center; font-family: var(--hand); font-size: 1.3rem; color: var(--ember); }
+.at-station { border-left: 2px solid var(--ember); padding: .2rem 0 .2rem .9rem; display: grid; gap: .35rem; }
+.at-ort { margin: 0; font-family: var(--name); font-size: 1.2rem; color: var(--vellum); line-height: 1.2; }
+.at-intro { margin: 0; font-style: italic; color: var(--vellum); }
+.at-eckdaten { margin: 0; display: flex; flex-wrap: wrap; gap: .2rem 1.1rem; font-size: .83rem; color: var(--ash); }
+.at-eckdaten .sg { color: var(--ember); font-weight: 600; }
+.at-urteil { margin: 0; font-family: var(--display); font-size: 1.1rem; letter-spacing: .05em; }
+.at-urteil.ja { color: #ffd27a; }
+.at-urteil.nein { color: #c4564a; }
+.at-sterne { letter-spacing: .1em; }
+.at-fuss { gap: .6rem; flex-wrap: wrap; }
+.at-weg-fuss { display: flex; justify-content: center; }
+.at-zurueck { border: 0; background: none; color: var(--ash); font: inherit; font-size: .78rem; text-decoration: underline; cursor: pointer; opacity: .7; }
+.at-zurueck:hover { opacity: 1; color: var(--vellum); }
 `;
   document.head.appendChild(css);
 
