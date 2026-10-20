@@ -36,7 +36,7 @@
       text: "Friedrich erzählt eure Kampagne nach: vom Hinterhalt auf der Straße bis nach Gracklstugh. Spann den Bogen, halte die Gegner vom Lager fern und hör auf Rex: Er wittert sie zuerst.",
       steuerung: "Irgendwo ins Bild tippen, zurückziehen, zielen, loslassen. Je weiter du ziehst, desto kräftiger der Schuss.",
       start: "▶ Auf die Jagd", weiter: "▶ Weiter", nochmal: "↻ Neue Jagd", beenden: "Jagd beenden",
-      pause: "Kurze Rast", pauseText: "Die Jagd wartet auf dich.", pauseKnopf: "Pause",
+      pause: "Kurze Rast", pauseText: "Die Jagd wartet auf dich.", pauseKnopf: "Pause", vollAn: "Vollbild", vollAus: "Vollbild beenden",
       hud: (k, n) => k + " · Welle " + n, welle: n => "Welle " + n, serie: n => "Serie ×" + n,
       kapitel: "Kapitel", kapWahl: "Ab Kapitel", uebung: "Übungsjagd: zählt nicht für die Bestenliste.", uebungEnde: "Übungsjagd – zählt nicht für die Bestenliste.",
       kapGeschafft: r => "Kapitel " + r + " geschafft!", neuFrei: n => "Neue Gabe am Lagerfeuer: " + n, neu: "Neu",
@@ -108,7 +108,7 @@
       text: "Friedrich retells your campaign: from the ambush on the road all the way to Gracklstugh. Draw your bow, keep the enemies away from the camp and listen to Rex: he smells them first.",
       steuerung: "Touch anywhere in the picture, pull back, aim, let go. The further you pull, the stronger the shot.",
       start: "▶ Begin the hunt", weiter: "▶ Continue", nochmal: "↻ New hunt", beenden: "End the hunt",
-      pause: "A short rest", pauseText: "The hunt is waiting for you.", pauseKnopf: "Pause",
+      pause: "A short rest", pauseText: "The hunt is waiting for you.", pauseKnopf: "Pause", vollAn: "Fullscreen", vollAus: "Exit fullscreen",
       hud: (k, n) => k + " · Wave " + n, welle: n => "Wave " + n, serie: n => "Streak ×" + n,
       kapitel: "Chapter", kapWahl: "From chapter", uebung: "Practice hunt: doesn't count for the leaderboard.", uebungEnde: "Practice hunt – doesn't count for the leaderboard.",
       kapGeschafft: r => "Chapter " + r + " complete!", neuFrei: n => "New gift at the campfire: " + n, neu: "New",
@@ -1422,6 +1422,27 @@
   function anwerfen() { if (!rafId && sichtbar && !document.hidden) { letzte = 0; rafId = requestAnimationFrame(schleife); } }
 
   /* ---------- DOM & Overlays ---------- */
+  let vollKnopf, rahmen;
+  const vollAn = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || rahmen.classList.contains("ersatz");
+  function vollbild() {
+    if (vollAn()) {
+      if (rahmen.classList.contains("ersatz")) rahmen.classList.remove("ersatz");
+      else (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else {
+      const an = rahmen.requestFullscreen || rahmen.webkitRequestFullscreen;
+      const ersatz = () => rahmen.classList.add("ersatz");
+      if (an) { try { const p = an.call(rahmen); if (p && p.catch) p.catch(ersatz); } catch (_) { ersatz(); } } else ersatz();
+    }
+    setTimeout(vollSetzen, 60);
+  }
+  function vollSetzen() {
+    const an = vollAn(), tx = t();
+    rahmen.classList.toggle("voll", an);
+    document.documentElement.classList.toggle("wl-ohne-scroll", rahmen.classList.contains("ersatz"));
+    vollKnopf.setAttribute("aria-label", an ? tx.vollAus : tx.vollAn); vollKnopf.title = an ? tx.vollAus : tx.vollAn;
+    vollKnopf.firstChild.textContent = an ? "✕" : "⛶";
+    setTimeout(groesse, 50);
+  }
   let buehne, schleier, tafel, fussRekord, tonKnopf, pauseKnopf, listeEl;
   const rekordKey = st => "imres-waldlauf-rekord-" + st;
   (function altenRekordUebernehmen() { const alt = lies("imres-waldlauf-rekord", ""); if (alt && !lies(rekordKey("waldlaeufer"), "")) schreib(rekordKey("waldlaeufer"), alt); })();
@@ -1434,7 +1455,7 @@
       '<h3 id="wl-titel">' + esc(tx.titel) + '</h3>' +
       '<p class="tav-info" id="wl-text">' + esc(tx.text) + '</p>' +
       '<p class="wl-steuerung" id="wl-steuerung">' + esc(tx.steuerung) + '</p>' +
-      '<div class="wl-buehne"><button type="button" class="wl-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><div class="wl-schleier"><div class="wl-tafel"></div></div></div>' +
+      '<div class="wl-rahmen"><div class="wl-buehne"><button type="button" class="wl-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><button type="button" class="wl-voll"><span aria-hidden="true">⛶</span></button><div class="wl-schleier"><div class="wl-tafel"></div></div></div></div>' +
       '<div class="wl-fuss"><span class="wl-rekord"></span><button type="button" class="wl-ton"></button></div>' +
       '<div class="wl-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".wl-buehne");
@@ -1448,6 +1469,9 @@
     listeEl = root.querySelector(".wl-liste");
     tonKnopf.addEventListener("click", () => { tonAn = !tonAn; schreib("imres-waldlauf-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.bellen(); });
     pauseKnopf.addEventListener("click", pausieren);
+    vollKnopf = root.querySelector(".wl-voll"); rahmen = root.querySelector(".wl-rahmen");
+    vollKnopf.addEventListener("click", vollbild);
+    document.addEventListener("fullscreenchange", vollSetzen); document.addEventListener("webkitfullscreenchange", vollSetzen);
     tafel.addEventListener("click", tafelKlick);
     tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".wl-name")) { e.preventDefault(); eintragen(); } });
     fussSetzen();
@@ -1458,6 +1482,7 @@
     tonKnopf.textContent = tonAn ? tx.ton[0] : tx.ton[1];
     tonKnopf.setAttribute("aria-pressed", String(tonAn));
     pauseKnopf.setAttribute("aria-label", tx.pauseKnopf);
+    if (vollKnopf) vollSetzen();
   }
   function texteSetzen() {
     const tx = t();
@@ -1510,7 +1535,7 @@
       KLANG.seite();
     }
     schleierAuf('<article class="wl-blatt">' +
-      (bild ? '<button type="button" class="wl-bild" aria-label="' + esc(daten.titel) + '"><img class="hinten" src="' + esc(bild) + '" alt=""><img class="vorne" src="' + esc(bild) + '" alt=""></button>' : "") +
+      (bild ? '<button type="button" class="wl-bild" style="width:' + bildBreite(bild) + '%" data-bild="' + esc(bild) + '" aria-label="' + esc(daten.titel) + '"><img src="' + esc(bild) + '" alt=""></button>' : "") +
       '<p class="label">' + esc(endlos ? "∞" : tx.kapitel + " " + ROEMISCH[k]) + '</p>' +
       '<h4>' + esc(daten.titel) + '</h4>' +
       '<p class="wl-erz">' + esc(daten.text) + '</p>' +
@@ -1518,6 +1543,18 @@
       '</article>');
   }
 
+  function bildBreite(bild) {
+    const m = window.BILDMASSE && window.BILDMASSE[bild], v = m ? m[0] / m[1] : 1.6;
+    return v < 0.85 ? 30 : v < 1.2 ? 37 : 46;
+  }
+  /* Bild antippen: groß über dem ganzen Spielfeld, nochmal antippen schließt */
+  function lupe(bild) {
+    const l = document.createElement("button");
+    l.type = "button"; l.className = "wl-lupe"; l.setAttribute("aria-label", "×");
+    l.innerHTML = '<img src="' + esc(bild) + '" alt="">';
+    l.addEventListener("click", () => l.remove());
+    buehne.appendChild(l);
+  }
   let angebot = [];
   function gabenZeigen(nurNeuZeichnen) {
     const tx = t();
@@ -1592,7 +1629,7 @@
       return;
     }
     const bild = e.target.closest(".wl-bild");
-    if (bild) { bild.classList.toggle("offen"); return; }
+    if (bild) { lupe(bild.dataset.bild); return; }
     const kb = e.target.closest("[data-kap]");
     if (kb && zustand === "start") { startKap = parseInt(kb.dataset.kap, 10) || 0; startZeigen(); zeichnen(performance.now()); return; }
     const g = e.target.closest("[data-gabe]");
@@ -1751,18 +1788,17 @@
 .wl-gabe .stufe { display: block; font-family: var(--body); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--blood); }
 .wl-gabe .neu { display: inline-block; margin-left: .35rem; padding: 0 .35rem; font-family: var(--body); font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; color: #f1e7cf; background: var(--blood); vertical-align: middle; }
 .wl-gabe small { font-size: .8rem; line-height: 1.25; color: #5a4a36; }
-.wl-blatt { display: grid; gap: .4rem; width: 100%; max-width: 24rem; padding: .75rem .85rem .85rem; text-align: left;
+.wl-blatt { display: block; width: 100%; max-width: 24rem; padding: .75rem .85rem .85rem; text-align: left;
   background: linear-gradient(172deg, #f1e7cf, #ddcca8); color: #2a2118; box-shadow: 0 14px 30px rgba(0,0,0,.5); transform: rotate(-.6deg); animation: wlblatt .5s ease-out; }
 @keyframes wlblatt { from { opacity: 0; transform: translateY(12px) rotate(-.6deg); } }
-.wl-bild { position: relative; display: block; width: 100%; height: clamp(7rem, 34vw, 11rem); padding: 0; overflow: hidden; border: 1px solid rgba(42,33,24,.35); background: #1a1410; cursor: zoom-in; transition: height .35s ease; }
-.wl-bild.offen { height: clamp(14rem, 62vw, 24rem); cursor: zoom-out; }
-.wl-bild img { display: block; filter: sepia(.15) contrast(1.05); }
-.wl-bild .hinten { position: absolute; inset: -12%; width: 124%; height: 124%; object-fit: cover; filter: blur(9px) brightness(.5) sepia(.35); }
-.wl-bild .vorne { position: relative; width: 100%; height: 100%; object-fit: contain; }
-.wl-tafel .wl-blatt .label { color: var(--blood); margin: .1rem 0 0; }
-.wl-tafel .wl-blatt h4 { color: #1d1610; font-size: clamp(1.25rem, 5vw, 1.6rem); }
+.wl-bild { float: right; margin: .1rem 0 .35rem .65rem; padding: 3px; border: 0; background: #fbf5e6; box-shadow: 0 3px 8px rgba(42,33,24,.35); transform: rotate(1.5deg); cursor: zoom-in; line-height: 0; -webkit-tap-highlight-color: transparent; }
+.wl-bild img { display: block; width: 100%; height: auto; filter: sepia(.15) contrast(1.05); }
+.wl-lupe { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; padding: .6rem; border: 0; background: rgba(9,8,15,.94); cursor: zoom-out; }
+.wl-lupe img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.wl-tafel .wl-blatt .label { color: var(--blood); margin: .1rem 0 .2rem; }
+.wl-tafel .wl-blatt h4 { color: #1d1610; font-size: clamp(1.2rem, 5vw, 1.55rem); margin: 0 0 .45rem; }
 .wl-tafel .wl-blatt .wl-erz { color: #3a2e22; font-size: .88rem; line-height: 1.42; }
-.wl-tafel .wl-blatt .tav-knopf { justify-self: end; border-color: #7a2f26; color: #7a2f26; background: rgba(122,47,38,.08); }
+.wl-tafel .wl-blatt .tav-knopf { display: block; clear: both; margin: .55rem 0 0 auto; border-color: #7a2f26; color: #7a2f26; background: rgba(122,47,38,.08); }
 .wl-tafel .wl-blatt .tav-knopf:hover { background: #7a2f26; color: #f1e7cf; }
 @media (max-width: 480px) {
   .wl-gaben { grid-template-columns: 1fr; gap: .45rem; }
@@ -1779,12 +1815,19 @@
   .wl-tafel .wl-spruch { font-size: 1.1rem; }
   .wl-tafel .wl-haupt { padding: .4rem 1.1rem; font-size: .95rem; }
   .wl-tafel .wl-blatt .wl-erz { font-size: .8rem; line-height: 1.35; }
-  .wl-blatt { padding: .55rem .65rem .65rem; gap: .3rem; }
+  .wl-blatt { padding: .55rem .65rem .65rem; }
 }
 .wl-leise { background: none; border: 0; color: var(--ash); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: .2rem; }
 .wl-pause { position: absolute; top: 12%; right: 8px; z-index: 2; display: none; width: 2.3rem; height: 2.3rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.55); color: var(--vellum); font-size: .8rem; letter-spacing: -.1em; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .wl-pause:hover, .wl-pause:focus-visible { border-color: var(--ember); color: var(--ember); }
 .wl-buehne.laeuft .wl-pause { display: grid; place-items: center; }
+.wl-rahmen { display: grid; justify-items: center; width: 100%; }
+.wl-voll { position: absolute; top: calc(12% + 2.7rem); right: 10px; z-index: 6; width: 2rem; height: 2rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.55); color: var(--vellum); font-size: .95rem; line-height: 1; cursor: pointer; display: grid; place-items: center; -webkit-tap-highlight-color: transparent; }
+.wl-voll:hover, .wl-voll:focus-visible { border-color: var(--ember); color: var(--ember); }
+.wl-buehne:not(.laeuft) .wl-voll { top: 8px; }
+.wl-rahmen.voll { position: fixed; inset: 0; z-index: 9999; place-items: center; align-content: center; background: #050408; padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0); }
+.wl-rahmen.voll .wl-buehne { width: min(100vw, calc(100vh * .8), calc(100dvh * .8)); max-width: none; border: 0; box-shadow: none; }
+html.wl-ohne-scroll, html.wl-ohne-scroll body { overflow: hidden; }
 .wl-stufen, .wl-kapitel { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .3rem; }
 .wl-stufen button, .wl-kapitel button { border: 1px solid var(--line); background: rgba(9,8,15,.4); color: var(--vellum); font: inherit; font-size: .82rem; padding: .38rem .55rem; white-space: nowrap; cursor: pointer; }
 .wl-kapitel span { font-size: .8rem; color: var(--ash); margin-right: .2rem; }
