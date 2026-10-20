@@ -570,8 +570,8 @@
       textAuf(W / 2, 160, tx.flieht.nezna, "#c88aff", 22, 1.6);
     }
     if (e.a.flucht && !e.flieht && e.hp > 0 && e.hp / e.maxHp <= e.a.flucht) {
-      e.flieht = true; e.dir = e.x < W / 2 ? -1 : 1; e.tempo *= 3.2; e.teleT = 0;
-      textAuf(W / 2, 170, tx.flieht[e.typ], "#e0a046", 22, 1.6);
+      e.flieht = true; e.dir = e.x < W / 2 ? -1 : 1; e.tempo *= 3.2; e.teleT = 0; e.tele = null; e.stutzt = 0.6;
+      textAuf(W / 2, 150, tx.flieht[e.typ], "#e0a046", 22, 2.2);
     }
     if (e.a.rasen && !e.rast && e.hp > 0 && e.hp <= e.maxHp / 2) {
       e.rast = true; e.tempo *= 1.7; S.beben = 0.6; KLANG.bruellen(); textAuf(W / 2, 170, tx.rasen, "#e0a046", 24, 1.5);
@@ -883,6 +883,17 @@
           e.x += schritt; e.y = e.basisY - Math.abs(Math.sin(e.t * 10 + e.phase)) * 10 * e.s;
           break;
         case "boss":
+          if (e.tele) {
+            e.tele.t += dt;
+            if (e.tele.phase === "aus" && e.tele.t >= 0.35) {
+              funken(e.x, mitte(e).y, e.a.splitter, 14);
+              e.x = e.tele.nx; e.tele = { phase: "ein", t: 0 };
+              funken(e.x, mitte(e).y, e.a.splitter, 14); KLANG.puff();
+            } else if (e.tele.phase === "ein" && e.tele.t >= 0.35) { e.tele = null; e.teleT = e.a.teleport; }
+            e.y = e.basisY;
+            break;
+          }
+          if (e.stutzt > 0) { e.stutzt -= dt; break; }
           if (e.bleibt) {
             const ziel = 200 + Math.sin(e.t * 0.35) * 70;
             e.x += Math.sign(ziel - e.x) * Math.min(Math.abs(ziel - e.x), e.tempo * Math.max(0, f) * 1.2 * dt);
@@ -890,13 +901,11 @@
           } else e.x += schritt;
           e.y = e.basisY + Math.sin(e.t * 1.6) * 3;
           if (e.a.teleport && !e.flieht && e.bann <= 0 && !e.gehalten) {
-            e.teleT -= dt;
-            if (e.teleT <= 0 && e.x > 30 && e.x < W - 30) {
-              e.teleT = e.a.teleport;
-              const m = mitte(e); puff(m.x, m.y, e.a.splitter, 16);
+            if (!e.tele) e.teleT -= dt;
+            if (!e.tele && e.teleT <= 0 && e.x > 30 && e.x < W - 30) {
               let nx = 70 + Math.random() * 260; if (Math.abs(nx - e.x) < 70) nx = e.x < W / 2 ? nx + 90 : nx - 90;
-              e.x = Math.max(60, Math.min(W - 60, nx));
-              funken(e.x, mitte(e).y, e.a.splitter, 14);
+              e.tele = { phase: "aus", t: 0, nx: Math.max(60, Math.min(W - 60, nx)) };
+              KLANG.puff();
             }
           }
           break;
@@ -1017,6 +1026,7 @@
     if (e.tot) { const k = e.tot / 0.5; alpha = 1 - k; dy = k * 18; dreh = e.dir * k * 0.5; }
     if (e.bew === "boden" && e.t < 0.35 && !e.a.seil) dy += (1 - e.t / 0.35) * e.h * 0.6;
     if (e.unsichtbar) alpha *= 0.12;
+    if (e.tele) alpha *= e.tele.phase === "aus" ? Math.max(0.05, 1 - e.tele.t / 0.35) : Math.min(1, e.tele.t / 0.35);
     else if (e.a.phasen && e.sichtbar <= 0) { const ph = e.t % 4; if (ph > 2.3) alpha *= Math.max(0.12, 1 - (ph - 2.3) / 0.3); else if (ph < 0.3) alpha *= Math.max(0.12, ph / 0.3); }
     if (e.bew === "seil") {
       ctx.strokeStyle = "rgba(220,230,240,.35)"; ctx.lineWidth = 0.8;
@@ -1050,6 +1060,21 @@
       const bw = e.a.art === "boss" ? 120 : Math.max(26, e.w * 0.55), bx = Math.max(4, Math.min(W - bw - 4, e.x - bw / 2));
       ctx.fillStyle = "rgba(16,14,21,.75)"; ctx.fillRect(bx - 1, kopf - 1, bw + 2, 5);
       ctx.fillStyle = e.a.art === "boss" && !e.a.mini ? "#c4564a" : "#e0a046"; ctx.fillRect(bx, kopf, bw * Math.max(0, e.hp / e.maxHp), 3);
+    }
+    if (e.tele) {
+      const k = e.tele.phase === "aus" ? e.tele.t / 0.35 : 1 - e.tele.t / 0.35, mm = mitte(e);
+      ctx.strokeStyle = "rgba(190,240,255," + (0.8 * (1 - Math.abs(k - 0.5))).toFixed(2) + ")"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(mm.x, mm.y, e.w * 0.6 * (0.4 + k), e.h * 0.55 * (0.4 + k), 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (e.flieht && e.a.art === "boss") {
+      const pfX = e.x + e.dir * 18, pfY = kopf - 14, wipp = Math.sin(e.t * 12) * 2;
+      ctx.fillStyle = "#e0a046"; ctx.font = "bold 20px " + FONT_D; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(e.stutzt > 0 ? "!" : "", e.x, pfY + wipp);
+      if (e.stutzt <= 0) {
+        ctx.beginPath(); ctx.moveTo(pfX + e.dir * 12, pfY); ctx.lineTo(pfX, pfY - 7); ctx.lineTo(pfX, pfY + 7); ctx.closePath(); ctx.fill();
+        ctx.fillRect(Math.min(pfX, pfX - e.dir * 14), pfY - 2.5, 14, 5);
+        if (Math.random() < 0.5) S.teilchen.push({ x: e.x - e.dir * e.w * 0.3, y: e.y - 4, vx: -e.dir * (30 + Math.random() * 40), vy: -20 - Math.random() * 30, leben: 0.5, max: 0.5, farbe: "rgba(168,159,143,.6)", gr: 3 + Math.random() * 3, schwer: 0.2, leuchten: true });
+      }
     }
     if (e.mal) { ctx.fillStyle = "#e0a046"; ctx.beginPath(); ctx.moveTo(e.x, kopf - 12); ctx.lineTo(e.x + 4, kopf - 7); ctx.lineTo(e.x, kopf - 2); ctx.lineTo(e.x - 4, kopf - 7); ctx.closePath(); ctx.fill(); }
     if (e.bann > 0) {
@@ -1370,7 +1395,7 @@
       KLANG.seite();
     }
     schleierAuf('<article class="wl-blatt">' +
-      (bild ? '<img src="' + esc(bild) + '" alt="" loading="eager">' : "") +
+      (bild ? '<button type="button" class="wl-bild" aria-label="' + esc(daten.titel) + '"><img class="hinten" src="' + esc(bild) + '" alt=""><img class="vorne" src="' + esc(bild) + '" alt=""></button>' : "") +
       '<p class="label">' + esc(endlos ? "∞" : tx.kapitel + " " + ROEMISCH[k]) + '</p>' +
       '<h4>' + esc(daten.titel) + '</h4>' +
       '<p class="wl-erz">' + esc(daten.text) + '</p>' +
@@ -1451,6 +1476,8 @@
       startZeigen(); fussSetzen(); bestenLaden(stufeWahl);
       return;
     }
+    const bild = e.target.closest(".wl-bild");
+    if (bild) { bild.classList.toggle("offen"); return; }
     const kb = e.target.closest("[data-kap]");
     if (kb && zustand === "start") { startKap = parseInt(kb.dataset.kap, 10) || 0; startZeigen(); zeichnen(performance.now()); return; }
     const g = e.target.closest("[data-gabe]");
@@ -1612,7 +1639,11 @@
 .wl-blatt { display: grid; gap: .4rem; width: 100%; max-width: 24rem; padding: .75rem .85rem .85rem; text-align: left;
   background: linear-gradient(172deg, #f1e7cf, #ddcca8); color: #2a2118; box-shadow: 0 14px 30px rgba(0,0,0,.5); transform: rotate(-.6deg); animation: wlblatt .5s ease-out; }
 @keyframes wlblatt { from { opacity: 0; transform: translateY(12px) rotate(-.6deg); } }
-.wl-blatt img { width: 100%; height: clamp(5rem, 24vw, 9rem); object-fit: cover; display: block; border: 1px solid rgba(42,33,24,.35); filter: sepia(.15) contrast(1.05); }
+.wl-bild { position: relative; display: block; width: 100%; height: clamp(7rem, 34vw, 11rem); padding: 0; overflow: hidden; border: 1px solid rgba(42,33,24,.35); background: #1a1410; cursor: zoom-in; transition: height .35s ease; }
+.wl-bild.offen { height: clamp(14rem, 62vw, 24rem); cursor: zoom-out; }
+.wl-bild img { display: block; filter: sepia(.15) contrast(1.05); }
+.wl-bild .hinten { position: absolute; inset: -12%; width: 124%; height: 124%; object-fit: cover; filter: blur(9px) brightness(.5) sepia(.35); }
+.wl-bild .vorne { position: relative; width: 100%; height: 100%; object-fit: contain; }
 .wl-tafel .wl-blatt .label { color: var(--blood); margin: .1rem 0 0; }
 .wl-tafel .wl-blatt h4 { color: #1d1610; font-size: clamp(1.25rem, 5vw, 1.6rem); }
 .wl-tafel .wl-blatt .wl-erz { color: #3a2e22; font-size: .88rem; line-height: 1.42; }
