@@ -900,7 +900,7 @@
       /* Sparmodus und Handy: EIN gemeinsames Hall-Netz für Raumhall und Echo-Hall, jeweils mit eigenem Sendepegel davor */
       const r = RAEUME[S.raum], neu = fdnHall(Math.max(2, r.dauer * .7), r.hell);
       neu.aus.gain.value *= .1; /* auf den Pegel des Faltungshalls abgestimmt */
-      if (!sparHallIn) { sparHallIn = ctx.createGain(); sparHallIn.gain.value = hallPegel(); hallFilter.connect(sparHallIn); }
+      if (!sparHallIn) { sparHallIn = ctx.createGain(); sparHallIn.gain.value = hallPegel() * SPAR_HALL; hallFilter.connect(sparHallIn); }
       if (hallNode) { try { sparHallIn.disconnect(); if (echoNass) echoNass.disconnect(); hallNode.disconnect(); } catch (_) {} }
       sparHallIn.connect(neu.ein); if (echoNass) echoNass.connect(neu.ein);
       hallNode = neu; sparAktiv = false; sparAusgang();
@@ -958,7 +958,9 @@
     if (soll === hallVerbunden) return;
     try { if (soll) hallEin.connect(hallFilter); else hallEin.disconnect(hallFilter); hallVerbunden = soll; } catch (_) {}
   }
-  const hallPegel = () => Math.pow(S.hall / 10, 1.3) * 1.05;
+  const hallPegel = () => Math.pow(S.hall / 10, 1.2) * 2.2;
+  /* das schlanke Hall-Netz (Handy/Sparmodus) braucht mehr Eingangspegel, um so viel Raum zu ergeben wie der Faltungshall */
+  const SPAR_HALL = 3.5;
   /* ---------- Geräuschkulisse ---------- */
   let kul = null, kulRauschen = null, sfxBus = null;
   const kulPegel = () => Math.pow(S.kulisseVol / 10, 1.5) * .9;
@@ -1156,7 +1158,7 @@
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
     hallSchalten();
     if (echoNass) echoNass.gain.setTargetAtTime(echoPegel() * (leicht() ? 10 : 1), j, .08);
-    if (sparHallIn) sparHallIn.gain.setTargetAtTime(hallPegel(), j, .08);
+    if (sparHallIn) sparHallIn.gain.setTargetAtTime(hallPegel() * SPAR_HALL, j, .08);
     sparAusgang();
     echoHallSchalten();
     if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
