@@ -50,19 +50,19 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .stage .sn small{font-family:var(--fb);color:var(--mute);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-right:6px}
 .hbtns{display:flex;gap:6px;align-items:center;pointer-events:auto}
 .gold{font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;font-size:14px;padding:0 4px;white-space:nowrap}
-.hb{position:relative;height:40px;min-width:40px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:rgba(37,29,41,.92);font-weight:800;font-size:13px}
+.hb{position:relative;height:44px;min-width:44px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:rgba(37,29,41,.92);font-weight:800;font-size:13px}
 .hb b{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--blood);color:#fff;font-size:11px;line-height:18px;border:1px solid #000}
 .hb b:empty{display:none}
 .hb.glow{border-color:var(--gold);box-shadow:0 0 12px rgba(229,180,84,.55)}
 @media (max-width:700px){
   .top{grid-template-columns:minmax(0,1fr) auto}
   .stage{grid-column:1 / -1;order:3}
-  .hb{height:36px;padding:0 8px;font-size:12px}
+  .hb{height:42px;min-width:42px;padding:0 10px;font-size:13px}
   #toast{top:calc(env(safe-area-inset-top,0px) + 150px)}
 }
-#skills{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:232px;height:150px;pointer-events:none}
-.sk{position:absolute;width:66px;height:66px;border-radius:50%;border:2px solid var(--gold);background:radial-gradient(circle at 40% 35%,#45344a,#160f18 70%);pointer-events:auto;touch-action:none;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.6);padding:0}
-.sk .ic{font-size:28px;line-height:1;color:#fff3dc;font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols',var(--fb)}
+#skills{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:262px;height:170px;pointer-events:none}
+.sk{position:absolute;width:76px;height:76px;border-radius:50%;border:2px solid var(--gold);background:radial-gradient(circle at 40% 35%,#45344a,#160f18 70%);pointer-events:auto;touch-action:none;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.6);padding:0}
+.sk .ic{font-size:32px;line-height:1;color:#fff3dc;font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols',var(--fb)}
 .sk .cd{position:absolute;inset:0;border-radius:50%;pointer-events:none}
 .sk .cdt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums;pointer-events:none}
 .sk .key{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:#0d090f;border:1px solid var(--line);font-size:11px;font-weight:800;line-height:18px;color:var(--mute)}
@@ -97,7 +97,7 @@ h3{font-size:22px;line-height:1.05;color:var(--text)}
 .muted{color:var(--mute)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .spread{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.btn{background:var(--panel2);border:1px solid var(--line);padding:10px 14px;border-radius:8px;font-weight:800}
+.btn{background:var(--panel2);border:1px solid var(--line);padding:11px 16px;min-height:44px;border-radius:8px;font-weight:800}
 .btn:hover{border-color:#5a4a5e}
 .btn[disabled]{opacity:.45;cursor:default}
 .btn.gold{border-color:var(--gold);color:var(--gold)}
@@ -156,6 +156,8 @@ h3{font-size:22px;line-height:1.05;color:var(--text)}
 .seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:12px;background:#120d14;border:1px solid var(--line)}
 .seg button{position:relative;padding:9px 6px;border-radius:9px;border:0;background:transparent;font-weight:800;color:var(--mute)}
 .seg button[aria-selected=true]{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px #4a3b4e}
+.mtabs{background:#120d14}
+.mtabs button{padding:12px 6px;font-size:15px}
 .seg b{position:absolute;top:7px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
 .tabbody{display:flex;flex-direction:column;gap:10px}
 .facts{display:grid;gap:8px}
@@ -1644,6 +1646,7 @@ function render(dt){
  cx.setTransform(DPR,0,0,DPR,0,0);
  const pr=P.hp/P.st.maxHp;if(pr<0.35){const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.7);g.addColorStop(0,'rgba(120,0,0,0)');g.addColorStop(1,`rgba(140,0,0,${(0.35-pr)*1.4+0.1*Math.sin(t*6)})`);cx.fillStyle=g;cx.fillRect(0,0,W,H)}
  const tgt=G.boss||G.guardE||G.portal;if(tgt){const sxp=(tgt.x-camX)*ZOOM,syp=(tgt.y-camY)*ZOOM;if(sxp<0||syp<0||sxp>W||syp>H){const a=Math.atan2(syp-H/2,sxp-W/2);const m=46;const ex=clamp(W/2+Math.cos(a)*W,m,W-m),ey=clamp(H/2+Math.sin(a)*H,m+60,H-m);cx.save();cx.translate(ex,ey);cx.rotate(a);poly(cx,tgt===G.portal?'#c48cff':'#ff5a4a',14,0,-8,-9,-8,9);cx.restore()}}
+ if(G.paused&&!G.overlay&&G.resumeT>0){cx.fillStyle='rgba(10,7,12,.35)';cx.fillRect(0,0,W,H);const cxm=W/2,cym=H*0.42,f=G.resumeT/1.5;circ(cx,cxm,cym,46,'rgba(16,12,18,.85)');cx.strokeStyle='#e5b454';cx.lineWidth=5;cx.beginPath();cx.arc(cxm,cym,46,-Math.PI/2,-Math.PI/2+TAU*f);cx.stroke();cx.fillStyle='#f0e6d4';cx.font='800 30px "Alegreya Sans",sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(String(Math.ceil(G.resumeT*2)/2).replace('.',','),cxm,cym+1);cx.font='700 14px "Alegreya Sans",sans-serif';cx.fillText('Gleich geht’s weiter',cxm,cym+66);cx.textBaseline='alphabetic'}
  if(joy&&joy.on){cx.globalAlpha=0.35;circ(cx,joy.ox,joy.oy,52,'#000');cx.globalAlpha=0.6;cx.strokeStyle='#e5b454';cx.lineWidth=2;cx.beginPath();cx.arc(joy.ox,joy.oy,52,0,TAU);cx.stroke();const dx=joy.x-joy.ox,dy=joy.y-joy.oy,dd=Math.hypot(dx,dy),m=Math.min(dd,46)/(dd||1);circ(cx,joy.ox+dx*m,joy.oy+dy*m,22,'#e5b454');cx.globalAlpha=1}
 }
 function drawEZone(z,t){const c=cx,a=Math.min(1,z.t*3,(z.dur-z.t)*2),col=ZCOL[z.kind]||'#8ad04a';
@@ -1731,7 +1734,7 @@ function hudUpdate(){if(G.state==='title'||!P)return;
   const sil=P.silT>0||P.stunT>0;if(b.sil!==sil){b.sil=sil;b.el.classList.toggle('sil',sil)}
   const tx=cd>0?(cd<1?f1(cd):String(Math.ceil(cd))):'';if(b.tx!==tx){b.tx=tx;b.cdt.textContent=tx}}}
 const AR={e_wave:150,b_pattern:250,b_fear:230,z_cleave:180,e_bear:260,z_frenzy:260,e_charge:420,z_step:420,b_mirror:300};
-const SKPOS=[[0,0],[76,0],[0,76],[76,76],[152,0],[152,76]];
+const SKPOS=[[0,0],[86,0],[0,86],[86,86],[172,0],[172,86]];
 function buildSkillBar(){P.actives=P.learn.map(id=>P.hero.tree.find(n=>n.id===id)).filter(Boolean).slice(0,6);
  skillsEl.innerHTML=P.actives.map((n,i)=>`<button class="sk ready" data-sk="${i}" style="right:${SKPOS[i][0]}px;bottom:${SKPOS[i][1]}px" aria-label="${esc(n.name)}"><span class="ic">${n.ic}</span><i class="cd"></i><span class="cdt"></span><span class="key">${i+1}</span></button>`).join('');
  P.skBtns=[...skillsEl.querySelectorAll('.sk')].map(el=>({el,cd:el.querySelector('.cd'),cdt:el.querySelector('.cdt'),q:-1,tx:null}));
@@ -1742,9 +1745,11 @@ function updateInvBadge(){G.upCount=P.bag.filter(it=>itemDelta(it)>0.005).length
 function showScreen(html,cls,keep){const y=scr.scrollTop;scr.className='screen'+(cls?' '+cls:'');scr.innerHTML=html;scr.hidden=false;scr.scrollTop=keep?y:0;
  scr.querySelectorAll('canvas[data-ico]').forEach(c=>{const[sl,r,b]=c.dataset.ico.split('|');const g=c.getContext('2d');g.setTransform(c.width/24,0,0,c.height/24,c.width/2,c.height/2);itemIcon(g,sl,RARCOL[+r],b)})}
 function hideScreen(){scr.hidden=true;scr.innerHTML='';stageCv=null}
-function openOverlay(k){if(G.state!=='play')return;G.paused=true;G.overlay=k;joy=null;for(const kk in keys)keys[kk]=false;
+function openOverlay(k){if(G.state!=='play')return;G.paused=true;G.resumeT=0;G.overlay=k;joy=null;for(const kk in keys)keys[kk]=false;
  if(k==='inv'){G.invSel=null;renderInv()}else if(k==='tree'){renderTree()}else renderPause()}
-function closeOverlay(){G.overlay=null;G.paused=false;hideScreen();last=performance.now()}
+function closeOverlay(){G.overlay=null;G.paused=true;G.resumeT=1.5;hideScreen();last=performance.now()}
+function switchOverlay(k){G.overlay=k;if(k==='inv'){G.invSel=null;renderInv()}else if(k==='tree')renderTree();else renderPause()}
+const menuTabs=a=>`<div class="seg mtabs" role="tablist"><button role="tab" aria-selected="${a==='inv'}" data-act="mtab" data-m="inv">Beutel${G.upCount?`<b aria-label="bessere Gegenstände"></b>`:''}</button><button role="tab" aria-selected="${a==='tree'}" data-act="mtab" data-m="tree">Talente${P.sp>0?'<b aria-label="freie Punkte"></b>':''}</button>${G.state==='between'?'':`<button role="tab" aria-selected="${a==='pause'}" data-act="mtab" data-m="pause">Pause</button>`}</div>`;
 
 const ATKSTYLE={barradin:'Rapierstich im Nahkampf, Klangnoten auf Distanz',echo:'Stabhieb oder Bärenpranke im Nahkampf, Dornengeschosse auf Distanz',friedrich:'Jagdmesser im Nahkampf, Pfeile auf Distanz – Rex beißt mit',ezekiel:'Klingenhieb im Nahkampf, Wurfdolche auf Distanz'};
 const HCOL={barradin:'#e3b456',echo:'#8fe07a',friedrich:'#a9d27e',ezekiel:'#ff5050'};
@@ -1825,6 +1830,7 @@ function endRun(win){if(G.state==='end')return;G.state='end';G.victory=win;hud.h
   <div><button class="btn-main" data-act="to-camp">Zurück ins Lager</button></div></div>`)}
 
 function renderPause(keep){showScreen(`<div class="wrap narrow">
+  ${menuTabs('pause')}
   <div class="spread"><h2>Pause</h2><button class="btn" data-act="close">Weiter</button></div>
   <div class="card ups">
    <div class="up"><div><div class="t">Fähigkeiten automatisch wirken</div><div class="d">Praktisch auf dem Handy: Fähigkeiten feuern von selbst, sobald Gegner in Reichweite sind.</div></div><button class="btn ${SAVE.auto?'gold':''}" data-act="auto">${SAVE.auto?'An':'Aus'}</button></div>
@@ -1847,10 +1853,11 @@ function renderInv(keep){const st=P.st;const sel=G.invSel;updateInvBadge();
    <div class="row">${selT==='b'?`<button class="btn gold" data-act="inv-equip">Anlegen</button><button class="btn" data-act="inv-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`:(selK!=='weapon'?`<button class="btn" data-act="inv-unequip" ${P.bag.length>=24?'disabled':''}>Ablegen</button>`:'<span class="muted" style="font-size:13px">Die Waffe kannst du nur austauschen.</span>')}</div></div>`}
  const lines=[['Schaden',fmt(st.dmg)],['Angriffe pro Sekunde',f1(st.rate)],['Leben',fmt(st.maxHp)],['Rüstung',`${fmt(st.armor)} (−${Math.round(armorRed(st.armor)*100)}%)`],['Kritische Trefferchance',Math.round(st.crit*100)+'%'],['Kritischer Schaden',pc(st.critd)],['Fertigkeitsschaden',pc(st.skill)],['Abklingzeiten',`−${Math.round(st.cdr*100)}%`],['Lebensraub',f1(st.ls*100)+'%'],['Regeneration',f1(st.regen)+' / s'],['Wirkungsbereich',pc(st.area)],['Goldfund',pc(st.gold)]];
  showScreen(`<div class="wrap inv ${selIt?'has-sheet':''}">
+  ${menuTabs('inv')}
   <div class="inv-head"><h2>Beutel<small>${P.bag.length} / 24</small></h2><div class="row"><button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten</button><button class="btn gold" data-act="close">${G.state==='between'?'Zurück':'Weiter'}</button></div></div>
   <div class="eyebrow">Angelegt</div><div class="equip">${eq}</div>
   <div class="eyebrow">Im Beutel ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
-  <div class="bag">${bag||'<div class="muted">Noch leer. Gegner lassen Ausrüstung fallen – einfach drüberlaufen.</div>'}</div>
+  <div class="bag">${bag||'<div class="muted" style="grid-column:1/-1">Noch leer. Gegner lassen Ausrüstung fallen – einfach drüberlaufen.</div>'}</div>
   <details class="stats" ${G.statsOpen?'open':''}><summary>Heldenwerte</summary><div class="stat">${lines.map(l=>`<span>${l[0]}</span><span>${l[1]}</span>`).join('')}</div></details>
  </div>${sheet}`,'',keep);
  const dt=scr.querySelector('details.stats');if(dt)dt.addEventListener('toggle',()=>{G.statsOpen=dt.open})}
@@ -1860,6 +1867,7 @@ function renderTree(keep){const Hh=P.hero;const sel=G.treeSel&&Hh.tree.find(n=>n
  const r=rank(sel.id);let req='';if(!prereq(sel)){const prev=Hh.tree.find(m=>m.b===sel.b&&m.row===sel.row-1);req=`Benötigt Heldenstufe ${ROWLV[sel.row]}${prev?` und ${prev.name}`:''}.`}
  const act=sel.a&&P.learn.indexOf(sel.id)>=6?'<div class="muted" style="font-size:13px">Es passen höchstens 6 aktive Fähigkeiten in die Leiste.</div>':'';
  showScreen(`<div class="wrap">
+  ${menuTabs('tree')}
   <div class="inv-head"><div><h2>Talente</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level}</div></div><button class="btn gold" data-act="close">${G.state==='between'?'Zurück':'Weiter'}</button></div>
   <div class="card"><div class="tree">${cols}</div>
    <div class="tdet" style="margin-top:12px"><div class="eyebrow">${sel.a?'Aktive Fähigkeit · Abklingzeit '+f1(sel.cd(Math.max(1,r)))+' s':'Passiv'} · Rang ${r} / ${sel.max}</div><h3>${sel.name}</h3>
@@ -1888,6 +1896,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'next-stage':G.state='play';setupStage(G.stage+1);showStageIntro();break;
   case'between-inv':G.invSel=null;G.overlay='inv';renderInv();break;
   case'between-tree':G.overlay='tree';renderTree();break;
+  case'mtab':if(G.state==='between'&&b.dataset.m!=='pause'){G.overlay=b.dataset.m;if(b.dataset.m==='inv'){G.invSel=null;renderInv()}else renderTree()}else if(G.state==='play')switchOverlay(b.dataset.m);break;
   case'open-inv':openOverlay('inv');break;
   case'open-tree':openOverlay('tree');break;
   case'open-pause':openOverlay('pause');break;
@@ -1908,12 +1917,13 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'tree-learn':{const n=P.hero.tree.find(x=>x.id===G.treeSel);if(n)learn(n);renderTree(true);break}
  }});
 window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(ev.code))return;audioInit();
+ if(G.state==='play'&&!G.overlay&&/^(Arrow|Key[WASD])/.test(ev.code))keys[ev.code]=true;
  if(G.state==='play'&&!G.paused){keys[ev.code]=true;if(/^Digit[1-6]$/.test(ev.code)){useSkill(+ev.code.slice(5)-1)}else if(ev.code==='KeyI')openOverlay('inv');else if(ev.code==='KeyT')openOverlay('tree');else if(ev.code==='Escape'||ev.code==='KeyP')openOverlay('pause');
   if(/^Arrow/.test(ev.code))ev.preventDefault()}
  else if(G.paused&&G.overlay==='inv'&&G.invSel&&ev.code==='Escape'){G.invSel=null;renderInv(true)}
- else if(G.paused&&(ev.code==='Escape'||(ev.code==='KeyI'&&G.overlay==='inv')||(ev.code==='KeyT'&&G.overlay==='tree')))closeOverlay()});
+ else if(G.overlay&&G.state==='play'){if(ev.code==='Escape'||(ev.code==='KeyI'&&G.overlay==='inv')||(ev.code==='KeyT'&&G.overlay==='tree'))closeOverlay();else if(ev.code==='KeyI')switchOverlay('inv');else if(ev.code==='KeyT')switchOverlay('tree')}});
 window.addEventListener('keyup',ev=>{keys[ev.code]=false});
-cv.addEventListener('pointerdown',ev=>{audioInit();if(G.state!=='play'||G.paused)return;if(joy&&joy.on)return;joy={on:true,id:ev.pointerId,ox:ev.clientX,oy:ev.clientY,x:ev.clientX,y:ev.clientY};try{cv.setPointerCapture(ev.pointerId)}catch(e){}ev.preventDefault()});
+cv.addEventListener('pointerdown',ev=>{audioInit();if(G.state!=='play'||G.overlay)return;if(joy&&joy.on)return;joy={on:true,id:ev.pointerId,ox:ev.clientX,oy:ev.clientY,x:ev.clientX,y:ev.clientY};try{cv.setPointerCapture(ev.pointerId)}catch(e){}ev.preventDefault()});
 cv.addEventListener('pointermove',ev=>{if(joy&&joy.on&&ev.pointerId===joy.id){joy.x=ev.clientX;joy.y=ev.clientY;const dx=joy.x-joy.ox,dy=joy.y-joy.oy,d=Math.hypot(dx,dy);if(d>90){joy.ox=joy.x-dx/d*90;joy.oy=joy.y-dy/d*90}}});
 const endJoy=ev=>{if(joy&&ev.pointerId===joy.id)joy=null};cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){persist();if(G.state==='play'&&!G.paused)openOverlay('pause')}});
@@ -1922,6 +1932,7 @@ window.addEventListener('contextmenu',e=>e.preventDefault());
 /* ================= Schleife ================= */
 let last=performance.now();
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(0.05,(now-last)/1000);last=now;
+ if(G.state==='play'&&G.paused&&!G.overlay&&G.resumeT>0){G.resumeT-=dt;if(G.resumeT<=0){G.resumeT=0;G.paused=false}}
  if(G.state==='play'&&!G.paused)update(dt);
  musikTick(dt);
  try{render(dt);if(G.state==='title'&&stageCv)drawStage()}catch(e){console.error(e)}
