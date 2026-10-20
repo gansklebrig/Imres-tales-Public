@@ -38,7 +38,7 @@
       steuerung: "Steuerung", pc: "PC", handy: "Handy", bild: (a, b) => "Bild " + a + " von " + b, zurueck: "Vorheriges Bild", vor: "Nächstes Bild",
       schnell: "Spiel wechseln", eigeneSeite: "öffnet eine eigene Seite",
       spiele: {
-        heldensturm: { titel: "Imres Heldensturm", kurz: "Die ganze Kampagne als Hordenkampf – bis nach Gracklstugh.", genre: "Roguelike", wer: "Alle vier Helden",
+        heldensturm: { titel: "Heldensturm", kurz: "Die ganze Kampagne als Hordenkampf – bis nach Gracklstugh.", genre: "Roguelike", wer: "Alle vier Helden",
           text: "Wähle Barradin, Echo, Friedrich oder Ezekiel und kämpf dich durch unsere Kampagne: vom Hinterhalt auf der Straße über Schloss Crackmore, Donnerbaum und das Unterreich bis nach Gracklstugh. Jeder Lauf bringt Beute und Gold, mit dem du im Lager dauerhaft stärker wirst.",
           punkte: ["Vier spielbare Helden mit Nah- und Fernkampf und je drei Talentbäumen", "13 Orte mit 28 Stufen, Wächtern und Bossen wie Glasstab, Venomfang, Ilvara und Demogorgon", "Musik aus dem Lautenwerk, Beutel, Lager-Verbesserungen und höhere Schwierigkeiten"],
           pc: "WASD oder Pfeiltasten zum Laufen, Fähigkeiten 1–6, Esc = Pause.", handy: "Links gedrückt halten und ziehen zum Laufen, Fähigkeiten unten rechts antippen." },
@@ -73,7 +73,7 @@
       steuerung: "Controls", pc: "PC", handy: "Phone", bild: (a, b) => "Image " + a + " of " + b, zurueck: "Previous image", vor: "Next image",
       schnell: "Switch game", eigeneSeite: "opens its own page",
       spiele: {
-        heldensturm: { titel: "Imres Heldensturm", kurz: "The whole campaign as a horde battle – all the way to Gracklstugh.", genre: "Roguelike", wer: "All four heroes",
+        heldensturm: { titel: "Heldensturm", kurz: "The whole campaign as a horde battle – all the way to Gracklstugh.", genre: "Roguelike", wer: "All four heroes",
           text: "Pick Barradin, Echo, Friedrich or Ezekiel and fight through our campaign: from the ambush on the road via Castle Crackmore, Thundertree and the Underdark all the way to Gracklstugh. Every run brings loot and gold to grow permanently stronger at camp.",
           punkte: ["Four playable heroes with melee and ranged attacks and three talent trees each", "13 places with 28 stages, guardians and bosses like Glasstab, Venomfang, Ilvara and Demogorgon", "Music from the Lautenwerk, bag, camp upgrades and higher difficulties"],
           pc: "WASD or arrow keys to move, abilities 1–6, Esc = pause.", handy: "Hold and drag on the left to move, tap abilities bottom right." },
