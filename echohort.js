@@ -95,7 +95,16 @@
         blitz: ["Sturmeiche", "Blitze springen von Gegner zu Gegner."],
         pilz: ["Pilzring", "Giftsporen für alle in der Nähe."]
       },
-      bau: { stufe: n => "Stufe " + n, verstaerken: "▲ Stärker", ausreissen: "✕ Ausreißen", max: "Volle Kraft", waehle: "Welcher Wächter soll hier wachsen?", zuwenig: "Zu wenig Saat" },
+      bau: { stufe: n => "Stufe " + n, verstaerken: "▲ Stärker", ausreissen: "✕ Ausreißen", max: "Volle Kraft", waehle: "Welcher Wächter soll hier wachsen?", zuwenig: "Zu wenig Saat", pflanzen: "Pflanzen", stufeVon: n => "Stufe " + n + "/3",
+        werte: { schaden: "Schaden", reich: "Reichweite", tempo: "Tempo" }, proSek: n => n + "/s", giftProSek: n => n + "/s Gift",
+        spez: {
+          dorn: (w, st) => "Ein Ziel: immer das vorderste. Trifft auch Fliegende.",
+          wurzel: (w, st) => "Alle in Reichweite · bremst um " + Math.round((1 - w.bremse[st]) * 100) + " %" + (st === 2 ? " · hält fest" : "") + " · Blights sind immun",
+          wolf: (w, st) => w.ziele[st] + (w.ziele[st] > 1 ? " Wölfe" : " Wolf") + " · beißt den Nächsten, kommt zurück",
+          eis: (w, st) => "Bis zu " + w.ziele[st] + " Splitter · bremst um " + Math.round((1 - w.bremse[st]) * 100) + " %",
+          blitz: (w, st) => "Springt auf " + w.ziele[st] + " Ziele, jedes Mal etwas schwächer",
+          pilz: (w, st) => w.ziele[st] + " Sporenbälle · vergiften alle im Umkreis für 3 s"
+        } },
       gesperrt: "Gesperrt",
       raubFertig: "Der Raubzug ist vorbei",
       raubWerte: { beute: "Beute", gier: "Gier", saat: "Saat", schaetze: "Schätze" },
@@ -200,7 +209,16 @@
         blitz: ["Storm oak", "Lightning jumps from foe to foe."],
         pilz: ["Mushroom ring", "Poison spores for everyone nearby."]
       },
-      bau: { stufe: n => "Level " + n, verstaerken: "▲ Stronger", ausreissen: "✕ Uproot", max: "Full strength", waehle: "Which guardian shall grow here?", zuwenig: "Not enough seeds" },
+      bau: { stufe: n => "Level " + n, verstaerken: "▲ Stronger", ausreissen: "✕ Uproot", max: "Full strength", waehle: "Which guardian shall grow here?", zuwenig: "Not enough seeds", pflanzen: "Plant", stufeVon: n => "Level " + n + "/3",
+        werte: { schaden: "Damage", reich: "Range", tempo: "Speed" }, proSek: n => n + "/s", giftProSek: n => n + "/s poison",
+        spez: {
+          dorn: (w, st) => "One target: always the one in front. Hits flyers too.",
+          wurzel: (w, st) => "Everyone in range · slows by " + Math.round((1 - w.bremse[st]) * 100) + " %" + (st === 2 ? " · roots them" : "") + " · blights are immune",
+          wolf: (w, st) => w.ziele[st] + (w.ziele[st] > 1 ? " wolves" : " wolf") + " · bites the nearest, comes back",
+          eis: (w, st) => "Up to " + w.ziele[st] + " shards · slows by " + Math.round((1 - w.bremse[st]) * 100) + " %",
+          blitz: (w, st) => "Jumps to " + w.ziele[st] + " targets, a little weaker each time",
+          pilz: (w, st) => w.ziele[st] + " spore balls · poison everyone nearby for 3 s"
+        } },
       gesperrt: "Locked",
       raubFertig: "The raid is over",
       raubWerte: { beute: "Loot", gier: "Greed", saat: "Seeds", schaetze: "Treasures" },
@@ -320,9 +338,9 @@
     dorn:   { ab: 0,  sym: "🌿", kosten: [30, 35, 55], reich: [74, 82, 92], schaden: [10, 17, 27], rate: 0.6, typ: "schuss", farbe: "#6f9a3a" },
     wurzel: { ab: 0,  sym: "🌳", kosten: [35, 40, 55], reich: [62, 68, 76], schaden: [5, 8, 12], rate: 1.7, typ: "puls", bremse: [0.55, 0.45, 0.32], bremsT: 1.6, farbe: "#8a6440" },
     wolf:   { ab: 2,  sym: "🐺", kosten: [45, 50, 65], reich: [58, 62, 68], schaden: [32, 50, 74], rate: 1.05, typ: "biss", ziele: [1, 1, 2], farbe: "#a89f8f" },
-    eis:    { ab: 6,  sym: "❄️", kosten: [50, 55, 75], reich: [74, 80, 88], schaden: [15, 24, 35], rate: 2.1, typ: "puls", bremse: [0.6, 0.5, 0.4], bremsT: 2, farbe: "#9fd6ec" },
+    eis:    { ab: 6,  sym: "❄️", kosten: [50, 55, 75], reich: [74, 80, 88], schaden: [15, 24, 35], rate: 2.1, typ: "puls", bremse: [0.6, 0.5, 0.4], bremsT: 2, ziele: [4, 6, 8], farbe: "#9fd6ec" },
     blitz:  { ab: 9,  sym: "⚡", kosten: [70, 75, 95], reich: [104, 114, 124], schaden: [44, 62, 88], rate: 2.3, typ: "kette", ziele: [2, 3, 4], farbe: "#f3e27a" },
-    pilz:   { ab: 15, sym: "🍄", kosten: [45, 55, 75], reich: [64, 70, 78], schaden: [10, 16, 24], rate: 1.8, typ: "gift", farbe: "#c49ae0" }
+    pilz:   { ab: 15, sym: "🍄", kosten: [45, 55, 75], reich: [64, 70, 78], schaden: [10, 16, 24], rate: 1.8, typ: "gift", ziele: [2, 3, 4], farbe: "#c49ae0" }
   };
   const WACHTER_REIHE = ["dorn", "wurzel", "wolf", "eis", "blitz", "pilz"];
 
@@ -901,6 +919,45 @@
         const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy), sch = 340 * dt;
         if (d <= sch + z.r) { treffen(z, g.schaden, "schuss"); g.weg = true; return; }
         g.x += dx / d * sch; g.y += dy / d * sch; g.w = Math.atan2(dy, dx);
+      } else if (g.art === "splitter") {
+        const z = g.ziel;
+        if (!z || z.tot) { g.weg = true; funken(g.x, g.y, 3, ["#cfeaf4", "#ffffff"], 40, 1.5); return; }
+        const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy), sch = 420 * dt;
+        if (d <= sch + z.r) {
+          treffen(z, g.schaden, "frost");
+          if (!z.tot) { z.bremse = Math.min(z.bremse, g.bremse); z.bremsT = Math.max(z.bremsT, g.bremsT); }
+          funken(z.x, z.y, 5, ["#cfeaf4", "#9fd6ec", "#ffffff"], 60, 2); g.weg = true; return;
+        }
+        g.x += dx / d * sch; g.y += dy / d * sch; g.w = Math.atan2(dy, dx); g.dreh = (g.dreh || 0) + dt * 14;
+      } else if (g.art === "spore") {
+        const u = Math.min(1, g.t / g.dauer);
+        g.x = g.x0 + (g.x1 - g.x0) * u; g.y = g.y0 + (g.y1 - g.y0) * u - Math.sin(u * Math.PI) * 34;
+        if (u >= 1) {
+          g.weg = true;
+          imKreis(g.x1, g.y1, 28).forEach(e => { e.gift = Math.max(e.gift, g.schaden); e.giftT = 3; });
+          S.blitze.push({ art: "sporenwolke", x: g.x1, y: g.y1, r: 28, t: 0, dauer: 0.9 });
+          KLANG.sporen();
+        }
+      } else if (g.art === "wolf") {
+        const heim = g.heim, v = 290 * dt;
+        if (g.zustand === "hin") {
+          let z = g.ziel;
+          if (!z || z.tot) { z = g.ziel = imKreis(heim.x, heim.y, g.reich + 20).sort((a, b) => abst(g.x, g.y, a.x, a.y) - abst(g.x, g.y, b.x, b.y))[0]; }
+          if (!z) { g.zustand = "zurueck"; return; }
+          const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy);
+          g.links = dx < 0;
+          if (d <= v + z.r + 4) {
+            treffen(z, g.schaden, "biss");
+            S.blitze.push({ art: "biss", x: z.x, y: z.y, t: 0, dauer: 0.35 });
+            KLANG.biss(); g.zustand = "zurueck"; return;
+          }
+          g.x += dx / d * v; g.y += dy / d * v;
+        } else {
+          const dx = heim.x - g.x, dy = heim.y - g.y, d = Math.hypot(dx, dy);
+          g.links = dx < 0;
+          if (d <= v) { g.weg = true; if (g.turm) g.turm.draussen = Math.max(0, (g.turm.draussen || 0) - 1); return; }
+          g.x += dx / d * v; g.y += dy / d * v;
+        }
       } else if (g.art === "feuerball") {
         const u = Math.min(1, g.t / g.dauer);
         g.x = g.x0 + (g.x1 - g.x0) * u; g.y = g.y0 + (g.y1 - g.y0) * u - Math.sin(u * Math.PI) * 50;
@@ -997,41 +1054,53 @@
     const ziele = imKreis(p.x, p.y, reich);
     if (!ziele.length) { T.cd = 0.1; return; }
     const vorne = l => l.slice().sort((a, b) => fortschritt(b) - fortschritt(a));
-    T.cd = w.rate; T.anim = 0.25;
+    if (w.typ === "biss" && (T.draussen || 0) > 0) { T.cd = 0.1; return; }
+    T.cd = w.rate; T.anim = 0.3;
     if (w.typ === "schuss") {
       const z = vorne(ziele)[0];
-      S.A.geschosse.push({ art: "dorn", x: p.x, y: p.y - 6, ziel: z, schaden: sch, t: 0, w: 0 });
+      T.winkel = Math.atan2(z.y - (p.y - 12), z.x - p.x);
+      S.A.geschosse.push({ art: "dorn", x: p.x + Math.cos(T.winkel) * 10, y: p.y - 12 + Math.sin(T.winkel) * 10, ziel: z, schaden: sch, t: 0, w: T.winkel, st });
       KLANG.dorn();
-    } else if (w.typ === "puls") {
+    } else if (T.k === "wurzel") {
       ziele.forEach(e => {
-        treffen(e, sch, T.k === "eis" ? "frost" : "wurzel", true);
-        if (T.k === "wurzel" && e.d.wurzelFest) return;
+        treffen(e, sch, "wurzel", true);
+        S.blitze.push({ art: "wurzelstich", x: e.x, y: e.y, t: 0, dauer: 0.55, seed: Math.random() });
+        if (e.d.wurzelFest) return;
         e.bremse = Math.min(e.bremse, w.bremse[st]); e.bremsT = Math.max(e.bremsT, w.bremsT);
-        if (T.k === "wurzel" && st === 2) e.festT = Math.max(e.festT, 0.5);
+        if (st === 2) e.festT = Math.max(e.festT, 0.5);
       });
-      S.blitze.push({ art: T.k === "eis" ? "frost" : "ring", x: p.x, y: p.y, r: reich, t: 0, dauer: 0.5 });
-      if (T.k === "eis") KLANG.frost(); else KLANG.wurzel();
+      S.blitze.push({ art: "ring", x: p.x, y: p.y + 4, r: reich, t: 0, dauer: 0.5 });
+      KLANG.wurzel();
+    } else if (T.k === "eis") {
+      vorne(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
+        const a = -Math.PI / 2 + (i - (w.ziele[st] - 1) / 2) * 0.5;
+        S.A.geschosse.push({ art: "splitter", x: p.x + Math.cos(a) * 6, y: p.y - 16 + Math.sin(a) * 6, ziel: e, schaden: sch, bremse: w.bremse[st], bremsT: w.bremsT, t: 0, w: a, dreh: 0 });
+      });
+      S.blitze.push({ art: "frost", x: p.x, y: p.y - 6, r: 24, t: 0, dauer: 0.35 });
+      KLANG.frost();
     } else if (w.typ === "biss") {
       ziele.sort((a, b) => abst(p.x, p.y, a.x, a.y) - abst(p.x, p.y, b.x, b.y)).slice(0, w.ziele[st]).forEach(e => {
-        treffen(e, sch, "biss");
-        S.blitze.push({ art: "biss", x: e.x, y: e.y, x0: p.x, y0: p.y, t: 0, dauer: 0.3 });
+        T.draussen = (T.draussen || 0) + 1;
+        S.A.geschosse.push({ art: "wolf", x: p.x, y: p.y + 2, heim: { x: p.x, y: p.y + 2 }, reich, ziel: e, schaden: sch, zustand: "hin", turm: T, t: 0, links: e.x < p.x });
       });
       KLANG.biss();
     } else if (w.typ === "kette") {
-      let z = vorne(ziele)[0], x0 = p.x, y0 = p.y - 10, s = sch;
+      let z = vorne(ziele)[0], x0 = p.x, y0 = p.y - 30 - st * 2, s = sch;
       const gehabt = new Set();
       for (let i = 0; i < w.ziele[st] && z; i++) {
         gehabt.add(z);
         S.blitze.push({ art: "blitz", x1: x0, y1: y0, x2: z.x, y2: z.y, t: 0, dauer: 0.3, seed: Math.random() });
         treffen(z, s, "kette");
+        funken(z.x, z.y, 4, ["#f3e27a", "#ffffff"], 60, 1.6);
         x0 = z.x; y0 = z.y; s *= 0.8;
         z = S.A.feinde.filter(e => sichtbarFuer(e) && !gehabt.has(e) && abst(x0, y0, e.x, e.y) < 85).sort((a, b) => abst(x0, y0, a.x, a.y) - abst(x0, y0, b.x, b.y))[0];
       }
       KLANG.blitz();
     } else if (w.typ === "gift") {
-      ziele.forEach(e => { e.gift = Math.max(e.gift, sch); e.giftT = 3; });
-      S.blitze.push({ art: "sporen", x: p.x, y: p.y, r: reich, t: 0, dauer: 0.7 });
-      KLANG.sporen();
+      vorne(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
+        const vor = e.flug ? { x: e.x, y: e.y } : pfadPunkt(S.A.P, e.s + e.v * e.bremse * 0.55);
+        S.A.geschosse.push({ art: "spore", x0: p.x + (i - 1) * 5, y0: p.y - 10, x1: vor.x, y1: vor.y, x: p.x, y: p.y - 10, t: 0, dauer: 0.55, schaden: sch });
+      });
     }
   }
   const fortschritt = e => e.flug ? 1000 - abst(e.x, e.y, HORT.x, HORT.y) : e.s;
@@ -1116,7 +1185,8 @@
   function bauen(k) {
     const A = S.A, p = A.plaetze[A.wahl]; if (!p || p.turm) return;
     const c = kosten(k, 0); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
-    A.saat -= c; p.turm = { k, st: 0, cd: 0.4, ausT: 0, wert: c };
+    A.saat -= c; p.turm = { k, st: 0, cd: 0.4, ausT: 0, wert: c, winkel: -Math.PI / 2, draussen: 0 };
+    A.bauTyp = k; schreib("imres-echohort-bautyp", k);
     funken(p.x, p.y, 14, ["#6f9a3a", "#cfe6a8", "#ebe2cc"], 80); KLANG.bau();
     A.wahl = -1;
   }
@@ -1135,7 +1205,11 @@
   function abwehrTippen(p) {
     const A = S.A; if (A.fertig) return;
     const i = A.plaetze.findIndex(q => abst(q.x, q.y, p.x, p.y) < 24);
-    if (i >= 0) { A.wahl = A.wahl === i ? -1 : i; KLANG.griff(); return; }
+    if (i >= 0) {
+      A.wahl = A.wahl === i ? -1 : i; KLANG.griff();
+      if (!A.bauTyp || !wachterFrei(A.bauTyp)) { const l = lies("imres-echohort-bautyp", "dorn"); A.bauTyp = WACHTER[l] && wachterFrei(l) ? l : "dorn"; }
+      return;
+    }
     if (A.wahl >= 0) { A.wahl = -1; return; }
     feuerball(p.x, p.y);
   }
@@ -1616,23 +1690,180 @@
     if (typ === "nezna") { x.save(); x.shadowColor = "#8a6ad0"; x.shadowBlur = 10; x.strokeStyle = "rgba(196,154,224,.7)"; x.lineWidth = 1.5; x.beginPath(); x.arc(0, 0, r + 3, 0, Math.PI * 2); x.stroke(); x.restore(); }
   }
 
-  /* --- Wächter --- */
+  /* --- Wächter: jeder hat eine eigene Gestalt --- */
+  function sockel(x, farbe) {
+    x.fillStyle = "rgba(0,0,0,.42)"; oval(x, 2, 9, 19, 7);
+    const g = x.createRadialGradient(-5, 2, 2, 0, 5, 19); g.addColorStop(0, "#4d3e2b"); g.addColorStop(1, "#211a12");
+    x.fillStyle = g; oval(x, 0, 5, 17, 9);
+    x.strokeStyle = farbe; x.globalAlpha = 0.75; x.lineWidth = 1.6; x.beginPath(); x.ellipse(0, 5, 17, 9, 0, 0, Math.PI * 2); x.stroke(); x.globalAlpha = 1;
+  }
+  function blatt(x, bx, by, w, l, b, farbe) { x.save(); x.translate(bx, by); x.rotate(w); x.fillStyle = farbe; x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(l * 0.5, -b, l, 0); x.quadraticCurveTo(l * 0.5, b, 0, 0); x.fill(); x.restore(); }
+  function kristall(x, bx, by, w, h, br, an) {
+    x.save(); x.translate(bx, by); x.rotate(w);
+    const g = x.createLinearGradient(-br, 0, br, 0); g.addColorStop(0, "#7fb8d4"); g.addColorStop(0.45, "#e6f6fc"); g.addColorStop(1, "#5d9cbc");
+    x.fillStyle = g; x.beginPath(); x.moveTo(-br, 0); x.lineTo(-br, -h); x.lineTo(0, -h - br * 1.4); x.lineTo(br, -h); x.lineTo(br, 0); x.closePath(); x.fill();
+    x.strokeStyle = "rgba(255,255,255," + (0.5 + an) + ")"; x.lineWidth = 0.8; x.beginPath(); x.moveTo(0, -1); x.lineTo(0, -h - br * 1.3); x.stroke();
+    x.restore();
+  }
+  /* T kann null sein (Vorschau in der Bauleiste) */
+  function malTurm(x, k, st, T, zeit) {
+    const w = WACHTER[k], an = T ? (T.anim || 0) / 0.3 : 0, sk = 1 + 0.09 * st;
+    x.save(); x.scale(sk, sk);
+    if (k === "dorn") {
+      sockel(x, w.farbe);
+      for (let i = 0; i < 5; i++) blatt(x, 0, 5, Math.PI + 0.3 + i * 0.6, 12, 4, i % 2 ? "#4d6b35" : "#5f8a3e");
+      // gewundener Stiel mit Dornen
+      x.strokeStyle = "#3b5a24"; x.lineWidth = 4.5; x.lineCap = "round";
+      x.beginPath(); x.moveTo(0, 6); x.bezierCurveTo(-7, -1, 6, -4, 0, -11); x.stroke();
+      x.fillStyle = "#cfe6a8";
+      for (const [tx, ty, tw] of [[-3.5, 1, Math.PI], [3, -4, 0], [-1.5, -8, Math.PI]]) { x.beginPath(); x.moveTo(tx, ty - 1.4); x.lineTo(tx + Math.cos(tw) * 4, ty); x.lineTo(tx, ty + 1.4); x.fill(); }
+      // Kopf: Dornenschote, die zum Ziel zeigt
+      const wink = T ? T.winkel : -Math.PI / 2.4;
+      x.save(); x.translate(0, -12); x.rotate(wink); x.translate(-an * 4, 0);
+      if (st === 2) for (let i = 0; i < 6; i++) blatt(x, -2, 0, i * 1.047 + zeit * 0.4, 9, 3.5, i % 2 ? "#c4564a" : "#9b3a2f");
+      const g = x.createLinearGradient(-8, -6, 8, 6); g.addColorStop(0, "#7da84a"); g.addColorStop(1, "#2f4a1c");
+      x.fillStyle = g; oval(x, 0, 0, 9 + st, 6 + st * 0.5);
+      x.fillStyle = "#cfe6a8";
+      for (let i = 0; i < 3 + st; i++) { const a = Math.PI * 0.6 + i * (Math.PI * 0.8 / (2 + st)); x.beginPath(); x.moveTo(Math.cos(a) * 7, Math.sin(a) * 5 - 1.5); x.lineTo(Math.cos(a) * 12, Math.sin(a) * 9); x.lineTo(Math.cos(a) * 7 + 1.5, Math.sin(a) * 5 + 1.5); x.fill(); }
+      x.fillStyle = "#6b2420"; oval(x, 8 + st, 0, 2.6 + an * 1.5, 3.4 + an * 1.5);
+      x.fillStyle = "#e8c070"; kreis(x, 3, -2.4, 1.1);
+      x.restore();
+    } else if (k === "wurzel") {
+      sockel(x, w.farbe);
+      // Wurzeln, die beim Schlag ausgreifen
+      x.strokeStyle = "#5a3f26"; x.lineCap = "round";
+      for (let i = 0; i < 5 + st; i++) {
+        const a = (i / (5 + st)) * Math.PI * 2 + 0.3, l = 13 + st * 2 + an * 8 + Math.sin(zeit * 2 + i) * 0.8;
+        x.lineWidth = 3.2 - i * 0.2; x.beginPath(); x.moveTo(Math.cos(a) * 5, 4 + Math.sin(a) * 3);
+        x.quadraticCurveTo(Math.cos(a + 0.4) * l * 0.7, 4 + Math.sin(a + 0.4) * l * 0.45, Math.cos(a) * l, 4 + Math.sin(a) * l * 0.55); x.stroke();
+      }
+      // Stumpf
+      let g = x.createLinearGradient(-9, 0, 9, 0); g.addColorStop(0, "#4a3220"); g.addColorStop(0.5, "#7a5638"); g.addColorStop(1, "#3b2818");
+      x.fillStyle = g; x.beginPath(); x.moveTo(-10, 5); x.quadraticCurveTo(-8, -4, -8, -11); x.lineTo(8, -11); x.quadraticCurveTo(8, -4, 10, 5); x.closePath(); x.fill();
+      x.strokeStyle = "rgba(30,20,12,.55)"; x.lineWidth = 1; x.beginPath(); x.moveTo(-4, 3); x.lineTo(-3, -9); x.moveTo(3, 4); x.lineTo(4, -8); x.stroke();
+      x.fillStyle = an > 0 ? "#d8a868" : "#b08c64"; oval(x, 0, -11, 8, 3.6);
+      x.strokeStyle = "rgba(90,63,38,.8)"; x.lineWidth = 0.8; for (let r = 2; r < 8; r += 2.2) { x.beginPath(); x.ellipse(0, -11, r, r * 0.45, 0, 0, Math.PI * 2); x.stroke(); }
+      if (st >= 1) { x.strokeStyle = "#4d6b35"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(5, -12); x.lineTo(7, -19); x.stroke(); blatt(x, 7, -18, -0.6, 7, 2.6, "#6f9a3a"); blatt(x, 6.5, -16, -2.4, 6, 2.4, "#5f8a3e"); }
+      if (st === 2) { x.save(); x.shadowColor = "#e0a046"; x.shadowBlur = 6; x.fillStyle = "#e0a046"; x.fillRect(-5, -6, 1.6, 5); x.fillRect(-2, -3, 3.5, 1.4); x.fillRect(2, -7, 1.6, 6); x.restore(); }
+    } else if (k === "wolf") {
+      x.fillStyle = "rgba(0,0,0,.42)"; oval(x, 2, 9, 20, 7);
+      // Felshügel mit Höhle
+      const g = x.createLinearGradient(0, -18, 0, 8); g.addColorStop(0, "#9a948a"); g.addColorStop(1, "#4a4640");
+      x.fillStyle = g; x.beginPath(); x.moveTo(-19, 8); x.lineTo(-15, -4); x.lineTo(-8, -12); x.lineTo(-1, -16 - st); x.lineTo(7, -13); x.lineTo(14, -5); x.lineTo(19, 8); x.closePath(); x.fill();
+      x.strokeStyle = "rgba(30,28,24,.5)"; x.lineWidth = 1; x.beginPath(); x.moveTo(-8, -12); x.lineTo(-5, -4); x.moveTo(7, -13); x.lineTo(4, -6); x.stroke();
+      if (st >= 1) { x.fillStyle = "#6a655c"; oval(x, 15, 5, 6, 4.5); x.fillStyle = "#3d6a32"; oval(x, -12, -6, 5, 2); }
+      x.fillStyle = "#14110e"; x.beginPath(); x.moveTo(-8, 8); x.quadraticCurveTo(-8, -6, 0, -6); x.quadraticCurveTo(8, -6, 8, 8); x.closePath(); x.fill();
+      const drin = !T || !T.draussen;
+      if (drin) {
+        const blink = Math.sin(zeit * 1.3 + (T ? T.winkel || 0 : 0)) > 0.96 ? 0.2 : 1;
+        x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 6; x.fillStyle = "#ffd34d";
+        oval(x, -2.5, 0, 1.4, 1.4 * blink); oval(x, 2.5, 0, 1.4, 1.4 * blink);
+        if (st === 2) { oval(x, -3.5, 4.5, 1.1, 1.1 * blink); oval(x, 0.5, 4.5, 1.1, 1.1 * blink); }
+        x.restore();
+      }
+      x.strokeStyle = "#ebe2cc"; x.lineWidth = 1.6; x.beginPath(); x.moveTo(-14, 9); x.lineTo(-9, 7); x.stroke(); x.fillStyle = "#ebe2cc"; kreis(x, -14, 9, 1.2); kreis(x, -9, 7, 1.2);
+    } else if (k === "eis") {
+      x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 2, 9, 18, 6);
+      x.fillStyle = "rgba(207,234,244,.35)"; oval(x, 0, 5, 17, 8);
+      x.strokeStyle = "rgba(159,214,236,.8)"; x.lineWidth = 1.4; x.beginPath(); x.ellipse(0, 5, 17, 8, 0, 0, Math.PI * 2); x.stroke();
+      x.save(); if (an > 0) { x.shadowColor = "#cfeaf4"; x.shadowBlur = 14 * an; }
+      if (st === 2) { kristall(x, -12, 6, -0.7, 7, 2.6, an); kristall(x, 12, 6, 0.7, 7, 2.6, an); }
+      kristall(x, -7, 6, -0.38, 12 + st * 2, 3.4, an);
+      kristall(x, 7, 6, 0.38, 13 + st * 2, 3.4, an);
+      kristall(x, 0, 6, 0, 20 + st * 4, 4.6, an);
+      x.restore();
+      x.fillStyle = "rgba(255,255,255," + (0.4 + Math.sin(zeit * 4) * 0.4) + ")"; kreis(x, -1.5, -10 - st * 2, 1);
+    } else if (k === "blitz") {
+      sockel(x, w.farbe);
+      x.fillStyle = "#3b2818"; x.beginPath(); x.moveTo(-4, 6); x.lineTo(-2.5, -8); x.lineTo(2.5, -8); x.lineTo(4, 6); x.closePath(); x.fill();
+      x.strokeStyle = "#3b2818"; x.lineWidth = 2; x.beginPath(); x.moveTo(-2, 5); x.lineTo(-8, 8); x.moveTo(2, 5); x.lineTo(8, 8); x.stroke();
+      const kr = 1 + st * 0.12;
+      for (const [cx, cy, r, f] of [[-7, -12, 7, "#1f3320"], [7, -12, 7, "#1f3320"], [0, -16, 8.5, "#2b4a2a"], [-4, -10, 6, "#2b4a2a"], [5, -9, 5.5, "#24402a"]]) { x.fillStyle = f; kreis(x, cx * kr, cy * kr, r * kr); }
+      x.fillStyle = "rgba(243,226,122,.35)"; kreis(x, -3 * kr, -18 * kr, 2);
+      // Wolke darüber
+      const wy = -29 - st * 2, hell = an > 0 ? "#f3e27a" : "#6a6878";
+      x.fillStyle = hell; kreis(x, -5, wy, 5); kreis(x, 1, wy - 2, 6.5); kreis(x, 7, wy, 4.5); x.fillRect(-5, wy, 12, 4.5);
+      if (an > 0 || Math.sin(zeit * 3.7) > 0.93) {
+        x.strokeStyle = "#fff6b0"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(1, wy + 4); x.lineTo(-1.5, wy + 8); x.lineTo(1.5, wy + 9); x.lineTo(-1, wy + 13); x.stroke();
+      }
+      if (st === 2) { x.strokeStyle = "rgba(224,160,70,.8)"; x.lineWidth = 1; x.beginPath(); x.ellipse(0, -2, 6, 2, 0, 0, Math.PI * 2); x.stroke(); }
+    } else if (k === "pilz") {
+      x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 2, 9, 18, 6);
+      x.fillStyle = "rgba(196,154,224," + (0.12 + Math.sin(zeit * 2) * 0.05) + ")"; oval(x, 0, 5, 18, 9);
+      const n = 4 + st, pos = [];
+      for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2 + 0.4; pos.push([Math.cos(a) * 12, 5 + Math.sin(a) * 6, 0.65]); }
+      pos.push([0, 2, 1 + st * 0.12]);
+      pos.sort((a, b) => a[1] - b[1]).forEach(([px, py, gr], i) => {
+        const druck = an * (i % 2 ? 0.7 : 1);
+        x.save(); x.translate(px, py); x.scale(gr, gr);
+        x.fillStyle = "#e8dcd0"; x.fillRect(-1.8, -8, 3.6, 8);
+        x.save(); x.scale(1 + druck * 0.25, 1 - druck * 0.3);
+        const g = x.createRadialGradient(-2, -11, 1, 0, -9, 8); g.addColorStop(0, "#d8b4ee"); g.addColorStop(1, "#7a4a9a");
+        x.fillStyle = g; x.beginPath(); x.ellipse(0, -9, 7, 5, 0, Math.PI, 0); x.closePath(); x.fill();
+        x.fillStyle = "#f1e7cf"; kreis(x, -3, -11, 0.9); kreis(x, 2, -12, 1.1); kreis(x, 4, -9.5, 0.8);
+        x.restore(); x.restore();
+      });
+    }
+    x.restore();
+  }
   function malWachter(x, p, zeit, gewaehlt) {
     const T = p.turm, w = WACHTER[T.k], st = T.st;
     x.save(); x.translate(p.x, p.y);
-    if (gewaehlt) { x.strokeStyle = "rgba(224,160,70,.35)"; x.fillStyle = "rgba(224,160,70,.06)"; x.lineWidth = 1; x.beginPath(); x.arc(0, 0, w.reich[st], 0, Math.PI * 2); x.fill(); x.stroke(); }
-    x.fillStyle = "rgba(0,0,0,.4)"; oval(x, 2, 6, 17, 8);
-    const g = x.createRadialGradient(-4, -5, 2, 0, 0, 18); g.addColorStop(0, "#3d4a30"); g.addColorStop(1, "#1e2618");
-    x.fillStyle = g; kreis(x, 0, 0, 16);
-    x.strokeStyle = w.farbe; x.lineWidth = 2; x.beginPath(); x.arc(0, 0, 16, 0, Math.PI * 2); x.stroke();
-    const sk = 1 + (T.anim || 0) * 0.8;
-    x.font = Math.round(17 * sk) + "px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(w.sym, 0, 1);
-    for (let i = 0; i <= st; i++) { x.fillStyle = "#e0a046"; kreis(x, -6 + i * 6, 19, 2.2); }
-    if (T.ausT > 0) {
-      x.fillStyle = "rgba(20,20,24,.55)"; kreis(x, 0, 0, 17);
-      if (T.netz) { x.strokeStyle = "rgba(235,226,204,.8)"; x.lineWidth = 0.8; for (let a = 0; a < 6; a++) { x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(a) * 18, Math.sin(a) * 18); x.stroke(); } x.beginPath(); x.arc(0, 0, 8, 0, 7); x.arc(0, 0, 14, 0, 7); x.stroke(); }
-      else { x.fillStyle = "#ebe2cc"; x.font = "11px " + FONT_B; x.fillText("💤", 8, -10); }
+    if (gewaehlt) {
+      x.strokeStyle = "rgba(224,160,70,.6)"; x.fillStyle = "rgba(224,160,70,.08)"; x.lineWidth = 1.2; x.beginPath(); x.arc(0, 0, w.reich[st], 0, Math.PI * 2); x.fill(); x.stroke();
+      if (st < 2) { x.strokeStyle = "rgba(207,230,168,.55)"; x.setLineDash([4, 4]); x.beginPath(); x.arc(0, 0, w.reich[st + 1], 0, Math.PI * 2); x.stroke(); x.setLineDash([]); }
     }
+    malTurm(x, T.k, st, T, zeit);
+    for (let i = 0; i < 3; i++) { x.fillStyle = i <= st ? "#e0a046" : "rgba(235,226,204,.18)"; kreis(x, -6 + i * 6, 17, 2); }
+    if (T.ausT > 0) {
+      x.fillStyle = "rgba(20,20,24,.5)"; kreis(x, 0, -4, 19);
+      if (T.netz) { x.strokeStyle = "rgba(235,226,204,.85)"; x.lineWidth = 0.8; for (let a = 0; a < 6; a++) { x.beginPath(); x.moveTo(0, -4); x.lineTo(Math.cos(a) * 20, -4 + Math.sin(a) * 20); x.stroke(); } x.beginPath(); x.arc(0, -4, 8, 0, 7); x.stroke(); x.beginPath(); x.arc(0, -4, 15, 0, 7); x.stroke(); }
+      else { x.fillStyle = "#ebe2cc"; x.font = "11px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("💤", 10, -20); }
+    }
+    x.restore();
+  }
+
+  /* --- Geschosse der Wächter --- */
+  function malGeschoss(x, g, zeit) {
+    if (g.art === "dorn") {
+      x.save(); x.translate(g.x, g.y); x.rotate(g.w);
+      x.strokeStyle = "rgba(207,230,168,.35)"; x.lineWidth = 2; x.beginPath(); x.moveTo(-6, 0); x.lineTo(-16, 0); x.stroke();
+      const l = 8 + (g.st || 0) * 1.5;
+      x.fillStyle = "#2f4a1c"; x.beginPath(); x.moveTo(l, 0); x.lineTo(-4, -2.6); x.lineTo(-6, 0); x.lineTo(-4, 2.6); x.closePath(); x.fill();
+      x.fillStyle = "#cfe6a8"; x.beginPath(); x.moveTo(l, 0); x.lineTo(l - 4, -1); x.lineTo(l - 4, 1); x.fill();
+      x.restore();
+    } else if (g.art === "splitter") {
+      x.save(); x.translate(g.x, g.y);
+      x.strokeStyle = "rgba(207,234,244,.45)"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(0, 0); x.lineTo(-Math.cos(g.w) * 10, -Math.sin(g.w) * 10); x.stroke();
+      x.rotate(g.dreh); x.shadowColor = "#cfeaf4"; x.shadowBlur = 8;
+      x.fillStyle = "#e6f6fc"; x.beginPath(); x.moveTo(0, -5); x.lineTo(2.6, 0); x.lineTo(0, 5); x.lineTo(-2.6, 0); x.closePath(); x.fill();
+      x.fillStyle = "#7fb8d4"; x.beginPath(); x.moveTo(0, -5); x.lineTo(2.6, 0); x.lineTo(0, 0.5); x.closePath(); x.fill();
+      x.restore();
+    } else if (g.art === "spore") {
+      const u = Math.min(1, g.t / g.dauer);
+      x.fillStyle = "rgba(0,0,0,.25)"; oval(x, g.x0 + (g.x1 - g.x0) * u, g.y0 + (g.y1 - g.y0) * u + 4, 5, 2);
+      x.save(); x.translate(g.x, g.y); x.rotate(zeit * 5);
+      x.shadowColor = "#c49ae0"; x.shadowBlur = 8;
+      x.fillStyle = "rgba(196,154,224,.85)"; kreis(x, 0, 0, 4.5); kreis(x, 3, -2, 3); kreis(x, -3, 2, 3);
+      x.fillStyle = "rgba(241,231,207,.8)"; kreis(x, -1, -1.5, 1.2);
+      x.restore();
+      if (Math.random() < 0.4) S.teilchen.push({ x: g.x, y: g.y, vx: (Math.random() - 0.5) * 20, vy: -30, t: 0, dauer: 0.5, farbe: "#c49ae0", gr: 2 });
+    } else if (g.art === "wolf") {
+      malWolf(x, g.x, g.y, g.links, zeit * (g.zustand === "hin" ? 1 : 0.8), g.zustand === "hin");
+    }
+  }
+  function malWolf(x, wx, wy, links, zeit, wild) {
+    x.save(); x.translate(wx, wy); if (!links) x.scale(-1, 1);
+    x.fillStyle = "rgba(0,0,0,.3)"; oval(x, 0, 6, 10, 2.5);
+    const lauf = Math.sin(zeit * 26);
+    x.strokeStyle = "#6a655c"; x.lineWidth = 2; x.lineCap = "round";
+    x.beginPath(); x.moveTo(-5, 1); x.lineTo(-7 + lauf * 3, 6); x.moveTo(-3, 1); x.lineTo(-1 - lauf * 3, 6); x.moveTo(4, 1); x.lineTo(2 + lauf * 3, 6); x.moveTo(6, 1); x.lineTo(8 - lauf * 3, 6); x.stroke();
+    x.fillStyle = "#8a847a"; oval(x, 0, -1, 8, 4);
+    x.fillStyle = "#6a655c"; x.beginPath(); x.moveTo(7, -2); x.quadraticCurveTo(13, -6 + lauf, 14, -1); x.lineTo(8, 0); x.fill();
+    x.fillStyle = "#a8a296"; kreis(x, -8, -3, 3.6);
+    x.beginPath(); x.moveTo(-10, -2); x.lineTo(-14.5, -1); x.lineTo(-10, 0.5); x.fill();
+    x.fillStyle = "#6a655c"; x.beginPath(); x.moveTo(-9, -5); x.lineTo(-8.5, -9); x.lineTo(-6.5, -5.5); x.fill();
+    x.fillStyle = wild ? "#ffd34d" : "#2a2118"; kreis(x, -9.5, -3.5, 0.8);
     x.restore();
   }
 
@@ -1689,6 +1920,15 @@
         for (let i = -1; i <= 1; i++) { x.beginPath(); x.moveTo(b.x - 7, b.y - 7 + i * 4); x.lineTo(b.x + 7, b.y + 3 + i * 4); x.stroke(); }
       } else if (b.art === "sporen") {
         for (let i = 0; i < 10; i++) { const w = i / 10 * Math.PI * 2 + u; x.fillStyle = "rgba(196,154,224," + a * 0.8 + ")"; kreis(x, b.x + Math.cos(w) * b.r * u, b.y + Math.sin(w) * b.r * u, 2.2); }
+      } else if (b.art === "wurzelstich") {
+        const h = Math.sin(Math.min(1, u * 1.6) * Math.PI) * 13, r = lcg(Math.floor(b.seed * 1e6));
+        x.fillStyle = "rgba(40,28,18," + a * 0.6 + ")"; oval(x, b.x, b.y + 5, 10, 3.5);
+        for (let i = 0; i < 3; i++) {
+          const ox = (i - 1) * 6 + (r() - 0.5) * 2, hh = h * (0.7 + r() * 0.5);
+          x.fillStyle = "#6b4a30"; x.beginPath(); x.moveTo(b.x + ox - 2.6, b.y + 5); x.quadraticCurveTo(b.x + ox - 1, b.y + 5 - hh * 0.6, b.x + ox + (i - 1) * 2, b.y + 5 - hh); x.lineTo(b.x + ox + 2.6, b.y + 5); x.fill();
+        }
+      } else if (b.art === "sporenwolke") {
+        for (let i = 0; i < 7; i++) { const w = i / 7 * Math.PI * 2 + b.t * 2, rr = b.r * (0.25 + u * 0.75); x.fillStyle = "rgba(196,154,224," + a * 0.45 + ")"; kreis(x, b.x + Math.cos(w) * rr * 0.6, b.y + Math.sin(w) * rr * 0.45, 7 + u * 5); }
       } else if (b.art === "gift") {
         x.fillStyle = "rgba(120,190,70," + a * 0.3 + ")"; kreis(x, b.x, b.y, b.r * (0.4 + u * 0.6));
       }
@@ -1741,10 +1981,53 @@
     x.textAlign = "center"; x.textBaseline = "middle";
     if (zeilen.length === 1) { x.font = "700 13px " + FONT_B; x.fillStyle = farbe || "#ebe2cc"; x.fillText(zeilen[0], bx + bw / 2, by + bh / 2 + 1, bw - 6); }
     else {
-      x.font = "18px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(zeilen[0], bx + bw / 2, by + bh / 2 - 7);
+      x.font = (zeilen[0].length > 3 ? "700 13px " : "18px ") + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(zeilen[0], bx + bw / 2, by + bh / 2 - 7, bw - 6);
       x.font = "600 10px " + FONT_B; x.fillStyle = farbe || "#a89f8f"; x.fillText(zeilen[1], bx + bw / 2, by + bh / 2 + 12, bw - 4);
     }
     x.globalAlpha = 1;
+  }
+
+  /* --- Zielstrahl: zeigt, was die Ranke als Erstes packen würde --- */
+  function zielInfo(R) {
+    const w = R.haken.winkel, dx = Math.sin(w), dy = Math.cos(w);
+    let len = reichweite();
+    if (dx < -1e-3) len = Math.min(len, (6 - DREH.x) / dx);
+    if (dx > 1e-3) len = Math.min(len, (W - 6 - DREH.x) / dx);
+    len = Math.min(len, (LEISTE - 6 - DREH.y) / dy);
+    let treffer = null;
+    R.dinge.forEach(d => {
+      if (d.flieht) return;
+      const rx = d.x - DREH.x, ry = d.y - DREH.y, entlang = rx * dx + ry * dy, quer = Math.abs(rx * dy - ry * dx);
+      if (entlang > 0 && entlang - d.r < len && quer < d.r + 5) { const l = Math.max(0, entlang - Math.sqrt(Math.max(0, (d.r + 5) ** 2 - quer * quer))); if (l < len) { len = l; treffer = d; } }
+    });
+    return { d: treffer, len, dx, dy };
+  }
+  function zielArt(R, d) {
+    if (!d) return "leer";
+    const f = formDaten();
+    if (d.typ === "tier" || d.typ === "stoerer" || d.typ === "stein") return "schlecht";
+    if ((d.block === "fels" && !f.fels) || (d.block === "netz" && !f.netz) || (f.maxGewicht && d.gewicht > f.maxGewicht)) return "gesperrt";
+    return "gut";
+  }
+  function malZielstrahl(x, R, zeit) {
+    const z = zielInfo(R), art = zielArt(R, z.d);
+    const farbe = { gut: "255,211,77", schlecht: "214,90,74", gesperrt: "190,182,166", leer: "235,226,204" }[art];
+    const ex = DREH.x + z.dx * z.len, ey = DREH.y + z.dy * z.len;
+    x.save(); x.lineCap = "round";
+    x.strokeStyle = "rgba(" + farbe + ",.18)"; x.lineWidth = 7; x.beginPath(); x.moveTo(DREH.x, DREH.y); x.lineTo(ex, ey); x.stroke();
+    x.strokeStyle = "rgba(" + farbe + ",.85)"; x.lineWidth = 2; x.setLineDash([7, 6]); x.lineDashOffset = -zeit * 40;
+    x.beginPath(); x.moveTo(DREH.x, DREH.y); x.lineTo(ex, ey); x.stroke(); x.setLineDash([]);
+    const puls = 0.5 + Math.sin(zeit * 8) * 0.5;
+    if (z.d) {
+      const d = z.d, r = d.r + 6 + puls * 2;
+      x.strokeStyle = "rgba(" + farbe + ",.95)"; x.lineWidth = 2.2; x.beginPath(); x.arc(d.x, d.y, r, 0, Math.PI * 2); x.stroke();
+      x.lineWidth = 2.6;
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + zeit * 1.5; x.beginPath(); x.moveTo(d.x + Math.cos(a) * (r + 2), d.y + Math.sin(a) * (r + 2)); x.lineTo(d.x + Math.cos(a) * (r + 7), d.y + Math.sin(a) * (r + 7)); x.stroke(); }
+      if (art !== "gut") { x.font = "700 13px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "rgba(" + farbe + ",1)"; x.fillText(art === "gesperrt" ? "🔒" : "✕", d.x + r + 4, d.y - r); }
+    } else {
+      x.fillStyle = "rgba(" + farbe + ",.7)"; kreis(x, ex, ey, 3 + puls * 1.5);
+    }
+    x.restore();
   }
 
   /* --- Raubzug zeichnen --- */
@@ -1760,11 +2043,8 @@
     else { x.fillStyle = "rgba(207,230,168,.25)"; kreis(x, DREH.x, 62, 10 + Math.sin(zeit * 8) * 3); }
     if (R.schmollT > 0) { x.font = "18px " + FONT_B; x.textAlign = "center"; x.fillText("💢", DREH.x + 22, 36 + Math.sin(zeit * 6) * 2); }
     // Zielhilfe
-    if (h.zustand === "schwingen" && !R.fertig) {
-      x.strokeStyle = "rgba(235,226,204,.13)"; x.setLineDash([2, 7]); x.lineWidth = 1.2;
-      x.beginPath(); x.moveTo(DREH.x, DREH.y); x.lineTo(DREH.x + Math.sin(h.winkel) * reichweite(), DREH.y + Math.cos(h.winkel) * reichweite()); x.stroke(); x.setLineDash([]);
-    }
     R.dinge.forEach(d => malDing(x, d, zeit));
+    if (h.zustand === "schwingen" && !R.fertig && R.schmollT <= 0) malZielstrahl(x, R, zeit);
     malRanke(x, R, zeit);
     if (h.last) malDing(x, h.last, zeit);
     malEffekte(x, zeit);
@@ -1810,7 +2090,7 @@
     malHort(x, A, zeit);
     A.feinde.slice().sort((a, b) => a.y - b.y).forEach(e => malFeind(x, e, zeit));
     A.geschosse.forEach(g => {
-      if (g.art === "dorn") { x.save(); x.translate(g.x, g.y); x.rotate(g.w); x.fillStyle = "#cfe6a8"; x.beginPath(); x.moveTo(6, 0); x.lineTo(-4, -2); x.lineTo(-4, 2); x.fill(); x.restore(); }
+      if (g.art === "dorn" || g.art === "splitter" || g.art === "spore" || g.art === "wolf") malGeschoss(x, g, zeit);
       else if (g.art === "feuerball") { x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 16; x.fillStyle = "#ffd27a"; kreis(x, g.x, g.y, 6); x.fillStyle = "#ff8a3a"; kreis(x, g.x, g.y, 3.5); x.restore(); funken(g.x, g.y, 1, ["#ff8a3a", "#e0a046"], 20, 2); }
       else if (g.art === "fels") { x.fillStyle = "#6a6458"; kreis(x, g.x, g.y, 7); x.fillStyle = "#8a8476"; kreis(x, g.x - 2, g.y - 2, 3); }
     });
@@ -1841,18 +2121,17 @@
     const p = A.wahl >= 0 ? A.plaetze[A.wahl] : null;
     x.textAlign = "left"; x.textBaseline = "middle";
     if (p && !p.turm) {
-      const frei = WACHTER_REIHE.filter(wachterFrei), bw = Math.min(64, (W - 12) / frei.length - 4);
-      frei.forEach((k, i) => knopf(x, "bau:" + k, 6 + i * (bw + 4), LEISTE + 4, bw, H - LEISTE - 8, [WACHTER[k].sym, "🌱" + kosten(k, 0)], false, A.saat < kosten(k, 0), A.saat < kosten(k, 0) ? "#c4564a" : "#cfe6a8"));
-      x.font = "600 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.textAlign = "center";
-      x.fillStyle = "rgba(9,8,15,.75)"; x.fillRect(0, LEISTE - 20, W, 20); x.fillStyle = "#ebe2cc";
-      x.fillText(T.bau.waehle, W / 2, LEISTE - 10);
+      const frei = WACHTER_REIHE.filter(wachterFrei), bw = Math.min(62, (W - 12) / frei.length - 4);
+      frei.forEach((k, i) => knopfTurm(x, "bau:" + k, 6 + i * (bw + 4), LEISTE + 3, bw, H - LEISTE - 6, k, 0, kosten(k, 0), A.bauTyp === k, A.saat < kosten(k, 0), zeit));
+      turmTafel(x, A, p, A.bauTyp, 0, true, zeit);
     } else if (p && p.turm) {
-      const w = WACHTER[p.turm.k], [name, info] = T.wachter[p.turm.k];
-      x.font = "15px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(w.sym + " " + name, 10, LEISTE + 16);
-      x.font = "11px " + FONT_B; x.fillStyle = "#a89f8f"; x.fillText(T.bau.stufe(p.turm.st + 1) + " · " + info, 10, LEISTE + 34, 200);
-      if (p.turm.st < 2) { const c = kosten(p.turm.k, p.turm.st + 1); knopf(x, "staerker", 214, LEISTE + 4, 98, H - LEISTE - 8, [T.bau.verstaerken, "🌱" + c], false, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8"); }
-      else knopf(x, "nix", 214, LEISTE + 4, 98, H - LEISTE - 8, [T.bau.max], false, true);
-      knopf(x, "raus", 316, LEISTE + 4, 78, H - LEISTE - 8, [T.bau.ausreissen, "+" + Math.round(p.turm.wert * 0.5)], false, false);
+      const lvl = p.turm.st;
+      x.font = "600 11px " + FONT_B; x.fillStyle = "#a89f8f"; x.textAlign = "left"; x.fillText(T.bau.stufeVon(lvl + 1), 10, LEISTE + 26);
+      for (let i = 0; i < 3; i++) { x.fillStyle = i <= lvl ? "#e0a046" : "rgba(235,226,204,.2)"; kreis(x, 82 + i * 10, LEISTE + 26, 3.2); }
+      if (lvl < 2) { const c = kosten(p.turm.k, lvl + 1); knopf(x, "staerker", 116, LEISTE + 4, 170, H - LEISTE - 8, [T.bau.verstaerken, "🌱" + c], true, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8"); }
+      else knopf(x, "nix", 116, LEISTE + 4, 170, H - LEISTE - 8, [T.bau.max], false, true);
+      knopf(x, "raus", 292, LEISTE + 4, 102, H - LEISTE - 8, [T.bau.ausreissen, "+" + Math.round(p.turm.wert * 0.5) + " 🌱"], false, false);
+      turmTafel(x, A, p, p.turm.k, lvl, false, zeit);
     } else if (A.vorT > 0) {
       knopf(x, "jetzt", W / 2 - 90, LEISTE + 6, 180, H - LEISTE - 12, [T.jetzt], true, false, "#e0a046");
     } else {
@@ -1862,6 +2141,64 @@
       x.textAlign = "right"; x.font = "600 11px " + FONT_B; x.fillStyle = "#a89f8f";
       x.fillText(levelName(A.lv), W - 10, LEISTE + 26, 200);
     }
+  }
+  function knopfTurm(x, id, bx, by, bw, bh, k, st, preis, an, zuTeuer, zeit) {
+    S.knoepfe.push({ id, x: bx, y: by, w: bw, h: bh });
+    x.fillStyle = an ? "rgba(224,160,70,.26)" : "rgba(235,226,204,.07)";
+    x.strokeStyle = an ? "#e0a046" : "rgba(235,226,204,.22)"; x.lineWidth = an ? 1.6 : 1;
+    x.beginPath(); x.roundRect ? x.roundRect(bx, by, bw, bh, 6) : x.rect(bx, by, bw, bh); x.fill(); x.stroke();
+    x.save(); x.beginPath(); x.rect(bx, by, bw, bh - 11); x.clip();
+    x.translate(bx + bw / 2, by + bh - 19); x.scale(0.68, 0.68); if (zuTeuer) x.globalAlpha = 0.5;
+    malTurm(x, k, st, null, zeit); x.restore();
+    x.font = "700 10px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle";
+    x.fillStyle = zuTeuer ? "#c4564a" : "#cfe6a8"; x.fillText("🌱" + preis, bx + bw / 2, by + bh - 6);
+  }
+  function turmWerte(k, st) {
+    const w = WACHTER[k], f = 1 + 0.045 * Math.min(S.lv, KAMPAGNE + 10);
+    return { schaden: Math.round(w.schaden[st] * f), schadenRoh: w.schaden[st], reich: w.reich[st], tempo: 1 / w.rate };
+  }
+  function turmTafel(x, A, p, k, st, bauModus, zeit) {
+    const T = t(), w = WACHTER[k], [name, info] = T.wachter[k];
+    const ph = 104, pw = W - 12, px = 6, py = p.y > LEISTE - ph - 50 ? 32 : LEISTE - ph - 4;
+    // Vorschau der Reichweite am Bauplatz
+    if (bauModus) {
+      x.save(); x.strokeStyle = "rgba(224,160,70,.65)"; x.fillStyle = "rgba(224,160,70,.07)"; x.setLineDash([5, 4]); x.lineWidth = 1.3;
+      x.beginPath(); x.arc(p.x, p.y, w.reich[0], 0, Math.PI * 2); x.fill(); x.stroke(); x.setLineDash([]);
+      x.translate(p.x, p.y); x.globalAlpha = 0.6; malTurm(x, k, 0, null, zeit); x.restore();
+    }
+    x.save();
+    x.fillStyle = "rgba(18,14,11,.93)"; x.strokeStyle = w.farbe; x.lineWidth = 1.4;
+    x.beginPath(); x.roundRect ? x.roundRect(px, py, pw, ph, 8) : x.rect(px, py, pw, ph); x.fill(); x.stroke();
+    // Bild
+    x.fillStyle = "rgba(235,226,204,.05)"; x.beginPath(); x.roundRect ? x.roundRect(px + 6, py + 6, 58, ph - 12, 6) : x.rect(px + 6, py + 6, 58, ph - 12); x.fill();
+    x.save(); x.translate(px + 35, py + ph / 2 + 14); x.scale(1.25, 1.25); malTurm(x, k, st, null, zeit); x.restore();
+    const tx = px + 72;
+    x.textAlign = "left"; x.textBaseline = "middle";
+    x.font = "16px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(name + (bauModus ? "" : " · " + T.bau.stufeVon(st + 1)), tx, py + 14, pw - 80);
+    x.font = "11px " + FONT_B; x.fillStyle = "#c8bfae"; x.fillText(info, tx, py + 30, bauModus ? 226 : pw - 80);
+    const jetzt = turmWerte(k, st), dann = !bauModus && st < 2 ? turmWerte(k, st + 1) : null;
+    const zeile = (y, label, wert, max, txt, wertDann, txtDann) => {
+      x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f"; x.textAlign = "left"; x.fillText(label, tx, y);
+      const bx = tx + 64, bw = 78;
+      x.fillStyle = "rgba(0,0,0,.55)"; x.fillRect(bx, y - 3.5, bw, 7);
+      if (wertDann != null) { x.fillStyle = "rgba(207,230,168,.45)"; x.fillRect(bx, y - 3.5, bw * klemm(wertDann / max, 0, 1), 7); }
+      x.fillStyle = w.farbe; x.fillRect(bx, y - 3.5, bw * klemm(wert / max, 0, 1), 7);
+      x.font = "700 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(txt, bx + bw + 6, y);
+      if (txtDann) { const tw = x.measureText(txt).width; x.fillStyle = "#cfe6a8"; x.fillText(" → " + txtDann, bx + bw + 6 + tw, y); }
+    };
+    const gift = w.typ === "gift";
+    const schadenTxt = v => gift ? T.bau.giftProSek(v) : String(v);
+    zeile(py + 48, T.bau.werte.schaden, jetzt.schadenRoh, 90, schadenTxt(jetzt.schaden), dann ? dann.schadenRoh : null, dann ? schadenTxt(dann.schaden) : null);
+    zeile(py + 62, T.bau.werte.reich, jetzt.reich, 125, String(jetzt.reich), dann ? dann.reich : null, dann ? String(dann.reich) : null);
+    zeile(py + 76, T.bau.werte.tempo, jetzt.tempo, 1.7, T.bau.proSek(jetzt.tempo.toFixed(1).replace(".", sprache() === "de" ? "," : ".")), null, null);
+    x.font = "italic 10.5px " + FONT_B; x.fillStyle = "#cfe6a8";
+    x.fillText("✦ " + T.bau.spez[k](w, st), tx, py + 93, bauModus ? 226 : pw - 80);
+    x.restore();
+    if (bauModus) {
+      const c = kosten(k, 0);
+      knopf(x, "pflanzen", px + pw - 84, py + 40, 78, 46, [T.bau.pflanzen, "🌱" + c], true, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8");
+    }
+    S.knoepfe.push({ id: "tafel", x: px, y: py, w: pw, h: ph });
   }
   function zeilenUmbruch(x, s, cx, cy, br, zh) {
     const woerter = s.split(" "), zeilen = []; let z = "";
@@ -2248,7 +2585,8 @@
       if (id.startsWith("form:")) formWaehlen(id.slice(5));
       else if (id === "genug") genug();
     } else {
-      if (id.startsWith("bau:")) bauen(id.slice(4));
+      if (id.startsWith("bau:")) { const k = id.slice(4); if (S.A.bauTyp === k) bauen(k); else { S.A.bauTyp = k; KLANG.griff(); } }
+      else if (id === "pflanzen") bauen(S.A.bauTyp);
       else if (id === "staerker") verstaerken();
       else if (id === "raus") ausreissen();
       else if (id === "jetzt") { S.A.vorT = 0.01; }
@@ -2259,14 +2597,9 @@
     ev.preventDefault();
     audio();
     const p = punkt(ev);
-    if (p.y >= LEISTE - (S.phase === "abwehr" && S.A && S.A.wahl >= 0 && !(S.A.plaetze[S.A.wahl] || {}).turm ? 20 : 0)) {
-      const k = (S.knoepfe || []).find(b => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
-      if (k && !k.aus) knopfDruck(k.id);
-      else if (k && k.aus && k.id.startsWith("form:")) formWaehlen(k.id.slice(5));
-      else if (k && k.aus && k.id.startsWith("bau:")) bauen(k.id.slice(4));
-      else if (k && k.aus && k.id === "staerker") verstaerken();
-      return;
-    }
+    const k = (S.knoepfe || []).find(b => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
+    if (k) { if (k.id !== "nix" && k.id !== "tafel") knopfDruck(k.id); return; }
+    if (p.y >= LEISTE) return;
     if (S.phase === "raub") raubTippen(p); else abwehrTippen(p);
   });
   leinwand.addEventListener("contextmenu", ev => ev.preventDefault());
