@@ -30,7 +30,7 @@
     { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2")],
       plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4", ton: "shake.mp3", art: "update", stand: "2026-10-20" },
     { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")],
-      plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4", ton: "harfe_76.mp3", art: "update", stand: "2026-10-20" },
+      plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4?v=2", ton: "harfe_76.mp3", art: "update", stand: "2026-10-20" },
     { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")],
       plakat: B("plakat-auftritt"), pos: "center 20%", farbe: "#ffc24a", clip: "vorschau/auftritt-clip.mp4", ton: "gitarre_63.mp3", art: "update", stand: "2026-10-20" },
     { key: "probe", karte: "barden-probe", held: "barradin.jpg", bilder: [B("probe-1"), B("probe-2")],
@@ -215,7 +215,7 @@
   const zeiger = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const losHref = sp => sp.extern || "#" + sp.karte;
   /* WebM für Chrome/Firefox/Android, MP4 (H.264) für Safari und iPhone */
-  const quellen = clip => '<source src="' + clip.replace(/\.mp4$/, ".webm") + '" type="video/webm"><source src="' + clip + '" type="video/mp4">';
+  const quellen = clip => '<source src="' + clip.replace(/\.mp4(\?.*)?$/, ".webm$1") + '" type="video/webm"><source src="' + clip + '" type="video/mp4">';
 
   function kachelnBauen() {
     const T = t(), M = m();
