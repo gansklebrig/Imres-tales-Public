@@ -661,6 +661,9 @@ html.saal-dialog-offen { overflow: hidden; }
 `;
   document.head.appendChild(css);
 
+  /* Für Startseite und Heldenbögen (wegweiser.js): dieselben Daten wie in der Taverne */
+  window.ImresSpielesaal = { SPIELE, nachKey, vorhanden, fortschritt, heutigesSpiel, quellen, losHref, gesehen, texte: () => t(), mehr: () => m() };
+
   /* ---------- Start ---------- */
   kachelnBauen(); kopfBauen();
   ausAdresse();

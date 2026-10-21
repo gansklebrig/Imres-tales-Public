@@ -60,7 +60,7 @@
   const t = () => TX[sprache()];
   const BILDER = {
     questtafel: "questtafel-wand.jpg", reise: "unterreich-karte.jpg", gefaehrten: "gundren-treffen.jpg",
-    nsc: "buergermeister-streit.jpg", bestiarium: "demogorgon-karte.webp", taverne: "siegesfeier.jpg", buehne: "kuo-toa-stadt.jpg"
+    nsc: "buergermeister-streit.jpg", bestiarium: "demogorgon-karte.webp", taverne: "vorschau/taverne-kopf.webp", buehne: "kuo-toa-stadt.jpg"
   };
 
   /* ---------- Ansichten ---------- */
