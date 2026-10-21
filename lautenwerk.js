@@ -4216,8 +4216,8 @@
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
   const einstAuf = { musik: false, klang: false };
   const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
-  Object.assign(TX.de, { einstMusik: "Klang & Raum", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
-  Object.assign(TX.en, { einstMusik: "Sound & room", einstKlang: "Backdrop & effects volume", wechselZu: "switching to", ausklangKommt: "Fade-out", leisePlus: "Intensity", funkKurz: "Listen in" });
+  Object.assign(TX.de, { einstMusik: "Klang, Raum & Gäste", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
+  Object.assign(TX.en, { einstMusik: "Sound, room & guests", einstKlang: "Backdrop & effects volume", wechselZu: "switching to", ausklangKommt: "Fade-out", leisePlus: "Intensity", funkKurz: "Listen in" });
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
   let musikTab = "stimmungen", fxTab = "effekte";
   try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; } catch (_) {}
@@ -4258,7 +4258,7 @@
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) + gaesteZeile(T) + stimmSpeicherZeile(T) : "") + einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>") + "</section>";
+      (musikTab === "stimmungen" ? intRegler(T) + stimmSpeicherZeile(T) : "") + einklapp("musik", T.einstMusik, gaesteZeile(T) + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>") + "</section>";
   }
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
