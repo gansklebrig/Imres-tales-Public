@@ -4075,6 +4075,10 @@
     raumWahl(T) + '<button type="button" class="lw-schalter lw-orch" data-aktion="orchester" aria-pressed="' + (S.orchester !== 0) + '" title="' + esc(T.orchTipp) + '">' + T.orchester + "</button>" + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
+  /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
+  const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler"><span>' + sym + " " + text + '</span><input type="range" min="0" max="10" step="1" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + wert * 10 + " %</b></label>";
+  Object.assign(TX.de, { kulisseKurz: "Kulisse", effekteKurz: "Effekte" });
+  Object.assign(TX.en, { kulisseKurz: "Backdrop", effekteKurz: "Effects" });
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
   const einstAuf = { musik: false, klang: false };
   const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
@@ -4125,10 +4129,12 @@
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + "</h4></div>" +
+      kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
       '<div class="lw-pult-gitter lw-kul-gitter">' + oben("k", KULISSEN).map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
+      kleinRegler("💥", T.effekteKurz, "fxvol", S.fxVol, "lw-fval") +
       '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" +
-      einklapp("klang", T.einstKlang, '<div class="lw-stimm-mix"><label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' + fxRegler(T) + "</div>") + "</section>";
+"</section>";
   }
   const konsole = (T, voll) => '<div class="lw-konsole">' + musikBox(T, voll) + klangBox(T) + "</div>";
   function boxNeu(welche) {
@@ -5119,6 +5125,10 @@ html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
 .ll-int button:hover { border-color: var(--ember); color: var(--ember); }
 .ll-wert { font-weight: 400; font-size: .76rem; color: var(--ash); min-width: 3.6rem; text-align: center; white-space: nowrap; }
 @media (max-width: 420px) { .ll-wert { min-width: 0; font-size: .7rem; } }
+.lw-kleinregler { display: flex; align-items: center; gap: .6rem; font-size: .82rem; color: var(--ash); }
+.lw-kleinregler span { flex: 0 0 auto; white-space: nowrap; }
+.lw-kleinregler input { flex: 1 1 auto; min-width: 4rem; max-width: 16rem; accent-color: var(--ember); }
+.lw-kleinregler b { flex: 0 0 2.6rem; text-align: right; color: var(--vellum); font-weight: 600; font-size: .8rem; }
 `;
   /* Requisiten: nur das gewählte Instrument ist sichtbar */
   css.textContent += ".lw-figur .req { display: none; }\n" +
