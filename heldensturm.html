@@ -216,7 +216,7 @@ details.stats .stat{padding:0 12px 12px}
 .it.empty{border-style:dashed;border-color:#3b3140}
 .it.sel{box-shadow:0 0 0 2px #fff inset}
 .r0{border-color:var(--r0)}.r1{border-color:var(--r1)}.r2{border-color:var(--r2)}.r3{border-color:var(--r3)}.r4{border-color:var(--r4);box-shadow:0 0 12px rgba(255,141,46,.35)}
-.c0{color:var(--r0)}.c1{color:var(--r1)}.c2{color:var(--r2)}.c3{color:var(--r3)}.c4{color:var(--r4)}.c5{color:#3fdc6a}.r5{border-color:#3fdc6a;box-shadow:0 0 12px rgba(63,220,106,.35)}
+.c0{color:var(--r0)}.c1{color:var(--r1)}.c2{color:var(--r2)}.c3{color:var(--r3)}.c4{color:var(--r4)}.c5{color:#3fdc6a}.c5h{color:#5affc0;text-shadow:0 0 8px rgba(90,255,192,.35)}.setrow{padding:7px 0;border-top:1px solid rgba(255,255,255,.07)}.setrow.done b{text-decoration:underline;text-decoration-color:rgba(90,255,192,.5)}.setp{display:flex;gap:6px;font-size:15px;color:#4a5a50;margin:2px 0}.setp .on{color:#3fdc6a}.r5{border-color:#3fdc6a;box-shadow:0 0 12px rgba(63,220,106,.35)}
 .idet2{position:relative;display:flex;flex-direction:column;gap:8px;border-color:#5a4560;background:#1f1723}
 .idet2 .x{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#120d14;font-size:20px;line-height:1}
 .cmpt{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
@@ -1424,7 +1424,7 @@ function legendKill(e){
 /* ================= Werte ================= */
 function computeStats(eq){
  const H=P.hero,up=P.up,lv=P.level;
- const lps0=null;const s={hp:H.hp*(1+0.06*(lv-1)),wdmg:0,wM:0,wR:0,rM:1,rR:1,rate:H.rate,speed:H.speed,armor:lv*0.6,crit:0.05,critd:1.5,cdr:0,ls:0,regen:0,area:1,skill:1,gold:1,luck:0,range:H.range,dmgP:0,hpP:0,rateP:0,speedP:0,regenP:0};
+ const lps0=null;const s={hp:H.hp*(1+0.06*(lv-1)),wdmg:0,wM:0,wR:0,rM:1,rR:1,rate:H.rate,speed:H.speed,armor:lv*0.6,crit:0.05,critd:1.5,cdr:0,ls:0,regen:0,area:1,skill:1,gold:1,luck:0,range:H.range,dmgP:0,hpP:0,rateP:0,speedP:0,regenP:0,meleeP:0,rangedP:0};
  for(const k of SLOTS){const it=eq[k];if(!it)continue;
   if(it.wdmg){if(k==='ranged'){s.wR+=it.wdmg;s.rR*=it.wrate}else{s.wM+=it.wdmg;s.rM*=it.wrate}}if(it.armor)s.armor+=it.armor;if(it.hp)s.hp+=it.hp;
   for(const a of affOf(it)){const v=a.v;switch(a.k){case'hp':s.hp+=v;break;case'dmg':s.dmgP+=v/100;break;case'rate':s.rateP+=v/100;break;case'crit':s.crit+=v/100;break;case'critd':s.critd+=v/100;break;case'armor':s.armor+=v;break;case'speed':s.speedP+=v/100;break;case'cdr':s.cdr+=v/100;break;case'ls':s.ls+=v/100;break;case'regen':s.regen+=v;break;case'area':s.area+=v/100;break;case'skill':s.skill+=v/100;break;case'gold':s.gold+=v/100;break}}}
@@ -1442,7 +1442,7 @@ function computeStats(eq){
  const lps=new Set();for(const k of SLOTS){const it=eq[k];if(it&&it.pow)lps.add(it.pow)}if(eq===P.eq)P.lp=lps;
  if(lps.has('taverne'))s.gold+=0.4;if(lps.has('sturmkrone'))s.cdr+=0.15;
  const maxHp=s.hp*(1+s.hpP);
- const lvF=(1+0.055*(lv-1))*(1+s.dmgP),dmgM=(H.dmg+s.wM)*lvF,dmgR=(H.dmg+s.wR)*lvF,rateM=s.rate*s.rM*(1+s.rateP),rateR=s.rate*s.rR*(1+s.rateP);
+ const lvF=(1+0.055*(lv-1))*(1+s.dmgP),dmgM=(H.dmg+s.wM)*lvF*(1+s.meleeP),dmgR=(H.dmg+s.wR)*lvF*(1+s.rangedP),rateM=s.rate*s.rM*(1+s.rateP),rateR=s.rate*s.rR*(1+s.rateP);
  return{maxHp,dmg:(dmgM+dmgR)/2,dmgM,dmgR,rateM,rateR,rate:(rateM+rateR)/2,speed:s.speed*(1+Math.min(s.speedP,0.6)),armor:s.armor,crit:Math.min(s.crit,0.75),critd:s.critd,cdr:Math.min(s.cdr,0.5),ls:s.ls,regen:s.regen+maxHp*s.regenP,area:s.area,skill:s.skill,gold:s.gold,luck:s.luck,range:s.range};
 }
 function recalc(){const old=P.st;const ratio=old?P.hp/old.maxHp:1;P.st=computeStats(P.eq);P.hp=Math.max(1,Math.min(P.st.maxHp,ratio*P.st.maxHp))}
@@ -1856,7 +1856,7 @@ function dealDmg(e,base,o){if(e.dead)return 0;if(e.flying&&e.flyHigh>0.4)return 
  if(o.holy&&HOLY.has(e.def.shape))m*=2;
  if(o.lightning&&e.chillT>0)m*=1+0.05*rank('e_icefan');
  if(LP('dawnlicht')&&HOLY.has(e.def.shape))m*=1.5;
- if(e.affix&&e.affix.gepanzert)m*=0.6;m*=bestMul(e);
+ if(e.affix&&e.affix.gepanzert)m*=0.6;m*=bestMul(e)*setHitMul(e,o);
  let crit=false;if(!o.noCrit){if(o.crit||P.critNext>0){crit=true;if(!o.crit&&P.critNext>0)P.critNext--}else crit=Math.random()<P.st.crit}
  if(crit)m*=P.st.critd;
  if(P.ambush>0&&!o.dot&&!o.pet){m*=1+P.ambush;P.ambush=0;word(e.x,e.y-e.r-18,'Hinterhalt!','#ff8a8a')}
@@ -1873,6 +1873,7 @@ function dealDmg(e,base,o){if(e.dead)return 0;if(e.flying&&e.flyHigh>0.4)return 
  if(o.fear&&!e.ccImmune){const t=o.fear*(e.boss?0.2:e.guard?0.4:e.elite?0.6:1);e.fearT=Math.max(e.fearT,t);e.fx=o.fx!==undefined?o.fx:P.x;e.fy=o.fy!==undefined?o.fy:P.y}
  if(o.onHit)o.onHit(e,crit,amt);
  if(o.basic)onBasicHit(e,crit,amt,o);
+ setOnHit(e,crit,amt,o);
  if(crit&&LP('giftzahn')&&!o.dot)dot(e,'poison',amt*0.17,3);
  if(e.affix&&e.affix.dornen&&!o.dot&&!o.pet&&(e.rfT||0)<G.time){e.rfT=G.time+0.3;hurtDot(e.dmg*0.12)}
  if(e.affix&&e.affix.elektrisch&&!o.dot)AFFIX.elektrisch.hit(e);
@@ -2096,8 +2097,8 @@ function dropItem(x,y,it){if(G.portal&&d2({x,y},G.portal)<100*100){const a=ang(G
 /* ================= Spieler ================= */
 const keys={};let joy=null;
 function absorb(a){if(P.shieldHp>0){const t=Math.min(P.shieldHp,a);P.shieldHp-=t;a-=t;if(P.shieldHp<=0)burst(P.x,P.y,'#9fe6ff',12,140)}return a}
-function hurt(raw){if(P.inv>0||G.state!=='play')return;let a=raw*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;P.hurtT=0.18;hurtFx(a);G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');if(P.hp<=0)die()}
-function hurtDot(a){if(P.inv>0||G.state!=='play')return;a=a*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(a<=0)return;P.hp-=a;P.dotAcc=(P.dotAcc||0)+a;if(P.dotAcc>P.st.maxHp*0.03){num(P.x+rnd(-8,8),P.y-26,P.dotAcc,false,true);P.dotAcc=0}if(P.hp<=0)die()}
+function hurt(raw){if(P.inv>0||G.state!=='play')return;let a=raw*setHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;P.hurtT=0.18;hurtFx(a);G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');if(P.hp<=0)die()}
+function hurtDot(a){if(P.inv>0||G.state!=='play')return;a=a*setHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(a<=0)return;P.hp-=a;P.dotAcc=(P.dotAcc||0)+a;if(P.dotAcc>P.st.maxHp*0.03){num(P.x+rnd(-8,8),P.y-26,P.dotAcc,false,true);P.dotAcc=0}if(P.hp<=0)die()}
 function die(){if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
  P.hp=0;endRun(false)}
@@ -2108,7 +2109,7 @@ function prereq(n){if(P.level<ROWLV[n.row])return false;if(n.row>0){const prev=P
 function learn(n){if(!canLearn(n))return;P.ranks[n.id]=rank(n.id)+1;P.sp--;if(n.a&&!P.learn.includes(n.id)){P.learn.push(n.id);if(P.bar.length<6)P.bar.push(n.id);else if(!G.bot)G.barPick=n.id}recalc();buildSkillBar();sfx('magic')}
 function toggleBar(id){const i=P.bar.indexOf(id);if(i>=0)P.bar.splice(i,1);else if(P.bar.length<6)P.bar.push(id);buildSkillBar()}
 function useSkill(i){if(G.state!=='play'||G.paused)return;if(P.silT>0||P.stunT>0){if(!P.silWarn||G.time-P.silWarn>1.5){P.silWarn=G.time;toast(P.silT>0?'Keine Magie – du bist verstummt!':'Du bist betäubt!','#c08cff')}return}if(P.chan&&!P.chan.move)return;const n=P.actives[i];if(!n)return;if((P.cds[n.id]||0)>0)return;const r=rank(n.id);
- if(n.cast(r)===false)return;if(n.ult&&!G.bot)ultFx();setOnCast();P.cds[n.id]=n.cd(r)*(1-P.st.cdr);const b=P.skBtns[i];if(b)b.el.classList.remove('ready')}
+ if(n.cast(r)===false)return;if(n.ult&&!G.bot)ultFx();P.cds[n.id]=n.cd(r)*(1-P.st.cdr);setOnCast(n);const b=P.skBtns[i];if(b)b.el.classList.remove('ready')}
 function usePotion(){if(G.state!=='play'||G.paused||P.pots<=0||P.potCd>0||P.hp>=P.st.maxHp)return;P.pots--;P.potCd=1;heal(P.st.maxHp*0.4*(LP('taverne')?1.5:1));burst(P.x,P.y,'#ff6a7a',16,120);ring(P.x,P.y,30,'#ff6a7a',0.4,3);sfx('potion');potionFx();say('pot',0,0.25)}
 function heroTick(dt){
  if(P.buffs.ballad>0){P.notesT=(P.notesT||0)-dt;if(P.notesT<=0){P.notesT=0.2;const r=rank('b_ballad');for(let i=0;i<4;i++){const a=G.time*2.4+i*TAU/4,x=P.x+Math.cos(a)*95,y=P.y+Math.sin(a)*95;aoe(x,y,26,sk(0.35+0.1*r),{quiet:1,noCrit:1})}}}
@@ -2139,15 +2140,15 @@ function updPlayer(dt){
  if(P.hoardT>0){P.hoardT-=dt;if(P.hoardT<=0){P.hoard=0;recalc()}}
  updChan(dt);legendTick(dt);heroTick(dt);
  if(P.potCd>0)P.potCd-=dt;
- P.atkT-=dt;if(P.atkT<=0&&!P.dash&&P.stunT<=0&&!P.chan){{const k=P.hero.basic();P.atkT=k?1/(k==='r'?P.st.rateR:k==='m'?P.st.rateM:P.st.rate):0.08}}
+ P.atkT-=dt;if(P.atkT<=0&&!P.dash&&P.stunT<=0&&!P.chan){{const k=P.hero.basic();P.atkT=k?1/(k==='r'?P.st.rateR:k==='m'?P.st.rateM:P.st.rate):0.08;if(k)setOnBasic(k)}}
  for(const k in P.cds)if(P.cds[k]>0)P.cds[k]-=dt;
  if(G.bot&&P.hp<P.st.maxHp*0.35)usePotion();
  if(G.bot&&P.stam>60&&nearest(P.x,P.y,140))P.sprint=true;
  if((SAVE.auto||G.bot)&&P.silT<=0&&P.stunT<=0&&!P.chan){for(let i=0;i<P.actives.length;i++){const n=P.actives[i];if((P.cds[n.id]||0)>0)continue;const near=nearest(P.x,P.y,(AR[n.id]||400)*(AR[n.id]&&AR[n.id]<300?P.st.area:1));if(!near)continue;
   if(n.id==='e_bear'&&P.form==='bear')continue;if(n.id==='e_rat'&&P.form)continue;if((n.id==='b_door'||n.id==='f_leap')&&P.hp>P.st.maxHp*0.6)continue;useSkill(i);break}}
  for(const L of G.loot){if(L.taken)continue;if(d2(L,P)<38*38){if(P.bag.length>=24){if(!L.full){L.full=1;toast('Der Beutel ist voll – verschrotte etwas.','#ff8a7a')}continue}
-  L.taken=1;const sl=L.it.slot==='ring'?(!P.eq.ring1?'ring1':!P.eq.ring2?'ring2':null):(P.eq[L.it.slot]?null:L.it.slot);if(sl){P.eq[sl]=L.it;recalc();toast(`<span class="c${L.it.rar}">${esc(L.it.name)}</span> angelegt`);sfx('equip');updateInvBadge();continue}
-  P.bag.push(L.it);const dl=itemDelta(L.it);if(L.it.rar>=2||dl>0.01)toast(`<span class="c${L.it.rar}">${esc(L.it.name)}</span>${dl>0.01?' <span class="good">▲ besser</span>':''}`);sfx(L.it.rar>=3?'legend':'item');updateInvBadge();if(G.bot)botEquip()}}
+  L.taken=1;setFound(L.it);const sl=L.it.slot==='ring'?(!P.eq.ring1?'ring1':!P.eq.ring2?'ring2':null):(P.eq[L.it.slot]?null:L.it.slot);if(sl){P.eq[sl]=L.it;recalc();toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span> angelegt`);sfx('equip');updateInvBadge();continue}
+  P.bag.push(L.it);const dl=itemDelta(L.it);if(L.it.rar>=2||dl>0.01)toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span>${dl>0.01?' <span class="good">▲ besser</span>':''}`);sfx(L.it.rar>=3?'legend':'item');updateInvBadge();if(G.bot)botEquip()}}
  G.loot=G.loot.filter(L=>!L.taken);
  if(G.portal&&d2(G.portal,P)<(G.portal.boat?60:46)**2)enterPortal();
 }
@@ -2395,7 +2396,7 @@ function ultFx(){const c=HCOL[P.id]||'#e5b454';sflash(c,0.3,0.35);zpunch(0.07);s
 function hurtFx(a){sparks(P.x,P.y-6,'#ff4a4a',4,220);if(a>P.st.maxHp*0.12){sflash('#ff1a1a',0.26,0.3);hitstop(0.05);zpunch(0.03)}}
 function potionFx(){G.fxs.push({k:'pillar',x:P.x,y:P.y+14,w:50,h:160,c:'#ff6a7a',t:0,life:0.6});embers(P.x,P.y,'#ff8a9a',10,18);light(P.x,P.y,200,'#ff6a7a',0.5,0.8)}
 function stageBanner(){later(2.6,()=>say('start',1,0.8));if(!STAGES[G.stage])return;const S=STAGES[G.stage],O=ORTE[S.ort];G.banner=null;banner(O.name,S.name,'#e5b454',{dur:2.8,size:50})}
-function landFx(L){const r=L.it.rar;if(r>=3){say('loot',0,0.6);const col=RARCOL[r];G.fxs.push({k:'shock',x:L.x,y:L.y,r:r>=4?120:80,c:col,t:0,life:0.5});light(L.x,L.y,220,col,0.6,1);sparks(L.x,L.y,col,12,300,1);sfxAt('thunk',L.x,L.y)}else if(r>=2)sparks(L.x,L.y,RARCOL[r],5,180,1)}
+function landFx(L){const r=L.it.rar;if(L.it.hs){G.fxs.push({k:'shock',x:L.x,y:L.y,r:170,c:HSCOL,t:0,life:0.7});light(L.x,L.y,300,HSCOL,0.8,1.4);sfxAt('legend',L.x,L.y)}if(r>=3){say('loot',0,0.6);const col=RARCOL[r];G.fxs.push({k:'shock',x:L.x,y:L.y,r:r>=4?120:80,c:col,t:0,life:0.5});light(L.x,L.y,220,col,0.6,1);sparks(L.x,L.y,col,12,300,1);sfxAt('thunk',L.x,L.y)}else if(r>=2)sparks(L.x,L.y,RARCOL[r],5,180,1)}
 function bolt(x,y){const mk=(x0,y0,x1,y1,n,j)=>{const pts=[[x0,y0]];for(let i=1;i<n;i++){const q=i/n;pts.push([x0+(x1-x0)*q+rnd(-j,j),y0+(y1-y0)*q+rnd(-j*0.4,j*0.4)])}pts.push([x1,y1]);return pts};
  const main=mk(x+rnd(-40,40),y-460,x,y,10,26),br=[];for(let i=0;i<(fxQ()>1?3:1);i++){const s=main[ri(2,7)];br.push(mk(s[0],s[1],s[0]+rnd(-90,90),s[1]+rnd(40,120),4,14))}
  G.fxs.push({k:'bolt',pts:main,br,t:0,life:0.3});G.fxs.push({k:'flash',x,y,r:80,c:'#9fd8ff',t:0,life:0.2});light(x,y,260,'#9fd8ff',0.25,1);sparks(x,y,'#cfefff',8,340);decal(x,y+4,'scorch',null,24)}
@@ -2415,7 +2416,7 @@ function drawProjGlow(inView){cx.lineCap='round';for(const p of G.projs){if(!inV
   if(p.kind!=='arrow'&&p.kind!=='dagger')glow(p.x,p.y,(p.r||6)*(p.kind==='fireball'?4.2:p.kind==='bigarrow'?3.5:2.8),p.kind==='fireball'?'#ff8a2a':col,0.7)}cx.globalAlpha=1}
 function updProjTrails(){const L=fxQ()>1?20:10;for(const p of G.projs){if(p.team!=='p')continue;const tr=p.tr||(p.tr=[]);tr.push(p.x,p.y);if(tr.length>L)tr.splice(0,2);if(p.kind==='fireball'&&Math.random()<0.6)embers(p.x,p.y,'#ff8a2a',1,6)}}
 function drawLootBeams(inView,t){for(const L of G.loot){if(!inView(L.x,L.y,280))continue;const r=L.it.rar,col=RARCOL[r],pul=0.75+0.25*Math.sin(t*3+L.t);
-  if(r>=2&&L.land!==0){const h=r>=4?270:r>=3?210:130,w=r>=4?36:r>=3?28:20;pillar(L.x,L.y+4,w,h,col,0.5*pul);glow(L.x,L.y+2,w*1.7,col,0.55*pul,true);
+  if(r>=2&&L.land!==0){if(L.it.hs){pillar(L.x,L.y+4,54,360,HSCOL,0.45*pul);pillar(L.x,L.y+4,20,400,'#fff6c8',0.35*pul)}const h=r>=4?270:r>=3?210:130,w=r>=4?36:r>=3?28:20;pillar(L.x,L.y+4,w,h,col,0.5*pul);glow(L.x,L.y+2,w*1.7,col,0.55*pul,true);
    if(r>=4){cx.save();cx.translate(L.x,L.y);cx.rotate(t*0.7);cx.fillStyle=col;for(let i=0;i<6;i++){cx.rotate(TAU/6);cx.globalAlpha=0.12*pul;cx.beginPath();cx.moveTo(0,0);cx.lineTo(70,-6);cx.lineTo(70,6);cx.closePath();cx.fill()}cx.restore()}}
   else glow(L.x,L.y,18,col,0.28,true)}cx.globalAlpha=1}
 function drawLootIcons(inView,t){for(const L of G.loot){if(!inView(L.x,L.y,40))continue;const col=RARCOL[L.it.rar],z=L.z||0;ell(cx,L.x,L.y+6,9*(1-Math.min(0.6,z/120)),3,'rgba(0,0,0,.35)');
@@ -2716,7 +2717,7 @@ function showTitle(keep){unseedRng();bookCv=null;G.state='title';G.paused=false;
  const picks=HERO_IDS.map(id=>`<button class="pk ${id===sel?'on':''}" data-act="sel-hero" data-id="${id}" aria-pressed="${id===sel}" style="--hc:${HCOL[id]}"><canvas data-hero="${id}" width="112" height="112"></canvas><span>${HEROES[id].name}</span></button>`).join('');
  const ups=META.map(m=>{const r=hs.up[m.id]||0,max=r>=m.max,cost=metaCost(m,r);return`<div class="up"><div><div class="t">${m.name}<small>${r} / ${m.max}</small></div><div class="d">${r?m.d(r):'noch nicht gelernt'}${max?'':` → <span style="color:var(--text)">${m.d(r+1)}</span>`}</div></div><button class="btn ${!max&&SAVE.gold>=cost?'gold':''}" data-act="meta" data-id="${m.id}" ${max||SAVE.gold<cost?'disabled':''}>${max?'Maximal':fmt(cost)+' Gold'}</button></div>`}).join('');
  const chips=[];for(let d=0;d<=Math.max(SAVE.maxDiff,1);d++)chips.push(`<button class="chip ${d===G.seldiff?'on':''}" data-act="diff" data-d="${d}" ${d>SAVE.maxDiff?'disabled title="Besiegt den Demogorgon, um das freizuschalten"':''}>${esc(diffName(d))}</button>`);
- const body=tab==='rang'?lbHtml():tab==='best'?renderBestiary():tab==='lager'?`<div class="muted" style="font-size:13px">Dauerhaft für ${H.name}. Gold teilen sich alle Helden.</div><div class="ups">${ups}</div>${ruhmHtml()}`
+ const body=tab==='rang'?lbHtml():tab==='best'?renderBestiary():tab==='lager'?`<div class="muted" style="font-size:13px">Dauerhaft für ${H.name}. Gold teilen sich alle Helden.</div><div class="ups">${ups}</div>${ruhmHtml()}${setsHtml(sel)}`
   :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div class="ups" style="display:flex;flex-direction:column;gap:8px">${volRows()}</div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Die Orgel nahm Simon Dalzell (Ivy Audio) auf. Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div>`
   :`${modeCard()}<p class="lead">${H.blurb}</p><div class="facts"><div><span>Kampfstil</span>${ATKSTYLE[sel]}</div><div><span>Talentbäume</span>${H.branches.join(' · ')}</div><div><span>Bester Lauf</span>${best}</div></div>`;
  showScreen(`<div class="camp" style="--hc:${HCOL[sel]}">
@@ -3225,24 +3226,128 @@ function smithAct(a,b){const it=smithSel();if(!it)return;let ok=false;
 function sparkleUI(){const el=scr.querySelector('.smdet');if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
 function saveRunKeep(){if(!P||G.bot||!SAVE.run)return;const st=SAVE.run.stage;saveRun();SAVE.run.stage=st;persist()}
 
-/* ================= Heldensets ================= */
+/* ================= Sets =================
+   Heldensets gehören zu einem Helden (je eines pro Talentbaum) und sind seltener.
+   Allgemeine Sets kann jeder tragen. Waffenteile tragen ein „%“, das durch den Waffennamen ersetzt wird. */
 const SETS={
- barradin:{n:'Garderobe des Barden',pieces:{helm:'Federhut des Barden',armor:'Bühnenwams des Virtuosen',gloves:'Samthandschuhe der Zugabe',ring:'Ring des tosenden Applauses'},b2:'+25% Fertigkeitsschaden, −10% Abklingzeiten',b4:'Jede Fähigkeit ruft ein Trugbild herbei (höchstens alle 3 s). Trugbilder verursachen doppelten Schaden.'},
- echo:{n:'Gewand des Uralthains',pieces:{helm:'Geweihkrone des Hains',armor:'Rindenmantel',gloves:'Wurzelgriffe',ring:'Ring der Jahreszeiten'},b2:'+25% Leben, +1% Leben pro Sekunde',b4:'Der Hain zürnt: Alle 1,5 s schlägt ein Blitz in einen nahen Gegner – in Bärengestalt doppelt so oft.'},
- friedrich:{n:'Rüstzeug des Rudelführers',pieces:{helm:'Wolfsfellkappe',armor:'Jägerwams aus Bärenleder',gloves:'Schützenhandschuhe',ring:'Pfeife des Rudels'},b2:'+20% Angriffstempo, +10% Bewegungstempo',b4:'Alle 10 s stoßen zwei Wölfe zum Rudel. Rex und alle Begleiter verursachen doppelten Schaden.'},
- ezekiel:{n:'Erbe der Darkin',pieces:{helm:'Blutkrone',armor:'Panzer des Gefallenen',gloves:'Klauen der Darkin',ring:'Siegel der Leere'},b2:'+20% Schaden, +3% Lebensraub',b4:'Jeder 20. Kill entfesselt einen Blutsturm: gewaltiger Schaden ringsum und 15% Leben zurück.'}};
-function makeSetItem(il,slot){const S=SETS[P.id];slot=slot||pick(['helm','armor','gloves','ring']);const it=makeItem(slot,il,5,P.id);it.set=P.id;it.name=S.pieces[slot];if(Math.random()<0.5)it.sock=[null];return it}
-function setCount(eq){const got=new Set();for(const k of SLOTS){const it=eq[k];if(it&&it.set===P.id)got.add(it.slot)}return got.size}
-function setStats(s,eq){const n=setCount(eq);if(eq===P.eq)P.set4=n>=4;if(n<2)return;const id=P.id;
- if(id==='barradin'){s.skill+=0.25;s.cdr+=0.1}else if(id==='echo'){s.hpP+=0.25;s.regenP+=0.01}else if(id==='friedrich'){s.rateP+=0.2;s.speedP+=0.1}else{s.dmgP+=0.2;s.ls+=0.03}}
-function setLines(it){const S=SETS[it.set];if(!S)return[];const n=setCount(P.eq);return[`<span class="c5"><b>${esc(S.n)}</b> (${n}/4 angelegt)</span>`,`<span class="${n>=2?'c5':'muted'}">2 Teile: ${S.b2}</span>`,`<span class="${n>=4?'c5':'muted'}">4 Teile: ${S.b4}</span>`]}
-function setTick(dt){if(!P.set4)return;
- if(P.id==='echo'){P.setT=(P.setT||0)-dt;if(P.setT<=0){P.setT=P.form==='bear'?0.75:1.5;const e=randomEnemy(P.x,P.y,320);if(e){bolt(e.x,e.y);aoe(e.x,e.y,55*P.st.area,sk(2.2),{lightning:1,quiet:1,noProp:1});sfxAt('thunder',e.x,e.y)}}}
- else if(P.id==='friedrich'){P.setT=(P.setT||4)-dt;if(P.setT<=0){P.setT=10;for(let i=0;i<2;i++)spawnPet('wolf',P.x+rnd(-60,60),P.y+rnd(-60,60),{life:9,dmg:()=>P.st.dmg*0.55,hp:P.st.maxHp*0.5,every:0.8,r:12,speed:240});howlFx()}}}
+ /* ---- Barradin ---- */
+ barradin:{n:'Garderobe des Barden',hero:'barradin',st:'Illusion',pieces:{helm:'Federhut des Barden',armor:'Bühnenwams des Virtuosen',gloves:'Samthandschuhe der Zugabe',ring:'Ring des tosenden Applauses'},
+  b2:'+25% Fertigkeitsschaden, −10% Abklingzeiten',b4:'Jede Fähigkeit ruft ein Trugbild herbei (höchstens alle 3 s). Trugbilder verursachen doppelten Schaden.',s2:s=>{s.skill+=0.25;s.cdr+=0.1}},
+ b_verz:{n:'Libretto des Hofnarren',hero:'barradin',st:'Verzauberung',pieces:{helm:'Schellenkappe des Hofnarren',armor:'Flickenrock der tausend Rollen',ring:'Siegel der Gunst',ranged:'% der Pointe'},
+  b2:'+20% Fertigkeitsschaden, +15% Wirkungsbereich',b4:'Jede Fähigkeit betäubt Gegner in deiner Nähe kurz. Betäubte Gegner erleiden 40% mehr Schaden.',s2:s=>{s.skill+=0.2;s.area+=0.15}},
+ b_ranke:{n:'Dornenkranz der Wildbühne',hero:'barradin',st:'Ranken',pieces:{helm:'Kranz aus Brombeerdornen',armor:'Moosgewand',gloves:'Dornenhandschuhe',weapon:'% der Wildrose'},
+  b2:'+25% Leben, +15 Rüstung',b4:'Alle 2 s schnellt eine Ranke aus dem Boden, fesselt einen Gegner und vergiftet ihn. Gefesselte Gegner erleiden 30% mehr Schaden.',s2:s=>{s.hpP+=0.25;s.armor+=15}},
+ /* ---- Echo ---- */
+ echo:{n:'Gewand des Uralthains',hero:'echo',st:'Sturm',pieces:{helm:'Geweihkrone des Hains',armor:'Rindenmantel',gloves:'Wurzelgriffe',ring:'Ring der Jahreszeiten'},
+  b2:'+25% Leben, +1% Leben pro Sekunde',b4:'Der Hain zürnt: Alle 1,5 s schlägt ein Blitz in einen nahen Gegner – in Bärengestalt doppelt so oft.',s2:s=>{s.hpP+=0.25;s.regenP+=0.01}},
+ e_bar:{n:'Pelz des Höhlenbären',hero:'echo',st:'Wildgestalt',pieces:{helm:'Bärenschädel',armor:'Zottelpelz',gloves:'Pranken des Höhlenbären',weapon:'% der Wildnis'},
+  b2:'+20 Rüstung, +15% Leben',b4:'In Bärengestalt erschüttert jeder Hieb den Boden (Flächenschaden) und du erleidest 20% weniger Schaden.',s2:s=>{s.armor+=20;s.hpP+=0.15}},
+ e_hort:{n:'Schatz der Elster',hero:'echo',st:'Natur & Gier',pieces:{helm:'Elsternfederkrone',gloves:'Diebische Krallen',ring:'Ring der glänzenden Dinge',ranged:'% der Elster'},
+  b2:'+40% Gold, +20% Glück',b4:'Alle 5 s schwärmen Insekten über einen Gegner. Besiegte Gegner werfen oft zusätzliches Gold ab.',s2:s=>{s.gold+=0.4;s.luck+=0.2}},
+ /* ---- Friedrich ---- */
+ friedrich:{n:'Rüstzeug des Rudelführers',hero:'friedrich',st:'Rex',pieces:{helm:'Wolfsfellkappe',armor:'Jägerwams aus Bärenleder',gloves:'Schützenhandschuhe',ring:'Pfeife des Rudels'},
+  b2:'+20% Angriffstempo, +10% Bewegungstempo',b4:'Alle 10 s stoßen zwei Wölfe zum Rudel. Rex und alle Begleiter verursachen doppelten Schaden.',s2:s=>{s.rateP+=0.2;s.speedP+=0.1}},
+ f_schuetz:{n:'Köcher des Meisterschützen',hero:'friedrich',st:'Schützenkunst',pieces:{ranged:'% des Meisterschützen',helm:'Kapuze des Adlerauges',gloves:'Sehnenschoner',ring:'Ring der ruhigen Hand'},
+  b2:'+10% kritische Trefferchance, +30% kritischer Schaden',b4:'Jeder 4. Fernkampfangriff feuert zusätzlich einen Fächer aus fünf Pfeilen.',s2:s=>{s.crit+=0.1;s.critd+=0.3}},
+ f_jaeger:{n:'Ausrüstung des Fallenstellers',hero:'friedrich',st:'Jäger',pieces:{weapon:'% des Fallenstellers',armor:'Tarnmantel aus Laub',gloves:'Fallenstellerhandschuhe',ring:'Ring der Fährte'},
+  b2:'+15% Schaden, +15 Rüstung',b4:'Alle 4 s schnappt eine Bärenfalle unter einem nahen Gegner zu. Nahkampftreffer machen Gegner 20% verwundbarer.',s2:s=>{s.dmgP+=0.15;s.armor+=15}},
+ /* ---- Ezekiel ---- */
+ ezekiel:{n:'Erbe der Darkin',hero:'ezekiel',st:'Darkin',pieces:{helm:'Blutkrone',armor:'Panzer des Gefallenen',gloves:'Klauen der Darkin',ring:'Siegel der Leere'},
+  b2:'+20% Schaden, +3% Lebensraub',b4:'Jeder 20. Kill entfesselt einen Blutsturm: gewaltiger Schaden ringsum und 15% Leben zurück.',s2:s=>{s.dmgP+=0.2;s.ls+=0.03}},
+ z_klingen:{n:'Gurt der tausend Klingen',hero:'ezekiel',st:'Klingen',pieces:{ranged:'% der tausend Klingen',armor:'Messergurt',gloves:'Fingerlose Werferhandschuhe',ring:'Ring des Jongleurs'},
+  b2:'+20% Angriffstempo, +10% kritische Trefferchance',b4:'Jeder Kill schleudert einen Ring aus sechs Dolchen (höchstens alle 0,5 s).',s2:s=>{s.rateP+=0.2;s.crit+=0.1}},
+ z_schatten:{n:'Schleier des Nachtpfads',hero:'ezekiel',st:'Schatten',pieces:{helm:'Maske ohne Gesicht',armor:'Schattenmantel',gloves:'Lautlose Handschuhe',weapon:'% des Nachtpfads'},
+  b2:'+15% kritischer Schaden, +12% Bewegungstempo',b4:'Alle 5 s sammelt sich Schatten: Dein nächster Treffer ist kritisch und verursacht 150% mehr Schaden.',s2:s=>{s.critd+=0.15;s.speedP+=0.12}},
+ /* ---- Allgemeine Sets ---- */
+ g_bollwerk:{n:'Bollwerk des Zwergenkönigs',st:'Verteidigung',pieces:{helm:'Zwergischer Visierhelm',armor:'Plattenpanzer aus Tiefenstahl',gloves:'Eisenfäuste',weapon:'% des Zwergenkönigs'},
+  b2:'+20% Rüstung, +15% Leben',b4:'Alle 8 s umgibt dich ein Schild aus 20% deines Lebens.',s2:s=>{s.armor*=1.2;s.hpP+=0.15}},
+ g_feuer:{n:'Glut des Phönix',st:'Feuer',pieces:{ranged:'% des Phönix',helm:'Flammenkrone',gloves:'Glimmende Handschuhe',ring:'Ring der Asche'},
+  b2:'+20% Schaden',b4:'Treffer setzen Gegner oft in Brand. Brennende Gegner explodieren manchmal, wenn sie sterben.',s2:s=>{s.dmgP+=0.2}},
+ g_blitz:{n:'Sturmkette von Donnerfels',st:'Blitz',pieces:{weapon:'% von Donnerfels',armor:'Kupferbrünne',helm:'Gewitterhelm',ring:'Ring der Funken'},
+  b2:'+15% Angriffstempo, +5% kritische Trefferchance',b4:'Kritische Treffer springen als Kettenblitz auf vier Gegner über.',s2:s=>{s.rateP+=0.15;s.crit+=0.05}},
+ g_vampir:{n:'Gewänder der Blutgräfin',st:'Lebensraub',pieces:{armor:'Samtrobe der Blutgräfin',gloves:'Spitzenhandschuhe',ring:'Ring der Nachtschwärmerin',ranged:'% der Blutgräfin'},
+  b2:'+3% Lebensraub, +20% kritischer Schaden',b4:'Jeder Kill heilt 2% Leben. Unter 35% Leben verursachst du 30% mehr Schaden.',s2:s=>{s.ls+=0.03;s.critd+=0.2}},
+ g_rudel:{n:'Banner der Gefährten',st:'Begleiter',pieces:{helm:'Helm des Bannerträgers',armor:'Wappenrock der Gefährten',ring:'Freundschaftsring',weapon:'% der Gefährten'},
+  b2:'Begleiter, Trugbilder und Rex verursachen 50% mehr Schaden',b4:'Alle 12 s eilt ein Geisterwolf herbei. Begleiter verursachen insgesamt doppelten Schaden.'},
+ g_glueck:{n:'Würfelbecher des Glücksritters',st:'Glück',pieces:{helm:'Glückshut mit Pfauenfeder',gloves:'Handschuhe des Falschspielers',ring:'Ring der gezinkten Würfel',ranged:'% des Glücksritters'},
+  b2:'+25% Glück, +30% Gold',b4:'4% aller Treffer sind eine natürliche 20 und verursachen vierfachen Schaden.',s2:s=>{s.luck+=0.25;s.gold+=0.3}},
+ g_tanz:{n:'Schärpe des Klingentänzers',st:'Nahkampf',pieces:{weapon:'% des Klingentänzers',armor:'Seidene Schärpe',gloves:'Tänzerhandschuhe',helm:'Stirnband des Tänzers'},
+  b2:'+25% Nahkampfschaden, +8% Bewegungstempo',b4:'Jeder 3. Nahkampfhieb wird zum Wirbel, der alle Gegner ringsum trifft.',s2:s=>{s.meleeP+=0.25;s.speedP+=0.08}},
+ g_weit:{n:'Adlerauge der Grenzwacht',st:'Fernkampf',pieces:{ranged:'% der Grenzwacht',helm:'Späherhelm',armor:'Mantel der Grenzwacht',ring:'Ring des Horizonts'},
+  b2:'+25% Fernkampfschaden, +10% Reichweite',b4:'Treffer gegen weit entfernte Gegner verursachen 40% mehr Schaden und betäuben manchmal.',s2:s=>{s.rangedP+=0.25;s.range*=1.1}},
+ g_magier:{n:'Robe des Erzmagiers',st:'Fertigkeiten',pieces:{helm:'Spitzhut des Erzmagiers',armor:'Sternenrobe',gloves:'Runenhandschuhe',ring:'Ring der Arkanen Quelle'},
+  b2:'−15% Abklingzeiten, +10% Fertigkeitsschaden',b4:'Fähigkeiten (außer der ultimativen) sind mit 25% Chance sofort wieder bereit.',s2:s=>{s.cdr+=0.15;s.skill+=0.1}}};
+const SET_IDS=Object.keys(SETS),HSCOL='#5affc0';
+const setOk=id=>{const S=SETS[id];return !!S&&(!S.hero||S.hero===P.id)};
+const setSize=id=>Object.keys(SETS[id].pieces).length;
+function pieceName(id,slot,base){const p=SETS[id].pieces[slot];return p.indexOf('%')>=0?p.replace('%',base||'Waffe'):p}
+function makeSetItem(il,slot,id){
+ if(!id||!SETS[id]){const own=SET_IDS.filter(k=>SETS[k].hero===P.id),gen=SET_IDS.filter(k=>!SETS[k].hero);
+  let c=Math.random()<0.3?own:gen;if(slot){const f=c.filter(k=>SETS[k].pieces[slot]);c=f.length?f:SET_IDS.filter(k=>setOk(k)&&SETS[k].pieces[slot])}id=pick(c)}
+ const S=SETS[id];if(!slot||!S.pieces[slot])slot=pick(Object.keys(S.pieces));
+ const it=makeItem(slot,il,5,P.id);it.set=id;if(S.hero)it.hs=1;it.name=pieceName(id,slot,it.base);if(Math.random()<0.5)it.sock=[null];return it}
+function setCounts(eq){const m={};for(const k of SLOTS){const it=eq[k];if(!it||!it.set||!setOk(it.set))continue;(m[it.set]=m[it.set]||new Set()).add(it.slot)}const r={};for(const k in m)r[k]=m[k].size;return r}
+function setCount(eq,id){return setCounts(eq)[id||P.id]||0}
+const S2=id=>!!(P&&P.setN&&P.setN[id]>=2),S4=id=>!!(P&&P.setN&&P.setN[id]>=setSize(id));
+function setStats(s,eq){const c=setCounts(eq);
+ if(eq===P.eq){const old=P.setN||{};P.setN=c;P.set4=S4(P.id);
+  if(P.st&&!G.bot&&G.state==='play')for(const id in c)if(c[id]>=setSize(id)&&!(old[id]>=setSize(id))){const S=SETS[id];banner(S.n,'Set vollständig!',S.hero?HSCOL:'#3fdc6a',{force:1});sfx('legend');if(fxQ()>0){G.fxs.push({k:'shock',x:P.x,y:P.y,r:180,c:S.hero?HSCOL:'#3fdc6a',t:0,life:0.7});light(P.x,P.y,300,S.hero?HSCOL:'#3fdc6a',0.8,1.2)}}}
+ for(const id in c){const S=SETS[id];if(c[id]>=2&&S.s2)S.s2(s);if(c[id]>=setSize(id)&&S.s4)S.s4(s)}}
+function setLines(it){const S=SETS[it.set];if(!S)return[];const c=setCounts(P.eq),n=c[it.set]||0,N=setSize(it.set),ok=setOk(it.set);
+ const have=new Set();for(const k of SLOTS){const e=P.eq[k];if(e&&e.set===it.set)have.add(e.slot)}
+ const L=[`<span class="${S.hero?'c5h':'c5'}"><b>${S.hero?'✦ Heldenset: ':''}${esc(S.n)}</b> · ${esc(S.st)} (${ok?n:0}/${N} angelegt)</span>`];
+ if(!ok)L.push(`<span class="bad">Nur für ${esc(HEROES[S.hero].name)}</span>`);
+ L.push(`<span class="muted" style="font-size:12px">${Object.keys(S.pieces).map(sl=>`${have.has(sl)&&ok?'✓':'·'} ${esc(SETS[it.set].pieces[sl].replace('% ','').replace('%',''))}`).join(' · ')}</span>`);
+ L.push(`<span class="${ok&&n>=2?'c5':'muted'}">2 Teile: ${S.b2}</span>`,`<span class="${ok&&n>=N?'c5':'muted'}">${N} Teile: ${S.b4}</span>`);return L}
+/* ---- Fund & Sammlung ---- */
+function setFound(it){if(!it||!it.set||!SETS[it.set]||G.bot)return;const S=SETS[it.set];SAVE.setsFound=SAVE.setsFound||{};const f=SAVE.setsFound[it.set]||(SAVE.setsFound[it.set]=[]);const neu=f.indexOf(it.slot)<0;if(neu)f.push(it.slot);
+ if(S.hero){banner('Heldenset!',S.n+(neu?' · neues Teil':''),HSCOL,{force:1});sfx('legend');if(fxQ()>0){G.fxs.push({k:'shock',x:P.x,y:P.y,r:200,c:HSCOL,t:0,life:0.8});light(P.x,P.y,320,HSCOL,0.9,1.4);sparks(P.x,P.y,'#ffe9a0',20,340,1)}}
+ else if(neu)toast(`<span class="c5">Neues Setteil für die Sammlung: ${esc(S.n)}</span>`,'#3fdc6a')}
+function setsHtml(hid){const F=SAVE.setsFound||{};const row=id=>{const S=SETS[id],f=F[id]||[],N=setSize(id),sl=Object.keys(S.pieces);
+  return`<div class="setrow ${f.length>=N?'done':''}"><div><b class="${S.hero?'c5h':'c5'}">${f.length?esc(S.n):'???'}</b> <span class="muted">· ${esc(S.st)}</span></div><div class="setp">${sl.map(k=>`<span class="${f.indexOf(k)>=0?'on':''}" title="${esc(SLOTLBL[k]||k)}">${f.indexOf(k)>=0?'◆':'◇'}</span>`).join('')}</div>${f.length?`<div class="muted" style="font-size:12px">${S.b4}</div>`:''}</div>`};
+ const own=SET_IDS.filter(k=>SETS[k].hero===hid),gen=SET_IDS.filter(k=>!SETS[k].hero);
+ const tot=SET_IDS.filter(k=>!SETS[k].hero||SETS[k].hero===hid).reduce((a,k)=>a+(F[k]||[]).length,0),max=own.concat(gen).reduce((a,k)=>a+setSize(k),0);
+ return`<div class="card"><div class="eyebrow">Setsammlung · ${tot} / ${max} Teile</div><p class="muted" style="margin:0 0 6px;font-size:13px">Heldensets passen zu je einem Talentbaum und sind besonders selten. Allgemeine Sets kann jeder tragen – Sets lassen sich auch mischen.</p>
+ <div class="eyebrow" style="color:${HSCOL}">✦ Heldensets von ${esc(HEROES[hid].name)}</div>${own.map(row).join('')}<div class="eyebrow" style="margin-top:8px">Allgemeine Sets</div>${gen.map(row).join('')}</div>`}
+/* ---- Wirkungen im Kampf ---- */
+function setTick(dt){if(!P.setN)return;
+ if(S4('echo')){P.setT=(P.setT||0)-dt;if(P.setT<=0){P.setT=P.form==='bear'?0.75:1.5;const e=randomEnemy(P.x,P.y,320);if(e){bolt(e.x,e.y);aoe(e.x,e.y,55*P.st.area,sk(2.2),{lightning:1,quiet:1,noProp:1});sfxAt('thunder',e.x,e.y)}}}
+ if(S4('friedrich')){P.setT=(P.setT||4)-dt;if(P.setT<=0){P.setT=10;for(let i=0;i<2;i++)spawnPet('wolf',P.x+rnd(-60,60),P.y+rnd(-60,60),{life:9,dmg:()=>P.st.dmg*0.55,hp:P.st.maxHp*0.5,every:0.8,r:12,speed:240});howlFx()}}
+ if(S4('b_ranke')){P.rankeT=(P.rankeT||0)-dt;if(P.rankeT<=0){P.rankeT=2;const e=randomEnemy(P.x,P.y,340);if(e){dealDmg(e,sk(1.6),{root:2,quiet:1});dot(e,'poison',sk(0.4),3);ring(e.x,e.y,28,'#6adc5a',0.5,4);sparks(e.x,e.y,'#8aff6a',8,200,1)}}}
+ if(S4('e_hort')){P.hortT=(P.hortT||2)-dt;if(P.hortT<=0){P.hortT=5;const e=randomEnemy(P.x,P.y,360);if(e)zone({x:e.x,y:e.y,r:80*P.st.area,dur:4,dps:sk(0.9),kind:'swarm',poison:1})}}
+ if(S4('f_jaeger')){P.fallT=(P.fallT||1)-dt;if(P.fallT<=0){P.fallT=4;const e=randomEnemy(P.x,P.y,320);if(e&&!e.flying){G.traps.push({x:e.x,y:e.y,r:34,dmg:sk(3),life:20,arm:0.15});sfx('equip')}}}
+ if(S4('z_schatten')&&!(P.ambush>0)){P.schT=(P.schT||0)-dt;if(P.schT<=0){P.schT=5;P.ambush=1.5;P.critNext=Math.max(P.critNext||0,1);puffs(P.x,P.y)}}
+ if(S4('g_bollwerk')){P.bollT=(P.bollT||0)-dt;if(P.bollT<=0&&!(P.shieldHp>0)){P.bollT=8;P.shieldHp=P.st.maxHp*0.2;ring(P.x,P.y,34,'#d8c8a0',0.5,4)}}
+ if(S4('g_rudel')){P.rudT=(P.rudT||5)-dt;if(P.rudT<=0){P.rudT=12;spawnPet('wolf',P.x+rnd(-60,60),P.y+rnd(-60,60),{life:10,dmg:()=>P.st.dmg*0.6,hp:P.st.maxHp*0.5,every:0.8,r:12,speed:240});howlFx()}}}
+function puffs(x,y){if(fxQ()>0)for(let i=0;i<6;i++)G.fxs.push({k:'shock',x:x+rnd(-14,14),y:y+rnd(-14,14),r:30,c:'#6a5a8a',t:0,life:0.35})}
 function howlFx(){sfx('roar');G.fxs.push({k:'shock',x:P.x,y:P.y,r:140,c:'#c8b8a0',t:0,life:0.5})}
-function setOnCast(){if(P.set4&&P.id==='barradin'&&(P.setCdT||0)<G.time){P.setCdT=G.time+3;illusion(P.x+rnd(-50,50),P.y+rnd(-50,50),3)}}
-function setOnKill(e){if(!(P.set4&&P.id==='ezekiel'))return;P.setKills=(P.setKills||0)+1;if(P.setKills>=20){P.setKills=0;const R=260*P.st.area;aoe(P.x,P.y,R,sk(7),{knock:500,stun:0.6,noProp:0});heal(P.st.maxHp*0.15);explodeFx(P.x,P.y,120,'#ff2a3a',{shake:6,smoke:'#3a0a14'});G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#ff2a3a',t:0,life:0.6});word(P.x,P.y-40,'Blutsturm!','#ff5a6a');sfx('ult')}}
-const petSetMul=()=>P.set4&&(P.id==='barradin'||P.id==='friedrich')?2:1;
+function setOnCast(n){if(!P.setN)return;
+ if(S4('barradin')&&(P.setCdT||0)<G.time){P.setCdT=G.time+3;illusion(P.x+rnd(-50,50),P.y+rnd(-50,50),3)}
+ if(S4('b_verz')){const R=170*P.st.area;query(P.x,P.y,R+40,e=>{if(d2(e,P)<R*R)stunE(e,0.7)});G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#ffb0e8',t:0,life:0.45})}
+ if(n&&!n.ult&&S4('g_magier')&&Math.random()<0.25){P.cds[n.id]=0;word(P.x,P.y-40,'Arkane Quelle!','#b89aff');ring(P.x,P.y,30,'#b89aff',0.4,3)}}
+function setOnKill(e){if(!P.setN)return;
+ if(S4('ezekiel')){P.setKills=(P.setKills||0)+1;if(P.setKills>=20){P.setKills=0;const R=260*P.st.area;aoe(P.x,P.y,R,sk(7),{knock:500,stun:0.6,noProp:0});heal(P.st.maxHp*0.15);explodeFx(P.x,P.y,120,'#ff2a3a',{shake:6,smoke:'#3a0a14'});G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#ff2a3a',t:0,life:0.6});word(P.x,P.y-40,'Blutsturm!','#ff5a6a');sfx('ult')}}
+ if(S4('z_klingen')&&(P.klT||0)<G.time){P.klT=G.time+0.5;daggerRing(6,sk(0.7))}
+ if(S4('g_vampir')){heal(P.st.maxHp*0.02);if(fxQ()>1)sparks(e.x,e.y,'#ff4a6a',4,160)}
+ if(S4('g_feuer')&&e.dots&&e.dots.some(d=>d.k==='burn')&&Math.random()<0.3){const x=e.x,y=e.y;aoe(x,y,85*P.st.area,sk(1.4),{quiet:1,onHit:o=>dot(o,'burn',sk(0.25),3)});explodeFx(x,y,60,'#ff8a2a',{shake:2})}
+ if(S4('e_hort')&&Math.random()<0.35)orb(e.x,e.y,'gold',Math.max(1,Math.round(ri(2,5)*P.st.gold)))}
+function setOnBasic(k){if(!P.setN)return;
+ if(k==='r'&&S4('f_schuetz')){P.schuN=(P.schuN||0)+1;if(P.schuN>=4){P.schuN=0;const t=nearest(P.x,P.y,P.st.range+60);const a=t?ang(P,t):(P.face||0);const sv=P.st.dmg;P.st.dmg=P.st.dmgR;try{for(let i=0;i<5;i++)shoot({x:P.x,y:P.y-4,a:a-0.4+0.2*i,spd:780,dmg:sk(0.7),r:6,pierce:1,kind:'arrow',c:'#bfffd8'})}finally{P.st.dmg=sv}}}
+ if(k==='m'&&S4('g_tanz')){P.tanzN=(P.tanzN||0)+1;if(P.tanzN>=3){P.tanzN=0;const R=130*P.st.area;aoe(P.x,P.y,R,P.st.dmgM*1.1,{melee:1,quiet:1});slash(P.x,P.y,0,TAU,R,'#ffe0a0',0.25);sfx('slash')}}}
+function setHitMul(e,o){if(!P.setN)return 1;let m=1;
+ if(S4('b_verz')&&e.stun>0)m*=1.4;
+ if(S4('b_ranke')&&e.root>0)m*=1.3;
+ if(S4('g_vampir')&&P.hp<P.st.maxHp*0.35)m*=1.3;
+ if(S4('g_weit')&&!o.melee&&!o.dot&&d2(e,P)>260*260){m*=1.4;if(!o.quiet&&Math.random()<0.08)stunE(e,0.5)}
+ if(S4('g_glueck')&&!o.dot&&Math.random()<0.04){m*=4;word(e.x,e.y-e.r-20,'20!','#ffd04a')}
+ return m}
+function setOnHit(e,crit,amt,o){if(!P.setN||o.dot||o.setFx)return;
+ if(crit&&S4('g_blitz')&&(P.blzT||0)<G.time){P.blzT=G.time+0.4;const t=randomEnemy(e.x,e.y,260);if(t&&t!==e)chainLightning(t,4,amt*0.5,240)}
+ if(S4('g_feuer')&&Math.random()<0.15)dot(e,'burn',amt*0.4,3);
+ if(S4('f_jaeger')&&o.melee){e.vuln=Math.max(e.vulnT>0?e.vuln:0,0.2);e.vulnT=4}
+ if(S4('e_bar')&&P.form==='bear'&&(o.melee||o.basic)&&(P.barT||0)<G.time){P.barT=G.time+0.45;aoe(e.x,e.y,90*P.st.area,amt*0.6,{quiet:1,setFx:1,knock:120});G.fxs.push({k:'shock',x:e.x,y:e.y,r:90*P.st.area,c:'#c8a070',t:0,life:0.35})}}
+const setHurtMul=()=>S4('e_bar')&&P.form==='bear'?0.8:1;
+const petSetMul=()=>((S4('barradin')||S4('friedrich'))?2:1)*(S4('g_rudel')?2:S2('g_rudel')?1.5:1);
 
 /* ================= Bestiarium ================= */
 const LORE={
@@ -3434,7 +3539,7 @@ function drawPills(){const now=performance.now();if(now-PILLT>250||!PILLM){PILLT
  if(P.shrine&&P.shrine.t>0)L.push({t:SHRINES[P.shrine.k].n.replace('Schrein der ','').replace('Schrein des ','')+' '+Math.ceil(P.shrine.t)+' s',c:SHRINES[P.shrine.k].c});
  for(const m of P.mods||[])L.push({t:m.n,c:m.good?'#8aff6a':'#ff8a7a'});
  if(G.mode==='taeglich'&&G.daily)for(const k of G.daily.mods)L.push({t:DMODS[k].n,c:'#e5b454'});
- if(P.set4)L.push({t:SETS[P.id].n,c:'#3fdc6a'});
+ if(P.setN)for(const id in P.setN)if(P.setN[id]>=setSize(id))L.push({t:SETS[id].n,c:SETS[id].hero?HSCOL:'#3fdc6a'});
  if(G.room)L.push({t:'Schatzkammer',c:'#ffd04a'});
  if(!L.length)return;const c=cx;c.font='800 11px "Alegreya Sans",sans-serif';c.textAlign='left';c.textBaseline='middle';let x=12,y=PILLTOP;
  for(const p of L){c.font=`800 ${p.big?14:11}px "Alegreya Sans",sans-serif`;const w=c.measureText(p.t).width+16,h=p.big?24:19;if(x+w>W-8){x=12;y+=h+5}c.globalAlpha=0.85;c.fillStyle='rgba(12,9,14,.8)';c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,h/2);else c.rect(x,y,w,h);c.fill();c.globalAlpha=1;c.strokeStyle=p.c;c.lineWidth=1;c.stroke();c.fillStyle=p.c;c.fillText(p.t,x+8,y+h/2+1);x+=w+6}
@@ -3502,7 +3607,7 @@ volInit();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE
 
 /* interner Testzugang */
 window.__hs={get G(){return G},get P(){return P},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
- step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},fn(){return{maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
+ step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},fn(){return{recalc,SETS,setsHtml,setLines,setFound,itemLines:typeof itemLines!=='undefined'?itemLines:null,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
 </script>
 
