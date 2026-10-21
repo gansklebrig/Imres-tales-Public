@@ -1100,6 +1100,46 @@
             [[["highpass", 1500, .7]], .14, null]],
     taverne: []
   };
+  /* Echte Aufnahmen als Grundteppich (Blanket-Sammlung: gemeinfrei/CC0 bzw. CC BY, siehe klang/LIZENZ.txt).
+     Jede Datei enthält die Schleife mit je einer halben Sekunde Vor- und Nachlauf – so schließt sie nahtlos. [Länge in s, Lautheit] */
+  const KUL_AUFNAHME = { k_regen: [60, .041], k_feuer: [22, .018], k_grillen: [45, .128], k_taverne: [13.5, .168], k_voegel: [60, .06],
+    k_bach: [50, .058], k_wellen: [60, .054], k_boot: [37.9934, .034], k_sturm: [22, .102], k_wind: [11.5, .133] };
+  const KUL_VORLAUF = .5;
+  /* Schichten je Kulisse: [Aufnahme, Stärke, { tief: Tiefpass, tempo, pan }] */
+  const KUL_SCHICHT = {
+    regen: [["k_regen", 1], ["k_wind", .14, { tief: 900 }]],
+    feuer: [["k_feuer", 1.1], ["k_grillen", .32]],
+    taverne: [["k_taverne", .7], ["k_taverne", .45, { tempo: .93, pan: .4 }], ["k_feuer", .35]],
+    wald: [["k_voegel", .85], ["k_bach", .3], ["k_wind", .16, { tief: 1400 }]],
+    hoehle: [["k_bach", .55, { tief: 650, tempo: .8 }], ["k_wind", .35, { tief: 380, tempo: .7 }]],
+    meer: [["k_wellen", .85], ["k_boot", .6], ["k_wind", .22, { tempo: .9 }]],
+    sturm: [["k_sturm", .55], ["k_regen", .6], ["k_wind", .75], ["k_wind", .5, { tempo: .8, pan: -.4 }]]
+  };
+  /* was von den gerechneten Klängen bleibt, wenn die Aufnahmen laufen: Rauschbetten (Indizes) und Ereignisse, die wegfallen */
+  const KUL_REST = { regen: { betten: [], ohne: [0] }, feuer: { betten: [], schleife: 0 }, taverne: { schleife: .45 }, wald: { betten: [], ohne: [1] },
+    hoehle: { betten: [1] }, meer: { betten: [], ohne: [0] }, sturm: { betten: [1, 2], ohne: [3] } };
+  const KUL_GRUND = 2.2;
+  function kulAufnahmen(k) {
+    const liste = KUL_SCHICHT[k.art]; if (!liste) return;
+    liste.slice(0, spar ? 2 : 9).forEach(([name, staerke, o]) => {
+      o = o || {};
+      sampleLaden(name).then(b => {
+        if (!b || kul !== k) return;
+        const [L, rms] = KUL_AUFNAHME[name], j = ctx.currentTime;
+        const q = ctx.createBufferSource(); q.buffer = b; q.loop = true; q.loopStart = KUL_VORLAUF; q.loopEnd = Math.min(b.duration, KUL_VORLAUF + L);
+        q.playbackRate.value = o.tempo || 1;
+        const g = ctx.createGain(), laut = KUL_GRUND * staerke * Math.min(3, .07 / rms);
+        g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(laut, j + 2.5);
+        let letzter = q;
+        if (o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = o.tief; letzter.connect(lp); letzter = lp; }
+        if (o.pan && ctx.createStereoPanner && !leicht()) { const pn = ctx.createStereoPanner(); pn.pan.value = o.pan; letzter.connect(pn); letzter = pn; }
+        letzter.connect(g); g.connect(k.g);
+        q.start(j, KUL_VORLAUF + Math.random() * L);
+        k.knoten.push(q);
+        k.schichten.push({ g, laut, filt: [], wandern: 0, schwanken: [.8, 1.15], naechst: j + 3 });
+      });
+    });
+  }
   /* Stärke-Phasen: mal Flaute, mal Höhepunkt – je Kulisse unterschiedlich weit */
   const KUL_PHASE = { sturm: [.35, 1.3], meer: [.6, 1.2], regen: [.6, 1.3], wald: [.7, 1.15], hoehle: [.7, 1.15], feuer: [.75, 1.15], taverne: [.75, 1.2] };
   function kulisseStart(sofort) {
@@ -1113,10 +1153,13 @@
     g.connect(master);
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
     kul = { art, g, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0 };
-    (KUL_BETT[art] || []).slice(0, spar ? 2 : 9).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
-    if (art === "taverne") kulSchleife("gemurmel", 22050, 1.1);
-    if (art === "feuer") kulSchleife("feuer", 32000, .7);
-    const ev = KUL_EREIGNIS[art] || [];
+    const rest = KUL_SCHICHT[art] ? KUL_REST[art] || {} : {};
+    (KUL_BETT[art] || []).filter((_, i) => !rest.betten || rest.betten.includes(i)).slice(0, spar ? 2 : 9).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
+    const sk = rest.schleife == null ? 1 : rest.schleife;
+    if (art === "taverne" && sk) kulSchleife("gemurmel", 22050, 1.1 * sk);
+    if (art === "feuer" && sk) kulSchleife("feuer", 32000, .7 * sk);
+    kulAufnahmen(kul);
+    const ev = (KUL_EREIGNIS[art] || []).filter((_, i) => !(rest.ohne || []).includes(i));
     kul.timer = setInterval(() => {
       if (!kul) return;
       const jetzt = ctx.currentTime;

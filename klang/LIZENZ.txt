@@ -10,3 +10,17 @@ Laute (gitarre_*), Dudelsack (dudel_*), Panflöte (pan_*), Okarina (oka_*) und G
 Fluid-R3-GM-Klangsatz von Frank Wen, als Einzeltöne aufbereitet von Benjamin Gleitzman
 (https://github.com/gleitz/midi-js-soundfonts). Lizenz: Creative Commons Namensnennung 3.0
 (https://creativecommons.org/licenses/by/3.0/). Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.
+
+Die Geräuschkulissen (k_*.mp3) stammen aus der Klangsammlung der App Blanket
+(https://github.com/rafaelmardojai/blanket, Bearbeitung: Porrumentzio), Originale auf Freesound bzw. SoundBible:
+  k_voegel   – kvgarlic, „Birds“ (freesound.org/s/156826)            – CC0
+  k_boot     – Falcet, „Boat“ (freesound.org/s/439365)               – CC0
+  k_bach     – gluckose, „Stream“ (freesound.org/s/333987)           – CC0
+  k_wind     – felix.blume, „Wind“ (freesound.org/s/217506)          – CC0
+  k_feuer    – ezwa, „Fireplace“ (soundbible.com/1543)               – gemeinfrei
+  k_taverne  – stephan, „Restaurant Ambiance“ (soundbible.com/1664)  – gemeinfrei
+  k_grillen  – Lisa Redfern, „Crickets Chirping At Night“ (soundbible.com/2083) – gemeinfrei
+  k_regen    – alex36917, „Rain“ (freesound.org/s/524605)            – CC BY
+  k_sturm    – Digifish Music, „Storm“ (freesound.org/s/41739)       – CC BY
+  k_wellen   – Luftrum, „Waves“ (freesound.org/s/48412)              – CC BY
+Für Imres Tales gekürzt, in Mono umgewandelt und zu nahtlosen Schleifen überblendet.
