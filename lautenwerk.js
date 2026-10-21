@@ -3440,12 +3440,12 @@
     letzterZuck[k] = jetzt;
     if (k === "klopf") zucken("klopf");
     else if (k === "schelle") zucken("schelle");
-    else if (k === "bass") { zucken("bass"); if (Math.random() < .4) schweben("♩", ORT.bass, "tief"); }
-    else if (k === "melodie") { zucken("mel"); schweben(Math.random() < .5 ? "♪" : "♫", ORT.laute); }
+    else if (k === "bass") { zucken("bass"); if (Math.random() < .4) schweben("♩", bandOrt(ORT.bass), "tief"); }
+    else if (k === "melodie") { zucken("mel"); schweben(Math.random() < .5 ? "♪" : "♫", bandOrt(ORT.laute)); }
     else if (k === "trommel") { zucken("trommel"); publikumSchlag(); }
-    else if (k === "floete") { zucken("floete"); if (Math.random() < .7) schweben("♪", ORT.floete, "floete", 62); }
+    else if (k === "floete") { zucken("floete"); if (Math.random() < .7) schweben("♪", bandOrt(ORT.floete), "floete", 62); }
     else if (k === "ketten") zucken("ketten");
-    else if (k === "rex") { zucken(wert === 1 ? "heul" : "wuff"); schweben(t().rexLaut[wert], ORT.rex, "blase", 36); }
+    else if (k === "rex") { zucken(wert === 1 ? "heul" : "wuff"); schweben(t().rexLaut[wert], bandOrt(ORT.rex), "blase", 36); }
   }
   /* Publikum im Takt: tanzen hüpft, nicken nickt – wiegen und ducken laufen ruhig über CSS */
   function publikumSchlag() {
@@ -3902,6 +3902,7 @@
       const id = gastQ.shift()[1]; gastZuletzt[id] = jetzt; gastWippen(b, id);
     }
     GAESTE.forEach(g => { if (gastZuletzt[g.id] && jetzt - gastZuletzt[g.id] < (g.rolle === "chor" || g.rolle === "glitzer" || g.rolle === "schief" || g.rolle === "signal" || g.rolle === "fanfare" ? 7000 : 3500) && (laeuft || klassikLauf)) da[g.seite].push(g.id); });
+    bandRuecken(b, da.l.length, da.r.length);
     GAESTE.forEach(g => {
       const el = b.querySelector('[data-gast-bild="' + g.id + '"]'); if (!el) return;
       const i = da[g.seite].indexOf(g.id), ist = i >= 0;
@@ -3916,6 +3917,28 @@
     root.querySelectorAll("[data-gast]").forEach(c => c.classList.toggle("spielt", !!gastDa[c.dataset.gast]));
     return da.l.length + da.r.length > 0;
   }
+  /* Kommen Gäste, rückt die Band zusammen und macht am Rand Platz: kleiner und zur freien Seite verschoben */
+  let bandMerk = "", bandEl = null;
+  const bandLage = { s: 1, x: 0 };
+  function bandRuecken(b, nl, nr) {
+    const W = b.clientWidth, H = b.clientHeight; if (!W || !H) return;
+    /* Band und Gäste schrumpfen gemeinsam, bis alle nebeneinander passen – so bleiben die Größen stimmig */
+    const gw0 = H * .62 * 90 / 140 / W, fig = Math.min(1, (H - 4) / 210 * 660 / W);
+    let sk = 1, L = 0, R = 0, gw = gw0, schritt = gw0 * .72;
+    for (let k = 0; k < 6; k++) {
+      gw = gw0 * Math.min(1, sk); schritt = gw * .62;
+      L = nl ? .015 + gw + (nl - 1) * schritt : 0; R = nr ? .015 + gw + (nr - 1) * schritt : 0;
+      sk = Math.min(1, Math.max(.72, (1 - L - R) / fig));
+    }
+    const frei = 1 - L - R, x = (L + frei / 2 - .5) * 100;
+    const merk = sk.toFixed(3) + "|" + x.toFixed(2) + "|" + (schritt * 100).toFixed(2);
+    if (merk === bandMerk && b === bandEl) return;
+    bandMerk = merk; bandEl = b; bandLage.s = sk; bandLage.x = x;
+    b.style.setProperty("--gast-s", Math.min(1, sk / Math.max(.6, fig) * fig + (1 - fig)).toFixed(3));
+    b.style.setProperty("--band-s", sk.toFixed(3)); b.style.setProperty("--band-x", x.toFixed(2) + "%"); b.style.setProperty("--gs", (schritt * 100).toFixed(2) + "%");
+  }
+  /* Ort auf der Bühne (in %) einer Bandfigur, wenn die Band gerade zusammengerückt ist */
+  const bandOrt = p => 50 + (p - 50) * bandLage.s + bandLage.x;
   function gastWippen(b, id) {
     if (ruhig) return;
     const el = b.querySelector('[data-gast-bild="' + id + '"]'); if (!el || !el.classList.contains("da")) return;
@@ -4812,9 +4835,9 @@
 @keyframes lwwiegen3 { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
 .lw-buehne[data-pub="still"] .lw-publikum { opacity: .85; }
 .lw-gaeste { position: absolute; inset: 0; pointer-events: none; }
-.lw-gast { position: absolute; bottom: 5%; height: 68%; width: auto; aspect-ratio: 90 / 140; opacity: 0; transition: transform 1s cubic-bezier(.3,.8,.3,1), opacity .8s; overflow: visible; }
-.lw-gast.seite-l { left: calc(1% + var(--slot, 0) * 8%); transform: translateX(-170%); }
-.lw-gast.seite-r { right: calc(1% + var(--slot, 0) * 8%); transform: translateX(170%); }
+.lw-gast { position: absolute; bottom: 5%; height: calc(62% * var(--gast-s, 1)); width: auto; aspect-ratio: 90 / 140; opacity: 0; transition: transform 1s cubic-bezier(.3,.8,.3,1), opacity .8s; overflow: visible; }
+.lw-gast.seite-l { left: calc(1.5% + var(--slot, 0) * var(--gs, 8%)); transform: translateX(-170%); }
+.lw-gast.seite-r { right: calc(1.5% + var(--slot, 0) * var(--gs, 8%)); transform: translateX(170%); }
 .lw-gast.da { opacity: 1; transform: none; }
 .lw-gast.solo:not(.geist) { filter: drop-shadow(0 0 7px rgba(255,214,130,.85)); }
 .lw-gast.solo { z-index: 2; }
@@ -5129,6 +5152,7 @@ html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
 .lw-kleinregler span { flex: 0 0 auto; white-space: nowrap; }
 .lw-kleinregler input { flex: 1 1 auto; min-width: 4rem; max-width: 16rem; accent-color: var(--ember); }
 .lw-kleinregler b { flex: 0 0 2.6rem; text-align: right; color: var(--vellum); font-weight: 600; font-size: .8rem; }
+.lw-buehne .lw-figur, .lw-buehne .lw-geister { transform: translateX(var(--band-x, 0%)) scale(var(--band-s, 1)); transform-origin: 50% 100%; transition: transform 1.1s cubic-bezier(.4,.1,.3,1); }
 `;
   /* Requisiten: nur das gewählte Instrument ist sichtbar */
   css.textContent += ".lw-figur .req { display: none; }\n" +
