@@ -65,7 +65,7 @@
       neuFreigeschaltet: "Neu:",
       phase: { raub: "Raubzug", abwehr: "Der Zorn des Hains" },
       raubIntro: "Tippe, um die Ranke zu schleudern. Steine und Tiere ärgern Echo.",
-      abwehrIntro: "Tippe auf einen leuchtenden Pflanzplatz, um einen Wächter wachsen zu lassen. Tippe auf die Karte für Echos Zauber.",
+      abwehrIntro: "Tippe auf einen leuchtenden Pflanzplatz, um einen Wächter wachsen zu lassen. Tippe auf die Karte für Echos Zauber. Deine Wächter bleiben stehen.",
       hud: { zorn: "Zorn", gier: "Gier", saat: "Saat", hort: "Hort", genug: "Genug!", wild: "Wildgestalt", feuerball: "Echos Zauber", gegner: "Plünderer" },
       formen: {
         ranke: ["Ranke", "Zieht alles, nur Felsen nicht."],
@@ -99,7 +99,7 @@
         werte: { schaden: "Schaden", reich: "Reichweite", tempo: "Tempo" }, proSek: n => n + "/s", giftProSek: n => n + "/s Gift",
         spez: {
           dorn: (w, st) => "Ein Ziel: immer das vorderste. Trifft auch Fliegende.",
-          wurzel: (w, st) => "Alle in Reichweite · bremst um " + Math.round((1 - w.bremse[st]) * 100) + " %" + (st === 2 ? " · hält fest" : "") + " · Blights sind immun",
+          wurzel: (w, st) => "Alle in Reichweite · bremst um " + Math.round((1 - w.bremse[st]) * 100) + " %" + (st >= 2 ? " · hält fest" : "") + " · Blights sind immun",
           wolf: (w, st) => w.ziele[st] + (w.ziele[st] > 1 ? " Wölfe" : " Wolf") + " · beißt den Nächsten, kommt zurück",
           eis: (w, st) => "Bis zu " + w.ziele[st] + " Splitter · bremst um " + Math.round((1 - w.bremse[st]) * 100) + " %",
           blitz: (w, st) => "Springt auf " + w.ziele[st] + " Ziele, jedes Mal etwas schwächer",
@@ -119,6 +119,42 @@
         anfuehrer: "Goblin-Anführer", glasstab: "Glasstab", bugbaer: "Der Bugbear vom Wachturm", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "Der rasende Riese" },
       eig: { flug: "fliegt", schnell: "schnell", zaeh: "zäh", ausweichen: "weicht aus", unsichtbar: "zeitweise unsichtbar", netz: "spinnt Wächter ein", feuerSchwach: "feuerschwach", wurzelFest: "wurzelfest",
         ruft: "ruft Verstärkung", blinzeln: "nimmt Geheimgänge", gift: "Giftatem lähmt Wächter", schrei: "Schrei lähmt Wächter", wurf: "wirft Felsen auf Wächter", verwandeln: "flieht als Fledermaus", unbesiegbar: "unbesiegbar – nur aufhalten!" },
+      zweige: {
+        dorn: { a: ["Giftdorn", "Dornen vergiften ihr Ziel."], b: ["Dornenhagel", "Schießt auf drei Gegner zugleich."] },
+        wurzel: { a: ["Würgewurzel", "Hält Gegner länger fest, selbst Bosse kurz."], b: ["Dornenwurzeln", "Doppelter Schaden; Getroffene nehmen 3 s lang 25 % mehr Schaden."] },
+        wolf: { a: ["Rudel", "Drei Wölfe auf einmal."], b: ["Alphawolf", "Ein riesiger Wolf: dreifacher Biss, der betäubt."] },
+        eis: { a: ["Permafrost", "Splitter frieren Gegner kurz ein."], b: ["Splitterregen", "Splitter zerspringen auf zwei weitere Gegner."] },
+        blitz: { a: ["Gewitter", "Springt auf bis zu sieben Ziele."], b: ["Donnerschlag", "Ein Ziel, dreifacher Schaden, betäubt."] },
+        pilz: { a: ["Seuche", "Wer am Gift stirbt, steckt seine Nachbarn an."], b: ["Riesenbovist", "Größere Giftwolken, die zusätzlich bremsen."] }
+      },
+      weg: "Auf Stufe 3 wählst du einen Weg:", uralt: "Stufe 4 „Uralt“: deutlich mehr Schaden und Reichweite.", zielmodus: { vorne: "🎯 Vorderster", stark: "🎯 Stärkster", nah: "🎯 Nächster" },
+      tiere: {
+        baer: ["Bär", "Stellt sich auf den Weg und hält Plünderer auf."],
+        eule: ["Eule", "Wächter in ihrer Nähe sehen weiter. Enthüllt Unsichtbare."],
+        hirsch: ["Hirsch", "Wächter in seiner Nähe feuern schneller."],
+        keiler: ["Keiler", "Stürmt den Weg entlang und wirft Plünderer zurück."],
+        falke: ["Falke", "Jagt Flieger und Diebe überall auf der Karte."],
+        dachs: ["Dachs", "Gräbt Fallen in den Weg, die Plünderer festhalten."]
+      },
+      tierFaehig: {
+        baer: ["Hält 2 Plünderer fest, Prankenhieb. Schläft sich nach einer Niederlage gesund.", "Hält 3 Plünderer fest, härtere Hiebe, mehr Leben, schläft kürzer."],
+        eule: ["Reichweite +20 % im Umkreis, enthüllt Unsichtbare, Flieger nehmen 30 % mehr Schaden.", "Reichweite +30 %, größerer Umkreis."],
+        hirsch: ["Tempo +25 % im Umkreis, alle 10 s ein Geweihstoß.", "Tempo +40 %, Geweihstoß alle 7 s."],
+        keiler: ["Alle 9 s ein Ansturm über 150 Schritt.", "Alle 7 s, längerer und härterer Ansturm."],
+        falke: ["Alle 4,5 s ein Sturzflug, doppelter Schaden gegen Flieger, holt Beutel zurück.", "Alle 3 s, härtere Krallen."],
+        dachs: ["Alle 7 s eine Falle, bis zu 3 gleichzeitig.", "Alle 5 s, bis zu 4 Fallen, härter."]
+      },
+      tab: { waechter: "🌿 Wächter", tiere: "🐾 Tiere", setz: n => "🌱 " + n },
+      frei: "frei", maxTier: "max", schlaeft: "schläft …",
+      setzHinweis: "Neues Gebiet! Deine Wächter warten als Setzlinge darauf, kostenlos neu gepflanzt zu werden.",
+      gartenHinweis: "Deine Wächter und Tiere bleiben stehen. Jede Welle wird härter.",
+      welle: (n, m) => "Welle " + n + "/" + m, welleIn: (n, m, sek) => "Welle " + n + "/" + m + " in " + sek + " …", welleGeschafft: "Welle geschafft!", rufen: n => "Welle rufen +" + n + " 🌱",
+      druide: { knopf: "🌙 Druidenkreis", titel: "Der Druidenkreis", text: "Mondsteine bleiben über alle Raubzüge hinweg erhalten. Für jedes gewonnene Level gibt es einen, für Bosse und neue Sterne mehr.", steine: n => "🌙 " + n + " Mondsteine", voll: "gemeistert", verdient: n => "+" + n + " 🌙" },
+      talente: {
+        boden: ["Fruchtbarer Boden", "+15 Saat zu Beginn jedes Levels."], saatgut: ["Gutes Saatgut", "Wächter kosten 6 % weniger."],
+        tierfreund: ["Tierfreund", "Von jedem Tier darf ein zweites in den Garten."], wildnis: ["Ruf der Wildnis", "Tiere sind 15 % stärker."],
+        mondsegen: ["Mondsegen", "Zauber laden 8 % schneller."], zaeh: ["Zähe Haut", "+1 Leben zu Beginn eines Raubzugs."], raubzug: ["Wilder Raubzug", "+1 Wildgestalt im Raubzug."]
+      },
       besonderheit: "Besonderheit:",
       einst: { titel: "Einstellungen", knopf: "⚙ Einstellungen", effekte: "🔊 Effekte", musik: "🎵 Musik", vib: "📳 Vibration", vibNein: "Dieses Gerät oder dieser Browser kann nicht vibrieren.", aus: "aus" },
       schatzkammer: "🏛 Schatzkammer", schatzTitel: "Echos Schatzkammer", schatzText: "Jedes Gebiet versteckt ein Relikt. Echo hebt sie alle auf. Natürlich.",
@@ -161,7 +197,7 @@
       up: {
         ranke: ["Lange Ranke", "Die Ranke reicht weiter."],
         zug: ["Starke Ranke", "Zieht schneller hoch."],
-        zeit: ["Lange Dämmerung", "+6 Sekunden Raubzug."],
+        zeit: ["Lange Dämmerung", "+5 Sekunden Raubzug."],
         wild: ["Wildgestalt", "+1 Verwandlung pro Raubzug."],
         dauer: ["Tiergedächtnis", "Gestalten halten einen Wurf länger."],
         goldnase: ["Goldnase", "Schätze sind 10 % mehr wert."],
@@ -175,7 +211,7 @@
         baerenkraft: ["Bärenkraft", "Der Bär trifft härter und trampelt weniger."],
         heilkraut: ["Heilkräuter", "+1 Leben."],
         doppelgriff: ["Doppelgriff", "Die Ranke packt zwei Dinge auf einmal, wenn sie nah beieinander liegen."],
-        sanft: ["Zahmer Bär", "Echos Bärenwut zertrampelt keine Wächter mehr."],
+        sanft: ["Zahmer Bär", "Echos Bärenwut bringt keine Wächter mehr aus dem Takt."],
         freunde: ["Gute Freunde", "Rex, Barradin und Ezekiel kommen öfter vorbei."]
       },
       leben: n => "❤ " + n,
@@ -226,7 +262,7 @@
       neuFreigeschaltet: "New:",
       phase: { raub: "Raid", abwehr: "Wrath of the grove" },
       raubIntro: "Tap to hurl the vine. Stones and animals annoy Echo.",
-      abwehrIntro: "Tap a glowing planting spot to grow a guardian. Tap the map for Echo's spell.",
+      abwehrIntro: "Tap a glowing planting spot to grow a guardian. Tap the map for Echo's spell. Your guardians stay.",
       hud: { zorn: "Rage", gier: "Greed", saat: "Seeds", hort: "Hoard", genug: "Enough!", wild: "Wild shape", feuerball: "Echo's spells", gegner: "Plunderers" },
       formen: {
         ranke: ["Vine", "Pulls anything except boulders."],
@@ -260,7 +296,7 @@
         werte: { schaden: "Damage", reich: "Range", tempo: "Speed" }, proSek: n => n + "/s", giftProSek: n => n + "/s poison",
         spez: {
           dorn: (w, st) => "One target: always the one in front. Hits flyers too.",
-          wurzel: (w, st) => "Everyone in range · slows by " + Math.round((1 - w.bremse[st]) * 100) + " %" + (st === 2 ? " · roots them" : "") + " · blights are immune",
+          wurzel: (w, st) => "Everyone in range · slows by " + Math.round((1 - w.bremse[st]) * 100) + " %" + (st >= 2 ? " · roots them" : "") + " · blights are immune",
           wolf: (w, st) => w.ziele[st] + (w.ziele[st] > 1 ? " wolves" : " wolf") + " · bites the nearest, comes back",
           eis: (w, st) => "Up to " + w.ziele[st] + " shards · slows by " + Math.round((1 - w.bremse[st]) * 100) + " %",
           blitz: (w, st) => "Jumps to " + w.ziele[st] + " targets, a little weaker each time",
@@ -280,6 +316,42 @@
         anfuehrer: "Goblin boss", glasstab: "Glasstaff", bugbaer: "The watchtower bugbear", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "The raging giant" },
       eig: { flug: "flies", schnell: "fast", zaeh: "tough", ausweichen: "dodges", unsichtbar: "sometimes invisible", netz: "webs guardians", feuerSchwach: "weak to fire", wurzelFest: "root-proof",
         ruft: "calls for help", blinzeln: "uses secret passages", gift: "poison breath stuns guardians", schrei: "scream stuns guardians", wurf: "throws boulders at guardians", verwandeln: "flees as a bat", unbesiegbar: "invincible – just hold him off!" },
+      zweige: {
+        dorn: { a: ["Poison thorn", "Thorns poison their target."], b: ["Thorn hail", "Shoots at three enemies at once."] },
+        wurzel: { a: ["Strangling root", "Holds enemies longer, even bosses briefly."], b: ["Thorn roots", "Double damage; hit enemies take 25 % more damage for 3 s."] },
+        wolf: { a: ["Pack", "Three wolves at once."], b: ["Alpha wolf", "One huge wolf: triple bite that stuns."] },
+        eis: { a: ["Permafrost", "Shards briefly freeze enemies."], b: ["Shard rain", "Shards burst onto two more enemies."] },
+        blitz: { a: ["Thunderstorm", "Jumps to up to seven targets."], b: ["Thunderclap", "One target, triple damage, stuns."] },
+        pilz: { a: ["Plague", "Whoever dies of poison infects their neighbours."], b: ["Giant puffball", "Bigger poison clouds that also slow."] }
+      },
+      weg: "At level 3 you choose a path:", uralt: "Level 4 “Ancient”: much more damage and range.", zielmodus: { vorne: "🎯 First", stark: "🎯 Strongest", nah: "🎯 Closest" },
+      tiere: {
+        baer: ["Bear", "Stands on the road and holds plunderers back."],
+        eule: ["Owl", "Guardians nearby see further. Reveals the invisible."],
+        hirsch: ["Stag", "Guardians nearby attack faster."],
+        keiler: ["Boar", "Charges along the road and knocks plunderers back."],
+        falke: ["Falcon", "Hunts flyers and thieves anywhere on the map."],
+        dachs: ["Badger", "Digs traps into the road that hold plunderers."]
+      },
+      tierFaehig: {
+        baer: ["Holds 2 plunderers, paw swipe. Sleeps off a defeat.", "Holds 3 plunderers, harder swipes, more life, sleeps less."],
+        eule: ["Range +20 % nearby, reveals the invisible, flyers take 30 % more damage.", "Range +30 %, bigger area."],
+        hirsch: ["Speed +25 % nearby, an antler strike every 10 s.", "Speed +40 %, antler strike every 7 s."],
+        keiler: ["A charge over 150 steps every 9 s.", "Every 7 s, longer and harder charge."],
+        falke: ["A dive every 4.5 s, double damage against flyers, brings pouches back.", "Every 3 s, sharper talons."],
+        dachs: ["A trap every 7 s, up to 3 at once.", "Every 5 s, up to 4 traps, harder."]
+      },
+      tab: { waechter: "🌿 Guardians", tiere: "🐾 Animals", setz: n => "🌱 " + n },
+      frei: "free", maxTier: "max", schlaeft: "sleeping …",
+      setzHinweis: "New region! Your guardians wait as seedlings to be replanted for free.",
+      gartenHinweis: "Your guardians and animals stay. Every wave gets harder.",
+      welle: (n, m) => "Wave " + n + "/" + m, welleIn: (n, m, sek) => "Wave " + n + "/" + m + " in " + sek + " …", welleGeschafft: "Wave cleared!", rufen: n => "Call wave +" + n + " 🌱",
+      druide: { knopf: "🌙 Druid circle", titel: "The druid circle", text: "Moonstones stay with you across all raids. Every won level earns one, bosses and new stars earn more.", steine: n => "🌙 " + n + " moonstones", voll: "mastered", verdient: n => "+" + n + " 🌙" },
+      talente: {
+        boden: ["Fertile soil", "+15 seeds at the start of every level."], saatgut: ["Good seed", "Guardians cost 6 % less."],
+        tierfreund: ["Animal friend", "A second animal of each kind may join the garden."], wildnis: ["Call of the wild", "Animals are 15 % stronger."],
+        mondsegen: ["Moon blessing", "Spells recharge 8 % faster."], zaeh: ["Tough skin", "+1 life at the start of a raid."], raubzug: ["Wild raid", "+1 wild shape in the raid."]
+      },
       besonderheit: "Special:",
       einst: { titel: "Settings", knopf: "⚙ Settings", effekte: "🔊 Effects", musik: "🎵 Music", vib: "📳 Vibration", vibNein: "This device or browser cannot vibrate.", aus: "off" },
       schatzkammer: "🏛 Treasury", schatzTitel: "Echo's treasury", schatzText: "Every region hides a relic. Echo keeps them all. Of course.",
@@ -322,7 +394,7 @@
       up: {
         ranke: ["Long vine", "The vine reaches further."],
         zug: ["Strong vine", "Pulls up faster."],
-        zeit: ["Long dusk", "+6 seconds of raiding."],
+        zeit: ["Long dusk", "+5 seconds of raiding."],
         wild: ["Wild shape", "+1 transformation per raid."],
         dauer: ["Animal memory", "Shapes last one throw longer."],
         goldnase: ["Gold nose", "Treasures are worth 10 % more."],
@@ -336,7 +408,7 @@
         baerenkraft: ["Bear strength", "The bear hits harder and tramples less."],
         heilkraut: ["Healing herbs", "+1 life."],
         doppelgriff: ["Double grip", "The vine grabs two things at once when they lie close together."],
-        sanft: ["Tame bear", "Echo's bear rage no longer tramples guardians."],
+        sanft: ["Tame bear", "Echo's bear rage no longer throws guardians off their rhythm."],
         freunde: ["Good friends", "Rex, Barradin and Ezekiel drop by more often."]
       },
       leben: n => "❤ " + n,
@@ -390,28 +462,28 @@
      relikt: Form des Relikts · tier / stoerer: Tiere und Störenfriede im Raubzug · gegner: Plünderer mit Anteil · boss
      f: Farben */
   const GEB = [
-    { k: "wald", stil: { horizont: "tannen", wurzeln: true, deko: "baeume", res: "eicheln" }, regel: "goblindieb", musik: "wald",
+    { k: "wald", stil: { ambient: "gluehwurm", horizont: "tannen", wurzeln: true, deko: "baeume", res: "eicheln" }, regel: "goblindieb", musik: "wald",
       relikt: "krone", tier: "hase", stoerer: "wespe", gegner: [["goblin", 1]], boss: "anfuehrer",
       f: { himmel: ["#0c1110", "#1a2620"], boden: ["#2a2117", "#16110c"], akzent: "#4d6b35", stein: "#5d574c", res: "#a8783e", weg: "#4a3a26", gras: "#1d2a1a" } },
-    { k: "phandalin", stil: { horizont: "daecher", deko: "haeuser", res: "kraeuter" }, regel: "laterne", musik: "dorf",
+    { k: "phandalin", stil: { ambient: "blatt", horizont: "daecher", deko: "haeuser", res: "kraeuter" }, regel: "laterne", musik: "dorf",
       relikt: "kelch", tier: "hase", stoerer: "wespe", gegner: [["goblin", 0.3], ["rotrobe", 0.7]], boss: "glasstab",
       f: { himmel: ["#120d10", "#2a1a1a"], boden: ["#2b221c", "#151010"], akzent: "#9b3a2f", stein: "#625a52", res: "#6f8a5a", weg: "#57483a", gras: "#232a1c", mauer: true } },
-    { k: "wachturm", stil: { horizont: "turm", deko: "steine", res: "moos" }, regel: "bugbear", musik: "turm",
+    { k: "wachturm", stil: { ambient: "nebel", horizont: "turm", deko: "steine", res: "moos" }, regel: "bugbear", musik: "turm",
       relikt: "amulett", tier: "fledermaus", stoerer: "spinne", gegner: [["goblin", 0.55], ["bandit", 0.45]], boss: "bugbaer",
       f: { himmel: ["#0c0c14", "#1c1c28"], boden: ["#26252a", "#121216"], akzent: "#6a6a86", stein: "#5a5866", res: "#5f8a4a", weg: "#3b3a40", gras: "#1d221c", mauer: true } },
-    { k: "schmiede", stil: { horizont: "hoehle", deko: "steine", res: "kristalle" }, regel: "loren", musik: "schmiede",
+    { k: "schmiede", stil: { ambient: "glut", horizont: "hoehle", deko: "steine", res: "kristalle" }, regel: "loren", musik: "schmiede",
       relikt: "hammer", tier: "fledermaus", stoerer: "spinne", gegner: [["soeldner", 0.6], ["goblin", 0.25], ["bugbear", 0.15]], boss: "nezna",
       f: { himmel: ["#0d0b0a", "#1e1712"], boden: ["#2d241b", "#120e0a"], akzent: "#e0a046", stein: "#5b5249", res: "#7fd6e0", weg: "#3d3024", gras: "#221b14", schienen: true } },
-    { k: "donnerbaum", stil: { horizont: "tannen", tanne: "#141a14", wurzeln: true, knochen: true, deko: "baeume", res: "wurzelholz" }, regel: "venomfang", musik: "donnerbaum",
+    { k: "donnerbaum", stil: { ambient: "gluehwurm", horizont: "tannen", tanne: "#141a14", wurzeln: true, knochen: true, deko: "baeume", res: "wurzelholz" }, regel: "venomfang", musik: "donnerbaum",
       relikt: "schuppe", tier: "hase", stoerer: "spinne", gegner: [["blight", 0.55], ["zombie", 0.3], ["spinne", 0.15]], boss: "venomfang",
       f: { himmel: ["#0b100c", "#18231a"], boden: ["#231d16", "#100c09"], akzent: "#6f9a3a", stein: "#55524a", res: "#8a6440", weg: "#3d3324", gras: "#1a2416" } },
-    { k: "unterreich", stil: { horizont: "hoehle", deko: "steine", res: "sporen" }, regel: "dunkel", musik: "unterreich",
+    { k: "unterreich", stil: { ambient: "spore", horizont: "hoehle", deko: "steine", res: "sporen" }, regel: "dunkel", musik: "unterreich",
       relikt: "idol", tier: "fledermaus", stoerer: "spinne", gegner: [["drow", 0.45], ["ettercap", 0.3], ["chasme", 0.25]], boss: "vrock",
       f: { himmel: ["#07060c", "#120f1c"], boden: ["#1b1724", "#0b0910"], akzent: "#8a6ad0", stein: "#4a4458", res: "#c49ae0", weg: "#2b2536", gras: "#161320", pilze: true } },
-    { k: "see", stil: { horizont: "ufer", res: "muscheln" }, regel: "stroemung", musik: "see",
+    { k: "see", stil: { ambient: "blase", horizont: "ufer", res: "muscheln" }, regel: "stroemung", musik: "see",
       relikt: "perle", tier: "fisch", stoerer: "aal", gegner: [["kuotoa", 1]], boss: "demogorgon",
       f: { himmel: ["#06090e", "#0e1824"], boden: ["#0f2230", "#06101a"], akzent: "#4aa0b0", stein: "#3d4c58", res: "#e8c8b0", weg: "#2a3a44", gras: "#10202a", wasser: true } },
-    { k: "gracklstugh", stil: { horizont: "hoehle", glut: true, deko: "steine", res: "feuermoos" }, regel: "geysir", musik: "gracklstugh",
+    { k: "gracklstugh", stil: { ambient: "glut", horizont: "hoehle", glut: true, deko: "steine", res: "feuermoos" }, regel: "geysir", musik: "gracklstugh",
       relikt: "krone", tier: "fledermaus", stoerer: "spinne", gegner: [["duergar", 0.75], ["bugbear", 0.25]], boss: "riese",
       f: { himmel: ["#0e0808", "#24120c"], boden: ["#2a1a14", "#120a08"], akzent: "#e0602a", stein: "#584a44", res: "#ff8a3a", weg: "#3a2a22", gras: "#22140f", lava: true } }
   ];
@@ -422,16 +494,16 @@
     goblin:   { hp: 30, v: 44, klau: 8, r: 8, pkt: 5, farbe: "#6b7d3e" },
     rotrobe:  { hp: 62, v: 36, klau: 12, r: 9, pkt: 8, farbe: "#8a2f26" },
     bandit:   { hp: 56, v: 38, klau: 12, r: 9, pkt: 8, farbe: "#6b4a30" },
-    bugbear:  { hp: 175, v: 26, klau: 25, r: 12, pkt: 20, farbe: "#a8783e" },
-    soeldner: { hp: 96, v: 32, klau: 15, r: 10, pkt: 10, farbe: "#7a7f86" },
-    zombie:   { hp: 155, v: 17, klau: 15, r: 10, pkt: 10, farbe: "#6a7a5c" },
+    bugbear:  { hp: 130, v: 26, klau: 25, r: 12, pkt: 20, farbe: "#a8783e" },
+    soeldner: { hp: 66, v: 32, klau: 15, r: 10, pkt: 10, farbe: "#7a7f86" },
+    zombie:   { hp: 105, v: 17, klau: 15, r: 10, pkt: 10, farbe: "#6a7a5c" },
     blight:   { hp: 36, v: 50, klau: 6, r: 7, pkt: 5, farbe: "#5a4630", feuerSchwach: true, wurzelFest: true },
-    spinne:   { hp: 88, v: 42, klau: 10, r: 10, pkt: 10, farbe: "#2a2226", netz: true },
-    drow:     { hp: 102, v: 36, klau: 14, r: 9, pkt: 12, farbe: "#3b2f4a", ausweichen: 0.2 },
-    ettercap: { hp: 122, v: 30, klau: 12, r: 10, pkt: 12, farbe: "#58505a", netz: true },
-    chasme:   { hp: 130, v: 36, klau: 20, r: 11, pkt: 15, farbe: "#3a4560", flug: true },
-    kuotoa:   { hp: 126, v: 31, klau: 15, r: 10, pkt: 12, farbe: "#3f7a78" },
-    duergar:  { hp: 165, v: 30, klau: 18, r: 10, pkt: 14, farbe: "#6a6460", unsichtbar: true },
+    spinne:   { hp: 58, v: 42, klau: 10, r: 10, pkt: 10, farbe: "#2a2226", netz: true },
+    drow:     { hp: 62, v: 36, klau: 14, r: 9, pkt: 12, farbe: "#3b2f4a", ausweichen: 0.2 },
+    ettercap: { hp: 74, v: 30, klau: 12, r: 10, pkt: 12, farbe: "#58505a", netz: true },
+    chasme:   { hp: 58, v: 36, klau: 20, r: 11, pkt: 15, farbe: "#3a4560", flug: true },
+    kuotoa:   { hp: 72, v: 31, klau: 15, r: 10, pkt: 12, farbe: "#3f7a78" },
+    duergar:  { hp: 78, v: 30, klau: 18, r: 10, pkt: 14, farbe: "#6a6460", unsichtbar: true },
     // Bosse
     anfuehrer: { hp: 430, v: 24, klau: 60, r: 15, pkt: 100, farbe: "#5d6e35", boss: true, ruft: "goblin" },
     glasstab:  { hp: 580, v: 22, klau: 70, r: 14, pkt: 120, farbe: "#9b3a2f", boss: true, blinzeln: true },
@@ -440,19 +512,36 @@
     venomfang: { hp: 1550, v: 19, klau: 110, r: 20, pkt: 220, farbe: "#4d7a3a", boss: true, bild: "venomfang.jpg", bildY: 0.32, gift: true },
     vrock:     { hp: 1500, v: 26, klau: 110, r: 18, pkt: 220, farbe: "#8a8070", boss: true, bild: "vrock.jpg", bildY: 0.28, flug: true },
     demogorgon:{ hp: 1, v: 8.5, klau: 99999, r: 24, pkt: 500, farbe: "#9b3a2f", boss: true, bild: "demogorgon-karte.webp", bildY: 0.3, unbesiegbar: true, schrei: true },
-    riese:     { hp: 2500, v: 13, klau: 220, r: 22, pkt: 350, farbe: "#7a6a5a", boss: true, bild: "portrait-riese.jpg", bildY: 0.5, wurf: true }
+    riese:     { hp: 1800, v: 13, klau: 220, r: 22, pkt: 350, farbe: "#7a6a5a", boss: true, bild: "portrait-riese.jpg", bildY: 0.5, wurf: true }
   };
 
   /* Wächter (Türme). ab = ab welchem Level (Index) verfügbar */
   const WACHTER = {
-    dorn:   { ab: 0,  sym: "🌿", kosten: [30, 35, 55], reich: [74, 82, 92], schaden: [10, 17, 27], rate: 0.6, typ: "schuss", farbe: "#6f9a3a" },
-    wurzel: { ab: 0,  sym: "🌳", kosten: [35, 40, 55], reich: [62, 68, 76], schaden: [5, 8, 12], rate: 1.7, typ: "puls", bremse: [0.55, 0.45, 0.32], bremsT: 1.6, farbe: "#8a6440" },
-    wolf:   { ab: 2,  sym: "🐺", kosten: [45, 50, 65], reich: [58, 62, 68], schaden: [32, 50, 74], rate: 1.05, typ: "biss", ziele: [1, 1, 2], farbe: "#a89f8f" },
-    eis:    { ab: 6,  sym: "❄️", kosten: [50, 55, 75], reich: [74, 80, 88], schaden: [15, 24, 35], rate: 2.1, typ: "puls", bremse: [0.6, 0.5, 0.4], bremsT: 2, ziele: [4, 6, 8], farbe: "#9fd6ec" },
-    blitz:  { ab: 9,  sym: "⚡", kosten: [70, 75, 95], reich: [104, 114, 124], schaden: [44, 62, 88], rate: 2.3, typ: "kette", ziele: [2, 3, 4], farbe: "#f3e27a" },
-    pilz:   { ab: 15, sym: "🍄", kosten: [45, 55, 75], reich: [64, 70, 78], schaden: [10, 16, 24], rate: 1.8, typ: "gift", ziele: [2, 3, 4], farbe: "#c49ae0" }
+    dorn:   { ab: 0,  sym: "🌿", kosten: [30, 45, 85, 260], reich: [74, 82, 92, 100], schaden: [10, 17, 27, 38], rate: 0.6, typ: "schuss", farbe: "#6f9a3a" },
+    wurzel: { ab: 0,  sym: "🌳", kosten: [35, 50, 85, 260], reich: [62, 68, 76, 82], schaden: [5, 8, 12, 17], rate: 1.7, typ: "puls", bremse: [0.55, 0.45, 0.32, 0.3], bremsT: 1.6, farbe: "#8a6440" },
+    wolf:   { ab: 2,  sym: "🐺", kosten: [45, 60, 95, 280], reich: [58, 62, 68, 74], schaden: [32, 50, 74, 104], rate: 1.05, typ: "biss", ziele: [1, 1, 2, 2], farbe: "#a89f8f" },
+    eis:    { ab: 6,  sym: "❄️", kosten: [50, 65, 105, 290], reich: [74, 80, 88, 96], schaden: [15, 24, 35, 49], rate: 2.1, typ: "puls", bremse: [0.6, 0.5, 0.4, 0.38], bremsT: 2, ziele: [4, 6, 8, 9], farbe: "#9fd6ec" },
+    blitz:  { ab: 9,  sym: "⚡", kosten: [70, 85, 130, 330], reich: [104, 114, 124, 134], schaden: [44, 62, 88, 123], rate: 2.3, typ: "kette", ziele: [2, 3, 4, 4], farbe: "#f3e27a" },
+    pilz:   { ab: 15, sym: "🍄", kosten: [45, 65, 105, 290], reich: [64, 70, 78, 84], schaden: [10, 16, 24, 34], rate: 1.8, typ: "gift", ziele: [2, 3, 4, 5], farbe: "#c49ae0" }
   };
+  const TURM_MAX = 3; // Stufe 4 („Uralt“) ist der Index 3
   const WACHTER_REIHE = ["dorn", "wurzel", "wolf", "eis", "blitz", "pilz"];
+
+  /* Tiergefährten: eigene Fähigkeiten, je Art höchstens eins (mit Talent zwei). pfad = steht am Weg */
+  const TIERE = {
+    baer:   { ab: 1,  sym: "🐻", kosten: [90, 110],  farbe: "#a8783e", pfad: true },
+    eule:   { ab: 3,  sym: "🦉", kosten: [70, 90],   farbe: "#c9a35a", reich: [100, 120] },
+    hirsch: { ab: 6,  sym: "🦌", kosten: [90, 110],  farbe: "#d8a868", reich: [90, 105] },
+    keiler: { ab: 9,  sym: "🐗", kosten: [100, 120], farbe: "#8a6440", pfad: true },
+    falke:  { ab: 12, sym: "🦅", kosten: [110, 130], farbe: "#9fb6c8" },
+    dachs:  { ab: 15, sym: "🦡", kosten: [80, 100],  farbe: "#c8c0b0", pfad: true }
+  };
+  const TIERE_REIHE = ["baer", "eule", "hirsch", "keiler", "falke", "dachs"];
+  /* Dauerhafte Talente im Druidenkreis (gelten über alle Raubzüge) */
+  const TALENTE = {
+    boden: { sym: "🌱", kosten: [3, 6, 10] }, saatgut: { sym: "💸", kosten: [4, 8, 12] }, tierfreund: { sym: "🐾", kosten: [15] },
+    wildnis: { sym: "🐺", kosten: [5, 9, 14] }, mondsegen: { sym: "🌙", kosten: [4, 8, 12] }, zaeh: { sym: "❤️", kosten: [10, 20] }, raubzug: { sym: "🌿", kosten: [6, 12] }
+  };
 
   /* Echos Zauberbuch für die Abwehr. ab = ab welchem Level, cd = Abklingzeit in Sekunden */
   const ZAUBER = {
@@ -513,7 +602,9 @@
   const innenVon = lv => lv < KAMPAGNE ? lv % LEVEL_PRO_GEBIET : (lv - KAMPAGNE) % LEVEL_PRO_GEBIET;
   const istBossLevel = lv => lv < KAMPAGNE ? innenVon(lv) === 2 : (lv - KAMPAGNE) % 4 === 3;
   const endlosRunde = lv => lv - KAMPAGNE + 1;
-  const skalierung = lv => 1 + 0.14 * Math.min(lv, KAMPAGNE) + (lv >= KAMPAGNE ? 0.2 * (lv - KAMPAGNE + 1) : 0);
+  /* Gegner werden mit jedem Level zäher – ohne Obergrenze, damit der Garten immer weiter wachsen muss */
+  const skalierung = lv => (1 + 0.35 * lv + 0.1 * lv * lv) * (lv > KAMPAGNE ? Math.pow(1.15, lv - KAMPAGNE) : 1);
+  const tal = k => (STAT.talente && STAT.talente[k]) || 0;
   function neueFreischaltungen(lv) {
     const n = [];
     FORMEN_REIHE.forEach(k => { if (FORMEN[k].ab === lv && lv > 0) n.push(FORMEN[k].sym + " " + t().formen[k][0]); });
@@ -703,7 +794,7 @@
   const ERFOLGE = [["erster", "💰"], ["relikt1", "🏺"], ["relikt8", "👑"], ["beute1000", "🪙"], ["gier5", "🤑"], ["zorn3", "🌋"], ["kombo", "⚡"], ["rex", "🐕"], ["ezekiel", "🗡️"],
     ["sparsam", "🌱"], ["bosse", "☠️"], ["demo", "🐙"], ["kampagne", "🗺️"], ["endlos5", "♾️"], ["sterne", "⭐"], ["alleSterne", "🌟"], ["hain", "🌳"]];
   let STAT = (() => { try { const v = JSON.parse(localStorage.getItem("imres-echohort-statistik") || "{}"); return v && typeof v === "object" ? v : {}; } catch (_) { return {}; } })();
-  ["relikte", "bosse", "erfolge"].forEach(k => { if (!STAT[k] || typeof STAT[k] !== "object") STAT[k] = {}; });
+  ["relikte", "bosse", "erfolge", "talente"].forEach(k => { if (!STAT[k] || typeof STAT[k] !== "object") STAT[k] = {}; });
   const statSichern = () => schreib("imres-echohort-statistik", JSON.stringify(STAT));
   function erfolg(id) {
     if (STAT.erfolge[id]) return;
@@ -745,7 +836,7 @@
 
   function neuesSpiel() {
     S = {
-      stufe: stufeWahl, lv: 0, leben: STUFEN[stufeWahl].leben, punkte: 0, beutel: 0,
+      stufe: stufeWahl, lv: 0, leben: STUFEN[stufeWahl].leben + tal("zaeh"), punkte: 0, beutel: 0, garten: null,
       goldGesamt: 0, erlegtGesamt: 0, schaetzeGesamt: 0, up: {}, phase: "raub", tafel: "", R: null, A: null, erg: null, statistik: STAT
     };
   }
@@ -759,11 +850,16 @@
     const st = S.stufe;
     if (S.lv > (parseInt(lies("imres-echohort-frei-" + st, "0"), 10) || 0)) schreib("imres-echohort-frei-" + st, String(Math.min(KAMPAGNE - 1, S.lv)));
     if (upSumme(S.up) >= upSumme(hainBestLesen(st))) schreib("imres-echohort-hainbest-" + st, JSON.stringify(S.up));
+    const gd = gartenDaten();
+    if (gd) {
+      const wert = d => Object.keys(d.turme || {}).reduce((a, i) => a + (d.turme[i].wert || 0), 0) + (d.setzlinge || []).reduce((a, z) => a + (z.wert || 0), 0);
+      if (wert(gd) >= wert(jsonLies("imres-echohort-gartenbest-" + st, {}))) schreib("imres-echohort-gartenbest-" + st, JSON.stringify(gd));
+    }
   }
   function speichern() {
     if (!S || S.einzel) return;
     fortschrittMerken();
-    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber };
+    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten() };
     schreib(SPEICHER, JSON.stringify(k));
   }
   function gespeichert() {
@@ -773,6 +869,38 @@
     neuesSpiel();
     Object.assign(S, k);
     S.up = Object.assign({}, k.up || {});
+    S.garten = k.garten && typeof k.garten === "object" ? { g: k.garten.g, turme: Object.assign({}, k.garten.turme || {}), setzlinge: (k.garten.setzlinge || []).slice() } : null;
+  }
+  /* ---------- Der Garten: Wächter und Tiere bleiben stehen ---------- */
+  const turmKurz = T => ({ k: T.k, st: T.st, zweig: T.zweig || null, ziel: T.ziel || "vorne", tier: !!T.tier, wert: T.wert || 0 });
+  function gartenSync() {
+    if (!S || !S.garten || !S.A) return;
+    const G = S.garten; G.turme = {};
+    S.A.plaetze.forEach((p, i) => { if (p.turm) G.turme[i] = p.turm; });
+  }
+  function gartenDaten() {
+    if (!S.garten) return null;
+    const G = S.garten, turme = {};
+    Object.keys(G.turme).forEach(i => { turme[i] = turmKurz(G.turme[i]); });
+    return { g: G.g, turme, setzlinge: G.setzlinge.map(x => turmKurz(x)) };
+  }
+  function turmNeu(z) {
+    return Object.assign({ cd: 0.5, ausT: 0, netz: 0, anim: 0, winkel: -Math.PI / 2, draussen: 0, wachs: 0, ziel: "vorne" }, z,
+      z.tier ? { hp: 0, schlafT: 0, faehigT: 2 + Math.random() * 2 } : {});
+  }
+  function gartenVorbereiten(g, plaetze) {
+    if (!S.garten) S.garten = { g, turme: {}, setzlinge: [] };
+    const G = S.garten;
+    if (G.g !== g) {
+      Object.keys(G.turme).forEach(i => G.setzlinge.push(turmKurz(G.turme[i])));
+      G.turme = {}; G.g = g;
+    }
+    plaetze.forEach((p, i) => {
+      p.i = i;
+      const z = G.turme[i]; if (!z) return;
+      p.turm = turmNeu(z); p.turm.wachs = 1; G.turme[i] = p.turm;
+      if (p.turm.tier) tierPosten(p);
+    });
   }
 
   /* gemeinsame Effekte für beide Phasen */
@@ -794,12 +922,12 @@
   function raubzugStarten() {
     const lv = S.lv, g = gebietVon(lv);
     musikStart(GEB[g].musik, 0);
-    const zeit = (40 + 6 * up("zeit")) * STUFEN[S.stufe].zeit;
+    const zeit = (26 + 5 * up("zeit")) * STUFEN[S.stufe].zeit;
     S.phase = "raub";
     S.texte = []; S.teilchen = []; S.banner = null; S.quip = null; S.quipT = 0; S.blitze = [];
     S.R = {
       g, zeit, zeitMax: zeit, dinge: dingeErzeugen(lv), zorn: 0, beute: 0, saat: 0, gier: 0, schaetze: 0,
-      form: "ranke", formWuerfe: 0, wild: 2 + up("wild"), schmollT: 0, schwingT: Math.random() * 3,
+      form: "ranke", formWuerfe: 0, wild: 2 + up("wild") + tal("raubzug"), schmollT: 0, schwingT: Math.random() * 3,
       haken: { zustand: "schwingen", winkel: 0, laenge: 18, last: null }, endeWunsch: false, fertig: false, endeT: 0,
       ausbrueche: 0, gierSchritt: 130 + 24 * Math.min(lv, KAMPAGNE + 12)
     };
@@ -919,7 +1047,7 @@
     const f = formDaten();
     if (h.zustand === "schwingen") {
       R.schwingT += dt * (R.form === "rabe" ? 1.25 : R.form === "baer" ? 0.85 : 1);
-      h.winkel = Math.sin(R.schwingT * 1.7) * 1.22;
+      h.winkel = Math.sin(R.schwingT * 1.15) * 1.22;
       R.leerlauf = (R.leerlauf || 0) + dt;
       if (R.leerlauf > 3 && !R.fertig && R.schmollT <= 0) zornDazu(5 * dt);
       if (R.endeWunsch && !R.fertig) raubzugEnde();
@@ -1354,8 +1482,10 @@
   ];
 
   function pfadBauen(lv) {
-    let roh = PFADE[lv < KAMPAGNE ? (lv + gebietVon(lv)) % PFADE.length : Math.floor(Math.random() * PFADE.length)];
-    if (gebietVon(lv) % 2 === 1) roh = roh.map(([x, y]) => [W - x, y]);
+    /* jedes Gebiet hat seine feste Karte, damit der Garten über alle drei Level stehen bleiben kann */
+    const g = gebietVon(lv);
+    let roh = PFADE[g % PFADE.length];
+    if (Math.floor(g / PFADE.length) % 2 === 1) roh = roh.map(([x, y]) => [W - x, y]);
     // Ecken etwas abrunden: jede Ecke durch eine kurze Kurve ersetzen
     const p = [];
     for (let i = 0; i < roh.length; i++) {
@@ -1393,39 +1523,39 @@
   function plaetzeBauen(P) {
     const l = [];
     let seite = 1;
-    for (let s = 34; s < P.gesamt - 30; s += 30) {
+    for (let s = 30; s < P.gesamt - 26; s += 22) {
       const a = pfadPunkt(P, s), b = pfadPunkt(P, s + 4), w = Math.atan2(b.y - a.y, b.x - a.x);
       for (const sd of [seite, -seite]) {
-        const x = a.x + Math.cos(w + Math.PI / 2) * 40 * sd, y = a.y + Math.sin(w + Math.PI / 2) * 40 * sd;
-        if (x < 24 || x > W - 24 || y < 50 || y > LEISTE - 26) continue;
+        const x = a.x + Math.cos(w + Math.PI / 2) * 39 * sd, y = a.y + Math.sin(w + Math.PI / 2) * 39 * sd;
+        if (x < 22 || x > W - 22 || y < 46 || y > LEISTE - 24) continue;
         if (abstZumPfad(P, x, y) < 31) continue;
-        if (abst(x, y, HORT.x, HORT.y) < 52) continue;
-        if (l.some(q => abst(q.x, q.y, x, y) < 50)) continue;
+        if (abst(x, y, HORT.x, HORT.y) < 50) continue;
+        if (l.some(q => abst(q.x, q.y, x, y) < 44)) continue;
         l.push({ x, y, turm: null }); seite = -seite; break;
       }
     }
-    return l.slice(0, 11);
+    return l.filter((q, i) => i % 4 !== 3).slice(0, 12);
   }
 
+  const WELLEN = 3;
   function gegnerListe(lv, gier) {
-    const g = gebietVon(lv), G = GEB[g], innen = innenVon(lv);
-    let n = Math.round((8 + lv * 0.9 + innen * 2 + gier * 2) * (lv >= KAMPAGNE ? 1.15 : 1));
-    const l = [];
+    const g = gebietVon(lv), G = GEB[g], innen = innenVon(lv), boss = istBossLevel(lv);
     const typ = () => { let r = Math.random(); for (const [k, w] of G.gegner) { r -= w; if (r <= 0) return k; } return G.gegner[0][0]; };
-    const boss = istBossLevel(lv);
-    if (boss) n = Math.round(n * 0.7);
-    for (let i = 0; i < n; i++) l.push(typ());
-    if (lv >= KAMPAGNE) { // endlos: ein paar Gäste aus anderen Gebieten
-      for (let i = 0; i < Math.min(8, 2 + (lv - KAMPAGNE)); i++) l.push(zufall(GEB[Math.floor(Math.random() * GEBIETE_ANZAHL)].gegner)[0]);
-      mischen(l);
+    const wellen = [];
+    for (let w = 0; w < WELLEN; w++) {
+      const n = Math.min(44, Math.round(7 + lv * 0.85 + innen * 1.5 + w * 3 + gier * 1.5));
+      const l = [];
+      for (let i = 0; i < n; i++) l.push(typ());
+      if (lv >= KAMPAGNE && w > 0) { for (let i = 0; i < Math.min(8, 2 + (lv - KAMPAGNE)); i++) l.push(zufall(GEB[Math.floor(Math.random() * GEBIETE_ANZAHL)].gegner)[0]); mischen(l); }
+      wellen.push(l);
     }
     if (boss) {
-      const b = lv < KAMPAGNE ? G.boss : zufall(GEB.map(G => G.boss).filter(b => !FEINDE[b].unbesiegbar));
-      if (b === "demogorgon") return { liste: l, boss: b, demo: true };
-      l.splice(Math.floor(l.length * 0.6), 0, b);
-      return { liste: l, boss: b };
+      const bk = lv < KAMPAGNE ? G.boss : zufall(GEB.map(G => G.boss).filter(b => !FEINDE[b].unbesiegbar));
+      if (bk === "demogorgon") { wellen[WELLEN - 1] = []; return { wellen, boss: bk, demo: true, liste: wellen.flat() }; }
+      wellen[WELLEN - 1].splice(Math.floor(wellen[WELLEN - 1].length * 0.5), 0, bk);
+      return { wellen, boss: bk, liste: wellen.flat() };
     }
-    return { liste: l };
+    return { wellen, liste: wellen.flat() };
   }
 
   function abwehrStarten() {
@@ -1439,21 +1569,23 @@
     S.A = {
       g, P, plaetze: plaetzeBauen(P), feinde: [], geschosse: [], effekte: [],
       hort: R.beute + reserve, reserve, hortStart: R.beute + reserve,
-      saat: 30 + 15 * up("ernte") + R.saat, zorn: 0, zauber: zauberWahlPruefen().map(k => ({ k, cd: 0, max: ZAUBER[k].cd * Math.pow(0.85, up("funken")) })), aktiv: 0, mond: null, adler: null,
-      warte: gl.liste.slice(), boss: gl.boss || null, demo: !!gl.demo, demoT: 0, demoDauer: 70, demoWeg: false,
-      spawnT: 0, abstand: Math.max(0.7, 1.75 - lv * 0.035), gespawnt: 0,
-      vorT: 9, wahl: -1, baer: null, erlegt: 0, verlorenGold: 0, zurueckGold: 0, schnell: lies("imres-echohort-schnell", "") === "1",
+      saat: (S.einzel ? (S.garten && S.garten.setzlinge.length ? 60 + 10 * lv : 110 + 40 * lv) : 30) + 12 * up("ernte") + 15 * tal("boden") + R.saat, zorn: 0, zauber: zauberWahlPruefen().map(k => ({ k, cd: 0, max: ZAUBER[k].cd * Math.pow(0.85, up("funken")) * Math.pow(0.92, tal("mondsegen")) })), aktiv: 0, mond: null, adler: null,
+      wellen: gl.wellen, welle: -1, warte: [], boss: gl.boss || null, bossDa: false, ansturm: [], fallen: [], auraT: 0, demo: !!gl.demo, demoT: 0, demoDauer: 62, demoWeg: false,
+      spawnT: 0, abstand: Math.max(0.42, 1.4 - lv * 0.035), gespawnt: 0,
+      vorT: 12, wahl: -1, baer: null, erlegt: 0, verlorenGold: 0, zurueckGold: 0, schnell: lies("imres-echohort-schnell", "") === "1",
       helfer: [], helferT: zw(12, 18) * [1, 0.72, 0.5][up("freunde")], barradinT: 0, portrait: null, letzterHelfer: "", punkte: 0, gesamt: gl.liste.length + (gl.demo ? 1 : 0), lv, fertig: false, endeT: 0, bossGerufen: false
     };
     if (S.A.demo) S.A.gesamt = gl.liste.length;
+    gartenVorbereiten(g, S.A.plaetze);
+    S.A.bauTab = S.garten.setzlinge.length ? "setz" : "waechter";
     hintergrundAbwehr(g, P);
   }
 
   function feindNeu(typ, s) {
     const A = S.A, d = FEINDE[typ], lv = S.lv;
-    const hpF = (d.boss ? 1 + 0.07 * lv : skalierung(lv)) * STUFEN[S.stufe].hp;
+    const hpF = (d.boss ? 1 + 0.09 * lv + 0.004 * lv * lv : skalierung(lv)) * STUFEN[S.stufe].hp * (1 + 0.07 * Math.max(0, A.welle));
     const e = {
-      typ, d, hp: d.hp * hpF, max: d.hp * hpF, v: d.v * STUFEN[S.stufe].tempo * (1 + Math.min(0.25, lv * 0.008)), r: d.r,
+      typ, d, hp: d.hp * hpF, max: d.hp * hpF, v: d.v * STUFEN[S.stufe].tempo * (1 + Math.min(0.4, lv * 0.012)), r: d.r,
       s: s || 0, x: 0, y: 0, flug: !!d.flug, bremse: 1, bremsT: 0, festT: 0, gift: 0, giftT: 0,
       cd: 3 + Math.random() * 2, unsT: 0, unsichtbarZyklus: Math.random() * 4, ph: Math.random() * 6, treffT: 0, verwandelt: false, tot: false
     };
@@ -1461,7 +1593,7 @@
       const st = pfadPunkt(A.P, 0);
       e.x = klemm(st.x + zw(-120, 120), 30, W - 30); e.y = 20;
     } else { const q = pfadPunkt(A.P, e.s); e.x = q.x; e.y = q.y; }
-    if (d.unbesiegbar) e.v = A.P.gesamt / 50 * STUFEN[S.stufe].tempo;
+    if (d.unbesiegbar) e.v = A.P.gesamt / 58 * STUFEN[S.stufe].tempo;
     if (d.boss) {
       text(W / 2, 180, t().bossRuft[typ] || "", "#c4564a", 22, 2.2);
       banner(t().bossRuft[typ] || "", "#c4564a", 2.2);
@@ -1475,12 +1607,13 @@
   function abwehrUpdate(dt) {
     const A = S.A;
     if (S.quipT > 0) S.quipT -= dt;
+    ambientUpdate(A, dt);
     A.zauber.forEach(z => { z.cd = Math.max(0, z.cd - dt); });
     zauberUpdate(dt);
     A.zorn = Math.max(0, A.zorn - dt * 1.2);
     if (A.fertig) { A.endeT += dt; if (A.endeT > 1.1 && zustand === "spiel") ergebnisZeigen(); return; }
     // Vorbereitung
-    if (A.vorT > 0) { A.vorT -= dt; if (A.vorT <= 0) { A.vorT = 0; KLANG.boss(); } }
+    if (A.vorT > 0) { A.vorT -= dt; if (A.vorT <= 0) welleStarten(); }
     else {
       // Gegner kommen
       A.spawnT -= dt;
@@ -1490,7 +1623,7 @@
         A.gespawnt++;
         A.spawnT = A.abstand * (A.gespawnt % 8 === 0 ? 2.6 : 1) * zw(0.75, 1.25);
       }
-      if (A.demo) {
+      if (A.demo && A.welle === A.wellen.length - 1) {
         A.demoT += dt;
         if (!A.bossGerufen && A.demoT > 2) { A.bossGerufen = true; feindNeu("demogorgon"); }
         if (A.demoT < A.demoDauer && A.warte.length < 2 && Math.random() < dt / 2.6) A.warte.push("kuotoa");
@@ -1502,11 +1635,14 @@
         }
       }
     }
+    // Tiere: Auren und Bären am Weg
+    aurenBerechnen(A); baerenVorbereiten(A);
     // Gegner bewegen
     A.feinde.forEach(e => feindBewegen(e, dt));
     A.feinde = A.feinde.filter(e => !e.tot);
     // Wächter
     A.plaetze.forEach(p => { if (p.turm) turmUpdate(p, dt); });
+    tiereUpdate(A, dt);
     // Geschosse
     A.geschosse.forEach(g => {
       g.t += dt;
@@ -1514,7 +1650,7 @@
         const z = g.ziel;
         if (!z || z.tot) { g.weg = true; return; }
         const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy), sch = 340 * dt;
-        if (d <= sch + z.r) { treffen(z, g.schaden, "schuss"); g.weg = true; return; }
+        if (d <= sch + z.r) { treffen(z, g.schaden, "schuss"); if (g.gift && !z.tot) { z.gift = Math.max(z.gift, g.gift); z.giftT = 3; } g.weg = true; return; }
         g.x += dx / d * sch; g.y += dy / d * sch; g.w = Math.atan2(dy, dx);
       } else if (g.art === "splitter") {
         const z = g.ziel;
@@ -1523,7 +1659,9 @@
         if (d <= sch + z.r) {
           z.eisT = Math.max(z.eisT || 0, g.bremsT);
           treffen(z, g.schaden, "frost");
-          if (!z.tot) { z.bremse = Math.min(z.bremse, g.bremse); z.bremsT = Math.max(z.bremsT, g.bremsT); }
+          if (!z.tot) { z.bremse = Math.min(z.bremse, g.bremse); z.bremsT = Math.max(z.bremsT, g.bremsT); if (g.frost) { if (z.d.boss) z.bremse = Math.min(z.bremse, 0.35); else festhalten(z, 0.9); } }
+          if (g.teilen) S.A.feinde.filter(o => o !== z && !o.tot && abst(o.x, o.y, z.x, z.y) < 70).sort((a, b) => abst(a.x, a.y, z.x, z.y) - abst(b.x, b.y, z.x, z.y)).slice(0, 2)
+            .forEach(o => S.A.geschosse.push({ art: "splitter", x: z.x, y: z.y, ziel: o, schaden: g.schaden * 0.5, bremse: g.bremse, bremsT: g.bremsT, t: 0, w: 0, dreh: 0 }));
           funken(z.x, z.y, 5, ["#cfeaf4", "#9fd6ec", "#ffffff"], 60, 2); g.weg = true; return;
         }
         g.x += dx / d * sch; g.y += dy / d * sch; g.w = Math.atan2(dy, dx); g.dreh = (g.dreh || 0) + dt * 14;
@@ -1532,8 +1670,9 @@
         g.x = g.x0 + (g.x1 - g.x0) * u; g.y = g.y0 + (g.y1 - g.y0) * u - Math.sin(u * Math.PI) * 34;
         if (u >= 1) {
           g.weg = true;
-          imKreis(g.x1, g.y1, 28).forEach(e => { e.gift = Math.max(e.gift, g.schaden); e.giftT = 3; });
-          S.blitze.push({ art: "sporenwolke", x: g.x1, y: g.y1, r: 28, t: 0, dauer: 0.9 });
+          const r = g.r || 28;
+          imKreis(g.x1, g.y1, r).forEach(e => { e.gift = Math.max(e.gift, g.schaden); e.giftT = 3; if (g.seuche) e.seuche = true; if (g.bremst) { e.bremse = Math.min(e.bremse, 0.6); e.bremsT = Math.max(e.bremsT, 3); } });
+          S.blitze.push({ art: "sporenwolke", x: g.x1, y: g.y1, r, t: 0, dauer: 0.9 });
           KLANG.sporen();
         }
       } else if (g.art === "wolf") {
@@ -1547,6 +1686,7 @@
           if (d <= v + z.r + 4) {
             const doppelt = z.wurzelT > 0;
             treffen(z, g.schaden * (doppelt ? 2 : 1), "biss");
+            if (g.alpha && !z.tot && !z.d.boss) festhalten(z, 0.8);
             if (doppelt) kombo(z);
             S.blitze.push({ art: "biss", x: z.x, y: z.y, t: 0, dauer: 0.35 });
             KLANG.biss(); g.zustand = "zurueck"; return;
@@ -1556,6 +1696,25 @@
           const dx = heim.x - g.x, dy = heim.y - g.y, d = Math.hypot(dx, dy);
           g.links = dx < 0;
           if (d <= v) { g.weg = true; if (g.turm) g.turm.draussen = Math.max(0, (g.turm.draussen || 0) - 1); return; }
+          g.x += dx / d * v; g.y += dy / d * v;
+        }
+      } else if (g.art === "falke") {
+        const v = 400 * dt;
+        if (g.zustand === "hin") {
+          const z = g.ziel;
+          if (!z || z.tot) { g.zustand = "zurueck"; return; }
+          const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy);
+          g.w = Math.atan2(dy, dx);
+          if (d <= v + z.r) {
+            if (z.beute) goldZurueck(z);
+            treffen(z, g.schaden * (z.flug ? 2 : 1), "falke");
+            funken(z.x, z.y, 8, ["#9fb6c8", "#ebe2cc"], 80); KLANG.biss(); g.zustand = "zurueck"; return;
+          }
+          g.x += dx / d * v; g.y += dy / d * v;
+        } else {
+          const dx = g.heim.x - g.x, dy = g.heim.y - g.y, d = Math.hypot(dx, dy);
+          g.w = Math.atan2(dy, dx);
+          if (d <= v) { g.weg = true; g.turm.unterwegs = false; return; }
           g.x += dx / d * v; g.y += dy / d * v;
         }
       } else if (g.art === "gold") {
@@ -1578,10 +1737,26 @@
     // Freunde der Gruppe
     if (A.vorT <= 0) helferUpdate(dt);
     // Ende?
-    const unterwegs = A.feinde.some(e => e.beute > 0) || A.geschosse.some(g => g.art === "gold");
+    const unterwegs = A.feinde.some(e => e.beute > 0 && !e.tot) || A.geschosse.some(g => g.art === "gold");
     if (A.hort <= 0 && !unterwegs) { A.hort = 0; A.fertig = true; A.verloren = true; A.endeT = 0; return; }
     if (unterwegs) return;
-    if (A.vorT <= 0 && !A.warte.length && !A.feinde.length && (!A.demo || A.demoWeg)) { A.fertig = true; A.verloren = false; A.endeT = 0; KLANG.sieg(); banner(t().sicher, "#e0a046", 2); }
+    const letzte = A.welle >= A.wellen.length - 1;
+    if (A.vorT <= 0 && !A.warte.length && !A.feinde.length && (!A.demo || !letzte || A.demoWeg)) {
+      if (letzte) { A.fertig = true; A.verloren = false; A.endeT = 0; KLANG.sieg(); banner(t().sicher, "#e0a046", 2); }
+      else { A.vorT = 9; const b = 4 + 3 * (A.welle + 1); A.saat += b; banner(t().welleGeschafft, "#cfe6a8", 1.6); text(W / 2, 260, "+" + b + " 🌱", "#cfe6a8", 18, 1.6); KLANG.kaufen(); }
+    }
+  }
+  function welleStarten() {
+    const A = S.A;
+    A.vorT = 0; A.welle++;
+    A.warte = A.wellen[A.welle].slice(); A.spawnT = 0.3; A.gespawnt = 0;
+    banner(t().welle(A.welle + 1, A.wellen.length), "#e0a046", 1.4); KLANG.boss();
+    if (A.demo && A.welle === A.wellen.length - 1) { A.demoT = 0; A.bossGerufen = false; }
+  }
+  function welleRufen() {
+    const A = S.A; if (A.vorT <= 0 || A.fertig) return;
+    const n = Math.ceil(A.vorT) * 2; A.saat += n;
+    text(W / 2, 300, "+" + n + " 🌱", "#cfe6a8", 16); welleStarten();
   }
 
   function feindBewegen(e, dt) {
@@ -1594,6 +1769,9 @@
     if (e.enthuelltT > 0) e.enthuelltT -= dt;
     if (e.eisT > 0) e.eisT -= dt;
     if (e.wurzelT > 0) e.wurzelT -= dt;
+    if (e.bruchT > 0) e.bruchT -= dt;
+    if (e.festSperre > 0) e.festSperre -= dt;
+    if (e.markT > 0) e.markT -= dt;
     if (d.unsichtbar) { e.unsichtbarZyklus += dt; e.unsT = (e.unsichtbarZyklus % 5.5) > 3.7 && !(e.enthuelltT > 0) ? 1 : 0; }
     if (e.cd <= 0) {
       if (d.ruft) { e.cd = 6; for (let i = 0; i < 2; i++) { const n = feindNeu(d.ruft, Math.max(0, e.s - 10 - i * 14)); A.gesamt++; n.v *= 1.1; } funken(e.x, e.y, 10, ["#6b7d3e", "#ebe2cc"], 60); }
@@ -1610,6 +1788,7 @@
     }
     // Bewegung
     let v = e.v * e.bremse;
+    if (e.halt) v = 0; else if (e.baerBremse) v *= 0.5;
     if (e.festT > 0) { e.festT -= dt; v = d.boss ? v * 0.5 : 0; }
     if (d.unbesiegbar) v = Math.max(v, e.v * 0.35);
     if (e.flieht) {
@@ -1623,6 +1802,8 @@
         if (e.s <= 0) { entkommen(e); return; }
         const q = pfadPunkt(A.P, e.s); e.x = q.x; e.y = q.y;
       }
+    } else if (e.wartet) {
+      if (A.hort > 0) ankommen(e);
     } else if (e.flug) {
       const dx = HORT.x - e.x, dy = HORT.y - 10 - e.y, l = Math.hypot(dx, dy);
       if (l < 16) { ankommen(e); return; }
@@ -1638,7 +1819,9 @@
     const A = S.A;
     const k = Math.min(A.hort, Math.round(Math.max(e.d.klau * (1 + 0.04 * Math.min(S.lv, KAMPAGNE)), A.hortStart * (e.d.boss ? 0.22 : 0.045))));
     A.hort -= k;
-    if (e.d.unbesiegbar || k <= 0) { e.tot = true; if (k <= 0) { text(HORT.x, HORT.y - 30, t().leer, "#a89f8f", 13); funken(e.x, e.y, 6, ["#ebe2cc"], 40); return; } }
+    if (k <= 0 && !e.d.unbesiegbar) { if (!e.wartet) { e.wartet = true; text(e.x, e.y - 18, t().leer, "#a89f8f", 12); } return; }
+    e.wartet = false;
+    if (e.d.unbesiegbar) e.tot = true;
     else { e.flieht = true; e.beute = k; e.v *= 1.25; e.bremse = 1; e.festT = 0; }
     text(HORT.x + zw(-30, 30), HORT.y - 30, t().klaut(k), "#c4564a", 16);
     funken(HORT.x, HORT.y - 6, 10, ["#e0a046", "#ffd34d"], 90);
@@ -1664,83 +1847,239 @@
     if (d.unbesiegbar) { if (!still && Math.random() < 0.15) funken(e.x, e.y, 3, ["#9fd6ec"], 40); return; }
     if (d.ausweichen && (art === "schuss" || art === "biss" || art === "kette") && Math.random() < d.ausweichen) { if (!still) text(e.x, e.y - 14, "!", "#c49ae0", 14, 0.6); return; }
     if (art === "feuer" && d.feuerSchwach) schaden *= 2;
+    if (e.bruchT > 0) schaden *= 1.25;
+    if (e.markT > 0 && e.flug) schaden *= 1.3;
     e.hp -= schaden; if (!still) e.treffT = 0.12;
     if (e.hp <= 0) {
       e.tot = true; A.erlegt++; S.erlegtGesamt++;
       if (d.boss && !d.unbesiegbar) { STAT.bosse[e.typ] = 1; erfolgPruefen("bosse"); }
       if (e.beute) goldZurueck(e);
+      if (e.seuche && e.giftT > 0) A.feinde.forEach(o => { if (o !== e && !o.tot && abst(o.x, o.y, e.x, e.y) < 46) { o.gift = Math.max(o.gift, e.gift); o.giftT = 3; o.seuche = true; S.blitze.push({ art: "sporenwolke", x: o.x, y: o.y, r: 16, t: 0, dauer: 0.5 }); } });
       A.punkte += d.pkt;
-      const saat = Math.round(d.pkt * 0.5) + 1;
+      const saat = Math.round(d.pkt * 0.18) + 1;
       A.saat += saat;
       if (d.boss) { text(e.x, e.y - 20, "+" + d.pkt, "#ffd34d", 22); funken(e.x, e.y, 40, ["#e0a046", "#c4564a", "#ebe2cc"], 150, 3.5); KLANG.boom(); S.beben = 0.4; }
       else { funken(e.x, e.y, 8, [d.farbe, "#ebe2cc"], 70); text(e.x, e.y - 10, "+" + saat + " 🌱", "#cfe6a8", 11, 0.9); KLANG.tod(); }
+      S.blitze.push({ art: "tod", x: e.x, y: e.y, r: e.r, t: 0, dauer: 0.45 });
     }
   }
 
+  /* Festhalten mit kurzer Unempfindlichkeit danach – sonst ließen sich Gegner endlos betäuben */
+  function festhalten(e, dauer) {
+    if (!e || e.tot) return;
+    if (e.festSperre > 0 && e.festT <= 0) { e.bremse = Math.min(e.bremse, 0.6); e.bremsT = Math.max(e.bremsT, 0.6); return; }
+    if (e.festT > 0) { e.festT = Math.max(e.festT, Math.min(dauer, e.festT + 0.2)); return; }
+    e.festT = e.d.boss ? Math.min(dauer, 0.5) : dauer; e.festSperre = e.festT + 1.6;
+  }
   function sichtbarFuer(e) { return !e.tot && !e.unsT; }
   function imKreis(x, y, r) { return S.A.feinde.filter(e => sichtbarFuer(e) && abst(x, y, e.x, e.y) <= r + e.r); }
 
+  function zielSortieren(l, T, p) {
+    const m = T.ziel || "vorne";
+    if (m === "stark") return l.slice().sort((a, b) => b.hp - a.hp);
+    if (m === "nah") return l.slice().sort((a, b) => abst(p.x, p.y, a.x, a.y) - abst(p.x, p.y, b.x, b.y));
+    return l.slice().sort((a, b) => fortschritt(b) - fortschritt(a));
+  }
+  const turmSk = () => 1 + 0.03 * Math.min(S.lv, KAMPAGNE + 10);
   function turmUpdate(p, dt) {
-    const T = p.turm, w = WACHTER[T.k], st = T.st;
+    const T = p.turm;
+    T.wachs = Math.min(1, (T.wachs || 0) + dt * 2.5);
+    if (T.tier) { tierUpdate(p, dt); return; }
+    const w = WACHTER[T.k], st = T.st, zw2 = st >= 2 ? T.zweig : null;
     T.anim = Math.max(0, (T.anim || 0) - dt);
     if (T.netz) T.netz = Math.max(0, T.netz - dt);
     if (T.ausT > 0) { T.ausT -= dt; return; }
-    T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1); if (T.cd > 0) return;
-    const reich = w.reich[st], sch = w.schaden[st] * (1 + 0.045 * Math.min(S.lv, KAMPAGNE + 10));
+    T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1) * (T._tempo || 1); if (T.cd > 0) return;
+    const reich = w.reich[st] * (T._reich || 1), sch = w.schaden[st] * turmSk();
     const ziele = imKreis(p.x, p.y, reich);
     if (!ziele.length) { T.cd = 0.1; return; }
-    const vorne = l => l.slice().sort((a, b) => fortschritt(b) - fortschritt(a));
+    const wahl = l => zielSortieren(l, T, p);
     if (w.typ === "biss" && (T.draussen || 0) > 0) { T.cd = 0.1; return; }
     T.cd = w.rate; T.anim = 0.3;
     if (w.typ === "schuss") {
-      const z = vorne(ziele)[0];
-      T.winkel = Math.atan2(z.y - (p.y - 12), z.x - p.x);
-      S.A.geschosse.push({ art: "dorn", x: p.x + Math.cos(T.winkel) * 10, y: p.y - 12 + Math.sin(T.winkel) * 10, ziel: z, schaden: sch, t: 0, w: T.winkel, st });
+      const zs = wahl(ziele).slice(0, zw2 === "b" ? 3 : 1);
+      zs.forEach((z, i) => {
+        const wi = Math.atan2(z.y - (p.y - 12), z.x - p.x); if (i === 0) T.winkel = wi;
+        S.A.geschosse.push({ art: "dorn", x: p.x + Math.cos(wi) * 10, y: p.y - 12 + Math.sin(wi) * 10, ziel: z, schaden: sch * (zw2 === "b" ? 0.75 : 1), t: 0, w: wi, st, gift: zw2 === "a" ? sch * 0.6 : 0 });
+      });
       KLANG.dorn();
     } else if (T.k === "wurzel") {
       ziele.forEach(e => {
         e.wurzelT = 2.2;
-        treffen(e, sch, "wurzel", true);
+        treffen(e, sch * (zw2 === "b" ? 2.2 : 1), "wurzel", true);
+        if (zw2 === "b") e.bruchT = 3;
         S.blitze.push({ art: "wurzelstich", x: e.x, y: e.y, t: 0, dauer: 0.55, seed: Math.random() });
         if (e.d.wurzelFest) return;
         e.bremse = Math.min(e.bremse, w.bremse[st]); e.bremsT = Math.max(e.bremsT, w.bremsT);
-        if (st === 2) e.festT = Math.max(e.festT, 0.5);
+        if (zw2 === "a") { if (e.d.boss) festhalten(e, 0.4); else festhalten(e, 1.2); }
+        else if (st >= 2) festhalten(e, 0.5);
       });
       S.blitze.push({ art: "ring", x: p.x, y: p.y + 4, r: reich, t: 0, dauer: 0.5 });
       KLANG.wurzel();
     } else if (T.k === "eis") {
-      vorne(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
+      wahl(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
         const a = -Math.PI / 2 + (i - (w.ziele[st] - 1) / 2) * 0.5;
-        S.A.geschosse.push({ art: "splitter", x: p.x + Math.cos(a) * 6, y: p.y - 16 + Math.sin(a) * 6, ziel: e, schaden: sch, bremse: w.bremse[st], bremsT: w.bremsT, t: 0, w: a, dreh: 0 });
+        S.A.geschosse.push({ art: "splitter", x: p.x + Math.cos(a) * 6, y: p.y - 16 + Math.sin(a) * 6, ziel: e, schaden: sch, bremse: w.bremse[st], bremsT: w.bremsT, t: 0, w: a, dreh: 0, frost: zw2 === "a", teilen: zw2 === "b" });
       });
       S.blitze.push({ art: "frost", x: p.x, y: p.y - 6, r: 24, t: 0, dauer: 0.35 });
       KLANG.frost();
     } else if (w.typ === "biss") {
-      ziele.sort((a, b) => abst(p.x, p.y, a.x, a.y) - abst(p.x, p.y, b.x, b.y)).slice(0, w.ziele[st]).forEach(e => {
+      const n = zw2 === "a" ? 3 : zw2 === "b" ? 1 : w.ziele[st];
+      ziele.sort((a, b) => abst(p.x, p.y, a.x, a.y) - abst(p.x, p.y, b.x, b.y)).slice(0, n).forEach(e => {
         T.draussen = (T.draussen || 0) + 1;
-        S.A.geschosse.push({ art: "wolf", x: p.x, y: p.y + 2, heim: { x: p.x, y: p.y + 2 }, reich, ziel: e, schaden: sch, zustand: "hin", turm: T, t: 0, links: e.x < p.x });
+        S.A.geschosse.push({ art: "wolf", x: p.x, y: p.y + 2, heim: { x: p.x, y: p.y + 2 }, reich, ziel: e, schaden: sch * (zw2 === "b" ? 3 : 1), zustand: "hin", turm: T, t: 0, links: e.x < p.x, alpha: zw2 === "b" });
       });
       KLANG.biss();
     } else if (w.typ === "kette") {
-      let z = vorne(ziele)[0], x0 = p.x, y0 = p.y - 30 - st * 2, s = sch;
+      let z = wahl(ziele)[0], x0 = p.x, y0 = p.y - 30 - st * 2, s = sch * (zw2 === "b" ? 3 : 1);
+      const n = zw2 === "a" ? 7 : zw2 === "b" ? 1 : w.ziele[st], abfall = zw2 === "a" ? 0.9 : 0.8;
       const gehabt = new Set();
-      for (let i = 0; i < w.ziele[st] && z; i++) {
+      for (let i = 0; i < n && z; i++) {
         gehabt.add(z);
-        S.blitze.push({ art: "blitz", x1: x0, y1: y0, x2: z.x, y2: z.y, t: 0, dauer: 0.3, seed: Math.random() });
+        S.blitze.push({ art: "blitz", x1: x0, y1: y0, x2: z.x, y2: z.y, t: 0, dauer: 0.3, seed: Math.random(), dick: zw2 === "b" });
         const gefroren = z.eisT > 0;
         treffen(z, s * (gefroren ? 1.5 : 1), "kette");
         if (gefroren) kombo(z);
-        funken(z.x, z.y, 4, ["#f3e27a", "#ffffff"], 60, 1.6);
-        x0 = z.x; y0 = z.y; s *= 0.8;
+        if (zw2 === "b" && !z.tot && !z.d.boss) festhalten(z, 0.6);
+        funken(z.x, z.y, zw2 === "b" ? 12 : 4, ["#f3e27a", "#ffffff"], 60, 1.6);
+        x0 = z.x; y0 = z.y; s *= abfall;
         z = S.A.feinde.filter(e => sichtbarFuer(e) && !gehabt.has(e) && abst(x0, y0, e.x, e.y) < 85).sort((a, b) => abst(x0, y0, a.x, a.y) - abst(x0, y0, b.x, b.y))[0];
       }
       KLANG.blitz();
     } else if (w.typ === "gift") {
-      vorne(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
+      wahl(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
         const vor = e.flug ? { x: e.x, y: e.y } : pfadPunkt(S.A.P, e.s + e.v * e.bremse * 0.55);
-        S.A.geschosse.push({ art: "spore", x0: p.x + (i - 1) * 5, y0: p.y - 10, x1: vor.x, y1: vor.y, x: p.x, y: p.y - 10, t: 0, dauer: 0.55, schaden: sch });
+        S.A.geschosse.push({ art: "spore", x0: p.x + (i - 1) * 5, y0: p.y - 10, x1: vor.x, y1: vor.y, x: p.x, y: p.y - 10, t: 0, dauer: 0.55, schaden: sch, r: zw2 === "b" ? 44 : 28, seuche: zw2 === "a", bremst: zw2 === "b" });
       });
     }
+  }
+
+  /* ---------- Tiergefährten ---------- */
+  const wild = () => 1 + 0.15 * tal("wildnis");
+  const tierMax = () => 1 + tal("tierfreund");
+  function tierPosten(p) {
+    const P = S.A.P; let best = 0, bd = 1e9;
+    for (let s = 20; s < P.gesamt - 20; s += 4) { const q = pfadPunkt(P, s), d = abst(q.x, q.y, p.x, p.y); if (d < bd) { bd = d; best = s; } }
+    const q = pfadPunkt(P, best); p.turm.postS = best; p.turm.postX = q.x; p.turm.postY = q.y;
+  }
+  function baerMaxHp(T) { return 260 * (1 + 0.14 * S.lv) * (T.st ? 1.6 : 1) * wild(); }
+  function aurenBerechnen(A) {
+    const turme = A.plaetze.filter(p => p.turm && !p.turm.tier);
+    turme.forEach(p => { p.turm._reich = 1; p.turm._tempo = 1; });
+    A.plaetze.forEach(q => {
+      const T = q.turm; if (!T || !T.tier || !(T.k === "eule" || T.k === "hirsch")) return;
+      const r = TIERE[T.k].reich[T.st];
+      turme.forEach(p => {
+        if (abst(p.x, p.y, q.x, q.y) > r) return;
+        if (T.k === "eule") p.turm._reich = Math.max(p.turm._reich, T.st ? 1.3 : 1.2);
+        else p.turm._tempo = Math.max(p.turm._tempo, T.st ? 1.4 : 1.25);
+      });
+    });
+  }
+  function baerenVorbereiten(A) {
+    A.feinde.forEach(e => { e.halt = false; e.baerBremse = false; });
+    A.plaetze.forEach(p => {
+      const T = p.turm; if (!T || !T.tier || T.k !== "baer" || T.schlafT > 0) return;
+      const cap = T.st ? 3 : 2, nah = [];
+      A.feinde.forEach(e => {
+        if (e.tot || e.flug || e.d.unbesiegbar) return;
+        const vor = e.flieht ? e.s - T.postS : T.postS - e.s;
+        if (vor < -4 || vor > 18) return;
+        if (e.d.boss) { e.baerBremse = true; nah.push(e); return; }
+        nah.push(e);
+      });
+      nah.sort((a, b) => Math.abs(a.s - T.postS) - Math.abs(b.s - T.postS));
+      T.blockiert = [];
+      nah.forEach(e => { if (e.d.boss) { T.blockiert.push(e); return; } if (T.blockiert.filter(o => !o.d.boss).length < cap) { e.halt = true; T.blockiert.push(e); } });
+    });
+  }
+  function tierUpdate(p, dt) {
+    const T = p.turm, A = S.A, sk = turmSk() * wild(), st = T.st;
+    T.anim = Math.max(0, (T.anim || 0) - dt);
+    if (T.ausT > 0) { T.ausT -= dt; return; }
+    T.faehigT -= dt * (A.barradinT > 0 ? 1.4 : 1);
+    if (T.k === "baer") {
+      const max = baerMaxHp(T); if (!T.hp) T.hp = max;
+      if (T.schlafT > 0) { T.schlafT -= dt; if (T.schlafT <= 0) { T.hp = max; text(T.postX, T.postY - 24, "🐻!", "#ebe2cc", 15); } return; }
+      const geg = (T.blockiert || []).filter(e => !e.tot);
+      if (geg.length) {
+        T.hp -= geg.reduce((a, e) => a + (4 + e.d.klau * 0.3) * (e.d.boss ? 3 : 1) * (1 + 0.08 * S.lv), 0) * dt;
+        if (T.faehigT <= 0) {
+          T.faehigT = 1.0; T.anim = 0.3;
+          geg.forEach(e => treffen(e, 40 * (st ? 1.6 : 1) * sk, "baer"));
+          S.blitze.push({ art: "prankenhieb", x: T.postX, y: T.postY, t: 0, dauer: 0.3, links: geg[0].x < T.postX });
+          KLANG.biss();
+        }
+        if (T.hp <= 0) { T.hp = 0; T.schlafT = st ? 9 : 12; text(T.postX, T.postY - 22, t().schlaeft, "#a89f8f", 13); KLANG.grummeln(); }
+      } else T.hp = Math.min(max, T.hp + max * 0.04 * dt);
+    } else if (T.k === "eule") {
+      const r = TIERE.eule.reich[st];
+      A.feinde.forEach(e => { if (!e.tot && abst(e.x, e.y, p.x, p.y) < r) { e.enthuelltT = 0.3; if (e.flug) e.markT = 0.3; } });
+    } else if (T.k === "hirsch") {
+      if (T.faehigT <= 0) {
+        const z = A.feinde.filter(e => !e.tot && !e.flug && !e.d.unbesiegbar && abst(e.x, e.y, p.x, p.y) < 85).sort((a, b) => fortschritt(b) - fortschritt(a))[0];
+        if (z) {
+          T.faehigT = st ? 7 : 10; T.anim = 0.4; T.stossX = z.x; T.stossY = z.y;
+          treffen(z, 35 * sk, "stoss");
+          if (!z.d.boss && !z.tot) { z.s = z.flieht ? z.s + 50 : Math.max(0, z.s - 55); festhalten(z, 1); }
+          S.blitze.push({ art: "stoss", x: z.x, y: z.y, x0: p.x, y0: p.y, t: 0, dauer: 0.4 });
+          KLANG.stein();
+        } else T.faehigT = 0.5;
+      }
+    } else if (T.k === "keiler") {
+      if (T.faehigT <= 0) {
+        const kommt = A.feinde.some(e => !e.tot && !e.flug && Math.abs(e.s - T.postS) < 200);
+        if (kommt) {
+          T.faehigT = st ? 7 : 9;
+          A.ansturm.push({ s: T.postS, ende: Math.max(0, T.postS - (st ? 210 : 150)), getroffen: new Set(), sch: 45 * (st ? 1.6 : 1) * sk, t: 0 });
+          KLANG.bruellen();
+        } else T.faehigT = 0.5;
+      }
+    } else if (T.k === "falke") {
+      if (T.faehigT <= 0 && !T.unterwegs) {
+        const l = A.feinde.filter(e => !e.tot && !e.d.unbesiegbar && !e.unsT);
+        const z = l.filter(e => e.beute)[0] || l.filter(e => e.flug).sort((a, b) => fortschritt(b) - fortschritt(a))[0] || l.sort((a, b) => fortschritt(b) - fortschritt(a))[0];
+        if (z) {
+          T.faehigT = st ? 3 : 4.5; T.unterwegs = true;
+          A.geschosse.push({ art: "falke", x: p.x, y: p.y - 14, heim: { x: p.x, y: p.y - 14 }, ziel: z, zustand: "hin", turm: T, t: 0, schaden: 70 * (st ? 1.5 : 1) * sk });
+          ton("sawtooth", 1500, 2400, 0.2, 0.04, 0, ["bandpass", 2000, 3]);
+        } else T.faehigT = 0.4;
+      }
+    } else if (T.k === "dachs") {
+      const max = st ? 4 : 3, meine = A.fallen.filter(f => f.T === T).length;
+      if (T.faehigT <= 0) {
+        if (meine < max) {
+          T.faehigT = st ? 5 : 7; T.anim = 0.4;
+          const s0 = klemm(T.postS + zw(-60, 60), 20, A.P.gesamt - 20), q = pfadPunkt(A.P, s0);
+          A.fallen.push({ T, s: s0, x: q.x, y: q.y, t: 0, sch: 55 * (st ? 1.5 : 1) * sk });
+          funken(q.x, q.y, 8, ["#6b4a30", "#a8783e"], 50);
+        } else T.faehigT = 1;
+      }
+    }
+  }
+  function tiereUpdate(A, dt) {
+    A.ansturm.forEach(a => {
+      a.t += dt; a.s -= 280 * dt;
+      const q = pfadPunkt(A.P, Math.max(0, a.s)); a.x = q.x; a.y = q.y; a.w = q.w;
+      A.feinde.forEach(e => {
+        if (e.tot || e.flug || a.getroffen.has(e) || abst(e.x, e.y, a.x, a.y) > 20 + e.r) return;
+        a.getroffen.add(e); treffen(e, a.sch, "keiler");
+        if (!e.tot && !e.d.boss && !e.d.unbesiegbar) { e.s = e.flieht ? e.s + 30 : Math.max(0, e.s - 40); festhalten(e, 0.5); }
+        funken(e.x, e.y, 6, ["#8a6440", "#ebe2cc"], 70);
+      });
+      if (a.s <= a.ende) a.weg = true;
+    });
+    A.ansturm = A.ansturm.filter(a => !a.weg);
+    A.fallen.forEach(f => {
+      f.t += dt;
+      const e = A.feinde.find(e => !e.tot && !e.flug && !e.d.unbesiegbar && abst(e.x, e.y, f.x, f.y) < 12 + e.r * 0.5);
+      if (!e) return;
+      f.weg = true; treffen(e, f.sch, "falle");
+      if (!e.tot) festhalten(e, e.d.boss ? 0.6 : 1.5);
+      S.blitze.push({ art: "falle", x: f.x, y: f.y, t: 0, dauer: 0.5 });
+      funken(f.x, f.y, 10, ["#6b4a30", "#a8783e", "#ebe2cc"], 80); KLANG.stein();
+    });
+    A.fallen = A.fallen.filter(f => !f.weg && (!f.T || A.plaetze.some(p => p.turm === f.T)));
   }
   const fortschritt = e => e.flieht ? (e.beute ? 5000 : 0) + (e.flug ? 1000 - abst(e.x, e.y, S.A.P.p[0].x, S.A.P.p[0].y) : S.A.P.gesamt - e.s) : e.flug ? 1000 - abst(e.x, e.y, HORT.x, HORT.y) : e.s;
 
@@ -1854,8 +2193,8 @@
 
   function turmBeschaedigen(p, durchWurf) {
     if (!p || !p.turm) return;
-    if (p.turm.st > 0) p.turm.st--; else p.turm = null;
-    funken(p.x, p.y, 12, ["#6f9a3a", "#8a6440", "#ebe2cc"], 80);
+    if (p.turm.st > 0) { p.turm.st--; if (p.turm.st < 2) p.turm.zweig = null; } else p.turm = null;
+    funken(p.x, p.y, 12, ["#6f9a3a", "#8a6440", "#ebe2cc"], 80); gartenSync();
     const A = S.A;
     A.zorn = klemm(A.zorn + 8 * zornFaktor(), 0, 100);
     if (A.zorn >= 100 && durchWurf) ausbruchAbwehr();
@@ -1904,7 +2243,7 @@
       const r = 74;
       A.feinde.filter(e => !e.tot && abst(x, y, e.x, e.y) <= r + e.r).forEach(e => {
         e.eisT = 3; treffen(e, 25 * sk, "frost", true);
-        if (e.d.boss) { e.bremse = Math.min(e.bremse, 0.5); e.bremsT = Math.max(e.bremsT, 2.5); } else e.festT = Math.max(e.festT, 2.2);
+        if (e.d.boss) { e.bremse = Math.min(e.bremse, 0.5); e.bremsT = Math.max(e.bremsT, 2.5); } else festhalten(e, 2.2);
       });
       S.blitze.push({ art: "frost", x, y, r, t: 0, dauer: 0.7 });
       funken(x, y, 34, ["#ffffff", "#cfeaf4", "#9fd6ec"], 120, 2.5);
@@ -1921,7 +2260,7 @@
         if (e.tot || e.flug) return;
         treffen(e, 35 * sk, "erde", true);
         e.bremse = Math.min(e.bremse, 0.4); e.bremsT = Math.max(e.bremsT, 3);
-        if (!e.d.boss) e.festT = Math.max(e.festT, 0.5);
+        if (!e.d.boss) festhalten(e, 0.5);
       });
       for (let i = 0; i < 7; i++) { const q = pfadPunkt(A.P, Math.random() * A.P.gesamt); S.blitze.push({ art: "riss", x: q.x, y: q.y, t: 0, dauer: 1.2, seed: Math.random() }); }
       S.beben = 0.9; KLANG.boom(); KLANG.bruellen(); vib(220);
@@ -1960,7 +2299,7 @@
       S.blitze.push({ art: "explosion", x: HORT.x, y: HORT.y - 10, r: 140, t: 0, dauer: 0.8 });
       funken(HORT.x, HORT.y, 50, ["#e0a046", "#ffd34d", "#c4564a"], 220, 4);
       const t2 = A.plaetze.filter(p => p.turm).sort((a, b) => abst(a.x, a.y, HORT.x, HORT.y) - abst(b.x, b.y, HORT.x, HORT.y))[0];
-      if (t2 && abst(t2.x, t2.y, HORT.x, HORT.y) < 150) { turmBeschaedigen(t2); text(t2.x, t2.y - 20, "🔥", "#c4564a", 18); }
+      if (t2 && abst(t2.x, t2.y, HORT.x, HORT.y) < 150) { t2.turm.ausT = Math.max(t2.turm.ausT || 0, 3); text(t2.x, t2.y - 20, "🔥", "#c4564a", 18); }
       KLANG.boom(); S.beben = 0.6;
     }
   }
@@ -1976,38 +2315,70 @@
       if (B.t - z < 0.5 && B.getroffen.has(e)) return;
       B.getroffen.set(e, B.t);
       treffen(e, sch, "baer"); funken(e.x, e.y, 6, ["#a8783e", "#ebe2cc"], 70);
-      if (!e.d.boss && !e.tot) { e.festT = Math.max(e.festT, 0.6); }
+      if (!e.d.boss && !e.tot) { festhalten(e, 0.6); }
     });
     const chance = up("sanft") ? 0 : [0.45, 0.28, 0.14][bk];
     A.plaetze.forEach(p => {
       if (!p.turm || B.geprueft.has(p) || abst(p.x, p.y, B.x, B.y) > 46) return;
       B.geprueft.add(p);
-      if (Math.random() < chance) { turmBeschaedigen(p); text(p.x, p.y - 22, "🐾", "#ebe2cc", 16); KLANG.stein(); }
+      if (Math.random() < chance) { p.turm.ausT = Math.max(p.turm.ausT || 0, 3); text(p.x, p.y - 22, "🐾", "#ebe2cc", 16); KLANG.stein(); }
     });
     if (B.s <= 0) { funken(B.x, B.y, 16, ["#a8783e", "#ebe2cc"], 80); A.baer = null; KLANG.puff(); }
   }
 
   /* Bauen */
   function wachterFrei(k) { return S.lv >= WACHTER[k].ab; }
-  function kosten(k, st) { return WACHTER[k].kosten[st]; }
+  function tierFrei(k) { return S.lv >= TIERE[k].ab; }
+  function kosten(k, st) { return Math.round(WACHTER[k].kosten[st] * (1 - 0.06 * tal("saatgut"))); }
+  function tierKosten(k, st) { return TIERE[k].kosten[st]; }
+  function tierAnzahl(k) { return S.A.plaetze.filter(p => p.turm && p.turm.tier && p.turm.k === k).length; }
+  function setzen(p, z, c) {
+    const A = S.A;
+    p.turm = turmNeu(Object.assign({ wert: c }, z));
+    if (p.turm.tier) { tierPosten(p); if (p.turm.k === "baer") p.turm.hp = baerMaxHp(p.turm); }
+    funken(p.x, p.y, 16, ["#6f9a3a", "#cfe6a8", "#ebe2cc"], 80); KLANG.bau(); vib(20);
+    A.wahl = -1; gartenSync();
+  }
   function bauen(k) {
     const A = S.A, p = A.plaetze[A.wahl]; if (!p || p.turm) return;
     const c = kosten(k, 0); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
-    A.saat -= c; p.turm = { k, st: 0, cd: 0.4, ausT: 0, wert: c, winkel: -Math.PI / 2, draussen: 0 };
-    A.bauTyp = k; schreib("imres-echohort-bautyp", k);
-    funken(p.x, p.y, 14, ["#6f9a3a", "#cfe6a8", "#ebe2cc"], 80); KLANG.bau();
-    A.wahl = -1;
+    A.saat -= c; A.bauTyp = k; schreib("imres-echohort-bautyp", k);
+    setzen(p, { k, st: 0 }, c);
   }
-  function verstaerken() {
-    const A = S.A, p = A.plaetze[A.wahl]; if (!p || !p.turm || p.turm.st >= 2) return;
-    const c = kosten(p.turm.k, p.turm.st + 1); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
-    A.saat -= c; p.turm.st++; p.turm.wert += c;
-    funken(p.x, p.y, 18, ["#e0a046", "#cfe6a8"], 90); KLANG.bau();
+  function tierBauen(k) {
+    const A = S.A, p = A.plaetze[A.wahl]; if (!p || p.turm) return;
+    if (tierAnzahl(k) >= tierMax()) { text(p.x, p.y - 20, t().maxTier, "#c4564a", 13); return; }
+    const c = tierKosten(k, 0); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
+    A.saat -= c; A.tierTyp = k;
+    setzen(p, { k, st: 0, tier: true }, c);
+  }
+  function setzlingPflanzen(i) {
+    const A = S.A, p = A.plaetze[A.wahl], G = S.garten; if (!p || p.turm || !G.setzlinge[i]) return;
+    const z = G.setzlinge[i];
+    if (z.tier && tierAnzahl(z.k) >= tierMax()) { text(p.x, p.y - 20, t().maxTier, "#c4564a", 13); return; }
+    G.setzlinge.splice(i, 1);
+    setzen(p, z, z.wert || 0);
+    if (!G.setzlinge.length) A.bauTab = "waechter";
+    A.setzWahl = 0;
+  }
+  function verstaerken(zweig) {
+    const A = S.A, p = A.plaetze[A.wahl]; if (!p || !p.turm) return;
+    const T = p.turm, max = T.tier ? 1 : TURM_MAX; if (T.st >= max) return;
+    if (!T.tier && T.st === 1 && !zweig) return;
+    const c = T.tier ? tierKosten(T.k, T.st + 1) : kosten(T.k, T.st + 1); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
+    A.saat -= c; T.st++; T.wert += c; if (zweig) T.zweig = zweig; T.wachs = 0.4;
+    if (T.tier && T.k === "baer") T.hp = baerMaxHp(T);
+    funken(p.x, p.y, 22, ["#e0a046", "#cfe6a8", "#ffd34d"], 100); KLANG.bau(); vib(25);
+    gartenSync();
+  }
+  function zielWechseln() {
+    const A = S.A, p = A.plaetze[A.wahl]; if (!p || !p.turm || p.turm.tier) return;
+    const l = ["vorne", "stark", "nah"]; p.turm.ziel = l[(l.indexOf(p.turm.ziel || "vorne") + 1) % 3]; KLANG.griff();
   }
   function ausreissen() {
     const A = S.A, p = A.plaetze[A.wahl]; if (!p || !p.turm) return;
     const n = Math.round(p.turm.wert * 0.5); A.saat += n; text(p.x, p.y - 20, "+" + n + " 🌱", "#cfe6a8", 13);
-    p.turm = null; funken(p.x, p.y, 10, ["#8a6440", "#6f9a3a"], 70); KLANG.puff(); A.wahl = -1;
+    p.turm = null; funken(p.x, p.y, 10, ["#8a6440", "#6f9a3a"], 70); KLANG.puff(); A.wahl = -1; gartenSync();
   }
 
   function abwehrTippen(p) {
@@ -2016,6 +2387,7 @@
     if (i >= 0) {
       A.wahl = A.wahl === i ? -1 : i; KLANG.griff();
       if (!A.bauTyp || !wachterFrei(A.bauTyp)) { const l = lies("imres-echohort-bautyp", "dorn"); A.bauTyp = WACHTER[l] && wachterFrei(l) ? l : "dorn"; }
+      if (S.garten.setzlinge.length) A.bauTab = "setz"; else if (A.bauTab === "setz") A.bauTab = "waechter";
       return;
     }
     if (A.wahl >= 0) { A.wahl = -1; return; }
@@ -2112,35 +2484,116 @@
   /* --- Hintergrund der Abwehr: Karte von oben mit Weg --- */
   function hintergrundAbwehr(g, P) {
     hgSchluessel = "abwehr" + g + ":" + S.lv;
-    const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(31 + g * 13 + S.lv);
+    const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(31 + g * 13);
+    const hoehle = ST.horizont === "hoehle", plaetze = (S.A && S.A.plaetze) || [];
     let gr = x.createLinearGradient(0, 0, 0, H);
     gr.addColorStop(0, F.gras); gr.addColorStop(1, F.boden[1]);
     x.fillStyle = gr; x.fillRect(0, 0, W, H);
-    for (let i = 0; i < 700; i++) { x.fillStyle = r() < 0.5 ? "rgba(0,0,0,.16)" : "rgba(235,226,204,.035)"; x.fillRect(r() * W, r() * H, 1 + r() * 2.5, 1 + r() * 2.5); }
-    // Deko je nach Gebiet
-    const deko = (n, fn) => { for (let i = 0; i < n; i++) { const px = r() * W, py = 30 + r() * (LEISTE - 40); if (abstZumPfad(P, px, py) < 26 || abst(px, py, HORT.x, HORT.y) < 50) continue; fn(px, py); } };
-    if (F.wasser) {
-      x.fillStyle = "rgba(74,160,176,.18)"; oval(x, 80, 90, 90, 50); oval(x, 330, 330, 80, 60);
-      x.strokeStyle = "rgba(159,214,236,.18)"; x.lineWidth = 1; for (let i = 0; i < 20; i++) { const wx = r() * W, wy = r() * LEISTE; x.beginPath(); x.arc(wx, wy, 6 + r() * 6, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); }
+    // weiche Bodenflecken
+    for (let i = 0; i < 26; i++) { const px = r() * W, py = r() * H, rr = 20 + r() * 50; const g2 = x.createRadialGradient(px, py, 2, px, py, rr); g2.addColorStop(0, r() < 0.5 ? "rgba(0,0,0,.16)" : "rgba(235,226,204,.05)"); g2.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g2; x.fillRect(px - rr, py - rr, rr * 2, rr * 2); }
+    for (let i = 0; i < 900; i++) { x.fillStyle = r() < 0.5 ? "rgba(0,0,0,.14)" : "rgba(235,226,204,.035)"; x.fillRect(r() * W, r() * H, 1 + r() * 2, 1 + r() * 2); }
+    const frei = (px, py, rand) => abstZumPfad(P, px, py) > (rand || 24) && abst(px, py, HORT.x, HORT.y) > 48 && plaetze.every(q => abst(q.x, q.y, px, py) > 22);
+    const deko = (n, fn, rand) => { for (let i = 0; i < n; i++) { const px = r() * W, py = 24 + r() * (LEISTE - 30); if (frei(px, py, rand)) fn(px, py); } };
+    // Gras und Blumen (nicht in Höhlen)
+    if (!hoehle && !F.wasser) {
+      deko(170, (px, py) => { x.strokeStyle = r() < 0.5 ? F.akzent : "rgba(111,154,58,.5)"; x.globalAlpha = 0.45 + r() * 0.3; x.lineWidth = 1; for (let k = 0; k < 4; k++) { x.beginPath(); x.moveTo(px + k * 1.5, py); x.lineTo(px + k * 1.5 + (r() - 0.5) * 4, py - 3 - r() * 5); x.stroke(); } x.globalAlpha = 1; }, 18);
+      const blumen = ST.knochen ? ["#8a7a9a", "#6a7a5a"] : ["#e8d8a8", "#c4564a", "#e0a046", "#b8a8e0"];
+      deko(45, (px, py) => { x.fillStyle = zufallR(r, blumen); kreis(x, px, py, 1.4); x.fillStyle = "rgba(255,240,200,.6)"; kreis(x, px, py, 0.5); }, 18);
     }
-    if (F.lava) { x.strokeStyle = "rgba(255,110,40,.4)"; x.lineWidth = 3; x.shadowColor = "#ff6a2a"; x.shadowBlur = 8; for (let i = 0; i < 4; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 50 - 25; py += r() * 50 - 25; x.lineTo(px, py); } x.stroke(); } x.shadowBlur = 0; }
-    if (ST.deko === "baeume") deko(26, (px, py) => { const h = 14 + r() * 12; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 4, py + 4, h * 0.7, h * 0.5); x.fillStyle = ST.knochen ? "#1d2a1a" : "#1f3320"; kreis(x, px, py, h * 0.7); x.fillStyle = ST.knochen ? "#26361f" : "#2b4a2a"; kreis(x, px - 3, py - 3, h * 0.45); });
-    if (ST.deko === "haeuser") deko(10, (px, py) => { x.fillStyle = "rgba(0,0,0,.3)"; x.fillRect(px - 14, py - 10, 32, 26); x.fillStyle = "#3a1f1c"; x.fillRect(px - 16, py - 13, 32, 24); x.strokeStyle = "#5a2f28"; x.lineWidth = 1; x.beginPath(); x.moveTo(px - 16, py - 1); x.lineTo(px + 16, py - 1); x.stroke(); });
-    if (F.mauer || ST.deko === "steine") deko(22, (px, py) => { x.fillStyle = F.stein; x.globalAlpha = 0.6; oval(x, px, py, 5 + r() * 8, 4 + r() * 6, r()); x.globalAlpha = 1; });
-    if (F.pilze) deko(18, (px, py) => { x.fillStyle = "rgba(196,154,224,.2)"; kreis(x, px, py, 8); x.fillStyle = "rgba(196,154,224,.65)"; kreis(x, px, py, 3); });
-    if (F.schienen) { x.strokeStyle = "rgba(138,128,112,.35)"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 60); x.lineTo(W, 120); x.moveTo(0, 66); x.lineTo(W, 126); x.stroke(); }
-    // Weg
+    if (hoehle) {
+      x.strokeStyle = "rgba(0,0,0,.3)"; x.lineWidth = 1.2;
+      for (let i = 0; i < 26; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 4; j++) { px += (r() - 0.5) * 28; py += (r() - 0.5) * 20; x.lineTo(px, py); } x.stroke(); }
+    }
+    if (F.wasser) {
+      x.fillStyle = "rgba(74,160,176,.2)"; oval(x, 70, 90, 90, 50); oval(x, 340, 330, 80, 60); oval(x, 60, 360, 50, 40);
+      x.strokeStyle = "rgba(159,214,236,.2)"; x.lineWidth = 1; for (let i = 0; i < 26; i++) { const wx = r() * W, wy = r() * LEISTE; x.beginPath(); x.arc(wx, wy, 6 + r() * 6, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); }
+      deko(30, (px, py) => { x.strokeStyle = "rgba(74,120,90,.55)"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + 3, py - 6, px - 1, py - 11); x.stroke(); }, 20);
+    }
+    if (F.lava) { x.strokeStyle = "rgba(255,110,40,.45)"; x.lineWidth = 3; x.shadowColor = "#ff6a2a"; x.shadowBlur = 10; for (let i = 0; i < 5; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 50 - 25; py += r() * 50 - 25; x.lineTo(px, py); } x.stroke(); } x.shadowBlur = 0; }
+    if (F.pilze) deko(22, (px, py) => { const g3 = x.createRadialGradient(px, py, 1, px, py, 12); g3.addColorStop(0, "rgba(196,154,224,.35)"); g3.addColorStop(1, "rgba(196,154,224,0)"); x.fillStyle = g3; kreis(x, px, py, 12); x.fillStyle = "#e8dcd0"; x.fillRect(px - 0.8, py - 1, 1.6, 4); x.fillStyle = "rgba(196,154,224,.85)"; oval(x, px, py - 1.5, 3.5, 2.2); });
+    if (F.schienen) { x.strokeStyle = "rgba(138,128,112,.45)"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 60); x.lineTo(W, 120); x.moveTo(0, 67); x.lineTo(W, 127); x.stroke(); x.strokeStyle = "rgba(90,68,48,.6)"; x.lineWidth = 2.5; for (let xx = 0; xx < W; xx += 14) { const yy = 60 + xx * 60 / W; x.beginPath(); x.moveTo(xx, yy - 2); x.lineTo(xx + 1, yy + 9); x.stroke(); } }
+    // Weg: Schatten, Grund, Staub, Spurrillen, Randsteine
     const weg = (breite, farbe) => { x.strokeStyle = farbe; x.lineWidth = breite; x.lineJoin = "round"; x.lineCap = "round"; x.beginPath(); P.p.forEach((q, i) => i ? x.lineTo(q.x, q.y) : x.moveTo(q.x, q.y)); x.stroke(); };
-    weg(36, "rgba(0,0,0,.35)"); weg(30, F.weg); weg(22, F.wasser ? "#33464f" : "rgba(235,226,204,.07)");
-    for (let i = 0; i < 160; i++) { const s = r() * P.gesamt, q = pfadPunkt(P, s); x.fillStyle = "rgba(0,0,0,.25)"; x.fillRect(q.x + r() * 20 - 10, q.y + r() * 20 - 10, 2, 2); }
-    // Eingang oben
+    weg(40, "rgba(0,0,0,.3)"); weg(32, F.weg); weg(24, F.wasser ? "#33464f" : "rgba(235,226,204,.06)"); weg(10, F.wasser ? "rgba(159,214,236,.08)" : "rgba(235,226,204,.04)");
+    const versatz = (d, fn) => { for (let s0 = 4; s0 < P.gesamt - 4; s0 += 3) { const a = pfadPunkt(P, s0), b = pfadPunkt(P, s0 + 2), w = Math.atan2(b.y - a.y, b.x - a.x); fn(a.x + Math.cos(w + Math.PI / 2) * d, a.y + Math.sin(w + Math.PI / 2) * d, s0, w); } };
+    if (!F.wasser) { x.fillStyle = "rgba(0,0,0,.14)"; versatz(6, (px, py) => x.fillRect(px - 1, py - 1, 2, 2)); versatz(-6, (px, py) => x.fillRect(px - 1, py - 1, 2, 2)); }
+    [-16.5, 16.5].forEach(d => versatz(d, (px, py, s0) => { if (s0 % 12 > 2.9) return; const rr = 2.2 + r() * 1.8; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 0.8, py + 1, rr, rr * 0.75); x.fillStyle = F.stein; oval(x, px, py, rr, rr * 0.75); x.fillStyle = "rgba(235,226,204,.14)"; oval(x, px - rr * 0.3, py - rr * 0.3, rr * 0.45, rr * 0.3); }));
+    for (let i = 0; i < 120; i++) { const s0 = r() * P.gesamt, q = pfadPunkt(P, s0); x.fillStyle = r() < 0.5 ? "rgba(0,0,0,.22)" : "rgba(235,226,204,.07)"; x.fillRect(q.x + r() * 18 - 9, q.y + r() * 18 - 9, 2, 2); }
+    // Bäume, Häuser, Felsen – nach dem Weg, damit sie darüber ragen dürfen
+    if (ST.deko === "baeume") deko(30, (px, py) => {
+      const h = 13 + r() * 11, d1 = ST.knochen ? "#1a2618" : "#1c3020", d2 = ST.knochen ? "#243520" : "#284a2a", d3 = ST.knochen ? "#30442a" : "#3a6236";
+      x.fillStyle = "rgba(0,0,0,.32)"; oval(x, px + 5, py + 6, h * 0.85, h * 0.55);
+      x.fillStyle = d1; kreis(x, px, py, h * 0.8); kreis(x, px - h * 0.45, py + h * 0.15, h * 0.5); kreis(x, px + h * 0.42, py + h * 0.2, h * 0.5);
+      x.fillStyle = d2; kreis(x, px - h * 0.12, py - h * 0.12, h * 0.6);
+      x.fillStyle = d3; kreis(x, px - h * 0.25, py - h * 0.3, h * 0.32);
+      if (ST.knochen) { x.strokeStyle = "rgba(20,14,10,.6)"; x.lineWidth = 1; x.beginPath(); x.moveTo(px, py); x.lineTo(px + h * 0.6, py - h * 0.7); x.stroke(); }
+    }, 30);
+    if (ST.deko === "haeuser") deko(9, (px, py) => {
+      x.fillStyle = "rgba(0,0,0,.35)"; x.fillRect(px - 13, py - 8, 32, 26);
+      x.fillStyle = "#4a2a22"; x.fillRect(px - 16, py - 12, 32, 24);
+      x.fillStyle = "#5e342a"; x.beginPath(); x.moveTo(px - 16, py - 12); x.lineTo(px + 16, py - 12); x.lineTo(px + 16, py); x.lineTo(px - 16, py); x.fill();
+      x.strokeStyle = "#7a4436"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(px - 16, py); x.lineTo(px + 16, py); x.stroke();
+      x.strokeStyle = "rgba(0,0,0,.25)"; x.lineWidth = 0.8; for (let k = -12; k < 16; k += 5) { x.beginPath(); x.moveTo(px + k, py - 12); x.lineTo(px + k, py + 12); x.stroke(); }
+      x.fillStyle = "#3a3632"; x.fillRect(px + 7, py - 15, 5, 6);
+      x.fillStyle = "rgba(255,200,110,.5)"; kreis(x, px - 9, py + 6, 1.6);
+    }, 34);
+    if (F.mauer || ST.deko === "steine") deko(24, (px, py) => { const rr = 4 + r() * 7; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 2, py + 2, rr, rr * 0.75); x.fillStyle = F.stein; oval(x, px, py, rr, rr * 0.75, r()); x.fillStyle = "rgba(235,226,204,.12)"; oval(x, px - rr * 0.3, py - rr * 0.3, rr * 0.5, rr * 0.3); }, 22);
+    // Steinplatten der Bauplätze
+    plaetze.forEach(q => {
+      x.fillStyle = "rgba(0,0,0,.3)"; oval(x, q.x + 1.5, q.y + 6, 19, 8);
+      x.fillStyle = "rgba(60,48,34,.7)"; oval(x, q.x, q.y + 4, 17, 8);
+      for (let k = 0; k < 9; k++) { const w = k / 9 * Math.PI * 2, sx = q.x + Math.cos(w) * 16, sy = q.y + 4 + Math.sin(w) * 7.5; x.fillStyle = k % 2 ? F.stein : "rgba(150,140,124,.9)"; oval(x, sx, sy, 3.4, 2.4); }
+      x.fillStyle = "rgba(235,226,204,.06)"; oval(x, q.x - 3, q.y + 2, 8, 3);
+    });
+    // Eingang mit Fackeln
     const st = P.p[0];
-    x.fillStyle = "rgba(0,0,0,.55)"; oval(x, st.x, st.y - 4, 26, 14);
-    // Vignette
-    gr = x.createRadialGradient(W / 2, 230, 140, W / 2, 230, 330); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.5)");
+    x.fillStyle = "rgba(0,0,0,.6)"; oval(x, st.x, st.y - 4, 26, 14);
+    [-22, 22].forEach(d => { x.fillStyle = "#3a2d20"; x.fillRect(st.x + d - 1.5, st.y - 14, 3, 14); const gl = x.createRadialGradient(st.x + d, st.y - 16, 1, st.x + d, st.y - 16, 22); gl.addColorStop(0, "rgba(255,190,90,.5)"); gl.addColorStop(1, "rgba(255,190,90,0)"); x.fillStyle = gl; kreis(x, st.x + d, st.y - 16, 22); x.fillStyle = "#ffcf7a"; kreis(x, st.x + d, st.y - 16, 2.4); });
+    // warmes Licht um den Hort, Vignette
+    let hl = x.createRadialGradient(HORT.x, HORT.y, 10, HORT.x, HORT.y, 120); hl.addColorStop(0, "rgba(255,200,110,.18)"); hl.addColorStop(1, "rgba(255,200,110,0)");
+    x.fillStyle = hl; x.fillRect(0, 0, W, H);
+    gr = x.createRadialGradient(W / 2, 240, 150, W / 2, 240, 340); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.5)");
     x.fillStyle = gr; x.fillRect(0, 0, W, H);
     hgBild = c;
   }
+  const zufallR = (r, l) => l[Math.floor(r() * l.length)];
+  /* Umgebung: Glühwürmchen, Glut, Nebel, Sporen, Blasen, fallende Blätter */
+  function ambientUpdate(A, dt) {
+    const art = GEB[A.g].stil.ambient; if (!art || ruhig) return;
+    A.ambient = A.ambient || [];
+    const ziel = art === "nebel" ? 6 : 26;
+    while (A.ambient.length < ziel) {
+      const q = { x: Math.random() * W, y: Math.random() * LEISTE, t: Math.random() * 4, ph: Math.random() * 6 };
+      if (art === "glut") { q.y = LEISTE + Math.random() * 20; q.vy = -zw(12, 30); q.vx = zw(-6, 6); }
+      if (art === "blase") { q.y = LEISTE + Math.random() * 20; q.vy = -zw(8, 18); }
+      if (art === "blatt") { q.y = -10 - Math.random() * 40; q.vy = zw(10, 18); q.vx = zw(-8, 8); q.dreh = Math.random() * 6; }
+      if (art === "spore") { q.vy = -zw(3, 8); }
+      if (art === "nebel") { q.vx = zw(4, 9) * (Math.random() < 0.5 ? -1 : 1); q.r = zw(40, 80); }
+      A.ambient.push(q);
+    }
+    A.ambient.forEach(q => {
+      q.t += dt; q.ph += dt;
+      if (art === "gluehwurm") { q.x += Math.sin(q.ph * 0.7) * 8 * dt; q.y += Math.cos(q.ph * 0.5) * 6 * dt; }
+      else if (art === "glut" || art === "blase" || art === "spore") { q.y += q.vy * dt; q.x += (q.vx || Math.sin(q.ph) * 5) * dt; if (q.y < -10) q.weg = true; }
+      else if (art === "blatt") { q.y += q.vy * dt; q.x += (q.vx + Math.sin(q.ph * 1.5) * 12) * dt; q.dreh += dt * 2; if (q.y > LEISTE + 10) q.weg = true; }
+      else if (art === "nebel") { q.x += q.vx * dt; if (q.x < -100 || q.x > W + 100) q.weg = true; }
+    });
+    A.ambient = A.ambient.filter(q => !q.weg);
+  }
+  function ambientMalen(x, A, zeit) {
+    const art = GEB[A.g].stil.ambient; if (!art || !A.ambient) return;
+    x.save();
+    A.ambient.forEach(q => {
+      if (art === "gluehwurm") { const a = 0.35 + Math.sin(q.ph * 3) * 0.35; if (a <= 0) return; const g = x.createRadialGradient(q.x, q.y, 0, q.x, q.y, 6); g.addColorStop(0, "rgba(230,255,140," + a + ")"); g.addColorStop(1, "rgba(230,255,140,0)"); x.fillStyle = g; kreis(x, q.x, q.y, 6); }
+      else if (art === "glut") { x.fillStyle = "rgba(255," + (120 + Math.floor(Math.sin(q.ph * 5) * 60)) + ",40," + (0.5 + Math.sin(q.ph * 4) * 0.3) + ")"; kreis(x, q.x, q.y, 1.4); }
+      else if (art === "blase") { x.strokeStyle = "rgba(190,230,245,.45)"; x.lineWidth = 0.8; x.beginPath(); x.arc(q.x, q.y, 1.8 + (q.ph % 2), 0, Math.PI * 2); x.stroke(); }
+      else if (art === "spore") { x.fillStyle = "rgba(196,154,224," + (0.3 + Math.sin(q.ph * 2) * 0.25) + ")"; kreis(x, q.x, q.y, 1.6); }
+      else if (art === "blatt") { x.save(); x.translate(q.x, q.y); x.rotate(q.dreh); x.fillStyle = "rgba(200,120,50,.75)"; oval(x, 0, 0, 3, 1.6); x.restore(); }
+      else if (art === "nebel") { const g = x.createRadialGradient(q.x, q.y, 4, q.x, q.y, q.r); g.addColorStop(0, "rgba(200,200,220,.09)"); g.addColorStop(1, "rgba(200,200,220,0)"); x.fillStyle = g; oval(x, q.x, q.y, q.r, q.r * 0.5); }
+    });
+    x.restore();
+  }
+
 
   /* --- Echo und seine Gestalten (nach Echos Bild: weißes Gewand, weißes Haar, dunkles Geweih) --- */
   function malEcho(x, cx, cy, s, form, zorn, zeit) {
@@ -2537,7 +2990,7 @@
       // Kopf: Dornenschote, die zum Ziel zeigt
       const wink = T ? T.winkel : -Math.PI / 2.4;
       x.save(); x.translate(0, -12); x.rotate(wink); x.translate(-an * 4, 0);
-      if (st === 2) for (let i = 0; i < 6; i++) blatt(x, -2, 0, i * 1.047 + zeit * 0.4, 9, 3.5, i % 2 ? "#c4564a" : "#9b3a2f");
+      if (st >= 2) for (let i = 0; i < 6; i++) blatt(x, -2, 0, i * 1.047 + zeit * 0.4, 9, 3.5, i % 2 ? "#c4564a" : "#9b3a2f");
       const g = x.createLinearGradient(-8, -6, 8, 6); g.addColorStop(0, "#7da84a"); g.addColorStop(1, "#2f4a1c");
       x.fillStyle = g; oval(x, 0, 0, 9 + st, 6 + st * 0.5);
       x.fillStyle = "#cfe6a8";
@@ -2561,7 +3014,7 @@
       x.fillStyle = an > 0 ? "#d8a868" : "#b08c64"; oval(x, 0, -11, 8, 3.6);
       x.strokeStyle = "rgba(90,63,38,.8)"; x.lineWidth = 0.8; for (let r = 2; r < 8; r += 2.2) { x.beginPath(); x.ellipse(0, -11, r, r * 0.45, 0, 0, Math.PI * 2); x.stroke(); }
       if (st >= 1) { x.strokeStyle = "#4d6b35"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(5, -12); x.lineTo(7, -19); x.stroke(); blatt(x, 7, -18, -0.6, 7, 2.6, "#6f9a3a"); blatt(x, 6.5, -16, -2.4, 6, 2.4, "#5f8a3e"); }
-      if (st === 2) { x.save(); x.shadowColor = "#e0a046"; x.shadowBlur = 6; x.fillStyle = "#e0a046"; x.fillRect(-5, -6, 1.6, 5); x.fillRect(-2, -3, 3.5, 1.4); x.fillRect(2, -7, 1.6, 6); x.restore(); }
+      if (st >= 2) { x.save(); x.shadowColor = "#e0a046"; x.shadowBlur = 6; x.fillStyle = "#e0a046"; x.fillRect(-5, -6, 1.6, 5); x.fillRect(-2, -3, 3.5, 1.4); x.fillRect(2, -7, 1.6, 6); x.restore(); }
     } else if (k === "wolf") {
       x.fillStyle = "rgba(0,0,0,.42)"; oval(x, 2, 9, 20, 7);
       // Felshügel mit Höhle
@@ -2575,7 +3028,7 @@
         const blink = Math.sin(zeit * 1.3 + (T ? T.winkel || 0 : 0)) > 0.96 ? 0.2 : 1;
         x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 6; x.fillStyle = "#ffd34d";
         oval(x, -2.5, 0, 1.4, 1.4 * blink); oval(x, 2.5, 0, 1.4, 1.4 * blink);
-        if (st === 2) { oval(x, -3.5, 4.5, 1.1, 1.1 * blink); oval(x, 0.5, 4.5, 1.1, 1.1 * blink); }
+        if (st >= 2) { oval(x, -3.5, 4.5, 1.1, 1.1 * blink); oval(x, 0.5, 4.5, 1.1, 1.1 * blink); }
         x.restore();
       }
       x.strokeStyle = "#ebe2cc"; x.lineWidth = 1.6; x.beginPath(); x.moveTo(-14, 9); x.lineTo(-9, 7); x.stroke(); x.fillStyle = "#ebe2cc"; kreis(x, -14, 9, 1.2); kreis(x, -9, 7, 1.2);
@@ -2584,7 +3037,7 @@
       x.fillStyle = "rgba(207,234,244,.35)"; oval(x, 0, 5, 17, 8);
       x.strokeStyle = "rgba(159,214,236,.8)"; x.lineWidth = 1.4; x.beginPath(); x.ellipse(0, 5, 17, 8, 0, 0, Math.PI * 2); x.stroke();
       x.save(); if (an > 0) { x.shadowColor = "#cfeaf4"; x.shadowBlur = 14 * an; }
-      if (st === 2) { kristall(x, -12, 6, -0.7, 7, 2.6, an); kristall(x, 12, 6, 0.7, 7, 2.6, an); }
+      if (st >= 2) { kristall(x, -12, 6, -0.7, 7, 2.6, an); kristall(x, 12, 6, 0.7, 7, 2.6, an); }
       kristall(x, -7, 6, -0.38, 12 + st * 2, 3.4, an);
       kristall(x, 7, 6, 0.38, 13 + st * 2, 3.4, an);
       kristall(x, 0, 6, 0, 20 + st * 4, 4.6, an);
@@ -2603,7 +3056,7 @@
       if (an > 0 || Math.sin(zeit * 3.7) > 0.93) {
         x.strokeStyle = "#fff6b0"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(1, wy + 4); x.lineTo(-1.5, wy + 8); x.lineTo(1.5, wy + 9); x.lineTo(-1, wy + 13); x.stroke();
       }
-      if (st === 2) { x.strokeStyle = "rgba(224,160,70,.8)"; x.lineWidth = 1; x.beginPath(); x.ellipse(0, -2, 6, 2, 0, 0, Math.PI * 2); x.stroke(); }
+      if (st >= 2) { x.strokeStyle = "rgba(224,160,70,.8)"; x.lineWidth = 1; x.beginPath(); x.ellipse(0, -2, 6, 2, 0, 0, Math.PI * 2); x.stroke(); }
     } else if (k === "pilz") {
       x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 2, 9, 18, 6);
       x.fillStyle = "rgba(196,154,224," + (0.12 + Math.sin(zeit * 2) * 0.05) + ")"; oval(x, 0, 5, 18, 9);
@@ -2623,22 +3076,185 @@
     }
     x.restore();
   }
-  function malWachter(x, p, zeit, gewaehlt) {
-    const T = p.turm, w = WACHTER[T.k], st = T.st;
-    x.save(); x.translate(p.x, p.y);
-    if (gewaehlt) {
-      x.strokeStyle = "rgba(224,160,70,.6)"; x.fillStyle = "rgba(224,160,70,.08)"; x.lineWidth = 1.2; x.beginPath(); x.arc(0, 0, w.reich[st], 0, Math.PI * 2); x.fill(); x.stroke();
-      if (st < 2) { x.strokeStyle = "rgba(207,230,168,.55)"; x.setLineDash([4, 4]); x.beginPath(); x.arc(0, 0, w.reich[st + 1], 0, Math.PI * 2); x.stroke(); x.setLineDash([]); }
+  /* --- Tiergefährten --- */
+  function malBaerFigur(x, zeit, schlaf, hieb, links) {
+    x.save(); if (!links) x.scale(-1, 1);
+    const atem = Math.sin(zeit * 2) * 0.6;
+    x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 0, 10, 16, 4);
+    if (schlaf) {
+      x.fillStyle = "#5a3e22"; oval(x, 0, 4 - atem * 0.5, 15, 8 + atem * 0.5); x.fillStyle = "#6b4a2a"; kreis(x, -11, 4, 6.5);
+      x.fillStyle = "#5a3e22"; kreis(x, -14, -1, 2.4); kreis(x, -8, -1.5, 2.4); x.fillStyle = "#c9a878"; oval(x, -15.5, 6, 3, 2.2);
+      x.strokeStyle = "#2a1c12"; x.lineWidth = 1; x.beginPath(); x.arc(-12, 3.5, 1.4, 0.2, Math.PI - 0.2); x.stroke();
+      x.restore(); return;
     }
-    malTurm(x, T.k, st, T, zeit);
+    x.fillStyle = "#4a3220"; x.fillRect(4, 2, 4.5, 8); x.fillRect(-7, 2, 4.5, 8);
+    x.fillStyle = "#6b4a2a"; oval(x, 1, -2 - atem, 13, 9 + atem);
+    x.fillStyle = "#7d5a34"; oval(x, -2, -5 - atem, 9, 6);
+    x.fillStyle = "#4a3220"; x.fillRect(-1, 2, 4.5, 8); x.fillRect(9, 2, 4, 8);
+    x.save(); x.translate(-10, -7 - atem); if (hieb) x.rotate(-0.3);
+    x.fillStyle = "#6b4a2a"; kreis(x, 0, 0, 6.5); x.fillStyle = "#5a3e22"; kreis(x, -3, -5.5, 2.4); kreis(x, 3.5, -5.5, 2.4);
+    x.fillStyle = "#c9a878"; oval(x, -5, 1.6, 3.4, 2.6); x.fillStyle = "#1a1210"; kreis(x, -7.6, 1, 1); kreis(x, -2.6, -1.5, 0.9);
+    x.restore();
+    if (hieb) { x.strokeStyle = "#6b4a2a"; x.lineWidth = 4; x.lineCap = "round"; x.beginPath(); x.moveTo(-6, -2); x.lineTo(-16, -12); x.stroke(); x.strokeStyle = "#ebe2cc"; x.lineWidth = 1; for (let i = -1; i <= 1; i++) { x.beginPath(); x.moveTo(-16, -12 + i * 2); x.lineTo(-19, -14 + i * 3); x.stroke(); } }
+    x.restore();
+  }
+  function malTierFigur(x, k, st, T, zeit) {
+    const an = T ? (T.anim || 0) / 0.3 : 0, sk = 1 + 0.1 * st;
+    x.save(); x.scale(sk, sk);
+    if (k === "baer") {
+      // Höhle am Bauplatz – der Bär selbst steht am Weg
+      x.fillStyle = "rgba(0,0,0,.4)"; oval(x, 2, 9, 19, 6);
+      const g = x.createLinearGradient(0, -14, 0, 8); g.addColorStop(0, "#8a847a"); g.addColorStop(1, "#4a4640");
+      x.fillStyle = g; x.beginPath(); x.moveTo(-18, 8); x.lineTo(-13, -5); x.lineTo(-4, -12); x.lineTo(6, -11); x.lineTo(14, -4); x.lineTo(18, 8); x.closePath(); x.fill();
+      x.fillStyle = "#14110e"; x.beginPath(); x.moveTo(-7, 8); x.quadraticCurveTo(-7, -4, 0, -4); x.quadraticCurveTo(7, -4, 7, 8); x.closePath(); x.fill();
+      if (!T) malBaerFigur(x, zeit, false, false, true);
+      else { x.fillStyle = "#6b4a2a"; x.font = "10px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("🐾", 0, 3); }
+      if (st) { x.fillStyle = "#3d6a32"; oval(x, -12, -6, 5, 2); oval(x, 10, -6, 4, 2); }
+    } else if (k === "eule") {
+      x.fillStyle = "rgba(0,0,0,.4)"; oval(x, 2, 9, 14, 5);
+      let g = x.createLinearGradient(-7, 0, 7, 0); g.addColorStop(0, "#4a3220"); g.addColorStop(0.5, "#7a5638"); g.addColorStop(1, "#3b2818");
+      x.fillStyle = g; x.fillRect(-7, -2, 14, 10); x.fillStyle = "#a8835c"; oval(x, 0, -2, 7, 2.6);
+      const neig = Math.sin(zeit * 0.9) * 0.25;
+      x.save(); x.translate(0, -12);
+      x.fillStyle = "#8a6a3a"; oval(x, 0, 0, 8, 10);
+      x.fillStyle = "#e0cca0"; oval(x, 0, 3, 5.5, 6.5);
+      x.strokeStyle = "#8a6a3a"; x.lineWidth = 0.8; for (let i = 0; i < 3; i++) { x.beginPath(); x.moveTo(-2.5, 1 + i * 2.6); x.lineTo(0, 2.4 + i * 2.6); x.lineTo(2.5, 1 + i * 2.6); x.stroke(); }
+      x.rotate(neig);
+      x.fillStyle = "#8a6a3a"; kreis(x, 0, -9, 7);
+      x.beginPath(); x.moveTo(-6, -13); x.lineTo(-7.5, -19); x.lineTo(-3, -14); x.fill(); x.beginPath(); x.moveTo(6, -13); x.lineTo(7.5, -19); x.lineTo(3, -14); x.fill();
+      x.fillStyle = "#efe2c4"; oval(x, -3, -9, 3.6, 3.4); oval(x, 3, -9, 3.6, 3.4);
+      x.save(); if (an > 0 || st) { x.shadowColor = "#ffd34d"; x.shadowBlur = 6; } x.fillStyle = "#ffcf3a"; kreis(x, -3, -9, 2.2); kreis(x, 3, -9, 2.2); x.restore();
+      const blink = Math.sin(zeit * 0.7) > 0.97 ? 0.2 : 1;
+      x.fillStyle = "#1a1210"; oval(x, -3, -9, 1.1, 1.1 * blink); oval(x, 3, -9, 1.1, 1.1 * blink);
+      x.fillStyle = "#c98a3a"; x.beginPath(); x.moveTo(-1.2, -7); x.lineTo(0, -4.5); x.lineTo(1.2, -7); x.fill();
+      x.restore();
+    } else if (k === "hirsch") {
+      x.fillStyle = "rgba(0,0,0,.4)"; oval(x, 1, 10, 15, 4);
+      const nick = T && T.anim > 0 ? 0.5 : Math.sin(zeit * 1.1) * 0.08;
+      x.strokeStyle = "#5a3a20"; x.lineWidth = 2; x.lineCap = "round";
+      [[-7, 0], [-4, 0], [5, 0], [8, 0]].forEach(([lx]) => { x.beginPath(); x.moveTo(lx, 0); x.lineTo(lx + (lx < 0 ? -0.5 : 0.5), 10); x.stroke(); });
+      x.fillStyle = "#a8703a"; oval(x, 1, -3, 11, 5.5);
+      x.fillStyle = "#f1e7cf"; oval(x, 11, -4, 2.4, 2.8); oval(x, 1, 0, 7, 2);
+      x.save(); x.translate(-8, -6); x.rotate(-0.6 + nick);
+      x.fillStyle = "#a8703a"; x.fillRect(-2.5, -9, 5, 10);
+      x.translate(0, -10); x.rotate(0.6);
+      x.fillStyle = "#b07a40"; oval(x, -3, 0, 5, 3.4); x.fillStyle = "#2a1c12"; kreis(x, -7, 0.4, 1); kreis(x, -3, -1, 0.8);
+      x.strokeStyle = "#4a3220"; x.lineWidth = 1.4;
+      const g = 1 + st * 0.25;
+      x.beginPath(); x.moveTo(0, -2); x.lineTo(2 * g, -10 * g); x.moveTo(1.2 * g, -6 * g); x.lineTo(5 * g, -8 * g); x.moveTo(1.8 * g, -9 * g); x.lineTo(-1 * g, -13 * g);
+      x.moveTo(-1, -2); x.lineTo(-3 * g, -9 * g); x.moveTo(-2.2 * g, -6 * g); x.lineTo(-6 * g, -7 * g); x.stroke();
+      if (st) { x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 6; x.fillStyle = "#ffd34d"; kreis(x, 2 * g, -10 * g, 1); kreis(x, -1 * g, -13 * g, 1); x.restore(); }
+      x.restore();
+    } else if (k === "keiler") {
+      x.fillStyle = "rgba(0,0,0,.4)"; oval(x, 1, 9, 15, 4);
+      const schnaub = Math.sin(zeit * 3) * 0.5;
+      x.fillStyle = "#2a1c12"; x.fillRect(-8, 2, 3, 6); x.fillRect(5, 2, 3, 6); x.fillRect(-4, 3, 3, 5); x.fillRect(8, 3, 3, 5);
+      x.fillStyle = "#4a3424"; oval(x, 1, -1, 12, 7);
+      x.fillStyle = "#3a2618"; for (let i = 0; i < 6; i++) { x.beginPath(); x.moveTo(-6 + i * 3.4, -6); x.lineTo(-4.5 + i * 3.4, -10 - (i % 2) * 1.5); x.lineTo(-3 + i * 3.4, -6); x.fill(); }
+      x.fillStyle = "#5a4030"; oval(x, -10, 0, 6, 5);
+      x.fillStyle = "#8a6440"; oval(x, -15 + schnaub * 0.3, 2, 3, 2.6);
+      x.fillStyle = "#1a1210"; kreis(x, -16, 1.6, 0.6); kreis(x, -14.5, 2.4, 0.6);
+      x.fillStyle = "#f1e7cf"; x.beginPath(); x.moveTo(-13, 3); x.quadraticCurveTo(-15, -1, -12.5, -2); x.lineTo(-12.2, 2.5); x.fill();
+      x.fillStyle = "#c4564a"; kreis(x, -9.5, -2, 0.9);
+      x.fillStyle = "#3a2618"; x.beginPath(); x.moveTo(-8, -4); x.lineTo(-6, -8); x.lineTo(-5, -4); x.fill();
+      if (st) { x.strokeStyle = "#e0a046"; x.lineWidth = 1; x.beginPath(); x.moveTo(-2, -2); x.lineTo(6, -2); x.stroke(); }
+    } else if (k === "falke") {
+      x.fillStyle = "rgba(0,0,0,.4)"; oval(x, 1, 9, 10, 3.5);
+      x.fillStyle = "#5a3a20"; x.fillRect(-1.5, -6, 3, 15); x.fillRect(-7, -7, 14, 2.5);
+      if (!T || !T.unterwegs) {
+        x.save(); x.translate(0, -14);
+        x.fillStyle = "#5a6a7a"; oval(x, 0, 0, 5.5, 8);
+        x.fillStyle = "#efe2c4"; oval(x, -1, 2, 3.5, 5.5);
+        x.strokeStyle = "#8a6a4a"; x.lineWidth = 0.7; for (let i = 0; i < 3; i++) { x.beginPath(); x.moveTo(-2.5, 0 + i * 2.4); x.lineTo(0, 1 + i * 2.4); x.stroke(); }
+        x.fillStyle = "#3a4450"; kreis(x, 0, -8, 4.2); x.fillStyle = "#efe2c4"; oval(x, -1.6, -6.6, 2, 1.6);
+        x.fillStyle = "#e0b030"; x.beginPath(); x.moveTo(-3.6, -8); x.lineTo(-6.4, -6.8); x.lineTo(-3.6, -6.2); x.fill();
+        x.fillStyle = "#1a1210"; kreis(x, -1.8, -8.6, 0.9);
+        x.fillStyle = "#e0b030"; x.fillRect(-2, 7.5, 1.2, 1.8); x.fillRect(1, 7.5, 1.2, 1.8);
+        x.fillStyle = "#3a4450"; x.beginPath(); x.moveTo(1, 5); x.lineTo(3.5, 12); x.lineTo(-1, 9); x.fill();
+        if (st) { x.strokeStyle = "#ffd34d"; x.lineWidth = 0.8; x.beginPath(); x.arc(0, -8, 5.5, 3.6, 5.8); x.stroke(); }
+        x.restore();
+      }
+    } else if (k === "dachs") {
+      x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 1, 8, 17, 5);
+      x.fillStyle = "#4a3828"; oval(x, 0, 4, 16, 7); x.fillStyle = "#14110e"; oval(x, 0, 4, 7.5, 4);
+      const guck = T && T.anim > 0 ? -5 : -1.5 + Math.sin(zeit * 1.3) * 1.2;
+      x.save(); x.beginPath(); x.rect(-10, -16, 20, 20 + 2); x.clip();
+      x.fillStyle = "#8a8478"; oval(x, 0, 4 + guck, 6.5, 6);
+      x.fillStyle = "#f1ece0"; oval(x, 0, 1 + guck, 4.6, 5.4);
+      x.fillStyle = "#1a1612"; x.fillRect(-2.8, -4 + guck, 1.8, 8); x.fillRect(1, -4 + guck, 1.8, 8);
+      x.fillStyle = "#1a1210"; kreis(x, 0, 6 + guck, 1.2);
+      x.fillStyle = "#e8e2d6"; kreis(x, -1.9, 0.5 + guck, 0.6); kreis(x, 1.9, 0.5 + guck, 0.6);
+      x.restore();
+      if (st) { x.fillStyle = "#a8783e"; for (let i = 0; i < 3; i++) kreis(x, -13 + i * 2.5, 7 - i, 1.2); }
+    }
+    x.restore();
+  }
+  function malWachter(x, p, zeit, gewaehlt) {
+    const T = p.turm, st = T.st;
+    x.save(); x.translate(p.x, p.y);
+    if (T.tier) {
+      const r = TIERE[T.k].reich ? TIERE[T.k].reich[st] : 0;
+      if (r && gewaehlt) { x.strokeStyle = "rgba(224,160,70,.6)"; x.fillStyle = "rgba(224,160,70,.08)"; x.lineWidth = 1.2; x.beginPath(); x.arc(0, 0, r, 0, Math.PI * 2); x.fill(); x.stroke(); }
+      else if (r) { x.strokeStyle = "rgba(" + (T.k === "eule" ? "255,211,77" : "207,230,168") + ",.16)"; x.setLineDash([2, 6]); x.lineWidth = 1; x.beginPath(); x.arc(0, 0, r, 0, Math.PI * 2); x.stroke(); x.setLineDash([]); }
+      if (gewaehlt && TIERE[T.k].pfad && T.postX != null) { x.strokeStyle = "rgba(224,160,70,.6)"; x.setLineDash([3, 3]); x.beginPath(); x.moveTo(0, 0); x.lineTo(T.postX - p.x, T.postY - p.y); x.stroke(); x.setLineDash([]); }
+    } else if (gewaehlt) {
+      const w = WACHTER[T.k], rf = T._reich || 1;
+      x.strokeStyle = "rgba(224,160,70,.6)"; x.fillStyle = "rgba(224,160,70,.08)"; x.lineWidth = 1.2; x.beginPath(); x.arc(0, 0, w.reich[st] * rf, 0, Math.PI * 2); x.fill(); x.stroke();
+      if (st < 2) { x.strokeStyle = "rgba(207,230,168,.55)"; x.setLineDash([4, 4]); x.beginPath(); x.arc(0, 0, w.reich[st + 1] * rf, 0, Math.PI * 2); x.stroke(); x.setLineDash([]); }
+    }
+    const wachs = T.wachs == null ? 1 : T.wachs, el = wachs >= 1 ? 1 : 1 - Math.pow(1 - wachs, 3) * Math.cos(wachs * 9);
+    x.save(); x.scale(el, el);
+    if (T.tier) malTierFigur(x, T.k, st, T, zeit); else malTurm(x, T.k, st, T, zeit);
+    x.restore();
+    if (T.zweig && !T.tier) {
+      const zs = { dorn: { a: "🧪", b: "🌵" }, wurzel: { a: "🪢", b: "🗡️" }, wolf: { a: "🐺", b: "👑" }, eis: { a: "🧊", b: "❄️" }, blitz: { a: "⛈️", b: "💥" }, pilz: { a: "☠️", b: "🍄" } }[T.k][T.zweig];
+      x.fillStyle = "rgba(9,8,15,.75)"; kreis(x, 13, -18, 7); x.strokeStyle = "#ffd34d"; x.lineWidth = 1; x.beginPath(); x.arc(13, -18, 7, 0, Math.PI * 2); x.stroke();
+      x.font = "9px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(zs, 13, -17.5);
+    }
     if (S.A && S.A.barradinT > 0) { x.font = "700 11px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#e0a046"; x.fillText("♪", 12, -24 + Math.sin(zeit * 6 + p.x) * 3); }
-    for (let i = 0; i < 3; i++) { x.fillStyle = i <= st ? "#e0a046" : "rgba(235,226,204,.18)"; kreis(x, -6 + i * 6, 17, 2); }
+    const stufen = T.tier ? 2 : 4;
+    if (!T.tier && st >= 3) { x.save(); x.globalAlpha = 0.35 + Math.sin(zeit * 2.5) * 0.15; x.strokeStyle = "#ffd34d"; x.lineWidth = 1.5; x.beginPath(); x.ellipse(0, 5, 19, 8.5, 0, 0, Math.PI * 2); x.stroke(); x.restore(); }
+    for (let i = 0; i < stufen; i++) { x.fillStyle = i <= st ? "#e0a046" : "rgba(235,226,204,.18)"; kreis(x, -(stufen - 1) * 3 + i * 6, 17, 2); }
     if (T.ausT > 0) {
       x.fillStyle = "rgba(20,20,24,.5)"; kreis(x, 0, -4, 19);
       if (T.netz) { x.strokeStyle = "rgba(235,226,204,.85)"; x.lineWidth = 0.8; for (let a = 0; a < 6; a++) { x.beginPath(); x.moveTo(0, -4); x.lineTo(Math.cos(a) * 20, -4 + Math.sin(a) * 20); x.stroke(); } x.beginPath(); x.arc(0, -4, 8, 0, 7); x.stroke(); x.beginPath(); x.arc(0, -4, 15, 0, 7); x.stroke(); }
       else { x.fillStyle = "#ebe2cc"; x.font = "11px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("💤", 10, -20); }
     }
     x.restore();
+  }
+
+  /* --- Tiere im Einsatz: Bär am Weg, Ansturm des Keilers, Fallen, Falke --- */
+  function malFallen(x, A, zeit) {
+    A.fallen.forEach(f => {
+      x.save(); x.translate(f.x, f.y);
+      x.fillStyle = "rgba(20,14,8,.75)"; oval(x, 0, 2, 7, 3.4);
+      x.strokeStyle = "#a8835c"; x.lineWidth = 1.2; for (let i = -2; i <= 2; i++) { x.beginPath(); x.moveTo(i * 2.4, 3); x.lineTo(i * 2.6, -2 - Math.abs(i) * 0.3); x.stroke(); }
+      x.fillStyle = "rgba(111,154,58,.7)"; oval(x, -5, 0, 2.4, 1); oval(x, 5, 1, 2.4, 1);
+      x.restore();
+    });
+  }
+  function malTierEinsatz(x, A, zeit) {
+    A.plaetze.forEach(p => {
+      const T = p.turm; if (!T || !T.tier || T.k !== "baer" || T.postX == null) return;
+      x.save(); x.translate(T.postX, T.postY - 2);
+      malBaerFigur(x, zeit, T.schlafT > 0, T.anim > 0, (T.blockiert && T.blockiert[0] ? T.blockiert[0].x < T.postX : p.x > T.postX));
+      x.restore();
+      if (T.schlafT > 0) { x.font = "700 11px " + FONT_B; x.fillStyle = "rgba(235,226,204,.75)"; x.textAlign = "center"; x.fillText("z", T.postX + 8, T.postY - 14 - (zeit * 10 % 12)); }
+      else {
+        const max = baerMaxHp(T), u = klemm((T.hp || max) / max, 0, 1);
+        x.fillStyle = "rgba(0,0,0,.6)"; x.fillRect(T.postX - 12, T.postY - 22, 24, 4);
+        x.fillStyle = u > 0.35 ? "#8ac24a" : "#c4564a"; x.fillRect(T.postX - 11, T.postY - 21, 22 * u, 2);
+      }
+    });
+    A.ansturm.forEach(a => {
+      x.save(); x.translate(a.x, a.y); x.rotate((a.w || 0) + Math.PI);
+      x.fillStyle = "rgba(168,120,62,.25)"; oval(x, 14, 0, 16, 5);
+      x.rotate(-((a.w || 0) + Math.PI)); x.scale(1.1, 1.1);
+      const links = Math.cos(a.w || 0) > 0;
+      x.save(); if (!links) x.scale(-1, 1); malTierFigur(x, "keiler", 0, null, a.t * 3); x.restore();
+      x.restore();
+      if (Math.random() < 0.5) S.teilchen.push({ x: a.x + zw(-6, 6), y: a.y + 6, vx: zw(-20, 20), vy: -20, t: 0, dauer: 0.4, farbe: "#8a6440", gr: 2.5 });
+    });
   }
 
   /* --- Zauber im Bild --- */
@@ -2785,7 +3401,7 @@
       x.restore();
       if (Math.random() < 0.4) S.teilchen.push({ x: g.x, y: g.y, vx: (Math.random() - 0.5) * 20, vy: -30, t: 0, dauer: 0.5, farbe: "#c49ae0", gr: 2 });
     } else if (g.art === "wolf") {
-      malWolf(x, g.x, g.y, g.links, zeit * (g.zustand === "hin" ? 1 : 0.8), g.zustand === "hin");
+      malWolf(x, g.x, g.y, g.links, zeit * (g.zustand === "hin" ? 1 : 0.8), g.zustand === "hin", null, g.alpha ? 1.7 : 1);
     }
   }
   const WOLF_FARBEN = { bein: "#6a655c", koerper: "#8a847a", schwanz: "#6a655c", kopf: "#a8a296", ohr: "#6a655c" };
@@ -2848,7 +3464,7 @@
         x.fillStyle = g; kreis(x, b.x, b.y, b.r * (0.5 + u * 0.6));
       } else if (b.art === "blitz") {
         const r = lcg(Math.floor(b.seed * 1e6) + Math.floor(zeit * 30));
-        x.strokeStyle = "rgba(243,226,122," + a + ")"; x.lineWidth = 2.5; x.shadowColor = "#f3e27a"; x.shadowBlur = 10;
+        x.strokeStyle = "rgba(243,226,122," + a + ")"; x.lineWidth = b.dick ? 5 : 2.5; x.shadowColor = "#f3e27a"; x.shadowBlur = b.dick ? 18 : 10;
         x.beginPath(); x.moveTo(b.x1, b.y1);
         for (let i = 1; i < 7; i++) { const v = i / 7; x.lineTo(b.x1 + (b.x2 - b.x1) * v + (r() - 0.5) * 16, b.y1 + (b.y2 - b.y1) * v + (r() - 0.5) * 16); }
         x.lineTo(b.x2, b.y2); x.stroke();
@@ -2869,6 +3485,17 @@
           const ox = (i - 1) * 6 + (r() - 0.5) * 2, hh = h * (0.7 + r() * 0.5);
           x.fillStyle = "#6b4a30"; x.beginPath(); x.moveTo(b.x + ox - 2.6, b.y + 5); x.quadraticCurveTo(b.x + ox - 1, b.y + 5 - hh * 0.6, b.x + ox + (i - 1) * 2, b.y + 5 - hh); x.lineTo(b.x + ox + 2.6, b.y + 5); x.fill();
         }
+      } else if (b.art === "tod") {
+        x.strokeStyle = "rgba(235,226,204," + a * 0.6 + ")"; x.lineWidth = 1.5; x.beginPath(); x.arc(b.x, b.y, b.r + u * 14, 0, Math.PI * 2); x.stroke();
+        x.fillStyle = "rgba(20,16,12," + a * 0.35 + ")"; kreis(x, b.x, b.y - u * 8, b.r * (1 - u * 0.5));
+      } else if (b.art === "prankenhieb") {
+        x.strokeStyle = "rgba(255,240,220," + a + ")"; x.lineWidth = 2; x.lineCap = "round";
+        for (let i = -1; i <= 1; i++) { x.beginPath(); x.arc(b.x + (b.links ? -6 : 6), b.y - 4 + i * 4, 10, b.links ? 2.4 : -0.7, b.links ? 3.9 : 0.8); x.stroke(); }
+      } else if (b.art === "stoss") {
+        x.strokeStyle = "rgba(216,168,104," + a + ")"; x.lineWidth = 3; x.beginPath(); x.moveTo(b.x0, b.y0); x.lineTo(b.x, b.y); x.stroke();
+        x.fillStyle = "rgba(255,240,200," + a * 0.6 + ")"; kreis(x, b.x, b.y, 8 + u * 10);
+      } else if (b.art === "falle") {
+        x.strokeStyle = "rgba(168,131,92," + a + ")"; x.lineWidth = 2; for (let i = 0; i < 6; i++) { const w = i / 6 * Math.PI * 2; x.beginPath(); x.moveTo(b.x, b.y); x.lineTo(b.x + Math.cos(w) * (6 + u * 10), b.y + Math.sin(w) * (4 + u * 6) - u * 6); x.stroke(); }
       } else if (b.art === "riss") {
         const r = lcg(Math.floor(b.seed * 1e6)); x.strokeStyle = "rgba(30,20,12," + a + ")"; x.lineWidth = 2.2;
         x.beginPath(); let px = b.x - 18, py = b.y; x.moveTo(px, py); for (let i = 0; i < 6; i++) { px += 6; py += (r() - 0.5) * 9; x.lineTo(px, py); } x.stroke();
@@ -2960,27 +3587,24 @@
     return "gut";
   }
   function malZielstrahl(x, R, zeit) {
-    const z = zielInfo(R);
-    if (R.regel === "dunkel" && z.d && !istHell(R, z.d.x, z.d.y)) z.d = null;
-    const art = zielArt(R, z.d);
-    const farbe = { gut: "255,211,77", schlecht: "214,90,74", gesperrt: "190,182,166", leer: "235,226,204" }[art];
-    const ex = DREH.x + z.dx * z.len, ey = DREH.y + z.dy * z.len;
+    /* nur ein gut sichtbarer Strahl in Wurfrichtung – wohin genau er trifft, muss man selbst einschätzen */
+    const w = R.haken.winkel, dx = Math.sin(w), dy = Math.cos(w);
+    let len = reichweite();
+    if (dx < -1e-3) len = Math.min(len, (6 - DREH.x) / dx);
+    if (dx > 1e-3) len = Math.min(len, (W - 6 - DREH.x) / dx);
+    len = Math.min(len, (LEISTE - 6 - DREH.y) / dy);
+    const ex = DREH.x + dx * len, ey = DREH.y + dy * len;
     x.save(); x.lineCap = "round";
-    x.strokeStyle = "rgba(" + farbe + ",.18)"; x.lineWidth = 7; x.beginPath(); x.moveTo(DREH.x, DREH.y); x.lineTo(ex, ey); x.stroke();
-    x.strokeStyle = "rgba(" + farbe + ",.85)"; x.lineWidth = 2; x.setLineDash([7, 6]); x.lineDashOffset = -zeit * 40;
+    const g = x.createLinearGradient(DREH.x, DREH.y, ex, ey);
+    g.addColorStop(0, "rgba(207,230,168,.32)"); g.addColorStop(1, "rgba(207,230,168,0)");
+    x.strokeStyle = g; x.lineWidth = 8; x.beginPath(); x.moveTo(DREH.x, DREH.y); x.lineTo(ex, ey); x.stroke();
+    const g2 = x.createLinearGradient(DREH.x, DREH.y, ex, ey);
+    g2.addColorStop(0, "rgba(235,240,210,.95)"); g2.addColorStop(0.75, "rgba(235,240,210,.55)"); g2.addColorStop(1, "rgba(235,240,210,0)");
+    x.strokeStyle = g2; x.lineWidth = 2.2; x.setLineDash([8, 6]); x.lineDashOffset = -zeit * 30;
     x.beginPath(); x.moveTo(DREH.x, DREH.y); x.lineTo(ex, ey); x.stroke(); x.setLineDash([]);
-    const puls = 0.5 + Math.sin(zeit * 8) * 0.5;
-    if (z.d) {
-      const d = z.d, r = d.r + 6 + puls * 2;
-      x.strokeStyle = "rgba(" + farbe + ",.95)"; x.lineWidth = 2.2; x.beginPath(); x.arc(d.x, d.y, r, 0, Math.PI * 2); x.stroke();
-      x.lineWidth = 2.6;
-      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + zeit * 1.5; x.beginPath(); x.moveTo(d.x + Math.cos(a) * (r + 2), d.y + Math.sin(a) * (r + 2)); x.lineTo(d.x + Math.cos(a) * (r + 7), d.y + Math.sin(a) * (r + 7)); x.stroke(); }
-      if (art !== "gut") { x.font = "700 13px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "rgba(" + farbe + ",1)"; x.fillText(art === "gesperrt" ? "🔒" : "✕", d.x + r + 4, d.y - r); }
-    } else {
-      x.fillStyle = "rgba(" + farbe + ",.7)"; kreis(x, ex, ey, 3 + puls * 1.5);
-    }
     x.restore();
   }
+
 
   /* --- Raubzug zeichnen --- */
   function zeichneRaub(x, zeit) {
@@ -3032,24 +3656,38 @@
   function zeichneAbwehr(x, zeit) {
     const A = S.A, T = t();
     x.drawImage(hgBild, 0, 0, W, H);
+    ambientMalen(x, A, zeit);
     // Pflanzplätze
     A.plaetze.forEach((p, i) => {
       if (p.turm) return;
-      const gew = A.wahl === i, puls = 0.5 + Math.sin(zeit * 3 + i) * 0.25;
-      x.fillStyle = gew ? "rgba(224,160,70,.3)" : "rgba(111,154,58," + (0.12 + puls * 0.12) + ")"; kreis(x, p.x, p.y, 15);
-      x.strokeStyle = gew ? "#e0a046" : "rgba(207,230,168," + (0.35 + puls * 0.3) + ")"; x.lineWidth = 1.5; x.setLineDash([3, 3]);
-      x.beginPath(); x.arc(p.x, p.y, 15, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
-      x.font = "11px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.globalAlpha = 0.7; x.fillText("🌱", p.x, p.y + 1); x.globalAlpha = 1;
+      const gew = A.wahl === i, puls = 0.5 + Math.sin(zeit * 2.4 + i) * 0.5;
+      x.fillStyle = gew ? "rgba(224,160,70,.32)" : "rgba(170,210,120," + (0.06 + puls * 0.08) + ")"; oval(x, p.x, p.y + 4, 14, 6.5);
+      x.strokeStyle = gew ? "#e0a046" : "rgba(207,230,168," + (0.18 + puls * 0.25) + ")"; x.lineWidth = gew ? 2 : 1.2;
+      x.beginPath(); x.ellipse(p.x, p.y + 4, 14, 6.5, 0, 0, Math.PI * 2); x.stroke();
+      x.strokeStyle = "rgba(111,154,58,.85)"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(p.x, p.y + 5); x.lineTo(p.x, p.y - 1); x.stroke();
+      blatt(x, p.x, p.y, -2.4, 5, 2, "#6f9a3a"); blatt(x, p.x, p.y - 1, -0.6, 5, 2, "#8ab04a");
     });
+    malFallen(x, A, zeit);
     A.plaetze.forEach((p, i) => { if (p.turm) malWachter(x, p, zeit, A.wahl === i); });
     malHort(x, A, zeit);
     A.feinde.slice().sort((a, b) => a.y - b.y).forEach(e => malFeind(x, e, zeit));
     A.geschosse.forEach(g => {
       if (g.art === "dorn" || g.art === "splitter" || g.art === "spore" || g.art === "wolf") malGeschoss(x, g, zeit);
+      else if (g.art === "falke") {
+        const fl = Math.sin(g.t * 26) * 0.5;
+        x.save(); x.translate(g.x, g.y); x.rotate(g.w || 0);
+        x.fillStyle = "#4a5866";
+        x.beginPath(); x.moveTo(-2, 0); x.quadraticCurveTo(-4, -13 - fl * 6, -12, -15 - fl * 4); x.quadraticCurveTo(-6, -5, -9, 0); x.fill();
+        x.beginPath(); x.moveTo(-2, 0); x.quadraticCurveTo(-4, 13 + fl * 6, -12, 15 + fl * 4); x.quadraticCurveTo(-6, 5, -9, 0); x.fill();
+        x.fillStyle = "#5a6a7a"; oval(x, -2, 0, 8, 3.4); x.fillStyle = "#efe2c4"; oval(x, -1, 1, 5, 1.6);
+        x.fillStyle = "#3a4450"; kreis(x, 5, 0, 3); x.fillStyle = "#e0b030"; x.beginPath(); x.moveTo(7.5, -1); x.lineTo(10.5, 0.5); x.lineTo(7.5, 1.2); x.fill();
+        x.restore();
+      }
       else if (g.art === "gold") { x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 10; x.fillStyle = "#ffd34d"; for (let i = 0; i < 4; i++) oval(x, g.x + Math.cos(zeit * 9 + i * 1.6) * 5, g.y + Math.sin(zeit * 9 + i * 1.6) * 3, 3, 1.6); x.restore(); }
       else if (g.art === "feuerball") { x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 16; x.fillStyle = "#ffd27a"; kreis(x, g.x, g.y, 6); x.fillStyle = "#ff8a3a"; kreis(x, g.x, g.y, 3.5); x.restore(); funken(g.x, g.y, 1, ["#ff8a3a", "#e0a046"], 20, 2); }
       else if (g.art === "fels") { x.fillStyle = "#6a6458"; kreis(x, g.x, g.y, 7); x.fillStyle = "#8a8476"; kreis(x, g.x - 2, g.y - 2, 3); }
     });
+    malTierEinsatz(x, A, zeit);
     if (A.baer) malBaer(x, A.baer, zeit);
     malHelfer(x, A, zeit);
     malZauber(x, A, zeit);
@@ -3057,12 +3695,12 @@
     malPortrait(x, A, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, HORT.x + 60, HORT.y - 54);
     // Vorbereitung
-    if (A.vorT > 0) {
-      x.fillStyle = "rgba(9,8,15,.55)"; x.fillRect(20, 150, W - 40, 74);
+    if (A.vorT > 0 && A.wahl < 0) {
+      const erste = A.welle < 0, h2 = erste ? 74 : 40;
+      x.fillStyle = "rgba(9,8,15,.55)"; x.fillRect(20, 150, W - 40, h2);
       x.textAlign = "center"; x.textBaseline = "middle";
-      x.font = "22px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(T.kommen(Math.ceil(A.vorT)), W / 2, 172, W - 60);
-      x.font = "12px " + FONT_B; x.fillStyle = "#ebe2cc";
-      zeilenUmbruch(x, T.abwehrIntro, W / 2, 196, W - 70, 14);
+      x.font = "22px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(T.welleIn(A.welle + 2, A.wellen.length, Math.ceil(A.vorT)), W / 2, 170, W - 60);
+      if (erste) { x.font = "12px " + FONT_B; x.fillStyle = "#ebe2cc"; zeilenUmbruch(x, S.garten.setzlinge.length ? T.setzHinweis : T.abwehrIntro, W / 2, 194, W - 70, 14); }
     }
     if (A.demo && A.bossGerufen && !A.demoWeg) {
       x.textAlign = "center"; x.font = "700 13px " + FONT_B; x.fillStyle = "#9fd6ec"; x.fillText("🌊 " + Math.ceil(A.demoDauer - A.demoT) + " s", W / 2, 42);
@@ -3073,26 +3711,47 @@
     px = hudText(x, "💰 " + Math.round(A.hort), px, A.hort < A.hortStart * 0.3 ? "#c4564a" : "#ffd34d") + 10;
     px = hudText(x, "🌱 " + Math.round(A.saat), px, "#cfe6a8") + 10;
     balken(x, px, 7, 76, 14, A.zorn / 100, A.zorn > 75 ? "#c4564a" : "#9b5a3a", T.hud.zorn); px += 86;
-    hudText(x, "👣 " + (A.warte.length + A.feinde.filter(e => !e.d.unbesiegbar).length), px, "#a89f8f", 12);
+    hudText(x, "🌊 " + Math.max(1, A.welle + 1) + "/" + A.wellen.length + "  👣 " + (A.warte.length + A.feinde.filter(e => !e.d.unbesiegbar).length), px, "#a89f8f", 12);
     // unten: Bauleiste
     x.fillStyle = "rgba(9,8,15,.72)"; x.fillRect(0, LEISTE, W, H - LEISTE);
     S.knoepfe = [];
     const p = A.wahl >= 0 ? A.plaetze[A.wahl] : null;
     x.textAlign = "left"; x.textBaseline = "middle";
+    const BH = H - LEISTE - 6;
     if (p && !p.turm) {
-      const frei = WACHTER_REIHE.filter(wachterFrei), bw = Math.min(62, (W - 12) / frei.length - 4);
-      frei.forEach((k, i) => knopfTurm(x, "bau:" + k, 6 + i * (bw + 4), LEISTE + 3, bw, H - LEISTE - 6, k, 0, kosten(k, 0), A.bauTyp === k, A.saat < kosten(k, 0), zeit));
-      turmTafel(x, A, p, A.bauTyp, 0, true, zeit);
+      const G = S.garten, tab = A.bauTab;
+      let auswahl = null;
+      if (tab === "setz" && G.setzlinge.length) {
+        const l = G.setzlinge.slice(0, 6), bw = Math.min(62, (W - 12) / l.length - 4);
+        if (!(A.setzWahl < G.setzlinge.length)) A.setzWahl = 0;
+        l.forEach((z, i) => knopfEinheit(x, "setz:" + i, 6 + i * (bw + 4), LEISTE + 3, bw, BH, z, T.frei, A.setzWahl === i, false, zeit));
+        auswahl = { z: G.setzlinge[A.setzWahl], modus: "setz" };
+      } else if (tab === "tiere") {
+        const frei = TIERE_REIHE.filter(tierFrei), bw = Math.min(62, (W - 12) / frei.length - 4);
+        if (!A.tierTyp || !tierFrei(A.tierTyp)) A.tierTyp = frei[0];
+        frei.forEach((k, i) => { const voll = tierAnzahl(k) >= tierMax(), c = tierKosten(k, 0); knopfEinheit(x, "tier:" + k, 6 + i * (bw + 4), LEISTE + 3, bw, BH, { k, st: 0, tier: true }, voll ? T.maxTier : "🌱" + c, A.tierTyp === k, voll || A.saat < c, zeit); });
+        auswahl = { z: { k: A.tierTyp, st: 0, tier: true }, modus: "bau" };
+      } else {
+        const frei = WACHTER_REIHE.filter(wachterFrei), bw = Math.min(62, (W - 12) / frei.length - 4);
+        if (!A.bauTyp || !wachterFrei(A.bauTyp)) A.bauTyp = "dorn";
+        frei.forEach((k, i) => knopfEinheit(x, "bau:" + k, 6 + i * (bw + 4), LEISTE + 3, bw, BH, { k, st: 0 }, "🌱" + kosten(k, 0), A.bauTyp === k, A.saat < kosten(k, 0), zeit));
+        auswahl = { z: { k: A.bauTyp, st: 0 }, modus: "bau" };
+      }
+      if (auswahl && auswahl.z) einheitTafel(x, A, p, auswahl.z, auswahl.modus, zeit);
     } else if (p && p.turm) {
-      const lvl = p.turm.st;
-      x.font = "600 11px " + FONT_B; x.fillStyle = "#a89f8f"; x.textAlign = "left"; x.fillText(T.bau.stufeVon(lvl + 1), 10, LEISTE + 26);
-      for (let i = 0; i < 3; i++) { x.fillStyle = i <= lvl ? "#e0a046" : "rgba(235,226,204,.2)"; kreis(x, 82 + i * 10, LEISTE + 26, 3.2); }
-      if (lvl < 2) { const c = kosten(p.turm.k, lvl + 1); knopf(x, "staerker", 116, LEISTE + 4, 170, H - LEISTE - 8, [T.bau.verstaerken, "🌱" + c], true, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8"); }
-      else knopf(x, "nix", 116, LEISTE + 4, 170, H - LEISTE - 8, [T.bau.max], false, true);
-      knopf(x, "raus", 292, LEISTE + 4, 102, H - LEISTE - 8, [T.bau.ausreissen, "+" + Math.round(p.turm.wert * 0.5) + " 🌱"], false, false);
-      turmTafel(x, A, p, p.turm.k, lvl, false, zeit);
+      const U = p.turm, lvl = U.st, max = U.tier ? 1 : TURM_MAX, rausB = 96, rx = W - rausB - 6;
+      if (!U.tier && lvl === 1) {
+        const c = kosten(U.k, 2), zt = T.zweige[U.k], bw = (rx - 12) / 2 - 3;
+        ["a", "b"].forEach((zw2, i) => knopf(x, "zweig:" + zw2, 6 + i * (bw + 6), LEISTE + 4, bw, BH - 2, [zt[zw2][0], "🌱" + c], true, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8"));
+      } else if (lvl < max) {
+        const c = U.tier ? tierKosten(U.k, lvl + 1) : kosten(U.k, lvl + 1);
+        knopf(x, "staerker", 6, LEISTE + 4, rx - 12, BH - 2, [T.bau.verstaerken, "🌱" + c], true, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8");
+      } else knopf(x, "nix", 6, LEISTE + 4, rx - 12, BH - 2, [T.bau.max], false, true);
+      knopf(x, "raus", rx, LEISTE + 4, rausB, BH - 2, [T.bau.ausreissen, "+" + Math.round(U.wert * 0.5) + " 🌱"], false, false);
+      einheitTafel(x, A, p, U, "steht", zeit);
     } else if (A.vorT > 0) {
-      knopf(x, "jetzt", 8, LEISTE + 6, 220, H - LEISTE - 12, [T.jetzt], true, false, "#e0a046");
+      const bonus = Math.ceil(A.vorT) * 2;
+      knopf(x, "jetzt", 8, LEISTE + 6, 220, H - LEISTE - 12, [A.welle < 0 ? T.jetzt : T.rufen(bonus)], true, false, "#e0a046");
       knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
     } else {
       A.zauber.forEach((z, i) => knopfZauber(x, "zauber:" + i, 6 + i * 92, LEISTE + 4, 88, H - LEISTE - 8, z, A.aktiv === i, zeit));
@@ -3119,62 +3778,126 @@
     x.fillText(bereit ? "✓" : Math.ceil(z.cd) + " s", bx + 32, by + bh / 2 + 8);
     x.restore();
   }
-  function knopfTurm(x, id, bx, by, bw, bh, k, st, preis, an, zuTeuer, zeit) {
+  function malEinheit(x, z, zeit) { if (z.tier) malTierFigur(x, z.k, z.st, null, zeit); else malTurm(x, z.k, z.st, null, zeit); }
+  function knopfEinheit(x, id, bx, by, bw, bh, z, preisTxt, an, rot, zeit) {
     S.knoepfe.push({ id, x: bx, y: by, w: bw, h: bh });
     x.fillStyle = an ? "rgba(224,160,70,.26)" : "rgba(235,226,204,.07)";
     x.strokeStyle = an ? "#e0a046" : "rgba(235,226,204,.22)"; x.lineWidth = an ? 1.6 : 1;
     x.beginPath(); x.roundRect ? x.roundRect(bx, by, bw, bh, 6) : x.rect(bx, by, bw, bh); x.fill(); x.stroke();
     x.save(); x.beginPath(); x.rect(bx, by, bw, bh - 11); x.clip();
-    x.translate(bx + bw / 2, by + bh - 19); x.scale(0.68, 0.68); if (zuTeuer) x.globalAlpha = 0.5;
-    malTurm(x, k, st, null, zeit); x.restore();
+    x.translate(bx + bw / 2, by + bh - 19); x.scale(0.66, 0.66); if (rot) x.globalAlpha = 0.5;
+    malEinheit(x, z, zeit); x.restore();
+    if (z.st) { for (let i = 0; i <= z.st; i++) { x.fillStyle = "#e0a046"; kreis(x, bx + 6 + i * 5, by + 6, 1.8); } }
     x.font = "700 10px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle";
-    x.fillStyle = zuTeuer ? "#c4564a" : "#cfe6a8"; x.fillText("🌱" + preis, bx + bw / 2, by + bh - 6);
+    x.fillStyle = rot ? "#c4564a" : "#cfe6a8"; x.fillText(preisTxt, bx + bw / 2, by + bh - 6, bw - 4);
   }
   function turmWerte(k, st) {
     const w = WACHTER[k], f = 1 + 0.045 * Math.min(S.lv, KAMPAGNE + 10);
     return { schaden: Math.round(w.schaden[st] * f), schadenRoh: w.schaden[st], reich: w.reich[st], tempo: 1 / w.rate };
   }
-  function turmTafel(x, A, p, k, st, bauModus, zeit) {
-    const T = t(), w = WACHTER[k], [name, info] = T.wachter[k];
-    const komboTxt = T.bau.kombo[k], ph = komboTxt ? 118 : 104, pw = W - 12, px = 6, py = p.y > LEISTE - ph - 50 ? 32 : LEISTE - ph - 4;
-    // Vorschau der Reichweite am Bauplatz
+  /* Werte-Tafel für Wächter, Tiere und Setzlinge. modus: bau | setz | steht */
+  function einheitTafel(x, A, p, z, modus, zeit) {
+    const T = t(), k = z.k, st = z.st || 0, istTier = !!z.tier, bauModus = modus !== "steht";
+    const farbe = istTier ? TIERE[k].farbe : WACHTER[k].farbe;
+    const [name, info] = istTier ? T.tiere[k] : T.wachter[k];
+    // Textzeilen unter den Werten
+    const zeilen = [];
+    if (istTier) {
+      zeilen.push(["✦ " + T.tierFaehig[k][st], "#cfe6a8"]);
+      if (modus === "steht" && st === 0) zeilen.push(["▲ " + T.tierFaehig[k][1], "#a89f8f"]);
+    } else {
+      const w = WACHTER[k];
+      if (st >= 2 && z.zweig) zeilen.push(["✦ " + T.zweige[k][z.zweig][0] + ": " + T.zweige[k][z.zweig][1], "#ffd34d"]);
+      else zeilen.push(["✦ " + T.bau.spez[k](w, st), "#cfe6a8"]);
+      if (modus === "steht" && st === 1) { zeilen.push([T.weg, "#a89f8f"]); ["a", "b"].forEach(zw2 => zeilen.push(["  " + T.zweige[k][zw2][0] + ": " + T.zweige[k][zw2][1], "#e8d8b8"])); }
+      else if (T.bau.kombo[k]) zeilen.push(["⚡ " + T.bau.kombo[k], "#9fd6ec"]);
+      if (modus === "steht" && st === 2) zeilen.push(["▲ " + T.uralt, "#ffd34d"]);
+    }
+    const tabs = modus !== "steht";
+    const statsH = istTier ? (k === "baer" ? 14 : 0) : 42;
+    const ph = Math.max(38 + statsH + zeilen.length * 14 + 8, tabs ? 84 : 60), pw = W - 12, px = 6;
+    const py = p.y > LEISTE - ph - 50 ? 32 : LEISTE - ph - 4;
+    // Vorschau am Bauplatz
     if (bauModus) {
-      x.save(); x.strokeStyle = "rgba(224,160,70,.65)"; x.fillStyle = "rgba(224,160,70,.07)"; x.setLineDash([5, 4]); x.lineWidth = 1.3;
-      x.beginPath(); x.arc(p.x, p.y, w.reich[0], 0, Math.PI * 2); x.fill(); x.stroke(); x.setLineDash([]);
-      x.translate(p.x, p.y); x.globalAlpha = 0.6; malTurm(x, k, 0, null, zeit); x.restore();
+      const r = istTier ? (TIERE[k].reich ? TIERE[k].reich[st] : 0) : WACHTER[k].reich[st];
+      x.save();
+      if (r) { x.strokeStyle = "rgba(224,160,70,.65)"; x.fillStyle = "rgba(224,160,70,.07)"; x.setLineDash([5, 4]); x.lineWidth = 1.3; x.beginPath(); x.arc(p.x, p.y, r, 0, Math.PI * 2); x.fill(); x.stroke(); x.setLineDash([]); }
+      x.translate(p.x, p.y); x.globalAlpha = 0.6; malEinheit(x, z, zeit); x.restore();
     }
     x.save();
-    x.fillStyle = "rgba(18,14,11,.93)"; x.strokeStyle = w.farbe; x.lineWidth = 1.4;
+    x.fillStyle = "rgba(18,14,11,.94)"; x.strokeStyle = farbe; x.lineWidth = 1.4;
     x.beginPath(); x.roundRect ? x.roundRect(px, py, pw, ph, 8) : x.rect(px, py, pw, ph); x.fill(); x.stroke();
-    // Bild
     x.fillStyle = "rgba(235,226,204,.05)"; x.beginPath(); x.roundRect ? x.roundRect(px + 6, py + 6, 58, ph - 12, 6) : x.rect(px + 6, py + 6, 58, ph - 12); x.fill();
-    x.save(); x.translate(px + 35, py + ph / 2 + 14); x.scale(1.25, 1.25); malTurm(x, k, st, null, zeit); x.restore();
-    const tx = px + 72;
+    x.save(); x.translate(px + 35, py + Math.min(ph / 2 + 12, 58)); x.scale(1.2, 1.2); malEinheit(x, z, zeit); x.restore();
+    const tx = px + 72, rechts = bauModus ? 226 : pw - 80;
     x.textAlign = "left"; x.textBaseline = "middle";
-    x.font = "16px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(name + (bauModus ? "" : " · " + T.bau.stufeVon(st + 1)), tx, py + 14, pw - 80);
-    x.font = "11px " + FONT_B; x.fillStyle = "#c8bfae"; x.fillText(info, tx, py + 30, bauModus ? 226 : pw - 80);
-    const jetzt = turmWerte(k, st), dann = !bauModus && st < 2 ? turmWerte(k, st + 1) : null;
-    const zeile = (y, label, wert, max, txt, wertDann, txtDann) => {
-      x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f"; x.textAlign = "left"; x.fillText(label, tx, y);
-      const bx = tx + 64, bw = 78;
-      x.fillStyle = "rgba(0,0,0,.55)"; x.fillRect(bx, y - 3.5, bw, 7);
-      if (wertDann != null) { x.fillStyle = "rgba(207,230,168,.45)"; x.fillRect(bx, y - 3.5, bw * klemm(wertDann / max, 0, 1), 7); }
-      x.fillStyle = w.farbe; x.fillRect(bx, y - 3.5, bw * klemm(wert / max, 0, 1), 7);
-      x.font = "700 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(txt, bx + bw + 6, y);
-      if (txtDann) { const tw = x.measureText(txt).width; x.fillStyle = "#cfe6a8"; x.fillText(" → " + txtDann, bx + bw + 6 + tw, y); }
-    };
-    const gift = w.typ === "gift";
-    const schadenTxt = v => gift ? T.bau.giftProSek(v) : String(v);
-    zeile(py + 48, T.bau.werte.schaden, jetzt.schadenRoh, 90, schadenTxt(jetzt.schaden), dann ? dann.schadenRoh : null, dann ? schadenTxt(dann.schaden) : null);
-    zeile(py + 62, T.bau.werte.reich, jetzt.reich, 125, String(jetzt.reich), dann ? dann.reich : null, dann ? String(dann.reich) : null);
-    zeile(py + 76, T.bau.werte.tempo, jetzt.tempo, 1.7, T.bau.proSek(jetzt.tempo.toFixed(1).replace(".", sprache() === "de" ? "," : ".")), null, null);
-    x.font = "italic 10.5px " + FONT_B; x.fillStyle = "#cfe6a8";
-    x.fillText("✦ " + T.bau.spez[k](w, st), tx, py + 93, bauModus ? 226 : pw - 80);
-    if (komboTxt) { x.fillStyle = "#9fd6ec"; x.fillText("⚡ " + komboTxt, tx, py + 108, bauModus ? 226 : pw - 80); }
+    let reiterBreite = 0;
+    if (tabs) {
+      x.font = "700 10px " + FONT_B;
+      const n = [T.tab.waechter].concat(TIERE_REIHE.some(tierFrei) ? [T.tab.tiere] : [], S.garten.setzlinge.length ? [T.tab.setz(S.garten.setzlinge.length)] : []);
+      if (n.length > 1) reiterBreite = n.reduce((a, txt) => a + Math.max(40, x.measureText(txt).width + 12) + 4, 0);
+    }
+    const titel = name + (modus === "bau" ? "" : " · " + T.bau.stufeVon(st + 1).replace("/3", istTier ? "/2" : "/4"));
+    x.font = "16px " + FONT_D; x.fillStyle = "#e0a046";
+    const tb = tabs ? pw - 72 - reiterBreite - 10 : pw - 160;
+    if (x.measureText(titel).width > tb) x.font = "13px " + FONT_D;
+    x.fillText(titel, tx, py + 14, tb);
+    x.font = "11px " + FONT_B; x.fillStyle = "#c8bfae"; x.fillText(info, tx, py + 30, rechts);
+    let y = py + 46;
+    if (!istTier) {
+      const w = WACHTER[k], jetzt = turmWerte(k, st), dann = modus === "steht" && (st === 0 || st === 2) ? turmWerte(k, st + 1) : null;
+      const rf = z._reich || 1, tf = z._tempo || 1;
+      const zeile = (yy, label, wert, maxW, txt, wertDann, txtDann) => {
+        x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f"; x.textAlign = "left"; x.fillText(label, tx, yy);
+        const bx = tx + 64, bw = 78;
+        x.fillStyle = "rgba(0,0,0,.55)"; x.fillRect(bx, yy - 3.5, bw, 7);
+        if (wertDann != null) { x.fillStyle = "rgba(207,230,168,.45)"; x.fillRect(bx, yy - 3.5, bw * klemm(wertDann / maxW, 0, 1), 7); }
+        x.fillStyle = farbe; x.fillRect(bx, yy - 3.5, bw * klemm(wert / maxW, 0, 1), 7);
+        x.font = "700 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(txt, bx + bw + 6, yy);
+        if (txtDann) { const tw = x.measureText(txt).width; x.fillStyle = "#cfe6a8"; x.fillText(" → " + txtDann, bx + bw + 6 + tw, yy); }
+      };
+      const gift = w.typ === "gift", schadenTxt = v => gift ? T.bau.giftProSek(v) : String(v);
+      zeile(y, T.bau.werte.schaden, jetzt.schadenRoh, 90, schadenTxt(jetzt.schaden), dann ? dann.schadenRoh : null, dann ? schadenTxt(dann.schaden) : null);
+      zeile(y + 14, T.bau.werte.reich, jetzt.reich * rf, 125, String(Math.round(jetzt.reich * rf)) + (rf > 1 ? " 🦉" : ""), dann ? dann.reich * rf : null, dann ? String(Math.round(dann.reich * rf)) : null);
+      zeile(y + 28, T.bau.werte.tempo, jetzt.tempo * tf, 1.7, T.bau.proSek((jetzt.tempo * tf).toFixed(1).replace(".", sprache() === "de" ? "," : ".")) + (tf > 1 ? " 🦌" : ""), null, null);
+      y += 42;
+    } else if (k === "baer" && modus === "steht") {
+      const max = baerMaxHp(z), u = z.schlafT > 0 ? 0 : klemm((z.hp || max) / max, 0, 1);
+      x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f"; x.fillText("❤", tx, y);
+      x.fillStyle = "rgba(0,0,0,.55)"; x.fillRect(tx + 14, y - 3.5, 120, 7); x.fillStyle = u > 0.35 ? "#8ac24a" : "#c4564a"; x.fillRect(tx + 14, y - 3.5, 120 * u, 7);
+      x.font = "700 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(z.schlafT > 0 ? T.schlaeft : Math.round(z.hp || max) + " / " + Math.round(max), tx + 140, y);
+      y += 14;
+    } else if (k === "baer") y += 14;
+    x.font = "italic 10.5px " + FONT_B;
+    zeilen.forEach(([txt, f]) => { x.fillStyle = f; x.fillText(txt, tx, y + 2, rechts); y += 14; });
     x.restore();
-    if (bauModus) {
-      const c = kosten(k, 0);
-      knopf(x, "pflanzen", px + pw - 84, py + 40, 78, 46, [T.bau.pflanzen, "🌱" + c], true, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8");
+    // Reiter und Zielwahl oben rechts
+    if (tabs) {
+      const G = S.garten, reiter = [["waechter", T.tab.waechter]];
+      if (TIERE_REIHE.some(tierFrei)) reiter.push(["tiere", T.tab.tiere]);
+      if (G.setzlinge.length) reiter.push(["setz", T.tab.setz(G.setzlinge.length)]);
+      if (reiter.length > 1) {
+        let rx = px + pw - 6;
+        reiter.slice().reverse().forEach(([id, txt]) => {
+          x.font = "700 10px " + FONT_B; const bw = Math.max(40, x.measureText(txt).width + 12); rx -= bw;
+          const an = A.bauTab === id;
+          S.knoepfe.push({ id: "tab:" + id, x: rx, y: py + 4, w: bw, h: 20 });
+          x.fillStyle = an ? "rgba(224,160,70,.3)" : "rgba(235,226,204,.08)"; x.strokeStyle = an ? "#e0a046" : "rgba(235,226,204,.25)"; x.lineWidth = 1;
+          x.beginPath(); x.roundRect ? x.roundRect(rx, py + 4, bw, 20, 10) : x.rect(rx, py + 4, bw, 20); x.fill(); x.stroke();
+          x.fillStyle = an ? "#ffd34d" : "#ebe2cc"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(txt, rx + bw / 2, py + 14.5);
+          rx -= 4;
+        });
+      }
+      const preis = modus === "setz" ? 0 : istTier ? tierKosten(k, 0) : kosten(k, 0);
+      const voll = istTier && tierAnzahl(k) >= tierMax();
+      knopf(x, "pflanzen", px + pw - 84, py + ph - 52, 78, 46, [T.bau.pflanzen, voll ? T.maxTier : preis ? "🌱" + preis : T.frei], true, voll || A.saat < preis, voll || A.saat < preis ? "#c4564a" : "#cfe6a8");
+    } else if (!istTier) {
+      const zm = T.zielmodus[z.ziel || "vorne"];
+      x.font = "700 10px " + FONT_B; const bw = x.measureText(zm).width + 14, bx = px + pw - bw - 6;
+      S.knoepfe.push({ id: "zielmodus", x: bx, y: py + 4, w: bw, h: 20 });
+      x.fillStyle = "rgba(235,226,204,.1)"; x.strokeStyle = "rgba(235,226,204,.35)"; x.lineWidth = 1;
+      x.beginPath(); x.roundRect ? x.roundRect(bx, py + 4, bw, 20, 10) : x.rect(bx, py + 4, bw, 20); x.fill(); x.stroke();
+      x.fillStyle = "#ebe2cc"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(zm, bx + bw / 2, py + 14.5);
     }
     S.knoepfe.push({ id: "tafel", x: px, y: py, w: pw, h: ph });
   }
@@ -3286,7 +4009,7 @@
     if (zustand !== "spiel") tafelNeu();
   }
   function tafelNeu() {
-    ({ start: startZeigen, einst: einstZeigen, schatz: schatzZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true) })[tafelArt]();
+    ({ start: startZeigen, druide: druideZeigen, einst: einstZeigen, schatz: schatzZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true) })[tafelArt]();
   }
   function schleierAuf(html, art) {
     tafelArt = art; tafel.innerHTML = html; schleier.hidden = false; buehne.classList.remove("laeuft");
@@ -3316,6 +4039,7 @@
     const lw = frei > 0 || summe > 0 ? '<button type="button" class="tav-knopf" data-tun="levelwahl">' + esc(tx.levelwahl) + ' <small>' + esc(tx.sterneGesamt(summe, KAMPAGNE * 3)) + '</small></button>' : "";
     schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + fort + stufenHtml(tx) +
       '<button type="button" class="tav-knopf ' + (sp ? "" : "eh-haupt") + '" data-tun="neu">' + esc(tx.neu) + '</button>' + lw +
+      '<button type="button" class="tav-knopf" data-tun="druide">' + esc(tx.druide.knopf) + ' <small>' + (STAT.mond || 0) + '</small></button>' +
       '<button type="button" class="tav-knopf" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>' +
       (sp ? '<p class="eh-klein">' + esc(tx.neuWarnung) + '</p>' : ""), "start");
   }
@@ -3329,6 +4053,25 @@
     malRelikt(x, GEB[g].relikt, 11, 0, 0.5);
     S = alt;
     return (reliktBilder[g] = c.toDataURL());
+  }
+  function druideZeigen() {
+    const tx = t(), D = tx.druide, mond = STAT.mond || 0;
+    const zeilen = Object.keys(TALENTE).map(k => {
+      const Tl = TALENTE[k], st = tal(k), voll = st >= Tl.kosten.length, preis = voll ? 0 : Tl.kosten[st], kann = !voll && mond >= preis;
+      const [name, text] = tx.talente[k];
+      return '<div class="eh-up eh-talent' + (voll ? " voll" : "") + '"><span class="sym" aria-hidden="true">' + Tl.sym + '</span>' +
+        '<span class="eh-up-text"><strong>' + esc(name) + '</strong><small>' + esc(text) + '</small><span class="eh-pips">' + Tl.kosten.map((_, i) => '<i class="' + (i < st ? "an" : "") + '"></i>').join("") + '</span></span>' +
+        '<button type="button" class="eh-kauf" data-talent="' + k + '"' + (kann ? "" : " disabled") + '>' + esc(voll ? D.voll : preis + " 🌙") + '</button></div>';
+    }).join("");
+    schleierAuf('<h4>' + esc(D.titel) + '</h4><p>' + esc(D.text) + '</p><p class="eh-beutel">' + esc(D.steine(mond)) + '</p>' +
+      '<div class="eh-hain">' + zeilen + '</div>' +
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="zumStart">' + esc(tx.zurueck) + '</button>', "druide");
+  }
+  function talentLernen(k) {
+    const Tl = TALENTE[k], st = tal(k); if (!Tl || st >= Tl.kosten.length) return;
+    const preis = Tl.kosten[st]; if ((STAT.mond || 0) < preis) return;
+    STAT.mond -= preis; STAT.talente[k] = st + 1; statSichern(); KLANG.edel();
+    const sc = schleier.scrollTop; druideZeigen(); schleier.scrollTop = sc;
   }
   let schatzZurueck = "start";
   function schatzZeigen() {
@@ -3369,6 +4112,8 @@
     const st = stufeWahl;
     stufeWahl = st; neuesSpiel();
     S.einzel = true; S.lv = lv; S.leben = 1; S.up = Object.assign({}, hainBestLesen(st));
+    const gb = jsonLies("imres-echohort-gartenbest-" + st, null);
+    if (gb && gb.turme) S.garten = { g: -1, turme: {}, setzlinge: Object.keys(gb.turme).map(i => gb.turme[i]).concat(gb.setzlinge || []) };
     introZeigen();
   }
 
@@ -3384,6 +4129,7 @@
       '<p class="eh-ober">' + esc(unter) + (istBossLevel(lv) ? ' · ☠' : '') + '</p>' +
       '<h4>' + esc(name) + '</h4>' +
       '<p class="eh-erzaehl">' + esc(text) + '</p>' +
+      (innenVon(lv) === 0 ? '<p class="eh-klein">🌿 ' + esc(tx.gartenHinweis) + '</p>' : "") +
       '<p class="eh-regel"><b>' + esc(tx.besonderheit) + ' ' + esc(tx.regeln[GEB[g].regel][0]) + '.</b> ' + esc(tx.regeln[GEB[g].regel][1]) + '</p>' +
       (neu.length ? '<p class="eh-neu">' + esc(tx.neuFreigeschaltet) + ' ' + neu.map(esc).join(" · ") + '</p>' : "") +
       (lv === 0 ? '<p>' + esc(tx.raubIntro) + '</p>' : "") +
@@ -3455,6 +4201,7 @@
     if (!nurNeu) {
       const A = S.A, R = S.R;
       zustand = "tafel";
+      gartenSync();
       if (A.verloren) {
         S.erg = { verloren: true };
         KLANG.verloren();
@@ -3470,10 +4217,10 @@
         const insBeutel = Math.round(gesichert * 0.5);
         const ziele = [true, A.verlorenGold === 0, R.gier >= 3];
         const sterne = ziele.filter(Boolean).length;
-        let neuBest = false;
+        let neuBest = false, neueSterne = 0;
         if (S.lv < KAMPAGNE) {
           const alle = sterneLesen(S.stufe);
-          if (sterne > (alle[S.lv] || 0)) { alle[S.lv] = sterne; neuBest = true; schreib("imres-echohort-sterne-" + S.stufe, JSON.stringify(alle)); }
+          if (sterne > (alle[S.lv] || 0)) { neueSterne = sterne - (alle[S.lv] || 0); alle[S.lv] = sterne; neuBest = true; schreib("imres-echohort-sterne-" + S.stufe, JSON.stringify(alle)); }
         }
         erfolgPruefen("sterne");
         if (A.demo && A.verlorenGold === 0 && A.hort >= A.hortStart) erfolg("demo");
@@ -3481,7 +4228,9 @@
         if (!S.einzel && S.lv === KAMPAGNE - 1) erfolg("kampagne");
         if (!S.einzel && S.lv >= KAMPAGNE + 4) erfolg("endlos5");
         statSichern();
-        S.erg = { verloren: false, gesichert, insBeutel, faktor, erlegt: A.erlegt, pkt, sieg: S.lv === KAMPAGNE - 1 && !S.einzel, ziele, sterne, neuBest, zurueck: A.zurueckGold, verlorenGold: A.verlorenGold };
+        const mond = (S.einzel ? 0 : 1 + (istBossLevel(S.lv) ? 2 : 0)) + neueSterne;
+        STAT.mond = (STAT.mond || 0) + mond; statSichern();
+        S.erg = { verloren: false, gesichert, insBeutel, faktor, erlegt: A.erlegt, pkt, mond, sieg: S.lv === KAMPAGNE - 1 && !S.einzel, ziele, sterne, neuBest, zurueck: A.zurueckGold, verlorenGold: A.verlorenGold };
         if (!S.einzel) {
           S.punkte += pkt; S.beutel += insBeutel; S.goldGesamt += gesichert;
           S.lv++;
@@ -3511,6 +4260,7 @@
       schleierAuf('<p class="eh-ober">' + esc(tx.einzelLabel) + ' · ' + esc(levelName(S.lv)) + '</p>' +
         '<h4>' + esc(tx.sicher) + '</h4>' + sternHtml +
         (E.neuBest ? '<p class="eh-neu">' + esc(tx.neuRekord) + '</p>' : "") +
+        (E.mond ? '<p class="eh-mond">' + esc(tx.druide.verdient(E.mond)) + '</p>' : "") +
         '<button type="button" class="tav-knopf eh-haupt" data-tun="levelwahl">' + esc(tx.zurLevelwahl) + '</button>' +
         '<button type="button" class="tav-knopf" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>', "ergebnis");
       return;
@@ -3525,6 +4275,7 @@
       '<dt>' + esc(tx.ergWerte.erlegt) + '</dt><dd>' + E.erlegt + '</dd>' +
       '<dt>' + esc(tx.ergWerte.punkte) + '</dt><dd>+' + E.pkt + '</dd>' +
       '<dt>' + esc(tx.ergWerte.beutel) + '</dt><dd>💰 +' + E.insBeutel + '</dd>' +
+      (E.mond ? '<dt>' + esc(tx.druide.titel) + '</dt><dd>' + esc(tx.druide.verdient(E.mond)) + '</dd>' : "") +
       '</dl>' +
       '<p class="eh-gross">' + S.punkte + ' <span>' + esc(tx.punkte) + '</span></p>' +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="hain">' + esc(tx.zumHain) + '</button>', "ergebnis");
@@ -3638,6 +4389,8 @@
     if (lvb && tafelArt === "levelwahl") { audio(); einzelStarten(parseInt(lvb.dataset.level, 10)); return; }
     const zb = e.target.closest("[data-zauber]");
     if (zb && tafelArt === "nachRaub") { zauberUmschalten(zb.dataset.zauber); return; }
+    const tb = e.target.closest("[data-talent]");
+    if (tb && tafelArt === "druide") { talentLernen(tb.dataset.talent); return; }
     const kb = e.target.closest("[data-kauf]");
     if (kb && tafelArt === "hain") { kaufen(kb.dataset.kauf); return; }
     if (e.target.closest(".eh-eintragen")) { eintragen(); return; }
@@ -3658,6 +4411,7 @@
     else if (tun === "einst") einstZeigen();
     else if (tun === "einstZurueck") { tafelArt = einstZurueck; tafelNeu(); }
     else if (tun === "schatzZurueck") { tafelArt = schatzZurueck; tafelNeu(); }
+    else if (tun === "druide") druideZeigen();
     else if (tun === "zumStart") { musikStop(); S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); zeichnen(performance.now()); }
     else if (tun === "nochmal") { musikStop(); zustand = "start"; S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); anwerfen(); }
   }
@@ -3732,11 +4486,17 @@
       if (id.startsWith("form:")) formWaehlen(id.slice(5));
       else if (id === "genug") genug();
     } else {
-      if (id.startsWith("bau:")) { const k = id.slice(4); if (S.A.bauTyp === k) bauen(k); else { S.A.bauTyp = k; KLANG.griff(); } }
-      else if (id === "pflanzen") bauen(S.A.bauTyp);
+      const A = S.A;
+      if (id.startsWith("bau:")) { const k = id.slice(4); if (A.bauTyp === k) bauen(k); else { A.bauTyp = k; KLANG.griff(); } }
+      else if (id.startsWith("tier:")) { const k = id.slice(5); if (A.tierTyp === k) tierBauen(k); else { A.tierTyp = k; KLANG.griff(); } }
+      else if (id.startsWith("setz:")) { const i = parseInt(id.slice(5), 10); if (A.setzWahl === i) setzlingPflanzen(i); else { A.setzWahl = i; KLANG.griff(); } }
+      else if (id.startsWith("tab:")) { A.bauTab = id.slice(4); KLANG.griff(); }
+      else if (id === "pflanzen") { if (A.bauTab === "tiere") tierBauen(A.tierTyp); else if (A.bauTab === "setz") setzlingPflanzen(A.setzWahl || 0); else bauen(A.bauTyp); }
+      else if (id.startsWith("zweig:")) verstaerken(id.slice(6));
+      else if (id === "zielmodus") zielWechseln();
       else if (id === "staerker") verstaerken();
       else if (id === "raus") ausreissen();
-      else if (id === "jetzt") { S.A.vorT = 0.01; }
+      else if (id === "jetzt") { if (A.welle < 0) A.vorT = 0.01; else welleRufen(); }
       else if (id.startsWith("zauber:")) { S.A.aktiv = parseInt(id.slice(7), 10); KLANG.griff(); }
       else if (id === "schnell") { S.A.schnell = !S.A.schnell; schreib("imres-echohort-schnell", S.A.schnell ? "1" : ""); KLANG.griff(); }
     }
@@ -3831,6 +4591,10 @@
 .eh-liste td:nth-child(3), .eh-liste th:nth-child(3), .eh-liste td:nth-child(4), .eh-liste th:nth-child(4) { text-align: right; }
 .eh-liste tr.mein td { color: var(--ember); }
 .eh-leer { color: var(--ash); font-size: .85rem; font-style: italic; margin: .3rem 0 0; }
+.eh-tafel .eh-mond { font-family: var(--display); font-size: 1.1rem; color: #d8d0ff; text-shadow: 0 0 10px rgba(200,190,255,.5); }
+.eh-talent { background: linear-gradient(172deg, #e4e0f4, #c8c2e0); }
+.eh-talent .eh-kauf { background: #23203a; color: #e8e4ff; border-color: #6a62a0; }
+.eh-talent .eh-pips i.an { background: #6a62a0; border-color: #6a62a0; }
 .eh-einst { display: grid; gap: .7rem; width: 100%; max-width: 22rem; text-align: left; }
 .eh-regler { display: grid; grid-template-columns: 7.5rem 1fr 3.2rem; gap: .5rem; align-items: center; color: var(--vellum); font-size: .92rem; }
 .eh-regler input { width: 100%; accent-color: #e0a046; }
@@ -3925,5 +4689,5 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu };
 })();
