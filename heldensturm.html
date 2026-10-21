@@ -280,7 +280,7 @@ details.stats .stat{padding:0 12px 12px}
 .d20{flex:0 0 auto;width:78px;height:78px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#6a3a7a,#2a1230);font:800 32px var(--fd);color:#f6ecd6}
 .evres.crit .d20{background:linear-gradient(160deg,#ffe07a,#a8741a);color:#2a1a08}
 .evres.fail .d20{background:linear-gradient(160deg,#8a2a2a,#2a0808)}
-.evres.ok .d20{background:linear-gradient(160deg,#3a8a4a,#123018)}
+.evres.rolling .d20{background:linear-gradient(160deg,#6a3a7a,#2a1230)}.evres.ok .d20{background:linear-gradient(160deg,#3a8a4a,#123018)}
 .d20.roll{animation:d20r .15s linear infinite}
 @keyframes d20r{from{transform:rotate(0) scale(1.05)}to{transform:rotate(60deg) scale(1.05)}}
 .d20.land{animation:d20l .45s ease-out}
@@ -1126,14 +1126,14 @@ const sk=m=>P.st.dmg*P.st.skill*m;
 const INSULTS=['Pilzkopf!','Hohlbirne!','Stinkstiefel!','Kloakenkriecher!','Goblinhirn!','Wurmfutter!','Trantüte!','Schnarchnase!','Knallcharge!','Sumpfhuhn!','Dösbaddel!','Lumpenpack!','Krötenkuss!','Rübennase!'];
 
 function basicStd(o){const b=bTarget(P.st.range,o.meleeR||85);if(!b)return false;faceA(b.a);
- if(b.melee){melee(b.a,(o.meleeR+15||100)*P.st.area,o.arc||1.5,(o.mm||1.35)*(o.meleeMul?o.meleeMul():1),o.mc,Object.assign({basic:1,melee:1},o.mopt||{}));sfx(o.msnd||'slash');return true}
- if(o.ranged)o.ranged(b.a,b.t);return true}
+ const sv=P.st.dmg;if(b.melee){P.st.dmg=P.st.dmgM;try{melee(b.a,(o.meleeR+15||100)*P.st.area,o.arc||1.5,(o.mm||1.35)*(o.meleeMul?o.meleeMul():1),o.mc,Object.assign({basic:1,melee:1},o.mopt||{}))}finally{P.st.dmg=sv}sfx(o.msnd||'slash');return'm'}
+ if(o.ranged){P.st.dmg=P.st.dmgR;try{o.ranged(b.a,b.t)}finally{P.st.dmg=sv}}return'r'}
 
 const HEROES={
  barradin:{name:'Barradin',cls:'Elfischer Barde',role:'Kontrolle & Illusion',hp:100,dmg:11,rate:1.5,speed:168,range:390,sig:'b_hold',
   blurb:'Hält den gefährlichsten Gegner mit einem Wort fest, verspottet ganze Horden, fesselt sie in Ranken und lockt sie mit Trugbildern ins Verderben.',
   branches:['Verzauberung','Ranken','Illusion'],
-  weapons:[{n:'Laute',r:1,d:1},{n:'Flöte',r:1.25,d:0.8},{n:'Harfe',r:0.8,d:1.3,imp:['area',10]},{n:'Rapier',r:1.1,d:0.95,imp:['crit',5]}],
+  meleeW:[{n:'Rapier',r:1.1,d:0.95,imp:['crit',5]},{n:'Degen',r:1,d:1},{n:'Stockdegen',r:0.82,d:1.3,imp:['critd',15]}],rangedW:[{n:'Laute',r:1,d:1},{n:'Flöte',r:1.25,d:0.8},{n:'Harfe',r:0.8,d:1.3,imp:['area',10]}],
   basic(){return basicStd({meleeR:85,arc:1.1,mm:1.4,mc:'#f6d77c',msnd:'stab',
    ranged:(a)=>{shoot({x:P.x,y:P.y-6,a,spd:540,dmg:P.st.dmg,r:8,pierce:2,kind:'note',c:'#f6d77c',basic:1});sfx('note')}})},
   tree:[
@@ -1180,9 +1180,9 @@ const HEROES={
  echo:{name:'Echo',cls:'Gehörnter Druide',role:'Zauber & Wildgestalt',hp:100,dmg:10,rate:1.5,speed:162,range:350,sig:'e_wave',
   blurb:'Wild, unberechenbar und ein wenig mürrisch. Ruft Donner, Blitz und Feuerbälle herab, wird zum Bären oder zur Ratte – und riecht Gold auf hundert Schritt.',
   branches:['Sturm','Wildgestalt','Natur & Gier'],
-  weapons:[{n:'Druidenstab',r:1,d:1},{n:'Sichel',r:1.2,d:0.85},{n:'Totemkeule',r:0.8,d:1.3,imp:['hp',0]},{n:'Mistelzweig',r:1,d:0.92,imp:['skill',10]}],
+  meleeW:[{n:'Druidenstab',r:1,d:1},{n:'Sichel',r:1.2,d:0.85},{n:'Totemkeule',r:0.8,d:1.3,imp:['hp',0]}],rangedW:[{n:'Mistelzweig',r:1,d:0.92,imp:['skill',10]},{n:'Dornenzweig',r:1.15,d:0.88},{n:'Eichenrute',r:0.82,d:1.28,imp:['area',8]}],
   basic(){if(P.form==='rat')return false;
-   if(P.form==='bear'){const b=bTarget(130,130);if(!b||!b.melee)return false;faceA(b.a);const R=105*P.st.area;cone(P.x,P.y,b.a,2.2,R,P.st.dmg*1.3,{knock:140,basic:1,melee:1});slash(P.x,P.y,b.a,2.2,R,'#f0d0a0',0.2);sfx('claw');return true}
+   if(P.form==='bear'){const b=bTarget(130,130);if(!b||!b.melee)return false;faceA(b.a);const R=105*P.st.area;cone(P.x,P.y,b.a,2.2,R,P.st.dmgM*1.3,{knock:140,basic:1,melee:1});slash(P.x,P.y,b.a,2.2,R,'#f0d0a0',0.2);sfx('claw');return'm'}
    return basicStd({meleeR:85,arc:1.9,mm:1.35,mc:'#9bd36a',mopt:{knock:140},
     ranged:(a)=>{shoot({x:P.x,y:P.y-6,a,spd:500,dmg:P.st.dmg,r:7,pierce:1,kind:'thorn',c:'#9bd36a',basic:1});sfx('thorn')}})},
   tree:[
@@ -1226,7 +1226,7 @@ const HEROES={
  friedrich:{name:'Friedrich',cls:'Menschlicher Waldläufer',role:'Fernkampf & Rex',hp:95,dmg:9,rate:1.75,speed:172,range:440,sig:'f_fan',
   blurb:'Trifft auf jede Entfernung, beendet Kämpfe mit einem einzigen Pfeil und hat Rex an seiner Seite – der wird mit jedem Talent bissiger.',
   branches:['Schützenkunst','Jäger','Rex'],
-  weapons:[{n:'Langbogen',r:0.9,d:1.18},{n:'Kurzbogen',r:1.25,d:0.8},{n:'Kompositbogen',r:1,d:1,imp:['crit',5]},{n:'Armbrust',r:0.72,d:1.5,imp:['critd',20]}],
+  meleeW:[{n:'Jagdmesser',r:1.2,d:0.85},{n:'Kurzschwert',r:1,d:1,imp:['crit',4]},{n:'Waldaxt',r:0.8,d:1.3,imp:['critd',15]}],rangedW:[{n:'Langbogen',r:0.9,d:1.18},{n:'Kurzbogen',r:1.25,d:0.8},{n:'Kompositbogen',r:1,d:1,imp:['crit',5]},{n:'Armbrust',r:0.72,d:1.5,imp:['critd',20]}],
   basic(){const sw=rank('f_sword');return basicStd({meleeR:80,arc:1.5+0.15*sw,mm:1.35,meleeMul:()=>1+0.2*sw+(sw?0.06*sw:0),mc:'#e6d3a8',
    ranged:(a)=>{const tn=rank('f_tenth');P.shots=(P.shots||0)+1;
     if(tn&&P.shots%(10-tn)===0){shoot({x:P.x,y:P.y-4,a,spd:980,dmg:P.st.dmg*(2.5+0.5*tn),r:12,pierce:999,kind:'bigarrow',c:'#fff1c2',basic:1,crit:1});sfx('pierce');return}
@@ -1270,7 +1270,7 @@ const HEROES={
  ezekiel:{name:'Ezekiel',cls:'Darkin-Schurke',role:'Nah- & Fernkampf',hp:105,dmg:10.5,rate:1.55,speed:178,range:400,sig:'z_cleave',
   blurb:'„The Destroyer“. Zerlegt alles in Reichweite mit Klingen, führt Dawnbringer, wirft Dolche auf den Rest und taucht im Schatten genau dort auf, wo es wehtut.',
   branches:['Klingen','Darkin','Schatten'],
-  weapons:[{n:'Dolchpaar',r:1.2,d:0.85},{n:'Krummschwert',r:1,d:1},{n:'Darkin-Klinge',r:0.82,d:1.32,imp:['ls',2]},{n:'Wurfmesser',r:1.1,d:0.95,imp:['crit',5]}],
+  meleeW:[{n:'Dolchpaar',r:1.2,d:0.85},{n:'Krummschwert',r:1,d:1},{n:'Darkin-Klinge',r:0.82,d:1.32,imp:['ls',2]}],rangedW:[{n:'Wurfmesser',r:1.1,d:0.95,imp:['crit',5]},{n:'Wurfsterne',r:1.3,d:0.76},{n:'Schattendolche',r:0.88,d:1.2,imp:['ls',1.5]}],
   basic(){const wh=rank('z_whirl');const ring8=()=>{if(wh&&Math.random()<0.05*wh)daggerRing(8,P.st.dmg*0.6)};
    return basicStd({meleeR:100,arc:1.9,mm:1.3,mc:'#ff5a5a',mopt:{onHit:ring8},
     ranged:(a)=>{shoot({x:P.x,y:P.y-4,a,spd:680,dmg:P.st.dmg*0.85,r:6,pierce:0,kind:'dagger',c:'#d8dde3',basic:1,hit:ring8});sfx('throw')}})},
@@ -1316,14 +1316,14 @@ const HERO_IDS=['barradin','echo','friedrich','ezekiel'];
 for(const id of HERO_IDS)for(const n of HEROES[id].tree){n.max=n.ult?3:5;if(n.c===undefined)n.c=0}
 
 /* ================= Gegenstände ================= */
-const SLOTS=['weapon','helm','armor','gloves','ring1','ring2'];
-const SLOTLBL={weapon:'Waffe',helm:'Helm',armor:'Rüstung',gloves:'Handschuhe',ring1:'Ring',ring2:'Ring',ring:'Ring'};
+const SLOTS=['weapon','ranged','helm','armor','gloves','ring1','ring2'];
+const SLOTLBL={weapon:'Nahkampf',ranged:'Fernkampf',helm:'Helm',armor:'Rüstung',gloves:'Handschuhe',ring1:'Ring',ring2:'Ring',ring:'Ring'};
 const RARN=['Gewöhnlich','Magisch','Selten','Episch','Legendär','Set'];
 const RARCOL=['#c4bcae','#62a8ff','#f2d24c','#bf7dff','#ff8d2e','#3fdc6a'];
 const RARB=[1,1.08,1.16,1.26,1.42,1.34];
 const BASES={helm:['Lederkappe','Eisenhelm','Hörnerhelm','Kapuze','Stirnreif','Topfhelm'],armor:['Wams','Kettenhemd','Schuppenpanzer','Robe','Brigantine','Lederrüstung'],gloves:['Lederhandschuhe','Panzerhandschuhe','Fingerlinge','Armschienen','Kampfhandschuhe'],ring:['Ring','Siegelring','Band','Reif','Knochenring']};
 const SUFFIX=['des Bären','der Wölfe','des Sturms','der Schatten','des Morgenrots','der Ranken','des Hains','des Mondes','der Glut','des Wanderers','der Krähen','des Abgrunds','der Tiefe','des Liedes','der Taverne','des Zwielichts'];
-const LEGEND={weapon:{barradin:['Sternensaiten','Imres Ballade','Laute der tausend Lügen'],echo:['Horn des Uralthains','Wurzel der Welt','Echos Hortwächter'],friedrich:['Wolfsgeheul','Letzter Atemzug','Rex’ Lieblingsstock'],ezekiel:['Darkin-Erbe','Klinge des Zerstörers','Blutdurst']},
+const LEGEND={weapon:{barradin:['Klinge der tausend Lügen','Imres Rapier'],echo:['Wurzel der Welt','Echos Hortwächter'],friedrich:['Rex’ Lieblingsstock','Letzter Atemzug'],ezekiel:['Darkin-Erbe','Klinge des Zerstörers']},ranged:{barradin:['Sternensaiten','Imres Ballade','Laute der tausend Lügen'],echo:['Horn des Uralthains','Dornen des Uralthains'],friedrich:['Wolfsgeheul','Sehne des Ersten Jägers'],ezekiel:['Blutdurst','Dornen der Nacht']},
  helm:['Krone des Sturmkönigs','Maske der Stille','Hörner des Ersten Druiden'],armor:['Haut des Demogorgon','Mantel der Sterne','Panzer des Goblinkönigs'],gloves:['Griff des Henkers','Hände des Meisterdiebs','Fäustlinge der Flut'],ring:['Imres Siegel','Ring der Ewigen Taverne','Auge des Abgrunds','Ring der Natürlichen Zwanzig']};
 const AFF={
  hp:{f:v=>`+${fmt(v)} Leben`,roll:il=>Math.round((6+il*3.2)*rnd(0.7,1.2))},
@@ -1340,11 +1340,11 @@ const AFF={
  skill:{f:v=>`+${v}% Fertigkeitsschaden`,roll:il=>Math.round((6+il*0.5)*rnd(0.7,1.2))},
  gold:{f:v=>`+${v}% Goldfund`,roll:()=>ri(8,25)}
 };
-const SLOTAFF={weapon:['dmg','rate','crit','critd','ls','skill','area'],helm:['hp','armor','cdr','crit','regen','skill'],armor:['hp','armor','regen','ls','dmg','cdr'],gloves:['rate','crit','critd','dmg','ls','armor'],ring:['dmg','crit','critd','hp','cdr','gold','speed','area','ls','skill','regen']};
+const SLOTAFF={weapon:['dmg','rate','crit','critd','ls','skill','area'],ranged:['dmg','rate','crit','critd','ls','skill','area'],helm:['hp','armor','cdr','crit','regen','skill'],armor:['hp','armor','regen','ls','dmg','cdr'],gloves:['rate','crit','critd','dmg','ls','armor'],ring:['dmg','crit','critd','hp','cdr','gold','speed','area','ls','skill','regen']};
 let ITEMID=1;
 function makeItem(slot,il,rar,heroId){
  const it={id:ITEMID++,slot,ilvl:il,rar,aff:[]};const m=RARB[rar];
- if(slot==='weapon'){const w=pick(HEROES[heroId].weapons);it.base=w.n;it.wdmg=Math.max(2,Math.round((3+il*1.6)*w.d*rnd(0.9,1.1)*m));it.wrate=w.r;
+ if(slot==='weapon'||slot==='ranged'){const w=pick(slot==='ranged'?HEROES[heroId].rangedW:HEROES[heroId].meleeW);it.base=w.n;it.wdmg=Math.max(2,Math.round((3+il*1.6)*w.d*rnd(0.9,1.1)*m));it.wrate=w.r;
   if(w.imp){const v=w.imp[0]==='hp'?Math.round((10+il*4)*m):Math.round(w.imp[1]*m*10)/10;it.aff.push({k:w.imp[0],v,imp:1})}}
  else{it.base=pick(BASES[slot]);
   if(slot==='helm'){it.armor=Math.round((2+il*0.9)*rnd(0.9,1.1)*m);it.hp=Math.round((5+il*2.5)*rnd(0.9,1.1)*m)}
@@ -1353,15 +1353,15 @@ function makeItem(slot,il,rar,heroId){
  let n=[slot==='ring'?1:0,ri(1,2),3,4,5,4][rar];const pool=SLOTAFF[slot].slice();
  const vm=[1,1,1.05,1.15,1.3,1.2][rar];
  while(n-->0&&pool.length){const k=pool.splice(Math.floor(Math.random()*pool.length),1)[0];let v=AFF[k].roll(il)*vm;v=(k==='ls'||k==='regen')?Math.round(v*10)/10:Math.round(v);it.aff.push({k,v})}
- if(rar===4){const L=slot==='weapon'?LEGEND.weapon[heroId]:LEGEND[slot];it.name=pick(L);it.pow=POWNAME[it.name]||pick(['d20','phiole','uralt','demohaut','fledermaus','blase','kraeuter','giftzahn','blutdurst'])}
+ if(rar===4){const L=slot==='weapon'?LEGEND.weapon[heroId]:slot==='ranged'?LEGEND.ranged[heroId]:LEGEND[slot];it.name=pick(L);it.pow=POWNAME[it.name]||pick(['d20','phiole','uralt','demohaut','fledermaus','blase','kraeuter','giftzahn','blutdurst'])}
  else if(rar===0)it.name=it.base;else it.name=it.base+' '+pick(SUFFIX);
  if(rar>=2&&rar<5&&Math.random()<(rar>=4?0.5:0.2))it.sock=[null];
  return it;
 }
 function rollRarity(bonus){const L=(P?P.st.luck:0)+bonus;const w=[60,28,9*(1+L),2.6*(1+L*1.2),0.45*(1+L*1.5)];let s=w.reduce((a,b)=>a+b,0)*Math.random();for(let i=0;i<5;i++){s-=w[i];if(s<=0)return i}return 0}
-function randomItem(il,bonus,minR){const sl=pick(['weapon','weapon','helm','armor','gloves','ring','ring']);const r=Math.max(minR||0,rollRarity(bonus));return makeItem(sl,il,r,P.id)}
+function randomItem(il,bonus,minR){const sl=pick(['weapon','ranged','weapon','ranged','helm','armor','gloves','ring','ring']);const r=Math.max(minR||0,rollRarity(bonus));return makeItem(sl,il,r,P.id)}
 const scrapValue=it=>Math.round((3+it.ilvl)*[1,2,4,8,16,12][it.rar]*(1+0.25*(it.up||0)));
-function itemLines(it){const L=[];if(it.slot==='weapon'){L.push(`<b>${fmt(it.wdmg)}</b> Waffenschaden`);L.push(`${f1(it.wrate)}× Angriffstempo`)}
+function itemLines(it){const L=[];if(it.slot==='weapon'||it.slot==='ranged'){L.push(`<b>${fmt(it.wdmg)}</b> ${it.slot==='ranged'?'Fernkampfschaden':'Nahkampfschaden'}`);L.push(`${f1(it.wrate)}× Angriffstempo`)}
  if(it.armor)L.push(`+${it.armor} Rüstung`);if(it.hp)L.push(`+${fmt(it.hp)} Leben`);for(const a of it.aff)L.push((a.imp?'<span class="muted">◇ </span>':'')+AFF[a.k].f(a.v));if(it.pow&&typeof LPOW!=='undefined'&&LPOW[it.pow])L.push(`<span class="c4"><b>${LPOW[it.pow].n}:</b> ${LPOW[it.pow].d}</span>`);if(it.sock)for(const g of it.sock)L.push(g?`<span style="color:${GEMS[g].c}">◆ ${GEMS[g].n}:</span> ${AFF[GEMS[g].k].f(gemVal(g,it.ilvl))}`:'<span class="muted">◇ leerer Sockel</span>');if(it.set)L.push(...setLines(it));return L}
 
 /* ================= Elite-Gegner =================
@@ -1409,7 +1409,7 @@ const LPOW={
  blutdurst:{n:'Blutdurst',d:'Jeder Kill: +3% Angriffstempo für 5s (bis +30%).'},
  dawnlicht:{n:'Sonnenaufgang',d:'+50% Schaden gegen Untote und Dämonen. Sonnenlicht verbrennt Gegner um dich herum.'}
 };
-const POWNAME={'Ring der Natürlichen Zwanzig':'d20','Imres Siegel':'d20','Haut des Demogorgon':'demohaut','Krone des Sturmkönigs':'sturmkrone','Horn des Uralthains':'uralt','Blutdurst':'blutdurst','Ring der Ewigen Taverne':'taverne','Rex’ Lieblingsstock':'rexstock','Dawnbringer':'dawnlicht','Auge des Abgrunds':'kraeuter','Maske der Stille':'fledermaus','Fäustlinge der Flut':'blase','Wolfsgeheul':'giftzahn','Griff des Henkers':'blutdurst','Mantel der Sterne':'blase','Panzer des Goblinkönigs':'demohaut','Hände des Meisterdiebs':'giftzahn','Hörner des Ersten Druiden':'uralt','Sternensaiten':'sturmkrone','Laute der tausend Lügen':'phiole','Wurzel der Welt':'kraeuter','Klinge des Zerstörers':'phiole','Darkin-Erbe':'blutdurst','Imres Ballade':'d20','Echos Hortwächter':'taverne','Letzter Atemzug':'giftzahn'};
+const POWNAME={'Klinge der tausend Lügen':'phiole','Imres Rapier':'d20','Dornen des Uralthains':'kraeuter','Sehne des Ersten Jägers':'giftzahn','Dornen der Nacht':'giftzahn','Ring der Natürlichen Zwanzig':'d20','Imres Siegel':'d20','Haut des Demogorgon':'demohaut','Krone des Sturmkönigs':'sturmkrone','Horn des Uralthains':'uralt','Blutdurst':'blutdurst','Ring der Ewigen Taverne':'taverne','Rex’ Lieblingsstock':'rexstock','Dawnbringer':'dawnlicht','Auge des Abgrunds':'kraeuter','Maske der Stille':'fledermaus','Fäustlinge der Flut':'blase','Wolfsgeheul':'giftzahn','Griff des Henkers':'blutdurst','Mantel der Sterne':'blase','Panzer des Goblinkönigs':'demohaut','Hände des Meisterdiebs':'giftzahn','Hörner des Ersten Druiden':'uralt','Sternensaiten':'sturmkrone','Laute der tausend Lügen':'phiole','Wurzel der Welt':'kraeuter','Klinge des Zerstörers':'phiole','Darkin-Erbe':'blutdurst','Imres Ballade':'d20','Echos Hortwächter':'taverne','Letzter Atemzug':'giftzahn'};
 const LP=id=>!!(P&&P.lp&&P.lp.has(id));
 function legendTick(dt){
  if(LP('uralt')){P.uraltT=(P.uraltT||4)-dt;if(P.uraltT<=0){P.uraltT=4;const e=nearest(P.x,P.y,420);if(e){bolt(e.x,e.y);dealDmg(e,sk(3),{lightning:1,stun:0.3});sfx('thunder')}}}
@@ -1424,9 +1424,9 @@ function legendKill(e){
 /* ================= Werte ================= */
 function computeStats(eq){
  const H=P.hero,up=P.up,lv=P.level;
- const lps0=null;const s={hp:H.hp*(1+0.06*(lv-1)),wdmg:0,rate:H.rate,speed:H.speed,armor:lv*0.6,crit:0.05,critd:1.5,cdr:0,ls:0,regen:0,area:1,skill:1,gold:1,luck:0,range:H.range,dmgP:0,hpP:0,rateP:0,speedP:0,regenP:0};
+ const lps0=null;const s={hp:H.hp*(1+0.06*(lv-1)),wdmg:0,wM:0,wR:0,rM:1,rR:1,rate:H.rate,speed:H.speed,armor:lv*0.6,crit:0.05,critd:1.5,cdr:0,ls:0,regen:0,area:1,skill:1,gold:1,luck:0,range:H.range,dmgP:0,hpP:0,rateP:0,speedP:0,regenP:0};
  for(const k of SLOTS){const it=eq[k];if(!it)continue;
-  if(it.wdmg){s.wdmg+=it.wdmg;s.rate*=it.wrate}if(it.armor)s.armor+=it.armor;if(it.hp)s.hp+=it.hp;
+  if(it.wdmg){if(k==='ranged'){s.wR+=it.wdmg;s.rR*=it.wrate}else{s.wM+=it.wdmg;s.rM*=it.wrate}}if(it.armor)s.armor+=it.armor;if(it.hp)s.hp+=it.hp;
   for(const a of affOf(it)){const v=a.v;switch(a.k){case'hp':s.hp+=v;break;case'dmg':s.dmgP+=v/100;break;case'rate':s.rateP+=v/100;break;case'crit':s.crit+=v/100;break;case'critd':s.critd+=v/100;break;case'armor':s.armor+=v;break;case'speed':s.speedP+=v/100;break;case'cdr':s.cdr+=v/100;break;case'ls':s.ls+=v/100;break;case'regen':s.regen+=v;break;case'area':s.area+=v/100;break;case'skill':s.skill+=v/100;break;case'gold':s.gold+=v/100;break}}}
  s.hpP+=0.06*(up.vit||0);s.dmgP+=0.06*(up.pow||0);s.rateP+=0.04*(up.agi||0);s.luck+=0.08*(up.luck||0);s.gold+=0.1*(up.luck||0);
  for(const n of H.tree){const r=P.ranks[n.id]||0;if(r&&n.mod)n.mod(s,r)}
@@ -1442,7 +1442,8 @@ function computeStats(eq){
  const lps=new Set();for(const k of SLOTS){const it=eq[k];if(it&&it.pow)lps.add(it.pow)}if(eq===P.eq)P.lp=lps;
  if(lps.has('taverne'))s.gold+=0.4;if(lps.has('sturmkrone'))s.cdr+=0.15;
  const maxHp=s.hp*(1+s.hpP);
- return{maxHp,dmg:(H.dmg+s.wdmg)*(1+0.055*(lv-1))*(1+s.dmgP),rate:s.rate*(1+s.rateP),speed:s.speed*(1+Math.min(s.speedP,0.6)),armor:s.armor,crit:Math.min(s.crit,0.75),critd:s.critd,cdr:Math.min(s.cdr,0.5),ls:s.ls,regen:s.regen+maxHp*s.regenP,area:s.area,skill:s.skill,gold:s.gold,luck:s.luck,range:s.range};
+ const lvF=(1+0.055*(lv-1))*(1+s.dmgP),dmgM=(H.dmg+s.wM)*lvF,dmgR=(H.dmg+s.wR)*lvF,rateM=s.rate*s.rM*(1+s.rateP),rateR=s.rate*s.rR*(1+s.rateP);
+ return{maxHp,dmg:(dmgM+dmgR)/2,dmgM,dmgR,rateM,rateR,rate:(rateM+rateR)/2,speed:s.speed*(1+Math.min(s.speedP,0.6)),armor:s.armor,crit:Math.min(s.crit,0.75),critd:s.critd,cdr:Math.min(s.cdr,0.5),ls:s.ls,regen:s.regen+maxHp*s.regenP,area:s.area,skill:s.skill,gold:s.gold,luck:s.luck,range:s.range};
 }
 function recalc(){const old=P.st;const ratio=old?P.hp/old.maxHp:1;P.st=computeStats(P.eq);P.hp=Math.max(1,Math.min(P.st.maxHp,ratio*P.st.maxHp))}
 const armorK=()=>60+12*(G&&G.state!=='title'?effStage():0);
@@ -1470,15 +1471,21 @@ function newHero(id,diff){const H=HEROES[id],hs=hsave(id);const lv0=1+diff*10;
 function startRun(id,diff,mode){mode=mode||'kampagne';unseedRng();const daily=mode==='taeglich'?dailyInfo():null;if(daily){id=daily.hero;diff=0}setStages(stagesFor(mode,daily));
  audioInit();const sm=G.selMode,lm=G.lbMode;G=newGame();G.selMode=sm;G.lbMode=lm;G.mode=mode;G.daily=daily;G.depth=1;G.sel=id;G.seldiff=diff;G.diff=diff;G.state='play';hsave(id).runs++;
  newHero(id,diff);const H=HEROES[id];
- const il=1+Math.round(1.1*22*diff);P.eq.weapon=makeItem('weapon',il,0,id);P.eq.weapon.base=H.weapons[0].n;P.eq.weapon.name=H.weapons[0].n;P.eq.weapon.wrate=H.weapons[0].r;P.eq.weapon.wdmg=Math.round(3+il*1.6);P.eq.weapon.aff=[];
+ const il=1+Math.round(1.1*22*diff);P.eq.weapon=starterWeapon('weapon',il,id);P.eq.ranged=starterWeapon('ranged',il,id);
  P.eq.armor=makeItem('armor',il,0,id);modeHero(mode);
  recalc();P.hp=P.st.maxHp;
  setupStage(0);showStageIntro();
 }
 function saveRun(){if(!P||G.bot)return;SAVE.run={id:P.id,diff:G.diff,stage:G.stage,level:P.level,xp:P.xp,sp:P.sp,ranks:P.ranks,learn:P.learn,eq:P.eq,bag:P.bag,revives:P.revives,kills:G.kills,goldRun:G.goldRun,time:G.time,itemId:ITEMID,score:G.score,bar:P.bar,pots:P.pots,mode:G.mode,depth:G.depth,tag:G.daily?G.daily.tag:null,stages:G.mode!=='kampagne'?STAGES.slice():null,gems:P.gems,mods:P.mods,potMax:P.potMax};persist()}
 function clearRun(){delete SAVE.run;persist()}
+
+function starterWeapon(slot,il,id){const H=HEROES[id],w=(slot==='ranged'?H.rangedW:H.meleeW)[0],it=makeItem(slot,il,0,id);it.base=w.n;it.name=w.n;it.wrate=w.r;it.wdmg=Math.round((3+il*1.6)*w.d);it.aff=[];return it}
+function migrateWeapons(){const H=P.hero,isR=it=>it&&it.slot==='weapon'&&H.rangedW.some(w=>w.n===it.base);
+ for(const it of P.bag)if(isR(it))it.slot='ranged';
+ if(isR(P.eq.weapon)){const w=P.eq.weapon;w.slot='ranged';if(!P.eq.ranged)P.eq.ranged=w;else P.bag.push(w);P.eq.weapon=null}
+ const il=Math.max(1,(P.eq.ranged||P.eq.weapon||{ilvl:1}).ilvl);if(!P.eq.weapon)P.eq.weapon=starterWeapon('weapon',il,P.id);if(!P.eq.ranged)P.eq.ranged=starterWeapon('ranged',il,P.id)}
 function continueRun(){const r=SAVE.run;if(!r||!HEROES[r.id])return;unseedRng();setStages(r.mode&&r.mode!=='kampagne'&&r.stages?r.stages:CAMP_STAGES);audioInit();const sm=G.selMode,lm=G.lbMode;G=newGame();G.selMode=sm;G.lbMode=lm;G.sel=r.id;G.diff=r.diff;G.seldiff=r.diff;G.state='play';G.mode=r.mode||'kampagne';G.daily=G.mode==='taeglich'?dailyInfo(r.tag):null;G.depth=r.depth||1;
- newHero(r.id,r.diff);Object.assign(P,{level:r.level,xp:r.xp,sp:r.sp,ranks:r.ranks,learn:r.learn,bar:r.bar||r.learn.slice(0,6),eq:r.eq||{},bag:r.bag||[],revives:r.revives||0,pots:r.pots!==undefined?r.pots:P.pots});for(const id of Object.keys(P.ranks))if(!P.hero.tree.find(n=>n.id===id))delete P.ranks[id];P.learn=P.learn.filter(id=>P.hero.tree.find(n=>n.id===id));P.bar=P.bar.filter(id=>P.learn.includes(id));G.score=r.score||0;P.gems=r.gems||{};P.mods=r.mods||[];if(r.potMax)P.potMax=r.potMax;if(G.mode==='taeglich'){P.up={};P.stamMax=P.stam=100;P.revives=0}
+ newHero(r.id,r.diff);Object.assign(P,{level:r.level,xp:r.xp,sp:r.sp,ranks:r.ranks,learn:r.learn,bar:r.bar||r.learn.slice(0,6),eq:r.eq||{},bag:r.bag||[],revives:r.revives||0,pots:r.pots!==undefined?r.pots:P.pots});for(const id of Object.keys(P.ranks))if(!P.hero.tree.find(n=>n.id===id))delete P.ranks[id];P.learn=P.learn.filter(id=>P.hero.tree.find(n=>n.id===id));P.bar=P.bar.filter(id=>P.learn.includes(id));G.score=r.score||0;migrateWeapons();P.gems=r.gems||{};P.mods=r.mods||[];if(r.potMax)P.potMax=r.potMax;if(G.mode==='taeglich'){P.up={};P.stamMax=P.stam=100;P.revives=0}
  ITEMID=Math.max(ITEMID,r.itemId||1);G.kills=r.kills||0;G.goldRun=r.goldRun||0;G.time=r.time||0;
  recalc();P.hp=P.st.maxHp;setupStage(Math.min(r.stage,STAGES.length-1));showStageIntro()}
 function setupStage(i){
@@ -2132,7 +2139,7 @@ function updPlayer(dt){
  if(P.hoardT>0){P.hoardT-=dt;if(P.hoardT<=0){P.hoard=0;recalc()}}
  updChan(dt);legendTick(dt);heroTick(dt);
  if(P.potCd>0)P.potCd-=dt;
- P.atkT-=dt;if(P.atkT<=0&&!P.dash&&P.stunT<=0&&!P.chan){P.atkT=P.hero.basic()?1/P.st.rate:0.08}
+ P.atkT-=dt;if(P.atkT<=0&&!P.dash&&P.stunT<=0&&!P.chan){{const k=P.hero.basic();P.atkT=k?1/(k==='r'?P.st.rateR:k==='m'?P.st.rateM:P.st.rate):0.08}}
  for(const k in P.cds)if(P.cds[k]>0)P.cds[k]-=dt;
  if(G.bot&&P.hp<P.st.maxHp*0.35)usePotion();
  if(G.bot&&P.stam>60&&nearest(P.x,P.y,140))P.sprint=true;
@@ -2561,10 +2568,13 @@ function drawPlayer(t){const blink=P.inv>0&&Math.sin(t*40)>0;if(P.inv>0.0&&blink
  if(P.silT>0){cx.strokeStyle='#c08cff';cx.lineWidth=2.4;cx.beginPath();cx.arc(P.x,P.y-38,7,0,TAU);cx.moveTo(P.x-5,P.y-33);cx.lineTo(P.x+5,P.y-43);cx.stroke()}
  if(P.slowT>0&&P.slowA>0.2){cx.globalAlpha=0.5;cx.strokeStyle='#9fd8ff';cx.lineWidth=2;cx.beginPath();cx.ellipse(P.x,P.y+13,16,5,0,0,TAU);cx.stroke();cx.globalAlpha=1}}
 function itemIcon(c,slot,col,base){
- if(slot==='weapon'){const b=(base||'').toLowerCase();
+ if(slot==='weapon'||slot==='ranged'){const b=(base||'').toLowerCase();
   if(/bogen|armbrust/.test(b)){c.strokeStyle='#b0824e';c.lineWidth=2.4;c.beginPath();c.arc(-3,0,10,-1.2,1.2);c.stroke();ln(c,'#e8e0d0',1,-3+10*Math.cos(-1.2),10*Math.sin(-1.2),-3+10*Math.cos(1.2),10*Math.sin(1.2));ln(c,col,2,-9,0,8,0);poly(c,col,11,0,6,-3,6,3)}
   else if(/laute|harfe|flöte/.test(b)){ln(c,'#5a3a1e',2.6,1,-1,8,-10);ell(c,-3,4,6.5,7.5,'#a86c34');circ(c,-3,4,2.2,'#2a170b');ln(c,col,2,6,-11,10,-8)}
-  else if(/stab|keule|zweig|sichel/.test(b)){ln(c,'#7a5230',2.8,-7,9,6,-8);circ(c,7,-9,3.8,col)}
+  else if(/stern/.test(b)){poly(c,col,0,-9,2.5,-2.5,9,0,2.5,2.5,0,9,-2.5,2.5,-9,0,-2.5,-2.5);circ(c,0,0,2,'#2a2228')}
+  else if(/wurf|schattendolch/.test(b)){ln(c,'#d8dde3',2.4,-8,3,1,-6);ln(c,col,2.6,-8,3,-5,0);ln(c,'#d8dde3',2.4,-3,8,6,-1);ln(c,col,2.6,-3,8,0,5);ln(c,'rgba(255,255,255,.35)',1,4,-8,8,-8)}
+  else if(/axt/.test(b)){ln(c,'#7a5230',2.6,-6,8,5,-7);poly(c,col,2,-9,9,-5,8,1,3,-3)}
+  else if(/stab|keule|zweig|sichel|rute/.test(b)){ln(c,'#7a5230',2.8,-7,9,6,-8);circ(c,7,-9,3.8,col)}
   else{ln(c,'#d8dde3',3,-7,7,7,-7);ln(c,col,3,-7,7,-3,3);ln(c,col,2,-8,2,-2,8)}}
  else if(slot==='helm'){c.fillStyle=col;c.beginPath();c.arc(0,2,8,Math.PI,0);c.fill();c.fillRect(-9,1,18,3);ln(c,'rgba(0,0,0,.35)',1.5,0,-6,0,1)}
  else if(slot==='armor'){poly(c,col,-8,-6,-3,-8,3,-8,8,-6,7,8,-7,8);ln(c,'rgba(0,0,0,.3)',1.5,0,-7,0,7)}
@@ -2806,10 +2816,10 @@ function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel
  if(selIt){const it=selIt,cur=selT==='b'?P.eq[target]:null;let head='';if(selT==='b'){const dl=itemDelta(it);head=`<div class="${dl>0.005?'good':dl<-0.005?'bad':'muted'}" style="font-weight:800">${dl>0.005?'▲ ':dl<-0.005?'▼ ':''}${dl>=0?'+':''}${Math.round(dl*100)}% Kampfkraft gegenüber dem Angelegten</div>`}
   const pw=it.pow&&LPOW[it.pow]?`<div class="lpow"><b>${LPOW[it.pow].n}</b> ${LPOW[it.pow].d}</div>`:'';const cpw=cur&&cur.pow&&LPOW[cur.pow]?`<div class="lpow old"><b>Angelegt: ${LPOW[cur.pow].n}</b> ${LPOW[cur.pow].d}</div>`:'';
   det=`<div class="idet2 card" id="idet2"><button class="x" data-act="inv-desel" aria-label="Schließen">×</button>
-   <div class="sh-head">${ico(it)}<div><div class="in c${it.rar}">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]}${it.slot==='weapon'?' ('+esc(it.base)+')':''} · Stufe ${it.ilvl}${cur?` · ersetzt <span class="c${cur.rar}">${esc(cur.name)}</span>`:''}</div></div></div>
+   <div class="sh-head">${ico(it)}<div><div class="in c${it.rar}">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]}${it.slot==='weapon'||it.slot==='ranged'?' ('+esc(it.base)+')':''} · Stufe ${it.ilvl}${cur?` · ersetzt <span class="c${cur.rar}">${esc(cur.name)}</span>`:''}</div></div></div>
    ${selT==='b'?compareHtml(it,cur):`<ul>${itemLines(it).map(l=>`<li>${l}</li>`).join('')}</ul>`}${pw}${cpw}${head}
-   <div class="row">${selT==='b'?`<button class="btn gold" data-act="inv-equip">Anlegen</button><button class="btn" data-act="inv-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`:(selK!=='weapon'?`<button class="btn" data-act="inv-unequip" ${P.bag.length>=24?'disabled':''}>Ablegen</button>`:'<span class="muted" style="font-size:13px">Die Waffe kannst du nur austauschen.</span>')}</div></div>`}
- const lines=[['Schaden',fmt(st.dmg)],['Angriffe pro Sekunde',f1(st.rate)],['Leben',fmt(st.maxHp)],['Rüstung',`${fmt(st.armor)} (−${Math.round(armorRed(st.armor)*100)}%)`],['Kritische Trefferchance',Math.round(st.crit*100)+'%'],['Kritischer Schaden',pc(st.critd)],['Fertigkeitsschaden',pc(st.skill)],['Abklingzeiten',`−${Math.round(st.cdr*100)}%`],['Lebensraub',f1(st.ls*100)+'%'],['Regeneration',f1(st.regen)+' / s'],['Wirkungsbereich',pc(st.area)],['Goldfund',pc(st.gold)],['Ausdauer',fmt(P.stamMax)],['Heiltränke',`${P.pots} / ${P.potMax}`]];
+   <div class="row">${selT==='b'?`<button class="btn gold" data-act="inv-equip">Anlegen</button><button class="btn" data-act="inv-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`:(selK!=='weapon'&&selK!=='ranged'?`<button class="btn" data-act="inv-unequip" ${P.bag.length>=24?'disabled':''}>Ablegen</button>`:'<span class="muted" style="font-size:13px">Waffen kannst du nur austauschen.</span>')}</div></div>`}
+ const lines=[['Nahkampf',`${fmt(st.dmgM)} · ${f1(st.rateM)} pro s`],['Fernkampf',`${fmt(st.dmgR)} · ${f1(st.rateR)} pro s`],['Fähigkeitsschaden-Basis',fmt(st.dmg)],['Leben',fmt(st.maxHp)],['Rüstung',`${fmt(st.armor)} (−${Math.round(armorRed(st.armor)*100)}%)`],['Kritische Trefferchance',Math.round(st.crit*100)+'%'],['Kritischer Schaden',pc(st.critd)],['Fertigkeitsschaden',pc(st.skill)],['Abklingzeiten',`−${Math.round(st.cdr*100)}%`],['Lebensraub',f1(st.ls*100)+'%'],['Regeneration',f1(st.regen)+' / s'],['Wirkungsbereich',pc(st.area)],['Goldfund',pc(st.gold)],['Ausdauer',fmt(P.stamMax)],['Heiltränke',`${P.pots} / ${P.potMax}`]];
  const pows=[...(P.lp||[])].filter(k=>LPOW[k]).map(k=>`<div class="lpow"><b>${LPOW[k].n}</b> ${LPOW[k].d}</div>`).join('');
  showScreen(`<div class="wrap inv">
   ${menuTabs('inv')}
@@ -2893,7 +2903,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'inv-equip':{const i=+G.invSel.split(':')[1];equipFromBag(i);G.invSel=null;sfx('equip');renderInv(true);break}
   case'inv-scrap':{const i=+G.invSel.split(':')[1];const it=P.bag[i];if(it){const v=scrapValue(it);SAVE.gold+=v;G.goldRun+=v;P.bag.splice(i,1);sfx('scrap')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'inv-scrapall':{let v=0;P.bag=P.bag.filter(it=>{if(it.rar<4&&!it.up&&!(it.sock&&it.sock.some(Boolean))&&itemDelta(it)<=0.005){v+=scrapValue(it);return false}return true});SAVE.gold+=v;G.goldRun+=v;if(v){sfx('scrap');toast(`+${fmt(v)} Gold`,'#e5b454')}G.invSel=null;updateInvBadge();renderInv(true);break}
-  case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<24&&k!=='weapon'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
+  case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<24&&k!=='weapon'&&k!=='ranged'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'tree-sel':if(G.barPick&&b.dataset.i!==undefined){const i=+b.dataset.i;if(!P.bar.includes(G.barPick)){P.bar[i]=G.barPick;buildSkillBar();sfx('equip')}G.treeSel=G.barPick;G.barPick=null;renderTree(true);break}if(G.barPick&&G.barPick!==b.dataset.id)G.barPick=null;G.treeSel=b.dataset.id;{const n=P.hero.tree.find(x=>x.id===b.dataset.id);if(n)G.treeBr=n.b}renderTree(true);break;
   case'tree-br':G.treeBr=+b.dataset.b;renderTree(true);break;
   case'tree-bar':if(P.bar.length>=6&&!P.bar.includes(G.treeSel))G.barPick=G.treeSel;else if(!P.bar.includes(G.treeSel)){toggleBar(G.treeSel);sfx('equip')}renderTree(true);break;
@@ -2951,8 +2961,8 @@ function bossStages(){const L=CAMP_STAGES.map((s,i)=>s.boss?Object.assign({},s,{
 function stagesFor(mode,daily){return mode==='taeglich'?daily.stages:mode==='abstieg'?[makeDepth(1)]:mode==='bossrausch'?bossStages():CAMP_STAGES}
 /* Heldenaufbau je Modus */
 function modeHero(mode){if(mode==='taeglich'){P.up={};P.pots=P.potMax=dmod('vampir')?0:2;P.stamMax=P.stam=100;P.revives=0;P.level=12;P.sp=12}
- if(mode==='bossrausch'){P.level=30;P.sp=30+(P.up.wis||0);const il=34+Math.round(22*G.diff*1.1);for(const s of ['helm','armor','gloves'])P.eq[s]=makeItem(s,il,2,P.id);P.eq.ring1=makeItem('ring',il,2,P.id);P.eq.ring2=makeItem('ring',il,2,P.id);const w=makeItem('weapon',il,2,P.id);P.eq.weapon=w}
- if(mode==='taeglich'){const il=14;P.eq.helm=makeItem('helm',il,1,P.id);P.eq.ring1=makeItem('ring',il,1,P.id);P.eq.weapon.wdmg=Math.round(3+il*1.6)}}
+ if(mode==='bossrausch'){P.level=30;P.sp=30+(P.up.wis||0);const il=34+Math.round(22*G.diff*1.1);for(const s of ['helm','armor','gloves'])P.eq[s]=makeItem(s,il,2,P.id);P.eq.ring1=makeItem('ring',il,2,P.id);P.eq.ring2=makeItem('ring',il,2,P.id);P.eq.weapon=makeItem('weapon',il,2,P.id);P.eq.ranged=makeItem('ranged',il,2,P.id)}
+ if(mode==='taeglich'){const il=14;P.eq.helm=makeItem('helm',il,1,P.id);P.eq.ring1=makeItem('ring',il,1,P.id);P.eq.weapon.wdmg=Math.round(3+il*1.6);P.eq.ranged.wdmg=Math.round(3+il*1.6)}}
 function modeStats(s){if(G.mode!=='taeglich')return;if(dmod('glaskanone')){s.dmgP+=0.6;s.hpP-=0.4}if(dmod('hektik'))s.speedP+=0.3;if(dmod('vampir'))s.ls+=0.06;if(dmod('goldrausch'))s.gold+=1.5}
 function modeTick(dt){if(G.mode==='abstieg'&&G.state==='play'){const S=STAGES[G.stage];if(S&&S.limit&&!G.portal){const left=S.limit-G.stageTime;
   if(left<30&&!G.warn30){G.warn30=1;toast('Noch 30 Sekunden auf dieser Ebene!','#ff8a7a');sfx('heart')}if(left<=0){G.timeUp=1;endRun(false)}}}}
@@ -3152,7 +3162,7 @@ function maybeEvent(){if(G.bot||!(G.mode==='kampagne'||G.mode==='abstieg'))retur
 function renderEvent(){const E=G.ev,ev=E.ev;hud.hidden=true;
  const opts=ev.opts.map((o,i)=>{const cost=o.cost?o.cost():0,bon=o.bonus&&o.bonus[P.id]||0;const poor=cost>SAVE.gold;
   return`<button class="btn ${o.skill?'gold':''} evopt" data-act="ev-opt" data-i="${i}" ${poor?'disabled':''}><b>${esc(o.l)}</b>${o.skill?`<small>${esc(o.skill)} · SG ${o.dc}${bon?` · ${P.hero.name} +${bon}`:''}</small>`:''}${cost?`<small>${fmt(cost)} Gold${poor?' – zu wenig':''}</small>`:''}</button>`}).join('');
- const res=E.res?`<div class="evres ${E.res.cls}"><div class="d20"><span id="d20n">${E.res.roll}</span></div><div><div class="evroll">${E.res.line}</div><div class="evtxt">${E.res.txt}</div></div></div>`:'';
+ const res=E.res?`<div class="evres ${E.res.rolling?'rolling':E.res.cls}"><div class="d20"><span id="d20n">${E.res.rolling?'?':E.res.roll}</span></div><div><div class="evroll">${E.res.line}</div><div class="evtxt">${E.res.txt}</div></div></div>`:'';
  showScreen(`<div class="wrap narrow center ev" style="min-height:70vh;justify-content:center">
   <div class="eyebrow">Unterwegs · ${esc(P.hero.name)}</div><h2>${esc(ev.t)}</h2><p class="lead">${esc(ev.txt)}</p>
   ${E.res?res+`<button class="btn-main" data-act="ev-done">Weiterziehen</button>`:`<div class="evopts">${opts}</div>`}</div>`)}
@@ -3163,10 +3173,10 @@ function chooseEvent(i){const E=G.ev,o=E.ev.opts[i];if(!o||E.res)return;
  const bon=o.bonus&&o.bonus[P.id]||0,r=ri(1,20),tot=r+bon,nat20=r===20,nat1=r===1,ok=nat20||(!nat1&&tot>=o.dc);
  const txt=nat20&&o.crit?o.crit():ok?o.ok():(o.fail?o.fail():'Nichts geschieht.');if(nat1&&!nat20)addMod('edmg',0.1,0,'Pech');
  E.res={roll:r,cls:nat20?'crit':ok?'ok':'fail',line:nat20?'Natürliche 20! Kritischer Erfolg!':nat1?'Natürliche 1 – kritischer Fehlschlag!':`Wurf ${r}${bon?' + '+bon+' = '+tot:''} gegen SG ${o.dc}: ${ok?'Erfolg':'Fehlschlag'}`,txt};
- renderEvent();persist();sfx('ui');diceAnim(r,nat20,nat1,ok)}
-function diceAnim(r,n20,n1,ok){const el=$('d20n');if(!el)return;const box=el.parentNode;box.classList.add('roll');let k=0;sfx('d_bone');
- const iv=setInterval(()=>{k++;el.textContent=ri(1,20);if(k%3===0)sfx('hit');if(k>=14){clearInterval(iv);el.textContent=r;box.classList.remove('roll');box.classList.add('land');sfx(n20?'legend':n1?'hurt':ok?'item':'d_flesh');if(n20)sfx('level')}},60);
- const rest=box.parentNode.querySelector('.evtxt'),line=box.parentNode.querySelector('.evroll');if(rest){rest.style.opacity=0;line.style.opacity=0;setTimeout(()=>{rest.style.opacity=1;line.style.opacity=1},900)}}
+ E.res.rolling=true;renderEvent();persist();sfx('ui');diceAnim(r,nat20,nat1,ok)}
+function diceAnim(r,n20,n1,ok){const el=$('d20n');if(!el)return;const box=el.parentNode;box.classList.add('roll');const rest=box.parentNode.querySelector('.evtxt'),line=box.parentNode.querySelector('.evroll');let k=0;sfx('d_bone');
+ const iv=setInterval(()=>{k++;el.textContent=ri(1,20);if(k%3===0)sfx('hit');if(k>=14){clearInterval(iv);el.textContent=r;box.classList.remove('roll');box.classList.add('land');if(G.ev&&G.ev.res){G.ev.res.rolling=false;const ev=box.closest('.evres');if(ev){ev.classList.remove('rolling');ev.classList.add(G.ev.res.cls)}}if(rest){rest.style.opacity=1;line.style.opacity=1}sfx(n20?'legend':n1?'hurt':ok?'item':'d_flesh');if(n20)sfx('level')}},60);
+ if(rest){rest.style.opacity=0;line.style.opacity=0}}
 function finishEvent(){G.ev=null;doNextStage()}
 
 /* ================= Der Schmied: Aufwerten, Neu schmieden, Sockel, Edelsteine =================
@@ -3195,7 +3205,7 @@ function renderSmith(keep){const it=smithSel();const ico=x=>`<canvas class="ico"
   const sk=socks.map((s,i)=>s?`<div class="smrow"><span><b style="color:${GEMS[s].c}">◆ ${GEMS[s].n}</b> ${AFF[GEMS[s].k].f(gemVal(s,it.ilvl))}</span><button class="btn small" data-act="smith-unsock" data-i="${i}" ${g<UNSOCK?'disabled':''}>Herauslösen · ${UNSOCK}</button></div>`
    :`<div class="smrow"><span class="muted">◇ leerer Sockel</span><span class="gemsel">${GEM_IDS.filter(x=>P.gems[x]>0).map(x=>`<button class="gemb" style="--gc:${GEMS[x].c}" data-act="smith-gem" data-i="${i}" data-g="${x}" title="${GEMS[x].n}: ${AFF[GEMS[x].k].f(gemVal(x,it.ilvl))}"><i></i></button>`).join('')||'<span class="muted" style="font-size:12px">keine Edelsteine</span>'}</span></div>`).join('');
   det=`<div class="sh-head">${ico(it)}<div><div class="in c${it.rar}">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]} · Stufe ${it.ilvl} · Aufwertung ${it.up||0} / 5</div></div></div>
-   <ul>${itemLines(it).slice(0,it.slot==='weapon'?2:(it.armor?1:0)+(it.hp?1:0)).map(l=>`<li>${l}</li>`).join('')}</ul>
+   <ul>${itemLines(it).slice(0,it.slot==='weapon'||it.slot==='ranged'?2:(it.armor?1:0)+(it.hp?1:0)).map(l=>`<li>${l}</li>`).join('')}</ul>
    <div class="eyebrow">Eigenschaften</div>${affs||'<p class="muted">keine</p>'}
    <div class="eyebrow">Sockel ${socks.length} / ${maxSock(it)}</div>${sk||'<p class="muted" style="font-size:13px">Noch keine Sockel.</p>'}
    <div class="row"><button class="btn gold" data-act="smith-up" ${(it.up||0)>=5||g<uc?'disabled':''}>${(it.up||0)>=5?'Voll aufgewertet':'Aufwerten (+8% auf alles) · '+fmt(uc)}</button>
