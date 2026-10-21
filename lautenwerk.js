@@ -3677,71 +3677,30 @@
     }
   }
 
-  /* ---------- Favoriten: die wichtigsten Kacheln groß oben im Pult ---------- */
-  Object.assign(TX.de, { favTitel: "Favoriten", favAnpassen: "✎ Anpassen", favFertig: "✓ Fertig", favLeer: "Noch nichts angeheftet – tippe auf „✎ Anpassen“.",
-    favTipp: "Tippe unten auf Stimmungen, Lieder, Kulissen oder Effekte, um sie anzuheften (★). Hier oben: ✕ entfernt, ‹ › verschiebt." });
-  Object.assign(TX.en, { favTitel: "Favourites", favAnpassen: "✎ Customise", favFertig: "✓ Done", favLeer: "Nothing pinned yet – tap “✎ Customise”.",
-    favTipp: "Tap moods, songs, backdrops or effects below to pin them (★). Up here: ✕ removes, ‹ › moves." });
-  const FAV_START = ["v:kampf", "v:spannung", "v:rast", "v:dorffest", "s:drache", "s:jubel", "s:krit", "s:bonk"];
-  let favs = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-favs")); if (Array.isArray(x)) return x.filter(f => typeof f === "string").slice(0, 40); } catch (_) {} return FAV_START.slice(); })();
-  let favModus = false;
+  /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
+  Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften" });
+  Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin" });
+  let favs = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-favs")); if (Array.isArray(x)) return x.filter(f => typeof f === "string").slice(0, 80); } catch (_) {} return []; })();
   function favsMerken() { try { localStorage.setItem("imres-lw-favs", JSON.stringify(favs)); } catch (_) {} }
-  const FAV_ATTR = { v: "data-vorlage", s: "data-sfx", k: "data-kulisse" };
-  function favText(T, f) {
-    const q = f[0], k = f.slice(2);
-    if (q === "v") {
-      if (k.startsWith("e_")) return eigeneStimmungen[k] && STIL[eigeneStimmungen[k].basis] ? "⭐ " + esc(eigeneStimmungen[k].name) : null;
-      return T.vorlagen[k] ? (eigeneStimmungen[k] ? esc((T.vorlagen[k].match(/^[^\wÄÖÜäöü]+/) || [""])[0] + stimmName(k)) + " ✎" : T.vorlagen[k]) : null;
-    }
-    if (q === "s") return T.sfx[k] && ALLE_FX.includes(k) ? T.sfx[k] : null;
-    if (q === "k") return KULISSEN.includes(k) ? T.kulissen[k] : null;
-    return null;
+  const FAV_Q = { "data-vorlage": "v", "data-sfx": "s", "data-kulisse": "k" };
+  /* angeheftete zuerst (in der Reihenfolge des Anheftens), danach der Rest wie gewohnt */
+  function oben(q, liste) {
+    const rang = k => { const i = favs.indexOf(q + ":" + k); return i < 0 ? 1e4 : i; };
+    return liste.map((k, i) => [k, i]).sort((x, y) => rang(x[0]) - rang(y[0]) || x[1] - y[1]).map(x => x[0]);
   }
-  function favLeiste(T) {
-    if (hoerer) return "";
-    const da = favs.map(f => [f, favText(T, f)]).filter(x => x[1]);
-    const kacheln = da.map(([f, text], i) => favModus
-      ? '<span class="lw-fav-e"><button type="button" data-favzug="' + i + ':-1" aria-label="‹">‹</button><button type="button" class="lw-fav-name" data-favweg="' + esc(f) + '">' + text + ' <b>✕</b></button><button type="button" data-favzug="' + i + ':1" aria-label="›">›</button></span>'
-      : '<button type="button" class="lw-fav" ' + FAV_ATTR[f[0]] + '="' + esc(f.slice(2)) + '">' + text + "</button>").join("");
-    return '<section class="lw-favs' + (favModus ? " bearbeiten" : "") + '"><div class="lw-favs-kopf"><h4>★ ' + T.favTitel + '</h4><button type="button" class="lw-klein" data-aktion="favmodus">' + (favModus ? T.favFertig : T.favAnpassen) + "</button></div>" +
-      (kacheln ? '<div class="lw-fav-gitter">' + kacheln + "</div>" : '<p class="lw-tipp lw-leer">' + T.favLeer + "</p>") + (favModus ? '<p class="lw-tipp">' + T.favTipp + "</p>" : "") + "</section>";
+  /* der Punkt in der Ecke: ein eigener Tippbereich innerhalb der Kachel */
+  function favPunkt(attr, wert) {
+    const q = FAV_Q[attr]; if (!q || hoerer || wert === "zufall" || wert === "leer") return "";
+    const an = favs.includes(q + ":" + wert), T = t();
+    return '<span class="lw-pin' + (an ? " an" : "") + '" data-pin="' + esc(q + ":" + wert) + '" role="button" aria-pressed="' + an + '" title="' + esc(an ? T.favAus : T.favAn) + '" aria-label="' + esc(an ? T.favAus : T.favAn) + '"></span>';
   }
-  function favsNeu() {
-    const alt = root.querySelector(".lw-favs");
-    if (alt) alt.outerHTML = favLeiste(t());
-    root.classList.toggle("lw-favmodus", favModus);
-    favMarkieren();
-  }
-  function favSchluessel(el) {
-    for (const q of ["v", "s", "k"]) if (el.hasAttribute(FAV_ATTR[q])) return q + ":" + el.getAttribute(FAV_ATTR[q]);
-    return null;
-  }
-  /* Favoriten zeigen, was gerade läuft, und im Bearbeiten-Modus tragen angeheftete Kacheln einen Stern */
-  function favMarkieren() {
-    const st = S.eigeneStimmung || S.stimmung;
-    root.querySelectorAll(".lw-favs .lw-fav").forEach(el => {
-      const f = favSchluessel(el); if (!f) return;
-      const k = f.slice(2);
-      el.classList.toggle("an", f[0] === "v" ? (STIL[k] || k.startsWith("e_") ? st === k : !S.stimmung && t().vorlagen[k] && S.titel === t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "")) : f[0] === "k" ? S.kulisse === k : false);
-    });
-    root.querySelectorAll(".lw-konsole [data-vorlage], .lw-konsole [data-sfx], .lw-konsole [data-kulisse]").forEach(el => el.classList.toggle("gepinnt", favModus && favs.includes(favSchluessel(el))));
-  }
+  function favMarkieren() {}
   root.addEventListener("click", e => {
-    if (e.target.closest('[data-aktion="favmodus"]')) { favModus = !favModus; favsNeu(); e.stopPropagation(); return; }
-    if (!favModus) return;
-    const weg = e.target.closest("[data-favweg]"), zug = e.target.closest("[data-favzug]");
-    if (weg) { favs = favs.filter(f => f !== weg.dataset.favweg); favsMerken(); favsNeu(); e.stopPropagation(); return; }
-    if (zug) {
-      const [i, d] = zug.dataset.favzug.split(":").map(Number), T = t(), da = favs.filter(f => favText(T, f));
-      const j = i + d; if (j >= 0 && j < da.length) { [da[i], da[j]] = [da[j], da[i]]; favs = da; favsMerken(); favsNeu(); }
-      e.stopPropagation(); return;
-    }
-    const k = e.target.closest(".lw-konsole [data-vorlage], .lw-konsole [data-sfx], .lw-konsole [data-kulisse]");
-    if (k) {
-      e.stopPropagation(); e.preventDefault();
-      const f = favSchluessel(k); if (!f || !favText(t(), f)) return;
-      favs = favs.includes(f) ? favs.filter(x => x !== f) : favs.concat([f]); favsMerken(); favsNeu();
-    }
+    const p = e.target.closest("[data-pin]"); if (!p) return;
+    e.stopPropagation(); e.preventDefault();
+    const f = p.dataset.pin;
+    favs = favs.includes(f) ? favs.filter(x => x !== f) : favs.concat([f]); favsMerken();
+    boxNeu(f[0] === "v" ? "musik" : f[0] === "k" || f[0] === "s" && !COVER_LISTE.includes(f.slice(2)) ? "klang" : "musik");
   }, true);
 
   /* ---------- Oberfläche ---------- */
@@ -3773,7 +3732,7 @@
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
   let musikTab = "stimmungen", fxTab = "effekte";
   try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; } catch (_) {}
-  const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + text + "</button>";
+  const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + text + favPunkt(attr, wert) + "</button>";
   const reiter = (art, liste, aktiv, T) => '<div class="lw-tabs" role="tablist">' + liste.map(([k, txt]) =>
     '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
   function stimmSpeicherZeile(T) {
@@ -3791,15 +3750,16 @@
   }
   function musikBox(T, voll) {
     let kacheln;
-    if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
+    if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(oben("v", LIEDER).map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
         voll ? [kachel("data-vorlage", "zufall", T.zufall), kachel("data-vorlage", "leer", T.leeren)] : [],
-        ['<p class="lw-trenner">' + T.coverTitel + "</p>"], COVER_LISTE.map(k => kachel("data-sfx", k, T.sfx[k]))).join("");
+        ['<p class="lw-trenner">' + T.coverTitel + "</p>"], oben("s", COVER_LISTE).map(k => kachel("data-sfx", k, T.sfx[k]))).join("");
     else if (musikTab === "eigene") {
       const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
       kacheln = alle.length ? alle.map(([q, l]) => kachel("data-eigen", q + ":" + l.id, (q === "g" ? "👥 " : "📱 ") + esc(l.name), geladen && geladen.quelle === q && String(geladen.id) === String(l.id))).join("")
         : '<p class="lw-tipp lw-leer">' + T.keineEigenen + "</p>";
-    } else kacheln = STIMMUNGEN.map(k => kachel("data-vorlage", k, eigeneStimmungen[k] ? esc((T.vorlagen[k].match(/^[^\wÄÖÜäöü]+/) || [""])[0] + stimmName(k)) + " ✎" : T.vorlagen[k], S.stimmung === k && (!S.eigeneStimmung || S.eigeneStimmung === k)))
-      .concat(Object.keys(eigeneStimmungen).filter(id => id.startsWith("e_") && STIL[eigeneStimmungen[id].basis]).map(id => kachel("data-vorlage", id, "⭐ " + esc(eigeneStimmungen[id].name), S.eigeneStimmung === id))).join("");
+    } else kacheln = oben("v", STIMMUNGEN.concat(Object.keys(eigeneStimmungen).filter(id => id.startsWith("e_") && STIL[eigeneStimmungen[id].basis]))).map(k => k.startsWith("e_")
+      ? kachel("data-vorlage", k, "⭐ " + esc(eigeneStimmungen[k].name), S.eigeneStimmung === k)
+      : kachel("data-vorlage", k, eigeneStimmungen[k] ? esc((T.vorlagen[k].match(/^[^\wÄÖÜäöü]+/) || [""])[0] + stimmName(k)) + " ✎" : T.vorlagen[k], S.stimmung === k && (!S.eigeneStimmung || S.eigeneStimmung === k))).join("");
     return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + "</h4>" +
         reiter("musiktab", [["stimmungen", T.tabStimmungen], ["lieder", T.tabLieder], ["eigene", T.tabEigene]], musikTab, T) + "</div>" +
       '<div class="lw-pult-gitter">' + kacheln + "</div>" +
@@ -3813,10 +3773,10 @@
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + "</h4></div>" +
-      '<div class="lw-pult-gitter lw-kul-gitter">' + KULISSEN.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
+      '<div class="lw-pult-gitter lw-kul-gitter">' + oben("k", KULISSEN).map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
       reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
-      '<div class="lw-pult-gitter lw-pult-fx">' + liste.map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" + fxRegler(T) + "</section>";
+      '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" + fxRegler(T) + "</section>";
   }
   const konsole = (T, voll) => '<div class="lw-konsole">' + musikBox(T, voll) + klangBox(T) + "</div>";
   function boxNeu(welche) {
@@ -3842,7 +3802,7 @@
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<span class="lw-pult-titel">' + esc(S.titel || T.eigenesLied) + "</span>" +
           '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></div>" +
-        favLeiste(T) + konsole(T, false) +
+        konsole(T, false) +
         '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
@@ -4054,7 +4014,7 @@
         '<button type="button" class="lw-schalter" data-feld="swing" aria-pressed="' + !!S.swing + '">' + T.swing + "</button>" +
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
       "</div>" +
-      favLeiste(T) + konsole(T, true) +
+      konsole(T, true) +
       '<div class="lw-teile">' +
         '<span class="lw-teilgruppe"><span class="lw-teile-label">' + T.teil + ':</span><span class="lw-teilknoepfe">' +
         TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") + "</span></span>" +
@@ -4524,28 +4484,15 @@
 .lw-note.zzz { color: #bcd0ff; font-family: var(--hand); font-size: 1.3rem; text-shadow: 0 0 8px rgba(150,180,255,.6); }
 .lw-note.zzz.gross-z { font-size: 2rem; }
 .lw-note.zirp { color: #a9c9a4; font-size: .95rem; font-style: italic; }
-.lw-favs { display: grid; gap: .55rem; padding: .75rem .8rem; margin: .2rem 0 .7rem; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(224,160,70,.09), rgba(235,226,204,.02)); }
-.lw-favs-kopf { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
-.lw-favs h4 { margin: 0; color: var(--ember); }
-.lw-fav-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
-@media (max-width: 520px) { .lw-fav-gitter { grid-template-columns: 1fr 1fr; } .lw-favs.bearbeiten .lw-fav-gitter { grid-template-columns: 1fr; } }
-.lw-fav { border: 1px solid rgba(224,160,70,.45); background: rgba(16,14,21,.75); color: var(--vellum); font: inherit; font-size: 1.05rem; padding: .85rem .6rem; min-height: 3.3rem; cursor: pointer; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: transform .12s, border-color .2s; }
-.lw-fav:hover { border-color: var(--ember); color: var(--ember); }
-.lw-fav:active { transform: scale(.96); }
-.lw-fav.an { background: var(--ember); border-color: var(--ember); color: var(--night); }
-.lw-fav.spielt { border-color: var(--ember); background: rgba(224,160,70,.25); color: var(--ember); }
-.lw-fav.spielt::after { content: " ■"; font-size: .8em; }
-.lw-fav.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
-.lw-fav.blitz { animation: lwblitz .5s ease-out; }
-.lw-fav-e { display: flex; min-width: 0; }
-.lw-fav-e button { border: 1px solid var(--line); background: rgba(16,14,21,.75); color: var(--ash); font: inherit; cursor: pointer; padding: .5rem .45rem; }
-.lw-fav-e .lw-fav-name { flex: 1; min-width: 0; color: var(--vellum); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-inline: 0; }
-.lw-fav-e .lw-fav-name b { color: #ffb3a8; font-weight: 400; }
-.lw-fav-e button:hover { color: var(--ember); }
-#lautenwerk.lw-favmodus .lw-konsole [data-vorlage], #lautenwerk.lw-favmodus .lw-konsole [data-sfx], #lautenwerk.lw-favmodus .lw-konsole [data-kulisse] { border-style: dashed; }
-#lautenwerk.lw-favmodus .lw-konsole .gepinnt { border-style: solid; border-color: var(--ember); box-shadow: inset 0 0 0 1px var(--ember); }
-#lautenwerk.lw-favmodus .lw-konsole .gepinnt::before { content: "★ "; color: var(--ember); }
-#lautenwerk.lw-favmodus .lw-konsole .gepinnt.an::before { color: var(--night); }
+.lw-pult-gitter button, .lw-effekte button, .lw-vorlagen button { position: relative; }
+.lw-pult-gitter button:has(.lw-pin) { padding-right: 1.2rem; }
+.lw-pin { position: absolute; top: 0; right: 0; bottom: 0; width: 1.3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.lw-pin::after { content: ""; width: .5rem; height: .5rem; border-radius: 50%; border: 1px solid rgba(224,160,70,.45); transition: transform .15s, background .15s; }
+.lw-pin:hover::after { border-color: var(--ember); transform: scale(1.3); }
+.lw-pin.an::after { background: var(--ember); border-color: var(--ember); box-shadow: 0 0 6px rgba(224,160,70,.6); }
+button.an > .lw-pin::after { border-color: rgba(16,14,21,.5); }
+button.an > .lw-pin.an::after { background: var(--night); border-color: var(--night); box-shadow: none; }
+button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 @media (prefers-reduced-motion: reduce) { .lw-buehne *, .lw-buehne *::before, .lw-buehne *::after { animation: none !important; } }
 .lw-buehne { position: relative; height: clamp(170px, 32vw, 250px); overflow: hidden;
   background: radial-gradient(ellipse at 45% 85%, rgba(224,160,70,.16), transparent 65%); border-bottom: 1px solid var(--line); margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); }
