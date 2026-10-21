@@ -2082,8 +2082,9 @@ function bossDefeated(e){G.bossDone=true;G.boss=null;bossDeathFx(e);G.shake+=10;
  if(!G.portal)G.portal={x:clamp(e.x,120,WORLD-120),y:clamp(e.y,120,WORLD-120),t:0};else toast(`${e.def.n} ist besiegt!`,'#e5b454');clearPortalLoot();G.score+=300+30*SL();
  if(G.mode==='bossrausch')G.score+=Math.max(0,Math.round(3000-G.stageTime*20));say('win',1);if(G.mode==='kampagne'){const hs=hsave(P.id);hs.best2=Math.max(hs.best2||0,G.diff*100+SL()+1)}persist()}
 function dawnbringer(il){const it=makeItem('weapon',il,4,P.id);it.name='Dawnbringer';it.pow='dawnlicht';it.aff.push({k:'skill',v:Math.round((10+il*0.6))},{k:'ls',v:2});return it}
-function orb(x,y,k,v){G.orbs.push({x,y,k,v,vx:rnd(-60,60),vy:rnd(-60,60),t:0})}
-function dropItem(x,y,it){if(G.portal&&d2({x,y},G.portal)<100*100){const a=ang(G.portal,{x,y})||rnd(TAU);x=G.portal.x+Math.cos(a)*130;y=G.portal.y+Math.sin(a)*130}G.loot.push({x:clamp(x,20,WORLD-20),y:clamp(y,20,WORLD-20),it,t:rnd(10),z:0,vz:rnd(260,340),land:0});if(it.rar>=3)sfx('legend');else if(it.rar>=2)sfx('item')}
+function inField(x,y){const r=G.room;if(r)return{x:clamp(x,r.x0+40,r.x1-40),y:clamp(y,r.y0+50,r.y1-40)};return{x:clamp(x,90,WORLD-90),y:clamp(y,90,WORLD-90)}}
+function orb(x,y,k,v){{const q=inField(x,y);x=q.x;y=q.y}G.orbs.push({x,y,k,v,vx:rnd(-60,60),vy:rnd(-60,60),t:0})}
+function dropItem(x,y,it){if(G.portal&&d2({x,y},G.portal)<100*100){const a=ang(G.portal,{x,y})||rnd(TAU);x=G.portal.x+Math.cos(a)*130;y=G.portal.y+Math.sin(a)*130}{const q=inField(x,y);x=q.x;y=q.y}G.loot.push({x,y,it,t:rnd(10),z:0,vz:rnd(260,340),land:0});if(it.rar>=3)sfx('legend');else if(it.rar>=2)sfx('item')}
 
 /* ================= Spieler ================= */
 const keys={};let joy=null;
