@@ -1160,6 +1160,7 @@
   function fxVorwaermen() { if (kwWorker !== false && !spar) EFFEKTE.concat(KAMPF_FX, MOMENTE).forEach((f, i) => setTimeout(() => fxNachfuellen(f, 1), 2500 + 600 * i)); }
   function effekt(art, staerke, zeit) {
     if (!ctx) return;
+    try { buehneFx(art); } catch (_) {}
     if (KLASSIK[art]) { klassikSpielen(art, staerke); return; }
     const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
     fxAbspielen(art, sfxBus, z, (FX_PEGEL[art] || .7) * l).then(r => { if (r) musikDucken(r.start, r.dauer); });
@@ -1216,6 +1217,7 @@
       master = ctx.createGain(); master.gain.value = .38;
       ducken = ctx.createGain(); ducken.gain.value = 1;
       master.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
+      try { pegelMesser = ctx.createAnalyser(); pegelMesser.fftSize = 256; pegelDaten = new Uint8Array(pegelMesser.fftSize); limiter.connect(pegelMesser); } catch (_) { pegelMesser = null; }
       /* Bühne in Stereo: Friedrich links, Echo und Ezekiel rechts, Barradin in der Mitte */
       const PAN = { klopf: -.08, schelle: .18, bass: 0, melodie: -.12, trommel: -.42, floete: .4, ketten: .5, rex: .3 };
       IDS.forEach(k => {
@@ -2046,7 +2048,7 @@
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
     planen(); timer = setInterval(planen, 30); taktgeber(true);
     bordunAn();
-    requestAnimationFrame(malen);
+    malenStarten();
     knoepfe(); funkAenderung();
   }
   function stopp(pause) {
@@ -2202,49 +2204,49 @@
       const vl = pr.tief ? -12 : pr.hoch ? 12 : 0, [tief, hoch] = PAD_FARBE[pr.farbe] || ["vc", "vln"];
       const pt = pr.farbe === "holz" ? orchPan.holz : orchPan.vc, ph = pr.farbe === "holz" ? orchPan.holz : orchPan.vln;
       const fk = pr.farbe === "orgel" ? .45 : pr.farbe === "holz" ? .8 : 1, hk = pr.farbe === "holz" ? -12 : 0;
-      probe(tief, ak.grund, zeit, pt, .3 * l * fk, { ein: .28, aus: .45, dauer });
+      oprobe(tief, ak.grund, zeit, pt, .3 * l * fk, { ein: .28, aus: .45, dauer });
       if (!pr.tief || x > .6) {
-        probe(hoch, ak.terz + vl + hk, zeit, ph, (leicht() ? .26 : .2) * l * fk, { ein: .32, aus: .5, dauer });
-        if (!leicht()) probe(hoch, ak.quinte + vl + hk, zeit, ph, .18 * l * fk, { ein: .36, aus: .5, dauer });
+        oprobe(hoch, ak.terz + vl + hk, zeit, ph, (leicht() ? .26 : .2) * l * fk, { ein: .32, aus: .5, dauer });
+        if (!leicht()) oprobe(hoch, ak.quinte + vl + hk, zeit, ph, .18 * l * fk, { ein: .36, aus: .5, dauer });
       }
       padAkkord = zeile; padEnde = zeit + dauer;
     }
     /* treibende Celli (Spiccato-Achtel) ab der Hälfte des Aufbaus */
     if (pr.ost && x >= .5 && S.intensitaet >= (leicht() ? 6 : 3) && schritt % 2 === 0) {
       const ton = [ak.grund - 12, ak.grund - 12, ak.q2 - 12, ak.grund - 12][(schritt / 2) % 4];
-      probe("spic", ton, zeit, orchPan.vc, (.22 + .12 * int) * (schritt % 4 === 0 ? 1 : .75), { dauer: sd * 1.8, aus: .05 });
+      oprobe("spic", ton, zeit, orchPan.vc, (.22 + .12 * int) * (schritt % 4 === 0 ? 1 : .75), { dauer: sd * 1.8, aus: .05 });
     }
     /* Hörner im Höhepunkt (bei hoher Intensität schon früher) */
     if (pr.horn && (ab === c || S.intensitaet >= 8) && schritt % 8 === 0) {
-      probe("horn", ak.grund - 12 + 12, zeit, orchPan.horn, .26 * (.6 + .5 * int), { ein: .12, aus: .35, dauer: 8 * sd + .2 });
-      probe("horn", ak.q2, zeit, orchPan.horn, .18 * (.6 + .5 * int), { ein: .14, aus: .35, dauer: 8 * sd + .2 });
+      oprobe("horn", ak.grund - 12 + 12, zeit, orchPan.horn, .26 * (.6 + .5 * int), { ein: .12, aus: .35, dauer: 8 * sd + .2 });
+      oprobe("horn", ak.q2, zeit, orchPan.horn, .18 * (.6 + .5 * int), { ein: .14, aus: .35, dauer: 8 * sd + .2 });
     }
     /* Blech im Höhepunkt: Trompeten auf Terz und Quinte, Posaune auf dem Grundton */
     if (ab === c && schritt % 8 === 0 && (pr.trp || pr.pos)) {
       const bl = .2 * (.6 + .5 * int), d8 = 8 * sd + .15;
-      if (pr.trp) { probe("trp", ak.terz, zeit, orchPan.blech, bl * 1.3, { ein: .05, aus: .3, dauer: d8 }); probe("trp", ak.quinte, zeit, orchPan.blech, bl * 1.1, { ein: .05, aus: .3, dauer: d8 }); }
-      if (pr.pos) probe("pos", ak.grund, zeit, orchPan.blech, bl * 1.1, { ein: .06, aus: .3, dauer: d8 });
+      if (pr.trp) { oprobe("trp", ak.terz, zeit, orchPan.blech, bl * 1.3, { ein: .05, aus: .3, dauer: d8 }); oprobe("trp", ak.quinte, zeit, orchPan.blech, bl * 1.1, { ein: .05, aus: .3, dauer: d8 }); }
+      if (pr.pos) oprobe("pos", ak.grund, zeit, orchPan.blech, bl * 1.1, { ein: .06, aus: .3, dauer: d8 });
     }
     /* Tuba als tiefes Fundament, sobald sich das Stück aufgebaut hat */
-    if (pr.tuba && x >= .5 && schritt === 0) probe("tuba", ak.grund - 12, zeit, orchPan.blech, .26 * (.6 + .5 * int), { ein: .12, aus: .4, dauer: bar + .1 });
+    if (pr.tuba && x >= .5 && schritt === 0) oprobe("tuba", ak.grund - 12, zeit, orchPan.blech, .26 * (.6 + .5 * int), { ein: .12, aus: .4, dauer: bar + .1 });
     /* Zwergenschmiede: Amboss auf Eins und Drei */
-    if (pr.amboss && x >= .5 && schritt % 8 === 0) probe("amboss", 0, zeit, orchPan.vc, (schritt === 0 ? .2 : .14) * (.6 + .5 * int));
+    if (pr.amboss && x >= .5 && schritt % 8 === 0) oprobe("amboss", 0, zeit, orchPan.vc, (schritt === 0 ? .2 : .14) * (.6 + .5 * int));
     /* Elben: ab und zu ein Schimmer aus Glöckchen */
-    if (pr.glanz && schritt === 0 && Math.random() < .35) probe("gloeckchen", 0, zeit, orchPan.vln, .18);
+    if (pr.glanz && schritt === 0 && Math.random() < .35) oprobe("gloeckchen", 0, zeit, orchPan.vln, .18);
     /* große Momente: Takt vor dem Höhepunkt Wirbel und Schwellen, auf der Eins des Höhepunkts der Schlag */
     if (pr.gross && schritt === 0 && durchgang % (pr.gross > 1 ? 2 : 3) === 0) {
       const L = S.ablauf.length, vorher = (c - 1 + L) % L;
       if (ab === vorher && L > 1) {
-        probe("timproll", 0, zeit, orchPan.gross, pr.gross > 1 ? .5 : .3, { ein: .4, dauer: bar, aus: .1 });
+        oprobe("timproll", 0, zeit, orchPan.gross, pr.gross > 1 ? .5 : .3, { ein: .4, dauer: bar, aus: .1 });
         const sw = sampleBuf.get("swell");
-        if (pr.gong) probe("bogen", 0, zeit, orchPan.gross, .22, { ein: .6, dauer: bar + .05, aus: .05 });
-        if (sw && pr.gross > 1) { const v = Math.max(0, sw._spitze - sw._start - bar); probe("swell", 0, zeit, orchPan.gross, .32, { ein: .05, dauer: bar + .05, aus: .05, versatz: v }); }
+        if (pr.gong) oprobe("bogen", 0, zeit, orchPan.gross, .22, { ein: .6, dauer: bar + .05, aus: .05 });
+        if (sw && pr.gross > 1) { const v = Math.max(0, sw._spitze - sw._start - bar); oprobe("swell", 0, zeit, orchPan.gross, .32, { ein: .05, dauer: bar + .05, aus: .05, versatz: v }); }
         else if (!sw) sampleLaden("swell");
       }
       if (ab === c && L > 1) {
-        if (pr.gross > 1) { probe("crash", 0, zeit, orchPan.gross, .38); probe("bd", 0, zeit, orchPan.gross, .55); }
-        probe("timp1", 0, zeit, orchPan.gross, pr.gross > 1 ? .55 : .35);
-        if (pr.gong) probe("gong", 0, zeit, orchPan.gross, .32);
+        if (pr.gross > 1) { oprobe("crash", 0, zeit, orchPan.gross, .38); oprobe("bd", 0, zeit, orchPan.gross, .55); }
+        oprobe("timp1", 0, zeit, orchPan.gross, pr.gross > 1 ? .55 : .35);
+        if (pr.gong) oprobe("gong", 0, zeit, orchPan.gross, .32);
       }
     }
   }
@@ -2757,14 +2759,14 @@
   /* ersetzt = gleich folgt ein anderes Stück: dann bleibt die Musik pausiert */
   function klassikStopp(sanft, ersetzt) {
     const k = klassikLauf; if (!k) return;
-    klassikLauf = null; clearInterval(k.timer);
+    klassikLauf = null; clearInterval(k.timer); klassikQ.length = 0;
     const j = ctx.currentTime; k.bus.gain.cancelScheduledValues(j); k.bus.gain.setTargetAtTime(0, j, sanft ? .25 : .06);
     setTimeout(() => { try { k.bus.disconnect(); } catch (_) {} }, 1500);
     clearTimeout(fortsetzTimer);
     if (!ersetzt) fortsetzTimer = setTimeout(musikFortsetzen, sanft ? 500 : 100);
     klassikKnoepfe();
   }
-  function klassikKnoepfe() { root.querySelectorAll("[data-sfx]").forEach(b => b.classList.toggle("spielt", !!klassikLauf && klassikLauf.art === b.dataset.sfx)); }
+  function klassikKnoepfe() { root.querySelectorAll("[data-sfx]").forEach(b => b.classList.toggle("spielt", !!klassikLauf && klassikLauf.art === b.dataset.sfx)); try { favMarkieren(); } catch (_) {} }
   async function klassikSpielen(art, laut) {
     const f = KLASSIK[art]; if (!f || !ctx) return;
     if (klassikLauf) { const war = klassikLauf.art; klassikStopp(true, war !== art); if (war === art) return; }
@@ -2784,12 +2786,13 @@
       const bis = ctx.currentTime + 1.2 - z;
       while (i < noten.length && noten[i][0] < bis) {
         const [t, gr, m, d, g, o] = noten[i++];
+        if (klassikQ.length < 400) klassikQ.push([z + t, BAND_SPUR(gr)]); geistMerken(gr, z + t);
         if (!SAMPLE_KARTE[gr]) probe(gr, 0, z + t, lauf.bus, g * l);
         else probe(gr, m, z + t, lauf.bus, g * l, o && o.kurz ? { dauer: Math.max(.08, d), aus: .04 } : { ein: .02, aus: Math.min(.25, d * .3), dauer: d + .05 });
       }
       if (i >= noten.length && ctx.currentTime > z + ende - .6) { clearInterval(lauf.timer); if (klassikLauf === lauf) { klassikLauf = null; klassikKnoepfe(); musikFortsetzen(); } }
     };
-    planen2(); lauf.timer = setInterval(planen2, 250);
+    planen2(); lauf.timer = setInterval(planen2, 250); malenStarten();
     if (!pause) musikDucken(z, ende + .4);
   }
 
@@ -2874,25 +2877,6 @@
     b.appendChild(n);
     setTimeout(() => n.remove(), 1700);
   }
-  function malen() {
-    if (!laeuft) return;
-    const jetzt = ctx.currentTime;
-    while (anzeige.length && anzeige[0].zeit <= jetzt) {
-      const ev = anzeige.shift(), sp = ev.spuren;
-      teilAnzeige(ev.teil);
-      spalte(ev.teil === bearbeite ? ev.schritt : -1);
-      if ("klopf" in sp) zucken("klopf");
-      if ("schelle" in sp) zucken("schelle");
-      if ("bass" in sp) { zucken("bass"); if (Math.random() < .4) schweben("♩", ORT.bass, "tief"); }
-      if ("melodie" in sp) { zucken("mel"); schweben(Math.random() < .5 ? "♪" : "♫", ORT.laute); }
-      if ("trommel" in sp) zucken("trommel");
-      if ("floete" in sp) { zucken("floete"); if (Math.random() < .7) schweben("♪", ORT.floete, "floete", 62); }
-      if ("ketten" in sp) zucken("ketten");
-      if ("rex" in sp) { zucken(sp.rex === 1 ? "heul" : "wuff"); schweben(t().rexLaut[sp.rex], ORT.rex, "blase", 36); }
-    }
-    requestAnimationFrame(malen);
-  }
-
   /* ---------- Die Band ---------- */
   const BUEHNE = `
 <svg class="lw-figur" viewBox="0 0 660 210" aria-hidden="true">
@@ -3179,6 +3163,530 @@
   </g>
  </svg>
 </svg>`;
+  /* ---------- Bühnenbild: Kulissen-Hintergründe, Geister-Orchester, Publikum ----------
+     Alles selbst gezeichnet (SVG). Die Hintergründe füllen die ganze Bühnenbreite, die Band steht davor. */
+  const zufallFolge = (saat => () => { saat = (saat * 16807) % 2147483647; return (saat - 1) / 2147483646; })(424242);
+  const r1 = (a, b) => a + zufallFolge() * (b - a);
+  const sterne = n => Array.from({ length: n }, (_, i) => '<circle class="stern" cx="' + r1(0, 800).toFixed(0) + '" cy="' + r1(4, 120).toFixed(0) + '" r="' + r1(.5, 1.6).toFixed(1) +
+    '" style="animation-delay:-' + r1(0, 4).toFixed(1) + 's;animation-duration:' + r1(2.5, 5).toFixed(1) + 's"/>').join("");
+  /* Regen, der nahtlos fällt: jeder Strich steht doppelt (eine Bahn höher), die Gruppe rutscht genau eine Bahn weiter */
+  const regenStriche = (n, laenge, klasse) => '<g class="' + klasse + '">' + Array.from({ length: n }, () => {
+    const x = r1(-40, 840), y = r1(0, 250), d = "l" + (-laenge * .25).toFixed(1) + " " + laenge;
+    return '<path d="M' + x.toFixed(0) + " " + y.toFixed(0) + " " + d + " M" + (x + 62.5).toFixed(1) + " " + (y - 250).toFixed(0) + " " + d + '"/>';
+  }).join("") + "</g>";
+  const tannen = (xs, basis, hoehe, farbe) => xs.map(([x, s]) => {
+    const h = hoehe * s, b = h * .42;
+    return '<path d="M' + x + " " + (basis - h) + " L" + (x - b * .45) + " " + (basis - h * .55) + " L" + (x - b * .25) + " " + (basis - h * .55) + " L" + (x - b * .75) + " " + (basis - h * .2) +
+      " L" + (x - b * .35) + " " + (basis - h * .2) + " L" + (x - b) + " " + basis + " L" + (x + b) + " " + basis + " L" + (x + b * .35) + " " + (basis - h * .2) + " L" + (x + b * .75) + " " + (basis - h * .2) +
+      " L" + (x + b * .25) + " " + (basis - h * .55) + " L" + (x + b * .45) + " " + (basis - h * .55) + ' Z" fill="' + farbe + '"/>';
+  }).join("");
+  const flaschen = (x0, y, n) => Array.from({ length: n }, (_, i) => {
+    const x = x0 + i * 15 + r1(-2, 2), h = r1(16, 26), farbe = ["#2f5a34", "#5a3a1a", "#7a5a1e", "#3a2a5a", "#6a2420"][i % 5];
+    return i % 4 === 3
+      ? '<g><rect x="' + x + '" y="' + (y - 13) + '" width="11" height="13" rx="2" fill="#6b4a2a" stroke="#2a1a0e"/><path d="M' + (x + 11) + " " + (y - 10) + " q5 0 5 4 q0 4 -5 4" + '" fill="none" stroke="#2a1a0e" stroke-width="2"/></g>'
+      : '<g><rect x="' + x + '" y="' + (y - h) + '" width="9" height="' + h + '" rx="3" fill="' + farbe + '" opacity=".9"/><rect x="' + (x + 3) + '" y="' + (y - h - 7) + '" width="3" height="8" fill="' + farbe + '"/>' +
+        '<rect x="' + (x + 1.5) + '" y="' + (y - h + 3) + '" width="2" height="' + (h - 7) + '" fill="#fff" opacity=".12"/></g>';
+  }).join("");
+  const laterne = (x, y) => '<g class="laterne"><path d="M' + x + " 0 V" + (y - 14) + '" stroke="#3a2a1a" stroke-width="1.5" stroke-dasharray="3 2"/>' +
+    '<circle class="licht" cx="' + x + '" cy="' + y + '" r="46" fill="url(#lwb-lampe)"/>' +
+    '<path d="M' + (x - 9) + " " + (y - 12) + " h18 l-3 26 h-12 Z" + '" fill="#2a1d12" stroke="#7a5a32"/><rect class="flamme" x="' + (x - 4) + '" y="' + (y - 7) + '" width="8" height="14" rx="4" fill="#ffc35a"/>' +
+    '<path d="M' + (x - 11) + " " + (y - 14) + " h22 l-4 -6 h-14 Z" + '" fill="#3a2a1a" stroke="#7a5a32"/></g>';
+  const kristall = (x, y, s, farbe, d) => '<g class="kristall" style="animation-delay:-' + d + 's"><path d="M' + x + " " + y + " l" + (-6 * s) + " " + (-10 * s) + " l" + (4 * s) + " " + (-26 * s) + " l" + (6 * s) + " " + (20 * s) + " l" + (4 * s) + " " + (-12 * s) + " l" + (3 * s) + " " + (28 * s) +
+    ' Z" fill="' + farbe + '" opacity=".75"/><circle cx="' + x + '" cy="' + (y - 12 * s) + '" r="' + Math.abs(30 * s) + '" fill="url(#lwb-lampe)" opacity=".5"/></g>';
+
+  const KULISSEN_BILD = `
+<svg class="lw-kulisse-bild" viewBox="0 0 800 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+ <defs>
+  <radialGradient id="lwb-lampe"><stop offset="0" stop-color="#ffc35a" stop-opacity=".55"/><stop offset=".35" stop-color="#ff9a3a" stop-opacity=".18"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="lwb-feuer" cx="50%" cy="100%" r="70%"><stop offset="0" stop-color="#ffb347" stop-opacity=".55"/><stop offset=".4" stop-color="#ff5a2e" stop-opacity=".2"/><stop offset="1" stop-color="#ff5a2e" stop-opacity="0"/></radialGradient>
+  <radialGradient id="lwb-mond"><stop offset=".55" stop-color="#e8e4cf"/><stop offset=".62" stop-color="#e8e4cf" stop-opacity=".25"/><stop offset="1" stop-color="#e8e4cf" stop-opacity="0"/></radialGradient>
+  <radialGradient id="lwb-spot" cx="50%" cy="0%" r="100%"><stop offset="0" stop-color="#ffe7b0" stop-opacity=".22"/><stop offset="1" stop-color="#ffe7b0" stop-opacity="0"/></radialGradient>
+  <linearGradient id="lwb-vorhang" x1="0" x2="1"><stop offset="0" stop-color="#4a0f14"/><stop offset=".25" stop-color="#8a2228"/><stop offset=".5" stop-color="#5a1418"/><stop offset=".75" stop-color="#8a2228"/><stop offset="1" stop-color="#4a0f14"/></linearGradient>
+  <linearGradient id="lwb-nacht" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070a18"/><stop offset=".7" stop-color="#151a30"/><stop offset="1" stop-color="#2a1a22"/></linearGradient>
+  <linearGradient id="lwb-wald" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06100f"/><stop offset=".6" stop-color="#0f2420"/><stop offset="1" stop-color="#0a1612"/></linearGradient>
+  <linearGradient id="lwb-meer-himmel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#121a33"/><stop offset=".55" stop-color="#3a3350"/><stop offset="1" stop-color="#b8603a"/></linearGradient>
+  <linearGradient id="lwb-meer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c3048"/><stop offset="1" stop-color="#0a1422"/></linearGradient>
+  <linearGradient id="lwb-sturm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c0e14"/><stop offset="1" stop-color="#1c2028"/></linearGradient>
+  <linearGradient id="lwb-holz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1a10"/><stop offset="1" stop-color="#1a100a"/></linearGradient>
+ </defs>
+
+ <!-- Bühne: roter Samtvorhang, Lichtkegel, Dielen -->
+ <g class="bg bg-keine">
+  <rect width="800" height="250" fill="#120a0e"/>
+  <g class="spots"><path class="spot s1" d="M250 0 L150 250 H410 Z" fill="url(#lwb-spot)"/><path class="spot s2" d="M550 0 L390 250 H650 Z" fill="url(#lwb-spot)"/></g>
+  <g fill="#1d1210" stroke="#2c1c14" stroke-width="1.2">${Array.from({ length: 9 }, (_, i) => '<path d="M' + (i * 100 - 40) + ' 250 L' + (400 + (i - 4) * 70) + ' 212"/>').join("")}</g>
+  <rect y="212" width="800" height="38" fill="#24160f" opacity=".85"/><path d="M0 212 H800" stroke="#e0a046" stroke-opacity=".25"/>
+  <path class="vorhang links" d="M0 0 H130 Q118 60 126 120 Q110 180 120 250 H0 Z" fill="url(#lwb-vorhang)"/>
+  <path class="vorhang rechts" d="M800 0 H670 Q682 60 674 120 Q690 180 680 250 H800 Z" fill="url(#lwb-vorhang)"/>
+  <path d="M0 0 H800 V26 Q760 40 720 26 Q680 40 640 26 Q600 40 560 26 Q520 40 480 26 Q440 40 400 26 Q360 40 320 26 Q280 40 240 26 Q200 40 160 26 Q120 40 80 26 Q40 40 0 26 Z" fill="#7a1c22"/>
+  <path d="M0 26 Q40 40 80 26 Q120 40 160 26 Q200 40 240 26 Q280 40 320 26 Q360 40 400 26 Q440 40 480 26 Q520 40 560 26 Q600 40 640 26 Q680 40 720 26 Q760 40 800 26" fill="none" stroke="#e0a046" stroke-width="2.5" stroke-dasharray="1 3" opacity=".8"/>
+ </g>
+
+ <!-- Taverne: Holzwand, Regale voller Flaschen, Laternen, Fässer -->
+ <g class="bg bg-taverne">
+  <rect width="800" height="250" fill="url(#lwb-holz)"/>
+  <g stroke="#120a06" stroke-width="2" opacity=".7">${Array.from({ length: 20 }, (_, i) => '<path d="M' + (i * 42 + 8) + ' 0 V250"/>').join("")}</g>
+  <g fill="#fff" opacity=".025">${Array.from({ length: 20 }, (_, i) => '<rect x="' + (i * 42 + 12) + '" y="0" width="6" height="250"/>').join("")}</g>
+  <rect y="52" width="800" height="14" fill="#3a2414"/><rect y="64" width="800" height="3" fill="#120a06" opacity=".7"/>
+  <rect x="140" y="66" width="12" height="184" fill="#2e1c10"/><rect x="648" y="66" width="12" height="184" fill="#2e1c10"/>
+  <rect x="20" y="118" width="210" height="7" fill="#4a2e18"/><g>${flaschen(30, 118, 13)}</g>
+  <rect x="580" y="118" width="200" height="7" fill="#4a2e18"/><g>${flaschen(590, 118, 12)}</g>
+  <g transform="translate(400 30)" opacity=".7"><path d="M-22 -14 H22 V8 Q22 26 0 34 Q-22 26 -22 8 Z" fill="#5a1c1c" stroke="#c9a24a" stroke-width="2"/><path d="M-10 -2 L0 14 L10 -2 M0 -6 V22" stroke="#c9a24a" stroke-width="2" fill="none"/></g>
+  ${laterne(95, 92)}${laterne(705, 92)}
+  <g fill="#3a2414" stroke="#1a0e08" stroke-width="2"><ellipse cx="40" cy="226" rx="38" ry="30"/><ellipse cx="760" cy="226" rx="38" ry="30"/></g>
+  <g stroke="#7a5a32" stroke-width="2.5" fill="none" opacity=".8"><path d="M6 212 Q40 220 74 212 M6 240 Q40 248 74 240 M726 212 Q760 220 794 212 M726 240 Q760 248 794 240"/></g>
+ </g>
+
+ <!-- Lagerfeuer bei Nacht: Sterne, Mond, Hügel, Tannen, Funkenflug -->
+ <g class="bg bg-feuer">
+  <rect width="800" height="250" fill="url(#lwb-nacht)"/>
+  <g fill="#fff">${sterne(55)}</g>
+  <circle cx="690" cy="44" r="30" fill="url(#lwb-mond)"/><circle cx="702" cy="38" r="17" fill="#0b0f20"/>
+  <path d="M0 190 Q120 150 230 176 Q330 140 450 170 Q560 138 680 168 Q750 158 800 172 V250 H0 Z" fill="#0d1018"/>
+  ${tannen([[20, 1.1], [62, .8], [98, 1], [710, .9], [748, 1.15], [790, .8]], 236, 150, "#06080e")}
+  <ellipse class="feuerschein" cx="400" cy="250" rx="380" ry="150" fill="url(#lwb-feuer)"/>
+  <g class="funken" fill="#ffb347">${Array.from({ length: 14 }, (_, i) => '<circle cx="' + r1(250, 550).toFixed(0) + '" cy="248" r="' + r1(.8, 1.8).toFixed(1) + '" style="animation-delay:-' + r1(0, 4).toFixed(1) + 's;animation-duration:' + r1(2.8, 4.5).toFixed(1) + 's"/>').join("")}</g>
+ </g>
+
+ <!-- Regen: Steinmauer mit Bogenfenstern, draußen schüttet es -->
+ <g class="bg bg-regen">
+  <rect width="800" height="250" fill="#14161c"/>
+  <g fill="#1d2028" stroke="#0c0d12" stroke-width="2">${Array.from({ length: 8 }, (_, r) => Array.from({ length: 11 }, (_, c) => '<rect x="' + (c * 80 - (r % 2) * 40) + '" y="' + r * 32 + '" width="78" height="30" rx="3"/>').join("")).join("")}</g>
+  <g>${[110, 690].map(x => '<g><path d="M' + (x - 55) + ' 200 V90 Q' + x + ' 30 ' + (x + 55) + ' 90 V200 Z" fill="#0e1c30"/>' +
+    '<path d="M' + (x - 55) + ' 200 V90 Q' + x + ' 30 ' + (x + 55) + ' 90 V200" fill="none" stroke="#3a3428" stroke-width="7"/><path d="M' + x + ' 44 V200 M' + (x - 55) + ' 128 H' + (x + 55) + '" stroke="#2a2418" stroke-width="4"/>' +
+    '<rect x="' + (x - 62) + '" y="198" width="124" height="9" fill="#3a3428"/></g>').join("")}</g>
+  <clipPath id="lwb-fenster"><path d="M55 200 V90 Q110 30 165 90 V200 Z M635 200 V90 Q690 30 745 90 V200 Z"/></clipPath>
+  <g clip-path="url(#lwb-fenster)" stroke="#9ab4d8" stroke-width="1.2" opacity=".55">${regenStriche(70, 26, "regen-fall")}</g>
+  <g class="kerze"><rect x="96" y="182" width="7" height="16" fill="#e8dcc0"/><ellipse class="flamme" cx="99.5" cy="178" rx="3" ry="6" fill="#ffc35a"/><circle class="licht" cx="99.5" cy="178" r="34" fill="url(#lwb-lampe)"/></g>
+  <g stroke="#9ab4d8" stroke-width=".9" opacity=".14">${regenStriche(60, 20, "regen-fall langsam")}</g>
+  <circle class="tropfen" cx="400" cy="0" r="2" fill="#9ab4d8" opacity=".6"/>
+ </g>
+
+ <!-- Wald bei Nacht: Mond, drei Reihen Bäume, Nebel, Glühwürmchen -->
+ <g class="bg bg-wald">
+  <rect width="800" height="250" fill="url(#lwb-wald)"/>
+  <circle cx="560" cy="52" r="40" fill="url(#lwb-mond)" opacity=".85"/>
+  ${tannen([[30, .9], [90, 1.1], [150, .8], [230, 1], [300, .7], [380, .95], [460, .75], [530, 1.05], [610, .85], [680, 1], [750, .9]], 210, 170, "#143028")}
+  <ellipse class="nebel" cx="400" cy="200" rx="460" ry="28" fill="#cfe3dc" opacity=".08"/>
+  ${tannen([[0, 1.2], [70, 1], [130, 1.3], [680, 1.25], [740, 1], [800, 1.3]], 252, 190, "#0a1a14")}
+  <g class="gluehwuermchen" fill="#d8ff8a">${Array.from({ length: 16 }, () => '<circle cx="' + r1(20, 780).toFixed(0) + '" cy="' + r1(80, 230).toFixed(0) + '" r="1.6" style="animation-delay:-' + r1(0, 6).toFixed(1) + 's;animation-duration:' + r1(4, 8).toFixed(1) + 's"/>').join("")}</g>
+ </g>
+
+ <!-- Höhle: Tropfsteine, leuchtende Kristalle, fallende Tropfen -->
+ <g class="bg bg-hoehle">
+  <rect width="800" height="250" fill="#08070c"/>
+  <path d="M0 0 H800 V30 L770 26 L752 70 L736 28 L700 34 L688 60 L670 30 L630 36 L612 92 L596 34 L560 30 L540 52 L520 28 L470 34 L458 64 L444 30 L400 26 L380 48 L360 28 L320 34 L300 80 L284 30 L240 36 L226 58 L210 30 L170 26 L150 74 L134 28 L96 34 L84 56 L70 30 L30 36 L18 66 L0 40 Z" fill="#15121c"/>
+  <path d="M0 250 V150 Q30 140 50 170 L70 120 L88 176 Q110 168 130 200 L150 160 L170 250 Z M800 250 V140 Q770 150 752 176 L732 116 L712 180 Q690 170 672 204 L652 164 L632 250 Z" fill="#110e17"/>
+  ${kristall(60, 180, 1.1, "#6ae0ff", 0)}${kristall(100, 205, .8, "#b47aff", 1.2)}${kristall(720, 176, 1.2, "#b47aff", .6)}${kristall(760, 210, .8, "#6ae0ff", 2)}${kristall(400, 30, -.7, "#6ae0ff", 1.5)}
+  <g class="tropfsteine" fill="#9ab4d8">${[150, 300, 612, 752].map((x, i) => '<circle class="tropfen" cx="' + x + '" cy="80" r="1.8" style="animation-delay:-' + (i * 1.3) + 's"/>').join("")}</g>
+ </g>
+
+ <!-- Meer: Abendhimmel, Wellen, Schiffsreling, Takelage, Möwen -->
+ <g class="bg bg-meer">
+  <rect width="800" height="170" fill="url(#lwb-meer-himmel)"/>
+  <circle cx="420" cy="168" r="34" fill="#ffb066" opacity=".55"/>
+  <rect y="160" width="800" height="90" fill="url(#lwb-meer)"/>
+  <path d="M380 166 h80 M372 176 h96 M388 188 h64" stroke="#ffb066" stroke-width="2" opacity=".45"/>
+  <g class="wellen" fill="none" stroke="#5a7aa0" stroke-width="2" opacity=".5">
+   <path class="w1" d="M-80 180 Q-60 172 -40 180 T0 180 T40 180 T80 180 T120 180 T160 180 T200 180 T240 180 T280 180 T320 180 T360 180 T400 180 T440 180 T480 180 T520 180 T560 180 T600 180 T640 180 T680 180 T720 180 T760 180 T800 180 T840 180 T880 180"/>
+   <path class="w2" d="M-80 200 Q-55 190 -30 200 T20 200 T70 200 T120 200 T170 200 T220 200 T270 200 T320 200 T370 200 T420 200 T470 200 T520 200 T570 200 T620 200 T670 200 T720 200 T770 200 T820 200 T870 200"/></g>
+  <g class="moewen" fill="none" stroke="#1a1a24" stroke-width="2"><path class="m1" d="M120 60 q8 -8 16 0 q8 -8 16 0"/><path class="m2" d="M600 40 q6 -6 12 0 q6 -6 12 0"/></g>
+  <path d="M60 0 L40 250 M60 0 L300 120 M60 30 L160 250" stroke="#3a2a1a" stroke-width="2.5"/><rect x="52" y="0" width="16" height="250" fill="#2a1a10"/>
+  <rect y="214" width="800" height="9" fill="#4a2e18"/><rect y="240" width="800" height="10" fill="#3a2414"/>
+  <g fill="#3a2414">${Array.from({ length: 17 }, (_, i) => '<rect x="' + (i * 50) + '" y="214" width="9" height="36"/>').join("")}</g>
+ </g>
+
+ <!-- Sturm: jagende Wolken, Platzregen, Blitze, sich biegende Bäume -->
+ <g class="bg bg-sturm">
+  <rect width="800" height="250" fill="url(#lwb-sturm)"/>
+  <rect class="blitzlicht" width="800" height="250" fill="#dfe8ff" opacity="0"/>
+  <path class="blitz" d="M520 0 L498 60 L516 62 L486 130 L506 132 L470 210" fill="none" stroke="#eef4ff" stroke-width="3" opacity="0"/>
+  <g class="wolken" fill="#232733">${Array.from({ length: 12 }, (_, i) => '<ellipse cx="' + (i * 80 - 40) + '" cy="' + (20 + (i % 3) * 14) + '" rx="' + r1(70, 110).toFixed(0) + '" ry="' + r1(26, 40).toFixed(0) + '"/>').join("")}</g>
+  <g class="wolken w2" fill="#1a1d26">${Array.from({ length: 10 }, (_, i) => '<ellipse cx="' + (i * 95) + '" cy="' + (50 + (i % 2) * 12) + '" rx="' + r1(60, 100).toFixed(0) + '" ry="' + r1(20, 30).toFixed(0) + '"/>').join("")}</g>
+  <g class="baeume-wind">${tannen([[30, 1.1], [90, .8], [720, 1], [775, 1.2]], 250, 160, "#0a0c10")}</g>
+  <g stroke="#a8b8d0" stroke-width="1.2" opacity=".35">${regenStriche(110, 34, "regen-fall schnell")}</g>
+ </g>
+</svg>`;
+
+  /* Geister-Orchester: schemenhafte Musiker auf einer Empore hinter der Band – sie werden sichtbar, sobald das Orchester spielt */
+  const geist = (x, y, s, inhalt, kl) => '<g class="geist ' + kl + '" transform="translate(' + x + " " + y + ") scale(" + s + ')"><g class="g-k"><circle cx="0" cy="-34" r="8"/><path d="M-12 -24 Q0 -30 12 -24 L16 18 H-16 Z"/>' + inhalt + "</g></g>";
+  const GEISTER = `
+<svg class="lw-geister" viewBox="0 0 660 210" aria-hidden="true">
+ <defs><radialGradient id="lwb-geistlicht"><stop offset="0" stop-color="#bfe0ff" stop-opacity=".35"/><stop offset="1" stop-color="#bfe0ff" stop-opacity="0"/></radialGradient></defs>
+ <g class="g-alle">
+  <ellipse class="g-schein" cx="330" cy="44" rx="300" ry="46" fill="url(#lwb-geistlicht)"/>
+  <g class="g-streicher">
+   ${[[168, 52, .62], [204, 48, .6], [240, 52, .62], [276, 48, .6]].map(([x, y, s]) => geist(x, y, s, '<ellipse cx="9" cy="-24" rx="9" ry="4" transform="rotate(-25 9 -24)"/><path class="g-bogen" d="M-6 -36 L26 -14" stroke-width="2"/>', "geige")).join("")}
+   ${[[488, 74, .78], [528, 70, .74]].map(([x, y, s]) => geist(x, y, s, '<ellipse cx="0" cy="4" rx="9" ry="16"/><path d="M0 -14 V30" stroke-width="1.5"/><path class="g-bogen quer" d="M-16 2 H16" stroke-width="2.2"/>', "cello")).join("")}
+  </g>
+  <g class="g-blech">
+   ${[[318, 46, .6], [352, 50, .62], [386, 46, .6]].map(([x, y, s]) => geist(x, y, s, '<path d="M8 -26 L30 -30" stroke-width="3"/><path d="M30 -36 L38 -30 L30 -24 Z"/>', "horn")).join("")}
+  </g>
+  <g class="g-pauke">${geist(118, 54, .66, '<ellipse class="kessel" cx="0" cy="26" rx="20" ry="7"/><path d="M-20 26 Q0 50 20 26"/><path class="schlegel" d="M-12 -10 L-4 20 M12 -10 L4 20" stroke-width="2"/>', "pauker")}</g>
+ </g>
+</svg>`;
+
+  /* Publikum in der ersten Reihe: Köpfe und Schultern als Scherenschnitt, manche mit Krug – jeder Gast ein eigenes kleines Bild */
+  const KOEPFE = {
+    hut: '<path d="M-13 -50 L1 -86 L12 -50 Z"/><path d="M-22 -50 H22" stroke-width="4"/>',
+    helm: '<path d="M-14 -46 Q0 -66 14 -46 Z"/><path d="M-12 -52 Q-24 -60 -22 -72 M12 -52 Q24 -60 22 -72" fill="none" stroke-width="3.5"/>',
+    elf: '<path d="M-12 -44 L-25 -56 L-11 -38 M12 -44 L25 -56 L11 -38"/><path d="M-12 -46 Q0 -60 12 -46" />',
+    kapuze: '<path d="M-17 -34 Q-19 -64 0 -62 Q19 -64 17 -34 Q8 -50 0 -50 Q-8 -50 -17 -34 Z"/>',
+    zopf: '<path d="M10 -44 Q22 -34 18 -18" fill="none" stroke-width="5"/>',
+    bart: '<path d="M-11 -38 Q0 -14 11 -38 Z"/>',
+    keiner: ""
+  };
+  const gast = (kopf, krug, s, i) => '<svg class="gast' + (krug ? " hat-krug" : "") + '" viewBox="-34 -92 68 94" style="--i:' + i + ";--s:" + s + '"><path d="M-27 2 Q-26 -28 0 -31 Q26 -28 27 2 Z"/><circle cx="0" cy="-43" r="13"/>' + kopf +
+    (krug ? '<g class="krug"><path class="arm" d="M17 -22 Q22 -36 24 -44" fill="none" stroke-width="7" stroke-linecap="round"/><rect x="18" y="-60" width="12" height="15" rx="2"/><path d="M30 -56 q6 0 6 5 q0 5 -6 5" fill="none" stroke-width="2.5"/></g>' : "") + "</svg>";
+  const PUBLIKUM = '<div class="lw-publikum" aria-hidden="true">' +
+    [["hut", 0, 1], ["keiner", 1, .92], ["helm", 1, 1.05], ["zopf", 0, .9], ["kapuze", 0, 1], ["bart", 1, .97], ["elf", 0, 1.04], ["keiner", 1, .9], ["helm", 0, 1], ["zopf", 1, .95], ["kapuze", 1, 1.02], ["hut", 0, .93]]
+      .map(([k, krug, s], i) => gast(KOEPFE[k], krug, s, i)).join("") + "</div>";
+  const BUEHNE_HINTEN = KULISSEN_BILD + GEISTER;
+  const BUEHNE_VORNE = PUBLIKUM + '<div class="lw-fx-licht"></div>';
+
+  /* Die Figuren bekommen je eine Hülle, damit sie als Ganzes springen, sinken oder wackeln können */
+  const BUEHNE_FIG = BUEHNE.replace(/\n <svg (x="\d+" y="\d+"[^>]*class="(\w+)")/g, '\n <g class="fg fg-$2"><svg $1').replace(/\n <\/svg>/g, "\n </svg></g>");
+  /* wie das Publikum auf die Musik reagiert */
+  const PUB_STIMMUNG = { dorffest: "tanz", marktplatz: "tanz", sieg: "tanz", shanty: "tanz", auenland: "tanz", fey: "tanz", reiter: "tanz",
+    kampf: "duck", boss: "duck", spannung: "duck", grusel: "duck", unterreich: "duck",
+    elben: "wiegen", klage: "wiegen", kamin: "wiegen", pilger: "wiegen", rast: "wiegen", hof: "wiegen", reise: "nicken", zwerge: "nicken" };
+  const PUB_STUECK = { trauermarsch: "wiegen", wiegenlied: "wiegen", elise: "wiegen", morgen: "wiegen", kanon: "wiegen", amazinggrace: "wiegen", scarborough: "wiegen",
+    greensleeves: "wiegen", sakura: "wiegen", auldlangsyne: "wiegen", diesirae: "duck", toccata: "duck", walkuere: "duck", zarathustra: "still", bergkoenig: "nicken", freude: "nicken", shchedryk: "nicken" };
+  function publikumArt() {
+    if (klassikLauf) return PUB_STUECK[klassikLauf.art] || "tanz";
+    if (!laeuft) return "still";
+    return S.stimmung ? PUB_STIMMUNG[S.stimmung] || "nicken" : "nicken";
+  }
+  const buehneAttr = () => ' data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten +
+    '" data-kul="' + esc(S.kulisse) + '" data-pub="' + publikumArt() + '"';
+  const buehneHTML = klein => '<div class="lw-buehne' + (klein ? " lw-buehne-klein" : "") + (leicht() ? " spar" : "") + '"' + buehneAttr() + '><div class="lw-szene">' +
+    BUEHNE_HINTEN + BUEHNE_FIG + BUEHNE_VORNE + "</div></div>";
+
+  /* ---------- Bühne lebt: Pegel, Geister-Orchester, Publikum, Effekte ---------- */
+  let pegelMesser = null, pegelDaten = null, pegelGlatt = 0, orchGlatt = 0, blechGlatt = 0, strBis = 0, blechBis = 0, strZiel = 0, fxBis = 0, malt = false, bildZaehler = 0;
+  const geistQ = [], klassikQ = [], letzterZuck = {};
+  let letzterSchlag = 0, buehneMerk = "";
+  const GEIST_ART = g => /^(vln|vc|spic|kb|vlntrem|vctrem|geigest)/.test(g) ? "str" : /^(horn|trp|pos|tuba)/.test(g) ? "blech" : /^(timp|bd|crash|gong)/.test(g) ? "pauke" : "";
+  const BAND_SPUR = g => /^(timp|bd|snare|bodh|tamb|crash|gong|swell)/.test(g) ? "trommel" : /^(schelle|shake|clave|holz|gloeckchen|amboss)/.test(g) ? "ketten"
+    : /^(fl|pan|oka|dudel|oboe|klar|fag)/.test(g) ? "floete" : /^(kb|tuba|vc|pos)/.test(g) ? "bass" : g === "gitarre" ? "klopf" : "melodie";
+  function geistMerken(gr, zeit) { const a = GEIST_ART(gr); if (a && geistQ.length < 200) geistQ.push([zeit, a]); }
+  /* Orchester-Töne gehen über diese Hülle, damit die Geister wissen, wann sie spielen */
+  function oprobe(gr, m, zeit, ...rest) { geistMerken(gr, zeit); return probe(gr, m, zeit, ...rest); }
+  function malenStarten() { if (!malt) { malt = true; requestAnimationFrame(malen); } }
+  /* eine Spur der Band sichtbar machen (aus der Musik oder aus einem Klassiker) */
+  function spurZeigen(k, wert) {
+    const jetzt = performance.now();
+    if (letzterZuck[k] && jetzt - letzterZuck[k] < 95) return;
+    letzterZuck[k] = jetzt;
+    if (k === "klopf") zucken("klopf");
+    else if (k === "schelle") zucken("schelle");
+    else if (k === "bass") { zucken("bass"); if (Math.random() < .4) schweben("♩", ORT.bass, "tief"); }
+    else if (k === "melodie") { zucken("mel"); schweben(Math.random() < .5 ? "♪" : "♫", ORT.laute); }
+    else if (k === "trommel") { zucken("trommel"); publikumSchlag(); }
+    else if (k === "floete") { zucken("floete"); if (Math.random() < .7) schweben("♪", ORT.floete, "floete", 62); }
+    else if (k === "ketten") zucken("ketten");
+    else if (k === "rex") { zucken(wert === 1 ? "heul" : "wuff"); schweben(t().rexLaut[wert], ORT.rex, "blase", 36); }
+  }
+  /* Publikum im Takt: tanzen hüpft, nicken nickt – wiegen und ducken laufen ruhig über CSS */
+  function publikumSchlag() {
+    const b = buehne(); if (!b || ruhig) return;
+    const jetzt = performance.now(); if (jetzt - letzterSchlag < 280) return;
+    letzterSchlag = jetzt;
+    const art = b.dataset.pub; if (art !== "tanz" && art !== "nicken") return;
+    let n = 0;
+    b.querySelectorAll(".lw-publikum .gast").forEach((g, i) => {
+      if (!g.animate || (b.classList.contains("spar") && i % 2)) return;
+      if (art === "tanz") {
+        const hoch = 3 + Math.random() * 5, seite = (n++ % 2 ? 1 : -1) * (2 + Math.random() * 3);
+        g.animate([{ transform: "none" }, { transform: "translateY(-" + hoch + "px) rotate(" + seite + "deg)", offset: .35 }, { transform: "none" }], { duration: 300, delay: Math.random() * 40, easing: "ease-out" });
+      } else g.animate([{ transform: "none" }, { transform: "rotate(" + (i % 2 ? 3 : -3) + "deg) translateY(1.5px)", offset: .4 }, { transform: "none" }], { duration: 340, delay: i * 12, easing: "ease-out" });
+    });
+  }
+  /* Werte auf die Bühne schreiben: Lichtpegel, Orchester, Stimmung des Publikums */
+  function buehneTick(b) {
+    const jetzt = ctx ? ctx.currentTime : 0;
+    if (pegelMesser && (++bildZaehler & 1)) {
+      pegelMesser.getByteTimeDomainData(pegelDaten);
+      let s = 0; for (let i = 0; i < pegelDaten.length; i += 2) { const x = pegelDaten[i] - 128; s += x * x; }
+      const rms = Math.min(1, Math.sqrt(s / (pegelDaten.length / 2)) / 38);
+      pegelGlatt += (rms - pegelGlatt) * (rms > pegelGlatt ? .5 : .12);
+    }
+    while (geistQ.length && geistQ[0][0] <= jetzt) {
+      const [, a] = geistQ.shift();
+      if (a === "str") { strBis = jetzt + 2.2; strZiel = Math.min(1, strZiel + .25); }
+      else if (a === "blech") { blechBis = jetzt + 2.4; strBis = Math.max(strBis, jetzt + 1.2); }
+      else if (a === "pauke") { paukeSchlag(b); strBis = Math.max(strBis, jetzt + 1); }
+    }
+    if (jetzt > strBis) strZiel = 0; else strZiel = Math.max(strZiel, .55);
+    orchGlatt += (strZiel - orchGlatt) * .04;
+    blechGlatt += ((jetzt < blechBis ? 1 : 0) - blechGlatt) * .05;
+    const merk = pegelGlatt.toFixed(2) + "|" + orchGlatt.toFixed(2) + "|" + blechGlatt.toFixed(2);
+    if (merk !== buehneMerk) {
+      buehneMerk = merk;
+      b.style.setProperty("--pegel", pegelGlatt.toFixed(2));
+      b.style.setProperty("--orch", orchGlatt.toFixed(2));
+      b.style.setProperty("--blech", blechGlatt.toFixed(2));
+      b.classList.toggle("orch-an", orchGlatt > .15);
+    }
+    const pub = publikumArt();
+    if (b.dataset.pub !== pub) b.dataset.pub = pub;
+    if (b.dataset.kul !== S.kulisse) b.dataset.kul = S.kulisse;
+    b.classList.toggle("spielt", !!(laeuft || klassikLauf));
+  }
+  function paukeSchlag(b) {
+    if (ruhig) return;
+    const p = b.querySelector(".lw-geister .g-pauke"); if (p && p.animate) p.animate([{ opacity: 1, filter: "drop-shadow(0 0 6px #cfe6ff)" }, { opacity: "" , filter: "none" }], { duration: 500, easing: "ease-out" });
+    const s = b.querySelector(".lw-geister .schlegel"); if (s && s.animate) s.animate([{ transform: "none" }, { transform: "translateY(4px)", offset: .3 }, { transform: "none" }], { duration: 260 });
+  }
+  function malen() {
+    const b = buehne();
+    const aktiv = ctx && b && !document.hidden && (laeuft || klassikLauf || performance.now() < fxBis || orchGlatt > .02 || pegelGlatt > .02 || anzeige.length || geistQ.length);
+    if (!aktiv) { malt = false; if (b) b.classList.remove("spielt"); return; }
+    const jetzt = ctx.currentTime;
+    while (anzeige.length && anzeige[0].zeit <= jetzt) {
+      const ev = anzeige.shift(), sp = ev.spuren;
+      teilAnzeige(ev.teil);
+      spalte(ev.teil === bearbeite ? ev.schritt : -1);
+      if (ev.schritt % 4 === 0) publikumSchlag();
+      ["klopf", "schelle", "bass", "melodie", "trommel", "floete", "ketten", "rex"].forEach(k => { if (k in sp) spurZeigen(k, sp[k]); });
+    }
+    while (klassikQ.length && klassikQ[0][0] <= jetzt) spurZeigen(klassikQ.shift()[1]);
+    buehneTick(b);
+    requestAnimationFrame(malen);
+  }
+
+  /* ---------- Effekte auf der Bühne ---------- */
+  function fxEbene(b) {
+    let e = b.querySelector(".lw-fx");
+    if (!e) { e = document.createElement("div"); e.className = "lw-fx"; b.appendChild(e); }
+    return e;
+  }
+  const wenig = () => leicht() ? .5 : 1;
+  function fxTeil(b, html, klasse, stil) {
+    const e = document.createElement("span"); e.className = "lw-t " + (klasse || ""); e.innerHTML = html;
+    Object.assign(e.style, stil || {}); fxEbene(b).appendChild(e); return e;
+  }
+  function weg(e, anim) { if (anim) anim.onfinish = () => e.remove(); else setTimeout(() => e.remove(), 2000); }
+  /* Partikel fliegen lassen: Startpunkt in Prozent, Bewegung in Pixel */
+  function flieg(b, html, klasse, x, y, keyframes, dauer, verz) {
+    const e = fxTeil(b, html, klasse, { left: x + "%", top: y + "%" });
+    if (!e.animate) { e.remove(); return; }
+    weg(e, e.animate(keyframes, { duration: dauer, delay: verz || 0, easing: "cubic-bezier(.2,.6,.4,1)", fill: "both" }));
+  }
+  function wackeln(b, px, dauer) {
+    const s = b.querySelector(".lw-szene"); if (!s || !s.animate) return;
+    const k = []; for (let i = 0; i <= 10; i++) { const f = px * (1 - i / 10); k.push({ transform: "translate(" + ((Math.random() * 2 - 1) * f).toFixed(1) + "px," + ((Math.random() * 2 - 1) * f).toFixed(1) + "px)" }); }
+    k[10] = { transform: "none" };
+    s.animate(k, { duration: dauer });
+  }
+  function licht(b, hintergrund, dauer, staerke, mischen) {
+    const l = b.querySelector(".lw-fx-licht"); if (!l || !l.animate) return;
+    l.style.background = hintergrund; l.style.mixBlendMode = mischen || "normal";
+    l.animate([{ opacity: 0 }, { opacity: staerke, offset: .08 }, { opacity: 0 }], { duration: dauer, easing: "ease-out" });
+  }
+  function szeneFilter(b, filter, dauer) { const s = b.querySelector(".lw-szene"); if (s && s.animate) s.animate([{ filter: "none" }, { filter, offset: .15 }, { filter, offset: .7 }, { filter: "none" }], { duration: dauer }); }
+  const FIGUREN = ["friedrich", "barradin", "echo", "rex", "ezekiel"];
+  function fig(b, name, keyframes, dauer, verz, easing) {
+    const e = b.querySelector(".fg-" + name); if (!e || !e.animate) return;
+    e.animate(keyframes, { duration: dauer, delay: verz || 0, easing: easing || "ease-out" });
+  }
+  function alleSpringen(b, hoehe, dauer) {
+    FIGUREN.forEach((f, i) => fig(b, f, [{ transform: "none" }, { transform: "translateY(-" + hoehe * (f === "rex" ? 1.3 : 1) + "px)", offset: .35 }, { transform: "translateY(2px) scaleY(.97)", offset: .8 }, { transform: "none" }], dauer || 520, i * 45, "cubic-bezier(.3,.7,.4,1)"));
+  }
+  function alleSinken(b, dauer) { FIGUREN.forEach((f, i) => fig(b, f, [{ transform: "none" }, { transform: "translateY(6px) rotate(" + (i % 2 ? 2 : -2) + "deg)", offset: .3 }, { transform: "translateY(6px) rotate(" + (i % 2 ? 2 : -2) + "deg)", offset: .75 }, { transform: "none" }], dauer, i * 80, "ease-in-out")); }
+  function alleZittern(b, dauer) { FIGUREN.forEach((f, i) => { const k = []; for (let j = 0; j < 9; j++) k.push({ transform: "translateX(" + (j % 2 ? 1.5 : -1.5) + "px)" }); k.push({ transform: "none" }); fig(b, f, k, dauer, i * 30, "linear"); }); }
+  function publikum(b, art) {
+    b.querySelectorAll(".lw-publikum .gast").forEach((g, i) => {
+      if (!g.animate) return;
+      if (art === "jubel") g.animate([{ transform: "none" }, { transform: "translateY(-" + (5 + Math.random() * 6) + "px)", offset: .3 }, { transform: "translateY(-2px)", offset: .6 }, { transform: "translateY(-" + (3 + Math.random() * 4) + "px)", offset: .8 }, { transform: "none" }], { duration: 1100, delay: i * 30 });
+      else if (art === "ooh") g.animate([{ transform: "none" }, { transform: "translateY(-3px) rotate(" + (i % 2 ? -4 : 4) + "deg)", offset: .25 }, { transform: "translateY(-3px) rotate(" + (i % 2 ? -4 : 4) + "deg)", offset: .75 }, { transform: "none" }], { duration: 1500, delay: i * 20 });
+      else if (art === "schock") g.animate([{ transform: "none" }, { transform: "translateY(-9px)", offset: .15 }, { transform: "translateY(-6px)", offset: .5 }, { transform: "none" }], { duration: 800, delay: Math.random() * 60 });
+      else if (art === "duck") g.animate([{ transform: "none" }, { transform: "translateY(55%)", offset: .2 }, { transform: "translateY(55%)", offset: .7 }, { transform: "none" }], { duration: 1600, delay: i * 15 });
+      else if (art === "still") g.animate([{ opacity: 1 }, { opacity: .55, offset: .2 }, { opacity: .55, offset: .8 }, { opacity: 1 }], { duration: 2600 });
+    });
+    if (art === "jubel") b.querySelectorAll(".lw-publikum .krug").forEach((k, i) => k.animate && k.animate([{ transform: "none" }, { transform: "translate(2px,-10px) rotate(-12deg)", offset: .3 }, { transform: "translate(2px,-8px) rotate(8deg)", offset: .6 }, { transform: "none" }], { duration: 1200, delay: i * 50 }));
+  }
+  function konfetti(b, n, farben) {
+    farben = farben || ["#e0a046", "#e25b4b", "#7fc8a9", "#8fb3ff", "#f4e3b2", "#c48bff"];
+    const h = b.clientHeight;
+    for (let i = 0; i < n * wenig(); i++) {
+      const x = Math.random() * 100, dx = (Math.random() * 2 - 1) * 40, r = Math.random() * 720 - 360;
+      flieg(b, "", "konfetti", x, -6, [{ transform: "translate(0,0) rotate(0)", opacity: 1 }, { transform: "translate(" + dx + "px," + h * (.55 + Math.random() * .5) + "px) rotate(" + r + "deg)", opacity: 1, offset: .85 }, { transform: "translate(" + dx * 1.2 + "px," + h * 1.05 + "px) rotate(" + r * 1.2 + "deg)", opacity: 0 }], 1600 + Math.random() * 1200, Math.random() * 400);
+      const e = fxEbene(b).lastChild; if (e) e.style.background = farben[i % farben.length];
+    }
+  }
+  function regnen(b, n, html, klasse, dauer) {
+    const h = b.clientHeight;
+    for (let i = 0; i < n * wenig(); i++) flieg(b, html, klasse, 5 + Math.random() * 90, -10, [{ transform: "translate(0,0) rotate(0)" }, { transform: "translate(" + (Math.random() * 20 - 10) + "px," + h * .82 + "px) rotate(" + (Math.random() * 300) + "deg)", offset: .8 },
+      { transform: "translate(" + (Math.random() * 20 - 10) + "px," + h * .74 + "px) rotate(" + (Math.random() * 300) + "deg)", offset: .9 }, { transform: "translate(0," + h * .82 + "px)", opacity: 0 }], dauer || 1500, Math.random() * 700);
+  }
+  function aufsteigen(b, n, html, klasse, x0, x1, dauer) {
+    const h = b.clientHeight;
+    for (let i = 0; i < n * wenig(); i++) flieg(b, html, klasse, x0 + Math.random() * (x1 - x0), 70 + Math.random() * 20, [{ transform: "translate(0,0) scale(.6)", opacity: 0 }, { opacity: 1, offset: .2 }, { transform: "translate(" + (Math.random() * 30 - 15) + "px,-" + h * (.4 + Math.random() * .35) + "px) scale(1.1)", opacity: 0 }], dauer || 1800, Math.random() * 600);
+  }
+  function platzen(b, n, html, klasse, x, y, weite, dauer) {
+    for (let i = 0; i < n * wenig(); i++) {
+      const w = Math.random() * Math.PI * 2, r = weite * (.4 + Math.random() * .6);
+      flieg(b, html, klasse, x, y, [{ transform: "translate(0,0) scale(.4)", opacity: 1 }, { transform: "translate(" + Math.cos(w) * r + "px," + Math.sin(w) * r + "px) scale(1)", opacity: .9, offset: .6 }, { transform: "translate(" + Math.cos(w) * r * 1.2 + "px," + (Math.sin(w) * r * 1.2 + 14) + "px) scale(.8)", opacity: 0 }], dauer || 900, Math.random() * 80);
+    }
+  }
+  function gross(b, html, klasse, dauer) {
+    flieg(b, html, "gross " + (klasse || ""), 50, 42, [{ transform: "translate(-50%,-50%) scale(.2) rotate(-12deg)", opacity: 0 }, { transform: "translate(-50%,-50%) scale(1.15) rotate(3deg)", opacity: 1, offset: .2 },
+      { transform: "translate(-50%,-50%) scale(1) rotate(0)", opacity: 1, offset: .32 }, { transform: "translate(-50%,-50%) scale(1)", opacity: 1, offset: .8 }, { transform: "translate(-50%,-60%) scale(1.1)", opacity: 0 }], dauer || 1600);
+  }
+  function quer(b, html, klasse, vonLinks, y, dauer, bogen) {
+    const w = b.clientWidth;
+    flieg(b, html, klasse, vonLinks ? -8 : 104, y, [{ transform: "translate(0,0)" + (vonLinks ? "" : " scaleX(-1)") }, { transform: "translate(" + (vonLinks ? 1 : -1) * w * .56 + "px," + (bogen ? -bogen : 0) + "px)" + (vonLinks ? "" : " scaleX(-1)"), offset: .5 },
+      { transform: "translate(" + (vonLinks ? 1 : -1) * w * 1.15 + "px,0)" + (vonLinks ? "" : " scaleX(-1)") }], dauer, 0);
+  }
+  const DRACHE = '<svg viewBox="0 0 220 110"><g class="drachen-fluegel"><path d="M92 54 L58 4 L84 18 L80 0 L104 24 L106 6 L122 46 Z"/></g><path d="M2 62 Q30 54 60 60 Q84 46 110 52 L148 46 Q160 38 172 42 L196 36 L206 42 L192 48 L200 54 L182 54 Q168 58 150 58 L118 64 Q96 74 74 66 Q40 74 2 62 Z"/><path d="M118 62 l-6 14 l6 -2 M88 66 l-4 14 l5 -2" stroke-width="3" fill="none"/><circle cx="186" cy="44" r="1.8" fill="#ff8a3a"/></svg>';
+  const BLITZ_SVG = '<svg viewBox="0 0 60 200" preserveAspectRatio="none"><path d="M34 0 L18 70 L32 72 L10 140 L28 140 L6 200" fill="none" stroke="#f4f8ff" stroke-width="4"/><path d="M34 0 L18 70 L32 72 L10 140 L28 140 L6 200" fill="none" stroke="#9cc4ff" stroke-width="10" opacity=".35"/></svg>';
+  const STRAHLEN = '<svg viewBox="0 0 200 120" preserveAspectRatio="none"><g fill="#ffe7a0">' + Array.from({ length: 9 }, (_, i) => '<path d="M100 -10 L' + (i * 25 - 6) + ' 130 L' + (i * 25 + 6) + ' 130 Z" opacity=".' + (3 + (i % 3)) + '"/>').join("") + "</g></svg>";
+  function buehneFx(art) {
+    const b = buehne(); if (!b) return;
+    fxBis = performance.now() + 3500; malenStarten();
+    if (ruhig) { if (["donner", "blitz", "boom", "feuerball", "krit"].includes(art)) licht(b, "#fff", 400, .2); return; }
+    const h = b.clientHeight;
+    switch (art) {
+      case "drache":
+        flieg(b, DRACHE, "drache", -40, 4, [{ transform: "translate(0,0) scale(1)" }, { transform: "translate(" + b.clientWidth * .8 + "px," + h * .05 + "px) scale(1.25)", offset: .55 }, { transform: "translate(" + b.clientWidth * 1.5 + "px,-" + h * .1 + "px) scale(1.4)" }], 2600);
+        setTimeout(() => { wackeln(b, 7, 1300); licht(b, "radial-gradient(ellipse at 50% 0%, rgba(255,110,40,.75), transparent 70%)", 1500, .9); alleSinken(b, 1400); publikum(b, "duck"); }, 700);
+        break;
+      case "schwert": case "hieb":
+        flieg(b, "", "hieb", 30, 18, [{ transform: "rotate(-28deg) scaleX(0)", opacity: 1 }, { transform: "rotate(-28deg) scaleX(1)", opacity: 1, offset: .35 }, { transform: "rotate(-28deg) scaleX(1) translateX(30px)", opacity: 0 }], 420);
+        platzen(b, 8, "", "funke", 52, 42, 40, 500); wackeln(b, 3, 300); break;
+      case "tuer":
+        licht(b, "rgba(0,0,0,.85)", 1600, .7);
+        flieg(b, "", "tuerlicht", 0, 0, [{ opacity: 0, transform: "scaleX(.1)" }, { opacity: .8, transform: "scaleX(1)", offset: .3 }, { opacity: 0, transform: "scaleX(1.1)" }], 1600, 200);
+        alleZittern(b, 300); break;
+      case "donner":
+        licht(b, "#e8f0ff", 350, .85); setTimeout(() => licht(b, "#e8f0ff", 500, .6), 260); setTimeout(() => wackeln(b, 5, 900), 200); break;
+      case "schrei": alleZittern(b, 600); licht(b, "radial-gradient(circle, transparent 35%, rgba(120,0,0,.7))", 1300, 1); publikum(b, "schock");
+        FIGUREN.forEach((f, i) => setTimeout(() => schweben("!", [12, 34, 60, 72, 90][i], "blase", 60), i * 60)); break;
+      case "wuerfel": case "krit": {
+        const w = b.clientWidth;
+        flieg(b, '<svg viewBox="0 0 40 40"><path d="M20 2 L37 12 L37 28 L20 38 L3 28 L3 12 Z" fill="#e0a046" stroke="#5a3a10" stroke-width="2"/><path d="M20 2 L10 26 L30 26 Z M3 12 L10 26 M37 12 L30 26 M20 38 L10 26 M20 38 L30 26" fill="none" stroke="#5a3a10" stroke-width="1.5"/><text x="20" y="22" text-anchor="middle" font-size="9" font-weight="700" fill="#2a1a08">' + (art === "krit" ? 20 : 1 + Math.floor(Math.random() * 20)) + "</text></svg>", "w20", 0, 64,
+          [{ transform: "translate(0,0) rotate(0)" }, { transform: "translate(" + w * .25 + "px,-" + h * .3 + "px) rotate(300deg)", offset: .3 }, { transform: "translate(" + w * .42 + "px,0) rotate(560deg)", offset: .55 }, { transform: "translate(" + w * .47 + "px,-" + h * .08 + "px) rotate(640deg)", offset: .7 }, { transform: "translate(" + w * .5 + "px,0) rotate(720deg)", offset: .85 }, { transform: "translate(" + w * .5 + "px,0) rotate(720deg)", opacity: 0 }], art === "krit" ? 1700 : 2000);
+        if (art === "krit") setTimeout(() => { konfetti(b, 60); gross(b, "NAT 20!", "gold", 2000); licht(b, "radial-gradient(circle, rgba(255,220,120,.6), transparent 70%)", 1200, 1); alleSpringen(b, 14); publikum(b, "jubel"); }, 1000);
+        break;
+      }
+      case "zauber": platzen(b, 26, "✦", "funkel lila", 50, 45, 120, 1400); licht(b, "radial-gradient(circle, rgba(170,110,255,.55), transparent 65%)", 1500, 1); break;
+      case "horn": flieg(b, STRAHLEN, "strahlen", 0, 0, [{ opacity: 0 }, { opacity: .7, offset: .3 }, { opacity: 0 }], 2200);
+        FIGUREN.forEach((f, i) => fig(b, f, [{ transform: "none" }, { transform: "translateY(-3px) scaleY(1.03)", offset: .3 }, { transform: "none" }], 1400, i * 70)); break;
+      case "jubel": konfetti(b, 30); publikum(b, "jubel"); alleSpringen(b, 9); break;
+      case "bogen": quer(b, "", "pfeil", true, 40, 620); break;
+      case "pfeil": quer(b, "", "pfeil", false, 36, 420); setTimeout(() => { wackeln(b, 2.5, 220); platzen(b, 6, "", "staub", 18, 45, 22, 500); }, 380); break;
+      case "verfehlt": quer(b, "", "pfeil", true, 18, 520, 10); fig(b, "barradin", [{ transform: "none" }, { transform: "translate(-8px,4px) rotate(-5deg)", offset: .3 }, { transform: "none" }], 700, 100);
+        setTimeout(() => schweben("…", ORT.laute, "blase", 66), 300); break;
+      case "block": platzen(b, 14, "", "funke", 46, 46, 50, 600); licht(b, "#fff6dc", 260, .5); flieg(b, "🛡", "symbol", 46, 36, [{ transform: "scale(.3)", opacity: 0 }, { transform: "scale(1.3)", opacity: 1, offset: .25 }, { transform: "scale(1)", opacity: 0 }], 900); wackeln(b, 3, 250); break;
+      case "wucht": wackeln(b, 9, 600); platzen(b, 10, "", "staub", 50, 86, 70, 900); licht(b, "#000", 400, .35); break;
+      case "schmerz": licht(b, "radial-gradient(circle, transparent 30%, rgba(200,20,20,.75))", 900, 1);
+        fig(b, "barradin", [{ transform: "none" }, { transform: "translateX(-5px) rotate(-3deg)", offset: .2 }, { transform: "translateX(4px) rotate(2deg)", offset: .45 }, { transform: "none" }], 500); break;
+      case "sterben": licht(b, "radial-gradient(circle, rgba(0,0,0,.2), rgba(0,0,0,.92))", 3000, 1); szeneFilter(b, "grayscale(1) brightness(.7)", 3000); alleSinken(b, 2600); publikum(b, "still");
+        flieg(b, "💀", "symbol gross-sym", 47, 40, [{ transform: "translateY(0) scale(.5)", opacity: 0 }, { opacity: 1, offset: .25 }, { transform: "translateY(-40px) scale(1.2)", opacity: 0 }], 2400, 300); break;
+      case "feuerball": licht(b, "radial-gradient(circle, rgba(255,170,60,.9), rgba(255,60,20,.5) 45%, transparent 75%)", 1200, 1); wackeln(b, 7, 700);
+        platzen(b, 22, "", "glut", 50, 50, 150, 1300); aufsteigen(b, 8, "", "rauch", 35, 65, 2400); break;
+      case "blitz": flieg(b, BLITZ_SVG, "blitzstrahl", 44, 0, [{ opacity: 0 }, { opacity: 1, offset: .05 }, { opacity: .2, offset: .2 }, { opacity: 1, offset: .3 }, { opacity: 0 }], 700);
+        licht(b, "#eef4ff", 450, .8); wackeln(b, 4, 400); alleZittern(b, 400); break;
+      case "heiltrank": aufsteigen(b, 18, "", "funkel gruen", 25, 75, 1900); aufsteigen(b, 5, "💚", "herz", 30, 70, 2100); licht(b, "radial-gradient(circle, rgba(120,255,160,.4), transparent 70%)", 1500, 1); break;
+      case "tusch": flieg(b, "", "spot", 50, 0, [{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .7 }, { opacity: 0 }], 1800); platzen(b, 18, "✦", "funkel", 50, 40, 110, 1100); alleSpringen(b, 6); break;
+      case "posaune": alleSinken(b, 2400); szeneFilter(b, "saturate(.3) brightness(.85)", 2400); schweben("😞", 50, "blase", 60); break;
+      case "dramatisch": { const s = b.querySelector(".lw-szene"); if (s && s.animate) s.animate([{ transform: "none" }, { transform: "scale(1.12)", offset: .25 }, { transform: "scale(1.12)", offset: .8 }, { transform: "none" }], { duration: 2400, easing: "ease-in-out" });
+        licht(b, "radial-gradient(circle, transparent 25%, rgba(0,0,0,.85) 70%)", 2400, 1); break; }
+      case "grillen": licht(b, "rgba(4,8,20,.8)", 3200, .8); publikum(b, "still"); ["zirp", "zirp…"].forEach((z, i) => setTimeout(() => schweben(z, 15 + Math.random() * 70, "zirp", 12), 400 + i * 900)); break;
+      case "ooh": publikum(b, "ooh"); [20, 50, 80].forEach((x, i) => setTimeout(() => schweben("Ooh!", x, "blase", 18), i * 140)); break;
+      case "muenzen": regnen(b, 26, "", "muenze", 1500); break;
+      case "ruelpser": platzen(b, 9, "", "wolke", 44, 34, 40, 1600); fig(b, "barradin", [{ transform: "none" }, { transform: "translateY(-3px) scale(1.04)", offset: .3 }, { transform: "none" }], 500); break;
+      case "schnarchen": FIGUREN.forEach((f, i) => setTimeout(() => schweben("z", [12, 36, 60, 70, 90][i], "zzz", 55), i * 250)); setTimeout(() => schweben("Z", 42, "zzz gross-z", 60), 900); alleSinken(b, 3000); licht(b, "rgba(10,14,40,.7)", 3000, .6); break;
+      case "bonk": fig(b, "barradin", [{ transform: "none" }, { transform: "translateY(5px) scaleY(.93)", offset: .12 }, { transform: "rotate(-4deg)", offset: .35 }, { transform: "rotate(3deg)", offset: .55 }, { transform: "rotate(-2deg)", offset: .75 }, { transform: "none" }], 1300);
+        for (let i = 0; i < 5; i++) { const w = i / 5 * 360; flieg(b, "★", "stern-kreis", ORT.laute - 2, 24, [0, 90, 180, 270, 360].map(a => ({ transform: "rotate(" + (w + a) + "deg) translateX(22px) rotate(-" + (w + a) + "deg) scaleY(.6)" })).concat([{ transform: "rotate(" + (w + 450) + "deg) translateX(22px)", opacity: 0 }]), 1700); }
+        break;
+      case "lufthorn": wackeln(b, 6, 900); alleSpringen(b, 7, 400); setTimeout(() => alleSpringen(b, 7, 400), 450); flieg(b, "📯", "symbol", 8, 30, [{ transform: "scale(.5) rotate(-20deg)", opacity: 0 }, { transform: "scale(1.4) rotate(0)", opacity: 1, offset: .2 }, { transform: "scale(1.2)", opacity: 0 }], 1200); break;
+      case "kratzer": b.classList.add("halt"); szeneFilter(b, "contrast(1.4) hue-rotate(20deg)", 500); { const s = b.querySelector(".lw-szene"); if (s && s.animate) s.animate([{ transform: "none" }, { transform: "translateX(-6px) skewX(4deg)", offset: .2 }, { transform: "translateX(5px)", offset: .4 }, { transform: "none" }], { duration: 400 }); }
+        setTimeout(() => b.classList.remove("halt"), 900); break;
+      case "boom": licht(b, "radial-gradient(circle, #fff, rgba(255,160,60,.8) 40%, rgba(60,20,0,.6))", 1300, 1); wackeln(b, 12, 1100); aufsteigen(b, 12, "", "rauch", 25, 75, 2600); platzen(b, 20, "", "glut", 50, 60, 170, 1000); alleSpringen(b, 12); publikum(b, "schock"); break;
+      case "falsch": gross(b, "✗", "rot", 1300); wackeln(b, 3, 300); break;
+      case "richtig": gross(b, "✓", "gruen", 1300); platzen(b, 10, "✦", "funkel gruen", 50, 42, 80, 900); break;
+      case "rutsch": fig(b, "barradin", [{ transform: "none" }, { transform: "translateY(18px) scaleY(.9)", offset: .55 }, { transform: "translateY(-6px)", offset: .8 }, { transform: "none" }], 1300, 0, "ease-in-out"); break;
+      case "boing": alleSpringen(b, 22, 700); break;
+      case "hupe": fig(b, "rex", [{ transform: "none" }, { transform: "translateY(-18px) rotate(-8deg)", offset: .3 }, { transform: "none" }], 600); schweben("HUP!", ORT.rex, "blase", 52); break;
+      case "halleluja": flieg(b, STRAHLEN, "strahlen gold", 0, 0, [{ opacity: 0 }, { opacity: .85, offset: .3 }, { opacity: .85, offset: .7 }, { opacity: 0 }], 3200); aufsteigen(b, 16, "✦", "funkel", 10, 90, 2600);
+        FIGUREN.forEach((f, i) => fig(b, f, [{ transform: "none", filter: "none" }, { transform: "translateY(-6px)", filter: "brightness(1.4) drop-shadow(0 0 6px #ffe7a0)", offset: .4 }, { transform: "translateY(-6px)", filter: "brightness(1.4) drop-shadow(0 0 6px #ffe7a0)", offset: .75 }, { transform: "none", filter: "none" }], 3000, i * 90)); break;
+      case "levelup": aufsteigen(b, 26, "", "funkel gold", 5, 95, 2000); gross(b, "LEVEL UP!", "gold klein", 2000); alleSpringen(b, 10); break;
+      case "schock": alleSpringen(b, 16, 420); publikum(b, "schock"); FIGUREN.forEach((f, i) => setTimeout(() => schweben("!", [12, 36, 60, 70, 90][i], "blase", 60), i * 40)); licht(b, "#fff", 200, .4); break;
+      case "wirbel": flieg(b, "", "spot wandert", 10, 0, [{ transform: "translateX(0)", opacity: 0 }, { opacity: 1, offset: .15 }, { transform: "translateX(" + b.clientWidth * .55 + "px)", opacity: 1, offset: .85 }, { transform: "translateX(" + b.clientWidth * .3 + "px)", opacity: 0 }], 2600);
+        for (let i = 0; i < 12; i++) setTimeout(() => zucken("trommel"), i * 110); break;
+      default:
+        if (KLASSIK[art]) { flieg(b, "", "spot", 50, 0, [{ opacity: 0 }, { opacity: 1, offset: .3 }, { opacity: 0 }], 2000); publikum(b, "jubel"); }
+    }
+  }
+
+  /* ---------- Favoriten: die wichtigsten Kacheln groß oben im Pult ---------- */
+  Object.assign(TX.de, { favTitel: "Favoriten", favAnpassen: "✎ Anpassen", favFertig: "✓ Fertig", favLeer: "Noch nichts angeheftet – tippe auf „✎ Anpassen“.",
+    favTipp: "Tippe unten auf Stimmungen, Lieder, Kulissen oder Effekte, um sie anzuheften (★). Hier oben: ✕ entfernt, ‹ › verschiebt." });
+  Object.assign(TX.en, { favTitel: "Favourites", favAnpassen: "✎ Customise", favFertig: "✓ Done", favLeer: "Nothing pinned yet – tap “✎ Customise”.",
+    favTipp: "Tap moods, songs, backdrops or effects below to pin them (★). Up here: ✕ removes, ‹ › moves." });
+  const FAV_START = ["v:kampf", "v:spannung", "v:rast", "v:dorffest", "s:drache", "s:jubel", "s:krit", "s:bonk"];
+  let favs = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-favs")); if (Array.isArray(x)) return x.filter(f => typeof f === "string").slice(0, 40); } catch (_) {} return FAV_START.slice(); })();
+  let favModus = false;
+  function favsMerken() { try { localStorage.setItem("imres-lw-favs", JSON.stringify(favs)); } catch (_) {} }
+  const FAV_ATTR = { v: "data-vorlage", s: "data-sfx", k: "data-kulisse" };
+  function favText(T, f) {
+    const q = f[0], k = f.slice(2);
+    if (q === "v") {
+      if (k.startsWith("e_")) return eigeneStimmungen[k] && STIL[eigeneStimmungen[k].basis] ? "⭐ " + esc(eigeneStimmungen[k].name) : null;
+      return T.vorlagen[k] ? (eigeneStimmungen[k] ? esc((T.vorlagen[k].match(/^[^\wÄÖÜäöü]+/) || [""])[0] + stimmName(k)) + " ✎" : T.vorlagen[k]) : null;
+    }
+    if (q === "s") return T.sfx[k] && ALLE_FX.includes(k) ? T.sfx[k] : null;
+    if (q === "k") return KULISSEN.includes(k) ? T.kulissen[k] : null;
+    return null;
+  }
+  function favLeiste(T) {
+    if (hoerer) return "";
+    const da = favs.map(f => [f, favText(T, f)]).filter(x => x[1]);
+    const kacheln = da.map(([f, text], i) => favModus
+      ? '<span class="lw-fav-e"><button type="button" data-favzug="' + i + ':-1" aria-label="‹">‹</button><button type="button" class="lw-fav-name" data-favweg="' + esc(f) + '">' + text + ' <b>✕</b></button><button type="button" data-favzug="' + i + ':1" aria-label="›">›</button></span>'
+      : '<button type="button" class="lw-fav" ' + FAV_ATTR[f[0]] + '="' + esc(f.slice(2)) + '">' + text + "</button>").join("");
+    return '<section class="lw-favs' + (favModus ? " bearbeiten" : "") + '"><div class="lw-favs-kopf"><h4>★ ' + T.favTitel + '</h4><button type="button" class="lw-klein" data-aktion="favmodus">' + (favModus ? T.favFertig : T.favAnpassen) + "</button></div>" +
+      (kacheln ? '<div class="lw-fav-gitter">' + kacheln + "</div>" : '<p class="lw-tipp lw-leer">' + T.favLeer + "</p>") + (favModus ? '<p class="lw-tipp">' + T.favTipp + "</p>" : "") + "</section>";
+  }
+  function favsNeu() {
+    const alt = root.querySelector(".lw-favs");
+    if (alt) alt.outerHTML = favLeiste(t());
+    root.classList.toggle("lw-favmodus", favModus);
+    favMarkieren();
+  }
+  function favSchluessel(el) {
+    for (const q of ["v", "s", "k"]) if (el.hasAttribute(FAV_ATTR[q])) return q + ":" + el.getAttribute(FAV_ATTR[q]);
+    return null;
+  }
+  /* Favoriten zeigen, was gerade läuft, und im Bearbeiten-Modus tragen angeheftete Kacheln einen Stern */
+  function favMarkieren() {
+    const st = S.eigeneStimmung || S.stimmung;
+    root.querySelectorAll(".lw-favs .lw-fav").forEach(el => {
+      const f = favSchluessel(el); if (!f) return;
+      const k = f.slice(2);
+      el.classList.toggle("an", f[0] === "v" ? (STIL[k] || k.startsWith("e_") ? st === k : !S.stimmung && t().vorlagen[k] && S.titel === t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "")) : f[0] === "k" ? S.kulisse === k : false);
+    });
+    root.querySelectorAll(".lw-konsole [data-vorlage], .lw-konsole [data-sfx], .lw-konsole [data-kulisse]").forEach(el => el.classList.toggle("gepinnt", favModus && favs.includes(favSchluessel(el))));
+  }
+  root.addEventListener("click", e => {
+    if (e.target.closest('[data-aktion="favmodus"]')) { favModus = !favModus; favsNeu(); e.stopPropagation(); return; }
+    if (!favModus) return;
+    const weg = e.target.closest("[data-favweg]"), zug = e.target.closest("[data-favzug]");
+    if (weg) { favs = favs.filter(f => f !== weg.dataset.favweg); favsMerken(); favsNeu(); e.stopPropagation(); return; }
+    if (zug) {
+      const [i, d] = zug.dataset.favzug.split(":").map(Number), T = t(), da = favs.filter(f => favText(T, f));
+      const j = i + d; if (j >= 0 && j < da.length) { [da[i], da[j]] = [da[j], da[i]]; favs = da; favsMerken(); favsNeu(); }
+      e.stopPropagation(); return;
+    }
+    const k = e.target.closest(".lw-konsole [data-vorlage], .lw-konsole [data-sfx], .lw-konsole [data-kulisse]");
+    if (k) {
+      e.stopPropagation(); e.preventDefault();
+      const f = favSchluessel(k); if (!f || !favText(t(), f)) return;
+      favs = favs.includes(f) ? favs.filter(x => x !== f) : favs.concat([f]); favsMerken(); favsNeu();
+    }
+  }, true);
 
   /* ---------- Oberfläche ---------- */
   function zeilenName(spur, z) {
@@ -3272,13 +3780,13 @@
   function pultZeichnen(T) {
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.pultTipp + "</p>" +
-      '<div class="lw-buehne lw-buehne-klein" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
+      buehneHTML(true) +
       '<div class="lw-pult">' +
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<span class="lw-pult-titel">' + esc(S.titel || T.eigenesLied) + "</span>" +
           '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></div>" +
-        konsole(T, false) +
+        favLeiste(T) + konsole(T, false) +
         '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
@@ -3363,7 +3871,7 @@
     const stat = !hoerer.verbunden ? T.hVerbinde : (z && z.laeuft ? "🟢 " + T.hVerbunden : T.hWarte);
     root.innerHTML =
       '<p class="label">' + T.funk + "</p><h3>" + T.hTitel + '</h3><p class="tav-info">' + T.hText + "</p>" +
-      '<div class="lw-buehne lw-buehne-klein" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
+      buehneHTML(true) +
       '<div class="lw-pult"><div class="lw-pult-kopf"><button type="button" class="lw-play-gross lw-hoeren' + (hoerer.an ? " an" : "") + '" data-aktion="hoeren">' + (hoerer.an ? T.hAus : T.hZuhoeren) + "</button>" +
         '<span class="lw-pult-titel">' + esc(z && z.titel ? z.titel : "") + "</span></div>" +
         '<p class="lw-funk-status">' + esc(stat) + "</p>" + '<p class="lw-diagnose"></p>' +
@@ -3479,7 +3987,7 @@
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.text + "</p>" +
       '<button type="button" class="lw-pultbanner" data-aktion="pult"><span class="lw-pb-icon">🎛</span><span><b>' + T.pultGross + "</b><small>" + T.pultUnter + '</small></span><span class="lw-pb-pfeil">→</span></button>' +
-      '<div class="lw-buehne" data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten + '">' + BUEHNE + "</div>" +
+      buehneHTML(false) +
       '<div class="lw-steuer">' +
         '<button type="button" class="lw-play">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
         '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
@@ -3490,7 +3998,7 @@
         '<button type="button" class="lw-schalter" data-feld="swing" aria-pressed="' + !!S.swing + '">' + T.swing + "</button>" +
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
       "</div>" +
-      konsole(T, true) +
+      favLeiste(T) + konsole(T, true) +
       '<div class="lw-teile">' +
         '<span class="lw-teilgruppe"><span class="lw-teile-label">' + T.teil + ':</span><span class="lw-teilknoepfe">' +
         TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") + "</span></span>" +
@@ -3534,7 +4042,7 @@
     k.textContent = laeuft ? "❚❚" : "▶"; k.setAttribute("aria-label", laeuft ? T.miniPause : T.miniWeiter); k.title = k.getAttribute("aria-label");
   }
   function knoepfe() {
-    miniAnzeigen();
+    miniAnzeigen(); try { favMarkieren(); } catch (_) {}
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
     root.querySelectorAll(".lw-ausklang").forEach(a => { a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; });
@@ -3845,13 +4353,143 @@
     }
   });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && laeuft) { const jetzt = ctx.currentTime; while (anzeige.length && anzeige[0].zeit < jetzt - .05) anzeige.shift(); requestAnimationFrame(malen); }
+    if (!document.hidden && laeuft) { const jetzt = ctx.currentTime; while (anzeige.length && anzeige[0].zeit < jetzt - .05) anzeige.shift(); malenStarten(); }
   });
 
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");
   css.textContent = `
 .lautenwerk { grid-column: 1 / -1; }
+.lw-buehne { background: #0d0a10; }
+.lw-szene { position: absolute; inset: 0; transform-origin: 34% 60%; }
+.lw-figur .fg-friedrich { transform-origin: 65px 208px; } .lw-figur .fg-barradin { transform-origin: 215px 208px; } .lw-figur .fg-echo { transform-origin: 415px 208px; } .lw-figur .fg-rex { transform-origin: 495px 210px; } .lw-figur .fg-ezekiel { transform-origin: 595px 208px; }
+.lw-kulisse-bild { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.lw-kulisse-bild .bg { display: none; }
+.lw-kulisse-bild g, .lw-kulisse-bild path, .lw-kulisse-bild circle, .lw-kulisse-bild ellipse, .lw-kulisse-bild rect { transform-box: fill-box; }
+.lw-buehne::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,6,10,.15), transparent 30%, transparent 70%, rgba(8,6,10,.55)); }
+.lw-kulisse-bild .stern { animation: lwfunkeln 3s ease-in-out infinite; }
+@keyframes lwfunkeln { 50% { opacity: .2; } }
+.lw-kulisse-bild .licht { opacity: calc(.3 + var(--pegel, 0) * 1.5); }
+.lw-kulisse-bild .flamme { transform-origin: 50% 100%; animation: lwflacker .32s ease-in-out infinite alternate; }
+@keyframes lwflacker { from { transform: scale(1, 1); } to { transform: scale(.82, 1.2); } }
+.lw-kulisse-bild .feuerschein { transform-origin: 50% 100%; opacity: calc(.55 + var(--pegel, 0) * 1.1); animation: lwschein 1.3s ease-in-out infinite alternate; }
+@keyframes lwschein { to { transform: scale(1.06, 1.12); } }
+.lw-kulisse-bild .funken circle { animation: lwfunke 4s linear infinite; }
+@keyframes lwfunke { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate(18px, -190px); opacity: 0; } }
+.lw-kulisse-bild .regen-fall { animation: lwregen .5s linear infinite; transform-box: view-box; }
+.lw-kulisse-bild .regen-fall.langsam { animation-duration: .9s; }
+.lw-kulisse-bild .regen-fall.schnell { animation-duration: .36s; }
+@keyframes lwregen { to { transform: translate(-62.5px, 250px); } }
+.lw-kulisse-bild .tropfen { animation: lwtropfen 2.8s ease-in infinite; }
+@keyframes lwtropfen { 0%, 40% { transform: translateY(0); opacity: 0; } 45% { opacity: .9; } 100% { transform: translateY(150px); opacity: 0; } }
+.lw-kulisse-bild .nebel { animation: lwnebel 14s ease-in-out infinite alternate; }
+@keyframes lwnebel { from { transform: translateX(-40px); } to { transform: translateX(40px) scaleY(1.3); } }
+.lw-kulisse-bild .gluehwuermchen circle { animation: lwgluehen 6s ease-in-out infinite; filter: drop-shadow(0 0 3px #d8ff8a); }
+@keyframes lwgluehen { 0%, 100% { opacity: 0; transform: translate(0, 0); } 40% { opacity: 1; } 60% { opacity: .8; transform: translate(14px, -10px); } }
+.lw-kulisse-bild .kristall { animation: lwkristall 4s ease-in-out infinite; }
+@keyframes lwkristall { 50% { opacity: .55; } }
+.lw-kulisse-bild .wellen .w1 { animation: lwwelle 5s linear infinite; }
+.lw-kulisse-bild .wellen .w2 { animation: lwwelle2 7s linear infinite; }
+@keyframes lwwelle { to { transform: translateX(80px); } }
+@keyframes lwwelle2 { to { transform: translateX(-100px); } }
+.lw-kulisse-bild .moewen .m1 { animation: lwmoewe 22s linear infinite; }
+.lw-kulisse-bild .moewen .m2 { animation: lwmoewe 30s linear infinite -12s; }
+@keyframes lwmoewe { from { transform: translate(-200px, 10px); } 50% { transform: translate(300px, -10px); } to { transform: translate(800px, 6px); } }
+.lw-kulisse-bild .wolken { animation: lwwolken 26s ease-in-out infinite alternate; }
+.lw-kulisse-bild .wolken.w2 { animation-duration: 17s; animation-direction: alternate-reverse; }
+@keyframes lwwolken { from { transform: translateX(-50px); } to { transform: translateX(50px); } }
+.lw-kulisse-bild .blitzlicht { animation: lwsturmblitz 9s linear infinite; }
+.lw-kulisse-bild .blitz { animation: lwsturmblitz2 9s linear infinite; }
+@keyframes lwsturmblitz { 0%, 60%, 62.5%, 64%, 100% { opacity: 0; } 61% { opacity: .45; } 63% { opacity: .3; } }
+@keyframes lwsturmblitz2 { 0%, 60%, 62.5%, 64%, 100% { opacity: 0; } 61%, 63% { opacity: 1; } }
+.lw-kulisse-bild .baeume-wind > path { transform-origin: 50% 100%; animation: lwwind 2.2s ease-in-out infinite alternate; }
+@keyframes lwwind { from { transform: skewX(-4deg); } to { transform: skewX(3deg); } }
+.lw-kulisse-bild .spot { transform-origin: 50% 0; opacity: calc(.45 + var(--pegel, 0) * 1.3); animation: lwspot 8s ease-in-out infinite alternate; }
+.lw-kulisse-bild .spot.s2 { animation-duration: 6.5s; animation-direction: alternate-reverse; }
+@keyframes lwspot { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+.lw-buehne:not(.spielt) .lw-kulisse-bild *, .lw-buehne.halt * { animation-play-state: paused !important; }
+.lw-buehne.spar .stern, .lw-buehne.spar .regen-fall.langsam, .lw-buehne.spar .wolken.w2, .lw-buehne.spar .gluehwuermchen circle, .lw-buehne.spar .nebel { animation: none; }
+.lw-buehne.spar .gluehwuermchen circle { filter: none; }
+.lw-geister { position: absolute; inset: 4px 4px 0; width: calc(100% - 8px); height: calc(100% - 4px); overflow: visible; opacity: calc(var(--orch, 0) * .75); fill: rgba(190,222,255,.16); stroke: rgba(205,230,255,.55); stroke-width: 1.2; }
+.lw-geister g, .lw-geister path, .lw-geister ellipse { transform-box: fill-box; }
+.lw-geister .g-schein { stroke: none; opacity: calc(.25 + var(--blech, 0) * .75); }
+.lw-geister .g-empore { fill: none; opacity: .5; }
+.lw-geister .g-blech { opacity: calc(.2 + var(--blech, 0) * .8); transform: translateY(calc(var(--blech, 0) * -3px)); transform-box: view-box; }
+.lw-geister .g-blech .horn path { stroke-width: 2.5; }
+.lw-buehne.orch-an .lw-geister .g-bogen { animation: lwbogen .9s ease-in-out infinite alternate; }
+.lw-buehne.orch-an .lw-geister .g-bogen.quer { animation-duration: 1.2s; }
+.lw-buehne.orch-an .lw-geister .geist .g-k { animation: lwgeistwiegen 2.6s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.lw-geister .geist:nth-child(2n) .g-k { animation-delay: -1.3s !important; }
+@keyframes lwbogen { from { transform: translate(-5px, -3px); } to { transform: translate(5px, 3px); } }
+@keyframes lwgeistwiegen { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+.lw-publikum { position: absolute; left: 0; right: 0; bottom: -3px; height: clamp(26px, 17%, 44px); display: flex; justify-content: space-evenly; align-items: flex-end; pointer-events: none; transition: transform .7s ease, opacity .7s; z-index: 1; }
+.lw-publikum .gast { height: 100%; width: auto; flex: 0 0 auto; margin: 0 -5px; fill: #060509; stroke: #060509; overflow: visible; transform-origin: 50% 100%; scale: var(--s, 1); }
+.lw-publikum .gast .krug rect { fill: #24170c; stroke: #060509; }
+.lw-buehne:not(.spar) .lw-publikum .gast { filter: drop-shadow(0 -1px 0 rgba(224,160,70,.28)); }
+@media (max-width: 560px) { .lw-publikum .gast:nth-child(3n) { display: none; } }
+.lw-buehne[data-pub="duck"] .lw-publikum { transform: translateY(42%); }
+.lw-buehne[data-pub="duck"] .lw-publikum .gast { animation: lwspaehen 6s ease-in-out infinite; animation-delay: calc(var(--i) * -1.7s); }
+@keyframes lwspaehen { 0%, 70%, 100% { transform: none; } 78%, 88% { transform: translateY(-30%); } }
+.lw-buehne[data-pub="wiegen"] .lw-publikum .gast { animation: lwwiegen3 3.4s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.45s); }
+@keyframes lwwiegen3 { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+.lw-buehne[data-pub="still"] .lw-publikum { opacity: .85; }
+.lw-fx-licht { position: absolute; inset: 0; opacity: 0; pointer-events: none; z-index: 2; }
+.lw-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
+.lw-t { position: absolute; pointer-events: none; line-height: 1; will-change: transform, opacity; }
+.lw-t svg { display: block; width: 100%; height: 100%; }
+.lw-t.konfetti { width: 7px; height: 11px; }
+.lw-t.funke { width: 4px; height: 4px; border-radius: 50%; background: #fff3c4; box-shadow: 0 0 6px 1px #ffc35a; }
+.lw-t.staub { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle, rgba(190,170,140,.6), transparent 70%); }
+.lw-t.glut { width: 6px; height: 6px; border-radius: 50%; background: #ffcf6a; box-shadow: 0 0 8px 2px #ff5a2e; }
+.lw-t.rauch { width: 40px; height: 40px; margin: -20px; border-radius: 50%; background: radial-gradient(circle, rgba(120,110,115,.6), transparent 70%); }
+.lw-t.wolke { width: 30px; height: 30px; margin: -15px; border-radius: 50%; background: radial-gradient(circle, rgba(150,210,90,.7), transparent 70%); }
+.lw-t.funkel { color: #ffe7a0; font-size: 15px; text-shadow: 0 0 8px currentColor; }
+.lw-t.funkel.lila { color: #d4b0ff; } .lw-t.funkel.gruen { color: #a6ffc0; } .lw-t.funkel.gold { color: #ffd27a; }
+.lw-t.funkel:empty { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px 2px currentColor; }
+.lw-t.muenze { width: 13px; height: 13px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff2b8, #e0aa3e 55%, #8a6216); box-shadow: 0 0 0 1px #6b4a10, 0 0 6px rgba(255,210,120,.5); }
+.lw-t.symbol { font-size: 2.1rem; margin: -1rem; } .lw-t.gross-sym { font-size: 3.2rem; }
+.lw-t.herz { font-size: 1.1rem; }
+.lw-t.gross { font-family: var(--display, Georgia, serif); font-size: clamp(2.2rem, 8vw, 4rem); font-weight: 700; white-space: nowrap; letter-spacing: .03em; text-shadow: 0 3px 0 #000, 0 0 22px currentColor; }
+.lw-t.gross.gold { color: #ffd27a; } .lw-t.gross.rot { color: #ff6a55; } .lw-t.gross.gruen { color: #86ffa8; } .lw-t.gross.klein { font-size: clamp(1.5rem, 5.5vw, 2.8rem); }
+.lw-t.hieb { width: 42%; height: 3px; background: linear-gradient(90deg, transparent, #fff 40%, #fff 70%, transparent); box-shadow: 0 0 14px 2px rgba(255,255,255,.8); transform-origin: 0 50%; border-radius: 50%; }
+.lw-t.pfeil { width: 54px; height: 2px; background: linear-gradient(90deg, #8a6a3a, #d8c49a); }
+.lw-t.pfeil::after { content: ""; position: absolute; right: -8px; top: -4px; border-left: 9px solid #e6e6ea; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.lw-t.pfeil::before { content: ""; position: absolute; left: -2px; top: -4px; width: 10px; height: 10px; background: linear-gradient(135deg, transparent 45%, #b5463a 46%, #b5463a 54%, transparent 55%), linear-gradient(45deg, transparent 45%, #b5463a 46%, #b5463a 54%, transparent 55%); }
+.lw-t.tuerlicht { left: 0; top: 0; width: 45%; height: 100%; background: linear-gradient(90deg, rgba(255,222,160,.7), transparent); transform-origin: 0 50%; clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 80%); }
+.lw-t.drache { width: clamp(150px, 32%, 280px); fill: #050308; stroke: #050308; filter: drop-shadow(0 0 12px rgba(255,90,30,.45)); }
+.lw-t.drache .drachen-fluegel { transform-box: fill-box; transform-origin: 50% 100%; animation: lwfluegel .42s ease-in-out infinite alternate; }
+@keyframes lwfluegel { to { transform: scaleY(-.55); } }
+.lw-t.w20 { width: clamp(32px, 6vw, 46px); height: clamp(32px, 6vw, 46px); filter: drop-shadow(0 3px 3px rgba(0,0,0,.6)); }
+.lw-t.strahlen { left: 0 !important; top: 0 !important; width: 100%; height: 100%; mix-blend-mode: screen; }
+.lw-t.blitzstrahl { width: 14%; height: 72%; filter: drop-shadow(0 0 8px #bcd6ff); }
+.lw-t.spot { width: 46%; height: 100%; margin-left: -23%; background: radial-gradient(ellipse 50% 100% at 50% 0, rgba(255,236,180,.55), transparent 80%); mix-blend-mode: screen; }
+.lw-t.stern-kreis { color: #ffe066; font-size: 21px; text-shadow: 0 0 6px #ffb300; }
+.lw-note.zzz { color: #bcd0ff; font-family: var(--hand); font-size: 1.3rem; text-shadow: 0 0 8px rgba(150,180,255,.6); }
+.lw-note.zzz.gross-z { font-size: 2rem; }
+.lw-note.zirp { color: #a9c9a4; font-size: .95rem; font-style: italic; }
+.lw-favs { display: grid; gap: .55rem; padding: .75rem .8rem; margin: .2rem 0 .7rem; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(224,160,70,.09), rgba(235,226,204,.02)); }
+.lw-favs-kopf { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.lw-favs h4 { margin: 0; color: var(--ember); }
+.lw-fav-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; }
+@media (max-width: 520px) { .lw-fav-gitter { grid-template-columns: 1fr 1fr; } .lw-favs.bearbeiten .lw-fav-gitter { grid-template-columns: 1fr; } }
+.lw-fav { border: 1px solid rgba(224,160,70,.45); background: rgba(16,14,21,.75); color: var(--vellum); font: inherit; font-size: 1.05rem; padding: .85rem .6rem; min-height: 3.3rem; cursor: pointer; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: transform .12s, border-color .2s; }
+.lw-fav:hover { border-color: var(--ember); color: var(--ember); }
+.lw-fav:active { transform: scale(.96); }
+.lw-fav.an { background: var(--ember); border-color: var(--ember); color: var(--night); }
+.lw-fav.spielt { border-color: var(--ember); background: rgba(224,160,70,.25); color: var(--ember); }
+.lw-fav.spielt::after { content: " ■"; font-size: .8em; }
+.lw-fav.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
+.lw-fav.blitz { animation: lwblitz .5s ease-out; }
+.lw-fav-e { display: flex; min-width: 0; }
+.lw-fav-e button { border: 1px solid var(--line); background: rgba(16,14,21,.75); color: var(--ash); font: inherit; cursor: pointer; padding: .5rem .45rem; }
+.lw-fav-e .lw-fav-name { flex: 1; min-width: 0; color: var(--vellum); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-inline: 0; }
+.lw-fav-e .lw-fav-name b { color: #ffb3a8; font-weight: 400; }
+.lw-fav-e button:hover { color: var(--ember); }
+#lautenwerk.lw-favmodus .lw-konsole [data-vorlage], #lautenwerk.lw-favmodus .lw-konsole [data-sfx], #lautenwerk.lw-favmodus .lw-konsole [data-kulisse] { border-style: dashed; }
+#lautenwerk.lw-favmodus .lw-konsole .gepinnt { border-style: solid; border-color: var(--ember); box-shadow: inset 0 0 0 1px var(--ember); }
+#lautenwerk.lw-favmodus .lw-konsole .gepinnt::before { content: "★ "; color: var(--ember); }
+#lautenwerk.lw-favmodus .lw-konsole .gepinnt.an::before { color: var(--night); }
+@media (prefers-reduced-motion: reduce) { .lw-buehne *, .lw-buehne *::before, .lw-buehne *::after { animation: none !important; } }
 .lw-buehne { position: relative; height: clamp(170px, 32vw, 250px); overflow: hidden;
   background: radial-gradient(ellipse at 45% 85%, rgba(224,160,70,.16), transparent 65%); border-bottom: 1px solid var(--line); margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); }
 .lw-figur { position: absolute; inset: 4px 4px 0; width: calc(100% - 8px); height: calc(100% - 4px); overflow: visible; }
@@ -4060,6 +4698,7 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 `;
   /* Requisiten: nur das gewählte Instrument ist sichtbar */
   css.textContent += ".lw-figur .req { display: none; }\n" +
+    KULISSEN.map(k => '.lw-buehne[data-kul="' + k + '"] .bg-' + k + ' { display: inline; }').join("\n") + "\n" +
     INSTRUMENTE.map(i => '.lw-buehne[data-mel="' + i + '"] .m-' + (i === "laute" ? "laute" : i) + " { display: inline; }").join("\n") + "\n" +
     BAND.trommel.map(i => '.lw-buehne[data-tr="' + i + '"] .f-' + i + " { display: inline; }").join("\n") + "\n" +
     BAND.floete.map(i => '.lw-buehne[data-fl="' + i + '"] .e-' + i + " { display: inline; }").join("\n") + "\n" +
