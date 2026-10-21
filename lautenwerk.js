@@ -61,7 +61,7 @@
   /* Die Instrumente der übrigen Band */
   const BAND = {
     trommel: ["trommel", "pauke", "bodhran", "tamburin", "stoecke"],
-    floete: ["floete", "panfloete", "okarina", "gesang", "horn"],
+    floete: ["floete", "panfloete", "okarina", "gesang", "horn", "klarinette", "oboe"],
     ketten: ["ketten", "klatschen", "schnipsen", "rassel", "stampfen", "loeffel", "krug"]
   };
   /* Hallräume: Nachhallzeit, Abklingkurve, Vorverzögerung, Helligkeit und frühe Reflexionen der Wände */
@@ -107,7 +107,7 @@
       instrument: "Instrument", instrumente: { laute: "Laute", harfe: "Harfe", mandoline: "Mandoline", fidel: "Fidel", drehleier: "Drehleier", schalmei: "Schalmei", dudelsack: "Dudelsack", glocken: "Glockenspiel", illusion: "Flöte der Illusionen" },
       band: {
         trommel: { trommel: "Landsknechttrommel", pauke: "Kesselpauke", bodhran: "Bodhrán", tamburin: "Schellentrommel", stoecke: "Holzstöcke" },
-        floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn" },
+        floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn", klarinette: "Klarinette", oboe: "Oboe" },
         ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch" }
       },
       teil: "Teil bearbeiten", ablauf: "Ablauf", kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
@@ -178,7 +178,7 @@
       instrument: "Instrument", instrumente: { laute: "Lute", harfe: "Harp", mandoline: "Mandolin", fidel: "Fiddle", drehleier: "Hurdy-gurdy", schalmei: "Shawm", dudelsack: "Bagpipes", glocken: "Glockenspiel", illusion: "Flute of Illusions" },
       band: {
         trommel: { trommel: "Field drum", pauke: "Kettledrum", bodhran: "Bodhrán", tamburin: "Tambourine", stoecke: "Wooden sticks" },
-        floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn" },
+        floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn", klarinette: "Clarinet", oboe: "Oboe" },
         ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table" }
       },
       teil: "Edit part", ablauf: "Order", kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
@@ -444,19 +444,19 @@
      B variiert es über andere Akkorde, C gehört Echo, D bringt das Motiv mit voller Besetzung zurück.
      Auf den Zählzeiten liegen immer Akkordtöne – so klingt es auch zufällig noch nach Musik. */
   const STIL = {
-    kampf: { chaos: 1, modus: ["phrygisch", "aeolisch"], tempo: [132, 146], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 3,
+    kampf: { chaos: 1, riff: 1, modus: ["phrygisch", "aeolisch"], tempo: [122, 134], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 2,
       instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn"], ketten: ["ketten", "stampfen"] },
       ablauf: ["AABACA", "AABCDD", "ABACABAD"], akkorde: [[0, 5, 4, 0], [0, 5, 1, 4], [0, 4, 5, 4], [0, 6, 0, 4], [0, 0, 5, 4], [0, 6, 5, 4]],
-      bass: ["puls", "galopp"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6]], lage: 3, dichte: 1, echo: "lang",
-      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], []], trommel: [[0, 3, 6, 8, 11, 14], [0, 2, 4, 6, 8, 10, 12, 13, 14, 15]],
-      ketten: [[4, 12], [0, 6, 8, 14]], rex: [0, 2] },
+      bass: ["puls", "galopp"], rhythmus: [[0, 2, 3, 4, 6], [0, 3, 4, 6], [0, 2, 4, 6]], lage: 3, dichte: 1, echo: "lang",
+      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], []], trommel: [[0, 3, 6, 8, 11, 14], [0, 6, 8, 12, 14]],
+      ketten: [[4, 12], [4, 12, 14]], rex: [0, 2] },
     unterreich: { chaos: 1, modus: ["phrygisch"], tempo: [58, 70], transpose: [-3, -5], swing: 0, bordun: 1, variation: 4,
       instrument: ["drehleier", "glocken", "illusion"], band: { trommel: ["pauke"], floete: ["okarina", "gesang"], ketten: ["ketten"] },
       ablauf: ["ABAC", "ABAC", "AABC"], akkorde: [[0, 0, 6, 0], [0, 5, 0, 6], [0, 0, 2, 6], [0, 4, 6, 0]],
       bass: ["orgel", "halbe"], rhythmus: [[0, 6], [2, 8], [0, 4]], lage: 2, dichte: .5, echo: "fern", schraeg: .35,
       klopf: [[]], schelle: [[]], trommel: [[0], [0, 12]], ketten: [[7], [5, 13], []], rex: [1, 2] },
     reise: { zier: "triller", terzen: 1, modus: ["mixolydisch", "dorisch"], tempo: [96, 108], transpose: [0, 2, -3], swing: 1, bordun: 1, variation: 3,
-      instrument: ["mandoline", "laute", "harfe"], band: { trommel: ["bodhran", "trommel"], floete: ["panfloete", "floete"], ketten: ["rassel", "stampfen"] },
+      instrument: ["mandoline", "laute", "harfe"], band: { trommel: ["bodhran", "trommel"], floete: ["panfloete", "floete", "klarinette"], ketten: ["rassel", "stampfen"] },
       ablauf: ["AABACB", "AABACA", "ABABCD"], akkorde: [[0, 4, 2, 0], [0, 2, 4, 0], [0, 6, 2, 4], [0, 4, 6, 2], [0, 2, 0, 3]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6, 7]], lage: 3, dichte: .9, echo: "antwort",
       klopf: [[0, 8]], schelle: [[4, 12], [2, 6, 10, 14]], trommel: [[0, 6, 8, 14], [0, 8]], ketten: [[2, 6, 10, 14]], rex: [0] },
@@ -472,20 +472,20 @@
       klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [0, 2, 4, 6, 8, 10, 12, 14]], trommel: [[0, 4, 6, 8, 12, 14], [0, 2, 4, 6, 8, 10, 12, 13, 14, 15]],
       ketten: [[4, 12]], rex: [0, 1] },
     rast: { zier: "vorhalt", modus: ["dorisch", "mixolydisch"], tempo: [76, 88], transpose: [0, 5, -2], swing: 1, bordun: 0, variation: 2,
-      instrument: ["harfe", "laute"], band: { trommel: ["bodhran"], floete: ["okarina", "gesang", "panfloete"], ketten: ["rassel", "schnipsen"] },
+      instrument: ["harfe", "laute"], band: { trommel: ["bodhran"], floete: ["okarina", "gesang", "panfloete", "klarinette"], ketten: ["rassel", "schnipsen"] },
       ablauf: ["AABB", "ABAC", "AABBCD"], akkorde: [[0, 0, 2, 2], [0, 6, 0, 2], [0, 4, 2, 0], [0, 2, 4, 0], [0, 3, 2, 0]],
       bass: ["halbe"], rhythmus: [[0, 2, 4, 6], [0, 4, 6], [0, 3, 4]], lage: 3, dichte: .6, echo: "antwort",
       klopf: [[0, 8], []], schelle: [[], [12]], trommel: [[0], []], ketten: [[4, 12], []], rex: [2] },
     /* ---- Klangwelten: Volksmusik und Fantasy-Stile (eigene Melodien, nur der Charakter erinnert) ---- */
     /* grünes Hügelland: Dur, hüpfend, Flöte antwortet */
     auenland: { zier: "triller", terzen: 1, modus: ["ionisch"], tempo: [104, 116], transpose: [0, 2, -3], swing: 1, bordun: 1, variation: 3,
-      instrument: ["mandoline", "harfe", "laute"], band: { trommel: ["bodhran"], floete: ["floete", "panfloete"], ketten: ["klatschen", "loeffel", "schnipsen"] },
+      instrument: ["mandoline", "harfe", "laute"], band: { trommel: ["bodhran"], floete: ["floete", "panfloete", "klarinette"], ketten: ["klatschen", "loeffel", "schnipsen"] },
       ablauf: ["AABA", "AABBCD", "ABACAD"], akkorde: [[0, 2, 3, 0], [0, 5, 2, 3], [0, 3, 5, 2], [0, 1, 2, 3], [0, 6, 3, 0], [0, 2, 0, 3]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 3, 4, 6, 7], [0, 2, 4, 5, 6]], lage: 4, dichte: .9, echo: "antwort",
       klopf: [[0, 8], [0, 6, 8, 14]], schelle: [[], [4, 12]], trommel: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
     /* Halle der Elben: lydisch schwebend, langsam, Harfe und Gesang */
     elben: { zier: "vorhalt", terzen: 1, modus: ["lydisch", "aeolisch"], tempo: [60, 72], transpose: [0, 2, -2], swing: 0, bordun: 1, variation: 2,
-      instrument: ["harfe", "glocken", "illusion"], band: { trommel: ["pauke"], floete: ["gesang", "floete"], ketten: ["schnipsen"] },
+      instrument: ["harfe", "glocken", "illusion"], band: { trommel: ["pauke"], floete: ["gesang", "floete", "klarinette"], ketten: ["schnipsen"] },
       ablauf: ["ABAC", "AABC", "ABAC"], akkorde: [[0, 6, 5, 3], [0, 6, 0, 5], [0, 5, 1, 3], [0, 5, 0, 3], [0, 4, 5, 0], [0, 1, 5, 0]],
       bass: ["orgel", "halbe"], rhythmus: [[0, 4], [0, 4, 6], [0, 2, 4], [0, 6]], lage: 5, dichte: .55, echo: "lang",
       klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[], [12]], rex: [2] },
@@ -496,7 +496,7 @@
       bass: ["galopp", "halbe"], rhythmus: [[0, 3, 4, 6], [0, 2, 4, 6], [0, 3, 6]], lage: 2, dichte: .8, echo: "lang",
       klopf: [[0, 8]], schelle: [[]], trommel: [[0, 3, 6, 8, 11, 14], [0, 8]], ketten: [[0, 3, 6, 8, 11, 14], [3, 11]], rex: [0, 2] },
     /* Reiter über die Ebene: galoppierend, heroisch, Horn und Fidel */
-    reiter: { zier: "triller", terzen: 1, modus: ["aeolisch", "dorisch"], tempo: [126, 138], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 3,
+    reiter: { zier: "triller", terzen: 1, modus: ["aeolisch", "dorisch"], tempo: [118, 130], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 3,
       instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["trommel", "bodhran"], floete: ["horn", "floete"], ketten: ["stampfen", "rassel"] },
       ablauf: ["AABACA", "AABCDD", "ABACAD"], akkorde: [[0, 5, 4, 0], [0, 5, 1, 4], [0, 4, 5, 4], [0, 4, 2, 0], [0, 1, 4, 0], [0, 2, 4, 0]],
       bass: ["galopp"], rhythmus: [[0, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 3, 4, 6]], lage: 4, dichte: .95, echo: "lang",
@@ -509,38 +509,38 @@
       klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [4, 12]], trommel: [[0, 4, 6, 8, 12, 14], [0, 2, 4, 6, 8, 10, 12, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0, 1] },
     /* Ballade am Kamin: ruhig erzählend, Laute und leise Stimme */
     kamin: { zier: "vorhalt", terzen: 1, modus: ["aeolisch", "dorisch"], tempo: [70, 80], transpose: [0, -2, 3], swing: 1, bordun: 0, variation: 2,
-      instrument: ["laute", "harfe"], band: { trommel: ["bodhran"], floete: ["gesang", "okarina"], ketten: ["schnipsen"] },
+      instrument: ["laute", "harfe"], band: { trommel: ["bodhran"], floete: ["gesang", "okarina", "klarinette"], ketten: ["schnipsen"] },
       ablauf: ["AABA", "ABAB", "AABC"], akkorde: [[0, 5, 1, 4], [0, 5, 2, 3], [0, 4, 2, 0], [0, 1, 4, 0], [0, 2, 3, 0], [0, 2, 5, 3]],
       bass: ["halbe"], rhythmus: [[0, 2, 4, 6], [0, 3, 4, 6], [0, 4, 6]], lage: 3, dichte: .7, echo: "antwort",
       klopf: [[], [0, 8]], schelle: [[]], trommel: [[], [0]], ketten: [[]], rex: [2] },
     /* Seemannslied: wiegend, die Mannschaft antwortet, Krüge auf dem Tisch */
     shanty: { zier: "triller", terzen: 1, modus: ["dorisch", "aeolisch"], tempo: [96, 108], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 3,
-      instrument: ["mandoline", "laute", "drehleier"], band: { trommel: ["trommel", "bodhran"], floete: ["gesang", "horn"], ketten: ["krug", "stampfen"] },
+      instrument: ["mandoline", "laute", "drehleier"], band: { trommel: ["trommel", "bodhran"], floete: ["gesang", "horn", "klarinette"], ketten: ["krug", "stampfen"] },
       ablauf: ["AABACA", "ABABCB", "AABBCD"], akkorde: [[0, 4, 0, 3], [0, 1, 4, 0], [0, 2, 4, 0], [0, 5, 4, 0], [0, 5, 1, 4]],
       bass: ["viertel"], rhythmus: [[0, 2, 4, 6], [0, 3, 4, 6], [0, 2, 3, 4]], lage: 3, dichte: .85, echo: "antwort",
       klopf: [[0, 8]], schelle: [[]], trommel: [[0, 8], [0, 6, 8]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0] },
     /* Pilgerweg: getragen wie ein alter Choral, Gesang über Orgelpunkt */
     pilger: { zier: "vorhalt", modus: ["dorisch", "aeolisch", "mixolydisch"], tempo: [62, 72], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 2,
-      instrument: ["drehleier", "glocken", "harfe"], band: { trommel: ["pauke"], floete: ["gesang"], ketten: ["schnipsen"] },
+      instrument: ["drehleier", "glocken", "harfe"], band: { trommel: ["pauke"], floete: ["gesang", "oboe"], ketten: ["schnipsen"] },
       ablauf: ["AB", "AABA", "ABAC"], akkorde: [[0, 4, 0, 2], [0, 2, 0, 4], [0, 0, 4, 0], [0, 2, 3, 0], [0, 3, 4, 0]],
       bass: ["orgel", "halbe"], rhythmus: [[0, 4], [0, 4, 6], [0, 2, 4]], lage: 4, dichte: .6, echo: "lang",
       klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[]], rex: [2] },
     /* ---- weitere Stimmungen ---- */
     /* Klage: Abschied, Begräbnis, verlorene Gefährten */
     klage: { zier: "vorhalt", modus: ["aeolisch", "dorisch"], tempo: [56, 66], transpose: [0, -2, 3], swing: 0, bordun: 1, variation: 2,
-      instrument: ["fidel", "harfe", "laute"], band: { trommel: ["pauke"], floete: ["gesang", "okarina"], ketten: ["schnipsen"] },
+      instrument: ["fidel", "harfe", "laute"], band: { trommel: ["pauke"], floete: ["gesang", "okarina", "oboe"], ketten: ["schnipsen"] },
       ablauf: ["ABAC", "AABACA", "ABAC"], akkorde: [[0, 5, 1, 4], [0, 5, 2, 3], [0, 2, 5, 3], [0, 4, 5, 3], [0, 1, 4, 0], [0, 2, 0, 3]],
       bass: ["halbe", "orgel"], rhythmus: [[0, 4], [0, 4, 6], [0, 6]], lage: 3, dichte: .5, echo: "lang",
       klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[]], rex: [2] },
     /* Marktplatz: Feilschen, Gaukler, buntes Treiben */
     marktplatz: { zier: "triller", terzen: 1, modus: ["mixolydisch", "ionisch"], tempo: [112, 124], transpose: [0, 2, -3], swing: 1, bordun: 0, variation: 3,
-      instrument: ["mandoline", "laute", "schalmei"], band: { trommel: ["tamburin", "bodhran"], floete: ["floete", "panfloete"], ketten: ["krug", "klatschen", "loeffel"] },
+      instrument: ["mandoline", "laute", "schalmei"], band: { trommel: ["tamburin", "bodhran"], floete: ["floete", "panfloete", "klarinette"], ketten: ["krug", "klatschen", "loeffel"] },
       ablauf: ["AABBCB", "ABAC", "AABBCD"], akkorde: [[0, 2, 3, 0], [0, 5, 2, 3], [0, 6, 3, 0], [0, 4, 2, 0], [0, 2, 0, 3]],
       bass: ["viertel"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6], [0, 2, 4, 5, 6]], lage: 4, dichte: .95, echo: "antwort",
       klopf: [[0, 8]], schelle: [[4, 12], [2, 6, 10, 14]], trommel: [[0, 6, 8, 14], [0, 4, 8, 12]], ketten: [[2, 6, 10, 14], [4, 12]], rex: [0] },
     /* Königshof: feierlich, höfisch, Fanfaren */
     hof: { zier: "vorhalt", terzen: 1, modus: ["ionisch", "mixolydisch"], tempo: [84, 96], transpose: [0, 2, -2], swing: 0, bordun: 0, variation: 2,
-      instrument: ["harfe", "laute", "fidel"], band: { trommel: ["pauke", "trommel"], floete: ["horn", "floete"], ketten: ["schnipsen"] },
+      instrument: ["harfe", "laute", "fidel"], band: { trommel: ["pauke", "trommel"], floete: ["horn", "floete", "oboe"], ketten: ["schnipsen"] },
       ablauf: ["AABACA", "AABBCD", "ABACAD"], akkorde: [[0, 6, 3, 0], [0, 2, 3, 0], [0, 5, 6, 3], [0, 1, 2, 3], [0, 3, 5, 2]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 4, 6], [0, 2, 4, 6], [0, 3, 4]], lage: 4, dichte: .75, echo: "lang",
       klopf: [[]], schelle: [[]], trommel: [[0, 8], [0, 6, 8]], ketten: [[]], rex: [2] },
@@ -557,12 +557,12 @@
       bass: ["viertel", "halbe"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 3, 4, 6]], lage: 5, dichte: .9, echo: "antwort",
       klopf: [[]], schelle: [[2, 6, 10, 14], [0, 4, 8, 12]], trommel: [[0, 8], [0, 6, 8, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
     /* Endgegner: noch schneller und wuchtiger als der Kampf */
-    boss: { chaos: 1, modus: ["phrygisch", "aeolisch"], tempo: [148, 160], transpose: [-2, 0, -4], swing: 0, bordun: 1, variation: 3,
-      instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn"], ketten: ["ketten", "stampfen"] },
+    boss: { chaos: 1, riff: 1, modus: ["phrygisch", "aeolisch"], tempo: [134, 146], transpose: [-2, 0, -4], swing: 0, bordun: 1, variation: 3,
+      instrument: ["fidel", "dudelsack", "schalmei"], band: { trommel: ["pauke", "trommel"], floete: ["horn", "gesang"], ketten: ["ketten", "stampfen"] },
       ablauf: ["AABCDD", "ABACABAD", "AABBCD"], akkorde: [[0, 6, 5, 4], [0, 5, 4, 0], [0, 0, 6, 0], [0, 5, 1, 4], [0, 4, 5, 6], [0, 0, 5, 4]],
-      bass: ["galopp", "puls"], rhythmus: [[0, 1, 2, 3, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 2, 4, 5, 6]], lage: 3, dichte: 1, echo: "lang",
-      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14]], trommel: [[0, 2, 3, 6, 8, 10, 11, 14], [0, 1, 2, 4, 6, 8, 9, 10, 12, 14, 15]],
-      ketten: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], rex: [0, 2] }
+      bass: ["galopp", "puls"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 3, 4, 6, 7]], lage: 3, dichte: 1, echo: "lang",
+      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14]], trommel: [[0, 3, 6, 8, 11, 14], [0, 3, 6, 8, 10, 11, 14]],
+      ketten: [[4, 12], [0, 6, 8, 14]], rex: [0, 2] }
   };
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
@@ -635,7 +635,10 @@
     const a = leer(), r = motiv.rhythmus, letzter = 8 + r[r.length - 1];
     const s = motiv.start, f = motiv.form;
     const erstes = halbeSetzen(a, bass, motiv, 0, s, f, null);
-    if (art === "frage") { /* Sequenz: dieselbe Form eine Stufe versetzt, offenes Ende */
+    if (art === "frage" && st.riff) { /* Riff: die zweite Hälfte wiederholt die erste – das bleibt im Ohr */
+      const ende = a[r[r.length - 1]];
+      halbeSetzen(a, bass, motiv, 8, erstes, f, schlussTon(bass, letzter, ende, true));
+    } else if (art === "frage") { /* Sequenz: dieselbe Form eine Stufe versetzt, offenes Ende */
       const ende = a[r[r.length - 1]];
       halbeSetzen(a, bass, motiv, 8, erstes + (ende > erstes ? -1 : 1), f, schlussTon(bass, letzter, ende + 1, true));
     } else { /* Antwort: umgekehrte Form, landet auf dem Grundton */
@@ -1551,6 +1554,12 @@
         : d >= .32 ? probe("fl", m, zeit, ziel, .42 * l, { ein: .05, aus: .2, dauer: d + .08 }) : probe("flst", m, zeit, ziel, .45 * l, { dauer: Math.max(.25, d), aus: .08 });
       if (ok) return;
     }
+    if ((art === "klarinette" || art === "oboe") && !rendert) {
+      const d = Math.max(.2, dauer || .3), m = Math.round(69 + 12 * Math.log2(freq / 440)) - 12;
+      if (probe(art === "klarinette" ? "klar" : "oboe", m, zeit, ziel, (art === "oboe" ? .36 : .42) * l, { ein: .04, aus: .16, dauer: d + .08 })) return;
+      floete(freq / 2, zeit, dauer || .25, l); return;
+    }
+    if (art === "klarinette" || art === "oboe") { floete(freq / 2, zeit, dauer || .25, l); return; }
     if (art === "gesang" && !rendert) {
       const d = Math.max(.2, dauer || .3);
       if (probe("stimme", Math.round(69 + 12 * Math.log2(freq / 2 / 440)), zeit, ziel, PEGEL_ECHT.gesang * l, { ein: .08, aus: .2, dauer: d + .1 })) return;
@@ -1903,7 +1912,7 @@
   let wirbelJetzt = false;
   function variiert(spur, wert, i, daten, v, letzterTakt) {
     if (v <= 0) return wert;
-    const sp = SPUR[spur], stil = S.stimmung && STIL[S.stimmung], ton = stil ? (stil.chaos ? .45 : .12) : 1;
+    const sp = SPUR[spur], stil = S.stimmung && STIL[S.stimmung], ton = stil ? (stil.chaos ? (stil.riff ? .22 : .38) : .12) : 1;
     const r = Math.random();
     if (sp.art === "an") {
       if (spur === "rex") return wert;
@@ -2042,9 +2051,9 @@
         if (abschnitt === 0) {
           durchgang++;
           const st = S.stimmung && STIL[S.stimmung];
-          wirbelJetzt = Math.random() < (st ? (st.chaos ? .35 : .15) : .3);
+          wirbelJetzt = Math.random() < (st ? (st.chaos ? .25 : .15) : .3);
           /* Stimmung: das Thema darf sich einprägen – erst nach drei Durchgängen ein neues, leicht abgewandeltes Stück */
-          if (st && !hoerer && durchgang % 3 === 0) setTimeout(stimmungWeiter, 0);
+          if (st && !hoerer && durchgang % 3 === 0) setTimeout(() => stimmungWeiter(true), 0);
         }
       }
     }
@@ -2063,10 +2072,19 @@
       taktWorker.postMessage(an ? 25 : 0);
     } catch (_) { taktWorker = null; }
   }
-  function stimmungWeiter() {
+  function stimmungWeiter(neuesThema) {
     if (!S.stimmung || !STIL[S.stimmung]) return;
     const neu = stimmungLied(S.stimmung, true);
     S.teile = neu.teile; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
+    /* mit dem neuen Thema greifen Barradin und Echo manchmal zu einem anderen Instrument – außer man hat sie selbst gewählt */
+    if (neuesThema && !S.festBesetzung) {
+      const st = STIL[S.stimmung], anders = (liste, jetzt) => { const r = liste.filter(x => x !== jetzt); return r.length ? zufall(r) : jetzt; };
+      let neuBes = false;
+      if (st.instrument.length > 1 && Math.random() < .55) { S.instrument = anders(st.instrument, S.instrument); neuBes = true; }
+      if (st.band.floete.length > 1 && Math.random() < .55) { S.band = Object.assign({}, S.band, { floete: anders(st.band.floete, S.band.floete) }); neuBes = true; }
+      if (neuBes) { try { saitenVorbereiten(); } catch (_) {} }
+    }
+    orchVorladen();
     merken(); if (!S.pult) { zeichnen(); knoepfe(); }
   }
   /* Ausklang: am Taktende ein gemeinsamer Schlussakkord, dann verklingt alles und die Band hört auf */
@@ -2195,7 +2213,17 @@
     auenland: { pad: .45, farbe: "holz" }, shanty: { pad: .4, farbe: "holz" }, rast: { pad: .4, farbe: "holz" }, kamin: { pad: .35, farbe: "holz" },
     dorffest: { pad: 0, volk: 1 }
   };
-  const PAD_FARBE = { trem: ["vctrem", "vlntrem"], orgel: ["orgel", "orgel"], holz: ["fag", "klar"] };
+  const PAD_FARBE = { trem: ["vctrem", "vlntrem"], orgel: ["orgel", "orgel"], holz: ["fag", "klar"], blech: ["pos", "horn"], chor: ["stimme", "stimme"], holz2: ["klar", "fl"] };
+  /* Klangfarbe des Teppichs: je Stimmung mehrere, gewählt nach dem Thema – mit jedem neuen Thema klingt der Hintergrund anders */
+  const ORCH_FARBEN = { kampf: ["", "blech"], boss: ["", "blech", "chor"], spannung: ["trem", "chor"], grusel: ["trem", "chor"], unterreich: ["trem", "chor", "orgel"],
+    elben: ["", "chor", "holz2"], klage: ["", "chor", "holz"], pilger: ["orgel", "chor"], hof: ["", "blech", "holz2"], zwerge: ["", "blech", "chor"],
+    auenland: ["holz", "holz2"], shanty: ["holz", "chor"], rast: ["holz", "holz2"], kamin: ["holz", "holz2", ""], reise: ["", "holz2"], sieg: ["", "blech"], reiter: ["", "blech"], fey: ["", "holz2"] };
+  function orchFarbe(pr) {
+    const l = S.stimmung && ORCH_FARBEN[S.stimmung];
+    if (!l) return pr ? pr.farbe : "";
+    const m = (S.teile && S.teile.A && S.teile.A.melodie) || [], h = m.reduce((a, v, i) => a + (v + 2) * (i + 7), 0);
+    return l[h % l.length];
+  }
   const orchProfil = () => S.orchester !== 0 && S.stimmung && ORCH[S.stimmung] ? ORCH[S.stimmung] : null;
   let orchBus = null, orchPan = {}, padAkkord = -1, padEnde = 0;
   function orchAufbauen() {
@@ -2226,6 +2254,9 @@
     if (S.band.trommel === "tamburin") { sampleLaden("tamb1"); sampleLaden("tamb2"); }
     if (S.band.floete === "floete") { probenLaden("fl"); probenLaden("flst"); }
     if (S.band.floete === "horn") probenLaden("horn");
+    if (S.band.floete === "klarinette") probenLaden("klar");
+    if (S.band.floete === "oboe") probenLaden("oboe");
+    { const f = orchFarbe(pr); if (f && PAD_FARBE[f]) PAD_FARBE[f].forEach(probenLaden); }
     if (S.band.trommel === "pauke") { sampleLaden("timp1"); sampleLaden("timp3"); }
     if (!pr) return;
     if (!pr.volk) probenLaden("kb");
@@ -2261,9 +2292,9 @@
     if (pr.pad && x >= .25 && (schritt % 8 === 0 || zeile !== padAkkord) && (zeile !== padAkkord || schritt === 0 || zeit >= padEnde - .05)) {
       let n = 1; while (n < SCHRITTE - schritt && klingt(daten.bass, schritt + n) === zeile) n++;
       const dauer = n * sd + .35, l = pr.pad * (.5 + .5 * x) * (.6 + .5 * int) * (gastJetzt.length ? .72 : 1); /* Platz für die Gäste */
-      const vl = pr.tief ? -12 : pr.hoch ? 12 : 0, [tief, hoch] = PAD_FARBE[pr.farbe] || ["vc", "vln"];
-      const pt = pr.farbe === "holz" ? orchPan.holz : orchPan.vc, ph = pr.farbe === "holz" ? orchPan.holz : orchPan.vln;
-      const fk = pr.farbe === "orgel" ? .45 : pr.farbe === "holz" ? .8 : 1, hk = pr.farbe === "holz" ? -12 : 0;
+      const fa = orchFarbe(pr), vl = pr.tief ? -12 : pr.hoch ? 12 : 0, [tief, hoch] = PAD_FARBE[fa] || ["vc", "vln"];
+      const pt = fa === "holz" || fa === "holz2" ? orchPan.holz : fa === "blech" ? orchPan.horn : orchPan.vc, ph = fa === "holz" || fa === "holz2" ? orchPan.holz : fa === "blech" ? orchPan.horn : orchPan.vln;
+      const fk = { orgel: .45, holz: .8, holz2: .7, blech: .62, chor: .75 }[fa] || 1, hk = fa === "holz" || fa === "chor" || fa === "blech" ? -12 : 0;
       oprobe(tief, ak.grund, zeit, pt, .3 * l * fk, { ein: .28, aus: .45, dauer });
       if (!pr.tief || x > .6) {
         oprobe(hoch, ak.terz + vl + hk, zeit, ph, (leicht() ? .26 : .2) * l * fk, { ein: .32, aus: .5, dauer });
@@ -3143,6 +3174,10 @@
    <g class="req e-horn"><path d="M58 80 Q76 94 92 82 Q100 74 102 64" fill="none" stroke="#e2d2a8" stroke-width="5" stroke-linecap="round"/>
     <path d="M58 80 Q76 94 92 82" fill="none" stroke="#8a7350" stroke-width="1.2" stroke-dasharray="2 4"/>
     <ellipse cx="102.5" cy="62" rx="6" ry="3.2" transform="rotate(-70 102.5 62)" fill="#4a3a28" stroke="#e2d2a8" stroke-width="1.5"/></g>
+   <g class="req e-klarinette"><path d="M58 80 L100 110" stroke="#18141a" stroke-width="4.4" stroke-linecap="round"/><path d="M97 107 L107 115 L100 118 Z" fill="#18141a"/>
+    <g fill="#c8ccd6"><circle cx="78" cy="94.3" r="1.2"/><circle cx="84" cy="98.6" r="1.2"/><circle cx="90" cy="102.9" r="1.2"/></g><path d="M60 82 l2 -2" stroke="#c8ccd6" stroke-width="1.6"/></g>
+   <g class="req e-oboe"><path d="M58 80 L98 108" stroke="#2a1a14" stroke-width="3.4" stroke-linecap="round"/><path d="M96 106 L103 112 L98 114 Z" fill="#2a1a14"/>
+    <g fill="#d8dce6"><circle cx="80" cy="95.4" r="1"/><circle cx="86" cy="99.6" r="1"/><circle cx="92" cy="103.8" r="1"/></g><path d="M56 79 l3 1" stroke="#c9a24a" stroke-width="1.4"/></g>
    <path d="M42 100 Q56 112 74 88" fill="none" stroke="#e9e6dc" stroke-width="8" stroke-linecap="round"/>
    <path d="M66 100 Q84 104 90 92" fill="none" stroke="#d8d3c4" stroke-width="7" stroke-linecap="round"/>
    <circle cx="74" cy="87" r="4.5" fill="#cdbfb0"/><circle cx="90" cy="92" r="4.5" fill="#cdbfb0"/>
@@ -3491,6 +3526,7 @@
     const pub = publikumArt();
     if (b.dataset.pub !== pub) b.dataset.pub = pub;
     if (b.dataset.kul !== S.kulisse) b.dataset.kul = S.kulisse;
+    if (b.dataset.mel !== S.instrument || b.dataset.fl !== S.band.floete) { b.dataset.mel = S.instrument; b.dataset.fl = S.band.floete; b.dataset.tr = S.band.trommel; b.dataset.ez = S.band.ketten; figurCache = {}; armeSetzen(); }
     b.classList.toggle("spielt", !!(laeuft || klassikLauf));
   }
   function paukeSchlag(b) {
@@ -4523,8 +4559,9 @@
       neu.titel = k === "zufall" ? t().zufall.replace(/^\S+\s/, "") : eig ? stimmName(k) : t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "");
       if (KULISSE_ZU[k]) neu.kulisse = KULISSE_ZU[k];
     }
-    neu.eigeneStimmung = null;
+    neu.eigeneStimmung = null; neu.festBesetzung = 0;
     if (eig && eig.werte) {
+      neu.festBesetzung = eig.werte.instrument ? 1 : 0;
       /* gespeicherte Stimmung: ihre Einstellungen gewinnen */
       const w = eig.werte;
       ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "instrument", "gaeste"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
@@ -4742,6 +4779,7 @@
     if (f === "instrument") {
       const spur = e.target.dataset.spur || "melodie";
       if (spur === "melodie") S.instrument = e.target.value; else S.band[spur] = e.target.value;
+      if (S.stimmung) S.festBesetzung = 1; /* selbst gewählt: bleibt, auch wenn das Thema wechselt */
       merken(); zeichnen(); knoepfe(); saitenVorbereiten();
       try {
         audioStart();
