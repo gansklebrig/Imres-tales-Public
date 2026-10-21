@@ -2942,8 +2942,8 @@
     if (klassikLauf !== lauf) return;
     /* Cover sind Musik und folgen dem Musik-Regler, Klassiker-Effekte dem Effekte-Regler */
     lauf.bus.connect(COVER_LISTE.includes(art) && kompRef ? kompRef : sfxBus);
-    /* die Klassiker sind Musik: sie bekommen weiter etwas Raumhall */
-    if (!COVER_LISTE.includes(art) && hallEin) { const hs = ctx.createGain(); hs.gain.value = .5; lauf.bus.connect(hs); hs.connect(hallEin); }
+    /* Klassiker und Cover sind Musik: sie gehen in den Raumhall (Hall-Regler) – nur die Geräuscheffekte bleiben trocken */
+    if (hallEin) { const hs = ctx.createGain(); hs.gain.value = COVER_LISTE.includes(art) ? .8 : .5; lauf.bus.connect(hs); hs.connect(hallEin); }
     const pause = musikPausieren();
     const ende = noten.reduce((s, x) => Math.max(s, x[0] + (x[3] || 2)), 0);
     const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * (COVER_LISTE.includes(art) ? .55 : .75) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, fruehling: 2, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
