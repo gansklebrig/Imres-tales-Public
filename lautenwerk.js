@@ -156,6 +156,9 @@
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
+      stimmSpeichern: "💾 Stimmung speichern", stimmNeu: "⭐ Als neue Stimmung", stimmUeber: n => "✎ „" + n + "“ überschreiben", stimmZurueck: "↺ Original wiederherstellen",
+      stimmZurueckOk: "Die ursprüngliche Stimmung ist wiederhergestellt.", stimmNamePlatz: "Name der Stimmung",
+      stimmTipp: "Merkt sich Intensität, Instrumente, Kulisse samt Lautstärke, Hall, Raum, Echo-Hall und Orchester – in diesem Browser.",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
       gespeichertOk: n => "„" + n + "“ wurde gespeichert.", geloescht: n => "„" + n + "“ wurde gelöscht.", liedGeladen: n => "„" + n + "“ geladen.",
       pwFrage: "Passwort der Questtafel (für gemeinsame Lieder):", pwFalsch: "Das Passwort stimmt nicht.", serverFehler: "Der Server ist gerade nicht erreichbar.",
@@ -224,6 +227,9 @@
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
+      stimmSpeichern: "💾 Save mood", stimmNeu: "⭐ As new mood", stimmUeber: n => "✎ Overwrite “" + n + "”", stimmZurueck: "↺ Restore original",
+      stimmZurueckOk: "The original mood has been restored.", stimmNamePlatz: "Mood name",
+      stimmTipp: "Remembers intensity, instruments, ambience and its volume, reverb, room, Echo reverb and orchestra – in this browser.",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
       gespeichertOk: n => "“" + n + "” was saved.", geloescht: n => "“" + n + "” was deleted.", liedGeladen: n => "“" + n + "” loaded.",
       pwFrage: "Quest board password (for shared songs):", pwFalsch: "That password is wrong.", serverFehler: "The server can't be reached right now.",
@@ -747,6 +753,14 @@
   /* ---------- Eigene Lieder: lokal im Browser oder gemeinsam auf dem Server der Questtafel ---------- */
   const LIED_SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
   let lokaleLieder = [], gruppenLieder = [], gruppeOk = false, geladen = null, speicherForm = null;
+  /* Eigene Stimmungen: Grundstimmung + gemerkte Einstellungen (Intensität, Instrumente, Kulisse, Hall, Raum …).
+     Schlüssel „e_…“ = neue Stimmung; Schlüssel einer eingebauten Stimmung = überschriebene Fassung. */
+  let eigeneStimmungen = {}, stimmForm = null;
+  try { eigeneStimmungen = JSON.parse(localStorage.getItem("imres-lw-stimmungen") || "{}") || {}; } catch (_) {}
+  const stimmungenMerken = () => { try { localStorage.setItem("imres-lw-stimmungen", JSON.stringify(eigeneStimmungen)); } catch (_) {} };
+  const STIMM_WERTE = () => ({ intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol, hall: S.hall, raum: S.raum, echoHall: S.echoHall,
+    orchester: S.orchester, instrument: S.instrument, band: Object.assign({}, S.band) });
+  const stimmName = k => eigeneStimmungen[k] && eigeneStimmungen[k].name ? eigeneStimmungen[k].name : (t().vorlagen[k] || "").replace(/^[^\wÄÖÜäöü]+/, "");
   try { lokaleLieder = JSON.parse(localStorage.getItem("imres-lautenwerk-lieder") || "[]") || []; } catch (_) {}
   const lokalMerken = () => { try { localStorage.setItem("imres-lautenwerk-lieder", JSON.stringify(lokaleLieder)); } catch (_) {} };
   function liedServer(pfad, body) {
@@ -1904,7 +1918,9 @@
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
   function wechselAnwenden(zeit) {
     const neu = wechsel; wechsel = null; wechselAb = 0;
+    const raumAlt = S.raum;
     S = neu; abschnitt = 0; durchgang = 0; padAkkord = -1; orchVorladen();
+    try { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); } catch (_) {}
     const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
     ausduennen = false; einblend = dr ? 0 : EINBLEND;
     if (master) {
@@ -3196,6 +3212,19 @@
   const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + text + "</button>";
   const reiter = (art, liste, aktiv, T) => '<div class="lw-tabs" role="tablist">' + liste.map(([k, txt]) =>
     '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
+  function stimmSpeicherZeile(T) {
+    if (hoerer || !S.stimmung || !STIL[S.stimmung]) return "";
+    const aktiv = S.eigeneStimmung || S.stimmung, name = stimmName(aktiv) || S.titel || "";
+    if (!stimmForm) return '<div class="lw-eigene-zeile"><button type="button" class="lw-klein" data-aktion="stimmspeichern" title="' + esc(T.stimmTipp) + '">' + T.stimmSpeichern + "</button></div>";
+    const eigen = aktiv.startsWith("e_"), ueberschrieben = !eigen && eigeneStimmungen[aktiv];
+    return '<div class="lw-eigene-zeile"><span class="lw-speicherform"><input type="text" maxlength="40" class="lw-stimmname" placeholder="' + esc(T.stimmNamePlatz) + '" value="' + esc(stimmForm.name) + '">' +
+      '<button type="button" data-aktion="stimmneu">' + T.stimmNeu + "</button>" +
+      '<button type="button" data-aktion="stimmueber">' + T.stimmUeber(name) + "</button>" +
+      (ueberschrieben ? '<button type="button" data-aktion="stimmzurueck">' + T.stimmZurueck + "</button>" : "") +
+      (eigen ? '<button type="button" data-aktion="stimmloeschen">' + T.loeschen + "</button>" : "") +
+      '<button type="button" data-aktion="stimmabbrechen">' + T.abbrechen + "</button></span>" +
+      '<p class="lw-tipp">' + T.stimmTipp + "</p></div>";
+  }
   function musikBox(T, voll) {
     let kacheln;
     if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(LIEDER.map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
@@ -3205,7 +3234,8 @@
       const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
       kacheln = alle.length ? alle.map(([q, l]) => kachel("data-eigen", q + ":" + l.id, (q === "g" ? "👥 " : "📱 ") + esc(l.name), geladen && geladen.quelle === q && String(geladen.id) === String(l.id))).join("")
         : '<p class="lw-tipp lw-leer">' + T.keineEigenen + "</p>";
-    } else kacheln = STIMMUNGEN.map(k => kachel("data-vorlage", k, T.vorlagen[k], S.stimmung === k)).join("");
+    } else kacheln = STIMMUNGEN.map(k => kachel("data-vorlage", k, eigeneStimmungen[k] ? esc((T.vorlagen[k].match(/^[^\wÄÖÜäöü]+/) || [""])[0] + stimmName(k)) + " ✎" : T.vorlagen[k], S.stimmung === k && (!S.eigeneStimmung || S.eigeneStimmung === k)))
+      .concat(Object.keys(eigeneStimmungen).filter(id => id.startsWith("e_") && STIL[eigeneStimmungen[id].basis]).map(id => kachel("data-vorlage", id, "⭐ " + esc(eigeneStimmungen[id].name), S.eigeneStimmung === id))).join("");
     return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + "</h4>" +
         reiter("musiktab", [["stimmungen", T.tabStimmungen], ["lieder", T.tabLieder], ["eigene", T.tabEigene]], musikTab, T) + "</div>" +
       '<div class="lw-pult-gitter">' + kacheln + "</div>" +
@@ -3214,7 +3244,7 @@
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) : "") + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div></section>";
+      (musikTab === "stimmungen" ? intRegler(T) + stimmSpeicherZeile(T) : "") + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div></section>";
   }
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
@@ -3568,21 +3598,34 @@
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
     else if (k === "zufall") neu = zufallsLied();
-    else if (STIL[k]) {
-      neu = stimmungLied(k);
+    else if (STIL[k] || (eigeneStimmungen[k] && STIL[eigeneStimmungen[k].basis])) {
+      const eig = eigeneStimmungen[k], basis = eig ? eig.basis : k;
+      neu = stimmungLied(basis, false, eig && eig.werte ? eig.werte.intensitaet : undefined);
       /* läuft schon Musik, bleibt die neue Stimmung möglichst nah an Tonart und Tonleiter der alten – so gleitet der Wechsel */
       if (laeuft && S) {
-        const st = STIL[k], tr = st.transpose.reduce((b, x) => Math.abs(x - S.transpose) < Math.abs(b - S.transpose) ? x : b, st.transpose[0]);
+        const st = STIL[basis], tr = st.transpose.reduce((b, x) => Math.abs(x - S.transpose) < Math.abs(b - S.transpose) ? x : b, st.transpose[0]);
         neu.transpose = tr; if (st.modus.includes(S.modus)) neu.modus = S.modus;
       }
     }
     else neu = pruefen(ausVorlage(k, mix));
     Object.assign(neu, behalten);
+    const eig = eigeneStimmungen[k];
     if (k !== "leer") {
-      neu.titel = k === "zufall" ? t().zufall.replace(/^\S+\s/, "") : t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "");
+      neu.titel = k === "zufall" ? t().zufall.replace(/^\S+\s/, "") : eig ? stimmName(k) : t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "");
       if (KULISSE_ZU[k]) neu.kulisse = KULISSE_ZU[k];
     }
-    if (k !== "leer" && !STIL[k]) neu.stimmung = null;
+    neu.eigeneStimmung = null;
+    if (eig && eig.werte) {
+      /* gespeicherte Stimmung: ihre Einstellungen gewinnen */
+      const w = eig.werte;
+      ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "instrument"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
+      if (w.band) neu.band = Object.assign({}, neu.band, w.band);
+      neu.stimmung = eig.basis; neu.eigeneStimmung = k;
+      if (!KULISSEN.includes(neu.kulisse)) neu.kulisse = "keine";
+      if (!RAEUME[neu.raum]) neu.raum = "taverne";
+    }
+    if (k !== "leer" && !neu.stimmung) neu.stimmung = null;
+    if (k !== "leer" && !STIL[k] && !eig) neu.stimmung = null;
     geladen = null; bearbeite = "A";
     if (laeuft && k !== "leer") {
       /* sanft: erst am nächsten Taktanfang wechseln; Klänge schon jetzt vorbereiten */
@@ -3592,8 +3635,10 @@
       status(t().wechselGleich(neu.titel || ""));
       return;
     }
+    const raumAlt = S.raum;
     S = neu;
     merken(); neuGezeichnet(); saitenVorbereiten();
+    if (ctx) { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); }
   }
   function neuGezeichnet() { zeichnen(); knoepfe(); if (laeuft) { bordunAus(); bordunAn(); } }
 
@@ -3659,6 +3704,30 @@
     }
     const tl = e.target.closest(".lw-teil");
     if (tl) { bearbeite = tl.dataset.teil; kopierZiel = null; zeichnen(); knoepfe(); return; }
+    const sa = e.target.closest("[data-aktion]");
+    if (sa && sa.dataset.aktion.startsWith("stimm")) {
+      const a = sa.dataset.aktion, T = t(), feld = root.querySelector(".lw-stimmname"), name = feld ? feld.value.trim().slice(0, 40) : "";
+      const aktiv = S.eigeneStimmung || S.stimmung;
+      if (a === "stimmspeichern") { stimmForm = { name: stimmName(aktiv) }; boxNeu("musik"); const f = root.querySelector(".lw-stimmname"); if (f) { f.focus(); f.select(); } return; }
+      if (a === "stimmabbrechen") { stimmForm = null; boxNeu("musik"); return; }
+      if (a === "stimmneu" || a === "stimmueber") {
+        if (!S.stimmung || !STIL[S.stimmung]) return;
+        if (a === "stimmneu" && !name) { status(T.keinName); return; }
+        const id = a === "stimmneu" ? "e_" + Date.now().toString(36) : aktiv;
+        const nm = name || stimmName(aktiv);
+        eigeneStimmungen[id] = { name: nm, basis: S.stimmung, werte: STIMM_WERTE() };
+        stimmungenMerken(); S.eigeneStimmung = id; S.titel = nm; merken(); stimmForm = null; zeichnen(); knoepfe(); status(T.gespeichertOk(nm)); return;
+      }
+      if (a === "stimmzurueck" && eigeneStimmungen[aktiv] && !aktiv.startsWith("e_")) {
+        delete eigeneStimmungen[aktiv]; stimmungenMerken(); S.eigeneStimmung = null; S.titel = stimmName(aktiv); merken(); stimmForm = null; zeichnen(); knoepfe(); status(T.stimmZurueckOk); return;
+      }
+      if (a === "stimmloeschen" && aktiv.startsWith("e_") && eigeneStimmungen[aktiv]) {
+        const nm = eigeneStimmungen[aktiv].name;
+        if (!window.confirm(T.loeschenFrage(nm))) return;
+        delete eigeneStimmungen[aktiv]; stimmungenMerken(); S.eigeneStimmung = null; merken(); stimmForm = null; zeichnen(); knoepfe(); status(T.geloescht(nm)); return;
+      }
+      return;
+    }
     const ak = e.target.closest("[data-aktion]");
     if (ak && ["speichern", "abbrechen", "nurhier", "fueralle", "loeschen"].includes(ak.dataset.aktion)) {
       const a = ak.dataset.aktion, T = t();
@@ -3943,6 +4012,10 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 @keyframes lwpuls { 50% { opacity: .45; } }
 .lw-gespeichert { font: inherit; font-size: .82rem; background: var(--night); color: var(--vellum); border: 1px solid var(--line); padding: .25rem .4rem; max-width: 16rem; }
 .lw-speicherform { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+.lw-speicherform button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .85rem; padding: .35rem .7rem; cursor: pointer; }
+.lw-speicherform button:hover { border-color: var(--ember); color: var(--ember); }
+.lw-stimmname { font: inherit; font-size: .85rem; background: var(--night); color: var(--vellum); border: 1px solid var(--ember); padding: .3rem .45rem; width: 14rem; max-width: 100%; }
+.lw-eigene-zeile .lw-tipp { flex-basis: 100%; margin: .2rem 0 0; font-size: .78rem; }
 .lw-liedname { font: inherit; font-size: .85rem; background: var(--night); color: var(--vellum); border: 1px solid var(--ember); padding: .25rem .45rem; width: 12rem; }
 .lw-tipp { flex-basis: 100%; margin: .2rem 0 0; font-size: .8rem; font-style: italic; color: var(--ash); }
 
