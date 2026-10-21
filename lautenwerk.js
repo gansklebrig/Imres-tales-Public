@@ -987,7 +987,7 @@
   }
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
   /* Effekte und Spieltisch-Momente haben ihren eigenen Pegel – unabhängig von der Musik */
-  const fxPegel = () => .34 * Math.pow((typeof S.fxVol === "number" ? S.fxVol : 8) / 10, 1.5);
+  const fxPegel = () => .55 * Math.pow((typeof S.fxVol === "number" ? S.fxVol : 8) / 10, 1.5);
   let fxAusgang = null, ducken = null, duckEnde = 0, musikStumm = false;
   function musikWieder() {
     if (!ducken || !musikStumm) return;
@@ -1361,7 +1361,7 @@
       { const d = kulRauschen.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
       sfxBus = ctx.createGain(); sfxBus.gain.value = 1;
       fxAusgang = ctx.createGain(); fxAusgang.gain.value = fxPegel(); sfxBus.connect(fxAusgang); fxAusgang.connect(limiter); setTimeout(fxVorwaermen, 1500);
-      { const s2 = ctx.createGain(); s2.gain.value = .5; sfxBus.connect(s2); s2.connect(hallEin); }
+      /* Effekte bleiben trocken – ein Bogenschuss mit Kirchenhall klingt seltsam */
       hallFilter = ctx.createBiquadFilter(); hallFilter.type = "lowpass"; hallFilter.frequency.value = RAEUME[S.raum].hell;
       hallNass.connect(komp); hallSchalten();
       raumAnwenden();
@@ -2942,9 +2942,11 @@
     if (klassikLauf !== lauf) return;
     /* Cover sind Musik und folgen dem Musik-Regler, Klassiker-Effekte dem Effekte-Regler */
     lauf.bus.connect(COVER_LISTE.includes(art) && kompRef ? kompRef : sfxBus);
+    /* die Klassiker sind Musik: sie bekommen weiter etwas Raumhall */
+    if (!COVER_LISTE.includes(art) && hallEin) { const hs = ctx.createGain(); hs.gain.value = .5; lauf.bus.connect(hs); hs.connect(hallEin); }
     const pause = musikPausieren();
     const ende = noten.reduce((s, x) => Math.max(s, x[0] + (x[3] || 2)), 0);
-    const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * (COVER_LISTE.includes(art) ? .55 : 1) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, fruehling: 2, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
+    const z = ctx.currentTime + (pause ? .7 : .08), l = (laut || 1) * (COVER_LISTE.includes(art) ? .55 : .75) * ({ zarathustra: .75, trauermarsch: .85, nachtmusik: 1.5, fruehling: 2, zirkus: 1.2, galopp: 1.2, angriff: 1.2, zapfenstreich: 1.15 }[art] || 1);
     let i = 0;
     const planen2 = () => {
       const bis = ctx.currentTime + 1.2 - z;
