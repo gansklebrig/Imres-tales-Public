@@ -3695,9 +3695,9 @@
     { id: "ploopploopeen", name: "Ploopploopeen", sym: "🐟", seite: "r", gr: "stimme", rolle: "chor", pegel: .3, geist: 1, stimmungen: ["unterreich", "grusel"] }
   ];
   const GAST = Object.fromEntries(GAESTE.map(g => [g.id, g]));
-  Object.assign(TX.de, { gaesteTitel: "Gäste", gaesteTipp: "Gäste aus unserer Geschichte spielen in passenden Stimmungen mit. Antippen wechselt: automatisch → immer → nie.",
+  Object.assign(TX.de, { gaesteTitel: "Gäste", gaesteTipp: "Gäste aus unserer Geschichte spielen in passenden Stimmungen mit und bekommen ein Solo.", gaesteEinzeln: "Gäste einzeln an- und abwählen",
     gastStufe: ["nie", "auto", "immer"], gastInstr: { gundren: "Tuba", nundro: "Posaune", zilda: "Marschtrommel", fagas: "Glockenspiel (Geist)", kardal: "Trompete", dolgrimson: "Signalhorn", ilvara: "Oboe", ploopploopeen: "Chorgesang (Geist)" } });
-  Object.assign(TX.en, { gaesteTitel: "Guests", gaesteTipp: "Guests from our story join in fitting moods. Tap to switch: automatic → always → never.",
+  Object.assign(TX.en, { gaesteTitel: "Guests", gaesteTipp: "Guests from our story join in fitting moods and get a solo.", gaesteEinzeln: "Choose guests one by one",
     gastStufe: ["never", "auto", "always"], gastInstr: { gundren: "tuba", nundro: "trombone", zilda: "marching drum", fagas: "glockenspiel (ghost)", kardal: "trumpet", dolgrimson: "signal horn", ilvara: "oboe", ploopploopeen: "chant (ghost)" } });
   const gastStufe = id => S.gaeste && (S.gaeste[id] === 0 || S.gaeste[id] === 2) ? S.gaeste[id] : 1;
   let gastJetzt = [], gastBus = null, gastSeite = {};
@@ -3714,7 +3714,7 @@
   }
   /* wer überhaupt mitspielen darf: passende Gäste (automatisch) und alle, die auf „immer“ stehen */
   function gastKandidaten() {
-    const st = S.stimmung; if (!st || !STIL[st]) return [];
+    const st = S.stimmung; if (!st || !STIL[st] || !gaesteAn()) return [];
     return GAESTE.filter(g => { const s = gastStufe(g.id); return s === 2 || (s === 1 && g.stimmungen.includes(st) && S.intensitaet >= 2); });
   }
   /* Der C-Teil gehört einem Gast: er spielt dort Echos Stimme als Solo. Wer dran ist, wechselt mit jedem neuen Thema. */
@@ -3928,19 +3928,27 @@
     }
   }
   /* die Gäste-Reihe im Pult */
+  /* die Gäste im Pult: eingeklappt nur ein Schalter für alle, aufgeklappt jeder Gast einzeln an oder aus */
+  let gaesteAuf = false;
+  const gaesteAn = () => !(S.gaeste && S.gaeste._aus);
   function gaesteZeile(T) {
     if (hoerer) return "";
-    return '<div class="lw-gaeste-zeile" title="' + esc(T.gaesteTipp) + '"><span class="lw-gz-titel">🎭 ' + T.gaesteTitel + "</span>" +
-      GAESTE.map(g => { const s = gastStufe(g.id); return '<button type="button" class="lw-gchip stufe-' + s + (g.geist ? " geist" : "") + (gastDa[g.id] ? " spielt" : "") + '" data-gast="' + g.id + '" title="' + esc(g.name + " – " + T.gastInstr[g.id] + " · " + T.gastStufe[s]) + '">' +
-        g.sym + " " + g.name + ' <small>' + T.gastStufe[s] + "</small></button>"; }).join("") + "</div>";
+    const an = gaesteAn();
+    return '<div class="lw-gaeste-zeile' + (gaesteAuf ? " auf" : "") + '">' +
+      '<button type="button" class="lw-schalter" data-aktion="gaeste" aria-pressed="' + an + '" title="' + esc(T.gaesteTipp) + '">🎭 ' + T.gaesteTitel + "</button>" +
+      '<button type="button" class="lw-gz-auf" data-aktion="gaesteauf" aria-expanded="' + gaesteAuf + '" title="' + esc(T.gaesteEinzeln) + '">' + (gaesteAuf ? "▴" : "▾") + "</button>" +
+      (gaesteAuf ? '<div class="lw-gz-liste' + (an ? "" : " aus") + '">' + GAESTE.map(g => { const ein = gastStufe(g.id) > 0;
+        return '<button type="button" class="lw-gchip' + (ein ? " ein" : "") + (g.geist ? " geist" : "") + (gastDa[g.id] ? " spielt" : "") + '" data-gast="' + g.id + '" aria-pressed="' + ein + '" title="' + esc(T.gastInstr[g.id]) + '">' + g.sym + " " + g.name + "</button>"; }).join("") + "</div>" : "") + "</div>";
   }
+  function gaesteNeu() { const z = root.querySelector(".lw-gaeste-zeile"); if (z) z.outerHTML = gaesteZeile(t()); }
   root.addEventListener("click", e => {
+    if (e.target.closest('[data-aktion="gaeste"]')) { e.stopPropagation(); S.gaeste = Object.assign({}, S.gaeste || {}, { _aus: gaesteAn() ? 1 : 0 }); merken(); gaesteVorladen(); gaesteNeu(); return; }
+    if (e.target.closest('[data-aktion="gaesteauf"]')) { e.stopPropagation(); gaesteAuf = !gaesteAuf; gaesteNeu(); return; }
     const c = e.target.closest("[data-gast]"); if (!c) return;
     e.stopPropagation();
-    const id = c.dataset.gast, s = gastStufe(id);
-    S.gaeste = Object.assign({}, S.gaeste || {}, { [id]: s === 1 ? 2 : s === 2 ? 0 : 1 });
-    merken(); gaesteVorladen();
-    const z = root.querySelector(".lw-gaeste-zeile"); if (z) z.outerHTML = gaesteZeile(t());
+    const id = c.dataset.gast;
+    S.gaeste = Object.assign({}, S.gaeste || {}, { [id]: gastStufe(id) > 0 ? 0 : 1 });
+    merken(); gaesteVorladen(); gaesteNeu();
   }, true);
   /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
   Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften" });
@@ -4215,7 +4223,7 @@
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
       kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
-      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, gaeste: Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
+      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, gaeste: Object.assign(Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), { _aus: d.gaeste && d.gaeste._aus ? 1 : 0 }), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
     if (laeuft && kern(neu) !== kern(S)) {
@@ -4729,12 +4737,13 @@
 .lw-gast .mund { transform-origin: 50% 50%; }
 .lw-note.gast { font-size: 1.1rem; color: #ffe7a0; }
 .lw-note.gastname { font-size: .95rem; white-space: nowrap; }
-.lw-gaeste-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; }
-.lw-gz-titel { color: var(--ash); font-size: .82rem; margin-right: .2rem; }
-.lw-gchip { border: 1px dashed var(--line); background: rgba(16,14,21,.6); color: var(--vellum); font: inherit; font-size: .82rem; padding: .3rem .5rem; cursor: pointer; white-space: nowrap; }
-.lw-gchip small { color: var(--ash); font-size: .72rem; }
-.lw-gchip.stufe-2 { border-style: solid; border-color: var(--ember); color: var(--ember); }
-.lw-gchip.stufe-0 { opacity: .45; text-decoration: line-through; }
+.lw-gaeste-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+.lw-gz-auf { border: 1px solid var(--line); background: none; color: var(--ash); font: inherit; font-size: .85rem; width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer; }
+.lw-gz-auf:hover { color: var(--ember); border-color: var(--ember); }
+.lw-gz-liste { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: .3rem; }
+.lw-gz-liste.aus { opacity: .45; }
+.lw-gchip { border: 1px solid var(--line); background: rgba(16,14,21,.6); color: var(--ash); font: inherit; font-size: .8rem; padding: .28rem .55rem; cursor: pointer; white-space: nowrap; border-radius: 999px; text-decoration: line-through; opacity: .6; }
+.lw-gchip.ein { color: var(--vellum); border-color: rgba(224,160,70,.5); text-decoration: none; opacity: 1; }
 .lw-gchip.spielt { box-shadow: 0 0 0 1px var(--ember), 0 0 10px rgba(224,160,70,.45); }
 .lw-gchip.geist.spielt { box-shadow: 0 0 0 1px #9fd8ff, 0 0 10px rgba(150,210,255,.5); }
 .lw-fx-licht { position: absolute; inset: 0; opacity: 0; pointer-events: none; z-index: 2; }
