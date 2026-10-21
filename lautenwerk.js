@@ -1866,7 +1866,9 @@
   let pausiert = false;
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
-  let durchgang = 0;
+  let durchgang = 0, ausduennen = false, einblend = 0;
+  const EINBLEND = 32; /* zwei Takte, in denen das neue Stück Schicht für Schicht dazukommt */
+  const SCHLAGWERK = { klopf: 1, schelle: 1, trommel: 1, ketten: 1, rex: 1 };
   let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
   /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
   const DRAMA = { kampf: 2, boss: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1, grusel: 1, hof: 1 };
@@ -1883,10 +1885,13 @@
   /* Weicher Übergang: die alte Musik tritt bis zum Taktende zurück, bei dramatischen Zielen kündigt ein
      Paukenwirbel (mit anschwellendem Becken) den Wechsel an; das neue Stück blendet sich auf der Eins ein. */
   function brueckeStarten() {
-    const jetzt = ctx.currentTime, T = taktEnde(), neu = wechsel, dr = neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
-    wechselAb = T;
+    const jetzt = ctx.currentTime, neu = wechsel, dr = neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
+    let T = taktEnde();
+    /* sanfter Wechsel: mindestens ein halber Takt zum Ausklingen – das Schlagwerk hört zuerst auf, die Melodie wird leiser */
+    if (!dr && T - jetzt < 8 * schrittDauer()) T += SCHRITTE * schrittDauer();
+    wechselAb = T; ausduennen = !dr;
     master.gain.cancelScheduledValues(jetzt); master.gain.setValueAtTime(master.gain.value, jetzt);
-    master.gain.linearRampToValueAtTime(.38 * (dr ? .3 : .45), T);
+    master.gain.linearRampToValueAtTime(.38 * (dr ? .3 : .22), T);
     if (dr && !rendert) {
       ["timproll", "swell", "crash", "timp1"].forEach(sampleLaden);
       const z = brueckeZiel(), lang = Math.min(T - jetzt - .05, 3);
@@ -1901,11 +1906,13 @@
     const neu = wechsel; wechsel = null; wechselAb = 0;
     S = neu; abschnitt = 0; durchgang = 0; padAkkord = -1; orchVorladen();
     const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
+    ausduennen = false; einblend = dr ? 0 : EINBLEND;
     if (master) {
       /* das neue Stück blendet sich ein – bei dramatischen Zielen schnell und mit Schlag auf der Eins, sonst sanft */
       const mg = master.gain;
-      if (mg.cancelAndHoldAtTime) mg.cancelAndHoldAtTime(zeit); else { mg.cancelScheduledValues(zeit); mg.setValueAtTime(.38 * (dr ? .3 : .45), zeit); }
-      mg.setTargetAtTime(.38, zeit, dr ? .12 : .7);
+      if (mg.cancelAndHoldAtTime) mg.cancelAndHoldAtTime(zeit); else { mg.cancelScheduledValues(zeit); mg.setValueAtTime(.38 * (dr ? .3 : .22), zeit); }
+      if (!dr) mg.setTargetAtTime(.38 * .2, zeit, .15); /* kurz zurücknehmen, dann langsam aufblenden */
+      mg.setTargetAtTime(.38, zeit + (dr ? 0 : .3), dr ? .12 : 2);
       if (dr > 1) { probe("crash", 0, zeit, brueckeZiel(), .3); probe("timp1", 0, zeit, brueckeZiel(), .5); }
       else if (dr) probe("timp1", 0, zeit, brueckeZiel(), .4);
     }
@@ -1926,17 +1933,21 @@
       if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && wechsel && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
       else if (schritt === 0 && intensitaetNeu) { intensitaetNeu = false; stimmungWeiter(); }
-      tempoJetzt = tempoJetzt ? tempoJetzt + (S.tempo - tempoJetzt) * .1 : S.tempo;
+      const zielTempo = ausduennen && wechsel ? wechsel.tempo : S.tempo;
+      tempoJetzt = tempoJetzt ? tempoJetzt + (zielTempo - tempoJetzt) * (ausduennen || einblend ? .05 : .1) : S.tempo;
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
       const v = S.variation / 10, letzterTakt = abschnitt % S.ablauf.length === S.ablauf.length - 1;
       const versatz = S.swing && schritt % 2 === 1 ? schrittDauer() * .33 : 0;
       const ev = { schritt, teil: teilName, zeit: naechste + versatz, spuren: {} };
+      const ein = einblend > 0 ? 1 - einblend / EINBLEND : 1;
       IDS.forEach(k => {
         if (S.mute[k]) return;
+        /* weicher Übergang: vorher fällt das Schlagwerk weg, danach kommt es erst im zweiten Takt wieder dazu */
+        if (SCHLAGWERK[k] && (ausduennen || (einblend > EINBLEND / 2))) return;
         const wert = variiert(k, daten[k][schritt], schritt, daten[k], v, letzterTakt);
         if (wert < 0) return;
         const wackel = v ? (Math.random() - .5) * .012 * v : 0;
-        const laut = (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1);
+        const laut = (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : .45 + .55 * ein) : 1);
         const haelt = k === "floete" || (k === "melodie" && (GEHALTEN[S.instrument] || S.instrument === "mandoline"));
         spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(daten[k], schritt) * schrittDauer() * .95 : 0);
         if (k === "bass") bordunStimmen(wert, ev.zeit);
@@ -1944,6 +1955,7 @@
       });
       try { orchesterSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
       anzeige.push(ev);
+      if (einblend > 0) einblend--;
       naechste += schrittDauer();
       schritt = (schritt + 1) % SCHRITTE;
       if (schritt === 0) {
@@ -2009,7 +2021,7 @@
     audioStart();
     saitenVorbereiten();
     if (!weiter) { schritt = 0; abschnitt = 0; }
-    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1;
+    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1; ausduennen = false; einblend = 0;
     if (klassikLauf) klassikStopp(true, true);
     clearTimeout(fortsetzTimer); musikPauseAb = 0;
     if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.value = .38; }
@@ -2027,6 +2039,7 @@
     if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop();
     /* ein gewählter, aber noch nicht begonnener Wechsel bleibt die Auswahl für das nächste Play */
     if (wechsel) { S = wechsel; merken(); setTimeout(() => { zeichnen(); knoepfe(); }, 0); }
+    ausduennen = false; einblend = 0;
     wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
   }
@@ -3555,7 +3568,14 @@
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
     else if (k === "zufall") neu = zufallsLied();
-    else if (STIL[k]) neu = stimmungLied(k);
+    else if (STIL[k]) {
+      neu = stimmungLied(k);
+      /* läuft schon Musik, bleibt die neue Stimmung möglichst nah an Tonart und Tonleiter der alten – so gleitet der Wechsel */
+      if (laeuft && S) {
+        const st = STIL[k], tr = st.transpose.reduce((b, x) => Math.abs(x - S.transpose) < Math.abs(b - S.transpose) ? x : b, st.transpose[0]);
+        neu.transpose = tr; if (st.modus.includes(S.modus)) neu.modus = S.modus;
+      }
+    }
     else neu = pruefen(ausVorlage(k, mix));
     Object.assign(neu, behalten);
     if (k !== "leer") {
