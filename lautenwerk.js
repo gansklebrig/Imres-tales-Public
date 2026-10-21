@@ -1938,7 +1938,7 @@
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
   let durchgang = 0, ausduennen = false, einblend = 0;
-  const EINBLEND = 32; /* zwei Takte, in denen das neue Stück Schicht für Schicht dazukommt */
+  const EINBLEND = 48; /* drei Takte, in denen das neue Stück Schicht für Schicht dazukommt */
   const SCHLAGWERK = { klopf: 1, schelle: 1, trommel: 1, ketten: 1, rex: 1 };
   let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
   /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
@@ -1959,8 +1959,9 @@
     const jetzt = ctx.currentTime, neu = wechsel, dr = neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
     let T = taktEnde();
     /* sanfter Wechsel: mindestens ein halber Takt zum Ausklingen – das Schlagwerk hört zuerst auf, die Melodie wird leiser */
-    if (!dr && T - jetzt < 8 * schrittDauer()) T += SCHRITTE * schrittDauer();
-    wechselAb = T; ausduennen = !dr;
+    /* lieber einen Moment länger als zu abrupt: sanft mindestens drei Viertel eines Takts zum Ausklingen, dramatisch mindestens ein halber für den Wirbel */
+    if (T - jetzt < 12 * schrittDauer()) T += SCHRITTE * schrittDauer();
+    wechselAb = T; wechselStart = jetzt; ausduennen = !dr;
     master.gain.cancelScheduledValues(jetzt); master.gain.setValueAtTime(master.gain.value, jetzt);
     master.gain.linearRampToValueAtTime(.38 * (dr ? .3 : .22), T);
     if (dr && !rendert) {
@@ -1985,7 +1986,7 @@
       const mg = master.gain;
       if (mg.cancelAndHoldAtTime) mg.cancelAndHoldAtTime(zeit); else { mg.cancelScheduledValues(zeit); mg.setValueAtTime(.38 * (dr ? .3 : .22), zeit); }
       if (!dr) mg.setTargetAtTime(.38 * .2, zeit, .15); /* kurz zurücknehmen, dann langsam aufblenden */
-      mg.setTargetAtTime(.38, zeit + (dr ? 0 : .3), dr ? .12 : 2);
+      mg.setTargetAtTime(.38, zeit + (dr ? 0 : .4), dr ? .12 : 2.8);
       if (dr > 1) { probe("crash", 0, zeit, brueckeZiel(), .3); probe("timp1", 0, zeit, brueckeZiel(), .5); }
       else if (dr) probe("timp1", 0, zeit, brueckeZiel(), .4);
     }
@@ -1993,14 +1994,14 @@
       merken(); zeichnen(); knoepfe();
       bordunAus(); if (S.bordun) setTimeout(bordunAn, 450);
       kulisseStart();
-    }, 0);
+    }, Math.max(0, (zeit - ctx.currentTime) * 1000)); /* Anzeige wechselt erst, wenn das neue Stück wirklich erklingt */
   }
   function planen() {
     const vorlauf = document.hidden ? 1 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     if (ausklingt) return;
     if (musikPauseAb && naechste >= musikPauseAb) { if (naechste < ctx.currentTime) naechste = ctx.currentTime; return; }
     if (wechsel && !wechselAb) brueckeStarten();
-    if (ausklangAb === -1) ausklangAb = taktEnde();
+    if (ausklangAb === -1) { ausklangAb = taktEnde(); ausklangStart = ctx.currentTime; }
     while (naechste < ctx.currentTime + vorlauf && !(musikPauseAb && naechste >= musikPauseAb)) {
       if (schritt === 0 && ausklangAb && naechste >= ausklangAb - 2 * schrittDauer()) { schlussAkkord(naechste); return; }
       if (schritt === 0 && hoerer) funkAusrichten(false);
@@ -3512,6 +3513,7 @@
     while (klassikQ.length && klassikQ[0][0] <= jetzt) spurZeigen(klassikQ.shift()[1]);
     buehneTick(b);
     try { gaesteZeigen(b); } catch (_) {}
+    try { wechselAnzeige(); } catch (_) {}
     requestAnimationFrame(malen);
   }
 
@@ -3950,6 +3952,77 @@
     S.gaeste = Object.assign({}, S.gaeste || {}, { [id]: gastStufe(id) > 0 ? 0 : 1 });
     merken(); gaesteVorladen(); gaesteNeu();
   }, true);
+  /* ---------- Pult-Helfer: Aufklappen, Wechselanzeige, mitwandernde Steuerleiste ---------- */
+  root.addEventListener("click", e => {
+    const ei = e.target.closest("[data-einst]");
+    if (ei) { e.stopPropagation(); einstAuf[ei.dataset.einst] = !einstAuf[ei.dataset.einst]; boxNeu(ei.dataset.einst === "musik" ? "musik" : "klang"); return; }
+    if (e.target.closest('[data-aktion="funkauf"]')) { e.stopPropagation(); funkAuf = !funkAuf; zeichnen(); knoepfe(); return; }
+  }, true);
+  let wechselStart = 0, ausklangStart = 0, wechselMerk = "";
+  /* was als Nächstes kommt und wie weit es noch ist (0 … 1) */
+  function wechselStand() {
+    if (!ctx || !laeuft) return null;
+    const j = ctx.currentTime, T = t();
+    if (wechsel) return { text: "→ " + (wechsel.titel || T.eigenesLied), p: wechselAb ? (j - wechselStart) / Math.max(.2, wechselAb - wechselStart) : 0 };
+    if (ausklangAb && !ausklingt) return { text: "→ " + T.ausklangKommt, p: ausklangAb > 0 ? (j - ausklangStart) / Math.max(.2, ausklangAb - ausklangStart) : 0 };
+    return null;
+  }
+  function wechselAnzeige() {
+    const w = wechselStand(), text = w ? w.text : "", p = w ? Math.max(0, Math.min(1, w.p)) : 0;
+    const ziele = [root, leiste].filter(Boolean);
+    if (text !== wechselMerk) {
+      wechselMerk = text;
+      ziele.forEach(z => z.querySelectorAll(".lw-titel-naechste, .ll-naechste").forEach(el => { el.textContent = text; }));
+      ziele.forEach(z => z.querySelectorAll(".lw-pult-titel, .ll-titel").forEach(el => el.classList.toggle("wechselt", !!text)));
+    }
+    ziele.forEach(z => z.querySelectorAll(".lw-wechselbalken").forEach(el => { el.style.transform = "scaleX(" + p.toFixed(3) + ")"; }));
+  }
+  let leiste = null, leisteFrame = 0;
+  function intensitaetSetzen(w) {
+    S.intensitaet = Math.max(0, Math.min(10, w));
+    root.querySelectorAll(".lw-ival").forEach(x => { x.textContent = t().intStufen[S.intensitaet]; });
+    const r = root.querySelector('[data-feld="intensitaet"]'); if (r) r.value = S.intensitaet;
+    merken();
+    if (S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetNeu = true; else stimmungWeiter(); }
+    leisteAktualisieren();
+  }
+  function leisteBauen() {
+    if (leiste || hoerer || !document.body) return;
+    leiste = document.createElement("div"); leiste.className = "lw-leiste"; leiste.hidden = true;
+    leiste.innerHTML = '<button type="button" class="ll-play"></button><button type="button" class="ll-aus" title="">🎼</button>' +
+      '<span class="ll-titel"><span class="ll-name"></span><span class="ll-naechste"></span><i class="lw-wechselbalken"></i></span>' +
+      '<span class="ll-int"><button type="button" class="ll-minus" aria-label="−">−</button><b class="ll-wert"></b><button type="button" class="ll-plus" aria-label="+">+</button></span>';
+    document.body.appendChild(leiste);
+    leiste.addEventListener("click", e => {
+      if (e.target.closest(".ll-play")) { const b = root.querySelector(".lw-play"); if (b) b.click(); }
+      else if (e.target.closest(".ll-aus")) { const b = root.querySelector(".lw-ausklang"); if (b) b.click(); }
+      else if (e.target.closest(".ll-minus")) intensitaetSetzen(S.intensitaet - 1);
+      else if (e.target.closest(".ll-plus")) intensitaetSetzen(S.intensitaet + 1);
+      leisteAktualisieren();
+    });
+    const pruefen2 = () => { leisteFrame = 0; leisteAktualisieren(); };
+    window.addEventListener("scroll", () => { if (!leisteFrame) leisteFrame = requestAnimationFrame(pruefen2); }, { passive: true });
+    window.addEventListener("resize", () => { if (!leisteFrame) leisteFrame = requestAnimationFrame(pruefen2); });
+  }
+  function leisteAktualisieren() {
+    if (!leiste) return;
+    const kopf = root.querySelector(".lw-pult-kopf"), T = t();
+    let zeigen = false;
+    if (S.pult && kopf && !hoerer) {
+      const k = kopf.getBoundingClientRect(), r = root.getBoundingClientRect();
+      zeigen = k.bottom < 0 && r.bottom > 140;
+    }
+    leiste.hidden = !zeigen;
+    document.documentElement.classList.toggle("lw-leiste-da", zeigen);
+    if (!zeigen) return;
+    const p = leiste.querySelector(".ll-play");
+    p.textContent = laeuft ? "■" : "▶"; p.classList.toggle("laeuft", laeuft); p.setAttribute("aria-label", laeuft ? T.stopp : T.spielen);
+    const a = leiste.querySelector(".ll-aus"); a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; a.title = T.ausklangTipp;
+    leiste.querySelector(".ll-name").textContent = S.titel || T.eigenesLied;
+    const st = !!(S.stimmung && STIL[S.stimmung]);
+    leiste.querySelector(".ll-int").hidden = !st;
+    leiste.querySelector(".ll-wert").textContent = "🔥 " + T.intStufen[S.intensitaet];
+  }
   /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
   Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften" });
   Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin" });
@@ -4002,10 +4075,16 @@
     raumWahl(T) + '<button type="button" class="lw-schalter lw-orch" data-aktion="orchester" aria-pressed="' + (S.orchester !== 0) + '" title="' + esc(T.orchTipp) + '">' + T.orchester + "</button>" + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
+  /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
+  const einstAuf = { musik: false, klang: false };
+  const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
+  Object.assign(TX.de, { einstMusik: "Klang & Raum", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
+  Object.assign(TX.en, { einstMusik: "Sound & room", einstKlang: "Backdrop & effects volume", wechselZu: "switching to", ausklangKommt: "Fade-out", leisePlus: "Intensity", funkKurz: "Listen in" });
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
   let musikTab = "stimmungen", fxTab = "effekte";
   try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; } catch (_) {}
-  const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + text + favPunkt(attr, wert) + "</button>";
+  const kachelText = text => { const m = /^([^\p{L}\p{N}\s–&<]+)\s+([\s\S]+)$/u.exec(text); return m ? '<span class="ki">' + m[1] + '</span><span class="kt">' + m[2] + "</span>" : '<span class="kt">' + text + "</span>"; };
+  const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + kachelText(text) + favPunkt(attr, wert) + "</button>";
   const reiter = (art, liste, aktiv, T) => '<div class="lw-tabs" role="tablist">' + liste.map(([k, txt]) =>
     '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
   function stimmSpeicherZeile(T) {
@@ -4041,15 +4120,15 @@
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) + gaesteZeile(T) + stimmSpeicherZeile(T) : "") + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div></section>";
+      (musikTab === "stimmungen" ? intRegler(T) + gaesteZeile(T) + stimmSpeicherZeile(T) : "") + einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>") + "</section>";
   }
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + "</h4></div>" +
       '<div class="lw-pult-gitter lw-kul-gitter">' + oben("k", KULISSEN).map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
-      '<label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' +
       reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
-      '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" + fxRegler(T) + "</section>";
+      '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" +
+      einklapp("klang", T.einstKlang, '<div class="lw-stimm-mix"><label class="lw-feld lw-regler lw-kulregler"><span>' + T.kulisseLaut + ' <b class="lw-kval">' + S.kulisseVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.kulisseVol + '" data-feld="kulvol"></label>' + fxRegler(T) + "</div>") + "</section>";
   }
   const konsole = (T, voll) => '<div class="lw-konsole">' + musikBox(T, voll) + klangBox(T) + "</div>";
   function boxNeu(welche) {
@@ -4073,10 +4152,11 @@
       '<div class="lw-pult">' +
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
-          '<span class="lw-pult-titel">' + esc(S.titel || T.eigenesLied) + "</span>" +
-          '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></div>" +
+          '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
+          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button>" +
+          '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></span></div>" +
+        (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
         konsole(T, false) +
-        '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
@@ -4133,7 +4213,9 @@
       '<p class="lw-funk-status">' + esc(funkStatusText(T)) + '</p><button type="button" class="lw-schalter" data-aktion="funk">' + T.funkStopp + "</button>";
   }
   const funkStatusText = T => !funk ? "" : funk.status === "ok" ? "🟢 " + T.funkLaeuft + " · " + T.funkZuhoerer(funk.zahl || 0) : funk.status === "fehler" ? "🔴 " + T.funkFehler : "🟡 " + T.funkVerbinde;
-  function funkAnzeigen() { const el = root.querySelector(".lw-funk-status"); if (el) el.textContent = funkStatusText(t()); }
+  function funkAnzeigen() { const el = root.querySelector(".lw-funk-status"); if (el) el.textContent = funkStatusText(t()); const k = root.querySelector(".lw-funk-knopf"); if (k) { k.textContent = funkKnopfText(t()); k.classList.toggle("an", !!funk); } }
+  let funkAuf = false;
+  const funkKnopfText = T => "📡 " + (funk && funk.status === "ok" ? (funk.zahl || 0) : funk ? "…" : T.funkKurz);
   function funkZustand() {
     const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
       ablauf: S.ablauf, vol: S.vol, mute: S.mute, teile: S.teile, instrument: S.instrument, band: S.band };
@@ -4331,7 +4413,7 @@
     k.textContent = laeuft ? "❚❚" : "▶"; k.setAttribute("aria-label", laeuft ? T.miniPause : T.miniWeiter); k.title = k.getAttribute("aria-label");
   }
   function knoepfe() {
-    miniAnzeigen(); try { favMarkieren(); } catch (_) {}
+    miniAnzeigen(); try { favMarkieren(); leisteBauen(); leisteAktualisieren(); wechselMerk = "\u0000"; wechselAnzeige(); } catch (_) {}
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
     root.querySelectorAll(".lw-ausklang").forEach(a => { a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; });
@@ -4995,6 +5077,48 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 .lw-teilen:hover { background: var(--ember); color: var(--night); }
 .lw-status { font-family: var(--hand); font-size: 1.3rem; color: var(--ember); }
 @media (prefers-reduced-motion: reduce) { .lw-figur .rauchwolke, .lw-figur .glut { animation: none; } }
+.lw-pult-gitter .ki { margin-right: .3em; }
+@media (max-width: 560px) {
+  .lw-pult-gitter { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .3rem; }
+  .lw-pult-gitter button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; text-align: center; padding: .45rem .25rem .4rem; min-height: 3.6rem; white-space: normal; }
+  .lw-pult-gitter button:has(.lw-pin) { padding-right: .25rem; }
+  .lw-pult-gitter .ki { margin: 0; font-size: 1.35rem; line-height: 1; }
+  .lw-pult-gitter .kt { font-size: .74rem; line-height: 1.15; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; hyphens: auto; }
+  .lw-pult-gitter .lw-pin { bottom: auto; height: 1.4rem; width: 1.4rem; }
+  .lw-pult-gitter [data-sfx].spielt::after { position: absolute; left: .3rem; top: .2rem; }
+  .lw-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin-inline: -.2rem; padding: 0 .2rem .1rem; }
+  .lw-tabs::-webkit-scrollbar { display: none; }
+  .lw-tabs button { flex: 0 0 auto; }
+}
+.lw-einst { border-top: 1px solid var(--line); padding-top: .45rem; display: grid; gap: .5rem; }
+.lw-einst-kopf { background: none; border: 0; color: var(--ash); font: inherit; font-size: .85rem; text-align: left; padding: .2rem 0; cursor: pointer; }
+.lw-einst-kopf:hover, .lw-einst.auf .lw-einst-kopf { color: var(--ember); }
+.lw-kopf-rechts { display: inline-flex; gap: .4rem; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
+.lw-funk-knopf.an { border-color: var(--ember); color: var(--ember); }
+.lw-pult-titel { position: relative; display: inline-flex; flex-direction: column; flex: 1 1 9rem; min-width: 0; padding-bottom: .3rem; }
+.lw-titel-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
+.lw-titel-naechste, .ll-naechste { font-size: .78rem; color: var(--ember); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lw-titel-naechste:empty, .ll-naechste:empty { display: none; }
+.lw-wechselbalken { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ember); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; transition: opacity .4s; border-radius: 2px; }
+.wechselt > .lw-wechselbalken { opacity: 1; }
+.lw-leiste { position: fixed; left: 50%; bottom: max(.6rem, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 60; width: min(40rem, calc(100% - 1.2rem)); display: flex; align-items: center; gap: .45rem; padding: .4rem .5rem; border: 1px solid rgba(224,160,70,.55); border-radius: 999px; background: rgba(16,14,21,.94); box-shadow: 0 8px 28px rgba(0,0,0,.55); backdrop-filter: blur(6px); animation: lwleisteein .25s ease-out; }
+.lw-leiste[hidden] { display: none; }
+@keyframes lwleisteein { from { transform: translate(-50%, 120%); opacity: 0; } }
+.lw-leiste button { font: inherit; cursor: pointer; }
+.ll-play { width: 2.6rem; height: 2.6rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--ember); background: var(--ember); color: var(--night); font-size: 1rem; }
+.ll-play.laeuft { background: none; color: var(--ember); }
+.ll-aus { width: 2.3rem; height: 2.3rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--vellum); }
+.ll-aus[hidden] { display: none; }
+.ll-aus:disabled { opacity: .4; }
+.ll-titel { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; padding-bottom: .25rem; }
+.ll-name { color: var(--vellum); font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ll-int { display: inline-flex; align-items: center; gap: .2rem; flex: 0 0 auto; }
+.ll-int[hidden] { display: none; }
+.ll-int button { width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--vellum); font-size: 1.05rem; line-height: 1; }
+.ll-int button:hover { border-color: var(--ember); color: var(--ember); }
+.ll-wert { font-weight: 400; font-size: .76rem; color: var(--ash); min-width: 3.6rem; text-align: center; white-space: nowrap; }
+@media (max-width: 420px) { .ll-wert { min-width: 0; font-size: .7rem; } }
 `;
   /* Requisiten: nur das gewählte Instrument ist sichtbar */
   css.textContent += ".lw-figur .req { display: none; }\n" +
