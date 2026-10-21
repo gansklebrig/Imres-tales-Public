@@ -316,6 +316,11 @@ details.stats .stat{padding:0 12px 12px}
 .bookcv{width:100%;max-width:640px;height:clamp(150px,36vw,250px);border-radius:12px;display:block;box-shadow:0 10px 34px rgba(0,0,0,.55)}
 .lead.book{text-align:left}.lead.book::first-letter{font-family:var(--fd);font-size:2.5em;float:left;line-height:.85;margin:4px 8px 0 0;color:var(--gold)}
 .seg button{font-size:clamp(12px,3.2vw,15px)}
+.bslot{touch-action:none;cursor:grab}.bslot.bsrc{opacity:.35}.bslot.over{box-shadow:0 0 0 3px #ffd04a,0 0 16px rgba(255,208,74,.6)}.bslot.pick{animation:bpk 1s ease-in-out infinite}
+@keyframes bpk{50%{box-shadow:0 0 0 3px rgba(255,208,74,.7)}}
+.bghost{position:fixed;z-index:99;pointer-events:none;width:48px;height:48px;transform:scale(1.15);box-shadow:0 8px 24px rgba(0,0,0,.6)}.bghost.rm{border-color:var(--bad);opacity:.7}
+.barhint{font-size:12px;flex:1 1 100%}.barpick{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px dashed rgba(229,180,84,.5);border-radius:10px}.bpick{display:flex;flex-wrap:wrap;gap:6px}.bpi{font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols',var(--fb)}
+.up.vol>div{flex:1 1 auto;min-width:0}.up.vol input[type=range]{width:100%;margin-top:8px;accent-color:var(--gold);height:28px}
 </style>
 
 </head>
@@ -365,7 +370,7 @@ const REDUCED=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').
 
 /* ================= Speicherstand ================= */
 const SKEY='imres-heldensturm-v1';
-function defSave(){return{gold:0,maxDiff:0,sound:true,music:true,auto:false,heroes:{}}}
+function defSave(){return{gold:0,maxDiff:0,sound:true,music:true,auto:false,heroes:{},volSfx:0.8,volMus:0.6}}
 let SAVE=defSave();
 try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s&&typeof s==='object')SAVE=Object.assign(defSave(),s)}catch(e){}
 function hsave(id){return SAVE.heroes[id]||(SAVE.heroes[id]={up:{},best:-1,runs:0,clears:0})}
@@ -396,12 +401,13 @@ const SND_FILES=['harfe_52','harfe_55','harfe_59','harfe_65','harfe_69','harfe_7
 function makeIR(sec){const n=Math.floor(AC.sampleRate*sec),b=AC.createBuffer(2,n,AC.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.8)}return b}
 function audioInit(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=0.9;let end=AC.destination;
   try{const comp=AC.createDynamicsCompressor();comp.threshold.value=-16;comp.knee.value=10;comp.ratio.value=4;comp.attack.value=0.003;comp.release.value=0.22;comp.connect(AC.destination);end=comp}catch(e){}
-  MASTER.connect(end);SFXB=AC.createGain();SFXB.gain.value=1;SFXB.connect(MASTER);
+  MASTER.connect(end);SFXB=AC.createGain();volInit();SFXB.gain.value=SAVE.volSfx;SFXB.connect(MASTER);
   try{const conv=AC.createConvolver();conv.buffer=makeIR(1.7);const send=AC.createGain();send.gain.value=0.2;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=4200;SFXB.connect(send);send.connect(conv);conv.connect(lp);lp.connect(MASTER)}catch(e){}
  }catch(e){AC=null}}
  if(AC&&AC.state==='suspended')AC.resume();
  if(AC&&!SNDLOAD){SNDLOAD=true;for(const n of SND_FILES)fetch(SND_BASE+n+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status)).then(b=>new Promise((res,rej)=>AC.decodeAudioData(b,res,rej))).then(buf=>{BUF[n]=buf}).catch(()=>{})}}
 const OUT=()=>CUR||SFXB;
+function volInit(){if(SAVE.volSfx===undefined)SAVE.volSfx=SAVE.sound===false?0:0.8;if(SAVE.volMus===undefined)SAVE.volMus=SAVE.music===false?0:0.6}
 function tone(f,d,type,v,f2,delay){const t=AC.currentTime+(delay||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+d+0.03);return true}
 function smp(n,v,o){const b=BUF[n];if(!b)return false;o=o||{};const t=AC.currentTime+(o.d||0);const s=AC.createBufferSource();s.buffer=b;s.playbackRate.value=o.r||1;const g=AC.createGain();g.gain.setValueAtTime(v,t);
  s.connect(g);g.connect(OUT());s.start(t);if(o.len){g.gain.setValueAtTime(v,t+o.len*0.55);g.gain.exponentialRampToValueAtTime(0.0001,t+o.len);s.stop(t+o.len+0.05)}return true}
@@ -1904,7 +1910,7 @@ function gainXp(v){v*=shrineOn('erkenntnis')?1.5:1;ruhmXp(v);P.xp+=v;let need=xp
 const xpNeed=l=>Math.round(10+l*8+Math.pow(l,1.7)*2);
 function canLearn(n){const r=rank(n.id);if(r>=n.max||P.sp<=0)return false;return prereq(n)}
 function prereq(n){if(P.level<ROWLV[n.row])return false;if(n.row>0){const prev=P.hero.tree.filter(m=>m.b===n.b&&m.row===n.row-1);if(!prev.some(m=>rank(m.id)>0))return false}return true}
-function learn(n){if(!canLearn(n))return;P.ranks[n.id]=rank(n.id)+1;P.sp--;if(n.a&&!P.learn.includes(n.id)){P.learn.push(n.id);if(P.bar.length<6)P.bar.push(n.id)}recalc();buildSkillBar();sfx('magic')}
+function learn(n){if(!canLearn(n))return;P.ranks[n.id]=rank(n.id)+1;P.sp--;if(n.a&&!P.learn.includes(n.id)){P.learn.push(n.id);if(P.bar.length<6)P.bar.push(n.id);else if(!G.bot)G.barPick=n.id}recalc();buildSkillBar();sfx('magic')}
 function toggleBar(id){const i=P.bar.indexOf(id);if(i>=0)P.bar.splice(i,1);else if(P.bar.length<6)P.bar.push(id);buildSkillBar()}
 function useSkill(i){if(G.state!=='play'||G.paused)return;if(P.silT>0||P.stunT>0){if(!P.silWarn||G.time-P.silWarn>1.5){P.silWarn=G.time;toast(P.silT>0?'Keine Magie – du bist verstummt!':'Du bist betäubt!','#c08cff')}return}if(P.chan&&!P.chan.move)return;const n=P.actives[i];if(!n)return;if((P.cds[n.id]||0)>0)return;const r=rank(n.id);
  if(n.cast(r)===false)return;if(n.ult&&!G.bot)ultFx();setOnCast();P.cds[n.id]=n.cd(r)*(1-P.st.cdr);const b=P.skBtns[i];if(b)b.el.classList.remove('ready')}
@@ -2513,7 +2519,7 @@ function showTitle(keep){unseedRng();bookCv=null;G.state='title';G.paused=false;
  const ups=META.map(m=>{const r=hs.up[m.id]||0,max=r>=m.max,cost=metaCost(m,r);return`<div class="up"><div><div class="t">${m.name}<small>${r} / ${m.max}</small></div><div class="d">${r?m.d(r):'noch nicht gelernt'}${max?'':` → <span style="color:var(--text)">${m.d(r+1)}</span>`}</div></div><button class="btn ${!max&&SAVE.gold>=cost?'gold':''}" data-act="meta" data-id="${m.id}" ${max||SAVE.gold<cost?'disabled':''}>${max?'Maximal':fmt(cost)+' Gold'}</button></div>`}).join('');
  const chips=[];for(let d=0;d<=Math.max(SAVE.maxDiff,1);d++)chips.push(`<button class="chip ${d===G.seldiff?'on':''}" data-act="diff" data-d="${d}" ${d>SAVE.maxDiff?'disabled title="Besiegt den Demogorgon, um das freizuschalten"':''}>${esc(diffName(d))}</button>`);
  const body=tab==='rang'?lbHtml():tab==='best'?renderBestiary():tab==='lager'?`<div class="muted" style="font-size:13px">Dauerhaft für ${H.name}. Gold teilen sich alle Helden.</div><div class="ups">${ups}</div>${ruhmHtml()}`
-  :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Musik</span>Barradins Band spielt passend zum Gebiet.</div><button class="btn ${SAVE.music?'gold':''}" data-act="music">${SAVE.music?'An':'Aus'}</button></div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div>`
+  :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div class="ups" style="display:flex;flex-direction:column;gap:8px">${volRows()}</div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div>`
   :`${modeCard()}<p class="lead">${H.blurb}</p><div class="facts"><div><span>Kampfstil</span>${ATKSTYLE[sel]}</div><div><span>Talentbäume</span>${H.branches.join(' · ')}</div><div><span>Bester Lauf</span>${best}</div></div>`;
  showScreen(`<div class="camp" style="--hc:${HCOL[sel]}">
   <header class="camp-top"><div><a class="back" href="./#taverne">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
@@ -2592,8 +2598,7 @@ function renderPause(keep){showScreen(`<div class="wrap narrow">
    <div class="up"><div><div class="t">Fähigkeiten automatisch wirken</div><div class="d">Praktisch auf dem Handy: Fähigkeiten feuern von selbst, sobald Gegner in Reichweite sind.</div></div><button class="btn ${SAVE.auto?'gold':''}" data-act="auto">${SAVE.auto?'An':'Aus'}</button></div>
    <div class="up"><div><div class="t">Mit der Maus zielen (PC)</div><div class="d">Normale Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger. Linke Maustaste gedrückt halten feuert auch ohne Gegner.</div></div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div>
    <div class="up"><div><div class="t">Effekte</div><div class="d">Licht, Funken, Zeitlupe. „Auto“ schaltet von selbst auf sparsam, wenn das Gerät ins Schwitzen kommt.</div></div><button class="btn ${SAVE.fx!=='low'?'gold':''}" data-act="fx">${SAVE.fx==='hi'?'Episch':SAVE.fx==='low'?'Sparsam':'Auto'}</button></div>
-   <div class="up"><div><div class="t">Musik</div><div class="d">Barradins Band spielt passend zum Gebiet – lauter, je wilder der Kampf.</div></div><button class="btn ${SAVE.music?'gold':''}" data-act="music">${SAVE.music?'An':'Aus'}</button></div>
-   <div class="up"><div><div class="t">Geräusche</div><div class="d">Harfe, Pauken, Gong und Klingen.</div></div><button class="btn ${SAVE.sound?'gold':''}" data-act="sound">${SAVE.sound?'An':'Aus'}</button></div>
+   ${volRows()}
   </div>
   <div class="card" id="giveup"><div class="spread"><div><div class="t" style="font-weight:800">Lauf aufgeben</div><div class="muted" style="font-size:13px">Das bisher gesammelte Gold bleibt erhalten. Der Lauf wird außerdem zu Beginn jeder Stufe gespeichert.</div></div><button class="btn" data-act="giveup">Aufgeben</button></div></div>
  </div>`,'',keep)}
@@ -2636,13 +2641,13 @@ function renderTree(keep){const Hh=P.hero;const sel=G.treeSel&&Hh.tree.find(n=>n
  const col=b=>{let h=`<div class="br ${b===brSel?'on':''}"><h3>${Hh.branches[b]}</h3>`;for(let row=0;row<6;row++){const ns=Hh.tree.filter(n=>n.b===b&&n.row===row);h+=`<div class="trow ${ns.length>1?'two':''}"><span class="lvreq">${ROWLV[row]}</span>${ns.map(node).join('')}</div>`}return h+'</div>'};
  const r=rank(sel.id);let req='';if(!prereq(sel)){const prev=Hh.tree.filter(m=>m.b===sel.b&&m.row===sel.row-1);req=`Benötigt Heldenstufe ${ROWLV[sel.row]}${prev.length?` und ${prev.map(m=>m.name).join(' oder ')}`:''}.`}
  const inBar=P.bar.includes(sel.id);
- const barBtn=sel.a&&r?`<button class="btn" data-act="tree-bar" ${!inBar&&P.bar.length>=6?'disabled':''}>${inBar?'Aus der Leiste nehmen':'In die Leiste'}</button>`:'';
- const barInfo=sel.a&&r&&!inBar&&P.bar.length>=6?'<div class="muted" style="font-size:13px">Die Leiste ist voll – nimm erst eine andere Fähigkeit heraus.</div>':'';
- const slots=[0,1,2,3,4,5].map(i=>{const id=P.bar[i],n=id&&Hh.tree.find(x=>x.id===id);return`<button class="bslot ${n?'':'empty'}" ${n?`data-act="tree-sel" data-id="${n.id}"`:'disabled'} title="${n?esc(n.name):'frei'}"><span>${n?n.ic:''}</span><i>${i+1}</i></button>`}).join('');
+ const barBtn=sel.a&&r&&!inBar&&G.barPick!==sel.id?`<button class="btn" data-act="tree-bar">${P.bar.length>=6?'In die Leiste (ersetzen)':'In die Leiste'}</button>`:'';
+ const barInfo=sel.a&&r&&inBar?`<div class="muted" style="font-size:13px">Platz ${P.bar.indexOf(sel.id)+1} in der Leiste – oben gedrückt halten und ziehen zum Verschieben.</div>`:G.barPick===sel.id?`<div class="barpick"><div style="font-weight:800">Die Leiste ist voll. Welche Fähigkeit soll ${esc(sel.name)} ersetzen?</div><div class="bpick">${P.bar.map((id,i)=>{const n=Hh.tree.find(x=>x.id===id);return n?`<button class="btn small" data-act="bar-rep" data-i="${i}"><span class="bpi">${n.ic}</span> ${esc(n.name)}</button>`:''}).join('')}</div><button class="btn small" data-act="bar-cancel">Nicht in die Leiste</button></div>`:'';
+ const slots=[0,1,2,3,4,5].map(i=>{const id=P.bar[i],n=id&&Hh.tree.find(x=>x.id===id);return`<button class="bslot ${n?'':'empty'} ${G.barPick&&n?'pick':''}" data-i="${i}" ${n?`data-act="tree-sel" data-id="${n.id}"`:'disabled'} title="${n?esc(n.name):'frei'}"><span>${n?n.ic:''}</span><i>${i+1}</i></button>`}).join('');
  showScreen(`<div class="wrap tree-wrap">
   ${menuTabs('tree')}
   <div class="inv-head"><div><h2>Talente</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level}</div></div><button class="btn gold" data-act="close">${G.state==='between'?'Zurück':'Weiter'}</button></div>
-  <div class="barrow"><span class="eyebrow">Leiste</span><div class="bslots">${slots}</div></div>
+  <div class="barrow"><span class="eyebrow">Leiste</span><div class="bslots">${slots}</div><span class="muted barhint">Halten und ziehen zum Sortieren</span></div>
   <div class="seg brtabs" role="tablist">${Hh.branches.map((n,b)=>`<button role="tab" aria-selected="${b===brSel}" data-act="tree-br" data-b="${b}">${n}${Hh.tree.some(x=>x.b===b&&canLearn(x))?'<b></b>':''}</button>`).join('')}</div>
   <div class="tree">${[0,1,2].map(col).join('')}</div>
   <div class="tdet card"><div class="eyebrow">${sel.ult?'Meisterfähigkeit · ':''}${sel.a?'Aktiv · Abklingzeit '+f1(sel.cd(Math.max(1,r)))+' s':'Passiv'} · Rang ${r} / ${sel.max}</div><h3>${sel.ic} ${sel.name}</h3>
@@ -2701,9 +2706,11 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'inv-scrap':{const i=+G.invSel.split(':')[1];const it=P.bag[i];if(it){const v=scrapValue(it);SAVE.gold+=v;G.goldRun+=v;P.bag.splice(i,1);sfx('scrap')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'inv-scrapall':{let v=0;P.bag=P.bag.filter(it=>{if(it.rar<4&&!it.up&&!(it.sock&&it.sock.some(Boolean))&&itemDelta(it)<=0.005){v+=scrapValue(it);return false}return true});SAVE.gold+=v;G.goldRun+=v;if(v){sfx('scrap');toast(`+${fmt(v)} Gold`,'#e5b454')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<24&&k!=='weapon'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
-  case'tree-sel':G.treeSel=b.dataset.id;{const n=P.hero.tree.find(x=>x.id===b.dataset.id);if(n)G.treeBr=n.b}renderTree(true);break;
+  case'tree-sel':if(G.barPick&&b.dataset.i!==undefined){const i=+b.dataset.i;if(!P.bar.includes(G.barPick)){P.bar[i]=G.barPick;buildSkillBar();sfx('equip')}G.treeSel=G.barPick;G.barPick=null;renderTree(true);break}if(G.barPick&&G.barPick!==b.dataset.id)G.barPick=null;G.treeSel=b.dataset.id;{const n=P.hero.tree.find(x=>x.id===b.dataset.id);if(n)G.treeBr=n.b}renderTree(true);break;
   case'tree-br':G.treeBr=+b.dataset.b;renderTree(true);break;
-  case'tree-bar':toggleBar(G.treeSel);renderTree(true);break;
+  case'tree-bar':if(P.bar.length>=6&&!P.bar.includes(G.treeSel))G.barPick=G.treeSel;else if(!P.bar.includes(G.treeSel)){toggleBar(G.treeSel);sfx('equip')}renderTree(true);break;
+  case'bar-rep':{const i=+b.dataset.i;if(G.barPick&&!P.bar.includes(G.barPick)){P.bar[i]=G.barPick;buildSkillBar();sfx('equip')}G.barPick=null;renderTree(true);break}
+  case'bar-cancel':G.barPick=null;renderTree(true);break;
   case'tree-learn':{const n=P.hero.tree.find(x=>x.id===G.treeSel);if(n)learn(n);renderTree(true);break}
  }});
 window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(ev.code))return;audioInit();
@@ -3262,6 +3269,29 @@ function shrineStats(s){if(!P.shrine||P.shrine.t<=0)return;const k=P.shrine.k;if
 function modStats(s){for(const m of P.mods||[]){if(m.k==='dmg')s.dmgP+=m.v;else if(m.k==='hp')s.hpP+=m.v;else if(m.k==='crit')s.crit+=m.v;else if(m.k==='speed')s.speedP+=m.v;else if(m.k==='gold')s.gold+=m.v}}
 function doNextStage(){G.state='play';setupStage(G.stage+1);showStageIntro()}
 
+
+/* Leiste sortieren: Symbol gedrückt halten und auf einen anderen Platz ziehen; aus der Leiste gezogen = entfernen */
+let BDRAG=null,BDRAG_NOCLICK=0;
+document.addEventListener('pointerdown',ev=>{const sl=ev.target.closest('.bslot[data-i]');if(!sl||!P||!P.bar[+sl.dataset.i])return;BDRAG={i:+sl.dataset.i,x:ev.clientX,y:ev.clientY,el:sl,on:false,ghost:null,id:ev.pointerId,t:performance.now()}});
+document.addEventListener('pointermove',ev=>{const D=BDRAG;if(!D||ev.pointerId!==D.id)return;const dx=ev.clientX-D.x,dy=ev.clientY-D.y;
+ if(!D.on){if(Math.hypot(dx,dy)<8)return;D.on=true;D.ghost=D.el.cloneNode(true);D.ghost.classList.add('bghost');document.body.appendChild(D.ghost);D.el.classList.add('bsrc')}
+ ev.preventDefault();D.ghost.style.left=(ev.clientX-24)+'px';D.ghost.style.top=(ev.clientY-24)+'px';
+ const t=document.elementFromPoint(ev.clientX,ev.clientY),ts=t&&t.closest('.bslot[data-i]');scr.querySelectorAll('.bslot.over').forEach(x=>x.classList.remove('over'));if(ts&&ts!==D.el)ts.classList.add('over');
+ const row=scr.querySelector('.barrow');if(row){const r=row.getBoundingClientRect();const out=ev.clientY<r.top-40||ev.clientY>r.bottom+40;D.ghost.classList.toggle('rm',out);D.out=out}},{passive:false});
+function bdragEnd(ev){const D=BDRAG;if(!D||ev.pointerId!==D.id)return;BDRAG=null;if(!D.on)return;BDRAG_NOCLICK=performance.now();D.ghost.remove();
+ const t=document.elementFromPoint(ev.clientX,ev.clientY),ts=t&&t.closest('.bslot[data-i]');
+ if(ts&&ts!==D.el){const j=+ts.dataset.i,a=P.bar[D.i];if(j<P.bar.length){P.bar[D.i]=P.bar[j];P.bar[j]=a}else{P.bar.splice(D.i,1);P.bar.push(a)}sfx('equip')}
+ else if(D.out){const id=P.bar[D.i];P.bar.splice(D.i,1);sfx('scrap');toast(`${esc((P.hero.tree.find(n=>n.id===id)||{}).name||'')} aus der Leiste genommen`,'#c8bca8')}
+ buildSkillBar();if(G.overlay==='tree')renderTree(true)}
+document.addEventListener('pointerup',bdragEnd);document.addEventListener('pointercancel',bdragEnd);
+document.addEventListener('click',ev=>{if(performance.now()-BDRAG_NOCLICK<350&&ev.target.closest('.bslot')){ev.stopPropagation();ev.preventDefault()}},true);
+/* Lautstärke */
+function volApply(){if(SFXB)SFXB.gain.value=SAVE.volSfx;MUSIK.lautstaerke(SAVE.volMus);SAVE.sound=SAVE.volSfx>0;const on=SAVE.volMus>0;if(on!==SAVE.music){SAVE.music=on;MUSIK.schalten(on)}}
+const volRow=(k,t,d)=>`<div class="up vol"><div><div class="t">${t}<small id="vl_${k}">${Math.round(SAVE[k]*100)}%</small></div><div class="d">${d}</div><input type="range" min="0" max="100" step="5" value="${Math.round(SAVE[k]*100)}" data-vol="${k}" aria-label="${t}"></div></div>`;
+const volRows=()=>volRow('volMus','Musik','Barradins Band – 0% schaltet sie aus.')+volRow('volSfx','Geräusche','Kampf, Zauber, Beute – 0% schaltet sie aus.');
+let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[data-vol]');if(!el)return;audioInit();const k=el.dataset.vol;SAVE[k]=(+el.value)/100;const l=$('vl_'+k);if(l)l.textContent=el.value+'%';volApply();persist();
+ if(k==='volSfx'&&performance.now()-volT>180){volT=performance.now();sfx('coin')}});
+
 /* ================= Schleife ================= */
 let last=performance.now();
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(0.05,(now-last)/1000);last=now;
@@ -3270,7 +3300,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(0.05,(now-las
  musikTick(dt);
  try{render(dt);if(G.state==='title'&&stageCv)drawStage();if(bookCv)drawBook()}catch(e){console.error(e)}
  hudUpdate()}
-MUSIK.schalten(SAVE.music!==false);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
+volInit();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
 window.__hs={get G(){return G},get P(){return P},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
