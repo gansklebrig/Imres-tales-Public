@@ -23,14 +23,105 @@
 
   /* ---------- Die Spiele ---------- */
   const SPIELE = [
-    { key: "heldensturm", karte: "heldensturm", extern: "heldensturm.html", held: "barradin.jpg", bilder: [B("heldensturm-1"), B("heldensturm-2")], gross: true },
-    { key: "jagd", karte: "waldlauf", held: "friedrich.jpg", bilder: [B("jagd-1"), B("jagd-2"), B("jagd-3")] },
-    { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2")] },
-    { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")] },
-    { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")] },
-    { key: "probe", karte: "barden-probe", held: "barradin.jpg", bilder: [B("probe-1"), B("probe-2")] },
-    { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")] }
+    { key: "heldensturm", karte: "heldensturm", extern: "heldensturm.html", held: "barradin.jpg", bilder: [B("heldensturm-1"), B("heldensturm-2")], gross: true,
+      plakat: B("plakat-heldensturm"), pos: "center 45%", farbe: "#ff7a3d", clip: "vorschau/heldensturm-clip.mp4", ton: "timp1.mp3", art: "neu", stand: "2026-10-21" },
+    { key: "jagd", karte: "waldlauf", held: "friedrich.jpg", bilder: [B("jagd-1"), B("jagd-2"), B("jagd-3")],
+      plakat: B("plakat-jagd"), pos: "center 22%", farbe: "#8fd36b", clip: "vorschau/jagd-clip.mp4", ton: "bogen.mp3", art: "update", stand: "2026-10-20" },
+    { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2")],
+      plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4", ton: "shake.mp3", art: "update", stand: "2026-10-20" },
+    { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")],
+      plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4", ton: "harfe_76.mp3", art: "update", stand: "2026-10-20" },
+    { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")],
+      plakat: B("plakat-auftritt"), pos: "center 20%", farbe: "#ffc24a", clip: "vorschau/auftritt-clip.mp4", ton: "gitarre_63.mp3", art: "update", stand: "2026-10-20" },
+    { key: "probe", karte: "barden-probe", held: "barradin.jpg", bilder: [B("probe-1"), B("probe-2")],
+      plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4", nurVorschauClip: true, ton: "holz1.mp3" },
+    { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")],
+      plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, ton: "glock_91.mp3" }
   ];
+  /* Sprüche aus Sicht der Helden, Kopf der Taverne, Fortschritt */
+  const MEHR = {
+    de: {
+      spruch: { heldensturm: "Vier Helden. Tausend Goblins. Ein sehr müder Barde.", jagd: "Wie viele Goblins schaffst du, bevor Rex heiser ist?",
+        nacht: "Ezekiel nimmt nur, was niemand vermisst. Meistens.", hort: "Was glänzt, gehört Echo. Was nicht glänzt, auch.",
+        auftritt: "Vom Hinterhof bis zu den Göttern – kein Ton daneben.", probe: "Eine 20 macht Helden. Eine 1 macht Lieder über dich.",
+        memory: "Erinnerst du dich an jedes Monster, das uns fressen wollte?" },
+      kopfLabel: "Zeitvertreib", kopfTitel: "Die Taverne",
+      kopfText: "Krüge hoch, Würfel raus! Sieben Spiele aus unserer Kampagne – vom Hordenkampf bis zum Loblied. Zieh dir einen Hocker ran.",
+      heute: "Heute in der Taverne", jetzt: "▶ Jetzt spielen", mehr: "Mehr erfahren", spielen: "▶ Spielen", weiter: "▶ Weiterspielen",
+      neu: "Neu", update: "Frisch", spiele: n => n + " Spiele", rekorde: n => n + (n === 1 ? " Rekord" : " Rekorde"), neuZahl: n => n + " neu",
+      tonAn: "Tavernenklänge an", tonAus: "Tavernenklänge aus", nieGespielt: "Noch nie gespielt – trau dich!", deinStand: "Dein Stand",
+      stand: {
+        heldensturm: d => [d.gold ? "💰 " + d.gold.toLocaleString("de-DE") + " Gold" : "", d.laeufe ? d.laeufe + (d.laeufe === 1 ? " Lauf" : " Läufe") : ""],
+        jagd: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : "", d.kapitel > 1 ? "Kapitel " + d.kapitel : ""],
+        nacht: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : "", d.nacht > 1 ? "Nacht " + d.nacht : "", d.taeglich ? "📅 Tägliche Nacht wartet" : ""],
+        hort: d => [d.weiter ? "▶ Level " + d.weiter + " gespeichert" : "", d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : ""],
+        auftritt: d => [d.sterne ? "★ " + d.sterne + "/33" : "", d.buehne > 1 ? "Bühne " + d.buehne + "/11" : ""],
+        probe: () => ["🎲 Ein Wurf genügt"],
+        memory: d => [d.rekord ? "🏆 " + d.rekord + " Züge" : ""]
+      }
+    },
+    en: {
+      spruch: { heldensturm: "Four heroes. A thousand goblins. One very tired bard.", jagd: "How many goblins can you drop before Rex goes hoarse?",
+        nacht: "Ezekiel only takes what no one will miss. Mostly.", hort: "If it shines, it's Echo's. If it doesn't – also Echo's.",
+        auftritt: "From the back alley to the gods – not one wrong note.", probe: "A 20 makes heroes. A 1 makes songs about you.",
+        memory: "Do you remember every monster that tried to eat us?" },
+      kopfLabel: "Pastimes", kopfTitel: "The Tavern",
+      kopfText: "Raise your tankards, roll the dice! Seven games from our campaign – from horde battles to songs of praise. Pull up a stool.",
+      heute: "Tonight at the tavern", jetzt: "▶ Play now", mehr: "Learn more", spielen: "▶ Play", weiter: "▶ Continue",
+      neu: "New", update: "Fresh", spiele: n => n + " games", rekorde: n => n + (n === 1 ? " record" : " records"), neuZahl: n => n + " new",
+      tonAn: "Tavern sounds on", tonAus: "Tavern sounds off", nieGespielt: "Never played – dare you!", deinStand: "Your progress",
+      stand: {
+        heldensturm: d => [d.gold ? "💰 " + d.gold.toLocaleString("en-GB") + " gold" : "", d.laeufe ? d.laeufe + (d.laeufe === 1 ? " run" : " runs") : ""],
+        jagd: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : "", d.kapitel > 1 ? "Chapter " + d.kapitel : ""],
+        nacht: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : "", d.nacht > 1 ? "Night " + d.nacht : "", d.taeglich ? "📅 Daily night awaits" : ""],
+        hort: d => [d.weiter ? "▶ Level " + d.weiter + " saved" : "", d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : ""],
+        auftritt: d => [d.sterne ? "★ " + d.sterne + "/33" : "", d.buehne > 1 ? "Stage " + d.buehne + "/11" : ""],
+        probe: () => ["🎲 One roll is all it takes"],
+        memory: d => [d.rekord ? "🏆 " + d.rekord + " moves" : ""]
+      }
+    }
+  };
+  const m = () => MEHR[sprache()];
+
+  /* ---------- Fortschritt aus den Spielständen lesen (nur lesen, nie schreiben) ---------- */
+  const lies = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+  const json = k => { try { return JSON.parse(lies(k) || "null"); } catch (_) { return null; } };
+  const maxMitPrefix = pre => { let best = 0; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(pre)) best = Math.max(best, parseInt(localStorage.getItem(k), 10) || 0); } } catch (_) {} return best; };
+  const heuteStr = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  function fortschritt(key) {
+    const d = {};
+    if (key === "heldensturm") { const h = json("imres-heldensturm-v1"); if (h) { d.gold = h.gold | 0; d.laeufe = Object.values(h.heroes || {}).reduce((a, x) => a + ((x && x.runs) | 0), 0); } }
+    if (key === "jagd") { d.rekord = maxMitPrefix("imres-waldlauf-rekord"); d.kapitel = parseInt(lies("imres-waldlauf-kapitel"), 10) || 0; }
+    if (key === "nacht") { d.rekord = maxMitPrefix("imres-diebesnacht-rekord-"); d.nacht = parseInt(lies("imres-diebesnacht-nacht"), 10) || 0;
+      d.taeglich = (d.rekord > 0 || d.nacht > 1) && !lies("imres-diebesnacht-tag-" + heuteStr()); }
+    if (key === "hort") { const sp = json("imres-echohort-spiel"); if (sp && typeof sp.lv === "number") d.weiter = sp.lv + 1; d.rekord = maxMitPrefix("imres-echohort-rekord-"); }
+    if (key === "auftritt") { const w = json("imres-auftritt-weg"); if (w) { d.sterne = (w.sterne || []).reduce((a, b) => a + (b || 0), 0); d.buehne = (w.frei | 0) + 1; }
+      d.gespielt = !!lies("imres-auftritt-rekord") || !!d.sterne; }
+    if (key === "memory") d.rekord = parseInt(lies("imres-memory-rekord"), 10) || 0;
+    const zeilen = m().stand[key](d).filter(Boolean);
+    const gespielt = key === "probe" ? true : zeilen.length > 0 || d.gespielt;
+    return { zeilen, gespielt, weiter: !!d.weiter, rekord: !!(d.rekord || d.sterne || d.laeufe) };
+  }
+  /* „Neu“ / „Frisch“: verschwindet, sobald man das Spiel nach der Änderung einmal geöffnet hat (höchstens 14 Tage lang) */
+  const gesehenLesen = () => json("imres-saal-gesehen") || {};
+  function istNeu(sp) {
+    if (!sp.stand) return false;
+    const alter = (Date.now() - new Date(sp.stand + "T12:00:00").getTime()) / 864e5;
+    if (alter > 14) return false;
+    const g = gesehenLesen()[sp.key];
+    return !g || g < sp.stand;
+  }
+  function gesehen(key) { const g = gesehenLesen(); g[key] = heuteStr(); try { localStorage.setItem("imres-saal-gesehen", JSON.stringify(g)); } catch (_) {} }
+
+  /* ---------- Tavernenklänge (aus, bis man sie einschaltet) ---------- */
+  let tonAn = lies("imres-saal-ton") === "1";
+  const toene = {}; let letzterTon = 0;
+  function klingen(sp) {
+    if (!tonAn || !sp.ton) return;
+    const jetzt = performance.now(); if (jetzt - letzterTon < 220) return; letzterTon = jetzt;
+    let a = toene[sp.ton]; if (!a) { a = toene[sp.ton] = new Audio("klang/" + sp.ton); a.preload = "auto"; }
+    try { a.pause(); a.currentTime = 0; a.volume = sp.ton === "timp1.mp3" ? .22 : .34; const pr = a.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (_) {}
+  }
 
   const TX = {
     de: {
@@ -111,23 +202,105 @@
   const nachKey = key => SPIELE.find(s => s.key === key);
 
   /* ---------- Gerüst ---------- */
+  const kopf = document.createElement("div"); kopf.className = "saal-kopf";
   const saal = document.createElement("div"); saal.className = "saal"; saal.id = "spielesaal";
+  buehne.parentNode.insertBefore(kopf, buehne);
   const leiste = document.createElement("div"); leiste.className = "saal-leiste"; leiste.hidden = true;
   buehne.parentNode.insertBefore(saal, buehne);
   buehne.parentNode.insertBefore(leiste, buehne);
   const dialog = document.createElement("dialog"); dialog.className = "saal-dialog"; dialog.setAttribute("aria-labelledby", "sd-titel");
   document.body.appendChild(dialog);
 
+  const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const zeiger = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const losHref = sp => sp.extern || "#" + sp.karte;
+  /* WebM für Chrome/Firefox/Android, MP4 (H.264) für Safari und iPhone */
+  const quellen = clip => '<source src="' + clip.replace(/\.mp4$/, ".webm") + '" type="video/webm"><source src="' + clip + '" type="video/mp4">';
+
   function kachelnBauen() {
-    const T = t();
+    const T = t(), M = m();
     saal.innerHTML = sichtbare().map((sp, i) => {
-      const s = T.spiele[sp.key];
-      return '<button type="button" class="saal-kachel' + (sp.gross ? " gross" : "") + '" data-spiel="' + sp.key + '" style="--i:' + i + '">' +
-        '<img src="' + sp.bilder[0] + '" alt="" decoding="async">' +
-        '<span class="sk-text"><span class="sk-genre">' + esc(s.genre) + "</span><b>" + esc(s.titel) + "</b><small>" + esc(s.kurz) + "</small>" +
-        '<span class="sk-mehr">' + esc(T.mehr) + " →</span></span></button>";
+      const s = T.spiele[sp.key], f = fortschritt(sp.key), neu = istNeu(sp);
+      return '<article class="saal-kachel' + (sp.gross ? " gross" : "") + '" data-key="' + sp.key + '" style="--i:' + i + ";--farbe:" + sp.farbe + '">' +
+        '<div class="sk-bild"><img src="' + sp.plakat + '" alt="" decoding="async"' + (i > 3 ? ' loading="lazy"' : "") + ' style="object-position:' + sp.pos + '">' +
+          (sp.clip && !sp.nurVorschauClip && zeiger && !ruhig ? '<video class="sk-clip" muted loop playsinline preload="none" data-clip="' + sp.clip + '"></video>' : "") +
+          '<span class="sk-glanz" aria-hidden="true"></span></div>' +
+        '<button type="button" class="sk-flaeche" data-spiel="' + sp.key + '" aria-label="' + esc(s.titel + " – " + M.mehr) + '"></button>' +
+        (neu ? '<span class="sk-neu ' + sp.art + '">' + esc(sp.art === "neu" ? M.neu : M.update) + "</span>" : "") +
+        '<div class="sk-text">' +
+          '<span class="sk-genre">' + esc(s.genre) + "</span>" +
+          "<b>" + esc(s.titel) + "</b>" +
+          '<i class="sk-spruch">' + esc(M.spruch[sp.key]) + "</i>" +
+          '<span class="sk-stand' + (f.gespielt ? "" : " leer") + '">' + esc(f.gespielt ? f.zeilen.join(" · ") : M.nieGespielt) + "</span>" +
+          '<span class="sk-aktionen"><a class="sk-los" href="' + losHref(sp) + '" data-gesehen="' + sp.key + '">' + esc(f.weiter ? M.weiter : M.spielen) + (sp.extern ? " ↗" : "") + "</a>" +
+            '<span class="sk-mehr" aria-hidden="true">' + esc(M.mehr) + " ›</span></span>" +
+        "</div></article>";
     }).join("");
   }
+
+  /* ---------- Kopf: Kerzenschein, Einladung, „Heute in der Taverne“ ---------- */
+  const TAGES = ["heldensturm", "jagd", "nacht", "hort", "auftritt"];
+  function heutigesSpiel() {
+    const tag = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
+    const l = TAGES.map(nachKey).filter(sp => sp && vorhanden(sp));
+    return l[tag % l.length];
+  }
+  function kopfBauen() {
+    const T = t(), M = m(), sp = heutigesSpiel(), alle = sichtbare();
+    const s = T.spiele[sp.key], f = fortschritt(sp.key);
+    const rekorde = alle.filter(x => fortschritt(x.key).rekord).length, neue = alle.filter(istNeu).length;
+    const funken = Array.from({ length: 16 }, (_, i) => '<span style="--x:' + Math.round(Math.random() * 100) + "%;--d:" + (4 + Math.random() * 5).toFixed(1) + "s;--v:" + (-Math.random() * 8).toFixed(1) + "s;--g:" + (2 + Math.random() * 3).toFixed(1) + 'px"></span>').join("");
+    kopf.innerHTML =
+      '<div class="sk-kopf-bild" aria-hidden="true"></div><div class="sk-kopf-licht" aria-hidden="true"></div><div class="sk-funken" aria-hidden="true">' + funken + "</div>" +
+      '<div class="sk-kopf-text">' +
+        '<p class="sk-kopf-label">' + esc(M.kopfLabel) + "</p>" +
+        '<h2 class="sk-kopf-titel">' + esc(M.kopfTitel) + "</h2>" +
+        '<p class="sk-kopf-satz">' + esc(M.kopfText) + "</p>" +
+        '<p class="sk-kopf-chips"><span>🎲 ' + esc(M.spiele(alle.length)) + "</span>" + (rekorde ? "<span>🏆 " + esc(M.rekorde(rekorde)) + "</span>" : "") + (neue ? '<span class="neu">✨ ' + esc(M.neuZahl(neue)) + "</span>" : "") +
+          '<button type="button" class="sk-ton" aria-pressed="' + tonAn + '">' + (tonAn ? "🔊 " : "🔈 ") + esc(tonAn ? M.tonAn : M.tonAus) + "</button></p>" +
+      "</div>" +
+      '<div class="sk-heute" style="--farbe:' + sp.farbe + '">' +
+        '<p class="sk-heute-label">✦ ' + esc(M.heute) + " ✦</p>" +
+        '<div class="sk-heute-bild" data-spiel="' + sp.key + '">' +
+          (ruhig ? '<img src="' + sp.bilder[0] + '" alt="">' : '<video muted loop playsinline autoplay preload="metadata" poster="' + sp.bilder[0] + '">' + quellen(sp.clip) + "</video>") +
+          '<img class="sk-heute-held" src="' + sp.held + '" alt="">' +
+        "</div>" +
+        '<div class="sk-heute-text"><b>' + esc(s.titel) + "</b><i>" + esc(M.spruch[sp.key]) + "</i>" + (f.gespielt && f.zeilen.length && sp.key !== "probe" ? '<span class="sk-stand">' + esc(f.zeilen.join(" · ")) + "</span>" : "") + "</div>" +
+        '<div class="sk-heute-knoepfe"><a class="sk-heute-los" href="' + losHref(sp) + '" data-gesehen="' + sp.key + '">' + esc(f.weiter ? M.weiter : M.jetzt) + (sp.extern ? " ↗" : "") + "</a>" +
+          '<button type="button" class="sk-heute-mehr" data-spiel="' + sp.key + '">' + esc(M.mehr) + "</button></div>" +
+      "</div>";
+    const v = kopf.querySelector("video"); if (v) { v.muted = true; const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); }
+  }
+  kopf.addEventListener("click", e => {
+    const tk = e.target.closest(".sk-ton");
+    if (tk) { tonAn = !tonAn; try { localStorage.setItem("imres-saal-ton", tonAn ? "1" : "0"); } catch (_) {} kopfBauen(); if (tonAn) klingen(nachKey("auftritt")); return; }
+    const k = e.target.closest("[data-spiel]"); if (k) vorschau(k.dataset.spiel);
+  });
+
+  /* ---------- Lebendige Kacheln: Neigen, Glanz, Clip, Klang ---------- */
+  function kachelVon(e) { const k = e.target.closest && e.target.closest(".saal-kachel"); return k && saal.contains(k) ? k : null; }
+  if (zeiger && !ruhig) {
+    saal.addEventListener("pointermove", e => {
+      const k = kachelVon(e); if (!k) return;
+      const r = k.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      k.style.setProperty("--rx", ((0.5 - y) * 7).toFixed(2) + "deg"); k.style.setProperty("--ry", ((x - 0.5) * 9).toFixed(2) + "deg");
+      k.style.setProperty("--mx", (x * 100).toFixed(1) + "%"); k.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+    });
+  }
+  saal.addEventListener("pointerover", e => {
+    const k = kachelVon(e); if (!k || (e.relatedTarget && k.contains(e.relatedTarget))) return;
+    const sp = nachKey(k.dataset.key); if (!sp) return;
+    klingen(sp);
+    const v = k.querySelector(".sk-clip");
+    if (v) { if (!v.dataset.geladen) { v.innerHTML = quellen(v.dataset.clip); v.dataset.geladen = "1"; v.load(); } v.currentTime = 0; const pr = v.play(); if (pr && pr.then) pr.then(() => k.classList.add("spielt")).catch(() => {}); else k.classList.add("spielt"); }
+  });
+  saal.addEventListener("pointerout", e => {
+    const k = kachelVon(e); if (!k || (e.relatedTarget && k.contains(e.relatedTarget))) return;
+    k.classList.remove("spielt"); k.style.removeProperty("--rx"); k.style.removeProperty("--ry");
+    const v = k.querySelector(".sk-clip"); if (v) setTimeout(() => { if (!k.classList.contains("spielt")) v.pause(); }, 350);
+  });
+  /* Wer ein Spiel öffnet, hat es „gesehen“ – das Neu-Abzeichen verschwindet */
+  document.addEventListener("click", e => { const a = e.target.closest && e.target.closest("[data-gesehen]"); if (a) gesehen(a.dataset.gesehen); }, true);
   function leisteBauen(aktiv) {
     const T = t();
     leiste.innerHTML = '<a class="saal-alle" href="#taverne">' + esc(T.alle) + "</a>" +
@@ -145,24 +318,28 @@
   function vorschau(key) {
     const sp = nachKey(key); if (!sp) return;
     offenKey = key;
-    const T = t(), s = T.spiele[key], n = sp.bilder.length;
+    const T = t(), M = m(), s = T.spiele[key], f = fortschritt(key);
+    const medien = (sp.clip && !ruhig ? [{ clip: sp.clip, poster: sp.bilder[0] }] : []).concat(sp.bilder.map(b => ({ bild: b }))), n = medien.length;
+    dialog.style.setProperty("--farbe", sp.farbe);
     dialog.innerHTML =
       '<form method="dialog" class="sd-zu-form"><button class="sd-zu" aria-label="' + esc(T.schliessen) + '">×</button></form>' +
       '<div class="sd-inhalt">' +
         '<div class="sd-bilder">' +
-          '<div class="sd-band" tabindex="0" aria-label="' + esc(s.titel) + '">' + sp.bilder.map((b, i) => '<figure><img src="' + b + '" alt="' + esc(s.titel + " – " + T.bild(i + 1, n)) + '" decoding="async"></figure>').join("") + "</div>" +
+          '<div class="sd-band" tabindex="0" aria-label="' + esc(s.titel) + '">' + medien.map((x, i) => "<figure>" + (x.clip ? '<video poster="' + x.poster + '" muted loop playsinline autoplay aria-label="' + esc(s.titel) + '">' + quellen(x.clip) + "</video>" : '<img src="' + x.bild + '" alt="' + esc(s.titel + " – " + T.bild(i + 1, n)) + '" decoding="async">') + "</figure>").join("") + "</div>" +
           (n > 1 ? '<button type="button" class="sd-pfeil links" data-schritt="-1" aria-label="' + esc(T.zurueck) + '">‹</button><button type="button" class="sd-pfeil rechts" data-schritt="1" aria-label="' + esc(T.vor) + '">›</button>' +
-            '<div class="sd-punkte">' + sp.bilder.map((b, i) => '<button type="button" data-bild="' + i + '" aria-label="' + esc(T.bild(i + 1, n)) + '"' + (i ? "" : ' aria-current="true"') + "></button>").join("") + "</div>" : "") +
+            '<div class="sd-punkte">' + medien.map((b, i) => '<button type="button" data-bild="' + i + '" aria-label="' + esc(T.bild(i + 1, n)) + '"' + (i ? "" : ' aria-current="true"') + "></button>").join("") + "</div>" : "") +
         "</div>" +
         '<div class="sd-text">' +
           '<p class="sd-genre">' + esc(s.genre) + " · " + esc(s.wer) + "</p>" +
           '<h3 id="sd-titel"><img src="' + sp.held + '" alt="" class="sd-held">' + esc(s.titel) + "</h3>" +
+          '<p class="sd-spruch">„' + esc(M.spruch[key]) + "“</p>" +
           "<p>" + esc(s.text) + "</p>" +
           '<ul class="sd-punkteliste">' + s.punkte.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>" +
           '<div class="sd-steuer"><p class="sd-steuer-titel">' + esc(T.steuerung) + '</p><p><b>' + esc(T.pc) + ":</b> " + esc(s.pc) + "</p><p><b>" + esc(T.handy) + ":</b> " + esc(s.handy) + "</p></div>" +
+          (f.gespielt && f.zeilen.length && key !== "probe" ? '<p class="sd-stand"><b>' + esc(M.deinStand) + ":</b> " + esc(f.zeilen.join(" · ")) + "</p>" : "") +
           '<div class="sd-aktionen">' + (sp.extern
-            ? '<a class="sd-los" href="' + sp.extern + '">' + esc(T.spielen) + ' <small>↗</small></a>'
-            : '<button type="button" class="sd-los" data-los="' + key + '">' + esc(T.spielen) + "</button>") +
+            ? '<a class="sd-los" href="' + sp.extern + '" data-gesehen="' + key + '">' + esc(T.spielen) + ' <small>↗</small></a>'
+            : '<button type="button" class="sd-los" data-los="' + key + '">' + esc(f.weiter ? M.weiter : T.spielen) + "</button>") +
           '<button type="button" class="sd-leise" data-zu>' + esc(T.schliessen) + "</button></div>" +
         "</div>" +
       "</div>";
@@ -170,6 +347,7 @@
     document.documentElement.classList.add("saal-dialog-offen");
     const band = dialog.querySelector(".sd-band");
     band.scrollLeft = 0;
+    const dv = band.querySelector("video"); if (dv) { dv.muted = true; const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); }
     band.addEventListener("scroll", () => {
       const i = Math.round(band.scrollLeft / Math.max(1, band.clientWidth));
       dialog.querySelectorAll(".sd-punkte button").forEach((b, k) => b.toggleAttribute("aria-current", k === i));
@@ -185,13 +363,13 @@
     band.scrollTo({ left: i * w, behavior: "smooth" });
   }
   function vorschauZu() { if (dialog.open) { if (dialog.close) dialog.close(); else dialog.removeAttribute("open"); } }
-  dialog.addEventListener("close", () => { offenKey = null; document.documentElement.classList.remove("saal-dialog-offen"); });
+  dialog.addEventListener("close", () => { const dv = dialog.querySelector("video"); if (dv) dv.pause(); offenKey = null; document.documentElement.classList.remove("saal-dialog-offen"); });
   dialog.addEventListener("click", e => {
     if (e.target === dialog) { vorschauZu(); return; } /* Klick neben das Fenster */
     const p = e.target.closest("[data-schritt]"); if (p) { blaettern(+p.dataset.schritt); return; }
     const d = e.target.closest("[data-bild]"); if (d) { blaettern(0, +d.dataset.bild); return; }
     if (e.target.closest("[data-zu]")) { vorschauZu(); return; }
-    const l = e.target.closest("[data-los]"); if (l) { const sp = nachKey(l.dataset.los); vorschauZu(); if (sp) spielZeigen(sp.karte, true); }
+    const l = e.target.closest("[data-los]"); if (l) { const sp = nachKey(l.dataset.los); vorschauZu(); if (sp) { gesehen(sp.key); spielZeigen(sp.karte, true); } }
   });
 
   /* ---------- Ansichten: Übersicht oder ein Spiel ---------- */
@@ -208,7 +386,9 @@
     aktiv = null;
     sektion.classList.remove("saal-einzeln");
     buehne.querySelectorAll(":scope > .tav-karte").forEach(k => k.classList.remove("saal-aktiv"));
-    saal.hidden = false; leiste.hidden = true;
+    saal.hidden = false; leiste.hidden = true; kopf.hidden = false;
+    /* Fortschritt kann sich beim Spielen geändert haben */
+    kachelnBauen(); kopfBauen();
   }
   function spielZeigen(kartenId, merken) {
     const sp = nachKarte(kartenId); if (!sp || !vorhanden(sp)) { uebersichtZeigen(); return; }
@@ -216,7 +396,9 @@
     aktiv = kartenId;
     sektion.classList.add("saal-einzeln");
     buehne.querySelectorAll(":scope > .tav-karte").forEach(k => k.classList.toggle("saal-aktiv", k.id === kartenId));
-    saal.hidden = true; leiste.hidden = false;
+    saal.hidden = true; leiste.hidden = false; kopf.hidden = true;
+    const kv = kopf.querySelector("video"); if (kv) kv.pause();
+    gesehen(sp.key);
     leisteBauen(sp.key);
     if (merken && location.hash !== "#" + kartenId) { try { history.pushState(null, "", "#" + kartenId); } catch (_) {} }
     obenHin();
@@ -261,30 +443,130 @@
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");
   css.textContent = `
-/* Übersicht */
-.saal { display: grid; gap: clamp(.7rem, 2vw, 1.1rem); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* ---------- Kopf der Taverne ---------- */
+#taverne:not(.saal-einzeln) .part-head { display: none; }
+.saal-kopf {
+  position: relative; overflow: hidden; isolation: isolate; margin-bottom: clamp(1.4rem, 4vw, 2.4rem);
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2.5rem); align-items: center;
+  min-height: clamp(380px, 46vw, 500px); padding: clamp(1.4rem, 4vw, 2.8rem);
+  border: 1px solid rgba(224,160,70,.45); background: #120e14;
+  box-shadow: 0 30px 70px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,210,140,.05);
+}
+.saal-kopf[hidden] { display: none; }
+.sk-kopf-bild { position: absolute; inset: 0; z-index: -3; background: url("vorschau/taverne-kopf.webp") center 35% / cover no-repeat; filter: saturate(1.1) brightness(.55); transform: scale(1.04); animation: kopfAtmen 18s ease-in-out infinite alternate; }
+.saal-kopf::before { content: ""; position: absolute; inset: 0; z-index: -2; background: linear-gradient(95deg, rgba(14,10,16,.96) 0%, rgba(14,10,16,.82) 42%, rgba(14,10,16,.35) 75%, rgba(14,10,16,.55)), linear-gradient(0deg, rgba(14,10,16,.85), transparent 45%); }
+.sk-kopf-licht { position: absolute; inset: -20%; z-index: -1; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(38% 46% at 22% 70%, rgba(255,160,60,.30), transparent 70%), radial-gradient(30% 40% at 78% 25%, rgba(255,190,110,.18), transparent 70%);
+  animation: flackern 3.2s steps(1) infinite, flackernWeich 7s ease-in-out infinite alternate; }
+@keyframes flackern { 0%,100% { opacity: .95 } 12% { opacity: .78 } 18% { opacity: 1 } 41% { opacity: .86 } 47% { opacity: .98 } 63% { opacity: .82 } 71% { opacity: 1 } 88% { opacity: .9 } }
+@keyframes flackernWeich { from { transform: translate(-1%, 1%) scale(1); } to { transform: translate(1%, -1%) scale(1.05); } }
+@keyframes kopfAtmen { from { transform: scale(1.04); } to { transform: scale(1.1) translate(-1%, 1%); } }
+.sk-funken { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.sk-funken span { position: absolute; bottom: -10px; left: var(--x); width: var(--g); height: var(--g); border-radius: 50%; background: #ffcf7a; box-shadow: 0 0 8px 2px rgba(255,160,60,.8); opacity: 0; animation: funke var(--d) linear infinite; animation-delay: var(--v); }
+@keyframes funke { 0% { opacity: 0; transform: translate(0, 0); } 10% { opacity: .95; } 70% { opacity: .6; } 100% { opacity: 0; transform: translate(40px, -460px); } }
+.sk-ton { padding: .3rem .8rem; border: 1px dashed rgba(224,160,70,.5); border-radius: 999px; background: rgba(10,8,12,.55); color: #d9cbb2; font: inherit; font-size: .82rem; cursor: pointer; transition: border-color .2s, color .2s, box-shadow .2s; }
+.sk-ton:hover { border-color: var(--ember); color: var(--vellum); }
+.sk-ton[aria-pressed="true"] { border-style: solid; border-color: var(--ember); color: var(--ember); box-shadow: 0 0 14px rgba(224,160,70,.35); }
+.sk-kopf-text { display: grid; gap: .7rem; align-content: center; }
+.sk-kopf-label { margin: 0; font-size: .74rem; letter-spacing: .26em; text-transform: uppercase; color: var(--ember); }
+.sk-kopf-titel { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(2.8rem, 8vw, 5.4rem); line-height: .95; color: #fff2d8;
+  text-shadow: 0 0 24px rgba(255,170,70,.45), 0 0 60px rgba(255,140,40,.25), 0 4px 0 rgba(0,0,0,.4); animation: titelGlut 4s ease-in-out infinite alternate; }
+@keyframes titelGlut { from { text-shadow: 0 0 18px rgba(255,170,70,.35), 0 0 50px rgba(255,140,40,.18), 0 4px 0 rgba(0,0,0,.4); } to { text-shadow: 0 0 28px rgba(255,180,80,.6), 0 0 80px rgba(255,140,40,.32), 0 4px 0 rgba(0,0,0,.4); } }
+.sk-kopf-satz { margin: 0; max-width: 32rem; font-size: clamp(1rem, 2.2vw, 1.18rem); line-height: 1.55; color: #e9dcc4; }
+.sk-kopf-chips { margin: .3rem 0 0; display: flex; flex-wrap: wrap; gap: .45rem; }
+.sk-kopf-chips span { padding: .3rem .75rem; border: 1px solid rgba(224,160,70,.4); border-radius: 999px; background: rgba(10,8,12,.55); font-size: .82rem; color: #f3e6cf; backdrop-filter: blur(4px); }
+.sk-kopf-chips .neu { border-color: var(--ember); color: var(--ember); }
+
+.sk-heute { position: relative; display: grid; gap: .65rem; padding: .9rem; border: 1px solid var(--farbe); background: linear-gradient(160deg, rgba(20,15,22,.88), rgba(12,9,14,.94)); backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 18px 50px rgba(0,0,0,.6), 0 0 40px color-mix(in srgb, var(--farbe) 30%, transparent); transform: rotate(1.2deg); animation: heuteSchweben 6s ease-in-out infinite alternate; }
+@keyframes heuteSchweben { from { transform: rotate(1.2deg) translateY(0); } to { transform: rotate(.4deg) translateY(-6px); } }
+.sk-heute-label { margin: 0; text-align: center; font-size: .7rem; letter-spacing: .24em; text-transform: uppercase; color: var(--farbe); }
+.sk-heute-bild { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: #07060a; cursor: pointer; border: 1px solid rgba(255,255,255,.06); }
+.sk-heute-bild video, .sk-heute-bild > img:first-child { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sk-heute-held { position: absolute; left: .6rem; bottom: .6rem; width: 3.2rem; height: 3.2rem; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--farbe); box-shadow: 0 4px 14px rgba(0,0,0,.6); }
+.sk-heute-text { display: grid; gap: .2rem; }
+.sk-heute-text b { font-family: var(--display); font-weight: 400; font-size: clamp(1.35rem, 3vw, 1.75rem); line-height: 1.05; color: #fff2d8; }
+.sk-heute-text i { color: #d9cbb2; font-size: .92rem; }
+.sk-heute-text .sk-stand { color: var(--farbe); font-size: .8rem; }
+.sk-heute-knoepfe { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.sk-heute-los { display: inline-flex; align-items: center; padding: .65rem 1.3rem; background: var(--farbe); color: #120e14; font-weight: 700; text-decoration: none; letter-spacing: .02em;
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--farbe) 60%, transparent); animation: puls 2.4s ease-out infinite; transition: transform .15s, filter .15s; }
+.sk-heute-los:hover { transform: translateY(-2px); filter: brightness(1.1); }
+@keyframes puls { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--farbe) 55%, transparent); } 70%, 100% { box-shadow: 0 0 0 14px transparent; } }
+.sk-heute-mehr { border: 0; background: none; color: #e9dcc4; font: inherit; font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: .4rem; }
+.sk-heute-mehr:hover { color: var(--farbe); }
+@media (max-width: 860px) {
+  .saal-kopf { grid-template-columns: minmax(0, 1fr); padding: 1.3rem 1rem 1.1rem; min-height: 0; }
+  .saal-kopf::before { background: linear-gradient(180deg, rgba(14,10,16,.7) 0%, rgba(14,10,16,.88) 45%, rgba(14,10,16,.97)); }
+  .sk-heute { transform: none; animation: none; }
+  .sk-kopf-satz { font-size: 1rem; }
+}
+
+/* ---------- Plakate ---------- */
+.saal { display: grid; gap: clamp(.75rem, 2vw, 1.2rem); grid-template-columns: repeat(2, minmax(0, 1fr)); perspective: 1200px; }
 @media (min-width: 900px) { .saal { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .saal[hidden] { display: none; }
 .saal-kachel {
-  position: relative; display: block; overflow: hidden; min-height: clamp(210px, 30vw, 330px); padding: 0; text-align: left; cursor: pointer;
-  border: 1px solid var(--line); background: var(--hall); font: inherit; color: inherit; -webkit-tap-highlight-color: transparent;
-  animation: saalEin .6s ease both; animation-delay: calc(var(--i) * 60ms);
-  transition: border-color .3s, box-shadow .3s;
+  --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 30%;
+  position: relative; display: block; min-height: clamp(270px, 34vw, 400px); overflow: hidden; isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--farbe) 35%, var(--line)); background: #120e14; color: inherit;
+  transform: rotateX(var(--rx)) rotateY(var(--ry)); transform-style: preserve-3d;
+  transition: transform .35s cubic-bezier(.2,.8,.3,1), border-color .3s, box-shadow .35s;
+  animation: saalEin .7s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i) * 70ms);
+  box-shadow: 0 10px 28px rgba(0,0,0,.45);
 }
 .saal-kachel.gross { grid-column: span 2; }
-@media (max-width: 899px) { .saal-kachel.gross { min-height: clamp(190px, 46vw, 300px); } }
-@keyframes saalEin { from { opacity: 0; transform: translateY(18px); } }
-.saal-kachel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; filter: saturate(.85) brightness(.72); transition: transform .9s cubic-bezier(.2,.8,.3,1), filter .5s; }
-.saal-kachel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(16,14,21,0) 25%, rgba(16,14,21,.55) 55%, rgba(16,14,21,.95)); }
-.saal-kachel:hover, .saal-kachel:focus-visible { border-color: var(--ember); box-shadow: 0 0 0 1px var(--ember), 0 12px 34px rgba(0,0,0,.55), 0 0 26px rgba(224,160,70,.18); outline: none; }
-.saal-kachel:hover img, .saal-kachel:focus-visible img { transform: scale(1.06); filter: saturate(1) brightness(.85); }
-.sk-text { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; padding: .9rem; display: grid; gap: .2rem; justify-items: start; }
-.sk-genre { font-size: .64rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--night); background: var(--ember); padding: .1rem .45rem; margin-bottom: .2rem; }
-.sk-text b { font-family: var(--display); font-weight: 400; font-size: clamp(1.1rem, 2.6vw, 1.5rem); line-height: 1.08; color: var(--vellum); }
-.saal-kachel.gross .sk-text b { font-size: clamp(1.4rem, 3.6vw, 2.2rem); }
-.sk-text small { font-size: .82rem; line-height: 1.35; color: var(--ash); }
-.sk-mehr { font-size: .78rem; color: var(--ember); margin-top: .15rem; opacity: .85; }
-@media (max-width: 520px) { .sk-text { padding: .7rem; } .sk-text small { font-size: .76rem; } .sk-mehr { display: none; } }
+@keyframes saalEin { from { opacity: 0; transform: translateY(26px) scale(.97); } }
+.saal-kachel:hover, .saal-kachel:focus-within {
+  transform: rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px); border-color: var(--farbe);
+  box-shadow: 0 0 0 1px var(--farbe), 0 22px 48px rgba(0,0,0,.6), 0 0 42px color-mix(in srgb, var(--farbe) 38%, transparent); z-index: 1;
+}
+.sk-bild { position: absolute; inset: 0; z-index: -1; }
+.sk-bild img, .sk-clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.sk-bild img { filter: saturate(1.05) brightness(.82); transition: transform 1.1s cubic-bezier(.2,.8,.3,1), filter .5s; }
+.saal-kachel:hover .sk-bild img { transform: scale(1.08); filter: saturate(1.2) brightness(.95); }
+.sk-clip { opacity: 0; transition: opacity .45s; }
+.saal-kachel.spielt .sk-clip { opacity: 1; }
+.sk-bild::after { content: ""; position: absolute; inset: 0; background:
+  linear-gradient(180deg, rgba(12,9,14,0) 30%, color-mix(in srgb, var(--farbe) 14%, rgba(12,9,14,.7)) 62%, rgba(12,9,14,.97) 100%),
+  linear-gradient(0deg, color-mix(in srgb, var(--farbe) 22%, transparent), transparent 40%); }
+.sk-glanz { position: absolute; inset: 0; opacity: 0; transition: opacity .35s; mix-blend-mode: soft-light; pointer-events: none;
+  background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.55), rgba(255,255,255,0) 45%); }
+.saal-kachel:hover .sk-glanz { opacity: 1; }
+.sk-flaeche { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.sk-flaeche:focus-visible { outline: 2px solid var(--farbe); outline-offset: -4px; }
+.sk-neu { position: absolute; z-index: 2; top: .75rem; left: -2.1rem; width: 8rem; transform: rotate(-35deg); text-align: center; padding: .22rem 0; font-size: .66rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+  background: var(--farbe); color: #120e14; box-shadow: 0 4px 12px rgba(0,0,0,.5); pointer-events: none; }
+.sk-neu.neu { animation: neuGlanz 2.2s ease-in-out infinite; }
+@keyframes neuGlanz { 50% { filter: brightness(1.3); box-shadow: 0 0 18px var(--farbe); } }
+.sk-text { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 1rem 1rem 1.05rem; display: grid; gap: .3rem; justify-items: start; pointer-events: none; transform: translateZ(30px); }
+.sk-genre { font-size: .62rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #120e14; background: var(--farbe); padding: .12rem .5rem; }
+.sk-text b { font-family: var(--display); font-weight: 400; font-size: clamp(1.25rem, 2.4vw, 1.7rem); line-height: 1.02; color: #fff4de; text-shadow: 0 2px 12px rgba(0,0,0,.8); }
+.saal-kachel.gross .sk-text b { font-size: clamp(1.7rem, 4vw, 2.7rem); }
+.sk-spruch { font-size: .86rem; line-height: 1.35; color: #e6d8bf; text-shadow: 0 1px 6px rgba(0,0,0,.9); }
+.saal-kachel.gross .sk-spruch { font-size: 1rem; max-width: 30rem; }
+.sk-stand { font-size: .76rem; font-weight: 600; color: var(--farbe); text-shadow: 0 1px 6px rgba(0,0,0,.9); }
+.sk-stand.leer { font-weight: 400; font-style: italic; color: #bfb19a; }
+.sk-aktionen { display: flex; align-items: center; gap: .7rem; margin-top: .35rem; }
+.sk-los { pointer-events: auto; position: relative; z-index: 3; display: inline-flex; align-items: center; padding: .45rem .95rem; background: var(--farbe); color: #120e14; font-weight: 700; font-size: .88rem; text-decoration: none;
+  box-shadow: 0 6px 16px rgba(0,0,0,.45); transition: transform .15s, filter .15s; }
+.sk-los:hover, .sk-los:focus-visible { transform: translateY(-2px) scale(1.04); filter: brightness(1.12); outline: none; }
+.sk-mehr { font-size: .8rem; color: #e6d8bf; opacity: .85; }
+@media (hover: hover) and (pointer: fine) {
+  .sk-aktionen { opacity: 0; transform: translateY(8px); transition: opacity .3s, transform .3s; }
+  .saal-kachel:hover .sk-aktionen, .saal-kachel:focus-within .sk-aktionen { opacity: 1; transform: none; }
+}
+@media (max-width: 560px) {
+  .saal-kachel { min-height: 255px; }
+  .saal-kachel.gross { min-height: 230px; }
+  .sk-text { padding: .7rem .7rem .75rem; gap: .22rem; }
+  .sk-text b { font-size: 1.12rem; }
+  .sk-spruch { font-size: .74rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .sk-stand { font-size: .68rem; }
+  .sk-los { padding: .38rem .7rem; font-size: .8rem; }
+  .sk-mehr { display: none; }
+  .sk-neu { top: .55rem; left: -2.3rem; font-size: .58rem; }
+}
 
 /* Ein Spiel */
 .saal-leiste { display: flex; align-items: center; gap: .8rem 1rem; flex-wrap: wrap; margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--line); }
@@ -322,7 +604,7 @@
 #taverne.saal-einzeln .tav-karte > .tav-info, #taverne.saal-einzeln .wl-steuerung, #taverne.saal-einzeln .dn-steuerung, #taverne.saal-einzeln .eh-steuerung { max-width: 48rem; }
 
 /* Vorschau-Fenster */
-.saal-dialog { width: min(1040px, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); padding: 0; border: 1px solid var(--ember); background: var(--hall, #16121a); color: var(--vellum); box-shadow: 0 30px 80px rgba(0,0,0,.7); overflow: hidden; }
+.saal-dialog { --farbe: var(--ember); width: min(1040px, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); padding: 0; border: 1px solid var(--farbe); background: var(--hall, #16121a); color: var(--vellum); box-shadow: 0 30px 80px rgba(0,0,0,.7); overflow: hidden; }
 .saal-dialog[open] { display: flex; flex-direction: column; animation: sdEin .25s ease; }
 @keyframes sdEin { from { opacity: 0; transform: translateY(14px) scale(.985); } }
 .saal-dialog::backdrop { background: rgba(6,5,10,.78); backdrop-filter: blur(3px); }
@@ -342,12 +624,16 @@ html.saal-dialog-offen { overflow: hidden; }
 .sd-pfeil:hover { border-color: var(--ember); color: var(--ember); }
 .sd-punkte { position: absolute; left: 0; right: 0; bottom: .5rem; display: flex; justify-content: center; gap: .45rem; }
 .sd-punkte button { width: .7rem; height: .7rem; padding: 0; border: 1px solid var(--vellum); border-radius: 50%; background: transparent; opacity: .6; cursor: pointer; }
-.sd-punkte button[aria-current] { background: var(--ember); border-color: var(--ember); opacity: 1; }
+.sd-punkte button[aria-current] { background: var(--farbe); border-color: var(--farbe); opacity: 1; }
 .sd-text { display: grid; align-content: start; gap: .8rem; padding: clamp(1.2rem, 3vw, 2rem); padding-top: clamp(1.4rem, 3vw, 2.4rem); }
 .sd-text p { margin: 0; color: var(--ash); line-height: 1.6; }
-.sd-genre { font-size: .7rem !important; letter-spacing: .16em; text-transform: uppercase; color: var(--ember) !important; }
+.sd-genre { font-size: .7rem !important; letter-spacing: .16em; text-transform: uppercase; color: var(--farbe) !important; }
+.sd-spruch { font-family: var(--name); font-style: italic; font-size: 1.12rem !important; color: #f3e6cf !important; }
+.sd-stand { font-size: .88rem; color: var(--farbe) !important; }
+.sd-stand b { color: var(--vellum); }
+.sd-band video { max-width: 100%; max-height: calc(var(--bh) - 2.6rem); object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
 .sd-text h3 { margin: 0; display: flex; align-items: center; gap: .7rem; font-family: var(--name); font-weight: 400; font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.05; color: var(--vellum); padding-right: 2rem; }
-.sd-held { flex: none; width: 2.8rem; height: 2.8rem; border-radius: 50%; object-fit: cover; object-position: top; border: 1px solid var(--ember); }
+.sd-held { flex: none; width: 2.8rem; height: 2.8rem; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--farbe); }
 .sd-punkteliste { margin: 0; padding: 0; list-style: none; display: grid; gap: .4rem; }
 .sd-punkteliste li { position: relative; padding-left: 1.3rem; color: var(--vellum); font-size: .93rem; line-height: 1.45; }
 .sd-punkteliste li::before { content: "✦"; position: absolute; left: 0; color: var(--ember); font-size: .8rem; top: .1rem; }
@@ -356,8 +642,8 @@ html.saal-dialog-offen { overflow: hidden; }
 .sd-steuer b { color: var(--vellum); font-weight: 600; }
 .sd-steuer-titel { font-size: .68rem !important; letter-spacing: .16em; text-transform: uppercase; color: var(--ember) !important; }
 .sd-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-top: .2rem; }
-.sd-los { display: inline-flex; align-items: center; gap: .4rem; padding: .75rem 1.6rem; border: 1px solid var(--ember); background: var(--ember); color: var(--night); font: inherit; font-size: 1.05rem; font-weight: 600; text-decoration: none; cursor: pointer; }
-.sd-los:hover, .sd-los:focus-visible { background: #f0b85e; outline: none; box-shadow: 0 0 22px rgba(224,160,70,.35); }
+.sd-los { display: inline-flex; align-items: center; gap: .4rem; padding: .75rem 1.6rem; border: 1px solid var(--farbe); background: var(--farbe); color: #120e14; font: inherit; font-size: 1.05rem; font-weight: 700; text-decoration: none; cursor: pointer; }
+.sd-los:hover, .sd-los:focus-visible { filter: brightness(1.12); outline: none; box-shadow: 0 0 26px color-mix(in srgb, var(--farbe) 50%, transparent); }
 .sd-leise { border: 0; background: none; color: var(--ash); font: inherit; font-size: .9rem; text-decoration: underline; cursor: pointer; padding: .5rem; }
 .sd-leise:hover { color: var(--vellum); }
 
@@ -371,19 +657,21 @@ html.saal-dialog-offen { overflow: hidden; }
   .sd-aktionen { position: sticky; bottom: 0; margin: 0 calc(-1 * clamp(1.2rem, 3vw, 2rem)); padding: .8rem clamp(1.2rem, 3vw, 2rem) calc(.8rem + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, rgba(22,18,26,.85), var(--hall, #16121a) 35%); border-top: 1px solid var(--line); }
   .sd-los { flex: 1; justify-content: center; }
 }
-@media (prefers-reduced-motion: reduce) { .saal-kachel, .saal-dialog[open] { animation: none; } .saal-kachel img { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .saal-kachel, .saal-dialog[open], .sk-kopf-bild, .sk-kopf-licht, .sk-kopf-titel, .sk-heute, .sk-heute-los, .sk-neu.neu { animation: none !important; } .sk-funken { display: none; } .saal-kachel, .saal-kachel img { transition: none; } }
 `;
   document.head.appendChild(css);
 
   /* ---------- Start ---------- */
-  kachelnBauen();
+  kachelnBauen(); kopfBauen();
   ausAdresse();
+  /* Kopf-Clip nur abspielen, wenn er zu sehen ist */
+  if ("IntersectionObserver" in window) new IntersectionObserver(es => { const v = kopf.querySelector("video"); if (!v) return; if (es[0].isIntersecting && !kopf.hidden) { const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); } else v.pause(); }, { threshold: .2 }).observe(kopf);
   if (aktiv) obenHin();
   /* Memory erscheint erst, wenn das Bestiarium geladen ist – Kacheln dann neu bauen */
-  setTimeout(() => { kachelnBauen(); if (aktiv) leisteBauen((nachKarte(aktiv) || {}).key); }, 1500);
+  setTimeout(() => { if (!aktiv) { kachelnBauen(); kopfBauen(); } else leisteBauen((nachKarte(aktiv) || {}).key); }, 1500);
   let letzteSprache = sprache();
   new MutationObserver(() => {
     if (sprache() === letzteSprache) return; letzteSprache = sprache();
-    kachelnBauen(); if (aktiv) leisteBauen((nachKarte(aktiv) || {}).key); if (offenKey) vorschau(offenKey);
+    kachelnBauen(); kopfBauen(); if (aktiv) leisteBauen((nachKarte(aktiv) || {}).key); if (offenKey) vorschau(offenKey);
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
 })();
