@@ -1075,7 +1075,7 @@
              [25, 70, z => kulFx("steinschlag", z, zz(.2, .45), { tief: zz(1500, 4000) })], [18, 50, z => kulFx("fledermaus", z, zz(.08, .16))]],
     taverne: [[3.5, 11, z => kulFx("lachen", z, zz(.3, .75))], [1.8, 6, z => kulFx("krug", z, zz(.15, .45))],
               [7, 20, z => kulFx("stuhl", z, zz(.12, .28))], [15, 40, z => kulFx("knarren", z, zz(.08, .16))],
-              [45, 100, z => kulFx("jubel", z, zz(.1, .18), { tief: 1800 })]],
+              [45, 100, z => kulFx("jubel", z, zz(.1, .18), { tief: 1800 })], [6, 16, z => kulFx("schritte", z, zz(.12, .25), { tief: zz(2500, 6000) })]],
     wald: [[2, 7, z => kulFx("vogel", z, zz(.15, .45))], [3, 9, z => kulFx("vogel", z, zz(.08, .2), { tief: 3000 })],
            [25, 60, z => kulFx("specht", z, zz(.15, .3), { tief: zz(2500, 6000) })], [15, 40, z => kulFx("knacken", z, zz(.12, .25))],
            [10, 25, z => kulFx("rascheln", z, zz(.15, .3))]],
@@ -1102,21 +1102,21 @@
   };
   /* Echte Aufnahmen als Grundteppich (Blanket-Sammlung: gemeinfrei/CC0 bzw. CC BY, siehe klang/LIZENZ.txt).
      Jede Datei enthält die Schleife mit je einer halben Sekunde Vor- und Nachlauf – so schließt sie nahtlos. [Länge in s, Lautheit] */
-  const KUL_AUFNAHME = { k_regen: [60, .041], k_feuer: [22, .018], k_grillen: [45, .128], k_taverne: [13.5, .168], k_voegel: [60, .06],
+  const KUL_AUFNAHME = { k_regen: [60, .041], k_feuer: [22, .018], k_grillen: [45, .128], k_voegel: [60, .06],
     k_bach: [50, .058], k_wellen: [60, .054], k_boot: [37.9934, .034], k_sturm: [22, .102], k_wind: [11.5, .133] };
   const KUL_VORLAUF = .5;
   /* Schichten je Kulisse: [Aufnahme, Stärke, { tief: Tiefpass, tempo, pan }] */
   const KUL_SCHICHT = {
     regen: [["k_regen", 1], ["k_wind", .14, { tief: 900 }]],
     feuer: [["k_feuer", 1.1], ["k_grillen", .32]],
-    taverne: [["k_taverne", .7], ["k_taverne", .45, { tempo: .93, pan: .4 }], ["k_feuer", .35]],
+    taverne: [["k_feuer", .4]],
     wald: [["k_voegel", .85], ["k_bach", .3], ["k_wind", .16, { tief: 1400 }]],
     hoehle: [["k_bach", .55, { tief: 650, tempo: .8 }], ["k_wind", .35, { tief: 380, tempo: .7 }]],
     meer: [["k_wellen", .85], ["k_boot", .6], ["k_wind", .22, { tempo: .9 }]],
     sturm: [["k_sturm", .55], ["k_regen", .6], ["k_wind", .75], ["k_wind", .5, { tempo: .8, pan: -.4 }]]
   };
   /* was von den gerechneten Klängen bleibt, wenn die Aufnahmen laufen: Rauschbetten (Indizes) und Ereignisse, die wegfallen */
-  const KUL_REST = { regen: { betten: [], ohne: [0] }, feuer: { betten: [], schleife: 0 }, taverne: { schleife: .45 }, wald: { betten: [], ohne: [1] },
+  const KUL_REST = { regen: { betten: [], ohne: [0] }, feuer: { betten: [], schleife: 0 }, taverne: { schleife: 1 }, wald: { betten: [], ohne: [1] },
     hoehle: { betten: [1] }, meer: { betten: [], ohne: [0] }, sturm: { betten: [1, 2], ohne: [3] } };
   const KUL_GRUND = 2.2;
   function kulAufnahmen(k) {
@@ -1250,7 +1250,32 @@
       if (ctx.createStereoPanner && !leicht()) { const pn = ctx.createStereoPanner(); pn.pan.value = opt.pan != null ? opt.pan : zz(-.75, .75); pn.connect(ziel); ziel = pn; }
       if (opt.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = opt.tief; lp.connect(ziel); ziel = lp; }
     } catch (_) {}
+    if (ECHT[art]) { echtVorladen(); if (echtSpielen(art, ziel, z, laut * (k.phase || 1) * (KUL_ECHT_PEGEL[art] || 1), opt.tempo || zz(.94, 1.06))) return; }
+    if (art === "schritte") return;
     fxAbspielen(art, ziel, z, laut * (k.phase || 1), opt.tempo || zz(.94, 1.06));
+  }
+  const KUL_ECHT_PEGEL = { krug: 1.6, stuhl: 1.4, knarren: 1.6, schritte: 1.3, donner: 1.1 };
+  /* Echte Aufnahmen für Effekte und Kulissen-Ereignisse (Kenney und OpenGameArt, alle CC0 – siehe klang/LIZENZ.txt).
+     Je Effekt mehrere Varianten; eine Variante = Schichten [Datei, Versatz s, Tempo, Stärke]; s = Anteil des gerechneten Klangs obendrauf. */
+  const ECHT = {"drache":{"v":[[["fx_cr2_roar_05",0,0.62,1],["fx_rd_creature_roar_03",0.35,0.7,0.6]],[["fx_cr2_monster_20",0,0.6,1],["fx_cr2_roar_06",0.4,0.68,0.7]],[["fx_rd_creature_roar_02",0,0.6,1],["fx_cr2_roar_04",0.5,0.66,0.7]]],"s":0.5},"schwert":{"v":[[["fx_rp_sword_unsheathe",0,1,1]],[["fx_rp_sword_unsheathe2",0,1,1]],[["fx_rp_sword_unsheathe3",0,1,1]],[["fx_rp_sword_unsheathe4",0,1,1]],[["fx_rp_sword_unsheathe5",0,1,1]]]},"tuer":{"v":[[["fx_ka_dooropen_2",0,0.9,1]],[["fx_ka_dooropen_1",0,0.85,1],["fx_ka_creak2",0.3,0.9,0.6]],[["fx_fo_door_01",0,1,1]],[["fx_rp_door",0,1,1]]]},"donner":{"v":[[["fx_fo2_sfx100v2_thunder_01",0,1,1]],[["fx_fo2_sfx100v2_thunder_01",0,0.85,1]],[["fx_fo2_sfx100v2_thunder_01",0,1.12,1]]],"s":0.45},"schrei":{"v":[[["fx_cr_scream_01",0,1,1]],[["fx_cr_scream_02",0,1,1]],[["fx_cr_scream_01",0,0.9,1]]]},"wuerfel":{"v":[[["fx_ca_dice_shake_1",0,1,0.8],["fx_ca_dice_throw_1",1.3,1,1]],[["fx_ca_dice_shake_2",0,1,0.8],["fx_ca_dice_throw_2",1.2,1,1],["fx_ca_die_throw_3",1.25,1,0.7]],[["fx_ca_dice_shake_3",0,1,0.8],["fx_ca_dice_throw_3",1.3,1,1]]]},"zauber":{"v":[[["fx_rp_spell",0,1,1]],[["fx_rd_spell_01",0,1,1],["fx_rd_spell_02",0.35,1.1,0.7]],[["fx_rp_magic1",0,1,1],["fx_rd_item_gem_04",0.2,1,0.6]]],"s":0.45},"bogen":{"v":[[["fx_ba_bow",0,1,1]],[["fx_ba_bow",0,0.92,1],["fx_ba_swish_3",0.08,1.2,0.5]]]},"pfeil":{"v":[[["fx_ba_swish_2",0,1.3,0.7],["fx_im_impactwood_heavy_000",0.22,1,1]],[["fx_ba_swish_4",0,1.3,0.7],["fx_im_impactwood_heavy_002",0.2,1,1]],[["fx_ba_swish_3",0,1.4,0.6],["fx_mw_wood_hit_03",0.22,1,1]]]},"hieb":{"v":[[["fx_rd_blade_01",0,1,1],["fx_im_impactpunch_heavy_000",0.12,1,0.6]],[["fx_rd_blade_02",0,1,1],["fx_ka_knifeslice",0.05,1,0.6]],[["fx_rd_blade_03",0,1,1],["fx_im_impactpunch_heavy_002",0.12,1,0.6]]]},"verfehlt":{"v":[[["fx_ba_swish_2",0,1,1]],[["fx_ba_swish_3",0,1,1]],[["fx_ba_swish_4",0,1,1]],[["fx_rp_swing",0,1,1],["fx_rp_swing2",0.18,1,0.7]]]},"block":{"v":[[["fx_im_impactmetal_heavy_000",0,1,1],["fx_rp_metal_ringing",0.02,1,0.6]],[["fx_im_impactplate_heavy_001",0,1,1],["fx_rp_metal_ringing",0.02,1.1,0.5]],[["fx_br_bfh1_metal_hit_02",0,1,1],["fx_im_impactmetal_heavy_003",0,1,0.7]]]},"wucht":{"v":[[["fx_im_impactpunch_heavy_001",0,0.8,1],["fx_br_bfh1_hit_02",0,0.85,0.8]],[["fx_hp_hit05",0,1,1]],[["fx_hp_hit08",0,1,1]],[["fx_im_impactpunch_heavy_003",0,0.75,1],["fx_br_bfh1_rock_breaking_02",0.02,1,0.5]]]},"schmerz":{"v":[[["fx_cr_hurt_02",0,1,1]],[["fx_cr_hurt_01",0,1,1]],[["fx_cr2_human_03",0,1,1]],[["fx_cr2_human_05",0,1,1]],[["fx_cr_hurt_05",0,1,1]]]},"sterben":{"v":[[["fx_cr2_die_02",0,0.95,1],["fx_im_impactsoft_heavy_001",0.55,0.9,0.7]],[["fx_cr2_die_03",0,0.95,1],["fx_im_impactsoft_heavy_003",0.6,0.9,0.7]],[["fx_cr2_die_04",0,0.95,1],["fx_im_impactsoft_heavy_000",0.7,0.9,0.7]]]},"feuerball":{"v":[[["fx_rd_spell_fire_03",0,1,1],["fx_fo_explosion",0.9,0.8,0.9]],[["fx_rd_spell_fire_04",0,1,1],["fx_fo_explosion",0.8,0.9,0.8]],[["fx_rd_spell_fire_01",0,1,1],["fx_fo_explosion",0.6,0.75,0.9]]],"s":0.35},"heiltrank":{"v":[[["fx_rp_bottle",0,1,1],["fx_wa_bubble_01",0.45,1,0.7],["fx_rp_bubble2",0.8,1,0.6]],[["fx_rp_bottle",0,0.95,1],["fx_rp_bubble",0.5,1,0.7],["fx_rp_bubble3",0.9,1,0.5]]],"s":0.4},"muenzen":{"v":[[["fx_ka_handlecoins",0,1,1],["fx_rd_item_coins_04",0.25,1,0.9]],[["fx_rd_item_coins_04",0,1,1]],[["fx_rp_coin2",0,1,1],["fx_ka_handlecoins2",0.4,1,0.8]]]},"ruelpser":{"v":[[["fx_rp_burp",0,1,1]],[["fx_cr_burp_01",0,0.9,1]],[["fx_cr_burp_02",0,0.9,1]]]},"schnarchen":{"v":[[["fx_cr2_snore_02",0,1,1],["fx_cr2_snore_02",1.6,0.95,0.9],["fx_cr2_snore_02",3.2,1,0.8]],[["fx_cr_snore",0,0.9,1],["fx_cr_snore",1.3,0.88,0.9],["fx_cr_snore",2.6,0.9,0.8]]]},"boing":{"v":[[["fx_fo_spring_01",0,1,1]],[["fx_fo_spring_02",0,1,1]],[["fx_fo_spring_06",0,1,1]]]},"boom":{"v":[[["fx_fo_explosion",0,0.7,1],["fx_br_bfh1_rock_breaking_01",0.05,0.8,0.6]],[["fx_fo_explosion",0,0.6,1],["fx_br_bfh1_rock_falling_04",0.3,1,0.6]]],"s":0.5},"bonk":{"v":[[["fx_im_impactwood_heavy_001",0,1,1],["fx_mw_wood_hit_05",0,0.9,0.6]],[["fx_mw_wood_hit_08",0,0.9,1],["fx_im_impactplank_medium_002",0,1,0.6]]],"s":0.6},"stuhl":{"v":[[["fx_mw_wood_squeak_01",0,1,1],["fx_ka_footstep04",0.4,1,0.5]],[["fx_mw_wood_squeak_02",0,1,1]],[["fx_fo_wooden_02",0,1,1]],[["fx_mw_wood_slam_02",0,1,0.7]]]},"krug":{"v":[[["fx_fo_glass_02",0,0.85,1]],[["fx_fo_glass_03",0,0.9,1]],[["fx_fo_dishes_01",0,1,0.8]],[["fx_fo_dishes_03",0,1,0.8]],[["fx_fo2_sfx100v2_glass_02",0,0.9,1]],[["fx_fo_pot_01",0,0.9,0.7]]]},"knarren":{"v":[[["fx_ka_creak1",0,1,1]],[["fx_ka_creak2",0,1,1]],[["fx_ka_creak3",0,0.9,1]],[["fx_mw_wood_squeak_01",0,0.8,1]]]},"schritte":{"v":[[["fx_ka_footstep00",0,1,1],["fx_ka_footstep01",0.42,1,0.9],["fx_ka_footstep02",0.85,1,0.8],["fx_ka_footstep03",1.28,1,0.7]],[["fx_im_footstep_wood_001",0,1,1],["fx_im_footstep_wood_002",0.4,1,0.9],["fx_im_footstep_wood_003",0.8,1,0.8]]]}};
+  const ECHT_DAUER = {"fx_cr2_roar_05":0.944,"fx_rd_creature_roar_03":0.899,"fx_cr2_monster_20":1.235,"fx_cr2_roar_06":0.861,"fx_rd_creature_roar_02":0.899,"fx_cr2_roar_04":0.841,"fx_rp_sword_unsheathe":0.388,"fx_rp_sword_unsheathe2":0.333,"fx_rp_sword_unsheathe3":0.369,"fx_rp_sword_unsheathe4":0.33,"fx_rp_sword_unsheathe5":0.349,"fx_ka_dooropen_2":1.38,"fx_ka_dooropen_1":0.913,"fx_ka_creak2":0.781,"fx_fo_door_01":2.568,"fx_rp_door":0.746,"fx_fo2_sfx100v2_thunder_01":4.287,"fx_cr_scream_01":0.87,"fx_cr_scream_02":0.897,"fx_ca_dice_shake_1":1.351,"fx_ca_dice_throw_1":0.558,"fx_ca_dice_shake_2":1.215,"fx_ca_dice_throw_2":0.354,"fx_ca_die_throw_3":0.619,"fx_ca_dice_shake_3":1.479,"fx_ca_dice_throw_3":0.52,"fx_rp_spell":2.534,"fx_rd_spell_01":0.547,"fx_rd_spell_02":0.459,"fx_rp_magic1":0.646,"fx_rd_item_gem_04":0.552,"fx_ba_bow":0.339,"fx_ba_swish_3":0.57,"fx_ba_swish_2":0.238,"fx_im_impactwood_heavy_000":0.31,"fx_ba_swish_4":0.315,"fx_im_impactwood_heavy_002":0.31,"fx_mw_wood_hit_03":0.299,"fx_rd_blade_01":0.271,"fx_im_impactpunch_heavy_000":0.489,"fx_rd_blade_02":0.303,"fx_ka_knifeslice":0.396,"fx_rd_blade_03":0.307,"fx_im_impactpunch_heavy_002":0.366,"fx_rp_swing":0.148,"fx_rp_swing2":0.125,"fx_im_impactmetal_heavy_000":0.165,"fx_rp_metal_ringing":0.507,"fx_im_impactplate_heavy_001":0.349,"fx_br_bfh1_metal_hit_02":0.433,"fx_im_impactmetal_heavy_003":0.204,"fx_im_impactpunch_heavy_001":0.418,"fx_br_bfh1_hit_02":0.557,"fx_hp_hit05":0.59,"fx_hp_hit08":0.685,"fx_im_impactpunch_heavy_003":0.376,"fx_br_bfh1_rock_breaking_02":0.865,"fx_cr_hurt_02":0.403,"fx_cr_hurt_01":0.403,"fx_cr2_human_03":0.613,"fx_cr2_human_05":0.544,"fx_cr_hurt_05":0.352,"fx_cr2_die_02":0.573,"fx_im_impactsoft_heavy_001":0.569,"fx_cr2_die_03":0.564,"fx_im_impactsoft_heavy_003":0.541,"fx_cr2_die_04":0.769,"fx_im_impactsoft_heavy_000":0.527,"fx_rd_spell_fire_03":1.633,"fx_fo_explosion":0.321,"fx_rd_spell_fire_04":1.267,"fx_rd_spell_fire_01":0.882,"fx_rp_bottle":0.406,"fx_wa_bubble_01":0.579,"fx_rp_bubble2":0.355,"fx_rp_bubble":0.384,"fx_rp_bubble3":0.62,"fx_ka_handlecoins":0.738,"fx_rd_item_coins_04":1.559,"fx_rp_coin2":0.893,"fx_ka_handlecoins2":0.319,"fx_rp_burp":0.924,"fx_cr_burp_01":0.543,"fx_cr_burp_02":0.725,"fx_cr2_snore_02":0.79,"fx_cr_snore":0.396,"fx_fo_spring_01":0.946,"fx_fo_spring_02":1.106,"fx_fo_spring_06":0.756,"fx_br_bfh1_rock_breaking_01":0.535,"fx_br_bfh1_rock_falling_04":0.254,"fx_im_impactwood_heavy_001":0.31,"fx_mw_wood_hit_05":0.16,"fx_mw_wood_hit_08":0.332,"fx_im_impactplank_medium_002":0.44,"fx_mw_wood_squeak_01":0.385,"fx_ka_footstep04":0.286,"fx_mw_wood_squeak_02":0.298,"fx_fo_wooden_02":0.34,"fx_mw_wood_slam_02":0.397,"fx_fo_glass_02":0.356,"fx_fo_glass_03":0.373,"fx_fo_dishes_01":0.759,"fx_fo_dishes_03":0.658,"fx_fo2_sfx100v2_glass_02":0.424,"fx_fo_pot_01":0.275,"fx_ka_creak1":0.6,"fx_ka_creak3":0.318,"fx_ka_footstep00":0.224,"fx_ka_footstep01":0.249,"fx_ka_footstep02":0.229,"fx_ka_footstep03":0.253,"fx_im_footstep_wood_001":0.249,"fx_im_footstep_wood_002":0.248,"fx_im_footstep_wood_003":0.249};
+  let echtGeladen = false;
+  function echtVorladen() { if (echtGeladen) return; echtGeladen = true; Object.keys(ECHT_DAUER).forEach((n, i) => setTimeout(() => sampleLaden(n), 40 * i)); }
+  /* spielt eine Variante, wenn alle Schichten schon geladen sind – sonst null (dann übernimmt der gerechnete Klang) */
+  function echtSpielen(art, ziel, zeit, laut, tempo) {
+    const e = ECHT[art]; if (!e || !ctx || rendert) return null;
+    const bereit = e.v.filter(v => v.every(([n]) => sampleBuf.get(n)));
+    e.v.forEach(v => v.forEach(([n]) => { if (!sampleBuf.get(n)) sampleLaden(n); }));
+    if (!bereit.length) return null;
+    const v = zufall(bereit), st = Math.max(zeit, ctx.currentTime + .01), t = tempo || zz(.96, 1.04);
+    let ende = 0;
+    v.forEach(([n, o, r, g]) => {
+      const b = sampleBuf.get(n), q = ctx.createBufferSource(), gn = ctx.createGain();
+      q.buffer = b; q.playbackRate.value = r * t; gn.gain.value = laut * g;
+      q.connect(gn); gn.connect(ziel); q.start(st + o / t, b._start || 0);
+      ende = Math.max(ende, o / t + (b.duration - (b._start || 0)) / (r * t));
+    });
+    return { start: st, dauer: ende };
   }
   /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
   const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55,
@@ -1263,9 +1288,14 @@
     if (!ctx) return;
     try { buehneFx(art); } catch (_) {}
     if (KLASSIK[art]) { klassikSpielen(art, staerke); return; }
-    const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1;
-    fxAbspielen(art, sfxBus, z, (FX_PEGEL[art] || .7) * l).then(r => { if (r) musikDucken(r.start, r.dauer); });
+    const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1, pg = (FX_PEGEL[art] || .7) * l;
+    echtVorladen();
+    const echt = echtSpielen(art, sfxBus, z, pg * (ECHT_PEGEL[art] || 1));
+    if (echt) { musikDucken(echt.start, echt.dauer); if (ECHT[art].s) fxAbspielen(art, sfxBus, z, pg * ECHT[art].s); return; }
+    fxAbspielen(art, sfxBus, z, pg).then(r => { if (r) musikDucken(r.start, r.dauer); });
   }
+  /* Feinabgleich der Aufnahmen gegenüber den gerechneten Klängen */
+  const ECHT_PEGEL = { drache: 1.07, schwert: 1.33, tuer: 1.26, schrei: 1.38, wuerfel: 1.55, zauber: 1.09, bogen: 1.24, pfeil: 1.25, hieb: 1.22, verfehlt: 1.31, block: 1.25, wucht: .92, schmerz: 1.33, sterben: 1.37, feuerball: 1.41, heiltrank: 1.33, muenzen: 1.45, ruelpser: 1.32, schnarchen: 1.28, boing: 1.7, boom: 1.35, bonk: 1.12 };
   function effekteAnwenden() {
     if (!ctx) return;
     const j = ctx.currentTime;

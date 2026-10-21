@@ -18,9 +18,16 @@ Die Geräuschkulissen (k_*.mp3) stammen aus der Klangsammlung der App Blanket
   k_bach     – gluckose, „Stream“ (freesound.org/s/333987)           – CC0
   k_wind     – felix.blume, „Wind“ (freesound.org/s/217506)          – CC0
   k_feuer    – ezwa, „Fireplace“ (soundbible.com/1543)               – gemeinfrei
-  k_taverne  – stephan, „Restaurant Ambiance“ (soundbible.com/1664)  – gemeinfrei
   k_grillen  – Lisa Redfern, „Crickets Chirping At Night“ (soundbible.com/2083) – gemeinfrei
   k_regen    – alex36917, „Rain“ (freesound.org/s/524605)            – CC BY
   k_sturm    – Digifish Music, „Storm“ (freesound.org/s/41739)       – CC BY
   k_wellen   – Luftrum, „Waves“ (freesound.org/s/48412)              – CC BY
 Für Imres Tales gekürzt, in Mono umgewandelt und zu nahtlosen Schleifen überblendet.
+
+Die echten Effekt-Geräusche (fx_*.mp3) stammen aus gemeinfreien Klangpaketen (CC0 1.0):
+  Kenney (kenney.nl): RPG Audio, Impact Sounds, Casino Audio
+  OpenGameArt.org: rubberduck „80 CC0 RPG SFX“, „80 CC0 creature SFX“ (1 und 2), „100 CC0 SFX“ (1 und 2),
+    „100 CC0 metal and wood SFX“, „75 CC0 breaking/falling/hit SFX“, „40 CC0 water/splash/slime SFX“;
+    „RPG Sound Pack“ (artisticdude), „Battle Sound Effects“, „37 hits/punches“
+  gesammelt im Open Game SFX Index (https://github.com/Legerdo/open-game-sfx-index).
+Für Imres Tales gekürzt, in Mono umgewandelt, im Pegel angeglichen und neu kodiert.
