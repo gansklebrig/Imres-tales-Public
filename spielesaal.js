@@ -131,8 +131,8 @@
       spiele: {
         heldensturm: { titel: "Heldensturm", kurz: "Die ganze Kampagne als Hordenkampf – bis nach Gracklstugh.", genre: "Roguelike", wer: "Alle vier Helden",
           text: "Wähle Barradin, Echo, Friedrich oder Ezekiel und kämpf dich durch unsere Kampagne: vom Hinterhalt auf der Straße über Schloss Crackmore, Donnerbaum und das Unterreich bis nach Gracklstugh. Jeder Lauf bringt Beute und Gold, mit dem du im Lager dauerhaft stärker wirst.",
-          punkte: ["Vier spielbare Helden mit Nah- und Fernkampf und je drei Talentbäumen", "13 Orte mit 28 Stufen, Wächtern und Bossen wie Glasstab, Venomfang, Ilvara und Demogorgon", "Musik aus dem Lautenwerk, Beutel, Lager-Verbesserungen und höhere Schwierigkeiten"],
-          pc: "WASD oder Pfeiltasten zum Laufen, Fähigkeiten 1–6, Esc = Pause.", handy: "Links gedrückt halten und ziehen zum Laufen, Fähigkeiten unten rechts antippen." },
+          punkte: ["Vier Helden mit je 21 Fähigkeiten in drei Talentbäumen – von Barradins Spott bis zu Ezekiels Dawnbringer", "13 Orte mit 28 Stufen, Elite-Rudeln, Wächtern und Bossen wie Glasstab, Venomfang, Ilvara und Demogorgon", "Legendäre Gegenstände mit besonderen Kräften, gemeinsame Bestenliste und höhere Schwierigkeiten"],
+          pc: "WASD oder Pfeiltasten zum Laufen, Shift = Sprinten, Q = Heiltrank, Fähigkeiten 1–6, Esc = Pause. Optional: mit der Maus zielen.", handy: "Links gedrückt halten und ziehen zum Laufen, Fähigkeiten, Sprint und Heiltrank unten rechts antippen." },
         jagd: { titel: "Friedrichs Jagd", kurz: "Die Kampagne als Bogenjagd – mit Rex an der Seite.", genre: "Bogenjagd", wer: "Friedrich & Rex",
           text: "Friedrich erzählt die Kampagne nach, Kapitel für Kapitel: von der Straße nach Phandalin bis nach Gracklstugh. Goblins, Banditen und die Kreaturen des Bestiariums kommen – Rex bellt, bevor sie auftauchen.",
           punkte: ["Zehn Kapitel mit eigener Kulisse und einem Endgegner, danach eine endlose Nacht", "Nach jeder Welle eine Gabe wie Doppelschuss oder Feuerpfeile", "Drei Schwierigkeitsstufen und eine gemeinsame Bestenliste"],
@@ -166,8 +166,8 @@
       spiele: {
         heldensturm: { titel: "Heldensturm", kurz: "The whole campaign as a horde battle – all the way to Gracklstugh.", genre: "Roguelike", wer: "All four heroes",
           text: "Pick Barradin, Echo, Friedrich or Ezekiel and fight through our campaign: from the ambush on the road via Castle Crackmore, Thundertree and the Underdark all the way to Gracklstugh. Every run brings loot and gold to grow permanently stronger at camp.",
-          punkte: ["Four playable heroes with melee and ranged attacks and three talent trees each", "13 places with 28 stages, guardians and bosses like Glasstab, Venomfang, Ilvara and Demogorgon", "Music from the Lautenwerk, bag, camp upgrades and higher difficulties"],
-          pc: "WASD or arrow keys to move, abilities 1–6, Esc = pause.", handy: "Hold and drag on the left to move, tap abilities bottom right." },
+          punkte: ["Four heroes with 21 abilities each in three talent trees – from Barradin's mockery to Ezekiel's Dawnbringer", "13 places with 28 stages, elite packs, guardians and bosses like Glasstab, Venomfang, Ilvara and Demogorgon", "Legendary items with special powers, a shared leaderboard and higher difficulties"],
+          pc: "WASD or arrow keys to move, Shift = sprint, Q = healing potion, abilities 1–6, Esc = pause. Optional: aim with the mouse.", handy: "Hold and drag on the left to move, tap abilities, sprint and potion bottom right." },
         jagd: { titel: "Friedrich's Hunt", kurz: "The campaign as a bow hunt – with Rex at his side.", genre: "Bow hunt", wer: "Friedrich & Rex",
           text: "Friedrich retells the campaign chapter by chapter: from the road to Phandalin all the way to Gracklstugh. Goblins, bandits and the creatures of the bestiary attack – Rex barks before they show up.",
           punkte: ["Ten chapters, each with its own scenery and a boss, then an endless night", "A gift after every wave, like double shot or fire arrows", "Three difficulty levels and a shared leaderboard"],
