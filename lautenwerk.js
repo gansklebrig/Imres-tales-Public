@@ -787,6 +787,7 @@
     if (!KULISSEN.includes(s.kulisse)) s.kulisse = "keine";
     if (typeof s.kulisseVol !== "number") s.kulisseVol = 5;
     if (typeof s.intensitaet !== "number") s.intensitaet = 5;
+    if (!s.gaeste || typeof s.gaeste !== "object") s.gaeste = {};
     if (typeof s.fxVol !== "number") s.fxVol = 8;
     if (typeof s.echoHall !== "number") s.echoHall = 3;
     if (s.orchester !== 0) s.orchester = 1;
@@ -813,7 +814,7 @@
   try { eigeneStimmungen = JSON.parse(localStorage.getItem("imres-lw-stimmungen") || "{}") || {}; } catch (_) {}
   const stimmungenMerken = () => { try { localStorage.setItem("imres-lw-stimmungen", JSON.stringify(eigeneStimmungen)); } catch (_) {} };
   const STIMM_WERTE = () => ({ intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol, hall: S.hall, raum: S.raum, echoHall: S.echoHall,
-    orchester: S.orchester, instrument: S.instrument, band: Object.assign({}, S.band) });
+    orchester: S.orchester, instrument: S.instrument, band: Object.assign({}, S.band), gaeste: Object.assign({}, S.gaeste) });
   const stimmName = k => eigeneStimmungen[k] && eigeneStimmungen[k].name ? eigeneStimmungen[k].name : (t().vorlagen[k] || "").replace(/^[^\wÄÖÜäöü]+/, "");
   try { lokaleLieder = JSON.parse(localStorage.getItem("imres-lautenwerk-lieder") || "[]") || []; } catch (_) {}
   const lokalMerken = () => { try { localStorage.setItem("imres-lautenwerk-lieder", JSON.stringify(lokaleLieder)); } catch (_) {} };
@@ -2028,6 +2029,7 @@
         ev.spuren[k] = wert;
       });
       try { orchesterSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
+      try { gaesteSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
       anzeige.push(ev);
       if (einblend > 0) einblend--;
       naechste += schrittDauer();
@@ -3416,7 +3418,7 @@
   const buehneAttr = () => ' data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten +
     '" data-kul="' + esc(S.kulisse) + '" data-pub="' + publikumArt() + '"';
   const buehneHTML = klein => '<div class="lw-buehne' + (klein ? " lw-buehne-klein" : "") + (leicht() ? " spar" : "") + '"' + buehneAttr() + '><div class="lw-szene">' +
-    BUEHNE_HINTEN + BUEHNE_FIG + BUEHNE_VORNE + "</div></div>";
+    BUEHNE_HINTEN + BUEHNE_FIG + GAESTE_HTML + BUEHNE_VORNE + "</div></div>";
 
   /* ---------- Bühne lebt: Pegel, Geister-Orchester, Publikum, Effekte ---------- */
   let pegelMesser = null, pegelDaten = null, pegelGlatt = 0, orchGlatt = 0, blechGlatt = 0, strBis = 0, blechBis = 0, strZiel = 0, fxBis = 0, malt = false, bildZaehler = 0;
@@ -3496,7 +3498,7 @@
   }
   function malen() {
     const b = buehne();
-    const aktiv = ctx && b && !document.hidden && (laeuft || klassikLauf || performance.now() < fxBis || orchGlatt > .02 || pegelGlatt > .02 || anzeige.length || geistQ.length);
+    const aktiv = ctx && b && !document.hidden && (laeuft || klassikLauf || performance.now() < fxBis || orchGlatt > .02 || pegelGlatt > .02 || anzeige.length || geistQ.length || gastQ.length || root.querySelector('.lw-gast.da'));
     if (!aktiv) { malt = false; if (b) b.classList.remove("spielt"); return; }
     const jetzt = ctx.currentTime;
     while (anzeige.length && anzeige[0].zeit <= jetzt) {
@@ -3508,6 +3510,7 @@
     }
     while (klassikQ.length && klassikQ[0][0] <= jetzt) spurZeigen(klassikQ.shift()[1]);
     buehneTick(b);
+    try { gaesteZeigen(b); } catch (_) {}
     requestAnimationFrame(malen);
   }
 
@@ -3677,6 +3680,239 @@
     }
   }
 
+  /* ---------- Gastmusiker aus unserer Geschichte ----------
+     Sie kommen in passenden Stimmungen dazu und spielen eine eigene Stimme auf echten Aufnahmen (VSCO, gemeinfrei; FluidR3, CC BY).
+     Die Gefallenen spielen als Geister mit. Stufe je Gast: 0 = nie, 1 = automatisch (passende Stimmungen), 2 = immer. */
+  const GAESTE = [
+    { id: "gundren", name: "Gundren", sym: "⛏", seite: "l", gr: "tuba", rolle: "tuba", pegel: .5, stimmungen: ["zwerge", "dorffest", "marktplatz", "shanty"] },
+    { id: "nundro", name: "Nundro", sym: "⛏", seite: "l", gr: "pos", rolle: "posaune", pegel: .3, stimmungen: ["zwerge", "dorffest", "marktplatz", "shanty"] },
+    { id: "zilda", name: "Zilda", sym: "🗡", seite: "l", gr: "snare1", rolle: "marsch", pegel: .42, stimmungen: ["kampf", "boss", "reiter"] },
+    { id: "fagas", name: "Fagas", sym: "👻", seite: "l", gr: "glock", rolle: "glitzer", pegel: .26, geist: 1, stimmungen: ["fey", "elben", "klage"] },
+    { id: "kardal", name: "Kardal", sym: "👑", seite: "r", gr: "trp", rolle: "fanfare", pegel: .26, stimmungen: ["hof", "sieg", "zwerge"] },
+    { id: "dolgrimson", name: "Dolgrimson", sym: "⚓", seite: "r", gr: "horn", rolle: "signal", pegel: .34, stimmungen: ["reiter", "reise", "hof"] },
+    { id: "ilvara", name: "Ilvara", sym: "🕷", seite: "r", gr: "oboe", rolle: "schief", pegel: .28, stimmungen: ["spannung", "grusel"] },
+    { id: "ploopploopeen", name: "Ploopploopeen", sym: "🐟", seite: "r", gr: "stimme", rolle: "chor", pegel: .3, geist: 1, stimmungen: ["unterreich", "grusel"] }
+  ];
+  const GAST = Object.fromEntries(GAESTE.map(g => [g.id, g]));
+  Object.assign(TX.de, { gaesteTitel: "Gäste", gaesteTipp: "Gäste aus unserer Geschichte spielen in passenden Stimmungen mit. Antippen wechselt: automatisch → immer → nie.",
+    gastStufe: ["nie", "auto", "immer"], gastInstr: { gundren: "Tuba", nundro: "Posaune", zilda: "Marschtrommel", fagas: "Glockenspiel (Geist)", kardal: "Trompete", dolgrimson: "Signalhorn", ilvara: "Oboe", ploopploopeen: "Chorgesang (Geist)" } });
+  Object.assign(TX.en, { gaesteTitel: "Guests", gaesteTipp: "Guests from our story join in fitting moods. Tap to switch: automatic → always → never.",
+    gastStufe: ["never", "auto", "always"], gastInstr: { gundren: "tuba", nundro: "trombone", zilda: "marching drum", fagas: "glockenspiel (ghost)", kardal: "trumpet", dolgrimson: "signal horn", ilvara: "oboe", ploopploopeen: "chant (ghost)" } });
+  const gastStufe = id => S.gaeste && (S.gaeste[id] === 0 || S.gaeste[id] === 2) ? S.gaeste[id] : 1;
+  let gastJetzt = [], gastBus = null, gastSeite = {};
+  const gastQ = [], gastZuletzt = {};
+  function gastBusBauen() {
+    if (gastBus || !ctx) return;
+    gastBus = ctx.createGain(); gastBus.gain.value = 1; gastBus.connect(master);
+    const hs = ctx.createGain(); hs.gain.value = .6; gastBus.connect(hs); hs.connect(hallEin);
+    [["l", -.45], ["r", .45]].forEach(([k, p]) => {
+      const n = ctx.createGain();
+      if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = p; n.connect(pn); pn.connect(gastBus); } else n.connect(gastBus);
+      gastSeite[k] = n;
+    });
+  }
+  /* wer in diesem Teil spielt: im ersten Teil die Band allein, danach wechseln sich die Gäste ab, im Höhepunkt sind alle da */
+  function gaesteWaehlen(ab) {
+    const c = hoehepunkt(), L = S.ablauf.length, st = S.stimmung;
+    const kand = GAESTE.filter((g, i) => {
+      const s = gastStufe(g.id); if (!s) return false;
+      if (s === 1 && (!g.stimmungen.includes(st) || S.intensitaet < 2)) return false;
+      return L === 1 || ab === c || (ab > 0 && (ab + i) % 2 === 0);
+    });
+    gastJetzt = kand.slice(0, leicht() ? 1 : 3);
+    gastJetzt.forEach(x => { if (x.rolle === "marsch") { sampleLaden("snare1"); sampleLaden("snare2"); } else probenLaden(x.gr); });
+  }
+  function gaesteVorladen() {
+    if (!S.stimmung) return;
+    GAESTE.forEach(g => { const s = gastStufe(g.id); if (s === 2 || (s === 1 && g.stimmungen.includes(S.stimmung))) { if (g.rolle === "marsch") { sampleLaden("snare1"); sampleLaden("snare2"); } else probenLaden(g.gr); } });
+  }
+  function gastTon(g, gr, midi, zeit, dauer, laut, o) {
+    if (probe(gr, midi, zeit, gastSeite[g.seite], g.pegel * laut, Object.assign({ dauer, ein: .03, aus: Math.min(.3, dauer * .4) }, o || {})) && gastQ.length < 300) gastQ.push([zeit, g.id]);
+  }
+  /* Akkordtöne in den Tonraum eines Instruments rücken */
+  const inLage = (m, lo, hi) => { while (m < lo) m += 12; while (m > hi) m -= 12; return m; };
+  const GAST_ROLLE = {
+    /* Gundren: in der Halle ein tiefer Ruf auf jedem Akkord, auf dem Fest das „Umm“ des Umpa */
+    tuba(g, z, sd, ak, x) {
+      if (S.stimmung === "zwerge" || (gastStufe(g.id) === 2 && !g.stimmungen.includes(S.stimmung) && x.ruhig)) { if (x.wechselt) gastTon(g, "tuba", inLage(ak.grund - 12, 33, 50), z, x.n * sd + .1, 1, { ein: .08 }); return; }
+      if (schritt === 0 || schritt === 8) gastTon(g, "tuba", inLage((schritt === 0 ? ak.grund : ak.q2) - 12, 33, 52), z, sd * 3, schritt === 0 ? 1 : .85);
+    },
+    /* Nundro, der Zwilling: das „Pah“ dazwischen – oder in der Halle eine Terz über dem Bruder */
+    posaune(g, z, sd, ak, x) {
+      if (S.stimmung === "zwerge" || (gastStufe(g.id) === 2 && !g.stimmungen.includes(S.stimmung) && x.ruhig)) { if (x.wechselt) gastTon(g, "pos", inLage(ak.terz - 12, 45, 62), z, x.n * sd + .1, .9, { ein: .1 }); return; }
+      if (schritt === 4 || schritt === 12) gastTon(g, "pos", inLage((schritt === 4 ? ak.terz : ak.quinte) - 12, 45, 64), z, sd * 1.6, .8, { aus: .06 });
+    },
+    /* Zilda: Marschtrommel mit Akzenten auf Zwei und Vier, Vorschlägen und einem Wirbel vor dem Höhepunkt */
+    marsch(g, z, sd, ak, x) {
+      const c = hoehepunkt(), L = S.ablauf.length, vorher = L > 1 && x.ab === (c - 1 + L) % L;
+      if (vorher && schritt >= 8) { gastTon(g, schritt % 2 ? "snare2" : "snare1", 0, z, .4, .35 + .05 * (schritt - 8)); return; }
+      if (schritt === 4 || schritt === 12) gastTon(g, "snare1", 0, z, .5, 1);
+      else if ((schritt === 14 || schritt === 15) && x.takt) gastTon(g, "snare2", 0, z, .4, .45);
+      else if (schritt === 0 && x.ab === c) gastTon(g, "snare1", 0, z, .5, .9);
+      else if (schritt % 2 === 1 && Math.random() < .12 * x.int) gastTon(g, "snare2", 0, z, .3, .25);
+    },
+    /* Fagas’ Geist: Glockenspiel-Arpeggios in den Wald- und Feenstimmungen, einzelne helle Töne in der Klage */
+    glitzer(g, z, sd, ak, x) {
+      if (S.stimmung === "klage") { if (x.wechselt && (schritt === 0 || x.takt)) gastTon(g, "glock", inLage(ak.quinte + 12, 76, 96), z, 2.2, .8); return; }
+      if (!(x.takt || x.hoch)) return;
+      const folge = { 8: ak.terz + 12, 10: ak.quinte + 12, 12: ak.grund + 36, 14: ak.terz + 24 };
+      if (folge[schritt] != null) gastTon(g, "glock", inLage(folge[schritt], 76, 100), z, 1.6, schritt === 8 ? .9 : .7);
+    },
+    /* Kardal: Fanfare des Königssohns am Anfang jedes zweiten Teils (im Höhepunkt immer) */
+    fanfare(g, z, sd, ak, x) {
+      if (!(x.takt === 0 || x.hoch)) return;
+      const grund = inLage(ak.grund + 12, 60, 72), terz = inLage(ak.terz, grund + 1, grund + 6), quinte = inLage(ak.quinte, grund + 5, grund + 9);
+      const f = { 0: [grund, 1.6, 1], 2: [grund, 1, .8], 3: [terz, 1, .85], 4: [quinte, 4, 1] };
+      if (f[schritt]) gastTon(g, "trp", f[schritt][0], z, sd * f[schritt][1], f[schritt][2], { ein: .015, aus: .08 });
+      if (x.hoch && schritt === 12) gastTon(g, "trp", inLage(ak.quinte, 64, 79), z, sd * 4, .9, { ein: .02 });
+    },
+    /* Captain Dolgrimson: Signalruf Quinte – Grundton – Quinte über das weite Land */
+    signal(g, z, sd, ak, x) {
+      if (!(x.takt || x.hoch)) return;
+      const q = inLage(ak.q2, 55, 67), gr = q - 7;
+      const f = { 0: [q, 3], 3: [gr, 1], 4: [q, 7] };
+      if (f[schritt]) gastTon(g, "horn", f[schritt][0], z, sd * f[schritt][1] + .05, schritt === 4 ? .9 : 1, { ein: .05 });
+    },
+    /* Ilvara: eine verführerisch schiefe Oboe – sie rutscht um einen Halbton daneben und zurück */
+    schief(g, z, sd, ak, x) {
+      if (!(x.takt || x.hoch)) return;
+      const t3 = inLage(ak.terz, 64, 80);
+      if (schritt === 8) gastTon(g, "oboe", t3, z, sd * 3, .9, { ein: .12 });
+      if (schritt === 11) gastTon(g, "oboe", t3 + 1, z, sd * 2, .8, { ein: .06 });
+      if (schritt === 13) gastTon(g, "oboe", t3, z, sd * 4, .75, { ein: .06, aus: .4 });
+    },
+    /* Ploopploopeens Geist: ein tiefer, fremder Gesang auf Grundton und Quinte, der mit jedem Akkord neu anhebt */
+    chor(g, z, sd, ak, x) {
+      if (!x.wechselt) return;
+      const d = x.n * sd + .4;
+      gastTon(g, "stimme", inLage(ak.grund, 50, 61), z, d, .9, { ein: .4, aus: .5 });
+      if (!leicht()) gastTon(g, "stimme", inLage(ak.q2, 55, 66), z + .05, d, .55, { ein: .5, aus: .5 });
+    }
+  };
+  function gaesteSchritt(zeit, daten, ab) {
+    if (!S.stimmung || !STIL[S.stimmung] || !ctx) return;
+    if (schritt === 0) gaesteWaehlen(ab);
+    if (!gastJetzt.length || ausduennen || einblend > EINBLEND / 2) return;
+    gastBusBauen();
+    const sd = schrittDauer(), zeile = klingt(daten.bass, schritt), ak = akkordMidi(zeile);
+    let n = 1; while (n < SCHRITTE - schritt && klingt(daten.bass, schritt + n) === zeile) n++;
+    const wechselt = schritt === 0 || (schritt % 4 === 0 && zeile !== klingt(daten.bass, schritt - 1));
+    const x = { ab, n, wechselt, takt: ab % 2, hoch: ab === hoehepunkt(), int: S.intensitaet / 10, ruhig: (STIL[S.stimmung].dichte || 1) < .7 };
+    gastJetzt.forEach(g => { try { GAST_ROLLE[g.rolle](g, zeit, sd, ak, x); } catch (_) {} });
+  }
+
+  /* ---------- Die Gäste auf der Bühne ---------- */
+  const zwerg = (o) => '<ellipse cx="45" cy="137" rx="28" ry="3" fill="rgba(0,0,0,.4)"/>' +
+    '<rect x="31" y="118" width="11" height="17" fill="' + o.hose + '"/><rect x="48" y="118" width="11" height="17" fill="' + o.hose + '"/><path d="M28 136 h16 v-5 h-15 Z M46 136 h16 v-5 h-15 Z" fill="#24160c"/>' +
+    '<path d="M21 123 Q19 88 45 83 Q71 88 69 123 Z" fill="' + o.rock + '"/><path d="M21 113 H69" stroke="#2a1a0e" stroke-width="5"/><rect x="41" y="109" width="8" height="8" fill="#c9a24a"/>' +
+    '<circle cx="45" cy="65" r="13" fill="' + o.haut + '"/>' +
+    '<path d="M32 66 Q29 100 45 109 Q61 100 58 66 Q52 75 45 75 Q38 75 32 66 Z" fill="' + o.bart + '"/>' + (o.zopf ? '<path d="M45 100 V116 M40 98 L38 112 M50 98 L52 112" stroke="' + o.bart + '" stroke-width="3"/><circle cx="45" cy="117" r="2" fill="#c9a24a"/>' : "") +
+    '<path d="M39 71 Q45 75 51 71" stroke="' + o.bartDunkel + '" stroke-width="2.4" fill="none"/>' +
+    '<circle cx="40" cy="63" r="1.6" fill="#1a1008"/><circle cx="50" cy="63" r="1.6" fill="#1a1008"/><path d="M37 59 l5 -1 M48 58 l5 1" stroke="' + o.bartDunkel + '" stroke-width="1.6"/>' +
+    '<ellipse cx="45" cy="67.5" rx="3.2" ry="2.6" fill="' + o.nase + '"/>' + o.kopf + o.instr +
+    '<circle cx="' + o.h1[0] + '" cy="' + o.h1[1] + '" r="4" fill="' + o.haut + '"/><circle cx="' + o.h2[0] + '" cy="' + o.h2[1] + '" r="4" fill="' + o.haut + '"/>';
+  const GAST_BILD = {
+    gundren: zwerg({ hose: "#4a3424", rock: "#7a3a22", haut: "#d9a07a", nase: "#c48c66", bart: "#8a4a22", bartDunkel: "#5a2e12",
+      kopf: '<path d="M31 59 Q32 45 45 44 Q58 45 59 59 Z" fill="#5a3a20"/><path d="M29 59 H61" stroke="#3a2412" stroke-width="3"/>',
+      instr: '<g class="instr"><circle cx="40" cy="98" r="13" fill="none" stroke="#d9a63a" stroke-width="5"/><circle cx="40" cy="98" r="7" fill="none" stroke="#b8862a" stroke-width="2"/><path d="M50 89 Q60 72 69 56" stroke="#d9a63a" stroke-width="6" fill="none"/>' +
+        '<ellipse cx="71" cy="51" rx="12" ry="5" transform="rotate(-28 71 51)" fill="#f0c860" stroke="#9a7020" stroke-width="1.5"/><path d="M46 75 L41 86" stroke="#c9a24a" stroke-width="2.5"/><rect x="51" y="92" width="4" height="8" fill="#b8862a"/><rect x="56" y="88" width="4" height="8" fill="#b8862a"/></g>',
+      h1: [29, 99], h2: [57, 93] }),
+    nundro: zwerg({ hose: "#3a3a2a", rock: "#3f5a32", haut: "#d9a07a", nase: "#c48c66", bart: "#d6d2c8", bartDunkel: "#9a968c",
+      kopf: '<path d="M30 62 Q30 42 45 41 Q60 42 60 62 Q54 52 45 52 Q36 52 30 62 Z" fill="#5a6a3a"/>',
+      instr: '<g class="instr"><path d="M46 72 H82 M48 80 H82" stroke="#d9a63a" stroke-width="3" fill="none"/><path d="M82 72 Q87 76 82 80" stroke="#d9a63a" stroke-width="3" fill="none"/>' +
+        '<path d="M52 72 L30 64 M30 64 L22 58 L22 72 Z" stroke="#d9a63a" stroke-width="3" fill="#f0c860"/></g>', h1: [56, 76], h2: [78, 80] }),
+    kardal: zwerg({ hose: "#2a2a34", rock: "#3a3a4a", haut: "#9c9ca8", nase: "#8a8a96", bart: "#1e1e24", bartDunkel: "#0e0e12", zopf: 1,
+      kopf: '<path d="M32 58 Q45 50 58 58" stroke="#d8dce6" stroke-width="3" fill="none"/><path d="M42 54 L45 48 L48 54" fill="#d8dce6"/><circle cx="45" cy="55" r="1.6" fill="#7ad0ff"/>',
+      instr: '<g class="instr"><path d="M48 72 L74 54" stroke="#e0b84a" stroke-width="3"/><path d="M72 56 L82 40 L88 48 Z" fill="#f0c860" stroke="#9a7020"/><path d="M56 66 v-6 M60 63 v-6 M64 60 v-6" stroke="#c9a24a" stroke-width="2"/></g>',
+      h1: [56, 70], h2: [64, 62] }),
+    dolgrimson: '<ellipse cx="45" cy="137" rx="24" ry="3" fill="rgba(0,0,0,.4)"/>' +
+      '<rect x="35" y="96" width="9" height="38" fill="#2a2a38"/><rect x="47" y="96" width="9" height="38" fill="#2a2a38"/><path d="M32 136 h14 v-6 h-13 Z M45 136 h14 v-6 h-13 Z" fill="#15151c"/>' +
+      '<path d="M27 104 Q25 54 45 49 Q65 54 63 104 L67 114 H23 Z" fill="#23365a"/><path d="M45 52 V112" stroke="#18243e" stroke-width="2"/>' +
+      '<circle cx="41" cy="64" r="1.6" fill="#e0b84a"/><circle cx="41" cy="76" r="1.6" fill="#e0b84a"/><circle cx="41" cy="88" r="1.6" fill="#e0b84a"/><path d="M26 54 h10 M54 54 h10" stroke="#e0b84a" stroke-width="3"/>' +
+      '<path d="M37 92 H53" stroke="#5a3a20" stroke-width="4"/><circle cx="45" cy="35" r="10" fill="#e0b08a"/><path d="M38 40 Q45 37 52 40" stroke="#8a8a8a" stroke-width="2.5" fill="none"/>' +
+      '<circle cx="41" cy="33" r="1.4" fill="#1a1008"/><circle cx="49" cy="33" r="1.4" fill="#1a1008"/>' +
+      '<path d="M25 29 Q45 8 65 29 Q45 22 25 29 Z" fill="#14141c"/><path d="M27 28 Q45 21 63 28" stroke="#e0b84a" stroke-width="1.2" fill="none"/>' +
+      '<g class="instr"><circle cx="62" cy="54" r="9" fill="none" stroke="#d9a63a" stroke-width="3"/><path d="M51 41 Q57 45 56 48" stroke="#d9a63a" stroke-width="2.5" fill="none"/><path d="M67 61 L76 70 L69 74 Z" fill="#f0c860" stroke="#9a7020"/></g>' +
+      '<circle cx="54" cy="47" r="3.6" fill="#e0b08a"/><circle cx="66" cy="62" r="3.6" fill="#e0b08a"/>',
+    zilda: '<ellipse cx="45" cy="137" rx="24" ry="3" fill="rgba(0,0,0,.4)"/>' +
+      '<rect x="36" y="98" width="8" height="36" fill="#3a2a1e"/><rect x="47" y="98" width="8" height="36" fill="#3a2a1e"/><path d="M33 136 h13 v-8 h-12 Z M45 136 h13 v-8 h-12 Z" fill="#20140c"/>' +
+      '<path d="M29 100 Q28 58 45 53 Q62 58 61 100 Z" fill="#6b4627"/><path d="M33 62 L57 90 M57 62 L35 90" stroke="#4a2e18" stroke-width="2.2"/><path d="M28 100 H62" stroke="#2a1a0e" stroke-width="4"/>' +
+      '<path d="M33 30 Q45 18 57 30 Q62 52 70 60 Q60 56 56 44 Z" fill="#a8452a"/><circle cx="45" cy="39" r="10" fill="#e6b896"/><path d="M35 34 Q45 24 55 34 Q50 30 45 31 Q40 30 35 34 Z" fill="#a8452a"/>' +
+      '<circle cx="41" cy="39" r="1.4" fill="#1a1008"/><circle cx="49" cy="39" r="1.4" fill="#1a1008"/><path d="M42 44 Q45 46 48 44" stroke="#8a4a3a" stroke-width="1.4" fill="none"/>' +
+      '<g class="instr"><rect x="34" y="96" width="30" height="16" rx="2" fill="#a83a2a" stroke="#5a1a10"/><ellipse cx="49" cy="96" rx="15" ry="4" fill="#ece4d0" stroke="#8a7a60"/><path d="M36 100 L44 110 L52 100 L60 110" stroke="#e0b84a" stroke-width="1.4" fill="none"/></g>' +
+      '<g class="stoecke"><path d="M30 70 L42 92 M68 70 L56 92" stroke="#d8c49a" stroke-width="2.5" stroke-linecap="round"/></g><circle cx="30" cy="70" r="3.6" fill="#e6b896"/><circle cx="68" cy="70" r="3.6" fill="#e6b896"/>',
+    ilvara: '<ellipse cx="45" cy="137" rx="24" ry="3" fill="rgba(0,0,0,.4)"/>' +
+      '<path d="M27 136 Q30 80 45 54 Q60 80 63 136 Z" fill="#3a1f4a"/><path d="M45 56 V136" stroke="#2a1236" stroke-width="2"/><path d="M33 100 Q45 108 57 100" stroke="#b088d0" stroke-width="1.4" fill="none"/>' +
+      '<path d="M34 30 Q30 70 26 88 Q36 70 38 50 Z M56 30 Q60 70 64 88 Q54 70 52 50 Z" fill="#e8e6f0"/><circle cx="45" cy="38" r="10" fill="#4a3a5e"/>' +
+      '<path d="M35 34 Q45 22 55 34 Q50 29 45 30 Q40 29 35 34 Z" fill="#e8e6f0"/><path d="M35 38 l-6 -5 M55 38 l6 -5" stroke="#4a3a5e" stroke-width="2.4"/>' +
+      '<circle cx="41" cy="38" r="1.6" fill="#ff3a3a"/><circle cx="49" cy="38" r="1.6" fill="#ff3a3a"/><path d="M41 37 h0 M49 37 h0" stroke="#ff8a8a"/>' +
+      '<g class="instr"><path d="M45 45 L52 82" stroke="#14101a" stroke-width="3" stroke-linecap="round"/><path d="M50 72 L54 82 L49 83 Z" fill="#14101a"/><circle cx="47.5" cy="58" r="1" fill="#c0c0c8"/><circle cx="49" cy="66" r="1" fill="#c0c0c8"/></g>' +
+      '<circle cx="47" cy="58" r="3.4" fill="#4a3a5e"/><circle cx="50" cy="72" r="3.4" fill="#4a3a5e"/>',
+    fagas: '<ellipse cx="45" cy="137" rx="22" ry="3" fill="rgba(0,0,0,.25)"/>' +
+      '<rect x="37" y="120" width="7" height="15" fill="#4a5a6a"/><rect x="47" y="120" width="7" height="15" fill="#4a5a6a"/>' +
+      '<path d="M30 124 Q29 98 45 94 Q61 98 60 124 Z" fill="#4a7a5a"/><circle cx="45" cy="82" r="11" fill="#f0c8a8"/><ellipse cx="45" cy="85" rx="4" ry="3.4" fill="#e0a888"/>' +
+      '<path d="M36 88 Q45 104 54 88 Q50 92 45 92 Q40 92 36 88 Z" fill="#f4f4f4"/><circle cx="41" cy="80" r="1.4" fill="#1a1008"/><circle cx="49" cy="80" r="1.4" fill="#1a1008"/>' +
+      '<path d="M33 75 L45 44 L57 75 Z" fill="#6a3a8a"/><path d="M33 75 H57" stroke="#4a2a6a" stroke-width="3"/>' +
+      '<g class="instr"><path d="M24 116 L66 116 L60 106 L30 106 Z" fill="#3a2a1a"/>' + [0, 1, 2, 3, 4, 5].map(i => '<rect x="' + (30 + i * 5.4) + '" y="' + (104 - i * .6) + '" width="4" height="' + (12 - i) + '" rx="1" fill="#d8dce6"/>').join("") + '</g>' +
+      '<g class="stoecke"><path d="M30 96 L38 104 M60 96 L52 104" stroke="#d8c49a" stroke-width="2"/><circle cx="38" cy="104" r="2" fill="#e0b84a"/><circle cx="52" cy="104" r="2" fill="#e0b84a"/></g>',
+    ploopploopeen: '<ellipse cx="45" cy="137" rx="24" ry="3" fill="rgba(0,0,0,.25)"/>' +
+      '<path d="M25 136 Q27 86 45 70 Q63 86 65 136 Z" fill="#6a2a2a"/><path d="M45 72 V136" stroke="#4a1a1a" stroke-width="2"/>' +
+      '<path d="M45 100 m-6 0 a6 6 0 1 0 12 0 a4 4 0 1 0 -8 0 a2 2 0 1 0 4 0" stroke="#e0b84a" stroke-width="1.6" fill="none"/>' +
+      '<path d="M32 46 Q45 18 58 46 Q60 66 45 72 Q30 66 32 46 Z" fill="#5a8a7a"/><path d="M38 26 L45 10 L52 26 L49 24 L45 16 L41 24 Z" fill="#3a6a5a"/>' +
+      '<circle cx="31" cy="46" r="7" fill="#e8f0e0"/><circle cx="59" cy="46" r="7" fill="#e8f0e0"/><circle cx="30" cy="46" r="3.4" fill="#101010"/><circle cx="60" cy="46" r="3.4" fill="#101010"/>' +
+      '<ellipse class="mund" cx="45" cy="61" rx="6" ry="5" fill="#1a0e10"/><path d="M36 52 q2 2 4 0 M50 52 q2 2 4 0" stroke="#3a6a5a" stroke-width="1.4" fill="none"/>' +
+      '<path d="M26 80 L16 64 M64 80 L74 64" stroke="#5a8a7a" stroke-width="6" stroke-linecap="round"/><path d="M14 64 l-3 -6 M16 62 l0 -7 M18 63 l3 -6 M72 63 l-3 -6 M74 62 l0 -7 M76 64 l3 -6" stroke="#5a8a7a" stroke-width="2"/>'
+  };
+  const GAESTE_HTML = '<div class="lw-gaeste" aria-hidden="true">' + GAESTE.map(g => '<svg class="lw-gast gast-' + g.id + (g.geist ? " geist" : "") + " seite-" + g.seite + '" data-gast-bild="' + g.id + '" viewBox="0 0 90 140" overflow="visible"><g class="gk">' + GAST_BILD[g.id] + "</g></svg>").join("") + "</div>";
+  const gastDa = {};
+  /* wer gerade gespielt hat, steht auf der Bühne; wer länger still ist, geht wieder */
+  function gaesteZeigen(b) {
+    const jetzt = performance.now(), da = { l: [], r: [] };
+    while (gastQ.length && gastQ[0][0] <= ctx.currentTime) {
+      const id = gastQ.shift()[1]; gastZuletzt[id] = jetzt; gastWippen(b, id);
+    }
+    GAESTE.forEach(g => { if (gastZuletzt[g.id] && jetzt - gastZuletzt[g.id] < (g.rolle === "chor" || g.rolle === "glitzer" || g.rolle === "schief" || g.rolle === "signal" || g.rolle === "fanfare" ? 7000 : 3500) && (laeuft || klassikLauf)) da[g.seite].push(g.id); });
+    GAESTE.forEach(g => {
+      const el = b.querySelector('[data-gast-bild="' + g.id + '"]'); if (!el) return;
+      const i = da[g.seite].indexOf(g.id), ist = i >= 0;
+      if (ist) el.style.setProperty("--slot", i);
+      if (ist !== el.classList.contains("da")) {
+        el.classList.toggle("da", ist);
+        if (ist && !gastDa[g.id]) setTimeout(() => { const r = el.getBoundingClientRect(), br = b.getBoundingClientRect(); if (r.width) schweben((g.geist ? "👻 " : "") + g.name, Math.max(9, Math.min(91, (r.left + r.width / 2 - br.left) / br.width * 100)), "blase gastname", 70); }, 500);
+        gastDa[g.id] = ist;
+      }
+    });
+    root.querySelectorAll("[data-gast]").forEach(c => c.classList.toggle("spielt", !!gastDa[c.dataset.gast]));
+    return da.l.length + da.r.length > 0;
+  }
+  function gastWippen(b, id) {
+    if (ruhig) return;
+    const el = b.querySelector('[data-gast-bild="' + id + '"]'); if (!el || !el.classList.contains("da")) return;
+    const g = GAST[id], k = el.querySelector(".gk"), ins = el.querySelector(".instr"), st = el.querySelector(".stoecke");
+    if (k && k.animate) k.animate([{ transform: "none" }, { transform: g.rolle === "marsch" ? "translateY(1.5px)" : "translateY(-2px) rotate(" + (g.seite === "l" ? 2 : -2) + "deg)", offset: .4 }, { transform: "none" }], { duration: 260 });
+    if (st && st.animate) st.animate([{ transform: "none" }, { transform: "translateY(6px)", offset: .35 }, { transform: "none" }], { duration: 180 });
+    if (ins && ins.animate && g.rolle !== "marsch") ins.animate([{ filter: "brightness(1.6) drop-shadow(0 0 3px #ffe7a0)" }, { filter: "none" }], { duration: 350 });
+    const m = el.querySelector(".mund"); if (m && m.animate) m.animate([{ transform: "scaleY(.5)" }, { transform: "scaleY(1.2)" }, { transform: "scaleY(1)" }], { duration: 600 });
+    if (Math.random() < (g.rolle === "marsch" ? .15 : .45)) {
+      const r = el.getBoundingClientRect(), br = b.getBoundingClientRect();
+      if (r.width) schweben(g.rolle === "marsch" ? "✦" : g.rolle === "chor" ? "～" : "♪", (r.left + r.width * (g.seite === "l" ? .75 : .25) - br.left) / br.width * 100, "gast", 55);
+    }
+  }
+  /* die Gäste-Reihe im Pult */
+  function gaesteZeile(T) {
+    if (hoerer) return "";
+    return '<div class="lw-gaeste-zeile" title="' + esc(T.gaesteTipp) + '"><span class="lw-gz-titel">🎭 ' + T.gaesteTitel + "</span>" +
+      GAESTE.map(g => { const s = gastStufe(g.id); return '<button type="button" class="lw-gchip stufe-' + s + (g.geist ? " geist" : "") + (gastDa[g.id] ? " spielt" : "") + '" data-gast="' + g.id + '" title="' + esc(g.name + " – " + T.gastInstr[g.id] + " · " + T.gastStufe[s]) + '">' +
+        g.sym + " " + g.name + ' <small>' + T.gastStufe[s] + "</small></button>"; }).join("") + "</div>";
+  }
+  root.addEventListener("click", e => {
+    const c = e.target.closest("[data-gast]"); if (!c) return;
+    e.stopPropagation();
+    const id = c.dataset.gast, s = gastStufe(id);
+    S.gaeste = Object.assign({}, S.gaeste || {}, { [id]: s === 1 ? 2 : s === 2 ? 0 : 1 });
+    merken(); gaesteVorladen();
+    const z = root.querySelector(".lw-gaeste-zeile"); if (z) z.outerHTML = gaesteZeile(t());
+  }, true);
   /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
   Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften" });
   Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin" });
@@ -3768,7 +4004,7 @@
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) + stimmSpeicherZeile(T) : "") + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div></section>";
+      (musikTab === "stimmungen" ? intRegler(T) + gaesteZeile(T) + stimmSpeicherZeile(T) : "") + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div></section>";
   }
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
@@ -3788,7 +4024,7 @@
     const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
     const d = l && dekodieren(l.code);
     if (!d) return;
-    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester"].forEach(k => { d[k] = S[k]; });
+    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester", "gaeste"].forEach(k => { d[k] = S[k]; });
     d.stimmung = null; d.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
     if (laeuft) { wechsel = d; const a = S; S = d; try { saitenVorbereiten(); } catch (_) {} S = a; status(t().wechselGleich(l.name)); boxNeu("musik"); return; }
     S = d; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
@@ -3865,7 +4101,7 @@
     const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
       ablauf: S.ablauf, vol: S.vol, mute: S.mute, teile: S.teile, instrument: S.instrument, band: S.band };
     return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
-      hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, laeuft };
+      hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, gaeste: S.gaeste, laeuft };
   }
   function funkSenden(ev, daten) { if (funk && funk.kanal) funk.kanal.senden(ev, daten); }
   function funkAenderung() {
@@ -3950,7 +4186,7 @@
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
       kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
-      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
+      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, gaeste: Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
     if (laeuft && kern(neu) !== kern(S)) {
@@ -4118,7 +4354,7 @@
   }
   function vorlageWaehlen(k) {
     const mix = { vol: S.vol, mute: S.mute };
-    const behalten = { orchester: S.orchester, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse };
+    const behalten = { orchester: S.orchester, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse, gaeste: S.gaeste };
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
     else if (k === "zufall") neu = zufallsLied();
@@ -4143,7 +4379,7 @@
     if (eig && eig.werte) {
       /* gespeicherte Stimmung: ihre Einstellungen gewinnen */
       const w = eig.werte;
-      ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "instrument"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
+      ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "instrument", "gaeste"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
       if (w.band) neu.band = Object.assign({}, neu.band, w.band);
       neu.stimmung = eig.basis; neu.eigeneStimmung = k;
       if (!KULISSEN.includes(neu.kulisse)) neu.kulisse = "keine";
@@ -4450,6 +4686,26 @@
 .lw-buehne[data-pub="wiegen"] .lw-publikum .gast { animation: lwwiegen3 3.4s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.45s); }
 @keyframes lwwiegen3 { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
 .lw-buehne[data-pub="still"] .lw-publikum { opacity: .85; }
+.lw-gaeste { position: absolute; inset: 0; pointer-events: none; }
+.lw-gast { position: absolute; bottom: 5%; height: 68%; width: auto; aspect-ratio: 90 / 140; opacity: 0; transition: transform 1s cubic-bezier(.3,.8,.3,1), opacity .8s; overflow: visible; }
+.lw-gast.seite-l { left: calc(1% + var(--slot, 0) * 8%); transform: translateX(-170%); }
+.lw-gast.seite-r { right: calc(1% + var(--slot, 0) * 8%); transform: translateX(170%); }
+.lw-gast.da { opacity: 1; transform: none; }
+.lw-gast.geist { filter: saturate(.5) brightness(1.25) drop-shadow(0 0 6px rgba(150,210,255,.9)); }
+.lw-gast.geist.da { opacity: .62; animation: lwgeistschweben 2.8s ease-in-out infinite alternate; }
+@keyframes lwgeistschweben { from { translate: 0 0; } to { translate: 0 -7px; } }
+.lw-gast g, .lw-gast path, .lw-gast ellipse { transform-box: fill-box; transform-origin: 50% 100%; }
+.lw-gast .mund { transform-origin: 50% 50%; }
+.lw-note.gast { font-size: 1.1rem; color: #ffe7a0; }
+.lw-note.gastname { font-size: .95rem; white-space: nowrap; }
+.lw-gaeste-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; }
+.lw-gz-titel { color: var(--ash); font-size: .82rem; margin-right: .2rem; }
+.lw-gchip { border: 1px dashed var(--line); background: rgba(16,14,21,.6); color: var(--vellum); font: inherit; font-size: .82rem; padding: .3rem .5rem; cursor: pointer; white-space: nowrap; }
+.lw-gchip small { color: var(--ash); font-size: .72rem; }
+.lw-gchip.stufe-2 { border-style: solid; border-color: var(--ember); color: var(--ember); }
+.lw-gchip.stufe-0 { opacity: .45; text-decoration: line-through; }
+.lw-gchip.spielt { box-shadow: 0 0 0 1px var(--ember), 0 0 10px rgba(224,160,70,.45); }
+.lw-gchip.geist.spielt { box-shadow: 0 0 0 1px #9fd8ff, 0 0 10px rgba(150,210,255,.5); }
 .lw-fx-licht { position: absolute; inset: 0; opacity: 0; pointer-events: none; z-index: 2; }
 .lw-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
 .lw-t { position: absolute; pointer-events: none; line-height: 1; will-change: transform, opacity; }
