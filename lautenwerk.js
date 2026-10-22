@@ -155,7 +155,7 @@
       hSelbst: "Selbst spielen statt zuhören", hSignal: (n, s) => "📶 " + n + " Signale von Imre" + (s == null ? "" : " · zuletzt vor " + s + " s"), hIphone: "iPhone: Falls nichts zu hören ist, Lautlos-Schalter prüfen und Lautstärke hochdrehen.", hLaut: "Meine Lautstärke",
       pult: "🎛 Spielleiter-Pult", pultGross: "Spielleiter-Pult öffnen", pultUnter: "Stimmungen, Geräuschkulisse und Effekte für den Spieltisch – mit einem Fingertipp", komplett: "🎼 Komplette Ansicht", pultTipp: "Für den Spieltisch: Stimmungen wechseln sanft am Taktende, Kulisse und Effekte laufen über der Musik.",
       liedWaehlen: "Lied wählen …", kulisseAn: "Kulisse an", kulisseAus: "Kulisse aus", lieder2: "Lieder",
-      raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
+      raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniKulStopp: "Geräusche anhalten", miniKulWeiter: "Geräusche wieder starten", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
@@ -227,7 +227,7 @@
       hSelbst: "Play yourself instead of listening", hSignal: (n, s) => "📶 " + n + " signals from Imre" + (s == null ? "" : " · last " + s + " s ago"), hIphone: "iPhone: if you hear nothing, check the silent switch and turn the volume up.", hLaut: "My volume",
       pult: "🎛 GM console", pultGross: "Open the GM console", pultUnter: "Moods, ambience and effects for the gaming table – one tap away", komplett: "🎼 Full view", pultTipp: "For the gaming table: moods change smoothly at the end of the bar, ambience and effects play over the music.",
       liedWaehlen: "Choose a song …", kulisseAn: "Ambience on", kulisseAus: "Ambience off", lieder2: "Songs",
-      raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniZur: "Go to the lute machine", eigenesLied: "Your song",
+      raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniKulStopp: "Stop ambience", miniKulWeiter: "Restart ambience", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
@@ -1104,7 +1104,7 @@
   /* das schlanke Hall-Netz (Handy/Sparmodus) braucht mehr Eingangspegel, um so viel Raum zu ergeben wie der Faltungshall */
   const SPAR_HALL = 3.5;
   /* ---------- Geräuschkulisse ---------- */
-  let kul = null, kulRauschen = null, sfxBus = null;
+  let kul = null, kulRauschen = null, sfxBus = null, kulMerk = null; /* kulMerk: über den Mini-Player angehaltene Kulisse */
   const kulPegel = () => Math.pow(S.kulisseVol / 10, 1.5) * .9;
   const zz = (a, b) => a + Math.random() * (b - a);
   /* Rauschbett; opt.wandern lässt die Filter langsam wandern (heulender Wind), opt.schwanken die Lautstärke */
@@ -1379,7 +1379,8 @@
     g.connect(master);
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
     kul = { art, g, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0 };
-    if (KUL_WELT[art]) { send.gain.value = KUL_WELT[art].raum; weltStart(kul, KUL_WELT[art]); return; }
+    kulMerk = null;
+    if (KUL_WELT[art]) { send.gain.value = KUL_WELT[art].raum; weltStart(kul, KUL_WELT[art]); try { miniAnzeigen(); } catch (_) {} return; }
     const rest = KUL_SCHICHT[art] ? KUL_REST[art] || {} : {};
     (KUL_BETT[art] || []).filter((_, i) => !rest.betten || rest.betten.includes(i)).slice(0, spar ? 2 : 9).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
     const sk = rest.schleife == null ? 1 : rest.schleife;
@@ -1410,6 +1411,7 @@
     const j = ctx.currentTime;
     k.g.gain.cancelScheduledValues(j); k.g.gain.setValueAtTime(k.g.gain.value, j); k.g.gain.linearRampToValueAtTime(0, j + 1.5);
     setTimeout(() => { k.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { k.g.disconnect(); } catch (_) {} }, 1700);
+    try { miniAnzeigen(); } catch (_) {}
   }
 
   /* ---------- Soundeffekte für den Spielleiter ---------- */
@@ -3187,7 +3189,7 @@
     if (!ersetzt) fortsetzTimer = setTimeout(musikFortsetzen, sanft ? 500 : 100);
     klassikKnoepfe();
   }
-  function klassikKnoepfe() { root.querySelectorAll("[data-sfx]").forEach(b => b.classList.toggle("spielt", !!klassikLauf && klassikLauf.art === b.dataset.sfx)); try { favMarkieren(); } catch (_) {} }
+  function klassikKnoepfe() { root.querySelectorAll("[data-sfx]").forEach(b => b.classList.toggle("spielt", !!klassikLauf && klassikLauf.art === b.dataset.sfx)); try { favMarkieren(); } catch (_) {} try { miniAnzeigen(); } catch (_) {} }
   async function klassikSpielen(art, laut) {
     const f = KLASSIK[art]; if (!f || !ctx) return;
     if (klassikLauf) { const war = klassikLauf.art; klassikStopp(true, war !== art); if (war === art) return; }
@@ -4959,22 +4961,39 @@
     if (!tools || mini) return;
     mini = document.createElement("div");
     mini.className = "lw-mini"; mini.hidden = true;
-    mini.innerHTML = '<a class="lw-mini-titel" href="#lautenwerk"><span class="lw-mini-note">♪</span><span class="lw-mini-name"></span></a><button type="button" class="lw-mini-knopf"></button>';
+    mini.innerHTML = '<a class="lw-mini-titel" href="#lautenwerk"><span class="lw-mini-note">♪</span><span class="lw-mini-name"></span></a><button type="button" class="lw-mini-knopf"></button><button type="button" class="lw-mini-knopf lw-mini-kul"></button>';
     tools.insertBefore(mini, tools.firstChild);
     mini.querySelector(".lw-mini-knopf").addEventListener("click", () => {
       if (hoerer) { const b = root.querySelector('[data-aktion="hoeren"]'); if (b) b.click(); return; }
       laeuft ? stopp(true) : start(true);
+    });
+    /* nur Geräusche (Kulisse oder Dauer-Effekt) ohne Musik: eigener Stopp-Knopf, danach wieder startbar */
+    mini.querySelector(".lw-mini-kul").addEventListener("click", () => {
+      if (kul || klassikLauf) {
+        if (kul) { kulMerk = S.kulisse; kulisseStop(); }
+        if (klassikLauf) klassikStopp(true);
+      } else if (kulMerk) { audioStart(); S.kulisse = kulMerk; kulisseStart(true); }
+      miniAnzeigen();
     });
     if (window.IntersectionObserver) new IntersectionObserver(e => { lautenwerkSichtbar = e[e.length - 1].isIntersecting; miniAnzeigen(); }).observe(root);
   }
   function miniAnzeigen() {
     if (!mini) return;
     const T = t();
-    mini.hidden = !((laeuft || pausiert) && !lautenwerkSichtbar);
-    mini.classList.toggle("spielt", laeuft);
-    mini.querySelector(".lw-mini-name").textContent = S.titel || T.eigenesLied;
+    const musik = laeuft || pausiert, geraeusch = !laeuft && (!!kul || !!klassikLauf), gemerkt = !laeuft && !geraeusch && !!kulMerk;
+    mini.hidden = !((musik || geraeusch || gemerkt) && !lautenwerkSichtbar);
+    mini.classList.toggle("spielt", laeuft || geraeusch);
+    const kk = mini.querySelector(".lw-mini-kul"), nurKul = !musik || geraeusch;
+    kk.hidden = !(geraeusch || gemerkt);
+    kk.textContent = geraeusch ? "■" : "▶";
+    kk.setAttribute("aria-label", geraeusch ? T.miniKulStopp : T.miniKulWeiter); kk.title = kk.getAttribute("aria-label");
+    mini.querySelector(".lw-mini-note").textContent = musik && !geraeusch ? "♪" : "🌫";
+    mini.querySelector(".lw-mini-knopf:not(.lw-mini-kul)").hidden = !musik || geraeusch;
+    mini.querySelector(".lw-mini-name").textContent = nurKul && (geraeusch || gemerkt)
+      ? (kul ? T.kulissen[kul.art] : klassikLauf ? T.sfx[klassikLauf.art] : T.kulissen[kulMerk] || "").replace(/^\S+\s/, "")
+      : S.titel || T.eigenesLied;
     mini.querySelector(".lw-mini-titel").title = T.miniZur;
-    const k = mini.querySelector(".lw-mini-knopf");
+    const k = mini.querySelector(".lw-mini-knopf:not(.lw-mini-kul)");
     k.textContent = laeuft ? "❚❚" : "▶"; k.setAttribute("aria-label", laeuft ? T.miniPause : T.miniWeiter); k.title = k.getAttribute("aria-label");
   }
   function knoepfe() {
@@ -5600,7 +5619,7 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 .lw-hallknopf { border: 1px solid var(--line); background: none; font-size: .78rem; line-height: 1; padding: .2rem .35rem; cursor: pointer; border-radius: 3px; opacity: .45; filter: grayscale(1); }
 .lw-hallknopf[aria-pressed="true"] { opacity: 1; filter: none; border-color: rgba(224,160,70,.6); }
 .lw-mini { display: inline-flex; align-items: center; gap: .35rem; margin-right: .6rem; padding: .15rem .25rem .15rem .55rem; border: 1px solid rgba(224,160,70,.6); border-radius: 999px; background: rgba(16,14,21,.7); }
-.lw-mini[hidden] { display: none; }
+.lw-mini[hidden], .lw-mini-knopf[hidden] { display: none; }
 .lw-mini-titel { display: inline-flex; align-items: center; gap: .35rem; color: var(--vellum); text-decoration: none; font-size: .8rem; max-width: 11rem; }
 .lw-mini-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-mini-note { color: var(--ember); }
