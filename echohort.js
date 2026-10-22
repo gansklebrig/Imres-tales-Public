@@ -458,7 +458,7 @@
      Neues Kampagnengebiet? Einfach hier einen Eintrag anhängen und in TX (de/en) bei gebiete, res und relikt
      je einen Eintrag ergänzen. Levelzahl, Levelwahl, Sterne, Endlosmodus und Bestenliste passen sich an.
      k: Kennung · stil: Aussehen (horizont: tannen | daecher | turm | hoehle | ufer, deko: baeume | haeuser | steine,
-     res: Form der Ressource) · regel: Besonderheit im Raubzug (siehe REGELN) · musik: Musikprofil (siehe MUSIK)
+     res: Form der Ressource) · regel: Besonderheit im Raubzug (siehe REGELN) · musik: Musikprofil (siehe GEBIET_MUSIK)
      relikt: Form des Relikts · tier / stoerer: Tiere und Störenfriede im Raubzug · gegner: Plünderer mit Anteil · boss
      f: Farben */
   const GEB = [
@@ -668,24 +668,50 @@
     q.connect(b); b.connect(huelle(a, effektBus, t0, laut, dauer));
     q.start(t0, Math.random() * 0.5); q.stop(t0 + dauer + 0.05);
   }
-  /* ---------- Musik: für jedes Gebiet eine eigene, endlos variierende Weise ----------
-     grund = Grundton (MIDI), leiter = Tonleiter, folge = Akkordfolge (Stufen), tempo in Schlägen pro Minute,
-     arp / mel / bass = Instrumente aus klang/, schlag = Schlagwerk, dicht = wie oft Melodietöne fallen */
-  const MUSIK = {
-    wald:        { grund: 50, leiter: [0, 2, 3, 5, 7, 9, 10], folge: [0, 3, 6, 4], tempo: 88, arp: "gitarre", mel: "fl", bass: "vc", dicht: 0.55 },
-    dorf:        { grund: 55, leiter: [0, 2, 4, 5, 7, 9, 10], folge: [0, 6, 3, 0], tempo: 104, arp: "gitarre", mel: "dudel", bass: "vc", schlag: "bodh", dicht: 0.5 },
-    turm:        { grund: 57, leiter: [0, 2, 3, 5, 7, 8, 10], folge: [0, 5, 3, 4], tempo: 72, arp: "harfe", mel: "fl", bass: "vctrem", dicht: 0.45 },
-    schmiede:    { grund: 50, leiter: [0, 2, 3, 5, 7, 8, 10], folge: [0, 0, 5, 4], tempo: 80, arp: "gitarre", mel: "horn", bass: "vc", schlag: "amboss", dicht: 0.35 },
-    donnerbaum:  { grund: 52, leiter: [0, 1, 3, 5, 7, 8, 10], folge: [0, 1, 0, 6], tempo: 66, arp: "harfe", mel: "oka", bass: "vctrem", dicht: 0.4 },
-    unterreich:  { grund: 48, leiter: [0, 1, 3, 5, 6, 8, 10], folge: [0, 1, 0, 5], tempo: 58, arp: "harfe", mel: "glock", bass: "vctrem", schlag: "gong", dicht: 0.3, luecken: 0.45 },
-    see:         { grund: 53, leiter: [0, 2, 4, 6, 7, 9, 11], folge: [0, 1, 4, 0], tempo: 70, arp: "harfe", mel: "pan", bass: "vc", dicht: 0.45 },
-    gracklstugh: { grund: 50, leiter: [0, 2, 3, 5, 7, 8, 11], folge: [0, 5, 4, 0], tempo: 84, arp: "gitarre", mel: "horn", bass: "tuba", schlag: "amboss", dicht: 0.4 }
+  /* ---------- Musik: viele Stücke je Gebiet, mit Teilen, Wiederholungen und Pausen ----------
+     Jedes Stück wird beim Start aus der Palette des Gebiets zusammengesetzt: Tonart, Modus, Tempo,
+     gerader Takt oder Walzer, Akkordfolgen und Instrumente je Teil sowie eigene Melodie-Motive.
+     Form z. B. Intro – A – A – B – A – C – B – A – Outro; danach eine kurze Pause und ein neues Stück.
+     Die Lage des Spiels (Raubzug, Baupause, Welle, Boss) bestimmt, wie voll und treibend es klingt. */
+  const MODI = { ionisch: [0, 2, 4, 5, 7, 9, 11], dorisch: [0, 2, 3, 5, 7, 9, 10], phrygisch: [0, 1, 3, 5, 7, 8, 10], lydisch: [0, 2, 4, 6, 7, 9, 11],
+    mixo: [0, 2, 4, 5, 7, 9, 10], aeolisch: [0, 2, 3, 5, 7, 8, 10], harm: [0, 2, 3, 5, 7, 8, 11], phrdom: [0, 1, 4, 5, 7, 8, 10], lokrisch: [0, 1, 3, 5, 6, 8, 10] };
+  const FOLGEN = {
+    dur: [[0, 4, 5, 3], [0, 3, 4, 0], [0, 5, 3, 4], [0, 3, 0, 4], [3, 4, 0, 0], [0, 1, 3, 4], [0, 6, 3, 0], [0, 2, 3, 4]],
+    moll: [[0, 5, 3, 4], [0, 3, 4, 0], [0, 6, 5, 6], [0, 5, 6, 0], [0, 3, 6, 2], [5, 3, 0, 4], [0, 4, 5, 4], [0, 6, 3, 4]],
+    duster: [[0, 1, 0, 6], [0, 1, 5, 0], [0, 5, 1, 0], [0, 0, 1, 1], [0, 6, 5, 1], [0, 3, 1, 0]]
   };
-  const PROBEN = { gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101],
-    fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], vc: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77], vctrem: [36, 40, 43, 50, 53, 57, 59, 60, 64, 67, 71, 74, 77],
+  const MUSTER = {
+    gerade: [[0, 1, 2, 1, 0, 1, 2, 1], [0, 2, 1, 2, 0, 2, 1, 2], [0, 1, 2, 3, 2, 1, 2, 1], [0, -1, 2, -1, 1, -1, 2, -1], [0, 2, 3, 2, 1, 2, 3, 2], [0, -1, -1, 1, 2, -1, 1, -1], [0, 1, 0, 2, 0, 1, 0, 3]],
+    walzer: [[0, 1, 2, 3, 2, 1], [0, -1, 1, 2, 1, 2], [0, 2, 1, 2, 3, 2], [0, -1, 2, -1, 1, -1]]
+  };
+  const RHYTHMEN = { gerade: [[2, 2, 4], [1, 1, 2, 4], [3, 1, 2, 2], [2, 1, 1, 4], [4, 2, 2], [2, 2, 2, 2], [1, 1, 1, 1, 4], [6, 2], [8]], walzer: [[2, 2, 2], [3, 3], [2, 1, 3], [4, 2], [6]] };
+  const GEBIET_MUSIK = {
+    wald:        { grund: [50, 52, 55], modi: ["dorisch", "aeolisch", "mixo"], tempo: [74, 98], walzer: 0.3, arp: ["gitarre", "harfe"], mel: ["fl", "oka", "pan", "geige", "stimme"], bass: ["vc", "kb"], pad: ["vc", "geigest"], schlag: ["bodh", "schelle"], natur: "k_voegel" },
+    dorf:        { grund: [55, 57, 53], modi: ["mixo", "ionisch", "dorisch"], tempo: [96, 124], walzer: 0.45, arp: ["gitarre"], mel: ["dudel", "fl", "geige", "klar"], bass: ["kb", "vc"], pad: ["oboest", "geigest"], schlag: ["bodh", "tamb", "holz"], natur: "k_feuer" },
+    turm:        { grund: [57, 55], modi: ["aeolisch", "phrygisch", "dorisch"], tempo: [64, 84], walzer: 0.2, arp: ["harfe", "spic"], mel: ["fl", "horn", "oboe", "geige"], bass: ["vctrem", "kb"], pad: ["vlntrem", "vc"], schlag: ["timp", "holz"], natur: "k_wind" },
+    schmiede:    { grund: [50, 48], modi: ["aeolisch", "harm", "dorisch"], tempo: [72, 92], walzer: 0.15, arp: ["gitarre", "spic"], mel: ["horn", "fag", "klar"], bass: ["tuba", "vc"], pad: ["orgel", "vc"], schlag: ["amboss", "bodh"], natur: "k_feuer" },
+    donnerbaum:  { grund: [52, 53], modi: ["phrygisch", "aeolisch", "lokrisch"], tempo: [58, 76], walzer: 0.25, arp: ["harfe", "spic"], mel: ["oka", "stimme", "oboe"], bass: ["vctrem", "kb"], pad: ["vlntrem"], schlag: ["holz", "timp"], natur: "k_grillen" },
+    unterreich:  { grund: [48, 46], modi: ["lokrisch", "phrygisch", "harm"], tempo: [52, 68], walzer: 0.2, arp: ["harfe"], mel: ["glock", "stimme", "fl"], bass: ["vctrem", "kb"], pad: ["orgel", "vlntrem"], schlag: ["gong", "timp"], natur: "k_bach", luecken: 0.4 },
+    see:         { grund: [53, 55, 50], modi: ["lydisch", "ionisch", "dorisch"], tempo: [60, 82], walzer: 0.4, arp: ["harfe", "gitarre"], mel: ["pan", "fl", "stimme", "klar"], bass: ["vc", "kb"], pad: ["geigest", "flst"], schlag: ["shake", "schelle"], natur: "k_wellen" },
+    gracklstugh: { grund: [50, 49], modi: ["harm", "phrdom", "aeolisch"], tempo: [76, 96], walzer: 0.1, arp: ["gitarre", "spic"], mel: ["horn", "trp", "pos", "fag"], bass: ["tuba", "kb"], pad: ["orgel"], schlag: ["amboss", "timp", "bodh"], natur: "k_feuer" }
+  };
+  const PROBEN = {
+    gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101],
+    fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], flst: [69, 72, 76, 81, 84, 88, 93, 96], vc: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77], vctrem: [36, 40, 43, 50, 53, 57, 59, 60, 64, 67, 71, 74, 77],
     dudel: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87], oka: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90], pan: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90],
-    glock: [79, 84, 91, 96, 103, 108], horn: [36, 39, 43, 46, 50, 53, 57, 60], tuba: [34, 39, 41, 46, 50, 53, 58], stimme: [57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87] };
-  const PEGEL = { gitarre: 0.5, harfe: 0.45, fl: 0.26, vc: 0.32, vctrem: 0.26, dudel: 0.16, oka: 0.26, pan: 0.26, glock: 0.16, horn: 0.26, tuba: 0.32, stimme: 0.22, amboss: 0.3, bodh1: 0.45, bodh2: 0.38, gong: 0.35, timp1: 0.4 };
+    glock: [79, 84, 91, 96, 103, 108], horn: [36, 39, 43, 46, 50, 53, 57, 60], tuba: [34, 39, 41, 46, 50, 53, 58], stimme: [57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87],
+    geige: [55, 57, 60, 64, 67, 69, 72, 76, 79, 81, 84, 88, 91, 93, 96], geigest: [55, 57, 60, 64, 67, 69, 72, 76, 79, 81, 84, 88, 91, 93, 96],
+    kb: [28, 30, 31, 34, 36, 38, 40, 42, 44, 45, 49, 52, 56, 59], spic: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77],
+    klar: [50, 53, 58, 62, 65, 70, 74, 77, 82, 86, 90], oboe: [58, 62, 65, 70, 74, 77, 82, 86, 89], oboest: [58, 62, 65, 70, 74, 77, 82, 89],
+    fag: [34, 37, 41, 45, 46, 48, 55, 60, 63, 68, 69, 72], pos: [34, 37, 39, 41, 46, 50, 53, 60, 61, 63, 65], trp: [53, 57, 60, 63, 67, 70, 74, 77, 81, 84],
+    orgel: [36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96], vlntrem: [55, 57, 59, 62, 69, 72, 76, 79, 83, 86]
+  };
+  const PEGEL = { gitarre: 0.5, harfe: 0.45, fl: 0.26, flst: 0.2, vc: 0.32, vctrem: 0.24, dudel: 0.15, oka: 0.26, pan: 0.26, glock: 0.15, horn: 0.26, tuba: 0.3, stimme: 0.2,
+    geige: 0.22, geigest: 0.16, kb: 0.4, spic: 0.42, klar: 0.24, oboe: 0.2, oboest: 0.15, fag: 0.28, pos: 0.24, trp: 0.2, orgel: 0.13, vlntrem: 0.14,
+    amboss: 0.28, bodh1: 0.45, bodh2: 0.38, gong: 0.32, timp1: 0.42, timp3: 0.38, timp5: 0.36, timproll: 0.35, bd: 0.4, crash: 0.22, snare1: 0.22, snare2: 0.18,
+    schelle1: 0.2, schelle2: 0.16, tamb1: 0.2, tamb2: 0.16, holz1: 0.3, holz2: 0.26, shake: 0.18, natur: 0.12 };
+  /* Lagen für die Melodie: wohin welches Instrument gehört */
+  const LAGE = { fl: 12, flst: 12, oka: 12, pan: 12, glock: 24, stimme: 12, geige: 12, klar: 0, oboe: 12, horn: -12, fag: -12, pos: -12, trp: 0, dudel: 12, gitarre: 0, harfe: 12 };
   const probeBasis = (() => { const sk = document.querySelector('script[src*="echohort"]'); return sk ? sk.src.replace(/echohort\.js.*$/, "klang/") : "klang/"; })();
   const probePuffer = new Map(), probeLaedt = new Map();
   function probeLaden(name) {
@@ -703,48 +729,158 @@
     if (!b) { probeLaden(name); return; }
     const q = ac.createBufferSource(), g = ac.createGain();
     q.buffer = b; if (m != null) q.playbackRate.value = Math.pow(2, (midi - m) / 12);
-    const l = Math.min((b.duration - b._start) / q.playbackRate.value, dauer), v = (PEGEL[fam] || 0.3) * (laut || 1);
-    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(v, zeit + 0.01);
-    g.gain.setValueAtTime(v, Math.max(zeit + 0.01, zeit + l - 0.25)); g.gain.linearRampToValueAtTime(0, zeit + l);
+    const l = Math.min((b.duration - b._start) / q.playbackRate.value, dauer), v = (PEGEL[fam] || 0.3) * (laut || 1) * (MZ.pegel || 1);
+    g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(v, zeit + 0.012);
+    g.gain.setValueAtTime(v, Math.max(zeit + 0.012, zeit + l - 0.25)); g.gain.linearRampToValueAtTime(0, zeit + l);
     q.connect(g); g.connect(musikBus); q.start(zeit, b._start); q.stop(zeit + l + 0.05);
   }
-  const MZ = { an: false, k: "", P: null, intens: 0, naechste: 0, schritt: 0, timer: 0, melo: 7 };
-  function musikVorladen(P) {
-    const roh = [[P.arp, P.grund + 12, P.grund + 24], [P.mel, P.grund + 12, P.grund + 31], [P.bass, P.grund - 12, P.grund]];
-    roh.forEach(([fam, a, b]) => { if (!PROBEN[fam]) return; PROBEN[fam].filter(m => m >= a - 4 && m <= b + 4).forEach(m => probeLaden(fam + "_" + m)); });
-    [P.schlag === "bodh" ? "bodh1" : P.schlag, "bodh1", "bodh2", "timp1"].forEach(n => n && probeLaden(n));
+  function famVorladen(fam, a, b) { if (PROBEN[fam]) PROBEN[fam].filter(m => m >= a - 5 && m <= b + 5).forEach(m => probeLaden(fam + "_" + m)); else probeLaden(fam); }
+  const MZ = { an: false, k: "", lage: 0, st: null, teil: 0, takt: 0, pos: 0, naechste: 0, timer: 0, pause: 0, pegel: 1, bossStueck: false, natur: null, naturGain: null };
+
+  function motivBauen(walzer) {
+    const noten = []; let pos = 0, stufe = zufall([0, 2, 4, 7]);
+    const takt = walzer ? 6 : 8;
+    for (let tk = 0; tk < 2; tk++) {
+      const rh = zufall(walzer ? RHYTHMEN.walzer : RHYTHMEN.gerade);
+      rh.forEach(d => { noten.push({ pos: pos, dauer: d, stufe, pause: Math.random() < 0.12 }); pos += d; stufe = klemm(stufe + zufall([-2, -1, -1, 1, 1, 2, 0, 3, -3]), -1, 9); });
+      pos = (tk + 1) * takt;
+    }
+    return noten;
   }
-  function musikStart(k, intens) {
-    if (!audio() || !MUSIK[k]) return;
-    MZ.k = k; MZ.P = MUSIK[k]; MZ.intens = intens || 0;
-    musikVorladen(MZ.P);
+  function stueckBauen(k, boss) {
+    const G = GEBIET_MUSIK[k] || GEBIET_MUSIK.wald;
+    const modus = boss ? zufall(["harm", "phrygisch", "phrdom"]) : zufall(G.modi);
+    const art = ["ionisch", "lydisch", "mixo"].includes(modus) ? "dur" : ["phrygisch", "lokrisch", "phrdom"].includes(modus) ? "duster" : "moll";
+    const walzer = !boss && Math.random() < G.walzer;
+    const teil = energie => ({
+      folge: zufall(FOLGEN[art]).slice(), muster: zufall(walzer ? MUSTER.walzer : MUSTER.gerade), motiv: motivBauen(walzer), energie,
+      arp: zufall(G.arp), mel: boss ? zufall(["horn", "trp", "pos"]) : zufall(G.mel), bass: zufall(G.bass), pad: zufall(G.pad)
+    });
+    const teile = { A: teil(1), B: teil(2), C: teil(0) };
+    if (Math.random() < 0.5) teile.B.arp = teile.A.arp;
+    const formen = boss ? [["I", "A", "B", "A", "B", "C", "B", "B"]] :
+      [["I", "A", "A", "B", "A", "C", "B", "A", "O"], ["I", "A", "B", "A", "B", "C", "A", "O"], ["I", "A", "A", "B", "B", "A", "O"], ["A", "B", "C", "A", "B", "O"], ["I", "A", "C", "A", "B", "B", "O"]];
+    const st = {
+      k, boss, modus, leiter: MODI[modus], grund: zufall(G.grund) + (boss ? -2 : 0) + zufall([0, 0, 2, -2]),
+      walzer, achtel: walzer ? 6 : 8, tempo: zw(G.tempo[0], G.tempo[1]) * (boss ? 1.15 : 1),
+      teile, form: zufall(formen).slice(), schlag: boss ? "timp" : zufall(G.schlag), luecken: G.luecken || 0, natur: G.natur
+    };
+    // Instrumente rechtzeitig laden
+    Object.values(teile).forEach(T => { famVorladen(T.arp, st.grund, st.grund + 26); famVorladen(T.mel, st.grund + (LAGE[T.mel] || 0) - 2, st.grund + (LAGE[T.mel] || 0) + 22); famVorladen(T.bass, st.grund - 26, st.grund - 4); famVorladen(T.pad, st.grund, st.grund + 16); });
+    ["bodh1", "bodh2", "schelle1", "schelle2", "tamb1", "tamb2", "holz1", "holz2", "shake", "timp1", "timp3", "timproll", "crash", "bd", "snare1", "snare2", "gong", "amboss", st.natur].forEach(n => n && probeLaden(n));
+    return st;
+  }
+  const teilLaenge = (st, t) => t === "I" ? 2 : t === "O" ? 2 : t === "C" ? 4 : 8;
+  function naturStarten(name) {
+    if (!ac || MZ.natur === name) return;
+    naturStoppen();
+    const b = probePuffer.get(name); if (!b) { probeLaden(name); setTimeout(() => { if (MZ.an && !MZ.natur) naturStarten(name); }, 1500); return; }
+    const q = ac.createBufferSource(), g = ac.createGain();
+    q.buffer = b; q.loop = true; g.gain.setValueAtTime(0, ac.currentTime); g.gain.linearRampToValueAtTime(PEGEL.natur, ac.currentTime + 3);
+    q.connect(g); g.connect(musikBus); q.start();
+    MZ.natur = name; MZ.naturQ = q; MZ.naturGain = g;
+  }
+  function naturStoppen() {
+    if (!MZ.naturQ || !ac) { MZ.natur = null; return; }
+    const q = MZ.naturQ; MZ.naturGain.gain.setTargetAtTime(0, ac.currentTime, 0.4); setTimeout(() => { try { q.stop(); } catch (_) {} }, 2000);
+    MZ.natur = null; MZ.naturQ = null;
+  }
+  function neuesStueck(boss) {
+    MZ.st = stueckBauen(MZ.k, boss); MZ.bossStueck = !!boss;
+    MZ.teil = 0; MZ.takt = 0; MZ.pos = 0;
+  }
+  function musikStart(k, lage) {
+    if (!audio() || !GEBIET_MUSIK[k]) return;
+    const neuesGebiet = MZ.k !== k;
+    MZ.k = k; MZ.lage = lage || 0;
+    if (neuesGebiet || !MZ.st || (MZ.bossStueck && MZ.lage < 3)) { neuesStueck(false); MZ.pause = 0; }
+    naturStarten(GEBIET_MUSIK[k].natur);
     if (MZ.an) return;
-    MZ.an = true; MZ.naechste = ac.currentTime + 0.15; MZ.schritt = 0;
+    MZ.an = true; MZ.naechste = ac.currentTime + 0.15;
     MZ.timer = setInterval(musikTakt, 90);
   }
-  function musikStop() { if (!MZ.an) return; MZ.an = false; clearInterval(MZ.timer); }
-  function tonDerStufe(P, stufe) { const n = P.leiter.length; return P.grund + P.leiter[((stufe % n) + n) % n] + 12 * Math.floor(stufe / n); }
+  /* Wechsel bei neuem Spielabschnitt: das laufende Stück klingt mit dem Outro aus, dann kommt ein neues */
+  function musikWechsel(lage) {
+    MZ.lage = lage;
+    if (!MZ.st || MZ.teil === 0) return;
+    const rest = MZ.st.form.slice(MZ.teil + 1);
+    if (rest.length > 1) MZ.st.form = MZ.st.form.slice(0, MZ.teil + 1).concat(["O"]);
+  }
+  function musikLage(n) {
+    if (MZ.lage === n) return;
+    const vorher = MZ.lage; MZ.lage = n;
+    if (!MZ.an || !ac) return;
+    if (n === 3 && !MZ.bossStueck) { neuesStueck(true); MZ.pause = 0; note("timproll", 0, ac.currentTime + 0.05, 2.5, 1); note("gong", 0, ac.currentTime + 1.2, 4, 0.8); }
+    else if (vorher === 3 && n < 3 && MZ.bossStueck) { neuesStueck(false); MZ.pause = 2; }
+  }
+  function musikSignal(art) {
+    if (!MZ.an || !ac || EINST.musik <= 0 || !MZ.st) return;
+    const z = ac.currentTime + 0.05, g = MZ.st.grund, L = MZ.st.leiter;
+    if (art === "welle") { note("horn", g - 12, z, 0.5, 1.2); note("horn", g - 12 + L[4], z + 0.32, 0.9, 1.3); note("bodh1", 0, z, 1, 1); }
+    else if (art === "geschafft") [0, 2, 4, 7].forEach((s, i) => note("harfe", g + 12 + L[s % 7] + (s >= 7 ? 12 : 0), z + i * 0.09, 1.2, 0.9));
+  }
+  function musikStop() { if (!MZ.an) return; MZ.an = false; clearInterval(MZ.timer); naturStoppen(); }
+  function tonDerStufe(st, stufe) { const n = st.leiter.length; return st.grund + st.leiter[((stufe % n) + n) % n] + 12 * Math.floor(stufe / n); }
   function musikTakt() {
-    if (!ac || !MZ.an || EINST.musik <= 0) return;
-    const P = MZ.P, achtel = 60 / (P.tempo * (MZ.intens ? 1.12 : 1)) / 2;
+    if (!ac || !MZ.an || EINST.musik <= 0 || !MZ.st) return;
     while (MZ.naechste < ac.currentTime + 0.4) {
-      const i = MZ.schritt, takt = Math.floor(i / 8), pos = i % 8, z = MZ.naechste, akk = P.folge[takt % P.folge.length];
-      const akkord = [akk, akk + 2, akk + 4].map(st => tonDerStufe(P, st));
-      if (pos === 0) note(P.bass, akkord[0] - 12, z, achtel * 8, 1);
-      if (!P.luecken || Math.random() > P.luecken) {
-        const muster = [0, 1, 2, 1, 0, 2, 1, 2], ton = akkord[muster[pos]] + 12;
-        note(P.arp, ton, z, achtel * 3, pos % 2 ? 0.75 : 1);
+      const st = MZ.st, lage = MZ.lage, tempo = st.tempo * (lage >= 2 ? 1.08 : 1), achtel = 60 / tempo / 2, z = MZ.naechste;
+      if (MZ.pause > 0) { // Atempause zwischen zwei Stücken: nur die Natur
+        MZ.pos++; if (MZ.pos >= st.achtel) { MZ.pos = 0; MZ.pause--; }
+        MZ.naechste += achtel; continue;
       }
-      if ((pos === 0 || pos === 4 || (MZ.intens && pos === 6)) && Math.random() < P.dicht) {
-        MZ.melo = klemm(MZ.melo + zufall([-2, -1, -1, 1, 1, 2, 0]), 4, 12);
-        if (Math.random() < 0.4) MZ.melo = akk + 7 + zufall([0, 2, 4]);
-        note(P.mel, tonDerStufe(P, MZ.melo) + (P.mel === "glock" ? 24 : 12), z, achtel * (pos === 6 ? 2 : 4), 1);
+      const tName = st.form[MZ.teil], T = tName === "I" || tName === "O" ? st.teile.A : st.teile[tName], pos = MZ.pos, takt = MZ.takt;
+      const akk = T.folge[takt % T.folge.length], akkord = [0, 2, 4].map(s => tonDerStufe(st, akk + s));
+      // Fülle: Abschnitt des Stücks und Lage des Spiels
+      const energie = tName === "I" ? 0 : tName === "O" ? 0 : T.energie;
+      const voll = energie + (lage >= 2 ? 1 : 0) + (lage === 3 ? 1 : 0);
+      MZ.pegel = tName === "O" ? 1 - (takt * st.achtel + pos) / (2 * st.achtel) * 0.6 : tName === "I" ? 0.7 + (takt * st.achtel + pos) / (2 * st.achtel) * 0.3 : 1;
+      const takte = st.achtel;
+      // Bass
+      if (pos === 0) note(T.bass, akkord[0] - 12, z, achtel * takte, energie === 0 ? 0.8 : 1);
+      else if (voll >= 2 && pos === takte / 2 && !st.walzer) note(T.bass, akkord[voll >= 3 ? 2 : 0] - 12, z, achtel * 3, 0.7);
+      // Klangteppich in ruhigen Teilen und bei voller Besetzung
+      if (pos === 0 && (energie === 0 || voll >= 3 || tName === "B")) { note(T.pad, akkord[1], z, achtel * takte * 1.05, 0.7); if (voll >= 3) note(T.pad, akkord[2] + 12, z, achtel * takte, 0.5); }
+      // Arpeggio
+      if (tName !== "I" && (energie >= 1 || lage >= 1 || takt % 2 === 0)) {
+        const m = T.muster[pos % T.muster.length];
+        if (m >= 0 && !(st.luecken && Math.random() < st.luecken) && !(energie === 0 && pos % 2)) note(T.arp, (m === 3 ? akkord[0] + 12 : akkord[m]) + 12, z, achtel * 3, pos === 0 ? 1 : 0.75);
       }
-      if (P.schlag === "amboss" && pos === 0 && Math.random() < 0.75) note("amboss", 0, z, 1.5, 1);
-      if (P.schlag === "gong" && pos === 0 && takt % 4 === 0) note("gong", 0, z, 4, 1);
-      if ((P.schlag === "bodh" || MZ.intens) && [0, 3, 4, 6].includes(pos)) note(pos === 0 ? "bodh1" : "bodh2", 0, z, 1, pos === 0 ? 1 : 0.7);
-      if (MZ.intens && S && S.A && S.A.boss && pos === 0 && takt % 2 === 0) note("timp1", 0, z, 2, 1);
-      MZ.naechste += achtel; MZ.schritt++;
+      // Melodie: Motiv über zwei Takte, folgt den Akkorden, am Phrasenende zum Grundton
+      if (tName !== "I" && tName !== "O" && energie >= 1 || (tName === "C" && takt % 2 === 0)) {
+        const imMotiv = (takt % 2) * takte + pos, phrasenEnde = takt === teilLaenge(st, tName) - 1;
+        T.motiv.forEach(n => {
+          if (n.pos !== imMotiv || n.pause) return;
+          let stufe = akk + n.stufe;
+          if (phrasenEnde && n === T.motiv[T.motiv.length - 1]) stufe = akk + 7;
+          const varTon = takt >= 4 && tName !== "C" ? (n.stufe % 2 ? 1 : 0) : 0;
+          note(T.mel, tonDerStufe(st, stufe + varTon) + (LAGE[T.mel] || 0), z, achtel * n.dauer * 1.1, tName === "C" ? 0.8 : 1);
+        });
+      }
+      // Schlagwerk
+      if (voll >= 2 || (voll >= 1 && st.schlag && takt % 2 === 1)) {
+        const s = lage === 3 ? "timp" : st.schlag;
+        if (s === "bodh" || lage >= 2) { if (pos === 0) note("bodh1", 0, z, 1, 1); else if (st.walzer ? pos === 3 : (pos === 3 || pos === 4 || pos === 6)) note("bodh2", 0, z, 1, 0.75); }
+        if (s === "schelle" && pos % 2 === 1) note(pos % 4 === 1 ? "schelle1" : "schelle2", 0, z, 1, 0.8);
+        if (s === "tamb" && pos % 2 === 1) note(pos === 3 ? "tamb1" : "tamb2", 0, z, 1, 0.8);
+        if (s === "holz" && (pos === 2 || pos === 6)) note(pos === 2 ? "holz1" : "holz2", 0, z, 1, 0.8);
+        if (s === "shake" && pos % 2 === 1) note("shake", 0, z, 1, 0.7);
+        if (s === "amboss" && pos === 0 && takt % 2 === 0) note("amboss", 0, z, 1.5, 1);
+        if (s === "gong" && pos === 0 && takt === 0) note("gong", 0, z, 4, 0.8);
+        if (s === "timp" && (pos === 0 || (lage === 3 && pos === takte / 2))) note(takt % 2 ? "timp3" : "timp1", 0, z, 2, 1);
+        if (lage === 3 && pos === 0 && takt % 2 === 0) note("bd", 0, z, 1.5, 1);
+        if (lage >= 2 && voll >= 3 && pos % 2 === 1 && !st.walzer) note(pos === 7 ? "snare1" : "snare2", 0, z, 1, 0.6);
+      }
+      if (pos === 0 && takt === 0 && tName === "B" && lage >= 2) note("crash", 0, z, 3, 0.9);
+      // weiter
+      MZ.naechste += achtel; MZ.pos++;
+      if (MZ.pos >= takte) {
+        MZ.pos = 0; MZ.takt++;
+        if (MZ.takt >= teilLaenge(st, tName)) {
+          MZ.takt = 0; MZ.teil++;
+          if (MZ.teil >= st.form.length) { MZ.pause = st.boss ? 0 : 1 + Math.floor(Math.random() * 3); neuesStueck(MZ.lage === 3); }
+        }
+      }
     }
   }
 
@@ -921,7 +1057,7 @@
   /* ================== PHASE 1: RAUBZUG ================== */
   function raubzugStarten() {
     const lv = S.lv, g = gebietVon(lv);
-    musikStart(GEB[g].musik, 0);
+    musikStart(GEB[g].musik, 0); musikWechsel(0);
     const zeit = (26 + 5 * up("zeit")) * STUFEN[S.stufe].zeit;
     S.phase = "raub";
     S.texte = []; S.teilchen = []; S.banner = null; S.quip = null; S.quipT = 0; S.blitze = [];
@@ -1560,7 +1696,7 @@
 
   function abwehrStarten() {
     const R = S.R, lv = S.lv, g = gebietVon(lv);
-    musikStart(GEB[g].musik, 1);
+    musikStart(GEB[g].musik, 1); musikWechsel(1);
     const P = pfadBauen(lv);
     const gl = R.gl || gegnerListe(lv, R.gier);
     const reserve = 20 + 30 * up("notgroschen");
@@ -1597,7 +1733,7 @@
     if (d.boss) {
       text(W / 2, 180, t().bossRuft[typ] || "", "#c4564a", 22, 2.2);
       banner(t().bossRuft[typ] || "", "#c4564a", 2.2);
-      KLANG.boss(); quip("boss", 1); vib([80, 60, 120]);
+      KLANG.boss(); quip("boss", 1); vib([80, 60, 120]); musikLage(3);
       if (typ === "demogorgon") { A.demoT = 0; text(W / 2, 220, t().demo.text, "#ebe2cc", 14, 4); }
     }
     A.feinde.push(e);
@@ -1743,14 +1879,14 @@
     const letzte = A.welle >= A.wellen.length - 1;
     if (A.vorT <= 0 && !A.warte.length && !A.feinde.length && (!A.demo || !letzte || A.demoWeg)) {
       if (letzte) { A.fertig = true; A.verloren = false; A.endeT = 0; KLANG.sieg(); banner(t().sicher, "#e0a046", 2); }
-      else { A.vorT = 9; const b = 4 + 3 * (A.welle + 1); A.saat += b; banner(t().welleGeschafft, "#cfe6a8", 1.6); text(W / 2, 260, "+" + b + " 🌱", "#cfe6a8", 18, 1.6); KLANG.kaufen(); }
+      else { A.vorT = 9; const b = 4 + 3 * (A.welle + 1); A.saat += b; banner(t().welleGeschafft, "#cfe6a8", 1.6); musikLage(1); musikSignal("geschafft"); text(W / 2, 260, "+" + b + " 🌱", "#cfe6a8", 18, 1.6); KLANG.kaufen(); }
     }
   }
   function welleStarten() {
     const A = S.A;
     A.vorT = 0; A.welle++;
     A.warte = A.wellen[A.welle].slice(); A.spawnT = 0.3; A.gespawnt = 0;
-    banner(t().welle(A.welle + 1, A.wellen.length), "#e0a046", 1.4); KLANG.boss();
+    banner(t().welle(A.welle + 1, A.wellen.length), "#e0a046", 1.4); KLANG.boss(); if (MZ.lage < 3) musikLage(2); musikSignal("welle");
     if (A.demo && A.welle === A.wellen.length - 1) { A.demoT = 0; A.bossGerufen = false; }
   }
   function welleRufen() {
@@ -4376,7 +4512,7 @@
     fussSetzen(); listeNeu();
   }
 
-  function losSpielen() { zustand = "spiel"; schleierZu(); anwerfen(); if (MZ.k && S) musikStart(MZ.k, S.phase === "abwehr" ? 1 : 0); }
+  function losSpielen() { zustand = "spiel"; schleierZu(); anwerfen(); if (MZ.k && S) musikStart(MZ.k, S.phase === "abwehr" ? (MZ.lage || 1) : 0); }
 
   function tafelKlick(e) {
     const st = e.target.closest("[data-stufe]");
@@ -4689,5 +4825,5 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen };
 })();
