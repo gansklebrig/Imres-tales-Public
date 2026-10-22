@@ -892,22 +892,25 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
 </dialog>
 
 <!-- Alle Texte stehen in inhalt.js (deutsch) und inhalt-en.js (englisch) -->
-<script src="seiten.js?v=20261021b" defer></script>
+<script src="seiten.js?v=20261022a" defer></script>
+<script src="nachlader.js?v=20261022a" defer></script>
 <script src="reime.js?v=20261021b" defer></script>
 <script src="spott.js?v=20261021b" defer></script>
-<script src="extras.js?v=20261021b" defer></script>
-<script src="klangwerk.js?v=20261021b" defer></script>
-<script src="lautenwerk.js?v=20261022b" defer></script>
-<script src="auftritt.js?v=20261021c" defer></script>
-<script src="waldlauf-figuren.js?v=20261019k" defer></script>
-<script src="waldlauf-welten.js?v=20261019k" defer></script>
-<script src="waldlauf.js?v=20261020c" defer></script>
-<script src="diebesnacht.js?v=20261020a" defer></script>
-<script src="echohort.js?v=20261021a" defer></script>
+<script src="extras.js?v=20261022a" defer></script>
+<script type="text/plain" data-nachladen="buehne" src="klangwerk.js?v=20261021b"></script>
+<script type="text/plain" data-nachladen="buehne" src="lautenwerk.js?v=20261022b"></script>
+<script type="text/plain" data-nachladen="taverne" src="auftritt.js?v=20261021c"></script>
+<script type="text/plain" data-nachladen="taverne" src="waldlauf-figuren.js?v=20261019k"></script>
+<script type="text/plain" data-nachladen="taverne" src="waldlauf-welten.js?v=20261019k"></script>
+<script type="text/plain" data-nachladen="taverne" src="waldlauf.js?v=20261020c"></script>
+<script type="text/plain" data-nachladen="taverne" src="diebesnacht.js?v=20261020a"></script>
+<script type="text/plain" data-nachladen="taverne" src="echohort.js?v=20261021a"></script>
 <script src="vollbild.js?v=20261021b" defer></script>
-<script src="spielesaal.js?v=20261021t" defer></script>
-<script src="wegweiser.js?v=20261021a" defer></script>
+<script src="spielesaal.js?v=20261022a" defer></script>
+<script src="wegweiser.js?v=20261022a" defer></script>
 <script src="startbuehne.js?v=20261021b" defer></script>
+<script src="handyleiste.js?v=20261022a" defer></script>
+<script src="neuigkeiten.js?v=20261022a" defer></script>
 <script>document.write('<script src="bildmasse.js?v=' + Date.now() + '"><\/script><script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
@@ -1056,7 +1059,8 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   const masse = f => { const m = (window.BILDMASSE || {})[f]; return m ? ' width="' + m[0] + '" height="' + m[1] + '"' : ""; };
   /* Bilder schon weit vor dem Sichtbereich laden, damit sie beim Scrollen bereit sind */
   const vorlader = window.IntersectionObserver ? new IntersectionObserver(eintraege => eintraege.forEach(e => {
-    if (e.isIntersecting) { e.target.loading = "eager"; vorlader.unobserve(e.target); }
+    const sek = e.target.closest("section.part"); /* nur im gerade geöffneten Bereich vorladen */
+    if (e.isIntersecting && e.boundingClientRect.width > 0 && (!sek || sek.classList.contains("aktiv"))) { e.target.loading = "eager"; vorlader.unobserve(e.target); }
   }), { rootMargin: "2500px 0px 2500px 0px" }) : null;
   function vorladen(wurzel) { if (vorlader && wurzel) wurzel.querySelectorAll('img[loading="lazy"]').forEach(i => vorlader.observe(i)); }
   const absaetze = list => (list || []).map(p => "<p>" + p + "</p>").join("");
@@ -1169,6 +1173,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
         svg.setAttribute("viewBox", "0 0 " + W + " " + H);
         punkte();
       }, { once: true });
+      img.loading = "lazy"; img.decoding = "async";
       img.src = karte;
       frame.appendChild(img);
     } else {
@@ -1514,7 +1519,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     const fries = [];
     D.helden.forEach(h => { fries.push(h); if (h.begleiter) fries.push(h.begleiter); });
     $("frieze").innerHTML = fries.map(h =>
-      '<a href="#' + h.id + '" data-target="' + h.id + '"><img src="' + esc(h.bild) + '" alt="' + esc(h.name) + '" style="object-position:' + esc(h.fries || "50% 30%") + '"><span>' + esc(h.name) + '<small>' + esc(h.rolle) + '</small></span></a>'
+      '<a href="#' + h.id + '" data-target="' + h.id + '"><img src="' + esc(h.bild) + '" loading="lazy" alt="' + esc(h.name) + '" style="object-position:' + esc(h.fries || "50% 30%") + '"><span>' + esc(h.name) + '<small>' + esc(h.rolle) + '</small></span></a>'
     ).join("");
     $("frieze").style.gridTemplateColumns = "repeat(" + fries.length + ", minmax(0, 1fr))";
 

@@ -881,7 +881,8 @@ html, body { overflow-x: clip; }
       b.style.setProperty("--dreh", ((i % 2 ? 1 : -1) * (4 + (i * 3) % 7)) + "deg");
       b.style.animationDelay = (-i * .7) + "s";
       b.setAttribute("aria-label", k.titel || "");
-      b.innerHTML = '<img src="' + esc(k.bild) + '" alt="" loading="lazy">';
+      /* Bild erst laden, wenn die Kerze brennt (sonst lädt die Startseite alle Skizzen vorab) */
+      b.innerHTML = mondAn ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy">' : '<img data-src="' + esc(k.bild) + '" alt="">';
       ebene.appendChild(b);
       anker.set(b, { p, rand });
     });
@@ -950,6 +951,7 @@ html, body { overflow-x: clip; }
 
   function mondlicht(an) {
     mondAn = an;
+    if (an) document.querySelectorAll("#tinten-ebene img[data-src]").forEach(i => { i.src = i.dataset.src; i.removeAttribute("data-src"); });
     const html = document.documentElement, kerze = document.querySelector(".kerze");
     let nacht = document.querySelector(".mondnacht"), buch = document.querySelector(".mond-buch");
     if (an) {

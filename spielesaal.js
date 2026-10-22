@@ -222,7 +222,7 @@
     saal.innerHTML = sichtbare().map((sp, i) => {
       const s = T.spiele[sp.key], f = fortschritt(sp.key), neu = istNeu(sp);
       return '<article class="saal-kachel' + (sp.gross ? " gross" : "") + '" data-key="' + sp.key + '" style="--i:' + i + ";--farbe:" + sp.farbe + '">' +
-        '<div class="sk-bild"><img src="' + sp.plakat + '" alt="" decoding="async"' + (i > 3 ? ' loading="lazy"' : "") + ' style="object-position:' + sp.pos + '">' +
+        '<div class="sk-bild"><img src="' + sp.plakat + '" alt="" decoding="async" loading="lazy" style="object-position:' + sp.pos + '">' +
           (sp.clip && !sp.nurVorschauClip && zeiger && !ruhig ? '<video class="sk-clip" muted loop playsinline preload="none" data-clip="' + sp.clip + '"></video>' : "") +
           '<span class="sk-glanz" aria-hidden="true"></span></div>' +
         '<button type="button" class="sk-flaeche" data-spiel="' + sp.key + '" aria-label="' + esc(s.titel + " – " + M.mehr) + '"></button>' +
@@ -262,14 +262,14 @@
       '<div class="sk-heute" style="--farbe:' + sp.farbe + '">' +
         '<p class="sk-heute-label">✦ ' + esc(M.heute) + " ✦</p>" +
         '<div class="sk-heute-bild" data-spiel="' + sp.key + '">' +
-          (ruhig ? '<img src="' + sp.bilder[0] + '" alt="">' : '<video muted loop playsinline autoplay preload="metadata" poster="' + sp.bilder[0] + '">' + quellen(sp.clip) + "</video>") +
-          '<img class="sk-heute-held" src="' + sp.held + '" alt="">' +
+          (ruhig ? '<img src="' + sp.bilder[0] + '" alt="">' : '<video muted loop playsinline preload="none" poster="' + sp.bilder[0] + '">' + quellen(sp.clip) + "</video>") +
+          '<img class="sk-heute-held" src="' + sp.held + '" alt="" loading="lazy">' +
         "</div>" +
         '<div class="sk-heute-text"><b>' + esc(s.titel) + "</b><i>" + esc(M.spruch[sp.key]) + "</i>" + (f.gespielt && f.zeilen.length && sp.key !== "probe" ? '<span class="sk-stand">' + esc(f.zeilen.join(" · ")) + "</span>" : "") + "</div>" +
         '<div class="sk-heute-knoepfe"><a class="sk-heute-los" href="' + losHref(sp) + '" data-gesehen="' + sp.key + '">' + esc(f.weiter ? M.weiter : M.jetzt) + (sp.extern ? " ↗" : "") + "</a>" +
           '<button type="button" class="sk-heute-mehr" data-spiel="' + sp.key + '">' + esc(M.mehr) + "</button></div>" +
       "</div>";
-    const v = kopf.querySelector("video"); if (v) { v.muted = true; const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); }
+    const v = kopf.querySelector("video"); if (v && sektion.classList.contains("aktiv")) { v.muted = true; const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); }
   }
   kopf.addEventListener("click", e => {
     const tk = e.target.closest(".sk-ton");

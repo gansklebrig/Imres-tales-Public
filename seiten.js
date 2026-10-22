@@ -129,6 +129,8 @@
 
   /* ---------- Halle der Gefährten ---------- */
   let halleTimer = null, halleAktiv = 0, halleHover = false, halleHelden = [];
+  /* Halle: gleiche Auflösung, aber als WebP (vorschau/halle/) – deutlich kleiner; sonst das Original */
+  const halleBild = f => /\.jpe?g$/i.test(f) ? "vorschau/halle/" + String(f).split("/").pop().replace(/\.jpe?g$/i, ".webp") : f;
   function halleBauen() {
     const D = daten(), box = $("halle");
     const helden = [];
@@ -137,7 +139,7 @@
     helden.push(...begleiter); /* Rex läuft hinterher */
     box.innerHTML = helden.map((h, i) =>
       '<a class="halle-tafel" href="#' + esc(h.id) + '" style="--i:' + i + '">' +
-        '<img src="' + esc(h.bild) + '" alt="' + esc(h.name) + '" style="object-position:' + esc(h.fries || "50% 30%") + '">' +
+        '<img src="' + esc(halleBild(h.bild)) + '" data-gross="' + esc(h.bild) + '" onerror="if(this.dataset.gross&&this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross" alt="' + esc(h.name) + '" style="object-position:' + esc(h.fries || "50% 30%") + '"' + (i ? ' fetchpriority="low"' : ' fetchpriority="high"') + '>' +
         "</a>").join("");
     halleHelden = helden;
     $("halle-namen").innerHTML = '<span class="hn-zeile">' + helden.map((h, i) =>
@@ -224,10 +226,12 @@
         "<b>" + esc(T.weiterWort) + "</b></span>";
     } else wl.hidden = true;
     const kacheln = BEREICHE.filter(vorhanden);
+    /* Kacheln sind klein – kompakte Bildversion aus vorschau/klein/, sonst (onerror) das Original */
+    const klein = f => "vorschau/klein/" + String(f).split("/").pop().replace(/\.(jpe?g|png|webp)$/i, ".webp");
     const bild = id => id === "chronik" ? ((letztes && letztes.bild) || "aufbruch-neverwinter.jpg") : BILDER[id];
     $("kacheln").innerHTML = kacheln.map((id, i) =>
       '<a class="kachel k-' + id + '" href="#' + id + '" style="--i:' + i + '">' +
-        '<img src="' + esc(bild(id)) + '" alt="" loading="lazy">' +
+        '<img src="' + esc(klein(bild(id))) + '" data-gross="' + esc(bild(id)) + '" alt="" loading="lazy" onerror="if(this.dataset.gross&&this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross">' +
         '<span class="kachel-text"><span class="kachel-zahl">' + esc(T.zahl[id](anzahl(id))) + "</span>" +
         "<b>" + esc(T.namen[id]) + "</b><small>" + esc(T.texte[id]) + "</small></span></a>").join("");
     if (window.IntersectionObserver && !ruhig) {

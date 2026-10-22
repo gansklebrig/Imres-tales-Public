@@ -49,6 +49,7 @@
     }
   };
   const t = () => TX[sprache()];
+  const klein = f => "vorschau/klein/" + String(f).split("/").pop().replace(/\.(jpe?g|png|webp)$/i, ".webp");
   const NAMEN = { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel" };
 
   /* ---------- 1. Startseite: zwei Tore ---------- */
@@ -69,7 +70,7 @@
       '<p class="wege-frage">' + esc(T.wohin) + "</p>" +
       '<div class="wege-tore">' +
         '<a class="tor tor-geschichte" href="' + esc(wl ? wl.getAttribute("href") : "#chronik") + '">' +
-          '<span class="tor-bild"><img src="' + esc(bild) + '" alt="" loading="lazy" decoding="async"></span>' +
+          '<span class="tor-bild"><img src="' + esc(klein(bild)) + '" data-gross="' + esc(bild) + '" alt="" loading="lazy" decoding="async" onerror="if(this.dataset.gross&&this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross"></span>' +
           '<span class="tor-text"><span class="tor-label">' + esc(T.geschichte.label) + "</span>" +
             "<b>" + esc(T.geschichte.titel) + "</b><span class=\"tor-satz\">" + esc(T.geschichte.satz) + "</span>" +
             (wlTitel ? '<span class="tor-info">' + esc(T.geschichte.zuletzt) + ": " + esc(zuletzt ? zuletzt + " – " : "") + esc(wlTitel.textContent) + "</span>" : "") +
