@@ -35,6 +35,8 @@
       label: "Waldläufer-Probe", titel: "Friedrichs Jagd",
       text: "Friedrich erzählt eure Kampagne nach: vom Hinterhalt auf der Straße bis nach Gracklstugh. Spann den Bogen, halte die Gegner vom Lager fern und hör auf Rex: Er wittert sie zuerst.",
       steuerung: "Irgendwo ins Bild tippen, zurückziehen, zielen, loslassen. Je weiter du ziehst, desto kräftiger der Schuss.",
+      steuerungKreuz: "Fadenkreuz: Einfach auf die Stelle klicken oder tippen, die der Pfeil treffen soll. Gedrückt halten schießt weiter.",
+      zielTitel: "Zielen", zielArten: { ziehen: "🏹 Bogen ziehen", kreuz: "⌖ Fadenkreuz" },
       start: "▶ Auf die Jagd", weiter: "▶ Weiter", nochmal: "↻ Neue Jagd", beenden: "Jagd beenden",
       pause: "Kurze Rast", pauseText: "Die Jagd wartet auf dich.", pauseKnopf: "Pause", vollAn: "Vollbild", vollAus: "Vollbild beenden",
       hud: (k, n) => k + " · Welle " + n, welle: n => "Welle " + n, serie: n => "Serie ×" + n,
@@ -107,6 +109,8 @@
       label: "Ranger check", titel: "Friedrich's Hunt",
       text: "Friedrich retells your campaign: from the ambush on the road all the way to Gracklstugh. Draw your bow, keep the enemies away from the camp and listen to Rex: he smells them first.",
       steuerung: "Touch anywhere in the picture, pull back, aim, let go. The further you pull, the stronger the shot.",
+      steuerungKreuz: "Crosshair: just click or tap the spot the arrow should hit. Hold to keep shooting.",
+      zielTitel: "Aiming", zielArten: { ziehen: "🏹 Draw the bow", kreuz: "⌖ Crosshair" },
       start: "▶ Begin the hunt", weiter: "▶ Continue", nochmal: "↻ New hunt", beenden: "End the hunt",
       pause: "A short rest", pauseText: "The hunt is waiting for you.", pauseKnopf: "Pause", vollAn: "Fullscreen", vollAus: "Exit fullscreen",
       hud: (k, n) => k + " · Wave " + n, welle: n => "Wave " + n, serie: n => "Streak ×" + n,
@@ -518,6 +522,24 @@
     const p = Math.max(0.18, Math.min(1, len / 110));
     return { ang, p, v: 330 + p * 500 };
   }
+  /* Fadenkreuz: Abschusswinkel so berechnen, dass der Pfeil genau den Punkt trifft (flache Flugbahn) */
+  const fein = window.matchMedia && window.matchMedia("(pointer: fine)").matches && !("ontouchstart" in window);
+  let zielArt = lies("imres-waldlauf-zielen", "") || (fein ? "kreuz" : "ziehen");
+  let kreuz = null; // { x, y, drueckt, id }
+  function kreuzVektor() {
+    if (!kreuz) return null;
+    const v = 830;
+    let ang = -Math.PI / 2;
+    for (let i = 0; i < 3; i++) {
+      const b = bogenPunkt(ang), X = kreuz.x - b.x, Y = b.y - kreuz.y, v2 = v * v;
+      const disc = v2 * v2 - G * (G * X * X + 2 * Y * v2);
+      const ax = Math.max(1, Math.abs(X));
+      const th = disc < 0 ? Math.PI / 4 : Math.atan((v2 - Math.sqrt(disc)) / (G * ax));
+      ang = X >= 0 ? -th : -(Math.PI - th);
+    }
+    ang = Math.max(-Math.PI + 0.05, Math.min(-0.05, ang));
+    return { ang, p: 1, v };
+  }
   function bogenPunkt(ang) { return { x: SCHULTER.x + Math.cos(ang) * 30, y: SCHULTER.y - 4 + Math.sin(ang) * 30 }; }
 
   function schiessen(z) {
@@ -846,6 +868,7 @@
     S.beben = Math.max(0, S.beben - dt);
     S.abkuehl = Math.max(0, S.abkuehl - dt);
     if (S.vorgemerkt && S.abkuehl <= 0) { schiessen(S.vorgemerkt); S.vorgemerkt = null; }
+    if (zielArt === "kreuz" && kreuz && kreuz.drueckt && S.abkuehl <= 0) { const zk = kreuzVektor(); if (zk) schiessen(zk); }
 
     // Gegner erscheinen – Rex bellt vorher
     if (S.warte.length) {
@@ -1241,6 +1264,22 @@
     ctx.restore();
   }
 
+  function kreuzZeichnen(z) {
+    const b = bogenPunkt(z.ang);
+    let x = b.x, y = b.y, vx = Math.cos(z.ang) * z.v, vy = Math.sin(z.ang) * z.v;
+    ctx.fillStyle = "rgba(224,160,70,.28)";
+    for (let i = 0; i < 40; i++) {
+      const sch = 0.02; vy += G * sch; x += vx * sch; y += vy * sch;
+      if (Math.hypot(x - kreuz.x, y - kreuz.y) < 10 || y < -10 || x < -10 || x > W + 10) break;
+      if (i % 2) { ctx.beginPath(); ctx.arc(x, y, 1.4, 0, Math.PI * 2); ctx.fill(); }
+    }
+    const bereit = S && S.abkuehl <= 0, kx = kreuz.x, ky = kreuz.y;
+    ctx.strokeStyle = bereit ? "rgba(255,207,122,.95)" : "rgba(224,160,70,.5)"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(kx, ky, 10, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(kx - 16, ky); ctx.lineTo(kx - 5, ky); ctx.moveTo(kx + 5, ky); ctx.lineTo(kx + 16, ky);
+    ctx.moveTo(kx, ky - 16); ctx.lineTo(kx, ky - 5); ctx.moveTo(kx, ky + 5); ctx.lineTo(kx, ky + 16); ctx.stroke();
+    ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(kx, ky, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
   function flugbahnZeichnen(z) {
     const b = bogenPunkt(z.ang);
     let x = b.x, y = b.y, vx = Math.cos(z.ang) * z.v, vy = Math.sin(z.ang) * z.v;
@@ -1382,8 +1421,10 @@
       });
       ctx.globalAlpha = 1;
     }
-    const z = zustand === "spiel" ? zielVektor() : null;
-    if (z) flugbahnZeichnen(z);
+    const zk = zustand === "spiel" && zielArt === "kreuz" ? kreuzVektor() : null;
+    const z = zustand === "spiel" ? (zk || zielVektor()) : null;
+    if (z && !zk) flugbahnZeichnen(z);
+    if (zk) kreuzZeichnen(zk);
     friedrichZeichnen(z);
     rexZeichnen();
     if (S) {
@@ -1454,11 +1495,12 @@
       '<p class="label" id="wl-label">' + esc(tx.label) + '</p>' +
       '<h3 id="wl-titel">' + esc(tx.titel) + '</h3>' +
       '<p class="tav-info" id="wl-text">' + esc(tx.text) + '</p>' +
-      '<p class="wl-steuerung" id="wl-steuerung">' + esc(tx.steuerung) + '</p>' +
+      '<p class="wl-steuerung" id="wl-steuerung">' + esc(zielArt === "kreuz" ? tx.steuerungKreuz : tx.steuerung) + '</p>' +
       '<div class="wl-rahmen"><div class="wl-buehne"><button type="button" class="wl-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><button type="button" class="wl-voll"><span aria-hidden="true">⛶</span></button><div class="wl-schleier"><div class="wl-tafel"></div></div></div></div>' +
       '<div class="wl-fuss"><span class="wl-rekord"></span><button type="button" class="wl-ton"></button></div>' +
       '<div class="wl-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".wl-buehne");
+    buehne.classList.toggle("kreuz", zielArt === "kreuz");
     buehne.insertBefore(leinwand, buehne.firstChild);
     leinwand.setAttribute("aria-label", tx.titel);
     schleier = root.querySelector(".wl-schleier");
@@ -1489,7 +1531,7 @@
     root.querySelector("#wl-label").textContent = tx.label;
     root.querySelector("#wl-titel").textContent = tx.titel;
     root.querySelector("#wl-text").textContent = tx.text;
-    root.querySelector("#wl-steuerung").textContent = tx.steuerung;
+    steuerungSetzen();
     leinwand.setAttribute("aria-label", tx.titel);
     fussSetzen(); listeNeu();
     if (zustand === "start") startZeigen();
@@ -1499,6 +1541,7 @@
     else if (zustand === "geschichte") geschichteZeigen(S.geschichteN, true);
   }
 
+  function steuerungSetzen() { const el = root.querySelector("#wl-steuerung"); if (el) el.textContent = zielArt === "kreuz" ? t().steuerungKreuz : t().steuerung; }
   function schleierAuf(html) { tafel.innerHTML = html; schleier.hidden = false; buehne.classList.remove("laeuft"); schleier.scrollTop = 0; }
   function schleierZu() { schleier.hidden = true; buehne.classList.add("laeuft"); }
 
@@ -1513,15 +1556,19 @@
     for (let i = 0; i < kapFrei; i++) h += '<button type="button" role="radio" data-kap="' + i + '" aria-checked="' + (i === startKap) + '" title="' + esc(tx.kap[i].titel) + '">' + ROEMISCH[i] + '</button>';
     return h + '</div>' + (startKap > 0 ? '<p class="wl-stufen-text">' + esc(tx.kap[startKap].titel) + ' · ' + esc(tx.uebung) + '</p>' : "");
   }
+  function zielHtml(tx) {
+    return '<div class="wl-stufen wl-zielart" role="radiogroup" aria-label="' + esc(tx.zielTitel) + '"><span>' + esc(tx.zielTitel) + '</span>' +
+      ["ziehen", "kreuz"].map(k => '<button type="button" role="radio" data-ziel="' + k + '" aria-checked="' + (k === zielArt) + '">' + esc(tx.zielArten[k]) + '</button>').join("") + '</div>';
+  }
   function startZeigen() {
     const tx = t();
     weltSetzen(KAPITEL[startKap].thema);
-    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + stufenHtml(tx) + kapitelHtml(tx) +
+    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + stufenHtml(tx) + kapitelHtml(tx) + zielHtml(tx) +
       '<button type="button" class="tav-knopf wl-haupt" data-tun="start">' + esc(tx.start) + '</button>');
   }
   function pauseZeigen() {
     const tx = t();
-    schleierAuf('<h4>' + esc(tx.pause) + '</h4><p>' + esc(tx.pauseText) + '</p><button type="button" class="tav-knopf wl-haupt" data-tun="weiter">' + esc(tx.weiter) + '</button>' +
+    schleierAuf('<h4>' + esc(tx.pause) + '</h4><p>' + esc(tx.pauseText) + '</p>' + zielHtml(tx) + '<button type="button" class="tav-knopf wl-haupt" data-tun="weiter">' + esc(tx.weiter) + '</button>' +
       '<button type="button" class="wl-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>');
   }
 
@@ -1622,6 +1669,13 @@
   }
 
   function tafelKlick(e) {
+    const za = e.target.closest("[data-ziel]");
+    if (za) {
+      zielArt = za.dataset.ziel; schreib("imres-waldlauf-zielen", zielArt); kreuz = null; zielen = null;
+      buehne.classList.toggle("kreuz", zielArt === "kreuz"); steuerungSetzen();
+      if (zustand === "start") startZeigen(); else if (zustand === "pause") pauseZeigen();
+      return;
+    }
     const st = e.target.closest("[data-stufe]");
     if (st && zustand === "start") {
       stufeWahl = st.dataset.stufe; schreib("imres-waldlauf-stufe", stufeWahl);
@@ -1729,14 +1783,30 @@
     ev.preventDefault();
     try { leinwand.setPointerCapture(ev.pointerId); } catch (_) {}
     const p = punkt(ev);
-    zielen = { id: ev.pointerId, sx: p.x, sy: p.y, x: p.x, y: p.y };
     audio();
+    if (zielArt === "kreuz") {
+      kreuz = { x: p.x, y: p.y, drueckt: true, id: ev.pointerId };
+      const zk = kreuzVektor();
+      if (zk) { if (S.abkuehl <= 0) schiessen(zk); else S.vorgemerkt = zk; }
+      return;
+    }
+    zielen = { id: ev.pointerId, sx: p.x, sy: p.y, x: p.x, y: p.y };
   });
   leinwand.addEventListener("pointermove", ev => {
+    if (zielArt === "kreuz") {
+      const p = punkt(ev);
+      if (ev.pointerType === "mouse" || (kreuz && kreuz.drueckt)) kreuz = { x: p.x, y: p.y, drueckt: !!(kreuz && kreuz.drueckt), id: ev.pointerId };
+      return;
+    }
     if (!zielen || ev.pointerId !== zielen.id) return;
     const p = punkt(ev); zielen.x = p.x; zielen.y = p.y;
   });
+  leinwand.addEventListener("pointerleave", ev => { if (zielArt === "kreuz" && ev.pointerType === "mouse" && !(kreuz && kreuz.drueckt)) kreuz = null; });
   function loslassen(ev, abbrechen) {
+    if (zielArt === "kreuz") {
+      if (kreuz) { kreuz.drueckt = false; if (ev.pointerType !== "mouse") kreuz = null; }
+      return;
+    }
     if (!zielen || ev.pointerId !== zielen.id) return;
     const z = abbrechen ? null : zielVektor();
     zielen = null;
@@ -1762,6 +1832,8 @@
 .wl-buehne { position: relative; width: 100%; max-width: min(100%, calc(76vh * .8)); justify-self: center; aspect-ratio: 4 / 5; border: 1px solid var(--line); background: #0b0a12; overflow: hidden; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; box-shadow: 0 14px 30px rgba(0,0,0,.45); }
 .wl-buehne canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: crosshair; -webkit-tap-highlight-color: transparent; }
 .wl-buehne.laeuft canvas { touch-action: none; }
+.wl-buehne.kreuz.laeuft canvas { cursor: none; }
+.wl-zielart span { font-size: .8rem; color: var(--ash); margin-right: .2rem; }
 .wl-schleier { position: absolute; inset: 0; display: grid; place-items: center; padding: clamp(.7rem, 3vw, 1.4rem); background: rgba(9,8,15,.68); text-align: center; overflow-y: auto; }
 .wl-schleier[hidden] { display: none; }
 .wl-tafel { display: grid; gap: .55rem; justify-items: center; width: 100%; max-width: 30rem; }
