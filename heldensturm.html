@@ -1463,7 +1463,7 @@ function itemDelta(it){const slot=bestSlotFor(it);const eq=Object.assign({},P.eq
 
 /* ================= DOM ================= */
 const $=id=>document.getElementById(id);
-const cv=$('cv');let cx=cv.getContext('2d');
+const cv=$('cv');let cx=cv.getContext('2d',{alpha:false});
 const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
@@ -2262,7 +2262,7 @@ function update(dt){
  if(G.firstWave&&G.stageTime>0.4){G.firstWave=0;firstWave()}
  if(G.stageKills>=G.need&&!G.room){if(S.boss){if(!G.boss&&!G.bossDone)spawnBoss()}else if(!G.guardE&&!G.guardDone)spawnGuard()}
  spawnTick(dt);if(!G.bot&&P.hp<P.st.maxHp*0.3){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=0.85;sfx('heart')}}
- if(G.time-G.lastSave>8){G.lastSave=G.time;persist()}
+ if(G.time-G.lastSave>20){G.lastSave=G.time;(window.requestIdleCallback||setTimeout)(()=>persist(),{timeout:2000})}
 }
 function updAlly(a,dt){
  if(a.hit>0)a.hit-=dt;
@@ -2307,13 +2307,20 @@ function musikTick(dt){if(!AC||!SAVE.music)return;G.musT-=dt;if(G.musT>0)return;
 let fpsAcc=0,fpsN=0,fpsBad=0,fpsGood=0;
 function fxQ(){return GF().q}
 function gfxSet(v,soft){SAVE.gfx=v;fpsBad=fpsGood=0;resize();persist();const el=$('gfxBox');if(!el)return;if(!soft){el.innerHTML=gfxInner();return}const L=gfxL();const n=$('gfxName');if(n)n.textContent=GFX[L].n;el.querySelectorAll('.gfxlbl span').forEach((s,i)=>s.classList.toggle('on',i===L));const b=el.querySelector('[data-act="gfx-auto"]');if(b){b.classList.remove('gold');b.textContent='Automatisch anpassen'}}
-function fpsWatch(dt){fpsAcc+=dt;fpsN++;if(fpsAcc<2)return;const avg=fpsAcc/fpsN;fpsAcc=0;fpsN=0;FPSNOW=Math.round(1/avg);const el=$('gfxFps');if(el)el.textContent=FPSNOW+' FPS';
- if(SAVE.gfx!=='auto'&&SAVE.gfx!==undefined)return;
- if(avg>0.027){fpsGood=0;if(++fpsBad>=2&&GAUTO>0){GCEIL=GAUTO-1;GAUTO--;fpsBad=0;resize()}}
- else if(avg<0.0185){fpsBad=0;if(++fpsGood>=4&&GAUTO<GCEIL){GAUTO++;fpsGood=0;resize()}}else{fpsBad=0;fpsGood=0}}
+const FW={iv:[],js:[],t:0};let PERF=null;
+function fpsWatch(dt,raw,js){FW.iv.push(raw);FW.js.push(js||0);FW.t+=raw;if(FW.t<2000)return;
+ const iv=FW.iv.slice().sort((a,b)=>a-b),ref=Math.max(4,iv[Math.floor(iv.length*0.2)]),miss=FW.iv.filter(x=>x>ref*1.6).length/FW.iv.length,avg=FW.t/FW.iv.length,jsA=FW.js.reduce((a,b)=>a+b,0)/FW.js.length,jsM=Math.max(...FW.js);
+ FPSNOW=Math.round(1000/avg);PERF={fps:FPSNOW,hz:Math.round(1000/ref),miss:Math.round(miss*100),js:jsA,jsM,lv:gfxL()};FW.iv.length=0;FW.js.length=0;FW.t=0;
+ const el=$('gfxFps');if(el)el.textContent=FPSNOW+' FPS';
+ if((SAVE.gfx!=='auto'&&SAVE.gfx!==undefined)||G.state!=='play'||G.paused)return;
+ if(miss>0.12){fpsGood=0;if(++fpsBad>=2&&GAUTO>0){GCEIL=GAUTO-1;GAUTO--;fpsBad=0;resize()}}
+ else if(miss<0.02){fpsBad=0;if(++fpsGood>=5&&GAUTO<GCEIL){GAUTO++;fpsGood=0;resize()}}else{fpsBad=0;fpsGood=0}}
+function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.font='700 11px ui-monospace,monospace';c.textAlign='left';c.textBaseline='top';
+ const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz`,`verpasste Bilder ${PERF.miss}%`,`Rechenzeit ⌀${PERF.js.toFixed(1)} / max ${PERF.jsM.toFixed(1)} ms`,`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}`];
+ const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;c.fillStyle='rgba(0,0,0,.65)';c.fillRect(8,y0,236,L.length*15+8);c.fillStyle=PERF.miss>10?'#ff8a7a':'#bfffc8';L.forEach((s,i)=>c.fillText(s,13,y0+4+i*15));c.restore()}
 const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Bloom, Funken und fliegende Gegner.</div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
- <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button></div>`};
+ <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button></div>`};
 const gfxRow=()=>`<div class="up vol" id="gfxBox">${gfxInner()}</div><div class="up" id="camBox">${camInner()}</div>`;
 const camInner=()=>{const L=camL();return`<div><div class="t">Wackeln &amp; Zeitlupe<small>${CAMN[L]}</small></div><div class="d">${CAMD[L]}</div></div><div class="chips">${CAMN.map((n,i)=>`<button class="chip ${i===L?'on':''}" data-act="camfx" data-v="${i}">${n}</button>`).join('')}</div>`};
 /* Farben */
@@ -2949,6 +2956,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'close':if(G.state==='between'){G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay();break;
   case'auto':SAVE.auto=!SAVE.auto;persist();renderPause(true);break;
   case'camfx':{SAVE.camfx=+b.dataset.v;persist();const el=$('camBox');if(el)el.innerHTML=camInner();break}
+  case'perf':SAVE.perf=!SAVE.perf;persist();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
   case'gfx-auto':gfxSet(SAVE.gfx==='auto'?gfxL():'auto');break;
   case'sound':SAVE.sound=!SAVE.sound;persist();renderPause(true);break;
   case'giveup':$('giveup').innerHTML=`<div class="spread"><div class="t" style="font-weight:800">Wirklich aufgeben?</div><div class="row"><button class="btn" data-act="giveup-no">Nein</button><button class="btn" style="border-color:var(--blood)" data-act="giveup-yes">Ja, aufgeben</button></div></div>`;break;
@@ -3470,12 +3478,13 @@ function wxTick(dt){const x=WX();if(!x||G.state!=='play')return;x.t+=dt;
      query(kx,ky,this.r+40,e=>{if(!e.boss&&d2(e,{x:kx,y:ky})<(this.r+e.r)**2){const hp=e.hp;e.hp-=e.maxHp*(e.guard?0.08:0.35);e.flash=0.1;if(e.hp<=0){e.hp=Math.min(hp,1);dealDmg(e,1e9,{quiet:1,noCrit:1,noLs:1})}}})}})}}}
  if(x.w==='gewitter'&&Math.random()<dt*0.12&&!G.bot){sflash('#c8d8ff',0.18,0.3);later(rnd(0.3,1.2),()=>sfx('thunder'))}}
 /* Bildschirm-Wetter: Tropfen, Flocken, Nebelbänke */
+const FOGS={};function fogSpr(col,a){const k=col+a;let s=FOGS[k];if(s)return s;s=document.createElement('canvas');s.width=s.height=128;const g=s.getContext('2d'),gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,`rgba(${col},${a})`);gr.addColorStop(1,`rgba(${col},0)`);g.fillStyle=gr;g.fillRect(0,0,128,128);return FOGS[k]=s}
 function drawWeather(t){const x=WX();if(!x||REDUCED&&x.w!=='nebel')return;const q=fxQ();
  if(x.w==='regen'||x.w==='gewitter'||x.w==='schnee'){const N=Math.round((x.w==='schnee'?90:130)*(q>1?1:0.5)*(x.w==='gewitter'?1.3:1));if(!x.drops||x.drops.length!==N){x.drops=[];for(let i=0;i<N;i++)x.drops.push([Math.random(),Math.random(),rnd(0.6,1.2)])}
   const c=cx;c.save();if(x.w==='schnee'){c.fillStyle='rgba(240,246,255,.75)';for(const d of x.drops){const yy=((d[1]+t*0.06*d[2])%1)*H,xx=((d[0]+Math.sin(t*0.8+d[1]*20)*0.01+t*0.01)%1)*W;c.globalAlpha=0.4+0.4*d[2]-0.3;c.beginPath();c.arc(xx,yy,1.2+d[2]*1.3,0,TAU);c.fill()}}
   else{c.strokeStyle='rgba(180,200,235,.5)';c.lineWidth=1;c.beginPath();for(const d of x.drops){const yy=((d[1]+t*1.1*d[2])%1)*(H+40)-20,xx=((d[0]+t*0.12*d[2])%1)*W;c.moveTo(xx,yy);c.lineTo(xx-4*d[2],yy+14*d[2])}c.globalAlpha=0.55;c.stroke()}
   c.restore()}
- if(x.w==='nebel'||x.w==='sporen'){const c=cx,col=x.w==='sporen'?'120,170,90':'190,200,210';c.save();for(let i=0;i<5;i++){const px=((i*0.27+t*0.012*(i%2?1:-1))%1+1)%1*W*1.4-W*0.2,py=H*(0.15+0.18*i),R=Math.max(W,H)*0.45;const g=c.createRadialGradient(px,py,0,px,py,R);g.addColorStop(0,`rgba(${col},${x.w==='sporen'?0.10:0.16})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(px-R,py-R,R*2,R*2)}c.restore()}}
+ if(x.w==='nebel'||x.w==='sporen'){const c=cx,col=x.w==='sporen'?'120,170,90':'190,200,210';c.save();for(let i=0;i<5;i++){const px=((i*0.27+t*0.012*(i%2?1:-1))%1+1)%1*W*1.4-W*0.2,py=H*(0.15+0.18*i),R=Math.max(W,H)*0.45;c.globalAlpha=1;c.drawImage(fogSpr(col,x.w==='sporen'?0.10:0.16),px-R,py-R,R*2,R*2)}c.restore()}}
 
 /* ================= Epische Schlacht: Gegner-Animation, Leichen, Combos, Bloom ================= */
 function enemyAnim(e,t){const A={on:0,dx:0,dy:0,rot:0};if(e.corpse||(fxQ()<2&&!e.boss&&!e.guard))return A;
@@ -3767,13 +3776,13 @@ let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[d
  if(k==='volSfx'&&performance.now()-volT>180){volT=performance.now();sfx('coin')}});
 
 /* ================= Schleife ================= */
-let last=performance.now();
-function frame(now){requestAnimationFrame(frame);const dt=Math.min(0.05,(now-last)/1000);last=now;
+let last=performance.now(),lastJs=0;
+function frame(now){requestAnimationFrame(frame);const raw=now-last,dt=Math.min(0.05,raw/1000);last=now;const js0=performance.now();
  if(G.state==='play'&&G.paused&&!G.overlay&&G.resumeT>0){G.resumeT-=dt;if(G.resumeT<=0){G.resumeT=0;G.paused=false}}
- if(G.state==='play'&&!G.paused){fpsWatch(dt);update(dt*timeScale(dt))}else if(G.state==='title')fpsWatch(dt);
+ fpsWatch(dt,raw,lastJs);if(G.state==='play'&&!G.paused)update(dt*timeScale(dt));
  musikTick(dt);
- try{render(dt);if(G.state==='title'&&stageCv)drawStage();if(bookCv)drawBook()}catch(e){console.error(e)}
- hudUpdate()}
+ try{render(dt);if(G.state==='play')drawPerf();if(G.state==='title'&&stageCv)drawStage();if(bookCv)drawBook()}catch(e){console.error(e)}
+ hudUpdate();lastJs=performance.now()-js0}
 volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
