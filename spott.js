@@ -100,13 +100,10 @@ window.BARRADIN_SPOTT = {
         "{n}, Echo hat dich mit einem Blitz gegrillt. Hast du gut geschmeckt? Nein? Dachte ich mir."
       ],
       kuotoa: [
-        "{n}, ihr betet Steine an und wundert euch, dass keiner zurückbetet.",
-        "Ihr riecht nach altem Fisch, {n}. Weil ihr alter Fisch seid.",
-        "{n}, eure Götter sind erfunden, eure Stadt ist Schutt, und euer Atem ist unverzeihlich."
-      ],
-      ploopploopeen: [
-        "Ploopploopeen? Ich nenne dich Blublupin, {n}, und daran ändert sich nichts.",
-        "{n}, dein Name klingt wie ein Frosch, der in eine Pfütze fällt."
+        "{n}, ihr betet einen Dämon mit zwei Köpfen an – und habt zusammen nicht mal einen halben Verstand.",
+        "Euer Kult riecht nach altem Fisch und schlechten Ideen, {n}.",
+        "{n}, eure falsche Erzpriesterin predigt, und ihr glotzt wie Fische, die auf den Köder warten.",
+        "Ploopploopeen hat euch gewarnt, {n}. Aber nein, ihr musstet ja unbedingt den Dämon anbeten."
       ],
       ilvara: [
         "{n}, du hast dich als Druidin verkleidet. Selbst die Verkleidung hatte mehr Persönlichkeit als du.",
@@ -186,10 +183,7 @@ window.BARRADIN_SPOTT = {
         "Ein Geier, {n}, der sich für schrecklich hält,\ndoch Echos Blitz hat dich ganz schnell gefällt!"
       ],
       kuotoa: [
-        "Ihr Fischgesichter, {n}, glotzt so stumpf und blöd,\nselbst euer Gott war ausgedacht – wie öd!"
-      ],
-      ploopploopeen: [
-        "Ploopploopeen, Blublupin – egal, wie man dich nennt:\nDein Name klingt nach Frosch, der durch die Pfütze rennt."
+        "Ihr Kultisten, {n}, kniet vor Tentakeln nieder –\nder falsche Gott, und ihr die falschen Brüder!"
       ],
       ilvara: [
         "Du Druidin aus Lügen, {n}, so falsch wie Gift im Tee,\nsprangst von der Brücke – und keiner rief: oh weh."
@@ -297,13 +291,10 @@ window.BARRADIN_SPOTT = {
         "{n}, Echo grilled you with a lightning bolt. Did you taste good? No? Thought not."
       ],
       kuotoa: [
-        "{n}, you worship rocks and wonder why nobody worships you back.",
-        "You smell like old fish, {n}. Because you are old fish.",
-        "{n}, your gods are made up, your city is rubble and your breath is unforgivable."
-      ],
-      ploopploopeen: [
-        "Ploopploopeen? I call you Blublupin, {n}, and that's not going to change.",
-        "{n}, your name sounds like a frog falling into a puddle."
+        "{n}, you worship a demon with two heads – and between all of you there isn't half a brain.",
+        "Your cult smells of old fish and bad ideas, {n}.",
+        "{n}, your false archpriestess preaches, and you gape like fish waiting for the bait.",
+        "Ploopploopeen warned you, {n}. But no, you just had to worship the demon."
       ],
       ilvara: [
         "{n}, you disguised yourself as a druid. Even the disguise had more personality than you.",
@@ -382,10 +373,7 @@ window.BARRADIN_SPOTT = {
         "A vulture, {n}, who thinks it's oh so grim,\nbut Echo's lightning fried you, limb by limb!"
       ],
       kuotoa: [
-        "You fish-faced fools, {n}, so dull and so dense,\neven your god was made up – no offence."
-      ],
-      ploopploopeen: [
-        "Ploopploopeen, Blublupin – whatever, who cares:\nyour name sounds like a frog falling down the stairs."
+        "You cultists, {n}, bow down to tentacles and slime –\nyou picked the wrong god at the very worst time!"
       ],
       ilvara: [
         "A druid made of lies, {n}, as false as poisoned tea,\nyou jumped off a bridge – and nobody cried, not me."

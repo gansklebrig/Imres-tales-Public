@@ -326,7 +326,7 @@
       ["ezekiel", "Der Demogorgon hat gerade aus dem Abgrund heraufgeschaut. Und gelacht. Mit beiden Köpfen.", "Demogorgon just peered up from the Abyss. And laughed. With both heads."],
       ["ezekiel", "Wenn du willst, sage ich allen, das war ich. Nein. Doch nicht.", "If you like, I'll tell everyone it was me. No. Never mind."],
       ["ezekiel", "Mein Dolch hat sich gerade vor Lachen von selbst gezogen.", "My dagger just drew itself from laughing."],
-      ["ezekiel", "Eine 1. Selbst die Kuo-Toa hätten jetzt Mitleid mit dir. Und die beten Ploopploopeen an.", "A 1. Even the kuo-toa would pity you now. And they pray to Ploopploopeen."],
+      ["ezekiel", "Eine 1. Dafür hätte selbst Ploopploopeen ein Gebet gesprochen. Und der hat für jeden gebetet.", "A 1. Even Ploopploopeen would have said a prayer for that. And he prayed for everyone."],
       ["ezekiel", "Ich habe Leute schon für weniger zum Schweigen gebracht. Aber das hier ist zu schön.", "I've silenced people for less. But this is too beautiful."],
       ["ezekiel", "Die Schatten weichen zurück. Sie wollen nicht mit dir gesehen werden.", "The shadows recoil. They don't want to be seen with you."],
       ["ezekiel", "Eine 1. Ich stehle sie. Niemand darf je davon erfahren. Außer allen, denen ich es erzähle.", "A 1. I'm stealing it. No one must ever know. Except everyone I tell."],
