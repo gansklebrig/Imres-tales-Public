@@ -1021,7 +1021,10 @@
     return { g: G.g, turme, setzlinge: G.setzlinge.map(x => turmKurz(x)) };
   }
   function turmNeu(z) {
-    return Object.assign({ cd: 0.5, ausT: 0, netz: 0, anim: 0, winkel: -Math.PI / 2, draussen: 0, wachs: 0, ziel: "vorne" }, z,
+    /* Laufzeit-Zustand immer frisch: Wölfe/Falke, die beim Rundenende noch unterwegs waren,
+       gibt es in der neuen Runde nicht mehr – sonst bliebe der Bau für immer stumm. */
+    return Object.assign({ winkel: -Math.PI / 2, wachs: 0, ziel: "vorne" }, z,
+      { cd: 0.5, ausT: 0, netz: 0, anim: 0, draussen: 0, unterwegs: false, blockiert: [] },
       z.tier ? { hp: 0, schlafT: 0, faehigT: 2 + Math.random() * 2 } : {});
   }
   function gartenVorbereiten(g, plaetze) {
@@ -2048,7 +2051,11 @@
     const ziele = imKreis(p.x, p.y, reich);
     if (!ziele.length) { T.cd = 0.1; return; }
     const wahl = l => zielSortieren(l, T, p);
-    if (w.typ === "biss" && (T.draussen || 0) > 0) { T.cd = 0.1; return; }
+    if (w.typ === "biss" && (T.draussen || 0) > 0) {
+      /* Sicherheitsnetz: zählt der Bau Wölfe, die es gar nicht mehr gibt, wieder freigeben */
+      T.draussen = S.A.geschosse.filter(g => g.art === "wolf" && g.turm === T && !g.weg).length;
+      if (T.draussen > 0) { T.cd = 0.1; return; }
+    }
     T.cd = w.rate; T.anim = 0.3;
     if (w.typ === "schuss") {
       const zs = wahl(ziele).slice(0, zw2 === "b" ? 3 : 1);
@@ -2190,6 +2197,7 @@
         } else T.faehigT = 0.5;
       }
     } else if (T.k === "falke") {
+      if (T.unterwegs && !A.geschosse.some(g => g.art === "falke" && g.turm === T)) T.unterwegs = false;
       if (T.faehigT <= 0 && !T.unterwegs) {
         const l = A.feinde.filter(e => !e.tot && !e.d.unbesiegbar && !e.unsT);
         const z = l.filter(e => e.beute)[0] || l.filter(e => e.flug).sort((a, b) => fortschritt(b) - fortschritt(a))[0] || l.sort((a, b) => fortschritt(b) - fortschritt(a))[0];
@@ -4843,5 +4851,5 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen };
 })();
