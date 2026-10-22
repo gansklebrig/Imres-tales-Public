@@ -216,7 +216,7 @@ details.stats .stat{padding:0 12px 12px}
 .it.empty{border-style:dashed;border-color:#3b3140}
 .it.sel{box-shadow:0 0 0 2px #fff inset}
 .r0{border-color:var(--r0)}.r1{border-color:var(--r1)}.r2{border-color:var(--r2)}.r3{border-color:var(--r3)}.r4{border-color:var(--r4);box-shadow:0 0 12px rgba(255,141,46,.35)}
-.c0{color:var(--r0)}.c1{color:var(--r1)}.c2{color:var(--r2)}.c3{color:var(--r3)}.c4{color:var(--r4)}.c5{color:#3fdc6a}.tdet .v1{display:none}.upv{color:#6ee06a;font-weight:800}@media (hover:hover){.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v1,.tree-wrap:has(.node.sel:hover) .tdet .v1{display:inline}.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v0,.tree-wrap:has(.node.sel:hover) .tdet .v0{display:none}}.rlstart{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted,#b0a0a0)}.rlstart select{background:#1f1723;color:var(--text,#f0e6d4);border:1px solid #5a4560;border-radius:10px;padding:7px 10px;font:inherit;font-weight:700;max-width:230px}.gfxlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted,#9a8a90);margin-top:2px}.gfxlbl span.on{color:#e5b454;font-weight:800}.curse{color:#c070ff;font-weight:800}.c5h{color:#5affc0;text-shadow:0 0 8px rgba(90,255,192,.35)}.setrow{padding:7px 0;border-top:1px solid rgba(255,255,255,.07)}.setrow.done b{text-decoration:underline;text-decoration-color:rgba(90,255,192,.5)}.setp{display:flex;gap:6px;font-size:15px;color:#4a5a50;margin:2px 0}.setp .on{color:#3fdc6a}.r5{border-color:#3fdc6a;box-shadow:0 0 12px rgba(63,220,106,.35)}
+.c0{color:var(--r0)}.c1{color:var(--r1)}.c2{color:var(--r2)}.c3{color:var(--r3)}.c4{color:var(--r4)}.c5{color:#3fdc6a}.dpsbox{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:3px}.dpsrow{display:flex;justify-content:space-between;gap:10px;font-size:14px}.it .ua.dn{background:#5a2020;color:#ffb0a0}.fsrow{display:flex;justify-content:space-between;align-items:center;gap:10px}.tdet .v1{display:none}.upv{color:#6ee06a;font-weight:800}@media (hover:hover){.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v1,.tree-wrap:has(.node.sel:hover) .tdet .v1{display:inline}.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v0,.tree-wrap:has(.node.sel:hover) .tdet .v0{display:none}}.rlstart{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted,#b0a0a0)}.rlstart select{background:#1f1723;color:var(--text,#f0e6d4);border:1px solid #5a4560;border-radius:10px;padding:7px 10px;font:inherit;font-weight:700;max-width:230px}.gfxlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted,#9a8a90);margin-top:2px}.gfxlbl span.on{color:#e5b454;font-weight:800}.curse{color:#c070ff;font-weight:800}.c5h{color:#5affc0;text-shadow:0 0 8px rgba(90,255,192,.35)}.setrow{padding:7px 0;border-top:1px solid rgba(255,255,255,.07)}.setrow.done b{text-decoration:underline;text-decoration-color:rgba(90,255,192,.5)}.setp{display:flex;gap:6px;font-size:15px;color:#4a5a50;margin:2px 0}.setp .on{color:#3fdc6a}.r5{border-color:#3fdc6a;box-shadow:0 0 12px rgba(63,220,106,.35)}
 .idet2{position:relative;display:flex;flex-direction:column;gap:8px;border-color:#5a4560;background:#1f1723}
 .idet2 .x{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#120d14;font-size:20px;line-height:1}
 .cmpt{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
@@ -1459,6 +1459,11 @@ const armorRed=a=>Math.max(0,a)/(Math.max(0,a)+armorK());
 function power(st){const dps=st.dmg*st.rate*(1+st.crit*(st.critd-1))*(0.55+0.45*st.skill)*(1+0.3*(st.area-1));const ehp=st.maxHp/(1-armorRed(st.armor)*0.95)*(1+st.ls*3)+st.regen*25;return Math.pow(dps,0.55)*Math.pow(ehp,0.45)*(1+0.5*st.cdr)*(1+0.3*(st.speed/P.hero.speed-1))*(1+0.05*(st.gold-1)+0.05*st.luck)}
 function bestSlotFor(it){if(it.slot!=='ring')return it.slot;if(!P.eq.ring1)return'ring1';if(!P.eq.ring2)return'ring2';
  const a=power(computeStats(Object.assign({},P.eq,{ring1:it}))),b=power(computeStats(Object.assign({},P.eq,{ring2:it})));return a>=b?'ring1':'ring2'}
+/* DPS der Grundangriffe: Schaden × Angriffe pro Sekunde × kritischer Mittelwert */
+function dpsOf(st){const cf=1+Math.min(st.crit,1)*(st.critd-1);return{m:st.dmgM*st.rateM*cf,r:st.dmgR*st.rateR*cf}}
+const dpsKind=it=>it.slot==='weapon'?'m':it.slot==='ranged'?'r':'a';
+const dpsPick=(d,k)=>k==='a'?(d.m+d.r)/2:d[k];
+function itemDps(it,base){base=base||computeStats(P.eq);const slot=bestSlotFor(it);const st=computeStats(Object.assign({},P.eq,{[slot]:it}));const a=dpsOf(base),b=dpsOf(st),k=dpsKind(it);return{d:dpsPick(b,k)/Math.max(1e-6,dpsPick(a,k))-1,a,b,k}}
 function itemDelta(it){const slot=bestSlotFor(it);const eq=Object.assign({},P.eq,{[slot]:it});const base=power(computeStats(P.eq));return power(computeStats(eq))/base-1}
 
 /* ================= DOM ================= */
@@ -1468,7 +1473,7 @@ const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='23.10.2026 · weiche Kamera';
+const HS_VERSION='23.10.2026 · DPS & Vollbild';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
 let GAUTO=3,GCEIL=3,FPSNOW=60;
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
@@ -2326,7 +2331,11 @@ function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransfo
 const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Bloom, Funken und fliegende Gegner.</div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
  <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button></div>`};
-const gfxRow=()=>`<div class="up vol" id="gfxBox">${gfxInner()}</div><div class="up" id="camBox">${camInner()}</div>`;
+const fsOk=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function fsToggle(){try{if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const e=document.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast('Vollbild wird hier nicht unterstützt.','#ff8a7a'))}}catch(e){toast('Vollbild wird hier nicht unterstützt.','#ff8a7a')}}
+document.addEventListener('fullscreenchange',()=>{setTimeout(resize,60);const b=$('fsBtn');if(b)b.textContent=fsOn()?'Vollbild beenden':'Vollbild'});document.addEventListener('webkitfullscreenchange',()=>setTimeout(resize,60));
+const fsRow=()=>fsOk()?`<div class="up fsrow"><div><div class="t">Vollbild</div><div class="d">Das Spiel füllt den ganzen Bildschirm. Am PC auch mit der Taste F.</div></div><button class="btn" id="fsBtn" data-act="fs">${fsOn()?'Vollbild beenden':'Vollbild'}</button></div>`:'';
+const gfxRow=()=>`${fsRow()}<div class="up vol" id="gfxBox">${gfxInner()}</div><div class="up" id="camBox">${camInner()}</div>`;
 const camInner=()=>{const L=camL();return`<div><div class="t">Wackeln &amp; Zeitlupe<small>${CAMN[L]}</small></div><div class="d">${CAMD[L]}</div></div><div class="chips">${CAMN.map((n,i)=>`<button class="chip ${i===L?'on':''}" data-act="camfx" data-v="${i}">${n}</button>`).join('')}</div>`};
 /* Farben */
 const RGBC={},LITE={};
@@ -2702,7 +2711,7 @@ function buildSkillBar(){P.bar=(P.bar||P.learn.slice(0,6)).filter(id=>P.learn.in
  skillsEl.innerHTML=P.actives.map((n,i)=>`<button class="sk ready" data-sk="${i}" style="right:${SKPOS[i][0]}px;bottom:${SKPOS[i][1]}px" aria-label="${esc(n.name)}"><span class="ic">${n.ic}</span><i class="cd"></i><span class="cdt"></span><span class="key">${i+1}</span></button>`).join('');
  P.skBtns=[...skillsEl.querySelectorAll('.sk')].map(el=>({el,cd:el.querySelector('.cd'),cdt:el.querySelector('.cdt'),q:-1,tx:null}));
  P.skBtns.forEach((b,i)=>b.el.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();useSkill(i)}))}
-function updateInvBadge(){G.upCount=P.bag.filter(it=>itemDelta(it)>0.005).length}
+function updateInvBadge(){const base=computeStats(P.eq);G.upCount=P.bag.filter(it=>itemDps(it,base).d>0.005).length}
 
 /* ================= Bestenliste =================
    Gemeinsam über den Supabase-Server der Website (Tabelle hs_bestenliste, siehe supabase-heldensturm.sql),
@@ -2873,27 +2882,28 @@ function statMap(it){const m={};if(!it)return m;if(it.wdmg){m.wdmg=it.wdmg;m.wra
 function compareHtml(it,cur){const a=statMap(it),b=statMap(cur);const keys=Object.keys(STLBL).filter(k=>a[k]!==undefined||b[k]!==undefined);
  return`<table class="cmpt"><thead><tr><th></th><th class="c${it.rar}">Neu</th><th>${cur?`<span class="c${cur.rar}">Angelegt</span>`:'Angelegt'}</th></tr></thead><tbody>${keys.map(k=>{const L=STLBL[k],x=a[k],y=b[k];const better=k==='wrate'?null:(x||0)>(y||0)?'good':(x||0)<(y||0)?'bad':'';
   return`<tr><td>${L[0]}</td><td class="${better||''}">${x!==undefined?L[1](x):'–'}${better==='good'?' ▲':better==='bad'?' ▼':''}</td><td class="muted">${y!==undefined?L[1](y):'–'}</td></tr>`}).join('')}</tbody></table>`}
-function sortBag(){const d=new Map(P.bag.map(it=>[it,itemDelta(it)]));P.bag.sort((x,y)=>d.get(y)-d.get(x)||y.rar-x.rar||y.ilvl-x.ilvl)}
+function sortBag(){const base=computeStats(P.eq),d=new Map(P.bag.map(it=>[it,itemDps(it,base).d])),k=new Map(P.bag.map(it=>[it,itemDelta(it)]));P.bag.sort((x,y)=>(d.get(y)-d.get(x))||(k.get(y)-k.get(x))||y.rar-x.rar||y.ilvl-x.ilvl)}
 function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel;updateInvBadge();
  let selIt=null,selT=null,selK=null;if(sel){[selT,selK]=sel.split(':');selIt=selT==='e'?P.eq[selK]:P.bag[+selK];if(!selIt){G.invSel=null}}
  const target=selIt&&selT==='b'?bestSlotFor(selIt):null;
  const ico=it=>`<canvas class="ico" data-ico="${it.slot}|${it.rar}|${esc(it.base||'')}" width="72" height="72" aria-hidden="true"></canvas>`;
  const eq=SLOTS.map(s=>{const it=P.eq[s];return`<button class="it ${it?'r'+it.rar:'empty'} ${sel==='e:'+s?'sel':''} ${target===s?'cmp':''}" data-act="inv-sel" data-k="e:${s}" ${it?'':'disabled'}><span class="sl">${SLOTLBL[s]}</span>${it?ico(it):''}<span class="nm ${it?'c'+it.rar:''}">${it?esc(it.name):'leer'}</span></button>`}).join('');
- const bag=P.bag.map((it,i)=>{const dl=itemDelta(it);return`<button class="it r${it.rar} ${sel==='b:'+i?'sel':''}" data-act="inv-sel" data-k="b:${i}"><span class="lv">${it.ilvl}</span>${dl>0.005?'<span class="ua">▲</span>':''}${ico(it)}<span class="nm">${esc(it.name)}</span></button>`}).join('');
+ const DB=computeStats(P.eq);const bag=P.bag.map((it,i)=>{const dd=itemDps(it,DB).d;return`<button class="it r${it.rar} ${sel==='b:'+i?'sel':''}" data-act="inv-sel" data-k="b:${i}"><span class="lv">${it.ilvl}</span>${Math.abs(dd)>0.005?`<span class="ua ${dd>0?'':'dn'}">${dd>0?'+':''}${Math.round(dd*100)}%</span>`:''}${ico(it)}<span class="nm">${esc(it.name)}</span></button>`}).join('');
  let det='';
- if(selIt){const it=selIt,cur=selT==='b'?P.eq[target]:null;let head='';if(selT==='b'){const dl=itemDelta(it);head=`<div class="${dl>0.005?'good':dl<-0.005?'bad':'muted'}" style="font-weight:800">${dl>0.005?'▲ ':dl<-0.005?'▼ ':''}${dl>=0?'+':''}${Math.round(dl*100)}% Kampfkraft gegenüber dem Angelegten</div>`}
+ if(selIt){const it=selIt,cur=selT==='b'?P.eq[target]:null;let head='';if(selT==='b'){const dl=itemDelta(it),D=itemDps(it);const row=(n,x,y)=>{const q=y/Math.max(1e-6,x)-1,c=q>0.005?'good':q<-0.005?'bad':'muted';return`<div class="dpsrow"><span>${n}</span><span>${fmt(x)} → <b class="${c}">${fmt(y)}</b> <span class="${c}">(${q>=0?'+':''}${Math.round(q*100)}%)</span></span></div>`};
+  head=`<div class="dpsbox"><div class="eyebrow">DPS-Vergleich</div>${row('Nahkampf-DPS',D.a.m,D.b.m)}${row('Fernkampf-DPS',D.a.r,D.b.r)}<div class="muted" style="font-size:12px;margin-top:4px">Kampfkraft gesamt (mit Leben, Rüstung &amp; Co.): <span class="${dl>0.005?'good':dl<-0.005?'bad':''}">${dl>=0?'+':''}${Math.round(dl*100)}%</span></div></div>`}
   const pw=it.pow&&LPOW[it.pow]?`<div class="lpow"><b>${LPOW[it.pow].n}</b> ${LPOW[it.pow].d}</div>`:'';const cpw=cur&&cur.pow&&LPOW[cur.pow]?`<div class="lpow old"><b>Angelegt: ${LPOW[cur.pow].n}</b> ${LPOW[cur.pow].d}</div>`:'';
   det=`<div class="idet2 card" id="idet2"><button class="x" data-act="inv-desel" aria-label="Schließen">×</button>
    <div class="sh-head">${ico(it)}<div><div class="in c${it.rar}">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]}${it.slot==='weapon'||it.slot==='ranged'?' ('+esc(it.base)+')':''} · Stufe ${it.ilvl}${cur?` · ersetzt <span class="c${cur.rar}">${esc(cur.name)}</span>`:''}</div></div></div>
    ${selT==='b'?compareHtml(it,cur):`<ul>${itemLines(it).map(l=>`<li>${l}</li>`).join('')}</ul>`}${pw}${cpw}${head}
    <div class="row">${selT==='b'?`<button class="btn gold" data-act="inv-equip">Anlegen</button><button class="btn" data-act="inv-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`:(selK!=='weapon'&&selK!=='ranged'?`<button class="btn" data-act="inv-unequip" ${P.bag.length>=24?'disabled':''}>Ablegen</button>`:'<span class="muted" style="font-size:13px">Waffen kannst du nur austauschen.</span>')}</div></div>`}
- const lines=[['Nahkampf',`${fmt(st.dmgM)} · ${f1(st.rateM)} pro s`],['Fernkampf',`${fmt(st.dmgR)} · ${f1(st.rateR)} pro s`],['Fähigkeitsschaden-Basis',fmt(st.dmg)],['Leben',fmt(st.maxHp)],['Rüstung',`${fmt(st.armor)} (−${Math.round(armorRed(st.armor)*100)}%)`],['Kritische Trefferchance',Math.round(st.crit*100)+'%'],['Kritischer Schaden',pc(st.critd)],['Fertigkeitsschaden',pc(st.skill)],['Abklingzeiten',`−${Math.round(st.cdr*100)}%`],['Lebensraub',f1(st.ls*100)+'%'],['Regeneration',f1(st.regen)+' / s'],['Wirkungsbereich',pc(st.area)],['Goldfund',pc(st.gold)],['Ausdauer',fmt(P.stamMax)],['Heiltränke',`${P.pots} / ${P.potMax}`]];
+ const DS=dpsOf(st);const lines=[['Nahkampf-DPS',fmt(DS.m)],['Fernkampf-DPS',fmt(DS.r)],['Nahkampf',`${fmt(st.dmgM)} · ${f1(st.rateM)} pro s`],['Fernkampf',`${fmt(st.dmgR)} · ${f1(st.rateR)} pro s`],['Fähigkeitsschaden-Basis',fmt(st.dmg)],['Leben',fmt(st.maxHp)],['Rüstung',`${fmt(st.armor)} (−${Math.round(armorRed(st.armor)*100)}%)`],['Kritische Trefferchance',Math.round(st.crit*100)+'%'],['Kritischer Schaden',pc(st.critd)],['Fertigkeitsschaden',pc(st.skill)],['Abklingzeiten',`−${Math.round(st.cdr*100)}%`],['Lebensraub',f1(st.ls*100)+'%'],['Regeneration',f1(st.regen)+' / s'],['Wirkungsbereich',pc(st.area)],['Goldfund',pc(st.gold)],['Ausdauer',fmt(P.stamMax)],['Heiltränke',`${P.pots} / ${P.potMax}`]];
  const pows=[...(P.lp||[])].filter(k=>LPOW[k]).map(k=>`<div class="lpow"><b>${LPOW[k].n}</b> ${LPOW[k].d}</div>`).join('');
  showScreen(`<div class="wrap inv">
   ${menuTabs('inv')}
   <div class="inv-head"><h2>Beutel<small>${P.bag.length} / 24</small></h2><div class="row"><button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten</button><button class="btn gold" data-act="close">${G.state==='between'?'Zurück':'Weiter'}</button></div></div>
   <div class="eyebrow">Angelegt</div><div class="equip">${eq}</div>
-  <div class="eyebrow">Im Beutel · stärkste zuerst ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
+  <div class="eyebrow">Im Beutel · nach DPS sortiert ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
   <div class="bag">${bag||'<div class="muted" style="grid-column:1/-1">Noch leer. Gegner lassen Ausrüstung fallen – einfach drüberlaufen. Leere Plätze werden automatisch belegt.</div>'}</div>
   ${det}
   <details class="stats" ${G.statsOpen?'open':''}><summary>Heldenwerte</summary><div class="stat">${lines.map(l=>`<span>${l[0]}</span><span>${l[1]}</span>`).join('')}</div>${pows?`<div style="padding:0 12px 12px">${pows}</div>`:''}</details>
@@ -2969,6 +2979,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'auto':SAVE.auto=!SAVE.auto;persist();renderPause(true);break;
   case'camfx':{SAVE.camfx=+b.dataset.v;persist();const el=$('camBox');if(el)el.innerHTML=camInner();break}
   case'perf':SAVE.perf=!SAVE.perf;persist();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
+  case'fs':fsToggle();break;
   case'gfx-auto':gfxSet(SAVE.gfx==='auto'?gfxL():'auto');break;
   case'sound':SAVE.sound=!SAVE.sound;persist();renderPause(true);break;
   case'giveup':$('giveup').innerHTML=`<div class="spread"><div class="t" style="font-weight:800">Wirklich aufgeben?</div><div class="row"><button class="btn" data-act="giveup-no">Nein</button><button class="btn" style="border-color:var(--blood)" data-act="giveup-yes">Ja, aufgeben</button></div></div>`;break;
@@ -2980,7 +2991,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'inv-desel':G.invSel=null;renderInv(true);break;
   case'inv-equip':{const i=+G.invSel.split(':')[1];equipFromBag(i);G.invSel=null;sfx('equip');renderInv(true);break}
   case'inv-scrap':{const i=+G.invSel.split(':')[1];const it=P.bag[i];if(it){const v=scrapValue(it);SAVE.gold+=v;G.goldRun+=v;P.bag.splice(i,1);sfx('scrap')}G.invSel=null;updateInvBadge();renderInv(true);break}
-  case'inv-scrapall':{let v=0;P.bag=P.bag.filter(it=>{if(it.rar<4&&!it.up&&!(it.sock&&it.sock.some(Boolean))&&itemDelta(it)<=0.005){v+=scrapValue(it);return false}return true});SAVE.gold+=v;G.goldRun+=v;if(v){sfx('scrap');toast(`+${fmt(v)} Gold`,'#e5b454')}G.invSel=null;updateInvBadge();renderInv(true);break}
+  case'inv-scrapall':{let v=0;P.bag=P.bag.filter(it=>{if(it.rar<4&&!it.up&&!(it.sock&&it.sock.some(Boolean))&&itemDelta(it)<=0.005&&itemDps(it).d<=0.005){v+=scrapValue(it);return false}return true});SAVE.gold+=v;G.goldRun+=v;if(v){sfx('scrap');toast(`+${fmt(v)} Gold`,'#e5b454')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<24&&k!=='weapon'&&k!=='ranged'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'tree-sel':if(G.barPick&&b.dataset.i!==undefined){const i=+b.dataset.i;if(!P.bar.includes(G.barPick)){P.bar[i]=G.barPick;buildSkillBar();sfx('equip')}G.treeSel=G.barPick;G.barPick=null;renderTree(true);break}if(G.barPick&&G.barPick!==b.dataset.id)G.barPick=null;if(G.treeOpen&&G.treeSel===b.dataset.id&&b.dataset.i===undefined)G.treeOpen=false;else{G.treeOpen=true;G.treeSel=b.dataset.id}{const n=P.hero.tree.find(x=>x.id===b.dataset.id);if(n)G.treeBr=n.b}renderTree(true);break;
   case'tree-close':G.treeOpen=false;G.barPick=null;renderTree(true);break;
@@ -2991,7 +3002,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'bar-cancel':G.barPick=null;renderTree(true);break;
   case'tree-learn':{const n=P.hero.tree.find(x=>x.id===G.treeSel);if(n)learn(n);renderTree(true);break}
  }});
-window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(ev.code))return;audioInit();
+window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(ev.code))return;audioInit();if(ev.code==='KeyF'&&!ev.ctrlKey&&!ev.metaKey&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))&&fsOk()){fsToggle();ev.preventDefault();return}
  if(G.state==='play'&&!G.overlay&&/^(Arrow|Key[WASD])/.test(ev.code))keys[ev.code]=true;
  if(G.state==='play'&&!G.overlay&&/^Shift/.test(ev.code))keys[ev.code]=true;
  if(G.state==='play'&&!G.paused){keys[ev.code]=true;if(/^Digit[1-6]$/.test(ev.code)){useSkill(+ev.code.slice(5)-1)}else if(ev.code==='KeyQ')usePotion();else if(ev.code==='KeyI')openOverlay('inv');else if(ev.code==='KeyT')openOverlay('tree');else if(ev.code==='Escape'||ev.code==='KeyP')openOverlay('pause');
