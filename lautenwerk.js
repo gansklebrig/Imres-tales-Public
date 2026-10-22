@@ -1317,10 +1317,14 @@
     if (!b.buf) return;
     const D = b.buf.duration;
     while (b.naechst < ctx.currentTime + 6) {
-      const len = Math.min(D * .8, zz(9, 22)), X = Math.min(3, len * .3), off = Math.random() * Math.max(0, D - len), t = b.naechst;
-      const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b.buf; q.playbackRate.value = zz(.985, 1.015);
+      /* len und X in echter Zeit; der Ausschnitt muss samt Tempo-Abweichung vollständig in der Datei liegen und darf erst
+         nach dem Ende der Ausblendung aufhören – sonst wird er hörbar abgeschnitten. Kurze Aufnahmen: lange Überblendung. */
+      const rate = zz(.985, 1.015), kurz = D < 15;
+      const len = Math.min((D - .3) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
+      const inhalt = len * rate, off = Math.random() * Math.max(0, D - inhalt - .2), t = b.naechst;
+      const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b.buf; q.playbackRate.value = rate;
       g.gain.value = 0; g.gain.setValueCurveAtTime(KUL_EIN, t, X); g.gain.setValueCurveAtTime(KUL_AUS, t + len - X, X);
-      q.connect(g); g.connect(b.out); q.start(t, off, len + .05);
+      q.connect(g); g.connect(b.out); q.start(t, off); q.stop(t + len + .05);
       k.knoten.push(q); q.onended = () => { const i = k.knoten.indexOf(q); if (i >= 0) k.knoten.splice(i, 1); };
       b.naechst = t + len - X;
     }
