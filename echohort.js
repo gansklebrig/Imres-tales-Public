@@ -83,7 +83,7 @@
       },
       ausbruch: { feuerball: "FEUERBALL!", blitz: "BLITZ!", baer: "BÄRENWUT!", grummeln: "Hmpf. Echo schmollt.", feuersturm: "FEUERSTURM!" },
       ausbruchTipp: "Der Zorn ist voll. Bei Echo weiß man nie, was jetzt passiert …",
-      kommen: n => "Die Plünderer kommen in " + n + " …", jetzt: "Sofort kommen lassen", klaut: n => "−" + n + " Gold",
+      kommen: n => "Die Plünderer kommen in " + n + " …", jetzt: "Sofort kommen lassen", los: "Bereit – los geht's!", klaut: n => "−" + n + " Gold",
       bossRuft: { anfuehrer: "Der Goblin-Anführer!", glasstab: "Glasstab, Anführer der Roten Roben!", bugbaer: "Der Bugbear vom Wachturm!", nezna: "Nezna, die Drow!", venomfang: "Venomfang!", vrock: "Ein Vrock!", demogorgon: "DEMOGORGON!", riese: "Der rasende Riese!" },
       demo: { text: "Demogorgon ist nicht zu besiegen. Halte ihn auf, bis er im See versinkt!", weg: "Demogorgon versinkt im See …", schrei: "Sein Schrei lässt die Magie erlöschen!" },
       neznaFlieht: "Nezna wird zur Fledermaus!", gift: "Giftatem!", wurf: "Felswurf!", netzTreffer: "Eingesponnen!", geheimgang: "Geheimgang!",
@@ -148,7 +148,7 @@
       frei: "frei", maxTier: "max", schlaeft: "schläft …",
       setzHinweis: "Neues Gebiet! Deine Wächter warten als Setzlinge darauf, kostenlos neu gepflanzt zu werden.",
       gartenHinweis: "Deine Wächter und Tiere bleiben stehen. Jede Welle wird härter.",
-      welle: (n, m) => "Welle " + n + "/" + m, welleIn: (n, m, sek) => "Welle " + n + "/" + m + " in " + sek + " …", welleGeschafft: "Welle geschafft!", rufen: n => "Welle rufen +" + n + " 🌱",
+      welle: (n, m) => "Welle " + n + "/" + m, welleIn: (n, m, sek) => "Welle " + n + "/" + m + " in " + sek + " …", welleBereit: (n, m) => "Welle " + n + "/" + m + " – starte, wenn du bereit bist", welleGeschafft: "Welle geschafft!", rufen: n => "Welle rufen +" + n + " 🌱",
       druide: { knopf: "🌙 Druidenkreis", titel: "Der Druidenkreis", text: "Mondsteine bleiben über alle Raubzüge hinweg erhalten. Für jedes gewonnene Level gibt es einen, für Bosse und neue Sterne mehr.", steine: n => "🌙 " + n + " Mondsteine", voll: "gemeistert", verdient: n => "+" + n + " 🌙" },
       talente: {
         boden: ["Fruchtbarer Boden", "+15 Saat zu Beginn jedes Levels."], saatgut: ["Gutes Saatgut", "Wächter kosten 6 % weniger."],
@@ -280,7 +280,7 @@
       },
       ausbruch: { feuerball: "FIREBALL!", blitz: "LIGHTNING!", baer: "BEAR RAGE!", grummeln: "Hmph. Echo sulks.", feuersturm: "FIRESTORM!" },
       ausbruchTipp: "His rage is full. With Echo you never know what happens next …",
-      kommen: n => "The plunderers arrive in " + n + " …", jetzt: "Bring them on now", klaut: n => "−" + n + " gold",
+      kommen: n => "The plunderers arrive in " + n + " …", jetzt: "Bring them on now", los: "Ready – let's go!", klaut: n => "−" + n + " gold",
       bossRuft: { anfuehrer: "The goblin boss!", glasstab: "Glasstaff, leader of the Redbrands!", bugbaer: "The bugbear of the watchtower!", nezna: "Nezna the drow!", venomfang: "Venomfang!", vrock: "A vrock!", demogorgon: "DEMOGORGON!", riese: "The raging giant!" },
       demo: { text: "Demogorgon cannot be defeated. Hold him off until he sinks back into the lake!", weg: "Demogorgon sinks into the lake …", schrei: "His scream snuffs out all magic!" },
       neznaFlieht: "Nezna turns into a bat!", gift: "Poison breath!", wurf: "Boulder throw!", netzTreffer: "Webbed!", geheimgang: "Secret passage!",
@@ -345,7 +345,7 @@
       frei: "free", maxTier: "max", schlaeft: "sleeping …",
       setzHinweis: "New region! Your guardians wait as seedlings to be replanted for free.",
       gartenHinweis: "Your guardians and animals stay. Every wave gets harder.",
-      welle: (n, m) => "Wave " + n + "/" + m, welleIn: (n, m, sek) => "Wave " + n + "/" + m + " in " + sek + " …", welleGeschafft: "Wave cleared!", rufen: n => "Call wave +" + n + " 🌱",
+      welle: (n, m) => "Wave " + n + "/" + m, welleIn: (n, m, sek) => "Wave " + n + "/" + m + " in " + sek + " …", welleBereit: (n, m) => "Wave " + n + "/" + m + " – start when ready", welleGeschafft: "Wave cleared!", rufen: n => "Call wave +" + n + " 🌱",
       druide: { knopf: "🌙 Druid circle", titel: "The druid circle", text: "Moonstones stay with you across all raids. Every won level earns one, bosses and new stars earn more.", steine: n => "🌙 " + n + " moonstones", voll: "mastered", verdient: n => "+" + n + " 🌙" },
       talente: {
         boden: ["Fertile soil", "+15 seeds at the start of every level."], saatgut: ["Good seed", "Guardians cost 6 % less."],
@@ -1670,7 +1670,23 @@
         l.push({ x, y, turm: null }); seite = -seite; break;
       }
     }
-    return l.filter((q, i) => i % 4 !== 3).slice(0, 12);
+    /* Reihenfolge der ersten zwölf bleibt wie früher, damit gespeicherte Gärten an ihrem Platz bleiben */
+    const alt = l.filter((q, i) => i % 4 !== 3), basis = alt.slice(0, 12), mehr = l.filter(q => !basis.includes(q));
+    const frei = (x, y, abstand) => x >= 22 && x <= W - 22 && y >= 46 && y <= LEISTE - 24 && abstZumPfad(P, x, y) >= 31 && abst(x, y, HORT.x, HORT.y) >= 50 && basis.every(q => abst(q.x, q.y, x, y) >= abstand);
+    // weitere Plätze direkt am Weg
+    mehr.forEach(q => { if (frei(q.x, q.y, 40)) basis.push(q); });
+    // Luftwachen: Plätze an der Flugschneise vom Eingang zum Hort, wo fliegende Gegner entlangkommen
+    const st = P.p[0], kand = [];
+    for (let y = 60; y <= LEISTE - 30; y += 12) for (let x = 30; x <= W - 30; x += 12) {
+      const u = klemm((y - 20) / (HORT.y - 30), 0, 1), mx = st.x + (HORT.x - st.x) * u, breite = 120 * (1 - u) + 20;
+      const d = Math.abs(x - mx);
+      if (d > breite + 30) continue;
+      kand.push({ x, y, wert: d / (breite + 30) + Math.abs(u - 0.62) * 0.8 });
+    }
+    kand.sort((a, b) => a.wert - b.wert || a.y - b.y || a.x - b.x);
+    let luft = 0;
+    for (const k of kand) { if (luft >= 6) break; if (frei(k.x, k.y, 46)) { basis.push({ x: k.x, y: k.y, turm: null, luft: true }); luft++; } }
+    return basis;
   }
 
   const WELLEN = 3;
@@ -1713,6 +1729,8 @@
     };
     if (S.A.demo) S.A.gesamt = gl.liste.length;
     gartenVorbereiten(g, S.A.plaetze);
+    /* leerer Garten (neue Welt oder neues Spiel): kein Countdown, erst losgehen, wenn Echo bereit ist */
+    S.A.halt = !S.A.plaetze.some(p => p.turm);
     S.A.bauTab = S.garten.setzlinge.length ? "setz" : "waechter";
     hintergrundAbwehr(g, P);
   }
@@ -1749,7 +1767,7 @@
     A.zorn = Math.max(0, A.zorn - dt * 1.2);
     if (A.fertig) { A.endeT += dt; if (A.endeT > 1.1 && zustand === "spiel") ergebnisZeigen(); return; }
     // Vorbereitung
-    if (A.vorT > 0) { A.vorT -= dt; if (A.vorT <= 0) welleStarten(); }
+    if (A.vorT > 0 && !A.halt) { A.vorT -= dt; if (A.vorT <= 0) welleStarten(); }
     else {
       // Gegner kommen
       A.spawnT -= dt;
@@ -3835,7 +3853,7 @@
       const erste = A.welle < 0, h2 = erste ? 74 : 40;
       x.fillStyle = "rgba(9,8,15,.55)"; x.fillRect(20, 150, W - 40, h2);
       x.textAlign = "center"; x.textBaseline = "middle";
-      x.font = "22px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(T.welleIn(A.welle + 2, A.wellen.length, Math.ceil(A.vorT)), W / 2, 170, W - 60);
+      x.font = "22px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(A.halt ? T.welleBereit(A.welle + 2, A.wellen.length) : T.welleIn(A.welle + 2, A.wellen.length, Math.ceil(A.vorT)), W / 2, 170, W - 60);
       if (erste) { x.font = "12px " + FONT_B; x.fillStyle = "#ebe2cc"; zeilenUmbruch(x, S.garten.setzlinge.length ? T.setzHinweis : T.abwehrIntro, W / 2, 194, W - 70, 14); }
     }
     if (A.demo && A.bossGerufen && !A.demoWeg) {
@@ -3887,7 +3905,7 @@
       einheitTafel(x, A, p, U, "steht", zeit);
     } else if (A.vorT > 0) {
       const bonus = Math.ceil(A.vorT) * 2;
-      knopf(x, "jetzt", 8, LEISTE + 6, 220, H - LEISTE - 12, [A.welle < 0 ? T.jetzt : T.rufen(bonus)], true, false, "#e0a046");
+      knopf(x, "jetzt", 8, LEISTE + 6, 220, H - LEISTE - 12, [A.halt ? T.los : A.welle < 0 ? T.jetzt : T.rufen(bonus)], true, false, "#e0a046");
       knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
     } else {
       A.zauber.forEach((z, i) => knopfZauber(x, "zauber:" + i, 6 + i * 92, LEISTE + 4, 88, H - LEISTE - 8, z, A.aktiv === i, zeit));
@@ -4632,7 +4650,7 @@
       else if (id === "zielmodus") zielWechseln();
       else if (id === "staerker") verstaerken();
       else if (id === "raus") ausreissen();
-      else if (id === "jetzt") { if (A.welle < 0) A.vorT = 0.01; else welleRufen(); }
+      else if (id === "jetzt") { if (A.welle < 0) { A.halt = false; A.vorT = 0.01; } else welleRufen(); }
       else if (id.startsWith("zauber:")) { S.A.aktiv = parseInt(id.slice(7), 10); KLANG.griff(); }
       else if (id === "schnell") { S.A.schnell = !S.A.schnell; schreib("imres-echohort-schnell", S.A.schnell ? "1" : ""); KLANG.griff(); }
     }
