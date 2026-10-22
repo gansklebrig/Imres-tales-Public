@@ -253,6 +253,29 @@
     goetter: { nurWeg: true, modus: "aeolisch", grund: 62, tempo: 1, folge: [0, 5, 6, 0, 3, 5, 6, 4], takt: 16, bass: [0, 6, 8, 12],
       motive: [[0, 2, 4, 6, 8, 10, 12, 14], [0, 3, 4, 6, 8, 11, 12], [2, 4, 6, 8, 10, 12, 14], [0, 2, 4, 7, 8, 10, 12]], floete: { g: [5, 13], u: [3, 9, 15] } }
   };
+  /* ---------- Komponierte Melodien ----------
+     Je Lied acht Takte, ein Zeichen je Schritt: „.“ = Pause, sonst die Stufe in der Tonleiter
+     (0 = Grundton, 7 = Oktave, a/b/c = 10/11/12). Aufbau: Hook – Antwort – Hook – Schluss.
+     Leichtere Stufen spielen nur die erste Note je Schlag (bzw. Halbschlag) – die Melodie bleibt erkennbar. */
+  const MELODIEN = {
+    reigen: ["4.7.7.8.9.8.7...", "6...8.7.6...3...", "5.7.a.9.7.6.5...", "4.2.4...7.......", "4.7.7.8.9.8.7...", "6...8.a.8.7.6...", "5...7.5.3.4.5...", "4...8...6...4..."],
+    bugbear: ["4.4.7...7.8.9.7.", "a.9.7...5.7.3...", "8.8.6...4.5.6.8.", "7...9.b.7.......", "9.9.7...5.6.7.9.", "a...7...5.7.a...", "b.a.8...6...4...", "4.5.6.7.8...4..."],
+    klage: ["4...7...9.8.7...", "7...5...2...5...", "6...4.6.9...6.4.", "3...1.3.6.......", "4...7...9.8.7...", "7...9.a.9.7.5...", "3...5...7...5.3.", "4...8...6...4..."],
+    schmiede: ["0...0.4.2...0...", "1...3.5.3...1...", "2...4.7.4.2.0...", "1...3...6...3...", "7...7.6.4...2.0.", "1.3.5...8...5...", "6...3...1...3...", "4...2...0......."],
+    seemann: ["4...7.7.7...9.8.", "8...8.7.6...3...", "4...7.7.7.8.9.a.", "8...6...4.6.8...", "4...7.7.7...9.8.", "a...8...6.7.8...", "7...5...3.4.5...", "4...7...9.8.7..."],
+    walzer: ["4...7...9...", "9.8.7...4...", "5...7...a...", "a.9.8...6...", "4...7...9...", "a...7...5...", "6...8...4...", "8.7.6...4..."],
+    schatten: ["7..4..2...4.7...", "8..5..3...5.8.7.", "7..4..2...3.4...", "6..3..1...3.6...", "7..4..2...4.7...", "a..8..5...8.a...", "9..7..5...7.9...", "8..7..6...3....."],
+    rex: ["7.7.4...7.7.9...", "8...6...3.4.6...", "7.7.4...2.3.4...", "6...4...1...4...", "7.7.4...7.7.9...", "a...8...6...3...", "5...7...3.4.5...", "4...6...8.7.6..."],
+    ploop: ["7.47.89.87.4", "5.7a.75.73..", "4.79.87.64..", "6.84.68..4..", "7.47.89.87.4", "a.97.53.57..", "8.63.68.76..", "7..4..2..0.."],
+    venom: ["7.6.7...4...2...", "5.4.5...2...0...", "3.4.5...7...a...", "8.7.6...4...1...", "7.6.7...4...2...", "a.9.7...5...3...", "9.8.7...5...7...", "6...8...4...6..."],
+    buerger: ["7...7.9.b...9.7.", "8...6.8.b...8...", "7...5.7.9.8.7...", "5...7...a.......", "7...7.9.b...9.7.", "a...7...5.7.a...", "4.4.6...8...6.8.", "7...4...2...0..."],
+    palast: ["7.....4.4...7.9.", "a.......7...5...", "6...8...4...6.8.", "9.......7.......", "5.6.7...9.8.7...", "a.9.a...7...5...", "8.9.a...5...8...", "4...6...8...a..."],
+    elfen: ["4.7.9...7...", "5.8.a...8...", "9.8.7...4...", "6...4...1...", "5.7.9...7...", "5.8.a...8...", "4.6.8...6...", "7...4...2..."],
+    goetter: ["7...4.7.9.8.7.4.", "7...5.7.9...7...", "8...6.8.a.9.8.6.", "7.......4...7...", "a.9.7...5...7...", "9...7...5.6.7...", "8...a...8.7.6...", "4.6.8...6...4..."]
+  };
+  Object.keys(MELODIEN).forEach(k => { if (LIEDER[k]) LIEDER[k].melodie = MELODIEN[k]; });
+  LIEDER.ploop.raster = [4, 3, 2]; /* Jig: Schläge zu je drei Schritten */
+  LIEDER.schmiede.bassGleich = true; LIEDER.schatten.bassGleich = true;
   /* ---------- Barradins Weg ----------
      Elf Bühnen, jede mit eigenem Stück, eigener Schwierigkeit und einem Schwierigkeitsgrad (SG),
      den der Auftrittswurf erreichen muss. Fehlende Angaben kommen von der Grundstufe. */
@@ -281,16 +304,90 @@
   const WALZER = { leicht: [[4, 8], [4, 8, 10], [8], [4, 6, 8]], mittel: [[2, 4, 8], [4, 6, 8, 10], [2, 4, 6, 8], [4, 8, 10]],
     schwer: [[0, 2, 4, 6, 8, 10], [0, 4, 6, 8, 10], [2, 4, 6, 8, 10], [0, 3, 4, 8, 10]] };
   const FLOETE_WALZER = { leicht: { g: [], u: [10] }, mittel: { g: [10], u: [6, 10] }, schwer: { g: [4, 10], u: [4, 8, 10] } };
+  /* Barradin improvisiert: ein Motiv wird erfunden und dann wiederholt und den Akkorden nachgeführt –
+     so entsteht ein Hook statt Zufallsgedudel. */
+  const RHYTHMEN = { 16: ["x.x.x.x.x...x...", "x...x.x.x...x...", "x.x.x...x.x.x...", "x...x...x.x.x.x.", "x..x..x...x.x...", "x.x.x...x...x.x.", "x...x.x.x.x.x..."],
+    12: ["x...x...x...", "x.x.x...x...", "x...x.x.x.x.", "x.x.x.x.x..."] };
+  const SCHLUSS = { 16: "x...x...x.......", 12: "x...x...x..." };
+  function melodieErfinden(modus, folge, L) {
+    const R = RHYTHMEN[L], a = zufall(R), b = zufall(R.filter(x => x !== a)), c = zufall(R);
+    const form = [a, b, a, c, a, b, a, SCHLUSS[L]];
+    const formen = new Map();
+    const gestalt = r => {
+      if (!formen.has(r)) { let v = zufall([0, 2, 4]); formen.set(r, [...r].map((ch, i) => { if (ch !== "x") return null; if (i) v = Math.max(-2, Math.min(6, v + zufall([-2, -1, -1, 0, 1, 1, 2]))); return v; })); }
+      return formen.get(r);
+    };
+    const zeichen = "0123456789abc";
+    return form.map((r, takt) => {
+      const g = folge[takt % folge.length], tone = [g % 7, (g + 2) % 7, (g + 4) % 7];
+      const basis = g < 3 ? g + 7 : g, gs = takt === 7 ? [4, 2, 0, null] : gestalt(r);
+      let k = 0, vor1 = null, vor2 = null;
+      return [...r].map((ch, i) => {
+        if (ch !== "x") return ".";
+        const v = takt === 7 ? [4, 2, 0][k++] : gs[i];
+        const ziel = Math.max(0, Math.min(12, basis + v - 3));
+        let best = null;
+        /* nicht dreimal derselbe Ton hintereinander */
+        const ok = n => (i % 4 ? true : tone.includes(n % 7)) && !(n === vor1 && n === vor2);
+        for (let n = 0; n <= 12; n++) if (ok(n) && (best === null || Math.abs(n - ziel) < Math.abs(best - ziel))) best = n;
+        vor2 = vor1; vor1 = best;
+        return zeichen[best];
+      }).join("");
+    });
+  }
   function liedErfinden() {
-    const modus = zufall(Object.keys(MODI)), E = TX.de.erfinden;
-    return { modus, grund: zufall([60, 62, 63, 64, 65]), tempo: zufall([.85, .92, 1, 1.05, 1.12]), takt: Math.random() < .25 ? 12 : 16,
-      folge: zufall(FOLGEN[modus]).concat(zufall(FOLGEN[modus])), name: [Math.floor(Math.random() * E.vorlage.length), Math.floor(Math.random() * E.adj.length), Math.floor(Math.random() * E.nom.length)] };
+    const modus = zufall(Object.keys(MODI)), E = TX.de.erfinden, takt = Math.random() < .25 ? 12 : 16;
+    const folge = zufall(FOLGEN[modus]).concat(zufall(FOLGEN[modus]));
+    return { modus, grund: zufall([60, 62, 63, 64, 65]), tempo: zufall([.92, 1, 1.05, 1.12]), takt, folge, melodie: melodieErfinden(modus, folge, takt),
+      name: [Math.floor(Math.random() * E.vorlage.length), Math.floor(Math.random() * E.adj.length), Math.floor(Math.random() * E.nom.length)] };
   }
   const liedName = (l, T) => l.name ? T.erfinden.vorlage[l.name[0]].replace("{a}", T.erfinden.adj[l.name[1]]).replace("{n}", T.erfinden.nom[l.name[2]]) : T.lieder[l.key];
-  const skala = modus => Array.from({ length: 11 }, (_, n) => MODI[modus][n % 7] + 12 * Math.floor(n / 7));
+  const skala = modus => Array.from({ length: 13 }, (_, n) => MODI[modus][n % 7] + 12 * Math.floor(n / 7));
   const akkordToene = g => [g % 7, (g + 2) % 7, (g + 4) % 7];
   const nah = (ziel, erlaubt) => { let b = null; for (let r = 0; r <= 9; r++) if (erlaubt(r) && (b === null || Math.abs(r - ziel) < Math.abs(b - ziel))) b = r; return b; };
   let SK = skala("dorisch"), GRUND = 62;
+  /* Komponiertes Lied spielen: feste Melodie, Bass auf Grundton/Quinte, Echos Flöte eine Terz darüber in den Lücken */
+  const STUFE_INDEX = { leicht: 0, mittel: 1, schwer: 2 };
+  function notenAusMelodie(st, lied, L, schritt, vor, akkord, eigen, bassSchritte, floete) {
+    const liste = [], akkorde = [], autoBass = [];
+    const fenster = (lied.raster || [4, 2, 1])[STUFE_INDEX[st.basis] || 0];
+    /* Reihenfolge der Takte: das Lied endet immer mit seinen letzten Takten; längere Auftritte spielen vorne mehr */
+    const vorn = Math.max(0, st.takte - 8), folgeTakte = [];
+    for (let i = 0; i < vorn; i++) folgeTakte.push(i % 8);
+    for (let i = 0; i < Math.min(7, st.takte - 1); i++) folgeTakte.push(i);
+    const zeit = (takt, s) => vor + (takt * L + s) * schritt;
+    for (let takt = 0; takt < st.takte; takt++) {
+      const letzter = takt === st.takte - 1, mt = folgeTakte[takt];
+      const grund = letzter ? 0 : lied.folge[mt % lied.folge.length]; akkorde.push(grund);
+      const setze = (s, spur, n) => liste.push({ zeit: zeit(takt, s), spur, ton: n, status: null });
+      if (letzter) { setze(0, 0, 0); setze(akkord ? 0 : 4, 1, 7); if (eigen) setze(8, 2, 4); continue; }
+      /* Melodie: je Fenster nur die erste Note */
+      const zeile = lied.melodie[mt % lied.melodie.length], laute = {};
+      let fensterBelegt = -1;
+      for (let s = 0; s < L; s++) {
+        const ch = zeile[s]; if (!ch || ch === ".") continue;
+        const f = Math.floor(s / fenster); if (f === fensterBelegt) continue;
+        fensterBelegt = f; laute[s] = parseInt(ch, 16); setze(s, 1, laute[s]);
+      }
+      /* Bass: Grundton, beim zweiten Schlag die Quinte; kollidiert er (ohne Doppelnoten) mit der Melodie, spielt ihn die Begleitung leise mit */
+      bassSchritte.forEach((s, k) => {
+        const n = lied.bassGleich || k % 2 === 0 ? grund : grund + 4;
+        if (!akkord && laute[s] != null) autoBass.push({ zeit: zeit(takt, s), ton: n });
+        else setze(s, 0, n);
+      });
+      /* Echos Flöte: eine Terz über dem zuletzt klingenden Lautenton, immer ein Akkordton, nie im Einklang */
+      (takt % 2 ? floete.u : floete.g).forEach(s => {
+        if (s >= L || (!akkord && (laute[s] != null || bassSchritte.includes(s)))) return;
+        let letzt = 4; for (let q = s; q >= 0; q--) { const ch = zeile[q]; if (ch && ch !== ".") { letzt = parseInt(ch, 16); break; } }
+        const tone = akkordToene(grund);
+        let best = null;
+        for (let n = 0; n <= 9; n++) if (tone.includes(n % 7) && n % 7 !== letzt % 7 && (best === null || Math.abs(n - (letzt + 2)) < Math.abs(best - (letzt + 2)))) best = n;
+        setze(s, 2, best == null ? 4 : best);
+      });
+    }
+    liste.sort((a, b) => a.zeit - b.zeit);
+    return { liste, ende: vor + st.takte * L * schritt + 1.5, schritt, vor, akkorde, L, puls: lied.puls, autoBass };
+  }
   function noten(st, lied) {
     const L = lied.takt, stufe = st.basis, schritt = 60 / (st.tempo * lied.tempo) / 4, vor = 16 * schritt, liste = [], akkorde = [];
     SK = skala(lied.modus); GRUND = lied.grund;
@@ -298,6 +395,7 @@
     const motive = lied.motive && eigen ? lied.motive : (L === 12 ? WALZER[stufe] : st.motive);
     const bassSchritte = lied.bass && eigen ? lied.bass : (L === 12 ? [0] : st.bass);
     const floete = lied.floete && eigen ? lied.floete : (L === 12 ? FLOETE_WALZER[stufe] : st.floete);
+    if (lied.melodie) return notenAusMelodie(st, lied, L, schritt, vor, akkord, eigen, bassSchritte, floete);
     let fton = 4; /* Flötenstimme: Stufe in der Tonleiter, eine Oktave über der Laute */
     /* Phrasen: Motiv a, b, a, Schluss – die Kontur jedes Motivs wird einmal erfunden und dann wiederholt */
     const konturen = motive.map(m => m.map(() => zufall([-2, -1, -1, 1, 1, 2])));
@@ -403,6 +501,7 @@
   function probenFuer(daten) {
     const namen = new Set(["bodh1", "bodh2", "holz1", "holz2"]);
     daten.liste.forEach(n => namen.add(probeName(SPUR_PROBE[n.spur], MIDI[n.spur](n.ton))));
+    (daten.autoBass || []).forEach(b => namen.add(probeName("kb", MIDI[0](b.ton))));
     return Promise.race([Promise.all([...namen].map(probeLaden)), new Promise(r => setTimeout(r, 4000))]);
   }
   /* Ersatz-Flöte: weicher Sinus mit etwas Hauch und Vibrato */
@@ -447,6 +546,7 @@
     for (let i = 0; i < 4; i++) { const z = start + i * 4 * s; if (!probe(i ? "holz2" : "holz1", 0, z, .7, { dauer: .4, aus: .1 })) { rauschen(z, "bandpass", 2200, .35, .04); schlag(z, 900, 700, .05, .05); } }
     /* Bodhrán: schwerer Schlag auf der Eins, leichtere dazwischen */
     const trommel = (z, schwer, laut) => { if (!probe(schwer ? "bodh1" : "bodh2", 0, z, laut, { dauer: .9, aus: .25 })) { if (schwer) schlag(z, 105, 46, .55, .32); else rauschen(z, "bandpass", 1300, .12, .05); } };
+    (daten.autoBass || []).forEach(b => { const z = start + b.zeit, m = MIDI[0](b.ton); if (!probe("kb", m, z, .45, { dauer: 1.2, aus: .3 })) zupfen(bassHz(b.ton), z, .55, true); });
     daten.akkorde.forEach((g, takt) => {
       const z = start + daten.vor + takt * L * s, dauer = L * s;
       trommel(z, true, .8);
