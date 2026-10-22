@@ -1468,7 +1468,7 @@ const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='23.10.2026 · Roguelite';
+const HS_VERSION='23.10.2026 · weiche Kamera';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
 let GAUTO=3,GCEIL=3,FPSNOW=60;
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
@@ -1848,7 +1848,10 @@ function targetsNear(R,n){const c=mouseAim()?cursorW():P;const L=[];for(const e 
 /* ---------- Zielen: automatisch oder mit der Maus ---------- */
 const MOUSE={x:0,y:0,has:false,down:false,fine:!!(window.matchMedia&&matchMedia('(pointer:fine)').matches)};
 const mouseAim=()=>!!(SAVE.aim&&MOUSE.has&&!G.bot);
-function camXY(){return{x:P.x-W/ZOOM/2,y:P.y-H/ZOOM/2}}
+function camXY(){const c=G.cam||P;return{x:c.x-W/ZOOM/2,y:c.y-H/ZOOM/2}}
+/* Weiche Kamera: folgt dem Helden gedämpft statt starr – das glättet Ruckler beim Laufen und Sprinten */
+function camUpd(dt,vw,vh){const tx=P.x,ty=P.y;if(!G.cam||G.camStage!==G.stage||Math.abs(G.cam.x-tx)>vw||Math.abs(G.cam.y-ty)>vh){G.cam={x:tx,y:ty};G.camStage=G.stage;return}
+ const k=1-Math.exp(-Math.min(dt,0.05)*8);G.cam.x+=(tx-G.cam.x)*k;G.cam.y+=(ty-G.cam.y)*k;const mx=vw*0.2,my=vh*0.2;G.cam.x=clamp(G.cam.x,tx-mx,tx+mx);G.cam.y=clamp(G.cam.y,ty-my,ty+my)}
 function cursorW(){const c=camXY();return{x:c.x+MOUSE.x/ZOOM,y:c.y+MOUSE.y/ZOOM}}
 function aimAng(R){if(mouseAim()){const c=cursorW();return Math.atan2(c.y-P.y,c.x-P.x)}const t=nearest(P.x,P.y,R||500);return t?ang(P,t):P.face}
 function aimPoint(range){if(mouseAim()){const c=cursorW(),d=Math.sqrt(d2(P,c));if(d<=range)return c;const a=ang(P,c);return{x:P.x+Math.cos(a)*range,y:P.y+Math.sin(a)*range}}
@@ -2525,8 +2528,8 @@ function render(dt){
  try{renderWorld(dt)}finally{ZOOM=Z0}}
 function renderWorld(dt){
  const t=G.time,q=fxQ();let sx=0,sy=0;if(G.shake>0&&camL()){const tt=performance.now()/1000,s=Math.min(G.shake,camL()===1?5:11)*(camL()===1?0.5:1);sx=s*(Math.sin(tt*29)+Math.sin(tt*17.3)*0.6)*0.6;sy=s*(Math.sin(tt*25.1)+Math.sin(tt*13.7)*0.6)*0.6}
- const vw=W/ZOOM,vh=H/ZOOM,camX=P.x-vw/2,camY=P.y-vh/2;
- const world=()=>cx.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,(-camX*ZOOM+sx)*DPR,(-camY*ZOOM+sy)*DPR);world();
+ const vw=W/ZOOM,vh=H/ZOOM;camUpd(dt,vw,vh);const camX=G.cam.x-vw/2,camY=G.cam.y-vh/2;
+ const wtx=Math.round((-camX*ZOOM+sx)*DPR),wty=Math.round((-camY*ZOOM+sy)*DPR);const world=()=>cx.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,wtx,wty);world();
  cx.globalCompositeOperation='source-over';cx.globalAlpha=1;
  cx.fillStyle=G.ground;cx.fillRect(camX-20,camY-20,vw+40,vh+40);
  if(G.road){cx.lineJoin='round';cx.lineCap='round';cx.beginPath();G.road.forEach((p,i)=>i?cx.lineTo(p[0],p[1]):cx.moveTo(p[0],p[1]));cx.strokeStyle='#40352a';cx.lineWidth=150;cx.stroke();cx.strokeStyle='#5c4c38';cx.lineWidth=120;cx.stroke();
@@ -3812,10 +3815,10 @@ let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[d
  if(k==='volSfx'&&performance.now()-volT>180){volT=performance.now();sfx('coin')}});
 
 /* ================= Schleife ================= */
-let last=performance.now(),lastJs=0;
+let last=performance.now(),lastJs=0,DTS=1/60;
 function frame(now){requestAnimationFrame(frame);const raw=now-last,dt=Math.min(0.05,raw/1000);last=now;const js0=performance.now();
  if(G.state==='play'&&G.paused&&!G.overlay&&G.resumeT>0){G.resumeT-=dt;if(G.resumeT<=0){G.resumeT=0;G.paused=false}}
- fpsWatch(dt,raw,lastJs);if(G.state==='play'&&!G.paused)update(dt*timeScale(dt));
+ fpsWatch(dt,raw,lastJs);const du=Math.abs(dt-DTS)<0.012?(DTS=DTS*0.85+dt*0.15):(DTS=dt);if(G.state==='play'&&!G.paused)update(du*timeScale(du));
  musikTick(dt);
  try{render(dt);if(G.state==='play')drawPerf();if(G.state==='title'&&stageCv)drawStage();if(bookCv)drawBook()}catch(e){console.error(e)}
  hudUpdate();lastJs=performance.now()-js0}
