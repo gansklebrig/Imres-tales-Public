@@ -869,6 +869,8 @@
     const g = JSON.parse(localStorage.getItem("imres-lautenwerk2") || "null");
     if (g && g.teile) S = pruefen(g);
   } catch (_) {}
+  /* Die Bühne öffnet immer im Spielleiter-Pult – die komplette Ansicht liegt hinter einem eigenen Schalter */
+  S.pult = true;
   let zugeklappt = {};
   try { zugeklappt = JSON.parse(localStorage.getItem("imres-lautenwerk-zu") || "{}") || {}; } catch (_) {}
   let bearbeite = "A", kopierZiel = null;
@@ -4190,6 +4192,14 @@
     /* ein Klick: Musik aus, leeres Notenblatt, komplette Ansicht – los geht’s mit dem eigenen Lied */
     if (e.target.closest('[data-aktion="komponieren"]')) {
       e.stopPropagation();
+      /* nur nachfragen, wenn wirklich etwas verloren ginge: laufende Musik oder ein Lied mit Noten */
+      const verlust = laeuft || TEILE.some(teilBenutzt);
+      if (verlust && leerFrage < Date.now()) {
+        leerFrage = Date.now() + 4000; zeichnen(); knoepfe();
+        setTimeout(() => { if (leerFrage && leerFrage <= Date.now()) { leerFrage = 0; const b = root.querySelector(".lw-leerblatt.frage"); if (b) { zeichnen(); knoepfe(); } } }, 4100);
+        return;
+      }
+      leerFrage = 0;
       if (laeuft) stopp();
       if (klassikLauf) klassikStopp(true);
       vorlageWaehlen("leer"); S.pult = false; S.titel = ""; merken(); zeichnen(); knoepfe();
@@ -4282,7 +4292,7 @@
       ["kulisse", "🌧 Kulisse", "Hintergrundgeräusche wie Taverne, Regen oder Höhle laufen unter der Musik weiter. Der Regler darüber stellt ihre Lautstärke ein."],
       ["effekte", "💥 Effekte", "Einmalige Geräusche auf Knopfdruck: Drache, Schwert, Würfel, Kampf, lustige Momente und kurze Klassiker. Der Regler darüber macht sie lauter oder leiser."],
       ["einst", "⚙ Klang, Raum & Gäste", "Seltene Einstellungen liegen hier eingeklappt: Lautstärke der Musik, Hall, Raum, Orchester, Sparmodus und die Gäste."],
-      ["oben", "Oben rechts", "✍ Eigenes Lied öffnet ein leeres Notenblatt · 🌫 Klangwelten: reine Geräusche ohne Musik · 📡 Mitlauschen: Link für die Runde, alle hören mit · Die kleinen ⓘ erklären einzelne Regler."]
+      ["oben", "Oben rechts", "🌫 Klangwelten: reine Geräusche ohne Musik · 📡 Mitlauschen: Link für die Runde, alle hören mit · Die kleinen ⓘ erklären einzelne Regler."]
     ] });
   Object.assign(TX.en, { rundgang: "❔ Tour", rundgangTipp: "A short tour of the console", weiter: "Next", zurueck: "Back", fertig: "Done", beenden: "Close",
     info: {
@@ -4303,7 +4313,7 @@
       ["kulisse", "🌧 Backdrop", "Background sounds like tavern, rain or cave keep running under the music. The slider above sets their volume."],
       ["effekte", "💥 Effects", "One-off sounds at a tap: dragon, sword, dice, combat, funny moments and short classics. The slider above makes them louder or quieter."],
       ["einst", "⚙ Sound, room & guests", "Rarely used settings are folded away here: music volume, reverb, room, orchestra, power saving and the guests."],
-      ["oben", "Top right", "✍ Compose a song opens an empty sheet · 🌫 Soundscapes: pure ambience without music · 📡 Listen in: a link for the group · The small ⓘ explain single controls."]
+      ["oben", "Top right", "🌫 Soundscapes: pure ambience without music · 📡 Listen in: a link for the group · The small ⓘ explain single controls."]
     ] });
   const RUNDGANG_ZIEL = {
     buehne: () => root.querySelector(".lw-buehne"), play: () => root.querySelector(".lw-pult-kopf .lw-play"),
@@ -4452,8 +4462,21 @@
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
   const einstAuf = { musik: false, klang: false };
   const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
-  Object.assign(TX.de, { komponieren: "✍ Eigenes Lied", komponierenTipp: "Leeres Notenblatt in der kompletten Ansicht öffnen und selbst komponieren" });
-  Object.assign(TX.en, { komponieren: "✍ Compose a song", komponierenTipp: "Open an empty sheet in the full view and compose your own" });
+  Object.assign(TX.de, { komponieren: "✍ Leeres Notenblatt", komponierenTipp: "Neues Lied von Grund auf – öffnet ein leeres Notenblatt in der kompletten Ansicht",
+    werkTitel: "Selbst gestalten", komplettUnter: "Alle Spuren, Noten und Regler – zum Feinschliff und Komponieren",
+    leerUnter: "Ein neues Lied von Grund auf schreiben", leerSicher: an => "Nochmal tippen zum Bestätigen – das aktuelle Lied wird geleert" + (an ? " und die Musik stoppt." : "."),
+    zumPult: "Zurück zum Spielleiter-Pult" });
+  Object.assign(TX.en, { komponieren: "✍ Empty sheet", komponierenTipp: "Start a song from scratch – opens an empty sheet in the full view",
+    werkTitel: "Make your own", komplettUnter: "All tracks, notes and controls – for fine-tuning and composing",
+    leerUnter: "Write a new song from scratch", leerSicher: an => "Tap again to confirm – the current song will be cleared" + (an ? " and the music stops." : "."),
+    zumPult: "Back to the GM console" });
+  /* Werkstatt: große, abgesetzte Schalter für die komplette Ansicht und das leere Notenblatt */
+  let leerFrage = 0;
+  const grossKnopf = (aktion, icon, titel, unter, extra) => '<button type="button" class="lw-werkknopf' + (extra || "") + '" data-aktion="' + aktion + '"><span class="lw-pb-icon">' + icon + "</span><span><b>" + titel + "</b><small>" + unter + "</small></span></button>";
+  const werkstatt = (T, imPult) => '<section class="lw-werkstatt"><h4>🛠 ' + T.werkTitel + '</h4><div class="lw-werkknoepfe">' +
+    (imPult ? grossKnopf("pult", "🎼", T.komplett.replace(/^\S+\s/, ""), T.komplettUnter) : "") +
+    grossKnopf("komponieren", "✍", T.komponieren.replace(/^\S+\s/, ""), leerFrage > Date.now() ? T.leerSicher(laeuft) : T.leerUnter, " lw-leerblatt" + (leerFrage > Date.now() ? " frage" : "")) +
+    "</div></section>";
   Object.assign(TX.de, { klangwelten: "🌫 Klangwelten", klangweltenTipp: "Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik" });
   Object.assign(TX.en, { klangwelten: "🌫 Soundscapes", klangweltenTipp: "Pure ambience from real recordings – no music" });
   Object.assign(TX.de, { einstMusik: "Klang, Raum & Gäste", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
@@ -4481,7 +4504,7 @@
   function musikBox(T, voll) {
     let kacheln;
     if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(oben("v", LIEDER).map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
-        voll ? [kachel("data-vorlage", "zufall", T.zufall), kachel("data-vorlage", "leer", T.leeren)] : [],
+        voll ? [kachel("data-vorlage", "zufall", T.zufall)] : [],
         ['<p class="lw-trenner">' + T.coverTitel + "</p>"], oben("s", COVER_LISTE).map(k => kachel("data-sfx", k, T.sfx[k]))).join("");
     else if (musikTab === "eigene") {
       const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
@@ -4533,10 +4556,10 @@
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
-          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<button type="button" class="lw-schalter" data-aktion="komponieren" title="' + esc(T.komponierenTipp) + '">' + T.komponieren + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button>" +
-          '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></span></div>" +
+          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button></span></div>" +
         (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
         konsole(T, false) +
+        werkstatt(T, true) +
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
@@ -4737,8 +4760,9 @@
 
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + '</h3><p class="tav-info">' + T.text + "</p>" +
-      '<button type="button" class="lw-pultbanner" data-aktion="pult"><span class="lw-pb-icon">🎛</span><span><b>' + T.pultGross + "</b><small>" + T.pultUnter + '</small></span><span class="lw-pb-pfeil">→</span></button>' +
+      '<button type="button" class="lw-pultbanner" data-aktion="pult"><span class="lw-pb-icon">🎛</span><span><b>' + T.zumPult + "</b><small>" + T.pultUnter + '</small></span><span class="lw-pb-pfeil">→</span></button>' +
       buehneHTML(false) +
+      werkstatt(T, false) +
       '<div class="lw-steuer">' +
         '<button type="button" class="lw-play">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
         '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
@@ -5376,6 +5400,19 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-pultbanner small { display: block; font-size: .85rem; color: var(--vellum); opacity: .85; margin-top: .15rem; }
 .lw-pb-icon { font-size: 2rem; line-height: 1; }
 .lw-pb-pfeil { margin-left: auto; font-size: 1.5rem; color: var(--ember); }
+.lw-werkstatt { margin-top: .6rem; border-top: 1px dashed var(--line) !important; padding-top: 1rem !important; }
+.lw-werkstatt h4 { margin: 0; }
+.lw-werkknoepfe { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+.lw-werkknopf { display: flex; align-items: center; gap: .9rem; text-align: left; padding: .95rem 1.1rem; min-height: 4.2rem;
+  border: 2px solid rgba(235,226,204,.35); background: rgba(235,226,204,.05); color: var(--vellum); font: inherit; cursor: pointer; transition: background .2s, border-color .2s; }
+.lw-werkknopf:hover { border-color: var(--ember); background: rgba(224,160,70,.1); }
+.lw-werkknopf b { display: block; font-family: var(--display); font-size: 1.1rem; letter-spacing: .04em; color: var(--ember); }
+.lw-werkknopf small { display: block; font-size: .85rem; opacity: .85; margin-top: .15rem; }
+.lw-leerblatt { border-style: dashed; }
+.lw-leerblatt.frage { border-color: var(--blood, #c4564a); border-style: solid; background: rgba(196,86,74,.14); }
+.lw-leerblatt.frage small { color: #f0b0a6; opacity: 1; }
+:not(.lw-pult) > .lw-werkstatt { margin: 0 0 1rem; border: 0 !important; padding: 0 !important; }
+:not(.lw-pult) > .lw-werkstatt h4 { display: none; }
 .lw-fxregler { margin-top: .6rem; }
 .lw-buehne-klein { height: clamp(130px, 24vw, 190px); }
 .lw-pult { display: grid; gap: 1.1rem; }
