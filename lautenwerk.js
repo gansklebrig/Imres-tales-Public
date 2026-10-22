@@ -74,7 +74,9 @@
     palast:  { dauer: 4.4, kurve: 2.9, vor: .045, hell: 6200, frueh: [[.048, .45], [.075, .35], [.102, .28], [.13, .2]] },
     hoehle:  { dauer: 6.5, kurve: 2.3, vor: .07, hell: 2600, frueh: [[.14, .5], [.29, .34], [.45, .22], [.62, .14]] }
   };
-  const KULISSEN = ["keine", "taverne", "feuer", "regen", "wald", "hoehle", "meer", "sturm"];
+  const KULISSEN = ["keine", "taverne", "feuer", "wald", "waldnacht", "regen", "zelt", "sturm", "meer", "schiff", "wasserfall", "hoehle", "unterreich", "kerker", "sumpf", "unterwasser", "schmiede", "labor", "bibliothek", "tempel"];
+  /* Bühnenbild für die neueren Kulissen: nächstliegendes vorhandenes Bild */
+  const KUL_BILD = { waldnacht: "wald", zelt: "regen", schiff: "meer", wasserfall: "wald", unterreich: "hoehle", kerker: "hoehle", sumpf: "wald", unterwasser: "meer", schmiede: "feuer", labor: "taverne", bibliothek: "taverne", tempel: "hoehle" };
   const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "wald", spannung: "hoehle", sieg: "taverne", kampf: "keine",
     taverne: "taverne", hafen: "meer", wald: "wald", schmiede: "feuer", wiegen: "feuer", trauer: "regen", ballade: "taverne",
     auenland: "wald", elben: "wald", zwerge: "hoehle", reiter: "keine", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen",
@@ -129,7 +131,8 @@
       master: "Musik", fxLaut: "Effekte", hall: "Hall", raum: "Raum",
       wechselGleich: n => "→ „" + n + "“ beginnt mit dem nächsten Takt …",
       kulisse: "Geräuschkulisse", kulisseLaut: "Kulisse",
-      kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Meer", sturm: "⛈ Sturm" },
+      kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Küste", sturm: "⛈ Gewitter",
+        waldnacht: "🌙 Wald bei Nacht", zelt: "⛺ Zelt im Regen", schiff: "⛵ An Deck", wasserfall: "🏞 Wasserfall", unterreich: "🕸 Unterreich", kerker: "⛓ Kerker", sumpf: "🐸 Sumpf", unterwasser: "🫧 Unter Wasser", schmiede: "⚒ Schmiede", labor: "⚗ Alchemistenstube", bibliothek: "📚 Bibliothek", tempel: "⛪ Tempel" },
       effekte: "Effekte",
       sfx: { drache: "🐉 Drache", schwert: "⚔ Klingen", tuer: "🚪 Tür", donner: "⚡ Donner", schrei: "😱 Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Horn", jubel: "🍻 Jubel",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Stille",
@@ -200,7 +203,8 @@
       master: "Music", fxLaut: "Effects", hall: "Reverb", raum: "Room",
       wechselGleich: n => "→ “" + n + "” starts with the next bar …",
       kulisse: "Ambience", kulisseLaut: "Ambience",
-      kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Sea", sturm: "⛈ Storm" },
+      kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Coast", sturm: "⛈ Thunderstorm",
+        waldnacht: "🌙 Forest at night", zelt: "⛺ Tent in the rain", schiff: "⛵ On deck", wasserfall: "🏞 Waterfall", unterreich: "🕸 Underdark", kerker: "⛓ Dungeon", sumpf: "🐸 Swamp", unterwasser: "🫧 Underwater", schmiede: "⚒ Forge", labor: "⚗ Alchemist's study", bibliothek: "📚 Library", tempel: "⛪ Temple" },
       effekte: "Effects",
       sfx: { drache: "🐉 Dragon", schwert: "⚔ Blades", tuer: "🚪 Door", donner: "⚡ Thunder", schrei: "😱 Scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 Horn", jubel: "🍻 Cheers",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Silence",
@@ -1208,6 +1212,158 @@
   }
   /* Stärke-Phasen: mal Flaute, mal Höhepunkt – je Kulisse unterschiedlich weit */
   const KUL_PHASE = { sturm: [.35, 1.3], meer: [.6, 1.2], regen: [.6, 1.3], wald: [.7, 1.15], hoehle: [.7, 1.15], feuer: [.75, 1.15], taverne: [.75, 1.2] };
+  /* ---------- Kulissen aus den Klangwelten-Aufnahmen (amb/, siehe klang/LIZENZ.txt) ----------
+     Teppiche: lange Aufnahmen, von denen immer neue Ausschnitte weich ineinander geblendet werden – keine hörbare Schleife.
+     Ereignisse: echte Einzelgeräusche (e_*, fx_*), nur Eule, Möwe, Specht, Vögel, Fledermaus und Lachen sind gerechnet. */
+  const AMB_LAUT = {"a_feuer1":.0315,"a_feuer2":.0164,"a_feuer3":.0183,"a_grillen":.129,"a_nacht":.144,"a_voegel1":.0601,"a_voegel2":.0565,"a_laub":.0853,"a_bach1":.0405,"a_bach2":.0505,
+    "a_wasserfall":.1828,"a_wind1":.0818,"a_wind2":.0963,"a_regen1":.0387,"a_regen2":.0462,"a_waldregen":.0248,"a_starkregen":.043,"a_zelt":.0196,"a_gewitter1":.0441,"a_gewitter2":.0412,
+    "a_wellen1":.0623,"a_wellen2":.0559,"a_boot":.0343,"a_tropfen1":.0089,"a_tropfen2":.0249,"a_unterwasser":.1387,"a_kochen":.0825,"a_blubbern":.0647};
+  const ambReihe = (p, n) => Array.from({ length: n }, (_, i) => p + (i + 1));
+  /* Ereignisse aus Aufnahmen: f = Dateien, tempo = Abspieltempo, folge = [min, max Anzahl, Abstand min, max] */
+  const AMB_EV = {
+    heulen: { f: ambReihe("e_heulen_", 1), tempo: [.5, .62] }, glocke: { f: ambReihe("e_glocke_", 4), tempo: [.8, 1] }, gong: { f: ambReihe("e_gong_", 2), tempo: [.85, 1] },
+    kette: { f: ambReihe("e_kette_", 4) }, stein: { f: ambReihe("e_stein_", 6) }, platsch: { f: ambReihe("e_platsch_", 4) }, blubb: { f: ambReihe("e_blubb_", 4) },
+    insekt: { f: ambReihe("e_insekt_", 4) }, buch: { f: ambReihe("e_buch_", 6) }, papier: { f: ambReihe("e_papier_", 3) },
+    hammer: { f: ambReihe("e_hammer_", 6).concat(["amboss"]), folge: [3, 7, .55, .75] }, metall: { f: ambReihe("e_metall_", 3) },
+    stoehnen: { f: ambReihe("e_stoehnen_", 4), tempo: [.75, .95] }, schleim: { f: ambReihe("e_schleim_", 3) }, monster: { f: ambReihe("e_monster_", 3), tempo: [.6, .8] },
+    blasebalg: { f: ambReihe("e_blasebalg_", 2) }, ast: { f: ambReihe("e_ast_", 4) }, kies: { f: ambReihe("e_kies_", 2), folge: [3, 6, .5, .6] },
+    laubschritt: { f: ambReihe("e_laubschritt_", 2), folge: [3, 6, .5, .62] }, riegel: { f: ambReihe("e_riegel_", 4) }, hund: { f: ambReihe("e_hund_", 2) },
+    tuch: { f: ambReihe("e_tuch_", 3) }, zischen: { f: ambReihe("e_zischen_", 2) },
+    chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 }
+  };
+  /* über kulFx (echte Aufnahmen aus ECHT bzw. gerechnet): Art in der Kulisse → Art in kulFx */
+  const KUL_FX = { krug: "krug", stuhl: "stuhl", knarren: "knarren", schritte: "schritte", holzschritte: "schritte", muenzen: "muenzen", tuer: "tuer", donner: "donner",
+    lachen: "lachen", eule: "eule", moewe: "moewe", specht: "specht", vogel: "vogel", fledermaus: "fledermaus" };
+  /* Klangwelten: betten [Quelle, Stärke, { tief }], ev [Art, [min, max] Sekunden, Stärke, Anteil „aus der Ferne“], raum = Hallanteil */
+  const KUL_WELT = {
+    taverne: { raum: .3, betten: [["a_feuer1", .55], ["@gemurmel", .9]],
+      ev: [["krug", [2.5, 8], .55, .2], ["lachen", [7, 18], .35, .5], ["stuhl", [8, 20], .4, .3], ["knarren", [10, 25], .35, .3], ["holzschritte", [9, 22], .35, .4], ["muenzen", [20, 45], .35, .4], ["tuer", [45, 100], .3, .5]] },
+    feuer: { raum: .35, betten: [["a_feuer2", 1], ["a_grillen", .45], ["a_nacht", .35], ["a_wind1", .15, { tief: 900 }]],
+      ev: [["eule", [25, 60], .4, .6], ["heulen", [70, 160], .3, 1], ["ast", [15, 35], .35, .5], ["laubschritt", [40, 90], .3, .8]] },
+    wald: { raum: .3, betten: [["a_voegel1", .8], ["a_voegel2", .55], ["a_laub", .3], ["a_bach1", .25], ["a_wind1", .14, { tief: 1400 }]],
+      ev: [["specht", [25, 60], .3, .6], ["vogel", [6, 16], .3, .5], ["ast", [20, 45], .3, .6], ["laubschritt", [35, 80], .3, .7]] },
+    waldnacht: { raum: .4, betten: [["a_nacht", .9], ["a_grillen", .55], ["a_wind2", .22, { tief: 1200 }]],
+      ev: [["eule", [15, 40], .45, .5], ["heulen", [45, 110], .35, 1], ["ast", [12, 30], .35, .6], ["fledermaus", [30, 70], .25, .5]] },
+    regen: { raum: .3, betten: [["a_waldregen", 1], ["a_regen1", .45], ["a_wind1", .2, { tief: 1000 }]],
+      ev: [["donner", [50, 130], .35, 1], ["platsch", [14, 35], .25, .5]] },
+    zelt: { raum: .15, betten: [["a_zelt", 1], ["a_regen2", .3, { tief: 1800 }], ["a_wind1", .2, { tief: 700 }]],
+      ev: [["donner", [60, 150], .3, 1], ["tuch", [25, 60], .25, .2]] },
+    sturm: { raum: .45, betten: [["a_gewitter1", 1], ["a_gewitter2", .5], ["a_starkregen", .45], ["a_wind2", .4]],
+      ev: [["donner", [14, 40], .55, .5]] },
+    meer: { raum: .3, betten: [["a_wellen1", 1], ["a_wellen2", .55], ["a_wind2", .3]],
+      ev: [["moewe", [8, 22], .4, .5], ["glocke", [60, 140], .2, 1]] },
+    schiff: { raum: .25, betten: [["a_boot", 1], ["a_wellen2", .7], ["a_wind1", .4]],
+      ev: [["knarren", [8, 20], .4, .3], ["moewe", [15, 40], .3, .6], ["tuch", [10, 25], .35, .3], ["glocke", [50, 120], .25, .6], ["holzschritte", [25, 60], .3, .5]] },
+    wasserfall: { raum: .35, betten: [["a_wasserfall", .9], ["a_bach2", .55], ["a_voegel2", .28]],
+      ev: [["vogel", [10, 25], .25, .6], ["platsch", [20, 45], .25, .5]] },
+    hoehle: { raum: .9, betten: [["a_tropfen1", 1], ["a_tropfen2", .45], ["a_wind1", .22, { tief: 380 }]],
+      ev: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5]] },
+    unterreich: { raum: .9, betten: [["a_tropfen1", .7], ["a_unterwasser", .35, { tief: 500 }], ["a_bach2", .18, { tief: 600 }]],
+      ev: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1]] },
+    kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }]],
+      ev: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8]] },
+    sumpf: { raum: .35, betten: [["a_blubbern", .4], ["a_grillen", .4], ["a_nacht", .4], ["a_tropfen2", .3]],
+      ev: [["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1]] },
+    unterwasser: { raum: .6, betten: [["a_unterwasser", 1], ["a_blubbern", .3, { tief: 1500 }]],
+      ev: [["blubb", [5, 14], .3, .5], ["monster", [70, 160], .15, 1]] },
+    schmiede: { raum: .25, betten: [["a_feuer1", .75], ["a_feuer3", .35]],
+      ev: [["hammer", [6, 14], .55, .1], ["blasebalg", [12, 28], .35, .2], ["zischen", [20, 45], .3, .2], ["metall", [15, 35], .3, .3]] },
+    labor: { raum: .25, betten: [["a_kochen", .7], ["a_blubbern", .45], ["a_feuer3", .35]],
+      ev: [["krug", [8, 20], .35, .2], ["blubb", [5, 14], .35, .3], ["buch", [20, 45], .3, .3], ["zischen", [25, 60], .25, .3]] },
+    bibliothek: { raum: .5, betten: [["a_feuer3", .7], ["a_wind2", .25, { tief: 600 }]],
+      ev: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7]] },
+    tempel: { raum: .9, betten: [["a_wind1", .35, { tief: 500 }], ["a_wind2", .2, { tief: 300 }], ["a_feuer3", .3, { tief: 2000 }]],
+      ev: [["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] }
+  };
+  /* Gesamtpegel der Klangwelten im Pult, abgestimmt auf die bisherigen Kulissen */
+  const WELT_GRUND = 2.6;
+  /* leise Klangwelten etwas anheben, damit alle Kulissen ähnlich präsent sind */
+  const WELT_PEGEL = { hoehle: 2, unterreich: 2, kerker: 2.6, bibliothek: 2.4, tempel: 2.4, zelt: 1.6, schmiede: 1.6, feuer: 1.4, regen: 1.4, sumpf: 1.4, meer: 1.2, schiff: 1.2 };
+  const ambBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "amb/") : "amb/"; })();
+  const ambBuf = new Map(), ambLaedt = new Map();
+  function ambLaden(name) {
+    if (name === "amboss" || name.startsWith("fx_") || name.startsWith("stimme_")) return sampleLaden(name);
+    if (ambBuf.has(name)) return Promise.resolve(ambBuf.get(name));
+    if (ambLaedt.has(name)) return ambLaedt.get(name);
+    if (!ctx) return Promise.resolve(null);
+    const c = ctx;
+    const pr = fetch(ambBasis + encodeURIComponent(name) + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(ab => new Promise((res, rej) => { const x = c.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); }))
+      .then(b => { ambBuf.set(name, b); return b; }).catch(() => { ambLaedt.delete(name); return null; });
+    ambLaedt.set(name, pr); return pr;
+  }
+  const ambPuffer = n => n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_") ? sampleBuf.get(n) : ambBuf.get(n);
+  const KUL_EIN = new Float32Array(64), KUL_AUS = new Float32Array(64);
+  for (let i = 0; i < 64; i++) { KUL_EIN[i] = Math.sin(i / 63 * Math.PI / 2); KUL_AUS[i] = Math.cos(i / 63 * Math.PI / 2); }
+  function weltBett(k, [name, staerke, o]) {
+    o = o || {};
+    const out = ctx.createGain(); out.gain.value = 0;
+    if (o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = o.tief; out.connect(lp); lp.connect(k.g); } else out.connect(k.g);
+    const b = { out, naechst: 0, drift: 0, buf: null };
+    if (name === "@gemurmel") { /* gerechnetes Stimmengewirr der Taverne */
+      kulSchleife("gemurmel", 22050, 1.1 * staerke * (k.wlaut || 1)); return b;
+    }
+    b.grund = WELT_GRUND * (k.wlaut || 1) * staerke * Math.min(1.15, .055 / (AMB_LAUT[name] || .05));
+    ambLaden(name).then(buf => {
+      if (!buf || kul !== k) return;
+      b.buf = buf; b.naechst = ctx.currentTime + .05;
+      out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(b.grund, ctx.currentTime + 3);
+      weltBettPlanen(k, b);
+    });
+    return b;
+  }
+  /* immer neue, zufällige Ausschnitte mit weichen Überblendungen */
+  function weltBettPlanen(k, b) {
+    if (!b.buf) return;
+    const D = b.buf.duration;
+    while (b.naechst < ctx.currentTime + 6) {
+      const len = Math.min(D * .8, zz(9, 22)), X = Math.min(3, len * .3), off = Math.random() * Math.max(0, D - len), t = b.naechst;
+      const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b.buf; q.playbackRate.value = zz(.985, 1.015);
+      g.gain.value = 0; g.gain.setValueCurveAtTime(KUL_EIN, t, X); g.gain.setValueCurveAtTime(KUL_AUS, t + len - X, X);
+      q.connect(g); g.connect(b.out); q.start(t, off, len + .05);
+      k.knoten.push(q); q.onended = () => { const i = k.knoten.indexOf(q); if (i >= 0) k.knoten.splice(i, 1); };
+      b.naechst = t + len - X;
+    }
+    /* langsames Atmen der Lautstärke */
+    if (ctx.currentTime > b.drift) { b.drift = ctx.currentTime + zz(8, 20); b.out.gain.setTargetAtTime(b.grund * zz(.78, 1.15), ctx.currentTime, zz(2, 5)); }
+  }
+  function weltEreignis(k, [art, , staerke, fern]) {
+    const weit = Math.random() < (fern || 0), laut = staerke * (k.wlaut || 1) * (weit ? zz(.3, .55) : zz(.65, 1));
+    if (KUL_FX[art]) { kulFx(KUL_FX[art], ctx.currentTime + .05, laut * 1.3, weit ? { tief: zz(900, 2600) } : {}); return; }
+    const e = AMB_EV[art]; if (!e) return;
+    const g = ctx.createGain(); g.gain.value = laut * WELT_GRUND; let letzter = g;
+    if (weit) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = zz(900, 2600); letzter.connect(lp); letzter = lp; }
+    if (ctx.createStereoPanner && !leicht()) { const pn = ctx.createStereoPanner(); pn.pan.value = zz(-.8, .8); letzter.connect(pn); letzter = pn; }
+    letzter.connect(k.g);
+    if (weit && k.send) { const sg = ctx.createGain(); sg.gain.value = 1.5; letzter.connect(sg); sg.connect(k.send); }
+    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1;
+    let t = ctx.currentTime + .05;
+    for (let i = 0; i < n; i++) {
+      const name = zufall(e.f), b = ambPuffer(name);
+      if (!b) { ambLaden(name); continue; }
+      const q = ctx.createBufferSource(), r = e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05); q.buffer = b; q.playbackRate.value = r;
+      if (e.lang) { const gg = ctx.createGain(), d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(1, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); q.connect(gg); gg.connect(g); }
+      else if (e.folge) { const gg = ctx.createGain(); gg.gain.value = zz(.7, 1); q.connect(gg); gg.connect(g); }
+      else q.connect(g);
+      q.start(t, b._start || 0);
+      if (e.folge) t += zz(e.folge[2], e.folge[3]);
+    }
+  }
+  function weltStart(k, w) {
+    k.phase = 1; k.wlaut = WELT_PEGEL[k.art] || 1;
+    const betten = w.betten.slice(0, spar ? 2 : 9).map(x => weltBett(k, x));
+    /* Einzelgeräusche schon vorladen, damit das erste gleich zu hören ist */
+    w.ev.forEach(([art]) => { if (AMB_EV[art]) AMB_EV[art].f.forEach(ambLaden); else if (KUL_FX[art] && ECHT[KUL_FX[art]]) echtVorladen(); });
+    k.timer = setInterval(() => {
+      if (kul !== k) return;
+      const jetzt = ctx.currentTime;
+      betten.forEach(b => weltBettPlanen(k, b));
+      w.ev.forEach((x, i) => {
+        if (k.naechst[i] == null) { k.naechst[i] = jetzt + zz(x[1][0] * .3, x[1][1] * .6); return; }
+        if (jetzt >= k.naechst[i]) { k.naechst[i] = jetzt + zz(x[1][0], x[1][1]); try { weltEreignis(k, x); } catch (_) {} }
+      });
+    }, 250);
+  }
   function kulisseStart(sofort) {
     if (!ctx) return;
     kulisseStop();
@@ -1218,7 +1374,8 @@
     g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(kulPegel(), j + 2.5);
     g.connect(master);
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
-    kul = { art, g, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0 };
+    kul = { art, g, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0 };
+    if (KUL_WELT[art]) { send.gain.value = KUL_WELT[art].raum; weltStart(kul, KUL_WELT[art]); return; }
     const rest = KUL_SCHICHT[art] ? KUL_REST[art] || {} : {};
     (KUL_BETT[art] || []).filter((_, i) => !rest.betten || rest.betten.includes(i)).slice(0, spar ? 2 : 9).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
     const sk = rest.schleife == null ? 1 : rest.schleife;
@@ -3624,7 +3781,7 @@
     return S.stimmung ? PUB_STIMMUNG[S.stimmung] || "nicken" : "nicken";
   }
   const buehneAttr = () => ' data-mel="' + S.instrument + '" data-tr="' + S.band.trommel + '" data-fl="' + S.band.floete + '" data-ez="' + S.band.ketten +
-    '" data-kul="' + esc(S.kulisse) + '" data-pub="' + publikumArt() + '"';
+    '" data-kul="' + esc(KUL_BILD[S.kulisse] || S.kulisse) + '" data-pub="' + publikumArt() + '"';
   const buehneHTML = klein => '<div class="lw-buehne' + (klein ? " lw-buehne-klein" : "") + (leicht() ? " spar" : "") + '"' + buehneAttr() + '><div class="lw-szene">' +
     BUEHNE_HINTEN + BUEHNE_FIG + GAESTE_HTML + BUEHNE_VORNE + "</div></div>";
 
