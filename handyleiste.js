@@ -1,7 +1,7 @@
 /* =====================================================================
    HANDYLEISTE – feste Navigation unten auf dem Handy (bis 760 px Breite)
    ---------------------------------------------------------------------
-   Fünf Ziele wie in einer App: Start, Chronik, Gefährten, Taverne, Mehr.
+   Sechs Ziele wie in einer App: Start, Chronik, Gefährten, Taverne, Bühne, Mehr.
    „Mehr“ öffnet ein Blatt mit den übrigen Bereichen, den Kapiteln,
    der Suche und der Sprachwahl. Oben bleibt nur die schmale Kopfzeile
    (Name, Suche, Sprache) – die lange, abgeschnittene Menüzeile entfällt.
@@ -24,9 +24,10 @@
     chronik: '<path d="M6 3.5h10.5a2 2 0 0 1 2 2v13a2 2 0 0 0 2 2H8a2 2 0 0 1-2-2v-15Z"/><path d="M6 6.5H4.5a1.5 1.5 0 0 1 0-3H6M9.5 8h6M9.5 11.5h6M9.5 15h4"/>',
     gefaehrten: '<path d="M12 3.5 19 6v5.5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-2.5Z"/><path d="M12 7.5v9M8.5 11h7"/>',
     taverne: '<path d="M6 8.5h9v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-10Z"/><path d="M15 10.5h1.8a2.2 2.2 0 0 1 0 4.4H15"/><path d="M6.3 8.5c-.8-2.6.9-4.6 3-4.2 1-1.6 3.6-1.5 4.3.4 1.6-.2 2.2 2 1.4 3.8"/>',
+    buehne: '<path d="M9 18.5V5.5l10-2v12.5"/><circle cx="6.6" cy="18.5" r="2.4"/><circle cx="16.6" cy="16" r="2.4"/><path d="M9 9.2l10-2"/>',
     mehr: '<circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/>'
   };
-  const ZIELE = ["start", "chronik", "gefaehrten", "taverne"];
+  const ZIELE = ["start", "chronik", "gefaehrten", "taverne", "buehne"];
   const linkText = id => { const a = topNav.querySelector('a[href="#' + id + '"]'); return a ? a.textContent.trim() : id; };
 
   /* ---------- Leiste ---------- */
@@ -107,11 +108,11 @@
   body { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
   .kerze { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
 
-  .handyleiste { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  .handyleiste { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
     padding: 4px 4px env(safe-area-inset-bottom, 0px); background: rgba(14,11,17,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid rgba(224,160,70,.28); box-shadow: 0 -8px 24px rgba(0,0,0,.45); }
   .handyleiste a, .handyleiste button { display: grid; justify-items: center; gap: 2px; padding: 6px 2px 5px; min-height: 52px; border: 0; background: none; color: var(--ash, #b9ab95);
-    font: inherit; font-size: .68rem; letter-spacing: .02em; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; position: relative; }
+    font: inherit; font-size: .64rem; letter-spacing: 0; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; position: relative; }
   .handyleiste svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .handyleiste .hl-mehr svg { fill: currentColor; stroke: none; }
   .handyleiste span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
