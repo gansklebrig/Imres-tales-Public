@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Klangwelten – reine Geräuschkulissen aus echten Aufnahmen für Pen & Paper: Taverne, Lagerfeuer, Wald, Höhle, Meer, Gewitter und mehr.">
+<meta name="theme-color" content="#100c12">
+<meta property="og:title" content="Klangwelten · Imres Tales">
+<meta property="og:description" content="Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik, ohne Schleifen-Gefühl.">
+<meta property="og:image" content="https://imrestales.de/vorschau.jpg">
+<title>Klangwelten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* Ruhig und reizarm: dunkles Pergament, keine Bewegung außer einem sanften Glimmen bei der laufenden Klangwelt. */
+:root{
+  color-scheme:dark;
+  --ink:#100c12;--panel:#1a1419;--panel2:#231b22;--line:#3a2f37;--text:#efe5d2;--mute:#a8998a;--ember:#e0a046;--night:#0b080d;
+  --fd:'IM Fell English','Palatino Linotype',Palatino,Georgia,serif;--fb:'Alegreya Sans','Trebuchet MS',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ink);color:var(--text)}
+body{font-family:var(--fb);font-size:16px;line-height:1.5;padding-bottom:calc(6.5rem + env(safe-area-inset-bottom,0px));
+  background:radial-gradient(ellipse at 50% -10%,rgba(224,160,70,.08),transparent 60%),var(--ink)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+.wrap{max-width:62rem;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px))}
+header.kopf{padding:1.6rem 0 1rem}
+.zurueck{color:var(--mute);text-decoration:none;font-size:.9rem}
+.zurueck:hover{color:var(--ember)}
+h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin:.4rem 0 .2rem;color:var(--text)}
+.unter{color:var(--mute);margin:0;max-width:40rem}
+.welten{display:grid;grid-template-columns:repeat(auto-fill,minmax(11.5rem,1fr));gap:.6rem;margin:1.2rem 0}
+@media (max-width:520px){.welten{grid-template-columns:1fr 1fr;gap:.45rem}}
+.welt{position:relative;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.8rem .85rem .75rem;min-height:6.4rem;display:flex;flex-direction:column;gap:.15rem;transition:border-color .3s,background .3s}
+.welt:hover{border-color:rgba(224,160,70,.6)}
+.welt .sym{font-size:1.5rem;line-height:1}
+.welt .nm{font-family:var(--fd);font-size:1.18rem;line-height:1.15;margin-top:.2rem}
+.welt .tx{font-size:.8rem;color:var(--mute);line-height:1.3}
+.welt.an{border-color:var(--ember);background:linear-gradient(180deg,rgba(224,160,70,.14),var(--panel));box-shadow:0 0 0 1px var(--ember) inset}
+.welt.an::after{content:"";position:absolute;top:.7rem;right:.7rem;width:.55rem;height:.55rem;border-radius:50%;background:var(--ember);box-shadow:0 0 10px var(--ember);animation:glimm 2.6s ease-in-out infinite}
+.welt.laedt::after{content:"…";position:absolute;top:.4rem;right:.7rem;color:var(--ember);background:none;box-shadow:none;width:auto;height:auto}
+@keyframes glimm{50%{opacity:.35}}
+.misch{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1rem .6rem;margin:1rem 0 0}
+.misch h2{font-family:var(--fd);font-weight:400;font-size:1.3rem;margin:0 0 .6rem;display:flex;align-items:center;gap:.5rem}
+.misch h2 small{font-family:var(--fb);font-size:.8rem;color:var(--mute)}
+.regler{display:grid;grid-template-columns:minmax(6.5rem,10rem) 1fr 2.6rem;align-items:center;gap:.6rem;padding:.25rem 0;font-size:.92rem}
+.regler span{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.regler b{font-weight:500;color:var(--mute);font-size:.8rem;text-align:right}
+.regler input{width:100%;accent-color:var(--ember)}
+.trenn{border:0;border-top:1px solid var(--line);margin:.6rem 0}
+.tipp{color:var(--mute);font-size:.82rem;margin:.4rem 0 .2rem}
+footer{color:var(--mute);font-size:.8rem;line-height:1.5;padding:1rem 0 2rem}
+footer a{color:var(--mute)}
+footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05rem;margin:0 0 .3rem}
+.leiste{position:fixed;left:50%;bottom:max(.7rem,env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(40rem,calc(100% - 1.4rem));display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;border:1px solid rgba(224,160,70,.5);border-radius:999px;background:rgba(16,12,18,.95);box-shadow:0 10px 30px rgba(0,0,0,.6);z-index:5}
+.spielen{width:2.9rem;height:2.9rem;flex:0 0 auto;border-radius:50%;border:1px solid var(--ember);background:var(--ember);color:var(--night);font-size:1.05rem}
+.spielen.laeuft{background:none;color:var(--ember)}
+.jetzt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.jetzt b{font-family:var(--fd);font-weight:400;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jetzt small{color:var(--mute);font-size:.76rem}
+.laut{display:flex;align-items:center;gap:.35rem;flex:0 1 9rem;min-width:5.5rem;color:var(--mute)}
+.laut input{width:100%;accent-color:var(--ember)}
+@media (prefers-reduced-motion:reduce){.welt.an::after{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="kopf">
+    <a class="zurueck" href="index.html#lautenwerk" data-t="zurueck">← Zurück zum Lautenwerk</a>
+    <h1 data-t="titel">Klangwelten</h1>
+    <p class="unter" data-t="unter">Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.</p>
+  </header>
+  <main>
+    <section class="misch" id="misch" hidden></section>
+    <div class="welten" id="welten"></div>
+  </main>
+  <footer id="dank"></footer>
+</div>
+<div class="leiste" id="leiste">
+  <button type="button" class="spielen" id="spielen" aria-label="Abspielen">▶</button>
+  <div class="jetzt"><b id="jetzt-name">–</b><small id="jetzt-info"></small></div>
+  <label class="laut"><span aria-hidden="true">🔊</span><input type="range" id="gesamt" min="0" max="100" value="70" aria-label="Lautstärke"></label>
+</div>
+<script>
+(() => {
+  "use strict";
+  const EN = (() => { try { return localStorage.getItem("imres-lang") === "en"; } catch (_) { return false; } })();
+  if (EN) document.documentElement.lang = "en";
+  const T = EN ? {
+    zurueck: "← Back to the Lautenwerk", titel: "Soundscapes", unter: "Pure ambience from real recordings – no music. The sounds are constantly rearranged, so nothing repeats noticeably.",
+    spielen: "Play", stopp: "Stop", laedt: "loading …", waehlen: "Choose a soundscape", ebenen: "Layers", leben: "Liveliness", raum: "Room echo", gesamt: "Volume",
+    tippMisch: "Every soundscape remembers your mix.", laeuft: "playing", pausiert: "paused"
+  } : {
+    zurueck: "← Zurück zum Lautenwerk", titel: "Klangwelten", unter: "Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.",
+    spielen: "Abspielen", stopp: "Anhalten", laedt: "lädt …", waehlen: "Wähle eine Klangwelt", ebenen: "Schichten", leben: "Lebendigkeit", raum: "Raumhall", gesamt: "Lautstärke",
+    tippMisch: "Jede Klangwelt merkt sich deine Mischung.", laeuft: "läuft", pausiert: "pausiert"
+  };
+  document.querySelectorAll("[data-t]").forEach(el => { if (T[el.dataset.t]) el.textContent = T[el.dataset.t]; });
+  document.title = T.titel;
+
+  /* ---------- Klangquellen ----------
+     a_* = lange Aufnahmen (Teppiche), e_* = einzelne Ereignisse, fx_* = Effekt-Aufnahmen des Lautenwerks, @name = gerechnet (klangwerk.js) */
+  const LAUTHEIT = {"a_feuer1":.0315,"a_feuer2":.0164,"a_feuer3":.0183,"a_grillen":.129,"a_nacht":.144,"a_voegel1":.0601,"a_voegel2":.0565,"a_laub":.0853,"a_bach1":.0405,"a_bach2":.0505,
+    "a_wasserfall":.1828,"a_wind1":.0818,"a_wind2":.0963,"a_regen1":.0387,"a_regen2":.0462,"a_waldregen":.0248,"a_starkregen":.043,"a_zelt":.0196,"a_gewitter1":.0441,"a_gewitter2":.0412,
+    "a_wellen1":.0623,"a_wellen2":.0559,"a_boot":.0343,"a_tropfen1":.0089,"a_tropfen2":.0249,"a_unterwasser":.1387,"a_kochen":.0825,"a_blubbern":.0647,"@gemurmel":.16};
+  const reihe = (p, n) => Array.from({ length: n }, (_, i) => p + (i + 1));
+  const EV = {
+    krug: { f: ["fx_fo_glass_02", "fx_fo_glass_03", "fx_fo_dishes_01", "fx_fo_dishes_03", "fx_fo2_sfx100v2_glass_02", "fx_fo_pot_01"] },
+    stuhl: { f: ["fx_mw_wood_squeak_01", "fx_mw_wood_squeak_02", "fx_fo_wooden_02"] },
+    knarren: { f: ["fx_ka_creak1", "fx_ka_creak2", "fx_ka_creak3"] },
+    schritte: { f: ["fx_ka_footstep00", "fx_ka_footstep01", "fx_ka_footstep02", "fx_ka_footstep03", "fx_ka_footstep04"], folge: [3, 6, .4, .48] },
+    holzschritte: { f: ["fx_im_footstep_wood_001", "fx_im_footstep_wood_002", "fx_im_footstep_wood_003"], folge: [3, 6, .45, .55] },
+    muenzen: { f: ["fx_ka_handlecoins", "fx_rd_item_coins_04", "fx_rp_coin2"] },
+    tuer: { f: ["fx_ka_dooropen_1", "fx_ka_dooropen_2", "fx_rp_door"] },
+    donner: { f: ["fx_fo2_sfx100v2_thunder_01"], tempo: [.7, 1.05] },
+    heulen: { f: reihe("e_heulen_", 1), tempo: [.5, .62] },
+    glocke: { f: reihe("e_glocke_", 4), tempo: [.8, 1] }, gong: { f: reihe("e_gong_", 2), tempo: [.85, 1] },
+    kette: { f: reihe("e_kette_", 4) }, stein: { f: reihe("e_stein_", 6) }, platsch: { f: reihe("e_platsch_", 4) }, blubb: { f: reihe("e_blubb_", 4) },
+    insekt: { f: reihe("e_insekt_", 4) }, buch: { f: reihe("e_buch_", 6) }, papier: { f: reihe("e_papier_", 3) },
+    hammer: { f: reihe("e_hammer_", 6).concat(["amboss"]), folge: [3, 7, .55, .75] }, metall: { f: reihe("e_metall_", 3) },
+    stoehnen: { f: reihe("e_stoehnen_", 4), tempo: [.75, .95] }, schleim: { f: reihe("e_schleim_", 3) }, monster: { f: reihe("e_monster_", 3), tempo: [.6, .8] },
+    blasebalg: { f: reihe("e_blasebalg_", 2) }, ast: { f: reihe("e_ast_", 4) }, kies: { f: reihe("e_kies_", 2), folge: [3, 6, .5, .6] },
+    laubschritt: { f: reihe("e_laubschritt_", 2), folge: [3, 6, .5, .62] }, riegel: { f: reihe("e_riegel_", 4) }, hund: { f: reihe("e_hund_", 2) },
+    tuch: { f: reihe("e_tuch_", 3) }, zischen: { f: reihe("e_zischen_", 2) },
+    chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 },
+    lachen: { s: "lachen" }, eule: { s: "eule" }, moewe: { s: "moewe" }, specht: { s: "specht" }, vogel: { s: "vogel" }, fledermaus: { s: "fledermaus" }
+  };
+  /* ---------- Die Klangwelten ----------
+     betten: [Quelle, Stärke, Name, { tief: Tiefpass }]; ereignisse: [Art, [min, max] Sekunden, Stärke, Anteil „aus der Ferne“] */
+  const W = (de, en) => EN ? en : de;
+  const WELTEN = [
+    { id: "taverne", sym: "🍺", name: W("Taverne", "Tavern"), text: W("Kaminfeuer, Stimmengewirr, Krüge und knarrende Dielen", "Hearth fire, chatter, tankards and creaking floorboards"), raum: .7,
+      betten: [["a_feuer1", .55, W("Kaminfeuer", "Hearth")], ["@gemurmel", .9, W("Stimmengewirr", "Chatter")]],
+      ereignisse: [["krug", [2.5, 8], .55, .2], ["lachen", [7, 18], .35, .5], ["stuhl", [8, 20], .4, .3], ["knarren", [10, 25], .35, .3], ["holzschritte", [9, 22], .35, .4], ["muenzen", [20, 45], .35, .4], ["tuer", [45, 100], .3, .5]] },
+    { id: "lagerfeuer", sym: "🔥", name: W("Lagerfeuer", "Campfire"), text: W("Knisterndes Feuer unter Sternen, Grillen, ferne Eulen", "Crackling fire under the stars, crickets, distant owls"), raum: 1.2,
+      betten: [["a_feuer2", 1, W("Feuer", "Fire")], ["a_grillen", .45, W("Grillen", "Crickets")], ["a_nacht", .35, W("Nacht", "Night")], ["a_wind1", .15, W("Wind", "Wind"), { tief: 900 }]],
+      ereignisse: [["eule", [25, 60], .4, .6], ["heulen", [70, 160], .3, 1], ["ast", [15, 35], .35, .5], ["laubschritt", [40, 90], .3, .8]] },
+    { id: "waldtag", sym: "🌲", name: W("Wald am Tag", "Forest by day"), text: W("Vogelgesang, raschelndes Laub, ein Bach", "Birdsong, rustling leaves, a brook"), raum: 1,
+      betten: [["a_voegel1", .8, W("Vögel", "Birds")], ["a_voegel2", .55, W("Baumkronen", "Treetops")], ["a_laub", .3, W("Laub", "Leaves")], ["a_bach1", .25, W("Bach", "Brook")], ["a_wind1", .14, W("Wind", "Wind"), { tief: 1400 }]],
+      ereignisse: [["specht", [25, 60], .3, .6], ["vogel", [6, 16], .3, .5], ["ast", [20, 45], .3, .6], ["laubschritt", [35, 80], .3, .7]] },
+    { id: "waldnacht", sym: "🌙", name: W("Wald bei Nacht", "Forest at night"), text: W("Grillen, Nachtwind, Eulen und Wölfe in der Ferne", "Crickets, night wind, owls and distant wolves"), raum: 1.3,
+      betten: [["a_nacht", .9, W("Nacht", "Night")], ["a_grillen", .55, W("Grillen", "Crickets")], ["a_wind2", .22, W("Wind", "Wind"), { tief: 1200 }]],
+      ereignisse: [["eule", [15, 40], .45, .5], ["heulen", [45, 110], .35, 1], ["ast", [12, 30], .35, .6], ["fledermaus", [30, 70], .25, .5]] },
+    { id: "regen", sym: "🌧", name: W("Regen unterwegs", "Rain on the road"), text: W("Regen auf Blättern, Pfützen, ferner Donner", "Rain on leaves, puddles, distant thunder"), raum: 1,
+      betten: [["a_waldregen", 1, W("Waldregen", "Forest rain")], ["a_regen1", .45, W("Regen", "Rain")], ["a_wind1", .2, W("Wind", "Wind"), { tief: 1000 }]],
+      ereignisse: [["donner", [50, 130], .35, 1], ["platsch", [14, 35], .25, .5]] },
+    { id: "zelt", sym: "⛺", name: W("Zelt im Regen", "Tent in the rain"), text: W("Tropfen auf der Zeltplane, draußen Wind", "Drops on canvas, wind outside"), raum: .4,
+      betten: [["a_zelt", 1, W("Zeltplane", "Canvas")], ["a_regen2", .3, W("Regen", "Rain"), { tief: 1800 }], ["a_wind1", .2, W("Wind", "Wind"), { tief: 700 }]],
+      ereignisse: [["donner", [60, 150], .3, 1], ["tuch", [25, 60], .25, .2]] },
+    { id: "gewitter", sym: "⛈", name: W("Gewitter", "Thunderstorm"), text: W("Prasselnder Regen, Sturm und rollender Donner", "Pouring rain, gale and rolling thunder"), raum: 1.5,
+      betten: [["a_gewitter1", 1, W("Gewitter", "Storm")], ["a_gewitter2", .5, W("Unwetter", "Tempest")], ["a_starkregen", .45, W("Starkregen", "Downpour")], ["a_wind2", .4, W("Sturmwind", "Gale")]],
+      ereignisse: [["donner", [14, 40], .55, .5]] },
+    { id: "hoehle", sym: "💧", name: W("Höhle", "Cave"), text: W("Tropfendes Wasser, Hall, bröckelnder Stein", "Dripping water, echoes, crumbling stone"), raum: 4,
+      betten: [["a_tropfen1", 1, W("Tropfen", "Drips")], ["a_tropfen2", .45, W("Rinnsal", "Trickle")], ["a_wind1", .22, W("Luftzug", "Draught"), { tief: 380 }]],
+      ereignisse: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5]] },
+    { id: "unterreich", sym: "🕸", name: W("Unterreich", "Underdark"), text: W("Endlose Tiefe, fremde Laute, Schleim und Stein", "Endless depths, alien sounds, slime and stone"), raum: 5,
+      betten: [["a_tropfen1", .7, W("Tropfen", "Drips")], ["a_unterwasser", .35, W("Tiefe", "Depths"), { tief: 500 }], ["a_bach2", .18, W("Ferner Fluss", "Distant river"), { tief: 600 }]],
+      ereignisse: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1]] },
+    { id: "kerker", sym: "⛓", name: W("Kerker", "Dungeon"), text: W("Klirrende Ketten, ferne Klagen, schwere Riegel", "Rattling chains, distant moans, heavy bolts"), raum: 2.5,
+      betten: [["a_tropfen2", .6, W("Tropfen", "Drips")], ["a_wind1", .25, W("Luftzug", "Draught"), { tief: 450 }]],
+      ereignisse: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8]] },
+    { id: "kueste", sym: "🌊", name: W("Küste", "Coast"), text: W("Brandung, Wind und Möwen", "Surf, wind and gulls"), raum: 1,
+      betten: [["a_wellen1", 1, W("Brandung", "Surf")], ["a_wellen2", .55, W("Wellen", "Waves")], ["a_wind2", .3, W("Wind", "Wind")]],
+      ereignisse: [["moewe", [8, 22], .4, .5], ["glocke", [60, 140], .2, 1]] },
+    { id: "schiff", sym: "⛵", name: W("An Deck", "On deck"), text: W("Knarzende Planken, Wellen gegen den Rumpf, Segel im Wind", "Creaking planks, waves on the hull, sails in the wind"), raum: .8,
+      betten: [["a_boot", 1, W("Planken", "Planks")], ["a_wellen2", .7, W("Wellen", "Waves")], ["a_wind1", .4, W("Wind", "Wind")]],
+      ereignisse: [["knarren", [8, 20], .4, .3], ["moewe", [15, 40], .3, .6], ["tuch", [10, 25], .35, .3], ["glocke", [50, 120], .25, .6], ["holzschritte", [25, 60], .3, .5]] },
+    { id: "fluss", sym: "🏞", name: W("Wasserfall", "Waterfall"), text: W("Rauschendes Wasser, Gischt, Vögel am Ufer", "Rushing water, spray, birds on the bank"), raum: 1.2,
+      betten: [["a_wasserfall", .9, W("Wasserfall", "Waterfall")], ["a_bach2", .55, W("Fluss", "River")], ["a_voegel2", .28, W("Vögel", "Birds")]],
+      ereignisse: [["vogel", [10, 25], .25, .6], ["platsch", [20, 45], .25, .5]] },
+    { id: "schmiede", sym: "⚒", name: W("Schmiede", "Forge"), text: W("Esse, Hammer auf Amboss, Blasebalg und zischender Stahl", "Hearth, hammer on anvil, bellows and hissing steel"), raum: .9,
+      betten: [["a_feuer1", .75, W("Esse", "Hearth")], ["a_feuer3", .35, W("Glut", "Embers")]],
+      ereignisse: [["hammer", [6, 14], .55, .1], ["blasebalg", [12, 28], .35, .2], ["zischen", [20, 45], .3, .2], ["metall", [15, 35], .3, .3]] },
+    { id: "labor", sym: "⚗", name: W("Alchemistenstube", "Alchemist's study"), text: W("Brodelnde Kessel, blubbernde Phiolen, klirrendes Glas", "Bubbling cauldrons, gurgling vials, clinking glass"), raum: .9,
+      betten: [["a_kochen", .7, W("Kessel", "Cauldron")], ["a_blubbern", .45, W("Phiolen", "Vials")], ["a_feuer3", .35, W("Feuer", "Fire")]],
+      ereignisse: [["krug", [8, 20], .35, .2], ["blubb", [5, 14], .35, .3], ["buch", [20, 45], .3, .3], ["zischen", [25, 60], .25, .3]] },
+    { id: "bibliothek", sym: "📚", name: W("Bibliothek", "Library"), text: W("Stille, Kaminglut, blätternde Seiten, knarrende Regale", "Silence, embers, turning pages, creaking shelves"), raum: 1.8,
+      betten: [["a_feuer3", .7, W("Kamin", "Hearth")], ["a_wind2", .25, W("Wind am Fenster", "Wind at the window"), { tief: 600 }]],
+      ereignisse: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7]] },
+    { id: "tempel", sym: "⛪", name: W("Tempel", "Temple"), text: W("Weite Stille, Glocken und Gong, Schritte auf Stein", "Vast silence, bells and gong, footsteps on stone"), raum: 5,
+      betten: [["a_wind1", .35, W("Luftzug", "Draught"), { tief: 500 }], ["a_wind2", .2, W("Weite", "Vastness"), { tief: 300 }], ["a_feuer3", .3, W("Kerzen", "Candles"), { tief: 2000 }]],
+      ereignisse: [["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] },
+    { id: "sumpf", sym: "🐸", name: W("Sumpf", "Swamp"), text: W("Blubbernder Morast, Insekten, Tropfen im Nebel", "Bubbling mire, insects, drips in the mist"), raum: 1.2,
+      betten: [["a_blubbern", .4, W("Morast", "Mire")], ["a_grillen", .4, W("Grillen", "Crickets")], ["a_nacht", .4, W("Nacht", "Night")], ["a_tropfen2", .3, W("Tropfen", "Drips")]],
+      ereignisse: [["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1]] },
+    { id: "unterwasser", sym: "🫧", name: W("Unter Wasser", "Underwater"), text: W("Gedämpfte Tiefe, aufsteigende Blasen", "Muffled depths, rising bubbles"), raum: 2,
+      betten: [["a_unterwasser", 1, W("Tiefe", "Depths")], ["a_blubbern", .3, W("Blasen", "Bubbles"), { tief: 1500 }]],
+      ereignisse: [["blubb", [5, 14], .3, .5], ["monster", [70, 160], .15, 1]] }
+  ];
+
+  /* ---------- Gemerkte Einstellungen ---------- */
+  let merk = {};
+  try { merk = JSON.parse(localStorage.getItem("imres-klangwelten") || "{}") || {}; } catch (_) {}
+  merk.mix = merk.mix || {};
+  const speichern = () => { try { localStorage.setItem("imres-klangwelten", JSON.stringify(merk)); } catch (_) {} };
+  const zz = (a, b) => a + Math.random() * (b - a);
+  const zufall = l => l[Math.floor(Math.random() * l.length)];
+
+  /* ---------- Audio ---------- */
+  let ctx = null, gesamt, trocken, hallEin, hall, hallNass, aktiv = null, timer = 0, stumm = null;
+  const puffer = new Map(), laedt = new Map();
+  function audioStart() {
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { ctx = new AC(); }
+    const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12; lim.attack.value = .005; lim.release.value = .3;
+    gesamt = ctx.createGain(); gesamt.gain.value = lautWert(); gesamt.connect(lim); lim.connect(ctx.destination);
+    trocken = ctx.createGain(); trocken.connect(gesamt);
+    hallEin = ctx.createGain(); hall = ctx.createConvolver(); hallNass = ctx.createGain(); hallNass.gain.value = .5;
+    hallEin.connect(hall); hall.connect(hallNass); hallNass.connect(gesamt);
+    /* iPhone: ein stummer Ton im Audio-Element hält die Wiedergabe auch bei gesperrtem Bildschirm am Leben */
+    try {
+      const n = 8000, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+      w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, "data"); v.setUint32(40, n, true);
+      for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+      let bin = ""; new Uint8Array(b).forEach(x => { bin += String.fromCharCode(x); });
+      stumm = new Audio("data:audio/wav;base64," + btoa(bin)); stumm.loop = true; stumm.setAttribute("playsinline", "");
+    } catch (_) {}
+  }
+  const lautWert = () => Math.pow((merk.gesamt != null ? merk.gesamt : 70) / 100, 1.6) * .95;
+  /* Raumhall: selbst erzeugter Nachhall, Länge je Klangwelt */
+  function raumSetzen(sek) {
+    /* auf dem Handy kürzer und einkanalig – spart Rechenzeit, damit nichts kratzt */
+    const mobil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || ""), k = mobil ? 1 : 2;
+    const sr = ctx.sampleRate, n = Math.floor(sr * Math.max(.3, Math.min(mobil ? 3 : 6, sek))), b = ctx.createBuffer(k, n, sr);
+    for (let c = 0; c < k; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
+    hall.buffer = b;
+  }
+  const quelle = n => n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_") ? "klang/" + n + ".mp3" : "amb/" + n + ".mp3";
+  function laden(n) {
+    if (puffer.has(n)) return Promise.resolve(puffer.get(n));
+    if (laedt.has(n)) return laedt.get(n);
+    const p = (n.startsWith("@") ? synth("kulisse", n.slice(1)) : fetch(quelle(n)).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(ab => new Promise((res, rej) => { const x = ctx.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); })))
+      .then(b => { puffer.set(n, b); return b; }).catch(() => { laedt.delete(n); return null; });
+    laedt.set(n, p); return p;
+  }
+  /* gerechnete Klänge (Eule, Möwe, Stimmengewirr …) aus klangwerk.js im Hintergrund */
+  let werk = null, werkNr = 0; const werkWarten = new Map();
+  function synth(gruppe, art) {
+    return new Promise(res => {
+      const sr = 32000, fertig = d => { if (!d) return res(null); const b = ctx.createBuffer(1, d.length, sr); b.getChannelData(0).set(d); res(b); };
+      try {
+        if (!werk) { werk = new Worker("klangwerk.js"); werk.onmessage = e => { const w = werkWarten.get(e.data.id); if (w) { werkWarten.delete(e.data.id); w(e.data.daten); } }; }
+        const id = ++werkNr; werkWarten.set(id, fertig); werk.postMessage({ id, gruppe, art, sr });
+      } catch (_) { res(null); }
+    });
+  }
+  const synthVorrat = {};
+  function synthEreignis(art) {
+    const v = synthVorrat[art] = synthVorrat[art] || { liste: [], laeuft: 0 };
+    const auf = () => { v.laeuft++; synth("effekt", art).then(b => { v.laeuft--; if (b) v.liste.push(b); }); };
+    while (v.liste.length + v.laeuft < 3) auf();
+    if (!v.liste.length) return null;
+    const b = v.liste.splice(Math.floor(Math.random() * v.liste.length), 1)[0]; auf(); return b;
+  }
+
+  /* ---------- Teppich: spielt immer neue, zufällig gewählte Ausschnitte mit weichen Überblendungen – so entsteht keine erkennbare Schleife ---------- */
+  const N = 64, EIN = new Float32Array(N), AUS = new Float32Array(N);
+  for (let i = 0; i < N; i++) { EIN[i] = Math.sin(i / (N - 1) * Math.PI / 2); AUS[i] = Math.cos(i / (N - 1) * Math.PI / 2); }
+  function bettStarten(welt, [name, staerke, label, o], i) {
+    const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false };
+    const m = merk.mix[welt.id]; if (m && m.b && typeof m.b[i] === "number") b.regler = m.b[i];
+    b.out.gain.value = 0;
+    let ziel = b.out;
+    if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(trocken); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); b.out.connect(lp); }
+    else { b.out.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; b.out.connect(s); s.connect(hallEin); }
+    /* auf gleiche Lautheit bringen – aber nie so weit, dass knackende Spitzen (Feuer, Tropfen) übersteuern */
+    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05));
+    laden(name).then(buf => {
+      if (!buf || b.aus) return;
+      b.buf = buf; b.naechst = ctx.currentTime + .05;
+      b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + 4);
+      bettPlanen(b);
+    });
+    return b;
+  }
+  function bettPlanen(b) {
+    if (!b.buf || b.aus) return;
+    const D = b.buf.duration;
+    while (b.naechst < ctx.currentTime + 6) {
+      const len = Math.min(D * .8, zz(9, 22)), X = Math.min(3, len * .3), off = Math.random() * Math.max(0, D - len), t = b.naechst;
+      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b.buf;
+      if (!b.o.fest) s.playbackRate.value = zz(.985, 1.015);
+      g.gain.value = 0; g.gain.setValueCurveAtTime(EIN, t, X); g.gain.setValueCurveAtTime(AUS, t + len - X, X);
+      s.connect(g); g.connect(b.out); s.start(t, off, len + .05);
+      b.quellen.push(s); s.onended = () => { const k = b.quellen.indexOf(s); if (k >= 0) b.quellen.splice(k, 1); };
+      b.naechst = t + len - X;
+    }
+    /* langsames Atmen der Lautstärke */
+    if (ctx.currentTime > b.drift) { b.drift = ctx.currentTime + zz(8, 20); b.out.gain.setTargetAtTime(b.grund * b.regler * zz(.78, 1.15), ctx.currentTime, zz(2, 5)); }
+  }
+  function bettStopp(b, sanft) {
+    b.aus = true; const j = ctx.currentTime;
+    b.out.gain.cancelScheduledValues(j); b.out.gain.setValueAtTime(b.out.gain.value, j); b.out.gain.linearRampToValueAtTime(0, j + (sanft ? 3 : .4));
+    b.quellen.forEach(s => { try { s.stop(j + (sanft ? 3.2 : .5)); } catch (_) {} });
+    setTimeout(() => { try { b.out.disconnect(); } catch (_) {} }, sanft ? 3500 : 700);
+  }
+
+  /* ---------- Ereignisse: mal nah, mal fern, links und rechts ---------- */
+  function ereignis(welt, [art, , staerke, fern]) {
+    const e = EV[art], j = ctx.currentTime + .05;
+    const weit = Math.random() < (fern || 0), laut = staerke * (weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv.leben > 1 ? 1 : .9);
+    let ziel;
+    const g = ctx.createGain(); g.gain.value = laut;
+    let letzter = g;
+    if (weit) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = zz(900, 2600); g.connect(lp); letzter = lp; }
+    if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = zz(-.8, .8); letzter.connect(pn); letzter = pn; }
+    letzter.connect(trocken); const s = ctx.createGain(); s.gain.value = weit ? .8 : .3; letzter.connect(s); s.connect(hallEin);
+    ziel = g;
+    if (e.s) { const b = synthEreignis(e.s); if (b) spiel(b, ziel, j, zz(.94, 1.06)); return; }
+    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1;
+    let t = j;
+    for (let k = 0; k < n; k++) {
+      const name = zufall(e.f), b = puffer.get(name);
+      if (!b) { laden(name); continue; }
+      if (e.lang) { const gg = ctx.createGain(), r = zz(e.tempo[0], e.tempo[1]), d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(1, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); gg.connect(ziel); spiel(b, gg, t, r); continue; }
+      spiel(b, ziel, t, e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05), e.folge ? zz(.7, 1) : 1);
+      if (e.folge) t += zz(e.folge[2], e.folge[3]);
+    }
+  }
+  function spiel(b, ziel, t, rate, g) {
+    const s = ctx.createBufferSource(); s.buffer = b; s.playbackRate.value = rate;
+    if (g != null && g !== 1) { const gg = ctx.createGain(); gg.gain.value = g; s.connect(gg); gg.connect(ziel); } else s.connect(ziel);
+    s.start(t);
+  }
+
+  /* ---------- Klangwelt starten / wechseln ---------- */
+  function weltStarten(welt) {
+    audioStart();
+    if (stumm) stumm.play().catch(() => {});
+    const alt = aktiv;
+    if (alt) alt.betten.forEach(b => bettStopp(b, true));
+    const m = merk.mix[welt.id] || {};
+    raumSetzen(welt.raum);
+    hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2, ctx.currentTime, .3);
+    aktiv = { welt, betten: welt.betten.map((x, i) => bettStarten(welt, x, i)), naechst: {}, leben: m.leben != null ? m.leben : 1 };
+    welt.ereignisse.forEach(([art]) => { (EV[art].f || []).forEach(laden); if (EV[art].s) synthEreignis(EV[art].s); });
+    merk.welt = welt.id; speichern();
+    clearInterval(timer);
+    timer = setInterval(takt, 250);
+    zeichnen();
+    if ("mediaSession" in navigator) {
+      try { navigator.mediaSession.metadata = new MediaMetadata({ title: welt.name, artist: T.titel, album: "Imres Tales" }); } catch (_) {}
+      try { navigator.mediaSession.setActionHandler("pause", stoppen); navigator.mediaSession.setActionHandler("play", () => weltStarten(welt)); } catch (_) {}
+    }
+  }
+  function takt() {
+    if (!aktiv || !ctx) return;
+    const j = ctx.currentTime;
+    aktiv.betten.forEach(bettPlanen);
+    if (aktiv.leben <= 0) return;
+    aktiv.welt.ereignisse.forEach((ev, i) => {
+      const [, [a, b]] = ev;
+      if (aktiv.naechst[i] == null) aktiv.naechst[i] = j + zz(a * .3, b) / aktiv.leben;
+      if (j >= aktiv.naechst[i]) { try { ereignis(aktiv.welt, ev); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / aktiv.leben; }
+    });
+  }
+  function stoppen() {
+    if (!aktiv) return;
+    aktiv.betten.forEach(b => bettStopp(b, true));
+    aktiv = null; clearInterval(timer);
+    if (stumm) stumm.pause();
+    zeichnen();
+  }
+
+  /* ---------- Oberfläche ---------- */
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function zeichnen() {
+    $("welten").innerHTML = WELTEN.map(w => '<button type="button" class="welt' + (aktiv && aktiv.welt === w ? " an" : "") + '" data-welt="' + w.id + '"><span class="sym" aria-hidden="true">' + w.sym +
+      '</span><span class="nm">' + esc(w.name) + '</span><span class="tx">' + esc(w.text) + "</span></button>").join("");
+    const sp = $("spielen"); sp.textContent = aktiv ? "■" : "▶"; sp.classList.toggle("laeuft", !!aktiv); sp.setAttribute("aria-label", aktiv ? T.stopp : T.spielen);
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt);
+    $("jetzt-name").textContent = w ? w.sym + " " + w.name : T.waehlen;
+    $("jetzt-info").textContent = aktiv ? T.laeuft : w ? T.pausiert : "";
+    const mi = $("misch");
+    if (!w) { mi.hidden = true; return; }
+    mi.hidden = false;
+    const m = merk.mix[w.id] || {}, wert = (x, d) => x != null ? x : d;
+    mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + "</small></h2>" +
+      w.betten.map((x, i) => regler("b" + i, x[2], Math.round(wert(m.b && m.b[i], 1) * 100), 0, 150)).join("") +
+      '<hr class="trenn">' + regler("leben", T.leben, Math.round(wert(m.leben, 1) * 100), 0, 200) + regler("raum", T.raum, wert(m.raum, 50), 0, 100) +
+      '<p class="tipp">' + esc(T.tippMisch) + "</p>";
+  }
+  const regler = (k, name, v, lo, hi) => '<label class="regler"><span>' + esc(name) + '</span><input type="range" min="' + lo + '" max="' + hi + '" value="' + v + '" data-regler="' + k + '"><b>' + v + " %</b></label>";
+  document.addEventListener("click", e => {
+    const w = e.target.closest("[data-welt]");
+    if (w) { const welt = WELTEN.find(x => x.id === w.dataset.welt); if (aktiv && aktiv.welt === welt) stoppen(); else weltStarten(welt); return; }
+    if (e.target.closest("#spielen")) {
+      if (aktiv) stoppen(); else weltStarten(WELTEN.find(x => x.id === merk.welt) || WELTEN[0]);
+    }
+  });
+  document.addEventListener("input", e => {
+    if (e.target.id === "gesamt") { merk.gesamt = +e.target.value; speichern(); if (gesamt) gesamt.gain.setTargetAtTime(lautWert(), ctx.currentTime, .05); return; }
+    const k = e.target.dataset.regler; if (!k) return;
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt); if (!w) return;
+    const m = merk.mix[w.id] = merk.mix[w.id] || {}, v = +e.target.value;
+    e.target.nextElementSibling.textContent = v + " %";
+    if (k[0] === "b") {
+      const i = +k.slice(1); m.b = m.b || []; m.b[i] = v / 100;
+      if (aktiv && aktiv.welt === w) { const b = aktiv.betten[i]; b.regler = v / 100; b.drift = 0; b.out.gain.setTargetAtTime(b.grund * b.regler, ctx.currentTime, .1); }
+    } else if (k === "leben") { m.leben = v / 100; if (aktiv && aktiv.welt === w) { aktiv.leben = m.leben; aktiv.naechst = {}; } }
+    else if (k === "raum") { m.raum = v; if (ctx && aktiv && aktiv.welt === w) hallNass.gain.setTargetAtTime(v / 100 * 1.2, ctx.currentTime, .1); }
+    speichern();
+  });
+  $("gesamt").value = merk.gesamt != null ? merk.gesamt : 70;
+  $("gesamt").setAttribute("aria-label", T.gesamt);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && aktiv && ctx.state === "suspended") ctx.resume(); });
+  zeichnen();
+
+  /* ---------- Dank ---------- */
+  $("dank").innerHTML = EN
+    ? '<h3>Where the sounds come from</h3><p>All layers are real field recordings: from the sound collections of the free apps <a href="https://github.com/rafaelmardojai/blanket">Blanket</a>, <a href="https://github.com/Muges/ambientsounds">AmbientSounds</a> and <a href="https://github.com/mateusfg7/Noisekun">Noisekun</a> (originals on Freesound and from SFX Producer – CC0 / public domain, some CC BY: rain by alex36917, storm by Digifish Music, waves by Luftrum, heavy rain by D W, forest rain by Corsica_S, stream by mystiscool, thunderstorm by RHumphries, waterfall by straget, rain on tent by Garuda1982). Single sounds: CC0 packs by Kenney and OpenGameArt (rubberduck and others), collected in the Open Game SFX Index. Owls, gulls, woodpeckers, chatter and laughter are synthesised. Full list in <a href="klang/LIZENZ.txt">klang/LIZENZ.txt</a>. Thank you!</p>'
+    : '<h3>Woher die Klänge stammen</h3><p>Alle Teppiche sind echte Aufnahmen: aus den Klangsammlungen der freien Apps <a href="https://github.com/rafaelmardojai/blanket">Blanket</a>, <a href="https://github.com/Muges/ambientsounds">AmbientSounds</a> und <a href="https://github.com/mateusfg7/Noisekun">Noisekun</a> (Originale auf Freesound und von SFX Producer – CC0 bzw. gemeinfrei, einige CC BY: Regen von alex36917, Sturm von Digifish Music, Wellen von Luftrum, Starkregen von D W, Waldregen von Corsica_S, Bach von mystiscool, Gewitter von RHumphries, Wasserfall von straget, Regen aufs Zelt von Garuda1982). Einzelgeräusche: CC0-Pakete von Kenney und OpenGameArt (u. a. rubberduck), gesammelt im Open Game SFX Index. Eulen, Möwen, Specht, Stimmengewirr und Lachen sind gerechnet. Vollständige Liste in <a href="klang/LIZENZ.txt">klang/LIZENZ.txt</a>. Danke!</p>';
+})();
+</script>
+</body>
+</html>

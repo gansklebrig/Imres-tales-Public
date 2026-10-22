@@ -31,3 +31,14 @@ Die echten Effekt-Geräusche (fx_*.mp3) stammen aus gemeinfreien Klangpaketen (C
     „RPG Sound Pack“ (artisticdude), „Battle Sound Effects“, „37 hits/punches“
   gesammelt im Open Game SFX Index (https://github.com/Legerdo/open-game-sfx-index).
 Für Imres Tales gekürzt, in Mono umgewandelt, im Pegel angeglichen und neu kodiert.
+
+Klangwelten (ambient.html) – Teppiche in amb/a_*.mp3, Einzelgeräusche in amb/e_*.mp3:
+  aus Blanket (siehe oben): Vögel, Bach, Wind, Boot (CC0); Kaminfeuer, Grillen (gemeinfrei); Regen, Wellen (CC BY)
+  aus AmbientSounds (github.com/Muges/ambientsounds), Originale auf Freesound:
+    Kaminfeuer – inchadney (CC0); Wind – felix.blume (CC0); Starkregen – D W (CC BY);
+    Waldregen – Corsica_S (CC BY); Bach – mystiscool (CC BY); Gewitter – RHumphries (CC BY)
+  aus Noisekun (github.com/mateusfg7/Noisekun): Laub – Stek59 (CC0); Unter Wasser – Tim Verberne (CC0);
+    Gewitter – Borys Kozielski (CC0); Wasserfall – straget (CC BY); Regen aufs Zelt – Garuda1982 (CC BY 4.0);
+    Höhlentropfen, Tropfen, Nacht, Holzfeuer, Vögel in Bäumen, Regen, Wellen – SFX Producer (CC0, laut Noisekun)
+  Kessel und Blasen sowie alle e_*-Geräusche: OpenGameArt (rubberduck u. a.) und Kenney, CC0, über den Open Game SFX Index.
+Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.

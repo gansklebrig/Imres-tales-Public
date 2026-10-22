@@ -4312,6 +4312,8 @@
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
   const einstAuf = { musik: false, klang: false };
   const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
+  Object.assign(TX.de, { klangwelten: "🌫 Klangwelten", klangweltenTipp: "Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik" });
+  Object.assign(TX.en, { klangwelten: "🌫 Soundscapes", klangweltenTipp: "Pure ambience from real recordings – no music" });
   Object.assign(TX.de, { einstMusik: "Klang, Raum & Gäste", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
   Object.assign(TX.en, { einstMusik: "Sound, room & guests", einstKlang: "Backdrop & effects volume", wechselZu: "switching to", ausklangKommt: "Fade-out", leisePlus: "Intensity", funkKurz: "Listen in" });
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
@@ -4389,7 +4391,7 @@
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
-          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button>" +
+          '<span class="lw-kopf-rechts"><a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button>" +
           '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></span></div>" +
         (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
         konsole(T, false) +
@@ -5333,6 +5335,7 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 .lw-einst-kopf:hover, .lw-einst.auf .lw-einst-kopf { color: var(--ember); }
 .lw-kopf-rechts { display: inline-flex; gap: .4rem; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .lw-funk-knopf.an { border-color: var(--ember); color: var(--ember); }
+.lw-klangwelten { text-decoration: none; display: inline-flex; align-items: center; }
 .lw-pult-titel { position: relative; display: inline-flex; flex-direction: column; flex: 1 1 9rem; min-width: 0; padding-bottom: .3rem; }
 .lw-titel-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
