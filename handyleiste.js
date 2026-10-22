@@ -15,8 +15,8 @@
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const TX = {
-    de: { start: "Start", mehr: "Mehr", bereiche: "Bereiche", kapitel: "Kapitel", suche: "Suchen", sprache: "Sprache", zu: "Schließen", leiste: "Schnellnavigation" },
-    en: { start: "Home", mehr: "More", bereiche: "Sections", kapitel: "Chapters", suche: "Search", sprache: "Language", zu: "Close", leiste: "Quick navigation" }
+    de: { start: "Start", mehr: "Mehr", bereiche: "Bereiche", kapitel: "Kapitel", suche: "Suchen", gaestebuch: "Gästebuch", sprache: "Sprache", zu: "Schließen", leiste: "Schnellnavigation" },
+    en: { start: "Home", mehr: "More", bereiche: "Sections", kapitel: "Chapters", suche: "Search", gaestebuch: "Guestbook", sprache: "Language", zu: "Close", leiste: "Quick navigation" }
   };
   const t = () => TX[sprache()];
   const ICON = {
@@ -58,7 +58,8 @@
       '<div class="hl-griff" aria-hidden="true"></div>' +
       '<button type="button" class="hl-zu" aria-label="' + esc(T.zu) + '">×</button>' +
       '<p class="hl-titel">' + esc(T.bereiche) + "</p>" +
-      '<div class="hl-raster">' + uebrige.map(id => '<a href="#' + id + '" data-ziel="' + id + '">' + esc(linkText(id)) + "</a>").join("") + "</div>" +
+      '<div class="hl-raster">' + uebrige.map(id => '<a href="#' + id + '" data-ziel="' + id + '">' + esc(linkText(id)) + "</a>").join("") +
+        (document.getElementById("gaestebuch") ? '<a href="#gaestebuch" data-ziel="gaestebuch">✒ ' + esc(T.gaestebuch) + "</a>" : "") + "</div>" +
       (kap.length ? '<p class="hl-titel">' + esc(T.kapitel) + '</p><div class="hl-kapitel">' + kap.map(k => '<a href="' + esc(k.href) + '">' + esc(k.text) + "</a>").join("") + "</div>" : "") +
       '<div class="hl-fuss"><button type="button" class="hl-suche">🔍 ' + esc(T.suche) + '</button>' +
         '<span class="hl-sprache" role="group" aria-label="' + esc(T.sprache) + '"><button type="button" data-lang="de" aria-pressed="' + (sprache() === "de") + '">Deutsch</button><button type="button" data-lang="en" aria-pressed="' + (sprache() === "en") + '">English</button></span></div>';
