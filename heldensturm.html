@@ -1467,8 +1467,9 @@ const cv=$('cv');let cx=cv.getContext('2d');
 const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
-const GFX=[{n:'Minimal',dpr:0.7,q:1,lr:0.25,parts:180,corpse:0},{n:'Niedrig',dpr:0.85,q:1,lr:0.34,parts:320,corpse:8},{n:'Mittel',dpr:1.25,q:2,lr:0.5,parts:650,corpse:20},{n:'Hoch',dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
-let GAUTO=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)?2:3,GCEIL=3,FPSNOW=60;
+/* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
+const GFX=[{n:'Minimal',dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
+let GAUTO=3,GCEIL=3,FPSNOW=60;
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
 const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'?GAUTO:clamp(+g,0,4)};
 const GF=()=>GFX[gfxL()];
@@ -1614,9 +1615,12 @@ function poly(c,f,...p){c.fillStyle=f;c.beginPath();c.moveTo(p[0],p[1]);for(let 
 function ln(c,s,w,...p){c.strokeStyle=s;c.lineWidth=w;c.lineCap='round';c.beginPath();c.moveTo(p[0],p[1]);for(let i=2;i<p.length;i+=2)c.lineTo(p[i],p[i+1]);c.stroke()}
 /* Licht und Dunkelheit: eine halb aufgelöste Dunkelschicht mit ausgestanzten Lichtkegeln */
 const LC=document.createElement('canvas'),lcx=LC.getContext('2d');
+let LITC=null,LITD=-1;
+function liteDark(camX,camY,dark){const R=Math.round(Math.max(W,H)*1.2);const key=dark.toFixed(2)+(CU('nacht')?'n':'')+ZOOM.toFixed(2);if(!LITC||LITC.width!==R||LITD!==key){LITD=key;LITC=LITC||document.createElement('canvas');LITC.width=LITC.height=R;const g=LITC.getContext('2d'),r0=170*ZOOM*(CU('nacht')?0.55:1),h2=R/2,gr=g.createRadialGradient(h2,h2,r0*0.15,h2,h2,r0);gr.addColorStop(0,'rgba(6,4,10,0)');gr.addColorStop(1,`rgba(6,4,10,${dark})`);g.fillStyle=gr;g.fillRect(0,0,R,R)}
+ const sx=(P.x-camX)*ZOOM,sy=(P.y-camY)*ZOOM;cx.drawImage(LITC,sx-R,sy-R,R*2,R*2)}
 function drawLighting(camX,camY,t){const T=G.theme;if(!T)return;const dark=Math.min(0.92,(T.dark||0)+wxDark()+(CU('nacht')?0.35:0));
  if(T.tint){cx.fillStyle=T.tint;cx.fillRect(0,0,W,H)}{const x=WX(),wt=x&&(WETTER[x.w].tint),zt=x&&ZEITEN[x.z].tint;if(wt){cx.fillStyle=wt;cx.fillRect(0,0,W,H)}if(zt){cx.fillStyle=zt;cx.fillRect(0,0,W,H)}}
- if(dark<=0)return;const LR=GF().lr,lw=Math.ceil(W*LR),lh=Math.ceil(H*LR);if(LC.width!==lw||LC.height!==lh){LC.width=lw;LC.height=lh}
+ if(dark<=0)return;if(GF().lite){liteDark(camX,camY,dark);return}const LR=GF().lr,lw=Math.ceil(W*LR),lh=Math.ceil(H*LR);if(LC.width!==lw||LC.height!==lh){LC.width=lw;LC.height=lh}
  lcx.globalCompositeOperation='source-over';lcx.clearRect(0,0,lw,lh);lcx.fillStyle=`rgba(6,4,10,${dark})`;lcx.fillRect(0,0,lw,lh);
  lcx.globalCompositeOperation='destination-out';const k=ZOOM*LR;
  const hole=(x,y,r,a)=>{const sx=(x-camX)*k,sy=(y-camY)*k,R=r*k;if(sx<-R||sy<-R||sx>lw+R||sy>lh+R)return;const g=lcx.createRadialGradient(sx,sy,R*0.15,sx,sy,R);g.addColorStop(0,`rgba(0,0,0,${a})`);g.addColorStop(1,'rgba(0,0,0,0)');lcx.fillStyle=g;lcx.fillRect(sx-R,sy-R,R*2,R*2)};
@@ -2305,7 +2309,7 @@ function fpsWatch(dt){fpsAcc+=dt;fpsN++;if(fpsAcc<2)return;const avg=fpsAcc/fpsN
  if(SAVE.gfx!=='auto'&&SAVE.gfx!==undefined)return;
  if(avg>0.027){fpsGood=0;if(++fpsBad>=2&&GAUTO>0){GCEIL=GAUTO-1;GAUTO--;fpsBad=0;resize()}}
  else if(avg<0.0185){fpsBad=0;if(++fpsGood>=4&&GAUTO<GCEIL){GAUTO++;fpsGood=0;resize()}}else{fpsBad=0;fpsGood=0}}
-const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Ruckelt es am Handy, weiter nach links schieben. Am PC sieht „Episch“ am besten aus: mehr Licht, Bloom, Funken und fliegende Gegner.</div>
+const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Bloom, Funken und fliegende Gegner.</div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
  <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button></div>`};
 const gfxRow=()=>`<div class="up vol" id="gfxBox">${gfxInner()}</div>`;
@@ -2385,7 +2389,7 @@ function decal(x,y,k,c,r){if(G.bot)return;if(!G.decals)G.decals=[];const max=fxQ
  if(k==='blood'||k==='slime'){const n=ri(4,7);for(let i=0;i<n;i++){const a=rnd(TAU),dd=rnd(0.5,1.6)*r;d.pts.push([Math.cos(a)*dd,Math.sin(a)*dd*0.6,rnd(0.12,0.38)*r])}}
  else if(k==='crack'){const n=ri(5,8);for(let i=0;i<n;i++){const a=rnd(TAU);let px=0,py=0;const seg=[[0,0]];for(let j=0;j<3;j++){const aa=a+rnd(-0.5,0.5);px+=Math.cos(aa)*r*rnd(0.25,0.45);py+=Math.sin(aa)*r*rnd(0.15,0.3);seg.push([px,py])}d.pts.push(seg)}}
  G.decals.push(d)}
-function drawDecals(inView){if(!G.decals)return;const c=cx;for(const d of G.decals){if(!inView(d.x,d.y,d.r*2))continue;const k=d.t/d.life,a=Math.min(1,d.t*8,k>0.7?(1-k)/0.3:1);
+function drawDecals(inView){if(!G.decals||GF().nodec)return;const c=cx;for(const d of G.decals){if(!inView(d.x,d.y,d.r*2))continue;const k=d.t/d.life,a=Math.min(1,d.t*8,k>0.7?(1-k)/0.3:1);
   if(d.k==='scorch'){c.globalAlpha=0.6*a;c.drawImage(scorchSpr(),d.x-d.r,d.y-d.r*0.7,d.r*2,d.r*1.4)}
   else if(d.k==='blood'||d.k==='slime'){c.globalAlpha=(d.k==='slime'?0.5:0.62)*a;c.fillStyle=d.c;c.beginPath();c.ellipse(d.x,d.y,d.r,d.r*0.55,Math.sin(d.rot)*0.3,0,TAU);for(const p of d.pts){c.moveTo(d.x+p[0]+p[2],d.y+p[1]);c.arc(d.x+p[0],d.y+p[1],p[2],0,TAU)}c.fill()}
   else if(d.k==='crack'){c.globalAlpha=0.75*a;c.strokeStyle='rgba(10,8,6,.85)';c.lineWidth=2.4;c.lineCap='round';c.beginPath();for(const s of d.pts){c.moveTo(d.x+s[0][0],d.y+s[0][1]);for(let i=1;i<s.length;i++)c.lineTo(d.x+s[i][0],d.y+s[i][1])}c.stroke()}}c.globalAlpha=1}
@@ -2399,7 +2403,7 @@ function newAmb(k,x,y){const o={k,x,y,t:0,life:rnd(4,9),ph:rnd(TAU),vx:rnd(-8,8)
 function updAmb(dt,camX,camY,vw,vh){const type=AMB[G.themeKey];if(!type)return;const A=G.amb||(G.amb=[]);const N=Math.round((fxQ()>1?44:14)*(type==='mist'||type==='ghost'?0.3:1));
  while(A.length<N)A.push(newAmb(type,camX+rnd(-60,vw+60),camY+rnd(-60,vh+60)));if(A.length>N)A.length=N;
  for(const a of A){a.t+=dt;a.x+=a.vx*dt;a.y+=a.vy*dt;if(a.t>a.life||a.x<camX-200||a.x>camX+vw+200||a.y<camY-200||a.y>camY+vh+200)Object.assign(a,newAmb(type,camX+rnd(-60,vw+60),camY+rnd(-60,vh+60)))}}
-function drawAmb(add,t){const A=G.amb;if(!A)return;for(const a of A){const fade=Math.min(1,a.t*1.5,(a.life-a.t)*1.5);if(fade<=0)continue;const x=a.x+Math.sin(t*0.8+a.ph)*10;
+function drawAmb(add,t){const A=G.amb;if(!A||GF().noamb)return;for(const a of A){const fade=Math.min(1,a.t*1.5,(a.life-a.t)*1.5);if(fade<=0)continue;const x=a.x+Math.sin(t*0.8+a.ph)*10;
   switch(a.k){
    case'dust':case'pollen':case'ash':if(add)break;cx.globalAlpha=0.32*fade;cx.fillStyle=a.k==='pollen'?'#e8e0a0':a.k==='ash'?'#a29c94':'#c8bca8';cx.fillRect(x,a.y,a.s,a.s);break;
    case'mist':if(add)break;glow(x,a.y,a.s,'#c8d4dc',0.08*fade,true);break;
