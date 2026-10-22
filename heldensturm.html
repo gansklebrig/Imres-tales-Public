@@ -1468,12 +1468,12 @@ const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const GFX=[{n:'Minimal',dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
+const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
 let GAUTO=3,GCEIL=3,FPSNOW=60;
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
 const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'?GAUTO:clamp(+g,0,4)};
 const GF=()=>GFX[gfxL()];
-function resize(){DPR=Math.min(window.devicePixelRatio||1,GF().dpr);W=window.innerWidth;H=window.innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';ZOOM=clamp(Math.min(W,H)/560,0.7,1.2)}
+function resize(){W=window.innerWidth;H=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,GF().dpr,Math.max(1,Math.sqrt(GF().px/Math.max(1,W*H))));cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';ZOOM=clamp(Math.min(W,H)/560,0.7,1.2)}
 window.addEventListener('resize',resize);resize();
 function toast(msg,col){const d=document.createElement('div');d.className='tm';d.innerHTML=msg;if(col)d.style.color=col;toastEl.appendChild(d);while(toastEl.children.length>4)toastEl.firstChild.remove();setTimeout(()=>d.remove(),2700)}
 
@@ -1615,6 +1615,8 @@ function poly(c,f,...p){c.fillStyle=f;c.beginPath();c.moveTo(p[0],p[1]);for(let 
 function ln(c,s,w,...p){c.strokeStyle=s;c.lineWidth=w;c.lineCap='round';c.beginPath();c.moveTo(p[0],p[1]);for(let i=2;i<p.length;i+=2)c.lineTo(p[i],p[i+1]);c.stroke()}
 /* Licht und Dunkelheit: eine halb aufgelöste Dunkelschicht mit ausgestanzten Lichtkegeln */
 const LC=document.createElement('canvas'),lcx=LC.getContext('2d');
+const DLS={};function decoLightSpr(c){let s=DLS[c];if(s)return s;s=document.createElement('canvas');s.width=s.height=64;const g=s.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,`rgba(${c},.22)`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.fillRect(0,0,64,64);return DLS[c]=s}
+let HOLE=null;function holeSpr(){if(HOLE)return HOLE;HOLE=document.createElement('canvas');HOLE.width=HOLE.height=128;const g=HOLE.getContext('2d'),gr=g.createRadialGradient(64,64,64*0.15,64,64,64);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);return HOLE}
 let LITC=null,LITD=-1;
 function liteDark(camX,camY,dark){const R=Math.round(Math.max(W,H)*1.2);const key=dark.toFixed(2)+(CU('nacht')?'n':'')+ZOOM.toFixed(2);if(!LITC||LITC.width!==R||LITD!==key){LITD=key;LITC=LITC||document.createElement('canvas');LITC.width=LITC.height=R;const g=LITC.getContext('2d'),r0=170*ZOOM*(CU('nacht')?0.55:1),h2=R/2,gr=g.createRadialGradient(h2,h2,r0*0.15,h2,h2,r0);gr.addColorStop(0,'rgba(6,4,10,0)');gr.addColorStop(1,`rgba(6,4,10,${dark})`);g.fillStyle=gr;g.fillRect(0,0,R,R)}
  const sx=(P.x-camX)*ZOOM,sy=(P.y-camY)*ZOOM;cx.drawImage(LITC,sx-R,sy-R,R*2,R*2)}
@@ -1623,16 +1625,16 @@ function drawLighting(camX,camY,t){const T=G.theme;if(!T)return;const dark=Math.
  if(dark<=0)return;if(GF().lite){liteDark(camX,camY,dark);return}const LR=GF().lr,lw=Math.ceil(W*LR),lh=Math.ceil(H*LR);if(LC.width!==lw||LC.height!==lh){LC.width=lw;LC.height=lh}
  lcx.globalCompositeOperation='source-over';lcx.clearRect(0,0,lw,lh);lcx.fillStyle=`rgba(6,4,10,${dark})`;lcx.fillRect(0,0,lw,lh);
  lcx.globalCompositeOperation='destination-out';const k=ZOOM*LR;
- const hole=(x,y,r,a)=>{const sx=(x-camX)*k,sy=(y-camY)*k,R=r*k;if(sx<-R||sy<-R||sx>lw+R||sy>lh+R)return;const g=lcx.createRadialGradient(sx,sy,R*0.15,sx,sy,R);g.addColorStop(0,`rgba(0,0,0,${a})`);g.addColorStop(1,'rgba(0,0,0,0)');lcx.fillStyle=g;lcx.fillRect(sx-R,sy-R,R*2,R*2)};
+ const HS=holeSpr();const hole=(x,y,r,a)=>{const sx=(x-camX)*k,sy=(y-camY)*k,R=r*k;if(sx<-R||sy<-R||sx>lw+R||sy>lh+R||!(a>0.01))return;lcx.globalAlpha=Math.min(1,a);lcx.drawImage(HS,sx-R,sy-R,R*2,R*2)};
  hole(P.x,P.y,340*(CU('nacht')?0.55:1)*(wxIs('nebel')?0.8:1),1);if(G.props)for(const p of G.props)if((p.k==='shrine'&&!p.used)||p.k==='exit'||(p.k==='secret'&&p.found))hole(p.x,p.y,220,0.85);if(G.lights)for(const L of G.lights){const q=1-L.t/L.life;hole(L.x,L.y,L.r,L.a*q)}{let pn=0;for(const p of G.projs)if(p.team==='p'&&p.kind!=='arrow'&&pn++<50)hole(p.x,p.y,80,0.55)}for(const L of G.loot)if(L.it.rar>=2)hole(L.x,L.y,110,0.7);
  let n=0;for(const d of G.deco){const L=LIGHTS[d.k];if(!L||!L[0])continue;if(d.x<camX-200||d.x>camX+W/ZOOM+200||d.y<camY-200||d.y>camY+H/ZOOM+200)continue;hole(d.x,d.y-10,L[0]*d.s*(0.92+0.08*Math.sin(t*9+d.v*7)),0.9);if(++n>16)break}
  for(const z of G.zones)hole(z.x,z.y,z.r*1.2,0.6);for(const z of G.ezones)if(z.kind!=='dunkel')hole(z.x,z.y,z.r*1.15,0.5);for(const k of G.tele)if(k.k==='circle'&&!k.screen)hole(k.x,k.y,k.r*1.2,0.65);
  for(const p of G.projs)if(p.team==='e'&&n++<40)hole(p.x,p.y,40,0.6);
  if(G.portal)hole(G.portal.x,G.portal.y,180,1);
  for(const e of G.enemies)if(e.boss||e.guard)hole(e.x,e.y,e.r*3,0.7);
- lcx.globalCompositeOperation='source-over';cx.drawImage(LC,0,0,W,H);
+ lcx.globalAlpha=1;lcx.globalCompositeOperation='source-over';cx.drawImage(LC,0,0,W,H);
  cx.globalCompositeOperation='lighter';
- for(const d of G.deco){const L=LIGHTS[d.k];if(!L||!L[0])continue;const sx=(d.x-camX)*ZOOM,sy=(d.y-10-camY)*ZOOM;if(sx<-150||sy<-150||sx>W+150||sy>H+150)continue;const R=L[0]*0.55*ZOOM*d.s;const g=cx.createRadialGradient(sx,sy,0,sx,sy,R);g.addColorStop(0,`rgba(${L[1]},.22)`);g.addColorStop(1,`rgba(${L[1]},0)`);cx.fillStyle=g;cx.fillRect(sx-R,sy-R,R*2,R*2)}
+ for(const d of G.deco){const L=LIGHTS[d.k];if(!L||!L[0])continue;const sx=(d.x-camX)*ZOOM,sy=(d.y-10-camY)*ZOOM;if(sx<-150||sy<-150||sx>W+150||sy>H+150)continue;const R=L[0]*0.55*ZOOM*d.s;cx.globalAlpha=1;cx.drawImage(decoLightSpr(L[1]),sx-R,sy-R,R*2,R*2)}
  cx.globalCompositeOperation='source-over'}
 
 /* ---------- Helden zeichnen (nach den Heldenbildern der Website) ---------- */
@@ -2208,7 +2210,7 @@ function botLearn(){let guard=0;while(P.sp>0&&guard++<20){const opts=P.hero.tree
 /* ================= Update ================= */
 function segHit(x,y,a,len,w){const dx=P.x-x,dy=P.y-y,c=Math.cos(a),s=Math.sin(a),tt=dx*c+dy*s;if(tt<0||tt>len)return false;return Math.abs(-dx*s+dy*c)<w}
 function update(dt){
- G.time+=dt;G.stageTime+=dt;if(G.shake>0)G.shake=Math.max(0,G.shake-dt*30);
+ G.time+=dt;G.stageTime+=dt;
  for(const t of G.timers)t.t-=dt;const due=G.timers.filter(t=>t.t<=0);G.timers=G.timers.filter(t=>t.t>0);for(const t of due)t.fn();
  if(G.state!=='play')return;
  buildGrid();
@@ -2312,7 +2314,8 @@ function fpsWatch(dt){fpsAcc+=dt;fpsN++;if(fpsAcc<2)return;const avg=fpsAcc/fpsN
 const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Bloom, Funken und fliegende Gegner.</div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
  <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button></div>`};
-const gfxRow=()=>`<div class="up vol" id="gfxBox">${gfxInner()}</div>`;
+const gfxRow=()=>`<div class="up vol" id="gfxBox">${gfxInner()}</div><div class="up" id="camBox">${camInner()}</div>`;
+const camInner=()=>{const L=camL();return`<div><div class="t">Wackeln &amp; Zeitlupe<small>${CAMN[L]}</small></div><div class="d">${CAMD[L]}</div></div><div class="chips">${CAMN.map((n,i)=>`<button class="chip ${i===L?'on':''}" data-act="camfx" data-v="${i}">${n}</button>`).join('')}</div>`};
 /* Farben */
 const RGBC={},LITE={};
 function rgbOf(c){let r=RGBC[c];if(r)return r;let h=String(c||'#fff').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h.slice(0,6),16);r=(h.length<6||isNaN(n))?[255,255,255]:[n>>16&255,n>>8&255,n&255];return RGBC[c]=r}
@@ -2338,11 +2341,13 @@ function vignette(){if(!VIG||VW!==W||VH!==H){VW=W;VH=H;VIG=document.createElemen
  cx.globalAlpha=1;cx.drawImage(VIG,0,0,W,H)}
 
 /* Zeit, Kamera, Bildschirm */
-function hitstop(s){if(REDUCED||G.bot)return;G.hsT=Math.max(G.hsT||0,s)}
-function slowmo(s,v){if(REDUCED||G.bot)return;G.smT=Math.max(G.smT||0,s);G.smV=v}
-function zpunch(v){if(REDUCED||G.bot)return;G.zp=Math.max(G.zp||0,v)}
-function sflash(c,a,d){if(G.bot)return;if(REDUCED)a*=0.4;G.sf={c,a,a0:a,d:d||0.3}}
-function timeScale(dt){if(G.hsT>0){G.hsT-=dt;return 0.05}if(G.smT>0){G.smT-=dt;return G.smV||0.4}return 1}
+const CAMN=['Aus','Sanft','Voll'],CAMD=['Kein Wackeln, keine Zeitlupe, gedämpfte Blitze.','Leichtes Wackeln und weiche Zeitlupe bei Bossen – ohne Ruckler.','Volle Wucht: starkes Wackeln, Trefferstopps und lange Zeitlupe.'];
+const camL=()=>REDUCED?0:(SAVE.camfx===undefined?1:SAVE.camfx);
+function hitstop(s){if(G.bot||camL()<2||(G.hsCd||0)>performance.now())return;G.hsCd=performance.now()+500;G.hsT=Math.max(G.hsT||0,Math.min(s,0.05))}
+function slowmo(s,v){if(G.bot)return;const L=camL();if(!L)return;if(L===1){s=Math.min(s*0.6,0.9);v=Math.max(v,0.5)}G.smT=Math.max(G.smT||0,s);G.smD=G.smT;G.smV=v}
+function zpunch(v){if(G.bot)return;const L=camL();if(!L)return;G.zp=Math.max(G.zp||0,v*(L===1?0.5:1))}
+function sflash(c,a,d){if(G.bot)return;a*=[0.3,0.6,1][camL()];G.sf={c,a,a0:a,d:d||0.3}}
+function timeScale(dt){if(G.hsT>0){G.hsT-=dt;return 0.25}if(G.smT>0){G.smT-=dt;const k=1-Math.max(0,G.smT)/(G.smD||1),v=G.smV||0.4;let e=k<0.12?k/0.12:k>0.55?1-(k-0.55)/0.45:1;e=e*e*(3-2*e);return 1+(v-1)*e}return 1}
 function banner(big,small,col,o){if(G.bot)return;if(G.banner&&G.banner.bars&&!(o&&(o.bars||o.force))&&G.banner.t<G.banner.dur-0.4)return;G.banner=Object.assign({big,small,col:col||'#e5b454',t:0,dur:2.6},o||{})}
 function drawBanner(dt){const b=G.banner;if(!b)return;b.t+=dt;if(b.t>b.dur){G.banner=null;return}
  const inA=Math.min(1,b.t/0.35),a=Math.min(inA,Math.min(1,(b.dur-b.t)/0.5));
@@ -2507,10 +2512,10 @@ function drawNums(){cx.textAlign='center';for(const n of G.nums){const k=n.t/0.7
 /* Zeichnen der Spielwelt */
 function render(dt){
  if(!G.ground||G.state==='title'){ambient(dt);return}
- const Z0=ZOOM;G.zp=(G.zp||0)*Math.exp(-7*dt);ZOOM=Z0*(1+G.zp);
+ const Z0=ZOOM;G.zp=(G.zp||0)*Math.exp(-7*dt);if(G.shake>0)G.shake=Math.max(0,G.shake-dt*26);ZOOM=Z0*(1+G.zp);
  try{renderWorld(dt)}finally{ZOOM=Z0}}
 function renderWorld(dt){
- const t=G.time,q=fxQ();let sx=0,sy=0;if(G.shake>0&&!REDUCED){const tt=performance.now()/1000,s=Math.min(G.shake,14);sx=s*(Math.sin(tt*73)+Math.sin(tt*41.7))*0.5;sy=s*(Math.sin(tt*67.3)+Math.sin(tt*37.1))*0.5}
+ const t=G.time,q=fxQ();let sx=0,sy=0;if(G.shake>0&&camL()){const tt=performance.now()/1000,s=Math.min(G.shake,camL()===1?5:11)*(camL()===1?0.5:1);sx=s*(Math.sin(tt*29)+Math.sin(tt*17.3)*0.6)*0.6;sy=s*(Math.sin(tt*25.1)+Math.sin(tt*13.7)*0.6)*0.6}
  const vw=W/ZOOM,vh=H/ZOOM,camX=P.x-vw/2,camY=P.y-vh/2;
  const world=()=>cx.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,(-camX*ZOOM+sx)*DPR,(-camY*ZOOM+sy)*DPR);world();
  cx.globalCompositeOperation='source-over';cx.globalAlpha=1;
@@ -2943,6 +2948,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'open-pause':openOverlay('pause');break;
   case'close':if(G.state==='between'){G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay();break;
   case'auto':SAVE.auto=!SAVE.auto;persist();renderPause(true);break;
+  case'camfx':{SAVE.camfx=+b.dataset.v;persist();const el=$('camBox');if(el)el.innerHTML=camInner();break}
   case'gfx-auto':gfxSet(SAVE.gfx==='auto'?gfxL():'auto');break;
   case'sound':SAVE.sound=!SAVE.sound;persist();renderPause(true);break;
   case'giveup':$('giveup').innerHTML=`<div class="spread"><div class="t" style="font-weight:800">Wirklich aufgeben?</div><div class="row"><button class="btn" data-act="giveup-no">Nein</button><button class="btn" style="border-color:var(--blood)" data-act="giveup-yes">Ja, aufgeben</button></div></div>`;break;
@@ -3772,7 +3778,7 @@ volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SA
 
 /* interner Testzugang */
 window.__hs={get G(){return G},get P(){return P},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
- step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},fn(){return{GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
+ step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},fn(){return{dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
 </script>
 
