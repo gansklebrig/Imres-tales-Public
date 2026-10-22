@@ -19,12 +19,12 @@
     de: {
       label: "Bühnenprobe", titel: "Barradins Auftritt",
       text: "Barradin spielt auf – und du greifst in die Saiten! Tippe die Noten, sobald sie die goldene Linie erreichen. Am Ende entscheidet dein Taktgefühl über den Auftrittswurf.",
-      steuerung: "Tasten A · S · D (oder J · K · L, ← ↓ →) – auf dem Handy einfach auf die Spur tippen.",
+      steuerung: "Tasten A · S · D (oder J · K · L, ← ↓ →) – auf dem Handy einfach auf die Spur tippen. Noten mit Schweif gedrückt halten, bis der Schweif endet.",
       publikum: "Publikum",
       stufen: { leicht: "🍺 Bauern in Phandalin", mittel: "👑 Am Hof von König Horga", schwer: "🐉 Ein Drache hört zu" },
       spuren: ["Bass", "Laute", "Flöte"],
       start: "▶ Auftritt beginnen", nochmal: "↻ Noch ein Auftritt", abbrechen: "Abbrechen",
-      urteil: { perfekt: "Meisterhaft!", gut: "Gut!", knapp: "Knapp …", daneben: "Daneben!" },
+      urteil: { perfekt: "Meisterhaft!", gut: "Gut!", knapp: "Knapp …", daneben: "Daneben!", gehalten: "Gehalten!" },
       serie: n => n + "er-Serie", punkte: "Punkte",
       ergebnis: "Der Auftrittswurf", treffer: (a, b) => a + " von " + b + " Noten getroffen", beste: n => "Beste Serie: " + n,
       genau: p => "Treffsicherheit: " + p + " %", fehlgriffe: n => n + " Fehlgriffe",
@@ -112,12 +112,12 @@
     en: {
       label: "Stage rehearsal", titel: "Barradin's Performance",
       text: "Barradin strikes up – and you play along! Hit the notes as soon as they reach the golden line. In the end your sense of rhythm decides the performance check.",
-      steuerung: "Keys A · S · D (or J · K · L, ← ↓ →) – on a phone just tap the lane.",
+      steuerung: "Keys A · S · D (or J · K · L, ← ↓ →) – on a phone just tap the lane. Notes with a tail: keep holding until the tail ends.",
       publikum: "Audience",
       stufen: { leicht: "🍺 Farmers in Phandalin", mittel: "👑 At King Horga's court", schwer: "🐉 A dragon is listening" },
       spuren: ["Bass", "Lute", "Flute"],
       start: "▶ Begin performance", nochmal: "↻ Another performance", abbrechen: "Cancel",
-      urteil: { perfekt: "Masterful!", gut: "Good!", knapp: "Close …", daneben: "Missed!" },
+      urteil: { perfekt: "Masterful!", gut: "Good!", knapp: "Close …", daneben: "Missed!", gehalten: "Held!" },
       serie: n => n + " streak", punkte: "points",
       ergebnis: "The performance check", treffer: (a, b) => a + " of " + b + " notes hit", beste: n => "Best streak: " + n,
       genau: p => "Accuracy: " + p + " %", fehlgriffe: n => n + " misplays",
@@ -255,23 +255,24 @@
   };
   /* ---------- Komponierte Melodien ----------
      Je Lied acht Takte, ein Zeichen je Schritt: „.“ = Pause, sonst die Stufe in der Tonleiter
-     (0 = Grundton, 7 = Oktave, a/b/c = 10/11/12). Aufbau: Hook – Antwort – Hook – Schluss.
+     (0 = Grundton, 7 = Oktave, a/b/c = 10/11/12), „-“ = Ton halten. Aufbau: Hook – Antwort – Hook – Schluss.
+     Ab sechs Schritten Länge wird ein gehaltener Ton zur Haltenote (gedrückt halten).
      Leichtere Stufen spielen nur die erste Note je Schlag (bzw. Halbschlag) – die Melodie bleibt erkennbar. */
   const MELODIEN = {
-    reigen: ["4.7.7.8.9.8.7...", "6...8.7.6...3...", "5.7.a.9.7.6.5...", "4.2.4...7.......", "4.7.7.8.9.8.7...", "6...8.a.8.7.6...", "5...7.5.3.4.5...", "4...8...6...4..."],
-    bugbear: ["4.4.7...7.8.9.7.", "a.9.7...5.7.3...", "8.8.6...4.5.6.8.", "7...9.b.7.......", "9.9.7...5.6.7.9.", "a...7...5.7.a...", "b.a.8...6...4...", "4.5.6.7.8...4..."],
-    klage: ["4...7...9.8.7...", "7...5...2...5...", "6...4.6.9...6.4.", "3...1.3.6.......", "4...7...9.8.7...", "7...9.a.9.7.5...", "3...5...7...5.3.", "4...8...6...4..."],
-    schmiede: ["0...0.4.2...0...", "1...3.5.3...1...", "2...4.7.4.2.0...", "1...3...6...3...", "7...7.6.4...2.0.", "1.3.5...8...5...", "6...3...1...3...", "4...2...0......."],
-    seemann: ["4...7.7.7...9.8.", "8...8.7.6...3...", "4...7.7.7.8.9.a.", "8...6...4.6.8...", "4...7.7.7...9.8.", "a...8...6.7.8...", "7...5...3.4.5...", "4...7...9.8.7..."],
-    walzer: ["4...7...9...", "9.8.7...4...", "5...7...a...", "a.9.8...6...", "4...7...9...", "a...7...5...", "6...8...4...", "8.7.6...4..."],
-    schatten: ["7..4..2...4.7...", "8..5..3...5.8.7.", "7..4..2...3.4...", "6..3..1...3.6...", "7..4..2...4.7...", "a..8..5...8.a...", "9..7..5...7.9...", "8..7..6...3....."],
-    rex: ["7.7.4...7.7.9...", "8...6...3.4.6...", "7.7.4...2.3.4...", "6...4...1...4...", "7.7.4...7.7.9...", "a...8...6...3...", "5...7...3.4.5...", "4...6...8.7.6..."],
-    ploop: ["7.47.89.87.4", "5.7a.75.73..", "4.79.87.64..", "6.84.68..4..", "7.47.89.87.4", "a.97.53.57..", "8.63.68.76..", "7..4..2..0.."],
-    venom: ["7.6.7...4...2...", "5.4.5...2...0...", "3.4.5...7...a...", "8.7.6...4...1...", "7.6.7...4...2...", "a.9.7...5...3...", "9.8.7...5...7...", "6...8...4...6..."],
-    buerger: ["7...7.9.b...9.7.", "8...6.8.b...8...", "7...5.7.9.8.7...", "5...7...a.......", "7...7.9.b...9.7.", "a...7...5.7.a...", "4.4.6...8...6.8.", "7...4...2...0..."],
-    palast: ["7.....4.4...7.9.", "a.......7...5...", "6...8...4...6.8.", "9.......7.......", "5.6.7...9.8.7...", "a.9.a...7...5...", "8.9.a...5...8...", "4...6...8...a..."],
-    elfen: ["4.7.9...7...", "5.8.a...8...", "9.8.7...4...", "6...4...1...", "5.7.9...7...", "5.8.a...8...", "4.6.8...6...", "7...4...2..."],
-    goetter: ["7...4.7.9.8.7.4.", "7...5.7.9...7...", "8...6.8.a.9.8.6.", "7.......4...7...", "a.9.7...5...7...", "9...7...5.6.7...", "8...a...8.7.6...", "4.6.8...6...4..."]
+    reigen: ["4.7.7.8.9.8.7...", "6...8.7.6...3...", "5.7.a.9.7.6.5...", "4.2.4...7-------", "4.7.7.8.9.8.7...", "6...8.a.8.7.6...", "5...7.5.3.4.5...", "8...6...4-------"],
+    bugbear: ["4.4.7...7.8.9.7.", "a.9.7...5.7.3...", "8.8.6...4.5.6.8.", "7...9.b.7-------", "9.9.7...5.6.7.9.", "a...7...5.7.a...", "b.a.8...6...4...", "4.5.6.7.8-------"],
+    klage: ["4...7...9.8.7...", "7...5...2-------", "6...4.6.9...6.4.", "3...1.3.6-------", "4...7...9.8.7...", "7...9.a.9.7.5...", "3...5...7...5.3.", "4...8...6-------"],
+    schmiede: ["0...0.4.2...0...", "1...3.5.3...1...", "2...4.7.4.2.0...", "1...3...6...3...", "7...7.6.4...2.0.", "1.3.5...8...5...", "6...3...1...3...", "4...2...0-------"],
+    seemann: ["4...7.7.7...9.8.", "8...8.7.6...3...", "4...7.7.7.8.9.a.", "8...6...4.6.8...", "4...7.7.7...9.8.", "a...8...6.7.8...", "7...5...3.4.5...", "4...7...9-------"],
+    walzer: ["4...7...9...", "9.8.7-------", "5...7...a...", "a.9.8-------", "4...7...9...", "a...7...5...", "6...8...4...", "8.7.6-------"],
+    schatten: ["7..4..2...4.7...", "8..5..3...5.8.7.", "7..4..2...3.4...", "6..3..1...3.6...", "7..4..2...4.7...", "a..8..5...8.a...", "9..7..5...7.9...", "8..7..6...3-----"],
+    rex: ["7.7.4...7.7.9...", "8...6...3.4.6...", "7.7.4...2.3.4...", "6...4...1-------", "7.7.4...7.7.9...", "a...8...6...3...", "5...7...3.4.5...", "4...6...8-------"],
+    ploop: ["7.47.89.87.4", "5.7a.75.73..", "4.79.87.64..", "6.84.68..4..", "7.47.89.87.4", "a.97.53.57..", "8.63.68.76..", "7..4..0-----"],
+    venom: ["7.6.7...4...2...", "5.4.5...2...0...", "3.4.5...7...a...", "8.7.6...4-------", "7.6.7...4...2...", "a.9.7...5...3...", "9.8.7...5...7...", "6...8...4-------"],
+    buerger: ["7...7.9.b...9.7.", "8...6.8.b...8...", "7...5.7.9.8.7...", "5...7...a-------", "7...7.9.b...9.7.", "a...7...5.7.a...", "4.4.6...8...6.8.", "7...4...0-------"],
+    palast: ["7-----4.4...7.9.", "a-------7...5...", "6...8...4...6.8.", "9-------7-------", "5.6.7...9.8.7...", "a.9.a...7...5...", "8.9.a...5...8...", "4...6...8-------"],
+    elfen: ["4.7.9...7...", "5.8.a...8...", "9.8.7-------", "6...4-------", "5.7.9...7...", "5.8.a...8...", "4.6.8...6...", "7-----4-----"],
+    goetter: ["7...4.7.9.8.7.4.", "7...5.7.9...7...", "8...6.8.a.9.8.6.", "7-------4...7...", "a.9.7...5...7...", "9...7...5.6.7...", "8...a...8.7.6...", "4.6.8...6-------"]
   };
   Object.keys(MELODIEN).forEach(k => { if (LIEDER[k]) LIEDER[k].melodie = MELODIEN[k]; });
   LIEDER.ploop.raster = [4, 3, 2]; /* Jig: Schläge zu je drei Schritten */
@@ -348,45 +349,70 @@
   let SK = skala("dorisch"), GRUND = 62;
   /* Komponiertes Lied spielen: feste Melodie, Bass auf Grundton/Quinte, Echos Flöte eine Terz darüber in den Lücken */
   const STUFE_INDEX = { leicht: 0, mittel: 1, schwer: 2 };
-  function notenAusMelodie(st, lied, L, schritt, vor, akkord, eigen, bassSchritte, floete) {
-    const liste = [], akkorde = [], autoBass = [];
-    const fenster = (lied.raster || [4, 2, 1])[STUFE_INDEX[st.basis] || 0];
+  const HALT_MIN = 6; /* Schritte – ab dieser Länge muss man halten */
+  function notenAusMelodie(st, lied, L, schritt, vor, akkord, eigen, bassSchritte) {
+    const liste = [], akkorde = [], auto = [];
+    const idx = STUFE_INDEX[st.basis] || 0, fenster = (lied.raster || [4, 2, 1])[idx];
     /* Reihenfolge der Takte: das Lied endet immer mit seinen letzten Takten; längere Auftritte spielen vorne mehr */
     const vorn = Math.max(0, st.takte - 8), folgeTakte = [];
     for (let i = 0; i < vorn; i++) folgeTakte.push(i % 8);
     for (let i = 0; i < Math.min(7, st.takte - 1); i++) folgeTakte.push(i);
     const zeit = (takt, s) => vor + (takt * L + s) * schritt;
+    let fl = 4; /* Echos Flöte: Stufe über dem Grundton der Flötenlage */
+    const naechsterAkkordton = (ziel, tone, ohne, min, max) => { let b = null; for (let n = min; n <= max; n++) if (tone.includes(n % 7) && n % 7 !== ohne && (b === null || Math.abs(n - ziel) < Math.abs(b - ziel))) b = n; return b == null ? ziel : b; };
     for (let takt = 0; takt < st.takte; takt++) {
       const letzter = takt === st.takte - 1, mt = folgeTakte[takt];
-      const grund = letzter ? 0 : lied.folge[mt % lied.folge.length]; akkorde.push(grund);
-      const setze = (s, spur, n) => liste.push({ zeit: zeit(takt, s), spur, ton: n, status: null });
-      if (letzter) { setze(0, 0, 0); setze(akkord ? 0 : 4, 1, 7); if (eigen) setze(8, 2, 4); continue; }
-      /* Melodie: je Fenster nur die erste Note */
-      const zeile = lied.melodie[mt % lied.melodie.length], laute = {};
-      let fensterBelegt = -1;
-      for (let s = 0; s < L; s++) {
-        const ch = zeile[s]; if (!ch || ch === ".") continue;
-        const f = Math.floor(s / fenster); if (f === fensterBelegt) continue;
-        fensterBelegt = f; laute[s] = parseInt(ch, 16); setze(s, 1, laute[s]);
+      const grund = letzter ? 0 : lied.folge[mt % lied.folge.length], tone = akkordToene(grund); akkorde.push(grund);
+      const belegt = {};
+      const setze = (s, spur, n, len, klingt) => {
+        const halten = len >= HALT_MIN;
+        liste.push({ zeit: zeit(takt, s), spur, ton: n, dauer: halten ? len * schritt : 0, klang: (klingt || len) * schritt, status: null }); belegt[s] = true;
+      };
+      const begleite = (s, spur, n, len, klingt) => auto.push({ zeit: zeit(takt, s), spur, ton: n, klang: (klingt || len) * schritt });
+      if (letzter) { /* Schluss: Bass auf der Eins, die Laute hält den Grundton aus, die Flöte die Quinte darüber */
+        setze(0, 0, 0, 2); setze(akkord ? 0 : 4, 1, 7, L - (akkord ? 0 : 4)); begleite(0, 2, 4, L);
+        continue;
       }
-      /* Bass: Grundton, beim zweiten Schlag die Quinte; kollidiert er (ohne Doppelnoten) mit der Melodie, spielt ihn die Begleitung leise mit */
+      /* Melodie: Einsätze mit Länge („-“ hält); je Fenster spielt man die erste Note, den Rest spielt die Band */
+      const zeile = lied.melodie[mt % lied.melodie.length], einsaetze = [];
+      for (let s = 0; s < L; s++) {
+        const ch = zeile[s]; if (!ch || ch === "." || ch === "-") continue;
+        let len = 1; while (zeile[s + len] === "-") len++;
+        let klingt = len; if (len === 1) { klingt = 1; while (s + klingt < L && zeile[s + klingt] === ".") klingt++; klingt = Math.min(4, klingt); }
+        einsaetze.push({ s, n: parseInt(ch, 16), len, klingt });
+      }
+      const laute = {};
+      let fensterBelegt = -1;
+      einsaetze.forEach(e => {
+        const f = Math.floor(e.s / fenster);
+        if (f !== fensterBelegt) { fensterBelegt = f; laute[e.s] = e.n; setze(e.s, 1, e.n, e.len, e.klingt); }
+        else begleite(e.s, 1, e.n, e.len, e.klingt);
+      });
+      /* Bass: Grundton, beim zweiten Schlag die Quinte; kollidiert er (ohne Doppelnoten) mit der Melodie, spielt ihn die Band */
       bassSchritte.forEach((s, k) => {
         const n = lied.bassGleich || k % 2 === 0 ? grund : grund + 4;
-        if (!akkord && laute[s] != null) autoBass.push({ zeit: zeit(takt, s), ton: n });
-        else setze(s, 0, n);
+        if (!akkord && laute[s] != null) begleite(s, 0, n, 4); else setze(s, 0, n, 2);
       });
-      /* Echos Flöte: eine Terz über dem zuletzt klingenden Lautenton, immer ein Akkordton, nie im Einklang */
-      (takt % 2 ? floete.u : floete.g).forEach(s => {
-        if (s >= L || (!akkord && (laute[s] != null || bassSchritte.includes(s)))) return;
-        let letzt = 4; for (let q = s; q >= 0; q--) { const ch = zeile[q]; if (ch && ch !== ".") { letzt = parseInt(ch, 16); break; } }
-        const tone = akkordToene(grund);
-        let best = null;
-        for (let n = 0; n <= 9; n++) if (tone.includes(n % 7) && n % 7 !== letzt % 7 && (best === null || Math.abs(n - (letzt + 2)) < Math.abs(best - (letzt + 2)))) best = n;
-        setze(s, 2, best == null ? 4 : best);
-      });
+      /* Echos Flöte: hält Akkordtöne als Gegenstimme (weich geführt) – und wo die Laute einen langen Ton hält,
+         antwortet sie mit einer kleinen absteigenden Figur. Spielbar ist sie in jedem zweiten Takt (mittel: nur ihr erster Ton). */
+      const spielbar = (s, erste) => takt % 2 === 1 && (idx === 2 || (idx === 1 && erste && !belegt[s]));
+      const letzte = einsaetze[einsaetze.length - 1];
+      const melodieBei = s => { let n = null; einsaetze.forEach(e => { if (e.s <= s) n = e.n; }); return n == null ? -1 : n % 7; };
+      if (letzte && letzte.len >= HALT_MIN && letzte.s + 2 < L) {
+        let n = naechsterAkkordton(fl + 2, tone, melodieBei(letzte.s), 2, 9);
+        for (let s = letzte.s + 2, k = 0; s < L && k < 3; s += 2, k++) {
+          const len = s + 2 >= L || k === 2 ? L - s : 2;
+          (spielbar(s, k === 0) && (idx === 2 || !belegt[s]) ? setze : begleite)(s, 2, n, len);
+          fl = n; n = n > 0 ? naechsterAkkordton(n - 2, tone, -1, 0, n - 1) : n; if (n < 0) n = fl;
+        }
+      } else {
+        const s0 = belegt[0] ? 2 : 0; /* setzt kurz nach der Eins ein – wie eine Antwort */
+        fl = naechsterAkkordton(fl, tone, melodieBei(s0), 2, 8);
+        (spielbar(s0, true) && (idx === 2 || !belegt[s0]) ? setze : begleite)(s0, 2, fl, L - s0);
+      }
     }
     liste.sort((a, b) => a.zeit - b.zeit);
-    return { liste, ende: vor + st.takte * L * schritt + 1.5, schritt, vor, akkorde, L, puls: lied.puls, autoBass };
+    return { liste, ende: vor + st.takte * L * schritt + 1.5, schritt, vor, akkorde, L, puls: lied.puls, auto, modus: lied.modus };
   }
   function noten(st, lied) {
     const L = lied.takt, stufe = st.basis, schritt = 60 / (st.tempo * lied.tempo) / 4, vor = 16 * schritt, liste = [], akkorde = [];
@@ -395,7 +421,7 @@
     const motive = lied.motive && eigen ? lied.motive : (L === 12 ? WALZER[stufe] : st.motive);
     const bassSchritte = lied.bass && eigen ? lied.bass : (L === 12 ? [0] : st.bass);
     const floete = lied.floete && eigen ? lied.floete : (L === 12 ? FLOETE_WALZER[stufe] : st.floete);
-    if (lied.melodie) return notenAusMelodie(st, lied, L, schritt, vor, akkord, eigen, bassSchritte, floete);
+    if (lied.melodie) return notenAusMelodie(st, lied, L, schritt, vor, akkord, eigen, bassSchritte);
     let fton = 4; /* Flötenstimme: Stufe in der Tonleiter, eine Oktave über der Laute */
     /* Phrasen: Motiv a, b, a, Schluss – die Kontur jedes Motivs wird einmal erfunden und dann wiederholt */
     const konturen = motive.map(m => m.map(() => zufall([-2, -1, -1, 1, 1, 2])));
@@ -460,7 +486,7 @@
   }
   const melHz = n => hz(GRUND + SK[n]), bassHz = n => hz(GRUND - 24 + SK[n % 7]);
   const MIDI = [n => GRUND - 24 + SK[n % 7], n => GRUND + SK[n], n => GRUND + 12 + SK[n]];
-  const KARTE = { kb: [28, 30, 31, 34, 36, 38, 40, 42, 44, 45, 49, 52, 56, 59],
+  const KARTE = { harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101], kb: [28, 30, 31, 34, 36, 38, 40, 42, 44, 45, 49, 52, 56, 59],
     gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96] };
   const SPUR_PROBE = ["kb", "gitarre", "fl"];
   const probeBuf = new Map(), probeLaedt = new Map();
@@ -494,14 +520,15 @@
     const dauer = Math.min(lang, o.dauer || lang), aus = Math.min(o.aus || .2, dauer * .5), ende = z + dauer;
     g.gain.setValueAtTime(0, z); g.gain.linearRampToValueAtTime(laut, z + ein);
     if (dauer < lang) { g.gain.setValueAtTime(laut, Math.max(z + ein, ende - aus)); g.gain.linearRampToValueAtTime(0, ende); }
-    src.connect(g); g.connect(bus || ausg); src.start(z, b._start); src.stop(ende + .05);
+    src.connect(g); g.connect(o.ziel || bus || ausg); src.start(z, b._start); src.stop(ende + .05);
     return true;
   }
   /* alle Aufnahmen für ein Lied laden (höchstens ein paar Sekunden warten, dann geht es notfalls mit dem Ersatzklang los) */
   function probenFuer(daten) {
     const namen = new Set(["bodh1", "bodh2", "holz1", "holz2"]);
     daten.liste.forEach(n => namen.add(probeName(SPUR_PROBE[n.spur], MIDI[n.spur](n.ton))));
-    (daten.autoBass || []).forEach(b => namen.add(probeName("kb", MIDI[0](b.ton))));
+    (daten.auto || []).forEach(a => namen.add(probeName(SPUR_PROBE[a.spur], MIDI[a.spur](a.ton))));
+    if (daten.modus) { const MO = MODI[daten.modus]; daten.akkorde.forEach(g => [0, 4, 7, 9, 11].forEach(o => { const d = g + o; namen.add(probeName("harfe", GRUND - 12 + MO[d % 7] + 12 * Math.floor(d / 7))); })); }
     return Promise.race([Promise.all([...namen].map(probeLaden)), new Promise(r => setTimeout(r, 4000))]);
   }
   /* Ersatz-Flöte: weicher Sinus mit etwas Hauch und Vibrato */
@@ -531,12 +558,19 @@
     g.gain.setValueAtTime(laut, z); g.gain.exponentialRampToValueAtTime(.001, z + dauer);
     o.connect(g); g.connect(bus || ausg); o.start(z); o.stop(z + dauer + .02);
   }
-  const ton = (spur, n, z) => {
-    const m = MIDI[spur](n);
-    if (spur === 0) { if (!probe("kb", m, z, .9, { dauer: 1.4, aus: .3 })) zupfen(bassHz(n), z, 1.1, true); }
-    else if (spur === 1) { if (!probe("gitarre", m, z, .62, { dauer: 2.2, aus: .35 })) zupfen(melHz(n), z, .8, false); }
-    else { const d = Math.max(.32, 3 * ((spiel && spiel.daten.schritt) || .16)); if (!probe("fl", m, z, .42, { ein: .03, aus: .15, dauer: d })) floeteSynth(hz(m), z, .16, d); }
+  /* Ton spielen: dauer = Klanglänge; lange Lautentöne als Tremolo (schnell wiederholt angeschlagen), damit sie klingen, solange man hält */
+  const ton = (spur, n, z, dauer, ziel, faktor) => {
+    const m = MIDI[spur](n), f = faktor || 1, sch = (spiel && spiel.daten.schritt) || .16;
+    dauer = dauer || 0;
+    if (spur === 0) { if (!probe("kb", m, z, .9 * f, { dauer: Math.max(1.1, Math.min(1.8, dauer)), aus: .3, ziel })) zupfen(bassHz(n), z, 1.1 * f, true); }
+    else if (spur === 1) {
+      if (!probe("gitarre", m, z, .62 * f, { dauer: Math.max(1, Math.min(2.2, dauer + 1)), aus: .35, ziel })) zupfen(melHz(n), z, .8 * f, false);
+      if (dauer >= HALT_MIN * sch) for (let t = z + 2 * sch, k = 0; t < z + dauer - .05; t += sch / 2, k++)
+        probe("gitarre", m, t, (k % 2 ? .2 : .26) * f, { dauer: Math.min(.45, z + dauer - t + .1), aus: .12, ziel });
+    }
+    else { const d = Math.max(.32, dauer || 3 * sch); if (!probe("fl", m, z, .36 * f, { ein: .05, aus: .25, dauer: d, ziel })) floeteSynth(hz(m), z, .14 * f, d); }
   };
+
   /* Fehlgriff: gedämpfte, schnarrende Saite */
   const daneben = z => { rauschen(z, "bandpass", 900, .35, .05); zupfen(hz(45), z, .25, true); };
   /* Begleitung: Rahmentrommel und ein weicher Akkord-Teppich – so klingt es auch zwischen den Treffern nach Musik */
@@ -546,7 +580,17 @@
     for (let i = 0; i < 4; i++) { const z = start + i * 4 * s; if (!probe(i ? "holz2" : "holz1", 0, z, .7, { dauer: .4, aus: .1 })) { rauschen(z, "bandpass", 2200, .35, .04); schlag(z, 900, 700, .05, .05); } }
     /* Bodhrán: schwerer Schlag auf der Eins, leichtere dazwischen */
     const trommel = (z, schwer, laut) => { if (!probe(schwer ? "bodh1" : "bodh2", 0, z, laut, { dauer: .9, aus: .25 })) { if (schwer) schlag(z, 105, 46, .55, .32); else rauschen(z, "bandpass", 1300, .12, .05); } };
-    (daten.autoBass || []).forEach(b => { const z = start + b.zeit, m = MIDI[0](b.ton); if (!probe("kb", m, z, .45, { dauer: 1.2, aus: .3 })) zupfen(bassHz(b.ton), z, .55, true); });
+    /* Die Band spielt alles, was gerade nicht deine Noten sind – so klingt das Lied immer vollständig */
+    (daten.auto || []).forEach(a => ton(a.spur, a.ton, start + a.zeit, a.klang, null, a.spur === 2 ? .8 : .75));
+    /* Harfe: gezupfte Akkordbrechung in Achteln – der Teppich unter allem */
+    if (daten.modus) {
+      const MO = MODI[daten.modus], stufeMidi = d => GRUND - 12 + MO[d % 7] + 12 * Math.floor(d / 7);
+      const muster = L === 12 ? [0, 4, 7, 9, 7, 4] : [0, 4, 7, 9, 11, 9, 7, 4];
+      daten.akkorde.forEach((g, takt) => {
+        const z0 = start + daten.vor + takt * L * s, schluss = takt === daten.akkorde.length - 1;
+        muster.forEach((o, k) => { if (schluss && k > 0) return; probe("harfe", stufeMidi(g + o), z0 + k * 2 * s, k === 0 ? .2 : .13, { dauer: schluss ? 2.5 : 1.2, aus: .4 }); });
+      });
+    }
     daten.akkorde.forEach((g, takt) => {
       const z = start + daten.vor + takt * L * s, dauer = L * s;
       trommel(z, true, .8);
@@ -557,7 +601,7 @@
         const o = ctx.createOscillator(), gg = ctx.createGain(), lp = ctx.createBiquadFilter();
         o.type = "triangle"; o.frequency.value = hz(GRUND - 12 + SK[st] + (k && SK[st] < SK[g % 7] ? 12 : 0));
         lp.type = "lowpass"; lp.frequency.value = 900;
-        gg.gain.setValueAtTime(0, z); gg.gain.linearRampToValueAtTime(.035, z + .25); gg.gain.setValueAtTime(.035, z + dauer - .2); gg.gain.linearRampToValueAtTime(0, z + dauer + .1);
+        gg.gain.setValueAtTime(0, z); gg.gain.linearRampToValueAtTime(.02, z + .25); gg.gain.setValueAtTime(.02, z + dauer - .2); gg.gain.linearRampToValueAtTime(0, z + dauer + .1);
         o.connect(lp); lp.connect(gg); gg.connect(bus || ausg); o.start(z); o.stop(z + dauer + .15); knoten.push(o);
       });
     });
@@ -718,6 +762,26 @@
       g.strokeStyle = takt ? "rgba(224,160,70,.28)" : "rgba(235,226,204,.08)"; g.lineWidth = (takt ? 2 : 1) * dpr;
       g.beginPath(); g.moveTo(0, ly); g.lineTo(w, ly); g.stroke();
     }
+    /* Haltenoten: Schweif bis zum Ende des Tons; gehalten leuchtet er, und am Ende gibt es den Bonus */
+    spiel.daten.liste.forEach(n => {
+      if (!n.dauer) return;
+      const ende = n.zeit + n.dauer, gehalten = spiel.halt[n.spur] && spiel.halt[n.spur].n === n;
+      if (gehalten && jetzt >= ende) { loslassen(n.spur, true); return; }
+      if (ende - jetzt < -.1 || n.zeit - jetzt > flug) return;
+      if (n.bonus != null && !gehalten && !n.losgelassen) return;
+      const x = n.spur * bahn + bahn / 2, kopf = gehalten ? y : y - ((n.zeit - jetzt) / flug) * y;
+      const yEnde = Math.max(0, y - ((ende - jetzt) / flug) * y);
+      if (kopf <= yEnde) return;
+      const breit = 13 * dpr;
+      g.globalAlpha = n.status === "daneben" || n.losgelassen ? .22 : gehalten ? .95 : .55;
+      g.fillStyle = FARBEN[n.spur];
+      if (gehalten) { g.shadowColor = FARBEN[n.spur]; g.shadowBlur = 16 * dpr; }
+      g.beginPath(); g.roundRect ? g.roundRect(x - breit / 2, yEnde, breit, kopf - yEnde, breit / 2) : g.rect(x - breit / 2, yEnde, breit, kopf - yEnde); g.fill();
+      g.shadowBlur = 0; g.globalAlpha = 1;
+      if (gehalten) { /* Funken an der goldenen Linie */
+        g.fillStyle = "#ffd27a"; for (let i = 0; i < 3; i++) { const a = Math.random() * Math.PI, r = (8 + Math.random() * 14) * dpr; g.fillRect(x + Math.cos(a) * r * 1.6, y - Math.sin(a) * r, 2 * dpr, 2 * dpr); }
+      }
+    });
     spiel.daten.liste.forEach(n => {
       if (n.status && n.status !== "daneben") return;
       const dt = n.zeit - jetzt; if (dt > flug || dt < -.4) return;
@@ -763,7 +827,7 @@
       saite(hz(45), 1.8, .4986);
       daten.liste.forEach(n => { if (n.spur === 2) return; const m = MIDI[n.spur](n.ton); if (!probeBuf.has(probeName(SPUR_PROBE[n.spur], m))) { if (n.spur === 0) saite(bassHz(n.ton), 1.8, .4986); else saite(melHz(n.ton), 1.4, .4979); } });
       bus = ctx.createGain(); bus.connect(ausg);
-      spiel = { daten, st, ort, start: ctx.currentTime + .35, punkte: 0, serie: 0, besteSerie: 0, streu: 0, blitz: [0, 0, 0], urteil: null };
+      spiel = { daten, st, ort, start: ctx.currentTime + .35, punkte: 0, serie: 0, besteSerie: 0, streu: 0, blitz: [0, 0, 0], urteil: null, halt: {} };
       spiel.knoten = begleitung(daten, spiel.start);
       zeichnen();
       requestAnimationFrame(malen);
@@ -773,6 +837,7 @@
     if (stimmt) { stimmt = null; zeichnen(); return; }
     if (!spiel) return;
     (spiel.knoten || []).forEach(n => { try { n.stop(); } catch (_) {} });
+    spiel.halt = {};
     if (bus) { const b = bus; b.gain.setTargetAtTime(0, ctx.currentTime, .04); setTimeout(() => { try { b.disconnect(); } catch (_) {} }, 300); bus = null; }
     spiel = null; zeichnen();
   }
@@ -787,13 +852,30 @@
     best.status = art; spiel.serie++; spiel.besteSerie = Math.max(spiel.besteSerie, spiel.serie);
     spiel.punkte += PUNKTE[art] * (1 + Math.min(spiel.serie, 20) * .025);
     /* zu früh getippt? Dann erklingt der Ton trotzdem genau im Takt */
-    ton(spur, best.ton, Math.max(ctx.currentTime, spiel.start + best.zeit));
+    if (best.dauer) {
+      const hg = ctx.createGain(); hg.connect(bus || ausg);
+      ton(spur, best.ton, Math.max(ctx.currentTime, spiel.start + best.zeit), best.klang, hg);
+      spiel.halt[spur] = { n: best, hg };
+    } else ton(spur, best.ton, Math.max(ctx.currentTime, spiel.start + best.zeit), best.klang);
     zeigeUrteil(art, spur);
   }
+  /* Haltenote loslassen: Bonus nach gehaltenem Anteil; zu früh losgelassen verklingt der Ton */
+  const HALT_BONUS = 50;
+  function loslassen(spur, fertig) {
+    if (!spiel || !spiel.halt[spur]) return;
+    const { n, hg } = spiel.halt[spur]; delete spiel.halt[spur];
+    const anteil = fertig ? 1 : Math.max(0, Math.min(1, (ctx.currentTime - spiel.start - n.zeit) / n.dauer));
+    n.bonus = Math.round(HALT_BONUS * (anteil >= .85 ? 1 : anteil));
+    spiel.punkte += n.bonus * (1 + Math.min(spiel.serie, 20) * .025);
+    if (anteil >= .85) zeigeUrteil("gehalten", spur);
+    else { n.losgelassen = ctx.currentTime - spiel.start; hg.gain.setTargetAtTime(0, ctx.currentTime, .06); }
+  }
   function beenden() {
+    Object.keys(spiel.halt || {}).forEach(k => loslassen(+k, true));
     const T = t(), liste = spiel.daten.liste;
-    const summe = liste.reduce((a, n) => a + (PUNKTE[n.status] || 0), 0) - spiel.streu * FEHLGRIFF;
-    const prozent = Math.max(0, Math.round(summe / (liste.length * 100) * 100));
+    const summe = liste.reduce((a, n) => a + (PUNKTE[n.status] || 0) + (n.bonus || 0), 0) - spiel.streu * FEHLGRIFF;
+    const moeglich = liste.reduce((a, n) => a + 100 + (n.dauer ? HALT_BONUS : 0), 0);
+    const prozent = Math.max(0, Math.round(summe / moeglich * 100));
     const getroffen = liste.filter(n => PUNKTE[n.status]).length;
     let w20 = Math.round(1 + (prozent / 100) * 19 + (Math.random() * 2 - 1));
     w20 = Math.max(1, Math.min(20, w20));
@@ -841,13 +923,22 @@
     if (k == null) return;
     e.preventDefault(); tippen(k);
   });
+  window.addEventListener("keyup", e => {
+    const k = TASTEN[String(e.key).toLowerCase()];
+    if (k != null && spiel) loslassen(k);
+  });
   root.addEventListener("pointerdown", e => {
     const c = e.target.closest(".at-canvas");
     if (!c || !spiel) return;
     e.preventDefault();
-    const r = c.getBoundingClientRect();
-    tippen(Math.max(0, Math.min(2, Math.floor((e.clientX - r.left) / (r.width / 3)))));
+    const r = c.getBoundingClientRect(), spur = Math.max(0, Math.min(2, Math.floor((e.clientX - r.left) / (r.width / 3))));
+    finger.set(e.pointerId, spur);
+    tippen(spur);
   });
+  /* Finger hoch = Haltenote loslassen */
+  const finger = new Map();
+  const fingerWeg = e => { if (!finger.has(e.pointerId)) return; const spur = finger.get(e.pointerId); finger.delete(e.pointerId); if (![...finger.values()].includes(spur)) loslassen(spur); };
+  window.addEventListener("pointerup", fingerWeg); window.addEventListener("pointercancel", fingerWeg);
   root.addEventListener("click", e => {
     const st = e.target.closest("[data-stufe]");
     if (st && !spiel && !stimmt) { stufe = st.dataset.stufe; try { localStorage.setItem("imres-auftritt-stufe", stufe); } catch (_) {} ergebnis = null; zeichnen(); bestenLaden(); return; }
