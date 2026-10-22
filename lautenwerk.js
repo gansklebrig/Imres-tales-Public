@@ -4168,7 +4168,7 @@
     const an = gaesteAn();
     return '<div class="lw-gaeste-zeile' + (gaesteAuf ? " auf" : "") + '">' +
       '<button type="button" class="lw-schalter" data-aktion="gaeste" aria-pressed="' + an + '" title="' + esc(T.gaesteTipp) + '">🎭 ' + T.gaesteTitel + "</button>" +
-      '<button type="button" class="lw-gz-auf" data-aktion="gaesteauf" aria-expanded="' + gaesteAuf + '" title="' + esc(T.gaesteEinzeln) + '">' + (gaesteAuf ? "▴" : "▾") + "</button>" +
+      '<button type="button" class="lw-gz-auf" data-aktion="gaesteauf" aria-expanded="' + gaesteAuf + '" title="' + esc(T.gaesteEinzeln) + '">' + (gaesteAuf ? "▴" : "▾") + "</button>" + info("gaeste") +
       (gaesteAuf ? '<div class="lw-gz-liste' + (an ? "" : " aus") + '">' + GAESTE.map(g => { const ein = gastStufe(g.id) > 0;
         return '<button type="button" class="lw-gchip' + (ein ? " ein" : "") + (g.geist ? " geist" : "") + (gastDa[g.id] ? " spielt" : "") + '" data-gast="' + g.id + '" aria-pressed="' + ein + '" title="' + esc(T.gastInstr[g.id]) + '">' + g.sym + " " + g.name + "</button>"; }).join("") + "</div>" : "") + "</div>";
   }
@@ -4262,6 +4262,137 @@
     leiste.querySelector(".ll-int").hidden = !st;
     leiste.querySelector(".ll-wert").textContent = "🔥 " + T.intStufen[S.intensitaet];
   }
+  /* ---------- Rundgang: eingeblendet, Schritt für Schritt, ohne die Seite zu verlassen ---------- */
+  Object.assign(TX.de, { rundgang: "❔ Rundgang", rundgangTipp: "Kurzer Rundgang durch das Pult", weiter: "Weiter", zurueck: "Zurück", fertig: "Fertig", beenden: "Beenden",
+    info: {
+      intensitaet: "Wie viel los ist: links ruhig und sparsam, rechts dicht und wild. Die Änderung greift am nächsten Taktanfang.",
+      gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im C-Teil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
+      speichern: "Merkt sich die aktuelle Stimmung samt Intensität, Kulisse, Hall, Instrumenten und Gästen – als neue Stimmung (⭐) oder als eigene Fassung einer vorhandenen (✎).",
+      musik: "Stimmungen komponieren endlos neue Stücke im passenden Charakter. Lieder sind fertige Stücke der Band und Cover alter Volksweisen, unter „Eigene“ liegen deine gespeicherten Lieder.",
+      klang: "Kulissen sind Hintergrundgeräusche, die dauerhaft laufen. Effekte erklingen einmal auf Knopfdruck. Beide laufen über der Musik, die Lautstärke regelst du direkt über den Kacheln.",
+      hall: "Raumhall für die Musik, die Kulissen, Cover und Klassiker – die Geräuscheffekte bleiben trocken. „Raum“ wählt die Art des Raums, Echo-Hall gilt nur für Echos Flöte."
+    },
+    schritte: [
+      ["buehne", "🎭 Die Bühne", "Hier spielt die Band, was gerade läuft. Gäste aus eurer Geschichte kommen dazu, das Publikum reagiert, und Effekte sind auch zu sehen."],
+      ["play", "▶ Start und Ausklang", "Startet und stoppt die Musik. „Ausklang“ beendet das Stück sauber mit einem Schlussakkord – schöner als einfach abzubrechen."],
+      ["stimmungen", "🎵 Stimmungen", "Tippe auf eine Stimmung: Sie wechselt sanft am Taktende, der goldene Balken unter dem Titel zeigt, wann. Jede Stimmung erfindet laufend neue Melodien."],
+      ["intensitaet", "🔥 Intensität", "Von leise bis wild – dieselbe Stimmung, mal zurückhaltend unter einem Gespräch, mal mitten im Getümmel."],
+      ["punkt", "● Favoriten", "Der kleine Punkt an jeder Kachel heftet sie oben in ihrer Liste an. So hast du deine Lieblinge immer griffbereit."],
+      ["tabs", "📜 Lieder und Eigene", "Fertige Lieder der Band, Cover alter Volksweisen und deine selbst gespeicherten Stücke."],
+      ["kulisse", "🌧 Kulisse", "Hintergrundgeräusche wie Taverne, Regen oder Höhle laufen unter der Musik weiter. Der Regler darüber stellt ihre Lautstärke ein."],
+      ["effekte", "💥 Effekte", "Einmalige Geräusche auf Knopfdruck: Drache, Schwert, Würfel, Kampf, lustige Momente und kurze Klassiker. Der Regler darüber macht sie lauter oder leiser."],
+      ["einst", "⚙ Klang, Raum & Gäste", "Seltene Einstellungen liegen hier eingeklappt: Lautstärke der Musik, Hall, Raum, Orchester, Sparmodus und die Gäste."],
+      ["oben", "Oben rechts", "✍ Eigenes Lied öffnet ein leeres Notenblatt · 🌫 Klangwelten: reine Geräusche ohne Musik · 📡 Mitlauschen: Link für die Runde, alle hören mit · Die kleinen ⓘ erklären einzelne Regler."]
+    ] });
+  Object.assign(TX.en, { rundgang: "❔ Tour", rundgangTipp: "A short tour of the console", weiter: "Next", zurueck: "Back", fertig: "Done", beenden: "Close",
+    info: {
+      intensitaet: "How busy it gets: left is calm and sparse, right is dense and wild. Changes take effect at the next bar.",
+      gaeste: "Characters from your story join in fitting moods and get a solo in part C. Expand to switch single guests on or off.",
+      speichern: "Saves the current mood with intensity, backdrop, reverb, instruments and guests – as a new mood (⭐) or as your own version of an existing one (✎).",
+      musik: "Moods keep composing new pieces in their character. Songs are finished pieces by the band and covers of old folk tunes; “Own” holds your saved songs.",
+      klang: "Backdrops are background sounds that keep running. Effects play once per tap. Both play over the music; set their volume right above the tiles.",
+      hall: "Room reverb for music, backdrops, covers and classics – sound effects stay dry. “Room” picks the kind of space, echo reverb only applies to Echo's flute."
+    },
+    schritte: [
+      ["buehne", "🎭 The stage", "The band plays whatever is running. Guests from your story join in, the audience reacts, and effects show up too."],
+      ["play", "▶ Start and fade-out", "Starts and stops the music. “Fade-out” ends the piece cleanly with a final chord – nicer than just cutting off."],
+      ["stimmungen", "🎵 Moods", "Tap a mood: it changes smoothly at the end of the bar, the golden bar below the title shows when. Every mood keeps inventing new melodies."],
+      ["intensitaet", "🔥 Intensity", "From quiet to wild – the same mood, sometimes reserved under a conversation, sometimes right in the thick of battle."],
+      ["punkt", "● Favourites", "The small dot on every tile pins it to the top of its list, so your favourites are always at hand."],
+      ["tabs", "📜 Songs and own", "Finished songs by the band, covers of old folk tunes and the pieces you saved yourself."],
+      ["kulisse", "🌧 Backdrop", "Background sounds like tavern, rain or cave keep running under the music. The slider above sets their volume."],
+      ["effekte", "💥 Effects", "One-off sounds at a tap: dragon, sword, dice, combat, funny moments and short classics. The slider above makes them louder or quieter."],
+      ["einst", "⚙ Sound, room & guests", "Rarely used settings are folded away here: music volume, reverb, room, orchestra, power saving and the guests."],
+      ["oben", "Top right", "✍ Compose a song opens an empty sheet · 🌫 Soundscapes: pure ambience without music · 📡 Listen in: a link for the group · The small ⓘ explain single controls."]
+    ] });
+  const RUNDGANG_ZIEL = {
+    buehne: () => root.querySelector(".lw-buehne"), play: () => root.querySelector(".lw-pult-kopf .lw-play"),
+    stimmungen: () => root.querySelector(".lw-musik .lw-pult-gitter"), intensitaet: () => root.querySelector(".lw-intensitaet"),
+    punkt: () => root.querySelector(".lw-musik .lw-pult-gitter button"), tabs: () => root.querySelector(".lw-musik .lw-tabs"),
+    kulisse: () => root.querySelector(".lw-klang .lw-kul-gitter"), effekte: () => root.querySelector(".lw-klang .lw-pult-fx"),
+    einst: () => root.querySelector(".lw-musik .lw-einst-kopf"), oben: () => root.querySelector(".lw-kopf-rechts")
+  };
+  let rundgang = null;
+  function rundgangStart() {
+    if (!S.pult) { S.pult = true; merken(); zeichnen(); knoepfe(); }
+    if (musikTab !== "stimmungen") { musikTab = "stimmungen"; boxNeu("musik"); }
+    try { localStorage.setItem("imres-lw-rundgang", "1"); } catch (_) {}
+    root.querySelectorAll('[data-aktion="rundgang"]').forEach(b => b.classList.remove("neu"));
+    const el = document.createElement("div"); el.className = "lw-tour"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = '<div class="lw-tour-loch"></div><div class="lw-tour-blase" tabindex="-1"></div>';
+    document.body.appendChild(el);
+    rundgang = { el, i: 0, nach: () => rundgangLage() };
+    window.addEventListener("scroll", rundgang.nach, { passive: true }); window.addEventListener("resize", rundgang.nach);
+    rundgangSchritt(0);
+  }
+  function rundgangEnde() {
+    if (!rundgang) return;
+    window.removeEventListener("scroll", rundgang.nach); window.removeEventListener("resize", rundgang.nach);
+    rundgang.el.remove(); rundgang = null;
+    const b = root.querySelector('[data-aktion="rundgang"]'); if (b) b.focus();
+  }
+  function rundgangSchritt(i) {
+    const T = t(), L = T.schritte;
+    if (i < 0 || i >= L.length) { rundgangEnde(); return; }
+    rundgang.i = i;
+    const [k, titel, text] = L[i], ziel = RUNDGANG_ZIEL[k] && RUNDGANG_ZIEL[k]();
+    rundgang.ziel = ziel;
+    const bl = rundgang.el.querySelector(".lw-tour-blase");
+    bl.innerHTML = '<p class="lw-tour-nr">' + (i + 1) + " / " + L.length + '</p><h4>' + titel + "</h4><p>" + text + '</p><div class="lw-tour-knoepfe">' +
+      '<button type="button" class="lw-klein" data-tour="ende">' + T.beenden + "</button><span></span>" +
+      (i > 0 ? '<button type="button" class="lw-klein" data-tour="zurueck">' + T.zurueck + "</button>" : "") +
+      '<button type="button" class="lw-tour-weiter" data-tour="weiter">' + (i === L.length - 1 ? T.fertig : T.weiter) + "</button></div>";
+    if (ziel) ziel.scrollIntoView({ block: "center", behavior: ruhig ? "auto" : "smooth" });
+    rundgangLage(); setTimeout(rundgangLage, 380); setTimeout(rundgangLage, 800);
+    bl.focus({ preventScroll: true });
+  }
+  function rundgangLage() {
+    if (!rundgang) return;
+    const loch = rundgang.el.querySelector(".lw-tour-loch"), bl = rundgang.el.querySelector(".lw-tour-blase"), z = rundgang.ziel;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    if (!z) { loch.style.cssText = "left:50%;top:50%;width:0;height:0"; bl.style.left = Math.max(12, (vw - bl.offsetWidth) / 2) + "px"; bl.style.top = Math.max(12, (vh - bl.offsetHeight) / 2) + "px"; return; }
+    const r = z.getBoundingClientRect(), p = 8;
+    loch.style.cssText = "left:" + (r.left - p) + "px;top:" + (r.top - p) + "px;width:" + (r.width + 2 * p) + "px;height:" + (r.height + 2 * p) + "px";
+    const bw = bl.offsetWidth, bh = bl.offsetHeight;
+    let top = r.bottom + p + 12;
+    if (top + bh > vh - 10) top = r.top - p - 12 - bh;
+    if (top < 10) top = Math.min(vh - bh - 10, Math.max(10, r.top + 20));
+    bl.style.top = top + "px";
+    bl.style.left = Math.max(10, Math.min(vw - bw - 10, r.left + r.width / 2 - bw / 2)) + "px";
+  }
+  document.addEventListener("click", e => {
+    if (!rundgang) return;
+    const b = e.target.closest("[data-tour]");
+    if (b) { const a = b.dataset.tour; if (a === "ende") rundgangEnde(); else rundgangSchritt(rundgang.i + (a === "weiter" ? 1 : -1)); return; }
+    if (e.target.closest(".lw-tour")) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  document.addEventListener("keydown", e => {
+    if (!rundgang) return;
+    if (e.key === "Escape") rundgangEnde();
+    else if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); rundgangSchritt(rundgang.i + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); rundgangSchritt(rundgang.i - 1); }
+  });
+  root.addEventListener("click", e => { if (e.target.closest('[data-aktion="rundgang"]')) { e.stopPropagation(); rundgangStart(); } }, true);
+  const rundgangNeu = () => { try { return !localStorage.getItem("imres-lw-rundgang"); } catch (_) { return false; } };
+
+  /* ---------- ⓘ: kleine Erklärungen zum Antippen ---------- */
+  const info = k => '<button type="button" class="lw-info" data-info="' + k + '" aria-label="Info" aria-expanded="false">ⓘ</button>';
+  let infoBlase = null;
+  function infoZu() { if (infoBlase) { infoBlase.remove(); infoBlase = null; root.querySelectorAll(".lw-info[aria-expanded=true]").forEach(b => b.setAttribute("aria-expanded", "false")); } }
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".lw-info");
+    if (!b) { if (infoBlase && !e.target.closest(".lw-info-blase")) infoZu(); return; }
+    e.preventDefault(); e.stopPropagation();
+    const offen = infoBlase && infoBlase.dataset.k === b.dataset.info; infoZu(); if (offen) return;
+    infoBlase = document.createElement("div"); infoBlase.className = "lw-info-blase"; infoBlase.dataset.k = b.dataset.info; infoBlase.setAttribute("role", "note");
+    infoBlase.textContent = t().info[b.dataset.info] || "";
+    document.body.appendChild(infoBlase); b.setAttribute("aria-expanded", "true");
+    const r = b.getBoundingClientRect(), w = infoBlase.offsetWidth, h = infoBlase.offsetHeight;
+    let top = r.bottom + 8 + scrollY; if (r.bottom + 8 + h > innerHeight - 10) top = r.top - 8 - h + scrollY;
+    infoBlase.style.top = top + "px"; infoBlase.style.left = Math.max(10, Math.min(innerWidth - w - 10, r.left + r.width / 2 - w / 2)) + scrollX + "px";
+  }, true);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") infoZu(); });
+  window.addEventListener("scroll", () => { if (infoBlase) infoZu(); }, { passive: true });
   /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
   Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften" });
   Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin" });
@@ -4309,11 +4440,11 @@
   const sparKnopf = T => '<button type="button" class="lw-schalter lw-spar" data-aktion="spar" aria-pressed="' + spar + '" title="' + esc(T.sparTipp) + '">' + T.spar + "</button>";
   const mixRegler = T =>
     '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
-    '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
+    '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b> ' + info("hall") + '</span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
     '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
     raumWahl(T) + '<button type="button" class="lw-schalter lw-orch" data-aktion="orchester" aria-pressed="' + (S.orchester !== 0) + '" title="' + esc(T.orchTipp) + '">' + T.orchester + "</button>" + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
-  const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b></span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
+  const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b> ' + info("intensitaet") + '</span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
   const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler"><span>' + sym + " " + text + '</span><input type="range" min="0" max="10" step="1" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + wert * 10 + " %</b></label>";
   Object.assign(TX.de, { kulisseKurz: "Kulisse", effekteKurz: "Effekte" });
@@ -4337,7 +4468,7 @@
   function stimmSpeicherZeile(T) {
     if (hoerer || !S.stimmung || !STIL[S.stimmung]) return "";
     const aktiv = S.eigeneStimmung || S.stimmung, name = stimmName(aktiv) || S.titel || "";
-    if (!stimmForm) return '<div class="lw-eigene-zeile"><button type="button" class="lw-klein" data-aktion="stimmspeichern" title="' + esc(T.stimmTipp) + '">' + T.stimmSpeichern + "</button></div>";
+    if (!stimmForm) return '<div class="lw-eigene-zeile"><button type="button" class="lw-klein" data-aktion="stimmspeichern" title="' + esc(T.stimmTipp) + '">' + T.stimmSpeichern + "</button>" + info("speichern") + "</div>";
     const eigen = aktiv.startsWith("e_"), ueberschrieben = !eigen && eigeneStimmungen[aktiv];
     return '<div class="lw-eigene-zeile"><span class="lw-speicherform"><input type="text" maxlength="40" class="lw-stimmname" placeholder="' + esc(T.stimmNamePlatz) + '" value="' + esc(stimmForm.name) + '">' +
       '<button type="button" data-aktion="stimmneu">' + T.stimmNeu + "</button>" +
@@ -4359,7 +4490,7 @@
     } else kacheln = oben("v", STIMMUNGEN.concat(Object.keys(eigeneStimmungen).filter(id => id.startsWith("e_") && STIL[eigeneStimmungen[id].basis]))).map(k => k.startsWith("e_")
       ? kachel("data-vorlage", k, "⭐ " + esc(eigeneStimmungen[k].name), S.eigeneStimmung === k)
       : kachel("data-vorlage", k, eigeneStimmungen[k] ? esc((T.vorlagen[k].match(/^[^\wÄÖÜäöü]+/) || [""])[0] + stimmName(k)) + " ✎" : T.vorlagen[k], S.stimmung === k && (!S.eigeneStimmung || S.eigeneStimmung === k))).join("");
-    return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + "</h4>" +
+    return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + " " + info("musik") + "</h4>" +
         reiter("musiktab", [["stimmungen", T.tabStimmungen], ["lieder", T.tabLieder], ["eigene", T.tabEigene]], musikTab, T) + "</div>" +
       '<div class="lw-pult-gitter">' + kacheln + "</div>" +
       (voll && musikTab === "eigene" ? '<div class="lw-eigene-zeile">' + '<button type="button" class="lw-klein" data-aktion="speichern">' + T.speichern + "</button>" +
@@ -4371,7 +4502,7 @@
   }
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
-    return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + "</h4></div>" +
+    return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + " " + info("klang") + "</h4></div>" +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
       '<div class="lw-pult-gitter lw-kul-gitter">' + oben("k", KULISSEN).map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
@@ -4402,7 +4533,7 @@
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
-          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter" data-aktion="komponieren" title="' + esc(T.komponierenTipp) + '">' + T.komponieren + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button>" +
+          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<button type="button" class="lw-schalter" data-aktion="komponieren" title="' + esc(T.komponierenTipp) + '">' + T.komponieren + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button>" +
           '<button type="button" class="lw-schalter" data-aktion="pult">' + T.komplett + "</button></span></div>" +
         (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
         konsole(T, false) +
@@ -5376,6 +5507,20 @@ html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
 .lw-kleinregler input { flex: 1 1 auto; min-width: 4rem; max-width: 16rem; accent-color: var(--ember); }
 .lw-kleinregler b { flex: 0 0 2.6rem; text-align: right; color: var(--vellum); font-weight: 600; font-size: .8rem; }
 .lw-buehne .lw-figur, .lw-buehne .lw-geister { transform: translateX(var(--band-x, 0%)) scale(var(--band-s, 1)); transform-origin: 50% 100%; transition: transform 1.1s cubic-bezier(.4,.1,.3,1); }
+.lw-tour { position: fixed; inset: 0; z-index: 10000; }
+.lw-tour-loch { position: fixed; border-radius: 12px; box-shadow: 0 0 0 200vmax rgba(6,4,8,.72), 0 0 0 2px var(--ember), 0 0 24px rgba(224,160,70,.45); transition: left .3s ease, top .3s ease, width .3s ease, height .3s ease; pointer-events: none; }
+.lw-tour-blase { position: fixed; width: min(22rem, calc(100vw - 20px)); background: #1b151e; border: 1px solid var(--ember); border-radius: 12px; padding: .8rem .95rem .7rem; box-shadow: 0 12px 34px rgba(0,0,0,.6); color: var(--vellum); transition: top .3s ease, left .3s ease; outline: none; }
+.lw-tour-blase h4 { margin: .1rem 0 .3rem; font-size: 1.1rem; color: var(--ember); }
+.lw-tour-blase p { margin: 0 0 .5rem; font-size: .95rem; line-height: 1.45; }
+.lw-tour-blase .lw-tour-nr { font-size: .75rem; color: var(--ash); margin: 0; }
+.lw-tour-knoepfe { display: flex; align-items: center; gap: .4rem; }
+.lw-tour-knoepfe span { flex: 1; }
+.lw-tour-weiter { border: 1px solid var(--ember); background: var(--ember); color: var(--night); font: inherit; font-size: .9rem; padding: .4rem .9rem; border-radius: 999px; cursor: pointer; }
+.lw-rundgang-knopf.neu { border-color: var(--ember); color: var(--ember); animation: lwpuls 1.6s ease-in-out 4; }
+.lw-info { border: 1px solid var(--line); background: none; color: var(--ash); width: 1.35rem; height: 1.35rem; border-radius: 50%; font-size: .78rem; line-height: 1; padding: 0; cursor: pointer; vertical-align: middle; font-family: inherit; font-weight: 400; letter-spacing: 0; text-transform: none; }
+.lw-info:hover, .lw-info[aria-expanded="true"] { color: var(--ember); border-color: var(--ember); }
+.lw-info-blase { position: absolute; z-index: 9999; max-width: min(19rem, calc(100vw - 20px)); background: #1b151e; border: 1px solid rgba(224,160,70,.6); border-radius: 10px; padding: .55rem .7rem; font-size: .88rem; line-height: 1.4; color: var(--vellum); box-shadow: 0 8px 24px rgba(0,0,0,.55); }
+@media (prefers-reduced-motion: reduce) { .lw-tour-loch, .lw-tour-blase { transition: none; } .lw-rundgang-knopf.neu { animation: none; } }
 `;
   /* Requisiten: nur das gewählte Instrument ist sichtbar */
   css.textContent += ".lw-figur .req { display: none; }\n" +

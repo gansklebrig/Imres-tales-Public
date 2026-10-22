@@ -49,6 +49,17 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
 .regler span{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .regler b{font-weight:500;color:var(--mute);font-size:.8rem;text-align:right}
 .regler input{width:100%;accent-color:var(--ember)}
+.kopfzeile{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.tour{position:fixed;inset:0;z-index:10000}
+.tour-loch{position:fixed;border-radius:12px;box-shadow:0 0 0 200vmax rgba(6,4,8,.72),0 0 0 2px var(--ember),0 0 24px rgba(224,160,70,.45);transition:all .3s ease;pointer-events:none}
+.tour-blase{position:fixed;width:min(21rem,calc(100vw - 20px));background:#1b151e;border:1px solid var(--ember);border-radius:12px;padding:.8rem .95rem .7rem;box-shadow:0 12px 34px rgba(0,0,0,.6);transition:top .3s ease,left .3s ease;outline:none}
+.tour-blase h4{margin:.1rem 0 .3rem;font-size:1.1rem;color:var(--ember);font-weight:500}
+.tour-blase p{margin:0 0 .5rem;font-size:.95rem;line-height:1.45}
+.tour-blase small{color:var(--mute);font-size:.75rem}
+.tour-k{display:flex;align-items:center;gap:.4rem}.tour-k span{flex:1}
+.tour-k button{border:1px solid var(--line);background:none;border-radius:999px;padding:.35rem .8rem;color:var(--mute)}
+.tour-k .los{border-color:var(--ember);background:var(--ember);color:var(--night)}
+@media (prefers-reduced-motion:reduce){.tour-loch,.tour-blase{transition:none}}
 .funk{margin:.4rem 0 0}
 .funk-knopf{border:1px solid var(--line);background:none;border-radius:999px;padding:.4rem .9rem;color:var(--mute);font-size:.9rem}
 .funk-knopf.an,.funk-knopf:hover{border-color:var(--ember);color:var(--ember)}
@@ -80,7 +91,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
 <body>
 <div class="wrap">
   <header class="kopf">
-    <a class="zurueck" href="index.html#lautenwerk" data-t="zurueck">← Zurück zum Lautenwerk</a>
+    <div class="kopfzeile"><a class="zurueck" href="index.html#lautenwerk" data-t="zurueck">← Zurück zum Lautenwerk</a><button type="button" class="funk-knopf" id="rundgang" data-t="rundgang">❔ Rundgang</button></div>
     <h1 data-t="titel">Klangwelten</h1>
     <p class="unter" data-t="unter">Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.</p>
   </header>
@@ -107,6 +118,8 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     tippMisch: "Every soundscape remembers your mix.", laeuft: "playing", pausiert: "paused",
     funk: "📡 Listen in", funkStart: "📡 Broadcast to everyone", funkStopp: "Stop broadcast", funkTipp: "The others open this link and tap “Listen” – the soundscape then plays in their own browser and follows yours.",
     kopieren: "Copy link", kopiert: "Copied!", verbinde: "Connecting …", fehler: "No connection – retrying …", hoeren: n => n === 1 ? "1 listening" : n + " listening",
+    rundgang: "❔ Tour", weiter: "Next", zurueck2: "Back", fertig: "Done", beenden: "Close",
+    schritte: [["#welten", "🗺 Choose a soundscape", "Tap a card to start it, tap again to stop. Switching fades smoothly."], ["#misch", "🎚 Mix", "Every layer has its own slider. “Liveliness” sets how often single sounds appear, “Room echo” how big the space feels. Each soundscape remembers your mix."], ["#funk", "📡 Listen in", "Broadcast to your group: share the link, the others tap “Listen” and hear the same soundscape."], ["#leiste", "▶ Play and volume", "Start, stop and overall volume – always at hand at the bottom."]],
     hTitel: "Listening in", hWarte: "Nothing is playing right now – as soon as it starts, you will hear it.", hZuhoeren: "🎧 Listen", hStumm: "❚❚ Mute", hSelbst: "Choose soundscapes yourself"
   } : {
     zurueck: "← Zurück zum Lautenwerk", titel: "Klangwelten", unter: "Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.",
@@ -114,6 +127,8 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     tippMisch: "Jede Klangwelt merkt sich deine Mischung.", laeuft: "läuft", pausiert: "pausiert",
     funk: "📡 Mitlauschen", funkStart: "📡 Für alle übertragen", funkStopp: "Übertragung beenden", funkTipp: "Die anderen öffnen diesen Link und tippen auf „Zuhören“ – die Klangwelt entsteht dann bei jedem selbst im Browser und folgt deiner.",
     kopieren: "Link kopieren", kopiert: "Kopiert!", verbinde: "Verbinde …", fehler: "Keine Verbindung – versuche es erneut …", hoeren: n => n === 1 ? "1 hört zu" : n + " hören zu",
+    rundgang: "❔ Rundgang", weiter: "Weiter", zurueck2: "Zurück", fertig: "Fertig", beenden: "Beenden",
+    schritte: [["#welten", "🗺 Klangwelt wählen", "Tippe auf eine Karte, um sie zu starten, nochmal tippen hält sie an. Beim Wechsel wird weich übergeblendet."], ["#misch", "🎚 Mischen", "Jede Schicht hat ihren eigenen Regler. „Lebendigkeit“ bestimmt, wie oft Einzelgeräusche kommen, „Raumhall“, wie groß der Raum klingt. Jede Klangwelt merkt sich deine Mischung."], ["#funk", "📡 Mitlauschen", "Für die Runde übertragen: Link teilen, die anderen tippen auf „Zuhören“ und hören dieselbe Klangwelt."], ["#leiste", "▶ Abspielen und Lautstärke", "Start, Stopp und Gesamtlautstärke – immer griffbereit unten."]],
     hTitel: "Mitlauschen", hWarte: "Gerade läuft nichts – sobald es losgeht, hörst du es.", hZuhoeren: "🎧 Zuhören", hStumm: "❚❚ Stumm", hSelbst: "Selbst Klangwelten wählen"
   };
   document.querySelectorAll("[data-t]").forEach(el => { if (T[el.dataset.t]) el.textContent = T[el.dataset.t]; });
@@ -551,6 +566,47 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     document.querySelector(".unter").textContent = "";
   }
   zeichnen(); funkZeichnen();
+
+  /* ---------- Rundgang ---------- */
+  let tour = null;
+  function tourSchritt(i) {
+    if (i < 0 || i >= T.schritte.length) { tourEnde(); return; }
+    tour.i = i;
+    const [sel, h, txt] = T.schritte[i];
+    if (sel === "#misch" && $("misch").hidden) { merk.welt = merk.welt || WELTEN[0].id; zeichnen(); }
+    tour.ziel = document.querySelector(sel);
+    const bl = tour.el.querySelector(".tour-blase");
+    bl.innerHTML = "<small>" + (i + 1) + " / " + T.schritte.length + "</small><h4>" + esc(h) + "</h4><p>" + esc(txt) + '</p><div class="tour-k"><button type="button" data-tour="ende">' + esc(T.beenden) + "</button><span></span>" +
+      (i ? '<button type="button" data-tour="zurueck">' + esc(T.zurueck2) + "</button>" : "") + '<button type="button" class="los" data-tour="weiter">' + esc(i === T.schritte.length - 1 ? T.fertig : T.weiter) + "</button></div>";
+    if (tour.ziel && sel !== "#leiste") tour.ziel.scrollIntoView({ block: "center", behavior: "smooth" });
+    tourLage(); setTimeout(tourLage, 380); setTimeout(tourLage, 800); bl.focus({ preventScroll: true });
+  }
+  function tourLage() {
+    if (!tour) return;
+    const loch = tour.el.querySelector(".tour-loch"), bl = tour.el.querySelector(".tour-blase"), z = tour.ziel, vw = innerWidth, vh = innerHeight;
+    if (!z) return;
+    const r = z.getBoundingClientRect(), p = 8;
+    loch.style.cssText = "left:" + (r.left - p) + "px;top:" + (r.top - p) + "px;width:" + (r.width + 2 * p) + "px;height:" + (Math.min(r.height, vh * .6) + 2 * p) + "px";
+    const bw = bl.offsetWidth, bh = bl.offsetHeight, unten = r.top + Math.min(r.height, vh * .6) + p + 12;
+    let top = unten; if (top + bh > vh - 10) top = r.top - p - 12 - bh; if (top < 10) top = Math.max(10, vh - bh - 90);
+    bl.style.top = top + "px"; bl.style.left = Math.max(10, Math.min(vw - bw - 10, r.left + r.width / 2 - bw / 2)) + "px";
+  }
+  function tourStart() {
+    const el = document.createElement("div"); el.className = "tour"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = '<div class="tour-loch"></div><div class="tour-blase" tabindex="-1"></div>'; document.body.appendChild(el);
+    tour = { el, i: 0, nach: tourLage }; addEventListener("scroll", tourLage, { passive: true }); addEventListener("resize", tourLage);
+    tourSchritt(0);
+  }
+  function tourEnde() { if (!tour) return; removeEventListener("scroll", tourLage); removeEventListener("resize", tourLage); tour.el.remove(); tour = null; }
+  document.addEventListener("click", e => {
+    if (e.target.closest("#rundgang")) { tourStart(); return; }
+    if (!tour) return;
+    const b = e.target.closest("[data-tour]");
+    if (b) { const a = b.dataset.tour; if (a === "ende") tourEnde(); else tourSchritt(tour.i + (a === "weiter" ? 1 : -1)); }
+    else if (e.target.closest(".tour")) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  document.addEventListener("keydown", e => { if (!tour) return; if (e.key === "Escape") tourEnde(); else if (e.key === "ArrowRight") tourSchritt(tour.i + 1); else if (e.key === "ArrowLeft") tourSchritt(tour.i - 1); });
+  if (hoerer) $("rundgang").hidden = true;
 
   /* ---------- Dank ---------- */
   $("dank").innerHTML = EN
