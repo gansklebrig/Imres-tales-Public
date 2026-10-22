@@ -216,7 +216,7 @@ details.stats .stat{padding:0 12px 12px}
 .it.empty{border-style:dashed;border-color:#3b3140}
 .it.sel{box-shadow:0 0 0 2px #fff inset}
 .r0{border-color:var(--r0)}.r1{border-color:var(--r1)}.r2{border-color:var(--r2)}.r3{border-color:var(--r3)}.r4{border-color:var(--r4);box-shadow:0 0 12px rgba(255,141,46,.35)}
-.c0{color:var(--r0)}.c1{color:var(--r1)}.c2{color:var(--r2)}.c3{color:var(--r3)}.c4{color:var(--r4)}.c5{color:#3fdc6a}.dpsbox{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:3px}.dpsrow{display:flex;justify-content:space-between;gap:10px;font-size:14px}.it .ua.dn{background:#5a2020;color:#ffb0a0}.fsrow{display:flex;justify-content:space-between;align-items:center;gap:10px}.tdet .v1{display:none}.upv{color:#6ee06a;font-weight:800}@media (hover:hover){.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v1,.tree-wrap:has(.node.sel:hover) .tdet .v1{display:inline}.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v0,.tree-wrap:has(.node.sel:hover) .tdet .v0{display:none}}.rlstart{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted,#b0a0a0)}.rlstart select{background:#1f1723;color:var(--text,#f0e6d4);border:1px solid #5a4560;border-radius:10px;padding:7px 10px;font:inherit;font-weight:700;max-width:230px}.gfxlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted,#9a8a90);margin-top:2px}.gfxlbl span.on{color:#e5b454;font-weight:800}.curse{color:#c070ff;font-weight:800}.c5h{color:#5affc0;text-shadow:0 0 8px rgba(90,255,192,.35)}.setrow{padding:7px 0;border-top:1px solid rgba(255,255,255,.07)}.setrow.done b{text-decoration:underline;text-decoration-color:rgba(90,255,192,.5)}.setp{display:flex;gap:6px;font-size:15px;color:#4a5a50;margin:2px 0}.setp .on{color:#3fdc6a}.r5{border-color:#3fdc6a;box-shadow:0 0 12px rgba(63,220,106,.35)}
+.c0{color:var(--r0)}.c1{color:var(--r1)}.c2{color:var(--r2)}.c3{color:var(--r3)}.c4{color:var(--r4)}.c5{color:#3fdc6a}.goodn{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:#e5b454;color:#1a1010;font-size:11px;margin-left:4px}.dpsbox{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:3px}.dpsrow{display:flex;justify-content:space-between;gap:10px;font-size:14px}.it .ua.dn{background:#5a2020;color:#ffb0a0}.fsrow{display:flex;justify-content:space-between;align-items:center;gap:10px}.tdet .v1{display:none}.upv{color:#6ee06a;font-weight:800}@media (hover:hover){.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v1,.tree-wrap:has(.node.sel:hover) .tdet .v1{display:inline}.tdet:has([data-act="tree-learn"]:not([disabled]):hover) .v0,.tree-wrap:has(.node.sel:hover) .tdet .v0{display:none}}.rlstart{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted,#b0a0a0)}.rlstart select{background:#1f1723;color:var(--text,#f0e6d4);border:1px solid #5a4560;border-radius:10px;padding:7px 10px;font:inherit;font-weight:700;max-width:230px}.gfxlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted,#9a8a90);margin-top:2px}.gfxlbl span.on{color:#e5b454;font-weight:800}.curse{color:#c070ff;font-weight:800}.c5h{color:#5affc0;text-shadow:0 0 8px rgba(90,255,192,.35)}.setrow{padding:7px 0;border-top:1px solid rgba(255,255,255,.07)}.setrow.done b{text-decoration:underline;text-decoration-color:rgba(90,255,192,.5)}.setp{display:flex;gap:6px;font-size:15px;color:#4a5a50;margin:2px 0}.setp .on{color:#3fdc6a}.r5{border-color:#3fdc6a;box-shadow:0 0 12px rgba(63,220,106,.35)}
 .idet2{position:relative;display:flex;flex-direction:column;gap:8px;border-color:#5a4560;background:#1f1723}
 .idet2 .x{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#120d14;font-size:20px;line-height:1}
 .cmpt{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
@@ -1473,7 +1473,7 @@ const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='23.10.2026 · DPS & Vollbild';
+const HS_VERSION='23.10.2026 · Ausrüsten im Lager';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
 let GAUTO=3,GCEIL=3,FPSNOW=60;
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
@@ -2532,7 +2532,7 @@ function drawNums(){cx.textAlign='center';for(const n of G.nums){const k=n.t/0.7
 
 /* Zeichnen der Spielwelt */
 function render(dt){
- if(!G.ground||G.state==='title'){ambient(dt);return}
+ if(!G.ground||G.state==='title'||G.state==='camp'){ambient(dt);return}
  const Z0=ZOOM;G.zp=(G.zp||0)*Math.exp(-7*dt);if(G.shake>0)G.shake=Math.max(0,G.shake-dt*26);ZOOM=Z0*(1+G.zp);
  try{renderWorld(dt)}finally{ZOOM=Z0}}
 function renderWorld(dt){
@@ -2690,7 +2690,7 @@ const HC={};const hEl={};['hName','hLvl','hForm','hpFill','hpTxt','xpFill','stFi
 function setT(k,v){if(HC[k]!==v){HC[k]=v;hEl[k].textContent=v}}
 function setH(k,v){if(HC[k]!==v){HC[k]=v;hEl[k].innerHTML=v}}
 function setW(k,v){v=Math.round(clamp(v,0,1)*400)/4;if(HC[k+'w']!==v){HC[k+'w']=v;hEl[k].style.width=v+'%'}}
-function hudUpdate(){if(G.state==='title'||!P)return;
+function hudUpdate(){if(G.state==='title'||G.state==='camp'||!P)return;
  setT('hName',P.hero.name);setT('hLvl',String(P.level));setT('hForm',P.form==='bear'?'Bär':P.form==='rat'?'Ratte':P.stealthT>0?'Unsichtbar':P.buffs.ascend>0?'Darkin':'');setW('hpFill',P.hp/P.st.maxHp);setT('hpTxt',fmt(Math.max(0,P.hp))+' / '+fmt(P.st.maxHp));setW('xpFill',P.xp/xpNeed(P.level));
  {const S=STAGES[G.stage];setH('stName',`<small>${stageTag(S)} · ${esc(diffName(G.diff))}</small>${esc(S.name.replace(/^Tiefe \d+ · /,''))}`)}
  {const pb=G.boss||G.guardE;
@@ -2778,7 +2778,7 @@ function openOverlay(k){if(G.state!=='play')return;G.paused=true;G.resumeT=0;G.o
  if(k==='inv'){G.invSel=null;renderInv()}else if(k==='tree'){renderTree()}else renderPause()}
 function closeOverlay(){G.overlay=null;G.paused=true;G.resumeT=1.5;hideScreen();hud.hidden=false;last=performance.now()}
 function switchOverlay(k){G.overlay=k;if(k==='inv'){G.invSel=null;renderInv()}else if(k==='tree')renderTree();else renderPause()}
-const menuTabs=a=>`<div class="seg mtabs" role="tablist"><button role="tab" aria-selected="${a==='inv'}" data-act="mtab" data-m="inv">Beutel${G.upCount?`<b aria-label="bessere Gegenstände"></b>`:''}</button><button role="tab" aria-selected="${a==='tree'}" data-act="mtab" data-m="tree">Talente${P.sp>0?'<b aria-label="freie Punkte"></b>':''}</button>${G.state==='between'?'':`<button role="tab" aria-selected="${a==='pause'}" data-act="mtab" data-m="pause">Pause</button>`}</div>`;
+const menuTabs=a=>`<div class="seg mtabs" role="tablist"><button role="tab" aria-selected="${a==='inv'}" data-act="mtab" data-m="inv">Beutel${G.upCount?`<b aria-label="bessere Gegenstände"></b>`:''}</button><button role="tab" aria-selected="${a==='tree'}" data-act="mtab" data-m="tree">Talente${P.sp>0?'<b aria-label="freie Punkte"></b>':''}</button>${G.state==='camp'?`<button role="tab" aria-selected="${a==='smith'}" data-act="mtab" data-m="smith">Schmied</button>`:G.state==='between'?'':`<button role="tab" aria-selected="${a==='pause'}" data-act="mtab" data-m="pause">Pause</button>`}</div>`;
 
 const ATKSTYLE={barradin:'Rapierstich im Nahkampf, Klangnoten auf Distanz',echo:'Stabhieb oder Bärenpranke im Nahkampf, Dornengeschosse auf Distanz',friedrich:'Jagdmesser im Nahkampf, Pfeile auf Distanz – Rex beißt mit',ezekiel:'Klingenhieb im Nahkampf, Wurfdolche auf Distanz'};
 const HCOL={barradin:'#e3b456',echo:'#8fe07a',friedrich:'#a9d27e',ezekiel:'#ff5050'};
@@ -2901,7 +2901,7 @@ function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel
  const pows=[...(P.lp||[])].filter(k=>LPOW[k]).map(k=>`<div class="lpow"><b>${LPOW[k].n}</b> ${LPOW[k].d}</div>`).join('');
  showScreen(`<div class="wrap inv">
   ${menuTabs('inv')}
-  <div class="inv-head"><h2>Beutel<small>${P.bag.length} / 24</small></h2><div class="row"><button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten</button><button class="btn gold" data-act="close">${G.state==='between'?'Zurück':'Weiter'}</button></div></div>
+  <div class="inv-head"><h2>Beutel<small>${P.bag.length} / 24</small></h2><div class="row"><button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten</button><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
   <div class="eyebrow">Angelegt</div><div class="equip">${eq}</div>
   <div class="eyebrow">Im Beutel · nach DPS sortiert ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
   <div class="bag">${bag||'<div class="muted" style="grid-column:1/-1">Noch leer. Gegner lassen Ausrüstung fallen – einfach drüberlaufen. Leere Plätze werden automatisch belegt.</div>'}</div>
@@ -2927,7 +2927,7 @@ function renderTree(keep){const Hh=P.hero;if(!keep){G.treeOpen=false;G.treeDet=f
  const slots=[0,1,2,3,4,5].map(i=>{const id=P.bar[i],n=id&&Hh.tree.find(x=>x.id===id);return`<button class="bslot ${n?'':'empty'} ${G.barPick&&n?'pick':''}" data-i="${i}" ${n?`data-act="tree-sel" data-id="${n.id}"`:'disabled'} title="${n?esc(n.name):'frei'}"><span>${n?n.ic:''}</span><i>${i+1}</i></button>`}).join('');
  showScreen(`<div class="wrap tree-wrap">
   ${menuTabs('tree')}
-  <div class="inv-head"><div><h2>Talente</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level}</div></div><button class="btn gold" data-act="close">${G.state==='between'?'Zurück':'Weiter'}</button></div>
+  <div class="inv-head"><div><h2>Talente</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level}</div></div><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div>
   <div class="barrow"><span class="eyebrow">Leiste</span><div class="bslots">${slots}</div><span class="muted barhint">Halten und ziehen zum Sortieren</span></div>
   <div class="seg brtabs" role="tablist">${Hh.branches.map((n,b)=>`<button role="tab" aria-selected="${b===brSel}" data-act="tree-br" data-b="${b}">${n}${Hh.tree.some(x=>x.b===b&&canLearn(x))?'<b></b>':''}</button>`).join('')}</div>
   <div class="tree">${[0,1,2].map(col).join('')}</div>
@@ -2948,6 +2948,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'meta':{const m=META.find(x=>x.id===b.dataset.id),hs=hsave(G.sel),r=hs.up[m.id]||0,c=metaCost(m,r);if(r<m.max&&SAVE.gold>=c){SAVE.gold-=c;hs.up[m.id]=r+1;persist();sfx('buy');showTitle(true)}break}
   case'start':if(SAVE.run&&!G.confirmNew){G.confirmNew=true;showTitle(true);break}G.confirmNew=false;startRun(G.sel,G.seldiff,G.selMode,{rl:!SAVE.hc,start:G.rlStart});break;
   case'start-yes':G.confirmNew=false;clearRun();startRun(G.sel,G.seldiff,G.selMode,{rl:!SAVE.hc,start:G.rlStart});break;
+  case'camp-inv':case'camp-tree':case'camp-smith':campOpen(a.slice(5));break;
   case'hc':SAVE.hc=b.dataset.v==='1';persist();showTitle(true);break;
   case'rl-smith':G.smithSel=null;G.overlay='smith';G.smithFrom='end';renderSmith();break;
   case'mode':G.selMode=b.dataset.m;showTitle(true);break;
@@ -2958,7 +2959,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'ev-done':finishEvent();break;
   case'smith-open':G.overlay='smith';G.smithSel=null;renderSmith();break;
   case'smith-sel':G.smithSel=G.smithSel===b.dataset.k?null:b.dataset.k;renderSmith(true);break;
-  case'smith-close':G.overlay=null;if(G.smithFrom==='end'){G.smithFrom=null;rlSync();persist();showTitle();break}showChapterDone();break;
+  case'smith-close':if(G.state==='camp'){campDone();break}G.overlay=null;if(G.smithFrom==='end'){G.smithFrom=null;rlSync();persist();showTitle();break}showChapterDone();break;
   case'smith-up':case'smith-rr':case'smith-sock':case'smith-gem':case'smith-unsock':smithAct(a,b);break;
   case'start-no':G.confirmNew=false;showTitle(true);break;
   case'run-go':continueRun();break;
@@ -2971,11 +2972,11 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'next-stage':if(maybeEvent())break;doNextStage();break;
   case'between-inv':G.invSel=null;G.overlay='inv';renderInv();break;
   case'between-tree':G.overlay='tree';renderTree();break;
-  case'mtab':if(G.state==='between'&&b.dataset.m!=='pause'){G.overlay=b.dataset.m;if(b.dataset.m==='inv'){G.invSel=null;renderInv()}else renderTree()}else if(G.state==='play')switchOverlay(b.dataset.m);break;
+  case'mtab':if(G.state==='camp'){campOpen(b.dataset.m,1);break}if(G.state==='between'&&b.dataset.m!=='pause'){G.overlay=b.dataset.m;if(b.dataset.m==='inv'){G.invSel=null;renderInv()}else renderTree()}else if(G.state==='play')switchOverlay(b.dataset.m);break;
   case'open-inv':openOverlay('inv');break;
   case'open-tree':openOverlay('tree');break;
   case'open-pause':openOverlay('pause');break;
-  case'close':if(G.state==='between'){G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay();break;
+  case'close':if(G.state==='camp'){campDone();break}if(G.state==='between'){G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay();break;
   case'auto':SAVE.auto=!SAVE.auto;persist();renderPause(true);break;
   case'camfx':{SAVE.camfx=+b.dataset.v;persist();const el=$('camBox');if(el)el.innerHTML=camInner();break}
   case'perf':SAVE.perf=!SAVE.perf;persist();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
@@ -3301,8 +3302,8 @@ function renderSmith(keep){const it=smithSel();const ico=x=>`<canvas class="ico"
    <div class="eyebrow">Sockel ${socks.length} / ${maxSock(it)}</div>${sk||'<p class="muted" style="font-size:13px">Noch keine Sockel.</p>'}
    <div class="row"><button class="btn gold" data-act="smith-up" ${(it.up||0)>=5||g<uc?'disabled':''}>${(it.up||0)>=5?'Voll aufgewertet':'Aufwerten (+8% auf alles) · '+fmt(uc)}</button>
    <button class="btn" data-act="smith-sock" ${socks.length>=maxSock(it)||g<sc?'disabled':''}>${socks.length>=maxSock(it)?'Keine weiteren Sockel':'Sockel bohren · '+fmt(sc)}</button></div>`}
- showScreen(`<div class="wrap inv smith">
-  <div class="inv-head"><div><h2>Der Schmied</h2><div class="muted" style="font-size:13px">Gold: <b class="goldline">${fmt(SAVE.gold)}</b> · Edelsteine fallen bei Elite-Gegnern, Truhen, Mimics und Schatzgoblins.</div></div><button class="btn gold" data-act="smith-close">Zurück</button></div>
+ showScreen(`<div class="wrap inv smith">${G.state==='camp'?menuTabs('smith'):''}
+  <div class="inv-head"><div><h2>Der Schmied</h2><div class="muted" style="font-size:13px">Gold: <b class="goldline">${fmt(SAVE.gold)}</b> · Edelsteine fallen bei Elite-Gegnern, Truhen, Mimics und Schatzgoblins.</div></div><button class="btn gold" data-act="smith-close">${G.state==='camp'?'Fertig':'Zurück'}</button></div>
   <div class="gems">${gems}</div>
   <div class="bag">${tiles}</div>
   <div class="card smdet">${det}</div></div>`,'',keep)}
@@ -3567,6 +3568,9 @@ function rlApply(){const r=rlS(P.id);if(!r)return false;const lv0=P.level;
 function rlSync(){if(!P||!G.rl||G.bot)return;const hs=hsave(P.id),old=hs.rl||{};hs.rl={level:P.level,xp:P.xp,sp:P.sp,wis:P.up.wis||0,ranks:rlClone(P.ranks),learn:P.learn.slice(),bar:P.bar.slice(),eq:rlClone(P.eq),bag:rlClone(P.bag),gems:rlClone(P.gems||{}),cp:old.cp||{},runs:(old.runs||0)}}
 function rlUnlock(S){if(!G.rl||G.mode!=='kampagne'||!S)return;const nx=S.ort+1;if(nx>=ORTE.length)return;const hs=hsave(P.id);hs.rl=hs.rl||{cp:{}};hs.rl.cp=hs.rl.cp||{};
  if((hs.rl.cp[G.diff]||0)<nx){hs.rl.cp[G.diff]=nx;later(1.6,()=>{banner('Portal geöffnet',`Neuer Startpunkt: ${ORTE[nx].name}`,'#b06cff',{dur:2.4});sfx('portal')})}}
+function campOpen(kind,keepHero){const id=G.sel||'barradin';if(!rlS(id))return;if(!(keepHero&&G.state==='camp'&&P&&P.id===id)){G.state='camp';G.mode='kampagne';G.rl=true;G.diff=G.seldiff||0;newHero(id,G.diff);rlApply();recalc();P.hp=P.st.maxHp;buildSkillBar()}
+ G.overlay=kind;if(kind==='inv'){G.invSel=null;renderInv()}else if(kind==='tree')renderTree();else{G.smithSel=null;renderSmith()}}
+function campDone(){rlSync();persist();G.overlay=null;G.rl=false;showTitle()}
 function rlStartHtml(){if(G.selMode!=='kampagne'||SAVE.hc)return'';const id=G.sel||'barradin',cp=rlCp(id,G.seldiff||0);if(cp<=0)return'';
  const cur=Math.min(G.rlStart===undefined?cp:G.rlStart,cp);const opts=[];for(let k=0;k<=cp;k++)if(k===0||CAMP_STAGES.some(s=>s.ort===k-1&&s.boss))opts.push(`<option value="${k}" ${k===cur?'selected':''}>${k===0?'Von vorn':ROM[k]+' · '+esc(ORTE[k].name)}</option>`);
  return`<label class="rlstart"><span>Start</span><select data-rlstart aria-label="Startpunkt">${opts.join('')}</select></label>`}
@@ -3575,7 +3579,7 @@ function rlModeHtml(){if(G.selMode!=='kampagne')return'';const hc=!!SAVE.hc;
 function rlCard(){const id=G.sel||'barradin',r=rlS(id),hc=!!SAVE.hc;
  if(hc)return`<div class="card"><div class="eyebrow">Hardcore</div><p style="margin:6px 0 0">Jeder Lauf beginnt von vorn: Stufe, Talente und Ausrüstung gehen beim Tod verloren, nur Gold und Lager-Verbesserungen bleiben. Dafür zählt der Lauf für die Bestenliste.</p></div>`;
  const cp=rlCp(id,G.seldiff||0);
- return`<div class="card"><div class="eyebrow">Roguelite</div><p style="margin:6px 0 0">${HEROES[id].name} behält Heldenstufe, Talente und Ausrüstung von Lauf zu Lauf. Jeder besiegte Ort-Boss öffnet ein Portal: Beim nächsten Mal könnt ihr direkt dort weitermachen.${r?`<br><br>Stand: <b style="color:var(--text)">Heldenstufe ${r.level}</b> · ${Object.values(r.eq||{}).filter(Boolean).length} Teile angelegt · ${(r.bag||[]).length} im Beutel${cp?` · weitester Startpunkt: <b style="color:var(--text)">${esc(ORTE[cp].name)}</b>`:''}`:''}</p></div>`}
+ return`<div class="card"><div class="eyebrow">Roguelite</div><p style="margin:6px 0 0">${HEROES[id].name} behält Heldenstufe, Talente und Ausrüstung von Lauf zu Lauf. Jeder besiegte Ort-Boss öffnet ein Portal: Beim nächsten Mal könnt ihr direkt dort weitermachen.${r?`<br><br>Stand: <b style="color:var(--text)">Heldenstufe ${r.level}</b> · ${Object.values(r.eq||{}).filter(Boolean).length} Teile angelegt · ${(r.bag||[]).length} im Beutel${cp?` · weitester Startpunkt: <b style="color:var(--text)">${esc(ORTE[cp].name)}</b>`:''}`:''}</p>${r?`<div class="row" style="margin-top:10px"><button class="btn" data-act="camp-inv">Beutel</button><button class="btn" data-act="camp-tree">Talente${(r.sp||0)>0?` <b class="goodn">${r.sp}</b>`:''}</button><button class="btn gold" data-act="camp-smith">Schmied</button></div><p class="muted" style="margin:6px 0 0;font-size:13px">Schon vor dem Lauf ausrüsten, Talente verteilen und beim Schmied aufrüsten.</p>`:''}</div>`}
 
 /* ================= Bestiarium ================= */
 const LORE={
