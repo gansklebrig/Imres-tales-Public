@@ -41,7 +41,7 @@
       zeichen: (n, m) => n + " / " + m,
       fehler: { "Name fehlt": "Bitte gib einen Namen an.", "Text zu kurz": "Schreib bitte ein paar Worte mehr.", "zu viele Links": "Bitte höchstens zwei Links.",
         "Bitte kurz warten": "Du hast gerade schon geschrieben – bitte warte ein paar Minuten.", "Bitte später nochmal": "Gerade ist viel los – bitte versuch es später nochmal.",
-        "Eintrag existiert schon": "Diesen Eintrag gibt es schon.", _: "Das hat nicht geklappt. Bitte versuch es gleich nochmal." },
+        "Eintrag existiert schon": "Diesen Eintrag gibt es schon.", "Bitte freundlich bleiben": "Bitte freundlich bleiben – dein Eintrag enthält Wörter, die wir hier nicht haben möchten.", _: "Das hat nicht geklappt. Bitte versuch es gleich nochmal." },
       zeit: { jetzt: "gerade eben", min: n => "vor " + n + " Min.", std: n => "vor " + n + " Std.", tag: n => n === 1 ? "gestern" : "vor " + n + " Tagen" }
     },
     en: {
@@ -60,13 +60,17 @@
       zeichen: (n, m) => n + " / " + m,
       fehler: { "Name fehlt": "Please enter a name.", "Text zu kurz": "Please write a few more words.", "zu viele Links": "Two links at most, please.",
         "Bitte kurz warten": "You just wrote – please wait a few minutes.", "Bitte später nochmal": "It's busy right now – please try again later.",
-        "Eintrag existiert schon": "This entry already exists.", _: "That didn't work. Please try again in a moment." },
+        "Eintrag existiert schon": "This entry already exists.", "Bitte freundlich bleiben": "Please keep it friendly – your entry contains words we don't want here.", _: "That didn't work. Please try again in a moment." },
       zeit: { jetzt: "just now", min: n => n + " min ago", std: n => n + " h ago", tag: n => n === 1 ? "yesterday" : n + " days ago" }
     }
   };
   const t = () => TX[sprache()];
   const THEMEN = ["allgemein", "geschichte", "spiele", "buehne", "idee"];
   const THEMA_ZEICHEN = { allgemein: "✦", geschichte: "📜", spiele: "🎲", buehne: "🎵", idee: "💡" };
+
+  /* Wortfilter (derselbe wie auf dem Server in gb_anstoessig) – gibt sofort Rückmeldung */
+  const SPERRE = new RegExp("(^|[^a-zäöüß])(?:a+r+s+c+h+l+o+c+h+|a+r+s+c+h+g+e+i+g+e+|w+i+c+h+s+e+r+|w+i+x+e+r+|f+i+c+k+(?!le)|f+o+t+z+e+|h+u+r+e+|s+c+h+l+a+m+p+e+|m+i+s+s+g+e+b+u+r+t+|s+p+a+s+t+|m+o+n+g+o+(?![a-zäöüß])|m+o+n+g+o+s+(?![a-zäöüß])|s+c+h+w+u+c+h+t+e+l+|n+e+g+e+r+|n+i+g+g+e+r+|n+i+g+g+a+|k+a+n+a+k+e+|j+u+d+e+n+s+a+u+|s+i+e+g+\\s+h+e+i+l+|h+e+i+l+\\s+h+i+t+l+e+r+|v+e+r+g+a+s+e+n+|b+r+i+n+g+\\s+d+i+c+h+\\s+u+m+|v+e+r+r+e+c+k+|k+i+l+l+\\s+y+o+u+r+s+e+l+f+|k+y+s+(?![a-zäöüß])|f+u+c+k+|c+u+n+t+|f+a+g+g+o+t+|f+a+g+(?![a-zäöüß])|r+e+t+a+r+d+|w+h+o+r+e+|s+l+u+t+|b+i+t+c+h+|m+o+t+h+e+r+f+u+c+k+e+r+|h+u+r+e+n+s+o+h+n+)", "i");
+  const anstoessig = x => SPERRE.test(String(x || "").toLowerCase().replace(/[0134@$]/g, c => ({ 0: "o", 1: "i", 3: "e", 4: "a", "@": "a", $: "s" }[c])));
 
   /* ---------- Server ---------- */
   function rpc(fn, body) {
@@ -213,6 +217,7 @@
     if (el.website.value) return; /* Bot */
     if (!name) { m.textContent = T.fehler["Name fehlt"]; el.name.focus(); return; }
     if (text.length < 3) { m.textContent = T.fehler["Text zu kurz"]; el.text.focus(); return; }
+    if (anstoessig(name) || anstoessig(text)) { m.textContent = T.fehler["Bitte freundlich bleiben"]; return; }
     knopf.disabled = true; m.textContent = T.sendet;
     merk(K_NAME, name);
     rpc("gb_eintragen", { p_name: name, p_text: text, p_thema: thema, p_schluessel: schluessel() }).then(id => {

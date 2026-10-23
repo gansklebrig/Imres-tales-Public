@@ -40,6 +40,14 @@ returns integer language sql stable security definer set search_path = public as
 $$;
 grant execute on function public.gb_anzahl() to anon;
 
+-- Wortfilter: Beleidigungen, Hetze und Schimpfwörter werden gar nicht erst angenommen.
+-- Groß/klein, Zahlen statt Buchstaben (f1ck) und gedehnte Wörter (fiiiick) werden mit erkannt.
+-- Neue Wörter: in das Muster unten mit | ergänzen (jeder Buchstabe mit + dahinter) und die Datei erneut ausführen.
+create or replace function public.gb_anstoessig(p text)
+returns boolean language sql immutable as $$
+  select translate(lower(coalesce(p, '')), '0134@$', 'oieaas') ~ '\ma+r+s+c+h+l+o+c+h+|\ma+r+s+c+h+g+e+i+g+e+|\mw+i+c+h+s+e+r+|\mw+i+x+e+r+|\mf+i+c+k+(?!le)|\mf+o+t+z+e+|\mh+u+r+e+|\ms+c+h+l+a+m+p+e+|\mm+i+s+s+g+e+b+u+r+t+|\ms+p+a+s+t+|\mm+o+n+g+o+\M|\mm+o+n+g+o+s+\M|\ms+c+h+w+u+c+h+t+e+l+|\mn+e+g+e+r+|\mn+i+g+g+e+r+|\mn+i+g+g+a+|\mk+a+n+a+k+e+|\mj+u+d+e+n+s+a+u+|\ms+i+e+g+\s+h+e+i+l+|\mh+e+i+l+\s+h+i+t+l+e+r+|\mv+e+r+g+a+s+e+n+|\mb+r+i+n+g+\s+d+i+c+h+\s+u+m+|\mv+e+r+r+e+c+k+|\mk+i+l+l+\s+y+o+u+r+s+e+l+f+|\mk+y+s+\M|\mf+u+c+k+|\mc+u+n+t+|\mf+a+g+g+o+t+|\mf+a+g+\M|\mr+e+t+a+r+d+|\mw+h+o+r+e+|\ms+l+u+t+|\mb+i+t+c+h+|\mm+o+t+h+e+r+f+u+c+k+e+r+|\mh+u+r+e+n+s+o+h+n+';
+$$;
+
 -- Schreiben mit einfachen Bremsen gegen Spam
 create or replace function public.gb_eintragen(p_name text, p_text text, p_thema text, p_schluessel text)
 returns bigint language plpgsql security definer set search_path = public as $$
@@ -52,6 +60,7 @@ begin
   if char_length(t) < 3 then raise exception 'Text zu kurz'; end if;
   if p_schluessel is null or p_schluessel !~ '^[A-Za-z0-9]{16,64}$' then raise exception 'ungültiger Schlüssel'; end if;
   if (select count(*) from regexp_matches(t, 'https?://|www\.', 'gi')) > 2 then raise exception 'zu viele Links'; end if;
+  if public.gb_anstoessig(n) or public.gb_anstoessig(t) then raise exception 'Bitte freundlich bleiben'; end if;
   -- derselbe Verfasser höchstens 3 Einträge in 10 Minuten, insgesamt höchstens 40 pro Stunde
   if (select count(*) from public.gaestebuch where schluessel = p_schluessel and erstellt > now() - interval '10 minutes') >= 3 then raise exception 'Bitte kurz warten'; end if;
   if (select count(*) from public.gaestebuch where erstellt > now() - interval '1 hour') >= 40 then raise exception 'Bitte später nochmal'; end if;
