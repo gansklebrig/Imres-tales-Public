@@ -40,5 +40,6 @@ Klangwelten (ambient.html) – Teppiche in amb/a_*.mp3, Einzelgeräusche in amb/
   aus Noisekun (github.com/mateusfg7/Noisekun): Laub – Stek59 (CC0); Unter Wasser – Tim Verberne (CC0);
     Gewitter – Borys Kozielski (CC0); Wasserfall – straget (CC BY); Regen aufs Zelt – Garuda1982 (CC BY 4.0);
     Höhlentropfen, Tropfen, Nacht, Holzfeuer, Vögel in Bäumen, Regen, Wellen – SFX Producer (CC0, laut Noisekun)
-  Kessel und Blasen sowie alle e_*-Geräusche: OpenGameArt (rubberduck u. a.) und Kenney, CC0, über den Open Game SFX Index.
+  aus Moodist (github.com/remvze/moodist, Klänge unter Pixabay-Inhaltslizenz bzw. CC0): Frösche – amb/e_frosch_1–8.mp3 (einzelne Rufe aus frog.mp3 geschnitten)
+  Kessel und Blasen sowie alle übrigen e_*-Geräusche: OpenGameArt (rubberduck u. a.) und Kenney, CC0, über den Open Game SFX Index.
 Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.

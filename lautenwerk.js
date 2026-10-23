@@ -1229,6 +1229,7 @@
     blasebalg: { f: ambReihe("e_blasebalg_", 2) }, ast: { f: ambReihe("e_ast_", 4) }, kies: { f: ambReihe("e_kies_", 2), folge: [3, 6, .5, .6] },
     laubschritt: { f: ambReihe("e_laubschritt_", 2), folge: [3, 6, .5, .62] }, riegel: { f: ambReihe("e_riegel_", 4) }, hund: { f: ambReihe("e_hund_", 2) },
     tuch: { f: ambReihe("e_tuch_", 3) }, zischen: { f: ambReihe("e_zischen_", 2) },
+    frosch: { f: ambReihe("e_frosch_", 8), tempo: [.82, 1.12], folge: [1, 3, .45, .9] },
     chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 }
   };
   /* über kulFx (echte Aufnahmen aus ECHT bzw. gerechnet): Art in der Kulisse → Art in kulFx */
@@ -1263,7 +1264,7 @@
     kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }]],
       ev: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8]] },
     sumpf: { raum: .35, betten: [["a_blubbern", .4], ["a_grillen", .4], ["a_nacht", .4], ["a_tropfen2", .3]],
-      ev: [["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1]] },
+      ev: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1]] },
     unterwasser: { raum: .6, betten: [["a_unterwasser", 1], ["a_blubbern", .3, { tief: 1500 }]],
       ev: [["blubb", [5, 14], .3, .5], ["monster", [70, 160], .15, 1]] },
     schmiede: { raum: .25, betten: [["a_feuer1", .75], ["a_feuer3", .35]],
