@@ -40,6 +40,14 @@ Klangwelten (ambient.html) – Teppiche in amb/a_*.mp3, Einzelgeräusche in amb/
   aus Noisekun (github.com/mateusfg7/Noisekun): Laub – Stek59 (CC0); Unter Wasser – Tim Verberne (CC0);
     Gewitter – Borys Kozielski (CC0); Wasserfall – straget (CC BY); Regen aufs Zelt – Garuda1982 (CC BY 4.0);
     Höhlentropfen, Tropfen, Nacht, Holzfeuer, Vögel in Bäumen, Regen, Wellen – SFX Producer (CC0, laut Noisekun)
-  aus Moodist (github.com/remvze/moodist, Klänge unter Pixabay-Inhaltslizenz bzw. CC0): Frösche – amb/e_frosch_1–8.mp3 (einzelne Rufe aus frog.mp3 geschnitten)
+  aus Moodist (github.com/remvze/moodist, Klänge unter Pixabay-Inhaltslizenz bzw. CC0):
+    Einzelrufe, aus den Aufnahmen geschnitten: Frösche (e_frosch), Eule (e_eule), Möwen (e_moewe), Specht (e_specht),
+    Vögel (e_vogel), Krähen (e_kraehe), Wolf (e_wolf), Hund (e_bellen), Katze (e_katze), Pferd (e_pferd), Wal (e_wal),
+    Donner (e_donner), Ruderboot (e_ruder);
+    Teppiche: Gaststube (a_gaeste), Lagerfeuer (a_lagerfeuer), Grillen (a_grillen2), Wind in den Bäumen (a_baumwind),
+    Bienen (a_bienen), heulender Wind (a_heulwind), Fluss (a_fluss), Tropfen (a_tropfen3), Regen auf Laub (a_laubregen),
+    Nieselregen (a_leichtregen), Starkregen (a_starkregen2), Regen am Fenster (a_fensterregen), Regen aufs Zelt (a_zelt2),
+    Wellen (a_wellen3), Segelboot (a_segel), Wasserfall (a_wasserfall2), Dschungel (a_dschungel), kochendes Wasser (a_kochen2),
+    Uhr (a_uhr), Tempel (a_gesang), Kirche (a_halle), Klangschale (a_klangschale)
   Kessel und Blasen sowie alle übrigen e_*-Geräusche: OpenGameArt (rubberduck u. a.) und Kenney, CC0, über den Open Game SFX Index.
 Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.
