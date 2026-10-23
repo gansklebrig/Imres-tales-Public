@@ -90,7 +90,7 @@
       wachter: {
         dorn: ["Dornenranke", "Schießt Dornen auf einen Gegner."],
         wurzel: ["Wurzelgriff", "Bremst alle in der Nähe."],
-        wolf: ["Wolfsbau", "Die befreiten Wölfe beißen zu."],
+        wolf: ["Wolfsbau", "Die befreiten Wölfe beißen zu – nur Gegner am Boden."],
         eis: ["Eisfächer", "Frost trifft alle in der Nähe."],
         blitz: ["Sturmeiche", "Blitze springen von Gegner zu Gegner."],
         pilz: ["Pilzring", "Giftsporen für alle in der Nähe."]
@@ -145,7 +145,7 @@
         dachs: ["Alle 7 s eine Falle, bis zu 3 gleichzeitig.", "Alle 5 s, bis zu 4 Fallen, härter."]
       },
       tab: { waechter: "🌿 Wächter", tiere: "🐾 Tiere", setz: n => "🌱 " + n },
-      frei: "frei", maxTier: "max", schlaeft: "schläft …",
+      frei: "frei", maxTier: "max", schlaeft: "schläft …", benommen: "benommen …", stufeHoch: n => "Stufe " + n + "!",
       setzHinweis: "Neues Gebiet! Deine Wächter warten als Setzlinge darauf, kostenlos neu gepflanzt zu werden.",
       gartenHinweis: "Deine Wächter und Tiere bleiben stehen. Jede Welle wird härter.",
       welle: (n, m) => "Welle " + n + "/" + m, welleIn: (n, m, sek) => "Welle " + n + "/" + m + " in " + sek + " …", welleBereit: (n, m) => "Welle " + n + "/" + m + " – starte, wenn du bereit bist", welleGeschafft: "Welle geschafft!", rufen: n => "Welle rufen +" + n + " 🌱",
@@ -287,7 +287,7 @@
       wachter: {
         dorn: ["Thorn vine", "Shoots thorns at one enemy."],
         wurzel: ["Root grip", "Slows everyone nearby."],
-        wolf: ["Wolf den", "The freed wolves bite."],
+        wolf: ["Wolf den", "The freed wolves bite – ground enemies only."],
         eis: ["Ice fan", "Frost hits everyone nearby."],
         blitz: ["Storm oak", "Lightning jumps from foe to foe."],
         pilz: ["Mushroom ring", "Poison spores for everyone nearby."]
@@ -342,7 +342,7 @@
         dachs: ["A trap every 7 s, up to 3 at once.", "Every 5 s, up to 4 traps, harder."]
       },
       tab: { waechter: "🌿 Guardians", tiere: "🐾 Animals", setz: n => "🌱 " + n },
-      frei: "free", maxTier: "max", schlaeft: "sleeping …",
+      frei: "free", maxTier: "max", schlaeft: "sleeping …", benommen: "dazed …", stufeHoch: n => "Level " + n + "!",
       setzHinweis: "New region! Your guardians wait as seedlings to be replanted for free.",
       gartenHinweis: "Your guardians and animals stay. Every wave gets harder.",
       welle: (n, m) => "Wave " + n + "/" + m, welleIn: (n, m, sek) => "Wave " + n + "/" + m + " in " + sek + " …", welleBereit: (n, m) => "Wave " + n + "/" + m + " – start when ready", welleGeschafft: "Wave cleared!", rufen: n => "Call wave +" + n + " 🌱",
@@ -1043,7 +1043,10 @@
   }
 
   /* gemeinsame Effekte für beide Phasen */
-  function text(x, y, s, farbe, gross, dauer) { S.texte.push({ x, y, s, farbe: farbe || "#ebe2cc", gross: gross || 15, t: 0, dauer: dauer || 1.3 }); }
+  function text(x, y, s, farbe, gross, dauer) {
+    y = Math.max(y, 52);
+    for (let k = 0; k < 4 && S.texte.some(o => o.t < 0.7 && Math.abs(o.x - x) < 48 && Math.abs(o.y - y) < 12); k++) y -= 13;
+    S.texte.push({ x, y, s, farbe: farbe || "#ebe2cc", gross: gross || 15, t: 0, dauer: dauer || 1.3 }); }
   function banner(s, farbe, dauer) { S.banner = { s, farbe: farbe || "#e0a046", t: 0, dauer: dauer || 1.8 }; }
   function funken(x, y, n, farben, tempo, gr) {
     if (ruhig) n = Math.ceil(n / 3);
@@ -1696,21 +1699,27 @@
   function gegnerListe(lv, gier) {
     const g = gebietVon(lv), G = GEB[g], innen = innenVon(lv), boss = istBossLevel(lv);
     const typ = () => { let r = Math.random(); for (const [k, w] of G.gegner) { r -= w; if (r <= 0) return k; } return G.gegner[0][0]; };
-    const wellen = [];
+    const wellen = [], endlos = lv >= KAMPAGNE;
+    let rohS = 0, nS = 0;
     for (let w = 0; w < WELLEN; w++) {
-      const n = Math.min(44, Math.round(7 + lv * 0.85 + innen * 1.5 + w * 3 + gier * 1.5));
+      const roh = Math.min(44, Math.round(7 + lv * 0.85 + innen * 1.5 + w * 3 + gier * 1.5));
+      /* Endlos: weniger, dafür zähere Gegner – gleiche Gesamtstärke, aber zügigere Wellen */
+      const n = endlos ? Math.min(18, roh) : roh;
       const l = [];
       for (let i = 0; i < n; i++) l.push(typ());
-      if (lv >= KAMPAGNE && w > 0) { for (let i = 0; i < Math.min(8, 2 + (lv - KAMPAGNE)); i++) l.push(zufall(GEB[Math.floor(Math.random() * GEBIETE_ANZAHL)].gegner)[0]); mischen(l); }
+      let ex = 0;
+      if (endlos && w > 0) { const exRoh = Math.min(8, 2 + (lv - KAMPAGNE)); ex = Math.min(4, exRoh); rohS += exRoh; for (let i = 0; i < ex; i++) l.push(zufall(GEB[Math.floor(Math.random() * GEBIETE_ANZAHL)].gegner)[0]); mischen(l); }
+      rohS += roh; nS += n + ex;
       wellen.push(l);
     }
+    const hpBonus = endlos ? Math.max(1, rohS / Math.max(1, nS)) : 1;
     if (boss) {
       const bk = lv < KAMPAGNE ? G.boss : zufall(GEB.map(G => G.boss).filter(b => !FEINDE[b].unbesiegbar));
-      if (bk === "demogorgon") { wellen[WELLEN - 1] = []; return { wellen, boss: bk, demo: true, liste: wellen.flat() }; }
+      if (bk === "demogorgon") { wellen[WELLEN - 1] = []; return { wellen, boss: bk, demo: true, liste: wellen.flat(), hpBonus }; }
       wellen[WELLEN - 1].splice(Math.floor(wellen[WELLEN - 1].length * 0.5), 0, bk);
-      return { wellen, boss: bk, liste: wellen.flat() };
+      return { wellen, boss: bk, liste: wellen.flat(), hpBonus };
     }
-    return { wellen, liste: wellen.flat() };
+    return { wellen, liste: wellen.flat(), hpBonus };
   }
 
   function abwehrStarten() {
@@ -1726,7 +1735,7 @@
       hort: R.beute + reserve, reserve, hortStart: R.beute + reserve,
       saat: (S.einzel ? (S.garten && S.garten.setzlinge.length ? 60 + 10 * lv : 110 + 40 * lv) : 30) + 12 * up("ernte") + 15 * tal("boden") + R.saat, zorn: 0, zauber: zauberWahlPruefen().map(k => ({ k, cd: 0, max: ZAUBER[k].cd * Math.pow(0.85, up("funken")) * Math.pow(0.92, tal("mondsegen")) })), aktiv: 0, mond: null, adler: null,
       wellen: gl.wellen, welle: -1, warte: [], boss: gl.boss || null, bossDa: false, ansturm: [], fallen: [], auraT: 0, demo: !!gl.demo, demoT: 0, demoDauer: 62, demoWeg: false,
-      spawnT: 0, abstand: Math.max(0.42, 1.4 - lv * 0.035), gespawnt: 0,
+      spawnT: 0, abstand: lv >= KAMPAGNE ? 0.55 : Math.max(0.42, 1.4 - lv * 0.035), gespawnt: 0, hpBonus: gl.hpBonus || 1, licht: [], teiche: [],
       vorT: 12, wahl: -1, baer: null, erlegt: 0, verlorenGold: 0, zurueckGold: 0, schnell: lies("imres-echohort-schnell", "") === "1",
       helfer: [], helferT: zw(12, 18) * [1, 0.72, 0.5][up("freunde")], barradinT: 0, portrait: null, letzterHelfer: "", punkte: 0, gesamt: gl.liste.length + (gl.demo ? 1 : 0), lv, fertig: false, endeT: 0, bossGerufen: false
     };
@@ -1740,7 +1749,7 @@
 
   function feindNeu(typ, s) {
     const A = S.A, d = FEINDE[typ], lv = S.lv;
-    const hpF = (d.boss ? 1 + 0.09 * lv + 0.004 * lv * lv : skalierung(lv)) * STUFEN[S.stufe].hp * (1 + 0.07 * Math.max(0, A.welle));
+    const hpF = (d.boss ? 1 + 0.09 * lv + 0.004 * lv * lv : skalierung(lv) * (A.hpBonus || 1)) * STUFEN[S.stufe].hp * (1 + 0.07 * Math.max(0, A.welle));
     const e = {
       typ, d, hp: d.hp * hpF, max: d.hp * hpF, v: d.v * STUFEN[S.stufe].tempo * (1 + Math.min(0.4, lv * 0.012)), r: d.r,
       s: s || 0, x: 0, y: 0, flug: !!d.flug, bremse: 1, bremsT: 0, festT: 0, gift: 0, giftT: 0,
@@ -1836,7 +1845,7 @@
         const heim = g.heim, v = 290 * dt;
         if (g.zustand === "hin") {
           let z = g.ziel;
-          if (!z || z.tot) { z = g.ziel = imKreis(heim.x, heim.y, g.reich + 20).sort((a, b) => abst(g.x, g.y, a.x, a.y) - abst(g.x, g.y, b.x, b.y))[0]; }
+          if (!z || z.tot || z.flug) { z = g.ziel = imKreis(heim.x, heim.y, g.reich + 20).filter(e => !e.flug).sort((a, b) => abst(g.x, g.y, a.x, a.y) - abst(g.x, g.y, b.x, b.y))[0]; }
           if (!z) { g.zustand = "zurueck"; return; }
           const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy);
           g.links = dx < 0;
@@ -2012,8 +2021,9 @@
       if (d.boss && !d.unbesiegbar) { STAT.bosse[e.typ] = 1; erfolgPruefen("bosse"); }
       if (e.beute) goldZurueck(e);
       if (e.seuche && e.giftT > 0) A.feinde.forEach(o => { if (o !== e && !o.tot && abst(o.x, o.y, e.x, e.y) < 46) { o.gift = Math.max(o.gift, e.gift); o.giftT = 3; o.seuche = true; S.blitze.push({ art: "sporenwolke", x: o.x, y: o.y, r: 16, t: 0, dauer: 0.5 }); } });
-      A.punkte += d.pkt;
-      const saat = Math.round(d.pkt * 0.18) + 1;
+      const zaeh = d.boss ? 1 : (A.hpBonus || 1);
+      A.punkte += Math.round(d.pkt * zaeh);
+      const saat = Math.round(d.pkt * 0.18 * zaeh) + 1;
       A.saat += saat;
       if (d.boss) { text(e.x, e.y - 20, "+" + d.pkt, "#ffd34d", 22); funken(e.x, e.y, 40, ["#e0a046", "#c4564a", "#ebe2cc"], 150, 3.5); KLANG.boom(); S.beben = 0.4; }
       else { funken(e.x, e.y, 8, [d.farbe, "#ebe2cc"], 70); text(e.x, e.y - 10, "+" + saat + " 🌱", "#cfe6a8", 11, 0.9); KLANG.tod(); }
@@ -2048,7 +2058,8 @@
     if (T.ausT > 0) { T.ausT -= dt; return; }
     T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1) * (T._tempo || 1); if (T.cd > 0) return;
     const reich = w.reich[st] * (T._reich || 1), sch = w.schaden[st] * turmSk();
-    const ziele = imKreis(p.x, p.y, reich);
+    let ziele = imKreis(p.x, p.y, reich);
+    if (w.typ === "biss") ziele = ziele.filter(e => !e.flug);
     if (!ziele.length) { T.cd = 0.1; return; }
     const wahl = l => zielSortieren(l, T, p);
     if (w.typ === "biss" && (T.draussen || 0) > 0) {
@@ -2355,6 +2366,14 @@
 
   function turmBeschaedigen(p, durchWurf) {
     if (!p || !p.turm) return;
+    if (p.turm.tier) {
+      const T = p.turm;
+      if (T.k === "baer") { T.hp = 0; T.schlafT = Math.max(T.schlafT || 0, 8); } else T.ausT = Math.max(T.ausT || 0, 6);
+      text(p.x, p.y - 24, t().benommen, "#a89f8f", 13); funken(p.x, p.y, 12, ["#a8a090", "#ebe2cc"], 80);
+      const A = S.A; A.zorn = klemm(A.zorn + 8 * zornFaktor(), 0, 100);
+      if (A.zorn >= 100 && durchWurf) ausbruchAbwehr();
+      return;
+    }
     if (p.turm.st > 0) { p.turm.st--; if (p.turm.st < 2) p.turm.zweig = null; } else p.turm = null;
     funken(p.x, p.y, 12, ["#6f9a3a", "#8a6440", "#ebe2cc"], 80); gartenSync();
     const A = S.A;
@@ -2499,6 +2518,7 @@
     p.turm = turmNeu(Object.assign({ wert: c }, z));
     if (p.turm.tier) { tierPosten(p); if (p.turm.k === "baer") p.turm.hp = baerMaxHp(p.turm); }
     funken(p.x, p.y, 16, ["#6f9a3a", "#cfe6a8", "#ebe2cc"], 80); KLANG.bau(); vib(20);
+    S.blitze.push({ art: "aufwertung", x: p.x, y: p.y, t: 0, dauer: 0.75, klein: true });
     A.wahl = -1; gartenSync();
   }
   function bauen(k) {
@@ -2529,6 +2549,7 @@
     if (!T.tier && T.st === 1 && !zweig) return;
     const c = T.tier ? tierKosten(T.k, T.st + 1) : kosten(T.k, T.st + 1); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
     A.saat -= c; T.st++; T.wert += c; if (zweig) T.zweig = zweig; T.wachs = 0.4;
+    S.blitze.push({ art: "aufwertung", x: p.x, y: p.y, t: 0, dauer: 1.1 }); text(p.x, p.y - 34, t().stufeHoch(T.st + 1), "#ffd34d", 15, 1.4);
     if (T.tier && T.k === "baer") T.hp = baerMaxHp(T);
     funken(p.x, p.y, 22, ["#e0a046", "#cfe6a8", "#ffd34d"], 100); KLANG.bau(); vib(25);
     gartenSync();
@@ -2602,8 +2623,18 @@
     x.fillStyle = F.gras; x.fillRect(0, 96, W, 10);
     if (!F.wasser) for (let i = 0; i < 90; i++) { x.strokeStyle = F.akzent; x.globalAlpha = 0.35; x.lineWidth = 1; const gx = r() * W; x.beginPath(); x.moveTo(gx, 104); x.lineTo(gx + r() * 4 - 2, 96 - r() * 6); x.stroke(); }
     x.globalAlpha = 1;
-    // Schichten
-    for (let s = 0; s < 5; s++) { x.strokeStyle = "rgba(0,0,0,.18)"; x.lineWidth = 2; x.beginPath(); let y = 160 + s * 62; x.moveTo(0, y); for (let i = 0; i <= 20; i++) x.lineTo(i * 20, y + Math.sin(i * 0.9 + s) * 6 + r() * 4); x.stroke(); }
+    // Erdschichten: abwechselnd getönte Bänder mit Kieseln an den Grenzen
+    for (let s = 0; s < 6; s++) {
+      const y0 = 140 + s * 62, oben = [], unten = [];
+      for (let i = 0; i <= 20; i++) { oben.push([i * 20, y0 + Math.sin(i * 0.9 + s) * 7 + r() * 4]); unten.push([i * 20, y0 + 62 + Math.sin(i * 0.9 + s + 1) * 7 + r() * 4]); }
+      x.fillStyle = s % 2 ? "rgba(0,0,0,.12)" : "rgba(235,226,204,.035)";
+      x.beginPath(); oben.forEach((q, i) => i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1])); for (let i = unten.length - 1; i >= 0; i--) x.lineTo(unten[i][0], unten[i][1]); x.closePath(); x.fill();
+      x.strokeStyle = "rgba(0,0,0,.24)"; x.lineWidth = 1.6; x.beginPath(); oben.forEach((q, i) => i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1])); x.stroke();
+      x.strokeStyle = "rgba(235,226,204,.06)"; x.lineWidth = 1; x.beginPath(); oben.forEach((q, i) => i ? x.lineTo(q[0], q[1] + 2) : x.moveTo(q[0], q[1] + 2)); x.stroke();
+      for (let kk = 0; kk < 16; kk++) { const q = oben[Math.floor(r() * oben.length)], rr = 1.4 + r() * 3.2, ox = q[0] + r() * 18 - 9; x.fillStyle = "rgba(0,0,0,.32)"; oval(x, ox + 0.8, q[1] + 1.6, rr, rr * 0.7); x.fillStyle = F.stein; oval(x, ox, q[1], rr, rr * 0.7, r()); x.fillStyle = "rgba(235,226,204,.14)"; oval(x, ox - rr * 0.3, q[1] - rr * 0.3, rr * 0.4, rr * 0.25); }
+    }
+    // feine Haarwurzeln unter der Grasnarbe
+    if (!F.wasser) for (let i = 0; i < 26; i++) { x.strokeStyle = "rgba(70,52,34," + (0.35 + r() * 0.3) + ")"; x.lineWidth = 0.6 + r() * 1.2; x.beginPath(); let px = r() * W, py = 104; x.moveTo(px, py); for (let j = 0; j < 4; j++) { px += r() * 10 - 5; py += 5 + r() * 9; x.lineTo(px, py); } x.stroke(); }
     // Körnung
     for (let i = 0; i < 500; i++) { x.fillStyle = r() < 0.5 ? "rgba(0,0,0,.18)" : "rgba(235,226,204,.04)"; x.fillRect(r() * W, 106 + r() * (H - 106), 1 + r() * 2, 1 + r() * 2); }
     // Gebietsdetails im Boden
@@ -2647,7 +2678,7 @@
   function hintergrundAbwehr(g, P) {
     hgSchluessel = "abwehr" + g + ":" + S.lv;
     const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(31 + g * 13);
-    const hoehle = ST.horizont === "hoehle", plaetze = (S.A && S.A.plaetze) || [];
+    const hoehle = ST.horizont === "hoehle", plaetze = (S.A && S.A.plaetze) || [], L = [];
     let gr = x.createLinearGradient(0, 0, 0, H);
     gr.addColorStop(0, F.gras); gr.addColorStop(1, F.boden[1]);
     x.fillStyle = gr; x.fillRect(0, 0, W, H);
@@ -2667,20 +2698,56 @@
       for (let i = 0; i < 26; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 4; j++) { px += (r() - 0.5) * 28; py += (r() - 0.5) * 20; x.lineTo(px, py); } x.stroke(); }
     }
     if (F.wasser) {
-      x.fillStyle = "rgba(74,160,176,.2)"; oval(x, 70, 90, 90, 50); oval(x, 340, 330, 80, 60); oval(x, 60, 360, 50, 40);
+      [[70, 90, 90, 50], [340, 330, 80, 60], [60, 360, 50, 40]].forEach(([tx, ty, rx, ry]) => {
+        const tg = x.createRadialGradient(tx, ty, 4, tx, ty, Math.max(rx, ry)); tg.addColorStop(0, "rgba(40,110,130,.55)"); tg.addColorStop(0.75, "rgba(30,90,110,.35)"); tg.addColorStop(1, "rgba(20,60,80,0)");
+        x.fillStyle = tg; oval(x, tx, ty, rx, ry);
+        x.strokeStyle = "rgba(159,214,236,.18)"; x.lineWidth = 1.2; x.beginPath(); x.ellipse(tx, ty, rx * 0.8, ry * 0.8, 0, 0, Math.PI * 2); x.stroke();
+        if (S.A) S.A.teiche.push({ x: tx, y: ty, rx, ry });
+      });
       x.strokeStyle = "rgba(159,214,236,.2)"; x.lineWidth = 1; for (let i = 0; i < 26; i++) { const wx = r() * W, wy = r() * LEISTE; x.beginPath(); x.arc(wx, wy, 6 + r() * 6, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); }
       deko(30, (px, py) => { x.strokeStyle = "rgba(74,120,90,.55)"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + 3, py - 6, px - 1, py - 11); x.stroke(); }, 20);
     }
-    if (F.lava) { x.strokeStyle = "rgba(255,110,40,.45)"; x.lineWidth = 3; x.shadowColor = "#ff6a2a"; x.shadowBlur = 10; for (let i = 0; i < 5; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 50 - 25; py += r() * 50 - 25; x.lineTo(px, py); } x.stroke(); } x.shadowBlur = 0; }
-    if (F.pilze) deko(22, (px, py) => { const g3 = x.createRadialGradient(px, py, 1, px, py, 12); g3.addColorStop(0, "rgba(196,154,224,.35)"); g3.addColorStop(1, "rgba(196,154,224,0)"); x.fillStyle = g3; kreis(x, px, py, 12); x.fillStyle = "#e8dcd0"; x.fillRect(px - 0.8, py - 1, 1.6, 4); x.fillStyle = "rgba(196,154,224,.85)"; oval(x, px, py - 1.5, 3.5, 2.2); });
+    if (F.lava) { x.strokeStyle = "rgba(255,110,40,.55)"; x.lineWidth = 3; x.shadowColor = "#ff6a2a"; x.shadowBlur = 10; for (let i = 0; i < 5; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 50 - 25; py += r() * 50 - 25; x.lineTo(px, py); if (j % 2) L.push({ x: px, y: py, r: 42, f: "rgba(255,110,40,.13)", fl: 1 }); } x.stroke(); } x.shadowBlur = 0; }
+    if (F.pilze) deko(22, (px, py) => { if (L.length < 40 && (px * 7 + py) % 3 < 1.4) L.push({ x: px, y: py, r: 30, f: "rgba(196,154,224,.11)" }); const g3 = x.createRadialGradient(px, py, 1, px, py, 12); g3.addColorStop(0, "rgba(196,154,224,.35)"); g3.addColorStop(1, "rgba(196,154,224,0)"); x.fillStyle = g3; kreis(x, px, py, 12); x.fillStyle = "#e8dcd0"; x.fillRect(px - 0.8, py - 1, 1.6, 4); x.fillStyle = "rgba(196,154,224,.85)"; oval(x, px, py - 1.5, 3.5, 2.2); });
     if (F.schienen) { x.strokeStyle = "rgba(138,128,112,.45)"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 60); x.lineTo(W, 120); x.moveTo(0, 67); x.lineTo(W, 127); x.stroke(); x.strokeStyle = "rgba(90,68,48,.6)"; x.lineWidth = 2.5; for (let xx = 0; xx < W; xx += 14) { const yy = 60 + xx * 60 / W; x.beginPath(); x.moveTo(xx, yy - 2); x.lineTo(xx + 1, yy + 9); x.stroke(); } }
     // Weg: Schatten, Grund, Staub, Spurrillen, Randsteine
     const weg = (breite, farbe) => { x.strokeStyle = farbe; x.lineWidth = breite; x.lineJoin = "round"; x.lineCap = "round"; x.beginPath(); P.p.forEach((q, i) => i ? x.lineTo(q.x, q.y) : x.moveTo(q.x, q.y)); x.stroke(); };
-    weg(40, "rgba(0,0,0,.3)"); weg(32, F.weg); weg(24, F.wasser ? "#33464f" : "rgba(235,226,204,.06)"); weg(10, F.wasser ? "rgba(159,214,236,.08)" : "rgba(235,226,204,.04)");
+    weg(44, "rgba(0,0,0,.34)"); weg(35, "rgba(235,226,204,.16)"); weg(32, F.weg); weg(24, F.wasser ? "#33464f" : "rgba(235,226,204,.08)"); weg(10, F.wasser ? "rgba(159,214,236,.08)" : "rgba(235,226,204,.05)");
     const versatz = (d, fn) => { for (let s0 = 4; s0 < P.gesamt - 4; s0 += 3) { const a = pfadPunkt(P, s0), b = pfadPunkt(P, s0 + 2), w = Math.atan2(b.y - a.y, b.x - a.x); fn(a.x + Math.cos(w + Math.PI / 2) * d, a.y + Math.sin(w + Math.PI / 2) * d, s0, w); } };
     if (!F.wasser) { x.fillStyle = "rgba(0,0,0,.14)"; versatz(6, (px, py) => x.fillRect(px - 1, py - 1, 2, 2)); versatz(-6, (px, py) => x.fillRect(px - 1, py - 1, 2, 2)); }
     [-16.5, 16.5].forEach(d => versatz(d, (px, py, s0) => { if (s0 % 12 > 2.9) return; const rr = 2.2 + r() * 1.8; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 0.8, py + 1, rr, rr * 0.75); x.fillStyle = F.stein; oval(x, px, py, rr, rr * 0.75); x.fillStyle = "rgba(235,226,204,.14)"; oval(x, px - rr * 0.3, py - rr * 0.3, rr * 0.45, rr * 0.3); }));
     for (let i = 0; i < 120; i++) { const s0 = r() * P.gesamt, q = pfadPunkt(P, s0); x.fillStyle = r() < 0.5 ? "rgba(0,0,0,.22)" : "rgba(235,226,204,.07)"; x.fillRect(q.x + r() * 18 - 9, q.y + r() * 18 - 9, 2, 2); }
+    if (F.mauer) { // Kopfsteinpflaster
+      [-9.5, -3.2, 3.2, 9.5].forEach((d, j) => versatz(d, (px, py, s0, w) => { if ((s0 + j * 3) % 6 > 2.9) return; x.save(); x.translate(px, py); x.rotate(w); x.fillStyle = "rgba(0,0,0,.28)"; x.fillRect(-2.6, -2.2, 5.6, 4.8); x.fillStyle = r() < 0.5 ? F.stein : "rgba(140,130,118,.85)"; x.fillRect(-3, -2.6, 5.4, 4.6); x.fillStyle = "rgba(235,226,204,.12)"; x.fillRect(-3, -2.6, 5.4, 1.2); x.restore(); }));
+    } else if (F.wasser) { // Holzsteg
+      versatz(0, (px, py, s0, w) => { if (s0 % 6 > 2.9) return; x.save(); x.translate(px, py); x.rotate(w); x.fillStyle = "rgba(0,0,0,.35)"; x.fillRect(-2, -14, 5, 29); x.fillStyle = (Math.floor(s0 / 6) % 3) ? "#5a4632" : "#6a5440"; x.fillRect(-2.5, -15, 4.6, 29); x.fillStyle = "rgba(235,226,204,.12)"; x.fillRect(-2.5, -15, 1.1, 29); x.fillStyle = "#2a2018"; kreis(x, -0.2, -12, 0.7); kreis(x, -0.2, 12, 0.7); x.restore(); });
+    } else if (hoehle) { // Geröll
+      for (let i = 0; i < 70; i++) { const q = pfadPunkt(P, r() * P.gesamt), rr = 1.2 + r() * 2.4, ox = r() * 22 - 11, oy = r() * 22 - 11; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, q.x + ox + 0.6, q.y + oy + 0.8, rr, rr * 0.7); x.fillStyle = F.stein; oval(x, q.x + ox, q.y + oy, rr, rr * 0.7); }
+    } else { // Fußspuren im Waldboden
+      versatz(0, (px, py, s0, w) => { if (s0 % 18 > 2.9) return; const seite = Math.floor(s0 / 18) % 2 ? 3 : -3; x.save(); x.translate(px + Math.cos(w + Math.PI / 2) * seite, py + Math.sin(w + Math.PI / 2) * seite); x.rotate(w); x.fillStyle = "rgba(0,0,0,.2)"; oval(x, 0, 0, 2.6, 1.4); oval(x, 3.2, 0, 1.2, 1.1); x.restore(); });
+    }
+    // Laternen, Kristalle oder Glutbecken am Wegrand – geben dem Weg Licht
+    const k0 = G.k, lat = k0 === "schmiede" ? "kristall" : k0 === "unterreich" ? "pilzkristall" : k0 === "gracklstugh" ? "glut" : "laterne";
+    for (let s0 = 70, i = 0; s0 < P.gesamt - 40; s0 += 135, i++) {
+      const a = pfadPunkt(P, s0), b = pfadPunkt(P, s0 + 2), w = Math.atan2(b.y - a.y, b.x - a.x), sd = i % 2 ? 1 : -1;
+      const lx = a.x + Math.cos(w + Math.PI / 2) * 25 * sd, ly = a.y + Math.sin(w + Math.PI / 2) * 25 * sd;
+      if (lx < 12 || lx > W - 12 || ly < 34 || ly > LEISTE - 10 || abst(lx, ly, HORT.x, HORT.y) < 46 || plaetze.some(q => abst(q.x, q.y, lx, ly) < 22)) continue;
+      x.fillStyle = "rgba(0,0,0,.35)"; oval(x, lx + 2, ly + 3, 6, 2.6);
+      if (lat === "laterne") {
+        x.fillStyle = "#3a2d20"; x.fillRect(lx - 1.2, ly - 16, 2.4, 18); x.fillRect(lx - 1.2, ly - 16, 6, 1.6);
+        const gl = x.createRadialGradient(lx + 4.5, ly - 11, 0.5, lx + 4.5, ly - 11, 9); gl.addColorStop(0, "rgba(255,210,120,.9)"); gl.addColorStop(1, "rgba(255,190,90,0)"); x.fillStyle = gl; kreis(x, lx + 4.5, ly - 11, 9);
+        x.fillStyle = "#2a2018"; x.fillRect(lx + 2.4, ly - 14.5, 4.2, 6); x.fillStyle = "#ffd27a"; x.fillRect(lx + 3.1, ly - 13.6, 2.8, 4.2);
+        L.push({ x: lx + 4.5, y: ly - 11, r: 64, f: "rgba(255,190,90,.13)", fl: 1 });
+      } else if (lat === "glut") {
+        x.fillStyle = "#3a3230"; x.beginPath(); x.moveTo(lx - 6, ly - 6); x.lineTo(lx + 6, ly - 6); x.lineTo(lx + 3, ly + 1); x.lineTo(lx - 3, ly + 1); x.fill();
+        x.fillStyle = "#ff8a3a"; oval(x, lx, ly - 6, 5.5, 2); x.fillStyle = "#ffd27a"; oval(x, lx, ly - 6.5, 3, 1.2);
+        L.push({ x: lx, y: ly - 8, r: 60, f: "rgba(255,120,50,.16)", fl: 1 });
+      } else {
+        const kf = lat === "kristall" ? ["#7fd6e0", "#cff4f8", "rgba(127,214,224,.14)"] : ["#b48ad8", "#efe0ff", "rgba(196,154,224,.14)"];
+        [[-3.5, -0.4, 9], [0, 0, 13], [3.5, 0.45, 8]].forEach(([dx, rw, hh]) => { x.save(); x.translate(lx + dx, ly); x.rotate(rw); x.fillStyle = kf[0]; x.beginPath(); x.moveTo(-2.2, 0); x.lineTo(-2.2, -hh + 2); x.lineTo(0, -hh); x.lineTo(2.2, -hh + 2); x.lineTo(2.2, 0); x.fill(); x.fillStyle = kf[1]; x.fillRect(-0.6, -hh + 2, 1.1, hh - 3); x.restore(); });
+        L.push({ x: lx, y: ly - 6, r: 56, f: kf[2] });
+      }
+    }
     // Bäume, Häuser, Felsen – nach dem Weg, damit sie darüber ragen dürfen
     if (ST.deko === "baeume") deko(30, (px, py) => {
       const h = 13 + r() * 11, d1 = ST.knochen ? "#1a2618" : "#1c3020", d2 = ST.knochen ? "#243520" : "#284a2a", d3 = ST.knochen ? "#30442a" : "#3a6236";
@@ -2702,23 +2769,146 @@
     if (F.mauer || ST.deko === "steine") deko(24, (px, py) => { const rr = 4 + r() * 7; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 2, py + 2, rr, rr * 0.75); x.fillStyle = F.stein; oval(x, px, py, rr, rr * 0.75, r()); x.fillStyle = "rgba(235,226,204,.12)"; oval(x, px - rr * 0.3, py - rr * 0.3, rr * 0.5, rr * 0.3); }, 22);
     // Steinplatten der Bauplätze
     plaetze.forEach(q => {
-      x.fillStyle = "rgba(0,0,0,.3)"; oval(x, q.x + 1.5, q.y + 6, 19, 8);
-      x.fillStyle = "rgba(60,48,34,.7)"; oval(x, q.x, q.y + 4, 17, 8);
-      for (let k = 0; k < 9; k++) { const w = k / 9 * Math.PI * 2, sx = q.x + Math.cos(w) * 16, sy = q.y + 4 + Math.sin(w) * 7.5; x.fillStyle = k % 2 ? F.stein : "rgba(150,140,124,.9)"; oval(x, sx, sy, 3.4, 2.4); }
+      x.fillStyle = "rgba(0,0,0,.22)"; oval(x, q.x + 1.5, q.y + 6, 19, 8);
+      x.fillStyle = "rgba(60,48,34,.45)"; oval(x, q.x, q.y + 4, 17, 8);
+      x.globalAlpha = 0.55; for (let k = 0; k < 9; k++) { const w = k / 9 * Math.PI * 2, sx = q.x + Math.cos(w) * 16, sy = q.y + 4 + Math.sin(w) * 7.5; x.fillStyle = k % 2 ? F.stein : "rgba(150,140,124,.9)"; oval(x, sx, sy, 3.4, 2.4); } x.globalAlpha = 1;
       x.fillStyle = "rgba(235,226,204,.06)"; oval(x, q.x - 3, q.y + 2, 8, 3);
     });
     // Eingang mit Fackeln
     const st = P.p[0];
     x.fillStyle = "rgba(0,0,0,.6)"; oval(x, st.x, st.y - 4, 26, 14);
-    [-22, 22].forEach(d => { x.fillStyle = "#3a2d20"; x.fillRect(st.x + d - 1.5, st.y - 14, 3, 14); const gl = x.createRadialGradient(st.x + d, st.y - 16, 1, st.x + d, st.y - 16, 22); gl.addColorStop(0, "rgba(255,190,90,.5)"); gl.addColorStop(1, "rgba(255,190,90,0)"); x.fillStyle = gl; kreis(x, st.x + d, st.y - 16, 22); x.fillStyle = "#ffcf7a"; kreis(x, st.x + d, st.y - 16, 2.4); });
+    [-22, 22].forEach(d => { L.push({ x: st.x + d, y: st.y - 16, r: 58, f: "rgba(255,170,80,.16)", fl: 1 }); x.fillStyle = "#3a2d20"; x.fillRect(st.x + d - 1.5, st.y - 14, 3, 14); const gl = x.createRadialGradient(st.x + d, st.y - 16, 1, st.x + d, st.y - 16, 22); gl.addColorStop(0, "rgba(255,190,90,.5)"); gl.addColorStop(1, "rgba(255,190,90,0)"); x.fillStyle = gl; kreis(x, st.x + d, st.y - 16, 22); x.fillStyle = "#ffcf7a"; kreis(x, st.x + d, st.y - 16, 2.4); });
     // warmes Licht um den Hort, Vignette
     let hl = x.createRadialGradient(HORT.x, HORT.y, 10, HORT.x, HORT.y, 120); hl.addColorStop(0, "rgba(255,200,110,.18)"); hl.addColorStop(1, "rgba(255,200,110,0)");
     x.fillStyle = hl; x.fillRect(0, 0, W, H);
-    gr = x.createRadialGradient(W / 2, 240, 150, W / 2, 240, 340); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.5)");
+    gr = x.createRadialGradient(W / 2, 240, 150, W / 2, 240, 340); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.32)");
     x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    if (S.A) S.A.licht = L;
     hgBild = c;
   }
   const zufallR = (r, l) => l[Math.floor(r() * l.length)];
+
+  /* ---------- Licht: Dunkelheit mit Lichtinseln (halbe Auflösung) + farbiger Schein ---------- */
+  const LF = 0.4;
+  const dunkelC = document.createElement("canvas"), dunkelX = dunkelC.getContext("2d");
+  const scheinC = document.createElement("canvas"), scheinX = scheinC.getContext("2d");
+  dunkelC.width = scheinC.width = Math.round(W * LF); dunkelC.height = scheinC.height = Math.round(LEISTE * LF);
+  const DUNKEL = { wald: 0.3, phandalin: 0.26, wachturm: 0.36, schmiede: 0.4, donnerbaum: 0.36, unterreich: 0.48, see: 0.38, gracklstugh: 0.38 };
+  /* Lichtbilder einmal vorberechnen (radiale Verläufe sind teuer) */
+  const SPRITE = 64;
+  function spriteBauen(farbe, innen) {
+    const c = document.createElement("canvas"); c.width = c.height = SPRITE;
+    const x = c.getContext("2d"), g = x.createRadialGradient(SPRITE / 2, SPRITE / 2, 0, SPRITE / 2, SPRITE / 2, SPRITE / 2);
+    g.addColorStop(0, "rgba(" + farbe + ",1)"); if (innen) g.addColorStop(0.55, "rgba(" + farbe + ",.6)"); g.addColorStop(1, "rgba(" + farbe + ",0)");
+    x.fillStyle = g; x.fillRect(0, 0, SPRITE, SPRITE); return c;
+  }
+  const lochSprite = spriteBauen("0,0,0", true), farbSprites = {};
+  const farbeTeilen = f => { const m = /rgba?\(([^,]+),([^,]+),([^,]+),?([^)]*)\)/.exec(f.replace(/\s/g, "")); return m ? [m[1] + "," + m[2] + "," + m[3], m[4] === "" ? 1 : parseFloat(m[4])] : ["255,255,255", 0.1]; };
+  function lichtMalen(x, quellen, dunkel, zeit) {
+    if (lichtAus) return;
+    const D = dunkelX, Sx = scheinX;
+    D.setTransform(1, 0, 0, 1, 0, 0); D.globalCompositeOperation = "source-over"; D.globalAlpha = 1; D.clearRect(0, 0, dunkelC.width, dunkelC.height);
+    D.fillStyle = "rgba(5,4,12," + dunkel + ")"; D.fillRect(0, 0, dunkelC.width, dunkelC.height);
+    D.setTransform(LF, 0, 0, LF, 0, 0); D.globalCompositeOperation = "destination-out";
+    Sx.setTransform(1, 0, 0, 1, 0, 0); Sx.globalCompositeOperation = "source-over"; Sx.globalAlpha = 1; Sx.clearRect(0, 0, scheinC.width, scheinC.height);
+    Sx.setTransform(LF, 0, 0, LF, 0, 0); Sx.globalCompositeOperation = "lighter";
+    let farbig = false;
+    quellen.forEach(q => {
+      const rr = q.r * (q.fl ? 1 + Math.sin(zeit * 9 + q.x * 0.3) * 0.04 + Math.sin(zeit * 23 + q.y) * 0.02 : 1);
+      D.globalAlpha = q.a == null ? 1 : q.a; D.drawImage(lochSprite, q.x - rr, q.y - rr, rr * 2, rr * 2);
+      if (q.f) {
+        const [rgb, al] = farbeTeilen(q.f); if (al <= 0.005) return;
+        const sp = farbSprites[rgb] || (farbSprites[rgb] = spriteBauen(rgb, false)), r2 = rr * 0.75;
+        Sx.globalAlpha = Math.min(1, al); Sx.drawImage(sp, q.x - r2, q.y - r2, r2 * 2, r2 * 2); farbig = true;
+      }
+    });
+    x.save();
+    x.drawImage(dunkelC, 0, 0, W, LEISTE);
+    if (farbig) { x.globalCompositeOperation = "lighter"; x.drawImage(scheinC, 0, 0, W, LEISTE); }
+    x.restore();
+  }
+  function lichtAbwehr(x, A, zeit) {
+    const Q = (A.licht || []).slice();
+    Q.push({ x: HORT.x, y: HORT.y - 10, r: 145, f: "rgba(255,190,90,.18)", fl: 1 });
+    Q.push({ x: W * 0.3, y: 120, r: 210, a: 0.35, f: "rgba(170,190,230,.04)" }); // Mondlicht
+    A.plaetze.forEach((p, i) => {
+      const T = p.turm;
+      if (!T) { if (A.wahl === i) Q.push({ x: p.x, y: p.y, r: 46, f: "rgba(224,160,70,.12)" }); return; }
+      if (T.k === "eis" && !T.tier) Q.push({ x: p.x, y: p.y - 8, r: 50, f: "rgba(159,214,236," + (0.12 + (T.anim || 0) * 0.5) + ")" });
+      else if (T.k === "blitz" && !T.tier) Q.push({ x: p.x, y: p.y - 22, r: (T.anim || 0) > 0 ? 80 : 40, f: (T.anim || 0) > 0 ? "rgba(243,226,122,.3)" : "rgba(243,226,122,.06)" });
+      else if (T.k === "pilz" && !T.tier) Q.push({ x: p.x, y: p.y, r: 44, f: "rgba(196,154,224,.13)" });
+      else Q.push({ x: p.x, y: p.y - 4, r: A.wahl === i ? 56 : 42 });
+    });
+    A.feinde.forEach(e => {
+      if (e.beute) Q.push({ x: e.x, y: e.y, r: 26, f: "rgba(255,211,77,.14)" });
+      else if (e.d.boss) Q.push({ x: e.x, y: e.y, r: 48, f: e.d.unbesiegbar ? "rgba(196,86,74,.14)" : "rgba(224,160,70,.08)" });
+    });
+    A.geschosse.forEach(g => {
+      if (g.art === "feuerball") Q.push({ x: g.x, y: g.y, r: 70, f: "rgba(255,138,58,.32)" });
+      else if (g.art === "gold") Q.push({ x: g.x, y: g.y, r: 30, f: "rgba(255,211,77,.2)" });
+      else if (g.art === "splitter") Q.push({ x: g.x, y: g.y, r: 18, f: "rgba(159,214,236,.18)" });
+    });
+    S.blitze.forEach(b => {
+      const a = 1 - b.t / b.dauer;
+      if (b.art === "explosion") Q.push({ x: b.x, y: b.y, r: (b.r || 40) * 1.7, f: "rgba(255,150,60," + (0.4 * a) + ")" });
+      else if (b.art === "blitz") Q.push({ x: b.x2, y: b.y2, r: 46, f: "rgba(243,226,122," + (0.3 * a) + ")" });
+      else if (b.art === "aufwertung") Q.push({ x: b.x, y: b.y - 10, r: 70, f: "rgba(255,211,77," + (0.25 * a) + ")" });
+    });
+    if (A.baer) Q.push({ x: A.baer.x, y: A.baer.y, r: 60, f: "rgba(196,86,74,.12)" });
+    lichtMalen(x, Q, DUNKEL[GEB[A.g].k] || 0.38, zeit);
+  }
+  function lichtRaub(x, R, zeit) {
+    const sp = hakenSpitze(R.haken), Q = [
+      { x: W / 2, y: 30, r: 230 }, { x: 60, y: 60, r: 120 }, { x: W - 60, y: 60, r: 120 },
+      { x: DREH.x, y: 62, r: 110, f: "rgba(207,230,168,.10)" },
+      { x: sp.x, y: sp.y, r: 78, f: "rgba(207,230,168,.13)" }
+    ];
+    R.dinge.forEach(d => { if (SCHEIN_DING[d.typ]) Q.push({ x: d.x, y: d.y, r: 18 + d.r, f: SCHEIN_DING[d.typ] }); });
+    const G = GEB[gebietVon(S.lv)];
+    if (G.regel === "dunkel") return; // das Unterreich hat schon seine eigene Dunkelheit
+    lichtMalen(x, Q, G.f.wasser ? 0.42 : 0.38, zeit);
+  }
+  const SCHEIN_DING = { muenze: "rgba(255,211,77,.10)", beutel: "rgba(255,211,77,.08)", nugget: "rgba(255,211,77,.14)", edelstein: "rgba(200,180,255,.14)", truhe: "rgba(255,211,77,.12)", relikt: "rgba(255,226,140,.18)", res: "rgba(207,230,168,.07)" };
+  function glitzern(x, R, zeit) {
+    x.save(); x.globalCompositeOperation = "lighter";
+    R.dinge.forEach(d => {
+      if (!SCHEIN_DING[d.typ] || d.typ === "res") return;
+      const ph = (d.seed || 0.5) * 40, tw = Math.sin(zeit * 2.1 + ph);
+      if (tw < 0.82) return;
+      const k = (tw - 0.82) / 0.18, sx = d.x + ((d.seed || 0.5) - 0.5) * d.r * 1.2, sy = d.y - d.r * 0.45, gr = 2 + k * 5;
+      x.fillStyle = "rgba(255,248,220," + k + ")";
+      x.beginPath(); x.moveTo(sx, sy - gr); x.lineTo(sx + gr * 0.22, sy - gr * 0.22); x.lineTo(sx + gr, sy); x.lineTo(sx + gr * 0.22, sy + gr * 0.22); x.lineTo(sx, sy + gr); x.lineTo(sx - gr * 0.22, sy + gr * 0.22); x.lineTo(sx - gr, sy); x.lineTo(sx - gr * 0.22, sy - gr * 0.22); x.closePath(); x.fill();
+    });
+    x.restore();
+  }
+  function teicheMalen(x, A, zeit) {
+    if (!A.teiche || !A.teiche.length) return;
+    x.save(); x.lineWidth = 1;
+    A.teiche.forEach((t2, i) => {
+      for (let k = 0; k < 4; k++) {
+        const u = ((zeit * 0.25 + k * 0.25 + i * 0.13) % 1), a = Math.sin(u * Math.PI) * 0.35;
+        x.strokeStyle = "rgba(190,230,245," + a + ")";
+        x.beginPath(); x.ellipse(t2.x + Math.sin(k * 2.1 + i) * t2.rx * 0.35, t2.y + Math.cos(k * 1.7 + i) * t2.ry * 0.3, t2.rx * 0.18 * (0.4 + u), t2.ry * 0.12 * (0.4 + u), 0, 0, Math.PI * 2); x.stroke();
+      }
+      const gl = 0.5 + Math.sin(zeit * 1.3 + i) * 0.5;
+      x.fillStyle = "rgba(220,245,255," + (0.08 + gl * 0.08) + ")"; oval(x, t2.x - t2.rx * 0.3, t2.y - t2.ry * 0.35, t2.rx * 0.25, t2.ry * 0.08, -0.2);
+    });
+    x.restore();
+  }
+  function leisteOben(x) {
+    const g = x.createLinearGradient(0, 0, 0, 30); g.addColorStop(0, "rgba(9,8,15,.88)"); g.addColorStop(1, "rgba(9,8,15,.58)");
+    x.fillStyle = g; x.fillRect(0, 0, W, 28);
+    const l = x.createLinearGradient(0, 0, W, 0); l.addColorStop(0, "rgba(224,160,70,0)"); l.addColorStop(0.5, "rgba(224,160,70,.55)"); l.addColorStop(1, "rgba(224,160,70,0)");
+    x.fillStyle = l; x.fillRect(0, 27.5, W, 1);
+  }
+  function leisteUnten(x) {
+    const g = x.createLinearGradient(0, LEISTE, 0, H); g.addColorStop(0, "rgba(14,11,18,.9)"); g.addColorStop(1, "rgba(6,5,10,.96)");
+    x.fillStyle = g; x.fillRect(0, LEISTE, W, H - LEISTE);
+    const l = x.createLinearGradient(0, 0, W, 0); l.addColorStop(0, "rgba(224,160,70,0)"); l.addColorStop(0.5, "rgba(224,160,70,.55)"); l.addColorStop(1, "rgba(224,160,70,0)");
+    x.fillStyle = l; x.fillRect(0, LEISTE, W, 1);
+    const s = x.createLinearGradient(0, LEISTE - 14, 0, LEISTE); s.addColorStop(0, "rgba(0,0,0,0)"); s.addColorStop(1, "rgba(0,0,0,.35)");
+    x.fillStyle = s; x.fillRect(0, LEISTE - 14, W, 14);
+  }
   /* Umgebung: Glühwürmchen, Glut, Nebel, Sporen, Blasen, fallende Blätter */
   function ambientUpdate(A, dt) {
     const art = GEB[A.g].stil.ambient; if (!art || ruhig) return;
@@ -3055,13 +3245,27 @@
     x.translate(0, hop - (e.flug ? 6 : 0));
     if (e.treffT > 0) { x.save(); x.globalAlpha = 0.8; x.fillStyle = "#ebe2cc"; kreis(x, 0, 0, r + 2); x.restore(); }
     if (e.verwandelt) { malTier(x, "fledermaus", true, zeit); x.restore(); lebensbalken(x, e); return; }
-    if (MEDAILLONS[e.typ]) {
+    if (e.lx != null) { const mx = e.x - e.lx, my = e.y - e.ly; if (mx * mx + my * my > 0.02) { const ziel = Math.atan2(my, mx); e.hw = e.hw == null ? ziel : e.hw + Math.atan2(Math.sin(ziel - e.hw), Math.cos(ziel - e.hw)) * 0.25; } }
+    e.lx = e.x; e.ly = e.y;
+    if (!MEDAILLONS[e.typ]) {
+      x.save(); if (e.hw != null) x.rotate(e.hw + Math.PI / 2);
+      const krabbler = e.typ === "spinne" || e.typ === "ettercap" || e.typ === "blight" || e.flug;
+      if (!krabbler) { const sw = Math.sin(zeit * 13 + e.ph) * r * 0.38 * (e.festT > 0 || e.halt ? 0 : 1); x.fillStyle = "rgba(18,12,8,.85)"; oval(x, -r * 0.45, sw, r * 0.24, r * 0.32); oval(x, r * 0.45, -sw, r * 0.24, r * 0.32); }
+      x.scale(1.12, 1.12);
+      x.fillStyle = "rgba(8,6,4,.55)"; kreis(x, 0, 0.6, r + 1.4);
+      malFigur(x, e.typ, r, d, zeit, e);
+      x.restore();
+      x.strokeStyle = "rgba(255,236,200,.3)"; x.lineWidth = 1.1; x.beginPath(); x.arc(0, 0, r * 0.92, -2.7, -1.0); x.stroke();
+    } else {
       x.save(); x.shadowColor = d.unbesiegbar ? "#c4564a" : "#e0a046"; x.shadowBlur = 14;
       x.fillStyle = d.farbe; kreis(x, 0, 0, r + 3); x.restore();
       x.drawImage(MEDAILLONS[e.typ], -r, -r, r * 2, r * 2);
       x.strokeStyle = d.unbesiegbar ? "#c4564a" : "#e0a046"; x.lineWidth = 2; x.beginPath(); x.arc(0, 0, r + 1, 0, Math.PI * 2); x.stroke();
-    } else malFigur(x, e.typ, r, d, zeit, e);
-    if (e.bremsT > 0 && e.bremse < 1) { x.strokeStyle = "rgba(159,214,236,.7)"; x.lineWidth = 1.5; x.beginPath(); x.arc(0, 0, r + 3, 0, Math.PI * 2); x.stroke(); }
+    }
+    if (e.bremsT > 0 && e.bremse < 1) {
+      x.strokeStyle = "rgba(159,214,236,.38)"; x.lineWidth = 1; x.setLineDash([2, 3]); x.beginPath(); x.arc(0, 0, r + 2.5, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+      x.fillStyle = "rgba(220,244,252,.85)"; for (let i = 0; i < 3; i++) { const w = zeit * 1.5 + i * 2.1 + e.ph; kreis(x, Math.cos(w) * (r + 2.5), Math.sin(w) * (r + 2.5), 1.2); }
+    }
     if (e.giftT > 0) { x.fillStyle = "rgba(196,154,224,.5)"; kreis(x, Math.sin(zeit * 5) * r * 0.7, -r - 3, 2); kreis(x, -Math.cos(zeit * 4) * r * 0.6, -r - 5, 1.5); }
     if (e.beute) {
       x.save(); x.translate(0, -r - 9 + Math.sin(zeit * 12) * 1.2);
@@ -3114,9 +3318,15 @@
     if (k === 2) { x.fillStyle = "#6b4a2a"; kreis(x, -r * 0.4, -r * 0.6, 2.5); kreis(x, r * 0.4, -r * 0.6, 2.5); x.fillStyle = "#c4564a"; kreis(x, -2, -r * 0.3, 1.1); kreis(x, 2, -r * 0.3, 1.1); }
     if (k === 3) { x.strokeStyle = "#5a5e64"; x.lineWidth = 1.5; x.beginPath(); x.arc(0, -r * 0.25, r * 0.55, Math.PI, 0); x.stroke(); x.fillStyle = "#c9c9c9"; x.fillRect(r * 0.7, -r, 2, r * 1.4); }
     if (k === 4) { x.fillStyle = "#3a4a2a"; kreis(x, -2, -r * 0.3, 1.4); kreis(x, 2, -r * 0.3, 1.4); x.strokeStyle = "#5a6a4c"; x.lineWidth = 3; x.beginPath(); x.moveTo(-r * 0.7, 0); x.lineTo(-r * 0.9, -r); x.moveTo(r * 0.7, 0); x.lineTo(r * 0.9, -r); x.stroke(); }
-    if (k === 7) { x.fillStyle = "#3b2f4a"; oval(x, 0, -r * 0.05, r * 0.32, r * 0.24); x.fillStyle = "#c4564a"; kreis(x, -1.5, -r * 0.1, 0.9); kreis(x, 1.5, -r * 0.1, 0.9); }
-    if (k === 10) { x.fillStyle = "#ebe2cc"; kreis(x, -r * 0.35, -r * 0.35, 2.2); kreis(x, r * 0.35, -r * 0.35, 2.2); x.fillStyle = "#1a1210"; kreis(x, -r * 0.35, -r * 0.35, 1); kreis(x, r * 0.35, -r * 0.35, 1); }
-    if (k === 11) { x.fillStyle = "#4a4440"; x.beginPath(); x.moveTo(-r * 0.4, -r * 0.05); x.lineTo(0, r * 0.6); x.lineTo(r * 0.4, -r * 0.05); x.fill(); }
+    if (k === 7) { x.strokeStyle = "rgba(138,106,208,.85)"; x.lineWidth = 1.2; x.beginPath(); x.ellipse(0, 2, r, r * 0.75, 0, 0.3, Math.PI - 0.3); x.stroke(); x.fillStyle = "#3b2f4a"; oval(x, 0, -r * 0.05, r * 0.32, r * 0.24); x.fillStyle = "#c4564a"; kreis(x, -1.5, -r * 0.1, 0.9); kreis(x, 1.5, -r * 0.1, 0.9); }
+    if (k === 10) {
+      x.fillStyle = "#2c5c5a"; x.beginPath(); x.moveTo(-r * 0.25, r * 0.55); x.lineTo(-r * 0.75, r * 1.25 + Math.sin(zeit * 9 + (e ? e.ph : 0)) * 1.5); x.lineTo(0, r * 0.95); x.lineTo(r * 0.75, r * 1.25 - Math.sin(zeit * 9 + (e ? e.ph : 0)) * 1.5); x.lineTo(r * 0.25, r * 0.55); x.fill();
+      x.strokeStyle = "#7ac4c0"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(0, -r * 0.1); x.lineTo(0, r * 0.7); x.stroke();
+      x.strokeStyle = "#b8a888"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(r * 0.85, r * 0.55); x.lineTo(r * 0.85, -r * 1.25); x.stroke();
+      x.fillStyle = "#d8d0c0"; x.beginPath(); x.moveTo(r * 0.85, -r * 1.55); x.lineTo(r * 0.6, -r * 1.15); x.lineTo(r * 1.1, -r * 1.15); x.fill();
+      x.fillStyle = "#ebe2cc"; kreis(x, -r * 0.35, -r * 0.35, 2.4); kreis(x, r * 0.35, -r * 0.35, 2.4); x.fillStyle = "#1a1210"; kreis(x, -r * 0.35, -r * 0.4, 1.1); kreis(x, r * 0.35, -r * 0.4, 1.1);
+    }
+    if (k === 11) { x.strokeStyle = "#3a3634"; x.lineWidth = 2; x.beginPath(); x.arc(0, -r * 0.25, r * 0.58, Math.PI * 0.95, Math.PI * 2.05); x.stroke(); x.fillStyle = "#4a4440"; x.beginPath(); x.moveTo(-r * 0.4, -r * 0.05); x.lineTo(0, r * 0.6); x.lineTo(r * 0.4, -r * 0.05); x.fill(); x.fillStyle = "#b8b0a8"; x.fillRect(-r * 0.95, -r * 0.2, 2, r * 1.1); }
     if (typ === "anfuehrer") { x.fillStyle = "#ffd34d"; x.beginPath(); x.moveTo(-5, -r * 0.7); x.lineTo(-5, -r * 1.05); x.lineTo(-2, -r * 0.85); x.lineTo(0, -r * 1.15); x.lineTo(2, -r * 0.85); x.lineTo(5, -r * 1.05); x.lineTo(5, -r * 0.7); x.fill(); }
     if (typ === "glasstab") { x.save(); x.shadowColor = "#9fd6ec"; x.shadowBlur = 8; x.strokeStyle = "#cfeaf4"; x.lineWidth = 2.5; x.beginPath(); x.moveTo(r * 0.8, r * 0.6); x.lineTo(r * 1.1, -r * 1.1); x.stroke(); x.restore(); }
     if (typ === "nezna") { x.save(); x.shadowColor = "#8a6ad0"; x.shadowBlur = 10; x.strokeStyle = "rgba(196,154,224,.7)"; x.lineWidth = 1.5; x.beginPath(); x.arc(0, 0, r + 3, 0, Math.PI * 2); x.stroke(); x.restore(); }
@@ -3188,8 +3398,15 @@
       const drin = !T || !T.draussen;
       if (drin) {
         const blink = Math.sin(zeit * 1.3 + (T ? T.winkel || 0 : 0)) > 0.96 ? 0.2 : 1;
+        const ph = T ? (T.phase || (T.phase = Math.random() * 6)) : 0, guck = Math.sin(zeit * 0.55 + ph);
+        if (guck > 0.55) { // ein Wolf schaut aus dem Bau
+          const v = Math.min(1, (guck - 0.55) / 0.2), gy = 4 - v * 6;
+          x.fillStyle = "#8a847a"; oval(x, 0, gy, 5.5, 4.6); x.fillStyle = "#a8a296"; oval(x, 0, gy + 2.6, 3, 2.2);
+          x.fillStyle = "#6a655c"; x.beginPath(); x.moveTo(-5, gy - 1); x.lineTo(-3.5, gy - 7); x.lineTo(-1.5, gy - 2.5); x.fill(); x.beginPath(); x.moveTo(5, gy - 1); x.lineTo(3.5, gy - 7); x.lineTo(1.5, gy - 2.5); x.fill();
+          x.fillStyle = "#1a1612"; kreis(x, 0, gy + 3.6, 1.1);
+        }
         x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 6; x.fillStyle = "#ffd34d";
-        oval(x, -2.5, 0, 1.4, 1.4 * blink); oval(x, 2.5, 0, 1.4, 1.4 * blink);
+        oval(x, -2.5, guck > 0.55 ? 4 - Math.min(1, (guck - 0.55) / 0.2) * 6 - 0.5 : 0, 1.4, 1.4 * blink); oval(x, 2.5, guck > 0.55 ? 4 - Math.min(1, (guck - 0.55) / 0.2) * 6 - 0.5 : 0, 1.4, 1.4 * blink);
         if (st >= 2) { oval(x, -3.5, 4.5, 1.1, 1.1 * blink); oval(x, 0.5, 4.5, 1.1, 1.1 * blink); }
         x.restore();
       }
@@ -3365,7 +3582,8 @@
       if (st < 2) { x.strokeStyle = "rgba(207,230,168,.55)"; x.setLineDash([4, 4]); x.beginPath(); x.arc(0, 0, w.reich[st + 1] * rf, 0, Math.PI * 2); x.stroke(); x.setLineDash([]); }
     }
     const wachs = T.wachs == null ? 1 : T.wachs, el = wachs >= 1 ? 1 : 1 - Math.pow(1 - wachs, 3) * Math.cos(wachs * 9);
-    x.save(); x.scale(el, el);
+    const atem = 1 + Math.sin(zeit * 1.8 + p.x * 0.07) * 0.025;
+    x.save(); x.scale(el, el * atem);
     if (T.tier) malTierFigur(x, T.k, st, T, zeit); else malTurm(x, T.k, st, T, zeit);
     x.restore();
     if (T.zweig && !T.tier) {
@@ -3620,7 +3838,15 @@
     S.blitze.forEach(b => {
       const u = b.t / b.dauer, a = 1 - u;
       x.save();
-      if (b.art === "explosion") {
+      if (b.art === "aufwertung") {
+        const k = b.klein ? 0.65 : 1, h = 70 * k * Math.min(1, u * 3);
+        const g = x.createLinearGradient(0, b.y + 6, 0, b.y - h);
+        g.addColorStop(0, "rgba(255,211,77," + (a * 0.55) + ")"); g.addColorStop(1, "rgba(255,211,77,0)");
+        x.globalCompositeOperation = "lighter"; x.fillStyle = g; x.fillRect(b.x - 11 * k, b.y - h, 22 * k, h + 6);
+        x.strokeStyle = "rgba(255,226,140," + a + ")"; x.lineWidth = 2.2 * k;
+        x.beginPath(); x.ellipse(b.x, b.y + 5, (12 + u * 30) * k, (5 + u * 12) * k, 0, 0, Math.PI * 2); x.stroke();
+        for (let i = 0; i < 7; i++) { const w = i / 7 * Math.PI * 2 + b.t * 2; x.fillStyle = "rgba(255,240,180," + a + ")"; kreis(x, b.x + Math.cos(w) * 14 * k, b.y - u * 46 * k - (i % 3) * 6, 1.6); }
+      } else if (b.art === "explosion") {
         const g = x.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r * (0.5 + u * 0.6));
         g.addColorStop(0, "rgba(255,240,160," + a + ")"); g.addColorStop(0.4, "rgba(255,138,58," + a * 0.8 + ")"); g.addColorStop(1, "rgba(196,86,74,0)");
         x.fillStyle = g; kreis(x, b.x, b.y, b.r * (0.5 + u * 0.6));
@@ -3680,8 +3906,9 @@
       const u = tx.t / tx.dauer;
       x.globalAlpha = klemm(1.4 - u * 1.4, 0, 1);
       x.font = "700 " + tx.gross + "px " + FONT_B;
-      x.lineWidth = 3; x.strokeStyle = "rgba(9,8,15,.85)"; x.strokeText(tx.s, tx.x, tx.y - u * 26);
-      x.fillStyle = tx.farbe; x.fillText(tx.s, tx.x, tx.y - u * 26);
+      if (tx.bx == null) { const bw = Math.min(W - 12, x.measureText(tx.s).width); tx.bx = klemm(tx.x, bw / 2 + 6, W - bw / 2 - 6); }
+      x.lineWidth = 3; x.strokeStyle = "rgba(9,8,15,.85)"; x.strokeText(tx.s, tx.bx, tx.y - u * 26, W - 12);
+      x.fillStyle = tx.farbe; x.fillText(tx.s, tx.bx, tx.y - u * 26, W - 12);
     });
     x.globalAlpha = 1;
     if (S.banner) {
@@ -3788,10 +4015,12 @@
     malRanke(x, R, zeit);
     if (h.last) malDing(x, h.last, zeit);
     if (h.last2) malDing(x, h.last2, zeit);
+    lichtRaub(x, R, zeit);
+    glitzern(x, R, zeit);
     malEffekte(x, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, DREH.x + 70, 40);
     // oben: Anzeigen
-    x.fillStyle = "rgba(9,8,15,.62)"; x.fillRect(0, 0, W, 28);
+    leisteOben(x);
     let px = 8;
     px = hudText(x, "⏳ " + Math.ceil(R.zeit), px, R.zeit < 8 ? "#c4564a" : "#ebe2cc") + 10;
     balken(x, px, 7, 76, 14, R.zorn / 100, R.zorn > 75 ? "#c4564a" : "#9b5a3a", T.hud.zorn); px += 86;
@@ -3799,7 +4028,7 @@
     if (R.gier) px = hudText(x, "×" + (1 + 0.15 * R.gier).toFixed(2).replace(/0$/, ""), px, "#e0a046", 11) + 8; else px += 4;
     hudText(x, "🌱 " + Math.round(R.saat), px, "#cfe6a8");
     // unten: Gestalten
-    x.fillStyle = "rgba(9,8,15,.7)"; x.fillRect(0, LEISTE, W, H - LEISTE);
+    leisteUnten(x);
     S.knoepfe = [];
     const frei = FORMEN_REIHE.filter(k => S.lv >= FORMEN[k].ab);
     const bw = 58;
@@ -3818,11 +4047,18 @@
   function zeichneAbwehr(x, zeit) {
     const A = S.A, T = t();
     x.drawImage(hgBild, 0, 0, W, H);
+    teicheMalen(x, A, zeit);
     ambientMalen(x, A, zeit);
     // Pflanzplätze
+    const bauZeit = (A.vorT > 0 || A.halt) && A.saat >= kosten("dorn", 0);
     A.plaetze.forEach((p, i) => {
       if (p.turm) return;
       const gew = A.wahl === i, puls = 0.5 + Math.sin(zeit * 2.4 + i) * 0.5;
+      if (!gew && !bauZeit) { // ruhig: nur ein zarter Ring
+        x.strokeStyle = "rgba(207,230,168,.13)"; x.lineWidth = 1; x.beginPath(); x.ellipse(p.x, p.y + 4, 13, 6, 0, 0, Math.PI * 2); x.stroke();
+        blatt(x, p.x, p.y + 3, -2.2, 4, 1.6, "rgba(111,154,58,.6)"); blatt(x, p.x, p.y + 3, -0.9, 4, 1.6, "rgba(138,176,74,.6)");
+        return;
+      }
       x.fillStyle = gew ? "rgba(224,160,70,.32)" : "rgba(170,210,120," + (0.06 + puls * 0.08) + ")"; oval(x, p.x, p.y + 4, 14, 6.5);
       x.strokeStyle = gew ? "#e0a046" : "rgba(207,230,168," + (0.18 + puls * 0.25) + ")"; x.lineWidth = gew ? 2 : 1.2;
       x.beginPath(); x.ellipse(p.x, p.y + 4, 14, 6.5, 0, 0, Math.PI * 2); x.stroke();
@@ -3853,6 +4089,7 @@
     if (A.baer) malBaer(x, A.baer, zeit);
     malHelfer(x, A, zeit);
     malZauber(x, A, zeit);
+    lichtAbwehr(x, A, zeit);
     malEffekte(x, zeit);
     malPortrait(x, A, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, HORT.x + 60, HORT.y - 54);
@@ -3868,14 +4105,14 @@
       x.textAlign = "center"; x.font = "700 13px " + FONT_B; x.fillStyle = "#9fd6ec"; x.fillText("🌊 " + Math.ceil(A.demoDauer - A.demoT) + " s", W / 2, 42);
     }
     // oben: Anzeigen
-    x.fillStyle = "rgba(9,8,15,.62)"; x.fillRect(0, 0, W, 28);
+    leisteOben(x);
     let px = 8;
     px = hudText(x, "💰 " + Math.round(A.hort), px, A.hort < A.hortStart * 0.3 ? "#c4564a" : "#ffd34d") + 10;
     px = hudText(x, "🌱 " + Math.round(A.saat), px, "#cfe6a8") + 10;
     balken(x, px, 7, 76, 14, A.zorn / 100, A.zorn > 75 ? "#c4564a" : "#9b5a3a", T.hud.zorn); px += 86;
     hudText(x, "🌊 " + Math.max(1, A.welle + 1) + "/" + A.wellen.length + "  👣 " + (A.warte.length + A.feinde.filter(e => !e.d.unbesiegbar).length), px, "#a89f8f", 12);
     // unten: Bauleiste
-    x.fillStyle = "rgba(9,8,15,.72)"; x.fillRect(0, LEISTE, W, H - LEISTE);
+    leisteUnten(x);
     S.knoepfe = [];
     const p = A.wahl >= 0 ? A.plaetze[A.wahl] : null;
     x.textAlign = "left"; x.textBaseline = "middle";
@@ -4106,9 +4343,13 @@
     if (S.quip) { S.quip.t += dt; if (S.quip.t > 2) S.quip = null; }
     if (S.beben > 0) S.beben = Math.max(0, S.beben - dt);
   }
+  let rahmenSchnitt = 16, langsamT = 0, lichtAus = false;
   function schleife(jetzt) {
     rafId = 0;
+    const roh = letzte ? jetzt - letzte : 16;
     const dt = letzte ? Math.min(0.05, (jetzt - letzte) / 1000) : 0;
+    /* Schwaches Gerät? Dann die Lichtebene abschalten, damit das Spiel flüssig bleibt */
+    if (zustand === "spiel" && roh < 200) { rahmenSchnitt = rahmenSchnitt * 0.95 + roh * 0.05; if (rahmenSchnitt > 30) { langsamT += roh; if (langsamT > 3000) lichtAus = true; } else langsamT = 0; }
     letzte = jetzt;
     const schritte = testTempo * (S && S.phase === "abwehr" && S.A && S.A.schnell ? 2 : 1);
     for (let i = 0; i < schritte && zustand === "spiel" && S; i++) {
@@ -4851,5 +5092,5 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen };
 })();
