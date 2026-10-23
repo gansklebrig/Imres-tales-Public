@@ -108,6 +108,10 @@
   .top .wrap { flex-wrap: nowrap; }
   body { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
   .kerze { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
+  /* Hinweise und Rex über der Leiste statt dahinter */
+  .ex-toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important; z-index: 950 !important; }
+  .mond-buch { bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; }
+  .rex-guckt.unten { bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important; }
 
   .handyleiste { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
     padding: 4px 4px env(safe-area-inset-bottom, 0px); background: rgba(14,11,17,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
