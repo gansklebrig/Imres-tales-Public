@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Klangwelten">
 <meta name="robots" content="noindex">
 <title>Klangwelten Live</title>
+<script>if (location.protocol === "http:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") location.replace("https://" + location.host + location.pathname + location.search);</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
@@ -724,7 +725,10 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   const CACHE = "klangwelten-live-v1";
   const statusEl = $("status");
   async function offlineVorbereiten() {
-    if (!("caches" in window)) { statusEl.textContent = "Offline-Speicher nicht verfügbar"; return; }
+    if (!("caches" in window) || !window.isSecureContext) {
+      const grund = !window.isSecureContext ? "Seite bitte über https://imrestales.de/live öffnen" : !("serviceWorker" in navigator) ? "Safari blockiert Web-Apps – Privates Surfen oder Blockierungsmodus ausschalten" : "Privates Surfen ausschalten";
+      statusEl.innerHTML = "⚠ Offline-Speicher nicht verfügbar: " + grund; $("start-info").innerHTML = statusEl.innerHTML; return;
+    }
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (_) {}
     const liste = dateien().concat(SCHALE);
     const c = await caches.open(CACHE);
