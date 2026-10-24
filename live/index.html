@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#100c12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Klangwelten">
+<meta name="robots" content="noindex">
+<title>Klangwelten Live</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<style>
+/* Bühnenpult: dunkel, große Flächen, alles mit einem Finger greifbar. Keine Schriften aus dem Netz – läuft komplett offline. */
+:root{
+  color-scheme:dark;
+  --ink:#0e0b10;--panel:#18131a;--panel2:#211a23;--line:#3a2f37;--text:#efe5d2;--mute:#a3958a;--ember:#e0a046;--ember2:#f2c27a;--kalt:#7fb2c9;--rot:#d9634f;--night:#0b080d;
+  --fd:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--fb:-apple-system,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;
+  --gap:10px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--ink);color:var(--text);overscroll-behavior:none}
+body{font-family:var(--fb);font-size:15px;line-height:1.3;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:var(--gap);height:100dvh;overflow:hidden;
+  padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  background:radial-gradient(ellipse at 50% -20%,rgba(224,160,70,.09),transparent 60%),var(--ink)}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+h2,h3{margin:0;font-weight:400}
+
+/* ---------- obere Leiste ---------- */
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.marke{font-family:var(--fd);font-size:1.45rem;white-space:nowrap;margin-right:4px}
+.marke span{color:var(--ember);font-family:var(--fb);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;vertical-align:middle;border:1px solid var(--ember);border-radius:4px;padding:2px 5px;margin-left:6px}
+.gruppe{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px 6px}
+.gruppe label{color:var(--mute);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:0 4px}
+.knapp{min-width:42px;height:42px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font-size:1.2rem}
+.knapp:active{border-color:var(--ember)}
+.bpm{min-width:68px;text-align:center;touch-action:none;line-height:1}
+.bpm b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums;font-weight:600}
+.bpm small{color:var(--mute);font-size:.65rem;letter-spacing:.12em}
+.tap{min-width:64px;height:42px;border-radius:9px;border:1px solid var(--ember);background:none;color:var(--ember);font-weight:600;letter-spacing:.05em}
+.tap:active,.tap.blitz{background:var(--ember);color:var(--night)}
+.puls{width:12px;height:12px;border-radius:50%;background:var(--line);margin:0 4px;transition:background .06s}
+.puls.an{background:var(--ember);box-shadow:0 0 10px var(--ember)}
+.puls.eins{background:var(--ember2);box-shadow:0 0 14px var(--ember2)}
+select{height:42px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);padding:0 10px;font-size:1rem}
+.status{flex:1;min-width:120px;color:var(--mute);font-size:.8rem;text-align:right}
+.status b{color:var(--ember);font-weight:500}
+.panik{height:46px;border-radius:12px;border:1px solid var(--rot);background:rgba(217,99,79,.12);color:#f1a596;padding:0 16px;font-weight:600}
+.panik:active{background:var(--rot);color:var(--night)}
+
+/* ---------- Pult ---------- */
+.pult{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:var(--gap);min-height:0}
+.feld{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
+.kopf{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.feld h2{font-family:var(--fd);font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kopf small,.feld h3 small{color:var(--mute);font-size:.72rem;font-family:var(--fb)}
+.feld h3{font-size:.75rem;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between;gap:6px}
+.feld h3 small{text-transform:none;letter-spacing:0}
+
+.pads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:7px;flex:1;min-height:0}
+.pad{position:relative;border-radius:11px;border:1px solid var(--line);background:var(--panel2);padding:6px 8px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;min-height:0;overflow:hidden;touch-action:manipulation}
+.pad .sym{font-size:1.35rem;line-height:1}
+.pad .nm{font-size:.86rem;line-height:1.1;font-weight:500;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pad .nr{position:absolute;top:5px;right:7px;color:var(--mute);font-size:.65rem}
+.pad.gewaehlt{border-color:rgba(224,160,70,.55)}
+.pad.an{border-color:var(--ember);background:linear-gradient(180deg,rgba(224,160,70,.28),rgba(224,160,70,.08));box-shadow:0 0 0 1px var(--ember) inset,0 0 18px rgba(224,160,70,.18)}
+.pad.an .nr{color:var(--ember)}
+.pad:active{transform:scale(.97)}
+
+.speicher{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.slot{height:52px;border-radius:9px;border:1px dashed var(--line);background:none;color:var(--mute);font-size:.7rem;line-height:1.1;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;touch-action:manipulation}
+.slot b{font-size:1rem;color:var(--text);font-weight:500}
+.slot.voll{border-style:solid;border-color:var(--kalt);background:rgba(127,178,201,.1);color:var(--text)}
+.slot.voll b{color:var(--kalt)}
+.slot.blitz{background:var(--kalt);color:var(--night)}
+.slot.blitz b{color:var(--night)}
+
+/* Fader */
+.fader-reihe{display:flex;gap:6px;flex:1;min-height:0;align-items:stretch}
+.fader{flex:1 1 0;min-width:0;max-width:74px;display:flex;flex-direction:column;align-items:center;gap:4px;touch-action:none}
+.fader .spur{position:relative;flex:1;width:100%;max-width:48px;border-radius:10px;background:var(--night);border:1px solid var(--line);overflow:hidden}
+.fader .fuell{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(224,160,70,.55),rgba(224,160,70,.18))}
+.fader .griff{position:absolute;left:3px;right:3px;height:6px;border-radius:3px;background:var(--ember2);box-shadow:0 0 8px rgba(242,194,122,.6);transform:translateY(50%)}
+.fader .marke100{position:absolute;left:0;right:0;border-top:1px dashed rgba(239,229,210,.25)}
+.fader b{font-size:.78rem;font-weight:500;font-variant-numeric:tabular-nums;color:var(--mute)}
+.fader span{font-size:.68rem;color:var(--text);text-align:center;width:100%;line-height:1.1;min-height:2.2em;overflow:hidden;overflow-wrap:anywhere;hyphens:auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.fader.greift .spur{border-color:var(--ember)}
+.fader.kalt .fuell{background:linear-gradient(0deg,rgba(127,178,201,.55),rgba(127,178,201,.15))}
+.fader.kalt .griff{background:#cfe6f0;box-shadow:0 0 8px rgba(127,178,201,.6)}
+.trenner{width:1px;background:var(--line);margin:0 2px}
+.leer{color:var(--mute);font-size:.9rem;align-self:center;text-align:center;flex:1;padding:0 8px}
+
+/* Drehregler */
+.knoepfe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:4px 6px;flex:1;min-height:0}
+.knopf{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;touch-action:none;border-radius:10px;padding:2px}
+.knopf svg{width:100%;max-width:84px;height:auto;max-height:calc(100% - 30px);flex:1 1 auto;min-height:36px;overflow:visible}
+.knopf .bahn{fill:none;stroke:var(--line);stroke-width:7;stroke-linecap:round}
+.knopf .bogen{fill:none;stroke:var(--ember);stroke-width:7;stroke-linecap:round}
+.knopf .kern{fill:var(--panel2);stroke:#2d242c;stroke-width:1}
+.knopf .zeiger{stroke:var(--text);stroke-width:3;stroke-linecap:round}
+.knopf b{font-size:.78rem;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ember2);line-height:1.1}
+.knopf span{font-size:.72rem;color:var(--mute);line-height:1.1;white-space:nowrap}
+.knopf.greift{background:rgba(224,160,70,.07)}
+.knopf.kalt .bogen{stroke:var(--kalt)}
+.knopf.kalt b{color:#cfe6f0}
+.knopf.aus .bogen{stroke:transparent}
+
+/* Einzelgeräusche */
+.shots{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:7px}
+.shot{height:66px;border-radius:11px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px;touch-action:manipulation;overflow:hidden}
+.shot .sym{font-size:1.3rem;line-height:1}
+.shot .nm{font-size:.72rem;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.shot.welt{border-color:rgba(224,160,70,.35)}
+.shot.blitz{background:var(--ember);border-color:var(--ember)}
+.shot.blitz .nm{color:var(--night)}
+.shot.frei{visibility:hidden}
+
+/* Startschirm */
+.start{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(8,6,10,.94);padding:24px;text-align:center}
+.start[hidden]{display:none}
+.start h1{font-family:var(--fd);font-weight:400;font-size:2.6rem;margin:0 0 .3rem}
+.start p{color:var(--mute);max-width:34rem;margin:.4rem auto;line-height:1.5}
+.start .los{margin-top:1.2rem;border:0;border-radius:999px;background:var(--ember);color:var(--night);font-size:1.2rem;font-weight:700;padding:16px 40px}
+.start .tipp{font-size:.85rem}
+
+/* Hochformat: Klangwelten oben über die ganze Breite */
+@media (max-aspect-ratio:1/1){
+  .pult{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1.15fr) minmax(0,1fr)}
+  #f-szenen{grid-column:1/-1}
+  .shots{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .shot{height:56px}
+}
+@media (max-width:900px) and (min-aspect-ratio:1/1){.marke{display:none}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="marke">Klangwelten<span>Live</span></div>
+  <div class="gruppe" aria-label="Tempo">
+    <button type="button" class="knapp" id="bpm-ab" aria-label="Langsamer">−</button>
+    <div class="bpm" id="bpm-feld" title="Ziehen zum Ändern"><b id="bpm">120</b><small>BPM</small></div>
+    <button type="button" class="knapp" id="bpm-auf" aria-label="Schneller">+</button>
+    <button type="button" class="tap" id="tap">TAP</button>
+    <i class="puls" id="puls" aria-hidden="true"></i>
+  </div>
+  <div class="gruppe" aria-label="Tonart">
+    <label for="grundton">Tonart</label>
+    <select id="grundton"></select>
+    <select id="skala" aria-label="Skala"></select>
+  </div>
+  <div class="status" id="status"></div>
+  <button type="button" class="panik" id="panik">■ Alles ausblenden</button>
+</header>
+
+<main class="pult">
+  <section class="feld" id="f-szenen">
+    <div class="kopf"><h2>Klangwelten</h2><small>Tippen = überblenden · nochmal = stopp</small></div>
+    <div class="pads" id="pads"></div>
+    <h3>Speicher <small>leer: tippen speichert · voll: tippen ruft ab, lange drücken überschreibt</small></h3>
+    <div class="speicher" id="speicher"></div>
+  </section>
+  <section class="feld" id="f-schichten">
+    <div class="kopf"><h2 id="welt-titel">Schichten</h2><small>Doppeltipp = zurücksetzen</small></div>
+    <div class="fader-reihe" id="fader"></div>
+  </section>
+  <section class="feld" id="f-fx">
+    <div class="kopf"><h2>Effekte &amp; Tonart</h2><small>hoch/runter ziehen</small></div>
+    <div class="knoepfe" id="knoepfe"></div>
+  </section>
+</main>
+
+<footer class="shots" id="shots" aria-label="Einzelgeräusche"></footer>
+
+<div class="start" id="start">
+  <div>
+    <h1>Klangwelten Live</h1>
+    <p>Geräuschkulissen aus echten Aufnahmen, Effekte im Bandtempo und ein Drone in eurer Tonart.</p>
+    <button type="button" class="los" id="los">Tippen zum Starten</button>
+    <p class="tipp" id="start-info"></p>
+  </div>
+</div>
+
+<script src="daten.js"></script>
+<script>
+(() => {
+  "use strict";
+  const { LAUTHEIT, EV, WELTEN, quelle, dateien, SCHALE } = window.KLANG;
+  const $ = id => document.getElementById(id);
+  const zz = (a, b) => a + Math.random() * (b - a);
+  const zufall = l => l[Math.floor(Math.random() * l.length)];
+  const begrenze = (v, a, b) => Math.max(a, Math.min(b, v));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const zahl = (v, st) => (Math.round(v * Math.pow(10, st || 0)) / Math.pow(10, st || 0)).toLocaleString("de-DE");
+
+  /* ---------- Tonarten (Handpan-Skalen: Intervalle in Halbtönen ab dem Ding) ---------- */
+  const NOTEN = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "B", "H"];
+  const SKALEN = {
+    kurd: { name: "Kurd", iv: [0, 7, 8, 10, 12, 14, 15, 17, 19] },
+    celtic: { name: "Celtic Minor", iv: [0, 7, 10, 12, 14, 15, 17, 19, 22] },
+    hijaz: { name: "Hijaz", iv: [0, 7, 8, 11, 12, 14, 15, 17, 19] },
+    pygmy: { name: "Pygmy", iv: [0, 7, 10, 12, 14, 15, 19, 22, 24] },
+    integral: { name: "Integral", iv: [0, 7, 8, 10, 12, 14, 15, 19] },
+    dur: { name: "Dur (Sabye)", iv: [0, 7, 9, 11, 12, 14, 16, 19, 21] }
+  };
+  const TEILUNG = [["1/16", .25], ["1/8", .5], ["1/8 ·", .75], ["1/4", 1], ["1/4 ·", 1.5], ["1/2", 2]];
+
+  /* ---------- Gemerkter Zustand ---------- */
+  const SPEICHER_KEY = "klangwelten-live";
+  const STD_FX = { hall: 45, raum: 100, filter: 0, echo: 0, rueck: 40, teilung: 2, ton: 0, xfade: 4, drone: 0, hell: 35, schimmer: 0, master: 75 };
+  let zust = { welt: null, bpm: 120, grundton: 2, skala: "kurd", fx: Object.assign({}, STD_FX), mix: {}, speicher: [null, null, null, null, null, null, null, null] };
+  try { const z = JSON.parse(localStorage.getItem(SPEICHER_KEY) || "null"); if (z) { zust = Object.assign(zust, z); zust.fx = Object.assign({}, STD_FX, z.fx || {}); } } catch (_) {}
+  if (!Array.isArray(zust.speicher) || zust.speicher.length !== 8) zust.speicher = [null, null, null, null, null, null, null, null];
+  let speicherWarte = 0;
+  const speichern = () => { clearTimeout(speicherWarte); speicherWarte = setTimeout(() => { try { localStorage.setItem(SPEICHER_KEY, JSON.stringify(zust)); } catch (_) {} }, 300); };
+
+  /* ---------- Audio-Grundgerüst ----------
+     Quellen → trocken ─┬→ misch → Filter → Gesamt → Begrenzer → Ausgang
+                        ├→ Echo (Tempo) ─→ misch
+     Quellen → hallEin → Hall ───────────→ misch */
+  let ctx = null, gesamt, filt, misch, trocken, hallEin, hall, hallNass, echoSend, echo, echoRueck, echoNass, droneBus, stumm = null;
+  const puffer = new Map(), laedt = new Map();
+  function audioStart() {
+    if (ctx) { if (ctx.state !== "running") ctx.resume(); return; }
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try { ctx = new AC({ latencyHint: "interactive" }); } catch (_) { ctx = new AC(); }
+    const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -5; lim.knee.value = 4; lim.ratio.value = 14; lim.attack.value = .004; lim.release.value = .3;
+    gesamt = ctx.createGain(); gesamt.connect(lim); lim.connect(ctx.destination);
+    filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = 20000; filt.Q.value = .9; filt.connect(gesamt);
+    misch = ctx.createGain(); misch.connect(filt);
+    trocken = ctx.createGain(); trocken.connect(misch);
+    hallEin = ctx.createGain(); hall = ctx.createConvolver(); hallNass = ctx.createGain();
+    hallEin.connect(hall); hall.connect(hallNass); hallNass.connect(misch);
+    echoSend = ctx.createGain(); echo = ctx.createDelay(5); echoRueck = ctx.createGain(); echoNass = ctx.createGain();
+    const echoTon = ctx.createBiquadFilter(); echoTon.type = "lowpass"; echoTon.frequency.value = 3200;
+    const echoHoch = ctx.createBiquadFilter(); echoHoch.type = "highpass"; echoHoch.frequency.value = 160;
+    trocken.connect(echoSend); echoSend.connect(echo); echo.connect(echoTon); echoTon.connect(echoHoch); echoHoch.connect(echoRueck); echoRueck.connect(echo);
+    echoHoch.connect(echoNass); echoNass.connect(misch);
+    const echoHall = ctx.createGain(); echoHall.gain.value = .25; echoHoch.connect(echoHall); echoHall.connect(hallEin);
+    droneBus = ctx.createGain(); droneBus.gain.value = 0; droneBus.connect(trocken);
+    const droneHall = ctx.createGain(); droneHall.gain.value = .55; droneBus.connect(droneHall); droneHall.connect(hallEin);
+    /* ein stummer Ton im Audio-Element hält die Wiedergabe auch bei gesperrtem Bildschirm und mit Stummschalter am Leben */
+    try {
+      const n = 8000, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+      w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, "data"); v.setUint32(40, n, true);
+      for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+      let bin = ""; new Uint8Array(b).forEach(x => { bin += String.fromCharCode(x); });
+      stumm = new Audio("data:audio/wav;base64," + btoa(bin)); stumm.loop = true; stumm.setAttribute("playsinline", ""); stumm.play().catch(() => {});
+    } catch (_) {}
+    Object.keys(STD_FX).forEach(k => fxAnwenden(k, true));
+    raumSetzen();
+    setInterval(planen, 40);
+  }
+
+  /* ---------- Effekte anwenden ---------- */
+  const tonFaktor = () => Math.pow(2, zust.fx.ton / 12);
+  const takt = () => 60 / zust.bpm;
+  const echoZeit = () => begrenze(takt() * TEILUNG[zust.fx.teilung][1], .05, 4.8);
+  let raumWarte = 0;
+  function fxAnwenden(k, sofort) {
+    if (!ctx) return;
+    const f = zust.fx, j = ctx.currentTime, tc = sofort ? .001 : .04;
+    switch (k) {
+      case "master": gesamt.gain.setTargetAtTime(Math.pow(f.master / 100, 1.6), j, tc); break;
+      case "hall": hallNass.gain.setTargetAtTime(f.hall / 100 * 1.3, j, tc); break;
+      case "raum": clearTimeout(raumWarte); raumWarte = setTimeout(raumSetzen, sofort ? 0 : 250); break;
+      case "filter": {
+        const v = f.filter / 100;
+        if (v < -.02) { if (filt.type !== "lowpass") filt.type = "lowpass"; filt.frequency.setTargetAtTime(20000 * Math.pow(.009, -v), j, tc); filt.Q.setTargetAtTime(1.4, j, tc); }
+        else if (v > .02) { if (filt.type !== "highpass") filt.type = "highpass"; filt.frequency.setTargetAtTime(20 * Math.pow(110, v), j, tc); filt.Q.setTargetAtTime(1.4, j, tc); }
+        else { filt.type = "lowpass"; filt.frequency.setTargetAtTime(20000, j, tc); filt.Q.setTargetAtTime(.7, j, tc); }
+        break;
+      }
+      case "echo": echoSend.gain.setTargetAtTime(Math.pow(f.echo / 100, 1.3) * .8, j, tc); break;
+      case "rueck": echoRueck.gain.setTargetAtTime(f.rueck / 100 * .88, j, tc); break;
+      case "teilung": echo.delayTime.setTargetAtTime(echoZeit(), j, sofort ? .001 : .08); break;
+      case "ton": tonAnwenden(); break;
+      case "drone": droneBus.gain.setTargetAtTime(Math.pow(f.drone / 100, 1.5) * .42, j, sofort ? .001 : .15); if (f.drone > 0 && !drone) droneBauen(); break;
+      case "hell": if (drone) drone.lp.frequency.setTargetAtTime(hellFreq(), j, .1); break;
+    }
+  }
+  /* Raumhall: selbst erzeugter Nachhall, Länge aus Klangwelt × Raumgröße */
+  function raumSetzen() {
+    if (!ctx) return;
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === zust.welt);
+    const sek = begrenze((w ? w.raum : 1.5) * zust.fx.raum / 100, .3, 7);
+    const sr = ctx.sampleRate, n = Math.floor(sr * sek), b = ctx.createBuffer(2, n, sr);
+    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
+    hall.buffer = b;
+  }
+
+  /* ---------- Aufnahmen laden (offline aus dem Zwischenspeicher) ---------- */
+  function laden(n) {
+    if (puffer.has(n)) return Promise.resolve(puffer.get(n));
+    if (laedt.has(n)) return laedt.get(n);
+    const p = (n.startsWith("@") ? synth("kulisse", n.slice(1)) : fetch(quelle(n)).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(ab => new Promise((res, rej) => { const x = ctx.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); })))
+      .then(b => { puffer.set(n, b); return b; }).catch(() => { laedt.delete(n); return null; });
+    laedt.set(n, p); return p;
+  }
+  let werk = null, werkNr = 0; const werkWarten = new Map();
+  function synth(gruppe, art) {
+    return new Promise(res => {
+      const sr = 32000, fertig = d => { if (!d) return res(null); const b = ctx.createBuffer(1, d.length, sr); b.getChannelData(0).set(d); res(b); };
+      try {
+        if (!werk) { werk = new Worker("../klangwerk.js"); werk.onmessage = e => { const w = werkWarten.get(e.data.id); if (w) { werkWarten.delete(e.data.id); w(e.data.daten); } }; }
+        const id = ++werkNr; werkWarten.set(id, fertig); werk.postMessage({ id, gruppe, art, sr });
+      } catch (_) { res(null); }
+    });
+  }
+  const synthVorrat = {};
+  function synthEreignis(art) {
+    const v = synthVorrat[art] = synthVorrat[art] || { liste: [], laeuft: 0 };
+    const auf = () => { v.laeuft++; synth("effekt", art).then(b => { v.laeuft--; if (b) v.liste.push(b); }); };
+    while (v.liste.length + v.laeuft < 3) auf();
+    if (!v.liste.length) return null;
+    const b = v.liste.splice(Math.floor(Math.random() * v.liste.length), 1)[0]; auf(); return b;
+  }
+
+  /* ---------- Teppiche: immer neue Ausschnitte mit weichen Überblendungen, keine hörbare Schleife ---------- */
+  const N = 64, EIN = new Float32Array(N), AUS = new Float32Array(N);
+  for (let i = 0; i < N; i++) { EIN[i] = Math.sin(i / (N - 1) * Math.PI / 2); AUS[i] = Math.cos(i / (N - 1) * Math.PI / 2); }
+  let aktiv = null;
+  const mixVon = id => (zust.mix[id] = zust.mix[id] || { b: [], leben: 1 });
+  function bettStarten(welt, [name, staerke, label, o], i) {
+    const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false };
+    const m = mixVon(welt.id); if (typeof m.b[i] === "number") b.regler = m.b[i];
+    b.out.gain.value = 0;
+    if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(trocken); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); b.out.connect(lp); }
+    else { b.out.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; b.out.connect(s); s.connect(hallEin); }
+    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05));
+    laden(name).then(buf => {
+      if (!buf || b.aus) return;
+      b.buf = buf; b.naechst = ctx.currentTime + .05;
+      b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + Math.max(.3, zust.fx.xfade));
+      bettPlanen(b);
+    });
+    return b;
+  }
+  function bettPlanen(b) {
+    if (!b.buf || b.aus) return;
+    const D = b.buf.duration, tf = tonFaktor();
+    while (b.naechst < ctx.currentTime + 6) {
+      const basis = b.o.fest ? 1 : zz(.985, 1.015), rate = basis * tf, kurz = D < 15;
+      const len = Math.min((D - .3) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
+      const inhalt = len * rate, off = Math.random() * Math.max(0, D - inhalt - .2), t = b.naechst;
+      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b.buf; s.playbackRate.value = rate; s._basis = basis;
+      g.gain.value = 0; g.gain.setValueCurveAtTime(EIN, t, X); g.gain.setValueCurveAtTime(AUS, t + len - X, X);
+      s.connect(g); g.connect(b.out); s.start(t, off); s.stop(t + len + .05);
+      b.quellen.push(s); s.onended = () => { const k = b.quellen.indexOf(s); if (k >= 0) b.quellen.splice(k, 1); };
+      b.naechst = t + len - X;
+    }
+    if (ctx.currentTime > b.drift) { b.drift = ctx.currentTime + zz(8, 20); b.out.gain.setTargetAtTime(b.grund * b.regler * zz(.8, 1.12), ctx.currentTime, zz(2, 5)); }
+  }
+  function bettStopp(b, zeit) {
+    b.aus = true; const j = ctx.currentTime;
+    b.out.gain.cancelScheduledValues(j); b.out.gain.setValueAtTime(b.out.gain.value, j); b.out.gain.linearRampToValueAtTime(0, j + zeit);
+    b.quellen.forEach(s => { try { s.stop(j + zeit + .2); } catch (_) {} });
+    setTimeout(() => { try { b.out.disconnect(); } catch (_) {} }, (zeit + .5) * 1000);
+  }
+  /* Tonhöhe: laufende Ausschnitte gleiten mit, neue starten gleich richtig */
+  function tonAnwenden() {
+    if (!aktiv || !ctx) return;
+    const tf = tonFaktor(), j = ctx.currentTime;
+    aktiv.betten.forEach(b => b.quellen.forEach(s => { try { s.playbackRate.setTargetAtTime((s._basis || 1) * tf, j, .08); } catch (_) {} }));
+  }
+
+  /* ---------- Einzelgeräusche: mal nah, mal fern, links und rechts ---------- */
+  function ereignis(art, staerke, fern, vonHand) {
+    const e = EV[art]; if (!e) return;
+    const j = ctx.currentTime + .02, tf = tonFaktor();
+    const weit = !vonHand && Math.random() < (fern || 0), laut = staerke * (vonHand ? zz(.9, 1.05) : weit ? zz(.3, .55) : zz(.65, 1));
+    const g = ctx.createGain(); g.gain.value = laut;
+    let letzter = g;
+    if (weit) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = zz(900, 2600); g.connect(lp); letzter = lp; }
+    if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = vonHand ? zz(-.45, .45) : zz(-.8, .8); letzter.connect(pn); letzter = pn; }
+    letzter.connect(trocken); const s = ctx.createGain(); s.gain.value = weit ? .8 : .35; letzter.connect(s); s.connect(hallEin);
+    if (e.s) { const b = synthEreignis(e.s); if (b) spiel(b, g, j, zz(.94, 1.06) * tf); return; }
+    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1;
+    let t = j;
+    for (let k = 0; k < n; k++) {
+      const name = zufall(e.f), b = puffer.get(name);
+      if (!b) { laden(name); continue; }
+      if (e.lang) { const gg = ctx.createGain(), r = zz(e.tempo[0], e.tempo[1]) * tf, d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(1, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); gg.connect(g); spiel(b, gg, t, r); continue; }
+      spiel(b, g, t, (e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05)) * tf, e.folge ? zz(.7, 1) : 1);
+      if (e.folge) t += zz(e.folge[2], e.folge[3]);
+    }
+  }
+  function spiel(b, ziel, t, rate, g) {
+    const s = ctx.createBufferSource(); s.buffer = b; s.playbackRate.value = rate;
+    if (g != null && g !== 1) { const gg = ctx.createGain(); gg.gain.value = g; s.connect(gg); gg.connect(ziel); } else s.connect(ziel);
+    s.start(t);
+  }
+  const vorladen = art => { const e = EV[art]; if (!e) return Promise.resolve(); if (e.s) { synthEreignis(e.s); return Promise.resolve(); } return Promise.all(e.f.map(laden)); };
+
+  /* ---------- Drone und Schimmer in der gewählten Tonart ---------- */
+  const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const hellFreq = () => 110 * Math.pow(32, zust.fx.hell / 100);
+  let drone = null;
+  function droneBauen() {
+    if (!ctx) return;
+    const alt = drone, j = ctx.currentTime, d = 36 + zust.grundton; /* Grundton in der tiefen Lage, passend zum Didgeridoo */
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(1, j + 3); g.connect(droneBus);
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = hellFreq(); lp.Q.value = .8; lp.connect(g);
+    const oscs = [];
+    const lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = zz(.05, .09); lfoG.gain.value = hellFreq() * .25; lfo.connect(lfoG); lfoG.connect(lp.frequency); lfo.start(j); oscs.push(lfo);
+    [[d, .16], [d + 12, .11], [d + 19, .07]].forEach(([m, lv]) => {
+      [-7, 7].forEach(ct => { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = "sawtooth"; o.frequency.value = midiHz(m); o.detune.value = ct + zz(-2, 2); og.gain.value = lv / 2; o.connect(og); og.connect(lp); o.start(j); oscs.push(o); });
+    });
+    const sub = ctx.createOscillator(), sg = ctx.createGain(); sub.type = "sine"; sub.frequency.value = midiHz(d); sg.gain.value = .3; sub.connect(sg); sg.connect(g); sub.start(j); oscs.push(sub);
+    drone = { g, lp, oscs };
+    if (alt) { alt.g.gain.cancelScheduledValues(j); alt.g.gain.setValueAtTime(alt.g.gain.value, j); alt.g.gain.linearRampToValueAtTime(0, j + 3); alt.oscs.forEach(o => { try { o.stop(j + 3.2); } catch (_) {} }); }
+  }
+  /* Schimmer: einzelne Töne wie von einer fernen Handpan, auf den Achteln des Bandtempos */
+  function schimmerTon(t) {
+    const sk = SKALEN[zust.skala] || SKALEN.kurd, ding = 48 + zust.grundton;
+    const m = ding + zufall(sk.iv.slice(1)) + (Math.random() < .25 ? 12 : 0), f = midiHz(m), dauer = zz(2.4, 4.2);
+    const env = ctx.createGain(); env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(zz(.13, .2), t + .006); env.gain.exponentialRampToValueAtTime(.0005, t + dauer);
+    [[1, 1], [2, .28], [3, .1]].forEach(([k, lv]) => { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = "sine"; o.frequency.value = f * k; o.detune.value = zz(-4, 4); og.gain.value = lv; o.connect(og); og.connect(env); o.start(t); o.stop(t + dauer + .05); });
+    let z = env; if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = zz(-.6, .6); env.connect(pn); z = pn; }
+    z.connect(trocken); const h = ctx.createGain(); h.gain.value = .7; z.connect(h); h.connect(hallEin);
+  }
+
+  /* ---------- Zeitplan: Teppiche, Zufallsgeräusche, Takt ---------- */
+  let schritt = 0, naechsterSchlag = 0, letzteRunde = 0;
+  function planen() {
+    if (!ctx) return;
+    const j = ctx.currentTime;
+    if (j - letzteRunde > .25) { letzteRunde = j; weltTakt(j); }
+    if (naechsterSchlag < j - .5) naechsterSchlag = j + .05;
+    while (naechsterSchlag < j + .15) {
+      const t = naechsterSchlag, achtel = schritt % 8;
+      if (achtel % 2 === 0) pulsZeigen(t - j, achtel === 0);
+      const p = zust.fx.schimmer / 100;
+      if (p > 0 && Math.random() < p * (achtel % 2 === 0 ? .34 : .18)) { try { schimmerTon(t); } catch (_) {} }
+      schritt++; naechsterSchlag += takt() / 2;
+    }
+  }
+  function weltTakt(j) {
+    if (!aktiv) return;
+    aktiv.betten.forEach(bettPlanen);
+    if (aktiv.leben <= 0) return;
+    aktiv.welt.ereignisse.forEach((ev, i) => {
+      const [art, [a, b], st, fern] = ev;
+      if (aktiv.naechst[i] == null) aktiv.naechst[i] = j + zz(a * .3, b) / aktiv.leben;
+      if (j >= aktiv.naechst[i]) { try { ereignis(art, st, fern, false); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / aktiv.leben; }
+    });
+  }
+  const puls = $("puls");
+  function pulsZeigen(inSek, eins) {
+    setTimeout(() => { puls.className = "puls " + (eins ? "eins" : "an"); setTimeout(() => { puls.className = "puls"; }, 90); }, Math.max(0, inSek * 1000));
+  }
+
+  /* ---------- Klangwelt starten / wechseln / anhalten ---------- */
+  function weltStarten(welt) {
+    audioStart();
+    const alt = aktiv, x = Math.max(.3, zust.fx.xfade);
+    if (alt) alt.betten.forEach(b => bettStopp(b, x));
+    const m = mixVon(welt.id);
+    aktiv = { welt, betten: welt.betten.map((b, i) => bettStarten(welt, b, i)), naechst: {}, leben: m.leben != null ? m.leben : 1 };
+    welt.ereignisse.forEach(([art]) => vorladen(art));
+    zust.welt = welt.id; speichern();
+    raumSetzen(); wachHalten(true);
+    zeichnePads(); zeichneFader(); zeichneShots();
+    if ("mediaSession" in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({ title: welt.name, artist: "Klangwelten Live" }); } catch (_) {} }
+  }
+  function stoppen(zeit) {
+    if (!aktiv) return;
+    aktiv.betten.forEach(b => bettStopp(b, zeit != null ? zeit : Math.max(.3, zust.fx.xfade)));
+    aktiv = null;
+    zeichnePads(); zeichneFader();
+  }
+  function panik() {
+    if (!ctx) return;
+    const j = ctx.currentTime;
+    stoppen(2.5);
+    droneBus.gain.cancelScheduledValues(j); droneBus.gain.setValueAtTime(droneBus.gain.value, j); droneBus.gain.linearRampToValueAtTime(0, j + 2.5);
+    echoRueck.gain.cancelScheduledValues(j); echoRueck.gain.setTargetAtTime(0, j, .5);
+    zust.fx.drone = 0; zust.fx.schimmer = 0; speichern();
+    knopfListe.forEach(k => k.zeigen());
+    setTimeout(() => fxAnwenden("rueck"), 4000);
+  }
+
+  /* ---------- Bildschirm wach halten ---------- */
+  let wachSperre = null;
+  async function wachHalten(an) {
+    try {
+      if (an && !wachSperre && "wakeLock" in navigator) { wachSperre = await navigator.wakeLock.request("screen"); wachSperre.addEventListener("release", () => { wachSperre = null; }); }
+    } catch (_) {}
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && ctx) { wachHalten(true); if (ctx.state !== "running") ctx.resume(); } });
+
+  /* ---------- Bedienelemente: ziehen statt springen, damit live nichts plötzlich laut wird ---------- */
+  function ziehbar(el, { holen, setzen, std, min, max, weg }) {
+    let id = null, y0 = 0, v0 = 0, tap = 0;
+    el.addEventListener("pointerdown", e => {
+      if (id !== null) return;
+      e.preventDefault(); id = e.pointerId; try { el.setPointerCapture(id); } catch (_) {}
+      const jetzt = performance.now();
+      if (jetzt - tap < 320 && std != null) { setzen(std); tap = 0; } else tap = jetzt;
+      y0 = e.clientY; v0 = holen(); el.classList.add("greift");
+    });
+    el.addEventListener("pointermove", e => {
+      if (e.pointerId !== id) return;
+      const h = typeof weg === "function" ? weg() : weg;
+      setzen(begrenze(v0 + (y0 - e.clientY) / h * (max - min), min, max));
+    });
+    const ende = e => { if (e.pointerId !== id) return; id = null; el.classList.remove("greift"); };
+    el.addEventListener("pointerup", ende); el.addEventListener("pointercancel", ende); el.addEventListener("lostpointercapture", ende);
+  }
+
+  /* Drehregler */
+  const W0 = -135, W1 = 135;
+  const punkt = (a, r) => [40 + r * Math.sin(a * Math.PI / 180), 40 - r * Math.cos(a * Math.PI / 180)];
+  function bogen(a, b) {
+    if (Math.abs(b - a) < .5) return "";
+    const [x0, y0] = punkt(a, 31), [x1, y1] = punkt(b, 31);
+    return "M" + x0.toFixed(2) + " " + y0.toFixed(2) + " A31 31 0 " + (Math.abs(b - a) > 180 ? 1 : 0) + " " + (b > a ? 1 : 0) + " " + x1.toFixed(2) + " " + y1.toFixed(2);
+  }
+  const knopfListe = [];
+  const KNOEPFE = [
+    { k: "hall", nm: "Hall", min: 0, max: 100, fmt: v => Math.round(v) + " %" },
+    { k: "raum", nm: "Raumgröße", min: 30, max: 220, fmt: v => Math.round(v) + " %" },
+    { k: "filter", nm: "Filter", min: -100, max: 100, mitte: true, fmt: v => Math.abs(v) < 2 ? "offen" : v < 0 ? "dumpf " + Math.round(-v) : "dünn " + Math.round(v) },
+    { k: "echo", nm: "Echo", min: 0, max: 100, fmt: v => Math.round(v) + " %" },
+    { k: "rueck", nm: "Wiederholungen", min: 0, max: 100, fmt: v => Math.round(v) + " %" },
+    { k: "teilung", nm: "Echo-Takt", min: 0, max: TEILUNG.length - 1, stufen: true, fmt: v => TEILUNG[Math.round(v)][0] },
+    { k: "ton", nm: "Tonhöhe", min: -12, max: 12, mitte: true, stufen: true, weg: 380, fmt: v => (v > 0 ? "+" : "") + Math.round(v) + " HT" },
+    { k: "xfade", nm: "Überblenden", min: .5, max: 15, fmt: v => zahl(v, v < 10 ? 1 : 0) + " s" },
+    { k: "schimmer", nm: "Schimmer", min: 0, max: 100, kalt: true, fmt: v => v < 1 ? "aus" : Math.round(v) + " %" },
+    { k: "drone", nm: "Drone", min: 0, max: 100, kalt: true, fmt: v => v < 1 ? "aus" : Math.round(v) + " %" },
+    { k: "hell", nm: "Drone-Farbe", min: 0, max: 100, kalt: true, fmt: v => v < 30 ? "warm " + Math.round(v) : v < 70 ? "rund " + Math.round(v) : "hell " + Math.round(v) }
+  ];
+  function knoepfeBauen() {
+    const box = $("knoepfe");
+    KNOEPFE.forEach(d => {
+      const el = document.createElement("div"); el.className = "knopf" + (d.kalt ? " kalt" : ""); el.setAttribute("role", "slider"); el.setAttribute("aria-label", d.nm);
+      el.innerHTML = '<svg viewBox="0 0 80 80" aria-hidden="true"><path class="bahn" d="' + bogen(W0, W1) + '"/><circle class="kern" cx="40" cy="40" r="22"/><path class="bogen"/><line class="zeiger" x1="40" y1="40" x2="40" y2="22"/></svg><b></b><span>' + esc(d.nm) + "</span>";
+      box.appendChild(el);
+      const bg = el.querySelector(".bogen"), zg = el.querySelector(".zeiger"), wt = el.querySelector("b");
+      const k = {
+        zeigen() {
+          const v = zust.fx[d.k], r = (v - d.min) / (d.max - d.min), a = W0 + r * (W1 - W0);
+          const a0 = d.mitte ? 0 : W0; bg.setAttribute("d", d.mitte ? (a < 0 ? bogen(a, 0) : bogen(0, a)) : bogen(a0, a));
+          const [x, y] = punkt(a, 19); zg.setAttribute("x2", x.toFixed(2)); zg.setAttribute("y2", y.toFixed(2));
+          wt.textContent = d.fmt(v); el.setAttribute("aria-valuetext", d.fmt(v));
+          el.classList.toggle("aus", !d.mitte && v <= d.min);
+        }
+      };
+      ziehbar(el, {
+        holen: () => zust.fx[d.k], min: d.min, max: d.max, std: STD_FX[d.k], weg: d.weg || (d.stufen ? 150 : 230),
+        setzen: v => { if (d.stufen) v = Math.round(v); if (v === zust.fx[d.k]) return; zust.fx[d.k] = v; k.zeigen(); fxAnwenden(d.k); speichern(); }
+      });
+      k.zeigen(); knopfListe.push(k);
+    });
+  }
+
+  /* Fader für die Schichten der laufenden Klangwelt */
+  function faderEl(nm, wert, min, max, std, kalt, setzen, hundert) {
+    const el = document.createElement("div"); el.className = "fader" + (kalt ? " kalt" : ""); el.setAttribute("role", "slider"); el.setAttribute("aria-label", nm);
+    el.innerHTML = '<div class="spur">' + (hundert != null ? '<i class="marke100" style="bottom:' + ((hundert - min) / (max - min) * 100) + '%"></i>' : "") + '<div class="fuell"></div><div class="griff"></div></div><b></b><span>' + esc(nm) + "</span>";
+    const sp = el.querySelector(".spur"), fu = el.querySelector(".fuell"), gr = el.querySelector(".griff"), wt = el.querySelector("b");
+    let v = wert;
+    const zeigen = () => { const r = (v - min) / (max - min) * 100; fu.style.height = r + "%"; gr.style.bottom = r + "%"; wt.textContent = Math.round(v); };
+    ziehbar(el, { holen: () => v, min, max, std, weg: () => Math.max(120, sp.clientHeight), setzen: x => { v = x; zeigen(); setzen(x); } });
+    zeigen(); return el;
+  }
+  function zeichneFader() {
+    const box = $("fader"); box.innerHTML = "";
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === zust.welt);
+    $("welt-titel").textContent = w ? w.sym + " " + w.name : "Schichten";
+    if (w) {
+      const m = mixVon(w.id);
+      w.betten.forEach((bt, i) => box.appendChild(faderEl(bt[2], (typeof m.b[i] === "number" ? m.b[i] : 1) * 100, 0, 150, 100, false, x => {
+        m.b[i] = x / 100; speichern();
+        if (aktiv && aktiv.welt === w) { const b = aktiv.betten[i]; if (b && !b.aus) { b.regler = x / 100; b.out.gain.cancelScheduledValues(ctx.currentTime); b.out.gain.setTargetAtTime(b.grund * b.regler, ctx.currentTime, .05); } }
+      }, 100)));
+      box.appendChild(faderEl("Lebendigkeit", (m.leben != null ? m.leben : 1) * 100, 0, 200, 100, true, x => { m.leben = x / 100; if (aktiv && aktiv.welt === w) aktiv.leben = m.leben; speichern(); }, 100));
+    } else {
+      const l = document.createElement("p"); l.className = "leer"; l.textContent = "Wähle links eine Klangwelt – hier erscheinen ihre Schichten."; box.appendChild(l);
+    }
+    const t = document.createElement("i"); t.className = "trenner"; box.appendChild(t);
+    box.appendChild(faderEl("Gesamt", zust.fx.master, 0, 100, STD_FX.master, true, x => { zust.fx.master = x; fxAnwenden("master"); speichern(); }));
+  }
+
+  /* Klangwelt-Pads */
+  function zeichnePads() {
+    $("pads").innerHTML = WELTEN.map((w, i) => '<button type="button" class="pad' + (aktiv && aktiv.welt === w ? " an" : !aktiv && zust.welt === w.id ? " gewaehlt" : "") + '" data-i="' + i + '">' +
+      '<span class="nr">' + (i < 10 ? (i + 1) % 10 : "") + '</span><span class="sym" aria-hidden="true">' + w.sym + '</span><span class="nm">' + esc(w.name) + "</span></button>").join("");
+  }
+  $("pads").addEventListener("pointerdown", e => {
+    const p = e.target.closest(".pad"); if (!p) return;
+    const w = WELTEN[+p.dataset.i];
+    if (aktiv && aktiv.welt === w) stoppen(); else weltStarten(w);
+  });
+
+  /* Einzelgeräusche zum Auslösen */
+  const SHOT = {
+    krug: ["🍺", "Krüge"], stuhl: ["🪑", "Stuhl"], knarren: ["🪵", "Knarren"], schritte: ["👣", "Schritte"], holzschritte: ["👣", "Dielen"], muenzen: ["🪙", "Münzen"], tuer: ["🚪", "Tür"],
+    donner: ["⚡", "Donner"], heulen: ["🌬", "Heulen"], glocke: ["🔔", "Glocke"], gong: ["🛕", "Gong"], kette: ["⛓", "Ketten"], stein: ["🪨", "Steine"], platsch: ["💦", "Platsch"],
+    blubb: ["🫧", "Blubb"], insekt: ["🦟", "Insekten"], buch: ["📖", "Buch"], papier: ["📜", "Papier"], hammer: ["⚒", "Hammer"], metall: ["🗡", "Metall"], stoehnen: ["👻", "Stöhnen"],
+    schleim: ["🟢", "Schleim"], monster: ["👹", "Monster"], blasebalg: ["💨", "Blasebalg"], ast: ["🌿", "Ast"], kies: ["🪨", "Kies"], laubschritt: ["🍂", "Laub"], riegel: ["🔒", "Riegel"],
+    hund: ["🐕", "Hund"], tuch: ["🏳", "Tuch"], zischen: ["♨", "Zischen"], frosch: ["🐸", "Frosch"], chor: ["🎶", "Chor"], eule: ["🦉", "Eule"], moewe: ["🕊", "Möwe"], specht: ["🪶", "Specht"],
+    vogel: ["🐦", "Vogel"], kraehe: ["🐦", "Krähe"], wolf: ["🐺", "Wolf"], wal: ["🐋", "Wal"], pferd: ["🐎", "Pferd"], katze: ["🐈", "Katze"], ruder: ["🛶", "Ruder"], lachen: ["😄", "Lachen"], fledermaus: ["🦇", "Fledermaus"]
+  };
+  const IMMER = ["donner", "gong", "glocke", "chor", "wal", "wolf", "eule", "kette"];
+  const SHOT_TASTEN = "asdfghjkl;'\\";
+  let shotListe = [];
+  function zeichneShots() {
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === zust.welt);
+    const eigene = w ? [...new Set(w.ereignisse.map(e => e[0]))] : [];
+    shotListe = eigene.concat(IMMER.filter(a => !eigene.includes(a))).slice(0, 12);
+    const html = shotListe.map((a, i) => { const s = SHOT[a] || ["•", a]; return '<button type="button" class="shot' + (eigene.includes(a) ? " welt" : "") + '" data-i="' + i + '"><span class="sym" aria-hidden="true">' + s[0] + '</span><span class="nm">' + esc(s[1]) + "</span></button>"; });
+    while (html.length < 12) html.push('<span class="shot frei"></span>');
+    $("shots").innerHTML = html.join("");
+  }
+  function shotAusloesen(i) {
+    const art = shotListe[i]; if (!art) return;
+    audioStart(); wachHalten(true);
+    const btn = $("shots").querySelector('[data-i="' + i + '"]');
+    if (btn) { btn.classList.add("blitz"); setTimeout(() => btn.classList.remove("blitz"), 260); }
+    const w = aktiv ? aktiv.welt : null, ev = w ? w.ereignisse.find(e => e[0] === art) : null;
+    vorladen(art).then(() => { try { ereignis(art, Math.max(.5, ev ? ev[2] * 1.3 : .55), 0, true); } catch (_) {} });
+  }
+  $("shots").addEventListener("pointerdown", e => { const b = e.target.closest(".shot[data-i]"); if (b) shotAusloesen(+b.dataset.i); });
+
+  /* Speicher: ein Platz pro Song – Klangwelt, Mischung, Effekte und Tonart */
+  function zeichneSpeicher() {
+    $("speicher").innerHTML = zust.speicher.map((s, i) => {
+      const w = s && WELTEN.find(x => x.id === s.welt);
+      return '<button type="button" class="slot' + (s ? " voll" : "") + '" data-i="' + i + '"><b>' + (i + 1) + "</b>" + (s ? (w ? w.sym + " " : "") + esc(NOTEN[s.grundton] + " " + ((SKALEN[s.skala] || {}).name || "")) : "leer") + "</button>";
+    }).join("");
+  }
+  function speicherAblegen(i) {
+    zust.speicher[i] = { welt: aktiv ? aktiv.welt.id : zust.welt, fx: Object.assign({}, zust.fx), mix: JSON.parse(JSON.stringify(zust.mix[aktiv ? aktiv.welt.id : zust.welt] || {})), grundton: zust.grundton, skala: zust.skala };
+    delete zust.speicher[i].fx.master;
+    speichern(); zeichneSpeicher(); blitzSlot(i);
+  }
+  function speicherAbrufen(i) {
+    const s = zust.speicher[i]; if (!s) return;
+    const tonartNeu = s.grundton !== zust.grundton || s.skala !== zust.skala;
+    Object.keys(s.fx || {}).forEach(k => { if (k in STD_FX && k !== "master") zust.fx[k] = s.fx[k]; });
+    zust.grundton = s.grundton; zust.skala = s.skala; $("grundton").value = s.grundton; $("skala").value = s.skala;
+    if (s.welt) zust.mix[s.welt] = JSON.parse(JSON.stringify(s.mix || {}));
+    knopfListe.forEach(k => k.zeigen());
+    audioStart();
+    Object.keys(STD_FX).forEach(k => fxAnwenden(k));
+    if (tonartNeu && drone) droneBauen();
+    const w = WELTEN.find(x => x.id === s.welt);
+    if (w) weltStarten(w); else zeichneFader();
+    speichern(); blitzSlot(i);
+  }
+  function blitzSlot(i) { const b = $("speicher").querySelector('[data-i="' + i + '"]'); if (b) { b.classList.add("blitz"); setTimeout(() => b.classList.remove("blitz"), 350); } }
+  (() => {
+    let halte = 0, lang = false;
+    const box = $("speicher");
+    box.addEventListener("pointerdown", e => {
+      const b = e.target.closest(".slot"); if (!b) return; e.preventDefault();
+      const i = +b.dataset.i; lang = false;
+      clearTimeout(halte); halte = setTimeout(() => { lang = true; speicherAblegen(i); if (navigator.vibrate) navigator.vibrate(30); }, 650);
+    });
+    const los = e => {
+      const b = e.target.closest(".slot"); clearTimeout(halte); if (!b || lang) return;
+      const i = +b.dataset.i; if (zust.speicher[i]) speicherAbrufen(i); else speicherAblegen(i);
+    };
+    box.addEventListener("pointerup", los);
+    box.addEventListener("pointercancel", () => clearTimeout(halte));
+    box.addEventListener("contextmenu", e => e.preventDefault());
+  })();
+
+  /* Tempo */
+  function bpmSetzen(v) {
+    zust.bpm = Math.round(begrenze(v, 40, 220)); $("bpm").textContent = zust.bpm; fxAnwenden("teilung"); speichern();
+  }
+  $("bpm-ab").addEventListener("click", () => bpmSetzen(zust.bpm - 1));
+  $("bpm-auf").addEventListener("click", () => bpmSetzen(zust.bpm + 1));
+  ziehbar($("bpm-feld"), { holen: () => zust.bpm, setzen: bpmSetzen, min: 40, max: 220, weg: 500 });
+  let taps = [];
+  function tippen() {
+    const t = performance.now();
+    if (taps.length && t - taps[taps.length - 1] > 2000) taps = [];
+    taps.push(t); if (taps.length > 6) taps.shift();
+    const tb = $("tap"); tb.classList.add("blitz"); setTimeout(() => tb.classList.remove("blitz"), 90);
+    if (taps.length >= 2) {
+      const d = []; for (let i = 1; i < taps.length; i++) d.push(taps[i] - taps[i - 1]);
+      bpmSetzen(60000 / (d.reduce((a, b) => a + b, 0) / d.length));
+      if (ctx) { schritt = 0; naechsterSchlag = ctx.currentTime + takt(); }
+    }
+  }
+  $("tap").addEventListener("pointerdown", e => { e.preventDefault(); tippen(); });
+
+  /* Tonart */
+  $("grundton").innerHTML = NOTEN.map((n, i) => '<option value="' + i + '">' + n + "</option>").join("");
+  $("skala").innerHTML = Object.keys(SKALEN).map(k => '<option value="' + k + '">' + SKALEN[k].name + "</option>").join("");
+  $("grundton").value = zust.grundton; $("skala").value = zust.skala;
+  const tonartGeaendert = () => { zust.grundton = +$("grundton").value; zust.skala = $("skala").value; speichern(); if (drone) droneBauen(); };
+  $("grundton").addEventListener("change", tonartGeaendert); $("skala").addEventListener("change", tonartGeaendert);
+
+  $("panik").addEventListener("click", panik);
+
+  /* Tastatur, Bluetooth-Fußschalter und Seitenwender (senden Pfeiltasten oder Bild auf/ab) */
+  document.addEventListener("keydown", e => {
+    if (e.target && e.target.tagName === "SELECT") return;
+    const k = e.key;
+    const weiter = d => { const i = aktiv ? WELTEN.indexOf(aktiv.welt) : Math.max(0, WELTEN.findIndex(x => x.id === zust.welt)); weltStarten(WELTEN[(i + d + WELTEN.length) % WELTEN.length]); };
+    if (/^[0-9]$/.test(k)) { const i = k === "0" ? 9 : +k - 1; const w = WELTEN[i]; if (aktiv && aktiv.welt === w) stoppen(); else weltStarten(w); }
+    else if (k === "ArrowRight" || k === "ArrowDown" || k === "PageDown") weiter(1);
+    else if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp") weiter(-1);
+    else if (k === " ") { if (aktiv) stoppen(); else { const w = WELTEN.find(x => x.id === zust.welt) || WELTEN[0]; weltStarten(w); } }
+    else if (k === "Escape") panik();
+    else if (k === "t" || k === "T") tippen();
+    else if (SHOT_TASTEN.includes(k.toLowerCase())) shotAusloesen(SHOT_TASTEN.indexOf(k.toLowerCase()));
+    else return;
+    e.preventDefault();
+  });
+
+  /* ---------- Offline-Speicher: einmal mit Internet öffnen, danach läuft alles ohne ---------- */
+  const CACHE = "klangwelten-live-v1";
+  const statusEl = $("status");
+  async function offlineVorbereiten() {
+    if (!("caches" in window)) { statusEl.textContent = "Offline-Speicher nicht verfügbar"; return; }
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (_) {}
+    const liste = dateien().concat(SCHALE);
+    const c = await caches.open(CACHE);
+    let fertig = 0, fehlt = [];
+    for (const u of liste) { if (await c.match(new URL(u, location.href).href, { ignoreSearch: true })) fertig++; else fehlt.push(u); }
+    const zeigen = () => {
+      statusEl.innerHTML = fertig >= liste.length ? "<b>✓ Offline bereit</b> · " + liste.length + " Dateien gespeichert"
+        : navigator.onLine ? "⤓ Lade für offline … " + fertig + " / " + liste.length + " – App offen lassen" : "⚠ Erst " + fertig + " / " + liste.length + " offline – einmal mit WLAN öffnen";
+      $("start-info").innerHTML = statusEl.innerHTML;
+    };
+    zeigen();
+    if (!fehlt.length || !navigator.onLine) return;
+    let i = 0;
+    const arbeiter = async () => {
+      while (i < fehlt.length) {
+        const u = fehlt[i++];
+        try { const r = await fetch(u, { cache: "no-cache" }); if (r.ok) { await c.put(new URL(u, location.href).href, r); fertig++; } } catch (_) {}
+        zeigen();
+      }
+    };
+    await Promise.all([arbeiter(), arbeiter(), arbeiter(), arbeiter()]);
+    zeigen();
+  }
+  if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(() => {}); }
+  window.addEventListener("online", offlineVorbereiten);
+
+  /* ---------- Start ---------- */
+  $("bpm").textContent = zust.bpm;
+  knoepfeBauen(); zeichnePads(); zeichneFader(); zeichneShots(); zeichneSpeicher();
+  $("los").addEventListener("click", () => {
+    audioStart(); wachHalten(true);
+    $("start").hidden = true;
+  });
+  offlineVorbereiten();
+})();
+</script>
+</body>
+</html>

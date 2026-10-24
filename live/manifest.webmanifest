@@ -1,0 +1,16 @@
+{
+  "name": "Klangwelten Live",
+  "short_name": "Klangwelten",
+  "description": "Geräuschkulissen aus echten Aufnahmen für die Bühne – offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0e0b10",
+  "theme_color": "#0e0b10",
+  "lang": "de",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
