@@ -65,7 +65,7 @@
       neuFreigeschaltet: "Neu:",
       phase: { raub: "Raubzug", abwehr: "Der Zorn des Hains" },
       raubIntro: "Tippe, um die Ranke zu schleudern. Steine und Tiere ärgern Echo.",
-      abwehrIntro: "Tippe auf einen leuchtenden Pflanzplatz, um einen Wächter wachsen zu lassen. Tippe auf die Karte für Echos Zauber. Deine Wächter bleiben stehen.",
+      abwehrIntro: "Tippe auf einen leuchtenden Pflanzplatz, um einen Wächter wachsen zu lassen. Tippe auf die Karte für Echos Zauber. Doppeltipp pflanzt oder verstärkt sofort.",
       hud: { zorn: "Zorn", gier: "Gier", saat: "Saat", hort: "Hort", genug: "Genug!", wild: "Wildgestalt", feuerball: "Echos Zauber", gegner: "Plünderer" },
       formen: {
         ranke: ["Ranke", "Zieht alles, nur Felsen nicht."],
@@ -83,7 +83,7 @@
       },
       ausbruch: { feuerball: "FEUERBALL!", blitz: "BLITZ!", baer: "BÄRENWUT!", grummeln: "Hmpf. Echo schmollt.", feuersturm: "FEUERSTURM!" },
       ausbruchTipp: "Der Zorn ist voll. Bei Echo weiß man nie, was jetzt passiert …",
-      kommen: n => "Die Plünderer kommen in " + n + " …", jetzt: "Sofort kommen lassen", los: "Bereit – los geht's!", klaut: n => "−" + n + " Gold",
+      kommen: n => "Die Plünderer kommen in " + n + " …", jetzt: "Sofort kommen lassen", bereitLos: "Bereit – los geht's!", klaut: n => "−" + n + " Gold",
       bossRuft: { anfuehrer: "Der Goblin-Anführer!", glasstab: "Glasstab, Anführer der Roten Roben!", bugbaer: "Der Bugbear vom Wachturm!", nezna: "Nezna, die Drow!", venomfang: "Venomfang!", vrock: "Ein Vrock!", demogorgon: "DEMOGORGON!", riese: "Der rasende Riese!" },
       demo: { text: "Demogorgon ist nicht zu besiegen. Halte ihn auf, bis er im See versinkt!", weg: "Demogorgon versinkt im See …", schrei: "Sein Schrei lässt die Magie erlöschen!" },
       neznaFlieht: "Nezna wird zur Fledermaus!", gift: "Giftatem!", wurf: "Felswurf!", netzTreffer: "Eingesponnen!", geheimgang: "Geheimgang!",
@@ -146,7 +146,7 @@
       },
       tab: { waechter: "🌿 Wächter", tiere: "🐾 Tiere", setz: n => "🌱 " + n },
       frei: "frei", maxTier: "max", schlaeft: "schläft …", benommen: "benommen …", stufeHoch: n => "Stufe " + n + "!",
-      setzHinweis: "Neues Gebiet! Deine Wächter warten als Setzlinge darauf, kostenlos neu gepflanzt zu werden.",
+      setzHinweis: "Neues Gebiet! Deine Wächter warten als Setzlinge – „Wie zuletzt“ pflanzt sie so wie im letzten Gebiet.",
       gartenHinweis: "Deine Wächter und Tiere bleiben stehen. Jede Welle wird härter.",
       welle: (n, m) => "Welle " + n + "/" + m, welleIn: (n, m, sek) => "Welle " + n + "/" + m + " in " + sek + " …", welleBereit: (n, m) => "Welle " + n + "/" + m + " – starte, wenn du bereit bist", welleGeschafft: "Welle geschafft!", rufen: n => "Welle rufen +" + n + " 🌱",
       druide: { knopf: "🌙 Druidenkreis", titel: "Der Druidenkreis", text: "Mondsteine bleiben über alle Raubzüge hinweg erhalten. Für jedes gewonnene Level gibt es einen, für Bosse und neue Sterne mehr.", steine: n => "🌙 " + n + " Mondsteine", voll: "gemeistert", verdient: n => "+" + n + " 🌙" },
@@ -189,7 +189,36 @@
         drache: "Venomfang erwacht! Giftatem!", gift: "Gift! −2 s", geschmolzen: "Geschmolzen!", verbrannt: "Autsch! Verbrannt!" },
       vorschau: "Es kommen", traegt: n => "+" + n + " zurück!", entkommt: n => "−" + n + " Gold entkommen!", leer: "Nichts mehr da!",
       raubHinweis: "Wer Gold stiehlt, rennt damit zum Eingang zurück. Halte ihn auf, dann ist es wieder deins!",
-      schnell: ["⏩ ×2", "▶ ×1"],
+      schnell: ["⏩ ×2", "⏩ ×3", "▶ ×1"],
+      wieZuletzt: "↺ Wie zuletzt", zurueckBeutel: "↩ in den Beutel", gefahr: "Nächste Welle",
+      zinsenText: n => "🐿 Ungenutzte Saat bringt nach der Welle +" + n + " 🌱 Zinsen", zinsen: n => "+" + n + " 🌱 Zinsen",
+      erspart: n => "🐿 Ersparnis: +" + n + " 🌱 fürs nächste Level", ersparnisStart: n => "🐿 +" + n + " 🌱 Ersparnis", ersparnisWert: "Ersparnis",
+      elite: "Elite", eliteArt: { panzer: "gepanzert", flink: "flink", teilung: "teilt sich", heilung: "heilt sich", schild: "mit Schild" },
+      launeTitel: "Wetter",
+      launen: {
+        nebel: ["Nebel", "Plünderer tasten sich 15 % langsamer voran", "Wächter sehen 15 % weniger weit"],
+        gewitter: ["Gewitter", "Blitzwächter +50 % Schaden, Blitze schlagen in Plünderer ein", "Plünderer haben 12 % mehr Leben"],
+        vollmond: ["Vollmond", "Tiere kämpfen 50 % stärker", "Zauber laden 30 % langsamer"],
+        frost: ["Frost", "Eiswächter +35 % Schaden, Kälte bremst länger", "Dornen und Wölfe schießen langsamer"],
+        duerre: ["Dürre", "Pilze +50 % Schaden", "Wurzeln reichen 25 % weniger weit"],
+        regen: ["Regen", "Wurzeln +30 % Reichweite und +20 % Schaden", "Zauber 30 % schwächer"],
+        goldrausch: ["Goldrausch", "+50 % Saat und +30 % Punkte", "35 % mehr Plünderer"],
+        sturm: ["Sturm", "Flieger 35 % langsamer", "Alle Wächter schießen 12 % langsamer"],
+        nacht: ["Neumond", "+25 % Saat", "Doppelt so viele Elite-Gegner"]
+      },
+      kleinodTitel: "Beute des Bosses", kleinodText: "Wähle ein Kleinod. Es begleitet dich für den Rest des Raubzugs.", kleinodKnopf: "☠ Beute wählen", kleinodeLabel: "Kleinode:",
+      kleinod: {
+        giftdorn: ["Natternzahn", "Dornen vergiften ihr Ziel zusätzlich"], rudel: ["Rudelhorn", "Wölfe +50 % Schaden"],
+        frostherz: ["Frostherz", "Eis +20 % Schaden, Kälte hält 50 % länger"], donnerhall: ["Donnerhall", "Blitzketten springen auf 2 Gegner mehr"],
+        pilzring: ["Hexenring", "Pilze +30 % Schaden und größere Wolken"], wurzelherz: ["Wurzelherz", "Wurzeln +25 % Reichweite"],
+        falkenauge: ["Falkenauge", "Alle Wächter +10 % Reichweite"], zunder: ["Zunderbüchse", "Zauber 20 % schneller bereit und 25 % stärker"],
+        wildherz: ["Wildherz", "Tiere +35 % Kraft"], saatbeutel: ["Saatbeutel", "+25 % Saat von erlegten Plünderern"],
+        sparstrumpf: ["Sparstrumpf", "Zinsen und Ersparnis +75 %"], schatzwacht: ["Schatzwacht", "+60 Gold Notreserve im Hort"],
+        kleeblatt: ["Vierblatt", "Elite-Gegner bringen doppelte Beute"], uraltrinde: ["Uralte Rinde", "Stufe 4 kostet 25 % weniger"]
+      },
+      tag: { knopf: "📅 Tagesherausforderung", titel: "Tagesherausforderung", text: "Jeden Tag eine neue Prüfung: dieselbe Karte, dieselben Gegner, dasselbe Wetter für alle. Ohne Hain und ohne Garten – nur dein Geschick zählt.",
+        heute: d => "Heute · " + d, dabei: "Kleinode für heute:", best: n => "Dein Bestes heute: " + n + " Punkte", liste: "Bestenliste von heute", punkte: "Punkte",
+        nochmal: "↻ Nochmal versuchen", zumStart: "← Zum Start", verloren: "Der Hort ist gefallen – aber jede erlegte Bande zählt.", geschafft: "Hort gehalten!", start: "▶ Antreten", leer: "Heute hat sich noch niemand eingetragen. Sei die Erste oder der Erste!" },
       helfer: { rex: "Rex!", rexText: "Wuff! Weg da!", rexSack: "Rex schnappt sich den Beutel!", barradin: "Barradin spielt auf!", barradinText: "Die Wächter tanzen im Takt.", ezekiel: "Ezekiel!", ezekielText: "Aus den Schatten …" },
       sterne: { sieg: "Hort verteidigt", alles: "Kein Gold entkommen", gier: "Gier ×1,45 oder mehr" },
       levelwahl: "★ Level wählen", levelwahlTitel: "Level wählen", levelwahlText: "Spiel ein Level noch einmal und hol dir mehr Sterne. Echos Hain ist dabei so weit gewachsen wie in deinem besten Raubzug.",
@@ -262,7 +291,7 @@
       neuFreigeschaltet: "New:",
       phase: { raub: "Raid", abwehr: "Wrath of the grove" },
       raubIntro: "Tap to hurl the vine. Stones and animals annoy Echo.",
-      abwehrIntro: "Tap a glowing planting spot to grow a guardian. Tap the map for Echo's spell. Your guardians stay.",
+      abwehrIntro: "Tap a glowing planting spot to grow a guardian. Tap the map for Echo's spell. Double-tap plants or upgrades at once.",
       hud: { zorn: "Rage", gier: "Greed", saat: "Seeds", hort: "Hoard", genug: "Enough!", wild: "Wild shape", feuerball: "Echo's spells", gegner: "Plunderers" },
       formen: {
         ranke: ["Vine", "Pulls anything except boulders."],
@@ -280,7 +309,7 @@
       },
       ausbruch: { feuerball: "FIREBALL!", blitz: "LIGHTNING!", baer: "BEAR RAGE!", grummeln: "Hmph. Echo sulks.", feuersturm: "FIRESTORM!" },
       ausbruchTipp: "His rage is full. With Echo you never know what happens next …",
-      kommen: n => "The plunderers arrive in " + n + " …", jetzt: "Bring them on now", los: "Ready – let's go!", klaut: n => "−" + n + " gold",
+      kommen: n => "The plunderers arrive in " + n + " …", jetzt: "Bring them on now", bereitLos: "Ready – let's go!", klaut: n => "−" + n + " gold",
       bossRuft: { anfuehrer: "The goblin boss!", glasstab: "Glasstaff, leader of the Redbrands!", bugbaer: "The bugbear of the watchtower!", nezna: "Nezna the drow!", venomfang: "Venomfang!", vrock: "A vrock!", demogorgon: "DEMOGORGON!", riese: "The raging giant!" },
       demo: { text: "Demogorgon cannot be defeated. Hold him off until he sinks back into the lake!", weg: "Demogorgon sinks into the lake …", schrei: "His scream snuffs out all magic!" },
       neznaFlieht: "Nezna turns into a bat!", gift: "Poison breath!", wurf: "Boulder throw!", netzTreffer: "Webbed!", geheimgang: "Secret passage!",
@@ -343,7 +372,7 @@
       },
       tab: { waechter: "🌿 Guardians", tiere: "🐾 Animals", setz: n => "🌱 " + n },
       frei: "free", maxTier: "max", schlaeft: "sleeping …", benommen: "dazed …", stufeHoch: n => "Level " + n + "!",
-      setzHinweis: "New region! Your guardians wait as seedlings to be replanted for free.",
+      setzHinweis: "New region! Your guardians wait as seedlings – “As before” replants them like in the last region.",
       gartenHinweis: "Your guardians and animals stay. Every wave gets harder.",
       welle: (n, m) => "Wave " + n + "/" + m, welleIn: (n, m, sek) => "Wave " + n + "/" + m + " in " + sek + " …", welleBereit: (n, m) => "Wave " + n + "/" + m + " – start when ready", welleGeschafft: "Wave cleared!", rufen: n => "Call wave +" + n + " 🌱",
       druide: { knopf: "🌙 Druid circle", titel: "The druid circle", text: "Moonstones stay with you across all raids. Every won level earns one, bosses and new stars earn more.", steine: n => "🌙 " + n + " moonstones", voll: "mastered", verdient: n => "+" + n + " 🌙" },
@@ -386,7 +415,36 @@
         drache: "Venomfang wakes! Poison breath!", gift: "Poison! −2 s", geschmolzen: "Melted!", verbrannt: "Ouch! Burned!" },
       vorschau: "Coming", traegt: n => "+" + n + " back!", entkommt: n => "−" + n + " gold escaped!", leer: "Nothing left!",
       raubHinweis: "Whoever steals gold runs back to the entrance with it. Stop them and it's yours again!",
-      schnell: ["⏩ ×2", "▶ ×1"],
+      schnell: ["⏩ ×2", "⏩ ×3", "▶ ×1"],
+      wieZuletzt: "↺ As before", zurueckBeutel: "↩ back to pouch", gefahr: "Next wave",
+      zinsenText: n => "🐿 Unspent seeds earn +" + n + " 🌱 interest after the wave", zinsen: n => "+" + n + " 🌱 interest",
+      erspart: n => "🐿 Savings: +" + n + " 🌱 for the next level", ersparnisStart: n => "🐿 +" + n + " 🌱 savings", ersparnisWert: "Savings",
+      elite: "Elite", eliteArt: { panzer: "armoured", flink: "swift", teilung: "splits", heilung: "regenerates", schild: "shielded" },
+      launeTitel: "Weather",
+      launen: {
+        nebel: ["Fog", "Plunderers grope 15% slower", "Guardians see 15% less far"],
+        gewitter: ["Thunderstorm", "Lightning guardians +50% damage, bolts strike plunderers", "Plunderers have 12% more health"],
+        vollmond: ["Full moon", "Animals fight 50% harder", "Spells recharge 30% slower"],
+        frost: ["Frost", "Ice guardians +35% damage, cold slows longer", "Thorns and wolves fire slower"],
+        duerre: ["Drought", "Mushrooms +50% damage", "Roots reach 25% less far"],
+        regen: ["Rain", "Roots +30% range and +20% damage", "Spells 30% weaker"],
+        goldrausch: ["Gold rush", "+50% seeds and +30% points", "35% more plunderers"],
+        sturm: ["Storm", "Flyers 35% slower", "All guardians fire 12% slower"],
+        nacht: ["New moon", "+25% seeds", "Twice as many elite enemies"]
+      },
+      kleinodTitel: "The boss's loot", kleinodText: "Pick a trinket. It stays with you for the rest of the raid.", kleinodKnopf: "☠ Choose loot", kleinodeLabel: "Trinkets:",
+      kleinod: {
+        giftdorn: ["Viper fang", "Thorns also poison their target"], rudel: ["Pack horn", "Wolves +50% damage"],
+        frostherz: ["Frost heart", "Ice +20% damage, cold lasts 50% longer"], donnerhall: ["Thunder echo", "Lightning chains jump to 2 more enemies"],
+        pilzring: ["Fairy ring", "Mushrooms +30% damage and bigger clouds"], wurzelherz: ["Root heart", "Roots +25% range"],
+        falkenauge: ["Hawk eye", "All guardians +10% range"], zunder: ["Tinderbox", "Spells ready 20% sooner and 25% stronger"],
+        wildherz: ["Wild heart", "Animals +35% strength"], saatbeutel: ["Seed pouch", "+25% seeds from slain plunderers"],
+        sparstrumpf: ["Nest egg", "Interest and savings +75%"], schatzwacht: ["Hoard ward", "+60 gold emergency reserve in the hoard"],
+        kleeblatt: ["Four-leaf clover", "Elite enemies drop double loot"], uraltrinde: ["Ancient bark", "Level 4 costs 25% less"]
+      },
+      tag: { knopf: "📅 Daily challenge", titel: "Daily challenge", text: "A new trial every day: the same map, the same enemies, the same weather for everyone. No grove, no garden – only your skill counts.",
+        heute: d => "Today · " + d, dabei: "Today's trinkets:", best: n => "Your best today: " + n + " points", liste: "Today's leaderboard", punkte: "points",
+        nochmal: "↻ Try again", zumStart: "← To the start", verloren: "The hoard has fallen – but every slain gang counts.", geschafft: "Hoard held!", start: "▶ Step up", leer: "Nobody has entered today yet. Be the first!" },
       helfer: { rex: "Rex!", rexText: "Woof! Get lost!", rexSack: "Rex grabs the pouch!", barradin: "Barradin strikes up!", barradinText: "The guardians dance to the beat.", ezekiel: "Ezekiel!", ezekielText: "From the shadows …" },
       sterne: { sieg: "Hoard defended", alles: "No gold escaped", gier: "Greed ×1.45 or more" },
       levelwahl: "★ Choose level", levelwahlTitel: "Choose level", levelwahlText: "Play a level again and earn more stars. Echo's grove has grown as far as in your best raid.",
@@ -552,6 +610,63 @@
     erdbeben:   { ab: 17, sym: "⛰️", cd: 24, farbe: "#c98a5a" }
   };
   const ZAUBER_REIHE = ["feuerball", "eissturm", "mondstrahl", "adler", "erdbeben"];
+
+  /* ===== Wetter je Level: immer ein Vorteil und ein Nachteil =====
+     m: Faktoren für mod(). Zahl = gilt für alles, Objekt = je Wächter (dorn, wurzel, wolf, eis, blitz, pilz) oder "alle". */
+  const LAUNEN = {
+    nebel:      { sym: "🌫️", m: { reich: { alle: 0.85 }, feindTempo: 0.85 } },
+    gewitter:   { sym: "⛈️", ab: WACHTER.blitz.ab, m: { schaden: { blitz: 1.5 }, feindHp: 1.12 }, blitzschlag: true },
+    vollmond:   { sym: "🌕", ab: 1, m: { tier: 1.5, zauberCd: 1.3 } },
+    frost:      { sym: "❄️", ab: WACHTER.eis.ab, m: { schaden: { eis: 1.35 }, bremsT: 1.5, rate: { dorn: 0.8, wolf: 0.85 } } },
+    duerre:     { sym: "☀️", ab: WACHTER.pilz.ab, m: { schaden: { pilz: 1.5 }, reich: { wurzel: 0.75 } } },
+    regen:      { sym: "🌧️", m: { reich: { wurzel: 1.3 }, schaden: { wurzel: 1.2 }, zauberSchaden: 0.7 } },
+    goldrausch: { sym: "💰", m: { anzahl: 1.35, saat: 1.5, punkte: 1.3 } },
+    sturm:      { sym: "🌪️", m: { flugTempo: 0.65, rate: { alle: 0.88 } } },
+    nacht:      { sym: "🌑", ab: 3, m: { elite: 2, saat: 1.25 } }
+  };
+  const LAUNEN_REIHE = Object.keys(LAUNEN);
+  const launenFuer = lv => LAUNEN_REIHE.filter(k => (LAUNEN[k].ab || 0) <= lv);
+  /* ===== Kleinode: Beute nach jedem Boss, eins aus drei, gilt bis zum Ende des Raubzugs ===== */
+  const KLEINODE = {
+    giftdorn:   { sym: "🐍", m: {} },
+    rudel:      { sym: "🐺", m: { schaden: { wolf: 1.5 } } },
+    frostherz:  { sym: "💎", m: { bremsT: 1.5, schaden: { eis: 1.2 } } },
+    donnerhall: { sym: "⚡", m: {} },
+    pilzring:   { sym: "🍄", m: { schaden: { pilz: 1.3 } } },
+    wurzelherz: { sym: "🌳", m: { reich: { wurzel: 1.25 } } },
+    falkenauge: { sym: "👁️", m: { reich: { alle: 1.1 } } },
+    zunder:     { sym: "🔥", m: { zauberCd: 0.8, zauberSchaden: 1.25 } },
+    wildherz:   { sym: "🐾", m: { tier: 1.35 } },
+    saatbeutel: { sym: "🌰", m: { saat: 1.25 } },
+    sparstrumpf:{ sym: "🧦", m: { zins: 1.75 } },
+    schatzwacht:{ sym: "🗝️", m: {} },
+    kleeblatt:  { sym: "🍀", m: { eliteBeute: 2 } },
+    uraltrinde: { sym: "🪵", m: { uraltPreis: 0.75 } }
+  };
+  const KLEINODE_REIHE = Object.keys(KLEINODE);
+  /* ===== Elite-Plünderer: selten, zäher, bringen mehr Beute ===== */
+  const ELITE = {
+    panzer:  { sym: "🛡️", farbe: "#d8cfb8", hp: 2.4 },
+    flink:   { sym: "💨", farbe: "#9fd6ec", hp: 1.5, v: 1.45 },
+    teilung: { sym: "✂️", farbe: "#c49ae0", hp: 1.6 },
+    heilung: { sym: "✚", farbe: "#8ac24a", hp: 1.6 },
+    schild:  { sym: "🔰", farbe: "#e0a046", hp: 1.4, schild: 0.7 }
+  };
+  const ELITE_REIHE = Object.keys(ELITE);
+  /* Vorteile und Nachteile aus Wetter und Kleinoden zusammenrechnen */
+  function mod(art, k) {
+    if (!S) return 1;
+    let m = 1;
+    const nimm = q => { const v = q && q[art]; if (v == null) return; m *= typeof v === "number" ? v : (v[k] != null ? v[k] : v.alle != null ? v.alle : 1); };
+    if (S.laune && LAUNEN[S.laune.k]) nimm(LAUNEN[S.laune.k].m);
+    (S.kleinode || []).forEach(id => { if (KLEINODE[id]) nimm(KLEINODE[id].m); });
+    return m;
+  }
+  const hat = id => !!(S && S.kleinode && S.kleinode.includes(id));
+  const launeVon = () => (S && S.laune && LAUNEN[S.laune.k]) ? S.laune.k : null;
+  /* Zinsen: Echo ist ein Sparfuchs */
+  const zinsen = saat => Math.max(0, Math.floor(Math.min(saat * 0.08, 8 + 2 * Math.min(S.lv, KAMPAGNE + 6)) * mod("zins")));
+  const ersparnis = saat => Math.max(0, Math.floor(Math.min(saat * 0.25, 40 + 8 * Math.min(S.lv, KAMPAGNE + 6)) * mod("zins")));
 
   /* Wildgestalten. ab = ab welchem Level verfügbar */
   const FORMEN = {
@@ -995,7 +1110,7 @@
   function speichern() {
     if (!S || S.einzel) return;
     fortschrittMerken();
-    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten() };
+    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten(), laune: S.laune || null, kleinode: S.kleinode || [], angebot: S.angebot || null, erspart: S.erspart || 0 };
     schreib(SPEICHER, JSON.stringify(k));
   }
   function gespeichert() {
@@ -1008,7 +1123,7 @@
     S.garten = k.garten && typeof k.garten === "object" ? { g: k.garten.g, turme: Object.assign({}, k.garten.turme || {}), setzlinge: (k.garten.setzlinge || []).slice() } : null;
   }
   /* ---------- Der Garten: Wächter und Tiere bleiben stehen ---------- */
-  const turmKurz = T => ({ k: T.k, st: T.st, zweig: T.zweig || null, ziel: T.ziel || "vorne", tier: !!T.tier, wert: T.wert || 0 });
+  const turmKurz = T => ({ k: T.k, st: T.st, zweig: T.zweig || null, ziel: T.ziel || "vorne", tier: !!T.tier, wert: T.wert || 0, u: T.u != null ? T.u : null });
   function gartenSync() {
     if (!S || !S.garten || !S.A) return;
     const G = S.garten; G.turme = {};
@@ -1031,7 +1146,8 @@
     if (!S.garten) S.garten = { g, turme: {}, setzlinge: [] };
     const G = S.garten;
     if (G.g !== g) {
-      Object.keys(G.turme).forEach(i => G.setzlinge.push(turmKurz(G.turme[i])));
+      /* u = wo am Weg der Wächter stand (0 = Eingang, 1 = Hort) – für „Wie zuletzt“ */
+      Object.keys(G.turme).forEach(i => { const z = turmKurz(G.turme[i]); if (z.u == null) z.u = Math.min(1, +i / 27); G.setzlinge.push(z); });
       G.turme = {}; G.g = g;
     }
     plaetze.forEach((p, i) => {
@@ -1662,6 +1778,19 @@
     }
     return m;
   }
+  /* Position am Weg (0 = Eingang, 1 = Hort) */
+  function pfadU(P, x, y) {
+    let best = 0, bd = 1e9;
+    for (let s = 0; s <= P.gesamt; s += 6) { const q = pfadPunkt(P, s), d = abst(q.x, q.y, x, y); if (d < bd) { bd = d; best = s; } }
+    return best / P.gesamt;
+  }
+  /* liegt der Punkt in der Schneise, durch die Flieger vom Eingang zum Hort fliegen? */
+  function flugSchneise(P, y) {
+    const st = P.p[0], u = klemm((y - 20) / (HORT.y - 30), 0, 1);
+    const l = Math.max(30, st.x - 120), rr = Math.min(W - 30, st.x + 120);
+    return { links: l + (HORT.x - l) * u, rechts: rr + (HORT.x - rr) * u };
+  }
+  function inFlugschneise(P, x, y, rand) { if (y < 20 || y > HORT.y) return false; const f = flugSchneise(P, y); return x >= f.links - rand && x <= f.rechts + rand; }
   function plaetzeBauen(P) {
     const l = [];
     let seite = 1;
@@ -1702,7 +1831,7 @@
     const wellen = [], endlos = lv >= KAMPAGNE;
     let rohS = 0, nS = 0;
     for (let w = 0; w < WELLEN; w++) {
-      const roh = Math.min(44, Math.round(7 + lv * 0.85 + innen * 1.5 + w * 3 + gier * 1.5));
+      const roh = Math.min(50, Math.round((7 + lv * 0.85 + innen * 1.5 + w * 3 + gier * 1.5) * mod("anzahl")));
       /* Endlos: weniger, dafür zähere Gegner – gleiche Gesamtstärke, aber zügigere Wellen */
       const n = endlos ? Math.min(18, roh) : roh;
       const l = [];
@@ -1727,19 +1856,21 @@
     musikStart(GEB[g].musik, 1); musikWechsel(1);
     const P = pfadBauen(lv);
     const gl = R.gl || gegnerListe(lv, R.gier);
-    const reserve = 20 + 30 * up("notgroschen");
+    const reserve = 20 + 30 * up("notgroschen") + (hat("schatzwacht") ? 60 : 0);
     S.phase = "abwehr";
     S.texte = []; S.teilchen = []; S.banner = null; S.blitze = []; S.quip = null; S.quipT = 0;
     S.A = {
       g, P, plaetze: plaetzeBauen(P), feinde: [], geschosse: [], effekte: [],
       hort: R.beute + reserve, reserve, hortStart: R.beute + reserve,
-      saat: (S.einzel ? (S.garten && S.garten.setzlinge.length ? 60 + 10 * lv : 110 + 40 * lv) : 30) + 12 * up("ernte") + 15 * tal("boden") + R.saat, zorn: 0, zauber: zauberWahlPruefen().map(k => ({ k, cd: 0, max: ZAUBER[k].cd * Math.pow(0.85, up("funken")) * Math.pow(0.92, tal("mondsegen")) })), aktiv: 0, mond: null, adler: null,
+      saat: (S.einzel ? (S.garten && S.garten.setzlinge.length ? 60 + 10 * lv : 110 + 40 * lv) : 30) + 12 * up("ernte") + 15 * tal("boden") + R.saat, zorn: 0, zauber: zauberWahlPruefen().map(k => ({ k, cd: 0, max: ZAUBER[k].cd * Math.pow(0.85, up("funken")) * Math.pow(0.92, tal("mondsegen")) * mod("zauberCd") })), aktiv: 0, mond: null, adler: null,
       wellen: gl.wellen, welle: -1, warte: [], boss: gl.boss || null, bossDa: false, ansturm: [], fallen: [], auraT: 0, demo: !!gl.demo, demoT: 0, demoDauer: 62, demoWeg: false,
       spawnT: 0, abstand: lv >= KAMPAGNE ? 0.55 : Math.max(0.42, 1.4 - lv * 0.035), gespawnt: 0, hpBonus: gl.hpBonus || 1, licht: [], teiche: [],
-      vorT: 12, wahl: -1, baer: null, erlegt: 0, verlorenGold: 0, zurueckGold: 0, schnell: lies("imres-echohort-schnell", "") === "1",
+      vorT: 12, wahl: -1, baer: null, erlegt: 0, verlorenGold: 0, zurueckGold: 0, schnell: klemm(parseInt(lies("imres-echohort-schnell", "1"), 10) || 1, 1, 3), pauseNr: 0, blitzT: 5, rng: S.tag ? lcg(tagSaat(S.tag) + 77) : null, zinsGesamt: 0,
       helfer: [], helferT: zw(12, 18) * [1, 0.72, 0.5][up("freunde")], barradinT: 0, portrait: null, letzterHelfer: "", punkte: 0, gesamt: gl.liste.length + (gl.demo ? 1 : 0), lv, fertig: false, endeT: 0, bossGerufen: false
     };
     if (S.A.demo) S.A.gesamt = gl.liste.length;
+    S.A.plaetze.forEach(p => { p.u = pfadU(P, p.x, p.y); p.luftNah = inFlugschneise(P, p.x, p.y, 46); });
+    if (!S.einzel && S.erspart > 0) { S.A.saat += S.erspart; S.A.ersparnisStart = S.erspart; S.erspart = 0; }
     gartenVorbereiten(g, S.A.plaetze);
     /* leerer Garten (neue Welt oder neues Spiel): kein Countdown, erst losgehen, wenn Echo bereit ist */
     S.A.halt = !S.A.plaetze.some(p => p.turm);
@@ -1747,11 +1878,11 @@
     hintergrundAbwehr(g, P);
   }
 
-  function feindNeu(typ, s) {
+  function feindNeu(typ, s, elite) {
     const A = S.A, d = FEINDE[typ], lv = S.lv;
-    const hpF = (d.boss ? 1 + 0.09 * lv + 0.004 * lv * lv : skalierung(lv) * (A.hpBonus || 1)) * STUFEN[S.stufe].hp * (1 + 0.07 * Math.max(0, A.welle));
+    const hpF = (d.boss ? 1 + 0.09 * lv + 0.004 * lv * lv : skalierung(lv) * (A.hpBonus || 1)) * STUFEN[S.stufe].hp * (1 + 0.07 * Math.max(0, A.welle)) * mod("feindHp");
     const e = {
-      typ, d, hp: d.hp * hpF, max: d.hp * hpF, v: d.v * STUFEN[S.stufe].tempo * (1 + Math.min(0.4, lv * 0.012)), r: d.r,
+      typ, d, hp: d.hp * hpF, max: d.hp * hpF, v: d.v * STUFEN[S.stufe].tempo * (1 + Math.min(0.4, lv * 0.012)) * mod("feindTempo") * (d.flug ? mod("flugTempo") : 1), r: d.r,
       s: s || 0, x: 0, y: 0, flug: !!d.flug, bremse: 1, bremsT: 0, festT: 0, gift: 0, giftT: 0,
       cd: 3 + Math.random() * 2, unsT: 0, unsichtbarZyklus: Math.random() * 4, ph: Math.random() * 6, treffT: 0, verwandelt: false, tot: false
     };
@@ -1760,6 +1891,11 @@
       e.x = klemm(st.x + zw(-120, 120), 30, W - 30); e.y = 20;
     } else { const q = pfadPunkt(A.P, e.s); e.x = q.x; e.y = q.y; }
     if (d.unbesiegbar) e.v = A.P.gesamt / 58 * STUFEN[S.stufe].tempo;
+    if (elite && ELITE[elite] && !d.boss && !d.unbesiegbar) {
+      const E = ELITE[elite]; e.elite = elite;
+      e.hp *= E.hp; e.max = e.hp; if (E.v) e.v *= E.v; if (E.schild) { e.schild = e.max * E.schild; e.schildMax = e.schild; }
+      text(e.x, Math.max(52, e.y + 22), E.sym + " " + t().elite, E.farbe, 12, 1.2);
+    }
     if (d.boss) {
       text(W / 2, 180, t().bossRuft[typ] || "", "#c4564a", 22, 2.2);
       banner(t().bossRuft[typ] || "", "#c4564a", 2.2);
@@ -1784,8 +1920,10 @@
       // Gegner kommen
       A.spawnT -= dt;
       if (A.warte.length && A.spawnT <= 0) {
-        const typ = A.warte.shift();
-        feindNeu(typ);
+        const typ = A.warte.shift(), wurf = A.rng || Math.random;
+        const chance = S.lv < 3 ? 0 : Math.min(0.16, 0.03 + 0.004 * S.lv) * mod("elite");
+        const ew = wurf() < chance ? ELITE_REIHE[Math.floor(wurf() * ELITE_REIHE.length)] : null;
+        feindNeu(typ, 0, ew);
         A.gespawnt++;
         A.spawnT = A.abstand * (A.gespawnt % 8 === 0 ? 2.6 : 1) * zw(0.75, 1.25);
       }
@@ -1799,6 +1937,15 @@
           if (dm) { dm.tot = true; funken(dm.x, dm.y, 40, ["#4aa0b0", "#9fd6ec", "#ebe2cc"], 120, 3); }
           banner(t().demo.weg, "#9fd6ec", 2.4); KLANG.puff();
         }
+      }
+    }
+    // Gewitter: ab und zu schlägt ein Blitz in einen Plünderer
+    if (launeVon() && LAUNEN[launeVon()].blitzschlag && A.vorT <= 0 && A.feinde.length) {
+      A.blitzT -= dt;
+      if (A.blitzT <= 0) {
+        A.blitzT = zw(5, 8);
+        const z = zufall(A.feinde.filter(e => sichtbarFuer(e) && !e.d.unbesiegbar).concat([null]));
+        if (z) { S.blitze.push({ art: "blitz", x1: z.x + zw(-30, 30), y1: 30, x2: z.x, y2: z.y, t: 0, dauer: 0.35, seed: Math.random(), dick: true }); treffen(z, 70 * turmSk(), "kette"); funken(z.x, z.y, 10, ["#f3e27a", "#ffffff"], 80, 2); KLANG.blitz(); }
       }
     }
     // Tiere: Auren und Bären am Weg
@@ -1909,12 +2056,13 @@
     const letzte = A.welle >= A.wellen.length - 1;
     if (A.vorT <= 0 && !A.warte.length && !A.feinde.length && (!A.demo || !letzte || A.demoWeg)) {
       if (letzte) { A.fertig = true; A.verloren = false; A.endeT = 0; KLANG.sieg(); banner(t().sicher, "#e0a046", 2); }
-      else { A.vorT = 9; const b = 4 + 3 * (A.welle + 1); A.saat += b; banner(t().welleGeschafft, "#cfe6a8", 1.6); musikLage(1); musikSignal("geschafft"); text(W / 2, 260, "+" + b + " 🌱", "#cfe6a8", 18, 1.6); KLANG.kaufen(); }
+      else { A.vorT = 9; const b = 4 + 3 * (A.welle + 1), z = zinsen(A.saat); A.saat += b + z; A.zinsGesamt += z; banner(t().welleGeschafft, "#cfe6a8", 1.6); musikLage(1); musikSignal("geschafft"); text(W / 2, 260, "+" + b + " 🌱", "#cfe6a8", 18, 1.6); if (z > 0) text(W / 2, 284, t().zinsen(z), "#ffd34d", 14, 2); KLANG.kaufen(); }
     }
   }
   function welleStarten() {
     const A = S.A;
-    A.vorT = 0; A.welle++;
+    A.vorT = 0; A.welle++; A.halt = false; A.pauseNr++; A.letzterTipp = null;
+    A.plaetze.forEach(p => { if (p.turm) { p.turm.frisch = 0; p.turm.ausBeutel = null; } });
     A.warte = A.wellen[A.welle].slice(); A.spawnT = 0.3; A.gespawnt = 0;
     banner(t().welle(A.welle + 1, A.wellen.length), "#e0a046", 1.4); KLANG.boss(); if (MZ.lage < 3) musikLage(2); musikSignal("welle");
     if (A.demo && A.welle === A.wellen.length - 1) { A.demoT = 0; A.bossGerufen = false; }
@@ -1930,6 +2078,7 @@
     e.ph += dt; e.treffT = Math.max(0, e.treffT - dt);
     if (e.bremsT > 0) { e.bremsT -= dt; if (e.bremsT <= 0) e.bremse = 1; }
     if (e.giftT > 0) { e.giftT -= dt; treffen(e, e.gift * dt, "gift", true); if (e.tot) return; }
+    if (e.elite === "heilung" && e.hp < e.max) e.hp = Math.min(e.max, e.hp + e.max * 0.035 * dt);
     // Fähigkeiten
     e.cd -= dt;
     if (e.enthuelltT > 0) e.enthuelltT -= dt;
@@ -2015,15 +2164,21 @@
     if (art === "feuer" && d.feuerSchwach) schaden *= 2;
     if (e.bruchT > 0) schaden *= 1.25;
     if (e.markT > 0 && e.flug) schaden *= 1.3;
+    if (e.schild > 0) { const ab = Math.min(e.schild, schaden); e.schild -= ab; schaden -= ab; if (e.schild <= 0 && !still) { funken(e.x, e.y, 10, ["#e0a046", "#ffd34d"], 70); KLANG.stein(); } }
     e.hp -= schaden; if (!still) e.treffT = 0.12;
     if (e.hp <= 0) {
       e.tot = true; A.erlegt++; S.erlegtGesamt++;
       if (d.boss && !d.unbesiegbar) { STAT.bosse[e.typ] = 1; erfolgPruefen("bosse"); }
       if (e.beute) goldZurueck(e);
       if (e.seuche && e.giftT > 0) A.feinde.forEach(o => { if (o !== e && !o.tot && abst(o.x, o.y, e.x, e.y) < 46) { o.gift = Math.max(o.gift, e.gift); o.giftT = 3; o.seuche = true; S.blitze.push({ art: "sporenwolke", x: o.x, y: o.y, r: 16, t: 0, dauer: 0.5 }); } });
-      const zaeh = d.boss ? 1 : (A.hpBonus || 1);
-      A.punkte += Math.round(d.pkt * zaeh);
-      const saat = Math.round(d.pkt * 0.18 * zaeh) + 1;
+      const zaeh = d.boss ? 1 : (A.hpBonus || 1), el = e.elite ? 1 : 0;
+      A.punkte += Math.round(d.pkt * zaeh * mod("punkte") * (el ? 2 : 1));
+      const saat = Math.round((Math.round(d.pkt * 0.18 * zaeh) + 1) * mod("saat") * (el ? 3 * mod("eliteBeute") : 1));
+      if (e.elite === "teilung") for (let i = 0; i < 2; i++) {
+        const n = feindNeu(e.typ, e.flug ? 0 : Math.max(0, e.s - 8 - i * 12)); A.gesamt++;
+        n.hp = n.max = e.max / ELITE.teilung.hp * 0.4; n.r = Math.max(6, e.r * 0.75);
+        if (e.flug) { n.x = e.x + (i ? 12 : -12); n.y = e.y; }
+      }
       A.saat += saat;
       if (d.boss) { text(e.x, e.y - 20, "+" + d.pkt, "#ffd34d", 22); funken(e.x, e.y, 40, ["#e0a046", "#c4564a", "#ebe2cc"], 150, 3.5); KLANG.boom(); S.beben = 0.4; }
       else { funken(e.x, e.y, 8, [d.farbe, "#ebe2cc"], 70); text(e.x, e.y - 10, "+" + saat + " 🌱", "#cfe6a8", 11, 0.9); KLANG.tod(); }
@@ -2056,8 +2211,8 @@
     T.anim = Math.max(0, (T.anim || 0) - dt);
     if (T.netz) T.netz = Math.max(0, T.netz - dt);
     if (T.ausT > 0) { T.ausT -= dt; return; }
-    T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1) * (T._tempo || 1); if (T.cd > 0) return;
-    const reich = w.reich[st] * (T._reich || 1), sch = w.schaden[st] * turmSk();
+    T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1) * (T._tempo || 1) * mod("rate", T.k); if (T.cd > 0) return;
+    const reich = w.reich[st] * (T._reich || 1) * mod("reich", T.k), sch = w.schaden[st] * turmSk() * mod("schaden", T.k), bremsF = mod("bremsT");
     let ziele = imKreis(p.x, p.y, reich);
     if (w.typ === "biss") ziele = ziele.filter(e => !e.flug);
     if (!ziele.length) { T.cd = 0.1; return; }
@@ -2072,7 +2227,7 @@
       const zs = wahl(ziele).slice(0, zw2 === "b" ? 3 : 1);
       zs.forEach((z, i) => {
         const wi = Math.atan2(z.y - (p.y - 12), z.x - p.x); if (i === 0) T.winkel = wi;
-        S.A.geschosse.push({ art: "dorn", x: p.x + Math.cos(wi) * 10, y: p.y - 12 + Math.sin(wi) * 10, ziel: z, schaden: sch * (zw2 === "b" ? 0.75 : 1), t: 0, w: wi, st, gift: zw2 === "a" ? sch * 0.6 : 0 });
+        S.A.geschosse.push({ art: "dorn", x: p.x + Math.cos(wi) * 10, y: p.y - 12 + Math.sin(wi) * 10, ziel: z, schaden: sch * (zw2 === "b" ? 0.75 : 1), t: 0, w: wi, st, gift: (zw2 === "a" ? sch * 0.6 : 0) + (hat("giftdorn") ? sch * 0.35 : 0) });
       });
       KLANG.dorn();
     } else if (T.k === "wurzel") {
@@ -2082,7 +2237,7 @@
         if (zw2 === "b") e.bruchT = 3;
         S.blitze.push({ art: "wurzelstich", x: e.x, y: e.y, t: 0, dauer: 0.55, seed: Math.random() });
         if (e.d.wurzelFest) return;
-        e.bremse = Math.min(e.bremse, w.bremse[st]); e.bremsT = Math.max(e.bremsT, w.bremsT);
+        e.bremse = Math.min(e.bremse, w.bremse[st]); e.bremsT = Math.max(e.bremsT, w.bremsT * bremsF);
         if (zw2 === "a") { if (e.d.boss) festhalten(e, 0.4); else festhalten(e, 1.2); }
         else if (st >= 2) festhalten(e, 0.5);
       });
@@ -2091,7 +2246,7 @@
     } else if (T.k === "eis") {
       wahl(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
         const a = -Math.PI / 2 + (i - (w.ziele[st] - 1) / 2) * 0.5;
-        S.A.geschosse.push({ art: "splitter", x: p.x + Math.cos(a) * 6, y: p.y - 16 + Math.sin(a) * 6, ziel: e, schaden: sch, bremse: w.bremse[st], bremsT: w.bremsT, t: 0, w: a, dreh: 0, frost: zw2 === "a", teilen: zw2 === "b" });
+        S.A.geschosse.push({ art: "splitter", x: p.x + Math.cos(a) * 6, y: p.y - 16 + Math.sin(a) * 6, ziel: e, schaden: sch, bremse: w.bremse[st], bremsT: w.bremsT * bremsF, t: 0, w: a, dreh: 0, frost: zw2 === "a", teilen: zw2 === "b" });
       });
       S.blitze.push({ art: "frost", x: p.x, y: p.y - 6, r: 24, t: 0, dauer: 0.35 });
       KLANG.frost();
@@ -2104,7 +2259,7 @@
       KLANG.biss();
     } else if (w.typ === "kette") {
       let z = wahl(ziele)[0], x0 = p.x, y0 = p.y - 30 - st * 2, s = sch * (zw2 === "b" ? 3 : 1);
-      const n = zw2 === "a" ? 7 : zw2 === "b" ? 1 : w.ziele[st], abfall = zw2 === "a" ? 0.9 : 0.8;
+      const n = (zw2 === "a" ? 7 : zw2 === "b" ? 1 : w.ziele[st]) + (hat("donnerhall") ? 2 : 0), abfall = zw2 === "a" ? 0.9 : 0.8;
       const gehabt = new Set();
       for (let i = 0; i < n && z; i++) {
         gehabt.add(z);
@@ -2121,7 +2276,7 @@
     } else if (w.typ === "gift") {
       wahl(ziele).slice(0, w.ziele[st]).forEach((e, i) => {
         const vor = e.flug ? { x: e.x, y: e.y } : pfadPunkt(S.A.P, e.s + e.v * e.bremse * 0.55);
-        S.A.geschosse.push({ art: "spore", x0: p.x + (i - 1) * 5, y0: p.y - 10, x1: vor.x, y1: vor.y, x: p.x, y: p.y - 10, t: 0, dauer: 0.55, schaden: sch, r: zw2 === "b" ? 44 : 28, seuche: zw2 === "a", bremst: zw2 === "b" });
+        S.A.geschosse.push({ art: "spore", x0: p.x + (i - 1) * 5, y0: p.y - 10, x1: vor.x, y1: vor.y, x: p.x, y: p.y - 10, t: 0, dauer: 0.55, schaden: sch, r: (zw2 === "b" ? 44 : 28) * (hat("pilzring") ? 1.3 : 1), seuche: zw2 === "a", bremst: zw2 === "b" });
       });
     }
   }
@@ -2166,7 +2321,7 @@
     });
   }
   function tierUpdate(p, dt) {
-    const T = p.turm, A = S.A, sk = turmSk() * wild(), st = T.st;
+    const T = p.turm, A = S.A, sk = turmSk() * wild() * mod("tier"), st = T.st;
     T.anim = Math.max(0, (T.anim || 0) - dt);
     if (T.ausT > 0) { T.ausT -= dt; return; }
     T.faehigT -= dt * (A.barradinT > 0 ? 1.4 : 1);
@@ -2416,7 +2571,7 @@
     const A = S.A, z = A.zauber[A.aktiv]; if (!z) return;
     if (z.cd > 0) { text(x, y, Math.ceil(z.cd) + " s", "#a89f8f", 13, 0.7); return; }
     z.cd = z.max;
-    const sk = 1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10);
+    const sk = (1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10)) * mod("zauberSchaden");
     if (z.k === "feuerball") {
       A.geschosse.push({ art: "feuerball", x0: HORT.x, y0: HORT.y - 26, x1: x, y1: y, x: HORT.x, y: HORT.y - 26, t: 0, dauer: 0.38, r: 50 + 8 * up("feuer"), schaden: 70 * (1 + 0.25 * up("feuer")) * sk });
       knistern(0.3, 0.12, "bandpass", 1400);
@@ -2456,7 +2611,7 @@
     }
     if (A.adler) {
       const B = A.adler; B.t += dt; B.x += B.vx * dt; B.y += B.vy * dt;
-      const sk = 1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10);
+      const sk = (1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10)) * mod("zauberSchaden");
       A.feinde.forEach(e => {
         if (e.tot || B.getroffen.has(e) || abst(B.x, B.y, e.x, e.y) > 22 + e.r) return;
         B.getroffen.add(e); if (e.beute) goldZurueck(e);
@@ -2510,12 +2665,12 @@
   /* Bauen */
   function wachterFrei(k) { return S.lv >= WACHTER[k].ab; }
   function tierFrei(k) { return S.lv >= TIERE[k].ab; }
-  function kosten(k, st) { return Math.round(WACHTER[k].kosten[st] * (1 - 0.06 * tal("saatgut"))); }
+  function kosten(k, st) { return Math.round(WACHTER[k].kosten[st] * (1 - 0.06 * tal("saatgut")) * (st === 3 ? mod("uraltPreis") : 1)); }
   function tierKosten(k, st) { return TIERE[k].kosten[st]; }
   function tierAnzahl(k) { return S.A.plaetze.filter(p => p.turm && p.turm.tier && p.turm.k === k).length; }
   function setzen(p, z, c) {
     const A = S.A;
-    p.turm = turmNeu(Object.assign({ wert: c }, z));
+    p.turm = turmNeu(Object.assign({ wert: c }, z)); p.turm.u = p.u; p.turm.frisch = 0; p.turm.ausBeutel = null;
     if (p.turm.tier) { tierPosten(p); if (p.turm.k === "baer") p.turm.hp = baerMaxHp(p.turm); }
     funken(p.x, p.y, 16, ["#6f9a3a", "#cfe6a8", "#ebe2cc"], 80); KLANG.bau(); vib(20);
     S.blitze.push({ art: "aufwertung", x: p.x, y: p.y, t: 0, dauer: 0.75, klein: true });
@@ -2525,21 +2680,21 @@
     const A = S.A, p = A.plaetze[A.wahl]; if (!p || p.turm) return;
     const c = kosten(k, 0); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
     A.saat -= c; A.bauTyp = k; schreib("imres-echohort-bautyp", k);
-    setzen(p, { k, st: 0 }, c);
+    setzen(p, { k, st: 0 }, c); p.turm.frisch = c;
   }
   function tierBauen(k) {
     const A = S.A, p = A.plaetze[A.wahl]; if (!p || p.turm) return;
     if (tierAnzahl(k) >= tierMax()) { text(p.x, p.y - 20, t().maxTier, "#c4564a", 13); return; }
     const c = tierKosten(k, 0); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
     A.saat -= c; A.tierTyp = k;
-    setzen(p, { k, st: 0, tier: true }, c);
+    setzen(p, { k, st: 0, tier: true }, c); p.turm.frisch = c;
   }
   function setzlingPflanzen(i) {
     const A = S.A, p = A.plaetze[A.wahl], G = S.garten; if (!p || p.turm || !G.setzlinge[i]) return;
     const z = G.setzlinge[i];
     if (z.tier && tierAnzahl(z.k) >= tierMax()) { text(p.x, p.y - 20, t().maxTier, "#c4564a", 13); return; }
     G.setzlinge.splice(i, 1);
-    setzen(p, z, z.wert || 0);
+    setzen(p, z, z.wert || 0); p.turm.ausBeutel = turmKurz(z);
     if (!G.setzlinge.length) A.bauTab = "waechter";
     A.setzWahl = 0;
   }
@@ -2549,6 +2704,7 @@
     if (!T.tier && T.st === 1 && !zweig) return;
     const c = T.tier ? tierKosten(T.k, T.st + 1) : kosten(T.k, T.st + 1); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
     A.saat -= c; T.st++; T.wert += c; if (zweig) T.zweig = zweig; T.wachs = 0.4;
+    if (A.vorT > 0 || A.halt) T.frisch = (T.frisch || 0) + c;
     S.blitze.push({ art: "aufwertung", x: p.x, y: p.y, t: 0, dauer: 1.1 }); text(p.x, p.y - 34, t().stufeHoch(T.st + 1), "#ffd34d", 15, 1.4);
     if (T.tier && T.k === "baer") T.hp = baerMaxHp(T);
     funken(p.x, p.y, 22, ["#e0a046", "#cfe6a8", "#ffd34d"], 100); KLANG.bau(); vib(25);
@@ -2558,16 +2714,49 @@
     const A = S.A, p = A.plaetze[A.wahl]; if (!p || !p.turm || p.turm.tier) return;
     const l = ["vorne", "stark", "nah"]; p.turm.ziel = l[(l.indexOf(p.turm.ziel || "vorne") + 1) % 3]; KLANG.griff();
   }
+  /* Was gibt es beim Ausreißen zurück? In der Baupause wird ein Fehlgriff voll erstattet. */
+  function rueckgabe(T) {
+    const A = S.A, bau = A.vorT > 0 || A.halt, fr = bau ? (T.frisch || 0) : 0;
+    if (bau && T.ausBeutel) return { beutel: true, saat: fr };
+    return { beutel: false, saat: Math.round(fr + (T.wert - fr) * 0.5) };
+  }
   function ausreissen() {
     const A = S.A, p = A.plaetze[A.wahl]; if (!p || !p.turm) return;
-    const n = Math.round(p.turm.wert * 0.5); A.saat += n; text(p.x, p.y - 20, "+" + n + " 🌱", "#cfe6a8", 13);
+    const rg = rueckgabe(p.turm), n = rg.saat;
+    if (rg.beutel) { S.garten.setzlinge.push(p.turm.ausBeutel); text(p.x, p.y - 34, t().zurueckBeutel, "#cfe6a8", 13); }
+    A.saat += n; if (n) text(p.x, p.y - 20, "+" + n + " 🌱", "#cfe6a8", 13);
     p.turm = null; funken(p.x, p.y, 10, ["#8a6440", "#6f9a3a"], 70); KLANG.puff(); A.wahl = -1; gartenSync();
   }
 
+  /* „Wie zuletzt“: Setzlinge in derselben Reihenfolge am Weg wieder einpflanzen */
+  function wieZuletzt() {
+    const A = S.A, G = S.garten; if (!G || !G.setzlinge.length) return;
+    const n = G.setzlinge.length;
+    const l = G.setzlinge.map((z, i) => ({ z, u: z.u != null ? z.u : i / Math.max(1, n - 1) })).sort((a, b) => a.u - b.u);
+    let gesetzt = 0;
+    l.forEach(o => {
+      if (o.z.tier && tierAnzahl(o.z.k) >= tierMax()) return;
+      let best = null, bd = 1e9;
+      A.plaetze.forEach(p => { if (p.turm) return; const d = Math.abs(p.u - o.u) + (p.luft ? 0.04 : 0); if (d < bd) { bd = d; best = p; } });
+      if (!best) return;
+      G.setzlinge.splice(G.setzlinge.indexOf(o.z), 1);
+      setzen(best, o.z, o.z.wert || 0); best.turm.ausBeutel = turmKurz(o.z); gesetzt++;
+    });
+    if (!G.setzlinge.length) A.bauTab = "waechter";
+    A.setzWahl = 0; A.wahl = -1;
+  }
   function abwehrTippen(p) {
     const A = S.A; if (A.fertig) return;
     const i = A.plaetze.findIndex(q => abst(q.x, q.y, p.x, p.y) < 24);
     if (i >= 0) {
+      const jetzt = performance.now(), doppel = A.letzterTipp && A.letzterTipp.i === i && jetzt - A.letzterTipp.t < 400;
+      A.letzterTipp = doppel ? null : { i, t: jetzt };
+      if (doppel) {
+        /* Doppeltipp: leerer Platz → gewählten Wächter pflanzen, Wächter → eine Stufe stärker */
+        A.wahl = i; const T = A.plaetze[i].turm;
+        if (T) { if (T.tier || T.st !== 1) verstaerken(); } else knopfDruck("pflanzen");
+        return;
+      }
       A.wahl = A.wahl === i ? -1 : i; KLANG.griff();
       if (!A.bauTyp || !wachterFrei(A.bauTyp)) { const l = lies("imres-echohort-bautyp", "dorn"); A.bauTyp = WACHTER[l] && wachterFrei(l) ? l : "dorn"; }
       if (S.garten.setzlinge.length) A.bauTab = "setz"; else if (A.bauTab === "setz") A.bauTab = "waechter";
@@ -3276,14 +3465,23 @@
       x.strokeStyle = "rgba(255,211,77," + (0.5 + Math.sin(zeit * 10) * 0.3) + ")"; x.lineWidth = 1.5; x.setLineDash([3, 3]); x.beginPath(); x.arc(0, 0, r + 4, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
     }
     if (e.festT > 0) { x.strokeStyle = "#8a6440"; x.lineWidth = 2; x.beginPath(); x.moveTo(-r, r); x.quadraticCurveTo(-r * 0.5, 0, 0, r * 0.8); x.quadraticCurveTo(r * 0.5, 0, r, r); x.stroke(); }
+    if (e.elite) {
+      const E = ELITE[e.elite];
+      x.save(); x.globalAlpha = 0.55 + Math.sin(zeit * 6 + e.ph) * 0.25; x.strokeStyle = E.farbe; x.lineWidth = 2;
+      x.beginPath(); x.arc(0, 0, r + 4, 0, Math.PI * 2); x.stroke();
+      if (e.schild > 0) { x.globalAlpha = 0.35; x.fillStyle = E.farbe; kreis(x, 0, 0, r + 3); }
+      x.globalAlpha = 1; x.font = "10px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(E.sym, r + 3, -r - 2);
+      x.restore();
+    }
     x.restore();
     lebensbalken(x, e);
   }
   function lebensbalken(x, e) {
-    if (e.d.unbesiegbar || e.hp >= e.max) return;
+    if (e.d.unbesiegbar || (e.hp >= e.max && !(e.schild > 0))) return;
     const b = Math.max(14, e.r * 2), y = e.y - e.r - (e.flug ? 14 : 8);
     x.fillStyle = "rgba(0,0,0,.6)"; x.fillRect(e.x - b / 2 - 1, y - 1, b + 2, 4);
-    x.fillStyle = e.d.boss ? "#c4564a" : "#8ac24a"; x.fillRect(e.x - b / 2, y, b * klemm(e.hp / e.max, 0, 1), 2);
+    x.fillStyle = e.d.boss ? "#c4564a" : e.elite ? ELITE[e.elite].farbe : "#8ac24a"; x.fillRect(e.x - b / 2, y, b * klemm(e.hp / e.max, 0, 1), 2);
+    if (e.schild > 0) { x.fillStyle = "rgba(0,0,0,.6)"; x.fillRect(e.x - b / 2 - 1, y - 4, b + 2, 3); x.fillStyle = "#e0a046"; x.fillRect(e.x - b / 2, y - 3.5, b * klemm(e.schild / e.schildMax, 0, 1), 2); }
   }
   function malFigur(x, typ, r, d, zeit, e) {
     const k = { goblin: 0, rotrobe: 1, bandit: 1, bugbear: 2, soeldner: 3, zombie: 4, blight: 5, spinne: 6, drow: 7, ettercap: 8, chasme: 9, kuotoa: 10, duergar: 11, anfuehrer: 0, glasstab: 1, nezna: 7 }[typ];
@@ -4044,6 +4242,41 @@
   }
 
   /* --- Abwehr zeichnen --- */
+  /* Gefahrenkarte: was bringt die nächste Welle? */
+  function gefahrDaten(A) {
+    const l = A.wellen[A.welle + 1]; if (!l) return null;
+    if (A.gefahrCache && A.gefahrCache.w === A.welle) return A.gefahrCache.d;
+    const d = { flug: 0, schnell: 0, zaeh: 0, unsichtbar: 0, boss: 0 };
+    l.forEach(k => { const f = FEINDE[k]; if (!f) return; if (f.boss) d.boss++; else { if (f.flug) d.flug++; if (f.v >= 48) d.schnell++; if (f.hp >= 150) d.zaeh++; if (f.unsichtbar) d.unsichtbar++; } });
+    if (A.demo && A.welle + 1 === A.wellen.length - 1) d.boss++;
+    A.gefahrCache = { w: A.welle, d };
+    return d;
+  }
+  const GEFAHR_SYM = { flug: "🦇", schnell: "💨", zaeh: "🛡️", unsichtbar: "👻", boss: "☠️" };
+  function malGefahr(x, A, d) {
+    if (!d) return;
+    const teile = Object.keys(GEFAHR_SYM).filter(k => d[k] > 0).map(k => GEFAHR_SYM[k] + (k === "boss" ? "" : d[k]));
+    if (!teile.length) return;
+    const st = A.P.p[0];
+    x.save(); x.font = "700 11px " + FONT_B;
+    const txt = teile.join("  "), tw = Math.max(x.measureText(txt).width, x.measureText(t().gefahr).width) + 16;
+    const bx = klemm(st.x - tw / 2, 6, W - tw - 6), by = 34;
+    x.fillStyle = "rgba(18,14,11,.82)"; x.strokeStyle = d.boss ? "#c4564a" : "rgba(224,160,70,.7)"; x.lineWidth = 1;
+    x.beginPath(); x.roundRect ? x.roundRect(bx, by, tw, 32, 6) : x.rect(bx, by, tw, 32); x.fill(); x.stroke();
+    x.textAlign = "center"; x.textBaseline = "middle";
+    x.font = "600 9px " + FONT_B; x.fillStyle = "#a89f8f"; x.fillText(t().gefahr.toUpperCase(), bx + tw / 2, by + 9);
+    x.font = "700 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(txt, bx + tw / 2, by + 22);
+    x.restore();
+  }
+  function malFlugschneise(x, A, zeit) {
+    const P = A.P, o = flugSchneise(P, 20), u = flugSchneise(P, HORT.y - 10);
+    x.save();
+    x.fillStyle = "rgba(159,214,236,.06)";
+    x.beginPath(); x.moveTo(o.links, 20); x.lineTo(o.rechts, 20); x.lineTo(u.rechts, HORT.y - 10); x.lineTo(u.links, HORT.y - 10); x.closePath(); x.fill();
+    x.strokeStyle = "rgba(159,214,236,.28)"; x.setLineDash([4, 6]); x.lineDashOffset = -zeit * 20; x.lineWidth = 1;
+    x.beginPath(); x.moveTo(o.links, 20); x.lineTo(u.links, HORT.y - 10); x.moveTo(o.rechts, 20); x.lineTo(u.rechts, HORT.y - 10); x.stroke();
+    x.restore();
+  }
   function zeichneAbwehr(x, zeit) {
     const A = S.A, T = t();
     x.drawImage(hgBild, 0, 0, W, H);
@@ -4051,6 +4284,8 @@
     ambientMalen(x, A, zeit);
     // Pflanzplätze
     const bauZeit = (A.vorT > 0 || A.halt) && A.saat >= kosten("dorn", 0);
+    const gef = A.vorT > 0 ? gefahrDaten(A) : null, fliegerKommen = gef && gef.flug > 0;
+    if (fliegerKommen) malFlugschneise(x, A, zeit);
     A.plaetze.forEach((p, i) => {
       if (p.turm) return;
       const gew = A.wahl === i, puls = 0.5 + Math.sin(zeit * 2.4 + i) * 0.5;
@@ -4060,7 +4295,7 @@
         return;
       }
       x.fillStyle = gew ? "rgba(224,160,70,.32)" : "rgba(170,210,120," + (0.06 + puls * 0.08) + ")"; oval(x, p.x, p.y + 4, 14, 6.5);
-      x.strokeStyle = gew ? "#e0a046" : "rgba(207,230,168," + (0.18 + puls * 0.25) + ")"; x.lineWidth = gew ? 2 : 1.2;
+      x.strokeStyle = gew ? "#e0a046" : fliegerKommen && p.luftNah ? "rgba(159,214,236," + (0.35 + puls * 0.4) + ")" : "rgba(207,230,168," + (0.18 + puls * 0.25) + ")"; x.lineWidth = gew ? 2 : fliegerKommen && p.luftNah ? 1.8 : 1.2;
       x.beginPath(); x.ellipse(p.x, p.y + 4, 14, 6.5, 0, 0, Math.PI * 2); x.stroke();
       x.strokeStyle = "rgba(111,154,58,.85)"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(p.x, p.y + 5); x.lineTo(p.x, p.y - 1); x.stroke();
       blatt(x, p.x, p.y, -2.4, 5, 2, "#6f9a3a"); blatt(x, p.x, p.y - 1, -0.6, 5, 2, "#8ab04a");
@@ -4094,12 +4329,14 @@
     malPortrait(x, A, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, HORT.x + 60, HORT.y - 54);
     // Vorbereitung
+    if (A.vorT > 0) malGefahr(x, A, gef);
     if (A.vorT > 0 && A.wahl < 0) {
-      const erste = A.welle < 0, h2 = erste ? 74 : 40;
+      const erste = A.welle < 0, zn = zinsen(A.saat), h2 = (erste ? 74 : 40) + (zn > 0 ? (erste ? 30 : 18) : 0);
       x.fillStyle = "rgba(9,8,15,.55)"; x.fillRect(20, 150, W - 40, h2);
       x.textAlign = "center"; x.textBaseline = "middle";
       x.font = "22px " + FONT_D; x.fillStyle = "#e0a046"; x.fillText(A.halt ? T.welleBereit(A.welle + 2, A.wellen.length) : T.welleIn(A.welle + 2, A.wellen.length, Math.ceil(A.vorT)), W / 2, 170, W - 60);
       if (erste) { x.font = "12px " + FONT_B; x.fillStyle = "#ebe2cc"; zeilenUmbruch(x, S.garten.setzlinge.length ? T.setzHinweis : T.abwehrIntro, W / 2, 194, W - 70, 14); }
+      if (zn > 0) { x.font = "600 11px " + FONT_B; x.fillStyle = "#ffd34d"; x.fillText(T.zinsenText(zn), W / 2, 150 + h2 - 11, W - 56); }
     }
     if (A.demo && A.bossGerufen && !A.demoWeg) {
       x.textAlign = "center"; x.font = "700 13px " + FONT_B; x.fillStyle = "#9fd6ec"; x.fillText("🌊 " + Math.ceil(A.demoDauer - A.demoT) + " s", W / 2, 42);
@@ -4110,7 +4347,8 @@
     px = hudText(x, "💰 " + Math.round(A.hort), px, A.hort < A.hortStart * 0.3 ? "#c4564a" : "#ffd34d") + 10;
     px = hudText(x, "🌱 " + Math.round(A.saat), px, "#cfe6a8") + 10;
     balken(x, px, 7, 76, 14, A.zorn / 100, A.zorn > 75 ? "#c4564a" : "#9b5a3a", T.hud.zorn); px += 86;
-    hudText(x, "🌊 " + Math.max(1, A.welle + 1) + "/" + A.wellen.length + "  👣 " + (A.warte.length + A.feinde.filter(e => !e.d.unbesiegbar).length), px, "#a89f8f", 12);
+    px = hudText(x, "🌊 " + Math.max(1, A.welle + 1) + "/" + A.wellen.length + "  👣 " + (A.warte.length + A.feinde.filter(e => !e.d.unbesiegbar).length), px, "#a89f8f", 12) + 8;
+    if (launeVon()) { x.save(); x.textAlign = "left"; x.textBaseline = "middle"; x.font = "13px " + FONT_B; x.fillText(LAUNEN[launeVon()].sym, px, 14); x.restore(); }
     // unten: Bauleiste
     leisteUnten(x);
     S.knoepfe = [];
@@ -4146,17 +4384,20 @@
         const c = U.tier ? tierKosten(U.k, lvl + 1) : kosten(U.k, lvl + 1);
         knopf(x, "staerker", 6, LEISTE + 4, rx - 12, BH - 2, [T.bau.verstaerken, "🌱" + c], true, A.saat < c, A.saat < c ? "#c4564a" : "#cfe6a8");
       } else knopf(x, "nix", 6, LEISTE + 4, rx - 12, BH - 2, [T.bau.max], false, true);
-      knopf(x, "raus", rx, LEISTE + 4, rausB, BH - 2, [T.bau.ausreissen, "+" + Math.round(U.wert * 0.5) + " 🌱"], false, false);
+      const rg = rueckgabe(U);
+      knopf(x, "raus", rx, LEISTE + 4, rausB, BH - 2, [T.bau.ausreissen, rg.beutel ? T.zurueckBeutel : "+" + rg.saat + " 🌱"], false, false, rg.beutel || (U.frisch && (A.vorT > 0 || A.halt)) ? "#cfe6a8" : undefined);
       einheitTafel(x, A, p, U, "steht", zeit);
     } else if (A.vorT > 0) {
       const bonus = Math.ceil(A.vorT) * 2;
-      knopf(x, "jetzt", 8, LEISTE + 6, 220, H - LEISTE - 12, [A.halt ? T.los : A.welle < 0 ? T.jetzt : T.rufen(bonus)], true, false, "#e0a046");
-      knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
+      const plan = A.welle < 0 && S.garten.setzlinge.length > 0, jb = plan ? 150 : 220;
+      knopf(x, "jetzt", 8, LEISTE + 6, jb, H - LEISTE - 12, [A.halt ? T.bereitLos : A.welle < 0 ? T.jetzt : T.rufen(bonus)], true, false, "#e0a046");
+      if (plan) knopf(x, "zuletzt", 8 + jb + 6, LEISTE + 6, W - 86 - (8 + jb + 6) - 6, H - LEISTE - 12, [T.wieZuletzt, "🌱 " + S.garten.setzlinge.length], true, false, "#cfe6a8");
+      knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [T.schnell[(A.schnell || 1) - 1]], A.schnell > 1, false, "#ebe2cc");
     } else {
       A.zauber.forEach((z, i) => knopfZauber(x, "zauber:" + i, 6 + i * 92, LEISTE + 4, 88, H - LEISTE - 8, z, A.aktiv === i, zeit));
       x.textAlign = "center"; x.textBaseline = "middle"; x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f";
       x.fillText(levelName(A.lv), 6 + A.zauber.length * 92 + (W - 92 - (6 + A.zauber.length * 92)) / 2, LEISTE + 26, W - 100 - A.zauber.length * 92);
-      knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [A.schnell ? T.schnell[1] : T.schnell[0]], A.schnell, false, "#ebe2cc");
+      knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [T.schnell[(A.schnell || 1) - 1]], A.schnell > 1, false, "#ebe2cc");
     }
   }
   function knopfZauber(x, id, bx, by, bw, bh, z, an, zeit) {
@@ -4192,7 +4433,7 @@
   }
   function turmWerte(k, st) {
     const w = WACHTER[k], f = 1 + 0.045 * Math.min(S.lv, KAMPAGNE + 10);
-    return { schaden: Math.round(w.schaden[st] * f), schadenRoh: w.schaden[st], reich: w.reich[st], tempo: 1 / w.rate };
+    return { schaden: Math.round(w.schaden[st] * f * mod("schaden", k)), schadenRoh: w.schaden[st] * mod("schaden", k), reich: w.reich[st], tempo: 1 / w.rate };
   }
   /* Werte-Tafel für Wächter, Tiere und Setzlinge. modus: bau | setz | steht */
   function einheitTafel(x, A, p, z, modus, zeit) {
@@ -4218,7 +4459,7 @@
     const py = p.y > LEISTE - ph - 50 ? 32 : LEISTE - ph - 4;
     // Vorschau am Bauplatz
     if (bauModus) {
-      const r = istTier ? (TIERE[k].reich ? TIERE[k].reich[st] : 0) : WACHTER[k].reich[st];
+      const r = istTier ? (TIERE[k].reich ? TIERE[k].reich[st] : 0) : WACHTER[k].reich[st] * mod("reich", k);
       x.save();
       if (r) { x.strokeStyle = "rgba(224,160,70,.65)"; x.fillStyle = "rgba(224,160,70,.07)"; x.setLineDash([5, 4]); x.lineWidth = 1.3; x.beginPath(); x.arc(p.x, p.y, r, 0, Math.PI * 2); x.fill(); x.stroke(); x.setLineDash([]); }
       x.translate(p.x, p.y); x.globalAlpha = 0.6; malEinheit(x, z, zeit); x.restore();
@@ -4245,7 +4486,7 @@
     let y = py + 46;
     if (!istTier) {
       const w = WACHTER[k], jetzt = turmWerte(k, st), dann = modus === "steht" && (st === 0 || st === 2) ? turmWerte(k, st + 1) : null;
-      const rf = z._reich || 1, tf = z._tempo || 1;
+      const rf = (z._reich || 1) * mod("reich", k), tf = (z._tempo || 1) * mod("rate", k);
       const zeile = (yy, label, wert, maxW, txt, wertDann, txtDann) => {
         x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f"; x.textAlign = "left"; x.fillText(label, tx, yy);
         const bx = tx + 64, bw = 78;
@@ -4351,7 +4592,7 @@
     /* Schwaches Gerät? Dann die Lichtebene abschalten, damit das Spiel flüssig bleibt */
     if (zustand === "spiel" && roh < 200) { rahmenSchnitt = rahmenSchnitt * 0.95 + roh * 0.05; if (rahmenSchnitt > 30) { langsamT += roh; if (langsamT > 3000) lichtAus = true; } else langsamT = 0; }
     letzte = jetzt;
-    const schritte = testTempo * (S && S.phase === "abwehr" && S.A && S.A.schnell ? 2 : 1);
+    const schritte = testTempo * (S && S.phase === "abwehr" && S.A ? (S.A.schnell || 1) : 1);
     for (let i = 0; i < schritte && zustand === "spiel" && S; i++) {
       if (S.phase === "raub" && S.R) raubUpdate(dt);
       else if (S.phase === "abwehr" && S.A) abwehrUpdate(dt);
@@ -4392,7 +4633,7 @@
     tafel.addEventListener("change", einstEingabe);
     pauseKnopf.addEventListener("click", pausieren);
     tafel.addEventListener("click", tafelKlick);
-    tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".eh-name")) { e.preventDefault(); eintragen(); } });
+    tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".eh-name")) { e.preventDefault(); if (tafelArt === "tagErgebnis") tagEintragen(); else eintragen(); } });
     fussSetzen();
   }
   function fussSetzen() {
@@ -4412,7 +4653,7 @@
     if (zustand !== "spiel") tafelNeu();
   }
   function tafelNeu() {
-    ({ start: startZeigen, druide: druideZeigen, einst: einstZeigen, schatz: schatzZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true) })[tafelArt]();
+    ({ start: startZeigen, druide: druideZeigen, einst: einstZeigen, schatz: schatzZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true), beute: kleinodZeigen, tag: () => tagZeigen(false), tagErgebnis: tagErgebnisZeigen })[tafelArt]();
   }
   function schleierAuf(html, art) {
     tafelArt = art; tafel.innerHTML = html; schleier.hidden = false; buehne.classList.remove("laeuft");
@@ -4442,6 +4683,7 @@
     const lw = frei > 0 || summe > 0 ? '<button type="button" class="tav-knopf" data-tun="levelwahl">' + esc(tx.levelwahl) + ' <small>' + esc(tx.sterneGesamt(summe, KAMPAGNE * 3)) + '</small></button>' : "";
     schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + fort + stufenHtml(tx) +
       '<button type="button" class="tav-knopf ' + (sp ? "" : "eh-haupt") + '" data-tun="neu">' + esc(tx.neu) + '</button>' + lw +
+      '<button type="button" class="tav-knopf" data-tun="tag">' + esc(tx.tag.knopf) + ' <small>' + LAUNEN[tagInfo(heuteDatum()).laune].sym + '</small></button>' +
       '<button type="button" class="tav-knopf" data-tun="druide">' + esc(tx.druide.knopf) + ' <small>' + (STAT.mond || 0) + '</small></button>' +
       '<button type="button" class="tav-knopf" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>' +
       (sp ? '<p class="eh-klein">' + esc(tx.neuWarnung) + '</p>' : ""), "start");
@@ -4520,9 +4762,19 @@
     introZeigen();
   }
 
+  function launeHtml() {
+    const tx = t(), k = launeVon(); if (!k) return "";
+    const [name, plus, minus] = tx.launen[k];
+    return '<p class="eh-laune"><b>' + LAUNEN[k].sym + " " + esc(tx.launeTitel) + ": " + esc(name) + '</b><span class="plus">＋ ' + esc(plus) + '</span><span class="minus">− ' + esc(minus) + '</span></p>';
+  }
+  function kleinodBesitzHtml() {
+    const tx = t(), l = (S && S.kleinode) || []; if (!l.length) return "";
+    return '<div class="eh-besitz"><span class="eh-ober">' + esc(tx.kleinodeLabel) + '</span>' + l.map(k => '<span class="eh-kl" title="' + esc(tx.kleinod[k][1]) + '">' + KLEINODE[k].sym + " " + esc(tx.kleinod[k][0]) + '</span>').join("") + '</div>';
+  }
   function introZeigen() {
     const tx = t(), lv = S.lv, g = gebietVon(lv);
     zustand = "tafel";
+    if (!S.laune || S.laune.lv !== lv) S.laune = { lv, k: lv >= 2 ? zufall(launenFuer(lv)) : null };
     S.R = null; S.A = null;
     hintergrundRaub(g); hgSchluessel = "raub" + g;
     const neu = neueFreischaltungen(lv);
@@ -4535,6 +4787,7 @@
       (innenVon(lv) === 0 ? '<p class="eh-klein">🌿 ' + esc(tx.gartenHinweis) + '</p>' : "") +
       '<p class="eh-regel"><b>' + esc(tx.besonderheit) + ' ' + esc(tx.regeln[GEB[g].regel][0]) + '.</b> ' + esc(tx.regeln[GEB[g].regel][1]) + '</p>' +
       (neu.length ? '<p class="eh-neu">' + esc(tx.neuFreigeschaltet) + ' ' + neu.map(esc).join(" · ") + '</p>' : "") +
+      launeHtml() + kleinodBesitzHtml() +
       (lv === 0 ? '<p>' + esc(tx.raubIntro) + '</p>' : "") +
       (S.einzel ? '<p class="eh-klein">' + esc(tx.einzelLabel) + ' · ' + "★".repeat(sterneLesen(S.stufe)[lv] || 0) + "☆".repeat(3 - (sterneLesen(S.stufe)[lv] || 0)) + '</p>'
         : '<p class="eh-klein">' + esc(tx.leben(S.leben)) + ' · ' + S.punkte + ' ' + esc(tx.punkte) + ' · ' + esc(tx.beutel(S.beutel)) + '</p>') +
@@ -4558,7 +4811,7 @@
       '<dt>' + esc(tx.raubWerte.schaetze) + '</dt><dd>' + R.schaetze + '</dd>' +
       '</dl>' +
       '<p class="eh-warn">' + esc(tx.gierWarnung(extra)) + '</p>' +
-      vorschauHtml(R.gl) + zauberWahlHtml() +
+      launeHtml() + vorschauHtml(R.gl) + zauberWahlHtml() +
       (S.lv <= 1 ? '<p>' + esc(tx.raubHinweis) + '</p>' : "") +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="abwehr">' + esc(tx.zurAbwehr) + '</button>', "nachRaub");
     if (!nurNeu) KLANG.gold();
@@ -4605,6 +4858,16 @@
       const A = S.A, R = S.R;
       zustand = "tafel";
       gartenSync();
+      if (S.tag) {
+        const pkt = A.verloren ? A.punkte : Math.round(Math.max(0, A.hort - A.reserve) * (1 + 0.15 * R.gier)) + A.punkte;
+        S.erg = { tag: true, verloren: !!A.verloren, pkt, erlegt: A.erlegt };
+        if (A.verloren) KLANG.verloren();
+        const best = jsonLies("imres-echohort-tagbest", {});
+        if (best.datum !== S.tag || pkt > (best.punkte || 0)) schreib("imres-echohort-tagbest", JSON.stringify({ datum: S.tag, punkte: pkt }));
+        S.eingetragen = ""; S.sendet = false;
+        tagErgebnisZeigen(); tagListeLaden(S.tag);
+        return;
+      }
       if (A.verloren) {
         S.erg = { verloren: true };
         KLANG.verloren();
@@ -4633,8 +4896,10 @@
         statSichern();
         const mond = (S.einzel ? 0 : 1 + (istBossLevel(S.lv) ? 2 : 0)) + neueSterne;
         STAT.mond = (STAT.mond || 0) + mond; statSichern();
-        S.erg = { verloren: false, gesichert, insBeutel, faktor, erlegt: A.erlegt, pkt, mond, sieg: S.lv === KAMPAGNE - 1 && !S.einzel, ziele, sterne, neuBest, zurueck: A.zurueckGold, verlorenGold: A.verlorenGold };
+        S.erg = { verloren: false, gesichert, insBeutel, faktor, erlegt: A.erlegt, pkt, mond, sieg: S.lv === KAMPAGNE - 1 && !S.einzel, ziele, sterne, neuBest, zurueck: A.zurueckGold, verlorenGold: A.verlorenGold, zins: A.zinsGesamt || 0, erspart: 0 };
         if (!S.einzel) {
+          S.erspart = ersparnis(A.saat); S.erg.erspart = S.erspart;
+          if (istBossLevel(S.lv)) { const frei = KLEINODE_REIHE.filter(k => !(S.kleinode || []).includes(k)); if (frei.length) S.angebot = mischen(frei.slice()).slice(0, 3); }
           S.punkte += pkt; S.beutel += insBeutel; S.goldGesamt += gesichert;
           S.lv++;
           speichern();
@@ -4645,6 +4910,7 @@
       }
     }
     const E = S.erg;
+    if (E.tag) { tagErgebnisZeigen(); return; }
     if (E.verloren && S.einzel) {
       schleierAuf('<p class="eh-ober">' + esc(tx.einzelLabel) + '</p><h4>' + esc(tx.verloren) + '</h4>' +
         '<button type="button" class="tav-knopf eh-haupt" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>' +
@@ -4679,9 +4945,115 @@
       '<dt>' + esc(tx.ergWerte.punkte) + '</dt><dd>+' + E.pkt + '</dd>' +
       '<dt>' + esc(tx.ergWerte.beutel) + '</dt><dd>💰 +' + E.insBeutel + '</dd>' +
       (E.mond ? '<dt>' + esc(tx.druide.titel) + '</dt><dd>' + esc(tx.druide.verdient(E.mond)) + '</dd>' : "") +
+      (E.zins ? '<dt>🐿 ' + esc(tx.zinsen(E.zins).replace(/^\+\d+ 🌱 /, "")) + '</dt><dd>🌱 +' + E.zins + '</dd>' : "") +
       '</dl>' +
+      (E.erspart ? '<p class="eh-neu">' + esc(tx.erspart(E.erspart)) + '</p>' : "") +
       '<p class="eh-gross">' + S.punkte + ' <span>' + esc(tx.punkte) + '</span></p>' +
-      '<button type="button" class="tav-knopf eh-haupt" data-tun="hain">' + esc(tx.zumHain) + '</button>', "ergebnis");
+      (S.angebot ? '<button type="button" class="tav-knopf eh-haupt" data-tun="beute">' + esc(tx.kleinodKnopf) + '</button>'
+        : '<button type="button" class="tav-knopf eh-haupt" data-tun="hain">' + esc(tx.zumHain) + '</button>'), "ergebnis");
+  }
+
+  function kleinodZeigen() {
+    const tx = t(); zustand = "tafel";
+    if (!S.angebot || !S.angebot.length) { hainZeigen(); return; }
+    const karten = S.angebot.map(k => '<button type="button" class="eh-zw eh-kleinod" data-kleinod="' + k + '"><span class="sym" aria-hidden="true">' + KLEINODE[k].sym + '</span><span><strong>' + esc(tx.kleinod[k][0]) + '</strong><small>' + esc(tx.kleinod[k][1]) + '</small></span></button>').join("");
+    schleierAuf('<p class="eh-ober">☠ ' + esc(levelName(S.lv - 1)) + '</p><h4>' + esc(tx.kleinodTitel) + '</h4><p>' + esc(tx.kleinodText) + '</p>' +
+      '<div class="eh-zw-liste eh-kleinode">' + karten + '</div>' + kleinodBesitzHtml(), "beute");
+  }
+  function kleinodWaehlen(k) {
+    if (!S || !S.angebot || !S.angebot.includes(k)) return;
+    S.kleinode = (S.kleinode || []).concat([k]); S.angebot = null;
+    KLANG.edel(); vib(40); speichern(); hainZeigen();
+  }
+
+  /* ---------- Tagesherausforderung: für alle gleich, jeden Tag neu ---------- */
+  function heuteDatum() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function tagSaat(datum) { let h = 2166136261; for (let i = 0; i < datum.length; i++) { h ^= datum.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) % 2147483645 + 1; }
+  function tagInfo(datum) {
+    const rng = lcg(tagSaat(datum)); rng(); rng();
+    const lv = 6 + Math.floor(rng() * (KAMPAGNE - 6));
+    const ln = launenFuer(lv), laune = ln[Math.floor(rng() * ln.length)];
+    const ko = KLEINODE_REIHE.slice(), kl = [];
+    for (let i = 0; i < 2; i++) kl.push(ko.splice(Math.floor(rng() * ko.length), 1)[0]);
+    return { lv, laune, kleinode: kl };
+  }
+  function tagSpielBauen() {
+    const datum = heuteDatum(), I = tagInfo(datum);
+    neuesSpiel();
+    Object.assign(S, { stufe: "druide", leben: 1, einzel: true, tag: datum, up: {}, lv: I.lv, laune: { lv: I.lv, k: I.laune }, kleinode: I.kleinode, zauber: null });
+    const alt = Math.random; Math.random = lcg(tagSaat(datum) + 13);
+    let gl; try { gl = gegnerListe(I.lv, 2); } finally { Math.random = alt; }
+    S.tagR = { g: gebietVon(I.lv), beute: 300 + 20 * I.lv, gier: 2, saat: 0, schaetze: 0, gl, dinge: [] };
+  }
+  const tagListe = {};
+  function tagListeLaden(datum) {
+    const st = "tag-" + datum;
+    return server("/rest/v1/hort_bestenliste?select=name,punkte,level,erstellt&stufe=eq." + st + "&order=punkte.desc,erstellt.asc&limit=10")
+      .then(l => { tagListe[datum] = { l: Array.isArray(l) ? l : [], ok: true }; })
+      .catch(() => { tagListe[datum] = { l: sortieren(lokalLesen()[st] || []).slice(0, 10), ok: false }; })
+      .then(() => { const el = tafel.querySelector(".eh-tagliste"); if (el) el.innerHTML = tagListeHtml(datum); });
+  }
+  function tagListeHtml(datum) {
+    const T = t(), L = tagListe[datum];
+    if (!L) return "";
+    return '<p class="eh-ober">' + esc(T.tag.liste) + '</p>' + (L.l.length ? "<table><tbody>" +
+      L.l.map((e, i) => "<tr" + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + e.punkte + "</td></tr>").join("") +
+      "</tbody></table>" : '<p class="eh-klein">' + esc(T.tag.leer) + "</p>") + (L.ok ? "" : '<p class="eh-klein">' + esc(T.nurHier) + "</p>");
+  }
+  function tagZeigen(neu) {
+    const tx = t(), T = tx.tag;
+    if (neu || !S || !S.tag || S.tag !== heuteDatum() || S.A) tagSpielBauen();
+    zustand = "tafel"; tafelArt = "tag"; hgSchluessel = "";
+    const lv = S.lv, g = gebietVon(lv), best = jsonLies("imres-echohort-tagbest", {});
+    const kl = S.kleinode.map(k => '<span class="eh-kl">' + KLEINODE[k].sym + " <b>" + esc(tx.kleinod[k][0]) + "</b> – " + esc(tx.kleinod[k][1]) + '</span>').join("");
+    schleierAuf('<p class="eh-ober">' + esc(T.heute(S.tag)) + '</p><h4>' + esc(T.titel) + '</h4><p>' + esc(T.text) + '</p>' +
+      '<p class="eh-regel"><b>' + esc(levelName(lv)) + '</b>' + (istBossLevel(lv) ? " · ☠" : "") + '</p>' +
+      launeHtml() + '<div class="eh-besitz eh-tagkl"><span class="eh-ober">' + esc(T.dabei) + '</span>' + kl + '</div>' +
+      vorschauHtml(S.tagR.gl) +
+      (best.datum === S.tag ? '<p class="eh-neu">' + esc(T.best(best.punkte)) + '</p>' : "") +
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="tagStart">' + esc(T.start) + '</button>' +
+      '<div class="eh-tagliste">' + tagListeHtml(S.tag) + '</div>' +
+      '<button type="button" class="eh-leise" data-tun="zumStart">' + esc(T.zumStart) + '</button>', "tag");
+    tagListeLaden(S.tag);
+    zeichnen(performance.now());
+  }
+  function tagStarten() {
+    if (!S || !S.tagR) tagSpielBauen();
+    S.R = S.tagR; S.phase = "abwehr"; S.texte = []; S.teilchen = []; S.blitze = [];
+    abwehrStarten(); losSpielen();
+  }
+  function tagErgebnisZeigen() {
+    const tx = t(), T = tx.tag, E = S.erg, best = jsonLies("imres-echohort-tagbest", {});
+    const name = lies("imres-echohort-name", "") || lies("imres-diebesnacht-name", "") || lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
+    const eintrag = E.pkt <= 0 ? "" : S.eingetragen ? '<p class="eh-eingetragen">' + esc(S.eingetragen) + "</p>" :
+      '<div class="eh-eintrag"><input type="text" class="eh-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(tx.deinName) + '" value="' + esc(name) + '">' +
+      '<button type="button" class="tav-knopf" data-tun="tagEintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(tx.eintragen) + "</button></div>";
+    schleierAuf('<p class="eh-ober">' + esc(T.titel) + ' · ' + esc(S.tag) + '</p><h4>' + esc(E.verloren ? tx.verloren : T.geschafft) + '</h4>' +
+      (E.verloren ? '<p>' + esc(T.verloren) + '</p>' : "") +
+      '<p class="eh-gross">' + E.pkt + ' <span>' + esc(T.punkte) + '</span></p>' +
+      (best.datum === S.tag ? '<p class="eh-klein">' + esc(T.best(best.punkte)) + '</p>' : "") +
+      eintrag + '<div class="eh-tagliste">' + tagListeHtml(S.tag) + '</div>' +
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="tagNochmal">' + esc(T.nochmal) + '</button>' +
+      '<button type="button" class="eh-leise" data-tun="zumStart">' + esc(T.zumStart) + '</button>', "tagErgebnis");
+  }
+  function tagEintragen() {
+    if (!S || !S.tag || !S.erg || S.eingetragen || S.sendet) return;
+    const feld = tafel.querySelector(".eh-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
+    if (!name) { if (feld) feld.focus(); return; }
+    schreib("imres-echohort-name", name);
+    const T = t(), datum = S.tag, st = "tag-" + datum, spiel = S;
+    const e = { name, punkte: S.erg.pkt, level: S.lv + 1, erstellt: new Date().toISOString() };
+    const lok = lokalLesen(); lok[st] = sortieren((lok[st] || []).concat([e])).slice(0, 10);
+    schreib("imres-echohort-liste", JSON.stringify(lok));
+    spiel.sendet = true; tagErgebnisZeigen();
+    server("/rest/v1/rpc/hort_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_level: e.level })
+      .catch(() => {}).then(() => tagListeLaden(datum)).then(() => {
+        spiel.sendet = false;
+        const l = (tagListe[datum] || { l: [] }).l, platz = l.findIndex(x => x.name === name && x.punkte === e.punkte) + 1;
+        if (platz) meinEintrag = l[platz - 1].erstellt;
+        spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
+        if (S === spiel && tafelArt === "tagErgebnis") tagErgebnisZeigen();
+      });
   }
 
   function hainZeigen() {
@@ -4701,7 +5073,7 @@
     }).join("");
     schleierAuf(
       '<h4>' + esc(tx.hain) + '</h4><p>' + esc(tx.hainText) + '</p>' +
-      '<p class="eh-beutel">💰 ' + esc(tx.beutel(S.beutel)) + '</p>' +
+      '<p class="eh-beutel">💰 ' + esc(tx.beutel(S.beutel)) + '</p>' + kleinodBesitzHtml() +
       '<div class="eh-hain">' + gruppen + '</div>' +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="weiterLevel">' + esc(tx.weiter) + '</button>' +
       '<button type="button" class="eh-leise" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>', "hain");
@@ -4794,6 +5166,8 @@
     if (zb && tafelArt === "nachRaub") { zauberUmschalten(zb.dataset.zauber); return; }
     const tb = e.target.closest("[data-talent]");
     if (tb && tafelArt === "druide") { talentLernen(tb.dataset.talent); return; }
+    const klb = e.target.closest("[data-kleinod]");
+    if (klb && tafelArt === "beute") { kleinodWaehlen(klb.dataset.kleinod); return; }
     const kb = e.target.closest("[data-kauf]");
     if (kb && tafelArt === "hain") { kaufen(kb.dataset.kauf); return; }
     if (e.target.closest(".eh-eintragen")) { eintragen(); return; }
@@ -4801,14 +5175,18 @@
     const tun = b.dataset.tun;
     audio();
     if (tun === "neu") { loesch(SPEICHER); neuesSpiel(); fussSetzen(); bestenLaden(S.stufe); introZeigen(); }
-    else if (tun === "fortsetzen") { const sp = gespeichert(); if (!sp) { startZeigen(); return; } laden(sp); fussSetzen(); bestenLaden(S.stufe); if (S.lv > 0) hainZeigen(); else introZeigen(); }
+    else if (tun === "fortsetzen") { const sp = gespeichert(); if (!sp) { startZeigen(); return; } laden(sp); fussSetzen(); bestenLaden(S.stufe); if (S.angebot && S.angebot.length) kleinodZeigen(); else if (S.lv > 0) hainZeigen(); else introZeigen(); }
+    else if (tun === "beute") kleinodZeigen();
+    else if (tun === "tag" || tun === "tagNochmal") { musikStop(); tagZeigen(true); }
+    else if (tun === "tagStart") tagStarten();
+    else if (tun === "tagEintragen") tagEintragen();
     else if (tun === "raub") { raubzugStarten(); losSpielen(); }
     else if (tun === "abwehr") { abwehrStarten(); losSpielen(); }
     else if (tun === "hain") hainZeigen();
     else if (tun === "weiterLevel") introZeigen();
     else if (tun === "wiederholen") introZeigen();
     else if (tun === "weiter") losSpielen();
-    else if (tun === "beenden") { if (S && S.einzel) levelwahlZeigen(); else spielEnde(); }
+    else if (tun === "beenden") { if (S && S.tag) { musikStop(); tagZeigen(true); } else if (S && S.einzel) levelwahlZeigen(); else spielEnde(); }
     else if (tun === "levelwahl") levelwahlZeigen();
     else if (tun === "schatz") schatzZeigen();
     else if (tun === "einst") einstZeigen();
@@ -4901,7 +5279,8 @@
       else if (id === "raus") ausreissen();
       else if (id === "jetzt") { if (A.welle < 0) { A.halt = false; A.vorT = 0.01; } else welleRufen(); }
       else if (id.startsWith("zauber:")) { S.A.aktiv = parseInt(id.slice(7), 10); KLANG.griff(); }
-      else if (id === "schnell") { S.A.schnell = !S.A.schnell; schreib("imres-echohort-schnell", S.A.schnell ? "1" : ""); KLANG.griff(); }
+      else if (id === "schnell") { S.A.schnell = S.A.schnell >= 3 ? 1 : (S.A.schnell || 1) + 1; schreib("imres-echohort-schnell", String(S.A.schnell)); KLANG.griff(); }
+      else if (id === "zuletzt") wieZuletzt();
     }
   }
   leinwand.addEventListener("pointerdown", ev => {
@@ -5026,6 +5405,19 @@
 .eh-troph small { display: block; font-size: .74rem; color: var(--ash); }
 .eh-zauberwahl { width: 100%; display: grid; gap: .3rem; }
 .eh-zw-liste { display: grid; gap: .3rem; }
+.eh-kleinode { width: 100%; }
+.eh-kleinode .eh-zw { padding: .55rem .7rem; } .eh-kleinode .eh-zw:hover, .eh-kleinode .eh-zw:focus-visible { border-color: var(--ember); background: rgba(224,160,70,.16); }
+.eh-kleinode .sym { font-size: 1.7rem; }
+.eh-tafel .eh-laune { display: grid; gap: .1rem; width: 100%; text-align: left; font-size: .84rem; background: rgba(159,214,236,.07); border-left: 3px solid #9fd6ec; padding: .35rem .55rem; }
+.eh-laune b { color: #cfeaf4; } .eh-laune .plus { color: #cfe6a8; } .eh-laune .minus { color: #e8a090; }
+.eh-besitz { display: flex; flex-wrap: wrap; gap: .25rem .45rem; justify-content: center; align-items: center; font-size: .8rem; color: var(--vellum); }
+.eh-besitz .eh-ober { width: 100%; }
+.eh-besitz .eh-kl { background: rgba(224,160,70,.1); border: 1px solid rgba(224,160,70,.3); padding: .1rem .4rem; }
+.eh-tagkl { flex-direction: column; align-items: stretch; text-align: left; }
+.eh-tagliste { width: 100%; }
+.eh-tagliste table { width: 100%; border-collapse: collapse; font-size: .85rem; color: var(--vellum); }
+.eh-tagliste td { padding: .15rem .3rem; border-bottom: 1px solid var(--line); } .eh-tagliste td:last-child { text-align: right; }
+.eh-tagliste tr.mein td { color: #ffd34d; }
 .eh-zw { display: grid; grid-template-columns: auto 1fr; gap: .5rem; align-items: center; text-align: left; padding: .35rem .55rem; border: 1px solid var(--line); background: rgba(9,8,15,.45); color: var(--vellum); font: inherit; cursor: pointer; }
 .eh-zw[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.16); }
 .eh-zw:disabled { cursor: default; }
@@ -5092,5 +5484,5 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen, tagZeigen, tagStarten, tagInfo, kleinodZeigen, wieZuletzt, mod, ergebnisZeigen: n => ergebnisZeigen(n) };
 })();
