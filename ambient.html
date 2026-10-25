@@ -1014,6 +1014,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       if (wetterAktiv) { wetterAktiv.betten.forEach(hart); wetterAktiv = null; }
       if (wIn) { try { wIn.disconnect(); } catch (_) {} wIn = wFilter = null; }
       if (spDrohne) { hart(spDrohne); spDrohne = null; }
+      if (spFlirren) { hart(spFlirren); spFlirren = null; }
       [...laufend.values()].forEach(l => { l.aus = true; laufend.delete(l.s.id); aufraeumen(l); });
       /* Nachklang kappen: Hall und Echos neu aufbauen, alle laufenden Einzelklänge abhängen */
       try { hallEin.disconnect(); hall.disconnect(); } catch (_) {}
@@ -1082,8 +1083,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
 
   /* ---------- Spannung: ein Regler von ruhig bis bedrohlich ----------
-     mehr Ereignisse, dunklerer Klang, ein tiefes Grollen darunter und zuletzt ein Herzschlag */
-  let dunkel = null, spDrohne = null, herzNaechst = 0;
+     mehr Ereignisse, dunklerer Klang, ein tiefes Grollen darunter; ab der Hälfte ein leises, unruhiges Streicherflirren
+     und ab und zu etwas, das aus der Tiefe anschwillt und wieder vergeht – bewusst ohne festen Takt */
+  let dunkel = null, spDrohne = null, spFlirren = null, schwellNaechst = 0;
   const spWert = () => wert(merk.spannung, 0) / 100;
   function spannungAnwenden() {
     if (!ctx || !dunkel) return;
@@ -1094,17 +1096,25 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       if (!spDrohne) spDrohne = eBettStarten({ id: "_spannung", pegel: 1 }, ["~tief", .55, "", { ton: ["kb_28", "vc_36"], rate: .5, tief: 260 }], 0);
       spDrohne.regler = Math.pow(sp, 1.4); spDrohne.drift = j + 12; spDrohne.out.gain.setTargetAtTime(spDrohne.grund * spDrohne.regler, j, 1.2);
     } else if (spDrohne) { bettStopp(spDrohne, true); spDrohne = null; }
+    /* Flirren: drei eng beieinanderliegende Tremolo-Töne der Celli (a – h – c), sehr leise, ohne Rhythmus */
+    const fl = Math.max(0, (sp - .45) / .55);
+    if (fl > 0) {
+      if (!spFlirren) spFlirren = eBettStarten({ id: "_flirren", pegel: 1 }, ["~flirren", .22, "", { ton: ["vctrem_57", "vctrem_59", "vctrem_60"], rate: 1, tief: 2400 }], 0);
+      spFlirren.regler = Math.pow(fl, 1.6); spFlirren.drift = j + 12; spFlirren.out.gain.setTargetAtTime(spFlirren.grund * spFlirren.regler, j, 1.5);
+    } else if (spFlirren) { bettStopp(spFlirren, true); spFlirren = null; }
   }
   function spannungTakt(j) {
     if (spDrohne) eTonPlanen(spDrohne);
+    if (spFlirren) eTonPlanen(spFlirren);
     const sp = spWert();
-    if (sp > .62 && E && j >= herzNaechst) {
-      /* Herzschlag: lub-dub, schneller und lauter, je höher die Spannung */
-      const b = puffer.get("bd"); if (!b) { laden("bd"); herzNaechst = j + 1; return; }
-      const z = eAusgang(E.trocken, .25, 0, false, 0), st = (sp - .62) / .38;
-      z.gain.value = .12 + st * .3; eSpiel(b, z, j + .05, .5, 1); eSpiel(b, z, j + .33, .55, .6);
-      herzNaechst = j + 60 / (62 + st * 40);
-    }
+    if (sp < .35 || !E) { schwellNaechst = 0; return; }
+    if (!schwellNaechst) { schwellNaechst = j + zz(6, 18); return; }
+    if (j < schwellNaechst) return;
+    /* Anschwellen aus der Tiefe: ein langsamer Paukenwirbel, tief gestimmt, gedämpft und weit weg – mal links, mal rechts */
+    const roll = puffer.get("timproll"); if (!roll) { laden("timproll"); schwellNaechst = j + 2; return; }
+    const st = (sp - .35) / .65, z = eAusgang(E.trocken, 1.2, .25, true, zz(-.6, .6));
+    z.gain.value = .18 + st * .35; eSpiel(roll, z, j + .05, zz(.38, .46), 1, "auf");
+    schwellNaechst = j + zz(28, 60) / (.6 + st);
   }
 
   /* ---------- Offline: einmal alles laden, danach läuft die Seite auch ohne Internet ---------- */
@@ -1115,7 +1125,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     GERAEUSCHE.forEach(a => a.lagen.forEach(l => l.f.forEach(x => n.add(x))));
     SZENEN.forEach(s => { if (s.datei) n.add(s.datei); });
     WETTER.forEach(w => { w.betten.forEach(([q]) => n.add(q)); (w.ev || []).forEach(([a]) => EV[a].f.forEach(x => n.add(x))); });
-    ["e_glocke_1", "e_glocke_3", "e_gong_1", "timp1", "timp3", "bd", "timproll", "kb_28", "vc_36"].forEach(x => n.add(x));
+    ["e_glocke_1", "e_glocke_3", "e_gong_1", "timp1", "timp3", "bd", "timproll", "kb_28", "vc_36", "vctrem_57", "vctrem_59", "vctrem_60"].forEach(x => n.add(x));
     return [...n].map(quelle).concat(["ambient.html", "klangwerk.js"]);
   }
   let offline = { status: (() => { try { return localStorage.getItem("imres-klangwelten-offline") === "1" ? "bereit" : ""; } catch (_) { return ""; } })(), p: 0 };
@@ -1306,7 +1316,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     else if (k === "spar") {
       merk.spar = !!an;
       /* neu aufbauen mit kürzerem bzw. vollem Hall; die laufende Welt startet weich neu */
-      if (ctx) { const w = aktiv && aktiv.welt; if (E) { try { E.bus.disconnect(); } catch (_) {} E = null; spDrohne = null; } if (w) weltStarten(w); spannungAnwenden(); }
+      if (ctx) { const w = aktiv && aktiv.welt; if (E) { try { E.bus.disconnect(); } catch (_) {} E = null; spDrohne = spFlirren = null; } if (w) weltStarten(w); spannungAnwenden(); }
     }
     else if (k === "sz-laut") { merk.szLaut = v; epischPegel(); }
     else if (k === "ehall" || k === "eweite") { merk[k] = v; epischRaum(); }
