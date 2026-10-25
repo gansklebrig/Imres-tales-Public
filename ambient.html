@@ -25,7 +25,7 @@ body{font-family:var(--fb);font-size:16px;line-height:1.5;padding-bottom:calc(6.
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
-.wrap{max-width:62rem;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:78rem;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px))}
 header.kopf{padding:1.6rem 0 1rem}
 .zurueck{color:var(--mute);text-decoration:none;font-size:.9rem}
 .zurueck:hover{color:var(--ember)}
@@ -86,12 +86,24 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
 .laut{display:flex;align-items:center;gap:.35rem;flex:0 1 9rem;min-width:5.5rem;color:var(--mute)}
 .laut input{width:100%;accent-color:var(--ember)}
 @media (prefers-reduced-motion:reduce){.welt.an::after{animation:none}}
-/* Umschalter Ruhig / Episch */
-.modus{display:inline-flex;gap:.25rem;padding:.25rem;margin:1rem 0 0;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
-.modus button{border:0;background:none;border-radius:999px;padding:.4rem 1rem;color:var(--mute);font-size:.95rem}
-.modus button[aria-selected="true"]{background:var(--ember);color:var(--night);font-weight:700}
-body.episch{--violett:#8f7cff;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(143,124,255,.14),transparent 70%),var(--night)}
-body.episch .welt{background:linear-gradient(180deg,#191424,var(--panel))}
+/* Aufbau: links Welten, Mischpult, Szenen – rechts (am Rechner mitlaufend) Geräusche & Einschläge */
+.buehne{display:grid;gap:.4rem 1.6rem;align-items:start}
+@media (min-width:980px){.buehne{grid-template-columns:minmax(0,1fr) 23rem}.seite{position:sticky;top:.8rem;max-height:calc(100vh - 6.8rem);overflow:auto;padding-right:.3rem;scrollbar-width:thin}}
+.seite h2.abschnitt{margin-top:1.2rem}
+/* auf dem Handy: Sprungleiste, damit Geräusche und Szenen nicht ganz unten verschwinden */
+.sprung{display:flex;gap:.4rem;margin:.8rem 0 0;position:sticky;top:0;z-index:4;padding:.45rem 0;background:linear-gradient(var(--ink) 70%,transparent)}
+.sprung a{border:1px solid var(--line);border-radius:999px;padding:.3rem .75rem;color:var(--text);text-decoration:none;font-size:.85rem;background:var(--panel)}
+@media (min-width:980px){.sprung{display:none}}
+#welten-box,#ger-box,#sz-box{scroll-margin-top:3.2rem}
+.weltgruppe{margin:0 0 .9rem}
+.weltgruppe h3{font:500 .78rem var(--fb);color:var(--mute);margin:.2rem 0 .4rem;text-transform:uppercase;letter-spacing:.06em}
+.weltgruppe .welten{margin:0}
+.welt.ep{background:linear-gradient(180deg,#1b1526,var(--panel));border-color:#3d3352}
+.welt.ep .nm::after{content:" ✦";color:#a593ff;font-size:.8em}
+.welt.ep.an{border-color:#8f7cff;box-shadow:0 0 0 1px #8f7cff inset,0 0 26px rgba(143,124,255,.22)}
+.chip.gross{border-color:#3d3352;background:linear-gradient(180deg,#1b1526,var(--panel))}
+.chip kbd{font:500 .66rem var(--fb);color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:0 .28rem;margin-left:.1rem}
+@media (max-width:520px){.chip kbd{display:none}}
 h2.abschnitt{font-family:var(--fd);font-weight:400;font-size:1.3rem;margin:1.4rem 0 .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:1 1 12rem}
 .pad{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.2rem,1fr));gap:.5rem}
@@ -135,27 +147,28 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     <h1 data-t="titel">Klangwelten</h1>
     <p class="unter" data-t="unter">Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.</p>
   </header>
-  <main>
-    <section class="funk" id="funk"></section>
-    <div class="modus" id="modus" role="tablist"><button type="button" role="tab" data-modus="ruhig" data-t="ruhig">🌿 Ruhig</button><button type="button" role="tab" data-modus="episch" data-t="episch">⚔ Episch</button></div>
-    <section class="misch" id="misch" hidden></section>
-    <div class="welten" id="welten"></div>
-    <section id="aus-box" hidden>
-      <h2 class="abschnitt"><span data-t="hAus">⚡ Einschläge</span><small data-t="hAusTx">Ein Schlag, der durch den Raum rollt – passt zu jeder Klangwelt.</small>
-        <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="aus-laut" min="0" max="150" value="100"></label></h2>
-      <div class="pad" id="aus"></div>
-    </section>
-    <section id="sz-box" hidden>
-      <h2 class="abschnitt"><span data-t="hSz">⏳ Szenen</span><small data-t="hSzTx">Lange Aufnahmen, die sich über Minuten entfalten. Nochmal antippen blendet aus.</small>
-        <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="sz-laut" min="0" max="150" value="100"></label>
-        <button type="button" class="leise" id="sz-stopp" data-t="szStopp">◼ Alle ausblenden</button></h2>
-      <div class="pad" id="szenen"></div>
-    </section>
-    <section id="ger-box">
-      <h2 class="abschnitt"><span data-t="hGer">🎭 Geräusche</span><small data-t="hGerTx">Was gerade am Tisch passiert – in natürlicher Tonhöhe, im Raum der laufenden Klangwelt.</small>
+  <section class="funk" id="funk"></section>
+  <nav class="sprung" id="sprung"><a href="#welten-box" data-t="nWelten">🗺 Klangwelten</a><a href="#ger-box" data-t="nGer">🎭 Geräusche</a><a href="#sz-box" data-t="nSz">⏳ Szenen</a></nav>
+  <main class="buehne">
+    <div class="haupt">
+      <section id="welten-box">
+        <h2 class="abschnitt"><span data-t="hWelten">🗺 Klangwelten</span><small data-t="hWeltenTx">Antippen startet, nochmal antippen hält an. ✦ = episch: tiefer gestimmt, mit riesigem Nachhall.</small></h2>
+        <div id="welten"></div>
+      </section>
+      <section class="misch" id="misch" hidden></section>
+      <section id="sz-box">
+        <h2 class="abschnitt"><span data-t="hSz">⏳ Szenen</span><small data-t="hSzTx">Lange Aufnahmen, die sich über Minuten entfalten. Nochmal antippen blendet aus.</small>
+          <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="sz-laut" min="0" max="150" value="100"></label>
+          <button type="button" class="leise" id="sz-stopp" data-t="szStopp">◼ Alle ausblenden</button></h2>
+        <div class="pad" id="szenen"></div>
+      </section>
+    </div>
+    <aside class="seite" id="ger-box">
+      <h2 class="abschnitt"><span data-t="hGer">🎭 Geräusche &amp; Einschläge</span>
         <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="ger-laut" min="0" max="150" value="100"></label></h2>
+      <p class="tipp" data-t="hGerTx">Antippen spielt einmal ab – im Raum der laufenden Klangwelt.</p>
       <div class="geraeusche" id="geraeusche"></div>
-    </section>
+    </aside>
   </main>
   <footer id="dank"></footer>
 </div>
@@ -190,21 +203,21 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     hTitel: "Mitlauschen", hWarte: "Gerade läuft nichts – sobald es losgeht, hörst du es.", hZuhoeren: "🎧 Zuhören", hStumm: "❚❚ Stumm", hSelbst: "Selbst Klangwelten wählen"
   };
   Object.assign(T, EN ? {
-    hGer: "🎭 Sounds", hGerTx: "What is happening at the table – natural pitch, in the room of the current soundscape.", ausAlles: "Stop everything now (Esc)", spar: "🪶 Light sound – if it crackles or scratches on this device", tGer: ["#ger-box", "🎭 Sounds", "Doors, footsteps, armour, coins, creatures: tap to play once, in the room of the current soundscape."], tAusAlles: ["#aus-alles", "✕ Stop everything", "Ends everything at once – soundscape, scenes, impacts. Esc does the same."],
+    hGer: "🎭 Sounds & impacts", hGerTx: "Tap to play once – in the room of the current soundscape.", hWelten: "🗺 Soundscapes", hWeltenTx: "Tap to start, tap again to stop. ✦ = epic: pitched down, with a huge reverb.", gGross: "⚡ Big moments", nWelten: "🗺 Soundscapes", nGer: "🎭 Sounds", nSz: "⏳ Scenes", wg: ["🏠 Places & halls", "🌲 Wilderness & weather", "🌊 Water", "🕳 Below & beyond"], ausAlles: "Stop everything now (Esc)", spar: "🪶 Light sound – if it crackles or scratches on this device", tGer: ["#ger-box", "🎭 Sounds & impacts", "Doors, footsteps, armour, coins, creatures – and at the top the big moments like thunder or a dragon's roar (keys 1–9 and 0). On a computer this column stays beside you while you scroll."], tAusAlles: ["#aus-alles", "✕ Stop everything", "Ends everything at once – soundscape, scenes, impacts. Esc does the same."],
     ruhig: "🌿 Calm", episch: "⚔ Epic", hAus: "⚡ Impacts", hAusTx: "One blow that rolls through the space – fits any soundscape.", hSz: "⏳ Scenes", hSzTx: "Long recordings unfolding over minutes. Tap again to fade out.", szStopp: "◼ Fade all out",
     noch: "left", szLaeuft: n => n === 1 ? "1 scene" : n + " scenes", ehall: "Reverb", eweite: "Echo depth", tasten: "Keys 1–9 and 0 fire the impacts.", tippEpisch: "Pitched down and bathed in a huge reverb. Reverb and echo depth also apply to impacts and scenes.",
     tModus: ["#modus", "🌿 Calm or ⚔ Epic", "“Calm” holds the quiet everyday soundscapes. “Epic” has vast, reverberant worlds plus impacts and long scenes for the big moments."],
     tAus: ["#aus-box", "⚡ Impacts", "Single blows for the big moment: thunder, a death knell, a dragon's roar – they also work over a calm soundscape. On a keyboard: keys 1–9 and 0."],
     tSz: ["#sz-box", "⏳ Scenes", "Long recordings unfolding over minutes – a storm rolling in, monks in the deep. The bar shows how far along it is; tap again to fade out."]
   } : {
-    hGer: "🎭 Geräusche", hGerTx: "Was gerade am Tisch passiert – in natürlicher Tonhöhe, im Raum der laufenden Klangwelt.", ausAlles: "Alles sofort stoppen (Esc)", spar: "🪶 Leichter Klang – falls es auf diesem Gerät kratzt oder knackt", tGer: ["#ger-box", "🎭 Geräusche", "Türen, Schritte, Rüstung, Münzen, Wesen: antippen spielt sie einmal ab, im Raum der laufenden Klangwelt."], tAusAlles: ["#aus-alles", "✕ Alles aus", "Beendet sofort alles – Klangwelt, Szenen, Einschläge. Die Esc-Taste macht dasselbe."],
+    hGer: "🎭 Geräusche & Einschläge", hGerTx: "Antippen spielt einmal ab – im Raum der laufenden Klangwelt.", hWelten: "🗺 Klangwelten", hWeltenTx: "Antippen startet, nochmal antippen hält an. ✦ = episch: tiefer gestimmt, mit riesigem Nachhall.", gGross: "⚡ Große Momente", nWelten: "🗺 Klangwelten", nGer: "🎭 Geräusche", nSz: "⏳ Szenen", wg: ["🏠 Orte & Hallen", "🌲 Wildnis & Wetter", "🌊 Wasser", "🕳 Tiefe & Jenseits"], ausAlles: "Alles sofort stoppen (Esc)", spar: "🪶 Leichter Klang – falls es auf diesem Gerät kratzt oder knackt", tGer: ["#ger-box", "🎭 Geräusche & Einschläge", "Türen, Schritte, Rüstung, Münzen, Wesen – und ganz oben die großen Momente wie Donner oder Drachenbrüllen (Tasten 1–9 und 0). Am Rechner bleibt diese Spalte beim Scrollen neben dir stehen."], tAusAlles: ["#aus-alles", "✕ Alles aus", "Beendet sofort alles – Klangwelt, Szenen, Einschläge. Die Esc-Taste macht dasselbe."],
     ruhig: "🌿 Ruhig", episch: "⚔ Episch", hAus: "⚡ Einschläge", hAusTx: "Ein Schlag, der durch den Raum rollt – passt zu jeder Klangwelt.", hSz: "⏳ Szenen", hSzTx: "Lange Aufnahmen, die sich über Minuten entfalten. Nochmal antippen blendet aus.", szStopp: "◼ Alle ausblenden",
     noch: "noch", szLaeuft: n => n === 1 ? "1 Szene" : n + " Szenen", ehall: "Nachhall", eweite: "Echotiefe", tasten: "Tasten 1–9 und 0 lösen die Einschläge aus.", tippEpisch: "Tiefer gestimmt und in riesigen Nachhall getaucht. Nachhall und Echotiefe gelten auch für Einschläge und Szenen.",
     tModus: ["#modus", "🌿 Ruhig oder ⚔ Episch", "„Ruhig“ sind die stillen Alltags-Klangwelten. „Episch“ hat gewaltige, hallende Welten und dazu Einschläge und lange Szenen für die großen Momente."],
     tAus: ["#aus-box", "⚡ Einschläge", "Einzelne Schläge für den großen Moment: Donner, Totenglocke, Drachenbrüllen – sie passen auch über eine ruhige Klangwelt. Am Rechner auch mit den Tasten 1–9 und 0."],
     tSz: ["#sz-box", "⏳ Szenen", "Lange Aufnahmen, die sich über Minuten entfalten – ein aufziehender Sturm, Mönche in der Tiefe. Der Balken zeigt, wie weit sie sind; nochmal antippen blendet aus."]
   });
-  T.schritte.splice(1, 0, T.tModus); T.schritte.splice(T.schritte.length - 2, 0, T.tAus, T.tSz, T.tGer); T.schritte.push(T.tAusAlles);
+  T.schritte[0][0] = "#welten-box"; T.schritte.splice(2, 0, T.tGer, T.tSz); T.schritte.push(T.tAusAlles);
   document.querySelectorAll("[data-t]").forEach(el => { if (T[el.dataset.t]) el.textContent = T[el.dataset.t]; });
   document.title = T.titel;
 
@@ -455,6 +468,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   SZENEN.forEach(s => { if (s.stimmen) { s.folge = "stimmen"; s.laenge = s.dauer; } });
 
 
+  const WELT_GRUPPE = { taverne: 0, bibliothek: 0, schmiede: 0, labor: 0, tempel: 0, kathedrale: 0, gefallene: 0, kerker: 0,
+    lagerfeuer: 1, waldtag: 1, waldnacht: 1, sumpf: 1, regen: 1, zelt: 1, gewitter: 1, gipfel: 1, schlachtfeld: 1,
+    kueste: 2, schiff: 2, fluss: 2, unterwasser: 2, ozean: 2, hoehle: 3, unterreich: 3, abgrund: 3, hort: 3, sterne: 3 };
   /* ---------- Gemerkte Einstellungen ---------- */
   let merk = {};
   const istObjekt = v => !!v && typeof v === "object" && !Array.isArray(v);
@@ -464,8 +480,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   if (!istObjekt(merk.mix)) merk.mix = {};
   Object.keys(merk.mix).forEach(k => { if (!istObjekt(merk.mix[k])) delete merk.mix[k]; });
   ["gesamt", "ehall", "eweite", "ausLaut", "szLaut", "gLaut"].forEach(k => { if (typeof merk[k] !== "number" || !isFinite(merk[k])) delete merk[k]; });
-  try { const q = new URLSearchParams(location.search).get("modus"); if (q === "episch" || q === "ruhig") merk.modus = q; } catch (_) {}
-  if (merk.modus !== "episch") merk.modus = "ruhig";
+  delete merk.modus;
   const speichern = () => { if (hoerer) return; try { localStorage.setItem("imres-klangwelten", JSON.stringify(merk)); } catch (_) {} };
   const zz = (a, b) => a + Math.random() * (b - a);
   const wert = (x, d) => x != null ? x : d;
@@ -508,7 +523,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     for (let c = 0; c < k; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
     hall.buffer = b;
   }
-  const quelle = n => /^(a|e|l)_/.test(n) ? "amb/" + n + ".mp3" : "klang/" + n + ".mp3";
+  const quelle = n => /^(a|e|l|g)_/.test(n) ? "amb/" + n + ".mp3" : "klang/" + n + ".mp3";
   function laden(n) {
     if (puffer.has(n)) return Promise.resolve(puffer.get(n));
     if (laedt.has(n)) return laedt.get(n);
@@ -993,12 +1008,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   function zeichnen() {
     if (hoerer) { hoererZeichnen(); return; }
-    const ep = merk.modus === "episch";
-    document.body.classList.toggle("episch", ep);
-    document.querySelectorAll("[data-modus]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.modus === merk.modus)));
-    $("aus-box").hidden = $("sz-box").hidden = !ep; $("ger-box").hidden = false;
-    $("welten").innerHTML = WELTEN.filter(w => !w.episch === !ep).map(w => '<button type="button" class="welt' + (aktiv && aktiv.welt === w ? " an" : "") + '" data-welt="' + w.id + '"><span class="sym" aria-hidden="true">' + w.sym +
-      '</span><span class="nm">' + esc(w.name) + '</span><span class="tx">' + esc(w.text) + "</span></button>").join("");
+    $("welten").innerHTML = T.wg.map((titel, g) => '<div class="weltgruppe"><h3>' + esc(titel) + '</h3><div class="welten">' +
+      WELTEN.filter(w => (WELT_GRUPPE[w.id] || 0) === g).map(w => '<button type="button" class="welt' + (w.episch ? " ep" : "") + (aktiv && aktiv.welt === w ? " an" : "") + '" data-welt="' + w.id + '"><span class="sym" aria-hidden="true">' + w.sym +
+      '</span><span class="nm">' + esc(w.name) + '</span><span class="tx">' + esc(w.text) + "</span></button>").join("") + "</div></div>").join("");
     const sp = $("spielen"); sp.textContent = aktiv ? "■" : "▶"; sp.classList.toggle("laeuft", !!aktiv); sp.setAttribute("aria-label", aktiv ? T.stopp : T.spielen);
     const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt);
     $("jetzt-name").textContent = w ? w.sym + " " + w.name : T.waehlen;
@@ -1025,12 +1037,12 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   const minuten = s => s >= 90 ? W("ca. ", "approx. ") + Math.round(s / 60) + " min" : Math.round(s / 10) * 10 + " s";
   function padZeichnen() {
     if (hoerer) return;
-    $("aus").innerHTML = EINSCHLAEGE.map((a, i) => '<button type="button" class="knopf" data-aus="' + a.id + '">' + (i < 10 && !mobil ? "<kbd>" + ((i + 1) % 10) + "</kbd>" : "") +
-      '<span class="sym" aria-hidden="true">' + a.sym + '</span><span class="nm">' + esc(a.name) + '</span><span class="tx">' + esc(a.tx) + "</span></button>").join("");
     $("szenen").innerHTML = SZENEN.map(s => { const l = laufend.get(s.id);
       return '<button type="button" class="knopf szene' + (l ? " an" : "") + (l && l.laedt ? " laedt" : "") + '" data-szene="' + s.id + '" aria-pressed="' + !!l + '"><span class="sym" aria-hidden="true">' + s.sym +
         '</span><span class="nm">' + esc(s.name) + '</span><span class="tx">' + (l ? "■ " : "⏳ ") + esc(minuten(s.laenge)) + "</span></button>"; }).join("");
-    $("geraeusche").innerHTML = GER_GRUPPEN.map(([g, titel]) => '<div class="gruppe"><h3>' + esc(titel) + '</h3><div class="chips">' +
+    $("geraeusche").innerHTML = '<div class="gruppe"><h3>' + esc(T.gGross) + '</h3><div class="chips">' +
+      EINSCHLAEGE.map((a, i) => '<button type="button" class="chip gross" data-aus="' + a.id + '" title="' + esc(a.tx) + '"><span aria-hidden="true">' + a.sym + "</span>" + esc(a.name) + (i < 10 && !mobil ? "<kbd>" + ((i + 1) % 10) + "</kbd>" : "") + "</button>").join("") + "</div></div>" +
+      GER_GRUPPEN.map(([g, titel]) => '<div class="gruppe"><h3>' + esc(titel) + '</h3><div class="chips">' +
       GERAEUSCHE.filter(d => d.gr === g).map(d => '<button type="button" class="chip" data-ger="' + d.id + '"><span aria-hidden="true">' + d.sym + "</span>" + esc(d.name) + "</button>").join("") + "</div></div>").join("");
     fortschritt(); infoZeile();
   }
@@ -1045,9 +1057,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
   function hoererZeichnen() {
     const d = hoerer.zuletzt, w = d && d.laeuft ? WELTEN.find(x => x.id === d.welt) : null;
-    $("welten").innerHTML = ""; $("misch").hidden = true; $("funk").innerHTML = ""; $("modus").hidden = $("aus-box").hidden = $("sz-box").hidden = $("ger-box").hidden = true;
+    $("welten").innerHTML = ""; $("misch").hidden = true; $("funk").innerHTML = ""; $("welten-box").hidden = $("sz-box").hidden = $("ger-box").hidden = $("sprung").hidden = true;
     let box = document.getElementById("hoerer");
-    if (!box) { box = document.createElement("section"); box.id = "hoerer"; box.className = "hoerer"; $("welten").before(box); }
+    if (!box) { box = document.createElement("section"); box.id = "hoerer"; box.className = "hoerer"; document.querySelector(".buehne").before(box); }
     box.innerHTML = '<p class="tipp">' + esc(T.hTitel) + (hoerer.status === "fehler" ? " · 🔴 " + esc(T.fehler) : hoerer.status !== "ok" ? " · 🟡 " + esc(T.verbinde) : "") + "</p>" +
       (w ? '<div class="gross">' + w.sym + "</div><h2>" + esc(w.name) + '</h2><p class="tipp">' + esc(w.text) + "</p>" : laufend.size ? "" : '<p class="tipp">' + esc(T.hWarte) + "</p>") +
       (laufend.size ? '<p class="tipp">⏳ ' + [...laufend.values()].map(l => l.s.sym + " " + esc(l.s.name)).join(" · ") + "</p>" : "") +
@@ -1059,8 +1071,6 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   const regler = (k, name, v, lo, hi) => '<label class="regler"><span>' + esc(name) + '</span><input type="range" min="' + lo + '" max="' + hi + '" value="' + v + '" data-regler="' + k + '"><b>' + v + " %</b></label>";
   document.addEventListener("click", e => {
     if (e.target.closest("#aus-alles")) { if (hoerer) { if (hoerer.an) hoererSchalten(); } else notAus(); return; }
-    const mo = e.target.closest("[data-modus]");
-    if (mo && !hoerer) { merk.modus = mo.dataset.modus; speichern(); zeichnen(); return; }
     if (!hoerer) {
       const a = e.target.closest("[data-aus]"); if (a) { ausloesen(a.dataset.aus); return; }
       const ge = e.target.closest("[data-ger]"); if (ge) { geraeusch(ge.dataset.ger); return; }
@@ -1075,14 +1085,14 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     }
   });
   document.addEventListener("input", e => {
-    if (e.target.id === "ger-laut") { merk.gLaut = +e.target.value; speichern(); gerPegel(); return; }
+    if (e.target.id === "ger-laut") { merk.gLaut = merk.ausLaut = +e.target.value; speichern(); gerPegel(); epischPegel(); return; }
     if (e.target.id === "spar") {
       merk.spar = e.target.checked; speichern();
       /* neu aufbauen mit kürzerem bzw. vollem Hall; die laufende Welt startet weich neu */
       if (ctx) { const w = aktiv && aktiv.welt; if (E) { try { E.bus.disconnect(); } catch (_) {} E = null; } if (w) weltStarten(w); }
       return;
     }
-    if (e.target.id === "aus-laut" || e.target.id === "sz-laut") { merk[e.target.id === "aus-laut" ? "ausLaut" : "szLaut"] = +e.target.value; speichern(); epischPegel(); return; }
+    if (e.target.id === "sz-laut") { merk.szLaut = +e.target.value; speichern(); epischPegel(); return; }
     if (e.target.dataset.regler === "ehall" || e.target.dataset.regler === "eweite") { merk[e.target.dataset.regler] = +e.target.value; e.target.nextElementSibling.textContent = e.target.value + " %"; epischRaum(); speichern(); funkSenden(); return; }
     if (e.target.id === "gesamt") { merk.gesamt = +e.target.value; speichern(); if (gesamt) gesamt.gain.setTargetAtTime(lautWert(), ctx.currentTime, .05); return; }
     const k = e.target.dataset.regler; if (!k) return;
@@ -1098,12 +1108,12 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   });
   $("gesamt").value = merk.gesamt != null ? merk.gesamt : 70;
   $("gesamt").setAttribute("aria-label", T.gesamt);
-  $("aus-laut").value = wert(merk.ausLaut, 100); $("sz-laut").value = wert(merk.szLaut, 100); $("ger-laut").value = wert(merk.gLaut, 100);
+  $("sz-laut").value = wert(merk.szLaut, 100); $("ger-laut").value = wert(merk.gLaut, 100);
   $("ger-laut").setAttribute("aria-label", T.hGer); $("aus-alles").setAttribute("aria-label", T.ausAlles); $("aus-alles").title = T.ausAlles;
-  $("aus-laut").setAttribute("aria-label", T.hAus); $("sz-laut").setAttribute("aria-label", T.hSz);
+  $("sz-laut").setAttribute("aria-label", T.hSz);
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && !tour && !hoerer) { notAus(); return; }
-    if (hoerer || tour || merk.modus !== "episch" || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
+    if (hoerer || tour || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
     if (/^[0-9]$/.test(e.key)) { const i = (+e.key + 9) % 10; if (EINSCHLAEGE[i]) { e.preventDefault(); ausloesen(EINSCHLAEGE[i].id); } }
   });
   setInterval(takt, 250);
@@ -1233,7 +1243,6 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     tour.i = i;
     const [sel, h, txt] = T.schritte[i];
     if (sel === "#misch" && $("misch").hidden) { merk.welt = merk.welt || WELTEN[0].id; zeichnen(); }
-    if ((sel === "#aus-box" || sel === "#sz-box") && merk.modus !== "episch") { merk.modus = "episch"; zeichnen(); }
     tour.ziel = document.querySelector(sel);
     const bl = tour.el.querySelector(".tour-blase");
     bl.innerHTML = "<small>" + (i + 1) + " / " + T.schritte.length + "</small><h4>" + esc(h) + "</h4><p>" + esc(txt) + '</p><div class="tour-k"><button type="button" data-tour="ende">' + esc(T.beenden) + "</button><span></span>" +
