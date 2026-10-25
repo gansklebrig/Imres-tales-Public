@@ -869,6 +869,8 @@
     return s;
   }
   let S = pruefen(ausVorlage("taverne"));
+  /* erster Besuch: die Tavernenmelodie trägt ihren Namen (nicht „Eigenes Lied“) */
+  try { S.titel = t().vorlagen.taverne.replace(/^[^\wÄÖÜäöü]+/, ""); } catch (_) {}
   try {
     const g = JSON.parse(localStorage.getItem("imres-lautenwerk2") || "null");
     if (g && g.teile) S = pruefen(g);
@@ -941,15 +943,17 @@
   const ziffern = a => a.map(v => v < 0 ? "." : v).join("");
   const unziffern = (str, max) => String(str || "").padEnd(SCHRITTE, ".").slice(0, SCHRITTE).split("").map(c => { const n = parseInt(c, 10); return isNaN(n) || n > max ? -1 : n; });
   const zahl = (x, min, max, d) => { const n = parseInt(x, 10); return isNaN(n) ? d : Math.max(min, Math.min(max, n)); };
-  const kodieren = () => ["4", S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, S.variation, S.ablauf,
+  /* Format 5 = Format 4 + Taktart (12 = Dreivierteltakt) und Kulisse; ältere Links bleiben lesbar */
+  const kodieren = () => ["5", S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, S.variation, S.ablauf,
     IDS.map(k => (S.mute[k] ? "m" : "") + S.vol[k]).join("")]
     .concat(...TEILE.map(p => SPUREN.map(sp => sp.art === "an" ? hex(S.teile[p][sp.id]) : ziffern(S.teile[p][sp.id]))))
     .concat([INSTRUMENTE.indexOf(S.instrument) + ["trommel", "floete", "ketten"].map(k => BAND[k].indexOf(S.band[k])).join("")])
+    .concat([S.takt === 12 ? 12 : 16, Math.max(0, KULISSEN.indexOf(S.kulisse))])
     .join("-");
   function dekodieren(code) {
     /* negative Tonart (z. B. -2) steht als "--2" im Code – vor dem Zerlegen schützen */
     const p = String(code).replace(/--(\d)/g, "-~$1").split("-").map(x => x.replace(/^~/, "-"));
-    if (p[0] === "4" && p.length === 10 + 4 * SPUREN.length) {
+    if ((p[0] === "4" && p.length === 10 + 4 * SPUREN.length) || (p[0] === "5" && p.length === 12 + 4 * SPUREN.length)) {
       const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, MODUS_LISTE.length - 1, 0)],
         swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: String(p[7]).toUpperCase(),
         ...MIX_START(), teile: {}, band: BAND_START() };
@@ -965,6 +969,7 @@
       const ins = String(p[9 + 4 * SPUREN.length] || "");
       s.instrument = INSTRUMENTE[zahl(ins[0], 0, INSTRUMENTE.length - 1, 0)];
       ["trommel", "floete", "ketten"].forEach((k, i) => { s.band[k] = BAND[k][zahl(ins[i + 1], 0, BAND[k].length - 1, 0)]; });
+      if (p[0] === "5") { s.takt = p[10 + 4 * SPUREN.length] === "12" ? 12 : 16; s.kulisse = KULISSEN[zahl(p[11 + 4 * SPUREN.length], 0, KULISSEN.length - 1, 0)]; }
       return pruefen(s);
     }
     if ((p[0] === "2" && p.length === 9 + 2 * SPUREN.length) || (p[0] === "3" && p.length === 10 + 2 * SPUREN.length)) {
@@ -1111,7 +1116,7 @@
   /* das schlanke Hall-Netz (Handy/Sparmodus) braucht mehr Eingangspegel, um so viel Raum zu ergeben wie der Faltungshall */
   const SPAR_HALL = 3.5;
   /* ---------- Geräuschkulisse ---------- */
-  let kul = null, kulRauschen = null, sfxBus = null, kulMerk = null; /* kulMerk: über den Mini-Player angehaltene Kulisse */
+  let kul = null, kulRauschen = null, sfxBus = null, kulMerk = null, kulBus = null; /* kulMerk: über den Mini-Player angehaltene Kulisse */
   const kulPegel = () => Math.pow(S.kulisseVol / 10, 1.5) * .9;
   const zz = (a, b) => a + Math.random() * (b - a);
   /* Rauschbett; opt.wandern lässt die Filter langsam wandern (heulender Wind), opt.schwanken die Lautstärke */
@@ -1395,17 +1400,23 @@
       });
     }, 250);
   }
+  /* sofort = vom Nutzer selbst angetippt: diese Kulisse bleibt, bis man sie selbst ändert – auch über Musik-Stopp und Stimmungswechsel hinweg.
+     Ohne sofort kommt sie von der Stimmung und geht mit der Musik. */
   function kulisseStart(sofort) {
     if (!ctx) return;
+    /* läuft genau diese Kulisse schon, nicht neu starten (sonst kurzes Aus- und Einblenden) */
+    if (kul && kul.art === S.kulisse && S.kulisse !== "keine") { if (sofort) kul.allein = true; return; }
     kulisseStop();
     const art = S.kulisse;
     if (art === "keine" || (!laeuft && !sofort)) return;
     musikWieder();
     const g = ctx.createGain(), j = ctx.currentTime;
     g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(kulPegel(), j + 2.5);
-    g.connect(master);
+    /* eigener Weg an der Musik-Dämpfung vorbei: Anhalten, Wechsel-Übergänge und Effekte dämpfen nur die Musik, nicht die Kulisse */
+    if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kompRef || master); }
+    g.connect(kulBus);
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
-    kul = { art, g, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0 };
+    kul = { art, g, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0, allein: !!sofort };
     kulMerk = null;
     if (KUL_WELT[art]) { send.gain.value = KUL_WELT[art].raum; weltStart(kul, KUL_WELT[art]); try { miniAnzeigen(); } catch (_) {} return; }
     const rest = KUL_SCHICHT[art] ? KUL_REST[art] || {} : {};
@@ -2481,8 +2492,8 @@
     clearTimeout(fortsetzTimer); musikPauseAb = 0;
     if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.value = .38; }
     musikWieder(); orchVorladen();
-    kulisseStart();
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
+    kulisseStart(); /* erst jetzt: vorher galt die Musik noch als angehalten, und die Kulisse schaltete sich gleich wieder ab */
     planen(); timer = setInterval(planen, 30); taktgeber(true);
     bordunAn();
     malenStarten();
@@ -2491,7 +2502,7 @@
   function stopp(pause) {
     laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; musikPauseAb = 0; if (klassikLauf) klassikStopp(true);
     /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
-    if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); kulisseStop();
+    if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); if (!(kul && kul.allein)) kulisseStop();
     /* ein gewählter, aber noch nicht begonnener Wechsel bleibt die Auswahl für das nächste Play */
     if (wechsel) { S = wechsel; merken(); setTimeout(() => { zeichnen(); knoepfe(); }, 0); }
     ausduennen = false; einblend = 0;
@@ -4627,7 +4638,7 @@
   function rasterZeile(spur, zeile, beschriftung, klasse) {
     const daten = S.teile[bearbeite][spur];
     let html = '<div class="lw-name ' + (klasse || "") + '">' + beschriftung + "</div>";
-    for (let i = 0; i < SCHRITTE; i++) {
+    for (let i = 0; i < taktL(); i++) { /* Dreivierteltakt: nur 12 Spalten – die übrigen würden nie erklingen */
       const istAn = SPUR[spur].art === "an" ? daten[i] >= 0 : daten[i] === zeile;
       html += '<button type="button" class="lw-zelle s-' + spur + (S.mute[spur] ? " stumm" : "") + (i % 4 === 0 ? " takt" : "") + (istAn ? " an" : "") +
         '" data-spur="' + spur + '" data-zeile="' + zeile + '" data-s="' + i + '" aria-pressed="' + istAn + '"></button>';
@@ -4973,7 +4984,7 @@
           TEILE.filter(z => z !== bearbeite).map(z => '<button type="button" class="lw-klein' + (kopierZiel === z ? " warnung" : "") + '" data-kopiere="' + z + '">' +
             (kopierZiel === z ? T.ueberschreiben(z) : "→ " + z) + "</button>").join("") + "</span>" +
       "</div>" +
-      '<div class="lw-scroll"><div class="lw-raster">' + raster + "</div></div>" +
+      '<div class="lw-scroll"><div class="lw-raster' + (taktL() === 12 ? " drei" : "") + '">' + raster + "</div></div>" +
       '<p class="lw-wisch">' + T.wischen + "</p>" +
       '<div class="lw-fuss"><button type="button" class="lw-teilen">' + T.teilen + '</button><span class="lw-status" aria-live="polite"></span></div>';
 
@@ -5106,6 +5117,8 @@
       neu.titel = k === "zufall" ? t().zufall.replace(/^\S+\s/, "") : eig ? stimmName(k) : t().vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, "");
       if (KULISSE_ZU[k]) neu.kulisse = KULISSE_ZU[k];
     }
+    /* selbst angetippte Kulisse läuft: sie bleibt, statt von der Kulisse der Stimmung ersetzt zu werden */
+    if (kul && kul.allein && !(eigeneStimmungen[k] && eigeneStimmungen[k].werte && eigeneStimmungen[k].werte.kulisse)) neu.kulisse = kul.art;
     neu.eigeneStimmung = null; neu.festBesetzung = 0;
     if (eig && eig.werte) {
       neu.festBesetzung = eig.werte.instrument ? 1 : 0;
@@ -5669,6 +5682,7 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 
 .lw-scroll { overflow-x: auto; margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); padding-inline: clamp(1.2rem, 4vw, 2rem); -webkit-overflow-scrolling: touch; }
 .lw-raster { display: grid; grid-template-columns: 3.4rem repeat(16, minmax(1.75rem, 1fr)); gap: 3px; min-width: 36rem; }
+.lw-raster.drei { grid-template-columns: 3.4rem repeat(12, minmax(1.75rem, 1fr)); min-width: 28rem; }
 .lw-kopf { grid-column: 1 / -1; margin-top: .8rem; }
 .lw-kopf:first-child { margin-top: 0; }
 .lw-kopf-in { position: sticky; left: 0; display: inline-flex; align-items: center; flex-wrap: wrap; gap: .4rem .55rem; max-width: calc(100vw - 2.5rem); }
