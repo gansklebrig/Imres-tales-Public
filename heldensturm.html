@@ -381,6 +381,7 @@ const REDUCED=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').
 
 /* ================= Speicherstand ================= */
 const SKEY='imres-heldensturm-v1';
+const DMAX=200;
 function defSave(){return{gold:0,maxDiff:0,sound:true,music:true,auto:false,heroes:{},volSfx:0.8,volMus:0.6}}
 let SAVE=defSave();
 try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s&&typeof s==='object'&&!Array.isArray(s))SAVE=Object.assign(defSave(),s)}catch(e){}
@@ -388,7 +389,18 @@ function saveFix(S){const D=defSave();for(const k in D){const d=D[k],v=S[k];if(t
  if(!S.heroes||typeof S.heroes!=='object'||Array.isArray(S.heroes))S.heroes={};for(const id in S.heroes){const x=S.heroes[id];if(!x||typeof x!=='object'){delete S.heroes[id];continue}if(!x.up||typeof x.up!=='object')x.up={};for(const k of['best','runs','clears'])if(typeof x[k]!=='number'||!isFinite(x[k]))x[k]=k==='best'?-1:0;if(x.rl&&typeof x.rl!=='object')delete x.rl}
  if(S.gfx!==undefined&&S.gfx!=='auto'&&!isFinite(+S.gfx))delete S.gfx;
  if(S.ruhm&&(typeof S.ruhm!=='object'||Array.isArray(S.ruhm)))delete S.ruhm;if(S.ruhm){if(!S.ruhm.pts||typeof S.ruhm.pts!=='object')S.ruhm.pts={};if(!isFinite(+S.ruhm.xp))S.ruhm.xp=0;if(!isFinite(+S.ruhm.lv))S.ruhm.lv=0}
- if(S.run&&typeof S.run!=='object')S.run=null;if(!Array.isArray(S.truhe))S.truhe=[];S.truhe=S.truhe.filter(x=>x&&typeof x==='object'&&typeof x.slot==='string');return S}
+ if(S.run&&typeof S.run!=='object')S.run=null;if(!Array.isArray(S.truhe))S.truhe=[];S.truhe=S.truhe.filter(x=>x&&typeof x==='object'&&typeof x.slot==='string');
+ S.gold=nNum(S.gold,0,1e15,0);S.maxDiff=nInt(S.maxDiff,0,DMAX,0);S.volSfx=nNum(S.volSfx,0,1,0.8);S.volMus=nNum(S.volMus,0,1,0.6);if(S.ruhm){for(const k in S.ruhm.pts)S.ruhm.pts[k]=nInt(S.ruhm.pts[k],0,1e6,0);S.ruhm.xp=nNum(S.ruhm.xp,0,1e15,0);S.ruhm.lv=nInt(S.ruhm.lv,0,1e6,0)}
+ if(S.deepest!==undefined)S.deepest=nInt(S.deepest,0,1e6,0);for(const k of['best','daily']){if(S[k]!==undefined&&!isObj(S[k]))delete S[k];else for(const j in S[k]||{})S[k][j]=nNum(S[k][j],0,1e15,0)}
+ if(S.netName!==undefined)S.netName=sTxt(S.netName,16);if(S.cloud!==undefined&&!(typeof S.cloud==='string'&&/^[A-Z0-9-]{4,20}$/.test(S.cloud)))delete S.cloud;
+ if(S.setsFound!==undefined){if(!isObj(S.setsFound))delete S.setsFound;else for(const k in S.setsFound){const f=S.setsFound[k];if(Array.isArray(f))S.setsFound[k]=f.filter(x=>typeof x==='string'&&/^[a-z0-9]{2,8}$/.test(x));else delete S.setsFound[k]}}return S}
+/* Fremde Daten (Speicherstand, Cloud, Mitspieler) streng prüfen: Zahlen begrenzen, nur bekannte Kennungen, Unbekanntes weg */
+function isObj(v){return!!v&&typeof v==='object'&&!Array.isArray(v)}
+function hasK(o,k){return!!o&&typeof o==='object'&&typeof k==='string'&&Object.prototype.hasOwnProperty.call(o,k)}
+function nNum(v,a,b,d){v=typeof v==='number'||typeof v==='string'||typeof v==='boolean'?+v:NaN;return isFinite(v)?clamp(v,a,b):d}
+function nInt(v,a,b,d){v=nNum(v,a,b,NaN);return isFinite(v)?clamp(Math.round(v),a,b):d}
+function sTxt(v,n){return(typeof v==='string'||typeof v==='number'?String(v):'').replace(/[<>&"'`\\\u0000-\u001f]/g,'').slice(0,n||60)}
+function okHero(id){return typeof id==='string'&&HERO_IDS.includes(id)}
 try{saveFix(SAVE)}catch(e){SAVE=defSave()}
 function hsave(id){return SAVE.heroes[id]||(SAVE.heroes[id]={up:{},best:-1,runs:0,clears:0})}
 function persist(){SAVE.savedAt=Date.now();try{localStorage.setItem(SKEY,JSON.stringify(SAVE))}catch(e){}cloudSoon()}
@@ -405,7 +417,7 @@ const META=[
 ];
 const metaCost=(m,r)=>Math.round(m.cost*Math.pow(1.6,r));
 const DIFFS=['Normal','Albtraum','Hölle','Abgrund','Götterdämmerung'];
-const diffName=d=>DIFFS[d]||('Qual '+ROMQ(d-4));
+const diffName=d=>{d=nInt(d,0,DMAX,0);return DIFFS[d]||('Qual '+ROMQ(d-4))};
 const diffMult=d=>({hp:Math.pow(3,d),dmg:Math.pow(2,d),il:d*12,gold:1+d*0.75,xp:1+d*0.4});
 
 /* ================= Audio =================
@@ -1501,7 +1513,7 @@ const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'||!isFini
 const GF=()=>GFX[gfxL()];
 function resize(){W=window.innerWidth;H=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,GF().dpr,Math.max(1,Math.sqrt(GF().px/Math.max(1,W*H))));cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';ZOOM=clamp(Math.min(W,H)/560,0.7,1.2)}
 window.addEventListener('resize',resize);resize();
-function toast(msg,col){const d=document.createElement('div');d.className='tm';d.innerHTML=msg;if(col)d.style.color=col;toastEl.appendChild(d);while(toastEl.children.length>4)toastEl.firstChild.remove();setTimeout(()=>d.remove(),2700)}
+function toast(msg,col){const d=document.createElement('div');d.className='tm';if(msg instanceof Node)d.appendChild(msg);else d.innerHTML=msg;if(col)d.style.color=col;toastEl.appendChild(d);while(toastEl.children.length>4)toastEl.firstChild.remove();setTimeout(()=>d.remove(),2700)}
 
 /* ================= Spielstart ================= */
 function newGame(){return{state:'title',diff:0,stage:0,kills:0,score:0,traps:[],stageKills:0,need:60,time:0,stageTime:0,enemies:[],projs:[],zones:[],ezones:[],allies:[],loot:[],orbs:[],parts:[],fxs:[],nums:[],tele:[],timers:[],spawnT:0,shake:0,goldRun:0,
@@ -1510,10 +1522,45 @@ G=newGame();
 function newHero(id,diff){const H=HEROES[id],hs=hsave(id);const lv0=Math.min(LEG_CAP,1+diff*(G&&G.rl?10:34));
  P={id,hero:H,up:hs.up,x:WORLD/2,y:WORLD/2,r:14,level:lv0,xp:0,sp:lv0+(hs.up.wis||0),ranks:{[H.sig]:1},learn:[H.sig],bar:[H.sig],eq:{},bag:[],cds:{},stam:100,stamMax:100+15*(hs.up.stam||0),sprint:false,stamWait:0,pots:2+(hs.up.flask||0)+legPot(id),potMax:2+(hs.up.flask||0)+legPot(id),potKills:0,shieldHp:0,stealthT:0,ambush:0,critNext:0,chan:null,hoard:0,hoardT:0,bdN:0,bdT:0,lp:new Set(),traps:0,form:null,formT:0,buffs:{},atkT:0,face:0,flip:1,moving:false,inv:0,hurtT:0,revives:hs.up.rev?1:0,dash:null,st:null,hp:1,slowT:0,slowA:0,rootT:0,silT:0,stunT:0,kx:0,ky:0,gems:{},mods:[],shrine:null}}
 /* Gespeicherten Lauf und Roguelite-Daten prüfen; Unbrauchbares verwerfen statt abzustürzen */
-function runFix(S){try{const r=S.run;if(r){const st=r.stages;let bad=!r||typeof r!=='object'||!HEROES[r.id]||typeof r.stage!=='number'||!isFinite(r.stage)||r.stage<0;
- if(!bad&&st!=null){bad=!Array.isArray(st)||!st.length||st.some(s=>!s||typeof s!=='object'||typeof s.name!=='string'||(s.ort!==undefined&&!ORTE[s.ort]))||r.stage>=st.length}
- if(!bad&&!st&&r.stage>=CAMP_STAGES.length)bad=true;if(bad)S.run=null}
- for(const id in S.heroes||{}){const R=S.heroes[id]&&S.heroes[id].rl;if(!R)continue;if(typeof R!=='object'){delete S.heroes[id].rl;continue}for(const k of['learn','bar','bag'])if(!Array.isArray(R[k]))delete R[k];if(R.bag)R.bag=R.bag.filter(x=>x&&typeof x==='object'&&x.slot);if(R.eq&&typeof R.eq==='object'){for(const k in R.eq)if(!R.eq[k]||typeof R.eq[k]!=='object')delete R.eq[k]}else delete R.eq;if(R.ranks&&typeof R.ranks!=='object')delete R.ranks;if(R.cp&&typeof R.cp!=='object')R.cp={}}}catch(e){S.run=null}}
+function runFix(S){try{const r=S.run;if(r){const st=r.stages;let bad=!isObj(r)||!okHero(r.id)||typeof r.stage!=='number'||!isFinite(r.stage)||r.stage<0||typeof r.diff!=='number'||!isFinite(r.diff)||r.diff<0||r.diff>DMAX||r.mode!=null&&!hasK(NETMODEN,r.mode);
+ if(!bad&&st!=null){bad=!Array.isArray(st)||!st.length||st.some(s=>!isObj(s)||typeof s.name!=='string'||(s.ort!==undefined&&!(Number.isInteger(s.ort)&&ORTE[s.ort])))||r.stage>=st.length}
+ if(!bad&&!st&&r.stage>=CAMP_STAGES.length)bad=true;if(bad)S.run=null;else runVals(r)}}catch(e){S.run=null}
+ try{if(!isObj(S.heroes))S.heroes={};for(const id of Object.keys(S.heroes)){const h=okHero(id)?heroFix(S.heroes[id],id):null;if(h)S.heroes[id]=h;else delete S.heroes[id]}}catch(e){S.heroes={}}
+ try{S.truhe=itemsFix(S.truhe)}catch(e){S.truhe=[]}}
+function runVals(r){r.stage=Math.floor(r.stage);r.diff=Math.floor(r.diff);r.level=nInt(r.level,1,LEG_CAP,1);r.xp=nNum(r.xp,0,1e15,0);r.sp=nInt(r.sp,0,1e5,0);r.revives=nInt(r.revives,0,9,0);
+ for(const k of['kills','goldRun','time','score','itemId'])r[k]=nNum(r[k],0,1e15,0);r.depth=nInt(r.depth,1,1e5,1);if(r.pots!==undefined)r.pots=nInt(r.pots,0,99,2);if(r.potMax!==undefined)r.potMax=nInt(r.potMax,1,99,2);if(r.tag!=null)r.tag=sTxt(r.tag,20);
+ r.eq=eqFix(r.eq);r.bag=itemsFix(r.bag);r.gems=gemsFix(r.gems);if(!isObj(r.ranks))delete r.ranks;else{const T=HEROES[r.id].tree;for(const k of Object.keys(r.ranks)){const n=T.find(x=>x.id===k);const v=n?nInt(r.ranks[k],0,n.max,0):0;if(v)r.ranks[k]=v;else delete r.ranks[k]}}
+ for(const k of['learn','bar'])if(r[k]!==undefined)r[k]=Array.isArray(r[k])?r[k].filter(x=>typeof x==='string').slice(0,80):undefined;
+ r.mods=Array.isArray(r.mods)?r.mods.filter(isObj).slice(0,30).map(m=>Object.assign({},m,{st:nInt(m.st,0,99,0)})):[]}
+/* Gegenstände: nur bekannte Plätze, Grundtypen, Eigenschaften, Edelsteine, Sets und Flüche; Zahlen begrenzt */
+let BASESET=null;const ISLOTS=['weapon','ranged','helm','armor','gloves','ring','ring1','ring2'];
+function itemFix(x){if(!isObj(x)||!ISLOTS.includes(x.slot))return null;
+ if(!BASESET){BASESET=new Set();for(const k in BASES)for(const b of BASES[k])BASESET.add(b);for(const id of HERO_IDS)for(const w of HEROES[id].meleeW.concat(HEROES[id].rangedW))BASESET.add(w.n)}
+ const it={id:nInt(x.id,1,1e9,0)||ITEMID++,slot:x.slot,ilvl:nInt(x.ilvl,1,1e5,1),rar:nInt(x.rar,0,5,0),aff:[]},wpn=it.slot==='weapon'||it.slot==='ranged';
+ if(typeof x.base==='string')it.base=BASESET.has(x.base)?x.base:sTxt(x.base,40);
+ it.name=sTxt(x.name,90)||it.base||SLOTLBL[it.slot];
+ if(wpn){it.wdmg=nNum(x.wdmg,0,1e15,1);it.wrate=nNum(x.wrate,0.05,20,1)}
+ for(const k of['armor','hp'])if(x[k]!=null){const v=nNum(x[k],0,1e15,0);if(v)it[k]=v}
+ if(Array.isArray(x.aff))for(const a of x.aff.slice(0,12))if(isObj(a)&&hasK(AFF,a.k)){const o={k:a.k,v:nNum(a.v,-1e9,1e12,0)};if(a.imp)o.imp=1;it.aff.push(o)}
+ if(hasK(LPOW,x.pow))it.pow=x.pow;if(Array.isArray(x.sock))it.sock=x.sock.slice(0,6).map(g=>hasK(GEMS,g)?g:null);
+ if(hasK(SETS,x.set)){it.set=x.set;if(x.hs)it.hs=1}if(hasK(CURSES,x.curse))it.curse=x.curse;if(x.anc===1||x.anc===2)it.anc=x.anc;
+ if(x.up)it.up=nInt(x.up,0,10,0);if(x.rr)it.rr=nInt(x.rr,0,1e5,0);if(x.fav)it.fav=1;if(okHero(x.for))it.for=x.for;return it}
+function itemsFix(a,n){return Array.isArray(a)?a.slice(0,n||200).map(itemFix).filter(Boolean):[]}
+function eqFix(o){const r={};if(!isObj(o))return r;for(const s of SLOTS){const it=itemFix(o[s]);if(it&&(s.startsWith('ring')?it.slot.startsWith('ring'):it.slot===s||s==='weapon'&&it.slot==='ranged'))r[s]=it}return r}
+function gemsFix(o){const r={};if(isObj(o))for(const k in o)if(hasK(GEMS,k)){const v=nInt(o[k],0,1e6,0);if(v)r[k]=v}return r}
+/* Heldenfortschritt: Lager-Aufwertungen bis zu ihrem Höchstwert, Legendenstufen, Roguelite-Stand */
+function heroFix(x,id){if(!isObj(x)||!okHero(id))return null;const h={up:{},best:nInt(x.best,-1,1e6,-1),runs:nInt(x.runs,0,1e9,0),clears:nInt(x.clears,0,1e9,0)};
+ if(isObj(x.up))for(const m of META)if(hasK(x.up,m.id)){const r=nInt(x.up[m.id],0,m.max,0);if(r)h.up[m.id]=r}
+ if(x.best2!==undefined)h.best2=nInt(x.best2,0,1e6,0);
+ if(isObj(x.leg)){const L=x.leg,pts={};if(isObj(L.pts))for(const b of LEGB)if(hasK(L.pts,b.id))pts[b.id]=nInt(L.pts[b.id],0,1e6,0);h.leg={lv:nInt(L.lv,0,1e6,0),xp:nNum(L.xp,0,1e15,0),pts}}
+ if(x.rl!==undefined){const R=rlFix(x.rl,id);if(R)h.rl=R}
+ for(const k in x)if(!(k in h)&&k!=='rl'&&k!=='leg'&&/^[a-zA-Z]\w{0,20}$/.test(k)&&(typeof x[k]==='boolean'||typeof x[k]==='number'&&isFinite(x[k])))h[k]=x[k];return h}
+function rlFix(R,id){if(!isObj(R)||R.eq!==undefined&&!isObj(R.eq)||R.bag!==undefined&&!Array.isArray(R.bag))return null;const T=HEROES[id].tree,node=k=>typeof k==='string'&&T.find(n=>n.id===k);
+ const r={level:nInt(R.level,1,LEG_CAP,1),xp:nNum(R.xp,0,1e15,0),sp:nInt(R.sp,0,1e5,0),wis:nInt(R.wis,0,3,0),runs:nInt(R.runs,0,1e9,0),cp:{}};
+ if(isObj(R.cp))for(const k in R.cp){const d=+k;if(Number.isInteger(d)&&d>=0&&d<=DMAX)r.cp[d]=nInt(R.cp[k],0,ORTE.length-1,0)}
+ if(isObj(R.ranks)){r.ranks={};for(const k in R.ranks){const n=node(k);if(n){const v=nInt(R.ranks[k],0,n.max,0);if(v)r.ranks[k]=v}}}
+ for(const k of['learn','bar'])if(Array.isArray(R[k]))r[k]=[...new Set(R[k].filter(node))].slice(0,k==='bar'?6:80);
+ if(R.eq)r.eq=eqFix(R.eq);if(R.bag)r.bag=itemsFix(R.bag);if(R.gems!==undefined)r.gems=gemsFix(R.gems);return r}
 function hcKit(id,il){for(const s of['helm','gloves','ring1','ring2'])if(!P.eq[s]){const it=makeItem(s.startsWith('ring')?'ring':s,il,1,id);if(it)P.eq[s]=it}P.eq.armor=makeItem('armor',il,1,id)}
 function startRun(id,diff,mode,opt){mode=mode||'kampagne';opt=opt||{};G.runId=Math.random();unseedRng();const daily=mode==='taeglich'?dailyInfo():null;if(daily){id=daily.hero;diff=0}setStages(stagesFor(mode,daily));
  audioInit();const sm=G.selMode,lm=G.lbMode,lob=G.lobby,pd=G.p1dev;G=newGame();G.selMode=sm;G.lbMode=lm;G.lobby=lob;G.p1dev=pd;G.mode=mode;G.rl=mode==='kampagne'&&!!opt.rl;G.mp=mode==='kampagne'&&!!(opt.mp&&opt.mp.length>1);G.daily=daily;G.depth=1;G.sel=id;G.seldiff=diff;G.diff=diff;G.state='play';hsave(id).runs++;
@@ -1535,10 +1582,10 @@ function migrateWeapons(){const H=P.hero,isR=it=>it&&it.slot==='weapon'&&H.range
  for(const it of P.bag)if(isR(it))it.slot='ranged';
  if(isR(P.eq.weapon)){const w=P.eq.weapon;w.slot='ranged';if(!P.eq.ranged)P.eq.ranged=w;else P.bag.push(w);P.eq.weapon=null}
  const il=Math.max(1,(P.eq.ranged||P.eq.weapon||{ilvl:1}).ilvl);if(!P.eq.weapon)P.eq.weapon=starterWeapon('weapon',il,P.id);if(!P.eq.ranged)P.eq.ranged=starterWeapon('ranged',il,P.id)}
-function continueRun(){const r=SAVE.run;if(!r||!HEROES[r.id])return;unseedRng();setStages(r.mode&&r.mode!=='kampagne'&&r.stages?r.stages:CAMP_STAGES);audioInit();const sm=G.selMode,lm=G.lbMode;G=newGame();G.selMode=sm;G.lbMode=lm;G.sel=r.id;G.diff=r.diff;G.seldiff=r.diff;G.state='play';G.mode=r.mode||'kampagne';G.rl=!!r.rl&&G.mode==='kampagne';G.daily=G.mode==='taeglich'?dailyInfo(r.tag):null;G.depth=r.depth||1;
- newHero(r.id,r.diff);PL=[P];P.dev='kb';G.mp=false;const rLearn=Array.isArray(r.learn)&&r.learn.length?r.learn:P.learn;Object.assign(P,{level:+r.level||P.level,xp:+r.xp||0,sp:+r.sp||0,ranks:r.ranks&&typeof r.ranks==='object'?r.ranks:P.ranks,learn:rLearn,bar:Array.isArray(r.bar)?r.bar:rLearn.slice(0,6),eq:r.eq||{},bag:r.bag||[],revives:r.revives||0,pots:r.pots!==undefined?r.pots:P.pots});for(const id of Object.keys(P.ranks))if(!P.hero.tree.find(n=>n.id===id))delete P.ranks[id];P.learn=P.learn.filter(id=>P.hero.tree.find(n=>n.id===id));P.bar=P.bar.filter(id=>P.learn.includes(id));G.score=r.score||0;migrateWeapons();if(G.rl&&rlS(r.id))rlApply();P.gems=r.gems||{};P.mods=(r.mods||[]).map(m=>Object.assign({},m,{st:(m.st||0)+1}));if(r.potMax)P.potMax=r.potMax;if(G.mode==='taeglich'){P.up={};P.stamMax=P.stam=100;P.revives=0}
+function continueRun(){const r=SAVE.run;if(!r||!okHero(r.id))return;const dd=nInt(r.diff,0,DMAX,0);unseedRng();setStages(r.mode&&r.mode!=='kampagne'&&r.stages?r.stages:CAMP_STAGES);audioInit();const sm=G.selMode,lm=G.lbMode;G=newGame();G.selMode=sm;G.lbMode=lm;G.sel=r.id;G.diff=dd;G.seldiff=dd;G.state='play';G.mode=r.mode||'kampagne';G.rl=!!r.rl&&G.mode==='kampagne';G.daily=G.mode==='taeglich'?dailyInfo(r.tag):null;G.depth=r.depth||1;
+ newHero(r.id,dd);PL=[P];P.dev='kb';G.mp=false;const rLearn=Array.isArray(r.learn)&&r.learn.length?r.learn:P.learn;Object.assign(P,{level:+r.level||P.level,xp:+r.xp||0,sp:+r.sp||0,ranks:r.ranks&&typeof r.ranks==='object'?r.ranks:P.ranks,learn:rLearn,bar:Array.isArray(r.bar)?r.bar:rLearn.slice(0,6),eq:r.eq||{},bag:r.bag||[],revives:r.revives||0,pots:r.pots!==undefined?r.pots:P.pots});for(const id of Object.keys(P.ranks))if(!P.hero.tree.find(n=>n.id===id))delete P.ranks[id];P.learn=P.learn.filter(id=>P.hero.tree.find(n=>n.id===id));P.bar=P.bar.filter(id=>P.learn.includes(id));G.score=r.score||0;migrateWeapons();if(G.rl&&rlS(r.id))rlApply();P.gems=r.gems||{};P.mods=(r.mods||[]).map(m=>Object.assign({},m,{st:(m.st||0)+1}));if(r.potMax)P.potMax=r.potMax;if(G.mode==='taeglich'){P.up={};P.stamMax=P.stam=100;P.revives=0}
  ITEMID=Math.max(ITEMID,r.itemId||1);G.kills=r.kills||0;G.goldRun=r.goldRun||0;G.time=r.time||0;
- recalc();P.hp=P.st.maxHp;setupStage(Math.min(r.stage,STAGES.length-1));showStageIntro()}
+ recalc();P.hp=P.st.maxHp;setupStage(nInt(r.stage,0,STAGES.length-1,0));showStageIntro()}
 function setupStage(i){
  if(G.mode==='taeglich'&&G.daily)seedRng(G.daily.seed*31+i*7919);const S=STAGES[i];G.stage=i;G.stageKills=0;G.need=S.need!==undefined?S.need:S.escape?45:Math.round(80+4*i);if(dmod('riesen'))G.need=Math.round(G.need*0.7);G.need=Math.round(G.need*mpNeed());G.warn30=0;G.timeUp=0;if(S.depth)G.depth=S.depth;
  for(const q of mpL())if(q){q.mods=(q.mods||[]).filter(m=>m.st>0);for(const m of q.mods)m.st--;q.shrine=null}G.stageTime=0;wxFor(i);
@@ -2841,10 +2888,10 @@ function setH(k,v){if(HC[k]!==v){HC[k]=v;hEl[k].innerHTML=v}}
 function setW(k,v){v=Math.round(clamp(v,0,1)*400)/4;if(HC[k+'w']!==v){HC[k+'w']=v;hEl[k].style.width=v+'%'}}
 function hudUpdate(){if(G.state==='title'||G.state==='camp'||!P)return;
  setT('hName',P.hero.name);setT('hLvl',P.level>=LEG_CAP&&legS(P.id).lv?P.level+'✦'+legS(P.id).lv:String(P.level));setT('hForm',P.form==='bear'?'Bär':P.form==='rat'?'Ratte':P.stealthT>0?'Unsichtbar':P.buffs.ascend>0?'Darkin':'');setW('hpFill',P.hp/P.st.maxHp);setT('hpTxt',fmt(Math.max(0,P.hp))+' / '+fmt(P.st.maxHp));setW('xpFill',P.level>=LEG_CAP?legS(P.id).xp/legNeed(legS(P.id).lv):P.xp/xpNeed(P.level));
- {const S=STAGES[G.stage];setH('stName',`<small>${stageTag(S)} · ${esc(diffName(G.diff))}</small>${esc(S.name.replace(/^Tiefe \d+ · /,''))}`)}
+ {const S=STAGES[G.stage]||{name:''};setH('stName',`<small>${esc(stageTag(S))} · ${esc(diffName(G.diff))}</small>${esc(String(S.name||'').replace(/^Tiefe \d+ · /,''))}`)}
  {const pb=G.boss||G.guardE;
  if(pb){let fr=pb.hp/pb.maxHp,txt=pb.def.n;if(pb.survive>0){fr=pb.survive/pb.def.survive;txt=`Überlebe noch ${Math.ceil(pb.survive)} s!`}else if(pb.def.survive&&G.portal)txt='Zum Boot – schnell!';setW('progFill',fr);setT('progTxt',txt);if(!HC.bossbar){HC.bossbar=1;hEl.progBar.classList.add('boss')}}
- else{if(HC.bossbar){HC.bossbar=0;hEl.progBar.classList.remove('boss')}if(G.portal){setW('progFill',1);setT('progTxt',G.portal.boat?'Zum Boot!':'Weiter zum Portal')}else{const S=STAGES[G.stage];setW('progFill',(G.need?G.stageKills/G.need:1));setT('progTxt',`${Math.min(G.stageKills,G.need)} / ${G.need} · dann ${S.boss?'Boss':'Wächter'}`)}}}
+ else{if(HC.bossbar){HC.bossbar=0;hEl.progBar.classList.remove('boss')}if(G.portal){setW('progFill',1);setT('progTxt',G.portal.boat?'Zum Boot!':'Weiter zum Portal')}else{const S=STAGES[G.stage]||{name:''};setW('progFill',(G.need?G.stageKills/G.need:1));setT('progTxt',`${Math.min(G.stageKills,G.need)} / ${G.need} · dann ${S.boss?'Boss':'Wächter'}`)}}}
  if(G.room&&G.room.txt){setW('progFill',G.room.fr!==undefined?clamp(G.room.fr,0,1):1);setT('progTxt',G.room.txt)}setW('stFill',P.stam/P.stamMax);{const low=P.stam<25;if(HC.stlow!==low){HC.stlow=low;hEl.stFill.parentNode.classList.toggle('low',low)}}
  setT('potN',String(P.pots));{const on=!!P.sprint;if(HC.spon!==on){HC.spon=on;hEl.btnSprint.classList.toggle('on',on)}const po=P.pots<=0;if(HC.potoff!==po){HC.potoff=po;hEl.btnPot.classList.toggle('off',po)}}
  setT('goldTxt',fmt(SAVE.gold)+' Gold');setT('spBadge',P.sp>0?String(P.sp):'');
@@ -2868,18 +2915,18 @@ function updateInvBadge(){const base=computeStats(P.eq);G.upCount=P.bag.filter(i
 const HS_SERVER={url:'https://iszdxkwkgkksdemtqhwu.supabase.co',key:'sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z'};
 const HSL={liste:null,ok:null,laedt:false,m:null};
 function hsServer(pfad,body){const h={apikey:HS_SERVER.key,'Content-Type':'application/json'};return fetch(HS_SERVER.url+pfad,body===undefined?{headers:h,cache:'no-store'}:{method:'POST',headers:h,body:JSON.stringify(body)}).then(r=>r.ok?(r.status===204?null:r.json()):Promise.reject(r.status))}
-const hsLokal=()=>{try{return JSON.parse(localStorage.getItem('imres-heldensturm-liste')||'[]')||[]}catch(e){return[]}};
+const hsLokal=()=>{try{const v=JSON.parse(localStorage.getItem('imres-heldensturm-liste')||'[]');return Array.isArray(v)?v.filter(isObj):[]}catch(e){return[]}};
 const hsSort=l=>l.sort((a,b)=>b.punkte-a.punkte||b.stufen-a.stufen||String(a.erstellt).localeCompare(String(b.erstellt)));
 const hsLokalM=m=>hsSort(hsLokal().filter(e=>(e.modus||'kampagne')===m&&(m!=='taeglich'||e.tag===todayTag()))).slice(0,15);
 function hsLaden(m){m=m||G.lbMode||'kampagne';if(HSL.m!==m){HSL.m=m;HSL.liste=null;HSL.laedt=false}if(HSL.laedt||HSL.liste)return;HSL.laedt=true;
  const sel='/rest/v1/hs_bestenliste?select=name,held,schwierigkeit,stufen,punkte,level,erstellt&order=punkte.desc,stufen.desc,erstellt.asc&limit=15';
  hsServer(sel+lbQuery(m)).catch(err=>m==='kampagne'?hsServer(sel):Promise.reject(err))
- .then(l=>{if(HSL.m!==m)return;HSL.liste=Array.isArray(l)?l:[];HSL.ok=true}).catch(()=>{if(HSL.m!==m)return;HSL.ok=false;HSL.liste=hsLokalM(m)}).then(()=>{HSL.laedt=false;const el=$('hsListe');if(el)el.innerHTML=hsTabelle()})}
+ .then(l=>{if(HSL.m!==m)return;HSL.liste=Array.isArray(l)?l.filter(isObj):[];HSL.ok=true}).catch(()=>{if(HSL.m!==m)return;HSL.ok=false;HSL.liste=hsLokalM(m)}).then(()=>{HSL.laedt=false;const el=$('hsListe');if(el)el.innerHTML=hsTabelle()})}
 function hsTabelle(){const l=HSL.liste,m=HSL.m||'kampagne';if(!l)return'<p class="muted">Lade Bestenliste …</p>';
  const lokal=HSL.ok===false?'<p class="muted" style="font-size:12px">Noch nur auf diesem Gerät gespeichert.</p>':'';
  if(!l.length)return`<p class="muted">${m==='taeglich'?'Heute hat sich noch niemand eingetragen – sei der Erste!':'Noch niemand eingetragen – sei der Erste!'}</p>`+lokal;
  const col=m==='abstieg'?'Tiefe':m==='bossrausch'?'Bosse':'Stufen';
- return`<table class="hst"><thead><tr><th>#</th><th>Name</th><th>Held</th><th>${col}</th><th>Punkte</th></tr></thead><tbody>${l.map((e,i)=>`<tr class="${G.hsMein&&e.erstellt===G.hsMein?'mein':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td>${esc(e.name)}</td><td>${esc(HEROES[e.held]?HEROES[e.held].name:e.held)}${e.schwierigkeit?` <span class="muted">· ${esc(diffName(e.schwierigkeit))}</span>`:''}</td><td>${e.stufen}</td><td><b>${fmt(e.punkte)}</b></td></tr>`).join('')}</tbody></table>`+lokal}
+ return`<table class="hst"><thead><tr><th>#</th><th>Name</th><th>Held</th><th>${col}</th><th>Punkte</th></tr></thead><tbody>${l.map((e,i)=>`<tr class="${G.hsMein&&e.erstellt===G.hsMein?'mein':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td>${esc(e.name)}</td><td>${esc(HEROES[e.held]?HEROES[e.held].name:e.held)}${e.schwierigkeit?` <span class="muted">· ${esc(diffName(e.schwierigkeit))}</span>`:''}</td><td>${esc(nInt(e.stufen,0,1e6,0))}</td><td><b>${fmt(e.punkte)}</b></td></tr>`).join('')}</tbody></table>`+lokal}
 function hsEintragen(){const f=$('hsName'),name=f?f.value.trim().slice(0,24):'';if(!name){if(f)f.focus();return}const R=G.hsRun;if(!R||R.sent)return;R.sent=true;
  try{localStorage.setItem('imres-heldensturm-name',name)}catch(e){}
  const e={name,held:R.held,schwierigkeit:R.diff,stufen:R.stufen,punkte:R.punkte,level:R.level,modus:R.modus,tag:R.tag,erstellt:new Date().toISOString()};
@@ -2920,8 +2967,8 @@ function cloudAct(a){
  const el=$('cloudBox');if(el)el.innerHTML=cloudInner()}
 
 /* ================= Menüs ================= */
-function showScreen(html,cls,keep){const y=scr.scrollTop;scr.className='screen'+(cls?' '+cls:'');scr.innerHTML=html;scr.hidden=false;scr.scrollTop=keep?y:0;
- scr.querySelectorAll('canvas[data-ico]').forEach(c=>{const[sl,r,b]=c.dataset.ico.split('|');const g=c.getContext('2d');g.setTransform(c.width/24,0,0,c.height/24,c.width/2,c.height/2);itemIcon(g,sl,RARCOL[+r],b)})}
+function showScreen(html,cls,keep){const y=scr.scrollTop;scr.className='screen'+(cls?' '+cls:'');if(html instanceof Node){scr.textContent='';scr.appendChild(html)}else scr.innerHTML=html;scr.hidden=false;scr.scrollTop=keep?y:0;
+ scr.querySelectorAll('canvas[data-ico]').forEach(c=>{try{const[sl,r,b]=c.dataset.ico.split('|');const g=c.getContext('2d');g.setTransform(c.width/24,0,0,c.height/24,c.width/2,c.height/2);itemIcon(g,sl,RARCOL[+r]||RARCOL[0],b)}catch(e){}})}
 function hideScreen(){scr.style.paddingBottom='';scr.hidden=true;scr.innerHTML='';stageCv=null}
 function openOverlay(k,pi){if(G.state!=='play')return;G.menuP=pi||0;if(G.mp&&PL[G.menuP])P=PL[G.menuP];G.paused=true;G.resumeT=0;G.overlay=k;hud.hidden=true;joy=null;for(const kk in keys)keys[kk]=false;
  if(k==='inv'){G.invSel=null;renderInv()}else if(k==='tree'){renderTree()}else if(k==='truhe'){G.trSel=null;renderTruhe()}else renderPause()}
@@ -2934,8 +2981,8 @@ const HCOL={barradin:'#e3b456',echo:'#8fe07a',friedrich:'#a9d27e',ezekiel:'#ff50
 let stageCv=null,stageT0=0;
 function showTitle(keep){unseedRng();bookCv=null;G.state='title';G.paused=false;hud.hidden=true;const sel=G.sel||'barradin',H=HEROES[sel],hs=hsave(sel),tab=G.campTab||'held';
  if(G.seldiff>SAVE.maxDiff)G.seldiff=SAVE.maxDiff;
- const b2=hs.best2||0;const best=b2>0?`${diffName(Math.floor(b2/100))}: ${b2%100} von ${STAGES.length} Stufen`:'noch keine Stufe geschafft';
- const R=SAVE.run,RS=R&&((R.stages&&R.stages[Math.min(R.stage,R.stages.length-1)])||CAMP_STAGES[Math.min(R.stage,CAMP_STAGES.length-1)]);const runBanner=R&&HEROES[R.id]?`<div class="runcard"><div><div class="eyebrow">Gespeicherter Lauf</div><div class="rc-t">${HEROES[R.id].name} · Heldenstufe ${R.level} · ${esc(diffName(R.diff))}</div><div class="muted" style="font-size:13px">${esc(ORTE[RS.ort].name)} – ${esc(RS.name)}</div></div><div class="row">${G.confirmDrop?'<span class="muted" style="font-size:13px">Wirklich verwerfen?</span><button class="btn" data-act="run-drop-no">Nein</button><button class="btn" style="border-color:var(--blood)" data-act="run-drop-yes">Ja</button>':'<button class="btn" data-act="run-drop">Verwerfen</button><button class="btn gold" data-act="run-go">Fortsetzen</button>'}</div></div>`:'';
+ const b2=hs.best2||0;const best=b2>0?`${diffName(Math.floor(b2/100))}: ${b2%100} von ${CAMP_STAGES.length} Stufen`:'noch keine Stufe geschafft';
+ const R=SAVE.run,RS=R&&((R.stages&&R.stages[Math.min(R.stage,R.stages.length-1)])||CAMP_STAGES[Math.min(R.stage,CAMP_STAGES.length-1)]);const runBanner=R&&okHero(R.id)&&RS&&ORTE[RS.ort]?`<div class="runcard"><div><div class="eyebrow">Gespeicherter Lauf</div><div class="rc-t">${HEROES[R.id].name} · Heldenstufe ${R.level} · ${esc(diffName(R.diff))}</div><div class="muted" style="font-size:13px">${esc(ORTE[RS.ort].name)} – ${esc(RS.name)}</div></div><div class="row">${G.confirmDrop?'<span class="muted" style="font-size:13px">Wirklich verwerfen?</span><button class="btn" data-act="run-drop-no">Nein</button><button class="btn" style="border-color:var(--blood)" data-act="run-drop-yes">Ja</button>':'<button class="btn" data-act="run-drop">Verwerfen</button><button class="btn gold" data-act="run-go">Fortsetzen</button>'}</div></div>`:'';
  const afford=META.some(m=>{const r=hs.up[m.id]||0;return r<m.max&&SAVE.gold>=metaCost(m,r)});
  const picks=HERO_IDS.map(id=>`<button class="pk ${id===sel?'on':''}" data-act="sel-hero" data-id="${id}" aria-pressed="${id===sel}" style="--hc:${HCOL[id]}"><canvas data-hero="${id}" width="112" height="112"></canvas><span>${HEROES[id].name}</span></button>`).join('');
  const ups=META.map(m=>{const r=hs.up[m.id]||0,max=r>=m.max,cost=metaCost(m,r);return`<div class="up"><div><div class="t">${m.name}<small>${r} / ${m.max}</small></div><div class="d">${r?m.d(r):'noch nicht gelernt'}${max?'':` → <span style="color:var(--text)">${m.d(r+1)}</span>`}</div></div><button class="btn ${!max&&SAVE.gold>=cost?'gold':''}" data-act="meta" data-id="${m.id}" ${max||SAVE.gold<cost?'disabled':''}>${max?'Maximal':fmt(cost)+' Gold'}</button></div>`}).join('');
@@ -3720,10 +3767,10 @@ const rlS=id=>{const hs=hsave(id);return hs.rl||null};
 const rlCp=(id,d)=>{const r=rlS(id);return r&&r.cp?(r.cp[d]||0):0};
 const ortStart=k=>Math.max(0,CAMP_STAGES.findIndex(s=>s.ort===k));
 const rlClone=o=>JSON.parse(JSON.stringify(o));
-function rlApply(){const r=rlS(P.id);if(!r)return false;const lv0=P.level;
+function rlApply(){const r=rlS(P.id);if(!r)return false;const lv0=P.level,bk={level:P.level,xp:P.xp,sp:P.sp,ranks:P.ranks,learn:P.learn,bar:P.bar,eq:P.eq,bag:P.bag,gems:P.gems};try{
  Object.assign(P,{level:Math.max(r.level||1,lv0),xp:r.xp||0,sp:(r.sp||0)+Math.max(0,lv0-(r.level||1))+Math.max(0,(P.up.wis||0)-(r.wis||0)),ranks:rlClone(r.ranks||P.ranks),learn:(r.learn||P.learn).slice(),bar:(r.bar||r.learn||P.bar).slice(),eq:rlClone(r.eq||P.eq),bag:rlClone(r.bag||[]),gems:rlClone(r.gems||{})});
  for(const id of Object.keys(P.ranks))if(!P.hero.tree.find(n=>n.id===id))delete P.ranks[id];P.learn=P.learn.filter(id=>P.hero.tree.find(n=>n.id===id));P.bar=P.bar.filter(id=>P.learn.includes(id)).slice(0,6);
- let mx=0;for(const it of Object.values(P.eq).concat(P.bag))if(it&&it.id>mx)mx=it.id;ITEMID=Math.max(ITEMID,mx+1);migrateWeapons();return true}
+ let mx=0;for(const it of Object.values(P.eq).concat(P.bag))if(it&&it.id>mx)mx=it.id;ITEMID=Math.max(ITEMID,mx+1);migrateWeapons();return true}catch(e){console.error(e);Object.assign(P,bk);return false}}
 function rlSync(){if(!P||!G.rl||G.bot)return;const hs=hsave(P.id),old=hs.rl||{};hs.rl={level:P.level,xp:P.xp,sp:P.sp,wis:P.up.wis||0,ranks:rlClone(P.ranks),learn:P.learn.slice(),bar:P.bar.slice(),eq:rlClone(P.eq),bag:rlClone(P.bag),gems:rlClone(P.gems||{}),cp:old.cp||{},runs:(old.runs||0)}}
 function rlUnlock(S){if(!G.rl||G.mode!=='kampagne'||!S)return;const nx=S.ort+1;if(nx>=ORTE.length)return;const hs=hsave(P.id);hs.rl=hs.rl||{cp:{}};hs.rl.cp=hs.rl.cp||{};
  if((hs.rl.cp[G.diff]||0)<nx){hs.rl.cp[G.diff]=nx;later(1.6,()=>{banner('Portal geöffnet',`Neuer Startpunkt: ${ORTE[nx].name}`,'#b06cff',{dur:2.4});sfx('portal')})}}
@@ -3958,7 +4005,7 @@ function netReg(){if(NREG)return NREG;const T={};const add=(n,t)=>{if(t&&typeof 
  add('WETTER',typeof WETTER!=='undefined'&&WETTER);add('SETS',typeof SETS!=='undefined'&&SETS);add('ORTE',typeof ORTE!=='undefined'&&ORTE);
  const m=new Map();for(const [tn,t] of Object.entries(T))for(const [k,v] of Object.entries(t))if(v&&typeof v==='object'&&!m.has(v))m.set(v,tn+'.'+k);
  for(const id of Object.keys(HEROES))for(const n of (HEROES[id].tree||[]))if(!m.has(n))m.set(n,'TREE.'+id+'.'+n.id);
- NREG={m,get(tok){const i=tok.indexOf('.'),tn=tok.slice(0,i),k=tok.slice(i+1);if(tn==='TREE'){const j=k.indexOf('.');const H=HEROES[k.slice(0,j)];return H&&H.tree.find(n=>n.id===k.slice(j+1))}return T[tn]&&T[tn][k]}};return NREG}
+ NREG={m,get(tok){const i=tok.indexOf('.'),tn=tok.slice(0,i),k=tok.slice(i+1);if(tn==='TREE'){const j=k.indexOf('.');const id=k.slice(0,j);return okHero(id)?HEROES[id].tree.find(n=>n.id===k.slice(j+1)):undefined}return hasK(T[tn],k)?T[tn][k]:undefined}};return NREG}
 function nid(o){let i=NET.ids.get(o);if(!i){i=NET.nid++;NET.ids.set(o,i)}return i}
 let NENT=new Set();
 function nEnc(v,d){const t=typeof v;
@@ -3972,11 +4019,11 @@ function nEnc(v,d){const t=typeof v;
 function nRec(o,W,BL){const r={};if(W){for(const k of W){const v=o[k];if(v===undefined)continue;const x=nEnc(k==='tether'?(v?1:0):v,1);if(x!==NOPE)r[k]=x}}
  else for(const k in o){if(BL.has(k))continue;const v=o[k];if(v===undefined||typeof v==='function')continue;const x=nEnc(v,1);if(x!==NOPE)r[k]=x}return r}
 function nDec(v,res){if(typeof v==='string'){if(v[0]==='$')return netReg().get(v.slice(1));if(v[0]==='@'){res.push(v);return v}if(v[0]==='~')return v.slice(1);return v}
- if(v&&typeof v==='object'){if(Array.isArray(v))return v.map(x=>nDec(x,res));const o={};for(const k in v)o[k]=nDec(v[k],res);return o}return v}
+ if(v&&typeof v==='object'){if(Array.isArray(v))return v.map(x=>nDec(x,res));const o={};for(const k in v)if(k!=='__proto__')o[k]=nDec(v[k],res);return o}return v}
 const nSame=(a,b)=>a===b||(a&&b&&typeof a==='object'&&typeof b==='object'&&JSON.stringify(a)===JSON.stringify(b));
 
 /* ---------- Transport ---------- */
-function netLib(){if(window.Peer)return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.onload=()=>window.Peer?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
+function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
 function netCfg(){return Object.assign({debug:0,config:{iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]}},window.__netcfg||{})}
 /* Eigener Kanal ohne Neuversand: verlorene Pakete stören nicht, das nächste ersetzt sie ohnehin */
 function netU(conn,onMsg){try{const pc=conn.peerConnection;if(!pc)return null;const u=pc.createDataChannel('hsu',{negotiated:true,id:77,ordered:false,maxRetransmits:0});u.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(er){return}onMsg(m)};return u}catch(e){return null}}
@@ -4004,26 +4051,28 @@ function netHostConn(c){const g={conn:c,u:null,cid:null,name:'Gast',hero:null,p:
 function netGuestGone(g){if(g.gone)return;g.gone=performance.now();if(g.p){g.p.netGone=1;toast(`${esc(g.name)} hat die Verbindung verloren …`,'#c8bca8')}else{NET.guests=NET.guests.filter(x=>x!==g);netLobbyDrop(g)}netRefresh()}
 function netLobbyDrop(g){if(G.lobby)G.lobby=G.lobby.filter(s=>s.dev!=='net:'+g.cid);if(g.hero)delete NET.hsOv[g.hero];netLobbyCast()}
 NET.hsOv={};
-function netHostMsg(g,m){if(!m||typeof m!=='object')return;g.last=performance.now();if(m.t==='ka')return;
+/* Nachrichten der Gäste: nichts davon ist vertrauenswürdig – Unsinn wird verworfen, nie darf er den Gastgeber stören */
+function netHostMsg(g,m){try{netHostMsg0(g,m)}catch(e){NET.lastErr=String(e)}}
+function netHostMsg0(g,m){if(!isObj(m)||typeof m.t!=='string')return;g.last=performance.now();if(m.t==='ka')return;
  if(g.gone&&g.p&&PL.includes(g.p)&&m.t==='i'&&g.conn.open&&NET.guests.includes(g)){g.gone=0;g.p.netGone=0;toast(`${esc(g.name)} ist wieder da!`,'#8fe7ff');netStartGuest(g)}
  if(m.t==='hello'){if(m.v!==NETV){netSendR(g.conn,{t:'bye',why:'Unterschiedliche Spielversion – bitte beide die Seite neu laden.'});return}
-  g.cid=String(m.cid||Math.random()).slice(0,20);g.name=String(m.name||'Gast').slice(0,16);
+  g.cid=sTxt(m.cid,20)||String(Math.random()).slice(2,12);g.name=sTxt(m.name,16)||'Gast';
   const old=NET.guests.find(x=>x.cid===g.cid&&x!==g);
   if(old){g.p=old.p;g.hero=old.hero;g.joinedRun=old.joinedRun;NET.guests=NET.guests.filter(x=>x!==old);try{old.conn.close()}catch(e){}}
   NET.guests.push(g);
   if(g.p&&PL.includes(g.p)){g.p.netGone=0;g.p.dev='net:'+g.cid;toast(`${esc(g.name)} ist wieder da!`,'#8fe7ff');netStartGuest(g);return}
-  g.p=null;g.hsAll=m.hsAll&&typeof m.hsAll==='object'?m.hsAll:{};if(m.hs&&m.hero)g.hsAll[m.hero]=m.hs;if(!netPickHero(g,m.hero))return;
+  g.p=null;g.hsAll=isObj(m.hsAll)?m.hsAll:{};if(isObj(m.hs)&&okHero(m.hero))g.hsAll[m.hero]=m.hs;if(!netPickHero(g,m.hero))return;
   if(G.state==='title'){netLobbyCast();showTitle(true)}else netJoinRun(g);return}
- if(m.t==='pick'){if(g.p)return;g.hsAll=m.hsAll&&typeof m.hsAll==='object'?m.hsAll:(g.hsAll||{});if(m.hs&&m.hero)g.hsAll[m.hero]=m.hs;if(!netPickHero(g,m.hero))return;netLobbyCast();if(G.state==='title')showTitle(true);return}
+ if(m.t==='pick'){if(g.p||!g.cid)return;g.hsAll=isObj(m.hsAll)?m.hsAll:(g.hsAll||{});if(isObj(m.hs)&&okHero(m.hero))g.hsAll[m.hero]=m.hs;if(!netPickHero(g,m.hero))return;netLobbyCast();if(G.state==='title')showTitle(true);return}
  if(m.t==='bye'){netGuestGone(g);return}
  if(m.t==='i'){netHostInput(g,m);return}
  if(m.t==='clk'){netHostClick(g,m);return}
- if(m.t==='pong'){g.ping=Math.round(performance.now()-m.c);return}}
-function netHsClean(h){h=JSON.parse(JSON.stringify(h));if(!h.up||typeof h.up!=='object')h.up={};for(const k of['best','runs','clears'])if(typeof h[k]!=='number')h[k]=k==='best'?-1:0;return h}
+ if(m.t==='pong'){g.ping=nInt(performance.now()-m.c,0,99999,0);return}}
+function netHsClean(h,id){let r=null;try{r=heroFix(JSON.parse(JSON.stringify(h)),id)}catch(e){}return r||{up:{},best:-1,runs:0,clears:0}}
 function netPickHero(g,h){const used=new Set(mpSlots().filter(s=>s.dev!=='net:'+g.cid).map(s=>s.hero));if(G.state!=='title')for(const q of PL)if(q!==g.p)used.add(q.id);
- if(!HEROES[h]||used.has(h))h=HERO_IDS.find(x=>!used.has(x));if(!h){netSendR(g.conn,{t:'bye',why:'Der Raum ist voll.'});return false}
+ if(!okHero(h)||used.has(h))h=HERO_IDS.find(x=>!used.has(x));if(!h){netSendR(g.conn,{t:'bye',why:'Der Raum ist voll.'});return false}
  if(G.state==='title'&&!(G.lobby||[]).some(x=>x.dev==='net:'+g.cid)&&mpSlots().length>=4){netSendR(g.conn,{t:'bye',why:'Der Raum ist voll (4 Helden).'});return false}
- if(g.hero&&g.hero!==h&&NET.hsOv[g.hero]&&g.hsOwn===g.hero)delete NET.hsOv[g.hero];g.hero=h;NET.hsOv[h]=netHsClean(g.hsAll&&g.hsAll[h]||{});g.hsOwn=h;
+ if(g.hero&&g.hero!==h&&NET.hsOv[g.hero]&&g.hsOwn===g.hero)delete NET.hsOv[g.hero];g.hero=h;NET.hsOv[h]=netHsClean(hasK(g.hsAll,h)?g.hsAll[h]:{},h);g.hsOwn=h;
  if(G.state==='title'){G.lobby=G.lobby||[];let s=G.lobby.find(x=>x.dev==='net:'+g.cid);if(!s){G.lobby.push(s={dev:'net:'+g.cid,hero:h,name:g.name})}s.hero=h;s.name=g.name;if(!SAVE.mpOn){SAVE.mpOn=true}}return true}
 function netLobbyCast(){if(G.state!=='title')return;const S=mpSlots().map((s,k)=>({k,hero:s.hero,name:netIs(s.dev)?(s.name||'Gast'):(k===0?(SAVE.netName||'Gastgeber'):devName(s.dev)),net:netIs(s.dev),cid:netIs(s.dev)?s.dev.slice(4):null}));
  const info={mode:G.selMode||'kampagne',diff:G.seldiff||0,rl:!SAVE.hc};for(const g of NET.guests)if(!g.gone)netSendR(g.conn,{t:'lobby',S,info,you:g.cid,hero:g.hero})}
@@ -4039,19 +4088,19 @@ const netStageKey=()=>[G.runId,G.stage,G.themeKey,G.room?1:0].join('|');
 function netStagePkt(){const S=STAGES[G.stage]||{};const s={};for(const k in S){const v=S[k];if(typeof v!=='function'){const x=nEncSafe(v);if(x!==NOPE)s[k]=x}}
  return{t:'stage',stage:G.stage,theme:G.themeKey,road:G.road,deco:G.deco.map(d=>({x:Math.round(d.x),y:Math.round(d.y),k:d.k,s:Math.round((d.s||1)*100)/100,v:d.v,edge:d.edge})),S:s,mode:G.mode,diff:G.diff,rl:G.rl,room:G.room?nEncSafe(G.room):null,depth:G.depth,n:STAGES.length}}
 function nEncSafe(v){netReg();NENT=new Set();return nEnc(v,1)}
-function netHostInput(g,m){const p=g.p;if(!p)return;if(m.q<=(g.inQ||-1))return;g.inQ=m.q;if(Array.isArray(m.R)){const Q=p.netMQ||(p.netMQ=[]);for(const e of m.R){if(!(e[0]>(g.rq||0)))continue;g.rq=e[0];let d=+e[3]||0;if(p.netDebt>0){const c=Math.min(p.netDebt,d);p.netDebt-=c;d-=c}if(d>0)Q.push({q:e[0],mx:clamp(+e[1]||0,-1,1),my:clamp(+e[2]||0,-1,1),d,s:e[4]?1:0});else p.netAck=e[0]}let tot=0;for(const x of Q)tot+=x.d;while(tot>0.2&&Q.length>1){const x=Q.shift();tot-=x.d;p.netAck=x.q}}if(m.k>g.ack)g.ack=m.k;g.echo=[m.tc,performance.now()];if(m.rtt){g.ping=m.rtt;p.ping=m.rtt}
- p.netIn={mx:clamp(+m.m[0]||0,-1,1),my:clamp(+m.m[1]||0,-1,1),spr:!!m.s,au:!!m.au,q:m.q};
- p.padAim=typeof m.a==='number'?m.a:null;p.netCur=m.c?{x:+m.c[0],y:+m.c[1],down:!!m.c[2]}:null;if(m.vw){p.vw=clamp(+m.vw,300,3000);p.vh=clamp(+m.vh,300,3000)}
- if(Array.isArray(m.A))for(const A of m.A){if(!(A[0]>g.aa))continue;g.aa=A[0];netHostAct(g,A[1],A[2])}}
+function netHostInput(g,m){const p=g.p;if(!p)return;const mq=+m.q;if(!isFinite(mq)||mq<=(g.inQ||-1))return;g.inQ=mq;if(Array.isArray(m.R)){const Q=p.netMQ||(p.netMQ=[]);for(const e of m.R.slice(-8)){if(!Array.isArray(e)||!(+e[0]>(g.rq||0))||!isFinite(+e[0]))continue;g.rq=+e[0];let d=clamp(+e[3]||0,0,0.25);if(p.netDebt>0){const c=Math.min(p.netDebt,d);p.netDebt-=c;d-=c}if(d>0)Q.push({q:g.rq,mx:clamp(+e[1]||0,-1,1),my:clamp(+e[2]||0,-1,1),d,s:e[4]?1:0});else p.netAck=g.rq}let tot=0;for(const x of Q)tot+=x.d;while(tot>0.2&&Q.length>1){const x=Q.shift();tot-=x.d;p.netAck=x.q}}if(isFinite(+m.k)&&+m.k>g.ack)g.ack=+m.k;g.echo=[nNum(m.tc,0,1e13,0),performance.now()];if(m.rtt){g.ping=nInt(m.rtt,0,99999,0);p.ping=g.ping}
+ const mm=Array.isArray(m.m)?m.m:[];p.netIn={mx:clamp(+mm[0]||0,-1,1),my:clamp(+mm[1]||0,-1,1),spr:!!m.s,au:!!m.au,q:mq};
+ p.padAim=typeof m.a==='number'&&isFinite(m.a)?m.a:null;p.netCur=Array.isArray(m.c)&&isFinite(+m.c[0])&&isFinite(+m.c[1])?{x:clamp(+m.c[0],0,WORLD),y:clamp(+m.c[1],0,WORLD),down:!!m.c[2]}:null;if(m.vw){p.vw=clamp(+m.vw||1400,300,3000);p.vh=clamp(+m.vh||900,300,3000)}
+ if(Array.isArray(m.A))for(const A of m.A.slice(-24)){if(!Array.isArray(A)||!(+A[0]>g.aa)||!isFinite(+A[0]))continue;g.aa=+A[0];netHostAct(g,A[1],A[2])}}
 function netHostAct(g,k,v){const p=g.p,i=PL.indexOf(p);if(i<0)return;
- if(k==='skill'||k==='pot'||k==='ult'){(p.netQ||(p.netQ=[])).push([k,v]);return}
- if(k==='menu'){if(G.overlay&&G.menuP!==i)return;if(G.state==='play'){if(G.overlay)switchOverlay(v);else openOverlay(v,i)}else if(G.state==='between'){G.menuP=i;P=p;G.overlay=v;G.invSel=null;if(v==='inv')renderInv();else if(v==='tree')renderTree()}return}
+ if(k==='skill'||k==='pot'||k==='ult'){if(k==='skill'&&!(Number.isInteger(v)&&v>=0&&v<6))return;const Q=p.netQ||(p.netQ=[]);if(Q.length<16)Q.push([k,k==='skill'?v:0]);return}
+ if(k==='menu'){if(v!=='inv'&&v!=='tree')return;if(G.overlay&&G.menuP!==i)return;if(G.state==='play'){if(G.overlay)switchOverlay(v);else openOverlay(v,i)}else if(G.state==='between'){G.menuP=i;P=p;G.overlay=v;G.invSel=null;if(v==='inv')renderInv();else if(v==='tree')renderTree()}return}
  if(k==='close'){if(G.overlay&&G.menuP===i){if(G.state==='between'){P=PL[0];G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay()}return}
  if(k==='leave'){netHsPush(true);netGuestGone(g);netLobbyDrop(g);const j=PL.indexOf(p);if(j>0)mpRemove(j);NET.guests=NET.guests.filter(x=>x!==g);try{g.conn.close()}catch(e){}}}
 /* Klicks der Gäste in gespiegelten Menüs */
 const NETNOCLK=/^(mp-menu|giveup|start|fs|gfx|vol|sound|auto|aim|ctl|camfx|perf|music|run-|to-camp|hs-|net-|split|rumble|mp-on|mp-dev|mp-kick|mp-loot|cloud|lang)/;
 function netHostClick(g,m){const i=PL.indexOf(g.p);if(i<0)return;const v=netView(g);if(!v.can)return;
- const el=scr.querySelectorAll('*')[m.i];if(!el)return;const b=el.closest('[data-act]');const a=b?b.dataset.act:'';if(a!==(m.act||''))return;if(a&&NETNOCLK.test(a)&&!(a==='mp-menu'&&+b.dataset.i===i))return;if(a==='mtab'&&b.dataset.m==='pause')return;
+ if(!Number.isInteger(m.i)||m.i<0)return;const el=scr.querySelectorAll('*')[m.i];if(!el)return;const b=el.closest('[data-act]');const a=b?b.dataset.act:'';if(a!==(m.act||''))return;if(a&&NETNOCLK.test(a)&&!(a==='mp-menu'&&+b.dataset.i===i))return;if(a==='mtab'&&b.dataset.m==='pause')return;
  const P0=P;if(G.overlay&&G.menuP===i)P=g.p;NET.cf=i;try{el.click()}finally{NET.cf=undefined;if(!(G.overlay&&G.menuP===i)&&G.state!=='between')P=PL[0]||P0}}
 function netView(g){const i=PL.indexOf(g.p);if(G.state==='title'||!g.p)return{v:'none'};
  if(G.overlay&&G.menuP!==i){const q=PL[G.menuP||0];return{v:'busy',who:q?(q.netName||q.hero.name):'Jemand'}}
@@ -4126,60 +4175,67 @@ function netLost(){if(NET.role!=='guest'||NET.st==='bye'||NET.st==='lost'&&NET.c
  if(!NET.lostT)NET.lostT=performance.now();NET.st='lost';NET.tries++;NET.msg='Verbindung unterbrochen – verbinde neu …';netBarSet();setTimeout(()=>{if(NET.st==='lost')netConnect()},1500)}
 function netGuestReset(){clearInterval(NET.kaI);NET.msg='';NET.lastSnap=0;try{NET.conn&&NET.conn.close()}catch(e){}try{NET.peer&&NET.peer.destroy()}catch(e){}Object.assign(NET,{role:null,peer:null,conn:null,u:null,st:'',me:0,mine:null,lobby:null,rs:null,lostT:0,tries:0});NET.states=new Map();NET.objs=new Map();NET.applied=-1;NET.ack=-1;netBarSet()}
 function netEndView(msg){G=newGame();G.state='title';PL=[];P=null;hud.hidden=true;showScreen(`<div class="wrap narrow"><h2>Online-Spiel beendet</h2><div class="card"><p>${esc(msg||'')}</p><p class="muted">Dein Fortschritt aus dieser Runde ist gespeichert.</p><div class="row"><button class="btn gold" data-act="net-again">Erneut beitreten</button><button class="btn" data-act="to-camp">Zum Titel</button></div></div></div>`,'see')}
-function netGuestMsg(m){if(!m||typeof m!=='object')return;NET.rx[m.t]=(NET.rx[m.t]||0)+1;
+/* Nachrichten des Gastgebers: auch ihm wird nichts blind geglaubt – HTML wird gesäubert, Zahlen begrenzt, Kennungen geprüft */
+function netGuestMsg(m){try{netGuestMsg0(m)}catch(e){NET.lastErr=String(e)}}
+function netGuestMsg0(m){if(!isObj(m)||typeof m.t!=='string')return;NET.rx[m.t]=(NET.rx[m.t]||0)+1;
  if(m.t==='s'){netSnap(m);return}
- if(m.t==='r'){for(const x of m.L)netRemoteFx(x);return}
- if(m.t==='lobby'){NET.lobby=m;if(m.hero)NET.pick=m.hero;NET.msg='';NET.st='lobby';if(G.netGuestRun)netBackToLobby();else netJoinScreen();return}
- if(m.t==='wait'){NET.msg=m.msg||'Die Runde läuft gerade – du steigst gleich ein.';if(!G.netGuestRun)netJoinScreen();return}
- if(m.t==='start'){netGuestStart(m);return}
+ if(m.t==='r'){if(Array.isArray(m.L))for(const x of m.L.slice(0,200))netRemoteFx(x);return}
+ if(m.t==='lobby'){const L=netLobbyFix(m);NET.lobby=L;if(L.hero)NET.pick=L.hero;NET.msg='';NET.st='lobby';if(G.netGuestRun)netBackToLobby();else netJoinScreen();return}
+ if(m.t==='wait'){NET.msg=typeof m.msg==='string'&&m.msg?m.msg.slice(0,300):'Die Runde läuft gerade – du steigst gleich ein.';if(!G.netGuestRun)netJoinScreen();return}
+ if(m.t==='start'){if(!isFinite(+m.me))return;m.me=+m.me;netGuestStart(m);return}
  if(m.t==='stage'){netStage(m);return}
- if(m.t==='scr'){NET.rs=m;if(G.overlay!=='netmenu')netShowRemote();return}
+ if(m.t==='scr'){NET.rs={v:['none','busy','scr'].includes(m.v)?m.v:'none',who:sTxt(m.who,24),can:!!m.can,own:!!m.own,html:typeof m.html==='string'?m.html:'',cls:typeof m.cls==='string'?m.cls.replace(/[^\w -]/g,'').slice(0,80):'',ver:nInt(m.ver,0,1e12,0)};if(G.overlay!=='netmenu')netShowRemote();return}
  if(m.t==='hs'){netHsSave(m);return}
- if(m.t==='bye'){NET.st='bye';const inRun=G.netGuestRun;netGuestReset();NET.msg=m.why||'Verbindung beendet.';if(inRun)netEndView(NET.msg);else netJoinScreen();return}
- if(m.t==='win'){if(SAVE.maxDiff<m.diff+1){SAVE.maxDiff=m.diff+1;toast('Neue Schwierigkeit freigeschaltet: '+diffName(m.diff+1),'#ffd04a')}persist();return}
- if(m.t==='rum'){rumble({dev:NET.localDev},m.s,m.ms);return}}
-function netHsSave(m){if(!m.id||!m.d)return;SAVE.heroes[m.id]=m.d;if(m.run!==NET.goldRun){NET.goldRun=m.run;NET.goldSeen=0}const add=Math.max(0,(m.gold||0)-NET.goldSeen);NET.goldSeen=Math.max(NET.goldSeen,m.gold||0);SAVE.gold+=add;persist()}
+ if(m.t==='bye'){NET.st='bye';const inRun=G.netGuestRun;netGuestReset();NET.msg=typeof m.why==='string'&&m.why?m.why.slice(0,300):'Verbindung beendet.';if(inRun)netEndView(NET.msg);else netJoinScreen();return}
+ if(m.t==='win'){const d=nInt(m.diff,0,DMAX-1,0);if(SAVE.maxDiff<d+1){SAVE.maxDiff=d+1;toast('Neue Schwierigkeit freigeschaltet: '+esc(diffName(d+1)),'#ffd04a')}persist();return}
+ if(m.t==='rum'){rumble({dev:NET.localDev},nNum(m.s,0,1,0),nInt(m.ms,0,2000,0));return}}
+function netLobbyFix(m){const S=(Array.isArray(m.S)?m.S:[]).filter(isObj).slice(0,4).map((x,k)=>({k:nInt(x.k,0,3,k),hero:okHero(x.hero)?x.hero:'barradin',name:sTxt(x.name,16)||'Gast',net:!!x.net,cid:x.cid==null?null:sTxt(x.cid,20)}));
+ const I=isObj(m.info)?m.info:{};return{t:'lobby',S,info:{mode:hasK(NETMODEN,I.mode)?I.mode:'kampagne',diff:nInt(I.diff,0,DMAX,0),rl:!!I.rl},you:sTxt(m.you,20),hero:okHero(m.hero)?m.hero:null}}
+function netHsSave(m){if(!okHero(m.id)||!isObj(m.d))return;SAVE.heroes[m.id]=netHsClean(m.d,m.id);if(m.run!==NET.goldRun){NET.goldRun=m.run;NET.goldSeen=0}const gm=nNum(m.gold,0,1e13,0);const add=Math.max(0,gm-NET.goldSeen);NET.goldSeen=Math.max(NET.goldSeen,gm);SAVE.gold=nNum(SAVE.gold+add,0,1e15,0);persist()}
 function netBackToLobby(){G=newGame();G.state='title';PL=[];P=null;hud.hidden=true;G.netGuestRun=false;netJoinScreen()}
 function netGuestStart(m){NET.st='play';NET.me=m.me;NET.states=new Map();NET.applied=-1;NET.ack=-1;NET.objs=new Map();NET.mine=null;NET.samp=[];NET.off=null;
  const sm=G.selMode;G=newGame();G.selMode=sm;G.state='play';G.mp=true;G.net=true;G.netGuestRun=true;G.parts=[];G.fxs=[];G.nums=[];G.corpses=[];G.lights=[];G.decals=[];G.deco=[];PL=[];P=null;
  hideScreen();hud.hidden=false;G.overlay=null;audioInit();netBarSet()}
-function netStage(m){if(!G.netGuestRun)return;STAGES.length=Math.max(STAGES.length,m.n||0);for(let i=0;i<STAGES.length;i++)if(!STAGES[i])STAGES[i]={name:'',ort:0};
- const S=nDec(m.S,[]);STAGES[m.stage]=S;G.stage=m.stage;G.mode=m.mode;G.diff=m.diff;G.rl=m.rl;G.depth=m.depth;
- G.themeKey=m.theme;G.theme=THEMES[m.theme]||THEMES.wald;G.road=m.road;G.ground=makeGround(G.theme);G.deco=m.deco||[];G.room=m.room?nDec(m.room,[]):null;
+function netStage(m){if(!G.netGuestRun)return;const si=nInt(m.stage,0,499,-1);if(si<0)return;STAGES.length=Math.max(STAGES.length,nInt(m.n,0,500,0),si+1);for(let i=0;i<STAGES.length;i++)if(!STAGES[i])STAGES[i]={name:'',ort:0};
+ let S=nDec(m.S,[]);if(!isObj(S))S={};if(typeof S.name!=='string')S.name='';STAGES[si]=S;G.stage=si;G.mode=hasK(NETMODEN,m.mode)?m.mode:'kampagne';G.diff=nInt(m.diff,0,DMAX,0);G.rl=!!m.rl;G.depth=nInt(m.depth,1,1e5,1);
+ G.themeKey=hasK(THEMES,m.theme)?m.theme:'wald';G.theme=THEMES[G.themeKey]||THEMES.wald;G.road=m.road&&typeof m.road==='object'?m.road:null;G.ground=makeGround(G.theme);G.deco=Array.isArray(m.deco)?m.deco.filter(isObj).slice(0,5000):[];G.room=isObj(m.room)?nDec(m.room,[]):null;
  G.parts=[];G.fxs=[];G.nums=[];G.corpses=[];G.lights=[];G.decals=[];G.amb=[];G.ghosts=[];G.cam=null}
 /* Spielstand übernehmen */
-function netSnap(m){NET.gotN++;NET.lastSnap=performance.now();if(NET.lastQ>=0&&m.q>NET.lastQ+1)NET.lossN+=m.q-NET.lastQ-1;if(m.q>NET.lastQ)NET.lastQ=m.q;
+function netSnap(m){if(!isFinite(+m.q)||!isFinite(+m.hc)||!isObj(m.d))return;m.q=+m.q;m.hc=+m.hc;m.me=+m.me;NET.gotN++;NET.lastSnap=performance.now();if(NET.lastQ>=0&&m.q>NET.lastQ+1)NET.lossN+=m.q-NET.lastQ-1;if(m.q>NET.lastQ)NET.lastQ=m.q;
  const now=performance.now(),o=now-m.hc;if(NET.off===null||o<NET.off)NET.off=o;else NET.off+=(o-NET.off)*0.002;const late=o-NET.off;NET.jit=NET.jit*0.9+late*0.1;
- if(m.te)NET.rtt=Math.round(NET.rtt?NET.rtt*0.7+(now-m.te[0]-m.te[1])*0.3:now-m.te[0]-m.te[1]);
+ if(Array.isArray(m.te)&&isFinite(m.te[0]-m.te[1]))NET.rtt=Math.round(NET.rtt?NET.rtt*0.7+(now-m.te[0]-m.te[1])*0.3:now-m.te[0]-m.te[1]);
  let base=null;if(m.b>=0){base=NET.states.get(m.b);if(!base)return}
  const S={};for(const c in (base||{}))S[c]=base[c];
- for(const c in m.d){const M=new Map(base&&base[c]?base[c]:[]);const dc=m.d[c];for(const id in dc){const v=dc[id],k=+id;if(v===0){M.delete(k);continue}const old=base&&base[c]&&base[c].get(k);M.set(k,old?Object.assign({},old,v):v)}S[c]=M}
+ for(const c in m.d){if(c!=='pl'&&c!=='g'&&!NETCAT.includes(c))continue;const dc=m.d[c];if(!isObj(dc))continue;const M=new Map(base&&base[c]?base[c]:[]);for(const id in dc){const v=dc[id],k=+id;if(v===0){M.delete(k);continue}if(!isObj(v)||!isFinite(k))continue;const old=base&&base[c]&&base[c].get(k);M.set(k,old?Object.assign({},old,v):v)}S[c]=M}
  for(const c of NETCAT.concat(['pl','g']))if(!S[c])S[c]=new Map();
  NET.states.set(m.q,S);for(const q of NET.states.keys())if(q<m.q-64)NET.states.delete(q);if(m.q>NET.ack)NET.ack=m.q;
  if(m.aa!==undefined)NET.aQ=NET.aQ.filter(a=>a[0]>m.aa);
- if(m.q>NET.applied){NET.applied=m.q;netApply(S,m.hc,m.me);if(m.e)for(const x of m.e)netRemoteFx(x)}}
-function netMirrorPlayer(id,heroId){const sv=P;newHero(HEROES[heroId]?heroId:'barradin',0);const o=P;P=sv;o.dev='net:m';o.skBtns=[];o.actives=[];o.st=o.st||{};return o}
+ if(m.q>NET.applied){NET.applied=m.q;netApply(S,m.hc,m.me);if(Array.isArray(m.e))for(const x of m.e.slice(0,400))netRemoteFx(x)}}
+function netMirrorPlayer(id,heroId){const sv=P;newHero(okHero(heroId)?heroId:'barradin',0);const o=P;P=sv;o.dev='net:m';o.skBtns=[];o.actives=[];o.st=o.st||{};return o}
 function netApply(S,hc,me){const res=[];const O=NET.objs,seen=new Set();
- for(const c of NETCAT){const A=[];for(const [id,r] of S[c]){let o=O.get(id);if(!o){o={_s:[]};O.set(id,o)}seen.add(id);if(o._r!==r){const nw=!o._r;for(const k in r){if(!nw&&(k==='x'||k==='y'))continue;o[k]=nDec(r[k],res)}if(o._r)for(const k in o._r)if(!(k in r)&&k[0]!=='_')delete o[k];o._r=r}o._s.push(hc,r.x,r.y);if(o._s.length>15)o._s.splice(0,3);A.push(o)}G[c]=A}
+ for(const c of NETCAT){const A=[];for(const [id,r] of S[c]){let o=O.get(id);if(!o){o={_s:[]};O.set(id,o)}seen.add(id);if(o._r!==r){const nw=!o._r;for(const k in r){if(!nw&&(k==='x'||k==='y')||k==='__proto__')continue;o[k]=nDec(r[k],res)}if(o._r)for(const k in o._r)if(!(k in r)&&k[0]!=='_')delete o[k];o._r=r}o._s.push(hc,r.x,r.y);if(o._s.length>15)o._s.splice(0,3);A.push(o)}G[c]=A}
  const L=[];for(const [id,r] of S.pl){let o=O.get(id);if(!o||!o.hero){o=Object.assign(netMirrorPlayer(id,r.id),{_s:[]});O.set(id,o)}seen.add(id);
-  if(o._r!==r){const bar0=JSON.stringify(o.bar)+JSON.stringify(o.learn);const nw2=o._dx===undefined&&!o._r;for(const k in r){if(!nw2&&(k==='x'||k==='y'))continue;o[k]=nDec(r[k],res)}o.hero=HEROES[o.id]||o.hero;o.dev='net:m';
+  if(o._r!==r){const bar0=JSON.stringify(o.bar)+JSON.stringify(o.learn);const nw2=o._dx===undefined&&!o._r;for(const k in r){if(!nw2&&(k==='x'||k==='y')||k==='__proto__'||k==='hero')continue;o[k]=nDec(r[k],res)}if(!okHero(o.id))o.id='barradin';o.hero=HEROES[o.id];o.dev='net:m';if(!Array.isArray(o.actives))o.actives=[];
    if(bar0!==JSON.stringify(o.bar)+JSON.stringify(o.learn)||!o.actives.length){o.actives=(o.bar||[]).map(b=>o.hero.tree.find(n=>n.id===b)).filter(Boolean);if(id===me){const sv=P;P=o;try{buildSkillBar()}catch(e){}P=sv}}o._r=r}
-  o._s.push(hc,r.x,r.y);if(o._s.length>15)o._s.splice(0,3);L[r.ci]=o}
+  o._s.push(hc,r.x,r.y);if(o._s.length>15)o._s.splice(0,3);const ci=nInt(r.ci,0,3,-1);if(ci>=0)L[ci]=o}
  PL=L.filter(Boolean);for(const id of O.keys())if(!seen.has(id))O.delete(id);
  const mine=O.get(me);if(mine){if(NET.mine!==mine){NET.mine=mine;mine._dx=mine.x;mine._dy=mine.y}P=mine}
  netFixRefs();
- const gr=S.g.get(0);if(gr&&gr!==NET.gLast){NET.gLast=gr;const st0=G.state;for(const k in gr){if(k==='wx'){if(!G.wx||G.wx.run!==gr.wx.run||G.wx.i!==gr.wx.i)G.wx={drops:null,t:0};Object.assign(G.wx,nDec(gr.wx,[]));continue}if(k==='pz'||k==='mpn')continue;if(k==='tm'){NET.tBase=gr.tm;NET.tHc=hc;continue}const v=nDec(gr[k],[]);G[k]=typeof v==='string'&&v[0]==='@'?(O.get(+v.slice(1))||null):v}
-  G.hostPaused=gr.pz;G.hostMenu=gr.mpn;G.shake=Math.max(G.shake||0,0);if(st0!==G.state)netStateChange(st0);netBarSet()}}
+ const gr=S.g.get(0);if(gr&&gr!==NET.gLast){NET.gLast=gr;const st0=G.state;for(const k in gr){if(k==='wx'){if(!isObj(gr.wx))continue;if(!G.wx||G.wx.run!==gr.wx.run||G.wx.i!==gr.wx.i)G.wx={drops:null,t:0};Object.assign(G.wx,nDec(gr.wx,[]));continue}if(k==='pz'||k==='mpn'||k==='__proto__'||NETGBL.has(k))continue;if(k==='stage'&&!(Number.isInteger(gr[k])&&STAGES[gr[k]])||k==='state'&&typeof gr[k]!=='string')continue;if(k==='tm'){NET.tBase=gr.tm;NET.tHc=hc;continue}const v=nDec(gr[k],[]);G[k]=typeof v==='string'&&v[0]==='@'?(O.get(+v.slice(1))||null):v}
+  G.hostPaused=gr.pz;G.hostMenu=typeof gr.mpn==='string'?gr.mpn.slice(0,24):'';G.shake=Math.max(G.shake||0,0);if(st0!==G.state)netStateChange(st0);netBarSet()}}
 function netFixRefs(){const O=NET.objs,f=v=>typeof v==='string'&&v[0]==='@'?(O.get(+v.slice(1))||null):v;for(const o of O.values())for(const k of['tgt','own','follow'])if(typeof o[k]==='string')o[k]=f(o[k]);if(typeof G.boss==='string')G.boss=f(G.boss);if(typeof G.guardE==='string')G.guardE=f(G.guardE)}
 function netStateChange(prev){if(G.state==='title'){netBackToLobby();return}if(G.state==='play'&&prev!=='play'){if(G.overlay==='remote'&&!(NET.rs&&NET.rs.v==='scr')){G.overlay=null;hideScreen()}hud.hidden=!!G.overlay}}
 /* Effekte beim Gast nachbauen */
 const NETFXF={burst,sparks,embers,puffs,chunks,wisps,light,decal,num,sfx:(n,x,y)=>x===undefined?sfx(n):sfx(n,{x,y}),ring,slash,word};
-function netRemoteFx(e){if(!G.netGuestRun&&e[0]!=='toast')return;try{const k=e[0];
- if(k[0]==='+'){const A=G[k.slice(1)];if(!A)return;const o=nDec(e[1],[]);if(k==='+corpses'){o.dots=null}A.push(o);return}
- if(k==='toast'){toast(e[1],e[2]);return}if(k==='banner'){banner(e[1],e[2],e[3],e[4]);return}
- if(k==='shake'){G.shake=Math.max(G.shake||0,e[1]);return}if(k==='zp'){G.zp=Math.max(G.zp||0,e[1]);return}
- if(k==='bub'){G.bub={txt:e[1],t:0,dur:2.8,who:e[2]};return}
- const f=NETFXF[k];if(f)f.apply(null,e.slice(1))}catch(er){}}
+const NETFXN=new Set(['burst','sparks','embers','puffs','chunks','wisps']);
+function netCol(c){return typeof c==='string'&&/^(#[0-9a-f]{3,8}|rgba?\([\d.,\s%]{1,40}\)|[a-z]{3,20})$/i.test(c)?c:undefined}
+function netBanO(o){if(!isObj(o))return null;const r={};if(o.dur!=null)r.dur=nNum(o.dur,0.2,12,2.6);if(o.size!=null)r.size=nNum(o.size,8,160,56);if(o.y!=null)r.y=nNum(o.y,0,5000,300);if(o.bars)r.bars=true;if(o.force)r.force=true;return r}
+function netRemoteFx(e){if(!Array.isArray(e)||typeof e[0]!=='string')return;if(!G.netGuestRun&&e[0]!=='toast')return;try{const k=e[0];
+ if(k[0]==='+'){if(k!=='+fxs'&&k!=='+nums'&&k!=='+corpses')return;const A=G[k.slice(1)];if(!Array.isArray(A)||A.length>800||!isObj(e[1]))return;const o=nDec(e[1],[]);if(k==='+corpses'){o.dots=null}A.push(o);return}
+ if(k==='toast'){toast(netSan(e[1]),netCol(e[2]));return}if(k==='banner'){banner(String(e[1]==null?'':e[1]).slice(0,120),e[2]==null?'':String(e[2]).slice(0,200),netCol(e[3]),netBanO(e[4]));return}
+ if(k==='shake'){G.shake=Math.max(G.shake||0,nNum(e[1],0,60,0));return}if(k==='zp'){G.zp=Math.max(G.zp||0,nNum(e[1],0,5,0));return}
+ if(k==='bub'){G.bub={txt:String(e[1]==null?'':e[1]).slice(0,200),t:0,dur:2.8,who:typeof e[2]==='number'?e[2]:null};return}
+ if(!hasK(NETFXF,k))return;const a=e.slice(1,9).map((x,i)=>typeof x==='number'?clamp(isFinite(x)?x:0,-1e5,1e5):typeof x==='string'?x.slice(0,40):typeof x==='boolean'||x===null?x:undefined);if(NETFXN.has(k))a[3]=clamp(+a[3]||0,0,60);NETFXF[k].apply(null,a)}catch(er){}}
 /* Zwischenbilder: andere Objekte werden leicht verzögert gezeigt und zwischen zwei Ständen geglättet */
 function netInterp(dt){const now=performance.now();if(NET.off===null)return;const delay=Math.min(220,NET.interval*1.6+Math.min(80,NET.jit*1.5)+12);const rt=now-NET.off-delay;NET.delay=delay;if(NET.tBase!==undefined)G.time=NET.tBase+clamp((rt-NET.tHc)/1000,-0.25,0.35);
  for(const o of NET.objs.values()){if(o===NET.mine)continue;const s=o._s;if(!s||s.length<6||s[s.length-2]===undefined)continue;let i=s.length-3;while(i>0&&s[i]>rt)i-=3;
@@ -4189,7 +4245,7 @@ function netInterp(dt){const now=performance.now();if(NET.off===null)return;cons
 function netPredict(dt){const me=NET.mine;if(!me||!me.st)return;const r=me._r;if(!r)return;const sx=r.x,sy=r.y;let px=sx,py=sy;
  if(!me.dash&&!me.down&&!(me.rootT>0)&&!(me.stunT>0)){const sp=(me.st.speed||200)*(me.slowT>0?1-(me.slowA||0):1)*(me.chan?(me.chan.move?0.75:0):1);const ack=NET.ackIn||0;
   for(const s of NET.samp){if(s[0]<=ack)continue;const m=(s[3]&&me.stam>5?1.6:1);px+=s[1]*sp*m*s[4];py+=s[2]*sp*m*s[4]}}
- px=clamp(px,16,WORLD-16);py=clamp(py,16,WORLD-16);if(G.room){px=clamp(px,G.room.x0+16,G.room.x1-16);py=clamp(py,G.room.y0+16,G.room.y1-16)}
+ px=clamp(px,16,WORLD-16);py=clamp(py,16,WORLD-16);if(G.room&&isFinite(G.room.x0+G.room.x1+G.room.y0+G.room.y1)){px=clamp(px,G.room.x0+16,G.room.x1-16);py=clamp(py,G.room.y0+16,G.room.y1-16)}
  if(me._dx===undefined||Math.hypot(px-me._dx,py-me._dy)>180){me._dx=px;me._dy=py}else{const cur=NET.samp[NET.samp.length-1];if(cur&&!me.dash&&!me.down&&!(me.rootT>0)&&!(me.stunT>0)){const sp=(me.st.speed||200)*(me.slowT>0?1-(me.slowA||0):1)*(me.chan?(me.chan.move?0.75:0):1)*(cur[3]&&me.stam>5?1.6:1);me._dx+=cur[1]*sp*dt;me._dy+=cur[2]*sp*dt}
   const ex=px-me._dx,ey=py-me._dy,er=Math.hypot(ex,ey);if(er>2){const k=1-Math.exp(-dt*(er>40?9:4));me._dx+=ex*k;me._dy+=ey*k}}me._dx=clamp(me._dx,16,WORLD-16);me._dy=clamp(me._dy,16,WORLD-16);me.x=me._dx;me.y=me._dy}
 /* Eingaben einsammeln und senden */
@@ -4220,9 +4276,29 @@ function netGuestFrame(dt){if(!G.netGuestRun)return;const now=performance.now();
 function netAckIn(){const me=NET.mine;return me&&me._r&&me._r.netAck?me._r.netAck:Math.max(0,(NET.sentQ||0)-Math.round((NET.rtt||80)/16))}
 function netAct(k,v){NET.aSeq++;NET.aQ.push([NET.aSeq,k,v]);if(NET.aQ.length>24)NET.aQ.shift();NET.lastIn=0}
 /* Gespiegelte Menüs */
+/* HTML vom Gastgeber: inert zerlegen (template) und nur bekannte Bausteine nachbauen – keine Skripte, keine on…-Attribute, keine fremden Links oder Bilder.
+   Jedes Element bleibt genau ein Element, damit die Klick-Nummern mit dem Gastgeber übereinstimmen. */
+const SAN_TAG=new Set('div span p b i em strong small br hr h1 h2 h3 h4 ul ol li dl dt dd button table thead tbody tfoot tr td th canvas a details summary nav header footer section label select option input s u sub sup kbd'.split(' '));
+const SAN_DROP=new Set('script style iframe frame frameset object embed applet link meta base form textarea noscript template svg math img image video audio source track picture portal title xmp plaintext noembed noframes slot'.split(' '));
+const SAN_ATTR=new Set('class title role disabled open selected checked value min max step maxlength placeholder width height colspan rowspan spellcheck autocomplete autocapitalize'.split(' '));
+const SAN_ID=/^(bookCv|camBox|cloudBox|cloudMsg|d20n|fsBtn|gd\d{1,3}|gfxBox|gfxFps|gfxName|giveup|heroStage|hsEintrag|hsListe|hsName|idet2|netStat|vl_[A-Za-z]{1,12})$/;
+const SAN_CSS=/url\s*\(|expression|javascript|vbscript|@import|behavior|binding|image-set|image\s*\(|element\s*\(|[\\<>]|\/\*/i;
+function netSan(html){const t=document.createElement('template');t.innerHTML=typeof html==='string'?html:'';const f=document.createDocumentFragment();sanKids(t.content,f,0);return f}
+function sanKids(from,to,dep){for(const n of Array.from(from.childNodes)){
+ if(n.nodeType===3){to.appendChild(document.createTextNode(n.data));continue}if(n.nodeType!==1)continue;
+ const tg=n.localName,html=n.namespaceURI==='http://www.w3.org/1999/xhtml';if(SAN_DROP.has(tg)||!html){to.appendChild(document.createElement('span'));continue}
+ const ok=SAN_TAG.has(tg),e=document.createElement(ok?tg:'span');
+ if(ok)for(const a of Array.from(n.attributes)){const k=a.name.toLowerCase(),v=a.value;
+  if(k==='id'){if(SAN_ID.test(v))e.id=v}
+  else if(/^(data|aria)-[a-z0-9-]{1,30}$/.test(k))e.setAttribute(k,v.slice(0,300));
+  else if(k==='style'){if(!SAN_CSS.test(v)&&v.length<400)e.setAttribute('style',v)}
+  else if(k==='href'){if(tg==='a'&&/^(#[\w-]*|\.\/#?[\w.-]*)$/.test(v))e.setAttribute('href',v)}
+  else if(k==='type'){if(tg==='input'?/^(range|text|number|checkbox)$/i.test(v):tg==='button'&&v==='button')e.setAttribute('type',v)}
+  else if(SAN_ATTR.has(k))e.setAttribute(k,v.slice(0,300))}
+ if(dep<40)sanKids(n,e,dep+1);to.appendChild(e)}}
 function netShowRemote(){const m=NET.rs;if(!G.netGuestRun)return;
  if(!m||m.v==='none'||m.v==='busy'){if(G.overlay==='remote'){G.overlay=null;hideScreen();hud.hidden=false}netBarSet();return}
- G.overlay='remote';NET.rsCan=!!m.can;NET.rsOwn=!!m.own;NET.rsVer=m.ver;showScreen(m.html,m.cls,true);hud.hidden=true;netBarSet()}
+ G.overlay='remote';NET.rsCan=!!m.can;NET.rsOwn=!!m.own;NET.rsVer=m.ver;showScreen(netSan(m.html),m.cls,true);hud.hidden=true;netBarSet()}
 function netMenuHtml(){const me=NET.mine,q=netQual();return`<div class="wrap narrow"><div class="spread"><h2>Menü</h2><button class="btn" data-act="net-close">Weiter</button></div>
  <div class="card"><div class="row"><button class="btn" data-act="net-inv">Beutel</button><button class="btn" data-act="net-tree">Talente${me&&me.sp>0?` (${me.sp})`:''}</button></div><p class="muted" style="margin:8px 0 0;font-size:13px">Online läuft das Spiel weiter, solange du hier bist. Beutel und Talente pausieren kurz für alle.</p></div>
  <div class="card ups"><div class="up"><div><div class="t">Verbindung</div><div class="d">Raum ${esc(NET.code)} · ${q.txt}</div></div><span class="netq ${q.cls}">${q.ms} ms</span></div>
@@ -4766,7 +4842,7 @@ const volRow=(k,t,d)=>`<div class="up vol"><div><div class="t">${t}<small id="vl
 const volRows=()=>volRow('volMus','Musik','Barradins Band – 0% schaltet sie aus.')+volRow('volSfx','Geräusche','Kampf, Zauber, Beute – 0% schaltet sie aus.');
 document.addEventListener('change',ev=>{const s=ev.target.closest('[data-rlstart]');if(s)G.rlStart=+s.value});
 document.addEventListener('input',ev=>{const g=ev.target.closest('[data-gfx]');if(g)gfxSet(+g.value,1)});
-let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[data-vol]');if(!el)return;audioInit();const k=el.dataset.vol;SAVE[k]=(+el.value)/100;const l=$('vl_'+k);if(l)l.textContent=el.value+'%';volApply();persist();
+let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[data-vol]');if(!el)return;audioInit();const k=el.dataset.vol;if(k!=='volMus'&&k!=='volSfx')return;SAVE[k]=clamp((+el.value||0)/100,0,1);const l=$('vl_'+k);if(l)l.textContent=el.value+'%';volApply();persist();
  if(k==='volSfx'&&performance.now()-volT>180){volT=performance.now();sfx('coin')}});
 
 /* ================= Schleife ================= */
@@ -4776,7 +4852,7 @@ function frame(now){requestAnimationFrame(frame);padFrame();if(NET.role!=='guest
  fpsWatch(dt,raw,lastJs);const du=Math.abs(dt-DTS)<0.012?(DTS=DTS*0.85+dt*0.15):(DTS=dt);if(NET.role==='guest'&&G.netGuestRun)netGuestFrame(du);else if(G.state==='play'&&!G.paused)update(du*timeScale(du));if(NET.role==='host')netHostTick(du);
  musikTick(dt);
  try{render(dt);if(G.state==='play')drawPerf();if(G.state==='title'&&stageCv)drawStage();if(bookCv)drawBook()}catch(e){console.error(e)}
- hudUpdate();lastJs=performance.now()-js0}
+ try{hudUpdate()}catch(e){console.error(e)}lastJs=performance.now()-js0}
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
