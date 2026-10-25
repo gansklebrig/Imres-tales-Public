@@ -583,6 +583,7 @@
   const fein = window.matchMedia && window.matchMedia("(pointer: fine)").matches && !("ontouchstart" in window);
   let zielArt = lies("imres-waldlauf-zielen", "") || (fein ? "kreuz" : "ziehen");
   let kreuz = null; // { x, y, drueckt, id }
+  let padAn = false; /* Controller zielt mit dem Fadenkreuz, egal welche Zielart eingestellt ist */
   function kreuzVektor() {
     if (!kreuz) return null;
     const v = 830;
@@ -925,7 +926,7 @@
     S.beben = Math.max(0, S.beben - dt);
     S.abkuehl = Math.max(0, S.abkuehl - dt);
     if (S.vorgemerkt && S.abkuehl <= 0) { schiessen(S.vorgemerkt); S.vorgemerkt = null; }
-    if (zielArt === "kreuz" && kreuz && kreuz.drueckt && S.abkuehl <= 0) { const zk = kreuzVektor(); if (zk) schiessen(zk); }
+    if ((zielArt === "kreuz" || padAn) && kreuz && kreuz.drueckt && S.abkuehl <= 0) { const zk = kreuzVektor(); if (zk) schiessen(zk); }
 
     // Gegner erscheinen – Rex bellt vorher
     if (S.warte.length) {
@@ -1478,7 +1479,7 @@
       });
       ctx.globalAlpha = 1;
     }
-    const zk = zustand === "spiel" && zielArt === "kreuz" ? kreuzVektor() : null;
+    const zk = zustand === "spiel" && (zielArt === "kreuz" || padAn) ? kreuzVektor() : null;
     const z = zustand === "spiel" ? (zk || zielVektor()) : null;
     if (z && !zk) flugbahnZeichnen(z);
     if (zk) kreuzZeichnen(zk);
@@ -2039,4 +2040,13 @@ html.wl-ohne-scroll, html.wl-ohne-scroll body { overflow: hidden; }
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  /* ---------- Controller (controller.js) ---------- */
+  root._pad = {
+    zustand: () => zustand, W, H,
+    kreuz(x, y, drueckt) { padAn = true; kreuz = { x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)), drueckt: !!drueckt, id: -1 }; },
+    kreuzPos: () => kreuz ? { x: kreuz.x, y: kreuz.y } : { x: W / 2, y: H * 0.35 },
+    aus() { if (padAn) { padAn = false; if (kreuz && kreuz.id === -1) kreuz = null; } },
+    pause: () => pausieren()
+  };
+  leinwand.addEventListener("pointermove", ev => { if (padAn && ev.pointerType === "mouse") root._pad.aus(); });
 })();

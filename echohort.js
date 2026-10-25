@@ -5354,6 +5354,12 @@
       else if (id === "zuletzt") wieZuletzt();
     }
   }
+  function leinwandDruck(p) {
+    const k = (S.knoepfe || []).find(b => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
+    if (k) { if (k.id !== "nix" && k.id !== "tafel") knopfDruck(k.id); return; }
+    if (p.y >= LEISTE) return;
+    if (S.phase === "raub") raubTippen(p); else abwehrTippen(p);
+  }
   leinwand.addEventListener("pointerdown", ev => {
     if (zustand !== "spiel" || !S) return;
     ev.preventDefault();
@@ -5559,4 +5565,13 @@
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen, tagZeigen, tagStarten, tagInfo, kleinodZeigen, wieZuletzt, mod, ergebnisZeigen: n => ergebnisZeigen(n), speichern, gespeichert, laden, spielEnde };
+  /* ---------- Controller (controller.js) ---------- */
+  root._pad = {
+    zustand: () => zustand, W, H, LEISTE, leinwand,
+    phase: () => S && S.phase,
+    knoepfe: () => ((S && S.knoepfe) || []).filter(b => b.id !== "nix" && b.id !== "tafel"),
+    plaetze: () => (S && S.A && S.A.plaetze || []).map(q => ({ x: q.x, y: q.y })),
+    druck(p) { if (zustand !== "spiel" || !S) return; audio(); leinwandDruck(p); },
+    pause: () => pausieren()
+  };
 })();

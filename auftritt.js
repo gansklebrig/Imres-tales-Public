@@ -1341,4 +1341,10 @@
   bestenLaden();
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); if (!spiel) zeichnen(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  /* ---------- Controller (controller.js) ---------- */
+  root._pad = {
+    laeuft: () => !!spiel && !spiel.pause, pausiert: () => !!spiel && spiel.pause === "pause", spielt: () => !!spiel,
+    pause: () => pausieren(), weiter: () => weiterspielen(),
+    anzeige(l) { TASTEN_ANZEIGE.splice(0, 3, ...l); if (!spiel) malenRuhe(); }
+  };
 })();

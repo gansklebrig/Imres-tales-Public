@@ -3063,4 +3063,18 @@
   /* Testzugang (für automatische Prüfungen, im Spiel unsichtbar) */
   root.__dn = { LEVELS, get S() { return S; }, get E() { return E; }, get zustand() { return zustand; }, set zustand(v) { zustand = v; },
     stufeLaden, neuesSpiel, begehbar, pfadSuchen, genau, neben, tippen, schlossStart, schlossTippen, schlossUpdate, schlossMitte, nadelTempo, zugLesen, setStufe: v => { stufeWahl = v; }, zeichnen, anwerfen, update, schleierZu };
+  /* ---------- Controller (controller.js) ---------- */
+  root._pad = {
+    zustand: () => zustand, W, H, C, OY, FUSS_Y, leinwand,
+    held: () => S && E ? { x: E.x * C, y: OY + E.y * C } : null,
+    zorn: () => { if (zornKnopf && !zornKnopf.hidden) zornKnopf.click(); },
+    rauch: () => { if (rauchKnopf && !rauchKnopf.hidden) rauchKnopf.click(); },
+    muenze: () => { if (muenzKnopf && !muenzKnopf.hidden) muenzKnopf.click(); },
+    schloss: () => !!(S && S.schloss),
+    zielt: () => !!(S && S.zielModus),
+    tippen(p) { if (zustand !== "spiel" || !S) return; audio(); tippen(p); muenzKnopfSetzen(); },
+    knacken() { if (S && S.schloss) { const m = schlossMitte(); schlossTippen({ x: m.x, y: m.y }); muenzKnopfSetzen(); } },
+    abbrechen() { if (!S) return false; if (S.schloss) { S.schloss = null; return true; } if (S.zielModus) { S.zielModus = false; muenzKnopfSetzen(); return true; } return false; },
+    pause: () => pausieren()
+  };
 })();
