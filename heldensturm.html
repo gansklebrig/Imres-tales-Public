@@ -1687,11 +1687,14 @@ let W=0,H=0,DPR=1,ZOOM=1;
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
 const HS_VERSION='25.10.2026 · Balance';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
-let GAUTO=3,GCEIL=3,FPSNOW=60;
+let GAUTO=3,GCEIL=3,FPSNOW=60,RSC=1,RSLOW=0,RSOK=0;
+/* Läuft der Browser ohne Grafikbeschleunigung (alles über den Prozessor)? Dann von Anfang an sparsamer rechnen und einen Hinweis geben. */
+const SWR=(()=>{try{const g=document.createElement('canvas').getContext('webgl');if(!g)return 1;const e=g.getExtension('WEBGL_debug_renderer_info');const r=String(e?g.getParameter(e.UNMASKED_RENDERER_WEBGL):g.getParameter(g.RENDERER));const l=g.getExtension('WEBGL_lose_context');if(l)l.loseContext();return/swiftshader|llvmpipe|softpipe|software|basic render/i.test(r)?1:0}catch(e){return 0}})();
+if(SWR){RSC=0.8;GAUTO=2}
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
 const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'||!isFinite(+g)?GAUTO:clamp(Math.round(+g),0,4)};
 const GF=()=>GFX[gfxL()];
-function resize(){W=window.innerWidth;H=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,GF().dpr,Math.max(1,Math.sqrt(GF().px/Math.max(1,W*H))));cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';ZOOM=Math.min(1.75,Math.max(clamp(Math.min(W,H)/560,0.7,1.2),H/720))}
+function resize(){W=window.innerWidth;H=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,GF().dpr,Math.max(1,Math.sqrt(GF().px/Math.max(1,W*H))))*RSC;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';ZOOM=Math.min(1.75,Math.max(clamp(Math.min(W,H)/560,0.7,1.2),H/720))}
 window.addEventListener('resize',resize);resize();
 function toast(msg,col){const d=document.createElement('div');d.className='tm';if(msg instanceof Node)d.appendChild(msg);else d.innerHTML=msg;if(col)d.style.color=col;toastEl.appendChild(d);while(toastEl.children.length>4)toastEl.firstChild.remove();setTimeout(()=>d.remove(),2700)}
 
@@ -3139,11 +3142,17 @@ function fpsWatch(dt,raw,js){FW.iv.push(raw);FW.js.push(js||0);FW.t+=raw;if(FW.t
  const iv=FW.iv.slice().sort((a,b)=>a-b),ref=Math.max(4,iv[Math.floor(iv.length*0.2)]),miss=FW.iv.filter(x=>x>ref*1.6).length/FW.iv.length,avg=FW.t/FW.iv.length,jsA=FW.js.reduce((a,b)=>a+b,0)/FW.js.length,jsM=Math.max(...FW.js);
  FPSNOW=Math.round(1000/avg);PERF={fps:FPSNOW,hz:Math.round(1000/ref),miss:Math.round(miss*100),js:jsA,jsM,lv:gfxL()};FW.iv.length=0;FW.js.length=0;FW.t=0;
  const el=$('gfxFps');if(el)el.textContent=FPSNOW+' FPS';
- if((SAVE.gfx!=='auto'&&SAVE.gfx!==undefined)||G.state!=='play'||G.paused)return;
- if(miss>0.12){fpsGood=0;if(++fpsBad>=2&&GAUTO>0){GCEIL=GAUTO-1;GAUTO--;fpsBad=0;resize()}}
+ if(G.state!=='play'||G.paused||document.hidden)return;
+ /* Dauerhaft langsam (z. B. großer Bildschirm, Grafikkarte bremst): intern etwas kleiner rechnen statt zu ruckeln – gilt in jeder Grafikstufe */
+ const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined,slow=FPSNOW<42&&(!auto||GAUTO<=1);
+ if(slow){RSOK=0;if(++RSLOW>=2&&RSC>0.55){RSC=Math.max(0.55,+(RSC-0.15).toFixed(2));RSLOW=0;resize()}}
+ else if(RSC<1&&FPSNOW>=55&&miss<0.03){RSLOW=0;if(++RSOK>=8){RSC=Math.min(1,+(RSC+0.1).toFixed(2));RSOK=0;resize()}}else{RSLOW=0;RSOK=0}
+ PERF.rs=RSC;
+ if(!auto)return;
+ if(miss>0.12||FPSNOW<42){fpsGood=0;if(++fpsBad>=2&&GAUTO>0){GCEIL=GAUTO-1;GAUTO--;fpsBad=0;resize()}}
  else if(miss<0.02){fpsBad=0;if(++fpsGood>=5&&GAUTO<GCEIL){GAUTO++;fpsGood=0;resize()}}else{fpsBad=0;fpsGood=0}}
 function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.font='700 11px ui-monospace,monospace';c.textAlign='left';c.textBaseline='top';
- const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz`,`verpasste Bilder ${PERF.miss}%`,`Rechenzeit ⌀${PERF.js.toFixed(1)} / max ${PERF.jsM.toFixed(1)} ms`,`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}`];
+ const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz`,`verpasste Bilder ${PERF.miss}%`,`Rechenzeit ⌀${PERF.js.toFixed(1)} / max ${PERF.jsM.toFixed(1)} ms`,`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}${RSC<1?' · '+Math.round(RSC*100)+'%':''}`].concat(SWR?['⚠ Grafikbeschleunigung des Browsers aus']:[]);
  const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;c.fillStyle='rgba(0,0,0,.65)';c.fillRect(8,y0,236,L.length*15+8);c.fillStyle=PERF.miss>10?'#ff8a7a':'#bfffc8';L.forEach((s,i)=>c.fillText(s,13,y0+4+i*15));c.restore()}
 const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner.</div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
@@ -3954,7 +3963,7 @@ function drawStage(){const c=stageCv;if(!c||!c.isConnected)return;const w=c.clie
 }
 /* Name mit passendem Artikel mitten im Satz: „der Leitwolf“, „die Goblin-Höhlenwache“, Eigennamen ohne */
 function artN(n){const b=x=>`<b style="color:var(--text)">${esc(x)}</b>`,m=/^(Der|Die|Das) (.+)$/.exec(n);if(m)return m[1].toLowerCase()+' '+b(m[2]);if(/wache$/.test(n))return'die '+b(n);if(/-|meister|mann|hüne/i.test(n))return'der '+b(n);return b(n)}
-function showStageIntro(){const S=STAGES[G.stage],O=ORTE[S.ort];hud.hidden=true;G.state='between';const camp=G.mode==='kampagne';
+function showStageIntro(){if(SWR&&!window.__swrT&&!G.bot){window.__swrT=1;setTimeout(()=>toast('⚠ Dein Browser rechnet ohne Grafikkarte – in den Browser-Einstellungen „Grafikbeschleunigung verwenden“ einschalten, dann läuft es viel flüssiger.','#ffcf7a'),2500)}const S=STAGES[G.stage],O=ORTE[S.ort];hud.hidden=true;G.state='between';const camp=G.mode==='kampagne';
  const ziel=S.escape&&!(S.need===0)?'Dann steigt Demogorgon aus dem See. Überlebt, bis das Boot bereitliegt.':S.boss?`${G.need?'Dann stellt':'Sofort stellt'} sich euch ${artN(BOSSES[S.boss].n)} entgegen.`:`Dann wartet ${artN(GUARDS[S.guard].n)}.`;
  const dots=camp?`<div class="ortdots" aria-label="Ort ${S.ort+1} von ${ORTE.length}">${ORTE.map((o,i)=>`<i class="${i<S.ort?'done':i===S.ort?'now':''}" title="${esc(o.name)}"></i>`).join('')}</div>`:'';
  const extra=G.mode==='abstieg'?`<p class="muted" style="margin:0">Zeitlimit: <b style="color:var(--text)">${mmss(S.limit)}</b>${S.depth%5===0?' · Boss-Ebene!':''}</p>`:G.mode==='taeglich'&&G.daily?`<p class="muted" style="margin:0">Heutige Regeln: ${G.daily.mods.map(k=>`<b style="color:var(--text)">${DMODS[k].n}</b>`).join(' · ')}</p>`:'';
@@ -4129,7 +4138,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'hs-send':hsEintragen();break;
   case'inv-sel':G.invSel=G.invSel===b.dataset.k?null:b.dataset.k;renderInv(true);break;
   case'inv-desel':G.invSel=null;renderInv(true);break;
-  case'inv-equip':{const i=+G.invSel.split(':')[1];equipFromBag(i);G.invSel=null;sfx('equip');renderInv(true);break}
+  case'inv-equip':{const i=+G.invSel.split(':')[1];equipFromBag(i);G.invSel=P.bag.length?'b:'+Math.min(i,P.bag.length-1):null;sfx('equip');renderInv(true);break}
   case'inv-scrap':{const i=+G.invSel.split(':')[1];const it=P.bag[i];if(it&&it.fav){toast('Gemerkt – erst den Stern entfernen.','#ffd04a');break}if(it){const v=scrapValue(it);SAVE.gold+=v;G.goldRun+=v;P.bag.splice(i,1);sfx('scrap')}G.invSel=P.bag.length?'b:'+Math.min(i,P.bag.length-1):null;updateInvBadge();renderInv(true);break}
   case'inv-scrapall':{let v=0;{const kp=P.bag.filter(it=>{if(!it.fav&&it.rar<4&&!it.up&&!(it.sock&&it.sock.some(Boolean))&&itemDelta(it)<=0.005&&itemDps(it).d<=0.005){v+=scrapValue(it);return false}return true});P.bag.length=0;P.bag.push(...kp)}SAVE.gold+=v;G.goldRun+=v;if(v){sfx('scrap');toast(`+${fmt(v)} Gold`,'#e5b454')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<BAGMAX&&k!=='weapon'&&k!=='ranged'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
@@ -5264,7 +5273,9 @@ addEventListener('keydown',ev=>{if(PADCAP&&ev.code==='Escape'){PADCAP=null;ctlRe
    Steuerkreuz oder linker Stick wählt räumlich (gehalten: wiederholt), A bestätigt, B zurück, LB/RB wechselt die Reiter,
    rechter Stick scrollt, Menu/View schließen bzw. wechseln. Im Mehrspieler bedient das Menü, wer es geöffnet hat. */
 const PADNAV={on:false,el:null,sig:'',rep:{},dirty:true,det:0,ret:''};
-addEventListener('pointerdown',()=>{if(PADNAV.on){PADNAV.on=false;if(PADNAV.el)PADNAV.el.classList.remove('padf');PADNAV.el=null}},true);
+addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!PADNAV.on)return;const t=e.target&&e.target.closest&&e.target.closest('button,select,input');
+ /* Maus übernimmt: der Controller macht danach am angeklickten Element weiter statt im alten Menü (kein Springen) */
+ PADNAV.on=false;if(PADNAV.el)PADNAV.el.classList.remove('padf');PADNAV.el=null;PADNAV.det=0;PADNAV.rep={};PADNAV.sig=t&&scr.contains(t)?padSig(t):''},true);
 try{new MutationObserver(()=>{PADNAV.dirty=true}).observe(scr,{childList:true,subtree:true})}catch(e){}
 function padEls(){return[...scr.querySelectorAll('button:not([disabled]),select:not([disabled]),input:not([disabled]):not([type=hidden])')].filter(b=>b.offsetParent!==null&&b.getClientRects().length&&getComputedStyle(b).visibility!=='hidden')}
 function padSig(el){return el?el.tagName+'|'+JSON.stringify(el.dataset)+'|'+(el.id||'')+'|'+(el.dataset.act?'':el.textContent.trim().slice(0,24)):''}
@@ -5300,7 +5311,7 @@ function padPress(cur){if(!cur){const m=scr.querySelector('.btn-main:not([disabl
  if((a==='inv-sel'&&G.invSel===cur.dataset.k||a==='tr-sel'&&G.trSel===cur.dataset.k)&&scr.querySelector('#idet2')){PADNAV.det=1;PADNAV.detSel='#idet2 .row button';const d=scr.querySelector('#idet2 .row button:not([disabled])');if(d){PADNAV.det=2;padMark(d)}return}
  cur.click();
  /* nach dem Verschrotten bleibt der Cursor bei den Gegenständen – auf dem nachgerückten */
- if(a==='inv-scrap'||a==='tr-scrap'){const k=a==='inv-scrap'?G.invSel:G.trSel,t=k&&scr.querySelector(`[data-act="${a==='inv-scrap'?'inv-sel':'tr-sel'}"][data-k="${k}"]`);PADNAV.det=0;if(t){PADNAV.el=t;PADNAV.sig=padSig(t)}return}if((a==='inv-sel'||a==='tr-sel')&&scr.querySelector('#idet2')){PADNAV.det=1;PADNAV.detSel='#idet2 .row button'}
+ if(a==='inv-scrap'||a==='tr-scrap'||a==='inv-equip'){const k=a!=='tr-scrap'?G.invSel:G.trSel,t=k&&scr.querySelector(`[data-act="${a!=='tr-scrap'?'inv-sel':'tr-sel'}"][data-k="${k}"]`);PADNAV.det=0;if(t){PADNAV.el=t;PADNAV.sig=padSig(t)}return}if((a==='inv-sel'||a==='tr-sel')&&scr.querySelector('#idet2')){PADNAV.det=1;PADNAV.detSel='#idet2 .row button'}
  else if(a==='tree-sel'&&scr.querySelector('[data-act="tree-learn"]:not([disabled])')){PADNAV.det=1;PADNAV.detSel='[data-act="tree-learn"]'}}
 function padAdjust(cur,dx){if(cur.type==='range'){const st=+cur.step||1,v=clamp((+cur.value)+dx*st,+cur.min||0,+cur.max||100);if(v!==+cur.value){cur.value=v;cur.dispatchEvent(new Event('input',{bubbles:true}));cur.dispatchEvent(new Event('change',{bubbles:true}))}return true}
  if(cur.tagName==='SELECT'){const n=cur.options.length;if(n){cur.selectedIndex=clamp(cur.selectedIndex+dx,0,n-1);cur.dispatchEvent(new Event('change',{bubbles:true}))}return true}return false}
@@ -6575,7 +6586,7 @@ function frame(now){requestAnimationFrame(frame);padFrame();if(NET.role!=='guest
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
-window.__hs={get G(){return G},get keys(){return keys},call(n,...a){return({useSkill,usePotion,openOverlay,closeOverlay,netAct})[n](...a)},get P(){return P},get PL(){return PL},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
+window.__hs={get G(){return G},rsc(v){if(v!==undefined){RSC=v;resize()}return{RSC,GAUTO,DPR,PERF}},get keys(){return keys},call(n,...a){return({useSkill,usePotion,openOverlay,closeOverlay,netAct})[n](...a)},get P(){return P},get PL(){return PL},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
  step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},net(){return NET},netFns(){return{netHost,netJoin,netJoinScreen,netAction,netGuestReset,netCloseRoom,netWorld,netDiff,mpSlots}},fn(){return{LPOW,mouseAim,dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal,gainXp,legS,makeAnc,ancRoll,dropItem,mpRemove,mpAddPlayer,groupRoll,musAk:a=>musAk(a),addMod,ambi:()=>JSON.stringify(Object.fromEntries(Object.entries(AMBI.el).map(([k,a])=>[k,{p:a.paused,bad:!!a._bad,g:a._g?+a._g.gain.value.toFixed(3):null}]))),lootBlocked,teleHits:typeof teleHits!=='undefined'?teleHits:null}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawNpc:(c,n,x,y,t,s)=>drawNpc(c,n,x,y,t,s),NPCS,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
 </script>
