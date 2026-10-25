@@ -39,7 +39,15 @@
         adj: ["traurigen", "betrunkenen", "tanzenden", "verliebten", "singenden", "hungrigen", "verlorenen", "kichernden", "einsamen", "wütenden", "verfluchten", "goldenen"],
         nom: ["Kobold", "Zwerg", "Drachen", "Bugbear", "Wirt", "Pilz", "Hering", "Barden", "Goblin", "Oger", "Schatten", "Mond", "Krug"] },
       bestenliste: "🏆 Bestenliste", nurHier: "Noch nur auf diesem Gerät gespeichert.", leer: "Noch niemand – sei die erste Legende!",
-      eintragen: "🏆 Eintragen", deinName: "Dein Name", eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!",
+      eintragen: "🏆 Eintragen", deinName: "Dein Name", eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!", sendet: "Wird eingetragen …",
+      fehler: { "Bitte freundlich bleiben": "Dieser Name ist leider nicht erlaubt – bitte wähle einen anderen.", "Bitte kurz warten": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.",
+        "Bitte später nochmal": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.", "Name fehlt": "Bitte gib einen Namen ein.",
+        netz: "Server nicht erreichbar – nur auf diesem Gerät gespeichert.", endgueltig: "Eintrag hat nicht geklappt – dein Ergebnis bleibt auf diesem Gerät.", _: "Eintrag hat nicht geklappt – bitte versuch es nochmal." },
+      pause: "Pausiert – Tippen zum Weiterspielen", pauseKnopf: "⏸ Pause",
+      ton: "Lautstärke", tonAus: "Ton aus", tonAn: "Ton an",
+      kalib: { knopf: "🎯 Kalibrieren", titel: "Kalibrieren", hinweis: "Hör auf die Klicks und tippe 8× genau mit (auf die Bühne oder A · S · D).", vorzaehlen: "Erst zuhören …", mit: (n, m) => "Jetzt mittippen! " + n + " / " + m,
+        fertig: ms => "Kalibriert: Deine Tipps werden um " + ms + " ms verschoben.", null: "Kalibriert: Kein Versatz nötig – du triffst genau!", zuWenig: "Zu wenige Tipps erkannt – bitte nochmal versuchen.",
+        aktuell: ms => "Versatz: " + ms + " ms", zuruecksetzen: "zurücksetzen" },
       spalten: ["#", "Name", "Treffer", "Wurf", "Lied"],
       stimmen: {
         patzer: ["Ich … habe gerade mit der Laute nach einer Fliege geschlagen. Und sie getroffen. Das Lied nicht.", "Eine 1. Die Laute weint. Ich weine. Der Wirt schenkt mir aus Mitleid nach."],
@@ -132,7 +140,15 @@
         adj: ["Sad", "Drunken", "Dancing", "Lovesick", "Singing", "Hungry", "Lost", "Giggling", "Lonely", "Angry", "Cursed", "Golden"],
         nom: ["Kobold", "Dwarf", "Dragon", "Bugbear", "Innkeeper", "Mushroom", "Herring", "Bard", "Goblin", "Ogre", "Shadow", "Moon", "Tankard"] },
       bestenliste: "🏆 Leaderboard", nurHier: "Only saved on this device for now.", leer: "Nobody yet – be the first legend!",
-      eintragen: "🏆 Submit", deinName: "Your name", eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!",
+      eintragen: "🏆 Submit", deinName: "Your name", eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!", sendet: "Submitting …",
+      fehler: { "Bitte freundlich bleiben": "That name isn't allowed – please choose another one.", "Bitte kurz warten": "Too many entries in a short time – please try again later.",
+        "Bitte später nochmal": "Too many entries in a short time – please try again later.", "Name fehlt": "Please enter a name.",
+        netz: "Server unreachable – saved on this device only.", endgueltig: "Submitting didn't work – your score stays on this device.", _: "Submitting didn't work – please try again." },
+      pause: "Paused – tap to continue", pauseKnopf: "⏸ Pause",
+      ton: "Volume", tonAus: "Sound off", tonAn: "Sound on",
+      kalib: { knopf: "🎯 Calibrate", titel: "Calibrate", hinweis: "Listen to the clicks and tap along 8 times (on the stage or A · S · D).", vorzaehlen: "Listen first …", mit: (n, m) => "Tap along now! " + n + " / " + m,
+        fertig: ms => "Calibrated: your taps are shifted by " + ms + " ms.", null: "Calibrated: no offset needed – you're spot on!", zuWenig: "Too few taps detected – please try again.",
+        aktuell: ms => "Offset: " + ms + " ms", zuruecksetzen: "reset" },
       spalten: ["#", "Name", "Hits", "Roll", "Song"],
       stimmen: {
         patzer: ["I … just swatted a fly with my lute. Hit the fly. Not the song.", "A 1. The lute weeps. I weep. The innkeeper pours me another out of pity."],
@@ -466,12 +482,39 @@
       const AC = window.AudioContext || window.webkitAudioContext;
       ctx = new AC();
       const komp = ctx.createDynamicsCompressor(); komp.threshold.value = -16; komp.ratio.value = 2.5;
-      ausg = ctx.createGain(); ausg.gain.value = .7; ausg.connect(komp); komp.connect(ctx.destination);
+      ausg = ctx.createGain(); ausg.gain.value = .7 * pegel(); ausg.connect(komp); komp.connect(ctx.destination);
       rausch = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
       const d = rausch.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      /* iOS: Anruf, Siri, Wecker … unterbrechen den Klang („interrupted“) – dann pausiert der Auftritt */
+      ctx.addEventListener("statechange", () => { if (spiel && !spiel.pause && ctx.state !== "running" && ctx.state !== "closed") pausieren(); });
     }
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended" || ctx.state === "interrupted") { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); }
   }
+  /* Lautstärke (0–1) und „Ton aus“ – gilt für Musik, Klicks und Applaus, wird gemerkt */
+  let lautstaerke = 1, stumm = false;
+  try { const v = parseFloat(localStorage.getItem("imres-auftritt-laut")); if (isFinite(v)) lautstaerke = Math.max(0, Math.min(1, v)); stumm = localStorage.getItem("imres-auftritt-stumm") === "1"; } catch (_) {}
+  const pegel = () => stumm ? 0 : lautstaerke * lautstaerke; /* quadratisch: der Regler fühlt sich gleichmäßiger an */
+  const pegelSetzen = () => { if (ausg) ausg.gain.setTargetAtTime(.7 * pegel(), ctx.currentTime, .03); };
+  /* Hörzeit: die Stelle im Lied, die in diesem Moment (bzw. zum Zeitpunkt ms eines Tipps) aus dem Lautsprecher kommt.
+     ctx.currentTime ist der Ausgabe um die Ausgabelatenz voraus; getOutputTimestamp verbindet Audio-Uhr und performance.now(). */
+  function hoerZeit(ms) {
+    const jetzt = performance.now();
+    if (!(ms > 0) || ms > jetzt + 5 || ms < jetzt - 2000) ms = jetzt;
+    const roh = ctx.currentTime - (jetzt - ms) / 1000;
+    if (ctx.state === "running" && ctx.getOutputTimestamp) {
+      try {
+        const o = ctx.getOutputTimestamp();
+        if (o && o.performanceTime > 0 && o.contextTime > 0) {
+          const z = o.contextTime + (ms - o.performanceTime) / 1000;
+          if (z <= roh + .005 && z >= roh - .5) return z;
+        }
+      } catch (_) {}
+    }
+    return roh - (ctx.outputLatency || 0) - (ctx.baseLatency || 0);
+  }
+  /* Kalibrierung: wie viele Sekunden dieser Spieler (mit diesem Gerät) im Mittel nach dem Klick tippt */
+  let kalibWert = 0;
+  try { const v = parseFloat(localStorage.getItem("imres-auftritt-kalib")); if (isFinite(v)) kalibWert = Math.max(-.25, Math.min(.25, v)); } catch (_) {}
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
   function saite(f, dauer, daempf) {
     const key = f.toFixed(1) + "|" + dauer;
@@ -629,7 +672,22 @@
   const wegLesen = () => { try { const w = JSON.parse(localStorage.getItem("imres-auftritt-weg") || "null"); if (w && Array.isArray(w.sterne)) return w; } catch (_) {} return { frei: 0, sterne: [] }; };
   let weg = wegLesen();
   weg.frei = Math.max(0, Math.min(WEG.length - 1, weg.frei | 0));
-  const wegSpeichern = () => { try { localStorage.setItem("imres-auftritt-weg", JSON.stringify(weg)); } catch (_) {} };
+  /* Ein zweiter Tab darf keinen Fortschritt überschreiben: vor dem Schreiben zusammenführen
+     (höchste freigespielte Bühne, je Bühne die meisten Sterne). „neu“ = Zeitpunkt des letzten Neubeginns –
+     wurde anderswo später neu begonnen, gilt dieser Stand. */
+  function wegMischen(s) {
+    if (!s) return;
+    if ((s.neu || 0) > (weg.neu || 0)) { weg = { frei: 0, sterne: [], neu: s.neu }; }
+    else if ((s.neu || 0) < (weg.neu || 0)) return;
+    weg.frei = Math.max(weg.frei | 0, Math.min(WEG.length - 1, Math.max(0, s.frei | 0)));
+    s.sterne.forEach((x, i) => { const n = Math.max(0, Math.min(3, x | 0)); if (n > (weg.sterne[i] || 0)) weg.sterne[i] = n; });
+  }
+  const wegSpeichern = neu => { if (!neu) wegMischen(wegLesen()); try { localStorage.setItem("imres-auftritt-weg", JSON.stringify(weg)); } catch (_) {} };
+  window.addEventListener("storage", e => {
+    if (e.key !== "imres-auftritt-weg") return;
+    wegMischen(wegLesen());
+    if (modus === "weg" && !spiel && !stimmt && !kalib) { wegStation = Math.min(wegStation, weg.frei); zeichnen(); }
+  });
   try { modus = localStorage.getItem("imres-auftritt-modus") === "weg" ? "weg" : "lieder"; wegStation = Math.min(weg.frei, Math.max(0, parseInt(localStorage.getItem("imres-auftritt-station"), 10) || weg.frei)); } catch (_) { wegStation = weg.frei; }
   const geschafft = () => weg.sterne.filter(x => x > 0).length;
   const rangName = T => { let n = -1; weg.sterne.forEach((x, i) => { if (x > 0) n = Math.max(n, i); }); return n < 0 ? T.weg.unbekannt : T.weg.raenge[n]; };
@@ -648,11 +706,16 @@
       '<p class="tav-info">' + (imWeg ? T.weg.text : T.text) + "</p>" +
       (imWeg ? wegHtml(T) : liederHtml(T)) +
       '<div class="at-buehne"><canvas class="at-canvas" width="560" height="380" aria-label="' + esc(T.titel) + '"></canvas>' +
-        '<div class="at-ergebnis" ' + (ergebnis ? "" : "hidden") + ">" + (ergebnis ? ergebnisHtml(T) : "") + "</div></div>" +
-      '<p class="at-steuer">' + T.steuerung + "<br>" + T.tipp + "</p>" +
+        '<div class="at-ergebnis" ' + (ergebnis ? "" : "hidden") + ">" + (ergebnis ? ergebnisHtml(T) : "") + "</div>" +
+        '<div class="at-pause" role="button" tabindex="0" hidden></div></div>' +
+      '<p class="at-steuer">' + (kalib ? T.kalib.hinweis : T.steuerung + "<br>" + T.tipp) + "</p>" +
       '<div class="at-fuss">' + knoepfeHtml(T) + "</div>" +
-      (imWeg ? '<div class="at-weg-fuss"><button type="button" class="at-zurueck">' + T.weg.zuruecksetzen + "</button></div>" :
-        (ergebnis && !spiel ? eintragHtml(T) : "") + '<div class="at-liste">' + listeHtml(T) + "</div>");
+      '<div class="at-ton"><button type="button" class="at-stumm"></button><label><span>' + T.ton + '</span><input type="range" class="at-laut" min="0" max="100" step="5"></label></div>' +
+      (spiel || stimmt ? "" : kalibHtml(T)) +
+      (imWeg ? (spiel || stimmt || kalib ? "" : '<div class="at-weg-fuss"><button type="button" class="at-zurueck">' + T.weg.zuruecksetzen + "</button></div>") :
+        (ergebnis && !spiel ? '<div class="at-eintrag-box">' + eintragHtml(T) + "</div>" : "") + '<div class="at-liste">' + listeHtml(T) + "</div>");
+    tonNeu(); pauseZeigen();
+    if (kalib) return;
     malenRuhe();
     const pf = root.querySelector(".at-pfad"), akt = pf && pf.querySelector('[aria-pressed="true"]');
     if (akt) pf.scrollLeft = Math.max(0, akt.parentNode.offsetLeft - (pf.clientWidth - akt.parentNode.offsetWidth) / 2);
@@ -678,9 +741,22 @@
         '<p class="at-intro">' + zit(s.intro) + "</p>" +
         '<p class="at-eckdaten"><span>' + W.publikum + ": " + esc(s.publikum) + "</span><span>" + W.lied + ": <em>" + esc(T.lieder[st.lied]) + "</em></span><span class=\"sg\">" + W.sg(st.sg) + "</span></p></div>";
   }
+  function tonNeu(nurKnopf) {
+    const k = root.querySelector(".at-stumm"), r = root.querySelector(".at-laut"), T = t();
+    const aus = stumm || lautstaerke === 0;
+    if (k) { k.textContent = aus ? "🔇" : lautstaerke < .5 ? "🔉" : "🔊"; k.setAttribute("aria-pressed", String(aus)); k.setAttribute("aria-label", aus ? T.tonAn : T.tonAus); k.title = aus ? T.tonAn : T.tonAus; }
+    if (r && !nurKnopf) { r.value = String(Math.round(lautstaerke * 100)); r.setAttribute("aria-label", T.ton); }
+  }
+  function kalibHtml(T) {
+    const ms = Math.round(kalibWert * 1000);
+    return '<div class="at-kalib-zeile">' + (kalib ? "" : '<button type="button" class="at-kalib">' + T.kalib.knopf + "</button>") +
+      (ms && !kalib ? '<span class="at-kalib-wert">' + T.kalib.aktuell((ms > 0 ? "+" : "") + ms) + ' · <button type="button" class="at-kalib-weg">' + T.kalib.zuruecksetzen + "</button></span>" : "") +
+      (kalibMeldung ? '<p class="at-kalib-info" role="status">' + esc(kalibMeldung) + "</p>" : "") + "</div>";
+  }
   function knoepfeHtml(T) {
+    if (kalib) return '<button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
     if (stimmt) return '<button type="button" class="tav-knopf at-start">' + T.stimmen_laden + "</button>";
-    if (spiel) return '<button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
+    if (spiel) return '<button type="button" class="tav-knopf at-pause-knopf">' + T.pauseKnopf + '</button><button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
     if (modus !== "weg") return '<button type="button" class="tav-knopf at-start">' + (ergebnis ? T.nochmal : T.start) + "</button>";
     const W = T.weg, weiter = ergebnis && ergebnis.bestanden && wegStation < WEG.length - 1;
     return (weiter ? '<button type="button" class="tav-knopf at-weiter">' + W.weiter + "</button>" : "") +
@@ -749,8 +825,8 @@
   function malen() {
     if (!spiel) return;
     const c = canvas(); if (!c) return;
-    const { w, h, dpr } = maße(c), g = c.getContext("2d"), jetzt = ctx.currentTime - spiel.start;
-    spiel.blitz = spiel.blitz.map(b => Math.max(0, b - .06));
+    const { w, h, dpr } = maße(c), g = c.getContext("2d"), jetzt = hoerZeit() - spiel.start, gewertet = jetzt - kalibWert;
+    if (!spiel.pause) spiel.blitz = spiel.blitz.map(b => Math.max(0, b - .06));
     const y = grund(g, w, h, dpr, spiel.blitz), bahn = w / 3, flug = spiel.st.flug;
     /* Taktlinien wandern mit – so sieht man den Rhythmus kommen */
     const d0 = spiel.daten, schlagDauer = 4 * d0.schritt;
@@ -766,7 +842,7 @@
     spiel.daten.liste.forEach(n => {
       if (!n.dauer) return;
       const ende = n.zeit + n.dauer, gehalten = spiel.halt[n.spur] && spiel.halt[n.spur].n === n;
-      if (gehalten && jetzt >= ende) { loslassen(n.spur, true); return; }
+      if (gehalten && gewertet >= ende) { loslassen(n.spur, true); return; }
       if (ende - jetzt < -.1 || n.zeit - jetzt > flug) return;
       if (n.bonus != null && !gehalten && !n.losgelassen) return;
       const x = n.spur * bahn + bahn / 2, kopf = gehalten ? y : y - ((n.zeit - jetzt) / flug) * y;
@@ -793,7 +869,7 @@
       g.shadowBlur = 0; g.fillStyle = "#16121a"; g.font = (15 * dpr) + "px serif"; g.textAlign = "center"; g.textBaseline = "middle";
       g.fillText(ZEICHEN[n.spur], x, ny + 1); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
       /* nicht getroffen → als daneben werten */
-      if (!n.status && dt < -FENSTER.knapp) { n.status = "daneben"; spiel.serie = 0; zeigeUrteil("daneben", n.spur); }
+      if (!n.status && !spiel.pause && n.zeit - gewertet < -FENSTER.knapp) { n.status = "daneben"; spiel.serie = 0; zeigeUrteil("daneben", n.spur); }
     });
     g.fillStyle = "#ebe2cc"; g.textAlign = "left"; g.font = (14 * dpr) + "px Georgia, serif";
     g.fillText(Math.round(spiel.punkte) + " " + t().punkte, 10 * dpr, 22 * dpr);
@@ -804,10 +880,10 @@
       g.fillStyle = spiel.urteil.art === "daneben" ? "#c4564a" : spiel.urteil.art === "perfekt" ? "#ffd27a" : "#ebe2cc";
       g.fillText(t().urteil[spiel.urteil.art], spiel.urteil.spur * bahn + bahn / 2, y - 40 * dpr - (1 - a) * 20 * dpr); g.globalAlpha = 1;
     }
-    if (jetzt > spiel.daten.ende) { beenden(); return; }
+    if (!spiel.pause && jetzt > spiel.daten.ende) { beenden(); return; }
     requestAnimationFrame(malen);
   }
-  function zeigeUrteil(art, spur) { spiel.urteil = { art, spur, zeit: ctx.currentTime - spiel.start }; }
+  function zeigeUrteil(art, spur) { spiel.urteil = { art, spur, zeit: hoerZeit() - spiel.start }; }
 
   /* ---------- Spielablauf ---------- */
   let stimmt = null; /* läuft gerade das Laden der Aufnahmen? */
@@ -819,7 +895,9 @@
     const daten = noten(st, lied); daten.lied = lied;
     const ort = imWeg ? wegStation : null;
     const token = stimmt = {};
+    kalibMeldung = "";
     zeichnen();
+    buehneZeigen();
     probenFuer(daten).then(() => {
       if (stimmt !== token) return; /* inzwischen abgebrochen */
       stimmt = null;
@@ -831,19 +909,131 @@
       spiel.knoten = begleitung(daten, spiel.start);
       zeichnen();
       requestAnimationFrame(malen);
+      if (document.hidden) pausieren(); /* während des Stimmens weggewechselt */
     });
   }
+  /* ---------- Pause ----------
+     Alles hängt an der Audio-Uhr: ctx.suspend() hält Musik, Noten und Wertung gemeinsam an.
+     Weiter geht es nach einem kurzen 3-2-1, damit man wieder hineinfindet. */
+  function pausieren() {
+    if (!spiel || spiel.pause === "pause") return;
+    clearTimeout(spiel.pauseUhr);
+    Object.keys(spiel.halt).forEach(k => loslassen(+k, true)); /* gehaltene Töne zählen als gehalten */
+    finger.clear();
+    spiel.pause = "pause";
+    if (ctx.state === "running") { const p = ctx.suspend(); if (p && p.catch) p.catch(() => {}); }
+    pauseZeigen();
+  }
+  function weiterspielen() {
+    if (!spiel || spiel.pause !== "pause") return;
+    const sp = spiel;
+    const schritt = n => {
+      if (spiel !== sp || typeof sp.pause !== "number" && n !== 3) return;
+      if (n > 0) { sp.pause = n; pauseZeigen(); sp.pauseUhr = setTimeout(() => schritt(n - 1), 650); return; }
+      const p = ctx.resume();
+      const los = () => { if (spiel !== sp || sp.pause !== 0) return; if (ctx.state === "running") { sp.pause = null; pauseZeigen(); } else { sp.pause = "pause"; pauseZeigen(); } };
+      sp.pause = 0;
+      if (p && p.then) p.then(los, () => { if (spiel === sp) { sp.pause = "pause"; pauseZeigen(); } }); else los();
+    };
+    schritt(3);
+  }
+  function pauseZeigen() {
+    const el = root.querySelector(".at-pause"); if (!el) return;
+    const p = spiel && spiel.pause;
+    el.hidden = p == null || p === false;
+    const k = root.querySelector(".at-pause-knopf"); if (k) k.disabled = !el.hidden;
+    if (el.hidden) return;
+    el.classList.toggle("zaehlt", typeof p === "number");
+    el.innerHTML = typeof p === "number" ? '<span class="at-zahl">' + (p || "♪") + "</span>" : '<span class="at-pause-sym" aria-hidden="true">⏸</span><span>' + esc(t().pause) + "</span>";
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) return;
+    if (spiel) pausieren();
+    if (kalib) kalibEnde(true);
+  });
+  window.addEventListener("pagehide", () => { if (spiel) pausieren(); });
+  /* Bühne beim Start ganz ins Bild holen (auf dem Handy liegt sie sonst halb unter der Leiste) */
+  function buehneZeigen() {
+    const b = root.querySelector(".at-buehne"); if (!b) return;
+    const r = b.getBoundingClientRect(); let unten = window.innerHeight;
+    const nav = document.querySelector(".handyleiste");
+    if (nav) { const nr = nav.getBoundingClientRect(); if (nr.height > 0 && nr.top < unten && getComputedStyle(nav).visibility !== "hidden") unten = nr.top; }
+    if (r.top >= 0 && r.bottom <= unten) return;
+    const ziel = r.height < unten ? (unten - r.height) / 2 : 8;
+    window.scrollBy({ top: r.top - ziel, behavior: "smooth" });
+  }
+  /* ---------- Kalibrieren ----------
+     Vier Klicks zum Zuhören, dann acht zum Mittippen. Der Median des Versatzes wird gemerkt
+     und beim Werten jedes Tipps abgezogen (positiv = man tippt etwas später als man hört). */
+  let kalib = null, kalibMeldung = "";
+  const KALIB_VOR = 4, KALIB_MIT = 8, KALIB_TAKT = .6;
+  function kalibStarten() {
+    if (spiel || stimmt || kalib) return;
+    audio(); ergebnis = null; kalibMeldung = "";
+    const k = kalib = { tipps: [], start: 0, bereit: false };
+    zeichnen(); buehneZeigen(); requestAnimationFrame(kalibMalen);
+    Promise.race([Promise.all([probeLaden("holz1"), probeLaden("holz2")]), new Promise(r => setTimeout(r, 1500))]).then(() => {
+      if (kalib !== k) return;
+      k.bus = ctx.createGain(); k.bus.connect(ausg);
+      k.start = ctx.currentTime + .5; k.bereit = true;
+      for (let i = 0; i < KALIB_VOR + KALIB_MIT; i++) {
+        const z = k.start + i * KALIB_TAKT, vor = i < KALIB_VOR;
+        if (!probe(vor ? "holz2" : "holz1", 0, z, vor ? .55 : .8, { dauer: .4, aus: .1, ziel: k.bus })) {
+          const alt = bus; bus = k.bus; rauschen(z, "bandpass", vor ? 1800 : 2600, .35, .04); schlag(z, vor ? 700 : 1000, vor ? 560 : 800, .06, .05); bus = alt;
+        }
+      }
+    });
+  }
+  function kalibTipp(ms) { if (kalib && kalib.bereit) kalib.tipps.push(hoerZeit(ms) - kalib.start); }
+  function kalibMalen() {
+    const k = kalib; if (!k) return;
+    const c = canvas(); if (!c) return;
+    const { w, h, dpr } = maße(c), g = c.getContext("2d"), T = t();
+    const y = grund(g, w, h, dpr), jetzt = k.bereit ? hoerZeit() - k.start : -1;
+    const i = Math.floor(jetzt / KALIB_TAKT), seit = jetzt - i * KALIB_TAKT;
+    const gezaehlt = new Set(k.tipps.map(x => Math.round(x / KALIB_TAKT)).filter(n => n >= KALIB_VOR && n < KALIB_VOR + KALIB_MIT)).size;
+    g.textAlign = "center"; g.fillStyle = "rgba(235,226,204,.85)"; g.font = "italic " + (16 * dpr) + "px Georgia, serif";
+    g.fillText(i < KALIB_VOR ? T.kalib.vorzaehlen : T.kalib.mit(gezaehlt, KALIB_MIT), w / 2, y * .3);
+    const an = jetzt >= 0 && i < KALIB_VOR + KALIB_MIT ? Math.max(0, 1 - seit / .25) : 0;
+    g.fillStyle = i < KALIB_VOR ? "rgba(235,226,204," + (.15 + .5 * an) + ")" : "rgba(224,160,70," + (.2 + .7 * an) + ")";
+    g.beginPath(); g.arc(w / 2, y * .62, (22 + 10 * an) * dpr, 0, Math.PI * 2); g.fill();
+    if (k.bereit && jetzt > (KALIB_VOR + KALIB_MIT) * KALIB_TAKT + .2) { kalibEnde(false); return; }
+    requestAnimationFrame(kalibMalen);
+  }
+  function kalibEnde(abgebrochen) {
+    const k = kalib; if (!k) return; kalib = null;
+    if (k.bus) { const b = k.bus; b.gain.setTargetAtTime(0, ctx.currentTime, .03); setTimeout(() => { try { b.disconnect(); } catch (_) {} }, 300); }
+    const T = t();
+    if (abgebrochen) { kalibMeldung = ""; zeichnen(); return; }
+    const versatz = [], belegt = new Set();
+    k.tipps.forEach(x => { const n = Math.round(x / KALIB_TAKT), d = x - n * KALIB_TAKT; if (n >= KALIB_VOR && n < KALIB_VOR + KALIB_MIT && Math.abs(d) < .28 && !belegt.has(n)) { belegt.add(n); versatz.push(d); } });
+    if (versatz.length < 5) kalibMeldung = T.kalib.zuWenig;
+    else {
+      versatz.sort((a, b) => a - b);
+      const m = versatz.length % 2 ? versatz[versatz.length >> 1] : (versatz[versatz.length / 2 - 1] + versatz[versatz.length / 2]) / 2;
+      kalibWert = Math.max(-.25, Math.min(.25, m));
+      try { localStorage.setItem("imres-auftritt-kalib", kalibWert.toFixed(4)); } catch (_) {}
+      const ms = Math.round(kalibWert * 1000);
+      kalibMeldung = Math.abs(ms) < 5 ? T.kalib.null : T.kalib.fertig((ms > 0 ? "+" : "") + ms);
+    }
+    zeichnen();
+  }
   function abbrechen() {
+    if (kalib) { kalibEnde(true); return; }
     if (stimmt) { stimmt = null; zeichnen(); return; }
     if (!spiel) return;
+    clearTimeout(spiel.pauseUhr);
+    if (ctx.state !== "running") { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); }
     (spiel.knoten || []).forEach(n => { try { n.stop(); } catch (_) {} });
     spiel.halt = {};
     if (bus) { const b = bus; b.gain.setTargetAtTime(0, ctx.currentTime, .04); setTimeout(() => { try { b.disconnect(); } catch (_) {} }, 300); bus = null; }
     spiel = null; zeichnen();
   }
-  function tippen(spur) {
-    if (!spiel) return;
-    const jetzt = ctx.currentTime - spiel.start;
+  /* ms: Zeitstempel des Eingabe-Ereignisses – so zählt der Moment des Tippens, nicht wann der Browser dazu kam */
+  function tippen(spur, ms) {
+    if (kalib) { kalibTipp(ms); return; }
+    if (!spiel || spiel.pause != null) return;
+    const jetzt = hoerZeit(ms) - spiel.start - kalibWert;
     spiel.blitz[spur] = 1;
     let best = null;
     spiel.daten.liste.forEach(n => { if (n.spur === spur && !n.status && Math.abs(n.zeit - jetzt) <= FENSTER.knapp && (!best || Math.abs(n.zeit - jetzt) < Math.abs(best.zeit - jetzt))) best = n; });
@@ -864,11 +1054,11 @@
   function loslassen(spur, fertig) {
     if (!spiel || !spiel.halt[spur]) return;
     const { n, hg } = spiel.halt[spur]; delete spiel.halt[spur];
-    const anteil = fertig ? 1 : Math.max(0, Math.min(1, (ctx.currentTime - spiel.start - n.zeit) / n.dauer));
+    const anteil = fertig ? 1 : Math.max(0, Math.min(1, (hoerZeit() - spiel.start - kalibWert - n.zeit) / n.dauer));
     n.bonus = Math.round(HALT_BONUS * (anteil >= .85 ? 1 : anteil));
     spiel.punkte += n.bonus * (1 + Math.min(spiel.serie, 20) * .025);
     if (anteil >= .85) zeigeUrteil("gehalten", spur);
-    else { n.losgelassen = ctx.currentTime - spiel.start; hg.gain.setTargetAtTime(0, ctx.currentTime, .06); }
+    else { n.losgelassen = hoerZeit() - spiel.start; hg.gain.setTargetAtTime(0, ctx.currentTime, .06); }
   }
   function beenden() {
     Object.keys(spiel.halt || {}).forEach(k => loslassen(+k, true));
@@ -916,12 +1106,14 @@
   /* ---------- Eingaben ---------- */
   const TASTEN = { a: 0, s: 1, d: 2, j: 0, k: 1, l: 2, arrowleft: 0, arrowdown: 1, arrowright: 2 };
   window.addEventListener("keydown", e => {
-    if (!spiel || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!(spiel || kalib) || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = (e.target && e.target.tagName) || "";
     if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+    if (spiel && spiel.pause === "pause" && (e.key === " " || e.key === "Enter")) { e.preventDefault(); weiterspielen(); return; }
+    if (spiel && !spiel.pause && (e.key === "Escape" || e.key === "p" || e.key === "P")) { e.preventDefault(); pausieren(); return; }
     const k = TASTEN[String(e.key).toLowerCase()];
     if (k == null) return;
-    e.preventDefault(); tippen(k);
+    e.preventDefault(); tippen(k, e.timeStamp);
   });
   window.addEventListener("keyup", e => {
     const k = TASTEN[String(e.key).toLowerCase()];
@@ -929,11 +1121,11 @@
   });
   root.addEventListener("pointerdown", e => {
     const c = e.target.closest(".at-canvas");
-    if (!c || !spiel) return;
+    if (!c || !(spiel || kalib)) return;
     e.preventDefault();
     const r = c.getBoundingClientRect(), spur = Math.max(0, Math.min(2, Math.floor((e.clientX - r.left) / (r.width / 3))));
-    finger.set(e.pointerId, spur);
-    tippen(spur);
+    if (spiel && !spiel.pause) finger.set(e.pointerId, spur);
+    tippen(spur, e.timeStamp);
   });
   /* Finger hoch = Haltenote loslassen */
   const finger = new Map();
@@ -949,19 +1141,44 @@
     const sw = e.target.closest("[data-station]");
     if (sw && !sw.disabled && !spiel && !stimmt) { stationWaehlen(+sw.dataset.station); return; }
     if (e.target.closest(".at-weiter") && !spiel && !stimmt) { stationWaehlen(wegStation + 1); const b = root.querySelector(".at-station"); if (b && b.getBoundingClientRect().top < 70) b.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
-    if (e.target.closest(".at-zurueck") && !spiel && !stimmt) { if (window.confirm(t().weg.sicher)) { weg = { frei: 0, sterne: [] }; wegSpeichern(); stationWaehlen(0); } return; }
+    if (e.target.closest(".at-zurueck") && !spiel && !stimmt) { if (window.confirm(t().weg.sicher)) { weg = { frei: 0, sterne: [], neu: Date.now() }; wegSpeichern(true); stationWaehlen(0); } return; }
     if (e.target.closest(".at-eintragen")) { eintragen(); return; }
-    if (e.target.closest(".at-start")) { spiel || stimmt ? abbrechen() : starten(); }
+    if (e.target.closest(".at-pause")) { weiterspielen(); return; }
+    if (e.target.closest(".at-pause-knopf")) { pausieren(); return; }
+    if (e.target.closest(".at-stumm")) { stumm = !stumm; try { localStorage.setItem("imres-auftritt-stumm", stumm ? "1" : "0"); } catch (_) {} pegelSetzen(); tonNeu(); return; }
+    if (e.target.closest(".at-kalib")) { kalib ? abbrechen() : kalibStarten(); return; }
+    if (e.target.closest(".at-kalib-weg")) { kalibWert = 0; try { localStorage.removeItem("imres-auftritt-kalib"); } catch (_) {} kalibMeldung = ""; zeichnen(); return; }
+    if (e.target.closest(".at-start")) { spiel || stimmt || kalib ? abbrechen() : starten(); }
+  });
+  root.addEventListener("input", e => {
+    const r = e.target.closest(".at-laut"); if (!r) return;
+    lautstaerke = Math.max(0, Math.min(1, (+r.value || 0) / 100));
+    if (stumm && lautstaerke > 0) stumm = false;
+    try { localStorage.setItem("imres-auftritt-laut", String(lautstaerke)); localStorage.setItem("imres-auftritt-stumm", stumm ? "1" : "0"); } catch (_) {}
+    pegelSetzen(); tonNeu(true);
   });
   window.addEventListener("resize", () => { if (!spiel) malenRuhe(); });
   root.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".at-name")) { e.preventDefault(); eintragen(); } });
 
   /* ---------- Bestenliste: gemeinsam über Supabase, sonst auf diesem Gerät ---------- */
   const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
+  /* Fehler kommen als { status, msg } zurück (msg = Meldung des Servers); nach 10 s wird abgebrochen */
   function server(pfad, body) {
     const h = { apikey: SERVER.key, "Content-Type": "application/json" };
-    return fetch(SERVER.url + pfad, body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) })
-      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
+    const opt = body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) };
+    const ab = window.AbortController ? new AbortController() : null, uhr = ab && setTimeout(() => ab.abort(), 10000);
+    if (ab) opt.signal = ab.signal;
+    const fertig = () => clearTimeout(uhr);
+    return fetch(SERVER.url + pfad, opt)
+      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : r.json().catch(() => ({})).then(j => Promise.reject({ status: r.status, msg: String((j && (j.message || j.hint)) || "") })))
+      .then(v => { fertig(); return v; }, f => { fertig(); return Promise.reject(f && f.status ? f : { status: 0, msg: "", netz: true }); });
+  }
+  /* Servermeldung → freundlicher Text; endgueltig = nochmal senden hilft nicht */
+  function fehlerText(f, T) {
+    const m = (f && f.msg) || "";
+    if (!f || f.netz || !f.status || f.status === 404 || f.status >= 500) return { text: T.fehler.netz };
+    const k = Object.keys(T.fehler).find(x => x.length > 2 && m.indexOf(x) >= 0), endgueltig = /falscher Tag|ungültig/i.test(m);
+    return { text: k ? T.fehler[k] : endgueltig ? T.fehler.endgueltig : T.fehler._, endgueltig };
   }
   const besten = {}; let serverOk = null, meinEintrag = null;
   /* jede Liste gehört zu Publikum + Lied; alle erfundenen Lieder teilen sich eine Liste */
@@ -991,20 +1208,31 @@
       (serverOk === false ? '<p class="at-leer">' + T.nurHier + "</p>" : "");
   }
   function eintragHtml(T) {
-    if (ergebnis.eingetragen) return '<p class="at-eingetragen">' + esc(ergebnis.eingetragen) + "</p>";
-    let name = ""; try { name = localStorage.getItem("imres-auftritt-name") || ""; } catch (_) {}
-    return '<div class="at-eintrag"><input type="text" class="at-name" maxlength="24" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '">' +
-      '<button type="button" class="tav-knopf at-eintragen">' + T.eintragen + "</button></div>";
+    const e = ergebnis;
+    if (e.eingetragen) return '<p class="at-eingetragen">' + esc(e.eingetragen) + "</p>";
+    if (e.endgueltig) return '<p class="at-fehler" role="alert">' + esc(e.fehler) + "</p>";
+    let name = e.nameEingabe; if (name == null) { name = ""; try { name = localStorage.getItem("imres-auftritt-name") || ""; } catch (_) {} }
+    return '<div class="at-eintrag"><input type="text" class="at-name" maxlength="24" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (e.sendet ? " disabled" : "") + ">" +
+      '<button type="button" class="tav-knopf at-eintragen"' + (e.sendet ? " disabled" : "") + ">" + (e.sendet ? T.sendet : T.eintragen) + "</button></div>" +
+      (e.fehler ? '<p class="at-fehler" role="alert">' + esc(e.fehler) + "</p>" : "");
+  }
+  function eintragNeu(fokus) {
+    const el = root.querySelector(".at-eintrag-box"); if (!el || !ergebnis) return;
+    el.innerHTML = eintragHtml(t());
+    const f = el.querySelector(".at-name"); if (fokus && f) { try { f.focus({ preventScroll: true }); f.select(); } catch (_) {} }
   }
   function eintragen() {
-    if (!ergebnis || ergebnis.eingetragen || ergebnis.sendet) return;
+    if (!ergebnis || ergebnis.eingetragen || ergebnis.sendet || ergebnis.endgueltig) return;
     const feld = root.querySelector(".at-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
     if (!name) { if (feld) feld.focus(); return; }
     try { localStorage.setItem("imres-auftritt-name", name); } catch (_) {}
-    const T = t(), e = { name, lied: ergebnis.lied.key ? ergebnis.lied.key : "neu|" + liedName(ergebnis.lied, T).slice(0, 36), prozent: ergebnis.prozent, wurf: ergebnis.summe, serie: ergebnis.serie, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(), k = listenSchluessel(); lok[k] = sortieren(sauber(lok[k]).concat([e])).slice(0, 10);
+    const T = t(), erg = ergebnis, k2 = listenSchluessel();
+    const e = { name, lied: erg.lied.key ? erg.lied.key : "neu|" + liedName(erg.lied, T).slice(0, 36), prozent: erg.prozent, wurf: erg.summe, serie: erg.serie, erstellt: new Date().toISOString() };
+    /* auf diesem Gerät merken – ein früherer, abgelehnter Versuch desselben Auftritts wird ersetzt */
+    const lok = lokalLesen(), alt = erg.lokal; lok[k2] = sortieren(sauber(lok[k2]).filter(x => !alt || x.erstellt !== alt).concat([e])).slice(0, 10);
     try { localStorage.setItem("imres-auftritt-liste", JSON.stringify(lok)); } catch (_) {}
-    const erg = ergebnis, k2 = listenSchluessel(); erg.sendet = true;
+    erg.lokal = e.erstellt; erg.nameEingabe = name; erg.fehler = ""; erg.sendet = true;
+    eintragNeu();
     const fertig = () => {
       erg.sendet = false;
       const l = besten[k2] || [];
@@ -1013,8 +1241,13 @@
       erg.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
       if (ergebnis === erg && !spiel) zeichnen(); else listeNeu();
     };
+    const fehler = f => {
+      const F = fehlerText(f, T);
+      erg.sendet = false; erg.fehler = F.text; erg.endgueltig = !!F.endgueltig;
+      return bestenLaden().then(() => { if (ergebnis === erg && !spiel) eintragNeu(!F.endgueltig); });
+    };
     server("/rest/v1/rpc/auftritt_eintragen", { p_name: e.name, p_stufe: stufe, p_lied: e.lied, p_prozent: e.prozent, p_wurf: e.wurf, p_serie: e.serie })
-      .catch(() => {}).then(bestenLaden).then(fertig);
+      .then(() => bestenLaden().then(fertig), fehler);
   }
 
   /* ---------- Aussehen ---------- */
@@ -1079,12 +1312,31 @@
 .at-sterne { letter-spacing: .1em; }
 .at-fuss { gap: .6rem; flex-wrap: wrap; }
 .at-weg-fuss { display: flex; justify-content: center; }
-.at-zurueck { border: 0; background: none; color: var(--ash); font: inherit; font-size: .78rem; text-decoration: underline; cursor: pointer; opacity: .7; }
-.at-zurueck:hover { opacity: 1; color: var(--vellum); }
+.at-weg-fuss { margin-top: 1.4rem; }
+.at-zurueck { border: 1px solid var(--line); background: rgba(0,0,0,.2); color: var(--ash); font: inherit; font-size: .85rem; min-height: 44px; padding: .5rem 1.1rem; cursor: pointer; }
+.at-zurueck:hover, .at-zurueck:focus-visible { color: var(--vellum); border-color: var(--ash); }
+.at-pause { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .5rem; padding: 1rem; text-align: center; background: rgba(16,14,21,.82); border: 1px solid var(--ember); color: var(--vellum); font-family: var(--name); font-size: 1.2rem; cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.at-pause[hidden] { display: none; }
+.at-pause.zaehlt { background: rgba(16,14,21,.45); cursor: default; }
+.at-pause-sym { font-size: 2.4rem; color: var(--ember); line-height: 1; }
+.at-zahl { font-family: var(--display); font-size: 4rem; color: #ffd27a; text-shadow: 0 0 24px rgba(255,210,122,.6); animation: atzahl .65s ease-out; }
+@keyframes atzahl { from { transform: scale(1.6); opacity: 0; } }
+.at-ton { display: flex; justify-content: center; align-items: center; gap: .6rem; font-size: .82rem; color: var(--ash); }
+.at-ton label { display: flex; align-items: center; gap: .5rem; }
+.at-laut { width: 9rem; height: 32px; margin: 0; accent-color: var(--ember); }
+.at-stumm { border: 1px solid var(--line); background: none; color: var(--vellum); font-size: 1.05rem; min-width: 44px; min-height: 40px; cursor: pointer; }
+.at-stumm[aria-pressed="true"] { border-color: var(--ember); }
+.at-kalib-zeile { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .3rem .9rem; font-size: .82rem; color: var(--ash); }
+.at-kalib { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .85rem; min-height: 40px; padding: .4rem .9rem; cursor: pointer; }
+.at-kalib-weg { border: 0; background: none; color: var(--ash); font: inherit; text-decoration: underline; cursor: pointer; padding: .3rem .2rem; }
+.at-kalib-info { flex-basis: 100%; text-align: center; color: var(--ember); margin: 0; }
+.at-fehler { text-align: center; color: #e08a7e; font-size: .88rem; margin: .4rem 0 0; }
+.at-eintrag input:disabled, .at-eintrag button:disabled { opacity: .6; }
+.auftritt button, .at-pause { touch-action: manipulation; }
 `;
   document.head.appendChild(css);
 
-  root._zustand = () => ({ spiel, ctx, stimmt, proben: [...probeBuf.keys()] }); /* für automatische Tests */
+  root._zustand = () => ({ spiel, ctx, stimmt, kalib, kalibWert, weg, proben: [...probeBuf.keys()], hoerZeit: ms => hoerZeit(ms) }); /* für automatische Tests */
   zeichnen();
   bestenLaden();
   let letzteSprache = sprache();

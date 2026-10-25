@@ -408,11 +408,30 @@
   }
   /* Spielfläche so hoch machen, wie unter Leiste und Steuerungshinweis noch Platz im Fenster ist */
   const FLAECHE = { waldlauf: [".wl-buehne", 14], diebesnacht: [".dn-buehne", 14], echohort: [".eh-buehne", 14], auftritt: [".at-canvas", 120] };
+  /* Unterkante des nutzbaren Fensters: über der Handy-Leiste (falls sichtbar), sonst über dem sicheren Rand (Home-Balken) */
+  let randMesser = null;
+  function sichererRand() {
+    if (!randMesser) {
+      randMesser = document.createElement("div");
+      randMesser.setAttribute("aria-hidden", "true");
+      randMesser.style.cssText = "position:fixed;left:0;bottom:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none";
+      document.body.appendChild(randMesser);
+    }
+    return parseFloat(getComputedStyle(randMesser).paddingBottom) || 0;
+  }
+  function untenFrei() {
+    const nav = document.querySelector(".handyleiste");
+    if (nav) {
+      const cs = getComputedStyle(nav), r = nav.getBoundingClientRect();
+      if (cs.display !== "none" && cs.visibility !== "hidden" && cs.position === "fixed" && r.height > 0 && r.top < window.innerHeight) return r.top;
+    }
+    return window.innerHeight - sichererRand();
+  }
   function hoeheSetzen() {
     if (!aktiv || !FLAECHE[aktiv]) return;
     const el = document.querySelector("#" + aktiv + " " + FLAECHE[aktiv][0]); if (!el) return;
     const oben = el.getBoundingClientRect().top + window.pageYOffset;
-    const h = Math.max(300, Math.round(window.innerHeight - oben - FLAECHE[aktiv][1]));
+    const h = Math.max(260, Math.round(untenFrei() - oben - FLAECHE[aktiv][1]));
     if (sektion.style.getPropertyValue("--sh") !== h + "px") sektion.style.setProperty("--sh", h + "px");
   }
   const hoeheWache = window.ResizeObserver ? new ResizeObserver(() => requestAnimationFrame(hoeheSetzen)) : null;
@@ -596,8 +615,10 @@
 /* Spielflächen in der Einzelansicht groß, aber ganz im Fenster */
 #taverne.saal-einzeln { --sh: calc(100vh - 15rem); }
 #taverne.saal-einzeln .wl-buehne, #taverne.saal-einzeln .wl-liste, #taverne.saal-einzeln .wl-fuss,
-#taverne.saal-einzeln .eh-buehne, #taverne.saal-einzeln .eh-liste, #taverne.saal-einzeln .eh-fuss { max-width: min(100%, max(300px, calc(var(--sh) * .8))); }
-#taverne.saal-einzeln .dn-buehne, #taverne.saal-einzeln .dn-liste, #taverne.saal-einzeln .dn-fuss { max-width: min(100%, max(300px, calc(var(--sh) * ${400 / 560}))); }
+#taverne.saal-einzeln .eh-buehne, #taverne.saal-einzeln .eh-liste, #taverne.saal-einzeln .eh-fuss { max-width: min(100%, max(240px, calc(var(--sh) * .8))); }
+#taverne.saal-einzeln .dn-buehne, #taverne.saal-einzeln .dn-liste, #taverne.saal-einzeln .dn-fuss { max-width: min(100%, max(220px, calc(var(--sh) * ${400 / 560}))); }
+/* kleine Handys: Steuerungshinweis kompakter, damit die Spielfläche über die Handy-Leiste passt */
+@media (max-width: 420px) { #taverne.saal-einzeln :is(.wl-steuerung, .dn-steuerung, .eh-steuerung) { font-size: .8rem; line-height: 1.35; margin-top: 0; margin-bottom: 0; } }
 #taverne.saal-einzeln .wl-fuss, #taverne.saal-einzeln .eh-fuss, #taverne.saal-einzeln .dn-fuss { width: 100%; justify-self: center; }
 #taverne.saal-einzeln .at-buehne, #taverne.saal-einzeln .at-liste { max-width: min(100%, 820px); }
 #taverne.saal-einzeln .tav-karte:not(.tav-voll) .at-canvas { height: clamp(300px, var(--sh), 600px); }

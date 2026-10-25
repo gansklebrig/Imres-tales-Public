@@ -255,7 +255,11 @@
         legende: ["Alles meins. Fast alles. Na gut, wir teilen.", "Selbst Demogorgon hat mich nicht beeindruckt.", "Es gibt kein Gold, das ich nicht finde."]
       },
       bestenliste: "Größte Horte", spalten: ["#", "Name", "Punkte", "Level"], leer: "Noch hat niemand einen Hort angelegt. Sei der Erste!", nurHier: "Gerade nur auf diesem Gerät gespeichert.",
-      deinName: "Dein Name", eintragen: "Eintragen", eingetragen: p => "Eingetragen auf Platz " + p + "!", eingetragenOhne: "Eingetragen!",
+      deinName: "Dein Name", eintragen: "Eintragen", eingetragen: p => "Eingetragen auf Platz " + p + "!", eingetragenOhne: "Eingetragen!", sendet: "Wird eingetragen …",
+      fehler: { "Bitte freundlich bleiben": "Dieser Name ist leider nicht erlaubt – bitte wähle einen anderen.", "Bitte kurz warten": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.",
+        "Bitte später nochmal": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.", "Name fehlt": "Bitte gib einen Namen ein.",
+        "falscher Tag": "Diese Tagesaufgabe ist schon vorbei – dein Ergebnis bleibt auf diesem Gerät.",
+        netz: "Server nicht erreichbar – nur auf diesem Gerät gespeichert.", endgueltig: "Eintrag hat nicht geklappt – dein Ergebnis bleibt auf diesem Gerät.", _: "Eintrag hat nicht geklappt – bitte versuch es nochmal." },
       rekord: (p, s) => "Bester Hort (" + s + "): " + p, neuRekord: "Neuer Rekord!",
       quips: {
         gold: ["Meins.", "Glänzt.", "Mehr!", "Hübsch.", "In den Beutel."],
@@ -481,7 +485,11 @@
         legende: ["All mine. Almost all. Fine, we share.", "Not even Demogorgon impressed me.", "There's no gold I can't find."]
       },
       bestenliste: "Greatest hoards", spalten: ["#", "Name", "Points", "Level"], leer: "Nobody has built a hoard yet. Be the first!", nurHier: "Only saved on this device right now.",
-      deinName: "Your name", eintragen: "Enter", eingetragen: p => "Entered at rank " + p + "!", eingetragenOhne: "Entered!",
+      deinName: "Your name", eintragen: "Enter", eingetragen: p => "Entered at rank " + p + "!", eingetragenOhne: "Entered!", sendet: "Submitting …",
+      fehler: { "Bitte freundlich bleiben": "That name isn't allowed – please choose another one.", "Bitte kurz warten": "Too many entries in a short time – please try again later.",
+        "Bitte später nochmal": "Too many entries in a short time – please try again later.", "Name fehlt": "Please enter a name.",
+        "falscher Tag": "This daily challenge is already over – your score stays on this device.",
+        netz: "Server unreachable – saved on this device only.", endgueltig: "Submitting didn't work – your score stays on this device.", _: "Submitting didn't work – please try again." },
       rekord: (p, s) => "Best hoard (" + s + "): " + p, neuRekord: "New record!",
       quips: {
         gold: ["Mine.", "Shiny.", "More!", "Pretty.", "Into the pouch."],
@@ -1119,9 +1127,23 @@
   function speichern() {
     if (!S || S.einzel) return;
     fortschrittMerken();
-    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten(), laune: S.laune || null, kleinode: S.kleinode || [], angebot: S.angebot || null, erspart: S.erspart || 0 };
+    /* Zweiter Tab: Hat ein anderer Tab inzwischen einen neueren Spielstand geschrieben, wird er nicht überschrieben. */
+    if (!speichernErlaubt()) return;
+    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten(), laune: S.laune || null, kleinode: S.kleinode || [], angebot: S.angebot || null, erspart: S.erspart || 0,
+      t: Math.max(Date.now(), (S.speicherT || 0) + 1), tab: TAB_ID };
+    S.speicherT = k.t;
     schreib(SPEICHER, JSON.stringify(k));
   }
+  /* Jeder Tab kennt den Zeitstempel des Spielstands, den er geladen oder zuletzt selbst geschrieben hat.
+     Ist der gespeicherte neuer und von einem anderen Tab, bleibt er stehen. */
+  const TAB_ID = Math.random().toString(36).slice(2, 10);
+  function speichernErlaubt() {
+    let v = null; try { v = JSON.parse(lies(SPEICHER, "null")); } catch (_) {}
+    if (!v || typeof v !== "object") return true;
+    if (v.tab === TAB_ID) return true;
+    return !((v.t || 0) > (S.speicherT || 0));
+  }
+  function speicherLoeschen() { if (!S || speichernErlaubt()) loesch(SPEICHER); }
   function gespeichert() {
     /* Obergrenze: weit hinter allem Spielbaren im Endlos-Modus – darüber würden die Gegner-Werte unendlich */
     try { const v = JSON.parse(lies(SPEICHER, "null")); return v && STUFEN[v.stufe] && Number.isInteger(v.lv) && v.lv >= 0 && v.lv <= KAMPAGNE + 200 ? v : null; } catch (_) { return null; }
@@ -1129,6 +1151,7 @@
   function laden(k) {
     neuesSpiel();
     Object.assign(S, k);
+    S.speicherT = k.t || 0; delete S.tab; delete S.t;
     S.up = Object.assign({}, k.up || {});
     S.garten = k.garten && typeof k.garten === "object" ? { g: k.garten.g, turme: Object.assign({}, k.garten.turme || {}), setzlinge: (k.garten.setzlinge || []).slice() } : null;
   }
@@ -1190,7 +1213,7 @@
   function raubzugStarten() {
     const lv = S.lv, g = gebietVon(lv);
     musikStart(GEB[g].musik, 0); musikWechsel(0);
-    const zeit = (26 + 5 * up("zeit")) * STUFEN[S.stufe].zeit;
+    const zeit = 26 * STUFEN[S.stufe].zeit + 5 * up("zeit"); /* „+5 Sekunden“ gilt auf jeder Stufe genau so */
     S.phase = "raub";
     S.texte = []; S.teilchen = []; S.banner = null; S.quip = null; S.quipT = 0; S.blitze = [];
     S.R = {
@@ -4876,7 +4899,7 @@
         if (A.verloren) KLANG.verloren();
         const best = jsonLies("imres-echohort-tagbest", {});
         if (best.datum !== S.tag || pkt > (best.punkte || 0)) schreib("imres-echohort-tagbest", JSON.stringify({ datum: S.tag, punkte: pkt }));
-        S.eingetragen = ""; S.sendet = false;
+        S.eingetragen = ""; S.sendet = false; S.fehler = ""; S.endgueltig = false; S.lokal = null; S.nameEingabe = null;
         tagErgebnisZeigen(); tagListeLaden(S.tag);
         return;
       }
@@ -4885,7 +4908,7 @@
         KLANG.verloren();
         if (!S.einzel) {
           S.leben--;
-          if (S.leben <= 0) { loesch(SPEICHER); spielEnde(); return; }
+          if (S.leben <= 0) { speicherLoeschen(); spielEnde(); return; }
           speichern();
         }
       } else {
@@ -5038,8 +5061,7 @@
     const tx = t(), T = tx.tag, E = S.erg, best = jsonLies("imres-echohort-tagbest", {});
     const name = lies("imres-echohort-name", "") || lies("imres-diebesnacht-name", "") || lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
     const eintrag = E.pkt <= 0 ? "" : S.eingetragen ? '<p class="eh-eingetragen">' + esc(S.eingetragen) + "</p>" :
-      '<div class="eh-eintrag"><input type="text" class="eh-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(tx.deinName) + '" value="' + esc(name) + '">' +
-      '<button type="button" class="tav-knopf" data-tun="tagEintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(tx.eintragen) + "</button></div>";
+      eintragFeld(tx, name, '<button type="button" class="tav-knopf" data-tun="tagEintragen">');
     schleierAuf('<p class="eh-ober">' + esc(T.titel) + ' · ' + esc(S.tag) + '</p><h4>' + esc(E.verloren ? tx.verloren : T.geschafft) + '</h4>' +
       (E.verloren ? '<p>' + esc(T.verloren) + '</p>' : "") +
       '<p class="eh-gross">' + E.pkt + ' <span>' + esc(T.punkte) + '</span></p>' +
@@ -5049,23 +5071,19 @@
       '<button type="button" class="eh-leise" data-tun="zumStart">' + esc(T.zumStart) + '</button>', "tagErgebnis");
   }
   function tagEintragen() {
-    if (!S || !S.tag || !S.erg || S.eingetragen || S.sendet) return;
+    if (!S || !S.tag || !S.erg || S.eingetragen || S.sendet || S.endgueltig) return;
     const feld = tafel.querySelector(".eh-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-echohort-name", name);
     const T = t(), datum = S.tag, st = "tag-" + datum, spiel = S;
     const e = { name, punkte: S.erg.pkt, level: S.lv + 1, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(); lok[st] = sortieren((lok[st] || []).concat([e])).slice(0, 10);
+    const lok = lokalLesen(), alt = spiel.lokal; lok[st] = sortieren((lok[st] || []).filter(x => !alt || x.erstellt !== alt).concat([e])).slice(0, 10);
     schreib("imres-echohort-liste", JSON.stringify(lok));
-    spiel.sendet = true; tagErgebnisZeigen();
-    server("/rest/v1/rpc/hort_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_level: e.level })
-      .catch(() => {}).then(() => tagListeLaden(datum)).then(() => {
-        spiel.sendet = false;
-        const l = (tagListe[datum] || { l: [] }).l, platz = l.findIndex(x => x.name === name && x.punkte === e.punkte) + 1;
-        if (platz) meinEintrag = l[platz - 1].erstellt;
-        spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
-        if (S === spiel && tafelArt === "tagErgebnis") tagErgebnisZeigen();
-      });
+    spiel.lokal = e.erstellt; spiel.nameEingabe = name;
+    senden(spiel, T, { p_name: name, p_stufe: st, p_punkte: e.punkte, p_level: e.level }, () => tagListeLaden(datum), () => {
+      const l = (tagListe[datum] || { l: [] }).l, i = l.findIndex(x => x.name === name && x.punkte === e.punkte);
+      return { i, e: l[i] };
+    }, tagErgebnisZeigen, () => tafelArt === "tagErgebnis");
   }
 
   function hainZeigen() {
@@ -5135,7 +5153,7 @@
     if (!nurNeu) {
       musikStop();
       zustand = "ende";
-      loesch(SPEICHER);
+      speicherLoeschen();
       KLANG.verloren();
       const alt = parseInt(lies(rekordKey(S.stufe), "0"), 10);
       S.neuerRekord = S.punkte > alt && S.punkte > 0;
@@ -5143,7 +5161,7 @@
       S.altRekord = alt;
       S.spruchStufe = S.lv >= KAMPAGNE ? "legende" : S.lv >= 15 ? "boss" : S.lv >= 9 ? "gut" : S.lv >= 3 ? "mittel" : "schwach";
       S.spruchIdx = Math.floor(Math.random() * 3);
-      S.eingetragen = ""; S.sendet = false;
+      S.eingetragen = ""; S.sendet = false; S.fehler = ""; S.endgueltig = false; S.lokal = null; S.nameEingabe = null;
     }
     zustand = "ende";
     const spruch = tx.spruch[S.spruchStufe][S.spruchIdx];
@@ -5186,7 +5204,7 @@
     const b = e.target.closest("[data-tun]"); if (!b) return;
     const tun = b.dataset.tun;
     audio();
-    if (tun === "neu") { loesch(SPEICHER); neuesSpiel(); fussSetzen(); bestenLaden(S.stufe); introZeigen(); }
+    if (tun === "neu") { loesch(SPEICHER); neuesSpiel(); S.speicherT = Date.now(); fussSetzen(); bestenLaden(S.stufe); introZeigen(); }
     else if (tun === "fortsetzen") { const sp = gespeichert(); if (!sp) { startZeigen(); return; } laden(sp); fussSetzen(); bestenLaden(S.stufe); if (S.angebot && S.angebot.length) kleinodZeigen(); else if (S.lv > 0) hainZeigen(); else introZeigen(); }
     else if (tun === "beute") kleinodZeigen();
     else if (tun === "tag" || tun === "tagNochmal") { musikStop(); tagZeigen(true); }
@@ -5217,10 +5235,50 @@
 
   /* ---------- Bestenliste: gemeinsam über Supabase, sonst auf diesem Gerät ---------- */
   const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
+  /* Fehler kommen als { status, msg } zurück (msg = Meldung des Servers); nach 10 s wird abgebrochen */
   function server(pfad, body) {
     const h = { apikey: SERVER.key, "Content-Type": "application/json" };
-    return fetch(SERVER.url + pfad, body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) })
-      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
+    const opt = body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) };
+    const ab = window.AbortController ? new AbortController() : null, uhr = ab && setTimeout(() => ab.abort(), 10000);
+    if (ab) opt.signal = ab.signal;
+    const fertig = () => clearTimeout(uhr);
+    return fetch(SERVER.url + pfad, opt)
+      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : r.json().catch(() => ({})).then(j => Promise.reject({ status: r.status, msg: String((j && (j.message || j.hint)) || "") })))
+      .then(v => { fertig(); return v; }, f => { fertig(); return Promise.reject(f && f.status ? f : { status: 0, msg: "", netz: true }); });
+  }
+  /* Servermeldung → freundlicher Text; endgueltig = nochmal senden hilft nicht */
+  function fehlerText(f, T) {
+    const m = (f && f.msg) || "";
+    if (!f || f.netz || !f.status || f.status === 404 || f.status >= 500) return { text: T.fehler.netz };
+    const k = Object.keys(T.fehler).find(x => x.length > 2 && m.indexOf(x) >= 0), endgueltig = /falscher Tag|ungültig/i.test(m);
+    return { text: k ? T.fehler[k] : endgueltig ? T.fehler.endgueltig : T.fehler._, endgueltig };
+  }
+  /* Eintragsfeld: Name, Knopf und – nach einer Ablehnung – die freundliche Erklärung */
+  function eintragFeld(T, name, knopf) {
+    if (S.endgueltig) return '<p class="eh-fehler" role="alert">' + esc(S.fehler) + "</p>";
+    if (S.nameEingabe != null) name = S.nameEingabe;
+    return '<div class="eh-eintrag"><input type="text" class="eh-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (S.sendet ? " disabled" : "") + ">" +
+      knopf.replace(">", (S.sendet ? " disabled" : "") + ">") + esc(S.sendet ? T.sendet : T.eintragen) + "</button></div>" +
+      (S.fehler ? '<p class="eh-fehler" role="alert">' + esc(S.fehler) + "</p>" : "");
+  }
+  function tafelBehalten(zeigen) { const y = schleier.scrollTop; zeigen(); schleier.scrollTop = y; }
+  function senden(spiel, T, body, laden, finden, zeigen, istDa) {
+    spiel.fehler = ""; spiel.sendet = true; tafelBehalten(zeigen);
+    server("/rest/v1/rpc/hort_eintragen", body).then(() => laden().then(() => {
+      spiel.sendet = false;
+      const r = finden();
+      if (r.i >= 0) meinEintrag = r.e.erstellt;
+      spiel.eingetragen = r.i >= 0 ? T.eingetragen(r.i + 1) : T.eingetragenOhne;
+      if (S === spiel && istDa()) tafelBehalten(zeigen); else listeNeu();
+    }), f => {
+      const F = fehlerText(f, T);
+      spiel.sendet = false; spiel.fehler = F.text; spiel.endgueltig = !!F.endgueltig;
+      return laden().then(() => {
+        if (S !== spiel || !istDa()) return;
+        tafelBehalten(zeigen);
+        const fe = tafel.querySelector(".eh-name"); if (fe) { try { fe.focus({ preventScroll: true }); fe.select(); } catch (_) {} }
+      });
+    });
   }
   const besten = {}, serverOk = {}; let meinEintrag = null;
   const lokalLesen = () => {
@@ -5252,28 +5310,22 @@
     if (!S || S.punkte <= 0) return "";
     if (S.eingetragen) return '<p class="eh-eingetragen">' + esc(S.eingetragen) + "</p>";
     const name = lies("imres-echohort-name", "") || lies("imres-diebesnacht-name", "") || lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
-    return '<div class="eh-eintrag"><input type="text" class="eh-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '">' +
-      '<button type="button" class="tav-knopf eh-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(T.eintragen) + "</button></div>";
+    return eintragFeld(T, name, '<button type="button" class="tav-knopf eh-eintragen">');
   }
   function eintragen() {
-    if (!S || zustand !== "ende" || S.eingetragen || S.sendet) return;
+    if (!S || zustand !== "ende" || S.eingetragen || S.sendet || S.endgueltig) return;
     const feld = tafel.querySelector(".eh-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-echohort-name", name);
     const T = t(), st = S.stufe, spiel = S;
     const e = { name, punkte: S.punkte, level: S.lv + 1, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(); lok[st] = sortieren((lok[st] || []).concat([e])).slice(0, 10);
+    const lok = lokalLesen(), alt = spiel.lokal; lok[st] = sortieren((lok[st] || []).filter(x => !alt || x.erstellt !== alt).concat([e])).slice(0, 10);
     schreib("imres-echohort-liste", JSON.stringify(lok));
-    spiel.sendet = true;
-    server("/rest/v1/rpc/hort_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_level: e.level })
-      .catch(() => {}).then(() => bestenLaden(st)).then(() => {
-        spiel.sendet = false;
-        const l = besten[st] || [];
-        const platz = l.findIndex(x => x.name === name && x.punkte === e.punkte && x.level === e.level) + 1;
-        if (platz) meinEintrag = l[platz - 1].erstellt;
-        spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
-        if (S === spiel && zustand === "ende") spielEnde(true); else listeNeu();
-      });
+    spiel.lokal = e.erstellt; spiel.nameEingabe = name;
+    senden(spiel, T, { p_name: name, p_stufe: st, p_punkte: e.punkte, p_level: e.level }, () => bestenLaden(st), () => {
+      const l = besten[st] || [], i = l.findIndex(x => x.name === name && x.punkte === e.punkte && x.level === e.level);
+      return { i, e: l[i] };
+    }, () => spielEnde(true), () => zustand === "ende");
   }
 
   /* ---------- Eingabe ---------- */
@@ -5383,6 +5435,9 @@
 .eh-name { background: rgba(0,0,0,.35); border: 1px solid var(--line); color: var(--vellum); font: inherit; font-size: .9rem; padding: .4rem .6rem; width: 10.5rem; min-width: 0; }
 .eh-eintrag .tav-knopf { font-size: .88rem; padding: .4rem .8rem; }
 .eh-tafel .eh-eingetragen { color: var(--ember); }
+.eh-tafel .eh-fehler { color: #e08a7e; font-size: .88rem; margin: 0; }
+.eh-eintrag input:disabled, .eh-eintrag button:disabled { opacity: .6; }
+.eh-buehne button, .eh-tafel button, .eh-fuss button { touch-action: manipulation; }
 .eh-liste { width: 100%; max-width: min(100%, calc(76vh * .8)); justify-self: center; }
 .eh-liste:empty { display: none; }
 .eh-liste h4 { font-family: var(--display); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); margin: .2rem 0 .4rem; font-weight: 400; }
@@ -5503,5 +5558,5 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen, tagZeigen, tagStarten, tagInfo, kleinodZeigen, wieZuletzt, mod, ergebnisZeigen: n => ergebnisZeigen(n) };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen, tagZeigen, tagStarten, tagInfo, kleinodZeigen, wieZuletzt, mod, ergebnisZeigen: n => ergebnisZeigen(n), speichern, gespeichert, laden, spielEnde };
 })();

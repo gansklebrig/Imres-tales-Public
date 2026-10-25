@@ -69,20 +69,25 @@
       stufenTitel: "Schwierigkeit", stufen: { lehrling: "🌱 Lehrling", waldlaeufer: "🏹 Waldläufer", legende: "🐉 Legende" },
       stufenText: { lehrling: "Langsamere Gegner, 7 Leben.", waldlaeufer: "Die Jagd, wie Friedrich sie kennt. 5 Leben.", legende: "Schnell, gnadenlos, 4 Leben." },
       bestenliste: "🏆 Bestenliste", nurHier: "Noch nur auf diesem Gerät gespeichert.", leer: "Noch niemand – sei die erste Legende!",
-      eintragen: "🏆 Eintragen", deinName: "Dein Name", eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!",
+      eintragen: "🏆 Eintragen", deinName: "Dein Name", eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!", sendet: "Wird eingetragen …",
+      fehler: { "Bitte freundlich bleiben": "Dieser Name ist leider nicht erlaubt – bitte wähle einen anderen.", "Bitte kurz warten": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.",
+        "Bitte später nochmal": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.", "Name fehlt": "Bitte gib einen Namen ein.",
+        netz: "Server nicht erreichbar – nur auf diesem Gerät gespeichert.", endgueltig: "Eintrag hat nicht geklappt – dein Ergebnis bleibt auf diesem Gerät.", _: "Eintrag hat nicht geklappt – bitte versuch es nochmal." },
+      fortsetzen: "↻ Jagd fortsetzen", fortsetzenInfo: (w, p, l) => "Angefangene Jagd: Welle " + w + " · " + p + " Punkte · " + l + " ♥",
+      fortsetzenKampf: "Die Welle wurde unterbrochen – Friedrich steigt mit einem Herz weniger wieder ein.", neueJagd: "▶ Neue Jagd",
       spalten: ["#", "Name", "Punkte", "Welle"],
       rast: "Rast am Lagerfeuer", rastText: "Wähle eine Gabe für die nächste Welle.",
       stufe: (a, b) => "Stufe " + a + "/" + b,
       gaben: {
         mehrfach: [["Doppelschuss", "Zwei Pfeile auf einmal."], ["Dreifachschuss", "Drei Pfeile im Fächer."]],
-        feuer: [["Feuerpfeile", "Treffer setzen alles in der Nähe in Brand."], ["Glutpfeile", "Größere Flammen, doppelter Schaden."]],
+        feuer: [["Feuerpfeile", "Treffer setzen alles in der Nähe in Brand."], ["Glutpfeile", "Größere Flammen, doppelter Schaden – auch ringsum."]],
         zug: [["Schneller Zug", "Der Bogen ist schneller wieder gespannt."]],
         durchschlag: [["Durchschlag", "Pfeile fliegen durch einen Gegner hindurch."], ["Großer Durchschlag", "Pfeile durchbohren zwei Gegner."]],
         rex: [["Rex packt zu", "Rex stürzt sich auf Gegner am Boden und hält sie fest."], ["Bissiger Rex", "Rex packt öfter und fester zu."]],
         adler: [["Adlerauge", "Die Flugbahn ist viel weiter zu sehen."]],
         echo: [["Echos Ranken", "Wurzeln aus dem Boden bremsen alle Gegner."], ["Dichtes Dickicht", "Die Ranken bremsen noch stärker."]],
         rast: [["Rast am Feuer", "+2 Leben fürs Lager."]],
-        barradin: [["Barradins Inspiration", "Ein Lied im Ohr: Serien bringen doppelt so viele Punkte."]],
+        barradin: [["Barradins Inspiration", "Ein Lied im Ohr: Der Serienbonus zählt doppelt."]],
         krit: [["Natürliche 20", "Jeder Treffer kann kritisch sein: dreifacher Schaden."], ["Glückswürfel", "Kritische Treffer doppelt so oft."]],
         eis: [["Echos Eisfächer", "Treffer frieren Gegner an und bremsen sie stark."], ["Klirrender Frost", "Länger und stärker eingefroren."]],
         blitz: [["Echos Blitz", "Treffer springen manchmal als Blitz auf zwei Gegner über."], ["Kettenblitz", "Öfter, und auf drei Gegner."]],
@@ -143,20 +148,25 @@
       stufenTitel: "Difficulty", stufen: { lehrling: "🌱 Apprentice", waldlaeufer: "🏹 Ranger", legende: "🐉 Legend" },
       stufenText: { lehrling: "Slower enemies, 7 lives.", waldlaeufer: "The hunt as Friedrich knows it. 5 lives.", legende: "Fast, merciless, 4 lives." },
       bestenliste: "🏆 Leaderboard", nurHier: "Only saved on this device for now.", leer: "Nobody yet – be the first legend!",
-      eintragen: "🏆 Submit", deinName: "Your name", eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!",
+      eintragen: "🏆 Submit", deinName: "Your name", eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!", sendet: "Submitting …",
+      fehler: { "Bitte freundlich bleiben": "That name isn't allowed – please choose another one.", "Bitte kurz warten": "Too many entries in a short time – please try again later.",
+        "Bitte später nochmal": "Too many entries in a short time – please try again later.", "Name fehlt": "Please enter a name.",
+        netz: "Server unreachable – saved on this device only.", endgueltig: "Submitting didn't work – your score stays on this device.", _: "Submitting didn't work – please try again." },
+      fortsetzen: "↻ Continue hunt", fortsetzenInfo: (w, p, l) => "Unfinished hunt: wave " + w + " · " + p + " points · " + l + " ♥",
+      fortsetzenKampf: "The wave was interrupted – Friedrich rejoins with one heart less.", neueJagd: "▶ New hunt",
       spalten: ["#", "Name", "Points", "Wave"],
       rast: "Rest at the campfire", rastText: "Choose a gift for the next wave.",
       stufe: (a, b) => "Level " + a + "/" + b,
       gaben: {
         mehrfach: [["Double shot", "Two arrows at once."], ["Triple shot", "Three arrows in a fan."]],
-        feuer: [["Fire arrows", "Hits set everything nearby ablaze."], ["Ember arrows", "Bigger flames, double damage."]],
+        feuer: [["Fire arrows", "Hits set everything nearby ablaze."], ["Ember arrows", "Bigger flames, double damage – splash included."]],
         zug: [["Quick draw", "The bow is drawn again faster."]],
         durchschlag: [["Piercing", "Arrows fly through one enemy."], ["Great piercing", "Arrows pierce two enemies."]],
         rex: [["Rex bites", "Rex pounces on enemies on the ground and holds them."], ["Fierce Rex", "Rex bites more often and harder."]],
         adler: [["Eagle eye", "You see much more of the flight path."]],
         echo: [["Echo's vines", "Roots from the ground slow all enemies."], ["Dense thicket", "The vines slow them even more."]],
         rast: [["Rest by the fire", "+2 lives for the camp."]],
-        barradin: [["Barradin's inspiration", "A song in your ear: streaks score twice as much."]],
+        barradin: [["Barradin's inspiration", "A song in your ear: the streak bonus counts double."]],
         krit: [["Natural 20", "Any hit can be critical: triple damage."], ["Lucky die", "Critical hits twice as often."]],
         eis: [["Echo's cone of cold", "Hits freeze enemies and slow them down a lot."], ["Biting frost", "Frozen longer and harder."]],
         blitz: [["Echo's lightning", "Hits sometimes jump to two enemies as lightning."], ["Chain lightning", "More often, and to three enemies."]],
@@ -410,6 +420,52 @@
     }
     S.welle = abKap ? PLAN.findIndex(p => p.kap === abKap) : 0;
   }
+  /* ---------- Angefangene Jagd merken ----------
+     Gespeichert wird an jedem Lagerfeuer (Gabenwahl) und zu Beginn jeder Welle. Fortsetzen zählt ganz normal;
+     wurde eine Welle mittendrin verlassen, beginnt sie neu – aber mit einem Herz weniger (sonst könnte man
+     schwierige Wellen beliebig oft wiederholen). Am Ende der Jagd wird der Spielstand gelöscht. */
+  const LAUF_KEY = "imres-waldlauf-lauf";
+  const LAUF_FELDER = ["stufe", "maxLeben", "uebung", "welle", "leben", "punkte", "combo", "besteCombo", "erlegt", "bonus", "salven", "salvenTreffer",
+    "kapFertig", "kapAktuell", "neuFrei", "kapGeschafft", "gezeigt", "gaben", "endlosThemen", "hypT", "lichtT", "floeteT", "neuMarke"];
+  function laufSpeichern(kampf) {
+    if (!S) return;
+    const d = { v: 1, kampf: !!kampf, zeit: Date.now(), angebot: kampf ? [] : angebot.slice(), s: {} };
+    LAUF_FELDER.forEach(k => { d.s[k] = S[k]; });
+    schreib(LAUF_KEY, JSON.stringify(d));
+  }
+  function laufLoeschen() { try { localStorage.removeItem(LAUF_KEY); } catch (_) {} }
+  function laufLesen() {
+    try {
+      const d = JSON.parse(lies(LAUF_KEY, "null"));
+      if (!d || d.v !== 1 || !d.s || !STUFEN[d.s.stufe] || !d.s.gaben || typeof d.s.gaben !== "object") return null;
+      const z = k => Number.isFinite(d.s[k]) && d.s[k] >= 0;
+      if (!["welle", "leben", "punkte", "maxLeben", "kapFertig"].every(z) || d.s.leben < 1 || d.s.welle < (d.kampf ? 1 : 0)) return null;
+      if (d.kampf && !d.s.punkte && !d.s.uebung && d.s.welle <= 1) return null; /* gerade erst losgelaufen – nichts zu verlieren */
+      if (!d.kampf && !(Array.isArray(d.angebot) && d.angebot.length && d.angebot.every(k => GABEN[k]))) return null;
+      return d;
+    } catch (_) { return null; }
+  }
+  function laufFortsetzen() {
+    const d = laufLesen(); if (!d) { startZeigen(); return; }
+    const alt = stufeWahl; stufeWahl = d.s.stufe; neuesSpiel(0); stufeWahl = alt;
+    LAUF_FELDER.forEach(k => { if (d.s[k] !== undefined) S[k] = d.s[k]; });
+    const g = GABEN_LEER(); Object.keys(g).forEach(k => { g[k] = Math.max(0, Math.min(GABEN[k], d.s.gaben[k] | 0)); }); S.gaben = g;
+    if (!Array.isArray(S.neuFrei)) S.neuFrei = []; if (!S.gezeigt || typeof S.gezeigt !== "object") S.gezeigt = {};
+    if (!Array.isArray(S.endlosThemen) || !S.endlosThemen.length) S.endlosThemen = mischen(WELT.namen.slice());
+    if (d.kampf) {
+      S.leben -= 1;
+      if (S.leben <= 0) { S.leben = 0; spielEnde(); return; }
+      welleStarten(S.welle);
+      S.banner = { titel: t().welle(S.welle), unter: t().fortsetzenKampf, t: 0, dauer: 3.2 };
+      anwerfen();
+      return;
+    }
+    const n = Math.max(1, S.welle);
+    weltSetzen(n <= PLAN.length ? KAPITEL[PLAN[n - 1].kap].thema : S.endlosThemen[Math.floor((n - PLAN.length - 1) / 2) % S.endlosThemen.length]);
+    zustand = "wahl"; angebot = d.angebot.slice();
+    gabenZeigen(true);
+    anwerfen();
+  }
   function gabenMoeglich() {
     return Object.keys(GABEN).filter(k => {
       if (GABE_AB[k] && S.kapFertig < GABE_AB[k]) return false;
@@ -454,6 +510,7 @@
     S.banner = { titel: t().welle(n), unter: w.unter, t: 0, dauer: 2.4 };
     zustand = "spiel";
     schleierZu();
+    laufSpeichern(true);
   }
   /* vor dem ersten Kampf eines Kapitels erzählt Friedrich, was passiert */
   function naechsteWelle(n) {
@@ -667,7 +724,7 @@
       S.gegner.forEach(o => {
         if (o === e || !angreifbar(o)) return;
         const om = mitte(o);
-        if (Math.hypot(om.x - p.x, om.y - p.y) < rad + radius(o) * 0.5) schaden(o, 1, salve, false);
+        if (Math.hypot(om.x - p.x, om.y - p.y) < rad + radius(o) * 0.5) schaden(o, p.feuer > 1 ? 2 : 1, salve, false);
       });
     }
     if (g.blitz && Math.random() < (g.blitz > 1 ? 0.4 : 0.25)) {
@@ -1563,8 +1620,12 @@
   function startZeigen() {
     const tx = t();
     weltSetzen(KAPITEL[startKap].thema);
-    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + stufenHtml(tx) + kapitelHtml(tx) + zielHtml(tx) +
-      '<button type="button" class="tav-knopf wl-haupt" data-tun="start">' + esc(tx.start) + '</button>');
+    const lauf = laufLesen();
+    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' +
+      (lauf ? '<div class="wl-fortsetzen"><button type="button" class="tav-knopf wl-haupt" data-tun="fortsetzen">' + esc(tx.fortsetzen) + '</button><p class="wl-stufen-text">' +
+        esc(tx.fortsetzenInfo(Math.max(1, lauf.s.welle + (lauf.kampf ? 0 : 1)), lauf.s.punkte, lauf.s.leben) + ' · ' + esc(tx.stufen[lauf.s.stufe])) + '</p></div>' : "") +
+      stufenHtml(tx) + kapitelHtml(tx) + zielHtml(tx) +
+      '<button type="button" class="tav-knopf wl-haupt" data-tun="start">' + esc(lauf ? tx.neueJagd : tx.start) + '</button>');
   }
   function pauseZeigen() {
     const tx = t();
@@ -1618,6 +1679,7 @@
       if (!angebot.length) angebot = ["rast"];
       S.neuMarke = neu.slice(); S.neuFrei = [];
       KLANG.gabe();
+      laufSpeichern(false);
     }
     const dreh = [-1.2, 0.8, -0.5];
     const karten = angebot.map((k, i) => {
@@ -1646,7 +1708,8 @@
       const k = S.kapAktuell;
       S.spruchStufe = k >= KAPITEL.length ? "legende" : k >= 8 ? "boss" : k >= 4 ? "gut" : k >= 2 ? "mittel" : "schwach";
       S.spruchIdx = Math.floor(Math.random() * 3);
-      S.eingetragen = ""; S.sendet = false;
+      S.eingetragen = ""; S.sendet = false; S.fehler = ""; S.endgueltig = false; S.lokal = null; S.nameEingabe = null;
+      laufLoeschen();
     }
     const spruch = tx.spruch[S.spruchStufe][S.spruchIdx];
     const freiwillig = S.leben > 0;
@@ -1702,7 +1765,8 @@
     const b = e.target.closest("[data-tun]"); if (!b) return;
     const tun = b.dataset.tun;
     audio();
-    if (tun === "start") { neuesSpiel(startKap); fussSetzen(); listeNeu(); naechsteWelle(S.welle + 1); }
+    if (tun === "fortsetzen") { laufFortsetzen(); fussSetzen(); listeNeu(); }
+    else if (tun === "start") { laufLoeschen(); neuesSpiel(startKap); fussSetzen(); listeNeu(); naechsteWelle(S.welle + 1); }
     else if (tun === "kampf") { welleStarten(S.geschichteN); anwerfen(); }
     else if (tun === "neu") { zustand = "start"; S = null; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); zeichnen(performance.now()); }
     else if (tun === "weiter") { zustand = "spiel"; schleierZu(); anwerfen(); }
@@ -1721,10 +1785,23 @@
 
   /* ---------- Bestenliste: gemeinsam über Supabase (wie beim Auftritt), sonst auf diesem Gerät ---------- */
   const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
+  /* Fehler kommen als { status, msg } zurück (msg = Meldung des Servers); nach 10 s wird abgebrochen */
   function server(pfad, body) {
     const h = { apikey: SERVER.key, "Content-Type": "application/json" };
-    return fetch(SERVER.url + pfad, body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) })
-      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
+    const opt = body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) };
+    const ab = window.AbortController ? new AbortController() : null, uhr = ab && setTimeout(() => ab.abort(), 10000);
+    if (ab) opt.signal = ab.signal;
+    const fertig = () => clearTimeout(uhr);
+    return fetch(SERVER.url + pfad, opt)
+      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : r.json().catch(() => ({})).then(j => Promise.reject({ status: r.status, msg: String((j && (j.message || j.hint)) || "") })))
+      .then(v => { fertig(); return v; }, f => { fertig(); return Promise.reject(f && f.status ? f : { status: 0, msg: "", netz: true }); });
+  }
+  /* Servermeldung → freundlicher Text; endgueltig = nochmal senden hilft nicht */
+  function fehlerText(f, T) {
+    const m = (f && f.msg) || "";
+    if (!f || f.netz || !f.status || f.status === 404 || f.status >= 500) return { text: T.fehler.netz };
+    const k = Object.keys(T.fehler).find(x => x.length > 2 && m.indexOf(x) >= 0), endgueltig = /falscher Tag|ungültig/i.test(m);
+    return { text: k ? T.fehler[k] : endgueltig ? T.fehler.endgueltig : T.fehler._, endgueltig };
   }
   const besten = {}, serverOk = {}; let meinEintrag = null;
   const lokalLesen = () => { try { return JSON.parse(localStorage.getItem("imres-waldlauf-liste") || "{}") || {}; } catch (_) { return {}; } };
@@ -1750,28 +1827,41 @@
   function eintragHtml(T) {
     if (!S || S.punkte <= 0) return "";
     if (S.eingetragen) return '<p class="wl-eingetragen">' + esc(S.eingetragen) + "</p>";
-    const name = lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
-    return '<div class="wl-eintrag"><input type="text" class="wl-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '">' +
-      '<button type="button" class="tav-knopf wl-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(T.eintragen) + "</button></div>";
+    if (S.endgueltig) return '<p class="wl-fehler" role="alert">' + esc(S.fehler) + "</p>";
+    const name = S.nameEingabe != null ? S.nameEingabe : lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
+    return '<div class="wl-eintrag"><input type="text" class="wl-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (S.sendet ? " disabled" : "") + ">" +
+      '<button type="button" class="tav-knopf wl-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(S.sendet ? T.sendet : T.eintragen) + "</button></div>" +
+      (S.fehler ? '<p class="wl-fehler" role="alert">' + esc(S.fehler) + "</p>" : "");
   }
+  function endeNeu() { const y = schleier.scrollTop; spielEnde(true); schleier.scrollTop = y; }
   function eintragen() {
-    if (!S || zustand !== "ende" || S.uebung || S.eingetragen || S.sendet) return;
+    if (!S || zustand !== "ende" || S.uebung || S.eingetragen || S.sendet || S.endgueltig) return;
     const feld = tafel.querySelector(".wl-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-waldlauf-name", name);
     const T = t(), st = S.stufe, spiel = S;
     const e = { name, punkte: S.punkte, welle: S.welle, genauigkeit: S.genau, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(); lok[st] = sortieren(sauber(lok[st]).concat([e])).slice(0, 10);
+    /* auf diesem Gerät merken – ein früherer, abgelehnter Versuch derselben Jagd wird ersetzt */
+    const lok = lokalLesen(), alt = spiel.lokal; lok[st] = sortieren(sauber(lok[st]).filter(x => !alt || x.erstellt !== alt).concat([e])).slice(0, 10);
     schreib("imres-waldlauf-liste", JSON.stringify(lok));
-    spiel.sendet = true;
+    spiel.lokal = e.erstellt; spiel.nameEingabe = name; spiel.fehler = ""; spiel.sendet = true;
+    endeNeu();
     server("/rest/v1/rpc/jagd_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_welle: e.welle, p_genauigkeit: e.genauigkeit })
-      .catch(() => {}).then(() => bestenLaden(st)).then(() => {
+      .then(() => bestenLaden(st).then(() => {
         spiel.sendet = false;
         const l = besten[st] || [];
         const platz = l.findIndex(x => x.name === name && x.punkte === e.punkte && x.welle === e.welle) + 1;
         if (platz) meinEintrag = l[platz - 1].erstellt;
         spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
-        if (S === spiel && zustand === "ende") spielEnde(true); else listeNeu();
+        if (S === spiel && zustand === "ende") endeNeu(); else listeNeu();
+      }), f => {
+        const F = fehlerText(f, T);
+        spiel.sendet = false; spiel.fehler = F.text; spiel.endgueltig = !!F.endgueltig;
+        return bestenLaden(st).then(() => {
+          if (S !== spiel || zustand !== "ende") return;
+          endeNeu();
+          const fe = tafel.querySelector(".wl-name"); if (fe) { try { fe.focus({ preventScroll: true }); fe.select(); } catch (_) {} }
+        });
       });
   }
 
@@ -1912,6 +2002,9 @@ html.wl-ohne-scroll, html.wl-ohne-scroll body { overflow: hidden; }
 .wl-name { background: rgba(0,0,0,.35); border: 1px solid var(--line); color: var(--vellum); font: inherit; font-size: .9rem; padding: .4rem .6rem; width: 10.5rem; min-width: 0; }
 .wl-eintrag .tav-knopf { font-size: .88rem; padding: .4rem .8rem; }
 .wl-tafel .wl-eingetragen { color: var(--ember); }
+.wl-tafel .wl-fehler { color: #e08a7e; font-size: .88rem; margin: .2rem 0 .4rem; }
+.wl-eintrag input:disabled, .wl-eintrag button:disabled { opacity: .6; }
+.wl-buehne button, .wl-tafel button, .wl-fuss button { touch-action: manipulation; }
 .wl-liste { width: 100%; max-width: min(100%, calc(76vh * .8)); justify-self: center; }
 .wl-liste:empty { display: none; }
 .wl-liste h4 { font-family: var(--display); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); margin: .2rem 0 .4rem; font-weight: 400; }

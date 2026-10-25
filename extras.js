@@ -410,6 +410,8 @@ main.beben { animation: beben .7s linear; }
   transition: opacity .4s; -webkit-tap-highlight-color: transparent;
 }
 .kerze:hover, .kerze:focus-visible { opacity: .95; }
+.kerze.im-spiel { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .3s, visibility 0s .3s; }
+.mem-karte, .memory-fuss button, .tav-knopf { touch-action: manipulation; }
 .kerze svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .kerze .schein { fill: rgba(224,160,70,.18); filter: blur(4px); transition: opacity 1s; animation: kerzenatem 3.4s ease-in-out infinite; }
 .kerze .flamme { fill: #e0a046; transform-origin: 20px 22px; animation: flamme 1.7s ease-in-out infinite; transition: opacity .25s, transform .25s; }
@@ -1024,6 +1026,26 @@ html, body { overflow-x: clip; }
       '<path class="teller" d="M4 66h32M7 63h26"/></svg>';
     document.body.appendChild(kerze);
     kerze.addEventListener("click", () => mondlicht(!mondAn));
+    /* Während ein Spiel offen ist (Taverne in der Einzelansicht), schwebt die Kerze nicht über der Spielfläche –
+       auf dem Handy würde man sie sonst versehentlich antippen. */
+    const spielOffen = () => {
+      const tv = document.getElementById("taverne");
+      if (!tv || !tv.classList.contains("saal-einzeln") || tv.hidden) return false;
+      return tv.getClientRects().length > 0 && getComputedStyle(tv).visibility !== "hidden";
+    };
+    let kerzeRaf = 0;
+    const kerzePruefen = () => { kerzeRaf = 0; const an = spielOffen(); if (kerze.classList.contains("im-spiel") !== an) { kerze.classList.toggle("im-spiel", an); kerze.tabIndex = an ? -1 : 0; kerze.setAttribute("aria-hidden", String(an)); } };
+    const kerzeBald = () => { if (!kerzeRaf) kerzeRaf = requestAnimationFrame(kerzePruefen); };
+    const tvBeobachten = () => {
+      const tv = document.getElementById("taverne"); if (!tv) return false;
+      new MutationObserver(kerzeBald).observe(tv, { attributes: true, attributeFilter: ["class", "hidden", "style"] });
+      return true;
+    };
+    if (!tvBeobachten()) setTimeout(tvBeobachten, 1500);
+    new MutationObserver(kerzeBald).observe(document.body, { attributes: true, attributeFilter: ["class", "hidden"] });
+    window.addEventListener("hashchange", () => setTimeout(kerzeBald, 50));
+    window.addEventListener("popstate", () => setTimeout(kerzeBald, 50));
+    kerzeBald(); setTimeout(kerzeBald, 1500);
     buchKnopfAktualisieren();
 
     skizzenVerstecken();

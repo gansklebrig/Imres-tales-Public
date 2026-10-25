@@ -61,7 +61,7 @@
       wegFrei: "Der Weg ist frei!", aus: "Ausgeschaltet", zuGross: "Zu groß.", wirtNein: "Der Wirt? Er schenkt doch aus.",
       pfft: "Pfft", wuff: "Wuff!", knarr: "Knarr …", klirr: "Klirr!", robe: "Verkleidet", schritt: "Schattenschritt!", zuWeit: "Zu weit.",
       keinWeg: "Kein Weg dorthin.", zielen: "Wohin werfen?", rexGut: "Rex wedelt.", lieberNicht: "Lieber nicht.", gaehn: "Gähn …", bruell: "GRAAAH!",
-      drache: "Venomfang erwacht!", schwertDa: "Die Klinge leuchtet!", erwischt: "Erwischt!", erwischtText: n => n > 0 ? "Noch " + n + (n === 1 ? " Leben." : " Leben.") + " Die Wache schleift dich zurück an den Anfang." : "",
+      drache: "Venomfang erwacht!", schwertDa: "Die Klinge leuchtet!", erwischt: "Erwischt!", erwischtText: n => n > 0 ? "Noch " + n + " Leben. Die Wache schleift dich zurück an den Anfang." : "",
       friedrich: ["… ich hab nichts gesehen.", "Rex, bleib.", "Lass mir was übrig.", "Heute zahlt Barradin."],
       barradin: ["Psst – ich lenke sie ab!", "Eine Strophe nur für dich!", "Ich singe später über dich. Ganz leise."],
       ezekielStumm: ["…", "Hm."],
@@ -139,7 +139,13 @@
       stufenText: { lehrling: "Langsamere, kurzsichtige Wachen. 5 Leben.", schurke: "Die Nacht, wie Ezekiel sie kennt. 3 Leben.", legende: "Wache Augen, schnelle Beine. 2 Leben." },
       nachtWahl: "Beginne in", pauseKnopf: "Pause", muenzeKnopf: "Münze werfen",
       bestenliste: "🏆 Bestenliste", nurHier: "Noch nur auf diesem Gerät gespeichert.", leer2: "Noch niemand – sei der erste Meisterdieb!",
-      eintragen: "🏆 Eintragen", deinName: "Dein Name", eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!",
+      eintragen: "🏆 Eintragen", deinName: "Dein Name", eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!", sendet: "Wird eingetragen …",
+      fehler: { "Bitte freundlich bleiben": "Dieser Name ist leider nicht erlaubt – bitte wähle einen anderen.", "Bitte kurz warten": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.",
+        "Bitte später nochmal": "Zu viele Einträge in kurzer Zeit – bitte später nochmal.", "Name fehlt": "Bitte gib einen Namen ein.",
+        "falscher Tag": "Diese Tägliche Nacht ist schon vorbei – dein Ergebnis bleibt auf diesem Gerät.",
+        netz: "Server nicht erreichbar – nur auf diesem Gerät gespeichert.", endgueltig: "Eintrag hat nicht geklappt – dein Ergebnis bleibt auf diesem Gerät.", _: "Eintrag hat nicht geklappt – bitte versuch es nochmal." },
+      fortsetzen: "↻ Diebeszug fortsetzen", fortsetzenInfo: (st, p, l) => "Angefangener Diebeszug: Stufe " + st + " · " + p + " Gold · " + l + " ♥",
+      fortsetzenErwischt: "Die Stufe wurde unterbrochen – Ezekiel beginnt sie neu, mit einem Leben weniger.", neuerZug: "▶ Neuer Diebeszug",
       spalten: ["#", "Name", "Gold", "Stufe"],
       stufe: (a, b) => "Stufe " + a + "/" + b,
       gaben: {
@@ -276,7 +282,13 @@
       stufenText: { lehrling: "Slower, short-sighted guards. 5 lives.", schurke: "The night as Ezekiel knows it. 3 lives.", legende: "Sharp eyes, quick legs. 2 lives." },
       nachtWahl: "Start in", pauseKnopf: "Pause", muenzeKnopf: "Throw a coin",
       bestenliste: "🏆 Leaderboard", nurHier: "Only saved on this device for now.", leer2: "Nobody yet – be the first master thief!",
-      eintragen: "🏆 Submit", deinName: "Your name", eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!",
+      eintragen: "🏆 Submit", deinName: "Your name", eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!", sendet: "Submitting …",
+      fehler: { "Bitte freundlich bleiben": "That name isn't allowed – please choose another one.", "Bitte kurz warten": "Too many entries in a short time – please try again later.",
+        "Bitte später nochmal": "Too many entries in a short time – please try again later.", "Name fehlt": "Please enter a name.",
+        "falscher Tag": "This daily night is already over – your score stays on this device.",
+        netz: "Server unreachable – saved on this device only.", endgueltig: "Submitting didn't work – your score stays on this device.", _: "Submitting didn't work – please try again." },
+      fortsetzen: "↻ Continue heist", fortsetzenInfo: (st, p, l) => "Unfinished heist: stage " + st + " · " + p + " gold · " + l + " ♥",
+      fortsetzenErwischt: "The stage was interrupted – Ezekiel starts it over with one life less.", neuerZug: "▶ New heist",
       spalten: ["#", "Name", "Gold", "Stage"],
       stufe: (a, b) => "Level " + a + "/" + b,
       gaben: {
@@ -674,6 +686,7 @@
     hintergrundBauen();
     lichtBerechnen();
     muenzKnopfSetzen(); zornKnopfSetzen(); rauchKnopfSetzen();
+    if (!S.taeglich) zugSpeichern(false);
   }
 
   const VARIANTE = { 4: { mantel: "#4a4644", kopf: "#8c8580", bart: true, dunkel: 2.0 }, 5: { mantel: "#2c2238", kopf: "#4a4160", haar: "#ece8f4", dunkel: 3.2 } };
@@ -1097,13 +1110,22 @@
       neueZone();
     } else {
       s.fehl = 0.35; KLANG.fehler(); textAuf(E.x, E.y - 0.8, t().fehler, "#c4564a", 17, 0.8);
+      /* Runenschloss (wandernde Zone): ein Fehlgriff kostet keinen Stift, macht nur ein wenig Lärm */
+      if (s.tr.runen) { laerm(s.tr.x + 0.5, s.tr.y + 0.5, 2, s.tr.x + 0.5, s.tr.y + 0.5, 0.2); aufsehen(2); neueZone(); return; }
       laerm(s.tr.x + 0.5, s.tr.y + 0.5, 3, s.tr.x + 0.5, s.tr.y + 0.5, 0.3); aufsehen(3);
       s.i = Math.max(0, s.i - 1); neueZone();
     }
   }
+  /* Fairness: Die Nadel muss mindestens SCHLOSS_FENSTER Sekunden in der goldenen Zone bleiben –
+     wird sie (samt wandernder Zone) zu schnell, wird die Nadel gebremst. */
+  const SCHLOSS_FENSTER = 0.12;
+  function nadelTempo(s) {
+    const roh = s.v * (1 + 0.1 * s.i), max = s.w / SCHLOSS_FENSTER, rel = roh - s.zv;
+    return Math.abs(rel) > max ? Math.max(0.6, s.zv + Math.sign(rel) * max) : roh;
+  }
   function schlossUpdate(dt) {
     const s = S.schloss; if (!s) return;
-    s.ang += s.v * (1 + 0.1 * s.i) * dt;
+    s.ang += nadelTempo(s) * dt;
     s.zone += s.zv * dt;
     s.blitz = Math.max(0, s.blitz - dt); s.fehl = Math.max(0, s.fehl - dt);
   }
@@ -1546,6 +1568,42 @@
     rauch(E.x, E.y, 10); KLANG.schritt(); textAuf(E.x, E.y - 0.9, t().schritt, "#ebe2cc", 20, 1.4);
     S.wachen.forEach(g => { if (g.zustand === "jagd" || g.zustand === "verdacht") { g.zustand = "suche"; g.ziel = g.zuletzt; g.pfad = []; g.t = 2.5; g.a = 0.45; } });
     muenzKnopfSetzen();
+  }
+  /* ---------- Angefangenen Diebeszug merken ----------
+     Gespeichert wird zu Beginn jeder Stufe (nicht in der Täglichen Nacht). Fortsetzen zählt ganz normal;
+     war die Stufe schon losgegangen, beginnt sie neu – mit einem Leben weniger, damit niemand
+     eine Stufe durch Schließen des Tabs beliebig wiederholen kann. Am Ende des Zugs wird gelöscht. */
+  const ZUG_KEY = "imres-diebesnacht-zug";
+  const ZUG_FELDER = ["stufe", "maxLeben", "leben", "punkte", "aufsehen", "auftraege", "klau", "aus", "geist", "erreicht", "startNacht", "sterneRun", "neznaRun", "gaben", "lvIdx"];
+  function zugSpeichern(begonnen) {
+    if (!S || S.taeglich) return;
+    const d = { v: 1, begonnen: !!begonnen, zeit: Date.now(), def: S.def, s: {} };
+    ZUG_FELDER.forEach(k => { d.s[k] = S[k]; });
+    try { localStorage.setItem(ZUG_KEY, JSON.stringify(d)); } catch (_) {}
+  }
+  function zugLoeschen() { try { localStorage.removeItem(ZUG_KEY); } catch (_) {} }
+  function zugLesen() {
+    try {
+      const d = JSON.parse(lies(ZUG_KEY, "null"));
+      if (!d || d.v !== 1 || !d.s || !STUFEN[d.s.stufe] || !d.s.gaben || typeof d.s.gaben !== "object" || !d.def || !Array.isArray(d.def.karte)) return null;
+      const z = k => Number.isFinite(d.s[k]) && d.s[k] >= 0;
+      if (!["leben", "punkte", "maxLeben", "lvIdx"].every(z) || d.s.leben < 1) return null;
+      if (!d.s.lvIdx && !d.s.punkte) return null; /* noch auf der ersten Stufe ohne Beute – nichts zu verlieren */
+      return d;
+    } catch (_) { return null; }
+  }
+  function zugFortsetzen() {
+    const d = zugLesen(); if (!d) { startZeigen(); return; }
+    const alt = stufeWahl; stufeWahl = d.s.stufe; neuesSpiel(); stufeWahl = alt;
+    ZUG_FELDER.forEach(k => { if (d.s[k] !== undefined) S[k] = d.s[k]; });
+    Object.keys(S.gaben).forEach(k => { S.gaben[k] = Math.max(0, Math.min(GABEN[k] || 0, d.s.gaben[k] | 0)); });
+    if (d.begonnen) {
+      S.leben -= 1;
+      if (S.leben <= 0) { S.leben = 0; S.erreicht = S.lvIdx; spielEnde(); return; }
+    }
+    stufeLaden(S.lvIdx, d.def);
+    S.fortsetzHinweis = d.begonnen;
+    zustand = "intro"; introZeigen(); anwerfen();
   }
   function stufeGeschafft() {
     if (zustand !== "spiel") return;
@@ -2464,8 +2522,12 @@
     if (startAnsicht === "versteck") return versteckZeigen();
     if (startAnsicht.indexOf("brief:") === 0) return archivBriefZeigen(startAnsicht.slice(6));
     if (startAnsicht === "taeglich") return taeglichZeigen();
-    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + stufenHtml(tx) +
-      '<button type="button" class="tav-knopf dn-haupt" data-tun="start">' + esc(tx.start) + '</button>' +
+    const zug = zugLesen();
+    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' +
+      (zug ? '<div class="dn-fortsetzen"><button type="button" class="tav-knopf dn-haupt" data-tun="fortsetzen">' + esc(tx.fortsetzen) + '</button><p class="dn-stufen-text">' +
+        esc(tx.fortsetzenInfo(stufeName(zug.s.lvIdx), zug.s.punkte, zug.s.leben) + " · " + tx.stufen[zug.s.stufe]) + '</p></div>' : "") +
+      stufenHtml(tx) +
+      '<button type="button" class="tav-knopf dn-haupt" data-tun="start">' + esc(zug ? tx.neuerZug : tx.start) + '</button>' +
       '<div class="dn-nebenwege"><button type="button" class="dn-weg" data-tun="taeglichZeigen">' + esc(tx.taeglichKnopf) + '</button>' +
       '<button type="button" class="dn-weg" data-tun="versteck">' + esc(tx.versteckKnopf(VS.gold)) + '</button></div>');
   }
@@ -2531,6 +2593,7 @@
       '<p class="dn-ort">' + esc(tg ? nacht[0] + " · " + nacht[1] : k ? tx.endlosUnter : nacht[1] + " · " + tx.stufe(S.lvIdx % 3 + 1, 3)) + '</p>' +
       (!k && !tg && S.lvIdx % 3 === 0 ? extra("„" + esc(tx.geschichte[S.def.n - 1]) + "“", "dn-geschichte") : "") +
       '<p class="dn-tipp">' + esc(tipp) + '</p>' +
+      (S.fortsetzHinweis ? extra(esc(tx.fortsetzenErwischt), "dn-bed") : "") +
       (S.bed ? extra("<b>" + esc(tx.bed[S.bed][0]) + "</b> – " + esc(tx.bed[S.bed][1]), "dn-bed") : "") +
       (S.def.ziel !== "frei" && S.lvIdx < 3 && !k && !tg ? extra(esc(tx.alarmHinweis)) : "") +
       (S.wachen.some(g => g.T.auge) ? extra(esc(tx.magierHinweis)) : "") +
@@ -2605,7 +2668,8 @@
       const e = S.erreicht;
       S.spruchStufe = S.taeglich ? (S.leben <= 0 ? "schwach" : S.geist ? "gut" : "mittel") : e >= LEVELS.length ? "legende" : e >= 6 ? "gut" : e >= 3 ? "mittel" : "schwach";
       S.spruchIdx = Math.floor(rnd() * 3);
-      S.eingetragen = ""; S.sendet = false;
+      S.eingetragen = ""; S.sendet = false; S.fehler = ""; S.endgueltig = false; S.lokal = null; S.nameEingabe = null;
+      if (!S.taeglich) zugLoeschen();
       S.versteckPlus = S.punkte; VS.gold += S.punkte; versteckSchreiben(VS);
       if (S.taeglich) {
         const k = "imres-diebesnacht-tag-" + S.taeglich, alt2 = parseInt(lies(k, "0"), 10);
@@ -2667,13 +2731,14 @@
     const b = e.target.closest("[data-tun]"); if (!b) return;
     const tun = b.dataset.tun;
     audio();
-    if (tun === "start") { startAnsicht = "start"; neuesSpiel(); stufeLaden((nachtWahl - 1) * 3); zustand = "intro"; introZeigen(); fussSetzen(); listeNeu(); anwerfen(); }
+    if (tun === "fortsetzen") { startAnsicht = "start"; zugFortsetzen(); fussSetzen(); listeNeu(); }
+    else if (tun === "start") { startAnsicht = "start"; zugLoeschen(); neuesSpiel(); stufeLaden((nachtWahl - 1) * 3); zustand = "intro"; introZeigen(); fussSetzen(); listeNeu(); anwerfen(); }
     else if (tun === "versteck") { startAnsicht = "versteck"; VS = versteckLesen(); startZeigen(); }
     else if (tun === "taeglichZeigen") { startAnsicht = "taeglich"; startZeigen(); }
     else if (tun === "zurueck") { startAnsicht = "start"; startZeigen(); listeNeu(); }
     else if (tun === "taeglich") { startAnsicht = "start"; taeglichStarten(); zustand = "intro"; introZeigen(); fussSetzen(); listeNeu(); anwerfen(); }
-    else if (tun === "los") { zustand = "spiel"; schleierZu(); muenzKnopfSetzen(); anwerfen(); }
-    else if (tun === "erneut") { if (S.taeglich) rnd = mulberry(S.tagSeed); stufeLaden(S.lvIdx, S.def); rnd = Math.random; zustand = "spiel"; schleierZu(); anwerfen(); }
+    else if (tun === "los") { zustand = "spiel"; if (S.fortsetzHinweis) S.fortsetzHinweis = false; if (!S.taeglich) zugSpeichern(true); schleierZu(); muenzKnopfSetzen(); anwerfen(); }
+    else if (tun === "erneut") { if (S.taeglich) rnd = mulberry(S.tagSeed); stufeLaden(S.lvIdx, S.def); rnd = Math.random; zugSpeichern(true); zustand = "spiel"; schleierZu(); anwerfen(); }
     else if (tun === "neu") { zustand = "start"; S = null; startAnsicht = "start"; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); zeichnen(); }
     else if (tun === "weiter") { zustand = "spiel"; schleierZu(); anwerfen(); }
     else if (tun === "beenden") { if (zustand === "wahl" || zustand === "erwischt") { /* Beute dieser Stufe zählt nicht */ } spielEnde(); }
@@ -2687,15 +2752,28 @@
   document.addEventListener("keydown", e => {
     if (zustand !== "spiel" || !sichtbar) return;
     if (e.key === "Escape" || e.key === "p" || e.key === "P") { e.preventDefault(); if (S.schloss) S.schloss = null; else pausieren(); }
-    if (e.key === " " && S.schloss) { e.preventDefault(); const m = schlossMitte(); schlossTippen({ x: m.x, y: m.y }); }
+    if (e.key === " " && S.schloss) { e.preventDefault(); if (e.repeat) return; const m = schlossMitte(); schlossTippen({ x: m.x, y: m.y }); }
   });
 
   /* ---------- Bestenliste: gemeinsam über Supabase (wie bei Friedrichs Jagd), sonst auf diesem Gerät ---------- */
   const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
+  /* Fehler kommen als { status, msg } zurück (msg = Meldung des Servers); nach 10 s wird abgebrochen */
   function server(pfad, body) {
     const h = { apikey: SERVER.key, "Content-Type": "application/json" };
-    return fetch(SERVER.url + pfad, body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) })
-      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
+    const opt = body === undefined ? { headers: h, cache: "no-store" } : { method: "POST", headers: h, body: JSON.stringify(body) };
+    const ab = window.AbortController ? new AbortController() : null, uhr = ab && setTimeout(() => ab.abort(), 10000);
+    if (ab) opt.signal = ab.signal;
+    const fertig = () => clearTimeout(uhr);
+    return fetch(SERVER.url + pfad, opt)
+      .then(r => r.ok ? (r.status === 204 ? null : r.json()) : r.json().catch(() => ({})).then(j => Promise.reject({ status: r.status, msg: String((j && (j.message || j.hint)) || "") })))
+      .then(v => { fertig(); return v; }, f => { fertig(); return Promise.reject(f && f.status ? f : { status: 0, msg: "", netz: true }); });
+  }
+  /* Servermeldung → freundlicher Text; endgueltig = nochmal senden hilft nicht */
+  function fehlerText(f, T) {
+    const m = (f && f.msg) || "";
+    if (!f || f.netz || !f.status || f.status === 404 || f.status >= 500) return { text: T.fehler.netz };
+    const k = Object.keys(T.fehler).find(x => x.length > 2 && m.indexOf(x) >= 0), endgueltig = /falscher Tag|ungültig/i.test(m);
+    return { text: k ? T.fehler[k] : endgueltig ? T.fehler.endgueltig : T.fehler._, endgueltig };
   }
   const besten = {}, serverOk = {}; let meinEintrag = null;
   const lokalLesen = () => { try { return JSON.parse(localStorage.getItem("imres-diebesnacht-liste") || "{}") || {}; } catch (_) { return {}; } };
@@ -2739,48 +2817,61 @@
   function eintragHtml(T) {
     if (!S || S.punkte <= 0) return "";
     if (S.eingetragen) return '<p class="dn-eingetragen">' + esc(S.eingetragen) + "</p>";
-    const name = lies("imres-diebesnacht-name", "") || lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
-    return '<div class="dn-eintrag"><input type="text" class="dn-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '">' +
-      '<button type="button" class="tav-knopf dn-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(T.eintragen) + "</button></div>";
+    if (S.endgueltig) return '<p class="dn-fehler" role="alert">' + esc(S.fehler) + "</p>";
+    const name = S.nameEingabe != null ? S.nameEingabe : lies("imres-diebesnacht-name", "") || lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
+    return '<div class="dn-eintrag"><input type="text" class="dn-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (S.sendet ? " disabled" : "") + ">" +
+      '<button type="button" class="tav-knopf dn-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(S.sendet ? T.sendet : T.eintragen) + "</button></div>" +
+      (S.fehler ? '<p class="dn-fehler" role="alert">' + esc(S.fehler) + "</p>" : "");
+  }
+  function endeNeu() { const y = schleier.scrollTop; spielEnde(true); schleier.scrollTop = y; }
+  /* gemeinsamer Ablauf für beide Listen: senden, bei Erfolg Platz zeigen, sonst freundlich erklären und Feld wieder freigeben */
+  function senden(spiel, T, rpc, body, laden, finden) {
+    spiel.fehler = ""; spiel.sendet = true; endeNeu();
+    server(rpc, body).then(() => laden().then(() => {
+      spiel.sendet = false;
+      const l = finden(), platz = l.i + 1;
+      if (platz) meinEintrag = l.e.erstellt;
+      spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
+      if (S === spiel && zustand === "ende") endeNeu(); else listeNeu();
+    }), f => {
+      const F = fehlerText(f, T);
+      spiel.sendet = false; spiel.fehler = F.text; spiel.endgueltig = !!F.endgueltig;
+      return laden().then(() => {
+        if (S !== spiel || zustand !== "ende") return;
+        endeNeu();
+        const fe = tafel.querySelector(".dn-name"); if (fe) { try { fe.focus({ preventScroll: true }); fe.select(); } catch (_) {} }
+      });
+    });
   }
   function eintragen() {
-    if (!S || zustand !== "ende" || S.eingetragen || S.sendet) return;
+    if (!S || zustand !== "ende" || S.eingetragen || S.sendet || S.endgueltig) return;
     const feld = tafel.querySelector(".dn-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-diebesnacht-name", name);
     if (S.taeglich) { tagEintragen(name); return; }
     const T = t(), st = S.stufe, spiel = S;
     const e = { name, punkte: S.punkte, level: S.lvIdx + 1, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(); lok[st] = sortieren((lok[st] || []).concat([e])).slice(0, 10);
+    /* auf diesem Gerät merken – ein früherer, abgelehnter Versuch desselben Zugs wird ersetzt */
+    const lok = lokalLesen(), alt = spiel.lokal; lok[st] = sortieren((lok[st] || []).filter(x => !alt || x.erstellt !== alt).concat([e])).slice(0, 10);
     schreib("imres-diebesnacht-liste", JSON.stringify(lok));
-    spiel.sendet = true;
-    server("/rest/v1/rpc/diebe_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_level: e.level })
-      .catch(() => {}).then(() => bestenLaden(st)).then(() => {
-        spiel.sendet = false;
-        const l = besten[st] || [];
-        const platz = l.findIndex(x => x.name === name && x.punkte === e.punkte && x.level === e.level) + 1;
-        if (platz) meinEintrag = l[platz - 1].erstellt;
-        spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
-        if (S === spiel && zustand === "ende") spielEnde(true); else listeNeu();
-      });
+    spiel.lokal = e.erstellt; spiel.nameEingabe = name;
+    senden(spiel, T, "/rest/v1/rpc/diebe_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_level: e.level }, () => bestenLaden(st), () => {
+      const l = besten[st] || [], i = l.findIndex(x => x.name === name && x.punkte === e.punkte && x.level === e.level);
+      return { i, e: l[i] };
+    });
   }
 
   function tagEintragen(name) {
     const T = t(), tag = S.taeglich, spiel = S;
     const e = { name, punkte: S.punkte, erstellt: new Date().toISOString() };
-    const lok = tagLokal(); lok[tag] = (lok[tag] || []).concat([e]).sort((a, b) => b.punkte - a.punkte).slice(0, 10);
+    const lok = tagLokal(), alt = spiel.lokal; lok[tag] = (lok[tag] || []).filter(x => !alt || x.erstellt !== alt).concat([e]).sort((a, b) => b.punkte - a.punkte).slice(0, 10);
     Object.keys(lok).forEach(k => { if (k < tag.slice(0, 8) + "00" && Object.keys(lok).length > 14) delete lok[k]; });
     schreib("imres-diebesnacht-tagliste", JSON.stringify(lok));
-    spiel.sendet = true;
-    server("/rest/v1/rpc/diebe_taeglich_eintragen", { p_tag: tag, p_name: name, p_punkte: e.punkte })
-      .catch(() => {}).then(() => tagLaden(tag)).then(() => {
-        spiel.sendet = false;
-        const l = bestenTag[tag] || [];
-        const platz = l.findIndex(x => x.name === name && x.punkte === e.punkte) + 1;
-        if (platz) meinEintrag = l[platz - 1].erstellt;
-        spiel.eingetragen = platz ? T.eingetragen(platz) : T.eingetragenOhne;
-        if (S === spiel && zustand === "ende") spielEnde(true); else listeNeu();
-      });
+    spiel.lokal = e.erstellt; spiel.nameEingabe = name;
+    senden(spiel, T, "/rest/v1/rpc/diebe_taeglich_eintragen", { p_tag: tag, p_name: name, p_punkte: e.punkte }, () => tagLaden(tag), () => {
+      const l = bestenTag[tag] || [], i = l.findIndex(x => x.name === name && x.punkte === e.punkte);
+      return { i, e: l[i] };
+    });
   }
 
   /* ---------- Eingabe ---------- */
@@ -2792,8 +2883,10 @@
   leinwand.addEventListener("pointerdown", ev => {
     if (zustand !== "spiel") return;
     ev.preventDefault();
-    druecke.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, t: performance.now() });
     audio();
+    /* Schloss knacken: der Moment des Antippens zählt, nicht das Loslassen */
+    if (S && S.schloss) { druecke.delete(ev.pointerId); schlossTippen(punkt(ev)); muenzKnopfSetzen(); return; }
+    druecke.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, t: performance.now() });
   });
   leinwand.addEventListener("pointerup", ev => {
     const d = druecke.get(ev.pointerId); druecke.delete(ev.pointerId);
@@ -2926,6 +3019,10 @@
 .dn-name { background: rgba(0,0,0,.35); border: 1px solid var(--line); color: var(--vellum); font: inherit; font-size: .9rem; padding: .4rem .6rem; width: 10.5rem; min-width: 0; }
 .dn-eintrag .tav-knopf { font-size: .88rem; padding: .4rem .8rem; }
 .dn-tafel .dn-eingetragen { color: var(--ember); }
+.dn-tafel .dn-fehler { color: #e08a7e; font-size: .88rem; }
+.dn-eintrag input:disabled, .dn-eintrag button:disabled { opacity: .6; }
+.dn-fortsetzen { display: grid; gap: .3rem; justify-items: center; }
+.dn-buehne button, .dn-tafel button, .dn-fuss button { touch-action: manipulation; }
 .dn-liste { width: 100%; max-width: min(100%, calc(78vh * ${W / H})); justify-self: center; }
 .dn-liste:empty { display: none; }
 .dn-liste h4 { font-family: var(--display); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); margin: .2rem 0 .4rem; font-weight: 400; }
@@ -2965,5 +3062,5 @@
 
   /* Testzugang (für automatische Prüfungen, im Spiel unsichtbar) */
   root.__dn = { LEVELS, get S() { return S; }, get E() { return E; }, get zustand() { return zustand; }, set zustand(v) { zustand = v; },
-    stufeLaden, neuesSpiel, begehbar, pfadSuchen, genau, neben, tippen, setStufe: v => { stufeWahl = v; }, zeichnen, anwerfen, update, schleierZu };
+    stufeLaden, neuesSpiel, begehbar, pfadSuchen, genau, neben, tippen, schlossStart, schlossTippen, schlossUpdate, schlossMitte, nadelTempo, zugLesen, setStufe: v => { stufeWahl = v; }, zeichnen, anwerfen, update, schleierZu };
 })();
