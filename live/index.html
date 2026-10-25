@@ -325,12 +325,14 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   }
 
   /* ---------- Teppiche: immer neue Ausschnitte mit weichen Überblendungen, keine hörbare Schleife ---------- */
+  const LIN_EIN = new Float32Array(64), LIN_AUS = new Float32Array(64);
+  for (let i = 0; i < 64; i++) { LIN_EIN[i] = i / 63; LIN_AUS[i] = 1 - i / 63; }
   const N = 64, EIN = new Float32Array(N), AUS = new Float32Array(N);
   for (let i = 0; i < N; i++) { EIN[i] = Math.sin(i / (N - 1) * Math.PI / 2); AUS[i] = Math.cos(i / (N - 1) * Math.PI / 2); }
   let aktiv = null;
   const mixVon = id => (zust.mix[id] = zust.mix[id] || { b: [], leben: 1 });
   function bettStarten(welt, [name, staerke, label, o], i) {
-    const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false };
+    const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false, pos: null };
     const m = mixVon(welt.id); if (typeof m.b[i] === "number") b.regler = m.b[i];
     b.out.gain.value = 0;
     if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(trocken); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); b.out.connect(lp); }
@@ -348,11 +350,22 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     if (!b.buf || b.aus) return;
     const D = b.buf.duration, tf = tonFaktor();
     while (b.naechst < ctx.currentTime + 6) {
-      const basis = b.o.fest ? 1 : zz(.985, 1.015), rate = basis * tf, kurz = D < 15;
-      const len = Math.min((D - .3) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
-      const inhalt = len * rate, off = Math.random() * Math.max(0, D - inhalt - .2), t = b.naechst;
+      const basis = b.o.fest || b.o.takt ? 1 : zz(.985, 1.015), rate = basis * tf, kurz = D < 15;
+      const len = Math.min((D - .3 - (b.o.takt || 0)) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
+      const inhalt = len * rate, t = b.naechst;
+      /* rhythmische Aufnahmen (Standuhr): neuer Ausschnitt liegt genau im Takt des vorigen, Tempo fest, lineare Überblendung –
+         so fallen die Ticks beim Überblenden übereinander, statt zu stolpern */
+      let off;
+      if (b.o.takt) {
+        const hi = Math.max(0, D - inhalt - .2), P = b.o.takt;
+        if (b.pos != null) { const ks = []; for (let o = ((b.pos % P) + P) % P; o <= hi; o += P) ks.push(o); off = ks.length ? ks[Math.floor(Math.random() * ks.length)] : Math.random() * hi; }
+        else off = Math.random() * hi;
+        b.pos = off + (len - X) * rate;
+      } else off = Math.random() * Math.max(0, D - inhalt - .2);
       const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b.buf; s.playbackRate.value = rate; s._basis = basis;
-      g.gain.value = 0; g.gain.setValueCurveAtTime(EIN, t, X); g.gain.setValueCurveAtTime(AUS, t + len - X, X);
+      /* für Tonhöhen-Wechsel: wo in der Aufnahme der Ausschnitt gerade ist (Position, Zeitpunkt, Tempo) */
+      s._g = g; s._t = t; s._ende = t + len; s._pos = off; s._jt = t; s._r = rate;
+      g.gain.value = 0; g.gain.setValueCurveAtTime(b.o.takt ? LIN_EIN : EIN, t, X); g.gain.setValueCurveAtTime(b.o.takt ? LIN_AUS : AUS, t + len - X, X);
       s.connect(g); g.connect(b.out); s.start(t, off); s.stop(t + len + .05);
       b.quellen.push(s); s.onended = () => { const k = b.quellen.indexOf(s); if (k >= 0) b.quellen.splice(k, 1); };
       b.naechst = t + len - X;
@@ -369,7 +382,33 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   function tonAnwenden() {
     if (!aktiv || !ctx) return;
     const tf = tonFaktor(), j = ctx.currentTime;
-    aktiv.betten.forEach(b => b.quellen.forEach(s => { try { s.playbackRate.setTargetAtTime((s._basis || 1) * tf, j, .08); } catch (_) {} }));
+    aktiv.betten.forEach(b => {
+      if (!b.buf || b.aus) return;
+      const D = b.buf.duration; let neuAb = null;
+      b.quellen.slice().forEach(s => {
+        const rate = (s._basis || 1) * tf;
+        if (s._t == null) { try { s.playbackRate.setTargetAtTime(rate, j, .08); } catch (_) {} return; }
+        /* noch nicht begonnen: verwerfen und mit neuem Tempo neu planen */
+        if (s._t > j + .02) { try { s.onended = null; s.stop(); } catch (_) {} b.quellen.splice(b.quellen.indexOf(s), 1); neuAb = neuAb == null ? s._t : Math.min(neuAb, s._t); return; }
+        try { s.playbackRate.setTargetAtTime(rate, j, .08); } catch (_) {}
+        /* läuft schon: reicht die Aufnahme beim neuen Tempo noch bis zum geplanten Ende? sonst früher sanft ausblenden */
+        s._pos += (j - s._jt) * s._r; s._jt = j; s._r = rate;
+        const leerAb = j + Math.max(0, D - s._pos - .1) / rate;
+        if (leerAb < s._ende) {
+          const ende = Math.max(j + .12, leerAb), x = Math.min(1.5, (ende - j) * .85);
+          /* laufende Ein-/Ausblendkurve festhalten (sonst Fehler bei überlappender Automation), dann zur neuen Zeit ausblenden */
+          const gg = s._g.gain;
+          try { if (gg.cancelAndHoldAtTime) gg.cancelAndHoldAtTime(j); else { const v = gg.value; gg.cancelScheduledValues(0); gg.setValueAtTime(v, j); } gg.linearRampToValueAtTime(0, ende); } catch (_) {}
+          try { s.stop(ende + .05); } catch (_) {}
+          s._ende = ende; neuAb = neuAb == null ? ende - x : Math.min(neuAb, ende - x);
+        }
+      });
+      if (neuAb != null) {
+        /* alles Geplante nach diesem Punkt verwerfen, ab dort neu planen */
+        b.quellen.slice().forEach(s => { if (s._t != null && s._t >= neuAb - .001 && s._t > j + .02) { try { s.onended = null; s.stop(); } catch (_) {} b.quellen.splice(b.quellen.indexOf(s), 1); } });
+        b.naechst = Math.max(j + .02, neuAb); b.pos = null; bettPlanen(b);
+      }
+    });
   }
 
   /* ---------- Einzelgeräusche: mal nah, mal fern, links und rechts ---------- */

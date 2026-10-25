@@ -1272,7 +1272,7 @@
       ev: [["hammer", [6, 14], .55, .1], ["blasebalg", [12, 28], .35, .2], ["zischen", [20, 45], .3, .2], ["metall", [15, 35], .3, .3]] },
     labor: { raum: .25, betten: [["a_kochen", .7], ["a_blubbern", .45], ["a_feuer3", .35], ["a_kochen2", .35]],
       ev: [["krug", [8, 20], .35, .2], ["blubb", [5, 14], .35, .3], ["buch", [20, 45], .3, .3], ["zischen", [25, 60], .25, .3]] },
-    bibliothek: { raum: .5, betten: [["a_feuer3", .7], ["a_wind2", .25, { tief: 600 }], ["a_uhr", .18], ["a_fensterregen", .14, { tief: 2500 }]],
+    bibliothek: { raum: .5, betten: [["a_feuer3", .7], ["a_wind2", .25, { tief: 600 }], ["a_uhr", .18, { takt: 2.0005 }], ["a_fensterregen", .14, { tief: 2500 }]],
       ev: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2]] },
     tempel: { raum: .9, betten: [["a_wind1", .35, { tief: 500 }], ["a_wind2", .2, { tief: 300 }], ["a_feuer3", .3, { tief: 2000 }], ["a_gesang", .2, { tief: 3000 }], ["a_halle", .22, { tief: 1800 }], ["a_klangschale", .08]],
       ev: [["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] },
@@ -1299,13 +1299,15 @@
     ambLaedt.set(name, pr); return pr;
   }
   const ambPuffer = n => n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_") ? sampleBuf.get(n) : ambBuf.get(n);
+  const LIN_EIN = new Float32Array(64), LIN_AUS = new Float32Array(64);
+  for (let i = 0; i < 64; i++) { LIN_EIN[i] = i / 63; LIN_AUS[i] = 1 - i / 63; }
   const KUL_EIN = new Float32Array(64), KUL_AUS = new Float32Array(64);
   for (let i = 0; i < 64; i++) { KUL_EIN[i] = Math.sin(i / 63 * Math.PI / 2); KUL_AUS[i] = Math.cos(i / 63 * Math.PI / 2); }
   function weltBett(k, [name, staerke, o]) {
     o = o || {};
     const out = ctx.createGain(); out.gain.value = 0;
     if (o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = o.tief; out.connect(lp); lp.connect(k.g); } else out.connect(k.g);
-    const b = { out, naechst: 0, drift: 0, buf: null };
+    const b = { out, o, naechst: 0, drift: 0, buf: null, pos: null };
     if (name === "@gemurmel") { /* gerechnetes Stimmengewirr der Taverne */
       kulSchleife("gemurmel", 22050, 1.1 * staerke * (k.wlaut || 1)); return b;
     }
@@ -1325,11 +1327,20 @@
     while (b.naechst < ctx.currentTime + 6) {
       /* len und X in echter Zeit; der Ausschnitt muss samt Tempo-Abweichung vollständig in der Datei liegen und darf erst
          nach dem Ende der Ausblendung aufhören – sonst wird er hörbar abgeschnitten. Kurze Aufnahmen: lange Überblendung. */
-      const rate = zz(.985, 1.015), kurz = D < 15;
-      const len = Math.min((D - .3) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
-      const inhalt = len * rate, off = Math.random() * Math.max(0, D - inhalt - .2), t = b.naechst;
+      const rate = b.o.takt ? 1 : zz(.985, 1.015), kurz = D < 15;
+      const len = Math.min((D - .3 - (b.o.takt || 0)) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
+      const inhalt = len * rate, t = b.naechst;
+      /* rhythmische Aufnahmen (Standuhr): neuer Ausschnitt liegt genau im Takt des vorigen, Tempo fest, lineare Überblendung –
+         so fallen die Ticks beim Überblenden übereinander, statt zu stolpern */
+      let off;
+      if (b.o.takt) {
+        const hi = Math.max(0, D - inhalt - .2), P = b.o.takt;
+        if (b.pos != null) { const ks = []; for (let o = ((b.pos % P) + P) % P; o <= hi; o += P) ks.push(o); off = ks.length ? ks[Math.floor(Math.random() * ks.length)] : Math.random() * hi; }
+        else off = Math.random() * hi;
+        b.pos = off + (len - X) * rate;
+      } else off = Math.random() * Math.max(0, D - inhalt - .2);
       const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b.buf; q.playbackRate.value = rate;
-      g.gain.value = 0; g.gain.setValueCurveAtTime(KUL_EIN, t, X); g.gain.setValueCurveAtTime(KUL_AUS, t + len - X, X);
+      g.gain.value = 0; g.gain.setValueCurveAtTime(b.o.takt ? LIN_EIN : KUL_EIN, t, X); g.gain.setValueCurveAtTime(b.o.takt ? LIN_AUS : KUL_AUS, t + len - X, X);
       q.connect(g); g.connect(b.out); q.start(t, off); q.stop(t + len + .05);
       k.knoten.push(q); q.onended = () => { const i = k.knoten.indexOf(q); if (i >= 0) k.knoten.splice(i, 1); };
       b.naechst = t + len - X;

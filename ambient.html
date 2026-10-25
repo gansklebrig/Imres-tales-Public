@@ -216,7 +216,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
       betten: [["a_kochen", .7, W("Kessel", "Cauldron")], ["a_blubbern", .45, W("Phiolen", "Vials")], ["a_feuer3", .35, W("Feuer", "Fire")], ["a_kochen2", .35, W("Sud", "Brew")]],
       ereignisse: [["krug", [8, 20], .35, .2], ["blubb", [5, 14], .35, .3], ["buch", [20, 45], .3, .3], ["zischen", [25, 60], .25, .3]] },
     { id: "bibliothek", sym: "📚", name: W("Bibliothek", "Library"), text: W("Stille, Kaminglut, Standuhr, Regen am Fenster, blätternde Seiten, eine Katze", "Silence, embers, a clock, rain at the window, turning pages, a cat"), raum: 1.8,
-      betten: [["a_feuer3", .7, W("Kamin", "Hearth")], ["a_wind2", .25, W("Wind am Fenster", "Wind at the window"), { tief: 600 }], ["a_uhr", .18, W("Standuhr", "Clock")], ["a_fensterregen", .14, W("Regen am Fenster", "Rain at the window"), { tief: 2500 }]],
+      betten: [["a_feuer3", .7, W("Kamin", "Hearth")], ["a_wind2", .25, W("Wind am Fenster", "Wind at the window"), { tief: 600 }], ["a_uhr", .18, W("Standuhr", "Clock"), { takt: 2.0005 }], ["a_fensterregen", .14, W("Regen am Fenster", "Rain at the window"), { tief: 2500 }]],
       ereignisse: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2]] },
     { id: "tempel", sym: "⛪", name: W("Tempel", "Temple"), text: W("Weite Halle, Mönchsgesang, Klangschale, Glocken und Gong", "Vast hall, chanting monks, singing bowl, bells and gong"), raum: 5,
       betten: [["a_wind1", .35, W("Luftzug", "Draught"), { tief: 500 }], ["a_wind2", .2, W("Weite", "Vastness"), { tief: 300 }], ["a_feuer3", .3, W("Kerzen", "Candles"), { tief: 2000 }], ["a_gesang", .2, W("Mönchsgesang", "Chanting"), { tief: 3000 }], ["a_halle", .22, W("Halle", "Hall"), { tief: 1800 }], ["a_klangschale", .08, W("Klangschale", "Singing bowl")]],
@@ -298,10 +298,12 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   }
 
   /* ---------- Teppich: spielt immer neue, zufällig gewählte Ausschnitte mit weichen Überblendungen – so entsteht keine erkennbare Schleife ---------- */
+  const LIN_EIN = new Float32Array(64), LIN_AUS = new Float32Array(64);
+  for (let i = 0; i < 64; i++) { LIN_EIN[i] = i / 63; LIN_AUS[i] = 1 - i / 63; }
   const N = 64, EIN = new Float32Array(N), AUS = new Float32Array(N);
   for (let i = 0; i < N; i++) { EIN[i] = Math.sin(i / (N - 1) * Math.PI / 2); AUS[i] = Math.cos(i / (N - 1) * Math.PI / 2); }
   function bettStarten(welt, [name, staerke, label, o], i) {
-    const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false };
+    const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false, pos: null };
     const m = merk.mix[welt.id]; if (m && m.b && typeof m.b[i] === "number") b.regler = m.b[i];
     b.out.gain.value = 0;
     let ziel = b.out;
@@ -323,11 +325,20 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     while (b.naechst < ctx.currentTime + 6) {
       /* len und X in echter Zeit; der Ausschnitt muss samt Tempo-Abweichung vollständig in der Datei liegen und darf erst
          nach dem Ende der Ausblendung aufhören – sonst wird er hörbar abgeschnitten. Kurze Aufnahmen: lange Überblendung. */
-      const rate = b.o.fest ? 1 : zz(.985, 1.015), kurz = D < 15;
-      const len = Math.min((D - .3) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
-      const inhalt = len * rate, off = Math.random() * Math.max(0, D - inhalt - .2), t = b.naechst;
+      const rate = b.o.fest || b.o.takt ? 1 : zz(.985, 1.015), kurz = D < 15;
+      const len = Math.min((D - .3 - (b.o.takt || 0)) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
+      const inhalt = len * rate, t = b.naechst;
+      /* rhythmische Aufnahmen (Standuhr): neuer Ausschnitt liegt genau im Takt des vorigen, Tempo fest, lineare Überblendung –
+         so fallen die Ticks beim Überblenden übereinander, statt zu stolpern */
+      let off;
+      if (b.o.takt) {
+        const hi = Math.max(0, D - inhalt - .2), P = b.o.takt;
+        if (b.pos != null) { const ks = []; for (let o = ((b.pos % P) + P) % P; o <= hi; o += P) ks.push(o); off = ks.length ? ks[Math.floor(Math.random() * ks.length)] : Math.random() * hi; }
+        else off = Math.random() * hi;
+        b.pos = off + (len - X) * rate;
+      } else off = Math.random() * Math.max(0, D - inhalt - .2);
       const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b.buf; s.playbackRate.value = rate;
-      g.gain.value = 0; g.gain.setValueCurveAtTime(EIN, t, X); g.gain.setValueCurveAtTime(AUS, t + len - X, X);
+      g.gain.value = 0; g.gain.setValueCurveAtTime(b.o.takt ? LIN_EIN : EIN, t, X); g.gain.setValueCurveAtTime(b.o.takt ? LIN_AUS : AUS, t + len - X, X);
       s.connect(g); g.connect(b.out); s.start(t, off); s.stop(t + len + .05);
       b.quellen.push(s); s.onended = () => { const k = b.quellen.indexOf(s); if (k >= 0) b.quellen.splice(k, 1); };
       b.naechst = t + len - X;
