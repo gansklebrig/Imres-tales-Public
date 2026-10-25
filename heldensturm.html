@@ -1456,7 +1456,7 @@ const HERO_IDS=['barradin','echo','friedrich','ezekiel'];
 for(const id of HERO_IDS)for(const n of HEROES[id].tree){n.max=n.ult?3:5;if(n.c===undefined)n.c=0}
 
 /* ================= Gegenstände ================= */
-const SLOTS=['weapon','ranged','helm','armor','gloves','ring1','ring2'];
+const SLOTS=['weapon','ranged','helm','armor','gloves','ring1','ring2'];const BAGMAX=30;
 const SLOTLBL={weapon:'Nahkampf',ranged:'Fernkampf',helm:'Helm',armor:'Rüstung',gloves:'Handschuhe',ring1:'Ring',ring2:'Ring',ring:'Ring'};
 const RARN=['Gewöhnlich','Magisch','Selten','Episch','Legendär','Set'];
 const RARCOL=['#c4bcae','#62a8ff','#f2d24c','#bf7dff','#ff8d2e','#3fdc6a'];
@@ -2503,7 +2503,7 @@ function updPlayer(dt){
  if(G.bot&&P.stam>60&&nearest(P.x,P.y,140))P.sprint=true;
  if(((P.netIn&&NET.role==='host'?P.netIn.au:SAVE.auto)||G.bot)&&P.silT<=0&&P.stunT<=0&&!P.chan){for(let i=0;i<P.actives.length;i++){const n=P.actives[i];if((P.cds[n.id]||0)>0)continue;const near=nearest(P.x,P.y,(AR[n.id]||400)*(AR[n.id]&&AR[n.id]<300?P.st.area:1));if(!near)continue;
   if(n.id==='e_bear'&&P.form==='bear')continue;if(n.id==='e_rat'&&P.form)continue;if((n.id==='b_door'||n.id==='f_leap')&&P.hp>P.st.maxHp*0.6)continue;useSkill(i);break}}
- for(const L of G.loot){if(L.taken)continue;if(d2(L,P)<38*38&&!lootBlocked(L)){if(P.bag.length>=24){if(!L.full){L.full=1;toast('Der Beutel ist voll – verschrotte etwas.','#ff8a7a')}continue}
+ for(const L of G.loot){if(L.taken)continue;if(d2(L,P)<38*38&&!lootBlocked(L)){if(P.bag.length>=BAGMAX){if(!L.full){L.full=1;toast('Der Beutel ist voll – verschrotte etwas.','#ff8a7a')}continue}
   L.taken=1;delete L.it.for;setFound(L.it);const sl=L.it.slot==='ring'?(!P.eq.ring1?'ring1':!P.eq.ring2?'ring2':null):(P.eq[L.it.slot]?null:L.it.slot);if(sl){P.eq[sl]=L.it;recalc();toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span> angelegt`);sfx('equip');updateInvBadge();continue}
   P.bag.push(L.it);const dl=itemDelta(L.it);if(L.it.rar>=2||dl>0.01)toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span>${dl>0.01?' <span class="good">▲ besser</span>':''}`);sfx(L.it.rar>=3?'legend':'item');updateInvBadge();if(G.bot)botEquip()}}
  G.loot=G.loot.filter(L=>!L.taken);
@@ -3239,12 +3239,12 @@ function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel
   det=`<div class="idet2 card" id="idet2"><button class="x" data-act="inv-desel" aria-label="Schließen">×</button>
    <div class="sh-head">${ico(it)}<div><div class="in c${it.rar}">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]}${it.slot==='weapon'||it.slot==='ranged'?' ('+esc(it.base)+')':''} · Stufe ${it.ilvl}${cur?` · ersetzt <span class="c${cur.rar}">${esc(cur.name)}</span>`:''}</div></div></div>
    ${selT==='b'?compareHtml(it,cur):`<ul>${itemLines(it).map(l=>`<li>${l}</li>`).join('')}</ul>`}${pw}${cpw}${head}
-   <div class="row">${selT==='b'?`<button class="btn gold" data-act="inv-equip">Anlegen</button>${G.mp?PL.map((q,i)=>q===P?'':`<button class="btn small" data-act="mp-give" data-i="${i}" style="border-color:${PCOL[i]}">→ P${i+1} ${q.hero.name}</button>`).join(''):''}<button class="btn ${it.fav?'gold':''}" data-act="inv-fav">${it.fav?'★ Gemerkt':'☆ Merken'}</button><button class="btn" data-act="inv-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`:(selK!=='weapon'&&selK!=='ranged'?`<button class="btn" data-act="inv-unequip" ${P.bag.length>=24?'disabled':''}>Ablegen</button>`:'<span class="muted" style="font-size:13px">Waffen kannst du nur austauschen.</span>')}${selT==='e'?`<button class="btn ${it.fav?'gold':''}" data-act="inv-fav">${it.fav?'★ Gemerkt':'☆ Merken'}</button>`:''}</div></div>`}
+   <div class="row">${selT==='b'?`<button class="btn gold" data-act="inv-equip">Anlegen</button>${G.mp?PL.map((q,i)=>q===P?'':`<button class="btn small" data-act="mp-give" data-i="${i}" style="border-color:${PCOL[i]}">→ P${i+1} ${q.hero.name}</button>`).join(''):''}<button class="btn ${it.fav?'gold':''}" data-act="inv-fav">${it.fav?'★ Gemerkt':'☆ Merken'}</button><button class="btn" data-act="inv-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`:(selK!=='weapon'&&selK!=='ranged'?`<button class="btn" data-act="inv-unequip" ${P.bag.length>=BAGMAX?'disabled':''}>Ablegen</button>`:'<span class="muted" style="font-size:13px">Waffen kannst du nur austauschen.</span>')}${selT==='e'?`<button class="btn ${it.fav?'gold':''}" data-act="inv-fav">${it.fav?'★ Gemerkt':'☆ Merken'}</button>`:''}</div></div>`}
  const DS=dpsOf(st);const lines=[['Nahkampf-DPS',fmt(DS.m)],['Fernkampf-DPS',fmt(DS.r)],['Nahkampf',`${fmt(st.dmgM)} · ${f1(st.rateM)} pro s`],['Fernkampf',`${fmt(st.dmgR)} · ${f1(st.rateR)} pro s`],['Fähigkeitsschaden-Basis',fmt(st.dmg)],['Leben',fmt(st.maxHp)],['Rüstung',`${fmt(st.armor)} (−${Math.round(armorRed(st.armor)*100)}%)`],['Kritische Trefferchance',Math.round(st.crit*100)+'%'],['Kritischer Schaden',pc(st.critd)],['Fertigkeitsschaden',pc(st.skill)],['Abklingzeiten',`−${Math.round(st.cdr*100)}%`],['Lebensraub',f1(st.ls*100)+'%'],['Regeneration',f1(st.regen)+' / s'],['Wirkungsbereich',pc(st.area)],['Goldfund',pc(st.gold)],['Ausdauer',fmt(P.stamMax)],['Heiltränke',`${P.pots} / ${P.potMax}`]];
  const pows=[...(P.lp||[])].filter(k=>LPOW[k]).map(k=>`<div class="lpow"><b>${LPOW[k].n}</b> ${LPOW[k].d}</div>`).join('');
  showScreen(`<div class="wrap inv">
   ${menuTabs('inv')}
-  <div class="inv-head"><h2>Beutel<small>${P.bag.length} / 24</small></h2><div class="row"><button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten</button><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
+  <div class="inv-head"><h2>Beutel<small>${P.bag.length} / ${BAGMAX}</small></h2><div class="row"><button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten</button><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
   <div class="eyebrow">Angelegt</div><div class="equip">${eq}</div>
   <div class="eyebrow">Im Beutel · nach DPS sortiert ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
   <div class="bag">${bag||'<div class="muted" style="grid-column:1/-1">Noch leer. Gegner lassen Ausrüstung fallen – einfach drüberlaufen. Leere Plätze werden automatisch belegt.</div>'}</div>
@@ -3347,7 +3347,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'inv-equip':{const i=+G.invSel.split(':')[1];equipFromBag(i);G.invSel=null;sfx('equip');renderInv(true);break}
   case'inv-scrap':{const i=+G.invSel.split(':')[1];const it=P.bag[i];if(it&&it.fav){toast('Gemerkt – erst den Stern entfernen.','#ffd04a');break}if(it){const v=scrapValue(it);SAVE.gold+=v;G.goldRun+=v;P.bag.splice(i,1);sfx('scrap')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'inv-scrapall':{let v=0;{const kp=P.bag.filter(it=>{if(!it.fav&&it.rar<4&&!it.up&&!(it.sock&&it.sock.some(Boolean))&&itemDelta(it)<=0.005&&itemDps(it).d<=0.005){v+=scrapValue(it);return false}return true});P.bag.length=0;P.bag.push(...kp)}SAVE.gold+=v;G.goldRun+=v;if(v){sfx('scrap');toast(`+${fmt(v)} Gold`,'#e5b454')}G.invSel=null;updateInvBadge();renderInv(true);break}
-  case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<24&&k!=='weapon'&&k!=='ranged'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
+  case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<BAGMAX&&k!=='weapon'&&k!=='ranged'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'tree-sel':if(G.barPick&&b.dataset.i!==undefined){const i=+b.dataset.i;if(!P.bar.includes(G.barPick)){P.bar[i]=G.barPick;buildSkillBar();sfx('equip')}G.treeSel=G.barPick;G.barPick=null;renderTree(true);break}if(G.barPick&&G.barPick!==b.dataset.id)G.barPick=null;if(G.treeOpen&&G.treeSel===b.dataset.id&&b.dataset.i===undefined)G.treeOpen=false;else{G.treeOpen=true;G.treeSel=b.dataset.id}{const n=P.hero.tree.find(x=>x.id===b.dataset.id);if(n)G.treeBr=n.b}renderTree(true);break;
   case'tree-close':G.treeOpen=false;G.barPick=null;renderTree(true);break;
   case'tree-det':G.treeDet=!G.treeDet;renderTree(true);break;
@@ -3568,7 +3568,7 @@ function modSum(k){let s=0;for(const m of P&&P.mods||[])if(m.k===k)s+=m.v;return
 const modHas=k=>!!(P&&P.mods&&P.mods.some(m=>m.k===k));
 const evGold=n=>Math.round(n*(1+0.12*SL())*diffMult(G.diff).gold);
 function giveGold(n){SAVE.gold+=n;G.goldRun+=n;sfx('coin');return `+${fmt(n)} Gold`}
-function giveItem(minR,bonus){const it=randomItem(scale().il+2,bonus||0.6,minR);sfx(it.rar>=3?'legend':'item');if(P.bag.length>=24){const v=scrapValue(it);SAVE.gold+=v;return `<span class="c${it.rar}">${esc(it.name)}</span> (Beutel voll – für ${fmt(v)} Gold verkauft)`}P.bag.push(it);updateInvBadge();return `<span class="c${it.rar}">${esc(it.name)}</span> im Beutel`}
+function giveItem(minR,bonus){const it=randomItem(scale().il+2,bonus||0.6,minR);sfx(it.rar>=3?'legend':'item');if(P.bag.length>=BAGMAX){const v=scrapValue(it);SAVE.gold+=v;return `<span class="c${it.rar}">${esc(it.name)}</span> (Beutel voll – für ${fmt(v)} Gold verkauft)`}P.bag.push(it);updateInvBadge();return `<span class="c${it.rar}">${esc(it.name)}</span> im Beutel`}
 function giveGems(n){const got=[];for(let i=0;i<n;i++){const g=pick(GEM_IDS);P.gems[g]=(P.gems[g]||0)+1;got.push(GEMS[g].n)}return got.join(', ')}
 function giveSP(n){P.sp+=n;sfx('level');return `+${n} Talentpunkt${n>1?'e':''}`}
 const EVENTS=[
@@ -4267,7 +4267,7 @@ const mpDmgMul=()=>P&&P.teamT>G.time?1.4:1;
 /* ---------- Beute je Held & Tauschen ---------- */
 const lootOwn=()=>G.mp&&SAVE.mpLoot!=='free';
 function lootBlocked(L){const f=L.it.for;if(f===undefined||!lootOwn())return false;const o=PL.find(q=>q.id===f);return !!o&&o!==P&&!o.down&&(G.time-(L.born||0))<25}
-function mpGive(i){const it=G.invSel&&G.invSel[0]==='b'?P.bag[+G.invSel.split(':')[1]]:null,q=PL[i];if(!it||!q||q===P)return;if(q.bag.length>=24){toast(`Der Beutel von ${q.hero.name} ist voll.`,'#ff8a7a');return}
+function mpGive(i){const it=G.invSel&&G.invSel[0]==='b'?P.bag[+G.invSel.split(':')[1]]:null,q=PL[i];if(!it||!q||q===P)return;if(q.bag.length>=BAGMAX){toast(`Der Beutel von ${q.hero.name} ist voll.`,'#ff8a7a');return}
  P.bag.splice(P.bag.indexOf(it),1);delete it.for;q.bag.push(it);toast(`${esc(it.name)} → ${q.hero.name}`,PCOL[i]);sfx('equip');G.invSel=null;updateInvBadge();renderInv(true)}
 /* ---------- Einsteigen & Aussteigen mitten im Lauf ---------- */
 function mpAddPlayer(dev,want){if(G.mode!=='kampagne'||PL.length>=4||G.state!=='play')return;const used=new Set(PL.map(q=>q.id)),h=want&&HEROES[want]&&!used.has(want)?want:HERO_IDS.find(x=>!used.has(x));if(!h)return;
@@ -4936,20 +4936,20 @@ function renderTruhe(keep){if(P&&netIs(P.dev)){showScreen(`<div class="wrap inv"
  let det='';if(it){const fromT=sel[0]==='t',S=it.set&&SETS[it.set];
   det=`<div class="idet2 card" id="idet2"><button class="x" data-act="tr-desel" aria-label="Schließen">×</button><div class="sh-head">${ico(it)}<div><div class="in c${it.rar}">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]} · Stufe ${it.ilvl}${S&&S.hero?` · Heldenset für ${esc(HEROES[S.hero].name)}`:''}</div></div></div>
    <ul>${itemLines(it).map(l=>`<li>${l}</li>`).join('')}</ul>
-   <div class="row">${fromT?`<button class="btn gold" data-act="tr-take" ${P.bag.length>=24?'disabled':''}>In den Beutel von ${esc(P.hero.name)}</button><button class="btn" data-act="tr-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`
+   <div class="row">${fromT?`<button class="btn gold" data-act="tr-take" ${P.bag.length>=BAGMAX?'disabled':''}>In den Beutel von ${esc(P.hero.name)}</button><button class="btn" data-act="tr-scrap">Verschrotten +${fmt(scrapValue(it))} Gold</button>`
     :`<button class="btn gold" data-act="tr-put" ${T.length>=TRUHE_MAX?'disabled':''}>In die Truhe legen</button><button class="btn ${it.fav?'gold':''}" data-act="tr-fav">${it.fav?'★ Gemerkt':'☆ Merken'}</button>`}</div></div>`}
  showScreen(`<div class="wrap inv">${menuTabs('truhe')}
   <div class="inv-head"><h2>Truhe<small>${T.length} / ${TRUHE_MAX}</small></h2><div class="row"><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
   <p class="muted" style="margin:0 0 8px;font-size:13px">Für alle Helden gemeinsam. Gegenstände mit Stern ★ und Set-Teile für andere Helden landen am Ende einer Runde von selbst hier.</p>
   <div class="eyebrow">In der Truhe</div><div class="bag">${T.map((x,i)=>tile(x,'t',i)).join('')||'<div class="muted" style="grid-column:1/-1">Noch leer.</div>'}</div>
-  <div class="eyebrow">Im Beutel von ${esc(P.hero.name)} · ${P.bag.length} / 24</div><div class="bag">${P.bag.map((x,i)=>tile(x,'b',i)).join('')||'<div class="muted" style="grid-column:1/-1">Beutel leer.</div>'}</div>
+  <div class="eyebrow">Im Beutel von ${esc(P.hero.name)} · ${P.bag.length} / ${BAGMAX}</div><div class="bag">${P.bag.map((x,i)=>tile(x,'b',i)).join('')||'<div class="muted" style="grid-column:1/-1">Beutel leer.</div>'}</div>
   ${det}</div>`,'',keep)}
 function truheAct(a,b){const T=truheL();
  if(a==='inv-fav'){const i=G.invSel&&G.invSel[0]==='b'?+G.invSel.split(':')[1]:-1,it=i>=0?P.bag[i]:G.invSel&&G.invSel[0]==='e'?P.eq[G.invSel.split(':')[1]]:null;if(it){it.fav=it.fav?0:1;sfx('ui');if(G.rl)rlSync();persist()}renderInv(true);return}
  if(a==='tr-sel'){G.trSel=G.trSel===b.dataset.k?null:b.dataset.k;renderTruhe(true);return}
  if(a==='tr-desel'){G.trSel=null;renderTruhe(true);return}
  const sel=G.trSel;if(!sel)return;const i=+sel.split(':')[1];
- if(a==='tr-take'){const it=T[i];if(it&&P.bag.length<24){T.splice(i,1);P.bag.push(it);sfx('equip');updateInvBadge()}}
+ if(a==='tr-take'){const it=T[i];if(it&&P.bag.length<BAGMAX){T.splice(i,1);P.bag.push(it);sfx('equip');updateInvBadge()}}
  else if(a==='tr-put'){const it=P.bag[i];if(it&&T.length<TRUHE_MAX){P.bag.splice(i,1);delete it.for;T.push(it);sfx('equip');updateInvBadge()}}
  else if(a==='tr-scrap'){const it=T[i];if(it){T.splice(i,1);const v=scrapValue(it);SAVE.gold+=v;if(G.state==='play'||G.state==='between')G.goldRun+=v;sfx('scrap')}}
  else if(a==='tr-fav'){const it=P.bag[i];if(it)it.fav=it.fav?0:1}
