@@ -2819,7 +2819,7 @@
     if (S.eingetragen) return '<p class="dn-eingetragen">' + esc(S.eingetragen) + "</p>";
     if (S.endgueltig) return '<p class="dn-fehler" role="alert">' + esc(S.fehler) + "</p>";
     const name = S.nameEingabe != null ? S.nameEingabe : lies("imres-diebesnacht-name", "") || lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
-    return '<div class="dn-eintrag"><input type="text" class="dn-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (S.sendet ? " disabled" : "") + ">" +
+    return '<div class="dn-eintrag">' + ImresKuerzel.feld({ klasse: "dn-name", aus: S.sendet }) +
       '<button type="button" class="tav-knopf dn-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(S.sendet ? T.sendet : T.eintragen) + "</button></div>" +
       (S.fehler ? '<p class="dn-fehler" role="alert">' + esc(S.fehler) + "</p>" : "");
   }
@@ -2845,7 +2845,7 @@
   }
   function eintragen() {
     if (!S || zustand !== "ende" || S.eingetragen || S.sendet || S.endgueltig) return;
-    const feld = tafel.querySelector(".dn-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
+    const feld = tafel.querySelector(".dn-name"), name = ImresKuerzel.wert(feld);
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-diebesnacht-name", name);
     if (S.taeglich) { tagEintragen(name); return; }

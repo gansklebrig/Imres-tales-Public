@@ -5072,7 +5072,7 @@
   }
   function tagEintragen() {
     if (!S || !S.tag || !S.erg || S.eingetragen || S.sendet || S.endgueltig) return;
-    const feld = tafel.querySelector(".eh-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
+    const feld = tafel.querySelector(".eh-name"), name = ImresKuerzel.wert(feld);
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-echohort-name", name);
     const T = t(), datum = S.tag, st = "tag-" + datum, spiel = S;
@@ -5257,7 +5257,7 @@
   function eintragFeld(T, name, knopf) {
     if (S.endgueltig) return '<p class="eh-fehler" role="alert">' + esc(S.fehler) + "</p>";
     if (S.nameEingabe != null) name = S.nameEingabe;
-    return '<div class="eh-eintrag"><input type="text" class="eh-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (S.sendet ? " disabled" : "") + ">" +
+    return '<div class="eh-eintrag">' + ImresKuerzel.feld({ klasse: "eh-name", aus: S.sendet }) +
       knopf.replace(">", (S.sendet ? " disabled" : "") + ">") + esc(S.sendet ? T.sendet : T.eintragen) + "</button></div>" +
       (S.fehler ? '<p class="eh-fehler" role="alert">' + esc(S.fehler) + "</p>" : "");
   }
@@ -5314,7 +5314,7 @@
   }
   function eintragen() {
     if (!S || zustand !== "ende" || S.eingetragen || S.sendet || S.endgueltig) return;
-    const feld = tafel.querySelector(".eh-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
+    const feld = tafel.querySelector(".eh-name"), name = ImresKuerzel.wert(feld);
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-echohort-name", name);
     const T = t(), st = S.stufe, spiel = S;

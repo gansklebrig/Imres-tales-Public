@@ -1830,14 +1830,14 @@
     if (S.eingetragen) return '<p class="wl-eingetragen">' + esc(S.eingetragen) + "</p>";
     if (S.endgueltig) return '<p class="wl-fehler" role="alert">' + esc(S.fehler) + "</p>";
     const name = S.nameEingabe != null ? S.nameEingabe : lies("imres-waldlauf-name", "") || lies("imres-auftritt-name", "");
-    return '<div class="wl-eintrag"><input type="text" class="wl-name" maxlength="24" autocomplete="nickname" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (S.sendet ? " disabled" : "") + ">" +
+    return '<div class="wl-eintrag">' + ImresKuerzel.feld({ klasse: "wl-name", aus: S.sendet }) +
       '<button type="button" class="tav-knopf wl-eintragen"' + (S.sendet ? " disabled" : "") + ">" + esc(S.sendet ? T.sendet : T.eintragen) + "</button></div>" +
       (S.fehler ? '<p class="wl-fehler" role="alert">' + esc(S.fehler) + "</p>" : "");
   }
   function endeNeu() { const y = schleier.scrollTop; spielEnde(true); schleier.scrollTop = y; }
   function eintragen() {
     if (!S || zustand !== "ende" || S.uebung || S.eingetragen || S.sendet || S.endgueltig) return;
-    const feld = tafel.querySelector(".wl-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
+    const feld = tafel.querySelector(".wl-name"), name = ImresKuerzel.wert(feld);
     if (!name) { if (feld) feld.focus(); return; }
     schreib("imres-waldlauf-name", name);
     const T = t(), st = S.stufe, spiel = S;

@@ -1212,7 +1212,7 @@
     if (e.eingetragen) return '<p class="at-eingetragen">' + esc(e.eingetragen) + "</p>";
     if (e.endgueltig) return '<p class="at-fehler" role="alert">' + esc(e.fehler) + "</p>";
     let name = e.nameEingabe; if (name == null) { name = ""; try { name = localStorage.getItem("imres-auftritt-name") || ""; } catch (_) {} }
-    return '<div class="at-eintrag"><input type="text" class="at-name" maxlength="24" placeholder="' + esc(T.deinName) + '" value="' + esc(name) + '"' + (e.sendet ? " disabled" : "") + ">" +
+    return '<div class="at-eintrag">' + ImresKuerzel.feld({ klasse: "at-name", aus: e.sendet }) +
       '<button type="button" class="tav-knopf at-eintragen"' + (e.sendet ? " disabled" : "") + ">" + (e.sendet ? T.sendet : T.eintragen) + "</button></div>" +
       (e.fehler ? '<p class="at-fehler" role="alert">' + esc(e.fehler) + "</p>" : "");
   }
@@ -1223,7 +1223,7 @@
   }
   function eintragen() {
     if (!ergebnis || ergebnis.eingetragen || ergebnis.sendet || ergebnis.endgueltig) return;
-    const feld = root.querySelector(".at-name"), name = feld ? feld.value.trim().slice(0, 24) : "";
+    const feld = root.querySelector(".at-name"), name = ImresKuerzel.wert(feld);
     if (!name) { if (feld) feld.focus(); return; }
     try { localStorage.setItem("imres-auftritt-name", name); } catch (_) {}
     const T = t(), erg = ergebnis, k2 = listenSchluessel();

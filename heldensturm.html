@@ -366,6 +366,7 @@ details.stats .stat{padding:0 12px 12px}
 <div id="toast"></div>
 <section class="screen see" id="scr" hidden></section>
 
+<script src="kuerzel.js?v=20261025b"></script>
 <script>
 (function(){
 'use strict';
@@ -3845,7 +3846,7 @@ function hsTabelle(){const l=HSL.liste,m=HSL.m||'kampagne';if(!l)return'<p class
  if(!l.length)return`<p class="muted">${m==='taeglich'?'Heute hat sich noch niemand eingetragen – sei der Erste!':'Noch niemand eingetragen – sei der Erste!'}</p>`+lokal;
  const col=m==='abstieg'?'Tiefe':m==='bossrausch'?'Bosse':'Stufen';
  return`<table class="hst"><thead><tr><th>#</th><th>Name</th><th>Held</th><th>${col}</th><th>Punkte</th></tr></thead><tbody>${l.map((e,i)=>`<tr class="${G.hsMein&&e.erstellt===G.hsMein?'mein':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td>${esc(e.name)}</td><td>${esc(HEROES[e.held]?HEROES[e.held].name:e.held)}${e.schwierigkeit?` <span class="muted">· ${esc(diffName(e.schwierigkeit))}</span>`:''}</td><td>${esc(nInt(e.stufen,0,1e6,0))}</td><td><b>${fmt(e.punkte)}</b></td></tr>`).join('')}</tbody></table>`+lokal}
-function hsEintragen(){const f=$('hsName'),name=f?f.value.trim().slice(0,24):'';if(!name){if(f)f.focus();return}const R=G.hsRun;if(!R||R.sent)return;R.sent=true;
+function hsEintragen(){const f=$('hsName'),name=ImresKuerzel.wert(f);if(!name){if(f)f.focus();return}const R=G.hsRun;if(!R||R.sent)return;R.sent=true;
  const e={name,held:R.held,schwierigkeit:R.diff,stufen:R.stufen,punkte:R.punkte,level:R.level,modus:R.modus,tag:R.tag,erstellt:new Date().toISOString()};
  const lokAdd=()=>{if(R.lok)return;R.lok=true;const lok=hsSort(hsLokal().concat([e])).slice(0,80);try{localStorage.setItem('imres-heldensturm-liste',JSON.stringify(lok))}catch(x){}};
  const el=$('hsEintrag');if(el)el.innerHTML='<p class="muted">Wird eingetragen …</p>';
@@ -3853,7 +3854,7 @@ function hsEintragen(){const f=$('hsName'),name=f?f.value.trim().slice(0,24):'';
  /* nur wenn die neue Funktion fehlt (404) auf die alte ausweichen; eine Ablehnung (400) wird angezeigt und der Name darf geändert werden */
  hsServer('/rest/v1/rpc/hs_eintragen2',Object.assign({p_modus:R.modus,p_tag:R.tag||null},base)).catch(x=>x&&x.status===404&&R.modus==='kampagne'?hsServer('/rest/v1/rpc/hs_eintragen',base):Promise.reject(x)).then(()=>{try{localStorage.setItem('imres-heldensturm-name',name)}catch(x){}lokAdd();HSL.liste=null;HSL.laedt=false;HSL.m=null;hsLaden(R.modus);
   const t=setInterval(()=>{if(HSL.liste){clearInterval(t);const i=HSL.ok?HSL.liste.findIndex(x=>x.name===name&&x.punkte===R.punkte):-1;if(i>=0)G.hsMein=HSL.liste[i].erstellt;const el2=$('hsEintrag');if(el2)el2.innerHTML=`<p class="good" style="font-weight:800">${i>=0?`Eingetragen auf Platz ${i+1}!`:'Eingetragen!'}</p>`;const l2=$('hsListe');if(l2)l2.innerHTML=hsTabelle()}},150);setTimeout(()=>clearInterval(t),12000)},
-  x=>{R.sent=false;const off=!x||!x.status;if(off)lokAdd();const el2=$('hsEintrag');if(el2){el2.innerHTML=`<input id="hsName" class="hsname" maxlength="24" autocomplete="nickname" placeholder="Dein Name" value="${esc(name)}"><button class="btn gold" data-act="hs-send">${off?'Nochmal versuchen':'Eintragen'}</button><p class="${off?'muted':'bad'}" style="flex-basis:100%;margin:0">${esc(hsMsg(x))}</p>`;el2.style.flexWrap='wrap'}
+  x=>{R.sent=false;const off=!x||!x.status;if(off)lokAdd();const el2=$('hsEintrag');if(el2){el2.innerHTML=`${ImresKuerzel.feld({klasse:'hsname',id:'hsName'})}<button class="btn gold" data-act="hs-send">${off?'Nochmal versuchen':'Eintragen'}</button><p class="${off?'muted':'bad'}" style="flex-basis:100%;margin:0">${esc(hsMsg(x))}</p>`;el2.style.flexWrap='wrap'}
    if(off){HSL.liste=null;HSL.laedt=false;HSL.m=null;hsLaden(R.modus)}})}
 const hsNameAlt=()=>{try{return localStorage.getItem('imres-heldensturm-name')||localStorage.getItem('imres-diebesnacht-name')||localStorage.getItem('imres-waldlauf-name')||''}catch(e){return''}};
 function lbHtml(){const m=G.lbMode||'kampagne';hsLaden(m);
@@ -4009,7 +4010,7 @@ function endRun(win){if(G.state==='end')return;G.state='end';clearHudFx();truheD
   ${unlock?`<div class="unlock">Neue Schwierigkeit freigeschaltet: ${esc(unlock)}. Stärkere Gegner, bessere Beute – und ihr startet mit höherer Heldenstufe.</div>`:''}
   <div class="big-sum"><div><span>${G.mode==='abstieg'?'Tiefe':'Stufen'}</span><b>${G.mode==='abstieg'?G.depth:reached+' / '+STAGES.length}</b></div><div><span>Heldenstufe</span><b>${P.level}</b></div><div><span>Besiegt</span><b>${fmt(G.kills)}</b></div><div><span>Gold erbeutet</span><b>${fmt(G.goldRun)}</b></div><div><span>Zeit</span><b>${mins}:${String(secs).padStart(2,'0')}</b></div><div><span>Punkte</span><b class="goldline">${fmt(punkte)}</b></div></div>
   ${mpSummaryHtml()}${G.rl?`<div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="eyebrow">Roguelite</div><p style="margin:0">Heldenstufe <b>${P.level}</b>, Talente und Ausrüstung bleiben ${P.hero.name} erhalten.${rlCp(P.id,G.diff)?` Nächster Start ab <b>${esc(ORTE[rlCp(P.id,G.diff)].name)}</b>.`:''} Beim Schmied kannst du jetzt mit deinem Gold aufrüsten.</p><div class="row"><button class="btn gold" data-act="rl-smith">Zum Schmied</button></div></div>`:''}
-  <div class="card" style="display:${G.rl||G.mp?'none':'flex'};flex-direction:column;gap:10px"><div class="eyebrow">Bestenliste</div><div id="hsEintrag" class="row"><input id="hsName" class="hsname" maxlength="24" autocomplete="nickname" placeholder="Dein Name" value="${esc(hsNameAlt())}"><button class="btn gold" data-act="hs-send">Eintragen</button></div><div id="hsListe">${hsTabelle()}</div></div>
+  <div class="card" style="display:${G.rl||G.mp?'none':'flex'};flex-direction:column;gap:10px"><div class="eyebrow">Bestenliste</div><div id="hsEintrag" class="row">${ImresKuerzel.feld({klasse:'hsname',id:'hsName'})}<button class="btn gold" data-act="hs-send">Eintragen</button></div><div id="hsListe">${hsTabelle()}</div></div>
   <div><button class="btn-main" data-act="to-camp">Zurück ins Lager</button></div></div>`)}
 
 function renderPause(keep){showScreen(`<div class="wrap narrow">
@@ -5345,7 +5346,7 @@ function padMenu(){if(PADCAP){padCapture();return}if(scr.hidden){PADNAV.rep={};P
   if(Math.abs(s.ry)>0.35)scr.scrollTop+=s.ry*16;
   if(!fire&&!pr.some(Boolean))continue;
   const LL=els();let cur=padCur(LL);
-  if(fire){PADNAV.on=true;if(cur&&dx&&padAdjust(cur,dx)){}else{const nx=padStep(LL,cur,dx,dy);if(nx)padMark(nx);else if(dy)scr.scrollTop+=dy*160}}
+  if(fire){PADNAV.on=true;if(cur&&dx&&padAdjust(cur,dx)){}else if(cur&&dy&&!dx&&cur.classList.contains('kz-feld')){cur.dispatchEvent(new KeyboardEvent('keydown',{key:dy<0?'ArrowUp':'ArrowDown',bubbles:true}))}else{const nx=padStep(LL,cur,dx,dy);if(nx)padMark(nx);else if(dy)scr.scrollTop+=dy*160}}
   if(pr[0]){PADNAV.on=true;padPress(cur);L=null}
   else if(pr[1]){PADNAV.on=true;padBack();L=null}
   else if(pr[4]||pr[5]){if(padTab(pr[5]?1:-1)){PADNAV.on=true;L=null}}

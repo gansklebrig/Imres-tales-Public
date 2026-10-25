@@ -239,7 +239,7 @@
     return document.body;
   }
   function kandidaten(raum) {
-    return Array.from(raum.querySelectorAll(FOKUSIERBAR)).filter(el => !el.disabled && sichtbar(el) && !el.closest(".pad-hinweis") && !(el.closest("dialog:not([open])"))
+    return Array.from(raum.querySelectorAll(FOKUSIERBAR)).filter(el => !el.disabled && !el.classList.contains("kz-pfeil") && sichtbar(el) && !el.closest(".pad-hinweis") && !(el.closest("dialog:not([open])"))
       && (raum !== document.body || !el.closest("dialog")) && el.getBoundingClientRect().width > 0);
   }
   const mitte = r => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
@@ -312,9 +312,12 @@
     let dx = d.x, dy = d.y;
     if (!dx && !dy && a.m > .5) { if (Math.abs(a.x) > Math.abs(a.y)) dx = Math.sign(a.x); else dy = Math.sign(a.y); }
     const r = dx + "," + dy;
+    /* im Kürzel-Feld (Bestenliste): ▲/▼ blättert den Buchstaben statt weiterzuspringen */
+    const kzFeld = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("kz-feld");
+    const schritt = () => { if (kzFeld && dy && !dx) taste(dy < 0 ? "ArrowUp" : "ArrowDown", "keydown", document.activeElement); else bewegen(dx, dy); };
     if (dx || dy) {
-      if (r !== letzteRichtung) { wiederholT = .38; bewegen(dx, dy); }
-      else { wiederholT -= dt; if (wiederholT <= 0) { wiederholT = .13; bewegen(dx, dy); } }
+      if (r !== letzteRichtung) { wiederholT = .38; schritt(); }
+      else { wiederholT -= dt; if (wiederholT <= 0) { wiederholT = .13; schritt(); } }
     }
     letzteRichtung = (dx || dy) ? r : "";
     /* rechter Stick scrollt (im Spielmenü dessen Fläche, sonst die Seite) */
