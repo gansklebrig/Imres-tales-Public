@@ -3345,7 +3345,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'inv-sel':G.invSel=G.invSel===b.dataset.k?null:b.dataset.k;renderInv(true);break;
   case'inv-desel':G.invSel=null;renderInv(true);break;
   case'inv-equip':{const i=+G.invSel.split(':')[1];equipFromBag(i);G.invSel=null;sfx('equip');renderInv(true);break}
-  case'inv-scrap':{const i=+G.invSel.split(':')[1];const it=P.bag[i];if(it&&it.fav){toast('Gemerkt – erst den Stern entfernen.','#ffd04a');break}if(it){const v=scrapValue(it);SAVE.gold+=v;G.goldRun+=v;P.bag.splice(i,1);sfx('scrap')}G.invSel=null;updateInvBadge();renderInv(true);break}
+  case'inv-scrap':{const i=+G.invSel.split(':')[1];const it=P.bag[i];if(it&&it.fav){toast('Gemerkt – erst den Stern entfernen.','#ffd04a');break}if(it){const v=scrapValue(it);SAVE.gold+=v;G.goldRun+=v;P.bag.splice(i,1);sfx('scrap')}G.invSel=P.bag.length?'b:'+Math.min(i,P.bag.length-1):null;updateInvBadge();renderInv(true);break}
   case'inv-scrapall':{let v=0;{const kp=P.bag.filter(it=>{if(!it.fav&&it.rar<4&&!it.up&&!(it.sock&&it.sock.some(Boolean))&&itemDelta(it)<=0.005&&itemDps(it).d<=0.005){v+=scrapValue(it);return false}return true});P.bag.length=0;P.bag.push(...kp)}SAVE.gold+=v;G.goldRun+=v;if(v){sfx('scrap');toast(`+${fmt(v)} Gold`,'#e5b454')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'inv-unequip':{const k=G.invSel.split(':')[1];if(P.eq[k]&&P.bag.length<BAGMAX&&k!=='weapon'&&k!=='ranged'){P.bag.push(P.eq[k]);P.eq[k]=null;recalc();sfx('equip')}G.invSel=null;updateInvBadge();renderInv(true);break}
   case'tree-sel':if(G.barPick&&b.dataset.i!==undefined){const i=+b.dataset.i;if(!P.bar.includes(G.barPick)){P.bar[i]=G.barPick;buildSkillBar();sfx('equip')}G.treeSel=G.barPick;G.barPick=null;renderTree(true);break}if(G.barPick&&G.barPick!==b.dataset.id)G.barPick=null;if(G.treeOpen&&G.treeSel===b.dataset.id&&b.dataset.i===undefined)G.treeOpen=false;else{G.treeOpen=true;G.treeSel=b.dataset.id}{const n=P.hero.tree.find(x=>x.id===b.dataset.id);if(n)G.treeBr=n.b}renderTree(true);break;
@@ -4174,7 +4174,11 @@ function padPress(cur){if(!cur){const m=scr.querySelector('.btn-main:not([disabl
  if(cur.tagName==='SELECT'){const n=cur.options.length;if(n){cur.selectedIndex=(cur.selectedIndex+1)%n;cur.dispatchEvent(new Event('change',{bubbles:true}))}return}
  if(cur.tagName==='INPUT'){if(cur.type==='range')return;try{cur.focus()}catch(e){}return}
  const a=cur.dataset.act||'';if(a==='inv-sel'||a==='tr-sel'||a==='tree-sel')PADNAV.ret=padSig(cur);
- cur.click();if((a==='inv-sel'||a==='tr-sel')&&scr.querySelector('#idet2')){PADNAV.det=1;PADNAV.detSel='#idet2 .row button'}
+ /* A auf den schon gewählten Gegenstand: in dessen Aktionen springen statt ihn abzuwählen */
+ if((a==='inv-sel'&&G.invSel===cur.dataset.k||a==='tr-sel'&&G.trSel===cur.dataset.k)&&scr.querySelector('#idet2')){PADNAV.det=1;PADNAV.detSel='#idet2 .row button';const d=scr.querySelector('#idet2 .row button:not([disabled])');if(d){PADNAV.det=2;padMark(d)}return}
+ cur.click();
+ /* nach dem Verschrotten bleibt der Cursor bei den Gegenständen – auf dem nachgerückten */
+ if(a==='inv-scrap'||a==='tr-scrap'){const k=a==='inv-scrap'?G.invSel:G.trSel,t=k&&scr.querySelector(`[data-act="${a==='inv-scrap'?'inv-sel':'tr-sel'}"][data-k="${k}"]`);PADNAV.det=0;if(t){PADNAV.el=t;PADNAV.sig=padSig(t)}return}if((a==='inv-sel'||a==='tr-sel')&&scr.querySelector('#idet2')){PADNAV.det=1;PADNAV.detSel='#idet2 .row button'}
  else if(a==='tree-sel'&&scr.querySelector('[data-act="tree-learn"]:not([disabled])')){PADNAV.det=1;PADNAV.detSel='[data-act="tree-learn"]'}}
 function padAdjust(cur,dx){if(cur.type==='range'){const st=+cur.step||1,v=clamp((+cur.value)+dx*st,+cur.min||0,+cur.max||100);if(v!==+cur.value){cur.value=v;cur.dispatchEvent(new Event('input',{bubbles:true}));cur.dispatchEvent(new Event('change',{bubbles:true}))}return true}
  if(cur.tagName==='SELECT'){const n=cur.options.length;if(n){cur.selectedIndex=clamp(cur.selectedIndex+dx,0,n-1);cur.dispatchEvent(new Event('change',{bubbles:true}))}return true}return false}
@@ -4968,7 +4972,7 @@ function truheAct(a,b){const T=truheL();
  else if(a==='tr-put'){const it=P.bag[i];if(it&&T.length<TRUHE_MAX){P.bag.splice(i,1);delete it.for;T.push(it);sfx('equip');updateInvBadge()}}
  else if(a==='tr-scrap'){const it=T[i];if(it){T.splice(i,1);const v=scrapValue(it);SAVE.gold+=v;if(G.state==='play'||G.state==='between')G.goldRun+=v;sfx('scrap')}}
  else if(a==='tr-fav'){const it=P.bag[i];if(it)it.fav=it.fav?0:1}
- G.trSel=a==='tr-fav'?sel:null;if(G.rl)rlSync();persist();renderTruhe(true)}
+ G.trSel=a==='tr-fav'?sel:a==='tr-scrap'&&T.length?'t:'+Math.min(i,T.length-1):null;if(G.rl)rlSync();persist();renderTruhe(true)}
 
 /* ================= Schriftrollen =================
    Versteckte Seiten aus der Welt von Imres Tales: Briefe, Tagebücher, Aushänge, Barradins Liedfetzen.
