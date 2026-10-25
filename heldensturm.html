@@ -1505,7 +1505,7 @@ const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='25.10.2026 · Fehlerjagd';
+const HS_VERSION='25.10.2026 · Zielen mit dem Stick';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
 let GAUTO=3,GCEIL=3,FPSNOW=60;
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
@@ -2046,19 +2046,22 @@ function camUpd(dt,vw,vh){const C=G.net?netCamC():G.mp&&!G.vp?mpCenter():P,tx=C.
  const k=1-Math.exp(-Math.min(dt,0.05)*8);G.cam.x+=(tx-G.cam.x)*k;G.cam.y+=(ty-G.cam.y)*k;const mx=vw*0.2,my=vh*0.2;G.cam.x=clamp(G.cam.x,tx-mx,tx+mx);G.cam.y=clamp(G.cam.y,ty-my,ty+my)}
 function cursorW(){if(NET.role==='host'&&P&&P.netCur)return{x:P.netCur.x,y:P.netCur.y};if(G.mp&&!splitOn()&&(G.mpz||1)!==1&&G.state==='play'){const Z=ZOOM*(G.mpz||1),cc=G.cam||P;return{x:cc.x+(MOUSE.x-W/2)/Z,y:cc.y+(MOUSE.y-H/2)/Z}}const c=camXY();return{x:c.x+MOUSE.x/ZOOM,y:c.y+MOUSE.y/ZOOM}}
 function aimAng(R){if(P.padAim!=null)return P.padAim;if(mouseAim()){const c=cursorW();return Math.atan2(c.y-P.y,c.x-P.x)}const t=nearest(P.x,P.y,R||500);return t?ang(P,t):P.face}
-function aimPoint(range){if(mouseAim()){const c=cursorW(),d=Math.sqrt(d2(P,c));if(d<=range)return c;const a=ang(P,c);return{x:P.x+Math.cos(a)*range,y:P.y+Math.sin(a)*range}}
+const padA=()=>P&&P.padAim!=null&&isFinite(P.padAim)?P.padAim:null;
+/* Ziel in Stick-Richtung: nächster Gegner im Kegel um den Winkel a */
+function coneTarget(a,R,arc){let b=null,bd=1e9;for(const e of G.enemies){if(!targetable(e))continue;const dx=e.x-P.x,dy=e.y-P.y,dd=Math.hypot(dx,dy);if(dd>R+e.r)continue;let da=Math.atan2(dy,dx)-a;da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));if(da>arc)continue;const sc=dd*(1+da*1.5);if(sc<bd){bd=sc;b=e}}return b}
+function aimPoint(range){{const a=padA();if(a!=null){const t=coneTarget(a,range,0.45);if(t)return{x:t.x,y:t.y};return{x:P.x+Math.cos(a)*range*0.6,y:P.y+Math.sin(a)*range*0.6}}}if(mouseAim()){const c=cursorW(),d=Math.sqrt(d2(P,c));if(d<=range)return c;const a=ang(P,c);return{x:P.x+Math.cos(a)*range,y:P.y+Math.sin(a)*range}}
  let best=null,bc=-1,n=0;for(const e of G.enemies){if(!targetable(e)||d2(P,e)>range*range)continue;if(++n>30)break;let c=e.boss?6:e.guard?4:0;for(const f of G.enemies)if(!f.dead&&Math.abs(f.x-e.x)<110&&Math.abs(f.y-e.y)<110)c++;if(c>bc){bc=c;best=e}}
  if(best)return{x:best.x,y:best.y};return{x:P.x+Math.cos(P.face)*range*0.45,y:P.y+Math.sin(P.face)*range*0.45}}
-function aimTarget(R,strong){if(mouseAim()){const c=cursorW();let b=null,bd=170*170;for(const e of G.enemies){if(!targetable(e)||d2(e,P)>R*R)continue;const dd=d2(e,c)-e.r*e.r;if(dd<bd){bd=dd;b=e}}return b}return strong?strongest(P.x,P.y,R):nearest(P.x,P.y,R)}
+function aimTarget(R,strong){{const a=padA();if(a!=null)return coneTarget(a,R,0.6)||coneTarget(a,R,1.2)||(strong?strongest(P.x,P.y,R):nearest(P.x,P.y,R))}if(mouseAim()){const c=cursorW();let b=null,bd=170*170;for(const e of G.enemies){if(!targetable(e)||d2(e,P)>R*R)continue;const dd=d2(e,c)-e.r*e.r;if(dd<bd){bd=dd;b=e}}return b}return strong?strongest(P.x,P.y,R):nearest(P.x,P.y,R)}
 function escapeAng(){let sx=0,sy=0,n=0;for(const e of G.enemies){if(e.dead||d2(e,P)>320*320)continue;sx+=e.x-P.x;sy+=e.y-P.y;n++}if(!n)return P.face+Math.PI;return Math.atan2(-sy,-sx)}
 function escapePoint(d){const a=escapeAng();return{x:clamp(P.x+Math.cos(a)*d,40,WORLD-40),y:clamp(P.y+Math.sin(a)*d,40,WORLD-40)}}
 /* Normale Angriffe: nahes Ziel → Nahkampf, sonst Fernkampf. Mit Maus: Richtung zum Mauszeiger. */
 function bTarget(range,meleeR){
- if(!mouseAim()){const t=nearest(P.x,P.y,range);if(!t)return null;return{t,a:ang(P,t),melee:inMelee(t,meleeR)}}
- const c=cursorW(),a=Math.atan2(c.y-P.y,c.x-P.x);let t=null,bd=1e9,mt=null,md=1e9;
+ const pa=padA();if(pa==null&&!mouseAim()){const t=nearest(P.x,P.y,range);if(!t)return null;return{t,a:ang(P,t),melee:inMelee(t,meleeR)}}
+ const c=pa!=null?null:cursorW(),a=pa!=null?pa:Math.atan2(c.y-P.y,c.x-P.x);let t=null,bd=1e9,mt=null,md=1e9;
  for(const e of G.enemies){if(!targetable(e))continue;const dx=e.x-P.x,dy=e.y-P.y,dd=Math.hypot(dx,dy);if(dd>range+e.r)continue;let da=Math.atan2(dy,dx)-a;da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));
   if(da<0.5&&dd<bd){bd=dd;t=e}if(dd<meleeR+e.r&&da<1.0&&dd<md){md=dd;mt=e}}
- if(!t&&!mt&&!(P.netCur&&NET.role==='host'?P.netCur.down:MOUSE.down))return null;return{t:mt||t,a,melee:!!mt}}
+ if(!t&&!mt&&pa==null&&!(P.netCur&&NET.role==='host'?P.netCur.down:MOUSE.down))return null;return{t:mt||t,a,melee:!!mt}}
 function faceA(a){P.face=a;if(Math.abs(Math.cos(a))>0.15)P.flip=Math.cos(a)<0?-1:1}
 const inMelee=(t,R)=>Math.sqrt(d2(P,t))<R+t.r;
 function melee(a,R,arc,mult,col,o){const n=cone(P.x,P.y,a,arc,R,P.st.dmg*mult,o||{});slash(P.x,P.y,a,arc,R,col,0.18);return n}
@@ -2763,7 +2766,7 @@ function renderWorld(dt){
  const ents=[];for(const e of G.enemies)if(inView(e.x,e.y,e.r+30))ents.push(e);for(const a of G.allies)if(!a.dead)ents.push(a);for(const q of (G.mp?PL:[P]))ents.push(q);for(const p of G.props)if(inView(p.x,p.y,70))ents.push(p);ents.sort((a,b)=>a.y-b.y);
  for(const tr of G.traps){if(!inView(tr.x,tr.y,40))continue;const sh=tr.done?1:0;ell(cx,tr.x,tr.y+2,16,6,'rgba(0,0,0,.3)');cx.strokeStyle='#8a8a92';cx.lineWidth=3;cx.beginPath();cx.ellipse(tr.x,tr.y,15,6,0,0,TAU);cx.stroke();for(let i=-3;i<=3;i++){ln(cx,'#c8c8d0',1.6,tr.x+i*4,tr.y-(sh?2:6),tr.x+i*4+1,tr.y-(sh?6:1))}if(tr.arm<=0&&!tr.done){cx.globalAlpha=0.3+0.2*Math.sin(t*5);circ(cx,tr.x,tr.y,3,'#ffd04a');cx.globalAlpha=1}}
  drawCorpses(inView,t);drawLinks(t);
- for(const e of ents){if(e===P||(G.mp&&PL.includes(e)))withP(e,()=>{if(P.down)drawDown(t);else drawPlayer(t);if(G.mp){drawMpTag();drawAuraTag(t)}});else if(e.prop)drawProp(e,t);else if(e.kind==='pet')drawPet(e,t);else if(e.kind==='rex'){const br=rank('f_bigrex');if(br){cx.save();cx.translate(e.x,e.y);cx.scale(1+0.18*br,1+0.18*br);drawRex(cx,0,0,e.flip,t,e.moving);cx.restore()}else drawRex(cx,e.x,e.y,e.flip,t,e.moving)}else if(e.kind==='ill'){drawHero(cx,'barradin',e.x,e.y,1,{t:t+e.t,flip:e.flip,ghost:1});cx.globalAlpha=0.6;cx.strokeStyle='#9fd8ff';cx.lineWidth=1.5;cx.beginPath();cx.arc(e.x,e.y,18+Math.sin(t*6)*2,0,TAU);cx.stroke();cx.globalAlpha=1}else drawEnemy(e,t)}
+ for(const e of ents){if(e===P||(G.mp&&PL.includes(e)))withP(e,()=>{if(P.down)drawDown(t);else{drawPlayer(t);drawPadAim()}if(G.mp){drawMpTag();drawAuraTag(t)}});else if(e.prop)drawProp(e,t);else if(e.kind==='pet')drawPet(e,t);else if(e.kind==='rex'){const br=rank('f_bigrex');if(br){cx.save();cx.translate(e.x,e.y);cx.scale(1+0.18*br,1+0.18*br);drawRex(cx,0,0,e.flip,t,e.moving);cx.restore()}else drawRex(cx,e.x,e.y,e.flip,t,e.moving)}else if(e.kind==='ill'){drawHero(cx,'barradin',e.x,e.y,1,{t:t+e.t,flip:e.flip,ghost:1});cx.globalAlpha=0.6;cx.strokeStyle='#9fd8ff';cx.lineWidth=1.5;cx.beginPath();cx.arc(e.x,e.y,18+Math.sin(t*6)*2,0,TAU);cx.stroke();cx.globalAlpha=1}else drawEnemy(e,t)}
  cx.globalAlpha=1;
  for(const e of G.enemies)if(e.flying&&e.flyHigh>0.6&&inView(e.x,e.y,200)){cx.save();cx.globalAlpha=0.9;const y=e.y-e.flyHigh*90;cx.translate(e.x,y);cx.scale(e.r/12,e.r/12);poly(cx,e.def.c,0,-2,-30,-14,-12,6);poly(cx,e.def.c,0,-2,30,-14,12,6);ell(cx,0,0,8,12,e.def.c);cx.restore()}
  const rex=G.allies.find(a=>a.kind==='rex'&&!a.dead);if(rex&&rex.hp<rex.maxHp){cx.fillStyle='rgba(0,0,0,.6)';cx.fillRect(rex.x-12,rex.y-18,24,3);cx.fillStyle='#7fd36a';cx.fillRect(rex.x-12,rex.y-18,24*rex.hp/rex.maxHp,3)}
@@ -3848,6 +3851,7 @@ function mpSlots(){const S=[{dev:G.p1dev||'kb',hero:G.sel||'barradin'}].concat(G
 function mpFreeHero(skip){const S=mpSlots();return HERO_IDS.find(h=>!S.some((s,k)=>k!==skip&&s.hero===h))}
 function padLobby(){if(G.state!=='title'||!mpActive()||!scr||scr.hidden)return;let ch=false;G.lobby=G.lobby||[];
  for(const s of Object.values(PADS.st)){const pr=s.pr;if(!pr.some(Boolean))continue;const dev='pad:'+s.i,k=mpSlots().findIndex(x=>x.dev===dev);
+  if(pr[3]&&k!==0){if(k>0){G.sel=G.lobby[k-1].hero;G.lobby.splice(k-1,1)}G.p1dev=dev;stageT0=performance.now();ch=true;sfx('equip');s.pr=s.pr.map(()=>false);continue}
   if(k<0){if(pr[0]&&mpSlots().length<4){const h=mpFreeHero(-1);if(h){G.lobby.push({dev,hero:h});ch=true;sfx('equip')}}}
   else{if(pr[4]||pr[5]){const S=mpSlots(),cur=HERO_IDS.indexOf(S[k].hero);for(let n=1;n<=4;n++){const h=HERO_IDS[(cur+(pr[5]?n:-n)+40)%4];if(!S.some((o,j)=>j!==k&&o.hero===h)){if(k===0)G.sel=h;else G.lobby[k-1].hero=h;break}}ch=true;sfx('ui')}
    if(pr[1]&&k>0){G.lobby.splice(k-1,1);ch=true}
@@ -3857,13 +3861,13 @@ function padLobby(){if(G.state!=='title'||!mpActive()||!scr||scr.hidden)return;l
 function mpModeHtml(){if((G.selMode||'kampagne')!=='kampagne')return NET.role==='host'?`<div class="card mpl netcard"><div class="spread"><p class="muted" style="margin:0;font-size:13px">Online-Raum <b>${esc(NET.code)}</b> ist offen – Mitspieler können nur in der Kampagne mitspielen.</p><button class="btn small" data-act="net-closeroom">Raum schließen</button></div></div>`:'';const on=!!SAVE.mpOn;return`<div class="chips"><button class="chip ${on?'':'on'}" data-act="mp-on" data-v="0">Allein</button><button class="chip ${on?'on':''}" data-act="mp-on" data-v="1">Gemeinsam</button><button class="chip" data-act="net-joinscr">Online beitreten</button></div>`}
 function mpLobbyHtml(){if(!mpActive())return'';const S=mpSlots(),pads=Object.keys(PADS.st).length;
  return`<div class="card mpl"><div class="eyebrow">Gemeinsam spielen · ${S.length} Spieler</div>
- ${S.map((s,k)=>`<div class="mprow"><b style="color:${PCOL[k]}">P${k+1}</b><span class="mpdev">${k===0?`<button class="btn small" data-act="mp-dev">${devName(s.dev)}</button>`:netIs(s.dev)?'🌐 '+esc(s.name||'Gast')+netSlotPing(s):esc(devName(s.dev))}</span><span class="mpheroes">${netIs(s.dev)?`<span class="chip on">${HEROES[s.hero]?HEROES[s.hero].name:'?'}</span>`:HERO_IDS.map(id=>`<button class="chip ${s.hero===id?'on':''}" data-act="mp-hero" data-k="${k}" data-id="${id}" ${S.some((o,j)=>j!==k&&o.hero===id)?'disabled':''}>${HEROES[id].name}</button>`).join('')}</span>${k?`<button class="btn small" data-act="mp-kick" data-k="${k}" aria-label="Entfernen">✕</button>`:''}</div>`).join('')}
- <p class="muted" style="margin:8px 0 0;font-size:13px">${pads?`${pads} Controller erkannt. `:'Noch kein Controller erkannt – anschließen und eine Taste drücken. '}Weitere Spieler drücken <b>A</b> auf ihrem Controller, um beizutreten (bis zu 4). <b>LB/RB</b> wechselt den Helden, <b>B</b> verlässt die Runde, <b>Start</b> beginnt.</p>
- <p class="muted" style="margin:4px 0 0;font-size:12px">Steuerung: linker Stick laufen · rechter Stick zielen · A, B, X, Y, LB, RB = Fähigkeiten 1–6 · LT sprinten · RT Heiltrank · Ansicht-Taste Beutel · Start Pause. Gefallene Helden stehen wieder auf, wenn ein Mitspieler kurz neben ihnen steht. Mit mehr Helden halten Gegner mehr aus und kommen öfter.</p></div>`+netLobbyHtml()}
+ ${S.map((s,k)=>`<div class="mprow"><b style="color:${PCOL[k]}">P${k+1}</b><span class="mpdev">${k===0?`<button class="btn small" data-act="mp-dev" title="Eingabegerät für Spieler 1 wechseln">${s.dev==='kb'?'⌨️':'🎮'} ${devName(s.dev)} ⇄</button>`:netIs(s.dev)?'🌐 '+esc(s.name||'Gast')+netSlotPing(s):esc(devName(s.dev))}</span><span class="mpheroes">${netIs(s.dev)?`<span class="chip on">${HEROES[s.hero]?HEROES[s.hero].name:'?'}</span>`:HERO_IDS.map(id=>`<button class="chip ${s.hero===id?'on':''}" data-act="mp-hero" data-k="${k}" data-id="${id}" ${S.some((o,j)=>j!==k&&o.hero===id)?'disabled':''}>${HEROES[id].name}</button>`).join('')}</span>${k?`<button class="btn small" data-act="mp-kick" data-k="${k}" aria-label="Entfernen">✕</button>`:''}</div>`).join('')}
+ <p class="muted" style="margin:8px 0 0;font-size:13px">${pads?`${pads} Controller erkannt. `:'Noch kein Controller erkannt – anschließen und eine Taste drücken. '}Weitere Spieler drücken <b>A</b> auf ihrem Controller, um beizutreten (bis zu 4). <b>LB/RB</b> wechselt den Helden, <b>B</b> verlässt die Runde, <b>Start</b> beginnt. Soll <b>Spieler 1</b> mit dem Controller spielen: am Controller <b>Y</b> drücken oder auf den Knopf neben P1 tippen.</p>
+ <p class="muted" style="margin:4px 0 0;font-size:12px">Steuerung: linker Stick laufen · rechter Stick = Angriffsrichtung (360°) · A, B, X, Y, LB, RB = Fähigkeiten 1–6 · LT sprinten · RT Heiltrank · Ansicht-Taste Beutel · Start Pause. Gefallene Helden stehen wieder auf, wenn ein Mitspieler kurz neben ihnen steht. Mit mehr Helden halten Gegner mehr aus und kommen öfter.</p></div>`+netLobbyHtml()}
 function mpAct(a,b){if(a==='mp-on'){SAVE.mpOn=b.dataset.v==='1';persist()}
  else if(a==='mp-hero'){const k=+b.dataset.k,id=b.dataset.id;if(NET.role==='host'&&(G.lobby||[]).some((s,j)=>netIs(s.dev)&&s.hero===id&&j!==k-1)){toast('Diesen Helden spielt gerade ein Online-Gast.','#ff8a7a');showTitle(true);return}if(k===0){G.sel=id;stageT0=performance.now()}else if(G.lobby&&G.lobby[k-1])G.lobby[k-1].hero=id}
  else if(a==='mp-kick'){const k=+b.dataset.k;if(G.lobby)G.lobby.splice(k-1,1)}
- else if(a==='mp-dev'){const opts=['kb'].concat(Object.keys(PADS.st).map(i=>'pad:'+i).filter(d=>!(G.lobby||[]).some(s=>s.dev===d)));const i=opts.indexOf(G.p1dev||'kb');G.p1dev=opts[(i+1)%opts.length]}
+ else if(a==='mp-dev'){const opts=['kb'].concat(Object.keys(PADS.st).map(i=>'pad:'+i));const i=opts.indexOf(G.p1dev||'kb');const nd=opts[(i+1)%opts.length];const j=(G.lobby||[]).findIndex(s=>s.dev===nd);if(j>=0){G.sel=G.lobby[j].hero;G.lobby.splice(j,1)}G.p1dev=nd;if(!Object.keys(PADS.st).length)toast('Kein Controller erkannt – anschließen und eine Taste drücken.','#ffd04a')}
  showTitle(true)}
 /* ---------- Anzeige ---------- */
 function drawDown(t){const p=P,k=Math.min(1,(p.revT||0)/2.5);cx.save();cx.globalAlpha=0.55;cx.translate(p.x,p.y+6);cx.rotate(Math.PI/2*0.9);drawHero(cx,p.id,0,0,0.95,{t:0,flip:1});cx.restore();
@@ -4255,6 +4259,7 @@ function netSample(){let ix=0,iy=0,spr=!!(keys.ShiftLeft||keys.ShiftRight)||NET.
   for(const s of Object.values(PADS.st)){let[a,b]=dz(s.lx,s.ly,0.22);if(s.b[14])a=-1;if(s.b[15])a=1;if(s.b[12])b=-1;if(s.b[13])b=1;if(Math.abs(a)+Math.abs(b)>Math.abs(ix)+Math.abs(iy)){ix=a;iy=b;NET.localDev='pad:'+s.i}
    if(s.b[6]||s.b[10])spr=true;const[rx,ry]=dz(s.rx,s.ry,0.4);if(rx||ry)aim=Math.atan2(ry,rx);
    const pr=s.pr;for(let i=0;i<6;i++)if(pr[i])netAct('skill',i);if(pr[7])netAct('pot');if(s.b[10]&&s.b[11]&&(pr[10]||pr[11]))netAct('ult');if(pr[9]){s.pr=s.pr.map(()=>false);openOverlay('pause')}else if(pr[8]){s.pr=s.pr.map(()=>false);openOverlay('inv')}}}
+ if(NET.mine)NET.mine.padAim=aim;
  const il=Math.hypot(ix,iy);if(il>1){ix/=il;iy/=il}if(ix||iy)NET.localDev=NET.localDev||'kb';
  if(SAVE.aim&&MOUSE.has&&aim===null&&NET.mine){const c=cursorW();cur=[Math.round(c.x),Math.round(c.y),MOUSE.down?1:0]}
  return{ix,iy,spr,aim,cur}}
@@ -4558,6 +4563,9 @@ function pressedNear(src,R){let b=null,bn=2;for(const q of teamNear(src,R||600))
 function teamUltHook(n){if(LP('schildwall')){for(const q of [P].concat(teamNear(P,auraR(P)))){q.shieldHp=Math.max(q.shieldHp||0,q.st.maxHp*0.25);ring(q.x,q.y,32,'#9fe6ff',0.6,4)}sfx('magic')}
  for(const q of mpL())if(hasBund(q,4)&&!q.down)for(const k in q.cds)if(!(q===P&&k===n.id)&&q.cds[k]>0)q.cds[k]=Math.max(0,q.cds[k]-3)}
 /* Anzeige: Reichweite der eigenen Aura und Symbole empfangener Auren */
+/* Zielpfeil, solange mit dem rechten Stick gezielt wird */
+function drawPadAim(){const a=padA();if(a==null)return;const c=HCOL[P.id]||'#e5b454',ga=cx.globalAlpha,x=P.x+Math.cos(a)*50,y=P.y+12+Math.sin(a)*32;cx.globalAlpha=ga*0.9;cx.save();cx.translate(x,y);cx.rotate(a);cx.lineCap='round';cx.lineJoin='round';
+ for(const[w,col]of[[7,'rgba(0,0,0,.5)'],[3.5,c]]){cx.strokeStyle=col;cx.lineWidth=w;cx.beginPath();cx.moveTo(-7,-9);cx.lineTo(4,0);cx.lineTo(-7,9);cx.moveTo(-15,-9);cx.lineTo(-4,0);cx.lineTo(-15,9);cx.stroke()}cx.restore();cx.globalAlpha=ga}
 function drawAuraTag(t){if(!G.mp||PL.length<2||P.down)return;const prov=rank('b_song')||rank('e_bark')||hasBund(P,2);
  if(prov&&teamNear(P,auraR(P)).length){const R=auraR(P),ga=cx.globalAlpha;cx.globalAlpha=ga*(0.1+0.04*Math.sin(t*2));cx.strokeStyle=HCOL[P.id]||'#e5b454';cx.lineWidth=3;cx.beginPath();cx.ellipse(P.x,P.y+10,R,R*0.55,0,0,TAU);cx.stroke();cx.globalAlpha=ga}
  const a=P.aura;if(a&&a.src&&a.src.length){cx.font='900 11px sans-serif';cx.textAlign='center';cx.lineWidth=3;cx.strokeStyle='rgba(0,0,0,.85)';const s=a.src.join(' ');cx.strokeText(s,P.x,P.y-58);cx.fillStyle='#ffe9a0';cx.fillText(s,P.x,P.y-58)}}
