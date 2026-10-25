@@ -74,13 +74,13 @@
     palast:  { dauer: 4.4, kurve: 2.9, vor: .045, hell: 6200, frueh: [[.048, .45], [.075, .35], [.102, .28], [.13, .2]] },
     hoehle:  { dauer: 6.5, kurve: 2.3, vor: .07, hell: 2600, frueh: [[.14, .5], [.29, .34], [.45, .22], [.62, .14]] }
   };
-  const KULISSEN = ["keine", "taverne", "feuer", "wald", "waldnacht", "regen", "zelt", "sturm", "meer", "schiff", "wasserfall", "hoehle", "unterreich", "kerker", "sumpf", "unterwasser", "schmiede", "labor", "bibliothek", "tempel"];
+  const KULISSEN = ["keine", "taverne", "feuer", "wald", "waldnacht", "regen", "zelt", "sturm", "meer", "schiff", "wasserfall", "hoehle", "unterreich", "kerker", "sumpf", "unterwasser", "schmiede", "labor", "bibliothek", "tempel", "dorf", "markt", "hafen", "gebirge", "mine", "strasse", "burg", "ufer"];
   /* Bühnenbild für die neueren Kulissen: nächstliegendes vorhandenes Bild */
-  const KUL_BILD = { waldnacht: "wald", zelt: "regen", schiff: "meer", wasserfall: "wald", unterreich: "hoehle", kerker: "hoehle", sumpf: "wald", unterwasser: "meer", schmiede: "feuer", labor: "taverne", bibliothek: "taverne", tempel: "hoehle" };
-  const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "wald", spannung: "hoehle", sieg: "taverne", kampf: "keine",
-    taverne: "taverne", hafen: "meer", wald: "wald", schmiede: "feuer", wiegen: "feuer", trauer: "regen", ballade: "taverne",
-    auenland: "wald", elben: "wald", zwerge: "hoehle", reiter: "keine", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen",
-    klage: "regen", marktplatz: "taverne", hof: "keine", grusel: "hoehle", fey: "wald", boss: "sturm" };
+  const KUL_BILD = { waldnacht: "wald", zelt: "regen", schiff: "meer", wasserfall: "wald", unterreich: "hoehle", kerker: "hoehle", sumpf: "wald", unterwasser: "meer", schmiede: "feuer", labor: "taverne", bibliothek: "taverne", tempel: "hoehle", dorf: "wald", markt: "taverne", hafen: "meer", gebirge: "sturm", mine: "hoehle", strasse: "wald", burg: "taverne", ufer: "wald" };
+  const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "strasse", spannung: "hoehle", sieg: "taverne", kampf: "keine",
+    taverne: "taverne", hafen: "hafen", wald: "wald", schmiede: "schmiede", wiegen: "feuer", trauer: "regen", ballade: "taverne",
+    auenland: "wald", elben: "wald", zwerge: "mine", reiter: "strasse", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen",
+    klage: "regen", marktplatz: "markt", hof: "burg", grusel: "hoehle", fey: "wald", boss: "sturm" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   /* lustige Spieltisch-Momente */
   const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk",
@@ -132,7 +132,8 @@
       wechselGleich: n => "→ „" + n + "“ beginnt mit dem nächsten Takt …",
       kulisse: "Geräuschkulisse", kulisseLaut: "Kulisse",
       kulissen: { keine: "– keine –", taverne: "🍺 Taverne", feuer: "🔥 Lagerfeuer", regen: "🌧 Regen", wald: "🌲 Wald", hoehle: "💧 Höhle", meer: "🌊 Küste", sturm: "⛈ Gewitter",
-        waldnacht: "🌙 Wald bei Nacht", zelt: "⛺ Zelt im Regen", schiff: "⛵ An Deck", wasserfall: "🏞 Wasserfall", unterreich: "🕸 Unterreich", kerker: "⛓ Kerker", sumpf: "🐸 Sumpf", unterwasser: "🫧 Unter Wasser", schmiede: "⚒ Schmiede", labor: "⚗ Alchemistenstube", bibliothek: "📚 Bibliothek", tempel: "⛪ Tempel" },
+        waldnacht: "🌙 Wald bei Nacht", zelt: "⛺ Zelt im Regen", schiff: "⛵ An Deck", wasserfall: "🏞 Wasserfall", unterreich: "🕸 Unterreich", kerker: "⛓ Kerker", sumpf: "🐸 Sumpf", unterwasser: "🫧 Unter Wasser", schmiede: "⚒ Schmiede", labor: "⚗ Alchemistenstube", bibliothek: "📚 Bibliothek", tempel: "⛪ Tempel",
+        dorf: "🐓 Bauernhof", markt: "🛒 Marktplatz", hafen: "⚓ Hafen", gebirge: "🏔 Bergpass im Schnee", mine: "⛏ Zwergenmine", strasse: "🐴 Unterwegs", burg: "🏰 Burghof", ufer: "🛶 Flussufer" },
       effekte: "Effekte",
       sfx: { drache: "🐉 Drache", schwert: "⚔ Klingen", tuer: "🚪 Tür", donner: "⚡ Donner", schrei: "😱 Schrei", wuerfel: "🎲 Würfel", zauber: "✨ Zauber", horn: "📯 Horn", jubel: "🍻 Jubel",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Stille",
@@ -204,7 +205,8 @@
       wechselGleich: n => "→ “" + n + "” starts with the next bar …",
       kulisse: "Ambience", kulisseLaut: "Ambience",
       kulissen: { keine: "– none –", taverne: "🍺 Tavern", feuer: "🔥 Campfire", regen: "🌧 Rain", wald: "🌲 Forest", hoehle: "💧 Cave", meer: "🌊 Coast", sturm: "⛈ Thunderstorm",
-        waldnacht: "🌙 Forest at night", zelt: "⛺ Tent in the rain", schiff: "⛵ On deck", wasserfall: "🏞 Waterfall", unterreich: "🕸 Underdark", kerker: "⛓ Dungeon", sumpf: "🐸 Swamp", unterwasser: "🫧 Underwater", schmiede: "⚒ Forge", labor: "⚗ Alchemist's study", bibliothek: "📚 Library", tempel: "⛪ Temple" },
+        waldnacht: "🌙 Forest at night", zelt: "⛺ Tent in the rain", schiff: "⛵ On deck", wasserfall: "🏞 Waterfall", unterreich: "🕸 Underdark", kerker: "⛓ Dungeon", sumpf: "🐸 Swamp", unterwasser: "🫧 Underwater", schmiede: "⚒ Forge", labor: "⚗ Alchemist's study", bibliothek: "📚 Library", tempel: "⛪ Temple",
+        dorf: "🐓 Farmstead", markt: "🛒 Market square", hafen: "⚓ Harbour", gebirge: "🏔 Snowy mountain pass", mine: "⛏ Dwarven mine", strasse: "🐴 On the road", burg: "🏰 Castle courtyard", ufer: "🛶 Riverbank" },
       effekte: "Effects",
       sfx: { drache: "🐉 Dragon", schwert: "⚔ Blades", tuer: "🚪 Door", donner: "⚡ Thunder", schrei: "😱 Scream", wuerfel: "🎲 Dice", zauber: "✨ Spell", horn: "📯 Horn", jubel: "🍻 Cheers",
         tusch: "🥁 Ba-dum-tss", posaune: "🎺 Wah-wah", krit: "🌟 Nat 20", dramatisch: "😨 Dun-dun", grillen: "🦗 Silence",
@@ -1230,7 +1232,8 @@
   const AMB_LAUT = {"a_feuer1":.0315,"a_feuer2":.0164,"a_feuer3":.0183,"a_grillen":.129,"a_nacht":.144,"a_voegel1":.0601,"a_voegel2":.0565,"a_laub":.0853,"a_bach1":.0405,"a_bach2":.0505,
     "a_wasserfall":.1828,"a_wind1":.0818,"a_wind2":.0963,"a_regen1":.0387,"a_regen2":.0462,"a_waldregen":.0248,"a_starkregen":.043,"a_zelt":.0196,"a_gewitter1":.0441,"a_gewitter2":.0412,
     "a_wellen1":.0623,"a_wellen2":.0559,"a_boot":.0343,"a_tropfen1":.0089,"a_tropfen2":.0249,"a_unterwasser":.1387,"a_kochen":.0825,"a_blubbern":.0647,
-    "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0243, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfen3":.0474, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459};
+    "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0243, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfen3":.0474, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459,
+    "a_hof":.0499, "a_hafen":.0499, "a_markt":.0499, "a_tagvoegel":.0498, "a_rinnsal":.0496, "a_strom":.0485, "a_wildwasser":.0495, "a_wasserfall3":.0496, "a_brandung":.05, "a_klippen":.05, "a_regen3":.0499, "a_regen4":.0499, "a_schneesturm":.05, "a_wind3":.0444, "a_orkan":.05, "a_huehner":.05, "a_kuehe":.0491, "a_schafe":.0497, "a_schnurren":.0499, "a_schneeschritte":.0457, "a_kiesweg":.0255, "l_windspiel":.0274, "l_wal":.1221};
   const ambReihe = (p, n) => Array.from({ length: n }, (_, i) => p + (i + 1));
   /* Ereignisse aus Aufnahmen: f = Dateien, tempo = Abspieltempo, folge = [min, max Anzahl, Abstand min, max] */
   const AMB_EV = {
@@ -1248,56 +1251,82 @@
     wal: { f: ambReihe("e_wal_", 3), tempo: [.8, 1] }, pferd: { f: ["e_pferd_1"], tempo: [.9, 1.06] }, katze: { f: ambReihe("e_katze_", 4) }, ruder: { f: ambReihe("e_ruder_", 3) },
     donner: { f: ["fx_fo2_sfx100v2_thunder_01"].concat(ambReihe("e_donner_", 4)), tempo: [.8, 1.05] },
     chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 },
-    klangschale: { f: ["a_klangschale"], tempo: [.98, 1.02] }
+    klangschale: { f: ["a_klangschale"], tempo: [.98, 1.02] },
+    kuh: { f: ambReihe("e_kuh_", 7), tempo: [.9, 1.05] }, huhn: { f: ambReihe("e_huhn_", 4), tempo: [.92, 1.08], folge: [1, 3, .5, 1.1] }, schaf: { f: ambReihe("e_schaf_", 2), tempo: [.88, 1.1] },
+    schwein: { f: ambReihe("e_schwein_", 3), tempo: [.9, 1.08] }, ross: { f: ambReihe("e_ross_", 6).concat(["e_pferd_1"]), tempo: [.92, 1.06] }, hufe: { f: ambReihe("e_hufe_", 6) },
+    schnee: { f: ambReihe("e_schnee_", 8).concat(ambReihe("g_schnee_", 4)), folge: [3, 7, .55, .7] }, tor: { f: ambReihe("e_tor_", 4), tempo: [.85, 1] }, rumpf: { f: ambReihe("e_rumpf_", 2), tempo: [.8, 1] },
+    axt: { f: ambReihe("e_axt_", 8), folge: [2, 5, 1.1, 1.6] }, baumfall: { f: ambReihe("e_baumfall_", 4), tempo: [.85, 1] }, hacke: { f: ambReihe("e_hacke_", 8), folge: [2, 5, .9, 1.4] }, erz: { f: ambReihe("e_erz_", 6), folge: [1, 3, 1, 1.5] },
+    zimmern: { f: ambReihe("e_zimmern_", 6), folge: [3, 7, .45, .7] }, windstoss: { f: ["e_windstoss_1"], tempo: [.8, 1.1] }, grollen: { f: ambReihe("e_grollen_", 2), tempo: [.8, 1] },
+    galopp: { f: ["g_galopp_1"], tempo: [.92, 1.05] }, steinschlag: { f: ambReihe("g_steinschlag_", 4), tempo: [.85, 1] }, untot: { f: ambReihe("g_untot_", 8), tempo: [.8, .95] },
+    schatten: { f: ambReihe("g_schatten_", 5), tempo: [.8, 1] }, troll: { f: ambReihe("g_troll_", 10), tempo: [.75, .9] }, schluessel: { f: ambReihe("g_schluessel_", 5) }, schloss: { f: ambReihe("g_schloss_", 7) },
+    nass: { f: ambReihe("g_nass_", 3), folge: [3, 6, .5, .65] }, gras: { f: ambReihe("g_gras_", 5), folge: [3, 7, .5, .62] }, holzbruch: { f: ambReihe("g_holzbruch_", 7), tempo: [.85, 1] }, glasbruch: { f: ambReihe("g_glasbruch_", 4) },
+    edelstein: { f: ambReihe("g_edelstein_", 3) }, leder: { f: ambReihe("g_leder_", 6) }, kettenhemd: { f: ambReihe("g_kettenhemd_", 5) }, zauber: { f: ambReihe("g_zauber_", 4), tempo: [.8, 1] },
+    uebung: { f: ambReihe("g_metallhieb_", 7).concat(ambReihe("g_schild_", 5)), folge: [2, 5, .45, .9] }
   };
   /* über kulFx (echte Aufnahmen aus ECHT bzw. gerechnet): Art in der Kulisse → Art in kulFx */
   const KUL_FX = { krug: "krug", stuhl: "stuhl", knarren: "knarren", schritte: "schritte", holzschritte: "schritte", muenzen: "muenzen", tuer: "tuer",
     lachen: "lachen", fledermaus: "fledermaus" };
   /* Klangwelten: betten [Quelle, Stärke, { tief }], ev [Art, [min, max] Sekunden, Stärke, Anteil „aus der Ferne“], raum = Hallanteil */
   const KUL_WELT = {
-    taverne: { raum: .3, betten: [["a_feuer1", .55], ["a_gaeste", .8, { tief: 3800 }]],
-      ev: [["krug", [2.5, 8], .55, .2], ["stuhl", [8, 20], .4, .3], ["knarren", [10, 25], .35, .3], ["holzschritte", [9, 22], .35, .4], ["muenzen", [20, 45], .35, .4], ["tuer", [45, 100], .3, .5], ["katze", [50, 120], .28, .1], ["hund", [70, 160], .25, 1]] },
-    feuer: { raum: .35, betten: [["a_feuer2", 1], ["a_grillen", .45], ["a_nacht", .35], ["a_wind1", .15, { tief: 900 }], ["a_lagerfeuer", .45], ["a_grillen2", .22]],
-      ev: [["eule", [25, 60], .4, .6], ["heulen", [70, 160], .3, 1], ["wolf", [90, 200], .3, 1], ["ast", [15, 35], .35, .5], ["laubschritt", [40, 90], .3, .8]] },
-    wald: { raum: .3, betten: [["a_voegel1", .8], ["a_voegel2", .55], ["a_laub", .3], ["a_bach1", .25], ["a_wind1", .14, { tief: 1400 }], ["a_baumwind", .3], ["a_bienen", .08, { tief: 3000 }]],
-      ev: [["specht", [25, 60], .35, .6], ["vogel", [6, 16], .35, .5], ["kraehe", [40, 100], .25, .8], ["ast", [20, 45], .3, .6], ["laubschritt", [35, 80], .3, .7]] },
-    waldnacht: { raum: .4, betten: [["a_nacht", .9], ["a_grillen", .55], ["a_wind2", .22, { tief: 1200 }], ["a_baumwind", .25, { tief: 1600 }], ["a_grillen2", .3]],
-      ev: [["eule", [15, 40], .45, .5], ["heulen", [45, 110], .35, 1], ["wolf", [60, 150], .3, 1], ["ast", [12, 30], .35, .6], ["fledermaus", [30, 70], .25, .5]] },
-    regen: { raum: .3, betten: [["a_waldregen", 1], ["a_regen1", .45], ["a_wind1", .2, { tief: 1000 }], ["a_laubregen", .5], ["a_leichtregen", .3]],
-      ev: [["donner", [50, 130], .35, 1], ["platsch", [14, 35], .25, .5], ["pferd", [70, 160], .3, .8], ["kraehe", [60, 140], .2, 1]] },
-    zelt: { raum: .15, betten: [["a_zelt", 1], ["a_regen2", .3, { tief: 1800 }], ["a_wind1", .2, { tief: 700 }], ["a_zelt2", .55], ["a_heulwind", .12, { tief: 600 }]],
-      ev: [["donner", [60, 150], .3, 1], ["tuch", [25, 60], .25, .2]] },
-    sturm: { raum: .45, betten: [["a_gewitter1", 1], ["a_gewitter2", .5], ["a_starkregen", .45], ["a_wind2", .4], ["a_starkregen2", .4], ["a_heulwind", .35]],
-      ev: [["donner", [14, 40], .55, .5], ["donner", [25, 70], .4, 1]] },
-    hoehle: { raum: .9, betten: [["a_tropfen1", 1], ["a_tropfen2", .45], ["a_wind1", .22, { tief: 380 }], ["a_tropfen3", .45, { schleife: true }], ["a_heulwind", .12, { tief: 400 }]],
-      ev: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5]] },
-    unterreich: { raum: .9, betten: [["a_tropfen1", .7], ["a_unterwasser", .35, { tief: 500 }], ["a_bach2", .18, { tief: 600 }], ["a_tropfen3", .3, { schleife: true }], ["a_heulwind", .14, { tief: 300 }]],
-      ev: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1]] },
-    kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }], ["a_tropfen3", .35, { schleife: true }], ["a_heulwind", .14, { tief: 500 }]],
-      ev: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8], ["hund", [80, 180], .22, 1]] },
-    meer: { raum: .3, betten: [["a_wellen1", 1], ["a_wellen2", .55], ["a_wind2", .3], ["a_wellen3", .55]],
-      ev: [["moewe", [8, 22], .4, .5], ["glocke", [60, 140], .2, 1]] },
-    schiff: { raum: .25, betten: [["a_boot", 1], ["a_wellen2", .7], ["a_wind1", .4], ["a_segel", .55]],
-      ev: [["knarren", [8, 20], .4, .3], ["moewe", [15, 40], .3, .6], ["tuch", [10, 25], .35, .3], ["glocke", [50, 120], .25, .6], ["holzschritte", [25, 60], .3, .5]] },
-    wasserfall: { raum: .35, betten: [["a_wasserfall", .9], ["a_bach2", .55], ["a_voegel2", .28], ["a_wasserfall2", .4], ["a_fluss", .35]],
-      ev: [["vogel", [10, 25], .3, .6], ["platsch", [20, 45], .25, .5], ["specht", [40, 100], .2, .8], ["frosch", [25, 60], .25, .8], ["ruder", [60, 150], .3, .6]] },
-    schmiede: { raum: .25, betten: [["a_feuer1", .75], ["a_feuer3", .35], ["a_lagerfeuer", .3]],
-      ev: [["hammer", [6, 14], .55, .1], ["blasebalg", [12, 28], .35, .2], ["zischen", [20, 45], .3, .2], ["metall", [15, 35], .3, .3]] },
-    labor: { raum: .25, betten: [["a_kochen", .7], ["a_blubbern", .45], ["a_feuer3", .35], ["a_kochen2", .35]],
-      ev: [["krug", [8, 20], .35, .2], ["blubb", [5, 14], .35, .3], ["buch", [20, 45], .3, .3], ["zischen", [25, 60], .25, .3]] },
-    bibliothek: { raum: .5, betten: [["a_feuer3", .7], ["a_wind2", .25, { tief: 600 }], ["a_uhr", .18, { takt: 2.0005 }], ["a_fensterregen", .14, { tief: 2500 }]],
-      ev: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2]] },
-    tempel: { raum: .9, betten: [["a_wind1", .35, { tief: 500 }], ["a_wind2", .2, { tief: 300 }], ["a_feuer3", .3, { tief: 2000 }], ["a_gesang", .2, { tief: 3000 }], ["a_halle", .22, { tief: 1800 }]],
-      ev: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] },
-    sumpf: { raum: .35, betten: [["a_blubbern", .4], ["a_grillen", .4], ["a_nacht", .4], ["a_tropfen2", .3], ["a_dschungel", .22]],
-      ev: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1], ["kraehe", [40, 100], .22, .9]] },
-    unterwasser: { raum: .6, betten: [["a_unterwasser", 1], ["a_blubbern", .3, { tief: 1500 }]],
-      ev: [["blubb", [5, 14], .3, .5], ["wal", [35, 90], .3, .8], ["monster", [70, 160], .15, 1]] }
+    taverne: { raum: .3, betten: [["a_feuer1", .55], ["a_gaeste", .8, { tief: 3800 }], ["a_feuer3", .3], ["a_schnurren", .12, { tief: 1200 }], ["a_wind3", .08, { tief: 500 }], ["a_lagerfeuer", .2]],
+      ev: [["krug", [2.5, 8], .55, .2], ["stuhl", [8, 20], .4, .3], ["knarren", [10, 25], .35, .3], ["holzschritte", [9, 22], .35, .4], ["muenzen", [20, 45], .35, .4], ["tuer", [45, 100], .3, .5], ["katze", [50, 120], .28, .1], ["hund", [70, 160], .25, 1], ["leder", [30, 70], .25, .4], ["kettenhemd", [60, 140], .25, .5], ["ross", [90, 200], .25, 1], ["glasbruch", [150, 320], .2, .6]] },
+    feuer: { raum: .35, betten: [["a_feuer2", 1], ["a_grillen", .45], ["a_nacht", .35], ["a_wind1", .15, { tief: 900 }], ["a_lagerfeuer", .45], ["a_grillen2", .22], ["a_wind3", .12, { tief: 700 }], ["a_rinnsal", .1, { tief: 1600 }]],
+      ev: [["eule", [25, 60], .4, .6], ["heulen", [70, 160], .3, 1], ["wolf", [90, 200], .3, 1], ["ast", [15, 35], .35, .5], ["laubschritt", [40, 90], .3, .8], ["ross", [70, 160], .25, .6], ["leder", [40, 90], .22, .3], ["grollen", [150, 300], .2, 1], ["gras", [60, 130], .25, .8]] },
+    wald: { raum: .3, betten: [["a_voegel1", .8], ["a_voegel2", .55], ["a_laub", .3], ["a_bach1", .25], ["a_wind1", .14, { tief: 1400 }], ["a_baumwind", .3], ["a_bienen", .08, { tief: 3000 }], ["a_tagvoegel", .45], ["a_rinnsal", .2]],
+      ev: [["specht", [25, 60], .35, .6], ["vogel", [6, 16], .35, .5], ["kraehe", [40, 100], .25, .8], ["ast", [20, 45], .3, .6], ["laubschritt", [35, 80], .3, .7], ["axt", [60, 150], .25, 1], ["baumfall", [200, 400], .2, 1], ["gras", [40, 90], .3, .6], ["ross", [120, 240], .2, 1]] },
+    waldnacht: { raum: .4, betten: [["a_nacht", .9], ["a_grillen", .55], ["a_wind2", .22, { tief: 1200 }], ["a_baumwind", .25, { tief: 1600 }], ["a_grillen2", .3], ["a_wind3", .15, { tief: 900 }], ["a_rinnsal", .12, { tief: 1500 }]],
+      ev: [["eule", [15, 40], .45, .5], ["heulen", [45, 110], .35, 1], ["wolf", [60, 150], .3, 1], ["ast", [12, 30], .35, .6], ["fledermaus", [30, 70], .25, .5], ["grollen", [120, 260], .2, 1], ["troll", [150, 300], .16, 1], ["gras", [50, 110], .25, .8]] },
+    regen: { raum: .3, betten: [["a_waldregen", 1], ["a_regen1", .45], ["a_wind1", .2, { tief: 1000 }], ["a_laubregen", .5], ["a_leichtregen", .3], ["a_regen3", .45], ["a_regen4", .3], ["a_rinnsal", .2]],
+      ev: [["donner", [50, 130], .35, 1], ["platsch", [14, 35], .25, .5], ["pferd", [70, 160], .3, .8], ["kraehe", [60, 140], .2, 1], ["grollen", [40, 100], .35, 1], ["nass", [40, 90], .3, .6], ["windstoss", [30, 80], .3, .5]] },
+    zelt: { raum: .15, betten: [["a_zelt", 1], ["a_regen2", .3, { tief: 1800 }], ["a_wind1", .2, { tief: 700 }], ["a_zelt2", .55], ["a_heulwind", .12, { tief: 600 }], ["a_regen4", .25, { tief: 1400 }]],
+      ev: [["donner", [60, 150], .3, 1], ["tuch", [25, 60], .25, .2], ["grollen", [50, 120], .3, 1], ["windstoss", [25, 60], .3, .3], ["leder", [30, 70], .2, .2], ["ross", [80, 180], .2, .8]] },
+    sturm: { raum: .45, betten: [["a_gewitter1", 1], ["a_gewitter2", .5], ["a_starkregen", .45], ["a_wind2", .4], ["a_starkregen2", .4], ["a_heulwind", .35], ["a_orkan", .4], ["a_regen3", .35]],
+      ev: [["donner", [14, 40], .55, .5], ["donner", [25, 70], .4, 1], ["grollen", [15, 40], .45, .8], ["windstoss", [8, 20], .4, .4], ["holzbruch", [60, 150], .3, .8]] },
+    hoehle: { raum: .9, betten: [["a_tropfen1", 1], ["a_tropfen2", .45], ["a_wind1", .22, { tief: 380 }], ["a_tropfen3", .45, { schleife: true }], ["a_heulwind", .12, { tief: 400 }], ["a_rinnsal", .2, { tief: 900 }], ["a_wind3", .1, { tief: 300 }]],
+      ev: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5], ["steinschlag", [40, 100], .3, .8], ["hacke", [90, 200], .2, 1], ["nass", [60, 140], .2, .8]] },
+    unterreich: { raum: .9, betten: [["a_tropfen1", .7], ["a_unterwasser", .35, { tief: 500 }], ["a_bach2", .18, { tief: 600 }], ["a_tropfen3", .3, { schleife: true }], ["a_heulwind", .14, { tief: 300 }], ["a_wildwasser", .1, { tief: 400 }], ["a_wind3", .12, { tief: 250 }]],
+      ev: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1], ["schatten", [40, 100], .25, .8], ["troll", [70, 160], .25, 1], ["hacke", [50, 120], .22, 1], ["steinschlag", [40, 90], .25, .9], ["erz", [90, 200], .2, 1]] },
+    kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }], ["a_tropfen3", .35, { schleife: true }], ["a_heulwind", .14, { tief: 500 }], ["a_wind3", .12, { tief: 350 }], ["a_regen4", .08, { tief: 500 }]],
+      ev: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8], ["hund", [80, 180], .22, 1], ["schluessel", [40, 90], .3, .6], ["schloss", [60, 130], .3, .7], ["nass", [60, 120], .25, .8], ["tor", [100, 220], .25, 1]] },
+    meer: { raum: .3, betten: [["a_wellen1", 1], ["a_wellen2", .55], ["a_wind2", .3], ["a_wellen3", .55], ["a_brandung", .55], ["a_klippen", .35], ["a_wind3", .18]],
+      ev: [["moewe", [8, 22], .4, .5], ["glocke", [60, 140], .2, 1], ["windstoss", [30, 80], .3, .4], ["ruder", [90, 200], .25, .9], ["rumpf", [100, 220], .2, 1]] },
+    schiff: { raum: .25, betten: [["a_boot", 1], ["a_wellen2", .7], ["a_wind1", .4], ["a_segel", .55], ["a_brandung", .25], ["a_wind3", .2]],
+      ev: [["knarren", [8, 20], .4, .3], ["moewe", [15, 40], .3, .6], ["tuch", [10, 25], .35, .3], ["glocke", [50, 120], .25, .6], ["holzschritte", [25, 60], .3, .5], ["rumpf", [12, 30], .35, .3], ["kette", [60, 140], .25, .5], ["windstoss", [25, 60], .3, .3], ["leder", [40, 90], .2, .4]] },
+    wasserfall: { raum: .35, betten: [["a_wasserfall", .9], ["a_bach2", .55], ["a_voegel2", .28], ["a_wasserfall2", .4], ["a_fluss", .35], ["a_wasserfall3", .4], ["a_strom", .35], ["a_tagvoegel", .25]],
+      ev: [["vogel", [10, 25], .3, .6], ["platsch", [20, 45], .25, .5], ["specht", [40, 100], .2, .8], ["frosch", [25, 60], .25, .8], ["ruder", [60, 150], .3, .6], ["nass", [50, 120], .25, .6], ["steinschlag", [120, 260], .15, 1]] },
+    schmiede: { raum: .25, betten: [["a_feuer1", .75], ["a_feuer3", .35], ["a_lagerfeuer", .3], ["a_wind3", .08, { tief: 500 }], ["a_markt", .12, { tief: 1500 }], ["a_hof", .08, { tief: 1200 }]],
+      ev: [["hammer", [6, 14], .55, .1], ["blasebalg", [12, 28], .35, .2], ["zischen", [20, 45], .3, .2], ["metall", [15, 35], .3, .3], ["zimmern", [40, 90], .25, .7], ["kettenhemd", [40, 90], .25, .4], ["ross", [90, 200], .25, .9], ["hufe", [80, 180], .25, .8]] },
+    labor: { raum: .25, betten: [["a_kochen", .7], ["a_blubbern", .45], ["a_feuer3", .35], ["a_kochen2", .35], ["a_wind3", .08, { tief: 600 }], ["a_rinnsal", .1, { tief: 2500 }]],
+      ev: [["krug", [8, 20], .35, .2], ["blubb", [5, 14], .35, .3], ["buch", [20, 45], .3, .3], ["zischen", [25, 60], .25, .3], ["glasbruch", [120, 260], .2, .5], ["zauber", [50, 120], .2, .4], ["edelstein", [40, 90], .22, .3], ["papier", [25, 60], .25, .3]] },
+    bibliothek: { raum: .5, betten: [["a_feuer3", .7], ["a_wind2", .25, { tief: 600 }], ["a_uhr", .18, { takt: 2.0005 }], ["a_fensterregen", .14, { tief: 2500 }], ["a_schnurren", .1, { tief: 1000 }], ["a_regen4", .1, { tief: 1200 }]],
+      ev: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2], ["schluessel", [90, 200], .2, .6], ["leder", [40, 90], .2, .4], ["grollen", [150, 300], .15, 1]] },
+    tempel: { raum: .9, betten: [["a_wind1", .35, { tief: 500 }], ["a_wind2", .2, { tief: 300 }], ["a_feuer3", .3, { tief: 2000 }], ["a_gesang", .2, { tief: 3000 }], ["a_halle", .22, { tief: 1800 }], ["l_windspiel", .15, { tief: 3500 }], ["a_rinnsal", .1, { tief: 1500 }]],
+      ev: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5], ["tor", [120, 260], .22, 1], ["leder", [50, 110], .2, .6]] },
+    sumpf: { raum: .35, betten: [["a_blubbern", .4], ["a_grillen", .4], ["a_nacht", .4], ["a_tropfen2", .3], ["a_dschungel", .22], ["a_rinnsal", .2], ["a_wind3", .1, { tief: 600 }]],
+      ev: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1], ["kraehe", [40, 100], .22, .9], ["troll", [90, 200], .2, 1], ["nass", [40, 90], .25, .7]] },
+    unterwasser: { raum: .6, betten: [["a_unterwasser", 1], ["a_blubbern", .3, { tief: 1500 }], ["a_wildwasser", .12, { tief: 300 }], ["l_wal", .12, { tief: 1500 }], ["a_wellen1", .15, { tief: 300 }]],
+      ev: [["blubb", [5, 14], .3, .5], ["wal", [35, 90], .3, .8], ["monster", [70, 160], .15, 1], ["rumpf", [90, 200], .2, 1], ["kette", [120, 260], .15, 1]] },
+    dorf: { raum: .35, betten: [["a_hof", .8], ["a_tagvoegel", .45], ["a_huehner", .3], ["a_kuehe", .22], ["a_schafe", .15], ["a_wind3", .12, { tief: 1200 }], ["a_bienen", .06, { tief: 3000 }]],
+      ev: [["huhn", [8, 20], .35, .4], ["kuh", [20, 50], .35, .7], ["schaf", [25, 60], .3, .7], ["schwein", [40, 90], .3, .5], ["ross", [40, 100], .3, .6], ["hund", [50, 120], .25, .8], ["axt", [40, 90], .3, .8], ["zimmern", [50, 120], .25, .9], ["glocke", [120, 260], .2, 1]] },
+    markt: { raum: .35, betten: [["a_markt", 1], ["a_gaeste", .3, { tief: 2500 }], ["a_tagvoegel", .15], ["a_huehner", .1, { tief: 2500 }], ["a_wind3", .08, { tief: 1000 }], ["a_hof", .12, { tief: 2000 }], ["a_rinnsal", .08, { tief: 2500 }]],
+      ev: [["muenzen", [8, 20], .35, .3], ["hufe", [25, 60], .3, .5], ["ross", [40, 90], .25, .7], ["huhn", [30, 70], .25, .6], ["hund", [50, 120], .22, .8], ["krug", [20, 45], .3, .4], ["zimmern", [40, 90], .25, 1], ["hammer", [60, 140], .22, 1], ["glocke", [90, 200], .2, 1]] },
+    hafen: { raum: .4, betten: [["a_hafen", 1], ["a_wellen3", .4], ["a_boot", .3], ["a_wind2", .2], ["a_segel", .2], ["a_brandung", .2, { tief: 1500 }], ["a_markt", .1, { tief: 2000 }]],
+      ev: [["moewe", [8, 20], .35, .5], ["glocke", [50, 120], .25, .7], ["knarren", [12, 30], .3, .4], ["kette", [30, 70], .3, .5], ["rumpf", [25, 60], .3, .5], ["ruder", [40, 90], .3, .6], ["zimmern", [50, 110], .22, 1], ["muenzen", [60, 140], .22, .5]] },
+    gebirge: { raum: .6, betten: [["a_schneesturm", .7], ["a_wind3", .5], ["a_heulwind", .3], ["a_schneeschritte", .18, { tief: 3000 }], ["a_wind2", .2, { tief: 900 }], ["a_orkan", .2, { tief: 1500 }]],
+      ev: [["windstoss", [15, 40], .35, .4], ["schnee", [30, 70], .3, .5], ["wolf", [70, 160], .3, 1], ["kraehe", [60, 140], .22, 1], ["steinschlag", [50, 120], .3, 1], ["heulen", [90, 200], .28, 1], ["kettenhemd", [40, 90], .2, .3]] },
+    mine: { raum: .8, betten: [["a_tropfen2", .5], ["a_wind1", .25, { tief: 400 }], ["a_feuer3", .3, { tief: 1500 }], ["a_rinnsal", .15, { tief: 900 }], ["a_tropfen3", .25, { schleife: true }], ["a_wind3", .1, { tief: 250 }], ["a_gaeste", .05, { tief: 600 }]],
+      ev: [["hacke", [5, 14], .4, .6], ["erz", [12, 30], .35, .6], ["hammer", [30, 70], .3, .8], ["kette", [30, 70], .3, .6], ["steinschlag", [40, 90], .3, .8], ["blasebalg", [50, 120], .22, 1], ["zischen", [60, 140], .2, 1], ["kies", [40, 90], .25, .6]] },
+    strasse: { raum: .3, betten: [["a_tagvoegel", .6], ["a_kiesweg", .25], ["a_wind1", .3, { tief: 2000 }], ["a_baumwind", .25], ["a_bienen", .06, { tief: 3000 }], ["a_rinnsal", .1, { tief: 2000 }]],
+      ev: [["hufe", [10, 25], .35, .2], ["ross", [30, 70], .3, .3], ["leder", [20, 45], .25, .2], ["kettenhemd", [30, 70], .25, .2], ["vogel", [10, 25], .3, .6], ["kraehe", [50, 120], .22, .9], ["knarren", [25, 60], .25, .3], ["galopp", [120, 260], .25, 1]] },
+    burg: { raum: .6, betten: [["a_wind3", .3], ["a_tagvoegel", .2], ["a_feuer3", .2], ["a_markt", .1, { tief: 1200 }], ["a_huehner", .06, { tief: 2000 }], ["a_hof", .1, { tief: 1600 }]],
+      ev: [["uebung", [12, 30], .3, .6], ["kettenhemd", [15, 35], .3, .4], ["hufe", [30, 70], .3, .5], ["ross", [40, 100], .25, .7], ["tor", [60, 140], .3, .7], ["hammer", [40, 90], .22, 1], ["glocke", [90, 200], .25, 1], ["hund", [70, 160], .22, .8], ["schluessel", [60, 140], .25, .4]] },
+    ufer: { raum: .35, betten: [["a_strom", .8], ["a_rinnsal", .4], ["a_tagvoegel", .4], ["a_fluss", .3], ["a_wind1", .15, { tief: 1800 }], ["a_bienen", .05, { tief: 3000 }]],
+      ev: [["frosch", [10, 25], .35, .6], ["platsch", [15, 35], .3, .5], ["ruder", [40, 90], .3, .6], ["vogel", [8, 20], .3, .6], ["specht", [40, 100], .22, .8], ["nass", [50, 110], .25, .5], ["insekt", [20, 45], .2, .4], ["moewe", [100, 220], .18, 1]] }
   };
   /* Gesamtpegel der Klangwelten im Pult, abgestimmt auf die bisherigen Kulissen */
   const WELT_GRUND = 2.6;
   /* leise Klangwelten etwas anheben, damit alle Kulissen ähnlich präsent sind */
-  const WELT_PEGEL = { hoehle: 2, unterreich: 2, kerker: 2.6, bibliothek: 2.4, tempel: 2.4, zelt: 1.6, schmiede: 1.6, feuer: 1.4, regen: 1.4, sumpf: 1.4, meer: 1.2, schiff: 1.2 };
+  const WELT_PEGEL = { taverne: 0.98, feuer: 1.39, wald: 0.91, waldnacht: 0.99, regen: 1.16, zelt: 1.55, sturm: 0.92, hoehle: 1.95, unterreich: 1.97, kerker: 2.58, meer: 1.07, schiff: 1.16, wasserfall: 0.9, schmiede: 1.57, labor: 0.99, bibliothek: 2.33, tempel: 2.27, sumpf: 1.35, unterwasser: 0.99, dorf: 1.05, markt: 1, hafen: 0.93, gebirge: 1.15, mine: 2.66, strasse: 1.49, burg: 2.82, ufer: 1.03 };
   const ambBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "amb/") : "amb/"; })();
   const ambBuf = new Map(), ambLaedt = new Map();
   function ambLaden(name) {
