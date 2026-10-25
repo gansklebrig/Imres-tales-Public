@@ -55,8 +55,8 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
   .seite .regler{grid-template-columns:minmax(5.5rem,8.5rem) 1fr 2.4rem;gap:.45rem;padding:.12rem 0;font-size:.85rem}
   .seite .misch .tipp,.seite .misch .spar{font-size:.76rem}
   /* rechts dreispaltig: kürzer, weniger Scrollen */
-  .seite .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.3rem}
-  .seite .chip{border-radius:9px;padding:.34rem .45rem;font-size:.8rem;line-height:1.15;gap:.3rem;text-align:left;min-height:2.3rem}
+  .seite .geraeusche .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.3rem}
+  .seite .geraeusche .chip{border-radius:9px;padding:.34rem .45rem;font-size:.8rem;line-height:1.15;gap:.3rem;text-align:left;min-height:2.3rem}
   .seite .chip kbd{margin-left:auto}
   .seite .geraeusche{gap:.55rem}
   .seite .misch:not([hidden]){display:grid;grid-template-columns:1fr 1fr;column-gap:1.1rem}
@@ -69,7 +69,8 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
   .misch-knopf{display:block}
   .leiste{gap:.45rem}
   .laut > span{display:none}
-  .laut{flex:0 1 5.5rem;min-width:4rem}
+  .laut{flex:0 1 4.5rem;min-width:3.5rem}
+  .jetzt small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .jetzt{cursor:pointer}
   .misch{position:fixed;left:.6rem;right:.6rem;bottom:calc(max(.7rem,env(safe-area-inset-bottom,0px)) + 4.4rem);margin:0;z-index:6;max-height:62vh;overflow:auto;
     box-shadow:0 -6px 30px rgba(0,0,0,.65);border-color:rgba(224,160,70,.5);transform:translateY(calc(100% + 6rem));opacity:0;pointer-events:none;transition:transform .28s ease,opacity .2s}
@@ -162,6 +163,22 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 .chip:hover{border-color:var(--ember)}
 .chip:active{transform:scale(.96)}
 .chip.blitz{animation:blitz 1.2s ease-out}
+.chip.fav::after{content:"★";color:var(--ember);font-size:.75em;margin-left:.15rem}
+.merken .chip{border-style:dashed}
+.merken .chip:not(.fav)::after{content:"☆";color:var(--mute);font-size:.75em;margin-left:.15rem}
+.werkzeug{display:flex;gap:.4rem;margin:.2rem 0 .6rem}
+.werkzeug input{flex:1;min-width:0;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:999px;padding:.4rem .8rem;color:var(--text);font-size:.9rem}
+.werkzeug .funk-knopf[aria-pressed="true"]{border-color:var(--ember);color:var(--ember)}
+.kopf-knoepfe{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}
+#offline.an{border-color:#5f9d6a;color:#8fd09b}
+.stimmung{grid-column:1/-1;margin:0 0 .3rem}
+.stimmung .chips{display:flex;flex-wrap:wrap;gap:.3rem;margin:.2rem 0 .35rem}
+.stimmung .chip{padding:.3rem .6rem .3rem .45rem;font-size:.84rem}
+.stimmung .chip.an{border-color:var(--ember);background:rgba(224,160,70,.16)}
+.stimmung h3{font:500 .74rem var(--fb);color:var(--mute);margin:.1rem 0 .1rem;text-transform:uppercase;letter-spacing:.06em}
+.regler.spannung input{accent-color:#c0584a}
+.fern-leiste{margin:.6rem 0 0;padding:.55rem .8rem;border:1px solid rgba(143,124,255,.55);border-radius:12px;background:rgba(143,124,255,.1);font-size:.9rem}
+.fern-leiste b{font-weight:600}
 .aus-alles{flex:0 0 auto;width:2.4rem;height:2.4rem;border-radius:50%;border:1px solid rgba(255,120,100,.55);background:none;color:#ff9a86;font-size:.95rem;line-height:1}
 .aus-alles:hover{background:rgba(255,120,100,.15)}
 .spar{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--mute);margin:.5rem 0 .2rem}
@@ -176,7 +193,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 <body>
 <div class="wrap">
   <header class="kopf">
-    <div class="kopfzeile"><a class="zurueck" href="index.html#lautenwerk" data-t="zurueck">← Zurück zum Lautenwerk</a><button type="button" class="funk-knopf" id="rundgang" data-t="rundgang">❔ Rundgang</button></div>
+    <div class="kopfzeile"><a class="zurueck" href="index.html#lautenwerk" data-t="zurueck">← Zurück zum Lautenwerk</a><span class="kopf-knoepfe"><button type="button" class="funk-knopf" id="offline" title="">⬇ Offline</button><button type="button" class="funk-knopf" id="rundgang" data-t="rundgang">❔ Rundgang</button></span></div>
+    <div class="fern-leiste" id="fern-leiste" hidden></div>
     <h1 data-t="titel">Klangwelten</h1>
     <p class="unter" data-t="unter">Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.</p>
   </header>
@@ -201,6 +219,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       <h2 class="abschnitt"><span data-t="hGer">🎭 Geräusche &amp; Einschläge</span>
         <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="ger-laut" min="0" max="150" value="100"></label></h2>
       <p class="tipp" data-t="hGerTx">Antippen spielt einmal ab – im Raum der laufenden Klangwelt.</p>
+      <div class="werkzeug"><input type="search" id="ger-suche" autocomplete="off" placeholder="🔎 Suchen …"><button type="button" class="funk-knopf" id="ger-merken" aria-pressed="false">☆ Merken</button></div>
+      <p class="tipp" id="merk-tipp" hidden></p>
       <div class="geraeusche" id="geraeusche"></div>
     </aside>
   </main>
@@ -237,14 +257,20 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     hTitel: "Mitlauschen", hWarte: "Gerade läuft nichts – sobald es losgeht, hörst du es.", hZuhoeren: "🎧 Zuhören", hStumm: "❚❚ Stumm", hSelbst: "Selbst Klangwelten wählen"
   };
   Object.assign(T, EN ? {
-    hGer: "🎭 Sounds & impacts", hGerTx: "Tap to play once – in the room of the current soundscape.", hWelten: "🗺 Soundscapes", hWeltenTx: "Tap to start, tap again to stop. ✦ = epic: pitched down, with a huge reverb.", gGross: "⚡ Big moments", nWelten: "🗺 Soundscapes", nGer: "🎭 Sounds", nSz: "⏳ Scenes", wg: ["🏠 Places & halls", "🌲 Wilderness & weather", "🌊 Water", "🕳 Below & beyond"], ausAlles: "Stop everything now (Esc)", spar: "🪶 Light sound – if it crackles or scratches on this device", tGer: ["#ger-box", "🎭 Sounds & impacts", "Doors, footsteps, armour, coins, creatures – and at the top the big moments like thunder or a dragon's roar (keys 1–9 and 0). On a computer this column stays beside you while you scroll."], tAusAlles: ["#aus-alles", "✕ Stop everything", "Ends everything at once – soundscape, scenes, impacts. Esc does the same."],
+    hGer: "🎭 Sounds & impacts", hGerTx: "Tap to play once – in the room of the current soundscape.", hWelten: "🗺 Soundscapes", hWeltenTx: "Tap to start, tap again to stop. ✦ = epic: pitched down, with a huge reverb.", gGross: "⚡ Big moments", stimmung: "Mood", wetter: "Weather", keinWetter: "clear", wlaut: "Weather", spannung: "Tension", gemerkt: "★ Saved", suchen: "🔎 Search …", merken: "☆ Mark", merkenFertig: "✓ Done", merkTipp: "Tap sounds to add or remove them from your ★ list at the top.", nichts: "Nothing found.",
+    offLaden: "⬇ Offline", offBereit: "✓ Offline ready", offTeils: "⚠ Offline partly", offFehlt: "⚠ Offline not possible", offTipp: "Downloads all recordings once (about 40 MB) – then the soundscapes also work without internet.",
+    fernTitel: "📱 Remote control", fernTipp: "Open this link on your phone: it becomes a remote for this page – soundscapes, sounds, scenes, weather and tension. Sound only comes from this computer.", fernAn: "📱 Allow remote control", fernAus: "Turn remote off",
+    fernLeiste: "📱 <b>Remote control</b> – everything you tap plays on the computer.", fernOk: "🟢 connected", fernWarte: "🟡 waiting for the computer – is the remote allowed there?", fernFehler: "🔴 no connection", nWelten: "🗺 Soundscapes", nGer: "🎭 Sounds", nSz: "⏳ Scenes", wg: ["🏠 Places & halls", "🌲 Wilderness & weather", "🌊 Water", "🕳 Below & beyond"], ausAlles: "Stop everything now (Esc)", spar: "🪶 Light sound – if it crackles or scratches on this device", tGer: ["#ger-box", "🎭 Sounds & impacts", "Doors, footsteps, armour, coins, creatures – and at the top the big moments like thunder or a dragon's roar (keys 1–9 and 0). On a computer this column stays beside you while you scroll."], tAusAlles: ["#aus-alles", "✕ Stop everything", "Ends everything at once – soundscape, scenes, impacts. Esc does the same."],
     ruhig: "🌿 Calm", episch: "⚔ Epic", hAus: "⚡ Impacts", hAusTx: "One blow that rolls through the space – fits any soundscape.", hSz: "⏳ Scenes", hSzTx: "Long recordings unfolding over minutes. Tap again to fade out.", szStopp: "◼ Fade all out",
     noch: "left", szLaeuft: n => n === 1 ? "1 scene" : n + " scenes", ehall: "Reverb", eweite: "Echo depth", tasten: "Keys 1–9 and 0 fire the impacts.", tippEpisch: "Pitched down and bathed in a huge reverb. Reverb and echo depth also apply to impacts and scenes.",
     tModus: ["#modus", "🌿 Calm or ⚔ Epic", "“Calm” holds the quiet everyday soundscapes. “Epic” has vast, reverberant worlds plus impacts and long scenes for the big moments."],
     tAus: ["#aus-box", "⚡ Impacts", "Single blows for the big moment: thunder, a death knell, a dragon's roar – they also work over a calm soundscape. On a keyboard: keys 1–9 and 0."],
     tSz: ["#sz-box", "⏳ Scenes", "Long recordings unfolding over minutes – a storm rolling in, monks in the deep. The bar shows how far along it is; tap again to fade out."]
   } : {
-    hGer: "🎭 Geräusche & Einschläge", hGerTx: "Antippen spielt einmal ab – im Raum der laufenden Klangwelt.", hWelten: "🗺 Klangwelten", hWeltenTx: "Antippen startet, nochmal antippen hält an. ✦ = episch: tiefer gestimmt, mit riesigem Nachhall.", gGross: "⚡ Große Momente", nWelten: "🗺 Klangwelten", nGer: "🎭 Geräusche", nSz: "⏳ Szenen", wg: ["🏠 Orte & Hallen", "🌲 Wildnis & Wetter", "🌊 Wasser", "🕳 Tiefe & Jenseits"], ausAlles: "Alles sofort stoppen (Esc)", spar: "🪶 Leichter Klang – falls es auf diesem Gerät kratzt oder knackt", tGer: ["#ger-box", "🎭 Geräusche & Einschläge", "Türen, Schritte, Rüstung, Münzen, Wesen – und ganz oben die großen Momente wie Donner oder Drachenbrüllen (Tasten 1–9 und 0). Am Rechner bleibt diese Spalte beim Scrollen neben dir stehen."], tAusAlles: ["#aus-alles", "✕ Alles aus", "Beendet sofort alles – Klangwelt, Szenen, Einschläge. Die Esc-Taste macht dasselbe."],
+    hGer: "🎭 Geräusche & Einschläge", hGerTx: "Antippen spielt einmal ab – im Raum der laufenden Klangwelt.", hWelten: "🗺 Klangwelten", hWeltenTx: "Antippen startet, nochmal antippen hält an. ✦ = episch: tiefer gestimmt, mit riesigem Nachhall.", gGross: "⚡ Große Momente", stimmung: "Stimmung", wetter: "Wetter", keinWetter: "klar", wlaut: "Wetter", spannung: "Spannung", gemerkt: "★ Gemerkt", suchen: "🔎 Suchen …", merken: "☆ Merken", merkenFertig: "✓ Fertig", merkTipp: "Tippe Geräusche an, um sie in deine ★-Liste ganz oben aufzunehmen oder herauszunehmen.", nichts: "Nichts gefunden.",
+    offLaden: "⬇ Offline", offBereit: "✓ Offline bereit", offTeils: "⚠ Offline teilweise", offFehlt: "⚠ Offline nicht möglich", offTipp: "Lädt alle Aufnahmen einmal herunter (etwa 40 MB) – danach laufen die Klangwelten auch ohne Internet.",
+    fernTitel: "📱 Fernbedienung", fernTipp: "Öffne diesen Link auf dem Handy: Es wird zur Fernbedienung für diese Seite – Klangwelten, Geräusche, Szenen, Wetter und Spannung. Der Ton kommt nur aus diesem Rechner.", fernAn: "📱 Fernbedienung erlauben", fernAus: "Fernbedienung ausschalten",
+    fernLeiste: "📱 <b>Fernbedienung</b> – was du antippst, erklingt am Rechner.", fernOk: "🟢 verbunden", fernWarte: "🟡 warte auf den Rechner – ist dort die Fernbedienung erlaubt?", fernFehler: "🔴 keine Verbindung", nWelten: "🗺 Klangwelten", nGer: "🎭 Geräusche", nSz: "⏳ Szenen", wg: ["🏠 Orte & Hallen", "🌲 Wildnis & Wetter", "🌊 Wasser", "🕳 Tiefe & Jenseits"], ausAlles: "Alles sofort stoppen (Esc)", spar: "🪶 Leichter Klang – falls es auf diesem Gerät kratzt oder knackt", tGer: ["#ger-box", "🎭 Geräusche & Einschläge", "Türen, Schritte, Rüstung, Münzen, Wesen – und ganz oben die großen Momente wie Donner oder Drachenbrüllen (Tasten 1–9 und 0). Am Rechner bleibt diese Spalte beim Scrollen neben dir stehen."], tAusAlles: ["#aus-alles", "✕ Alles aus", "Beendet sofort alles – Klangwelt, Szenen, Einschläge. Die Esc-Taste macht dasselbe."],
     ruhig: "🌿 Ruhig", episch: "⚔ Episch", hAus: "⚡ Einschläge", hAusTx: "Ein Schlag, der durch den Raum rollt – passt zu jeder Klangwelt.", hSz: "⏳ Szenen", hSzTx: "Lange Aufnahmen, die sich über Minuten entfalten. Nochmal antippen blendet aus.", szStopp: "◼ Alle ausblenden",
     noch: "noch", szLaeuft: n => n === 1 ? "1 Szene" : n + " Szenen", ehall: "Nachhall", eweite: "Echotiefe", tasten: "Tasten 1–9 und 0 lösen die Einschläge aus.", tippEpisch: "Tiefer gestimmt und in riesigen Nachhall getaucht. Nachhall und Echotiefe gelten auch für Einschläge und Szenen.",
     tModus: ["#modus", "🌿 Ruhig oder ⚔ Episch", "„Ruhig“ sind die stillen Alltags-Klangwelten. „Episch“ hat gewaltige, hallende Welten und dazu Einschläge und lange Szenen für die großen Momente."],
@@ -304,15 +330,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     { id: "waldnacht", sym: "🌙", name: W("Wald bei Nacht", "Forest at night"), text: W("Grillen, raunende Bäume, Eulen und Wölfe in der Ferne", "Crickets, murmuring trees, owls and distant wolves"), raum: 1.3,
       betten: [["a_nacht", .9, W("Nacht", "Night")], ["a_grillen", .55, W("Grillen", "Crickets")], ["a_wind2", .22, W("Wind", "Wind"), { tief: 1200 }], ["a_baumwind", .25, W("Raunende Bäume", "Murmuring trees"), { tief: 1600 }], ["a_grillen2", .3, W("Grillenwiese", "Cricket meadow")]],
       ereignisse: [["eule", [15, 40], .45, .5], ["heulen", [45, 110], .35, 1], ["wolf", [60, 150], .3, 1], ["ast", [12, 30], .35, .6], ["fledermaus", [30, 70], .25, .5]] },
-    { id: "regen", sym: "🌧", name: W("Regen unterwegs", "Rain on the road"), text: W("Regen auf Blättern, Pfützen, ein Reiter, ferner Donner", "Rain on leaves, puddles, a rider, distant thunder"), raum: 1,
-      betten: [["a_waldregen", 1, W("Waldregen", "Forest rain")], ["a_regen1", .45, W("Regen", "Rain")], ["a_wind1", .2, W("Wind", "Wind"), { tief: 1000 }], ["a_laubregen", .5, W("Regen auf Laub", "Rain on leaves")], ["a_leichtregen", .3, W("Nieselregen", "Drizzle")]],
-      ereignisse: [["donner", [50, 130], .35, 1], ["platsch", [14, 35], .25, .5], ["pferd", [70, 160], .3, .8], ["kraehe", [60, 140], .2, 1]] },
     { id: "zelt", sym: "⛺", name: W("Zelt im Regen", "Tent in the rain"), text: W("Tropfen auf der Zeltplane, draußen Böen und Donner", "Drops on canvas, gusts and thunder outside"), raum: .4,
       betten: [["a_zelt", 1, W("Zeltplane", "Canvas")], ["a_regen2", .3, W("Regen", "Rain"), { tief: 1800 }], ["a_wind1", .2, W("Wind", "Wind"), { tief: 700 }], ["a_zelt2", .55, W("Plane", "Tarp")], ["a_heulwind", .12, W("Böen", "Gusts"), { tief: 600 }]],
       ereignisse: [["donner", [60, 150], .3, 1], ["tuch", [25, 60], .25, .2]] },
-    { id: "gewitter", sym: "⛈", name: W("Gewitter", "Thunderstorm"), text: W("Prasselnder Regen, heulender Sturm und rollender Donner", "Pouring rain, howling gale and rolling thunder"), raum: 1.5,
-      betten: [["a_gewitter1", 1, W("Gewitter", "Storm")], ["a_gewitter2", .5, W("Unwetter", "Tempest")], ["a_starkregen", .45, W("Starkregen", "Downpour")], ["a_wind2", .4, W("Sturmwind", "Gale")], ["a_starkregen2", .4, W("Wolkenbruch", "Cloudburst")], ["a_heulwind", .35, W("Heulender Sturm", "Howling gale")]],
-      ereignisse: [["donner", [14, 40], .55, .5], ["donner", [25, 70], .4, 1]] },
     { id: "hoehle", sym: "💧", name: W("Höhle", "Cave"), text: W("Tropfsteine, Hall, Höhlenwind, bröckelnder Stein", "Dripstones, echoes, cave wind, crumbling stone"), raum: 4,
       betten: [["a_tropfen1", 1, W("Tropfen", "Drips")], ["a_tropfen2", .45, W("Rinnsal", "Trickle")], ["a_wind1", .22, W("Luftzug", "Draught"), { tief: 380 }], ["a_tropfen3", .45, W("Tropfsteine", "Dripstones"), { schleife: true }], ["a_heulwind", .12, W("Höhlenwind", "Cave wind"), { tief: 400 }]],
       ereignisse: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5]] },
@@ -503,19 +523,24 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 
 
   const WELT_GRUPPE = { taverne: 0, bibliothek: 0, schmiede: 0, labor: 0, tempel: 0, kathedrale: 0, gefallene: 0, kerker: 0,
-    lagerfeuer: 1, waldtag: 1, waldnacht: 1, sumpf: 1, regen: 1, zelt: 1, gewitter: 1, gipfel: 1, schlachtfeld: 1,
+    lagerfeuer: 1, waldtag: 1, waldnacht: 1, sumpf: 1, zelt: 1, gipfel: 1, schlachtfeld: 1,
     kueste: 2, schiff: 2, fluss: 2, unterwasser: 2, ozean: 2, hoehle: 3, unterreich: 3, abgrund: 3, hort: 3, sterne: 3 };
   /* ---------- Gemerkte Einstellungen ---------- */
+  /* Fernbedienung: ?fern=RAUM.SCHLÜSSEL – diese Seite spielt dann nichts selbst, sondern steuert das Pult */
+  const FERN = (() => { try { const c = new URLSearchParams(location.search).get("fern"); return c && /^[a-z0-9]{4,16}\.[a-z0-9]{6,24}$/i.test(c) ? { raum: c.split(".")[0].toLowerCase(), key: c.split(".")[1], status: "verbinde", zuletzt: null, zeit: 0 } : null; } catch (_) { return null; } })();
+  const MERK_KEY = FERN ? "imres-klangwelten-fern" : "imres-klangwelten";
   let merk = {};
   const istObjekt = v => !!v && typeof v === "object" && !Array.isArray(v);
-  try { merk = JSON.parse(localStorage.getItem("imres-klangwelten") || "{}") || {}; } catch (_) {}
+  try { merk = JSON.parse(localStorage.getItem(MERK_KEY) || "{}") || {}; } catch (_) {}
   /* kaputte Speicherstände (Zahl, Text, Liste …) nicht übernehmen */
   if (!istObjekt(merk)) merk = {};
   if (!istObjekt(merk.mix)) merk.mix = {};
   Object.keys(merk.mix).forEach(k => { if (!istObjekt(merk.mix[k])) delete merk.mix[k]; });
-  ["gesamt", "ehall", "eweite", "ausLaut", "szLaut", "gLaut"].forEach(k => { if (typeof merk[k] !== "number" || !isFinite(merk[k])) delete merk[k]; });
+  ["gesamt", "ehall", "eweite", "ausLaut", "szLaut", "gLaut", "wLaut", "spannung"].forEach(k => { if (typeof merk[k] !== "number" || !isFinite(merk[k])) delete merk[k]; });
   delete merk.modus;
-  const speichern = () => { if (hoerer) return; try { localStorage.setItem("imres-klangwelten", JSON.stringify(merk)); } catch (_) {} };
+  if (!Array.isArray(merk.gfav)) merk.gfav = [];
+  if (merk.wetter != null && typeof merk.wetter !== "string") delete merk.wetter;
+  const speichern = () => { if (hoerer) return; try { localStorage.setItem(MERK_KEY, JSON.stringify(merk)); } catch (_) {} };
   const zz = (a, b) => a + Math.random() * (b - a);
   const wert = (x, d) => x != null ? x : d;
   /* Handy oder Tablet (auch iPad, das sich als Mac ausgibt) oder schwacher Rechner: alles etwas sparsamer rechnen */
@@ -535,9 +560,10 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     const sc = ctx.createWaveShaper(), kurve = new Float32Array(2049);
     for (let i = 0; i < 2049; i++) { const x = i / 1024 - 1, a = Math.abs(x); kurve[i] = Math.sign(x) * (a < .7 ? a : .7 + .28 * Math.tanh((a - .7) / .28)); }
     sc.curve = kurve; lim.connect(sc); sc.connect(ctx.destination);
-    trocken = ctx.createGain(); trocken.connect(gesamt);
+    dunkel = ctx.createBiquadFilter(); dunkel.type = "lowpass"; dunkel.frequency.value = 20000; dunkel.Q.value = .4; dunkel.connect(gesamt);
+    trocken = ctx.createGain(); trocken.connect(dunkel);
     hallEin = ctx.createGain(); hall = ctx.createConvolver(); hallNass = ctx.createGain(); hallNass.gain.value = .5;
-    hallEin.connect(hall); hall.connect(hallNass); hallNass.connect(gesamt);
+    hallEin.connect(hall); hall.connect(hallNass); hallNass.connect(dunkel);
     /* iPhone: ein stummer Ton im Audio-Element hält die Wiedergabe auch bei gesperrtem Bildschirm am Leben */
     try {
       const n = 8000, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
@@ -647,7 +673,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   /* ---------- Ereignisse: mal nah, mal fern, links und rechts ---------- */
   function ereignis(welt, [art, , staerke, fern]) {
     const e = EV[art], j = ctx.currentTime + .05;
-    const weit = Math.random() < (fern || 0), laut = staerke * (weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv.leben > 1 ? 1 : .9);
+    const weit = Math.random() < (fern || 0), laut = staerke * (weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv && aktiv.leben > 1 ? 1 : .9);
     let ziel;
     const g = ctx.createGain(); g.gain.value = laut;
     let letzter = g;
@@ -681,7 +707,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (E) return E;
     E = {};
     /* kein eigener Kompressor: mit schneller Ansprache verzerrt er tiefe Töne hörbar („Kratzen“) – stattdessen fester, niedriger Pegel */
-    const bus = ctx.createGain(); bus.gain.value = .9; bus.connect(gesamt); E.bus = bus;
+    const bus = ctx.createGain(); bus.gain.value = .9; bus.connect(dunkel); E.bus = bus;
     E.trocken = ctx.createGain(); E.trocken.connect(bus);
     E.hallEin = ctx.createGain(); E.hall = ctx.createConvolver(); E.hallNass = ctx.createGain();
     E.hall.buffer = E_IR = E_IR && E_IR.spar === !!merk.spar ? E_IR : epischerHall(); E.hallEin.connect(E.hall); E.hall.connect(E.hallNass); E.hallNass.connect(bus);
@@ -983,12 +1009,17 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     const j = ctx.currentTime;
     gesamt.gain.cancelScheduledValues(j); gesamt.gain.setValueAtTime(gesamt.gain.value, j); gesamt.gain.linearRampToValueAtTime(0, j + .05);
     setTimeout(() => {
-      if (aktiv) { aktiv.betten.forEach(b => { b.aus = true; b.quellen.forEach(q => { try { q.stop(); } catch (_) {} }); try { b.out.disconnect(); if (b.lfo) b.lfo.stop(); } catch (_) {} }); aktiv = null; }
+      const hart = b => { b.aus = true; b.quellen.forEach(q => { try { q.stop(); } catch (_) {} }); try { b.out.disconnect(); if (b.lfo) b.lfo.stop(); } catch (_) {} };
+      if (aktiv) { aktiv.betten.forEach(hart); aktiv = null; }
+      if (wetterAktiv) { wetterAktiv.betten.forEach(hart); wetterAktiv = null; }
+      if (wIn) { try { wIn.disconnect(); } catch (_) {} wIn = wFilter = null; }
+      if (spDrohne) { hart(spDrohne); spDrohne = null; }
       [...laufend.values()].forEach(l => { l.aus = true; laufend.delete(l.s.id); aufraeumen(l); });
       /* Nachklang kappen: Hall und Echos neu aufbauen, alle laufenden Einzelklänge abhängen */
       try { hallEin.disconnect(); hall.disconnect(); } catch (_) {}
       const neu = ctx.createConvolver(); neu.buffer = hall.buffer; hall = neu; hallEin.connect(hall); hall.connect(hallNass);
       if (E) { try { E.bus.disconnect(); } catch (_) {} E = null; }
+      merk.wetter = null; merk.spannung = 0; speichern(); if (dunkel) dunkel.frequency.setValueAtTime(20000, ctx.currentTime);
       if (gBus) { try { gBus.disconnect(); } catch (_) {} gBus = null; }
       const t = ctx.currentTime; gesamt.gain.setValueAtTime(0, t); gesamt.gain.linearRampToValueAtTime(lautWert(), t + .25);
       if (stumm) stumm.pause();
@@ -997,6 +1028,115 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (!vonFern && funk) funk.kanal.senden("notaus", {});
     setTimeout(funkSenden, 150);
   }
+  /* ---------- Wetter: eine eigene Schicht über jeder Klangwelt ----------
+     Drinnen klingt es gedämpft durch die Wände, unter der Erde nur noch als fernes Grollen. */
+  const WETTER = [
+    { id: "niesel", sym: "🌦", name: W("Niesel", "Drizzle"), betten: [["a_leichtregen", .6], ["a_laubregen", .35]] },
+    { id: "regen", sym: "🌧", name: W("Regen", "Rain"), betten: [["a_regen1", .7], ["a_waldregen", .5], ["a_laubregen", .3]], ev: [["platsch", [15, 35], .2, .6]] },
+    { id: "gewitter", sym: "⛈", name: W("Gewitter", "Thunderstorm"), betten: [["a_gewitter1", .8], ["a_starkregen", .45], ["a_gewitter2", .4]], ev: [["donner", [14, 40], .55, .5], ["donner", [25, 70], .4, 1]] },
+    { id: "wind", sym: "💨", name: W("Wind", "Wind"), betten: [["a_wind1", .6], ["a_baumwind", .35]] },
+    { id: "sturm", sym: "🌪", name: W("Sturm", "Gale"), betten: [["a_heulwind", .6], ["a_wind2", .5], ["a_starkregen2", .3]], ev: [["donner", [60, 140], .3, 1]] },
+    { id: "schnee", sym: "❄", name: W("Schnee", "Snow"), tief: 750, betten: [["a_wind2", .55], ["a_heulwind", .3]] }
+  ];
+  const DRINNEN = ["taverne", "bibliothek", "schmiede", "labor", "tempel", "kathedrale", "gefallene", "kerker"], UNTEN = ["hoehle", "unterreich", "abgrund", "hort", "unterwasser"];
+  let wetterAktiv = null, wIn = null, wFilter = null;
+  function wetterOrt() {
+    const w = aktiv ? aktiv.welt.id : merk.welt, def = WETTER.find(x => x.id === merk.wetter);
+    if (UNTEN.includes(w)) return { f: 260, g: .3, fern: 1 };
+    if (DRINNEN.includes(w)) return { f: 800, g: .55, fern: 1 };
+    if (w === "zelt") return { f: 3200, g: .85, fern: 0 };
+    return { f: def && def.tief ? def.tief : 20000, g: 1, fern: 0 };
+  }
+  function wetterKlang() {
+    if (!wFilter) return;
+    const o = wetterOrt(), j = ctx.currentTime;
+    wFilter.frequency.setTargetAtTime(o.f, j, .8);
+    wIn.gain.setTargetAtTime(Math.pow(wert(merk.wLaut, 100) / 100, 1.3) * o.g, j, .5);
+  }
+  function wetterStarten() {
+    if (wetterAktiv) { wetterAktiv.betten.forEach(b => bettStopp(b, true)); wetterAktiv = null; }
+    const def = WETTER.find(x => x.id === merk.wetter);
+    if (!def || !ctx) return;
+    if (!wIn) {
+      wIn = ctx.createGain(); wFilter = ctx.createBiquadFilter(); wFilter.type = "lowpass"; wFilter.frequency.value = 20000;
+      wIn.connect(wFilter); wFilter.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; wFilter.connect(s); s.connect(hallEin);
+    }
+    wetterAktiv = { def, naechst: {}, betten: def.betten.map(([n, st], i) => { const b = bettStarten({ id: "_wetter" }, [n, st, "", {}], i); b.out.disconnect(); b.out.connect(wIn); return b; }) };
+    (def.ev || []).forEach(([art]) => EV[art].f.forEach(laden));
+    wetterKlang();
+  }
+  function wetterSetzen(id) {
+    merk.wetter = id && id !== merk.wetter ? id : null; speichern();
+    if (merk.wetter) { audioStart(); if (stumm) stumm.play().catch(() => {}); }
+    wetterStarten(); zeichnen(); funkSenden();
+  }
+  function wetterTakt(j) {
+    if (!wetterAktiv) return;
+    wetterAktiv.betten.forEach(bettPlanen);
+    const o = wetterOrt(), lvl = Math.pow(wert(merk.wLaut, 100) / 100, 1.3) * o.g;
+    (wetterAktiv.def.ev || []).forEach((ev, i) => {
+      const n = wetterAktiv.naechst;
+      if (n[i] == null) n[i] = j + zz(ev[1][0] * .3, ev[1][1]);
+      if (j >= n[i]) { try { ereignis(null, [ev[0], ev[1], ev[2] * lvl, o.fern ? 1 : ev[3]]); } catch (_) {} n[i] = j + zz(ev[1][0], ev[1][1]); }
+    });
+  }
+
+  /* ---------- Spannung: ein Regler von ruhig bis bedrohlich ----------
+     mehr Ereignisse, dunklerer Klang, ein tiefes Grollen darunter und zuletzt ein Herzschlag */
+  let dunkel = null, spDrohne = null, herzNaechst = 0;
+  const spWert = () => wert(merk.spannung, 0) / 100;
+  function spannungAnwenden() {
+    if (!ctx || !dunkel) return;
+    const sp = spWert(), j = ctx.currentTime;
+    dunkel.frequency.setTargetAtTime(20000 * Math.pow(1700 / 20000, Math.pow(sp, 1.15)), j, .6);
+    if (sp > .04) {
+      epischStart();
+      if (!spDrohne) spDrohne = eBettStarten({ id: "_spannung", pegel: 1 }, ["~tief", .55, "", { ton: ["kb_28", "vc_36"], rate: .5, tief: 260 }], 0);
+      spDrohne.regler = Math.pow(sp, 1.4); spDrohne.drift = j + 12; spDrohne.out.gain.setTargetAtTime(spDrohne.grund * spDrohne.regler, j, 1.2);
+    } else if (spDrohne) { bettStopp(spDrohne, true); spDrohne = null; }
+  }
+  function spannungTakt(j) {
+    if (spDrohne) eTonPlanen(spDrohne);
+    const sp = spWert();
+    if (sp > .62 && E && j >= herzNaechst) {
+      /* Herzschlag: lub-dub, schneller und lauter, je höher die Spannung */
+      const b = puffer.get("bd"); if (!b) { laden("bd"); herzNaechst = j + 1; return; }
+      const z = eAusgang(E.trocken, .25, 0, false, 0), st = (sp - .62) / .38;
+      z.gain.value = .12 + st * .3; eSpiel(b, z, j + .05, .5, 1); eSpiel(b, z, j + .33, .55, .6);
+      herzNaechst = j + 60 / (62 + st * 40);
+    }
+  }
+
+  /* ---------- Offline: einmal alles laden, danach läuft die Seite auch ohne Internet ---------- */
+  function alleDateien() {
+    const n = new Set();
+    WELTEN.forEach(w => { w.betten.forEach(([q, , , o]) => { if (o && o.ton) o.ton.forEach(x => n.add(x)); else if (!q.startsWith("@") && !q.startsWith("~")) n.add(q); }); w.ereignisse.forEach(([a]) => (EV[a].f || []).forEach(x => n.add(x))); });
+    EINSCHLAEGE.forEach(a => a.lagen.forEach(l => l.f.forEach(x => n.add(x))));
+    GERAEUSCHE.forEach(a => a.lagen.forEach(l => l.f.forEach(x => n.add(x))));
+    SZENEN.forEach(s => { if (s.datei) n.add(s.datei); });
+    WETTER.forEach(w => { w.betten.forEach(([q]) => n.add(q)); (w.ev || []).forEach(([a]) => EV[a].f.forEach(x => n.add(x))); });
+    ["e_glocke_1", "e_glocke_3", "e_gong_1", "timp1", "timp3", "bd", "timproll", "kb_28", "vc_36"].forEach(x => n.add(x));
+    return [...n].map(quelle).concat(["ambient.html", "klangwerk.js"]);
+  }
+  let offline = { status: (() => { try { return localStorage.getItem("imres-klangwelten-offline") === "1" ? "bereit" : ""; } catch (_) { return ""; } })(), p: 0 };
+  async function offlineLaden() {
+    if (!("caches" in window) || !("serviceWorker" in navigator)) { offline.status = "fehlt"; offlineZeichnen(); return; }
+    offline.status = "laedt"; offline.p = 0; offlineZeichnen();
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (_) {}
+    const c = await caches.open("imres-klangwelten-v1"), liste = alleDateien(); let fertig = 0, fehler = 0;
+    const arbeiter = async () => { while (liste.length) { const u = liste.shift(); try { if (!(await c.match(u))) { const r = await fetch(u, { cache: "no-cache" }); if (r.ok) await c.put(u, r); else fehler++; } } catch (_) { fehler++; } fertig++; offline.p = fertig / (fertig + liste.length); offlineZeichnen(); } };
+    await Promise.all([arbeiter(), arbeiter(), arbeiter(), arbeiter()]);
+    offline.status = fehler ? "teils" : "bereit";
+    try { if (!fehler) localStorage.setItem("imres-klangwelten-offline", "1"); } catch (_) {}
+    offlineZeichnen();
+  }
+  function offlineZeichnen() {
+    const k = document.getElementById("offline"); if (!k) return;
+    k.textContent = offline.status === "laedt" ? "⬇ " + Math.round(offline.p * 100) + " %" : offline.status === "bereit" ? T.offBereit : offline.status === "teils" ? T.offTeils : offline.status === "fehlt" ? T.offFehlt : T.offLaden;
+    k.classList.toggle("an", offline.status === "bereit");
+  }
+  try { if ("serviceWorker" in navigator) navigator.serviceWorker.register("klangwelten-sw.js", { scope: "./ambient" }).catch(() => {}); } catch (_) {}
+
   /* ---------- Klangwelt starten / wechseln ---------- */
   function weltStarten(welt) {
     audioStart();
@@ -1009,6 +1149,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     aktiv = { welt, betten: welt.betten.map((x, i) => (welt.episch ? eBettStarten : bettStarten)(welt, x, i)), naechst: {}, leben: m.leben != null ? m.leben : 1 };
     welt.ereignisse.forEach(([art]) => { (EV[art].f || []).forEach(laden); if (EV[art].s) synthEreignis(EV[art].s); });
     merk.welt = welt.id; speichern();
+    if (merk.wetter && !wetterAktiv) wetterStarten(); else wetterKlang();
+    spannungAnwenden();
     zeichnen(); funkSenden();
     if ("mediaSession" in navigator) {
       try { navigator.mediaSession.metadata = new MediaMetadata({ title: welt.name, artist: T.titel, album: "Imres Tales" }); } catch (_) {}
@@ -1019,20 +1161,24 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (!ctx) return;
     laufend.forEach(l => { if (l.s.folge) folgePlanen(l); });
     fortschritt();
-    if (!aktiv) return;
     const j = ctx.currentTime;
+    wetterTakt(j); spannungTakt(j);
+    if (!aktiv) return;
     aktiv.betten.forEach(b => b.e ? eBettPlanen(b) : bettPlanen(b));
     if (aktiv.leben <= 0) return;
+    /* Spannung: bis zu zweieinhalbmal so viele Ereignisse */
+    const lb = aktiv.leben * (1 + spWert() * 1.5);
     aktiv.welt.ereignisse.forEach((ev, i) => {
       const [, [a, b]] = ev;
-      if (aktiv.naechst[i] == null) aktiv.naechst[i] = j + zz(a * .3, b) / aktiv.leben;
-      if (j >= aktiv.naechst[i]) { try { if (aktiv.welt.episch) eEreignis(ev); else ereignis(aktiv.welt, ev); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / aktiv.leben; }
+      if (aktiv.naechst[i] == null) aktiv.naechst[i] = j + zz(a * .3, b) / lb;
+      if (j >= aktiv.naechst[i]) { try { if (aktiv.welt.episch) eEreignis(ev); else ereignis(aktiv.welt, ev); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / lb; }
     });
   }
   function stoppen() {
     if (!aktiv) return;
     aktiv.betten.forEach(b => bettStopp(b, true));
     aktiv = null;
+    if (wetterAktiv) { wetterAktiv.betten.forEach(b => bettStopp(b, true)); wetterAktiv = null; }
     if (stumm && !laufend.size) stumm.pause();
     zeichnen(); funkSenden();
   }
@@ -1040,7 +1186,6 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   /* ---------- Oberfläche ---------- */
   /* Handy: Schichten-Blatt auf- und zuklappen (am Rechner steht das Mischpult ohnehin in der Spalte) */
   function mischBlatt(auf) {
-    if (auf && document.getElementById("misch").hidden) { if (!merk.welt) return; }
     document.body.classList.toggle("misch-auf", !!auf);
     const k = document.getElementById("misch-knopf"); if (k) k.setAttribute("aria-expanded", String(!!auf));
   }
@@ -1056,10 +1201,15 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     $("jetzt-name").textContent = w ? w.sym + " " + w.name : T.waehlen;
     infoZeile();
     const mi = $("misch");
-    if (!w) { mi.hidden = true; return; }
+    if (FERN && fernZiehen) return;
     mi.hidden = false;
-    const m = merk.mix[w.id] || {}, wert = (x, d) => x != null ? x : d;
-    mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + '</small><button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' +
+    const stimmung = '<div class="stimmung"><h3>' + esc(T.wetter) + '</h3><div class="chips">' +
+      ['<button type="button" class="chip' + (!merk.wetter ? " an" : "") + '" data-wetter="">☀ ' + esc(T.keinWetter) + "</button>"].concat(WETTER.map(x => '<button type="button" class="chip' + (merk.wetter === x.id ? " an" : "") + '" data-wetter="' + x.id + '">' + x.sym + " " + esc(x.name) + "</button>")).join("") + "</div>" +
+      (merk.wetter ? regler("wlaut", T.wlaut, wert(merk.wLaut, 100), 0, 150) : "") +
+      regler("spannung", "⚡ " + T.spannung, wert(merk.spannung, 0), 0, 100).replace('class="regler"', 'class="regler spannung"') + "</div>";
+    if (!w) { mi.innerHTML = "<h2>🎚 " + esc(T.stimmung) + ' <button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' + stimmung; return; }
+    const m = merk.mix[w.id] || {};
+    mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + '</small><button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' + stimmung + '<hr class="trenn">' +
       w.betten.map((x, i) => regler("b" + i, x[2], Math.round(wert(m.b && m.b[i], 1) * 100), 0, 150)).join("") +
       '<hr class="trenn">' + regler("leben", T.leben, Math.round(wert(m.leben, 1) * 100), 0, 200) +
       '<label class="spar"><input type="checkbox" id="spar"' + (merk.spar ? " checked" : "") + "> " + esc(T.spar) + "</label>" +
@@ -1080,11 +1230,28 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     $("szenen").innerHTML = SZENEN.map(s => { const l = laufend.get(s.id);
       return '<button type="button" class="knopf szene' + (l ? " an" : "") + (l && l.laedt ? " laedt" : "") + '" data-szene="' + s.id + '" aria-pressed="' + !!l + '"><span class="sym" aria-hidden="true">' + s.sym +
         '</span><span class="nm">' + esc(s.name) + '</span><span class="tx">' + (l ? "■ " : "⏳ ") + esc(minuten(s.laenge)) + "</span></button>"; }).join("");
-    $("geraeusche").innerHTML = '<div class="gruppe"><h3>' + esc(T.gGross) + '</h3><div class="chips">' +
-      EINSCHLAEGE.map((a, i) => '<button type="button" class="chip gross" data-aus="' + a.id + '" title="' + esc(a.tx) + '"><span aria-hidden="true">' + a.sym + "</span>" + esc(a.name) + (i < 10 && !mobil ? "<kbd>" + ((i + 1) % 10) + "</kbd>" : "") + "</button>").join("") + "</div></div>" +
-      GER_GRUPPEN.map(([g, titel]) => '<div class="gruppe"><h3>' + esc(titel) + '</h3><div class="chips">' +
-      GERAEUSCHE.filter(d => d.gr === g).map(d => '<button type="button" class="chip" data-ger="' + d.id + '"><span aria-hidden="true">' + d.sym + "</span>" + esc(d.name) + "</button>").join("") + "</div></div>").join("");
+    const fav = new Set(merk.gfav), auChip = (a, i) => '<button type="button" class="chip gross' + (fav.has(a.id) ? " fav" : "") + '" data-aus="' + a.id + '" title="' + esc(a.tx) + '"><span aria-hidden="true">' + a.sym + "</span>" + esc(a.name) + (i < 10 && !mobil ? "<kbd>" + ((i + 1) % 10) + "</kbd>" : "") + "</button>",
+      geChip = d => '<button type="button" class="chip' + (fav.has(d.id) ? " fav" : "") + '" data-ger="' + d.id + '"><span aria-hidden="true">' + d.sym + "</span>" + esc(d.name) + "</button>";
+    const favListe = merk.gfav.map(id => { const i = EINSCHLAEGE.findIndex(a => a.id === id); if (i >= 0) return auChip(EINSCHLAEGE[i], 99); const d = GERAEUSCHE.find(x => x.id === id); return d ? geChip(d) : ""; }).join("");
+    $("geraeusche").classList.toggle("merken", merkenModus);
+    $("geraeusche").innerHTML = (favListe ? '<div class="gruppe" data-fav="1"><h3>' + esc(T.gemerkt) + '</h3><div class="chips">' + favListe + "</div></div>" : "") +
+      '<div class="gruppe"><h3>' + esc(T.gGross) + '</h3><div class="chips">' + EINSCHLAEGE.map(auChip).join("") + "</div></div>" +
+      GER_GRUPPEN.map(([g, titel]) => '<div class="gruppe"><h3>' + esc(titel) + '</h3><div class="chips">' + GERAEUSCHE.filter(d => d.gr === g).map(geChip).join("") + "</div></div>").join("") +
+      '<p class="tipp" id="ger-nichts" hidden>' + esc(T.nichts) + "</p>";
+    gerFiltern();
     fortschritt(); infoZeile();
+  }
+  /* Suche: ohne Groß/Klein und Umlaute („tur“ findet „Tür“), auch nach Gruppennamen */
+  let merkenModus = false;
+  const norm = t => String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ß/g, "ss");
+  function gerFiltern() {
+    const q = norm(($("ger-suche") || {}).value || "").trim(); let treffer = 0;
+    document.querySelectorAll("#geraeusche .gruppe").forEach(g => {
+      const gt = norm(g.querySelector("h3").textContent); let n = 0;
+      g.querySelectorAll(".chip").forEach(c => { const ok = !q || norm(c.textContent).includes(q) || gt.includes(q); c.hidden = !ok; if (ok) n++; });
+      g.hidden = !n || (q && g.dataset.fav); treffer += g.hidden ? 0 : n;
+    });
+    const nx = $("ger-nichts"); if (nx) nx.hidden = treffer > 0;
   }
   function fortschritt() {
     if (hoerer || !ctx) return;
@@ -1114,6 +1281,13 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (e.target.closest("#misch-zu")) { mischBlatt(false); return; }
     if (document.body.classList.contains("misch-auf") && !e.target.closest("#misch")) mischBlatt(false);
     if (e.target.closest("#aus-alles")) { if (hoerer) { if (hoerer.an) hoererSchalten(); } else notAus(); return; }
+    if (e.target.closest("#offline")) { if (offline.status !== "laedt") { if (offline.status !== "bereit" || confirm(T.offTipp)) offlineLaden(); } return; }
+    if (e.target.closest("#ger-merken")) { merkenModus = !merkenModus; $("ger-merken").setAttribute("aria-pressed", String(merkenModus)); $("ger-merken").textContent = merkenModus ? T.merkenFertig : T.merken; $("merk-tipp").hidden = !merkenModus; $("merk-tipp").textContent = T.merkTipp; padZeichnen(); return; }
+    if (merkenModus) {
+      const c = e.target.closest("#geraeusche [data-ger], #geraeusche [data-aus]");
+      if (c) { const id = c.dataset.ger || c.dataset.aus, i = merk.gfav.indexOf(id); if (i >= 0) merk.gfav.splice(i, 1); else merk.gfav.push(id); speichern(); padZeichnen(); return; }
+    }
+    const wt = e.target.closest("[data-wetter]"); if (wt && !hoerer) { wetterSetzen(wt.dataset.wetter); return; }
     if (!hoerer) {
       const a = e.target.closest("[data-aus]"); if (a) { ausloesen(a.dataset.aus); return; }
       const ge = e.target.closest("[data-ger]"); if (ge) { geraeusch(ge.dataset.ger); return; }
@@ -1127,37 +1301,52 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       if (aktiv) stoppen(); else weltStarten(WELTEN.find(x => x.id === merk.welt) || WELTEN[0]);
     }
   });
-  document.addEventListener("input", e => {
-    if (e.target.id === "ger-laut") { merk.gLaut = merk.ausLaut = +e.target.value; speichern(); gerPegel(); epischPegel(); return; }
-    if (e.target.id === "spar") {
-      merk.spar = e.target.checked; speichern();
+  function reglerSetzen(k, v, an) {
+    if (k === "ger-laut") { merk.gLaut = merk.ausLaut = v; gerPegel(); epischPegel(); }
+    else if (k === "spar") {
+      merk.spar = !!an;
       /* neu aufbauen mit kürzerem bzw. vollem Hall; die laufende Welt startet weich neu */
-      if (ctx) { const w = aktiv && aktiv.welt; if (E) { try { E.bus.disconnect(); } catch (_) {} E = null; } if (w) weltStarten(w); }
-      return;
+      if (ctx) { const w = aktiv && aktiv.welt; if (E) { try { E.bus.disconnect(); } catch (_) {} E = null; spDrohne = null; } if (w) weltStarten(w); spannungAnwenden(); }
     }
-    if (e.target.id === "sz-laut") { merk.szLaut = +e.target.value; speichern(); epischPegel(); return; }
-    if (e.target.dataset.regler === "ehall" || e.target.dataset.regler === "eweite") { merk[e.target.dataset.regler] = +e.target.value; e.target.nextElementSibling.textContent = e.target.value + " %"; epischRaum(); speichern(); funkSenden(); return; }
-    if (e.target.id === "gesamt") { merk.gesamt = +e.target.value; speichern(); if (gesamt) gesamt.gain.setTargetAtTime(lautWert(), ctx.currentTime, .05); return; }
-    const k = e.target.dataset.regler; if (!k) return;
-    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt); if (!w) return;
-    const m = merk.mix[w.id] = merk.mix[w.id] || {}, v = +e.target.value;
-    e.target.nextElementSibling.textContent = v + " %";
-    if (k[0] === "b") {
-      const i = +k.slice(1); m.b = m.b || []; m.b[i] = v / 100;
-      if (aktiv && aktiv.welt === w) { const b = aktiv.betten[i]; b.regler = v / 100; b.drift = 0; b.out.gain.setTargetAtTime(b.grund * b.regler, ctx.currentTime, .1); }
-    } else if (k === "leben") { m.leben = v / 100; if (aktiv && aktiv.welt === w) { aktiv.leben = m.leben; aktiv.naechst = {}; } }
-    else if (k === "raum") { m.raum = v; if (ctx && aktiv && aktiv.welt === w) hallNass.gain.setTargetAtTime(v / 100 * 1.2, ctx.currentTime, .1); }
+    else if (k === "sz-laut") { merk.szLaut = v; epischPegel(); }
+    else if (k === "ehall" || k === "eweite") { merk[k] = v; epischRaum(); }
+    else if (k === "gesamt") { merk.gesamt = v; if (gesamt) gesamt.gain.setTargetAtTime(lautWert(), ctx.currentTime, .05); }
+    else if (k === "wlaut") { merk.wLaut = v; if (ctx) wetterKlang(); }
+    else if (k === "spannung") { merk.spannung = v; if (v > 0) audioStart(); spannungAnwenden(); }
+    else {
+      const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt); if (!w) return;
+      const m = merk.mix[w.id] = merk.mix[w.id] || {};
+      if (k[0] === "b") {
+        const i = +k.slice(1); m.b = m.b || []; m.b[i] = v / 100;
+        if (aktiv && aktiv.welt === w && aktiv.betten[i]) { const b = aktiv.betten[i]; b.regler = v / 100; b.drift = 0; b.out.gain.setTargetAtTime(b.grund * b.regler, ctx.currentTime, .1); }
+      } else if (k === "leben") { m.leben = v / 100; if (aktiv && aktiv.welt === w) { aktiv.leben = m.leben; aktiv.naechst = {}; } }
+      else if (k === "raum") { m.raum = v; if (ctx && aktiv && aktiv.welt === w) hallNass.gain.setTargetAtTime(v / 100 * 1.2, ctx.currentTime, .1); }
+      else return;
+    }
     speichern(); funkSenden();
+  }
+  document.addEventListener("input", e => {
+    if (e.target.id === "ger-suche") { gerFiltern(); return; }
+    const k = e.target.dataset.regler || e.target.id; if (!k) return;
+    if (e.target.dataset.regler && e.target.nextElementSibling) e.target.nextElementSibling.textContent = e.target.value + " %";
+    if (FERN) { fernSenden({ art: "regler", k, v: +e.target.value, an: e.target.checked }); return; }
+    reglerSetzen(k, +e.target.value, e.target.checked);
   });
   $("gesamt").value = merk.gesamt != null ? merk.gesamt : 70;
   $("gesamt").setAttribute("aria-label", T.gesamt);
   $("sz-laut").value = wert(merk.szLaut, 100); $("ger-laut").value = wert(merk.gLaut, 100);
   $("ger-laut").setAttribute("aria-label", T.hGer); $("aus-alles").setAttribute("aria-label", T.ausAlles); $("aus-alles").title = T.ausAlles;
   $("sz-laut").setAttribute("aria-label", T.hSz);
+  $("ger-suche").placeholder = T.suchen; $("ger-merken").textContent = T.merken; $("offline").title = T.offTipp; offlineZeichnen();
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape" && !tour && !hoerer) { notAus(); return; }
+    if (e.target.id === "ger-suche") {
+      if (e.key === "Escape") { e.target.value = ""; gerFiltern(); e.target.blur(); }
+      if (e.key === "Enter") { const c = [...document.querySelectorAll("#geraeusche .gruppe:not([hidden]) .chip:not([hidden])")][0]; if (c) c.click(); }
+      return;
+    }
+    if (e.key === "Escape" && !tour && !hoerer) { if (FERN) fernSenden({ art: "notaus" }); else notAus(); return; }
     if (hoerer || tour || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
-    if (/^[0-9]$/.test(e.key)) { const i = (+e.key + 9) % 10; if (EINSCHLAEGE[i]) { e.preventDefault(); ausloesen(EINSCHLAEGE[i].id); } }
+    if (/^[0-9]$/.test(e.key)) { const i = (+e.key + 9) % 10; if (EINSCHLAEGE[i]) { e.preventDefault(); if (FERN) fernSenden({ art: "aus", id: EINSCHLAEGE[i].id }); else ausloesen(EINSCHLAEGE[i].id); } }
   });
   setInterval(takt, 250);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && aktiv && ctx.state === "suspended") ctx.resume(); });
@@ -1210,31 +1399,64 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   function zustand() {
     const w = aktiv ? aktiv.welt : null, m = w ? merk.mix[w.id] || {} : {};
     return { welt: w ? w.id : null, laeuft: !!aktiv, mix: { b: m.b || [], leben: m.leben != null ? m.leben : 1, raum: m.raum != null ? m.raum : 50 },
-      ehall: wert(merk.ehall, 75), eweite: wert(merk.eweite, 45), szenen: [...laufend.values()].filter(l => !l.aus).map(l => ({ id: l.s.id, nr: l.nr })) };
+      ehall: wert(merk.ehall, 75), eweite: wert(merk.eweite, 45), szenen: [...laufend.values()].filter(l => !l.aus).map(l => ({ id: l.s.id, nr: l.nr })),
+      wetter: merk.wetter || null, wlaut: wert(merk.wLaut, 100), spannung: wert(merk.spannung, 0), gewaehlt: merk.welt || null, gesamt: wert(merk.gesamt, 70), glaut: wert(merk.gLaut, 100), szlaut: wert(merk.szLaut, 100), spar: !!merk.spar };
   }
   let funkWarte = 0;
   function funkSenden() { if (!funk) return; clearTimeout(funkWarte); funkWarte = setTimeout(() => funk.kanal.senden("zustand", zustand()), 250); }
   function funkUmschalten() {
     if (funk) { funk.kanal.schliessen(); clearInterval(funk.puls); funk = null; funkZeichnen(); return; }
     funk = { status: "verbinde", zahl: 0 };
-    funk.kanal = kanal(raumCode(), "pult", ev => { if (ev === "_offen" || ev === "hallo") funk.kanal.senden("zustand", zustand()); },
+    funk.kanal = kanal(raumCode(), "pult", (ev, d) => { if (ev === "_offen" || ev === "hallo") funk.kanal.senden("zustand", zustand()); else if (ev === "befehl" && funk && funk.fern && d && d.key === fernKey()) befehl(d); },
       (st, n) => { if (!funk) return; funk.status = st; if (n != null) funk.zahl = n; funkStatus(); });
     funk.puls = setInterval(() => funk && funk.kanal.senden("zustand", zustand()), 15000);
     funkZeichnen();
   }
   const statusText = () => !funk ? "" : funk.status === "ok" ? "🟢 " + T.hoeren(funk.zahl || 0) : funk.status === "fehler" ? "🔴 " + T.fehler : "🟡 " + T.verbinde;
   function funkStatus() { const el = document.getElementById("funk-status"); if (el) el.textContent = statusText(); const k = document.getElementById("funk-knopf"); if (k) k.textContent = funk && funk.status === "ok" ? "📡 " + (funk.zahl || 0) : T.funk; }
+  function fernKey() {
+    let k = null; try { k = localStorage.getItem("imres-fern-key"); } catch (_) {}
+    if (!k || !/^[a-z0-9]{6,24}$/.test(k)) { k = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8); try { localStorage.setItem("imres-fern-key", k); } catch (_) {} }
+    return k;
+  }
+  const fernLink = () => location.origin + location.pathname + "?fern=" + raumCode() + "." + fernKey();
+  /* Befehl der Fernbedienung – genau so, als hätte man hier selbst getippt */
+  function befehl(c) {
+    const welt = c.id && WELTEN.find(x => x.id === c.id);
+    try {
+      if (c.art === "welt" && welt) { if (aktiv && aktiv.welt === welt) stoppen(); else weltStarten(welt); }
+      else if (c.art === "spielen") { if (aktiv) stoppen(); else weltStarten(WELTEN.find(x => x.id === merk.welt) || WELTEN[0]); }
+      else if (c.art === "ger") geraeusch(c.id);
+      else if (c.art === "aus") ausloesen(c.id);
+      else if (c.art === "szene") szeneSchalten(c.id);
+      else if (c.art === "szstopp") { [...laufend.values()].forEach(szeneStopp); }
+      else if (c.art === "notaus") notAus();
+      else if (c.art === "wetter") wetterSetzen(c.id || null);
+      else if (c.art === "regler" && typeof c.k === "string") reglerSetzen(c.k, Math.max(0, Math.min(200, +c.v || 0)), !!c.an);
+    } catch (_) {}
+    zeichnen(); padZeichnen(); funkSenden();
+  }
   function funkZeichnen() {
     const el = $("funk"); if (hoerer) { el.innerHTML = ""; return; }
     el.innerHTML = '<button type="button" class="funk-knopf' + (funk ? " an" : "") + '" id="funk-knopf" aria-expanded="' + funkAuf + '">' + (funk && funk.status === "ok" ? "📡 " + (funk.zahl || 0) : T.funk) + "</button>" +
       (funkAuf ? '<div class="funk-box"><p class="tipp">' + esc(T.funkTipp) + "</p>" +
         (funk ? '<div class="funk-zeile"><input type="text" readonly value="' + esc(funkLink()) + '"><button type="button" id="funk-kopieren">' + esc(T.kopieren) + "</button></div>" +
-          '<p class="tipp" id="funk-status">' + esc(statusText()) + '</p><button type="button" class="funk-knopf" id="funk-schalter">' + esc(T.funkStopp) + "</button>"
+          '<p class="tipp" id="funk-status">' + esc(statusText()) + '</p><button type="button" class="funk-knopf" id="funk-schalter">' + esc(T.funkStopp) + "</button>" +
+          '<hr class="trenn"><p class="tipp"><b>' + esc(T.fernTitel) + "</b> – " + esc(T.fernTipp) + "</p>" +
+          (funk.fern ? '<div class="funk-zeile"><input type="text" readonly value="' + esc(fernLink()) + '"><button type="button" id="fern-kopieren">' + esc(T.kopieren) + '</button></div><button type="button" class="funk-knopf" id="fern-schalter">' + esc(T.fernAus) + "</button>"
+            : '<button type="button" class="funk-knopf an" id="fern-schalter">' + esc(T.fernAn) + "</button>")
           : '<button type="button" class="funk-knopf an" id="funk-schalter">' + esc(T.funkStart) + "</button>") + "</div>" : "");
   }
   document.addEventListener("click", e => {
     if (e.target.closest("#funk-knopf")) { funkAuf = !funkAuf; funkZeichnen(); return; }
     if (e.target.closest("#funk-schalter")) { funkUmschalten(); funkAuf = true; funkZeichnen(); return; }
+    if (e.target.closest("#fern-schalter")) { if (!funk) funkUmschalten(); funk.fern = !funk.fern; if (funk.fern) { audioStart(); if (stumm) stumm.play().catch(() => {}); } funkAuf = true; funkZeichnen(); return; }
+    const fk = e.target.closest("#fern-kopieren");
+    if (fk) {
+      if (navigator.share && /Mobi|Android|iPhone/i.test(navigator.userAgent)) navigator.share({ title: T.fernTitel, url: fernLink() }).catch(() => {});
+      else if (navigator.clipboard) navigator.clipboard.writeText(fernLink()).then(() => { fk.textContent = T.kopiert; setTimeout(() => { fk.textContent = T.kopieren; }, 1800); });
+      return;
+    }
     if (e.target.closest("#funk-kopieren")) {
       const b = e.target.closest("#funk-kopieren");
       if (navigator.share && /Mobi|Android|iPhone/i.test(navigator.userAgent)) navigator.share({ title: T.titel, url: funkLink() }).catch(() => {});
@@ -1254,6 +1476,10 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
   function hoererAnwenden() {
     const d = hoerer.zuletzt; if (!d) return;
+    const wt = WETTER.some(x => x.id === d.wetter) ? d.wetter : null;
+    merk.wLaut = Math.max(0, Math.min(150, +d.wlaut || 0)); merk.spannung = Math.max(0, Math.min(100, +d.spannung || 0));
+    if (wt !== (merk.wetter || null)) { merk.wetter = wt; wetterStarten(); } else wetterKlang();
+    spannungAnwenden();
     merk.ehall = Math.max(0, Math.min(100, +d.ehall || 0)); merk.eweite = Math.max(0, Math.min(100, +d.eweite || 0)); epischRaum();
     /* Szenen: jede genau einmal starten (über ihre Nummer), beendete ausblenden */
     const soll = Array.isArray(d.szenen) ? d.szenen.filter(x => x && SZENEN.some(s => s.id === x.id)) : [];
@@ -1277,6 +1503,54 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     hoerer.kanal = kanal(hoerer.raum, "hoerer", (ev, d) => { if (ev === "_offen") hoerer.kanal.senden("hallo", {}); else hoererEmpfang(ev, d); }, st => { hoerer.status = st; zeichnen(); });
     document.querySelector(".unter").textContent = "";
   }
+  /* ---------- Fernbedienung: diese Seite spielt nichts, sie schickt Befehle ans Pult und zeigt, was dort läuft ---------- */
+  let fernZiehen = false, fernWarte = 0, fernLetzt = null;
+  function fernSenden(c) {
+    if (!FERN || !FERN.kanal) return;
+    if (c.art === "regler") { fernLetzt = c; if (fernWarte) return; fernWarte = setTimeout(() => { fernWarte = 0; FERN.kanal.senden("befehl", Object.assign({ key: FERN.key }, fernLetzt)); }, 70); return; }
+    FERN.kanal.senden("befehl", Object.assign({ key: FERN.key }, c));
+  }
+  function fernAnwenden(d) {
+    FERN.zuletzt = d; FERN.zeit = Date.now();
+    const welt = WELTEN.find(w => w.id === d.welt);
+    aktiv = d.laeuft && welt ? { welt, betten: [], naechst: {}, leben: 1, fern: 1 } : null;
+    if (d.gewaehlt && WELTEN.some(w => w.id === d.gewaehlt)) merk.welt = d.gewaehlt;
+    if (welt && d.mix) merk.mix[welt.id] = { b: Array.isArray(d.mix.b) ? d.mix.b.map(x => +x || 0) : [], leben: +d.mix.leben || 0, raum: +d.mix.raum || 0 };
+    laufend.clear(); (Array.isArray(d.szenen) ? d.szenen : []).forEach(x => { const s = SZENEN.find(z => z.id === x.id); if (s) laufend.set(s.id, { s, nr: x.nr, start: 0, fern: 1 }); });
+    merk.wetter = WETTER.some(x => x.id === d.wetter) ? d.wetter : null;
+    ["wLaut:wlaut", "spannung:spannung", "ehall:ehall", "eweite:eweite", "gesamt:gesamt", "gLaut:glaut", "szLaut:szlaut"].forEach(p => { const [a, b] = p.split(":"); if (typeof d[b] === "number") merk[a] = d[b]; });
+    merk.spar = !!d.spar;
+    if (!fernZiehen) { $("gesamt").value = wert(merk.gesamt, 70); $("ger-laut").value = wert(merk.gLaut, 100); $("sz-laut").value = wert(merk.szLaut, 100); }
+    zeichnen(); padZeichnen(); fernLeiste();
+  }
+  function fernLeiste() {
+    const el = $("fern-leiste"); if (!FERN) return;
+    el.hidden = false;
+    el.innerHTML = T.fernLeiste + " · " + (FERN.status === "fehler" ? T.fernFehler : FERN.status === "ok" && FERN.zuletzt && Date.now() - FERN.zeit < 40000 ? T.fernOk : FERN.status === "ok" ? T.fernWarte : "🟡 …");
+  }
+  if (FERN) {
+    $("funk").hidden = true; $("offline").hidden = true;
+    FERN.kanal = kanal(FERN.raum, "fern", (ev, d) => { if (ev === "_offen") FERN.kanal.senden("hallo", {}); else if (ev === "zustand" && d) fernAnwenden(d); }, st => { FERN.status = st; fernLeiste(); });
+    setInterval(fernLeiste, 5000); fernLeiste();
+    document.addEventListener("pointerdown", e => { if (e.target.matches && e.target.matches("input[type=range]")) fernZiehen = true; }, true);
+    document.addEventListener("pointerup", () => { if (fernZiehen) { fernZiehen = false; } }, true);
+    /* Tippen abfangen, bevor die Seite selbst etwas abspielt */
+    document.addEventListener("click", e => {
+      if (tour || merkenModus && e.target.closest("#geraeusche .chip")) return;
+      const t = e.target, blitz = el => { if (el) { el.classList.remove("blitz"); void el.offsetWidth; el.classList.add("blitz"); } };
+      let c = null, el = null;
+      if ((el = t.closest("[data-welt]"))) c = { art: "welt", id: el.dataset.welt };
+      else if ((el = t.closest("[data-ger]"))) c = { art: "ger", id: el.dataset.ger };
+      else if ((el = t.closest("[data-aus]"))) c = { art: "aus", id: el.dataset.aus };
+      else if ((el = t.closest("[data-szene]"))) c = { art: "szene", id: el.dataset.szene };
+      else if ((el = t.closest("[data-wetter]"))) c = { art: "wetter", id: el.dataset.wetter === merk.wetter ? "" : el.dataset.wetter };
+      else if (t.closest("#sz-stopp")) c = { art: "szstopp" };
+      else if (t.closest("#aus-alles")) c = { art: "notaus" };
+      else if (t.closest("#spielen")) c = { art: "spielen" };
+      if (!c) return;
+      e.stopPropagation(); e.preventDefault(); blitz(el); fernSenden(c);
+    }, true);
+  }
   zeichnen(); padZeichnen(); funkZeichnen();
 
   /* ---------- Rundgang ---------- */
@@ -1285,7 +1559,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (i < 0 || i >= T.schritte.length) { tourEnde(); return; }
     tour.i = i;
     const [sel, h, txt] = T.schritte[i];
-    if (sel === "#misch" && $("misch").hidden) { merk.welt = merk.welt || WELTEN[0].id; zeichnen(); }
+    if (sel === "#misch" && !merk.welt) { merk.welt = WELTEN[0].id; zeichnen(); }
     mischBlatt(sel === "#misch");
     tour.ziel = document.querySelector(sel);
     const bl = tour.el.querySelector(".tour-blase");
