@@ -105,5 +105,8 @@
     return Array.from(s).map(quelle);
   }
   const SCHALE = ["./", "./index.html", "./daten.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png", "../klangwerk.js"];
-  wurzel.KLANG = { LAUTHEIT, EV, WELTEN, quelle, dateien, SCHALE };
+  /* Name des Offline-Speichers – nur hier festgelegt (App und Service Worker lesen ihn von hier).
+     Muss nicht hochgezählt werden: geänderte und weggefallene Dateien erkennt die App selbst. */
+  const CACHE = "klangwelten-live-v1";
+  wurzel.KLANG = { LAUTHEIT, EV, WELTEN, quelle, dateien, SCHALE, CACHE };
 })(typeof self !== "undefined" ? self : this);

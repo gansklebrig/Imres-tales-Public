@@ -40,7 +40,7 @@
     Object.keys(k).forEach(b => { if (!k[b].length) delete k[b]; });
     return k;
   }
-  const lesen = () => { try { return JSON.parse(localStorage.getItem(SCHLUESSEL)) || null; } catch (e) { return null; } };
+  const lesen = () => { try { const v = JSON.parse(localStorage.getItem(SCHLUESSEL)); return v && typeof v === "object" && !Array.isArray(v) ? v : null; } catch (e) { return null; } };
   const schreiben = v => { try { localStorage.setItem(SCHLUESSEL, JSON.stringify(v)); } catch (e) {} };
 
   const jetzt = kennungen();

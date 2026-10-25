@@ -362,6 +362,7 @@
     const n = SPRUECHE[art].length;
     let stapel = {};
     try { stapel = JSON.parse(lies("imres-wuerfel-stapel") || "{}") || {}; } catch (_) { stapel = {}; }
+    if (typeof stapel !== "object" || Array.isArray(stapel)) stapel = {};
     let rest = Array.isArray(stapel[art]) ? stapel[art].filter(i => Number.isInteger(i) && i >= 0 && i < n) : [];
     if (!rest.length) {
       rest = Array.from({ length: n }, (_, i) => i);
@@ -386,7 +387,7 @@
     '<path class="w-kante" d="M50,22 L78,69 L22,69 Z M50,3 L50,22 M9,26.5 L50,22 L91,26.5 M9,26.5 L22,69 L9,73.5 M91,26.5 L78,69 L91,73.5 M22,69 L50,97 L78,69"/>' +
     '<text class="w-zahl" x="50" y="59">20</text></svg>';
   const tagHeute = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
-  function statistik() { try { const s = JSON.parse(lies("imres-wuerfel-tag") || "null"); if (s && s.tag === tagHeute()) return s; } catch (_) {} return { tag: tagHeute(), n: 0, best: 0 }; }
+  function statistik() { try { const s = JSON.parse(lies("imres-wuerfel-tag") || "null"); if (s && typeof s === "object" && s.tag === tagHeute()) return { tag: s.tag, n: +s.n || 0, best: +s.best || 0 }; } catch (_) {} return { tag: tagHeute(), n: 0, best: 0 }; }
   let letzter = null;
   function karteBauen() {
     const T = t(), st = statistik();

@@ -85,17 +85,18 @@
 
   /* ---------- Fortschritt aus den Spielständen lesen (nur lesen, nie schreiben) ---------- */
   const lies = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
-  const json = k => { try { return JSON.parse(lies(k) || "null"); } catch (_) { return null; } };
+  /* nur echte Objekte zurückgeben – kaputte Speicherstände (Zahl, Text, Liste) gelten als leer */
+  const json = k => { try { const v = JSON.parse(lies(k) || "null"); return v && typeof v === "object" && !Array.isArray(v) ? v : null; } catch (_) { return null; } };
   const maxMitPrefix = pre => { let best = 0; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(pre)) best = Math.max(best, parseInt(localStorage.getItem(k), 10) || 0); } } catch (_) {} return best; };
   const heuteStr = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   function fortschritt(key) {
     const d = {};
-    if (key === "heldensturm") { const h = json("imres-heldensturm-v1"); if (h) { d.gold = h.gold | 0; d.laeufe = Object.values(h.heroes || {}).reduce((a, x) => a + ((x && x.runs) | 0), 0); } }
+    if (key === "heldensturm") { const h = json("imres-heldensturm-v1"); if (h) { d.gold = h.gold | 0; d.laeufe = Object.values(h.heroes && typeof h.heroes === "object" ? h.heroes : {}).reduce((a, x) => a + ((x && x.runs) | 0), 0); } }
     if (key === "jagd") { d.rekord = maxMitPrefix("imres-waldlauf-rekord"); d.kapitel = parseInt(lies("imres-waldlauf-kapitel"), 10) || 0; }
     if (key === "nacht") { d.rekord = maxMitPrefix("imres-diebesnacht-rekord-"); d.nacht = parseInt(lies("imres-diebesnacht-nacht"), 10) || 0;
       d.taeglich = (d.rekord > 0 || d.nacht > 1) && !lies("imres-diebesnacht-tag-" + heuteStr()); }
     if (key === "hort") { const sp = json("imres-echohort-spiel"); if (sp && typeof sp.lv === "number") d.weiter = sp.lv + 1; d.rekord = maxMitPrefix("imres-echohort-rekord-"); }
-    if (key === "auftritt") { const w = json("imres-auftritt-weg"); if (w) { d.sterne = (w.sterne || []).reduce((a, b) => a + (b || 0), 0); d.buehne = (w.frei | 0) + 1; }
+    if (key === "auftritt") { const w = json("imres-auftritt-weg"); if (w) { d.sterne = (Array.isArray(w.sterne) ? w.sterne : []).reduce((a, b) => a + (+b || 0), 0); d.buehne = (w.frei | 0) + 1; }
       d.gespielt = !!lies("imres-auftritt-rekord") || !!d.sterne; }
     if (key === "memory") d.rekord = parseInt(lies("imres-memory-rekord"), 10) || 0;
     const zeilen = m().stand[key](d).filter(Boolean);

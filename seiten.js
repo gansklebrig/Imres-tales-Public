@@ -73,7 +73,8 @@
     if (!el) return "start";
     if (start.contains(el)) return "start";
     const s = el.closest && el.closest("section.part");
-    return s ? s.id : "start";
+    /* Versteckte Bereiche (z. B. alter Link #kuenste, leere Questtafel) zeigen die Startseite statt einer leeren Seite */
+    return s && !s.hidden ? s.id : "start";
   }
   function setze(neu) {
     if (neu === ansicht) return;
@@ -105,8 +106,9 @@
   }
   function route(hash, scrollen) {
     const el = ziel(hash);
-    setze(ansichtVon(el));
-    if (scrollen !== false) requestAnimationFrame(() => hinScrollen(el));
+    const neu = ansichtVon(el);
+    setze(neu);
+    if (scrollen !== false) requestAnimationFrame(() => hinScrollen(neu === "start" && el && !start.contains(el) ? null : el));
   }
   /* Für Sprünge aus dem restlichen Code (Kapitelmenü, Suche, Karte …) */
   window.ImresAnsicht = { zeige: el => setze(ansichtVon(el)) };
@@ -391,6 +393,13 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
   function allesBauen() { halleBauen(); uebersichtBauen(); bereichsNavigation(); }
   allesBauen();
   route(location.hash, !!location.hash && location.hash !== "#start");
+  /* Wird ein Bereich erst später sichtbar (oder wieder versteckt), die Ansicht zum aktuellen Link nachziehen */
+  new MutationObserver(ms => {
+    if (!ms.some(m => m.target.matches && m.target.matches("section.part"))) return;
+    const el = ziel(location.hash);
+    if (el && ansichtVon(el) !== ansicht) route(location.hash);
+    else if (ansicht !== "start" && !vorhanden(ansicht)) route("#start", false);
+  }).observe(document.querySelector("main") || document.body, { attributes: true, attributeFilter: ["hidden"], subtree: true });
   let letzteSprache = sprache();
   new MutationObserver(() => {
     if (sprache() === letzteSprache) return;

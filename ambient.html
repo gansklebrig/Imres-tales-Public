@@ -232,8 +232,13 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
 
   /* ---------- Gemerkte Einstellungen ---------- */
   let merk = {};
+  const istObjekt = v => !!v && typeof v === "object" && !Array.isArray(v);
   try { merk = JSON.parse(localStorage.getItem("imres-klangwelten") || "{}") || {}; } catch (_) {}
-  merk.mix = merk.mix || {};
+  /* kaputte Speicherstände (Zahl, Text, Liste …) nicht übernehmen */
+  if (!istObjekt(merk)) merk = {};
+  if (!istObjekt(merk.mix)) merk.mix = {};
+  Object.keys(merk.mix).forEach(k => { if (!istObjekt(merk.mix[k])) delete merk.mix[k]; });
+  if (typeof merk.gesamt !== "number" || !isFinite(merk.gesamt)) delete merk.gesamt;
   const speichern = () => { if (hoerer) return; try { localStorage.setItem("imres-klangwelten", JSON.stringify(merk)); } catch (_) {} };
   const zz = (a, b) => a + Math.random() * (b - a);
   const zufall = l => l[Math.floor(Math.random() * l.length)];

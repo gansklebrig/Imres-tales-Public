@@ -89,7 +89,7 @@
     }
     return s;
   }
-  const meine = () => { try { return JSON.parse(lies(K_MEINE, "[]")) || []; } catch (e) { return []; } };
+  const meine = () => { try { const m = JSON.parse(lies(K_MEINE, "[]")); return Array.isArray(m) ? m : []; } catch (e) { return []; } };
 
   /* ---------- Zustand ---------- */
   let eintraege = [], anzahl = 0, zustand = "neu" /* neu | laedt | ok | aufbau | fehler */, alleOffen = false, ende = false, formOffen = false, meldung = null;
@@ -141,8 +141,28 @@
       "</form>";
   }
 
+  /* Angefangener Eintrag: überlebt das Neuaufbauen (Alle lesen, Ältere laden, Sprachwechsel …) */
+  let entwurf = null;
+  function entwurfMerken() {
+    const f = box.querySelector(".gb-form");
+    if (!f) return;
+    const a = document.activeElement, fokus = a && f.contains(a) && a.name ? a.name : null;
+    entwurf = { name: f.elements.name.value, text: f.elements.text.value, thema: (f.querySelector("[name=thema]:checked") || {}).value, fokus,
+      von: fokus && "selectionStart" in a ? a.selectionStart : null, bis: fokus && "selectionEnd" in a ? a.selectionEnd : null };
+  }
+  function entwurfZurueck() {
+    const f = box.querySelector(".gb-form");
+    if (!f || !entwurf) return;
+    f.elements.name.value = entwurf.name; f.elements.text.value = entwurf.text;
+    const r = entwurf.thema && f.querySelector('[name=thema][value="' + entwurf.thema + '"]'); if (r) r.checked = true;
+    const z = f.querySelector(".gb-zaehler"); if (z) z.textContent = t().zeichen(entwurf.text.length, 1000);
+    const el = entwurf.fokus && f.querySelector('[name="' + entwurf.fokus + '"]' + (entwurf.fokus === "thema" ? ":checked" : ""));
+    if (el) { try { el.focus({ preventScroll: true }); if (entwurf.von != null && el.setSelectionRange) el.setSelectionRange(entwurf.von, entwurf.bis); } catch (_) {} }
+  }
+
   function bauen() {
     const T = t();
+    if (formOffen) entwurfMerken(); else entwurf = null;
     const sichtbar = alleOffen ? eintraege : eintraege.slice(0, ZUERST_());
     let liste = "";
     if (zustand === "neu" || zustand === "laedt") liste = '<p class="gb-status">' + esc(T.laedt) + "</p>";
@@ -163,6 +183,7 @@
       (meldung ? '<p class="gb-danke" role="status">' + esc(meldung) + "</p>" : "") +
       (kannSchreiben && formOffen ? formHtml() : "") +
       liste + (mehr ? '<div class="gb-mehr-reihe">' + mehr + "</div>" : "");
+    if (formOffen) entwurfZurueck();
   }
 
   /* ---------- Laden ---------- */

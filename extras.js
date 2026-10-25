@@ -615,16 +615,25 @@ html, body { overflow-x: clip; }
         g.addColorStop(1, "rgba(224,120,40,0)");
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, f.y, f.r * 4, 0, 7); ctx.fill();
       }
-      if (!ruhig && laeuft) requestAnimationFrame(bild);
+      if (!ruhig && laeuft) { if (verdeckt()) laeuft = false; else requestAnimationFrame(bild); }
     }
+    /* Ein Spiel im Vollbild verdeckt den Hintergrund ganz – dann keine Bilder rechnen */
+    const verdeckt = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || document.documentElement.classList.contains("tav-voll-offen");
+    const weiter = () => {
+      if (ruhig || laeuft || document.hidden || verdeckt()) return;
+      laeuft = true; zuletzt = performance.now(); requestAnimationFrame(bild);
+    };
 
     groesse();
     let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { groesse(); if (ruhig) bild(performance.now()); }, 150); });
     document.addEventListener("visibilitychange", () => {
       if (ruhig) return;
       if (document.hidden) laeuft = false;
-      else if (!laeuft) { laeuft = true; zuletzt = performance.now(); requestAnimationFrame(bild); }
+      else weiter();
     });
+    document.addEventListener("fullscreenchange", weiter);
+    document.addEventListener("webkitfullscreenchange", weiter);
+    new MutationObserver(weiter).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     requestAnimationFrame(bild);
   }
 
@@ -841,14 +850,14 @@ html, body { overflow-x: clip; }
     "skizze-riese.webp": /\briesen?\b|\bgiant/i,
     "skizze-chasme.webp": /chasme/i,
     "skizze-turm.webp": /venomfang/i,
-    "skizze-ketten.webp": /\bketten\b|\bchains\b/i,
+    "skizze-ketten.webp": /lag in fesseln|\blay bound\b/i, /* das Erwachen im Kerker der Drow */
     "skizze-laute.webp": "#barradin"
   };
   const skizzenListe = () => {
     const q = sprache() === "en" ? (window.INHALT_EN || window.INHALT) : window.INHALT;
     return ((q && q.kunst) || []).filter(k => k.bild);
   };
-  const gefundeneSkizzen = () => { try { return JSON.parse(lies("imres-skizzen", "[]")) || []; } catch (_) { return []; } };
+  const gefundeneSkizzen = () => { try { const g = JSON.parse(lies("imres-skizzen", "[]")); return Array.isArray(g) ? g.filter(x => typeof x === "string") : []; } catch (_) { return []; } };
   let mondAn = false;
   const anker = new Map(); /* Skizze → Absatz, an dem sie hängt */
 
@@ -1211,15 +1220,18 @@ html, body { overflow-x: clip; }
     if (mem.offen.length < 2) return;
     mem.zuege++;
     const [a, b] = mem.offen;
+    /* Jedes Spiel ist ein eigenes mem-Objekt: Zeitgeber eines alten Spiels (nach „Neues Spiel“) tun nichts mehr */
+    const spiel = mem;
     if (mem.karten[+a.dataset.i].id === mem.karten[+b.dataset.i].id) {
       mem.offen = [];
-      setTimeout(() => { a.classList.replace("offen", "weg"); b.classList.replace("offen", "weg"); namenSetzen(); }, 350);
+      setTimeout(() => { if (mem !== spiel) return; a.classList.replace("offen", "weg"); b.classList.replace("offen", "weg"); namenSetzen(); }, 350);
       mem.paare++;
       if (mem.paare === mem.gesamt) {
         const rekord = parseInt(lies("imres-memory-rekord", "0"), 10);
         const neu = !rekord || mem.zuege < rekord;
         if (neu) schreib("imres-memory-rekord", String(mem.zuege));
         setTimeout(() => {
+          if (mem !== spiel) return;
           $("memory-sieg").textContent = t().memSieg(mem.zuege) + (neu && rekord ? t().memNeuerRekord : "");
           const r = $("memory").getBoundingClientRect();
           konfetti(r.left + r.width / 2, r.top + r.height / 2, ["✦", "⚔", "★", "♪"], 34);
@@ -1227,8 +1239,9 @@ html, body { overflow-x: clip; }
       }
     } else {
       mem.sperre = true;
-      setTimeout(() => { a.classList.add("falsch"); b.classList.add("falsch"); }, 450);
+      setTimeout(() => { if (mem !== spiel) return; a.classList.add("falsch"); b.classList.add("falsch"); }, 450);
       setTimeout(() => {
+        if (mem !== spiel) return;
         a.classList.remove("offen", "falsch"); b.classList.remove("offen", "falsch");
         mem.offen = []; mem.sperre = false; namenSetzen();
       }, 1100);

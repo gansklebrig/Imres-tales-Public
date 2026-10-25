@@ -214,7 +214,9 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   const SPEICHER_KEY = "klangwelten-live";
   const STD_FX = { hall: 45, raum: 100, filter: 0, echo: 0, rueck: 40, teilung: 2, ton: 0, xfade: 4, drone: 0, hell: 35, schimmer: 0, master: 75 };
   let zust = { welt: null, bpm: 120, grundton: 2, skala: "kurd", fx: Object.assign({}, STD_FX), mix: {}, speicher: [null, null, null, null, null, null, null, null] };
-  try { const z = JSON.parse(localStorage.getItem(SPEICHER_KEY) || "null"); if (z) { zust = Object.assign(zust, z); zust.fx = Object.assign({}, STD_FX, z.fx || {}); } } catch (_) {}
+  const istObjekt = v => !!v && typeof v === "object" && !Array.isArray(v);
+  try { const z = JSON.parse(localStorage.getItem(SPEICHER_KEY) || "null"); if (istObjekt(z)) { zust = Object.assign(zust, z); zust.fx = Object.assign({}, STD_FX, istObjekt(z.fx) ? z.fx : {}); } } catch (_) {}
+  if (!istObjekt(zust.mix)) zust.mix = {};
   if (!Array.isArray(zust.speicher) || zust.speicher.length !== 8) zust.speicher = [null, null, null, null, null, null, null, null];
   let speicherWarte = 0;
   const speichern = () => { clearTimeout(speicherWarte); speicherWarte = setTimeout(() => { try { localStorage.setItem(SPEICHER_KEY, JSON.stringify(zust)); } catch (_) {} }, 300); };
@@ -310,8 +312,15 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     return new Promise(res => {
       const sr = 32000, fertig = d => { if (!d) return res(null); const b = ctx.createBuffer(1, d.length, sr); b.getChannelData(0).set(d); res(b); };
       try {
-        if (!werk) { werk = new Worker("../klangwerk.js"); werk.onmessage = e => { const w = werkWarten.get(e.data.id); if (w) { werkWarten.delete(e.data.id); w(e.data.daten); } }; }
-        const id = ++werkNr; werkWarten.set(id, fertig); werk.postMessage({ id, gruppe, art, sr });
+        /* ../klangwerk.js liegt außerhalb von /live/ und damit außerhalb des Service Workers – ein direkt gestarteter Worker
+           liefe offline ins Leere. Darum das Skript über die (offline gespeicherte) Seite holen und als Blob starten. */
+        if (!werk) werk = fetch("../klangwerk.js").then(r => r.ok ? r.blob() : Promise.reject(r.status)).then(b => {
+          const w = new Worker(URL.createObjectURL(b));
+          w.onmessage = e => { const f = werkWarten.get(e.data.id); if (f) { werkWarten.delete(e.data.id); f(e.data.daten); } };
+          return w;
+        });
+        const id = ++werkNr; werkWarten.set(id, fertig);
+        werk.then(w => w.postMessage({ id, gruppe, art, sr })).catch(() => { werk = null; werkWarten.delete(id); res(null); });
       } catch (_) { res(null); }
     });
   }
@@ -763,37 +772,73 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   });
 
   /* ---------- Offline-Speicher: einmal mit Internet öffnen, danach läuft alles ohne ---------- */
-  const CACHE = "klangwelten-live-v1";
+  const CACHE = window.KLANG.CACHE;
   const statusEl = $("status");
-  async function offlineVorbereiten() {
+  let vorbereitung = null;
+  function offlineVorbereiten() {
+    if (!vorbereitung) vorbereitung = speicherAbgleichen().catch(() => {}).then(() => { vorbereitung = null; });
+    return vorbereitung;
+  }
+  /* Abruf am Service Worker und am HTTP-Cache vorbei, damit wirklich der Stand auf dem Server ankommt */
+  const amServer = (u, o) => fetch(u, Object.assign({ cache: "no-store" }, o, { headers: Object.assign({ "X-Klang-Pruefen": "1" }, o && o.headers) }));
+  const gleicheBytes = (a, b) => { if (a.byteLength !== b.byteLength) return false; const x = new Uint8Array(a), y = new Uint8Array(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return false; return true; };
+  async function speicherAbgleichen() {
     if (!("caches" in window) || !window.isSecureContext) {
       const grund = !window.isSecureContext ? "Seite bitte über https://imrestales.de/live öffnen" : !("serviceWorker" in navigator) ? "Safari blockiert Web-Apps – Privates Surfen oder Blockierungsmodus ausschalten" : "Privates Surfen ausschalten";
       statusEl.innerHTML = "⚠ Offline-Speicher nicht verfügbar: " + grund; $("start-info").innerHTML = statusEl.innerHTML; return;
     }
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (_) {}
     const liste = dateien().concat(SCHALE);
+    const voll = u => new URL(u, location.href).href;
     const c = await caches.open(CACHE);
-    let fertig = 0, fehlt = [];
-    for (const u of liste) { if (await c.match(new URL(u, location.href).href, { ignoreSearch: true })) fertig++; else fehlt.push(u); }
+    /* Nicht mehr gebrauchte Aufnahmen aus dem Speicher werfen */
+    const soll = new Set(liste.map(voll));
+    for (const k of await c.keys()) { const u = new URL(k.url); if (!soll.has(u.origin + u.pathname)) await c.delete(k); }
+    let fertig = 0;
+    const fehlt = [], da = [];
+    for (const u of liste) { if (await c.match(voll(u), { ignoreSearch: true })) { fertig++; da.push(u); } else fehlt.push(u); }
     const zeigen = () => {
       statusEl.innerHTML = fertig >= liste.length ? "<b>✓ Offline bereit</b> · " + liste.length + " Dateien gespeichert"
         : navigator.onLine ? "⤓ Lade für offline … " + fertig + " / " + liste.length + " – App offen lassen" : "⚠ Erst " + fertig + " / " + liste.length + " offline – einmal mit WLAN öffnen";
       $("start-info").innerHTML = statusEl.innerHTML;
     };
     zeigen();
-    if (!fehlt.length || !navigator.onLine) return;
+    if (!navigator.onLine) return;
+    const laden = async u => { const r = await amServer(u); if (r.ok && r.status === 200) { await c.put(voll(u), r); return true; } return false; };
+    /* Gespeicherte Datei mit dem Server vergleichen (ETag/Last-Modified/Länge) und bei Änderung ersetzen –
+       so kommen neue Fassungen von Aufnahmen und Skripten an, ohne dass jemand eine Versionsnummer hochzählen muss */
+    const abgleichen = async u => {
+      const alt = await c.match(voll(u), { ignoreSearch: true });
+      if (!alt) return;
+      const kopf = await amServer(u, { method: "HEAD" });
+      if (!kopf.ok) return;
+      const h = n => kopf.headers.get(n), a = n => alt.headers.get(n);
+      if (h("etag") ? h("etag") === a("etag") : !!h("last-modified") && h("last-modified") === a("last-modified")) return;
+      if (SCHALE.includes(u) || !h("content-length") || !a("content-length") || h("content-length") !== a("content-length")) { await laden(u); return; }
+      /* Gleiche Länge, nur neuer Stempel (GitHub Pages stempelt bei jedem Hochladen alles neu): Stichprobe aus der Mitte vergleichen */
+      const altBlob = await alt.blob();
+      const von = Math.max(0, Math.floor(altBlob.size / 2) - 8192), bis = Math.min(altBlob.size, von + 16384);
+      const probe = await amServer(u, { headers: { Range: "bytes=" + von + "-" + (bis - 1) } });
+      if (probe.status === 206) {
+        if (gleicheBytes(await probe.arrayBuffer(), await altBlob.slice(von, bis).arrayBuffer())) await c.put(voll(u), new Response(altBlob, { headers: kopf.headers }));
+        else await laden(u);
+      } else if (probe.ok && probe.status === 200) await c.put(voll(u), probe);
+    };
     let i = 0;
     const arbeiter = async () => {
       while (i < fehlt.length) {
         const u = fehlt[i++];
-        try { const r = await fetch(u, { cache: "no-cache" }); if (r.ok) { await c.put(new URL(u, location.href).href, r); fertig++; } } catch (_) {}
+        try { if (await laden(u)) fertig++; } catch (_) {}
         zeigen();
       }
     };
     await Promise.all([arbeiter(), arbeiter(), arbeiter(), arbeiter()]);
     zeigen();
+    let j = 0;
+    const pruefer = async () => { while (j < da.length) { const u = da[j++]; try { await abgleichen(u); } catch (_) {} } };
+    await Promise.all([pruefer(), pruefer(), pruefer(), pruefer()]);
   }
-  if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(() => {}); }
+  if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {}); }
   window.addEventListener("online", offlineVorbereiten);
 
   /* ---------- Start ---------- */
