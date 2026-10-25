@@ -21,7 +21,7 @@
   if (!root || !FIG || !WELT) return;
 
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
-  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const zufall = l => l[Math.floor(Math.random() * l.length)];
   const lies = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (_) { return d; } };
   const schreib = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
@@ -1728,11 +1728,13 @@
   }
   const besten = {}, serverOk = {}; let meinEintrag = null;
   const lokalLesen = () => { try { return JSON.parse(localStorage.getItem("imres-waldlauf-liste") || "{}") || {}; } catch (_) { return {}; } };
+  const zahl = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+  const sauber = l => (Array.isArray(l) ? l : []).filter(e => e && typeof e === "object").map(e => ({ name: String(e.name == null ? "" : e.name), punkte: zahl(e.punkte), welle: zahl(e.welle), genauigkeit: zahl(e.genauigkeit), erstellt: String(e.erstellt == null ? "" : e.erstellt) }));
   const sortieren = l => l.sort((a, b) => b.punkte - a.punkte || b.welle - a.welle || String(a.erstellt).localeCompare(String(b.erstellt)));
   function bestenLaden(st) {
     return server("/rest/v1/jagd_bestenliste?select=name,punkte,welle,genauigkeit,erstellt&stufe=eq." + st + "&order=punkte.desc,welle.desc,erstellt.asc&limit=10")
-      .then(l => { besten[st] = Array.isArray(l) ? l : []; serverOk[st] = true; })
-      .catch(() => { serverOk[st] = false; besten[st] = sortieren(lokalLesen()[st] || []).slice(0, 10); })
+      .then(l => { besten[st] = sauber(l); serverOk[st] = true; })
+      .catch(() => { serverOk[st] = false; besten[st] = sortieren(sauber(lokalLesen()[st])).slice(0, 10); })
       .then(listeNeu);
   }
   function listeNeu() {
@@ -1741,7 +1743,7 @@
     if (!l) { listeEl.innerHTML = ""; return; }
     listeEl.innerHTML = '<h4>' + T.bestenliste + " · " + esc(T.stufen[st]) + "</h4>" +
       (l.length ? "<table><thead><tr>" + T.spalten.map(x => "<th>" + esc(x) + "</th>").join("") + "</tr></thead><tbody>" +
-        l.map((e, i) => "<tr" + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + e.punkte + "</td><td>" + e.welle + "</td></tr>").join("") +
+        l.map((e, i) => "<tr" + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + zahl(e.punkte) + "</td><td>" + zahl(e.welle) + "</td></tr>").join("") +
         "</tbody></table>" : '<p class="wl-leer">' + esc(T.leer) + "</p>") +
       (serverOk[st] === false ? '<p class="wl-leer">' + esc(T.nurHier) + "</p>" : "");
   }
@@ -1759,7 +1761,7 @@
     schreib("imres-waldlauf-name", name);
     const T = t(), st = S.stufe, spiel = S;
     const e = { name, punkte: S.punkte, welle: S.welle, genauigkeit: S.genau, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(); lok[st] = sortieren((lok[st] || []).concat([e])).slice(0, 10);
+    const lok = lokalLesen(); lok[st] = sortieren(sauber(lok[st]).concat([e])).slice(0, 10);
     schreib("imres-waldlauf-liste", JSON.stringify(lok));
     spiel.sendet = true;
     server("/rest/v1/rpc/jagd_eintragen", { p_name: name, p_stufe: st, p_punkte: e.punkte, p_welle: e.welle, p_genauigkeit: e.genauigkeit })

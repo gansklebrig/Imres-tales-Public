@@ -35,7 +35,7 @@
 
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
-  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const zufall = l => l[Math.floor(Math.random() * l.length)];
   const SCHRITTE = 16;
   /* Spielzustand eines Teils: Tonart-Anhebung im Höhepunkt, Break, verändertes Taktgefühl */
@@ -166,7 +166,7 @@
       stimmTipp: "Merkt sich Intensität, Instrumente, Kulisse samt Lautstärke, Hall, Raum, Echo-Hall und Orchester – in diesem Browser.",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
       gespeichertOk: n => "„" + n + "“ wurde gespeichert.", geloescht: n => "„" + n + "“ wurde gelöscht.", liedGeladen: n => "„" + n + "“ geladen.",
-      pwFrage: "Passwort der Questtafel (für gemeinsame Lieder):", pwFalsch: "Das Passwort stimmt nicht.", serverFehler: "Der Server ist gerade nicht erreichbar.",
+      pwFrage: "Passwort der Questtafel (für gemeinsame Lieder):", pwFalsch: "Das Passwort stimmt nicht.", abmelden: "🔓 Abmelden", abmeldenTipp: "Passwort der Questtafel in diesem Tab vergessen", abgemeldet: "Abgemeldet – das Passwort ist vergessen.", serverFehler: "Der Server ist gerade nicht erreichbar.",
       loeschenFrage: n => "„" + n + "“ wirklich löschen?", keinName: "Bitte gib dem Lied einen Namen.",
       modi: { dorisch: "Dorisch", mixolydisch: "Mixolydisch", aeolisch: "Äolisch", phrygisch: "Phrygisch", ionisch: "Dur", lydisch: "Lydisch" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B", "H"],
@@ -238,7 +238,7 @@
       stimmTipp: "Remembers intensity, instruments, ambience and its volume, reverb, room, Echo reverb and orchestra – in this browser.",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
       gespeichertOk: n => "“" + n + "” was saved.", geloescht: n => "“" + n + "” was deleted.", liedGeladen: n => "“" + n + "” loaded.",
-      pwFrage: "Quest board password (for shared songs):", pwFalsch: "That password is wrong.", serverFehler: "The server can't be reached right now.",
+      pwFrage: "Quest board password (for shared songs):", pwFalsch: "That password is wrong.", abmelden: "🔓 Log out", abmeldenTipp: "Forget the quest board password in this tab", abgemeldet: "Logged out – the password has been forgotten.", serverFehler: "The server can't be reached right now.",
       loeschenFrage: n => "Really delete “" + n + "”?", keinName: "Please give the song a name.",
       modi: { dorisch: "Dorian", mixolydisch: "Mixolydian", aeolisch: "Aeolian", phrygisch: "Phrygian", ionisch: "Major", lydisch: "Lydian" },
       noten: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"],
@@ -911,17 +911,24 @@
       "</select>";
   }
   function neuAuswahl() { if (musikTab === "eigene") boxNeu("musik"); }
+  /* Passwort der Questtafel: nur für diese Sitzung (Tab) gemerkt, gleicher Schlüssel wie auf der Tafel */
   let liedPw = "";
-  try { liedPw = localStorage.getItem("imres-tafel-pw") || ""; } catch (_) {}
+  const PW_SCHLUESSEL = "imres-tafel-pw";
+  try { localStorage.removeItem(PW_SCHLUESSEL); } catch (_) {}
+  const pwLesen = () => { try { liedPw = sessionStorage.getItem(PW_SCHLUESSEL) || ""; } catch (_) {} return liedPw; };
+  const pwMerken = pw => { liedPw = pw || ""; try { if (pw) sessionStorage.setItem(PW_SCHLUESSEL, pw); else sessionStorage.removeItem(PW_SCHLUESSEL); } catch (_) {} };
+  pwLesen();
   function passwort() {
     const pruefe = pw => liedServer("/rest/v1/rpc/tafel_pruefen", { passwort: pw }).then(ok => ok === true);
+    pwLesen();
     return (liedPw ? pruefe(liedPw) : Promise.resolve(false)).then(ok => {
       if (ok) return liedPw;
+      if (liedPw) pwMerken("");
       const pw = window.prompt(t().pwFrage, "");
       if (!pw) return null;
       return pruefe(pw).then(ok2 => {
         if (!ok2) { window.alert(t().pwFalsch); return null; }
-        liedPw = pw; try { localStorage.setItem("imres-tafel-pw", pw); } catch (_) {}
+        pwMerken(pw);
         return pw;
       });
     });
@@ -4701,6 +4708,7 @@
       '<div class="lw-pult-gitter">' + kacheln + "</div>" +
       (voll && musikTab === "eigene" ? '<div class="lw-eigene-zeile">' + '<button type="button" class="lw-klein" data-aktion="speichern">' + T.speichern + "</button>" +
         (geladen ? '<button type="button" class="lw-klein" data-aktion="loeschen">' + T.loeschen + "</button>" : "") +
+        (gruppeOk && pwLesen() ? '<button type="button" class="lw-klein" data-aktion="abmelden" title="' + esc(T.abmeldenTipp) + '">' + T.abmelden + "</button>" : "") +
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
@@ -5214,8 +5222,9 @@
       return;
     }
     const ak = e.target.closest("[data-aktion]");
-    if (ak && ["speichern", "abbrechen", "nurhier", "fueralle", "loeschen"].includes(ak.dataset.aktion)) {
+    if (ak && ["speichern", "abbrechen", "nurhier", "fueralle", "loeschen", "abmelden"].includes(ak.dataset.aktion)) {
       const a = ak.dataset.aktion, T = t();
+      if (a === "abmelden") { pwMerken(""); zeichnen(); knoepfe(); status(T.abgemeldet); return; }
       const nameFeld = root.querySelector(".lw-liedname"), name = nameFeld ? nameFeld.value.trim().slice(0, 60) : "";
       if (a === "speichern") { speicherForm = { name: geladen ? geladen.name : "" }; zeichnen(); knoepfe(); const f = root.querySelector(".lw-liedname"); if (f) f.focus(); return; }
       if (a === "abbrechen") { speicherForm = null; zeichnen(); knoepfe(); return; }

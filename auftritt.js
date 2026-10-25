@@ -12,7 +12,7 @@
   const root = document.getElementById("auftritt");
   if (!root) return;
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
-  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const zufall = l => l[Math.floor(Math.random() * l.length)];
 
   const TX = {
@@ -969,12 +969,14 @@
   const liedFilter = () => liedWahl === "neu" ? "lied=like." + encodeURIComponent("neu|*") : "lied=eq." + liedWahl;
   const liedAnzeige = (feld, T) => String(feld || "").startsWith("neu|") ? String(feld).slice(4) : (T.lieder[feld] || feld);
   const lokalLesen = () => { try { return JSON.parse(localStorage.getItem("imres-auftritt-liste") || "{}") || {}; } catch (_) { return {}; } };
+  const zahl = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+  const sauber = l => (Array.isArray(l) ? l : []).filter(e => e && typeof e === "object").map(e => ({ name: String(e.name == null ? "" : e.name), lied: String(e.lied == null ? "" : e.lied), prozent: zahl(e.prozent), wurf: zahl(e.wurf), serie: zahl(e.serie), erstellt: String(e.erstellt == null ? "" : e.erstellt) }));
   const sortieren = l => l.sort((a, b) => b.prozent - a.prozent || b.serie - a.serie || String(a.erstellt).localeCompare(String(b.erstellt)));
   function bestenLaden() {
     const k = listenSchluessel();
     return server("/rest/v1/auftritt_bestenliste?select=name,lied,prozent,wurf,serie,erstellt&stufe=eq." + stufe + "&" + liedFilter() + "&order=prozent.desc,serie.desc,erstellt.asc&limit=10")
-      .then(l => { besten[k] = Array.isArray(l) ? l : []; serverOk = true; })
-      .catch(() => { serverOk = false; besten[k] = sortieren(lokalLesen()[k] || []).slice(0, 10); })
+      .then(l => { besten[k] = sauber(l); serverOk = true; })
+      .catch(() => { serverOk = false; besten[k] = sortieren(sauber(lokalLesen()[k])).slice(0, 10); })
       .then(listeNeu);
   }
   function listeNeu() { const el = root.querySelector(".at-liste"); if (el) el.innerHTML = listeHtml(t()); }
@@ -984,7 +986,7 @@
     const mitLied = liedWahl === "neu", sp = mitLied ? T.spalten : T.spalten.slice(0, 4);
     return '<h4>' + T.bestenliste + " · " + esc(T.stufen[stufe]) + " · " + esc(liedWahl === "neu" ? T.neuesLied : T.lieder[liedWahl]) + "</h4>" +
       (l.length ? '<table><thead><tr>' + sp.map(x => "<th>" + x + "</th>").join("") + "</tr></thead><tbody>" +
-        l.map((e, i) => '<tr' + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + e.prozent + " %</td><td>" + e.wurf + "</td>" + (mitLied ? "<td>" + esc(liedAnzeige(e.lied, T)) + "</td>" : "") + "</tr>").join("") +
+        l.map((e, i) => '<tr' + (meinEintrag && e.erstellt === meinEintrag ? ' class="mein"' : "") + "><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + zahl(e.prozent) + " %</td><td>" + zahl(e.wurf) + "</td>" + (mitLied ? "<td>" + esc(liedAnzeige(e.lied, T)) + "</td>" : "") + "</tr>").join("") +
         "</tbody></table>" : '<p class="at-leer">' + T.leer + "</p>") +
       (serverOk === false ? '<p class="at-leer">' + T.nurHier + "</p>" : "");
   }
@@ -1000,7 +1002,7 @@
     if (!name) { if (feld) feld.focus(); return; }
     try { localStorage.setItem("imres-auftritt-name", name); } catch (_) {}
     const T = t(), e = { name, lied: ergebnis.lied.key ? ergebnis.lied.key : "neu|" + liedName(ergebnis.lied, T).slice(0, 36), prozent: ergebnis.prozent, wurf: ergebnis.summe, serie: ergebnis.serie, erstellt: new Date().toISOString() };
-    const lok = lokalLesen(), k = listenSchluessel(); lok[k] = sortieren((lok[k] || []).concat([e])).slice(0, 10);
+    const lok = lokalLesen(), k = listenSchluessel(); lok[k] = sortieren(sauber(lok[k]).concat([e])).slice(0, 10);
     try { localStorage.setItem("imres-auftritt-liste", JSON.stringify(lok)); } catch (_) {}
     const erg = ergebnis, k2 = listenSchluessel(); erg.sendet = true;
     const fertig = () => {

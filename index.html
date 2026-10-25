@@ -722,6 +722,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
           <button type="button" class="faden-klein" id="notiz-neu" data-i18n="notizNeu">+ Notiz</button>
           <button type="button" class="faden-klein" id="faden-kopieren" data-i18n="tafelKopieren">Tafel kopieren</button>
           <button type="button" class="faden-klein" id="faden-reset" data-i18n="fadenReset">Zurücksetzen</button>
+          <button type="button" class="faden-klein" id="tafel-abmelden" data-i18n="tafelAbmelden" hidden>Abmelden</button>
           <span class="tafel-status" id="tafel-status" aria-live="polite"></span>
         </div>
       </div>
@@ -898,11 +899,11 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
 <script src="spott.js?v=20261022p" defer></script>
 <script src="extras.js?v=20261022a" defer></script>
 <script type="text/plain" data-nachladen="buehne" src="klangwerk.js?v=20261021b"></script>
-<script type="text/plain" data-nachladen="buehne" src="lautenwerk.js?v=20261025b"></script>
-<script type="text/plain" data-nachladen="taverne" src="auftritt.js?v=20261022e"></script>
+<script type="text/plain" data-nachladen="buehne" src="lautenwerk.js?v=20261025s"></script>
+<script type="text/plain" data-nachladen="taverne" src="auftritt.js?v=20261025s"></script>
 <script type="text/plain" data-nachladen="taverne" src="waldlauf-figuren.js?v=20261019k"></script>
 <script type="text/plain" data-nachladen="taverne" src="waldlauf-welten.js?v=20261019k"></script>
-<script type="text/plain" data-nachladen="taverne" src="waldlauf.js?v=20261022a"></script>
+<script type="text/plain" data-nachladen="taverne" src="waldlauf.js?v=20261025s"></script>
 <script type="text/plain" data-nachladen="taverne" src="diebesnacht.js?v=20261020a"></script>
 <script type="text/plain" data-nachladen="taverne" src="echohort.js?v=20261024a"></script>
 <script src="vollbild.js?v=20261021b" defer></script>
@@ -943,7 +944,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       questText: "Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.",
       wischHint: "← Wische, um dich auf der Tafel umzusehen →", wasWirWissen: "Was wir wissen",
       textBearbeiten: "✎ Text bearbeiten", feldAufschrift: "Aufschrift auf dem Zettel", feldUnter: "Kleine Zeile darunter", feldTitel: "Überschrift", feldLabel: "Kategorie", feldText: "Text", feldHinweise: "Was wir wissen (eine Zeile pro Punkt)", speichern: "Speichern", abbrechen: "Abbrechen", original: "Originaltext wiederherstellen", pwFrage: "Passwort für die Questtafel:", pwFalsch: "Das Passwort stimmt nicht.", stGespeichert: "Gespeichert ✓", stSpeichere: "Speichere …", stFehler: "Nicht gespeichert!", stOffline: "Keine Verbindung zur Tafel", resetAlle: "Die gemeinsame Tafel für ALLE auf den Ursprungszustand zurücksetzen?",
-      fadenModus: "Tafel bearbeiten", fadenFertig: "Fertig", wzSchieben: "Verschieben", wzFaden: "Fäden", notizNeu: "+ Notiz", tafelKopieren: "Tafel kopieren", fadenKopiert: "Kopiert!", fadenReset: "Zurücksetzen", fadenResetFrage: "Alle eigenen Änderungen entfernen und die ursprüngliche Tafel wiederherstellen?", fadenFarbe: "Fadenfarbe", tippSchieben: "Zettel und Notizen mit der Maus oder dem Finger verschieben. Notiz antippen, um sie zu bearbeiten, × entfernt sie. Alles wird in diesem Browser gespeichert.", tippFaden: "Von einer beliebigen Stelle eines Zettels zu einer Stelle auf einem anderen ziehen: Dort sitzen dann die Reißzwecken. Ein Klick auf einen Faden entfernt ihn.", farbNamen: { rot: "Rot", blau: "Blau", gruen: "Grün", gelb: "Gelb", schwarz: "Schwarz" },
+      fadenModus: "Tafel bearbeiten", fadenFertig: "Fertig", wzSchieben: "Verschieben", wzFaden: "Fäden", notizNeu: "+ Notiz", tafelKopieren: "Tafel kopieren", fadenKopiert: "Kopiert!", fadenReset: "Zurücksetzen", tafelAbmelden: "Abmelden", fadenResetFrage: "Alle eigenen Änderungen entfernen und die ursprüngliche Tafel wiederherstellen?", fadenFarbe: "Fadenfarbe", tippSchieben: "Zettel und Notizen mit der Maus oder dem Finger verschieben. Notiz antippen, um sie zu bearbeiten, × entfernt sie. Alles wird in diesem Browser gespeichert.", tippFaden: "Von einer beliebigen Stelle eines Zettels zu einer Stelle auf einem anderen ziehen: Dort sitzen dann die Reißzwecken. Ein Klick auf einen Faden entfernt ihn.", farbNamen: { rot: "Rot", blau: "Blau", gruen: "Grün", gelb: "Gelb", schwarz: "Schwarz" },
       roteFaeden: "Zusammenhänge", loserFaden: "Dieser Faden hängt noch lose …", schliessen: "Schließen", questtafelBild: "Questtafel",
       nscLabel: "Bekanntschaften", nscTitle: "Freund, Feind &amp; Fragezeichen",
       nscText: "Wer der Gruppe unterwegs begegnet ist, geholfen hat oder ihr noch etwas schuldet.",
@@ -1008,7 +1009,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       questText: "What keeps the party up at night. Tap a note to learn more.",
       wischHint: "← Swipe to look around the board →", wasWirWissen: "What we know",
       textBearbeiten: "✎ Edit text", feldAufschrift: "Text on the note", feldUnter: "Small line below", feldTitel: "Heading", feldLabel: "Category", feldText: "Text", feldHinweise: "What we know (one line per point)", speichern: "Save", abbrechen: "Cancel", original: "Restore original text", pwFrage: "Password for the quest board:", pwFalsch: "That password is not correct.", stGespeichert: "Saved ✓", stSpeichere: "Saving …", stFehler: "Not saved!", stOffline: "Cannot reach the board", resetAlle: "Reset the shared board to its original state for EVERYONE?",
-      fadenModus: "Edit board", fadenFertig: "Done", wzSchieben: "Move", wzFaden: "Threads", notizNeu: "+ Note", tafelKopieren: "Copy board", fadenKopiert: "Copied!", fadenReset: "Reset", fadenResetFrage: "Remove all your own changes and restore the original board?", fadenFarbe: "Thread colour", tippSchieben: "Drag notes and sticky notes with your mouse or finger. Tap a sticky note to edit it, × removes it. Everything is saved in this browser.", tippFaden: "Drag from any spot on one note to a spot on another: that is where the pins go. Click a thread to remove it.", farbNamen: { rot: "Red", blau: "Blue", gruen: "Green", gelb: "Yellow", schwarz: "Black" },
+      fadenModus: "Edit board", fadenFertig: "Done", wzSchieben: "Move", wzFaden: "Threads", notizNeu: "+ Note", tafelKopieren: "Copy board", fadenKopiert: "Copied!", fadenReset: "Reset", tafelAbmelden: "Log out", fadenResetFrage: "Remove all your own changes and restore the original board?", fadenFarbe: "Thread colour", tippSchieben: "Drag notes and sticky notes with your mouse or finger. Tap a sticky note to edit it, × removes it. Everything is saved in this browser.", tippFaden: "Drag from any spot on one note to a spot on another: that is where the pins go. Click a thread to remove it.", farbNamen: { rot: "Red", blau: "Blue", gruen: "Green", gelb: "Yellow", schwarz: "Black" },
       roteFaeden: "Connections", loserFaden: "This thread is still hanging loose …", schliessen: "Close", questtafelBild: "Quest board",
       nscLabel: "Acquaintances", nscTitle: "Friend, Foe &amp; Question Mark",
       nscText: "Everyone the party has met on the road, who helped us, or who still owes us something.",
@@ -1055,7 +1056,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   };
 
   const $ = id => document.getElementById(id);
-  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* Breite/Höhe bekannter Bilder, damit beim Nachladen nichts springt */
   const masse = f => { const m = (window.BILDMASSE || {})[f]; return m ? ' width="' + m[0] + '" height="' + m[1] + '"' : ""; };
   /* Bilder schon weit vor dem Sichtbereich laden, damit sie beim Scrollen bereit sind */
@@ -1207,14 +1208,39 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   const FARBEN = { rot: "#b3261e", blau: "#2f5fa8", gruen: "#3d7d3a", gelb: "#d6a21e", schwarz: "#221d18" };
   const paarKey = (a, b) => [a, b].sort().join("|");
   const TAFEL_LEER = () => ({ hinzu: [], weg: [], pos: {}, notiz: {}, neu: [], texte: {} });
+  /* Tafeldaten kommen vom Server (oder aus dem Browser) und sind nie vertrauenswürdig: Form prüfen, beim Zeichnen escapen */
+  const istObj = x => !!x && typeof x === "object" && !Array.isArray(x);
+  const eigenes = (o, k) => istObj(o) && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined;
+  function tafelSaeubern(d) {
+    const t = Object.assign(TAFEL_LEER(), istObj(d) ? d : {});
+    ["hinzu", "neu"].forEach(k => { t[k] = Array.isArray(t[k]) ? t[k].filter(istObj) : []; });
+    t.weg = Array.isArray(t.weg) ? t.weg.filter(x => typeof x === "string") : [];
+    ["pos", "notiz", "texte"].forEach(k => { if (!istObj(t[k])) t[k] = {}; });
+    return t;
+  }
+  const zahl = (v, d) => { const n = Number(v); return isFinite(n) ? n : d; };
+  /* HTML aus Tafeldaten: alles escapen, nur <br>, <small>, <em>, <strong>, <b>, <i> (ohne Attribute) und Entities wie &shy; bleiben */
+  const ERLAUBT = ["small", "em", "strong", "b", "i"];
+  function sicher(h) {
+    let s = esc(h).replace(/&lt;(\/?)(br|small|em|strong|b|i)\s*\/?&gt;/gi, (_, z, t) => "<" + z + t.toLowerCase() + ">")
+      .replace(/&amp;(#\d{1,7}|#x[0-9a-f]{1,6}|[a-z][a-z0-9]{1,31});/gi, "&$1;");
+    ERLAUBT.forEach(t => { for (let n = (s.split("<" + t + ">").length) - (s.split("</" + t + ">").length); n > 0; n--) s += "</" + t + ">"; });
+    return s;
+  }
+  const FORMAT_OK = /^\d{1,3}(\.\d{1,3})?\/\d{1,3}(\.\d{1,3})?$/, POS_OK = /^-?\d{1,3}(\.\d{1,3})?% -?\d{1,3}(\.\d{1,3})?%$/;
   let tafelEdit = TAFEL_LEER(), bearbeiten = false, werkzeug = "schieben", fadenFarbe = "rot";
   try {
     const g = (TAFEL_SERVER.url && TAFEL_SERVER.key) ? null : JSON.parse(localStorage.getItem("imres-tafel") || localStorage.getItem("imres-faeden") || "null");
-    if (g && Array.isArray(g.hinzu)) tafelEdit = Object.assign(TAFEL_LEER(), g);
+    if (g && Array.isArray(g.hinzu)) tafelEdit = tafelSaeubern(g);
   } catch (_) {}
   const SERVER = !!(TAFEL_SERVER.url && TAFEL_SERVER.key);
   let tafelPw = "", speicherTimer = 0, zuletztGeladen = "";
-  try { tafelPw = localStorage.getItem("imres-tafel-pw") || ""; } catch (_) {}
+  /* Passwort nur für diese Sitzung (Tab) merken; alte, dauerhaft gespeicherte Kopien entfernen. Das Lautenwerk liest denselben Schlüssel. */
+  const PW_SCHLUESSEL = "imres-tafel-pw";
+  try { localStorage.removeItem(PW_SCHLUESSEL); } catch (_) {}
+  const pwLesen = () => { try { tafelPw = sessionStorage.getItem(PW_SCHLUESSEL) || ""; } catch (_) {} return tafelPw; };
+  const pwMerken = pw => { tafelPw = pw || ""; try { if (pw) sessionStorage.setItem(PW_SCHLUESSEL, pw); else sessionStorage.removeItem(PW_SCHLUESSEL); } catch (_) {} };
+  pwLesen();
   function tafelStatus(text, fehler) { const el = $("tafel-status"); if (el) { el.textContent = text || ""; el.classList.toggle("fehler", !!fehler); } }
   function server(pfad, body) {
     const h = { apikey: TAFEL_SERVER.key, "Content-Type": "application/json" };
@@ -1229,7 +1255,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       const json = JSON.stringify(d || {});
       if (json === zuletztGeladen) return;
       zuletztGeladen = json;
-      tafelEdit = Object.assign(TAFEL_LEER(), d || {});
+      tafelEdit = tafelSaeubern(d);
       kartenLaden(); tafelZeichnen();
     }).catch(() => tafelStatus(T.stOffline, true));
   }
@@ -1237,9 +1263,10 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     if (!SERVER) { try { localStorage.setItem("imres-tafel", JSON.stringify(tafelEdit)); } catch (_) {} return; }
     tafelStatus(T.stSpeichere);
     clearTimeout(speicherTimer);
+    const pw = tafelPw; /* auch nach dem Abmelden noch das zuletzt Bearbeitete speichern */
     speicherTimer = setTimeout(() => {
       const daten = JSON.parse(JSON.stringify(tafelEdit));
-      server("/rest/v1/rpc/tafel_speichern", { passwort: tafelPw, neue_daten: daten })
+      server("/rest/v1/rpc/tafel_speichern", { passwort: pw, neue_daten: daten })
         .then(() => { zuletztGeladen = JSON.stringify(daten); tafelStatus(T.stGespeichert); })
         .catch(() => tafelStatus(T.stFehler, true));
     }, 500);
@@ -1252,11 +1279,12 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       if (!pw) return false;
       return pruefe(pw).then(ok => {
         if (!ok) { alert(T.pwFalsch); return false; }
-        tafelPw = pw; try { localStorage.setItem("imres-tafel-pw", pw); } catch (_) {}
+        pwMerken(pw);
         return true;
       });
     };
-    return (tafelPw ? pruefe(tafelPw) : Promise.resolve(false)).then(ok => ok || fragen()).catch(() => { tafelStatus(T.stOffline, true); return false; });
+    pwLesen();
+    return (tafelPw ? pruefe(tafelPw).then(ok => { if (!ok) pwMerken(""); return ok; }) : Promise.resolve(false)).then(ok => ok || fragen()).catch(() => { tafelStatus(T.stOffline, true); return false; });
   }
   function alleFaeden() {
     const weg = new Set(tafelEdit.weg), pos = new Map(), out = [];
@@ -1283,17 +1311,24 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     if (tafelEdit.hinzu.length === vorher && !tafelEdit.weg.includes(k)) tafelEdit.weg.push(k);
     tafelSpeichern(); tafelZeichnen();
   }
-  const kartePos = k => tafelEdit.pos[k.id] || { x: +k.x, y: +k.y };
+  const kartePos = k => { const p = eigenes(tafelEdit.pos, k.id); return istObj(p) ? { x: zahl(p.x, +k.x), y: zahl(p.y, +k.y) } : { x: +k.x, y: +k.y }; };
   let qKartenBasis = [];
   function kartenLaden() {
     const t = (tafelEdit.texte || {})[lang] || {};
-    qKarten = qKartenBasis.map(k => Object.assign({}, k, t[k.id] || {}));
+    /* vom Server nur die Textfelder übernehmen, die der Editor schreibt */
+    qKarten = qKartenBasis.map(k => {
+      const neu = eigenes(t, k.id), o = Object.assign({}, k);
+      if (!istObj(neu)) return o;
+      ["kurz", "titel", "label", "text"].forEach(f => { if (neu[f] != null) o[f] = String(neu[f]); });
+      if (neu.hinweise != null) o.hinweise = Array.isArray(neu.hinweise) ? neu.hinweise.map(String) : [];
+      return o;
+    });
   }
-  const htmlAlsText = h => { const d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<br\s*\/?>/gi, "\n"); return d.textContent; };
+  const htmlAlsText = h => { const d = document.createElement("div"); d.innerHTML = sicher(h || "").replace(/<br>/gi, "\n"); return d.textContent; };
   function questBearbeiten(id) {
     const k = qKarten.find(x => x.id === id);
     if (!k) return;
-    const kurz = String(k.kurz || esc(k.titel));
+    const kurz = k.kurz ? sicher(k.kurz) : esc(k.titel);
     const i = kurz.search(/<small>/i);
     const oben = htmlAlsText(i > -1 ? kurz.slice(0, i) : kurz), unten = i > -1 ? htmlAlsText(kurz.slice(i)) : "";
     const feld = (name, label, wert, zeilen) => '<label>' + esc(label) + (zeilen ? '<textarea name="' + name + '" rows="' + zeilen + '">' + esc(wert) + "</textarea>" : '<input name="' + name + '" value="' + esc(wert) + '">') + "</label>";
@@ -1324,7 +1359,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     tafelSpeichern(); kartenLaden(); tafelZeichnen(); questOeffnen(id);
   }
   function aktuelleNotizen() {
-    const basis = qNotizen.map((n, i) => Object.assign({ id: "n" + i }, n, tafelEdit.notiz["n" + i] || {})).filter(n => !n.weg);
+    const basis = qNotizen.map((n, i) => { const e = eigenes(tafelEdit.notiz, "n" + i); return Object.assign({ id: "n" + i }, n, istObj(e) ? e : {}); }).filter(n => !n.weg);
     return basis.concat(tafelEdit.neu);
   }
   function notizSetzen(id, werte) {
@@ -1381,16 +1416,16 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     const zettel = qKarten.map(k => {
       const art = k.skizze ? "skizze" : (k.bild ? "bild" : "zettel");
       const p = kartePos(k);
-      const stil = "--x:" + p.x + ";--y:" + p.y + ";--b:" + k.b + ";--dreh:" + (k.dreh || 0) + "deg" +
-        (k.format ? ";--format:" + k.format : "") + (k.pos ? ";--pos:" + k.pos : "");
-      const inhalt = k.skizze ? (SKIZZEN[k.skizze] || "") : k.bild ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy" draggable="false"' + (k.zeichnung ? ' class="zeichnung"' : "") + ">" : "";
+      const stil = "--x:" + p.x + ";--y:" + p.y + ";--b:" + zahl(k.b, 15) + ";--dreh:" + zahl(k.dreh, 0) + "deg" +
+        (FORMAT_OK.test(k.format) ? ";--format:" + k.format : "") + (POS_OK.test(k.pos) ? ";--pos:" + k.pos : "");
+      const inhalt = k.skizze ? (eigenes(SKIZZEN, k.skizze) || "") : k.bild ? '<img src="' + esc(k.bild) + '" alt="" loading="lazy" draggable="false"' + (k.zeichnung ? ' class="zeichnung"' : "") + ">" : "";
       return '<button type="button" class="pin-note ' + art + (k.haupt ? " haupt" : "") + '" id="quest-' + esc(k.id) + '" data-q="' + esc(k.id) + '" style="' + esc(stil) + '" aria-haspopup="dialog" aria-label="' + esc(k.titel) + '">' +
         (gepinnt.has(k.id) ? "" : '<span class="band"></span>') +
-        '<span class="paper">' + inhalt + '<span class="kurz">' + (k.kurz || esc(k.titel)) + "</span></span></button>";
+        '<span class="paper">' + inhalt + '<span class="kurz">' + (k.kurz ? sicher(k.kurz) : esc(k.titel)) + "</span></span></button>";
     }).join("");
     const notizen = aktuelleNotizen().map(n =>
-      '<div class="sticky' + (n.gross ? " gross" : "") + '" data-n="' + esc(n.id) + '" style="--x:' + n.x + ";--y:" + n.y + ";--b:" + n.b + ";--dreh:" + (n.dreh || 0) + 'deg"><span class="band"></span>' +
-        '<span class="sticky-text">' + (n.eigen ? textAlsHtml(n.text) : n.text) + '</span><button type="button" class="sticky-weg" data-weg="' + esc(n.id) + '" aria-label="×">×</button></div>'
+      '<div class="sticky' + (n.gross ? " gross" : "") + '" data-n="' + esc(n.id) + '" style="--x:' + zahl(n.x, 0) + ";--y:" + zahl(n.y, 0) + ";--b:" + zahl(n.b, 10) + ";--dreh:" + zahl(n.dreh, 0) + 'deg"><span class="band"></span>' +
+        '<span class="sticky-text">' + (n.eigen ? textAlsHtml(n.text) : sicher(n.text)) + '</span><button type="button" class="sticky-weg" data-weg="' + esc(n.id) + '" aria-label="×">×</button></div>'
     ).join("");
 
     brett.setAttribute("role", "group");
@@ -1412,7 +1447,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     if (!el || !k) return null;
     const W = brett.offsetWidth, H = brett.offsetHeight, w = el.offsetWidth, h = el.offsetHeight;
     if (!W || !h) return null;
-    const fx = a ? a[0] : .5, fy = a ? a[1] : (PIN_Y / 100 * H) / h;
+    const fx = Array.isArray(a) ? zahl(a[0], .5) : .5, fy = Array.isArray(a) ? zahl(a[1], 0) : (PIN_Y / 100 * H) / h;
     const dx = (fx - .5) * w, dy = fy * h, th = (k.dreh || 0) * Math.PI / 180;
     const px = el.offsetLeft + w / 2 + dx * Math.cos(th) - dy * Math.sin(th);
     const py = el.offsetTop + dx * Math.sin(th) + dy * Math.cos(th);
@@ -1449,9 +1484,9 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       if (f.schnur === false) return;
       const p1 = anker(f.von, f.a1), p2 = anker(f.nach, f.a2);
       if (!p1 || !p2) return;
-      pin(p1, f.von + (f.a1 || "")); pin(p2, f.nach + (f.a2 || ""));
+      pin(p1, f.von + (Array.isArray(f.a1) ? f.a1 : "")); pin(p2, f.nach + (Array.isArray(f.a2) ? f.a2 : ""));
       const d = fadenPfad(p1[0], p1[1], p2[0], p2[1]);
-      faeden += '<g class="faden" data-key="' + esc(paarKey(f.von, f.nach)) + '"><path class="string" style="stroke:' + (FARBEN[f.farbe] || FARBEN.rot) + '" data-von="' + esc(f.von) + '" data-nach="' + esc(f.nach) + '" d="' + d + '"/>' +
+      faeden += '<g class="faden" data-key="' + esc(paarKey(f.von, f.nach)) + '"><path class="string" style="stroke:' + (eigenes(FARBEN, f.farbe) || FARBEN.rot) + '" data-von="' + esc(f.von) + '" data-nach="' + esc(f.nach) + '" d="' + d + '"/>' +
         '<path class="string-hit" d="' + d + '"/></g>';
     });
     qKarten.forEach(k => {
@@ -1480,14 +1515,14 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     if (!k) return;
     const verbunden = alleFaeden().filter(f => f.von === id || f.nach === id).map(f => {
       const ander = qKarten.find(x => x.id === (f.von === id ? f.nach : f.von));
-      return ander ? '<li><button type="button" data-q="' + esc(ander.id) + '">' + esc(ander.titel) + "</button>" + (f.grund ? " · " + f.grund : "") + "</li>" : "";
+      return ander ? '<li><button type="button" data-q="' + esc(ander.id) + '">' + esc(ander.titel) + "</button>" + (f.grund ? " · " + esc(f.grund) : "") + "</li>" : "";
     }).join("");
     $("qd-body").innerHTML =
       (k.label ? '<p class="label">' + esc(k.label) + "</p>" : "") +
       '<h3 id="qd-title">' + esc(k.titel) + "</h3>" +
       (k.bild ? '<figure class="qd-bild"><img src="' + esc(k.bild) + '" alt=""' + (k.zeichnung ? ' class="zeichnung"' : "") + "></figure>" : "") +
-      (k.text ? "<p>" + k.text + "</p>" : "") +
-      (k.hinweise && k.hinweise.length ? '<p class="qd-head">' + esc(T.wasWirWissen) + "</p><ul>" + k.hinweise.map(h => "<li>" + h + "</li>").join("") + "</ul>" : "") +
+      (k.text ? "<p>" + sicher(k.text) + "</p>" : "") +
+      (Array.isArray(k.hinweise) && k.hinweise.length ? '<p class="qd-head">' + esc(T.wasWirWissen) + "</p><ul>" + k.hinweise.map(h => "<li>" + sicher(h) + "</li>").join("") + "</ul>" : "") +
       (verbunden ? '<p class="qd-head">' + esc(T.roteFaeden) + '</p><ul class="qd-links">' + verbunden + "</ul>" : "") +
       (k.lose ? '<p class="qd-lose">' + esc(T.loserFaden) + "</p>" : "") +
       (k.kapitel ? '<button type="button" class="qd-go" data-kapitel="' + esc(k.kapitel) + '" data-abschnitt="' + esc(k.abschnitt || "") + '">' + esc(T.nachlesen(k.kapitel)) + "</button>" : "") +
@@ -1671,6 +1706,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     brett.classList.toggle("wz-schieben", werkzeug === "schieben");
     document.querySelectorAll(".wz-wahl [data-wz]").forEach(b => b.setAttribute("aria-pressed", b.dataset.wz === werkzeug ? "true" : "false"));
     $("faden-farben").hidden = werkzeug !== "faden";
+    $("tafel-abmelden").hidden = !SERVER;
     $("faden-farben").setAttribute("aria-label", T.fadenFarbe);
     $("faden-farben").innerHTML = Object.keys(FARBEN).map(f =>
       '<button type="button" role="radio" data-farbe="' + f + '" aria-checked="' + (f === fadenFarbe) + '" aria-label="' + esc(T.farbNamen[f]) + '" title="' + esc(T.farbNamen[f]) + '" style="--f:' + FARBEN[f] + '"></button>'
@@ -1691,6 +1727,15 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   });
   document.querySelector(".wz-wahl").addEventListener("click", e => { const b = e.target.closest("[data-wz]"); if (b) { werkzeug = b.dataset.wz; fadenLeiste(); } });
   $("faden-farben").addEventListener("click", e => { const b = e.target.closest("[data-farbe]"); if (b) { fadenFarbe = b.dataset.farbe; fadenLeiste(); } });
+  /* Abmelden: Passwort vergessen und Bearbeiten beenden */
+  $("tafel-abmelden").addEventListener("click", () => {
+    if (document.activeElement && document.activeElement.isContentEditable) document.activeElement.blur();
+    pwMerken("");
+    bearbeiten = false;
+    const dlg = $("quest-dialog");
+    if (dlg.open && dlg.querySelector(".qd-form, .qd-edit")) dlg.close();
+    hervorheben(null); fadenLeiste();
+  });
   $("faden-reset").addEventListener("click", () => {
     if (!confirm(SERVER ? T.resetAlle : T.fadenResetFrage)) return;
     tafelEdit = TAFEL_LEER(); tafelSpeichern(); tafelZeichnen();
@@ -1707,7 +1752,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     else prompt("", text);
   });
   function notizBearbeiten(id) {
-    const t = $("quests").querySelector('.sticky[data-n="' + id + '"] .sticky-text');
+    const t = [...$("quests").querySelectorAll(".sticky")].filter(s => s.dataset.n === id).map(s => s.querySelector(".sticky-text"))[0];
     if (!t) return;
     t.contentEditable = "true";
     t.focus();
@@ -2015,7 +2060,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   document.addEventListener("click", e => { if (!suchPanel.hidden && !suchPanel.contains(e.target)) sucheZu(); });
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && !suchPanel.hidden) { sucheZu(); suchBtn.focus(); }
-    else if (e.key === "/" && suchPanel.hidden && !/input|textarea/i.test(document.activeElement.tagName)) { e.preventDefault(); sucheAuf(); }
+    else if (e.key === "/" && suchPanel.hidden && !/input|textarea/i.test(document.activeElement.tagName) && !document.activeElement.isContentEditable) { e.preventDefault(); sucheAuf(); }
   });
   window.addEventListener("resize", () => { if (!suchPanel.hidden && document.activeElement !== suchFeld) sucheZu(); });
 
