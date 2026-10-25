@@ -24,7 +24,7 @@ end $$;
 create or replace function public.imres_saeubern(p text)
 returns text language sql immutable as $$
   select regexp_replace(
-           regexp_replace(coalesce(p, ''), '[\u00ad\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]', '', 'g'),
+           regexp_replace(coalesce(p, ''), '[\u00ad\u061c\u180e\u200b\u200c\u200e\u200f\u202a-\u202e\u2060-\u2069\ufeff]', '', 'g'),
            '([\u0300-\u036f\u0483-\u0489\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]{2})[\u0300-\u036f\u0483-\u0489\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]+', '\1', 'g');
 $$;
 
@@ -33,7 +33,7 @@ create or replace function public.imres_vergleich(p text)
 returns text language plpgsql immutable as $$
 declare r text;
 begin
-  r := lower(public.imres_saeubern(p));
+  r := replace(lower(public.imres_saeubern(p)), U&'\200D', '');  -- Emoji-Verbinder nur für den Vergleich entfernen
   r := replace(replace(r, 'ß', 'ss'), 'ẞ', 'ss');
   r := normalize(r, NFKD);
   r := regexp_replace(r, '[\u0300-\u036f\u0483-\u0489\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]', '', 'g');

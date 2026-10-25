@@ -16,7 +16,7 @@
   const uebersicht = document.getElementById("uebersicht");
   if (!uebersicht) return;
   const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
-  const K_SCHLUESSEL = "imres-gb-schluessel", K_NAME = "imres-gb-name", K_MEINE = "imres-gb-meine";
+  const K_SCHLUESSEL = "imres-gb-schluessel", K_NAME = "imres-gb-name", K_MEINE = "imres-gb-meine", K_GEMELDET = "imres-gb-gemeldet";
   const SEITE = 20;
   const ZUERST_ = () => (window.innerWidth >= 900 ? 6 : 4);
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
@@ -41,7 +41,12 @@
       zeichen: (n, m) => n + " / " + m,
       fehler: { "Name fehlt": "Bitte gib einen Namen an.", "Text zu kurz": "Schreib bitte ein paar Worte mehr.", "zu viele Links": "Bitte höchstens zwei Links.",
         "Bitte kurz warten": "Du hast gerade schon geschrieben – bitte warte ein paar Minuten.", "Bitte später nochmal": "Gerade ist viel los – bitte versuch es später nochmal.",
-        "Eintrag existiert schon": "Diesen Eintrag gibt es schon.", "Bitte freundlich bleiben": "Bitte freundlich bleiben – dein Eintrag enthält Wörter, die wir hier nicht haben möchten.", _: "Das hat nicht geklappt. Bitte versuch es gleich nochmal." },
+        "Eintrag existiert schon": "Diesen Eintrag gibt es schon.", "Bitte freundlich bleiben": "Bitte freundlich bleiben – dein Eintrag enthält Wörter, die wir hier nicht haben möchten.",
+        "Dieser Name ist der Runde vorbehalten": "Dieser Name ist für unsere Runde reserviert – such dir bitte einen anderen aus.",
+        "Bitte nur echte Buchstaben": "Bitte schreib mit echten Buchstaben – unsichtbare Zeichen oder Leerzeichen allein reichen nicht.", _: "Das hat nicht geklappt. Bitte versuch es gleich nochmal." },
+      ohneName: "Unbekannter Gast",
+      melden: "⚑ Melden", meldenTitel: "Diesen Eintrag der Runde melden", meldenFrage: "Diesen Eintrag melden? Wir schauen ihn uns dann an.", meldenJa: "Ja, melden", meldenNein: "Abbrechen",
+      gemeldet: "Danke – wir schauen es uns an.", meldenFehler: { "Schon gemeldet": "Danke – das wurde schon gemeldet, wir schauen es uns an.", "Bitte kurz warten": "Bitte warte kurz, bevor du noch etwas meldest.", _: "Das Melden hat gerade nicht geklappt. Bitte versuch es gleich nochmal." },
       zeit: { jetzt: "gerade eben", min: n => "vor " + n + " Min.", std: n => "vor " + n + " Std.", tag: n => n === 1 ? "gestern" : "vor " + n + " Tagen" }
     },
     en: {
@@ -60,7 +65,12 @@
       zeichen: (n, m) => n + " / " + m,
       fehler: { "Name fehlt": "Please enter a name.", "Text zu kurz": "Please write a few more words.", "zu viele Links": "Two links at most, please.",
         "Bitte kurz warten": "You just wrote – please wait a few minutes.", "Bitte später nochmal": "It's busy right now – please try again later.",
-        "Eintrag existiert schon": "This entry already exists.", "Bitte freundlich bleiben": "Please keep it friendly – your entry contains words we don't want here.", _: "That didn't work. Please try again in a moment." },
+        "Eintrag existiert schon": "This entry already exists.", "Bitte freundlich bleiben": "Please keep it friendly – your entry contains words we don't want here.",
+        "Dieser Name ist der Runde vorbehalten": "That name is reserved for our group – please pick another one.",
+        "Bitte nur echte Buchstaben": "Please write with real letters – invisible characters or spaces alone won't do.", _: "That didn't work. Please try again in a moment." },
+      ohneName: "Unknown guest",
+      melden: "⚑ Report", meldenTitel: "Report this entry to the party", meldenFrage: "Report this entry? We'll take a look at it.", meldenJa: "Yes, report", meldenNein: "Cancel",
+      gemeldet: "Thanks – we'll take a look.", meldenFehler: { "Schon gemeldet": "Thanks – this has already been reported, we'll take a look.", "Bitte kurz warten": "Please wait a moment before reporting something else.", _: "Reporting didn't work just now. Please try again in a moment." },
       zeit: { jetzt: "just now", min: n => n + " min ago", std: n => n + " h ago", tag: n => n === 1 ? "yesterday" : n + " days ago" }
     }
   };
@@ -71,6 +81,29 @@
   /* Wortfilter (derselbe wie auf dem Server in gb_anstoessig) – gibt sofort Rückmeldung */
   const SPERRE = new RegExp("(^|[^a-zäöüß])(?:a+r+s+c+h+l+o+c+h+|a+r+s+c+h+g+e+i+g+e+|w+i+c+h+s+e+r+|w+i+x+e+r+|f+i+c+k+(?!le)|f+o+t+z+e+|h+u+r+e+|s+c+h+l+a+m+p+e+|m+i+s+s+g+e+b+u+r+t+|s+p+a+s+t+|m+o+n+g+o+(?![a-zäöüß])|m+o+n+g+o+s+(?![a-zäöüß])|s+c+h+w+u+c+h+t+e+l+|n+e+g+e+r+|n+i+g+g+e+r+|n+i+g+g+a+|k+a+n+a+k+e+|j+u+d+e+n+s+a+u+|s+i+e+g+\\s+h+e+i+l+|h+e+i+l+\\s+h+i+t+l+e+r+|v+e+r+g+a+s+e+n+|b+r+i+n+g+\\s+d+i+c+h+\\s+u+m+|v+e+r+r+e+c+k+|k+i+l+l+\\s+y+o+u+r+s+e+l+f+|k+y+s+(?![a-zäöüß])|f+u+c+k+|c+u+n+t+|f+a+g+g+o+t+|f+a+g+(?![a-zäöüß])|r+e+t+a+r+d+|w+h+o+r+e+|s+l+u+t+|b+i+t+c+h+|m+o+t+h+e+r+f+u+c+k+e+r+|h+u+r+e+n+s+o+h+n+)", "i");
   const anstoessig = x => SPERRE.test(String(x || "").toLowerCase().replace(/[0134@$]/g, c => ({ 0: "o", 1: "i", 3: "e", 4: "a", "@": "a", $: "s" }[c])));
+
+  /* ---------- Text säubern (vor dem Senden und beim Anzeigen) ----------
+     - unsichtbare Zeichen und Schreibrichtungs-Steuerzeichen raus (Nullbreite, RTL-Override, weiches Trennzeichen …)
+     - „Zalgo“: mehr als zwei übereinanderliegende Akzentzeichen werden gekappt
+     - beim Anzeigen: höchstens eine Leerzeile am Stück und insgesamt höchstens 15 Zeilenumbrüche */
+  const UNSICHTBAR = /[\u00AD\u061C\u180E\u200B\u200C\u200E\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]/g;
+  let AKZENTE = null; try { AKZENTE = new RegExp("(\\p{M}{2})\\p{M}+", "gu"); } catch (_) { AKZENTE = /([\u0300-\u036f\u0483-\u0489\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]{2})[\u0300-\u036f\u0483-\u0489\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]+/g; }
+  let BUCHSTABE = null; try { BUCHSTABE = new RegExp("[\\p{L}\\p{N}]", "u"); } catch (_) { BUCHSTABE = /[A-Za-z0-9\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF\u0590-\u06FF\u3040-\u30FF\u4E00-\u9FFF\uAC00-\uD7AF]/; }
+  function saeubern(x) {
+    return String(x == null ? "" : x).replace(/\r\n?/g, "\n").replace(UNSICHTBAR, "").replace(AKZENTE, "$1");
+  }
+  const nameSaeubern = x => saeubern(x).replace(/\s+/g, " ").trim();
+  function textSaeubern(x, zumAnzeigen) {
+    let t = saeubern(x).replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+    if (zumAnzeigen) { let n = 0; t = t.replace(/\n/g, z => (++n > 15 ? " " : z)); }
+    return t;
+  }
+  const hatBuchstaben = x => BUCHSTABE.test(String(x || ""));
+  /* Für die Runde reservierte Namen (der Server prüft das auch) – hier nur für die schnelle Rückmeldung */
+  const RESERVIERT = ["admin", "administrator", "moderator", "spielleiter", "gamemaster", "dungeonmaster", "dierunde", "imrestales"];
+  const reserviert = n => RESERVIERT.includes(String(n || "").toLowerCase().replace(/[^a-zäöüß]/g, ""));
+  const gemeldet = () => { try { const m = JSON.parse(lies(K_GEMELDET, "[]")); return Array.isArray(m) ? m : []; } catch (e) { return []; } };
+  const gedankt = new Map(); /* id → Text, der statt „Melden“ steht (nur in diesem Besuch) */
 
   /* ---------- Server ---------- */
   function rpc(fn, body) {
@@ -110,21 +143,27 @@
   }
   /* Text: erst escapen, dann Absätze und (sichere) Links */
   function textHtml(s) {
-    return esc(s).replace(/\b(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, '<a href="$1" target="_blank" rel="nofollow noopener ugc">$1</a>')
+    return esc(textSaeubern(s, true)).replace(/\b(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, '<a href="$1" target="_blank" rel="nofollow noopener ugc">$1</a>')
       .split(/\n{2,}/).map(p => "<p>" + p.replace(/\n/g, "<br>") + "</p>").join("");
   }
 
   function eintragHtml(e, i) {
-    const T = t(), meins = meine().includes(e.id);
+    const T = t(), id = Number(e.id), meins = meine().includes(id);
     const thema = THEMEN.includes(e.thema) ? e.thema : "allgemein";
-    return '<article class="gb-eintrag" style="--i:' + (i % 8) + ';--dreh:' + (((e.id * 37) % 7) - 3) * 0.25 + 'deg">' +
-      '<header><b class="gb-name">' + esc(e.name) + '</b><span class="gb-thema t-' + thema + '">' + THEMA_ZEICHEN[thema] + " " + esc(T.themen[thema]) + "</span>" +
+    const name = nameSaeubern(e.name);
+    let fuss = "";
+    if (meins) fuss = '<button type="button" class="gb-loeschen" data-id="' + id + '">' + esc(T.loeschen) + "</button>";
+    else if (gedankt.has(id)) fuss = '<p class="gb-gemeldet" role="status">' + esc(gedankt.get(id)) + "</p>";
+    else if (isFinite(id) && !gemeldet().includes(id)) fuss = '<button type="button" class="gb-melden" data-id="' + id + '" title="' + esc(T.meldenTitel) + '">' + esc(T.melden) + "</button>";
+    return '<article class="gb-eintrag" style="--i:' + (i % 8) + ';--dreh:' + (((id * 37) % 7) - 3) * 0.25 + 'deg">' +
+      '<header><b class="gb-name" dir="auto">' + esc(name || T.ohneName) + '</b><span class="gb-thema t-' + thema + '">' + THEMA_ZEICHEN[thema] + " " + esc(T.themen[thema]) + "</span>" +
       '<time datetime="' + esc(e.erstellt) + '">' + esc(zeitText(e.erstellt)) + "</time></header>" +
-      '<div class="gb-text">' + textHtml(e.text) + "</div>" +
+      '<div class="gb-text" dir="auto">' + textHtml(e.text) + "</div>" +
       (e.antwort ? '<div class="gb-antwort"><small>' + esc(T.antwort) + "</small>" + textHtml(e.antwort) + "</div>" : "") +
-      (meins ? '<button type="button" class="gb-loeschen" data-id="' + e.id + '">' + esc(T.loeschen) + "</button>" : "") +
-      "</article>";
+      fuss + "</article>";
   }
+  /* Einträge ohne sichtbaren Inhalt (nur unsichtbare Zeichen) gar nicht erst zeigen */
+  const zeigbar = e => !!e && hatBuchstaben(textSaeubern(e.text)) ;
 
   function formHtml() {
     const T = t();
@@ -163,12 +202,13 @@
   function bauen() {
     const T = t();
     if (formOffen) entwurfMerken(); else entwurf = null;
-    const sichtbar = alleOffen ? eintraege : eintraege.slice(0, ZUERST_());
+    const alleZeigbar = eintraege.filter(zeigbar);
+    const sichtbar = alleOffen ? alleZeigbar : alleZeigbar.slice(0, ZUERST_());
     let liste = "";
     if (zustand === "neu" || zustand === "laedt") liste = '<p class="gb-status">' + esc(T.laedt) + "</p>";
     else if (zustand === "aufbau") liste = '<p class="gb-status">' + esc(T.aufbau) + "</p>";
     else if (zustand === "fehler") liste = '<p class="gb-status">' + esc(T.fehlerLaden) + ' <button type="button" class="gb-nochmal">' + esc(T.nochmal) + "</button></p>";
-    else if (!eintraege.length) liste = '<p class="gb-status">' + esc(T.leer) + "</p>";
+    else if (!alleZeigbar.length) liste = '<p class="gb-status">' + esc(T.leer) + "</p>";
     else liste = '<div class="gb-liste">' + sichtbar.map(eintragHtml).join("") + "</div>";
     let mehr = "";
     if (zustand === "ok" && eintraege.length) {
@@ -219,6 +259,25 @@
       return;
     }
     if (b.classList.contains("gb-nein")) { bauen(); return; }
+    if (b.classList.contains("gb-melden")) {
+      const T = t();
+      b.outerHTML = '<span class="gb-frage gb-melde-frage">' + esc(T.meldenFrage) + ' <button type="button" class="gb-melden-ja" data-id="' + b.dataset.id + '">' + esc(T.meldenJa) + '</button> <button type="button" class="gb-nein">' + esc(T.meldenNein) + "</button></span>";
+      const ja = box.querySelector('.gb-melden-ja[data-id="' + b.dataset.id + '"]'); if (ja) ja.focus();
+      return;
+    }
+    if (b.classList.contains("gb-melden-ja")) {
+      const id = Number(b.dataset.id), T = t();
+      b.disabled = true;
+      const merkGemeldet = () => merk(K_GEMELDET, JSON.stringify(gemeldet().concat(id).slice(-200)));
+      rpc("gb_melden", { p_id: id }).then(() => { merkGemeldet(); gedankt.set(id, T.gemeldet); bauen(); })
+        .catch(fe => {
+          const msg = (fe && fe.msg) || "";
+          if (msg.indexOf("Schon gemeldet") >= 0) { merkGemeldet(); gedankt.set(id, T.meldenFehler["Schon gemeldet"]); bauen(); return; }
+          const frage = b.closest(".gb-frage");
+          if (frage) frage.outerHTML = '<p class="gb-gemeldet fehler" role="status">' + esc(T.meldenFehler[msg.indexOf("Bitte kurz warten") >= 0 ? "Bitte kurz warten" : "_"]) + "</p>";
+        });
+      return;
+    }
     if (b.classList.contains("gb-ja")) {
       const id = Number(b.dataset.id);
       rpc("gb_loeschen", { p_id: id, p_schluessel: schluessel() }).then(ok => {
@@ -234,10 +293,13 @@
   box.addEventListener("submit", e => {
     e.preventDefault();
     const f = e.target, el = f.elements, T = t(), m = f.querySelector(".gb-meldung"), knopf = f.querySelector(".gb-senden");
-    const name = el.name.value.trim(), text = el.text.value.trim(), thema = (f.querySelector("[name=thema]:checked") || {}).value || "allgemein";
+    const name = nameSaeubern(el.name.value), text = textSaeubern(el.text.value), thema = (f.querySelector("[name=thema]:checked") || {}).value || "allgemein";
     if (el.website.value) return; /* Bot */
     if (!name) { m.textContent = T.fehler["Name fehlt"]; el.name.focus(); return; }
+    if (!hatBuchstaben(name)) { m.textContent = T.fehler["Bitte nur echte Buchstaben"]; el.name.focus(); return; }
+    if (reserviert(name)) { m.textContent = T.fehler["Dieser Name ist der Runde vorbehalten"]; el.name.focus(); return; }
     if (text.length < 3) { m.textContent = T.fehler["Text zu kurz"]; el.text.focus(); return; }
+    if (!hatBuchstaben(text)) { m.textContent = T.fehler["Bitte nur echte Buchstaben"]; el.text.focus(); return; }
     if (anstoessig(name) || anstoessig(text)) { m.textContent = T.fehler["Bitte freundlich bleiben"]; return; }
     knopf.disabled = true; m.textContent = T.sendet;
     merk(K_NAME, name);
@@ -306,6 +368,11 @@
 
 .gb-status { color: var(--ash); font-style: italic; padding: 1rem 0; }
 .gb-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: clamp(1.1rem, 3vw, 1.5rem) clamp(.9rem, 2.5vw, 1.4rem); align-items: start; padding-top: 8px; }
+/* Lange Wörter, Namen ohne Leerzeichen usw. dürfen die Zettel nie breiter als den Bildschirm machen */
+.gb-liste > *, .gb-eintrag header > *, .gb-kopf > * { min-width: 0; }
+.gb-eintrag { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.gb-name { overflow-wrap: anywhere; word-break: break-word; max-width: 100%; unicode-bidi: isolate; }
+.gb-text, .gb-antwort { overflow-wrap: anywhere; unicode-bidi: isolate; }
 /* Einträge als Pergamentzettel */
 .gb-eintrag { display: block; position: relative; padding: 1rem 1.15rem 1.05rem; color: #2a2016; transform: rotate(var(--dreh, 0deg));
   background: radial-gradient(130% 90% at 20% 0%, #f3e8cc, #e6d6ae 70%, #d9c493); box-shadow: 0 10px 24px rgba(0,0,0,.45), inset 0 0 30px rgba(120,86,40,.18);
@@ -324,6 +391,12 @@
 .gb-text a, .gb-antwort a { color: #8a3a12; }
 .gb-antwort { margin-top: .75rem; padding: .55rem .7rem; border-left: 3px solid #9b3a2f; background: rgba(155,58,47,.08); font-size: .92rem; line-height: 1.5; }
 .gb-antwort small { display: block; font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #9b3a2f; margin-bottom: .15rem; }
+.gb-melden { display: block; margin: .55rem 0 0 auto; border: 0; background: none; padding: .35rem 0 .1rem .5rem; min-height: 32px; font: inherit; font-size: .72rem;
+  color: #8a7a62; opacity: .75; cursor: pointer; letter-spacing: .02em; }
+.gb-melden:hover, .gb-melden:focus-visible { opacity: 1; color: #9b3a2f; text-decoration: underline; }
+.gb-melden-ja { margin-top: .6rem; border: 0; background: none; padding: 0; font: inherit; font-size: .78rem; color: #9b3a2f; font-weight: 600; text-decoration: underline; cursor: pointer; margin-left: .3rem; }
+.gb-gemeldet { margin-top: .6rem; font-size: .8rem; font-style: italic; color: #4f6b3c; }
+.gb-gemeldet.fehler { color: #8e1f17; }
 .gb-loeschen, .gb-ja, .gb-nein { margin-top: .6rem; border: 0; background: none; padding: 0; font: inherit; font-size: .78rem; color: #7a6a52; text-decoration: underline; cursor: pointer; }
 .gb-ja { color: #9b3a2f; font-weight: 600; margin-left: .3rem; }
 .gb-nein { margin-left: .3rem; }

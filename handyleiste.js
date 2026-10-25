@@ -33,6 +33,7 @@
   /* ---------- Leiste ---------- */
   const leiste = document.createElement("nav"); leiste.className = "handyleiste";
   const blatt = document.createElement("div"); blatt.className = "hl-blatt"; blatt.hidden = true;
+  blatt.setAttribute("role", "dialog"); blatt.setAttribute("aria-modal", "true"); blatt.tabIndex = -1;
   const hinter = document.createElement("div"); hinter.className = "hl-hinter"; hinter.hidden = true;
   document.body.append(hinter, blatt, leiste);
 
@@ -48,7 +49,8 @@
   /* ---------- „Mehr“-Blatt ---------- */
   function kapitelListe() {
     const D = (sprache() === "en" ? (window.INHALT_EN || window.INHALT) : window.INHALT) || {};
-    return (D.kapitel || []).map(k => ({ href: "#kapitel-" + String(k.nummer).toLowerCase(), text: k.nummer + " · " + k.titel }));
+    /* gleiche Adressen wie das Kapitelmenü oben (IDs sind z. B. „kapitel-I“, Groß-/Kleinschreibung zählt) */
+    return (D.kapitel || []).map(k => ({ href: "#kapitel-" + String(k.nummer), text: k.nummer + " · " + k.titel }));
   }
   function blattBauen() {
     const T = t();
@@ -64,16 +66,47 @@
       '<div class="hl-fuss"><button type="button" class="hl-suche">🔍 ' + esc(T.suche) + '</button>' +
         '<span class="hl-sprache" role="group" aria-label="' + esc(T.sprache) + '"><button type="button" data-lang="de" aria-pressed="' + (sprache() === "de") + '">Deutsch</button><button type="button" data-lang="en" aria-pressed="' + (sprache() === "en") + '">English</button></span></div>';
   }
-  function blattAuf() { blattBauen(); blatt.hidden = false; hinter.hidden = false; requestAnimationFrame(() => { blatt.classList.add("offen"); hinter.classList.add("offen"); }); leiste.querySelector(".hl-mehr").setAttribute("aria-expanded", "true"); }
+  /* Fokus wandert ins Blatt und beim Schließen zurück zum „Mehr“-Knopf (Tastatur, Screenreader) */
+  let vorherFokus = null;
+  const fokussierbar = () => [...blatt.querySelectorAll("a[href], button:not([disabled])")].filter(x => x.offsetParent !== null);
+  function blattAuf() {
+    vorherFokus = document.activeElement;
+    blattBauen(); blatt.setAttribute("aria-label", t().mehr); blatt.hidden = false; hinter.hidden = false;
+    requestAnimationFrame(() => { blatt.classList.add("offen"); hinter.classList.add("offen"); const f = fokussierbar(); const erst = f.find(x => !x.classList.contains("hl-zu")) || f[0] || blatt; try { erst.focus({ preventScroll: true }); } catch (_) {} });
+    leiste.querySelector(".hl-mehr").setAttribute("aria-expanded", "true");
+  }
   function blattZu() {
     if (blatt.hidden) return;
+    const warDrin = blatt.contains(document.activeElement) || document.activeElement === document.body;
     blatt.classList.remove("offen"); hinter.classList.remove("offen");
     const m = leiste.querySelector(".hl-mehr"); if (m) m.setAttribute("aria-expanded", "false");
     setTimeout(() => { if (!blatt.classList.contains("offen")) { blatt.hidden = true; hinter.hidden = true; } }, 260);
+    if (warDrin) { const z = (vorherFokus && document.contains(vorherFokus) && vorherFokus !== document.body) ? vorherFokus : m; try { if (z) z.focus({ preventScroll: true }); } catch (_) {} }
   }
+  /* Tab bleibt im offenen Blatt */
+  blatt.addEventListener("keydown", e => {
+    if (e.key !== "Tab") return;
+    const f = fokussierbar(); if (!f.length) return;
+    const erst = f[0], letzt = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === erst) { e.preventDefault(); letzt.focus(); }
+    else if (!e.shiftKey && document.activeElement === letzt) { e.preventDefault(); erst.focus(); }
+  });
   leiste.addEventListener("click", e => { if (e.target.closest(".hl-mehr")) { blatt.hidden ? blattAuf() : blattZu(); } else if (e.target.closest("a")) blattZu(); });
   hinter.addEventListener("click", blattZu);
   document.addEventListener("keydown", e => { if (e.key === "Escape") blattZu(); });
+
+  /* ---------- Bildschirmtastatur: Leiste ausblenden, solange ein Eingabefeld den Fokus hat ----------
+     (Sonst liegt sie über dem Absendeknopf, z. B. im Gästebuch.) Nur auf Touch-Geräten. */
+  const touch = window.matchMedia ? window.matchMedia("(hover: none), (pointer: coarse)") : { matches: false };
+  const tippFeld = el => !!el && (el.isContentEditable || el.tagName === "TEXTAREA" || el.tagName === "SELECT" ||
+    (el.tagName === "INPUT" && !/^(button|submit|reset|checkbox|radio|range|color|file|image)$/i.test(el.type)));
+  let tastaturTimer = 0;
+  document.addEventListener("focusin", e => { if (touch.matches && tippFeld(e.target)) { clearTimeout(tastaturTimer); document.documentElement.classList.add("hl-tastatur"); } });
+  document.addEventListener("focusout", () => {
+    clearTimeout(tastaturTimer);
+    /* kurz warten: springt der Fokus nur ins nächste Feld, bleibt die Leiste weg */
+    tastaturTimer = setTimeout(() => { if (!tippFeld(document.activeElement)) document.documentElement.classList.remove("hl-tastatur"); }, 150);
+  });
   blatt.addEventListener("click", e => {
     if (e.target.closest(".hl-zu")) { blattZu(); return; }
     if (e.target.closest("a")) { blattZu(); return; }
@@ -144,6 +177,8 @@
 
   /* Nicht stören: im Vollbild der Spiele und bei offenen Fenstern */
   html.tav-voll-offen .handyleiste, html.saal-dialog-offen .handyleiste, html.wl-ohne-scroll .handyleiste, :fullscreen ~ .handyleiste { display: none; }
+  /* Tastatur offen (siehe oben) – und für Spiele, die beim Spielen die ganze Höhe brauchen: <body class="spiel-offen"> */
+  html.hl-tastatur .handyleiste, body.spiel-offen .handyleiste { display: none; }
 }
 @media (max-width: 760px) and (prefers-reduced-motion: reduce) { .hl-blatt, .hl-hinter { transition: none; } }
 `;

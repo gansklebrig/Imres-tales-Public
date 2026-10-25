@@ -25,6 +25,7 @@
       weiterlesen: (nr, titel) => "<small>Zuletzt geschehen</small>Kapitel " + nr + " · " + titel + "<b>Weiterlesen →</b>",
       zuletzt: "Zuletzt geschehen", kapitelWort: "Kapitel", weiterWort: "Weiterlesen →",
       runter: "Zur Übersicht",
+      weg: "Diese Stelle gibt es nicht mehr – ", wegLink: "hier geht's zur Übersicht",
       namen: { chronik: "Die Chronik", questtafel: "Die Questtafel", reise: "Die Reise", gefaehrten: "Die Gefährten", nsc: "Bekanntschaften", bestiarium: "Das Bestiarium", taverne: "Die Taverne", buehne: "Barradins Bühne" },
       texte: {
         chronik: "Das ganze Abenteuer, Kapitel für Kapitel nacherzählt.",
@@ -33,7 +34,7 @@
         gefaehrten: "Vier Helden und ein Hund – wer sie sind.",
         nsc: "Freund, Feind und Fragezeichen.",
         bestiarium: "Alles, was uns fressen wollte.",
-        taverne: "Heldensturm, Jagd, Diebesnacht, Echos Hort, Auftritt, Loblied & Memory.",
+        taverne: "Heldensturm, Friedrichs Jagd, Ezekiels lange Nacht, Echos Hort, Barradins Auftritt, Loblied & Spott und Bestiarium-Memory.",
         buehne: "Lautenwerk und Spielleiter-Pult für eure Sessions."
       },
       zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "7 Spiele", buehne: () => "♪ Musik" }
@@ -43,6 +44,7 @@
       weiterlesen: (nr, titel) => "<small>Most recently</small>Chapter " + nr + " · " + titel + "<b>Read on →</b>",
       zuletzt: "Most recently", kapitelWort: "Chapter", weiterWort: "Read on →",
       runter: "To the overview",
+      weg: "This spot doesn't exist any more – ", wegLink: "here's the overview",
       namen: { chronik: "The Chronicle", questtafel: "The Quest Board", reise: "The Journey", gefaehrten: "The Companions", nsc: "Acquaintances", bestiarium: "The Bestiary", taverne: "The Tavern", buehne: "Barradin's Stage" },
       texte: {
         chronik: "The whole adventure, retold chapter by chapter.",
@@ -51,8 +53,8 @@
         gefaehrten: "Four heroes and a dog – who they are.",
         nsc: "Friend, foe and question mark.",
         bestiarium: "Everything that wanted to eat us.",
-        taverne: "Heldensturm, hunt, long night, Echo's hoard, performance, praise & memory.",
-        buehne: "Lute machine and GM console for your sessions."
+        taverne: "Heldensturm, Friedrich's Hunt, Ezekiel's Long Night, Echo's Hoard, Barradin's Performance, Praise & Mockery and Bestiary Memory.",
+        buehne: "Lautenwerk and Dungeon Master's console for your sessions."
       },
       zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "7 games", buehne: () => "♪ Music" }
     }
@@ -100,9 +102,11 @@
     window.scrollTo({ top: Math.max(0, y), behavior: "instant" });
   }
   function ziel(hash) {
-    const id = decodeURIComponent(String(hash || "").replace(/^#/, ""));
+    let id = String(hash || "").replace(/^#/, "");
+    try { id = decodeURIComponent(id); } catch (_) {}
     if (!id || id === "start") return null;
-    try { return document.getElementById(id); } catch (_) { return null; }
+    /* index.html kennt auch die Anker der anderen Sprache (alte deutsche Links auf Englisch und umgekehrt) */
+    try { return window.ImresAnker ? window.ImresAnker.finde(id) : document.getElementById(id); } catch (_) { return null; }
   }
   function route(hash, scrollen) {
     const el = ziel(hash);
@@ -110,8 +114,49 @@
     setze(neu);
     if (scrollen !== false) requestAnimationFrame(() => hinScrollen(neu === "start" && el && !start.contains(el) ? null : el));
   }
+
+  /* ---------- Verlauf: Zurück/Vor stellen Ansicht UND Scrollposition wieder her ----------
+     Jeder Eintrag merkt sich seine Scrollposition (replaceState, nur nach dem Scrollen – erzeugt keine neuen Einträge).
+     Neue Einträge entstehen nur bei Klicks bzw. Sprüngen, die der Besucher selbst auslöst. */
+  try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (_) {}
+  function merkeScroll() {
+    try { const st = history.state && typeof history.state === "object" ? history.state : {}; history.replaceState(Object.assign({}, st, { y: Math.round(window.pageYOffset) }), "", location.href); } catch (_) {}
+  }
+  /* Gemerkt wird nur, wenn sich seit dem Scrollen die Adresse nicht geändert hat und gerade nichts wiederhergestellt wird */
+  let scrollTimer = 0, stand = 0, stelltHer = false;
+  window.addEventListener("scroll", () => {
+    if (stelltHer) return;
+    clearTimeout(scrollTimer);
+    const bei = stand, url = location.href;
+    /* nicht während ein Fenster offen ist (die Seite ist dann oft gesperrt und meldet falsche Positionen) */
+    scrollTimer = setTimeout(() => { if (bei === stand && url === location.href && !stelltHer && !document.querySelector("dialog[open]") && getComputedStyle(document.documentElement).overflowY !== "hidden") merkeScroll(); }, 200);
+  }, { passive: true });
+  function neuerEintrag(adresse) {
+    clearTimeout(scrollTimer); merkeScroll(); stand++;
+    try { history.pushState(null, "", adresse); } catch (_) {}
+  }
+  let zuletztPop = "", popTimer = 0;
+  function zurueckVor() {
+    stand++; clearTimeout(scrollTimer); stelltHer = false;
+    const st = history.state, y = st && typeof st.y === "number" ? st.y : null;
+    zuletztPop = location.href; clearTimeout(popTimer); popTimer = setTimeout(() => { zuletztPop = ""; }, 120);
+    if (y == null) { route(location.hash); return; }
+    stelltHer = true;
+    route(location.hash, false);
+    window.scrollTo({ top: y, behavior: "instant" });
+    /* und noch einmal nach den anderen Skripten (die Taverne baut ihre Kacheln in einem eigenen Schritt neu) */
+    const bei = stand;
+    setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (bei === stand) window.scrollTo({ top: y, behavior: "instant" });
+      setTimeout(() => { if (bei === stand) stelltHer = false; }, 50);
+    })), 60);
+  }
+  window.addEventListener("popstate", zurueckVor);
+  /* hashchange kommt bei Zurück/Vor zusätzlich zu popstate – dann nicht doppelt; sonst (Adresse von Hand geändert) normal */
+  window.addEventListener("hashchange", () => { if (location.href !== zuletztPop) { route(location.hash); pruefeAdresse(); } });
+
   /* Für Sprünge aus dem restlichen Code (Kapitelmenü, Suche, Karte …) */
-  window.ImresAnsicht = { zeige: el => setze(ansichtVon(el)) };
+  window.ImresAnsicht = { zeige: el => setze(ansichtVon(el)), merkeScroll: () => { clearTimeout(scrollTimer); merkeScroll(); stand++; stelltHer = false; } };
 
   document.addEventListener("click", e => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
@@ -122,12 +167,45 @@
     const el = ziel(hash);
     if (hash !== "#start" && hash !== "#uebersicht" && !el) return;
     e.preventDefault();
+    const adresse = hash === "#start" ? location.pathname + location.search : hash;
+    const gleich = hash === "#start" ? !location.hash : location.hash === hash;
+    if (!gleich) neuerEintrag(adresse);
     if (hash === "#uebersicht") { setze("start"); requestAnimationFrame(() => hinScrollen($("uebersicht"))); }
     else route(hash);
-    try { history.pushState(null, "", hash === "#start" ? location.pathname + location.search : hash); } catch (_) {}
   });
-  window.addEventListener("popstate", () => route(location.hash));
-  window.addEventListener("hashchange", () => route(location.hash));
+
+  /* ---------- Unbekannte Adresse: Startseite und ein leiser Hinweis ---------- */
+  function hinweis(html) {
+    let t = document.querySelector(".ort-toast");
+    if (!t) { t = document.createElement("div"); t.className = "ort-toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+    t.innerHTML = html;
+    requestAnimationFrame(() => t.classList.add("an"));
+    clearTimeout(hinweis.timer);
+    hinweis.timer = setTimeout(() => { t.classList.remove("an"); }, 8000);
+    t.onclick = e => { if (e.target.closest("a")) t.classList.remove("an"); };
+  }
+  /* Nur bei Adressen, die wie ein Anker aussehen und auch nach dem Laden aller Skripte nicht existieren */
+  const BESONDERS = /^(start|uebersicht|en|de)$|test/i;
+  function pruefeAdresse() {
+    const hash = location.hash;
+    let id = hash.replace(/^#/, ""); try { id = decodeURIComponent(id); } catch (_) {}
+    if (!id || BESONDERS.test(id) || !/^[\w\u00c0-\u024f-]{2,120}$/.test(id)) return;
+    const pruefen = () => {
+      if (location.hash !== hash) return;
+      const el = ziel(hash);
+      if (el) {
+        /* Erst später entstanden (z. B. #gaestebuch): jetzt richtig hinspringen */
+        if (ansichtVon(el) !== ansicht) route(hash);
+        else if (ansicht === "start" && start.contains(el)) hinScrollen(el);
+        return;
+      }
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (_) {}
+      const T = t();
+      hinweis(esc(T.weg) + '<a href="#uebersicht">' + esc(T.wegLink) + "</a>");
+    };
+    if (document.readyState === "complete") setTimeout(pruefen, 900);
+    else window.addEventListener("load", () => setTimeout(pruefen, 900), { once: true });
+  }
 
   /* ---------- Halle der Gefährten ---------- */
   let halleTimer = null, halleAktiv = 0, halleHover = false, halleHelden = [];
@@ -382,6 +460,8 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
   .halle-namen { font-size: .95rem; }
   .halle-tafel.vorn { flex-grow: 3.2; }
 }
+/* Ganz schmale Handys: Namenszeile etwas kleiner, damit die Kerze unten rechts nicht über „Rex“ liegt */
+@media (max-width: 380px) { .halle-titel { padding-inline: 34px; } .halle-namen { font-size: .86rem; } }
 @media (prefers-reduced-motion: reduce) {
   .halle-tafel, .halle-tafel img, .halle-titel h1, .halle-titel .label, .halle-namen, .halle-runter, .weiterlesen::after { animation: none !important; opacity: 1 !important; transform: none !important; }
   .kachel { opacity: 1; transform: none; }
@@ -392,7 +472,16 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
   /* ---------- Start ---------- */
   function allesBauen() { halleBauen(); uebersichtBauen(); bereichsNavigation(); }
   allesBauen();
-  route(location.hash, !!location.hash && location.hash !== "#start");
+  /* Neu laden bzw. Zurück aus einer anderen Seite: an die gemerkte Stelle; sonst zum Anker im Link */
+  const navArt = (() => { try { const n = performance.getEntriesByType("navigation")[0]; return n ? n.type : ""; } catch (_) { return ""; } })();
+  const gemerktY = history.state && typeof history.state.y === "number" && (navArt === "reload" || navArt === "back_forward") ? history.state.y : null;
+  if (gemerktY != null) {
+    route(location.hash, false); stelltHer = true;
+    const hin = () => window.scrollTo({ top: gemerktY, behavior: "instant" });
+    hin(); requestAnimationFrame(hin);
+    window.addEventListener("load", () => { if (Math.abs(window.pageYOffset - gemerktY) > 2 && stand === 0) hin(); stelltHer = false; }, { once: true });
+  } else route(location.hash, !!location.hash);
+  pruefeAdresse();
   /* Wird ein Bereich erst später sichtbar (oder wieder versteckt), die Ansicht zum aktuellen Link nachziehen */
   new MutationObserver(ms => {
     if (!ms.some(m => m.target.matches && m.target.matches("section.part"))) return;

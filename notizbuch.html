@@ -9,7 +9,11 @@
 <meta name="theme-color" content="#100e15">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap"></noscript>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 /* Versteckte Seite: Barradins handgeschriebene Notizbuchseiten. Gleiche Farben wie index.html, bewusst nur dunkel. */
 :root {
@@ -62,8 +66,11 @@ footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; color: var
 
 <script>
 (function () {
-  var lang = "de";
-  try { if (localStorage.getItem("imres-lang") === "en") lang = "en"; } catch (e) {}
+  /* Sprache wie auf der Hauptseite: ?lang= im Link, dann die gemerkte Wahl, dann die Browsersprache */
+  var lang = null;
+  try { var q = (location.search.match(/[?&]lang=(de|en)\b/) || [])[1]; if (q) lang = q; } catch (e) {}
+  if (!lang) try { var g = localStorage.getItem("imres-lang"); if (g === "de" || g === "en") lang = g; } catch (e) {}
+  if (!lang) { var n = (navigator.languages && navigator.languages[0]) || navigator.language || "de"; lang = /^de\b/i.test(n) ? "de" : "en"; }
   var SEITEN = {
     de: [
       ["Die Einladung", "Gundrens Brief, die magische Schmiede, Phandalin, die Roten Roben und Glasstab."],

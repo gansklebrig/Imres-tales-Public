@@ -20,9 +20,16 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://imrestales.de/vorschau.jpg">
 <meta name="theme-color" content="#100e15">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<!-- Schriften blockieren nichts: Hängt Google Fonts, steht die Seite trotzdem (erst mit Ersatzschrift, dann display=swap) -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap"></noscript>
+<noscript><style>main > section.part { display: block !important; }</style></noscript>
 <style>
 /* Layout: ein nächtliches Gasthaus-Buch. Gruppenbild als Fries oben, dann Chronik, Reisekarte, Gefährten als abwechselnde Doppelseiten und das Bestiarium. Bewusst nur dunkel. */
 :root {
@@ -53,6 +60,14 @@ body {
 }
 a { color: var(--ember); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+/* Hinweis-Toast (z. B. unbekannte Adresse) */
+.ort-toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 960; transform: translate(-50%, 12px); opacity: 0;
+  width: max-content; max-width: calc(100vw - 32px); padding: .7rem 1rem; border: 1px solid var(--line); border-left: 3px solid var(--ember);
+  background: rgba(16,14,21,.96); color: var(--vellum); font-size: .92rem; line-height: 1.45; box-shadow: 0 12px 30px rgba(0,0,0,.5);
+  transition: opacity .35s, transform .35s; }
+.ort-toast.an { opacity: 1; transform: translate(-50%, 0); }
+.ort-toast a { color: var(--ember); }
+@media (max-width: 760px) { .ort-toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); } }
 .wrap { max-width: 68rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
 h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
 p { margin: 0; }
@@ -101,12 +116,14 @@ p { margin: 0; }
 
 /* ---------- Suche ---------- */
 .tools { display: flex; align-items: center; gap: .7rem; }
+/* Treffläche mind. 40 px (Padding), sichtbar bleibt der kleine Rahmen um das Symbol (Outline statt Border); negativer Rand hält das Layout gleich */
 .such-btn {
-  background: none; border: 1px solid transparent; border-radius: 2px; color: var(--ash);
-  cursor: pointer; padding: .3rem; line-height: 0;
+  background: none; border: 0; border-radius: 2px; color: var(--ash);
+  cursor: pointer; padding: 12px; margin: -6px; line-height: 0;
 }
-.such-btn:hover, .such-btn[aria-expanded="true"] { color: var(--ember); border-color: var(--line); }
-.such-btn svg { width: 1.05rem; height: 1.05rem; }
+.such-btn svg { width: 1.05rem; height: 1.05rem; outline: 1px solid transparent; outline-offset: 5px; border-radius: 1px; }
+.such-btn:hover, .such-btn[aria-expanded="true"] { color: var(--ember); }
+.such-btn:hover svg, .such-btn[aria-expanded="true"] svg { outline-color: var(--line); }
 .such-panel {
   position: fixed; z-index: 30; width: min(27rem, calc(100vw - 32px));
   background: var(--night); border: 1px solid var(--line); border-radius: 2px;
@@ -135,13 +152,17 @@ p { margin: 0; }
 .such-treffer { outline: 2px solid var(--ember); outline-offset: 6px; border-radius: 2px; transition: outline-color 1.2s; }
 
 .lang { display: flex; gap: .35rem; align-items: center; }
+/* Flaggen: 40 × 40 px Treffläche, sichtbar weiter 26 × 18 (Rahmen als Outline am Bild) */
 .lang button {
-  display: block; padding: 2px; background: none; border: 1px solid transparent; border-radius: 2px;
-  cursor: pointer; opacity: .45; transition: opacity .2s, border-color .2s; line-height: 0;
+  display: block; padding: 14px 10px; margin: -11px -7px; background: none; border: 0; border-radius: 2px;
+  cursor: pointer; opacity: .45; transition: opacity .2s; line-height: 0; position: relative;
 }
 .lang button:hover { opacity: .85; }
-.lang button[aria-pressed="true"] { opacity: 1; border-color: var(--line); }
-.lang svg { width: 20px; height: 12px; display: block; }
+.lang button[aria-pressed="true"] { opacity: 1; }
+.lang svg { width: 20px; height: 12px; display: block; outline: 1px solid transparent; outline-offset: 2px; transition: outline-color .2s; }
+.lang button[aria-pressed="true"] svg { outline-color: var(--line); }
+.lang button:focus-visible { outline: none; }
+.lang button:focus-visible svg { outline: 2px solid var(--ember); outline-offset: 3px; }
 
 .hero { padding-block: clamp(2.5rem, 7vw, 5rem) 2rem; }
 .hero .label { margin-bottom: .9rem; }
@@ -182,6 +203,9 @@ p { margin: 0; }
 
 /* ---------- Abschnitte ---------- */
 section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(--line); scroll-margin-top: 3.5rem; }
+/* Bis seiten.js die Ansicht setzt, sind die Bereiche zu – so lädt die Startseite keine Bilder aus verborgenen Bereichen.
+   (Ohne JavaScript bzw. falls seiten.js fehlt, zeigt „ohne-ansicht“ wieder alles untereinander.) */
+body:not(.ansicht-start):not(.ansicht-bereich):not(.ohne-ansicht) main > section.part { display: none; }
 .part-head { display: grid; gap: .5rem; margin-bottom: 2.5rem; max-width: 42rem; }
 .part-head h2 { font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1; }
 .part-head p { color: var(--ash); }
@@ -224,6 +248,8 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .route-done { animation: march 1.2s linear infinite; }
 @keyframes march { to { stroke-dashoffset: -11; } }
 .stop circle { fill: var(--night); stroke: var(--ember); stroke-width: 3; transition: fill .2s; }
+/* größere, unsichtbare Trefferfläche um jede Station (liegt unter allen sichtbaren Punkten) */
+.stop-hit { fill: transparent; stroke: none; cursor: pointer; pointer-events: all; }
 .stop text { fill: var(--vellum); font-family: var(--body); font-size: 19px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .stop { cursor: pointer; }
 .stop:hover circle, .stop.active circle { fill: var(--blood); }
@@ -297,7 +323,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 /* ---------- Bestiarium ---------- */
 .bestiary-legend { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.4rem; }
 .tag { font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; padding: .2rem .65rem; border: 1px solid; }
-.tag.slain { color: var(--blood); border-color: var(--blood); }
+.tag.slain { color: #d0675a; border-color: #d0675a; } /* heller als --blood: Kontrast ≥ 4.5:1 auf --hall */
 .tag.seen { color: var(--moss); border-color: var(--moss); }
 .tome .seal.skull b { color: var(--blood); }
 
@@ -439,6 +465,24 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .wz-wahl button + button { border-left: 1px solid var(--line); }
 .wz-wahl button[aria-pressed="true"] { background: color-mix(in srgb, var(--ember) 22%, transparent); color: var(--vellum); }
 .faden-leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem 1rem; margin-top: 1rem; }
+.faden-leiste:has(> .faden-werkzeug[hidden]) { display: none; }
+/* Bearbeiten nur für die Runde: kleiner Knopf an der Ecke der Tafel */
+.tafel-rahmen { position: relative; }
+.faden-modus.runde {
+  position: absolute; right: 6px; bottom: 6px; z-index: 6; display: inline-flex; align-items: center; gap: .35rem;
+  min-height: 40px; padding: .3rem .7rem; border: 1px solid rgba(224,160,70,.22); border-radius: 999px;
+  background: rgba(16,14,21,.62); color: rgba(235,226,204,.62); font-size: .74rem; letter-spacing: .04em;
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+}
+.faden-modus.runde:hover, .faden-modus.runde:focus-visible { color: var(--ember); border-color: var(--ember); background: rgba(16,14,21,.85); }
+.faden-modus.runde .stift { font-size: .95rem; line-height: 1; }
+.faden-modus.runde[aria-pressed="true"] { background: var(--ember); border-color: var(--ember); color: var(--night); }
+.pw-dialog { width: min(24rem, calc(100vw - 32px)); }
+.pw-dialog .qd-inner { gap: .7rem; }
+.pw-dialog h3 { font-size: clamp(1.5rem, 5vw, 1.9rem); }
+.pw-dialog .pw-text { font-size: .92rem; color: #4a3d2e; }
+.pw-dialog .pw-fehler { min-height: 1.3em; font-size: .9rem; color: #8e1f17; font-weight: 600; }
+.pw-dialog .pw-fehler:empty { display: none; }
 .faden-modus, .faden-klein {
   background: none; border: 1px solid var(--line); color: var(--vellum); font: inherit; cursor: pointer;
   padding: .45rem .95rem; border-radius: 2px; font-size: .9rem; letter-spacing: .03em;
@@ -563,7 +607,7 @@ section.part { padding-block: clamp(3rem, 8vw, 6rem); border-top: 1px solid var(
 .npc p { font-size: .97rem; line-height: 1.55; }
 .npc .tag { justify-self: start; font-size: .64rem; }
 .tag.ally { color: var(--moss); border-color: var(--moss); }
-.tag.foe { color: #c7574a; border-color: #c7574a; }
+.tag.foe { color: #d4685b; border-color: #d4685b; }
 .tag.unclear { color: var(--ember); border-color: var(--ember); border-style: dashed; }
 .tag.neutral, .tag.dead { color: var(--ash); border-color: var(--ash); }
 
@@ -710,9 +754,12 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
         <h2 data-i18n="questTitle">Offene Fragen</h2>
         <p data-i18n="questText">Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.</p>
       </div>
-      <div class="tafel-scroll" id="tafel-scroll"><div class="tafel-szene"><div class="tafel-flaeche" id="quests"></div></div></div>
+      <div class="tafel-rahmen">
+        <div class="tafel-scroll" id="tafel-scroll"><div class="tafel-szene"><div class="tafel-flaeche" id="quests"></div></div></div>
+        <!-- Bearbeiten ist nur für die Runde (Passwort) – daher nur ein kleiner Knopf an der Ecke -->
+        <button type="button" class="faden-modus runde" id="faden-modus" aria-pressed="false"><span class="stift" aria-hidden="true">✎</span><span class="fm-text">Für die Runde</span></button>
+      </div>
       <div class="faden-leiste">
-        <button type="button" class="faden-modus" id="faden-modus" aria-pressed="false">Tafel bearbeiten</button>
         <div class="faden-werkzeug" id="faden-werkzeug" hidden>
           <div class="wz-wahl" role="group">
             <button type="button" data-wz="schieben" data-i18n="wzSchieben">Verschieben</button>
@@ -728,6 +775,17 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       </div>
       <p class="faden-tipp" id="faden-tipp" hidden></p>
       <p class="tafel-hint" data-i18n="wischHint">← Wische, um dich auf der Tafel umzusehen →</p>
+      <dialog class="quest-dialog pw-dialog" id="pw-dialog" aria-labelledby="pw-titel">
+        <form method="dialog"><button class="qd-close" value="abbruch" aria-label="Schließen" data-i18n-aria="schliessen">×</button></form>
+        <form class="qd-inner qd-form" id="pw-form" novalidate>
+          <p class="label" data-i18n="pwLabel">Für die Runde</p>
+          <h3 id="pw-titel" data-i18n="pwTitel">Tafel bearbeiten</h3>
+          <p class="pw-text" data-i18n="pwText">Mit dem Passwort der Runde lassen sich Zettel, Fäden und Notizen ändern – die Änderungen sieht danach jeder Besucher.</p>
+          <label><span data-i18n="pwFeld">Passwort</span><input type="password" name="pw" id="pw-feld" autocomplete="current-password" required></label>
+          <p class="pw-fehler" id="pw-fehler" role="alert"></p>
+          <div class="knoepfe"><button type="submit" class="haupt" id="pw-los" data-i18n="pwLos">Anmelden</button><button type="button" id="pw-abbruch" data-i18n="abbrechen">Abbrechen</button></div>
+        </form>
+      </dialog>
       <dialog class="quest-dialog" id="quest-dialog" aria-labelledby="qd-title">
         <form method="dialog"><button class="qd-close" aria-label="Schließen" data-i18n-aria="schliessen">×</button></form>
         <div class="qd-inner" id="qd-body"></div>
@@ -893,7 +951,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
 </dialog>
 
 <!-- Alle Texte stehen in inhalt.js (deutsch) und inhalt-en.js (englisch) -->
-<script src="seiten.js?v=20261025s" defer></script>
+<script src="seiten.js?v=20261025x" defer></script>
 <script src="nachlader.js?v=20261022a" defer></script>
 <script src="reime.js?v=20261021b" defer></script>
 <script src="spott.js?v=20261022p" defer></script>
@@ -908,12 +966,17 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
 <script type="text/plain" data-nachladen="taverne" src="echohort.js?v=20261025s"></script>
 <script src="vollbild.js?v=20261021b" defer></script>
 <script src="spielesaal.js?v=20261025v" defer></script>
-<script src="wegweiser.js?v=20261022a" defer></script>
+<script src="wegweiser.js?v=20261025x" defer></script>
 <script src="startbuehne.js?v=20261025s" defer></script>
-<script src="handyleiste.js?v=20261023a" defer></script>
+<script src="handyleiste.js?v=20261025x" defer></script>
 <script src="neuigkeiten.js?v=20261025s" defer></script>
-<script src="gaestebuch.js?v=20261025s" defer></script>
-<script>document.write('<script src="bildmasse.js?v=' + Date.now() + '"><\/script><script src="inhalt.js?v=' + Date.now() + '"><\/script><script src="inhalt-en.js?v=' + Date.now() + '"><\/script>');</script>
+<script src="gaestebuch.js?v=20261025x" defer></script>
+<!-- Inhalte: normale (nicht verzögerte) Skripte, damit sie vor dem Seitenskript unten bereitstehen.
+     WICHTIG für Georg: Nach jeder Änderung an inhalt.js / inhalt-en.js / bildmasse.js die Nummer hinter ?v= erhöhen
+     (z. B. Datum + Buchstabe), sonst zeigen Browser mit Cache noch den alten Stand. -->
+<script src="bildmasse.js?v=20261025a"></script>
+<script src="inhalt.js?v=20261025a"></script>
+<script src="inhalt-en.js?v=20261025a"></script>
 <script>
 (function () {
   /* Gemeinsame Questtafel: Zugangsdaten des Supabase-Projekts (leer = jeder Browser speichert für sich) */
@@ -943,8 +1006,8 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       questLabel: "Die Questtafel", questTitle: "Offene Fragen",
       questText: "Was die Gruppe gerade umtreibt. Tippe auf einen Zettel, um mehr zu erfahren.",
       wischHint: "← Wische, um dich auf der Tafel umzusehen →", wasWirWissen: "Was wir wissen",
-      textBearbeiten: "✎ Text bearbeiten", feldAufschrift: "Aufschrift auf dem Zettel", feldUnter: "Kleine Zeile darunter", feldTitel: "Überschrift", feldLabel: "Kategorie", feldText: "Text", feldHinweise: "Was wir wissen (eine Zeile pro Punkt)", speichern: "Speichern", abbrechen: "Abbrechen", original: "Originaltext wiederherstellen", pwFrage: "Passwort für die Questtafel:", pwFalsch: "Das Passwort stimmt nicht.", stGespeichert: "Gespeichert ✓", stSpeichere: "Speichere …", stFehler: "Nicht gespeichert!", stOffline: "Keine Verbindung zur Tafel", resetAlle: "Die gemeinsame Tafel für ALLE auf den Ursprungszustand zurücksetzen?",
-      fadenModus: "Tafel bearbeiten", fadenFertig: "Fertig", wzSchieben: "Verschieben", wzFaden: "Fäden", notizNeu: "+ Notiz", tafelKopieren: "Tafel kopieren", fadenKopiert: "Kopiert!", fadenReset: "Zurücksetzen", tafelAbmelden: "Abmelden", fadenResetFrage: "Alle eigenen Änderungen entfernen und die ursprüngliche Tafel wiederherstellen?", fadenFarbe: "Fadenfarbe", tippSchieben: "Zettel und Notizen mit der Maus oder dem Finger verschieben. Notiz antippen, um sie zu bearbeiten, × entfernt sie. Alles wird in diesem Browser gespeichert.", tippFaden: "Von einer beliebigen Stelle eines Zettels zu einer Stelle auf einem anderen ziehen: Dort sitzen dann die Reißzwecken. Ein Klick auf einen Faden entfernt ihn.", farbNamen: { rot: "Rot", blau: "Blau", gruen: "Grün", gelb: "Gelb", schwarz: "Schwarz" },
+      textBearbeiten: "✎ Text bearbeiten", feldAufschrift: "Aufschrift auf dem Zettel", feldUnter: "Kleine Zeile darunter", feldTitel: "Überschrift", feldLabel: "Kategorie", feldText: "Text", feldHinweise: "Was wir wissen (eine Zeile pro Punkt)", speichern: "Speichern", abbrechen: "Abbrechen", original: "Originaltext wiederherstellen", pwFrage: "Passwort für die Questtafel:", pwFalsch: "Das Passwort stimmt nicht.", pwLabel: "Für die Runde", pwTitel: "Tafel bearbeiten", pwText: "Mit dem Passwort der Runde lassen sich Zettel, Fäden und Notizen ändern – die Änderungen sieht danach jeder Besucher.", pwFeld: "Passwort", pwLos: "Anmelden", pwPruefe: "Einen Moment …", pwLeer: "Bitte gib das Passwort ein.", pwZuViele: "Zu viele falsche Versuche – bitte versuch es in einer Stunde nochmal.", fadenModusTitel: "Tafel bearbeiten (nur für die Runde)", stGespeichert: "Gespeichert ✓", stSpeichere: "Speichere …", stFehler: "Nicht gespeichert!", stOffline: "Keine Verbindung zur Tafel", resetAlle: "Die gemeinsame Tafel für ALLE auf den Ursprungszustand zurücksetzen?",
+      fadenModus: "Für die Runde", fadenFertig: "Fertig", wzSchieben: "Verschieben", wzFaden: "Fäden", notizNeu: "+ Notiz", tafelKopieren: "Tafel kopieren", fadenKopiert: "Kopiert!", fadenReset: "Zurücksetzen", tafelAbmelden: "Abmelden", fadenResetFrage: "Alle eigenen Änderungen entfernen und die ursprüngliche Tafel wiederherstellen?", fadenFarbe: "Fadenfarbe", tippSchieben: "Zettel und Notizen mit der Maus oder dem Finger verschieben. Notiz antippen, um sie zu bearbeiten, × entfernt sie.", tippAlle: "Jede Änderung wird sofort gespeichert und ist für alle Besucher sichtbar.", tippLokal: "Alles wird in diesem Browser gespeichert.", tippFaden: "Von einer beliebigen Stelle eines Zettels zu einer Stelle auf einem anderen ziehen: Dort sitzen dann die Reißzwecken. Ein Klick auf einen Faden entfernt ihn.", farbNamen: { rot: "Rot", blau: "Blau", gruen: "Grün", gelb: "Gelb", schwarz: "Schwarz" },
       roteFaeden: "Zusammenhänge", loserFaden: "Dieser Faden hängt noch lose …", schliessen: "Schließen", questtafelBild: "Questtafel",
       nscLabel: "Bekanntschaften", nscTitle: "Freund, Feind &amp; Fragezeichen",
       nscText: "Wer der Gruppe unterwegs begegnet ist, geholfen hat oder ihr noch etwas schuldet.",
@@ -1008,8 +1071,8 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       questLabel: "The Quest Board", questTitle: "Open Questions",
       questText: "What keeps the party up at night. Tap a note to learn more.",
       wischHint: "← Swipe to look around the board →", wasWirWissen: "What we know",
-      textBearbeiten: "✎ Edit text", feldAufschrift: "Text on the note", feldUnter: "Small line below", feldTitel: "Heading", feldLabel: "Category", feldText: "Text", feldHinweise: "What we know (one line per point)", speichern: "Save", abbrechen: "Cancel", original: "Restore original text", pwFrage: "Password for the quest board:", pwFalsch: "That password is not correct.", stGespeichert: "Saved ✓", stSpeichere: "Saving …", stFehler: "Not saved!", stOffline: "Cannot reach the board", resetAlle: "Reset the shared board to its original state for EVERYONE?",
-      fadenModus: "Edit board", fadenFertig: "Done", wzSchieben: "Move", wzFaden: "Threads", notizNeu: "+ Note", tafelKopieren: "Copy board", fadenKopiert: "Copied!", fadenReset: "Reset", tafelAbmelden: "Log out", fadenResetFrage: "Remove all your own changes and restore the original board?", fadenFarbe: "Thread colour", tippSchieben: "Drag notes and sticky notes with your mouse or finger. Tap a sticky note to edit it, × removes it. Everything is saved in this browser.", tippFaden: "Drag from any spot on one note to a spot on another: that is where the pins go. Click a thread to remove it.", farbNamen: { rot: "Red", blau: "Blue", gruen: "Green", gelb: "Yellow", schwarz: "Black" },
+      textBearbeiten: "✎ Edit text", feldAufschrift: "Text on the note", feldUnter: "Small line below", feldTitel: "Heading", feldLabel: "Category", feldText: "Text", feldHinweise: "What we know (one line per point)", speichern: "Save", abbrechen: "Cancel", original: "Restore original text", pwFrage: "Password for the quest board:", pwFalsch: "That password is not correct.", pwLabel: "For the party", pwTitel: "Edit the board", pwText: "With the party's password you can change notes, threads and sticky notes – every visitor will see the changes.", pwFeld: "Password", pwLos: "Log in", pwPruefe: "One moment …", pwLeer: "Please enter the password.", pwZuViele: "Too many wrong attempts – please try again in an hour.", fadenModusTitel: "Edit the board (party only)", stGespeichert: "Saved ✓", stSpeichere: "Saving …", stFehler: "Not saved!", stOffline: "Cannot reach the board", resetAlle: "Reset the shared board to its original state for EVERYONE?",
+      fadenModus: "For the party", fadenFertig: "Done", wzSchieben: "Move", wzFaden: "Threads", notizNeu: "+ Note", tafelKopieren: "Copy board", fadenKopiert: "Copied!", fadenReset: "Reset", tafelAbmelden: "Log out", fadenResetFrage: "Remove all your own changes and restore the original board?", fadenFarbe: "Thread colour", tippSchieben: "Drag notes and sticky notes with your mouse or finger. Tap a sticky note to edit it, × removes it.", tippAlle: "Every change is saved right away and visible to all visitors.", tippLokal: "Everything is saved in this browser.", tippFaden: "Drag from any spot on one note to a spot on another: that is where the pins go. Click a thread to remove it.", farbNamen: { rot: "Red", blau: "Blue", gruen: "Green", gelb: "Yellow", schwarz: "Black" },
       roteFaeden: "Connections", loserFaden: "This thread is still hanging loose …", schliessen: "Close", questtafelBild: "Quest board",
       nscLabel: "Acquaintances", nscTitle: "Friend, Foe &amp; Question Mark",
       nscText: "Everyone the party has met on the road, who helped us, or who still owes us something.",
@@ -1033,8 +1096,8 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       dankKnopf: "Credits",
       wotc: "Imres Tales is unofficial Fan Content permitted under the <a href=\"https://company.wizards.com/en/legal/fancontentpolicy\" target=\"_blank\" rel=\"noopener\">Fan Content Policy</a>. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.",
       dankInhalt: '<span class="label">Credits</span><h3 id="dank-titel">Thanks</h3>' +
-        '<h4>The table</h4><p><strong>Imre</strong>, our game master, who brings this world to life every session – and my fellow adventurers <strong>Tobi</strong>, <strong>Nils</strong> and <strong>Alex</strong>, without whom there would be no stories to tell. ❤️</p>' +
-        '<h4>Dungeons &amp; Dragons</h4><p>World, rules, adventures, places and creatures belong to <a href="https://dnd.wizards.com" target="_blank" rel="noopener">Wizards of the Coast</a>. Places, characters and creatures such as Phandalin, Glasstaff, Venomfang and Cragmaw Castle come from the adventure “Lost Mine of Phandelver”; Gracklstugh, Ilvara, the kuo-toa and Demogorgon from “Out of the Abyss”. This site is a private, non-commercial fan project and not affiliated with Wizards.</p>' +
+        '<h4>The table</h4><p><strong>Imre</strong>, our Dungeon Master, who brings this world to life every session – and my fellow adventurers <strong>Tobi</strong>, <strong>Nils</strong> and <strong>Alex</strong>, without whom there would be no stories to tell. ❤️</p>' +
+        '<h4>Dungeons &amp; Dragons</h4><p>World, rules, adventures, places and creatures belong to <a href="https://dnd.wizards.com" target="_blank" rel="noopener">Wizards of the Coast</a>. Places, characters and creatures such as Phandalin, Glasstaff, Venomfang and Castle Crackmore come from the adventure “Lost Mine of Phandelver”; Gracklstugh, Ilvara, the kuo-toa and Demogorgon from “Out of the Abyss”. This site is a private, non-commercial fan project and not affiliated with Wizards.</p>' +
         '<h4>Images</h4><p>The images of the heroes and the group were created with AI. Some images of NPCs and monsters were found online, and sadly we do not know all of their creators. The same images also appear in the games – in Friedrich’s Hunt, Echo’s Hoard and the Bestiary Memory, some cut out or combined into a collage by us. Is one of them yours? Let us know – we will gladly credit you or take the image down. The creature sketches and the handwritten notebook were drawn and written by <strong>Georg</strong>, Barradin’s player.</p>' +
         '<h4>Music of the stage</h4><p>The real instruments in the Lautenwerk – strings, double bass, violin, woodwinds, horns, trumpets, trombone, tuba, harp, glockenspiel, timpani, drums, sleigh bells, claves, gong and anvil – are recordings from the <a href="https://versilian-studios.com/vsco-community/" target="_blank" rel="noopener">VSCO 2 Community Edition</a> by Versilian Studios, generously released under CC0. The organ was recorded by Simon Dalzell (Ivy Audio). Lute, bagpipe, pan flute, ocarina and Echo’s singing come from the “Fluid R3” sound set by Frank Wen, prepared by Benjamin Gleitzman (<a href="https://github.com/gleitz/midi-js-soundfonts" target="_blank" rel="noopener">midi-js-soundfonts</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>). The classical snippets are public-domain works by Bach, Mozart, Beethoven, Chopin, Rossini, Mendelssohn, Wagner, Brahms, Grieg, Strauss and Fučík, played by our own band – as are the covers: old public-domain folk tunes (incl. Drunken Sailor, Irish Washerwoman, Scarborough Fair, Greensleeves, Korobeiniki, Amazing Grace, Frère Jacques, Sakura, Auld Lang Syne) and Leontovych’s “Shchedryk”; plus Pachelbel, Vivaldi and Mozart. All other melodies, moods and sounds were made for this site. The same instrument recordings are also heard in Barradin’s Performance, in the music of Echo’s Hoard, in Heldensturm, with the dice of the day and with the tavern sounds in the game hall.</p>' +
         '<h4>Ambience</h4><p>Rain, fire, crickets, birds, stream, waves, ship planks, storm and wind are real recordings from the sound collection of the app <a href="https://github.com/rafaelmardojai/blanket" target="_blank" rel="noopener">Blanket</a> (edited by Porrumentzio). Public domain / CC0: birds (kvgarlic), boat (Falcet), stream (gluckose), wind (felix.blume), fireplace (ezwa), crickets (Lisa Redfern). Under <a href="https://creativecommons.org/licenses/" target="_blank" rel="noopener">CC BY (attribution)</a>: rain (alex36917), storm (Digifish Music) and waves (Luftrum), all via <a href="https://freesound.org" target="_blank" rel="noopener">Freesound</a>. Trimmed and turned into seamless loops for the Lautenwerk. Animal calls (frogs, owls, gulls, woodpecker, crows, wolves, dog, cat, horse, whale), thunder and many more ambience layers come from the collection of the free app <a href="https://github.com/remvze/moodist" target="_blank" rel="noopener">Moodist</a> (Pixabay licence / CC0). Thank you!</p>' +
@@ -1070,7 +1133,14 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   const abschnittId = (nr, titel) => "kapitel-" + slug(nr) + "-" + slug(titel);
 
   /* ---------- Sprache wählen ---------- */
+  /* Reihenfolge: ?lang=en / #en im Link (gilt nur für diesen Besuch), dann die gemerkte Wahl, dann die Browsersprache */
   function startSprache() {
+    try {
+      const q = new URLSearchParams(location.search).get("lang");
+      if (q === "de" || q === "en") return q;
+      const h = location.hash.toLowerCase();
+      if (h === "#en" || h === "#de") { history.replaceState(history.state, "", location.pathname + location.search); return h.slice(1); }
+    } catch (_) {}
     try { const s = localStorage.getItem("imres-lang"); if (s === "de" || s === "en") return s; } catch (_) {}
     const n = (navigator.languages && navigator.languages[0]) || navigator.language || "de";
     return /^de\b/i.test(n) ? "de" : "en";
@@ -1078,14 +1148,56 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   let lang = startSprache();
   let D = QUELLEN[lang], T = UI[lang];
 
+  /* ---------- Links in beiden Sprachen ----------
+     Abschnitte und NSC haben Anker aus ihren (übersetzten) Titeln, z. B. #kapitel-ii-der-rasende-riese bzw.
+     #kapitel-ii-the-raging-giant. inhalt.js und inhalt-en.js sind gleich aufgebaut (gleiche Reihenfolge),
+     daher zeigen beide Fassungen auf denselben festen Schlüssel – alte deutsche Links funktionieren auch auf Englisch
+     und umgekehrt, Groß-/Kleinschreibung egal (#kapitel-i = #kapitel-I). */
+  const ANKER = new Map(); /* kleingeschriebene ID → { de: ID, en: ID } */
+  (function ankerBauen() {
+    const eintragen = (schluessel, sprache, id) => {
+      const k = ANKER.get("§" + schluessel) || {};
+      k[sprache] = id; ANKER.set("§" + schluessel, k); ANKER.set(String(id).toLowerCase(), k);
+    };
+    ["de", "en"].forEach(sp => {
+      const Q = QUELLEN[sp] || LEER;
+      (Q.kapitel || []).forEach((k, i) => {
+        eintragen("k" + i, sp, "kapitel-" + k.nummer);
+        (k.absaetze || []).filter(p => typeof p === "string" && p.indexOf("## ") === 0)
+          .forEach((p, j) => eintragen("k" + i + "s" + j, sp, abschnittId(k.nummer, p.slice(3).trim())));
+      });
+      (Q.nsc || []).forEach((n, i) => eintragen("n" + i, sp, "nsc-" + slug(n.name)));
+      (Q.helden || []).forEach((h, i) => { eintragen("h" + i, sp, h.id); if (h.begleiter) eintragen("b" + i, sp, h.begleiter.id); });
+    });
+  })();
+  window.ImresAnker = {
+    /* Element zu einer ID aus einem Link – auch für die andere Sprache oder andere Schreibweise */
+    finde(id) {
+      id = String(id || "");
+      if (!id) return null;
+      const direkt = document.getElementById(id);
+      if (direkt) return direkt;
+      const k = ANKER.get(id.toLowerCase());
+      return k ? document.getElementById(k[lang] || k.de || k.en) : null;
+    }
+  };
+
+  /* Vom Besucher ausgelöste Sprünge bekommen einen eigenen Eintrag im Verlauf (Zurück-Taste führt zurück),
+     aber nur, wenn sich die Adresse wirklich ändert. Die Scrollposition des alten Eintrags merkt seiten.js. */
+  function adresseMerken(id) {
+    if (!id || location.hash === "#" + id) return;
+    if (window.ImresAnsicht && window.ImresAnsicht.merkeScroll) window.ImresAnsicht.merkeScroll();
+    try { history.pushState(null, "", "#" + id); } catch (_) {}
+  }
+
   /* ---------- Sprung mit Hervorhebung ---------- */
   function springe(ziel) {
     if (!ziel) return;
+    adresseMerken(ziel.id);
     if (window.ImresAnsicht) window.ImresAnsicht.zeige(ziel);
     const kopf = document.querySelector(".top").offsetHeight + 12;
     const y = ziel.getBoundingClientRect().top + window.pageYOffset - kopf;
     window.scrollTo({ top: y, behavior: "instant" });
-    try { history.replaceState(null, "", "#" + ziel.id); } catch (_) {}
     document.querySelectorAll(".spotlight").forEach(x => x.classList.remove("spotlight"));
     ziel.classList.add("spotlight");
     setTimeout(() => ziel.classList.remove("spotlight"), 2400);
@@ -1123,6 +1235,8 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       routeG.appendChild(el("path", { d, class: "route-shadow" }));
       routeG.appendChild(el("path", { d, class: "route route-done" }));
     }
+    /* unsichtbare, größere Trefferflächen zuerst – die sichtbaren Punkte liegen darüber und gewinnen bei Überschneidung */
+    hier.forEach((s, i) => routeG.appendChild(el("circle", { cx: pts[i][0], cy: pts[i][1], r: 46, class: "stop-hit", "data-stop": s.i, "aria-hidden": "true" })));
     hier.forEach((s, i) => {
       const p = pts[i];
       const g = el("g", { class: "stop" + (s.i === aktiv ? " active" : ""), tabindex: 0, role: "button", "aria-label": s.nr + ". " + s.name, "data-stop": s.i });
@@ -1271,20 +1385,50 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
         .catch(() => tafelStatus(T.stFehler, true));
     }, 500);
   }
+  /* Fehlertext des Servers (HTTP 400 mit {"message": "…"}) in einen freundlichen Satz übersetzen */
+  function serverFehler(f) {
+    const roh = String((f && f.message) || f || "");
+    if (/zu viele falsche versuche/i.test(roh)) return T.pwZuViele;
+    if (/^4\d\d /.test(roh)) return T.pwFalsch;
+    return T.stOffline;
+  }
+  const pruefePw = pw => server("/rest/v1/rpc/tafel_pruefen", { passwort: pw }).then(ok => ok === true);
+  /* Passwort-Fenster im Stil der Seite statt window.prompt: Enter meldet an, Esc oder × schließt */
+  let pwFertig = null;
+  function pwFragen() {
+    const dlg = $("pw-dialog"), feld = $("pw-feld"), fehler = $("pw-fehler");
+    feld.value = ""; fehler.textContent = ""; $("pw-los").disabled = false;
+    return new Promise(fertig => {
+      pwFertig = fertig;
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+      setTimeout(() => feld.focus(), 30);
+    });
+  }
+  function pwEnde(ok) {
+    const f = pwFertig; pwFertig = null;
+    const dlg = $("pw-dialog"); if (dlg.open) dlg.close();
+    if (f) f(ok);
+  }
+  $("pw-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const pw = $("pw-feld").value, fehler = $("pw-fehler"), los = $("pw-los");
+    if (!pw) { fehler.textContent = T.pwLeer; $("pw-feld").focus(); return; }
+    los.disabled = true; fehler.textContent = T.pwPruefe;
+    pruefePw(pw).then(ok => {
+      los.disabled = false;
+      if (!ok) { fehler.textContent = T.pwFalsch; $("pw-feld").select(); return; }
+      pwMerken(pw); pwEnde(true);
+    }).catch(f => { los.disabled = false; fehler.textContent = serverFehler(f); });
+  });
+  $("pw-abbruch").addEventListener("click", () => pwEnde(false));
+  $("pw-dialog").addEventListener("close", () => { if (pwFertig) pwEnde(false); });
+  $("pw-dialog").addEventListener("click", e => { if (e.target === $("pw-dialog")) pwEnde(false); });
   function anmelden() {
     if (!SERVER) return Promise.resolve(true);
-    const pruefe = pw => server("/rest/v1/rpc/tafel_pruefen", { passwort: pw }).then(ok => ok === true);
-    const fragen = () => {
-      const pw = prompt(T.pwFrage, "");
-      if (!pw) return false;
-      return pruefe(pw).then(ok => {
-        if (!ok) { alert(T.pwFalsch); return false; }
-        pwMerken(pw);
-        return true;
-      });
-    };
     pwLesen();
-    return (tafelPw ? pruefe(tafelPw).then(ok => { if (!ok) pwMerken(""); return ok; }) : Promise.resolve(false)).then(ok => ok || fragen()).catch(() => { tafelStatus(T.stOffline, true); return false; });
+    return (tafelPw ? pruefePw(tafelPw).then(ok => { if (!ok) pwMerken(""); return ok; }) : Promise.resolve(false))
+      .catch(() => false)
+      .then(ok => ok || pwFragen());
   }
   function alleFaeden() {
     const weg = new Set(tafelEdit.weg), pos = new Map(), out = [];
@@ -1434,12 +1578,16 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     notizGroesse();
     fadenZeichnen();
 
-    if (!tafelZentriert) {
-      const sc = $("tafel-scroll");
-      requestAnimationFrame(() => { if (sc.scrollWidth > sc.clientWidth) sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; });
-      tafelZentriert = true;
-    }
+    if (!tafelZentriert) requestAnimationFrame(tafelZentrieren);
   }
+  /* Erst zentrieren, wenn die Tafel wirklich zu sehen ist (der Bereich ist anfangs zu) */
+  function tafelZentrieren() {
+    const sc = $("tafel-scroll");
+    if (tafelZentriert || !sc || !sc.clientWidth) return;
+    if (sc.scrollWidth > sc.clientWidth) sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2;
+    tafelZentriert = true;
+  }
+  window.addEventListener("resize", () => { if (!tafelZentriert) requestAnimationFrame(tafelZentrieren); });
 
   /* Ankerpunkt auf einem Zettel (a = Anteil von Breite/Höhe, ohne Drehung) in Tafel-Koordinaten */
   function anker(id, a) {
@@ -1577,7 +1725,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     /* Erzähler-Hinweis */
     if (D.erzaehler && D.erzaehler.text) {
       const n = D.erzaehler, img = $("narrator-img");
-      if (n.bild) { img.src = n.bild; img.alt = n.name || ""; img.hidden = false; } else { img.hidden = true; }
+      if (n.bild) { img.loading = "lazy"; img.src = n.bild; img.alt = n.name || ""; img.hidden = false; } else { img.hidden = true; }
       $("narrator-label").textContent = n.label || "";
       $("narrator-text").innerHTML = n.text;
       $("narrator").hidden = false;
@@ -1612,7 +1760,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
       '<article class="chapter" id="kapitel-' + esc(k.nummer) + '">' +
         '<p class="label">' + esc(T.kapitel) + " " + esc(k.nummer) + "</p>" +
         "<h3>" + esc(k.titel) + "</h3>" +
-        (k.bild ? '<figure><img src="' + esc(k.bild) + '" alt="' + esc(k.bildAlt || k.titel) + '">' + (k.bildtext ? "<figcaption>" + esc(k.bildtext) + "</figcaption>" : "") + "</figure>" : "") +
+        (k.bild ? '<figure><img src="' + esc(k.bild) + '" alt="' + esc(k.bildAlt || k.titel) + '"' + masse(k.bild) + ' loading="lazy" decoding="async">' + (k.bildtext ? "<figcaption>" + esc(k.bildtext) + "</figcaption>" : "") + "</figure>" : "") +
         '<div class="prose">' + kapitelText(k) + "</div>" +
         (!hatAbschnittLinks(k) && k.station && stationen[k.station - 1] ? '<button type="button" class="linkbtn" data-station="' + (k.station - 1) + '">' + esc(T.aufKarte) + "</button>" : "") +
         (k.fortsetzung ? '<p class="to-be">' + esc(k.fortsetzung) + "</p>" : "") +
@@ -1695,11 +1843,15 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   });
   /* ---------- Tafel bearbeiten: verschieben, Fäden, Notizen ---------- */
   function fadenLeiste() {
-    $("faden-modus").textContent = bearbeiten ? T.fadenFertig : T.fadenModus;
-    $("faden-modus").setAttribute("aria-pressed", bearbeiten ? "true" : "false");
+    const fm = $("faden-modus");
+    fm.querySelector(".stift").textContent = bearbeiten ? "✓" : "✎";
+    fm.querySelector(".fm-text").textContent = bearbeiten ? T.fadenFertig : T.fadenModus;
+    fm.title = bearbeiten ? T.fadenFertig : T.fadenModusTitel;
+    fm.setAttribute("aria-label", bearbeiten ? T.fadenFertig : T.fadenModusTitel);
+    fm.setAttribute("aria-pressed", bearbeiten ? "true" : "false");
     $("faden-werkzeug").hidden = !bearbeiten;
     $("faden-tipp").hidden = !bearbeiten;
-    $("faden-tipp").textContent = werkzeug === "faden" ? T.tippFaden : T.tippSchieben;
+    $("faden-tipp").textContent = (werkzeug === "faden" ? T.tippFaden : T.tippSchieben) + " " + (SERVER ? T.tippAlle : T.tippLokal);
     const brett = $("quests");
     brett.classList.toggle("bearbeiten", bearbeiten);
     brett.classList.toggle("wz-faden", werkzeug === "faden");
@@ -1932,6 +2084,12 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     lang = b.dataset.lang;
     try { localStorage.setItem("imres-lang", lang); } catch (_) {}
     render();
+    /* Anker der anderen Sprache in der Adresse auf die neue Sprache umstellen (gleicher Eintrag im Verlauf) */
+    try {
+      const id = decodeURIComponent(location.hash.slice(1)), el = id && window.ImresAnker.finde(id);
+      if (el && el.id && el.id !== id) history.replaceState(history.state, "", "#" + el.id);
+      if (/[?&]lang=/.test(location.search)) history.replaceState(history.state, "", location.pathname + location.search.replace(/([?&])lang=(de|en)&?/, "$1").replace(/[?&]$/, "") + location.hash);
+    } catch (_) {}
   }));
 
   /* ---------- Kapitel-Auswahl im Kopf ---------- */
@@ -2027,6 +2185,12 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
     const q = falte(suchFeld.value.trim());
     sucheZu();
     const el = t.el;
+    /* Adresse auf die nächste verlinkbare Stelle setzen (Abschnitt im Kapitel, Held, NSC, Zettel …) */
+    let anker = null;
+    const ch = el.closest(".chapter");
+    if (ch) { let n = el.closest(".prose > *") || el; while (n && (n = n.previousElementSibling)) if (n.classList.contains("sub")) { anker = n; break; } anker = anker || ch; }
+    else anker = el.closest(".npc[id], .hero-entry[id], .companion[id], .pin-note[id]") || el.closest("section.part");
+    if (anker && anker.id) adresseMerken(anker.id);
     if (window.ImresAnsicht) window.ImresAnsicht.zeige(el);
     if (el.matches(".pin-note, .kunst-blatt, #stops button")) el.click();
     const kopf = document.querySelector(".top").offsetHeight + 24;
@@ -2075,6 +2239,8 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
   k.addEventListener("click", () => { if (d.showModal) d.showModal(); else d.setAttribute("open", ""); });
   d.addEventListener("click", e => { if (e.target === d) d.close(); });
 })();
+/* Sicherheitsnetz: Hat seiten.js die Ansicht nach dem Laden nicht gesetzt (Skript fehlt), alles untereinander zeigen */
+window.addEventListener("load", () => { const b = document.body.classList; if (!b.contains("ansicht-start") && !b.contains("ansicht-bereich")) b.add("ohne-ansicht"); });
 </script>
 </body>
 </html>

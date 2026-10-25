@@ -1,0 +1,16 @@
+{
+  "name": "Imres Tales",
+  "short_name": "Imres Tales",
+  "description": "Die Chronik unserer Pen-&-Paper-Kampagne",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#100e15",
+  "theme_color": "#100e15",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -77,7 +77,8 @@
             '<span class="tor-knopf">' + esc(T.geschichte.weiter) + "</span></span></a>" +
         '<div class="tor tor-taverne" style="--farbe:' + sp.farbe + '">' +
           '<a class="tor-flaeche" href="#taverne" aria-label="' + esc(T.taverne.alle) + '"></a>' +
-          '<span class="tor-bild">' + (ruhig ? '<img src="' + sp.bilder[0] + '" alt="">' : '<video muted loop playsinline autoplay preload="metadata" poster="' + sp.bilder[0] + '">' + S.quellen(sp.clip) + "</video>") + "</span>" +
+          /* Der Clip (bis ~1 MB) lädt erst, wenn das Tor in Sicht kommt – und gar nicht bei Datensparmodus/langsamem Netz */
+          '<span class="tor-bild">' + (ruhig || sparsam() ? '<img src="' + sp.bilder[0] + '" alt="" loading="lazy" decoding="async">' : '<video muted loop playsinline preload="none" poster="' + sp.bilder[0] + '">' + S.quellen(sp.clip) + "</video>") + "</span>" +
           '<span class="tor-text"><span class="tor-label">' + esc(T.taverne.label) + "</span>" +
             "<b>" + esc(T.taverne.titel(alle.length)) + "</b>" +
             '<span class="tor-satz">' + esc(T.taverne.heute) + ": <strong>" + esc(s.titel) + "</strong> – " + esc(M.spruch[sp.key]) + "</span>" +
@@ -85,13 +86,17 @@
             '<span class="tor-knoepfe"><a class="tor-knopf voll" href="' + S.losHref(sp) + '" data-gesehen="' + sp.key + '">' + esc(f.weiter ? M.weiter : T.taverne.jetzt) + (sp.extern ? " ↗" : "") + "</a>" +
               '<a class="tor-knopf" href="#taverne">' + esc(T.taverne.alle) + "</a></span></span></div>" +
       "</div>";
-    const v = tore.querySelector("video"); if (v) { v.muted = true; const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); }
+    const v = tore.querySelector("video"); if (v) { v.muted = true; if (torSichtbar) abspielen(v); }
   }
+  function sparsam() { const n = navigator.connection || {}; return !!n.saveData || /(^|-)(2g|3g)$/.test(n.effectiveType || ""); }
+  let torSichtbar = false;
+  function abspielen(v) { const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); }
   if (weiterlesen) new MutationObserver(() => toreBauen()).observe(weiterlesen, { childList: true, attributes: true, attributeFilter: ["hidden", "href"] });
   /* Clip nur abspielen, wenn das Tor zu sehen ist */
   function clipWache() {
     if (!("IntersectionObserver" in window) || !uebersicht) return;
-    new IntersectionObserver(es => { const v = tore && tore.querySelector("video"); if (!v) return; if (es[0].isIntersecting) { const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); } else v.pause(); }, { threshold: .1 }).observe(uebersicht);
+    const wache = new IntersectionObserver(es => { torSichtbar = es[0].isIntersecting; const v = tore && tore.querySelector("video"); if (!v) return; if (torSichtbar) abspielen(v); else v.pause(); }, { threshold: .05 });
+    wache.observe(tore || uebersicht);
   }
 
   /* ---------- 2. Heldenbögen: kleine Spielhinweise ---------- */
@@ -161,6 +166,9 @@
 .tor-geschichte .tor-knopf { margin-top: .35rem; }
 .tor-knopf.voll { background: var(--farbe); color: #120e14; font-weight: 700; }
 .tor-knopf:hover, .tor-knopf:focus-visible { transform: translateY(-2px); background: var(--farbe); color: #120e14; outline: none; }
+/* Tastatur: deutlich sichtbarer Ring – auch beim schon gefüllten „▶ Jetzt spielen“ */
+.tor-knopf:focus-visible { outline: 2px solid #fff4de; outline-offset: 3px; box-shadow: 0 0 0 5px rgba(12,9,14,.85); }
+.tor-geschichte:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .tor, .tor-bild img, .tor-bild video { transition: none; } }
 
 /* Heldenbögen: kleiner, ruhiger Hinweis */
