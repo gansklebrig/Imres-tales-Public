@@ -298,7 +298,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     tuer: { f: ["fx_ka_dooropen_1", "fx_ka_dooropen_2", "fx_rp_door"] },
     donner: { f: ["fx_fo2_sfx100v2_thunder_01"].concat(reihe("e_donner_", 4)), tempo: [.8, 1.05] },
     heulen: { f: reihe("e_heulen_", 1), tempo: [.5, .62] },
-    glocke: { f: reihe("e_glocke_", 4), tempo: [.8, 1] }, gong: { f: reihe("e_gong_", 2), tempo: [.85, 1] },
+    glocke: { f: ["e_glocke_1", "e_glocke_2"], tempo: [.8, 1] }, gong: { f: reihe("e_gong_", 2), tempo: [.85, 1] },
     kette: { f: reihe("e_kette_", 4) }, stein: { f: reihe("e_stein_", 6) }, platsch: { f: reihe("e_platsch_", 4) }, blubb: { f: reihe("e_blubb_", 4) },
     insekt: { f: reihe("e_insekt_", 4) }, buch: { f: reihe("e_buch_", 6) }, papier: { f: reihe("e_papier_", 3) },
     hammer: { f: reihe("e_hammer_", 6).concat(["amboss"]), folge: [3, 7, .55, .75] }, metall: { f: reihe("e_metall_", 3) },
@@ -377,7 +377,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   const DONNER_T = ["fx_fo2_sfx100v2_thunder_01"].concat(reihe("e_donner_", 4));
   const BRUELLEN = ["fx_cr2_roar_04", "fx_cr2_roar_05", "fx_cr2_roar_06", "fx_rd_creature_roar_02", "fx_rd_creature_roar_03"];
   Object.assign(EV, {
-    t_glocke: { f: reihe("e_glocke_", 4), tempo: [.3, .45] }, t_gong: { f: reihe("e_gong_", 2).concat(["gong"]), tempo: [.34, .46] },
+    t_glocke: { f: ["e_glocke_1", "e_glocke_2"], tempo: [.3, .45] }, t_gong: { f: reihe("e_gong_", 2).concat(["gong"]), tempo: [.34, .46] },
     t_chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.5, .5], lang: 1 },
     t_donner: { f: DONNER_T, tempo: [.6, .8] }, t_heulen: { f: ["e_heulen_1"].concat(reihe("e_wolf_", 4)), tempo: [.55, .7] },
     t_monster: { f: reihe("e_monster_", 3), tempo: [.35, .5] }, t_stein: { f: reihe("e_stein_", 6), tempo: [.45, .65] }, t_kette: { f: reihe("e_kette_", 4), tempo: [.5, .65] },
@@ -723,7 +723,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     epischRaum(); epischPegel();
     /* Einschläge schon jetzt laden, damit der erste Knopfdruck sofort klingt */
     EINSCHLAEGE.forEach(a => a.lagen.forEach(l => l.f.forEach(laden)));
-    ["e_glocke_1", "e_glocke_3", "e_gong_1", "timp1", "timp3", "bd", "timproll"].forEach(laden);
+    ["e_glocke_1", "e_glocke_2", "e_gong_1", "timp1", "timp3", "bd", "timproll"].forEach(laden);
     return E;
   }
   /* Nachhall: kurzes Aufblühen, helle Anteile verklingen schnell, dunkle tragen lange.
@@ -933,8 +933,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
         l.naechst = Math.min(frueh, l.ende);
         if (l.naechst > j + 4) break;
       } else if (s.folge === "gelaeut") {
-        const zwei = Math.random() < .5, b = puffer.get(zwei ? "e_glocke_3" : "e_glocke_1");
-        if (b) { const z = eAusgang(l.g, 0, 0, false, zwei ? .35 : -.35); z.gain.value = h * (zwei ? .7 : .9); eSpiel(b, z, t, zwei ? .42 : .31); }
+        const zwei = Math.random() < .5, b = puffer.get(zwei ? "e_glocke_2" : "e_glocke_1");
+        if (b) { const z = eAusgang(l.g, 0, 0, false, zwei ? .35 : -.35); z.gain.value = h * (zwei ? .7 : .9); eSpiel(b, z, t, zwei ? .36 : .31); }
         if (Math.random() < .12) { const g = puffer.get("e_gong_1"); if (g) { const z = eAusgang(l.g, 0, 0, false, 0); z.gain.value = h * .5; eSpiel(g, z, t + .8, .3); } }
         l.naechst = t + zz(3.2, 4.6);
       } else {
@@ -1125,7 +1125,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     GERAEUSCHE.forEach(a => a.lagen.forEach(l => l.f.forEach(x => n.add(x))));
     SZENEN.forEach(s => { if (s.datei) n.add(s.datei); });
     WETTER.forEach(w => { w.betten.forEach(([q]) => n.add(q)); (w.ev || []).forEach(([a]) => EV[a].f.forEach(x => n.add(x))); });
-    ["e_glocke_1", "e_glocke_3", "e_gong_1", "timp1", "timp3", "bd", "timproll", "kb_28", "vc_36", "vctrem_57", "vctrem_59", "vctrem_60"].forEach(x => n.add(x));
+    ["e_glocke_1", "e_glocke_2", "e_gong_1", "timp1", "timp3", "bd", "timproll", "kb_28", "vc_36", "vctrem_57", "vctrem_59", "vctrem_60"].forEach(x => n.add(x));
     return [...n].map(quelle).concat(["ambient.html", "klangwerk.js"]);
   }
   let offline = { status: (() => { try { return localStorage.getItem("imres-klangwelten-offline") === "1" ? "bereit" : ""; } catch (_) { return ""; } })(), p: 0 };
