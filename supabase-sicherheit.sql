@@ -179,7 +179,7 @@ revoke select on public.gaestebuch, public.hs_spielstand from anon, authenticate
 -- ===================================================================================
 -- PRÜFUNG für die Teile, deren Einrichtung nicht im Repository liegt
 -- (Questtafel, Lieder, Jagd- und Auftritt-Bestenliste).
--- Das Ergebnis unten (Tabelle „pruefung“) bitte kopieren und an Claude schicken.
+-- Die Ergebnis-Tabelle, die nach „Run“ unten erscheint, bitte kopieren und an Claude schicken.
 -- Diese Abfrage ändert nichts.
 -- ===================================================================================
 with t(tab) as (values ('tafel'), ('lieder'), ('jagd_bestenliste'), ('auftritt_bestenliste'))
