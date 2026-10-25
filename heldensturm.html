@@ -1354,9 +1354,8 @@ const HEROES={
     cast(r){const R=260*P.st.area;aoe(P.x,P.y,R,sk(1.5+0.4*r),{fear:3+0.3*r,fx:P.x,fy:P.y});G.fxs.push({k:'phantom',x:P.x,y:P.y-30,t:0,life:1.3});ring(P.x,P.y,R,'#b06cff',0.7,5);sfx('big')}},
    {id:'b_flute',b:2,row:3,c:0,a:1,ic:'♪',name:'Flöte der Illusionen',cd:()=>24,d:r=>`Die Flöte aus Gracklstugh beschwört einen kleinen Demogorgon, der ${6+r}s lang mit seinen Tentakeln Gegner zerschmettert: ${pc(1.5+0.35*r)} Schaden je Schlag.`,
     cast(r){const p=aimPoint(260);spawnPet('demo',p.x,p.y,{life:6+r,dmg:()=>sk(1.5+0.35*r),hp:P.st.maxHp*2,every:0.9,r:20});ring(p.x,p.y,60,'#ff6ab0',0.6,5);smoke(p.x,p.y);sfx('magic')}},
-   {id:'b_hypno',b:2,row:3,c:1,a:1,ic:'◎',name:'Hypnotisches Muster',cd:()=>16,d:r=>`Ein schillerndes Farbenmuster in der Luft: Gegner im Zielgebiet starren ${f1(2.5+0.4*r)}s lang gebannt hinein und rühren sich nicht (Wächter und Bosse werden nur verlangsamt). Gebannte Gegner erleiden von allen Helden +${30+8*r}% Schaden.`,
-    cast(r){const p=aimPoint(420),R=(150+10*r)*P.st.area,t=2.5+0.4*r;let n=0;query(p.x,p.y,R,e=>{if(e.dead||d2(e,p)>R*R)return;n++;if(e.boss||e.guard){e.slowT=Math.max(e.slowT,t);e.slowA=Math.max(e.slowA,0.45)}else stunE(e,t);e.vulnT=Math.max(e.vulnT||0,t);e.vuln=Math.max(e.vulnT>0?e.vuln||0:0,0.3+0.08*r)});if(!n)return false;
-     ['#ff7ad9','#7ad9ff','#ffd04a','#9b7aff'].forEach((c,i)=>later(i*0.09,()=>ring(p.x,p.y,R*(1-i*0.18),c,0.9,5)));G.fxs.push({k:'shock',x:p.x,y:p.y,r:R,c:'#c89aff',t:0,life:0.7});light(p.x,p.y,R*1.4,'#c89aff',0.9,1);sparks(p.x,p.y,'#ffb0f0',18,300,1);sfx('magic');sfx('note')}},
+   {id:'b_juggle',b:2,row:3,c:1,a:1,ic:'♨',name:'Feuerjonglage',cd:()=>14,d:r=>`Wie auf dem Nachtmarkt: Barradin jongliert ${f1(6+r)}s lang ${3+(r>>1)} brennende Fackeln. Sie wirbeln um ihn herum und versengen jeden Gegner, den sie streifen (${pc(0.9+0.2*r)} Schaden und Brand). Seine Trugbilder machen die Show mit und werfen jede Sekunde eine Fackel (${pc(0.8+0.2*r)} im Umkreis). Zum großen Finale fliegen alle Fackeln auf die nächsten Gegner: je ${pc(1.6+0.4*r)} Schaden.`,
+    cast(r){P.jug={t:6+r,n:3+(r>>1),r,a:0,hitT:0};ring(P.x,P.y,75,'#ff9a3a',0.5,4);embers(P.x,P.y-20,'#ffb04a',12,30);light(P.x,P.y,200,'#ff9a3a',0.6,0.8);sfx('fire')}},
    {id:'b_door',b:2,row:4,a:1,ic:'⌂',name:'Dimensionstür',cd:()=>7,d:r=>`Barradin springt an den Zielort (ohne Maus: weg von den Gegnern). Am Startpunkt bleibt ein Trugbild zurück, das nach 1s für ${pc(2+0.5*r)} Schaden zerplatzt.`,
     cast(r){const p=mouseAim()?aimPoint(380):escapePoint(340);const ox=P.x,oy=P.y;illusion(ox,oy,r,{life:1,boom:sk(2+0.5*r)});smoke(ox,oy);P.x=clamp(p.x,20,WORLD-20);P.y=clamp(p.y,20,WORLD-20);P.inv=Math.max(P.inv,0.3);smoke(P.x,P.y);ring(P.x,P.y,40,'#9fd8ff',0.4,3);sfx('blink')}},
    {id:'b_hall',b:2,row:5,ult:1,ic:'❖',name:'Spiegelkabinett',d:r=>`Alle ${12-2*r}s erscheint von selbst ein Trugbild an Barradins Seite. Alle Trugbilder verursachen +${25*r}% Schaden und zerplatzen stärker.`}
@@ -1366,13 +1365,13 @@ const HEROES={
   branches:['Sturm','Wildgestalt','Natur & Gier'],
   meleeW:[{n:'Druidenstab',r:1,d:1},{n:'Sichel',r:1.2,d:0.85},{n:'Totemkeule',r:0.8,d:1.3,imp:['hp',0]}],rangedW:[{n:'Mistelzweig',r:1,d:0.92,imp:['skill',10]},{n:'Dornenzweig',r:1.15,d:0.88},{n:'Eichenrute',r:0.82,d:1.28,imp:['area',8]}],
   basic(){if(P.form==='rat')return false;
-   if(P.form==='bear'){const b=bTarget(130,130);if(!b||!b.melee)return false;faceA(b.a);const R=105*P.st.area;cone(P.x,P.y,b.a,2.2,R,P.st.dmgM*1.3,{knock:140,basic:1,melee:1});slash(P.x,P.y,b.a,2.2,R,'#f0d0a0',0.2);sfx('claw');return'm'}
+   if(P.form==='bear'){const b=bTarget(130,130);if(!b||!b.melee)return false;faceA(b.a);const R=105*P.st.area;cone(P.x,P.y,b.a,2.2,R,P.st.dmgM*1.3,{knock:140,basic:1,melee:1});{const ub=rank('e_beast');if(ub){P.bearN=(P.bearN||0)+1;if(P.bearN%4===0){const x=P.x+Math.cos(b.a)*55,y=P.y+Math.sin(b.a)*55,R3=115*P.st.area;aoe(x,y,R3,sk(1.5+0.4*ub),{stun:0.6,knock:220,melee:1,fx:P.x,fy:P.y});ring(x,y,R3,'#e8b070',0.5,6);chunks(x,y,'#6a5032',6,200);heal(P.st.maxHp*0.02*ub);G.shake+=3;sfx('thunk')}}}slash(P.x,P.y,b.a,2.2,R,'#f0d0a0',0.2);sfx('claw');return'm'}
    return basicStd({meleeR:85,arc:1.9,mm:1.35,mc:'#9bd36a',mopt:{knock:140},
     ranged:(a)=>{shoot({x:P.x,y:P.y-6,a,spd:500,dmg:P.st.dmg,r:7,pierce:1,kind:'thorn',c:'#9bd36a',basic:1});sfx('thorn')}})},
   tree:[
    {id:'e_wave',b:0,row:0,a:1,ic:'≋',name:'Donnerwoge',cd:()=>6,d:r=>`Eine donnernde Welle um Echo schleudert Gegner zurück und verursacht ${pc(1.4+0.35*r)} Schaden.`,
     cast(r){const R=(135+8*r)*P.st.area;aoe(P.x,P.y,R,sk(1.4+0.35*r),{knock:430,stun:0.3,fx:P.x,fy:P.y});ring(P.x,P.y,R,'#9fe0ff',0.45,6);G.shake+=3;sfx('thunder')}},
-   {id:'e_storm',b:0,row:1,ic:'✦',name:'Sturmherz',d:r=>`+${8*r}% Fertigkeitsschaden und ${3*r}% kürzere Abklingzeiten.`,mod:(s,r)=>{s.skill+=0.08*r;s.cdr+=0.03*r}},
+   {id:'e_storm',b:0,row:1,ic:'✦',name:'Statische Ladung',d:r=>`Jede gewirkte Fähigkeit lädt Echo auf (bis 4 Ladungen, sichtbar als Funken um ihn). Bei 4 Ladungen entlädt sich ein Kettenblitz auf ${3+r} Gegner (${pc(1.2+0.3*r)} je Treffer), und alle Abklingzeiten sinken um ${f1(0.3*r)}s. +${4*r}% Fertigkeitsschaden.`,mod:(s,r)=>{s.skill+=0.04*r}},
    {id:'e_call',b:0,row:2,a:1,ic:'ϟ',name:'Ruf des Blitzes',cd:()=>10,d:r=>`Ruft ${3+r} Blitze herab, die je ${pc(1.8+0.4*r)} Schaden verursachen und kurz betäuben.`,
     cast(r){const n=3+r;for(let i=0;i<n;i++)later(i*0.2,()=>{const e=mouseAim()?nearestTo(cursorW(),160):randomEnemy(P.x,P.y,500);const c=cursorW();const x=e?e.x:(mouseAim()?c.x+rnd(-60,60):P.x+rnd(-220,220)),y=e?e.y:(mouseAim()?c.y+rnd(-60,60):P.y+rnd(-220,220));bolt(x,y);aoe(x,y,62*P.st.area,sk(1.8+0.4*r),{stun:0.4,lightning:1});sfx('thunder')})}},
    {id:'e_fireball',b:0,row:3,c:0,a:1,ic:'☄',name:'Feuerball',cd:()=>6,d:r=>`Echos Lieblingsantwort auf freche Gegner: Ein Feuerball explodiert am Ziel – ${pc(3+0.7*r)} Schaden im Umkreis und 3s brennender Boden (${pc(0.6+0.15*r)} pro Sekunde).`,
@@ -1385,7 +1384,7 @@ const HEROES={
     cast(r){P.buffs.tempest=7+r;P.tempestR=r;ring(P.x,P.y,200,'#9fe0ff',0.8,6);sfx('thunder');G.shake+=4}},
    {id:'e_bear',b:1,row:0,a:1,ic:'✪',name:'Wildgestalt: Bär',cd:()=>22,d:r=>`Echo wird ${f1((10+2*r)*(1+0.4*rank('e_primal')))}s lang zum Höhlenbären: +${30+8*r}% Schaden, +${20+5*r} Rüstung, +30% Leben, Prankenhiebe treffen alles vor ihm. Heilt 20% Leben.`,
     cast(r){setForm('bear',(10+2*r)*(1+0.4*rank('e_primal')));heal(P.st.maxHp*0.2);ring(P.x,P.y,60,'#c89a6a',0.5,5);burst(P.x,P.y,'#9bd36a',20,180);sfx('roar')}},
-   {id:'e_beast',b:1,row:1,ic:'✚',name:'Urtier',d:r=>`+${8*r}% Leben. In Bärengestalt +${3*r}% Lebensraub.`,mod:(s,r)=>{s.hpP+=0.08*r;if(P.form==='bear')s.ls+=0.03*r}},
+   {id:'e_beast',b:1,row:1,ic:'✚',name:'Urinstinkt',d:r=>`+${6*r}% Leben. In Bärengestalt ist jeder 4. Prankenhieb ein Wuchtschlag: ${pc(1.5+0.4*r)} Schaden im Umkreis, 0,6s Betäubung, und Echo heilt ${2*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.06*r}},
    {id:'e_charge',b:1,row:2,a:1,ic:'➹',name:'Wilder Ansturm',cd:r=>8-0.3*r,d:r=>`Echo stürmt als Bär los, trampelt alles nieder (${pc(2+0.5*r)} Schaden) und schleudert Gegner beiseite.`,
     cast(r){const a=aimAng(520);if(P.form!=='bear')setForm('bear',4);dash(a,310,0.28,sk(2+0.5*r),{knock:380,stun:0.5});sfx('roar')}},
    {id:'e_rat',b:1,row:3,c:0,a:1,ic:'ᘛ',name:'Rattengestalt',cd:()=>18,d:r=>`Wie damals im Kerker: Echo wird ${f1(3+0.5*r)}s lang zur Ratte – winzig, unsichtbar und 60% schneller. Beim Zurückverwandeln beißt ein Rattenschwarm alle Gegner in der Nähe: ${pc(2+0.5*r)} Schaden.`,
@@ -1397,7 +1396,7 @@ const HEROES={
    {id:'e_bark',b:2,row:0,ic:'▣',name:'Rindenhaut',d:r=>`+${r*6} Rüstung, plus ${r} je Heldenstufe. Aura: Mitspieler in der Nähe erhalten die Hälfte.`,mod:(s,r)=>{s.armor+=r*(6+P.level)}},
    {id:'e_moon',b:2,row:1,a:1,ic:'☾',name:'Mondstrahl',cd:()=>12,d:r=>`Ein Mondstrahl jagt ${f1(6+0.5*r)}s lang Gegnern hinterher und verursacht ${pc(1.5+0.4*r)} Schaden pro Sekunde.`,
     cast(r){const p=aimPoint(420);zone({x:p.x,y:p.y,r:72*P.st.area,dur:6+0.5*r,dps:sk(1.5+0.4*r),follow:125,kind:'moon'});sfx('magic')}},
-   {id:'e_greed',b:2,row:2,ic:'◆',name:'Goldgier',d:r=>`Echo riecht Schätze: +${15*r}% Gold, +${8*r}% bessere Beute, +${4*r}% Schaden.`,mod:(s,r)=>{s.gold+=0.15*r;s.luck+=0.08*r;s.dmgP+=0.04*r}},
+   {id:'e_greed',b:2,row:2,ic:'◆',name:'Goldgier',d:r=>`Echo riecht Schätze: +${15*r}% Gold und +${8*r}% bessere Beute. Jedes aufgesammelte Gold hat ${4*r}% Chance auf einen Goldrausch: 5s lang +${20+4*r}% Angriffstempo und +15% Lauftempo – auch für Mitspieler in der Nähe, denn am Ende landet alles auf dem gemeinsamen Haufen.`,mod:(s,r)=>{s.gold+=0.15*r;s.luck+=0.08*r}},
    {id:'e_swarm',b:2,row:3,c:0,a:1,ic:'⁙',name:'Insektenschwarm',cd:()=>9,d:r=>`Ein Insektenschwarm verfolgt ${f1(6+0.5*r)}s lang die Gegner: ${pc(0.9+0.25*r)} Schaden pro Sekunde und −30% Tempo.`,
     cast(r){const p=aimPoint(420);zone({x:p.x,y:p.y,r:85*P.st.area,dur:6+0.5*r,dps:sk(0.9+0.25*r),follow:150,slow:0.3,kind:'swarm'});sfx('vine')}},
    {id:'e_treant',b:2,row:3,c:1,a:1,ic:'♠',name:'Baumhirte',cd:()=>25,d:r=>`Ein Baumhirte kämpft ${15+2*r}s lang an Echos Seite – oder bei einem verwundeten Mitspieler –, zieht Gegner auf sich und schlägt mit ${40+10*r}% von Echos Schaden zu.`,
@@ -1431,7 +1430,7 @@ const HEROES={
    {id:'f_pierce',b:1,row:0,a:1,ic:'➶',name:'Durchbohrender Schuss',cd:()=>6,d:r=>`Ein gewaltiger Pfeil durchschlägt alle Gegner in einer Linie: ${pc(3+0.8*r)} Schaden und Rückstoß.`,
     cast(r){const a=aimAng(700);shoot({x:P.x,y:P.y-4,a,spd:980,dmg:sk(3+0.8*r),r:15,pierce:999,kind:'bigarrow',c:'#fff1c2',knock:260,life:1.1});G.shake+=2;sfx('pierce')}},
    {id:'f_mark',b:1,row:1,ic:'⌖',name:'Jägermal',d:r=>`Normale Pfeile markieren Gegner: Sie erleiden von allen ${6*r}% mehr Schaden. +${3*r}% Kritische Trefferchance.`,mod:(s,r)=>{s.crit+=0.03*r}},
-   {id:'f_sniper',b:1,row:2,ic:'✛',name:'Scharfschütze',d:r=>`+${4*r}% Kritische Trefferchance, +${12*r}% Kritischer Schaden, +${20*r} Reichweite.`,mod:(s,r)=>{s.crit+=0.04*r;s.critd+=0.12*r;s.range+=20*r}},
+   {id:'f_sniper',b:1,row:2,ic:'✛',name:'Ruhender Pol',d:r=>`Friedrich ist der ruhende Pol der Gruppe: +${2*r}% Kritische Trefferchance. Steht er still, steigt sie jede halbe Sekunde um weitere 2% (bis zusätzlich +${3*r}%); beim Laufen sinkt der Bonus langsam wieder. Mitspieler in seiner Nähe erhalten die Hälfte des Bonus. +${10*r}% Kritischer Schaden, +${20*r} Reichweite.`,mod:(s,r)=>{s.crit+=0.02*r;s.critd+=0.1*r;s.range+=20*r}},
    {id:'f_trap',b:1,row:3,c:0,a:1,ic:'⊓',name:'Bärenfallen',cd:()=>8,d:r=>`Friedrich legt ${2+(r>>1)} Bärenfallen aus. Tritt ein Gegner hinein, schnappt sie zu: ${pc(2.5+0.6*r)} Schaden und 2,5s gefesselt. Wird ein Mitspieler bedrängt, schnappen zwei weitere Fallen bei ihm zu.`,
     cast(r){const a=aimAng(400),n=2+(r>>1);for(let i=0;i<n;i++){const aa=a+(i-(n-1)/2)*0.5,d=110+40*(i%2);G.traps.push({x:clamp(P.x+Math.cos(aa)*d,20,WORLD-20),y:clamp(P.y+Math.sin(aa)*d,20,WORLD-20),r:34,dmg:sk(2.5+0.6*r),life:30,arm:0.4})}{const pq=pressedNear(P);if(pq)for(let i=0;i<2;i++){const aa=rnd(TAU);G.traps.push({x:clamp(pq.x+Math.cos(aa)*70,20,WORLD-20),y:clamp(pq.y+Math.sin(aa)*70,20,WORLD-20),r:34,dmg:sk(2.5+0.6*r),life:30,arm:0.4})}}sfx('equip')}},
    {id:'f_sword',b:1,row:3,c:1,ic:'†',name:'Schwertkunst',d:r=>`Wie gegen den Bugbear: Nahkampfhiebe treffen ${20+12*r}% härter und in weiterem Bogen. +${3*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.03*r}},
@@ -1442,7 +1441,7 @@ const HEROES={
     cast(r){const rex=G.allies.find(a=>a.kind==='rex');if(!rex)return;if(rex.dead){rex.dead=false;rex.hp=rex.maxHp;rex.x=P.x;rex.y=P.y}
      const t=aimTarget(500,true);if(t){const a=ang(t,P);rex.x=t.x+Math.cos(a)*(t.r+8);rex.y=t.y+Math.sin(a)*(t.r+8);rex.tgt=t;aoe(t.x,t.y,72*P.st.area,sk(2.5+0.6*r),{stun:1.5});ring(t.x,t.y,72*P.st.area,'#e8b070',0.4,4)}
      burst(rex.x,rex.y,'#c8a070',12,140);sfx('bark')}},
-   {id:'f_loyal',b:2,row:1,ic:'✚',name:'Treuer Gefährte',d:r=>`Rex erhält +${25*r}% Leben und +${20*r}% Schaden.`},
+   {id:'f_loyal',b:2,row:1,ic:'✚',name:'Treuer Gefährte',d:r=>`Rex erhält +${25*r}% Leben und +${20*r}% Schaden. Wird Friedrich oder ein Mitspieler in Rex’ Nähe getroffen, springt Rex dem Angreifer an die Kehle (alle ${f1(Math.max(2,6-0.6*r))}s): ${pc(1.2+0.3*r)} Schaden und 0,8s Betäubung.`},
    {id:'f_pack',b:2,row:2,ic:'⁂',name:'Rudelführer',d:r=>`Rex beißt ${15*r}% schneller, betäubt mit ${10*r}% Chance, und jeder Biss heilt Friedrich um ${f1(0.5*r)}% Leben.`},
    {id:'f_howl',b:2,row:3,c:0,a:1,ic:'❂',name:'Heulen',cd:()=>15,d:r=>`Rex heult: 6s lang +${20+5*r}% Schaden und +20% Tempo für Friedrich, Rex und alle Verbündeten. Gegner nahe Rex fliehen 1,5s.`,
     cast(r){P.buffs.howl=6;P.howlR=r;teamBuff('howl',6,q=>{q.howlR=r});recalc();const rex=G.allies.find(a=>a.kind==='rex'&&!a.dead)||P;aoe(rex.x,rex.y,170,sk(0.3),{fear:1.5,fx:rex.x,fy:rex.y});ring(rex.x,rex.y,170,'#e8b070',0.7,6);sfx('bark')}},
@@ -1477,7 +1476,7 @@ const HEROES={
     cast(r){P.buffs.frenzy=6;teamBuff('frenzyG',6);recalc();ring(P.x,P.y,55,'#ff3b4a',0.5,5);burst(P.x,P.y,'#ff3b4a',18,160);sfx('roar')}},
    {id:'z_dawn',b:1,row:3,c:0,a:1,ic:'☼',name:'Dawnbringer',cd:()=>7,d:r=>`Ein Hieb aus Sonnenlicht in weitem Bogen: ${pc(3+0.7*r)} Schaden, die Getroffenen brennen. Untote und Dämonen erleiden doppelten Schaden.`,
     cast(r){const a=aimAng(380),R=(200+10*r)*P.st.area;faceA(a);cone(P.x,P.y,a,2,R,sk(3+0.7*r),{holy:1,melee:1,onHit:e=>dot(e,'burn',sk(0.4+0.1*r),3)});slash(P.x,P.y,a,2,R,'#ffe08a',0.4,1);burst(P.x+Math.cos(a)*R*0.6,P.y+Math.sin(a)*R*0.6,'#fff0b0',20,200);sfx('cleave')}},
-   {id:'z_pact',b:1,row:3,c:1,ic:'♥',name:'Blutpakt',d:r=>`Unter 50% Leben: +${6*r}% Lebensraub und +${8*r}% Schaden.`},
+   {id:'z_pact',b:1,row:3,c:1,ic:'♥',name:'Blutpakt',d:r=>`Unter 50% Leben – oder wenn ein Mitspieler in der Nähe unter 30% fällt – erwacht der Pakt: +${6*r}% Lebensraub, +${8*r}% Schaden, und jeder Treffer heilt diesen Mitspieler um ${f1(1.5*r)}% des Schadens. Einmal alle ${90-10*r}s weigert sich der Darkin zu sterben: Ein tödlicher Treffer lässt Ezekiel mit 30% Leben und 2s unverwundbar zurück.`},
    {id:'z_leap',b:1,row:4,a:1,ic:'⤊',name:'Darkin-Sprung',cd:()=>8,d:r=>`Ezekiel springt zum Ziel und schlägt ein: ${pc(2.5+0.6*r)} Schaden im Umkreis und 1s Betäubung.`,
     cast(r){const p=aimPoint(420),a=ang(P,p),dist=Math.max(40,Math.sqrt(d2(P,p)));P.leap={t:0.32,T:0.32};dash(a,dist,0.32,0,{},()=>{const R=120*P.st.area;aoe(P.x,P.y,R,sk(2.5+0.6*r),{stun:1,knock:200,fx:P.x,fy:P.y});ring(P.x,P.y,R,'#ff3b4a',0.5,6);burst(P.x,P.y,'#a89a8a',20,240);G.shake+=6;sfx('boom')});sfx('roar')}},
    {id:'z_ascend',b:1,row:5,a:1,ult:1,ic:'♆',name:'Erwachter Darkin',cd:()=>50,d:r=>`${8+2*r}s lang erwacht der Darkin in Ezekiel: +${40+15*r}% Schaden, +30% Wirkungsbereich, +10% Lebensraub, immun gegen Betäubung, Fesseln und Verlangsamung.`,
@@ -1486,7 +1485,7 @@ const HEROES={
     cast(r){const p=aimPoint(430);smoke(P.x,P.y);P.x=clamp(p.x,20,WORLD-20);P.y=clamp(p.y,20,WORLD-20);P.inv=Math.max(P.inv,0.5);const as=rank('z_assassin');if(as)P.ambush=Math.max(P.ambush||0,1*as);
      const R=100*P.st.area,k0=G.kills;aoe(P.x,P.y,R,sk(1.5+0.4*r),{knock:220,fx:P.x,fy:P.y});smoke(P.x,P.y);ring(P.x,P.y,R,'#8a2a8a',0.35,4);sfx('blink');if(as&&G.kills>k0)later(0.01,()=>{P.cds.z_step=0})}},
    {id:'z_murder',b:2,row:1,ic:'☓',name:'Mordlust',d:r=>`Jeder Kill verkürzt alle Abklingzeiten um ${f1(0.12*r)}s.`},
-   {id:'z_destroyer',b:2,row:2,ic:'✠',name:'Der Zerstörer',d:r=>`+${6*r}% Schaden, +${4*r}% Wirkungsbereich, +${5*r}% Kritischer Schaden.`,mod:(s,r)=>{s.dmgP+=0.06*r;s.area+=0.04*r;s.critd+=0.05*r}},
+   {id:'z_destroyer',b:2,row:2,ic:'✠',name:'Der Zerstörer',d:r=>`Jeder Kill nährt die Klinge: Ein Zerstörer-Stapel (8s, bis 10) gibt +${f1(0.8*r)}% Schaden und +${r}% Kritischen Schaden. Bei 10 Stapeln reißt der nächste Nahkampftreffer den Boden auf: ${pc(2+0.5*r)} Schaden im weiten Umkreis – danach beginnt die Jagd von vorn.`},
    {id:'z_smoke',b:2,row:3,c:0,a:1,ic:'☁',name:'Rauchbombe',cd:()=>14,d:r=>`Eine Rauchwolke (5s): Darin sind Ezekiel und Mitspieler unsichtbar, und Gegner im Rauch treffen kaum noch. Der erste Angriff aus dem Rauch verursacht +${60+15*r}% Schaden.`,
     cast(r){zone({x:P.x,y:P.y,r:150*P.st.area,dur:5,dps:0,kind:'smoke',blind:1});P.ambush=Math.max(P.ambush||0,0.6+0.15*r);smoke(P.x,P.y);smoke(P.x+30,P.y);sfx('blink')}},
    {id:'z_clone',b:2,row:3,c:1,a:1,ic:'⧉',name:'Schattenklon',cd:()=>20,d:r=>`Ein Klon aus Schatten kämpft ${8+r}s lang und wiederholt Ezekiels Angriffe mit ${40+10*r}% Schaden.`,
@@ -1632,6 +1631,7 @@ function computeStats(eq){
  if(P.stealthT>0)s.speedP+=0.3;
  if(P.buffs.ballad>0){const r=P.balladR||rank('b_ballad');s.dmgP+=0.3+0.15*r;s.rateP+=0.2+0.1*r;s.regenP+=0.01*(1+r)}
  if(P.buffs.howl>0){s.dmgP+=0.2+0.05*(P.howlR||1);s.speedP+=0.2}
+ if(P.buffs.goldrausch>0){s.rateP+=0.2+0.04*(P.goldR||1);s.speedP+=0.15}
  if(P.buffs.ascend>0){s.dmgP+=0.4+0.15*(P.ascendR||1);s.area+=0.3;s.ls+=0.1}
  if(P.bdN>0)s.rateP+=0.03*P.bdN;
  const lps=new Set();for(const k of SLOTS){const it=eq[k];if(it&&it.pow)lps.add(it.pow)}if(eq===P.eq)P.lp=lps;
@@ -1640,7 +1640,7 @@ function computeStats(eq){
  const lvF=(1+0.055*(lv-1))*(1+s.dmgP),dmgM=(H.dmg+s.wM)*lvF*(1+s.meleeP),dmgR=(H.dmg+s.wR)*lvF*(1+s.rangedP),rateM=s.rate*s.rM*(1+s.rateP),rateR=s.rate*s.rR*(1+s.rateP);
  const st={maxHp,dmg:(dmgM+dmgR)/2,dmgM,dmgR,rateM,rateR,rate:(rateM+rateR)/2,speed:s.speed*(1+Math.min(s.speedP,0.6)),armor:s.armor,crit:Math.min(s.crit,0.75),critd:s.critd,cdr:Math.min(s.cdr,0.5),ls:s.ls,regen:s.regen+maxHp*s.regenP,area:s.area,skill:s.skill,gold:s.gold,luck:s.luck,range:s.range};curseLate(st,cur);return st;
 }
-function recalc(){if(P.ranks&&P.ranks.b_invis!==undefined){P.ranks.b_hypno=(P.ranks.b_hypno||0)+P.ranks.b_invis;delete P.ranks.b_invis;for(const L of [P.learn,P.bar])if(Array.isArray(L)){const k=L.indexOf('b_invis');if(k>=0)L[k]='b_hypno'}}const old=P.st;const ratio=old?P.hp/old.maxHp:1;P.st=computeStats(P.eq);P.hp=Math.max(1,Math.min(P.st.maxHp,ratio*P.st.maxHp))}
+function recalc(){if(P.ranks)for(const old of ['b_invis','b_hypno'])if(P.ranks[old]!==undefined){P.ranks.b_juggle=Math.min(5,(P.ranks.b_juggle||0)+P.ranks[old]);delete P.ranks[old];for(const L of [P.learn,P.bar])if(Array.isArray(L)){const k=L.indexOf(old);if(k>=0){if(L.includes('b_juggle'))L.splice(k,1);else L[k]='b_juggle'}}}const old=P.st;const ratio=old?P.hp/old.maxHp:1;P.st=computeStats(P.eq);P.hp=Math.max(1,Math.min(P.st.maxHp,ratio*P.st.maxHp))}
 const armorK=()=>60+12*(G&&G.state!=='title'?effStage():0);
 const armorRed=a=>Math.max(0,a)/(Math.max(0,a)+armorK());
 function power(st){const dps=st.dmg*st.rate*(1+st.crit*(st.critd-1))*(0.55+0.45*st.skill)*(1+0.3*(st.area-1));const ehp=st.maxHp/(1-armorRed(st.armor)*0.95)*(1+st.ls*3)+st.regen*25;return Math.pow(dps,0.55)*Math.pow(ehp,0.45)*(1+0.5*st.cdr)*(1+0.3*(st.speed/P.hero.speed-1))*(1+0.05*(st.gold-1)+0.05*st.luck)}
@@ -1660,7 +1660,7 @@ const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='25.10.2026 · Bosse & Wächter';
+const HS_VERSION='25.10.2026 · Neue Talente';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
 let GAUTO=3,GCEIL=3,FPSNOW=60;
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
@@ -2554,18 +2554,20 @@ function dealDmg(e,base,o){if(e.dead)return 0;if(e.flying&&e.flyHigh>0.4)return 
  if(e.vulnT>0)m*=1+e.vuln;
  const sn=rank('z_sneak');if(sn&&e.hp>=e.maxHp)m*=1+0.4*sn;
  const wr=rank('z_wrath');if(wr)m*=1+0.015*wr*Math.floor((1-P.hp/P.st.maxHp)*10);
- const pa=rank('z_pact');if(pa&&P.hp<P.st.maxHp*0.5)m*=1+0.08*pa;
+ const pa=rank('z_pact'),paOn=pa&&pactOn();if(paOn)m*=1+0.08*pa;
  if(o.holy&&HOLY.has(e.def.shape))m*=2;
  if(o.lightning&&e.chillT>0)m*=1+0.05*rank('e_icefan');
  if(LP('dawnlicht')&&HOLY.has(e.def.shape))m*=1.5;
  if(e.affix&&e.affix.gepanzert)m*=0.6;if(e.shT>G.time)m*=0.5;if(e.shadeT>G.time)m*=0.25;m*=bestMul(e)*setHitMul(e,o)*wxHitMul(e,o)*mpDmgMul();
- let crit=false;if(!o.noCrit){if(o.crit||P.critNext>0){crit=true;if(!o.crit&&P.critNext>0)P.critNext--}else crit=Math.random()<P.st.crit}
- if(crit)m*=P.st.critd;
+ let crit=false;if(!o.noCrit){if(o.crit||P.critNext>0){crit=true;if(!o.crit&&P.critNext>0)P.critNext--}else crit=Math.random()<P.st.crit+skCrit()}
+ if(crit)m*=P.st.critd+(P.zdN?0.01*rank('z_destroyer')*P.zdN:0);
+ if(P.zdN)m*=1+0.008*rank('z_destroyer')*P.zdN;
  if(P.ambush>0&&!o.dot&&!o.pet){m*=1+P.ambush;P.ambush=0;word(e.x,e.y-e.r-18,'Hinterhalt!','#ff8a8a')}
  if(!o.dot&&LP('d20')&&Math.random()<0.05){m*=4;word(e.x,e.y-e.r-20,'20!','#ffd04a');sfx('legend')}
  const amt=base*m*(1-(e.dr||0));e.hp-=amt;{const os=G.ortS;if(os&&P){if(amt>os.best){os.best=amt;os.by=P.id}os.dmg[P.id]=(os.dmg[P.id]||0)+amt}}if(G.mp){P.stDmg=(P.stDmg||0)+amt;if(!o.basic&&!o.dot&&!o.pet&&!o.setFx)comboHit(e)}if(e.def.k==='thief'&&!o.dot&&Math.random()<0.35)orb(e.x,e.y,'gold',Math.max(1,Math.round(ri(1,3)*P.st.gold)));e.flash=0.07;if(!o.dot)e.hitAt=G.time;
  if(e.markT>0&&!o.noMark)e.markAcc+=amt;
- let ls=P.st.ls;if(pa&&P.hp<P.st.maxHp*0.5)ls+=0.06*pa;
+ let ls=P.st.ls;if(paOn)ls+=0.06*pa;if(paOn&&P.pactAlly&&!o.dot&&!P.pactAlly.down)P.pactAlly.hp=Math.min(P.pactAlly.st.maxHp,P.pactAlly.hp+amt*0.015*pa);
+ if(P.zdN>=10&&o.melee&&!o.zdBoom){P.zdN=0;P.zdW=0;const R2=170*P.st.area;aoe(P.x,P.y,R2,sk(2+0.5*rank('z_destroyer')),{zdBoom:1,knock:240,fx:P.x,fy:P.y});ring(P.x,P.y,R2,'#ff3b4a',0.7,7);G.fxs.push({k:'shock',x:P.x,y:P.y,r:R2,c:'#ff3b4a',t:0,life:0.5});chunks(P.x,P.y,'#5a3a2a',10,260);G.shake+=6;sfx('boom')}
  if(ls>0&&!o.noLs&&!o.dot)heal(Math.min(amt*ls,P.st.maxHp*0.015));
  if(!o.quiet||amt>P.st.dmg*0.25)num(e.x+rnd(-6,6),e.y-e.r-4,amt,crit,false,o.dot);if(crit&&!o.dot&&!o.quiet)critFx(e,amt);else if(!o.dot&&!o.quiet&&fxQ()>1&&Math.random()<0.6)sparks(e.x,e.y-e.r*0.3,o.holy?'#ffe9a0':o.lightning?'#9fd8ff':'#fff2d8',2,230);
  if(o.stun)stunE(e,o.stun);
@@ -2803,7 +2805,7 @@ function spawnBoss(){const S=STAGES[G.stage];const def=BOSSES[S.boss];const p=ed
  const b=spawnEnemy(def,p.x,p.y,{boss:1});G.boss=b;if(def.survive)b.survive=def.survive;
  if(def.adds)for(const id of def.adds){const a=ADDS[id];spawnEnemy(a,p.x+60,p.y+40,{add:1})}
  toast(`<span style="color:#ff8a7a">${def.say||def.n+' erscheint!'}</span>`);G.shake+=6;ring(p.x,p.y,120,'#ff5a4a',0.8,8);bossIntroFx(b,def)}
-function killEnemy(e,o){if(e.dead)return;e.dead=true;addCorpse(e,o);comboKill();if(G.mp){P.stKills=(P.stKills||0)+1;teamGain(1/150)}G.kills++;if(!e.boss&&!e.guard)G.stageKills++;
+function killEnemy(e,o){if(e.dead)return;e.dead=true;addCorpse(e,o);comboKill();if(G.mp){P.stKills=(P.stKills||0)+1;teamGain(1/150)}G.kills++;if(!e.boss&&!e.guard)G.stageKills++;try{skKill(e)}catch(er){}
  G.score+=Math.round((e.boss?400+40*SL():e.guard?120+10*SL():e.rare?60:e.elite?25:e.summon?1:2+0.2*SL()));
  affixDeath(e);legendKill(e);bestKill(e);setOnKill(e);curseKill();noteKill();if(e.mimic)mimicLoot(e);if(e.def.k==='thief')thiefLoot(e);if(e.rare)say('elite',0,0.5);
  if(dmod('explosiv')&&!e.boss&&!e.guard&&!e.summon&&Math.random()<0.3){const x=e.x,y=e.y;tele({k:'circle',x,y,r:60,delay:0.7,dmg:e.dmg*0.9,c:'#ffb040'})}
@@ -2843,9 +2845,9 @@ function dropItem(x,y,it){it=ancRoll(it);if(G.portal&&d2({x,y},G.portal)<100*100
 /* ================= Spieler ================= */
 const keys={};let joy=null;
 function absorb(a){if(P.shieldHp>0){const t=Math.min(P.shieldHp,a);P.shieldHp-=t;a-=t;if(P.shieldHp<=0)burst(P.x,P.y,'#9fe6ff',12,140)}return a}
-function hurt(raw){if(P.inv>0||P.down||G.state!=='play')return;let a=raw*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');if(P.hp<=0)die()}
+function hurt(raw){if(P.inv>0||P.down||G.state!=='play')return;let a=raw*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
 function hurtDot(a){if(P.inv>0||P.down||G.state!=='play')return;a=a*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(a<=0)return;P.hp-=a;P.dotAcc=(P.dotAcc||0)+a;if(P.dotAcc>P.st.maxHp*0.03){num(P.x+rnd(-8,8),P.y-26,P.dotAcc,false,true);P.dotAcc=0}if(P.hp<=0)die()}
-function die(){if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
+function die(){if(pactSave())return;if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
  if(G.mp){mpDown();return}P.hp=0;endRun(false)}
 function gainXp(v){v*=shrineOn('erkenntnis')?1.5:1;ruhmXp(v);P.xp+=v;let need=xpNeed(P.level);while(P.xp>=need){if(P.level>=LEG_CAP){legXp(P.xp);P.xp=0;break}P.xp-=need;P.level++;P.sp++;recalc();heal(P.st.maxHp*0.25);ring(P.x,P.y,70,'#8fe7ff',0.6,4);levelFx();rumble(P,0.25,90);say('level',0,0.4);sfx('level');toast(`Stufe ${P.level}! Neuer Talentpunkt.`,'#8fe7ff');need=xpNeed(P.level)}}
@@ -2857,7 +2859,32 @@ function toggleBar(id){const i=P.bar.indexOf(id);if(i>=0)P.bar.splice(i,1);else 
 function useSkill(i){if(G.state!=='play'||G.paused)return;if(P.silT>0||P.stunT>0){if(!P.silWarn||G.time-P.silWarn>1.5){P.silWarn=G.time;toast(P.silT>0?'Keine Magie – du bist verstummt!':'Du bist betäubt!','#c08cff')}return}if(P.chan&&!P.chan.move)return;const n=P.actives[i];if(!n)return;if((P.cds[n.id]||0)>0)return;const r=rank(n.id);
  if(n.cast(r)===false)return;if(n.ult){if(!G.bot)ultFx();teamUltHook(n)}P.cds[n.id]=n.cd(r)*(1-P.st.cdr);setOnCast(n);P.castA=G.time;const b=P.skBtns&&P.skBtns[i];if(b)b.el.classList.remove('ready')}
 function usePotion(){if(G.state!=='play'||G.paused||P.pots<=0||P.potCd>0||P.hp>=P.st.maxHp)return;P.pots--;P.potCd=1;heal(P.st.maxHp*0.4*(LP('taverne')?1.5:1)*cursePotMul()*(LP('retter')?1.4:1));if(LP('retter'))for(const q of teamNear(P,auraR(P)))withP(q,()=>heal(P.st.maxHp*0.2));burst(P.x,P.y,'#ff6a7a',16,120);ring(P.x,P.y,30,'#ff6a7a',0.4,3);sfx('potion');potionFx();say('pot',0,0.25)}
+/* ---------- Talent-Mechaniken (Ladungen, Stapel, Jonglage, Rex als Beschützer, Blutpakt) ---------- */
+function skillOnCast(n){const st=rank('e_storm');if(!st||n.id==='e_storm')return;P.stat=(P.stat||0)+1;if(P.stat<4)return;P.stat=0;
+ const t=randomEnemy(P.x,P.y,440);if(t)chainLightning(t,3+st,sk(1.2+0.3*st),230);for(const k in P.cds)if(P.cds[k]>0)P.cds[k]=Math.max(0,P.cds[k]-0.3*st);ring(P.x,P.y,70,'#9fe0ff',0.5,4);sparks(P.x,P.y-20,'#bfe9ff',14,320,1);sfx('thunder')}
+function jugPos(J,i){const a=J.a+i*TAU/J.n,h=Math.abs(Math.sin(G.time*5+i*1.7))*22;return{x:P.x+Math.cos(a)*72,y:P.y-8+Math.sin(a)*44-h}}
+function skTick(dt){
+ const J=P.jug;if(J){J.t-=dt;J.a+=dt*3.4;J.hitT-=dt;if(J.hitT<=0){J.hitT=0.1;for(let i=0;i<J.n;i++){const q=jugPos(J,i);query(q.x,q.y,40,e=>{if(e.dead||(e.jugAt||0)>G.time||d2(e,q)>(30+e.r)*(30+e.r))return;e.jugAt=G.time+0.5;dealDmg(e,sk(0.9+0.2*J.r),{onHit:x=>dot(x,'burn',sk(0.25+0.05*J.r),3)});dot(e,'burn',sk(0.25+0.05*J.r),3);sparks(q.x,q.y,'#ffb04a',4,160)})}if(fxQ()>1)for(let i=0;i<J.n;i++){const q=jugPos(J,i);embers(q.x,q.y,'#ff9a3a',1,4)}}
+  if(J.t<=0){P.jug=null;const L=targetsNear(460,J.n);for(let i=0;i<J.n;i++){const q=jugPos(J,i),t=L[i%Math.max(1,L.length)];if(!t)break;shoot({x:q.x,y:q.y,a:ang(q,t),spd:620,dmg:0,r:10,pierce:0,kind:'fireball',c:'#ff8a2a',life:Math.min(1,Math.sqrt(d2(q,t))/620+0.05),boom:{R:70*P.st.area,dmg:sk(1.6+0.4*J.r),burn:sk(0.3+0.06*J.r)}})}if(L.length){word(P.x,P.y-60,'Finale!','#ffb04a');sfx('fire')}}}
+ const sn=rank('f_sniper');if(sn){if(!P.moving){P.polT=(P.polT||0)+dt;if(P.polT>=0.5){P.polT=0;const o=P.polC||0;P.polC=Math.min(0.03*sn,o+0.02);if(P.polC>o)ring(P.x,P.y+10,22+P.polC*300,'#efe0b8',0.3,2)}}else{P.polT=0;P.polC=Math.max(0,(P.polC||0)-dt*0.03)}
+  if(P.polC>0)for(const q of teamNear(P,auraR(P))){q.polA=P.polC*0.5;q.polAT=G.time+0.6}}
+ if(P.zdN&&G.time>P.zdT)P.zdN=0;
+ if(rank('z_pact')){let w=null,wf=0.3;for(const q of teamNear(P,420)){const f=q.hp/q.st.maxHp;if(f<wf){wf=f;w=q}}P.pactAlly=w}}
+function pactOn(){return rank('z_pact')&&(P.hp<P.st.maxHp*0.5||!!P.pactAlly)}
+function pactSave(){const pa=rank('z_pact');if(!pa||G.time<(P.pactCd||0))return false;P.pactCd=G.time+90-10*pa;P.hp=P.st.maxHp*0.3;P.inv=Math.max(P.inv,2);
+ ring(P.x,P.y,90,'#ff3b4a',0.8,6);sparks(P.x,P.y-20,'#ff3b4a',24,380,1);light(P.x,P.y,260,'#ff3b4a',1,1);word(P.x,P.y-60,'Der Darkin weigert sich!','#ff5a5a');sfx('roar');return true}
+function skKill(e){const zd=rank('z_destroyer');if(zd){P.zdN=Math.min(10,(P.zdN||0)+1);P.zdT=G.time+8;if(P.zdN===10&&!P.zdW){P.zdW=1;word(P.x,P.y-60,'Zerstörer!','#ff5a5a')}}}
+function greedPick(){const g=rank('e_greed');if(!g||Math.random()>=0.04*g)return;P.buffs.goldrausch=5;P.goldR=g;teamBuff('goldrausch',5,q=>{q.goldR=g});recalc();word(P.x,P.y-56,'Goldrausch!','#ffd04a');sparks(P.x,P.y-20,'#ffd04a',16,300,1);sfx('coin')}
+function rexGuard(victim){if(!G.allies)return;for(const a of G.allies){if(a.kind!=='rex'||a.dead)continue;const own=a.own||(G.mp?null:P);if(!own)continue;
+ withP(own,()=>{const lo=rank('f_loyal');if(!lo||G.time<(a.guardT||0))return;if(victim!==P&&d2(a,victim)>280*280)return;const t=nearest(victim.x,victim.y,170);if(!t)return;
+  a.guardT=G.time+Math.max(2,6-0.6*lo);const an=ang(t,victim);a.x=t.x+Math.cos(an)*(t.r+8);a.y=t.y+Math.sin(an)*(t.r+8);a.tgt=t;dealDmg(t,sk(1.2+0.3*lo),{pet:1,rex:1,noLs:true});stunE(t,0.8);burst(t.x,t.y,'#e8b070',10,140);word(a.x,a.y-24,'Grrr!','#e8b070');sfx('bark')})}}
+function skHurt(){try{rexGuard(P)}catch(e){}}
+function skCrit(){return(P.polC||0)+(P.polAT>G.time?P.polA||0:0)}
+function drawSkx(t){const J=P.jug;if(J)for(let i=0;i<J.n;i++){const q=jugPos(J,i),sp=G.time*9+i;cx.save();cx.translate(q.x,q.y);cx.rotate(sp);ln(cx,'#7a4a24',3,0,8,0,-6);cx.restore();cx.globalAlpha=0.4;circ(cx,q.x,q.y-7,15,'#ff8a2a');cx.globalAlpha=0.8;circ(cx,q.x,q.y-8,8,'#ffb04a');cx.globalAlpha=1;circ(cx,q.x,q.y-8,4,'#fff2c0')}
+ if(P.stat>0)for(let i=0;i<P.stat;i++){const a=G.time*3+i*TAU/4;cx.globalAlpha=0.85;circ(cx,P.x+Math.cos(a)*34,P.y-20+Math.sin(a)*18,3,'#bfe9ff');cx.globalAlpha=1}
+ if(P.zdN>0){for(let i=0;i<P.zdN;i++){cx.globalAlpha=0.9;circ(cx,P.x-22+i*4.9,P.y+24,1.8,P.zdN>=10?'#ffd04a':'#ff3b4a')}cx.globalAlpha=1}}
 function heroTick(dt){
+ try{skTick(dt)}catch(e){}
  if(P.buffs.ballad>0&&P.balladOwn!==0){P.notesT=(P.notesT||0)-dt;if(P.notesT<=0){P.notesT=0.2;const r=rank('b_ballad');for(let i=0;i<4;i++){const a=G.time*2.4+i*TAU/4,x=P.x+Math.cos(a)*95,y=P.y+Math.sin(a)*95;aoe(x,y,26,sk(0.35+0.1*r),{quiet:1,noCrit:1})}}}
  if(P.buffs.tempest>0){P.tempT=(P.tempT||0)-dt;if(P.tempT<=0){P.tempT=0.25;const e=randomEnemy(P.x,P.y,300);if(e){bolt(e.x,e.y);aoe(e.x,e.y,60*P.st.area,sk(1.4+0.4*(P.tempestR||1)),{lightning:1,knock:180,fx:P.x,fy:P.y,quiet:1});if(Math.random()<0.4)sfx('thunder')}}}
  const hl=rank('b_hall');if(hl){P.hallT=(P.hallT||12-2*hl)-dt;if(P.hallT<=0){P.hallT=12-2*hl;if(G.enemies.length){const a=rnd(TAU);illusion(P.x+Math.cos(a)*60,P.y+Math.sin(a)*60,rank('b_mirror')||1);ring(P.x,P.y,50,'#9fd8ff',0.4,3)}}}
@@ -2964,7 +2991,7 @@ function update(dt){
  for(const o of G.orbs){o.t+=dt;o.x+=o.vx*dt;o.y+=o.vy*dt;o.vx*=0.9;o.vy*=0.9;const OQ=G.mp?nearestP(o.x,o.y):P;const dd=d2(o,OQ);const mag=o.k==='gold'?170:180;
   const hr=rank('e_hoard');const mg=o.k==='gold'&&hr?mag*2:mag;
   if((dd<mg*mg&&o.t>0.25)||o.t>7||G.portal){const a=ang(o,OQ),s=420+o.t*80;o.x+=Math.cos(a)*s*dt;o.y+=Math.sin(a)*s*dt}
-  if(dd<20*20&&o.t>0.2){o.dead=1;if(o.k==='xp'){if(G.mp){const xf=o.v/(1+0.35*(PL.length-1));for(const q of PL)withP(q,()=>gainXp(xf))}else gainXp(o.v);sfx('xp')}else if(o.k==='gem'){OQ.gems[o.v]=(OQ.gems[o.v]||0)+1;word(OQ.x,OQ.y-34,GEMS[o.v].n,GEMS[o.v].c);sfx('item')}else{SAVE.gold+=o.v;G.goldRun+=o.v;sfx('coin');if(hr){P.hoard=Math.min(6*hr,(P.hoard||0)+1);P.hoardT=8;recalc()}}}}
+  if(dd<20*20&&o.t>0.2){o.dead=1;if(o.k==='xp'){if(G.mp){const xf=o.v/(1+0.35*(PL.length-1));for(const q of PL)withP(q,()=>gainXp(xf))}else gainXp(o.v);sfx('xp')}else if(o.k==='gem'){OQ.gems[o.v]=(OQ.gems[o.v]||0)+1;word(OQ.x,OQ.y-34,GEMS[o.v].n,GEMS[o.v].c);sfx('item')}else{SAVE.gold+=o.v;G.goldRun+=o.v;sfx('coin');try{withP(OQ,greedPick)}catch(er){}if(hr){P.hoard=Math.min(6*hr,(P.hoard||0)+1);P.hoardT=8;recalc()}}}}
  G.orbs=G.orbs.filter(o=>!o.dead&&o.t<90);
  updParts(dt);if(G.lights){for(const L of G.lights)L.t+=dt;G.lights=G.lights.filter(L=>L.t<L.life)}if(G.decals){for(const d of G.decals)d.t+=dt;G.decals=G.decals.filter(d=>d.t<d.life)}updLoot(dt);
  for(const f of G.fxs)f.t+=dt;G.fxs=G.fxs.filter(f=>f.t<f.life);
@@ -2996,6 +3023,7 @@ function updAlly(a,dt){
   return}
  if(a.kind==='ill'){a.life-=dt;a.t+=dt;if(a.hp<=0)a.life=0;
   const ph=rank('b_phantom');a.atk-=dt;if(ph&&a.atk<=0){const t=nearest(a.x,a.y,360);if(t){a.atk=0.9;a.flip=t.x<a.x?-1:1;shoot({x:a.x,y:a.y-6,a:ang(a,t),spd:520,dmg:P.st.dmg*(0.3+0.1*ph)*(1+0.25*rank('b_hall'))*petDmgMul(),r:7,pierce:0,kind:'note',c:'#bfe6ff'})}}
+  if(P.jug&&(a.jugT=(a.jugT===undefined?0.5:a.jugT)-dt)<=0){a.jugT=1;const t=nearest(a.x,a.y,380);if(t){a.flip=t.x<a.x?-1:1;shoot({x:a.x,y:a.y-14,a:ang(a,t),spd:520,dmg:0,r:9,pierce:0,kind:'fireball',c:'#ff8a2a',life:Math.min(0.95,Math.sqrt(d2(a,t))/520+0.05),boom:{R:60*P.st.area,dmg:sk(0.8+0.2*P.jug.r)}})}}
   if(a.life<=0){aoe(a.x,a.y,95*P.st.area,a.boom,{knock:200});ring(a.x,a.y,95*P.st.area,'#9fd8ff',0.4,5);burst(a.x,a.y,'#bfe6ff',18,200);sfx('magic')}}
 }
 function enterPortal(){sfx('portal');const S=STAGES[G.stage];
@@ -3629,6 +3657,7 @@ function drawPet(a,t){const fade=Math.min(1,a.life*2);cx.globalAlpha=fade;
  cx.globalAlpha=1}
 function drawPlayer(t){const blink=P.inv>0&&Math.sin(t*40)>0;if(P.inv>0.0&&blink)cx.globalAlpha=0.55;
  if(P.buffs.ballad>0){for(let i=0;i<4;i++){const a=G.time*2.4+i*TAU/4,x=P.x+Math.cos(a)*95,y=P.y+Math.sin(a)*95;cx.globalAlpha=0.35;circ(cx,x,y,13,'#f6d77c');cx.globalAlpha=1;circ(cx,x-2,y+3,4,'#f6d77c');ln(cx,'#f6d77c',2,x+1.6,y+3,x+1.6,y-8);ln(cx,'#f6d77c',2,x+1.6,y-8,x+6,y-5)}}
+ try{drawSkx(t)}catch(e){}
  if(P.buffs.tempest>0){cx.globalAlpha=0.18+0.08*Math.sin(t*9);circ(cx,P.x,P.y,300,'#9fe0ff');cx.globalAlpha=0.5;cx.strokeStyle='#cfefff';cx.lineWidth=2;cx.setLineDash([12,10]);cx.beginPath();cx.arc(P.x,P.y,300,t*0.8,t*0.8+TAU);cx.stroke();cx.setLineDash([]);cx.globalAlpha=1}
  if(P.chan&&P.chan.draw==='aim'){const a=mouseAim()?aimAng(800):P.chan.a,k=1-P.chan.t/0.8;cx.globalAlpha=0.3+0.5*k;cx.strokeStyle='#ffe9a0';cx.lineWidth=2+4*k;cx.beginPath();cx.moveTo(P.x,P.y-4);cx.lineTo(P.x+Math.cos(a)*800,P.y-4+Math.sin(a)*800);cx.stroke();cx.globalAlpha=1}
  if(P.batT>0){const fl=Math.sin(t*30)*7;poly(cx,'#2a2236',P.x,P.y-10,P.x-16,P.y-18-fl,P.x-8,P.y-6);poly(cx,'#2a2236',P.x,P.y-10,P.x+16,P.y-18-fl,P.x+8,P.y-6);circ(cx,P.x,P.y-10,4,'#2a2236');cx.globalAlpha=1;return}
@@ -3712,7 +3741,7 @@ function hudUpdate(){if(G.state==='title'||G.state==='camp'||!P)return;
   if(b.q!==q){b.q=q;b.cd.style.background=q>0?`conic-gradient(rgba(8,5,10,.72) ${q*360}deg, transparent 0)`:'none';b.el.classList.toggle('ready',q===0)}
   const sil=P.silT>0||P.stunT>0;if(b.sil!==sil){b.sil=sil;b.el.classList.toggle('sil',sil)}
   const tx=cd>0?(cd<1?f1(cd):String(Math.ceil(cd))):'';if(b.tx!==tx){b.tx=tx;b.cdt.textContent=tx}}}
-const AR={b_mock:420,b_dissonant:480,b_ballad:300,b_hypno:420,b_door:260,b_flute:300,e_icefan:230,e_chain:420,e_tempest:280,e_rat:200,e_roar:200,e_treant:350,e_wrath:450,f_strafe:420,f_onearrow:650,f_trap:300,f_leap:150,f_howl:300,f_wolves:400,z_fan:380,z_spin:120,z_lotus:250,z_dawn:200,z_leap:400,z_ascend:260,z_smoke:180,z_clone:300,z_mark:450,e_wave:150,b_pattern:250,b_fear:230,z_cleave:180,e_bear:260,z_frenzy:260,e_charge:420,z_step:420,b_mirror:300};
+const AR={b_mock:420,b_dissonant:480,b_ballad:300,b_juggle:200,b_door:260,b_flute:300,e_icefan:230,e_chain:420,e_tempest:280,e_rat:200,e_roar:200,e_treant:350,e_wrath:450,f_strafe:420,f_onearrow:650,f_trap:300,f_leap:150,f_howl:300,f_wolves:400,z_fan:380,z_spin:120,z_lotus:250,z_dawn:200,z_leap:400,z_ascend:260,z_smoke:180,z_clone:300,z_mark:450,e_wave:150,b_pattern:250,b_fear:230,z_cleave:180,e_bear:260,z_frenzy:260,e_charge:420,z_step:420,b_mirror:300};
 const SKPOS=[[0,0],[86,0],[0,86],[86,86],[172,0],[172,86]];
 function buildSkillBar(){P.bar=(P.bar||P.learn.slice(0,6)).filter(id=>P.learn.includes(id)).slice(0,6);P.actives=P.bar.map(id=>P.hero.tree.find(n=>n.id===id)).filter(Boolean);if(G.mp&&PL[0]&&P!==mainP()){P.skBtns=[];return}
  skillsEl.innerHTML=P.actives.map((n,i)=>`<button class="sk ready" data-sk="${i}" style="right:${SKPOS[i][0]}px;bottom:${SKPOS[i][1]}px" aria-label="${esc(n.name)}"><span class="ic">${n.ic}</span><i class="cd"></i><span class="cdt"></span><span class="key">${i+1}</span></button>`).join('');
@@ -4447,7 +4476,7 @@ function setTick(dt){if(!P.setN)return;
  if(S4('g_bollwerk')){P.bollT=(P.bollT||0)-dt;if(P.bollT<=0&&!(P.shieldHp>0)){P.bollT=8;P.shieldHp=P.st.maxHp*0.2;ring(P.x,P.y,34,'#d8c8a0',0.5,4)}}
  if(S4('g_rudel')){P.rudT=(P.rudT||5)-dt;if(P.rudT<=0){P.rudT=12;spawnPet('wolf',P.x+rnd(-60,60),P.y+rnd(-60,60),{life:10,dmg:()=>P.st.dmg*0.6,hp:P.st.maxHp*0.5,every:0.8,r:12,speed:240});howlFx()}}}
 function howlFx(){sfx('roar');G.fxs.push({k:'shock',x:P.x,y:P.y,r:140,c:'#c8b8a0',t:0,life:0.5})}
-function setOnCast(n){if(!P.setN)return;
+function setOnCast(n){try{skillOnCast(n)}catch(e){}if(!P.setN)return;
  if(S4('barradin')&&(P.setCdT||0)<G.time){P.setCdT=G.time+3;illusion(P.x+rnd(-50,50),P.y+rnd(-50,50),3)}
  if(S4('b_verz')){const R=170*P.st.area;query(P.x,P.y,R+40,e=>{if(d2(e,P)<R*R)stunE(e,0.7)});G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#ffb0e8',t:0,life:0.45})}
  if(n&&!n.ult&&S4('g_magier')&&Math.random()<0.25){P.cds[n.id]=0;word(P.x,P.y-40,'Arkane Quelle!','#b89aff');ring(P.x,P.y,30,'#b89aff',0.4,3)}}
