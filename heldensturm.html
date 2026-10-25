@@ -1886,8 +1886,9 @@ const LC=document.createElement('canvas'),lcx=LC.getContext('2d');
 const DLS={};function decoLightSpr(c){let s=DLS[c];if(s)return s;s=document.createElement('canvas');s.width=s.height=64;const g=s.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,`rgba(${c},.22)`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.fillRect(0,0,64,64);return DLS[c]=s}
 let HOLE=null;function holeSpr(){if(HOLE)return HOLE;HOLE=document.createElement('canvas');HOLE.width=HOLE.height=128;const g=HOLE.getContext('2d'),gr=g.createRadialGradient(64,64,64*0.15,64,64,64);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);return HOLE}
 let LITC=null,LITD=-1;
-function liteDark(camX,camY,dark){const R=Math.round(Math.max(W,H)*1.2);const key=dark.toFixed(2)+(CU('nacht')?'n':'')+ZOOM.toFixed(2);if(!LITC||LITC.width!==R||LITD!==key){LITD=key;LITC=LITC||document.createElement('canvas');LITC.width=LITC.height=R;const g=LITC.getContext('2d'),r0=170*ZOOM*(CU('nacht')?0.55:1),h2=R/2,gr=g.createRadialGradient(h2,h2,r0*0.15,h2,h2,r0);gr.addColorStop(0,'rgba(6,4,10,0)');gr.addColorStop(1,`rgba(6,4,10,${dark})`);g.fillStyle=gr;g.fillRect(0,0,R,R)}
- const sx=(P.x-camX)*ZOOM,sy=(P.y-camY)*ZOOM;cx.drawImage(LITC,sx-R,sy-R,R*2,R*2)}
+/* Die große Dunkel-Maske wird nur bei grob anderem Zoom neu gezeichnet (vorher bei jeder kleinen Zoom-Änderung – sehr teuer auf großen Bildschirmen) */
+function liteDark(camX,camY,dark){const R=Math.round(Math.max(W,H)*1.2),zq=Math.max(0.3,Math.round(ZOOM*4)/4),zs=ZOOM/zq;const key=dark.toFixed(2)+(CU('nacht')?'n':'')+zq;if(!LITC||LITC.width!==R||LITD!==key){LITD=key;LITC=LITC||document.createElement('canvas');LITC.width=LITC.height=R;const g=LITC.getContext('2d'),r0=170*zq*(CU('nacht')?0.55:1),h2=R/2,gr=g.createRadialGradient(h2,h2,r0*0.15,h2,h2,r0);gr.addColorStop(0,'rgba(6,4,10,0)');gr.addColorStop(1,`rgba(6,4,10,${dark})`);g.fillStyle=gr;g.fillRect(0,0,R,R)}
+ const sx=(P.x-camX)*ZOOM,sy=(P.y-camY)*ZOOM,Rz=R*zs;cx.drawImage(LITC,sx-Rz,sy-Rz,Rz*2,Rz*2);if(zs<1){cx.fillStyle=`rgba(6,4,10,${dark})`;cx.fillRect(0,0,W,Math.max(0,sy-Rz));cx.fillRect(0,sy+Rz,W,H);cx.fillRect(0,0,Math.max(0,sx-Rz),H);cx.fillRect(sx+Rz,0,W,H)}}
 function drawLighting(camX,camY,t){const T=G.theme;if(!T)return;const dark=Math.min(0.92,(T.dark||0)+wxDark()+(CU('nacht')?0.35:0));
  if(T.tint){cx.fillStyle=T.tint;cx.fillRect(0,0,W,H)}{const x=WX(),wt=x&&(WETTER[x.w].tint),zt=x&&ZEITEN[x.z].tint;if(wt){cx.fillStyle=wt;cx.fillRect(0,0,W,H)}if(zt){cx.fillStyle=zt;cx.fillRect(0,0,W,H)}}
  if(dark<=0)return;if(GF().lite){liteDark(camX,camY,dark);return}const LR=GF().lr,lw=Math.ceil(W*LR),lh=Math.ceil(H*LR);if(LC.width!==lw||LC.height!==lh){LC.width=lw;LC.height=lh}
@@ -3617,7 +3618,7 @@ function drawNums(){cx.textAlign='center';for(const n of G.nums){const k=n.t/0.7
 function render(dt){
  if(!G.ground||G.state==='title'||G.state==='camp'||!P){ambient(dt);return}
  const Z0=ZOOM;G.zp=(G.zp||0)*Math.exp(-7*dt);const MZ=G.mp&&G.state==='play'&&!SAVE.split?mpView(dt):1;
- {let tz=1;if(G.state==='play'&&camL()&&!splitOn()){let n=0;for(const e of G.enemies)if(!e.dead&&Math.abs(e.x-P.x)<520&&Math.abs(e.y-P.y)<380)n++;const mv=P&&P.moving;tz=(G.boss||G.guardE?0.93:1)*(n>28?0.93:n>14?0.97:n<4&&!mv?1.04:1)*(P&&P.sprintOn?0.97:1)}G.cz=(G.cz||1)+(tz-(G.cz||1))*Math.min(1,dt*0.9)}if(G.shake>0)G.shake=Math.max(0,G.shake-dt*26);ZOOM=Z0*(1+G.zp)*MZ*(G.cz||1);
+ {let tz=1;if(G.state==='play'&&camL()&&!splitOn()){let n=0;for(const e of G.enemies)if(!e.dead&&Math.abs(e.x-P.x)<520&&Math.abs(e.y-P.y)<380)n++;const mv=P&&P.moving;tz=(G.boss||G.guardE?0.93:1)*(n>28?0.93:n>14?0.97:n<4&&!mv?1.04:1)*(P&&P.sprintOn?0.97:1)}G.cz=(G.cz||1)+(tz-(G.cz||1))*Math.min(1,dt*0.9);if(Math.abs(G.cz-tz)<0.003)G.cz=tz}if(G.shake>0)G.shake=Math.max(0,G.shake-dt*26);ZOOM=Z0*(1+(G.zp>0.002?G.zp:0))*(Math.round(MZ*100)/100)*(Math.round((G.cz||1)*100)/100);
  try{if(splitOn())renderSplit(dt);else renderWorld(dt)}finally{ZOOM=Z0}}
 function renderWorld(dt){
  const t=G.time,q=fxQ();let sx=0,sy=0;if(G.shake>0&&camL()){const tt=performance.now()/1000,s=Math.min(G.shake,camL()===1?5:11)*(camL()===1?0.5:1);sx=s*(Math.sin(tt*29)+Math.sin(tt*17.3)*0.6)*0.6;sy=s*(Math.sin(tt*25.1)+Math.sin(tt*13.7)*0.6)*0.6}
@@ -5143,7 +5144,7 @@ function drawNpcArt(c,n,x,y,t,s){const k=s*0.95,ga=c.globalAlpha;c.save();c.tran
 
 /* kleine Porträts der Neuankömmlinge (Lagerfeuer-Szene) */
 function npcRowStart(cv){if(cv._on)return;cv._on=1;let t=0,last=performance.now();const ids=(cv.dataset.npcrow||'').split(',').filter(Boolean);
- const loop=now=>{if(!document.body.contains(cv)){cv._on=0;return}t+=Math.min(0.05,(now-last)/1000);last=now;const dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth||300,H=cv.clientHeight||90;
+ const loop=now=>{if(!document.body.contains(cv)){cv._on=0;return}if(!cv.offsetParent){last=now;requestAnimationFrame(loop);return}t+=Math.min(0.05,(now-last)/1000);last=now;const dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth||300,H=cv.clientHeight||90;
   if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
   const n=ids.length,step=Math.min(110,W/Math.max(1,n));ids.forEach((id,i)=>{const N=NPCS.find(q=>q.id===id);if(!N)return;const x=W/2+(i-(n-1)/2)*step,y=H-8,s=Math.min(1.45,H/58);
    drawNpc(c,N,x,y,t,s)});
@@ -5165,7 +5166,7 @@ function lagerPos(n,i,W,H){const cx=W/2,cy=H*0.74,N=Math.max(1,n),a=Math.PI*(0.0
 function bubble(c,x,y,txt,W){c.font='600 12px system-ui,sans-serif';const words=txt.split(' '),lines=[];let l='';const mw=Math.min(220,W*0.5);for(const w of words){const tt=l?l+' '+w:w;if(c.measureText(tt).width>mw&&l){lines.push(l);l=w}else l=tt}if(l)lines.push(l);const L=lines.slice(0,4);if(lines.length>4)L[3]+=' …';
  const bw=Math.max(...L.map(z=>c.measureText(z).width))+16,bh=L.length*15+10,bx=Math.max(4,Math.min(W-bw-4,x-bw/2)),by=Math.max(4,y-bh-10);c.fillStyle='rgba(250,240,220,.95)';c.beginPath();c.roundRect?c.roundRect(bx,by,bw,bh,8):c.rect(bx,by,bw,bh);c.fill();c.beginPath();c.moveTo(x-5,by+bh);c.lineTo(x+5,by+bh);c.lineTo(x,by+bh+7);c.fill();c.fillStyle='#2a1e14';L.forEach((z,i)=>c.fillText(z,bx+8,by+17+i*15))}
 function sceneStart(cv){if(cv._on)return;cv._on=1;let last=performance.now(),t=0;const fire=cv.dataset.fire!=null;const parts=(fire?cv.dataset.fire:cv.dataset.lager||'').split('|');
- const loop=now=>{if(!document.body.contains(cv)){cv._on=0;return}const dt=Math.min(0.05,(now-last)/1000);last=now;t+=dt;const dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth||320,H=cv.clientHeight||200;
+ const loop=now=>{if(!document.body.contains(cv)){cv._on=0;return}if(!cv.offsetParent){last=now;requestAnimationFrame(loop);return}const dt=Math.min(0.05,(now-last)/1000);last=now;t+=dt;const dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth||320,H=cv.clientHeight||200;
   if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
   try{fireSky(cv,c,W,H,t);const fx=W/2,fy=H*0.8,s=Math.min(1.2,H/220);fireGlow(c,fx,fy-14*s,Math.min(W,H)*0.75,t);
    if(fire){const ids=(parts[0]||'').split(',').filter(id=>HEROES[id]),seats=[[-0.27,0],[0.27,0],[-0.15,-0.1],[0.15,-0.1]];
@@ -5199,7 +5200,7 @@ const mpN=()=>G&&G.mp?PL.length:1;
 const mpHp=()=>1+0.55*(mpN()-1),mpSpawn=()=>1+0.4*(mpN()-1),mpNeed=()=>1+0.25*(mpN()-1);
 function mpCenter(){const A=PL.filter(p=>!p.down),L=A.length?A:PL;let x=0,y=0;for(const p of L){x+=p.x;y+=p.y}return{x:x/L.length,y:y/L.length}}
 function mpView(dt){const A=(G.net?mpLocal():PL).filter(p=>!p.down);let tz=1;if(A.length>1){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const p of A){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y)}
- tz=clamp(Math.min((W/ZOOM)/(x1-x0+300),(H/ZOOM)/(y1-y0+300)),0.72,1)}G.mpz=(G.mpz||1)+(tz-(G.mpz||1))*Math.min(1,dt*3);return G.mpz}
+ tz=clamp(Math.min((W/ZOOM)/(x1-x0+300),(H/ZOOM)/(y1-y0+300)),0.72,1)}G.mpz=(G.mpz||1)+(tz-(G.mpz||1))*Math.min(1,dt*3);if(Math.abs(G.mpz-tz)<0.003)G.mpz=tz;return G.mpz}
 function mpLeash(){if(G.net){netLeash();return}let sx=0,sy=0;for(const p of PL){sx+=p.x;sy+=p.y}const c={x:sx/PL.length,y:sy/PL.length},z=ZOOM*0.72,hw=W/z/2-90,hh=H/z/2-110;for(const p of PL){if(p.down)continue;p.x=clamp(p.x,c.x-hw,c.x+hw);p.y=clamp(p.y,c.y-hh,c.y+hh)}}
 function mpDown(){P.down=1;P.stDown=(P.stDown||0)+1;rumbleAll(0.8,400);P.hp=0;P.revT=0;P.chan=null;P.dash=null;P.sprint=false;if(P.form)endForm();
  toast(`${P.hero.name} ist gefallen! Stellt euch kurz neben ${P.hero.name}, um wiederzubeleben.`,'#ff8a7a');sfx('boss');if(!PL.some(q=>!q.down))endRun(false)}
