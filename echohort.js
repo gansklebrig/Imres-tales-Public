@@ -731,7 +731,12 @@
   /* ---------- Einstellungen: Lautstärke von Effekten und Musik, Vibration ---------- */
   const EINST = (() => {
     const d = { effekte: lies("imres-echohort-ton", "1") === "0" ? 0 : 0.8, musik: 0.5, vib: true };
-    try { const v = JSON.parse(localStorage.getItem("imres-echohort-einst") || "null"); if (v && typeof v === "object") Object.assign(d, v); } catch (_) {}
+    const std = Object.assign({}, d);
+    try { const v = JSON.parse(localStorage.getItem("imres-echohort-einst") || "null"); if (v && typeof v === "object" && !Array.isArray(v)) Object.assign(d, v); } catch (_) {}
+    /* Kaputte oder fremde Werte (z. B. "laut") würden die Lautstärke-Regler und AudioParams sprengen */
+    ["effekte", "musik"].forEach(k => { const n = Number(d[k]); d[k] = typeof d[k] !== "boolean" && d[k] !== null && d[k] !== "" && isFinite(n) ? Math.min(1, Math.max(0, n)) : std[k]; });
+    d.vib = typeof d.vib === "boolean" ? d.vib : std.vib;
+    Object.keys(d).forEach(k => { if (!(k in std)) delete d[k]; });
     return d;
   })();
   const einstSichern = () => schreib("imres-echohort-einst", JSON.stringify(EINST));
@@ -905,6 +910,8 @@
     MZ.teil = 0; MZ.takt = 0; MZ.pos = 0;
   }
   function musikStart(k, lage) {
+    /* Musik aus: nichts laden und keinen Takt laufen lassen – nur merken, wo wir sind, damit späteres Aufdrehen passt */
+    if (EINST.musik <= 0) { if (GEBIET_MUSIK[k]) { if (MZ.k !== k) MZ.st = null; MZ.k = k; MZ.lage = lage || 0; } return; }
     if (!audio() || !GEBIET_MUSIK[k]) return;
     const neuesGebiet = MZ.k !== k;
     MZ.k = k; MZ.lage = lage || 0;
@@ -1044,8 +1051,10 @@
   /* ---------- Schatzkammer, Statistik und Trophäen (gelten für alle Schwierigkeiten) ---------- */
   const ERFOLGE = [["erster", "💰"], ["relikt1", "🏺"], ["relikt8", "👑"], ["beute1000", "🪙"], ["gier5", "🤑"], ["zorn3", "🌋"], ["kombo", "⚡"], ["rex", "🐕"], ["ezekiel", "🗡️"],
     ["sparsam", "🌱"], ["bosse", "☠️"], ["demo", "🐙"], ["kampagne", "🗺️"], ["endlos5", "♾️"], ["sterne", "⭐"], ["alleSterne", "🌟"], ["hain", "🌳"]];
-  let STAT = (() => { try { const v = JSON.parse(localStorage.getItem("imres-echohort-statistik") || "{}"); return v && typeof v === "object" ? v : {}; } catch (_) { return {}; } })();
-  ["relikte", "bosse", "erfolge", "talente"].forEach(k => { if (!STAT[k] || typeof STAT[k] !== "object") STAT[k] = {}; });
+  let STAT = (() => { try { const v = JSON.parse(localStorage.getItem("imres-echohort-statistik") || "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (_) { return {}; } })();
+  ["relikte", "bosse", "erfolge", "talente"].forEach(k => { if (!STAT[k] || typeof STAT[k] !== "object" || Array.isArray(STAT[k])) STAT[k] = {}; });
+  ["mond", "kombos", "rex", "ezekiel"].forEach(k => { if (k in STAT && !(typeof STAT[k] === "number" && isFinite(STAT[k]) && STAT[k] >= 0)) STAT[k] = 0; });
+  ["relikte", "talente"].forEach(k => Object.keys(STAT[k]).forEach(i => { const n = STAT[k][i]; if (!(typeof n === "number" && isFinite(n) && n >= 0)) delete STAT[k][i]; }));
   const statSichern = () => schreib("imres-echohort-statistik", JSON.stringify(STAT));
   function erfolg(id) {
     if (STAT.erfolge[id]) return;
@@ -1114,7 +1123,8 @@
     schreib(SPEICHER, JSON.stringify(k));
   }
   function gespeichert() {
-    try { const v = JSON.parse(lies(SPEICHER, "null")); return v && STUFEN[v.stufe] && typeof v.lv === "number" ? v : null; } catch (_) { return null; }
+    /* Obergrenze: weit hinter allem Spielbaren im Endlos-Modus – darüber würden die Gegner-Werte unendlich */
+    try { const v = JSON.parse(lies(SPEICHER, "null")); return v && STUFEN[v.stufe] && Number.isInteger(v.lv) && v.lv >= 0 && v.lv <= KAMPAGNE + 200 ? v : null; } catch (_) { return null; }
   }
   function laden(k) {
     neuesSpiel();
@@ -4759,6 +4769,8 @@
     S.einzel = true; S.lv = lv; S.leben = 1; S.up = Object.assign({}, hainBestLesen(st));
     const gb = jsonLies("imres-echohort-gartenbest-" + st, null);
     if (gb && gb.turme) S.garten = { g: -1, turme: {}, setzlinge: Object.keys(gb.turme).map(i => gb.turme[i]).concat(gb.setzlinge || []) };
+    /* Für „Level wiederholen“: jeder Versuch beginnt mit genau diesem Garten – sonst ließe er sich mit der vollen Start-Saat beliebig aufstocken */
+    S.gartenStart = S.garten ? JSON.stringify(gartenDaten()) : null;
     introZeigen();
   }
 
@@ -5184,7 +5196,7 @@
     else if (tun === "abwehr") { abwehrStarten(); losSpielen(); }
     else if (tun === "hain") hainZeigen();
     else if (tun === "weiterLevel") introZeigen();
-    else if (tun === "wiederholen") introZeigen();
+    else if (tun === "wiederholen") { if (S && S.einzel && !S.tag && "gartenStart" in S) S.garten = S.gartenStart ? JSON.parse(S.gartenStart) : null; introZeigen(); }
     else if (tun === "weiter") losSpielen();
     else if (tun === "beenden") { if (S && S.tag) { musikStop(); tagZeigen(true); } else if (S && S.einzel) levelwahlZeigen(); else spielEnde(); }
     else if (tun === "levelwahl") levelwahlZeigen();
@@ -5211,8 +5223,15 @@
       .then(r => r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r.status));
   }
   const besten = {}, serverOk = {}; let meinEintrag = null;
-  const lokalLesen = () => { try { return JSON.parse(localStorage.getItem("imres-echohort-liste") || "{}") || {}; } catch (_) { return {}; } };
-  const sortieren = l => l.sort((a, b) => b.punkte - a.punkte || b.level - a.level || String(a.erstellt).localeCompare(String(b.erstellt)));
+  const lokalLesen = () => {
+    try {
+      const v = JSON.parse(localStorage.getItem("imres-echohort-liste") || "{}");
+      if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+      Object.keys(v).forEach(k => { if (!Array.isArray(v[k])) delete v[k]; });
+      return v;
+    } catch (_) { return {}; }
+  };
+  const sortieren = l => (Array.isArray(l) ? l : []).filter(e => e && typeof e === "object" && typeof e.punkte === "number" && isFinite(e.punkte)).sort((a, b) => b.punkte - a.punkte || b.level - a.level || String(a.erstellt).localeCompare(String(b.erstellt)));
   function bestenLaden(st) {
     return server("/rest/v1/hort_bestenliste?select=name,punkte,level,erstellt&stufe=eq." + st + "&order=punkte.desc,level.desc,erstellt.asc&limit=10")
       .then(l => { besten[st] = Array.isArray(l) ? l : []; serverOk[st] = true; })

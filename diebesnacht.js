@@ -356,6 +356,7 @@
   const versteckSchreiben = v => { try { localStorage.setItem("imres-diebesnacht-versteck", JSON.stringify(v)); } catch (_) {} };
   let VS = versteckLesen();
   const hat = k => !!VS.kauf[k];
+  const ware = k => hat(k) && !(S && S.taeglich); // gekaufte Ware im Spiel – nicht in der Täglichen Nacht
   const heute = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const datumKurz = d => d.slice(8, 10) + "." + d.slice(5, 7) + ".";
   const GABEN = { umhang: 2, sohlen: 2, finger: 2, muenze: 3, klinge: 1, schritt: 1, ranken: 2, sinne: 1, lied: 1, blutdurst: 1, rast: 99 };
@@ -509,7 +510,8 @@
   let S = null, E = null, K = null;
 
   function neuesSpiel(stufeFest) {
-    const stufe = stufeFest || stufeWahl, st = STUFEN[stufe], leben = st.leben + (hat("herz") ? 1 : 0);
+    /* Feste Stufe = Tägliche Nacht: für alle gleich, gekaufte Waren zählen dort nicht */
+    const stufe = stufeFest || stufeWahl, st = STUFEN[stufe], leben = st.leben + (hat("herz") && !stufeFest ? 1 : 0);
     const mitGabe = hat("gabe") && !stufeFest;
     S = {
       stufe, maxLeben: leben, leben, punkte: 0, aufsehen: 0, auftraege: 0, taeglich: null,
@@ -585,7 +587,7 @@
   /* ---------- Stufe laden ---------- */
   function levelDef(idx) {
     if (idx < LEVELS.length) return Object.assign({}, LEVELS[idx], { basisIdx: idx });
-    let r; do { r = Math.floor(rnd() * LEVELS.length); } while (S.def && LEVELS[r] === S.def.basis && LEVELS.length > 1);
+    let r; do { r = Math.floor(rnd() * LEVELS.length); } while (S.def && r === S.def.basisIdx && LEVELS.length > 1);
     const d = rnd() < 0.5 ? spiegeln(LEVELS[r]) : JSON.parse(JSON.stringify(LEVELS[r]));
     d.basis = LEVELS[r]; d.basisIdx = r; d.schluesselZeigen = false;
     return d;
@@ -596,14 +598,14 @@
     S.lvIdx = idx; S.def = def || levelDef(idx);
     const D = S.def, st = STUFEN[S.stufe], k = endlosK();
     K = D.karte.map(r => r.split(""));
-    S.mod = { sicht: st.sicht * (1 + 0.035 * Math.min(k, 10)), tempo: st.tempo * (1 + 0.035 * Math.min(k, 10)), rate: st.rate * (1 + 0.05 * Math.min(k, 10)), schloss: st.schloss * (hat("dietrich") ? 1.25 : 1), dunkel: 1 };
+    S.mod = { sicht: st.sicht * (1 + 0.035 * Math.min(k, 10)), tempo: st.tempo * (1 + 0.035 * Math.min(k, 10)), rate: st.rate * (1 + 0.05 * Math.min(k, 10)), schloss: st.schloss * (ware("dietrich") ? 1.25 : 1), dunkel: 1 };
     if (D.bed === undefined) D.bed = idx < 3 ? null : (rnd() < (k ? 0.75 : 0.4) ? zufall(BED) : null);
     S.bed = D.bed;
     if (S.bed === "vollmond") S.mod.dunkel = 1.55;
     if (S.bed === "nebel") { S.mod.sicht *= 0.72; S.mod.dunkel = 0.8; }
     if (S.bed === "wachsam") { S.mod.sicht *= 1.12; S.mod.rate *= 1.18; }
-    S.goldF = (S.bed === "wachsam" ? 1.5 : 1) * (hat("beutel") ? 1.15 : 1);
-    S.seil = hat("seil"); S.rauchN = hat("rauch") ? 1 : 0; S.wolke = null;
+    S.goldF = (S.bed === "wachsam" ? 1.5 : 1) * (ware("beutel") ? 1.15 : 1);
+    S.seil = ware("seil"); S.rauchN = ware("rauch") ? 1 : 0; S.wolke = null;
     S.alarm = false; S.alarmT = 0; S.relightT = 0; S.blitzT = 0; S.gew = S.bed === "gewitter" ? { t: 6 + rnd() * 4, leuchten: false } : null;
     S.pulse = []; S.boss = null; S.brief = null; S.lvJagd = false; S.spawnQ = []; S.alarmBald = 0; S.spielZeit = 0; S.banner = null;
     S.offen = D.ziel === "frei"; S.schluessel = false; S.belegt = new Uint8Array(COLS * ROWS);
@@ -706,8 +708,9 @@
       const w = [];
       if (S.boss) w.push(["glasstab", 99]);
       else {
-        const briefNeu = VS.briefe.indexOf(endlosK() ? "x" : "n" + D.n) < 0;
-        w.push(["brief", briefNeu ? 4 : 1], ["zeit", 2], ["keinAlarm", 2]);
+        /* Tägliche Nacht: feste Gewichte, sonst bekäme jeder je nach eigenen Briefen einen anderen Auftrag */
+        const briefNeu = !S.taeglich && VS.briefe.indexOf(endlosK() ? "x" : "n" + D.n) < 0;
+        w.push(["brief", S.taeglich ? 2 : briefNeu ? 4 : 1], ["zeit", 2], ["keinAlarm", 2]);
         if (S.kerzen.length >= 2) w.push(["kerzen", 2]);
         if (S.nezna) w.push(["nezna", 3]);
       }
