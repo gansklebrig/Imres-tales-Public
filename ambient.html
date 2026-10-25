@@ -45,6 +45,30 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
 .misch{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1rem .6rem;margin:1rem 0 0}
 .misch h2{font-family:var(--fd);font-weight:400;font-size:1.3rem;margin:0 0 .6rem;display:flex;align-items:center;gap:.5rem}
 .misch h2 small{font-family:var(--fb);font-size:.8rem;color:var(--mute)}
+.misch h2 .zu{margin-left:auto;border:1px solid var(--line);background:none;border-radius:50%;width:2rem;height:2rem;color:var(--mute);display:none}
+.misch-knopf{display:none;flex:0 0 auto;width:2.4rem;height:2.4rem;border-radius:50%;border:1px solid var(--line);background:none;font-size:1rem;line-height:1}
+.misch-knopf[aria-expanded="true"]{border-color:var(--ember);background:rgba(224,160,70,.15)}
+/* Rechner: Schichten oben in der mitlaufenden Spalte, kompakt */
+@media (min-width:980px){
+  .seite .misch{margin:1.2rem 0 .2rem;padding:.75rem .85rem .4rem}
+  .seite .misch h2{font-size:1.15rem;margin-bottom:.35rem}
+  .seite .regler{grid-template-columns:minmax(5.5rem,8.5rem) 1fr 2.4rem;gap:.45rem;padding:.12rem 0;font-size:.85rem}
+  .seite .misch .tipp,.seite .misch .spar{font-size:.76rem}
+}
+/* Handy: Schichten als Blatt, das über der Leiste aufgeht (🎚 oder Tippen auf den Namen) */
+@media (max-width:979px){
+  .misch-knopf{display:block}
+  .leiste{gap:.45rem}
+  .laut > span{display:none}
+  .laut{flex:0 1 5.5rem;min-width:4rem}
+  .jetzt{cursor:pointer}
+  .misch{position:fixed;left:.6rem;right:.6rem;bottom:calc(max(.7rem,env(safe-area-inset-bottom,0px)) + 4.4rem);margin:0;z-index:6;max-height:62vh;overflow:auto;
+    box-shadow:0 -6px 30px rgba(0,0,0,.65);border-color:rgba(224,160,70,.5);transform:translateY(calc(100% + 6rem));opacity:0;pointer-events:none;transition:transform .28s ease,opacity .2s}
+  body.misch-auf .misch{transform:none;opacity:1;pointer-events:auto}
+  .misch h2{position:sticky;top:-1rem;background:var(--panel);padding:.2rem 0 .3rem;z-index:1}
+  .misch h2 .zu{display:block}
+}
+@media (prefers-reduced-motion:reduce){.misch{transition:none}}
 .regler{display:grid;grid-template-columns:minmax(6.5rem,10rem) 1fr 2.6rem;align-items:center;gap:.6rem;padding:.25rem 0;font-size:.92rem}
 .regler span{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .regler b{font-weight:500;color:var(--mute);font-size:.8rem;text-align:right}
@@ -155,27 +179,28 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
         <h2 class="abschnitt"><span data-t="hWelten">🗺 Klangwelten</span><small data-t="hWeltenTx">Antippen startet, nochmal antippen hält an. ✦ = episch: tiefer gestimmt, mit riesigem Nachhall.</small></h2>
         <div id="welten"></div>
       </section>
-      <section class="misch" id="misch" hidden></section>
       <section id="sz-box">
         <h2 class="abschnitt"><span data-t="hSz">⏳ Szenen</span><small data-t="hSzTx">Lange Aufnahmen, die sich über Minuten entfalten. Nochmal antippen blendet aus.</small>
           <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="sz-laut" min="0" max="150" value="100"></label>
           <button type="button" class="leise" id="sz-stopp" data-t="szStopp">◼ Alle ausblenden</button></h2>
         <div class="pad" id="szenen"></div>
       </section>
+      <footer id="dank"></footer>
     </div>
     <aside class="seite" id="ger-box">
+      <section class="misch" id="misch" hidden></section>
       <h2 class="abschnitt"><span data-t="hGer">🎭 Geräusche &amp; Einschläge</span>
         <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="ger-laut" min="0" max="150" value="100"></label></h2>
       <p class="tipp" data-t="hGerTx">Antippen spielt einmal ab – im Raum der laufenden Klangwelt.</p>
       <div class="geraeusche" id="geraeusche"></div>
     </aside>
   </main>
-  <footer id="dank"></footer>
 </div>
 <div class="leiste" id="leiste">
   <button type="button" class="spielen" id="spielen" aria-label="Abspielen">▶</button>
   <div class="jetzt"><b id="jetzt-name">–</b><small id="jetzt-info"></small></div>
   <label class="laut"><span aria-hidden="true">🔊</span><input type="range" id="gesamt" min="0" max="100" value="70" aria-label="Lautstärke"></label>
+  <button type="button" class="misch-knopf" id="misch-knopf" aria-expanded="false" aria-controls="misch" title="Schichten">🎚</button>
   <button type="button" class="aus-alles" id="aus-alles" aria-label="Alles sofort stoppen" title="Alles sofort stoppen (Esc)">✕</button>
 </div>
 <script>
@@ -1004,6 +1029,12 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
 
   /* ---------- Oberfläche ---------- */
+  /* Handy: Schichten-Blatt auf- und zuklappen (am Rechner steht das Mischpult ohnehin in der Spalte) */
+  function mischBlatt(auf) {
+    if (auf && document.getElementById("misch").hidden) { if (!merk.welt) return; }
+    document.body.classList.toggle("misch-auf", !!auf);
+    const k = document.getElementById("misch-knopf"); if (k) k.setAttribute("aria-expanded", String(!!auf));
+  }
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   function zeichnen() {
@@ -1019,7 +1050,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (!w) { mi.hidden = true; return; }
     mi.hidden = false;
     const m = merk.mix[w.id] || {}, wert = (x, d) => x != null ? x : d;
-    mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + "</small></h2>" +
+    mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + '</small><button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' +
       w.betten.map((x, i) => regler("b" + i, x[2], Math.round(wert(m.b && m.b[i], 1) * 100), 0, 150)).join("") +
       '<hr class="trenn">' + regler("leben", T.leben, Math.round(wert(m.leben, 1) * 100), 0, 200) +
       '<label class="spar"><input type="checkbox" id="spar"' + (merk.spar ? " checked" : "") + "> " + esc(T.spar) + "</label>" +
@@ -1070,6 +1101,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
   const regler = (k, name, v, lo, hi) => '<label class="regler"><span>' + esc(name) + '</span><input type="range" min="' + lo + '" max="' + hi + '" value="' + v + '" data-regler="' + k + '"><b>' + v + " %</b></label>";
   document.addEventListener("click", e => {
+    if (e.target.closest("#misch-knopf") || (e.target.closest(".jetzt") && !hoerer)) { mischBlatt(!document.body.classList.contains("misch-auf")); return; }
+    if (e.target.closest("#misch-zu")) { mischBlatt(false); return; }
+    if (document.body.classList.contains("misch-auf") && !e.target.closest("#misch")) mischBlatt(false);
     if (e.target.closest("#aus-alles")) { if (hoerer) { if (hoerer.an) hoererSchalten(); } else notAus(); return; }
     if (!hoerer) {
       const a = e.target.closest("[data-aus]"); if (a) { ausloesen(a.dataset.aus); return; }
@@ -1243,6 +1277,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     tour.i = i;
     const [sel, h, txt] = T.schritte[i];
     if (sel === "#misch" && $("misch").hidden) { merk.welt = merk.welt || WELTEN[0].id; zeichnen(); }
+    mischBlatt(sel === "#misch");
     tour.ziel = document.querySelector(sel);
     const bl = tour.el.querySelector(".tour-blase");
     bl.innerHTML = "<small>" + (i + 1) + " / " + T.schritte.length + "</small><h4>" + esc(h) + "</h4><p>" + esc(txt) + '</p><div class="tour-k"><button type="button" data-tour="ende">' + esc(T.beenden) + "</button><span></span>" +
