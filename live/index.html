@@ -72,6 +72,9 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
 .pad.an{border-color:var(--ember);background:linear-gradient(180deg,rgba(224,160,70,.28),rgba(224,160,70,.08));box-shadow:0 0 0 1px var(--ember) inset,0 0 18px rgba(224,160,70,.18)}
 .pad.an .nr{color:var(--ember)}
 .pad:active{transform:scale(.97)}
+.pad.laedt::after{content:"lädt …";position:absolute;right:7px;bottom:5px;color:var(--ember);font-size:.65rem;animation:blinken 1s ease-in-out infinite alternate}
+.pad.fehlt{border-color:var(--rot)}
+@keyframes blinken{from{opacity:.35}to{opacity:1}}
 
 .speicher{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
 .slot{height:52px;border-radius:9px;border:1px dashed var(--line);background:none;color:var(--mute);font-size:.7rem;line-height:1.1;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;touch-action:manipulation}
@@ -129,6 +132,20 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
 .start .los{margin-top:1.2rem;border:0;border-radius:999px;background:var(--ember);color:var(--night);font-size:1.2rem;font-weight:700;padding:16px 40px}
 .start .tipp{font-size:.85rem}
 
+/* Unterbrechung (Anruf, Siri, anderes Ausgabegerät): großes Band über die ganze Breite, Tippen setzt fort */
+.banner{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:120px;
+  padding:max(18px,env(safe-area-inset-top)) 16px 18px;border:0;border-bottom:2px solid var(--ember);background:rgba(40,22,12,.97);color:var(--text);font:inherit;text-align:center;touch-action:manipulation}
+.banner[hidden]{display:none}
+.banner b{font-size:1.5rem;font-weight:600;color:var(--ember2)}
+.banner small{font-size:1rem;color:var(--text)}
+/* kleine Hinweise (Home-Bildschirm, fehlende Dateien) – wegtippbar */
+.notiz{position:fixed;left:50%;transform:translateX(-50%);bottom:max(90px,calc(env(safe-area-inset-bottom) + 84px));z-index:25;display:flex;align-items:center;gap:10px;
+  max-width:min(640px,calc(100vw - 32px));padding:10px 12px 10px 16px;border-radius:12px;border:1px solid var(--kalt);background:#14202a;color:var(--text);font-size:.9rem;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.notiz[hidden]{display:none}
+.notiz.warn{border-color:var(--rot);background:#2a1512}
+.notiz button{flex:none;min-width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font-size:1.1rem}
+.status .warn{color:#f1a596}
+
 /* Hochformat: Klangwelten oben über die ganze Breite */
 @media (max-aspect-ratio:1/1){
   .pult{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1.15fr) minmax(0,1fr)}
@@ -166,11 +183,11 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     <div class="speicher" id="speicher"></div>
   </section>
   <section class="feld" id="f-schichten">
-    <div class="kopf"><h2 id="welt-titel">Schichten</h2><small>Doppeltipp = zurücksetzen</small></div>
+    <div class="kopf"><h2 id="welt-titel">Schichten</h2><small>hoch/runter ziehen</small></div>
     <div class="fader-reihe" id="fader"></div>
   </section>
   <section class="feld" id="f-fx">
-    <div class="kopf"><h2>Effekte &amp; Tonart</h2><small>hoch/runter ziehen</small></div>
+    <div class="kopf"><h2>Effekte &amp; Tonart</h2><small>ziehen · lange halten = Grundwert</small></div>
     <div class="knoepfe" id="knoepfe"></div>
   </section>
 </main>
@@ -186,11 +203,19 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   </div>
 </div>
 
+<button type="button" class="banner" id="banner" hidden><b id="banner-text">Ton unterbrochen</b><small>Tippen zum Fortsetzen</small></button>
+<div class="notiz" id="notiz" role="status" hidden><span id="notiz-text"></span><button type="button" id="notiz-zu" aria-label="Hinweis schließen">✕</button></div>
+
 <script src="daten.js"></script>
 <script>
 (() => {
   "use strict";
   const { LAUTHEIT, EV, WELTEN, quelle, dateien, SCHALE } = window.KLANG;
+  const TRIM = window.KLANG.TRIM || {}, PEGEL = window.KLANG.PEGEL || {};
+  const ua = navigator.userAgent || "";
+  const iOS = /iPhone|iPad|iPod/.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));
+  /* iPad, Handy oder schwacher Rechner: sparsamer rechnen (einkanaliger, kürzerer Hall, größerer Audiopuffer) – auf der Bühne zählt, dass nichts knackt */
+  const mobil = iOS || /Android|Mobile/i.test(ua) || (navigator.hardwareConcurrency || 8) <= 4;
   const $ = id => document.getElementById(id);
   const zz = (a, b) => a + Math.random() * (b - a);
   const zufall = l => l[Math.floor(Math.random() * l.length)];
@@ -225,20 +250,68 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
      Quellen → trocken ─┬→ misch → Filter → Gesamt → Begrenzer → Ausgang
                         ├→ Echo (Tempo) ─→ misch
      Quellen → hallEin → Hall ───────────→ misch */
-  let ctx = null, gesamt, filt, misch, trocken, hallEin, hall, hallNass, echoSend, echo, echoRueck, echoNass, droneBus, stumm = null;
+  let ctx = null, gesamt, filt, misch, trocken, hallEin, hallNass, echoSend, echo, echoRueck, echoNass, droneBus, stumm = null, ctxSeit = 0;
+  /* Aufnahmen im Arbeitsspeicher: höchstens BUDGET Bytes. Was am längsten nicht gebraucht wurde, fliegt zuerst raus –
+     nie aber Aufnahmen der laufenden, der vorigen und der gerade ausklingenden Klangwelt. Rausgeworfenes kommt beim
+     nächsten Mal schnell wieder aus dem Offline-Speicher. (Alle 19 Welten entpackt wären über 600 MB – zu viel fürs iPad.) */
+  const BUDGET = (mobil ? 160 : 320) * 1048576;
+  const groesse = b => b.length * b.numberOfChannels * 4;
   const puffer = new Map(), laedt = new Map();
+  let pufferBytes = 0;
+  const pufferHol = n => { const b = puffer.get(n); if (b) { puffer.delete(n); puffer.set(n, b); } return b; };
+  let vorige = null; const ausklang = [];
+  function weltNamen(w, s) { w.betten.forEach(b => s.add(b[0])); w.ereignisse.forEach(e => (EV[e[0]].f || []).forEach(n => s.add(n))); return s; }
+  function aufraeumen() {
+    if (pufferBytes <= BUDGET) return;
+    const schutz = new Set(), j = ctx ? ctx.currentTime : 0;
+    if (aktiv) weltNamen(aktiv.welt, schutz);
+    if (vorige) weltNamen(vorige, schutz);
+    for (let i = ausklang.length - 1; i >= 0; i--) { if (ausklang[i].bis < j) ausklang.splice(i, 1); else weltNamen(ausklang[i].welt, schutz); }
+    for (const [n, b] of puffer) {
+      if (pufferBytes <= BUDGET) break;
+      if (schutz.has(n)) continue;
+      puffer.delete(n); pufferBytes -= groesse(b);
+    }
+  }
+  /* ---------- Unterbrechungen (Anruf, Siri, Bildschirmsperre, anderes Ausgabegerät): selbst fortsetzen, sonst großes Band zum Antippen ---------- */
+  let bannerGrund = null, fortWarte = 0, letzterVersuch = 0, geraetStumm = false;
+  const laeuftEtwas = () => !!aktiv || zust.fx.drone > 0 || zust.fx.schimmer > 0;
+  function bannerZeigen(grund, text) { bannerGrund = grund; $("banner-text").textContent = text; $("banner").hidden = false; }
+  function bannerAus() { bannerGrund = null; $("banner").hidden = true; }
+  function stummSpielen() { if (stumm && stumm.paused) { try { const p = stumm.play(); if (p && p.catch) p.catch(() => {}); } catch (_) {} } }
+  function fortsetzen() {
+    if (!ctx || ctx.state === "closed") return;
+    letzterVersuch = performance.now();
+    stummSpielen();
+    if (ctx.state === "running") { if (bannerGrund === "pause") bannerAus(); return; }
+    try { const p = ctx.resume(); if (p && p.then) p.then(() => { if (ctx.state === "running" && bannerGrund === "pause") bannerAus(); }, () => {}); } catch (_) {}
+    clearTimeout(fortWarte);
+    fortWarte = setTimeout(() => { if (ctx.state !== "running" && document.visibilityState === "visible" && !bannerGrund) bannerZeigen("pause", "Ton unterbrochen"); }, 900);
+  }
+  function wiederAn() {
+    /* Tippen auf das Band: das ist eine Nutzergeste – damit darf Safari den Ton wieder starten */
+    const war = bannerGrund; bannerAus();
+    if (!ctx) return;
+    try { ctx.resume(); } catch (_) {}
+    if (stumm) { try { stumm.play().catch(() => {}); } catch (_) {} }
+    if (war === "geraet" || geraetStumm) { geraetStumm = false; const j = ctx.currentTime; gesamt.gain.cancelScheduledValues(j); gesamt.gain.setValueAtTime(gesamt.gain.value, j); gesamt.gain.linearRampToValueAtTime(masterWert(), j + 1.2); }
+    setTimeout(() => { if (ctx.state !== "running") bannerZeigen("pause", "Ton unterbrochen"); }, 900);
+  }
   function audioStart() {
-    if (ctx) { if (ctx.state !== "running") ctx.resume(); return; }
+    if (ctx) { if (ctx.state !== "running") fortsetzen(); else stummSpielen(); return; }
     try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
     const AC = window.AudioContext || window.webkitAudioContext;
-    try { ctx = new AC({ latencyHint: "interactive" }); } catch (_) { ctx = new AC(); }
+    /* "playback": größerer Puffer, weniger Aussetzer; ein Pad reagiert dann ~50–100 ms später – für Klangflächen egal.
+       Den Takt gleicht tippen() über die tatsächliche Ausgabezeit ab. */
+    try { ctx = new AC({ latencyHint: mobil ? "playback" : "interactive" }); } catch (_) { ctx = new AC(); }
+    ctxSeit = performance.now();
+    ctx.onstatechange = () => { if (ctx.state === "running") { if (bannerGrund === "pause") bannerAus(); } else fortsetzen(); };
     const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -5; lim.knee.value = 4; lim.ratio.value = 14; lim.attack.value = .004; lim.release.value = .3;
     gesamt = ctx.createGain(); gesamt.connect(lim); lim.connect(ctx.destination);
     filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = 20000; filt.Q.value = .9; filt.connect(gesamt);
     misch = ctx.createGain(); misch.connect(filt);
     trocken = ctx.createGain(); trocken.connect(misch);
-    hallEin = ctx.createGain(); hall = ctx.createConvolver(); hallNass = ctx.createGain();
-    hallEin.connect(hall); hall.connect(hallNass); hallNass.connect(misch);
+    hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.connect(misch);
     echoSend = ctx.createGain(); echo = ctx.createDelay(5); echoRueck = ctx.createGain(); echoNass = ctx.createGain();
     const echoTon = ctx.createBiquadFilter(); echoTon.type = "lowpass"; echoTon.frequency.value = 3200;
     const echoHoch = ctx.createBiquadFilter(); echoHoch.type = "highpass"; echoHoch.frequency.value = 160;
@@ -255,11 +328,17 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
       for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
       let bin = ""; new Uint8Array(b).forEach(x => { bin += String.fromCharCode(x); });
       stumm = new Audio("data:audio/wav;base64," + btoa(bin)); stumm.loop = true; stumm.setAttribute("playsinline", ""); stumm.play().catch(() => {});
+      /* iOS hält das Element bei Unterbrechungen an – dann gleich wieder starten */
+      stumm.addEventListener("pause", () => { if (document.visibilityState === "visible") setTimeout(stummSpielen, 300); });
     } catch (_) {}
     Object.keys(STD_FX).forEach(k => fxAnwenden(k, true));
     raumSetzen();
     setInterval(planen, 40);
+    /* Nachhall für alle Klangwelten schon vorab in Ruhepausen rechnen, damit beim Wechsel nichts stockt */
+    hallVorrechnen();
+    geraeteMerken();
   }
+  const masterWert = () => Math.pow(zust.fx.master / 100, 1.6);
 
   /* ---------- Effekte anwenden ---------- */
   const tonFaktor = () => Math.pow(2, zust.fx.ton / 12);
@@ -270,9 +349,9 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     if (!ctx) return;
     const f = zust.fx, j = ctx.currentTime, tc = sofort ? .001 : .04;
     switch (k) {
-      case "master": gesamt.gain.setTargetAtTime(Math.pow(f.master / 100, 1.6), j, tc); break;
+      case "master": if (!geraetStumm) gesamt.gain.setTargetAtTime(masterWert(), j, tc); break;
       case "hall": hallNass.gain.setTargetAtTime(f.hall / 100 * 1.3, j, tc); break;
-      case "raum": clearTimeout(raumWarte); raumWarte = setTimeout(raumSetzen, sofort ? 0 : 250); break;
+      case "raum": clearTimeout(raumWarte); raumWarte = setTimeout(raumSetzen, sofort ? 0 : 450); break;
       case "filter": {
         const v = f.filter / 100;
         if (v < -.02) { if (filt.type !== "lowpass") filt.type = "lowpass"; filt.frequency.setTargetAtTime(20000 * Math.pow(.009, -v), j, tc); filt.Q.setTargetAtTime(1.4, j, tc); }
@@ -288,23 +367,57 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
       case "hell": if (drone) drone.lp.frequency.setTargetAtTime(hellFreq(), j, .1); break;
     }
   }
-  /* Raumhall: selbst erzeugter Nachhall, Länge aus Klangwelt × Raumgröße */
+  /* Raumhall: selbst erzeugter Nachhall, Länge aus Klangwelt × Raumgröße (auf 0,1 s gerundet).
+     Jede Länge wird nur einmal gerechnet und aufgehoben. Beim Wechsel bekommt ein neuer Hall die Eingänge, der alte
+     klingt mit seiner ganzen Fahne aus und wird erst danach abgebaut – nichts wird abgeschnitten. */
+  const HALL_KANAELE = mobil ? 1 : 2, HALL_MAX = mobil ? 3 : 5;
+  const irVorrat = new Map();
+  let hallAkt = null;
+  const raumSek = w => Math.round(begrenze((w ? w.raum : 1.5) * zust.fx.raum / 100, .3, HALL_MAX) * 10) / 10;
+  function irHolen(sek) {
+    const key = HALL_KANAELE + ":" + sek;
+    let b = irVorrat.get(key);
+    if (!b) {
+      const sr = ctx.sampleRate, n = Math.floor(sr * sek); b = ctx.createBuffer(HALL_KANAELE, n, sr);
+      for (let c = 0; c < HALL_KANAELE; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
+      irVorrat.set(key, b);
+    }
+    return b;
+  }
   function raumSetzen() {
     if (!ctx) return;
-    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === zust.welt);
-    const sek = begrenze((w ? w.raum : 1.5) * zust.fx.raum / 100, .3, 7);
-    const sr = ctx.sampleRate, n = Math.floor(sr * sek), b = ctx.createBuffer(2, n, sr);
-    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
-    hall.buffer = b;
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === zust.welt), sek = raumSek(w);
+    if (hallAkt && hallAkt.sek === sek) return;
+    const j = ctx.currentTime, X = .6;
+    const ein = ctx.createGain(), conv = ctx.createConvolver();
+    conv.buffer = irHolen(sek);
+    hallEin.connect(ein); ein.connect(conv); conv.connect(hallNass);
+    const alt = hallAkt;
+    hallAkt = { ein, conv, sek };
+    if (!alt) return;
+    /* Eingänge weich umlegen (gleichbleibende Leistung), alter Hall klingt aus */
+    ein.gain.value = 0; ein.gain.setValueCurveAtTime(EIN, j + .01, X);
+    try { const g = alt.ein.gain, v = g.value; g.cancelScheduledValues(j); g.setValueAtTime(v, j); g.linearRampToValueAtTime(0, j + X); } catch (_) {}
+    setTimeout(() => { try { hallEin.disconnect(alt.ein); } catch (_) {} try { alt.ein.disconnect(); alt.conv.disconnect(); } catch (_) {} }, (X + alt.sek + 1) * 1000);
+  }
+  function hallVorrechnen() {
+    const sek = [...new Set(WELTEN.map(raumSek))];
+    const eins = () => { const s = sek.shift(); if (s == null) return; irHolen(s); weiter(); };
+    const weiter = () => { if (window.requestIdleCallback) requestIdleCallback(eins, { timeout: 4000 }); else setTimeout(eins, 400); };
+    weiter();
   }
 
   /* ---------- Aufnahmen laden (offline aus dem Zwischenspeicher) ---------- */
   function laden(n) {
-    if (puffer.has(n)) return Promise.resolve(puffer.get(n));
+    if (puffer.has(n)) return Promise.resolve(pufferHol(n));
     if (laedt.has(n)) return laedt.get(n);
     const p = (n.startsWith("@") ? synth("kulisse", n.slice(1)) : fetch(quelle(n)).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
       .then(ab => new Promise((res, rej) => { const x = ctx.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); })))
-      .then(b => { puffer.set(n, b); return b; }).catch(() => { laedt.delete(n); return null; });
+      .then(b => {
+        laedt.delete(n);
+        if (b) { if (!puffer.has(n)) pufferBytes += groesse(b); puffer.set(n, b); aufraeumen(); }
+        return b;
+      }).catch(() => { laedt.delete(n); return null; });
     laedt.set(n, p); return p;
   }
   let werk = null, werkNr = 0; const werkWarten = new Map();
@@ -339,6 +452,10 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   const N = 64, EIN = new Float32Array(N), AUS = new Float32Array(N);
   for (let i = 0; i < N; i++) { EIN[i] = Math.sin(i / (N - 1) * Math.PI / 2); AUS[i] = Math.cos(i / (N - 1) * Math.PI / 2); }
   let aktiv = null;
+  const trimVon = w => w ? Math.pow(10, (TRIM[w.id] || 0) / 20) : 1;
+  /* Teppiche weit vorausplanen: der nächste Ausschnitt steht schon, sobald der jetzige beginnt –
+     so übersteht der Ton auch Sekunden, in denen das iPad das Skript anhält (Sperre, Speicherbereinigung) */
+  const VORAUS = 24;
   const mixVon = id => (zust.mix[id] = zust.mix[id] || { b: [], leben: 1 });
   function bettStarten(welt, [name, staerke, label, o], i) {
     const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false, pos: null };
@@ -346,8 +463,10 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     b.out.gain.value = 0;
     if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(trocken); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); b.out.connect(lp); }
     else { b.out.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; b.out.connect(s); s.connect(hallEin); }
-    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05));
-    laden(name).then(buf => {
+    /* auf gleiche Lautheit bringen – aber nie so weit, dass knackende Spitzen (Feuer, Tropfen) übersteuern;
+       dazu der Ausgleich je Klangwelt (TRIM in daten.js, nach Spitzenpegel begrenzt), damit alle Welten etwa gleich laut sind */
+    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)) * trimVon(welt);
+    b.p = laden(name).then(buf => {
       if (!buf || b.aus) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05;
       b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + Math.max(.3, zust.fx.xfade));
@@ -360,7 +479,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   function bettPlanen(b) {
     if (!b.buf || b.aus) return;
     const D = b.buf.duration, tf = tonFaktor();
-    while (!b.o.schleife && b.naechst < ctx.currentTime + 6) {
+    while (!b.o.schleife && b.naechst < ctx.currentTime + VORAUS) {
       const basis = b.o.fest || b.o.takt ? 1 : zz(.985, 1.015), rate = basis * tf, kurz = D < 15;
       const len = Math.min((D - .3 - (b.o.takt || 0)) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
       const inhalt = len * rate, t = b.naechst;
@@ -426,7 +545,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   function ereignis(art, staerke, fern, vonHand) {
     const e = EV[art]; if (!e) return;
     const j = ctx.currentTime + .02, tf = tonFaktor();
-    const weit = !vonHand && Math.random() < (fern || 0), laut = staerke * (vonHand ? zz(.9, 1.05) : weit ? zz(.3, .55) : zz(.65, 1));
+    const weit = !vonHand && Math.random() < (fern || 0), laut = staerke * (vonHand ? zz(.9, 1.05) : weit ? zz(.3, .55) : zz(.65, 1)) * trimVon(aktiv && aktiv.welt);
     const g = ctx.createGain(); g.gain.value = laut;
     let letzter = g;
     if (weit) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = zz(900, 2600); g.connect(lp); letzter = lp; }
@@ -436,10 +555,10 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1;
     let t = j;
     for (let k = 0; k < n; k++) {
-      const name = zufall(e.f), b = puffer.get(name);
+      const name = zufall(e.f), b = pufferHol(name), pg = PEGEL[name] || 1;
       if (!b) { laden(name); continue; }
-      if (e.lang) { const gg = ctx.createGain(), r = zz(e.tempo[0], e.tempo[1]) * tf, d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(1, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); gg.connect(g); spiel(b, gg, t, r); continue; }
-      spiel(b, g, t, (e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05)) * tf, e.folge ? zz(.7, 1) : 1);
+      if (e.lang) { const gg = ctx.createGain(), r = zz(e.tempo[0], e.tempo[1]) * tf, d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(pg, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); gg.connect(g); spiel(b, gg, t, r); continue; }
+      spiel(b, g, t, (e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05)) * tf, (e.folge ? zz(.7, 1) : 1) * pg);
       if (e.folge) t += zz(e.folge[2], e.folge[3]);
     }
   }
@@ -484,8 +603,11 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     if (!ctx) return;
     const j = ctx.currentTime;
     if (j - letzteRunde > .25) { letzteRunde = j; weltTakt(j); }
-    if (naechsterSchlag < j - .5) naechsterSchlag = j + .05;
-    while (naechsterSchlag < j + .15) {
+    if (ctx.state !== "running" && performance.now() - letzterVersuch > 2500 && laeuftEtwas()) fortsetzen();
+    /* War das Skript kurz blockiert, sind Schläge schon vorbei: die werden ausgelassen statt verspätet gespielt –
+       in ganzen Achteln, damit das Raster genau auf dem alten Takt bleibt (sonst rutscht es gegenüber der TR-8S weg) */
+    if (naechsterSchlag < j + .005) { const h = takt() / 2, n = Math.ceil((j + .005 - naechsterSchlag) / h); naechsterSchlag += n * h; schritt += n; }
+    while (naechsterSchlag < j + .2) {
       const t = naechsterSchlag, achtel = schritt % 8;
       if (achtel % 2 === 0) pulsZeigen(t - j, achtel === 0);
       const p = zust.fx.schimmer / 100;
@@ -512,10 +634,18 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   function weltStarten(welt) {
     audioStart();
     const alt = aktiv, x = Math.max(.3, zust.fx.xfade);
-    if (alt) alt.betten.forEach(b => bettStopp(b, x));
+    if (alt) { alt.betten.forEach(b => bettStopp(b, x)); ausklang.push({ welt: alt.welt, bis: ctx.currentTime + x + 1 }); if (alt.welt !== welt) vorige = alt.welt; }
     const m = mixVon(welt.id);
-    aktiv = { welt, betten: welt.betten.map((b, i) => bettStarten(welt, b, i)), naechst: {}, leben: m.leben != null ? m.leben : 1 };
+    const neu = aktiv = { welt, betten: welt.betten.map((b, i) => bettStarten(welt, b, i)), naechst: {}, leben: m.leben != null ? m.leben : 1, laedt: true };
     welt.ereignisse.forEach(([art]) => vorladen(art));
+    /* Ladeanzeige am Pad, bis alle Schichten da sind; fehlt etwas, sagt ein Hinweis welche */
+    Promise.all(neu.betten.map(b => b.p)).then(() => {
+      neu.laedt = false;
+      const fehlt = neu.betten.filter(b => !b.buf && !b.aus).map(b => b.label);
+      neu.fehlt = fehlt.length > 0;
+      if (fehlt.length) notiz("⚠ " + welt.name + ": nicht geladen – " + fehlt.join(", ") + (navigator.onLine ? "" : " (fehlt im Offline-Speicher)"), true);
+      if (aktiv === neu) zeichnePads();
+    });
     zust.welt = welt.id; speichern();
     raumSetzen(); wachHalten(true);
     zeichnePads(); zeichneFader(); zeichneShots();
@@ -523,9 +653,25 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   }
   function stoppen(zeit) {
     if (!aktiv) return;
-    aktiv.betten.forEach(b => bettStopp(b, zeit != null ? zeit : Math.max(.3, zust.fx.xfade)));
+    const x = zeit != null ? zeit : Math.max(.3, zust.fx.xfade);
+    aktiv.betten.forEach(b => bettStopp(b, x));
+    ausklang.push({ welt: aktiv.welt, bis: ctx.currentTime + x + 1 }); vorige = aktiv.welt;
     aktiv = null;
     zeichnePads(); zeichneFader();
+  }
+  /* Lebendigkeit: schon geplante Ereignisse sofort auf das neue Maß umrechnen (sonst wartet nach einem Dip auf 5 %
+     das nächste Geräusch bis zu einer Stunde) */
+  function lebenSetzen(neu) {
+    if (!aktiv) return;
+    const alt = aktiv.leben, j = ctx ? ctx.currentTime : 0;
+    aktiv.leben = neu;
+    if (neu <= 0) return;
+    aktiv.welt.ereignisse.forEach(([, [a, b]], i) => {
+      const t = aktiv.naechst[i];
+      if (t == null) return;
+      if (alt <= .02 || t <= j) { aktiv.naechst[i] = j + zz(a * .3, b) / neu; return; }
+      aktiv.naechst[i] = j + Math.min((t - j) * alt / neu, b / neu);
+    });
   }
   function panik() {
     if (!ctx) return;
@@ -545,24 +691,68 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
       if (an && !wachSperre && "wakeLock" in navigator) { wachSperre = await navigator.wakeLock.request("screen"); wachSperre.addEventListener("release", () => { wachSperre = null; }); }
     } catch (_) {}
   }
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && ctx) { wachHalten(true); if (ctx.state !== "running") ctx.resume(); } });
+  const wiederDa = () => { if (document.visibilityState === "visible" && ctx) { wachHalten(true); fortsetzen(); } };
+  document.addEventListener("visibilitychange", wiederDa);
+  window.addEventListener("pageshow", wiederDa);
+  window.addEventListener("focus", wiederDa);
+  /* jede Berührung ist eine Nutzergeste – falls der Ton hängt, gleich mit fortsetzen */
+  document.addEventListener("pointerdown", () => { if (ctx && ctx.state !== "running") { try { ctx.resume(); } catch (_) {} stummSpielen(); } }, true);
+  $("banner").addEventListener("click", wiederAn);
+
+  /* Hinweise unten (wegtippbar) */
+  let notizArt = null;
+  function notiz(text, warn, art) { notizArt = art || null; $("notiz-text").textContent = text; $("notiz").classList.toggle("warn", !!warn); $("notiz").hidden = false; }
+  $("notiz-zu").addEventListener("click", () => {
+    $("notiz").hidden = true;
+    if (notizArt === "home") { try { localStorage.setItem(SPEICHER_KEY + "-homehinweis", String(Date.now())); } catch (_) {} }
+  });
+
+  /* Ausgabegerät gewechselt (Kabel raus → Ton käme plötzlich aus dem iPad-Lautsprecher): sanft stumm, Band zum Fortsetzen.
+     Nur während etwas läuft, nicht in den ersten Sekunden, und nur wenn sich die Ausgänge wirklich geändert haben
+     (wo der Browser sie nicht verrät, lieber einmal zu oft – ein Tipp, und es geht weiter). */
+  let geraeteSig = null;
+  async function geraeteSignatur() {
+    try {
+      const l = await navigator.mediaDevices.enumerateDevices();
+      const aus = l.filter(d => d.kind === "audiooutput");
+      return aus.length && aus.some(d => d.deviceId || d.label) ? aus.map(d => d.deviceId + "|" + d.label).sort().join(",") : "";
+    } catch (_) { return ""; }
+  }
+  async function geraeteMerken() { if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) geraeteSig = await geraeteSignatur(); }
+  if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener("devicechange", async () => {
+    const alt = geraeteSig, neu = await geraeteSignatur(); geraeteSig = neu;
+    if (!ctx || ctx.state !== "running" || !laeuftEtwas() || performance.now() - ctxSeit < 5000) return;
+    if (neu && alt && neu === alt) return;
+    geraetStumm = true;
+    const j = ctx.currentTime; gesamt.gain.cancelScheduledValues(j); gesamt.gain.setValueAtTime(gesamt.gain.value, j); gesamt.gain.linearRampToValueAtTime(0, j + .5);
+    bannerZeigen("geraet", "Ausgabegerät gewechselt");
+  });
 
   /* ---------- Bedienelemente: ziehen statt springen, damit live nichts plötzlich laut wird ---------- */
+  /* Kein Doppeltipp-Zurücksetzen mehr (ließ den Gesamtpegel springen). Drehregler mit Grundwert: lange still halten (0,6 s)
+     → gleitet in einer halben Sekunde dorthin. Fader haben gar kein Zurücksetzen. */
   function ziehbar(el, { holen, setzen, std, min, max, weg }) {
-    let id = null, y0 = 0, v0 = 0, tap = 0;
+    let id = null, y0 = 0, v0 = 0, halte = 0, gleit = 0;
+    const gleiten = () => {
+      const von = holen(), t0 = performance.now();
+      const schritt = () => { const r = Math.min(1, (performance.now() - t0) / 500); setzen(von + (std - von) * (1 - Math.pow(1 - r, 2))); if (r < 1 && id === null) gleit = requestAnimationFrame(schritt); };
+      cancelAnimationFrame(gleit); id = null; el.classList.remove("greift"); gleit = requestAnimationFrame(schritt);
+      if (navigator.vibrate) navigator.vibrate(20);
+    };
     el.addEventListener("pointerdown", e => {
       if (id !== null) return;
       e.preventDefault(); id = e.pointerId; try { el.setPointerCapture(id); } catch (_) {}
-      const jetzt = performance.now();
-      if (jetzt - tap < 320 && std != null) { setzen(std); tap = 0; } else tap = jetzt;
+      cancelAnimationFrame(gleit);
       y0 = e.clientY; v0 = holen(); el.classList.add("greift");
+      clearTimeout(halte); if (std != null) halte = setTimeout(gleiten, 600);
     });
     el.addEventListener("pointermove", e => {
       if (e.pointerId !== id) return;
+      if (Math.abs(y0 - e.clientY) > 6) clearTimeout(halte);
       const h = typeof weg === "function" ? weg() : weg;
       setzen(begrenze(v0 + (y0 - e.clientY) / h * (max - min), min, max));
     });
-    const ende = e => { if (e.pointerId !== id) return; id = null; el.classList.remove("greift"); };
+    const ende = e => { if (e.pointerId !== id) return; clearTimeout(halte); id = null; el.classList.remove("greift"); };
     el.addEventListener("pointerup", ende); el.addEventListener("pointercancel", ende); el.addEventListener("lostpointercapture", ende);
   }
 
@@ -619,7 +809,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     const sp = el.querySelector(".spur"), fu = el.querySelector(".fuell"), gr = el.querySelector(".griff"), wt = el.querySelector("b");
     let v = wert;
     const zeigen = () => { const r = (v - min) / (max - min) * 100; fu.style.height = r + "%"; gr.style.bottom = r + "%"; wt.textContent = Math.round(v); };
-    ziehbar(el, { holen: () => v, min, max, std, weg: () => Math.max(120, sp.clientHeight), setzen: x => { v = x; zeigen(); setzen(x); } });
+    ziehbar(el, { holen: () => v, min, max, std: null, weg: () => Math.max(120, sp.clientHeight), setzen: x => { v = x; zeigen(); setzen(x); } });
     zeigen(); return el;
   }
   function zeichneFader() {
@@ -632,7 +822,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
         m.b[i] = x / 100; speichern();
         if (aktiv && aktiv.welt === w) { const b = aktiv.betten[i]; if (b && !b.aus) { b.regler = x / 100; b.out.gain.cancelScheduledValues(ctx.currentTime); b.out.gain.setTargetAtTime(b.grund * b.regler, ctx.currentTime, .05); } }
       }, 100)));
-      box.appendChild(faderEl("Lebendigkeit", (m.leben != null ? m.leben : 1) * 100, 0, 200, 100, true, x => { m.leben = x / 100; if (aktiv && aktiv.welt === w) aktiv.leben = m.leben; speichern(); }, 100));
+      box.appendChild(faderEl("Lebendigkeit", (m.leben != null ? m.leben : 1) * 100, 0, 200, null, true, x => { m.leben = x / 100; if (aktiv && aktiv.welt === w) lebenSetzen(m.leben); speichern(); }, 100));
     } else {
       const l = document.createElement("p"); l.className = "leer"; l.textContent = "Wähle links eine Klangwelt – hier erscheinen ihre Schichten."; box.appendChild(l);
     }
@@ -642,7 +832,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
 
   /* Klangwelt-Pads */
   function zeichnePads() {
-    $("pads").innerHTML = WELTEN.map((w, i) => '<button type="button" class="pad' + (aktiv && aktiv.welt === w ? " an" : !aktiv && zust.welt === w.id ? " gewaehlt" : "") + '" data-i="' + i + '">' +
+    $("pads").innerHTML = WELTEN.map((w, i) => '<button type="button" class="pad' + (aktiv && aktiv.welt === w ? " an" + (aktiv.laedt ? " laedt" : "") + (aktiv.fehlt ? " fehlt" : "") : !aktiv && zust.welt === w.id ? " gewaehlt" : "") + '" data-i="' + i + '">' +
       '<span class="nr">' + (i < 10 ? (i + 1) % 10 : "") + '</span><span class="sym" aria-hidden="true">' + w.sym + '</span><span class="nm">' + esc(w.name) + "</span></button>").join("");
   }
   $("pads").addEventListener("pointerdown", e => {
@@ -685,11 +875,11 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   function zeichneSpeicher() {
     $("speicher").innerHTML = zust.speicher.map((s, i) => {
       const w = s && WELTEN.find(x => x.id === s.welt);
-      return '<button type="button" class="slot' + (s ? " voll" : "") + '" data-i="' + i + '"><b>' + (i + 1) + "</b>" + (s ? (w ? w.sym + " " : "") + esc(NOTEN[s.grundton] + " " + ((SKALEN[s.skala] || {}).name || "")) : "leer") + "</button>";
+      return '<button type="button" class="slot' + (s ? " voll" : "") + '" data-i="' + i + '"><b>' + (i + 1) + "</b>" + (s ? (w ? w.sym + " " : "") + esc(NOTEN[s.grundton] + " " + ((SKALEN[s.skala] || {}).name || "")) + (typeof s.bpm === "number" ? "<br>" + Math.round(s.bpm) + " BPM" : "") : "leer") + "</button>";
     }).join("");
   }
   function speicherAblegen(i) {
-    zust.speicher[i] = { welt: aktiv ? aktiv.welt.id : zust.welt, fx: Object.assign({}, zust.fx), mix: JSON.parse(JSON.stringify(zust.mix[aktiv ? aktiv.welt.id : zust.welt] || {})), grundton: zust.grundton, skala: zust.skala };
+    zust.speicher[i] = { welt: aktiv ? aktiv.welt.id : zust.welt, fx: Object.assign({}, zust.fx), mix: JSON.parse(JSON.stringify(zust.mix[aktiv ? aktiv.welt.id : zust.welt] || {})), grundton: zust.grundton, skala: zust.skala, bpm: zust.bpm };
     delete zust.speicher[i].fx.master;
     speichern(); zeichneSpeicher(); blitzSlot(i);
   }
@@ -698,6 +888,8 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     const tonartNeu = s.grundton !== zust.grundton || s.skala !== zust.skala;
     Object.keys(s.fx || {}).forEach(k => { if (k in STD_FX && k !== "master") zust.fx[k] = s.fx[k]; });
     zust.grundton = s.grundton; zust.skala = s.skala; $("grundton").value = s.grundton; $("skala").value = s.skala;
+    /* ältere Speicherplätze haben noch kein Tempo – dann bleibt das jetzige */
+    if (typeof s.bpm === "number" && isFinite(s.bpm)) bpmSetzen(s.bpm);
     if (s.welt) zust.mix[s.welt] = JSON.parse(JSON.stringify(s.mix || {}));
     knopfListe.forEach(k => k.zeigen());
     audioStart();
@@ -732,19 +924,46 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   $("bpm-ab").addEventListener("click", () => bpmSetzen(zust.bpm - 1));
   $("bpm-auf").addEventListener("click", () => bpmSetzen(zust.bpm + 1));
   ziehbar($("bpm-feld"), { holen: () => zust.bpm, setzen: bpmSetzen, min: 40, max: 220, weg: 500 });
+  /* Tap: Der erste Tipp nach einer Pause legt nur die „Eins“ neu (Tempo bleibt). Weitere Tipps richten den Takt nach.
+     Ein neues Tempo gibt es erst ab drei Tipps, gemittelt über bis zu acht Abstände – und nur, wenn es mehr als 3 %
+     (bei sechs und mehr Abständen: 2 %) vom jetzigen abweicht; sonst bleibt das Tempo und nur die Phase wird angeglichen.
+     Gemessen wird gegen die Zeit, die gerade aus dem Lautsprecher kommt (Ausgabelatenz herausgerechnet). */
   let taps = [];
-  function tippen() {
-    const t = performance.now();
-    if (taps.length && t - taps[taps.length - 1] > 2000) taps = [];
-    taps.push(t); if (taps.length > 6) taps.shift();
-    const tb = $("tap"); tb.classList.add("blitz"); setTimeout(() => tb.classList.remove("blitz"), 90);
-    if (taps.length >= 2) {
-      const d = []; for (let i = 1; i < taps.length; i++) d.push(taps[i] - taps[i - 1]);
-      bpmSetzen(60000 / (d.reduce((a, b) => a + b, 0) / d.length));
-      if (ctx) { schritt = 0; naechsterSchlag = ctx.currentTime + takt(); }
-    }
+  function hoerZeit(tPerf) {
+    /* Kontextzeit des Klangs, der im Moment tPerf (performance.now) zu hören war */
+    try {
+      if (ctx.getOutputTimestamp) { const o = ctx.getOutputTimestamp(); if (o && o.performanceTime > 0 && o.contextTime > 0) return o.contextTime + (tPerf - o.performanceTime) / 1000; }
+    } catch (_) {}
+    return ctx.currentTime - (performance.now() - tPerf) / 1000 - (ctx.outputLatency || 0) - (ctx.baseLatency || 0);
   }
-  $("tap").addEventListener("pointerdown", e => { e.preventDefault(); tippen(); });
+  function phaseSetzen(anker, schrittAnker) {
+    /* Raster so legen, dass bei „anker“ (Kontextzeit) Achtel Nr. schrittAnker liegt; schon vergangene Achtel auslassen */
+    const h = takt() / 2, ab = ctx.currentTime + .03;
+    const n = Math.max(0, Math.ceil((ab - anker) / h));
+    naechsterSchlag = anker + n * h; schritt = schrittAnker + n;
+  }
+  function tippen(ev) {
+    const tPerf = ev && ev.timeStamp > 0 && ev.timeStamp <= performance.now() + 5 ? ev.timeStamp : performance.now();
+    if (taps.length && tPerf - taps[taps.length - 1].p > 2000) taps = [];
+    const tb = $("tap"); tb.classList.add("blitz"); setTimeout(() => tb.classList.remove("blitz"), 90);
+    if (!ctx) { taps = []; return; }
+    taps.push({ p: tPerf, c: hoerZeit(tPerf) }); if (taps.length > 9) taps.shift();
+    const n = taps.length;
+    if (n >= 3) {
+      const d = []; for (let i = 1; i < n; i++) d.push(taps[i].p - taps[i - 1].p);
+      const med = d.slice().sort((a, b) => a - b)[Math.floor(d.length / 2)];
+      const gut = d.filter(x => Math.abs(x - med) < med * .25);
+      const bpmNeu = 60000 / (gut.reduce((a, b) => a + b, 0) / gut.length);
+      const tol = gut.length >= 6 ? .02 : .03;
+      if (isFinite(bpmNeu) && Math.abs(bpmNeu - zust.bpm) / zust.bpm > tol) bpmSetzen(bpmNeu);
+    }
+    /* Phase: Mittel über die Tipps dieser Reihe (jeder Tipp = ein Viertel), bezogen auf das jetzige Tempo */
+    const P = takt(), k0 = n - Math.min(n, 4);
+    let s = 0; for (let i = k0; i < n; i++) s += taps[i].c - (i - k0) * P;
+    const anker = s / (n - k0) + (n - 1 - k0) * P;
+    phaseSetzen(anker, 2 * (n - 1));
+  }
+  $("tap").addEventListener("pointerdown", e => { e.preventDefault(); tippen(e); });
 
   /* Tonart */
   $("grundton").innerHTML = NOTEN.map((n, i) => '<option value="' + i + '">' + n + "</option>").join("");
@@ -765,7 +984,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     else if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp") weiter(-1);
     else if (k === " ") { if (aktiv) stoppen(); else { const w = WELTEN.find(x => x.id === zust.welt) || WELTEN[0]; weltStarten(w); } }
     else if (k === "Escape") panik();
-    else if (k === "t" || k === "T") tippen();
+    else if (k === "t" || k === "T") { if (!e.repeat) tippen(e); }
     else if (SHOT_TASTEN.includes(k.toLowerCase())) shotAusloesen(SHOT_TASTEN.indexOf(k.toLowerCase()));
     else return;
     e.preventDefault();
@@ -787,7 +1006,13 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
       const grund = !window.isSecureContext ? "Seite bitte über https://imrestales.de/live öffnen" : !("serviceWorker" in navigator) ? "Safari blockiert Web-Apps – Privates Surfen oder Blockierungsmodus ausschalten" : "Privates Surfen ausschalten";
       statusEl.innerHTML = "⚠ Offline-Speicher nicht verfügbar: " + grund; $("start-info").innerHTML = statusEl.innerHTML; return;
     }
-    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (_) {}
+    /* Dauerhaften Speicher erbitten – sonst darf Safari den Offline-Speicher nach 7 Tagen ohne Besuch löschen */
+    let dauerhaft = null;
+    try { if (navigator.storage && navigator.storage.persist) dauerhaft = (await navigator.storage.persisted()) || (await navigator.storage.persist()); } catch (_) {}
+    const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+    let homeWeg = 0; try { homeWeg = +localStorage.getItem(SPEICHER_KEY + "-homehinweis") || 0; } catch (_) {}
+    if (iOS && !standalone && Date.now() - homeWeg > 7 * 864e5) notiz("Für Auftritte: Teilen → „Zum Home-Bildschirm“. Nur so bleibt der Offline-Speicher sicher erhalten – Safari löscht ihn sonst nach einigen Tagen.", false, "home");
+    const speicherInfo = () => dauerhaft === true ? " · Speicher dauerhaft" : dauerhaft === false && !standalone ? ' · <span class="warn">Speicher nicht dauerhaft</span>' : "";
     const liste = dateien().concat(SCHALE);
     const voll = u => new URL(u, location.href).href;
     const c = await caches.open(CACHE);
@@ -798,12 +1023,20 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     const fehlt = [], da = [];
     for (const u of liste) { if (await c.match(voll(u), { ignoreSearch: true })) { fertig++; da.push(u); } else fehlt.push(u); }
     const zeigen = () => {
-      statusEl.innerHTML = fertig >= liste.length ? "<b>✓ Offline bereit</b> · " + liste.length + " Dateien gespeichert"
-        : navigator.onLine ? "⤓ Lade für offline … " + fertig + " / " + liste.length + " – App offen lassen" : "⚠ Erst " + fertig + " / " + liste.length + " offline – einmal mit WLAN öffnen";
+      statusEl.innerHTML = (fertig >= liste.length ? "<b>✓ Offline bereit</b> · " + liste.length + " Dateien gespeichert"
+        : navigator.onLine ? "⤓ Lade für offline … " + fertig + " / " + liste.length + " – App offen lassen" : '<span class="warn">⚠ Erst ' + fertig + " / " + liste.length + " offline – einmal mit WLAN öffnen</span>") + speicherInfo();
       $("start-info").innerHTML = statusEl.innerHTML;
     };
+    /* Welche Klangwelten wären ohne Netz unvollständig? Deutlich sagen, statt auf der Bühne Stille zu erleben */
+    const fehltWelten = () => {
+      const weg = new Set(fehlt.map(voll));
+      return WELTEN.filter(w => [...weltNamen(w, new Set())].some(n => !n.startsWith("@") && weg.has(voll(quelle(n))))).map(w => w.name);
+    };
     zeigen();
-    if (!navigator.onLine) return;
+    if (!navigator.onLine) {
+      if (fehlt.length) { const fw = fehltWelten(); notiz("⚠ Offline unvollständig: " + fehlt.length + (fehlt.length === 1 ? " Datei fehlt" : " Dateien fehlen") + (fw.length ? " – betrifft " + fw.join(", ") : "") + ". Einmal mit WLAN öffnen und warten, bis „Offline bereit“ steht.", true); }
+      return;
+    }
     const laden = async u => { const r = await amServer(u); if (r.ok && r.status === 200) { await c.put(voll(u), r); return true; } return false; };
     /* Gespeicherte Datei mit dem Server vergleichen (ETag/Last-Modified/Länge) und bei Änderung ersetzen –
        so kommen neue Fassungen von Aufnahmen und Skripten an, ohne dass jemand eine Versionsnummer hochzählen muss */
@@ -834,6 +1067,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     };
     await Promise.all([arbeiter(), arbeiter(), arbeiter(), arbeiter()]);
     zeigen();
+    if (fertig < liste.length) notiz("⚠ " + (liste.length - fertig) + " Dateien konnten nicht offline gespeichert werden – App später mit WLAN nochmal öffnen.", true);
     let j = 0;
     const pruefer = async () => { while (j < da.length) { const u = da[j++]; try { await abgleichen(u); } catch (_) {} } };
     await Promise.all([pruefer(), pruefer(), pruefer(), pruefer()]);

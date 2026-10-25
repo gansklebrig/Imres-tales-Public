@@ -549,11 +549,27 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 
   /* ---------- Audio ---------- */
   let ctx = null, gesamt, trocken, hallEin, hall, hallNass, aktiv = null, timer = 0, stumm = null;
-  const puffer = new Map(), laedt = new Map();
+  /* entpackte Aufnahmen: höchstens PUFFER_MAX Bytes; was am längsten nicht gebraucht wurde, fliegt raus
+     (nie Schichten, die gerade laufen, und nichts, was in den letzten 3 Minuten erklungen ist) */
+  const PUFFER_MAX = (mobil ? 150 : 300) * 1048576, pGr = b => b.length * b.numberOfChannels * 4, pZeit = new Map();
+  class PufferMap extends Map {
+    get(k) { const v = super.get(k); if (v) { super.delete(k); super.set(k, v); pZeit.set(k, Date.now()); } return v; }
+    set(k, v) {
+      super.delete(k); super.set(k, v); pZeit.set(k, Date.now());
+      let s = 0; for (const b of this.values()) s += pGr(b);
+      const halt = new Set(), jetzt = Date.now(); [aktiv, wetterAktiv].forEach(a => a && a.betten.forEach(x => { halt.add(x.name); if (x.o && Array.isArray(x.o.ton)) x.o.ton.forEach(t => halt.add(t)); }));
+      for (const [n, b] of this) { if (s <= PUFFER_MAX) break; if (n !== k && !halt.has(n) && jetzt - (pZeit.get(n) || 0) > 18e4) { super.delete(n); s -= pGr(b); } }
+      return this;
+    }
+  }
+  const puffer = new PufferMap(), laedt = new Map();
   function audioStart() {
-    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
+    if (ctx) { if (ctx.state !== "running") ctx.resume(); return; }
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
     const AC = window.AudioContext || window.webkitAudioContext;
     try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { ctx = new AC(); }
+    /* iOS: nach Anruf/Siri („interrupted“) oder Sperre selbst wieder anlaufen */
+    ctx.onstatechange = () => { if (ctx.state !== "running" && ctx.state !== "closed" && !document.hidden) { try { ctx.resume().catch(() => {}); } catch (_) {} if (stumm && stumm.paused && aktiv) stumm.play().catch(() => {}); } };
     const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12; lim.attack.value = .005; lim.release.value = .3;
     gesamt = ctx.createGain(); gesamt.gain.value = lautWert(); gesamt.connect(lim);
     /* letzte Sicherung gegen Übersteuern: unterhalb von 0,7 unverändert, darüber weich bis höchstens 0,98 abgerundet */
@@ -579,17 +595,25 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   function raumSetzen(sek) {
     /* auf dem Handy kürzer und einkanalig – spart Rechenzeit, damit nichts kratzt */
     const k = mobil || merk.spar ? 1 : 2;
-    const sr = ctx.sampleRate, n = Math.floor(sr * Math.max(.3, Math.min(merk.spar ? 1.5 : mobil ? 3 : 5, sek))), b = ctx.createBuffer(k, n, sr);
-    for (let c = 0; c < k; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
-    hall.buffer = b;
+    const sr = ctx.sampleRate, n = Math.floor(sr * Math.round(Math.max(.3, Math.min(merk.spar ? 1.5 : mobil ? 3 : 5, sek)) * 10) / 10);
+    /* jede Länge nur einmal rechnen */
+    let b = irVorrat.get(k + ":" + n);
+    if (!b) { b = ctx.createBuffer(k, n, sr); for (let c = 0; c < k; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); } irVorrat.set(k + ":" + n, b); }
+    if (hall.buffer === b) return;
+    if (!hall.buffer) { hall.buffer = b; return; }
+    /* neuer Hall übernimmt den Eingang, der alte klingt mit seiner ganzen Fahne aus (statt abgeschnitten zu werden) */
+    const alt = hall; hall = ctx.createConvolver(); hall.buffer = b; hallEin.connect(hall); hall.connect(hallNass);
+    try { hallEin.disconnect(alt); } catch (_) {}
+    setTimeout(() => { try { alt.disconnect(); } catch (_) {} }, (alt.buffer.duration + 1) * 1000);
   }
+  const irVorrat = new Map();
   const quelle = n => /^(a|e|l|g)_/.test(n) ? "amb/" + n + ".mp3" : "klang/" + n + ".mp3";
   function laden(n) {
     if (puffer.has(n)) return Promise.resolve(puffer.get(n));
     if (laedt.has(n)) return laedt.get(n);
     const p = (n.startsWith("@") ? synth("kulisse", n.slice(1)) : fetch(quelle(n)).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
       .then(ab => new Promise((res, rej) => { const x = ctx.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); })))
-      .then(b => { puffer.set(n, b); return b; }).catch(() => { laedt.delete(n); return null; });
+      .then(b => { laedt.delete(n); if (b) puffer.set(n, b); return b; }).catch(() => { laedt.delete(n); return null; });
     laedt.set(n, p); return p;
   }
   /* gerechnete Klänge (Eule, Möwe, Stimmengewirr …) aus klangwerk.js im Hintergrund */
@@ -617,6 +641,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   for (let i = 0; i < 64; i++) { LIN_EIN[i] = i / 63; LIN_AUS[i] = 1 - i / 63; }
   const N = 64, EIN = new Float32Array(N), AUS = new Float32Array(N);
   for (let i = 0; i < N; i++) { EIN[i] = Math.sin(i / (N - 1) * Math.PI / 2); AUS[i] = Math.cos(i / (N - 1) * Math.PI / 2); }
+  /* Pegel-Ausgleich – gleiche Werte wie PEGEL/TRIM in live/daten.js (dort erklärt) */
+  const PEGEL = {"fx_fo_glass_02":1.14,"fx_fo_glass_03":1.94,"fx_fo2_sfx100v2_glass_02":0.83,"fx_fo_pot_01":0.66,"fx_mw_wood_squeak_02":1.21,"fx_fo_wooden_02":0.5,"fx_ka_footstep01":0.85,"fx_ka_footstep02":1.14,"fx_im_footstep_wood_003":1.17,"fx_rp_coin2":0.41,"fx_rp_door":0.87,"fx_fo2_sfx100v2_thunder_01":0.78,"e_donner_1":0.81,"e_donner_3":1.2,"e_donner_4":1.22,"e_glocke_1":1.17,"e_glocke_4":0.44,"e_stein_1":0.72,"e_stein_2":1.33,"e_stein_4":1.24,"e_stein_6":0.6,"e_platsch_1":0.85,"e_platsch_2":1.17,"e_platsch_3":0.62,"e_platsch_4":1.34,"e_blubb_3":1.9,"e_insekt_1":1.21,"e_insekt_2":1.24,"e_insekt_3":0.83,"e_insekt_4":0.81,"e_buch_1":1.33,"e_buch_2":0.75,"e_buch_3":0.57,"e_buch_4":1.47,"e_buch_5":1.38,"e_buch_6":0.75,"e_papier_1":1.5,"e_papier_3":0.85,"e_hammer_1":0.82,"e_hammer_2":1.31,"e_hammer_3":1.45,"e_hammer_4":1.32,"amboss":0.45,"e_metall_2":1.63,"e_stoehnen_4":1.15,"e_schleim_1":1.9,"e_schleim_3":0.88,"e_monster_3":0.57,"e_ast_1":1.16,"e_ast_4":0.74,"e_laubschritt_1":1.14,"e_laubschritt_2":0.88,"e_riegel_1":0.68,"e_riegel_2":1.47,"e_riegel_3":1.65,"e_riegel_4":0.46,"e_hund_1":1.57,"e_hund_2":1.61,"e_bellen_5":0.82,"e_zischen_1":0.87,"e_zischen_2":1.15,"e_frosch_1":1.14,"stimme_57":0.77,"e_eule_1":0.48,"e_eule_2":0.52,"e_moewe_6":1.23,"e_moewe_8":0.79,"e_specht_2":0.71,"e_specht_3":1.22,"e_vogel_4":1.14,"e_vogel_8":1.17,"e_kraehe_2":0.88,"e_kraehe_3":0.87,"e_kraehe_4":1.16,"e_kraehe_6":0.87,"e_ruder_1":0.81};
+  const TRIM = {"taverne": -0.6, "waldtag": -2.6, "waldnacht": -3, "regen": 0.6, "zelt": 1.4, "gewitter": -1, "hoehle": 3.1, "unterreich": 3.6, "kerker": 4, "kueste": -3.2, "schiff": -3, "fluss": -3.7, "schmiede": 3.6, "labor": -0.9, "bibliothek": 6.1, "tempel": 5.8, "sumpf": 1, "unterwasser": -2.4, "lagerfeuer": 0.5}, trimVon = w => Math.pow(10, ((w && TRIM[w.id]) || 0) / 20);
   function bettStarten(welt, [name, staerke, label, o], i) {
     const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false, pos: null };
     const m = merk.mix[welt.id]; if (m && m.b && typeof m.b[i] === "number") b.regler = m.b[i];
@@ -625,7 +652,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(trocken); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); b.out.connect(lp); }
     else { b.out.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; b.out.connect(s); s.connect(hallEin); }
     /* auf gleiche Lautheit bringen – aber nie so weit, dass knackende Spitzen (Feuer, Tropfen) übersteuern */
-    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05));
+    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)) * trimVon(welt);
     laden(name).then(buf => {
       if (!buf || b.aus) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05;
@@ -673,7 +700,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   /* ---------- Ereignisse: mal nah, mal fern, links und rechts ---------- */
   function ereignis(welt, [art, , staerke, fern]) {
     const e = EV[art], j = ctx.currentTime + .05;
-    const weit = Math.random() < (fern || 0), laut = staerke * (weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv && aktiv.leben > 1 ? 1 : .9);
+    const weit = Math.random() < (fern || 0), laut = staerke * (weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv && aktiv.leben > 1 ? 1 : .9) * trimVon(welt);
     let ziel;
     const g = ctx.createGain(); g.gain.value = laut;
     let letzter = g;
@@ -687,8 +714,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     for (let k = 0; k < n; k++) {
       const name = zufall(e.f), b = puffer.get(name);
       if (!b) { laden(name); continue; }
-      if (e.lang) { const gg = ctx.createGain(), r = zz(e.tempo[0], e.tempo[1]), d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(1, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); gg.connect(ziel); spiel(b, gg, t, r); continue; }
-      spiel(b, ziel, t, e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05), e.folge ? zz(.7, 1) : 1);
+      const pg = PEGEL[name] || 1;
+      if (e.lang) { const gg = ctx.createGain(), r = zz(e.tempo[0], e.tempo[1]), d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(pg, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); gg.connect(ziel); spiel(b, gg, t, r); continue; }
+      spiel(b, ziel, t, e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05), (e.folge ? zz(.7, 1) : 1) * pg);
       if (e.folge) t += zz(e.folge[2], e.folge[3]);
     }
   }
@@ -1156,7 +1184,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     const m = merk.mix[welt.id] || {};
     if (welt.episch) epischStart();
     else { raumSetzen(welt.raum); hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2, ctx.currentTime, .3); }
-    aktiv = { welt, betten: welt.betten.map((x, i) => (welt.episch ? eBettStarten : bettStarten)(welt, x, i)), naechst: {}, leben: m.leben != null ? m.leben : 1 };
+    aktiv = { welt, betten: welt.betten.map((x, i) => (welt.episch ? eBettStarten : bettStarten)(welt, x, i)), naechst: {}, leben: m.leben != null ? m.leben : 1, laedt: true };
+    /* Ladeanzeige an der Karte, bis alle Schichten da sind */
+    const geladen = aktiv; Promise.all(welt.betten.map(x => laden(x[0]))).then(() => { geladen.laedt = false; if (aktiv === geladen) zeichnen(); });
     welt.ereignisse.forEach(([art]) => { (EV[art].f || []).forEach(laden); if (EV[art].s) synthEreignis(EV[art].s); });
     merk.welt = welt.id; speichern();
     if (merk.wetter && !wetterAktiv) wetterStarten(); else wetterKlang();
@@ -1204,7 +1234,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   function zeichnen() {
     if (hoerer) { hoererZeichnen(); return; }
     $("welten").innerHTML = T.wg.map((titel, g) => '<div class="weltgruppe"><h3>' + esc(titel) + '</h3><div class="welten">' +
-      WELTEN.filter(w => (WELT_GRUPPE[w.id] || 0) === g).map(w => '<button type="button" class="welt' + (w.episch ? " ep" : "") + (aktiv && aktiv.welt === w ? " an" : "") + '" data-welt="' + w.id + '"><span class="sym" aria-hidden="true">' + w.sym +
+      WELTEN.filter(w => (WELT_GRUPPE[w.id] || 0) === g).map(w => '<button type="button" class="welt' + (w.episch ? " ep" : "") + (aktiv && aktiv.welt === w ? " an" + (aktiv.laedt ? " laedt" : "") : "") + '" data-welt="' + w.id + '"><span class="sym" aria-hidden="true">' + w.sym +
       '</span><span class="nm">' + esc(w.name) + '</span><span class="tx">' + esc(w.text) + "</span></button>").join("") + "</div></div>").join("");
     const sp = $("spielen"); sp.textContent = aktiv ? "■" : "▶"; sp.classList.toggle("laeuft", !!aktiv); sp.setAttribute("aria-label", aktiv ? T.stopp : T.spielen);
     const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt);
@@ -1359,7 +1389,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (/^[0-9]$/.test(e.key)) { const i = (+e.key + 9) % 10; if (EINSCHLAEGE[i]) { e.preventDefault(); if (FERN) fernSenden({ art: "aus", id: EINSCHLAEGE[i].id }); else ausloesen(EINSCHLAEGE[i].id); } }
   });
   setInterval(takt, 250);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && aktiv && ctx.state === "suspended") ctx.resume(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && ctx.state !== "running") { ctx.resume(); if (stumm && stumm.paused && aktiv) stumm.play().catch(() => {}); } });
+  /* jede Berührung ist eine Nutzergeste: hängt der Ton (iOS „interrupted“), damit wieder starten */
+  document.addEventListener("pointerdown", () => { if (ctx && ctx.state !== "running") { ctx.resume(); if (stumm && stumm.paused && aktiv) stumm.play().catch(() => {}); } }, true);
 
   /* ---------- Mitlauschen: dieselbe Echtzeit-Verbindung wie im Lautenwerk (Supabase Realtime) ---------- */
   const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };

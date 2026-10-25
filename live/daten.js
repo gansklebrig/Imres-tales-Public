@@ -97,6 +97,13 @@
   ];
 
 
+  /* Pegel-Ausgleich (gleich in ambient.html):
+     PEGEL = Faktor je Einzelgeräusch-Datei – jede Variante auf die mittlere Lautheit ihrer Gruppe (lautestes 0,4-s-Fenster),
+     höchstens ±9 dB; die Eulen zusätzlich −6 dB (waren deutlich lauter als alle anderen Tiere).
+     TRIM = Ausgleich je Klangwelt in dB, gemessen am Gesamtausgang, damit alle Welten etwa gleich laut sind (±2 dB). */
+  const PEGEL = {"fx_fo_glass_02":1.14,"fx_fo_glass_03":1.94,"fx_fo2_sfx100v2_glass_02":0.83,"fx_fo_pot_01":0.66,"fx_mw_wood_squeak_02":1.21,"fx_fo_wooden_02":0.5,"fx_ka_footstep01":0.85,"fx_ka_footstep02":1.14,"fx_im_footstep_wood_003":1.17,"fx_rp_coin2":0.41,"fx_rp_door":0.87,"fx_fo2_sfx100v2_thunder_01":0.78,"e_donner_1":0.81,"e_donner_3":1.2,"e_donner_4":1.22,"e_glocke_1":1.17,"e_glocke_4":0.44,"e_stein_1":0.72,"e_stein_2":1.33,"e_stein_4":1.24,"e_stein_6":0.6,"e_platsch_1":0.85,"e_platsch_2":1.17,"e_platsch_3":0.62,"e_platsch_4":1.34,"e_blubb_3":1.9,"e_insekt_1":1.21,"e_insekt_2":1.24,"e_insekt_3":0.83,"e_insekt_4":0.81,"e_buch_1":1.33,"e_buch_2":0.75,"e_buch_3":0.57,"e_buch_4":1.47,"e_buch_5":1.38,"e_buch_6":0.75,"e_papier_1":1.5,"e_papier_3":0.85,"e_hammer_1":0.82,"e_hammer_2":1.31,"e_hammer_3":1.45,"e_hammer_4":1.32,"amboss":0.45,"e_metall_2":1.63,"e_stoehnen_4":1.15,"e_schleim_1":1.9,"e_schleim_3":0.88,"e_monster_3":0.57,"e_ast_1":1.16,"e_ast_4":0.74,"e_laubschritt_1":1.14,"e_laubschritt_2":0.88,"e_riegel_1":0.68,"e_riegel_2":1.47,"e_riegel_3":1.65,"e_riegel_4":0.46,"e_hund_1":1.57,"e_hund_2":1.61,"e_bellen_5":0.82,"e_zischen_1":0.87,"e_zischen_2":1.15,"e_frosch_1":1.14,"stimme_57":0.77,"e_eule_1":0.48,"e_eule_2":0.52,"e_moewe_6":1.23,"e_moewe_8":0.79,"e_specht_2":0.71,"e_specht_3":1.22,"e_vogel_4":1.14,"e_vogel_8":1.17,"e_kraehe_2":0.88,"e_kraehe_3":0.87,"e_kraehe_4":1.16,"e_kraehe_6":0.87,"e_ruder_1":0.81};
+  const TRIM = {"taverne": -0.6, "waldtag": -2.6, "waldnacht": -3, "regen": 0.6, "zelt": 1.4, "gewitter": -1, "hoehle": 3.1, "unterreich": 3.6, "kerker": 4, "kueste": -3.2, "schiff": -3, "fluss": -3.7, "schmiede": 3.6, "labor": -0.9, "bibliothek": 6.1, "tempel": 5.8, "sumpf": 1, "unterwasser": -2.4, "lagerfeuer": 0.5};
+
   /* Pfad einer Aufnahme, gesehen aus dem Ordner /live/ */
   const quelle = n => n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_") ? "../klang/" + n + ".mp3" : "../amb/" + n + ".mp3";
   function dateien() {
@@ -108,5 +115,5 @@
   /* Name des Offline-Speichers – nur hier festgelegt (App und Service Worker lesen ihn von hier).
      Muss nicht hochgezählt werden: geänderte und weggefallene Dateien erkennt die App selbst. */
   const CACHE = "klangwelten-live-v1";
-  wurzel.KLANG = { LAUTHEIT, EV, WELTEN, quelle, dateien, SCHALE, CACHE };
+  wurzel.KLANG = { LAUTHEIT, EV, WELTEN, quelle, dateien, SCHALE, CACHE, PEGEL, TRIM };
 })(typeof self !== "undefined" ? self : this);
