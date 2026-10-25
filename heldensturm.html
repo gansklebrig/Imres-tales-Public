@@ -3307,7 +3307,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'ruhm':{const R=ruhmS(),id=b.dataset.id;if(ruhmFree()>0&&(R.pts[id]||0)<RUHM_MAX){R.pts[id]=(R.pts[id]||0)+1;persist();sfx('buy');showTitle(true)}break}
   case'cloud-new':case'cloud-save':case'cloud-copy':case'cloud-off':case'cloud-load':cloudAct(a);break;
   case'ev-opt':chooseEvent(+b.dataset.i);break;
-  case'ev-done':finishEvent();break;
+  case'ev-done':finishEvent();break;case'ev-swap':case'ev-keep':evSwap(a,b);break;
   case'smith-open':G.overlay='smith';G.smithSel=null;renderSmith();break;
   case'smith-sel':G.smithSel=G.smithSel===b.dataset.k?null:b.dataset.k;renderSmith(true);break;
   case'smith-close':if(G.state==='camp'){campDone();break}G.overlay=null;if(G.smithFrom==='end'){G.smithFrom=null;rlSync();persist();showTitle();break}showChapterDone();break;
@@ -3568,7 +3568,7 @@ function modSum(k){let s=0;for(const m of P&&P.mods||[])if(m.k===k)s+=m.v;return
 const modHas=k=>!!(P&&P.mods&&P.mods.some(m=>m.k===k));
 const evGold=n=>Math.round(n*(1+0.12*SL())*diffMult(G.diff).gold);
 function giveGold(n){SAVE.gold+=n;G.goldRun+=n;sfx('coin');return `+${fmt(n)} Gold`}
-function giveItem(minR,bonus){const it=randomItem(scale().il+2,bonus||0.6,minR);sfx(it.rar>=3?'legend':'item');if(P.bag.length>=BAGMAX){const v=scrapValue(it);SAVE.gold+=v;return `<span class="c${it.rar}">${esc(it.name)}</span> (Beutel voll – für ${fmt(v)} Gold verkauft)`}P.bag.push(it);updateInvBadge();return `<span class="c${it.rar}">${esc(it.name)}</span> im Beutel`}
+function giveItem(minR,bonus){const it=randomItem(scale().il+2,bonus||0.6,minR);sfx(it.rar>=3?'legend':'item');if(P.bag.length>=BAGMAX){if(G.ev&&!G.bot){(P.evPend||(P.evPend=[])).push(it);return `<span class="c${it.rar}">${esc(it.name)}</span> – der Beutel ist voll, unten kannst du Platz schaffen`}const v=scrapValue(it);SAVE.gold+=v;return `<span class="c${it.rar}">${esc(it.name)}</span> (Beutel voll – für ${fmt(v)} Gold verkauft)`}P.bag.push(it);updateInvBadge();return `<span class="c${it.rar}">${esc(it.name)}</span> im Beutel`}
 function giveGems(n){const got=[];for(let i=0;i<n;i++){const g=pick(GEM_IDS);P.gems[g]=(P.gems[g]||0)+1;got.push(GEMS[g].n)}return got.join(', ')}
 function giveSP(n){P.sp+=n;sfx('level');return `+${n} Talentpunkt${n>1?'e':''}`}
 const EVENTS=[
@@ -3607,7 +3607,7 @@ function renderEvent(){const E=G.ev,ev=E.ev;hud.hidden=true;clearHudFx();
  const res=E.res?(E.res.group?`<div class="evres ${E.res.rolling?'rolling':E.res.cls}" style="flex-direction:column">${groupDiceHtml(E.res.group,E.res.rolling)}<div style="${E.res.rolling?'opacity:0':''}"><div class="evroll">${E.res.line}</div><div class="evtxt">${E.res.txt}</div></div></div>`:`<div class="evres ${E.res.rolling?'rolling':E.res.cls}"><div class="d20"><span id="d20n">${E.res.rolling?'?':E.res.roll}</span></div><div><div class="evroll">${E.res.line}</div><div class="evtxt">${E.res.txt}</div></div></div>`):'';
  showScreen(`<div class="wrap narrow center ev" style="min-height:70vh;justify-content:center">
   <div class="eyebrow">Unterwegs · ${G.mp?'die ganze Gruppe würfelt':esc(P.hero.name)}</div><h2>${esc(ev.t)}</h2><p class="lead">${esc(ev.txt)}</p>
-  ${E.res?res+`<button class="btn-main" data-act="ev-done">Weiterziehen</button>`:`<div class="evopts">${opts}</div>`}</div>`)}
+  ${E.res?res+(E.res.rolling?'':evPendHtml())+`<button class="btn-main" data-act="ev-done">Weiterziehen</button>`:`<div class="evopts">${opts}</div>`}</div>`)}
 function chooseEvent(i){const E=G.ev,o=E.ev.opts[i];if(!o||E.res)return;
  if(!o.skill&&!o.cost){finishEvent();return}
  const cost=o.cost?o.cost():0;if(cost>SAVE.gold)return;SAVE.gold-=cost;
@@ -3620,9 +3620,24 @@ function chooseEvent(i){const E=G.ev,o=E.ev.opts[i];if(!o||E.res)return;
  E.res={roll:r,cls:nat20?'crit':ok?'ok':'fail',line:nat20?'Natürliche 20! Kritischer Erfolg!':nat1?'Natürliche 1 – kritischer Fehlschlag!':`Wurf ${r}${bon?' + '+bon+' = '+tot:''} gegen SG ${o.dc}: ${ok?'Erfolg':'Fehlschlag'}`,txt};
  E.res.rolling=true;renderEvent();persist();sfx('ui');diceAnim(r,nat20,nat1,ok)}
 function diceAnim(r,n20,n1,ok){const el=$('d20n');if(!el)return;const box=el.parentNode;box.classList.add('roll');const rest=box.parentNode.querySelector('.evtxt'),line=box.parentNode.querySelector('.evroll');let k=0;sfx('wuerfel');
- const iv=setInterval(()=>{k++;el.textContent=ri(1,20);if(k%3===0&&!BUF.fx_ca_dice_shake_1)sfx('hit');if(k>=14){clearInterval(iv);el.textContent=r;box.classList.remove('roll');box.classList.add('land');if(G.ev&&G.ev.res){G.ev.res.rolling=false;const ev=box.closest('.evres');if(ev){ev.classList.remove('rolling');ev.classList.add(G.ev.res.cls)}}if(rest){rest.style.opacity=1;line.style.opacity=1}sfx(n20?'legend':n1?'hurt':ok?'item':'d_flesh');if(n20)sfx('level')}},60);
+ const iv=setInterval(()=>{k++;el.textContent=ri(1,20);if(k%3===0&&!BUF.fx_ca_dice_shake_1)sfx('hit');if(k>=14){clearInterval(iv);el.textContent=r;box.classList.remove('roll');box.classList.add('land');if(G.ev&&G.ev.res){G.ev.res.rolling=false;if(mpL().some(q=>q.evPend&&q.evPend.length))setTimeout(()=>{if(G.ev)renderEvent()},900);const ev=box.closest('.evres');if(ev){ev.classList.remove('rolling');ev.classList.add(G.ev.res.cls)}}if(rest){rest.style.opacity=1;line.style.opacity=1}sfx(n20?'legend':n1?'hurt':ok?'item':'d_flesh');if(n20)sfx('level')}},60);
  if(rest){rest.style.opacity=0;line.style.opacity=0}}
-function finishEvent(){G.ev=null;doNextStage()}
+
+/* Beutel voll bei einem Ereignis: einen alten Gegenstand verkaufen, um Platz für den neuen zu schaffen */
+function evPendHtml(){const L=mpL().filter(q=>q.evPend&&q.evPend.length&&!netIs(q.dev));if(!L.length)return'';
+ const ico=x=>`<canvas class="ico" data-ico="${x.slot}|${x.rar}|${esc(x.base||'')}" width="72" height="72" aria-hidden="true"></canvas>`;
+ return L.map(q=>{const pi=PL.indexOf(q)<0?0:PL.indexOf(q),it=q.evPend[0];let base,dd=0;withP(q,()=>{base=computeStats(P.eq);dd=itemDps(it,base).d});
+  const tiles=q.bag.map((x,i)=>{let d=0;withP(q,()=>{d=itemDps(x,base).d});return`<button class="it r${x.rar}${x.anc?' anc'+x.anc:''}" data-act="ev-swap" data-p="${pi}" data-i="${i}" title="Verkaufen für ${fmt(scrapValue(x))} Gold"><span class="lv">${x.ilvl}</span>${x.fav?'<span class="fav">★</span>':''}${Math.abs(d)>0.005?`<span class="ua ${d>0?'':'dn'}">${d>0?'+':''}${Math.round(d*100)}%</span>`:''}${ico(x)}<span class="nm">${esc(x.name)}</span><span class="muted" style="font-size:10px">+${fmt(scrapValue(x))} G</span></button>`}).join('');
+  return`<div class="card evswap" style="margin-top:12px;text-align:left"><div class="eyebrow">${G.mp?esc(q.hero.name)+' · ':''}Beutel voll (${q.bag.length} / ${BAGMAX})${q.evPend.length>1?' · noch '+q.evPend.length+' Funde':''}</div>
+   <div style="display:flex;gap:10px;align-items:center;margin:6px 0 8px">${ico(it)}<div><div class="c${it.rar}" style="font-weight:800">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]} · Stufe ${it.ilvl}${Math.abs(dd)>0.005?` · <b style="color:${dd>0?'#8ff08a':'#ffb4a4'}">${dd>0?'+':''}${Math.round(dd*100)}% DPS</b>`:''}</div></div></div>
+   <p class="muted" style="margin:0 0 6px;font-size:13px">Tippe einen Gegenstand an – er wird verkauft und der neue Fund kommt in den Beutel.</p>
+   <div class="bag">${tiles}</div><div class="row" style="margin-top:8px"><button class="btn" data-act="ev-keep" data-p="${pi}">Lieber den neuen Fund verkaufen (+${fmt(scrapValue(it))} Gold)</button></div></div>`}).join('')}
+function evSwap(a,b){const q=PL[+b.dataset.p]||P;if(!q||!q.evPend||!q.evPend.length)return;const it=q.evPend.shift();
+ if(a==='ev-swap'){const i=+b.dataset.i,old=q.bag[i];if(!old){q.evPend.unshift(it);return}const v=scrapValue(old);SAVE.gold+=v;q.bag.splice(i,1,it);toast(`${esc(old.name)} verkauft (+${fmt(v)} Gold) – ${esc(it.name)} ist im Beutel.`,'#ffd04a');sfx('scrap');sfx('equip')}
+ else{const v=scrapValue(it);SAVE.gold+=v;toast(`${esc(it.name)} verkauft (+${fmt(v)} Gold).`,'#ffd04a');sfx('scrap')}
+ withP(q,()=>updateInvBadge());if(G.rl)rlSync();persist();renderEvent()}
+function evPendFlush(){for(const q of mpL()){if(!q.evPend||!q.evPend.length)continue;for(const it of q.evPend)SAVE.gold+=scrapValue(it);q.evPend=null}}
+function finishEvent(){evPendFlush();G.ev=null;doNextStage()}
 
 /* ================= Der Schmied: Aufwerten, Neu schmieden, Sockel, Edelsteine =================
    Bezahlt wird mit dem Gold, das alle Helden teilen – jede Münze hier fehlt im Lager. */
