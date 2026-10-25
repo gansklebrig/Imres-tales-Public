@@ -51,3 +51,12 @@ Klangwelten (ambient.html) – Teppiche in amb/a_*.mp3, Einzelgeräusche in amb/
     Uhr (a_uhr), Tempel (a_gesang), Kirche (a_halle), Klangschale (a_klangschale)
   Kessel und Blasen sowie alle übrigen e_*-Geräusche: OpenGameArt (rubberduck u. a.) und Kenney, CC0, über den Open Game SFX Index.
 Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.
+
+Klangwelten · Episch (ambient.html, Umschalter „Episch“) – lange Aufnahmen in voller Länge, amb/l_*.mp3:
+  l_gewitter – RHumphries, Gewitter (über AmbientSounds, Freesound) – CC BY
+  l_wind     – felix.blume, Wind (über AmbientSounds, Freesound) – CC0
+  l_sturm    – Borys Kozielski, Sturm (über Noisekun) – CC0
+  l_tempel, l_windspiel, l_donner, l_wal – Tempel, Windspiel, Donner, Wal aus Moodist (Pixabay-Inhaltslizenz bzw. CC0)
+  Außerdem tiefer gestimmt verwendet: Orgel, Pauken, Horn, Gong, Kontrabass, Cello (VSCO 2 CE, CC0), Chorstimmen (FluidR3, CC BY 3.0),
+  Einschläge und Wesen (fx_*, CC0, Kenney und OpenGameArt) – alle wie oben beschrieben.
+Für Imres Tales in Mono umgewandelt, im Pegel angeglichen, Anfang und Ende weich ausgeblendet und neu kodiert.

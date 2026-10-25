@@ -86,6 +86,35 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
 .laut{display:flex;align-items:center;gap:.35rem;flex:0 1 9rem;min-width:5.5rem;color:var(--mute)}
 .laut input{width:100%;accent-color:var(--ember)}
 @media (prefers-reduced-motion:reduce){.welt.an::after{animation:none}}
+/* Umschalter Ruhig / Episch */
+.modus{display:inline-flex;gap:.25rem;padding:.25rem;margin:1rem 0 0;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.modus button{border:0;background:none;border-radius:999px;padding:.4rem 1rem;color:var(--mute);font-size:.95rem}
+.modus button[aria-selected="true"]{background:var(--ember);color:var(--night);font-weight:700}
+body.episch{--violett:#8f7cff;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(143,124,255,.14),transparent 70%),var(--night)}
+body.episch .welt{background:linear-gradient(180deg,#191424,var(--panel))}
+h2.abschnitt{font-family:var(--fd);font-weight:400;font-size:1.3rem;margin:1.4rem 0 .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:1 1 12rem}
+.pad{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.2rem,1fr));gap:.5rem}
+@media (max-width:520px){.pad{grid-template-columns:1fr 1fr;gap:.4rem}}
+.knopf{position:relative;overflow:hidden;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.6rem .7rem .55rem;min-height:4.6rem;display:flex;flex-direction:column;gap:.1rem;transition:border-color .25s,transform .08s}
+.knopf:hover{border-color:rgba(143,124,255,.6)}
+.knopf:active{transform:scale(.97)}
+.knopf .sym{font-size:1.3rem;line-height:1}
+.knopf .nm{font-size:.92rem;font-weight:500;line-height:1.15;margin-top:.15rem}
+.knopf .tx{font-size:.72rem;color:var(--mute);line-height:1.2}
+.knopf kbd{position:absolute;top:.4rem;right:.5rem;font:500 .66rem var(--fb);color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:0 .3rem}
+.knopf.blitz{animation:blitz 1.4s ease-out}
+@keyframes blitz{0%{box-shadow:0 0 0 2px #8f7cff inset,0 0 40px rgba(143,124,255,.7);border-color:#8f7cff}100%{box-shadow:none}}
+.knopf.szene::before{content:"";position:absolute;left:0;bottom:0;height:3px;width:var(--p,0%);background:linear-gradient(90deg,#8f7cff,var(--ember));transition:width .25s linear}
+.knopf.szene.an{border-color:#8f7cff;background:linear-gradient(180deg,rgba(143,124,255,.16),var(--panel))}
+.knopf.szene.an .tx{color:var(--text)}
+.knopf.laedt .tx::after{content:" …"}
+@media (max-width:520px){.knopf{min-height:4.2rem;padding:.5rem .55rem}.knopf .tx{display:none}.knopf.szene .tx{display:block}.knopf kbd{display:none}}
+.mini{display:flex;align-items:center;gap:.35rem;color:var(--mute);font-size:.8rem}
+.mini input{width:7rem;accent-color:#8f7cff}
+.leise{border:1px solid var(--line);background:none;border-radius:999px;padding:.25rem .7rem;color:var(--mute);font-size:.8rem}
+.leise:hover{border-color:var(--ember);color:var(--ember)}
+@media (prefers-reduced-motion:reduce){.knopf.blitz{animation:none}}
 </style>
 </head>
 <body>
@@ -97,8 +126,20 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   </header>
   <main>
     <section class="funk" id="funk"></section>
+    <div class="modus" id="modus" role="tablist"><button type="button" role="tab" data-modus="ruhig" data-t="ruhig">🌿 Ruhig</button><button type="button" role="tab" data-modus="episch" data-t="episch">⚔ Episch</button></div>
     <section class="misch" id="misch" hidden></section>
     <div class="welten" id="welten"></div>
+    <section id="aus-box" hidden>
+      <h2 class="abschnitt"><span data-t="hAus">⚡ Einschläge</span><small data-t="hAusTx">Ein Schlag, der durch den Raum rollt – passt zu jeder Klangwelt.</small>
+        <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="aus-laut" min="0" max="150" value="100"></label></h2>
+      <div class="pad" id="aus"></div>
+    </section>
+    <section id="sz-box" hidden>
+      <h2 class="abschnitt"><span data-t="hSz">⏳ Szenen</span><small data-t="hSzTx">Lange Aufnahmen, die sich über Minuten entfalten. Nochmal antippen blendet aus.</small>
+        <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="sz-laut" min="0" max="150" value="100"></label>
+        <button type="button" class="leise" id="sz-stopp" data-t="szStopp">◼ Alle ausblenden</button></h2>
+      <div class="pad" id="szenen"></div>
+    </section>
   </main>
   <footer id="dank"></footer>
 </div>
@@ -131,6 +172,20 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     schritte: [["#welten", "🗺 Klangwelt wählen", "Tippe auf eine Karte, um sie zu starten, nochmal tippen hält sie an. Beim Wechsel wird weich übergeblendet."], ["#misch", "🎚 Mischen", "Jede Schicht hat ihren eigenen Regler. „Lebendigkeit“ bestimmt, wie oft Einzelgeräusche kommen, „Raumhall“, wie groß der Raum klingt. Jede Klangwelt merkt sich deine Mischung."], ["#funk", "📡 Mitlauschen", "Für die Runde übertragen: Link teilen, die anderen tippen auf „Zuhören“ und hören dieselbe Klangwelt."], ["#leiste", "▶ Abspielen und Lautstärke", "Start, Stopp und Gesamtlautstärke – immer griffbereit unten."]],
     hTitel: "Mitlauschen", hWarte: "Gerade läuft nichts – sobald es losgeht, hörst du es.", hZuhoeren: "🎧 Zuhören", hStumm: "❚❚ Stumm", hSelbst: "Selbst Klangwelten wählen"
   };
+  Object.assign(T, EN ? {
+    ruhig: "🌿 Calm", episch: "⚔ Epic", hAus: "⚡ Impacts", hAusTx: "One blow that rolls through the space – fits any soundscape.", hSz: "⏳ Scenes", hSzTx: "Long recordings unfolding over minutes. Tap again to fade out.", szStopp: "◼ Fade all out",
+    noch: "left", szLaeuft: n => n === 1 ? "1 scene" : n + " scenes", ehall: "Reverb", eweite: "Echo depth", tasten: "Keys 1–9 and 0 fire the impacts.", tippEpisch: "Pitched down and bathed in a huge reverb. Reverb and echo depth also apply to impacts and scenes.",
+    tModus: ["#modus", "🌿 Calm or ⚔ Epic", "“Calm” holds the quiet everyday soundscapes. “Epic” has vast, reverberant worlds plus impacts and long scenes for the big moments."],
+    tAus: ["#aus-box", "⚡ Impacts", "Single blows for the big moment: thunder, a death knell, a dragon's roar – they also work over a calm soundscape. On a keyboard: keys 1–9 and 0."],
+    tSz: ["#sz-box", "⏳ Scenes", "Long recordings unfolding over minutes – a storm rolling in, monks in the deep. The bar shows how far along it is; tap again to fade out."]
+  } : {
+    ruhig: "🌿 Ruhig", episch: "⚔ Episch", hAus: "⚡ Einschläge", hAusTx: "Ein Schlag, der durch den Raum rollt – passt zu jeder Klangwelt.", hSz: "⏳ Szenen", hSzTx: "Lange Aufnahmen, die sich über Minuten entfalten. Nochmal antippen blendet aus.", szStopp: "◼ Alle ausblenden",
+    noch: "noch", szLaeuft: n => n === 1 ? "1 Szene" : n + " Szenen", ehall: "Nachhall", eweite: "Echotiefe", tasten: "Tasten 1–9 und 0 lösen die Einschläge aus.", tippEpisch: "Tiefer gestimmt und in riesigen Nachhall getaucht. Nachhall und Echotiefe gelten auch für Einschläge und Szenen.",
+    tModus: ["#modus", "🌿 Ruhig oder ⚔ Episch", "„Ruhig“ sind die stillen Alltags-Klangwelten. „Episch“ hat gewaltige, hallende Welten und dazu Einschläge und lange Szenen für die großen Momente."],
+    tAus: ["#aus-box", "⚡ Einschläge", "Einzelne Schläge für den großen Moment: Donner, Totenglocke, Drachenbrüllen – sie passen auch über eine ruhige Klangwelt. Am Rechner auch mit den Tasten 1–9 und 0."],
+    tSz: ["#sz-box", "⏳ Szenen", "Lange Aufnahmen, die sich über Minuten entfalten – ein aufziehender Sturm, Mönche in der Tiefe. Der Balken zeigt, wie weit sie sind; nochmal antippen blendet aus."]
+  });
+  T.schritte.splice(1, 0, T.tModus); T.schritte.splice(T.schritte.length - 2, 0, T.tAus, T.tSz);
   document.querySelectorAll("[data-t]").forEach(el => { if (T[el.dataset.t]) el.textContent = T[el.dataset.t]; });
   document.title = T.titel;
 
@@ -230,6 +285,80 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
       ereignisse: [["blubb", [5, 14], .3, .5], ["wal", [35, 90], .3, .8], ["monster", [70, 160], .15, 1]] }
   ];
 
+  /* ---------- Episch: tief gestimmte Welten, auslösbare Einschläge und minutenlange Szenen ----------
+     Alles Epische läuft über einen eigenen Strang: eigener langer Nachhall, Ping-Pong-Echos („Weite“), eigener Begrenzer, dann in die Gesamtlautstärke. */
+  Object.assign(LAUTHEIT, { l_sturm: .0384, l_gewitter: .0376, l_wind: .0703, l_windspiel: .0274, l_tempel: .174, l_donner: .0396, l_wal: .1221 });
+  const DONNER_T = ["fx_fo2_sfx100v2_thunder_01"].concat(reihe("e_donner_", 4));
+  const BRUELLEN = ["fx_cr2_roar_04", "fx_cr2_roar_05", "fx_cr2_roar_06", "fx_rd_creature_roar_02", "fx_rd_creature_roar_03"];
+  Object.assign(EV, {
+    t_glocke: { f: reihe("e_glocke_", 4), tempo: [.3, .45] }, t_gong: { f: reihe("e_gong_", 2).concat(["gong"]), tempo: [.34, .46] },
+    t_chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.5, .5], lang: 1 },
+    t_donner: { f: DONNER_T, tempo: [.6, .8] }, t_heulen: { f: ["e_heulen_1"].concat(reihe("e_wolf_", 4)), tempo: [.55, .7] },
+    t_monster: { f: reihe("e_monster_", 3), tempo: [.35, .5] }, t_stein: { f: reihe("e_stein_", 6), tempo: [.45, .65] }, t_kette: { f: reihe("e_kette_", 4), tempo: [.5, .65] },
+    t_stoehnen: { f: reihe("e_stoehnen_", 4), tempo: [.5, .65] }, t_platsch: { f: reihe("e_platsch_", 4), tempo: [.4, .55] }, t_wal: { f: reihe("e_wal_", 3), tempo: [.45, .6] },
+    t_atem: { f: ["fx_cr2_snore_02", "fx_cr_snore"], tempo: [.36, .44] }, t_muenzen: { f: ["fx_ka_handlecoins", "fx_ka_handlecoins2", "fx_rd_item_coins_04"], tempo: [.55, .75] },
+    t_bruellen: { f: BRUELLEN, tempo: [.42, .55] }, t_kraehe: { f: reihe("e_kraehe_", 7), tempo: [.72, .88] }, t_metall: { f: reihe("e_metall_", 3).concat(["fx_rp_metal_ringing"]), tempo: [.5, .65] },
+    t_kies: { f: reihe("e_kies_", 2), tempo: [.65, .75], folge: [3, 6, .8, 1.05] }
+  });
+  /* betten: [Quelle, Stärke, Name, { rate: Tonhöhe, tief: Tiefpass, ton: Instrumententöne für einen schwebenden Grund }] */
+  WELTEN.push(
+    { id: "kathedrale", episch: 1, pegel: 1, sym: "⛪", name: W("Kathedrale der Ewigkeit", "Cathedral of Eternity"), text: W("Ein Dom ohne Ende: tiefer Gesang, Orgelgrund, ferne Glocken", "An endless dome: deep chant, organ drone, distant bells"),
+      betten: [["a_halle", .8, W("Halle", "Hall"), { rate: .6 }], ["a_gesang", .5, W("Mönchschor", "Monks"), { rate: .55, tief: 2500 }], ["a_wind2", .3, W("Zugluft", "Draught"), { rate: .6, tief: 500 }], ["~orgel", .28, W("Orgelgrund", "Organ drone"), { ton: ["orgel_36", "orgel_48"], rate: 1, tief: 1800 }]],
+      ereignisse: [["t_glocke", [20, 45], .5, .6], ["t_chor", [18, 40], .35, .5], ["t_gong", [50, 110], .45, .5], ["t_kies", [40, 90], .3, .7]] },
+    { id: "gipfel", episch: 1, pegel: .9, sym: "🏔", name: W("Sturm über dem Gipfel", "Storm over the Peak"), text: W("Heulender Höhensturm und Donner, der durch die Täler rollt", "A howling mountain gale and thunder rolling through the valleys"),
+      betten: [["l_sturm", .85, W("Sturm", "Storm"), { rate: .8 }], ["a_heulwind", .5, W("Heulender Wind", "Howling wind"), { rate: .7 }], ["a_wind1", .45, W("Böen", "Gusts"), { rate: .75 }]],
+      ereignisse: [["t_donner", [12, 35], .6, .6], ["t_heulen", [40, 100], .3, 1], ["t_kraehe", [60, 140], .2, 1]] },
+    { id: "abgrund", episch: 1, pegel: 1.6, sym: "🕳", name: W("Abgrund des Unterreichs", "Abyss of the Underdark"), text: W("Bodenlose Tiefe, Tropfen, die ewig fallen, Wesen im Dunkel", "Bottomless depths, drops falling forever, creatures in the dark"),
+      betten: [["a_tropfen1", .8, W("Tropfen", "Drips"), { rate: .6 }], ["a_unterwasser", .4, W("Tiefe", "Depths"), { rate: .5, tief: 400 }], ["a_heulwind", .25, W("Ferner Wind", "Distant wind"), { rate: .45, tief: 350 }], ["~tief", .25, W("Grollen", "Rumble"), { ton: ["kb_28", "vc_36"], rate: .5, tief: 300 }]],
+      ereignisse: [["t_monster", [30, 70], .4, 1], ["t_stein", [20, 50], .35, .7], ["t_kette", [50, 120], .25, 1], ["t_stoehnen", [50, 120], .25, 1], ["t_platsch", [15, 35], .3, .6]] },
+    { id: "ozean", episch: 1, pegel: 1.45, sym: "🌊", name: W("Ozean der Nacht", "Ocean of Night"), text: W("Gewaltige Brandung unter Sternen, Walgesang aus der Tiefe", "Mighty surf under the stars, whale song from the deep"),
+      betten: [["a_wellen1", .9, W("Brandung", "Surf"), { rate: .7 }], ["a_wellen2", .5, W("Dünung", "Swell"), { rate: .55 }], ["a_wind2", .3, W("Seewind", "Sea wind"), { rate: .7 }]],
+      ereignisse: [["t_wal", [30, 80], .4, .7], ["t_glocke", [70, 150], .25, 1]] },
+    { id: "hort", episch: 1, pegel: 1.9, sym: "🐉", name: W("Drachenhort", "Dragon's Hoard"), text: W("Glühende Schätze, ein schlafender Drache atmet, irgendwo rieselt Gold", "Glowing treasure, a sleeping dragon breathes, gold trickles somewhere"),
+      betten: [["a_feuer1", .55, W("Glut", "Embers"), { rate: .55 }], ["a_tropfen1", .35, W("Höhle", "Cave"), { rate: .7 }], ["l_wind", .3, W("Höhlenwind", "Cave wind"), { rate: .5, tief: 500 }], ["~tief", .2, W("Grollen", "Rumble"), { ton: ["kb_28", "vc_36"], rate: .5, tief: 250 }]],
+      ereignisse: [["t_atem", [7, 13], .5, 0], ["t_muenzen", [12, 30], .35, .3], ["t_bruellen", [80, 180], .4, 1], ["t_stein", [30, 70], .3, .6]] },
+    { id: "gefallene", episch: 1, pegel: 1.35, sym: "👻", name: W("Halle der Gefallenen", "Hall of the Fallen"), text: W("Verlassene Halle, Geisterglocken, Klagen und ferner Chor", "A forsaken hall, ghostly chimes, laments and a distant choir"),
+      betten: [["a_halle", .5, W("Halle", "Hall"), { rate: .5 }], ["l_windspiel", .35, W("Geisterglocken", "Ghost chimes"), { rate: .5 }], ["a_heulwind", .35, W("Klagender Wind", "Wailing wind"), { rate: .55, tief: 900 }], ["~chor", .22, W("Geisterchor", "Ghost choir"), { ton: ["stimme_57", "stimme_60", "stimme_63"], rate: .5, tief: 2200 }]],
+      ereignisse: [["t_stoehnen", [25, 60], .3, .8], ["t_chor", [25, 55], .3, .6], ["t_glocke", [40, 90], .35, 1], ["t_kette", [60, 140], .2, 1]] },
+    { id: "sterne", episch: 1, pegel: 2.4, sym: "✨", name: W("Zwischen den Sternen", "Between the Stars"), text: W("Schwebende Klangschalen, kosmischer Wind, endlose Weite", "Floating singing bowls, cosmic wind, endless expanse"),
+      betten: [["a_klangschale", .5, W("Klangschalen", "Singing bowls"), { rate: .5 }], ["l_windspiel", .25, W("Sternenstaub", "Stardust"), { rate: .7, tief: 3000 }], ["a_wind2", .3, W("Kosmischer Wind", "Cosmic wind"), { rate: .4, tief: 700 }], ["~chor", .2, W("Sphärenchor", "Choir of spheres"), { ton: ["stimme_57", "stimme_60", "stimme_63"], rate: .5, tief: 2600 }]],
+      ereignisse: [["t_glocke", [30, 70], .25, 1], ["t_chor", [25, 60], .25, .7], ["t_wal", [80, 160], .22, 1]] },
+    { id: "schlachtfeld", episch: 1, pegel: 1.8, sym: "⚔", name: W("Schlachtfeld danach", "Battlefield, after"), text: W("Rauch und Brände, Krähen über dem Feld, ferner Donner, Wind", "Smoke and fires, crows over the field, distant thunder, wind"),
+      betten: [["a_feuer2", .4, W("Brände", "Fires"), { rate: .7 }], ["a_wind1", .5, W("Wind", "Wind"), { rate: .6 }], ["l_gewitter", .28, W("Fernes Unwetter", "Distant storm"), { rate: .6, tief: 600 }]],
+      ereignisse: [["t_kraehe", [12, 30], .3, .7], ["t_metall", [25, 60], .25, .7], ["t_stoehnen", [40, 90], .2, 1], ["t_donner", [60, 140], .3, 1], ["t_heulen", [70, 150], .25, 1]] }
+  );
+  /* Einschläge: mehrere Lagen echter Aufnahmen übereinander, tiefer gestimmt.
+     Lage: { f: Dateien, r: [Tempo], g: Pegel, n: Anzahl, abstand: Sekunden oder [min,max], nach: Verzögerung, lang: weich ein- und ausblenden ("auf" = anschwellen) } */
+  const EINSCHLAEGE = [
+    { id: "donner", sym: "⚡", name: W("Donnerschlag", "Thunderclap"), tx: W("Ein Blitz schlägt ein", "Lightning strikes"), lagen: [{ f: DONNER_T, r: [.62, .75], g: 1 }, { f: ["fx_fo_explosion"], r: [.34, .4], g: .7 }] },
+    { id: "glocke", sym: "🔔", name: W("Totenglocke", "Death knell"), tx: W("Drei schwere Schläge", "Three heavy strokes"), lagen: [{ f: ["e_glocke_1", "e_glocke_2"], r: [.3, .3], g: 1, n: 3, abstand: 3.6 }] },
+    { id: "gong", sym: "🌕", name: W("Gong der Tiefe", "Gong of the deep"), tx: W("Bebt lange nach", "Trembles on and on"), lagen: [{ f: ["gong"], r: [.5, .5], g: .65 }, { f: ["e_gong_1", "e_gong_2"], r: [.3, .33], g: .45 }] },
+    { id: "bruellen", sym: "🐉", name: W("Drachenbrüllen", "Dragon's roar"), tx: W("Aus der Tiefe der Höhle", "From deep within the cave"), lagen: [{ f: BRUELLEN, r: [.44, .5], g: 1, n: 2, abstand: .22 }, { f: ["fx_br_bfh1_rock_breaking_01"], r: [.5, .5], g: .5, nach: .4 }] },
+    { id: "einsturz", sym: "🪨", name: W("Einsturz", "Collapse"), tx: W("Fels bricht, Steine regnen", "Rock breaks, stones rain down"), lagen: [{ f: ["fx_br_bfh1_rock_breaking_01", "fx_br_bfh1_rock_breaking_02"], r: [.45, .55], g: 2.4 }, { f: reihe("e_stein_", 6), r: [.5, .7], g: 1.6, n: 6, abstand: [.15, .5], nach: .3 }, { f: ["fx_br_bfh1_rock_falling_04"], r: [.5, .6], g: 1.5, n: 3, abstand: [.3, .7], nach: .6 }] },
+    { id: "chor", sym: "🎶", name: W("Chor der Alten", "Choir of the ancients"), tx: W("Ein Akkord schwillt an", "A chord swells up"), lagen: [{ f: ["stimme_57"], r: [.5, .5], g: .38, lang: 1 }, { f: ["stimme_60"], r: [.5, .5], g: .38, lang: 1 }, { f: ["stimme_63"], r: [.5, .5], g: .34, lang: 1 }] },
+    { id: "horn", sym: "📯", name: W("Kriegshorn", "War horn"), tx: W("Ein Ruf über die Ebene", "A call across the plain"), weite: .7, lagen: [{ f: ["horn_39"], r: [.75, .75], g: .75, lang: 1 }, { f: ["horn_36"], r: [.75, .75], g: .5, lang: 1, nach: .15 }] },
+    { id: "zauber", sym: "🔮", name: W("Uralter Zauber", "Ancient spell"), tx: W("Magie flutet den Raum", "Magic floods the space"), lagen: [{ f: ["fx_rd_spell_01", "fx_rd_spell_02", "fx_rp_magic1"], r: [.45, .55], g: 2.3 }, { f: ["glock_91", "glock_96", "glock_103"], r: [1, 1], g: .55, n: 4, abstand: [.12, .3], nach: .2 }] },
+    { id: "einschlag", sym: "💥", name: W("Einschlag", "Impact"), tx: W("Etwas Gewaltiges trifft auf", "Something huge hits"), lagen: [{ f: ["fx_fo_explosion"], r: [.4, .45], g: .9 }, { f: ["timp1"], r: [.5, .5], g: .8 }, { f: ["crash"], r: [.5, .55], g: .4 }] },
+    { id: "schrei", sym: "👻", name: W("Geisterschrei", "Ghostly wail"), tx: W("Ein Schrei aus einer anderen Welt", "A scream from another world"), lagen: [{ f: ["fx_cr_scream_01", "fx_cr_scream_02"], r: [.45, .55], g: .7, fern: 1 }, { f: ["e_heulen_1"], r: [.38, .42], g: .5, nach: .4 }] },
+    { id: "wirbel", sym: "🥁", name: W("Schicksalswirbel", "Drumroll of fate"), tx: W("Anschwellen – und Schlag", "Building – then the blow"), lagen: [{ f: ["timproll"], r: [.6, .6], g: .9, lang: "auf" }, { f: ["timp1"], r: [.5, .5], g: 1, nach: 6.4 }, { f: ["crash"], r: [.55, .55], g: .4, nach: 6.4 }] }
+  ];
+  /* Szenen: ganze Aufnahmen in voller Länge (gestreamt, tiefer gestimmt) oder lange Abfolgen echter Klänge */
+  const SZENEN = [
+    { id: "sturm", g: .75, sym: "🌩", name: W("Sturm zieht auf", "A storm rolls in"), datei: "l_gewitter", rate: .85, ein: 25 },
+    { id: "weltsturm", g: .4, sym: "🌀", name: W("Weltensturm", "World storm"), datei: "l_sturm", rate: .7, ein: 20 },
+    { id: "wind", g: 1.4, sym: "🌪", name: W("Götterwind", "Wind of the gods"), datei: "l_wind", rate: .55, ein: 25 },
+    { id: "grollen", g: 3, sym: "🌑", name: W("Grollen der Tiefe", "Rumble of the deep"), datei: "l_donner", rate: .5, ein: 12 },
+    { id: "moenche", g: .8, sym: "🕯", name: W("Mönche der Tiefe", "Monks of the deep"), datei: "l_tempel", rate: .55, ein: 20 },
+    { id: "dom", g: .85, sym: "⛪", name: W("Endloser Dom", "Endless dome"), datei: "a_halle", rate: .5, ein: 15 },
+    { id: "windspiel", g: 2.2, sym: "🎐", name: W("Geisterglocken", "Ghost bells"), datei: "l_windspiel", rate: .45, ein: 15 },
+    { id: "leviathan", g: 2.2, sym: "🐋", name: W("Leviathan", "Leviathan"), datei: "l_wal", rate: .45, ein: 8 },
+    { id: "schalen", g: .5, sym: "🪷", name: W("Klangschalenkreis", "Circle of bowls"), datei: "a_klangschale", rate: .5, ein: 8 },
+    { id: "gelaeut", g: 2.2, sym: "🔔", name: W("Geläut", "Tolling"), folge: "gelaeut", dauer: 120 },
+    { id: "trommeln", g: .8, sym: "🥁", name: W("Kriegstrommeln", "War drums"), folge: "trommeln", dauer: 150 }
+  ];
+  const DAUER = { l_gewitter: 180, l_sturm: 187.2, l_wind: 166, l_donner: 68.5, l_tempel: 91.6, a_halle: 70.5, l_windspiel: 83, l_wal: 30, a_klangschale: 49 };
+  SZENEN.forEach(s => { s.laenge = s.folge ? s.dauer : DAUER[s.datei] / s.rate; });
+
   /* ---------- Gemerkte Einstellungen ---------- */
   let merk = {};
   const istObjekt = v => !!v && typeof v === "object" && !Array.isArray(v);
@@ -238,7 +367,9 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   if (!istObjekt(merk)) merk = {};
   if (!istObjekt(merk.mix)) merk.mix = {};
   Object.keys(merk.mix).forEach(k => { if (!istObjekt(merk.mix[k])) delete merk.mix[k]; });
-  if (typeof merk.gesamt !== "number" || !isFinite(merk.gesamt)) delete merk.gesamt;
+  ["gesamt", "ehall", "eweite", "ausLaut", "szLaut"].forEach(k => { if (typeof merk[k] !== "number" || !isFinite(merk[k])) delete merk[k]; });
+  try { const q = new URLSearchParams(location.search).get("modus"); if (q === "episch" || q === "ruhig") merk.modus = q; } catch (_) {}
+  if (merk.modus !== "episch") merk.modus = "ruhig";
   const speichern = () => { if (hoerer) return; try { localStorage.setItem("imres-klangwelten", JSON.stringify(merk)); } catch (_) {} };
   const zz = (a, b) => a + Math.random() * (b - a);
   const zufall = l => l[Math.floor(Math.random() * l.length)];
@@ -251,7 +382,11 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     const AC = window.AudioContext || window.webkitAudioContext;
     try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { ctx = new AC(); }
     const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12; lim.attack.value = .005; lim.release.value = .3;
-    gesamt = ctx.createGain(); gesamt.gain.value = lautWert(); gesamt.connect(lim); lim.connect(ctx.destination);
+    gesamt = ctx.createGain(); gesamt.gain.value = lautWert(); gesamt.connect(lim);
+    /* letzte Sicherung gegen Übersteuern: unterhalb von 0,7 unverändert, darüber weich bis höchstens 0,98 abgerundet */
+    const sc = ctx.createWaveShaper(), kurve = new Float32Array(2049);
+    for (let i = 0; i < 2049; i++) { const x = i / 1024 - 1, a = Math.abs(x); kurve[i] = Math.sign(x) * (a < .7 ? a : .7 + .28 * Math.tanh((a - .7) / .28)); }
+    sc.curve = kurve; lim.connect(sc); sc.connect(ctx.destination);
     trocken = ctx.createGain(); trocken.connect(gesamt);
     hallEin = ctx.createGain(); hall = ctx.createConvolver(); hallNass = ctx.createGain(); hallNass.gain.value = .5;
     hallEin.connect(hall); hall.connect(hallNass); hallNass.connect(gesamt);
@@ -274,7 +409,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     for (let c = 0; c < k; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
     hall.buffer = b;
   }
-  const quelle = n => n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_") ? "klang/" + n + ".mp3" : "amb/" + n + ".mp3";
+  const quelle = n => /^(a|e|l)_/.test(n) ? "amb/" + n + ".mp3" : "klang/" + n + ".mp3";
   function laden(n) {
     if (puffer.has(n)) return Promise.resolve(puffer.get(n));
     if (laedt.has(n)) return laedt.get(n);
@@ -358,7 +493,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     b.aus = true; const j = ctx.currentTime;
     b.out.gain.cancelScheduledValues(j); b.out.gain.setValueAtTime(b.out.gain.value, j); b.out.gain.linearRampToValueAtTime(0, j + (sanft ? 3 : .4));
     b.quellen.forEach(s => { try { s.stop(j + (sanft ? 3.2 : .5)); } catch (_) {} });
-    setTimeout(() => { try { b.out.disconnect(); } catch (_) {} }, sanft ? 3500 : 700);
+    setTimeout(() => { try { b.out.disconnect(); if (b.lfo) b.lfo.stop(); } catch (_) {} }, sanft ? 3500 : 700);
   }
 
   /* ---------- Ereignisse: mal nah, mal fern, links und rechts ---------- */
@@ -389,6 +524,249 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     s.start(t);
   }
 
+  /* ---------- Episch: der Klangstrang ----------
+     Quellen → eTrocken + langer, dunkler Nachhall + Weite (Ping-Pong-Echos, die selbst wieder in den Hall laufen) → eigener Begrenzer → Gesamt.
+     Der Strang entsteht erst, wenn zum ersten Mal etwas Episches erklingt – vorher kostet er keine Rechenzeit. */
+  const wert = (x, d) => x != null ? x : d;
+  const mobil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+  let E = null;
+  function epischStart() {
+    audioStart();
+    if (E) return E;
+    E = {};
+    const bus = ctx.createGain(); bus.gain.value = .26;
+    const komp = ctx.createDynamicsCompressor(); komp.threshold.value = -16; komp.knee.value = 6; komp.ratio.value = 8; komp.attack.value = .004; komp.release.value = .35;
+    bus.connect(komp); komp.connect(gesamt); E.bus = bus;
+    E.trocken = ctx.createGain(); E.trocken.connect(bus);
+    E.hallEin = ctx.createGain(); E.hall = ctx.createConvolver(); E.hallNass = ctx.createGain();
+    E.hall.buffer = epischerHall(); E.hallEin.connect(E.hall); E.hall.connect(E.hallNass); E.hallNass.connect(bus);
+    E.weiteEin = ctx.createGain(); E.weiteAus = ctx.createGain();
+    const merger = ctx.createChannelMerger(2), dl = ctx.createDelay(2), dr = ctx.createDelay(2);
+    dl.delayTime.value = .53; dr.delayTime.value = .79;
+    const lpl = ctx.createBiquadFilter(), lpr = ctx.createBiquadFilter(); lpl.type = lpr.type = "lowpass"; lpl.frequency.value = 2400; lpr.frequency.value = 1900;
+    const fl = ctx.createGain(), fr = ctx.createGain(); E.fb = [fl, fr];
+    E.weiteEin.connect(dl); dl.connect(lpl); lpl.connect(fl); fl.connect(dr); dr.connect(lpr); lpr.connect(fr); fr.connect(dl);
+    lpl.connect(merger, 0, 0); lpr.connect(merger, 0, 1); merger.connect(E.weiteAus); E.weiteAus.connect(bus);
+    const wh = ctx.createGain(); wh.gain.value = .7; E.weiteAus.connect(wh); wh.connect(E.hallEin);
+    E.ausBus = ctx.createGain(); E.szBus = ctx.createGain(); E.ausBus.connect(E.trocken); E.szBus.connect(E.trocken);
+    epischRaum(); epischPegel();
+    /* Einschläge schon jetzt laden, damit der erste Knopfdruck sofort klingt */
+    EINSCHLAEGE.forEach(a => a.lagen.forEach(l => l.f.forEach(laden)));
+    ["e_glocke_1", "e_glocke_3", "e_gong_1", "timp1", "timp3", "bd", "timproll"].forEach(laden);
+    return E;
+  }
+  /* Nachhall: kurzes Aufblühen, helle Anteile verklingen schnell, dunkle tragen lange.
+     Am Rechner 9 s stereo; auf dem Handy 3,5 s einkanalig (spart Rechenzeit, sonst kratzt es) – die Echos der Weite verlängern ihn dort. */
+  function epischerHall() {
+    const sr = ctx.sampleRate, T = mobil ? 3.5 : 9, k = mobil ? 1 : 2, n = Math.floor(sr * T), b = ctx.createBuffer(k, n, sr), pre = Math.floor(sr * .05);
+    for (let c = 0; c < k; c++) {
+      const d = b.getChannelData(c); let m = 0, t2 = 0;
+      for (let i = pre; i < n; i++) {
+        const t = (i - pre) / sr, x = Math.random() * 2 - 1, aus = Math.min(1, (n - i) / (sr * .3));
+        m += .35 * (x - m); t2 += .06 * (x - t2);
+        d[i] = aus * (1 - Math.exp(-t / .3)) * (x * Math.exp(-6.9 * t / (T * .22)) * .35 + m * Math.exp(-6.9 * t / (T * .5)) * .7 + t2 * Math.exp(-6.9 * t / (T * .92)) * 2.4);
+      }
+      [.013, .021, .034, .047, .061].forEach((s, j) => { const i = pre + Math.floor(sr * s * (c ? 1.13 : 1)); if (i < n) d[i] += (j % 2 ? -.5 : .55) * (1 - j * .12); });
+    }
+    return b;
+  }
+  function epischRaum() {
+    if (!E) return;
+    const h = wert(merk.ehall, 75) / 100, w = wert(merk.eweite, 45) / 100, j = ctx.currentTime;
+    E.hallNass.gain.setTargetAtTime(h * 1.5, j, .2); E.trocken.gain.setTargetAtTime(1 - h * .55, j, .2);
+    E.weiteAus.gain.setTargetAtTime(w * .55, j, .2); E.fb.forEach(f => f.gain.setTargetAtTime(.3 + w * .3, j, .2));
+  }
+  function epischPegel() {
+    if (!E) return; const j = ctx.currentTime;
+    E.ausBus.gain.setTargetAtTime(Math.pow(wert(merk.ausLaut, 100) / 100, 1.3), j, .05);
+    E.szBus.gain.setTargetAtTime(Math.pow(wert(merk.szLaut, 100) / 100, 1.3), j, .05);
+  }
+  /* Ausgang mit Hall- und Weite-Anteil, mal fern (gedämpft), irgendwo im Raum */
+  function eAusgang(ziel, hallAnteil, weiteAnteil, fern, pan) {
+    const g = ctx.createGain(); let letzter = g;
+    if (fern) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = zz(700, 1800); g.connect(lp); letzter = lp; }
+    if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = pan != null ? pan : zz(-.7, .7); letzter.connect(pn); letzter = pn; }
+    letzter.connect(ziel);
+    if (hallAnteil) { const h = ctx.createGain(); h.gain.value = hallAnteil; letzter.connect(h); h.connect(E.hallEin); }
+    if (weiteAnteil) { const w = ctx.createGain(); w.gain.value = weiteAnteil; letzter.connect(w); w.connect(E.weiteEin); }
+    return g;
+  }
+  function eSpiel(b, ziel, t, rate, g, form) {
+    const s = ctx.createBufferSource(); s.buffer = b; s.playbackRate.value = rate;
+    const d = b.duration / rate, gg = ctx.createGain(), v = g == null ? 1 : g; gg.gain.value = v;
+    if (form === "auf") { gg.gain.setValueAtTime(.05 * v, t); gg.gain.linearRampToValueAtTime(v, t + d * .97); }
+    else if (form) { gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(v, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); }
+    s.connect(gg); gg.connect(ziel); s.start(t);
+  }
+
+  /* Teppiche der epischen Welten: tiefer gestimmt, lange überblendet, langsam durch den Raum wandernd */
+  function eBettStarten(welt, [name, staerke, label, o], i) {
+    const b = { e: 1, name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false };
+    const m = merk.mix[welt.id]; if (m && m.b && typeof m.b[i] === "number") b.regler = m.b[i];
+    b.out.gain.value = 0;
+    let letzter = b.out;
+    if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; letzter.connect(lp); letzter = lp; }
+    if (ctx.createStereoPanner) {
+      const pn = ctx.createStereoPanner(), lfo = ctx.createOscillator(), tiefe = ctx.createGain();
+      lfo.frequency.value = zz(.012, .035); tiefe.gain.value = zz(.25, .5); lfo.connect(tiefe); tiefe.connect(pn.pan); lfo.start();
+      letzter.connect(pn); letzter = pn; b.lfo = lfo;
+    }
+    letzter.connect(E.trocken);
+    const s = ctx.createGain(); s.gain.value = b.o.ton ? .9 : .6; letzter.connect(s); s.connect(E.hallEin);
+    const p = welt.pegel || 1;
+    if (b.o.ton) {
+      b.grund = staerke * p * .19;
+      Promise.all(b.o.ton.map(laden)).then(() => { if (b.aus) return; b.naechst = ctx.currentTime + .05; b.bereit = true; eAnblenden(b); eTonPlanen(b); });
+    } else {
+      /* Pegel angleichen, aber nie so weit, dass knackende Spitzen übersteuern */
+      b.grund = Math.min(1.4, staerke * p * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)));
+      laden(name).then(buf => { if (!buf || b.aus) return; b.buf = buf; b.naechst = ctx.currentTime + .05; eAnblenden(b); eBettPlanen(b); });
+    }
+    return b;
+  }
+  function eAnblenden(b) { const j = ctx.currentTime; b.out.gain.setValueAtTime(0, j); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, j + 6); b.drift = j + 8; }
+  function eBettPlanen(b) {
+    if (b.o.ton) return eTonPlanen(b);
+    if (!b.buf || b.aus) return;
+    const D = b.buf.duration;
+    while (b.naechst < ctx.currentTime + 6) {
+      /* len und X in echter Zeit; der Ausschnitt liegt samt Tempo vollständig in der Datei und endet erst nach der Ausblendung */
+      const rate = (b.o.rate || 1) * zz(.985, 1.015), kurz = D / rate < 30;
+      const len = Math.min((D - .3) / rate * (kurz ? .9 : .8), zz(12, 28)), X = kurz ? len * .45 : Math.min(5, len * .32);
+      const t = b.naechst, off = Math.random() * Math.max(0, D - len * rate - .2);
+      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b.buf; s.playbackRate.value = rate;
+      g.gain.value = 0; g.gain.setValueCurveAtTime(EIN, t, X); g.gain.setValueCurveAtTime(AUS, t + len - X, X);
+      s.connect(g); g.connect(b.out); s.start(t, off); s.stop(t + len + .05);
+      b.quellen.push(s); s.onended = () => { const k = b.quellen.indexOf(s); if (k >= 0) b.quellen.splice(k, 1); };
+      b.naechst = t + len - X;
+    }
+    eAtmen(b);
+  }
+  /* schwebender Grund aus Instrumententönen: nur der gehaltene Teil, lang überblendet, leicht verstimmt */
+  function eTonPlanen(b) {
+    if (!b.bereit || b.aus) return;
+    while (b.naechst < ctx.currentTime + 6) {
+      const buf = puffer.get(zufall(b.o.ton)); if (!buf) { b.naechst += 1; continue; }
+      const rate = (b.o.rate || 1) * zz(.997, 1.003), off = Math.min(.35, buf.duration * .1), len = (buf.duration - off - .3) / rate, X = len * .45, t = b.naechst;
+      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = buf; s.playbackRate.value = rate;
+      g.gain.value = 0; g.gain.setValueCurveAtTime(EIN, t, X); g.gain.setValueCurveAtTime(AUS, t + len - X, X);
+      s.connect(g); g.connect(b.out); s.start(t, off); s.stop(t + len + .05);
+      b.quellen.push(s); s.onended = () => { const k = b.quellen.indexOf(s); if (k >= 0) b.quellen.splice(k, 1); };
+      b.naechst = t + len - X;
+    }
+    eAtmen(b);
+  }
+  function eAtmen(b) { if (ctx.currentTime > b.drift) { b.drift = ctx.currentTime + zz(10, 24); b.out.gain.setTargetAtTime(b.grund * b.regler * zz(.75, 1.12), ctx.currentTime, zz(3, 6)); } }
+  function eEreignis([art, , staerke, fern]) {
+    const e = EV[art], j = ctx.currentTime + .05, weit = Math.random() < (fern || 0);
+    const ziel = eAusgang(E.trocken, weit ? 1.3 : .8, weit ? .35 : .15, weit);
+    ziel.gain.value = staerke * (weit ? zz(.45, .7) : zz(.7, 1));
+    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1;
+    let t = j;
+    for (let k = 0; k < n; k++) {
+      const name = zufall(e.f), b = puffer.get(name);
+      if (!b) { laden(name); continue; }
+      eSpiel(b, ziel, t, zz(e.tempo[0], e.tempo[1]), e.folge ? zz(.7, 1) : 1, e.lang ? 1 : null);
+      if (e.folge) t += zz(e.folge[2], e.folge[3]);
+    }
+  }
+
+  /* Einschläge */
+  function ausloesen(id, vonFern) {
+    const a = EINSCHLAEGE.find(x => x.id === id); if (!a) return;
+    epischStart(); if (stumm) stumm.play().catch(() => {});
+    const el = document.querySelector('[data-aus="' + id + '"]');
+    if (el) { el.classList.remove("blitz"); void el.offsetWidth; el.classList.add("blitz"); }
+    const j = ctx.currentTime + .03, pan = zz(-.35, .35);
+    a.lagen.forEach(l => {
+      const ziel = eAusgang(E.ausBus, l.fern ? 1.5 : 1.05, a.weite != null ? a.weite : .3, l.fern, pan + zz(-.15, .15));
+      ziel.gain.value = l.g * .9;
+      let t = j + (l.nach || 0);
+      for (let k = 0; k < (l.n || 1); k++) {
+        const name = zufall(l.f), b = puffer.get(name);
+        if (b) eSpiel(b, ziel, t, zz(l.r[0], l.r[1]), k ? zz(.75, 1) : 1, l.lang || null); else laden(name);
+        const ab = l.abstand || 0; t += Array.isArray(ab) ? zz(ab[0], ab[1]) : ab;
+      }
+    });
+    if (!vonFern && funk) funk.kanal.senden("aus", { id });
+  }
+
+  /* Szenen */
+  const laufend = new Map(); let szNr = 0;
+  function szeneSchalten(id, an) {
+    const s = SZENEN.find(x => x.id === id); if (!s) return;
+    const l = laufend.get(id);
+    if (an === undefined) an = !l;
+    if (!an) { if (l) szeneStopp(l); } else if (!l) szeneStart(s);
+    funkSenden();
+  }
+  function szeneStart(s) {
+    epischStart(); if (stumm) stumm.play().catch(() => {});
+    const j = ctx.currentTime, l = { s, start: j, g: ctx.createGain(), nr: ++szNr, aus: false };
+    laufend.set(s.id, l); padZeichnen();
+    l.g.gain.value = 0;
+    let letzter = l.g;
+    if (ctx.createStereoPanner) {
+      const pn = ctx.createStereoPanner(), lfo = ctx.createOscillator(), t = ctx.createGain();
+      lfo.frequency.value = zz(.015, .04); t.gain.value = .5; lfo.connect(t); t.connect(pn.pan); lfo.start(); l.lfo = lfo; letzter.connect(pn); letzter = pn;
+    }
+    letzter.connect(E.szBus); const h = ctx.createGain(); h.gain.value = 1; letzter.connect(h); h.connect(E.hallEin);
+    const w = ctx.createGain(); w.gain.value = .12; letzter.connect(w); w.connect(E.weiteEin);
+    if (s.folge) { l.ende = j + s.dauer; l.naechst = j + .1; l.g.gain.value = s.g || 1; folgePlanen(l); return; }
+    /* lange Aufnahme als Strom (spart Speicher); ohne Tonhöhen-Ausgleich sinkt die Tonhöhe mit dem Tempo */
+    const el = new Audio(); el.preload = "auto"; el.src = quelle(s.datei);
+    el.preservesPitch = false; el.mozPreservesPitch = false; el.webkitPreservesPitch = false; el.setAttribute("playsinline", "");
+    l.el = el; l.laedt = true;
+    try { ctx.createMediaElementSource(el).connect(l.g); } catch (_) {}
+    const pegel = Math.min(2, .055 / (LAUTHEIT[s.datei] || .05)) * .95 * (s.g || 1);
+    el.playbackRate = s.rate; el.defaultPlaybackRate = s.rate;
+    el.addEventListener("playing", () => {
+      if (l.aus || !l.laedt) return; l.laedt = false;
+      const t = ctx.currentTime, d = (el.duration || DAUER[s.datei]) / s.rate, ein = Math.min(s.ein || 15, d * .25), aus = Math.min(30, d * .2);
+      l.start = t - el.currentTime / s.rate; l.ende = l.start + d;
+      l.g.gain.cancelScheduledValues(t); l.g.gain.setValueAtTime(0, t); l.g.gain.linearRampToValueAtTime(pegel, t + ein);
+      l.g.gain.setValueAtTime(pegel, Math.max(t + ein, l.ende - aus)); l.g.gain.linearRampToValueAtTime(0, l.ende);
+      padZeichnen();
+    }, { once: true });
+    const weg = () => { if (laufend.get(s.id) === l) szeneEnde(l); };
+    el.addEventListener("ended", weg); el.addEventListener("error", weg);
+    const p = el.play(); if (p && p.catch) p.catch(weg);
+  }
+  /* Geläut und Kriegstrommeln: Schlag für Schlag ein paar Sekunden im Voraus geplant */
+  function folgePlanen(l) {
+    if (l.aus) return;
+    const j = ctx.currentTime, s = l.s, D = s.dauer;
+    const huelle = t => { const x = (t - l.start) / D; return x < 0 ? 0 : x < .3 ? x / .3 : x < .7 ? 1 : x < 1 ? (1 - x) / .3 : 0; };
+    while (l.naechst < j + 4 && l.naechst < l.ende) {
+      const t = l.naechst, h = Math.max(.08, huelle(t));
+      if (s.folge === "gelaeut") {
+        const zwei = Math.random() < .5, b = puffer.get(zwei ? "e_glocke_3" : "e_glocke_1");
+        if (b) { const z = eAusgang(l.g, 0, 0, false, zwei ? .35 : -.35); z.gain.value = h * (zwei ? .7 : .9); eSpiel(b, z, t, zwei ? .42 : .31); }
+        if (Math.random() < .12) { const g = puffer.get("e_gong_1"); if (g) { const z = eAusgang(l.g, 0, 0, false, 0); z.gain.value = h * .5; eSpiel(g, z, t + .8, .3); } }
+        l.naechst = t + zz(3.2, 4.6);
+      } else {
+        /* langsamer Marsch: BUM – – BUM-BUM, alle vier Takte ein Wirbel; zwei Trommler links und rechts, in der Ferne */
+        const takt = l.takt = (l.takt || 0) + 1, z = eAusgang(l.g, 0, 0, true, -.3), y = eAusgang(l.g, 0, 0, true, .3);
+        z.gain.value = h; y.gain.value = h;
+        const t1 = puffer.get("timp1"), t3 = puffer.get("timp3"), bd = puffer.get("bd"), roll = puffer.get("timproll");
+        if (t1) { eSpiel(t1, z, t, .5, 1); eSpiel(t1, z, t + 3, .5, .55); eSpiel(t1, z, t + 3.5, .5, .75); }
+        if (bd) eSpiel(bd, y, t, .7, .8);
+        if (t3) eSpiel(t3, y, t + 2, .5, .8);
+        if (takt % 4 === 0 && roll) eSpiel(roll, y, t, .6, .5, "auf");
+        l.naechst = t + 4;
+      }
+    }
+    if (j >= l.ende + 6) szeneEnde(l);
+  }
+  function szeneStopp(l) {
+    if (l.aus) return; l.aus = true;
+    const j = ctx.currentTime; l.g.gain.cancelScheduledValues(j); l.g.gain.setValueAtTime(l.g.gain.value, j); l.g.gain.linearRampToValueAtTime(0, j + 6);
+    laufend.delete(l.s.id); padZeichnen();
+    setTimeout(() => aufraeumen(l), 6500);
+  }
+  function szeneEnde(l) { l.aus = true; laufend.delete(l.s.id); aufraeumen(l); padZeichnen(); funkSenden(); }
+  function aufraeumen(l) { try { if (l.el) { l.el.pause(); l.el.removeAttribute("src"); l.el.load(); } if (l.lfo) l.lfo.stop(); l.g.disconnect(); } catch (_) {} }
+
   /* ---------- Klangwelt starten / wechseln ---------- */
   function weltStarten(welt) {
     audioStart();
@@ -396,13 +774,11 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     const alt = aktiv;
     if (alt) alt.betten.forEach(b => bettStopp(b, true));
     const m = merk.mix[welt.id] || {};
-    raumSetzen(welt.raum);
-    hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2, ctx.currentTime, .3);
-    aktiv = { welt, betten: welt.betten.map((x, i) => bettStarten(welt, x, i)), naechst: {}, leben: m.leben != null ? m.leben : 1 };
+    if (welt.episch) epischStart();
+    else { raumSetzen(welt.raum); hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2, ctx.currentTime, .3); }
+    aktiv = { welt, betten: welt.betten.map((x, i) => (welt.episch ? eBettStarten : bettStarten)(welt, x, i)), naechst: {}, leben: m.leben != null ? m.leben : 1 };
     welt.ereignisse.forEach(([art]) => { (EV[art].f || []).forEach(laden); if (EV[art].s) synthEreignis(EV[art].s); });
     merk.welt = welt.id; speichern();
-    clearInterval(timer);
-    timer = setInterval(takt, 250);
     zeichnen(); funkSenden();
     if ("mediaSession" in navigator) {
       try { navigator.mediaSession.metadata = new MediaMetadata({ title: welt.name, artist: T.titel, album: "Imres Tales" }); } catch (_) {}
@@ -410,21 +786,24 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     }
   }
   function takt() {
-    if (!aktiv || !ctx) return;
+    if (!ctx) return;
+    laufend.forEach(l => { if (l.s.folge) folgePlanen(l); });
+    fortschritt();
+    if (!aktiv) return;
     const j = ctx.currentTime;
-    aktiv.betten.forEach(bettPlanen);
+    aktiv.betten.forEach(b => b.e ? eBettPlanen(b) : bettPlanen(b));
     if (aktiv.leben <= 0) return;
     aktiv.welt.ereignisse.forEach((ev, i) => {
       const [, [a, b]] = ev;
       if (aktiv.naechst[i] == null) aktiv.naechst[i] = j + zz(a * .3, b) / aktiv.leben;
-      if (j >= aktiv.naechst[i]) { try { ereignis(aktiv.welt, ev); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / aktiv.leben; }
+      if (j >= aktiv.naechst[i]) { try { if (aktiv.welt.episch) eEreignis(ev); else ereignis(aktiv.welt, ev); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / aktiv.leben; }
     });
   }
   function stoppen() {
     if (!aktiv) return;
     aktiv.betten.forEach(b => bettStopp(b, true));
-    aktiv = null; clearInterval(timer);
-    if (stumm) stumm.pause();
+    aktiv = null;
+    if (stumm && !laufend.size) stumm.pause();
     zeichnen(); funkSenden();
   }
 
@@ -433,28 +812,61 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   function zeichnen() {
     if (hoerer) { hoererZeichnen(); return; }
-    $("welten").innerHTML = WELTEN.map(w => '<button type="button" class="welt' + (aktiv && aktiv.welt === w ? " an" : "") + '" data-welt="' + w.id + '"><span class="sym" aria-hidden="true">' + w.sym +
+    const ep = merk.modus === "episch";
+    document.body.classList.toggle("episch", ep);
+    document.querySelectorAll("[data-modus]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.modus === merk.modus)));
+    $("aus-box").hidden = $("sz-box").hidden = !ep;
+    $("welten").innerHTML = WELTEN.filter(w => !w.episch === !ep).map(w => '<button type="button" class="welt' + (aktiv && aktiv.welt === w ? " an" : "") + '" data-welt="' + w.id + '"><span class="sym" aria-hidden="true">' + w.sym +
       '</span><span class="nm">' + esc(w.name) + '</span><span class="tx">' + esc(w.text) + "</span></button>").join("");
     const sp = $("spielen"); sp.textContent = aktiv ? "■" : "▶"; sp.classList.toggle("laeuft", !!aktiv); sp.setAttribute("aria-label", aktiv ? T.stopp : T.spielen);
     const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt);
     $("jetzt-name").textContent = w ? w.sym + " " + w.name : T.waehlen;
-    $("jetzt-info").textContent = aktiv ? T.laeuft : w ? T.pausiert : "";
+    infoZeile();
     const mi = $("misch");
     if (!w) { mi.hidden = true; return; }
     mi.hidden = false;
     const m = merk.mix[w.id] || {}, wert = (x, d) => x != null ? x : d;
     mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + "</small></h2>" +
       w.betten.map((x, i) => regler("b" + i, x[2], Math.round(wert(m.b && m.b[i], 1) * 100), 0, 150)).join("") +
-      '<hr class="trenn">' + regler("leben", T.leben, Math.round(wert(m.leben, 1) * 100), 0, 200) + regler("raum", T.raum, wert(m.raum, 50), 0, 100) +
-      '<p class="tipp">' + esc(T.tippMisch) + "</p>";
+      '<hr class="trenn">' + regler("leben", T.leben, Math.round(wert(m.leben, 1) * 100), 0, 200) +
+      (w.episch ? regler("ehall", T.ehall, wert(merk.ehall, 75), 0, 100) + regler("eweite", T.eweite, wert(merk.eweite, 45), 0, 100) : regler("raum", T.raum, wert(m.raum, 50), 0, 100)) +
+      '<p class="tipp">' + esc(w.episch ? T.tippEpisch + " " + T.tippMisch : T.tippMisch) + "</p>";
+  }
+  function infoZeile() {
+    if (hoerer) return;
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), teile = [];
+    if (aktiv) teile.push(T.laeuft); else if (w) teile.push(T.pausiert);
+    if (laufend.size) teile.push("⏳ " + T.szLaeuft(laufend.size));
+    $("jetzt-info").textContent = teile.join(" · ");
+  }
+  const zeit = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  const minuten = s => s >= 90 ? W("ca. ", "approx. ") + Math.round(s / 60) + " min" : Math.round(s / 10) * 10 + " s";
+  function padZeichnen() {
+    if (hoerer) return;
+    $("aus").innerHTML = EINSCHLAEGE.map((a, i) => '<button type="button" class="knopf" data-aus="' + a.id + '">' + (i < 10 && !mobil ? "<kbd>" + ((i + 1) % 10) + "</kbd>" : "") +
+      '<span class="sym" aria-hidden="true">' + a.sym + '</span><span class="nm">' + esc(a.name) + '</span><span class="tx">' + esc(a.tx) + "</span></button>").join("");
+    $("szenen").innerHTML = SZENEN.map(s => { const l = laufend.get(s.id);
+      return '<button type="button" class="knopf szene' + (l ? " an" : "") + (l && l.laedt ? " laedt" : "") + '" data-szene="' + s.id + '" aria-pressed="' + !!l + '"><span class="sym" aria-hidden="true">' + s.sym +
+        '</span><span class="nm">' + esc(s.name) + '</span><span class="tx">' + (l ? "■ " : "⏳ ") + esc(minuten(s.laenge)) + "</span></button>"; }).join("");
+    fortschritt(); infoZeile();
+  }
+  function fortschritt() {
+    if (hoerer || !ctx) return;
+    laufend.forEach(l => {
+      const el = document.querySelector('[data-szene="' + l.s.id + '"]'); if (!el) return;
+      const ende = l.ende || (l.start + l.s.laenge), p = Math.max(0, Math.min(1, (ctx.currentTime - l.start) / (ende - l.start)));
+      el.style.setProperty("--p", (p * 100).toFixed(1) + "%");
+      const tx = el.querySelector(".tx"); if (tx && !l.laedt) tx.textContent = "■ " + T.noch + " " + zeit(ende - ctx.currentTime);
+    });
   }
   function hoererZeichnen() {
     const d = hoerer.zuletzt, w = d && d.laeuft ? WELTEN.find(x => x.id === d.welt) : null;
-    $("welten").innerHTML = ""; $("misch").hidden = true; $("funk").innerHTML = "";
+    $("welten").innerHTML = ""; $("misch").hidden = true; $("funk").innerHTML = ""; $("modus").hidden = $("aus-box").hidden = $("sz-box").hidden = true;
     let box = document.getElementById("hoerer");
     if (!box) { box = document.createElement("section"); box.id = "hoerer"; box.className = "hoerer"; $("welten").before(box); }
     box.innerHTML = '<p class="tipp">' + esc(T.hTitel) + (hoerer.status === "fehler" ? " · 🔴 " + esc(T.fehler) : hoerer.status !== "ok" ? " · 🟡 " + esc(T.verbinde) : "") + "</p>" +
-      (w ? '<div class="gross">' + w.sym + "</div><h2>" + esc(w.name) + '</h2><p class="tipp">' + esc(w.text) + "</p>" : '<p class="tipp">' + esc(T.hWarte) + "</p>") +
+      (w ? '<div class="gross">' + w.sym + "</div><h2>" + esc(w.name) + '</h2><p class="tipp">' + esc(w.text) + "</p>" : laufend.size ? "" : '<p class="tipp">' + esc(T.hWarte) + "</p>") +
+      (laufend.size ? '<p class="tipp">⏳ ' + [...laufend.values()].map(l => l.s.sym + " " + esc(l.s.name)).join(" · ") + "</p>" : "") +
       '<button type="button" class="zuhoeren' + (hoerer.an ? " an" : "") + '">' + (hoerer.an ? T.hStumm : T.hZuhoeren) + "</button>" +
       '<p class="tipp"><a href="' + esc(location.pathname) + '" style="color:var(--mute)">' + esc(T.hSelbst) + "</a></p>";
     const sp = $("spielen"); sp.textContent = hoerer.an ? "❚❚" : "▶"; sp.classList.toggle("laeuft", hoerer.an);
@@ -462,6 +874,13 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   }
   const regler = (k, name, v, lo, hi) => '<label class="regler"><span>' + esc(name) + '</span><input type="range" min="' + lo + '" max="' + hi + '" value="' + v + '" data-regler="' + k + '"><b>' + v + " %</b></label>";
   document.addEventListener("click", e => {
+    const mo = e.target.closest("[data-modus]");
+    if (mo && !hoerer) { merk.modus = mo.dataset.modus; speichern(); zeichnen(); return; }
+    if (!hoerer) {
+      const a = e.target.closest("[data-aus]"); if (a) { ausloesen(a.dataset.aus); return; }
+      const sz = e.target.closest("[data-szene]"); if (sz) { szeneSchalten(sz.dataset.szene); return; }
+      if (e.target.closest("#sz-stopp")) { [...laufend.values()].forEach(szeneStopp); funkSenden(); return; }
+    }
     const w = e.target.closest("[data-welt]");
     if (w && !hoerer) { const welt = WELTEN.find(x => x.id === w.dataset.welt); if (aktiv && aktiv.welt === welt) stoppen(); else weltStarten(welt); return; }
     if (e.target.closest("#spielen")) {
@@ -470,6 +889,8 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     }
   });
   document.addEventListener("input", e => {
+    if (e.target.id === "aus-laut" || e.target.id === "sz-laut") { merk[e.target.id === "aus-laut" ? "ausLaut" : "szLaut"] = +e.target.value; speichern(); epischPegel(); return; }
+    if (e.target.dataset.regler === "ehall" || e.target.dataset.regler === "eweite") { merk[e.target.dataset.regler] = +e.target.value; e.target.nextElementSibling.textContent = e.target.value + " %"; epischRaum(); speichern(); funkSenden(); return; }
     if (e.target.id === "gesamt") { merk.gesamt = +e.target.value; speichern(); if (gesamt) gesamt.gain.setTargetAtTime(lautWert(), ctx.currentTime, .05); return; }
     const k = e.target.dataset.regler; if (!k) return;
     const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt); if (!w) return;
@@ -484,12 +905,19 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   });
   $("gesamt").value = merk.gesamt != null ? merk.gesamt : 70;
   $("gesamt").setAttribute("aria-label", T.gesamt);
+  $("aus-laut").value = wert(merk.ausLaut, 100); $("sz-laut").value = wert(merk.szLaut, 100);
+  $("aus-laut").setAttribute("aria-label", T.hAus); $("sz-laut").setAttribute("aria-label", T.hSz);
+  document.addEventListener("keydown", e => {
+    if (hoerer || tour || merk.modus !== "episch" || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
+    if (/^[0-9]$/.test(e.key)) { const i = (+e.key + 9) % 10; if (EINSCHLAEGE[i]) { e.preventDefault(); ausloesen(EINSCHLAEGE[i].id); } }
+  });
+  setInterval(takt, 250);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && aktiv && ctx.state === "suspended") ctx.resume(); });
 
   /* ---------- Mitlauschen: dieselbe Echtzeit-Verbindung wie im Lautenwerk (Supabase Realtime) ---------- */
   const SERVER = { url: "https://iszdxkwkgkksdemtqhwu.supabase.co", key: "sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z" };
   let hoerer = null, funk = null, funkAuf = false;
-  try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, zuletzt: null, status: "verbinde" }; } catch (_) {}
+  try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, zuletzt: null, status: "verbinde", gesehen: {} }; } catch (_) {}
   function kanal(raum, rolle, beiNachricht, beiStatus) {
     let ws = null, ref = 0, joinRef = null, herz = null, zu = false, leute = {};
     const topic = "realtime:imres-klangwelten-" + raum;
@@ -533,7 +961,8 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   const funkLink = () => location.origin + location.pathname + "?lauschen=" + raumCode();
   function zustand() {
     const w = aktiv ? aktiv.welt : null, m = w ? merk.mix[w.id] || {} : {};
-    return { welt: w ? w.id : null, laeuft: !!aktiv, mix: { b: m.b || [], leben: m.leben != null ? m.leben : 1, raum: m.raum != null ? m.raum : 50 } };
+    return { welt: w ? w.id : null, laeuft: !!aktiv, mix: { b: m.b || [], leben: m.leben != null ? m.leben : 1, raum: m.raum != null ? m.raum : 50 },
+      ehall: wert(merk.ehall, 75), eweite: wert(merk.eweite, 45), szenen: [...laufend.values()].filter(l => !l.aus).map(l => ({ id: l.s.id, nr: l.nr })) };
   }
   let funkWarte = 0;
   function funkSenden() { if (!funk) return; clearTimeout(funkWarte); funkWarte = setTimeout(() => funk.kanal.senden("zustand", zustand()), 250); }
@@ -567,32 +996,39 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   });
   /* Zuhörer: folgt der Klangwelt des Pults, Lautstärke regelt jeder selbst */
   function hoererEmpfang(ev, d) {
-    if (ev !== "zustand" || !d) return;
+    if (!d) return;
+    if (ev === "aus") { if (hoerer.an && EINSCHLAEGE.some(a => a.id === d.id)) ausloesen(d.id, true); return; }
+    if (ev !== "zustand") return;
     hoerer.zuletzt = d;
     if (hoerer.an) hoererAnwenden();
     zeichnen();
   }
   function hoererAnwenden() {
     const d = hoerer.zuletzt; if (!d) return;
+    merk.ehall = Math.max(0, Math.min(100, +d.ehall || 0)); merk.eweite = Math.max(0, Math.min(100, +d.eweite || 0)); epischRaum();
+    /* Szenen: jede genau einmal starten (über ihre Nummer), beendete ausblenden */
+    const soll = Array.isArray(d.szenen) ? d.szenen.filter(x => x && SZENEN.some(s => s.id === x.id)) : [];
+    soll.forEach(x => { const k = x.id + "#" + x.nr; if (!hoerer.gesehen[k]) { hoerer.gesehen[k] = 1; if (!laufend.has(x.id)) szeneStart(SZENEN.find(s => s.id === x.id)); } });
+    laufend.forEach(l => { if (!soll.some(x => x.id === l.s.id)) szeneStopp(l); });
     const welt = WELTEN.find(w => w.id === d.welt);
     if (!d.laeuft || !welt) { if (aktiv) stoppen(); return; }
     const m = d.mix || {}; merk.mix[welt.id] = { b: Array.isArray(m.b) ? m.b.map(x => Math.max(0, Math.min(1.5, +x || 0))) : [], leben: Math.max(0, Math.min(2, +m.leben || 0)), raum: Math.max(0, Math.min(100, +m.raum || 0)) };
     if (!aktiv || aktiv.welt !== welt) weltStarten(welt);
     else {
       aktiv.betten.forEach((b, i) => { const r = merk.mix[welt.id].b[i]; if (typeof r === "number" && r !== b.regler) { b.regler = r; b.drift = 0; b.out.gain.setTargetAtTime(b.grund * r, ctx.currentTime, .3); } });
-      aktiv.leben = merk.mix[welt.id].leben; hallNass.gain.setTargetAtTime(merk.mix[welt.id].raum / 100 * 1.2, ctx.currentTime, .3);
+      aktiv.leben = merk.mix[welt.id].leben; if (!welt.episch) hallNass.gain.setTargetAtTime(merk.mix[welt.id].raum / 100 * 1.2, ctx.currentTime, .3);
     }
   }
   function hoererSchalten() {
     hoerer.an = !hoerer.an;
-    if (hoerer.an) { audioStart(); if (stumm) stumm.play().catch(() => {}); hoererAnwenden(); } else stoppen();
+    if (hoerer.an) { audioStart(); if (stumm) stumm.play().catch(() => {}); hoererAnwenden(); } else { stoppen(); [...laufend.values()].forEach(szeneStopp); hoerer.gesehen = {}; }
     zeichnen();
   }
   if (hoerer) {
     hoerer.kanal = kanal(hoerer.raum, "hoerer", (ev, d) => { if (ev === "_offen") hoerer.kanal.senden("hallo", {}); else hoererEmpfang(ev, d); }, st => { hoerer.status = st; zeichnen(); });
     document.querySelector(".unter").textContent = "";
   }
-  zeichnen(); funkZeichnen();
+  zeichnen(); padZeichnen(); funkZeichnen();
 
   /* ---------- Rundgang ---------- */
   let tour = null;
@@ -601,6 +1037,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     tour.i = i;
     const [sel, h, txt] = T.schritte[i];
     if (sel === "#misch" && $("misch").hidden) { merk.welt = merk.welt || WELTEN[0].id; zeichnen(); }
+    if ((sel === "#aus-box" || sel === "#sz-box") && merk.modus !== "episch") { merk.modus = "episch"; zeichnen(); }
     tour.ziel = document.querySelector(sel);
     const bl = tour.el.querySelector(".tour-blase");
     bl.innerHTML = "<small>" + (i + 1) + " / " + T.schritte.length + "</small><h4>" + esc(h) + "</h4><p>" + esc(txt) + '</p><div class="tour-k"><button type="button" data-tour="ende">' + esc(T.beenden) + "</button><span></span>" +
@@ -637,8 +1074,8 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
 
   /* ---------- Dank ---------- */
   $("dank").innerHTML = EN
-    ? '<h3>Where the sounds come from</h3><p>All layers are real field recordings: from the sound collections of the free apps <a href="https://github.com/rafaelmardojai/blanket">Blanket</a>, <a href="https://github.com/Muges/ambientsounds">AmbientSounds</a> and <a href="https://github.com/mateusfg7/Noisekun">Noisekun</a> (originals on Freesound and from SFX Producer – CC0 / public domain, some CC BY: rain by alex36917, storm by Digifish Music, waves by Luftrum, heavy rain by D W, forest rain by Corsica_S, stream by mystiscool, thunderstorm by RHumphries, waterfall by straget, rain on tent by Garuda1982). Single sounds: CC0 packs by Kenney and OpenGameArt (rubberduck and others), collected in the Open Game SFX Index. Frogs, owls, gulls, woodpecker, birdsong, crows, wolves, dog, cat, horse, whale, thunder, oars, the tavern crowd and further layers (campfire, crickets, wind in the trees, howling wind, river, waterfall, dripstones, rain on leaves, tent and window, waves, rigging, jungle insects, boiling brew, clock, monks chanting, temple hall, singing bowl, bees) come from the collection of the free app <a href="https://github.com/remvze/moodist">Moodist</a> (Pixabay licence / CC0). Only the bats are synthesised. Full list in <a href="klang/LIZENZ.txt">klang/LIZENZ.txt</a>. Thank you!</p>'
-    : '<h3>Woher die Klänge stammen</h3><p>Alle Teppiche sind echte Aufnahmen: aus den Klangsammlungen der freien Apps <a href="https://github.com/rafaelmardojai/blanket">Blanket</a>, <a href="https://github.com/Muges/ambientsounds">AmbientSounds</a> und <a href="https://github.com/mateusfg7/Noisekun">Noisekun</a> (Originale auf Freesound und von SFX Producer – CC0 bzw. gemeinfrei, einige CC BY: Regen von alex36917, Sturm von Digifish Music, Wellen von Luftrum, Starkregen von D W, Waldregen von Corsica_S, Bach von mystiscool, Gewitter von RHumphries, Wasserfall von straget, Regen aufs Zelt von Garuda1982). Einzelgeräusche: CC0-Pakete von Kenney und OpenGameArt (u. a. rubberduck), gesammelt im Open Game SFX Index. Frösche, Eulen, Möwen, Specht, Vogelrufe, Krähen, Wölfe, Hund, Katze, Pferd, Wal, Donner, Ruderschläge, die volle Gaststube und weitere Teppiche (Lagerfeuer, Grillenwiese, Wind in den Bäumen, heulender Sturm, Fluss, Gischt, Tropfsteine, Regen auf Laub, Zelt und Fenster, Uferwellen, Takelage, Insektenchor, siedender Sud, Standuhr, Mönchsgesang, Tempelhalle, Klangschale, Bienen) stammen aus der Sammlung der freien App <a href="https://github.com/remvze/moodist">Moodist</a> (Pixabay-Lizenz bzw. CC0). Nur die Fledermäuse sind gerechnet. Vollständige Liste in <a href="klang/LIZENZ.txt">klang/LIZENZ.txt</a>. Danke!</p>';
+    ? '<h3>Where the sounds come from</h3><p>All layers are real field recordings: from the sound collections of the free apps <a href="https://github.com/rafaelmardojai/blanket">Blanket</a>, <a href="https://github.com/Muges/ambientsounds">AmbientSounds</a> and <a href="https://github.com/mateusfg7/Noisekun">Noisekun</a> (originals on Freesound and from SFX Producer – CC0 / public domain, some CC BY: rain by alex36917, storm by Digifish Music, waves by Luftrum, heavy rain by D W, forest rain by Corsica_S, stream by mystiscool, thunderstorm by RHumphries, waterfall by straget, rain on tent by Garuda1982). Single sounds: CC0 packs by Kenney and OpenGameArt (rubberduck and others), collected in the Open Game SFX Index. Frogs, owls, gulls, woodpecker, birdsong, crows, wolves, dog, cat, horse, whale, thunder, oars, the tavern crowd and further layers (campfire, crickets, wind in the trees, howling wind, river, waterfall, dripstones, rain on leaves, tent and window, waves, rigging, jungle insects, boiling brew, clock, monks chanting, temple hall, singing bowl, bees) come from the collection of the free app <a href="https://github.com/remvze/moodist">Moodist</a> (Pixabay licence / CC0). Only the bats are synthesised. <b>Epic:</b> the same recordings pitched down, plus full-length thunderstorm by RHumphries (CC BY), wind by felix.blume (CC0), storm by Borys Kozielski (CC0) and temple, wind chimes, thunder and whale from Moodist; organ, timpani, horn, gong, double bass and cello from <a href="https://github.com/sgossner/VSCO-2-CE">VSCO 2 Community Edition</a> (CC0, organ by Simon Dalzell); choir voices from FluidR3 by Frank Wen (CC BY 3.0); impacts and creatures from CC0 packs by Kenney and OpenGameArt. Full list in <a href="klang/LIZENZ.txt">klang/LIZENZ.txt</a>. Thank you!</p>'
+    : '<h3>Woher die Klänge stammen</h3><p>Alle Teppiche sind echte Aufnahmen: aus den Klangsammlungen der freien Apps <a href="https://github.com/rafaelmardojai/blanket">Blanket</a>, <a href="https://github.com/Muges/ambientsounds">AmbientSounds</a> und <a href="https://github.com/mateusfg7/Noisekun">Noisekun</a> (Originale auf Freesound und von SFX Producer – CC0 bzw. gemeinfrei, einige CC BY: Regen von alex36917, Sturm von Digifish Music, Wellen von Luftrum, Starkregen von D W, Waldregen von Corsica_S, Bach von mystiscool, Gewitter von RHumphries, Wasserfall von straget, Regen aufs Zelt von Garuda1982). Einzelgeräusche: CC0-Pakete von Kenney und OpenGameArt (u. a. rubberduck), gesammelt im Open Game SFX Index. Frösche, Eulen, Möwen, Specht, Vogelrufe, Krähen, Wölfe, Hund, Katze, Pferd, Wal, Donner, Ruderschläge, die volle Gaststube und weitere Teppiche (Lagerfeuer, Grillenwiese, Wind in den Bäumen, heulender Sturm, Fluss, Gischt, Tropfsteine, Regen auf Laub, Zelt und Fenster, Uferwellen, Takelage, Insektenchor, siedender Sud, Standuhr, Mönchsgesang, Tempelhalle, Klangschale, Bienen) stammen aus der Sammlung der freien App <a href="https://github.com/remvze/moodist">Moodist</a> (Pixabay-Lizenz bzw. CC0). Nur die Fledermäuse sind gerechnet. <b>Episch:</b> dieselben Aufnahmen tiefer gestimmt, dazu in voller Länge Gewitter von RHumphries (CC BY), Wind von felix.blume (CC0), Sturm von Borys Kozielski (CC0) sowie Tempel, Windspiel, Donner und Wal aus Moodist; Orgel, Pauken, Horn, Gong, Kontrabass und Cello aus <a href="https://github.com/sgossner/VSCO-2-CE">VSCO 2 Community Edition</a> (CC0, Orgel von Simon Dalzell); Chorstimmen aus FluidR3 von Frank Wen (CC BY 3.0); Einschläge und Wesen aus CC0-Paketen von Kenney und OpenGameArt. Vollständige Liste in <a href="klang/LIZENZ.txt">klang/LIZENZ.txt</a>. Danke!</p>';
 })();
 </script>
 </body>
