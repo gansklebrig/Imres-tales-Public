@@ -2570,6 +2570,7 @@ function bTarget(range,meleeR){
  const c=pa!=null?null:cursorW(),a=pa!=null?pa:Math.atan2(c.y-P.y,c.x-P.x);let t=null,bd=1e9,mt=null,md=1e9;
  for(const e of G.enemies){if(!targetable(e))continue;const dx=e.x-P.x,dy=e.y-P.y,dd=Math.hypot(dx,dy);if(dd>range+e.r)continue;let da=Math.atan2(dy,dx)-a;da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));
   if(da<0.5){const sc=dd/(1+ePrio(e)/12);if(sc<bd){bd=sc;t=e}}if(dd<meleeR+e.r&&da<1.0&&dd<md){md=dd;mt=e}}
+ if(!t&&!mt&&pa!=null&&!P.padHeld&&!(P.netIn&&P.netIn.a!=null)){const n=nearest(P.x,P.y,range);if(!n)return null;return{t:n,a:ang(P,n),melee:inMelee(n,meleeR)}}
  if(!t&&!mt&&pa==null&&!(P.netCur&&NET.role==='host'?P.netCur.down:MOUSE.down))return null;return{t:mt||t,a,melee:!!mt}}
 function faceA(a){P.face=a;if(Math.abs(Math.cos(a))>0.15)P.flip=Math.cos(a)<0?-1:1}
 const inMelee=(t,R)=>Math.sqrt(d2(P,t))<R+t.r;
@@ -5227,7 +5228,9 @@ function padActions(p){const L=padsOf(p);if(!L.length)return;let sprAny=0,aimA=n
  if(padHit(s,'pot'))usePotion();
  if(padSpr(s))sprAny=1;{const[rx,ry]=dz(s.rx,s.ry,0.4);if((rx||ry)&&aimA===null)aimA=Math.atan2(ry,rx)}
  const pi=Math.max(0,PL.indexOf(p));if(padHit(s,'pause')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('pause',pi);return}if(padHit(s,'inv')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('inv',pi);return}}
- if(sprAny){if(P.stam>(P.puste?35:5)&&!P.padSpr)P.sprint=true;P.padSpr=1}else if(P.padSpr){P.sprint=false;P.padSpr=0}P.padAim=aimA}
+ if(sprAny){if(P.stam>(P.puste?35:5)&&!P.padSpr)P.sprint=true;P.padSpr=1}else if(P.padSpr){P.sprint=false;P.padSpr=0}
+ if(aimA!==null){P.padAim=aimA;P.padAimT=G.time;P.padHeld=1}else{P.padHeld=0;if(P.padAim!=null&&G.time-(P.padAimT||0)>PAD_STICKY)P.padAim=null}}
+const PAD_STICKY=3;
 /* ---------- Controller-Belegung (eine für alle Controller, in SAVE.padMap) ---------- */
 const PADBN=['A','B','X','Y','LB','RB','LT','RT','View','Menu','LS','RS','Steuerkreuz ↑','Steuerkreuz ↓','Steuerkreuz ←','Steuerkreuz →'];
 const PADACT=[['s1','Fähigkeit 1'],['s2','Fähigkeit 2'],['s3','Fähigkeit 3'],['s4','Fähigkeit 4'],['s5','Fähigkeit 5'],['s6','Fähigkeit 6'],['pot','Heiltrank'],['spr','Sprinten'],['ult','Imres Segen'],['inv','Beutel'],['pause','Pause']];
@@ -5753,6 +5756,7 @@ function netSample(){let ix=0,iy=0,spr=!!(keys.ShiftLeft||keys.ShiftRight)||NET.
  if(NET.mine)NET.mine.padAim=aim;
  const il=Math.hypot(ix,iy);if(il>1){ix/=il;iy/=il}if(ix||iy)NET.localDev=NET.localDev||'kb';
  if(SAVE.aim&&MOUSE.has&&aim===null&&NET.mine){const c=cursorW();cur=[Math.round(c.x),Math.round(c.y),MOUSE.down?1:0]}
+ if(aim!==null){NET.aimL=aim;NET.aimT=performance.now()}else if(NET.aimL!=null&&performance.now()-(NET.aimT||0)<PAD_STICKY*1000)aim=NET.aimL;else NET.aimL=null;
  return{ix,iy,spr,aim,cur}}
 function netGuestFrame(dt){if(!G.netGuestRun)return;const now=performance.now();
  if(NET.st==='play'&&NET.lastSnap&&now-NET.lastSnap>9000&&NET.conn){NET.lastSnap=now;try{NET.conn.close()}catch(e){}netLost()}
@@ -6058,7 +6062,7 @@ function teamUltHook(n){if(LP('schildwall')){for(const q of [P].concat(teamNear(
  for(const q of mpL())if(hasBund(q,4)&&!q.down)for(const k in q.cds)if(!(q===P&&k===n.id)&&q.cds[k]>0)q.cds[k]=Math.max(0,q.cds[k]-3)}
 /* Anzeige: Reichweite der eigenen Aura und Symbole empfangener Auren */
 /* Zielpfeil, solange mit dem rechten Stick gezielt wird */
-function drawPadAim(){const a=padA();if(a==null)return;const c=HCOL[P.id]||'#e5b454',ga=cx.globalAlpha,x=P.x+Math.cos(a)*50,y=P.y+12+Math.sin(a)*32;cx.globalAlpha=ga*0.9;cx.save();cx.translate(x,y);cx.rotate(a);cx.lineCap='round';cx.lineJoin='round';
+function drawPadAim(){const a=padA();if(a==null)return;const st=P.padHeld||netIs(P.dev)?1:Math.max(0,1-(G.time-(P.padAimT||0))/PAD_STICKY)*0.55;if(st<=0.02)return;const c=HCOL[P.id]||'#e5b454',ga=cx.globalAlpha,x=P.x+Math.cos(a)*50,y=P.y+12+Math.sin(a)*32;cx.globalAlpha=ga*0.9*st;cx.save();cx.translate(x,y);cx.rotate(a);cx.lineCap='round';cx.lineJoin='round';
  for(const[w,col]of[[7,'rgba(0,0,0,.5)'],[3.5,c]]){cx.strokeStyle=col;cx.lineWidth=w;cx.beginPath();cx.moveTo(-7,-9);cx.lineTo(4,0);cx.lineTo(-7,9);cx.moveTo(-15,-9);cx.lineTo(-4,0);cx.lineTo(-15,9);cx.stroke()}cx.restore();cx.globalAlpha=ga}
 function drawAuraTag(t){if(!G.mp||PL.length<2||P.down)return;const prov=rank('b_song')||rank('e_bark')||hasBund(P,2);
  if(prov&&teamNear(P,auraR(P)).length){const R=auraR(P),ga=cx.globalAlpha;cx.globalAlpha=ga*(0.1+0.04*Math.sin(t*2));cx.strokeStyle=HCOL[P.id]||'#e5b454';cx.lineWidth=3;cx.beginPath();cx.ellipse(P.x,P.y+10,R,R*0.55,0,0,TAU);cx.stroke();cx.globalAlpha=ga}
