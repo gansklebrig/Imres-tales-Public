@@ -332,7 +332,7 @@ details.stats .stat{padding:0 12px 12px}
 .xpbar.leg i{background:linear-gradient(90deg,#ff9a3a,#ffe08a)}.legcard .eyebrow{color:#ffb84a}
 .qualsel{display:inline-flex;gap:4px;flex-wrap:nowrap}.chip.qual.on{background:linear-gradient(180deg,#5a1a24,#3a0e16);border-color:#ff4a6a;color:#ffd0d8}
 .it .fav{position:absolute;left:50%;top:1px;transform:translateX(-50%);color:#ffd04a;font-size:13px;text-shadow:0 0 4px rgba(0,0,0,.8)}
-.fire-wrap{min-height:70vh;justify-content:center;gap:8px}.fire-cv,.lager-cv{width:100%;max-width:640px;height:230px;border-radius:14px;border:1px solid rgba(229,180,84,.25);box-shadow:0 0 40px rgba(255,140,50,.12) inset;display:block;margin:6px auto;background:#0b0d1c}.lager-cv{height:260px;cursor:pointer}.fire-stats{margin:4px 0 0;font-size:14px;color:var(--muted,#b8a99a)}.fire-stats b{color:var(--text,#f4e9d8)}.fire-mvp{margin:0;font-size:14px}.fire-imre{margin:6px 0 0;font-style:italic;line-height:1.45;max-width:560px}.fire-imre span{font-style:normal;font-weight:800;color:#e5b454;letter-spacing:.04em}.fire-neu{margin:0;color:#ffd04a;font-size:14px}.fire-next{margin:0;font-size:13.5px}.lager-say{min-height:2.8em;margin:4px 0 6px;line-height:1.45}.lager-chips{justify-content:center}@media (max-width:520px){.fire-cv{height:190px}.lager-cv{height:220px}}
+.fire-wrap{min-height:70vh;justify-content:center;gap:8px}.fire-cv,.lager-cv{width:100%;max-width:640px;height:230px;border-radius:14px;border:1px solid rgba(229,180,84,.25);box-shadow:0 0 40px rgba(255,140,50,.12) inset;display:block;margin:6px auto;background:#0b0d1c}.lager-cv{height:260px;cursor:pointer}.fire-stats{margin:4px 0 0;font-size:14px;color:var(--muted,#b8a99a)}.fire-stats b{color:var(--text,#f4e9d8)}.fire-mvp{margin:0;font-size:14px}.fire-imre{margin:6px 0 0;font-style:italic;line-height:1.45;max-width:560px}.fire-imre span{font-style:normal;font-weight:800;color:#e5b454;letter-spacing:.04em}.fire-neu{margin:0;color:#ffd04a;font-size:14px}.npc-row{display:block;width:100%;max-width:520px;height:96px;margin:2px auto -4px}.fire-next{margin:0;font-size:13.5px}.lager-say{min-height:2.8em;margin:4px 0 6px;line-height:1.45}.lager-chips{justify-content:center}@media (max-width:520px){.fire-cv{height:190px}.lager-cv{height:220px}}
 </style>
 
 </head>
@@ -4699,7 +4699,7 @@ function showCampfire(){hud.hidden=true;clearHudFx();const S=STAGES[G.stage],N=S
   <canvas class="fire-cv" data-fire="${ids.join(',')}|${rex}" aria-hidden="true"></canvas>
   ${fireStats()}
   <p class="fire-imre"><span>Imre erzählt:</span> „${esc(imre)}“</p>
-  ${neu.length?`<p class="fire-neu">Neu im Lager: <b>${neu.map(n=>esc(n.n)).join(', ')}</b></p>`:''}
+  ${neu.length?`<canvas class="npc-row" data-npcrow="${neu.map(n=>n.id).join(',')}" aria-hidden="true"></canvas><p class="fire-neu">Neu im Lager: <b>${neu.map(n=>esc(n.n)).join(', ')}</b></p>`:''}
   ${nx?`<p class="muted fire-next">Als Nächstes: <b style="color:var(--text)">${esc(nx.name)}</b>${tz?' – '+esc(tz):''}</p>`:''}
   <button class="btn-main" data-act="fire-go">Weiterziehen</button></div>`)}
 
@@ -4729,7 +4729,341 @@ function fireSky(cv,c,W,H,t){const g=c.createLinearGradient(0,0,0,H);g.addColorS
  const st=cv._st||(cv._st=Array.from({length:26},()=>[Math.random(),Math.random()*0.5,Math.random()*6]));for(const [a,b,p] of st){c.globalAlpha=0.35+0.35*Math.sin(t*1.5+p);c.fillStyle='#dfe6ff';c.fillRect(a*W,b*H,1.5,1.5)}c.globalAlpha=1;
  ell(c,W/2,H*0.86,W*0.48,H*0.16,'#241b13')}
 /* einfache Figuren für das Lager */
-function drawNpc(c,n,x,y,t,s){const b=Math.sin(t*2+x)*0.6*s;c.save();c.translate(x,y);ell(c,0,2*s,16*s,5*s,'rgba(0,0,0,.35)');
+/* ---------- Lagerfiguren: detailreich wie die Helden, nach den Bildern der Kampagne ----------
+   Gleiches Maßsystem wie die Heldenfiguren: Füße bei y=15, Kopf um y=-14, Umriss HOL, Schattierung in zwei Tönen. */
+const NPC_SKIN={dark:'#6e4a30',darkS:'#57382a',duer:'#8d929c',duerS:'#737882',light:'#ecc6a0',lightS:'#d6aa84',gnome:'#f2caa2',gnomeS:'#dcae86'};
+function npcBoots(c,step,boot,cap,fur){for(const sd of[-1,1]){const fx=sd*4.6+(sd<0?step:-step)*1.5;
+ hQ(c,boot,HOL,0.8,q=>{q.moveTo(fx-3,10.6);q.lineTo(fx+2.8,10.6);q.lineTo(fx+4.2,15.2);q.lineTo(fx-3.2,15.4);q.closePath()});
+ if(cap)hQ(c,cap,HOL,0.6,q=>{q.moveTo(fx+1.2,13);q.lineTo(fx+4.2,13);q.lineTo(fx+4.2,15.2);q.lineTo(fx+0.8,15.3);q.closePath()});
+ if(fur)for(let k=0;k<3;k++)hC(c,fx-2.2+k*2.2,10.8,1.5,fur,HOL,0.4)}}
+/* zwergischer Rumpf: breit, kurz */
+function npcDwarfBody(c,coat,coatS,trim){hP(c,coat,HOL,1,[-12.5,11,-13.5,-2,-8,-7,8,-7,13.5,-2,12.5,11]);hP(c,coatS,null,0,[-12.5,11,-13.5,-2,-8,-7,-4,-7,-6,11]);if(trim){ln(c,trim,0.9,-12.2,10.4,12.2,10.4)}}
+function npcArm(c,sx,ang,sleeve,hand,cuff){c.save();c.translate(sx*10.5,-4.5);c.rotate(ang);hQ(c,sleeve,HOL,0.8,q=>{q.moveTo(-2.6,-1);q.lineTo(2.6,-1);q.lineTo(2.2,9.5);q.lineTo(-2.2,9.5);q.closePath()});if(cuff)hQ(c,cuff,HOL,0.6,q=>q.rect(-2.5,7.6,5,2.2));hC(c,0,11.2,2.2,hand,HOL,0.6);c.restore()}
+/* schwarzer Flechtbart mit Goldperlen (Gundren und sein Zwillingsbruder) */
+function npcBraidBeard(c,t,col,bead){const sw=Math.sin(t*1.6)*0.6;
+ hQ(c,col,HOL,0.8,q=>{q.moveTo(-7.5,-13);q.quadraticCurveTo(-8.5,-5,-4.5,-1);q.lineTo(4.5,-1);q.quadraticCurveTo(8.5,-5,7.5,-13);q.quadraticCurveTo(0,-8.5,-7.5,-13);q.closePath()});
+ for(const sd of[-1,1]){const bx=sd*2.6+sw*sd*0.3;hQ(c,col,HOL,0.7,q=>{q.moveTo(bx-1.8,-2);q.quadraticCurveTo(bx-2.2+sw,4,bx-0.6+sw,9);q.lineTo(bx+1+sw,9);q.quadraticCurveTo(bx+2,4,bx+1.8,-2);q.closePath()});
+  for(let k=0;k<4;k++){const yy=-0.5+k*2.4;ln(c,'#3a3a40',0.5,bx-1.4+sw*k*0.2,yy,bx+1.2+sw*k*0.2,yy+0.8)}
+  for(const yy of[1.4,6.4])hQ(c,bead,HOL,0.4,q=>q.rect(bx-1.5+sw*yy*0.08,yy,3,1.6))}
+ /* Schnurrbart */
+ for(const sd of[-1,1])hQ(c,col,HOL,0.6,q=>{q.moveTo(0,-11.2);q.quadraticCurveTo(sd*4,-12.6,sd*6.4,-10);q.quadraticCurveTo(sd*3.6,-10.4,0,-10.2);q.closePath()})}
+function npcDwarfFace(c,t,skin,skinS,ph,brow){hC(c,0,-15,7.6,skin,HOL,0.9);hQ(c,skinS,null,0,q=>{q.arc(0,-15,7.6,Math.PI*0.62,Math.PI*1.32);q.lineTo(-1.5,-15);q.closePath()});
+ hE(c,0,-12.6,2.2,1.8,skinS,HOL,0.6);hC(c,-0.6,-13.2,0.6,'rgba(255,255,255,.25)');
+ hEye(c,-2.9,-16,'#3a2814',t,ph,1.15);hEye(c,2.9,-16,'#3a2814',t,ph,1.15);
+ ln(c,brow,1.4,-5,-18.4,-1.2,-17.8);ln(c,brow,1.4,1.2,-17.8,5,-18.4)}
+
+/* Gundren Felsensucher: dunkle Haut, langer schwarzer Flechtbart mit Goldperlen, großer grauer Hut, heller Mantel mit Fellkragen */
+function npcGundren(c,t,step,ga){const g=Math.sin(t*1.1);
+ npcBoots(c,0,'#5a3a22','#a8adb5','#c8c0b0');
+ hQ(c,'#4a4038',HOL,0.8,q=>{q.rect(-8,6,7,6);q.rect(1,6,7,6)});
+ npcDwarfBody(c,'#d8d0c0','#bdb4a2','#b89a5a');
+ /* Mantelsäume mit Goldborte, Lederweste */
+ hP(c,'#6a4a2c',HOL,0.8,[-6.5,9,-7.5,-5,7.5,-5,6.5,9]);hP(c,'#5a3e24',null,0,[-6.5,9,-7.5,-5,-2,-5,-2,9]);
+ for(let i=0;i<3;i++)hC(c,0,-2+i*3.4,0.6,'#d8b060',HOL,0.3);
+ ln(c,'#b89a5a',0.8,-8,-6,-12.6,10);ln(c,'#b89a5a',0.8,8,-6,12.6,10);
+ hQ(c,'#4a2e18',HOL,0.7,q=>q.rect(-12.5,6.4,25,2.8));hQ(c,'#d8b060',HOL,0.6,q=>q.rect(-2.2,5.8,4.4,4));hQ(c,'#4a2e18',null,0,q=>q.rect(-1,6.8,2,2));
+ hQ(c,'#7a5230',HOL,0.7,q=>{q.moveTo(6.5,9.2);q.lineTo(11,9.2);q.lineTo(10.6,13.4);q.lineTo(6.9,13.4);q.closePath()});hC(c,8.8,10.6,0.6,'#d8b060');
+ /* Fellkragen */
+ for(let k=-3;k<=3;k++){const x=k*3.5,y=-7+Math.abs(k)*0.5;hC(c,x,y,3.2,HOL)}for(let k=-3;k<=3;k++){const x=k*3.5,y=-7+Math.abs(k)*0.5;hC(c,x,y,2.6,k%2?'#cfc6b8':'#e2dacc');hC(c,x-0.6,y-0.9,1,'#f2ece2')}
+ /* Arme: linker auf dem Gürtel, rechter gestikuliert einladend */
+ npcArm(c,-1,0.25,'#d8d0c0','#6e4a30','#b89a5a');
+ npcArm(c,1,-0.9+g*0.15,'#d8d0c0','#6e4a30','#b89a5a');
+ /* Ringe an der Hand */
+ c.save();c.translate(10.5,-4.5);c.rotate(-0.9+g*0.15);hC(c,0.8,12.6,0.6,'#f0c860');c.restore();
+ /* Kopf */
+ npcDwarfFace(c,t,NPC_SKIN.dark,NPC_SKIN.darkS,0.7,'#141210');
+ hQ(c,null,'#2a1810',0.8,q=>{q.arc(0,-11.4,2,0.3,Math.PI-0.3)});
+ npcBraidBeard(c,t,'#17151a','#e0b850');
+ /* großer grauer Hut mit breiter Krempe, leicht schief */
+ c.save();c.translate(0,-22.4);c.rotate(-0.08+Math.max(0,Math.sin(t*0.7)-0.95)*3);
+ hE(c,0,0.6,15.5,3.6,'#8c8a86',HOL,0.9);hE(c,0,0.2,15,2.8,'#a3a19c');
+ hQ(c,'#9a9893',HOL,0.9,q=>{q.moveTo(-7.5,0);q.quadraticCurveTo(-8,-8.5,-3,-9.2);q.quadraticCurveTo(0,-7.2,3,-9.2);q.quadraticCurveTo(8,-8.5,7.5,0);q.closePath()});
+ hQ(c,'#86847f',null,0,q=>{q.moveTo(-7.5,0);q.quadraticCurveTo(-8,-8.5,-3,-9.2);q.lineTo(-2,0);q.closePath()});
+ hQ(c,'#3a2c20',HOL,0.6,q=>q.rect(-7.6,-2.6,15.2,2.2));ln(c,'#b8b6b0',0.6,-12,1.4,-6,1.8);c.restore()}
+
+/* Nundro: Gundrens Zwilling – gleiches Gesicht und gleicher Flechtbart, aber ohne Hut, Kopfverband und gesprengte Fessel */
+function npcNundro(c,t,step,ga){const g=Math.sin(t*1.3);
+ npcBoots(c,0,'#4a3424',null,null);
+ hQ(c,'#3e3a36',HOL,0.8,q=>{q.rect(-8,6,7,6);q.rect(1,6,7,6)});
+ npcDwarfBody(c,'#4a5a7a','#3c4a66',null);
+ /* zerschlissene Tunika: Flicken, ausgefranster Saum */
+ hQ(c,'#6a5a3a',HOL,0.6,q=>q.rect(-9,0,4.4,4));ln(c,'#3a3020',0.5,-8.4,0.6,-5.2,3.4);ln(c,'#3a3020',0.5,-8.4,3.4,-5.2,0.6);
+ for(let i=-5;i<=5;i++)ln(c,'#3c4a66',1,i*2.3,11,i*2.3+0.6,12.6);
+ hQ(c,'#5a3a20',HOL,0.7,q=>q.rect(-12.5,6.4,25,2.4));ln(c,'#8a6a40',1.2,-1,6.2,1,9);
+ /* Decke über der Schulter */
+ hQ(c,'#7a5a3a',HOL,0.8,q=>{q.moveTo(-13.5,-2);q.quadraticCurveTo(-10,-9,-2,-7.6);q.lineTo(-6,4);q.quadraticCurveTo(-11,2,-13.5,-2);q.closePath()});for(let i=0;i<3;i++)ln(c,'#5a4028',0.7,-12+i*3,-4+i,-7+i*2,-6.6+i*1.4);
+ npcArm(c,-1,0.2,'#4a5a7a','#6e4a30',null);
+ npcArm(c,1,-0.35+g*0.08,'#4a5a7a','#6e4a30',null);
+ /* gesprengte Eisenschelle mit Kettenglied */
+ c.save();c.translate(10.5,-4.5);c.rotate(-0.35+g*0.08);hQ(c,'#7a7f88',HOL,0.6,q=>q.rect(-2.8,6.6,5.6,2.6));hE(c,2.6,11.6,1.5,1,null,'#7a7f88',0.9);hE(c,3.6,13.6,1,1.5,null,'#6a6f78',0.9);c.restore();
+ /* Kopf: dunkle Haut, schwarzes zurückgebundenes Haar, Verband */
+ npcDwarfFace(c,t,NPC_SKIN.dark,NPC_SKIN.darkS,1.9,'#141210');
+ hQ(c,null,'#2a1810',0.8,q=>{q.arc(0,-11.6,1.7,0.4,Math.PI-0.4)});
+ hQ(c,'#17151a',HOL,0.8,q=>{q.arc(0,-16.4,8,Math.PI*1.05,Math.PI*1.95);q.quadraticCurveTo(3,-20,0,-20.4);q.quadraticCurveTo(-3,-20,-7.7,-18);q.closePath()});
+ hQ(c,'#17151a',HOL,0.6,q=>{q.moveTo(-7.4,-17);q.quadraticCurveTo(-10.5,-14,-9.6,-9.5);q.lineTo(-8,-10.6);q.quadraticCurveTo(-8.4,-14,-6.4,-16);q.closePath()});
+ hQ(c,'#ece4d4',HOL,0.7,q=>{q.moveTo(-7.8,-20.2);q.quadraticCurveTo(0,-23.6,7.8,-20.2);q.lineTo(7.4,-18.2);q.quadraticCurveTo(0,-21.4,-7.4,-18.2);q.closePath()});
+ hC(c,4.4,-20.8,1,'#b8443a');ln(c,'#d8d0c0',0.5,-6,-19.4,6,-19.8);
+ npcBraidBeard(c,t+0.4,'#17151a','#e0b850')}
+
+/* Prinz Kardal: Duergar-Späher in dunkler Schuppenrüstung, graue Haut, kahler Kopf, dunkler Bart, schmaler Goldreif */
+function npcKardal(c,t,step,ga){const g=Math.sin(t*1.2);
+ npcBoots(c,0,'#2a2a30','#5a5e66',null);
+ hQ(c,'#3a3a42',HOL,0.8,q=>{q.rect(-8,6,7,6);q.rect(1,6,7,6)});
+ /* dunkelroter Umhang hinten */
+ hQ(c,'#5a1e1e',HOL,0.8,q=>{q.moveTo(-11,-6);q.quadraticCurveTo(-15+g*0.4,4,-13.5,12);q.lineTo(13.5,12);q.quadraticCurveTo(15-g*0.4,4,11,-6);q.closePath()});
+ npcDwarfBody(c,'#3e4048','#33353c',null);
+ /* Schuppen */
+ for(let r=0;r<4;r++)for(let k=-4;k<=4;k++){const x=k*2.6+(r%2)*1.3,y=-4+r*3.2;if(Math.abs(x)>10.5-r*0.2)continue;hQ(c,r%2?'#4a4c56':'#555864','rgba(18,10,8,.55)',0.4,q=>{q.arc(x,y,1.5,0,Math.PI)})}
+ hQ(c,'#2a2a30',HOL,0.7,q=>q.rect(-12.5,6.4,25,2.6));hQ(c,'#c8a050',HOL,0.5,q=>{q.moveTo(-2,6);q.lineTo(2,6);q.lineTo(2.6,8.2);q.lineTo(0,10);q.lineTo(-2.6,8.2);q.closePath()});
+ /* Schulterplatten mit Nieten, Goldspange */
+ for(const sd of[-1,1]){hQ(c,'#555864',HOL,0.8,q=>{q.ellipse(sd*10,-5,5.2,3.6,sd*0.3,Math.PI,TAU);q.closePath()});for(let i=0;i<3;i++)hC(c,sd*(7.6+i*2.2),-6+i*0.3,0.45,'#9aa0aa')}
+ hC(c,-6.5,-6.2,1.4,'#e0b850',HOL,0.5);hC(c,-6.5,-6.2,0.6,'#b8443a');
+ /* Arme: einer am Kriegshammer, einer zeigt den Weg */
+ npcArm(c,-1,0.15,'#3e4048',NPC_SKIN.duer,'#555864');
+ c.save();c.translate(-10.5,-4.5);c.rotate(0.15);hQ(c,'#5a4030',HOL,0.6,q=>q.rect(-0.8,4,1.6,14));hQ(c,'#6a6e78',HOL,0.7,q=>{q.rect(-3.6,16.5,7.2,4)});c.restore();
+ npcArm(c,1,-1.25+g*0.08,'#3e4048',NPC_SKIN.duer,'#555864');
+ /* Kopf: kahl, graue Haut, dunkler kurzer Bart, ernster Blick mit bernsteinfarbenen Augen */
+ hC(c,0,-15,7.4,NPC_SKIN.duer,HOL,0.9);hQ(c,NPC_SKIN.duerS,null,0,q=>{q.arc(0,-15,7.4,Math.PI*0.62,Math.PI*1.32);q.lineTo(-1.5,-15);q.closePath()});
+ hC(c,-2.4,-20,1.6,'rgba(255,255,255,.18)');
+ for(const sd of[-1,1])hP(c,NPC_SKIN.duer,HOL,0.7,[sd*7,-17,sd*10.4,-18.6,sd*7.4,-13.6]);
+ hE(c,0,-12.8,2,1.6,NPC_SKIN.duerS,HOL,0.6);
+ hEye(c,-2.8,-16,'#d88a2a',t,1.3,1.05);hEye(c,2.8,-16,'#d88a2a',t,1.3,1.05);
+ ln(c,'#2a2a30',1.5,-5.2,-18.6,-1,-17.4);ln(c,'#2a2a30',1.5,1,-17.4,5.2,-18.6);
+ hQ(c,'#2e2c30',HOL,0.8,q=>{q.moveTo(-7,-13);q.quadraticCurveTo(-6.6,-4,0,-2.6);q.quadraticCurveTo(6.6,-4,7,-13);q.quadraticCurveTo(0,-9.4,-7,-13);q.closePath()});
+ for(let i=-2;i<=2;i++)ln(c,'#4a484e',0.5,i*2,-9,i*2.2,-4.4);
+ ln(c,'#1a1a1e',0.8,-1.6,-10.6,1.6,-10.6);
+ /* schmaler Goldreif des Prinzen */
+ hQ(c,'#e0b850',HOL,0.6,q=>{q.moveTo(-6.8,-19.6);q.quadraticCurveTo(0,-22.8,6.8,-19.6);q.lineTo(6.6,-18.4);q.quadraticCurveTo(0,-21.4,-6.6,-18.4);q.closePath()});hP(c,'#e0b850',HOL,0.5,[-1.4,-21.4,0,-23.8,1.4,-21.4]);hC(c,0,-20.6,0.7,'#d84a3a')}
+
+/* Captain Dolgrimson: Anführer der Allianz der Lords – Plattenrüstung, blauer Wappenrock mit goldener Krone, Umhang, grauer Schnurrbart */
+function npcDolgrimson(c,t,step,ga){const g=Math.sin(t*1.4);
+ hLegs(c,0,'#8f98aa','#5a5e68','#c8ccd4');
+ hQ(c,'#24406e',HOL,0.8,q=>{q.moveTo(-10,-7);q.quadraticCurveTo(-15+g*0.5,3,-13,14);q.lineTo(13,14);q.quadraticCurveTo(15-g*0.5,3,10,-7);q.closePath()});
+ hP(c,'#a8b0be',HOL,1,[-11,10,-12.5,-1,-7.5,-7.5,7.5,-7.5,12.5,-1,11,10]);hP(c,'#8f98aa',null,0,[-11,10,-12.5,-1,-7.5,-7.5,-3,-7.5,-4,10]);
+ /* Wappenrock */
+ hP(c,'#2f4a7a',HOL,0.9,[-6.5,12.5,-7,-6.5,7,-6.5,6.5,12.5,0,10.6]);hP(c,'#26406c',null,0,[-6.5,12.5,-7,-6.5,-2,-6.5,-2,11.4]);
+ ln(c,'#e0b850',0.8,-6.6,-6,-6.2,12);ln(c,'#e0b850',0.8,6.6,-6,6.2,12);
+ hP(c,'#e0b850',HOL,0.5,[-3.2,1.4,-3.2,-1.4,-1.6,0,0,-2.4,1.6,0,3.2,-1.4,3.2,1.4]);hQ(c,'#e0b850',HOL,0.5,q=>q.rect(-3.2,1.2,6.4,1.4));
+ hQ(c,'#4a2e18',HOL,0.7,q=>q.rect(-11,6.4,22,2.4));hQ(c,'#c8ccd4',HOL,0.5,q=>q.rect(-1.6,6,3.2,3.2));
+ /* Schulterplatten */
+ for(const sd of[-1,1]){hQ(c,'#bcc4d0',HOL,0.8,q=>{q.ellipse(sd*9.8,-5,5.4,3.8,sd*0.3,Math.PI,TAU);q.closePath()});ln(c,'#e0b850',0.8,sd*5.8,-5.8,sd*14,-3.6)}
+ /* Arme: Hand auf dem Schwertknauf, andere grüßt ab und zu */
+ c.save();c.translate(-9.5,7);c.rotate(0.35);hQ(c,'#3a2a20',HOL,0.6,q=>{q.moveTo(-1.3,-1);q.lineTo(1.3,-1);q.lineTo(1.1,9);q.lineTo(0,10.4);q.lineTo(-1.1,9);q.closePath()});hQ(c,'#c8ccd4',HOL,0.6,q=>q.rect(-3.4,-2.6,6.8,1.6));hQ(c,'#5a3a20',HOL,0.5,q=>q.rect(-0.8,-6,1.6,3.4));hC(c,0,-6.6,1.3,'#e0b850',HOL,0.5);c.restore();
+ npcArm(c,-1,0.05,'#a8b0be','#c8ccd4',null);
+ npcArm(c,1,0.32+g*0.04,'#a8b0be','#c8ccd4',null);
+ /* Kopf: kantiges Gesicht, kurzes graues Haar, Schnurrbart, Narbe */
+ hC(c,0,-14.5,7.8,NPC_SKIN.light,HOL,0.9);hQ(c,NPC_SKIN.lightS,null,0,q=>{q.arc(0,-14.5,7.8,Math.PI*0.62,Math.PI*1.32);q.lineTo(-1.5,-14.5);q.closePath()});
+ hQ(c,'#8a8a8e',HOL,0.8,q=>{q.arc(0,-15.6,8.2,Math.PI*1.02,Math.PI*1.98);q.lineTo(7.6,-16.4);q.quadraticCurveTo(0,-19.4,-7.6,-16.4);q.closePath()});
+ hEye(c,-2.8,-15,'#4a6a8a',t,2.7,1.1);hEye(c,2.8,-15,'#4a6a8a',t,2.7,1.1);ln(c,'#6a6a6e',1.3,-5,-17.4,-1,-16.8);ln(c,'#6a6a6e',1.3,1,-16.8,5,-17.4);
+ ln(c,'#b07a64',0.7,4.2,-16.4,5.6,-13.2);
+ ln(c,'#c09070',0.7,0,-14,0.6,-12.4);
+ for(const sd of[-1,1])hQ(c,'#9a9a9e',HOL,0.6,q=>{q.moveTo(0,-11.4);q.quadraticCurveTo(sd*3.4,-12.4,sd*5,-10);q.quadraticCurveTo(sd*2.6,-10.6,0,-10.6);q.closePath()});
+ ln(c,'#7a3a2a',0.8,-1.4,-9.4,1.4,-9.4);hQ(c,'#c8a888',null,0,q=>q.rect(-3,-8.6,6,1.4))}
+
+/* Fagas: Gnom aus Khaems Grab, aus dem Spinnenkokon befreit – violetter Spitzhut, Brille, wilde weiße Haare, Schriftrolle, noch Spinnweben an sich */
+function npcFagas(c,t,step,ga){const g=Math.sin(t*2.2),look=Math.sin(t*0.9)>0.6?1.2:0;
+ c.save();c.translate(0,3);c.scale(0.86,0.86);
+ npcBoots(c,0,'#5a3a22',null,null);
+ hQ(c,'#4a3a5a',HOL,0.8,q=>{q.rect(-6.5,6,5.5,6);q.rect(1,6,5.5,6)});
+ /* Robe */
+ hP(c,'#7a4a9a',HOL,1,[-10,11,-11,-1,-6.5,-6.5,6.5,-6.5,11,-1,10,11]);hP(c,'#653a82',null,0,[-10,11,-11,-1,-6.5,-6.5,-3,-6.5,-4,11]);
+ ln(c,'#e0b850',0.8,-9.8,10.4,9.8,10.4);hQ(c,'#5a3a20',HOL,0.6,q=>q.rect(-10,5.6,20,2.2));
+ /* Umhängetasche mit Schriftrollen */
+ hQ(c,'#8a5a30',HOL,0.7,q=>{q.moveTo(4.5,6.6);q.lineTo(10.5,6.6);q.lineTo(10,12.4);q.lineTo(5,12.4);q.closePath()});ln(c,'#5a3a20',1,-6,-6,7,7);
+ hQ(c,'#efe6cc',HOL,0.5,q=>q.rect(6,3.6,1.4,3.6));hQ(c,'#efe6cc',HOL,0.5,q=>q.rect(8,3,1.4,4.2));
+ /* Spinnweben an Schulter und Robe */
+ c.globalAlpha=ga*0.75;for(const[x0,y0,x1,y1]of[[-10,-2,-4,4],[-9,4,-3,-1],[-11,1,-6,9]])ln(c,'#f4f4f8',0.5,x0,y0,x1,y1);hQ(c,null,'#f4f4f8',0.4,q=>{q.arc(-7,1.6,2.6,0,TAU)});c.globalAlpha=ga;
+ /* Arme: hält ein Buch, die andere schiebt die Brille hoch */
+ npcArm(c,-1,0.55,'#7a4a9a',NPC_SKIN.gnome,null);
+ c.save();c.translate(-12.5,6);c.rotate(0.2);hQ(c,'#6a2a2a',HOL,0.7,q=>q.rect(-3,-2.5,6,7));hQ(c,'#efe6cc',null,0,q=>q.rect(-2.2,-1.8,0.8,5.6));hC(c,0.6,1,0.8,'#e0b850');c.restore();
+ npcArm(c,1,-2.4+look*0.6+g*0.04,'#7a4a9a',NPC_SKIN.gnome,null);
+ /* Kopf: groß, Knollennase, wilde weiße Haare, Brille */
+ hQ(c,'#f0eee8',HOL,0.7,q=>{for(let k=0;k<7;k++){const a=Math.PI*(0.95+k*0.17),r=10+(k%2)*1.6;q.lineTo(Math.cos(a)*r,-14+Math.sin(a)*r*0.8)}q.lineTo(9.5,-11);q.lineTo(-9.5,-11);q.closePath()});
+ hC(c,0,-14,8.2,NPC_SKIN.gnome,HOL,0.9);hQ(c,NPC_SKIN.gnomeS,null,0,q=>{q.arc(0,-14,8.2,Math.PI*0.62,Math.PI*1.32);q.lineTo(-1.5,-14);q.closePath()});
+ for(const sd of[-1,1])hP(c,NPC_SKIN.gnome,HOL,0.7,[sd*7.6,-16,sd*11.6,-19,sd*8.2,-12.4]);
+ hE(c,0.4,-11.6,2.8,2.4,'#e8a888',HOL,0.7);hC(c,-0.4,-12.4,0.8,'rgba(255,255,255,.35)');
+ hEye(c,-3.2,-15.2,'#5a7a4a',t,1.1,1.25);hEye(c,3.6,-15.2,'#5a7a4a',t,1.1,1.25);
+ c.strokeStyle='#8a7040';c.lineWidth=0.7;c.beginPath();c.arc(-3.2,-15.2,2.6,0,TAU);c.moveTo(6.2,-15.2);c.arc(3.6,-15.2,2.6,0,TAU);c.moveTo(-0.6,-15.4);c.lineTo(1,-15.4);c.stroke();
+ c.globalAlpha=ga*0.3;hC(c,-3.2,-15.2,2.4,'#cfe8ff');hC(c,3.6,-15.2,2.4,'#cfe8ff');c.globalAlpha=ga;
+ ln(c,'#f0eee8',1.4,-5.6,-18.6,-1.6,-18.2);ln(c,'#f0eee8',1.4,1.6,-18.2,5.6,-18.6);
+ hQ(c,null,'#7a3a2a',0.8,q=>{q.arc(0.4,-9,2,0.3,Math.PI-0.3)});
+ hQ(c,'#f0eee8',HOL,0.6,q=>{q.moveTo(-5,-10);q.quadraticCurveTo(0,-4,5,-10);q.quadraticCurveTo(0,-7.6,-5,-10);q.closePath()});
+ /* violetter Spitzhut, an der Spitze geknickt, mit Spinnenfaden */
+ c.save();c.translate(0,-20);hE(c,0,1,10.6,2.6,'#6a3a8a',HOL,0.8);
+ hQ(c,'#7a4a9a',HOL,0.9,q=>{q.moveTo(-7,0.6);q.quadraticCurveTo(-4,-9,1,-12);q.quadraticCurveTo(5,-15+g*0.4,9,-12.6+g*0.6);q.quadraticCurveTo(4,-10,6.8,0.6);q.closePath()});
+ hQ(c,'#653a82',null,0,q=>{q.moveTo(-7,0.6);q.quadraticCurveTo(-4,-9,1,-12);q.lineTo(-1,0.6);q.closePath()});hQ(c,'#e0b850',HOL,0.5,q=>q.rect(-6.8,-1.8,13.6,1.8));
+ hC(c,9,-12.6+g*0.6,1,'#e0b850',HOL,0.4);c.globalAlpha=ga*0.7;ln(c,'#f4f4f8',0.4,9,-12+g*0.6,10.4,-4+g);c.globalAlpha=ga;c.restore();
+ c.restore()}
+
+/* Befreite aus Schloss Crackmore: Leute aus Phandalin, die die Roten Roben festgehalten hatten – jetzt feiern sie */
+function npcPhandalin(c,t,step,ga){const cheer=Math.max(0,Math.sin(t*1.5)),g=Math.sin(t*2);
+ /* Frau im Mieder mit Krug */
+ c.save();c.translate(-7.5,1);c.scale(0.9,0.9);
+ hQ(c,'#a0582e',HOL,1,q=>{q.moveTo(-10,15);q.quadraticCurveTo(-11,4,-7,1);q.lineTo(7,1);q.quadraticCurveTo(11,4,10,15);q.closePath()});hQ(c,'#8a4a24',null,0,q=>{q.moveTo(-10,15);q.quadraticCurveTo(-11,4,-7,1);q.lineTo(-3,1);q.lineTo(-4,15);q.closePath()});
+ hQ(c,'#efe6d4',HOL,0.6,q=>{q.moveTo(-3.6,15);q.lineTo(-3,3);q.lineTo(3,3);q.lineTo(3.6,15);q.closePath()});
+ hP(c,'#f4ecdc',HOL,0.9,[-8,2,-9,-5,-5,-8,5,-8,9,-5,8,2]);
+ hP(c,'#6a3a22',HOL,0.8,[-6,2.6,-6.4,-4.6,6.4,-4.6,6,2.6]);for(let i=0;i<3;i++)ln(c,'#e8d8b0',0.5,-2,-3.4+i*2,2,-2.4+i*2);
+ npcArm(c,-1,0.3,'#f4ecdc',NPC_SKIN.light,null);
+ c.save();c.translate(8,-4.5);c.rotate(-0.4-cheer*1.6);hQ(c,'#f4ecdc',HOL,0.8,q=>{q.moveTo(-2.4,-1);q.lineTo(2.4,-1);q.lineTo(2,9);q.lineTo(-2,9);q.closePath()});hC(c,0,10.6,2,NPC_SKIN.light,HOL,0.6);
+  hQ(c,'#b88a4a',HOL,0.6,q=>q.rect(-2.2,11,4.6,5.4));hQ(c,'#f8f4e8',HOL,0.4,q=>{q.ellipse(0.1,11,2.6,1.2,0,0,TAU)});ln(c,'#8a6030',0.6,-2.2,13,2.4,13);c.restore();
+ hC(c,0,-14,7.4,NPC_SKIN.light,HOL,0.9);hQ(c,NPC_SKIN.lightS,null,0,q=>{q.arc(0,-14,7.4,Math.PI*0.62,Math.PI*1.32);q.lineTo(-1.5,-14);q.closePath()});
+ hQ(c,'#a8442a',HOL,0.8,q=>{q.arc(0,-15,8,Math.PI*1.0,Math.PI*2.0);q.quadraticCurveTo(4,-19,0,-18);q.quadraticCurveTo(-4,-19,-8,-15);q.closePath()});
+ hQ(c,'#a8442a',HOL,0.7,q=>{q.moveTo(-7.6,-14);q.quadraticCurveTo(-11,-6+g*0.4,-8.6,1);q.lineTo(-6.8,0.4);q.quadraticCurveTo(-8.8,-6,-5.6,-12);q.closePath()});
+ hEye(c,-2.6,-14.2,'#4a6a3a',t,0.4,1.1);hEye(c,2.6,-14.2,'#4a6a3a',t,0.4,1.1);hE(c,-4.6,-11.6,1.4,0.9,'rgba(232,120,110,.45)');hE(c,4.6,-11.6,1.4,0.9,'rgba(232,120,110,.45)');
+ hQ(c,'#7a2a2a',HOL,0.6,q=>{q.arc(0,-10.8,2.2,0.15,Math.PI-0.15);q.closePath()});c.restore();
+ /* Mann in grüner Weste mit Mütze */
+ c.save();c.translate(8,0);c.scale(0.92,0.92);
+ hLegs(c,Math.sin(t*3)*cheer*0.6,'#5a4a32','#3a2a1a',null);
+ hP(c,'#f0e8d8',HOL,1,[-10,10,-11,-1,-6.5,-7.5,6.5,-7.5,11,-1,10,10]);
+ hP(c,'#4a7a3a',HOL,0.8,[-9.6,9.6,-10,-5,-3,-7,-1.6,9.6]);hP(c,'#4a7a3a',HOL,0.8,[9.6,9.6,10,-5,3,-7,1.6,9.6]);hP(c,'#3e6a30',null,0,[-9.6,9.6,-10,-5,-6,-6,-6,9.6]);
+ for(let i=0;i<3;i++)hC(c,2.6,-3+i*3.4,0.5,'#c8a060');hQ(c,'#5a3a20',HOL,0.6,q=>q.rect(-10,6.4,20,2.2));
+ npcArm(c,1,0.25,'#f0e8d8',NPC_SKIN.light,null);
+ c.save();c.translate(-9,-4.5);c.rotate(0.6+cheer*1.8);hQ(c,'#f0e8d8',HOL,0.8,q=>{q.moveTo(-2.4,-1);q.lineTo(2.4,-1);q.lineTo(2,9);q.lineTo(-2,9);q.closePath()});hC(c,0,10.6,2,NPC_SKIN.light,HOL,0.6);c.restore();
+ hC(c,0,-14,7.4,NPC_SKIN.light,HOL,0.9);hQ(c,NPC_SKIN.lightS,null,0,q=>{q.arc(0,-14,7.4,Math.PI*0.62,Math.PI*1.32);q.lineTo(-1.5,-14);q.closePath()});
+ hQ(c,'#6a4a2a',HOL,0.7,q=>{q.arc(0,-14.6,7.8,Math.PI*1.02,Math.PI*1.98);q.closePath()});
+ hQ(c,'#6a5a46',HOL,0.8,q=>{q.moveTo(-8,-17);q.quadraticCurveTo(-6,-24,1,-23);q.quadraticCurveTo(7,-22,8.6,-17.6);q.quadraticCurveTo(10,-16.6,11,-16.8);q.lineTo(-8,-16.2);q.closePath()});
+ hEye(c,-2.6,-14.4,'#5a4030',t,2.4,1.05);hEye(c,2.6,-14.4,'#5a4030',t,2.4,1.05);ln(c,'#5a3a20',1,-4.6,-16.8,-1.2,-16.4);ln(c,'#5a3a20',1,1.2,-16.4,4.6,-16.8);
+ c.globalAlpha=ga*0.3;hQ(c,'#5a3a20',null,0,q=>{q.arc(0,-11,5.6,0.1,Math.PI-0.1);q.closePath()});c.globalAlpha=ga;
+ hQ(c,'#7a2a2a',HOL,0.6,q=>{q.arc(0,-11,2.6,0.1,Math.PI-0.1);q.closePath()});hQ(c,'#fbf6ee',null,0,q=>q.rect(-1.8,-11,3.6,0.9));c.restore()}
+
+/* Erzpriester Ploopploopeen: Kuo-Toa wie auf dem Kampagnenbild – hockend, blaugrün gesprenkelt, große Glubschaugen,
+   breites Maul mit Barteln, Krone aus gebundenen Stöcken, Kopfflossen, Perlenkette, bronzene Bauchplatte, erhobene Faust zum Segen */
+function npcPloop(c,t,step,ga){const sw=Math.sin(t*1.3)*0.8,bless=Math.sin(t*0.8),dr=(t*0.7)%1;
+ c.save();c.translate(0,1);c.rotate(sw*0.02);
+ const B='#3c7f92',BS='#2e6476',BL='#5aa2b4',SP='#a8e0ee';
+ /* hockende Froschbeine */
+ for(const sd of[-1,1]){hQ(c,'#3a5a7a',HOL,0.9,q=>{q.moveTo(sd*3,6);q.quadraticCurveTo(sd*15,0,sd*15.5,8);q.quadraticCurveTo(sd*15,13,sd*9,13.4);q.lineTo(sd*4,11);q.closePath()});
+  hE(c,sd*12,6.6,3,2,'#4a6a8a');
+  for(let k=0;k<3;k++){const fx=sd*(7+k*2.6);hQ(c,'#3a5a7a',HOL,0.6,q=>{q.moveTo(fx-1.2,12.6);q.lineTo(fx+1.2,12.6);q.lineTo(fx+sd*0.8,15.4);q.closePath()})}
+  hP(c,'rgba(110,170,200,.55)',null,0,[sd*7,13,sd*12.6,13,sd*12,15,sd*7.6,15])}
+ /* Rumpf */
+ hQ(c,B,HOL,1,q=>{q.moveTo(-11,9);q.quadraticCurveTo(-14,-4,-8,-9);q.lineTo(8,-9);q.quadraticCurveTo(14,-4,11,9);q.quadraticCurveTo(0,12,-11,9);q.closePath()});
+ hQ(c,BS,null,0,q=>{q.moveTo(-11,9);q.quadraticCurveTo(-14,-4,-8,-9);q.lineTo(-4,-9);q.quadraticCurveTo(-8,0,-5,10);q.closePath()});
+ /* bronzene Bauchplatte */
+ hQ(c,'#b8783a',HOL,0.8,q=>{q.moveTo(-5.5,-3);q.lineTo(5.5,-3);q.lineTo(6.2,6);q.lineTo(0,9.6);q.lineTo(-6.2,6);q.closePath()});
+ hQ(c,'#9a6028',null,0,q=>{q.moveTo(-5.5,-3);q.lineTo(-1,-3);q.lineTo(-1.4,9);q.lineTo(-6.2,6);q.closePath()});
+ ln(c,'#e0a860',0.6,-4.6,-1.8,4.6,-1.8);ln(c,'#7a4a1a',0.6,0,-3,0,9.4);for(const[x,y]of[[-4.4,0],[4.4,0],[-4.6,4.6],[4.6,4.6]])hC(c,x,y,0.55,'#f0c070');
+ /* Sprenkel */
+ c.globalAlpha=ga*0.8;for(let i=0;i<14;i++){const a=i*2.4,x=Math.cos(a)*(6+i%4*1.6),y=-3+Math.sin(a*1.3)*6;if(Math.abs(x)<6.4&&y>-3)continue;hC(c,x,y,0.45,SP)}c.globalAlpha=ga;
+ /* Perlen-/Knochenkette in zwei Bögen */
+ for(let k=0;k<2;k++)for(let i=0;i<9;i++){const a=Math.PI*(0.12+i*0.095),r=8+k*2.4;hE(c,Math.cos(a)*r,-9+Math.sin(a)*r*0.8,0.9,0.75,i%3?'#efe4c8':'#c8b088',HOL,0.3)}
+ /* Arme: linker auf dem Knie mit Kupferreif, rechter mit erhobener Faust (Segen) */
+ hQ(c,B,HOL,0.8,q=>{q.moveTo(-9,-6);q.quadraticCurveTo(-15,-2,-14,5);q.lineTo(-11,5.6);q.quadraticCurveTo(-11.6,0,-7,-3);q.closePath()});
+ hQ(c,'#b8783a',HOL,0.5,q=>q.rect(-15,2.6,4.6,1.8));hC(c,-12.6,6.8,2.4,B,HOL,0.6);for(let k=0;k<3;k++)ln(c,HOL,0.5,-14+k*1.4,8.4,-14.2+k*1.4,9.6);
+ /* Kopf: breit, Flossen seitlich, große Glubschaugen */
+ const hy=-16;
+ for(const sd of[-1,1]){hQ(c,'#7ac8d8',HOL,0.7,q=>{q.moveTo(sd*9,hy-2);q.lineTo(sd*15,hy-7);q.lineTo(sd*13.6,hy-3.6);q.lineTo(sd*16.4,hy-2.4);q.lineTo(sd*13.6,hy+0.4);q.lineTo(sd*15.6,hy+2.6);q.lineTo(sd*9.6,hy+3);q.closePath()});
+  for(let k=0;k<3;k++)ln(c,'#4a98aa',0.5,sd*10,hy-1+k*1.6,sd*14.6,hy-5+k*3.2)}
+ hQ(c,B,HOL,1,q=>{q.ellipse(0,hy,10,8.6,0,0,TAU)});hQ(c,BS,null,0,q=>{q.ellipse(0,hy,10,8.6,0,Math.PI*0.6,Math.PI*1.35);q.lineTo(-2,hy);q.closePath()});
+ c.globalAlpha=ga*0.9;for(const[x,y]of[[-6,-4],[-3,-6.6],[5,-5],[7,-1.6],[-7.6,0]])hC(c,x,hy+y,0.5,SP);c.globalAlpha=ga;
+ /* Mittelflosse */
+ hP(c,'#7ac8d8',HOL,0.6,[-1.4,hy-8,0,hy-12.4,1.4,hy-8]);
+ for(const sd of[-1,1]){const ex=sd*4.6,ey=hy-3.4;hC(c,ex,ey,3.9,BL,HOL,0.8);
+  if(hBlink(t,0.3)){ln(c,HOL,1,ex-2.6,ey,ex+2.6,ey)}else{hC(c,ex,ey,3.1,'#f2f2ea');hC(c,ex+sd*0.4,ey+0.3,1.5,'#1a2a2a');hC(c,ex+sd*0.4+0.7,ey-0.5,0.6,'#ffffff')}}
+ /* breites Maul, zum Lächeln geschwungen, mit kleinen Zähnen */
+ hQ(c,'#7a2a3a',HOL,0.8,q=>{q.moveTo(-7.4,hy+1.6);q.quadraticCurveTo(0,hy+8.6,7.4,hy+1.6);q.quadraticCurveTo(0,hy+4.6,-7.4,hy+1.6);q.closePath()});
+ hQ(c,'#c86a7a',null,0,q=>{q.ellipse(0,hy+5,3.2,1.3,0,0,TAU)});
+ for(let i=-3;i<=3;i++){const x=i*1.9,y=hy+2.6+Math.abs(i)*-0.2+ (3-Math.abs(i))*0.5;hP(c,'#f6f2e2',null,0,[x-0.7,y-0.6,x+0.7,y-0.6,x,y+1])}
+ /* Barteln */
+ for(let i=-2;i<=2;i++){const bx=i*2.4,len=6+(2-Math.abs(i))*1.6,wv=Math.sin(t*2+i)*1.2;c.strokeStyle='#c4dcef';c.lineWidth=1;c.lineCap='round';c.beginPath();c.moveTo(bx,hy+5.6);c.quadraticCurveTo(bx+wv,hy+5.6+len*0.6,bx+wv*1.4,hy+5.6+len);c.stroke()}
+ /* Krone aus gebundenen Stöcken */
+ for(let i=-3;i<=3;i++){const x=i*2.6,top=hy-12-(3-Math.abs(i))*1.6+(i%2?1:0),lean=i*0.06;
+  hQ(c,'#c8a874',HOL,0.5,q=>{q.moveTo(x-0.7,hy-6.6);q.lineTo(x+0.7,hy-6.6);q.lineTo(x+0.6+lean*8,top);q.lineTo(x-0.6+lean*8,top);q.closePath()})}
+ for(const yy of[-9.4,-12.4])ln(c,'#8a6a40',0.8,-8.2,hy+yy,8.2,hy+yy);
+ for(const sd of[-1,1]){ln(c,'#d8bc88',0.6,sd*3.4,hy-13,sd*6.4,hy-11.6);ln(c,'#d8bc88',0.6,sd*6,hy-15,sd*8.6,hy-12.8)}
+ hP(c,'#e0c890',HOL,0.4,[-0.7,hy-14,0,hy-18.6,0.7,hy-14]);
+ c.save();c.translate(12.5,-5);c.rotate(0.12-0.22*Math.max(0,bless));
+ hQ(c,B,HOL,0.8,q=>{q.moveTo(-2.6,0);q.lineTo(2.6,-1);q.lineTo(4.4,-11);q.lineTo(0.4,-11.6);q.closePath()});
+ hQ(c,'#6a4428',HOL,0.6,q=>{q.moveTo(0.2,-9.4);q.lineTo(4.6,-9);q.lineTo(4.8,-11.8);q.lineTo(0.4,-12.2);q.closePath()});ln(c,'#8a6038',0.4,0.4,-10.8,4.7,-10.4);
+ hE(c,2.4,-14.6,3.4,3,B,HOL,0.8);for(let k=0;k<3;k++)ln(c,BS,0.6,0.6+k*1.3,-16.8,0.8+k*1.3,-15.2);
+ if(bless>0.4){c.globalAlpha=ga*(bless-0.4)*0.9;hC(c,2.4,-15,6,'rgba(150,230,255,.35)');for(let k=0;k<4;k++){const a=t*2+k*Math.PI/2;hSpark(c,2.4+Math.cos(a)*6,-15+Math.sin(a)*6,0.8,'#cff4ff',1,ga)}c.globalAlpha=ga}c.restore();
+ /* Wassertropfen */
+ c.globalAlpha=ga*(1-dr);hE(c,-9,9+dr*6,0.6,1,'#a8e0ee');hE(c,10.6,7+((dr+0.5)%1)*6,0.6,1,'#a8e0ee');c.globalAlpha=ga;
+ c.restore()}
+
+/* Die befreiten Wölfe aus der Goblinhöhle: ein grauer und ein dunkler Wolf, sitzend, noch mit gesprengtem Eisenring am Hals */
+function npcWolf(c,t,col,colS,chest,eye,ph,fl){c.save();c.scale(fl,1);const wag=Math.sin(t*4+ph)*0.5,howl=Math.max(0,Math.sin(t*0.4+ph)*3-2.3),tilt=Math.sin(t*0.7+ph)*0.06;
+ /* Schwanz, wedelt */
+ hQ(c,colS,HOL,0.8,q=>{q.moveTo(-6,11);q.quadraticCurveTo(-15,10+wag*3,-16,3+wag*5);q.quadraticCurveTo(-12,6,-5,7.6);q.closePath()});hC(c,-15.6,3.6+wag*5,1.4,col);
+ /* Hinterlauf und Rumpf (sitzend) */
+ hQ(c,col,HOL,1,q=>{q.moveTo(-8,15);q.quadraticCurveTo(-11,6,-6,-3);q.quadraticCurveTo(0,-8,5,-4);q.quadraticCurveTo(8,4,7,15);q.closePath()});
+ hQ(c,colS,null,0,q=>{q.moveTo(-8,15);q.quadraticCurveTo(-11,6,-6,-3);q.lineTo(-3,-3);q.quadraticCurveTo(-6,6,-4,15);q.closePath()});
+ hQ(c,colS,HOL,0.8,q=>q.ellipse(-5,10,4.6,5.2,-0.2,0,TAU));
+ /* helle Brust mit Fellzacken */
+ hQ(c,chest,null,0,q=>{q.moveTo(-1,-4);q.quadraticCurveTo(5,-2,4,8);q.lineTo(2.4,6);q.lineTo(1.2,9);q.lineTo(0,6.6);q.lineTo(-1.6,9);q.quadraticCurveTo(-3,2,-1,-4);q.closePath()});
+ /* Vorderbeine */
+ for(const dx of[-1.2,3.4])hQ(c,col,HOL,0.8,q=>{q.moveTo(dx-1.8,4);q.lineTo(dx+1.8,4);q.lineTo(dx+2.2,14.4);q.lineTo(dx+3.4,15.4);q.lineTo(dx-2,15.4);q.closePath()});
+ for(const dx of[-1.2,3.4])for(let k=0;k<3;k++)ln(c,HOL,0.4,dx-1+k*1.4,14.4,dx-1+k*1.4,15.3);
+ /* gesprengter Eisenring mit zwei Kettengliedern */
+ hQ(c,null,'#80858e',1.5,q=>q.ellipse(1.4,-3.4,5.2,2,0.1,0,TAU));hE(c,4.6,0.4,1.2,1.7,null,'#6a6f78',0.9,0.3);hE(c,5.4,3.2,1.7,1.1,null,'#6a6f78',0.9);
+ /* Kopf, hebt sich ab und zu zum Heulen */
+ c.save();c.translate(1.6,-7);c.rotate(tilt-howl*0.55);
+ hQ(c,col,HOL,0.9,q=>{q.moveTo(-6.4,2);q.quadraticCurveTo(-7.6,-7,0,-7.4);q.quadraticCurveTo(7.6,-7,6.4,2);q.quadraticCurveTo(0,5,-6.4,2);q.closePath()});
+ for(const sd of[-1,1]){hP(c,col,HOL,0.8,[sd*2.4,-6.6,sd*5.4,-13+Math.sin(t*3+ph+sd)*0.4,sd*6.6,-4.4]);hP(c,'#d8a8a0',null,0,[sd*3.6,-6.8,sd*5.2,-11,sd*5.8,-5.6])}
+ hQ(c,colS,null,0,q=>{q.moveTo(-6.4,1);q.quadraticCurveTo(-7,-5,-3,-6.6);q.lineTo(-2.4,1.4);q.closePath()});
+ /* Schnauze */
+ hQ(c,chest,HOL,0.8,q=>{q.moveTo(-3.4,-1);q.quadraticCurveTo(0,-3,3.4,-1);q.quadraticCurveTo(4,4.4,0,5.4);q.quadraticCurveTo(-4,4.4,-3.4,-1);q.closePath()});
+ hE(c,0,0.6,1.7,1.1,'#1a1414',HOL,0.4);hC(c,-0.5,0.2,0.4,'rgba(255,255,255,.4)');
+ if(howl>0.15){c.globalAlpha=Math.min(1,howl);hE(c,0,3.6,1.6,1.2,'#4a1a1a');c.globalAlpha=1}else ln(c,'#1a1414',0.6,-1.4,3.4,0,4,1.4,3.4);
+ for(const sd of[-1,1]){const ex=sd*2.9,ey=-3.4;if(hBlink(t,ph+sd*0.1)){ln(c,'#1a1414',0.8,ex-1.2,ey,ex+1.2,ey)}else{hE(c,ex,ey,1.3,1.1,eye,HOL,0.4);hC(c,ex,ey,0.55,'#1a1414');hC(c,ex+0.4,ey-0.4,0.3,'#fff')}}
+ ln(c,colS,0.8,-4.6,-5.4,-1.6,-4.6);ln(c,colS,0.8,1.6,-4.6,4.6,-5.4);
+ c.restore();c.restore()}
+function npcWoelfe(c,t){c.save();c.translate(-9,0);npcWolf(c,t,'#8e8a84','#6e6a64','#e6e0d6','#e8c040',0,1);c.restore();c.save();c.translate(10,0.5);c.scale(0.94,0.94);npcWolf(c,t,'#3c3c42','#2a2a30','#9a9aa0','#f0c838',2.1,-1);c.restore()}
+
+
+/* Rex fürs Lager: dreifarbiger Australian Shepherd (schwarz, weiß, lohfarben, im Gesicht blue merle), weiße Blesse,
+   lohfarbene Augenbrauen und Backen, bernsteinfarbene Augen, weiche Kippohren, flauschige weiße Halskrause, Ledergeschirr.
+   Sitzt, wedelt und legt ab und zu den Kopf schief. (Im Spiel bleibt die kleine Rex-Figur unverändert.) */
+function npcRex(c,t,step,ga){const wag=Math.sin(t*6)*0.6,tilt=Math.max(0,Math.sin(t*0.55)*3-2.2)*0.32,pant=Math.sin(t*7)*0.4,blk='#1e1c22',blkS='#141217',tan='#c27a3a',wht='#f4f0ea',whtS='#d8d2ca';
+ /* buschiger Schwanz */
+ c.save();c.translate(-7,10);c.rotate(-0.6+wag*0.5);hQ(c,blk,HOL,0.8,q=>{q.moveTo(0,0);q.quadraticCurveTo(-6,-4,-9,-11);q.quadraticCurveTo(-4,-9,2,-3);q.closePath()});hQ(c,wht,null,0,q=>{q.moveTo(-8.4,-10.4);q.quadraticCurveTo(-6.6,-9.4,-5.6,-7.4);q.lineTo(-7.6,-8);q.closePath()});c.restore();
+ /* sitzender Rumpf, Hinterlauf */
+ hQ(c,blk,HOL,1,q=>{q.moveTo(-9,15);q.quadraticCurveTo(-12,4,-6,-4);q.quadraticCurveTo(0,-8,6,-4);q.quadraticCurveTo(9,5,8,15);q.closePath()});
+ hQ(c,blkS,null,0,q=>{q.moveTo(-9,15);q.quadraticCurveTo(-12,4,-6,-4);q.lineTo(-3,-4);q.quadraticCurveTo(-6,6,-4,15);q.closePath()});
+ hQ(c,blk,HOL,0.8,q=>q.ellipse(-5.6,10.4,4.8,5,-0.2,0,TAU));hQ(c,tan,null,0,q=>q.ellipse(-6.6,13.4,2.4,1.4,0,0,TAU));
+ /* Merle-Sprenkel am Körper */
+ c.globalAlpha=ga*0.55;for(const[x,y]of[[-7,2],[-4,-1],[-8,6],[5,1],[6,6]])hC(c,x,y,0.9,'#8a96a8');c.globalAlpha=ga;
+ /* flauschige weiße Brust und Halskrause */
+ hQ(c,wht,HOL,0.7,q=>{q.moveTo(-5,-5);q.quadraticCurveTo(0,-8,5,-5);q.quadraticCurveTo(7,2,4,9);q.lineTo(2.6,7);q.lineTo(1.2,10);q.lineTo(0,7.6);q.lineTo(-1.2,10);q.lineTo(-2.6,7);q.lineTo(-4,9);q.quadraticCurveTo(-7,2,-5,-5);q.closePath()});
+ for(let i=-2;i<=2;i++)ln(c,whtS,0.6,i*1.8,-1,i*2,3.4);
+ /* Vorderbeine weiß mit lohfarbenen Ansätzen */
+ for(const dx of[-2,2.8]){hQ(c,wht,HOL,0.8,q=>{q.moveTo(dx-1.8,4);q.lineTo(dx+1.8,4);q.lineTo(dx+2.2,14.2);q.lineTo(dx+3.2,15.4);q.lineTo(dx-2,15.4);q.closePath()});hQ(c,tan,null,0,q=>q.rect(dx-1.5,4.6,3,2.6));for(let k=0;k<3;k++)ln(c,whtS,0.4,dx-1+k*1.3,14.4,dx-1+k*1.3,15.3)}
+ /* Ledergeschirr */
+ hQ(c,'#7a4a24',HOL,0.7,q=>{q.moveTo(-7,-2.6);q.quadraticCurveTo(0,0.4,7,-2.6);q.lineTo(7,-0.6);q.quadraticCurveTo(0,2.4,-7,-0.6);q.closePath()});hQ(c,'#7a4a24',HOL,0.6,q=>q.rect(-9.4,1.6,4,9));hC(c,0,0.4,1,'#d8b060',HOL,0.4);hQ(c,'#d8b060',HOL,0.4,q=>q.rect(-8.6,5,2.4,1.6));
+ /* Kopf */
+ c.save();c.translate(0.6,-9);c.rotate(tilt);
+ for(const sd of[-1,1]){hQ(c,blk,HOL,0.8,q=>{q.moveTo(sd*2.6,-6.8);q.quadraticCurveTo(sd*8.6,-11.4,sd*9.6,-5.4);q.quadraticCurveTo(sd*9.8,-1.6,sd*7.6,-0.6);q.quadraticCurveTo(sd*7.2,-4.2,sd*4.4,-4.6);q.closePath()});hQ(c,'#3a3540',null,0,q=>{q.moveTo(sd*4.4,-6.6);q.quadraticCurveTo(sd*7.4,-8.2,sd*7.6,-5);q.lineTo(sd*5.6,-5);q.closePath()})}
+ hQ(c,blk,HOL,0.9,q=>{q.moveTo(-6.6,1.6);q.quadraticCurveTo(-7.8,-7.6,0,-7.8);q.quadraticCurveTo(7.8,-7.6,6.6,1.6);q.quadraticCurveTo(0,5,-6.6,1.6);q.closePath()});
+ /* Blue-Merle-Gesicht: graue Flecken */
+ c.globalAlpha=ga*0.75;for(const[x,y,r]of[[-4.6,-5,1.1],[-5.6,-1.4,0.9],[4.8,-4.4,0.9],[5.6,-0.6,1],[-2.6,-6.6,0.7]])hC(c,x,y,r,'#7d8a9c');c.globalAlpha=ga;
+ /* lohfarbene Backen und Augenbrauen */
+ for(const sd of[-1,1]){hE(c,sd*4.4,0.2,2.2,2.2,tan);hE(c,sd*3,-4.9,1.2,0.8,tan)}
+ /* weiße Blesse bis zur Schnauze, mit Sommersprossen */
+ hQ(c,wht,null,0,q=>{q.moveTo(-0.6,-7.6);q.lineTo(0.6,-7.6);q.lineTo(1.2,-2.4);q.quadraticCurveTo(3.4,0.6,3.2,3.4);q.quadraticCurveTo(0,5.4,-3.2,3.4);q.quadraticCurveTo(-3.4,0.6,-1.2,-2.4);q.closePath()});
+ c.globalAlpha=ga*0.7;for(const[x,y]of[[-1.6,1.4],[1.4,1],[2.2,2.4],[-2.4,2.6],[0.6,-3],[-0.8,-1.4],[2.6,0.2],[-2.8,0.6],[1,3.8]])hC(c,x,y,0.4,'#7d8a9c');c.globalAlpha=ga;
+ hE(c,0,1.2,1.7,1.2,'#141217',HOL,0.4);hC(c,-0.5,0.8,0.45,'rgba(255,255,255,.45)');
+ /* hechelndes Maul mit Zunge */
+ ln(c,'#141217',0.6,-1.8,3.4,0,3,1.8,3.4);hQ(c,'#e4707e',HOL,0.5,q=>{q.moveTo(-1,3.6);q.lineTo(1,3.6);q.quadraticCurveTo(1.4,5.6+pant,0,6+pant);q.quadraticCurveTo(-1.4,5.6+pant,-1,3.6);q.closePath()});
+ /* bernsteinfarbene Augen */
+ for(const sd of[-1,1]){const ex=sd*2.9,ey=-3;if(hBlink(t,0.8)){ln(c,'#141217',0.8,ex-1.2,ey,ex+1.2,ey)}else{hE(c,ex,ey,1.3,1.2,'#c8822a',HOL,0.4);hC(c,ex,ey,0.6,'#141217');hC(c,ex+0.4,ey-0.4,0.32,'#fff')}}
+ c.restore()}
+const NPC_ART={rex:npcRex,gundren:npcGundren,nundro:npcNundro,kardal:npcKardal,dolgrimson:npcDolgrimson,fagas:npcFagas,phandalin:npcPhandalin,ploop:npcPloop};
+/* Figur am Boden (x,y) – s wie bei den alten Lagerfiguren */
+function drawNpcArt(c,n,x,y,t,s){const k=s*0.95,ga=c.globalAlpha;c.save();c.translate(x,y);
+ if(n.id==='woelfe'){ell(c,0,1,24*k,6*k,'rgba(0,0,0,.35)');c.translate(0,-15*k);c.scale(k,k);npcWoelfe(c,t+x*0.01);c.restore();c.globalAlpha=ga;return true}
+ const f=NPC_ART[n.id];if(!f){c.restore();return false}
+ ell(c,0,1,(n.id==='ploop'?20:15)*k,5*k,'rgba(0,0,0,.35)');const bob=Math.sin(t*2.2+x*0.01)*0.5;c.translate(0,-15*k+bob*k);c.scale(k,k);
+ try{f(c,t+x*0.013,0,ga)}catch(e){}c.globalAlpha=ga;c.restore();return true}
+
+/* kleine Porträts der Neuankömmlinge (Lagerfeuer-Szene) */
+function npcRowStart(cv){if(cv._on)return;cv._on=1;let t=0,last=performance.now();const ids=(cv.dataset.npcrow||'').split(',').filter(Boolean);
+ const loop=now=>{if(!document.body.contains(cv)){cv._on=0;return}t+=Math.min(0.05,(now-last)/1000);last=now;const dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth||300,H=cv.clientHeight||90;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+  const n=ids.length,step=Math.min(110,W/Math.max(1,n));ids.forEach((id,i)=>{const N=NPCS.find(q=>q.id===id);if(!N)return;const x=W/2+(i-(n-1)/2)*step,y=H-8,s=Math.min(1.45,H/58);
+   drawNpc(c,N,x,y,t,s)});
+  requestAnimationFrame(loop)};requestAnimationFrame(loop)}
+
+function drawNpc(c,n,x,y,t,s){if(drawNpcArt(c,n,x,y,t,s))return;const b=Math.sin(t*2+x)*0.6*s;c.save();c.translate(x,y);ell(c,0,2*s,16*s,5*s,'rgba(0,0,0,.35)');
  const body=(w,h,col)=>{c.fillStyle=col;c.beginPath();c.moveTo(-w*s,0);c.quadraticCurveTo(-w*s,-h*s+b,0,-h*s+b);c.quadraticCurveTo(w*s,-h*s+b,w*s,0);c.closePath();c.fill()};
  const head=(hy,r,col)=>ell(c,0,hy*s+b,r*s,r*s,col);
  if(n.k==='zwerg'){body(14,24,n.c);c.fillStyle='#3a2414';c.fillRect(-14*s,-9*s+b,28*s,3*s);head(-27,8.5,'#e2b48a');c.fillStyle=n.beard;c.beginPath();c.moveTo(-8*s,-26*s+b);c.lineTo(8*s,-26*s+b);c.lineTo(0,-11*s+b);c.closePath();c.fill();ell(c,-3*s,-29*s+b,1.3*s,1.3*s,'#1a1410');ell(c,3*s,-29*s+b,1.3*s,1.3*s,'#1a1410')}
@@ -4752,17 +5086,17 @@ function sceneStart(cv){if(cv._on)return;cv._on=1;let last=performance.now(),t=0
     const order=ids.map((id,i)=>({id,x:fx+seats[i][0]*Math.min(W,520),y:fy+seats[i][1]*H})).sort((a,b)=>a.y-b.y);
     for(const h of order)if(h.y<fy)drawHero(c,h.id,h.x,h.y,s*1.3,{t:t+h.x,flip:h.x>fx?-1:1});
     fireFlame(c,fx,fy,t,s);for(const h of order)if(h.y>=fy)drawHero(c,h.id,h.x,h.y,s*1.4,{t:t+h.x,flip:h.x>fx?-1:1});
-    if(parts[1]==='1')drawRex(c,fx-Math.min(W,520)*0.12,fy+16*s,1,t,false)}
+    if(parts[1]==='1')drawNpc(c,NPCS[0],fx-Math.min(W,520)*0.12,fy+20*s,t+0.7,s*1.15)}
    else{const hid=HEROES[parts[0]]?parts[0]:'barradin',ids=(parts[1]||'').split(',').filter(Boolean),sel=parts[2]||'',L=ids.map(id=>NPCS.find(n=>n.id===id)).filter(Boolean),others=L.filter(n=>n.id!=='rex');
     const pos=others.map((n,i)=>({n,...lagerPos(others.length,i,W,H)}));fireFlame(c,fx,fy,t,s);drawHero(c,hid,fx+46*s,fy+6*s,s,{t,flip:-1});
-    if(L.some(n=>n.id==='rex'))drawRex(c,fx-46*s,fy+10*s,1,t,false);
+    if(L.some(n=>n.id==='rex'))drawNpc(c,NPCS[0],fx-46*s,fy+16*s,t+0.7,s*1.05);
     for(const p of pos.sort((a,b)=>a.y-b.y)){if(p.n.id===sel){ell(c,p.x,p.y+2*s,20*s,7*s,'rgba(255,208,74,.35)')}drawNpc(c,p.n,p.x,p.y,t,s*1.15)}
     cv._pos=pos.map(p=>({id:p.n.id,x:p.x,y:p.y})).concat(L.some(n=>n.id==='rex')?[{id:'rex',x:fx-46*s,y:fy+10*s}]:[]);
     const sp=G.lagerLine&&G.lagerLine.split('|');if(sp&&sp[0]===sel){const p=cv._pos.find(q=>q.id===sel);if(p)bubble(c,p.x,p.y-48*s,sp.slice(1).join('|'),W)}}
    fireSparks(cv,c,fx,fy,t,dt,s)}catch(e){}
   requestAnimationFrame(loop)};requestAnimationFrame(loop);
  if(!fire)cv.addEventListener('click',ev=>{const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top;let b=null,bd=48*48;for(const p of cv._pos||[]){const d=(p.x-x)**2+(p.y-20-y)**2;if(d<bd){bd=d;b=p}}if(b){sfx('ui');showLager(b.id)}})}
-setInterval(()=>{try{for(const cv of document.querySelectorAll('canvas[data-fire],canvas[data-lager]'))sceneStart(cv)}catch(e){}},300);
+setInterval(()=>{try{for(const cv of document.querySelectorAll('canvas[data-fire],canvas[data-lager]'))sceneStart(cv);for(const cv of document.querySelectorAll('canvas[data-npcrow]'))npcRowStart(cv)}catch(e){}},300);
 
 /* ================= Lokaler Mehrspieler & Controller =================
    Alle Helden stehen in PL (PL[0] = Spieler 1). Das Spiel rechnet weiterhin mit dem globalen P –
@@ -6144,7 +6478,7 @@ document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);n
 
 /* interner Testzugang */
 window.__hs={get G(){return G},get keys(){return keys},call(n,...a){return({useSkill,usePotion,openOverlay,closeOverlay,netAct})[n](...a)},get P(){return P},get PL(){return PL},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
- step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},net(){return NET},netFns(){return{netHost,netJoin,netJoinScreen,netAction,netGuestReset,netCloseRoom,netWorld,netDiff,mpSlots}},fn(){return{LPOW,dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal,gainXp,legS,makeAnc,ancRoll,dropItem,mpRemove,mpAddPlayer,groupRoll,musAk:a=>musAk(a),addMod,ambi:()=>JSON.stringify(Object.fromEntries(Object.entries(AMBI.el).map(([k,a])=>[k,{p:a.paused,bad:!!a._bad,g:a._g?+a._g.gain.value.toFixed(3):null}]))),lootBlocked,teleHits:typeof teleHits!=='undefined'?teleHits:null}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
+ step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},net(){return NET},netFns(){return{netHost,netJoin,netJoinScreen,netAction,netGuestReset,netCloseRoom,netWorld,netDiff,mpSlots}},fn(){return{LPOW,dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal,gainXp,legS,makeAnc,ancRoll,dropItem,mpRemove,mpAddPlayer,groupRoll,musAk:a=>musAk(a),addMod,ambi:()=>JSON.stringify(Object.fromEntries(Object.entries(AMBI.el).map(([k,a])=>[k,{p:a.paused,bad:!!a._bad,g:a._g?+a._g.gain.value.toFixed(3):null}]))),lootBlocked,teleHits:typeof teleHits!=='undefined'?teleHits:null}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawNpc:(c,n,x,y,t,s)=>drawNpc(c,n,x,y,t,s),NPCS,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
 </script>
 
