@@ -25,7 +25,7 @@ body{font-family:var(--fb);font-size:16px;line-height:1.5;padding-bottom:calc(6.
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
-.wrap{max-width:78rem;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:86rem;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px))}
 header.kopf{padding:1.6rem 0 1rem}
 .zurueck{color:var(--mute);text-decoration:none;font-size:.9rem}
 .zurueck:hover{color:var(--ember)}
@@ -54,6 +54,15 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
   .seite .misch h2{font-size:1.15rem;margin-bottom:.35rem}
   .seite .regler{grid-template-columns:minmax(5.5rem,8.5rem) 1fr 2.4rem;gap:.45rem;padding:.12rem 0;font-size:.85rem}
   .seite .misch .tipp,.seite .misch .spar{font-size:.76rem}
+  /* rechts dreispaltig: kürzer, weniger Scrollen */
+  .seite .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.3rem}
+  .seite .chip{border-radius:9px;padding:.34rem .45rem;font-size:.8rem;line-height:1.15;gap:.3rem;text-align:left;min-height:2.3rem}
+  .seite .chip kbd{margin-left:auto}
+  .seite .geraeusche{gap:.55rem}
+  .seite .misch:not([hidden]){display:grid;grid-template-columns:1fr 1fr;column-gap:1.1rem}
+  .seite .misch .regler{grid-template-columns:minmax(4.5rem,6.5rem) 1fr 2.7rem}
+  .seite .misch .regler b{white-space:nowrap}
+  .seite .misch > h2,.seite .misch > hr,.seite .misch > .tipp,.seite .misch > .spar{grid-column:1/-1}
 }
 /* Handy: Schichten als Blatt, das über der Leiste aufgeht (🎚 oder Tippen auf den Namen) */
 @media (max-width:979px){
@@ -112,7 +121,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
 @media (prefers-reduced-motion:reduce){.welt.an::after{animation:none}}
 /* Aufbau: links Welten, Mischpult, Szenen – rechts (am Rechner mitlaufend) Geräusche & Einschläge */
 .buehne{display:grid;gap:.4rem 1.6rem;align-items:start}
-@media (min-width:980px){.buehne{grid-template-columns:minmax(0,1fr) 23rem}.seite{position:sticky;top:.8rem;max-height:calc(100vh - 6.8rem);overflow:auto;padding-right:.3rem;scrollbar-width:thin}}
+@media (min-width:980px){.buehne{grid-template-columns:minmax(0,1fr) minmax(26rem,32rem)}.seite{position:sticky;top:.8rem;max-height:calc(100vh - 6.8rem);overflow:auto;padding-right:.3rem;scrollbar-width:thin}}
 .seite h2.abschnitt{margin-top:1.2rem}
 /* auf dem Handy: Sprungleiste, damit Geräusche und Szenen nicht ganz unten verschwinden */
 .sprung{display:flex;gap:.4rem;margin:.8rem 0 0;position:sticky;top:0;z-index:4;padding:.45rem 0;background:linear-gradient(var(--ink) 70%,transparent)}
