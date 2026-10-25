@@ -1235,7 +1235,8 @@
     vogel: { f: ambReihe("e_vogel_", 10), tempo: [.92, 1.08] }, kraehe: { f: ambReihe("e_kraehe_", 7) }, wolf: { f: ambReihe("e_wolf_", 4), tempo: [.9, 1.03] },
     wal: { f: ambReihe("e_wal_", 3), tempo: [.8, 1] }, pferd: { f: ["e_pferd_1"], tempo: [.9, 1.06] }, katze: { f: ambReihe("e_katze_", 4) }, ruder: { f: ambReihe("e_ruder_", 3) },
     donner: { f: ["fx_fo2_sfx100v2_thunder_01"].concat(ambReihe("e_donner_", 4)), tempo: [.8, 1.05] },
-    chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 }
+    chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 },
+    klangschale: { f: ["a_klangschale"], tempo: [.98, 1.02] }
   };
   /* über kulFx (echte Aufnahmen aus ECHT bzw. gerechnet): Art in der Kulisse → Art in kulFx */
   const KUL_FX = { krug: "krug", stuhl: "stuhl", knarren: "knarren", schritte: "schritte", holzschritte: "schritte", muenzen: "muenzen", tuer: "tuer",
@@ -1256,11 +1257,11 @@
       ev: [["donner", [60, 150], .3, 1], ["tuch", [25, 60], .25, .2]] },
     sturm: { raum: .45, betten: [["a_gewitter1", 1], ["a_gewitter2", .5], ["a_starkregen", .45], ["a_wind2", .4], ["a_starkregen2", .4], ["a_heulwind", .35]],
       ev: [["donner", [14, 40], .55, .5], ["donner", [25, 70], .4, 1]] },
-    hoehle: { raum: .9, betten: [["a_tropfen1", 1], ["a_tropfen2", .45], ["a_wind1", .22, { tief: 380 }], ["a_tropfen3", .45], ["a_heulwind", .12, { tief: 400 }]],
+    hoehle: { raum: .9, betten: [["a_tropfen1", 1], ["a_tropfen2", .45], ["a_wind1", .22, { tief: 380 }], ["a_tropfen3", .45, { schleife: true }], ["a_heulwind", .12, { tief: 400 }]],
       ev: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5]] },
-    unterreich: { raum: .9, betten: [["a_tropfen1", .7], ["a_unterwasser", .35, { tief: 500 }], ["a_bach2", .18, { tief: 600 }], ["a_tropfen3", .3], ["a_heulwind", .14, { tief: 300 }]],
+    unterreich: { raum: .9, betten: [["a_tropfen1", .7], ["a_unterwasser", .35, { tief: 500 }], ["a_bach2", .18, { tief: 600 }], ["a_tropfen3", .3, { schleife: true }], ["a_heulwind", .14, { tief: 300 }]],
       ev: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1]] },
-    kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }], ["a_tropfen3", .35], ["a_heulwind", .14, { tief: 500 }]],
+    kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }], ["a_tropfen3", .35, { schleife: true }], ["a_heulwind", .14, { tief: 500 }]],
       ev: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8], ["hund", [80, 180], .22, 1]] },
     meer: { raum: .3, betten: [["a_wellen1", 1], ["a_wellen2", .55], ["a_wind2", .3], ["a_wellen3", .55]],
       ev: [["moewe", [8, 22], .4, .5], ["glocke", [60, 140], .2, 1]] },
@@ -1274,8 +1275,8 @@
       ev: [["krug", [8, 20], .35, .2], ["blubb", [5, 14], .35, .3], ["buch", [20, 45], .3, .3], ["zischen", [25, 60], .25, .3]] },
     bibliothek: { raum: .5, betten: [["a_feuer3", .7], ["a_wind2", .25, { tief: 600 }], ["a_uhr", .18, { takt: 2.0005 }], ["a_fensterregen", .14, { tief: 2500 }]],
       ev: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2]] },
-    tempel: { raum: .9, betten: [["a_wind1", .35, { tief: 500 }], ["a_wind2", .2, { tief: 300 }], ["a_feuer3", .3, { tief: 2000 }], ["a_gesang", .2, { tief: 3000 }], ["a_halle", .22, { tief: 1800 }], ["a_klangschale", .08]],
-      ev: [["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] },
+    tempel: { raum: .9, betten: [["a_wind1", .35, { tief: 500 }], ["a_wind2", .2, { tief: 300 }], ["a_feuer3", .3, { tief: 2000 }], ["a_gesang", .2, { tief: 3000 }], ["a_halle", .22, { tief: 1800 }]],
+      ev: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] },
     sumpf: { raum: .35, betten: [["a_blubbern", .4], ["a_grillen", .4], ["a_nacht", .4], ["a_tropfen2", .3], ["a_dschungel", .22]],
       ev: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1], ["kraehe", [40, 100], .22, .9]] },
     unterwasser: { raum: .6, betten: [["a_unterwasser", 1], ["a_blubbern", .3, { tief: 1500 }]],
@@ -1316,6 +1317,8 @@
       if (!buf || kul !== k) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05;
       out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(b.grund, ctx.currentTime + 3);
+      /* Aufnahmen mit unregelmäßigem Rhythmus (Pfützen-Tropfen): als ganze, nahtlose Endlosschleife – zerschnitten würden sie stolpern */
+      if (o.schleife) { const q = ctx.createBufferSource(); q.buffer = buf; q.loop = true; q.connect(out); q.start(ctx.currentTime + .05, Math.random() * buf.duration); k.knoten.push(q); }
       weltBettPlanen(k, b);
     });
     return b;
@@ -1324,7 +1327,7 @@
   function weltBettPlanen(k, b) {
     if (!b.buf) return;
     const D = b.buf.duration;
-    while (b.naechst < ctx.currentTime + 6) {
+    while (!b.o.schleife && b.naechst < ctx.currentTime + 6) {
       /* len und X in echter Zeit; der Ausschnitt muss samt Tempo-Abweichung vollständig in der Datei liegen und darf erst
          nach dem Ende der Ausblendung aufhören – sonst wird er hörbar abgeschnitten. Kurze Aufnahmen: lange Überblendung. */
       const rate = b.o.takt ? 1 : zz(.985, 1.015), kurz = D < 15;

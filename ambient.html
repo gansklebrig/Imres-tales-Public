@@ -161,6 +161,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
     tuch: { f: reihe("e_tuch_", 3) }, zischen: { f: reihe("e_zischen_", 2) },
     frosch: { f: reihe("e_frosch_", 8), tempo: [.82, 1.12], folge: [1, 3, .45, .9] },
     chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 },
+    klangschale: { f: ["a_klangschale"], tempo: [.98, 1.02] },
     eule: { f: reihe("e_eule_", 2), tempo: [.88, 1.05] }, moewe: { f: reihe("e_moewe_", 10) }, specht: { f: reihe("e_specht_", 4) },
     vogel: { f: reihe("e_vogel_", 10), tempo: [.92, 1.08] }, kraehe: { f: reihe("e_kraehe_", 7) }, wolf: { f: reihe("e_wolf_", 4), tempo: [.9, 1.03] },
     wal: { f: reihe("e_wal_", 3), tempo: [.8, 1] }, pferd: { f: ["e_pferd_1"], tempo: [.9, 1.06] }, katze: { f: reihe("e_katze_", 4) }, ruder: { f: reihe("e_ruder_", 3) },
@@ -192,13 +193,13 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
       betten: [["a_gewitter1", 1, W("Gewitter", "Storm")], ["a_gewitter2", .5, W("Unwetter", "Tempest")], ["a_starkregen", .45, W("Starkregen", "Downpour")], ["a_wind2", .4, W("Sturmwind", "Gale")], ["a_starkregen2", .4, W("Wolkenbruch", "Cloudburst")], ["a_heulwind", .35, W("Heulender Sturm", "Howling gale")]],
       ereignisse: [["donner", [14, 40], .55, .5], ["donner", [25, 70], .4, 1]] },
     { id: "hoehle", sym: "💧", name: W("Höhle", "Cave"), text: W("Tropfsteine, Hall, Höhlenwind, bröckelnder Stein", "Dripstones, echoes, cave wind, crumbling stone"), raum: 4,
-      betten: [["a_tropfen1", 1, W("Tropfen", "Drips")], ["a_tropfen2", .45, W("Rinnsal", "Trickle")], ["a_wind1", .22, W("Luftzug", "Draught"), { tief: 380 }], ["a_tropfen3", .45, W("Tropfsteine", "Dripstones")], ["a_heulwind", .12, W("Höhlenwind", "Cave wind"), { tief: 400 }]],
+      betten: [["a_tropfen1", 1, W("Tropfen", "Drips")], ["a_tropfen2", .45, W("Rinnsal", "Trickle")], ["a_wind1", .22, W("Luftzug", "Draught"), { tief: 380 }], ["a_tropfen3", .45, W("Tropfsteine", "Dripstones"), { schleife: true }], ["a_heulwind", .12, W("Höhlenwind", "Cave wind"), { tief: 400 }]],
       ereignisse: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5]] },
     { id: "unterreich", sym: "🕸", name: W("Unterreich", "Underdark"), text: W("Endlose Tiefe, fremde Laute, Schleim, Stein und ferner Wind", "Endless depths, alien sounds, slime, stone and distant wind"), raum: 5,
-      betten: [["a_tropfen1", .7, W("Tropfen", "Drips")], ["a_unterwasser", .35, W("Tiefe", "Depths"), { tief: 500 }], ["a_bach2", .18, W("Ferner Fluss", "Distant river"), { tief: 600 }], ["a_tropfen3", .3, W("Tropfsteine", "Dripstones")], ["a_heulwind", .14, W("Ferner Wind", "Distant wind"), { tief: 300 }]],
+      betten: [["a_tropfen1", .7, W("Tropfen", "Drips")], ["a_unterwasser", .35, W("Tiefe", "Depths"), { tief: 500 }], ["a_bach2", .18, W("Ferner Fluss", "Distant river"), { tief: 600 }], ["a_tropfen3", .3, W("Tropfsteine", "Dripstones"), { schleife: true }], ["a_heulwind", .14, W("Ferner Wind", "Distant wind"), { tief: 300 }]],
       ereignisse: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1]] },
     { id: "kerker", sym: "⛓", name: W("Kerker", "Dungeon"), text: W("Klirrende Ketten, ferne Klagen, Zugluft, schwere Riegel, ein Wachhund", "Rattling chains, distant moans, draughts, heavy bolts, a guard dog"), raum: 2.5,
-      betten: [["a_tropfen2", .6, W("Tropfen", "Drips")], ["a_wind1", .25, W("Luftzug", "Draught"), { tief: 450 }], ["a_tropfen3", .35, W("Pfützen", "Puddles")], ["a_heulwind", .14, W("Zugluft", "Cold draught"), { tief: 500 }]],
+      betten: [["a_tropfen2", .6, W("Tropfen", "Drips")], ["a_wind1", .25, W("Luftzug", "Draught"), { tief: 450 }], ["a_tropfen3", .35, W("Pfützen", "Puddles"), { schleife: true }], ["a_heulwind", .14, W("Zugluft", "Cold draught"), { tief: 500 }]],
       ereignisse: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8], ["hund", [80, 180], .22, 1]] },
     { id: "kueste", sym: "🌊", name: W("Küste", "Coast"), text: W("Brandung, Uferwellen, Wind und Möwen", "Surf, lapping waves, wind and gulls"), raum: 1,
       betten: [["a_wellen1", 1, W("Brandung", "Surf")], ["a_wellen2", .55, W("Wellen", "Waves")], ["a_wind2", .3, W("Wind", "Wind")], ["a_wellen3", .55, W("Uferwellen", "Lapping waves")]],
@@ -219,8 +220,8 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
       betten: [["a_feuer3", .7, W("Kamin", "Hearth")], ["a_wind2", .25, W("Wind am Fenster", "Wind at the window"), { tief: 600 }], ["a_uhr", .18, W("Standuhr", "Clock"), { takt: 2.0005 }], ["a_fensterregen", .14, W("Regen am Fenster", "Rain at the window"), { tief: 2500 }]],
       ereignisse: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2]] },
     { id: "tempel", sym: "⛪", name: W("Tempel", "Temple"), text: W("Weite Halle, Mönchsgesang, Klangschale, Glocken und Gong", "Vast hall, chanting monks, singing bowl, bells and gong"), raum: 5,
-      betten: [["a_wind1", .35, W("Luftzug", "Draught"), { tief: 500 }], ["a_wind2", .2, W("Weite", "Vastness"), { tief: 300 }], ["a_feuer3", .3, W("Kerzen", "Candles"), { tief: 2000 }], ["a_gesang", .2, W("Mönchsgesang", "Chanting"), { tief: 3000 }], ["a_halle", .22, W("Halle", "Hall"), { tief: 1800 }], ["a_klangschale", .08, W("Klangschale", "Singing bowl")]],
-      ereignisse: [["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] },
+      betten: [["a_wind1", .35, W("Luftzug", "Draught"), { tief: 500 }], ["a_wind2", .2, W("Weite", "Vastness"), { tief: 300 }], ["a_feuer3", .3, W("Kerzen", "Candles"), { tief: 2000 }], ["a_gesang", .2, W("Mönchsgesang", "Chanting"), { tief: 3000 }], ["a_halle", .22, W("Halle", "Hall"), { tief: 1800 }]],
+      ereignisse: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5]] },
     { id: "sumpf", sym: "🐸", name: W("Sumpf", "Swamp"), text: W("Blubbernder Morast, quakende Frösche, sirrende Insekten, Krähen im Nebel", "Bubbling mire, croaking frogs, whirring insects, crows in the mist"), raum: 1.2,
       betten: [["a_blubbern", .4, W("Morast", "Mire")], ["a_grillen", .4, W("Grillen", "Crickets")], ["a_nacht", .4, W("Nacht", "Night")], ["a_tropfen2", .3, W("Tropfen", "Drips")], ["a_dschungel", .22, W("Insektenchor", "Insect chorus")]],
       ereignisse: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1], ["kraehe", [40, 100], .22, .9]] },
@@ -315,6 +316,8 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
       if (!buf || b.aus) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05;
       b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + 4);
+      /* Aufnahmen mit unregelmäßigem Rhythmus (Pfützen-Tropfen): als ganze, nahtlose Endlosschleife – zerschnitten würden sie stolpern */
+      if (b.o.schleife) { const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.connect(b.out); s.start(ctx.currentTime + .05, Math.random() * buf.duration); b.quellen.push(s); }
       bettPlanen(b);
     });
     return b;
@@ -322,7 +325,7 @@ footer h3{font-family:var(--fd);font-weight:400;color:var(--text);font-size:1.05
   function bettPlanen(b) {
     if (!b.buf || b.aus) return;
     const D = b.buf.duration;
-    while (b.naechst < ctx.currentTime + 6) {
+    while (!b.o.schleife && b.naechst < ctx.currentTime + 6) {
       /* len und X in echter Zeit; der Ausschnitt muss samt Tempo-Abweichung vollständig in der Datei liegen und darf erst
          nach dem Ende der Ausblendung aufhören – sonst wird er hörbar abgeschnitten. Kurze Aufnahmen: lange Überblendung. */
       const rate = b.o.fest || b.o.takt ? 1 : zz(.985, 1.015), kurz = D < 15;

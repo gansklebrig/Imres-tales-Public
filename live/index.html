@@ -342,6 +342,8 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
       if (!buf || b.aus) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05;
       b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + Math.max(.3, zust.fx.xfade));
+      /* Aufnahmen mit unregelmäßigem Rhythmus (Pfützen-Tropfen): als ganze, nahtlose Endlosschleife – zerschnitten würden sie stolpern */
+      if (b.o.schleife) { const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.playbackRate.value = tonFaktor(); s._basis = 1; s.connect(b.out); s.start(ctx.currentTime + .05, Math.random() * buf.duration); b.quellen.push(s); }
       bettPlanen(b);
     });
     return b;
@@ -349,7 +351,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   function bettPlanen(b) {
     if (!b.buf || b.aus) return;
     const D = b.buf.duration, tf = tonFaktor();
-    while (b.naechst < ctx.currentTime + 6) {
+    while (!b.o.schleife && b.naechst < ctx.currentTime + 6) {
       const basis = b.o.fest || b.o.takt ? 1 : zz(.985, 1.015), rate = basis * tf, kurz = D < 15;
       const len = Math.min((D - .3 - (b.o.takt || 0)) / rate * (kurz ? .92 : .8), zz(9, 22)), X = kurz ? len * .45 : Math.min(3, len * .3);
       const inhalt = len * rate, t = b.naechst;
