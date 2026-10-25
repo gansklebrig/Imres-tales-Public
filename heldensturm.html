@@ -3998,7 +3998,7 @@ function showChapterDone(){hud.hidden=true;clearHudFx();G.atIntro=0;const S=STAG
   ${P.sp>0?`<p class="sp" style="margin:0">Du hast ${P.sp} freie${P.sp>1?'':'n'} Talentpunkt${P.sp>1?'e':''}.</p>`:''}
   <div class="row" style="justify-content:center"><button class="btn" data-act="between-inv">Beutel</button><button class="btn" data-act="between-tree">Talente</button><button class="btn" data-act="smith-open">Schmied</button></div>
   <p class="muted" style="margin:0">Weiter: <b style="color:var(--text)">${N.ort!==S.ort?esc(ORTE[N.ort].name)+' – ':''}${esc(N.name)}</b></p>
-  <button class="btn-main" data-act="next-stage">Weiterziehen</button></div>`)}
+  <div class="row" style="justify-content:center;align-items:center"><button class="btn" data-act="stay-stage" title="Zurück in die Stufe – das Portal bleibt offen">↩ Noch bleiben</button><button class="btn-main" data-act="next-stage">Weiterziehen</button></div></div>`)}
 function endRun(win){if(G.state==='end')return;G.state='end';clearHudFx();truheDeposit();if(G.mp&&PL[0])P=PL[0];if(G.rl){for(const q of mpL())withP(q,()=>{q.chan=null;q.form=null;rlSync()})}G.victory=win;hud.hidden=true;joy=null;const hs=hsave(P.id);
  const reached=G.stage+(win?1:0);const camp=G.mode==='kampagne';if(camp)hs.best2=Math.max(hs.best2||0,G.diff*100+reached);let unlock='';unseedRng();
  if(win&&camp){hs.clears++;if(G.diff+1>SAVE.maxDiff){SAVE.maxDiff=G.diff+1;unlock=diffName(G.diff+1)}}if(!G.mp)clearRun();persist();sfx(win?'portal':'boss');
@@ -4128,6 +4128,10 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'lager-npc':sfx('ui');showLager(b.dataset.k);break;
   case'stage-go':hideScreen();hud.hidden=false;G.state='play';G.paused=false;last=performance.now();stageBanner();if(G.stage===0&&G.kills===0)toast('Laufen – angreifen geht von allein!');break;
   case'next-stage':if(maybeEvent())break;doNextStage();break;
+   /* Aus Versehen ins Portal gelaufen: zurück in die Stufe, das Portal bleibt offen */
+   case'stay-stage':{if(G.state!=='between')break;G.state='play';G.paused=false;G.fireOn=0;G.overlay=null;hideScreen();hud.hidden=false;last=performance.now();const pt=G.portal;
+    if(pt)for(const q of mpL()){if(!q)continue;const d=Math.sqrt(d2(q,pt));if(d<150){const a=d>1?Math.atan2(q.y-pt.y,q.x-pt.x):Math.PI/2;q.x=clamp(pt.x+Math.cos(a)*150,20,WORLD-20);q.y=clamp(pt.y+Math.sin(a)*150,20,WORLD-20)}}
+    if(P&&!G.bot){saveRun();persist()}sfx('ui');toast('Das Portal bleibt offen – geh hinein, wenn du so weit bist.','#bfe6ff');break}
   case'between-inv':G.invSel=null;G.menuP=NET.cf||0;if(G.mp&&PL[G.menuP])P=PL[G.menuP];G.overlay='inv';renderInv();break;
   case'between-tree':G.menuP=NET.cf||0;if(G.mp&&PL[G.menuP])P=PL[G.menuP];G.overlay='tree';renderTree();break;
   case'mtab':if(G.state==='camp'){campOpen(b.dataset.m,1);break}if(G.state==='between'&&b.dataset.m!=='pause'){if(!G.overlay){G.menuP=NET.cf||0;if(G.mp&&PL[G.menuP])P=PL[G.menuP]}G.overlay=b.dataset.m;if(b.dataset.m==='inv'){G.invSel=null;renderInv()}else if(b.dataset.m==='truhe'){G.trSel=null;renderTruhe()}else renderTree()}else if(G.state==='play')switchOverlay(b.dataset.m);break;
