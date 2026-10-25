@@ -60,3 +60,11 @@ Klangwelten · Episch (ambient.html, Umschalter „Episch“) – lange Aufnahme
   Außerdem tiefer gestimmt verwendet: Orgel, Pauken, Horn, Gong, Kontrabass, Cello (VSCO 2 CE, CC0), Chorstimmen (FluidR3, CC BY 3.0),
   Einschläge und Wesen (fx_*, CC0, Kenney und OpenGameArt) – alle wie oben beschrieben.
 Für Imres Tales in Mono umgewandelt, im Pegel angeglichen, Anfang und Ende weich ausgeblendet und neu kodiert.
+
+Klangwelten · Geräusche (amb/g_*.mp3) – alle CC0, über den Open Game SFX Index:
+  Kenney „RPG Audio“ und „Impact Sounds“ (kenney.nl): Türen, Knarren, Schritte (Stein, Holz, Gras, Schnee), Bücher, Leder, Dolch, Axt, Metall- und Schildtreffer, Faustschläge
+  OpenGameArt: rubberduck („100 CC0 SFX“, „100 CC0 SFX #2“, „100 CC0 metal and wood SFX“, „80 CC0 RPG SFX“, „75 CC0 breaking/falling/hit SFX“, „80 CC0 creature SFX“) –
+    Schlüssel, Schlösser, Truhe, Falle, Glocke, nasse Schritte, Klingen, Glas, Holzbruch, Ketten, Zauber, Feuer, Edelsteine, Steinschlag, Troll;
+    artisticdude („RPG Sound Pack“) – Kettenhemd, Rüstung, Oger, Riese, Schatten, Schleim; Zombie-Laute („Zombies“-Paket)
+  Galopp (g_galopp_1): Moodist (Pixabay-Inhaltslizenz bzw. CC0)
+Für Imres Tales zugeschnitten, in Mono umgewandelt, im Pegel angeglichen und neu kodiert.
