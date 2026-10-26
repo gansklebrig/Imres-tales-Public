@@ -134,6 +134,7 @@
       umgewandelt: "In vier Pattern umgewandelt: A Strophe, B Refrain, C Zwischenteil, D Höhepunkt.",
       rollen: { i: "Vorspiel", s: "Strophe", v: "Aufbau", r: "Refrain", b: "Zwischenteil", h: "Höhepunkt" }, kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
+      uebergang: "Übergang", uebStufe: n => n === 1 ? "schnell, 1 Takt" : n + " Takte, nahtlos",
       lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
       vorlagen: { taverne: "Tavernentanz", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", schmiede: "⚒ Schmiede", trauer: "Trauerlied", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lager",
@@ -218,6 +219,7 @@
       umgewandelt: "Turned into four patterns: A verse, B chorus, C bridge, D finale.",
       rollen: { i: "Intro", s: "Verse", v: "Build-up", r: "Chorus", b: "Bridge", h: "Finale" }, kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
+      uebergang: "Transition", uebStufe: n => n === 1 ? "quick, 1 bar" : n + " bars, seamless",
       lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
       vorlagen: { taverne: "Tavern dance", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", schmiede: "⚒ Forge", trauer: "Lament", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Camp",
@@ -3283,7 +3285,7 @@
 
   }
   function kickSchritt(zeit, ab) {
-    if (!S.kick || S.mute.trommel || !ctx || ausduennen || einblend > EINBLEND / 2) return;
+    if (!S.kick || S.mute.trommel || !ctx || ausduennen || (!morphEin && einblend > EINBLEND / 2)) return;
     const L = taktL(), rolle = S.rollen ? rolleAn(ab) : "r";
     let m = kickMuster(rolle, L);
     if (gefuehl === "halb") m = m.filter(x => x % 8 === 0);
@@ -3297,6 +3299,26 @@
     if (fam === "episch" && schritt === 0 && (rolle === "r" || rolle === "h")) probe("bd", 0, zeit, master, .22 * pegel);
   }
   let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
+  /* Übergang zwischen Stimmungen: 1 Takt = schneller Wechsel (mit Paukenwirbel bei dramatischen Zielen),
+     2–8 Takte = das laufende Stück wird Takt für Takt zum neuen umgebaut (morph) */
+  let uebergang = 4, morph = null, morphEin = false, einblendMax = 48;
+  try { const u = parseInt(localStorage.getItem("imres-lw-uebergang"), 10); if (u >= 1 && u <= 8) uebergang = u; } catch (_) {}
+  /* Reihenfolge, in der das Schlagwerk auf den neuen Rhythmus umsteigt (Anteil der Takte bis zur Mitte) */
+  const MORPH_FOLGE = { ketten: 0, rex: .2, schelle: .4, klopf: .6, trommel: .8 };
+  const glatt = x => x * x * (3 - 2 * x);
+  /* Umbau beginnen: kein Lautstärkeloch – die Mitte des Übergangs (Takt „pivot“) übernimmt Bass, Melodie und Harmonie */
+  function morphStarten() {
+    const N = uebergang, pivot = Math.max(1, Math.round(N / 2)), sd = schrittDauer(), L = taktL();
+    morph = { N, pivot, takt: -1, tempoA: tempoJetzt || S.tempo, tempoB: wechsel.tempo };
+    /* alles, was das neue Stück braucht, schon jetzt laden – zur Mitte des Umbaus muss es sofort erklingen */
+    { const alt = S; S = wechsel; try { orchVorladen(); gaesteVorladen(); kapelleVorladen(); } catch (_) {} S = alt; }
+    const T = taktEnde() + pivot * L * sd; /* nur für die Fortschrittsanzeige */
+    wechselAb = T; wechselStart = ctx.currentTime; ausduennen = false;
+    /* falls ein früherer schneller Wechsel die Lautstärke abgesenkt hat: weich zurück */
+    const mg = master.gain, j = ctx.currentTime;
+    if (mg.cancelAndHoldAtTime) mg.cancelAndHoldAtTime(j); else { mg.cancelScheduledValues(j); mg.setValueAtTime(mg.value, j); }
+    mg.setTargetAtTime(.38, j, .4);
+  }
   /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
   const DRAMA = { heldenlied: 1, verfolgung: 2, ruinen: 1, kampf: 2, boss: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1, grusel: 1, hof: 1 };
   /* Ende des laufenden Takts – liegt er weniger als einen Schlag entfernt, das Ende des nächsten */
@@ -3356,14 +3378,19 @@
     else if (st.gefuehl && st.gefuehl !== "halb" && ab === c && energie && durchgang % 2 === 0 && TL === 16 && S.intensitaet >= 6) gefuehl = "doppelt";
   }
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
-  function wechselAnwenden(zeit) {
+  function wechselAnwenden(zeit, sanft) {
     const neu = wechsel; wechsel = null; wechselAb = 0;
     const raumAlt = S.raum;
     S = neu; abschnitt = 0; durchgang = 0; padAkkord = -1; orchVorladen();
     try { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); } catch (_) {}
     const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
-    ausduennen = false; einblend = dr ? 0 : EINBLEND;
-    if (master) {
+    ausduennen = false; einblend = dr ? 0 : EINBLEND; einblendMax = EINBLEND; morphEin = false;
+    if (sanft) {
+      /* Umbau: Schlagwerk spielt schon den neuen Rhythmus, die neue Melodie wächst in den restlichen Takten heran */
+      einblendMax = einblend = Math.max(8, (morph ? morph.N - morph.pivot : 2) * taktL()); morphEin = true;
+      /* mitten im Fluss: das neue Stück steigt nicht mit seinem leisen Intro ein, sondern im ersten richtigen Teil */
+      if (S.rollen) { let a = 0; while (a < S.ablauf.length - 1 && rolleAn(a) === "i") a++; abschnitt = a; }
+    } else if (master) {
       /* das neue Stück blendet sich ein – bei dramatischen Zielen schnell und mit Schlag auf der Eins, sonst sanft */
       const mg = master.gain;
       if (mg.cancelAndHoldAtTime) mg.cancelAndHoldAtTime(zeit); else { mg.cancelScheduledValues(zeit); mg.setValueAtTime(.38 * (dr ? .3 : .22), zeit); }
@@ -3378,32 +3405,53 @@
       kulisseStart();
     }, Math.max(0, (zeit - ctx.currentTime) * 1000)); /* Anzeige wechselt erst, wenn das neue Stück wirklich erklingt */
   }
-  function planen() {
-    const vorlauf = document.hidden ? 1 : .3; /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
+  /* vor schwerer Rechenarbeit (neues Stück komponieren, Klänge vorberechnen) weit vorausplanen:
+     die Musik ist dann schon eingeplant und läuft durch die Rechenpause, statt kurz abzureißen */
+  let planVorlauf = 0, imPlanen = false, intVorrat = null;
+  function planenVoraus(sek) { if (!laeuft || !ctx || imPlanen) return; planVorlauf = sek || 1.2; try { planen(); } catch (_) {} planVorlauf = 0; }
+  function planen() { imPlanen = true; try { planenInnen(); } finally { imPlanen = false; } }
+  function planenInnen() {
+    const vorlauf = planVorlauf || (document.hidden ? 1 : .3); /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     if (ausklingt) return;
     if (musikPauseAb && naechste >= musikPauseAb) { if (naechste < ctx.currentTime) naechste = ctx.currentTime; return; }
-    if (wechsel && !wechselAb) brueckeStarten();
+    if (morph && wechsel) morph.tempoB = wechsel.tempo;
+    if (wechsel && !wechselAb) { if (uebergang > 1 && !hoerer) morphStarten(); else brueckeStarten(); }
     if (ausklangAb === -1) { ausklangAb = taktEnde(); ausklangStart = ctx.currentTime; }
     while (naechste < ctx.currentTime + vorlauf && !(musikPauseAb && naechste >= musikPauseAb)) {
       if (schritt === 0 && ausklangAb && naechste >= ausklangAb - 2 * schrittDauer()) { schlussAkkord(naechste); return; }
       if (schritt === 0 && hoerer) funkAusrichten(false);
-      if (schritt === 0 && wechsel && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
-      else if (schritt === 0 && intensitaetNeu) { intensitaetNeu = false; stimmungWeiter(); }
+      if (schritt === 0 && morph) {
+        morph.takt++;
+        if (morph.takt === morph.pivot && wechsel) wechselAnwenden(naechste, true);
+        if (morph.takt >= morph.N) morph = null;
+      }
+      if (schritt === 0 && wechsel && !morph && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
+      else if (schritt === 0 && intensitaetNeu && (intVorrat || naechste - ctx.currentTime < .15)) { intensitaetNeu = false; const v = intVorrat; intVorrat = null; stimmungWeiter(false, v); }
       if (schritt === 0) { teilPlanen(abschnitt % S.ablauf.length); try { kapJetzt = stilKey() && S.kapelle !== 0 ? kapPlan(abschnitt % S.ablauf.length) : null; } catch (_) { kapJetzt = null; } }
       const zielTempo = ausduennen && wechsel ? wechsel.tempo : S.tempo;
-      tempoJetzt = tempoJetzt ? tempoJetzt + (zielTempo - tempoJetzt) * (ausduennen || einblend ? .05 : .1) : S.tempo;
+      if (morph) {
+        /* Tempo gleitet stufenlos über den ganzen Umbau */
+        const p = Math.max(0, Math.min(1, (Math.max(0, morph.takt) * taktL() + schritt) / (morph.N * taktL())));
+        tempoJetzt = morph.tempoA + ((wechsel ? morph.tempoB : S.tempo) - morph.tempoA) * glatt(p);
+      } else tempoJetzt = tempoJetzt ? tempoJetzt + (zielTempo - tempoJetzt) * (ausduennen || einblend ? .05 : .1) : S.tempo;
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
       const v = S.variation / 10, letzterTakt = abschnitt % S.ablauf.length === S.ablauf.length - 1;
       const versatz = S.swing && schritt % 2 === 1 ? schrittDauer() * .33 : 0;
       const ev = { schritt, teil: teilName, zeit: naechste + versatz, spuren: {} };
-      const ein = einblend > 0 ? 1 - einblend / EINBLEND : 1;
+      const ein = einblend > 0 ? 1 - einblend / einblendMax : 1;
+      /* Umbau vor der Mitte: Schlagwerk steigt nach und nach auf den neuen Rhythmus um, Melodie und Flöte treten zurück */
+      /* Schlagwerk steigt nur vorab um, wenn beide Stücke dieselbe Taktart haben (3/4 und 4/4 passen nicht Schritt für Schritt) */
+      const vorMitte = morph && wechsel && morph.takt >= 0, neuTeil = vorMitte && wechsel.takt === S.takt ? wechsel.teile[wechsel.ablauf[0] || "A"] : null;
+      const zurueck = vorMitte ? 1 - .35 * glatt(Math.min(1, (morph.takt + schritt / taktL()) / morph.pivot)) : 1;
       IDS.forEach(k => {
         if (S.mute[k]) return;
         if (k === "floete" && gastSolist(abschnitt % S.ablauf.length)) return;
         if (k === "floete" && kapJetzt && kapJetzt.echo === 0) return; /* die Kapelle spielt hier Solo bzw. den Ohrwurm */ /* im Zwischenteil (alte Lieder: C-Teil) spielt der Gast Echos Stimme als Solo */
         /* weicher Übergang: vorher fällt das Schlagwerk weg, danach kommt es erst im zweiten Takt wieder dazu */
-        if (SCHLAGWERK[k] && (ausduennen || (einblend > EINBLEND / 2))) return;
-        let wert = variiert(k, daten[k][schritt], schritt, daten[k], v, letzterTakt);
+        if (SCHLAGWERK[k] && !morphEin && (ausduennen || (einblend > EINBLEND / 2))) return;
+        const umgestellt = neuTeil && SCHLAGWERK[k] && neuTeil[k] && morph.takt >= Math.floor((MORPH_FOLGE[k] || 0) * morph.pivot);
+        const dk = umgestellt ? neuTeil[k] : daten[k];
+        let wert = variiert(k, dk[schritt], schritt, dk, v, letzterTakt);
         /* halbes Taktgefühl: Trommel nur auf der Eins, Klatschen auf der Drei, Bass in Halben */
         if (gefuehl === "halb") {
           if (k === "trommel") wert = schritt % 8 === 0 ? 0 : -1; else if (k === "ketten") wert = schritt === 8 ? 0 : -1;
@@ -3420,9 +3468,9 @@
         /* Betonung wie bei echten Spielleuten: die Eins trägt, Achtel dazwischen leichter, Sechzehntel am leisesten */
         const akzent = (S.stimmung && !SCHLAGWERK[k] ? (schritt % 8 === 0 ? 1.1 : schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .88 : .78)
           : SCHLAGWERK[k] ? (schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .9 : .8) : 1) * (.94 + Math.random() * .12);
-        const laut = (k === "floete" && kapJetzt ? kapJetzt.echo : 1) * akzent * (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : .45 + .55 * ein) : 1) * (k === "floete" && gastJetzt.length ? .6 : 1);
+        const laut = (k === "melodie" || k === "floete" ? zurueck : 1) * (k === "floete" && kapJetzt ? kapJetzt.echo : 1) * akzent * (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : morphEin ? .62 + .38 * ein : .45 + .55 * ein) : 1) * (k === "floete" && gastJetzt.length ? .6 : 1);
         const haelt = k === "floete" || (k === "melodie" && (GEHALTEN[S.instrument] || S.instrument === "mandoline"));
-        spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(daten[k], schritt) * schrittDauer() * .95 : 0);
+        spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(dk, schritt) * schrittDauer() * .95 : 0);
         if (k === "bass") { bordunStimmen(wert, ev.zeit); try { subBass(wert, ev.zeit + Math.max(0, wackel), notenLaenge(daten.bass, schritt) * schrittDauer()); } catch (_) {} }
         ev.spuren[k] = wert;
       });
@@ -3434,7 +3482,7 @@
         try { kapelleSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
       }
       anzeige.push(ev);
-      if (einblend > 0) einblend--;
+      if (einblend > 0) { einblend--; if (!einblend) morphEin = false; }
       naechste += schrittDauer();
       schritt = (schritt + 1) % taktL();
       if (schritt === 0) {
@@ -3445,7 +3493,7 @@
           const st = S.stimmung && STIL[S.stimmung];
           wirbelJetzt = Math.random() < (st ? (st.chaos ? .25 : .15) : .3);
           /* Stimmung: das Thema darf sich einprägen – erst nach drei Durchgängen ein neues, leicht abgewandeltes Stück */
-          if (st && !hoerer && durchgang % (S.ablauf.length >= 12 ? 2 : 3) === 0) setTimeout(() => stimmungWeiter(true), 0);
+          if (st && !hoerer && !wechsel && !morph && durchgang % (S.ablauf.length >= 12 ? 2 : 3) === 0) setTimeout(() => stimmungWeiter(true), 0);
         }
       }
     }
@@ -3464,9 +3512,10 @@
       taktWorker.postMessage(an ? 25 : 0);
     } catch (_) { taktWorker = null; }
   }
-  function stimmungWeiter(neuesThema) {
+  function stimmungWeiter(neuesThema, vorrat) {
     if (!S.stimmung || !STIL[S.stimmung]) return;
-    const neu = stimmungLied(S.stimmung, true, undefined, neuesThema);
+    planenVoraus(1.2);
+    const neu = vorrat && vorrat.stimmung === S.stimmung ? vorrat.lied : stimmungLied(S.stimmung, true, undefined, neuesThema);
     S.teile = neu.teile; S.ablauf = neu.ablauf; if (neu.rollen) S.rollen = neu.rollen; else delete S.rollen; S.kapWahl = neu.kapWahl; S.arrSeed = neu.arrSeed; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
     /* mit dem neuen Thema greifen Barradin und Echo manchmal zu einem anderen Instrument – außer man hat sie selbst gewählt */
     if (neuesThema && !S.festBesetzung) {
@@ -3479,7 +3528,13 @@
     }
     orchVorladen();
     try { hallProfilAnwenden(); } catch (_) {}
-    merken(); if (!S.pult) autoZeichnen();
+    merken(); if (!S.pult) { if (imPlanen) setTimeout(autoZeichnen, 0); else autoZeichnen(); }
+  }
+  /* Intensität während der Musik: das neue Stück gleich jetzt (außerhalb des Taktgebers) komponieren, am Taktanfang nur übernehmen */
+  function intensitaetVormerken() {
+    intensitaetNeu = true; intVorrat = null;
+    setTimeout(() => { if (!laeuft || !intensitaetNeu || !S.stimmung || !STIL[S.stimmung]) return; planenVoraus(1.2);
+      try { intVorrat = { stimmung: S.stimmung, lied: stimmungLied(S.stimmung, true, undefined, false) }; } catch (_) { intVorrat = null; } }, 0);
   }
   /* Ausklang: am Taktende ein gemeinsamer Schlussakkord, dann verklingt alles und die Band hört auf */
   function schlussAkkord(z) {
@@ -3513,7 +3568,7 @@
     const vonVorn = !weiter || !pausiert || schritt >= taktL() || abschnitt >= S.ablauf.length;
     if (vonVorn) { schritt = 0; abschnitt = 0; durchgang = 0; }
     /* jeder Start ist ein sanftes Intro: die Band kommt Schicht für Schicht dazu, das Schlagwerk erst nach ein paar Takten */
-    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1; ausduennen = false; einblend = EINBLEND;
+    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; morph = null; morphEin = false; einblendMax = EINBLEND; padAkkord = -1; ausduennen = false; einblend = EINBLEND;
     if (klassikLauf) klassikStopp(true, true);
     clearTimeout(fortsetzTimer); musikPauseAb = 0;
     /* … und die Lautstärke steigt von null an (gut 4 Sekunden bis zum vollen Pegel) */
@@ -3527,6 +3582,7 @@
     knoepfe(); funkAenderung(); medienStand();
   }
   function stopp(pause) {
+    morph = null; morphEin = false; einblendMax = EINBLEND;
     laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; musikPauseAb = 0; if (klassikLauf) klassikStopp(true);
     /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
     if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); if (!(kul && kul.allein)) kulisseStop();
@@ -5590,7 +5646,7 @@
   function gaesteSchritt(zeit, daten, ab) {
     if (!S.stimmung || !STIL[S.stimmung] || !ctx) return;
     if (schritt === 0) gaesteWaehlen(ab);
-    if (!gastJetzt.length || ausduennen || einblend > EINBLEND / 2) return;
+    if (!gastJetzt.length || ausduennen || (!morphEin && einblend > EINBLEND / 2)) return;
     gastBusBauen();
     const sd = schrittDauer(), zeile = klingt(daten.bass, schritt), ak = akkordMidi(zeile);
     let n = 1; while (n < taktL() - schritt && klingt(daten.bass, schritt + n) === zeile) n++;
@@ -5823,7 +5879,7 @@
     return (kapPlanMerk = { key, plan: { w, echo, solo } }).plan;
   }
   function kapelleSchritt(zeit, daten, ab) {
-    if (!stilKey() || !ctx || ausduennen || einblend > EINBLEND / 2 || S.intensitaet < 2) return;
+    if (!stilKey() || !ctx || ausduennen || (!morphEin && einblend > EINBLEND / 2) || S.intensitaet < 2) return;
     const sp = kapSpieler(); if (!sp.length) return;
     kapBusBauen();
     const L = taktL(), rolle = rolleAn(ab), sd = schrittDauer(), zeile = klingt(daten.bass, schritt), ak = akkordMidi(zeile);
@@ -6283,7 +6339,7 @@
     root.querySelectorAll(".lw-ival").forEach(x => { x.textContent = t().intStufen[S.intensitaet]; });
     const r = root.querySelector('[data-feld="intensitaet"]'); if (r) r.value = S.intensitaet;
     merken();
-    if (S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetNeu = true; else stimmungWeiter(); }
+    if (S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetVormerken(); else stimmungWeiter(); }
     leisteAktualisieren();
   }
   function leisteBauen() {
@@ -6370,6 +6426,7 @@
   /* ---------- Rundgang: eingeblendet, Schritt für Schritt, ohne die Seite zu verlassen ---------- */
   Object.assign(TX.de, { rundgang: "❔ Rundgang", rundgangTipp: "Kurzer Rundgang durch das Pult", weiter: "Weiter", zurueck: "Zurück", fertig: "Fertig", beenden: "Beenden",
     info: {
+      uebergang: "Wie lange der Wechsel zur nächsten Stimmung dauert. Ab 2 Takten wird das laufende Stück Takt für Takt umgebaut: Das Tempo gleitet, das Schlagwerk steigt nach und nach auf den neuen Rhythmus um, in der Mitte übernimmt die neue Melodie. Bei 1 Takt wechselt es schnell – bei dramatischen Stimmungen mit Paukenwirbel.",
       intensitaet: "Wie viel los ist: links ruhig und sparsam, rechts dicht und wild. Die Änderung greift am nächsten Taktanfang.",
       gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im Zwischenteil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
       mitspieler: "Band allein: nur Barradin, Friedrich, Echo, Ezekiel und Rex. Ein paar Mitspieler: dazu das Geister-Orchester, ein Musiker der Kapelle und die Gäste aus eurer Geschichte. Volle Big Band: die ganze Kapelle. Aufgeklappt lässt sich jede Gruppe einzeln an- und abschalten; die Gäste kommen nur in Stimmungen, die zu ihnen passen.",
@@ -6393,6 +6450,7 @@
     ] });
   Object.assign(TX.en, { rundgang: "❔ Tour", rundgangTipp: "A short tour of the console", weiter: "Next", zurueck: "Back", fertig: "Done", beenden: "Close",
     info: {
+      uebergang: "How long the change to the next mood takes. From 2 bars on, the playing piece is rebuilt bar by bar: the tempo glides, the percussion switches to the new rhythm one by one, and halfway through the new melody takes over. At 1 bar it changes quickly – with a timpani roll for dramatic moods.",
       intensitaet: "How busy it gets: left is calm and sparse, right is dense and wild. Changes take effect at the next bar.",
       gaeste: "Characters from your story join in fitting moods and get a solo in the bridge. Expand to switch single guests on or off.",
       mitspieler: "Band alone: just Barradin, Friedrich, Echo, Ezekiel and Rex. A few players: plus the ghost orchestra, one street-band musician and the guests from your story. Full big band: the whole street band. Expanded, every group can be switched on or off; guests only join moods that suit them.",
@@ -6554,6 +6612,7 @@
     '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
     raumWahl(T) + '<button type="button" class="lw-schalter lw-kick" data-aktion="kick" aria-pressed="' + (S.kick !== 0) + '" title="' + esc(T.kickTipp) + '">🥁 ' + T.kick + ": " + T.kickStufe[S.kick] + "</button>" + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
+  const uebRegler = T => '<label class="lw-feld lw-regler lw-uebergang"><span>🌊 ' + T.uebergang + ' <b class="lw-uval">' + T.uebStufe(uebergang) + '</b> ' + info("uebergang") + '</span><input type="range" min="1" max="8" step="1" value="' + uebergang + '" data-feld="uebergang"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b> ' + info("intensitaet") + '</span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
   const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler"><span>' + sym + " " + text + '</span><input type="range" min="0" max="10" step="1" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + wert * 10 + " %</b></label>";
@@ -6639,7 +6698,7 @@
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) + stimmSpeicherZeile(T) + zweiKlapp(T) : einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>")) + "</section>";
+      (musikTab === "stimmungen" ? intRegler(T) + uebRegler(T) + stimmSpeicherZeile(T) + zweiKlapp(T) : einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>")) + "</section>";
   }
   /* Kulissen und Effekte nehmen am Handy viel Platz: von den Kulissen zuerst nur neun (Favoriten und die laufende vorn),
      die Effekte und Momente sind zugeklappt, bis man sie braucht – das merkt sich die Seite */
@@ -6668,6 +6727,7 @@
     klassikKnoepfe();
   }
   function eigenLaden(wert) {
+    planenVoraus(1.2);
     const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
     const d = l && dekodieren(l.code);
     if (!d) return;
@@ -7112,6 +7172,7 @@
     try { audioStart(); spielen(spur, daten[i], ctx.currentTime + .01, i, 1, .3); } catch (_) {}
   }
   function vorlageWaehlen(k) {
+    planenVoraus(1.2);
     const mix = { vol: S.vol, mute: S.mute };
     const behalten = { orchester: S.orchester, kapelle: S.kapelle, kapStufe: S.kapStufe, kick: S.kick, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse, gaeste: S.gaeste };
     let neu;
@@ -7351,6 +7412,10 @@
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "uebergang") {
+      uebergang = Math.max(1, Math.min(8, +e.target.value)); try { localStorage.setItem("imres-lw-uebergang", String(uebergang)); } catch (_) {}
+      root.querySelectorAll(".lw-uval").forEach(x => x.textContent = t().uebStufe(uebergang));
+    }
     if (d.feld === "intensitaet") {
       S.intensitaet = +e.target.value;
       root.querySelectorAll(".lw-ival").forEach(x => x.textContent = t().intStufen[S.intensitaet]);
@@ -7360,7 +7425,7 @@
   });
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
-    if (f === "intensitaet" && S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetNeu = true; else stimmungWeiter(); }
+    if (f === "intensitaet" && S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetVormerken(); else stimmungWeiter(); }
     if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
     if (f === "ablauf" || f === "rolle" || (f === "kopiere" && e.target.value)) stimmungLoesen();
@@ -7654,6 +7719,8 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-vorlagen button:hover { border-color: var(--ember); color: var(--ember); }
 .lw-stimmungen { padding: .6rem .7rem; border: 1px dashed var(--line); }
 .lw-intensitaet { flex: 1 1 100%; margin-top: .5rem; }
+.lw-uebergang { flex: 1 1 100%; margin-top: .35rem; }
+.lw-uebergang input { width: 100%; accent-color: #3d8fa8; }
 .lw-klangwelt-titel { flex: 1 1 100%; margin-top: .3rem; font-size: .85rem; color: var(--ash); }
 .lw-stimm-mix { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: flex-end; margin-top: .4rem; }
 .lw-intensitaet input { width: 100%; accent-color: #c0502a; }
