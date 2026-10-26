@@ -1439,6 +1439,7 @@
     if (s.kapelle !== 0) s.kapelle = 1;
     if (s.besetzung && (s.stimmung || !KAPELLE_NAMEN.includes(s.besetzung))) delete s.besetzung;
     if (s.kapStufe !== 1) s.kapStufe = 2;
+    if (![0, 1, 2].includes(s.kick)) s.kick = 1;
     s.kapWahl = Array.isArray(s.kapWahl) ? s.kapWahl.filter(Number.isInteger).slice(0, 4) : [];
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
@@ -3059,6 +3060,58 @@
   let durchgang = 0, ausduennen = false, einblend = 0;
   const EINBLEND = 48; /* drei Takte, in denen das neue Stück Schicht für Schicht dazukommt */
   const SCHLAGWERK = { klopf: 1, schelle: 1, trommel: 1, ketten: 1, rex: 1 };
+  /* ---------- Bassdrum („Wumms“) ----------
+     Eine tiefe Trommel unter der ganzen Musik – je nach Stimmung anders: bei Festen ein warmer Fass-Schlag auf den Vierteln,
+     bei Kampf, Reitern und Hymnen ein harter, treibender Kick, bei Grusel und Spannung ein leiser Herzschlag, in ruhigen Stimmungen keiner.
+     S.kick: 0 = aus, 1 = passend (Standard), 2 = kräftig. Sie folgt dem Regler und der Stummtaste der Trommel. */
+  const KICK_FAMILIE = { trinklied: "fest", dorffest: "fest", marktplatz: "fest", shanty: "fest", auenland: "fest", reise: "fest", sieg: "fest", taverne: "fest", hafen: "fest",
+    kampf: "episch", boss: "episch", verfolgung: "episch", reiter: "episch", heldenlied: "episch", zwerge: "episch", schmiede: "episch",
+    grusel: "herz", unterreich: "herz", spannung: "herz", ruinen: "herz" };
+  let kickBus = null;
+  function kickSchlag(zeit, l, tief) {
+    if (!ctx || rendert) return;
+    if (!kickBus) { kickBus = ctx.createGain(); kickBus.gain.value = 1; kickBus.connect(master); }
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(tief ? 150 : 115, zeit); o.frequency.exponentialRampToValueAtTime(tief ? 44 : 56, zeit + (tief ? .12 : .09));
+    g.gain.setValueAtTime(.0001, zeit); g.gain.exponentialRampToValueAtTime(l, zeit + .005); g.gain.exponentialRampToValueAtTime(.001, zeit + (tief ? .45 : .3));
+    o.connect(g); g.connect(kickBus); o.start(zeit); o.stop(zeit + .5);
+    /* der Anschlag: ein kurzes Klicken, damit man den Schlag auch auf kleinen Lautsprechern hört */
+    if (rauschen) { const r = ctx.createBufferSource(), f = ctx.createBiquadFilter(), gg = ctx.createGain(); r.buffer = rauschen; f.type = "bandpass"; f.frequency.value = tief ? 2200 : 1600; f.Q.value = 1.2;
+      gg.gain.setValueAtTime(l * (tief ? .35 : .22), zeit); gg.gain.exponentialRampToValueAtTime(.001, zeit + .02); r.connect(f); f.connect(gg); gg.connect(kickBus); r.start(zeit); r.stop(zeit + .03); }
+  }
+  /* wo der Kick in diesem Schritt fällt (oder -1) */
+  function kickMuster(rolle, L) {
+    const fam = KICK_FAMILIE[stilKey()] || "ruhig", st = S.kick === 2 ? 1 : 0, i = S.intensitaet + st * 2, jig = (STIL[S.stimmung] || {}).dreier === "jig";
+    if (!S.kick) return [];
+    if (L === 12) {
+      if (fam === "ruhig") return st && (rolle === "r" || rolle === "h") ? [0] : [];
+      if (fam === "herz") return i >= 2 ? [0, 2] : [];
+      return i < 4 ? [] : rolle === "i" || rolle === "b" ? [0] : jig ? (fam === "episch" && (rolle === "r" || rolle === "h") ? [0, 3, 6, 9] : [0, 6]) : (i >= 7 ? [0, 4, 8] : [0]);
+    }
+    if (fam === "fest") return i < 4 ? [] : rolle === "i" || rolle === "b" ? [0] : i >= 7 || rolle === "h" ? [0, 4, 8, 12] : [0, 8];
+    if (fam === "episch") {
+      if (i < 3) return [];
+      if (rolle === "i") return [0, 12, 13, 14, 15];
+      if (rolle === "b") return [0, 8];
+      if (rolle === "s" || rolle === "v") return i >= 6 ? [0, 6, 8, 11] : [0, 8];
+      return i >= 8 || st ? [0, 3, 4, 6, 8, 11, 12, 14] : [0, 3, 6, 8, 11, 14];
+    }
+    if (fam === "herz") return i < 2 ? [] : rolle === "r" || rolle === "h" ? [0, 3, 8, 11] : [0, 3];
+    return st && (rolle === "r" || rolle === "h") ? [0, 8] : [];
+  }
+  function kickSchritt(zeit, ab) {
+    if (!S.kick || S.mute.trommel || !ctx || ausduennen || einblend > EINBLEND / 2) return;
+    const L = taktL(), rolle = S.rollen ? rolleAn(ab) : "r";
+    let m = kickMuster(rolle, L);
+    if (gefuehl === "halb") m = m.filter(x => x % 8 === 0);
+    if (brk === "luft" && schritt >= brkAb) return;
+    if (!m.includes(schritt)) return;
+    const fam = KICK_FAMILIE[stilKey()] || "ruhig", pegel = 1.3 * spurPegel("trommel") * (S.kick === 2 ? 1.25 : 1);
+    const betont = schritt === 0 || schritt === L / 2, l = (fam === "herz" ? (schritt % 8 === 0 ? .42 : .3) : fam === "fest" ? .5 : (betont ? .62 : .5)) * pegel;
+    kickSchlag(zeit, Math.min(.9, l), fam === "episch" || fam === "herz");
+    /* im Kampf und im Höhepunkt rollt auf den großen Schlägen die Orchester-Trommel mit */
+    if (fam === "episch" && schritt === 0 && (rolle === "r" || rolle === "h")) probe("bd", 0, zeit, master, .22 * pegel);
+  }
   let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
   /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
   const DRAMA = { heldenlied: 1, verfolgung: 2, ruinen: 1, kampf: 2, boss: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1, grusel: 1, hof: 1 };
@@ -3187,6 +3240,7 @@
         if (k === "bass") bordunStimmen(wert, ev.zeit);
         ev.spuren[k] = wert;
       });
+      try { kickSchritt(ev.zeit, abschnitt % S.ablauf.length); } catch (_) {}
       if (!(brk && schritt >= brkAb)) {
         try { orchesterSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
         try { gaesteSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
@@ -5600,6 +5654,8 @@
   }
   function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
   /* ---------- Mitspieler: Orchester, Kapelle und Gäste unter einem Dach ---------- */
+  Object.assign(TX.de, { kick: "Bassdrum", kickStufe: ["aus", "passend", "kräftig"], kickTipp: "Tiefe Trommel unter der Musik: bei Festen ein warmer Schlag, im Kampf ein treibender Kick, bei Grusel ein Herzschlag. Antippen wechselt aus – passend – kräftig." });
+  Object.assign(TX.en, { kick: "Bass drum", kickStufe: ["off", "fitting", "strong"], kickTipp: "Deep drum under the music: a warm thump at feasts, a driving kick in battle, a heartbeat in horror. Tap to cycle off – fitting – strong." });
   Object.assign(TX.de, { mitspieler: "🎻 Mitspieler", msStufe: ["Band allein", "Ein paar", "Volle Big Band"], msEigen: "eigene Auswahl", msAuf: "Einzeln einstellen",
     msOrch: "🎻 Geister-Orchester", msKap: "🎺 Kapelle", msGaeste: "🎭 Gäste", msNurBand: "Nur die Band spielt.", msGastPasst: "in passenden Stimmungen", msEinzeln: "Einzeln", msWaehle: "Wähle eine Stimmung, dann siehst du hier, wer mitspielt." });
   Object.assign(TX.en, { mitspieler: "🎻 Players", msStufe: ["Band alone", "A few", "Full big band"], msEigen: "custom", msAuf: "Adjust one by one",
@@ -6307,7 +6363,7 @@
     '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b> ' + info("hall") + '</span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
     '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
-    raumWahl(T) + sparKnopf(T);
+    raumWahl(T) + '<button type="button" class="lw-schalter lw-kick" data-aktion="kick" aria-pressed="' + (S.kick !== 0) + '" title="' + esc(T.kickTipp) + '">🥁 ' + T.kick + ": " + T.kickStufe[S.kick] + "</button>" + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b> ' + info("intensitaet") + '</span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
@@ -6426,7 +6482,7 @@
     const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
     const d = l && dekodieren(l.code);
     if (!d) return;
-    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester", "kapelle", "kapStufe", "gaeste"].forEach(k => { d[k] = S[k]; });
+    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester", "kapelle", "kapStufe", "kick", "gaeste"].forEach(k => { d[k] = S[k]; });
     d.stimmung = null; d.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
     if (laeuft) { wechsel = d; const a = S; S = d; try { saitenVorbereiten(); } catch (_) {} S = a; status(t().wechselGleich(l.name)); boxNeu("musik"); return; }
     S = d; pausiert = false; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
@@ -6868,7 +6924,7 @@
   }
   function vorlageWaehlen(k) {
     const mix = { vol: S.vol, mute: S.mute };
-    const behalten = { orchester: S.orchester, kapelle: S.kapelle, kapStufe: S.kapStufe, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse, gaeste: S.gaeste };
+    const behalten = { orchester: S.orchester, kapelle: S.kapelle, kapStufe: S.kapStufe, kick: S.kick, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse, gaeste: S.gaeste };
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: Object.fromEntries(TEILE.map(p => [p, teilLeer()])), ablauf: "A", titel: "", stimmung: null }); delete neu.rollen; }
     else if (k === "zufall") neu = zufallsLied();
@@ -6949,6 +7005,11 @@
     if (e.target.closest('[data-aktion="kapneu"]')) { if (S.stimmung) { S.kapWahl = kapelleWaehlen(S.stimmung); merken(); if (ctx) kapelleVorladen(); gaesteNeu(); } return; }
     if (e.target.closest('[data-aktion="orchester"]')) {
       S.orchester = S.orchester === 0 ? 1 : 0; merken(); if (ctx) orchVorladen(); gaesteNeu(); return;
+    }
+    if (e.target.closest('[data-aktion="kick"]')) {
+      S.kick = ((S.kick == null ? 1 : S.kick) + 1) % 3; merken();
+      root.querySelectorAll(".lw-kick").forEach(b => { b.setAttribute("aria-pressed", S.kick !== 0); b.textContent = "🥁 " + t().kick + ": " + t().kickStufe[S.kick]; });
+      return;
     }
     if (e.target.closest('[data-aktion="spar"]')) {
       spar = !spar; try { localStorage.setItem("imres-lw-spar", spar ? "1" : "0"); } catch (_) {}
