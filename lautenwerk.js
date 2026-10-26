@@ -2933,11 +2933,14 @@
   function start(weiter) {
     audioStart();
     saitenVorbereiten();
-    if (!weiter || !pausiert || schritt >= taktL() || abschnitt >= S.ablauf.length) { schritt = 0; abschnitt = 0; }
-    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1; ausduennen = false; einblend = 0;
+    const vonVorn = !weiter || !pausiert || schritt >= taktL() || abschnitt >= S.ablauf.length;
+    if (vonVorn) { schritt = 0; abschnitt = 0; durchgang = 0; }
+    /* jeder Start ist ein sanftes Intro: die Band kommt Schicht für Schicht dazu, das Schlagwerk erst nach ein paar Takten */
+    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1; ausduennen = false; einblend = EINBLEND;
     if (klassikLauf) klassikStopp(true, true);
     clearTimeout(fortsetzTimer); musikPauseAb = 0;
-    if (master) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.value = .38; }
+    /* … und die Lautstärke steigt von null an (gut 4 Sekunden bis zum vollen Pegel) */
+    if (master) { const j = ctx.currentTime, mg = master.gain; mg.cancelScheduledValues(j); mg.setValueAtTime(.0001, j); mg.linearRampToValueAtTime(.38 * .15, j + .8); mg.setTargetAtTime(.38, j + .8, 1.3); }
     musikWieder(); orchVorladen();
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
     kulisseStart(); /* erst jetzt: vorher galt die Musik noch als angehalten, und die Kulisse schaltete sich gleich wieder ab */
@@ -6463,7 +6466,13 @@
       return;
     }
     const v = e.target.closest("[data-vorlage]");
-    if (v) { vorlageWaehlen(v.dataset.vorlage); return; }
+    if (v) {
+      const k = v.dataset.vorlage, istStimmung = !!(STIL[k] || (eigeneStimmungen[k] && STIL[eigeneStimmungen[k].basis]));
+      vorlageWaehlen(k);
+      /* eine Stimmung antippen genügt: läuft noch nichts, beginnt sie gleich – leise von null an */
+      if (istStimmung && !laeuft && !hoerer) { pausiert = false; start(); }
+      return;
+    }
     const kb = e.target.closest("[data-kulisse]");
     if (kb) { audioStart(); S.kulisse = kb.dataset.kulisse; merken(); kulisseStart(true); zeichnen(); knoepfe(); return; }
     const fx = e.target.closest("[data-sfx]");
