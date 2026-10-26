@@ -652,6 +652,57 @@
     bogen: [0, 1, 2, 1, 0, -1], steigend: [0, 1, 2, 3, 4, 5], fallend: [0, -1, -2, -3, -4, -5], wechsel: [0, 1, 0, -1, 0, 1],
     sprung: [0, 2, 1, 0, -1, 0], terzen: [0, 2, 1, 3, 2, 4], ruf: [0, 0, 1, 0, -1, -2], welle: [0, -1, 0, 2, 1, 0]
   };
+  /* typische Melodiewendungen (Tonleiterschritte relativ zum ersten Ton) – angelehnt an Fantasy- und Filmmusik */
+  Object.assign(FORMEN, {
+    held: [0, 3, 4, 3, 2, 4],        /* Quarte hinauf, dann weiter – der Ruf einer Heldenhymne */
+    fanfare: [0, 4, 2, 4, 5, 4],     /* Quinte, Dreiklang – Fanfare */
+    weite: [0, 4, 3, 2, 3, 1],       /* großer Sprung, dann langsam zurück – Weite, Landschaft */
+    elbisch: [0, 1, 3, 2, 1, 2],     /* sanft steigend mit Umspielung – schwebend */
+    seufzer: [0, -1, -1, -2, -3, -2],/* Abwärtsseufzer – Klage */
+    huepfer: [0, 1, 2, 4, 2, 1],     /* Hüpfen im Jig – Auenland */
+    zwergen: [0, 0, -1, -2, 0, -2],  /* schwer, schreitend, wiederholte Töne – Lied unter dem Berg */
+    sturm: [0, 0, 1, 0, 3, 2],       /* Tonwiederholung und Sprung – Kampf */
+    lauf: [0, 1, 2, 3, 2, 1],        /* gehetzter Lauf – Verfolgung */
+    spuk: [0, 1, 0, -1, 3, 2],       /* kriechend mit plötzlichem Sprung – Grusel */
+    tiefe: [0, -1, 0, 1, 0, -3],     /* kreisend, dann in die Tiefe – Unterreich */
+    choral: [0, 1, 0, -1, 0, 0],     /* schrittweise wie ein alter Choral – Pilger */
+    fern: [0, 4, 3, 1, 2, 0],        /* weiter Ruf ins Leere – Ruinen */
+    glitzer: [0, 2, 4, 5, 4, 2],     /* gebrochener Akkord – Feen */
+    seemann: [0, 0, 0, 2, 4, 2],     /* Tonwiederholung zum Mitgrölen – Shanty */
+    krug: [0, 0, 2, 4, 2, 0],        /* Trinklied */
+    wiegen: [0, 2, 1, 2, 0, -1],     /* wiegend am Feuer */
+    menuett: [0, 2, 1, 3, 2, 4],     /* höfisch in Terzen */
+    wanderer: [0, 2, 3, 4, 3, 1]     /* auf der Straße – Reise */
+  });
+  /* je Stimmung: Formen für Strophe (s), Ohrwurm (h), Zwischenteil (b), der Sprung zu Beginn des Ohrwurms (kopf, in Tonleiterschritten)
+     und wie die Strophe ihre Sequenz versetzt (seq) */
+  const WENDUNG = {
+    heldenlied: { s: ["wanderer", "bogen", "held"], h: ["held", "fanfare"], b: ["weite", "steigend"], kopf: [3, 4], seq: [1, 2] },
+    sieg: { s: ["fanfare", "terzen"], h: ["fanfare", "held"], b: ["steigend"], kopf: [4], seq: [1, 2] },
+    hof: { s: ["menuett", "terzen", "bogen"], h: ["menuett", "fanfare"], b: ["bogen"], kopf: [2, 4], seq: [1] },
+    reiter: { s: ["weite", "held"], h: ["held", "weite"], b: ["steigend", "weite"], kopf: [3, 4], seq: [1, 2] },
+    kampf: { s: ["sturm", "ruf"], h: ["sturm", "sprung"], b: ["steigend"], kopf: [2, 3], seq: [1, -1] },
+    boss: { s: ["sturm", "tiefe"], h: ["sturm", "ruf"], b: ["steigend"], kopf: [1, 3], seq: [1] },
+    verfolgung: { s: ["lauf", "sturm"], h: ["lauf", "sprung"], b: ["steigend"], kopf: [2], seq: [1, 2] },
+    spannung: { s: ["wechsel", "spuk"], h: ["spuk", "ruf"], b: ["welle"], kopf: [1, 3], seq: [1, -1] },
+    grusel: { s: ["spuk", "wechsel"], h: ["spuk", "seufzer"], b: ["welle"], kopf: [3], seq: [-1] },
+    unterreich: { s: ["tiefe", "wechsel"], h: ["tiefe", "zwergen"], b: ["welle"], kopf: [-2, 3], seq: [-1] },
+    ruinen: { s: ["fern", "welle"], h: ["fern", "elbisch"], b: ["weite", "welle"], kopf: [4], seq: [1, -1] },
+    elben: { s: ["elbisch", "welle", "bogen"], h: ["elbisch", "weite"], b: ["weite", "elbisch"], kopf: [2, 4], seq: [1] },
+    fey: { s: ["glitzer", "huepfer"], h: ["glitzer", "terzen"], b: ["steigend"], kopf: [2, 4], seq: [1, 2] },
+    pilger: { s: ["choral", "bogen"], h: ["choral", "fern"], b: ["welle"], kopf: [2], seq: [1, -1] },
+    klage: { s: ["seufzer", "fallend"], h: ["seufzer", "welle"], b: ["fallend", "welle"], kopf: [2], seq: [-1] },
+    kamin: { s: ["wiegen", "bogen", "fallend"], h: ["bogen", "seufzer"], b: ["welle"], kopf: [2], seq: [1, -1] },
+    rast: { s: ["wiegen", "welle"], h: ["wiegen", "bogen"], b: ["welle"], kopf: [2], seq: [1] },
+    reise: { s: ["wanderer", "weite"], h: ["weite", "wanderer"], b: ["steigend"], kopf: [3, 4], seq: [1, 2] },
+    auenland: { s: ["huepfer", "terzen"], h: ["huepfer", "bogen"], b: ["welle"], kopf: [2], seq: [1, 2] },
+    zwerge: { s: ["zwergen", "ruf"], h: ["zwergen", "held"], b: ["fallend"], kopf: [3], seq: [-1, 1] },
+    dorffest: { s: ["huepfer", "terzen", "krug"], h: ["krug", "huepfer"], b: ["steigend"], kopf: [2, 4], seq: [1, 2] },
+    marktplatz: { s: ["terzen", "huepfer"], h: ["krug", "glitzer"], b: ["welle"], kopf: [2], seq: [1, 2] },
+    trinklied: { s: ["krug", "seemann"], h: ["krug", "fanfare"], b: ["steigend"], kopf: [2, 4], seq: [1, 2] },
+    shanty: { s: ["seemann", "wiegen"], h: ["seemann", "ruf"], b: ["welle"], kopf: [2, 3], seq: [1, -1] }
+  };
+  Object.keys(WENDUNG).forEach(k => { if (STIL[k]) STIL[k].wendung = WENDUNG[k]; });
   const STIL_FORMEN = { ruhig: ["bogen", "wechsel", "fallend", "welle", "ruf"], lebhaft: ["bogen", "terzen", "sprung", "steigend", "welle", "ruf"], wild: ["steigend", "sprung", "terzen", "wechsel", "ruf"] };
   const umkehren = f => f.map(x => -x);
   /* naheliegender Akkordton – nur wenn er die Form höchstens um einen Schritt verbiegt */
@@ -973,9 +1024,17 @@
     const rS = taktRhythmus(false, !!st.riff || Math.random() < .55);
     let rH = taktRhythmus(true, Math.random() < .35);
     for (let k = 0; k < 6 && String(rH) === String(rS); k++) rH = taktRhythmus(true, Math.random() < .35);
-    const mS = motiv(rS, zufall(STIL_FORMEN[art]), st.riff ? 0 : zufall([-1, 1, 2]));
-    const mH = motiv(rH, zufall(HAKEN_FORMEN[art]), st.riff ? 0 : zufall([-1, -2, 1]));
-    const sequenz = zufall([-1, 1, 2]);
+    /* die typische Wendung der Stimmung: eigene Formen für Strophe und Ohrwurm, und der Ohrwurm beginnt mit ihrem Sprung */
+    const w = st.wendung || null;
+    const mS = motiv(rS, zufall(w ? w.s : STIL_FORMEN[art]), st.riff ? 0 : zufall(w ? w.seq : [-1, 1, 2]));
+    const mH = motiv(rH, zufall(w ? w.h : HAKEN_FORMEN[art]), st.riff ? 0 : zufall([-1, -2, 1]));
+    if (w && w.kopf && mH.rel.length >= 3) {
+      const sp = zufall(w.kopf), d = sp - (mH.rel[1] - mH.rel[0]);
+      /* Sprung einsetzen und den Rest der ersten Takthälfte mitziehen, damit die Linie danach stimmig weitergeht */
+      for (let k = 1; k < mH.rel.length; k++) mH.rel[k] += d * (k === 1 ? 1 : .6);
+      mH.rel = mH.rel.map(Math.round);
+    }
+    const sequenz = zufall(w ? w.seq : [-1, 1, 2]);
     /* ----- Töne setzen ----- */
     function setzeTakt(bass, m, start, lo, hi, ziel) {
       const a = leer(); if (!m.pos.length) return a;
@@ -1114,7 +1173,7 @@
       return { bass, mel, fl: echo(bass, mel, "fern") };
     }
     function bruecke(n) {
-      const mF = motiv(rH, zufall(["bogen", "welle", "steigend"]), -1);
+      const mF = motiv(rH, zufall(w && w.b ? w.b : ["bogen", "welle", "steigend"]), -1);
       const lang = L === 12 ? { pos: [0], rel: [0] } : { pos: [0, cfg.mitte], rel: [0, -1] };
       return Array.from({ length: n }, (_, k) => {
         const ch = brueckeAkk[k % brueckeAkk.length], bass = bassVon(ch, artB);
