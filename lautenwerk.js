@@ -99,7 +99,7 @@
   /* gemeinfreie Klassiker, von der eigenen Band mit echten Instrumenten gespielt */
   const KLASSIKER = ["zirkus", "trauermarsch", "toccata", "zarathustra", "bergkoenig", "walkuere", "galopp", "hochzeit",
     "elise", "nachtmusik", "freude", "diesirae", "wiegenlied", "morgen", "zapfenstreich", "angriff", "kanon", "fruehling", "turca"];
-  const COVER_LISTE = ["matrose", "washerwoman", "scarborough", "greensleeves", "korobeiniki", "amazinggrace", "bruderjakob", "sakura", "auldlangsyne", "shchedryk"];
+  const COVER_LISTE = ["matrose", "washerwoman", "swallowtail", "morrison", "drowsymaggie", "cooley", "scarborough", "greensleeves", "folia", "korobeiniki", "amazinggrace", "bruderjakob", "sakura", "auldlangsyne", "shchedryk"];
   const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE, KLASSIKER, COVER_LISTE);
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
@@ -162,7 +162,7 @@
         zirkus: "🤡 Zirkus", trauermarsch: "⚰️ Trauermarsch", toccata: "🦇 Schurken-Orgel", zarathustra: "🌅 Zarathustra", bergkoenig: "👺 Bergkönig",
         walkuere: "🐎 Walkürenritt", galopp: "🏇 Galopp", hochzeit: "💍 Hochzeitsmarsch", elise: "🎹 Für Elise", nachtmusik: "🎩 Nachtmusik",
         matrose: "⚓ Drunken Sailor", scarborough: "🌿 Scarborough Fair", greensleeves: "💚 Greensleeves", korobeiniki: "🧱 Korobeiniki", auldlangsyne: "🥂 Auld Lang Syne", shchedryk: "🔔 Schtschedryk",
-        amazinggrace: "🕊 Amazing Grace", bruderjakob: "🔁 Bruder Jakob (Kanon)", washerwoman: "☘️ Irish Washerwoman", sakura: "🌸 Sakura",
+        amazinggrace: "🕊 Amazing Grace", bruderjakob: "🔁 Bruder Jakob (Kanon)", swallowtail: "🐦 Swallowtail Jig", morrison: "🍀 Morrison's Jig", drowsymaggie: "😴 Drowsy Maggie", cooley: "🎻 Cooley's Reel", folia: "💃 La Folia", washerwoman: "☘️ Irish Washerwoman", sakura: "🌸 Sakura",
         kanon: "👑 Pachelbel-Kanon", fruehling: "🐦 Vivaldi: Frühling", turca: "🐫 Alla turca",
         freude: "🇪🇺 Ode an die Freude", diesirae: "💀 Dies irae", wiegenlied: "🌙 Wiegenlied", morgen: "☀️ Morgenstimmung", zapfenstreich: "🎺 Zapfenstreich", angriff: "📯 Angriff!",
         bogen: "🏹 Bogen", pfeil: "🎯 Pfeil", hieb: "🗡 Hieb", verfehlt: "💨 Verfehlt", block: "🛡 Block", wucht: "🔨 Wucht",
@@ -245,7 +245,7 @@
         boing: "🌀 Boing", hupe: "🤡 Honk honk", halleluja: "😇 Hallelujah", levelup: "⬆️ Level up!", schock: "😱 Shock", wirbel: "🥁 Drum roll",
         zirkus: "🤡 Circus", trauermarsch: "⚰️ Funeral march", toccata: "🦇 Villain organ", zarathustra: "🌅 Zarathustra", bergkoenig: "👺 Mountain King",
         walkuere: "🐎 Valkyries", galopp: "🏇 Gallop", hochzeit: "💍 Wedding march", elise: "🎹 Für Elise", nachtmusik: "🎩 Night music",
-        matrose: "⚓ Drunken Sailor", scarborough: "🌿 Scarborough Fair", greensleeves: "💚 Greensleeves", korobeiniki: "🧱 Korobeiniki", auldlangsyne: "🥂 Auld Lang Syne", shchedryk: "🔔 Carol of the Bells",
+        swallowtail: "🐦 Swallowtail Jig", morrison: "🍀 Morrison's Jig", drowsymaggie: "😴 Drowsy Maggie", cooley: "🎻 Cooley's Reel", folia: "💃 La Folia", matrose: "⚓ Drunken Sailor", scarborough: "🌿 Scarborough Fair", greensleeves: "💚 Greensleeves", korobeiniki: "🧱 Korobeiniki", auldlangsyne: "🥂 Auld Lang Syne", shchedryk: "🔔 Carol of the Bells",
         amazinggrace: "🕊 Amazing Grace", bruderjakob: "🔁 Frère Jacques (round)", washerwoman: "☘️ Irish Washerwoman", sakura: "🌸 Sakura",
         kanon: "👑 Pachelbel’s Canon", fruehling: "🐦 Vivaldi: Spring", turca: "🐫 Alla turca",
         freude: "🇪🇺 Ode to Joy", diesirae: "💀 Dies irae", wiegenlied: "🌙 Lullaby", morgen: "☀️ Morning mood", zapfenstreich: "🎺 Taps", angriff: "📯 Charge!",
@@ -296,6 +296,9 @@
   const BASS_ANZEIGE = [4, 5, 3, 2, 1, 6, 0];
   /* auf welcher Stufe jede Tonleiter ihren verminderten (schiefen) Dreiklang hat – solche Akkorde meiden die Stimmungen */
   const VERMINDERT = { ionisch: 6, dorisch: 5, phrygisch: 4, lydisch: 3, mixolydisch: 2, aeolisch: 1 };
+  /* Stimmung – oder bei den Liedern der Band die Besetzung, aus der Kapelle, Orchester und Hall kommen */
+  const stilKey = () => S.stimmung || S.besetzung || null;
+  const KAPELLE_NAMEN = ["kampf", "boss", "verfolgung", "spannung", "grusel", "unterreich", "ruinen", "reise", "reiter", "heldenlied", "sieg", "rast", "trinklied", "kamin", "klage", "auenland", "elben", "fey", "zwerge", "dorffest", "marktplatz", "hof", "shanty", "pilger"];
   const MEL_GRUND = 62, BASS_GRUND = 38, FLOETE_GRUND = 74; /* D4, D2, D5 */
   const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
   const tonMidi = (spur, zeile, s) => {
@@ -1251,9 +1254,101 @@
     vol: { klopf: 7, schelle: 5, bass: 8, melodie: 8, trommel: 7, floete: 6, ketten: 6, rex: 5 },
     mute: Object.fromEntries(IDS.map(k => [k, 0]))
   });
+  /* ---------- Die Lieder der Band, neu geschrieben ----------
+     Jedes Lied ist eine ganze Form (Vorspiel, Strophe, Refrain, Zwischenteil, Schlussrefrain) mit fester Kapelle.
+     Notiert als Leadsheet: je Takt die Akkorde (vier Viertel, Bass-Zeilen 0 = I, 1 = III, 2 = IV, 3 = V, 4 = VII, 5 = VI, 6 = II)
+     und die Melodie in 16 Schritten (Zeichen 0–9, a–e = Tonleiterstufen, „.“ = klingt weiter / Pause).
+     Echos Stimme: eigene Noten oder „echo“ (antwortet in den Pausen), „lang“ (lange Töne), „terz“ (singt in Terzen mit). */
+  const LIED_ROLLEN = "issssrrrrbbhhhhs";
+  const LIEDER_NEU = {
+    taverne: { instrument: "laute", band: { trommel: "bodhran", floete: "floete", ketten: "klatschen" }, tempo: 112, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2,
+      besetzung: "trinklied", kapWahl: [0, 1, 4], ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "halbe", s: "viertel", r: "puls", b: "halbe", h: "puls" },
+      schlag: { i: { trommel: [0, 8] }, s: { trommel: [0, 6, 8, 14], klopf: [0, 8], schelle: [4, 12] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] },
+        b: { trommel: [0] }, h: { trommel: [0, 3, 6, 8, 10, 11, 12, 14], klopf: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] } },
+      takte: [["0000", "", "4...2...4...7..."],
+        ["0044", "4.2.4.7.6.4.6.4.", "echo"], ["0033", "4.2.4.7.8.7.6.4.", "echo"], ["0044", "2.4.7.9.8.6.3.6.", "echo"], ["2233", "3.5.7.5.4.......", "lang"],
+        ["0044", "7...9.7.6...8.6.", "lang"], ["2233", "a...9.7.8...6.8.", "lang"], ["0044", "7...9.7.6...8.6.", "lang"], ["3300", "8.7.6.4.7.......", "lang"],
+        ["1122", "9.......a.......", "2.4.6.4.3.5.7.5."], ["4433", "8.......6.......", "6.4.3.1.4.6.4..."],
+        ["0044", "7...9.7.6...8.6.", "terz"], ["2233", "a...9.7.8...6.8.", "terz"], ["0044", "7...9.7.6...8.6.", "terz"], ["3300", "8.7.6.8.7...7...", "terz"]] },
+    ballade: { instrument: "harfe", band: { trommel: "bodhran", floete: "gesang", ketten: "schnipsen" }, tempo: 76, transpose: 0, modus: "aeolisch", swing: 0, bordun: 0, variation: 1,
+      besetzung: "kamin", kapWahl: [0, 1, 2], ablauf: "ABCDEFGHIBCDEJKLMNO",
+      bass: { i: "orgel", s: "halbe", r: "viertel", b: "orgel", h: "viertel" },
+      schlag: { s: { trommel: [0] }, r: { trommel: [0, 8], ketten: [4, 12] }, h: { trommel: [0, 6, 8, 14], ketten: [4, 12] } },
+      takte: [["0000", "0...4...7...4...", ""],
+        ["0055", "4...4.3.5...0.2.", "echo"], ["2244", "3...5.3.1...3.4.", "echo"], ["0055", "4...7.6.5...2.4.", "echo"], ["2233", "3...5.3.1.......", "lang"],
+        ["5522", "7...7.9.a...c.a.", "lang"], ["0044", "9...7.6.8...6.4.", "lang"], ["5522", "7...7.9.a...c.a.", "lang"], ["2300", "a...8.6.7.......", "lang"],
+        ["1144", "9.......8.......", "4.6.4.2.3.1.3.5."], ["5533", "7.......8.......", "2.4.5.2.4.6.4.1."],
+        ["5522", "7...7.9.a...c.a.", "terz"], ["0044", "9...7.6.8...6.4.", "terz"], ["5522", "7...7.9.a...c.a.", "terz"], ["2300", "a...8.6.7...7...", "terz"]] },
+    hafen: { instrument: "akkordeon", band: { trommel: "trommel", floete: "gesang", ketten: "krug" }, tempo: 100, transpose: 0, modus: "dorisch", swing: 0, bordun: 1, variation: 2,
+      besetzung: "shanty", kapWahl: [1, 2, 3], ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "halbe", s: "viertel", r: "viertel", b: "halbe", h: "puls" },
+      schlag: { i: { ketten: [4, 12] }, s: { trommel: [0, 8], ketten: [4, 12] }, r: { trommel: [0, 6, 8, 14], klopf: [0, 8], ketten: [4, 12] },
+        b: { trommel: [0] }, h: { trommel: [0, 3, 6, 8, 11, 14], klopf: [0, 8], ketten: [4, 10, 12] } },
+      takte: [["0000", "", ""],
+        ["0000", "4.4.4.2.0.2.4...", "echo"], ["4444", "3.3.3.1.6.1.3...", "echo"], ["0000", "4.4.4.2.0.2.4...", "echo"], ["4430", "3.1.6...4...0...", "lang"],
+        ["0022", "7...7...a...c...", "terz"], ["4433", "8...6...8...6...", "terz"], ["0022", "7...7...a...c...", "terz"], ["4300", "8.6.4.6.7.......", "lang"],
+        ["2222", "a.......c.......", "3.5.7.5.3.5.0..."], ["4433", "8.......6.......", "6.4.3.1.4.6.4..."],
+        ["0022", "7...7...a...c...", "terz"], ["4433", "8...6...8...6...", "terz"], ["0022", "7...7...a...c...", "terz"], ["4300", "8.6.4.6.7...7...", "terz"]] },
+    wald: { instrument: "harfe", band: { trommel: "bodhran", floete: "panfloete", ketten: "rassel" }, tempo: 92, transpose: 0, modus: "lydisch", swing: 1, bordun: 0, variation: 2,
+      besetzung: "fey", kapWahl: [0, 2, 4], ablauf: "ABCDEFGHIJKLMNO",
+      bass: { i: "orgel", s: "halbe", r: "viertel", b: "halbe", h: "viertel" },
+      schlag: { s: { trommel: [0, 8], schelle: [12] }, r: { trommel: [0, 6, 8], ketten: [2, 6, 10, 14] }, h: { trommel: [0, 6, 8, 14], ketten: [2, 6, 10, 14] } },
+      takte: [["0000", "", "4.......2......."],
+        ["0066", "4.5.4.2.1.3.5.3.", "echo"], ["5533", "5.4.2.0.4.6.8.6.", "echo"], ["0066", "4.5.7.5.3.5.8.5.", "echo"], ["1133", "4.2.4.6.4.......", "lang"],
+        ["0066", "9...b.9.8...a.8.", "lang"], ["5533", "7...9.7.6...8.6.", "lang"], ["0066", "9...b.9.8...a.8.", "lang"], ["6300", "8.a.8.6.7.......", "lang"],
+        ["5555", "c.......9.......", "0.2.5.4.2.4.0.2."], ["1133", "b.......d.......", "4.6.4.2.6.4.1.4."],
+        ["0066", "9...b.9.8...a.8.", "terz"], ["5533", "7...9.7.6...8.6.", "terz"], ["0066", "9...b.9.8...a.8.", "terz"], ["6300", "8.a.8.6.7...7...", "terz"]] },
+    schmiede: { instrument: "drehleier", band: { trommel: "pauke", floete: "horn", ketten: "loeffel" }, tempo: 88, transpose: -2, modus: "aeolisch", swing: 0, bordun: 1, variation: 2,
+      besetzung: "zwerge", kapWahl: [0, 1, 2], ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "halbe", s: "halbe", r: "galopp", b: "halbe", h: "galopp" },
+      schlag: { i: { trommel: [0, 8] }, s: { trommel: [0, 8], ketten: [3, 11] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [0, 8], ketten: [3, 6, 11, 14] },
+        b: { trommel: [0] }, h: { trommel: [0, 3, 6, 8, 10, 11, 12, 14], klopf: [0, 8], ketten: [3, 6, 11, 14] } },
+      takte: [["0000", "", ""],
+        ["0000", "0..0..2.4...2...", "lang"], ["5544", "0..0..2.3...1...", "lang"], ["0000", "0..0..2.4...2...", "lang"], ["5533", "2..2..0.1.......", "lang"],
+        ["0055", "7..7..9.7...5...", "terz"], ["4433", "6..6..8.6...4...", "terz"], ["0055", "7..7..9.7...5...", "terz"], ["4400", "6..8..6.7.......", "lang"],
+        ["2222", "a.......c.......", "3...5...7...5..."], ["3333", "b.......8.......", "4...6...1...4..."],
+        ["0055", "7..7..9.7...5...", "terz"], ["4433", "6..6..8.6...4...", "terz"], ["0055", "7..7..9.7...5...", "terz"], ["4400", "6..8..6.7...7...", "terz"]] },
+    trauer: { instrument: "fidel", band: { trommel: "pauke", floete: "gesang", ketten: "ketten" }, tempo: 58, transpose: 0, modus: "aeolisch", swing: 0, bordun: 1, variation: 1,
+      besetzung: "klage", kapWahl: [0, 1, 2], ablauf: "ABCDEFGHIJKLMNO",
+      bass: { i: "orgel", s: "halbe", r: "halbe", b: "orgel", h: "viertel" },
+      schlag: { s: { trommel: [0] }, r: { trommel: [0, 8] }, b: { trommel: [0] }, h: { trommel: [0, 8, 12] } },
+      takte: [["0000", "", "4.......2......."],
+        ["0055", "4...4.3.5...0.2.", "lang"], ["2244", "3...5.3.1...3...", "lang"], ["0055", "4...7.6.5...2.0.", "lang"], ["2233", "3...5.3.1.......", "lang"],
+        ["5522", "7...9.7.a...c...", "lang"], ["0044", "9...7.6.8...6...", "lang"], ["5522", "7...9.7.a...c...", "lang"], ["2300", "a...8.6.7.......", "lang"],
+        ["1144", "9.......8.......", "4...6...3...1..."], ["5533", "7.......8.......", "2...5...4...1..."],
+        ["5522", "7...9.7.a...c...", "terz"], ["0044", "9...7.6.8...6...", "terz"], ["5522", "7...9.7.a...c...", "terz"], ["2300", "a...8.6.7...7...", "terz"]] },
+    wiegen: { instrument: "glocken", band: { trommel: "bodhran", floete: "okarina", ketten: "rassel" }, tempo: 66, transpose: 0, modus: "ionisch", swing: 0, bordun: 0, variation: 1,
+      besetzung: "rast", kapWahl: [0, 4, 1], ablauf: "ABCDEFGHIJKLMNO",
+      bass: { i: "orgel", s: "halbe", r: "halbe", b: "orgel", h: "halbe" },
+      schlag: { r: { trommel: [0], ketten: [4, 12] }, h: { trommel: [0, 8], ketten: [4, 12] } },
+      takte: [["0000", "", ""],
+        ["0033", "4.3.2...4.3.1...", "echo"], ["3300", "1.2.4...4.2.0...", "echo"], ["0033", "4.3.2...4.3.1...", "echo"], ["2233", "3.4.5...4...1...", "lang"],
+        ["5522", "7...5...7...a...", "lang"], ["0033", "9...7...8...6...", "lang"], ["5522", "7...5...7...a...", "lang"], ["2300", "5...6.8.7.......", "lang"],
+        ["6633", "8.......6.......", "1...3...4...6..."], ["5522", "7.......7.......", "2...5...3...5..."],
+        ["5522", "7...5...7...a...", "terz"], ["0033", "9...7...8...6...", "terz"], ["5522", "7...5...7...a...", "terz"], ["2300", "5...6.8.7...7...", "terz"]] }
+  };
+  function liedVonNoten(d) {
+    const v = { instrument: d.instrument, band: d.band, tempo: d.tempo, transpose: d.transpose, modus: d.modus, swing: d.swing, bordun: d.bordun, variation: d.variation,
+      ablauf: d.ablauf, rollen: LIED_ROLLEN, besetzung: d.besetzung, kapWahl: d.kapWahl.slice() };
+    const zeile = str => { const a = leer(); for (let i = 0; i < SCHRITTE && i < str.length; i++) if (str[i] !== ".") a[i] = parseInt(str[i], 36); return a; };
+    d.takte.forEach(([akk, mel, fl], k) => {
+      const p = TEILE[k], rolle = LIED_ROLLEN[k], t = teilLeer();
+      const ch = akk.split("").map(Number), bass = bassBauen(ch, d.bass[rolle] || "halbe"), m = zeile(mel);
+      t.bass = bass; t.melodie = m;
+      t.floete = fl === "echo" ? echoBauen(bass, m, "antwort") : fl === "lang" ? echoBauen(bass, m, "lang") : fl === "terz" ? terzStimme(bass, m) : fl ? zeile(fl) : leer();
+      const sc = (d.schlag || {})[rolle] || {};
+      ["klopf", "schelle", "trommel", "ketten"].forEach(s => { t[s] = an(sc[s] || []); });
+      if (k === d.takte.length - 1) t.rex[15] = 0;
+      v[p] = t;
+    });
+    return v;
+  }
+  Object.keys(LIEDER_NEU).forEach(k => { VORLAGEN[k] = liedVonNoten(LIEDER_NEU[k]); });
   const ausVorlage = (k, mix) => {
     const v = kopie(VORLAGEN[k]);
     return { tempo: v.tempo, transpose: v.transpose, modus: v.modus, swing: v.swing, bordun: v.bordun, variation: v.variation, instrument: v.instrument || "laute",
+      ...(v.rollen ? { rollen: v.rollen } : {}), ...(v.besetzung ? { besetzung: v.besetzung, kapWahl: v.kapWahl } : {}),
       band: Object.assign(BAND_START(), v.band || {}),
       ablauf: v.ablauf, teile: Object.fromEntries(TEILE.map(p => [p, v[p] || teilLeer()])), ...(mix || MIX_START()) };
   };
@@ -1277,6 +1372,7 @@
     if (typeof s.echoHall !== "number") s.echoHall = 3;
     if (s.orchester !== 0) s.orchester = 1;
     if (s.kapelle !== 0) s.kapelle = 1;
+    if (s.besetzung && (s.stimmung || !KAPELLE_NAMEN.includes(s.besetzung))) delete s.besetzung;
     if (s.kapStufe !== 1) s.kapStufe = 2;
     s.kapWahl = Array.isArray(s.kapWahl) ? s.kapWahl.filter(Number.isInteger).slice(0, 4) : [];
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
@@ -2080,7 +2176,7 @@
   };
   const HELD = 1.45, NEBEN = .8;
   function hallStimmung() {
-    const p = S.stimmung && HALL_STIMMUNG[S.stimmung];
+    const p = stilKey() && HALL_STIMMUNG[stilKey()];
     if (!p) return null;
     const held = p.held[((S.arrSeed || 0) + (S.kapWahl || []).reduce((a, b) => a + b, 0)) % p.held.length];
     return { nass: p.nass, held, orch: p.orch || 1 };
@@ -2991,7 +3087,7 @@
       if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && wechsel && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
       else if (schritt === 0 && intensitaetNeu) { intensitaetNeu = false; stimmungWeiter(); }
-      if (schritt === 0) { teilPlanen(abschnitt % S.ablauf.length); try { kapJetzt = S.stimmung && S.kapelle !== 0 ? kapPlan(abschnitt % S.ablauf.length) : null; } catch (_) { kapJetzt = null; } }
+      if (schritt === 0) { teilPlanen(abschnitt % S.ablauf.length); try { kapJetzt = stilKey() && S.kapelle !== 0 ? kapPlan(abschnitt % S.ablauf.length) : null; } catch (_) { kapJetzt = null; } }
       const zielTempo = ausduennen && wechsel ? wechsel.tempo : S.tempo;
       tempoJetzt = tempoJetzt ? tempoJetzt + (zielTempo - tempoJetzt) * (ausduennen || einblend ? .05 : .1) : S.tempo;
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
@@ -3219,7 +3315,7 @@
     elben: ["", "chor", "holz2", "ooh"], klage: ["", "chor", "holz", "bratsche"], pilger: ["orgel", "chor", "ooh"], hof: ["", "blech", "holz2", "bratsche"], zwerge: ["", "blech", "chor"],
     auenland: ["holz", "holz2"], shanty: ["holz", "chor"], rast: ["holz", "holz2"], kamin: ["holz", "holz2", "", "bratsche"], reise: ["", "holz2"], sieg: ["", "blech"], reiter: ["", "blech"], fey: ["", "holz2"] };
   function orchFarbe(pr) {
-    const l = S.stimmung && ORCH_FARBEN[S.stimmung];
+    const l = stilKey() && ORCH_FARBEN[stilKey()];
     if (!l) return pr ? pr.farbe : "";
     const m = (S.teile && TEILE.map(p => S.teile[p] && S.teile[p].melodie).find(x => x && x.some(v => v >= 0))) || [], h = m.reduce((a, v, i) => a + (v + 2) * (i + 7), 0);
     return l[h % l.length];
@@ -3234,7 +3330,7 @@
     if (fa === "bratsche" && (e === "bratsche" || kap.includes("bra"))) return "";
     return fa;
   }
-  const orchProfil = () => S.orchester !== 0 && S.stimmung && ORCH[S.stimmung] ? ORCH[S.stimmung] : null;
+  const orchProfil = () => S.orchester !== 0 && stilKey() && ORCH[stilKey()] ? ORCH[stilKey()] : null;
   let orchBus = null, orchPan = {}, padAkkord = -1, padEnde = 0;
   function orchAufbauen() {
     if (orchBus || !ctx) return;
@@ -3723,7 +3819,7 @@
       const q = .42;
       const m = [["F4", 1], ["G4", 1], ["A4", 1], ["F4", 1], ["F4", 1], ["G4", 1], ["A4", 1], ["F4", 1], ["A4", 1], ["Bb4", 1], ["C5", 2], ["A4", 1], ["Bb4", 1], ["C5", 2],
         ["C5", .5], ["D5", .5], ["C5", .5], ["Bb4", .5], ["A4", 1], ["F4", 1], ["C5", .5], ["D5", .5], ["C5", .5], ["Bb4", .5], ["A4", 1], ["F4", 1], ["F4", 1], ["C4", 1], ["F4", 2], ["F4", 1], ["C4", 1], ["F4", 2]];
-      const stimmen = [["geige", 0, .38], ["fl", 1, .3], ["oboe", 0, .3], ["fag", -1, .38]];
+      const stimmen = [["hack", 0, .38], ["bfl", 1, .28], ["akk", 0, .26], ["bra", -1, .34]];
       stimmen.forEach(([gr, o, l], k) => { const t0 = k * 8 * q; linie(n, gr, t0, achtel(m.concat(m).map(([x, d]) => [okt(x, o), d]), q), l, { leg: .9 }); });
       const ende = 3 * 8 * q + 64 * q;
       for (let z = 0; z < ende - .1; z += 2 * q) { n("gitarre", ton("F2") + 12, z, q * 1.5, .25); ["A3", "C4", "F4"].forEach(x => n("gitarre", ton(x), z + q, q, .12)); }
@@ -3840,17 +3936,259 @@
       const takte = 24; let t = 0;
       for (let k = 0; k < takte; k++) {
         const z = k * takt, staerke = k < 4 ? .3 : k < 20 ? .38 : .3;
-        linie(n, k < 8 ? "harfe" : "geigest", z, achtel(ost, e), staerke, { kurz: k >= 8 ? 1 : 0, leg: .8 });
+        linie(n, k < 8 ? "cel" : "geigest", z, achtel(ost, e), staerke, { kurz: k >= 8 ? 1 : 0, leg: .8 });
+        if (k >= 4 && k < 22) linie(n, k < 12 ? "kal" : "hack", z, achtel(ost, e), .18, { leg: .8 });
+        if (k >= 12 && k % 4 === 0) n("rgl", ton("G5"), z, 3, .16);
         if (k >= 4 && k < 22) n("vc", ton(["G2", "F2", "Eb2", "D2"][k % 4]), z, takt, .22);
         if (k >= 8 && k < 20) n("vln", ton(["D5", "C5", "Bb4", "A4"][k % 4]), z, takt, .14);
         if (k >= 12 && k < 20 && k % 2 === 0) linie(n, "trp", z, achtel([["G5", 1], ["G5", 1], ["G5", 1], ["F5", 1], ["Eb5", 1], ["D5", 1]], e).map(([x, d]) => [okt(x, -1), d]), .25, { kurz: 1, leg: .7 });
-        if (k >= 16 && k < 20) { linie(n, "stimme", z, achtel([["D5", 3], ["C5", 3]], e), .2); n("timp1", 0, z, 0, .3); }
+        if (k >= 16 && k < 20) { linie(n, "ooh", z, achtel([["D5", 3], ["C5", 3]], e), .24); n("timp1", 0, z, 0, .3); }
         if (k === 16) n("crash", 0, z, 0, .2);
         t = z + takt;
       }
       n("harfe", ton("G3"), t, 2.5, .3); n("harfe", ton("D4"), t + .05, 2.5, .25); n("harfe", ton("G4"), t + .1, 2.5, .3); n("vc", ton("G2"), t, 2.2, .2);
     }
   };
+  /* ---------- Cover, neu arrangiert für die ganze Kapelle ----------
+     Jedes Cover besteht aus der überlieferten Melodie, den Akkorden je Takt und einem Plan, wer in welchem Durchgang spielt:
+     Vorspiel → erste Strophe leise und sparsam → dann kommen Gegenstimme, Bass, Trommeln, Chor und Glanz dazu → großer Schluss.
+     Alle Melodien sind alte Volksweisen oder vor 1929 erschienen (gemeinfrei). */
+  const LAGE_COVER = { fl: [60, 96], flst: [60, 96], bfl: [60, 93], pfeife: [72, 96], pic: [76, 100], geige: [55, 93], geigest: [55, 93], oboe: [58, 88], klar: [50, 86],
+    dudel: [60, 86], stimme: [57, 81], ooh: [48, 76], harfe: [40, 96], gitarre: [40, 84], akk: [53, 86], hack: [52, 93], cemb: [45, 88], mar: [48, 90], xyl: [65, 100],
+    kal: [60, 93], cel: [60, 100], spiel: [64, 100], sitar: [50, 82], shaku: [55, 82], eh: [52, 79], bra: [48, 82], pizz: [40, 79], blech: [48, 80], horn: [41, 69], trp: [55, 82], vc: [36, 67], fag: [36, 67] };
+  /* Akkordsymbol → Grundton (MIDI, um C3) und Akkordtöne als Tonklassen */
+  function akkord(sym) {
+    const m = /^([A-G])([#b]?)(m(?!aj))?(7)?(dim)?$/.exec(sym || "C"); if (!m) return { grund: 48, pk: [0, 4, 7] };
+    const g = TONNAME[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0), moll = !!m[3], dim = !!m[5];
+    const pk = [0, dim || moll ? 3 : 4, dim ? 6 : 7].concat(m[4] ? [10] : []).map(x => (g + x) % 12);
+    return { grund: 48 + ((g + 12 - 0) % 12), pk };
+  }
+  const faltIn = (m, [lo, hi]) => { while (m > hi) m -= 12; while (m < lo) m += 12; return m; };
+  /* eine ganze Melodie in die Lage eines Instruments legen (ganze Oktaven, einzelne Ausreißer gefaltet) */
+  function melodieLage(noten, gr, okt) {
+    const lage = LAGE_COVER[gr] || [48, 90], hs = noten.filter(x => x[0]).map(x => ton(x[0]));
+    let best = 0, bestW = -1;
+    for (const o of [-24, -12, 0, 12, 24]) { const w = hs.filter(h => h + o >= lage[0] && h + o <= lage[1]).length - Math.abs(o) / 100; if (w > bestW) { bestW = w; best = o; } }
+    return noten.map(([x, d]) => [x ? faltIn(ton(x) + best + (okt || 0) * 12, lage) : null, d]);
+  }
+  /* der Ablauf eines Covers. d = { e: Sekunden je Einheit, takt: Einheiten je Takt, auf: Auftakt, teile: {A: [[Ton, Dauer]…]}, akk: {A: [Akkord je Takt]},
+     folge: [{ teil, lead, l, zweit, doppel, begl, bass, trommel, chor, glanz, pad }…], stil: jig | reel | walzer | ballade | hymne | marsch, vor: Takte Vorspiel } */
+  function arrangiere(n, d) {
+    const e = d.e, T = d.takt * e, stil = d.stil || "ballade";
+    let t = 0;
+    const akkBei = (liste, zeit) => { const k = Math.max(0, Math.floor((zeit + 1e-6) / T)); return liste[Math.min(k, liste.length - 1)]; };
+    /* Begleitung eines Taktes */
+    function begleitung(gr, sym, z, l, dichte) {
+      if (!gr) return;
+      const a = akkord(sym), lage = LAGE_COVER[gr] || [48, 84], tief = faltIn(a.grund, [Math.max(lage[0], 40), Math.max(lage[0], 40) + 11]);
+      const ak = a.pk.map(pc => faltIn(tief + ((pc - tief % 12) + 12) % 12, [tief + 1, tief + 16]));
+      const kurz = gr === "pizz" || gr === "mar" || gr === "xyl" || gr === "kal" ? .9 : 1.6;
+      if (stil === "jig" || stil === "walzer") {
+        const halb = d.takt / 2;
+        n(gr, tief, z, kurz, l); ak.forEach((x, i) => n(gr, x, z + (stil === "walzer" ? d.takt / 3 : 2) * e + i * .01, kurz * .6, l * .55));
+        if (stil === "jig") { n(gr, faltIn(tief + 7, [tief, tief + 12]), z + halb * e, kurz, l * .8); ak.forEach((x, i) => n(gr, x, z + (halb + 2) * e + i * .01, kurz * .6, l * .5)); }
+        else ak.forEach((x, i) => n(gr, x, z + 2 * d.takt / 3 * e + i * .01, kurz * .6, l * .5));
+      } else if (stil === "reel" || stil === "marsch") {
+        const v = d.takt / 4;
+        [0, 1, 2, 3].forEach(q => { if (q % 2 === 0) n(gr, q ? faltIn(tief + 7, [tief, tief + 12]) : tief, z + q * v * e, kurz, l); else ak.forEach((x, i) => n(gr, x, z + q * v * e + i * .01, kurz * .6, l * .55)); });
+      } else if (stil === "hymne") {
+        n(gr, tief, z, T * .98, l); ak.forEach((x, i) => n(gr, x, z + .02 * i, T * .98, l * .6));
+      } else { /* Ballade: gebrochene Akkorde */
+        const folge = [tief].concat(ak, [ak[0] + 12, ak[1] + 12]).slice(0, Math.max(3, Math.min(8, dichte || d.takt)));
+        const schritt = T / folge.length;
+        folge.forEach((x, i) => n(gr, x, z + i * schritt, Math.max(1.2, T), l * (i ? .6 : 1)));
+      }
+    }
+    function trommel(stufe, z, letzter) {
+      if (!stufe) return;
+      if (stil === "jig") { const h = d.takt / 2; n("bodh1", 0, z, 0, .5); n("bodh2", 0, z + h * e, 0, .38); if (stufe > 1) { n("bodh2", 0, z + 2 * e, 0, .22); n("bodh2", 0, z + (h + 2) * e, 0, .22); n("tamb2", 0, z + h * e, 0, .2); } }
+      else if (stil === "reel") { const v = d.takt / 4; for (let q = 0; q < 4; q++) n(q % 2 ? "bodh2" : "bodh1", 0, z + q * v * e, 0, q % 2 ? .3 : .45); if (stufe > 1) [1, 3].forEach(q => n("tamb1", 0, z + q * v * e, 0, .22)); }
+      else if (stil === "walzer") { n("bodh1", 0, z, 0, .42); if (stufe > 1) { n("tamb2", 0, z + d.takt / 3 * e, 0, .15); n("tamb2", 0, z + 2 * d.takt / 3 * e, 0, .15); } }
+      else if (stil === "marsch") { const v = d.takt / 4; for (let q = 0; q < 4; q++) n(q % 2 ? "snare2" : "snare1", 0, z + q * v * e, 0, q % 2 ? .22 : .32); if (stufe > 1) n("bd", 0, z, 0, .3); }
+      else { if (stufe > 1) n("timp1", 0, z, 0, .3); else n("bodh1", 0, z, 0, .3); if (letzter && stufe > 1) n("timproll", 0, z + T - 1, 0, .2); }
+    }
+    /* Vorspiel: Begleitung der ersten Takte */
+    const vor = d.vor == null ? 2 : d.vor, erste = d.folge[0], akk0 = d.akk[erste.teil];
+    for (let k = 0; k < vor; k++) { begleitung(erste.begl || "harfe", akk0[k % akk0.length], t + k * T, .3); if (erste.trommel) trommel(1, t + k * T); }
+    t += vor * T;
+    d.folge.forEach((r, ri) => {
+      const mel = d.teile[r.teil], akk = d.akk[r.teil], start = t, auf = (d.auf || 0) * e;
+      const lead = melodieLage(mel, r.lead, r.okt);
+      let z = start;
+      lead.forEach(([m, dd]) => { if (m != null) n(r.lead, m, z, dd * e * (r.leg || .93), r.l || .38); z += dd * e; });
+      const ende = Math.max(z, start + auf + akk.length * T);
+      /* Gegenstimme: der nächste Akkordton unter der Melodie (Terz oder Sexte), weich */
+      if (r.zweit) { let zz = start; lead.forEach(([m, dd]) => { if (m != null) { const a = akkord(akkBei(akk, zz - start - auf)), kand = [];
+        for (let x = m - 3; x >= m - 9; x--) if (a.pk.includes(((x % 12) + 12) % 12)) { kand.push(x); break; }
+        if (kand.length) n(r.zweit, faltIn(kand[0], LAGE_COVER[r.zweit] || [48, 84]), zz, dd * e * .95, r.zl || .2); } zz += dd * e; }); }
+      /* Verdopplung eine Oktave höher (oder tiefer) */
+      if (r.doppel) { const dl = melodieLage(mel, r.doppel, r.dokt || 0); let zz = start; dl.forEach(([m, dd]) => { if (m != null) n(r.doppel, m, zz, dd * e * .9, r.dl || .18); zz += dd * e; }); }
+      akk.forEach((sym, k) => {
+        const zt = start + auf + k * T, a = akkord(sym);
+        begleitung(r.begl, sym, zt, r.bl || .26, r.dichte);
+        if (r.begl2) begleitung(r.begl2, sym, zt, r.bl2 || .16, r.dichte);
+        if (r.bass) n(r.bass, faltIn(a.grund, LAGE_COVER[r.bass] ? [LAGE_COVER[r.bass][0], LAGE_COVER[r.bass][0] + 14] : [36, 50]), zt, T * .95, r.bassl || .24);
+        if (r.chor) a.pk.slice(1, 3).forEach((pc, i) => n(r.chor, faltIn(48 + pc, LAGE_COVER[r.chor] || [52, 72]), zt + .02 * i, T * .98, r.chorl || .13));
+        if (r.pad) a.pk.forEach((pc, i) => n(r.pad, faltIn(55 + pc, LAGE_COVER[r.pad] || [55, 76]), zt, T * .98, r.padl || .1));
+        if (r.glanz && k % 2 === 0) n(r.glanz, faltIn(84 + a.pk[0], LAGE_COVER[r.glanz] || [76, 96]), zt, 2.5, r.gll || .16);
+        if (r.trommel) trommel(r.trommel, zt, k === akk.length - 1 && ri === d.folge.length - 1);
+      });
+      t = ende + (r.atem || 0);
+    });
+    /* Schluss: Schlussakkord der ganzen Kapelle */
+    const last = d.folge[d.folge.length - 1], a = akkord(d.akk[last.teil][d.akk[last.teil].length - 1]);
+    const tief = faltIn(a.grund, [40, 51]);
+    [tief].concat(a.pk.map(pc => faltIn(tief + 12 + ((pc - tief % 12) + 12) % 12, [tief + 12, tief + 24]))).forEach((x, i) => n("harfe", x, t + i * .09, 3, .3));
+    if (last.bass) n(last.bass, faltIn(a.grund, LAGE_COVER[last.bass] ? [LAGE_COVER[last.bass][0], LAGE_COVER[last.bass][0] + 14] : [36, 50]), t, 2.6, .25);
+    if (last.chor) a.pk.forEach((pc, i) => n(last.chor, faltIn(52 + pc, [52, 72]), t + .03 * i, 2.8, .14));
+    if (last.glanz) n(last.glanz, faltIn(84 + a.pk[0], LAGE_COVER[last.glanz] || [76, 96]), t + .3, 3, .2);
+    if (d.schlussSchlag) n(d.schlussSchlag, 0, t, 0, .4);
+    return t + 3;
+  }
+  /* kurze Schreibweise für Reels und Jigs (ABC): Großbuchstaben = 4. Oktave, klein = 5., ' höher, , tiefer, ^ # _ b, Zahl = Länge, z = Pause */
+  function abc(str, vorz) {
+    const vz = {}; (vorz || "").split(" ").filter(Boolean).forEach(x => { vz[x[0]] = x[1]; });
+    const out = []; const re = /([\^_=]?)([A-Ga-gz])([',]*)(\d*\/?\d*)/g; let m;
+    const clean = str.replace(/[|:\]\[]/g, " ");
+    while ((m = re.exec(clean))) {
+      const [, acc, b, okt, dur] = m;
+      let d = 1; if (dur) { if (dur.includes("/")) { const [a, c] = dur.split("/"); d = (+a || 1) / (+c || 2); } else d = +dur; }
+      if (b === "z") { out.push([null, d]); continue; }
+      const gross = b === b.toUpperCase(), name = b.toUpperCase();
+      let o = gross ? 4 : 5; o += (okt.match(/'/g) || []).length - (okt.match(/,/g) || []).length;
+      const vorzeichen = acc === "^" ? "#" : acc === "_" ? "b" : acc === "=" ? "" : (vz[name] || "");
+      out.push([name + vorzeichen + o, d]);
+    }
+    return out;
+  }
+  const NEUE_COVER = {
+    /* ---- bekannte Cover, neu arrangiert ---- */
+    amazinggrace(n) {
+      const m = [["D4", 1], ["G4", 2], ["B4", .5], ["G4", .5], ["B4", 2], ["A4", 1], ["G4", 2], ["E4", 1], ["D4", 2], ["D4", 1], ["G4", 2], ["B4", .5], ["G4", .5], ["B4", 2], ["A4", 1], ["D5", 3],
+        ["D5", 2], ["B4", 1], ["D5", 2], ["B4", .5], ["D5", .5], ["B4", 2], ["A4", 1], ["G4", 2], ["E4", 1], ["D4", 2], ["D4", 1], ["G4", 2], ["B4", .5], ["G4", .5], ["B4", 2], ["A4", 1], ["G4", 3]];
+      const A = ["G", "G", "C", "G", "G", "G", "D", "G", "G", "G", "C", "G", "G", "D", "G"];
+      arrangiere(n, { e: .55, takt: 3, auf: 1, stil: "walzer", vor: 2, teile: { A: m }, akk: { A },
+        folge: [{ teil: "A", lead: "shaku", l: .4, begl: "harfe", bl: .2 },
+          { teil: "A", lead: "dudel", l: .3, zweit: "bra", zl: .16, begl: "harfe", bass: "vc", chor: "ooh", atem: .3 },
+          { teil: "A", lead: "dudel", l: .32, doppel: "pfeife", dl: .12, zweit: "akk", zl: .14, begl: "harfe", bass: "vc", chor: "ooh", glanz: "rgl", pad: "orgel", padl: .07, trommel: 2 }] });
+    },
+    scarborough(n) {
+      const m = [["D4", 2], ["D4", 1], ["A4", 2], ["A4", 1], ["E4", 1.5], ["F4", .5], ["E4", 1], ["D4", 3],
+        [null, 1], ["A4", 1], ["C5", 1], ["D5", 2], ["C5", 1], ["A4", 1], ["B4", 1], ["G4", 1], ["A4", 3],
+        ["D5", 2], ["D5", 1], ["C5", 2], ["A4", 1], ["A4", 1], ["G4", 1], ["F4", 1], ["E4", 1], ["C4", 2],
+        ["D4", 2], ["A4", 1], ["G4", 2], ["F4", 1], ["E4", 1], ["D4", 1], ["C4", 1], ["D4", 3]];
+      const A = ["Dm", "Dm", "C", "Dm", "Dm", "F", "C", "Dm", "F", "C", "Dm", "Dm", "C", "Dm", "C", "Dm"];
+      arrangiere(n, { e: .52, takt: 3, stil: "ballade", vor: 2, teile: { A: m }, akk: { A },
+        folge: [{ teil: "A", lead: "bfl", l: .36, begl: "harfe", bl: .2, dichte: 3 },
+          { teil: "A", lead: "stimme", l: .3, zweit: "eh", zl: .15, begl: "hack", bl: .18, dichte: 6, glanz: "cel" },
+          { teil: "A", lead: "geige", l: .36, doppel: "fl", dokt: 1, dl: .12, begl: "harfe", bass: "vc", chor: "ooh", glanz: "cel", trommel: 1 }] });
+    },
+    greensleeves(n) {
+      const s = [["A4", 1], ["C5", 2], ["D5", 1], ["E5", 1.5], ["F5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 2], ["A4", 1], ["A4", 1.5], ["G#4", .5], ["A4", 1], ["B4", 2], ["G#4", 1], ["E4", 2],
+        ["A4", 1], ["C5", 2], ["D5", 1], ["E5", 1.5], ["F5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 1.5], ["B4", .5], ["A4", 1], ["G#4", 1.5], ["F#4", .5], ["G#4", 1], ["A4", 3], ["A4", 2]];
+      const r = [[null, 1], ["G5", 3], ["G5", 1.5], ["F#5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 2], ["A4", 1], ["A4", 1.5], ["G#4", .5], ["A4", 1], ["B4", 2], ["G#4", 1], ["E4", 3],
+        ["G5", 3], ["G5", 1.5], ["F#5", .5], ["E5", 1], ["D5", 2], ["B4", 1], ["G4", 1.5], ["A4", .5], ["B4", 1], ["C5", 1.5], ["B4", .5], ["A4", 1], ["G#4", 1.5], ["F#4", .5], ["G#4", 1], ["A4", 3], ["A4", 2]];
+      arrangiere(n, { e: .2, takt: 3, auf: 1, stil: "walzer", vor: 2, teile: { S: s, R: r },
+        akk: { S: ["Am", "Am", "G", "G", "Am", "Am", "E", "E", "Am", "Am", "G", "G", "Am", "E", "Am", "Am"], R: ["C", "C", "G", "G", "Am", "Am", "E", "E", "C", "C", "G", "G", "Am", "E", "Am", "Am"] },
+        folge: [{ teil: "S", lead: "cemb", l: .34, begl: "harfe", bl: .18 }, { teil: "R", lead: "fl", l: .36, begl: "harfe", bl: .18, glanz: "kal" },
+          { teil: "S", lead: "geige", l: .36, zweit: "bra", zl: .15, begl: "cemb", bl: .16, bass: "vc" }, { teil: "R", lead: "oboe", l: .32, doppel: "fl", dokt: 1, dl: .12, zweit: "bra", zl: .14, begl: "harfe", bass: "vc", chor: "ooh", glanz: "cel", trommel: 1 }] });
+    },
+    matrose(n) {
+      const zeile = (a, b) => [[a, 1], [a, .5], [a, .5], [a, 1], [a, .5], [a, .5], [a, 1], [b[0], 1], [b[1], 1], [b[2], 1]];
+      const strophe = zeile("A4", ["D4", "F4", "A4"]).concat(zeile("G4", ["C4", "E4", "G4"]), zeile("A4", ["B4", "C5", "D5"]), [["C5", 1], ["A4", 1], ["G4", 1], ["E4", 1], ["D4", 2], ["D4", 2]]);
+      const chorz = (a, b) => [[a, 2], [a, 1.5], [a, .5], [a, 1], [b[0], 1], [b[1], 1], [b[2], 1]];
+      const refrain = chorz("A4", ["D4", "F4", "A4"]).concat(chorz("G4", ["C4", "E4", "G4"]), chorz("A4", ["B4", "C5", "D5"]), [["C5", 1], ["A4", 1], ["G4", 1], ["E4", 1], ["D4", 2], ["D4", 2]]);
+      const A = ["Dm", "Dm", "C", "C", "Dm", "Dm", "C", "Dm"];
+      arrangiere(n, { e: .4, takt: 4, stil: "reel", vor: 2, schlussSchlag: "bodh1", teile: { S: strophe, R: refrain }, akk: { S: A, R: A },
+        folge: [{ teil: "S", lead: "akk", l: .34, begl: "gitarre", bl: .24, trommel: 1 }, { teil: "R", lead: "stimme", l: .3, zweit: "ooh", zl: .14, begl: "gitarre", bass: "pizz", trommel: 2 },
+          { teil: "S", lead: "pfeife", l: .26, zweit: "akk", zl: .14, begl: "akk", bl: .18, bass: "pizz", trommel: 2 }, { teil: "R", lead: "stimme", l: .3, doppel: "akk", dl: .16, zweit: "ooh", zl: .16, begl: "gitarre", bass: "tuba", chor: "ooh", trommel: 2 }] });
+    },
+    korobeiniki(n) {
+      const A = [["E5", 1], ["B4", .5], ["C5", .5], ["D5", 1], ["C5", .5], ["B4", .5], ["A4", 1], ["A4", .5], ["C5", .5], ["E5", 1], ["D5", .5], ["C5", .5], ["B4", 1.5], ["C5", .5], ["D5", 1], ["E5", 1], ["C5", 1], ["A4", 1], ["A4", 2],
+        [null, .5], ["D5", 1], ["F5", .5], ["A5", 1], ["G5", .5], ["F5", .5], ["E5", 1.5], ["C5", .5], ["E5", 1], ["D5", .5], ["C5", .5], ["B4", 1], ["B4", .5], ["C5", .5], ["D5", 1], ["E5", 1], ["C5", 1], ["A4", 1], ["A4", 2]];
+      const B = [["E5", 2], ["C5", 2], ["D5", 2], ["B4", 2], ["C5", 2], ["A4", 2], ["G#4", 2], ["B4", 2], ["E5", 2], ["C5", 2], ["D5", 2], ["B4", 2], ["C5", 1], ["E5", 1], ["A5", 2], ["G#5", 4]];
+      const aA = ["E", "Am", "E", "Am", "Dm", "C", "E", "Am"], aB = ["Am", "E", "Am", "E", "Am", "E", "Am", "E"];
+      arrangiere(n, { e: .36, takt: 4, stil: "marsch", vor: 2, teile: { A, B }, akk: { A: aA, B: aB },
+        folge: [{ teil: "A", lead: "akk", l: .32, begl: "pizz", bl: .26 }, { teil: "A", lead: "geigest", l: .36, leg: .7, zweit: "akk", zl: .14, begl: "pizz", bass: "kb", trommel: 1 },
+          { teil: "B", lead: "bra", l: .34, chor: "ooh", begl: "akk", bl: .16, bass: "kb" }, { teil: "A", lead: "xyl", l: .3, doppel: "geigest", dokt: -1, dl: .22, begl: "pizz", bass: "kb", trommel: 2 },
+          { teil: "A", lead: "geigest", l: .4, leg: .7, doppel: "blech", dokt: -1, dl: .18, zweit: "akk", zl: .16, begl: "pizz", bass: "tuba", chor: "ooh", trommel: 2 }] });
+    },
+    auldlangsyne(n) {
+      const s = [["C4", 1], ["F4", 1.5], ["F4", .5], ["F4", 1], ["A4", 1], ["G4", 1.5], ["F4", .5], ["G4", 1], ["A4", .5], ["G4", .5], ["F4", 1.5], ["F4", .5], ["A4", 1], ["C5", 1], ["D5", 3],
+        ["D5", 1], ["C5", 1.5], ["A4", .5], ["A4", 1], ["F4", 1], ["G4", 1.5], ["F4", .5], ["G4", 1], ["A4", .5], ["G4", .5], ["F4", 1.5], ["D4", .5], ["D4", 1], ["C4", 1], ["F4", 3]];
+      const A = ["F", "F", "C", "C", "F", "F", "Bb", "Bb", "F", "F", "C", "C", "Dm", "Bb", "F", "F"];
+      arrangiere(n, { e: .5, takt: 2, auf: 1, stil: "hymne", vor: 2, teile: { A: s }, akk: { A },
+        folge: [{ teil: "A", lead: "fl", l: .36, begl: "harfe", bl: .16 }, { teil: "A", lead: "stimme", l: .3, zweit: "eh", zl: .14, begl: "akk", bl: .14, bass: "vc", atem: .2 },
+          { teil: "A", lead: "geige", l: .36, doppel: "stimme", dl: .2, zweit: "bra", zl: .15, begl: "akk", bl: .14, bass: "vc", chor: "ooh", glanz: "rgl", trommel: 2 }] });
+    },
+    washerwoman(n) {
+      const A = abc("BGG DGG BGB dcB cAA EAA cAc edc BGG DGG BGB dcB cBc Adc BGG G2z", "F#");
+      const B = abc("dGG BGG dGG BGG eAA cAA eAA cAA dGG BGG ded cBA BcA FAd BGG G2z", "F#");
+      const aA = ["G", "G", "Am", "D", "G", "G", "D", "G"], aB = ["G", "G", "Am", "Am", "G", "G", "D", "G"];
+      arrangiere(n, { e: .15, takt: 6, stil: "jig", vor: 2, schlussSchlag: "bodh1", teile: { A, B }, akk: { A: aA, B: aB },
+        folge: [{ teil: "A", lead: "geige", l: .36, leg: .85, begl: "gitarre", bl: .22, trommel: 1 }, { teil: "A", lead: "pfeife", l: .24, leg: .85, begl: "gitarre", bass: "pizz", trommel: 2 },
+          { teil: "B", lead: "akk", l: .3, leg: .85, begl: "gitarre", bass: "pizz", trommel: 2 }, { teil: "B", lead: "hack", l: .32, begl: "akk", bl: .16, bass: "pizz", trommel: 2 },
+          { teil: "A", lead: "geige", l: .38, leg: .85, doppel: "pfeife", dokt: 1, dl: .14, begl: "gitarre", begl2: "akk", bass: "pizz", trommel: 2 }] });
+    },
+    sakura(n) {
+      const m = [["A4", 1], ["A4", 1], ["B4", 2], ["A4", 1], ["A4", 1], ["B4", 2], ["A4", 1], ["B4", 1], ["C5", 1], ["B4", 1], ["A4", 1], ["B4", .5], ["A4", .5], ["F4", 2],
+        ["E4", 1], ["C4", 1], ["E4", 1], ["F4", 1], ["E4", 1], ["E4", .5], ["C4", .5], ["B3", 2], ["A4", 1], ["B4", 1], ["C5", 1], ["B4", 1], ["A4", 1], ["B4", .5], ["A4", .5], ["F4", 2],
+        ["E4", 1], ["C4", 1], ["E4", 1], ["F4", 1], ["E4", 1], ["E4", .5], ["C4", .5], ["B3", 2], ["A4", 1], ["A4", 1], ["B4", 2], ["A4", 1], ["A4", 1], ["B4", 2],
+        ["E4", 1], ["F4", 1], ["B4", .5], ["A4", .5], ["F4", 1], ["E4", 4]];
+      const A = ["Am", "Am", "Am", "Dm", "Am", "E", "Am", "Dm", "Am", "E", "Am", "Am", "Dm", "E"];
+      arrangiere(n, { e: .5, takt: 4, stil: "ballade", vor: 1, schlussSchlag: "gong", teile: { A: m }, akk: { A },
+        folge: [{ teil: "A", lead: "kal", l: .4, begl: "harfe", bl: .16, dichte: 4 }, { teil: "A", lead: "shaku", l: .38, zweit: "hack", zl: .14, begl: "harfe", bl: .16, dichte: 4, glanz: "spiel", atem: .4 },
+          { teil: "A", lead: "sitar", l: .34, doppel: "shaku", dl: .2, dokt: 0, begl: "hack", bl: .16, dichte: 8, chor: "ooh", glanz: "cel" }] });
+    },
+    /* ---- neue Cover (überlieferte Tanzweisen) ---- */
+    swallowtail(n) { /* „Swallowtail Jig“ – irischer Jig, E-dorisch */
+      const A = abc("GEE BEE GEE BAG FDD ADD dcd AGF GEE BEE GEE B2c dcd AGF GEE E3", "F# C#");
+      const B = abc("Bcd e2f e2f edB Bcd e2f edB d3 Bcd e2f e2f edB dcd AGF GEE E3", "F# C#");
+      const aA = ["Em", "Em", "D", "D", "Em", "Em", "D", "Em"], aB = ["Em", "Em", "Em", "D", "Em", "Em", "D", "Em"];
+      arrangiere(n, { e: .16, takt: 6, stil: "jig", vor: 2, schlussSchlag: "bodh1", teile: { A, B }, akk: { A: aA, B: aB },
+        folge: [{ teil: "A", lead: "pfeife", l: .26, leg: .85, begl: "gitarre", bl: .2, trommel: 1 }, { teil: "A", lead: "geige", l: .36, leg: .85, begl: "gitarre", bass: "pizz", trommel: 2 },
+          { teil: "B", lead: "geige", l: .36, leg: .85, zweit: "akk", zl: .14, begl: "gitarre", bass: "pizz", trommel: 2 }, { teil: "B", lead: "hack", l: .32, doppel: "pfeife", dokt: 1, dl: .12, begl: "akk", bl: .16, bass: "pizz", trommel: 2 },
+          { teil: "A", lead: "dudel", l: .3, leg: .85, doppel: "geige", dl: .2, begl: "gitarre", begl2: "akk", bass: "pizz", trommel: 2 }] });
+    },
+    drowsymaggie(n) { /* „Drowsy Maggie“ – irischer Reel */
+      const A = abc("E2BE dEBE E2BE AFDF E2BE dEBE BABc dAFD", "F# C#");
+      const B = abc("d2fd c2ec defg afge d2fd c2ec BABc dAFA", "F# C#");
+      const aA = ["Em", "D", "Em", "D"], aB = ["D", "D", "D", "Bm"];
+      arrangiere(n, { e: .14, takt: 8, stil: "reel", vor: 2, schlussSchlag: "bodh1", teile: { A: A.concat(A), B: B.concat(B) }, akk: { A: aA.concat(aA), B: aB.concat(aB) },
+        folge: [{ teil: "A", lead: "geige", l: .36, leg: .82, begl: "gitarre", bl: .2, trommel: 1 }, { teil: "B", lead: "pfeife", l: .24, leg: .82, begl: "gitarre", bass: "pizz", trommel: 2 },
+          { teil: "A", lead: "akk", l: .3, leg: .82, doppel: "geige", dl: .2, begl: "gitarre", bass: "pizz", trommel: 2 }, { teil: "B", lead: "geige", l: .38, leg: .82, doppel: "pfeife", dokt: 1, dl: .12, zweit: "akk", zl: .12, begl: "gitarre", bass: "pizz", trommel: 2 }] });
+    },
+    cooley(n) { /* „Cooley's Reel“ – irischer Reel */
+      const A = abc("EBBA B2EB B2AB dBAG FDAD BDAD FDAD dAFD EBBA B2EB B2AB defg afec dBAF DEFD E4", "F# C#");
+      const B = abc("eB B2 efge eB B2 gedB A2FA DAFA A2FA defg eB B2 eB B2 eB B2 defg afec dBAF DEFD E4", "F# C#");
+      const aA = ["Em", "Em", "D", "D", "Em", "Em", "D", "Em"], aB = ["Em", "Em", "D", "D", "Em", "Em", "D", "Em"];
+      arrangiere(n, { e: .135, takt: 8, stil: "reel", vor: 2, schlussSchlag: "bodh1", teile: { A, B }, akk: { A: aA, B: aB },
+        folge: [{ teil: "A", lead: "fl", l: .36, leg: .82, begl: "gitarre", bl: .2, trommel: 1 }, { teil: "B", lead: "geige", l: .36, leg: .82, begl: "gitarre", bass: "pizz", trommel: 2 },
+          { teil: "A", lead: "hack", l: .32, doppel: "fl", dl: .16, begl: "akk", bl: .16, bass: "pizz", trommel: 2 }, { teil: "B", lead: "dudel", l: .3, leg: .85, doppel: "geige", dl: .2, begl: "gitarre", begl2: "akk", bass: "pizz", trommel: 2 }] });
+    },
+    morrison(n) { /* „Morrison's Jig“ – irischer Jig */
+      const A = abc("E3 B3 EBE AFD EDE B3 dcB AFD E3 B3 EBE AFD G3 FGA dAG FED", "F# C#");
+      const B = abc("Bee fee aee fee Bee fee a2g fed Bee fee aee fee gfe d2A BAG FED", "F# C#");
+      const aA = ["Em", "D", "Em", "D", "Em", "D", "G", "D"], aB = ["Em", "Em", "Em", "D", "Em", "Em", "G", "D"];
+      arrangiere(n, { e: .16, takt: 6, stil: "jig", vor: 2, schlussSchlag: "bodh1", teile: { A, B, E: abc("E3 B3 EBE AFD EDE B3 dcB AFD E3 B3 EBE AFD G3 FGA BAG E3", "F# C#") },
+        akk: { A: aA, B: aB, E: ["Em", "D", "Em", "D", "Em", "D", "G", "Em"] },
+        folge: [{ teil: "A", lead: "bfl", l: .32, leg: .85, begl: "gitarre", bl: .2, trommel: 1 }, { teil: "B", lead: "geige", l: .36, leg: .85, begl: "gitarre", bass: "pizz", trommel: 2 },
+          { teil: "A", lead: "akk", l: .3, leg: .85, zweit: "bra", zl: .12, begl: "gitarre", bass: "pizz", trommel: 2 }, { teil: "B", lead: "pfeife", l: .24, leg: .85, doppel: "geige", dokt: -1, dl: .2, begl: "akk", bl: .16, bass: "pizz", trommel: 2 },
+          { teil: "E", lead: "geige", l: .38, leg: .85, doppel: "bfl", dl: .16, begl: "gitarre", begl2: "akk", bass: "pizz", trommel: 2 }] });
+    },
+    folia(n) { /* „La Folia“ – der alte spanisch-portugiesische Tanz über seinen berühmten Bass (17. Jh.), mit eigenen Variationen */
+      const akk = ["Dm", "A", "Dm", "C", "F", "C", "Dm", "A", "Dm", "A", "Dm", "C", "F", "C", "Dm", "Dm"];
+      const thema = [["D5", 3], ["C#5", 2], ["E5", 1], ["D5", 2], ["F5", 1], ["E5", 3], ["F5", 2], ["C5", 1], ["E5", 2], ["G4", 1], ["D5", 2], ["F4", 1], ["E4", 3],
+        ["F4", 2], ["A4", 1], ["E4", 2], ["A4", 1], ["D4", 2], ["F4", 1], ["G4", 2], ["E4", 1], ["A4", 2], ["C5", 1], ["G4", 2], ["E4", 1], ["F4", 1.5], ["E4", 1.5], ["D4", 3]];
+      const arp = [["D5", "F5", "A4"], ["C#5", "E5", "A4"], ["D5", "A4", "F4"], ["E5", "C5", "G4"], ["F5", "C5", "A4"], ["E5", "G4", "C5"], ["D5", "F5", "A4"], ["E5", "C#5", "A4"],
+        ["F5", "D5", "A4"], ["E5", "A4", "C#5"], ["D5", "F4", "A4"], ["C5", "E5", "G4"], ["A4", "C5", "F5"], ["G4", "C5", "E5"], ["F5", "E5", "D5"]];
+      const var1 = arp.flatMap(b => b.map(x => [x, 1])).concat([["D5", 3]]);
+      arrangiere(n, { e: .3, takt: 3, stil: "walzer", vor: 2, schlussSchlag: "timp1", teile: { T: thema, V: var1 }, akk: { T: akk, V: akk },
+        folge: [{ teil: "T", lead: "cemb", l: .34, begl: "gitarre", bl: .2 }, { teil: "V", lead: "geige", l: .34, begl: "cemb", bl: .16, bass: "vc" },
+          { teil: "T", lead: "blech", l: .26, zweit: "bra", zl: .16, begl: "cemb", bl: .14, bass: "kb", chor: "ooh", trommel: 2 }, { teil: "V", lead: "geigest", l: .38, leg: .75, doppel: "xyl", dokt: 1, dl: .14, begl: "harfe", bass: "kb", trommel: 2 }] });
+    }
+  };
+  Object.assign(COVER_STUECKE, NEUE_COVER);
   const COVER = Object.keys(COVER_STUECKE);
   Object.assign(KLASSIK, COVER_STUECKE);
   /* Abspielen: die Partitur wird vorab gelesen, die Aufnahmen geladen, dann Stück für Stück eingeplant.
@@ -3908,6 +4246,7 @@
       while (i < noten.length && noten[i][0] < bis) {
         const [t, gr, m, d, g, o] = noten[i++];
         if (klassikQ.length < 400) klassikQ.push([z + t, BAND_SPUR(gr)]); geistMerken(gr, z + t);
+        if (KAP_FIG[gr] && kapQ.length < 300) kapQ.push([z + t, gr]); /* die Kapellen-Musiker treten auch bei den Covern auf */
         if (!SAMPLE_KARTE[gr]) probe(gr, 0, z + t, lauf.bus, g * l);
         else probe(gr, m, z + t, lauf.bus, g * l, o && o.kurz ? { dauer: Math.max(.08, d), aus: .04 } : { ein: .02, aus: Math.min(.25, d * .3), dauer: d + .05 });
       }
@@ -5016,7 +5355,7 @@
     return ix.slice(0, n).sort((a, b) => a - b);
   }
   function kapSpieler() {
-    const pool = S.stimmung && KAPELLE[S.stimmung];
+    const pool = stilKey() && KAPELLE[stilKey()];
     if (!pool || S.kapelle === 0 || !Array.isArray(S.kapWahl)) return [];
     return S.kapWahl.filter(i => pool[i]).slice(0, S.kapStufe === 1 ? 1 : leicht() ? 2 : 3).map((i, k) => {
       const [inst, weise, ab, lage, ab_int] = pool[i];
@@ -5163,7 +5502,7 @@
     return (kapPlanMerk = { key, plan: { w, echo, solo } }).plan;
   }
   function kapelleSchritt(zeit, daten, ab) {
-    if (!S.stimmung || !ctx || ausduennen || einblend > EINBLEND / 2 || S.intensitaet < 2) return;
+    if (!stilKey() || !ctx || ausduennen || einblend > EINBLEND / 2 || S.intensitaet < 2) return;
     const sp = kapSpieler(); if (!sp.length) return;
     kapBusBauen();
     const L = taktL(), rolle = rolleAn(ab), sd = schrittDauer(), zeile = klingt(daten.bass, schritt), ak = akkordMidi(zeile);
@@ -5456,11 +5795,12 @@
      Wer länger still ist (oder nicht mehr zur Besetzung gehört), geht wieder. */
   const kapDa = {};
   function kapZeigen(b, jetzt, da) {
-    if (!laeuft) Object.keys(kapZuletzt).forEach(k => delete kapZuletzt[k]);
+    if (!laeuft && !klassikLauf) Object.keys(kapZuletzt).forEach(k => delete kapZuletzt[k]);
     while (kapQ.length && kapQ[0][0] <= ctx.currentTime) {
       const id = kapQ.shift()[1]; kapZuletzt[id] = jetzt; kapWippen(b, id);
     }
-    const spieler = laeuft ? kapSpieler() : [];
+    /* beim Cover: wer zuletzt gespielt hat (höchstens vier) */
+    const spieler = laeuft ? kapSpieler() : klassikLauf ? Object.keys(kapZuletzt).filter(k => KAP_FIG[k]).sort((a, c) => kapZuletzt[c] - kapZuletzt[a]).slice(0, 4).map(inst => ({ inst, weise: "" })) : [];
     const jetztDa = spieler.filter(p => kapZuletzt[p.inst] && jetzt - kapZuletzt[p.inst] < (p.weise === "glanz" || p.weise === "halte" ? 9000 : 5000)).map(p => p.inst);
     Object.keys(kapSeiteMerk).forEach(i => { if (!jetztDa.includes(i)) delete kapSeiteMerk[i]; });
     jetztDa.forEach(i => {
