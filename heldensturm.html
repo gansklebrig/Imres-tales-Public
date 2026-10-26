@@ -1037,7 +1037,7 @@ const MEL_LADEN={cembalo:['cemb'],akkordeon:['akk'],fidel:['geige','geigest'],du
 const FL_INST={floete:'fl',horn:'horn',okarina:'oka',gesang:'stimme',panfloete:'pan',oohchor:'ooh',englischhorn:'eh',bratsche:'bra',pfeife:'pfeife',klarinette:'klar',piccolo:'pic'};
 const TROMMEL={trommel:['snare1','snare2'],pauke:['timp1','timp3'],bodhran:['bodh1','bodh2'],tamburin:['tamb1','tamb2'],stoecke:['clave1','clave2'],taiko:['taiko:43','taiko:48']};
 const KETTE={kriegstrommel:['taiko:43','taiko:48'],rahmentrommel:['bodh1','bodh2'],ketten:['shake','shake'],stampfen:['bd','bd'],klatschen:['clave1','clave2'],rassel:['shake','shake'],schnipsen:['clave2','clave2'],loeffel:['clave2','clave1'],krug:['holz1','holz2']};
-function vorladen(s){{const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt)gruppeLaden(mt.inst)}(MEL_LADEN[s.instrument]||[]).forEach(gruppeLaden);gruppeLaden(FL_INST[s.band.floete]);if(s.band.floete==='floete')gruppeLaden('flst');
+function vorladen(s){kapSpieler(s).forEach(q=>gruppeLaden(q.inst));{const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt)gruppeLaden(mt.inst)}(MEL_LADEN[s.instrument]||[]).forEach(gruppeLaden);gruppeLaden(FL_INST[s.band.floete]);if(s.band.floete==='floete')gruppeLaden('flst');
  const lx=n=>{if(n.indexOf(':')>0){const q=n.split(':');ld(q[0],+q[1])}else laden(n)};(TROMMEL[s.band.trommel]||[]).forEach(lx);(KETTE[s.band.ketten]||[]).forEach(lx);['bd','schelle1','schelle2','holz1','holz2'].forEach(laden);
  const pr=ORCH[s.mood];if(!pr||pr.volk)gruppeLaden('gitarre');if(!pr)return;if(!pr.volk)gruppeLaden('kb');
  if(pr.pad)(PAD_FARBE[pr.farbe]||['vc','vln']).forEach(gruppeLaden);if(pr.ost)gruppeLaden('spic');['horn','trp','pos','tuba'].forEach(k=>{if(pr[k])gruppeLaden(k)});
@@ -1272,14 +1272,84 @@ function liedVonNoten(d){const v={instrument:d.instrument,band:d.band,modus:d.mo
  d.takte.forEach(([akk,mel,fl],k)=>{const p=TEILE[k],rolle=LIED_ROLLEN[k],t=teilLeer();const ch=akk.split('').map(Number),bass=bassBauen(ch,d.bass[rolle]||'halbe'),m=zeile(mel);t.bass=bass;t.melodie=m;
   t.floete=fl==='echo'?echoBauen(bass,m,'antwort'):fl==='lang'?echoBauen(bass,m,'lang'):fl==='terz'?terzStimme(bass,m):fl?zeile(fl):leer();
   const sc=(d.schlag||{})[rolle]||{};['klopf','schelle','trommel','ketten'].forEach(x=>{t[x]=an(sc[x]||[])});v.teile[p]=t});return v}
+const KAP_INSTR = { akk: { g: .3, halt: 1 }, hack: { g: .36 }, cemb: { g: .3 }, mar: { g: .4 }, cel: { g: .3 }, spiel: { g: .28 }, rgl: { g: .24 },
+    taiko: { g: .6 }, bfl: { g: .24, halt: 1 }, pic: { g: .17, halt: 1 }, pfeife: { g: .18, halt: 1 }, shaku: { g: .28, halt: 1 }, eh: { g: .26, halt: 1 },
+    sitar: { g: .3 }, kal: { g: .4 }, bra: { g: .28, halt: 1 }, pizz: { g: .4 }, blech: { g: .24, halt: 1 }, xyl: { g: .26 }, ooh: { g: .24, halt: 1 } };
+const KAPELLE = {
+  kampf: [["blech", "stoss", "srh"], ["taiko", "stampf", "svrbh"], ["pizz", "ostinato", "sv"], ["xyl", "unisono", "rh", 12, 5], ["ooh", "halte", "rh", -12]],
+  boss: [["blech", "stoss", "srh"], ["taiko", "stampf", "isvrbh"], ["ooh", "halte", "srh", -12], ["pizz", "ostinato", "sb"], ["bra", "unisono", "h", -12, 5]],
+  verfolgung: [["pizz", "ostinato", "svrh"], ["taiko", "stampf", "rh"], ["ooh", "halte", "rh", -12], ["blech", "stoss", "h"], ["bra", "terz", "r", -12]],
+  spannung: [["pizz", "ostinato", "srh"], ["rgl", "glanz", "h"], ["cel", "echo", "r", 0, 4], ["sitar", "ostinato", "s"], ["spiel", "echo", "b"]],
+  grusel: [["spiel", "unisono", "s", 12], ["ooh", "halte", "rh", -12], ["rgl", "glanz", "h"], ["cel", "echo", "b"], ["eh", "terz", "r", -12]],
+  unterreich: [["sitar", "ostinato", "srh"], ["taiko", "puls", "h"], ["shaku", "echo", "sb"], ["ooh", "halte", "h", -12], ["rgl", "glanz", "h"]],
+  ruinen: [["cel", "glanz", "srh"], ["shaku", "echo", "sr"], ["ooh", "halte", "h"], ["kal", "arp", "b"], ["sitar", "arp", "s"]],
+  reise: [["hack", "arp", "srh"], ["bfl", "unisono", "rh"], ["pizz", "umpa", "s"], ["akk", "halte", "h"], ["mar", "ostinato", "s"]],
+  reiter: [["blech", "stoss", "rh"], ["taiko", "puls", "svrh"], ["pizz", "ostinato", "s"], ["pic", "unisono", "h", 12, 6], ["hack", "arp", "s"]],
+  heldenlied: [["blech", "stoss", "rh"], ["ooh", "halte", "h"], ["hack", "arp", "s"], ["taiko", "puls", "vh"], ["bra", "terz", "r", -12]],
+  sieg: [["blech", "stoss", "srh"], ["pic", "unisono", "h", 12, 4], ["xyl", "glanz", "rh"], ["akk", "umpa", "s"], ["cemb", "arp", "s"]],
+  rast: [["kal", "arp", "srh"], ["bfl", "echo", "r"], ["akk", "halte", "h"], ["hack", "terz", "h", -12], ["spiel", "glanz", "b"]],
+  trinklied: [["akk", "umpa", "svrh"], ["hack", "unisono", "rh"], ["pfeife", "unisono", "h", 12, 5], ["xyl", "echo", "r"], ["mar", "ostinato", "s"]],
+  kamin: [["hack", "arp", "srh"], ["bra", "terz", "rh", -12], ["spiel", "glanz", "ib"], ["eh", "echo", "s"], ["cemb", "arp", "s"]],
+  klage: [["bra", "terz", "rh", -12], ["ooh", "halte", "h"], ["rgl", "glanz", "h"], ["eh", "unisono", "s", -12], ["cel", "glanz", "ib"]],
+  auenland: [["pfeife", "unisono", "rh", 12, 4], ["akk", "umpa", "srh"], ["mar", "ostinato", "s"], ["bfl", "echo", "r"], ["hack", "arp", "s"]],
+  elben: [["cel", "arp", "srh"], ["shaku", "echo", "rh"], ["ooh", "halte", "h"], ["kal", "glanz", "ib"], ["bra", "terz", "r", -12]],
+  fey: [["cel", "glanz", "srh"], ["xyl", "arp", "rh"], ["kal", "ostinato", "s"], ["pic", "unisono", "h", 12, 5], ["spiel", "echo", "b"]],
+  zwerge: [["taiko", "puls", "svrh"], ["blech", "stoss", "rh"], ["ooh", "halte", "h", -12], ["akk", "umpa", "s"], ["pizz", "umpa", "s"]],
+  dorffest: [["akk", "umpa", "srh"], ["hack", "unisono", "rh"], ["pfeife", "echo", "h"], ["xyl", "arp", "s"], ["mar", "ostinato", "s"]],
+  marktplatz: [["mar", "ostinato", "srh"], ["hack", "echo", "rh"], ["bra", "terz", "rh", -12], ["cemb", "arp", "s"], ["sitar", "echo", "b"]],
+  hof: [["cemb", "arp", "srh"], ["blech", "stoss", "h"], ["bra", "terz", "rh", -12], ["bfl", "echo", "s"], ["cel", "glanz", "ib"]],
+  shanty: [["akk", "umpa", "srh"], ["pfeife", "unisono", "rh", 12, 4], ["pizz", "ostinato", "s"], ["ooh", "halte", "h", -12], ["bra", "terz", "r", -12]],
+  pilger: [["ooh", "halte", "srh"], ["rgl", "glanz", "rh"], ["eh", "unisono", "b", -12], ["bfl", "echo", "h"], ["cel", "glanz", "b"]]
+};
+
+/* ---------- Die Kapelle (Big Band) aus Barradins Lautenwerk ----------
+   Je Stimmung ein Kreis von Musikern; bei jedem neuen Stück spielen ein bis drei von ihnen mit, jeder mit seiner Spielweise
+   und nur in seinen Abschnitten (Vorspiel, Strophe, Aufbau, Refrain, Zwischenteil, Höhepunkt). Einstellung: Aus / Ein paar / Volle Big Band. */
+const kapStufe=()=>SAVE.band===undefined?(MOBIL?0:2):SAVE.band;
+const KAP_HELL=['xyl','cel','spiel','kal','pic','pfeife','rgl'],KAP_MELODISCH=['bfl','pfeife','shaku','eh','bra','pic','sitar','akk','hack','xyl','mar','cemb','cel','kal','spiel'];
+function kapelleWaehlen(mood){const pool=KAPELLE[mBasis(mood)];if(!pool)return[];if(mBasis(mood)==='kampf'||mBasis(mood)==='boss'){const rest=pool.map((_,i)=>i).filter(i=>i>1).sort(()=>Math.random()-.5);return[0,1,rest[0]]}
+ const ix=pool.map((_,i)=>i).sort(()=>Math.random()-.5);return ix.slice(0,pool.length>=4&&Math.random()<.65?3:2).sort((a,b)=>a-b)}
+function kapSpieler(s){const pool=KAPELLE[mBasis(s.mood)],st=kapStufe();if(!pool||!st||!s.kapWahl)return[];
+ return s.kapWahl.filter(i=>pool[i]).slice(0,st===1?1:3).map((i,k)=>{const[inst,weise,ab,lage,mi]=pool[i];return{inst,weise,ab,lage:lage||0,min:mi==null?2:mi,pan:[-.6,.6,-.15][k%3]}})}
+const kapRolle=(s,ab)=>s.rollen?(rolleVon(s,ab)==='i'?'i':rolleVon(s,ab)):ab===hoehepunkt(s)?'h':ab===0?'s':ab%2?'r':'s';
+function kapFenster(s,p,w){const r=MEL_GRUND+s.transpose,hell=KAP_HELL.includes(p.inst);
+ switch(w){case'umpa':case'stoss':case'halte':return[r-15,r+5];case'ostinato':case'arp':return hell?[r+19,r+34]:[r-12,r+7];case'glanz':return[r+22,r+38];
+  case'unisono':return hell?[r+12,r+40]:[r-13,r+11];case'terz':return hell?[r+10,r+34]:[r-6,r+21];case'echo':return[r+12,r+34];default:return null}}
+function kapTon(s,p,midi,zeit,dauer,laut,int,nicht){const def=KAP_INSTR[p.inst],k=KARTE[p.inst];if(!def||!k)return;let lo=k[0]-2,hi=k[k.length-1]+2;
+ const f=p.inst==='taiko'?null:kapFenster(s,p,p.jetzt);if(f&&Math.min(hi,f[1])-Math.max(lo,f[0])>=11){lo=Math.max(lo,f[0]);hi=Math.min(hi,f[1])}
+ let m=p.inst==='taiko'?midi:inLage(midi,lo,hi);if(nicht!=null&&m===nicht){if(m+12<=hi)m+=12;else if(m-12>=lo)m-=12;else return}
+ const l=def.g*laut*(.55+.55*int)*.8;zeit+=(Math.random()-.5)*.01;
+ spiel(p.inst,m,zeit,l,def.halt?dauer+.06:Math.max(dauer,1.2),def.halt?{ein:.04,aus:Math.min(.25,dauer*.4),pan:p.pan}:{aus:.3,pan:p.pan})}
+const melM=(s,v)=>MEL_GRUND+s.transpose+ton(MODI[s.modus]||MODI.dorisch,v);
+const KAP_WEISE={
+ unisono(s,p,i,z,sd,ak,x,d){const v=d.melodie[i];if(v<0)return;const mm=melM(s,v);kapTon(s,p,mm+(KAP_HELL.includes(p.inst)?12:-12),z,laenge(d.melodie,i)*sd*.95,1,x.int,mm)},
+ terz(s,p,i,z,sd,ak,x,d){const v=d.melodie[i];if(v<2)return;kapTon(s,p,melM(s,v-2)+p.lage,z,laenge(d.melodie,i)*sd*.95,.8,x.int)},
+ echo(s,p,i,z,sd,ak,x,d){if(i<2)return;const v=d.melodie[i-2];if(v<0||d.melodie[i]>=0)return;kapTon(s,p,melM(s,v)+12+p.lage,z,1.6*sd,.65,x.int)},
+ arp(s,p,i,z,sd,ak,x){if(i%2)return;const f=[ak.grund+12,ak.terz,ak.quinte,ak.terz+12];kapTon(s,p,f[(i/2)%4]+p.lage,z,2.4*sd,i%8===0?1:.72,x.int)},
+ umpa(s,p,i,z,sd,ak,x){if(i===0||i===8)kapTon(s,p,ak.grund+p.lage,z,1.6*sd,.85,x.int);else if(i===4||i===12)[ak.terz,ak.quinte].forEach(m=>kapTon(s,p,m+p.lage,z,1.4*sd,.62,x.int))},
+ stoss(s,p,i,z,sd,ak,x){const hits=x.rolle==='h'?[0,6,10,12]:[0,10];if(!hits.includes(i))return;[ak.terz,ak.quinte,ak.grund+12].forEach((m,k)=>kapTon(s,p,m+p.lage,z,(i===0?3:1.3)*sd,k?.62:.8,x.int))},
+ ostinato(s,p,i,z,sd,ak,x){const k=[0,3,6,8,11,14].indexOf(i);if(k<0)return;const f=[ak.grund+12,ak.quinte,ak.terz+12,ak.quinte,ak.grund+24,ak.quinte];kapTon(s,p,f[k]+p.lage,z,1.8*sd,k===0?1:.72,x.int)},
+ glanz(s,p,i,z,sd,ak,x){if(!(i===0||(x.rolle==='h'&&i===8)))return;kapTon(s,p,ak.quinte+12+p.lage,z,6*sd,.9,x.int)},
+ puls(s,p,i,z,sd,ak,x){if(i===0)kapTon(s,p,36,z,1.4,1,x.int);else if(i===8)kapTon(s,p,42,z,1.2,.8,x.int);else if(x.ende&&i>=12)kapTon(s,p,48,z,.6,.45+.12*(i-12),x.int)},
+ stampf(s,p,i,z,sd,ak,x){if(i%4===0)kapTon(s,p,i===0?36:42,z,1,i===0?1:.75,x.int);else if(x.ende&&i>=13)kapTon(s,p,48,z,.5,.55,x.int)},
+ fanfare(s,p,i,z,sd,ak,x,d){const v=d.melodie[i];if(v<0)return;kapTon(s,p,melM(s,v),z,laenge(d.melodie,i)*sd*.92,1.2,Math.max(x.int,.7))},
+ halte(s,p,i,z,sd,ak,x){if(!x.wechselt)return;const dd=x.n*sd+.3;[ak.terz,ak.quinte].forEach((m,k)=>kapTon(s,p,m+p.lage,z,dd,k?.66:.82,x.int))}};
+function kapelleSchritt(s,p,i,zeit,sd,ab){if(wechsel>0||s.int<2||!s.kapWahl)return;const sp=kapSpieler(s);if(!sp.length)return;
+ const rolle=kapRolle(s,ab),zeile=klingt(p.bass,i),ak=akkordMidi(s,zeile);let n=1;while(n<SCHRITTE-i&&klingt(p.bass,i+n)===zeile)n++;
+ const x={rolle,n,int:s.int/10,wechselt:i===0||(i%4===0&&zeile!==klingt(p.bass,i-1)),ende:kapRolle(s,ab+1)!==rolle};
+ const mel=sp.findIndex(q=>KAP_MELODISCH.includes(q.inst)&&!['puls','ostinato','umpa','stoss','stampf'].includes(q.weise)),bl=sp.findIndex(q=>q.inst==='blech');
+ sp.forEach((q,k)=>{let w=q.ab.includes(rolle)?q.weise:null;
+  if(rolle==='i')w=null;
+  else if((rolle==='r'||rolle==='h')){w=q.weise;if(k===mel)w='terz';if(k===bl&&(s.mood==='kampf'||mBasis(s.mood)==='boss'))w='fanfare'}
+  if(!w||!KAP_WEISE[w]||s.int<q.min||(k>0&&s.int<=3))return;q.jetzt=w;try{KAP_WEISE[w](s,q,i,zeit,sd,ak,x,p)}catch(e){}})}
 function komponieren(mood,int,behalten,alt){const roh=STIL[mood]||STIL.reise,st=mitIntensitaet(roh,int);
  const LL=KAMPF_LIEDER[mood];if(LL&&LL.length){const gleich=behalten&&cur&&cur.mood===mood&&cur.liedNr!=null;let nr=gleich?cur.liedNr:Math.floor(Math.random()*LL.length);if(!gleich&&alt&&alt.mood===mood&&LL.length>1&&nr===alt.liedNr)nr=(nr+1)%LL.length;
   const v=liedVonNoten(LL[nr]),tr=gleich?cur.transpose:alt?st.transpose.reduce((b,t)=>Math.abs(t-alt.transpose)<Math.abs(b-alt.transpose)?t:b,st.transpose[0]):zufall(st.transpose);
-  return{mood,int,tempo:tempoFuer(roh,int),swing:v.swing,transpose:tr,modus:v.modus,instrument:v.instrument,band:Object.assign({},v.band),ablauf:v.ablauf,rollen:v.rollen,teile:v.teile,liedNr:nr,seed:Math.floor(Math.random()*97),durch:0}}
+  return{mood,int,tempo:tempoFuer(roh,int),swing:v.swing,transpose:tr,modus:v.modus,instrument:v.instrument,band:Object.assign({},v.band),ablauf:v.ablauf,rollen:v.rollen,teile:v.teile,liedNr:nr,seed:Math.floor(Math.random()*97),durch:0,kapWahl:gleich&&cur.kapWahl?cur.kapWahl:kapelleWaehlen(mood)}}
  let basis;if(behalten&&cur&&cur.mood===mood)basis={transpose:cur.transpose,modus:cur.modus,instrument:cur.instrument,band:cur.band,ablauf:cur.ablauf,seed:cur.seed};
  else{const tr=alt?st.transpose.reduce((b,t)=>Math.abs(t-alt.transpose)<Math.abs(b-alt.transpose)?t:b,st.transpose[0]):zufall(st.transpose);
   basis={transpose:tr,modus:zufall(st.modus),instrument:zufall(st.instrument),band:{trommel:zufall(st.band.trommel),floete:zufall(st.band.floete),ketten:zufall(st.band.ketten)},ablauf:zufall(st.ablauf),seed:Math.floor(Math.random()*97)}}
- return Object.assign(basis,{mood,int,tempo:tempoFuer(roh,int),swing:st.swing,teile:stimmungTeile(st,basis.modus),durch:0})}
+ return Object.assign(basis,{mood,int,tempo:tempoFuer(roh,int),swing:st.swing,teile:stimmungTeile(st,basis.modus),durch:0,kapWahl:behalten&&cur&&cur.mood===mood&&cur.kapWahl?cur.kapWahl:kapelleWaehlen(mood)})}
 const SCHLAG={trommel:1,klopf:1,schelle:1,ketten:1};
 /* Bassdrum: warmer Schlag bei Festen, treibender Kick bei Kampf und Hymnen, Herzschlag bei Grusel */
 const KICK={verfolgung:{k:[0,3,6,8,11,14],l:.26},kampf:{k:[0,4,8,12],l:.3},boss:{k:[0,4,8,12],l:.34},reiter:{k:[0,6,8,14],l:.24},sieg:{k:[0,4,8,12],l:.24},zwerge:{k:[0,8],l:.26},dorffest:{k:[0,8],l:.2},marktplatz:{k:[0,8],l:.18},shanty:{k:[0,8],l:.2},grusel:{k:[0,3],l:.2},spannung:{k:[0,3],l:.16}};
@@ -1299,7 +1369,7 @@ function planen(s,i,zeit,sp){const ab=teil,p=s.teile[s.ablauf[ab]]||s.teile.A;if
   if(p.schelle[i]>=0&&lay>=.22)spiel(Math.random()<.5?'schelle1':'schelle2',0,zeit,.08*lk,.6);
   if(p.klopf[i]>=0)spiel(i%4===0?'holz1':'holz2',0,zeit,.15*lk,.3);
   if(p.ketten[i]>=0&&lay>=.22){const k=KETTE[s.band.ketten]||KETTE.rassel;spiel(k[i%4===0?0:1],0,zeit,(s.band.ketten==='stampfen'?.22:.12)*lk,.5)}}
- orchester(s,p,i,zeit,sp,ab);gaesteSchritt(s,p,i,zeit,sp,ab);
+ orchester(s,p,i,zeit,sp,ab);if(!ruhe)kapelleSchritt(s,p,i,zeit,sp,ab);gaesteSchritt(s,p,i,zeit,sp,ab);
  {const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt&&!ruhe&&(ab%2===0||ab===hoehepunkt(s)))for(const n of mt.n)if(n[0]===i)spiel(mt.inst,MEL_GRUND+tr+ton(sk,n[1])+12*(mt.okt||0),zeit,mt.l*(.75+.25*Math.min(1,s.int/9)),n[2]*sp+.06,{ein:.02,aus:.14,pan:.18})}}
 function takt(){if(!AC||!cur||!bus||AC.state!=='running')return;const voraus=AC.currentTime+0.2;let n=0;
  while(naechste<voraus&&n++<32){let tempo=cur.tempo;if(altTempo&&wechsel>0){const q=(2-wechsel+schritt/SCHRITTE)/2;tempo=altTempo+(cur.tempo-altTempo)*Math.min(1,q)}
@@ -4492,6 +4562,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'tree-rec':{const n=recNode();if(n){G.treeRec=n.id;G.treeSel=n.id;G.treeOpen=true;G.treeBr=n.b}renderTree(true);break}
   case'camfx':{SAVE.camfx=+b.dataset.v;persist();const el=$('camBox');if(el)el.innerHTML=camInner();break}
   case'perf':SAVE.perf=!SAVE.perf;persist();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
+  case'band':SAVE.band=+b.dataset.v;persist();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
   case'amb-t':SAVE.amb=SAVE.amb===false;persist();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
   case'bass-t':SAVE.bass=!bassOn();persist();bassSet();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
   case'sharp':SAVE.sharp=!sharpOn();persist();resize();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
@@ -6980,7 +7051,7 @@ document.addEventListener('click',ev=>{if(performance.now()-BDRAG_NOCLICK<350&&e
 function volApply(){if(SFXB)SFXB.gain.value=SAVE.volSfx;MUSIK.lautstaerke(SAVE.volMus);SAVE.sound=SAVE.volSfx>0;const on=SAVE.volMus>0;if(on!==SAVE.music){SAVE.music=on;MUSIK.schalten(on)}}
 const volRow=(k,t,d)=>`<div class="up vol"><div><div class="t">${t}<small id="vl_${k}">${Math.round(SAVE[k]*100)}%</small></div><div class="d">${d}</div><input type="range" min="0" max="100" step="5" value="${Math.round(SAVE[k]*100)}" data-vol="${k}" aria-label="${t}"></div></div>`;
 const volRows=()=>volRow('volMus','Musik','Barradins Band – 0% schaltet sie aus.')+volRow('volSfx','Geräusche','Kampf, Zauber, Beute – 0% schaltet sie aus.')+`<div class="row" id="sndOpts" style="margin:4px 0 2px">${sndOpts()}</div>`;
-const sndOpts=()=>`<button class="btn small ${SAVE.amb!==false?'gold':''}" data-act="amb-t" title="Regen, Wind, Vögel, Höhlentropfen …">${SAVE.amb!==false?'Klangkulisse: an':'Klangkulisse: aus'}</button><button class="btn small ${bassOn()?'gold':''}" data-act="bass-t" title="Nimmt tiefen Bass weg, bei dem Handy-Lautsprecher schnarren – mit Kopfhörern oder Box ausschalten">${bassOn()?'Lautsprecher-Schutz: an':'Lautsprecher-Schutz: aus'}</button>`;
+const sndOpts=()=>`<span class="muted" style="font-size:13px;align-self:center">Big Band:</span>${['Aus','Ein paar','Volle Big Band'].map((n,i)=>`<button class="btn small ${(SAVE.band===undefined?(MOBIL?0:2):SAVE.band)===i?'gold':''}" data-act="band" data-v="${i}" title="Weitere Musiker aus Barradins Lautenwerk: Akkordeon, Hackbrett, Bläser, Chor, Taiko …">${n}</button>`).join('')}<span style="flex-basis:100%;height:0"></span><button class="btn small ${SAVE.amb!==false?'gold':''}" data-act="amb-t" title="Regen, Wind, Vögel, Höhlentropfen …">${SAVE.amb!==false?'Klangkulisse: an':'Klangkulisse: aus'}</button><button class="btn small ${bassOn()?'gold':''}" data-act="bass-t" title="Nimmt tiefen Bass weg, bei dem Handy-Lautsprecher schnarren – mit Kopfhörern oder Box ausschalten">${bassOn()?'Lautsprecher-Schutz: an':'Lautsprecher-Schutz: aus'}</button>`;
 document.addEventListener('change',ev=>{const s=ev.target.closest('[data-rlstart]');if(s)G.rlStart=+s.value});
 document.addEventListener('input',ev=>{const g=ev.target.closest('[data-gfx]');if(g)gfxSet(+g.value,1);const t=ev.target.closest('[data-tb]');if(t){tbS()[t.dataset.tb]=clamp((+t.value||100)/100,0.35,1.35);persist();tbApply()}});
 let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[data-vol]');if(!el)return;audioInit();const k=el.dataset.vol;if(k!=='volMus'&&k!=='volSfx')return;SAVE[k]=clamp((+el.value||0)/100,0,1);const l=$('vl_'+k);if(l)l.textContent=el.value+'%';volApply();persist();
