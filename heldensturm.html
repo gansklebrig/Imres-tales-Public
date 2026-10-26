@@ -237,7 +237,7 @@ details.stats .stat{padding:0 12px 12px}
 .cmpt th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:2px 6px 4px}
 .cmpt td{padding:3px 6px;border-top:1px solid #2c232f}
 .cmpt td:nth-child(2){font-weight:800;white-space:nowrap}
-.cmpt .dcol{text-align:right;font-weight:800;white-space:nowrap}
+.cmpt .dcol{text-align:center;font-weight:800;white-space:nowrap;font-size:13px}
 .lpow{border:1px solid rgba(255,141,46,.55);background:rgba(255,141,46,.08);border-radius:8px;padding:6px 10px;font-size:13px;margin-top:4px}
 .lpow b{color:var(--r4);display:block}
 .lpow.old{opacity:.7}
@@ -4437,10 +4437,10 @@ function renderPause(keep){showScreen(`<div class="wrap narrow">
 const STLBL={wdmg:['Waffenschaden',v=>fmt(v)],wrate:['Waffentempo',v=>f1(v)+'×'],armor:['Rüstung',v=>'+'+fmt(v)],hp:['Leben',v=>'+'+fmt(v)],dmg:['Schaden',v=>'+'+v+'%'],rate:['Angriffstempo',v=>'+'+v+'%'],crit:['Krit. Chance',v=>'+'+v+'%'],critd:['Krit. Schaden',v=>'+'+v+'%'],speed:['Bewegungstempo',v=>'+'+v+'%'],cdr:['Abklingzeiten',v=>'−'+v+'%'],ls:['Lebensraub',v=>'+'+f1(v)+'%'],regen:['Regeneration',v=>'+'+f1(v)+'/s'],area:['Wirkungsbereich',v=>'+'+v+'%'],skill:['Fertigkeitsschaden',v=>'+'+v+'%'],gold:['Goldfund',v=>'+'+v+'%']};
 function statMap(it){const m={};if(!it)return m;if(it.wdmg){m.wdmg=it.wdmg;m.wrate=it.wrate}if(it.armor)m.armor=it.armor;if(it.hp)m.hp=it.hp;for(const a of affOf(it))m[a.k]=(m[a.k]||0)+a.v;return m}
 function compareHtml(it,cur){const a=statMap(it),b=statMap(cur);const keys=Object.keys(STLBL).filter(k=>a[k]!==undefined||b[k]!==undefined);
- return`<table class="cmpt"><thead><tr><th></th><th class="c${it.rar}">Neu</th><th>${cur?`<span class="c${cur.rar}">Angelegt</span>`:'Angelegt'}</th><th class="dcol">±</th></tr></thead><tbody>${keys.map(k=>{const L=STLBL[k],x=a[k],y=b[k];const better=k==='wrate'?null:(x||0)>(y||0)?'good':(x||0)<(y||0)?'bad':'';
-  return`<tr><td>${L[0]}</td><td class="${better||''}">${x!==undefined?L[1](x):'–'}${better==='good'?' ▲':better==='bad'?' ▼':''}</td><td class="muted">${y!==undefined?L[1](y):'–'}</td><td class="dcol ${dc(x,y)}">${dpct(x,y)}</td></tr>`}).join('')}</tbody></table>`}
-/* genauer Unterschied in Prozent: neu gegenüber angelegt */
-function dpct(x,y){if(x===undefined&&y===undefined)return'';if(y===undefined||!y)return x?'neu':'';if(x===undefined||!x)return'−100%';const q=(x/y-1)*100;if(Math.abs(q)<0.05)return'±0%';const r=Math.abs(q)<10?Math.round(q*10)/10:Math.round(q);return(q>0?'+':'−')+String(Math.abs(r)).replace('.',',')+'%'}
+ /* Neu | Unterschied | Angelegt – der bessere Wert grün, der schlechtere rot, dazwischen nur „+5 %“ bzw. „−2 %“ */
+ return`<table class="cmpt"><thead><tr><th></th><th class="c${it.rar}">Neu</th><th class="dcol"></th><th>${cur?`<span class="c${cur.rar}">Angelegt</span>`:'Angelegt'}</th></tr></thead><tbody>${keys.map(k=>{const L=STLBL[k],x=a[k],y=b[k],c=dc(x,y),o=c==='good'?'bad':c==='bad'?'good':'muted';
+  return`<tr><td>${L[0]}</td><td class="${x!==undefined?c:'muted'}">${x!==undefined?L[1](x):'–'}</td><td class="dcol ${c}">${dpct(x,y)}</td><td class="${y!==undefined?o:'muted'}">${y!==undefined?L[1](y):'–'}</td></tr>`}).join('')}</tbody></table>`}
+function dpct(x,y){if(x===undefined&&y===undefined)return'';if(y===undefined||!y)return x?'neu':'';if(x===undefined||!x)return'−100%';const q=Math.round((x/y-1)*100);return q===0?'±0%':(q>0?'+':'−')+Math.abs(q)+'%'}
 const dc=(x,y)=>{const a=x||0,b=y||0;return a>b?'good':a<b?'bad':'muted'};
 function sortBag(){const base=computeStats(P.eq),d=new Map(P.bag.map(it=>[it,itemDps(it,base).d])),k=new Map(P.bag.map(it=>[it,itemDelta(it)]));P.bag.sort((x,y)=>(d.get(y)-d.get(x))||(k.get(y)-k.get(x))||y.rar-x.rar||y.ilvl-x.ilvl)}
 function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel;updateInvBadge();
