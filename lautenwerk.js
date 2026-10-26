@@ -2610,7 +2610,7 @@
     const sr = ctx.sampleRate, n = Math.round(sr * 1.9), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
     const AMP = [1, .62, .42, .26, .16, .1, .06, .035], pos = .2;
     AMP.forEach((a0, k) => {
-      const h = k + 1, fh = freq * h * (1 + .0003 * h * h);
+      const h = k + 1, fh = freq * h * (1 + .0002 * (h * h - 1)); /* Grundton exakt, nur die Obertöne leicht gespreizt */
       if (fh > sr * .45) return;
       const a = a0 * Math.abs(Math.sin(Math.PI * h * pos)) / Math.sin(Math.PI * pos), tau = 1.5 / (1 + k * .7);
       let ph = Math.random() * .3;
@@ -2634,15 +2634,18 @@
     if (art === "bass") { const b = bassSaite(freq); saitenCache.set(key, b); return b; }
     const sr = ctx.sampleRate, dauer = art === "bass" ? 1.8 : art === "harfe" ? 2.6 : art === "mandoline" ? .9 : 1.4, n = Math.round(sr * dauer);
     const buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
-    const p = Math.max(2, Math.round(sr / freq)), ring = new Float32Array(p);
+    /* Schleifenlänge exakt treffen: die Mittelung kürzt die Schleife um eine halbe Probe, der Rest
+       (Bruchteil einer Probe) kommt aus einem Allpass – sonst klingen hohe Töne bis zu 40 Cent zu hoch */
+    const P = sr / freq + .5, p = Math.max(2, Math.floor(P - .1)), fr = P - p, C = (1 - fr) / (1 + fr), ring = new Float32Array(p);
     for (let j = 0; j < p; j++) ring[j] = Math.random() * 2 - 1;
     if (art === "harfe") for (let k = 0; k < 2; k++) for (let j = 0; j < p; j++) ring[j] = (ring[j] + ring[(j + 1) % p]) / 2; /* weicher angezupft */
     const daempf = art === "bass" ? .4985 : art === "harfe" ? .4993 : art === "mandoline" ? .4962 : .4975;
-    let idx = 0;
+    let idx = 0, apX = 0, apY = 0;
     for (let j = 0; j < n; j++) {
       const a = ring[idx], b = ring[(idx + 1) % p];
       d[j] = a;
-      ring[idx] = (a + b) * daempf;
+      const x = (a + b) * daempf; apY = C * x + apX - C * apY; apX = x;
+      ring[idx] = apY;
       idx = (idx + 1) % p;
     }
     saitenCache.set(key, buf);
@@ -2978,7 +2981,7 @@
       rauschStoss(zeit, ziel, "bandpass", 2400, 2, .05 * l, .12);
     } else if (art === "drehleier") { /* Rad-gestrichen, leicht schnarrend */
       const o = ctx.createOscillator(), o2 = ctx.createOscillator(); o.type = "sawtooth"; o2.type = "sawtooth";
-      o.frequency.value = freq; o2.frequency.value = freq * 1.004; oscs = [o, o2];
+      o.frequency.value = freq / 1.002; o2.frequency.value = freq * 1.002; oscs = [o, o2];
       const roh = ctx.createGain(); roh.gain.value = .32; o.connect(roh); o2.connect(roh);
       const schnarr = ctx.createGain(), tr = ctx.createOscillator(), tg = ctx.createGain();
       tr.type = "sine"; tr.frequency.value = 28; tg.gain.value = .18; schnarr.gain.value = .65;
@@ -3004,7 +3007,7 @@
       ende = huelle(g, zeit, d, .38 * l, .012, .03);
     } else { /* Flöte der Illusionen: weich, schimmernd und mit Echo */
       const o = ctx.createOscillator(), o2 = ctx.createOscillator(); o.type = "sine"; o2.type = "triangle";
-      o.frequency.value = freq * 2; o2.frequency.value = freq * 2.003; oscs = [o, o2];
+      o.frequency.value = freq * 2 / 1.0015; o2.frequency.value = freq * 2 * 1.0015; oscs = [o, o2];
       o.connect(sum); const g2 = ctx.createGain(); g2.gain.value = .35; o2.connect(g2); g2.connect(sum);
       lp.frequency.value = 3200;
       ende = huelle(g, zeit, d, .3 * l, .07, .25);
@@ -3548,7 +3551,7 @@
     fag: [34,  37,  41,  45,  46,  48,  55,  60,  63,  68,  69,  72], pos: [34,  37,  39,  41,  46,  50,  53,  60,  61,  63,  65], vctrem: [36,  40,  43,  50,  53,  57,  59,  60,  64,  67,  71,  74,  77], trp: [53,  57,  60,  63,  67,  70,  74,  77,  81,  84], oboest: [58,  62,  65,  70,  74,  77,  82,  89], kb: [28,  30,  31,  34,  36,  38,  40,  42,  44,  45,  49,  52,  56,  59], geigest: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], geige: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], tuba: [34,  39,  41,  46,  50,  53,  58], klar: [50,  53,  58,  62,  65,  70,  74,  77,  82,  86,  90], orgel: [36,  42,  48,  54,  60,  66,  72,  78,  84,  90,  96], vlntrem: [55,  57,  59,  62,  69,  72,  76,  79,  83,  86], oboe: [58,  62,  65,  70,  74,  77,  82,  86,  89] };
   /* Stimmung der Aufnahmen, nachgemessen (Cent zu hoch +, zu tief −): einige Flöten, die Harfe und manche Streicher waren
      bis zu 25 Cent verstimmt, eine Klarinetten-Aufnahme sogar einen Halbton – das wird beim Abspielen ausgeglichen */
-  const STIMM_KORR = {"akk":{"56":6,"59":6,"80":10,"83":11,"86":9,"89":8},"hack":{"69":6,"72":5,"93":-6},"cemb":{"80":6,"83":6},"cel":{"84":11,"87":10,"96":7,"99":10,"102":11},"spiel":{"102":6},"pizz":{"42":23,"48":16,"51":12,"57":11,"60":5,"72":13},"blech":{"55":8,"58":6,"61":6,"64":6},"vln":{"83":5},"vc":{"40":-7},"spic":{"40":-6,"60":14,"64":-5,"67":-16},"harfe":{"28":-18,"31":-20,"35":-16,"38":-6,"41":-7,"45":-5,"52":-5,"55":-10,"59":-14,"62":-12,"69":-9,"72":-10,"76":-12,"79":-5,"83":-8,"86":-6,"93":-18,"95":-6,"101":-24},"vctrem":{"36":-5,"67":-9,"71":-5},"trp":{"53":-6,"67":7,"74":7,"81":6},"oboest":{"89":-10},"kb":{"30":-14,"38":6,"59":-13},"geigest":{"55":10,"60":-6,"91":6},"geige":{"57":5,"60":24,"64":7,"67":-6,"76":8,"88":8,"93":-6},"tuba":{"50":-6,"53":-6,"58":10},"orgel":{"36":-6,"54":5},"flst":{"72":-6},"oka":{"87":5},"klar":{"65":6,"77":6,"82":5,"86":6,"90":-98},"stimme":{"84":-8,"87":-7},"horn":{"39":-8,"50":-10,"53":-6},"bfl":{"60":10,"63":6,"66":6,"69":5,"75":12,"78":8,"84":7,"87":7,"90":8,"93":7,"96":8},"pic":{"74":8,"77":7,"95":8,"98":8,"101":8,"104":5},"pfeife":{"72":10,"75":12,"81":11,"87":16,"90":16,"93":11,"96":12},"shaku":{"55":-8,"58":-8,"61":-7,"64":-6},"eh":{"55":8,"64":-8,"67":8,"70":-6,"76":-8,"79":-8},"bra":{"63":-6}};
+  const STIMM_KORR = {"akk":{"80":6,"83":6,"86":6,"89":11},"hack":{"63":7,"66":5},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"36":-24,"39":-11,"42":22,"45":24,"48":20,"51":22,"57":12,"60":5,"69":-13,"72":7,"78":-12,"81":-21},"blech":{"61":5,"64":5},"vln":{"69":5,"62":6,"66":-5},"vc":{"40":-11,"53":16},"spic":{"36":-6,"40":-8,"53":-16,"57":6,"60":23,"64":-9,"67":-18,"71":-7,"74":-7,"77":7,"43":-5},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":10,"50":5,"53":-5,"57":7,"59":23,"64":12,"67":-12,"71":-10,"74":-8,"77":14},"trp":{"53":-7,"67":10,"74":7,"81":9},"oboest":{"89":-13},"kb":{"30":-22,"34":-7,"36":-20,"38":7,"40":-14,"42":-5,"56":-28,"59":-13},"geigest":{"55":6,"60":-9,"72":6,"76":5,"84":5,"91":6},"geige":{"60":22,"64":7,"67":-5,"76":7,"79":7,"88":8,"84":-5},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10},"vlntrem":{"57":-11,"69":-8,"72":8,"79":-8},"flst":{"72":-8,"88":-17,"93":-7},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-9,"53":-7},"bfl":{"60":13,"75":10,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6,"63":10,"66":6,"69":5,"72":5},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":18,"81":6,"84":-7,"87":11,"90":15,"93":11},"shaku":{"55":-8,"58":-8,"61":-8,"64":-5},"eh":{"55":7,"64":-9,"67":9,"70":-7,"76":-8,"79":-9},"bra":{"54":14,"84":-6,"60":7,"63":-6,"81":9},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24}};
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
   function sampleLaden(name) {
