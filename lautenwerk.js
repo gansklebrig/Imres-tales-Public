@@ -1432,12 +1432,14 @@
       sparHallIn.connect(neu.ein); if (echoNass) echoNass.connect(neu.ein);
       hallNode = neu; sparAktiv = false; sparAusgang();
       hallFilter.frequency.setTargetAtTime(r.hell, ctx.currentTime, .05);
+      sparHallIn.gain.setTargetAtTime(hallPegel() * SPAR_HALL, ctx.currentTime, .08);
       return;
     }
     const neu = ctx.createConvolver();
     neu.buffer = hallBild(S.raum);
     if (hallNode) { try { hallFilter.disconnect(hallNode); hallNode.disconnect(); } catch (_) {} }
     hallFilter.connect(neu); neu.connect(hallNass); hallNode = neu;
+    if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), ctx.currentTime, .08);
     hallFilter.frequency.setTargetAtTime(RAEUME[S.raum].hell, ctx.currentTime, .05);
   }
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
@@ -1485,7 +1487,10 @@
     if (soll === hallVerbunden) return;
     try { if (soll) hallEin.connect(hallFilter); else hallEin.disconnect(hallFilter); hallVerbunden = soll; } catch (_) {}
   }
-  const hallPegel = () => Math.pow(S.hall / 10, 1.2) * 2.2;
+  /* Hallanteil je Raum und Gerät abgeglichen (nachgemessen): bei 100 % ist der Hall etwa so laut wie die Musik selbst,
+     große Räume eine Spur mehr. Der Faltungshall (PC) war vorher 10–15 dB lauter als das Hall-Netz am Handy. */
+  const hallTrim = () => { const d = (RAEUME[S.raum] || RAEUME.taverne).dauer; return leicht() ? .8 * Math.pow(d / 1.4, .32) : .335 * Math.pow(1.4 / d, .27); };
+  const hallPegel = () => Math.pow(S.hall / 10, 1.2) * 2.2 * hallTrim();
   /* das schlanke Hall-Netz (Handy/Sparmodus) braucht mehr Eingangspegel, um so viel Raum zu ergeben wie der Faltungshall */
   const SPAR_HALL = 3.5;
   /* ---------- Geräuschkulisse ---------- */
