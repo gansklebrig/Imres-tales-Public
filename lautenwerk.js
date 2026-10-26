@@ -1418,7 +1418,7 @@
     aus.gain.value = .7 * (1 - Math.max(...linien.map(l => l.fb)));
     return { ein, aus, connect: z => aus.connect(z), disconnect: () => { try { aus.disconnect(); } catch (_) {} } };
   }
-  let sparHallIn = null, sparAktiv = false, kompRef = null;
+  let sparHallIn = null, sparAktiv = false, kompRef = null, hallHP = null, orchHall = null, gastHall = null;
   /* Hall-Netz nur dann am Ausgang, wenn überhaupt ein Hall läuft – sonst spart es die Rechenzeit ganz */
   function sparAusgang() {
     if (!leicht() || !hallNode || !kompRef) return;
@@ -1974,6 +1974,76 @@
   }
   /* Feinabgleich der Aufnahmen gegenüber den gerechneten Klängen */
   const ECHT_PEGEL = { drache: 1.07, schwert: 1.33, tuer: 1.26, schrei: 1.38, wuerfel: 1.55, zauber: 1.09, bogen: 1.24, pfeil: 1.25, hieb: 1.22, verfehlt: 1.31, block: 1.25, wucht: .92, schmerz: 1.33, sterben: 1.37, feuerball: 1.41, heiltrank: 1.33, muenzen: 1.45, ruelpser: 1.32, schnarchen: 1.28, boing: 1.7, boom: 1.35, bonk: 1.12 };
+  /* ---------- Hall pro Instrument und Stimmung ----------
+     Jedes Instrument hat seinen eigenen Hallanteil: gehaltene, schwebende Klänge (Harfe, Glocken, Chor, Horn, Pauke) bekommen viel Raum,
+     alles Rhythmische (Bass, Klopfen, Umpa, Zupfstreicher) bleibt fast trocken – so wird es episch, ohne zum Klangbrei zu werden.
+     Jede Stimmung hat dazu einen Grundcharakter (nass) und ihre „Helden“, die besonders weit klingen; welcher Held es ist,
+     wechselt mit dem Lied. Der Hall-Regler bleibt der Meister über alles, die 🏛-Knöpfe schalten einzelne Spuren ganz trocken. */
+  const HALL_INSTR = {
+    melodie: { harfe: 1.3, glocken: 1.4, illusion: 1.3, laute: .9, mandoline: .7, fidel: 1, drehleier: 1, schalmei: .8, dudelsack: .75, hackbrett: 1.1, cembalo: .7, akkordeon: .6, sitar: 1.2 },
+    floete: { horn: 1.3, gesang: 1.3, oohchor: 1.5, shakuhachi: 1.4, okarina: 1.2, floete: 1, panfloete: 1.1, klarinette: .9, oboe: 1, englischhorn: 1.2, bratsche: 1.1, piccolo: .7, pfeife: .6, blockfloete: .8 },
+    trommel: { pauke: 1.2, taiko: 1.3, trommel: .5, bodhran: .45, tamburin: .4, stoecke: .3 },
+    kap: { ooh: 1.5, rgl: 1.6, cel: 1.4, spiel: 1.3, kal: 1, bra: 1.1, eh: 1.2, shaku: 1.4, bfl: .8, pic: .6, pfeife: .5, blech: 1.2, taiko: 1.3, pizz: .4, akk: .5, hack: .9, cemb: .6, mar: .7, xyl: .6, sitar: 1.1 }
+  };
+  const HALL_SPUR = { bass: .25, klopf: .3, schelle: .5, ketten: .6, rex: .8 };
+  const HALL_WEISE = { umpa: .55, ostinato: .6, puls: 1, stoss: .85, halte: 1.3, glanz: 1.35, arp: .8 };
+  /* nass = Grundcharakter der Stimmung, held = mögliche Helden (eine Gruppe je Lied), orch/gast = Teppich und Gäste */
+  const HALL_STIMMUNG = {
+    heldenlied: { nass: 1, held: [["trommel", "floete"], ["floete", "kap"], ["trommel", "kap"]], orch: 1.3 },
+    kampf: { nass: .85, held: [["trommel"], ["floete", "trommel"]], orch: 1.2 },
+    boss: { nass: .95, held: [["trommel", "kap"], ["floete", "trommel"]], orch: 1.3 },
+    verfolgung: { nass: .6, held: [["trommel"], ["floete"]], orch: .9 },
+    spannung: { nass: .9, held: [["melodie"], ["kap"]], orch: 1.1 },
+    grusel: { nass: 1.2, held: [["melodie", "kap"], ["floete"]], orch: 1.2 },
+    unterreich: { nass: 1.25, held: [["melodie", "trommel"], ["floete", "kap"]], orch: 1.2 },
+    ruinen: { nass: 1.2, held: [["floete"], ["melodie", "kap"]], orch: 1.2 },
+    elben: { nass: 1.2, held: [["melodie"], ["floete", "kap"]], orch: 1.2 },
+    fey: { nass: 1.05, held: [["melodie"], ["kap"]], orch: 1 },
+    pilger: { nass: 1.25, held: [["floete", "kap"], ["melodie"]], orch: 1.3 },
+    klage: { nass: 1.05, held: [["melodie"], ["floete"]], orch: 1.1 },
+    kamin: { nass: .8, held: [["melodie"], ["floete"]], orch: .9 },
+    rast: { nass: .8, held: [["floete"], ["melodie"]], orch: .9 },
+    reise: { nass: .85, held: [["floete"], ["melodie"]], orch: 1 },
+    hof: { nass: 1, held: [["kap", "floete"], ["melodie"]], orch: 1.2 },
+    sieg: { nass: .95, held: [["kap", "trommel"], ["floete"]], orch: 1.2 },
+    reiter: { nass: .8, held: [["floete"], ["kap"]], orch: 1.1 },
+    zwerge: { nass: 1, held: [["floete", "trommel"], ["kap"]], orch: 1.2 },
+    auenland: { nass: .7, held: [["floete"], ["melodie"]], orch: .9 },
+    dorffest: { nass: .6, held: [["floete"], ["kap"]], orch: .8 },
+    marktplatz: { nass: .6, held: [["kap"], ["floete"]], orch: .8 },
+    trinklied: { nass: .6, held: [["floete"], ["melodie"]], orch: .8 },
+    shanty: { nass: .75, held: [["floete", "kap"], ["melodie"]], orch: .9 }
+  };
+  const HELD = 1.45, NEBEN = .8;
+  function hallStimmung() {
+    const p = S.stimmung && HALL_STIMMUNG[S.stimmung];
+    if (!p) return null;
+    const held = p.held[((S.arrSeed || 0) + (S.kapWahl || []).reduce((a, b) => a + b, 0)) % p.held.length];
+    return { nass: p.nass, held, orch: p.orch || 1 };
+  }
+  /* Hallanteil einer Spur der Band (ohne die 🏛-Knöpfe) */
+  function hallAnteil(k) {
+    const p = hallStimmung();
+    let w = k === "melodie" ? HALL_INSTR.melodie[S.instrument] || 1 : k === "floete" ? HALL_INSTR.floete[S.band.floete] || 1 : k === "trommel" ? HALL_INSTR.trommel[S.band.trommel] || .6 : HALL_SPUR[k] != null ? HALL_SPUR[k] : 1;
+    if (!p) return w;
+    w *= p.nass;
+    if (k === "melodie" || k === "floete" || k === "trommel") w *= p.held.includes(k) ? HELD : NEBEN;
+    return Math.min(1.9, w);
+  }
+  /* Hallanteil eines Kapellen-Musikers */
+  function kapHallAnteil(p) {
+    const st = hallStimmung();
+    let w = (HALL_INSTR.kap[p.inst] || 1) * (HALL_WEISE[p.jetzt] || 1) * .55;
+    if (st) w *= st.nass * (st.held.includes("kap") && !["umpa", "ostinato"].includes(p.jetzt) ? HELD : NEBEN);
+    return Math.min(1.2, w);
+  }
+  function hallProfilAnwenden() {
+    if (!ctx) return;
+    const j = ctx.currentTime, st = hallStimmung();
+    IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : hallAnteil(k), j, .3));
+    if (orchHall) orchHall.gain.setTargetAtTime(.7 * (st ? st.orch * st.nass : 1), j, .3);
+    if (gastHall) gastHall.gain.setTargetAtTime(.6 * (st ? st.nass : 1), j, .3);
+  }
   function effekteAnwenden() {
     if (!ctx) return;
     const j = ctx.currentTime;
@@ -1986,7 +2056,7 @@
     sparAusgang();
     echoHallSchalten();
     if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
-    IDS.forEach(k => hallSend[k] && hallSend[k].gain.setTargetAtTime(S.hallAus[k] ? 0 : 1, j, .05));
+    hallProfilAnwenden();
   }
   const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6);
   function mixAnwenden() {
@@ -2041,9 +2111,11 @@
       fxAusgang = ctx.createGain(); fxAusgang.gain.value = fxPegel(); sfxBus.connect(fxAusgang); fxAusgang.connect(limiter); setTimeout(fxVorwaermen, 1500);
       /* Effekte bleiben trocken – ein Bogenschuss mit Kirchenhall klingt seltsam */
       hallFilter = ctx.createBiquadFilter(); hallFilter.type = "lowpass"; hallFilter.frequency.value = RAEUME[S.raum].hell;
+      /* alles, was in den Hall geht, ohne Tiefen: Bass und Grundtöne im Nachhall würden den Klang verschmieren */
+      hallHP = ctx.createBiquadFilter(); hallHP.type = "highpass"; hallHP.frequency.value = 280; hallHP.Q.value = .5; hallHP.connect(hallEin);
       hallNass.connect(komp); hallSchalten();
       raumAnwenden();
-      IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : 1; spurGain[k].connect(g); g.connect(hallEin); hallSend[k] = g; });
+      IDS.forEach(k => { const g = ctx.createGain(); g.gain.value = S.hallAus[k] ? 0 : hallAnteil(k); spurGain[k].connect(g); g.connect(hallHP); hallSend[k] = g; });
       /* Echos eigener Hall: weiter, schwebender Raum nur für ihre Instrumente, unabhängig vom Raumhall */
       echoSend = ctx.createGain(); echoSend.gain.value = 1; echoNass = ctx.createGain(); echoNass.gain.value = echoPegel();
       if (leicht()) { echoNass.gain.value = echoPegel() * 10; echoSend.connect(echoNass); if (hallNode && hallNode.ein) echoNass.connect(hallNode.ein); sparAusgang(); }
@@ -2902,6 +2974,7 @@
       if (neuBes) { try { saitenVorbereiten(); } catch (_) {} }
     }
     orchVorladen();
+    try { hallProfilAnwenden(); } catch (_) {}
     merken(); if (!S.pult) autoZeichnen();
   }
   /* Ausklang: am Taktende ein gemeinsamer Schlussakkord, dann verklingt alles und die Band hört auf */
@@ -3064,7 +3137,7 @@
   function orchAufbauen() {
     if (orchBus || !ctx) return;
     orchBus = ctx.createGain(); orchBus.gain.value = 1; orchBus.connect(master);
-    const hs = ctx.createGain(); hs.gain.value = .7; orchBus.connect(hs); hs.connect(hallEin);
+    const hs = ctx.createGain(); hs.gain.value = .7; orchBus.connect(hs); hs.connect(hallHP || hallEin); orchHall = hs; hallProfilAnwenden();
     [["vln", -.35], ["vc", .3], ["horn", .12], ["blech", .22], ["holz", -.18], ["gross", 0]].forEach(([k, p]) => {
       let n = ctx.createGain();
       if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = p; pn.connect(orchBus); n.connect(pn); } else n.connect(orchBus);
@@ -4667,7 +4740,7 @@
   function gastBusBauen() {
     if (gastBus || !ctx) return;
     gastBus = ctx.createGain(); gastBus.gain.value = 1; gastBus.connect(master);
-    const hs = ctx.createGain(); hs.gain.value = .6; gastBus.connect(hs); hs.connect(hallEin);
+    const hs = ctx.createGain(); hs.gain.value = .6; gastBus.connect(hs); hs.connect(hallHP || hallEin); gastHall = hs; hallProfilAnwenden();
     [["l", -.45], ["r", .45]].forEach(([k, p]) => {
       const n = ctx.createGain();
       if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = p; n.connect(pn); pn.connect(gastBus); } else n.connect(gastBus);
@@ -4852,13 +4925,13 @@
   function kapBusBauen() {
     if (kapBus || !ctx) return;
     kapBus = ctx.createGain(); kapBus.gain.value = 1; kapBus.connect(master);
-    const hs = ctx.createGain(); hs.gain.value = .55; kapBus.connect(hs); hs.connect(hallEin);
   }
   function kapZiel(pan) {
     const k = String(pan);
     if (kapSeite[k]) return kapSeite[k];
     const n = ctx.createGain();
     if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = pan; n.connect(pn); pn.connect(kapBus); } else n.connect(kapBus);
+    const hs = ctx.createGain(); hs.gain.value = .55; n.connect(hs); hs.connect(hallHP || hallEin); n._hall = hs; n._hallWert = .55;
     return kapSeite[k] = n;
   }
   /* Lagen der Kapelle, damit sich niemand mit Barradins Melodie (r … r+24) oder Echo im selben Bereich reibt:
@@ -4888,7 +4961,9 @@
     /* eine Verdopplung soll nie genau auf Barradins Ton landen – dann lieber die andere Oktave oder gar nicht */
     if (nichtGleich != null && m === nichtGleich) { if (m + 12 <= hi) m += 12; else if (m - 12 >= lo) m -= 12; else return; }
     const l = def.g * laut * (.55 + .55 * int);
-    if (probe(p.inst, m, zeit, kapZiel(p.pan), l, def.halt ? { ein: .04, aus: Math.min(.25, dauer * .4), dauer: dauer + .06 } : { dauer: Math.max(dauer, 1.2), aus: .3 }) && kapQ.length < 300) kapQ.push([zeit, p.inst]);
+    const ziel = kapZiel(p.pan), hw = kapHallAnteil(p);
+    if (ziel._hall && Math.abs(ziel._hallWert - hw) > .02) { ziel._hall.gain.setTargetAtTime(hw, Math.max(ctx.currentTime, zeit - .02), .05); ziel._hallWert = hw; }
+    if (probe(p.inst, m, zeit, ziel, l, def.halt ? { ein: .04, aus: Math.min(.25, dauer * .4), dauer: dauer + .06 } : { dauer: Math.max(dauer, 1.2), aus: .3 }) && kapQ.length < 300) kapQ.push([zeit, p.inst]);
   }
   const kapQ = [], kapZuletzt = {}, kapSeiteMerk = {};
   const KAP_WEISE = {
