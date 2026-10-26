@@ -179,6 +179,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniKulStopp: "Geräusche anhalten", miniKulWeiter: "Geräusche wieder starten", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
+      zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: "Über jede Kulisse legbar – drinnen klingt Wetter gedämpft wie durch Mauern. Der Kulissen-Balken regelt alles gemeinsam.", zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – sonst wird es zu viel für das Gerät.",
       kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %",
       stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente & Klassik",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
@@ -265,6 +266,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniKulStopp: "Stop ambience", miniKulWeiter: "Restart ambience", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
+      zusaetze: "Extras", zusMini: "Extras", zusTipp: "Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. The backdrop slider controls everything together.", zusVoll: n => "At most " + n + " extras at once – more would be too much for this device.",
       kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %",
       stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments & classics",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
@@ -2082,7 +2084,7 @@
     }
     b.grund = WELT_GRUND * (k.wlaut || 1) * staerke * Math.min(1.15, .055 / (AMB_LAUT[name] || .05));
     ambLaden(name).then(buf => {
-      if (!buf || kul !== k) return;
+      if (!buf || (k.zusatz ? k.aus : kul !== k)) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05;
       out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + 3);
       /* Aufnahmen mit unregelmäßigem Rhythmus (Pfützen-Tropfen): als ganze, nahtlose Endlosschleife – zerschnitten würden sie stolpern */
@@ -2141,13 +2143,75 @@
       if (e.folge) t += zz(e.folge[2], e.folge[3]);
     }
   }
+  /* ---------- Zusätze: einzelne Schichten über jede Kulisse legen (Regen über dem Kerker, Vögel in der Taverne …) ----------
+     Jeder Zusatz läuft wie eine kleine eigene Kulisse; der Kulissen-Balken regelt alles gemeinsam.
+     Außenklänge werden in Innenräumen gedämpft, als kämen sie durch Mauern. */
+  const ZUSATZ = {
+    regen: { sym: "🌧", de: "Regen", en: "Rain", raus: 1, betten: [["a_regen2", .9], ["a_leichtregen", .4]], ev: [] },
+    gewitter: { sym: "⛈", de: "Gewitter", en: "Thunderstorm", raus: 1, betten: [["a_gewitter1", .8]], ev: [["donner", [25, 60], .5, .7]] },
+    sturm: { sym: "🌬", de: "Sturm", en: "Gale", raus: 1, betten: [["a_heulwind", .7], ["a_wind2", .5]], ev: [] },
+    wind: { sym: "🍃", de: "Wind", en: "Wind", raus: 1, betten: [["a_wind1", .6]], ev: [] },
+    schnee: { sym: "❄", de: "Schneetreiben", en: "Snowdrift", raus: 1, betten: [["a_schneesturm", .7]], ev: [] },
+    voegel: { sym: "🐦", de: "Vögel", en: "Birds", raus: 1, betten: [["a_tagvoegel", .7]], ev: [["vogel", [8, 20], .25, .5]] },
+    nacht: { sym: "🦉", de: "Nachtgetier", en: "Night creatures", raus: 1, betten: [["a_nacht", .6], ["a_grillen", .4]], ev: [["eule", [30, 70], .3, .6]] },
+    bach: { sym: "🏞", de: "Bach", en: "Brook", raus: 1, betten: [["a_bach1", .7]], ev: [] },
+    wellen: { sym: "🌊", de: "Wellen", en: "Waves", raus: 1, betten: [["a_wellen2", .7]], ev: [] },
+    tropfen: { sym: "💧", de: "Tropfen", en: "Drips", betten: [["a_tropfen2", .6]], ev: [] },
+    feuer: { sym: "🔥", de: "Feuer", en: "Fire", betten: [["a_feuer2", .8]], ev: [] },
+    stimmen: { sym: "🗣", de: "Stimmengewirr", en: "Chatter", betten: [["a_gaeste", .6]], ev: [] },
+    hof: { sym: "🐄", de: "Bauernhof", en: "Farmyard", raus: 1, betten: [["a_hof", .5], ["a_huehner", .3]], ev: [] },
+    uhr: { sym: "🕰", de: "Standuhr", en: "Clock", betten: [["a_uhr", .25, { takt: 2.0005 }]], ev: [] },
+    katze: { sym: "🐈", de: "Schnurrende Katze", en: "Purring cat", betten: [["a_schnurren", .35]], ev: [] }
+  };
+  const DRINNEN = ["taverne", "hoehle", "unterreich", "kerker", "schmiede", "labor", "bibliothek", "tempel", "mine"];
+  let zusWahl = {}, zusLauf = {}, zusPausiert = false;
+  try { zusWahl = JSON.parse(localStorage.getItem("imres-lw-zusaetze") || "{}") || {}; } catch (_) {}
+  Object.keys(zusWahl).forEach(id => { if (!ZUSATZ[id]) delete zusWahl[id]; });
+  /* gewählt = Eintrag vorhanden (auch bei 0 %); Wert = Lautstärke 0–2 */
+  const zusIst = id => Object.prototype.hasOwnProperty.call(zusWahl, id);
+  const zusWert = id => typeof zusWahl[id] === "number" ? zusWahl[id] : 1;
+  const zusMerken = () => { try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {} };
+  const zusMax = () => leicht() ? 2 : 4;
+  /* steckt der Zusatz schon in der Grundkulisse? dann wird er nicht angeboten */
+  const zusInKulisse = id => { const w = KUL_WELT[S.kulisse]; return !!w && w.betten.some(([n]) => n === ZUSATZ[id].betten[0][0]); };
+  const zusFaktor = () => { const n = Object.keys(zusLauf).length; return .8 * (n >= 3 ? Math.sqrt(2 / n) : 1); };
+  const zusDumpf = id => ZUSATZ[id].raus && DRINNEN.includes(S.kulisse);
+  function zusPegelSetzen() {
+    if (!ctx) return; const j = ctx.currentTime, f = zusFaktor();
+    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id]; z.g.gain.setTargetAtTime(kulPegel() * f * zusWert(id), j, .15); z.filt.frequency.setTargetAtTime(zusDumpf(id) ? 750 : 18000, j, .3); });
+  }
+  function zusAn(id) {
+    if (zusLauf[id] || !ctx) return;
+    const filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = zusDumpf(id) ? 750 : 18000;
+    if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kompRef || master); }
+    const g = ctx.createGain(); g.gain.value = 0; g.connect(filt); filt.connect(kulBus);
+    const z = { zusatz: true, aus: false, art: "z_" + id, g, filt, send: null, knoten: [], naechst: {}, schichten: [], phase: 1 };
+    zusLauf[id] = z;
+    weltStart(z, ZUSATZ[id]);
+    zusPegelSetzen();
+  }
+  function zusAus(id) {
+    const z = zusLauf[id]; if (!z) return;
+    delete zusLauf[id]; z.aus = true; clearInterval(z.timer);
+    const j = ctx.currentTime; z.g.gain.cancelScheduledValues(j); z.g.gain.setValueAtTime(z.g.gain.value, j); z.g.gain.linearRampToValueAtTime(0, j + 1.2);
+    setTimeout(() => { z.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { z.g.disconnect(); } catch (_) {} }, 1400);
+    zusPegelSetzen();
+  }
+  /* gewählte Zusätze laufen lassen (nach Neuladen beginnen sie mit dem ersten Ton), abgewählte beenden */
+  function zusSync() {
+    if (!ctx) return;
+    Object.keys(zusLauf).forEach(id => { if (!zusIst(id) || zusPausiert) zusAus(id); });
+    if (!zusPausiert) Object.keys(zusWahl).forEach(id => { if (!zusLauf[id]) zusAn(id); });
+    zusPegelSetzen(); try { miniAnzeigen(); } catch (_) {}
+  }
+  const zusLaufen = () => Object.keys(zusLauf).length > 0;
   function weltStart(k, w) {
     k.phase = 1; k.wlaut = WELT_PEGEL[k.art] || 1;
     const betten = k.betten = w.betten.slice(0, spar ? 2 : 9).map((x, i) => weltBett(k, x, i));
     /* Einzelgeräusche schon vorladen, damit das erste gleich zu hören ist */
     w.ev.forEach(([art]) => { if (AMB_EV[art]) AMB_EV[art].f.forEach(ambLaden); else if (KUL_FX[art] && ECHT[KUL_FX[art]]) echtVorladen(); });
     k.timer = setInterval(() => {
-      if (kul !== k) return;
+      if (k.zusatz ? k.aus : kul !== k) return;
       const jetzt = ctx.currentTime;
       betten.forEach(b => weltBettPlanen(k, b));
       w.ev.forEach((x, i) => {
@@ -2160,6 +2224,7 @@
      Ohne sofort kommt sie von der Stimmung und geht mit der Musik. */
   function kulisseStart(sofort) {
     if (!ctx) return;
+    try { zusSync(); } catch (_) {}
     /* läuft genau diese Kulisse schon, nicht neu starten (sonst kurzes Aus- und Einblenden) */
     if (kul && kul.art === S.kulisse && S.kulisse !== "keine") { if (sofort) kul.allein = true; return; }
     kulisseStop();
@@ -2401,6 +2466,7 @@
     sparAusgang();
     echoHallSchalten();
     if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
+    try { zusPegelSetzen(); } catch (_) {}
     hallProfilAnwenden();
   }
   const spurPegel = k => S.mute[k] ? 0 : Math.pow(S.vol[k] / 9, 1.6);
@@ -3592,7 +3658,7 @@
     clearTimeout(fortsetzTimer); musikPauseAb = 0;
     /* … und die Lautstärke steigt von null an (gut 4 Sekunden bis zum vollen Pegel) */
     if (master) { const j = ctx.currentTime, mg = master.gain; mg.cancelScheduledValues(j); mg.setValueAtTime(.0001, j); mg.linearRampToValueAtTime(.38 * .15, j + .8); mg.setTargetAtTime(.38, j + .8, 1.3); }
-    musikWieder(); orchVorladen();
+    musikWieder(); orchVorladen(); zusPausiert = false;
     laeuft = true; pausiert = false; naechste = ctx.currentTime + .1; anzeige.length = 0;
     kulisseStart(); /* erst jetzt: vorher galt die Musik noch als angehalten, und die Kulisse schaltete sich gleich wieder ab */
     planen(); timer = setInterval(planen, 30); taktgeber(true);
@@ -6391,8 +6457,8 @@
       else if (e.target.closest(".ll-einst")) { leisteAuf = !leisteAuf; }
       else if (e.target.closest(".ll-kul")) {
         audioStart();
-        if (kul) { kulMerk = S.kulisse; kulisseStop(); }
-        else { if (S.kulisse === "keine" && kulMerk) S.kulisse = kulMerk; if (S.kulisse !== "keine") { merken(); kulisseStart(true); } }
+        if (kul || zusLaufen()) { if (kul) { kulMerk = S.kulisse; kulisseStop(); } if (zusLaufen()) { zusPausiert = true; zusSync(); } }
+        else { zusPausiert = false; if (S.kulisse === "keine" && kulMerk) S.kulisse = kulMerk; if (S.kulisse !== "keine") { merken(); kulisseStart(true); } else zusSync(); }
         try { zeichnen(); knoepfe(); } catch (_) {}
       }
       else if (e.target.closest(".ll-hin")) {
@@ -6731,6 +6797,20 @@
   /* Kulissen und Effekte nehmen am Handy viel Platz: von den Kulissen zuerst nur neun (Favoriten und die laufende vorn),
      die Effekte und Momente sind zugeklappt, bis man sie braucht – das merkt sich die Seite */
   let klangAuf = { kul: false, fx: false, spuren: false };
+  /* aufklappbar unter dem Kulissen-Balken: einzelne Schichten über die Kulisse legen */
+  function zusBox(T) {
+    const auf = !!klangAuf.zus, sp = sprache(), an = Object.keys(zusWahl);
+    const kurz = an.length ? " · " + an.map(id => ZUSATZ[id].sym).join(" ") : "";
+    let html = '<button type="button" class="lw-klappe lw-spurklappe" data-klangauf="zus" aria-expanded="' + auf + '">✚ ' + T.zusaetze + kurz + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
+    if (!auf) return html;
+    const ids = Object.keys(ZUSATZ).filter(id => zusIst(id) || !zusInKulisse(id));
+    html += '<div class="lw-spuren lw-zus">' + ids.map(id => {
+      const z = ZUSATZ[id], ist = zusIst(id), v = Math.round(zusWert(id) * 100);
+      return '<div class="lw-zuszeile' + (ist ? " an" : "") + '"><button type="button" data-zusatz="' + id + '" aria-pressed="' + ist + '">' + z.sym + " " + esc(z[sp] || z.de) + "</button>" +
+        (ist ? '<input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + esc(z[sp] || z.de) + '"><b>' + v + " %</b>" : "<span></span><span></span>") + "</div>";
+    }).join("") + '<p class="lw-tipp">' + T.zusTipp + "</p></div>";
+    return html;
+  }
   /* aufklappbar unter dem Kulissen-Balken: jede Schicht der gewählten Kulisse einzeln regeln */
   function kulSpuren(T) {
     const w = KUL_WELT[S.kulisse]; if (!w) return "";
@@ -6752,7 +6832,7 @@
     if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + " " + info("klang") + "</h4></div>" +
-      kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") + kulSpuren(T) +
+      kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") + kulSpuren(T) + zusBox(T) +
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KULISSEN.length - 1)) +
       klappe("fx", klangAuf.fx, T.fxKlappe) +
@@ -7121,10 +7201,11 @@
     });
     /* nur Geräusche (Kulisse oder Dauer-Effekt) ohne Musik: eigener Stopp-Knopf, danach wieder startbar */
     mini.querySelector(".lw-mini-kul").addEventListener("click", () => {
-      if (kul || klassikLauf) {
+      if (kul || klassikLauf || zusLaufen()) {
         if (kul) { kulMerk = S.kulisse; kulisseStop(); }
         if (klassikLauf) klassikStopp(true);
-      } else if (kulMerk) { audioStart(); S.kulisse = kulMerk; kulisseStart(true); }
+        if (zusLaufen()) { zusPausiert = true; zusSync(); if (!kulMerk) kulMerk = "keine"; }
+      } else if (kulMerk) { audioStart(); zusPausiert = false; if (kulMerk !== "keine") { S.kulisse = kulMerk; kulisseStart(true); } else { kulMerk = null; zusSync(); } }
       miniAnzeigen();
     });
     if (window.IntersectionObserver) new IntersectionObserver(e => { lautenwerkSichtbar = e[e.length - 1].isIntersecting; miniAnzeigen(); }).observe(root);
@@ -7132,7 +7213,7 @@
   function miniAnzeigen() {
     if (!mini) return;
     const T = t();
-    const musik = laeuft || pausiert, geraeusch = !laeuft && (!!kul || !!klassikLauf), gemerkt = !laeuft && !geraeusch && !!kulMerk;
+    const musik = laeuft || pausiert, geraeusch = !laeuft && (!!kul || !!klassikLauf || zusLaufen()), gemerkt = !laeuft && !geraeusch && !!kulMerk;
     mini.hidden = !((musik || geraeusch || gemerkt) && !lautenwerkSichtbar) || !!(leiste && !leiste.hidden);
     mini.classList.toggle("spielt", laeuft || geraeusch);
     const kk = mini.querySelector(".lw-mini-kul"), nurKul = !musik || geraeusch;
@@ -7142,7 +7223,7 @@
     mini.querySelector(".lw-mini-note").textContent = musik && !geraeusch ? "♪" : "🌫";
     mini.querySelector(".lw-mini-knopf:not(.lw-mini-kul)").hidden = !musik || geraeusch;
     mini.querySelector(".lw-mini-name").textContent = nurKul && (geraeusch || gemerkt)
-      ? (kul ? T.kulissen[kul.art] : klassikLauf ? T.sfx[klassikLauf.art] : T.kulissen[kulMerk] || "").replace(/^\S+\s/, "")
+      ? (kul ? T.kulissen[kul.art] : klassikLauf ? T.sfx[klassikLauf.art] : zusLaufen() || kulMerk === "keine" ? T.zusMini : T.kulissen[kulMerk] || "").replace(/^\S+\s/, "")
       : S.titel || T.eigenesLied;
     mini.querySelector(".lw-mini-titel").title = T.miniZur;
     const k = mini.querySelector(".lw-mini-knopf:not(.lw-mini-kul)");
@@ -7308,6 +7389,14 @@
     }
     const mt = e.target.closest("[data-musiktab]");
     if (mt) { musikTab = mt.dataset.musiktab; try { localStorage.setItem("imres-lw-musiktab", musikTab); } catch (_) {} boxNeu("musik"); return; }
+    const zb = e.target.closest("[data-zusatz]");
+    if (zb) {
+      const id = zb.dataset.zusatz; audioStart();
+      if (zusIst(id)) delete zusWahl[id];
+      else if (Object.keys(zusWahl).length >= zusMax()) { status(t().zusVoll(zusMax())); return; }
+      else zusWahl[id] = 1;
+      zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang"); return;
+    }
     if (e.target.closest('[data-aktion="kulmixzurueck"]')) {
       delete kulMix[S.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {}
       if (kul && kul.betten) kul.betten.forEach(x => { x.regler = 1; x.out.gain.setTargetAtTime(x.grund, ctx.currentTime, .08); });
@@ -7458,6 +7547,11 @@
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.zusvol) {
+      const id = d.zusvol, v = (+e.target.value) / 100; if (!zusIst(id)) return;
+      zusWahl[id] = v; zusMerken(); const b = e.target.parentNode.querySelector("b"); if (b) b.textContent = Math.round(v * 100) + " %";
+      zusPegelSetzen(); return;
+    }
     if (d.kulspur != null) {
       const art = S.kulisse, i = d.kulspur === "ev" ? "ev" : +d.kulspur, v = (+e.target.value) / 100;
       const m = kulMix[art] = kulMix[art] || { b: [] }; if (i === "ev") m.ev = v; else m.b[i] = v;
@@ -8020,6 +8114,12 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-spurzeile input { width: 100%; accent-color: #6a9fb5; }
 .lw-spurzeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
 .lw-spuren .lw-klein { justify-self: start; margin-top: .2rem; }
+.lw-zuszeile { display: grid; grid-template-columns: minmax(8rem, 11rem) 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; }
+.lw-zuszeile button { text-align: left; border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; padding: .3rem .5rem; cursor: pointer; border-radius: 3px; }
+.lw-zuszeile button[aria-pressed="true"] { border-color: #6a9fb5; background: rgba(106,159,181,.22); }
+.lw-zuszeile input { width: 100%; accent-color: #6a9fb5; }
+.lw-zuszeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
+.lw-zus .lw-tipp { margin: .2rem 0 0; font-size: .74rem; color: var(--ash); }
 .lw-kleinregler span { flex: 0 0 auto; white-space: nowrap; }
 .lw-kleinregler input { flex: 1 1 auto; min-width: 4rem; max-width: 16rem; accent-color: var(--ember); }
 .lw-kleinregler b { flex: 0 0 2.6rem; text-align: right; color: var(--vellum); font-weight: 600; font-size: .8rem; }
