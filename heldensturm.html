@@ -2036,7 +2036,7 @@ function newGame(){return{state:'title',diff:0,stage:0,kills:0,score:0,traps:[],
  boss:null,bossDone:false,guardE:null,guardDone:false,portal:null,ground:null,theme:null,road:null,deco:[],paused:false,overlay:null,sel:G?G.sel:'barradin',seldiff:G?G.seldiff:0,bot:G?G.bot:false,campTab:G?G.campTab:'held',upCount:0,lastSave:0,victory:false,musT:0,confirmNew:false,props:[],mode:'kampagne',selMode:G?G.selMode:'kampagne',lbMode:G?G.lbMode:'kampagne'}}
 G=newGame();
 function newHero(id,diff){const H=HEROES[id],hs=hsave(id);const lv0=Math.min(LEG_CAP,1+diff*(G&&G.rl?10:34));
- P={id,hero:H,up:hs.up,x:WORLD/2,y:WORLD/2,r:14,level:lv0,xp:0,sp:lv0+(hs.up.wis||0),ranks:{[H.sig]:1},learn:[H.sig],bar:[H.sig],eq:{},bag:[],cds:{},stam:100,stamMax:100+15*(hs.up.stam||0),sprint:false,stamWait:0,pots:2+(hs.up.flask||0)+legPot(id),potMax:2+(hs.up.flask||0)+legPot(id),potKills:0,shieldHp:0,stealthT:0,ambush:0,critNext:0,chan:null,hoard:0,hoardT:0,bdN:0,bdT:0,lp:new Set(),traps:0,form:null,formT:0,buffs:{},atkT:0,face:0,flip:1,moving:false,inv:0,hurtT:0,revives:hs.up.rev?1:0,dash:null,st:null,hp:1,slowT:0,slowA:0,rootT:0,silT:0,stunT:0,kx:0,ky:0,gems:{},mods:[],shrine:null}}
+ P={id,hero:H,up:hs.up,x:WORLD/2,y:WORLD/2,r:14,level:lv0,xp:0,sp:spFuer(lv0)+(hs.up.wis||0),ranks:{[H.sig]:1},learn:[H.sig],bar:[H.sig],eq:{},bag:[],cds:{},stam:100,stamMax:100+15*(hs.up.stam||0),sprint:false,stamWait:0,pots:2+(hs.up.flask||0)+legPot(id),potMax:2+(hs.up.flask||0)+legPot(id),potKills:0,shieldHp:0,stealthT:0,ambush:0,critNext:0,chan:null,hoard:0,hoardT:0,bdN:0,bdT:0,lp:new Set(),traps:0,form:null,formT:0,buffs:{},atkT:0,face:0,flip:1,moving:false,inv:0,hurtT:0,revives:hs.up.rev?1:0,dash:null,st:null,hp:1,slowT:0,slowA:0,rootT:0,silT:0,stunT:0,kx:0,ky:0,gems:{},mods:[],shrine:null}}
 /* Gespeicherten Lauf und Roguelite-Daten prüfen; Unbrauchbares verwerfen statt abzustürzen */
 function runFix(S){try{const r=S.run;if(r){const st=r.stages;let bad=!isObj(r)||!okHero(r.id)||typeof r.stage!=='number'||!isFinite(r.stage)||r.stage<0||typeof r.diff!=='number'||!isFinite(r.diff)||r.diff<0||r.diff>DMAX||r.mode!=null&&!hasK(NETMODEN,r.mode);
  if(!bad&&st!=null){bad=!Array.isArray(st)||!st.length||st.some(s=>!isObj(s)||typeof s.name!=='string'||(s.ort!==undefined&&!(Number.isInteger(s.ort)&&ORTE[s.ort])))||r.stage>=st.length}
@@ -3055,7 +3055,7 @@ const effStage=()=>SL()+diffStages(G.diff);
 const EB=()=>G&&G.diff===0?Math.max(0,1-SL()/14):0;
 /* Ab sehr hohen Stufen wachsen Gegner langsamer, damit Hölle und darüber schwer, aber schaffbar bleiben */
 const softE=(E,k)=>E<=30?E:30+(E-30)*k;
-function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB();return{hp:28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?1.35:1),dmg:9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.88:1)*(HARD()?1.2:1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
+function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB();return{hp:28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?1.35:1),dmg:9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?1.2:1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
 function spawnEnemy(def,x,y,o){o=o||{};const sc=scale();const big=o.boss||o.guard||o.add;const elite=false;
  const sz=(big?(def.size||2):(def.size||1)*(elite?1.35:1))*(dmod('riesen')&&!big?1.3:1);
  const hp=sc.hp*(def.hp||1)*(dmod('riesen')?1.5:1)*(dmod('goldrausch')?1.25:1)*wxUndead(def)*(elite?4.5:1)*(o.boss?(40+SL()*1.5):o.guard?(8+Math.min(6,SL()*0.5)):o.add?10:1);
@@ -3280,23 +3280,23 @@ function hurtDot(a){if(P.inv>0||P.down||G.state!=='play')return;a=a*setHurtMul()
 function die(){if(pactSave())return;if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
  if(G.mp){mpDown();return}P.hp=0;endRun(false)}
-function gainXp(v){v*=shrineOn('erkenntnis')?1.5:1;ruhmXp(v);P.xp+=v;let need=xpNeed(P.level);while(P.xp>=need){if(P.level>=LEG_CAP){legXp(P.xp);P.xp=0;break}P.xp-=need;P.level++;P.sp++;recalc();heal(P.st.maxHp*0.25);ring(P.x,P.y,70,'#8fe7ff',0.6,4);levelFx();rumble(P,0.25,90);say('level',0,0.4);sfx('level');toast(`Stufe ${P.level}! Neuer Talentpunkt.`,'#8fe7ff',{minor:1});need=xpNeed(P.level)}}
-const xpNeed=l=>Math.round(10+l*8+Math.pow(l,1.7)*2);
-/* Neue Fähigkeiten nach und nach: Fähigkeitsplätze öffnen sich mit der Heldenstufe, und eine neue aktive Fähigkeit
-   gibt es erst, wenn man die zuletzt gelernte ein paarmal eingesetzt hat – so lernt man jede kennen, statt Knöpfe zu drücken.
-   Talentpunkte für Passives und Ränge bleiben frei. */
+function gainXp(v){v*=shrineOn('erkenntnis')?1.5:1;ruhmXp(v);P.xp+=v;let need=xpNeed(P.level);while(P.xp>=need){if(P.level>=LEG_CAP){legXp(P.xp);P.xp=0;break}P.xp-=need;P.level++;const tp=spFuer(P.level)>spFuer(P.level-1);if(tp)P.sp++;recalc();heal(P.st.maxHp*0.25);ring(P.x,P.y,70,'#8fe7ff',0.6,4);levelFx();rumble(P,0.25,90);say('level',0,0.4);sfx('level');toast(tp?`Stufe ${P.level}! Neuer Talentpunkt.`:`Stufe ${P.level}!`,'#8fe7ff',{minor:1});need=xpNeed(P.level)}}
+const xpNeed=l=>Math.round((10+l*8+Math.pow(l,1.7)*2)*(1+Math.max(0,l-25)*0.04));
+/* Langsamere Entwicklung: Fähigkeitsplätze öffnen sich mit der Heldenstufe, Talentpunkte gibt es bis Stufe 15 bei jedem
+   Aufstieg, danach bei jedem zweiten – und die hohen Stufen brauchen deutlich mehr Erfahrung. */
+const spFuer=l=>l<=15?l:15+Math.floor((l-15)/2);
 const SLOTLV=[1,4,9,15,22,30],UEBUNG=8;
 const slotsFrei=()=>SLOTLV.filter(l=>P.level>=l).length;
 const aktivN=()=>P.hero.tree.filter(n=>n.a&&rank(n.id)>0).length;
 const zuletztNeu=()=>{const L=(P.learn||[]).filter(id=>id!==P.hero.sig);return L.length?L[L.length-1]:null};
 function aktivSperre(n){if(!n.a||rank(n.id)>0)return null;if(aktivN()>=slotsFrei()){const nx=SLOTLV.find(l=>l>P.level);return nx?`Nächster Fähigkeitsplatz ab Heldenstufe ${nx}.`:'Alle Fähigkeitsplätze sind belegt.'}
- const l=zuletztNeu(),u=l?((P.use||{})[l]||0):UEBUNG;if(u<UEBUNG){const m=P.hero.tree.find(x=>x.id===l);return`Erst ${m?m.name:'die neue Fähigkeit'} ausprobieren: ${u} / ${UEBUNG} Einsätze.`}return null}
+ return null}
 function canLearn(n){const r=rank(n.id);if(r>=n.max||P.sp<=0)return false;if(aktivSperre(n))return false;return prereq(n)}
 function prereq(n){if(P.level<ROWLV[n.row])return false;if(n.row>0){const prev=P.hero.tree.filter(m=>m.b===n.b&&m.row===n.row-1);if(!prev.some(m=>rank(m.id)>0))return false}return true}
 function learn(n){if(!canLearn(n))return;sfx('lernen');P.ranks[n.id]=rank(n.id)+1;P.sp--;if(n.a&&!P.learn.includes(n.id)){P.learn.push(n.id);if(P.bar.length<6)P.bar.push(n.id);else if(!G.bot)G.barPick=n.id}recalc();buildSkillBar();sfx('magic')}
 function toggleBar(id){const i=P.bar.indexOf(id);if(i>=0)P.bar.splice(i,1);else if(P.bar.length<6)P.bar.push(id);buildSkillBar()}
 function useSkill(i){if(G.state!=='play'||G.paused)return;if(P.silT>0||P.stunT>0){if(!P.silWarn||G.time-P.silWarn>1.5){P.silWarn=G.time;toast(P.silT>0?'Keine Magie – du bist verstummt!':'Du bist betäubt!','#c08cff')}return}if(P.chan&&!P.chan.move)return;const n=P.actives[i];if(!n)return;if((P.cds[n.id]||0)>0)return;const r=rank(n.id);
- if(n.cast(r)===false)return;{const U=P.use||(P.use={});U[n.id]=(U[n.id]||0)+1;if(U[n.id]<=3&&!G.bot&&n.id!==P.hero.sig)word(P.x,P.y-56,n.name,'#ffe9a0');if(U[n.id]===UEBUNG&&n.id===zuletztNeu()&&!G.bot&&P.sp>0&&aktivN()<slotsFrei())toast(`${n.name} sitzt! Eine neue Fähigkeit kann gelernt werden.`,'#ffe9a0',{minor:1})}if(n.ult){if(!G.bot)ultFx();teamUltHook(n)}P.cds[n.id]=n.cd(r)*(1-P.st.cdr);setOnCast(n);P.castA=G.time;const b=P.skBtns&&P.skBtns[i];if(b)b.el.classList.remove('ready')}
+ if(n.cast(r)===false)return;{const U=P.use||(P.use={});U[n.id]=(U[n.id]||0)+1;if(U[n.id]<=3&&!G.bot&&n.id!==P.hero.sig)word(P.x,P.y-56,n.name,'#ffe9a0');}if(n.ult){if(!G.bot)ultFx();teamUltHook(n)}P.cds[n.id]=n.cd(r)*(1-P.st.cdr);setOnCast(n);P.castA=G.time;const b=P.skBtns&&P.skBtns[i];if(b)b.el.classList.remove('ready')}
 function usePotion(){if(G.state!=='play'||G.paused||P.pots<=0||P.potCd>0||P.hp>=P.st.maxHp)return;P.pots--;P.potCd=1;heal(P.st.maxHp*0.4*(LP('taverne')?1.5:1)*cursePotMul()*(LP('retter')?1.4:1));if(LP('retter'))for(const q of teamNear(P,auraR(P)))withP(q,()=>heal(P.st.maxHp*0.2));burst(P.x,P.y,'#ff6a7a',16,120);ring(P.x,P.y,30,'#ff6a7a',0.4,3);sfx('potion');potionFx();say('pot',0,0.25)}
 /* ---------- Talent-Mechaniken (Ladungen, Stapel, Jonglage, Rex als Beschützer, Blutpakt) ---------- */
 function skillOnCast(n){const st=rank('e_storm');if(!st||n.id==='e_storm')return;P.stat=(P.stat||0)+1;if(P.stat<4)return;P.stat=0;
@@ -5210,7 +5210,7 @@ const rlCp=(id,d)=>{const r=rlS(id);return r&&r.cp?(r.cp[d]||0):0};
 const ortStart=k=>Math.max(0,CAMP_STAGES.findIndex(s=>s.ort===k));
 const rlClone=o=>JSON.parse(JSON.stringify(o));
 function rlApply(){const r=rlS(P.id);if(!r)return false;const lv0=P.level,bk={level:P.level,xp:P.xp,sp:P.sp,ranks:P.ranks,learn:P.learn,bar:P.bar,eq:P.eq,bag:P.bag,gems:P.gems};try{
- Object.assign(P,{level:Math.max(r.level||1,lv0),xp:r.xp||0,sp:(r.sp||0)+Math.max(0,lv0-(r.level||1))+Math.max(0,(P.up.wis||0)-(r.wis||0)),ranks:rlClone(r.ranks||P.ranks),learn:(r.learn||P.learn).slice(),use:rlClone(r.use||{}),bar:(r.bar||r.learn||P.bar).slice(),eq:rlClone(r.eq||P.eq),bag:rlClone(r.bag||[]),gems:rlClone(r.gems||{})});
+ Object.assign(P,{level:Math.max(r.level||1,lv0),xp:r.xp||0,sp:(r.sp||0)+Math.max(0,spFuer(lv0)-spFuer(r.level||1))+Math.max(0,(P.up.wis||0)-(r.wis||0)),ranks:rlClone(r.ranks||P.ranks),learn:(r.learn||P.learn).slice(),use:rlClone(r.use||{}),bar:(r.bar||r.learn||P.bar).slice(),eq:rlClone(r.eq||P.eq),bag:rlClone(r.bag||[]),gems:rlClone(r.gems||{})});
  for(const id of Object.keys(P.ranks))if(!P.hero.tree.find(n=>n.id===id))delete P.ranks[id];P.learn=P.learn.filter(id=>P.hero.tree.find(n=>n.id===id));P.bar=P.bar.filter(id=>P.learn.includes(id)).slice(0,6);
  let mx=0;for(const it of Object.values(P.eq).concat(P.bag))if(it&&it.id>mx)mx=it.id;ITEMID=Math.max(ITEMID,mx+1);migrateWeapons();return true}catch(e){console.error(e);Object.assign(P,bk);return false}}
 function rlSync(){if(!P||!G.rl||G.bot&&!window.__rlBot)return;const hs=hsave(P.id),old=hs.rl||{};hs.rl={level:P.level,xp:P.xp,sp:P.sp,wis:P.up.wis||0,ranks:rlClone(P.ranks),learn:P.learn.slice(),use:rlClone(P.use||{}),bar:P.bar.slice(),eq:rlClone(P.eq),bag:rlClone(P.bag),gems:rlClone(P.gems||{}),cp:old.cp||{},runs:(old.runs||0)}}
