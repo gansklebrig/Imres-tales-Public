@@ -104,6 +104,10 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 112px);transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;z-index:15;width:min(92vw,520px)}
 .tm{background:rgba(16,12,18,.88);border:1px solid var(--line);padding:6px 12px;border-radius:6px;font-weight:800;text-align:center;animation:tin 2.6s forwards}
 @media (max-width:700px){#toast{top:calc(env(safe-area-inset-top,0px) + 150px)}}
+#feed{position:fixed;left:max(10px,env(safe-area-inset-left,0px));top:46%;display:flex;flex-direction:column;align-items:flex-start;gap:4px;pointer-events:none;z-index:14;max-width:min(46vw,280px)}
+.fm{font-size:12px;font-weight:700;line-height:1.3;background:rgba(16,12,18,.62);border-left:3px solid rgba(229,180,84,.8);padding:3px 9px 3px 7px;border-radius:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:fin 2.3s forwards}
+@keyframes fin{0%{opacity:0;transform:translateX(-10px)}9%{opacity:1;transform:none}72%{opacity:.95}100%{opacity:0}}
+@media (pointer:coarse){.tm{font-size:13px;padding:4px 10px}#toast{width:min(70vw,440px)}}
 @keyframes tin{0%{opacity:0;transform:translateY(-6px)}8%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
 
 /* ---------- Menüs ---------- */
@@ -371,7 +375,7 @@ details.stats .stat{padding:0 12px 12px}
   <div id="skills"></div>
   <div id="util"><button class="ub" id="btnPot" aria-label="Heiltrank"><span class="ic">⚱</span><b id="potN"></b><span class="key">Q</span></button><button class="ub" id="btnSprint" aria-label="Sprinten"><span class="ic">»</span><span class="key">⇧</span></button></div>
 </div>
-<div id="toast"></div>
+<div id="feed" aria-live="polite"></div><div id="toast"></div>
 <section class="screen see" id="scr" hidden></section>
 
 <script src="kuerzel.js?v=20261025b"></script>
@@ -1723,7 +1727,17 @@ function resize(){W=window.innerWidth;H=window.innerHeight;const dpr=window.devi
  let px=false;if(sharpOn()&&dpr>=1.5&&DPR<dpr*0.97){let k=2;while(dpr/k>DPR*1.12&&k<4)k++;DPR=dpr/k;px=true}
  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';cv.style.imageRendering=px?'pixelated':'';ZOOM=Math.min(1.75,Math.max(clamp(Math.min(W,H)/560,0.7,1.2),H/720))}
 window.addEventListener('resize',resize);resize();
-function toast(msg,col){const d=document.createElement('div');d.className='tm';if(msg instanceof Node)d.appendChild(msg);else d.innerHTML=msg;if(col)d.style.color=col;toastEl.appendChild(d);while(toastEl.children.length>4)toastEl.firstChild.remove();setTimeout(()=>d.remove(),2700)}
+/* Meldungen: 0 = alle in der Mitte, 1 = ruhig (Kleinkram läuft dezent am linken Rand, weniger Sprechblasen), 2 = minimal */
+const msgL=()=>SAVE.msg===undefined?1:SAVE.msg;
+const TOAST_MINOR=/▲ besser|angelegt$|Keine Puste|Heiltrank aufgefüllt|^Stufe \d+!|^\+[\d.,]+ Gold$/;
+function toast(msg,col,o){o=o||{};const txt=msg instanceof Node?msg.textContent:String(msg).replace(/<[^>]*>/g,'');
+ if(G&&G.state==='play'&&!G.paused&&(o.minor||TOAST_MINOR.test(txt))&&msgL()>=1){if(msgL()===2||o.drop)return;return feedAdd(msg,col)}
+ for(const c of toastEl.children)if(c.textContent===txt){c.style.animation='none';void c.offsetWidth;c.style.animation='';return}
+ const d=document.createElement('div');d.className='tm';if(msg instanceof Node)d.appendChild(msg);else d.innerHTML=msg;if(col)d.style.color=col;toastEl.appendChild(d);while(toastEl.children.length>(MOBIL?2:4))toastEl.firstChild.remove();setTimeout(()=>d.remove(),MOBIL?2300:2700)}
+function feedAdd(msg,col){const F=$('feed');if(!F)return;let txt=msg instanceof Node?msg.textContent:String(msg).replace(/<[^>]*>/g,'');
+ /* mehrere Aufstiege kurz hintereinander: eine Zeile */
+ if(/^Stufe \d+!/.test(txt)){const old=[...F.children].find(c=>c.dataset.lv);if(old){const n=(+old.dataset.n||1)+1;old.dataset.n=n;old.textContent=txt.replace(/!.*/,'')+` · +${n} Talentpunkte`;old.style.animation='none';void old.offsetWidth;old.style.animation='';return}}for(const c of F.children)if(c.textContent===txt){c.style.animation='none';void c.offsetWidth;c.style.animation='';return}
+ const d=document.createElement('div');d.className='fm';if(msg instanceof Node)d.appendChild(msg);else d.innerHTML=msg;if(col){d.style.color=col;d.style.borderLeftColor=col}if(/^Stufe \d+!/.test(txt))d.dataset.lv=1;F.appendChild(d);while(F.children.length>3)F.firstChild.remove();setTimeout(()=>d.remove(),2400)}
 
 /* ================= Spielstart ================= */
 function newGame(){return{state:'title',diff:0,stage:0,kills:0,score:0,traps:[],stageKills:0,need:60,time:0,stageTime:0,enemies:[],projs:[],zones:[],ezones:[],allies:[],loot:[],orbs:[],parts:[],fxs:[],nums:[],tele:[],timers:[],spawnT:0,shake:0,goldRun:0,
@@ -2941,7 +2955,7 @@ function hurtDot(a){if(P.inv>0||P.down||G.state!=='play')return;a=a*setHurtMul()
 function die(){if(pactSave())return;if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
  if(G.mp){mpDown();return}P.hp=0;endRun(false)}
-function gainXp(v){v*=shrineOn('erkenntnis')?1.5:1;ruhmXp(v);P.xp+=v;let need=xpNeed(P.level);while(P.xp>=need){if(P.level>=LEG_CAP){legXp(P.xp);P.xp=0;break}P.xp-=need;P.level++;P.sp++;recalc();heal(P.st.maxHp*0.25);ring(P.x,P.y,70,'#8fe7ff',0.6,4);levelFx();rumble(P,0.25,90);say('level',0,0.4);sfx('level');toast(`Stufe ${P.level}! Neuer Talentpunkt.`,'#8fe7ff');need=xpNeed(P.level)}}
+function gainXp(v){v*=shrineOn('erkenntnis')?1.5:1;ruhmXp(v);P.xp+=v;let need=xpNeed(P.level);while(P.xp>=need){if(P.level>=LEG_CAP){legXp(P.xp);P.xp=0;break}P.xp-=need;P.level++;P.sp++;recalc();heal(P.st.maxHp*0.25);ring(P.x,P.y,70,'#8fe7ff',0.6,4);levelFx();rumble(P,0.25,90);say('level',0,0.4);sfx('level');toast(`Stufe ${P.level}! Neuer Talentpunkt.`,'#8fe7ff',{minor:1});need=xpNeed(P.level)}}
 const xpNeed=l=>Math.round(10+l*8+Math.pow(l,1.7)*2);
 function canLearn(n){const r=rank(n.id);if(r>=n.max||P.sp<=0)return false;return prereq(n)}
 function prereq(n){if(P.level<ROWLV[n.row])return false;if(n.row>0){const prev=P.hero.tree.filter(m=>m.b===n.b&&m.row===n.row-1);if(!prev.some(m=>rank(m.id)>0))return false}return true}
@@ -2992,7 +3006,7 @@ function updPlayer(dt){
   const pm=padMove(P);if(Math.hypot(pm[0],pm[1])>Math.hypot(ix,iy)){ix=pm[0];iy=pm[1]}padActions(P);if(G.paused||G.state!=='play')return}
  const il=Math.hypot(ix,iy);if(il>1){ix/=il;iy/=il}
  if(!P.dev||P.dev==='kb'){if(keys.ShiftLeft||keys.ShiftRight){if(P.sprint||P.stam>(P.puste?35:5))P.sprint=true}else if(P.sprintKey){P.sprint=false}P.sprintKey=!!(keys.ShiftLeft||keys.ShiftRight)}
- const sprinting=P.sprint&&P.stam>0&&il>0.1&&P.rootT<=0;if(sprinting){P.stam=Math.max(0,P.stam-28*dt*(shrineOn('eile')?0:1));P.stamWait=0.8;if(P.stam<=0){P.sprint=false;if(!P.puste)toast('Keine Puste mehr!','#9fd8ff');P.puste=1}}else{if(P.puste&&P.stam>35)P.puste=0;if(P.stamWait>0)P.stamWait-=dt;else P.stam=Math.min(P.stamMax,P.stam+18*dt)}
+ const sprinting=P.sprint&&P.stam>0&&il>0.1&&P.rootT<=0;if(sprinting){P.stam=Math.max(0,P.stam-28*dt*(shrineOn('eile')?0:1));P.stamWait=0.8;if(P.stam<=0){P.sprint=false;if(!P.puste)toast('Keine Puste mehr!','#9fd8ff',{minor:1,drop:msgL()>=1});P.puste=1}}else{if(P.puste&&P.stam>35)P.puste=0;if(P.stamWait>0)P.stamWait-=dt;else P.stam=Math.min(P.stamMax,P.stam+18*dt)}
  P.sprintOn=sprinting;const chanMove=P.chan?(P.chan.move?0.75:0):1;
  P.moving=il>0.1;if(P.moving&&!P.dash){P.face=Math.atan2(iy,ix);if(Math.abs(ix)>0.2)P.flip=ix<0?-1:1}
  if(P.dash){const D=P.dash;P.x+=D.vx*dt;P.y+=D.vy*dt;D.t-=dt;if(D.amt>0)query(P.x,P.y,90,e=>{if(D.hits.has(e))return;if(d2(e,P)<(e.r+P.r+14)*(e.r+P.r+14)){D.hits.add(e);dealDmg(e,D.amt,D.o)}});if(Math.random()<0.6)burst(P.x,P.y+10,'#9a7a5a',2,60);if(D.t<=0){P.dash=null;P.x=clamp(P.x,16,WORLD-16);P.y=clamp(P.y,16,WORLD-16);if(D.onEnd)D.onEnd()}}
@@ -3016,8 +3030,8 @@ function updPlayer(dt){
  if(((P.netIn&&NET.role==='host'?P.netIn.au:SAVE.auto)||G.bot)&&P.silT<=0&&P.stunT<=0&&!P.chan){for(let i=0;i<P.actives.length;i++){const n=P.actives[i];if((P.cds[n.id]||0)>0)continue;const near=nearest(P.x,P.y,(AR[n.id]||400)*(AR[n.id]&&AR[n.id]<300?P.st.area:1));if(!near)continue;
   if(n.id==='e_bear'&&P.form==='bear')continue;if(n.id==='e_rat'&&P.form)continue;if((n.id==='b_door'||n.id==='f_leap')&&P.hp>P.st.maxHp*0.6)continue;useSkill(i);break}}
  for(const L of G.loot){if(L.taken)continue;if(d2(L,P)<38*38&&!lootBlocked(L)){if(P.bag.length>=BAGMAX){if(!L.full){L.full=1;toast('Der Beutel ist voll – verschrotte etwas.','#ff8a7a')}continue}
-  L.taken=1;delete L.it.for;setFound(L.it);const sl=L.it.slot==='ring'?(!P.eq.ring1?'ring1':!P.eq.ring2?'ring2':null):(P.eq[L.it.slot]?null:L.it.slot);if(sl){P.eq[sl]=L.it;recalc();toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span> angelegt`);sfx('equip');updateInvBadge();continue}
-  P.bag.push(L.it);const dl=itemDelta(L.it);if(L.it.rar>=2||dl>0.01)toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span>${dl>0.01?' <span class="good">▲ besser</span>':''}`);sfx(L.it.rar>=3?'legend':'item');updateInvBadge();if(G.bot)botEquip()}}
+  L.taken=1;delete L.it.for;setFound(L.it);const sl=L.it.slot==='ring'?(!P.eq.ring1?'ring1':!P.eq.ring2?'ring2':null):(P.eq[L.it.slot]?null:L.it.slot);if(sl){P.eq[sl]=L.it;recalc();toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span> angelegt`,null,{minor:1});sfx('equip');updateInvBadge();continue}
+  P.bag.push(L.it);const dl=itemDelta(L.it);if(L.it.rar>=2||dl>0.01)toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span>${dl>0.01?' <span class="good">▲ besser</span>':''}`,null,{minor:1,drop:L.it.rar<3&&dl<=0.01});sfx(L.it.rar>=3?'legend':'item');updateInvBadge();if(G.bot)botEquip()}}
  G.loot=G.loot.filter(L=>!L.taken);
  if(G.portal&&d2(G.portal,P)<(G.portal.boat?60:46)**2)enterPortal();
 }
@@ -3600,7 +3614,7 @@ function bossIntroFx(b,def){later(1.2,()=>say('boss',1));const S=STAGES[G.stage]
  G.fxs.push({k:'pillar',x:b.x,y:b.y+b.r,w:b.r*5,h:560,c:'#ff4a3a',t:0,life:1.3});G.fxs.push({k:'shock',x:b.x,y:b.y,r:280,c:'#ff4a3a',t:0,life:0.8});light(b.x,b.y,520,'#ff4a3a',1.5,1);chunks(b.x,b.y,'#3a2a22',12,280);decal(b.x,b.y+b.r*0.6,'crack',null,b.r*3)}
 function guardIntroFx(e,def){later(1,()=>say('guard',1,0.7));musAk('waechter');banner(def.n,'Wächter','#ff9a7a',{dur:2.3,size:44});G.fxs.push({k:'pillar',x:e.x,y:e.y+e.r,w:e.r*4,h:380,c:'#ff7a4a',t:0,life:1});G.fxs.push({k:'shock',x:e.x,y:e.y,r:180,c:'#ff7a4a',t:0,life:0.6});light(e.x,e.y,360,'#ff7a4a',1,1)}
 function packFx(x,y,rare){const col=rare?'#f2d24c':'#62a8ff';G.fxs.push({k:'pillar',x,y:y+10,w:rare?70:50,h:300,c:col,t:0,life:0.9});G.fxs.push({k:'shock',x,y,r:120,c:col,t:0,life:0.5});light(x,y,260,col,0.9,1);sfxAt('elite',x,y)}
-function levelFx(){if((G.lvFxT||-9)>G.time-0.4){banner('Stufe '+P.level,'Neue Talentpunkte','#8fe7ff',{dur:1.8,size:42,y:H*0.3});return}G.lvFxT=G.time;G.fxs.push({k:'pillar',x:P.x,y:P.y+14,w:70,h:360,c:'#8fe7ff',t:0,life:1.1});G.fxs.push({k:'shock',x:P.x,y:P.y,r:160,c:'#8fe7ff',t:0,life:0.6});embers(P.x,P.y,'#bff4ff',14,30);sparks(P.x,P.y,'#8fe7ff',18,460,1);light(P.x,P.y,340,'#8fe7ff',1,1);banner('Stufe '+P.level,'Neuer Talentpunkt','#8fe7ff',{dur:1.8,size:42,y:H*0.3})}
+function levelFx(){if((G.lvFxT||-9)>G.time-0.4){if(msgL()===0)banner('Stufe '+P.level,'Neue Talentpunkte','#8fe7ff',{dur:1.8,size:42,y:H*0.3});return}G.lvFxT=G.time;G.fxs.push({k:'pillar',x:P.x,y:P.y+14,w:70,h:360,c:'#8fe7ff',t:0,life:1.1});G.fxs.push({k:'shock',x:P.x,y:P.y,r:160,c:'#8fe7ff',t:0,life:0.6});embers(P.x,P.y,'#bff4ff',14,30);sparks(P.x,P.y,'#8fe7ff',18,460,1);light(P.x,P.y,340,'#8fe7ff',1,1);if(msgL()===0)banner('Stufe '+P.level,'Neuer Talentpunkt','#8fe7ff',{dur:1.8,size:42,y:H*0.3})}
 function ultFx(){const c=HCOL[P.id]||'#e5b454';sflash(c,0.3,0.35);zpunch(0.07);slowmo(0.25,0.35);G.fxs.push({k:'shock',x:P.x,y:P.y,r:270,c,t:0,life:0.55});G.fxs.push({k:'pillar',x:P.x,y:P.y+14,w:90,h:440,c,t:0,life:0.7});light(P.x,P.y,440,c,0.8,1);sparks(P.x,P.y,c,26,620,1);sfx('ult')}
 function hurtFx(a){sparks(P.x,P.y-6,'#ff4a4a',4,220);if(a>P.st.maxHp*0.12){sflash('#ff1a1a',0.26,0.3);hitstop(0.05);zpunch(0.03)}}
 function potionFx(){G.fxs.push({k:'pillar',x:P.x,y:P.y+14,w:50,h:160,c:'#ff6a7a',t:0,life:0.6});embers(P.x,P.y,'#ff8a9a',10,18);light(P.x,P.y,200,'#ff6a7a',0.5,0.8)}
@@ -4080,6 +4094,7 @@ function renderPause(keep){showScreen(`<div class="wrap narrow">
   <div class="spread"><h2>Pause</h2><button class="btn" data-act="close">Weiter</button></div>${rollePauseHtml()}
   <div class="card ups">
    <div class="up"><div><div class="t">Fähigkeiten automatisch wirken</div><div class="d">Praktisch auf dem Handy: Fähigkeiten feuern von selbst, sobald Gegner in Reichweite sind.</div></div><button class="btn ${SAVE.auto?'gold':''}" data-act="auto">${SAVE.auto?'An':'Aus'}</button></div>
+   <div class="up"><div><div class="t">Meldungen im Bild</div><div class="d">${['Alles in der Bildmitte, wie früher.','Wichtiges in der Mitte, Beute und Aufstiege klein am linken Rand, seltener Sprechblasen.','Nur Wichtiges: Wächter, Bosse, Warnungen und Geschichte.'][msgL()]}</div></div><div class="row" style="flex-wrap:nowrap">${['Alle','Ruhig','Minimal'].map((n,i)=>`<button class="btn small ${msgL()===i?'gold':''}" data-act="msg" data-v="${i}">${n}</button>`).join('')}</div></div>
    <div class="up"><div><div class="t">Heiltrank automatisch</div><div class="d">Trinkt von selbst, wenn das Leben unter 30 % fällt.</div></div><button class="btn ${SAVE.autoPot?'gold':''}" data-act="autopot">${SAVE.autoPot?'An':'Aus'}</button></div>
    ${TOUCHDEV?touchRows():''}
    <div class="up"><div><div class="t">Mit der Maus zielen (PC)</div><div class="d">Normale Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger. Linke Maustaste gedrückt halten feuert auch ohne Gegner.</div></div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div>
@@ -4204,6 +4219,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'open-pause':openOverlay('pause');break;
   case'close':if(G.lagerOn&&G.state==='title'){G.lagerOn=0;G.lagerSel=null;showTitle();break}if(G.state==='camp'){campDone();break}if(G.state==='between'){if(G.mp&&PL[0])P=PL[0];G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay();break;
   case'auto':SAVE.auto=!SAVE.auto;persist();renderPause(true);break;
+  case'msg':SAVE.msg=+b.dataset.v;persist();renderPause(true);break;
   case'autopot':SAVE.autoPot=!SAVE.autoPot;persist();renderPause(true);break;
   case'vib':SAVE.vib=SAVE.vib===false;persist();if(SAVE.vib)vib(40);renderPause(true);break;
   case'tb-arc':tbS().arc=tbS().arc?0:1;persist();tbApply();renderPause(true);break;
@@ -6584,7 +6600,7 @@ function banBub(id,txt,delay){const B=G.bubs||(G.bubs=[]);B.push({who:id,txt,t:-
 function banPlay(lines){if(G.bubs)for(const b of G.bubs)if(b.t>=0)b.t=Math.max(b.t,b.dur-0.35);let d=0;for(const[id,txt]of lines){banBub(id,txt,d);d+=2.3}G.banLast=G.time;G.banUntil=G.time+d+0.4;G.sayCd=Math.max(G.sayCd||0,G.banUntil)}
 /* lvl 0 = nebenbei, 1 = wichtig, 2 = großer Moment */
 function banOk(lvl){if(G.bot||!P||G.state!=='play'||G.paused||SAVE.banter===false||NET.role==='guest')return false;if(G.banUntil&&G.time<G.banUntil)return false;
- const gap=lvl>=2?6:lvl===1?16:28+((G.banJit=(G.banJit||Math.random()*12)));if(G.time-(G.banLast==null?-99:G.banLast)<gap)return false;if(!lvl&&banBusy())return false;return true}
+ if(msgL()===2&&lvl<2)return false;const gap=(lvl>=2?6:lvl===1?16:28+((G.banJit=(G.banJit||Math.random()*12))))*(msgL()===1&&lvl<2?1.6:1);if(G.time-(G.banLast==null?-99:G.banLast)<gap)return false;if(!lvl&&banBusy())return false;return true}
 function banter(k,lvl){if(!banOk(lvl||0))return false;const ids=banParty().map(q=>q.id);if(!ids.length)return false;G.banJit=0;
  if(ids.length===1){if(Math.random()>(lvl>=2?0.3:0.15)||(G.bubs||[]).some(b=>b.t<b.dur))return false;const key=k.startsWith('boss_')?'boss':k,L=(BAN_SOLO[key]||[]).map(banParse).filter(x=>x[0][0]===ids[0]);if(!L.length)return false;banPlay(pick(L));return true}
  const pool=(BANTER[k]||[]).map(banParse),ok=[];pool.forEach((x,i)=>{if(x.every(l=>ids.includes(l[0])))ok.push(i)});if(!ok.length)return false;
@@ -6609,8 +6625,8 @@ function bubsTick(dt){const B=G.bubs;if(!B||!B.length)return;for(const b of B)b.
 {const f=enterSecret;enterSecret=function(){const was=G.room;const r=f.apply(this,arguments);if(!was&&G.room)later(2.3,()=>banter('geheim',1));return r}}
 {const f=useShrine;useShrine=function(){const r=f.apply(this,arguments);later(1.6,()=>banter('segen',0));return r}}
 {const f=addMod;addMod=function(k,v,good){const r=f.apply(this,arguments);if(G.state==='play'&&!G.bot)later(1.2,()=>banter(good?'segen':'fluch',1));return r}}
-function say(kind,force,prob){if(G.bot||!P||G.state!=='play')return;if(G.banUntil&&G.time<G.banUntil)return;if(prob!==undefined&&Math.random()>prob)return;if(!force&&G.time<(G.sayCd||0))return;const L=SAY[P.id]&&SAY[P.id][kind];if(!L)return;
- banBub(P.id,pick(L),0);G.sayCd=G.time+(force?4:7)}
+function say(kind,force,prob){if(G.bot||!P||G.state!=='play')return;if(G.banUntil&&G.time<G.banUntil)return;if(prob!==undefined&&Math.random()>prob)return;if(!force&&G.time<(G.sayCd||0))return;if(msgL()===2&&!force)return;const L=SAY[P.id]&&SAY[P.id][kind];if(!L)return;
+ banBub(P.id,pick(L),0);G.sayCd=G.time+(force?4:7)*(msgL()?1.8:1)}
 function bubbleTick(dt){bubsTick(dt);try{banTick(dt)}catch(e){}if(G.bub){G.bub.t+=dt;if(G.bub.t>G.bub.dur)G.bub=null}if(G.rexBub){G.rexBub.t+=dt;if(G.rexBub.t>1.4)G.rexBub=null}
  if(P.hp<P.st.maxHp*0.3&&G.time>(G.lowSay||0)){G.lowSay=G.time+25;say('low',1)}
  if(P.id==='friedrich'&&!G.rexBub&&Math.random()<dt*0.035)G.rexBub={t:0,txt:pick(['Wuff!','Wuff wuff!','Grrr!','*hechel*'])}}
