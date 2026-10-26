@@ -123,6 +123,7 @@
         floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn", klarinette: "Klarinette", oboe: "Oboe" },
         ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch" }
       },
+      alleSpuren: "Alle", schritte: "Schritte",
       teil: "Teil bearbeiten", ablauf: "Ablauf", rolleVon: p => "Rolle von " + p, pattern: "Pattern", kette: "Kette",
       modusTitel: "Art zu komponieren", modusPattern: "▦ 4 Pattern", modusLied: "▤ Ganzes Lied",
       modusPatternTipp: "Wie an einer Groovebox: vier Takte A–D, die du zu einer Kette verbindest.",
@@ -205,6 +206,7 @@
         floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn", klarinette: "Clarinet", oboe: "Oboe" },
         ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table" }
       },
+      alleSpuren: "All", schritte: "Steps",
       teil: "Edit part", ablauf: "Order", rolleVon: p => "Role of " + p, pattern: "Pattern", kette: "Chain",
       modusTitel: "How to compose", modusPattern: "▦ 4 patterns", modusLied: "▤ Full song",
       modusPatternTipp: "Like a groovebox: four bars A–D that you link into a chain.",
@@ -4309,6 +4311,7 @@
       const ev = anzeige.shift(), sp = ev.spuren;
       teilAnzeige(ev.teil);
       spalte(ev.teil === bearbeite ? ev.schritt : -1);
+      haelfteAnzeige(ev.teil === bearbeite ? ev.schritt : -1);
       if (ev.schritt % 4 === 0) publikumSchlag();
       ["klopf", "schelle", "bass", "melodie", "trommel", "floete", "ketten", "rex"].forEach(k => { if (k in sp) spurZeigen(k, sp[k]); });
     }
@@ -5073,7 +5076,8 @@
   function rasterZeile(spur, zeile, beschriftung, klasse) {
     const daten = S.teile[bearbeite][spur];
     let html = '<div class="lw-name ' + (klasse || "") + '">' + beschriftung + "</div>";
-    for (let i = 0; i < taktL(); i++) { /* Dreivierteltakt: nur 12 Spalten – die übrigen würden nie erklingen */
+    const [von, bis] = rasterFenster();
+    for (let i = von; i < bis; i++) { /* Dreivierteltakt: nur 12 Spalten – die übrigen würden nie erklingen */
       const istAn = SPUR[spur].art === "an" ? daten[i] >= 0 : daten[i] === zeile;
       html += '<button type="button" class="lw-zelle s-' + spur + (S.mute[spur] ? " stumm" : "") + (i % 4 === 0 ? " takt" : "") + (istAn ? " an" : "") +
         '" data-spur="' + spur + '" data-zeile="' + zeile + '" data-s="' + i + '" aria-pressed="' + istAn + '"></button>';
@@ -5383,7 +5387,12 @@
     if (st === "fehler" && hoerer.verbunden) { hoerer.verbunden = false; zeichnen(); }
   });
 
-  function zeichnen() { zeichnenInnen(); armeSetzen(); klassikKnoepfe(); }
+  function zeichnen() { root.classList.toggle("lw-pultmodus", !!S.pult && !hoerer); zeichnenInnen(); armeSetzen(); klassikKnoepfe(); }
+  /* Handy gedreht oder Fenster schmaler/breiter: Raster und Aufteilung passen sich an */
+  try {
+    const mq = window.matchMedia("(max-width: 760px)"), neu = () => { try { zeichnen(); knoepfe(); } catch (_) {} };
+    if (mq.addEventListener) mq.addEventListener("change", neu); else if (mq.addListener) mq.addListener(neu);
+  } catch (_) {}
   function zeichnenInnen() {
     const T = t();
     if (hoerer) { hoererZeichnen(T); return; }
@@ -5406,6 +5415,7 @@
     };
     let raster = "";
     SPUREN.forEach(sp => {
+      if (schmal() && spurWahl !== "alle" && sp.wer !== spurWahl) return;
       raster += kopf(sp.id);
       if (zugeklappt[sp.id]) return;
       if (sp.art === "an") raster += rasterZeile(sp.id, 0, (SYMBOL[sp.id] && SYMBOL[sp.id][S.band[sp.id]]) || sp.sym, "sym");
@@ -5493,8 +5503,27 @@
         teile.map(p => '<button type="button" class="lw-teil' + (lied ? " r-" + rolleVon(S, p) : "") + (teilBenutzt(p) || S.ablauf.includes(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '"' + (lied ? ' title="' + esc(T.rollen[rolleVon(S, p)]) + '"' : "") + ">" + p + "</button>").join("") + "</span></span>" +
         mitte +
       "</div>" +
-      '<div class="lw-scroll"><div class="lw-raster' + (taktL() === 12 ? " drei" : "") + '">' + raster + "</div></div>";
+      rasterWahl(T) +
+      '<div class="lw-scroll"><div class="lw-raster' + (taktL() === 12 ? " drei" : "") + (schmal() ? " halb" : "") + '">' + raster + "</div></div>";
   }
+  /* ---------- Am Handy: Raster wie an einer Groovebox ----------
+     Ein halber Takt pro Bildschirm (Schritte 1–8 | 9–16) mit großen Feldern statt seitlich zu scrollen,
+     und immer nur ein Gefährte – oben wählt man, wessen Spuren man sieht. */
+  const schmal = () => !!(window.matchMedia && window.matchMedia("(max-width: 760px)").matches);
+  let rasterHaelfte = 0, spurWahl = "barradin";
+  try { const w = localStorage.getItem("imres-lw-spurwahl"); if (w) spurWahl = w; } catch (_) {}
+  const WER_LISTE = ["barradin", "friedrich", "echo", "ezekiel", "rex"];
+  function rasterFenster() { const L = taktL(); if (!schmal()) return [0, L]; const h = L / 2; return [rasterHaelfte * h, rasterHaelfte * h + h]; }
+  function rasterWahl(T) {
+    if (!schmal()) return "";
+    const h = taktL() / 2;
+    return '<div class="lw-rasterwahl"><div class="lw-wer" role="tablist">' +
+      WER_LISTE.concat(["alle"]).map(w => '<button type="button" role="tab" data-werwahl="' + w + '" aria-selected="' + (spurWahl === w) + '">' + (w === "alle" ? T.alleSpuren : T.wer[w]) + "</button>").join("") + "</div>" +
+      '<div class="lw-haelfte" role="group" aria-label="' + esc(T.schritte) + '">' +
+      [0, 1].map(k => '<button type="button" data-haelfte="' + k + '" aria-pressed="' + (rasterHaelfte === k) + '">' + (k * h + 1) + "–" + (k * h + h) + "</button>").join("") + "</div></div>";
+  }
+  /* welche Hälfte gerade erklingt: ein Punkt auf ihrem Knopf */
+  function haelfteAnzeige(i) { if (!schmal()) return; const h = taktL() / 2; root.querySelectorAll("[data-haelfte]").forEach(b => b.classList.toggle("spielt", i >= 0 && Math.floor(i / h) === +b.dataset.haelfte)); }
   /* ---------- Mini-Player oben: erscheint, wenn die Musik läuft und das Lautenwerk nicht zu sehen ist ---------- */
   let mini = null, lautenwerkSichtbar = true;
   function miniBauen() {
@@ -5712,6 +5741,10 @@
       }
       return;
     }
+    const ww = e.target.closest("[data-werwahl]");
+    if (ww) { spurWahl = ww.dataset.werwahl; try { localStorage.setItem("imres-lw-spurwahl", spurWahl); } catch (_) {} zeichnen(); knoepfe(); return; }
+    const hb = e.target.closest("[data-haelfte]");
+    if (hb) { rasterHaelfte = +hb.dataset.haelfte ? 1 : 0; zeichnen(); knoepfe(); return; }
     const md = e.target.closest("[data-modus]");
     if (md) { editModus = md.dataset.modus === "lied" ? "lied" : "pattern"; try { localStorage.setItem("imres-lw-modus", editModus); } catch (_) {} kopierZiel = null; zeichnen(); knoepfe(); return; }
     if (e.target.closest('[data-aktion="zupattern"]')) { zuPattern(); zeichnen(); knoepfe(); status(t().umgewandelt); return; }
@@ -6200,6 +6233,27 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 .lw-scroll { overflow-x: auto; margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); padding-inline: clamp(1.2rem, 4vw, 2rem); -webkit-overflow-scrolling: touch; }
 .lw-raster { display: grid; grid-template-columns: 3.4rem repeat(16, minmax(1.75rem, 1fr)); gap: 3px; min-width: 36rem; }
 .lw-raster.drei { grid-template-columns: 3.4rem repeat(12, minmax(1.75rem, 1fr)); min-width: 28rem; }
+.lw-raster.halb { grid-template-columns: 3rem repeat(8, minmax(0, 1fr)); min-width: 0; gap: 5px; }
+.lw-raster.drei.halb { grid-template-columns: 3rem repeat(6, minmax(0, 1fr)); }
+.lw-raster.halb .lw-zelle { height: 2.6rem; border-radius: 6px; }
+.lw-raster.halb ~ .lw-wisch, .lw-scroll:has(.lw-raster.halb) + .lw-wisch { display: none !important; }
+.lw-rasterwahl { display: grid; gap: .5rem; margin: .4rem 0 .6rem; }
+.lw-wer { display: flex; gap: .3rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.lw-wer::-webkit-scrollbar { display: none; }
+.lw-wer button, .lw-haelfte button { flex: 0 0 auto; font: inherit; font-size: .88rem; padding: .5rem .8rem; border: 1px solid var(--line); background: none; color: var(--vellum); border-radius: 999px; cursor: pointer; }
+.lw-wer button[aria-selected="true"], .lw-haelfte button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
+.lw-haelfte { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+.lw-haelfte button { position: relative; font-family: var(--display); font-size: 1.05rem; padding: .55rem; border-radius: 8px; }
+.lw-haelfte button.spielt::after { content: ""; position: absolute; top: 6px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: #7fd36b; box-shadow: 0 0 6px #7fd36b; }
+/* Querformat am Handy: Bühne links (bleibt stehen), Pult rechts */
+@media (orientation: landscape) and (max-height: 540px) {
+  #lautenwerk.lw-pultmodus { display: grid; grid-template-columns: minmax(0, 44%) minmax(0, 1fr); column-gap: 1rem; align-items: start; }
+  #lautenwerk.lw-pultmodus > * { grid-column: 2; min-width: 0; }
+  #lautenwerk.lw-pultmodus > .lw-buehne { grid-column: 1; grid-row: 1 / span 40; position: sticky; top: 4rem; height: min(62vh, 260px); margin-inline: 0; width: auto; }
+  #lautenwerk.lw-pultmodus .lw-pult-gitter { grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr)); }
+  #lautenwerk.lw-pultmodus .lw-konsole { grid-template-columns: 1fr; }
+  #lautenwerk.lw-pultmodus .lw-pult-kopf { flex-wrap: wrap; }
+}
 .lw-kopf { grid-column: 1 / -1; margin-top: .8rem; }
 .lw-kopf:first-child { margin-top: 0; }
 .lw-kopf-in { position: sticky; left: 0; display: inline-flex; align-items: center; flex-wrap: wrap; gap: .4rem .55rem; max-width: calc(100vw - 2.5rem); }
