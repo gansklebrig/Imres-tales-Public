@@ -1063,6 +1063,25 @@
         return { bass, mel, fl: echo(bass, mel, st.echo) };
       });
     }
+    /* Gegenstimme für die Kapelle: lange Akkordtöne unter der Melodie, in Gegenbewegung zu ihr;
+       wo die Melodie Luft lässt, füllt sie mit einem Zwischenton – so antworten sich Barradin und die Kapelle */
+    function gegenstimme(bass, mel) {
+      const a = leer(), schlaege = L === 12 ? (jig ? [0, 6] : [0, 4, 8]) : [0, 4, 8, 12], halb = L === 12 ? (jig ? 6 : 4) : 4;
+      let vor = null, melVor = null;
+      const melBei = i => { for (let k = i; k >= 0; k--) if (mel[k] >= 0) return mel[k]; return cr; };
+      schlaege.forEach((pp, k) => {
+        const stark = k === 0 || pp === cfg.mitte, ruht = mel.slice(pp, pp + halb).every(v => v < 0);
+        if (!stark && !ruht) return;
+        const m = melBei(pp), trend = melVor == null ? 0 : Math.sign(m - melVor); melVor = m;
+        const toene = akkordToene(klingt(bass, pp)), lo = Math.max(0, m - 9), hi = Math.max(lo + 2, m - 3);
+        const ziel = vor == null ? m - 5 : vor - (trend || (Math.random() < .5 ? 1 : -1));
+        let best = null;
+        for (let t = lo; t <= hi; t++) if (toene.includes(((t % 7) + 7) % 7) && (best === null || Math.abs(t - ziel) < Math.abs(best - ziel) || (t !== vor && best === vor))) best = t;
+        if (best == null) return;
+        a[pp] = best; vor = best;
+      });
+      return a;
+    }
     function refrain(n) {
       let haken = null;
       return Array.from({ length: n }, (_, k) => {
@@ -1075,7 +1094,7 @@
           if (!haken || String(ch) !== String(refrainAkk[0])) haken = schmuecken(setzeTakt(bass, mH, cr, loR, hiR, null), bass, "frage");
           mel = haken.slice();
         }
-        return { bass, mel, fl: echo(bass, mel, ruhig ? "lang" : "antwort") };
+        return { bass, mel, fl: echo(bass, mel, ruhig ? "lang" : "antwort"), gegen: gegenstimme(bass, mel) };
       });
     }
     function hoehe(n, ref) {
@@ -1083,7 +1102,7 @@
         const b = ref[k % ref.length], ch = refrainAkk[k % refrainAkk.length];
         const bass = b ? b.bass.slice() : bassVon(ch, artR);
         const mel = k === n - 1 ? schmuecken(kadenzTakt(bass, mH, cr, loR, hiH, "zu", spitze), bass, "antwort") : b.mel.slice();
-        return { bass, mel, fl: st.terzen ? terzFl(bass, mel) : echo(bass, mel, "lang"), rex: k === n - 1 };
+        return { bass, mel, fl: st.terzen ? terzFl(bass, mel) : echo(bass, mel, "lang"), rex: k === n - 1, gegen: k === n - 1 || !b.gegen ? gegenstimme(bass, mel) : b.gegen.slice() };
       });
     }
     function aufbauTakt() {
@@ -1131,6 +1150,7 @@
       a.teile.forEach((p, k) => {
         const x = takte[k], t = teilLeer();
         t.bass = x.bass; t.melodie = x.mel.map(v => v < 0 ? -1 : Math.max(0, Math.min(14, Math.round(v)))); t.floete = x.fl.map(v => v < 0 ? -1 : Math.max(0, Math.min(7, Math.round(v))));
+        if (x.gegen) t.gegen = x.gegen.map(v => v < 0 ? -1 : Math.max(0, Math.min(14, Math.round(v))));
         schlagwerk(t, a.rolle);
         if ((a.rolle === "r" || a.rolle === "h") && k === n - 1 && st.rex.length && Math.random() < .5) t.rex[L - 1] = zufall(st.rex);
         teile[p] = t;
@@ -1149,6 +1169,7 @@
     /* ein ganzes Lied: die Form bleibt beim Weiterkomponieren gleich (die Band ist mitten im Stück), ein neues Thema darf eine neue Form bringen */
     const form = behalten && !neueForm && S.rollen && S.stimmung === k ? { rollen: S.rollen, ablauf: S.ablauf } : formBauen(roh);
     let teile;
+    basis.arrSeed = behalten && !neueForm && S.stimmung === k && typeof S.arrSeed === "number" ? S.arrSeed : (Math.random() < .5 ? 0 : 1);
     basis.kapWahl = behalten && !neueForm && S.stimmung === k && Array.isArray(S.kapWahl) && S.kapWahl.length ? S.kapWahl.slice() : kapelleWaehlen(k);
     try { teile = liedTeile(st, basis.modus, form.rollen, basis.takt); basis.ablauf = form.ablauf; basis.rollen = form.rollen; }
     catch (_) { teile = stimmungTeile(st, basis.modus); if (!/^[ABCD]+$/.test(basis.ablauf)) basis.ablauf = zufall(roh.ablauf); delete basis.rollen; }
@@ -2681,7 +2702,7 @@
   }
 
   /* ---------- Taktgeber ---------- */
-  let pausiert = false;
+  let pausiert = false, kapJetzt = null;
   let laeuft = false, schritt = 0, abschnitt = 0, naechste = 0, timer = null;
   const anzeige = [];
   let durchgang = 0, ausduennen = false, einblend = 0;
@@ -2780,7 +2801,7 @@
       if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && wechsel && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
       else if (schritt === 0 && intensitaetNeu) { intensitaetNeu = false; stimmungWeiter(); }
-      if (schritt === 0) teilPlanen(abschnitt % S.ablauf.length);
+      if (schritt === 0) { teilPlanen(abschnitt % S.ablauf.length); try { kapJetzt = S.stimmung && S.kapelle !== 0 ? kapPlan(abschnitt % S.ablauf.length) : null; } catch (_) { kapJetzt = null; } }
       const zielTempo = ausduennen && wechsel ? wechsel.tempo : S.tempo;
       tempoJetzt = tempoJetzt ? tempoJetzt + (zielTempo - tempoJetzt) * (ausduennen || einblend ? .05 : .1) : S.tempo;
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
@@ -2790,7 +2811,8 @@
       const ein = einblend > 0 ? 1 - einblend / EINBLEND : 1;
       IDS.forEach(k => {
         if (S.mute[k]) return;
-        if (k === "floete" && gastSolist(abschnitt % S.ablauf.length)) return; /* im Zwischenteil (alte Lieder: C-Teil) spielt der Gast Echos Stimme als Solo */
+        if (k === "floete" && gastSolist(abschnitt % S.ablauf.length)) return;
+        if (k === "floete" && kapJetzt && kapJetzt.echo === 0) return; /* die Kapelle spielt hier Solo bzw. den Ohrwurm */ /* im Zwischenteil (alte Lieder: C-Teil) spielt der Gast Echos Stimme als Solo */
         /* weicher Übergang: vorher fällt das Schlagwerk weg, danach kommt es erst im zweiten Takt wieder dazu */
         if (SCHLAGWERK[k] && (ausduennen || (einblend > EINBLEND / 2))) return;
         let wert = variiert(k, daten[k][schritt], schritt, daten[k], v, letzterTakt);
@@ -2808,7 +2830,7 @@
         const wackel = v ? (Math.random() - .5) * .012 * v : 0;
         /* Betonung wie bei echten Spielleuten: die Eins trägt, Achtel dazwischen leichter, Sechzehntel am leisesten */
         const akzent = S.stimmung && !SCHLAGWERK[k] ? (schritt % 8 === 0 ? 1.1 : schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .88 : .78) : 1;
-        const laut = akzent * (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : .45 + .55 * ein) : 1) * (k === "floete" && gastJetzt.length ? .6 : 1);
+        const laut = (k === "floete" && kapJetzt ? kapJetzt.echo : 1) * akzent * (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : .45 + .55 * ein) : 1) * (k === "floete" && gastJetzt.length ? .6 : 1);
         const haelt = k === "floete" || (k === "melodie" && (GEHALTEN[S.instrument] || S.instrument === "mandoline"));
         spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(daten[k], schritt) * schrittDauer() * .95 : 0);
         if (k === "bass") bordunStimmen(wert, ev.zeit);
@@ -2853,7 +2875,7 @@
   function stimmungWeiter(neuesThema) {
     if (!S.stimmung || !STIL[S.stimmung]) return;
     const neu = stimmungLied(S.stimmung, true, undefined, neuesThema);
-    S.teile = neu.teile; S.ablauf = neu.ablauf; if (neu.rollen) S.rollen = neu.rollen; else delete S.rollen; S.kapWahl = neu.kapWahl; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
+    S.teile = neu.teile; S.ablauf = neu.ablauf; if (neu.rollen) S.rollen = neu.rollen; else delete S.rollen; S.kapWahl = neu.kapWahl; S.arrSeed = neu.arrSeed; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
     /* mit dem neuen Thema greifen Barradin und Echo manchmal zu einem anderen Instrument – außer man hat sie selbst gewählt */
     if (neuesThema && !S.festBesetzung) {
       const st = STIL[S.stimmung], anders = (liste, jetzt) => { const r = liste.filter(x => x !== jetzt); return r.length ? zufall(r) : jetzt; };
@@ -4556,6 +4578,7 @@
   /* Der Zwischenteil (bei alten Liedern der C-Teil) gehört einem Gast: er spielt dort Echos Stimme als Solo. Wer dran ist, wechselt mit jedem neuen Thema. */
   function gastSolist(ab) {
     if (!S.stimmung || (S.rollen ? rolleAn(ab) !== "b" : S.ablauf[ab] !== "C")) return null;
+    try { const kp = S.kapelle !== 0 && kapPlan(ab); if (kp && kp.solo) return null; } catch (_) {}
     const k = gastKandidaten(); if (!k.length) return null;
     const eigen = k.filter(g => g.stimmungen.includes(S.stimmung)), pool = eigen.length ? eigen : k;
     const tl = S.teile[S.ablauf[ab]], f = (tl && tl.floete) || [], h = f.reduce((a, v, i) => a + (v + 2) * (i + 3), 0);
@@ -4776,9 +4799,64 @@
       else if (x.ende && schritt >= x.L - 4) kapTon(p, 48, z, .6, .45 + .12 * (schritt - x.L + 4), x.int);
       else if (x.rolle === "h" && schritt === x.L - 4) kapTon(p, 42, z, 1, .7, x.int);
     },
+    /* die eigene Gegenstimme aus dem Liedschreiber (lange Töne, Gegenbewegung) */
+    gegen(p, z, sd, ak, x, d) {
+      const g = d.gegen; if (!g) return; const v = g[schritt]; if (v < 0) return;
+      let n = 1; while (schritt + n < x.L && g[schritt + n] < 0) n++;
+      kapTon(p, tonMidi("melodie", v, S) + p.lage, z, n * sd * .96, .85, x.int);
+    },
+    /* das Solo im Zwischenteil: Echos Linie, gespielt vom Kapellenmusiker */
+    solo(p, z, sd, ak, x, d) { const v = d.floete[schritt]; if (v < 0) return; kapTon(p, tonMidi("floete", v, S) - 12 + p.lage, z, notenLaenge(d.floete, schritt) * sd * .95, 1.25, Math.max(x.int, .6)); },
+    /* im Vorspiel: der Ohrwurm des Refrains, schon einmal angedeutet */
+    haken(p, z, sd, ak, x) {
+      let r = null; for (let i = 0; i < S.ablauf.length; i++) if (rolleAn(i) === "r") { r = S.teile[S.ablauf[i]]; break; }
+      if (!r) return; const v = r.melodie[schritt]; if (v < 0 || schritt >= x.mitte + (x.L === 12 ? 0 : 4)) return;
+      kapTon(p, tonMidi("melodie", v, S) + p.lage, z, notenLaenge(r.melodie, schritt) * sd * .95, 1, Math.max(x.int, .6));
+    },
     /* lang gehaltener Akkord bei jedem Akkordwechsel */
     halte(p, z, sd, ak, x) { if (!x.wechselt) return; const d = x.n * sd + .3; [ak.terz, ak.quinte].forEach((m, i) => kapTon(p, m + p.lage, z, d, i ? .66 : .82, x.int)); }
   };
+  /* ---------- Der Arrangeur: wer aus der Kapelle wann was spielt ----------
+     Über das Lied baut sich die Kapelle auf: in der ersten Strophe nur ein Musiker, ab der zweiten antwortet einer Barradin
+     (Ruf und Antwort), im Refrain spielen alle und ein Melodie-Instrument hat seine eigene Gegenstimme, ab dem zweiten Refrain
+     verdoppelt der Bläsersatz den Ohrwurm. Im Zwischenteil bekommt abwechselnd ein Kapellenmusiker oder Echo bzw. ein Gast das Solo.
+     Das Vorspiel deutet ein Kapellenmusiker mit dem Ohrwurm an. Spielt die Kapelle eine eigene Stimme, nimmt sich Echo zurück. */
+  const KAP_MELODISCH = ["bfl", "pfeife", "shaku", "eh", "bra", "pic", "sitar", "akk", "hack", "xyl", "mar", "cemb", "cel", "kal", "spiel"];
+  const KAP_RHYTHMUS = ["puls", "ostinato", "umpa", "stoss"];
+  function vorkommen(ab) { const r = rolleAn(ab); let n = -1; for (let i = 0; i <= ab; i++) if (rolleAn(i) === r && abschnittAnfang(i)) n++; return Math.max(0, n); }
+  const abschnittEnde = ab => { const L = S.ablauf.length, nx = ab + 1; return nx >= L || abschnittAnfang(nx); };
+  let kapPlanMerk = null;
+  function kapPlan(ab) {
+    const sp = kapSpieler(); if (!sp.length) return null;
+    const key = [ab, S.ablauf, S.kapWahl.join(), S.intensitaet, durchgang, S.rollen || ""].join("|");
+    if (kapPlanMerk && kapPlanMerk.key === key) return kapPlanMerk.plan;
+    const r = rolleAn(ab), n = vorkommen(ab), tl = S.teile[S.ablauf[ab]] || {};
+    /* die eigene Stimme bekommt ein Melodie-Instrument, das nicht gerade den Rhythmus trägt (Akkordeon-Umpa bleibt Umpa) */
+    const mel = sp.map((_, i) => i).filter(i => KAP_MELODISCH.includes(sp[i].inst))
+      .sort((a, b) => (KAP_RHYTHMUS.includes(sp[a].weise) - KAP_RHYTHMUS.includes(sp[b].weise)) || (KAP_MELODISCH.indexOf(sp[a].inst) - KAP_MELODISCH.indexOf(sp[b].inst)));
+    const m = mel.length ? mel[0] : -1, bl = sp.findIndex(p => p.inst === "blech");
+    const gegenDa = !!(tl.gegen && tl.gegen.some(v => v >= 0));
+    let w = sp.map(p => p.ab.includes(r) ? p.weise : null), echo = 1, solo = false;
+    if (!S.rollen) return (kapPlanMerk = { key, plan: { w, echo, solo } }).plan;   /* alte Lieder: wie bisher */
+    if (r === "i") { w = w.map(() => null); if (m >= 0 && abschnittEnde(ab)) { w[m] = "haken"; echo = 0; } }
+    else if (r === "s") {
+      if (n === 0) { const erst = w.findIndex(x => x); w = w.map((x, i) => i === (erst >= 0 ? erst : 0) ? (x || sp[i].weise) : null); }
+      else if (m >= 0 && (!w[m] || w[m] === "unisono")) w[m] = "echo";
+    }
+    else if (r === "v") w = sp.map((p, i) => KAP_RHYTHMUS.includes(p.weise) ? p.weise : w[i]);
+    else if (r === "r" || r === "h") {
+      w = sp.map(p => p.weise);
+      if (m >= 0) { w[m] = gegenDa ? "gegen" : "terz"; echo = gegenDa ? .5 : 1; }
+      if (bl >= 0 && (n >= 1 || r === "h")) w[bl] = abschnittEnde(ab) ? "stoss" : "unisono";
+    }
+    else if (r === "b") {
+      if (m >= 0 && (n + (S.arrSeed || 0) + durchgang) % 2 === 0) {
+        w = sp.map((p, i) => i === m ? "solo" : ["halte", "glanz", "arp"].includes(p.weise) ? p.weise : null);
+        echo = 0; solo = true;
+      }
+    }
+    return (kapPlanMerk = { key, plan: { w, echo, solo } }).plan;
+  }
   function kapelleSchritt(zeit, daten, ab) {
     if (!S.stimmung || !ctx || ausduennen || einblend > EINBLEND / 2 || S.intensitaet < 2) return;
     const sp = kapSpieler(); if (!sp.length) return;
@@ -4788,10 +4866,13 @@
     const st = STIL[S.stimmung] || {}, naechst = (ab + 1) % S.ablauf.length;
     const x = { L, rolle, n, int: S.intensitaet / 10, jig: st.dreier === "jig", mitte: L === 12 ? (st.dreier === "jig" ? 6 : 8) : 8,
       wechselt: schritt === 0 || (schritt % 4 === 0 && zeile !== klingt(daten.bass, schritt - 1)), ende: naechst === 0 || abschnittAnfang(naechst) };
-    /* bei ruhiger Intensität nur der erste Musiker */
+    /* der Plan des Arrangeurs; bei ruhiger Intensität nur der erste Musiker (das Solo und der Ohrwurm im Vorspiel bleiben) */
+    const plan = kapPlan(ab) || { w: sp.map(p => p.ab.includes(rolle) ? p.weise : null) };
     sp.forEach((p, k) => {
-      if (!p.ab.includes(rolle) || S.intensitaet < p.min || (k > 0 && S.intensitaet <= 3)) return;
-      try { KAP_WEISE[p.weise](p, zeit, sd, ak, x, daten); } catch (_) {}
+      const weise = plan.w[k]; if (!weise || !KAP_WEISE[weise]) return;
+      const besonders = weise === "solo" || weise === "haken";
+      if (!besonders && (S.intensitaet < p.min || (k > 0 && S.intensitaet <= 3))) return;
+      try { KAP_WEISE[weise](p, zeit, sd, ak, x, daten); } catch (_) {}
     });
   }
   function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
