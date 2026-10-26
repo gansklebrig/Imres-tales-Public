@@ -8,8 +8,10 @@
      Echo       Flöte
      Ezekiel    Ketten
      Rex        Wuff! und Heulen
-   Jedes Lied hat zwei Teile (A = Strophe, B = Refrain) und einen Ablauf,
-   z. B. A-A-B-A. Der Variations-Regler lässt die Band frei improvisieren:
+   Jedes Lied besteht aus bis zu 16 Teilen (A–P, je ein Takt) und einem Ablauf,
+   z. B. A-A-B-A. Jeder Teil hat eine Rolle im Lied (Vorspiel, Strophe, Aufbau,
+   Refrain, Zwischenteil, Höhepunkt) – mehrere Teile hintereinander bilden einen
+   Abschnitt, so entstehen Melodien über vier Takte. Der Variations-Regler lässt die Band frei improvisieren:
    Noten wandern, Trommelwirbel kommen dazu – ideal als endlose
    Hintergrundmusik (siehe „Stimmungen“).
    Dazu: Tempo, Tonart, Kirchentonart, Tanzschritt (Swing), Bordun,
@@ -47,7 +49,7 @@
     { id: "klopf", wer: "barradin", art: "an", sym: "✊" },
     { id: "schelle", wer: "barradin", art: "an", sym: "🔔" },
     { id: "bass", wer: "barradin", art: "ton", zeilen: 7 },
-    { id: "melodie", wer: "barradin", art: "ton", zeilen: 8 },
+    { id: "melodie", wer: "barradin", art: "ton", zeilen: 15 },
     { id: "trommel", wer: "friedrich", art: "an", sym: "🥁" },
     { id: "floete", wer: "echo", art: "ton", zeilen: 8 },
     { id: "ketten", wer: "ezekiel", art: "an", sym: "⛓" },
@@ -55,7 +57,13 @@
   ];
   const IDS = SPUREN.map(s => s.id);
   const SPUR = Object.fromEntries(SPUREN.map(s => [s.id, s]));
-  const TEILE = ["A", "B", "C", "D"];
+  const TEILE = "ABCDEFGHIJKLMNOP".split("");
+  /* Rolle jedes Teils: i = Vorspiel, s = Strophe, v = Aufbau (vor dem Refrain), r = Refrain, b = Zwischenteil, h = Höhepunkt.
+     Lieder ohne gespeicherte Rollen behalten die alte Bedeutung: A Strophe, B Refrain, C Zwischenteil (Solo der Gäste), D Höhepunkt. */
+  const ROLLEN = ["i", "s", "v", "r", "b", "h"];
+  const ROLLE_ALT = { A: "s", B: "r", C: "b", D: "h" };
+  const rollenStandard = () => TEILE.map(p => ROLLE_ALT[p] || "s").join("");
+  const rolleVon = (s, p) => (s.rollen && s.rollen[TEILE.indexOf(p)]) || ROLLE_ALT[p] || "s";
   const ABLAEUFE = ["A", "AB", "AABB", "AABA", "ABAB", "AAAB", "ABC", "ABAC", "AABC", "ABCB", "AABACA", "AABBCC", "ABCD", "ABCABCD", "ABACABAD", "AABBCCDD"];
   /* Barradins Instrumente für die Melodie-Spur */
   const INSTRUMENTE = ["laute", "harfe", "mandoline", "fidel", "drehleier", "schalmei", "dudelsack", "glocken", "illusion"];
@@ -80,7 +88,8 @@
   const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "strasse", spannung: "hoehle", sieg: "taverne", kampf: "keine",
     taverne: "taverne", hafen: "hafen", wald: "wald", schmiede: "schmiede", wiegen: "feuer", trauer: "regen", ballade: "taverne",
     auenland: "wald", elben: "wald", zwerge: "mine", reiter: "strasse", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen",
-    klage: "regen", marktplatz: "markt", hof: "burg", grusel: "hoehle", fey: "wald", boss: "sturm" };
+    klage: "regen", marktplatz: "markt", hof: "burg", grusel: "hoehle", fey: "wald", boss: "sturm",
+    heldenlied: "burg", trinklied: "taverne", verfolgung: "strasse", ruinen: "tempel" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   /* lustige Spieltisch-Momente */
   const MOMENTE = ["tusch", "posaune", "krit", "dramatisch", "grillen", "ooh", "muenzen", "ruelpser", "schnarchen", "bonk",
@@ -114,13 +123,15 @@
         floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn", klarinette: "Klarinette", oboe: "Oboe" },
         ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch" }
       },
-      teil: "Teil bearbeiten", ablauf: "Ablauf", kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
+      teil: "Teil bearbeiten", ablauf: "Ablauf", rolleVon: p => "Rolle von " + p,
+      rollen: { i: "Vorspiel", s: "Strophe", v: "Aufbau", r: "Refrain", b: "Zwischenteil", h: "Höhepunkt" }, kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
       lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
       vorlagen: { taverne: "Tavernentanz", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", schmiede: "⚒ Schmiede", trauer: "Trauerlied", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lager",
         auenland: "🌿 Auenland", elben: "✨ Elben", zwerge: "⛏ Zwerge", reiter: "🐎 Reiter", dorffest: "💃 Dorffest", kamin: "🕯 Kamin", shanty: "🌊 Shanty", pilger: "⛪ Pilger",
-        klage: "🥀 Klage", marktplatz: "🛒 Marktplatz", hof: "👑 Königshof", grusel: "👻 Spukhaus", fey: "🧚 Feenwald", boss: "🐲 Endgegner" },
+        klage: "🥀 Klage", marktplatz: "🛒 Marktplatz", hof: "👑 Königshof", grusel: "👻 Spukhaus", fey: "🧚 Feenwald", boss: "🐲 Endgegner",
+        heldenlied: "🛡 Heldenlied", trinklied: "🍻 Trinklied", verfolgung: "🏃 Verfolgung", ruinen: "🏛 Ruinen" },
       klangwelten: "Klangwelten", klangTipp: "Volksmusik und Fantasy-Klänge – jedes Mal neu komponiert, im Stil vertraut, aber immer eigene Melodien.",
       zufall: "🎲 Zufall", leeren: "Leeren",
       stumm: "Stumm schalten", lautstaerke: "Lautstärke", zuklappen: "Ein- oder ausklappen",
@@ -187,13 +198,15 @@
         floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn", klarinette: "Clarinet", oboe: "Oboe" },
         ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table" }
       },
-      teil: "Edit part", ablauf: "Order", kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
+      teil: "Edit part", ablauf: "Order", rolleVon: p => "Role of " + p,
+      rollen: { i: "Intro", s: "Verse", v: "Build-up", r: "Chorus", b: "Bridge", h: "Finale" }, kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
       lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
       vorlagen: { taverne: "Tavern dance", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", schmiede: "⚒ Forge", trauer: "Lament", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Camp",
         auenland: "🌿 Shire", elben: "✨ Elves", zwerge: "⛏ Dwarves", reiter: "🐎 Riders", dorffest: "💃 Fair", kamin: "🕯 Fireside", shanty: "🌊 Shanty", pilger: "⛪ Pilgrim",
-        klage: "🥀 Lament", marktplatz: "🛒 Market square", hof: "👑 Royal court", grusel: "👻 Haunted house", fey: "🧚 Fey forest", boss: "🐲 Boss fight" },
+        klage: "🥀 Lament", marktplatz: "🛒 Market square", hof: "👑 Royal court", grusel: "👻 Haunted house", fey: "🧚 Fey forest", boss: "🐲 Boss fight" ,
+        heldenlied: "🛡 Heroes' Anthem", trinklied: "🍻 Drinking Song", verfolgung: "🏃 Chase", ruinen: "🏛 Ancient Ruins" },
       klangwelten: "Soundscapes", klangTipp: "Folk music and fantasy sounds – freshly composed every time, familiar in style but always with original melodies.",
       zufall: "🎲 Random", leeren: "Clear",
       stumm: "Mute", lautstaerke: "Volume", zuklappen: "Expand or collapse",
@@ -268,11 +281,11 @@
   const MEL_GRUND = 62, BASS_GRUND = 38, FLOETE_GRUND = 74; /* D4, D2, D5 */
   const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
   const tonMidi = (spur, zeile, s) => {
-    const sk = MODI[s.modus];
+    const sk = MODI[s.modus], st = z => sk[z % 7] + 12 * Math.floor(z / 7);
     const h = s === S ? hebung : 0;
     if (spur === "bass") return BASS_GRUND + s.transpose + h + sk[BASS_STUFEN[zeile]];
-    if (spur === "floete") return FLOETE_GRUND + s.transpose + h + sk[zeile];
-    return MEL_GRUND + s.transpose + h + sk[zeile];
+    if (spur === "floete") return FLOETE_GRUND + s.transpose + h + st(zeile);
+    return MEL_GRUND + s.transpose + h + st(zeile);
   };
   const notenName = m => t().noten[((m % 12) + 12) % 12];
 
@@ -445,7 +458,7 @@
         floete: folge({ 0: 5, 4: 4, 8: 3, 12: 4 }), rex: folge({ 14: 0 }) }) }
   };
   const LIEDER = ["taverne", "ballade", "hafen", "wald", "schmiede", "trauer", "wiegen"];
-  const STIMMUNGEN = ["kampf", "boss", "spannung", "grusel", "unterreich", "reise", "reiter", "sieg", "rast", "kamin", "klage", "auenland", "elben", "fey", "zwerge", "dorffest", "marktplatz", "hof", "shanty", "pilger"];
+  const STIMMUNGEN = ["kampf", "boss", "verfolgung", "spannung", "grusel", "unterreich", "ruinen", "reise", "reiter", "heldenlied", "sieg", "rast", "trinklied", "kamin", "klage", "auenland", "elben", "fey", "zwerge", "dorffest", "marktplatz", "hof", "shanty", "pilger"];
 
   /* ---------- Stimmungs-Generatoren ----------
      Jede Stimmung ist ein Stil: Tonleiter, Tempo, Besetzung, Akkordfolgen (Bass-Zeilen je Viertel),
@@ -571,7 +584,32 @@
       ablauf: ["AABCDD", "ABACABAD", "AABBCD"], akkorde: [[0, 6, 5, 4], [0, 5, 4, 0], [0, 0, 6, 0], [0, 5, 1, 4], [0, 4, 5, 6], [0, 0, 5, 4]],
       bass: ["galopp", "puls"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 3, 4, 6, 7]], lage: 3, dichte: 1, echo: "lang",
       klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14]], trommel: [[0, 3, 6, 8, 11, 14], [0, 3, 6, 8, 10, 11, 14]],
-      ketten: [[4, 12], [0, 6, 8, 14]], rex: [0, 2] }
+      ketten: [[4, 12], [0, 6, 8, 14]], rex: [0, 2] },
+    /* ---- Lieder mit ganzer Form (Strophe, Refrain, Schlussrefrain) ---- */
+    /* Heldenlied: eine Hymne auf die Gefährten – breiter Refrain zum Mitsingen, Hörner, am Ende einen Ganzton höher */
+    heldenlied: { form: "hymne", zier: "triller", terzen: 1, modus: ["ionisch", "mixolydisch", "dorisch"], tempo: [92, 104], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 2,
+      instrument: ["laute", "fidel", "dudelsack"], band: { trommel: ["trommel", "pauke"], floete: ["horn", "gesang", "floete"], ketten: ["stampfen", "klatschen"] },
+      ablauf: ["AABACA"], akkorde: [[0, 4, 5, 3], [0, 5, 2, 3], [0, 2, 5, 3], [0, 3, 5, 2], [0, 6, 2, 3], [0, 4, 2, 3]],
+      bass: ["viertel", "puls"], rhythmus: [[0, 2, 4, 6], [0, 3, 4, 6], [0, 2, 3, 4, 6], [0, 4, 6]], lage: 3, dichte: .9, echo: "lang",
+      klopf: [[0, 8], [0, 4, 8, 12]], schelle: [[], [4, 12]], trommel: [[0, 8], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [4, 12]], rex: [0, 1] },
+    /* Trinklied: Krüge hoch! Stampfen, Klatschen und ein Refrain, den nach dem dritten Krug jeder mitsingt */
+    trinklied: { form: "tanz", dreier: "jig", zier: "triller", terzen: 1, modus: ["mixolydisch", "ionisch", "dorisch"], tempo: [112, 124], transpose: [0, 2, -3], swing: 1, bordun: 1, variation: 3,
+      instrument: ["fidel", "laute", "dudelsack", "mandoline"], band: { trommel: ["bodhran", "tamburin"], floete: ["gesang", "floete"], ketten: ["krug", "stampfen", "klatschen"] },
+      ablauf: ["AABBCD"], akkorde: [[0, 3, 0, 3], [0, 2, 3, 0], [0, 4, 0, 3], [0, 2, 0, 3], [0, 5, 2, 3]],
+      bass: ["viertel", "puls"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 4, 6], [0, 3, 4, 6]], lage: 3, dichte: 1, echo: "antwort",
+      klopf: [[0, 8], [0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [0, 2, 4, 6, 8, 10, 12, 14]], trommel: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0, 1] },
+    /* Verfolgung: Hetzjagd durch Gassen und Wälder – treibende Achtel und ein Riff, das nicht loslässt */
+    verfolgung: { form: "hymne", chaos: 1, riff: 1, modus: ["aeolisch", "phrygisch", "dorisch"], tempo: [138, 152], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 2,
+      instrument: ["fidel", "schalmei", "mandoline"], band: { trommel: ["trommel", "pauke"], floete: ["horn", "floete"], ketten: ["stampfen", "ketten"] },
+      ablauf: ["AABACA"], akkorde: [[0, 5, 4, 0], [0, 4, 5, 4], [0, 0, 5, 4], [0, 6, 0, 4], [0, 5, 0, 4]],
+      bass: ["puls", "galopp"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 4, 5, 6], [0, 2, 4, 6]], lage: 3, dichte: 1, echo: "lang",
+      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14]], trommel: [[0, 3, 6, 8, 11, 14], [0, 2, 3, 6, 8, 10, 11, 14]], ketten: [[4, 12], [4, 10, 12]], rex: [0] },
+    /* Alte Ruinen: Staunen und Geheimnis – lydisch schwebend, Glocken und ferne Stimmen, langsam wachsend */
+    ruinen: { form: "ballade", zier: "vorhalt", modus: ["lydisch", "dorisch", "aeolisch"], tempo: [66, 76], transpose: [0, -2, 3], swing: 0, bordun: 1, variation: 2,
+      instrument: ["harfe", "glocken", "illusion"], band: { trommel: ["pauke"], floete: ["gesang", "okarina", "panfloete"], ketten: ["schnipsen", "rassel"] },
+      ablauf: ["ABAC"], akkorde: [[0, 6, 0, 5], [0, 1, 6, 0], [0, 5, 6, 0], [0, 6, 5, 6], [0, 2, 0, 6]],
+      bass: ["orgel", "halbe"], rhythmus: [[0, 4], [0, 4, 6], [0, 3, 4], [0, 6]], lage: 4, dichte: .55, echo: "fern",
+      klopf: [[]], schelle: [[]], trommel: [[0], [0, 12]], ketten: [[], [6, 14]], rex: [2] }
   };
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
@@ -670,7 +708,7 @@
       [0, 8].forEach(h => {
         if (st.schwung != null && st.schwung < .3) return;
         for (let i = h; i < h + 8; i++) if (a[i] >= 0 && frei(i, 3)) {
-          const t = a[i], n = t < 7 ? t + 1 : t - 1;
+          const t = a[i], n = t < 14 ? t + 1 : t - 1;
           a[i + 1] = n; a[i + 2] = t; break;
         }
       });
@@ -678,7 +716,7 @@
       [8].forEach(h => { /* nur am Phrasenende – ein Seufzer, kein Dauerzustand */
         let letzter = -1; for (let i = h; i < h + 8; i++) if (a[i] >= 0) letzter = i;
         if (letzter < h + 2 || letzter + 2 >= h + 8 || !frei(letzter, 2)) return;
-        const t = a[letzter]; if (t >= 7) return;
+        const t = a[letzter]; if (t >= 14) return;
         a[letzter + 2] = t; a[letzter] = t + 1;
       });
     }
@@ -823,7 +861,265 @@
     const D = teilVon(p1, melD, st.terzen && (st.schwung == null || st.schwung >= .35) ? terzStimme(b1, melD) : echoBauen(b1, melD, "lang"), 1);
     return { A, B, C, D };
   }
-  function stimmungLied(k, behalten, stufe) {
+  /* ---------- Der Liedschreiber: ganze Lieder statt vier Takten ----------
+     Jede Stimmung bekommt eine Liedform (Vorspiel, Strophe, Aufbau, Refrain, Zwischenteil, Schlussrefrain).
+     Ein Abschnitt besteht aus mehreren Teilen (je ein Takt) – so entstehen Melodiebögen über vier Takte:
+       Strophe      = Motiv, Motiv als Sequenz versetzt, Motiv wieder, offener Schluss
+       Refrain      = Ohrwurm, Antwort, derselbe Ohrwurm noch einmal, Schluss auf dem Grundton – höher als die Strophe
+       Aufbau       = die Laute läuft eine Tonleiter hinauf in den Refrain, die Trommel treibt
+       Zwischenteil = andere Akkorde, die Laute hält lange Töne, Echo (oder ein Gast) spielt ein Solo
+       Höhepunkt    = der Refrain mit voller Besetzung, Echo in Terzen, am Ende hinauf zum hohen Grundton
+     Die Laute spielt in zwei Oktaven (Zeile 0–14), auf den Zählzeiten liegen immer Akkordtöne. */
+  const LIEDFORMEN = {
+    /* Hymne: Strophe, Aufbau, Refrain – und ein großer Schlussrefrain nach dem Zwischenteil */
+    hymne: { teile: [["i", 1], ["s", 4], ["v", 1], ["r", 4], ["b", 2], ["h", 4]],
+      folgen: [["i", "s", "s", "v", "r", "r", "b", "v", "h", "h"], ["i", "s", "v", "r", "b", "v", "h", "h"], ["i", "s", "s", "v", "r", "b", "v", "h"]] },
+    /* Ballade: ruhig erzählend, ohne treibenden Aufbau */
+    ballade: { teile: [["i", 1], ["s", 4], ["r", 4], ["b", 2], ["h", 4]],
+      folgen: [["i", "s", "s", "r", "b", "h"], ["i", "s", "r", "s", "r", "b", "h"], ["i", "s", "s", "r", "b", "h", "h"]] },
+    /* Tanz: Strophe und Refrain wechseln sich ab, erst vor dem Schluss wird angeheizt */
+    tanz: { teile: [["i", 1], ["s", 4], ["r", 4], ["b", 2], ["v", 1], ["h", 4]],
+      folgen: [["i", "s", "r", "s", "r", "b", "v", "h"], ["i", "s", "s", "r", "r", "b", "v", "h", "h"], ["i", "s", "r", "b", "v", "h", "h"]] },
+    /* dunkel: langes Vorspiel, der „Refrain“ ist das bedrohliche Thema */
+    dunkel: { teile: [["i", 2], ["s", 4], ["r", 4], ["b", 2], ["h", 4]],
+      folgen: [["i", "s", "s", "r", "b", "h"], ["i", "s", "r", "b", "s", "h"], ["i", "s", "r", "s", "r", "b", "h"]] }
+  };
+  function formFuer(st) {
+    if (st.form) return st.form;
+    if (st.chaos && !st.riff) return "dunkel";
+    if (st.dreier === "jig" || (st.swing && st.dichte >= .85)) return "tanz";
+    return st.dichte < .7 ? "ballade" : "hymne";
+  }
+  function formBauen(st) {
+    const f = LIEDFORMEN[formFuer(st)], buchst = {}; let rollen = "", i = 0;
+    f.teile.forEach(([r, n]) => { buchst[r] = TEILE.slice(i, i + n).join(""); rollen += r.repeat(n); i += n; });
+    rollen = (rollen + "s".repeat(16)).slice(0, 16);
+    return { rollen, ablauf: zufall(f.folgen).map(r => buchst[r]).join("") };
+  }
+  /* Abschnitte aus dem Rollen-Text: [{ rolle, teile: ["B", "C", …] }] */
+  function abschnitteVon(rollen) {
+    const out = [];
+    TEILE.forEach((p, i) => { const r = rollen[i]; if (out.length && out[out.length - 1].rolle === r) out[out.length - 1].teile.push(p); else out.push({ rolle: r, teile: [p] }); });
+    return out;
+  }
+  const BASS_REIHE = ["orgel", "halbe", "viertel", "puls", "galopp"];
+  const HAKEN_FORMEN = { ruhig: ["bogen", "welle", "ruf", "fallend"], lebhaft: ["sprung", "terzen", "ruf", "bogen", "welle"], wild: ["ruf", "sprung", "steigend", "wechsel"] };
+  function liedTeile(st, modus, rollen, L) {
+    L = L === 12 ? 12 : 16;
+    const jig = st.dreier === "jig", cfg = L === 12 ? { schlag: jig ? [0, 6] : [0, 4, 8], mitte: jig ? 6 : 8 } : { schlag: [0, 4, 8, 12], mitte: 8 };
+    const vm = VERMINDERT[modus], ok = z => BASS_STUFEN[z] !== vm;
+    const folgen = folgenFuer(st, modus);
+    const ruhig = st.dichte < .75 || (st.schwung != null && st.schwung < .35);
+    const dunkel = !!st.chaos && !st.riff;
+    const art = st.chaos ? "wild" : ruhig ? "ruhig" : "lebhaft";
+    const hr = !ruhig && L === 16 && Math.random() < .55 ? 2 : 1; /* Akkorde je Takt */
+    const dom = ok(3) ? 3 : 4, sub = ok(2) ? 2 : 5;
+    /* ----- Tonräume: Strophe in der Mitte, Refrain darüber, der Höhepunkt reicht bis zum hohen Grundton ----- */
+    const cv = Math.max(3, Math.min(8, st.lage + 2)), loV = Math.max(0, cv - 4), hiV = Math.min(12, cv + 4);
+    const cr = Math.max(5, Math.min(10, cv + (dunkel ? 1 : ruhig ? 2 : 3))), loR = Math.max(0, cr - 3), hiR = Math.min(13, cr + 4);
+    const spitze = dunkel ? 7 : cr >= 8 ? 14 : 7, hiH = Math.max(hiR, spitze);
+    /* ----- Harmonien ----- */
+    const P = zufall(folgen), Q = zufall(folgen);
+    let R = zufall(folgen.length > 1 ? folgen.filter(f => f !== P) : folgen);
+    /* der Refrain beginnt gern auf der Subdominante oder der Mollparallele – das hebt ihn von der Strophe ab */
+    { const k = R.findIndex(c => c === 2 || c === 5); if (k > 0 && Math.random() < .8) R = R.slice(k).concat(R.slice(0, k)); }
+    const strophenAkk = hr === 1 ? P.map(c => [c]) : [[P[0], P[1]], [P[2], P[3]], [Q[0], Q[1]], [Q[2], Q[3]]];
+    { const l = strophenAkk[3]; if (l[l.length - 1] === 0) l[l.length - 1] = dom; }
+    const refrainAkk = hr === 1 ? [[R[0]], [R[1]], [R[0]], [dom, 0]] : [[R[0], R[1]], [R[2], R[3]], [R[0], R[1]], [dom, 0]];
+    const BR = [[5, 2], [2, 5], [5, 6], [6, 2], [2, 4], [5, 4], [6, 5]].filter(([a, b]) => ok(a) && ok(b));
+    const [b0, b1] = BR.length ? zufall(BR) : [sub, sub];
+    const brueckeAkk = [[b0], [b1, dom]];
+    /* ----- Bass: in der Strophe ruhiger, im Refrain treibender ----- */
+    const arten = st.bass.slice().sort((a, b) => BASS_REIHE.indexOf(a) - BASS_REIHE.indexOf(b));
+    const artS = arten.length > 1 && Math.random() < .6 ? arten[0] : zufall(arten), artR = arten[arten.length - 1];
+    const artVor = artR === "galopp" ? "galopp" : ruhig ? "viertel" : "puls", artB = ruhig || dunkel ? (arten.includes("orgel") ? "orgel" : "halbe") : "halbe", artI = dunkel ? arten[0] : artS;
+    const bassVon = (ch, a) => {
+      if (L === 12) { const b = leer(); b[0] = ch[0]; if (ch.length > 1 && ch[1] !== ch[0]) b[cfg.mitte] = ch[1]; return b; }
+      return bassBauen(ch.length > 1 ? [ch[0], ch[0], ch[1], ch[1]] : [ch[0], ch[0], ch[0], ch[0]], a);
+    };
+    /* ----- Rhythmen und Motive ----- */
+    const sortiert = st.rhythmus.slice().sort((a, b) => a.length - b.length);
+    const halbWahl = dichter => st.dichte < .6 ? sortiert[0] : dichter ? zufall(sortiert.slice(Math.floor(sortiert.length / 2))) : zufall(sortiert.slice(0, Math.max(1, sortiert.length - 1)));
+    const taktRhythmus = (dichter, gleich) => {
+      if (L === 12) return zufall(RHYTHMUS12[jig ? "jig" : "walzer"][ruhig ? "ruhig" : "lebhaft"]).slice();
+      const a = halbWahl(dichter), b = gleich ? a : halbWahl(dichter);
+      return a.concat(b.map(x => x + 8));
+    };
+    /* Motiv = Rhythmus + Form; die zweite Takthälfte wiederholt die Form, versetzt um „sprung“ (Sequenz) */
+    const motiv = (pos, form, sprung) => {
+      const f = FORMEN[form], n1 = pos.filter(p => p < cfg.mitte).length;
+      return { pos, rel: pos.map((p, k) => { const kk = p < cfg.mitte ? k : k - n1; return f[kk % f.length] - f[0] + (p < cfg.mitte ? 0 : sprung); }) };
+    };
+    const umgekehrt = m => ({ pos: m.pos, rel: m.rel.map(x => -x) });
+    const rS = taktRhythmus(false, !!st.riff || Math.random() < .55);
+    let rH = taktRhythmus(true, Math.random() < .35);
+    for (let k = 0; k < 6 && String(rH) === String(rS); k++) rH = taktRhythmus(true, Math.random() < .35);
+    const mS = motiv(rS, zufall(STIL_FORMEN[art]), st.riff ? 0 : zufall([-1, 1, 2]));
+    const mH = motiv(rH, zufall(HAKEN_FORMEN[art]), st.riff ? 0 : zufall([-1, -2, 1]));
+    const sequenz = zufall([-1, 1, 2]);
+    /* ----- Töne setzen ----- */
+    function setzeTakt(bass, m, start, lo, hi, ziel) {
+      const a = leer(); if (!m.pos.length) return a;
+      const rlo = Math.min(...m.rel), rhi = Math.max(...m.rel);
+      const s0 = Math.max(lo - rlo, Math.min(hi - rhi, start));
+      let vor = -9;
+      m.pos.forEach((p, k) => {
+        let t = Math.max(lo, Math.min(hi, s0 + m.rel[k]));
+        if (cfg.schlag.includes(p)) {
+          const toene = akkordToene(klingt(bass, p));
+          if (!toene.includes(t % 7)) {
+            const ri = k > 0 && m.rel[k] < m.rel[k - 1] ? -1 : 1;
+            const z = [t + ri, t - ri, t + 2 * ri, t - 2 * ri].find(x => x >= lo && x <= hi && x !== vor && toene.includes(x % 7));
+            if (z != null) t = z;
+          }
+        }
+        if (k === m.pos.length - 1 && ziel != null) t = ziel;
+        a[p] = t; vor = t;
+      });
+      return a;
+    }
+    function zielTon(bass, p, wunsch, wie, lo, hi) {
+      const toene = akkordToene(klingt(bass, p));
+      let kand = []; for (let t = lo; t <= hi; t++) if (toene.includes(t % 7)) kand.push(t);
+      if (wie === "zu") { const g = kand.filter(t => t % 7 === 0); if (g.length) kand = g; }
+      if (wie === "offen") { const g = kand.filter(t => t % 7 !== 0); if (g.length) kand = g; }
+      if (!kand.length) return Math.max(lo, Math.min(hi, wunsch));
+      return kand.reduce((b, t) => Math.abs(t - wunsch) < Math.abs(b - wunsch) ? t : b, kand[0]);
+    }
+    /* Schlusstakt einer Phrase: der Anfang des Motivs, dann ein langer Ton auf der Takthälfte */
+    function kadenzTakt(bass, m, start, lo, hi, wie, wunsch) {
+      const n = Math.max(1, m.pos.filter(p => p < cfg.mitte).length);
+      const k = { pos: m.pos.slice(0, n).filter(p => p < cfg.mitte).concat([cfg.mitte]), rel: m.rel.slice(0, n).concat([m.rel[n - 1] - 1]) };
+      return setzeTakt(bass, k, start, lo, hi, zielTon(bass, cfg.mitte, wunsch, wie, lo, hi));
+    }
+    function schmuecken(a, bass, wie) {
+      if (st.fuell > .2) for (let i = 1; i < L - 1; i++) {
+        if (a[i] < 0 && a[i - 1] >= 0 && a[i + 1] >= 0 && Math.abs(a[i + 1] - a[i - 1]) === 2 && (i % 4 === 1 || st.fuell > .45)) a[i] = (a[i - 1] + a[i + 1]) / 2;
+      }
+      if (st.schraeg) for (let i = 1; i < L; i += 4) if (a[i] >= 0 && a[i] % 7 === 0) a[i] += 1;
+      if (L === 16) verzieren(a, bass, st, wie);
+      for (let i = L; i < SCHRITTE; i++) a[i] = -1;
+      return a;
+    }
+    const zurFloete = t => t < 0 ? -1 : t >= 7 ? Math.min(7, t - 7) : t;
+    /* Echo singt in Terzen (oder Sexten) mit – Echos Flöte klingt eine Oktave höher als die Zeile */
+    const terzFl = (bass, mel) => mel.map((m, i) => {
+      if (m < 0 || i >= L) return -1;
+      const toene = akkordToene(klingt(bass, i));
+      for (const c of [m - 2, m + 2, m - 5, m + 5, m + 9]) {
+        if (c < 7 || c > 14) continue;
+        let f = c - 7;
+        if (cfg.schlag.includes(i) && !toene.includes(f % 7)) { const alt = naechsterTon(f, toene); if (alt != null && Math.abs(alt - f) <= 1) f = alt; }
+        return Math.max(0, Math.min(7, f));
+      }
+      return -1;
+    });
+    const echo = (bass, mel, wie) => { const a = echoBauen(bass, mel, wie); for (let i = L; i < SCHRITTE; i++) a[i] = -1; return a; };
+    /* ----- Schlagwerk je Rolle ----- */
+    const rhy = (liste, i) => an(((liste && liste[Math.min(i, liste.length - 1)]) || []).filter(x => x < L));
+    function schlagwerk(t, rolle) {
+      const stufe = rolle === "r" || rolle === "h" ? 1 : 0;
+      if (L === 12) {
+        const leise = st.schwung != null && st.schwung < .3, voll = st.schwung != null && st.schwung > .7;
+        const sc = jig ? { klopf: leise ? [] : [0, 6], schelle: leise ? [] : (voll ? [2, 4, 8, 10] : [3, 9]), trommel: stufe ? [0, 4, 6, 10] : [0, 6], ketten: leise ? [] : [6] }
+          : { klopf: leise ? [] : [4, 8], schelle: voll ? [4, 8] : [], trommel: stufe ? [0, 8] : [0], ketten: leise || !(st.ketten[0] || []).length ? [] : [4, 8] };
+        if (rolle === "v") sc.trommel = jig ? [0, 2, 4, 6, 8, 10] : [0, 4, 8, 10];
+        ["klopf", "schelle", "trommel", "ketten"].forEach(k => { t[k] = (st[k] && st[k][0] && st[k][0].length === 0 && k !== "trommel") ? leer() : an(sc[k]); });
+      } else {
+        t.klopf = rhy(st.klopf, stufe); t.schelle = rhy(st.schelle, stufe); t.trommel = rhy(st.trommel, stufe); t.ketten = rhy(st.ketten, stufe);
+        if (rolle === "v" && (st.trommel[0] || []).length) {
+          const grund = (st.trommel[st.trommel.length - 1] || []).filter(x => x < 8);
+          t.trommel = an(grund.concat(st.dichte >= .85 ? [8, 10, 12, 13, 14, 15] : [8, 12, 14]));
+        }
+      }
+      if (rolle === "i") { t.klopf = leer(); t.schelle = leer(); }
+      if (rolle === "b") { t.klopf = leer(); t.schelle = leer(); t.trommel = an((st.trommel[0] || []).length ? [0] : []); }
+    }
+    /* ----- Abschnitte komponieren ----- */
+    function strophe(n) {
+      return Array.from({ length: n }, (_, k) => {
+        const ch = strophenAkk[k % strophenAkk.length], bass = bassVon(ch, artS);
+        const mel = k === n - 1 ? kadenzTakt(bass, mS, cv, loV, hiV, "offen", cv + 1)
+          : setzeTakt(bass, mS, k % 4 === 1 ? cv + sequenz : cv, loV, hiV, null);
+        schmuecken(mel, bass, k === n - 1 ? "antwort" : "frage");
+        return { bass, mel, fl: echo(bass, mel, st.echo) };
+      });
+    }
+    function refrain(n) {
+      let haken = null;
+      return Array.from({ length: n }, (_, k) => {
+        const ch = refrainAkk[k % refrainAkk.length], bass = bassVon(ch, artR);
+        let mel;
+        if (k === n - 1) mel = schmuecken(kadenzTakt(bass, mH, cr, loR, hiR, "zu", cr - 1), bass, "antwort");
+        else if (k % 2 === 1) mel = schmuecken(setzeTakt(bass, umgekehrt(mH), cr - 1, loR, hiR, null), bass, "antwort");
+        else {
+          /* derselbe Ohrwurm noch einmal – bei gleichem Akkord Ton für Ton gleich */
+          if (!haken || String(ch) !== String(refrainAkk[0])) haken = schmuecken(setzeTakt(bass, mH, cr, loR, hiR, null), bass, "frage");
+          mel = haken.slice();
+        }
+        return { bass, mel, fl: echo(bass, mel, ruhig ? "lang" : "antwort") };
+      });
+    }
+    function hoehe(n, ref) {
+      return Array.from({ length: n }, (_, k) => {
+        const b = ref[k % ref.length], ch = refrainAkk[k % refrainAkk.length];
+        const bass = b ? b.bass.slice() : bassVon(ch, artR);
+        const mel = k === n - 1 ? schmuecken(kadenzTakt(bass, mH, cr, loR, hiH, "zu", spitze), bass, "antwort") : b.mel.slice();
+        return { bass, mel, fl: st.terzen ? terzFl(bass, mel) : echo(bass, mel, "lang"), rex: k === n - 1 };
+      });
+    }
+    function aufbauTakt() {
+      const bass = bassVon([sub, dom], artVor);
+      const pos = L === 12 ? (ruhig ? [0, 4, 8] : [0, 2, 4, 6, 8, 10]) : (ruhig ? [0, 4, 8, 12] : [0, 2, 4, 6, 8, 10, 12, 14]);
+      const ende = cr - 1, anf = ende - (pos.length - 1);
+      const mel = setzeTakt(bass, { pos, rel: pos.map((_, k) => k) }, anf, Math.max(0, anf - 2), Math.min(14, ende + 1), null);
+      return { bass, mel, fl: echo(bass, mel, "fern") };
+    }
+    function bruecke(n) {
+      const mF = motiv(rH, zufall(["bogen", "welle", "steigend"]), -1);
+      const lang = L === 12 ? { pos: [0], rel: [0] } : { pos: [0, cfg.mitte], rel: [0, -1] };
+      return Array.from({ length: n }, (_, k) => {
+        const ch = brueckeAkk[k % brueckeAkk.length], bass = bassVon(ch, artB);
+        const letzt = lang.pos[lang.pos.length - 1];
+        const mel = setzeTakt(bass, lang, cv - 1, loV, hiV, k === n - 1 ? zielTon(bass, letzt, cv, "offen", loV, hiV) : null);
+        const fl = setzeTakt(bass, mF, k ? 9 : 10, 7, 14, null).map(t => t < 0 ? -1 : t - 7);
+        return { bass, mel, fl };
+      });
+    }
+    function vorspiel(n) {
+      return Array.from({ length: n }, (_, k) => {
+        const letzt = k === n - 1, ch = letzt ? refrainAkk[0].slice(0, 1) : [0], bass = bassVon(ch, artI);
+        /* Echo deutet den Ohrwurm schon einmal an */
+        const fl = letzt && !dunkel ? setzeTakt(bass, { pos: mH.pos.filter(p => p < cfg.mitte), rel: mH.rel.filter((_, i) => mH.pos[i] < cfg.mitte) }, cr, loR, hiR, null).map(zurFloete) : leer();
+        return { bass, mel: leer(), fl };
+      });
+    }
+    const teile = Object.fromEntries(TEILE.map(p => [p, teilLeer()]));
+    const gesehen = new Set();
+    let refStueck = null;
+    const abs = abschnitteVon(rollen);
+    /* der Refrain zuerst – der Höhepunkt baut auf ihm auf */
+    abs.slice().sort((a, b) => (a.rolle === "r" ? -1 : 0) - (b.rolle === "r" ? -1 : 0)).forEach(a => {
+      if (gesehen.has(a.rolle)) return; gesehen.add(a.rolle);
+      const n = a.teile.length;
+      let takte;
+      if (a.rolle === "s") takte = strophe(n);
+      else if (a.rolle === "r") takte = refStueck = refrain(n);
+      else if (a.rolle === "h") takte = hoehe(n, refStueck || refrain(4));
+      else if (a.rolle === "v") takte = Array.from({ length: n }, aufbauTakt);
+      else if (a.rolle === "b") takte = bruecke(n);
+      else takte = vorspiel(n);
+      a.teile.forEach((p, k) => {
+        const x = takte[k], t = teilLeer();
+        t.bass = x.bass; t.melodie = x.mel.map(v => v < 0 ? -1 : Math.max(0, Math.min(14, Math.round(v)))); t.floete = x.fl.map(v => v < 0 ? -1 : Math.max(0, Math.min(7, Math.round(v))));
+        schlagwerk(t, a.rolle);
+        if ((a.rolle === "r" || a.rolle === "h") && k === n - 1 && st.rex.length && Math.random() < .5) t.rex[L - 1] = zufall(st.rex);
+        teile[p] = t;
+      });
+    });
+    return teile;
+  }
+  function stimmungLied(k, behalten, stufe, neueForm) {
     const roh = STIL[k], ist = stufe != null ? stufe : (typeof S.intensitaet === "number" ? S.intensitaet : 5), st = mitIntensitaet(roh, ist);
     const basis = behalten ? { tempo: S.tempo, transpose: S.transpose, modus: S.modus, instrument: S.instrument, band: S.band, ablauf: S.ablauf, swing: S.swing, bordun: S.bordun, takt: S.takt === 12 && roh.dreier ? 12 : 16 }
       : { tempo: tempoFuer(roh, ist) + zufall([-2, 0, 2]), transpose: zufall(st.transpose), modus: zufall(st.modus), instrument: zufall(st.instrument),
@@ -831,8 +1127,14 @@
           ablauf: zufall(st.ablauf), swing: st.swing, bordun: st.bordun, takt: roh.dreier && Math.random() < .5 ? 12 : 16 };
     st.taktJetzt = basis.takt;
     if (basis.takt === 12) basis.swing = 0;
-    return pruefen(Object.assign(basis, { variation: st.variation, teile: stimmungTeile(st, basis.modus), vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist }));
+    /* ein ganzes Lied: die Form bleibt beim Weiterkomponieren gleich (die Band ist mitten im Stück), ein neues Thema darf eine neue Form bringen */
+    const form = behalten && !neueForm && S.rollen && S.stimmung === k ? { rollen: S.rollen, ablauf: S.ablauf } : formBauen(roh);
+    let teile;
+    try { teile = liedTeile(st, basis.modus, form.rollen, basis.takt); basis.ablauf = form.ablauf; basis.rollen = form.rollen; }
+    catch (_) { teile = stimmungTeile(st, basis.modus); if (!/^[ABCD]+$/.test(basis.ablauf)) basis.ablauf = zufall(roh.ablauf); delete basis.rollen; }
+    return pruefen(Object.assign(basis, { variation: st.variation, teile, vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist }));
   }
+
   const kopie = o => JSON.parse(JSON.stringify(o));
 
   /* ---------- Zustand (gemerkt im Browser) ---------- */
@@ -844,14 +1146,15 @@
     const v = kopie(VORLAGEN[k]);
     return { tempo: v.tempo, transpose: v.transpose, modus: v.modus, swing: v.swing, bordun: v.bordun, variation: v.variation, instrument: v.instrument || "laute",
       band: Object.assign(BAND_START(), v.band || {}),
-      ablauf: v.ablauf, teile: { A: v.A || teilLeer(), B: v.B || teilLeer(), C: v.C || teilLeer(), D: v.D || teilLeer() }, ...(mix || MIX_START()) };
+      ablauf: v.ablauf, teile: Object.fromEntries(TEILE.map(p => [p, v[p] || teilLeer()])), ...(mix || MIX_START()) };
   };
   function pruefen(s) {
     const m = MIX_START();
     s.vol = Object.assign(m.vol, s.vol || {}); s.mute = Object.assign(m.mute, s.mute || {});
     s.teile = s.teile || {};
     TEILE.forEach(p => { s.teile[p] = Object.assign(teilLeer(), s.teile[p] || {}); });
-    if (!/^[ABCD]{1,8}$/.test(s.ablauf || "")) s.ablauf = "A";
+    if (!/^[A-P]{1,64}$/.test(s.ablauf || "")) s.ablauf = "A";
+    if (typeof s.rollen !== "string" || !/^[isvrbh]{16}$/.test(s.rollen)) delete s.rollen;
     s.band = Object.assign(BAND_START(), s.band || {});
     if (typeof s.master !== "number") s.master = 8;
     if (typeof s.hall !== "number") s.hall = 0;
@@ -942,26 +1245,50 @@
   /* ---------- Lied als kurzer Code für den Link ---------- */
   const hex = a => { let n = 0; a.forEach((v, i) => { if (v >= 0) n |= 1 << i; }); return n.toString(16).padStart(4, "0"); };
   const unhex = h => { const n = parseInt(h, 16) || 0; return Array.from({ length: SCHRITTE }, (_, i) => ((n >> i) & 1) ? 0 : -1); };
-  const ziffern = a => a.map(v => v < 0 ? "." : v).join("");
-  const unziffern = (str, max) => String(str || "").padEnd(SCHRITTE, ".").slice(0, SCHRITTE).split("").map(c => { const n = parseInt(c, 10); return isNaN(n) || n > max ? -1 : n; });
+  /* Töne als ein Zeichen: 0–9, darüber a–e (die zweite Oktave der Laute) */
+  const ziffern = a => a.map(v => v < 0 ? "." : v.toString(36)).join("");
+  const unziffern = (str, max) => String(str || "").padEnd(SCHRITTE, ".").slice(0, SCHRITTE).split("").map(c => { const n = parseInt(c, 36); return isNaN(n) || n > max ? -1 : n; });
   const zahl = (x, min, max, d) => { const n = parseInt(x, 10); return isNaN(n) ? d : Math.max(min, Math.min(max, n)); };
-  /* Format 5 = Format 4 + Taktart (12 = Dreivierteltakt) und Kulisse; ältere Links bleiben lesbar */
-  const kodieren = () => ["5", S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, S.variation, S.ablauf,
-    IDS.map(k => (S.mute[k] ? "m" : "") + S.vol[k]).join("")]
-    .concat(...TEILE.map(p => SPUREN.map(sp => sp.art === "an" ? hex(S.teile[p][sp.id]) : ziffern(S.teile[p][sp.id]))))
-    .concat([INSTRUMENTE.indexOf(S.instrument) + ["trommel", "floete", "ketten"].map(k => BAND[k].indexOf(S.band[k])).join("")])
-    .concat([S.takt === 12 ? 12 : 16, Math.max(0, KULISSEN.indexOf(S.kulisse))])
-    .join("-");
+  /* Format 6 = bis zu 16 Teile (nur so viele wie gebraucht) mit ihren Rollen, Laute in zwei Oktaven.
+     Format 5 = vier Teile + Taktart (12 = Dreivierteltakt) und Kulisse; ältere Links bleiben lesbar */
+  const kodieren = () => {
+    const genutzt = TEILE.filter(p => S.ablauf.includes(p) || IDS.some(k => S.teile[p][k].some(v => v >= 0))), n = Math.max(4, TEILE.indexOf(genutzt[genutzt.length - 1]) + 1);
+    return ["6", S.tempo, S.transpose, MODUS_LISTE.indexOf(S.modus), S.swing, S.bordun, S.variation, S.ablauf,
+      IDS.map(k => (S.mute[k] ? "m" : "") + S.vol[k]).join(""), n, S.rollen || "x"]
+      .concat(...TEILE.slice(0, n).map(p => SPUREN.map(sp => sp.art === "an" ? hex(S.teile[p][sp.id]) : ziffern(S.teile[p][sp.id]))))
+      .concat([INSTRUMENTE.indexOf(S.instrument) + ["trommel", "floete", "ketten"].map(k => BAND[k].indexOf(S.band[k])).join("")])
+      .concat([S.takt === 12 ? 12 : 16, Math.max(0, KULISSEN.indexOf(S.kulisse))])
+      .join("-");
+  };
   function dekodieren(code) {
     /* negative Tonart (z. B. -2) steht als "--2" im Code – vor dem Zerlegen schützen */
     const p = String(code).replace(/--(\d)/g, "-~$1").split("-").map(x => x.replace(/^~/, "-"));
+    if (p[0] === "6") {
+      const n = zahl(p[9], 1, TEILE.length, 4), F = SPUREN.length;
+      if (p.length !== 14 + n * F) return null;
+      const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, MODUS_LISTE.length - 1, 0)],
+        swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: String(p[7]).toUpperCase(),
+        ...MIX_START(), teile: {}, band: BAND_START() };
+      if (/^[isvrbh]{16}$/.test(p[10])) s.rollen = p[10];
+      const mix = p[8].match(/m?\d/g);
+      if (mix && mix.length === IDS.length) IDS.forEach((k, i) => { s.mute[k] = mix[i][0] === "m" ? 1 : 0; s.vol[k] = +mix[i].slice(-1); });
+      TEILE.slice(0, n).forEach((teilName, ti) => {
+        s.teile[teilName] = {};
+        SPUREN.forEach((sp, si) => { const feld = p[11 + ti * F + si]; s.teile[teilName][sp.id] = sp.art === "an" ? unhex(feld) : unziffern(feld, sp.zeilen - 1); });
+      });
+      const ins = String(p[11 + n * F] || "");
+      s.instrument = INSTRUMENTE[zahl(ins[0], 0, INSTRUMENTE.length - 1, 0)];
+      ["trommel", "floete", "ketten"].forEach((k, i) => { s.band[k] = BAND[k][zahl(ins[i + 1], 0, BAND[k].length - 1, 0)]; });
+      s.takt = p[12 + n * F] === "12" ? 12 : 16; s.kulisse = KULISSEN[zahl(p[13 + n * F], 0, KULISSEN.length - 1, 0)];
+      return pruefen(s);
+    }
     if ((p[0] === "4" && p.length === 10 + 4 * SPUREN.length) || (p[0] === "5" && p.length === 12 + 4 * SPUREN.length)) {
       const s = { tempo: zahl(p[1], 50, 180, 110), transpose: zahl(p[2], -5, 6, 0), modus: MODUS_LISTE[zahl(p[3], 0, MODUS_LISTE.length - 1, 0)],
         swing: zahl(p[4], 0, 1, 0), bordun: zahl(p[5], 0, 1, 1), variation: zahl(p[6], 0, 10, 0), ablauf: String(p[7]).toUpperCase(),
         ...MIX_START(), teile: {}, band: BAND_START() };
       const mix = p[8].match(/m?\d/g);
       if (mix && mix.length === IDS.length) IDS.forEach((k, i) => { s.mute[k] = mix[i][0] === "m" ? 1 : 0; s.vol[k] = +mix[i].slice(-1); });
-      TEILE.forEach((teilName, ti) => {
+      ["A", "B", "C", "D"].forEach((teilName, ti) => {
         s.teile[teilName] = {};
         SPUREN.forEach((sp, si) => {
           const feld = p[9 + ti * SPUREN.length + si];
@@ -1801,7 +2128,7 @@
     const sa = { laute: "mel", harfe: "harfe", mandoline: "mandoline" }[S.instrument];
     /* auch einen Ganzton höher – für die Anhebung im Höhepunkt */
     [0, 2].forEach(h => {
-      if (sa) for (let z = 0; z < 8; z++) saite(midiHz(tonMidi("melodie", z, S) - hebung + h), sa);
+      if (sa) for (let z = 0; z < SPUR.melodie.zeilen; z++) saite(midiHz(tonMidi("melodie", z, S) - hebung + h), sa);
       for (let z = 0; z < BASS_STUFEN.length; z++) saite(midiHz(tonMidi("bass", z, S) - hebung + h), "bass");
     });
     klaengeVorbereiten();
@@ -2323,7 +2650,7 @@
   const SCHLAGWERK = { klopf: 1, schelle: 1, trommel: 1, ketten: 1, rex: 1 };
   let wechsel = null, tempoJetzt = 0, intensitaetNeu = false, wechselAb = 0, ausklangAb = 0, ausklingt = false, brueckeBus = null;
   /* Stimmungen, bei denen ein Wechsel mit Paukenwirbel angekündigt wird (2 = zusätzlich Becken auf der Eins) */
-  const DRAMA = { kampf: 2, boss: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1, grusel: 1, hof: 1 };
+  const DRAMA = { heldenlied: 1, verfolgung: 2, ruinen: 1, kampf: 2, boss: 2, sieg: 2, reiter: 2, zwerge: 1, spannung: 1, unterreich: 1, reise: 1, grusel: 1, hof: 1 };
   /* Ende des laufenden Takts – liegt er weniger als einen Schlag entfernt, das Ende des nächsten */
   function taktEnde() {
     const sd = schrittDauer(), L = taktL(); let T = naechste + ((L - schritt) % L) * sd;
@@ -2360,7 +2687,19 @@
     hebung = 0; brk = null; brkAb = 99; gefuehl = null;
     const st = S.stimmung && STIL[S.stimmung]; if (!st || ausklingt || ausklangAb || wechsel) return;
     const L = S.ablauf.length, c = hoehepunkt(), naechst = (ab + 1) % L, TL = taktL();
-    const energie = (st.dichte || 1) >= .85, dunkel = ["grusel", "unterreich", "spannung"].includes(S.stimmung);
+    const energie = (st.dichte || 1) >= .85, dunkel = DUNKEL.includes(S.stimmung);
+    if (S.rollen) {
+      /* ganze Lieder: der Schlussrefrain steht einen Ganzton höher; am Ende eines Abschnitts vor Refrain oder Höhepunkt
+         ein Break, im Zwischenteil ab und zu halbes Taktgefühl, im zweiten Schlussrefrain doppeltes */
+      const r = rolleAn(ab), rn = rolleAn(naechst), endet = naechst === 0 || abschnittAnfang(naechst);
+      if (!dunkel && r === "h" && S.intensitaet >= 3) hebung = 2;
+      if (endet && rn !== r && (rn === "h" || rn === "r") && S.intensitaet >= 3 && Math.random() < (rn === "h" ? .7 : .4)) brk = energie ? "trommel" : "luft";
+      else if (endet && r !== "h" && r !== "i" && S.intensitaet >= 2 && Math.random() < .1) brk = "luft";
+      if (brk) brkAb = brk === "trommel" ? TL / 2 : TL - 4;
+      if (r === "b" && durchgang % 2 === 1 && TL === 16) gefuehl = "halb";
+      else if (r === "h" && energie && TL === 16 && S.intensitaet >= 4 && sektionNr(ab) % 2 === 1) gefuehl = "doppelt";
+      return;
+    }
     if (!dunkel && L > 2 && ab === c && durchgang % 2 === 1 && S.intensitaet >= 3) hebung = 2;
     if (L > 2 && naechst === c && ab !== c && S.intensitaet >= 3 && Math.random() < .55) { brk = energie ? "trommel" : "luft"; }
     else if (ab !== c && L > 1 && S.intensitaet >= 2 && Math.random() < .12) brk = "luft";
@@ -2412,7 +2751,7 @@
       const ein = einblend > 0 ? 1 - einblend / EINBLEND : 1;
       IDS.forEach(k => {
         if (S.mute[k]) return;
-        if (k === "floete" && gastSolist(abschnitt % S.ablauf.length)) return; /* im C-Teil spielt der Gast Echos Stimme als Solo */
+        if (k === "floete" && gastSolist(abschnitt % S.ablauf.length)) return; /* im Zwischenteil (alte Lieder: C-Teil) spielt der Gast Echos Stimme als Solo */
         /* weicher Übergang: vorher fällt das Schlagwerk weg, danach kommt es erst im zweiten Takt wieder dazu */
         if (SCHLAGWERK[k] && (ausduennen || (einblend > EINBLEND / 2))) return;
         let wert = variiert(k, daten[k][schritt], schritt, daten[k], v, letzterTakt);
@@ -2452,7 +2791,7 @@
           const st = S.stimmung && STIL[S.stimmung];
           wirbelJetzt = Math.random() < (st ? (st.chaos ? .25 : .15) : .3);
           /* Stimmung: das Thema darf sich einprägen – erst nach drei Durchgängen ein neues, leicht abgewandeltes Stück */
-          if (st && !hoerer && durchgang % 3 === 0) setTimeout(() => stimmungWeiter(true), 0);
+          if (st && !hoerer && durchgang % (S.ablauf.length >= 12 ? 2 : 3) === 0) setTimeout(() => stimmungWeiter(true), 0);
         }
       }
     }
@@ -2473,8 +2812,8 @@
   }
   function stimmungWeiter(neuesThema) {
     if (!S.stimmung || !STIL[S.stimmung]) return;
-    const neu = stimmungLied(S.stimmung, true);
-    S.teile = neu.teile; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
+    const neu = stimmungLied(S.stimmung, true, undefined, neuesThema);
+    S.teile = neu.teile; S.ablauf = neu.ablauf; if (neu.rollen) S.rollen = neu.rollen; else delete S.rollen; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
     /* mit dem neuen Thema greifen Barradin und Echo manchmal zu einem anderen Instrument – außer man hat sie selbst gewählt */
     if (neuesThema && !S.festBesetzung) {
       const st = STIL[S.stimmung], anders = (liste, jetzt) => { const r = liste.filter(x => x !== jetzt); return r.length ? zufall(r) : jetzt; };
@@ -2610,17 +2949,18 @@
     grusel: { pad: .55, farbe: "trem", tief: 1, gross: 1, gong: 1 }, klage: { pad: .6 }, hof: { pad: .55, horn: 1, trp: 1, gross: 1 },
     fey: { pad: .4, hoch: 1, glanz: 1 }, marktplatz: { pad: 0, volk: 1 }, pilger: { pad: .6, farbe: "orgel" }, reise: { pad: .5, gross: 1 },
     auenland: { pad: .45, farbe: "holz" }, shanty: { pad: .4, farbe: "holz" }, rast: { pad: .4, farbe: "holz" }, kamin: { pad: .35, farbe: "holz" },
-    dorffest: { pad: 0, volk: 1 }
+    dorffest: { pad: 0, volk: 1 }, trinklied: { pad: 0, volk: 1 },
+    heldenlied: { pad: .7, horn: 1, trp: 1, pos: 1, gross: 2 }, verfolgung: { pad: .8, ost: 1, horn: 1, gross: 2 }, ruinen: { pad: .6, hoch: 1, glanz: 1, gong: 1, gross: 1 }
   };
   const PAD_FARBE = { trem: ["vctrem", "vlntrem"], orgel: ["orgel", "orgel"], holz: ["fag", "klar"], blech: ["pos", "horn"], chor: ["stimme", "stimme"], holz2: ["klar", "fl"] };
   /* Klangfarbe des Teppichs: je Stimmung mehrere, gewählt nach dem Thema – mit jedem neuen Thema klingt der Hintergrund anders */
-  const ORCH_FARBEN = { kampf: ["", "blech"], boss: ["", "blech", "chor"], spannung: ["trem", "chor"], grusel: ["trem", "chor"], unterreich: ["trem", "chor", "orgel"],
+  const ORCH_FARBEN = { heldenlied: ["", "blech", "chor"], verfolgung: ["", "blech"], ruinen: ["chor", "holz2", "orgel"], kampf: ["", "blech"], boss: ["", "blech", "chor"], spannung: ["trem", "chor"], grusel: ["trem", "chor"], unterreich: ["trem", "chor", "orgel"],
     elben: ["", "chor", "holz2"], klage: ["", "chor", "holz"], pilger: ["orgel", "chor"], hof: ["", "blech", "holz2"], zwerge: ["", "blech", "chor"],
     auenland: ["holz", "holz2"], shanty: ["holz", "chor"], rast: ["holz", "holz2"], kamin: ["holz", "holz2", ""], reise: ["", "holz2"], sieg: ["", "blech"], reiter: ["", "blech"], fey: ["", "holz2"] };
   function orchFarbe(pr) {
     const l = S.stimmung && ORCH_FARBEN[S.stimmung];
     if (!l) return pr ? pr.farbe : "";
-    const m = (S.teile && S.teile.A && S.teile.A.melodie) || [], h = m.reduce((a, v, i) => a + (v + 2) * (i + 7), 0);
+    const m = (S.teile && TEILE.map(p => S.teile[p] && S.teile[p].melodie).find(x => x && x.some(v => v >= 0))) || [], h = m.reduce((a, v, i) => a + (v + 2) * (i + 7), 0);
     return l[h % l.length];
   }
   const orchProfil = () => S.orchester !== 0 && S.stimmung && ORCH[S.stimmung] ? ORCH[S.stimmung] : null;
@@ -2675,9 +3015,20 @@
     const sk = MODI[S.modus], d = BASS_STUFEN[zeile || 0], st = i => sk[i % 7] + 12 * Math.floor(i / 7), tr = S.transpose + hebung;
     return { grund: BASS_GRUND + 12 + tr + st(d), terz: MEL_GRUND + tr + st(d + 2), quinte: MEL_GRUND + tr + st(d + 4), q2: BASS_GRUND + 12 + tr + st(d + 4) };
   }
-  function hoehepunkt() { const i = S.ablauf.indexOf("D"); return i >= 0 ? i : S.ablauf.length - 1; }
+  /* Rollen im laufenden Lied: Abschnitt = Teile derselben Rolle hintereinander (eine Wiederholung beginnt einen neuen) */
+  const DUNKEL = ["grusel", "unterreich", "spannung", "ruinen"];
+  const rolleAn = ab => rolleVon(S, S.ablauf[ab] || "A");
+  const abschnittAnfang = ab => ab === 0 || rolleAn(ab) !== rolleAn(ab - 1) || S.ablauf[ab] <= S.ablauf[ab - 1];
+  function sektionNr(ab) { let n = 0; for (let i = 1; i <= ab; i++) if (abschnittAnfang(i)) n++; return n; }
+  function hoehepunkt() {
+    if (S.rollen) { for (let i = 0; i < S.ablauf.length; i++) if (rolleAn(i) === "h") return i; return S.ablauf.length - 1; }
+    const i = S.ablauf.indexOf("D"); return i >= 0 ? i : S.ablauf.length - 1;
+  }
+  const istHoch = ab => S.rollen ? rolleAn(ab) === "h" : ab === hoehepunkt();
+  const AUFBAU = { i: .3, s: .4, v: .65, r: .82, b: .5, h: 1 };
   /* wie weit das Orchester in diesem Teil schon „aufgebaut“ ist: 0 (Anfang) … 1 (Höhepunkt) */
   function aufbau(ab) {
+    if (S.rollen) return AUFBAU[rolleAn(ab)] || .5;
     const c = hoehepunkt(), L = S.ablauf.length;
     if (L <= 2) return ab === c ? 1 : .6;
     return ab < c ? .25 + .75 * ab / Math.max(1, c) : ab === c ? 1 : .7;
@@ -2707,12 +3058,12 @@
       oprobe("spic", ton, zeit, orchPan.vc, (.22 + .12 * int) * (schritt % 4 === 0 ? 1 : .75), { dauer: sd * 1.8, aus: .05 });
     }
     /* Hörner im Höhepunkt (bei hoher Intensität schon früher) */
-    if (pr.horn && (ab === c || S.intensitaet >= 8) && schritt % 8 === 0) {
+    if (pr.horn && (istHoch(ab) || (S.rollen && rolleAn(ab) === "r" && S.intensitaet >= 6) || S.intensitaet >= 8) && schritt % 8 === 0) {
       oprobe("horn", ak.grund - 12 + 12, zeit, orchPan.horn, .26 * (.6 + .5 * int), { ein: .12, aus: .35, dauer: 8 * sd + .2 });
       oprobe("horn", ak.q2, zeit, orchPan.horn, .18 * (.6 + .5 * int), { ein: .14, aus: .35, dauer: 8 * sd + .2 });
     }
     /* Blech im Höhepunkt: Trompeten auf Terz und Quinte, Posaune auf dem Grundton */
-    if (ab === c && schritt % 8 === 0 && (pr.trp || pr.pos)) {
+    if (istHoch(ab) && schritt % 8 === 0 && (pr.trp || pr.pos)) {
       const bl = .2 * (.6 + .5 * int), d8 = 8 * sd + .15;
       if (pr.trp) { oprobe("trp", ak.terz, zeit, orchPan.blech, bl * 1.3, { ein: .05, aus: .3, dauer: d8 }); oprobe("trp", ak.quinte, zeit, orchPan.blech, bl * 1.1, { ein: .05, aus: .3, dauer: d8 }); }
       if (pr.pos) oprobe("pos", ak.grund, zeit, orchPan.blech, bl * 1.1, { ein: .06, aus: .3, dauer: d8 });
@@ -3843,7 +4194,7 @@
   /* Die Figuren bekommen je eine Hülle, damit sie als Ganzes springen, sinken oder wackeln können */
   const BUEHNE_FIG = BUEHNE.replace(/\n <svg (x="\d+" y="\d+"[^>]*class="(\w+)")/g, '\n <g class="fg fg-$2"><svg $1').replace(/\n <\/svg>/g, "\n </svg></g>");
   /* wie das Publikum auf die Musik reagiert */
-  const PUB_STIMMUNG = { dorffest: "tanz", marktplatz: "tanz", sieg: "tanz", shanty: "tanz", auenland: "tanz", fey: "tanz", reiter: "tanz",
+  const PUB_STIMMUNG = { trinklied: "tanz", heldenlied: "nicken", verfolgung: "duck", ruinen: "wiegen", dorffest: "tanz", marktplatz: "tanz", sieg: "tanz", shanty: "tanz", auenland: "tanz", fey: "tanz", reiter: "tanz",
     kampf: "duck", boss: "duck", spannung: "duck", grusel: "duck", unterreich: "duck",
     elben: "wiegen", klage: "wiegen", kamin: "wiegen", pilger: "wiegen", rast: "wiegen", hof: "wiegen", reise: "nicken", zwerge: "nicken" };
   const PUB_STUECK = { trauermarsch: "wiegen", wiegenlied: "wiegen", elise: "wiegen", morgen: "wiegen", kanon: "wiegen", amazinggrace: "wiegen", scarborough: "wiegen",
@@ -4124,12 +4475,12 @@
      Sie kommen in passenden Stimmungen dazu und spielen eine eigene Stimme auf echten Aufnahmen (VSCO, gemeinfrei; FluidR3, CC BY).
      Die Gefallenen spielen als Geister mit. Stufe je Gast: 0 = nie, 1 = automatisch (passende Stimmungen), 2 = immer. */
   const GAESTE = [
-    { id: "gundren", name: "Gundren", sym: "⛏", seite: "l", gr: "tuba", rolle: "tuba", pegel: .5, stimmungen: ["zwerge", "dorffest", "marktplatz", "shanty"] },
-    { id: "nundro", name: "Nundro", sym: "⛏", seite: "l", gr: "pos", rolle: "posaune", pegel: .3, stimmungen: ["zwerge", "dorffest", "marktplatz", "shanty"] },
-    { id: "zilda", name: "Zilda", sym: "🗡", seite: "l", gr: "snare1", rolle: "marsch", pegel: .42, stimmungen: ["kampf", "boss", "reiter"] },
-    { id: "fagas", name: "Fagas", sym: "👻", seite: "l", gr: "glock", rolle: "glitzer", pegel: .26, geist: 1, stimmungen: ["fey", "elben", "klage"] },
-    { id: "kardal", name: "Kardal", sym: "👑", seite: "r", gr: "trp", rolle: "fanfare", pegel: .26, stimmungen: ["hof", "sieg", "zwerge"] },
-    { id: "dolgrimson", name: "Dolgrimson", sym: "⚓", seite: "r", gr: "horn", rolle: "signal", pegel: .34, stimmungen: ["reiter", "reise", "hof"] },
+    { id: "gundren", name: "Gundren", sym: "⛏", seite: "l", gr: "tuba", rolle: "tuba", pegel: .5, stimmungen: ["zwerge", "dorffest", "marktplatz", "shanty", "trinklied"] },
+    { id: "nundro", name: "Nundro", sym: "⛏", seite: "l", gr: "pos", rolle: "posaune", pegel: .3, stimmungen: ["zwerge", "dorffest", "marktplatz", "shanty", "trinklied"] },
+    { id: "zilda", name: "Zilda", sym: "🗡", seite: "l", gr: "snare1", rolle: "marsch", pegel: .42, stimmungen: ["kampf", "boss", "reiter", "verfolgung"] },
+    { id: "fagas", name: "Fagas", sym: "👻", seite: "l", gr: "glock", rolle: "glitzer", pegel: .26, geist: 1, stimmungen: ["fey", "elben", "klage", "ruinen"] },
+    { id: "kardal", name: "Kardal", sym: "👑", seite: "r", gr: "trp", rolle: "fanfare", pegel: .26, stimmungen: ["hof", "sieg", "zwerge", "heldenlied"] },
+    { id: "dolgrimson", name: "Dolgrimson", sym: "⚓", seite: "r", gr: "horn", rolle: "signal", pegel: .34, stimmungen: ["reiter", "reise", "hof", "heldenlied"] },
     { id: "ilvara", name: "Ilvara", sym: "🕷", seite: "r", gr: "oboe", rolle: "schief", pegel: .28, stimmungen: ["spannung", "grusel"] },
     { id: "ploopploopeen", name: "Ploopploopeen", sym: "🐟", seite: "r", gr: "stimme", rolle: "chor", pegel: .3, geist: 1, stimmungen: ["unterreich", "grusel"] }
   ];
@@ -4156,12 +4507,12 @@
     const st = S.stimmung; if (!st || !STIL[st] || !gaesteAn()) return [];
     return GAESTE.filter(g => { const s = gastStufe(g.id); return s === 2 || (s === 1 && g.stimmungen.includes(st) && S.intensitaet >= 2); });
   }
-  /* Der C-Teil gehört einem Gast: er spielt dort Echos Stimme als Solo. Wer dran ist, wechselt mit jedem neuen Thema. */
+  /* Der Zwischenteil (bei alten Liedern der C-Teil) gehört einem Gast: er spielt dort Echos Stimme als Solo. Wer dran ist, wechselt mit jedem neuen Thema. */
   function gastSolist(ab) {
-    if (!S.stimmung || S.ablauf[ab] !== "C") return null;
+    if (!S.stimmung || (S.rollen ? rolleAn(ab) !== "b" : S.ablauf[ab] !== "C")) return null;
     const k = gastKandidaten(); if (!k.length) return null;
     const eigen = k.filter(g => g.stimmungen.includes(S.stimmung)), pool = eigen.length ? eigen : k;
-    const f = (S.teile.C && S.teile.C.floete) || [], h = f.reduce((a, v, i) => a + (v + 2) * (i + 3), 0);
+    const tl = S.teile[S.ablauf[ab]], f = (tl && tl.floete) || [], h = f.reduce((a, v, i) => a + (v + 2) * (i + 3), 0);
     return pool[h % pool.length];
   }
   let gastSoloJetzt = null;
@@ -4169,7 +4520,8 @@
   function gaesteWaehlen(ab) {
     const c = hoehepunkt(), L = S.ablauf.length, so = gastSolist(ab);
     gastSoloJetzt = so;
-    const kand = so ? [so] : gastKandidaten().filter(g => L === 1 || ab === c || (ab > 0 && (ab + GAESTE.indexOf(g)) % 2 === 0));
+    const wer = S.rollen ? sektionNr(ab) : ab;
+    const kand = so ? [so] : gastKandidaten().filter(g => L === 1 || istHoch(ab) || (ab > 0 && (wer + GAESTE.indexOf(g)) % 2 === 0));
     gastJetzt = kand.slice(0, leicht() ? 1 : 3);
     gastJetzt.forEach(x => { if (x.rolle === "marsch") { sampleLaden("snare1"); sampleLaden("snare2"); } else probenLaden(x.gr); });
   }
@@ -4250,7 +4602,7 @@
     const sd = schrittDauer(), zeile = klingt(daten.bass, schritt), ak = akkordMidi(zeile);
     let n = 1; while (n < taktL() - schritt && klingt(daten.bass, schritt + n) === zeile) n++;
     const wechselt = schritt === 0 || (schritt % 4 === 0 && zeile !== klingt(daten.bass, schritt - 1));
-    const x = { ab, n, wechselt, takt: ab % 2, hoch: ab === hoehepunkt(), int: S.intensitaet / 10, ruhig: (STIL[S.stimmung].dichte || 1) < .7 };
+    const x = { ab, n, wechselt, takt: ab % 2, hoch: istHoch(ab), int: S.intensitaet / 10, ruhig: (STIL[S.stimmung].dichte || 1) < .7 };
     if (gastSoloJetzt && gastJetzt[0] === gastSoloJetzt) { gastSolo(gastSoloJetzt, zeit, sd, daten); return; }
     gastJetzt.forEach(g => { try { GAST_ROLLE[g.rolle](g, zeit, sd, ak, x); } catch (_) {} });
   }
@@ -4456,7 +4808,7 @@
     }
     ziele.forEach(z => z.querySelectorAll(".lw-wechselbalken").forEach(el => { el.style.transform = "scaleX(" + p.toFixed(3) + ")"; }));
   }
-  let leiste = null, leisteFrame = 0;
+  let leiste = null, leisteFrame = 0, leisteAuf = false;
   function intensitaetSetzen(w) {
     S.intensitaet = Math.max(0, Math.min(10, w));
     root.querySelectorAll(".lw-ival").forEach(x => { x.textContent = t().intStufen[S.intensitaet]; });
@@ -4470,32 +4822,72 @@
     leiste = document.createElement("div"); leiste.className = "lw-leiste"; leiste.hidden = true;
     leiste.innerHTML = '<button type="button" class="ll-play"></button><button type="button" class="ll-aus" title="">🎼</button>' +
       '<span class="ll-titel"><span class="ll-name"></span><span class="ll-naechste"></span><i class="lw-wechselbalken"></i></span>' +
-      '<span class="ll-int"><button type="button" class="ll-minus" aria-label="−">−</button><b class="ll-wert"></b><button type="button" class="ll-plus" aria-label="+">+</button></span>';
+      '<span class="ll-int"><button type="button" class="ll-minus" aria-label="−">−</button><b class="ll-wert"></b><button type="button" class="ll-plus" aria-label="+">+</button></span>' +
+      '<button type="button" class="ll-einst" aria-expanded="false">⚙</button>' +
+      '<div class="ll-panel" hidden>' +
+        '<label class="lw-kleinregler"><span class="ll-pm"></span><input type="range" min="0" max="10" step="1" data-ll="master"><b class="ll-pmw"></b></label>' +
+        '<label class="lw-kleinregler"><span class="ll-pk"></span><input type="range" min="0" max="10" step="1" data-ll="kulvol"><b class="ll-pkw"></b></label>' +
+        '<div class="ll-knoepfe"><button type="button" class="lw-schalter ll-kul"></button><button type="button" class="lw-schalter ll-hin"></button></div>' +
+      "</div>";
     document.body.appendChild(leiste);
     leiste.addEventListener("click", e => {
-      if (e.target.closest(".ll-play")) { const b = root.querySelector(".lw-play"); if (b) b.click(); }
+      if (e.target.closest(".ll-play")) { audioStart(); laeuft ? stopp(true) : start(true); try { zeichnen(); knoepfe(); } catch (_) {} }
       else if (e.target.closest(".ll-aus")) { const b = root.querySelector(".lw-ausklang"); if (b) b.click(); }
       else if (e.target.closest(".ll-minus")) intensitaetSetzen(S.intensitaet - 1);
       else if (e.target.closest(".ll-plus")) intensitaetSetzen(S.intensitaet + 1);
+      else if (e.target.closest(".ll-einst")) { leisteAuf = !leisteAuf; }
+      else if (e.target.closest(".ll-kul")) {
+        audioStart();
+        if (kul) { kulMerk = S.kulisse; kulisseStop(); }
+        else { if (S.kulisse === "keine" && kulMerk) S.kulisse = kulMerk; if (S.kulisse !== "keine") { merken(); kulisseStart(true); } }
+        try { zeichnen(); knoepfe(); } catch (_) {}
+      }
+      else if (e.target.closest(".ll-hin")) { leisteAuf = false; root.scrollIntoView({ block: "start", behavior: "smooth" }); }
       leisteAktualisieren();
+    });
+    leiste.addEventListener("input", e => {
+      const f = e.target.dataset && e.target.dataset.ll; if (!f) return;
+      const v = +e.target.value;
+      if (f === "master") { S.master = v; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = v * 10 + " %"); }
+      else { S.kulisseVol = v; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = v * 10 + " %"); }
+      root.querySelectorAll('[data-feld="' + f + '"]').forEach(r => { r.value = v; });
+      merken(); effekteAnwenden(); leisteAktualisieren();
     });
     const pruefen2 = () => { leisteFrame = 0; leisteAktualisieren(); };
     window.addEventListener("scroll", () => { if (!leisteFrame) leisteFrame = requestAnimationFrame(pruefen2); }, { passive: true });
     window.addEventListener("resize", () => { if (!leisteFrame) leisteFrame = requestAnimationFrame(pruefen2); });
   }
+  /* Die Leiste unten: im Pult und in der kompletten Ansicht, sobald die eigenen Knöpfe aus dem Bild sind –
+     und überall sonst auf der Seite, sobald einmal Musik oder Kulisse lief. */
   function leisteAktualisieren() {
     if (!leiste) return;
-    const kopf = root.querySelector(".lw-pult-kopf"), T = t();
+    const T = t(), vh = window.innerHeight || 800;
     let zeigen = false;
-    if (S.pult && kopf && !hoerer) {
-      const k = kopf.getBoundingClientRect(), r = root.getBoundingClientRect();
-      zeigen = k.bottom < 0 && r.bottom > 140;
+    if (!hoerer) {
+      const r = root.getBoundingClientRect(), imBild = r.top < vh && r.bottom > 0;
+      const steuer = root.querySelector(S.pult ? ".lw-pult-kopf" : ".lw-steuer");
+      if (imBild) {
+        if (steuer) { const k = steuer.getBoundingClientRect(); zeigen = (k.bottom < 0 || k.top > vh) && r.bottom > 140; }
+      } else zeigen = laeuft || pausiert || !!kul || !!ctx;
     }
+    const vorher = !leiste.hidden;
     leiste.hidden = !zeigen;
     document.documentElement.classList.toggle("lw-leiste-da", zeigen);
-    if (!zeigen) return;
+    if (vorher !== zeigen) { try { miniAnzeigen(); } catch (_) {} }
+    if (!zeigen) { leisteAuf = false; return; }
+    const pn = leiste.querySelector(".ll-panel"), eb = leiste.querySelector(".ll-einst");
+    pn.hidden = !leisteAuf; eb.setAttribute("aria-expanded", leisteAuf); eb.title = eb.ariaLabel = T.einstKurz;
+    if (leisteAuf) {
+      leiste.querySelector(".ll-pm").textContent = "🔊 " + T.master; leiste.querySelector(".ll-pk").textContent = "🌫 " + T.kulisseLaut;
+      const m = leiste.querySelector('[data-ll="master"]'), k = leiste.querySelector('[data-ll="kulvol"]');
+      if (document.activeElement !== m) m.value = S.master; if (document.activeElement !== k) k.value = S.kulisseVol;
+      leiste.querySelector(".ll-pmw").textContent = S.master * 10 + " %"; leiste.querySelector(".ll-pkw").textContent = S.kulisseVol * 10 + " %";
+      const kb = leiste.querySelector(".ll-kul"); kb.textContent = kul ? T.kulisseAn : T.kulisseAus; kb.setAttribute("aria-pressed", !!kul);
+      kb.hidden = !kul && S.kulisse === "keine" && !kulMerk;
+      leiste.querySelector(".ll-hin").textContent = T.zumLautenwerk;
+    }
     const p = leiste.querySelector(".ll-play");
-    p.textContent = laeuft ? "■" : "▶"; p.classList.toggle("laeuft", laeuft); p.setAttribute("aria-label", laeuft ? T.stopp : T.spielen);
+    p.textContent = laeuft ? "❚❚" : "▶"; p.classList.toggle("laeuft", laeuft); p.setAttribute("aria-label", laeuft ? T.miniPause : T.miniWeiter);
     const a = leiste.querySelector(".ll-aus"); a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; a.title = T.ausklangTipp;
     leiste.querySelector(".ll-name").textContent = S.titel || T.eigenesLied;
     const st = !!(S.stimmung && STIL[S.stimmung]);
@@ -4506,9 +4898,9 @@
   Object.assign(TX.de, { rundgang: "❔ Rundgang", rundgangTipp: "Kurzer Rundgang durch das Pult", weiter: "Weiter", zurueck: "Zurück", fertig: "Fertig", beenden: "Beenden",
     info: {
       intensitaet: "Wie viel los ist: links ruhig und sparsam, rechts dicht und wild. Die Änderung greift am nächsten Taktanfang.",
-      gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im C-Teil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
+      gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im Zwischenteil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
       speichern: "Merkt sich die aktuelle Stimmung samt Intensität, Kulisse, Hall, Instrumenten und Gästen – als neue Stimmung (⭐) oder als eigene Fassung einer vorhandenen (✎).",
-      musik: "Stimmungen komponieren endlos neue Stücke im passenden Charakter. Lieder sind fertige Stücke der Band und Cover alter Volksweisen, unter „Eigene“ liegen deine gespeicherten Lieder.",
+      musik: "Stimmungen komponieren endlos neue Lieder im passenden Charakter – mit Vorspiel, Strophe, einem Refrain zum Mitsummen, Zwischenteil und großem Schlussrefrain. Lieder sind fertige Stücke der Band und Cover alter Volksweisen, unter „Eigene“ liegen deine gespeicherten Lieder.",
       klang: "Kulissen sind Hintergrundgeräusche, die dauerhaft laufen. Effekte erklingen einmal auf Knopfdruck. Beide laufen über der Musik, die Lautstärke regelst du direkt über den Kacheln.",
       hall: "Raumhall für die Musik, die Kulissen, Cover und Klassiker – die Geräuscheffekte bleiben trocken. „Raum“ wählt die Art des Raums, Echo-Hall gilt nur für Echos Flöte."
     },
@@ -4527,9 +4919,9 @@
   Object.assign(TX.en, { rundgang: "❔ Tour", rundgangTipp: "A short tour of the console", weiter: "Next", zurueck: "Back", fertig: "Done", beenden: "Close",
     info: {
       intensitaet: "How busy it gets: left is calm and sparse, right is dense and wild. Changes take effect at the next bar.",
-      gaeste: "Characters from your story join in fitting moods and get a solo in part C. Expand to switch single guests on or off.",
+      gaeste: "Characters from your story join in fitting moods and get a solo in the bridge. Expand to switch single guests on or off.",
       speichern: "Saves the current mood with intensity, backdrop, reverb, instruments and guests – as a new mood (⭐) or as your own version of an existing one (✎).",
-      musik: "Moods keep composing new pieces in their character. Songs are finished pieces by the band and covers of old folk tunes; “Own” holds your saved songs.",
+      musik: "Moods keep composing new songs in their character – with intro, verse, a chorus to hum along, bridge and a big final chorus. Songs are finished pieces by the band and covers of old folk tunes; “Own” holds your saved songs.",
       klang: "Backdrops are background sounds that keep running. Effects play once per tap. Both play over the music; set their volume right above the tiles.",
       hall: "Room reverb for music, backdrops, covers and classics – sound effects stay dry. “Room” picks the kind of space, echo reverb only applies to Echo's flute."
     },
@@ -4687,8 +5079,8 @@
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b> ' + info("intensitaet") + '</span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
   const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler"><span>' + sym + " " + text + '</span><input type="range" min="0" max="10" step="1" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + wert * 10 + " %</b></label>";
-  Object.assign(TX.de, { kulisseKurz: "Kulisse", effekteKurz: "Effekte" });
-  Object.assign(TX.en, { kulisseKurz: "Backdrop", effekteKurz: "Effects" });
+  Object.assign(TX.de, { kulisseKurz: "Kulisse", effekteKurz: "Effekte", einstKurz: "Lautstärke und Kulisse", zumLautenwerk: "↑ Zum Lautenwerk" });
+  Object.assign(TX.en, { kulisseKurz: "Backdrop", effekteKurz: "Effects", einstKurz: "Volume and backdrop", zumLautenwerk: "↑ To the Lautenwerk" });
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
   const einstAuf = { musik: false, klang: false };
   const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
@@ -4852,7 +5244,7 @@
   const funkKnopfText = T => "📡 " + (funk && funk.status === "ok" ? (funk.zahl || 0) : funk ? "…" : T.funkKurz);
   function funkZustand() {
     const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
-      ablauf: S.ablauf, vol: S.vol, mute: S.mute, teile: S.teile, instrument: S.instrument, band: S.band, takt: S.takt };
+      ablauf: S.ablauf, rollen: S.rollen || null, vol: S.vol, mute: S.mute, teile: Object.fromEntries(TEILE.filter(p => S.ablauf.includes(p)).map(p => [p, S.teile[p]])), instrument: S.instrument, band: S.band, takt: S.takt };
     return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
       hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, gaeste: S.gaeste, laeuft };
   }
@@ -4912,7 +5304,7 @@
     IDS.forEach(k => { vol[k] = zahl(x.vol && x.vol[k], 0, 10, 7); mute[k] = x.mute && x.mute[k] ? 1 : 0; });
     return pruefen({ tempo: zahl(x.tempo, 40, 200, 110), transpose: zahl(x.transpose, -7, 7, 0), modus: MODUS_LISTE.includes(x.modus) ? x.modus : MODUS_LISTE[0],
       swing: x.swing ? 1 : 0, bordun: x.bordun ? 1 : 0, variation: zahl(x.variation, 0, 10, 0), ablauf: String(x.ablauf || "A"),
-      vol, mute, teile, instrument: String(x.instrument || ""), band: Object.assign({}, x.band || {}), takt: x.takt === 12 ? 12 : 16 });
+      vol, mute, teile, rollen: typeof x.rollen === "string" ? x.rollen : undefined, instrument: String(x.instrument || ""), band: Object.assign({}, x.band || {}), takt: x.takt === 12 ? 12 : 16 });
   }
   /* Position des Pults merken: an jedem Taktanfang springt der Zuhörer in denselben Teil wie Imre */
   let funkPos = null;
@@ -4966,7 +5358,6 @@
     if (S.pult) { pultZeichnen(T); return; }
     const tonarten = Array.from({ length: 12 }, (_, i) => i - 5).map(tr => '<option value="' + tr + '"' + (tr === S.transpose ? " selected" : "") + ">" + notenName(MEL_GRUND + tr) + "</option>").join("");
     const modi = MODUS_LISTE.map(m => '<option value="' + m + '"' + (m === S.modus ? " selected" : "") + ">" + T.modi[m] + "</option>").join("");
-    const ablaeufe = (ABLAEUFE.includes(S.ablauf) ? ABLAEUFE : ABLAEUFE.concat([S.ablauf])).map(a => '<option value="' + a + '"' + (a === S.ablauf ? " selected" : "") + ">" + a.split("").join(" – ") + "</option>").join("");
     const wahl = k => k === "melodie" ? { liste: INSTRUMENTE, wert: S.instrument, namen: T.instrumente }
       : BAND[k] ? { liste: BAND[k], wert: S.band[k], namen: T.band[k] } : null;
     const kopf = k => {
@@ -4986,7 +5377,7 @@
       raster += kopf(sp.id);
       if (zugeklappt[sp.id]) return;
       if (sp.art === "an") raster += rasterZeile(sp.id, 0, (SYMBOL[sp.id] && SYMBOL[sp.id][S.band[sp.id]]) || sp.sym, "sym");
-      else for (const z of (sp.id === "bass" ? BASS_ANZEIGE : Array.from({ length: sp.zeilen }, (_, k) => sp.zeilen - 1 - k))) raster += rasterZeile(sp.id, z, zeilenName(sp.id, z), (z === 0 || z === 7) && sp.id !== "rex" ? "grund" : (sp.id === "rex" ? "sym klein" : ""));
+      else for (const z of (sp.id === "bass" ? BASS_ANZEIGE : Array.from({ length: sp.zeilen }, (_, k) => sp.zeilen - 1 - k))) raster += rasterZeile(sp.id, z, zeilenName(sp.id, z), (z === 0 || z === 7 || z === 14) && sp.id !== "rex" ? "grund" : (sp.id === "rex" ? "sym klein" : ""));
     });
 
     root.innerHTML =
@@ -5007,11 +5398,14 @@
       konsole(T, true) +
       '<div class="lw-teile">' +
         '<span class="lw-teilgruppe"><span class="lw-teile-label">' + T.teil + ':</span><span class="lw-teilknoepfe">' +
-        TEILE.map(p => '<button type="button" class="lw-teil' + (teilBenutzt(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '">' + p + "</button>").join("") + "</span></span>" +
-        '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><select data-feld="ablauf">' + ablaeufe + "</select></label>" +
-        '<span class="lw-kopieren"><span class="lw-teile-label">' + T.kopierenNach(bearbeite) + ":</span>" +
-          TEILE.filter(z => z !== bearbeite).map(z => '<button type="button" class="lw-klein' + (kopierZiel === z ? " warnung" : "") + '" data-kopiere="' + z + '">' +
-            (kopierZiel === z ? T.ueberschreiben(z) : "→ " + z) + "</button>").join("") + "</span>" +
+        TEILE.map(p => '<button type="button" class="lw-teil r-' + rolleVon(S, p) + (teilBenutzt(p) || S.ablauf.includes(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '" title="' + esc(T.rollen[rolleVon(S, p)]) + '">' + p + "</button>").join("") + "</span></span>" +
+        '<label class="lw-feld lw-rolle"><span>' + T.rolleVon(bearbeite) + '</span><select data-feld="rolle">' +
+          ROLLEN.map(r => '<option value="' + r + '"' + (rolleVon(S, bearbeite) === r ? " selected" : "") + ">" + T.rollen[r] + "</option>").join("") + "</select></label>" +
+        '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><input type="text" data-feld="ablauf" value="' + esc(S.ablauf) + '" list="lw-ablaeufe" maxlength="64" spellcheck="false" autocomplete="off" autocapitalize="characters">' +
+          '<datalist id="lw-ablaeufe">' + ABLAEUFE.map(a => '<option value="' + a + '"></option>').join("") + "</datalist></label>" +
+        '<span class="lw-kopieren"><label class="lw-feld"><span>' + T.kopierenNach(bearbeite) + '</span><select data-feld="kopiere"><option value="">…</option>' +
+          TEILE.filter(z => z !== bearbeite).map(z => '<option value="' + z + '">' + z + (teilBenutzt(z) ? " •" : "") + "</option>").join("") + "</select></label>" +
+          (kopierZiel ? '<button type="button" class="lw-klein warnung" data-kopiere="' + kopierZiel + '">' + T.ueberschreiben(kopierZiel) + "</button>" : "") + "</span>" +
       "</div>" +
       '<div class="lw-scroll"><div class="lw-raster' + (taktL() === 12 ? " drei" : "") + '">' + raster + "</div></div>" +
       '<p class="lw-wisch">' + T.wischen + "</p>" +
@@ -5049,7 +5443,7 @@
     if (!mini) return;
     const T = t();
     const musik = laeuft || pausiert, geraeusch = !laeuft && (!!kul || !!klassikLauf), gemerkt = !laeuft && !geraeusch && !!kulMerk;
-    mini.hidden = !((musik || geraeusch || gemerkt) && !lautenwerkSichtbar);
+    mini.hidden = !((musik || geraeusch || gemerkt) && !lautenwerkSichtbar) || !!(leiste && !leiste.hidden);
     mini.classList.toggle("spielt", laeuft || geraeusch);
     const kk = mini.querySelector(".lw-mini-kul"), nurKul = !musik || geraeusch;
     kk.hidden = !(geraeusch || gemerkt);
@@ -5106,7 +5500,7 @@
     return pruefen({ tempo: 80 + Math.floor(Math.random() * 25) * 2, transpose: S.transpose, modus: zufall(MODUS_LISTE), instrument: zufall(INSTRUMENTE),
       band: { trommel: zufall(BAND.trommel), floete: zufall(BAND.floete), ketten: zufall(BAND.ketten) },
       swing: Math.random() < .3 ? 1 : 0, bordun: Math.random() < .7 ? 1 : 0, variation: S.variation, ablauf,
-      teile: { A: zufallsTeil(false), B: zufallsTeil(true), C: ablauf.includes("C") ? zufallsTeil(true) : teilLeer(), D: teilLeer() }, vol: S.vol, mute: S.mute });
+      teile: { A: zufallsTeil(false), B: zufallsTeil(true), C: ablauf.includes("C") ? zufallsTeil(true) : teilLeer() }, vol: S.vol, mute: S.mute });
   }
 
   /* ---------- Bedienung ---------- */
@@ -5127,7 +5521,7 @@
     const mix = { vol: S.vol, mute: S.mute };
     const behalten = { orchester: S.orchester, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse, gaeste: S.gaeste };
     let neu;
-    if (k === "leer") { neu = Object.assign({}, S, { teile: { A: teilLeer(), B: teilLeer(), C: teilLeer(), D: teilLeer() }, titel: "", stimmung: null }); }
+    if (k === "leer") { neu = Object.assign({}, S, { teile: Object.fromEntries(TEILE.map(p => [p, teilLeer()])), ablauf: "A", titel: "", stimmung: null }); delete neu.rollen; }
     else if (k === "zufall") neu = zufallsLied();
     else if (STIL[k] || (eigeneStimmungen[k] && STIL[eigeneStimmungen[k].basis])) {
       const eig = eigeneStimmungen[k], basis = eig ? eig.basis : k;
@@ -5136,7 +5530,7 @@
       if (laeuft && S) {
         const st = STIL[basis], tr = st.transpose.reduce((b, x) => Math.abs(x - S.transpose) < Math.abs(b - S.transpose) ? x : b, st.transpose[0]);
         neu.transpose = tr;
-        if (st.modus.includes(S.modus) && neu.modus !== S.modus) { neu.modus = S.modus; const st2 = mitIntensitaet(st, neu.intensitaet); st2.taktJetzt = neu.takt; neu.teile = pruefen({ teile: stimmungTeile(st2, neu.modus) }).teile; }
+        if (st.modus.includes(S.modus) && neu.modus !== S.modus) { neu.modus = S.modus; const st2 = mitIntensitaet(st, neu.intensitaet); st2.taktJetzt = neu.takt; let tl; try { tl = neu.rollen ? liedTeile(st2, neu.modus, neu.rollen, neu.takt) : stimmungTeile(st2, neu.modus); } catch (_) { tl = neu.teile; } neu.teile = pruefen({ teile: tl }).teile; }
       }
     }
     else neu = pruefen(ausVorlage(k, mix));
@@ -5354,7 +5748,13 @@
     if (f === "intensitaet" && S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetNeu = true; else stimmungWeiter(); }
     if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
-    if (f === "ablauf") { S.ablauf = e.target.value; merken(); }
+    if (f === "ablauf") { const v = String(e.target.value).toUpperCase().replace(/[^A-P]/g, "").slice(0, 64) || "A"; S.ablauf = v; e.target.value = v; merken(); zeichnen(); knoepfe(); }
+    if (f === "rolle") { const i = TEILE.indexOf(bearbeite), r = S.rollen || rollenStandard(); S.rollen = r.slice(0, i) + e.target.value + r.slice(i + 1); merken(); zeichnen(); knoepfe(); }
+    if (f === "kopiere" && e.target.value) {
+      const von = bearbeite, nach = e.target.value;
+      if (teilBenutzt(nach)) { kopierZiel = nach; zeichnen(); knoepfe(); status(t().sicher(nach)); return; }
+      kopierZiel = null; S.teile[nach] = kopie(S.teile[von]); merken(); bearbeite = nach; zeichnen(); knoepfe(); status(t().kopiert2(von, nach)); return;
+    }
     if (f === "kulisse") { audioStart(); S.kulisse = e.target.value; merken(); kulisseStart(true); zeichnen(); knoepfe(); }
     if (f === "liedwahl" && e.target.value) { vorlageWaehlen(e.target.value); }
     if (f === "raum") { S.raum = e.target.value; if (!S.hall) { S.hall = 5; const r = root.querySelector('[data-feld="hall"]'); if (r) r.value = 5; root.querySelector(".lw-hval").textContent = "50 %"; effekteAnwenden(); } merken(); raumAnwenden(); }
@@ -5611,6 +6011,10 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-teile-label { font-size: .78rem; letter-spacing: .06em; color: var(--ash); align-self: center; }
 .lw-teil { position: relative; width: 2.6rem; height: 2.3rem; border: 1px solid var(--line); background: none; color: var(--vellum); font-family: var(--display); font-size: 1.15rem; cursor: pointer; }
 .lw-teil.leer { color: var(--ash); border-style: dashed; }
+.lw-teil::before { content: ""; position: absolute; left: 3px; right: 3px; bottom: 2px; height: 3px; border-radius: 2px; background: var(--rf, transparent); opacity: .85; }
+.lw-teil.r-i { --rf: #8a8f9a; } .lw-teil.r-s { --rf: #6fa6d8; } .lw-teil.r-v { --rf: #d8b25a; } .lw-teil.r-r { --rf: #e07a46; } .lw-teil.r-b { --rf: #9a7ad8; } .lw-teil.r-h { --rf: #e64a5a; }
+.lw-teilknoepfe { flex-wrap: wrap !important; max-width: 100%; }
+.lw-ablauf input { width: min(22rem, 100%); font: inherit; font-family: var(--mono, monospace); letter-spacing: .08em; text-transform: uppercase; }
 .lw-teil[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
 .lw-teil.spielt::after { content: ""; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #7fd36b; box-shadow: 0 0 6px #7fd36b; }
 .lw-klein { border: 1px solid var(--line); background: none; color: var(--ash); font: inherit; font-size: .82rem; padding: .35rem .7rem; cursor: pointer; }
@@ -5770,6 +6174,13 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 .lw-pult-titel { position: relative; display: inline-flex; flex-direction: column; flex: 1 1 9rem; min-width: 0; padding-bottom: .3rem; }
 .lw-titel-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
+html.lw-leiste-da body { padding-bottom: 4.6rem; }
+.ll-einst { width: 2.2rem; height: 2.2rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--vellum); font-size: 1rem; }
+.ll-einst[aria-expanded="true"] { border-color: var(--ember); color: var(--ember); }
+.ll-panel { position: absolute; right: 0; bottom: calc(100% + .5rem); width: min(22rem, 100%); display: grid; gap: .55rem; padding: .8rem .9rem; border: 1px solid rgba(224,160,70,.55); border-radius: 16px; background: rgba(16,14,21,.97); box-shadow: 0 8px 28px rgba(0,0,0,.55); }
+.ll-panel[hidden] { display: none; }
+.ll-knoepfe { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ll-knoepfe [hidden] { display: none; }
 .lw-titel-naechste, .ll-naechste { font-size: .78rem; color: var(--ember); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lw-titel-naechste:empty, .ll-naechste:empty { display: none; }
 .lw-wechselbalken { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ember); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; transition: opacity .4s; border-radius: 2px; }
@@ -5777,6 +6188,8 @@ html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
 .lw-leiste { position: fixed; left: 50%; bottom: max(.6rem, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 60; width: min(40rem, calc(100% - 1.2rem)); display: flex; align-items: center; gap: .45rem; padding: .4rem .5rem; border: 1px solid rgba(224,160,70,.55); border-radius: 999px; background: rgba(16,14,21,.94); box-shadow: 0 8px 28px rgba(0,0,0,.55); backdrop-filter: blur(6px); animation: lwleisteein .25s ease-out; }
 .lw-leiste[hidden] { display: none; }
 @keyframes lwleisteein { from { transform: translate(-50%, 120%); opacity: 0; } }
+/* am Handy liegt unten die Navigationsleiste der Seite – die Musikleiste schwebt darüber */
+@media (max-width: 760px) { .lw-leiste { bottom: calc(66px + env(safe-area-inset-bottom, 0px)); } html.lw-leiste-da body { padding-bottom: calc(126px + env(safe-area-inset-bottom, 0px)); } }
 .lw-leiste button { font: inherit; cursor: pointer; }
 .ll-play { width: 2.6rem; height: 2.6rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--ember); background: var(--ember); color: var(--night); font-size: 1rem; }
 .ll-play.laeuft { background: none; color: var(--ember); }
