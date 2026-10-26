@@ -484,11 +484,13 @@
      B variiert es über andere Akkorde, C gehört Echo, D bringt das Motiv mit voller Besetzung zurück.
      Auf den Zählzeiten liegen immer Akkordtöne – so klingt es auch zufällig noch nach Musik. */
   const STIL = {
-    kampf: { gefuehl: 1, chaos: 1, riff: 1, modus: ["aeolisch", "phrygisch"], tempo: [128, 138], transpose: [-2, 0, 2], swing: 0, bordun: 1, variation: 2,
-      instrument: ["fidel", "dudelsack", "schalmei", "drehleier"], band: { trommel: ["pauke", "taiko", "trommel"], floete: ["horn", "oohchor"], ketten: ["ketten", "stampfen"] },
-      ablauf: ["AABACA", "AABCDD", "ABACABAD"], akkorde: [[0, 5, 4, 0], [0, 5, 1, 4], [0, 4, 5, 4], [0, 6, 0, 4], [0, 0, 5, 4], [0, 6, 5, 4]],
-      bass: ["puls", "galopp"], rhythmus: [[0, 2, 3, 4, 6], [0, 3, 4, 6], [0, 2, 4, 6]], lage: 3, dichte: 1, echo: "lang",
-      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], []], trommel: [[0, 3, 6, 8, 11, 14], [0, 6, 8, 12, 14]],
+    /* Kampf: Schlachtmusik wie im Film – Taiko, Pauken und Streicher treiben im 3-3-2, darüber ein heldenhaftes Thema
+       in langen Tönen (Fidel, Horn, Chor), die Akkorde schreiten i – VI – VII; kein Zufallsgeklapper mehr */
+    kampf: { form: "hymne", gefuehl: "halb", modus: ["aeolisch"], tempo: [126, 134], transpose: [-2, 0], swing: 0, bordun: 1, variation: 1,
+      instrument: ["fidel", "drehleier", "dudelsack"], band: { trommel: ["taiko", "pauke"], floete: ["horn", "oohchor"], ketten: ["stampfen", "ketten"] },
+      ablauf: ["AABACA"], akkorde: [[0, 5, 4, 0], [0, 5, 1, 4], [0, 5, 4, 4], [0, 2, 5, 4], [0, 5, 2, 4]],
+      bass: ["galopp", "puls"], rhythmus: [[0, 3, 6], [0, 4, 6], [0, 3, 4, 6], [0, 6]], lage: 3, dichte: 1, echo: "lang",
+      klopf: [[0, 8], [0, 4, 8, 12]], schelle: [[]], trommel: [[0, 3, 6, 8, 11, 14], [0, 3, 6, 8, 10, 11, 12, 14]],
       ketten: [[4, 12], [4, 12, 14]], rex: [0, 2] },
     unterreich: { chaos: 1, modus: ["phrygisch"], tempo: [56, 64], transpose: [-3, -5], swing: 0, bordun: 1, variation: 4,
       instrument: ["drehleier", "glocken", "illusion", "sitar"], band: { trommel: ["pauke", "taiko"], floete: ["okarina", "gesang", "shakuhachi", "oohchor", "bratsche"], ketten: ["ketten", "rassel"] },
@@ -597,12 +599,14 @@
       bass: ["viertel", "halbe"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 3, 4, 6]], lage: 5, dichte: .9, echo: "antwort",
       klopf: [[]], schelle: [[2, 6, 10, 14], [0, 4, 8, 12]], trommel: [[0, 8], [0, 6, 8, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
     /* Endgegner: noch schneller und wuchtiger als der Kampf */
-    boss: { gefuehl: 1, chaos: 1, riff: 1, modus: ["phrygisch"], tempo: [132, 142], transpose: [-2, 0, -4], swing: 0, bordun: 1, variation: 3,
-      instrument: ["fidel", "dudelsack", "schalmei", "drehleier"], band: { trommel: ["pauke", "trommel", "taiko"], floete: ["horn", "gesang", "oohchor"], ketten: ["ketten", "stampfen"] },
-      ablauf: ["AABCDD", "ABACABAD", "AABBCD"], akkorde: [[0, 6, 5, 4], [0, 5, 4, 0], [0, 0, 6, 0], [0, 5, 1, 4], [0, 4, 5, 6], [0, 0, 5, 4]],
-      bass: ["galopp", "puls"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 3, 4, 6, 7]], lage: 3, dichte: 1, echo: "lang",
-      klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14]], trommel: [[0, 3, 6, 8, 11, 14], [0, 3, 6, 8, 10, 11, 14]],
-      ketten: [[4, 12], [0, 6, 8, 14]], rex: [0, 2] },
+    /* Endgegner: übermächtig und düster wie die Brücke von Khazad-dûm – schwerer und breiter als der Kampf, phrygisch,
+       ein Riff, das sich festbeißt, Chor und tiefe Bläser, Amboss-Schläge und Gong; im Zwischenteil halbes Tempo */
+    boss: { form: "hymne", gefuehl: "halb", riff: 1, modus: ["phrygisch"], tempo: [104, 114], transpose: [-2, -4], swing: 0, bordun: 1, variation: 1,
+      instrument: ["fidel", "drehleier"], band: { trommel: ["taiko", "pauke"], floete: ["oohchor", "horn"], ketten: ["ketten", "stampfen"] },
+      ablauf: ["AABACA"], akkorde: [[0, 6, 0, 5], [0, 6, 5, 4], [0, 5, 6, 0], [0, 0, 6, 5], [0, 5, 4, 6]],
+      bass: ["galopp", "halbe"], rhythmus: [[0, 3, 6], [0, 6], [0, 2, 3, 6], [0, 4, 6]], lage: 2, dichte: 1, echo: "lang",
+      klopf: [[0, 8]], schelle: [[]], trommel: [[0, 3, 6, 8, 10], [0, 3, 6, 8, 10, 11, 12, 14]],
+      ketten: [[8], [0, 8]], rex: [0, 2] },
     /* ---- Lieder mit ganzer Form (Strophe, Refrain, Schlussrefrain) ---- */
     /* Heldenlied: eine Hymne auf die Gefährten – breiter Refrain zum Mitsingen, Hörner, am Ende einen Ganzton höher */
     heldenlied: { hebung: 1, gefuehl: 1, form: "hymne", zier: "triller", terzen: 1, modus: ["ionisch", "mixolydisch"], tempo: [80, 92], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 2,
@@ -681,8 +685,8 @@
     sieg: { s: ["fanfare", "terzen"], h: ["fanfare", "held"], b: ["steigend"], kopf: [4], seq: [1, 2] },
     hof: { s: ["menuett", "terzen", "bogen"], h: ["menuett", "fanfare"], b: ["bogen"], kopf: [2, 4], seq: [1] },
     reiter: { s: ["weite", "held"], h: ["held", "weite"], b: ["steigend", "weite"], kopf: [3, 4], seq: [1, 2] },
-    kampf: { s: ["sturm", "ruf"], h: ["sturm", "sprung"], b: ["steigend"], kopf: [2, 3], seq: [1, -1] },
-    boss: { s: ["sturm", "tiefe"], h: ["sturm", "ruf"], b: ["steigend"], kopf: [1, 3], seq: [1] },
+    kampf: { s: ["held", "weite", "ruf"], h: ["held", "fanfare"], b: ["steigend", "weite"], kopf: [4, 3], seq: [1, 2] },
+    boss: { s: ["tiefe", "zwergen"], h: ["ruf", "held"], b: ["steigend"], kopf: [1, 4], seq: [1] },
     verfolgung: { s: ["lauf", "sturm"], h: ["lauf", "sprung"], b: ["steigend"], kopf: [2], seq: [1, 2] },
     spannung: { s: ["wechsel", "spuk"], h: ["spuk", "ruf"], b: ["welle"], kopf: [1, 3], seq: [1, -1] },
     grusel: { s: ["spuk", "wechsel"], h: ["spuk", "seufzer"], b: ["welle"], kopf: [3], seq: [-1] },
@@ -2943,7 +2947,7 @@
       else if (endet && r !== "h" && r !== "i" && S.intensitaet >= 2 && Math.random() < .1) brk = "luft";
       if (brk) brkAb = brk === "trommel" ? TL / 2 : TL - 4;
       if (st.gefuehl && r === "b" && durchgang % 2 === 1 && TL === 16) gefuehl = "halb";
-      else if (st.gefuehl && r === "h" && energie && TL === 16 && S.intensitaet >= 6 && sektionNr(ab) % 2 === 1) gefuehl = "doppelt";
+      else if (st.gefuehl && st.gefuehl !== "halb" && r === "h" && energie && TL === 16 && S.intensitaet >= 6 && sektionNr(ab) % 2 === 1) gefuehl = "doppelt";
       return;
     }
     if (st.hebung && L > 2 && ab === c && durchgang % 2 === 1 && S.intensitaet >= 3) hebung = 2;
@@ -2951,7 +2955,7 @@
     else if (ab !== c && L > 1 && S.intensitaet >= 2 && Math.random() < .12) brk = "luft";
     if (brk) brkAb = brk === "trommel" ? TL / 2 : TL - 4;
     if (st.gefuehl && ab !== c && ab > 0 && S.ablauf[ab] === "B" && durchgang % 3 === 2 && TL === 16) gefuehl = "halb";
-    else if (st.gefuehl && ab === c && energie && durchgang % 2 === 0 && TL === 16 && S.intensitaet >= 6) gefuehl = "doppelt";
+    else if (st.gefuehl && st.gefuehl !== "halb" && ab === c && energie && durchgang % 2 === 0 && TL === 16 && S.intensitaet >= 6) gefuehl = "doppelt";
   }
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
   function wechselAnwenden(zeit) {
@@ -3202,7 +3206,7 @@
     kampf: { pad: .8, ost: 1, horn: 1, trp: 1, pos: 1, gross: 2 }, sieg: { pad: .8, horn: 1, trp: 1, gross: 2 },
     reiter: { pad: .7, ost: 1, horn: 1, trp: 1, gross: 2 }, zwerge: { pad: .7, horn: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1 },
     spannung: { pad: .6, farbe: "trem", ost: 1, gross: 1 }, unterreich: { pad: .6, farbe: "trem", tief: 1, tuba: 1, gross: 1, gong: 1 },
-    elben: { pad: .7, hoch: 1, glanz: 1 }, boss: { pad: .9, ost: 1, horn: 1, trp: 1, pos: 1, gross: 2, tief: 1 },
+    elben: { pad: .7, hoch: 1, glanz: 1 }, boss: { pad: .9, ost: 1, horn: 1, trp: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1 },
     grusel: { pad: .55, farbe: "trem", tief: 1, gross: 1, gong: 1 }, klage: { pad: .6 }, hof: { pad: .55, horn: 1, trp: 1, gross: 1 },
     fey: { pad: .4, hoch: 1, glanz: 1 }, marktplatz: { pad: 0, volk: 1 }, pilger: { pad: .6, farbe: "orgel" }, reise: { pad: .5, gross: 1 },
     auenland: { pad: .45, farbe: "holz" }, shanty: { pad: .4, farbe: "holz" }, rast: { pad: .4, farbe: "holz" }, kamin: { pad: .35, farbe: "holz" },
@@ -4975,7 +4979,7 @@
     sitar: { g: .3 }, kal: { g: .4 }, bra: { g: .28, halt: 1 }, pizz: { g: .4 }, blech: { g: .24, halt: 1 }, xyl: { g: .26 }, ooh: { g: .24, halt: 1 } };
   const KAPELLE = {
     kampf: [["blech", "stoss", "rh"], ["taiko", "puls", "svrh"], ["pizz", "ostinato", "sv"], ["bra", "unisono", "h", -12, 5], ["ooh", "halte", "rh", -12]],
-    boss: [["blech", "stoss", "srh"], ["taiko", "puls", "isvrh"], ["ooh", "halte", "rh", -12], ["pizz", "ostinato", "sb"], ["rgl", "glanz", "h"]],
+    boss: [["blech", "stoss", "srh"], ["taiko", "puls", "isvrh"], ["ooh", "halte", "srh", -12], ["pizz", "ostinato", "sb"], ["bra", "unisono", "h", -12, 5]],
     verfolgung: [["pizz", "ostinato", "svrh"], ["taiko", "puls", "rh"], ["pic", "unisono", "h", 12, 5], ["blech", "stoss", "h"], ["xyl", "ostinato", "s"]],
     spannung: [["pizz", "ostinato", "srh"], ["rgl", "glanz", "h"], ["cel", "echo", "r", 0, 4], ["sitar", "ostinato", "s"], ["spiel", "echo", "b"]],
     grusel: [["spiel", "unisono", "s", 12], ["ooh", "halte", "rh", -12], ["rgl", "glanz", "h"], ["cel", "echo", "b"], ["eh", "terz", "r", -12]],
@@ -5180,9 +5184,9 @@
   function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
   /* ---------- Mitspieler: Orchester, Kapelle und Gäste unter einem Dach ---------- */
   Object.assign(TX.de, { mitspieler: "🎻 Mitspieler", msStufe: ["Band allein", "Ein paar", "Volle Big Band"], msEigen: "eigene Auswahl", msAuf: "Einzeln einstellen",
-    msOrch: "🎻 Geister-Orchester", msKap: "🎺 Kapelle", msGaeste: "🎭 Gäste", msNurBand: "Nur die Band spielt.", msGastPasst: "in passenden Stimmungen" });
+    msOrch: "🎻 Geister-Orchester", msKap: "🎺 Kapelle", msGaeste: "🎭 Gäste", msNurBand: "Nur die Band spielt.", msGastPasst: "in passenden Stimmungen", msEinzeln: "Einzeln", msWaehle: "Wähle eine Stimmung, dann siehst du hier, wer mitspielt." });
   Object.assign(TX.en, { mitspieler: "🎻 Players", msStufe: ["Band alone", "A few", "Full big band"], msEigen: "custom", msAuf: "Adjust one by one",
-    msOrch: "🎻 Ghost orchestra", msKap: "🎺 Street band", msGaeste: "🎭 Guests", msNurBand: "Only the band plays.", msGastPasst: "in fitting moods" });
+    msOrch: "🎻 Ghost orchestra", msKap: "🎺 Street band", msGaeste: "🎭 Guests", msNurBand: "Only the band plays.", msGastPasst: "in fitting moods", msEinzeln: "Details", msWaehle: "Pick a mood to see who joins in." });
   let msAuf = false;
   /* welche Stufe gerade gilt – oder -1, wenn einzeln umgestellt wurde */
   function msStufe() {
@@ -5204,11 +5208,11 @@
     const gaeste = gaesteAn() ? gastKandidaten().map(g => g.name) : [];
     const wer = [S.orchester !== 0 && ORCH[S.stimmung] ? T.msOrch.replace(/^\S+\s/, "") : "", ...kap, ...gaeste].filter(Boolean);
     const chip = (an, html, attr, tipp, extra) => '<button type="button" class="lw-gchip' + (an ? " ein" : "") + (extra || "") + '" ' + attr + ' aria-pressed="' + an + '"' + (tipp ? ' title="' + esc(tipp) + '"' : "") + ">" + html + "</button>";
-    return '<div class="lw-mitspieler' + (msAuf ? " auf" : "") + '"><div class="lw-ms-kopf"><span class="lw-ms-titel">' + T.mitspieler + " " + info("mitspieler") + "</span>" +
-      '<div class="lw-ms-stufen" role="group" aria-label="' + esc(T.mitspieler) + '">' + T.msStufe.map((n, i) => '<button type="button" data-mitspieler="' + i + '" aria-pressed="' + (st === i) + '">' + n + "</button>").join("") + "</div>" +
-      (kap.length ? '<button type="button" class="lw-klein" data-aktion="kapneu" title="' + esc(T.kapNeu) + '">🎲</button>' : "") +
-      '<button type="button" class="lw-gz-auf" data-aktion="msauf" aria-expanded="' + msAuf + '" title="' + esc(T.msAuf) + '">' + (msAuf ? "▴" : "▾") + "</button></div>" +
-      '<div class="lw-ms-wer">' + (st === -1 ? "<i>" + esc(T.msEigen) + "</i> · " : "") + esc(wer.length ? wer.join(" · ") : st === 0 ? T.msNurBand : "–") + "</div>" +
+    return '<div class="lw-mitspieler' + (msAuf ? " auf" : "") + '"><div class="lw-ms-kopf">' +
+      '<div class="lw-ms-stufen" role="group" aria-label="' + esc(T.mitspieler) + '">' + T.msStufe.map((n, i) => '<button type="button" data-mitspieler="' + i + '" aria-pressed="' + (st === i) + '">' + n + "</button>").join("") + "</div></div>" +
+      '<div class="lw-ms-fuss"><div class="lw-ms-wer">' + (st === -1 ? "<i>" + esc(T.msEigen) + "</i> · " : "") + esc(wer.length ? wer.join(" · ") : st === 0 ? T.msNurBand : T.msWaehle) + "</div>" +
+      (kap.length ? '<button type="button" class="lw-klein" data-aktion="kapneu" title="' + esc(T.kapNeu) + '">🎲</button>' : "") + info("mitspieler") +
+      '<button type="button" class="lw-gz-auf lw-ms-einzeln" data-aktion="msauf" aria-expanded="' + msAuf + '" title="' + esc(T.msAuf) + '">' + T.msEinzeln + " " + (msAuf ? "▴" : "▾") + "</button></div>" +
       (msAuf ? '<div class="lw-ms-liste">' +
         '<div class="lw-ms-gruppe">' + chip(S.orchester !== 0, T.msOrch, 'data-aktion="orchester"', T.orchTipp, " lw-orch") + "</div>" +
         '<div class="lw-ms-gruppe">' + chip(S.kapelle !== 0, T.msKap, 'data-aktion="kapelle"', T.kapelleTipp) +
@@ -5555,7 +5559,7 @@
       (gaesteAuf ? '<div class="lw-gz-liste' + (an ? "" : " aus") + '">' + GAESTE.map(g => { const ein = gastStufe(g.id) > 0;
         return '<button type="button" class="lw-gchip' + (ein ? " ein" : "") + (g.geist ? " geist" : "") + (gastDa[g.id] ? " spielt" : "") + '" data-gast="' + g.id + '" aria-pressed="' + ein + '" title="' + esc(T.gastInstr[g.id]) + '">' + g.sym + " " + g.name + "</button>"; }).join("") + "</div>" : "") + "</div>";
   }
-  function gaesteNeu() { const z = root.querySelector(".lw-mitspieler"); if (z) z.outerHTML = mitspielerZeile(t()); }
+  function gaesteNeu() { const z = root.querySelector(".lw-zweiklapp"); if (z) z.outerHTML = zweiKlapp(t()); else { const m = root.querySelector(".lw-mitspieler"); if (m) m.outerHTML = mitspielerZeile(t()); } }
   root.addEventListener("click", e => {
     if (e.target.closest('[data-aktion="gaeste"]')) { e.stopPropagation(); S.gaeste = Object.assign({}, S.gaeste || {}, { _aus: gaesteAn() ? 1 : 0 }); merken(); gaesteVorladen(); gaesteNeu(); return; }
     if (e.target.closest('[data-aktion="gaesteauf"]')) { e.stopPropagation(); gaesteAuf = !gaesteAuf; gaesteNeu(); return; }
@@ -5571,7 +5575,7 @@
   /* ---------- Pult-Helfer: Aufklappen, Wechselanzeige, mitwandernde Steuerleiste ---------- */
   root.addEventListener("click", e => {
     const ei = e.target.closest("[data-einst]");
-    if (ei) { e.stopPropagation(); einstAuf[ei.dataset.einst] = !einstAuf[ei.dataset.einst]; boxNeu(ei.dataset.einst === "musik" ? "musik" : "klang"); return; }
+    if (ei) { e.stopPropagation(); einstAuf[ei.dataset.einst] = !einstAuf[ei.dataset.einst]; boxNeu(ei.dataset.einst === "musik" || ei.dataset.einst === "mitspieler" ? "musik" : "klang"); return; }
     if (e.target.closest('[data-aktion="funkauf"]')) { e.stopPropagation(); funkAuf = !funkAuf; zeichnen(); knoepfe(); return; }
     /* ein Klick: Musik aus, leeres Notenblatt, komplette Ansicht – los geht’s mit dem eigenen Lied */
     if (e.target.closest('[data-aktion="komponieren"]')) {
@@ -5752,7 +5756,7 @@
     stimmungen: () => root.querySelector(".lw-musik .lw-pult-gitter"), intensitaet: () => root.querySelector(".lw-intensitaet"),
     punkt: () => root.querySelector(".lw-musik .lw-pult-gitter button"), tabs: () => root.querySelector(".lw-musik .lw-tabs"),
     kulisse: () => root.querySelector(".lw-klang .lw-kul-gitter"), effekte: () => root.querySelector(".lw-klang .lw-pult-fx") || root.querySelector('.lw-klang [data-klangauf="fx"]'),
-    einst: () => root.querySelector(".lw-musik .lw-einst-kopf"), mitspieler: () => root.querySelector(".lw-mitspieler"), oben: () => root.querySelector(".lw-kopf-rechts")
+    einst: () => root.querySelector('.lw-musik [data-einst="musik"]'), mitspieler: () => root.querySelector('[data-einst="mitspieler"]'), oben: () => root.querySelector(".lw-kopf-rechts")
   };
   let rundgang = null;
   function rundgangStart() {
@@ -5893,7 +5897,16 @@
   Object.assign(TX.de, { kulisseKurz: "Kulisse", effekteKurz: "Effekte", einstKurz: "Lautstärke und Kulisse", zumLautenwerk: "↑ Zum Lautenwerk" });
   Object.assign(TX.en, { kulisseKurz: "Backdrop", effekteKurz: "Effects", einstKurz: "Volume and backdrop", zumLautenwerk: "↑ To the Lautenwerk" });
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
-  const einstAuf = { musik: false, klang: false };
+  const einstAuf = { musik: false, klang: false, mitspieler: false };
+  /* Mitspieler und Klang & Raum: zwei Knöpfe nebeneinander, beide standardmäßig zugeklappt; aufgeklappt erscheint das Feld darunter */
+  function zweiKlapp(T) {
+    const st = msStufe(), mk = einstAuf.mitspieler, kk = einstAuf.musik;
+    const knopf = (k, auf, txt, sub) => '<button type="button" class="lw-einst-kopf lw-zk-knopf' + (auf ? " auf" : "") + '" data-einst="' + k + '" aria-expanded="' + auf + '"><span class="lw-zk-titel">' + txt + ' <span>' + (auf ? "▴" : "▾") + '</span></span>' + (sub ? '<small>' + esc(sub) + "</small>" : "") + "</button>";
+    return '<div class="lw-einst lw-zweiklapp' + (mk || kk ? " auf" : "") + '"><div class="lw-zk-reihe">' +
+      knopf("mitspieler", mk, T.mitspieler, st >= 0 ? T.msStufe[st] : T.msEigen) +
+      knopf("musik", kk, "⚙ " + T.einstMusik, T.hall + " " + S.hall * 10 + " %") + "</div>" +
+      (mk ? mitspielerZeile(T) : "") + (kk ? '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>" : "") + "</div>";
+  }
   const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
   Object.assign(TX.de, { komponieren: "✍ Leeres Notenblatt", komponierenTipp: "Neues Lied von Grund auf – öffnet ein leeres Notenblatt in der kompletten Ansicht",
     werkTitel: "Selbst gestalten", komplettUnter: "Alle Spuren, Noten und Regler – zum Feinschliff und Komponieren",
@@ -5963,7 +5976,7 @@
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) + mitspielerZeile(T) + stimmSpeicherZeile(T) : "") + einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>") + "</section>";
+      (musikTab === "stimmungen" ? intRegler(T) + stimmSpeicherZeile(T) + zweiKlapp(T) : einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>")) + "</section>";
   }
   /* Kulissen und Effekte nehmen am Handy viel Platz: von den Kulissen zuerst nur neun (Favoriten und die laufende vorn),
      die Effekte und Momente sind zugeklappt, bis man sie braucht – das merkt sich die Seite */
@@ -7139,6 +7152,11 @@ html.hl-tastatur .lw-leiste { bottom: max(.6rem, env(safe-area-inset-bottom)); }
   .lw-tabs button { flex: 0 0 auto; }
 }
 .lw-einst { border-top: 1px solid var(--line); padding-top: .45rem; display: grid; gap: .5rem; }
+.lw-zk-reihe { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.lw-zk-knopf { display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; border: 1px solid var(--line) !important; border-radius: 10px; padding: .45rem .6rem !important; background: rgba(16,14,21,.45) !important; min-height: 2.9rem; }
+.lw-zk-knopf small { font-size: .75rem; color: var(--ash); }
+.lw-zk-knopf.auf { border-color: var(--ember) !important; color: var(--ember); }
+.lw-zk-titel { white-space: nowrap; }
 .lw-einst-kopf { background: none; border: 0; color: var(--ash); font: inherit; font-size: .85rem; text-align: left; padding: .2rem 0; cursor: pointer; }
 .lw-einst-kopf:hover, .lw-einst.auf .lw-einst-kopf { color: var(--ember); }
 .lw-kopf-rechts { display: inline-flex; gap: .4rem; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
@@ -7186,10 +7204,13 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-mitspieler { margin: .55rem 0 .25rem; display: flex; flex-direction: column; gap: .35rem; }
 .lw-ms-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .5rem; }
 .lw-ms-titel { font-size: .9rem; color: var(--vellum); white-space: nowrap; }
-.lw-ms-stufen { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: 1 1 auto; max-width: 26rem; }
+.lw-ms-stufen { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: 1 1 100%; }
 .lw-ms-stufen button { flex: 1 1 0; border: 0; background: rgba(16,14,21,.6); color: var(--ash); font: inherit; font-size: .82rem; padding: .45rem .5rem; min-height: 2.3rem; cursor: pointer; white-space: nowrap; }
 .lw-ms-stufen button + button { border-left: 1px solid var(--line); }
 .lw-ms-stufen button[aria-pressed="true"] { background: var(--ember); color: var(--night); font-weight: 600; }
+.lw-ms-fuss { display: flex; align-items: center; gap: .4rem; }
+.lw-ms-fuss .lw-ms-wer { flex: 1; }
+.lw-ms-einzeln { width: auto !important; border-radius: 999px !important; padding: 0 .7rem; white-space: nowrap; }
 .lw-ms-wer { font-size: .8rem; color: var(--ash); line-height: 1.35; }
 .lw-ms-wer i { color: var(--ember); font-style: normal; }
 .lw-ms-liste { display: flex; flex-direction: column; gap: .45rem; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(16,14,21,.35); }
