@@ -2729,7 +2729,7 @@
   }
   /* Alle Saitenklänge der aktuellen Tonleiter vorab berechnen,
      damit beim Spielen nichts mehr gerechnet werden muss (verhindert Hänger) */
-  function saitenVorbereiten() {
+  function saitenVorbereiten(nurSaiten) {
     if (!ctx) return;
     const sa = { laute: "mel", harfe: "harfe", mandoline: "mandoline" }[S.instrument];
     /* auch einen Ganzton höher – für die Anhebung im Höhepunkt */
@@ -2737,7 +2737,7 @@
       if (sa) for (let z = 0; z < SPUR.melodie.zeilen; z++) saite(midiHz(tonMidi("melodie", z, S) - hebung + h), sa);
       for (let z = 0; z < BASS_STUFEN.length; z++) saite(midiHz(tonMidi("bass", z, S) - hebung + h), "bass");
     });
-    klaengeVorbereiten();
+    if (!nurSaiten) klaengeVorbereiten();
   }
   function zupf(freq, zeit, art, laut) {
     const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -3391,12 +3391,52 @@
   /* Reihenfolge, in der das Schlagwerk auf den neuen Rhythmus umsteigt (Anteil der Takte bis zur Mitte) */
   const MORPH_FOLGE = { ketten: 0, rex: .2, schelle: .4, klopf: .6, trommel: .8 };
   const glatt = x => x * x * (3 - 2 * x);
+  /* Tonart-Annäherung: liegt die neue Stimmung in einer anderen Tonart oder Tonleiter, rückt das laufende Stück in den Takten
+     vor der Mitte in Ganz- oder Halbtonschritten an sie heran und färbt sich Stufe für Stufe heller oder dunkler (jede Stufe
+     ändert nur einen Ton der Leiter); was dann noch fehlt, holt das neue Stück Takt für Takt nach (tonZiel).
+     So erklingen alte und neue Musik im Moment des Wechsels in derselben Tonart – nichts klingt kurz schief. */
+  let tonZiel = null;
+  const HELL = ["lydisch", "ionisch", "mixolydisch", "dorisch", "aeolisch", "phrygisch"];
+  const tonSchritt = d => Math.sign(d) * Math.min(2, Math.abs(d));
+  const modAbstand = (a, b) => HELL.indexOf(b) - HELL.indexOf(a);
+  /* rückt S um einen Schritt Richtung Ziel – mit rest: nur, wenn die verbleibenden Takte sonst nicht reichen */
+  function tonRuecken(zielTr, zielMod, rest) {
+    const d = zielTr - S.transpose, m = HELL.includes(S.modus) && HELL.includes(zielMod) ? modAbstand(S.modus, zielMod) : 0;
+    if (d && (!rest || Math.ceil(Math.abs(d) / 2) >= rest)) S.transpose += tonSchritt(d);
+    if (m && (!rest || Math.abs(m) >= rest)) S.modus = HELL[HELL.indexOf(S.modus) + Math.sign(m)];
+  }
+  function tonNaehern(rest) { tonRuecken(wechsel.transpose, wechsel.modus, rest); }
+  /* wie viele Takte die Annäherung braucht (Ganztonschritte, Leiter je Takt um eine Stufe) */
+  const tonTakte = (a, b) => Math.max(Math.ceil(Math.abs(b.transpose - a.transpose) / 2), HELL.includes(a.modus) && HELL.includes(b.modus) ? Math.abs(modAbstand(a.modus, b.modus)) : 0);
+  function tonWeiter() {
+    if (tonZiel.warten > 0) { tonZiel.warten--; return; }
+    tonRuecken(tonZiel.ziel, tonZiel.modus, 0);
+    if (S.transpose === tonZiel.ziel && S.modus === tonZiel.modus) {
+      tonZiel = null; merken();
+      const sel = root.querySelector('[data-feld="transpose"]'); if (sel) sel.value = String(S.transpose);
+      const ml = root.querySelector('[data-feld="modus"]'); if (ml) ml.value = S.modus;
+    }
+  }
+  /* Saiten für die Zwischentonarten schon vorher stimmen – verteilt, damit nichts ruckelt */
+  function tonWegVorbereiten(von, bis, stuecke) {
+    const tr = []; for (let x = Math.min(von, bis); x <= Math.max(von, bis); x++) if (x !== von && x !== bis) tr.push(x);
+    tr.push(von, bis);
+    let i = 0;
+    stuecke.forEach(st => tr.forEach(x => setTimeout(() => {
+      if (!ctx) return;
+      const alt = S; S = Object.assign({}, st, { transpose: x }); try { saitenVorbereiten(true); } catch (_) {} S = alt;
+    }, 40 * i++)));
+  }
   /* Umbau beginnen: kein Lautstärkeloch – die Mitte des Übergangs (Takt „pivot“) übernimmt Bass, Melodie und Harmonie */
   function morphStarten() {
-    const N = uebergang, pivot = Math.max(1, Math.round(N / 2)), sd = schrittDauer(), L = taktL();
+    /* weit entfernte Tonart: die Mitte rückt einen Takt später, damit vorher genug Zeit zum Annähern bleibt */
+    const basis = Math.max(1, Math.round(uebergang / 2)), pivot = Math.max(basis, Math.min(basis + 1, tonTakte(S, wechsel) - 1)), N = Math.max(uebergang, pivot + 1);
+    const sd = schrittDauer(), L = taktL();
     morph = { N, pivot, takt: -1, tempoA: tempoJetzt || S.tempo, tempoB: wechsel.tempo };
     /* alles, was das neue Stück braucht, schon jetzt laden – zur Mitte des Umbaus muss es sofort erklingen */
     { const alt = S; S = wechsel; try { orchVorladen(); gaesteVorladen(); kapelleVorladen(); } catch (_) {} S = alt; }
+    tonZiel = null;
+    if (wechsel.transpose !== S.transpose || wechsel.modus !== S.modus) tonWegVorbereiten(S.transpose, wechsel.transpose, [S, wechsel]);
     const T = taktEnde() + pivot * L * sd; /* nur für die Fortschrittsanzeige */
     wechselAb = T; wechselStart = ctx.currentTime; ausduennen = false;
     /* falls ein früherer schneller Wechsel die Lautstärke abgesenkt hat: weich zurück */
@@ -3466,6 +3506,12 @@
   function wechselAnwenden(zeit, sanft) {
     const neu = wechsel; wechsel = null; wechselAb = 0;
     const raumAlt = S.raum;
+    /* Umbau: das neue Stück beginnt in der Tonart, die gerade klingt, und gleitet danach in seine eigene */
+    tonZiel = null;
+    if (sanft && S && (neu.transpose !== S.transpose || neu.modus !== S.modus)) {
+      tonZiel = { ziel: neu.transpose, modus: neu.modus, warten: 1 }; neu.transpose = S.transpose;
+      if (HELL.includes(S.modus) && HELL.includes(neu.modus)) neu.modus = S.modus;
+    }
     S = neu; abschnitt = 0; durchgang = 0; padAkkord = -1; orchVorladen();
     try { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); } catch (_) {}
     const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
@@ -3507,9 +3553,11 @@
       if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && morph) {
         morph.takt++;
+        if (wechsel && morph.takt < morph.pivot) tonNaehern(morph.pivot - morph.takt);
         if (morph.takt === morph.pivot && wechsel) wechselAnwenden(naechste, true);
         if (morph.takt >= morph.N) morph = null;
       }
+      if (schritt === 0 && tonZiel && !wechsel) tonWeiter();
       if (schritt === 0 && wechsel && !morph && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
       else if (schritt === 0 && intensitaetNeu && (intVorrat || naechste - ctx.currentTime < .15)) { intensitaetNeu = false; const v = intVorrat; intVorrat = null; stimmungWeiter(false, v); }
       if (schritt === 0) { teilPlanen(abschnitt % S.ablauf.length); try { kapJetzt = stilKey() && S.kapelle !== 0 ? kapPlan(abschnitt % S.ablauf.length) : null; } catch (_) { kapJetzt = null; } }
@@ -3653,7 +3701,7 @@
     const vonVorn = !weiter || !pausiert || schritt >= taktL() || abschnitt >= S.ablauf.length;
     if (vonVorn) { schritt = 0; abschnitt = 0; durchgang = 0; }
     /* jeder Start ist ein sanftes Intro: die Band kommt Schicht für Schicht dazu, das Schlagwerk erst nach ein paar Takten */
-    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; morph = null; morphEin = false; einblendMax = EINBLEND; padAkkord = -1; ausduennen = false; einblend = EINBLEND;
+    tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; morph = null; tonZiel = null; morphEin = false; einblendMax = EINBLEND; padAkkord = -1; ausduennen = false; einblend = EINBLEND;
     if (klassikLauf) klassikStopp(true, true);
     clearTimeout(fortsetzTimer); musikPauseAb = 0;
     /* … und die Lautstärke steigt von null an (gut 4 Sekunden bis zum vollen Pegel) */
@@ -6520,7 +6568,7 @@
   /* ---------- Rundgang: eingeblendet, Schritt für Schritt, ohne die Seite zu verlassen ---------- */
   Object.assign(TX.de, { rundgang: "❔ Rundgang", rundgangTipp: "Kurzer Rundgang durch das Pult", weiter: "Weiter", zurueck: "Zurück", fertig: "Fertig", beenden: "Beenden",
     info: {
-      uebergang: "Wie lange der Wechsel zur nächsten Stimmung dauert. Ab 2 Takten wird das laufende Stück Takt für Takt umgebaut: Das Tempo gleitet, das Schlagwerk steigt nach und nach auf den neuen Rhythmus um, in der Mitte übernimmt die neue Melodie. Bei 1 Takt wechselt es schnell – bei dramatischen Stimmungen mit Paukenwirbel.",
+      uebergang: "Wie lange der Wechsel zur nächsten Stimmung dauert. Ab 2 Takten wird das laufende Stück Takt für Takt umgebaut: Das Tempo gleitet, das Schlagwerk steigt nach und nach auf den neuen Rhythmus um, in der Mitte übernimmt die neue Melodie. Liegt die neue Stimmung in einer anderen Tonart, rückt die Musik vorher schrittweise an sie heran und gleitet danach in Ruhe ganz hinüber – im Moment des Wechsels klingt nichts schief. Bei 1 Takt wechselt es schnell – bei dramatischen Stimmungen mit Paukenwirbel.",
       intensitaet: "Wie viel los ist: links ruhig und sparsam, rechts dicht und wild. Die Änderung greift am nächsten Taktanfang.",
       gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im Zwischenteil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
       mitspieler: "Band allein: nur Barradin, Friedrich, Echo, Ezekiel und Rex. Ein paar Mitspieler: dazu das Geister-Orchester, ein Musiker der Kapelle und die Gäste aus eurer Geschichte. Volle Big Band: die ganze Kapelle. Aufgeklappt lässt sich jede Gruppe einzeln an- und abschalten; die Gäste kommen nur in Stimmungen, die zu ihnen passen.",
@@ -6544,7 +6592,7 @@
     ] });
   Object.assign(TX.en, { rundgang: "❔ Tour", rundgangTipp: "A short tour of the console", weiter: "Next", zurueck: "Back", fertig: "Done", beenden: "Close",
     info: {
-      uebergang: "How long the change to the next mood takes. From 2 bars on, the playing piece is rebuilt bar by bar: the tempo glides, the percussion switches to the new rhythm one by one, and halfway through the new melody takes over. At 1 bar it changes quickly – with a timpani roll for dramatic moods.",
+      uebergang: "How long the change to the next mood takes. From 2 bars on, the playing piece is rebuilt bar by bar: the tempo glides, the percussion switches to the new rhythm one by one, and halfway through the new melody takes over. If the new mood is in another key, the music moves towards it step by step beforehand and glides the rest of the way afterwards – nothing sounds off at the moment of the change. At 1 bar it changes quickly – with a timpani roll for dramatic moods.",
       intensitaet: "How busy it gets: left is calm and sparse, right is dense and wild. Changes take effect at the next bar.",
       gaeste: "Characters from your story join in fitting moods and get a solo in the bridge. Expand to switch single guests on or off.",
       mitspieler: "Band alone: just Barradin, Friedrich, Echo, Ezekiel and Rex. A few players: plus the ghost orchestra, one street-band musician and the guests from your story. Full big band: the whole street band. Expanded, every group can be switched on or off; guests only join moods that suit them.",
@@ -7305,9 +7353,16 @@
       neu = stimmungLied(basis, false, eig && eig.werte ? eig.werte.intensitaet : undefined);
       /* läuft schon Musik, bleibt die neue Stimmung möglichst nah an Tonart und Tonleiter der alten – so gleitet der Wechsel */
       if (laeuft && S) {
-        const st = STIL[basis], tr = st.transpose.reduce((b, x) => Math.abs(x - S.transpose) < Math.abs(b - S.transpose) ? x : b, st.transpose[0]);
-        neu.transpose = tr;
-        if (!st.lieder && st.modus.includes(S.modus) && neu.modus !== S.modus) { neu.modus = S.modus; const st2 = mitIntensitaet(st, neu.intensitaet); st2.taktJetzt = neu.takt; let tl; try { tl = neu.rollen ? liedTeile(st2, neu.modus, neu.rollen, neu.takt) : stimmungTeile(st2, neu.modus); } catch (_) { tl = neu.teile; } neu.teile = pruefen({ teile: tl }).teile; }
+        /* unter den Tonarten und Tonleitern der neuen Stimmung die mit den meisten gemeinsamen Tönen (und dem kleinsten Abstand) */
+        const st = STIL[basis], leitern = st.lieder ? [neu.modus] : st.modus, tonSet = (m, tr) => new Set(MODI[m].slice(0, 7).map(x => ((x + tr) % 12 + 12) % 12));
+        const altSet = tonSet(S.modus, S.transpose);
+        let best = null;
+        st.transpose.forEach(tr => leitern.forEach(m => {
+          const gemein = [...tonSet(m, tr)].filter(x => altSet.has(x)).length, wert = gemein - .35 * Math.abs(tr - S.transpose) + (m === S.modus ? .2 : 0);
+          if (!best || wert > best.wert) best = { tr, m, wert };
+        }));
+        neu.transpose = best.tr;
+        if (!st.lieder && best.m !== neu.modus) { neu.modus = best.m; const st2 = mitIntensitaet(st, neu.intensitaet); st2.taktJetzt = neu.takt; let tl; try { tl = neu.rollen ? liedTeile(st2, neu.modus, neu.rollen, neu.takt) : stimmungTeile(st2, neu.modus); } catch (_) { tl = neu.teile; } neu.teile = pruefen({ teile: tl }).teile; }
       }
     }
     else neu = pruefen(ausVorlage(k, mix));
@@ -7575,8 +7630,8 @@
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
     if (f === "intensitaet" && S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetVormerken(); else stimmungWeiter(); }
-    if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
-    if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
+    if (f === "transpose") { tonZiel = null; S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
+    if (f === "modus") { tonZiel = null; S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
     if (f === "ablauf" || f === "rolle" || (f === "kopiere" && e.target.value)) stimmungLoesen();
     if (f === "ablauf") { const v = String(e.target.value).toUpperCase().replace(/[^A-P]/g, "").slice(0, 64) || "A"; S.ablauf = v; e.target.value = v; merken(); zeichnen(); knoepfe(); }
     if (f === "rolle") { const i = TEILE.indexOf(bearbeite), r = S.rollen || rollenStandard(); S.rollen = r.slice(0, i) + e.target.value + r.slice(i + 1); merken(); zeichnen(); knoepfe(); }
