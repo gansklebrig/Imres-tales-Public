@@ -2072,13 +2072,51 @@
     try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
     if (stummAudio) { if (stummAudio.paused) stummAudio.play().catch(() => {}); return; }
     try {
-      const n = 800, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
+      /* 6 Sekunden: kürzere Töne zählt Android nicht als Medienwiedergabe – dann gingen die Kopfhörer-Tasten ins Leere */
+      const n = 8000 * 6, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
       w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
       v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, "data"); v.setUint32(40, n, true);
       for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
       let bin = ""; new Uint8Array(b).forEach(x => { bin += String.fromCharCode(x); });
       stummAudio = new Audio("data:audio/wav;base64," + btoa(bin)); stummAudio.loop = true; stummAudio.setAttribute("playsinline", "");
       stummAudio.play().catch(() => {});
+    } catch (_) {}
+    medienSitzung();
+  }
+  /* ---------- Kopfhörer- und Sperrbildschirm-Tasten ----------
+     Pause am (Bluetooth-)Kopfhörer hält Musik UND Kulisse an, Play setzt beides fort – genau dort, wo es war. */
+  let medienMerk = null, medienAn = false;
+  function medienSitzung() {
+    if (!("mediaSession" in navigator) || medienAn) return;
+    medienAn = true;
+    const ms = navigator.mediaSession, h = (a, f) => { try { ms.setActionHandler(a, f); } catch (_) {} };
+    h("pause", () => medienPause());
+    h("stop", () => medienPause());
+    h("play", () => medienWeiter());
+    medienStand();
+  }
+  function medienPause() {
+    if (!ctx) return;
+    medienMerk = { musik: laeuft, kul: kul ? kul.art : null, allein: !!(kul && kul.allein) };
+    if (laeuft) stopp(true);
+    if (kul) kulisseStop();
+    if (stummAudio) try { stummAudio.pause(); } catch (_) {}
+    medienStand(); try { knoepfe(); } catch (_) {}
+  }
+  function medienWeiter() {
+    const m = medienMerk; medienMerk = null;
+    if (stummAudio && stummAudio.paused) stummAudio.play().catch(() => {});
+    if (!m || m.musik || (!m.kul && !laeuft)) { if (!laeuft) start(true); }
+    else if (m.kul) { audioStart(); S.kulisse = m.kul; kulisseStart(true); }
+    medienStand(); try { knoepfe(); } catch (_) {}
+  }
+  function medienStand() {
+    if (!("mediaSession" in navigator)) return;
+    const ms = navigator.mediaSession, an = laeuft || !!kul;
+    try { ms.playbackState = an ? "playing" : "paused"; } catch (_) {}
+    try {
+      const titel = (S.titel || (S.stimmung && t().vorlagen[S.stimmung] ? t().vorlagen[S.stimmung].replace(/^[^\wÄÖÜäöü]+/, "") : "")) || t().titel || "Lautenwerk";
+      if (window.MediaMetadata && (!ms.metadata || ms.metadata.title !== titel)) ms.metadata = new MediaMetadata({ title: titel, artist: "Lautenwerk · Imres Tales", album: "Imres Tales" });
     } catch (_) {}
   }
   function audioStart() {
@@ -3021,7 +3059,7 @@
     planen(); timer = setInterval(planen, 30); taktgeber(true);
     bordunAn();
     malenStarten();
-    knoepfe(); funkAenderung();
+    knoepfe(); funkAenderung(); medienStand();
   }
   function stopp(pause) {
     laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; musikPauseAb = 0; if (klassikLauf) klassikStopp(true);
@@ -3031,7 +3069,7 @@
     if (wechsel) { S = wechsel; merken(); setTimeout(() => { zeichnen(); knoepfe(); }, 0); }
     ausduennen = false; einblend = 0;
     wechsel = null;
-    spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung();
+    spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung(); setTimeout(medienStand, 0);
   }
 
 
