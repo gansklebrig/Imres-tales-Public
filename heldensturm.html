@@ -3978,7 +3978,38 @@ GART.salamander=(c,t,e,A,F)=>{const w=Math.sin(t*5+A.s),fl=0.7+0.3*Math.sin(t*11
  ell(c,4,-10,6.5,5,F('#a8341a'));poly(c,F('#a8341a'),7,-12,15,-9,8,-7);gEye(c,7,-11.5,1.4,A.enr?'#ffffff':'#ffd040',true);
  const open=Math.max(A.wd,A.atk)*2;poly(c,F('#3a0a04'),9,-8,15,-8.5,13,-7+open);
  const ra=0.25-A.wd*0.9+A.atk*1.3;c.save();c.translate(8,0);c.rotate(ra);ln(c,F('#3a2a1a'),2,0,8,0,-20);poly(c,F('#ffb040'),-2,-20,0,-27,2,-20);if(A.q>=1){c.globalAlpha=0.4*fl;circ(c,0,-23,4,'#ff8a2a');c.globalAlpha=1}c.restore()};
-Object.assign(GVOICE,{schreifels:'gv_stein',salamander:'gv_spin'});Object.assign(GLOW,{schreifels:'#b080ff',salamander:'#ff8a2a'});
+Object.assign(GVOICE,{schreifels:'gv_stein',salamander:'gv_spin'});
+/* --- Der Stadtvogt: Duergar in Rot und Eisen, Helm mit Kamm, Hellebarde, Amtskette --- */
+GART.stadtvogt=(c,t,e,A,F)=>{const gl=0.55+0.35*Math.sin(t*3+A.s)+(A.enr?0.4:0);
+ gLegs(c,F('#2a2226'),4.2,A.lg,-4.5,4.5,6,13);
+ poly(c,F('#8a2a1a'),-12,10,-11,-6,11,-6,12,10);c.fillStyle=F('#4a4248');c.fillRect(-10,-7,20,9);ln(c,F('#6a6470'),1.2,-10,-2,10,-2);
+ for(let i=0;i<5;i++)circ(c,-6+i*3,2.5+Math.abs(i-2)*0.8,1.1,F('#e5b454'));
+ circ(c,0,-11,7,F('#7a7a82'));c.fillStyle=F('#5a5460');c.beginPath();c.arc(0,-12.5,7.8,Math.PI,0);c.fill();
+ poly(c,F('#c8501a'),-1.6,-20,0,-27,1.6,-20);poly(c,F('#c8501a'),-4,-19,-2,-25,0,-19.5);
+ poly(c,F('#c8c0b0'),-5,-8,5,-8,3.5,-2,0,1,-3.5,-2);gEye(c,2.6,-11.4,1.2,'#ff5a2a',A.enr);gEye(c,-1.8,-11.4,1.1,'#ff5a2a',A.enr);ln(c,F('#3a3a40'),1,-4,-13.2,0,-12.6);ln(c,F('#3a3a40'),1,1.2,-12.6,5,-13.4);
+ const ra=0.25-A.wd*1.3+A.atk*1.7;c.save();c.translate(11,0);c.rotate(ra);ln(c,F('#5a4030'),2.2,0,8,0,-22);poly(c,F('#9aa0aa'),0,-22,9,-19,9,-13,0,-16);poly(c,F('#9aa0aa'),-1,-22,0,-29,1,-22);c.globalAlpha=Math.min(1,gl)*0.6;ln(c,'#ff8a3a',0.8,1,-20,8,-17);c.globalAlpha=1;c.restore()};
+
+/* --- Der Feuerschlucker vom Markt: bunter Flickenrock, Fackel, aufgeblasene Backen, Flammenstoß beim Angriff --- */
+GART.feuerschlucker=(c,t,e,A,F)=>{const fl=0.7+0.3*Math.sin(t*14+A.s);
+ gLegs(c,F('#3a2a2a'),3,A.lg,-3.5,3.5,6,13);
+ poly(c,F('#8a2a1a'),-9,8,-8,-6,0,-7,0,8);poly(c,F('#e5b454'),0,8,0,-7,8,-6,9,8);for(let i=0;i<3;i++){circ(c,-4,-3+i*4,1,F('#e5b454'));circ(c,4,-3+i*4,1,F('#8a2a1a'))}
+ circ(c,0,-12,6.4,F('#8a8a92'));const puff=A.wd>0?1.2+A.wd:1;hE(c,-3.4,-10.4,2*puff,1.7*puff,F('#9a9aa2'));hE(c,3.4,-10.4,2*puff,1.7*puff,F('#9a9aa2'));
+ poly(c,F('#c8301a'),-6.4,-15,0,-24,6.4,-15);circ(c,0,-24,1.6,F('#e5b454'));gEye(c,2.4,-13,1.1,'#ffd040',A.enr);gEye(c,-2,-13,1,'#ffd040',A.enr);
+ const ra=-0.3-A.wd*0.8+A.atk*1.2;c.save();c.translate(-9,-2);c.rotate(ra);ln(c,F('#6a4a2a'),2,0,6,0,-10);c.globalAlpha=fl;poly(c,'#ff8a2a',-3,-10,0,-19-fl*3,3,-10);poly(c,'#ffe08a',-1.4,-10,0,-15-fl*2,1.4,-10);c.globalAlpha=1;c.restore();
+ if(A.atk>0.05&&A.q>=1){c.globalAlpha=A.atk;for(let i=0;i<4;i++)circ(c,8+i*4,-10+Math.sin(t*20+i)*1.5,2.6-i*0.4,i%2?'#ffd040':'#ff6a1a');c.globalAlpha=1}};
+
+/* --- Ein besessener Steinriese: grau wie Fels, Lendenschurz, violett glimmende Augen, hebt einen Brocken über den Kopf --- */
+GART.steinriese=(c,t,e,A,F)=>{const gl=Math.min(1,0.55+0.35*Math.sin(t*2.2+A.s)+(A.enr?0.35:0)),lift=A.wd*10;
+ gLegs(c,F('#5a544c'),5,A.lg*0.6,-5,5,6,14);
+ poly(c,F('#7a7268'),-12,8,-13,-7,-6,-11,6,-11,13,-7,12,8);poly(c,F('#5a4a34'),-12,5,12,5,10,11,-10,11);ln(c,F('#3e3428'),1,-12,5,12,5);
+ for(const[x,y]of[[-7,-6],[5,-3],[-2,2]]){c.globalAlpha=0.5;circ(c,x,y,1.6,F('#5e5850'));c.globalAlpha=1}
+ ln(c,F('#6a6258'),4.4,-12,-6,-15,-14-lift*0.8);ln(c,F('#6a6258'),4.4,12,-6,15,-14-lift*0.8);
+ if(A.wd>0.05||A.enr){const by=-22-lift;circ(c,0,by,8,F('#6a6258'));circ(c,-2,by-2,3,F('#7e766c'));c.globalAlpha=gl*0.6;ln(c,'#b080ff',1,-3,by+2,1,by-3,4,by+1);c.globalAlpha=1}
+ circ(c,0,-15,6.6,F('#8a8278'));ln(c,F('#5e5850'),1.2,-4,-18,4,-18.4);
+ c.globalAlpha=gl;gEye(c,2.4,-15.4,1.3,'#c090ff',true);gEye(c,-2.2,-15.4,1.2,'#c090ff',true);c.globalAlpha=1;
+ ln(c,F('#4a443e'),1.2,-2.4,-11.6,2.4,-11.6)};
+Object.assign(GVOICE,{stadtvogt:'gv_hum',feuerschlucker:'gv_hum',steinriese:'gv_stein'});Object.assign(GLOW,{stadtvogt:'#ff8a3a',feuerschlucker:'#ffb040',steinriese:'#b080ff'});
+Object.assign(GLOW,{schreifels:'#b080ff',salamander:'#ff8a2a'});
 
 /* ---------- Welt-Effekte rund um Wächter: Wutfunken, Vorzeichen-Skins ---------- */
 {const _dE=drawEnemy;drawEnemy=function(e,t){_dE(e,t);if(!e.guard||e.dead||e.corpse||!e.def.gx||G.paused)return;const id=e.def.gx;
