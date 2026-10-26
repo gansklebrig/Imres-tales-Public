@@ -73,7 +73,7 @@ Klangwelten · Erweiterung Oktober 2026 (amb/):
   aus 0 A.D. von Wildfire Games (https://play0ad.com), Lizenz: Creative Commons Namensnennung – Weitergabe unter gleichen
   Bedingungen 3.0 (CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/):
     Teppiche: Bauernhof (a_hof), Hafen (a_hafen), Markt (a_markt), Singvögel (a_tagvoegel), Rinnsal (a_rinnsal), Strom (a_strom),
-      Wildwasser (a_wildwasser), Wasserfall (a_wasserfall3), Brecher (a_brandung), Klippen (a_klippen), Regen (a_regen3, a_regen4),
+      Wildwasser (a_wildwasser), Brecher (a_brandung), Klippen (a_klippen), Regen (a_regen3, a_regen4),
       Schneesturm (a_schneesturm), Wind (a_wind3), Orkan (a_orkan)
     Einzelgeräusche: Kühe (e_kuh), Hühner (e_huhn), Schafe (e_schaf), Schweine (e_schwein), Pferd (e_ross), Hufschlag (e_hufe),
       Schritte im Schnee (e_schnee), Burgtor (e_tor), Schiffsrumpf (e_rumpf), Axt (e_axt), fallender Baum (e_baumfall),

@@ -1233,7 +1233,7 @@
     "a_wasserfall":.1828,"a_wind1":.0818,"a_wind2":.0963,"a_regen1":.0387,"a_regen2":.0462,"a_waldregen":.0248,"a_starkregen":.043,"a_zelt":.0196,"a_gewitter1":.0441,"a_gewitter2":.0412,
     "a_wellen1":.0623,"a_wellen2":.0559,"a_boot":.0343,"a_tropfen1":.0089,"a_tropfen2":.0249,"a_unterwasser":.1387,"a_kochen":.0825,"a_blubbern":.0647,
     "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0243, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfen3":.0474, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459,
-    "a_hof":.0499, "a_hafen":.0499, "a_markt":.0499, "a_tagvoegel":.0498, "a_rinnsal":.0496, "a_strom":.0485, "a_wildwasser":.0495, "a_wasserfall3":.0496, "a_brandung":.05, "a_klippen":.05, "a_regen3":.0499, "a_regen4":.0499, "a_schneesturm":.05, "a_wind3":.0444, "a_orkan":.05, "a_huehner":.05, "a_kuehe":.0491, "a_schafe":.0497, "a_schnurren":.0499, "a_schneeschritte":.0457, "a_kiesweg":.0255, "l_windspiel":.0274, "l_wal":.1221};
+    "a_hof":.0499, "a_hafen":.0499, "a_markt":.0499, "a_tagvoegel":.0498, "a_rinnsal":.0496, "a_strom":.0485, "a_wildwasser":.0495, "a_brandung":.05, "a_klippen":.05, "a_regen3":.0499, "a_regen4":.0499, "a_schneesturm":.05, "a_wind3":.0444, "a_orkan":.05, "a_huehner":.05, "a_kuehe":.0491, "a_schafe":.0497, "a_schnurren":.0499, "a_schneeschritte":.0457, "a_kiesweg":.0255, "l_windspiel":.0274, "l_wal":.1221};
   const ambReihe = (p, n) => Array.from({ length: n }, (_, i) => p + (i + 1));
   /* Ereignisse aus Aufnahmen: f = Dateien, tempo = Abspieltempo, folge = [min, max Anzahl, Abstand min, max] */
   const AMB_EV = {
@@ -1292,7 +1292,7 @@
       ev: [["moewe", [8, 22], .4, .5], ["glocke", [60, 140], .2, 1], ["windstoss", [30, 80], .3, .4], ["ruder", [90, 200], .25, .9], ["rumpf", [100, 220], .2, 1]] },
     schiff: { raum: .25, betten: [["a_boot", 1], ["a_wellen2", .7], ["a_wind1", .4], ["a_segel", .55], ["a_brandung", .25], ["a_wind3", .2]],
       ev: [["knarren", [8, 20], .4, .3], ["moewe", [15, 40], .3, .6], ["tuch", [10, 25], .35, .3], ["glocke", [50, 120], .25, .6], ["holzschritte", [25, 60], .3, .5], ["rumpf", [12, 30], .35, .3], ["kette", [60, 140], .25, .5], ["windstoss", [25, 60], .3, .3], ["leder", [40, 90], .2, .4]] },
-    wasserfall: { raum: .35, betten: [["a_wasserfall", .9], ["a_bach2", .55], ["a_voegel2", .28], ["a_wasserfall2", .4], ["a_fluss", .35], ["a_wasserfall3", .4], ["a_strom", .35], ["a_tagvoegel", .25]],
+    wasserfall: { raum: .35, betten: [["a_wasserfall", .9], ["a_bach2", .55], ["a_voegel2", .28], ["a_wasserfall2", .4], ["a_fluss", .35], ["a_wildwasser", .3], ["a_strom", .35], ["a_tagvoegel", .25]],
       ev: [["vogel", [10, 25], .3, .6], ["platsch", [20, 45], .25, .5], ["specht", [40, 100], .2, .8], ["frosch", [25, 60], .25, .8], ["ruder", [60, 150], .3, .6], ["nass", [50, 120], .25, .6], ["steinschlag", [120, 260], .15, 1]] },
     schmiede: { raum: .25, betten: [["a_feuer1", .75], ["a_feuer3", .35], ["a_lagerfeuer", .3], ["a_wind3", .08, { tief: 500 }], ["a_markt", .12, { tief: 1500 }], ["a_hof", .08, { tief: 1200 }]],
       ev: [["hammer", [6, 14], .55, .1], ["blasebalg", [12, 28], .35, .2], ["zischen", [20, 45], .3, .2], ["metall", [15, 35], .3, .3], ["zimmern", [40, 90], .25, .7], ["kettenhemd", [40, 90], .25, .4], ["ross", [90, 200], .25, .9], ["hufe", [80, 180], .25, .8]] },
