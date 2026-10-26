@@ -334,6 +334,71 @@
         });
       },
       lagen: { form: "stein", rand: "rgba(255,150,80,.15)", farben: ["#1e1612", "#18110e", "#110c0a"] }
+    },
+    /* XI · Die Slums ganz unten in Gracklstugh: schiefe Hütten, Lavaschein aus der Tiefe */
+    slums: {
+      partikel: "glut", unten: true,
+      malen(x, r) {
+        himmel(x, [[0, "#060405"], [0.35, "#140c0c"], [0.62, "#2a140c"], [0.75, "#3a1a0c"], [1, "#0c0806"]]);
+        // weit oben: die Lichter der Stadt, unerreichbar
+        hoehlenDecke(x, r, "#040303", 40);
+        for (let i = 0; i < 26; i++) { x.fillStyle = "rgba(255,170,80," + (0.15 + r() * 0.35).toFixed(2) + ")"; x.fillRect(r() * W, 50 + r() * 50, 2, 2); }
+        // Felswände links und rechts, eng zusammen
+        x.fillStyle = "#0e0a0a";
+        x.beginPath(); x.moveTo(0, 60); x.lineTo(58, 90); x.lineTo(46, 170); x.lineTo(70, 230); x.lineTo(54, 300); x.lineTo(0, 300); x.fill();
+        x.beginPath(); x.moveTo(W, 60); x.lineTo(W - 52, 100); x.lineTo(W - 40, 180); x.lineTo(W - 66, 240); x.lineTo(W - 50, 300); x.lineTo(W, 300); x.fill();
+        // Lavaschein aus den Spalten unten
+        glow(x, 200, 300, 230, "rgba(255,110,40,.2)");
+        // schiefe Hütten, übereinander gestapelt
+        const huette = (px, py, w, h, schief, dunkel) => {
+          x.save(); x.translate(px, py); x.rotate(schief);
+          x.fillStyle = dunkel; x.fillRect(-w / 2, -h, w, h);
+          x.beginPath(); x.moveTo(-w / 2 - 5, -h); x.lineTo(-w * 0.1, -h - h * 0.45); x.lineTo(w / 2 + 5, -h); x.closePath(); x.fill();
+          x.strokeStyle = "rgba(0,0,0,.45)"; x.lineWidth = 1;
+          for (let yy = -h + 6; yy < 0; yy += 7) { x.beginPath(); x.moveTo(-w / 2, yy); x.lineTo(w / 2, yy + (r() - 0.5) * 2); x.stroke(); }
+          x.restore();
+        };
+        [[90, 220, 42, 30, -0.06], [140, 214, 36, 26, 0.05], [262, 216, 44, 32, 0.07], [312, 224, 34, 26, -0.05], [200, 180, 40, 28, 0.03], [118, 176, 30, 22, -0.08], [286, 176, 32, 24, 0.06]]
+          .forEach(([px, py, w, h, s]) => huette(px, py, w, h, s, "#1c1210"));
+        [[70, 290, 54, 46, 0.04], [150, 296, 46, 40, -0.05], [244, 294, 52, 44, 0.05], [330, 292, 56, 48, -0.04]]
+          .forEach(([px, py, w, h, s]) => huette(px, py, w, h, s, "#140d0b"));
+        // Stege, Leitern, Wäscheleinen
+        x.strokeStyle = "#2a1a12"; x.lineWidth = 3;
+        x.beginPath(); x.moveTo(60, 222); x.lineTo(340, 226); x.stroke();
+        x.beginPath(); x.moveTo(100, 178); x.lineTo(304, 180); x.stroke();
+        x.lineWidth = 2;
+        [[176, 182, 226], [232, 228, 292]].forEach(([px, y0, y1]) => { x.beginPath(); x.moveTo(px, y0); x.lineTo(px, y1); x.moveTo(px + 8, y0); x.lineTo(px + 8, y1); x.stroke(); for (let yy = y0 + 6; yy < y1; yy += 8) { x.beginPath(); x.moveTo(px, yy); x.lineTo(px + 8, yy); x.stroke(); } });
+        x.strokeStyle = "rgba(90,70,60,.6)"; x.lineWidth = 0.8;
+        x.beginPath(); x.moveTo(110, 196); x.quadraticCurveTo(200, 212, 290, 196); x.stroke();
+        [[140, 201, "#3a2a26"], [170, 205, "#2a2430"], [228, 205, "#3a2a20"], [262, 200, "#2a2a2a"]].forEach(([px, py, f]) => { x.fillStyle = f; x.fillRect(px - 5, py, 10, 12); });
+        // Lavarinne quer hinter der vordersten Gasse
+        const lg = x.createLinearGradient(0, 286, 0, 300); lg.addColorStop(0, "#ffcf7a"); lg.addColorStop(0.4, "#ff7a2a"); lg.addColorStop(1, "#7a1e0c");
+        x.fillStyle = lg; x.fillRect(0, 290, W, 10);
+        x.fillStyle = "rgba(40,14,8,.7)"; for (let i = 0; i < 14; i++) x.fillRect(r() * W, 291 + r() * 5, 8 + r() * 14, 2);
+        // ein Drachenkopf-Zeichen an der Wand: hier waren die Grauen Geister
+        x.strokeStyle = "rgba(168,159,143,.35)"; x.lineWidth = 1.5;
+        x.beginPath(); x.arc(30, 210, 10, 0, Math.PI * 2); x.stroke();
+        x.beginPath(); x.moveTo(36, 206); x.lineTo(28, 204); x.lineTo(22, 212); x.lineTo(30, 214); x.lineTo(38, 202); x.stroke();
+      },
+      deko(x, t) {
+        // flackernde Fenster
+        [[90, 204], [140, 200], [262, 200], [200, 166], [70, 266], [244, 270], [330, 266]].forEach(([px, py], i) => {
+          const a = 0.35 + 0.3 * Math.sin(t * (3 + i % 3) + i * 1.7) * Math.sin(t * 1.3 + i);
+          glow(x, px, py, 14, "rgba(255,150,60," + (Math.max(0.05, a) * 0.6).toFixed(2) + ")");
+          x.fillStyle = "rgba(255,180,90," + Math.max(0.1, a).toFixed(2) + ")"; x.fillRect(px - 3, py - 4, 6, 8);
+        });
+        // Lavarinne pulsiert, Blasen steigen
+        glow(x, 200, 294, 200, "rgba(255,120,40," + (0.1 + 0.05 * Math.sin(t * 1.4)).toFixed(2) + ")");
+        for (let i = 0; i < 6; i++) {
+          const ph = (t * 0.6 + i / 6) % 1, px = (i * 71 + 30) % W;
+          x.fillStyle = "rgba(255,210,120," + (0.8 * (1 - ph)).toFixed(2) + ")";
+          x.beginPath(); x.arc(px, 292 - ph * 10, 1.5 + ph * 2, 0, 7); x.fill();
+        }
+        // ein Paar Augen im Dunkeln zwischen den Hütten
+        const blinz = (t % 5) < 4.6 ? 1 : 0;
+        if (blinz && (t % 11) < 6) { x.fillStyle = "rgba(223,232,255,.7)"; x.fillRect(216, 206, 2.5, 1.5); x.fillRect(222, 206, 2.5, 1.5); }
+      },
+      lagen: { form: "stein", rand: "rgba(255,140,60,.2)", farben: ["#1e1410", "#170f0c", "#100a08"] }
     }
   };
 

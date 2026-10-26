@@ -4,11 +4,12 @@
    Friedrich erzählt die Kampagne nach, Kapitel für Kapitel:
    Straße nach Phandalin → Goblinhöhle → Schloss Crackmore → Wachturm →
    magische Schmiede → Donnerbaum → Ausbruch im Unterreich →
-   Spinnweben → unterirdischer See → Gracklstugh → endlose Nacht.
+   Spinnweben → unterirdischer See → Gracklstugh → Slums der Grauen
+   Geister → endlose Nacht.
    Jedes Kapitel hat eine eigene Kulisse (waldlauf-welten.js), eigene
    Gegner (waldlauf-figuren.js malt die, für die es kein Bild gibt) und
    einen Höhepunkt (Glasstab, Nezna, Venomfang, Ilvara, Wraith,
-   Demogorgon, der rasende Riese …).
+   Demogorgon, der rasende Riese, Drokey …).
    Ziehen & loslassen spannt den Bogen. Rex bellt, bevor etwas
    auftaucht. Nach jeder Welle wählt man eine Gabe.
    Drei Schwierigkeitsstufen, Pause, Bonusziele, Kapitelwahl (Übung)
@@ -27,13 +28,13 @@
   const schreib = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const mischen = l => { for (let i = l.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [l[i], l[j]] = [l[j], l[i]]; } return l; };
-  const ROEMISCH = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+  const ROEMISCH = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"];
 
   /* ---------- Texte ---------- */
   const TX = {
     de: {
       label: "Waldläufer-Probe", titel: "Friedrichs Jagd",
-      text: "Friedrich erzählt eure Kampagne nach: vom Hinterhalt auf der Straße bis nach Gracklstugh. Spann den Bogen, halte die Gegner vom Lager fern und hör auf Rex: Er wittert sie zuerst.",
+      text: "Friedrich erzählt eure Kampagne nach: vom Hinterhalt auf der Straße bis hinunter in die Slums von Gracklstugh. Spann den Bogen, halte die Gegner vom Lager fern und hör auf Rex: Er wittert sie zuerst.",
       steuerung: "Irgendwo ins Bild tippen, zurückziehen, zielen, loslassen. Je weiter du ziehst, desto kräftiger der Schuss.",
       steuerungKreuz: "Fadenkreuz: Einfach auf die Stelle klicken oder tippen, die der Pfeil treffen soll. Gedrückt halten schießt weiter.",
       zielTitel: "Zielen", zielArten: { ziehen: "🏹 Bogen ziehen", kreuz: "⌖ Fadenkreuz" },
@@ -52,12 +53,14 @@
         { titel: "Der Ausbruch", text: "Die nette Druidin hat uns mit Kräuternebel betäubt. Wir wachen in Ketten im Unterreich auf. Echo nagt als Ratte die Fesseln durch, Barradin beleidigt die Wachen, und im Hof wüten Dämonen. Dann zeigt Ilvara ihr wahres Gesicht.", wellen: ["Die Wachen stürmen herein", "Dämonen im Hof"] },
         { titel: "Durch die Spinnweben", text: "Immer tiefer, über Schluchten und Netze. Spinnen seilen sich von der Decke ab, Ettercaps lauern dazwischen. Im Grab der Magierin Khaem erhebt sich ein Wraith. Treffen kann man ihn nur, wenn er sichtbar ist.", wellen: ["Spinnen von der Decke", "Das Grab der Magierin"] },
         { titel: "Der unterirdische See", text: "Ploopploopeen bittet uns um Hilfe gegen die Anhänger eines falschen Gottes. In der Stadt der Kuo-Toa bricht Chaos aus. Dann steigt Demogorgon aus dem See. Haltet durch, bis das Boot ablegt. Oder boxt ihn diesmal wirklich.", wellen: ["Chaos in der Stadt", "Demogorgon erwacht"] },
-        { titel: "Gracklstugh", text: "Kardal, der Späher, ist in Wahrheit ein Prinz. Wir dürfen in der Stadt bleiben, doch etwas stimmt hier nicht: Stimmen in den Köpfen. Besessene Duergar greifen an, und dann rast ein Riese durch die Gassen. Betäuben, nicht töten.", wellen: ["Stimmen in den Köpfen", "Der rasende Riese"] }
+        { titel: "Gracklstugh", text: "Kardal, der Späher, ist in Wahrheit ein Prinz. Wir dürfen in der Stadt bleiben, doch etwas stimmt hier nicht: Stimmen in den Köpfen. Besessene Duergar greifen an, und dann rast ein Riese durch die Gassen. Betäuben, nicht töten.", wellen: ["Stimmen in den Köpfen", "Der rasende Riese"] },
+        { titel: "Die Grauen Geister", text: "Echo hat sogar den Drachen gefragt, ob er Gundren kennt. Themberchaud hat uns trotzdem leben lassen und uns einen Auftrag gegeben: Jemand hat ein Drachenei gestohlen. Die Spur führt in die Slums ganz unten, zu den Grauen Geistern. Die kommen aus der Dunkelheit, also schießt, solange ihr sie seht. Und trefft die Glutkäfer, wenn Diebe in der Nähe sind. Am Ende wartet Drokey, und so einer hat immer einen Fluchtweg.", wellen: ["Schatten in den Gassen", "Drokeys Versteck"] }
       ],
-      endlos: { titel: "Endlose Nacht", text: "Der Riese ist gefesselt, und hier endet unsere Chronik. Vorerst. Doch die Stimmen werden lauter, und von überall her kommen sie zurück: Goblins, Dämonen, Drachen. Wie lange hält das Lager?", unter: "Die Stimmen werden lauter" },
+      endlos: { titel: "Endlose Nacht", text: "Drokey ist im Rauch verschwunden, das Ei bleibt verschollen, und hier endet unsere Chronik. Vorerst. Doch die Stimmen werden lauter, und von überall her kommen sie zurück: Goblins, Dämonen, Diebe. Wie lange hält das Lager?", unter: "Die Stimmen werden lauter" },
       wuff: "Wuff!", grr: "Grrr!", entkommen: "Entkommen!", doppel: "Doppeltreffer!", dreifach: "Dreifachtreffer!",
-      bossFaellt: { demogorgon: "Demogorgon fällt!", anfuehrer: "Der Anführer fällt!", glasstab: "Glasstab ist gestellt!", neznaBoss: "Nezna fällt!", venomfang: "Venomfang stürzt ab!", ilvara: "Ilvara ist besiegt!", wraith: "Der Wraith zerfällt!", riese: "Betäubt und gefesselt!" },
-      bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "Ein Bugbear-Anführer!", glasstab: "Glasstab!", neznaBoss: "Nezna, schon wieder!", venomfang: "Venomfang greift an!", ilvara: "Die Druidin …?", wraith: "Ein Wraith erhebt sich!", riese: "Ein rasender Riese!" },
+      bossFaellt: { demogorgon: "Demogorgon fällt!", anfuehrer: "Der Anführer fällt!", glasstab: "Glasstab ist gestellt!", neznaBoss: "Nezna fällt!", venomfang: "Venomfang stürzt ab!", ilvara: "Ilvara ist besiegt!", wraith: "Der Wraith zerfällt!", riese: "Betäubt und gefesselt!", drokey: "Drokey ist gestellt!" },
+      bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "Ein Bugbear-Anführer!", glasstab: "Glasstab!", neznaBoss: "Nezna, schon wieder!", venomfang: "Venomfang greift an!", ilvara: "Die Druidin …?", wraith: "Ein Wraith erhebt sich!", riese: "Ein rasender Riese!", drokey: "Drokey, der Graue Geist!" },
+      rauch: "Rauchbombe! Drokey ist weg …", spur: "… doch die Spur führt weiter.", geistHinweis: "Graue Geister! Schießt, solange ihr sie seht.", glutPlatzt: "Glut!",
       flieht: { glasstab: "Glasstab flieht zum Geheimgang!", ilvara: "Ilvara springt zum Abgrund!", nezna: "Nezna wird zur Fledermaus!" },
       entwischt: { glasstab: "Glasstab ist entwischt!", ilvara: "„Die Spinne wird euch alle kriegen!“", nezna: "Nezna entkommt … vorerst." },
       speer: "Speer!", speerWeg: "Abgefangen!", netz: "Ein Netz!", netzWeg: "Netz zerrissen!",
@@ -112,7 +115,7 @@
     },
     en: {
       label: "Ranger check", titel: "Friedrich's Hunt",
-      text: "Friedrich retells your campaign: from the ambush on the road all the way to Gracklstugh. Draw your bow, keep the enemies away from the camp and listen to Rex: he smells them first.",
+      text: "Friedrich retells your campaign: from the ambush on the road all the way down to the slums of Gracklstugh. Draw your bow, keep the enemies away from the camp and listen to Rex: he smells them first.",
       steuerung: "Touch anywhere in the picture, pull back, aim, let go. The further you pull, the stronger the shot.",
       steuerungKreuz: "Crosshair: just click or tap the spot the arrow should hit. Hold to keep shooting.",
       zielTitel: "Aiming", zielArten: { ziehen: "🏹 Draw the bow", kreuz: "⌖ Crosshair" },
@@ -131,12 +134,14 @@
         { titel: "The Breakout", text: "The friendly druid knocked us out with herbal mist. We wake up in chains in the Underdark. Echo gnaws through the ropes as a rat, Barradin insults the guards, and demons rage in the courtyard. Then Ilvara shows her true face.", wellen: ["The guards storm in", "Demons in the courtyard"] },
         { titel: "Through the Webs", text: "Ever deeper, across chasms and webs. Spiders lower themselves from the ceiling, ettercaps lurk in between. In the tomb of the mage Khaem a wraith rises. You can only hit it while it is visible.", wellen: ["Spiders from the ceiling", "The mage's tomb"] },
         { titel: "The Underground Lake", text: "Ploopploopeen asks for help against the followers of a false god. Chaos breaks out in the city of the kuo-toa. Then Demogorgon rises from the lake. Hold on until the boat casts off. Or punch him for real this time.", wellen: ["Chaos in the city", "Demogorgon awakens"] },
-        { titel: "Gracklstugh", text: "Kardal the scout is actually a prince. We may stay in the city, but something is wrong here: voices in people's heads. Possessed duergar attack, and then a giant rampages through the alleys. Stun him, don't kill him.", wellen: ["Voices in their heads", "The raging giant"] }
+        { titel: "Gracklstugh", text: "Kardal the scout is actually a prince. We may stay in the city, but something is wrong here: voices in people's heads. Possessed duergar attack, and then a giant rampages through the alleys. Stun him, don't kill him.", wellen: ["Voices in their heads", "The raging giant"] },
+        { titel: "The Grey Ghosts", text: "Echo even asked the dragon whether he knows Gundren. Themberchaud let us live anyway and gave us a job: someone has stolen a dragon egg. The trail leads down into the slums at the very bottom, to the Grey Ghosts. They come out of the dark, so shoot while you can see them. And hit the ember beetles when thieves are close by. At the end waits Drokey, and his kind always has a way out.", wellen: ["Shadows in the alleys", "Drokey's hideout"] }
       ],
-      endlos: { titel: "Endless Night", text: "The giant is tied up, and this is where our chronicle ends. For now. But the voices grow louder, and from everywhere they come back: goblins, demons, dragons. How long will the camp hold?", unter: "The voices grow louder" },
+      endlos: { titel: "Endless Night", text: "Drokey vanished in the smoke, the egg is still missing, and this is where our chronicle ends. For now. But the voices grow louder, and from everywhere they come back: goblins, demons, thieves. How long will the camp hold?", unter: "The voices grow louder" },
       wuff: "Woof!", grr: "Grrr!", entkommen: "Escaped!", doppel: "Double hit!", dreifach: "Triple hit!",
-      bossFaellt: { demogorgon: "Demogorgon falls!", anfuehrer: "The leader falls!", glasstab: "Glasstaff is caught!", neznaBoss: "Nezna falls!", venomfang: "Venomfang crashes down!", ilvara: "Ilvara is defeated!", wraith: "The wraith crumbles!", riese: "Stunned and tied up!" },
-      bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "A bugbear leader!", glasstab: "Glasstaff!", neznaBoss: "Nezna, again!", venomfang: "Venomfang attacks!", ilvara: "The druid …?", wraith: "A wraith rises!", riese: "A raging giant!" },
+      bossFaellt: { demogorgon: "Demogorgon falls!", anfuehrer: "The leader falls!", glasstab: "Glasstaff is caught!", neznaBoss: "Nezna falls!", venomfang: "Venomfang crashes down!", ilvara: "Ilvara is defeated!", wraith: "The wraith crumbles!", riese: "Stunned and tied up!", drokey: "Drokey is caught!" },
+      bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "A bugbear leader!", glasstab: "Glasstaff!", neznaBoss: "Nezna, again!", venomfang: "Venomfang attacks!", ilvara: "The druid …?", wraith: "A wraith rises!", riese: "A raging giant!", drokey: "Drokey, the Grey Ghost!" },
+      rauch: "Smoke bomb! Drokey is gone …", spur: "… but the trail goes on.", geistHinweis: "Grey Ghosts! Shoot while you can see them.", glutPlatzt: "Embers!",
       flieht: { glasstab: "Glasstaff runs for the secret passage!", ilvara: "Ilvara leaps for the abyss!", nezna: "Nezna turns into a bat!" },
       entwischt: { glasstab: "Glasstaff got away!", ilvara: "“The Spider will get you all!”", nezna: "Nezna escapes … for now." },
       speer: "Spear!", speerWeg: "Intercepted!", netz: "A web!", netzWeg: "Web torn!",
@@ -223,13 +228,16 @@
       { abstand: 2, gegner: {}, boss: "demogorgon", flucht: 40, eskorte: ["kuotoa", "kuotoa"] }] },
     { thema: "gracklstugh", bild: "gracklstugh.jpg", wellen: [
       { abstand: 1.2, gegner: { duergar: 9, chasme: 2 } },
-      { abstand: 1.6, gegner: { duergar: 3 }, boss: "riese" }] }
+      { abstand: 1.6, gegner: { duergar: 3 }, boss: "riese" }] },
+    { thema: "slums", bild: "themberchaud-hort.jpg", wellen: [
+      { abstand: 1.15, gegner: { graugeist: 9, glutkaefer: 5 } },
+      { abstand: 1.5, gegner: { graugeist: 4, glutkaefer: 3 }, boss: "drokey" }] }
   ];
   const PLAN = [];
   KAPITEL.forEach((k, ki) => k.wellen.forEach((w, wi) => PLAN.push({ kap: ki, w: wi })));
   const ENDLOS_BILD = "siegesfeier.jpg";
-  const ENDLOS_GEGNER = ["goblin", "bandit", "soeldner", "robe", "drowwache", "skelett", "zombie", "spinne", "ettercap", "kuotoa", "duergar", "stirge", "blight", "bugbear", "vrock", "chasme"];
-  const ENDLOS_BOSSE = ["anfuehrer", "glasstab", "venomfang", "neznaBoss", "ilvara", "wraith", "riese", "demogorgon"];
+  const ENDLOS_GEGNER = ["goblin", "bandit", "soeldner", "robe", "drowwache", "skelett", "zombie", "spinne", "ettercap", "kuotoa", "duergar", "stirge", "blight", "bugbear", "vrock", "chasme", "graugeist", "glutkaefer"];
+  const ENDLOS_BOSSE = ["anfuehrer", "glasstab", "venomfang", "neznaBoss", "ilvara", "wraith", "riese", "demogorgon", "drokey"];
 
   /* ---------- Welt ---------- */
   const W = 400, H = 500, G = 520;
@@ -264,6 +272,8 @@
     vrock:     { bild: "vrock-frei.webp", hoehe: 80, hp: 2, tempo: 62, punkte: 20, art: "flug", blick: 1, hell: 1.35, splitter: ["#a89f8f", "#6a6256", "#3a352f"] },
     chasme:    { bild: "chasme-frei.webp", hoehe: 64, hp: 1, tempo: 100, punkte: 25, art: "flug", blick: 1, splitter: ["#c4564a", "#2b3550", "#9b3a2f"] },
     wolf:      { malen: ["wolf"], hoehe: 46, hp: 1, tempo: 95, punkte: 25, art: "freund", splitter: ["#9a9aa2", "#55555c", "#c9c9cc"] },
+    graugeist: { malen: ["graugeist"], hoehe: 82, hp: 2, tempo: 50, punkte: 20, art: "boden", schatten: true, hell: 1.15, splitter: ["#8a8794", "#3e3b46", "#dfe8ff"] },
+    glutkaefer:{ malen: ["glutkaefer"], hoehe: 34, hp: 1, tempo: 84, punkte: 14, art: "flug", platzt: true, glut: "rgba(255,140,60,.7)", splitter: ["#ffb04a", "#c4401e", "#fff0b0"] },
     // Höhepunkte
     anfuehrer: { sprite: "bugbear", hoehe: 140, hp: 12, tempo: 21, punkte: 150, art: "boss", mini: true, verlust: 2, glut: "rgba(224,160,70,.5)", eskorte: ["goblin", "goblin", "bandit"], splitter: ["#9b3a2f", "#a8783e", "#e0a046"] },
     glasstab:  { malen: ["glasstab"], hoehe: 112, hp: 10, tempo: 26, punkte: 160, art: "boss", mini: true, teleport: 3.2, flucht: 0.35, verlust: 2, glut: "rgba(155,231,255,.5)", eskorte: ["robe", "robe", "goblin"], splitter: ["#c4523a", "#9be7ff", "#c9a35a"] },
@@ -272,6 +282,7 @@
     ilvara:    { bild: "ilvara-druidin.webp", hoehe: 118, hp: 14, tempo: 22, punkte: 260, art: "boss", mini: true, maske: true, teleport: 3.4, flucht: 0.25, verlust: 1, ohneRand: true, glut: "rgba(190,140,255,.5)", eskorte: ["drowwache", "chasme", "vrock"], splitter: ["#6b5ca8", "#e8e6f0", "#1d1828"] },
     wraith:    { malen: ["wraith"], hoehe: 130, hp: 15, tempo: 16, punkte: 300, art: "boss", schwebt: true, phasen: true, verlust: 2, glut: "rgba(155,231,255,.6)", eskorte: ["spinne", "ettercap"], splitter: ["#9be7ff", "#141826", "#c8e8ff"] },
     demogorgon:{ bild: "demogorgon.webp", hoehe: 196, hp: 28, tempo: 15, punkte: 400, art: "boss", verlust: 3, glut: "rgba(196,86,74,.55)", eskorte: ["blight", "goblin", "chasme"], splitter: ["#e0a046", "#9b3a2f", "#c98a3a"] },
+    drokey:    { malen: ["drokey"], hoehe: 112, hp: 16, tempo: 30, punkte: 280, art: "boss", mini: true, teleport: 2.6, rauch: 0.25, verlust: 2, glut: "rgba(223,232,255,.45)", eskorte: ["graugeist", "glutkaefer", "graugeist"], splitter: ["#8a8794", "#e0a046", "#3a3742"] },
     riese:     { bild: "riese-frei.webp", ohneRand: true, hoehe: 172, hp: 26, tempo: 15, punkte: 350, art: "boss", rasen: true, verlust: 3, glut: "rgba(255,150,80,.45)", eskorte: ["duergar"], splitter: ["#c9a08a", "#7a5a4a", "#e0a046"] },
     // Bonusziele
     hase:      { malen: ["hase"], hoehe: 34, hp: 1, tempo: 165, punkte: 60, art: "bonus", splitter: ["#8a6a4a", "#ebe2cc", "#5a4430"] },
@@ -563,6 +574,7 @@
     S.gegner.push(g);
     if (a.art === "boss") { KLANG.bruellen(); S.beben = a.mini ? 0.4 : 0.7; S.bossRufT = 4; S.eskorteT = 3; S.eskorte2T = 7; textAuf(W / 2, 200, t().bossRuft[e.typ], a.mini ? "#e0a046" : "#c4564a", 26, 1.6); }
     if (a.art === "bonus" && e.typ !== "stimme") { textAuf(W / 2, 92, t().bonusDa[e.typ], "#ebe2cc", 19, 1.6); KLANG.glocke(); if (e.typ === "hase") S.rex.hops = 0.35; }
+    if (a.schatten && !S.geistHinweis) { S.geistHinweis = true; textAuf(W / 2, 150, t().geistHinweis, "#dfe8ff", 20, 2.6); }
     if (a.art === "freund" && !S.wolfHinweis) { S.wolfHinweis = true; textAuf(W / 2, 150, t().wolfHinweis, "#ebe2cc", 22, 2.4); }
   }
 
@@ -628,12 +640,12 @@
     }
   }
 
-  const angreifbar = e => !e.tot && e.liegt <= 0 && !e.unsichtbar && e.a.art !== "freund" && e.a.art !== "bonus";
+  const angreifbar = e => !e.tot && !e.weg && e.liegt <= 0 && !e.unsichtbar && e.a.art !== "freund" && e.a.art !== "bonus";
 
   function puff(x, y, farben, n) { funken(x, y, farben || ["#a89f8f", "#ebe2cc", "#6a6256"], n || 18); KLANG.puff(); }
 
   function schaden(e, dmg, salve, pfeil) {
-    if (e.tot || e.liegt > 0) return false;
+    if (e.tot || e.weg || e.liegt > 0) return false;
     const tx = t(), m = mitte(e);
     if (e.a.art === "freund") {
       if (pfeil && !e.aua) { e.aua = true; e.tempo *= 1.8; S.punkte = Math.max(0, S.punkte - 20); S.combo = 0; textAuf(m.x, m.y - 16, tx.wolfAua + " −20", "#c4564a", 19, 1.3); KLANG.jaulen(); }
@@ -646,6 +658,7 @@
       e.unterbrechung++;
       if (e.unterbrechung >= 3) { e.laedt = false; e.odemT = 8; textAuf(m.x, m.y - 40, tx.unterbrochen, "#b4ff6a", 22, 1.2); KLANG.puff(); }
     }
+    if (e.a.rauch && e.hp / e.maxHp <= e.a.rauch) { rauchbombe(e); return true; }
     if (e.a.maske && !e.enttarnt) {
       e.enttarnt = true; puff(m.x, m.y, ["#6b5ca8", "#c88aff", "#1d1828"], 30);
       groesseSetzen(e, SPRITES.ilvara_wahr ? "ilvara_wahr" : e.sp, e.a.hoehe);
@@ -689,6 +702,12 @@
     KLANG.tod();
     if (e.verwandelt) { S.punkte += 100; textAuf(W / 2, 170, tx.neznaGestellt + " +100", "#e0a046", 24, 1.6); }
     if (e.a.stimme) spawnen({ typ: "stimme", dir: 1, x: m.x, y: m.y });
+    if (e.a.platzt) {
+      glut(m.x, m.y, ruhig ? 8 : 26, ["#ffb04a", "#fff0b0", "#c4401e"]); KLANG.feuer();
+      let n = 0;
+      S.gegner.slice().forEach(o => { if (o !== e && angreifbar(o) && Math.hypot(mitte(o).x - m.x, mitte(o).y - m.y) < 62 + radius(o) * 0.5) { n++; schaden(o, 1, salve, false); } });
+      if (n) textAuf(m.x, m.y - 18, tx.glutPlatzt, "#ffb04a", 18, 0.9);
+    }
     if (e.rudel) S.gegner.forEach(o => { if (o !== e && o.rudel === e.rudel && !o.tot) o.schreck = 1.3; });
     if (e.a.teilt && e.bahn >= 0) [-16, 16].forEach(dx => spawnen({ typ: "zombieKlein", dir: e.dir, bahn: e.bahn, posX: e.x + dx }));
     if (e.a.art === "boss") {
@@ -697,6 +716,26 @@
       if (e.bleibt) { S.punkte += 500; textAuf(W / 2, 214, tx.geboxt + " +500", "#ffcf7a", 22, 2.4); S.fluchtT = 0; }
     }
     return true;
+  }
+  /* Graue Geister: alle 3,4 s für gut eine Sekunde in der Dunkelheit verschwunden (Dawnbringers Licht holt sie heraus) */
+  function schattenPhase(e) { return e.sichtbar > 0 || e.t < 1 ? 0 : (e.t + e.phase) % 3.4; }
+  /* Drokey lässt sich nicht fangen: bei wenig Leben wirft er eine Rauchbombe und ist weg (zählt als geschafft) */
+  function rauchbombe(e) {
+    const tx = t(), m = mitte(e);
+    e.weg = true; e.hp = 0;
+    const mult = 1 + Math.min(S.combo, 20) * 0.1 * (S.gaben.barradin ? 2 : 1);
+    const p = Math.round(e.a.punkte * mult);
+    S.punkte += p;
+    textAuf(m.x, m.y - 10, "+" + p, "#ebe2cc", 30, 0.9);
+    for (let i = 0; i < (ruhig ? 14 : 50); i++) {
+      const a = Math.random() * Math.PI * 2, v = 30 + Math.random() * 110;
+      S.teilchen.push({ x: m.x + (Math.random() - 0.5) * 30, y: m.y + (Math.random() - 0.5) * 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6 - 30, leben: 0.9 + Math.random() * 0.9, max: 1.8, farbe: zufall(["rgba(168,159,143,.75)", "rgba(110,106,120,.8)", "rgba(200,196,190,.6)"]), gr: 5 + Math.random() * 7, schwer: -0.15 });
+    }
+    funken(m.x, m.y, ["#e0a046", "#ffcf7a"], 10);
+    if (S.rex.ziel === e) { S.rex.zustand = "zurueck"; S.rex.ziel = null; }
+    KLANG.puff(); KLANG.bruellen(); S.beben = 0.4;
+    textAuf(W / 2, 170, tx.rauch, "#ebe2cc", 26, 2.4);
+    textAuf(W / 2, 204, tx.spur, "#e0a046", 20, 2.6);
   }
   function mitte(e) { return { x: e.x, y: e.y - e.h * (e.a.art === "boss" ? 0.55 : 0.5) }; }
   function radius(e) {
@@ -814,7 +853,7 @@
       S.lichtT -= dt;
       if (S.lichtT <= 0 && S.gegner.some(e => !e.tot && e.a.art !== "freund" && e.a.art !== "bonus")) {
         S.lichtT = g.dawnbringer > 1 ? 10 : 15; S.licht = 0.7; KLANG.licht();
-        S.gegner.forEach(e => { if (e.a.phasen) e.sichtbar = 2.5; });
+        S.gegner.forEach(e => { if (e.a.phasen || e.a.schatten) e.sichtbar = 2.5; });
         S.gegner.slice().forEach(e => { if (!e.tot && e.liegt <= 0 && e.a.art !== "freund" && e.a.art !== "bonus") schaden(e, 1, null, false); });
       }
     }
@@ -1004,10 +1043,11 @@
       e.duck = Math.max(0, e.duck - dt); e.schreck = Math.max(0, e.schreck - dt);
       faehigkeiten(e, dt);
       if (e.tot) return;
-      e.unsichtbar = (!!e.a.phasen && e.sichtbar <= 0 && (e.t % 4) > 2.6) || e.duck > 0;
+      e.unsichtbar = (!!e.a.phasen && e.sichtbar <= 0 && (e.t % 4) > 2.6) || e.duck > 0 || (!!e.a.schatten && schattenPhase(e) > 2.3 && schattenPhase(e) < 3.25);
       let f = (e.a.art === "bonus" || e.a.art === "freund") ? 1 : tf;
       if (e.bann > 0 || e.gehalten || e.duck > 0 || e.schreck > 0) f = 0;
       if (e.eis > 0) f *= 1 - e.eisK;
+      if (e.a.schatten && e.unsichtbar) f *= 1.7; // im Dunkeln huschen sie schneller
       const zurueck = e.angst > 0 && e.a.art !== "boss";
       if (zurueck) f *= -0.8;
       const schritt = e.dir * e.tempo * f * dt;
@@ -1116,7 +1156,7 @@
         p.vy += G * d; p.x += p.vx * d; p.y += p.vy * d; p.t += d;
         if (pfeilHindernis(p)) { p.weg = true; break; }
         for (const e of S.gegner) {
-          if (e.tot || e.liegt > 0 || e.unsichtbar || p.getroffen.includes(e)) continue;
+          if (e.tot || e.weg || e.liegt > 0 || e.unsichtbar || p.getroffen.includes(e)) continue;
           const m = mitte(e), r = radius(e);
           if ((p.x - m.x) ** 2 + (p.y - m.y) ** 2 < r * r) {
             p.getroffen.push(e);
@@ -1207,6 +1247,7 @@
     if (e.unsichtbar && e.duck <= 0) alpha *= 0.12;
     if (e.tele) alpha *= e.tele.phase === "aus" ? Math.max(0.05, 1 - e.tele.t / 0.35) : Math.min(1, e.tele.t / 0.35);
     else if (e.a.phasen && e.sichtbar <= 0) { const ph = e.t % 4; if (ph > 2.3) alpha *= Math.max(0.12, 1 - (ph - 2.3) / 0.3); else if (ph < 0.3) alpha *= Math.max(0.12, ph / 0.3); }
+    else if (e.a.schatten) { const ph = schattenPhase(e); if (ph > 2.0) alpha *= Math.max(0.1, 1 - (ph - 2.0) / 0.3); if (ph > 3.1) alpha = Math.max(alpha, 0.1 + (ph - 3.1) / 0.3 * 0.9); }
     if (e.bew === "seil") {
       ctx.strokeStyle = "rgba(220,230,240,.35)"; ctx.lineWidth = 0.8;
       ctx.beginPath(); ctx.moveTo(e.x, 0); ctx.lineTo(e.x, e.y - e.h * 0.6); ctx.stroke();

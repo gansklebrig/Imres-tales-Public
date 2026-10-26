@@ -451,6 +451,105 @@
       return c;
     },
 
+    /* Grauer Geist: Dieb aus den Slums von Gracklstugh, Kapuze, Dolch, Umhang zerfasert zu Rauch */
+    graugeist() {
+      const [c, x] = grund(120, 190);
+      // Umhang hinten, unten in Rauch auslaufend
+      x.fillStyle = verlauf(x, 60, 50, 60, 188, [[0, "#5e5b66"], [0.65, "rgba(70,67,78,.8)"], [1, "rgba(70,67,78,0)"]]);
+      x.beginPath(); x.moveTo(56, 40); x.quadraticCurveTo(106, 90, 104, 186); x.lineTo(92, 168); x.lineTo(84, 188); x.lineTo(72, 166); x.lineTo(60, 186);
+      x.lineTo(50, 160); x.quadraticCurveTo(44, 100, 56, 40); x.closePath(); x.fill();
+      // Beine, geduckt
+      linie(x, "#2a2830", 9, [[66, 118], [80, 146], [76, 176]]);
+      linie(x, "#34313a", 9, [[54, 118], [40, 144], [34, 172]]);
+      x.fillStyle = "#1a181e"; oval(x, 78, 178, 8, 3.5); oval(x, 30, 174, 8, 3.5);
+      // Körper in grauem Leder
+      x.fillStyle = verlauf(x, 36, 56, 86, 126, [[0, "#8a8794"], [1, "#3e3b46"]]);
+      x.beginPath(); x.moveTo(40, 62); x.lineTo(76, 58); x.quadraticCurveTo(86, 92, 78, 124); x.lineTo(42, 126); x.quadraticCurveTo(32, 94, 40, 62); x.fill();
+      linie(x, "#22202a", 4, [[42, 68], [76, 110]]);
+      x.fillStyle = "#1c1a22"; x.fillRect(38, 104, 44, 6);
+      x.save(); x.shadowColor = "#ffcf7a"; x.shadowBlur = 6; x.fillStyle = "#e0a046"; oval(x, 66, 112, 4, 4); x.restore(); // gestohlene Münze am Gürtel
+      // Kapuze, tief ins Gesicht gezogen
+      x.fillStyle = verlauf(x, 28, 8, 84, 70, [[0, "#9a97a4"], [1, "#4a4754"]]);
+      x.beginPath(); x.moveTo(30, 70); x.quadraticCurveTo(22, 22, 52, 10); x.quadraticCurveTo(84, 10, 82, 60); x.quadraticCurveTo(80, 70, 74, 72); x.closePath(); x.fill();
+      x.fillStyle = "#08070b"; oval(x, 46, 44, 13, 17);
+      leuchtAuge(x, 39, 42, 2.8, 1.5, "#dfe8ff", 9); leuchtAuge(x, 50, 42, 2.4, 1.4, "#dfe8ff", 9);
+      x.strokeStyle = "rgba(235,226,204,.35)"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(52, 10); x.quadraticCurveTo(84, 10, 82, 60); x.stroke();
+      // Arm mit gebogenem Dolch, nach vorn gestreckt
+      linie(x, "#5a5764", 8, [[44, 70], [28, 90], [16, 88]]);
+      x.fillStyle = "#6e6a78"; oval(x, 14, 88, 4, 4);
+      linie(x, "#3a2d20", 3, [[10, 84], [20, 92]]);
+      x.strokeStyle = verlauf(x, 0, 60, 14, 88, [[0, "#f1ece0"], [1, "#8a8577"]]); x.lineWidth = 3.5;
+      x.beginPath(); x.moveTo(13, 87); x.quadraticCurveTo(0, 78, 4, 62); x.stroke();
+      return c;
+    },
+
+    /* Glutkäfer aus der Drachenhalle: glühender Hinterleib, surrende Flügel */
+    glutkaefer() {
+      const [c, x] = grund(130, 90);
+      // Flügel (durchscheinend, hinten)
+      x.fillStyle = "rgba(255,200,140,.28)"; oval(x, 82, 26, 30, 11, -0.35); oval(x, 70, 22, 26, 9, -0.6);
+      x.strokeStyle = "rgba(255,220,170,.45)"; x.lineWidth = 1; x.beginPath(); x.moveTo(60, 40); x.lineTo(104, 14); x.stroke();
+      // Beine
+      [[[56, 56], [46, 72], [38, 78]], [[70, 58], [68, 76], [60, 84]], [[84, 56], [94, 74], [100, 82]]].forEach(p => linie(x, "#1a0f0a", 3, p));
+      // glühender Hinterleib
+      x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 14;
+      const g = x.createRadialGradient(96, 50, 2, 92, 48, 26); g.addColorStop(0, "#fff0b0"); g.addColorStop(0.4, "#ffb04a"); g.addColorStop(1, "#c4401e");
+      x.fillStyle = g; oval(x, 92, 48, 24, 16); x.restore();
+      x.strokeStyle = "rgba(90,20,8,.6)"; x.lineWidth = 1.6; [84, 94, 104].forEach(xx => { x.beginPath(); x.moveTo(xx, 34); x.quadraticCurveTo(xx + 3, 48, xx, 62); x.stroke(); });
+      // Panzer (Deckflügel) mit Glutrissen
+      x.fillStyle = verlauf(x, 40, 28, 90, 64, [[0, "#4a2a1c"], [1, "#1a0e0a"]]);
+      x.beginPath(); x.moveTo(44, 50); x.quadraticCurveTo(52, 26, 82, 30); x.quadraticCurveTo(92, 44, 84, 58); x.quadraticCurveTo(62, 66, 44, 50); x.fill();
+      linie(x, "rgba(255,150,60,.9)", 1.4, [[54, 42], [62, 48], [70, 40], [78, 50]]);
+      linie(x, "rgba(255,150,60,.7)", 1.2, [[60, 54], [68, 52]]);
+      // Kopf mit Zangen
+      x.fillStyle = "#2a1610"; oval(x, 38, 50, 11, 9);
+      linie(x, "#3a2216", 3, [[30, 54], [18, 58], [14, 52]]); linie(x, "#3a2216", 3, [[30, 48], [18, 44], [16, 50]]);
+      leuchtAuge(x, 34, 46, 2.4, 2.2, "#ffd34d", 7);
+      linie(x, "#4a2a1c", 1.4, [[36, 42], [24, 26]]);
+      return c;
+    },
+
+    /* Drokey, Grauer Geist: Duergar-Dieb mit Halbmaske, Beutesack und der Drachenkopf-Münze */
+    drokey() {
+      const [c, x] = grund(150, 210);
+      // Beutesack über der Schulter
+      x.fillStyle = verlauf(x, 76, 30, 130, 110, [[0, "#7a6a50"], [1, "#3a3020"]]);
+      x.beginPath(); x.moveTo(84, 60); x.quadraticCurveTo(140, 50, 132, 98); x.quadraticCurveTo(118, 124, 92, 108); x.closePath(); x.fill();
+      linie(x, "#2a2014", 2, [[96, 70], [116, 98]]);
+      // Umhang
+      x.fillStyle = verlauf(x, 60, 50, 60, 200, [[0, "#57545f"], [0.7, "rgba(60,57,68,.85)"], [1, "rgba(60,57,68,0)"]]);
+      x.beginPath(); x.moveTo(62, 52); x.quadraticCurveTo(112, 110, 110, 200); x.lineTo(96, 180); x.lineTo(86, 202); x.lineTo(74, 178); x.lineTo(62, 198); x.lineTo(54, 150); x.closePath(); x.fill();
+      // Beine (stämmig)
+      linie(x, "#2a2830", 13, [[78, 140], [86, 170], [86, 196]]);
+      linie(x, "#34313a", 13, [[58, 140], [48, 168], [46, 196]]);
+      x.fillStyle = "#16141a"; oval(x, 88, 198, 12, 5); oval(x, 42, 198, 12, 5);
+      // breiter Körper in grauem Leder mit Riemen
+      x.fillStyle = verlauf(x, 34, 60, 100, 146, [[0, "#8e8b98"], [1, "#3a3742"]]);
+      x.beginPath(); x.moveTo(38, 66); x.lineTo(94, 62); x.quadraticCurveTo(106, 104, 96, 146); x.lineTo(38, 148); x.quadraticCurveTo(28, 106, 38, 66); x.fill();
+      linie(x, "#1e1c24", 5, [[42, 70], [94, 130]]);
+      x.fillStyle = "#1c1a22"; x.fillRect(34, 120, 64, 8);
+      x.fillStyle = "#9b7a3a"; x.fillRect(60, 120, 10, 8);
+      linie(x, "#c9c4b8", 2.5, [[84, 126], [92, 146]]);
+      // Kopf: grau, kahl, langer Bart, graue Halbmaske
+      x.fillStyle = "#8a8682"; oval(x, 60, 40, 19, 19);
+      x.fillStyle = "rgba(255,255,255,.16)"; oval(x, 66, 28, 7, 4);
+      x.fillStyle = "#3a3640"; x.beginPath(); x.moveTo(42, 50); x.quadraticCurveTo(42, 96, 60, 106); x.quadraticCurveTo(80, 96, 78, 52); x.quadraticCurveTo(60, 60, 42, 50); x.fill();
+      x.fillStyle = "#4e4b58"; x.beginPath(); x.moveTo(40, 46); x.lineTo(80, 44); x.lineTo(78, 62); x.quadraticCurveTo(60, 70, 42, 62); x.closePath(); x.fill();
+      linie(x, "#22202a", 3, [[42, 32], [56, 36]]);
+      leuchtAuge(x, 48, 39, 3, 1.8, "#dfe8ff", 9); leuchtAuge(x, 60, 39, 2.6, 1.6, "#dfe8ff", 9);
+      // erhobener Arm mit der faustgroßen Drachenkopf-Münze
+      linie(x, "#5a5764", 11, [[48, 70], [30, 58], [24, 36]]);
+      x.fillStyle = "#8a8682"; oval(x, 24, 32, 6, 6);
+      x.save(); x.shadowColor = "#ffcf7a"; x.shadowBlur = 16;
+      const g = x.createRadialGradient(20, 18, 2, 24, 22, 16); g.addColorStop(0, "#fff0b0"); g.addColorStop(0.6, "#e0a046"); g.addColorStop(1, "#9b6a2a");
+      x.fillStyle = g; oval(x, 24, 22, 15, 15); x.restore();
+      x.strokeStyle = "#8a5a20"; x.lineWidth = 1.5; x.beginPath(); x.arc(24, 22, 12, 0, Math.PI * 2); x.stroke();
+      x.fillStyle = "#8a5a20"; // Drachenkopf auf der Münze
+      poly(x, [[30, 16], [22, 14], [14, 22], [20, 24], [16, 28], [24, 28], [30, 24], [34, 12]]);
+      x.fillStyle = "#fff0b0"; oval(x, 22, 19, 1.3, 1.3);
+      return c;
+    },
+
     hase() {
       const [c, x] = grund(130, 90);
       x.fillStyle = "#6b4f35";
