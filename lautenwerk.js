@@ -24,6 +24,7 @@
   if (!root) return;
   /* Mitlauschen: ?lauschen=CODE macht diese Seite zum Zuhörer */
   let hoerer = null, funk = null;
+  let tonZiel = null; /* Stimmungswechsel: Zieltonart, in die das neue Stück noch gleitet (siehe tonWeiter) */
   /* Sparmodus für Handys: größerer Audiopuffer, vorgerechnete Klänge, schlankere Kulissen */
   let spar = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
   try { const v = localStorage.getItem("imres-lw-spar"); if (v === "1" || v === "0") spar = v === "1"; } catch (_) {}
@@ -83,6 +84,9 @@
     hoehle:  { dauer: 6.5, kurve: 2.3, vor: .07, hell: 2600, frueh: [[.14, .5], [.29, .34], [.45, .22], [.62, .14]] }
   };
   const KULISSEN = ["keine", "taverne", "feuer", "wald", "waldnacht", "regen", "zelt", "sturm", "meer", "schiff", "wasserfall", "hoehle", "unterreich", "kerker", "sumpf", "unterwasser", "schmiede", "labor", "bibliothek", "tempel", "dorf", "markt", "hafen", "gebirge", "mine", "strasse", "burg", "ufer"];
+  /* abgeschaffte Kulissen bleiben in der Liste (alte Links zählen nach ihrer Stelle), werden aber nicht mehr angeboten und laden als Ersatz */
+  const KUL_WEG = { zelt: "regen" };
+  const KUL_ZEIGEN = KULISSEN.filter(k => !KUL_WEG[k]);
   /* Bühnenbild für die neueren Kulissen: nächstliegendes vorhandenes Bild */
   const KUL_BILD = { waldnacht: "wald", zelt: "regen", schiff: "meer", wasserfall: "wald", unterreich: "hoehle", kerker: "hoehle", sumpf: "wald", unterwasser: "meer", schmiede: "feuer", labor: "taverne", bibliothek: "taverne", tempel: "hoehle", dorf: "wald", markt: "taverne", hafen: "meer", gebirge: "sturm", mine: "hoehle", strasse: "wald", burg: "taverne", ufer: "wald" };
   const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "strasse", spannung: "hoehle", sieg: "taverne", kampf: "keine",
@@ -179,7 +183,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniKulStopp: "Geräusche anhalten", miniKulWeiter: "Geräusche wieder starten", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
-      zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: "Über jede Kulisse legbar – drinnen klingt Wetter gedämpft wie durch Mauern. Der Kulissen-Balken regelt alles gemeinsam.", zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – sonst wird es zu viel für das Gerät.",
+      zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren).", zusDrin: "steckt schon in der Kulisse", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
       kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %",
       stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente & Klassik",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
@@ -266,7 +270,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniKulStopp: "Stop ambience", miniKulWeiter: "Restart ambience", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
-      zusaetze: "Extras", zusMini: "Extras", zusTipp: "Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. The backdrop slider controls everything together.", zusVoll: n => "At most " + n + " extras at once – more would be too much for this device.",
+      zusaetze: "Extras", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover).", zusDrin: "already part of the backdrop", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
       kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %",
       stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments & classics",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
@@ -1541,6 +1545,7 @@
     if (typeof s.master !== "number") s.master = 8;
     if (typeof s.hall !== "number") s.hall = 0;
     if (!RAEUME[s.raum]) s.raum = "taverne";
+    if (KUL_WEG[s.kulisse]) s.kulisse = KUL_WEG[s.kulisse];
     if (!KULISSEN.includes(s.kulisse)) s.kulisse = "keine";
     if (typeof s.kulisseVol !== "number") s.kulisseVol = 5;
     if (typeof s.intensitaet !== "number") s.intensitaet = 5;
@@ -1627,7 +1632,9 @@
       });
     });
   }
-  const merken = () => { if (hoerer) return; try { localStorage.setItem("imres-lautenwerk2", JSON.stringify(S)); } catch (_) {} funkAenderung(); };
+  /* während das Stück noch in seine Tonart gleitet, zählt die Zieltonart (beim Neuladen und für Zuhörer) */
+  const tonFest = () => tonZiel ? Object.assign({}, S, { transpose: tonZiel.ziel, modus: tonZiel.modus }) : S;
+  const merken = () => { if (hoerer) return; try { localStorage.setItem("imres-lautenwerk2", JSON.stringify(tonFest())); } catch (_) {} funkAenderung(); };
 
   /* ---------- Lied als kurzer Code für den Link ---------- */
   const hex = a => { let n = 0; a.forEach((v, i) => { if (v >= 0) n |= 1 << i; }); return n.toString(16).padStart(4, "0"); };
@@ -2123,7 +2130,7 @@
   }
   function weltEreignis(k, [art, , staerke, fern]) {
     const weit = Math.random() < (fern || 0), laut = kulMixWert(k.art, "ev") * staerke * (k.wlaut || 1) * (weit ? zz(.3, .55) : zz(.65, 1));
-    if (KUL_FX[art]) { kulFx(KUL_FX[art], ctx.currentTime + .05, laut * 1.3, weit ? { tief: zz(900, 2600) } : {}); return; }
+    if (KUL_FX[art]) { kulFx(KUL_FX[art], ctx.currentTime + .05, laut * 1.3, weit ? { tief: zz(900, 2600) } : {}, k); return; }
     const e = AMB_EV[art]; if (!e) return;
     const g = ctx.createGain(); g.gain.value = laut * WELT_GRUND; let letzter = g;
     if (weit) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = zz(900, 2600); letzter.connect(lp); letzter = lp; }
@@ -2146,34 +2153,122 @@
   /* ---------- Zusätze: einzelne Schichten über jede Kulisse legen (Regen über dem Kerker, Vögel in der Taverne …) ----------
      Jeder Zusatz läuft wie eine kleine eigene Kulisse; der Kulissen-Balken regelt alles gemeinsam.
      Außenklänge werden in Innenräumen gedämpft, als kämen sie durch Mauern. */
+  /* g = Gruppe (in der Leiste durch etwas Abstand getrennt); Einzelgeräusche: [Art, [Abstand von, bis] s, Stärke, Anteil fern] */
   const ZUSATZ = {
-    regen: { sym: "🌧", de: "Regen", en: "Rain", raus: 1, betten: [["a_regen2", .9], ["a_leichtregen", .4]], ev: [] },
-    gewitter: { sym: "⛈", de: "Gewitter", en: "Thunderstorm", raus: 1, betten: [["a_gewitter1", .8]], ev: [["donner", [25, 60], .5, .7]] },
-    sturm: { sym: "🌬", de: "Sturm", en: "Gale", raus: 1, betten: [["a_heulwind", .7], ["a_wind2", .5]], ev: [] },
-    wind: { sym: "🍃", de: "Wind", en: "Wind", raus: 1, betten: [["a_wind1", .6]], ev: [] },
-    schnee: { sym: "❄", de: "Schneetreiben", en: "Snowdrift", raus: 1, betten: [["a_schneesturm", .7]], ev: [] },
-    voegel: { sym: "🐦", de: "Vögel", en: "Birds", raus: 1, betten: [["a_tagvoegel", .7]], ev: [["vogel", [8, 20], .25, .5]] },
-    nacht: { sym: "🦉", de: "Nachtgetier", en: "Night creatures", raus: 1, betten: [["a_nacht", .6], ["a_grillen", .4]], ev: [["eule", [30, 70], .3, .6]] },
-    bach: { sym: "🏞", de: "Bach", en: "Brook", raus: 1, betten: [["a_bach1", .7]], ev: [] },
-    wellen: { sym: "🌊", de: "Wellen", en: "Waves", raus: 1, betten: [["a_wellen2", .7]], ev: [] },
-    tropfen: { sym: "💧", de: "Tropfen", en: "Drips", betten: [["a_tropfen2", .6]], ev: [] },
-    feuer: { sym: "🔥", de: "Feuer", en: "Fire", betten: [["a_feuer2", .8]], ev: [] },
-    stimmen: { sym: "🗣", de: "Stimmengewirr", en: "Chatter", betten: [["a_gaeste", .6]], ev: [] },
-    hof: { sym: "🐄", de: "Bauernhof", en: "Farmyard", raus: 1, betten: [["a_hof", .5], ["a_huehner", .3]], ev: [] },
-    uhr: { sym: "🕰", de: "Standuhr", en: "Clock", betten: [["a_uhr", .25, { takt: 2.0005 }]], ev: [] },
-    katze: { sym: "🐈", de: "Schnurrende Katze", en: "Purring cat", betten: [["a_schnurren", .35]], ev: [] }
+    regen: { g: 0, de: "Regen", en: "Rain", raus: 1, betten: [["a_regen2", .9], ["a_leichtregen", .4]], ev: [] },
+    starkregen: { g: 0, de: "Starkregen", en: "Downpour", raus: 1, betten: [["a_starkregen", .8], ["a_regen4", .3]], ev: [] },
+    gewitter: { g: 0, de: "Gewitter", en: "Thunderstorm", raus: 1, betten: [["a_gewitter1", .8]], ev: [["donner", [25, 60], .5, .7]] },
+    sturm: { g: 0, de: "Sturm", en: "Gale", raus: 1, betten: [["a_heulwind", .7], ["a_wind2", .5]], ev: [] },
+    wind: { g: 0, de: "Wind", en: "Wind", raus: 1, betten: [["a_wind1", .6]], ev: [] },
+    laub: { g: 0, de: "Rauschende Bäume", en: "Rustling trees", raus: 1, betten: [["a_baumwind", .6]], ev: [] },
+    schnee: { g: 0, de: "Schneetreiben", en: "Snowdrift", raus: 1, betten: [["a_schneesturm", .7]], ev: [] },
+    bach: { g: 1, de: "Bach", en: "Brook", raus: 1, betten: [["a_bach1", .7]], ev: [] },
+    wellen: { g: 1, de: "Wellen", en: "Waves", raus: 1, betten: [["a_wellen2", .7]], ev: [] },
+    wasserfall: { g: 1, de: "Wasserfall", en: "Waterfall", raus: 1, betten: [["a_wasserfall2", .65]], ev: [] },
+    tropfen: { g: 1, de: "Tropfen", en: "Drips", betten: [["a_tropfen2", .6]], ev: [] },
+    blubbern: { g: 1, de: "Blubbern", en: "Bubbling", betten: [["a_blubbern", .5]], ev: [["blubb", [4, 10], .35, .3]] },
+    feuer: { g: 2, de: "Feuer", en: "Fire", betten: [["a_feuer2", .8]], ev: [] },
+    kessel: { g: 2, de: "Brodelnder Kessel", en: "Bubbling cauldron", betten: [["a_kochen", .55]], ev: [] },
+    voegel: { g: 3, de: "Vögel", en: "Birds", raus: 1, betten: [["a_tagvoegel", .7]], ev: [["vogel", [8, 20], .25, .5]] },
+    grillen: { g: 3, de: "Grillen", en: "Crickets", raus: 1, betten: [["a_grillen", .55]], ev: [] },
+    eule: { g: 3, de: "Eule", en: "Owl", raus: 1, betten: [], ev: [["eule", [12, 30], .45, .5]] },
+    frosch: { g: 3, de: "Frösche", en: "Frogs", raus: 1, betten: [], ev: [["frosch", [3, 9], .4, .5]] },
+    wolf: { g: 3, de: "Wölfe", en: "Wolves", raus: 1, betten: [], ev: [["wolf", [18, 45], .4, .7]] },
+    kraehe: { g: 3, de: "Krähen", en: "Crows", raus: 1, betten: [], ev: [["kraehe", [7, 18], .35, .5]] },
+    moewe: { g: 3, de: "Möwen", en: "Gulls", raus: 1, betten: [], ev: [["moewe", [5, 14], .3, .5]] },
+    specht: { g: 3, de: "Specht", en: "Woodpecker", raus: 1, betten: [], ev: [["specht", [10, 25], .35, .6]] },
+    bienen: { g: 3, de: "Bienen", en: "Bees", raus: 1, betten: [["a_bienen", .35]], ev: [] },
+    fledermaus: { g: 3, de: "Fledermäuse", en: "Bats", betten: [], ev: [["fledermaus", [5, 14], .3, .4]] },
+    hund: { g: 3, de: "Hund", en: "Dog", raus: 1, betten: [], ev: [["hund", [14, 35], .35, .6]] },
+    pferd: { g: 3, de: "Pferde", en: "Horses", raus: 1, betten: [], ev: [["ross", [12, 30], .35, .5], ["hufe", [20, 45], .25, .5]] },
+    kuh: { g: 3, de: "Kühe", en: "Cows", raus: 1, betten: [["a_kuehe", .45]], ev: [["kuh", [15, 35], .3, .5]] },
+    schaf: { g: 3, de: "Schafe", en: "Sheep", raus: 1, betten: [["a_schafe", .5]], ev: [] },
+    huhn: { g: 3, de: "Hühner", en: "Hens", raus: 1, betten: [["a_huehner", .45]], ev: [] },
+    schwein: { g: 3, de: "Schweine", en: "Pigs", raus: 1, betten: [], ev: [["schwein", [8, 22], .35, .4]] },
+    katze: { g: 3, de: "Schnurrende Katze", en: "Purring cat", betten: [["a_schnurren", .35]], ev: [] },
+    wal: { g: 3, de: "Wale", en: "Whales", raus: 1, betten: [], ev: [["wal", [18, 40], .4, .6]] },
+    stimmen: { g: 4, de: "Stimmengewirr", en: "Chatter", betten: [["a_gaeste", .6]], ev: [] },
+    markt: { g: 4, de: "Markt", en: "Market", raus: 1, betten: [["a_markt", .55]], ev: [] },
+    hafen: { g: 4, de: "Hafen", en: "Harbour", raus: 1, betten: [["a_hafen", .5]], ev: [["moewe", [20, 50], .2, .7]] },
+    segel: { g: 4, de: "Segelschiff", en: "Sailing ship", betten: [["a_segel", .5], ["a_boot", .4]], ev: [] },
+    schmiede: { g: 4, de: "Schmiede", en: "Smithy", betten: [], ev: [["hammer", [4, 10], .35, .5]] },
+    axt: { g: 4, de: "Holzfäller", en: "Woodcutter", raus: 1, betten: [], ev: [["axt", [8, 20], .3, .6]] },
+    hacke: { g: 4, de: "Bergbau", en: "Mining", betten: [], ev: [["hacke", [7, 18], .3, .6]] },
+    glocke: { g: 4, de: "Glocken", en: "Bells", raus: 1, betten: [], ev: [["glocke", [20, 50], .35, .7]] },
+    uhr: { g: 4, de: "Standuhr", en: "Clock", betten: [["a_uhr", .25, { takt: 2.0005 }]], ev: [] },
+    gesang: { g: 4, de: "Mönchsgesang", en: "Monks chanting", betten: [["a_gesang", .4]], ev: [] },
+    geist: { g: 5, de: "Geisterheulen", en: "Ghostly wailing", betten: [], ev: [["heulen", [15, 35], .35, .5]] },
+    untot: { g: 5, de: "Untote", en: "Undead", betten: [], ev: [["untot", [10, 25], .3, .5], ["stoehnen", [18, 40], .3, .5]] },
+    ketten: { g: 5, de: "Ketten", en: "Chains", betten: [], ev: [["kette", [8, 20], .3, .5]] },
+    monster: { g: 5, de: "Ungeheuer", en: "Monster", betten: [], ev: [["monster", [20, 45], .35, .6]] }
   };
+  /* Symbole der Zusätze: 24×24, Linien (1), gefüllte Flächen (2), weitere Linien (3) */
+  const WOLKE = "M7 14.5h10.2a3.4 3.4 0 0 0 .3-6.8 5 5 0 0 0-9.7-.9A3.4 3.4 0 0 0 7 14.5z";
+const ZUS_ICON = {
+  regen: [WOLKE + "M8.5 17.5l-1 2.5M12.5 17.5l-1 2.5M16.5 17.5l-1 2.5"],
+  starkregen: [WOLKE + "M7.5 17l-1.6 4.5M10.5 17l-1.6 4.5M13.5 17l-1.6 4.5M16.5 17l-1.6 4.5M19 17l-1 3"],
+  gewitter: [WOLKE, "M13 15l-3 4h3.2l-2.2 3.5 5-5h-3.2l1.7-2.5z"],
+  sturm: ["M3 8h10.5a2.8 2.8 0 1 0-2.8-2.8M2 12.5h17a3 3 0 1 1-3 3M3 17h7.5"],
+  wind: ["M3 10h10a2.5 2.5 0 1 0-2.5-2.5M3 14h9", "M15.5 19.5c-.3-3.3 2.2-5.6 6-5.5.2 3.6-2.4 5.9-6 5.5z"],
+  schnee: ["M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M10 4.8l2 1.7 2-1.7M10 19.2l2-1.7 2 1.7M4.8 10.8l2.6-.5-.9-2.4M19.2 13.2l-2.6.5.9 2.4M4.8 13.2l2.6.5-.9 2.4M19.2 10.8l-2.6-.5.9-2.4"],
+  laub: ["M8.2 15a3.4 3.4 0 0 1-1.7-6.4A4.6 4.6 0 0 1 12 4a4.6 4.6 0 0 1 5.5 4.6A3.4 3.4 0 0 1 15.8 15zM12 15v6.5M12 18.5l-2.2-1.7M2.3 8.5c1 1 1 2.6 0 3.6M21.7 8.5c-1 1-1 2.6 0 3.6"],
+  bach: ["M3 8c2.2-1.6 4.4 1.6 6.6 0s4.4-1.6 6.6 0 3.3.8 4.8 0M3 12.5c2.2-1.6 4.4 1.6 6.6 0s4.4-1.6 6.6 0 3.3.8 4.8 0", "M5 18.5a2 1.4 0 1 0 4 0 2 1.4 0 1 0-4 0zM12 19a2.8 1.8 0 1 0 5.6 0 2.8 1.8 0 1 0-5.6 0z"],
+  wellen: ["M2 19c1.7 0 2.6-1.4 4-1.4S8.3 19 10 19s2.6-1.4 4-1.4 2.3 1.4 4 1.4 2.6-1.4 4-1.4M3 15c0-5.5 3.6-9.5 8.5-9.5 3 0 4.7 1.8 4.7 4 0 1.7-1.2 2.9-2.8 2.9-1.2 0-2-.8-2-1.8"],
+  wasserfall: ["M3 4.5h18M8 4.5v11M12 4.5v11M16 4.5v11M4 19.5c1.5-1.6 3-1.6 4.5 0s3 1.6 4.5 0 3-1.6 4.5 0 2.2 1 3.5 0"],
+  tropfen: ["M12 3c3.2 4.6 6 8 6 11.2a6 6 0 0 1-12 0C6 11 8.8 7.6 12 3z", "", "M9.3 14.5a2.8 2.8 0 0 0 2.4 2.7"],
+  blubbern: ["M5 15a4 4 0 1 0 8 0 4 4 0 1 0-8 0zM14 8.5a2.6 2.6 0 1 0 5.2 0 2.6 2.6 0 1 0-5.2 0zM14.8 17a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0zM7 6a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0z"],
+  feuer: ["M12 2.5c1 3.4 5 5.3 5 9.6a5 5 0 0 1-10 0c0-2.5 1.4-4 2.5-5 .3 1.6 1 2.6 2 3.1.6-2.4.6-5.2.5-7.7z", "M4.5 21l15-3.2M4.5 17.8l15 3.2"],
+  kessel: ["M4.5 10.5h15M6 10.5c0 4.8 2.6 7.8 6 7.8s6-3 6-7.8M8.5 18l-1.2 2.8M15.5 18l1.2 2.8M9 7.2a1.2 1.2 0 1 0 2.4 0 1.2 1.2 0 1 0-2.4 0zM13 4.5a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0z"],
+  voegel: ["M3 15.5c2.6.2 4.8-1.3 5.8-4.2.9-2.6 2.8-4.3 5.3-4.3 2 0 3.4 1.4 3.6 3.3l2.3.6-2.3.9c-.6 3.8-3.6 6.7-8 6.7H8.5L6 21M10.5 13.5c1.8.4 3.6-.3 4.6-2"],
+  grillen: ["M7.5 14.2c0-1.6 1.5-2.6 3.5-2.6h6c1.5 0 2.5.9 2.5 2s-1 2-2.5 2h-6c-2 0-3.5-.2-3.5-1.4zM3.6 13.8a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM15 11.8l3-5.3 2.8 9.6M9.5 15.6L8 19.5M12.5 15.6l-.6 3.9M4.6 12.2C3.4 9 4.3 5.8 7.3 3.8M6 11.9c.4-3 2.4-5.6 5.5-6.6"],
+  eule: ["M6 9c0-3 2.4-4.5 6-4.5S18 6 18 9v5.5c0 3.9-2.6 6.2-6 6.2s-6-2.3-6-6.2zM6.3 6.8L5 3.2l3.4 2M17.7 6.8L19 3.2l-3.4 2M7.4 10a2.3 2.3 0 1 0 4.6 0 2.3 2.3 0 1 0-4.6 0zM12 10a2.3 2.3 0 1 0 4.6 0 2.3 2.3 0 1 0-4.6 0z", "M12 12.2l-.9 1.5h1.8zM9.2 9.9a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0zM13.6 9.9a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z"],
+  frosch: ["M3.5 15c0-3.8 3.8-6.3 8.5-6.3s8.5 2.5 8.5 6.3c0 3-3.8 5-8.5 5s-8.5-2-8.5-5zM5.2 8.3a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0zM13.2 8.3a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0zM7.5 15.2c2.8 1.7 6.2 1.7 9 0", "M7.2 8.3a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM15 8.3a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"],
+  wolf: ["M4.5 3l3.2 5h8.6l3.2-5 .8 8.5-3.3 3.3-2 5.7h-6l-2-5.7-3.3-3.3zM8.5 11.5l2 .8M15.5 11.5l-2 .8M10 17.5l2 1.3 2-1.3", "M11 15.6h2l-1 1.2z"],
+  kraehe: ["M5 21.5h14.5M10 19.2v2.3M13 19v2.5", "M2.5 9.3L6 8.2C6.6 6.3 8 5.2 9.8 5.2c2.2 0 3.7 1.5 4 3.6 2.4 1.3 4.6 3.6 6.6 6.9l1.1 1.8-3.3-.9c-1.4 1.4-3.4 2.2-5.7 2.2-3.4 0-5.7-2-5.7-5 0-1.5.5-2.8 1.2-3.7L6 9.9z"],
+  moewe: ["M2 10.5c3-2.4 6.5-2.2 10 1.8 3.5-4 7-4.2 10-1.8M4 18.5c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"],
+  specht: ["M18 2v20M21.5 2v20M14.5 9.5l3.5.5M15 11.5c-1.4 0-2.6-1-2.8-2.5-.2-1.8 1.1-3.3 2.9-3.2l-1 9.5c-1.5 2.5-3.3 4.5-5.6 6M12.4 7.5c.5-.8 1.4-1.3 2.4-1.4", "M12.2 8.5a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z", "M3 8l2 .8M3 11.5h2.3M3 15l2-.8"],
+  bienen: ["M7 14.5a5 4 0 1 0 10 0 5 4 0 1 0-10 0zM10.2 10.8v7.4M13.8 10.8v7.4M17 14.5h2.5M10 10.5C7.5 8 8 4.5 10 4.5s2.3 3 1.5 5.5M14 10.5c2.5-2.5 2-6-.2-6-1.8 0-2 3-1.3 5.5"],
+  fledermaus: ["", "M12 9.5l-1-2.2v3.2c-1.2-.4-2.6-.1-3.4.8C6.6 9.8 4.5 9.2 2 10c1.4 1.6 1.7 4.1 1 6 1.6-1 3.6-1 5 .2.9-1.2 2.4-1.5 4-.4 1.6-1.1 3.1-.8 4 .4 1.4-1.2 3.4-1.2 5-.2-.7-1.9-.4-4.4 1-6-2.5-.8-4.6-.2-5.6 1.3-.8-.9-2.2-1.2-3.4-.8V7.3z"],
+  hund: ["M8 5.5h8c2 0 3 1.6 3 4v4c0 3.6-3 6.5-7 6.5s-7-2.9-7-6.5v-4c0-2.4 1-4 3-4zM8 5.5C5 5.5 2.6 7.6 3.2 12l2.3 2.2M16 5.5c3 0 5.4 2.1 4.8 6.5l-2.3 2.2M10 16.5c1.3 1 2.7 1 4 0", "M8.9 10.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.3 10.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM10.6 13.2h2.8l-1.4 1.6z"],
+  pferd: ["M9 21.5v-4L5.3 14.2c-1-1-.8-2.6.6-3.2l6-4.5.5-3 2.1 2.3c2.9.9 4.6 3.6 4.6 7.6v8.1M13.6 5.4c1.7 1.1 2.9 2.8 3.3 4.8M6.2 13.3l1.6-.4", "M11.6 9a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
+  kuh: ["M8 7.5c0-1.3 1.3-2.3 4-2.3s4 1 4 2.3l.6 6.5H7.4zM6.5 14h11a2.6 2.6 0 0 1 0 5.2h-11a2.6 2.6 0 0 1 0-5.2zM8.2 6.3C6 6.3 4.8 4.7 4.8 3M15.8 6.3c2.2 0 3.4-1.6 3.4-3.3M8 8.5H4.3l1.8 2.3M16 8.5h3.7l-1.8 2.3", "M8.4 16.6a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.8 16.6a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"],
+  schaf: ["M4.5 14.2a2.5 2.5 0 0 1 .9-4.7 3 3 0 0 1 4.9-1.6 3 3 0 0 1 5.2.9 2.5 2.5 0 0 1 .7 4.9 2.6 2.6 0 0 1-3 2.6H7.4a2.5 2.5 0 0 1-2.9-2.1zM8 16.4v4M13.5 16.4v4", "M16.8 9.2c1.6-1.3 4.7-.5 4.7 2 0 2.2-1.7 3.6-3.7 3.3z"],
+  huhn: ["M7 11.5c0-3 2-5 4.5-5 2.2 0 3.6 1.5 3.6 3.6v1.1c2 0 3.8-1.8 4.9-4.2 1.2 3.4.2 8.2-2.8 10.2-2.1 1.4-5.2 1.6-7.3.2C7.9 16.3 7 14 7 11.5zM10.5 18.4v3M13.5 18.4v3", "M9.7 6.8c-.6-1.5.4-3 1.6-2.4.5-1.2 2.2-.7 2.2.7zM7 9.6l-2.2.8 2.2.8zM9.2 9.3a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"],
+  schwein: ["M4 12.5c0-4.2 3.6-7 8-7s8 2.8 8 7-3.6 7.5-8 7.5-8-3.3-8-7.5zM6 7.8L5 3.8l4 2.3M18 7.8l1-4-4 2.3M9 14.5a3 2.2 0 1 0 6 0 3 2.2 0 1 0-6 0z", "M10.5 14.5a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0zM12.1 14.5a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0zM8 10.3a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM14.4 10.3a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
+  katze: ["M5 4l3.6 4h6.8L19 4l.6 8.6c0 4.4-3.4 7.4-7.6 7.4s-7.6-3-7.6-7.4zM1.5 13.5h5.5M1.8 16.5l5.2-1.4M22.5 13.5H17M22.2 16.5L17 15.1M10.5 16.2c.9.7 2.1.7 3 0", "M8.3 11.8l2.2.4-2.2.6zM15.7 11.8l-2.2.4 2.2.6zM11 14h2l-1 1.1z"],
+  wal: ["M2.5 13.5c0-3 4-5 9-5 4.2 0 7 2 8 4.6l2.3-2.2v5.4l-2.3-1.6c-1.1 2.6-4 4.3-8 4.3-5 0-9-2.4-9-5.5zM10 6.2V3M10 6.2C10 4.5 11 3.5 12 3.3M10 6.2C10 4.5 9 3.5 8 3.3M3.5 15.5c2.5 1.2 6 1.5 9 1", "M6 12.2a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
+  stimmen: ["M3 4.5h11.5v7.5H8.2L5 15v-3H3zM10 14.5h6.8L20 17.5v-3h1V8h-4.5"],
+  markt: ["M3 9.5L5 4h14l2 5.5M3 9.5a2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0M5 12v8.5M19 12v8.5M3 20.5h18M9.5 4l-.8 5.5M14.5 4l.8 5.5", "M7.5 17.2a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0zM11 17.2a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0z"],
+  hafen: ["M10 4.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM12 6.5v14.5M8 10h8M4 13.5c0 4.3 3.6 7.5 8 7.5s8-3.2 8-7.5M2.3 15.3L4 13.5l1.8 1.8M18.2 15.3l1.8-1.8 1.7 1.8"],
+  schmiede: ["M3.5 10h13c0 2.1-1.9 3.6-4 3.6l1 3.6H7.5l1-3.6c-2.7 0-5-1.5-5-3.6zM5.5 20.5h11M8 17.2v3.3M13 17.2v3.3M15.5 2.8l5.2 5.2M18.1 5.4l-4.6 4.6", "M19.5 12a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0zM21 9.8a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z"],
+  glocke: ["M6 17c1-1.5 1.5-3.2 1.5-6a4.5 4.5 0 0 1 9 0c0 2.8.5 4.5 1.5 6zM4.5 17h15M10.8 19.3a1.2 1.2 0 0 0 2.4 0M12 6.5V4.2M2.6 9.5c0-2 .8-3.6 2-4.8M21.4 9.5c0-2-.8-3.6-2-4.8"],
+  uhr: ["M3.5 12a8.5 8.5 0 1 0 17 0 8.5 8.5 0 1 0-17 0zM12 7v5l3.3 2.2M12 3.5v1.3M20.5 12h-1.3M12 20.5v-1.3M3.5 12h1.3"],
+  gesang: ["M5.5 21.5c0-5.4 1.5-9.4 3.1-12.1C9.7 7.4 10.8 5.8 12 5.8s2.3 1.6 3.4 3.6c1.6 2.7 3.1 6.7 3.1 12.1zM8.5 21.5c.3-2 1.6-3.2 3.5-3.2s3.2 1.2 3.5 3.2", "M9.6 13.8c0-1.7 1-3 2.4-3s2.4 1.3 2.4 3v1.9H9.6zM16.6 8a1.4 1.1 0 1 0 2.8 0 1.4 1.1 0 1 0-2.8 0z", "M19.3 7.9V2.5l2.4 1.1"],
+  segel: ["M12 2.5v15M12 3.5l7.5 11.7H12M12 6.5l-6.5 8.7H12M3.5 17.5h17l-2.6 3.8H6.1z"],
+  axt: ["M4 21.5L15.5 6M12.8 4.6c2.2-1.7 5.2-1.6 7.1.3l-4.3 6.3-3.3-2.5z", "M2.5 21.5h9"],
+  hacke: ["M3.5 9.5C7.6 4.4 14.6 3.5 20.5 7M11.4 5.4L6.4 21.5", "M15.5 18.5l2-2.3 2.6.8.5 2.5-2.4 1.3zM20.2 14.3l1-.6.6 1-.9.6z"],
+  geist: ["M6 21V10a6 6 0 0 1 12 0v11l-2-1.6-2 1.6-2-1.6-2 1.6-2-1.6zM10 15.5a2 2.2 0 1 0 4 0 2 2.2 0 1 0-4 0z", "M8.8 10.8a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0zM13.2 10.8a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0z"],
+  untot: ["M3 21.5h18M5.5 21.5l1.2-1.2M17 21.5l1.4-1.6M9.5 21.5V12l-1.8-3.4c-.4-.8.6-1.5 1.2-.8l1.3 1.6V4.8a.9.9 0 0 1 1.8 0v4.5V3.8a.9.9 0 0 1 1.8 0v5.5V5a.9.9 0 0 1 1.8 0v5.5l.6-1.5c.4-.9 1.8-.5 1.6.5L18 14c-.3 1.6-1.4 2.6-3 3v4.5"],
+  ketten: ["M7.6 12l-2.4 2.4a3.4 3.4 0 0 0 4.8 4.8l2.4-2.4a3.4 3.4 0 0 0 0-4.8M16.4 12l2.4-2.4a3.4 3.4 0 0 0-4.8-4.8l-2.4 2.4a3.4 3.4 0 0 0 0 4.8M9.5 14.5l5-5"],
+  monster: ["M3.5 8c2.2-1.3 4.5-1.1 6.2.6M20.5 8c-2.2-1.3-4.5-1.1-6.2.6M5.5 16h13M7.5 16l1.2 3.4L10 16M14 16l1.3 3.4 1.2-3.4", "M5.8 10.6l4.2 1.3-3.9.8zM18.2 10.6L14 11.9l3.9.8z"]
+};
+  const zusSvg = (id, gross) => { const a = ZUS_ICON[id] || []; return '<svg class="lw-zico' + (gross ? " gross" : "") + '" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+    (a[0] ? '<path d="' + a[0] + '"/>' : "") + (a[1] ? '<path d="' + a[1] + '" fill="currentColor" stroke="none"/>' : "") + (a[2] ? '<path d="' + a[2] + '"/>' : "") + "</svg>"; };
   const DRINNEN = ["taverne", "hoehle", "unterreich", "kerker", "schmiede", "labor", "bibliothek", "tempel", "mine"];
   let zusWahl = {}, zusLauf = {}, zusPausiert = false;
   try { zusWahl = JSON.parse(localStorage.getItem("imres-lw-zusaetze") || "{}") || {}; } catch (_) {}
-  Object.keys(zusWahl).forEach(id => { if (!ZUSATZ[id]) delete zusWahl[id]; });
+  /* frühere Zusätze, die aufgeteilt wurden */
+  { const alt = { nacht: ["grillen", "eule"], hof: ["huhn", "kuh"] };
+    Object.keys(zusWahl).forEach(id => { if (alt[id]) { alt[id].forEach(n => { if (!(n in zusWahl)) zusWahl[n] = zusWahl[id]; }); delete zusWahl[id]; } else if (!ZUSATZ[id]) delete zusWahl[id]; });
+    try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {} }
   /* gewählt = Eintrag vorhanden (auch bei 0 %); Wert = Lautstärke 0–2 */
   const zusIst = id => Object.prototype.hasOwnProperty.call(zusWahl, id);
   const zusWert = id => typeof zusWahl[id] === "number" ? zusWahl[id] : 1;
   const zusMerken = () => { try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {} };
-  const zusMax = () => leicht() ? 2 : 4;
+  /* Handy 2, Tablet 4, großer Bildschirm 6 */
+  const zusMax = () => { const b = Math.min(innerWidth || 1200, screen && screen.width ? Math.max(screen.width, 1) : 1e4); return b < 640 || (leicht() && b < 900) ? 2 : b < 1100 ? 4 : 6; };
   /* steckt der Zusatz schon in der Grundkulisse? dann wird er nicht angeboten */
-  const zusInKulisse = id => { const w = KUL_WELT[S.kulisse]; return !!w && w.betten.some(([n]) => n === ZUSATZ[id].betten[0][0]); };
+  const zusInKulisse = id => { const w = KUL_WELT[S.kulisse], z = ZUSATZ[id]; return !!w && z.betten.length > 0 && w.betten.some(([n]) => n === z.betten[0][0]); };
   const zusFaktor = () => { const n = Object.keys(zusLauf).length; return .8 * (n >= 3 ? Math.sqrt(2 / n) : 1); };
   const zusDumpf = id => ZUSATZ[id].raus && DRINNEN.includes(S.kulisse);
   function zusPegelSetzen() {
@@ -2215,7 +2310,8 @@
       const jetzt = ctx.currentTime;
       betten.forEach(b => weltBettPlanen(k, b));
       w.ev.forEach((x, i) => {
-        if (k.naechst[i] == null) { k.naechst[i] = jetzt + zz(x[1][0] * .3, x[1][1] * .6); return; }
+        /* ein angetippter Zusatz meldet sich gleich – sonst wüsste man nicht, ob er läuft */
+        if (k.naechst[i] == null) { k.naechst[i] = jetzt + (k.zusatz ? zz(.4, 2.5) + i * 2 : zz(x[1][0] * .3, x[1][1] * .6)); return; }
         if (jetzt >= k.naechst[i]) { k.naechst[i] = jetzt + zz(x[1][0], x[1][1]); try { weltEreignis(k, x); } catch (_) {} }
       });
     }, 250);
@@ -2330,8 +2426,8 @@
     });
   }
   /* Ereignis der Kulisse: mal links, mal rechts, mal weit weg (dumpfer) */
-  function kulFx(art, z, laut, opt) {
-    const k = kul; if (!k) return;
+  function kulFx(art, z, laut, opt, quelle) {
+    const k = quelle || kul; if (!k) return;
     opt = opt || {};
     let ziel = k.g;
     try {
@@ -3395,7 +3491,6 @@
      vor der Mitte in Ganz- oder Halbtonschritten an sie heran und färbt sich Stufe für Stufe heller oder dunkler (jede Stufe
      ändert nur einen Ton der Leiter); was dann noch fehlt, holt das neue Stück Takt für Takt nach (tonZiel).
      So erklingen alte und neue Musik im Moment des Wechsels in derselben Tonart – nichts klingt kurz schief. */
-  let tonZiel = null;
   const HELL = ["lydisch", "ionisch", "mixolydisch", "dorisch", "aeolisch", "phrygisch"];
   const tonSchritt = d => Math.sign(d) * Math.min(2, Math.abs(d));
   const modAbstand = (a, b) => HELL.indexOf(b) - HELL.indexOf(a);
@@ -3716,6 +3811,8 @@
   }
   function stopp(pause) {
     morph = null; morphEin = false; einblendMax = EINBLEND;
+    /* mitten im Hinübergleiten angehalten: das Stück steht gleich in seiner eigenen Tonart */
+    if (tonZiel) { S.transpose = tonZiel.ziel; S.modus = tonZiel.modus; tonZiel = null; merken(); }
     laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; musikPauseAb = 0; if (klassikLauf) klassikStopp(true);
     /* beim Anhalten klingen bereits geplante Töne nicht mehr nach, sondern verstummen weich */
     if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); if (!(kul && kul.allein)) kulisseStop();
@@ -6745,7 +6842,7 @@
     return html;
   }
   const raumWahl = T => '<label class="lw-feld"><span>' + T.raum + '</span><select data-feld="raum">' + Object.keys(RAEUME).map(r => '<option value="' + r + '"' + (r === S.raum ? " selected" : "") + ">" + T.raeume[r] + "</option>").join("") + "</select></label>";
-  const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KULISSEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
+  const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KUL_ZEIGEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
     '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
   const sparKnopf = T => '<button type="button" class="lw-schalter lw-spar" data-aktion="spar" aria-pressed="' + spar + '" title="' + esc(T.sparTipp) + '">' + T.spar + "</button>";
   const mixRegler = T =>
@@ -6847,17 +6944,28 @@
   let klangAuf = { kul: false, fx: false, spuren: false };
   /* aufklappbar unter dem Kulissen-Balken: einzelne Schichten über die Kulisse legen */
   function zusBox(T) {
-    const auf = !!klangAuf.zus, sp = sprache(), an = Object.keys(zusWahl);
-    const kurz = an.length ? " · " + an.map(id => ZUSATZ[id].sym).join(" ") : "";
+    const auf = !!klangAuf.zus, sp = sprache(), an = Object.keys(zusWahl), name = id => esc(ZUSATZ[id][sp] || ZUSATZ[id].de);
+    const kurz = an.length ? '<span class="lw-zkurz">' + an.map(id => zusSvg(id)).join("") + "</span>" : "";
     let html = '<button type="button" class="lw-klappe lw-spurklappe" data-klangauf="zus" aria-expanded="' + auf + '">✚ ' + T.zusaetze + kurz + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     if (!auf) return html;
-    const ids = Object.keys(ZUSATZ).filter(id => zusIst(id) || !zusInKulisse(id));
-    html += '<div class="lw-spuren lw-zus">' + ids.map(id => {
-      const z = ZUSATZ[id], ist = zusIst(id), v = Math.round(zusWert(id) * 100);
-      return '<div class="lw-zuszeile' + (ist ? " an" : "") + '"><button type="button" data-zusatz="' + id + '" aria-pressed="' + ist + '">' + z.sym + " " + esc(z[sp] || z.de) + "</button>" +
-        (ist ? '<input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + esc(z[sp] || z.de) + '"><b>' + v + " %</b>" : "<span></span><span></span>") + "</div>";
-    }).join("") + '<p class="lw-tipp">' + T.zusTipp + "</p></div>";
-    return html;
+    let gr = -1;
+    const knoepfe = Object.keys(ZUSATZ).map(id => {
+      const z = ZUSATZ[id], ist = zusIst(id), drin = !ist && zusInKulisse(id);
+      const trenn = z.g !== gr && gr >= 0 ? '<span class="lw-ztrenn" aria-hidden="true"></span>' : ""; gr = z.g;
+      return trenn + '<button type="button" class="lw-zknopf' + (drin ? " drin" : "") + '" data-zusatz="' + id + '" aria-pressed="' + ist + '" title="' + name(id) + (drin ? " – " + T.zusDrin : "") + '" aria-label="' + name(id) + '"' + (drin ? " disabled" : "") + ">" + zusSvg(id, 1) + "</button>";
+    }).join("");
+    const regler = an.map(id => { const v = Math.round(zusWert(id) * 100);
+      return '<div class="lw-zuszeile"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
+        '<input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("");
+    return html + '<div class="lw-spuren lw-zus"><div class="lw-zgitter">' + knoepfe + '</div><p class="lw-zhinweis" aria-live="polite"></p>' + (regler ? '<div class="lw-zregler">' + regler + "</div>" : "") +
+      '<p class="lw-tipp">' + T.zusTipp(an.length, zusMax()) + "</p></div>";
+  }
+  /* Rückmeldung direkt unter den Symbolen – die allgemeine Statuszeile liegt im Pult oft außer Sicht */
+  function zusHinweis(text, warn) {
+    status(text);
+    const h = root.querySelector(".lw-zhinweis"); if (!h) return;
+    h.textContent = text; h.classList.toggle("warn", !!warn);
+    clearTimeout(zusHinweis.t); zusHinweis.t = setTimeout(() => { h.textContent = ""; }, 4000);
   }
   /* aufklappbar unter dem Kulissen-Balken: jede Schicht der gewählten Kulisse einzeln regeln */
   function kulSpuren(T) {
@@ -6876,13 +6984,13 @@
   const KUL_KURZ = 9;
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
-    let kul = oben("k", KULISSEN);
+    let kul = oben("k", KUL_ZEIGEN);
     if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + " " + info("klang") + "</h4></div>" +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") + kulSpuren(T) + zusBox(T) +
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
-      klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KULISSEN.length - 1)) +
+      klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) +
       klappe("fx", klangAuf.fx, T.fxKlappe) +
       (klangAuf.fx ? reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
         kleinRegler("💥", T.effekteKurz, "fxvol", S.fxVol, "lw-fval") +
@@ -6977,7 +7085,8 @@
   let funkAuf = false;
   const funkKnopfText = T => "📡 " + (funk && funk.status === "ok" ? (funk.zahl || 0) : funk ? "…" : T.funkKurz);
   function funkZustand() {
-    const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
+    const fest = tonFest();
+    const lied = { tempo: S.tempo, transpose: fest.transpose, modus: fest.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
       ablauf: S.ablauf, rollen: S.rollen || null, kapelle: S.kapelle, kapWahl: S.kapWahl || [], vol: S.vol, mute: S.mute, teile: Object.fromEntries(TEILE.filter(p => S.ablauf.includes(p)).map(p => [p, S.teile[p]])), instrument: S.instrument, band: S.band, takt: S.takt };
     return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
       hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, kapStufe: S.kapStufe, gaeste: S.gaeste, laeuft };
@@ -7064,7 +7173,7 @@
     if (!neu) neu = dekodieren(d.lied);
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
-      kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
+      kulisse: KUL_WEG[d.kulisse] || (KULISSEN.includes(d.kulisse) ? d.kulisse : "keine"), kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
       raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, kapStufe: d.kapStufe === 1 ? 1 : 2, gaeste: Object.assign(Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), { _aus: d.gaeste && d.gaeste._aus ? 1 : 0 }), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun, x.takt].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
@@ -7382,6 +7491,7 @@
       ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "kapelle", "kapStufe", "instrument", "gaeste"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
       if (w.band) neu.band = Object.assign({}, neu.band, w.band);
       neu.stimmung = eig.basis; neu.eigeneStimmung = k;
+      if (KUL_WEG[neu.kulisse]) neu.kulisse = KUL_WEG[neu.kulisse];
       if (!KULISSEN.includes(neu.kulisse)) neu.kulisse = "keine";
       if (!RAEUME[neu.raum]) neu.raum = "taverne";
     }
@@ -7447,10 +7557,13 @@
     const zb = e.target.closest("[data-zusatz]");
     if (zb) {
       const id = zb.dataset.zusatz; audioStart();
-      if (zusIst(id)) delete zusWahl[id];
-      else if (Object.keys(zusWahl).length >= zusMax()) { status(t().zusVoll(zusMax())); return; }
+      if (!ZUSATZ[id]) return;
+      const war = zusIst(id), nm = ZUSATZ[id][sprache()] || ZUSATZ[id].de;
+      if (war) delete zusWahl[id];
+      else if (Object.keys(zusWahl).length >= zusMax()) { zusHinweis(t().zusVoll(zusMax()), 1); return; }
       else zusWahl[id] = 1;
-      zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang"); return;
+      zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang");
+      zusHinweis(war ? t().zusWeg(nm) : t().zusAn(nm)); return;
     }
     if (e.target.closest('[data-aktion="kulmixzurueck"]')) {
       delete kulMix[S.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {}
@@ -8169,11 +8282,23 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-spurzeile input { width: 100%; accent-color: #6a9fb5; }
 .lw-spurzeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
 .lw-spuren .lw-klein { justify-self: start; margin-top: .2rem; }
-.lw-zuszeile { display: grid; grid-template-columns: minmax(8rem, 11rem) 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; }
-.lw-zuszeile button { text-align: left; border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; padding: .3rem .5rem; cursor: pointer; border-radius: 3px; }
-.lw-zuszeile button[aria-pressed="true"] { border-color: #6a9fb5; background: rgba(106,159,181,.22); }
+.lw-zgitter { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+.lw-ztrenn { width: .45rem; }
+.lw-zknopf { width: 2.6rem; height: 2.6rem; padding: .3rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); background: rgba(255,255,255,.02); color: var(--vellum); cursor: pointer; border-radius: 6px; transition: background .15s, border-color .15s, color .15s; }
+.lw-zknopf:hover { border-color: var(--ember); color: var(--ember); }
+.lw-zknopf[aria-pressed="true"] { border-color: #6a9fb5; background: rgba(106,159,181,.25); color: #cfe6ef; }
+.lw-zknopf.drin { opacity: .3; cursor: default; }
+.lw-zknopf.drin:hover { border-color: var(--line); color: var(--vellum); }
+.lw-zico { width: 1.25rem; height: 1.25rem; vertical-align: -.25rem; flex: none; }
+.lw-zico.gross { width: 100%; height: 100%; }
+.lw-zkurz { display: inline-flex; gap: .2rem; margin-left: .4rem; color: #9fc9da; }
+.lw-zhinweis { min-height: 1.1rem; margin: .4rem 0 0; font-size: .8rem; color: #9fc9da; }
+.lw-zhinweis.warn { color: var(--ember); }
+.lw-zregler { display: grid; gap: .3rem; margin-top: .5rem; }
+.lw-zuszeile { display: grid; grid-template-columns: 2.6rem 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; }
 .lw-zuszeile input { width: 100%; accent-color: #6a9fb5; }
 .lw-zuszeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
+@media (max-width: 640px) { .lw-zknopf { width: 2.75rem; height: 2.75rem; } .lw-ztrenn { width: .2rem; } }
 .lw-zus .lw-tipp { margin: .2rem 0 0; font-size: .74rem; color: var(--ash); }
 .lw-kleinregler span { flex: 0 0 auto; white-space: nowrap; }
 .lw-kleinregler input { flex: 1 1 auto; min-width: 4rem; max-width: 16rem; accent-color: var(--ember); }
