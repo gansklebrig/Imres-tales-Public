@@ -88,7 +88,7 @@ begin
   if char_length(n) < 1 then raise exception 'Name fehlt'; end if;
   if char_length(t) < 3 then raise exception 'Text zu kurz'; end if;
   if n !~ '[[:alpha:]]' or t !~ '[[:alpha:]]' then raise exception 'Bitte nur echte Buchstaben'; end if;
-  if (char_length(t) - char_length(replace(t, E'\n', ''))) > 20 then raise exception 'Bitte weniger Zeilenumbrüche'; end if;
+  if 20 < cardinality(string_to_array(t, E'\n')) - 1 then raise exception 'Bitte weniger Zeilenumbrüche'; end if;
   if p_schluessel is null or p_schluessel !~ '^[A-Za-z0-9]{16,64}$' then raise exception 'ungültiger Schlüssel'; end if;
   if (select count(*) from regexp_matches(t, 'https?://|www\.', 'gi')) > 2 then raise exception 'zu viele Links'; end if;
   if public.gb_anstoessig(n) or public.gb_anstoessig(t) then raise exception 'Bitte freundlich bleiben'; end if;
