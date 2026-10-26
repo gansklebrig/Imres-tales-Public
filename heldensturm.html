@@ -6,7 +6,7 @@
 <meta name="description" content="Heldensturm – das Roguelike zu Imres Tales: Barradin, Echo, Friedrich und Ezekiel kämpfen sich durch die ganze Kampagne.">
 <meta name="theme-color" content="#100c12">
 <meta property="og:title" content="Heldensturm">
-<meta property="og:description" content="Das Roguelike zu Imres Tales: 13 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
+<meta property="og:description" content="Das Roguelike zu Imres Tales: 15 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
 <meta property="og:image" content="https://imrestales.de/vorschau.jpg">
 <style>[hidden]{display:none!important}body{margin:0}</style>
 <title>Heldensturm</title>
@@ -1002,6 +1002,7 @@ const BOSSTHEMA={
  erzpriesterin:{s:{modus:['phrygisch'],tempo:[132,140],instrument:['glocken'],band:{trommel:['pauke'],floete:['gesang'],ketten:['krug']}},o:{gong:1,tuba:1},m:{inst:'stimme',l:.32,n:[[0,0,2],[2,0,2],[4,1,2],[6,0,2],[8,-2,4],[12,0,4]]}},
  demogorgon:{s:{modus:['phrygisch'],tempo:[146,154],transpose:[-4,-5],instrument:['illusion'],band:{trommel:['pauke'],floete:['gesang'],ketten:['ketten']}},o:{farbe:'orgel',gong:1,tuba:1,pos:1},m:{inst:'orgel',okt:-1,l:.3,n:[[0,0,4],[4,1,4],[8,0,2],[10,1,2],[12,-1,4]]}},
  riese:{s:{modus:['aeolisch'],tempo:[112,120],instrument:['drehleier'],band:{trommel:['pauke'],floete:['horn'],ketten:['stampfen']}},o:{tuba:1,pos:1,tief:1,amboss:1},m:{inst:'tuba',okt:-2,l:.42,n:[[0,0,3],[3,0,1],[4,2,4],[8,1,2],[10,0,6]]}},
+ themberchaud:{s:{modus:['phrygisch'],tempo:[150,158],instrument:['drehleier'],band:{trommel:['taiko'],floete:['oohchor'],ketten:['kriegstrommel']}},o:{tuba:1,pos:1,trp:1,horn:1,amboss:1,tief:1,gross:2},m:{inst:'tuba',okt:-2,l:.46,n:[[0,0,4],[4,1,2],[6,0,2],[8,4,5],[13,3,1],[14,1,2]]}},
  drokey:{s:{modus:['phrygisch','aeolisch'],tempo:[140,148],instrument:['laute'],schraeg:.3,band:{trommel:['stoecke'],floete:['okarina'],ketten:['rassel']}},o:{farbe:'trem'},m:{inst:'klar',l:.24,n:[[0,4,1],[1,3,1],[2,4,1],[3,1,3],[8,2,1],[9,1,1],[10,0,4]]}}};
 for(const id in BOSSTHEMA){const t=BOSSTHEMA[id];STIL['boss_'+id]=Object.assign({},STIL.boss,t.s,{motiv:t.m});ORCH['boss_'+id]=Object.assign({},ORCH.boss,t.o)}
 /* Verfolgung: gehetzt, phrygisch – für die Flucht vor dem Demogorgon */
@@ -1544,6 +1545,9 @@ const GUARDS={
  peitschenmeister:{n:'Kuo-Toa-Peitschenmeister',shape:'kuotoa',c:'#2a5a52',t:'#e5b454',hp:1,sp:82,dmg:1,size:2.1,moves:['lightning','summon'],summon:['kuotoa']},
  duergarHuene:{n:'Duergar-Hüne',shape:'duergar',c:'#4a4246',t:'#ff6a2a',skin:'#7a7a82',hp:1,sp:80,dmg:1,size:1.8,moves:['grow','slam','charge']},
  schreifels:{n:'Der schreiende Fels',shape:'stone',c:'#5e5750',t:'#b080ff',hp:1.1,sp:62,dmg:1,size:2.5,moves:['gw_slam','g_boulder','quake'],pc:'#c8a0ff',say:'Der Stein schreit – und ein ganzer Fels reißt sich aus der Wand des Steinbruchs!'},
+ stadtvogt:{n:'Der Stadtvogt',shape:'duergar',c:'#4a4248',t:'#c8501a',skin:'#7a7a82',hp:1.05,sp:84,dmg:1,size:2.1,moves:['charge','fan','summon'],summon:['duergar','duergarArmbrust'],pc:'#ff8a3a',say:'„Da sind die Eierdiebe!“ Der Stadtvogt von Gracklstugh versperrt die Gasse – mit einer ganzen Wache im Rücken.'},
+ feuerschlucker:{n:'Der Feuerschlucker vom Markt',shape:'human',c:'#8a2a1a',t:'#e5b454',skin:'#8a8a92',hp:1,sp:92,dmg:1,size:2,moves:['fan','g_forge','gw_lob','g_coins'],lob:'feuer',pc:'#ffb040',say:'Zwischen den Ständen spuckt ein Gaukler Feuer – und zielt dabei auffallend genau auf euch.'},
+ steinriese:{n:'Ein besessener Steinriese',shape:'giant',c:'#6a6258',t:'#4a3e34',skin:'#a89a8a',hp:1.25,sp:70,dmg:1.15,size:3.2,moves:['g_boulder','quake','gw_slam'],pc:'#b080ff',say:'Der Stein schreit – und ein Steinriese hört ihn. Mit leerem Blick hebt er einen Felsbrocken über den Kopf.'},
  salamander:{n:'Der Feuersalamander',shape:'salamander',c:'#a8341a',t:'#ffb040',hp:1,sp:95,dmg:1,size:2.3,moves:['gw_charge','g_forge','gw_lob'],lob:'feuer',pc:'#ff8a2a',say:'Aus dem Lavastrom kriecht ein Feuersalamander. Die Hitze raubt euch den Atem.'}
 };
 /* Bosse: eigene Fähigkeiten nach Charakter und Erzählung */
@@ -1570,6 +1574,8 @@ const BOSSES={
   say:'Etwas steigt aus dem See: Demogorgon, Fürst der Dämonen. Ihr könnt ihn nicht besiegen. Rennt zum Boot!',outro:'Ihr erreicht das Boot, Kardal mit euch. Ploopploopeen steht noch mit erhobenen Armen auf den Stufen seines Tempels. Dann fällt ein Tentakel. Barradin hatte ihm ein Lied versprochen. Es wird ein Klagelied.'},
  riese:{n:'Der rasende Riese',shape:'giant',c:'#7a6a5a',t:'#4a3a2a',skin:'#b89a80',hp:1.3,sp:80,dmg:1.2,size:3.8,moves:['boulder','quake','rampage','roar'],pc:'#a89a8a',death:'bound',
   say:'Schreie, krachende Häuser – ein Riese tobt durch die Stadt. Stimmen in seinem Kopf treiben ihn an.',outro:'Der Riese liegt betäubt und gefesselt. Ein zweiter Riese dankt euch und lädt euch ein, mit dem Steinsprecher zu reden. Welch eine Ehre!'},
+ themberchaud:{n:'Themberchaud',shape:'dragon',c:'#b8321e',t:'#f0a85a',hp:4,sp:74,dmg:1.15,size:5.2,floorX:3.2,phases:1,moves:['t_atem','t_platsch','t_schwanz','t_gold'],moves2:['t_meteor','t_feger','t_atem','t_diener','t_gold'],moves3:['t_inferno','t_feger','t_platsch','t_meteor','t_atem'],summon:['magmin','feuerkaefer'],pc:'#ff7a2a',death:'flee',
+  say:'Ein tosendes Brausen – der Meister der Flammen landet auf seinem Gold. Themberchaud. Diesmal hilft kein Lied.',outro:'Themberchaud sinkt schnaufend auf seinen Hort, die Glut in seinen Augen wird schwächer. „Ihr … habt es nicht“, grollt er. „Dann findet es.“ Er lässt euch gehen. Barradin verbeugt sich trotzdem. Rex hat eine Münze im Maul.'},
  drokey:{n:'Drokey',shape:'human',c:'#3a3a44',t:'#e5b454',skin:'#8a8a92',hp:1.15,sp:96,dmg:1.05,size:2.3,moves:['fan','g_blades','g_coins','summon','darkness'],summon:['grauerGeist','geistMesser'],pc:'#e5b454',kite:1,death:'flee',
   say:'Eine goldene Münze mit Drachenkopf blitzt im Dunkeln: Drokey, angeblich einer der Grauen Geister – und verdächtig, das Drachenei gestohlen zu haben.',outro:'Eine Rauchkugel zerplatzt, und Drokey ist in den Gassen verschwunden. Zurück bleibt nur eine faustgroße Goldmünze mit Drachenkopf. Echo ruft ihm hinterher: „Kennst du Gundren?“ Keine Antwort. Vom Drachenei keine Spur.'}
 };
@@ -1622,9 +1628,14 @@ const ORTE=[
  {kap:1,name:'Die Glut von Gracklstugh',story:'Kardal führt euch ins Dorf der Steinriesen. Steinsprecher Hgraam spricht in Rätseln: Etwas Unersättliches regt sich, der Stein schreit. Dann führen zwei Rotroben euch durch einen geheimen Gang zum Meister der Flammen, und beim Hinausgehen flüstert Hohepriester Gartokkar: Ein Drachenei wurde gestohlen. Die Spur führt hinab in die Slums.',
   stufen:[{name:'Der schreiende Stein',theme:'steinbruch',mood:'unterreich',int:6,foes:{steinkriecher:4,steinsplitter:2,brocken:1.5},guard:'schreifels'},
           {name:'Der Gang der Bewahrer',theme:'glutgang',mood:'pilger',int:6,foes:{magmin:3,feuerkaefer:3,eiferer:2},guard:'salamander'},
-          {name:'Die Slums der Grauen Geister',theme:'slums',mood:'spannung',int:7,foes:{grauerGeist:4,geistMesser:2,schatten:2,ratte:2},boss:'drokey'}]}
+          {name:'Die Slums der Grauen Geister',theme:'slums',mood:'spannung',int:7,foes:{grauerGeist:4,geistMesser:2,schatten:2,ratte:2},boss:'drokey'}]},
+ {kap:1,name:'Der Meister der Flammen',story:'Kein Ei, kein Dieb – und der Stein schreit lauter denn je. In Gracklstugh heißt es, ihr hättet das Drachenei selbst. Die Rotroben hetzen die Stadt gegen euch, und tief im Hort tobt Themberchaud. Ihr müsst durch die Gassen, über den Markt und durch die Enklave der Riesen – bis vor den Meister der Flammen.',
+  stufen:[{name:'Aufruhr in den Gassen',theme:'gracklstugh',mood:'kampf',int:7,foes:{duergar:4,duergarArmbrust:2,eiferer:2,duergarRammer:1.5},guard:'stadtvogt'},
+          {name:'Der Markt von Gracklstugh',theme:'markt',mood:'marktplatz',int:7,foes:{grauerGeist:3,geistMesser:2,duergar:3,ratte:2},guard:'feuerschlucker'},
+          {name:'Die Enklave der Riesen',theme:'steinbruch',mood:'zwerge',int:8,foes:{steinkriecher:3,brocken:2,steinsplitter:2,steinbrecher:1},guard:'steinriese'},
+          {name:'Themberchauds Hort',theme:'hort',mood:'boss',int:9,foes:{magmin:3,feuerkaefer:3,eiferer:2},boss:'themberchaud'}]}
 ];
-const FORTSETZUNG='Fortsetzung folgt … Wer hat das Drachenei?';
+const FORTSETZUNG='Fortsetzung folgt … Wo ist das Drachenei?';
 const STAGES=[];ORTE.forEach((o,oi)=>o.stufen.forEach((st,si)=>STAGES.push(Object.assign({ort:oi,si,of:o.stufen.length},st))));
 const ROM=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
 const stageLabel=i=>{const S=STAGES[i],O=ORTE[S.ort];return{ort:O.name,stufe:S.name,kap:KAPITEL[O.kap],pos:`Ort ${S.ort+1} von ${ORTE.length} · Stufe ${S.si+1} von ${S.of}`}};
@@ -2149,6 +2160,8 @@ const THEMES={
  gracklstugh:{base:'#2a2422',blot:['#332c29','#211c1a','#3a302b'],tiles:1,deco:['forge','house','anvil','barrel','forge'],dark:0.4,tint:'rgba(200,90,30,.08)'},
  steinbruch:{base:'#2e2a26',blot:['#38332e','#24211e','#403a33'],deco:['block','block','erzwagen','rubble','rock','torch','schreistein'],dark:0.45,tint:'rgba(120,80,170,.07)'},
  glutgang:{base:'#2a1a16',blot:['#34201a','#1e1210','#3c2418'],tiles:1,deco:['lava','brazier','pillar','lava','goldhaufen'],dark:0.35,tint:'rgba(230,80,20,.12)'},
+ markt:{base:'#2a2523',blot:['#332c28','#221d1b','#3a312b'],cobble:1,deco:['crate','barrel','lantern','huette','crate','forge','barrel'],dark:0.4,tint:'rgba(220,140,60,.08)'},
+ hort:{base:'#24140f',blot:['#2e1a12','#1a0d08','#3a1e12'],tiles:1,deco:['goldhaufen','goldhaufen','goldhaufen','brazier','pillar','goldhaufen','brazier'],dark:0.25,tint:'rgba(255,90,20,.14)'},
  slums:{base:'#252326',blot:['#2d2a2e','#1b191c','#332f33'],cobble:1,deco:['huette','huette','lantern','crate','barrel','rubble'],dark:0.6,tint:'rgba(60,60,90,.1)'}
 };
 const LIGHTS={torch:[150,'255,170,80'],lantern:[160,'255,200,120'],brazier:[190,'255,140,60'],rune:[130,'120,210,255'],anvil:[110,'120,210,255'],glowshroom:[120,'120,255,220'],forge:[230,'255,120,40'],well:[0,''],cell:[0,''],lava:[210,'255,110,30'],goldhaufen:[120,'255,200,90'],schreistein:[100,'180,130,255']};
@@ -2495,6 +2508,65 @@ function bossArtDraw(c,e,t,lg,wob){const id=BAKEY(e),f=BOSSART[id];if(!f)return 
 const bLeg=(c,x,st,w,col,boot,len)=>{const fx=x+st*2.6;hQ(c,col,HOL,0.8,q=>{q.moveTo(x-w,5);q.lineTo(x+w,5);q.lineTo(fx+w*0.8,(len||12));q.lineTo(fx-w*0.8,(len||12));q.closePath()});if(boot)hE(c,fx+0.8,(len||12)+0.8,w+1.2,1.9,boot,HOL,0.7)};
 function bRunes(c,t,R,col,n,ga,sp){c.lineWidth=0.8;c.strokeStyle=col;for(let i=0;i<n;i++){const a=t*(sp||0.8)+i*TAU/n,x=Math.cos(a)*R,y=Math.sin(a)*R*0.45-6;c.globalAlpha=ga*(0.45+0.35*Math.sin(t*4+i));c.beginPath();c.moveTo(x,y-2.2);c.lineTo(x+1.4,y);c.lineTo(x,y+2.2);c.lineTo(x-1.4,y);c.closePath();c.stroke();c.beginPath();c.moveTo(x,y-1);c.lineTo(x,y+1);c.stroke()}c.globalAlpha=ga}
 const BOSSART={
+/* ---------- Themberchaud, der Meister der Flammen: riesig, rund wie ein Ofen, lange Hörner, ein Grinsen voller Zähne ---------- */
+themberchaud(c,e,A){const{t,st,cast,atk,ph2,ga,q}=A,ph=e.ph||1,fl=e.flying?1:0;
+ const rd=ph>=3?'#c8381c':'#b8321e',rdd=bT(rd,-0.32),rdl=bT(rd,0.18),bel='#f0a85a',beld='#c87a34',horn='#e0c49a',hornd='#8a6a48',gold='#e5b454';
+ const br=A.br,flap=Math.sin(t*(fl?8:2.2)+e.seed)*(fl?8:2),puff=1+0.03*Math.sin(t*1.6+e.seed)+cast*0.06;
+ /* Schwanz: dick, schwer, mit Stachelreihe */
+ const tw=Math.sin(t*1.8+e.seed)*3;
+ hQ(c,rd,HOL,1,p=>{p.moveTo(-14,4);p.quadraticCurveTo(-28,10+tw*0.4,-34,-2+tw);p.lineTo(-31,-4+tw);p.quadraticCurveTo(-24,2,-13,-5);p.closePath()});
+ for(let i=0;i<4;i++)hP(c,horn,HOL,0.5,[-18-i*4,1.5-i*0.6+tw*0.25*i/3,-19.5-i*4,-3.5-i*0.6+tw*0.25*i/3,-21-i*4,1-i*0.6+tw*0.25*i/3]);
+ /* hinterer Flügel */
+ c.save();c.translate(-4,-12);c.scale(fl?1.35:1,1);hQ(c,rdd,HOL,0.9,p=>{p.moveTo(0,0);p.lineTo(-8,-15-flap);p.lineTo(-24,-11-flap*0.6);p.quadraticCurveTo(-18,-6,-17,-2);p.quadraticCurveTo(-12,-3,-9,1);p.closePath()});c.restore();
+ /* Hinterbeine: kurz und stämmig */
+ for(const[x,s]of[[-10,st],[-3,-st]]){hQ(c,rdd,HOL,0.9,p=>{p.moveTo(x-4,6);p.lineTo(x+4,6);p.lineTo(x+3.4+s*1.6,14);p.lineTo(x-3.4+s*1.6,14);p.closePath()});for(let k=0;k<3;k++)hP(c,horn,null,0,[x-2.6+k*2.4+s*1.6,13.6,x-1.8+k*2.4+s*1.6,13.6,x-2.2+k*2.4+s*1.6,15.8])}
+ /* Rumpf: ein runder Ofen von einem Drachen */
+ c.save();c.translate(-2,-1);c.scale(puff,puff);
+ hE(c,0,0,18,14,rd,HOL,1.3);hE(c,-2,-4,13,7,rdl);
+ /* Bauch mit Schuppenplatten – und ein paar Münzen, die daran kleben geblieben sind */
+ hE(c,4,4,12.5,9.5,bel,HOL,0.9);for(let i=0;i<5;i++){const y=-3.2+i*3.4,w=Math.sqrt(Math.max(0,1-Math.pow((y-4)/9.5,2)))*12;ln(c,beld,0.7,4-w,y,4+w,y)}
+ hC(c,0,7,1.5,gold,HOL,0.4);hC(c,7,2,1.2,gold,HOL,0.4);hC(c,9.5,8,1.1,gold,HOL,0.4);
+ /* Rückenstacheln */
+ for(let i=0;i<6;i++){const x=-14+i*4.6,y=-11.5+Math.abs(i-2.5)*1.2;hP(c,horn,HOL,0.5,[x-1.8,y+1,x+0.2,y-4.6-(i%2),x+2,y+1])}
+ if(ph>=2&&q>0){c.globalAlpha=ga*(0.5+0.4*Math.sin(t*5+e.seed));ln(c,'#ffb040',0.9,-12,-2,-8,1,-10,5);ln(c,'#ffb040',0.9,-4,-7,-1,-4);ln(c,'#ff8a2a',0.8,-15,3,-12,6);c.globalAlpha=ga}
+ c.restore();
+ /* Vorderbeine */
+ for(const[x,s]of[[6,-st],[12,st]]){hQ(c,rd,HOL,0.9,p=>{p.moveTo(x-3.6,5);p.lineTo(x+3.6,5);p.lineTo(x+3+s*1.6,14);p.lineTo(x-3+s*1.6,14);p.closePath()});for(let k=0;k<3;k++)hP(c,horn,null,0,[x-2.4+k*2.2+s*1.6,13.6,x-1.6+k*2.2+s*1.6,13.6,x-2+k*2.2+s*1.6,15.8])}
+ /* Hals – kurz, dick, mit Doppelkinn */
+ const lo=cast*4+atk*2,op=Math.max(cast,atk);
+ hQ(c,rd,HOL,1.1,p=>{p.moveTo(8,-6);p.quadraticCurveTo(14,-14-lo*0.2,17,-17+lo);p.lineTo(25,-13+lo);p.quadraticCurveTo(22,-3,15,5);p.closePath()});
+ hE(c,18,-4+lo*0.5,6,4.6,bel,HOL,0.8);ln(c,beld,0.6,14,-4+lo*0.5,22,-4.4+lo*0.5);ln(c,beld,0.6,15,-1.4+lo*0.5,21,-1.8+lo*0.5);
+ /* Kopf */
+ c.save();c.translate(22,-17+lo+br*0.5);c.rotate(lo*0.03);
+ /* lange, nach hinten geschwungene Hörner (das Markenzeichen) */
+ hQ(c,horn,HOL,0.9,p=>{p.moveTo(-3,-4);p.quadraticCurveTo(-12,-12,-22,-14);p.quadraticCurveTo(-13,-9,-5,-1.6);p.closePath()});
+ hQ(c,bT(horn,-0.08),HOL,0.9,p=>{p.moveTo(0,-5);p.quadraticCurveTo(-8,-16,-17,-20);p.quadraticCurveTo(-8,-12,-2,-2.6);p.closePath()});
+ for(let i=0;i<3;i++){ln(c,hornd,0.6,-6-i*4,-6.2-i*1.8,-5.2-i*4,-4-i*1.6);ln(c,hornd,0.6,-4-i*3.6,-8.6-i*2.6,-3-i*3.6,-6.4-i*2.4)}
+ /* Schädel und Schnauze */
+ hQ(c,rd,HOL,1.1,p=>{p.moveTo(-5,-4);p.quadraticCurveTo(0,-8.5,8,-6);p.quadraticCurveTo(13,-4.6,14,-1.6);p.lineTo(13.6,0.6-op*0.4);p.lineTo(-4,2.6);p.closePath()});
+ hE(c,1,-4.5,5,2.2,rdl);
+ /* Stirnstacheln und Wangenstacheln */
+ hP(c,horn,HOL,0.5,[2,-6.8,3.6,-10.2,5,-6.4]);hP(c,horn,HOL,0.5,[5.6,-6.2,7.4,-9,8.4,-5.6]);hP(c,horn,HOL,0.5,[-3,1,-7,3.4,-3.6,3.6]);hP(c,horn,HOL,0.5,[-1,2.6,-4,6,-0.4,4.4]);
+ /* Unterkiefer: geht beim Feuerspeien weit auf */
+ hQ(c,rd,HOL,1,p=>{p.moveTo(-3,2);p.lineTo(5,2+op*2.2);p.lineTo(13,1.6+op*4.2);p.lineTo(11,5+op*3);p.lineTo(-2,5.4);p.closePath()});
+ hQ(c,bel,null,0,p=>{p.moveTo(0,4.6);p.lineTo(10,4.4+op*3);p.lineTo(9,5+op*3);p.lineTo(0,5.4);p.closePath()});
+ /* Maul und Feuer */
+ if(op>0.08){c.globalAlpha=ga*Math.min(1,op*1.5);hQ(c,'#3a0806',null,0,p=>{p.moveTo(3,1);p.lineTo(13.6,0.4);p.lineTo(12.6,1.8+op*4);p.lineTo(4,2.4+op*2);p.closePath()});
+  if(q>0){glow(10,1.6+op*2,7+op*7,'#ffb040',0.7*op*ga,true);glow(14,1.4+op*2,4+op*4,'#fff0a0',0.6*op*ga,true)}c.globalAlpha=ga}
+ /* Zähne: viele, krumm, freundlich-furchterregend */
+ for(let i=0;i<6;i++)hP(c,'#fbf2dc',HOL,0.35,[2+i*2,0.8-op*0.2,2.9+i*2,2.8,3.8+i*2,0.6-op*0.2]);
+ for(let i=0;i<5;i++)hP(c,'#fbf2dc',HOL,0.35,[3+i*2,4.2+op*(1+i*0.5),3.9+i*2,2.4+op*(1+i*0.5),4.8+i*2,4.2+op*(1+i*0.5)]);
+ /* Auge: klein, schlau, glühend */
+ hEye(c,4.2,-3.2,ph>=2?'#ff5a1a':'#ffd040',t,e.seed,1.25);hQ(c,null,rdd,0.9,p=>{p.moveTo(1.6,-5.2);p.lineTo(6.8,-4.4)});
+ /* Nüstern mit Rauch */
+ hC(c,12.6,-2.4,0.6,'#2a0806');
+ if(q>0&&op<0.1){const s=(t*0.8+e.seed)%1;c.globalAlpha=ga*(1-s)*0.5;hC(c,13.5+s*4,-4-s*6,1+s*2.4,ph>=2?'#5a3a30':'#6a6060');c.globalAlpha=ga}
+ c.restore();
+ /* vorderer Flügel: klein im Verhältnis zum Bauch – fliegt trotzdem */
+ c.save();c.translate(-1,-12);c.scale(fl?1.4:1,1);hQ(c,rd,HOL,1,p=>{p.moveTo(0,0);p.lineTo(-3,-18-flap);p.lineTo(-17,-15-flap*0.8);p.quadraticCurveTo(-13,-9,-12,-4);p.quadraticCurveTo(-7,-5,-4,0);p.closePath()});
+ c.globalAlpha=ga*0.7;ln(c,rdd,0.8,-3,-18-flap,-8,-5);ln(c,rdd,0.8,-3,-18-flap,-13,-8);c.globalAlpha=ga;hC(c,-3,-18-flap,1.1,horn);c.restore();
+ /* dritte Phase: Glutfunken steigen aus dem Rücken */
+ if(ph>=3&&q>1){for(let i=0;i<4;i++){const p=((t*0.9+i/4+e.seed)%1);c.globalAlpha=ga*(1-p)*0.8;hC(c,-12+i*6+Math.sin(t*3+i)*2,-12-p*22,0.9,i%2?'#ffd040':'#ff6a2a')}c.globalAlpha=ga}},
 /* ---------- Goblin-Anführer: Krone, Fellumhang, Kriegshorn, Hackbeil ---------- */
 goblinboss(c,e,A){const{t,st,cast,atk,ph2,ga,q}=A,sk=ph2?'#6f9a2a':'#6a9a34',skd='#3e6a1c',cl='#8a2a24';
  hQ(c,'#5a3e22',HOL,0.9,p=>{p.moveTo(-8,-8);p.lineTo(8,-8);p.lineTo(11,10);for(let i=0;i<6;i++)p.lineTo(9-i*3.6,12+(i%2?3:0));p.lineTo(-11,10);p.closePath()});
@@ -3062,7 +3134,7 @@ function spawnEnemy(def,x,y,o){o=o||{};const sc=scale();const big=o.boss||o.guar
  const e={def,x:clamp(x,10,WORLD-10),y:clamp(y,10,WORLD-10),r:12*sz,hp,maxHp:hp,dmg:sc.dmg*(def.dmg||1)*(dmod('riesen')?1.2:1)*wxUndead(def)*(elite?1.5:1)*(o.boss?(SL()<4?1.8:2.2):o.guard?(SL()<4?1.4:1.7):o.add?1.3:1),sp:(def.sp||80)*(big?1:rnd(0.9,1.1))*(dmod('hektik')?1.3:1)*wxEnemySp(),
   elite,boss:!!o.boss,guard:!!o.guard,add:!!o.add,summon:!!o.summon,moves:def.moves||null,hitCd:0,atkCd:rnd(1,2.2),stun:0,root:0,slowT:0,slowA:0,fearT:0,fx:0,fy:0,vulnT:0,vuln:0,kx:0,ky:0,flash:0,
   tgtT:0,tgt:null,moveT:big?1.6:2,charging:0,cvx:0,cvy:0,fuse:0,seed:rnd(10),il:sc.il,dead:false,dr:0,shield:0,flying:false,flyHigh:0,heldT:0,dashT:0};
- if(o.guard||o.boss&&!def.survive){const f=guardFloor(!!o.boss);if(f>e.maxHp){e.hp=e.maxHp=f}}
+ if(o.guard||o.boss&&!def.survive){const f=guardFloor(!!o.boss)*(def.floorX||1);if(f>e.maxHp){e.hp=e.maxHp=f}}
  e.born=G.time;G.enemies.push(e);return e}
 /* Wächter wachsen mit der Ausrüstung der Gruppe mit: Mindestleben = Grundschaden der Helden × einige Sekunden, damit sie nicht in ein paar Schlägen fallen */
 function guardFloor(boss){let s=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const d=dpsOf(q.st);s+=Math.max(d.m,d.r)*(GUARD_HK[q.id]||1.5)}return s*(boss?BOSS_T0+Math.min(BOSS_T1,SL()*BOSS_TS):GUARD_T0+Math.min(GUARD_T1,SL()*GUARD_TS))*(HARD()?1.35:1)}
@@ -3138,20 +3210,52 @@ function bossAI(e,dt){const def=e.def;
   if(d2(e,P)<(e.r+P.r)*(e.r+P.r)&&e.hitCd<=0){e.hitCd=0.6;hurt(e.dmg*(e.stingHit?2.4:1.6))}if(Math.random()<0.5)burst(e.x,e.y+e.r*0.6,'#8a7a6a',2,60);
   if(e.charging<=0){e.stingHit=0;if(e.rampage>0){e.rampage--;later(0.15,()=>{if(!e.dead)BM.charge(e,false,0.45)})}}return true}
  if(e.flying){e.flyT-=dt;if(e.flyT>0.9){e.flyHigh=Math.min(1,e.flyHigh+dt*2);const a=ang(e,P);e.x+=Math.cos(a)*240*dt;e.y+=Math.sin(a)*240*dt}
-  else if(!e.landing){e.landing=1;const tx=P.x,ty=P.y;tele({k:'circle',x:tx,y:ty,r:125,delay:0.85,dmg:e.dmg*2.2,c:def.pc||'#ff4a3a',after:()=>{if(e.dead)return;e.x=tx;e.y=ty;e.flying=false;e.flyHigh=0;e.landing=0;G.shake+=5;burst(tx,ty,'#a89a8a',20,240)}})}
+  else if(!e.landing){e.landing=1;const tx=P.x,ty=P.y,pl=e.platsch;tele({k:'circle',x:tx,y:ty,r:pl?175:125,delay:pl?1.1:0.85,dmg:e.dmg*(pl?2.6:2.2),c:def.pc||'#ff4a3a',after:()=>{if(e.dead)return;e.x=tx;e.y=ty;e.flying=false;e.flyHigh=0;e.landing=0;G.shake+=pl?12:5;burst(tx,ty,'#a89a8a',20,240);if(pl){e.platsch=0;tele({k:'wave',x:tx,y:ty,r:e.r,spd:380,max:420,dmg:e.dmg*1.1,c:'#ffb040',push:420});sparks(tx,ty,'#ffd040',30,420,1);sfx('boom');if((e.ph||1)>=2)lavaPool(e,tx,ty,95,(e.ph===3?40:24))}}})}
   return true}
+ if(e.def.phases)themPhasen(e,dt);
  if(e.stun>0)return true;
  const enr=e.hp<e.maxHp*0.4;
  if(def.half&&!e.halfDone&&e.hp<e.maxHp*0.5){e.halfDone=1;halfPhase(e)}
  if(def.bat&&e.hp<e.maxHp*0.5){e.dead=true;e.noLoot=true;smoke(e.x,e.y);G.fxs.push({k:'batfly',x:e.x,y:e.y,t:0,life:1.4});toast('Nezna verwandelt sich in eine Fledermaus und flieht: „Die Spinne wird euch kriegen …“','#c48cff');return true}
  if(def.hazard==='ilvaraPfeile'){e.hazT=(e.hazT||3)-dt;if(e.hazT<=0){e.hazT=rnd(3,4.5);const p=edgePoint(520);for(let i=-1;i<=1;i++)eShot(p.x,p.y,ang(p,P)+i*0.12,330,e.dmg*0.55,{kind:'earrow',c:'#b080ff'});G.fxs.push({k:'ring',x:p.x,y:p.y,r:30,c:'#b080ff',t:0,life:0.5,w:3})}}
  e.moveT-=dt;
- if(e.moveT<=0&&e.moves){const big=e.boss?1:1.3;e.moveT=(enr?1.7:2.5)*big*rnd(0.85,1.15);const list=(e.phase2&&def.moves2)?def.moves2:e.moves;const mv=pick(list);if(BM[mv])BM[mv](e,enr)}
+ if(e.moveT<=0&&e.moves){const big=e.boss?1:1.3;e.moveT=(enr?1.7:2.5)*big*rnd(0.85,1.15);const list=(e.ph===3&&def.moves3)?def.moves3:(e.phase2&&def.moves2)?def.moves2:e.moves;if(e.ph===3)e.moveT*=0.75;const mv=pick(list);if(BM[mv])BM[mv](e,enr)}
  return false}
 function halfPhase(e){const def=e.def;
  if(def.half==='flee'){smoke(e.x,e.y);const p=edgePoint(620);e.x=p.x;e.y=p.y;smoke(e.x,e.y);e.fleeT=4;for(let i=0;i<4;i++){const q=edgePoint(260);spawnEnemy(FOES.robe,q.x,q.y,{summon:1})}toast('Glasstab flieht durch den Geheimgang! Hinterher!','#ff8a7a')}
  if(def.half==='reveal'){e.phase2=1;smoke(e.x,e.y);burst(e.x,e.y,'#b080ff',30,220);toast('Die Druidin zeigt ihr wahres Gesicht: Ilvara Mizzrym, eine Drow!','#c48cff')}}
+/* ---------- Themberchaud: drei Phasen ----------
+   1 (bis 2/3): am Boden – Feueratem, Bauchplatscher, Schwanzfeger, Goldlawine.
+   2 (bis 1/3): er erhebt sich, der Hort wird zur Lava – Meteore aus Glut, Feuerfeger, Diener aus dem Lavastrom.
+   3: Raserei – Inferno-Ring, schneller, mehr Lava; der Boden brennt an immer mehr Stellen. */
+function lavaPool(e,x,y,r,dur){if(G.ezones.filter(z=>z.kind==='lava').length>=16)return;eZone({x:clamp(x,40,WORLD-40),y:clamp(y,40,WORLD-40),r,dur,dps:e.dmg*1.5,kind:'lava'})}
+function themPhasen(e,dt){const f=e.hp/e.maxHp;e.ph=e.ph||1;
+ if(e.dr>0&&G.time>(e.drBis||0))e.dr=0;
+ if(e.ph===1&&f<0.66){e.ph=2;e.phase2=true;e.dr=0.8;e.drBis=G.time+3;e.flying=true;e.flyT=3.4;e.flyHigh=0;e.landing=0;G.shake+=14;sfx('roar');sfx('boss');musAk('phase');
+  banner('Themberchaud erhebt sich!','Der Hort wird zur Lava','#ff7a2a',{dur:2.4,size:46,force:1});rumbleAll(0.8,400);
+  for(let i=0;i<6;i++){const a=i/6*TAU+rnd(-0.3,0.3),d=rnd(260,520);const x=e.x+Math.cos(a)*d,y=e.y+Math.sin(a)*d;tele({k:'circle',x,y,r:90,delay:1.2+i*0.12,dmg:e.dmg*1.2,c:'#ff5a14',after:()=>lavaPool(e,x,y,rnd(80,105),999)})}}
+ if(e.ph===2&&f<0.33){e.ph=3;e.dr=0.8;e.drBis=G.time+2.2;e.sp*=1.18;G.shake+=16;sfx('roar');sfx('boss');musAk('phase');
+  banner('Der Meister der Flammen rast!','Bleibt in Bewegung','#ff3a1a',{dur:2.4,size:46,force:1});rumbleAll(1,500);
+  tele({k:'wave',x:e.x,y:e.y,r:e.r,spd:420,max:700,dmg:e.dmg*1.2,c:'#ff7a2a',push:500});
+  for(let i=0;i<5;i++){const x=P.x+rnd(-420,420),y=P.y+rnd(-420,420);tele({k:'circle',x,y,r:95,delay:1.4,dmg:e.dmg*1.2,c:'#ff5a14',after:()=>lavaPool(e,x,y,rnd(85,110),999)})}}
+ if(e.ph>=2){e.lavaT=(e.lavaT==null?6:e.lavaT)-dt;if(e.lavaT<=0){e.lavaT=e.ph===3?3.8:6.5;const x=P.x+rnd(-160,160),y=P.y+rnd(-160,160);tele({k:'circle',x,y,r:80,delay:1.3,dmg:e.dmg*1,c:'#ff5a14',after:()=>lavaPool(e,x,y,rnd(70,95),e.ph===3?45:28)})}}}
 const BM={
+ /* Diener aus dem Lavastrom: ein paar Magmins und Feuerkäfer kriechen heraus */
+ t_diener(e){if(G.enemies.filter(x=>!x.dead).length>45)return;for(let i=0;i<4;i++){const a=rnd(TAU);spawnEnemy(FOES[i%2?'feuerkaefer':'magmin'],e.x+Math.cos(a)*(e.r+60),e.y+Math.sin(a)*(e.r+60),{summon:1})}ring(e.x,e.y,e.r+50,'#ff7a2a',0.5,4)},
+ /* Feueratem: ein breiter Kegel, danach brennt der Boden */
+ t_atem(e,enr){const a=ang(e,P);e.castA=G.time;tele({k:'cone',x:e.x,y:e.y,a,arc:1.05,len:440,delay:0.95,dmg:e.dmg*2.3,c:'#ff7a2a',follow:e,after:()=>{e.atkA=G.time;for(let i=1;i<=3;i++)eZone({x:e.x+Math.cos(a)*i*115,y:e.y+Math.sin(a)*i*115,r:58+i*12,dur:4.5,dps:e.dmg*0.65,kind:'feuer'});sparks(e.x+Math.cos(a)*120,e.y+Math.sin(a)*120,'#ffb040',24,500,1)}});sfx('roar');later(0.9,()=>sfx('fire'))},
+ /* Bauchplatscher: er springt hoch und lässt sich mit dem ganzen Gewicht fallen */
+ t_platsch(e){e.platsch=1;e.flying=true;e.flyT=1.5;e.flyHigh=0;e.landing=0;sfx('roar')},
+ /* Schwanzfeger: eine Druckwelle rund um ihn – nur eine Lücke bleibt frei */
+ t_schwanz(e){tele({k:'wave',x:e.x,y:e.y,r:e.r,spd:360,max:360,dmg:e.dmg*1.3,c:'#ffb040',push:620,gap:ang(e,P)+Math.PI+rnd(-0.6,0.6),gapW:1.1});sfx('cleave')},
+ /* Goldlawine: er schleudert seinen Hort – Münzen und Kelche prasseln herab */
+ t_gold(e,enr){const n=9+(enr?4:0);for(let i=0;i<n;i++){const x=P.x+(i?rnd(-230,230):0),y=P.y+(i?rnd(-230,230):0);tele({k:'circle',x,y,r:44,delay:0.9+i*0.06,dmg:e.dmg*1.1,c:'#e5b454',rock:{x:e.x,y:e.y},after:()=>{if(fxQ()>0)sparks(x,y,'#ffd040',6,200,1)}})}sfx('coin');later(0.4,()=>sfx('coin'))},
+ /* Glutmeteore: Brocken aus dem Lavastrom, wo sie einschlagen, bleibt Lava */
+ t_meteor(e){for(let i=0;i<6;i++){const x=P.x+(i?rnd(-260,260):0),y=P.y+(i?rnd(-260,260):0);tele({k:'circle',x,y,r:82,delay:1.25+i*0.08,dmg:e.dmg*1.8,c:'#ff5a14',rock:{x:e.x,y:e.y},after:()=>lavaPool(e,x,y,70,(e.ph===3?30:18))})}sfx('roar')},
+ /* Feuerfeger: der Atem dreht sich wie ein Leuchtturm um ihn */
+ t_feger(e,enr){const a0=ang(e,P),dir=Math.random()<0.5?-1:1;e.castA=G.time;tele({k:'beam',x:e.x,y:e.y,a:a0-dir*1.1,av:dir*(e.ph===3?1.25:0.95),len:560,w:58,delay:1,dur:2.6,dps:e.dmg*2.4,c:'#ff7a2a',follow:e});sfx('fire')},
+ /* Inferno: ein Feuerring rast nach außen, dahinter ein Kranz aus Lava */
+ t_inferno(e){G.shake+=6;tele({k:'wave',x:e.x,y:e.y,r:e.r,spd:300,max:640,dmg:e.dmg*1.6,c:'#ff3a1a',push:300,gap:rnd(TAU),gapW:0.9});const x0=e.x,y0=e.y;later(1.2,()=>{if(e.dead)return;for(let i=0;i<7;i++){const a=i/7*TAU+rnd(-0.2,0.2);lavaPool(e,x0+Math.cos(a)*330,y0+Math.sin(a)*330,70,22)}});sfx('boom')},
  charge(e,enr,delay){const a=ang(e,P);tele({k:'line',x:e.x,y:e.y,a,len:520,w:e.r*1.6,delay:delay||0.75,c:'#ff4a3a'});later(delay||0.75,()=>{if(e.dead)return;e.charging=0.5;e.cvx=Math.cos(a)*1050;e.cvy=Math.sin(a)*1050;sfx('roar')});e.moveT+=0.6},
  rampage(e){e.rampage=2;BM.charge(e)},
  sting(e){const a=ang(e,P);tele({k:'line',x:e.x,y:e.y,a,len:460,w:e.r*1.2,delay:0.5,c:'#e0c040'});later(0.5,()=>{if(e.dead)return;e.charging=0.38;e.stingHit=1;e.cvx=Math.cos(a)*1300;e.cvy=Math.sin(a)*1300;sfx('pierce')})},
@@ -3189,7 +3293,7 @@ const BM={
  grow(e){if(e.grown){BM.slam(e);return}e.grown=1;e.r*=1.4;e.dmg*=1.5;ring(e.x,e.y,e.r+30,'#ff6a2a',0.6,6);toast(`${e.def.n} wächst zu riesiger Größe!`,'#ff8a5a')}
 };
 /* ---------- Boss-Zauber: Kennzeichen-Angriffe, Geschosse, Klänge ---------- */
-const BSHOT={drokey:'eshard',schmiedewaechter:'ebolt',erzpriesterin:'ebolt',venomfang:'evenom',wraith:'esoul',demogorgon:'esoul',vrock:'efeather'};
+const BSHOT={themberchaud:'efire',drokey:'eshard',schmiedewaechter:'ebolt',erzpriesterin:'ebolt',venomfang:'evenom',wraith:'esoul',demogorgon:'esoul',vrock:'efeather'};
 const CASTSND={fly:'b_fluegel',tentacle:'b_tentakel',beam:'b_rune',pylons:'b_rune',gaze:'b_rune',drain:'b_seele',howl:'b_horn',spores:'b_feder',web:'b_welle'};
 Object.assign(BM,{
  /* Goblin-Anführer: Kriegshorn – Druckwelle, und von den Rändern stürmen Goblins heran */
@@ -3228,7 +3332,7 @@ function drawTeleFx(k,t){const q=fxQ();if(q<1||k.screen)return;const c=cx,col=k.
  else if(k.k==='wave'){c.globalAlpha=0.25;c.strokeStyle='#ffffff';c.lineWidth=3;c.beginPath();if(k.gap!==undefined)c.arc(k.x,k.y,k.r+8,k.gap+k.gapW/2,k.gap-k.gapW/2+TAU);else c.arc(k.x,k.y,k.r+8,0,TAU);c.stroke();if(q>1&&k.gap!==undefined){const gx=k.x+Math.cos(k.gap)*k.r,gy=k.y+Math.sin(k.gap)*k.r;glow(gx,gy,40,'#ffffff',0.35,true)}}
  c.globalAlpha=ga}
 
-const ZCOL={gift:'#8ad04a',feuer:'#ff7a2a',netz:'#ececf4',sporen:'#c0a050',nebel:'#b0d0a0',dunkel:'#0a0610',summen:'#e0c040',faden:'#c08cff'};
+const ZCOL={lava:'#ff5a14',gift:'#8ad04a',feuer:'#ff7a2a',netz:'#ececf4',sporen:'#c0a050',nebel:'#b0d0a0',dunkel:'#0a0610',summen:'#e0c040',faden:'#c08cff'};
 function spawnGuard(){const S=STAGES[G.stage];const def=GUARDS[S.guard];const p=edgePoint(420);const e=spawnEnemy(def,p.x,p.y,{guard:1});G.guardE=e;rumbleAll(0.45,160);
  toast(def.say?def.say:`Wächter: ${def.n}`,'#ff9a7a');sfx('boss');G.shake+=4;ring(p.x,p.y,90,'#ff7a4a',0.7,6);guardIntroFx(e,def)}
 function spawnBoss(){const S=STAGES[G.stage];const def=BOSSES[S.boss];const p=edgePoint(430);
@@ -3484,7 +3588,7 @@ function saveRunNext(){if(!P||G.bot)return;saveRun();if(SAVE.run&&!G.mp)SAVE.run
    Fehlt eine Datei (z. B. in der Vorschau ohne die Website), bleibt es einfach still. */
 const AMBI={el:{},on:{}};
 const AMB_ORT={hoehle:'a_tropfen1',tunnel:'a_tropfen2',mine:'a_tropfen1',minenetz:'a_tropfstein',spinnweben:'a_tropfen2',pilze:'a_tropfstein',ruine:'a_heulwind',kerker:'a_tropfen2',grab:'a_heulwind',geisterdorf:'a_heulwind',
- gracklstugh:'a_feuer2',schmiede:'a_feuer1',labor:'a_kochen',kuostadt:'a_wellen2',see:'a_wellen1',wachhaus:'a_feuer3',schloss:'a_wind1',hof:'a_wind1',turm:'a_wind2',flucht:'a_fluss',wurzeldorf:'a_baumwind',steinbruch:'a_tropfen1',glutgang:'a_feuer3',slums:'a_tropfen2'};
+ gracklstugh:'a_feuer2',schmiede:'a_feuer1',labor:'a_kochen',kuostadt:'a_wellen2',see:'a_wellen1',wachhaus:'a_feuer3',schloss:'a_wind1',hof:'a_wind1',turm:'a_wind2',flucht:'a_fluss',wurzeldorf:'a_baumwind',steinbruch:'a_tropfen1',glutgang:'a_feuer3',slums:'a_tropfen2',markt:'a_markt',hort:'a_feuer3'};
 const AMB_RAUM={schatz:'a_tropfstein',arena:'a_halle',goblin:'a_tropfen1',fallen:'a_feuer3',altar:'a_gesang',haendler:'a_markt',fluch:'a_heulwind',pilzkreis:'a_bienen',ballsaal:'a_halle',schmiede:'a_feuer1',hain:'a_voegel2'};
 function ambiEl(n){let a=AMBI.el[n];if(a)return a;a=new Audio();a.loop=true;a.preload='auto';a.src='amb/'+n+'.mp3';a.onerror=()=>{a._bad=1};
  try{const src=AC.createMediaElementSource(a),g=AC.createGain();g.gain.value=0;src.connect(g);g.connect(MASTER);a._g=g}catch(e){a._bad=1}return AMBI.el[n]=a}
@@ -3640,7 +3744,7 @@ function drawDecals(inView){if(!G.decals||GF().nodec)return;const c=cx;for(const
   else if(d.k==='crack'){c.globalAlpha=0.75*a;c.strokeStyle='rgba(10,8,6,.85)';c.lineWidth=2.4;c.lineCap='round';c.beginPath();for(const s of d.pts){c.moveTo(d.x+s[0][0],d.y+s[0][1]);for(let i=1;i<s.length;i++)c.lineTo(d.x+s[i][0],d.y+s[i][1])}c.stroke()}}c.globalAlpha=1}
 
 /* Umgebung: Staub, Glühwürmchen, Asche, Funken, Nebel – je nach Gebiet */
-const AMB={strasse:'pollen',wald:'fly',hoehle:'dust',dorf:'dust',tunnel:'dust',schloss:'dust',labor:'bubble',nacht:'fly',wachhaus:'dust',mine:'dust',minenetz:'dust',schmiede:'spark',geisterdorf:'ghost',turm:'pollen',wurzeldorf:'ash',kerker:'dust',hof:'dust',spinnweben:'dust',pilze:'spore',ruine:'dust',grab:'soul',see:'mist',kuostadt:'bubble',flucht:'bubble',gracklstugh:'spark',steinbruch:'dust',glutgang:'ash',slums:'dust'};
+const AMB={strasse:'pollen',wald:'fly',hoehle:'dust',dorf:'dust',tunnel:'dust',schloss:'dust',labor:'bubble',nacht:'fly',wachhaus:'dust',mine:'dust',minenetz:'dust',schmiede:'spark',geisterdorf:'ghost',turm:'pollen',wurzeldorf:'ash',kerker:'dust',hof:'dust',spinnweben:'dust',pilze:'spore',ruine:'dust',grab:'soul',see:'mist',kuostadt:'bubble',flucht:'bubble',gracklstugh:'spark',steinbruch:'dust',glutgang:'ash',slums:'dust',markt:'dust',hort:'ash'};
 function newAmb(k,x,y){const o={k,x,y,t:0,life:rnd(4,9),ph:rnd(TAU),vx:rnd(-8,8),vy:rnd(-8,8),s:rnd(1,2.2)};
  if(k==='spark'){o.vy=rnd(-60,-25);o.life=rnd(1.5,3.5);o.s=rnd(1.5,3)}else if(k==='ash'){o.vy=rnd(12,30);o.vx=rnd(-12,4);o.s=rnd(1.5,2.6)}else if(k==='fly'){o.s=rnd(2,3.5)}
  else if(k==='bubble'){o.vy=rnd(-30,-12)}else if(k==='mist'||k==='ghost'){o.s=rnd(90,170);o.vx=rnd(-12,12);o.vy=rnd(-4,4);o.life=rnd(8,14)}else if(k==='spore'||k==='soul'){o.vy=rnd(-14,-4);o.s=rnd(2,3.5)}
@@ -4109,6 +4213,9 @@ const TEMB=[];for(let i=0;i<70;i++)TEMB.push({x:Math.random(),y:Math.random(),s:
 function ambient(dt){const t=performance.now()/1000;cx.setTransform(DPR,0,0,DPR,0,0);const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1a1020');g.addColorStop(0.6,'#120c14');g.addColorStop(1,'#240e10');cx.fillStyle=g;cx.fillRect(0,0,W,H);
  for(const e of TEMB){e.y-=e.v*dt;if(e.y<-0.02){e.y=1.02;e.x=Math.random()}const x=(e.x+Math.sin(t*0.6+e.p)*0.01)*W,y=e.y*H;cx.globalAlpha=0.35+0.35*Math.sin(t*2+e.p);circ(cx,x,y,e.s,'#f0a040')}cx.globalAlpha=1}
 function drawEZone(z,t){const c=cx,a=Math.min(1,z.t*3,(z.dur-z.t)*2),col=ZCOL[z.kind]||'#8ad04a';
+ /* Lava: dunkle Kruste, glühender Kern, Blasen – wer hineintritt, verbrennt */
+ if(z.kind==='lava'){c.globalAlpha=0.95*a;hE(c,z.x,z.y,z.r*1.08,z.r*0.78,'#2a0804');hE(c,z.x,z.y,z.r,z.r*0.7,'#9a2408');const f=0.6+0.4*Math.sin(t*1.7+z.x*0.01);c.globalAlpha=f*a;hE(c,z.x+Math.sin(t*0.6+z.y)*z.r*0.2,z.y,z.r*0.62,z.r*0.38,'#ff7a1a');hE(c,z.x,z.y,z.r*0.3,z.r*0.18,'#ffd060');
+  c.globalAlpha=a;glow(z.x,z.y,z.r*1.3,'#ff5a14',0.35*a,true);if(Math.sin(t*4+z.x)>0.9)hC(c,z.x+rnd(-z.r*0.6,z.r*0.6),z.y+rnd(-z.r*0.3,z.r*0.3),2.4,'#ffe08a');c.globalAlpha=1;return}
  if(z.kind==='dunkel'){c.globalAlpha=0.75*a;circ(c,z.x,z.y,z.r,'#05030a');c.globalAlpha=0.4*a;circ(c,z.x,z.y,z.r*1.15,'#05030a');c.globalAlpha=1;return}
  if(z.kind==='netz'){c.globalAlpha=0.6*a;c.strokeStyle=col;c.lineWidth=1.2;for(let k=0;k<8;k++){const an=k/8*TAU;c.beginPath();c.moveTo(z.x,z.y);c.lineTo(z.x+Math.cos(an)*z.r,z.y+Math.sin(an)*z.r);c.stroke()}for(let r=z.r*0.3;r<=z.r;r+=z.r*0.23){c.beginPath();c.arc(z.x,z.y,r,0,TAU);c.stroke()}c.globalAlpha=1;return}
  if(z.kind==='summen'){c.globalAlpha=(0.15+0.1*Math.sin(t*20))*a;circ(c,z.x,z.y,z.r,col);c.globalAlpha=0.5*a;c.strokeStyle=col;c.lineWidth=2;c.setLineDash([4,6]);c.beginPath();c.arc(z.x,z.y,z.r,t*2,t*2+TAU);c.stroke();c.setLineDash([]);c.globalAlpha=1;return}
@@ -4175,7 +4282,8 @@ function drawProj(p,t){const c=cx;c.save();c.translate(p.x,p.y);c.rotate(p.a);
   case'eneedle':ln(c,p.c,2,-7,0,7,0);break;
   case'espear':ln(c,'#7a6a4a',2.4,-14,0,6,0);poly(c,p.c,12,0,5,-3,5,3);break;
   case'eglas':c.rotate(t*12);poly(c,'rgba(225,245,255,.92)',6,0,-2,-3,-4,0,-2,3);c.globalAlpha=0.45;circ(c,0,0,5,'#bfe6ff');c.globalAlpha=1;break;
-  case'ebolt':for(let i=1;i<4;i++){c.globalAlpha=0.35/i;poly(c,p.c,5-i*7,0,-i*7,-3.5,-5-i*7,0,-i*7,3.5)}c.globalAlpha=1;poly(c,p.c,7,0,0,-4.5,-7,0,0,4.5);poly(c,'#ffffff',4,0,0,-2,-4,0,0,2);break;
+  case'efire':{c.globalAlpha=0.45;circ(c,-7,0,5.5,'#ff3a0a');circ(c,-12,0,3.5,'#ff5a14');c.globalAlpha=1;circ(c,0,0,5.4,'#ff7a2a');circ(c,1.2,-0.4,2.8,'#ffe08a');break}
+   case'ebolt':for(let i=1;i<4;i++){c.globalAlpha=0.35/i;poly(c,p.c,5-i*7,0,-i*7,-3.5,-5-i*7,0,-i*7,3.5)}c.globalAlpha=1;poly(c,p.c,7,0,0,-4.5,-7,0,0,4.5);poly(c,'#ffffff',4,0,0,-2,-4,0,0,2);break;
   case'efeather':c.rotate(Math.sin(t*14+p.x*0.05)*0.4);c.fillStyle='#2e2e22';c.beginPath();c.moveTo(9,0);c.quadraticCurveTo(0,-4,-9,0);c.quadraticCurveTo(0,4,9,0);c.fill();ln(c,'#c8a070',0.9,-9,0,9,0);break;
   case'evenom':for(let i=1;i<4;i++){c.globalAlpha=0.4/i;circ(c,-i*6,Math.sin(t*12+i)*1.5,p.r*(1-i*0.18),p.c)}c.globalAlpha=1;circ(c,0,0,p.r,'#4a8a24');circ(c,1.5,-1,p.r*0.6,p.c);circ(c,2.4,-2,p.r*0.22,'#f0ffd0');break;
   case'esoul':for(let i=1;i<4;i++){c.globalAlpha=0.32/i;circ(c,-i*6,Math.sin(t*9+i)*2,p.r*(1-0.15*i),p.c)}c.globalAlpha=0.9;circ(c,0,0,p.r,p.c);c.globalAlpha=1;circ(c,2,-1.8,1.2,'#ffffff');circ(c,2,1.8,1.2,'#ffffff');break;
@@ -4699,7 +4807,7 @@ function modeTitle(win){if(G.mode==='abstieg')return G.timeUp?'Die Zeit ist um':
 function modeLead(win,S){if(G.mode==='abstieg')return`Ihr seid bis in <b>Tiefe ${G.depth}</b> vorgedrungen. ${G.timeUp?'Das Unterreich hat euch eingeholt – beim nächsten Mal schneller sein!':'Das Gold bleibt euch – stärkt euch im Lager und steigt erneut hinab.'}`;
  if(G.mode==='taeglich')return win?'Alle vier Stufen gemeistert. Mal sehen, ob das heute für die Spitze reicht!':'Morgen gibt es eine neue Herausforderung – und heute dürft ihr es so oft versuchen, wie ihr wollt.';
  if(G.mode==='bossrausch')return win?'Kein Boss der Kampagne steht mehr. Respekt!':`Bei ${esc(BOSSES[S.boss].n)} war Schluss.`;
- return win?esc(BOSSES.drokey.outro)+' <br><br><b>'+esc(FORTSETZUNG)+'</b> Sobald die Geschichte weitergeht, geht es hier weiter.':G.rl?`In „${esc(ORTE[S.ort].name)} – ${esc(S.name)}“ war Schluss. Stufe, Talente, Ausrüstung und Gold bleiben euch – rüstet beim Schmied auf und stürzt euch erneut hinein.`:`In „${esc(ORTE[S.ort].name)} – ${esc(S.name)}“ war Schluss. Das erbeutete Gold bleibt euch – verstärkt die Helden im Lager und versucht es erneut.`}
+ return win?esc(BOSSES.themberchaud.outro)+' <br><br><b>'+esc(FORTSETZUNG)+'</b> Sobald die Geschichte weitergeht, geht es hier weiter.':G.rl?`In „${esc(ORTE[S.ort].name)} – ${esc(S.name)}“ war Schluss. Stufe, Talente, Ausrüstung und Gold bleiben euch – rüstet beim Schmied auf und stürzt euch erneut hinein.`:`In „${esc(ORTE[S.ort].name)} – ${esc(S.name)}“ war Schluss. Das erbeutete Gold bleibt euch – verstärkt die Helden im Lager und versucht es erneut.`}
 function modePoints(win,reached){const m=1+0.5*G.diff;if(G.mode==='abstieg')return Math.round(((G.depth-1)*1000+G.score)*m);if(G.mode==='taeglich')return Math.round(G.score+reached*500);if(G.mode==='bossrausch')return Math.round((G.score+reached*300)*m);return Math.round((G.score+reached*250)*m)}
 /* Startleiste im Lager */
 function modeShort(m){if(m==='taeglich'){const d=dailyInfo(),b=SAVE.daily&&SAVE.daily[d.tag];return`Heute: <b>${HEROES[d.hero].name}</b> · ${d.mods.map(k=>DMODS[k].n).join(' · ')}${b?` · Bestes: ${fmt(b)}`:''}`}
@@ -5245,6 +5353,7 @@ const FIRE_IMRE={
  10:'Der Wraith ist vergangen. Als Ezekiel das Schwert aus der Halterung hob, ging mitten im Unterreich die Sonne auf.',
  11:'Am See ist es wieder still. Ein Dämonenfürst ist zurück in der Tiefe – und Ploopploopeens Volk wird euch das nie vergessen.',
  12:'Der Riese ist gefallen, und Gracklstugh atmet auf. Doch die Stimmen in manchen Köpfen hier sind noch nicht verstummt …',
+ 14:'Ihr habt dem Meister der Flammen standgehalten. Das Gold glüht noch, und irgendwo in Gracklstugh liegt ein Ei, das alles erklären könnte …',
  13:'Barradins Lied hat einen Drachen besänftigt. Themberchaud ließ euch ziehen – nun sucht ihr sein gestohlenes Ei. Und der Stein schreit noch immer …'};
 const NPCS=[
  {id:'rex',n:'Rex',ort:-1,k:'rex',say:['Rex schnarcht am Feuer. Im Traum jagt er ein Kaninchen – vermutlich das von Schloss Crackmore.','Rex bringt dir einen Stock. Er ist nass. Er ist sehr stolz darauf.','Rex legt den Kopf auf deine Stiefel und seufzt zufrieden.']},
@@ -6649,13 +6758,15 @@ const ROLLEN=[
  {id:'r11b',ort:11,t:'Fagas’ letzter Eintrag',art:'Notizbuch',x:'Das Seeufer! Die Fischmenschen sind seltsam, aber ihr Erzpriester hat gütige Augen. Die Gefährten vertrauen ihm, also tue ich es auch. Wenn wir zurück sind, erzähle ich Arafil vom Licht im Grab. Und der Barde schuldet mir noch ein Lied über mich. Ein heldenhaftes, bitte.'},
  {id:'r12a',ort:12,t:'Erlass von König Horga Stahl V.',art:'Erlass',x:'Die Fremden, die meinen Sohn Kardal aus den Netzen der Fischmenschen befreiten, stehen unter dem Schutz der Krone. Wer ihnen Schaden zufügt, bezahlt mit seinem Bart. Das gilt ausdrücklich auch dann, wenn der Barde wieder singt.'},
  {id:'r12b',ort:12,t:'Kaufbeleg',art:'Quittung',x:'Verkauft an einen Elfen mit Pfeife: eine Flöte der Illusionen und zwei Zaubertränke. Der Käufer probierte die Ware noch im Laden aus. Schaden: ein Regal, eine Miniaturstadt aus Ton, zwei Kunden mit Albträumen. Vermerk: Nie wieder an Barden verkaufen.'},
+ {id:'r14a',ort:14,t:'Ein Steckbrief vom Markt',art:'Aushang',x:'GESUCHT: Vier Fremde von der Oberfläche. Ein Elf mit Laute (redet viel), eine Druidin (fragt nach einem Gundren), ein Bogenschütze mit Hund, ein Mann mit zwei Klingen. Verdacht: Diebstahl eines Dracheneies. Belohnung: Eine Goldmünze mit Drachenkopf. Darunter, mit Kohle: „Der Elf singt wirklich gut.“'},
+ {id:'r14b',ort:14,t:'Barradins Ballade, zweite Strophe',art:'Liedblatt',x:'„Der Meister der Flammen, so rund wie ein Ofen, / so heiß wie die Schmiede, so gierig wie zehn – / wir kamen nicht, Herr, um dein Gold zu beklopfen, / wir wollten nur höflich dein Ei wiedersehn.“ Am Rand: „Nicht vorsingen. Wirklich nicht.“'},
  {id:'r13a',ort:13,t:'Die Worte des Steinsprechers',art:'Abschrift',x:'„Etwas Böses regt sich. Etwas Unersättliches. Der Stein schreit, und wer ihn hört, hört ihn nie wieder auf.“ Hgraam sprach es ruhig, als redete er vom Wetter. Selbst Barradins Flöte, die ihm Demogorgon vor Augen führte, ließ ihn ungerührt. Darunter, in Echos Schrift: „Kennt Gundren nicht.“'},
  {id:'r13b',ort:13,t:'Echos Rechnung',art:'Zettel',x:'Ein Berg aus Gold. Münzen: unzählbar (ich habe es versucht). Edelsteine: mehr als im ganzen Hort. Ein goldener Hund: Rex wäre neidisch. Davon könnte man kaufen: eine Burg, zwei Schiffe, alle Pilze des Unterreichs. Notiz an mich selbst: Den Drachen NICHT fragen, ob er teilt. Er hat Nein gesagt.'},
  {id:'g1',ort:-1,t:'Brief ohne Absender',art:'Geheime Rolle',x:'Glasstab ist tot, Nezna ebenso, und Ilvara meldet ihre Gefangenen entkommen. Diese vier sind lästiger als ein ganzes Heer. Sollen sie ruhig glauben, sie jagten mich. Ich bin längst dort, wohin sie erst noch gehen werden.'},
  {id:'g2',ort:-1,t:'Echos Beuteliste',art:'Geheime Rolle',x:'Gold: viel. Edelsteine: mehr. Der Amboss in der Schmiede: zu schwer (vorerst). Ilvaras Fuchs: kein Gold, trotzdem hübsch. Notiz an mich selbst: Am Ende landet alles auf dem gemeinsamen Haufen. Meistens.'},
  {id:'g3',ort:-1,t:'Rex’ Schatzkarte',art:'Geheime Rolle',x:'Eine zerknitterte Karte voller Pfotenabdrücke. Jeder Abdruck markiert eine Stelle, an der Rex einen Stock vergraben hat. Es sind siebenundzwanzig. Einer davon liegt, wenn man der Karte glaubt, mitten im Thronsaal von König Horga.'},
  {id:'g4',ort:-1,t:'Ein Lied für den Priester des Sees',art:'Geheime Rolle',x:'Er stand auf den Stufen, die Arme erhoben,\nder Priester des Sees, nie ein Schritt zurück.\nIch nannte ihn falsch, und er hat nur gelächelt –\nPloopploopeen, hier ist dein Lied, Stück für Stück.\n(Entwurf, in Barradins Handschrift. Ein paar Wörter sind verwischt.)'}];
-const ROLLE_ORTE=14;
+const ROLLE_ORTE=15;
 const rolS=()=>{if(!SAVE.rollen||typeof SAVE.rollen!=='object'||Array.isArray(SAVE.rollen))SAVE.rollen={};return SAVE.rollen};
 const rolHat=id=>!!rolS()[id];
 const rolAnz=()=>ROLLEN.filter(r=>rolHat(r.id)).length;
@@ -6790,6 +6901,10 @@ const LORE={
  geistMesser:'Wirft Messer aus dem Schatten der Slums. Trifft meistens, wenn er nicht gerade Münzen zählt.',
  w_schreifels:'Ein ganzer Fels, aus der Wand des Steinbruchs gerissen. Etwas Unersättliches regt sich darin.',
  w_salamander:'Ein Feuersalamander aus dem Lavastrom. Er hütet den Gang zum Meister der Flammen.',
+ b_themberchaud:'Themberchaud, der Meister der Flammen. Rund wie ein Schmelzofen, gierig wie ein ganzer Drachenhort – und schneller, als er aussieht.',
+ w_stadtvogt:'Der Stadtvogt von Gracklstugh. Glaubt jedes Gerücht, das ihm eine Rotrobe ins Ohr flüstert.',
+ w_feuerschlucker:'Ein Gaukler vom Markt. Spuckt Feuer für Münzen – und für Rotroben umsonst.',
+ w_steinriese:'Ein Steinriese, der den Schrei des Steins hört. Er weiß nicht, was er tut. Der Fels in seinen Händen schon.',
  b_drokey:'Drokey, angeblich einer der Grauen Geister. Verdächtig, das Drachenei gestohlen zu haben – und schwer zu fassen.'
 };
 const BEST_T={foe:[10,50,250],guard:[1,3,10],boss:[1,3,8],spec:[1,5,15]};
@@ -6927,6 +7042,9 @@ const BANTER={
   'B:Ein Gott! Das wird die Ballade meines Lebens!|F:Ich box ihn nochmal. Für die Ballade.'],
  boss_riese:['B:Der Riese rast durch die Gassen!|E:Er ist nicht böse. Nur verloren. Bringen wir ihn zur Ruhe.',
   'F:Ziel auf die Knie!|Z:Ich nehme die Fersen.'],
+ boss_themberchaud:['B:Darf ich ihm noch einmal vorsingen?|E:NEIN.|F:Ja.|Z:Nein.',
+  'E:Kennst du Gundren?|B:Echo, er SPEIT FEUER.|E:Das ist keine Antwort.',
+  'F:Er ist ... rund.|Z:Rund heißt nicht langsam.|B:Rund heißt: viel Platz für uns.'],
  boss_drokey:['E:Kennst du Gundren?|B:Echo, er ist ein DIEB.|E:Diebe kennen viele Leute.',
   'F:Die Münze mit dem Drachenkopf! Das ist er.|Z:Dann lassen wir ihn diesmal nicht entwischen.',
   'B:Ein Drachenei klauen – mutig. Dumm, aber mutig.|E:Und sehr, sehr wertvoll.'],
