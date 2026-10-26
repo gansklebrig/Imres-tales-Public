@@ -14,6 +14,9 @@ Fluid-R3-GM-Klangsatz von Frank Wen, als Einzeltöne aufbereitet von Benjamin Gl
 (https://github.com/gleitz/midi-js-soundfonts). Lizenz: Creative Commons Namensnennung 3.0
 (https://creativecommons.org/licenses/by/3.0/). Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.
 
+Tropfsteinhöhle (amb/a_tropfstein.mp3) – für Imres Tales selbst erzeugt: physikalisch nachgebildete Tropfen
+(Luftblasen-Resonanz) mit Höhlenhall, nahtlose 60-s-Schleife. Frei verwendbar (CC0).
+
 Die Geräuschkulissen (k_*.mp3) stammen aus der Klangsammlung der App Blanket
 (https://github.com/rafaelmardojai/blanket, Bearbeitung: Porrumentzio), Originale auf Freesound bzw. SoundBible:
   k_voegel   – kvgarlic, „Birds“ (freesound.org/s/156826)            – CC0
