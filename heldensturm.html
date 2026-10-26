@@ -80,7 +80,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .sk .ic{font-size:32px;line-height:1;color:#fff3dc;font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols',var(--fb)}
 .sk .cd{position:absolute;inset:0;border-radius:50%;pointer-events:none}
 .sk .cdt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums;pointer-events:none}
-.sk .key{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:#0d090f;border:1px solid var(--line);font-size:11px;font-weight:800;line-height:18px;color:var(--mute)}
+.sk .key{position:absolute;right:-2px;bottom:-2px;min-width:20px;padding:0 4px;box-sizing:border-box;height:20px;border-radius:50%;background:#0d090f;border:1px solid var(--line);font-size:11px;font-weight:800;line-height:18px;color:var(--mute)}
 .sk.ready{border-color:#f7d988}
 .sk.hold{transform:scale(1.1);box-shadow:0 0 18px rgba(247,217,136,.7)}
 .node.rec{outline:2px dashed rgba(229,180,84,.55);outline-offset:3px}
@@ -262,7 +262,7 @@ details.stats .stat{padding:0 12px 12px}
 .bslots{display:flex;gap:6px}
 .bslot{position:relative;width:44px;height:44px;border-radius:50%;border:2px solid var(--gold);background:radial-gradient(circle at 40% 35%,#45344a,#160f18 70%);display:flex;align-items:center;justify-content:center;padding:0;font-size:20px;font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols',var(--fb);color:#fff3dc}
 .bslot.empty{border-style:dashed;border-color:#4a3b4e}
-.bslot i{position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;border-radius:50%;background:#0d090f;border:1px solid var(--line);font-size:9px;font-style:normal;font-weight:800;line-height:14px;color:var(--mute)}
+.bslot i{position:absolute;right:-3px;bottom:-3px;min-width:16px;padding:0 3px;box-sizing:border-box;height:16px;border-radius:50%;background:#0d090f;border:1px solid var(--line);font-size:9px;font-style:normal;font-weight:800;line-height:14px;color:var(--mute)}
 .tree-wrap .tdet{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 0px);z-index:3;background:#1f1723;border-color:#5a4560;box-shadow:0 -10px 30px rgba(0,0,0,.6);max-height:44vh;overflow-y:auto}
 @media (max-width:760px){.brtabs{display:grid}.tree{grid-template-columns:minmax(0,1fr)}.tree .br{display:none}.tree .br.on{display:flex}.tree .br h3{display:none}.trow .node{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;text-align:left}.trow.two .node{flex-direction:column;align-items:center;gap:2px;padding:10px 4px}.trow .node .tag{position:static;order:5;margin-left:auto}.trow.two .node .tag{position:absolute;margin:0}.trow .node .nn{text-align:left;font-size:14px}.trow.two .node .nn{text-align:center;font-size:12px}}
 .br{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -4181,6 +4181,7 @@ function setT(k,v){if(HC[k]!==v){HC[k]=v;hEl[k].textContent=v}}
 function setH(k,v){if(HC[k]!==v){HC[k]=v;hEl[k].innerHTML=v}}
 function setW(k,v){v=Math.round(clamp(v,0,1)*400)/4;if(HC[k+'w']!==v){HC[k+'w']=v;hEl[k].style.width=v+'%'}}
 function hudUpdate(){if(G.state==='title'||G.state==='camp'||!P)return;
+ {const n=performance.now();if(P.skBtns&&n-(G._kt||0)>800){G._kt=n;P.skBtns.forEach((b,i)=>{const k=b.el.querySelector('.key'),t=skKey(i);if(k&&k.textContent!==t)k.textContent=t})}}
  setT('hName',P.hero.name);setT('hLvl',P.level>=LEG_CAP&&legS(P.id).lv?P.level+'✦'+legS(P.id).lv:String(P.level));setT('hForm',P.form==='bear'?'Bär':P.form==='rat'?'Ratte':P.stealthT>0?'Unsichtbar':P.buffs.ascend>0?'Darkin':'');setW('hpFill',P.hp/P.st.maxHp);setT('hpTxt',fmt(Math.max(0,P.hp))+' / '+fmt(P.st.maxHp));setW('xpFill',P.level>=LEG_CAP?legS(P.id).xp/legNeed(legS(P.id).lv):P.xp/xpNeed(P.level));
  {const S=STAGES[G.stage]||{name:''};setH('stName',`<small>${esc(stageTag(S))} · ${esc(diffNm())}</small>${esc(String(S.name||'').replace(/^Tiefe \d+ · /,''))}`)}
  {const pb=G.boss||G.guardE;
@@ -4197,8 +4198,10 @@ function hudUpdate(){if(G.state==='title'||G.state==='camp'||!P)return;
   const tx=cd>0?(cd<1?f1(cd):String(Math.ceil(cd))):'';if(b.tx!==tx){b.tx=tx;b.cdt.textContent=tx}}}
 const AR={b_mock:420,b_dissonant:480,b_ballad:300,b_juggle:200,b_door:260,b_flute:300,e_icefan:230,e_chain:420,e_tempest:280,e_rat:200,e_roar:200,e_treant:350,e_wrath:450,f_strafe:420,f_onearrow:650,f_trap:300,f_leap:150,f_howl:300,f_wolves:400,z_fan:380,z_spin:120,z_lotus:250,z_dawn:200,z_leap:400,z_ascend:260,z_smoke:180,z_clone:300,z_mark:450,e_wave:150,b_pattern:250,b_fear:230,z_cleave:180,e_bear:260,z_frenzy:260,e_charge:420,z_step:420,b_mirror:300};
 const SKPOS=[[0,0],[86,0],[0,86],[86,86],[172,0],[172,86]];
+/* Tastenbeschriftung der Fähigkeiten: mit Controller die belegte Taste (A, X, LB …), sonst 1–6 */
+function skKey(i){try{if(Object.keys(PADS.st).length&&(PADS.t||0)>=(MOUSE.t||0)){const b=padMap()['s'+(i+1)];if(b!=null&&b>=0&&PADBN[b])return PADBN[b].replace('Steuerkreuz ','')}}catch(e){}return String(i+1)}
 function buildSkillBar(){P.bar=(P.bar||P.learn.slice(0,6)).filter(id=>P.learn.includes(id)).slice(0,6);P.actives=P.bar.map(id=>P.hero.tree.find(n=>n.id===id)).filter(Boolean);if(G.mp&&PL[0]&&P!==mainP()){P.skBtns=[];return}
- skillsEl.innerHTML=P.actives.map((n,i)=>`<button class="sk ready" data-sk="${i}" style="right:${SKPOS[i][0]}px;bottom:${SKPOS[i][1]}px" aria-label="${esc(n.name)}"><span class="ic">${n.ic}</span><i class="cd"></i><span class="cdt"></span><span class="key">${i+1}</span></button>`).join('');
+ skillsEl.innerHTML=P.actives.map((n,i)=>`<button class="sk ready" data-sk="${i}" style="right:${SKPOS[i][0]}px;bottom:${SKPOS[i][1]}px" aria-label="${esc(n.name)}"><span class="ic">${n.ic}</span><i class="cd"></i><span class="cdt"></span><span class="key">${skKey(i)}</span></button>`).join('');
  P.skBtns=[...skillsEl.querySelectorAll('.sk')].map(el=>({el,cd:el.querySelector('.cd'),cdt:el.querySelector('.cdt'),q:-1,tx:null}));
  P.skBtns.forEach((b,i)=>skTouch(b.el,i));tbApply()}
 /* Handy: Fähigkeit antippen = automatisch zielen (Boss/Wächter/Elite zuerst); halten und ziehen = in diese Richtung zielen,
@@ -4484,7 +4487,7 @@ function renderTree(keep){const Hh=P.hero;if(!keep){G.treeOpen=false;G.treeDet=f
  const inBar=P.bar.includes(sel.id);
  const barBtn=sel.a&&r&&!inBar&&G.barPick!==sel.id?`<button class="btn" data-act="tree-bar">${P.bar.length>=6?'In die Leiste (ersetzen)':'In die Leiste'}</button>`:'';
  const barInfo=sel.a&&r&&inBar?`<div class="muted" style="font-size:13px">Platz ${P.bar.indexOf(sel.id)+1} in der Leiste – oben gedrückt halten und ziehen zum Verschieben.</div>`:G.barPick===sel.id?`<div class="barpick"><div style="font-weight:800">Die Leiste ist voll. Welche Fähigkeit soll ${esc(sel.name)} ersetzen?</div><div class="bpick">${P.bar.map((id,i)=>{const n=Hh.tree.find(x=>x.id===id);return n?`<button class="btn small" data-act="bar-rep" data-i="${i}"><span class="bpi">${n.ic}</span> ${esc(n.name)}</button>`:''}).join('')}</div><button class="btn small" data-act="bar-cancel">Nicht in die Leiste</button></div>`:'';
- const slots=[0,1,2,3,4,5].map(i=>{const id=P.bar[i],n=id&&Hh.tree.find(x=>x.id===id);return`<button class="bslot ${n?'':'empty'} ${G.barPick&&n?'pick':''}" data-i="${i}" ${n?`data-act="tree-sel" data-id="${n.id}"`:'disabled'} title="${n?esc(n.name):'frei'}"><span>${n?n.ic:''}</span><i>${i+1}</i></button>`}).join('');
+ const slots=[0,1,2,3,4,5].map(i=>{const id=P.bar[i],n=id&&Hh.tree.find(x=>x.id===id);return`<button class="bslot ${n?'':'empty'} ${G.barPick&&n?'pick':''}" data-i="${i}" ${n?`data-act="tree-sel" data-id="${n.id}"`:'disabled'} title="${n?esc(n.name):'frei'}"><span>${n?n.ic:''}</span><i>${skKey(i)}</i></button>`}).join('');
  showScreen(`<div class="wrap tree-wrap">
   ${menuTabs('tree')}
   <div class="inv-head"><div><h2>Talente</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level}${P.sp>0&&Hh.tree.some(canLearn)?` <button class="btn hint" data-act="tree-rec" title="Zeigt einen passenden nächsten Punkt – du entscheidest selbst">Vorschlag?</button>`:''}</div></div><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div>
@@ -4599,7 +4602,7 @@ window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(
  else if(G.overlay&&G.state==='play'){if(ev.code==='Escape'||(ev.code==='KeyI'&&G.overlay==='inv')||(ev.code==='KeyT'&&G.overlay==='tree'))closeOverlay();else if(ev.code==='KeyI')switchOverlay('inv');else if(ev.code==='KeyT')switchOverlay('tree')}});
 window.addEventListener('keyup',ev=>{keys[ev.code]=false});
 document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target&&ev.target.id==='hsName'){ev.preventDefault();hsEintragen()}});
-window.addEventListener('gamepadconnected',()=>{toast('Controller verbunden','#8fe7ff');if(G.state==='title')setTimeout(()=>showTitle(true),50)});
+window.addEventListener('gamepadconnected',()=>{toast('Controller verbunden','#8fe7ff');setTimeout(()=>{try{if(P&&P.skBtns&&P.skBtns.length)buildSkillBar();if(G.overlay==='tree')renderTree(true)}catch(e){}},400);if(G.state==='title')setTimeout(()=>showTitle(true),50)});
 window.addEventListener('pointerup',ev=>{if(ev.pointerType==='mouse'&&ev.button===0)MOUSE.down=false});
 window.addEventListener('blur',()=>{MOUSE.down=false;for(const k in keys)keys[k]=false});
 $('btnPot').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();usePotion()});
