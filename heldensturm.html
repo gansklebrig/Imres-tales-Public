@@ -3641,8 +3641,10 @@ function fpsWatch(dt,raw,js){FW.iv.push(raw);FW.js.push(js||0);FW.t+=raw;if(FW.t
  const el=$('gfxFps');if(el)el.textContent=FPSNOW+' FPS';
  if(G.state!=='play'||G.paused||document.hidden)return;
  /* Dauerhaft langsam (z. B. großer Bildschirm, Grafikkarte bremst): intern etwas kleiner rechnen statt zu ruckeln – gilt in jeder Grafikstufe */
- const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined,slow=FPSNOW<42&&(!auto||GAUTO<=1);
- if(slow){RSOK=0;if(++RSLOW>=2&&RSC>0.55){RSC=Math.max(0.55,+(RSC-0.15).toFixed(2));RSLOW=0;resize()}}
+ /* am PC erst bei wirklich niedriger Bildrate und nie unter 75 % (sonst wird es auf großen Bildschirmen unscharf); „volle Auflösung“ schaltet das ganz ab */
+ const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined,minR=SAVE.fullres?1:MOBIL?0.55:0.75,slow=FPSNOW<(MOBIL?42:30)&&(!auto||GAUTO<=1);
+ if(RSC<minR){RSC=minR;resize()}
+ if(slow){RSOK=0;if(++RSLOW>=2&&RSC>minR){RSC=Math.max(minR,+(RSC-0.15).toFixed(2));RSLOW=0;resize()}}
  else if(RSC<1&&FPSNOW>=55&&miss<0.03){RSLOW=0;if(++RSOK>=8){RSC=Math.min(1,+(RSC+0.1).toFixed(2));RSOK=0;resize()}}else{RSLOW=0;RSOK=0}
  PERF.rs=RSC;
  if(!auto)return;
@@ -3653,7 +3655,7 @@ function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransfo
  const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;c.fillStyle='rgba(0,0,0,.65)';c.fillRect(8,y0,236,L.length*15+8);c.fillStyle=PERF.miss>10?'#ff8a7a':'#bfffc8';L.forEach((s,i)=>c.fillText(s,13,y0+4+i*15));c.restore()}
 const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner.</div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
- <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
+ <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button><button class="btn small ${SAVE.fullres?'gold':''}" data-act="fullres" title="Nie die Auflösung senken – schärfer, aber auf sehr großen Bildschirmen evtl. weniger Bilder pro Sekunde">${SAVE.fullres?'Volle Auflösung: an':'Volle Auflösung'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
 const fsOk=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function fsToggle(){try{if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const e=document.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast('Vollbild wird hier nicht unterstützt.','#ff8a7a'))}}catch(e){toast('Vollbild wird hier nicht unterstützt.','#ff8a7a')}}
 document.addEventListener('fullscreenchange',()=>{setTimeout(resize,60);const b=$('fsBtn');if(b)b.textContent=fsOn()?'Vollbild beenden':'Vollbild'});document.addEventListener('webkitfullscreenchange',()=>setTimeout(resize,60));
@@ -4730,6 +4732,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'band':SAVE.band=+b.dataset.v;persist();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
   case'amb-t':SAVE.amb=SAVE.amb===false;persist();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
   case'bass-t':SAVE.bass=!bassOn();persist();bassSet();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
+  case'fullres':SAVE.fullres=!SAVE.fullres;persist();if(SAVE.fullres&&RSC<1){RSC=1;resize()}{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
   case'sharp':SAVE.sharp=!sharpOn();persist();resize();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
   case'fs':fsToggle();break;
   case'gfx-auto':gfxSet(SAVE.gfx==='auto'?gfxL():'auto');break;
