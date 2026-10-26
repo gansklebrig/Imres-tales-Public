@@ -123,7 +123,13 @@
         floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn", klarinette: "Klarinette", oboe: "Oboe" },
         ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch" }
       },
-      teil: "Teil bearbeiten", ablauf: "Ablauf", rolleVon: p => "Rolle von " + p,
+      teil: "Teil bearbeiten", ablauf: "Ablauf", rolleVon: p => "Rolle von " + p, pattern: "Pattern", kette: "Kette",
+      modusTitel: "Art zu komponieren", modusPattern: "▦ 4 Pattern", modusLied: "▤ Ganzes Lied",
+      modusPatternTipp: "Wie an einer Groovebox: vier Takte A–D, die du zu einer Kette verbindest.",
+      modusLiedTipp: "Bis zu 16 Takte mit Rollen wie Strophe und Refrain – so komponieren auch die Stimmungen.",
+      liedHinweis: n => "Gerade ist ein ganzes Lied mit " + n + " Takten geladen (Strophe, Refrain, Schlussrefrain …). Im Pattern-Modus gibt es nur vier Pattern A–D.",
+      zuPattern: "▦ In 4 Pattern umwandeln", liedBearbeiten: "▤ Ganzes Lied bearbeiten",
+      umgewandelt: "In vier Pattern umgewandelt: A Strophe, B Refrain, C Zwischenteil, D Höhepunkt.",
       rollen: { i: "Vorspiel", s: "Strophe", v: "Aufbau", r: "Refrain", b: "Zwischenteil", h: "Höhepunkt" }, kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
       lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
@@ -170,6 +176,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniKulStopp: "Geräusche anhalten", miniKulWeiter: "Geräusche wieder starten", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
+      stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente & Klassik",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
@@ -198,7 +205,13 @@
         floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn", klarinette: "Clarinet", oboe: "Oboe" },
         ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table" }
       },
-      teil: "Edit part", ablauf: "Order", rolleVon: p => "Role of " + p,
+      teil: "Edit part", ablauf: "Order", rolleVon: p => "Role of " + p, pattern: "Pattern", kette: "Chain",
+      modusTitel: "How to compose", modusPattern: "▦ 4 patterns", modusLied: "▤ Full song",
+      modusPatternTipp: "Like a groovebox: four bars A–D that you link into a chain.",
+      modusLiedTipp: "Up to 16 bars with roles like verse and chorus – the way the moods compose.",
+      liedHinweis: n => "A full song with " + n + " bars is loaded (verse, chorus, final chorus …). Pattern mode only has four patterns A–D.",
+      zuPattern: "▦ Turn into 4 patterns", liedBearbeiten: "▤ Edit the full song",
+      umgewandelt: "Turned into four patterns: A verse, B chorus, C bridge, D finale.",
       rollen: { i: "Intro", s: "Verse", v: "Build-up", r: "Chorus", b: "Bridge", h: "Finale" }, kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
       lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
@@ -245,6 +258,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniKulStopp: "Stop ambience", miniKulWeiter: "Restart ambience", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
+      stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments & classics",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
@@ -4912,7 +4926,7 @@
       ["punkt", "● Favoriten", "Der kleine Punkt an jeder Kachel heftet sie oben in ihrer Liste an. So hast du deine Lieblinge immer griffbereit."],
       ["tabs", "📜 Lieder und Eigene", "Fertige Lieder der Band, Cover alter Volksweisen und deine selbst gespeicherten Stücke."],
       ["kulisse", "🌧 Kulisse", "Hintergrundgeräusche wie Taverne, Regen oder Höhle laufen unter der Musik weiter. Der Regler darüber stellt ihre Lautstärke ein."],
-      ["effekte", "💥 Effekte", "Einmalige Geräusche auf Knopfdruck: Drache, Schwert, Würfel, Kampf, lustige Momente und kurze Klassiker. Der Regler darüber macht sie lauter oder leiser."],
+      ["effekte", "💥 Effekte", "Einmalige Geräusche auf Knopfdruck: Drache, Schwert, Würfel, Kampf, lustige Momente und kurze Klassiker – zugeklappt, damit das Pult kurz bleibt; einmal antippen klappt sie auf."],
       ["einst", "⚙ Klang, Raum & Gäste", "Seltene Einstellungen liegen hier eingeklappt: Lautstärke der Musik, Hall, Raum, Orchester, Sparmodus und die Gäste."],
       ["oben", "Oben rechts", "🌫 Klangwelten: reine Geräusche ohne Musik · 📡 Mitlauschen: Link für die Runde, alle hören mit · Die kleinen ⓘ erklären einzelne Regler."]
     ] });
@@ -4933,7 +4947,7 @@
       ["punkt", "● Favourites", "The small dot on every tile pins it to the top of its list, so your favourites are always at hand."],
       ["tabs", "📜 Songs and own", "Finished songs by the band, covers of old folk tunes and the pieces you saved yourself."],
       ["kulisse", "🌧 Backdrop", "Background sounds like tavern, rain or cave keep running under the music. The slider above sets their volume."],
-      ["effekte", "💥 Effects", "One-off sounds at a tap: dragon, sword, dice, combat, funny moments and short classics. The slider above makes them louder or quieter."],
+      ["effekte", "💥 Effects", "One-off sounds at a tap: dragon, sword, dice, combat, funny moments and short classics – folded away to keep the desk short; tap once to unfold."],
       ["einst", "⚙ Sound, room & guests", "Rarely used settings are folded away here: music volume, reverb, room, orchestra, power saving and the guests."],
       ["oben", "Top right", "🌫 Soundscapes: pure ambience without music · 📡 Listen in: a link for the group · The small ⓘ explain single controls."]
     ] });
@@ -4941,7 +4955,7 @@
     buehne: () => root.querySelector(".lw-buehne"), play: () => root.querySelector(".lw-pult-kopf .lw-play"),
     stimmungen: () => root.querySelector(".lw-musik .lw-pult-gitter"), intensitaet: () => root.querySelector(".lw-intensitaet"),
     punkt: () => root.querySelector(".lw-musik .lw-pult-gitter button"), tabs: () => root.querySelector(".lw-musik .lw-tabs"),
-    kulisse: () => root.querySelector(".lw-klang .lw-kul-gitter"), effekte: () => root.querySelector(".lw-klang .lw-pult-fx"),
+    kulisse: () => root.querySelector(".lw-klang .lw-kul-gitter"), effekte: () => root.querySelector(".lw-klang .lw-pult-fx") || root.querySelector('.lw-klang [data-klangauf="fx"]'),
     einst: () => root.querySelector(".lw-musik .lw-einst-kopf"), oben: () => root.querySelector(".lw-kopf-rechts")
   };
   let rundgang = null;
@@ -5123,6 +5137,8 @@
       '<button type="button" data-aktion="stimmabbrechen">' + T.abbrechen + "</button></span>" +
       '<p class="lw-tipp">' + T.stimmTipp + "</p></div>";
   }
+  /* von den Stimmungen zuerst zwölf (Favoriten und die laufende vorn), der Rest aufklappbar */
+  const ST_KURZ = 12; let mehrSt = 0;
   function musikBox(T, voll) {
     let kacheln;
     if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(oben("v", LIEDER).map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
@@ -5132,12 +5148,18 @@
       const alle = gruppenLieder.map(l => ["g", l]).concat(lokaleLieder.map(l => ["l", l]));
       kacheln = alle.length ? alle.map(([q, l]) => kachel("data-eigen", q + ":" + l.id, (q === "g" ? "👥 " : "📱 ") + esc(l.name), geladen && geladen.quelle === q && String(geladen.id) === String(l.id))).join("")
         : '<p class="lw-tipp lw-leer">' + T.keineEigenen + "</p>";
-    } else kacheln = oben("v", STIMMUNGEN.concat(Object.keys(eigeneStimmungen).filter(id => id.startsWith("e_") && STIL[eigeneStimmungen[id].basis]))).map(k => k.startsWith("e_")
+    } else {
+      let st = oben("v", STIMMUNGEN.concat(Object.keys(eigeneStimmungen).filter(id => id.startsWith("e_") && STIL[eigeneStimmungen[id].basis])));
+      const jetzt = S.eigeneStimmung || S.stimmung;
+      if (!klangAuf.st && st.length > ST_KURZ) { const kurz = st.slice(0, ST_KURZ); if (jetzt && st.includes(jetzt) && !kurz.includes(jetzt)) kurz[ST_KURZ - 1] = jetzt; mehrSt = st.length; st = kurz; } else mehrSt = st.length > ST_KURZ ? st.length : 0;
+      kacheln = st.map(k => k.startsWith("e_")
       ? kachel("data-vorlage", k, "⭐ " + esc(eigeneStimmungen[k].name), S.eigeneStimmung === k)
       : kachel("data-vorlage", k, eigeneStimmungen[k] ? esc((T.vorlagen[k].match(/^[^\wÄÖÜäöü]+/) || [""])[0] + stimmName(k)) + " ✎" : T.vorlagen[k], S.stimmung === k && (!S.eigeneStimmung || S.eigeneStimmung === k))).join("");
+    }
     return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + " " + info("musik") + "</h4>" +
         reiter("musiktab", [["stimmungen", T.tabStimmungen], ["lieder", T.tabLieder], ["eigene", T.tabEigene]], musikTab, T) + "</div>" +
       '<div class="lw-pult-gitter">' + kacheln + "</div>" +
+      (musikTab === "stimmungen" && mehrSt ? '<button type="button" class="lw-klappe" data-klangauf="st" aria-expanded="' + !!klangAuf.st + '">' + (klangAuf.st ? T.stWeniger : T.stAlle(mehrSt)) + " <span>" + (klangAuf.st ? "▴" : "▾") + "</span></button>" : "") +
       (voll && musikTab === "eigene" ? '<div class="lw-eigene-zeile">' + '<button type="button" class="lw-klein" data-aktion="speichern">' + T.speichern + "</button>" +
         (geladen ? '<button type="button" class="lw-klein" data-aktion="loeschen">' + T.loeschen + "</button>" : "") +
         (gruppeOk && pwLesen() ? '<button type="button" class="lw-klein" data-aktion="abmelden" title="' + esc(T.abmeldenTipp) + '">' + T.abmelden + "</button>" : "") +
@@ -5146,14 +5168,24 @@
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
       (musikTab === "stimmungen" ? intRegler(T) + stimmSpeicherZeile(T) : "") + einklapp("musik", T.einstMusik, gaesteZeile(T) + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>") + "</section>";
   }
+  /* Kulissen und Effekte nehmen am Handy viel Platz: von den Kulissen zuerst nur neun (Favoriten und die laufende vorn),
+     die Effekte und Momente sind zugeklappt, bis man sie braucht – das merkt sich die Seite */
+  let klangAuf = { kul: false, fx: false };
+  try { klangAuf = Object.assign(klangAuf, JSON.parse(localStorage.getItem("imres-lw-klangauf") || "{}") || {}); } catch (_) {}
+  const KUL_KURZ = 9;
   function klangBox(T) {
     const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
+    let kul = oben("k", KULISSEN);
+    if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
+    const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + " " + info("klang") + "</h4></div>" +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
-      '<div class="lw-pult-gitter lw-kul-gitter">' + oben("k", KULISSEN).map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
-      reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
-      kleinRegler("💥", T.effekteKurz, "fxvol", S.fxVol, "lw-fval") +
-      '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" +
+      '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
+      klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KULISSEN.length - 1)) +
+      klappe("fx", klangAuf.fx, T.fxKlappe) +
+      (klangAuf.fx ? reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
+        kleinRegler("💥", T.effekteKurz, "fxvol", S.fxVol, "lw-fval") +
+        '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
 "</section>";
   }
   const konsole = (T, voll) => '<div class="lw-konsole">' + musikBox(T, voll) + klangBox(T) + "</div>";
@@ -5377,7 +5409,7 @@
       raster += kopf(sp.id);
       if (zugeklappt[sp.id]) return;
       if (sp.art === "an") raster += rasterZeile(sp.id, 0, (SYMBOL[sp.id] && SYMBOL[sp.id][S.band[sp.id]]) || sp.sym, "sym");
-      else for (const z of (sp.id === "bass" ? BASS_ANZEIGE : Array.from({ length: sp.zeilen }, (_, k) => sp.zeilen - 1 - k))) raster += rasterZeile(sp.id, z, zeilenName(sp.id, z), (z === 0 || z === 7 || z === 14) && sp.id !== "rex" ? "grund" : (sp.id === "rex" ? "sym klein" : ""));
+      else for (const z of (sp.id === "bass" ? BASS_ANZEIGE : Array.from({ length: zeilenZahl(sp) }, (_, k) => zeilenZahl(sp) - 1 - k))) raster += rasterZeile(sp.id, z, zeilenName(sp.id, z), (z === 0 || z === 7 || z === 14) && sp.id !== "rex" ? "grund" : (sp.id === "rex" ? "sym klein" : ""));
     });
 
     root.innerHTML =
@@ -5396,18 +5428,7 @@
         '<button type="button" class="lw-schalter" data-feld="bordun" aria-pressed="' + !!S.bordun + '">' + T.bordun + "</button>" +
       "</div>" +
       konsole(T, true) +
-      '<div class="lw-teile">' +
-        '<span class="lw-teilgruppe"><span class="lw-teile-label">' + T.teil + ':</span><span class="lw-teilknoepfe">' +
-        TEILE.map(p => '<button type="button" class="lw-teil r-' + rolleVon(S, p) + (teilBenutzt(p) || S.ablauf.includes(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '" title="' + esc(T.rollen[rolleVon(S, p)]) + '">' + p + "</button>").join("") + "</span></span>" +
-        '<label class="lw-feld lw-rolle"><span>' + T.rolleVon(bearbeite) + '</span><select data-feld="rolle">' +
-          ROLLEN.map(r => '<option value="' + r + '"' + (rolleVon(S, bearbeite) === r ? " selected" : "") + ">" + T.rollen[r] + "</option>").join("") + "</select></label>" +
-        '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><input type="text" data-feld="ablauf" value="' + esc(S.ablauf) + '" list="lw-ablaeufe" maxlength="64" spellcheck="false" autocomplete="off" autocapitalize="characters">' +
-          '<datalist id="lw-ablaeufe">' + ABLAEUFE.map(a => '<option value="' + a + '"></option>').join("") + "</datalist></label>" +
-        '<span class="lw-kopieren"><label class="lw-feld"><span>' + T.kopierenNach(bearbeite) + '</span><select data-feld="kopiere"><option value="">…</option>' +
-          TEILE.filter(z => z !== bearbeite).map(z => '<option value="' + z + '">' + z + (teilBenutzt(z) ? " •" : "") + "</option>").join("") + "</select></label>" +
-          (kopierZiel ? '<button type="button" class="lw-klein warnung" data-kopiere="' + kopierZiel + '">' + T.ueberschreiben(kopierZiel) + "</button>" : "") + "</span>" +
-      "</div>" +
-      '<div class="lw-scroll"><div class="lw-raster' + (taktL() === 12 ? " drei" : "") + '">' + raster + "</div></div>" +
+      editorHTML(T, raster) +
       '<p class="lw-wisch">' + T.wischen + "</p>" +
       '<div class="lw-fuss"><button type="button" class="lw-teilen">' + T.teilen + '</button><span class="lw-status" aria-live="polite"></span></div>';
 
@@ -5416,6 +5437,64 @@
     figurCache = {};
   }
   const teilBenutzt = p => IDS.some(k => S.teile[p][k].some(v => v >= 0));
+  /* ---------- Zwei Arten zu komponieren ----------
+     „4 Pattern“ (Standard): wie an einer Groovebox – vier Takte A–D, die man zu einer Kette (Ablauf) verbindet, die Laute in einer Oktave.
+     „Ganzes Lied“: bis zu 16 Takte mit Rollen (Strophe, Refrain …) und die Laute in zwei Oktaven – so schreiben auch die Stimmungen.
+     Ein ganzes Lied lässt sich in vier Pattern umwandeln: je ein Takt aus Strophe, Refrain, Zwischenteil und Höhepunkt. */
+  let editModus = "pattern";
+  try { if (localStorage.getItem("imres-lw-modus") === "lied") editModus = "lied"; } catch (_) {}
+  const PATTERN = ["A", "B", "C", "D"];
+  const istGanzesLied = () => !!S.rollen || /[E-P]/.test(S.ablauf) || TEILE.slice(4).some(teilBenutzt);
+  /* im Pattern-Modus nur eine Oktave – außer das Lied hat schon höhere Töne */
+  const zeilenZahl = sp => sp.id === "melodie" && editModus === "pattern" && !PATTERN.some(p => S.teile[p].melodie.some(v => v > 7)) ? 8 : sp.zeilen;
+  function zuPattern() {
+    const nimm = r => { for (let i = 0; i < S.ablauf.length; i++) if (rolleAn(i) === r) return S.ablauf[i]; return null; };
+    const quelle = { A: nimm("s") || S.ablauf[0], B: nimm("r") || nimm("h"), C: nimm("b"), D: nimm("h") || nimm("r") };
+    const neu = Object.fromEntries(TEILE.map(p => [p, teilLeer()]));
+    PATTERN.forEach(p => { if (quelle[p]) neu[p] = kopie(S.teile[quelle[p]]); });
+    const mel = PATTERN.flatMap(p => neu[p].melodie.filter(v => v >= 0));
+    if (mel.length && Math.min(...mel) >= 7) PATTERN.forEach(p => { neu[p].melodie = neu[p].melodie.map(v => v < 0 ? v : v - 7); });
+    S.teile = neu; S.ablauf = quelle.C ? "AABBCD" : "AABBDD"; delete S.rollen;
+    if (S.stimmung) { S.stimmung = null; const w = root.querySelector(".lw-wandelt"); if (w) w.remove(); }
+    bearbeite = "A"; kopierZiel = null; merken();
+  }
+  function editorHTML(T, raster) {
+    const lied = editModus === "lied", ganz = istGanzesLied();
+    const schalter = '<div class="lw-modus" role="group" aria-label="' + esc(T.modusTitel) + '">' +
+      '<button type="button" data-modus="pattern" aria-pressed="' + !lied + '">' + T.modusPattern + "</button>" +
+      '<button type="button" data-modus="lied" aria-pressed="' + lied + '">' + T.modusLied + "</button>" +
+      '<span class="lw-modus-tipp">' + (lied ? T.modusLiedTipp : T.modusPatternTipp) + "</span></div>";
+    if (!lied && ganz) return schalter +
+      '<div class="lw-liedkarte"><p>' + T.liedHinweis(S.ablauf.length) + "</p>" +
+      '<button type="button" class="lw-schalter" data-aktion="zupattern">' + T.zuPattern + "</button>" +
+      '<button type="button" class="lw-schalter" data-modus="lied">' + T.liedBearbeiten + "</button></div>";
+    const teile = lied ? TEILE : PATTERN;
+    if (!teile.includes(bearbeite)) bearbeite = "A";
+    let mitte;
+    if (lied) mitte =
+      '<label class="lw-feld lw-rolle"><span>' + T.rolleVon(bearbeite) + '</span><select data-feld="rolle">' +
+        ROLLEN.map(r => '<option value="' + r + '"' + (rolleVon(S, bearbeite) === r ? " selected" : "") + ">" + T.rollen[r] + "</option>").join("") + "</select></label>" +
+      '<label class="lw-feld lw-ablauf"><span>' + T.ablauf + '</span><input type="text" data-feld="ablauf" value="' + esc(S.ablauf) + '" list="lw-ablaeufe" maxlength="64" spellcheck="false" autocomplete="off" autocapitalize="characters">' +
+        '<datalist id="lw-ablaeufe">' + ABLAEUFE.map(a => '<option value="' + a + '"></option>').join("") + "</datalist></label>" +
+      '<span class="lw-kopieren"><label class="lw-feld"><span>' + T.kopierenNach(bearbeite) + '</span><select data-feld="kopiere"><option value="">…</option>' +
+        TEILE.filter(z => z !== bearbeite).map(z => '<option value="' + z + '">' + z + (teilBenutzt(z) ? " •" : "") + "</option>").join("") + "</select></label>" +
+        (kopierZiel ? '<button type="button" class="lw-klein warnung" data-kopiere="' + kopierZiel + '">' + T.ueberschreiben(kopierZiel) + "</button>" : "") + "</span>";
+    else {
+      const ablaeufe = (ABLAEUFE.includes(S.ablauf) ? ABLAEUFE : ABLAEUFE.concat([S.ablauf])).map(a => '<option value="' + a + '"' + (a === S.ablauf ? " selected" : "") + ">" + a.split("").join(" – ") + "</option>").join("");
+      mitte =
+        '<label class="lw-feld lw-ablauf"><span>' + T.kette + '</span><select data-feld="ablauf">' + ablaeufe + "</select></label>" +
+        '<span class="lw-kopieren"><span class="lw-teile-label">' + T.kopierenNach(bearbeite) + ":</span>" +
+          PATTERN.filter(z => z !== bearbeite).map(z => '<button type="button" class="lw-klein' + (kopierZiel === z ? " warnung" : "") + '" data-kopiere="' + z + '">' +
+            (kopierZiel === z ? T.ueberschreiben(z) : "→ " + z) + "</button>").join("") + "</span>";
+    }
+    return schalter +
+      '<div class="lw-teile">' +
+        '<span class="lw-teilgruppe"><span class="lw-teile-label">' + (lied ? T.teil : T.pattern) + ':</span><span class="lw-teilknoepfe">' +
+        teile.map(p => '<button type="button" class="lw-teil' + (lied ? " r-" + rolleVon(S, p) : "") + (teilBenutzt(p) || S.ablauf.includes(p) ? "" : " leer") + '" data-teil="' + p + '" aria-pressed="' + (bearbeite === p) + '"' + (lied ? ' title="' + esc(T.rollen[rolleVon(S, p)]) + '"' : "") + ">" + p + "</button>").join("") + "</span></span>" +
+        mitte +
+      "</div>" +
+      '<div class="lw-scroll"><div class="lw-raster' + (taktL() === 12 ? " drei" : "") + '">' + raster + "</div></div>";
+  }
   /* ---------- Mini-Player oben: erscheint, wenn die Musik läuft und das Lautenwerk nicht zu sehen ist ---------- */
   let mini = null, lautenwerkSichtbar = true;
   function miniBauen() {
@@ -5606,6 +5685,8 @@
     }
     const mt = e.target.closest("[data-musiktab]");
     if (mt) { musikTab = mt.dataset.musiktab; try { localStorage.setItem("imres-lw-musiktab", musikTab); } catch (_) {} boxNeu("musik"); return; }
+    const ka = e.target.closest("[data-klangauf]");
+    if (ka) { const k = ka.dataset.klangauf; klangAuf[k] = !klangAuf[k]; try { localStorage.setItem("imres-lw-klangauf", JSON.stringify(klangAuf)); } catch (_) {} boxNeu(k === "st" ? "musik" : "klang"); return; }
     const ft = e.target.closest("[data-fxtab]");
     if (ft) { fxTab = ft.dataset.fxtab; try { localStorage.setItem("imres-lw-fxtab", fxTab); } catch (_) {} boxNeu("klang"); return; }
     const eg = e.target.closest("[data-eigen]");
@@ -5631,6 +5712,9 @@
       }
       return;
     }
+    const md = e.target.closest("[data-modus]");
+    if (md) { editModus = md.dataset.modus === "lied" ? "lied" : "pattern"; try { localStorage.setItem("imres-lw-modus", editModus); } catch (_) {} kopierZiel = null; zeichnen(); knoepfe(); return; }
+    if (e.target.closest('[data-aktion="zupattern"]')) { zuPattern(); zeichnen(); knoepfe(); status(t().umgewandelt); return; }
     const tl = e.target.closest(".lw-teil");
     if (tl) { bearbeite = tl.dataset.teil; kopierZiel = null; zeichnen(); knoepfe(); return; }
     const sa = e.target.closest("[data-aktion]");
@@ -6204,6 +6288,15 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .ll-int button:hover { border-color: var(--ember); color: var(--ember); }
 .ll-wert { font-weight: 400; font-size: .76rem; color: var(--ash); min-width: 3.6rem; text-align: center; white-space: nowrap; }
 @media (max-width: 420px) { .ll-wert { min-width: 0; font-size: .7rem; } }
+.lw-modus { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .5rem; margin: 1rem 0 .7rem; }
+.lw-modus button { font: inherit; font-size: .92rem; padding: .45rem .85rem; border: 1px solid var(--line); background: none; color: var(--vellum); cursor: pointer; border-radius: 999px; }
+.lw-modus button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
+.lw-modus-tipp { flex: 1 1 14rem; font-size: .8rem; color: var(--ash); }
+.lw-liedkarte { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .9rem 1rem; margin-bottom: 1rem; border: 1px dashed rgba(224,160,70,.55); border-radius: 12px; background: rgba(224,160,70,.06); }
+.lw-liedkarte p { flex: 1 1 100%; margin: 0 0 .3rem; color: var(--vellum); font-size: .92rem; }
+.lw-klappe { display: flex; justify-content: space-between; align-items: center; width: 100%; margin: .55rem 0 0; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(235,226,204,.03); color: var(--vellum); font: inherit; font-size: .9rem; cursor: pointer; text-align: left; }
+.lw-klappe:hover, .lw-klappe[aria-expanded="true"] { border-color: var(--ember); color: var(--ember); }
+.lw-klappe + .lw-klappe { margin-top: .45rem; }
 .lw-kleinregler { display: flex; align-items: center; gap: .6rem; font-size: .82rem; color: var(--ash); }
 .lw-kleinregler span { flex: 0 0 auto; white-space: nowrap; }
 .lw-kleinregler input { flex: 1 1 auto; min-width: 4rem; max-width: 16rem; accent-color: var(--ember); }
