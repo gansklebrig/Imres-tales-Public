@@ -624,7 +624,7 @@
       bass: ["viertel", "puls"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 4, 6], [0, 3, 4, 6]], lage: 3, dichte: 1, echo: "antwort",
       klopf: [[0, 8], [0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [0, 2, 4, 6, 8, 10, 12, 14]], trommel: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0, 1] },
     /* Verfolgung: Hetzjagd durch Gassen und Wälder – treibende Achtel und ein Riff, das nicht loslässt */
-    verfolgung: { gefuehl: 1, form: "hymne", chaos: 1, riff: 1, modus: ["aeolisch", "dorisch"], tempo: [140, 150], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 2,
+    verfolgung: { gefuehl: "halb", form: "hymne", chaos: 1, riff: 1, modus: ["phrygisch"], tempo: [150, 162], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 2,
       instrument: ["fidel", "schalmei", "mandoline", "drehleier"], band: { trommel: ["trommel", "taiko", "stoecke"], floete: ["horn", "floete", "piccolo"], ketten: ["stampfen", "ketten"] },
       ablauf: ["AABACA"], akkorde: [[0, 5, 4, 0], [0, 4, 5, 4], [0, 0, 5, 4], [0, 6, 0, 4], [0, 5, 0, 4]],
       bass: ["puls", "galopp"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 4, 5, 6], [0, 2, 4, 6]], lage: 3, dichte: 1, echo: "lang",
@@ -1408,6 +1408,32 @@
           ["0055", "e...e.d.c...9...", "terz"], ["6644", "c...a.8.d...a...", "terz"], ["0055", "e...e.d.c...9...", "terz"], ["6600", "8.a.c.a.7...e...", "terz"]] }
     ]
   };
+  /* Verfolgung: gehetzt und voller Angst. Phrygisch (der bange Halbton über dem Grundton), Sechzehntel-Zittern, stolpernde Akzente,
+     im Refrain schmerzliche Schreie in hoher Lage, die abwärts fallen – und nur einmal, kurz vor dem Ende des Refrains,
+     ein Dur-Akkord mit einer aufsteigenden Linie: der Hauch von Hoffnung, der gleich wieder verschluckt wird */
+  const VERF_SCHLAG = {
+    i: { trommel: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15], schelle: [] },
+    s: { trommel: [0, 3, 6, 9, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [7, 15] },
+    r: { trommel: [0, 2, 3, 6, 8, 10, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [7, 15] },
+    b: { trommel: [0, 3, 6, 13, 14, 15], schelle: [0, 4, 8, 12] },
+    h: { trommel: [0, 2, 3, 6, 8, 9, 10, 11, 12, 13, 14, 15], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [7, 15] }
+  };
+  KAMPF_LIEDER.verfolgung = [
+    { instrument: "fidel", band: { trommel: "trommel", floete: "bratsche", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "puls", s: "puls", r: "galopp", b: "halbe", h: "galopp" }, schlag: VERF_SCHLAG,
+      takte: [["0000", "0101010101010101", ""],
+        ["0000", "4.3.4.5.4.3.2.0.", "lang"], ["6666", "5.3.5.6.5.3.1.3.", "lang"], ["0000", "4.3.4.5.7.5.4.2.", "lang"], ["4466", "6.5.3.1.3.1.5.1.", "lang"],
+        ["0055", "b...a.9.9...c.9.", "lang"], ["6644", "c...a.8.a...8.6.", "lang"], ["0055", "b...a.9.9...c.9.", "lang"], ["1111", "9...b...d.......", "terz"],
+        ["0000", "0.......1.......", "0.1.0.1.2.1.0.1."], ["6666", "1.......3.4.5.6.", "1.3.1.3.5.3.1.3."],
+        ["0055", "b...a.9.9...c.9.", "lang"], ["6644", "c...a.8.a...8.6.", "lang"], ["0055", "b...a.9.9...c.9.", "lang"], ["1100", "9.b.d...7...0...", "terz"]] },
+    { instrument: "drehleier", band: { trommel: "taiko", floete: "oohchor", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "puls", s: "puls", r: "galopp", b: "halbe", h: "galopp" }, schlag: VERF_SCHLAG,
+      takte: [["0000", "e.d.c.b.a.9.8.7.", ""],
+        ["0000", "0..1..0.4..2..0.", "lang"], ["6666", "1..3..1.5..3..1.", "lang"], ["5555", "2..0..2.5..4..2.", "lang"], ["4400", "3..1..6.7..4..2.", "lang"],
+        ["0066", "e...e.d.a...c.a.", "lang"], ["5544", "c...9.7.d...a.8.", "lang"], ["0066", "e...e.d.a...c.a.", "lang"], ["1155", "b...9...c...e...", "terz"],
+        ["2222", "a.......7.......", "3.5.3.0.3.5.7.5."], ["6666", "8.......8.a.c.e.", "1.3.5.3.1.3.5.1."],
+        ["0066", "e...e.d.a...c.a.", "lang"], ["5544", "c...9.7.d...a.8.", "lang"], ["0066", "e...e.d.a...c.a.", "lang"], ["5500", "c.a.9.7.7...0...", "terz"]] }
+  ];
   Object.keys(KAMPF_LIEDER).forEach(k => { if (STIL[k]) STIL[k].lieder = KAMPF_LIEDER[k]; });
 
   const ausVorlage = (k, mix) => {
@@ -3151,7 +3177,7 @@
     const g = pumpBus.gain;
     g.cancelScheduledValues(zeit); g.setValueAtTime(1, zeit); g.linearRampToValueAtTime(tiefe, zeit + .012); g.setTargetAtTime(1, zeit + .04, .09);
   }
-  /* Anlauf in den Refrain: Becken schwillt an, die Snare wirbelt hinauf, dann ein Atemzug Stille – und der Refrain kommt mit einem großen Schlag */
+  /* Anlauf in den Refrain: Becken schwillt an, die Snare wirbelt hinauf – und der Refrain kommt mit einem großen Schlag */
   function anlaufSchritt(zeit, ab) {
     if (!S.rollen || !ctx || rendert || ausduennen || einblend > 0 || S.intensitaet < 3) return;
     const L = taktL(), naechst = (ab + 1) % S.ablauf.length, r = rolleAn(ab), rn = rolleAn(naechst);
@@ -3170,7 +3196,7 @@
     }
     if (fam !== "ruhig" && schritt >= L - 4 && schritt < L - 1) probe(schritt % 2 ? "snare2" : "snare1", 0, zeit, master, .14 + .07 * (schritt - L + 4));
     /* der Atemzug: das letzte Sechzehntel fast still */
-    if (schritt === L - 1 && atem && fam !== "ruhig") { const g = atem.gain; g.cancelScheduledValues(zeit); g.setValueAtTime(1, zeit); g.linearRampToValueAtTime(.12, zeit + .02); g.setValueAtTime(.12, zeit + sd - .015); g.linearRampToValueAtTime(1, zeit + sd); }
+
   }
   function kickSchritt(zeit, ab) {
     if (!S.kick || S.mute.trommel || !ctx || ausduennen || einblend > EINBLEND / 2) return;
@@ -3507,7 +3533,7 @@
   };
   const PAD_FARBE = { ooh: ["ooh", "ooh"], bratsche: ["vc", "bra"], trem: ["vctrem", "vlntrem"], orgel: ["orgel", "orgel"], holz: ["fag", "klar"], blech: ["pos", "horn"], chor: ["stimme", "stimme"], holz2: ["klar", "fl"] };
   /* Klangfarbe des Teppichs: je Stimmung mehrere, gewählt nach dem Thema – mit jedem neuen Thema klingt der Hintergrund anders */
-  const ORCH_FARBEN = { heldenlied: ["", "blech", "chor"], verfolgung: ["", "blech"], ruinen: ["chor", "holz2", "orgel", "ooh"], kampf: ["", "blech"], boss: ["", "blech", "chor", "ooh"], spannung: ["trem", "chor"], grusel: ["trem", "chor", "ooh"], unterreich: ["trem", "chor", "orgel"],
+  const ORCH_FARBEN = { heldenlied: ["", "blech", "chor"], verfolgung: ["trem", "trem", ""], ruinen: ["chor", "holz2", "orgel", "ooh"], kampf: ["", "blech"], boss: ["", "blech", "chor", "ooh"], spannung: ["trem", "chor"], grusel: ["trem", "chor", "ooh"], unterreich: ["trem", "chor", "orgel"],
     elben: ["", "chor", "holz2", "ooh"], klage: ["", "chor", "holz", "bratsche"], pilger: ["orgel", "chor", "ooh"], hof: ["", "blech", "holz2", "bratsche"], zwerge: ["", "blech", "chor"],
     auenland: ["holz", "holz2"], shanty: ["holz", "chor"], rast: ["holz", "holz2"], kamin: ["holz", "holz2", "", "bratsche"], reise: ["", "holz2"], sieg: ["", "blech"], reiter: ["", "blech"], fey: ["", "holz2"] };
   function orchFarbe(pr) {
@@ -5515,7 +5541,7 @@
   const KAPELLE = {
     kampf: [["blech", "stoss", "srh"], ["taiko", "stampf", "svrbh"], ["pizz", "ostinato", "sv"], ["xyl", "unisono", "rh", 12, 5], ["ooh", "halte", "rh", -12]],
     boss: [["blech", "stoss", "srh"], ["taiko", "stampf", "isvrbh"], ["ooh", "halte", "srh", -12], ["pizz", "ostinato", "sb"], ["bra", "unisono", "h", -12, 5]],
-    verfolgung: [["pizz", "ostinato", "svrh"], ["taiko", "puls", "rh"], ["pic", "unisono", "h", 12, 5], ["blech", "stoss", "h"], ["xyl", "ostinato", "s"]],
+    verfolgung: [["pizz", "ostinato", "svrh"], ["taiko", "stampf", "rh"], ["ooh", "halte", "rh", -12], ["blech", "stoss", "h"], ["bra", "terz", "r", -12]],
     spannung: [["pizz", "ostinato", "srh"], ["rgl", "glanz", "h"], ["cel", "echo", "r", 0, 4], ["sitar", "ostinato", "s"], ["spiel", "echo", "b"]],
     grusel: [["spiel", "unisono", "s", 12], ["ooh", "halte", "rh", -12], ["rgl", "glanz", "h"], ["cel", "echo", "b"], ["eh", "terz", "r", -12]],
     unterreich: [["sitar", "ostinato", "srh"], ["taiko", "puls", "h"], ["shaku", "echo", "sb"], ["ooh", "halte", "h", -12], ["rgl", "glanz", "h"]],

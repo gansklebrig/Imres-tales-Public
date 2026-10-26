@@ -470,11 +470,11 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     { id: "sturm", g: .75, sym: "🌩", name: W("Sturm zieht auf", "A storm rolls in"), datei: "l_gewitter", rate: .85, ein: 25 },
     { id: "weltsturm", g: .4, sym: "🌀", name: W("Weltensturm", "World storm"), datei: "l_sturm", rate: .7, ein: 20 },
     { id: "wind", g: 1.4, sym: "🌪", name: W("Götterwind", "Wind of the gods"), datei: "l_wind", rate: .55, ein: 25 },
-    { id: "grollen", g: 3, sym: "🌑", name: W("Grollen der Tiefe", "Rumble of the deep"), datei: "l_donner", rate: .5, ein: 12 },
+    { id: "grollen", g: 1.15, sym: "🌑", name: W("Grollen der Tiefe", "Rumble of the deep"), datei: "l_donner", rate: .5, ein: 12 },
     { id: "moenche", g: .8, sym: "🕯", name: W("Mönche der Tiefe", "Monks of the deep"), datei: "l_tempel", rate: .55, ein: 20 },
-    { id: "dom", g: .85, sym: "⛪", name: W("Endloser Dom", "Endless dome"), datei: "a_halle", rate: .5, ein: 15 },
-    { id: "windspiel", g: 2.2, sym: "🎐", name: W("Geisterglocken", "Ghost bells"), datei: "l_windspiel", rate: .45, ein: 15 },
-    { id: "leviathan", g: 2.2, sym: "🐋", name: W("Leviathan", "Leviathan"), datei: "l_wal", rate: .45, ein: 8 },
+    { id: "dom", g: .7, sym: "⛪", name: W("Endloser Dom", "Endless dome"), datei: "a_halle", rate: .5, ein: 15 },
+    { id: "windspiel", g: 1.4, sym: "🎐", name: W("Geisterglocken", "Ghost bells"), datei: "l_windspiel", rate: .45, ein: 15 },
+    { id: "leviathan", g: 1.6, sym: "🐋", name: W("Leviathan", "Leviathan"), datei: "l_wal", rate: .45, ein: 8 },
     { id: "schalen", g: .5, sym: "🪷", name: W("Klangschalenkreis", "Circle of bowls"), datei: "a_klangschale", rate: .5, ein: 8 },
     { id: "gelaeut", g: 2.2, sym: "🔔", name: W("Geläut", "Tolling"), folge: "gelaeut", dauer: 120 },
     { id: "trommeln", g: .8, sym: "🥁", name: W("Kriegstrommeln", "War drums"), folge: "trommeln", dauer: 150 }
@@ -609,7 +609,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { ctx = new AC(); }
     /* iOS: nach Anruf/Siri („interrupted“) oder Sperre selbst wieder anlaufen */
     ctx.onstatechange = () => { if (ctx.state !== "running" && ctx.state !== "closed" && !document.hidden) { try { ctx.resume().catch(() => {}); } catch (_) {} if (stumm && stumm.paused && aktiv) stumm.play().catch(() => {}); } };
-    const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12; lim.attack.value = .005; lim.release.value = .3;
+    const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -9; lim.knee.value = 6; lim.ratio.value = 14; lim.attack.value = .0015; lim.release.value = .25;
     gesamt = ctx.createGain(); gesamt.gain.value = lautWert();
     /* Handy-Lautsprecher können tiefe Töne nicht wiedergeben – sie schnarren und kratzen dann (vor allem die epischen,
        tiefer gestimmten Welten). Der Schutz nimmt den tiefen Bass weg; mit Kopfhörern oder Box lässt er sich ausschalten. */
@@ -639,7 +639,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   let bassSchutz = null;
   /* standardmäßig nur auf echten Handys und Tablets an (nicht auf Laptops mit wenigen Prozessorkernen) */
   const bassSchutzAn = () => merk.bass != null ? !!merk.bass : /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent || ""));
-  function bassSchutzSetzen() { if (bassSchutz) bassSchutz.forEach((f, i) => f.frequency.setTargetAtTime(bassSchutzAn() ? (i < 2 ? 180 : 10000) : (i < 2 ? 12 : 22000), ctx.currentTime, .05)); }
+  function bassSchutzSetzen() { if (bassSchutz) bassSchutz.forEach((f, i) => f.frequency.setTargetAtTime(bassSchutzAn() ? (i < 2 ? 180 : 10000) : (i < 2 ? 38 : 22000), ctx.currentTime, .05)); }
   const lautWert = () => Math.pow((merk.gesamt != null ? merk.gesamt : 70) / 100, 1.6) * .95;
   /* Raumhall: selbst erzeugter Nachhall, Länge je Klangwelt */
   function raumSetzen(sek) {
@@ -879,6 +879,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     /* beim Tieferstimmen rutscht das obere Rauschen der MP3-Kodierung ins Hörbare und klingt kratzig – das schneidet ein Tiefpass weg */
     const grenze = Math.min(b.o.tief || 20000, b.o.ton ? 20000 : 14500 * (b.o.rate || 1));
     if (grenze < 16000) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = grenze; lp.Q.value = .5; letzter.connect(lp); letzter = lp; }
+    /* tief gestimmte Aufnahmen rumpeln unter 50 Hz nur noch – das kostet Aussteuerung und schnarrt auf kleinen Lautsprechern */
+    if ((b.o.rate || 1) < .75) { const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 50; hp.Q.value = .6; letzter.connect(hp); letzter = hp; }
     if (ctx.createStereoPanner && !merk.spar) {
       const pn = ctx.createStereoPanner(), lfo = ctx.createOscillator(), tiefe = ctx.createGain();
       lfo.frequency.value = zz(.012, .035); tiefe.gain.value = zz(.25, .5); lfo.connect(tiefe); tiefe.connect(pn.pan); lfo.start();
@@ -984,6 +986,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     l.g.gain.value = 0;
     let letzter = l.g;
     if (s.rate && s.rate < .95) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 14500 * s.rate; lp.Q.value = .5; letzter.connect(lp); letzter = lp; }
+    if (s.rate && s.rate < .75) { const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 45; hp.Q.value = .6; letzter.connect(hp); letzter = hp; }
     if (ctx.createStereoPanner && !merk.spar) {
       const pn = ctx.createStereoPanner(), lfo = ctx.createOscillator(), t = ctx.createGain();
       lfo.frequency.value = zz(.015, .04); t.gain.value = .5; lfo.connect(t); t.connect(pn.pan); lfo.start(); l.lfo = lfo; letzter.connect(pn); letzter = pn;
@@ -1192,7 +1195,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     dunkel.frequency.setTargetAtTime(20000 * Math.pow(1700 / 20000, Math.pow(sp, 1.15)), j, .6);
     if (sp > .04) {
       epischStart();
-      if (!spDrohne) spDrohne = eBettStarten({ id: "_spannung", pegel: 1 }, ["~tief", .55, "", { ton: ["kb_28", "vc_36"], rate: .5, tief: 260 }], 0);
+      if (!spDrohne) spDrohne = eBettStarten({ id: "_spannung", pegel: 1 }, ["~tief", .4, "", { ton: ["kb_40", "vc_43"], rate: .5, tief: 300 }], 0);
       spDrohne.regler = Math.pow(sp, 1.4); spDrohne.drift = j + 12; spDrohne.out.gain.setTargetAtTime(spDrohne.grund * spDrohne.regler, j, 1.2);
     } else if (spDrohne) { bettStopp(spDrohne, true); spDrohne = null; }
     /* Flirren: drei eng beieinanderliegende Tremolo-Töne der Celli (a – h – c), sehr leise, ohne Rhythmus */
