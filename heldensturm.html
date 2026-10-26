@@ -6,7 +6,7 @@
 <meta name="description" content="Heldensturm – das Roguelike zu Imres Tales: Barradin, Echo, Friedrich und Ezekiel kämpfen sich durch die ganze Kampagne.">
 <meta name="theme-color" content="#100c12">
 <meta property="og:title" content="Heldensturm">
-<meta property="og:description" content="Das Roguelike zu Imres Tales: 13 Orte der Kampagne, Wächter, Bosse, Beute und Talente.">
+<meta property="og:description" content="Das Roguelike zu Imres Tales: 13 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
 <meta property="og:image" content="https://imrestales.de/vorschau.jpg">
 <style>[hidden]{display:none!important}body{margin:0}</style>
 <title>Heldensturm</title>
@@ -82,6 +82,14 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .sk .cdt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums;pointer-events:none}
 .sk .key{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:#0d090f;border:1px solid var(--line);font-size:11px;font-weight:800;line-height:18px;color:var(--mute)}
 .sk.ready{border-color:#f7d988}
+.sk.hold{transform:scale(1.1);box-shadow:0 0 18px rgba(247,217,136,.7)}
+.node.rec{outline:2px dashed rgba(229,180,84,.55);outline-offset:3px}
+.btn.hint{background:transparent;border-style:dashed;opacity:.75;font-size:12px;padding:6px 10px}
+.lpcmp{position:fixed;z-index:60;pointer-events:none;max-width:min(78vw,300px);background:rgba(16,12,18,.96);border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+.lpcmp b{display:block;margin-bottom:2px}
+.tbrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tbrow label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mute)}
+.tbrow input[type=range]{width:120px}
 .sk:active{transform:scale(.94)}
 .sk.sil{opacity:.35;filter:grayscale(1)}
 .runcard{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;border:1px solid rgba(229,180,84,.6);background:rgba(229,180,84,.08)}
@@ -2882,10 +2890,10 @@ function drawTeleFx(k,t){const q=fxQ();if(q<1||k.screen)return;const c=cx,col=k.
  c.globalAlpha=ga}
 
 const ZCOL={gift:'#8ad04a',feuer:'#ff7a2a',netz:'#ececf4',sporen:'#c0a050',nebel:'#b0d0a0',dunkel:'#0a0610',summen:'#e0c040',faden:'#c08cff'};
-function spawnGuard(){const S=STAGES[G.stage];const def=GUARDS[S.guard];const p=edgePoint(420);const e=spawnEnemy(def,p.x,p.y,{guard:1});G.guardE=e;
+function spawnGuard(){const S=STAGES[G.stage];const def=GUARDS[S.guard];const p=edgePoint(420);const e=spawnEnemy(def,p.x,p.y,{guard:1});G.guardE=e;rumbleAll(0.45,160);
  toast(def.say?def.say:`Wächter: ${def.n}`,'#ff9a7a');sfx('boss');G.shake+=4;ring(p.x,p.y,90,'#ff7a4a',0.7,6);guardIntroFx(e,def)}
 function spawnBoss(){const S=STAGES[G.stage];const def=BOSSES[S.boss];const p=edgePoint(430);
- const b=spawnEnemy(def,p.x,p.y,{boss:1});G.boss=b;if(def.survive)b.survive=def.survive;/* erste Kampagne auf Normal: Bosse treffen etwas sanfter, Demogorgon muss man kürzer überleben */if(NORM()&&G.mode==='kampagne'){b.dmg*=0.8;if(b.survive)b.survive=Math.round(b.survive*0.8)}if(b.survive)b.survive0=b.survive;
+ const b=spawnEnemy(def,p.x,p.y,{boss:1});G.boss=b;rumbleAll(0.7,260);if(def.survive)b.survive=def.survive;/* erste Kampagne auf Normal: Bosse treffen etwas sanfter, Demogorgon muss man kürzer überleben */if(NORM()&&G.mode==='kampagne'){b.dmg*=0.8;if(b.survive)b.survive=Math.round(b.survive*0.8)}if(b.survive)b.survive0=b.survive;
  if(def.adds)for(const id of def.adds){const a=ADDS[id];spawnEnemy(a,p.x+60,p.y+40,{add:1})}
  toast(`<span style="color:#ff8a7a">${def.say||def.n+' erscheint!'}</span>`);G.shake+=6;ring(p.x,p.y,120,'#ff5a4a',0.8,8);bossIntroFx(b,def)}
 function killEnemy(e,o){if(e.dead)return;e.dead=true;addCorpse(e,o);comboKill();if(G.mp){P.stKills=(P.stKills||0)+1;teamGain(1/150)}G.kills++;if(!e.boss&&!e.guard)G.stageKills++;try{skKill(e)}catch(er){}
@@ -3003,7 +3011,7 @@ function updPlayer(dt){
  if(P.potCd>0)P.potCd-=dt;
  P.atkT-=dt;if(P.atkT<=0&&!P.dash&&P.stunT<=0&&!P.chan){{const k=P.hero.basic();P.atkT=k?1/(k==='r'?P.st.rateR:k==='m'?P.st.rateM:P.st.rate):0.08;if(k){setOnBasic(k);P.atkA=G.time;P.atkK=k}}}
  for(const k in P.cds)if(P.cds[k]>0)P.cds[k]-=dt;
- if(G.bot&&P.hp<P.st.maxHp*0.35)usePotion();
+ if(G.bot?P.hp<P.st.maxHp*0.35:SAVE.autoPot&&!netIs(P.dev)&&P.hp<P.st.maxHp*0.3&&P.hp>0)usePotion();
  if(G.bot&&P.stam>60&&nearest(P.x,P.y,140))P.sprint=true;
  if(((P.netIn&&NET.role==='host'?P.netIn.au:SAVE.auto)||G.bot)&&P.silT<=0&&P.stunT<=0&&!P.chan){for(let i=0;i<P.actives.length;i++){const n=P.actives[i];if((P.cds[n.id]||0)>0)continue;const near=nearest(P.x,P.y,(AR[n.id]||400)*(AR[n.id]&&AR[n.id]<300?P.st.area:1));if(!near)continue;
   if(n.id==='e_bear'&&P.form==='bear')continue;if(n.id==='e_rat'&&P.form)continue;if((n.id==='b_door'||n.id==='f_leap')&&P.hp>P.st.maxHp*0.6)continue;useSkill(i);break}}
@@ -3026,6 +3034,12 @@ function botMove(){let vx=0,vy=0;for(const e of G.enemies){if(e.dead)continue;co
  n=Math.hypot(vx,vy);return n>0.05?[vx/n,vy/n]:[0,0]}
 function botEquip(){for(let pass=0;pass<3;pass++){let bi=-1,bd=0.002;P.bag.forEach((it,i)=>{const d=itemDelta(it);if(d>bd){bd=d;bi=i}});if(bi<0)break;equipFromBag(bi)}
  const scrap=P.bag.filter(it=>itemDelta(it)<=0);if(P.bag.length>16)for(const it of scrap){SAVE.gold+=scrapValue(it);G.goldRun+=scrapValue(it);P.bag.splice(P.bag.indexOf(it),1)}}
+/* alles Bessere auf einmal anlegen – verfluchte Gegenstände bleiben im Beutel */
+function equipBest(){let n=0;for(let pass=0;pass<8;pass++){let bi=-1,bd=0.005;P.bag.forEach((it,i)=>{if(it.curse)return;const d=itemDelta(it);if(d>bd){bd=d;bi=i}});if(bi<0)break;equipFromBag(bi);n++}if(n)updateInvBadge();return n}
+/* Talent-Vorschlag: nur auf Wunsch. Bleibt beim Zweig, in den schon Punkte flossen, stärkt Fähigkeiten in der Leiste, nimmt Meister-Talente mit. */
+function recNode(){const T=P.hero.tree,opts=T.filter(canLearn);if(!opts.length)return null;const inv=[0,0,0];for(const n of T)inv[n.b]+=rank(n.id);const top=Math.max(...inv);
+ const sc=n=>{const r=rank(n.id);let v=top?inv[n.b]/top*3:0;if(n.ult)v+=5;if(n.a&&P.bar.includes(n.id))v+=2.2;if(n.a&&!r&&P.bar.length<6)v+=1.6;if(!n.a)v+=0.8;return v-r*0.35+n.row*0.25};
+ return opts.sort((a,b)=>sc(b)-sc(a))[0]}
 function botLearn(){let guard=0;while(P.sp>0&&guard++<20){const opts=P.hero.tree.filter(canLearn);if(!opts.length)break;const bw=window.__bb,bp=window.__bpick||[],bk=n=>rank(n.id)-(n.a?1.5:0)-(n.ult?3:0)-n.row*0.3+(bw!=null&&n.b!==bw?6:0)-(bp.includes(n.id)?10:0);opts.sort((a,b)=>bk(a)-bk(b));learn(opts[0])}
  if(P.bar.length>=6){const ul=P.learn.find(id=>P.hero.tree.find(n=>n.id===id).ult&&!P.bar.includes(id));if(ul){P.bar.splice(1,1);P.bar.push(ul);buildSkillBar()}}}
 
@@ -3841,7 +3855,28 @@ const SKPOS=[[0,0],[86,0],[0,86],[86,86],[172,0],[172,86]];
 function buildSkillBar(){P.bar=(P.bar||P.learn.slice(0,6)).filter(id=>P.learn.includes(id)).slice(0,6);P.actives=P.bar.map(id=>P.hero.tree.find(n=>n.id===id)).filter(Boolean);if(G.mp&&PL[0]&&P!==mainP()){P.skBtns=[];return}
  skillsEl.innerHTML=P.actives.map((n,i)=>`<button class="sk ready" data-sk="${i}" style="right:${SKPOS[i][0]}px;bottom:${SKPOS[i][1]}px" aria-label="${esc(n.name)}"><span class="ic">${n.ic}</span><i class="cd"></i><span class="cdt"></span><span class="key">${i+1}</span></button>`).join('');
  P.skBtns=[...skillsEl.querySelectorAll('.sk')].map(el=>({el,cd:el.querySelector('.cd'),cdt:el.querySelector('.cdt'),q:-1,tx:null}));
- P.skBtns.forEach((b,i)=>b.el.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();useSkill(i)}))}
+ P.skBtns.forEach((b,i)=>skTouch(b.el,i));tbApply()}
+/* Handy: Fähigkeit antippen = automatisch zielen (Boss/Wächter/Elite zuerst); halten und ziehen = in diese Richtung zielen,
+   eine Linie zeigt Richtung und Reichweite; zurück auf den Knopf ziehen bricht ab. Maus und Stift lösen sofort aus. */
+let SKD=null;
+function skTouch(el,i){
+ el.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();if(ev.pointerType==='mouse'){useSkill(i);return}
+  SKD={i,id:ev.pointerId,x0:ev.clientX,y0:ev.clientY,drag:false};el.classList.add('hold');try{el.setPointerCapture(ev.pointerId)}catch(e){}});
+ el.addEventListener('pointermove',ev=>{const D=SKD;if(!D||D.id!==ev.pointerId||!P)return;const dx=ev.clientX-D.x0,dy=ev.clientY-D.y0,d=Math.hypot(dx,dy);
+  if(d>24){if(!D.drag){D.drag=true;sfx('ui')}P.padAim=Math.atan2(dy,dx);P.padAimT=G.time;P.padHeld=1;P.touchAim=i}else if(D.drag){P.touchAim=-1;P.padAim=null}});
+ const up=ev=>{const D=SKD;if(!D||D.id!==ev.pointerId)return;SKD=null;el.classList.remove('hold');if(!P)return;const dx=ev.clientX-D.x0,dy=ev.clientY-D.y0,d=Math.hypot(dx,dy);
+  if(ev.type==='pointercancel'||(D.drag&&d<=24)){touchAimEnd();return}
+  if(D.drag){P.padAim=Math.atan2(dy,dx);P.padHeld=1}else P.padAim=null;useSkill(i);touchAimEnd()};
+ el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)}
+function touchAimEnd(){if(P){P.padAim=null;P.padHeld=0;P.touchAim=null}}
+/* Knöpfe: Größe, Deckkraft, Bogen um den Daumen, Linkshänder */
+const SKARC=[[0,0],[106,0],[76,76],[0,106],[184,62],[62,184]];
+const tbS=()=>SAVE.tb||(SAVE.tb={s:1,o:1,arc:0,left:0});
+function tbApply(){const sk=$('skills'),ut=$('util');if(!sk||!ut)return;const T=tbS(),s=clamp(+T.s||1,0.75,1.35),o=clamp(+T.o||1,0.35,1),L=!!T.left,side=L?'left':'right',oth=L?'right':'left';
+ for(const el of [sk,ut]){el.style[oth]='auto';el.style.transformOrigin=side+' bottom';el.style.transform=s!==1?`scale(${s})`:'';el.style.opacity=o<1?String(o):''}
+ sk.style[side]=`max(14px,env(safe-area-inset-${side},0px))`;ut.style[side]=`calc(max(14px,env(safe-area-inset-${side},0px)) + ${Math.round((window.innerWidth<=420?262:272)*s)}px)`;
+ const pos=T.arc?SKARC:SKPOS;sk.querySelectorAll('.sk').forEach((el,i)=>{const p=pos[i]||[0,0];el.style[oth]='auto';el.style[side]=p[0]+'px';el.style.bottom=p[1]+'px'})}
+window.addEventListener('resize',()=>{try{tbApply()}catch(e){}});
 function updateInvBadge(){const base=computeStats(P.eq);G.upCount=P.bag.filter(it=>itemDps(it,base).d>0.005).length}
 
 /* ================= Bestenliste =================
@@ -4036,11 +4071,17 @@ function endRun(win){if(G.state==='end')return;G.state='end';clearHudFx();truheD
   <div class="card" style="display:${G.rl||G.mp?'none':'flex'};flex-direction:column;gap:10px"><div class="eyebrow">Bestenliste</div><div id="hsEintrag" class="row">${ImresKuerzel.feld({klasse:'hsname',id:'hsName'})}<button class="btn gold" data-act="hs-send">Eintragen</button></div><div id="hsListe">${hsTabelle()}</div></div>
   <div><button class="btn-main" data-act="to-camp">Zurück ins Lager</button></div></div>`)}
 
+const touchRows=()=>`${navigator.vibrate?`<div class="up"><div><div class="t">Vibration</div><div class="d">Kurzes Rütteln bei harten Treffern, Stufenaufstieg, Wächtern und Bossen.</div></div><button class="btn ${SAVE.vib!==false?'gold':''}" data-act="vib">${SAVE.vib!==false?'An':'Aus'}</button></div>`:''}
+   <div class="up"><div style="min-width:0"><div class="t">Knöpfe am Bildschirm</div><div class="d">Fähigkeit antippen zielt automatisch, halten und ziehen zielt in die Richtung. Schnell über den Bildschirm wischen sprintet.</div>
+   <div class="tbrow" style="margin-top:8px"><label>Größe <input type="range" min="75" max="135" step="5" value="${Math.round((tbS().s||1)*100)}" data-tb="s" aria-label="Knopfgröße"></label><label>Deckkraft <input type="range" min="35" max="100" step="5" value="${Math.round((tbS().o||1)*100)}" data-tb="o" aria-label="Deckkraft der Knöpfe"></label></div>
+   <div class="row" style="margin-top:6px"><button class="btn small ${tbS().arc?'gold':''}" data-act="tb-arc">${tbS().arc?'Anordnung: Bogen':'Anordnung: Raster'}</button><button class="btn small ${tbS().left?'gold':''}" data-act="tb-left">${tbS().left?'Linkshänder: an':'Linkshänder: aus'}</button></div></div></div>`;
 function renderPause(keep){showScreen(`<div class="wrap narrow">
   ${menuTabs('pause')}
   <div class="spread"><h2>Pause</h2><button class="btn" data-act="close">Weiter</button></div>${rollePauseHtml()}
   <div class="card ups">
    <div class="up"><div><div class="t">Fähigkeiten automatisch wirken</div><div class="d">Praktisch auf dem Handy: Fähigkeiten feuern von selbst, sobald Gegner in Reichweite sind.</div></div><button class="btn ${SAVE.auto?'gold':''}" data-act="auto">${SAVE.auto?'An':'Aus'}</button></div>
+   <div class="up"><div><div class="t">Heiltrank automatisch</div><div class="d">Trinkt von selbst, wenn das Leben unter 30 % fällt.</div></div><button class="btn ${SAVE.autoPot?'gold':''}" data-act="autopot">${SAVE.autoPot?'An':'Aus'}</button></div>
+   ${TOUCHDEV?touchRows():''}
    <div class="up"><div><div class="t">Mit der Maus zielen (PC)</div><div class="d">Normale Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger. Linke Maustaste gedrückt halten feuert auch ohne Gegner.</div></div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div>
    ${gfxRow()}
    ${volRows()}</div>${P&&P.level>=LEG_CAP?legHtml(P.id,true):''}${mpPauseHtml()}<div class="card ups ctlBox">${ctlRows()}
@@ -4071,7 +4112,7 @@ function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel
  const pows=[...(P.lp||[])].filter(k=>LPOW[k]).map(k=>`<div class="lpow"><b>${LPOW[k].n}</b> ${LPOW[k].d}</div>`).join('');
  showScreen(`<div class="wrap inv">
   ${menuTabs('inv')}
-  <div class="inv-head"><h2>Beutel<small>${P.bag.length} / ${BAGMAX}</small></h2><div class="row"><button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten${Object.keys(PADS.st).length?' <small style="opacity:.7">· 🎮 X+Y halten</small>':''}</button><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
+  <div class="inv-head"><h2>Beutel<small>${P.bag.length} / ${BAGMAX}</small></h2><div class="row">${(()=>{const n=P.bag.filter(it=>!it.curse&&itemDelta(it)>0.005).length;return n?`<button class="btn" data-act="inv-best" style="border-color:#9be06a">✓ Bestes anlegen <small style="opacity:.75">(${n})</small></button>`:''})()}<button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten${Object.keys(PADS.st).length?' <small style="opacity:.7">· 🎮 X+Y halten</small>':''}</button><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
   <div class="eyebrow">Angelegt</div><div class="equip">${eq}</div>
   <div class="eyebrow">Im Beutel · nach Schaden sortiert ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
   <div class="bag">${bag||'<div class="muted" style="grid-column:1/-1">Noch leer. Gegner lassen Ausrüstung fallen – einfach drüberlaufen. Leere Plätze werden automatisch belegt.</div>'}</div>
@@ -4088,7 +4129,7 @@ function upDiff(a,b){const A=String(a).split(/(\d+(?:[.,]\d+)?)/),B=String(b).sp
 function shortD(s){s=String(s).replace(/<[^>]*>/g,'');const i=s.search(/[.!?](\s|$)/);let t=i>0?s.slice(0,i+1):s;if(t.length>110)t=t.slice(0,105).replace(/\s+\S*$/,'')+' …';return t}
 function renderTree(keep){const Hh=P.hero;if(!keep){G.treeOpen=false;G.treeDet=false}const open=!!G.treeOpen||!!G.barPick;const sel=G.treeSel&&Hh.tree.find(n=>n.id===G.treeSel)||Hh.tree.find(n=>canLearn(n))||Hh.tree[0];G.treeSel=sel.id;
  const brSel=G.treeBr!==undefined?G.treeBr:sel.b;G.treeBr=brSel;
- const node=n=>{const r=rank(n.id),inBar=P.bar.includes(n.id);return`<button class="node ${n.a?'act':'pas'} ${n.ult?'ult':''} ${!prereq(n)&&!r?'locked':''} ${canLearn(n)?'can':''} ${n===sel&&open?'sel':''}" data-act="tree-sel" data-id="${n.id}"><span class="tag">${n.ult?'Meister':n.a?'Aktiv':'Passiv'}</span>${inBar?'<span class="inbar" title="In der Leiste">▣</span>':''}<span class="g">${n.ic}</span><span class="nn">${n.name}</span><span class="pp">${'●'.repeat(r)}${'○'.repeat(n.max-r)}</span></button>`};
+ const node=n=>{const r=rank(n.id),inBar=P.bar.includes(n.id);return`<button class="node ${n.a?'act':'pas'} ${n.ult?'ult':''} ${G.treeRec===n.id&&canLearn(n)?'rec':''} ${!prereq(n)&&!r?'locked':''} ${canLearn(n)?'can':''} ${n===sel&&open?'sel':''}" data-act="tree-sel" data-id="${n.id}"><span class="tag">${n.ult?'Meister':n.a?'Aktiv':'Passiv'}</span>${inBar?'<span class="inbar" title="In der Leiste">▣</span>':''}<span class="g">${n.ic}</span><span class="nn">${n.name}</span><span class="pp">${'●'.repeat(r)}${'○'.repeat(n.max-r)}</span></button>`};
  const col=b=>{let h=`<div class="br ${b===brSel?'on':''}"><h3>${Hh.branches[b]}</h3>`;for(let row=0;row<6;row++){const ns=Hh.tree.filter(n=>n.b===b&&n.row===row);h+=`<div class="trow ${ns.length>1?'two':''}"><span class="lvreq">${ROWLV[row]}</span>${ns.map(node).join('')}</div>`}return h+'</div>'};
  const r=rank(sel.id);let req='';if(!prereq(sel)){const prev=Hh.tree.filter(m=>m.b===sel.b&&m.row===sel.row-1);req=`Benötigt Heldenstufe ${ROWLV[sel.row]}${prev.length?` und ${prev.map(m=>m.name).join(' oder ')}`:''}.`}
  const inBar=P.bar.includes(sel.id);
@@ -4097,7 +4138,7 @@ function renderTree(keep){const Hh=P.hero;if(!keep){G.treeOpen=false;G.treeDet=f
  const slots=[0,1,2,3,4,5].map(i=>{const id=P.bar[i],n=id&&Hh.tree.find(x=>x.id===id);return`<button class="bslot ${n?'':'empty'} ${G.barPick&&n?'pick':''}" data-i="${i}" ${n?`data-act="tree-sel" data-id="${n.id}"`:'disabled'} title="${n?esc(n.name):'frei'}"><span>${n?n.ic:''}</span><i>${i+1}</i></button>`}).join('');
  showScreen(`<div class="wrap tree-wrap">
   ${menuTabs('tree')}
-  <div class="inv-head"><div><h2>Talente</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level}</div></div><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div>
+  <div class="inv-head"><div><h2>Talente</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level}${P.sp>0&&Hh.tree.some(canLearn)?` <button class="btn hint" data-act="tree-rec" title="Zeigt einen passenden nächsten Punkt – du entscheidest selbst">Vorschlag?</button>`:''}</div></div><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div>
   <div class="barrow"><span class="eyebrow">Leiste</span><div class="bslots">${slots}</div><span class="muted barhint">Halten und ziehen zum Sortieren</span></div>
   <div class="seg brtabs" role="tablist">${Hh.branches.map((n,b)=>`<button role="tab" aria-selected="${b===brSel}" data-act="tree-br" data-b="${b}">${n}${Hh.tree.some(x=>x.b===b&&canLearn(x))?'<b></b>':''}</button>`).join('')}</div>
   <div class="tree">${[0,1,2].map(col).join('')}</div>
@@ -4163,6 +4204,12 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'open-pause':openOverlay('pause');break;
   case'close':if(G.lagerOn&&G.state==='title'){G.lagerOn=0;G.lagerSel=null;showTitle();break}if(G.state==='camp'){campDone();break}if(G.state==='between'){if(G.mp&&PL[0])P=PL[0];G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay();break;
   case'auto':SAVE.auto=!SAVE.auto;persist();renderPause(true);break;
+  case'autopot':SAVE.autoPot=!SAVE.autoPot;persist();renderPause(true);break;
+  case'vib':SAVE.vib=SAVE.vib===false;persist();if(SAVE.vib)vib(40);renderPause(true);break;
+  case'tb-arc':tbS().arc=tbS().arc?0:1;persist();tbApply();renderPause(true);break;
+  case'tb-left':tbS().left=tbS().left?0:1;persist();tbApply();renderPause(true);break;
+  case'inv-best':{const n=equipBest();if(n){sfx('equip');toast(`${n} Gegenstand${n>1?'e':''} angelegt`,'#9be06a')}G.invSel=null;renderInv(true);break}
+  case'tree-rec':{const n=recNode();if(n){G.treeRec=n.id;G.treeSel=n.id;G.treeOpen=true;G.treeBr=n.b}renderTree(true);break}
   case'camfx':{SAVE.camfx=+b.dataset.v;persist();const el=$('camBox');if(el)el.innerHTML=camInner();break}
   case'perf':SAVE.perf=!SAVE.perf;persist();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
   case'amb-t':SAVE.amb=SAVE.amb===false;persist();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
@@ -4189,7 +4236,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'tree-bar':if(P.bar.length>=6&&!P.bar.includes(G.treeSel))G.barPick=G.treeSel;else if(!P.bar.includes(G.treeSel)){toggleBar(G.treeSel);sfx('equip')}renderTree(true);break;
   case'bar-rep':{const i=+b.dataset.i;if(G.barPick&&!P.bar.includes(G.barPick)){P.bar[i]=G.barPick;buildSkillBar();sfx('equip')}G.barPick=null;renderTree(true);break}
   case'bar-cancel':G.barPick=null;renderTree(true);break;
-  case'tree-learn':{const n=P.hero.tree.find(x=>x.id===G.treeSel);if(n)learn(n);renderTree(true);break}
+  case'tree-learn':{const n=P.hero.tree.find(x=>x.id===G.treeSel);if(n)learn(n);G.treeRec=null;renderTree(true);break}
  }});
 window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(ev.code))return;audioInit();if(ev.code==='KeyF'&&!ev.ctrlKey&&!ev.metaKey&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))&&fsOk()){fsToggle();ev.preventDefault();return}
  if(G.state==='play'&&!G.overlay&&/^(Arrow|Key[WASD])/.test(ev.code))keys[ev.code]=true;
@@ -4206,12 +4253,30 @@ window.addEventListener('pointerup',ev=>{if(ev.pointerType==='mouse'&&ev.button=
 window.addEventListener('blur',()=>{MOUSE.down=false;for(const k in keys)keys[k]=false});
 $('btnPot').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();usePotion()});
 $('btnSprint').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();if(NET.role==='guest'&&G.netGuestRun){NET.sprT=!NET.sprT;return}if(G.state==='play'&&!G.paused){P.sprint=!P.sprint&&P.stam>5}});
-cv.addEventListener('pointerdown',ev=>{audioInit();if(G.segR&&G.mp&&G.state==='play'&&!G.overlay&&!G.paused){const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top,S=G.segR;if(x>S.x-12&&x<S.x+S.w+12&&y>S.y-16&&y<S.y+30){teamUlt();ev.preventDefault();return}}if(ev.pointerType==='mouse'){MOUSE.has=true;MOUSE.t=performance.now();MOUSE.x=ev.clientX;MOUSE.y=ev.clientY;if(ev.button===0)MOUSE.down=true;if(SAVE.aim)return}if(G.state!=='play'||G.overlay)return;if(joy&&joy.on)return;joy={on:true,id:ev.pointerId,ox:ev.clientX,oy:ev.clientY,x:ev.clientX,y:ev.clientY};try{cv.setPointerCapture(ev.pointerId)}catch(e){}ev.preventDefault()});
-cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='mouse'){MOUSE.has=true;if(Math.abs(ev.clientX-MOUSE.x)+Math.abs(ev.clientY-MOUSE.y)>4)MOUSE.t=performance.now();MOUSE.x=ev.clientX;MOUSE.y=ev.clientY}if(joy&&joy.on&&ev.pointerId===joy.id){joy.x=ev.clientX;joy.y=ev.clientY;const dx=joy.x-joy.ox,dy=joy.y-joy.oy,d=Math.hypot(dx,dy);if(d>90){joy.ox=joy.x-dx/d*90;joy.oy=joy.y-dy/d*90}}});
-const endJoy=ev=>{if(joy&&ev.pointerId===joy.id)joy=null};cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);
+cv.addEventListener('pointerdown',ev=>{audioInit();if(G.segR&&G.mp&&G.state==='play'&&!G.overlay&&!G.paused){const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top,S=G.segR;if(x>S.x-12&&x<S.x+S.w+12&&y>S.y-16&&y<S.y+30){teamUlt();ev.preventDefault();return}}if(ev.pointerType==='mouse'){MOUSE.has=true;MOUSE.t=performance.now();MOUSE.x=ev.clientX;MOUSE.y=ev.clientY;if(ev.button===0)MOUSE.down=true;if(SAVE.aim)return}if(G.state!=='play'||G.overlay)return;if(joy&&joy.on)return;joy={on:true,id:ev.pointerId,ox:ev.clientX,oy:ev.clientY,x:ev.clientX,y:ev.clientY,sx:ev.clientX,sy:ev.clientY,t0:performance.now(),touch:ev.pointerType!=='mouse'};try{cv.setPointerCapture(ev.pointerId)}catch(e){}ev.preventDefault()});
+cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='mouse'){MOUSE.has=true;if(Math.abs(ev.clientX-MOUSE.x)+Math.abs(ev.clientY-MOUSE.y)>4)MOUSE.t=performance.now();MOUSE.x=ev.clientX;MOUSE.y=ev.clientY}if(joy&&joy.on&&ev.pointerId===joy.id){joy.x=ev.clientX;joy.y=ev.clientY;if(joy.touch&&!joy.fl&&performance.now()-joy.t0<190&&Math.hypot(joy.x-joy.sx,joy.y-joy.sy)>70){joy.fl=1;if(NET.role==='guest'&&G.netGuestRun){NET.sprT=true;joy.spr=2}else if(G.state==='play'&&!G.paused&&P&&P.stam>5){P.sprint=true;joy.spr=1}}const dx=joy.x-joy.ox,dy=joy.y-joy.oy,d=Math.hypot(dx,dy);if(d>90){joy.ox=joy.x-dx/d*90;joy.oy=joy.y-dy/d*90}}});
+const endJoy=ev=>{if(joy&&ev.pointerId===joy.id){if(joy.spr===1&&P)P.sprint=false;else if(joy.spr===2)NET.sprT=false;joy=null}};cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){persist();if(SAVE.cloud)cloudSave();if(G.state==='play'&&!G.paused)openOverlay('pause');if(AC&&AC.state==='running')try{AC.suspend();AC._hid=1}catch(e){}}
  else{if(AC&&AC._hid){AC._hid=0;try{AC.resume()}catch(e){}}if(SAVE.cloud&&Date.now()-CLOUD.chk>60000&&!CLOUD.busy)cloudSync()}});
 window.addEventListener('contextmenu',e=>e.preventDefault());
+/* Beutel mit einer Hand: im Detailfenster seitlich wischen = nächster/vorheriger Gegenstand;
+   einen Gegenstand lange drücken = kurzer Vergleich mit dem angelegten, ohne ihn auszuwählen */
+let ISW=null,ILP=null,INOCLICK=0;
+document.addEventListener('pointerdown',ev=>{if(ev.pointerType==='mouse'||!P)return;const d=ev.target.closest&&ev.target.closest('#idet2');
+ if(d&&G.invSel&&G.invSel.indexOf('b:')===0)ISW={id:ev.pointerId,x:ev.clientX,y:ev.clientY};
+ const t=ev.target.closest&&ev.target.closest('.it[data-act="inv-sel"]');if(t&&/^b:/.test(t.dataset.k||'')){const k=t.dataset.k;ILP={id:ev.pointerId,x:ev.clientX,y:ev.clientY,on:false,tm:setTimeout(()=>{const it=P.bag[+k.slice(2)];if(!it)return;ILP.on=true;lpShow(it,ev.clientX,ev.clientY);vib(15)},450)}}},true);
+document.addEventListener('pointermove',ev=>{if(ILP&&ev.pointerId===ILP.id&&!ILP.on&&Math.hypot(ev.clientX-ILP.x,ev.clientY-ILP.y)>12){clearTimeout(ILP.tm);ILP=null}},true);
+const iEnd=ev=>{if(ILP&&ev.pointerId===ILP.id){clearTimeout(ILP.tm);if(ILP.on){lpHide();INOCLICK=performance.now()}ILP=null}
+ if(ISW&&ev.pointerId===ISW.id){const dx=ev.clientX-ISW.x,dy=ev.clientY-ISW.y;ISW=null;if(ev.type==='pointerup'&&Math.abs(dx)>60&&Math.abs(dy)<45&&G.invSel&&P.bag.length>1){const i=+G.invSel.slice(2),j=clamp(i+(dx<0?1:-1),0,P.bag.length-1);if(j!==i){G.invSel='b:'+j;INOCLICK=performance.now();sfx('ui');renderInv(true)}}}};
+document.addEventListener('pointerup',iEnd,true);document.addEventListener('pointercancel',iEnd,true);
+document.addEventListener('click',ev=>{if(performance.now()-INOCLICK<350&&ev.target.closest&&ev.target.closest('#scr,.screen')){ev.stopPropagation();ev.preventDefault()}},true);
+function lpShow(it,x,y){lpHide();const cur=P.eq[bestSlotFor(it)],D=itemDps(it),dl=itemDelta(it),q=(D.k==='a'?(D.b.m+D.b.r)/Math.max(1e-6,D.a.m+D.a.r):D.b[D.k]/Math.max(1e-6,D.a[D.k]))-1;
+ const c=v=>v>0.005?'good':v<-0.005?'bad':'muted',pc=v=>(v>=0?'+':'')+Math.round(v*100)+'%';
+ const el=document.createElement('div');el.className='lpcmp';el.id='lpcmp';el.innerHTML=`<b class="c${it.rar}">${esc(it.name)}</b><div>Schaden <span class="${c(q)}">${pc(q)}</span> · Kampfkraft <span class="${c(dl)}">${pc(dl)}</span></div><div class="muted">${cur?'ersetzt '+esc(cur.name):'Platz ist frei'}</div>`;
+ document.body.appendChild(el);const r=el.getBoundingClientRect();el.style.left=clamp(x-r.width/2,8,window.innerWidth-r.width-8)+'px';el.style.top=Math.max(8,y-r.height-28)+'px'}
+function lpHide(){const o=$('lpcmp');if(o)o.remove()}
+/* Handy: Anruf, Benachrichtigung oder App-Wechsel – sofort pausieren */
+for(const evn of ['blur','pagehide'])window.addEventListener(evn,()=>{if(TOUCHDEV&&G.state==='play'&&!G.paused&&!G.bot&&!(NET.role==='guest'))try{openOverlay('pause')}catch(e){}});
 
 /* ================= Spielmodi ================= */
 const MODES={
@@ -5434,7 +5499,10 @@ function drawMpHud(){if(!G.mp||PL.length<2)return;const c=cx;c.save();c.setTrans
 /* ---------- Vibration ---------- */
 const RUMN=['Aus','Sanft','Stark'];
 const rumL=()=>SAVE.rumble===undefined?1:SAVE.rumble;
-function rumble(p,s,ms){const L=rumL();if(!L||!p||G.bot)return;let ids=[];
+const TOUCHDEV=(()=>{try{return matchMedia('(pointer:coarse)').matches||'ontouchstart' in window}catch(e){return false}})();
+const vibOn=()=>TOUCHDEV&&!!navigator.vibrate&&SAVE.vib!==false;let VIBT=0;
+function vib(pat){if(!vibOn()||G.bot)return;const n=performance.now();if(n-VIBT<110)return;VIBT=n;try{navigator.vibrate(pat)}catch(e){}}
+function rumble(p,s,ms){if(p&&!G.bot&&s>=0.3&&(!G.mp||p===PL[0])&&!(p.dev&&p.dev.indexOf('pad:')===0))vib(Math.round(Math.min(90,ms*0.5)*Math.min(1,s)));const L=rumL();if(!L||!p||G.bot)return;let ids=[];
  if(p.dev&&p.dev.indexOf('pad:')===0)ids=[padIdx(p.dev)];else if(!G.mp||p===PL[0])ids=Object.keys(PADS.st).map(Number).filter(i=>!PL.some(q=>q.dev==='pad:'+i));
  let gps=[];try{gps=navigator.getGamepads?navigator.getGamepads():[]}catch(e){}
  const k=L===2?1:0.5;for(const i of ids){const gp=gps[i],va=gp&&gp.vibrationActuator;if(va&&va.playEffect){try{va.playEffect('dual-rumble',{startDelay:0,duration:ms,strongMagnitude:Math.min(1,s*k),weakMagnitude:Math.min(1,s*0.85*k)})}catch(e){}}}}
@@ -6115,7 +6183,11 @@ function teamUltHook(n){if(LP('schildwall')){for(const q of [P].concat(teamNear(
  for(const q of mpL())if(hasBund(q,4)&&!q.down)for(const k in q.cds)if(!(q===P&&k===n.id)&&q.cds[k]>0)q.cds[k]=Math.max(0,q.cds[k]-3)}
 /* Anzeige: Reichweite der eigenen Aura und Symbole empfangener Auren */
 /* Zielpfeil, solange mit dem rechten Stick gezielt wird */
-function drawPadAim(){const a=padA();if(a==null)return;const st=P.padHeld||netIs(P.dev)?1:Math.max(0,1-(G.time-(P.padAimT||0))/PAD_STICKY)*0.55;if(st<=0.02)return;const c=HCOL[P.id]||'#e5b454',ga=cx.globalAlpha,x=P.x+Math.cos(a)*50,y=P.y+12+Math.sin(a)*32;cx.globalAlpha=ga*0.9*st;cx.save();cx.translate(x,y);cx.rotate(a);cx.lineCap='round';cx.lineJoin='round';
+function drawPadAim(){const a=padA();if(a==null)return;
+ if(P.touchAim!=null&&P.touchAim>=0&&P.actives){const n=P.actives[P.touchAim],R=n&&AR[n.id]||320,c=HCOL[P.id]||'#e5b454',ex=P.x+Math.cos(a)*R,ey=P.y+Math.sin(a)*R,ga0=cx.globalAlpha;
+  cx.save();cx.strokeStyle=c;cx.lineWidth=3;cx.globalAlpha=ga0*0.55;cx.setLineDash([10,8]);cx.beginPath();cx.moveTo(P.x,P.y);cx.lineTo(ex,ey);cx.stroke();cx.setLineDash([]);
+  cx.globalAlpha=ga0*0.16;cx.fillStyle=c;cx.beginPath();cx.ellipse(ex,ey+6,46,30,0,0,TAU);cx.fill();
+  const t=prioInCone(a,R,0.6)||coneTarget(a,R,0.5);if(t){cx.globalAlpha=ga0*0.85;cx.lineWidth=3;cx.beginPath();cx.ellipse(t.x,t.y+t.r*0.6,t.r+10,(t.r+10)*0.6,0,0,TAU);cx.stroke()}cx.restore()}const st=P.padHeld||netIs(P.dev)?1:Math.max(0,1-(G.time-(P.padAimT||0))/PAD_STICKY)*0.55;if(st<=0.02)return;const c=HCOL[P.id]||'#e5b454',ga=cx.globalAlpha,x=P.x+Math.cos(a)*50,y=P.y+12+Math.sin(a)*32;cx.globalAlpha=ga*0.9*st;cx.save();cx.translate(x,y);cx.rotate(a);cx.lineCap='round';cx.lineJoin='round';
  for(const[w,col]of[[7,'rgba(0,0,0,.5)'],[3.5,c]]){cx.strokeStyle=col;cx.lineWidth=w;cx.beginPath();cx.moveTo(-7,-9);cx.lineTo(4,0);cx.lineTo(-7,9);cx.moveTo(-15,-9);cx.lineTo(-4,0);cx.lineTo(-15,9);cx.stroke()}cx.restore();cx.globalAlpha=ga}
 function drawAuraTag(t){if(!G.mp||PL.length<2||P.down)return;const prov=rank('b_song')||rank('e_bark')||hasBund(P,2);
  if(prov&&teamNear(P,auraR(P)).length){const R=auraR(P),ga=cx.globalAlpha;cx.globalAlpha=ga*(0.1+0.04*Math.sin(t*2));cx.strokeStyle=HCOL[P.id]||'#e5b454';cx.lineWidth=3;cx.beginPath();cx.ellipse(P.x,P.y+10,R,R*0.55,0,0,TAU);cx.stroke();cx.globalAlpha=ga}
@@ -6612,7 +6684,7 @@ const volRow=(k,t,d)=>`<div class="up vol"><div><div class="t">${t}<small id="vl
 const volRows=()=>volRow('volMus','Musik','Barradins Band – 0% schaltet sie aus.')+volRow('volSfx','Geräusche','Kampf, Zauber, Beute – 0% schaltet sie aus.')+`<div class="row" id="sndOpts" style="margin:4px 0 2px">${sndOpts()}</div>`;
 const sndOpts=()=>`<button class="btn small ${SAVE.amb!==false?'gold':''}" data-act="amb-t" title="Regen, Wind, Vögel, Höhlentropfen …">${SAVE.amb!==false?'Klangkulisse: an':'Klangkulisse: aus'}</button><button class="btn small ${bassOn()?'gold':''}" data-act="bass-t" title="Nimmt tiefen Bass weg, bei dem Handy-Lautsprecher schnarren – mit Kopfhörern oder Box ausschalten">${bassOn()?'Lautsprecher-Schutz: an':'Lautsprecher-Schutz: aus'}</button>`;
 document.addEventListener('change',ev=>{const s=ev.target.closest('[data-rlstart]');if(s)G.rlStart=+s.value});
-document.addEventListener('input',ev=>{const g=ev.target.closest('[data-gfx]');if(g)gfxSet(+g.value,1)});
+document.addEventListener('input',ev=>{const g=ev.target.closest('[data-gfx]');if(g)gfxSet(+g.value,1);const t=ev.target.closest('[data-tb]');if(t){tbS()[t.dataset.tb]=clamp((+t.value||100)/100,0.35,1.35);persist();tbApply()}});
 let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[data-vol]');if(!el)return;audioInit();const k=el.dataset.vol;if(k!=='volMus'&&k!=='volSfx')return;SAVE[k]=clamp((+el.value||0)/100,0,1);const l=$('vl_'+k);if(l)l.textContent=el.value+'%';volApply();persist();
  if(k==='volSfx'&&performance.now()-volT>180){volT=performance.now();sfx('coin')}});
 
