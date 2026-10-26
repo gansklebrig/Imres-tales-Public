@@ -1111,12 +1111,13 @@
       });
     }
     const teile = Object.fromEntries(TEILE.map(p => [p, teilLeer()]));
-    const gesehen = new Set();
+    const gesehen = new Map();
     let refStueck = null;
     const abs = abschnitteVon(rollen);
     /* der Refrain zuerst – der Höhepunkt baut auf ihm auf */
     abs.slice().sort((a, b) => (a.rolle === "r" ? -1 : 0) - (b.rolle === "r" ? -1 : 0)).forEach(a => {
-      if (gesehen.has(a.rolle)) return; gesehen.add(a.rolle);
+      if (gesehen.has(a.rolle)) { const vor = gesehen.get(a.rolle); a.teile.forEach((p, k) => { teile[p] = kopie(teile[vor[k % vor.length]]); }); return; }
+      gesehen.set(a.rolle, a.teile);
       const n = a.teile.length;
       let takte;
       if (a.rolle === "s") takte = strophe(n);
@@ -1572,10 +1573,10 @@
   /* ---------- Kulissen aus den Klangwelten-Aufnahmen (amb/, siehe klang/LIZENZ.txt) ----------
      Teppiche: lange Aufnahmen, von denen immer neue Ausschnitte weich ineinander geblendet werden – keine hörbare Schleife.
      Ereignisse: echte Einzelgeräusche (e_*, fx_*), nur Fledermaus und Lachen sind gerechnet. */
-  const AMB_LAUT = {"a_feuer1":.0315,"a_feuer2":.0164,"a_feuer3":.0183,"a_grillen":.129,"a_nacht":.144,"a_voegel1":.0601,"a_voegel2":.0565,"a_laub":.0853,"a_bach1":.0405,"a_bach2":.0505,
+  const AMB_LAUT = {"a_feuer1":.0281,"a_feuer2":.0108,"a_feuer3":.0158,"a_grillen":.129,"a_nacht":.144,"a_voegel1":.0601,"a_voegel2":.0565,"a_laub":.0853,"a_bach1":.0405,"a_bach2":.0505,
     "a_wasserfall":.1828,"a_wind1":.0818,"a_wind2":.0963,"a_regen1":.0387,"a_regen2":.0462,"a_waldregen":.0248,"a_starkregen":.043,"a_zelt":.0196,"a_gewitter1":.0441,"a_gewitter2":.0412,
     "a_wellen1":.0623,"a_wellen2":.0559,"a_boot":.0343,"a_tropfen1":.0089,"a_tropfen2":.0249,"a_unterwasser":.1387,"a_kochen":.0825,"a_blubbern":.0647,
-    "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0243, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfen3":.0474, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459,
+    "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0148, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfen3":.0474, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459,
     "a_hof":.0499, "a_hafen":.0499, "a_markt":.0499, "a_tagvoegel":.0498, "a_rinnsal":.0496, "a_strom":.0485, "a_wildwasser":.0495, "a_brandung":.05, "a_klippen":.05, "a_regen3":.0499, "a_regen4":.0499, "a_schneesturm":.05, "a_wind3":.0444, "a_orkan":.05, "a_huehner":.05, "a_kuehe":.0491, "a_schafe":.0497, "a_schnurren":.0499, "a_schneeschritte":.0457, "a_kiesweg":.0255, "l_windspiel":.0274, "l_wal":.1221};
   const ambReihe = (p, n) => Array.from({ length: n }, (_, i) => p + (i + 1));
   /* Ereignisse aus Aufnahmen: f = Dateien, tempo = Abspieltempo, folge = [min, max Anzahl, Abstand min, max] */
@@ -1604,6 +1605,7 @@
     schatten: { f: ambReihe("g_schatten_", 5), tempo: [.8, 1] }, troll: { f: ambReihe("g_troll_", 10), tempo: [.75, .9] }, schluessel: { f: ambReihe("g_schluessel_", 5) }, schloss: { f: ambReihe("g_schloss_", 7) },
     nass: { f: ambReihe("g_nass_", 3), folge: [3, 6, .5, .65] }, gras: { f: ambReihe("g_gras_", 5), folge: [3, 7, .5, .62] }, holzbruch: { f: ambReihe("g_holzbruch_", 7), tempo: [.85, 1] }, glasbruch: { f: ambReihe("g_glasbruch_", 4) },
     edelstein: { f: ambReihe("g_edelstein_", 3) }, leder: { f: ambReihe("g_leder_", 6) }, kettenhemd: { f: ambReihe("g_kettenhemd_", 5) }, zauber: { f: ambReihe("g_zauber_", 4), tempo: [.8, 1] },
+    steinschritte: { f: ambReihe("g_stein_", 5), folge: [3, 6, .5, .62] },
     uebung: { f: ambReihe("g_metallhieb_", 7).concat(ambReihe("g_schild_", 5)), folge: [2, 5, .45, .9] }
   };
   /* über kulFx (echte Aufnahmen aus ECHT bzw. gerechnet): Art in der Kulisse → Art in kulFx */
@@ -1629,7 +1631,7 @@
       ev: [["stein", [20, 50], .35, .6], ["platsch", [12, 30], .25, .6], ["fledermaus", [30, 80], .2, .5], ["steinschlag", [40, 100], .3, .8], ["hacke", [90, 200], .2, 1], ["nass", [60, 140], .2, .8]] },
     unterreich: { raum: .9, betten: [["a_tropfen1", .7], ["a_unterwasser", .35, { tief: 500 }], ["a_bach2", .18, { tief: 600 }], ["a_tropfen3", .3, { schleife: true }], ["a_heulwind", .14, { tief: 300 }], ["a_wildwasser", .1, { tief: 400 }], ["a_wind3", .12, { tief: 250 }]],
       ev: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1], ["schatten", [40, 100], .25, .8], ["troll", [70, 160], .25, 1], ["hacke", [50, 120], .22, 1], ["steinschlag", [40, 90], .25, .9], ["erz", [90, 200], .2, 1]] },
-    kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }], ["a_tropfen3", .35, { schleife: true }], ["a_heulwind", .14, { tief: 500 }], ["a_wind3", .12, { tief: 350 }], ["a_regen4", .08, { tief: 500 }]],
+    kerker: { raum: .7, betten: [["a_tropfen2", .6], ["a_wind1", .25, { tief: 450 }], ["a_tropfen1", .75], ["a_heulwind", .14, { tief: 500 }], ["a_wind3", .12, { tief: 350 }], ["a_regen4", .08, { tief: 500 }]],
       ev: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8], ["hund", [80, 180], .22, 1], ["schluessel", [40, 90], .3, .6], ["schloss", [60, 130], .3, .7], ["nass", [60, 120], .25, .8], ["tor", [100, 220], .25, 1]] },
     meer: { raum: .3, betten: [["a_wellen1", 1], ["a_wellen2", .55], ["a_wind2", .3], ["a_wellen3", .55], ["a_brandung", .55], ["a_klippen", .35], ["a_wind3", .18]],
       ev: [["moewe", [8, 22], .4, .5], ["glocke", [60, 140], .2, 1], ["windstoss", [30, 80], .3, .4], ["ruder", [90, 200], .25, .9], ["rumpf", [100, 220], .2, 1]] },
@@ -1644,7 +1646,7 @@
     bibliothek: { raum: .5, betten: [["a_feuer3", .7], ["a_wind2", .25, { tief: 600 }], ["a_uhr", .18, { takt: 2.0005 }], ["a_fensterregen", .14, { tief: 2500 }], ["a_schnurren", .1, { tief: 1000 }], ["a_regen4", .1, { tief: 1200 }]],
       ev: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2], ["schluessel", [90, 200], .2, .6], ["leder", [40, 90], .2, .4], ["grollen", [150, 300], .15, 1]] },
     tempel: { raum: .9, betten: [["a_wind1", .35, { tief: 500 }], ["a_wind2", .2, { tief: 300 }], ["a_feuer3", .3, { tief: 2000 }], ["a_gesang", .2, { tief: 3000 }], ["a_halle", .22, { tief: 1800 }], ["l_windspiel", .15, { tief: 3500 }], ["a_rinnsal", .1, { tief: 1500 }]],
-      ev: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5], ["tor", [120, 260], .22, 1], ["leder", [50, 110], .2, .6]] },
+      ev: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["steinschritte", [30, 70], .22, .7], ["tor", [120, 260], .22, 1]] },
     sumpf: { raum: .35, betten: [["a_blubbern", .4], ["a_grillen", .4], ["a_nacht", .4], ["a_tropfen2", .3], ["a_dschungel", .22], ["a_rinnsal", .2], ["a_wind3", .1, { tief: 600 }]],
       ev: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1], ["kraehe", [40, 100], .22, .9], ["troll", [90, 200], .2, 1], ["nass", [40, 90], .25, .7]] },
     unterwasser: { raum: .6, betten: [["a_unterwasser", 1], ["a_blubbern", .3, { tief: 1500 }], ["a_wildwasser", .12, { tief: 300 }], ["l_wal", .12, { tief: 1500 }], ["a_wellen1", .15, { tief: 300 }]],
@@ -1657,7 +1659,7 @@
       ev: [["moewe", [8, 20], .35, .5], ["glocke", [50, 120], .25, .7], ["knarren", [12, 30], .3, .4], ["kette", [30, 70], .3, .5], ["rumpf", [25, 60], .3, .5], ["ruder", [40, 90], .3, .6], ["zimmern", [50, 110], .22, 1], ["muenzen", [60, 140], .22, .5]] },
     gebirge: { raum: .6, betten: [["a_schneesturm", .7], ["a_wind3", .5], ["a_heulwind", .3], ["a_schneeschritte", .18, { tief: 3000 }], ["a_wind2", .2, { tief: 900 }], ["a_orkan", .2, { tief: 1500 }]],
       ev: [["windstoss", [15, 40], .35, .4], ["schnee", [30, 70], .3, .5], ["wolf", [70, 160], .3, 1], ["kraehe", [60, 140], .22, 1], ["steinschlag", [50, 120], .3, 1], ["heulen", [90, 200], .28, 1], ["kettenhemd", [40, 90], .2, .3]] },
-    mine: { raum: .8, betten: [["a_tropfen2", .5], ["a_wind1", .25, { tief: 400 }], ["a_feuer3", .3, { tief: 1500 }], ["a_rinnsal", .15, { tief: 900 }], ["a_tropfen3", .25, { schleife: true }], ["a_wind3", .1, { tief: 250 }], ["a_gaeste", .05, { tief: 600 }]],
+    mine: { raum: .8, betten: [["a_tropfen2", .5], ["a_wind1", .25, { tief: 400 }], ["a_feuer3", .3, { tief: 1500 }], ["a_rinnsal", .15, { tief: 900 }], ["a_tropfen1", .6], ["a_wind3", .1, { tief: 250 }], ["a_gaeste", .05, { tief: 600 }]],
       ev: [["hacke", [5, 14], .4, .6], ["erz", [12, 30], .35, .6], ["hammer", [30, 70], .3, .8], ["kette", [30, 70], .3, .6], ["steinschlag", [40, 90], .3, .8], ["blasebalg", [50, 120], .22, 1], ["zischen", [60, 140], .2, 1], ["kies", [40, 90], .25, .6]] },
     strasse: { raum: .3, betten: [["a_tagvoegel", .6], ["a_kiesweg", .25], ["a_wind1", .3, { tief: 2000 }], ["a_baumwind", .25], ["a_bienen", .06, { tief: 3000 }], ["a_rinnsal", .1, { tief: 2000 }]],
       ev: [["hufe", [10, 25], .35, .2], ["ross", [30, 70], .3, .3], ["leder", [20, 45], .25, .2], ["kettenhemd", [30, 70], .25, .2], ["vogel", [10, 25], .3, .6], ["kraehe", [50, 120], .22, .9], ["knarren", [25, 60], .25, .3], ["galopp", [120, 260], .25, 1]] },
@@ -2741,7 +2743,7 @@
       else if (dr) probe("timp1", 0, zeit, brueckeZiel(), .4);
     }
     setTimeout(() => {
-      merken(); zeichnen(); knoepfe();
+      merken(); if (S.pult) { zeichnen(); knoepfe(); } else autoZeichnen();
       bordunAus(); if (S.bordun) setTimeout(bordunAn, 450);
       kulisseStart();
     }, Math.max(0, (zeit - ctx.currentTime) * 1000)); /* Anzeige wechselt erst, wenn das neue Stück wirklich erklingt */
@@ -2839,7 +2841,7 @@
       if (neuBes) { try { saitenVorbereiten(); } catch (_) {} }
     }
     orchVorladen();
-    merken(); if (!S.pult) { zeichnen(); knoepfe(); }
+    merken(); if (!S.pult) autoZeichnen();
   }
   /* Ausklang: am Taktende ein gemeinsamer Schlussakkord, dann verklingt alles und die Band hört auf */
   function schlussAkkord(z) {
@@ -2870,7 +2872,7 @@
   function start(weiter) {
     audioStart();
     saitenVorbereiten();
-    if (!weiter) { schritt = 0; abschnitt = 0; }
+    if (!weiter || !pausiert || schritt >= taktL() || abschnitt >= S.ablauf.length) { schritt = 0; abschnitt = 0; }
     tempoJetzt = S.tempo; wechsel = null; wechselAb = 0; ausklangAb = 0; ausklingt = false; padAkkord = -1; ausduennen = false; einblend = 0;
     if (klassikLauf) klassikStopp(true, true);
     clearTimeout(fortsetzTimer); musikPauseAb = 0;
@@ -3092,15 +3094,15 @@
     if (pr.glanz && schritt === 0 && Math.random() < .35) oprobe("gloeckchen", 0, zeit, orchPan.vln, .18);
     /* große Momente: Takt vor dem Höhepunkt Wirbel und Schwellen, auf der Eins des Höhepunkts der Schlag */
     if (pr.gross && schritt === 0 && durchgang % (pr.gross > 1 ? 2 : 3) === 0) {
-      const L = S.ablauf.length, vorher = (c - 1 + L) % L;
-      if (ab === vorher && L > 1) {
+      const L = S.ablauf.length, vorher = (c - 1 + L) % L, hochAnfang = S.rollen ? istHoch(ab) && abschnittAnfang(ab) : ab === c;
+      if ((S.rollen ? !istHoch(ab) && istHoch((ab + 1) % L) : ab === vorher) && L > 1) {
         oprobe("timproll", 0, zeit, orchPan.gross, pr.gross > 1 ? .5 : .3, { ein: .4, dauer: bar, aus: .1 });
         const sw = sampleBuf.get("swell");
         if (pr.gong) oprobe("bogen", 0, zeit, orchPan.gross, .22, { ein: .6, dauer: bar + .05, aus: .05 });
         if (sw && pr.gross > 1) { const v = Math.max(0, sw._spitze - sw._start - bar); oprobe("swell", 0, zeit, orchPan.gross, .32, { ein: .05, dauer: bar + .05, aus: .05, versatz: v }); }
         else if (!sw) sampleLaden("swell");
       }
-      if (ab === c && L > 1) {
+      if (hochAnfang && L > 1) {
         if (pr.gross > 1) { oprobe("crash", 0, zeit, orchPan.gross, .38); oprobe("bd", 0, zeit, orchPan.gross, .55); }
         oprobe("timp1", 0, zeit, orchPan.gross, pr.gross > 1 ? .55 : .35);
         if (pr.gong) oprobe("gong", 0, zeit, orchPan.gross, .32);
@@ -4848,7 +4850,7 @@
       "</div>";
     document.body.appendChild(leiste);
     leiste.addEventListener("click", e => {
-      if (e.target.closest(".ll-play")) { audioStart(); laeuft ? stopp(true) : start(true); try { zeichnen(); knoepfe(); } catch (_) {} }
+      if (e.target.closest(".ll-play")) { audioStart(); laeuft ? stopp(true) : start(true); try { knoepfe(); } catch (_) {} }
       else if (e.target.closest(".ll-aus")) { const b = root.querySelector(".lw-ausklang"); if (b) b.click(); }
       else if (e.target.closest(".ll-minus")) intensitaetSetzen(S.intensitaet - 1);
       else if (e.target.closest(".ll-plus")) intensitaetSetzen(S.intensitaet + 1);
@@ -4859,7 +4861,11 @@
         else { if (S.kulisse === "keine" && kulMerk) S.kulisse = kulMerk; if (S.kulisse !== "keine") { merken(); kulisseStart(true); } }
         try { zeichnen(); knoepfe(); } catch (_) {}
       }
-      else if (e.target.closest(".ll-hin")) { leisteAuf = false; root.scrollIntoView({ block: "start", behavior: "smooth" }); }
+      else if (e.target.closest(".ll-hin")) {
+        leisteAuf = false;
+        if (!root.offsetParent && window.ImresAnsicht) { try { window.ImresAnsicht.merkeScroll(); history.pushState(null, "", "#lautenwerk"); window.ImresAnsicht.zeige(root); } catch (_) {} }
+        requestAnimationFrame(() => root.scrollIntoView({ block: "start", behavior: "smooth" }));
+      }
       leisteAktualisieren();
     });
     leiste.addEventListener("input", e => {
@@ -4885,7 +4891,7 @@
       const steuer = root.querySelector(S.pult ? ".lw-pult-kopf" : ".lw-steuer");
       if (imBild) {
         if (steuer) { const k = steuer.getBoundingClientRect(); zeigen = (k.bottom < 0 || k.top > vh) && r.bottom > 140; }
-      } else zeigen = laeuft || pausiert || !!kul || !!ctx;
+      } else zeigen = laeuft || pausiert || !!kul;
     }
     const vorher = !leiste.hidden;
     leiste.hidden = !zeigen;
@@ -5205,7 +5211,7 @@
     ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester", "gaeste"].forEach(k => { d[k] = S[k]; });
     d.stimmung = null; d.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
     if (laeuft) { wechsel = d; const a = S; S = d; try { saitenVorbereiten(); } catch (_) {} S = a; status(t().wechselGleich(l.name)); boxNeu("musik"); return; }
-    S = d; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
+    S = d; pausiert = false; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
   }
   function pultZeichnen(T) {
     root.innerHTML =
@@ -5387,7 +5393,18 @@
     if (st === "fehler" && hoerer.verbunden) { hoerer.verbunden = false; zeichnen(); }
   });
 
-  function zeichnen() { root.classList.toggle("lw-pultmodus", !!S.pult && !hoerer); zeichnenInnen(); armeSetzen(); klassikKnoepfe(); }
+  function zeichnen() {
+    /* das Feld, das man gerade bedient hat, verliert den Fokus, bevor es ersetzt wird – sonst bleibt am Handy
+       der Zustand „Tastatur offen“ hängen und die Navigationsleiste der Seite taucht später unter dem Finger auf */
+    const f = document.activeElement; if (f && f !== document.body && root.contains(f) && f.blur) { try { f.blur(); } catch (_) {} }
+    zeichnenSpaeter = false;
+    root.classList.toggle("lw-pultmodus", !!S.pult && !hoerer); zeichnenInnen(); armeSetzen(); klassikKnoepfe();
+  }
+  /* von der Musik ausgelöstes Neuzeichnen (neues Thema, Wechsel): nicht mitten in eine offene Auswahl oder ein Eingabefeld hinein */
+  let zeichnenSpaeter = false;
+  const feldOffen = () => { const f = document.activeElement; return !!f && root.contains(f) && (f.tagName === "SELECT" || (f.tagName === "INPUT" && f.type === "text")); };
+  function autoZeichnen() { if (feldOffen()) { zeichnenSpaeter = true; return; } zeichnen(); knoepfe(); }
+  root.addEventListener("focusout", () => setTimeout(() => { if (zeichnenSpaeter && !feldOffen()) { zeichnen(); knoepfe(); } }, 60));
   /* Handy gedreht oder Fenster schmaler/breiter: Raster und Aufteilung passen sich an */
   try {
     const mq = window.matchMedia("(max-width: 760px)"), neu = () => { try { zeichnen(); knoepfe(); } catch (_) {} };
@@ -5397,6 +5414,7 @@
     const T = t();
     if (hoerer) { hoererZeichnen(T); return; }
     if (S.pult) { pultZeichnen(T); return; }
+    if (!(editModus === "lied" ? TEILE : PATTERN).includes(bearbeite)) { bearbeite = "A"; kopierZiel = null; }
     const tonarten = Array.from({ length: 12 }, (_, i) => i - 5).map(tr => '<option value="' + tr + '"' + (tr === S.transpose ? " selected" : "") + ">" + notenName(MEL_GRUND + tr) + "</option>").join("");
     const modi = MODUS_LISTE.map(m => '<option value="' + m + '"' + (m === S.modus ? " selected" : "") + ">" + T.modi[m] + "</option>").join("");
     const wahl = k => k === "melodie" ? { liste: INSTRUMENTE, wert: S.instrument, namen: T.instrumente }
@@ -5459,7 +5477,7 @@
   const zeilenZahl = sp => sp.id === "melodie" && editModus === "pattern" && !PATTERN.some(p => S.teile[p].melodie.some(v => v > 7)) ? 8 : sp.zeilen;
   function zuPattern() {
     const nimm = r => { for (let i = 0; i < S.ablauf.length; i++) if (rolleAn(i) === r) return S.ablauf[i]; return null; };
-    const quelle = { A: nimm("s") || S.ablauf[0], B: nimm("r") || nimm("h"), C: nimm("b"), D: nimm("h") || nimm("r") };
+    const a0 = nimm("s") || S.ablauf[0], quelle = { A: a0, B: nimm("r") || nimm("h") || a0, C: nimm("b"), D: nimm("h") || nimm("r") || a0 };
     const neu = Object.fromEntries(TEILE.map(p => [p, teilLeer()]));
     PATTERN.forEach(p => { if (quelle[p]) neu[p] = kopie(S.teile[quelle[p]]); });
     const mel = PATTERN.flatMap(p => neu[p].melodie.filter(v => v >= 0));
@@ -5511,8 +5529,8 @@
      und immer nur ein Gefährte – oben wählt man, wessen Spuren man sieht. */
   const schmal = () => !!(window.matchMedia && window.matchMedia("(max-width: 760px)").matches);
   let rasterHaelfte = 0, spurWahl = "barradin";
-  try { const w = localStorage.getItem("imres-lw-spurwahl"); if (w) spurWahl = w; } catch (_) {}
   const WER_LISTE = ["barradin", "friedrich", "echo", "ezekiel", "rex"];
+  try { const w = localStorage.getItem("imres-lw-spurwahl"); if (w === "alle" || WER_LISTE.includes(w)) spurWahl = w; } catch (_) {}
   function rasterFenster() { const L = taktL(); if (!schmal()) return [0, L]; const h = L / 2; return [rasterHaelfte * h, rasterHaelfte * h + h]; }
   function rasterWahl(T) {
     if (!schmal()) return "";
@@ -5612,6 +5630,11 @@
   }
 
   /* ---------- Bedienung ---------- */
+  function stimmungLoesen() {
+    if (!S.stimmung) return;
+    S.stimmung = null; const w = root.querySelector(".lw-wandelt"); if (w) w.remove();
+    root.querySelectorAll(".lw-musik [data-vorlage]").forEach(b => b.classList.remove("an"));
+  }
   function antippen(z) {
     const spur = z.dataset.spur, i = +z.dataset.s, zeile = +z.dataset.zeile, daten = S.teile[bearbeite][spur];
     if (S.stimmung) { S.stimmung = null; const w = root.querySelector(".lw-wandelt"); if (w) w.remove(); root.querySelectorAll(".lw-musik [data-vorlage]").forEach(b => b.classList.remove("an")); }
@@ -5673,7 +5696,7 @@
       return;
     }
     const raumAlt = S.raum;
-    S = neu;
+    S = neu; if (!laeuft) pausiert = false;
     merken(); neuGezeichnet(); saitenVorbereiten();
     if (ctx) { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); }
   }
@@ -5865,6 +5888,7 @@
     if (f === "intensitaet" && S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetNeu = true; else stimmungWeiter(); }
     if (f === "transpose") { S.transpose = +e.target.value; merken(); zeichnen(); knoepfe(); bordunStimmen(); saitenVorbereiten(); }
     if (f === "modus") { S.modus = e.target.value; merken(); zeichnen(); knoepfe(); saitenVorbereiten(); }
+    if (f === "ablauf" || f === "rolle" || (f === "kopiere" && e.target.value)) stimmungLoesen();
     if (f === "ablauf") { const v = String(e.target.value).toUpperCase().replace(/[^A-P]/g, "").slice(0, 64) || "A"; S.ablauf = v; e.target.value = v; merken(); zeichnen(); knoepfe(); }
     if (f === "rolle") { const i = TEILE.indexOf(bearbeite), r = S.rollen || rollenStandard(); S.rollen = r.slice(0, i) + e.target.value + r.slice(i + 1); merken(); zeichnen(); knoepfe(); }
     if (f === "kopiere" && e.target.value) {
@@ -6230,6 +6254,11 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 .lw-liedname { font: inherit; font-size: .85rem; background: var(--night); color: var(--vellum); border: 1px solid var(--ember); padding: .25rem .45rem; width: 12rem; }
 .lw-tipp { flex-basis: 100%; margin: .2rem 0 0; font-size: .8rem; font-style: italic; color: var(--ash); }
 
+/* seitliches Wischen auf der Bühne darf nie zur Zurück-Geste des Browsers werden (die springt sonst auf die Startseite) */
+.lw-scroll, .lw-tabs { overscroll-behavior-x: contain; }
+html:has(#buehne.aktiv), html:has(#buehne.aktiv) body { overscroll-behavior-x: none; }
+html.hl-tastatur .lw-leiste { bottom: max(.6rem, env(safe-area-inset-bottom)); }
+#lautenwerk { touch-action: manipulation; }
 .lw-scroll { overflow-x: auto; margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); padding-inline: clamp(1.2rem, 4vw, 2rem); -webkit-overflow-scrolling: touch; }
 .lw-raster { display: grid; grid-template-columns: 3.4rem repeat(16, minmax(1.75rem, 1fr)); gap: 3px; min-width: 36rem; }
 .lw-raster.drei { grid-template-columns: 3.4rem repeat(12, minmax(1.75rem, 1fr)); min-width: 28rem; }
@@ -6238,7 +6267,7 @@ body.lw-nur-zuhoeren #buehne .part-head, body.lw-nur-zuhoeren #buehne .bereich-w
 .lw-raster.halb .lw-zelle { height: 2.6rem; border-radius: 6px; }
 .lw-raster.halb ~ .lw-wisch, .lw-scroll:has(.lw-raster.halb) + .lw-wisch { display: none !important; }
 .lw-rasterwahl { display: grid; gap: .5rem; margin: .4rem 0 .6rem; }
-.lw-wer { display: flex; gap: .3rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.lw-wer { display: flex; flex-wrap: wrap; gap: .3rem; }
 .lw-wer::-webkit-scrollbar { display: none; }
 .lw-wer button, .lw-haelfte button { flex: 0 0 auto; font: inherit; font-size: .88rem; padding: .5rem .8rem; border: 1px solid var(--line); background: none; color: var(--vellum); border-radius: 999px; cursor: pointer; }
 .lw-wer button[aria-selected="true"], .lw-haelfte button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }

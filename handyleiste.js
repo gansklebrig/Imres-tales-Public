@@ -105,8 +105,11 @@
   document.addEventListener("focusout", () => {
     clearTimeout(tastaturTimer);
     /* kurz warten: springt der Fokus nur ins nächste Feld, bleibt die Leiste weg */
-    tastaturTimer = setTimeout(() => { if (!tippFeld(document.activeElement)) document.documentElement.classList.remove("hl-tastatur"); }, 150);
+    tastaturTimer = setTimeout(() => { if (!tippFeld(document.activeElement) && document.documentElement.classList.contains("hl-tastatur")) { document.documentElement.classList.remove("hl-tastatur"); wiederDa = Date.now(); } }, 150);
   });
+  /* taucht die Leiste wieder auf, während man gerade tippt, landet der Finger sonst unversehens auf „Start“ – kurz nicht reagieren */
+  let wiederDa = 0;
+  leiste.addEventListener("click", e => { if (Date.now() - wiederDa < 500) { e.preventDefault(); e.stopPropagation(); } }, true);
   blatt.addEventListener("click", e => {
     if (e.target.closest(".hl-zu")) { blattZu(); return; }
     if (e.target.closest("a")) { blattZu(); return; }

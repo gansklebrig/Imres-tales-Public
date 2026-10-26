@@ -283,10 +283,10 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 
   /* ---------- Klangquellen ----------
      a_* = lange Aufnahmen (Teppiche), e_* = einzelne Ereignisse, fx_* = Effekt-Aufnahmen des Lautenwerks, @name = gerechnet (klangwerk.js) */
-  const LAUTHEIT = {"a_feuer1":.0315,"a_feuer2":.0164,"a_feuer3":.0183,"a_grillen":.129,"a_nacht":.144,"a_voegel1":.0601,"a_voegel2":.0565,"a_laub":.0853,"a_bach1":.0405,"a_bach2":.0505,
+  const LAUTHEIT = {"a_feuer1":.0281,"a_feuer2":.0108,"a_feuer3":.0158,"a_grillen":.129,"a_nacht":.144,"a_voegel1":.0601,"a_voegel2":.0565,"a_laub":.0853,"a_bach1":.0405,"a_bach2":.0505,
     "a_wasserfall":.1828,"a_wind1":.0818,"a_wind2":.0963,"a_regen1":.0387,"a_regen2":.0462,"a_waldregen":.0248,"a_starkregen":.043,"a_zelt":.0196,"a_gewitter1":.0441,"a_gewitter2":.0412,
     "a_wellen1":.0623,"a_wellen2":.0559,"a_boot":.0343,"a_tropfen1":.0089,"a_tropfen2":.0249,"a_unterwasser":.1387,"a_kochen":.0825,"a_blubbern":.0647,"@gemurmel":.16,
-    "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0243, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfen3":.0474, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459,
+    "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0148, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfen3":.0474, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459,
     "a_hof":.0499, "a_hafen":.0499, "a_markt":.0499, "a_tagvoegel":.0498, "a_rinnsal":.0496, "a_strom":.0485, "a_wildwasser":.0495, "a_brandung":.05, "a_klippen":.05, "a_regen3":.0499, "a_regen4":.0499, "a_schneesturm":.05, "a_wind3":.0444, "a_orkan":.05, "a_huehner":.05, "a_kuehe":.0491, "a_schafe":.0497, "a_schnurren":.0499, "a_schneeschritte":.0457, "a_kiesweg":.0255, "l_windspiel":.0274, "l_wal":.1221};
   const reihe = (p, n) => Array.from({ length: n }, (_, i) => p + (i + 1));
   const EV = {
@@ -323,6 +323,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     schatten: { f: reihe("g_schatten_", 5), tempo: [.8, 1] }, troll: { f: reihe("g_troll_", 10), tempo: [.75, .9] }, schluessel: { f: reihe("g_schluessel_", 5) }, schloss: { f: reihe("g_schloss_", 7) },
     nass: { f: reihe("g_nass_", 3), folge: [3, 6, .5, .65] }, gras: { f: reihe("g_gras_", 5), folge: [3, 7, .5, .62] }, holzbruch: { f: reihe("g_holzbruch_", 7), tempo: [.85, 1] }, glasbruch: { f: reihe("g_glasbruch_", 4) },
     edelstein: { f: reihe("g_edelstein_", 3) }, leder: { f: reihe("g_leder_", 6) }, kettenhemd: { f: reihe("g_kettenhemd_", 5) }, zauber: { f: reihe("g_zauber_", 4), tempo: [.8, 1] },
+    steinschritte: { f: reihe("g_stein_", 5), folge: [3, 6, .5, .62] },
     uebung: { f: reihe("g_metallhieb_", 7).concat(reihe("g_schild_", 5)), folge: [2, 5, .45, .9] }
   };
   /* ---------- Die Klangwelten ----------
@@ -351,7 +352,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       betten: [["a_tropfen1", .7, W("Tropfen", "Drips")], ["a_unterwasser", .35, W("Tiefe", "Depths"), { tief: 500 }], ["a_bach2", .18, W("Ferner Fluss", "Distant river"), { tief: 600 }], ["a_tropfen3", .3, W("Tropfsteine", "Dripstones"), { schleife: true }], ["a_heulwind", .14, W("Ferner Wind", "Distant wind"), { tief: 300 }], ["a_wildwasser", .1, W("Unterirdischer Strom", "Underground torrent"), { tief: 400 }], ["a_wind3", .12, W("Schlundwind", "Chasm wind"), { tief: 250 }]],
       ereignisse: [["monster", [30, 75], .3, 1], ["schleim", [20, 50], .3, .6], ["stein", [25, 60], .3, .7], ["stoehnen", [60, 140], .2, 1], ["kette", [70, 150], .2, 1], ["schatten", [40, 100], .25, .8], ["troll", [70, 160], .25, 1], ["hacke", [50, 120], .22, 1], ["steinschlag", [40, 90], .25, .9], ["erz", [90, 200], .2, 1]] },
     { id: "kerker", sym: "⛓", name: W("Kerker", "Dungeon"), text: W("Klirrende Ketten, ferne Klagen, Zugluft, schwere Riegel, ein Wachhund", "Rattling chains, distant moans, draughts, heavy bolts, a guard dog"), raum: 2.5,
-      betten: [["a_tropfen2", .6, W("Tropfen", "Drips")], ["a_wind1", .25, W("Luftzug", "Draught"), { tief: 450 }], ["a_tropfen3", .35, W("Pfützen", "Puddles"), { schleife: true }], ["a_heulwind", .14, W("Zugluft", "Cold draught"), { tief: 500 }], ["a_wind3", .12, W("Kalter Luftzug", "Cold draught"), { tief: 350 }], ["a_regen4", .08, W("Regen über dem Gitter", "Rain above the grate"), { tief: 500 }]],
+      betten: [["a_tropfen2", .6, W("Tropfen", "Drips")], ["a_wind1", .25, W("Luftzug", "Draught"), { tief: 450 }], ["a_tropfen1", .75, W("Pfützen", "Puddles")], ["a_heulwind", .14, W("Zugluft", "Cold draught"), { tief: 500 }], ["a_wind3", .12, W("Kalter Luftzug", "Cold draught"), { tief: 350 }], ["a_regen4", .08, W("Regen über dem Gitter", "Rain above the grate"), { tief: 500 }]],
       ereignisse: [["kette", [10, 25], .4, .5], ["stoehnen", [25, 60], .3, .8], ["riegel", [35, 80], .35, .6], ["kies", [30, 70], .3, .7], ["tuer", [70, 150], .25, .8], ["hund", [80, 180], .22, 1], ["schluessel", [40, 90], .3, .6], ["schloss", [60, 130], .3, .7], ["nass", [60, 120], .25, .8], ["tor", [100, 220], .25, 1]] },
     { id: "kueste", sym: "🌊", name: W("Küste", "Coast"), text: W("Brandung, Uferwellen, Wind und Möwen", "Surf, lapping waves, wind and gulls"), raum: 1,
       betten: [["a_wellen1", 1, W("Brandung", "Surf")], ["a_wellen2", .55, W("Wellen", "Waves")], ["a_wind2", .3, W("Wind", "Wind")], ["a_wellen3", .55, W("Uferwellen", "Lapping waves")], ["a_brandung", .55, W("Brecher", "Breakers")], ["a_klippen", .35, W("Klippen", "Cliffs")], ["a_wind3", .18, W("Küstenwind", "Coastal wind")]],
@@ -373,7 +374,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       ereignisse: [["buch", [8, 20], .35, .3], ["papier", [12, 30], .3, .3], ["knarren", [25, 60], .25, .6], ["holzschritte", [30, 70], .25, .7], ["katze", [50, 120], .28, .2], ["schluessel", [90, 200], .2, .6], ["leder", [40, 90], .2, .4], ["grollen", [150, 300], .15, 1]] },
     { id: "tempel", sym: "⛪", name: W("Tempel", "Temple"), text: W("Weite Halle, Mönchsgesang, Klangschale, Glocken und Gong", "Vast hall, chanting monks, singing bowl, bells and gong"), raum: 5,
       betten: [["a_wind1", .35, W("Luftzug", "Draught"), { tief: 500 }], ["a_wind2", .2, W("Weite", "Vastness"), { tief: 300 }], ["a_feuer3", .3, W("Kerzen", "Candles"), { tief: 2000 }], ["a_gesang", .2, W("Mönchsgesang", "Chanting"), { tief: 3000 }], ["a_halle", .22, W("Halle", "Hall"), { tief: 1800 }], ["l_windspiel", .15, W("Windspiel", "Wind chimes"), { tief: 3500 }], ["a_rinnsal", .1, W("Brunnen", "Fountain"), { tief: 1500 }]],
-      ereignisse: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["kies", [25, 60], .3, .6], ["tuch", [30, 70], .25, .5], ["tor", [120, 260], .22, 1], ["leder", [50, 110], .2, .6]] },
+      ereignisse: [["klangschale", [25, 50], .04, 0], ["chor", [14, 34], .3, .7], ["glocke", [20, 50], .4, .5], ["gong", [50, 120], .35, .5], ["steinschritte", [30, 70], .22, .7], ["tor", [120, 260], .22, 1]] },
     { id: "sumpf", sym: "🐸", name: W("Sumpf", "Swamp"), text: W("Blubbernder Morast, quakende Frösche, sirrende Insekten, Krähen im Nebel", "Bubbling mire, croaking frogs, whirring insects, crows in the mist"), raum: 1.2,
       betten: [["a_blubbern", .4, W("Morast", "Mire")], ["a_grillen", .4, W("Grillen", "Crickets")], ["a_nacht", .4, W("Nacht", "Night")], ["a_tropfen2", .3, W("Tropfen", "Drips")], ["a_dschungel", .22, W("Insektenchor", "Insect chorus")], ["a_rinnsal", .2, W("Rinnsal", "Trickle")], ["a_wind3", .1, W("Nebelwind", "Misty wind"), { tief: 600 }]],
       ereignisse: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1], ["kraehe", [40, 100], .22, .9], ["troll", [90, 200], .2, 1], ["nass", [40, 90], .25, .7]] },
@@ -393,7 +394,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       betten: [["a_schneesturm", .7, W("Schneetreiben", "Drifting snow")], ["a_wind3", .5, W("Höhenwind", "Mountain wind")], ["a_heulwind", .3, W("Heulende Böen", "Howling gusts")], ["a_schneeschritte", .18, W("Stapfen im Schnee", "Trudging through snow"), { tief: 3000 }], ["a_wind2", .2, W("Grat", "Ridge"), { tief: 900 }], ["a_orkan", .2, W("Sturm am Gipfel", "Gale at the summit"), { tief: 1500 }]],
       ereignisse: [["windstoss", [15, 40], .35, .4], ["schnee", [30, 70], .3, .5], ["wolf", [70, 160], .3, 1], ["kraehe", [60, 140], .22, 1], ["steinschlag", [50, 120], .3, 1], ["heulen", [90, 200], .28, 1], ["kettenhemd", [40, 90], .2, .3]] },
     { id: "mine", sym: "⛏", name: W("Zwergenmine", "Dwarven mine"), text: W("Spitzhacken im Fels, klingendes Erz, ferne Essen, Ketten, Tropfen und rieselndes Gestein", "Pickaxes on rock, ringing ore, distant forges, chains, drips and trickling stone"), raum: 2.4,
-      betten: [["a_tropfen2", .5, W("Tropfen", "Drips")], ["a_wind1", .25, W("Stollenwind", "Tunnel draught"), { tief: 400 }], ["a_feuer3", .3, W("Ferne Essen", "Distant forges"), { tief: 1500 }], ["a_rinnsal", .15, W("Grubenwasser", "Mine water"), { tief: 900 }], ["a_tropfen3", .25, W("Pfützen", "Puddles"), { schleife: true }], ["a_wind3", .1, W("Schacht", "Shaft"), { tief: 250 }], ["a_gaeste", .05, W("Ferne Zwergenstimmen", "Distant dwarven voices"), { tief: 600 }]],
+      betten: [["a_tropfen2", .5, W("Tropfen", "Drips")], ["a_wind1", .25, W("Stollenwind", "Tunnel draught"), { tief: 400 }], ["a_feuer3", .3, W("Ferne Essen", "Distant forges"), { tief: 1500 }], ["a_rinnsal", .15, W("Grubenwasser", "Mine water"), { tief: 900 }], ["a_tropfen1", .6, W("Pfützen", "Puddles")], ["a_wind3", .1, W("Schacht", "Shaft"), { tief: 250 }], ["a_gaeste", .05, W("Ferne Zwergenstimmen", "Distant dwarven voices"), { tief: 600 }]],
       ereignisse: [["hacke", [5, 14], .4, .6], ["erz", [12, 30], .35, .6], ["hammer", [30, 70], .3, .8], ["kette", [30, 70], .3, .6], ["steinschlag", [40, 90], .3, .8], ["blasebalg", [50, 120], .22, 1], ["zischen", [60, 140], .2, 1], ["kies", [40, 90], .25, .6]] },
     { id: "strasse", sym: "🐴", name: W("Unterwegs", "On the road"), text: W("Hufschlag, knirschender Kies, Lederzeug und Kettenhemd, Vögel am Wegesrand", "Hoofbeats, crunching gravel, leather and chainmail, birds by the wayside"), raum: .9,
       betten: [["a_tagvoegel", .6, W("Vögel am Weg", "Wayside birds")], ["a_kiesweg", .25, W("Kiesweg", "Gravel road")], ["a_wind1", .3, W("Wind", "Wind"), { tief: 2000 }], ["a_baumwind", .25, W("Bäume", "Trees")], ["a_bienen", .06, W("Bienen", "Bees"), { tief: 3000 }], ["a_rinnsal", .1, W("Graben", "Ditch"), { tief: 2000 }]],
@@ -419,7 +420,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     t_stoehnen: { f: reihe("e_stoehnen_", 4), tempo: [.5, .65] }, t_platsch: { f: reihe("e_platsch_", 4), tempo: [.4, .55] }, t_wal: { f: reihe("e_wal_", 3), tempo: [.45, .6] },
     t_atem: { f: ["fx_cr2_snore_02", "fx_cr_snore"], tempo: [.36, .44] }, t_muenzen: { f: ["fx_ka_handlecoins", "fx_ka_handlecoins2", "fx_rd_item_coins_04"], tempo: [.55, .75] },
     t_bruellen: { f: BRUELLEN, tempo: [.42, .55] }, t_kraehe: { f: reihe("e_kraehe_", 7), tempo: [.72, .88] }, t_metall: { f: reihe("e_metall_", 3).concat(["fx_rp_metal_ringing"]), tempo: [.5, .65] },
-    t_kies: { f: reihe("e_kies_", 2), tempo: [.65, .75], folge: [3, 6, .8, 1.05] }
+    /* Schritte in der Kathedrale: auf Stein statt Kies – Kies klang tief gestimmt wie Kratzen */
+    t_kies: { f: reihe("g_stein_", 5), tempo: [.7, .8], folge: [3, 6, .8, 1.05] }
   });
   /* betten: [Quelle, Stärke, Name, { rate: Tonhöhe, tief: Tiefpass, ton: Instrumententöne für einen schwebenden Grund }] */
   WELTEN.push(
@@ -631,7 +633,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     } catch (_) {}
   }
   let bassSchutz = null;
-  const bassSchutzAn = () => merk.bass != null ? !!merk.bass : mobil;
+  /* standardmäßig nur auf echten Handys und Tablets an (nicht auf Laptops mit wenigen Prozessorkernen) */
+  const bassSchutzAn = () => merk.bass != null ? !!merk.bass : /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent || ""));
   function bassSchutzSetzen() { if (bassSchutz) bassSchutz.forEach(f => f.frequency.setTargetAtTime(bassSchutzAn() ? 180 : 12, ctx.currentTime, .05)); }
   const lautWert = () => Math.pow((merk.gesamt != null ? merk.gesamt : 70) / 100, 1.6) * .95;
   /* Raumhall: selbst erzeugter Nachhall, Länge je Klangwelt */
