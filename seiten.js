@@ -264,10 +264,14 @@
   const slug = x => String(x).toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   function zuletztGeschehen(k) {
     const abs = k.absaetze || [];
+    /* Wo ging die Geschichte zuletzt weiter? „neuAb“ im Kapitel nennt den ersten Abschnitt der neuesten Sitzung –
+       so landet man dort, wo es brandneu weitergeht, und nicht am Ende (kein Spoiler). Sonst: letzter Abschnitt. */
     let start = -1;
-    abs.forEach((p, i) => { if (p.indexOf("## ") === 0) start = i; });
+    if (k.neuAb) start = abs.findIndex(p => p.indexOf("## ") === 0 && p.slice(3).trim() === String(k.neuAb).trim());
+    if (start < 0) abs.forEach((p, i) => { if (p.indexOf("## ") === 0) start = i; });
     const titel = start > -1 ? abs[start].slice(3).trim() : "";
-    const teil = abs.slice(start + 1);
+    let ende = abs.findIndex((p, i) => i > start && p.indexOf("## ") === 0);
+    const teil = abs.slice(start + 1, ende < 0 ? abs.length : ende);
     const bildVon = p => p.slice(1).split("|")[0].trim();
     let bild = (teil.find(p => p.charAt(0) === "!") || "");
     if (!bild) for (let i = start; i >= 0; i--) if (abs[i].charAt(0) === "!") { bild = abs[i]; break; }

@@ -302,6 +302,7 @@ window.INHALT = {
         "Zum Abschluss überreichte er uns ein Abzeichen, als Zeichen, dass wir im Namen der Flamme handeln: eine faustgroße Goldmünze mit einem Drachenkopf darauf.",
         "<em class=\"aside\">Ein Drache, der seinem Priester nicht traut, ein Priester, der Diebe verdächtigt, und wir mittendrin. Ich spüre ein neues Lied.</em>"
       ],
+      neuAb: "Das Dorf der Riesen", /* erster Abschnitt der neuesten Sitzung – dorthin führt „Weiterlesen“ auf der Startseite */
       fortsetzung: "Fortsetzung folgt …"
     }
   ],

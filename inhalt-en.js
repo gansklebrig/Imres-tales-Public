@@ -295,6 +295,7 @@ window.INHALT_EN = {
         "Finally he handed us a badge, a sign that we act in the name of the Flame: a gold coin the size of a fist, with a dragon's head on it.",
         "<em class=\"aside\">A dragon who doesn't trust his priest, a priest who suspects thieves, and us right in the middle. I feel a new song coming.</em>"
       ],
+      neuAb: "The Village of the Giants", /* erster Abschnitt der neuesten Sitzung – dorthin führt „Weiterlesen“ auf der Startseite */
       fortsetzung: "To be continued …"
     }
   ],
