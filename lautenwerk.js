@@ -1209,6 +1209,7 @@
     if (typeof s.echoHall !== "number") s.echoHall = 3;
     if (s.orchester !== 0) s.orchester = 1;
     if (s.kapelle !== 0) s.kapelle = 1;
+    if (s.kapStufe !== 1) s.kapStufe = 2;
     s.kapWahl = Array.isArray(s.kapWahl) ? s.kapWahl.filter(Number.isInteger).slice(0, 4) : [];
     s.hallAus = Object.assign({ klopf: 0, schelle: 0, bass: 0, melodie: 0, trommel: 0, floete: 0, ketten: 0, rex: 0 }, s.hallAus || {});
     Object.keys(BAND).forEach(k => { if (!BAND[k].includes(s.band[k])) s.band[k] = BAND[k][0]; });
@@ -1237,7 +1238,7 @@
   try { eigeneStimmungen = JSON.parse(localStorage.getItem("imres-lw-stimmungen") || "{}") || {}; } catch (_) {}
   const stimmungenMerken = () => { try { localStorage.setItem("imres-lw-stimmungen", JSON.stringify(eigeneStimmungen)); } catch (_) {} };
   const STIMM_WERTE = () => ({ intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol, hall: S.hall, raum: S.raum, echoHall: S.echoHall,
-    orchester: S.orchester, instrument: S.instrument, band: Object.assign({}, S.band), gaeste: Object.assign({}, S.gaeste) });
+    orchester: S.orchester, kapelle: S.kapelle, kapStufe: S.kapStufe, instrument: S.instrument, band: Object.assign({}, S.band), gaeste: Object.assign({}, S.gaeste) });
   const stimmName = k => eigeneStimmungen[k] && eigeneStimmungen[k].name ? eigeneStimmungen[k].name : (t().vorlagen[k] || "").replace(/^[^\wÄÖÜäöü]+/, "");
   try { lokaleLieder = JSON.parse(localStorage.getItem("imres-lautenwerk-lieder") || "[]") || []; } catch (_) {}
   const lokalMerken = () => { try { localStorage.setItem("imres-lautenwerk-lieder", JSON.stringify(lokaleLieder)); } catch (_) {} };
@@ -4812,7 +4813,7 @@
   function kapSpieler() {
     const pool = S.stimmung && KAPELLE[S.stimmung];
     if (!pool || S.kapelle === 0 || !Array.isArray(S.kapWahl)) return [];
-    return S.kapWahl.filter(i => pool[i]).slice(0, leicht() ? 2 : 3).map((i, k) => {
+    return S.kapWahl.filter(i => pool[i]).slice(0, S.kapStufe === 1 ? 1 : leicht() ? 2 : 3).map((i, k) => {
       const [inst, weise, ab, lage, ab_int] = pool[i];
       return { inst, weise, ab, lage: lage || 0, min: ab_int == null ? 2 : ab_int, pan: [-.5, .5, 0][k % 3] };
     });
@@ -4950,6 +4951,45 @@
     });
   }
   function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
+  /* ---------- Mitspieler: Orchester, Kapelle und Gäste unter einem Dach ---------- */
+  Object.assign(TX.de, { mitspieler: "🎻 Mitspieler", msStufe: ["Band allein", "Ein paar", "Volle Big Band"], msEigen: "eigene Auswahl", msAuf: "Einzeln einstellen",
+    msOrch: "🎻 Geister-Orchester", msKap: "🎺 Kapelle", msGaeste: "🎭 Gäste", msNurBand: "Nur die Band spielt.", msGastPasst: "in passenden Stimmungen" });
+  Object.assign(TX.en, { mitspieler: "🎻 Players", msStufe: ["Band alone", "A few", "Full big band"], msEigen: "custom", msAuf: "Adjust one by one",
+    msOrch: "🎻 Ghost orchestra", msKap: "🎺 Street band", msGaeste: "🎭 Guests", msNurBand: "Only the band plays.", msGastPasst: "in fitting moods" });
+  let msAuf = false;
+  /* welche Stufe gerade gilt – oder -1, wenn einzeln umgestellt wurde */
+  function msStufe() {
+    const o = S.orchester !== 0, k = S.kapelle !== 0, g = gaesteAn();
+    if (!o && !k && !g) return 0;
+    if (o && k && g) return S.kapStufe === 1 ? 1 : 2;
+    return -1;
+  }
+  function msSetzen(n) {
+    S.orchester = n ? 1 : 0; S.kapelle = n ? 1 : 0; S.kapStufe = n === 1 ? 1 : 2;
+    S.gaeste = Object.assign({}, S.gaeste || {}, { _aus: n ? 0 : 1 });
+    merken();
+    if (ctx) { try { orchVorladen(); kapelleVorladen(); gaesteVorladen(); } catch (_) {} }
+  }
+  function mitspielerZeile(T) {
+    if (hoerer) return "";
+    const st = msStufe(), mitSt = !!(S.stimmung && KAPELLE[S.stimmung]);
+    const kap = mitSt && S.kapelle !== 0 ? kapSpieler().map(p => (KAP_FIG[p.inst] ? KAP_FIG[p.inst].name + " (" + T.kapName[p.inst] + ")" : T.kapName[p.inst])) : [];
+    const gaeste = gaesteAn() ? gastKandidaten().map(g => g.name) : [];
+    const wer = [S.orchester !== 0 && ORCH[S.stimmung] ? T.msOrch.replace(/^\S+\s/, "") : "", ...kap, ...gaeste].filter(Boolean);
+    const chip = (an, html, attr, tipp, extra) => '<button type="button" class="lw-gchip' + (an ? " ein" : "") + (extra || "") + '" ' + attr + ' aria-pressed="' + an + '"' + (tipp ? ' title="' + esc(tipp) + '"' : "") + ">" + html + "</button>";
+    return '<div class="lw-mitspieler' + (msAuf ? " auf" : "") + '"><div class="lw-ms-kopf"><span class="lw-ms-titel">' + T.mitspieler + " " + info("mitspieler") + "</span>" +
+      '<div class="lw-ms-stufen" role="group" aria-label="' + esc(T.mitspieler) + '">' + T.msStufe.map((n, i) => '<button type="button" data-mitspieler="' + i + '" aria-pressed="' + (st === i) + '">' + n + "</button>").join("") + "</div>" +
+      (kap.length ? '<button type="button" class="lw-klein" data-aktion="kapneu" title="' + esc(T.kapNeu) + '">🎲</button>' : "") +
+      '<button type="button" class="lw-gz-auf" data-aktion="msauf" aria-expanded="' + msAuf + '" title="' + esc(T.msAuf) + '">' + (msAuf ? "▴" : "▾") + "</button></div>" +
+      '<div class="lw-ms-wer">' + (st === -1 ? "<i>" + esc(T.msEigen) + "</i> · " : "") + esc(wer.length ? wer.join(" · ") : st === 0 ? T.msNurBand : "–") + "</div>" +
+      (msAuf ? '<div class="lw-ms-liste">' +
+        '<div class="lw-ms-gruppe">' + chip(S.orchester !== 0, T.msOrch, 'data-aktion="orchester"', T.orchTipp, " lw-orch") + "</div>" +
+        '<div class="lw-ms-gruppe">' + chip(S.kapelle !== 0, T.msKap, 'data-aktion="kapelle"', T.kapelleTipp) +
+          (mitSt && S.kapelle !== 0 ? '<span class="lw-kap-namen">' + esc(kap.join(" · ")) + "</span>" : "") + "</div>" +
+        '<div class="lw-ms-gruppe">' + chip(gaesteAn(), T.msGaeste, 'data-aktion="gaeste"', T.gaesteTipp) + '<span class="lw-ms-klein">' + esc(T.msGastPasst) + "</span>" +
+          '<div class="lw-gz-liste' + (gaesteAn() ? "" : " aus") + '">' + GAESTE.map(g => chip(gastStufe(g.id) > 0, g.sym + " " + g.name, 'data-gast="' + g.id + '"', T.gastInstr[g.id], (g.geist ? " geist" : "") + (gastDa[g.id] ? " spielt" : ""))).join("") + "</div></div>" +
+        "</div>" : "") + "</div>";
+  }
   function kapelleZeile(T) {
     if (hoerer || !S.stimmung || !KAPELLE[S.stimmung]) return "";
     const an = S.kapelle !== 0, namen = kapSpieler().map(p => T.kapName[p.inst]).join(" · ");
@@ -5288,10 +5328,13 @@
       (gaesteAuf ? '<div class="lw-gz-liste' + (an ? "" : " aus") + '">' + GAESTE.map(g => { const ein = gastStufe(g.id) > 0;
         return '<button type="button" class="lw-gchip' + (ein ? " ein" : "") + (g.geist ? " geist" : "") + (gastDa[g.id] ? " spielt" : "") + '" data-gast="' + g.id + '" aria-pressed="' + ein + '" title="' + esc(T.gastInstr[g.id]) + '">' + g.sym + " " + g.name + "</button>"; }).join("") + "</div>" : "") + "</div>";
   }
-  function gaesteNeu() { const z = root.querySelector(".lw-gaeste-zeile"); if (z) z.outerHTML = gaesteZeile(t()); }
+  function gaesteNeu() { const z = root.querySelector(".lw-mitspieler"); if (z) z.outerHTML = mitspielerZeile(t()); }
   root.addEventListener("click", e => {
     if (e.target.closest('[data-aktion="gaeste"]')) { e.stopPropagation(); S.gaeste = Object.assign({}, S.gaeste || {}, { _aus: gaesteAn() ? 1 : 0 }); merken(); gaesteVorladen(); gaesteNeu(); return; }
     if (e.target.closest('[data-aktion="gaesteauf"]')) { e.stopPropagation(); gaesteAuf = !gaesteAuf; gaesteNeu(); return; }
+    if (e.target.closest('[data-aktion="msauf"]')) { e.stopPropagation(); msAuf = !msAuf; gaesteNeu(); return; }
+    const ms = e.target.closest("[data-mitspieler]");
+    if (ms) { e.stopPropagation(); msSetzen(+ms.dataset.mitspieler); gaesteNeu(); return; }
     const c = e.target.closest("[data-gast]"); if (!c) return;
     e.stopPropagation();
     const id = c.dataset.gast;
@@ -5435,6 +5478,7 @@
     info: {
       intensitaet: "Wie viel los ist: links ruhig und sparsam, rechts dicht und wild. Die Änderung greift am nächsten Taktanfang.",
       gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im Zwischenteil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
+      mitspieler: "Band allein: nur Barradin, Friedrich, Echo, Ezekiel und Rex. Ein paar Mitspieler: dazu das Geister-Orchester, ein Musiker der Kapelle und die Gäste aus eurer Geschichte. Volle Big Band: die ganze Kapelle. Aufgeklappt lässt sich jede Gruppe einzeln an- und abschalten; die Gäste kommen nur in Stimmungen, die zu ihnen passen.",
       speichern: "Merkt sich die aktuelle Stimmung samt Intensität, Kulisse, Hall, Instrumenten und Gästen – als neue Stimmung (⭐) oder als eigene Fassung einer vorhandenen (✎).",
       musik: "Stimmungen komponieren endlos neue Lieder im passenden Charakter – mit Vorspiel, Strophe, einem Refrain zum Mitsummen, Zwischenteil und großem Schlussrefrain. Lieder sind fertige Stücke der Band und Cover alter Volksweisen, unter „Eigene“ liegen deine gespeicherten Lieder.",
       klang: "Kulissen sind Hintergrundgeräusche, die dauerhaft laufen. Effekte erklingen einmal auf Knopfdruck. Beide laufen über der Musik, die Lautstärke regelst du direkt über den Kacheln.",
@@ -5449,13 +5493,15 @@
       ["tabs", "📜 Lieder und Eigene", "Fertige Lieder der Band, Cover alter Volksweisen und deine selbst gespeicherten Stücke."],
       ["kulisse", "🌧 Kulisse", "Hintergrundgeräusche wie Taverne, Regen oder Höhle laufen unter der Musik weiter. Der Regler darüber stellt ihre Lautstärke ein."],
       ["effekte", "💥 Effekte", "Einmalige Geräusche auf Knopfdruck: Drache, Schwert, Würfel, Kampf, lustige Momente und kurze Klassiker – zugeklappt, damit das Pult kurz bleibt; einmal antippen klappt sie auf."],
-      ["einst", "⚙ Klang, Raum & Gäste", "Seltene Einstellungen liegen hier eingeklappt: Lautstärke der Musik, Hall, Raum, Orchester, Sparmodus und die Gäste."],
+      ["mitspieler", "🎻 Mitspieler", "Wer außer der Band mitspielt: Band allein, ein paar Mitspieler oder die volle Big Band mit Geister-Orchester, Kapelle und Gästen. Aufklappen für die Feineinstellung, 🎲 holt eine neue Besetzung."],
+      ["einst", "⚙ Klang & Raum", "Seltene Einstellungen liegen hier eingeklappt: Lautstärke der Musik, Hall, Raum und Sparmodus."],
       ["oben", "Oben rechts", "🌫 Klangwelten: reine Geräusche ohne Musik · 📡 Mitlauschen: Link für die Runde, alle hören mit · Die kleinen ⓘ erklären einzelne Regler."]
     ] });
   Object.assign(TX.en, { rundgang: "❔ Tour", rundgangTipp: "A short tour of the console", weiter: "Next", zurueck: "Back", fertig: "Done", beenden: "Close",
     info: {
       intensitaet: "How busy it gets: left is calm and sparse, right is dense and wild. Changes take effect at the next bar.",
       gaeste: "Characters from your story join in fitting moods and get a solo in the bridge. Expand to switch single guests on or off.",
+      mitspieler: "Band alone: just Barradin, Friedrich, Echo, Ezekiel and Rex. A few players: plus the ghost orchestra, one street-band musician and the guests from your story. Full big band: the whole street band. Expanded, every group can be switched on or off; guests only join moods that suit them.",
       speichern: "Saves the current mood with intensity, backdrop, reverb, instruments and guests – as a new mood (⭐) or as your own version of an existing one (✎).",
       musik: "Moods keep composing new songs in their character – with intro, verse, a chorus to hum along, bridge and a big final chorus. Songs are finished pieces by the band and covers of old folk tunes; “Own” holds your saved songs.",
       klang: "Backdrops are background sounds that keep running. Effects play once per tap. Both play over the music; set their volume right above the tiles.",
@@ -5470,7 +5516,8 @@
       ["tabs", "📜 Songs and own", "Finished songs by the band, covers of old folk tunes and the pieces you saved yourself."],
       ["kulisse", "🌧 Backdrop", "Background sounds like tavern, rain or cave keep running under the music. The slider above sets their volume."],
       ["effekte", "💥 Effects", "One-off sounds at a tap: dragon, sword, dice, combat, funny moments and short classics – folded away to keep the desk short; tap once to unfold."],
-      ["einst", "⚙ Sound, room & guests", "Rarely used settings are folded away here: music volume, reverb, room, orchestra, power saving and the guests."],
+      ["mitspieler", "🎻 Players", "Who joins the band: band alone, a few players or the full big band with ghost orchestra, street band and guests. Expand for details, 🎲 brings a new line-up."],
+      ["einst", "⚙ Sound & room", "Rarely used settings are folded away here: music volume, reverb, room and power saving."],
       ["oben", "Top right", "🌫 Soundscapes: pure ambience without music · 📡 Listen in: a link for the group · The small ⓘ explain single controls."]
     ] });
   const RUNDGANG_ZIEL = {
@@ -5478,7 +5525,7 @@
     stimmungen: () => root.querySelector(".lw-musik .lw-pult-gitter"), intensitaet: () => root.querySelector(".lw-intensitaet"),
     punkt: () => root.querySelector(".lw-musik .lw-pult-gitter button"), tabs: () => root.querySelector(".lw-musik .lw-tabs"),
     kulisse: () => root.querySelector(".lw-klang .lw-kul-gitter"), effekte: () => root.querySelector(".lw-klang .lw-pult-fx") || root.querySelector('.lw-klang [data-klangauf="fx"]'),
-    einst: () => root.querySelector(".lw-musik .lw-einst-kopf"), oben: () => root.querySelector(".lw-kopf-rechts")
+    einst: () => root.querySelector(".lw-musik .lw-einst-kopf"), mitspieler: () => root.querySelector(".lw-mitspieler"), oben: () => root.querySelector(".lw-kopf-rechts")
   };
   let rundgang = null;
   function rundgangStart() {
@@ -5611,7 +5658,7 @@
     '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b> ' + info("hall") + '</span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
     '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
-    raumWahl(T) + '<button type="button" class="lw-schalter lw-orch" data-aktion="orchester" aria-pressed="' + (S.orchester !== 0) + '" title="' + esc(T.orchTipp) + '">' + T.orchester + "</button>" + sparKnopf(T);
+    raumWahl(T) + sparKnopf(T);
   const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b> ' + info("intensitaet") + '</span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
@@ -5638,8 +5685,8 @@
     "</div></section>";
   Object.assign(TX.de, { klangwelten: "🌫 Klangwelten", klangweltenTipp: "Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik" });
   Object.assign(TX.en, { klangwelten: "🌫 Soundscapes", klangweltenTipp: "Pure ambience from real recordings – no music" });
-  Object.assign(TX.de, { einstMusik: "Klang, Raum & Gäste", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
-  Object.assign(TX.en, { einstMusik: "Sound, room & guests", einstKlang: "Backdrop & effects volume", wechselZu: "switching to", ausklangKommt: "Fade-out", leisePlus: "Intensity", funkKurz: "Listen in" });
+  Object.assign(TX.de, { einstMusik: "Klang & Raum", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
+  Object.assign(TX.en, { einstMusik: "Sound & room", einstKlang: "Backdrop & effects volume", wechselZu: "switching to", ausklangKommt: "Fade-out", leisePlus: "Intensity", funkKurz: "Listen in" });
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
   let musikTab = "stimmungen", fxTab = "effekte";
   try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; } catch (_) {}
@@ -5689,7 +5736,7 @@
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) + kapelleZeile(T) + stimmSpeicherZeile(T) : "") + einklapp("musik", T.einstMusik, gaesteZeile(T) + '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>") + "</section>";
+      (musikTab === "stimmungen" ? intRegler(T) + mitspielerZeile(T) + stimmSpeicherZeile(T) : "") + einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>") + "</section>";
   }
   /* Kulissen und Effekte nehmen am Handy viel Platz: von den Kulissen zuerst nur neun (Favoriten und die laufende vorn),
      die Effekte und Momente sind zugeklappt, bis man sie braucht – das merkt sich die Seite */
@@ -5721,7 +5768,7 @@
     const [q, id] = String(wert).split(":"), l = (q === "g" ? gruppenLieder : lokaleLieder).find(x => String(x.id) === id);
     const d = l && dekodieren(l.code);
     if (!d) return;
-    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester", "gaeste"].forEach(k => { d[k] = S[k]; });
+    ["vol", "mute", "master", "hall", "hallAus", "raum", "kulisse", "kulisseVol", "pult", "fxVol", "intensitaet", "echoHall", "orchester", "kapelle", "kapStufe", "gaeste"].forEach(k => { d[k] = S[k]; });
     d.stimmung = null; d.titel = l.name; geladen = { quelle: q, id: l.id, name: l.name }; bearbeite = "A";
     if (laeuft) { wechsel = d; const a = S; S = d; try { saitenVorbereiten(); } catch (_) {} S = a; status(t().wechselGleich(l.name)); boxNeu("musik"); return; }
     S = d; pausiert = false; merken(); neuGezeichnet(); saitenVorbereiten(); status(t().liedGeladen(l.name));
@@ -5801,7 +5848,7 @@
     const lied = { tempo: S.tempo, transpose: S.transpose, modus: S.modus, swing: S.swing, bordun: S.bordun, variation: S.variation,
       ablauf: S.ablauf, rollen: S.rollen || null, kapelle: S.kapelle, kapWahl: S.kapWahl || [], vol: S.vol, mute: S.mute, teile: Object.fromEntries(TEILE.filter(p => S.ablauf.includes(p)).map(p => [p, S.teile[p]])), instrument: S.instrument, band: S.band, takt: S.takt };
     return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
-      hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, gaeste: S.gaeste, laeuft };
+      hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, kapStufe: S.kapStufe, gaeste: S.gaeste, laeuft };
   }
   function funkSenden(ev, daten) { if (funk && funk.kanal) funk.kanal.senden(ev, daten); }
   function funkAenderung() {
@@ -5886,7 +5933,7 @@
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
       kulisse: KULISSEN.includes(d.kulisse) ? d.kulisse : "keine", kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
-      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, gaeste: Object.assign(Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), { _aus: d.gaeste && d.gaeste._aus ? 1 : 0 }), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
+      raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, kapStufe: d.kapStufe === 1 ? 1 : 2, gaeste: Object.assign(Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), { _aus: d.gaeste && d.gaeste._aus ? 1 : 0 }), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun, x.takt].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
     if (laeuft && kern(neu) !== kern(S)) {
@@ -6163,7 +6210,7 @@
   }
   function vorlageWaehlen(k) {
     const mix = { vol: S.vol, mute: S.mute };
-    const behalten = { orchester: S.orchester, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse, gaeste: S.gaeste };
+    const behalten = { orchester: S.orchester, kapelle: S.kapelle, kapStufe: S.kapStufe, echoHall: S.echoHall, fxVol: S.fxVol, intensitaet: S.intensitaet, master: S.master, hall: S.hall, hallAus: S.hallAus, raum: S.raum, kulisseVol: S.kulisseVol, pult: S.pult, kulisse: S.kulisse, gaeste: S.gaeste };
     let neu;
     if (k === "leer") { neu = Object.assign({}, S, { teile: Object.fromEntries(TEILE.map(p => [p, teilLeer()])), ablauf: "A", titel: "", stimmung: null }); delete neu.rollen; }
     else if (k === "zufall") neu = zufallsLied();
@@ -6191,7 +6238,7 @@
       neu.festBesetzung = eig.werte.instrument ? 1 : 0;
       /* gespeicherte Stimmung: ihre Einstellungen gewinnen */
       const w = eig.werte;
-      ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "instrument", "gaeste"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
+      ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "kapelle", "kapStufe", "instrument", "gaeste"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
       if (w.band) neu.band = Object.assign({}, neu.band, w.band);
       neu.stimmung = eig.basis; neu.eigeneStimmung = k;
       if (!KULISSEN.includes(neu.kulisse)) neu.kulisse = "keine";
@@ -6240,11 +6287,10 @@
     }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
     if (e.target.closest('[data-aktion="ausklang"]')) { if (laeuft && !ausklingt && !ausklangAb) { ausklangAb = -1; wechsel = null; wechselAb = 0; knoepfe(); status(t().ausklingt); } return; }
-    if (e.target.closest('[data-aktion="kapelle"]')) { S.kapelle = S.kapelle === 0 ? 1 : 0; merken(); if (ctx) kapelleVorladen(); boxNeu("musik"); return; }
-    if (e.target.closest('[data-aktion="kapneu"]')) { if (S.stimmung) { S.kapWahl = kapelleWaehlen(S.stimmung); merken(); if (ctx) kapelleVorladen(); boxNeu("musik"); } return; }
+    if (e.target.closest('[data-aktion="kapelle"]')) { S.kapelle = S.kapelle === 0 ? 1 : 0; merken(); if (ctx) kapelleVorladen(); gaesteNeu(); return; }
+    if (e.target.closest('[data-aktion="kapneu"]')) { if (S.stimmung) { S.kapWahl = kapelleWaehlen(S.stimmung); merken(); if (ctx) kapelleVorladen(); gaesteNeu(); } return; }
     if (e.target.closest('[data-aktion="orchester"]')) {
-      S.orchester = S.orchester === 0 ? 1 : 0; merken(); root.querySelectorAll(".lw-orch").forEach(b => b.setAttribute("aria-pressed", S.orchester !== 0));
-      if (ctx) orchVorladen(); return;
+      S.orchester = S.orchester === 0 ? 1 : 0; merken(); if (ctx) orchVorladen(); gaesteNeu(); return;
     }
     if (e.target.closest('[data-aktion="spar"]')) {
       spar = !spar; try { localStorage.setItem("imres-lw-spar", spar ? "1" : "0"); } catch (_) {}
@@ -6904,6 +6950,20 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-modus-tipp { flex: 1 1 14rem; font-size: .8rem; color: var(--ash); }
 .lw-liedkarte { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .9rem 1rem; margin-bottom: 1rem; border: 1px dashed rgba(224,160,70,.55); border-radius: 12px; background: rgba(224,160,70,.06); }
 .lw-liedkarte p { flex: 1 1 100%; margin: 0 0 .3rem; color: var(--vellum); font-size: .92rem; }
+.lw-mitspieler { margin: .55rem 0 .25rem; display: flex; flex-direction: column; gap: .35rem; }
+.lw-ms-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .5rem; }
+.lw-ms-titel { font-size: .9rem; color: var(--vellum); white-space: nowrap; }
+.lw-ms-stufen { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: 1 1 auto; max-width: 26rem; }
+.lw-ms-stufen button { flex: 1 1 0; border: 0; background: rgba(16,14,21,.6); color: var(--ash); font: inherit; font-size: .82rem; padding: .45rem .5rem; min-height: 2.3rem; cursor: pointer; white-space: nowrap; }
+.lw-ms-stufen button + button { border-left: 1px solid var(--line); }
+.lw-ms-stufen button[aria-pressed="true"] { background: var(--ember); color: var(--night); font-weight: 600; }
+.lw-ms-wer { font-size: .8rem; color: var(--ash); line-height: 1.35; }
+.lw-ms-wer i { color: var(--ember); font-style: normal; }
+.lw-ms-liste { display: flex; flex-direction: column; gap: .45rem; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(16,14,21,.35); }
+.lw-ms-gruppe { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .5rem; }
+.lw-ms-klein { font-size: .75rem; color: var(--ash); }
+.lw-ms-liste .lw-gz-liste { margin-top: .1rem; }
+@media (max-width: 420px) { .lw-ms-stufen { flex-basis: 100%; max-width: none; order: 3; } }
 .lw-kapelle-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin: .5rem 0 .2rem; }
 .lw-kap-namen { flex: 1 1 10rem; font-size: .82rem; color: var(--vellum); }
 .lw-klappe { display: flex; justify-content: space-between; align-items: center; width: 100%; margin: .55rem 0 0; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(235,226,204,.03); color: var(--vellum); font: inherit; font-size: .9rem; cursor: pointer; text-align: left; }
