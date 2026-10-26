@@ -183,7 +183,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniKulStopp: "Geräusche anhalten", miniKulWeiter: "Geräusche wieder starten", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
-      zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren).", zusDrin: "steckt schon in der Kulisse", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
+      zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren).", zusDrin: "steckt schon in der Kulisse", zusAlleAus: "Alle Zusätze abschalten", zusAlleAusKurz: "Alle aus", zusAlleWeg: "Alle Zusätze aus", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
       kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %",
       stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente & Klassik",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
@@ -270,7 +270,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniKulStopp: "Stop ambience", miniKulWeiter: "Restart ambience", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
-      zusaetze: "Extras", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover).", zusDrin: "already part of the backdrop", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
+      zusaetze: "Extras", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover).", zusDrin: "already part of the backdrop", zusAlleAus: "Switch off all extras", zusAlleAusKurz: "All off", zusAlleWeg: "All extras off", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
       kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %",
       stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments & classics",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
@@ -2155,51 +2155,51 @@
      Außenklänge werden in Innenräumen gedämpft, als kämen sie durch Mauern. */
   /* g = Gruppe (in der Leiste durch etwas Abstand getrennt); Einzelgeräusche: [Art, [Abstand von, bis] s, Stärke, Anteil fern] */
   const ZUSATZ = {
-    regen: { g: 0, de: "Regen", en: "Rain", raus: 1, betten: [["a_regen2", .9], ["a_leichtregen", .4]], ev: [] },
-    starkregen: { g: 0, de: "Starkregen", en: "Downpour", raus: 1, betten: [["a_starkregen", .8], ["a_regen4", .3]], ev: [] },
-    gewitter: { g: 0, de: "Gewitter", en: "Thunderstorm", raus: 1, betten: [["a_gewitter1", .8]], ev: [["donner", [25, 60], .5, .7]] },
-    sturm: { g: 0, de: "Sturm", en: "Gale", raus: 1, betten: [["a_heulwind", .7], ["a_wind2", .5]], ev: [] },
-    wind: { g: 0, de: "Wind", en: "Wind", raus: 1, betten: [["a_wind1", .6]], ev: [] },
-    laub: { g: 0, de: "Rauschende Bäume", en: "Rustling trees", raus: 1, betten: [["a_baumwind", .6]], ev: [] },
-    schnee: { g: 0, de: "Schneetreiben", en: "Snowdrift", raus: 1, betten: [["a_schneesturm", .7]], ev: [] },
-    bach: { g: 1, de: "Bach", en: "Brook", raus: 1, betten: [["a_bach1", .7]], ev: [] },
-    wellen: { g: 1, de: "Wellen", en: "Waves", raus: 1, betten: [["a_wellen2", .7]], ev: [] },
-    wasserfall: { g: 1, de: "Wasserfall", en: "Waterfall", raus: 1, betten: [["a_wasserfall2", .65]], ev: [] },
-    tropfen: { g: 1, de: "Tropfen", en: "Drips", betten: [["a_tropfen2", .6]], ev: [] },
-    blubbern: { g: 1, de: "Blubbern", en: "Bubbling", betten: [["a_blubbern", .5]], ev: [["blubb", [4, 10], .35, .3]] },
-    feuer: { g: 2, de: "Feuer", en: "Fire", betten: [["a_feuer2", .8]], ev: [] },
-    kessel: { g: 2, de: "Brodelnder Kessel", en: "Bubbling cauldron", betten: [["a_kochen", .55]], ev: [] },
-    voegel: { g: 3, de: "Vögel", en: "Birds", raus: 1, betten: [["a_tagvoegel", .7]], ev: [["vogel", [8, 20], .25, .5]] },
-    grillen: { g: 3, de: "Grillen", en: "Crickets", raus: 1, betten: [["a_grillen", .55]], ev: [] },
-    eule: { g: 3, de: "Eule", en: "Owl", raus: 1, betten: [], ev: [["eule", [12, 30], .45, .5]] },
-    frosch: { g: 3, de: "Frösche", en: "Frogs", raus: 1, betten: [], ev: [["frosch", [3, 9], .4, .5]] },
-    wolf: { g: 3, de: "Wölfe", en: "Wolves", raus: 1, betten: [], ev: [["wolf", [18, 45], .4, .7]] },
-    kraehe: { g: 3, de: "Krähen", en: "Crows", raus: 1, betten: [], ev: [["kraehe", [7, 18], .35, .5]] },
-    moewe: { g: 3, de: "Möwen", en: "Gulls", raus: 1, betten: [], ev: [["moewe", [5, 14], .3, .5]] },
-    specht: { g: 3, de: "Specht", en: "Woodpecker", raus: 1, betten: [], ev: [["specht", [10, 25], .35, .6]] },
-    bienen: { g: 3, de: "Bienen", en: "Bees", raus: 1, betten: [["a_bienen", .35]], ev: [] },
+    regen: { g: 0, de: "Regen", en: "Rain", raus: 1, betten: [["a_regen2", .57], ["a_leichtregen", .25]], ev: [] },
+    starkregen: { g: 0, de: "Starkregen", en: "Downpour", raus: 1, betten: [["a_starkregen", .55], ["a_regen4", .21]], ev: [] },
+    gewitter: { g: 0, de: "Gewitter", en: "Thunderstorm", raus: 1, betten: [["a_gewitter1", .82]], ev: [["donner", [25, 60], .71, .7]] },
+    sturm: { g: 0, de: "Sturm", en: "Gale", raus: 1, betten: [["a_heulwind", .72], ["a_wind2", .51]], ev: [] },
+    wind: { g: 0, de: "Wind", en: "Wind", raus: 1, betten: [["a_wind1", 1.04]], ev: [] },
+    laub: { g: 0, de: "Rauschende Bäume", en: "Rustling trees", raus: 1, betten: [["a_baumwind", 1.2]], ev: [] },
+    schnee: { g: 0, de: "Schneetreiben", en: "Snowdrift", raus: 1, betten: [["a_schneesturm", .48]], ev: [] },
+    bach: { g: 1, de: "Bach", en: "Brook", raus: 1, betten: [["a_bach1", .75]], ev: [] },
+    wellen: { g: 1, de: "Wellen", en: "Waves", raus: 1, betten: [["a_wellen2", .67]], ev: [] },
+    wasserfall: { g: 1, de: "Wasserfall", en: "Waterfall", raus: 1, betten: [["a_wasserfall2", .61]], ev: [] },
+    tropfen: { g: 1, de: "Tropfen", en: "Drips", betten: [["a_tropfen2", .95]], ev: [] },
+    blubbern: { g: 1, de: "Blubbern", en: "Bubbling", betten: [["a_blubbern", .77]], ev: [["blubb", [4, 10], .36, .3]] },
+    feuer: { g: 2, de: "Feuer", en: "Fire", betten: [["a_feuer2", 2.84]], ev: [] },
+    kessel: { g: 2, de: "Brodelnder Kessel", en: "Bubbling cauldron", betten: [["a_kochen", .76]], ev: [] },
+    voegel: { g: 3, de: "Vögel", en: "Birds", raus: 1, betten: [["a_tagvoegel", .24]], ev: [["vogel", [8, 20], .29, .5]] },
+    grillen: { g: 3, de: "Grillen", en: "Crickets", raus: 1, betten: [["a_grillen", .47]], ev: [] },
+    eule: { g: 3, de: "Eule", en: "Owl", raus: 1, betten: [], ev: [["eule", [12, 30], .21, .5]] },
+    frosch: { g: 3, de: "Frösche", en: "Frogs", raus: 1, betten: [], ev: [["frosch", [3, 9], .49, .5]] },
+    wolf: { g: 3, de: "Wölfe", en: "Wolves", raus: 1, betten: [], ev: [["wolf", [18, 45], .3, .7]] },
+    kraehe: { g: 3, de: "Krähen", en: "Crows", raus: 1, betten: [], ev: [["kraehe", [7, 18], .4, .5]] },
+    moewe: { g: 3, de: "Möwen", en: "Gulls", raus: 1, betten: [], ev: [["moewe", [5, 14], .42, .5]] },
+    specht: { g: 3, de: "Specht", en: "Woodpecker", raus: 1, betten: [], ev: [["specht", [10, 25], .93, .6]] },
+    bienen: { g: 3, de: "Bienen", en: "Bees", raus: 1, betten: [["a_bienen", .73]], ev: [] },
     fledermaus: { g: 3, de: "Fledermäuse", en: "Bats", betten: [], ev: [["fledermaus", [5, 14], .3, .4]] },
-    hund: { g: 3, de: "Hund", en: "Dog", raus: 1, betten: [], ev: [["hund", [14, 35], .35, .6]] },
-    pferd: { g: 3, de: "Pferde", en: "Horses", raus: 1, betten: [], ev: [["ross", [12, 30], .35, .5], ["hufe", [20, 45], .25, .5]] },
-    kuh: { g: 3, de: "Kühe", en: "Cows", raus: 1, betten: [["a_kuehe", .45]], ev: [["kuh", [15, 35], .3, .5]] },
-    schaf: { g: 3, de: "Schafe", en: "Sheep", raus: 1, betten: [["a_schafe", .5]], ev: [] },
-    huhn: { g: 3, de: "Hühner", en: "Hens", raus: 1, betten: [["a_huehner", .45]], ev: [] },
-    schwein: { g: 3, de: "Schweine", en: "Pigs", raus: 1, betten: [], ev: [["schwein", [8, 22], .35, .4]] },
-    katze: { g: 3, de: "Schnurrende Katze", en: "Purring cat", betten: [["a_schnurren", .35]], ev: [] },
-    wal: { g: 3, de: "Wale", en: "Whales", raus: 1, betten: [], ev: [["wal", [18, 40], .4, .6]] },
-    stimmen: { g: 4, de: "Stimmengewirr", en: "Chatter", betten: [["a_gaeste", .6]], ev: [] },
-    markt: { g: 4, de: "Markt", en: "Market", raus: 1, betten: [["a_markt", .55]], ev: [] },
-    hafen: { g: 4, de: "Hafen", en: "Harbour", raus: 1, betten: [["a_hafen", .5]], ev: [["moewe", [20, 50], .2, .7]] },
-    segel: { g: 4, de: "Segelschiff", en: "Sailing ship", betten: [["a_segel", .5], ["a_boot", .4]], ev: [] },
-    schmiede: { g: 4, de: "Schmiede", en: "Smithy", betten: [], ev: [["hammer", [4, 10], .35, .5]] },
-    axt: { g: 4, de: "Holzfäller", en: "Woodcutter", raus: 1, betten: [], ev: [["axt", [8, 20], .3, .6]] },
-    hacke: { g: 4, de: "Bergbau", en: "Mining", betten: [], ev: [["hacke", [7, 18], .3, .6]] },
-    glocke: { g: 4, de: "Glocken", en: "Bells", raus: 1, betten: [], ev: [["glocke", [20, 50], .35, .7]] },
-    uhr: { g: 4, de: "Standuhr", en: "Clock", betten: [["a_uhr", .25, { takt: 2.0005 }]], ev: [] },
-    gesang: { g: 4, de: "Mönchsgesang", en: "Monks chanting", betten: [["a_gesang", .4]], ev: [] },
-    geist: { g: 5, de: "Geisterheulen", en: "Ghostly wailing", betten: [], ev: [["heulen", [15, 35], .35, .5]] },
-    untot: { g: 5, de: "Untote", en: "Undead", betten: [], ev: [["untot", [10, 25], .3, .5], ["stoehnen", [18, 40], .3, .5]] },
-    ketten: { g: 5, de: "Ketten", en: "Chains", betten: [], ev: [["kette", [8, 20], .3, .5]] },
+    hund: { g: 3, de: "Hund", en: "Dog", raus: 1, betten: [], ev: [["hund", [14, 35], .4, .6]] },
+    pferd: { g: 3, de: "Pferde", en: "Horses", raus: 1, betten: [], ev: [["ross", [12, 30], .48, .5], ["hufe", [20, 45], .35, .5]] },
+    kuh: { g: 3, de: "Kühe", en: "Cows", raus: 1, betten: [["a_kuehe", .4]], ev: [["kuh", [15, 35], .26, .5]] },
+    schaf: { g: 3, de: "Schafe", en: "Sheep", raus: 1, betten: [["a_schafe", .7]], ev: [] },
+    huhn: { g: 3, de: "Hühner", en: "Hens", raus: 1, betten: [["a_huehner", .51]], ev: [] },
+    schwein: { g: 3, de: "Schweine", en: "Pigs", raus: 1, betten: [], ev: [["schwein", [8, 22], .47, .4]] },
+    katze: { g: 3, de: "Schnurrende Katze", en: "Purring cat", betten: [["a_schnurren", 1.15]], ev: [] },
+    wal: { g: 3, de: "Wale", en: "Whales", raus: 1, betten: [], ev: [["wal", [18, 40], .41, .6]] },
+    stimmen: { g: 4, de: "Stimmengewirr", en: "Chatter", betten: [["a_gaeste", .71]], ev: [] },
+    markt: { g: 4, de: "Markt", en: "Market", raus: 1, betten: [["a_markt", .73]], ev: [] },
+    hafen: { g: 4, de: "Hafen", en: "Harbour", raus: 1, betten: [["a_hafen", .88]], ev: [["moewe", [20, 50], .32, .7]] },
+    segel: { g: 4, de: "Segelschiff", en: "Sailing ship", betten: [["a_segel", .71], ["a_boot", .57]], ev: [] },
+    schmiede: { g: 4, de: "Schmiede", en: "Smithy", betten: [], ev: [["hammer", [4, 10], .81, .5]] },
+    axt: { g: 4, de: "Holzfäller", en: "Woodcutter", raus: 1, betten: [], ev: [["axt", [8, 20], .96, .6]] },
+    hacke: { g: 4, de: "Bergbau", en: "Mining", betten: [], ev: [["hacke", [7, 18], .7, .6]] },
+    glocke: { g: 4, de: "Glocken", en: "Bells", raus: 1, betten: [], ev: [["glocke", [20, 50], .42, .7]] },
+    uhr: { g: 4, de: "Standuhr", en: "Clock", betten: [["a_uhr", .23, { takt: 2.0005 }]], ev: [] },
+    gesang: { g: 4, de: "Mönchsgesang", en: "Monks chanting", betten: [["a_gesang", .85]], ev: [] },
+    geist: { g: 5, de: "Geisterheulen", en: "Ghostly wailing", betten: [], ev: [["heulen", [15, 35], .28, .5]] },
+    untot: { g: 5, de: "Untote", en: "Undead", betten: [], ev: [["untot", [10, 25], .38, .5], ["stoehnen", [18, 40], .38, .5]] },
+    ketten: { g: 5, de: "Ketten", en: "Chains", betten: [], ev: [["kette", [8, 20], .34, .5]] },
     monster: { g: 5, de: "Ungeheuer", en: "Monster", betten: [], ev: [["monster", [20, 45], .35, .6]] }
   };
   /* Symbole der Zusätze: 24×24, Linien (1), gefüllte Flächen (2), weitere Linien (3) */
@@ -6587,9 +6587,9 @@ const ZUS_ICON = {
     leiste.innerHTML = '<button type="button" class="ll-play"></button><button type="button" class="ll-aus" title="">🎼</button>' +
       '<span class="ll-titel"><span class="ll-name"></span><span class="ll-naechste"></span><i class="lw-wechselbalken"></i></span>' +
       '<span class="ll-int"><button type="button" class="ll-minus" aria-label="−">−</button><b class="ll-wert"></b><button type="button" class="ll-plus" aria-label="+">+</button></span>' +
+      '<label class="ll-vol"><span aria-hidden="true">🔊</span><input type="range" min="0" max="10" step="1" data-ll="master"></label>' +
       '<button type="button" class="ll-einst" aria-expanded="false">⚙</button>' +
       '<div class="ll-panel" hidden>' +
-        '<label class="lw-kleinregler"><span class="ll-pm"></span><input type="range" min="0" max="10" step="1" data-ll="master"><b class="ll-pmw"></b></label>' +
         '<label class="lw-kleinregler"><span class="ll-pk"></span><input type="range" min="0" max="10" step="1" data-ll="kulvol"><b class="ll-pkw"></b></label>' +
         '<div class="ll-knoepfe"><button type="button" class="lw-schalter ll-kul"></button><button type="button" class="lw-schalter ll-hin"></button></div>' +
       "</div>";
@@ -6645,11 +6645,13 @@ const ZUS_ICON = {
     if (!zeigen) { leisteAuf = false; return; }
     const pn = leiste.querySelector(".ll-panel"), eb = leiste.querySelector(".ll-einst");
     pn.hidden = !leisteAuf; eb.setAttribute("aria-expanded", leisteAuf); eb.title = eb.ariaLabel = T.einstKurz;
+    { const m = leiste.querySelector('[data-ll="master"]'); if (document.activeElement !== m) m.value = S.master;
+      m.setAttribute("aria-label", T.master + " " + S.master * 10 + " %"); m.title = T.master + ": " + S.master * 10 + " %"; }
     if (leisteAuf) {
-      leiste.querySelector(".ll-pm").textContent = "🔊 " + T.master; leiste.querySelector(".ll-pk").textContent = "🌫 " + T.kulisseLaut;
-      const m = leiste.querySelector('[data-ll="master"]'), k = leiste.querySelector('[data-ll="kulvol"]');
-      if (document.activeElement !== m) m.value = S.master; if (document.activeElement !== k) k.value = S.kulisseVol;
-      leiste.querySelector(".ll-pmw").textContent = S.master * 10 + " %"; leiste.querySelector(".ll-pkw").textContent = S.kulisseVol * 10 + " %";
+      leiste.querySelector(".ll-pk").textContent = "🌫 " + T.kulisseLaut;
+      const k = leiste.querySelector('[data-ll="kulvol"]');
+      if (document.activeElement !== k) k.value = S.kulisseVol;
+      leiste.querySelector(".ll-pkw").textContent = S.kulisseVol * 10 + " %";
       const kb = leiste.querySelector(".ll-kul"); kb.textContent = kul ? T.kulisseAn : T.kulisseAus; kb.setAttribute("aria-pressed", !!kul);
       kb.hidden = !kul && S.kulisse === "keine" && !kulMerk;
       leiste.querySelector(".ll-hin").textContent = T.zumLautenwerk;
@@ -6845,8 +6847,8 @@ const ZUS_ICON = {
   const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KUL_ZEIGEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
     '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
   const sparKnopf = T => '<button type="button" class="lw-schalter lw-spar" data-aktion="spar" aria-pressed="' + spar + '" title="' + esc(T.sparTipp) + '">' + T.spar + "</button>";
-  const mixRegler = T =>
-    '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' +
+  const mixRegler = (T, ohneMusik) =>
+    (ohneMusik ? "" : '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>') +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b> ' + info("hall") + '</span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
     '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
     raumWahl(T) + '<button type="button" class="lw-schalter lw-kick" data-aktion="kick" aria-pressed="' + (S.kick !== 0) + '" title="' + esc(T.kickTipp) + '">🥁 ' + T.kick + ": " + T.kickStufe[S.kick] + "</button>" + sparKnopf(T);
@@ -6866,7 +6868,7 @@ const ZUS_ICON = {
     return '<div class="lw-einst lw-zweiklapp' + (mk || kk ? " auf" : "") + '"><div class="lw-zk-reihe">' +
       knopf("mitspieler", mk, T.mitspieler, st >= 0 ? T.msStufe[st] : T.msEigen) +
       knopf("musik", kk, "⚙ " + T.einstMusik, T.hall + " " + S.hall * 10 + " %") + "</div>" +
-      (mk ? mitspielerZeile(T) : "") + (kk ? '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>" : "") + "</div>";
+      (mk ? mitspielerZeile(T) : "") + (kk ? '<div class="lw-stimm-mix">' + mixRegler(T, 1) + "</div>" : "") + "</div>";
   }
   const einklapp = (k, titel, inhalt) => '<div class="lw-einst' + (einstAuf[k] ? " auf" : "") + '"><button type="button" class="lw-einst-kopf" data-einst="' + k + '" aria-expanded="' + einstAuf[k] + '">⚙ ' + titel + ' <span>' + (einstAuf[k] ? "▴" : "▾") + "</span></button>" + (einstAuf[k] ? inhalt : "") + "</div>";
   Object.assign(TX.de, { komponieren: "✍ Leeres Notenblatt", komponierenTipp: "Neues Lied von Grund auf – öffnet ein leeres Notenblatt in der kompletten Ansicht",
@@ -6929,6 +6931,7 @@ const ZUS_ICON = {
     }
     return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + " " + info("musik") + "</h4>" +
         reiter("musiktab", [["stimmungen", T.tabStimmungen], ["lieder", T.tabLieder], ["eigene", T.tabEigene]], musikTab, T) + "</div>" +
+      kleinRegler("🔊", T.master, "master", S.master, "lw-mval") +
       '<div class="lw-pult-gitter">' + kacheln + "</div>" +
       (musikTab === "stimmungen" && mehrSt ? '<button type="button" class="lw-klappe" data-klangauf="st" aria-expanded="' + !!klangAuf.st + '">' + (klangAuf.st ? T.stWeniger : T.stAlle(mehrSt)) + " <span>" + (klangAuf.st ? "▴" : "▾") + "</span></button>" : "") +
       (voll && musikTab === "eigene" ? '<div class="lw-eigene-zeile">' + '<button type="button" class="lw-klein" data-aktion="speichern">' + T.speichern + "</button>" +
@@ -6937,7 +6940,7 @@ const ZUS_ICON = {
         (speicherForm ? '<span class="lw-speicherform"><input type="text" maxlength="60" class="lw-liedname" placeholder="' + esc(T.liedName) + '" value="' + esc(speicherForm.name) + '">' +
           (gruppeOk ? '<button type="button" data-aktion="fueralle">' + T.fuerAlle + "</button>" : "") +
           '<button type="button" data-aktion="nurhier">' + T.nurHier + '</button><button type="button" data-aktion="abbrechen">' + T.abbrechen + "</button></span>" : "") + "</div>" : "") +
-      (musikTab === "stimmungen" ? intRegler(T) + uebRegler(T) + stimmSpeicherZeile(T) + zweiKlapp(T) : einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T) + "</div>")) + "</section>";
+      (musikTab === "stimmungen" ? intRegler(T) + uebRegler(T) + stimmSpeicherZeile(T) + zweiKlapp(T) : einklapp("musik", T.einstMusik, '<div class="lw-stimm-mix">' + mixRegler(T, 1) + "</div>")) + "</section>";
   }
   /* Kulissen und Effekte nehmen am Handy viel Platz: von den Kulissen zuerst nur neun (Favoriten und die laufende vorn),
      die Effekte und Momente sind zugeklappt, bis man sie braucht – das merkt sich die Seite */
@@ -6946,7 +6949,8 @@ const ZUS_ICON = {
   function zusBox(T) {
     const auf = !!klangAuf.zus, sp = sprache(), an = Object.keys(zusWahl), name = id => esc(ZUSATZ[id][sp] || ZUSATZ[id].de);
     const kurz = an.length ? '<span class="lw-zkurz">' + an.map(id => zusSvg(id)).join("") + "</span>" : "";
-    let html = '<button type="button" class="lw-klappe lw-spurklappe" data-klangauf="zus" aria-expanded="' + auf + '">✚ ' + T.zusaetze + kurz + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
+    const alleAus = an.length ? '<button type="button" class="lw-zalle" data-aktion="zusalleaus" title="' + esc(T.zusAlleAus) + '">✕ ' + T.zusAlleAusKurz + "</button>" : "";
+    let html = '<div class="lw-zkopf"><button type="button" class="lw-klappe lw-spurklappe" data-klangauf="zus" aria-expanded="' + auf + '">✚ ' + T.zusaetze + kurz + " <span>" + (auf ? "▴" : "▾") + "</span></button>" + alleAus + "</div>";
     if (!auf) return html;
     let gr = -1;
     const knoepfe = Object.keys(ZUSATZ).map(id => {
@@ -7565,6 +7569,9 @@ const ZUS_ICON = {
       zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang");
       zusHinweis(war ? t().zusWeg(nm) : t().zusAn(nm)); return;
     }
+    if (e.target.closest('[data-aktion="zusalleaus"]')) {
+      zusWahl = {}; zusMerken(); zusSync(); boxNeu("klang"); zusHinweis(t().zusAlleWeg); return;
+    }
     if (e.target.closest('[data-aktion="kulmixzurueck"]')) {
       delete kulMix[S.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {}
       if (kul && kul.betten) kul.betten.forEach(x => { x.regler = 1; x.out.gain.setTargetAtTime(x.grund, ctx.currentTime, .08); });
@@ -7711,7 +7718,7 @@ const ZUS_ICON = {
     if (d.vol) { S.vol[d.vol] = +e.target.value; merken(); mixAnwenden(); return; }
     if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
-    if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = S.master * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = S.master * 10 + " %"); root.querySelectorAll('[data-feld="master"]').forEach(r => { if (r !== e.target) r.value = S.master; }); merken(); effekteAnwenden(); try { leisteAktualisieren(); } catch (_) {} }
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
@@ -8218,6 +8225,9 @@ html.hl-tastatur .lw-leiste { bottom: max(.6rem, env(safe-area-inset-bottom)); }
 .lw-titel-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 html.lw-leiste-da #lautenwerk { padding-bottom: 5rem; }
 html.lw-leiste-da body { padding-bottom: 4.6rem; }
+.ll-vol { display: inline-flex; align-items: center; gap: .25rem; flex: 0 0 auto; font-size: .85rem; }
+.ll-vol input { width: 6rem; accent-color: var(--ember); }
+@media (max-width: 480px) { .ll-vol input { width: 3.6rem; } .ll-vol span { display: none; } }
 .ll-einst { width: 2.2rem; height: 2.2rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--vellum); font-size: 1rem; }
 .ll-einst[aria-expanded="true"] { border-color: var(--ember); color: var(--ember); }
 .ll-panel { position: absolute; right: 0; bottom: calc(100% + .5rem); width: min(22rem, 100%); display: grid; gap: .55rem; padding: .8rem .9rem; border: 1px solid rgba(224,160,70,.55); border-radius: 16px; background: rgba(16,14,21,.97); box-shadow: 0 8px 28px rgba(0,0,0,.55); }
@@ -8282,6 +8292,10 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-spurzeile input { width: 100%; accent-color: #6a9fb5; }
 .lw-spurzeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
 .lw-spuren .lw-klein { justify-self: start; margin-top: .2rem; }
+.lw-zkopf { display: flex; gap: .4rem; align-items: stretch; margin: .3rem 0 .1rem; }
+.lw-zkopf .lw-klappe { flex: 1; min-width: 0; margin: 0; }
+.lw-zalle { flex: none; border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .8rem; padding: 0 .7rem; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.lw-zalle:hover { border-color: var(--ember); color: var(--ember); }
 .lw-zgitter { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
 .lw-ztrenn { width: .45rem; }
 .lw-zknopf { width: 2.6rem; height: 2.6rem; padding: .3rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); background: rgba(255,255,255,.02); color: var(--vellum); cursor: pointer; border-radius: 6px; transition: background .15s, border-color .15s, color .15s; }
