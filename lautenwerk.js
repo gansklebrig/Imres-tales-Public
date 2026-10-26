@@ -3732,6 +3732,13 @@
       bewegung: { bass: [[".barradin .arm-schlag", "translate(0, 1.5px)", 160]], klopf: [[".barradin .arm-schlag", "translate(0, 1.5px)", 160]], mel: [[".barradin .hand-griff", "translate(0, 1.5px)", 160]] } },
     dudelsack: { griff: [150, 128, "Q118 126"], schlag: [168, 137, "Q104 132 120 138 L"],
       bewegung: { bass: [[".barradin .arm-schlag", "translate(0, 2px)", 160]], klopf: [[".barradin .arm-griff", "translate(1px, 2px)", 220]], mel: [[".barradin .hand-griff", "translate(0, 2px)", 160]] } },
+    hackbrett: { griff: [197, 104, "Q160 104"], schlag: [160, 124, "Q104 126 118 132 L"],
+      bewegung: { mel: [[".barradin .hand-griff", "translate(-2px, 6px)", 200]], bass: [[".barradin .arm-schlag", "translate(1px, 5px)", 200]] } },
+    cembalo: { griff: [196, 124, "Q166 108"], schlag: [148, 126, "Q104 124 118 128 L"],
+      bewegung: { mel: [[".barradin .hand-griff", "translate(0, 3px)", 160]], bass: [[".barradin .arm-schlag", "translate(0, 3px)", 160]] } },
+    akkordeon: { griff: [176, 114, "Q160 102"], schlag: [131, 124, "Q104 124 118 128 L"],
+      bewegung: { bass: [[".barradin .m-akkordeon .balg", "scaleX(.86)", 320]], mel: [[".barradin .hand-griff", "translate(0, 2px)", 160]] } },
+    sitar: { griff: [214, 82, "Q168 94"], schlag: [161, 126, "Q104 124 118 128 L"] },
     glocken: { griff: [197, 99, "Q160 104"], schlag: [160, 128, "Q104 126 118 132 L"],
       bewegung: { mel: [[".barradin .hand-griff", "translate(-2px, 6px)", 200]] } }
   };
@@ -3843,6 +3850,13 @@
    <path d="M83 142 L74 192 M97 142 L97 192 M111 142 L120 192" stroke="#5a3a20" stroke-width="2.5"/>
    <ellipse cx="97" cy="138" rx="22" ry="7" fill="#efe2c2" stroke="#8a5a32" stroke-width="4"/>
    <g fill="#e0a046" stroke="#8a6a24" stroke-width=".5"><circle cx="76" cy="138" r="2.2"/><circle cx="84" cy="143" r="2.2"/><circle cx="97" cy="145.5" r="2.2"/><circle cx="110" cy="143" r="2.2"/><circle cx="118" cy="138" r="2.2"/><circle cx="97" cy="131" r="2"/></g></g>
+  <g class="req f-taiko">
+   <path d="M76 168 L68 192 M118 168 L126 192" stroke="#3a2412" stroke-width="3"/>
+   <rect x="67" y="134" width="60" height="42" rx="16" fill="#7a3a1a" stroke="#3a1a0a" stroke-width="1.2"/>
+   <path d="M69 144 H125 M69 166 H125" stroke="#c9a24a" stroke-width="1"/>
+   <g fill="#e0b84a"><circle cx="75" cy="144" r="1.2"/><circle cx="85" cy="144" r="1.2"/><circle cx="97" cy="144" r="1.2"/><circle cx="109" cy="144" r="1.2"/><circle cx="119" cy="144" r="1.2"/><circle cx="75" cy="166" r="1.2"/><circle cx="85" cy="166" r="1.2"/><circle cx="97" cy="166" r="1.2"/><circle cx="109" cy="166" r="1.2"/><circle cx="119" cy="166" r="1.2"/></g>
+   <path d="M84 150 Q97 160 110 150" stroke="#d8c49a" stroke-width="1.5" fill="none"/>
+   <ellipse class="trommelfell" cx="97" cy="135" rx="29" ry="7.5" fill="#e8d9b5" stroke="#3a1a0a" stroke-width="1.4"/></g>
   <g class="req f-stoecke">
    <path d="M86 142 L80 192 M108 142 L114 192" stroke="#5a3a20" stroke-width="2.5"/>
    <rect x="78" y="130" width="38" height="13" rx="5" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
@@ -3946,6 +3960,30 @@
    <g stroke-width="3" stroke-linecap="round"><path d="M148 133 L150 139" stroke="#e0c070"/><path d="M156 130 L158 137" stroke="#d8dce6"/><path d="M164 127 L166 134" stroke="#e0c070"/><path d="M172 124 L174 131" stroke="#d8dce6"/><path d="M180 121 L182 128" stroke="#e0c070"/><path d="M188 118 L190 125" stroke="#d8dce6"/></g>
    <path d="M162 128 L170 120" stroke="#c9934f" stroke-width="1.8"/><circle cx="171" cy="119" r="3" fill="#9b3a2f"/>
    <path d="M196 100 L188 114" stroke="#c9934f" stroke-width="1.8"/><circle cx="187.5" cy="116" r="3" fill="#9b3a2f"/></g>
+  <g class="req m-hackbrett">
+   <path d="M126 142 L204 116 L210 129 L134 157 Z" fill="#8a5a2a" stroke="#3a2412" stroke-width="1.2"/>
+   <path class="saiten" d="M132 146 L204 121 M134 150 L206 125 M136 153 L208 128" stroke="#efe2c2" stroke-width=".6"/>
+   <circle cx="168" cy="137" r="4" fill="#3a2412"/>
+   <path d="M197 104 L188 120 M160 124 L170 137" stroke="#d8c49a" stroke-width="1.8"/><circle cx="188" cy="121" r="2.4" fill="#9b3a2f"/><circle cx="170" cy="138" r="2.4" fill="#9b3a2f"/></g>
+  <g class="req m-cembalo">
+   <path d="M118 130 H212 Q226 130 226 140 L222 150 H122 Z" fill="#3a1f12" stroke="#c9a24a" stroke-width="1.2"/>
+   <rect x="128" y="124" width="84" height="7" fill="#f4f0e6" stroke="#2a1a10" stroke-width=".7"/>
+   <g fill="#1a1010"><rect x="133" y="124" width="3" height="4"/><rect x="141" y="124" width="3" height="4"/><rect x="153" y="124" width="3" height="4"/><rect x="161" y="124" width="3" height="4"/><rect x="169" y="124" width="3" height="4"/><rect x="181" y="124" width="3" height="4"/><rect x="189" y="124" width="3" height="4"/><rect x="201" y="124" width="3" height="4"/></g>
+   <path class="saiten" d="M130 140 H214" stroke="#c9a24a" stroke-width=".8"/></g>
+  <g class="req m-akkordeon">
+   <rect x="124" y="98" width="12" height="44" rx="3" fill="#b0302a" stroke="#5a1010"/>
+   <g class="balg"><path d="M136 98 L141 103 L136 108 L141 113 L136 118 L141 123 L136 128 L141 133 L136 142 H168 L163 133 L168 128 L163 123 L168 118 L163 113 L168 108 L163 103 L168 98 Z" fill="#c83a30" stroke="#5a1010" stroke-width=".8"/>
+   <path class="saiten" d="M141 103 H163 M141 113 H163 M141 123 H163 M141 133 H163" stroke="#e0b84a" stroke-width=".8"/></g>
+   <rect x="168" y="98" width="14" height="44" rx="3" fill="#efe6d4" stroke="#6b1a14"/>
+   <g fill="#1a1010"><rect x="170" y="102" width="6" height="2.4"/><rect x="170" y="108" width="6" height="2.4"/><rect x="170" y="114" width="6" height="2.4"/><rect x="170" y="120" width="6" height="2.4"/><rect x="170" y="126" width="6" height="2.4"/><rect x="170" y="132" width="6" height="2.4"/></g>
+   <g fill="#f4f0e0"><circle cx="130" cy="106" r="1.5"/><circle cx="130" cy="113" r="1.5"/><circle cx="130" cy="120" r="1.5"/><circle cx="130" cy="127" r="1.5"/></g></g>
+  <g class="req m-sitar">
+   <path d="M160 128 L250 40 L256 46 L168 134 Z" fill="#6a3a1a" stroke="#2a1a10" stroke-width="1.2"/>
+   <g stroke="#e0b84a" stroke-width="1"><path d="M180 112 l6 6 M192 100 l6 6 M204 88 l6 6 M216 76 l6 6 M228 64 l6 6"/></g>
+   <circle cx="254" cy="40" r="8" fill="#a8643a" stroke="#4a2410" stroke-width="1.2"/>
+   <ellipse cx="146" cy="144" rx="32" ry="27" transform="rotate(-38 146 144)" fill="#b0703c" stroke="#4a2410" stroke-width="2"/>
+   <ellipse cx="146" cy="144" rx="22" ry="17" transform="rotate(-38 146 144)" fill="none" stroke="#e0b84a" stroke-width="1" opacity=".8"/>
+   <path class="saiten" d="M134 154 L252 42 M137 156 L254 44" stroke="#ebe2cc" stroke-width=".6" opacity=".9"/></g>
   <g class="req m-illusion">
    <path d="M129 74 L202 90" stroke="#b98cff" stroke-width="3.6" stroke-linecap="round"/>
    <path d="M129 74 L202 90" stroke="#efe2ff" stroke-width="1" stroke-linecap="round"/>
@@ -3997,6 +4035,22 @@
     <g fill="#c8ccd6"><circle cx="78" cy="94.3" r="1.2"/><circle cx="84" cy="98.6" r="1.2"/><circle cx="90" cy="102.9" r="1.2"/></g><path d="M60 82 l2 -2" stroke="#c8ccd6" stroke-width="1.6"/></g>
    <g class="req e-oboe"><path d="M58 80 L98 108" stroke="#2a1a14" stroke-width="3.4" stroke-linecap="round"/><path d="M96 106 L103 112 L98 114 Z" fill="#2a1a14"/>
     <g fill="#d8dce6"><circle cx="80" cy="95.4" r="1"/><circle cx="86" cy="99.6" r="1"/><circle cx="92" cy="103.8" r="1"/></g><path d="M56 79 l3 1" stroke="#c9a24a" stroke-width="1.4"/></g>
+   <g class="req e-blockfloete"><path d="M58 80 L98 108" stroke="#d8b070" stroke-width="4.4" stroke-linecap="round"/><path d="M95 105 L103 112 L97 114 Z" fill="#c09050"/>
+    <g fill="#5a3a1a"><circle cx="76" cy="92.6" r="1"/><circle cx="82" cy="96.8" r="1"/><circle cx="88" cy="101" r="1"/></g><path d="M58 80 l4 2.8" stroke="#f0e0b0" stroke-width="4.6"/></g>
+   <g class="req e-piccolo"><path d="M58 79 L96 93" stroke="#d8dce6" stroke-width="2.6" stroke-linecap="round"/>
+    <g fill="#5a5a64"><circle cx="80" cy="87" r=".8"/><circle cx="85" cy="88.9" r=".8"/><circle cx="90" cy="90.7" r=".8"/></g></g>
+   <g class="req e-pfeife"><path d="M58 80 L96 106" stroke="#c8ccd6" stroke-width="3.2" stroke-linecap="round"/><path d="M58 80 L63 83.4" stroke="#2a6a3a" stroke-width="3.8" stroke-linecap="round"/>
+    <g fill="#3a3a44"><circle cx="78" cy="93.7" r=".9"/><circle cx="83" cy="97.1" r=".9"/><circle cx="88" cy="100.5" r=".9"/></g></g>
+   <g class="req e-shakuhachi"><path d="M58 80 L100 112" stroke="#b8a060" stroke-width="5.6" stroke-linecap="round"/>
+    <path d="M70 87 l-3 4 M84 98 l-3 4 M95 106 l-3 4" stroke="#7a6630" stroke-width="1.4"/></g>
+   <g class="req e-englischhorn"><path d="M54 76 Q58 76 60 81" stroke="#c9a24a" stroke-width="1.4" fill="none"/><path d="M60 81 L97 107" stroke="#2a1a14" stroke-width="3.4" stroke-linecap="round"/>
+    <ellipse cx="100" cy="110" rx="4.4" ry="5.6" transform="rotate(-35 100 110)" fill="#2a1a14"/>
+    <g fill="#d8dce6"><circle cx="78" cy="93.7" r="1"/><circle cx="84" cy="97.9" r="1"/></g></g>
+   <g class="req e-oohchor"><path d="M70 82 L82 86 L82 100 L70 96 Z" fill="#f4eedc" stroke="#6b4a2a" stroke-width="1"/><path d="M82 86 L95 84 L95 98 L82 100 Z" fill="#efe6d0" stroke="#6b4a2a" stroke-width="1"/>
+    <path d="M73 87 l6 2 M73 90 l6 2 M85 89 l7 -1 M85 92 l7 -1" stroke="#8a7a60" stroke-width=".6"/><ellipse class="mund" cx="54" cy="80" rx="2.6" ry="3" fill="#5a4a4a"/></g>
+   <g class="req e-bratsche"><path d="M64 84 L100 98" stroke="#3a2414" stroke-width="3" stroke-linecap="round"/><path d="M100 98 q5 1 5 -3" stroke="#3a2414" stroke-width="2.4" fill="none"/>
+    <ellipse cx="64" cy="86" rx="11" ry="7.5" transform="rotate(22 64 86)" fill="#9a4a22" stroke="#4a1a0a"/><path d="M60 84 q2 2 0 4 M68 87 q2 2 0 4" stroke="#2a1a10" stroke-width="1.1" fill="none"/>
+    <path d="M58 104 L86 72" stroke="#6b4423" stroke-width="1.8"/><path d="M60 104 L87 74" stroke="#f2ead8" stroke-width=".7"/></g>
    <path d="M42 100 Q56 112 74 88" fill="none" stroke="#e9e6dc" stroke-width="8" stroke-linecap="round"/>
    <path d="M66 100 Q84 104 90 92" fill="none" stroke="#d8d3c4" stroke-width="7" stroke-linecap="round"/>
    <circle cx="74" cy="87" r="4.5" fill="#cdbfb0"/><circle cx="90" cy="92" r="4.5" fill="#cdbfb0"/>
@@ -4236,6 +4290,11 @@
   <g class="g-blech">
    ${[[318, 46, .6], [352, 50, .62], [386, 46, .6]].map(([x, y, s]) => geist(x, y, s, '<path d="M8 -26 L30 -30" stroke-width="3"/><path d="M30 -36 L38 -30 L30 -24 Z"/>', "horn")).join("")}
   </g>
+  <g class="g-neu g-orgel"><path class="g-pfeifen" d="M28 70 V22 M38 70 V14 M48 70 V8 M58 70 V4 M68 70 V8 M78 70 V14 M88 70 V22" stroke-width="5" stroke-linecap="round"/>${geist(58, 76, .66, '<path d="M-22 4 H22" stroke-width="4"/><path d="M-14 -14 L-10 2 M14 -14 L10 2" stroke-width="2"/>', "organist")}</g>
+  <g class="g-neu g-amboss">${geist(64, 62, .7, '<path d="M-26 22 H-4 L-8 30 H-22 Z"/><path class="schlegel" d="M12 -22 L-8 12" stroke-width="2.4"/><rect x="-14" y="8" width="10" height="6" rx="1"/>', "schmied")}</g>
+  <g class="g-neu g-holz">${[[428, 50, .6], [458, 54, .6]].map(([x, y, s]) => geist(x, y, s, '<path d="M4 -30 L24 -2" stroke-width="2.6"/><path d="M22 -4 L27 2 L20 3 Z"/>', "holzblaeser")).join("")}</g>
+  <g class="g-neu g-chor">${[[578, 50, .6], [604, 44, .6], [630, 50, .6]].map(([x, y, s]) => geist(x, y, s, '<ellipse class="g-mund" cx="0" cy="-30" rx="2.2" ry="2.8"/><path d="M-10 -14 L0 -11 L10 -14 L10 -3 L0 0 L-10 -3 Z"/>', "saenger")).join("")}</g>
+  <g class="g-neu g-glanz">${geist(404, 26, .5, '<path d="M14 -24 l7 12 h-14 Z"/><path d="M-14 -24 l7 12 h-14 Z"/><circle cx="14" cy="-10" r="2"/><circle cx="-14" cy="-10" r="2"/>', "glocke")}</g>
   <g class="g-pauke">${geist(118, 54, .66, '<ellipse class="kessel" cx="0" cy="26" rx="20" ry="7"/><path d="M-20 26 Q0 50 20 26"/><path class="schlegel" d="M-12 -10 L-4 20 M12 -10 L4 20" stroke-width="2"/>', "pauker")}</g>
  </g>
 </svg>`;
@@ -4280,7 +4339,10 @@
   let pegelMesser = null, pegelDaten = null, pegelGlatt = 0, orchGlatt = 0, blechGlatt = 0, strBis = 0, blechBis = 0, strZiel = 0, fxBis = 0, malt = false, bildZaehler = 0;
   const geistQ = [], klassikQ = [], letzterZuck = {};
   let letzterSchlag = 0, buehneMerk = "";
-  const GEIST_ART = g => /^(vln|vc|spic|kb|vlntrem|vctrem|geigest)/.test(g) ? "str" : /^(horn|trp|pos|tuba)/.test(g) ? "blech" : /^(timp|bd|crash|gong)/.test(g) ? "pauke" : "";
+  const GEIST_ART = g => /^(vln|vc|spic|kb|vlntrem|vctrem|geigest|bra|bogen)/.test(g) ? "str" : /^(horn|trp|pos|tuba)/.test(g) ? "blech" : /^(timp|bd|crash|gong|swell)/.test(g) ? "pauke"
+    : /^(fl|klar|fag|oboe)/.test(g) ? "holz" : /^(stimme|ooh)/.test(g) ? "chor" : g === "orgel" ? "orgel" : g === "amboss" ? "amboss" : g === "gloeckchen" ? "glanz" : "";
+  /* weitere Geister auf der Empore: Holzbläser, Chor, Organist, Schmied und Glöckner – jeder nur, solange er spielt */
+  const GEIST_NEU = ["holz", "chor", "orgel", "amboss", "glanz"], geistBis = {};
   const BAND_SPUR = g => /^(timp|bd|snare|bodh|tamb|crash|gong|swell)/.test(g) ? "trommel" : /^(schelle|shake|clave|holz|gloeckchen|amboss)/.test(g) ? "ketten"
     : /^(fl|pan|oka|dudel|oboe|klar|fag)/.test(g) ? "floete" : /^(kb|tuba|vc|pos)/.test(g) ? "bass" : g === "gitarre" ? "klopf" : "melodie";
   function geistMerken(gr, zeit) { const a = GEIST_ART(gr); if (a && geistQ.length < 200) geistQ.push([zeit, a]); }
@@ -4330,7 +4392,9 @@
       if (a === "str") { strBis = jetzt + 2.2; strZiel = Math.min(1, strZiel + .25); }
       else if (a === "blech") { blechBis = jetzt + 2.4; strBis = Math.max(strBis, jetzt + 1.2); }
       else if (a === "pauke") { paukeSchlag(b); strBis = Math.max(strBis, jetzt + 1); }
+      else { geistBis[a] = jetzt + (a === "amboss" || a === "glanz" ? 2.2 : 4.5); if (a === "amboss") geistHammer(b); }
     }
+    GEIST_NEU.forEach(a => b.classList.toggle("g-" + a, !!(laeuft || klassikLauf) && jetzt < (geistBis[a] || 0)));
     if (jetzt > strBis) strZiel = 0; else strZiel = Math.max(strZiel, .55);
     orchGlatt += (strZiel - orchGlatt) * .04;
     blechGlatt += ((jetzt < blechBis ? 1 : 0) - blechGlatt) * .05;
@@ -4348,6 +4412,10 @@
     if (b.dataset.mel !== S.instrument || b.dataset.fl !== S.band.floete) { b.dataset.mel = S.instrument; b.dataset.fl = S.band.floete; b.dataset.tr = S.band.trommel; b.dataset.ez = S.band.ketten; figurCache = {}; armeSetzen(); }
     b.classList.toggle("spielt", !!(laeuft || klassikLauf));
   }
+  function geistHammer(b) {
+    if (ruhig) return;
+    const s = b.querySelector(".lw-geister .g-amboss .schlegel"); if (s && s.animate) s.animate([{ transform: "none" }, { transform: "rotate(-24deg)", offset: .3 }, { transform: "none" }], { duration: 300 });
+  }
   function paukeSchlag(b) {
     if (ruhig) return;
     const p = b.querySelector(".lw-geister .g-pauke"); if (p && p.animate) p.animate([{ opacity: 1, filter: "drop-shadow(0 0 6px #cfe6ff)" }, { opacity: "" , filter: "none" }], { duration: 500, easing: "ease-out" });
@@ -4355,7 +4423,7 @@
   }
   function malen() {
     const b = buehne();
-    const aktiv = ctx && b && !document.hidden && (laeuft || klassikLauf || performance.now() < fxBis || orchGlatt > .02 || pegelGlatt > .02 || anzeige.length || geistQ.length || gastQ.length || root.querySelector('.lw-gast.da'));
+    const aktiv = ctx && b && !document.hidden && (laeuft || klassikLauf || performance.now() < fxBis || orchGlatt > .02 || pegelGlatt > .02 || anzeige.length || geistQ.length || gastQ.length || kapQ.length || root.querySelector('.lw-gast.da'));
     if (!aktiv) { malt = false; if (b) b.classList.remove("spielt"); return; }
     const jetzt = ctx.currentTime;
     while (anzeige.length && anzeige[0].zeit <= jetzt) {
@@ -4761,8 +4829,9 @@
     const def = KAP_INSTR[p.inst], karte = SAMPLE_KARTE[p.inst]; if (!def || !karte) return;
     const m = p.inst === "taiko" ? midi : inLage(midi, karte[0] - 2, karte[karte.length - 1] + 2);
     const l = def.g * laut * (.55 + .55 * int);
-    probe(p.inst, m, zeit, kapZiel(p.pan), l, def.halt ? { ein: .04, aus: Math.min(.25, dauer * .4), dauer: dauer + .06 } : { dauer: Math.max(dauer, 1.2), aus: .3 });
+    if (probe(p.inst, m, zeit, kapZiel(p.pan), l, def.halt ? { ein: .04, aus: Math.min(.25, dauer * .4), dauer: dauer + .06 } : { dauer: Math.max(dauer, 1.2), aus: .3 }) && kapQ.length < 300) kapQ.push([zeit, p.inst]);
   }
+  const kapQ = [], kapZuletzt = {}, kapSeiteMerk = {};
   const KAP_WEISE = {
     /* spielt die Melodie mit (eine Oktave höher oder tiefer) */
     unisono(p, z, sd, ak, x, d) { const v = d.melodie[schritt]; if (v < 0) return; kapTon(p, tonMidi("melodie", v, S) + p.lage, z, notenLaenge(d.melodie, schritt) * sd * .95, 1, x.int); },
@@ -4945,7 +5014,143 @@
       '<ellipse class="mund" cx="45" cy="61" rx="6" ry="5" fill="#1a0e10"/><path d="M36 52 q2 2 4 0 M50 52 q2 2 4 0" stroke="#3a6a5a" stroke-width="1.4" fill="none"/>' +
       '<path d="M26 80 L16 64 M64 80 L74 64" stroke="#5a8a7a" stroke-width="6" stroke-linecap="round"/><path d="M14 64 l-3 -6 M16 62 l0 -7 M18 63 l3 -6 M72 63 l-3 -6 M74 62 l0 -7 M76 64 l3 -6" stroke="#5a8a7a" stroke-width="2"/>'
   };
-  const GAESTE_HTML = '<div class="lw-gaeste" aria-hidden="true">' + GAESTE.map(g => '<svg class="lw-gast gast-' + g.id + (g.geist ? " geist" : "") + " seite-" + g.seite + '" data-gast-bild="' + g.id + '" viewBox="0 0 90 140" overflow="visible"><g class="gk">' + GAST_BILD[g.id] + "</g></svg>").join("") + "</div>";
+  /* ---------- Die Kapelle auf der Bühne: zu jedem Instrument ein eigener Musiker ---------- */
+  const nH = (x, y, haut) => '<circle cx="' + x + '" cy="' + y + '" r="3.7" fill="' + haut + '"/>';
+  const nArm = (x1, y1, bx, by, x2, y2, farbe) => '<path d="M' + x1 + " " + y1 + " Q" + bx + " " + by + " " + x2 + " " + y2 + '" stroke="' + farbe + '" stroke-width="6.5" fill="none" stroke-linecap="round"/>';
+  const NPC_HAAR = {
+    kurz: (y, c) => '<path d="M35 ' + (y - 1) + " Q34 " + (y - 13) + " 45 " + (y - 13) + " Q56 " + (y - 13) + " 55 " + (y - 1) + " Q51 " + (y - 8) + " 45 " + (y - 8) + " Q39 " + (y - 8) + " 35 " + (y - 1) + ' Z" fill="' + c + '"/>',
+    lang: (y, c) => '<path d="M35 ' + (y - 1) + " Q34 " + (y - 13) + " 45 " + (y - 13) + " Q56 " + (y - 13) + " 55 " + (y - 1) + " Q51 " + (y - 8) + " 45 " + (y - 8) + " Q39 " + (y - 8) + " 35 " + (y - 1) + ' Z M35 ' + (y - 3) + " Q31 " + (y + 12) + " 33 " + (y + 22) + " L38 " + (y + 4) + " Z M55 " + (y - 3) + " Q59 " + (y + 12) + " 57 " + (y + 22) + " L52 " + (y + 4) + ' Z" fill="' + c + '"/>',
+    dutt: (y, c) => NPC_HAAR.kurz(y, c) + '<circle cx="45" cy="' + (y - 14) + '" r="4.5" fill="' + c + '"/>',
+    locken: (y, c) => [[36, -6], [39, -11], [45, -13], [51, -11], [54, -6]].map(([x, d]) => '<circle cx="' + x + '" cy="' + (y + d) + '" r="4.2" fill="' + c + '"/>').join(""),
+    keins: () => ""
+  };
+  const NPC_HUT = {
+    spitz: (y, c) => '<path d="M33 ' + (y - 6) + " L47 " + (y - 36) + " L57 " + (y - 6) + ' Z" fill="' + c + '"/><path d="M31 ' + (y - 6) + " H59" + '" stroke="rgba(0,0,0,.35)" stroke-width="3"/>',
+    kappe: (y, c) => '<ellipse cx="47" cy="' + (y - 9) + '" rx="12" ry="5" fill="' + c + '"/><circle cx="47" cy="' + (y - 14) + '" r="1.8" fill="' + c + '"/>',
+    feder: (y, c) => '<ellipse cx="46" cy="' + (y - 9) + '" rx="13" ry="5" fill="' + c + '"/><path d="M52 ' + (y - 12) + " Q66 " + (y - 26) + " 72 " + (y - 22) + " Q62 " + (y - 18) + " 54 " + (y - 9) + ' Z" fill="#f4f0e6"/>',
+    kapuze: (y, c) => '<path d="M32 ' + (y + 9) + " Q30 " + (y - 17) + " 45 " + (y - 17) + " Q60 " + (y - 17) + " 58 " + (y + 9) + " Q56 " + (y - 7) + " 45 " + (y - 8) + " Q34 " + (y - 7) + " 32 " + (y + 9) + ' Z" fill="' + c + '"/>',
+    kasa: (y) => '<path d="M24 ' + (y - 4) + " L45 " + (y - 19) + " L66 " + (y - 4) + ' Z" fill="#c9a86a" stroke="#7a5a30" stroke-width="1"/>',
+    hoerner: (y, c) => '<path d="M38 ' + (y - 8) + " Q31 " + (y - 19) + " 35 " + (y - 25) + " Q38 " + (y - 16) + " 42 " + (y - 10) + " Z M52 " + (y - 8) + " Q59 " + (y - 19) + " 55 " + (y - 25) + " Q52 " + (y - 16) + " 48 " + (y - 10) + ' Z" fill="' + c + '"/>',
+    tuch: (y, c) => '<path d="M34 ' + (y - 2) + " Q35 " + (y - 13) + " 45 " + (y - 13) + " Q55 " + (y - 13) + " 56 " + (y - 2) + ' Z" fill="' + c + '"/><path d="M56 ' + (y - 4) + " l6 3 l-3 5 Z" + '" fill="' + c + '"/>',
+    perucke: (y) => [[34, -2], [34, 5], [35, -9], [45, -13], [55, -9], [56, -2], [56, 5]].map(([x, d]) => '<circle cx="' + x + '" cy="' + (y + d) + '" r="4.6" fill="#ece8de"/>').join(""),
+    shako: (y, c) => '<rect x="37" y="' + (y - 23) + '" width="16" height="14" rx="2" fill="' + c + '"/><path d="M35 ' + (y - 9) + " H55" + '" stroke="#1a1a1a" stroke-width="2.5"/><circle cx="45" cy="' + (y - 17) + '" r="2" fill="#e0b84a"/><path d="M45 ' + (y - 23) + " v-5" + '" stroke="#f4f0e6" stroke-width="2.5"/>',
+    keiner: () => ""
+  };
+  /* ein Musiker aus dem Volk: Kopfhöhe ky, Kleidung, Haar, Hut – das Instrument und die Arme kommen obendrauf */
+  function npc(o) {
+    const y = o.ky || 40, sy = y + 16, h = o.haut, k = o.kleid, bt = o.klein ? 116 : 108;
+    let s = '<ellipse cx="45" cy="137" rx="23" ry="3" fill="rgba(0,0,0,.4)"/>';
+    if (o.robe) s += '<path d="M27 135 Q29 ' + (sy + 34) + " 34 " + sy + " Q45 " + (sy - 5) + " 56 " + sy + " Q61 " + (sy + 34) + ' 63 135 Z" fill="' + k + '"/>' + (o.saum ? '<path d="M27.5 132 H62.5" stroke="' + o.saum + '" stroke-width="2.5"/>' : "");
+    else s += '<rect x="36" y="' + bt + '" width="8" height="' + (134 - bt) + '" fill="' + (o.hose || "#3a2a1e") + '"/><rect x="47" y="' + bt + '" width="8" height="' + (134 - bt) + '" fill="' + (o.hose || "#3a2a1e") + '"/>' +
+      '<path d="M33 136 h12 v-5 h-11 Z M46 136 h12 v-5 h-11 Z" fill="#20140c"/>' +
+      '<path d="M30 ' + (bt + 4) + " Q29 " + (sy + 6) + " 35 " + sy + " Q45 " + (sy - 5) + " 55 " + sy + " Q61 " + (sy + 6) + " 60 " + (bt + 4) + ' Z" fill="' + k + '"/>' +
+      (o.gurt ? '<path d="M30 ' + (bt - 2) + " H60" + '" stroke="' + o.gurt + '" stroke-width="3.5"/>' : "");
+    if (o.muster) s += o.muster;
+    if (o.elf) s += '<path d="M36 ' + y + " L27 " + (y - 7) + " L36 " + (y + 4) + " Z M54 " + y + " L63 " + (y - 7) + " L54 " + (y + 4) + ' Z" fill="' + h + '"/>';
+    if (o.gross) s += '<ellipse cx="33" cy="' + y + '" rx="7" ry="4" transform="rotate(-25 33 ' + y + ')" fill="' + h + '"/><ellipse cx="57" cy="' + y + '" rx="7" ry="4" transform="rotate(25 57 ' + y + ')" fill="' + h + '"/>';
+    s += '<circle cx="45" cy="' + y + '" r="' + (o.klein ? 11 : 10) + '" fill="' + h + '"/>' + (NPC_HAAR[o.haar || "kurz"] || NPC_HAAR.kurz)(y, o.haarFarbe || "#4a2e18");
+    if (o.bart) s += '<path d="M37 ' + (y + 3) + " Q38 " + (y + 18) + " 45 " + (y + 20) + " Q52 " + (y + 18) + " 53 " + (y + 3) + " Q49 " + (y + 8) + " 45 " + (y + 8) + " Q41 " + (y + 8) + " 37 " + (y + 3) + ' Z" fill="' + o.bart + '"/>';
+    s += '<circle cx="41" cy="' + (y - 1) + '" r="1.4" fill="#1a1008"/><circle cx="49" cy="' + (y - 1) + '" r="1.4" fill="#1a1008"/>';
+    s += o.singt ? '<ellipse class="mund" cx="45" cy="' + (y + 5) + '" rx="2.6" ry="2.2" fill="#3a1a14"/>' : o.blaest ? "" : '<path d="M42 ' + (y + 4.5) + " Q45 " + (y + 7) + " 48 " + (y + 4.5) + '" stroke="rgba(60,30,20,.75)" stroke-width="1.3" fill="none"/>';
+    if (o.zaehne) s += '<path d="M41 ' + (y + 5) + " l1 -3 l1 3 M47 " + (y + 5) + " l1 -3 l1 3" + '" stroke="#f4f0e0" stroke-width="1.2" fill="#f4f0e0"/>';
+    if (o.hut) s += NPC_HUT[o.hut](y, o.hutFarbe || "#5a3a20");
+    return s + (o.vorne || "") + '<g class="instr">' + o.instr + "</g>" + (o.arme || "");
+  }
+  /* die Musiker der Kapelle: Name, ob Geist, und ihr Bild (viewBox 0 0 90 140) */
+  const KAP_FIG = {
+    akk: { name: "Mira", bild: npc({ klein: 1, ky: 62, haut: "#e8b896", kleid: "#8a3a5a", haar: "dutt", haarFarbe: "#7a4a22", hose: "#4a2e2a",
+      instr: '<rect x="27" y="84" width="8" height="26" rx="2" fill="#efe6d4" stroke="#6b1a14"/><g class="balg"><path d="M35 84 L38 87 L35 90 L38 93 L35 96 L38 99 L35 102 L38 105 L35 110 H55 L52 105 L55 102 L52 99 L55 96 L52 93 L55 90 L52 87 L55 84 Z" fill="#b0302a" stroke="#5a1010" stroke-width=".8"/>' +
+        '<path d="M38 87 H52 M38 93 H52 M38 99 H52 M38 105 H52" stroke="#e0b84a" stroke-width=".7"/></g><rect x="55" y="84" width="8" height="26" rx="2" fill="#b0302a" stroke="#5a1010"/>' +
+        [88, 93, 98, 103].map(v => '<circle cx="59" cy="' + v + '" r="1.2" fill="#f4f0e0"/>').join("") + [86, 90, 94, 98, 102, 106].map(v => '<path d="M28 ' + v + ' h6" stroke="#1a1010" stroke-width="1.4"/>').join(""),
+      arme: nArm(36, 79, 30, 86, 31, 96, "#8a3a5a") + nArm(54, 79, 60, 86, 59, 96, "#8a3a5a") + nH(31, 96, "#e8b896") + nH(59, 96, "#e8b896") }) },
+    hack: { name: "Pimpel", bild: npc({ klein: 1, ky: 64, haut: "#f0c0a0", kleid: "#3a6a8a", haar: "keins", bart: "#f4f0e8", hut: "spitz", hutFarbe: "#b0302a", hose: "#5a4a3a",
+      instr: '<path d="M22 110 L20 134 M68 110 L70 134" stroke="#4a2e18" stroke-width="2.5"/><path d="M14 110 L76 110 L67 97 L23 97 Z" fill="#8a5a2a" stroke="#3a2412" stroke-width="1.2"/>' +
+        '<path d="M22 100 H68 M20 103.5 H70 M18 107 H72" stroke="#efe2c2" stroke-width=".6"/><circle cx="45" cy="103" r="3" fill="#3a2412"/>',
+      arme: nArm(36, 80, 30, 88, 33, 93, "#3a6a8a") + nArm(54, 80, 60, 88, 57, 93, "#3a6a8a") + '<g class="stoecke"><path d="M33 93 L28 101 M57 93 L62 101" stroke="#d8c49a" stroke-width="1.6"/><circle cx="28" cy="101" r="1.8" fill="#9b3a2f"/><circle cx="62" cy="101" r="1.8" fill="#9b3a2f"/></g>' + nH(33, 93, "#f0c0a0") + nH(57, 93, "#f0c0a0") }) },
+    cemb: { name: "Baron Quill", bild: npc({ ky: 38, haut: "#ecc8a8", kleid: "#33356a", haar: "keins", hut: "perucke", gurt: "#c9a24a", hose: "#e8e0d0",
+      muster: '<path d="M45 56 V100" stroke="#e0b84a" stroke-width="1.6"/><path d="M40 57 L45 63 L50 57" fill="#f4f0e6"/>',
+      instr: '<path d="M18 104 L16 134 M72 104 L74 134 M45 104 L45 134" stroke="#2a1a10" stroke-width="2.5"/><path d="M10 90 H66 Q80 90 80 98 L78 104 H10 Z" fill="#3a1f12" stroke="#c9a24a" stroke-width="1.2"/>' +
+        '<rect x="14" y="88" width="52" height="5" fill="#f4f0e6" stroke="#2a1a10" stroke-width=".6"/>' + [18, 24, 30, 36, 42, 48, 54, 60].map(x => '<rect x="' + x + '" y="88" width="2.4" height="3" fill="#1a1010"/>').join(""),
+      arme: nArm(35, 55, 28, 72, 34, 89, "#33356a") + nArm(55, 55, 62, 72, 55, 89, "#33356a") + nH(34, 89, "#ecc8a8") + nH(55, 89, "#ecc8a8") }) },
+    mar: { name: "Oska", bild: npc({ ky: 40, haut: "#8aa868", kleid: "#c0702a", haar: "lang", haarFarbe: "#1a1410", zaehne: 1, gurt: "#5a3a20", hose: "#4a3a2a",
+      instr: '<path d="M14 104 L12 134 M76 104 L78 134" stroke="#4a2e18" stroke-width="2.5"/>' + [0, 1, 2, 3, 4, 5, 6].map(i => '<rect x="' + (12 + i * 9.6) + '" y="' + (94 + i * .7) + '" width="8" height="' + (10 - i * .7) + '" rx="1.5" fill="#a8643a" stroke="#5a2e12" stroke-width=".6"/>').join("") +
+        [0, 1, 2, 3, 4, 5, 6].map(i => '<rect x="' + (14.5 + i * 9.6) + '" y="105" width="3" height="' + (22 - i * 2) + '" fill="#8a8a92"/>').join(""),
+      arme: nArm(35, 56, 26, 76, 30, 88, "#c0702a") + nArm(55, 56, 64, 76, 60, 88, "#c0702a") + '<g class="stoecke"><path d="M30 88 L24 95 M60 88 L66 95" stroke="#d8c49a" stroke-width="1.6"/><circle cx="24" cy="95" r="2.2" fill="#3a5a9a"/><circle cx="66" cy="95" r="2.2" fill="#3a5a9a"/></g>' + nH(30, 88, "#8aa868") + nH(60, 88, "#8aa868") }) },
+    cel: { name: "Lady Wispel", geist: 1, bild: npc({ ky: 38, haut: "#dfe8f0", kleid: "#9ab4d0", robe: 1, saum: "#e8f0ff", haar: "lang", haarFarbe: "#b8a8e0",
+      instr: '<rect x="14" y="84" width="62" height="40" rx="3" fill="#5a3a5a" stroke="#d8c0e0" stroke-width="1"/><rect x="18" y="84" width="54" height="5" fill="#f4f0e6"/>' + [22, 30, 38, 46, 54, 62].map(x => '<rect x="' + x + '" y="84" width="2.4" height="3" fill="#1a1010"/>').join("") +
+        '<path d="M22 96 H68 M22 110 H68" stroke="#d8c0e0" stroke-width=".7"/><circle cx="45" cy="104" r="4" fill="none" stroke="#d8c0e0"/><path d="M18 124 v10 M72 124 v10" stroke="#5a3a5a" stroke-width="3"/>',
+      arme: nArm(35, 54, 28, 70, 33, 85, "#9ab4d0") + nArm(55, 54, 62, 70, 57, 85, "#9ab4d0") + nH(33, 85, "#dfe8f0") + nH(57, 85, "#dfe8f0") }) },
+    spiel: { name: "Nele", geist: 1, bild: npc({ klein: 1, ky: 66, haut: "#e8eef4", kleid: "#e4e8f0", robe: 1, saum: "#b0c0d8", haar: "lang", haarFarbe: "#c8b890", singt: 1,
+      instr: '<rect x="33" y="94" width="24" height="12" rx="1.5" fill="#8a5a3a" stroke="#4a2a12"/><path d="M33 94 L36 86 H60 L57 94 Z" fill="#a8744a" stroke="#4a2a12" stroke-width=".8"/><path d="M45 94 v-6" stroke="#e0b84a" stroke-width="1"/><circle cx="45" cy="87" r="1.8" fill="#f0a0c0"/>' +
+        '<g class="kurbel"><path d="M57 100 h5 v-5" stroke="#c9a24a" stroke-width="1.6" fill="none"/></g>',
+      arme: nArm(37, 83, 32, 92, 35, 100, "#e4e8f0") + nArm(53, 83, 60, 90, 60, 96, "#e4e8f0") + nH(35, 100, "#e8eef4") + nH(60, 96, "#e8eef4") }) },
+    rgl: { name: "Bruder Anselm", bild: npc({ ky: 42, haut: "#e0b090", kleid: "#6a4a2a", robe: 1, haar: "keins", hut: "kapuze", hutFarbe: "#5a3a1e",
+      muster: '<path d="M34 98 Q45 102 56 98" stroke="#d8c49a" stroke-width="2" fill="none"/>',
+      vorne: '<path d="M66 30 V134 M88 30 V134 M64 30 H90" stroke="#3a2412" stroke-width="2.5"/>' + [0, 1, 2, 3].map(i => '<rect x="' + (68.5 + i * 4.6) + '" y="33" width="3.2" height="' + (62 - i * 9) + '" rx="1.2" fill="#d8c070" stroke="#8a7020" stroke-width=".5"/>').join(""),
+      instr: "",
+      arme: nArm(35, 58, 30, 76, 38, 84, "#6a4a2a") + nArm(55, 58, 62, 62, 64, 58, "#6a4a2a") + '<g class="stoecke"><path d="M64 58 L70 49" stroke="#8a5a32" stroke-width="2"/><rect x="67" y="45" width="7" height="4" rx="1.5" fill="#efe2c2" transform="rotate(-55 70 47)"/></g>' + nH(38, 84, "#e0b090") + nH(64, 58, "#e0b090") }) },
+    taiko: { name: "Grom", bild: npc({ ky: 38, haut: "#7a9a5a", kleid: "#7a9a5a", haar: "keins", hut: "tuch", hutFarbe: "#b0302a", zaehne: 1, hose: "#2a2a34", gurt: "#b0302a",
+      muster: '<path d="M38 66 Q45 70 52 66 M40 78 h10" stroke="#5a7a3a" stroke-width="1.4" fill="none"/>',
+      instr: '<path d="M20 126 L16 136 M70 126 L74 136" stroke="#3a2412" stroke-width="3"/><rect x="16" y="90" width="58" height="38" rx="15" fill="#7a3a1a" stroke="#3a1a0a" stroke-width="1.2"/>' +
+        '<ellipse cx="45" cy="91" rx="27" ry="5" fill="#e8d9b5" stroke="#3a1a0a"/><path d="M18 100 H72 M18 118 H72" stroke="#c9a24a" stroke-width="1"/>' + [24, 32, 40, 48, 56, 64].map(x => '<circle cx="' + x + '" cy="100" r="1.1" fill="#e0b84a"/><circle cx="' + x + '" cy="118" r="1.1" fill="#e0b84a"/>').join("") + '<path d="M34 104 Q45 114 56 104" stroke="#d8c49a" stroke-width="1.5" fill="none"/>',
+      arme: nArm(34, 54, 22, 58, 24, 44, "#7a9a5a") + nArm(56, 54, 68, 58, 66, 44, "#7a9a5a") + '<g class="stoecke"><path d="M24 44 L30 26 M66 44 L60 26" stroke="#d8c49a" stroke-width="3" stroke-linecap="round"/></g>' + nH(24, 44, "#7a9a5a") + nH(66, 44, "#7a9a5a") }) },
+    bfl: { name: "Tobi", bild: npc({ klein: 1, ky: 64, haut: "#f0c8a0", kleid: "#4a7a3a", haar: "locken", haarFarbe: "#d8b060", hose: "#6a4a2a", gurt: "#5a3a20", blaest: 1,
+      instr: '<path d="M45 70 L50 108" stroke="#d8b070" stroke-width="4" stroke-linecap="round"/><path d="M49 103 L52 110 L47 111 Z" fill="#c09050"/>' + [82, 88, 94].map(v => '<circle cx="' + (45 + (v - 70) * 5 / 38) + '" cy="' + v + '" r=".9" fill="#5a3a1a"/>').join(""),
+      arme: nArm(37, 81, 34, 92, 46, 84, "#4a7a3a") + nArm(53, 81, 58, 98, 49, 98, "#4a7a3a") + nH(46, 84, "#f0c8a0") + nH(49, 98, "#f0c8a0") }) },
+    pic: { name: "Fips", bild: npc({ klein: 1, ky: 62, haut: "#f0c4a4", kleid: "#a8302a", haar: "kurz", haarFarbe: "#3a2414", hut: "shako", hutFarbe: "#1e2a4a", hose: "#eae4d6", gurt: "#f4f0e6", blaest: 1,
+      muster: '<path d="M36 84 L54 104 M54 84 L36 104" stroke="#f4f0e6" stroke-width="1.6"/>',
+      instr: '<path d="M46 67 L78 60" stroke="#d8dce6" stroke-width="2.6" stroke-linecap="round"/><g fill="#5a5a64"><circle cx="60" cy="64" r=".8"/><circle cx="65" cy="63" r=".8"/><circle cx="70" cy="62" r=".8"/></g>',
+      arme: nArm(37, 79, 42, 84, 54, 66, "#a8302a") + nArm(53, 79, 66, 80, 70, 63, "#a8302a") + nH(54, 66, "#f0c4a4") + nH(70, 63, "#f0c4a4") }) },
+    pfeife: { name: "Jonte", bild: npc({ ky: 40, haut: "#e0a87a", kleid: "#e8e4dc", haar: "kurz", haarFarbe: "#6a3a1a", hut: "tuch", hutFarbe: "#b0302a", bart: "#6a3a1a", hose: "#2a3a5a", blaest: 1,
+      muster: [64, 72, 80, 88, 96, 104].map(v => '<path d="M30.5 ' + v + ' H59.5" stroke="#2a4a7a" stroke-width="2.6"/>').join(""),
+      instr: '<path d="M46 46 L60 80" stroke="#c8ccd6" stroke-width="3" stroke-linecap="round"/><path d="M46 46 L49 53" stroke="#2a6a3a" stroke-width="3.4" stroke-linecap="round"/>' + [62, 68, 74].map(v => '<circle cx="' + (46 + (v - 46) * 14 / 34) + '" cy="' + v + '" r=".9" fill="#3a3a44"/>').join(""),
+      arme: nArm(35, 56, 36, 72, 51, 62, "#e8e4dc") + nArm(55, 56, 64, 70, 57, 73, "#e8e4dc") + nH(51, 62, "#e0a87a") + nH(57, 73, "#e0a87a") }) },
+    shaku: { name: "Ren", bild: npc({ ky: 40, haut: "#e4b890", kleid: "#4a5a6a", robe: 1, saum: "#2a3440", haar: "keins", hut: "kasa", blaest: 1,
+      muster: '<path d="M38 56 L45 76 L52 56" stroke="#e8e0d0" stroke-width="2" fill="none"/>',
+      instr: '<path d="M45 47 L49 104" stroke="#b8a060" stroke-width="5" stroke-linecap="round"/><path d="M44.5 62 h5 M45.6 78 h5 M46.8 94 h5" stroke="#7a6630" stroke-width="1.2"/>',
+      arme: nArm(35, 56, 34, 70, 46, 66, "#4a5a6a") + nArm(55, 56, 58, 80, 48, 86, "#4a5a6a") + nH(46, 66, "#e4b890") + nH(48, 86, "#e4b890") }) },
+    eh: { name: "Elarion", bild: npc({ ky: 38, haut: "#f0d8c0", kleid: "#3a6a4a", robe: 1, saum: "#d8c070", haar: "lang", haarFarbe: "#e8e4d8", elf: 1, blaest: 1,
+      muster: '<path d="M45 56 V132" stroke="#d8c070" stroke-width="1.2"/>',
+      instr: '<path d="M46 42 Q49 46 47 50" stroke="#c9a24a" stroke-width="1.4" fill="none"/><path d="M47 50 L53 100" stroke="#2a1a14" stroke-width="3.4" stroke-linecap="round"/><ellipse cx="53.5" cy="103" rx="3.6" ry="4.6" fill="#2a1a14"/>' + [62, 72, 82].map(v => '<circle cx="' + (47 + (v - 50) * 6 / 50) + '" cy="' + v + '" r=".9" fill="#d8dce6"/>').join(""),
+      arme: nArm(35, 54, 36, 68, 48, 62, "#3a6a4a") + nArm(55, 54, 60, 80, 51, 84, "#3a6a4a") + nH(48, 62, "#f0d8c0") + nH(51, 84, "#f0d8c0") }) },
+    sitar: { name: "Zaria", bild: npc({ ky: 40, haut: "#a8708e", kleid: "#2a7a7a", haar: "lang", haarFarbe: "#1a1020", hut: "hoerner", hutFarbe: "#2a1a24", gurt: "#e0b84a", hose: "#3a2a4a",
+      instr: '<path d="M30 104 L80 28" stroke="#6a3a1a" stroke-width="4.4" stroke-linecap="round"/><circle cx="29" cy="106" r="14" fill="#a8643a" stroke="#4a2410" stroke-width="1.2"/><circle cx="29" cy="106" r="8" fill="none" stroke="#e0b84a" stroke-width=".8"/>' +
+        '<circle cx="74" cy="36" r="5" fill="#a8643a" stroke="#4a2410"/>' + [0, 1, 2, 3, 4].map(i => '<path d="M' + (44 + i * 6) + " " + (79 - i * 9) + ' l4 2.5" stroke="#e0b84a" stroke-width=".9"/>').join("") + '<path d="M30 104 L80 28" stroke="#ebe2cc" stroke-width=".5"/>',
+      arme: nArm(35, 56, 42, 70, 62, 57, "#2a7a7a") + nArm(55, 56, 50, 86, 37, 98, "#2a7a7a") + nH(62, 57, "#a8708e") + nH(37, 98, "#a8708e") }) },
+    kal: { name: "Funkel", bild: '<g class="fluegel"><path d="M40 80 Q14 56 18 86 Q22 98 40 88 Z M50 80 Q76 56 72 86 Q68 98 50 88 Z" fill="rgba(200,240,255,.45)" stroke="rgba(230,250,255,.8)" stroke-width=".8"/></g>' +
+      npc({ klein: 1, ky: 64, haut: "#f4dcc8", kleid: "#7ab06a", robe: 1, saum: "#e8f0a0", haar: "locken", haarFarbe: "#e8a0c8", elf: 1,
+        instr: '<rect x="34" y="88" width="22" height="13" rx="3" fill="#a8743c" stroke="#5a3a1a"/><circle cx="45" cy="97" r="2" fill="#3a2410"/>' + [0, 1, 2, 3, 4, 5, 6].map(i => '<path d="M' + (36.5 + i * 2.8) + " 89 v" + (6 - Math.abs(i - 3) * 1.2) + '" stroke="#e0e4ec" stroke-width="1.4"/>').join(""),
+        arme: nArm(37, 81, 31, 90, 35, 96, "#7ab06a") + nArm(53, 81, 59, 90, 55, 96, "#7ab06a") + nH(35, 96, "#f4dcc8") + nH(55, 96, "#f4dcc8") }) },
+    bra: { name: "Liriel", bild: npc({ ky: 40, haut: "#f2d6c0", kleid: "#7a2a3a", robe: 1, saum: "#d8a050", haar: "lang", haarFarbe: "#b0441e", elf: 1,
+      instr: '<path d="M30 56 L10 48" stroke="#3a2414" stroke-width="3" stroke-linecap="round"/><path d="M10 48 q-4 -2 -3 -6" stroke="#3a2414" stroke-width="2.4" fill="none"/>' +
+        '<ellipse cx="36" cy="60" rx="10" ry="7" transform="rotate(20 36 60)" fill="#9a4a22" stroke="#4a1a0a"/><path d="M33 58 q2 2 0 4 M40 60 q2 2 0 4" stroke="#2a1a10" stroke-width="1.2" fill="none"/><path d="M42 63 L10 48" stroke="#ebe2cc" stroke-width=".5"/>',
+      arme: nArm(35, 56, 22, 66, 18, 52, "#7a2a3a") + '<g class="bogen">' + nArm(55, 56, 64, 72, 58, 72, "#7a2a3a") + '<path d="M58 72 L22 64" stroke="#6b4423" stroke-width="1.6"/><path d="M58 70 L23 62" stroke="#f2ead8" stroke-width=".7"/>' + nH(58, 72, "#f2d6c0") + "</g>" + nH(18, 52, "#f2d6c0") }) },
+    pizz: { name: "Knirps", bild: npc({ klein: 1, ky: 70, haut: "#8ab060", kleid: "#6a5a3a", haar: "keins", gross: 1, zaehne: 1, hose: "#3a3a2a", gurt: "#3a2414", hut: "kappe", hutFarbe: "#6a2a2a",
+      vorne: "",
+      instr: '<path d="M62 70 L64 14" stroke="#2a1a10" stroke-width="3.4"/><path d="M64 14 q4 -6 0 -9 q-4 3 0 9" fill="#3a2414"/><path d="M60 128 L58 136" stroke="#2a1a10" stroke-width="2"/>' +
+        '<path d="M62 66 Q46 66 49 84 Q44 92 48 104 Q42 128 61 128 Q80 128 74 104 Q78 92 73 84 Q76 66 62 66 Z" fill="#9a4a22" stroke="#4a1a0a" stroke-width="1.2"/><path d="M57 92 q2 3 0 6 M66 92 q2 3 0 6" stroke="#2a1a10" stroke-width="1.4" fill="none"/>' +
+        '<path d="M58 118 h8" stroke="#2a1a10" stroke-width="2"/><path d="M61 118 L63 14 M63 118 L64.5 14" stroke="#ebe2cc" stroke-width=".5"/>',
+      arme: nArm(37, 87, 44, 70, 61, 46, "#6a5a3a") + nArm(53, 87, 52, 102, 59, 104, "#6a5a3a") + nH(61, 46, "#8ab060") + nH(59, 104, "#8ab060") }) },
+    blech: { name: "Herold Hagen", bild: npc({ ky: 38, haut: "#e8b890", kleid: "#2a4a8a", haar: "kurz", haarFarbe: "#3a2414", hut: "feder", hutFarbe: "#8a1e1e", hose: "#e8e0d0", gurt: "#c9a24a", blaest: 1,
+      muster: '<path d="M34 56 H56 L54 102 H36 Z" fill="#c9a24a" opacity=".25"/><path d="M45 70 l4 6 l-4 6 l-4 -6 Z" fill="#e0b84a"/>',
+      instr: '<path d="M46 44 L82 38" stroke="#e0b84a" stroke-width="2.8" stroke-linecap="round"/><path d="M80 38 L90 30 L90 46 Z" fill="#f0c860" stroke="#9a7020" stroke-width=".8"/>' +
+        '<path d="M58 42 L74 39.5 L74 58 L66 54 L58 60 Z" fill="#8a1e1e" stroke="#e0b84a" stroke-width=".8"/><path d="M66 46 l2.5 4 l-2.5 4 l-2.5 -4 Z" fill="#e0b84a"/>',
+      arme: nArm(35, 54, 40, 62, 55, 44, "#2a4a8a") + nArm(55, 54, 66, 58, 70, 40, "#2a4a8a") + nH(55, 44, "#e8b890") + nH(70, 40, "#e8b890") }) },
+    xyl: { name: "Klapper", bild: '<ellipse cx="45" cy="137" rx="22" ry="3" fill="rgba(0,0,0,.4)"/>' +
+      '<path d="M39 106 L37 134 M51 106 L53 134" stroke="#ece6d4" stroke-width="3.4" stroke-linecap="round"/><path d="M33 135 h7 M50 135 h7" stroke="#ece6d4" stroke-width="3" stroke-linecap="round"/>' +
+      '<path d="M45 52 V104" stroke="#ece6d4" stroke-width="3"/>' + [62, 70, 78, 86].map((v, i) => '<path d="M' + (34 + i) + " " + v + " Q45 " + (v + 5) + " " + (56 - i) + " " + v + '" stroke="#ece6d4" stroke-width="2.4" fill="none"/>').join("") +
+      '<path d="M36 104 Q45 98 54 104 Q45 110 36 104 Z" fill="#ece6d4"/>' +
+      '<path d="M35 38 Q35 24 45 24 Q55 24 55 38 Q55 46 50 48 V52 H40 V48 Q35 46 35 38 Z" fill="#f4f0e2"/><circle cx="41" cy="37" r="3" fill="#1a1010"/><circle cx="49" cy="37" r="3" fill="#1a1010"/><circle cx="41" cy="37" r=".9" fill="#7ad0ff"/><circle cx="49" cy="37" r=".9" fill="#7ad0ff"/>' +
+      '<path d="M44 42 l1 -2 l1 2 Z" fill="#1a1010"/><path class="mund" d="M41 48 h8 M43 46.5 v3 M45 46.5 v3 M47 46.5 v3" stroke="#1a1010" stroke-width=".8"/>' +
+      '<g class="instr"><path d="M16 106 L12 134 M74 106 L78 134" stroke="#4a2e18" stroke-width="2.5"/>' + [0, 1, 2, 3, 4, 5, 6].map(i => '<rect x="' + (12 + i * 9.6) + '" y="' + (96 + i * .6) + '" width="8" height="' + (9 - i * .6) + '" rx="1.2" fill="' + ["#d84a3a", "#e8903a", "#e8c83a", "#6ab04a", "#3a8ad8", "#6a5ad8", "#b05ad8"][i] + '" stroke="rgba(0,0,0,.4)" stroke-width=".5"/>').join("") + '<path d="M10 106 H80" stroke="#4a2e18" stroke-width="2"/></g>' +
+      '<path d="M37 56 Q28 70 30 88 M53 56 Q62 70 60 88" stroke="#ece6d4" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<g class="stoecke"><path d="M30 88 L24 95 M60 88 L66 95" stroke="#ece6d4" stroke-width="2"/><circle cx="24" cy="95" r="2.4" fill="#f4f0e2"/><circle cx="66" cy="95" r="2.4" fill="#f4f0e2"/></g>' },
+    ooh: { name: "Die Nebelstimmen", geist: 1, bild: [[20, 50, .82], [70, 50, .82], [45, 40, 1]].map(([x, y, s]) => '<g transform="translate(' + x + " " + y + ") scale(" + s + ')"><path d="M-14 86 Q-16 20 0 14 Q16 20 14 86 Q8 80 4 86 Q0 80 -4 86 Q-8 80 -14 86 Z" fill="#c8d8ec"/>' +
+      '<path d="M-12 30 Q-14 2 0 0 Q14 2 12 30 Q6 20 0 20 Q-6 20 -12 30 Z" fill="#9ab0cc"/><circle cx="0" cy="18" r="9" fill="#e8f0fa"/><circle cx="-3.4" cy="16" r="1.4" fill="#2a3a5a"/><circle cx="3.4" cy="16" r="1.4" fill="#2a3a5a"/>' +
+      '<ellipse class="mund" cx="0" cy="22.5" rx="2.4" ry="3" fill="#2a3a5a"/><rect x="-8" y="40" width="16" height="11" rx="1" fill="#6a4a2a"/><path d="M0 40 v11" stroke="#e8e0d0" stroke-width=".8"/></g>').join("") }
+  };
+  const KAP_HTML = Object.keys(KAP_FIG).map(id => '<svg class="lw-gast lw-kap kap-' + id + (KAP_FIG[id].geist ? " geist" : "") + ' seite-l" data-gast-bild="kap-' + id + '" viewBox="0 0 90 140" overflow="visible"><g class="gk">' + KAP_FIG[id].bild + "</g></svg>").join("");
+  const GAESTE_HTML = '<div class="lw-gaeste" aria-hidden="true">' + KAP_HTML + GAESTE.map(g => '<svg class="lw-gast gast-' + g.id + (g.geist ? " geist" : "") + " seite-" + g.seite + '" data-gast-bild="' + g.id + '" viewBox="0 0 90 140" overflow="visible"><g class="gk">' + GAST_BILD[g.id] + "</g></svg>").join("") + "</div>";
   const gastDa = {};
   /* wer gerade gespielt hat, steht auf der Bühne; wer länger still ist, geht wieder */
   function gaesteZeigen(b) {
@@ -4955,6 +5160,7 @@
       const id = gastQ.shift()[1]; gastZuletzt[id] = jetzt; gastWippen(b, id);
     }
     GAESTE.forEach(g => { if (gastZuletzt[g.id] && jetzt - gastZuletzt[g.id] < (g.rolle === "chor" || g.rolle === "glitzer" || g.rolle === "schief" || g.rolle === "signal" || g.rolle === "fanfare" ? 7000 : 3500) && (laeuft || klassikLauf)) da[g.seite].push(g.id); });
+    kapZeigen(b, jetzt, da);
     bandRuecken(b, da.l.length, da.r.length);
     GAESTE.forEach(g => {
       const el = b.querySelector('[data-gast-bild="' + g.id + '"]'); if (!el) return;
@@ -4970,25 +5176,84 @@
     root.querySelectorAll("[data-gast]").forEach(c => c.classList.toggle("spielt", !!gastDa[c.dataset.gast]));
     return da.l.length + da.r.length > 0;
   }
+  /* Die Musiker der Kapelle treten an den Bühnenrand, sobald ihr Instrument erklingt – innen neben der Band, die Gäste außen.
+     Wer länger still ist (oder nicht mehr zur Besetzung gehört), geht wieder. */
+  const kapDa = {};
+  function kapZeigen(b, jetzt, da) {
+    if (!laeuft) Object.keys(kapZuletzt).forEach(k => delete kapZuletzt[k]);
+    while (kapQ.length && kapQ[0][0] <= ctx.currentTime) {
+      const id = kapQ.shift()[1]; kapZuletzt[id] = jetzt; kapWippen(b, id);
+    }
+    const spieler = laeuft ? kapSpieler() : [];
+    const jetztDa = spieler.filter(p => kapZuletzt[p.inst] && jetzt - kapZuletzt[p.inst] < (p.weise === "glanz" || p.weise === "halte" ? 9000 : 5000)).map(p => p.inst);
+    Object.keys(kapSeiteMerk).forEach(i => { if (!jetztDa.includes(i)) delete kapSeiteMerk[i]; });
+    jetztDa.forEach(i => {
+      if (!kapSeiteMerk[i]) { const n = s => da[s].length + jetztDa.filter(x => kapSeiteMerk[x] === s).length; kapSeiteMerk[i] = n("l") <= n("r") ? "l" : "r"; }
+    });
+    ["l", "r"].forEach(s => jetztDa.forEach(i => { if (kapSeiteMerk[i] === s) da[s].push("kap-" + i); }));
+    Object.keys(KAP_FIG).forEach(id => {
+      const el = b.querySelector('[data-gast-bild="kap-' + id + '"]'); if (!el) return;
+      const seite = kapSeiteMerk[id], ist = !!seite;
+      if (ist) {
+        el.style.setProperty("--slot", da[seite].indexOf("kap-" + id));
+        if (!el.classList.contains("seite-" + seite)) {
+          /* die Seite wechseln, ohne quer über die Bühne zu fliegen */
+          el.style.transition = "none"; el.classList.remove("da", "seite-l", "seite-r"); el.classList.add("seite-" + seite); void el.getBoundingClientRect(); el.style.transition = "";
+        }
+      }
+      if (ist !== el.classList.contains("da")) {
+        el.classList.toggle("da", ist);
+        if (ist && !kapDa[id]) setTimeout(() => { const r = el.getBoundingClientRect(), br = b.getBoundingClientRect(); if (r.width && el.classList.contains("da")) schweben((KAP_FIG[id].geist ? "👻 " : "") + KAP_FIG[id].name + " · " + t().kapName[id], Math.max(12, Math.min(88, (r.left + r.width / 2 - br.left) / br.width * 100)), "blase gastname", 70); }, 500);
+        kapDa[id] = ist;
+      }
+    });
+  }
+  function kapWippen(b, id) {
+    if (ruhig) return;
+    const el = b.querySelector('[data-gast-bild="kap-' + id + '"]'); if (!el || !el.classList.contains("da")) return;
+    const k = el.querySelector(".gk"), q = sel => el.querySelector(sel), an = (e, f, d) => { if (e && e.animate) e.animate(f, { duration: d }); };
+    const links = el.classList.contains("seite-l");
+    an(k, [{ transform: "none" }, { transform: "translateY(-1.5px) rotate(" + (links ? 1.5 : -1.5) + "deg)", offset: .4 }, { transform: "none" }], 300);
+    an(q(".stoecke"), [{ transform: "none" }, { transform: "translateY(5px)", offset: .35 }, { transform: "none" }], 180);
+    an(q(".balg"), [{ transform: "scaleX(1)" }, { transform: "scaleX(.82)", offset: .5 }, { transform: "scaleX(1)" }], 520);
+    an(q(".bogen"), [{ transform: "none" }, { transform: "translate(-6px, -1px)", offset: .5 }, { transform: "none" }], 420);
+    an(q(".kurbel"), [{ transform: "rotate(0)" }, { transform: "rotate(360deg)" }], 600);
+    an(q(".fluegel"), [{ transform: "scaleX(1)" }, { transform: "scaleX(.8)", offset: .5 }, { transform: "scaleX(1)" }], 300);
+    an(q(".instr"), [{ filter: "brightness(1.5) drop-shadow(0 0 3px #ffe7a0)" }, { filter: "none" }], 380);
+    an(q(".mund"), [{ transform: "scaleY(.5)" }, { transform: "scaleY(1.25)" }, { transform: "scaleY(1)" }], 600);
+    if (Math.random() < .35) {
+      const r = el.getBoundingClientRect(), br = b.getBoundingClientRect();
+      if (r.width) schweben(id === "ooh" ? "～" : id === "taiko" ? "✦" : "♪", (r.left + r.width * (links ? .7 : .3) - br.left) / br.width * 100, "gast", 55);
+    }
+  }
   /* Kommen Gäste, rückt die Band zusammen und macht am Rand Platz: kleiner und zur freien Seite verschoben */
   let bandMerk = "", bandEl = null;
   const bandLage = { s: 1, x: 0 };
   function bandRuecken(b, nl, nr) {
     const W = b.clientWidth, H = b.clientHeight; if (!W || !H) return;
     /* Band und Gäste schrumpfen gemeinsam, bis alle nebeneinander passen – so bleiben die Größen stimmig */
-    const gw0 = H * .62 * 90 / 140 / W, fig = Math.min(1, (H - 4) / 210 * 660 / W);
+    /* auf schmalen, hohen Bühnen (Handy quer) sind die Musiker nicht größer als die Band */
+    const bandH = Math.min(H - 4, (W - 8) * 210 / 660), gs0 = Math.min(1, .66 * bandH / (.62 * H));
+    const gw0 = H * .62 * gs0 * 90 / 140 / W, fig = Math.min(1, (H - 4) / 210 * 660 / W);
     let sk = 1, L = 0, R = 0, gw = gw0, schritt = gw0 * .72;
     for (let k = 0; k < 6; k++) {
       gw = gw0 * Math.min(1, sk); schritt = gw * .62;
       L = nl ? .015 + gw + (nl - 1) * schritt : 0; R = nr ? .015 + gw + (nr - 1) * schritt : 0;
       sk = Math.min(1, Math.max(.72, (1 - L - R) / fig));
     }
+    /* viele Musiker: enger zusammenstehen statt in die Band hinein */
+    const zwischen = Math.max(0, nl - 1) + Math.max(0, nr - 1), fest = (nl ? .015 + gw : 0) + (nr ? .015 + gw : 0), platz = 1 - fig * sk;
+    if (zwischen && fest + zwischen * schritt > platz) {
+      schritt = Math.max(gw * .42, (platz - fest) / zwischen);
+      L = nl ? .015 + gw + (nl - 1) * schritt : 0; R = nr ? .015 + gw + (nr - 1) * schritt : 0;
+    }
     const frei = 1 - L - R, x = (L + frei / 2 - .5) * 100;
-    const merk = sk.toFixed(3) + "|" + x.toFixed(2) + "|" + (schritt * 100).toFixed(2);
+    const unten = ((H - 4 - bandH) / 2 + bandH * .05) * sk;
+    const merk = sk.toFixed(3) + "|" + x.toFixed(2) + "|" + (schritt * 100).toFixed(2) + "|" + unten.toFixed(0);
     if (merk === bandMerk && b === bandEl) return;
     bandMerk = merk; bandEl = b; bandLage.s = sk; bandLage.x = x;
-    b.style.setProperty("--gast-s", Math.min(1, sk / Math.max(.6, fig) * fig + (1 - fig)).toFixed(3));
-    b.style.setProperty("--band-s", sk.toFixed(3)); b.style.setProperty("--band-x", x.toFixed(2) + "%"); b.style.setProperty("--gs", (schritt * 100).toFixed(2) + "%");
+    b.style.setProperty("--gast-s", (gs0 * Math.min(1, sk / Math.max(.6, fig) * fig + (1 - fig))).toFixed(3));
+    b.style.setProperty("--band-s", sk.toFixed(3)); b.style.setProperty("--band-x", x.toFixed(2) + "%"); b.style.setProperty("--gs", (schritt * 100).toFixed(2) + "%"); b.style.setProperty("--gast-unten", unten.toFixed(1) + "px");
   }
   /* Ort auf der Bühne (in %) einer Bandfigur, wenn die Band gerade zusammengerückt ist */
   const bandOrt = p => 50 + (p - 50) * bandLage.s + bandLage.x;
@@ -6225,11 +6490,23 @@
 .lw-buehne:not(.spielt) .lw-kulisse-bild *, .lw-buehne.halt * { animation-play-state: paused !important; }
 .lw-buehne.spar .stern, .lw-buehne.spar .regen-fall.langsam, .lw-buehne.spar .wolken.w2, .lw-buehne.spar .gluehwuermchen circle, .lw-buehne.spar .nebel { animation: none; }
 .lw-buehne.spar .gluehwuermchen circle { filter: none; }
-.lw-geister { position: absolute; inset: 4px 4px 0; width: calc(100% - 8px); height: calc(100% - 4px); overflow: visible; opacity: calc(var(--orch, 0) * .75); fill: rgba(190,222,255,.16); stroke: rgba(205,230,255,.55); stroke-width: 1.2; }
+.lw-geister { position: absolute; inset: 4px 4px 0; width: calc(100% - 8px); height: calc(100% - 4px); overflow: visible; opacity: .75; fill: rgba(190,222,255,.16); stroke: rgba(205,230,255,.55); stroke-width: 1.2; }
 .lw-geister g, .lw-geister path, .lw-geister ellipse { transform-box: fill-box; }
-.lw-geister .g-schein { stroke: none; opacity: calc(.25 + var(--blech, 0) * .75); }
+.lw-geister .g-schein { stroke: none; opacity: calc(var(--orch, 0) * (.25 + var(--blech, 0) * .75)); }
+.lw-geister .g-streicher, .lw-geister .g-pauke { opacity: var(--orch, 0); }
+.lw-geister .g-neu { opacity: 0; transition: opacity 1.4s ease; }
+.lw-buehne.spielt .lw-geister .g-neu .geist .g-k { animation: lwgeistwiegen 2.6s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.lw-buehne.g-holz .lw-geister .g-holz, .lw-buehne.g-chor .lw-geister .g-chor, .lw-buehne.g-orgel .lw-geister .g-orgel, .lw-buehne.g-amboss .lw-geister .g-amboss, .lw-buehne.g-glanz .lw-geister .g-glanz { opacity: 1; }
+.lw-buehne.g-orgel .lw-geister .g-amboss { opacity: 0; }
+.lw-geister .g-pfeifen { stroke: rgba(205,230,255,.4); }
+.lw-buehne.g-chor .lw-geister .g-mund { animation: lwsingen 1.3s ease-in-out infinite alternate; transform-origin: 50% 50%; }
+.lw-buehne.g-chor .lw-geister .saenger:nth-child(2) .g-mund { animation-delay: -.6s; }
+@keyframes lwsingen { from { transform: scaleY(.6); } to { transform: scaleY(1.3); } }
+.lw-buehne.g-glanz .lw-geister .g-glanz .g-k { animation: lwgeistwiegen 1.4s ease-in-out infinite alternate; transform-origin: 50% 0; }
+.lw-figur .balg, .lw-gast .balg, .lw-gast .fluegel { transform-box: fill-box; transform-origin: 50% 50%; }
+.lw-gast .kurbel { transform-box: fill-box; transform-origin: 0 100%; }
 .lw-geister .g-empore { fill: none; opacity: .5; }
-.lw-geister .g-blech { opacity: calc(.2 + var(--blech, 0) * .8); transform: translateY(calc(var(--blech, 0) * -3px)); transform-box: view-box; }
+.lw-geister .g-blech { opacity: calc(var(--orch, 0) * (.2 + var(--blech, 0) * .8)); transform: translateY(calc(var(--blech, 0) * -3px)); transform-box: view-box; }
 .lw-geister .g-blech .horn path { stroke-width: 2.5; }
 .lw-buehne.orch-an .lw-geister .g-bogen { animation: lwbogen .9s ease-in-out infinite alternate; }
 .lw-buehne.orch-an .lw-geister .g-bogen.quer { animation-duration: 1.2s; }
@@ -6249,10 +6526,10 @@
 @keyframes lwwiegen3 { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
 .lw-buehne[data-pub="still"] .lw-publikum { opacity: .85; }
 .lw-gaeste { position: absolute; inset: 0; pointer-events: none; }
-.lw-gast { position: absolute; bottom: 5%; height: calc(62% * var(--gast-s, 1)); width: auto; aspect-ratio: 90 / 140; opacity: 0; transition: transform 1s cubic-bezier(.3,.8,.3,1), opacity .8s; overflow: visible; }
+.lw-gast { position: absolute; bottom: var(--gast-unten, 5%); height: calc(62% * var(--gast-s, 1)); width: auto; aspect-ratio: 90 / 140; opacity: 0; visibility: hidden; transition: transform 1s cubic-bezier(.3,.8,.3,1), opacity .8s, visibility 0s 1s; overflow: visible; }
 .lw-gast.seite-l { left: calc(1.5% + var(--slot, 0) * var(--gs, 8%)); transform: translateX(-170%); }
 .lw-gast.seite-r { right: calc(1.5% + var(--slot, 0) * var(--gs, 8%)); transform: translateX(170%); }
-.lw-gast.da { opacity: 1; transform: none; }
+.lw-gast.da { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
 .lw-gast.solo:not(.geist) { filter: drop-shadow(0 0 7px rgba(255,214,130,.85)); }
 .lw-gast.solo { z-index: 2; }
 .lw-gast.geist { filter: saturate(.5) brightness(1.25) drop-shadow(0 0 6px rgba(150,210,255,.9)); }
