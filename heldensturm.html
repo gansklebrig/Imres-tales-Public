@@ -2017,9 +2017,12 @@ let W=0,H=0,DPR=1,ZOOM=1;
 const HS_VERSION='25.10.2026 · Balance';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
 let GAUTO=3,GCEIL=3,FPSNOW=60,RSC=1,RSLOW=0,RSOK=0;
+/* feste Render-Auflösung (Anteil der Bildschirmauflösung) oder null = automatisch */
+const RES_STUFEN=[1,0.85,0.7,0.5];const resFest=()=>{const v=SAVE&&(SAVE.res!=null?SAVE.res:SAVE.fullres?1:null);return RES_STUFEN.includes(v)?v:null};
 /* Läuft der Browser ohne Grafikbeschleunigung (alles über den Prozessor)? Dann von Anfang an sparsamer rechnen und einen Hinweis geben. */
 const SWR=(()=>{try{const g=document.createElement('canvas').getContext('webgl');if(!g)return 1;const e=g.getExtension('WEBGL_debug_renderer_info');const r=String(e?g.getParameter(e.UNMASKED_RENDERER_WEBGL):g.getParameter(g.RENDERER));const l=g.getExtension('WEBGL_lose_context');if(l)l.loseContext();return/swiftshader|llvmpipe|softpipe|software|basic render/i.test(r)?1:0}catch(e){return 0}})();
 if(SWR){RSC=0.8;GAUTO=2}
+try{const f=resFest();if(f)RSC=f}catch(e){}
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
 const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'||!isFinite(+g)?GAUTO:clamp(Math.round(+g),0,4)};
 const GF=()=>GFX[gfxL()];
@@ -3642,10 +3645,11 @@ function fpsWatch(dt,raw,js){FW.iv.push(raw);FW.js.push(js||0);FW.t+=raw;if(FW.t
  if(G.state!=='play'||G.paused||document.hidden)return;
  /* Dauerhaft langsam (z. B. großer Bildschirm, Grafikkarte bremst): intern etwas kleiner rechnen statt zu ruckeln – gilt in jeder Grafikstufe */
  /* am PC erst bei wirklich niedriger Bildrate und nie unter 75 % (sonst wird es auf großen Bildschirmen unscharf); „volle Auflösung“ schaltet das ganz ab */
- const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined,minR=SAVE.fullres?1:MOBIL?0.55:0.75,slow=FPSNOW<(MOBIL?42:30)&&(!auto||GAUTO<=1);
+ const fest=resFest();if(fest){if(RSC!==fest){RSC=fest;resize()}PERF.rs=RSC}
+ const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined,minR=fest||(MOBIL?0.55:0.75),slow=FPSNOW<(MOBIL?42:30)&&(!auto||GAUTO<=1);
  if(RSC<minR){RSC=minR;resize()}
- if(slow){RSOK=0;if(++RSLOW>=2&&RSC>minR){RSC=Math.max(minR,+(RSC-0.15).toFixed(2));RSLOW=0;resize()}}
- else if(RSC<1&&FPSNOW>=55&&miss<0.03){RSLOW=0;if(++RSOK>=8){RSC=Math.min(1,+(RSC+0.1).toFixed(2));RSOK=0;resize()}}else{RSLOW=0;RSOK=0}
+ if(!fest&&slow){RSOK=0;if(++RSLOW>=2&&RSC>minR){RSC=Math.max(minR,+(RSC-0.15).toFixed(2));RSLOW=0;resize()}}
+ else if(!fest&&RSC<1&&FPSNOW>=55&&miss<0.03){RSLOW=0;if(++RSOK>=8){RSC=Math.min(1,+(RSC+0.1).toFixed(2));RSOK=0;resize()}}else{RSLOW=0;RSOK=0}
  PERF.rs=RSC;
  if(!auto)return;
  if(miss>0.12||FPSNOW<42){fpsGood=0;if(++fpsBad>=2&&GAUTO>0){GCEIL=GAUTO-1;GAUTO--;fpsBad=0;resize()}}
@@ -3654,8 +3658,9 @@ function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransfo
  const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz`,`verpasste Bilder ${PERF.miss}%`,`Rechenzeit ⌀${PERF.js.toFixed(1)} / max ${PERF.jsM.toFixed(1)} ms`,`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}${RSC<1?' · '+Math.round(RSC*100)+'%':''}`].concat(SWR?['⚠ Grafikbeschleunigung des Browsers aus']:[]);
  const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;c.fillStyle='rgba(0,0,0,.65)';c.fillRect(8,y0,236,L.length*15+8);c.fillStyle=PERF.miss>10?'#ff8a7a':'#bfffc8';L.forEach((s,i)=>c.fillText(s,13,y0+4+i*15));c.restore()}
 const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner.</div>
+ <div class="row" style="margin:6px 0 2px;align-items:center;flex-wrap:wrap"><span class="muted" style="font-size:13px">Auflösung:</span>${[null].concat(RES_STUFEN).map(v=>`<button class="btn small ${resFest()===v?'gold':''}" data-act="res" data-v="${v==null?'auto':v}" title="${v==null?'Senkt die Auflösung nur, wenn es ruckelt':v===1?'Immer volle Schärfe':'Feste, kleinere Auflösung – mehr Bilder pro Sekunde, etwas weicher'}">${v==null?'Auto':Math.round(v*100)+' %'}</button>`).join('')}<span class="muted" style="font-size:12px">${cv.width}×${cv.height}</span></div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
- <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button><button class="btn small ${SAVE.fullres?'gold':''}" data-act="fullres" title="Nie die Auflösung senken – schärfer, aber auf sehr großen Bildschirmen evtl. weniger Bilder pro Sekunde">${SAVE.fullres?'Volle Auflösung: an':'Volle Auflösung'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
+ <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
 const fsOk=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function fsToggle(){try{if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const e=document.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast('Vollbild wird hier nicht unterstützt.','#ff8a7a'))}}catch(e){toast('Vollbild wird hier nicht unterstützt.','#ff8a7a')}}
 document.addEventListener('fullscreenchange',()=>{setTimeout(resize,60);const b=$('fsBtn');if(b)b.textContent=fsOn()?'Vollbild beenden':'Vollbild'});document.addEventListener('webkitfullscreenchange',()=>setTimeout(resize,60));
@@ -4732,7 +4737,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'band':SAVE.band=+b.dataset.v;persist();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
   case'amb-t':SAVE.amb=SAVE.amb===false;persist();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
   case'bass-t':SAVE.bass=!bassOn();persist();bassSet();{const el=$('sndOpts');if(el)el.innerHTML=sndOpts()}break;
-  case'fullres':SAVE.fullres=!SAVE.fullres;persist();if(SAVE.fullres&&RSC<1){RSC=1;resize()}{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
+  case'res':{const v=b.dataset.v;SAVE.res=v==='auto'?null:+v;delete SAVE.fullres;RSC=resFest()||1;RSLOW=RSOK=0;resize();persist();const el=$('gfxBox');if(el)el.innerHTML=gfxInner();break}
   case'sharp':SAVE.sharp=!sharpOn();persist();resize();{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}break;
   case'fs':fsToggle();break;
   case'gfx-auto':gfxSet(SAVE.gfx==='auto'?gfxL():'auto');break;
