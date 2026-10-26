@@ -505,12 +505,12 @@
       ablauf: ["AABACB", "AABACA", "ABABCD"], akkorde: [[0, 4, 2, 0], [0, 2, 4, 0], [0, 6, 2, 4], [0, 4, 6, 2], [0, 2, 0, 3]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 2, 4, 6], [0, 2, 3, 4, 6], [0, 3, 4, 6, 7]], lage: 3, dichte: .9, echo: "antwort",
       klopf: [[0, 8]], schelle: [[4, 12], [2, 6, 10, 14]], trommel: [[0, 6, 8, 14], [0, 8]], ketten: [[2, 6, 10, 14]], rex: [0] },
-    spannung: { chaos: 1, modus: ["aeolisch"], tempo: [78, 86], transpose: [0, -2], swing: 0, bordun: 0, variation: 4,
+    spannung: { chaos: 1, modus: ["aeolisch"], tempo: [86, 96], transpose: [0, -2], swing: 0, bordun: 0, variation: 4,
       instrument: ["glocken", "harfe", "illusion", "sitar", "cembalo"], band: { trommel: ["pauke", "stoecke"], floete: ["okarina", "englischhorn", "klarinette", "bratsche"], ketten: ["schnipsen", "rassel"] },
       ablauf: ["AAABAC", "AABACA", "AABC"], akkorde: [[0, 0, 5, 5], [0, 5, 0, 4], [0, 4, 5, 4], [0, 0, 6, 6], [0, 2, 0, 5]],
       bass: ["puls"], rhythmus: [[0, 4], [0, 6], [4]], lage: 5, dichte: .45, echo: "fern", schraeg: .25,
       klopf: [[]], schelle: [[]], trommel: [[0, 2], [0, 2, 8, 10]], ketten: [[0, 4, 8, 12]], rex: [2] },
-    sieg: { hebung: 1, zier: "triller", terzen: 1, modus: ["ionisch", "mixolydisch"], tempo: [104, 116], transpose: [0, 2], swing: 0, bordun: 1, variation: 3,
+    sieg: { hebung: 1, fanfare: 1, zier: "triller", terzen: 1, modus: ["ionisch", "mixolydisch"], tempo: [112, 124], transpose: [0, 2], swing: 0, bordun: 1, variation: 3,
       instrument: ["laute", "dudelsack", "mandoline", "akkordeon"], band: { trommel: ["tamburin", "trommel", "pauke"], floete: ["horn", "floete", "piccolo", "pfeife"], ketten: ["klatschen", "stampfen", "krug"] },
       ablauf: ["AABBCB", "AABBCD", "ABACAD"], akkorde: [[0, 2, 3, 0], [0, 5, 2, 3], [0, 6, 3, 0], [0, 4, 2, 0], [0, 2, 0, 3]],
       bass: ["viertel", "puls"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 4, 6], [0, 2, 3, 4]], lage: 4, dichte: 1, echo: "lang",
@@ -541,7 +541,7 @@
       bass: ["galopp", "halbe"], rhythmus: [[0, 3, 4, 6], [0, 2, 4, 6], [0, 3, 6]], lage: 2, dichte: .8, echo: "lang",
       klopf: [[0, 8]], schelle: [[]], trommel: [[0, 3, 6, 8, 11, 14], [0, 8]], ketten: [[0, 3, 6, 8, 11, 14], [3, 11]], rex: [0, 2] },
     /* Reiter über die Ebene: galoppierend, heroisch, Horn und Fidel */
-    reiter: { gefuehl: 1, zier: "triller", terzen: 1, modus: ["aeolisch", "dorisch"], tempo: [114, 124], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 3,
+    reiter: { fanfare: 1, gefuehl: "halb", zier: "triller", terzen: 1, modus: ["aeolisch", "dorisch"], tempo: [116, 126], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 3,
       instrument: ["fidel", "dudelsack", "drehleier", "mandoline"], band: { trommel: ["taiko", "trommel", "bodhran"], floete: ["horn", "floete", "oohchor"], ketten: ["stampfen", "rassel"] },
       ablauf: ["AABACA", "AABCDD", "ABACAD"], akkorde: [[0, 5, 4, 0], [0, 5, 1, 4], [0, 4, 5, 4], [0, 4, 2, 0], [0, 1, 4, 0], [0, 2, 4, 0]],
       bass: ["galopp"], rhythmus: [[0, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 3, 4, 6]], lage: 4, dichte: .95, echo: "lang",
@@ -578,7 +578,7 @@
       bass: ["halbe", "orgel"], rhythmus: [[0, 4], [0, 4, 6], [0, 6]], lage: 3, dichte: .5, echo: "lang",
       klopf: [[]], schelle: [[]], trommel: [[0], []], ketten: [[]], rex: [2] },
     /* Marktplatz: Feilschen, Gaukler, buntes Treiben */
-    marktplatz: { zier: "triller", terzen: 1, modus: ["mixolydisch", "ionisch"], tempo: [108, 118], transpose: [0, 2, -3], swing: 1, bordun: 0, variation: 3,
+    marktplatz: { zier: "triller", terzen: 1, modus: ["dorisch"], tempo: [100, 110], transpose: [0, 2, -3], swing: 1, bordun: 0, variation: 3,
       instrument: ["mandoline", "laute", "schalmei", "akkordeon", "cembalo", "hackbrett"], band: { trommel: ["tamburin", "bodhran", "stoecke"], floete: ["floete", "panfloete", "klarinette", "pfeife", "blockfloete"], ketten: ["krug", "klatschen", "loeffel"] },
       ablauf: ["AABBCB", "ABAC", "AABBCD"], akkorde: [[0, 2, 3, 0], [0, 5, 2, 3], [0, 6, 3, 0], [0, 4, 2, 0], [0, 2, 0, 3]],
       bass: ["viertel"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6], [0, 2, 4, 5, 6]], lage: 4, dichte: .95, echo: "antwort",
@@ -1237,7 +1237,7 @@
       if (neueForm && roh.lieder.length > 1) while (nr === alt) nr = Math.floor(Math.random() * roh.lieder.length);
       const v = liedVonNoten(roh.lieder[nr]), gleich = behalten && S.stimmung === k;
       return pruefen({ tempo: tempoFuer(roh, ist), transpose: gleich ? S.transpose : zufall(roh.transpose), modus: v.modus, instrument: gleich ? S.instrument : v.instrument,
-        band: gleich ? S.band : Object.assign(BAND_START(), v.band), ablauf: v.ablauf, rollen: v.rollen, swing: 0, bordun: v.bordun, takt: 16, liedNr: nr,
+        band: gleich ? S.band : Object.assign(BAND_START(), v.band), ablauf: v.ablauf, rollen: v.rollen, swing: v.swing || 0, bordun: v.bordun, takt: 16, liedNr: nr,
         arrSeed: Math.random() < .5 ? 0 : 1, kapWahl: gleich && Array.isArray(S.kapWahl) && S.kapWahl.length ? S.kapWahl.slice() : kapelleWaehlen(k),
         variation: v.variation, teile: Object.fromEntries(TEILE.map(p => [p, v[p] || teilLeer()])), vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist });
     }
@@ -1341,7 +1341,7 @@
   };
   function liedVonNoten(d) {
     const v = { instrument: d.instrument, band: d.band, tempo: d.tempo, transpose: d.transpose, modus: d.modus, swing: d.swing, bordun: d.bordun, variation: d.variation,
-      ablauf: d.ablauf, rollen: LIED_ROLLEN, besetzung: d.besetzung, kapWahl: (d.kapWahl || []).slice() };
+      ablauf: d.ablauf, rollen: LIED_ROLLEN, besetzung: d.besetzung, kapWahl: (d.kapWahl || []).slice(), swing: d.swing || 0 };
     const zeile = str => { const a = leer(); for (let i = 0; i < SCHRITTE && i < str.length; i++) if (str[i] !== ".") a[i] = parseInt(str[i], 36); return a; };
     d.takte.forEach(([akk, mel, fl], k) => {
       const p = TEILE[k], rolle = LIED_ROLLEN[k], t = teilLeer();
@@ -1434,6 +1434,87 @@
         ["2222", "a.......7.......", "3.5.3.0.3.5.7.5."], ["6666", "8.......8.a.c.e.", "1.3.5.3.1.3.5.1."],
         ["0066", "e...e.d.a...c.a.", "lang"], ["5544", "c...9.7.d...a.8.", "lang"], ["0066", "e...e.d.a...c.a.", "lang"], ["5500", "c.a.9.7.7...0...", "terz"]] }
   ];
+  /* ---------- Spannung, Reiter, Sieg, Marktplatz: ebenfalls handgeschrieben ---------- */
+  const SPANN_SCHLAG = { s: { trommel: [0], ketten: [0, 4, 8, 12] }, r: { trommel: [0, 8], ketten: [0, 2, 4, 6, 8, 10, 12, 14] }, b: { ketten: [0, 4, 8, 12] },
+    h: { trommel: [0, 4, 8, 12, 14], ketten: [0, 2, 4, 6, 8, 10, 12, 14], schelle: [2, 6, 10, 14] } };
+  const REIT_SCHLAG = { i: { trommel: [0, 3, 6, 8, 11, 14] }, s: { trommel: [0, 3, 6, 8, 11, 14], klopf: [8], schelle: [0, 8] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [0, 4, 8, 12], ketten: [4, 12] },
+    b: { trommel: [0, 8] }, h: { trommel: [0, 3, 6, 8, 11, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } };
+  const SIEG_SCHLAG = { i: { trommel: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15] }, s: { trommel: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] },
+    r: { trommel: [0, 3, 4, 6, 8, 11, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] }, b: { trommel: [0, 8], schelle: [4, 12] },
+    h: { trommel: [0, 2, 3, 4, 6, 8, 10, 11, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } };
+  const MARKT_SCHLAG = { i: { trommel: [0, 8] }, s: { trommel: [0, 6, 8, 14], klopf: [4, 12], schelle: [2, 10] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], ketten: [6, 14] },
+    b: { trommel: [0, 8] }, h: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [2, 6, 10, 14], ketten: [6, 14] } };
+  const ABL = "ABCDEFGHIBCDEFGHIJKLMNO";
+  Object.assign(KAMPF_LIEDER, {
+    /* Spannung: tickendes Ostinato, ein reibender Halbton, Stille im Zwischenteil – und dann zittert alles */
+    spannung: [
+      { instrument: "harfe", band: { trommel: "pauke", floete: "englischhorn", ketten: "schnipsen" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: ABL,
+        bass: { i: "orgel", s: "puls", r: "halbe", b: "orgel", h: "puls" }, schlag: SPANN_SCHLAG,
+        takte: [["0000", "0...0...0...0...", ""],
+          ["0000", "0.0.0.1.0.0.0.1.", "lang"], ["0000", "0.0.0.1.0.0.2.1.", "lang"], ["6666", "1.1.1.3.1.1.1.3.", "lang"], ["0000", "0.0.0.1.4...5...", "lang"],
+          ["0000", "7.......8.......", "lang"], ["5555", "9.......8.......", "lang"], ["0000", "7.......8...7...", "lang"], ["6666", "8...a...c...8...", "lang"],
+          ["0000", "................", "0...0...1...1..."], ["4444", "........6.8.a.d.", "6...6...1...3..."],
+          ["0000", "7.8.7.8.7.8.7.8.", "lang"], ["5555", "9.8.9.8.9.8.9.8.", "lang"], ["0000", "7.8.7.8.a.8.7.8.", "lang"], ["6600", "8.......7...0...", "lang"]] },
+      { instrument: "cembalo", band: { trommel: "pauke", floete: "bratsche", ketten: "schnipsen" }, modus: "aeolisch", bordun: 1, variation: 1, ablauf: ABL,
+        bass: { i: "orgel", s: "puls", r: "halbe", b: "orgel", h: "puls" }, schlag: SPANN_SCHLAG,
+        takte: [["0000", "4.......4.......", ""],
+          ["0000", "4.5.4...4.5.4...", "lang"], ["5555", "5.6.5...5.6.5...", "lang"], ["0000", "4.5.4...7.5.4...", "lang"], ["3333", "4.3.1...6.4.1...", "lang"],
+          ["0000", "b...........a...", "lang"], ["5555", "c...........b...", "lang"], ["2222", "a...........c...", "lang"], ["3333", "b.c.d.e.d.c.b...", "lang"],
+          ["0000", "................", "4...5...4...5..."], ["4444", "............9.a.", "6...6...3...3..."],
+          ["0000", "b.a.b.a.b.a.b.a.", "lang"], ["5555", "c.b.c.b.c.b.c.b.", "lang"], ["2222", "a.c.a.c.a.c.a.c.", "lang"], ["3300", "b.......7...0...", "lang"]] }
+    ],
+    /* Reiter: Galopp im 3-3-2, ein weiter, edler Ruf darüber, Hörner antworten */
+    reiter: [
+      { instrument: "fidel", band: { trommel: "bodhran", floete: "horn", ketten: "stampfen" }, modus: "dorisch", bordun: 1, variation: 1, ablauf: ABL,
+        bass: { i: "galopp", s: "galopp", r: "galopp", b: "halbe", h: "galopp" }, schlag: REIT_SCHLAG,
+        takte: [["0000", "0..0..0.4..4..4.", ""],
+          ["0000", "4...7...4.2.0.2.", "lang"], ["2222", "3...7...5.3.0.3.", "lang"], ["4444", "6...8...6.3.1.3.", "lang"], ["3300", "4...6...7.......", "lang"],
+          ["0022", "7...9.a.a...c.a.", "terz"], ["4433", "8...a.8.6...8.b.", "terz"], ["0022", "7...9.a.a...c.a.", "terz"], ["2300", "a...b.a.7.......", "lang"],
+          ["1111", "9.......b.......", "2...4...6...4..."], ["4433", "8.......b.......", "1...3...4...6..."],
+          ["0022", "7...9.a.a...c.a.", "terz"], ["4433", "8...a.8.6...8.b.", "terz"], ["0022", "7...9.a.a...c.a.", "terz"], ["2300", "a...b.a.e.......", "terz"]] },
+      { instrument: "fidel", band: { trommel: "trommel", floete: "horn", ketten: "stampfen" }, modus: "dorisch", bordun: 1, variation: 1, ablauf: ABL,
+        bass: { i: "galopp", s: "galopp", r: "galopp", b: "halbe", h: "galopp" }, schlag: REIT_SCHLAG,
+        takte: [["0000", "7..7..7.4..4..4.", ""],
+          ["0000", "0...2...4...7...", "lang"], ["4444", "1...3...6...8...", "lang"], ["2222", "3...5...7...a...", "lang"], ["3333", "4...6...8...b...", "lang"],
+          ["0044", "e.......d.c.a.8.", "terz"], ["2233", "c.......b.a.8.6.", "terz"], ["0044", "e.......d.c.a.8.", "terz"], ["4400", "d.c.a.8.7.......", "lang"],
+          ["1111", "b.......9.......", "2...4...6...4..."], ["3333", "8.......b.......", "4...6...1...4..."],
+          ["0044", "e.......d.c.a.8.", "terz"], ["2233", "c.......b.a.8.6.", "terz"], ["0044", "e.......d.c.a.8.", "terz"], ["4400", "d.c.a.8.7...e...", "terz"]] }
+    ],
+    /* Sieg: Siegesfanfare (ta-ta-ta-taaa), Marschtrommel, ein breiter Refrain und ein Schluss, der wirklich ankommt */
+    sieg: [
+      { instrument: "dudelsack", band: { trommel: "trommel", floete: "horn", ketten: "klatschen" }, modus: "ionisch", bordun: 1, variation: 1, ablauf: ABL,
+        bass: { i: "halbe", s: "viertel", r: "puls", b: "halbe", h: "puls" }, schlag: SIEG_SCHLAG,
+        takte: [["0530", "777.5...6...7...", ""],
+          ["0000", "4.4.7...4.4.9...", "lang"], ["2222", "5.5.7...5.5.a...", "lang"], ["3333", "6.6.8...6.6.b...", "lang"], ["3300", "8.6.4.6.7.......", "lang"],
+          ["0022", "e...e.d.c...a.c.", "terz"], ["5533", "c...c.b.b...8.6.", "terz"], ["0022", "e...e.d.c...a.c.", "terz"], ["2300", "a...b...e.......", "terz"],
+          ["5555", "9.......7.......", "5...7...5...2..."], ["6633", "8.......b...d...", "1...3...4...6..."],
+          ["0022", "e...e.d.c...a.c.", "terz"], ["5533", "c...c.b.b...8.6.", "terz"], ["0022", "e...e.d.c...a.c.", "terz"], ["3300", "d.b.8.b.e...e...", "terz"]] },
+      { instrument: "mandoline", band: { trommel: "pauke", floete: "pfeife", ketten: "klatschen" }, modus: "ionisch", bordun: 1, variation: 1, ablauf: ABL,
+        bass: { i: "halbe", s: "viertel", r: "puls", b: "halbe", h: "puls" }, schlag: SIEG_SCHLAG,
+        takte: [["0000", "0.4.7.b.e.......", ""],
+          ["0000", "7.7.9.7.4...7...", "lang"], ["2222", "7.7.a.7.5...7...", "lang"], ["5555", "7.7.9.7.5...2...", "lang"], ["3333", "6.8.b.8.6.......", "lang"],
+          ["0033", "e...b...d...b...", "terz"], ["2200", "c...a...e...b...", "terz"], ["0033", "e...b...d...b...", "terz"], ["2300", "a...b...e.......", "terz"],
+          ["1111", "9.......b.......", "2...4...6...4..."], ["6633", "8.......b...d...", "1...3...4...6..."],
+          ["0033", "e...b...d...b...", "terz"], ["2200", "c...a...e...b...", "terz"], ["0033", "e...b...d...b...", "terz"], ["3300", "d.b.8.b.e...e...", "terz"]] }
+    ],
+    /* Marktplatz: Feilschen – Händler ruft, Kunde widerspricht (Ruf und Antwort), dorisch, belebt, aber nicht zuckersüß */
+    marktplatz: [
+      { instrument: "schalmei", band: { trommel: "tamburin", floete: "klarinette", ketten: "krug" }, modus: "dorisch", bordun: 1, variation: 1, swing: 1, ablauf: ABL,
+        bass: { i: "halbe", s: "viertel", r: "viertel", b: "halbe", h: "puls" }, schlag: MARKT_SCHLAG,
+        takte: [["0000", "0.0.4...0.0.2...", ""],
+          ["0000", "4.3.4.7.4.......", "........4.2.0.2."], ["4444", "3.1.3.6.3.......", "........6.3.1.3."], ["2222", "5.3.5.7.a.......", "........5.3.0.3."], ["3300", "4.6.4.1.7...4...", ""],
+          ["0044", "7.7.9.7.........", "........6.6.1.6."], ["2233", "a.a.c.a.........", "........4.4.6.4."], ["0044", "7.9.b.9.8...6...", ""], ["3300", "8.6.4.6.7.......", "........4.2.0..."],
+          ["1111", "9.......b.......", "2.4.6.4.2.4.6.4."], ["3333", "b.......8.......", "4.6.1.6.4.6.1.6."],
+          ["0044", "7.7.9.7.........", "........6.6.1.6."], ["2233", "a.a.c.a.........", "........4.4.6.4."], ["0044", "7.9.b.9.8...6...", ""], ["3300", "8.6.4.6.7...0...", "........4.2.0..."]] },
+      { instrument: "cembalo", band: { trommel: "tamburin", floete: "englischhorn", ketten: "loeffel" }, modus: "dorisch", bordun: 0, variation: 1, swing: 1, ablauf: ABL,
+        bass: { i: "halbe", s: "viertel", r: "viertel", b: "halbe", h: "puls" }, schlag: MARKT_SCHLAG,
+        takte: [["0000", "4.2.4.2.0.......", ""],
+          ["0000", "2.4.2.0.4.......", "........2.4.0..."], ["2222", "3.5.3.0.5.......", "........3.5.0..."], ["4444", "1.3.1.6.3.......", "........1.3.6..."], ["3300", "4.1.4.6.7...0...", ""],
+          ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["4433", "8.6.8.a.b.......", "........4.6.1.4."], ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["3300", "b.8.6.8.7.......", "........4.2.0..."],
+          ["1111", "b.......9.......", "2.4.6.4.2.4.6.4."], ["2233", "a.......8.......", "3.5.0.5.4.6.1.6."],
+          ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["4433", "8.6.8.a.b.......", "........4.6.1.4."], ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["3300", "b.8.6.8.7...0...", "........4.2.0..."]] }
+    ]
+  });
   Object.keys(KAMPF_LIEDER).forEach(k => { if (STIL[k]) STIL[k].lieder = KAMPF_LIEDER[k]; });
 
   const ausVorlage = (k, mix) => {
@@ -5559,7 +5640,7 @@
     fey: [["cel", "glanz", "srh"], ["xyl", "arp", "rh"], ["kal", "ostinato", "s"], ["pic", "unisono", "h", 12, 5], ["spiel", "echo", "b"]],
     zwerge: [["taiko", "puls", "svrh"], ["blech", "stoss", "rh"], ["ooh", "halte", "h", -12], ["akk", "umpa", "s"], ["pizz", "umpa", "s"]],
     dorffest: [["akk", "umpa", "srh"], ["hack", "unisono", "rh"], ["pfeife", "echo", "h"], ["xyl", "arp", "s"], ["mar", "ostinato", "s"]],
-    marktplatz: [["mar", "ostinato", "srh"], ["akk", "unisono", "rh"], ["pfeife", "echo", "h"], ["cemb", "arp", "s"], ["sitar", "echo", "b"]],
+    marktplatz: [["mar", "ostinato", "srh"], ["hack", "echo", "rh"], ["bra", "terz", "rh", -12], ["cemb", "arp", "s"], ["sitar", "echo", "b"]],
     hof: [["cemb", "arp", "srh"], ["blech", "stoss", "h"], ["bra", "terz", "rh", -12], ["bfl", "echo", "s"], ["cel", "glanz", "ib"]],
     shanty: [["akk", "umpa", "srh"], ["pfeife", "unisono", "rh", 12, 4], ["pizz", "ostinato", "s"], ["ooh", "halte", "h", -12], ["bra", "terz", "r", -12]],
     pilger: [["ooh", "halte", "srh"], ["rgl", "glanz", "rh"], ["eh", "unisono", "b", -12], ["bfl", "echo", "h"], ["cel", "glanz", "b"]]
