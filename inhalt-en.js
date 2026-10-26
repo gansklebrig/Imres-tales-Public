@@ -269,7 +269,31 @@ window.INHALT_EN = {
         "!riese.webp|The giant, shortly before we calmed him down. Judging by his look, he still hears the voices.|frei",
         "Suddenly we heard screams and the crash of houses, and already a giant stood before us and attacked. With our combined strength we managed to stun him and tie him up.",
         "Shortly afterwards a second giant appeared, but this one thanked us. He could not explain his kinsman's outburst. Apparently voices in his head had driven him to it. Voices in his head … That sounded uncomfortably familiar.",
-        "As thanks, he invited us to speak with the Stonespeaker. What an honour!"
+        "As thanks, he invited us to speak with the Stonespeaker. What an honour!",
+        "## The Village of the Giants",
+        "After a few more squabbles within our group (I shall spare posterity the details) we decided to accept the invitation. Kardal led us to the village of the giants, a little world of its own on the edge of Gracklstugh. Stone is quarried here: giants push enormous carts full of rock and ore through the lanes as if they were wheelbarrows.",
+        "Echo seized the chance to ask the nearest giant whether he knew Gundren. He had already tried this with every single merchant in Gracklstugh. The giant looked down for a very long time, and a very long way. The answer was no. The giant did, however, notice Rex sniffing at him curiously, and then petted him with great interest and affection. <em class=\"aside\">Rex apparently has more friends in Gracklstugh than the rest of us put together.</em>",
+        "## The Stonespeaker",
+        "We had barely entered the village when the Stonespeaker Hgraam received us. He told us of an old pact between the giants and the king: each side leaves the other in peace and respects the borders. The giants may live in an enclave of the city, but they prefer to stay in their part, and the dwarves in theirs. Hgraam would say no more about it. Then he grew serious: something evil, something insatiable is stirring, he said, and the stone is screaming. That was all we could get out of him, for stonespeakers apparently speak in riddles as a matter of principle. <em class=\"aside\">I know the feeling. I call it poetry.</em> A screaming stone, a giant with voices in his head … rather loud, these giants.",
+        "In a last attempt I reached for my flute of illusions and summoned Demogorgon once more, at full size and with every tentacle, so that Hgraam would understand what kind of danger we might be facing down here. The Stonespeaker regarded the demon, nodded vaguely and went on speaking in riddles, as if I had just shown him a picture of Ezekiel's uncle. <em class=\"aside\">He was clearly busy with worries of his own. Or giants simply don't frighten easily.</em> Either way, we got no new answers.",
+        "As thanks for stopping the giant on the Market of Blades without harming him, Hgraam gave us a stonespeaker crystal. The honour belongs to Friedrich, by the way: he had calmed the raging giant with a sleeping draught we had bought at a market stall not five minutes earlier. <em class=\"aside\">Sometimes shopping really is heroism.</em>",
+        "## Back at the Tavern",
+        "Back at the tavern we questioned Kardal. He was just about to tell us about the poorest of the city, who live far down in the slums, when two dwarves in red robes came to our table and asked us to a meeting. They called themselves the Keepers of the Flame and served, so they said, the Master of Flames. <em class=\"aside\">Anyone calling himself that has either a very large oven or a very large ego. As it turned out: both.</em>",
+        "## The Keepers of the Flame",
+        "They led us to a large stone that hid a secret entrance. With every step it grew warmer, until we stood before Gartokkar, high priest of the Red Robes and first servant of their master.",
+        "He led us into a vast, square hall bathed in a blazing red light, as if from the heart of a volcano. Along the walls and around every corner flowed an endless stream of lava. And in the middle rose a mountain of gold: coins upon coins, gemstones, half-melted treasures and animals of pure gold. There was even a golden dog among them. <em class=\"aside\">Rex eyed it for a very long time, and very suspiciously.</em> We all stood there with our mouths open. Echo was already working out in his head how much it might be worth and everything he could buy with it. <em class=\"aside\">You could see it on his lips. He had reached numbers I know no rhymes for.</em>",
+        "Then we heard it: a rushing sound that grew louder and louder, like mighty wings. Something big was coming. Something very big.",
+        "!themberchaud-hort.jpg|Themberchaud, the Master of Flames, lands on his hoard. I have never seen an audience with so much fire in its belly.",
+        "With a thundering roar the Master of Flames himself landed before us on his treasure: a dragon! Themberchaud.",
+        "## Themberchaud",
+        "I did what I do best: I struck up a song. And what a song! In rhyme I sang of our whole journey through the underworld: our abduction in Thundertree, the fight against the drow, the spiders and everything in between, the battle in the city of the kuo-toa, the coming of Demogorgon, our escape and finally our arrival in Gracklstugh. It was, if I may say so in all modesty, a natural 20. Themberchaud did not destroy us, at any rate. <em class=\"aside\">I count that as my greatest success in front of an audience so far.</em>",
+        "The last note had barely faded when Echo stepped forward and asked the dragon whether he happened to know Gundren. <em class=\"aside\">I did not breathe at that moment. Neither did Themberchaud, incidentally. Then he simply went on talking. So the answer was probably no.</em>",
+        "Instead the dragon told us that he distrusts his own high priest, and ordered us to do something for him and to let Gartokkar instruct us.",
+        "## The Stolen Egg",
+        "!themberchaud.webp|Themberchaud. He did not eat me. I take that as a compliment.|frei",
+        "Only when we left the dragon's hall again and met Gartokkar at the exit did he come out with it: someone has stolen a dragon egg! According to a secret tip he suspects a certain Drokey, supposedly a member of the Gray Ghosts, a thieves' guild from the slums of Gracklstugh.",
+        "Finally he handed us a badge, a sign that we act in the name of the Flame: a gold coin the size of a fist, with a dragon's head on it.",
+        "<em class=\"aside\">A dragon who doesn't trust his priest, a priest who suspects thieves, and us right in the middle. I feel a new song coming.</em>"
       ],
       fortsetzung: "To be continued …"
     }
@@ -301,7 +325,8 @@ window.INHALT_EN = {
           { name: "The Wizard's Tomb", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "The Wizard's Tomb", text: "Behind a defaced spider statue: a wraith and the sword Dawnbringer." },
           { name: "The Underground Lake", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "The Underground Lake", text: "On the shore, Ploopploopeen, archpriest of the kuo-toa, asks for help." },
           { name: "The Kuo-Toa Ruins", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Here Demogorgon rose from the lake. Only ruins remain of the city." },
-          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "The fortress in the rock. Kardal turns out to be a prince, the king grants us hospitality, and a giant rampages through the city." }
+          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "The fortress in the rock. Kardal turns out to be a prince, the king grants us hospitality, and a giant rampages through the city." },
+          { name: "Themberchaud's Hoard", x: 23.5, y: 77.5, kapitel: "II", abschnitt: "The Keepers of the Flame", text: "Behind a great stone: a hall ringed by lava, a mountain of gold and a dragon who gives us a task." }
         ]
       }
     ]
@@ -369,6 +394,12 @@ window.INHALT_EN = {
         label: "Puzzling", titel: "Voices in His Head",
         text: "A giant attacked us in the middle of Gracklstugh. A second giant could not explain the outburst; apparently voices in his head had driven him. Whose voices?",
         kapitel: "II", abschnitt: "The Raging Giant" },
+      { id: "drachenei", bild: "skizze-themberchaud.webp", zeichnung: true, format: "4/3", pos: "70% 30%", x: 18, y: 55, b: 15, dreh: -3,
+        kurz: "The dragon egg<small>Drokey? Gray Ghosts?</small>",
+        label: "Task", titel: "Who stole Themberchaud's egg?",
+        text: "Themberchaud, the Master of Flames, has given us a task: someone has stolen a dragon egg. His high priest Gartokkar suspects a certain Drokey of the Gray Ghosts, a thieves' guild from the slums. The dragon, in turn, does not trust Gartokkar.",
+        hinweise: ["Our badge: a fist-sized gold coin with a dragon's head.", "The tip about Drokey supposedly came anonymously.", "Kardal was just about to tell us about the poorest in the slums …"],
+        kapitel: "II", abschnitt: "The Stolen Egg" },
     ],
     faeden: [
       { von: "nezna", nach: "spinne", a1: [0.03, 0.144], a2: [0.488, 0.034], grund: "spoke of the Spider as well." },
@@ -379,7 +410,9 @@ window.INHALT_EN = {
       { von: "nezna", nach: "ilvara", schnur: false, grund: "both drow, both shapeshifters. Coincidence?" },
       { von: "glasstab", nach: "nezna", schnur: false, grund: "both spoke of the Spider." },
       { von: "kardal", nach: "gracklstugh", schnur: false, grund: "Kardal is the son of Gracklstugh's king." },
-      { von: "ilvara", nach: "demogorgon", schnur: false, grund: "demons appeared out of nowhere during our breakout from her dungeon." }
+      { von: "ilvara", nach: "demogorgon", schnur: false, grund: "demons appeared out of nowhere during our breakout from her dungeon." },
+      { von: "drachenei", nach: "gracklstugh", farbe: "gelb", grund: "the egg vanished in the middle of the city – the Gray Ghosts live in its slums." },
+      { von: "drachenei", nach: "riese", schnur: false, grund: "\u201cSomething evil, insatiable is stirring\u201d, says the Stonespeaker. Is it connected?" }
     ],
     notizen: [
       { text: "both:<br>“the Spider”!", x: 11.4, y: 15.2, b: 10, dreh: 7 },
@@ -404,7 +437,11 @@ window.INHALT_EN = {
     { gruppe: "The Underdark", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Archpriest of the kuo-toa", text: "A friend of the party, if only for a short while. He trusted us, smuggled us into his city as fake prisoners and stood on the steps of his temple to the very end when Demogorgon destroyed it. Barradin fondly called him Blublupin – and still owes him a song." },
     { gruppe: "The Underdark", name: "Kardal", status: "verbuendet", rolle: "Dwarf, son of the king of Gracklstugh", text: "Found bound among the kuo-toa, passed himself off as a scout and fled across the lake with us. In Gracklstugh it came out that he is the king's son." },
     { gruppe: "The Underdark", name: "King Horga Stahl V", bild: "portrait-koenig.jpg", bildPos: "50% 50%", status: "neutral", rolle: "King of Gracklstugh, Kardal's father", text: "Listened to Barradin's song about Demogorgon and the rescue of his son, and granted us leave to stay in the city." },
-    { gruppe: "The Underdark", name: "The Raging Giant", bild: "portrait-riese.jpg", bildPos: "50% 50%", status: "unklar", rolle: "Giant in Gracklstugh", text: "Attacked us in the middle of the city until we managed to stun him and tie him up. Another giant believes voices in his head drove him to it." }
+    { gruppe: "The Underdark", name: "The Raging Giant", bild: "portrait-riese.jpg", bildPos: "50% 50%", status: "unklar", rolle: "Giant in Gracklstugh", text: "Attacked us in the middle of the city until we managed to stun him and tie him up. Another giant believes voices in his head drove him to it." },
+    { gruppe: "The Underdark", name: "Hgraam", status: "neutral", rolle: "Stonespeaker of the giants", text: "Received us in the village of the giants and spoke in riddles of something evil and insatiable stirring. Even an illusory Demogorgon left him cold. As thanks for stopping the giant peacefully, he gave us a stonespeaker crystal." },
+    { gruppe: "The Underdark", name: "Themberchaud", bild: "themberchaud.webp", bildPos: "50% 25%", status: "neutral", rolle: "Dragon, the Master of Flames", text: "Rests on a mountain of gold in a hall ringed by lava. Barradin's rhyming ballad of our deeds (a natural 20) put him in a gracious mood. He distrusts his own high priest – and someone has stolen a dragon egg from him." },
+    { gruppe: "The Underdark", name: "Gartokkar", status: "unklar", rolle: "High priest of the Keepers of the Flame", text: "Highest of the Red Robes and Themberchaud's first servant. Sends us after the stolen dragon egg and gave us a fist-sized gold coin as a badge. His master does not trust him an inch, though." },
+    { gruppe: "The Underdark", name: "Drokey", status: "unklar", rolle: "Supposedly one of the Gray Ghosts", text: "According to a secret tip, he stole the dragon egg. The Gray Ghosts are a thieves' guild from the slums of Gracklstugh. We have not seen him yet." }
   ],
 
   kunst: [
@@ -416,6 +453,7 @@ window.INHALT_EN = {
     { bild: "skizze-chasme.webp", titel: "Chasme", text: "Appeared out of nowhere in the middle of our breakout." },
     { bild: "skizze-turm.webp", titel: "The Tower of Thundertree", text: "Where the Venomfang was waiting." },
     { bild: "skizze-ketten.webp", titel: "In Chains", text: "How we woke up in the Underdark." },
-    { bild: "skizze-laute.webp", titel: "Barradin's Lute", text: "The party's most important weapon." }
+    { bild: "skizze-laute.webp", titel: "Barradin's Lute", text: "The party's most important weapon." },
+    { bild: "skizze-themberchaud.webp", titel: "Themberchaud", text: "Drawn from a safe distance. That is, from memory." }
   ]
 };

@@ -853,6 +853,7 @@ html, body { overflow-x: clip; }
     "skizze-chasme.webp": /chasme/i,
     "skizze-turm.webp": /venomfang/i,
     "skizze-ketten.webp": /lag in fesseln|\blay bound\b/i, /* das Erwachen im Kerker der Drow */
+    "skizze-themberchaud.webp": /themberchaud/i,
     "skizze-laute.webp": "#barradin"
   };
   const skizzenListe = () => {

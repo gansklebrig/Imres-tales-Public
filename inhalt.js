@@ -276,7 +276,31 @@ window.INHALT = {
         "!riese.webp|Der Riese, kurz bevor wir ihn zur Ruhe gebracht haben. Seinem Blick nach hört er die Stimmen noch.|frei",
         "Plötzlich hörten wir Schreie und das Krachen von Häusern, und schon stand ein Riese vor uns und griff an. Mit vereinten Kräften gelang es uns, ihn zu betäuben und zu fesseln.",
         "Kurz darauf erschien ein zweiter Riese, doch dieser dankte uns. Den Ausfall seines Artgenossen konnte er sich nicht erklären. Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben. Stimmen im Kopf … Das kam mir unangenehm bekannt vor.",
-        "Zum Dank lud er uns ein, mit dem Steinsprecher zu reden. Welch eine Ehre!"
+        "Zum Dank lud er uns ein, mit dem Steinsprecher zu reden. Welch eine Ehre!",
+        "## Das Dorf der Riesen",
+        "Nach ein paar weiteren Plänkeleien in unserer Gruppe (die Einzelheiten erspare ich der Nachwelt) beschlossen wir, der Einladung zu folgen. Kardal führte uns in das Dorf der Riesen, eine eigene kleine Welt am Rand von Gracklstugh. Hier wird Stein gebrochen: Riesen schieben gewaltige Wagen voller Gestein und Erz durch die Gassen, als wären es Schubkarren.",
+        "Echo nutzte die Gelegenheit, den nächstbesten Riesen zu fragen, ob er Gundren kenne. Das hatte er in Gracklstugh schon bei jedem einzelnen Händler versucht. Der Riese sah sehr lange und sehr weit nach unten. Die Antwort war nein. Dafür bemerkte der Riese, wie Rex neugierig an ihm schnupperte, und streichelte ihn daraufhin interessiert und liebevoll. <em class=\"aside\">Rex hat in Gracklstugh offenbar mehr Freunde als wir alle zusammen.</em>",
+        "## Der Steinsprecher",
+        "Kaum hatten wir das Dorf betreten, empfing uns schon der Steinsprecher Hgraam. Er erzählte von einem alten Pakt zwischen den Riesen und dem König: Man lässt einander in Ruhe und achtet die Grenzen. Die Riesen leben zwar in einer Enklave der Stadt, bleiben aber lieber in ihrem Teil, und die Zwerge in ihrem. Mehr wollte Hgraam dazu nicht sagen. Dann wurde er ernst: Etwas Böses, Unersättliches regt sich, sagte er, und der Stein schreit. Mehr war aus ihm nicht herauszubekommen, denn Steinsprecher reden offenbar grundsätzlich in Rätseln. <em class=\"aside\">Ich kenne das. Ich nenne es Lyrik.</em> Ein schreiender Stein, ein Riese mit Stimmen im Kopf … ganz schön laut bei diesen Riesen.",
+        "In einem letzten Versuch griff ich zu meiner Flöte der Illusionen und ließ ein weiteres Mal Demogorgon erscheinen, in voller Größe und mit allen Tentakeln, damit Hgraam begreift, mit welcher Art von Gefahr wir es hier unten zu tun haben könnten. Der Steinsprecher betrachtete den Dämon, nickte vage und sprach weiter in Rätseln, als hätte ich ihm gerade ein Bild von Ezekiels Onkel gezeigt. <em class=\"aside\">Er war offenbar mit seinen eigenen Sorgen beschäftigt. Oder Riesen erschrecken einfach nicht so leicht.</em> Neue Antworten bekamen wir jedenfalls keine.",
+        "Zum Dank dafür, dass wir den Riesen auf dem Markt der Klingen aufgehalten hatten, ohne ihm etwas anzutun, schenkte uns Hgraam einen Steinsprecher-Kristall. Die Ehre gebührt übrigens Friedrich: Er hatte den Rasenden mit einem Betäubungstrank ruhiggestellt, den wir keine fünf Minuten vorher an einem Marktstand gekauft hatten. <em class=\"aside\">Manchmal ist Einkaufen eben doch Heldentat.</em>",
+        "## Besuch in der Schenke",
+        "Zurück in der Schenke nahmen wir Kardal ins Verhör. Er wollte uns gerade von den Ärmsten der Stadt erzählen, die ganz unten in den Slums hausen, als zwei Zwerge in roten Roben an unseren Tisch traten und uns zu einem Gespräch baten. Sie nannten sich die Bewahrer der Flamme und dienten, so sagten sie, dem Meister der Flammen. <em class=\"aside\">Wer sich so nennt, hat entweder einen sehr großen Ofen oder ein sehr großes Ego. Wie sich herausstellte: beides.</em>",
+        "## Die Bewahrer der Flamme",
+        "Sie führten uns zu einem großen Stein, hinter dem sich ein geheimer Eingang verbarg. Mit jedem Schritt wurde es wärmer, bis wir vor Gartokkar standen, dem Hohepriester der Rotroben und ersten Diener ihres Meisters.",
+        "Er geleitete uns in eine riesige, quadratische Halle, getaucht in ein lodernd rotes Licht wie aus dem Inneren eines Vulkans. Entlang der Wände und um alle Ecken floss ein unaufhörlicher Strom aus Lava. Und in der Mitte erhob sich ein Berg aus Gold: Münzen über Münzen, Edelsteine, halb geschmolzene Kostbarkeiten und Tiere aus purem Gold. Sogar ein goldener Hund war darunter. <em class=\"aside\">Rex hat ihn sehr lange und sehr misstrauisch angesehen.</em> Wir standen alle mit offenem Mund davor. Echo rechnete im Kopf schon nach, wie viel das wohl wäre und was er sich davon alles kaufen könnte. <em class=\"aside\">Man sah es an seinen Lippen. Er war bei Zahlen angekommen, für die ich keine Reime kenne.</em>",
+        "Dann hörten wir es: ein Rauschen, das immer lauter wurde, wie von gewaltigen Schwingen. Etwas Großes kam näher. Sehr Großes.",
+        "!themberchaud-hort.jpg|Themberchaud, der Meister der Flammen, landet auf seinem Hort. Ich habe noch nie ein Publikum gesehen, das so viel Feuer im Bauch hat.",
+        "Mit einem tosenden Brausen landete der Meister der Flammen höchstpersönlich vor uns auf seinem Schatz: ein Drache! Themberchaud.",
+        "## Themberchaud",
+        "Ich tat, was ich am besten kann: Ich stimmte ein Lied an. Und was für eins! In Reimen besang ich unsere ganze Reise durch die Unterwelt, unsere Entführung in Donnerbaum, den Kampf gegen die Drow, die Spinnen und alles dazwischen, die Schlacht in der Stadt der Kuo-Toa, das Erscheinen Demogorgons, unsere Flucht und schließlich unsere Ankunft in Gracklstugh. Es war, das darf ich in aller Bescheidenheit sagen, eine natürliche 20. Themberchaud vernichtete uns jedenfalls nicht. <em class=\"aside\">Ich verbuche das als meinen bisher größten Erfolg vor Publikum.</em>",
+        "Kaum war der letzte Ton verklungen, trat Echo vor und fragte den Drachen, ob er zufällig Gundren kenne. <em class=\"aside\">Ich habe in diesem Moment nicht geatmet. Themberchaud übrigens auch nicht. Dann hat er einfach weitergeredet. Die Antwort war also vermutlich nein.</em>",
+        "Stattdessen erzählte uns der Drache, dass er seinem eigenen Hohepriester misstraut, und befahl uns, etwas für ihn zu erledigen und uns dafür von Gartokkar unterweisen zu lassen.",
+        "## Das gestohlene Ei",
+        "!themberchaud.webp|Themberchaud. Er hat mich nicht gefressen. Ich nehme das als Kompliment.|frei",
+        "Erst als wir die Halle des Drachen wieder verließen und vor dem Ausgang auf Gartokkar trafen, rückte dieser mit der Sprache heraus: Jemand hat ein Drachenei gestohlen! Einem geheimen Hinweis zufolge verdächtigt er einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh.",
+        "Zum Abschluss überreichte er uns ein Abzeichen, als Zeichen, dass wir im Namen der Flamme handeln: eine faustgroße Goldmünze mit einem Drachenkopf darauf.",
+        "<em class=\"aside\">Ein Drache, der seinem Priester nicht traut, ein Priester, der Diebe verdächtigt, und wir mittendrin. Ich spüre ein neues Lied.</em>"
       ],
       fortsetzung: "Fortsetzung folgt …"
     }
@@ -311,7 +335,8 @@ window.INHALT = {
           { name: "Das Grab der Magierin", x: 26.0, y: 27.3, kapitel: "II", abschnitt: "Das Grab der Magierin", text: "Hinter einer verunstalteten Spinnenstatue: ein Wraith und das Schwert Dawnbringer." },
           { name: "Der unterirdische See", x: 22.7, y: 41.9, kapitel: "II", abschnitt: "Der unterirdische See", text: "Am Ufer bittet Ploopploopeen, Erzpriester der Kuo-Toa, um Hilfe." },
           { name: "Die Ruinen der Kuo-Toa", x: 20.0, y: 47.1, kapitel: "II", abschnitt: "Demogorgon", text: "Hier stieg Demogorgon aus dem See. Von der Stadt sind nur Ruinen geblieben." },
-          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels. Kardal entpuppt sich als Prinz, der König gewährt uns Gastrecht, und ein Riese rast durch die Stadt." }
+          { name: "Gracklstugh", x: 19, y: 73, kapitel: "II", abschnitt: "Gracklstugh", text: "Die Festung im Fels. Kardal entpuppt sich als Prinz, der König gewährt uns Gastrecht, und ein Riese rast durch die Stadt." },
+          { name: "Themberchauds Hort", x: 23.5, y: 77.5, kapitel: "II", abschnitt: "Die Bewahrer der Flamme", text: "Hinter einem großen Stein: eine lavaumflossene Halle, ein Berg aus Gold und ein Drache, der uns einen Auftrag gibt." }
         ]
       }
     ]
@@ -389,6 +414,12 @@ window.INHALT = {
         label: "Rätselhaft", titel: "Stimmen im Kopf",
         text: "Ein Riese griff uns mitten in Gracklstugh an. Ein zweiter Riese konnte sich den Ausfall nicht erklären, offenbar hatten ihn Stimmen in seinem Kopf getrieben. Wessen Stimmen?",
         kapitel: "II", abschnitt: "Der rasende Riese" },
+      { id: "drachenei", bild: "skizze-themberchaud.webp", zeichnung: true, format: "4/3", pos: "70% 30%", x: 18, y: 55, b: 15, dreh: -3,
+        kurz: "Das Drachenei<small>Drokey? Graue Geister?</small>",
+        label: "Auftrag", titel: "Wer stahl Themberchauds Ei?",
+        text: "Themberchaud, der Meister der Flammen, hat uns beauftragt: Jemand hat ein Drachenei gestohlen. Sein Hohepriester Gartokkar verdächtigt einen gewissen Drokey von den Grauen Geistern, einer Diebesgilde aus den Slums. Der Drache wiederum traut Gartokkar nicht.",
+        hinweise: ["Unser Abzeichen: eine faustgroße Goldmünze mit Drachenkopf.", "Der Hinweis auf Drokey kam angeblich anonym.", "Kardal wollte uns gerade von den Ärmsten in den Slums erzählen …"],
+        kapitel: "II", abschnitt: "Das gestohlene Ei" },
     ],
     /* schnur: false = kein roter Faden, steht aber im Detailtext unter „Zusammenhänge“ (die Zettel hängen dann nebeneinander). */
     faeden: [
@@ -400,7 +431,9 @@ window.INHALT = {
       { von: "nezna", nach: "ilvara", schnur: false, grund: "beide Drow, beide Gestaltwandlerinnen. Zufall?" },
       { von: "glasstab", nach: "nezna", schnur: false, grund: "beide sprachen von der Spinne." },
       { von: "kardal", nach: "gracklstugh", schnur: false, grund: "Kardal ist der Sohn des Königs von Gracklstugh." },
-      { von: "ilvara", nach: "demogorgon", schnur: false, grund: "beim Ausbruch aus ihrem Kerker tauchten wie aus dem Nichts Dämonen auf." }
+      { von: "ilvara", nach: "demogorgon", schnur: false, grund: "beim Ausbruch aus ihrem Kerker tauchten wie aus dem Nichts Dämonen auf." },
+      { von: "drachenei", nach: "gracklstugh", farbe: "gelb", grund: "das Ei verschwand mitten in der Stadt – die Grauen Geister hausen in ihren Slums." },
+      { von: "drachenei", nach: "riese", schnur: false, grund: "„Etwas Böses, Unersättliches regt sich“, sagt der Steinsprecher. Hängt das zusammen?" }
     ],
     /* Gelbe Randnotizen, nur zur Deko (nicht anklickbar). gross: true = große Schrift. */
     notizen: [
@@ -429,7 +462,11 @@ window.INHALT = {
     { gruppe: "Das Unterreich", name: "Ploopploopeen", bild: "ploopploopeen.jpg", bildPos: "50% 25%", status: "tot", rolle: "Erzpriester der Kuo-Toa", text: "Ein Freund der Gruppe, wenn auch nur für kurze Zeit. Er vertraute uns, schmuggelte uns zum Schein gefesselt in seine Stadt und stand bis zuletzt auf den Stufen seines Tempels, als Demogorgon sie zerstörte. Barradin hat ihn liebevoll Blublupin genannt – und schuldet ihm noch ein Lied." },
     { gruppe: "Das Unterreich", name: "Kardal", status: "verbuendet", rolle: "Zwerg, Sohn des Königs von Gracklstugh", text: "Gefesselt bei den Kuo-Toa gefunden, gab sich als Späher aus und floh mit uns über den See. In Gracklstugh kam heraus, dass er der Sohn des Königs ist." },
     { gruppe: "Das Unterreich", name: "König Horga Stahl V.", bild: "portrait-koenig.jpg", bildPos: "50% 50%", status: "neutral", rolle: "König von Gracklstugh, Kardals Vater", text: "Hörte sich Barradins Gesang über Demogorgon und die Rettung seines Sohnes an und gewährte uns, in der Stadt zu verweilen." },
-    { gruppe: "Das Unterreich", name: "Der rasende Riese", bild: "portrait-riese.jpg", bildPos: "50% 50%", status: "unklar", rolle: "Riese in Gracklstugh", text: "Griff uns mitten in der Stadt an, bis wir ihn betäuben und fesseln konnten. Ein anderer Riese meint, Stimmen in seinem Kopf hätten ihn dazu getrieben." }
+    { gruppe: "Das Unterreich", name: "Der rasende Riese", bild: "portrait-riese.jpg", bildPos: "50% 50%", status: "unklar", rolle: "Riese in Gracklstugh", text: "Griff uns mitten in der Stadt an, bis wir ihn betäuben und fesseln konnten. Ein anderer Riese meint, Stimmen in seinem Kopf hätten ihn dazu getrieben." },
+    { gruppe: "Das Unterreich", name: "Hgraam", status: "neutral", rolle: "Steinsprecher der Riesen", text: "Empfing uns im Dorf der Riesen und sprach in Rätseln von etwas Bösem, Unersättlichem, das sich regt. Selbst ein illusionierter Demogorgon ließ ihn kalt. Zum Dank für den friedlich gestoppten Riesen schenkte er uns einen Steinsprecher-Kristall." },
+    { gruppe: "Das Unterreich", name: "Themberchaud", bild: "themberchaud.webp", bildPos: "50% 25%", status: "neutral", rolle: "Drache, der Meister der Flammen", text: "Thront in einer lavaumflossenen Halle auf einem Berg aus Gold. Barradins gereimte Heldenballade (eine natürliche 20) stimmte ihn gnädig. Er misstraut seinem eigenen Hohepriester – und jemand hat ihm ein Drachenei gestohlen." },
+    { gruppe: "Das Unterreich", name: "Gartokkar", status: "unklar", rolle: "Hohepriester der Bewahrer der Flamme", text: "Höchster der Rotroben und erster Diener Themberchauds. Schickt uns auf die Suche nach dem gestohlenen Drachenei und gab uns eine faustgroße Goldmünze als Abzeichen. Sein Meister traut ihm allerdings nicht über den Weg." },
+    { gruppe: "Das Unterreich", name: "Drokey", status: "unklar", rolle: "Angeblich einer der Grauen Geister", text: "Einem geheimen Hinweis zufolge soll er das Drachenei gestohlen haben. Die Grauen Geister sind eine Diebesgilde aus den Slums von Gracklstugh. Gesehen haben wir ihn noch nicht." }
   ],
 
   /* ---------- BARRADINS KÜNSTE ----------
@@ -443,6 +480,7 @@ window.INHALT = {
     { bild: "skizze-chasme.webp", titel: "Chasme", text: "Tauchte mitten im Ausbruch aus dem Nichts auf." },
     { bild: "skizze-turm.webp", titel: "Der Turm von Donnerbaum", text: "Hier wartete der Venomfang." },
     { bild: "skizze-ketten.webp", titel: "In Ketten", text: "So sind wir im Unterreich aufgewacht." },
-    { bild: "skizze-laute.webp", titel: "Barradins Laute", text: "Die wichtigste Waffe der Gruppe." }
+    { bild: "skizze-laute.webp", titel: "Barradins Laute", text: "Die wichtigste Waffe der Gruppe." },
+    { bild: "skizze-themberchaud.webp", titel: "Themberchaud", text: "Aus sicherer Entfernung gezeichnet. Also aus dem Gedächtnis." }
   ]
 };
