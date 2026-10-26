@@ -489,7 +489,7 @@
   const STIL = {
     /* Kampf: Schlachtmusik wie im Film – Taiko, Pauken und Streicher treiben im 3-3-2, darüber ein heldenhaftes Thema
        in langen Tönen (Fidel, Horn, Chor), die Akkorde schreiten i – VI – VII; kein Zufallsgeklapper mehr */
-    kampf: { form: "hymne", gefuehl: "halb", modus: ["aeolisch"], tempo: [126, 134], transpose: [-2, 0], swing: 0, bordun: 1, variation: 1,
+    kampf: { form: "hymne", gefuehl: "halb", modus: ["aeolisch"], tempo: [146, 158], transpose: [-2, 0], swing: 0, bordun: 1, variation: 1,
       instrument: ["fidel", "drehleier", "dudelsack"], band: { trommel: ["taiko", "pauke"], floete: ["horn", "oohchor"], ketten: ["stampfen", "ketten"] },
       ablauf: ["AABACA"], akkorde: [[0, 5, 4, 0], [0, 5, 1, 4], [0, 5, 4, 4], [0, 2, 5, 4], [0, 5, 2, 4]],
       bass: ["galopp", "puls"], rhythmus: [[0, 3, 6], [0, 4, 6], [0, 3, 4, 6], [0, 6]], lage: 3, dichte: 1, echo: "lang",
@@ -604,7 +604,7 @@
     /* Endgegner: noch schneller und wuchtiger als der Kampf */
     /* Endgegner: übermächtig und düster wie die Brücke von Khazad-dûm – schwerer und breiter als der Kampf, phrygisch,
        ein Riff, das sich festbeißt, Chor und tiefe Bläser, Amboss-Schläge und Gong; im Zwischenteil halbes Tempo */
-    boss: { form: "hymne", gefuehl: "halb", riff: 1, modus: ["phrygisch"], tempo: [104, 114], transpose: [-2, -4], swing: 0, bordun: 1, variation: 1,
+    boss: { form: "hymne", gefuehl: "halb", riff: 1, modus: ["phrygisch"], tempo: [136, 148], transpose: [-2, -4], swing: 0, bordun: 1, variation: 1,
       instrument: ["fidel", "drehleier"], band: { trommel: ["taiko", "pauke"], floete: ["oohchor", "horn"], ketten: ["ketten", "stampfen"] },
       ablauf: ["AABACA"], akkorde: [[0, 6, 0, 5], [0, 6, 5, 4], [0, 5, 6, 0], [0, 0, 6, 5], [0, 5, 4, 6]],
       bass: ["galopp", "halbe"], rhythmus: [[0, 3, 6], [0, 6], [0, 2, 3, 6], [0, 4, 6]], lage: 2, dichte: 1, echo: "lang",
@@ -1230,6 +1230,17 @@
   const echoWahl = (liste, mel, jetzt) => { const ok = liste.filter(x => !(FAMILIE[mel] || []).includes(x)), r = ok.length ? ok : liste, ohne = r.filter(x => x !== jetzt); return zufall(jetzt != null && ohne.length ? ohne : r); };
   function stimmungLied(k, behalten, stufe, neueForm) {
     const roh = STIL[k], ist = stufe != null ? stufe : (typeof S.intensitaet === "number" ? S.intensitaet : 5), st = mitIntensitaet(roh, ist);
+    /* Stimmungen mit handgeschriebenen Themen (Kampf, Endgegner): ein Thema wählen – beim neuen Lied ein anderes */
+    if (roh.lieder && roh.lieder.length) {
+      const alt = behalten && S.stimmung === k && Number.isInteger(S.liedNr) ? S.liedNr : -1;
+      let nr = alt >= 0 && !neueForm ? alt : Math.floor(Math.random() * roh.lieder.length);
+      if (neueForm && roh.lieder.length > 1) while (nr === alt) nr = Math.floor(Math.random() * roh.lieder.length);
+      const v = liedVonNoten(roh.lieder[nr]), gleich = behalten && S.stimmung === k;
+      return pruefen({ tempo: tempoFuer(roh, ist), transpose: gleich ? S.transpose : zufall(roh.transpose), modus: v.modus, instrument: gleich ? S.instrument : v.instrument,
+        band: gleich ? S.band : Object.assign(BAND_START(), v.band), ablauf: v.ablauf, rollen: v.rollen, swing: 0, bordun: v.bordun, takt: 16, liedNr: nr,
+        arrSeed: Math.random() < .5 ? 0 : 1, kapWahl: gleich && Array.isArray(S.kapWahl) && S.kapWahl.length ? S.kapWahl.slice() : kapelleWaehlen(k),
+        variation: v.variation, teile: Object.fromEntries(TEILE.map(p => [p, v[p] || teilLeer()])), vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist });
+    }
     const basis = behalten ? { tempo: S.tempo, transpose: S.transpose, modus: S.modus, instrument: S.instrument, band: S.band, ablauf: S.ablauf, swing: S.swing, bordun: S.bordun, takt: S.takt === 12 && roh.dreier ? 12 : 16 }
       : { tempo: tempoFuer(roh, ist) + zufall([-2, 0, 2]), transpose: zufall(st.transpose), modus: zufall(st.modus), instrument: zufall(st.instrument),
           band: { trommel: zufall(st.band.trommel), floete: zufall(st.band.floete), ketten: zufall(st.band.ketten) },
@@ -1330,7 +1341,7 @@
   };
   function liedVonNoten(d) {
     const v = { instrument: d.instrument, band: d.band, tempo: d.tempo, transpose: d.transpose, modus: d.modus, swing: d.swing, bordun: d.bordun, variation: d.variation,
-      ablauf: d.ablauf, rollen: LIED_ROLLEN, besetzung: d.besetzung, kapWahl: d.kapWahl.slice() };
+      ablauf: d.ablauf, rollen: LIED_ROLLEN, besetzung: d.besetzung, kapWahl: (d.kapWahl || []).slice() };
     const zeile = str => { const a = leer(); for (let i = 0; i < SCHRITTE && i < str.length; i++) if (str[i] !== ".") a[i] = parseInt(str[i], 36); return a; };
     d.takte.forEach(([akk, mel, fl], k) => {
       const p = TEILE[k], rolle = LIED_ROLLEN[k], t = teilLeer();
@@ -1345,6 +1356,53 @@
     return v;
   }
   Object.keys(LIEDER_NEU).forEach(k => { VORLAGEN[k] = liedVonNoten(LIEDER_NEU[k]); });
+  /* ---------- Kampf und Endgegner: handgeschriebene Kampfthemen ----------
+     Inspiriert von Spiele-Kampfmusik (Pokémon & Co.): ein schneller Lauf als Auftakt, treibende Achtel im Bass,
+     Snare mit Rückschlag und Wirbeln, synkopierte Riffs in der Strophe und ein heldenhafter Refrain in hoher Lage.
+     Mehrere Themen je Stimmung – mit jedem neuen Lied kommt ein anderes. */
+  const KAMPF_SCHLAG = {
+    i: { trommel: [10, 12, 13, 14, 15], schelle: [] },
+    s: { trommel: [0, 3, 6, 10, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+    r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+    b: { trommel: [0, 8, 12, 13, 14, 15], schelle: [0, 4, 8, 12] },
+    h: { trommel: [0, 3, 6, 8, 10, 11, 12, 13, 14, 15], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] }
+  };
+  const KAMPF_LIEDER = {
+    kampf: [
+      { instrument: "fidel", band: { trommel: "trommel", floete: "horn", ketten: "stampfen" }, modus: "aeolisch", bordun: 0, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+        bass: { i: "orgel", s: "puls", r: "galopp", b: "halbe", h: "puls" }, schlag: KAMPF_SCHLAG,
+        takte: [["0000", "edcba9876543210.", ""],
+          ["0000", "7..7..9.7.4.2.4.", "lang"], ["5555", "7..7..9.c.9.7.5.", "lang"], ["4444", "6..6..8.a.8.6.3.", "lang"], ["3333", "4.6.8.6.b.a.8.6.", "lang"],
+          ["0044", "e...c.b.a...8.a.", "terz"], ["5533", "c...b.a.b...8.6.", "terz"], ["2244", "a...c.a.8...a.8.", "terz"], ["3300", "b.a.8.6.7.......", "lang"],
+          ["5555", "c.......c.d.e.d.", "5...7...5...2..."], ["3333", "b.......b.c.d.b.", "4...6...1...4..."],
+          ["0044", "e...c.b.a...8.a.", "terz"], ["5533", "c...b.a.b...8.6.", "terz"], ["2244", "a...c.a.8...a.8.", "terz"], ["3300", "b.a.8.6.7...e...", "terz"]] },
+      { instrument: "fidel", band: { trommel: "taiko", floete: "horn", ketten: "stampfen" }, modus: "aeolisch", bordun: 0, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+        bass: { i: "orgel", s: "puls", r: "puls", b: "halbe", h: "galopp" }, schlag: KAMPF_SCHLAG,
+        takte: [["0000", "0.4.7.4.0.4.7.b.", ""],
+          ["0000", "4.4.5.4.2...0.2.", "lang"], ["4444", "3.3.4.3.1...6.1.", "lang"], ["5555", "2.2.3.2.0...5.7.", "lang"], ["3333", "1.4.6.8.b...8...", "lang"],
+          ["5544", "c..c..a.a...8...", "terz"], ["0033", "9..9..7.b...8...", "terz"], ["5544", "c..c..a.a...8...", "terz"], ["2300", "a..a..8.7.......", "lang"],
+          ["1111", "9.......b.......", "2...4...6...4..."], ["3333", "b.......8.......", "4...6...1...4..."],
+          ["5544", "c..c..a.a...8...", "terz"], ["0033", "9..9..7.b...8...", "terz"], ["5544", "c..c..a.a...8...", "terz"], ["2300", "a..a..8.7...e...", "terz"]] }
+    ],
+    boss: [
+      { instrument: "drehleier", band: { trommel: "taiko", floete: "oohchor", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+        bass: { i: "puls", s: "puls", r: "galopp", b: "halbe", h: "galopp" }, schlag: KAMPF_SCHLAG,
+        takte: [["0000", "0.0.1.1.0.0.1.1.", ""],
+          ["0066", "7.7.7.8.8...a.8.", "lang"], ["0055", "7.7.7.8.9...7.5.", "lang"], ["4444", "6.6.6.8.a...8.6.", "lang"], ["6666", "8.8.a.c.8...5...", "lang"],
+          ["0055", "e..e..c.e...c.9.", "terz"], ["4466", "d..d..a.8...a.c.", "terz"], ["0055", "e..e..c.e...c.9.", "terz"], ["6600", "c.a.8.a.7.......", "lang"],
+          ["5555", "9.......c.......", "2...5...7...5..."], ["6666", "8.......a.......", "1...3...5...1..."],
+          ["0055", "e..e..c.e...c.9.", "terz"], ["4466", "d..d..a.8...a.c.", "terz"], ["0055", "e..e..c.e...c.9.", "terz"], ["6600", "c.a.8.a.7...e...", "terz"]] },
+      { instrument: "fidel", band: { trommel: "pauke", floete: "oohchor", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+        bass: { i: "orgel", s: "puls", r: "puls", b: "halbe", h: "galopp" }, schlag: KAMPF_SCHLAG,
+        takte: [["0000", "e.d.c.b.a.9.8.7.", ""],
+          ["0000", "0..0..1.0...4.2.", "lang"], ["6666", "1..1..3.1...5.3.", "lang"], ["0000", "0..0..1.0...7.4.", "lang"], ["5544", "5..5..7.6...8...", "lang"],
+          ["0066", "7...8.7.8...a.8.", "terz"], ["5544", "9...7.5.6...8.6.", "terz"], ["0066", "7...8.7.8...a.8.", "terz"], ["6600", "8.a.8.5.7.......", "lang"],
+          ["1111", "b.......9.......", "2...4...6...4..."], ["6666", "a.......8.......", "3...5...1...3..."],
+          ["0066", "7...8.7.8...a.8.", "terz"], ["5544", "9...7.5.6...8.6.", "terz"], ["0066", "7...8.7.8...a.8.", "terz"], ["6600", "8.a.8.5.7...7...", "terz"]] }
+    ]
+  };
+  Object.keys(KAMPF_LIEDER).forEach(k => { if (STIL[k]) STIL[k].lieder = KAMPF_LIEDER[k]; });
+
   const ausVorlage = (k, mix) => {
     const v = kopie(VORLAGEN[k]);
     return { tempo: v.tempo, transpose: v.transpose, modus: v.modus, swing: v.swing, bordun: v.bordun, variation: v.variation, instrument: v.instrument || "laute",
@@ -5317,7 +5375,7 @@
     taiko: { g: .6 }, bfl: { g: .24, halt: 1 }, pic: { g: .17, halt: 1 }, pfeife: { g: .18, halt: 1 }, shaku: { g: .28, halt: 1 }, eh: { g: .26, halt: 1 },
     sitar: { g: .3 }, kal: { g: .4 }, bra: { g: .28, halt: 1 }, pizz: { g: .4 }, blech: { g: .24, halt: 1 }, xyl: { g: .26 }, ooh: { g: .24, halt: 1 } };
   const KAPELLE = {
-    kampf: [["blech", "stoss", "rh"], ["taiko", "puls", "svrh"], ["pizz", "ostinato", "sv"], ["bra", "unisono", "h", -12, 5], ["ooh", "halte", "rh", -12]],
+    kampf: [["blech", "stoss", "srh"], ["taiko", "puls", "svrh"], ["pizz", "ostinato", "sv"], ["xyl", "unisono", "rh", 12, 5], ["ooh", "halte", "rh", -12]],
     boss: [["blech", "stoss", "srh"], ["taiko", "puls", "isvrh"], ["ooh", "halte", "srh", -12], ["pizz", "ostinato", "sb"], ["bra", "unisono", "h", -12, 5]],
     verfolgung: [["pizz", "ostinato", "svrh"], ["taiko", "puls", "rh"], ["pic", "unisono", "h", 12, 5], ["blech", "stoss", "h"], ["xyl", "ostinato", "s"]],
     spannung: [["pizz", "ostinato", "srh"], ["rgl", "glanz", "h"], ["cel", "echo", "r", 0, 4], ["sitar", "ostinato", "s"], ["spiel", "echo", "b"]],
@@ -6801,7 +6859,7 @@
       if (laeuft && S) {
         const st = STIL[basis], tr = st.transpose.reduce((b, x) => Math.abs(x - S.transpose) < Math.abs(b - S.transpose) ? x : b, st.transpose[0]);
         neu.transpose = tr;
-        if (st.modus.includes(S.modus) && neu.modus !== S.modus) { neu.modus = S.modus; const st2 = mitIntensitaet(st, neu.intensitaet); st2.taktJetzt = neu.takt; let tl; try { tl = neu.rollen ? liedTeile(st2, neu.modus, neu.rollen, neu.takt) : stimmungTeile(st2, neu.modus); } catch (_) { tl = neu.teile; } neu.teile = pruefen({ teile: tl }).teile; }
+        if (!st.lieder && st.modus.includes(S.modus) && neu.modus !== S.modus) { neu.modus = S.modus; const st2 = mitIntensitaet(st, neu.intensitaet); st2.taktJetzt = neu.takt; let tl; try { tl = neu.rollen ? liedTeile(st2, neu.modus, neu.rollen, neu.takt) : stimmungTeile(st2, neu.modus); } catch (_) { tl = neu.teile; } neu.teile = pruefen({ teile: tl }).teile; }
       }
     }
     else neu = pruefen(ausVorlage(k, mix));
