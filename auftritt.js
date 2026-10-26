@@ -33,7 +33,8 @@
       lied: "Lied", neuesLied: "🎲 Neues Lied", erfunden: "Barradin improvisiert",
       lieder: { reigen: "Tavernenreigen", bugbear: "Der Bugbear im Fass", klage: "Phandalins Klage", schmiede: "Hammer und Amboss", seemann: "Seemannsgarn", walzer: "Demogorgons Walzer",
         schatten: "Ezekiels Schattentanz", rex: "Rex' wilde Jagd", ploop: "Ploopploopeens Tiefseeshanty", venom: "Venomfangs Odem",
-        buerger: "Des Bürgermeisters Geldbeutel", palast: "Hymne der Krone", elfen: "Mondscheinreigen der Feen", goetter: "Das Ewige Lied" },
+        buerger: "Des Bürgermeisters Geldbeutel", palast: "Hymne der Krone", elfen: "Mondscheinreigen der Feen", goetter: "Das Ewige Lied",
+        flammen: "Die Ballade vom Meister der Flammen" },
       stimmen_laden: "🎻 Instrumente werden gestimmt …",
       erfinden: { vorlage: ["Die Ballade vom {a} {n}", "Das Lied vom {a} {n}", "Der Reigen vom {a} {n}", "Die Mär vom {a} {n}", "Die Klage vom {a} {n}"],
         adj: ["traurigen", "betrunkenen", "tanzenden", "verliebten", "singenden", "hungrigen", "verlorenen", "kichernden", "einsamen", "wütenden", "verfluchten", "goldenen"],
@@ -65,10 +66,10 @@
         publikum: "Publikum", sg: n => "SG " + n, lied: "Stück",
         start: "▶ Auftreten", nochmal: "↻ Noch einmal versuchen", wiederholen: "↻ Noch einmal spielen", weiter: "Zur nächsten Bühne →",
         gegen: n => "Auftrittswurf gegen SG " + n, bestanden: "Bestanden!", durchgefallen: "Nicht geschafft …",
-        neuerRang: r => "Neuer Ruf: " + r, ende: "Barradins Weg ist vollendet. Die Götter summen sein Lied.",
+        neuerRang: r => "Neuer Ruf: " + r, ende: "Barradins Weg ist vollendet. Die Götter summen sein Lied – und tief unter Gracklstugh brummt ein Drache mit.",
         zuruecksetzen: "Weg von vorn beginnen", sicher: "Wirklich den ganzen Fortschritt löschen?",
         unbekannt: "Unbekannter Barde",
-        raenge: ["Straßenmusikant", "Spelunkensänger", "Hafenbarde", "Gasthaussänger", "Festbarde", "Ballmusikus", "Schlossbarde", "Spielmann des Unterreichs", "Hofbarde von Neverwinter", "Liebling der Feen", "Gottgeküsster Barde"],
+        raenge: ["Straßenmusikant", "Spelunkensänger", "Hafenbarde", "Gasthaussänger", "Festbarde", "Ballmusikus", "Schlossbarde", "Spielmann des Unterreichs", "Hofbarde von Neverwinter", "Liebling der Feen", "Gottgeküsster Barde", "Drachensänger"],
         stationen: [
           { ort: "„Zum Lahmen Esel“ – Straßenkneipe in Phandalin", publikum: "Drei Bauern, ein schlafender Hund und der Wirt",
             intro: "Irgendwo muss eine Legende anfangen. Warum nicht hier, zwischen verschüttetem Bier und einem Hund, der sehr laut träumt?",
@@ -112,8 +113,12 @@
             pleite: "Die Feen kichern. Eine hat meine Saiten zu Blumen verknotet. Noch einmal – mit Würde." },
           { ort: "Die Hallen des Ewigen Liedes", publikum: "Die Götter selbst",
             intro: "Kein Weg führt hierher, nur ein Lied. Wer hier spielt, spielt für die Ewigkeit. Keine Fehler, Barradin. Keine. Fehler.",
-            sieg: "Die Götter erheben sich. Mein Lied wird in die Sterne geschrieben, und irgendwo in Phandalin wacht ein Hund auf und wedelt mit dem Schwanz.",
-            pleite: "Ein Gott hustet. Ein anderer lächelt nachsichtig. Unsterbliche haben Zeit – und ich noch einen Versuch." }
+            sieg: "Die Götter erheben sich. Mein Lied wird in die Sterne geschrieben, und irgendwo in Phandalin wacht ein Hund auf und wedelt mit dem Schwanz. Nur: Tief im Unterreich hat jemand mitgehört, der nach Schwefel riecht. Zugabe!",
+            pleite: "Ein Gott hustet. Ein anderer lächelt nachsichtig. Unsterbliche haben Zeit – und ich noch einen Versuch." },
+          { ort: "Zugabe: Vor dem Meister der Flammen – Themberchauds Halle in Gracklstugh", publikum: "Ein roter Drache auf einem Berg aus Gold, sein Hohepriester Gartokkar und ein Echo, das die Münzen zählt",
+            intro: "Lava an allen Rändern, Gold in der Mitte, und obendrauf ein Drache, der schon satt aussieht – hoffentlich. Ich singe ihm unsere ganze Reise: Donnerbaum, Drow, Spinnen, Kuo-Toa, Demogorgon. In Reimen. Ohne Patzer.",
+            sieg: "Themberchaud senkt den gewaltigen Kopf. „Unterhaltsam.“ Wir dürfen leben – mehr noch: Der Meister der Flammen hat einen Auftrag für uns. Echo fragt ihn, ob er Gundren kennt. Er kennt ihn nicht.",
+            pleite: "Aus den Nüstern des Drachen steigt ein Rauchwölkchen. Ein kleines. Ein warnendes. Meine Laute ist plötzlich sehr warm. Noch einmal – und diesmal mit Reimen, die sich reimen." }
         ]
       }
     },
@@ -134,7 +139,8 @@
       lied: "Song", neuesLied: "🎲 New song", erfunden: "Barradin improvises",
       lieder: { reigen: "Tavern Round", bugbear: "The Bugbear in the Barrel", klage: "Phandalin's Lament", schmiede: "Hammer and Anvil", seemann: "Sailor's Yarn", walzer: "Demogorgon's Waltz",
         schatten: "Ezekiel's Shadow Dance", rex: "Rex's Wild Hunt", ploop: "Ploopploopeen's Deep-Sea Shanty", venom: "Venomfang's Breath",
-        buerger: "The Mayor's Purse", palast: "Hymn of the Crown", elfen: "Moonlit Dance of the Fey", goetter: "The Eternal Song" },
+        buerger: "The Mayor's Purse", palast: "Hymn of the Crown", elfen: "Moonlit Dance of the Fey", goetter: "The Eternal Song",
+        flammen: "The Ballad of the Master of Flames" },
       stimmen_laden: "🎻 Tuning the instruments …",
       erfinden: { vorlage: ["The Ballad of the {a} {n}", "The Song of the {a} {n}", "The Round of the {a} {n}", "The Tale of the {a} {n}", "The Lament of the {a} {n}"],
         adj: ["Sad", "Drunken", "Dancing", "Lovesick", "Singing", "Hungry", "Lost", "Giggling", "Lonely", "Angry", "Cursed", "Golden"],
@@ -166,10 +172,10 @@
         publikum: "Audience", sg: n => "DC " + n, lied: "Piece",
         start: "▶ Perform", nochmal: "↻ Try again", wiederholen: "↻ Play it again", weiter: "On to the next stage →",
         gegen: n => "Performance check against DC " + n, bestanden: "Success!", durchgefallen: "Not quite …",
-        neuerRang: r => "New fame: " + r, ende: "Barradin's road is complete. The gods are humming his song.",
+        neuerRang: r => "New fame: " + r, ende: "Barradin's road is complete. The gods are humming his song – and deep beneath Gracklstugh a dragon rumbles along.",
         zuruecksetzen: "Start the road over", sicher: "Really erase all progress?",
         unbekannt: "Unknown bard",
-        raenge: ["Street musician", "Dive singer", "Harbour bard", "Inn singer", "Festival bard", "Ballroom musician", "Castle bard", "Minstrel of the Underdark", "Court bard of Neverwinter", "Darling of the fey", "God-kissed bard"],
+        raenge: ["Street musician", "Dive singer", "Harbour bard", "Inn singer", "Festival bard", "Ballroom musician", "Castle bard", "Minstrel of the Underdark", "Court bard of Neverwinter", "Darling of the fey", "God-kissed bard", "Dragon singer"],
         stationen: [
           { ort: "\"The Lame Donkey\" – a street pub in Phandalin", publikum: "Three farmers, a sleeping dog and the innkeeper",
             intro: "A legend has to start somewhere. Why not here, between spilled beer and a dog that dreams very loudly?",
@@ -213,8 +219,12 @@
             pleite: "The fey giggle. One of them has tied my strings into flowers. Once more – with dignity." },
           { ort: "The Halls of the Eternal Song", publikum: "The gods themselves",
             intro: "No road leads here, only a song. Whoever plays here plays for eternity. No mistakes, Barradin. No. Mistakes.",
-            sieg: "The gods rise. My song is written into the stars, and somewhere in Phandalin a dog wakes up and wags its tail.",
-            pleite: "One god coughs. Another smiles indulgently. Immortals have time – and I have another try." }
+            sieg: "The gods rise. My song is written into the stars, and somewhere in Phandalin a dog wakes up and wags its tail. Except: deep in the Underdark, someone who smells of brimstone was listening. Encore!",
+            pleite: "One god coughs. Another smiles indulgently. Immortals have time – and I have another try." },
+          { ort: "Encore: before the Master of Flames – Themberchaud's hall in Gracklstugh", publikum: "A red dragon on a mountain of gold, his high priest Gartokkar and an Echo counting the coins",
+            intro: "Lava on every edge, gold in the middle, and on top a dragon who already looks well fed – hopefully. I'll sing him our whole journey: Thunder Tree, drow, spiders, kuo-toa, Demogorgon. In rhyme. Without a slip.",
+            sieg: "Themberchaud lowers his enormous head. \"Entertaining.\" We get to live – better still: the Master of Flames has a task for us. Echo asks him if he knows Gundren. He does not.",
+            pleite: "A little puff of smoke rises from the dragon's nostrils. A small one. A warning one. My lute is suddenly very warm. Once more – and this time with rhymes that actually rhyme." }
         ]
       }
     }
@@ -267,7 +277,9 @@
     elfen: { nurWeg: true, modus: "lydisch", grund: 64, tempo: 1.12, folge: [0, 1, 0, 4, 5, 1, 4, 0], takt: 12, bass: [0, 6], puls: [6],
       motive: [[0, 2, 4, 6, 8, 10], [0, 4, 6, 8, 10], [2, 4, 6, 8, 10], [0, 2, 6, 8, 10]], floete: { g: [3, 9], u: [3, 7, 11] } },
     goetter: { nurWeg: true, modus: "aeolisch", grund: 62, tempo: 1, folge: [0, 5, 6, 0, 3, 5, 6, 4], takt: 16, bass: [0, 6, 8, 12],
-      motive: [[0, 2, 4, 6, 8, 10, 12, 14], [0, 3, 4, 6, 8, 11, 12], [2, 4, 6, 8, 10, 12, 14], [0, 2, 4, 7, 8, 10, 12]], floete: { g: [5, 13], u: [3, 9, 15] } }
+      motive: [[0, 2, 4, 6, 8, 10, 12, 14], [0, 3, 4, 6, 8, 11, 12], [2, 4, 6, 8, 10, 12, 14], [0, 2, 4, 7, 8, 10, 12]], floete: { g: [5, 13], u: [3, 9, 15] } },
+    /* Themberchauds Ballade: harmonisch Moll auf C, feurig – i, VI, iv, V; im Nachsatz der verminderte ii vor der Dominante */
+    flammen: { modus: "harmonisch", grund: 60, tempo: 1, folge: [0, 5, 3, 4, 0, 5, 1, 4], takt: 16, bass: [0, 6, 8] }
   };
   /* ---------- Komponierte Melodien ----------
      Je Lied acht Takte, ein Zeichen je Schritt: „.“ = Pause, sonst die Stufe in der Tonleiter
@@ -288,13 +300,14 @@
     buerger: ["7...7.9.b...9.7.", "8...6.8.b...8...", "7...5.7.9.8.7...", "5...7...a-------", "7...7.9.b...9.7.", "a...7...5.7.a...", "4.4.6...8...6.8.", "7...4...0-------"],
     palast: ["7-----4.4...7.9.", "a-------7...5...", "6...8...4...6.8.", "9-------7-------", "5.6.7...9.8.7...", "a.9.a...7...5...", "8.9.a...5...8...", "4...6...8-------"],
     elfen: ["4.7.9...7...", "5.8.a...8...", "9.8.7-------", "6...4-------", "5.7.9...7...", "5.8.a...8...", "4.6.8...6...", "7-----4-----"],
-    goetter: ["7...4.7.9.8.7.4.", "7...5.7.9...7...", "8...6.8.a.9.8.6.", "7-------4...7...", "a.9.7...5...7...", "9...7...5.6.7...", "8...a...8.7.6...", "4.6.8...6-------"]
+    goetter: ["7...4.7.9.8.7.4.", "7...5.7.9...7...", "8...6.8.a.9.8.6.", "7-------4...7...", "a.9.7...5...7...", "9...7...5.6.7...", "8...a...8.7.6...", "4.6.8...6-------"],
+    flammen: ["4.7.9...b-a-9.7.", "c-a-9...7.9.c...", "a...a.9.7...5.7.", "8.9.8.6.4-------", "4.7.9...b-a-9.7.", "c-b-c...9...7.9.", "a...8.a.c...a.8.", "b.a.b.8.6-------"]
   };
   Object.keys(MELODIEN).forEach(k => { if (LIEDER[k]) LIEDER[k].melodie = MELODIEN[k]; });
   LIEDER.ploop.raster = [4, 3, 2]; /* Jig: Schläge zu je drei Schritten */
   LIEDER.schmiede.bassGleich = true; LIEDER.schatten.bassGleich = true;
   /* ---------- Barradins Weg ----------
-     Elf Bühnen, jede mit eigenem Stück, eigener Schwierigkeit und einem Schwierigkeitsgrad (SG),
+     Zwölf Bühnen (die letzte ist die Zugabe vor Themberchaud), jede mit eigenem Stück, eigener Schwierigkeit und einem Schwierigkeitsgrad (SG),
      den der Auftrittswurf erreichen muss. Fehlende Angaben kommen von der Grundstufe. */
   const station = (basis, lied, sg, mehr) => ({ lied, sg, st: Object.assign({}, STUFEN[basis], { basis }, mehr) });
   const WEG = [
@@ -308,9 +321,11 @@
     station("schwer", "schmiede", 17, { tempo: 102, flug: 1.85, takte: 14 }),
     station("schwer", "palast", 18, { tempo: 106, flug: 1.8, takte: 16 }),
     station("schwer", "elfen", 19, { tempo: 98, flug: 1.7, takte: 16 }),
-    station("schwer", "goetter", 21, { tempo: 114, flug: 1.6, takte: 20 })
+    station("schwer", "goetter", 21, { tempo: 114, flug: 1.6, takte: 20 }),
+    /* Zugabe – nur hinten anhängen, die Sterne werden nach Index gespeichert */
+    station("schwer", "flammen", 22, { tempo: 104, flug: 1.65, takte: 18 })
   ];
-  const WEG_ZEICHEN = ["🍺", "🐀", "⚓", "🕯️", "💰", "💃", "🦇", "⚒️", "👑", "🌙", "✨"];
+  const WEG_ZEICHEN = ["🍺", "🐀", "⚓", "🕯️", "💰", "💃", "🦇", "⚒️", "👑", "🌙", "✨", "🐉"];
   const FOLGEN = {
     dorisch: [[0, 6, 3, 0], [0, 3, 0, 6], [0, 6, 0, 3], [0, 4, 3, 0]], ionisch: [[0, 3, 4, 0], [0, 5, 3, 4], [0, 4, 5, 3], [0, 3, 0, 4]],
     aeolisch: [[0, 5, 2, 6], [0, 3, 6, 0], [0, 5, 3, 4], [0, 6, 5, 6]], phrygisch: [[0, 1, 0, 6], [0, 1, 6, 0], [0, 6, 5, 1]],
@@ -671,6 +686,9 @@
   let modus = "lieder", wegStation = 0;
   const wegLesen = () => { try { const w = JSON.parse(localStorage.getItem("imres-auftritt-weg") || "null"); if (w && Array.isArray(w.sterne)) return w; } catch (_) {} return { frei: 0, sterne: [] }; };
   let weg = wegLesen();
+  /* Bestandene Bühne schaltet die nächste frei – auch eine später angehängte Zugabe */
+  const freiAusSternen = w => { (w.sterne || []).forEach((x, i) => { if (x > 0) w.frei = Math.max(w.frei | 0, i + 1); }); };
+  freiAusSternen(weg);
   weg.frei = Math.max(0, Math.min(WEG.length - 1, weg.frei | 0));
   /* Ein zweiter Tab darf keinen Fortschritt überschreiben: vor dem Schreiben zusammenführen
      (höchste freigespielte Bühne, je Bühne die meisten Sterne). „neu“ = Zeitpunkt des letzten Neubeginns –
@@ -681,6 +699,7 @@
     else if ((s.neu || 0) < (weg.neu || 0)) return;
     weg.frei = Math.max(weg.frei | 0, Math.min(WEG.length - 1, Math.max(0, s.frei | 0)));
     s.sterne.forEach((x, i) => { const n = Math.max(0, Math.min(3, x | 0)); if (n > (weg.sterne[i] || 0)) weg.sterne[i] = n; });
+    freiAusSternen(weg); weg.frei = Math.min(WEG.length - 1, weg.frei);
   }
   const wegSpeichern = neu => { if (!neu) wegMischen(wegLesen()); try { localStorage.setItem("imres-auftritt-weg", JSON.stringify(weg)); } catch (_) {} };
   window.addEventListener("storage", e => {
