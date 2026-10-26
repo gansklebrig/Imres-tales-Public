@@ -6,7 +6,7 @@
 <meta name="description" content="Heldensturm – das Roguelike zu Imres Tales: Barradin, Echo, Friedrich und Ezekiel kämpfen sich durch die ganze Kampagne.">
 <meta name="theme-color" content="#100c12">
 <meta property="og:title" content="Heldensturm">
-<meta property="og:description" content="Das Roguelike zu Imres Tales: 14 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
+<meta property="og:description" content="Das Roguelike zu Imres Tales: 13 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
 <meta property="og:image" content="https://imrestales.de/vorschau.jpg">
 <style>[hidden]{display:none!important}body{margin:0}</style>
 <title>Heldensturm</title>
@@ -474,10 +474,10 @@ const SND_FILES2=['horn_46','horn_39','fx_ba_bow','fx_ba_swish_3','fx_cr2_human_
 const MOBIL=(()=>{try{return matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)}catch(e){return false}})();
 let OUTN=null,BASSF=null;const bassOn=()=>SAVE.bass===undefined?MOBIL:!!SAVE.bass;
 function hsOut(){if(OUTN)return OUTN;if(!AC)return null;try{const pre=AC.createGain();pre.gain.value=MOBIL?0.82:0.92;
-  BASSF=[AC.createBiquadFilter(),AC.createBiquadFilter()];BASSF.forEach(f=>{f.type='highpass';f.Q.value=0.6;f.frequency.value=bassOn()?150:12});
+  BASSF=[AC.createBiquadFilter(),AC.createBiquadFilter()];BASSF.forEach(f=>{f.type='highpass';f.Q.value=0.6;f.frequency.value=bassOn()?150:30});
   const lim=AC.createDynamicsCompressor();lim.threshold.value=-3;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.12;
-  pre.connect(BASSF[0]);BASSF[0].connect(BASSF[1]);BASSF[1].connect(lim);lim.connect(AC.destination);OUTN=pre}catch(e){OUTN=AC.destination}return OUTN}
-function bassSet(){if(BASSF&&AC)BASSF.forEach(f=>f.frequency.setTargetAtTime(bassOn()?150:12,AC.currentTime,0.05))}
+  pre.connect(BASSF[0]);BASSF[0].connect(BASSF[1]);if(MOBIL){const hs=AC.createBiquadFilter();hs.type='lowpass';hs.frequency.value=10000;hs.Q.value=0.5;BASSF[1].connect(hs);hs.connect(lim)}else BASSF[1].connect(lim);lim.connect(AC.destination);OUTN=pre}catch(e){OUTN=AC.destination}return OUTN}
+function bassSet(){if(BASSF&&AC)BASSF.forEach(f=>f.frequency.setTargetAtTime(bassOn()?150:30,AC.currentTime,0.05))}
 function makeIR(sec){const n=Math.floor(AC.sampleRate*sec),b=AC.createBuffer(2,n,AC.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.8)}return b}
 function audioInit(){if(!AC){try{const ACK=window.AudioContext||window.webkitAudioContext;try{AC=MOBIL?new ACK({latencyHint:'balanced'}):new ACK()}catch(e){AC=new ACK()}MASTER=AC.createGain();MASTER.gain.value=0.9;let end=hsOut();
   try{const comp=AC.createDynamicsCompressor();comp.threshold.value=-12;comp.knee.value=10;comp.ratio.value=3;comp.attack.value=0.003;comp.release.value=0.22;comp.connect(end);end=comp}catch(e){}
@@ -978,12 +978,10 @@ function stimmungTeile(st, modus) {
   return { A, B, C, D };
 }
 /* ---------- Klang: Aufnahmen, Orchester, Gäste ---------- */
-const KARTE={vln:[55,57,59,62,66,69,72,76,79,83,86],vc:[36,40,43,47,50,53,57,60,64,67,71,74,77],spic:[36,40,43,47,50,53,57,60,64,67,71,74,77],horn:[36,39,43,46,50,53,57,60],
- fl:[60,64,69,72,76,81,84,88,93,96],flst:[69,72,76,81,84,88,93,96],harfe:[28,31,35,38,41,45,48,52,55,59,62,65,69,72,76,79,83,86,89,93,95,98,101],glock:[79,84,91,96,103,108],
- gitarre:[36,39,42,45,48,51,54,57,60,63,66,69,72,75,78,81,84],dudel:[60,63,66,69,72,75,78,81,84,87],pan:[60,63,66,69,72,75,78,81,84,87,90],stimme:[57,60,63,66,69,72,75,78,81,84,87],oka:[60,63,66,69,72,75,78,81,84,87,90],
- fag:[34,37,41,45,46,48,55,60,63,68,69,72],pos:[34,37,39,41,46,50,53,60,61,63,65],vctrem:[36,40,43,50,53,57,59,60,64,67,71,74,77],trp:[53,57,60,63,67,70,74,77,81,84],oboest:[58,62,65,70,74,77,82,89],
- kb:[28,30,31,34,36,38,40,42,44,45,49,52,56,59],geigest:[55,57,60,64,67,69,72,76,79,81,84,88,91,93,96],geige:[55,57,60,64,67,69,72,76,79,81,84,88,91,93,96],tuba:[34,39,41,46,50,53,58],
- klar:[50,53,58,62,65,70,74,77,82,86,90],orgel:[36,42,48,54,60,66,72,78,84,90,96],vlntrem:[55,57,59,62,69,72,76,79,83,86],oboe:[58,62,65,70,74,77,82,86,89]};
+/* Aufnahmen und ihre Tonhöhen – wie im Lautenwerk (inkl. Kapelle: Akkordeon, Hackbrett, Cembalo, Marimba, Celesta, Spieluhr, Taiko, Chor u. a.) */
+const KARTE={akk:[53,56,59,62,65,68,71,74,77,80,83,86,89],hack:[48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,96],cemb:[41,44,47,50,53,56,59,62,65,68,71,74,77,80,83,86,89],mar:[45,48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,96],cel:[60,63,66,69,72,75,78,81,84,87,90,93,96,99,102,105,108],spiel:[60,63,66,69,72,75,78,81,84,87,90,93,96,99,102,105],rgl:[60,63,66,69,72,75,78],taiko:[36,42,48],bfl:[60,63,66,69,72,75,78,81,84,87,90,93,96],pic:[74,77,80,83,86,89,92,95,98,101,104],shaku:[55,58,61,64,67,70,73,76,79,82],eh:[52,55,58,61,64,67,70,73,76,79],sitar:[48,51,54,57,60,63,66,69,72,75,78,81,84],kal:[60,63,66,69,72,75,78,81,84,87,90,93,96],bra:[48,51,54,57,60,63,66,69,72,75,78,81,84],pizz:[36,39,42,45,48,51,54,57,60,63,66,69,72,75,78,81,84],blech:[46,49,52,55,58,61,64,67,70,73,76,79,82],xyl:[65,68,71,74,77,80,83,86,89,92,95,98,101,104],pfeife:[72,75,78,81,84,87,90,93,96],ooh:[48,51,54,57,60,63,66,69,72,75,78],vln:[55,57,59,62,66,69,72,76,79,83,86],vc:[36,40,43,47,50,53,57,60,64,67,71,74,77],spic:[36,40,43,47,50,53,57,60,64,67,71,74,77],horn:[36,39,43,46,50,53,57,60],fl:[60,64,69,72,76,81,84,88,93,96],flst:[69,72,76,81,84,88,93,96],harfe:[28,31,35,38,41,45,48,52,55,59,62,65,69,72,76,79,83,86,89,93,95,98,101],glock:[79,84,91,96,103,108],gitarre:[36,39,42,45,48,51,54,57,60,63,66,69,72,75,78,81,84],dudel:[60,63,66,69,72,75,78,81,84,87],pan:[60,63,66,69,72,75,78,81,84,87,90],stimme:[57,60,63,66,69,72,75,78,81,84,87],oka:[60,63,66,69,72,75,78,81,84,87,90],fag:[34,37,41,45,46,48,55,60,63,68,69,72],pos:[34,37,39,41,46,50,53,60,61,63,65],vctrem:[36,40,43,50,53,57,59,60,64,67,71,74,77],trp:[53,57,60,63,67,70,74,77,81,84],oboest:[58,62,65,70,74,77,82,89],kb:[28,30,31,34,36,38,40,42,44,45,49,52,56,59],geigest:[55,57,60,64,67,69,72,76,79,81,84,88,91,93,96],geige:[55,57,60,64,67,69,72,76,79,81,84,88,91,93,96],tuba:[34,39,41,46,50,53,58],klar:[50,53,58,62,65,70,74,77,82,86,90],orgel:[36,42,48,54,60,66,72,78,84,90,96],vlntrem:[55,57,59,62,69,72,76,79,83,86],oboe:[58,62,65,70,74,77,82,86,89]};
+/* nachgemessene Verstimmung der Aufnahmen in Cent (wird beim Abspielen ausgeglichen) */
+const STIMM_KORR={"akk":{"80":6,"83":6,"86":6,"89":11},"hack":{"63":7,"66":5},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"36":-24,"39":-11,"42":22,"45":24,"48":20,"51":22,"57":12,"60":5,"69":-13,"72":7,"78":-12,"81":-21},"blech":{"61":5,"64":5},"vln":{"69":5,"62":6,"66":-5},"vc":{"40":-11,"53":16},"spic":{"36":-6,"40":-8,"53":-16,"57":6,"60":23,"64":-9,"67":-18,"71":-7,"74":-7,"77":7,"43":-5},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":10,"50":5,"53":-5,"57":7,"59":23,"64":12,"67":-12,"71":-10,"74":-8,"77":14},"trp":{"53":-7,"67":10,"74":7,"81":9},"oboest":{"89":-13},"kb":{"30":-22,"34":-7,"36":-20,"38":7,"40":-14,"42":-5,"56":-28,"59":-13},"geigest":{"55":6,"60":-9,"72":6,"76":5,"84":5,"91":6},"geige":{"60":22,"64":7,"67":-5,"76":7,"79":7,"88":8,"84":-5},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10},"vlntrem":{"57":-11,"69":-8,"72":8,"79":-8},"flst":{"72":-8,"88":-17,"93":-7},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-9,"53":-7},"bfl":{"60":13,"75":10,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6,"63":10,"66":6,"69":5,"72":5},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":18,"81":6,"84":-7,"87":11,"90":15,"93":11},"shaku":{"55":-8,"58":-8,"61":-8,"64":-5},"eh":{"55":7,"64":-9,"67":9,"70":-7,"76":-8,"79":-9},"bra":{"54":14,"84":-6,"60":7,"63":-6,"81":9},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24}};
 const ORCH={kampf:{pad:.8,ost:1,horn:1,trp:1,pos:1,gross:2},sieg:{pad:.8,horn:1,trp:1,gross:2},reiter:{pad:.7,ost:1,horn:1,trp:1,gross:2},zwerge:{pad:.7,horn:1,pos:1,tuba:1,amboss:1,gross:2,tief:1},
  spannung:{pad:.6,farbe:'trem',ost:1,gross:1},unterreich:{pad:.6,farbe:'trem',tief:1,tuba:1,gross:1,gong:1},elben:{pad:.7,hoch:1,glanz:1},boss:{pad:.9,ost:1,horn:1,trp:1,pos:1,gross:2,tief:1},
  grusel:{pad:.55,farbe:'trem',tief:1,gross:1,gong:1},klage:{pad:.6},hof:{pad:.55,horn:1,trp:1,gross:1},fey:{pad:.4,hoch:1,glanz:1},marktplatz:{pad:0,volk:1},pilger:{pad:.6,farbe:'orgel'},
@@ -1005,6 +1003,8 @@ const BOSSTHEMA={
  riese:{s:{modus:['aeolisch'],tempo:[112,120],instrument:['drehleier'],band:{trommel:['pauke'],floete:['horn'],ketten:['stampfen']}},o:{tuba:1,pos:1,tief:1,amboss:1},m:{inst:'tuba',okt:-2,l:.42,n:[[0,0,3],[3,0,1],[4,2,4],[8,1,2],[10,0,6]]}},
  drokey:{s:{modus:['phrygisch','aeolisch'],tempo:[140,148],instrument:['laute'],schraeg:.3,band:{trommel:['stoecke'],floete:['okarina'],ketten:['rassel']}},o:{farbe:'trem'},m:{inst:'klar',l:.24,n:[[0,4,1],[1,3,1],[2,4,1],[3,1,3],[8,2,1],[9,1,1],[10,0,4]]}}};
 for(const id in BOSSTHEMA){const t=BOSSTHEMA[id];STIL['boss_'+id]=Object.assign({},STIL.boss,t.s,{motiv:t.m});ORCH['boss_'+id]=Object.assign({},ORCH.boss,t.o)}
+/* Verfolgung: gehetzt, phrygisch – für die Flucht vor dem Demogorgon */
+STIL.verfolgung=Object.assign({},STIL.kampf,{modus:['phrygisch'],tempo:[150,162]});ORCH.verfolgung=ORCH.kampf;
 const mBasis=m=>m&&m.indexOf('boss')===0?'boss':m;
 
 const GAESTE=[
@@ -1027,17 +1027,17 @@ function busBauen(){if(bus||!AC)return;bus=AC.createGain();bus.gain.value=an_?vo
   hallIn=AC.createGain();hallIn.gain.value=.22;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=5000;hallIn.connect(cv);cv.connect(lp);lp.connect(bus)}catch(e){hallIn=null}}
 function panNode(p){const k=String(p);if(pans[k])return pans[k];let n=AC.createGain();if(p&&AC.createStereoPanner){const s=AC.createStereoPanner();s.pan.value=p;n.connect(s);s.connect(bus);if(hallIn)s.connect(hallIn)}else{n.connect(bus);if(hallIn)n.connect(hallIn)}return pans[k]=n}
 /* eine Note aus den Aufnahmen: nächste Probe, auf die Tonhöhe gestimmt, mit sanftem Ein- und Ausklang */
-function spiel(g,midi,zeit,laut,dauer,o){o=o||{};const m=KARTE[g]?KARTE[g].reduce((b,x)=>b==null||Math.abs(x-midi)<Math.abs(b-midi)?x:b,null):null;const name=m==null?g:g+'_'+m,b=buf.get(name);if(!b)return false;
- const s=AC.createBufferSource(),gn=AC.createGain();s.buffer=b;if(m!=null)s.playbackRate.value=Math.pow(2,(midi-m)/12);
+function spiel(g,midi,zeit,laut,dauer,o){o=o||{};if(g.indexOf(':')>0){const q=g.split(':');g=q[0];midi=+q[1]}const m=KARTE[g]?KARTE[g].reduce((b,x)=>b==null||Math.abs(x-midi)<Math.abs(b-midi)?x:b,null):null;const name=m==null?g:g+'_'+m,b=buf.get(name);if(!b)return false;
+ const s=AC.createBufferSource(),gn=AC.createGain();s.buffer=b;if(m!=null)s.playbackRate.value=Math.pow(2,(midi-m)/12-((STIMM_KORR[g]&&STIMM_KORR[g][m])||0)/1200);
  const lang=(b.duration-b._start)/s.playbackRate.value,dd=Math.min(lang,dauer||lang),ein=o.ein||.006,aus=Math.min(o.aus||.25,dd*.5);
  gn.gain.setValueAtTime(0,zeit);gn.gain.linearRampToValueAtTime(laut,zeit+ein);if(dauer&&dauer<lang){gn.gain.setValueAtTime(laut,Math.max(zeit+ein+.005,zeit+dd-aus));gn.gain.linearRampToValueAtTime(0,zeit+dd)}
  s.connect(gn);gn.connect(panNode(o.pan||0));s.start(zeit,b._start);s.stop(zeit+dd+.05);return true}
-const MEL_LADEN={fidel:['geige','geigest'],dudelsack:['dudel'],schalmei:['oboe','oboest'],harfe:['harfe'],laute:['gitarre'],mandoline:['gitarre'],drehleier:['geige'],glocken:['glock'],illusion:['vlntrem']};
-const FL_INST={floete:'fl',horn:'horn',okarina:'oka',gesang:'stimme',panfloete:'pan'};
-const TROMMEL={trommel:['snare1','snare2'],pauke:['timp1','timp3'],bodhran:['bodh1','bodh2'],tamburin:['tamb1','tamb2'],stoecke:['clave1','clave2']};
-const KETTE={ketten:['shake','shake'],stampfen:['bd','bd'],klatschen:['clave1','clave2'],rassel:['shake','shake'],schnipsen:['clave2','clave2'],loeffel:['clave2','clave1'],krug:['holz1','holz2']};
+const MEL_LADEN={cembalo:['cemb'],akkordeon:['akk'],fidel:['geige','geigest'],dudelsack:['dudel'],schalmei:['oboe','oboest'],harfe:['harfe'],laute:['gitarre'],mandoline:['gitarre'],drehleier:['geige'],glocken:['glock'],illusion:['vlntrem']};
+const FL_INST={floete:'fl',horn:'horn',okarina:'oka',gesang:'stimme',panfloete:'pan',oohchor:'ooh',englischhorn:'eh',bratsche:'bra',pfeife:'pfeife',klarinette:'klar',piccolo:'pic'};
+const TROMMEL={trommel:['snare1','snare2'],pauke:['timp1','timp3'],bodhran:['bodh1','bodh2'],tamburin:['tamb1','tamb2'],stoecke:['clave1','clave2'],taiko:['taiko:43','taiko:48']};
+const KETTE={kriegstrommel:['taiko:43','taiko:48'],rahmentrommel:['bodh1','bodh2'],ketten:['shake','shake'],stampfen:['bd','bd'],klatschen:['clave1','clave2'],rassel:['shake','shake'],schnipsen:['clave2','clave2'],loeffel:['clave2','clave1'],krug:['holz1','holz2']};
 function vorladen(s){{const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt)gruppeLaden(mt.inst)}(MEL_LADEN[s.instrument]||[]).forEach(gruppeLaden);gruppeLaden(FL_INST[s.band.floete]);if(s.band.floete==='floete')gruppeLaden('flst');
- (TROMMEL[s.band.trommel]||[]).forEach(laden);(KETTE[s.band.ketten]||[]).forEach(laden);['bd','schelle1','schelle2','holz1','holz2'].forEach(laden);
+ const lx=n=>{if(n.indexOf(':')>0){const q=n.split(':');ld(q[0],+q[1])}else laden(n)};(TROMMEL[s.band.trommel]||[]).forEach(lx);(KETTE[s.band.ketten]||[]).forEach(lx);['bd','schelle1','schelle2','holz1','holz2'].forEach(laden);
  const pr=ORCH[s.mood];if(!pr||pr.volk)gruppeLaden('gitarre');if(!pr)return;if(!pr.volk)gruppeLaden('kb');
  if(pr.pad)(PAD_FARBE[pr.farbe]||['vc','vln']).forEach(gruppeLaden);if(pr.ost)gruppeLaden('spic');['horn','trp','pos','tuba'].forEach(k=>{if(pr[k])gruppeLaden(k)});
  if(pr.amboss)laden('amboss');if(pr.glanz)laden('gloeckchen');if(pr.gong){laden('gong');laden('bogen')}if(pr.gross)['timproll','crash','swell','bd','timp1'].forEach(laden);
@@ -1046,11 +1046,13 @@ const ton=(sk,i)=>sk[((i%7)+7)%7]+12*Math.floor(i/7);
 function akkordMidi(s,zeile){const sk=MODI[s.modus]||MODI.dorisch,d=BASS_STUFEN[zeile||0];return{grund:BASS_GRUND+12+s.transpose+ton(sk,d),terz:MEL_GRUND+s.transpose+ton(sk,d+2),quinte:MEL_GRUND+s.transpose+ton(sk,d+4),q2:BASS_GRUND+12+s.transpose+ton(sk,d+4)}}
 const inLage=(m,lo,hi)=>{while(m<lo)m+=12;while(m>hi)m-=12;return m};
 const laenge=(daten,i)=>{let n=1;while(n<4&&daten[(i+n)%SCHRITTE]<0)n++;return n};
-const hoehepunkt=s=>{const i=s.ablauf.indexOf('D');return i>=0?i:s.ablauf.length-1};
-function aufbau(s,ab){const c=hoehepunkt(s),L=s.ablauf.length;if(L<=2)return ab===c?1:.6;return ab<c?.25+.75*ab/Math.max(1,c):ab===c?1:.7}
+const hoehepunkt=s=>{if(s.rollen){for(let k=0;k<s.ablauf.length;k++)if(rolleVon(s,k)==='h')return k}const i=s.ablauf.indexOf('D');return i>=0?i:s.ablauf.length-1};
+function aufbau(s,ab){if(s.rollen){const r=rolleVon(s,ab);return{i:.3,s:.55,r:.85,b:.5,h:1}[r]||.6}const c=hoehepunkt(s),L=s.ablauf.length;if(L<=2)return ab===c?1:.6;return ab<c?.25+.75*ab/Math.max(1,c):ab===c?1:.7}
 /* Melodie: jedes Instrument mit seiner Spielweise; die Eins trägt, Zwischentöne sind leiser */
 function melodie(s,m,zeit,dauer,l){const a=s.instrument;
  if(a==='harfe')return spiel('harfe',m,zeit,.42*l,2.6,{aus:.4});
+ if(a==='cembalo')return spiel('cemb',m,zeit,.34*l,1.4,{aus:.3});
+ if(a==='akkordeon')return spiel('akk',m,zeit,.26*l,Math.max(.2,dauer)+.06,{ein:.02,aus:.1});
  if(a==='glocken')return spiel('glock',m+12,zeit,.24*l,2.2);
  if(a==='fidel'){const lang=dauer>=.32;return spiel(lang?'geige':'geigest',m,zeit,(lang?.5:.32)*l,lang?dauer+.08:Math.max(.22,dauer),lang?{ein:.06,aus:.16}:{aus:.07})}
  if(a==='schalmei'){const lang=dauer>=.32;return spiel(lang?'oboe':'oboest',m,zeit,.26*l,lang?dauer+.08:Math.max(.22,dauer),lang?{ein:.05,aus:.14}:{aus:.07})}
@@ -1061,7 +1063,7 @@ function melodie(s,m,zeit,dauer,l){const a=s.instrument;
  if(a==='mandoline'){const n=Math.max(1,Math.min(6,Math.round(Math.max(.12,dauer)/.08)));for(let k=0;k<n;k++)spiel('gitarre',m,zeit+k*.08,.3*l*(k?.65:1),k===n-1?1.2:.14,{aus:k===n-1?.3:.03});return true}}
 function echoStimme(s,m,zeit,dauer,l){const a=s.band.floete,g=FL_INST[a]||'fl';
  if(a==='floete'&&dauer<.3)return spiel('flst',m,zeit,.2*l,Math.max(.2,dauer),{aus:.06});
- return spiel(g,g==='horn'?m-24:g==='stimme'?m-12:m,zeit,(g==='stimme'?.24:g==='horn'?.28:.2)*l,dauer+.15,{ein:g==='stimme'?.08:.03,aus:.18})}
+ const tief=g==='horn'?-24:/^(stimme|ooh|eh|bra|klar)$/.test(g)?-12:0;return spiel(g,m+tief,zeit,(g==='stimme'||g==='ooh'?.24:g==='horn'?.28:g==='bra'||g==='eh'?.22:g==='pic'||g==='pfeife'?.15:.2)*l,dauer+.15,{ein:g==='stimme'?.08:.03,aus:.18})}
 function orchester(s,p,i,zeit,sd,ab){const pr=ORCH[s.mood];if(!pr)return;const x=aufbau(s,ab),int=s.int/10,c=hoehepunkt(s),bar=SCHRITTE*sd,zeile=klingt(p.bass,i),ak=akkordMidi(s,zeile),einbl=wechsel>0;
  if(pr.pad&&x>=.25&&(i%8===0||zeile!==padAkk)&&(zeile!==padAkk||i===0||zeit>=padEnde-.05)){let n=1;while(n<SCHRITTE-i&&klingt(p.bass,i+n)===zeile)n++;
   const dauer=n*sd+.35,l=pr.pad*(.5+.5*x)*(.6+.5*int)*(gaeste.length?.72:1),vl=pr.tief?-12:pr.hoch?12:0,[tief,hoch]=PAD_FARBE[pr.farbe]||['vc','vln'],fk=pr.farbe==='orgel'?.45:pr.farbe==='holz'?.8:1,hk=pr.farbe==='holz'?-12:0;
@@ -1103,12 +1105,183 @@ function gaesteSchritt(s,p,i,zeit,sd,ab){if(i===0)gaesteWaehlen(s,ab);if(!gaeste
   gTon(g,g.gr,m,zeit,d,1.4,{ein:g.rolle==='chor'?.12:g.rolle==='glitzer'?.004:.025,aus:g.rolle==='glitzer'?.6:.12});return}
  for(const g of gaeste){try{ROLLE[g.rolle](g,s,i,zeit,sd,ak,x)}catch(e){}}}
 /* ---------- Stück und Ablauf ---------- */
+/* ---------- Handgeschriebene Themen aus Barradins Lautenwerk ----------
+   Kampf, Endgegner, Verfolgung, Spannung, Reiter, Sieg und Marktplatz haben echte Lieder mit ganzer Form:
+   Vorspiel, Strophe, Refrain, Zwischenteil, Höhepunkt – notiert als Leadsheet (Akkorde je Viertel, Melodie in 16 Schritten). */
+  const BOSS_SCHLAG = {
+  i: { trommel: [0, 4, 8, 12, 13, 14, 15], schelle: [] },
+  s: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+  r: { trommel: [0, 2, 3, 6, 8, 10, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+  b: { trommel: [0, 3, 6, 8, 11, 14], schelle: [0, 4, 8, 12], ketten: [4, 12] },
+  h: { trommel: [0, 2, 3, 4, 6, 8, 10, 11, 12, 13, 14, 15], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] }
+};
+const KAMPF_SCHLAG = {
+  i: { trommel: [10, 12, 13, 14, 15], schelle: [] },
+  s: { trommel: [0, 3, 6, 8, 10, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+  r: { trommel: [0, 3, 4, 6, 8, 11, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+  b: { trommel: [0, 4, 8, 12, 13, 14, 15], schelle: [0, 4, 8, 12], ketten: [4, 12] },
+  h: { trommel: [0, 3, 6, 8, 10, 11, 12, 13, 14, 15], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] }
+};
+const KAMPF_LIEDER = {
+  kampf: [
+    { instrument: "fidel", band: { trommel: "trommel", floete: "horn", ketten: "stampfen" }, modus: "aeolisch", bordun: 0, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "orgel", s: "puls", r: "galopp", b: "puls", h: "galopp" }, schlag: KAMPF_SCHLAG,
+      takte: [["0000", "edcba9876543210.", ""],
+        ["0000", "4.4.7.4.9.7.4.2.", "lang"], ["5555", "5.5.7.5.9.7.5.2.", "lang"], ["2222", "3.3.7.3.a.7.5.3.", "lang"], ["3333", "4.6.8.b.8.6.b.d.", "lang"],
+        ["0055", "7.7.9.b.c...9.7.", "terz"], ["4433", "a.a.8.6.b.......", "terz"], ["0055", "7.7.9.b.c...e.c.", "terz"], ["4433", "d.c.a.c.b.......", "lang"],
+        ["5544", "c.......a.......", "5.7.5.2.6.3.6.1."], ["2233", "a.......b.c.d.e.", "3.5.3.0.4.6.1.4."],
+        ["0055", "7.7.9.b.c...9.7.", "terz"], ["4433", "a.a.8.6.b.......", "terz"], ["0055", "7.7.9.b.c...e.c.", "terz"], ["4400", "d.c.a.c.e.......", "terz"]] },
+    { instrument: "fidel", band: { trommel: "taiko", floete: "horn", ketten: "stampfen" }, modus: "aeolisch", bordun: 0, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "orgel", s: "puls", r: "puls", b: "halbe", h: "galopp" }, schlag: KAMPF_SCHLAG,
+      takte: [["0000", "0.4.7.4.0.4.7.b.", ""],
+        ["0000", "4.4.5.4.2...0.2.", "lang"], ["4444", "3.3.4.3.1...6.1.", "lang"], ["5555", "2.2.3.2.0...5.7.", "lang"], ["3333", "1.4.6.8.b...8...", "lang"],
+        ["5544", "c..c..a.a...8...", "terz"], ["0033", "9..9..7.b...8...", "terz"], ["5544", "c..c..a.a...8...", "terz"], ["2300", "a..a..8.7.......", "lang"],
+        ["1111", "9.......b.......", "2...4...6...4..."], ["3333", "b.......8.......", "4...6...1...4..."],
+        ["5544", "c..c..a.a...8...", "terz"], ["0033", "9..9..7.b...8...", "terz"], ["5544", "c..c..a.a...8...", "terz"], ["2300", "a..a..8.7...e...", "terz"]] }
+  ],
+  boss: [
+    { instrument: "drehleier", band: { trommel: "taiko", floete: "oohchor", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "puls", s: "galopp", r: "puls", b: "galopp", h: "galopp" }, schlag: BOSS_SCHLAG,
+      takte: [["0000", "e.d.c.b.a.9.8.7.", ""],
+        ["0066", "0.0.1.0.1.1.3.1.", "lang"], ["0066", "0.0.1.0.5.3.1.3.", "lang"], ["5544", "2.2.0.2.6.6.3.1.", "lang"], ["6666", "1.3.5.8.a.8.5.3.", "lang"],
+        ["0066", "7...7.8.a...8.7.", "terz"], ["5566", "9...9.7.8...a.c.", "terz"], ["0066", "7...7.8.a...c.e.", "terz"], ["4466", "d.c.a.8.8.......", "lang"],
+        ["1111", "b.......9.......", "2...4...6...4..."], ["6666", "a.......8.a.c.e.", "1...3...5...3..."],
+        ["0066", "7...7.8.a...8.7.", "terz"], ["5566", "9...9.7.8...a.c.", "terz"], ["0066", "7...7.8.a...c.e.", "terz"], ["6600", "c.a.8.a.7...0...", "terz"]] },
+    { instrument: "fidel", band: { trommel: "pauke", floete: "oohchor", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+      bass: { i: "puls", s: "galopp", r: "galopp", b: "puls", h: "galopp" }, schlag: BOSS_SCHLAG,
+      takte: [["0000", "0.1.0.1.0.1.0.1.", ""],
+        ["0000", "4.5.4.2.4.5.4.2.", "lang"], ["6666", "5.6.5.3.5.6.5.3.", "lang"], ["5555", "2.3.2.0.2.3.2.5.", "lang"], ["4444", "6.8.a.d.a.8.6.3.", "lang"],
+        ["0055", "e...e.d.c...9...", "terz"], ["6644", "c...a.8.d...a...", "terz"], ["0055", "e...e.d.c...9...", "terz"], ["6600", "8.a.c.a.7.......", "lang"],
+        ["5555", "9.......c.......", "2...5...7...5..."], ["6666", "a.......c.a.8.a.", "3...5...1...3..."],
+        ["0055", "e...e.d.c...9...", "terz"], ["6644", "c...a.8.d...a...", "terz"], ["0055", "e...e.d.c...9...", "terz"], ["6600", "8.a.c.a.7...e...", "terz"]] }
+  ]
+};
+/* Verfolgung: gehetzt und voller Angst. Phrygisch (der bange Halbton über dem Grundton), Sechzehntel-Zittern, stolpernde Akzente,
+   im Refrain schmerzliche Schreie in hoher Lage, die abwärts fallen – und nur einmal, kurz vor dem Ende des Refrains,
+   ein Dur-Akkord mit einer aufsteigenden Linie: der Hauch von Hoffnung, der gleich wieder verschluckt wird */
+const VERF_SCHLAG = {
+  i: { trommel: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15], schelle: [] },
+  s: { trommel: [0, 3, 6, 9, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [7, 15] },
+  r: { trommel: [0, 2, 3, 6, 8, 10, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [7, 15] },
+  b: { trommel: [0, 3, 6, 13, 14, 15], schelle: [0, 4, 8, 12] },
+  h: { trommel: [0, 2, 3, 6, 8, 9, 10, 11, 12, 13, 14, 15], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [7, 15] }
+};
+KAMPF_LIEDER.verfolgung = [
+  { instrument: "fidel", band: { trommel: "trommel", floete: "bratsche", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+    bass: { i: "puls", s: "puls", r: "galopp", b: "halbe", h: "galopp" }, schlag: VERF_SCHLAG,
+    takte: [["0000", "0101010101010101", ""],
+      ["0000", "4.3.4.5.4.3.2.0.", "lang"], ["6666", "5.3.5.6.5.3.1.3.", "lang"], ["0000", "4.3.4.5.7.5.4.2.", "lang"], ["4466", "6.5.3.1.3.1.5.1.", "lang"],
+      ["0055", "b...a.9.9...c.9.", "lang"], ["6644", "c...a.8.a...8.6.", "lang"], ["0055", "b...a.9.9...c.9.", "lang"], ["1111", "9...b...d.......", "terz"],
+      ["0000", "0.......1.......", "0.1.0.1.2.1.0.1."], ["6666", "1.......3.4.5.6.", "1.3.1.3.5.3.1.3."],
+      ["0055", "b...a.9.9...c.9.", "lang"], ["6644", "c...a.8.a...8.6.", "lang"], ["0055", "b...a.9.9...c.9.", "lang"], ["1100", "9.b.d...7...0...", "terz"]] },
+  { instrument: "drehleier", band: { trommel: "taiko", floete: "oohchor", ketten: "ketten" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: "ABCDEFGHIBCDEFGHIJKLMNO",
+    bass: { i: "puls", s: "puls", r: "galopp", b: "halbe", h: "galopp" }, schlag: VERF_SCHLAG,
+    takte: [["0000", "e.d.c.b.a.9.8.7.", ""],
+      ["0000", "0..1..0.4..2..0.", "lang"], ["6666", "1..3..1.5..3..1.", "lang"], ["5555", "2..0..2.5..4..2.", "lang"], ["4400", "3..1..6.7..4..2.", "lang"],
+      ["0066", "e...e.d.a...c.a.", "lang"], ["5544", "c...9.7.d...a.8.", "lang"], ["0066", "e...e.d.a...c.a.", "lang"], ["1155", "b...9...c...e...", "terz"],
+      ["2222", "a.......7.......", "3.5.3.0.3.5.7.5."], ["6666", "8.......8.a.c.e.", "1.3.5.3.1.3.5.1."],
+      ["0066", "e...e.d.a...c.a.", "lang"], ["5544", "c...9.7.d...a.8.", "lang"], ["0066", "e...e.d.a...c.a.", "lang"], ["5500", "c.a.9.7.7...0...", "terz"]] }
+];
+/* ---------- Spannung, Reiter, Sieg, Marktplatz: ebenfalls handgeschrieben ---------- */
+const SPANN_SCHLAG = { s: { trommel: [0], ketten: [0, 4, 8, 12] }, r: { trommel: [0, 8], ketten: [0, 2, 4, 6, 8, 10, 12, 14] }, b: { ketten: [0, 4, 8, 12] },
+  h: { trommel: [0, 4, 8, 12, 14], ketten: [0, 2, 4, 6, 8, 10, 12, 14], schelle: [2, 6, 10, 14] } };
+const REIT_SCHLAG = { i: { trommel: [0, 3, 6, 8, 11, 14] }, s: { trommel: [0, 3, 6, 8, 11, 14], klopf: [8], schelle: [0, 8] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [0, 4, 8, 12], ketten: [4, 12] },
+  b: { trommel: [0, 8] }, h: { trommel: [0, 3, 6, 8, 11, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } };
+const SIEG_SCHLAG = { i: { trommel: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15] }, s: { trommel: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] },
+  r: { trommel: [0, 3, 4, 6, 8, 11, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] }, b: { trommel: [0, 8], schelle: [4, 12] },
+  h: { trommel: [0, 2, 3, 4, 6, 8, 10, 11, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } };
+const MARKT_SCHLAG = { i: { trommel: [0, 8] }, s: { trommel: [0, 6, 8, 14], klopf: [4, 12], schelle: [2, 10] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], ketten: [6, 14] },
+  b: { trommel: [0, 8] }, h: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [2, 6, 10, 14], ketten: [6, 14] } };
+const ABL = "ABCDEFGHIBCDEFGHIJKLMNO";
+Object.assign(KAMPF_LIEDER, {
+  /* Spannung: tickendes Ostinato, ein reibender Halbton, Stille im Zwischenteil – und dann zittert alles */
+  spannung: [
+    { instrument: "harfe", band: { trommel: "pauke", floete: "englischhorn", ketten: "schnipsen" }, modus: "phrygisch", bordun: 1, variation: 1, ablauf: ABL,
+      bass: { i: "orgel", s: "puls", r: "halbe", b: "orgel", h: "puls" }, schlag: SPANN_SCHLAG,
+      takte: [["0000", "0...0...0...0...", ""],
+        ["0000", "0.0.0.1.0.0.0.1.", "lang"], ["0000", "0.0.0.1.0.0.2.1.", "lang"], ["6666", "1.1.1.3.1.1.1.3.", "lang"], ["0000", "0.0.0.1.4...5...", "lang"],
+        ["0000", "7.......8.......", "lang"], ["5555", "9.......8.......", "lang"], ["0000", "7.......8...7...", "lang"], ["6666", "8...a...c...8...", "lang"],
+        ["0000", "................", "0...0...1...1..."], ["4444", "........6.8.a.d.", "6...6...1...3..."],
+        ["0000", "7.8.7.8.7.8.7.8.", "lang"], ["5555", "9.8.9.8.9.8.9.8.", "lang"], ["0000", "7.8.7.8.a.8.7.8.", "lang"], ["6600", "8.......7...0...", "lang"]] },
+    { instrument: "cembalo", band: { trommel: "pauke", floete: "bratsche", ketten: "schnipsen" }, modus: "aeolisch", bordun: 1, variation: 1, ablauf: ABL,
+      bass: { i: "orgel", s: "puls", r: "halbe", b: "orgel", h: "puls" }, schlag: SPANN_SCHLAG,
+      takte: [["0000", "4.......4.......", ""],
+        ["0000", "4.5.4...4.5.4...", "lang"], ["5555", "5.6.5...5.6.5...", "lang"], ["0000", "4.5.4...7.5.4...", "lang"], ["3333", "4.3.1...6.4.1...", "lang"],
+        ["0000", "b...........a...", "lang"], ["5555", "c...........b...", "lang"], ["2222", "a...........c...", "lang"], ["3333", "b.c.d.e.d.c.b...", "lang"],
+        ["0000", "................", "4...5...4...5..."], ["4444", "............9.a.", "6...6...3...3..."],
+        ["0000", "b.a.b.a.b.a.b.a.", "lang"], ["5555", "c.b.c.b.c.b.c.b.", "lang"], ["2222", "a.c.a.c.a.c.a.c.", "lang"], ["3300", "b.......7...0...", "lang"]] }
+  ],
+  /* Reiter: Galopp im 3-3-2, ein weiter, edler Ruf darüber, Hörner antworten */
+  reiter: [
+    { instrument: "fidel", band: { trommel: "bodhran", floete: "horn", ketten: "stampfen" }, modus: "dorisch", bordun: 1, variation: 1, ablauf: ABL,
+      bass: { i: "galopp", s: "galopp", r: "galopp", b: "halbe", h: "galopp" }, schlag: REIT_SCHLAG,
+      takte: [["0000", "0..0..0.4..4..4.", ""],
+        ["0000", "4...7...4.2.0.2.", "lang"], ["2222", "3...7...5.3.0.3.", "lang"], ["4444", "6...8...6.3.1.3.", "lang"], ["3300", "4...6...7.......", "lang"],
+        ["0022", "7...9.a.a...c.a.", "terz"], ["4433", "8...a.8.6...8.b.", "terz"], ["0022", "7...9.a.a...c.a.", "terz"], ["2300", "a...b.a.7.......", "lang"],
+        ["1111", "9.......b.......", "2...4...6...4..."], ["4433", "8.......b.......", "1...3...4...6..."],
+        ["0022", "7...9.a.a...c.a.", "terz"], ["4433", "8...a.8.6...8.b.", "terz"], ["0022", "7...9.a.a...c.a.", "terz"], ["2300", "a...b.a.e.......", "terz"]] },
+    { instrument: "fidel", band: { trommel: "trommel", floete: "horn", ketten: "stampfen" }, modus: "dorisch", bordun: 1, variation: 1, ablauf: ABL,
+      bass: { i: "galopp", s: "galopp", r: "galopp", b: "halbe", h: "galopp" }, schlag: REIT_SCHLAG,
+      takte: [["0000", "7..7..7.4..4..4.", ""],
+        ["0000", "0...2...4...7...", "lang"], ["4444", "1...3...6...8...", "lang"], ["2222", "3...5...7...a...", "lang"], ["3333", "4...6...8...b...", "lang"],
+        ["0044", "e.......d.c.a.8.", "terz"], ["2233", "c.......b.a.8.6.", "terz"], ["0044", "e.......d.c.a.8.", "terz"], ["4400", "d.c.a.8.7.......", "lang"],
+        ["1111", "b.......9.......", "2...4...6...4..."], ["3333", "8.......b.......", "4...6...1...4..."],
+        ["0044", "e.......d.c.a.8.", "terz"], ["2233", "c.......b.a.8.6.", "terz"], ["0044", "e.......d.c.a.8.", "terz"], ["4400", "d.c.a.8.7...e...", "terz"]] }
+  ],
+  /* Sieg: Siegesfanfare (ta-ta-ta-taaa), Marschtrommel, ein breiter Refrain und ein Schluss, der wirklich ankommt */
+  sieg: [
+    { instrument: "dudelsack", band: { trommel: "trommel", floete: "horn", ketten: "klatschen" }, modus: "ionisch", bordun: 1, variation: 1, ablauf: ABL,
+      bass: { i: "halbe", s: "viertel", r: "puls", b: "halbe", h: "puls" }, schlag: SIEG_SCHLAG,
+      takte: [["0530", "777.5...6...7...", ""],
+        ["0000", "4.4.7...4.4.9...", "lang"], ["2222", "5.5.7...5.5.a...", "lang"], ["3333", "6.6.8...6.6.b...", "lang"], ["3300", "8.6.4.6.7.......", "lang"],
+        ["0022", "e...e.d.c...a.c.", "terz"], ["5533", "c...c.b.b...8.6.", "terz"], ["0022", "e...e.d.c...a.c.", "terz"], ["2300", "a...b...e.......", "terz"],
+        ["5555", "9.......7.......", "5...7...5...2..."], ["6633", "8.......b...d...", "1...3...4...6..."],
+        ["0022", "e...e.d.c...a.c.", "terz"], ["5533", "c...c.b.b...8.6.", "terz"], ["0022", "e...e.d.c...a.c.", "terz"], ["3300", "d.b.8.b.e...e...", "terz"]] },
+    { instrument: "mandoline", band: { trommel: "pauke", floete: "pfeife", ketten: "klatschen" }, modus: "ionisch", bordun: 1, variation: 1, ablauf: ABL,
+      bass: { i: "halbe", s: "viertel", r: "puls", b: "halbe", h: "puls" }, schlag: SIEG_SCHLAG,
+      takte: [["0000", "0.4.7.b.e.......", ""],
+        ["0000", "7.7.9.7.4...7...", "lang"], ["2222", "7.7.a.7.5...7...", "lang"], ["5555", "7.7.9.7.5...2...", "lang"], ["3333", "6.8.b.8.6.......", "lang"],
+        ["0033", "e...b...d...b...", "terz"], ["2200", "c...a...e...b...", "terz"], ["0033", "e...b...d...b...", "terz"], ["2300", "a...b...e.......", "terz"],
+        ["1111", "9.......b.......", "2...4...6...4..."], ["6633", "8.......b...d...", "1...3...4...6..."],
+        ["0033", "e...b...d...b...", "terz"], ["2200", "c...a...e...b...", "terz"], ["0033", "e...b...d...b...", "terz"], ["3300", "d.b.8.b.e...e...", "terz"]] }
+  ],
+  /* Marktplatz: Feilschen – Händler ruft, Kunde widerspricht (Ruf und Antwort), dorisch, belebt, aber nicht zuckersüß */
+  marktplatz: [
+    { instrument: "schalmei", band: { trommel: "tamburin", floete: "klarinette", ketten: "krug" }, modus: "dorisch", bordun: 1, variation: 1, swing: 1, ablauf: ABL,
+      bass: { i: "halbe", s: "viertel", r: "viertel", b: "halbe", h: "puls" }, schlag: MARKT_SCHLAG,
+      takte: [["0000", "0.0.4...0.0.2...", ""],
+        ["0000", "4.3.4.7.4.......", "........4.2.0.2."], ["4444", "3.1.3.6.3.......", "........6.3.1.3."], ["2222", "5.3.5.7.a.......", "........5.3.0.3."], ["3300", "4.6.4.1.7...4...", ""],
+        ["0044", "7.7.9.7.........", "........6.6.1.6."], ["2233", "a.a.c.a.........", "........4.4.6.4."], ["0044", "7.9.b.9.8...6...", ""], ["3300", "8.6.4.6.7.......", "........4.2.0..."],
+        ["1111", "9.......b.......", "2.4.6.4.2.4.6.4."], ["3333", "b.......8.......", "4.6.1.6.4.6.1.6."],
+        ["0044", "7.7.9.7.........", "........6.6.1.6."], ["2233", "a.a.c.a.........", "........4.4.6.4."], ["0044", "7.9.b.9.8...6...", ""], ["3300", "8.6.4.6.7...0...", "........4.2.0..."]] },
+    { instrument: "cembalo", band: { trommel: "tamburin", floete: "englischhorn", ketten: "loeffel" }, modus: "dorisch", bordun: 0, variation: 1, swing: 1, ablauf: ABL,
+      bass: { i: "halbe", s: "viertel", r: "viertel", b: "halbe", h: "puls" }, schlag: MARKT_SCHLAG,
+      takte: [["0000", "4.2.4.2.0.......", ""],
+        ["0000", "2.4.2.0.4.......", "........2.4.0..."], ["2222", "3.5.3.0.5.......", "........3.5.0..."], ["4444", "1.3.1.6.3.......", "........1.3.6..."], ["3300", "4.1.4.6.7...0...", ""],
+        ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["4433", "8.6.8.a.b.......", "........4.6.1.4."], ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["3300", "b.8.6.8.7.......", "........4.2.0..."],
+        ["1111", "b.......9.......", "2.4.6.4.2.4.6.4."], ["2233", "a.......8.......", "3.5.0.5.4.6.1.6."],
+        ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["4433", "8.6.8.a.b.......", "........4.6.1.4."], ["0022", "9.7.9.b.a.......", "........3.5.3.0."], ["3300", "b.8.6.8.7...0...", "........4.2.0..."]] }
+  ]
+});
+
+const TEILE='ABCDEFGHIJKLMNOP'.split(''),LIED_ROLLEN='issssrrrrbbhhhhs';
+const rolleVon=(s,ab)=>s.rollen?s.rollen[TEILE.indexOf(s.ablauf[((ab%s.ablauf.length)+s.ablauf.length)%s.ablauf.length])]:null;
+function liedVonNoten(d){const v={instrument:d.instrument,band:d.band,modus:d.modus,ablauf:d.ablauf,rollen:LIED_ROLLEN,swing:d.swing||0,teile:{}};
+ const zeile=str=>{const a=leer();for(let i=0;i<SCHRITTE&&i<str.length;i++)if(str[i]!=='.')a[i]=parseInt(str[i],36);return a};
+ d.takte.forEach(([akk,mel,fl],k)=>{const p=TEILE[k],rolle=LIED_ROLLEN[k],t=teilLeer();const ch=akk.split('').map(Number),bass=bassBauen(ch,d.bass[rolle]||'halbe'),m=zeile(mel);t.bass=bass;t.melodie=m;
+  t.floete=fl==='echo'?echoBauen(bass,m,'antwort'):fl==='lang'?echoBauen(bass,m,'lang'):fl==='terz'?terzStimme(bass,m):fl?zeile(fl):leer();
+  const sc=(d.schlag||{})[rolle]||{};['klopf','schelle','trommel','ketten'].forEach(x=>{t[x]=an(sc[x]||[])});v.teile[p]=t});return v}
 function komponieren(mood,int,behalten,alt){const roh=STIL[mood]||STIL.reise,st=mitIntensitaet(roh,int);
+ const LL=KAMPF_LIEDER[mood];if(LL&&LL.length){const gleich=behalten&&cur&&cur.mood===mood&&cur.liedNr!=null;let nr=gleich?cur.liedNr:Math.floor(Math.random()*LL.length);if(!gleich&&alt&&alt.mood===mood&&LL.length>1&&nr===alt.liedNr)nr=(nr+1)%LL.length;
+  const v=liedVonNoten(LL[nr]),tr=gleich?cur.transpose:alt?st.transpose.reduce((b,t)=>Math.abs(t-alt.transpose)<Math.abs(b-alt.transpose)?t:b,st.transpose[0]):zufall(st.transpose);
+  return{mood,int,tempo:tempoFuer(roh,int),swing:v.swing,transpose:tr,modus:v.modus,instrument:v.instrument,band:Object.assign({},v.band),ablauf:v.ablauf,rollen:v.rollen,teile:v.teile,liedNr:nr,seed:Math.floor(Math.random()*97),durch:0}}
  let basis;if(behalten&&cur&&cur.mood===mood)basis={transpose:cur.transpose,modus:cur.modus,instrument:cur.instrument,band:cur.band,ablauf:cur.ablauf,seed:cur.seed};
  else{const tr=alt?st.transpose.reduce((b,t)=>Math.abs(t-alt.transpose)<Math.abs(b-alt.transpose)?t:b,st.transpose[0]):zufall(st.transpose);
   basis={transpose:tr,modus:zufall(st.modus),instrument:zufall(st.instrument),band:{trommel:zufall(st.band.trommel),floete:zufall(st.band.floete),ketten:zufall(st.band.ketten)},ablauf:zufall(st.ablauf),seed:Math.floor(Math.random()*97)}}
  return Object.assign(basis,{mood,int,tempo:tempoFuer(roh,int),swing:st.swing,teile:stimmungTeile(st,basis.modus),durch:0})}
 const SCHLAG={trommel:1,klopf:1,schelle:1,ketten:1};
+/* Bassdrum: warmer Schlag bei Festen, treibender Kick bei Kampf und Hymnen, Herzschlag bei Grusel */
+const KICK={verfolgung:{k:[0,3,6,8,11,14],l:.26},kampf:{k:[0,4,8,12],l:.3},boss:{k:[0,4,8,12],l:.34},reiter:{k:[0,6,8,14],l:.24},sieg:{k:[0,4,8,12],l:.24},zwerge:{k:[0,8],l:.26},dorffest:{k:[0,8],l:.2},marktplatz:{k:[0,8],l:.18},shanty:{k:[0,8],l:.2},grusel:{k:[0,3],l:.2},spannung:{k:[0,3],l:.16}};
 function planen(s,i,zeit,sp){const ab=teil,p=s.teile[s.ablauf[ab]]||s.teile.A;if(s.swing&&i%2===1)zeit+=sp*0.3;const tr=s.transpose,sk=MODI[s.modus]||MODI.dorisch,pr=ORCH[s.mood];
  const ruhe=wechsel>1||(want.mood&&want.mood!==s.mood&&i>=8),halb=wechsel===1;/* vor und nach einem Stimmungswechsel schweigt das Schlagwerk */
  const betont=i%4===0?1:i%2===0?.82:.68;
@@ -1117,7 +1290,11 @@ function planen(s,i,zeit,sp){const ab=teil,p=s.teile[s.ablauf[ab]]||s.teile.A;if
  v=p.floete[i];if(v>=0&&!solist)echoStimme(s,FLOETE_GRUND+tr+ton(sk,v),zeit,laenge(p.floete,i)*sp*.95,(gaeste.length?.8:1)*(i%4===0?1:.85));
  if(!ruhe){const lk=halb?.55:1;
   if(p.trommel[i]>=0&&(lay>=.22||i===0)){const t=TROMMEL[s.band.trommel]||TROMMEL.trommel;spiel(t[i%4===0?0:1],0,zeit,(i%4===0?.42:.3)*lk,1.4,{aus:.3});if(i===0&&(s.mood==='kampf'||mBasis(s.mood)==='boss'))spiel('bd',0,zeit,.4*lk,1)}
-  if(lay>.72&&i%4===0&&!(p.trommel[i]>=0))spiel('bd',0,zeit,.26*lk,1);if(lay>.88&&i>=12&&ab%2===1)spiel(i%2?'snare2':'snare1',0,zeit,(.12+.04*(i-12))*lk,.4);
+  {const kk=KICK[mBasis(s.mood)];if(kk&&lay>=.45&&s.int>=4){if(kk.k.includes(i)&&!(i===0&&p.trommel[0]>=0&&(s.mood==='kampf'||mBasis(s.mood)==='boss')))spiel('bd',0,zeit,kk.l*(i%4===0?1:.7)*lk,.9)}else if(lay>.72&&i%4===0&&!(p.trommel[i]>=0))spiel('bd',0,zeit,.26*lk,1)}
+  /* Anlauf in den Refrain: Becken schwillt an, die Snare wirbelt hinauf, ein Atemzug – und der Refrain kommt mit einem großen Schlag */
+  if(s.rollen&&lay>=.4){const jetzt=rolleVon(s,ab),nx=rolleVon(s,ab+1),vor=rolleVon(s,ab-1);
+   if((nx==='r'||nx==='h')&&jetzt!=='r'&&jetzt!=='h'){if(i===8)spiel('swell',0,zeit,.15*lk,sp*8,{ein:sp*7});if(i>=12&&i<15)spiel(i%2?'snare2':'snare1',0,zeit,(.09+.05*(i-12))*lk,.3)}
+   if((jetzt==='r'||jetzt==='h')&&i===0&&ab>0&&vor!==jetzt){spiel('crash',0,zeit,.2*lk,2.5);spiel('bd',0,zeit,.42*lk,1)}}if(lay>.88&&i>=12&&ab%2===1)spiel(i%2?'snare2':'snare1',0,zeit,(.12+.04*(i-12))*lk,.4);
   if(p.schelle[i]>=0&&lay>=.22)spiel(Math.random()<.5?'schelle1':'schelle2',0,zeit,.08*lk,.6);
   if(p.klopf[i]>=0)spiel(i%4===0?'holz1':'holz2',0,zeit,.15*lk,.3);
   if(p.ketten[i]>=0&&lay>=.22){const k=KETTE[s.band.ketten]||KETTE.rassel;spiel(k[i%4===0?0:1],0,zeit,(s.band.ketten==='stampfen'?.22:.12)*lk,.5)}}
@@ -1139,43 +1316,55 @@ function setzen(mood,int){want.mood=mood;want.int=Math.max(0,Math.min(10,Math.ro
    Alles aus denselben Aufnahmen wie die Musik; fehlt eine Datei, bleibt es still statt falsch. */
 function ld(g,m){if(KARTE[g]){const x=KARTE[g].reduce((b,y)=>b==null||Math.abs(y-m)<Math.abs(b-m)?y:b,null);laden(g+'_'+x)}else laden(g)}
 const AKN={stufe:[['horn',50],['horn',57],['horn',62],['trp',62],['trp',66],['trp',69],['harfe',62],['harfe',66],['harfe',69],['harfe',74],['harfe',78],['harfe',81],['harfe',86],['timp1'],['crash']],
- waechter:[['timproll'],['pos',38],['pos',41],['tuba',38],['bd'],['vctrem',38],['vctrem',45]],
- boss:[['gong'],['timproll'],['tuba',38],['tuba',34],['pos',38],['pos',39],['vctrem',36],['vctrem',43],['stimme',57],['stimme',60],['stimme',63],['crash'],['bd'],['swell']],
- phase:[['crash'],['timp1'],['trp',63],['trp',67],['trp',70],['bd'],['swell']],
+ waechter:[['timproll'],['pos',38],['pos',45],['tuba',38],['bd'],['vctrem',38],['taiko',43],['taiko',48],['horn',50],['horn',55],['horn',57],['ooh',57],['crash']],
+ boss:[['gong'],['timproll'],['tuba',34],['pos',38],['pos',39],['pos',45],['trp',62],['vctrem',36],['vctrem',43],['ooh',48],['ooh',51],['ooh',55],['taiko',43],['taiko',48],['crash'],['bd'],['swell'],['timp1']],
+ phase:[['crash'],['timp1'],['trp',63],['trp',67],['trp',70],['bd'],['swell'],['taiko',43],['taiko',48],['ooh',60],['ooh',63],['ooh',67]],
+ segen:[['cel',72],['cel',76],['cel',79],['cel',84],['harfe',67],['harfe',72],['ooh',62],['ooh',66],['ooh',69]],
+ fluch:[['pizz',38],['pizz',39],['ooh',50],['ooh',51],['vctrem',37]],
  sieg:[['crash'],['gong'],['trp',62],['trp',66],['trp',69],['trp',74],['horn',50],['horn',57],['timp1'],['timproll'],['harfe',62],['harfe',74],['harfe',86]],
  geschafft:[['horn',50],['horn',57],['timp1'],['glock',86],['glock',93]],
- geheim:[['harfe',57],['harfe',60],['harfe',64],['harfe',67],['harfe',71],['harfe',74],['harfe',79],['harfe',83],['gloeckchen'],['stimme',62],['stimme',66],['stimme',69],['swell']],
+ geheim:[['cel',69],['cel',72],['cel',76],['cel',79],['cel',83],['cel',84],['cel',88],['cel',91],['harfe',57],['harfe',64],['harfe',67],['kal',72],['kal',79],['gloeckchen'],['ooh',62],['ooh',66],['ooh',69],['swell']],
  zurueck:[['harfe',79],['harfe',74],['harfe',69],['harfe',62]],
- legendaer:[['glock',86],['glock',93],['stimme',69],['stimme',74]],
+ legendaer:[['glock',86],['glock',93],['ooh',69],['ooh',74],['spiel',81],['spiel',84],['spiel',88],['spiel',93]],
  uralt:[['stimme',62],['stimme',66],['stimme',69],['stimme',74],['glock',86],['glock',93],['gloeckchen'],['swell']],
  mythisch:[['stimme',62],['stimme',66],['stimme',69],['stimme',74],['glock',86],['glock',93],['gloeckchen'],['gong'],['timproll']]};
 function akVorladen(){laden('snare1');laden('snare2');for(const k in AKN)for(const [g,m] of AKN[k])ld(g,m||0)}
 /* Musik kurz absenken (0..1) und nach t Sekunden wieder hochfahren */
 function ducken(z,t,auf){if(!duck)return;const n=AC.currentTime;duck.gain.cancelScheduledValues(n);duck.gain.setValueAtTime(duck.gain.value,n);duck.gain.linearRampToValueAtTime(z,n+0.08);duck.gain.setValueAtTime(z,n+t);duck.gain.linearRampToValueAtTime(1,n+t+(auf||0.6))}
 /* harter Schnitt: das laufende Stück verklingt, nach p Sekunden setzt die neue Stimmung voll ein */
-function schnitt(mood,int,p){want.mood=mood;want.int=Math.max(0,Math.min(10,Math.round(int)));if(!cur)return setzen(mood,int);const alt=cur;cur=komponieren(want.mood,want.int,false,alt);vorladen(cur);schritt=0;teil=0;wechsel=0;altTempo=0;padAkk=-1;naechste=AC.currentTime+p}
+function schnitt(mood,int,p,ab){want.mood=mood;want.int=Math.max(0,Math.min(10,Math.round(int)));if(!cur)return setzen(mood,int);const alt=cur;cur=komponieren(want.mood,want.int,false,alt);vorladen(cur);schritt=0;teil=0;wechsel=0;altTempo=0;padAkk=-1;naechste=AC.currentTime+p;
+ if(ab&&cur.rollen){for(let k=0;k<cur.ablauf.length;k++)if(rolleVon(cur,k)===ab){teil=k;break}}}
 function akzent(a){if(!an_||!AC||AC.state!=='running')return;busBauen();if(!bus)return;const now=AC.currentTime,t=now+0.03;if(a!=='phase'&&now-akT<0.6)return;akT=now;
  const S=(g,m,d,l,dau,o)=>spiel(g,m,t+d,l,dau,o);
  if(a==='stufe'){ducken(0.25,1.6,1.2);S('timp1',0,0,.42,2);S('horn',50,0,.32,1.1,{ein:.04,aus:.3,pan:.15});S('horn',57,.32,.32,.9,{ein:.04,aus:.3,pan:.15});S('horn',62,.6,.36,1.6,{ein:.04,aus:.6,pan:.15});
   S('trp',62,.6,.22,1.4,{ein:.03,aus:.5,pan:-.2});S('trp',66,.6,.18,1.4,{ein:.03,aus:.5,pan:-.2});S('trp',69,.6,.18,1.4,{ein:.03,aus:.5,pan:-.2});S('crash',0,.6,.18,2.5);
   [62,66,69,74,78,81,86].forEach((m,i)=>S('harfe',m,.62+i*.045,.22,1.4,{pan:-.4}));const st=typeof STAGES!=='undefined'&&G&&STAGES[G.stage];if(st)schnitt(st.mood,st.int,1.9);else if(want.mood)schnitt(want.mood,want.int,1.9)}
- else if(a==='waechter'){ducken(0.3,1.9,0.8);S('timproll',0,0,.4,1.9,{ein:1.2,aus:.1});S('vctrem',38,0,.3,2,{ein:.8,aus:.4,pan:.25});S('vctrem',45,.05,.22,2,{ein:.8,aus:.4,pan:-.25});
-  S('pos',38,1.85,.38,1.4,{ein:.03,aus:.6});S('pos',41,1.85,.3,1.4,{ein:.03,aus:.6});S('tuba',38,1.85,.38,1.6,{ein:.03,aus:.6});S('bd',0,1.85,.55,1.2)}
- else if(a==='boss'){ducken(0.08,2.9,0.05);S('gong',0,0,.5,6);S('swell',0,.1,.22,2.6,{ein:1.5});S('timproll',0,.2,.5,2.7,{ein:1.6,aus:.08});S('tuba',34,0,.4,3,{ein:.3,aus:.6,pan:.2});S('tuba',38,.05,.32,3,{ein:.3,aus:.6,pan:.2});
-  S('vctrem',36,.1,.34,3,{ein:.6,aus:.6,pan:.3});S('vctrem',43,.1,.26,3,{ein:.6,aus:.6,pan:-.3});S('pos',38,1.4,.3,1.6,{ein:.4,aus:.3});S('pos',39,1.4,.26,1.6,{ein:.4,aus:.3});
-  S('stimme',57,.5,.26,2.5,{ein:.8,aus:.4,pan:-.3});S('stimme',60,.6,.22,2.4,{ein:.8,aus:.4,pan:.3});S('stimme',63,.7,.2,2.3,{ein:.8,aus:.4});
-  S('crash',0,2.95,.34,3);S('bd',0,2.95,.6,1.2);S('timp1',0,2.95,.5,2);schnitt(bossMood(),9,2.95)}
- else if(a==='phase'){if(!cur||mBasis(cur.mood)!=='boss')return;ducken(0.35,.5,.3);S('crash',0,0,.36,3);S('bd',0,0,.6,1);S('timp1',0,0,.5,2);S('swell',0,0,.2,1.5);[63,67,70].forEach((m,i)=>S('trp',m,0,.24-i*.03,.7,{ein:.02,aus:.3}));
-  cur.transpose+=1;cur.tempo=Math.round(cur.tempo*1.1);naechste=Math.max(naechste,AC.currentTime+.55);schritt=0}
+ else if(a==='waechter'){/* Kriegstrommeln im 3-3-2, ein Hornruf (Quart, Quinte) – dann setzt das Kampfthema direkt im Refrain ein */
+  ducken(0.2,2.1,0.4);[0,.375,.75,1,1.375,1.75].forEach((d,i)=>S('taiko',i%3===2?48:43,d,.3+.05*i,1.2,{aus:.3}));S('timproll',0,.9,.34,1.2,{ein:.9,aus:.1});
+  S('horn',50,.1,.3,.45,{ein:.03,aus:.2,pan:.15});S('horn',55,.45,.3,.45,{ein:.03,aus:.2,pan:.15});S('horn',57,.8,.34,1.2,{ein:.03,aus:.5,pan:.15});S('vctrem',38,0,.26,2.1,{ein:.6,aus:.4,pan:.25});S('ooh',57,.6,.2,1.5,{ein:.5,aus:.4,pan:-.3});
+  S('pos',38,2.05,.36,1.4,{ein:.03,aus:.6});S('pos',45,2.05,.3,1.4,{ein:.03,aus:.6});S('tuba',38,2.05,.36,1.6,{ein:.03,aus:.6});S('bd',0,2.05,.55,1.2);S('crash',0,2.05,.24,2.4);schnitt('kampf',8,2.05,'r')}
+ else if(a==='boss'){/* Gong, Chor aus der Tiefe, Kriegstrommeln, die immer schneller werden – ein Atemzug Stille – der große Schlag */
+  ducken(0.06,3.2,0.05);S('gong',0,0,.45,6);S('swell',0,.3,.22,2.9,{ein:2.3});
+  [0,.6,1.1,1.5,1.82,2.08,2.3,2.48,2.62,2.74,2.84,2.92].forEach((d,i)=>S('taiko',i%2?48:43,d,.24+.025*i,1,{aus:.3}));S('timproll',0,1.5,.4,1.6,{ein:1.3,aus:.08});
+  S('tuba',34,0,.36,3.1,{ein:.4,aus:.6,pan:.2});S('vctrem',36,.1,.3,3,{ein:.6,aus:.6,pan:.3});S('vctrem',43,.1,.22,3,{ein:.6,aus:.6,pan:-.3});
+  S('ooh',48,.4,.24,2.7,{ein:1,aus:.3,pan:-.3});S('ooh',51,.5,.22,2.6,{ein:1,aus:.3,pan:.3});S('ooh',55,.6,.2,2.5,{ein:1,aus:.3});S('pos',38,1.6,.26,1.5,{ein:.5,aus:.2});S('pos',39,1.6,.22,1.5,{ein:.5,aus:.2});
+  S('crash',0,3.25,.36,3);S('bd',0,3.25,.62,1.2);S('timp1',0,3.25,.5,2);S('pos',38,3.25,.34,1.4,{ein:.02,aus:.5});S('pos',45,3.25,.3,1.4,{ein:.02,aus:.5});S('trp',62,3.25,.22,1.2,{ein:.02,aus:.5});schnitt(bossMood(),9,3.25)}
+ else if(a==='phase'){if(!cur||mBasis(cur.mood)!=='boss')return;ducken(0.3,.6,.25);S('crash',0,0,.36,3);S('bd',0,0,.6,1);S('timp1',0,0,.5,2);S('swell',0,0,.2,1.5);
+  [0,.19,.38].forEach((d,i)=>S('taiko',i===1?48:43,d,.5,1.2,{aus:.3}));[60,63,67].forEach(m=>S('ooh',m,0,.22,1.8,{ein:.15,aus:.6}));[63,67,70].forEach((m,i)=>S('trp',m,.38,.24-i*.03,.8,{ein:.02,aus:.3}));
+  cur.transpose+=1;cur.tempo=Math.round(cur.tempo*1.08);naechste=Math.max(naechste,AC.currentTime+.6);schritt=0;if(cur.rollen){const h=hoehepunkt(cur);if(h>=0)teil=h}}
  else if(a==='sieg'){ducken(0.05,4.2,0.05);S('crash',0,.05,.36,3.5);S('gong',0,.05,.36,5);S('timproll',0,.05,.36,1.5,{aus:.2});S('timp1',0,1.5,.5,2);
   [[62,.5,.32],[62,.82,.16],[66,1.0,.16],[69,1.18,.5],[74,1.5,1.8]].forEach(([m,d,l])=>{S('trp',m,d,.32,l+.1,{ein:.015,aus:.12,pan:.2})});
   S('trp',66,1.5,.24,1.8,{ein:.02,aus:.6,pan:-.2});S('trp',69,1.5,.24,1.8,{ein:.02,aus:.6,pan:-.2});S('horn',50,1.5,.34,2.2,{ein:.05,aus:.8});S('horn',57,1.5,.3,2.2,{ein:.05,aus:.8});
   [62,66,69,74,78,81,86].forEach((m,i)=>S('harfe',m,1.5+i*.05,.22,1.8,{pan:-.4}));schnitt('sieg',7,3.6)}
  else if(a==='geschafft'){ducken(0.4,1.2,1);S('horn',50,0,.3,1.4,{ein:.04,aus:.5});S('horn',57,.25,.3,1.4,{ein:.04,aus:.5});S('timp1',0,0,.36,2);S('glock',86,.3,.2,1.6);S('glock',93,.45,.18,1.6)}
- else if(a==='geheim'){ducken(0.06,1.5,0.05);[57,60,64,67,71,74,79,83].forEach((m,i)=>S('harfe',m,i*.06,.26,1.8,{pan:i%2?.35:-.35}));S('gloeckchen',0,.45,.3,3,{pan:-.3});S('swell',0,0,.14,1.4,{ein:.9});
-  [62,66,69].forEach((m,i)=>S('stimme',m,.35+i*.08,.2,2.2,{ein:.5,aus:.8}));const r=G.room&&ROOMMOOD[G.room.type];schnitt(r||want.mood||'fey',5,1.5)}
+ else if(a==='geheim'){ducken(0.06,1.5,0.05);[69,72,76,79,83,84,88,91].forEach((m,i)=>S('cel',m,i*.065,.2,1.8,{pan:i%2?.35:-.35}));[57,64,67].forEach((m,i)=>S('harfe',m,i*.06,.2,1.8,{pan:-.2}));S('kal',72,.55,.2,1.5,{pan:.3});S('kal',79,.68,.18,1.5,{pan:-.3});S('gloeckchen',0,.45,.26,3,{pan:-.3});S('swell',0,0,.14,1.4,{ein:.9});
+  [62,66,69].forEach((m,i)=>S('ooh',m,.35+i*.08,.2,2.2,{ein:.5,aus:.8}));const r=G.room&&ROOMMOOD[G.room.type];schnitt(r||want.mood||'fey',5,1.5)}
  else if(a==='zurueck'){ducken(0.15,.8,0.05);[79,74,69,62].forEach((m,i)=>S('harfe',m,i*.07,.24,1.4));const st=STAGES[G.stage];if(st)schnitt(st.mood,st.int,.85)}
- else if(a==='legendaer'){ducken(0.45,1.4,1);S('stimme',69,0,.2,1.8,{ein:.3,aus:.7});S('stimme',74,.05,.18,1.8,{ein:.3,aus:.7});S('glock',86,.1,.2,1.6);S('glock',93,.22,.18,1.6)}
+ else if(a==='legendaer'){ducken(0.45,1.4,1);S('ooh',69,0,.2,1.8,{ein:.3,aus:.7});S('ooh',74,.05,.18,1.8,{ein:.3,aus:.7});S('glock',86,.1,.2,1.6);S('glock',93,.22,.18,1.6);[81,84,88,93].forEach((m,i)=>S('spiel',m,.3+i*.09,.16,1.4))}
+ /* Segen (Schrein, gute Wendung): helle Celesta aufwärts, Harfe, ein Dur-Hauch im Chor */
+ else if(a==='segen'){ducken(0.6,1,0.6);[72,76,79,84].forEach((m,i)=>S('cel',m,i*.07,.18,1.4,{pan:i%2?.3:-.3}));S('harfe',67,.05,.18,1.6);S('harfe',72,.12,.16,1.6);[62,66,69].forEach(m=>S('ooh',m,.15,.13,1.6,{ein:.3,aus:.6}))}
+ /* Fluch: tiefe Pizzicati, ein reibender Halbton im Chor, die Streicher zittern */
+ else if(a==='fluch'){ducken(0.55,1.2,0.6);S('pizz',38,0,.34,1);S('pizz',39,.18,.3,1);S('ooh',50,.1,.18,1.8,{ein:.4,aus:.6});S('ooh',51,.1,.15,1.8,{ein:.4,aus:.6});S('vctrem',37,0,.2,1.6,{ein:.3,aus:.5,pan:.3})}
  else if(a==='uralt'||a==='mythisch'){const m2=a==='mythisch';ducken(m2?0.12:0.25,m2?2.4:1.8,1.2);[62,66,69,74].forEach((m,i)=>S('stimme',m,i*.06,.24,2.6,{ein:.35,aus:1,pan:i%2?.3:-.3}));S('glock',86,.2,.24,2);S('glock',93,.35,.22,2);S('gloeckchen',0,.3,.3,3);S('swell',0,0,.16,1.6,{ein:1});
   if(m2){S('gong',0,0,.36,5);S('timproll',0,0,.3,1.2,{aus:.2})}}}
 /* Gefahr: wenig Leben = Musik dumpf (wie in Watte), alle gefallen = fast nur noch ein fernes Grollen */
@@ -3200,9 +3389,9 @@ function saveRunNext(){if(!P||G.bot)return;saveRun();if(SAVE.run&&!G.mp)SAVE.run
    Vögel am Tag, Grillen in der Nacht, die Gaststube im Lager. Gestreamt statt dekodiert, sanft überblendet.
    Fehlt eine Datei (z. B. in der Vorschau ohne die Website), bleibt es einfach still. */
 const AMBI={el:{},on:{}};
-const AMB_ORT={hoehle:'a_tropfen1',tunnel:'a_tropfen2',mine:'a_tropfen1',minenetz:'a_tropfen3',spinnweben:'a_tropfen2',pilze:'a_tropfen3',ruine:'a_heulwind',kerker:'a_tropfen2',grab:'a_heulwind',geisterdorf:'a_heulwind',
+const AMB_ORT={hoehle:'a_tropfen1',tunnel:'a_tropfen2',mine:'a_tropfen1',minenetz:'a_tropfstein',spinnweben:'a_tropfen2',pilze:'a_tropfstein',ruine:'a_heulwind',kerker:'a_tropfen2',grab:'a_heulwind',geisterdorf:'a_heulwind',
  gracklstugh:'a_feuer2',schmiede:'a_feuer1',labor:'a_kochen',kuostadt:'a_wellen2',see:'a_wellen1',wachhaus:'a_feuer3',schloss:'a_wind1',hof:'a_wind1',turm:'a_wind2',flucht:'a_fluss',wurzeldorf:'a_baumwind',steinbruch:'a_tropfen1',glutgang:'a_feuer3',slums:'a_tropfen2'};
-const AMB_RAUM={schatz:'a_tropfen3',arena:'a_halle',goblin:'a_tropfen1',fallen:'a_feuer3',altar:'a_gesang',haendler:'a_markt',fluch:'a_heulwind',pilzkreis:'a_bienen',ballsaal:'a_halle',schmiede:'a_feuer1',hain:'a_voegel2'};
+const AMB_RAUM={schatz:'a_tropfstein',arena:'a_halle',goblin:'a_tropfen1',fallen:'a_feuer3',altar:'a_gesang',haendler:'a_markt',fluch:'a_heulwind',pilzkreis:'a_bienen',ballsaal:'a_halle',schmiede:'a_feuer1',hain:'a_voegel2'};
 function ambiEl(n){let a=AMBI.el[n];if(a)return a;a=new Audio();a.loop=true;a.preload='auto';a.src='amb/'+n+'.mp3';a.onerror=()=>{a._bad=1};
  try{const src=AC.createMediaElementSource(a),g=AC.createGain();g.gain.value=0;src.connect(g);g.connect(MASTER);a._g=g}catch(e){a._bad=1}return AMBI.el[n]=a}
 function ambiWunsch(){const W={};if(G.state==='camp'||G.state==='title'&&scr&&!scr.hidden&&G.camp){W.a_gaeste=0.5;W.a_lagerfeuer=0.35;return W}
@@ -3223,7 +3412,7 @@ function ambiTick(){if(WXF&&AC){const S=STAGES[G.stage],out=G.state==='play'&&!G
  if(!AC||!MASTER||G.bot||AC.state!=='running')return;const W=SAVE.sound&&SAVE.amb!==false?ambiWunsch():{},v=(SAVE.volSfx==null?0.8:SAVE.volSfx)*0.6*(G.paused?0.5:1),now=AC.currentTime;
  for(const n in W){const a=ambiEl(n);if(a._bad||!a._g)continue;if(a.paused){a.currentTime=Math.random()*20;a.play().catch(()=>{})}const z=W[n]*v;if(Math.abs((AMBI.on[n]||0)-z)>0.01){a._g.gain.cancelScheduledValues(now);a._g.gain.setTargetAtTime(z,now,0.9);AMBI.on[n]=z}}
  for(const n in AMBI.on){if(W[n])continue;const a=AMBI.el[n];if(!a||!a._g){delete AMBI.on[n];continue}if(AMBI.on[n]>0){a._g.gain.cancelScheduledValues(now);a._g.gain.setTargetAtTime(0,now,0.7);AMBI.on[n]=0;a._off=now}else if(now-(a._off||0)>4&&!a.paused){a.pause();delete AMBI.on[n]}}}
-function bossMood(){const b=G.boss;if(!b)return 'boss';if(b.musId===undefined){const S=STAGES[G.stage];b.musId=S&&S.boss&&BOSSES[S.boss]===b.def?S.boss:Object.keys(BOSSES).find(k=>BOSSES[k]===b.def)||''}return b.musId&&MUSIK.hat('boss_'+b.musId)?'boss_'+b.musId:'boss'}
+function bossMood(){const b=G.boss;if(!b)return 'boss';if(b.survive0||b.survive)return 'verfolgung';if(b.musId===undefined){const S=STAGES[G.stage];b.musId=S&&S.boss&&BOSSES[S.boss]===b.def?S.boss:Object.keys(BOSSES).find(k=>BOSSES[k]===b.def)||''}return b.musId&&MUSIK.hat('boss_'+b.musId)?'boss_'+b.musId:'boss'}
 const ROOMMOOD={schatz:'fey',arena:'kampf',goblin:'dorffest',fallen:'spannung',altar:'pilger',haendler:'marktplatz',fluch:'grusel',pilzkreis:'elben',ballsaal:'hof',schmiede:'zwerge',hain:'elben'};
 /* Akzente in der Musik – auch bei Online-Gästen (siehe Netz) */
 function musAk(a){if(!AC||!SAVE.music||G.bot)return;try{MUSIK.akzent(a)}catch(e){}}
@@ -3233,7 +3422,7 @@ function musikTick(dt){G.ambT=(G.ambT||0)-dt;if(G.ambT<=0){G.ambT=0.5;try{ambiTi
  if(G.state==='between')return MUSIK.setzen(G.fireOn?'kamin':'reise',3);
  if(G.paused)return;
  const S=STAGES[G.stage];let mood=S.mood,int=S.int,near=0;for(const e of G.enemies)if(!e.dead&&d2(e,P)<450*450)near++;int+=Math.min(3,near/10);
- if(G.guardE)int=Math.max(int,8);
+ if(G.guardE){int=Math.max(int,8);if(!G.room)mood='kampf'}
  if(G.boss){mood=bossMood();int=G.boss.hp<G.boss.maxHp*0.4?10:9;if(int===10&&!G.boss.musP2&&!G.boss.dead){G.boss.musP2=1;musAk('phase')}}
  if(G.room&&ROOMMOOD[G.room.type]){mood=ROOMMOOD[G.room.type];int=Math.max(3,int-2)+(G.enemies.some(e=>!e.dead)?3:0)}
  {const L=mpL().filter(q=>!q.netGone),down=L.length&&L.every(q=>q.down),low=L.some(q=>!q.down&&q.hp<q.st.maxHp*0.28);MUSIK.gefahr(down?2:low?1:0)}
@@ -4207,7 +4396,7 @@ function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel
  </div>`,'',keep);
  const dt=scr.querySelector('details.stats');if(dt)dt.addEventListener('toggle',()=>{G.statsOpen=dt.open});
  const id2=$('idet2');if(id2){const r=id2.getBoundingClientRect();if(r.bottom>window.innerHeight-8||r.top<0)id2.scrollIntoView({block:'nearest',behavior:REDUCED?'auto':'smooth'})}}
-function equipFromBag(i){const it=P.bag[i];if(!it)return;if(it.curse&&CURSES[it.curse])sfx('fluch');else{const sl=bestSlotFor(it);sfx(sl==='weapon'||sl==='ranged'?'eq_waffe':sl==='armor'?'eq_ruestung':sl==='helm'?'eq_helm':sl==='gloves'?'eq_leder':'eq_ring')}const slot=bestSlotFor(it);const old=P.eq[slot];P.eq[slot]=it;P.bag.splice(i,1);if(old)P.bag.push(old);recalc();updateInvBadge()}
+function equipFromBag(i){const it=P.bag[i];if(!it)return;if(it.curse&&CURSES[it.curse]){sfx('fluch');musAk('fluch')}else{const sl=bestSlotFor(it);sfx(sl==='weapon'||sl==='ranged'?'eq_waffe':sl==='armor'?'eq_ruestung':sl==='helm'?'eq_helm':sl==='gloves'?'eq_leder':'eq_ring')}const slot=bestSlotFor(it);const old=P.eq[slot];P.eq[slot]=it;P.bag.splice(i,1);if(old)P.bag.push(old);recalc();updateInvBadge()}
 /* Vorschau beim Überfahren von „Verbessern“: geänderte Zahlen bekommen grün den neuen Wert dahinter */
 function upDiff(a,b){const A=String(a).split(/(\d+(?:[.,]\d+)?)/),B=String(b).split(/(\d+(?:[.,]\d+)?)/);
  if(A.length!==B.length||A.some((x,i)=>i%2===0&&x.replace(/<[^>]*>/g,'')!==B[i].replace(/<[^>]*>/g,'')))return`${a} <span class="upv">→ ${b}</span>`;
@@ -4468,7 +4657,7 @@ function barrelBoom(p){const R=115;explodeFx(p.x,p.y-6,R*0.75,'#ff8a2a',{shake:4
  for(const q of G.props)if(!q.dead&&q.k==='barrel'&&d2(q,p)<(R+q.r)*(R+q.r))breakProp(q,'chain')}
 function useShrine(p){p.used=true;const S=SHRINES[p.type];P.shrine={k:p.type,t:dmod('schreine')?45:30};recalc();
  G.fxs.push({k:'pillar',x:p.x,y:p.y+10,w:70,h:340,c:S.c,t:0,life:1});G.fxs.push({k:'shock',x:p.x,y:p.y,r:180,c:S.c,t:0,life:0.6});light(p.x,p.y,320,S.c,1,1);sparks(p.x,p.y,S.c,20,420,1);
- banner(S.n,S.d,S.c,{dur:2,size:38,y:H*0.3});sfx('segen');sfx('magic');say('shrine')}
+ banner(S.n,S.d,S.c,{dur:2,size:38,y:H*0.3});sfx('segen');sfx('magic');musAk('segen');say('shrine')}
 function openChest(p){p.open=true;if(p.mimic){p.dead=true;const e=spawnEnemy(MIMIC,p.x,p.y,{});e.mimic=1;e.hp*=1+0.04*SL();e.maxHp=e.hp;e.stun=0.5;word(p.x,p.y-30,'Ein Mimic!','#ff8a5a');sfx('mimic');sfx('roar');G.shake+=5;chunks(p.x,p.y,'#7a4a24',8,200);say('mimic');return}
  const il=scale().il;sfx('truhe');sfx('legend');G.fxs.push({k:'pillar',x:p.x,y:p.y+8,w:60,h:240,c:'#ffd04a',t:0,life:0.9});light(p.x,p.y,260,'#ffd04a',0.8,1);sparks(p.x,p.y,'#ffd04a',18,380,1);
  const n=ri(2,3)+(p.rich||0);for(let i=0;i<n;i++){const a=-Math.PI/2+(i-(n-1)/2)*(p.rich?0.6:0.9);dropItem(p.x+Math.cos(a)*70,p.y+Math.sin(a)*50+30,randomItem(il+1+(p.rich||0),0.5+0.02*SL()+0.4*(p.rich||0),i===0?(p.rich?Math.min(4,2+p.rich):Math.random()<0.5?2:1):(p.rich?2:1)))}
@@ -4550,7 +4739,7 @@ function drawRoomWalls(){const r=G.room;if(!r)return;const c=cx;c.fillStyle='#0b
 /* ================= Würfel-Ereignisse zwischen den Stufen =================
    Wie am Spieltisch: eine Lage, eine Entscheidung, ein W20. Die natürliche 20 krönt, die 1 verflucht. */
 const MODN={dmg:v=>`${v>0?'+':''}${Math.round(v*100)}% Schaden`,hp:v=>`${v>0?'+':''}${Math.round(v*100)}% Leben`,crit:v=>`+${Math.round(v*100)}% Krit. Chance`,speed:v=>`${v>0?'+':''}${Math.round(v*100)}% Tempo`,edmg:v=>`Gegner ${v>0?'+':''}${Math.round(v*100)}% Schaden`,gold:v=>`+${Math.round(v*100)}% Gold`,ambush:()=>'Hinterhalt: Ein Elite-Rudel lauert',nopot:()=>'Keine Heiltränke'};
-function addMod(k,v,good,label){if(!G.bot&&(!G.modSndT||G.time-G.modSndT>0.4||G.state!=='play')){G.modSndT=G.time;sfx(good?'segen':'fluch')}(P.mods||(P.mods=[])).push({k,v,good,n:(label?label+': ':'')+MODN[k](v),st:1})}
+function addMod(k,v,good,label){if(!G.bot&&(!G.modSndT||G.time-G.modSndT>0.4||G.state!=='play')){G.modSndT=G.time;sfx(good?'segen':'fluch');musAk(good?'segen':'fluch')}(P.mods||(P.mods=[])).push({k,v,good,n:(label?label+': ':'')+MODN[k](v),st:1})}
 function modSum(k){let s=0;for(const m of P&&P.mods||[])if(m.k===k)s+=m.v;return s}
 const modHas=k=>!!(P&&P.mods&&P.mods.some(m=>m.k===k));
 const evGold=n=>Math.round(n*(1+0.12*SL())*dMult().gold);
