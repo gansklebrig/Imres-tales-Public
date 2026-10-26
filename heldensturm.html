@@ -1975,15 +1975,26 @@ function computeStats(eq){
 function recalc(){if(P.ranks)for(const old of ['b_invis','b_hypno'])if(P.ranks[old]!==undefined){P.ranks.b_juggle=Math.min(5,(P.ranks.b_juggle||0)+P.ranks[old]);delete P.ranks[old];for(const L of [P.learn,P.bar])if(Array.isArray(L)){const k=L.indexOf(old);if(k>=0){if(L.includes('b_juggle'))L.splice(k,1);else L[k]='b_juggle'}}}const old=P.st;const ratio=old?P.hp/old.maxHp:1;P.st=computeStats(P.eq);P.hp=Math.max(1,Math.min(P.st.maxHp,ratio*P.st.maxHp))}
 const armorK=()=>60+12*(G&&G.state!=='title'?effStage():0);
 const armorRed=a=>Math.max(0,a)/(Math.max(0,a)+armorK());
-function power(st){const dps=st.dmg*st.rate*(1+st.crit*(st.critd-1))*(0.55+0.45*st.skill)*(1+0.3*(st.area-1));const ehp=st.maxHp/(1-armorRed(st.armor)*0.95)*(1+st.ls*3)+st.regen*25;return Math.pow(dps,0.55)*Math.pow(ehp,0.45)*(1+0.5*st.cdr)*(1+0.3*(st.speed/P.hero.speed-1))*(1+0.05*(st.gold-1)+0.05*st.luck)}
+/* Kampfwert eines Helden – danach wird die Beute sortiert und verglichen.
+   Angriff = Grundangriffe (Nah/Fern so gewichtet, wie der Held kämpft) und Fähigkeiten (Fertigkeitsschaden, Abklingzeiten,
+   Wirkungsbereich) im Verhältnis seiner Spielweise; dazu Überleben (Leben, Rüstung, Lebensraub, Regeneration), Tempo und
+   legendäre Kräfte. So rutschen starke Gegenstände für Fähigkeiten oder Überleben nicht mehr nach hinten. */
+const KW_HELD={barradin:{nah:.35,fk:.6},echo:{nah:.5,fk:.6},friedrich:{nah:.25,fk:.4},ezekiel:{nah:.7,fk:.5}};
+function power(st,lpN){const w=KW_HELD[P.id]||{nah:.5,fk:.5},cf=1+Math.min(st.crit,1)*(st.critd-1);
+ const basis=Math.max(1e-6,(st.dmgM*st.rateM*w.nah+st.dmgR*st.rateR*(1-w.nah))*cf);
+ const faeh=Math.max(1e-6,st.dmg*st.skill*cf*(1+0.35*(st.area-1))/(1-Math.min(0.5,st.cdr)*0.9));
+ const off=Math.pow(basis,1-w.fk)*Math.pow(faeh,w.fk);
+ const ehp=st.maxHp/(1-armorRed(st.armor)*0.95)*(1+st.ls*3)+st.regen*25;
+ return Math.pow(off,0.6)*Math.pow(ehp,0.4)*(1+0.3*(st.speed/P.hero.speed-1))*(1+0.05*(st.gold-1)+0.05*st.luck)*Math.pow(1.15,lpN||0)}
+const lpZahl=eq=>{const L=new Set();for(const k of SLOTS){const it=eq[k];if(it&&it.pow&&LPOW[it.pow])L.add(it.pow)}return L.size};
 function bestSlotFor(it){if(it.slot!=='ring')return it.slot;if(!P.eq.ring1)return'ring1';if(!P.eq.ring2)return'ring2';
- const a=power(computeStats(Object.assign({},P.eq,{ring1:it}))),b=power(computeStats(Object.assign({},P.eq,{ring2:it})));return a>=b?'ring1':'ring2'}
+ const e1=Object.assign({},P.eq,{ring1:it}),e2=Object.assign({},P.eq,{ring2:it}),a=power(computeStats(e1),lpZahl(e1)),b=power(computeStats(e2),lpZahl(e2));return a>=b?'ring1':'ring2'}
 /* DPS der Grundangriffe: Schaden × Angriffe pro Sekunde × kritischer Mittelwert */
 function dpsOf(st){const cf=1+Math.min(st.crit,1)*(st.critd-1);return{m:st.dmgM*st.rateM*cf,r:st.dmgR*st.rateR*cf}}
 const dpsKind=it=>it.slot==='weapon'?'m':it.slot==='ranged'?'r':'a';
 const dpsPick=(d,k)=>k==='a'?(d.m+d.r)/2:d[k];
 function itemDps(it,base){base=base||computeStats(P.eq);const slot=bestSlotFor(it);const st=computeStats(Object.assign({},P.eq,{[slot]:it}));const a=dpsOf(base),b=dpsOf(st),k=dpsKind(it);return{d:dpsPick(b,k)/Math.max(1e-6,dpsPick(a,k))-1,a,b,k}}
-function itemDelta(it){const slot=bestSlotFor(it);const eq=Object.assign({},P.eq,{[slot]:it});const base=power(computeStats(P.eq));return power(computeStats(eq))/base-1}
+function itemDelta(it){const slot=bestSlotFor(it);const eq=Object.assign({},P.eq,{[slot]:it});const base=power(computeStats(P.eq),lpZahl(P.eq));return power(computeStats(eq),lpZahl(eq))/base-1}
 
 /* ================= DOM ================= */
 const $=id=>document.getElementById(id);
@@ -4228,7 +4239,7 @@ function tbApply(){const sk=$('skills'),ut=$('util');if(!sk||!ut)return;const T=
  sk.style[side]=`max(14px,env(safe-area-inset-${side},0px))`;ut.style[side]=`calc(max(14px,env(safe-area-inset-${side},0px)) + ${Math.round((window.innerWidth<=420?262:272)*s)}px)`;
  const pos=T.arc?SKARC:SKPOS;sk.querySelectorAll('.sk').forEach((el,i)=>{const p=pos[i]||[0,0];el.style[oth]='auto';el.style[side]=p[0]+'px';el.style.bottom=p[1]+'px'})}
 window.addEventListener('resize',()=>{try{tbApply()}catch(e){}});
-function updateInvBadge(){const base=computeStats(P.eq);G.upCount=P.bag.filter(it=>itemDps(it,base).d>0.005).length}
+function updateInvBadge(){G.upCount=P.bag.filter(it=>itemDelta(it)>0.005).length}
 
 /* ================= Bestenliste =================
    Gemeinsam über den Supabase-Server der Website (Tabelle hs_bestenliste, siehe supabase-heldensturm.sql),
@@ -4448,13 +4459,13 @@ function compareHtml(it,cur){const a=statMap(it),b=statMap(cur);const keys=Objec
   return`<tr><td>${L[0]}</td><td class="${x!==undefined?c:'muted'}">${x!==undefined?L[1](x):'–'}</td><td class="dcol ${c}">${dpct(x,y)}</td><td class="${y!==undefined?o:'muted'}">${y!==undefined?L[1](y):'–'}</td></tr>`}).join('')}</tbody></table>`}
 function dpct(x,y){if(x===undefined&&y===undefined)return'';if(y===undefined||!y)return x?'neu':'';if(x===undefined||!x)return'−100%';const q=Math.round((x/y-1)*100);return q===0?'±0%':(q>0?'+':'−')+Math.abs(q)+'%'}
 const dc=(x,y)=>{const a=x||0,b=y||0;return a>b?'good':a<b?'bad':'muted'};
-function sortBag(){const base=computeStats(P.eq),d=new Map(P.bag.map(it=>[it,itemDps(it,base).d])),k=new Map(P.bag.map(it=>[it,itemDelta(it)]));P.bag.sort((x,y)=>(d.get(y)-d.get(x))||(k.get(y)-k.get(x))||y.rar-x.rar||y.ilvl-x.ilvl)}
+function sortBag(){const k=new Map(P.bag.map(it=>[it,itemDelta(it)]));P.bag.sort((x,y)=>(k.get(y)-k.get(x))||y.rar-x.rar||y.ilvl-x.ilvl)}
 function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel;updateInvBadge();
  let selIt=null,selT=null,selK=null;if(sel){[selT,selK]=sel.split(':');selIt=selT==='e'?P.eq[selK]:P.bag[+selK];if(!selIt){G.invSel=null}}
  const target=selIt&&selT==='b'?bestSlotFor(selIt):null;
  const ico=it=>`<canvas class="ico" data-ico="${it.slot}|${it.rar}|${esc(it.base||'')}" width="72" height="72" aria-hidden="true"></canvas>`;
  const eq=SLOTS.map(s=>{const it=P.eq[s];return`<button class="it ${it?'r'+it.rar:'empty'}${it&&it.anc?' anc'+it.anc:''} ${sel==='e:'+s?'sel':''} ${target===s?'cmp':''}" data-act="inv-sel" data-k="e:${s}" ${it?'':'disabled'}><span class="sl">${SLOTLBL[s]}</span>${it?ico(it):''}<span class="nm ${it?'c'+it.rar:''}">${it?esc(it.name):'leer'}</span></button>`}).join('');
- const DB=computeStats(P.eq);const bag=P.bag.map((it,i)=>{const dd=itemDps(it,DB).d;return`<button class="it r${it.rar}${it.anc?' anc'+it.anc:''} ${sel==='b:'+i?'sel':''}" data-act="inv-sel" data-k="b:${i}"><span class="lv">${it.ilvl}</span>${it.fav?'<span class="fav">★</span>':''}${Math.abs(dd)>0.005?`<span class="ua ${dd>0?'':'dn'}">${dd>0?'+':''}${Math.round(dd*100)}%</span>`:''}${ico(it)}<span class="nm">${esc(it.name)}</span></button>`}).join('');
+ const bag=P.bag.map((it,i)=>{const dd=itemDelta(it);return`<button class="it r${it.rar}${it.anc?' anc'+it.anc:''} ${sel==='b:'+i?'sel':''}" data-act="inv-sel" data-k="b:${i}"><span class="lv">${it.ilvl}</span>${it.fav?'<span class="fav">★</span>':''}${Math.abs(dd)>0.005?`<span class="ua ${dd>0?'':'dn'}">${dd>0?'+':''}${Math.round(dd*100)}%</span>`:''}${ico(it)}<span class="nm">${esc(it.name)}</span></button>`}).join('');
  let det='';
  if(selIt){const it=selIt,cur=selT==='b'?P.eq[target]:null;let head='';if(selT==='b'){const dl=itemDelta(it),D=itemDps(it);const row=(n,x,y)=>{const q=y/Math.max(1e-6,x)-1,c=q>0.005?'good':q<-0.005?'bad':'muted';return`<div class="dpsrow"><span>${n}</span><span>${fmt(x)} → <b class="${c}">${fmt(y)}</b> <span class="${c}">(${q>=0?'+':''}${Math.round(q*100)}%)</span></span></div>`};
   head=`<div class="dpsbox"><div class="eyebrow">Schaden pro Sekunde im Vergleich</div>${row('Nahkampf',D.a.m,D.b.m)}${row('Fernkampf',D.a.r,D.b.r)}<div class="muted" style="font-size:12px;margin-top:4px">Kampfkraft gesamt (mit Leben, Rüstung &amp; Co.): <span class="${dl>0.005?'good':dl<-0.005?'bad':''}">${dl>=0?'+':''}${Math.round(dl*100)}%</span></div></div>`}
@@ -4469,7 +4480,7 @@ function renderInv(keep){const st=P.st;if(!G.invSel)sortBag();const sel=G.invSel
   ${menuTabs('inv')}
   <div class="inv-head"><h2>Beutel<small>${P.bag.length} / ${BAGMAX}</small></h2><div class="row">${(()=>{const n=P.bag.filter(it=>!it.curse&&itemDelta(it)>0.005).length;return n?`<button class="btn" data-act="inv-best" style="border-color:#9be06a">✓ Bestes anlegen <small style="opacity:.75">(${n})</small></button>`:''})()}<button class="btn" data-act="inv-scrapall" ${P.bag.length?'':'disabled'}>Schwächeres verschrotten${Object.keys(PADS.st).length?' <small style="opacity:.7">· 🎮 X+Y halten</small>':''}</button><button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
   <div class="eyebrow">Angelegt</div><div class="equip">${eq}</div>
-  <div class="eyebrow">Im Beutel · nach Schaden sortiert ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
+  <div class="eyebrow">Im Beutel · nach Kampfwert sortiert ${G.upCount?`<span class="good">· ${G.upCount} besser</span>`:''}</div>
   <div class="bag">${bag||'<div class="muted" style="grid-column:1/-1">Noch leer. Gegner lassen Ausrüstung fallen – einfach drüberlaufen. Leere Plätze werden automatisch belegt.</div>'}</div>
   ${det}
   <details class="stats" ${G.statsOpen?'open':''}><summary>Heldenwerte</summary><div class="stat">${lines.map(l=>`<span>${l[0]}</span><span>${l[1]}</span>`).join('')}</div>${pows?`<div style="padding:0 12px 12px">${pows}</div>`:''}</details>
@@ -4883,8 +4894,8 @@ function diceAnim(r,n20,n1,ok){const el=$('d20n');if(!el)return;const box=el.par
 /* Beutel voll bei einem Ereignis: einen alten Gegenstand verkaufen, um Platz für den neuen zu schaffen */
 function evPendHtml(){const L=mpL().filter(q=>q.evPend&&q.evPend.length&&!netIs(q.dev));if(!L.length)return'';
  const ico=x=>`<canvas class="ico" data-ico="${x.slot}|${x.rar}|${esc(x.base||'')}" width="72" height="72" aria-hidden="true"></canvas>`;
- return L.map(q=>{const pi=PL.indexOf(q)<0?0:PL.indexOf(q),it=q.evPend[0];let base,dd=0;withP(q,()=>{base=computeStats(P.eq);dd=itemDps(it,base).d});
-  const tiles=q.bag.map((x,i)=>{let d=0;withP(q,()=>{d=itemDps(x,base).d});return`<button class="it r${x.rar}${x.anc?' anc'+x.anc:''}" data-act="ev-swap" data-p="${pi}" data-i="${i}" title="Verkaufen für ${fmt(scrapValue(x))} Gold"><span class="lv">${x.ilvl}</span>${x.fav?'<span class="fav">★</span>':''}${Math.abs(d)>0.005?`<span class="ua ${d>0?'':'dn'}">${d>0?'+':''}${Math.round(d*100)}%</span>`:''}${ico(x)}<span class="nm">${esc(x.name)}</span><span class="muted" style="font-size:10px">+${fmt(scrapValue(x))} G</span></button>`}).join('');
+ return L.map(q=>{const pi=PL.indexOf(q)<0?0:PL.indexOf(q),it=q.evPend[0];let base,dd=0;withP(q,()=>{base=computeStats(P.eq);dd=itemDelta(it)});
+  const tiles=q.bag.map((x,i)=>{let d=0;withP(q,()=>{d=itemDelta(x)});return`<button class="it r${x.rar}${x.anc?' anc'+x.anc:''}" data-act="ev-swap" data-p="${pi}" data-i="${i}" title="Verkaufen für ${fmt(scrapValue(x))} Gold"><span class="lv">${x.ilvl}</span>${x.fav?'<span class="fav">★</span>':''}${Math.abs(d)>0.005?`<span class="ua ${d>0?'':'dn'}">${d>0?'+':''}${Math.round(d*100)}%</span>`:''}${ico(x)}<span class="nm">${esc(x.name)}</span><span class="muted" style="font-size:10px">+${fmt(scrapValue(x))} G</span></button>`}).join('');
   return`<div class="card evswap" style="margin-top:12px;text-align:left"><div class="eyebrow">${G.mp?esc(q.hero.name)+' · ':''}Beutel voll (${q.bag.length} / ${BAGMAX})${q.evPend.length>1?' · noch '+q.evPend.length+' Funde':''}</div>
    <div style="display:flex;gap:10px;align-items:center;margin:6px 0 8px">${ico(it)}<div><div class="c${it.rar}" style="font-weight:800">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]} · Stufe ${it.ilvl}${Math.abs(dd)>0.005?` · <b style="color:${dd>0?'#8ff08a':'#ffb4a4'}">${dd>0?'+':''}${Math.round(dd*100)}% Schaden/s</b>`:''}</div></div></div>
    <p class="muted" style="margin:0 0 6px;font-size:13px">Tippe einen Gegenstand an – er wird verkauft und der neue Fund kommt in den Beutel.</p>
