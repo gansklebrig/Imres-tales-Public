@@ -1645,6 +1645,8 @@
     return { ein, aus, connect: z => aus.connect(z), disconnect: () => { try { aus.disconnect(); } catch (_) {} } };
   }
   let sparHallIn = null, sparAktiv = false, kompRef = null, hallHP = null, orchHall = null, gastHall = null;
+  let atem = null, pumpBus = null, breiteGain = null, taktEcho = null, taktEchoNass = null, taktEchoEin = null;
+  const pumpZiel = () => pumpBus || master;
   /* Hall-Netz nur dann am Ausgang, wenn überhaupt ein Hall läuft – sonst spart es die Rechenzeit ganz */
   function sparAusgang() {
     if (!leicht() || !hallNode || !kompRef) return;
@@ -2359,14 +2361,41 @@
       limiter.threshold.value = -4; limiter.knee.value = 2; limiter.ratio.value = 20; limiter.attack.value = .003; limiter.release.value = .25;
       master = ctx.createGain(); master.gain.value = .38;
       ducken = ctx.createGain(); ducken.gain.value = 1;
-      master.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
+      /* „Atem“: das kurze Luftholen vor einem Refrain (alles für einen Augenblick fast still) */
+      atem = ctx.createGain(); atem.gain.value = 1;
+      master.connect(atem); atem.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
+      /* Pump-Bus: Teppich, Orchester, Kapelle, Gäste und Sub-Bass ducken sich bei jedem Kick kurz weg */
+      pumpBus = ctx.createGain(); pumpBus.gain.value = 1; pumpBus.connect(master);
       try { pegelMesser = ctx.createAnalyser(); pegelMesser.fftSize = 256; pegelDaten = new Uint8Array(pegelMesser.fftSize); limiter.connect(pegelMesser); } catch (_) { pegelMesser = null; }
       /* Bühne in Stereo: Friedrich links, Echo und Ezekiel rechts, Barradin in der Mitte */
       const PAN = { klopf: -.08, schelle: .18, bass: 0, melodie: -.12, trommel: -.42, floete: .4, ketten: .5, rex: .3 };
+      /* Klangbild: alles außer Bass und Trommel ohne tiefe Brummanteile (sonst Brei), die Melodie etwas präsenter */
+      const EQ = { melodie: [130, 2600, 2.2], floete: [160, 0, 0], klopf: [140, 0, 0], schelle: [220, 0, 0], ketten: [160, 0, 0], rex: [180, 0, 0] };
       IDS.forEach(k => {
         const g = ctx.createGain(); spurGain[k] = g;
-        if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = PAN[k]; g.connect(pn); pn.connect(master); } else g.connect(master);
+        let aus = g;
+        if (EQ[k]) {
+          const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = EQ[k][0]; hp.Q.value = .6; aus.connect(hp); aus = hp;
+          if (EQ[k][1] && !leicht()) { const pk = ctx.createBiquadFilter(); pk.type = "peaking"; pk.frequency.value = EQ[k][1]; pk.Q.value = .9; pk.gain.value = EQ[k][2]; aus.connect(pk); aus = pk; }
+        }
+        if (!leicht() && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = PAN[k]; aus.connect(pn); pn.connect(master); } else aus.connect(master);
       });
+      /* Breite: Barradins Melodie minimal versetzt und leicht verstimmt ein zweites Mal, auf der anderen Seite */
+      if (!leicht() && ctx.createStereoPanner) {
+        const d = ctx.createDelay(.05), g2 = ctx.createGain(), pn2 = ctx.createStereoPanner(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+        d.delayTime.value = .019; g2.gain.value = .3; pn2.pan.value = .55; lfo.frequency.value = .35; lg.gain.value = .0016;
+        lfo.connect(lg); lg.connect(d.delayTime); lfo.start();
+        const hp2 = ctx.createBiquadFilter(); hp2.type = "highpass"; hp2.frequency.value = 220;
+        spurGain.melodie.connect(hp2); hp2.connect(d); d.connect(g2); g2.connect(pn2); pn2.connect(master); breiteGain = g2;
+      }
+      /* Echo im Takt (punktierte Achtel) für Flöte, Melodie und Kapelle – nur in ruhigen, schwebenden Stimmungen */
+      taktEcho = ctx.createDelay(2); taktEcho.delayTime.value = .45;
+      const tfb = ctx.createGain(), tlp = ctx.createBiquadFilter(), thp = ctx.createBiquadFilter();
+      tfb.gain.value = .32; tlp.type = "lowpass"; tlp.frequency.value = 3200; thp.type = "highpass"; thp.frequency.value = 300;
+      taktEchoNass = ctx.createGain(); taktEchoNass.gain.value = 0;
+      taktEcho.connect(tlp); tlp.connect(thp); thp.connect(tfb); tfb.connect(taktEcho); thp.connect(taktEchoNass); taktEchoNass.connect(master);
+      taktEchoEin = ctx.createGain(); taktEchoEin.gain.value = 1; taktEchoEin.connect(taktEcho);
+      ["floete", "melodie"].forEach(k => { const sg = ctx.createGain(); sg.gain.value = k === "floete" ? 1 : .6; spurGain[k].connect(sg); sg.connect(taktEchoEin); });
       /* Raumhall: jede Spur schickt einen Teil in einen Faltungshall (selbst erzeugter Raum, ca. 2,8 s) */
       hallEin = ctx.createGain(); hallNass = ctx.createGain(); hallNass.gain.value = hallPegel();
       kulRauschen = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
@@ -3099,6 +3128,50 @@
     if (fam === "herz") return i < 2 ? [] : rolle === "r" || rolle === "h" ? [0, 3, 8, 11] : [0, 3];
     return st && (rolle === "r" || rolle === "h") ? [0, 8] : [];
   }
+  const TAKT_ECHO = { elben: .32, ruinen: .3, pilger: .26, unterreich: .26, grusel: .26, spannung: .2, rast: .2, klage: .2, kamin: .14, fey: .2, hof: .1, reise: .1, auenland: .08, ballade: .16, wald: .22, wiegen: .2, trauer: .2 };
+  function taktEchoStellen(zeit) {
+    if (!taktEcho) return;
+    const sd = schrittDauer(), soll = Math.min(1.5, sd * 6); /* punktierte Achtel */
+    taktEcho.delayTime.setTargetAtTime(soll, zeit, .3);
+    const w = (TAKT_ECHO[stilKey() || ""] || 0) * (S.hall > 0 ? 1 : .7);
+    taktEchoNass.gain.setTargetAtTime(w, zeit, .5);
+  }
+  /* Sub-Bass: eine reine, sehr tiefe Welle eine Oktave unter dem Bass – nur in den epischen Stimmungen */
+  function subBass(zeile, zeit, dauer) {
+    if (!ctx || rendert || S.mute.bass || (KICK_FAMILIE[stilKey()] || "") !== "episch" || S.intensitaet < 3) return;
+    const m = tonMidi("bass", zeile, S) - 12, f = 440 * Math.pow(2, (m - 69) / 12); if (f < 25) return;
+    const o = ctx.createOscillator(), g = ctx.createGain(), l = .3 * spurPegel("bass"), d = Math.max(.12, Math.min(dauer, 1.6));
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, zeit); g.gain.exponentialRampToValueAtTime(l, zeit + .015); g.gain.setValueAtTime(l, zeit + d * .7); g.gain.exponentialRampToValueAtTime(.0005, zeit + d + .06);
+    o.connect(g); g.connect(pumpZiel()); o.start(zeit); o.stop(zeit + d + .1);
+  }
+  /* Pumpen: bei jedem Kick ducken sich Teppich, Orchester, Kapelle, Gäste und Sub-Bass für einen Augenblick */
+  function pumpen(zeit, tiefe) {
+    if (!pumpBus) return;
+    const g = pumpBus.gain;
+    g.cancelScheduledValues(zeit); g.setValueAtTime(1, zeit); g.linearRampToValueAtTime(tiefe, zeit + .012); g.setTargetAtTime(1, zeit + .04, .09);
+  }
+  /* Anlauf in den Refrain: Becken schwillt an, die Snare wirbelt hinauf, dann ein Atemzug Stille – und der Refrain kommt mit einem großen Schlag */
+  function anlaufSchritt(zeit, ab) {
+    if (!S.rollen || !ctx || rendert || ausduennen || einblend > 0 || S.intensitaet < 3) return;
+    const L = taktL(), naechst = (ab + 1) % S.ablauf.length, r = rolleAn(ab), rn = rolleAn(naechst);
+    const fam = KICK_FAMILIE[stilKey()] || "ruhig", sd = schrittDauer();
+    /* der große Schlag auf der Eins des Refrains */
+    if (schritt === 0 && abschnittAnfang(ab) && (r === "r" || r === "h") && ab > 0 && rolleAn(ab - 1) !== r) {
+      if (fam === "ruhig") { probe("rgl", 79 + S.transpose, zeit, master, .12); return; }
+      probe("crash", 0, zeit, master, fam === "herz" ? .14 : .22); probe("bd", 0, zeit, master, .3); probe("timp1", 0, zeit, master, .3);
+      return;
+    }
+    if (!(abschnittAnfang(naechst) && (rn === "r" || rn === "h") && rn !== r && naechst !== 0)) return;
+    if (schritt === L - 8) {
+      /* Becken-Anschwellen über den halben Takt bis genau zur Eins */
+      const sw = sampleBuf.get("swell"), lang = 8 * sd;
+      if (sw) probe("swell", 0, zeit, master, fam === "ruhig" ? .14 : .26, { ein: .05, dauer: lang + .03, aus: .03, versatz: Math.max(0, sw._spitze - sw._start - lang) }); else sampleLaden("swell");
+    }
+    if (fam !== "ruhig" && schritt >= L - 4 && schritt < L - 1) probe(schritt % 2 ? "snare2" : "snare1", 0, zeit, master, .14 + .07 * (schritt - L + 4));
+    /* der Atemzug: das letzte Sechzehntel fast still */
+    if (schritt === L - 1 && atem && fam !== "ruhig") { const g = atem.gain; g.cancelScheduledValues(zeit); g.setValueAtTime(1, zeit); g.linearRampToValueAtTime(.12, zeit + .02); g.setValueAtTime(.12, zeit + sd - .015); g.linearRampToValueAtTime(1, zeit + sd); }
+  }
   function kickSchritt(zeit, ab) {
     if (!S.kick || S.mute.trommel || !ctx || ausduennen || einblend > EINBLEND / 2) return;
     const L = taktL(), rolle = S.rollen ? rolleAn(ab) : "r";
@@ -3109,6 +3182,7 @@
     const fam = KICK_FAMILIE[stilKey()] || "ruhig", pegel = 1.3 * spurPegel("trommel") * (S.kick === 2 ? 1.25 : 1);
     const betont = schritt === 0 || schritt === L / 2, l = (fam === "herz" ? (schritt % 8 === 0 ? .42 : .3) : fam === "fest" ? .5 : (betont ? .62 : .5)) * pegel;
     kickSchlag(zeit, Math.min(.9, l), fam === "episch" || fam === "herz");
+    if (fam === "episch" || fam === "fest") pumpen(zeit, fam === "episch" ? (S.kick === 2 ? .5 : .6) : .78);
     /* im Kampf und im Höhepunkt rollt auf den großen Schlägen die Orchester-Trommel mit */
     if (fam === "episch" && schritt === 0 && (rolle === "r" || rolle === "h")) probe("bd", 0, zeit, master, .22 * pegel);
   }
@@ -3231,16 +3305,19 @@
           else if (k !== "melodie") wert = -1;
         }
         if (wert < 0) return;
-        const wackel = v ? (Math.random() - .5) * .012 * v : 0;
+        /* Groove: jeder Ton minimal früher oder später, die Nachschläge des Schlagwerks etwas zurückgelehnt */
+        const wackel = (v ? (Math.random() - .5) * .012 * v : 0) + (Math.random() - .5) * .008 + (SCHLAGWERK[k] && schritt % 2 === 1 ? .006 : 0);
         /* Betonung wie bei echten Spielleuten: die Eins trägt, Achtel dazwischen leichter, Sechzehntel am leisesten */
-        const akzent = S.stimmung && !SCHLAGWERK[k] ? (schritt % 8 === 0 ? 1.1 : schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .88 : .78) : 1;
+        const akzent = (S.stimmung && !SCHLAGWERK[k] ? (schritt % 8 === 0 ? 1.1 : schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .88 : .78)
+          : SCHLAGWERK[k] ? (schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .9 : .8) : 1) * (.94 + Math.random() * .12);
         const laut = (k === "floete" && kapJetzt ? kapJetzt.echo : 1) * akzent * (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : .45 + .55 * ein) : 1) * (k === "floete" && gastJetzt.length ? .6 : 1);
         const haelt = k === "floete" || (k === "melodie" && (GEHALTEN[S.instrument] || S.instrument === "mandoline"));
         spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(daten[k], schritt) * schrittDauer() * .95 : 0);
-        if (k === "bass") bordunStimmen(wert, ev.zeit);
+        if (k === "bass") { bordunStimmen(wert, ev.zeit); try { subBass(wert, ev.zeit + Math.max(0, wackel), notenLaenge(daten.bass, schritt) * schrittDauer()); } catch (_) {} }
         ev.spuren[k] = wert;
       });
       try { kickSchritt(ev.zeit, abschnitt % S.ablauf.length); } catch (_) {}
+      try { anlaufSchritt(ev.zeit, abschnitt % S.ablauf.length); if (schritt === 0) taktEchoStellen(ev.zeit); } catch (_) {}
       if (!(brk && schritt >= brkAb)) {
         try { orchesterSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
         try { gaesteSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
@@ -3453,7 +3530,7 @@
   let orchBus = null, orchPan = {}, padAkkord = -1, padEnde = 0;
   function orchAufbauen() {
     if (orchBus || !ctx) return;
-    orchBus = ctx.createGain(); orchBus.gain.value = 1; orchBus.connect(master);
+    orchBus = ctx.createGain(); orchBus.gain.value = 1; orchBus.connect(pumpZiel());
     const hs = ctx.createGain(); hs.gain.value = .7; orchBus.connect(hs); hs.connect(hallHP || hallEin); orchHall = hs; hallProfilAnwenden();
     [["vln", -.35], ["vc", .3], ["horn", .12], ["blech", .22], ["holz", -.18], ["gross", 0]].forEach(([k, p]) => {
       let n = ctx.createGain();
@@ -5299,7 +5376,7 @@
   const gastQ = [], gastZuletzt = {};
   function gastBusBauen() {
     if (gastBus || !ctx) return;
-    gastBus = ctx.createGain(); gastBus.gain.value = 1; gastBus.connect(master);
+    gastBus = ctx.createGain(); gastBus.gain.value = 1; gastBus.connect(pumpZiel());
     const hs = ctx.createGain(); hs.gain.value = .6; gastBus.connect(hs); hs.connect(hallHP || hallEin); gastHall = hs; hallProfilAnwenden();
     [["l", -.45], ["r", .45]].forEach(([k, p]) => {
       const n = ctx.createGain();
@@ -5480,13 +5557,14 @@
     if (!pool || S.kapelle === 0 || !Array.isArray(S.kapWahl)) return [];
     return S.kapWahl.filter(i => pool[i]).slice(0, S.kapStufe === 1 ? 1 : leicht() ? 2 : 3).map((i, k) => {
       const [inst, weise, ab, lage, ab_int] = pool[i];
-      return { inst, weise, ab, lage: lage || 0, min: ab_int == null ? 2 : ab_int, pan: [-.5, .5, 0][k % 3] };
+      return { inst, weise, ab, lage: lage || 0, min: ab_int == null ? 2 : ab_int, pan: [-.7, .7, -.15][k % 3] };
     });
   }
   let kapBus = null; const kapSeite = {};
   function kapBusBauen() {
     if (kapBus || !ctx) return;
-    kapBus = ctx.createGain(); kapBus.gain.value = 1; kapBus.connect(master);
+    kapBus = ctx.createGain(); kapBus.gain.value = 1; kapBus.connect(pumpZiel());
+    if (taktEchoEin) { const es = ctx.createGain(); es.gain.value = .5; kapBus.connect(es); es.connect(taktEchoEin); }
   }
   function kapZiel(pan) {
     const k = String(pan);
@@ -5524,6 +5602,7 @@
     /* eine Verdopplung soll nie genau auf Barradins Ton landen – dann lieber die andere Oktave oder gar nicht */
     if (nichtGleich != null && m === nichtGleich) { if (m + 12 <= hi) m += 12; else if (m - 12 >= lo) m -= 12; else return; }
     const l = def.g * laut * (.55 + .55 * int);
+    zeit += (Math.random() - .5) * .01; /* die Kapelle spielt nicht roboterhaft genau */
     const ziel = kapZiel(p.pan), hw = kapHallAnteil(p);
     if (ziel._hall && Math.abs(ziel._hallWert - hw) > .02) { ziel._hall.gain.setTargetAtTime(hw, Math.max(ctx.currentTime, zeit - .02), .05); ziel._hallWert = hw; }
     if (probe(p.inst, m, zeit, ziel, l, def.halt ? { ein: .04, aus: Math.min(.25, dauer * .4), dauer: dauer + .06 } : { dauer: Math.max(dauer, 1.2), aus: .3 }) && kapQ.length < 300) kapQ.push([zeit, p.inst]);
