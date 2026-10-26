@@ -229,7 +229,7 @@
     { thema: "gracklstugh", bild: "gracklstugh.jpg", wellen: [
       { abstand: 1.2, gegner: { duergar: 9, chasme: 2 } },
       { abstand: 1.6, gegner: { duergar: 3 }, boss: "riese" }] },
-    { thema: "slums", bild: "themberchaud-hort.jpg", wellen: [
+    { thema: "slums", bild: "themberchaud-halle.jpg", wellen: [
       { abstand: 1.15, gegner: { graugeist: 9, glutkaefer: 5 } },
       { abstand: 1.5, gegner: { graugeist: 4, glutkaefer: 3 }, boss: "drokey" }] }
   ];
