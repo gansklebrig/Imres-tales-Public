@@ -1,6 +1,6 @@
 /* =====================================================================
    EZEKIELS LANGE NACHT – Schleich- und Taschendiebspiel in der Taverne
-   Fünf Nächte mit je drei Stufen (Schankraum, Gewölbe, Hinterzimmer),
+   Sechs Nächte mit je drei Stufen (Schankraum, Gewölbe, Hinterzimmer),
    danach geht die Nacht endlos weiter (gespiegelte Karten, schärfere Wachen).
    Tippen = schleichen. Gäste von hinten antippen = bestehlen, Wachen von
    hinten = ausschalten, Kerzen = auspusten, Truhen = Schloss knacken.
@@ -31,11 +31,11 @@
   const TX = {
     de: {
       label: "Schurken-Probe", titel: "Ezekiels lange Nacht",
-      text: "Fünf Nächte, fünfzehn Orte: Ezekiel leert fremde Taschen, bleibt im Schatten, knackt jede Truhe und verschwindet, bevor jemand „Dieb!“ rufen kann. Was er dabei denkt, weiß nur Ezekiel.",
+      text: "Sechs Nächte, achtzehn Orte: Ezekiel leert fremde Taschen, bleibt im Schatten, knackt jede Truhe und verschwindet, bevor jemand „Dieb!“ rufen kann. Was er dabei denkt, weiß nur Ezekiel.",
       steuerung: "Tippe auf einen Ort, um dorthin zu schleichen. Tippe Gäste, Wachen, Kerzen und Truhen an, um zu tun, was ein Schurke eben tut.",
       start: "▶ In die Nacht", los: "▶ Los", weiter: "▶ Weiter", nochmal: "↻ Neue Nacht", beenden: "Nacht beenden", erneut: "▶ Noch einmal",
       pause: "Im Schatten verharren", pauseText: "Niemand bemerkt dich, solange du stillhältst.",
-      naechte: [["Phandalin", "Zum Schlafenden Riesen"], ["Die Schlossruine", "Bei den Roten Roben"], ["Donnerbaum", "Der verfallene Wachturm"], ["Gracklstugh", "Die Stadt der Duergar"], ["Das Unterreich", "Ilvaras Festung"]],
+      naechte: [["Phandalin", "Zum Schlafenden Riesen"], ["Die Schlossruine", "Bei den Roten Roben"], ["Donnerbaum", "Der verfallene Wachturm"], ["Gracklstugh", "Die Stadt der Duergar"], ["Das Unterreich", "Ilvaras Festung"], ["Gracklstugh", "Das gestohlene Drachenei"]],
       nacht: n => "Nacht " + n, endlos: k => "Endlose Nacht · " + k, endlosUnter: "Die Nacht nimmt kein Ende",
       kurz: (n, s) => "N" + n + " · " + s + "/3", kurzEndlos: k => "∞ " + k,
       lv: [
@@ -53,7 +53,10 @@
         ["Die magische Schmiede", "Die Truhe ist mit Blutrunen gesichert: Das goldene Feld wandert."],
         ["Die Zellen", "Drow sehen im Dunkeln. Schatten helfen nur, wenn du Abstand hältst. Der Kerkermeister trägt den Schlüssel."],
         ["Die Spinnweben", "Spinnweben halten dich fest – wer hindurch muss, ist langsam."],
-        ["Das Grab", "Hier ruht eine Klinge, die leuchtet wie ein Sonnenaufgang. Trägst du sie, leuchtest du mit – und alle sehen dich."]
+        ["Das Grab", "Hier ruht eine Klinge, die leuchtet wie ein Sonnenaufgang. Trägst du sie, leuchtest du mit – und alle sehen dich."],
+        ["Der Markt der Klingen", "Ein Grauer Geist mischt sich unters Volk. Er trägt ihr Abzeichen: eine faustgroße Goldmünze mit Drachenkopf. Nimm sie ihm ab – von hinten."],
+        ["Die Slums der Grauen Geister", "Ganz unten in Gracklstugh. Die Späher der Grauen Geister sind flink und sehen im Dunkeln weit. Drokey hockt bei seiner Truhe – sobald Alarm geschlagen wird, haut er ab."],
+        ["Themberchauds Halle", "Hier verschwand das Ei. Lava an allen Rändern verrät dich mit ihrem Schein, auf dem Goldberg schläft der Meister der Flammen. Lärm weckt ihn. Und eine Münze vom Berg … merkt doch keiner."]
       ],
       ziel: { schluessel: "Stiehl den Schlüssel", truhe: "Knacke die Truhe", frei: "Finde den Ausgang", schwert: "Hol dir die Klinge", ausgang: "✓ Zum Ausgang!" },
       zielWort: "Ziel: ",
@@ -80,9 +83,10 @@
         "Schloss Crackmore. Rote Roben, Würfel, Wein – und hinter allem ein Name, den niemand laut sagt: die Spinne.",
         "Donnerbaum ist verlassen. Fast. Goblins, ein schlafender Bugbear – und etwas Grünes, das auf Gold schläft.",
         "In Gracklstugh wird Tag und Nacht geschmiedet. Und der Riese in der Gasse hört wieder Stimmen.",
-        "Ilvaras Festung. Ketten, Spinnweben – und ein Grab, das schon viel zu lange wartet."
+        "Ilvaras Festung. Ketten, Spinnweben – und ein Grab, das schon viel zu lange wartet.",
+        "Später, wieder in Gracklstugh: Ein Drachenei ist gestohlen. Ezekiel hört sich auf eigene Faust um – die Spur führt zu einer Goldmünze mit Drachenkopf und zu einem Dieb namens Drokey."
       ],
-      alarmRuf: ["Die Glocke von Phandalin läutet!", "Die Kultglocke dröhnt durch die Ruine!", "Ein Goblin bläst ins Horn!", "Die Duergar schlagen Alarm auf dem Amboss!", "Ein Gong hallt durch das Unterreich!"],
+      alarmRuf: ["Die Glocke von Phandalin läutet!", "Die Kultglocke dröhnt durch die Ruine!", "Ein Goblin bläst ins Horn!", "Die Duergar schlagen Alarm auf dem Amboss!", "Ein Gong hallt durch das Unterreich!", "Ein Pfiff gellt durch die Gassen von Gracklstugh!"],
       alarm: "ALARM!", alarmSub: "Verstärkung kommt – die Kerzen brennen gleich wieder.", alarmHinweis: "Sobald du das Ziel hast, wird Alarm geschlagen: Verstärkung kommt, Kerzen werden wieder angezündet. Der Rückweg ist die eigentliche Prüfung.",
       leiche: "Eine Leiche! Alarm!", verborgen: "Versteckt.", leichenHinweis: "Ausgeschaltete Wachen werden gefunden. Tippe sie an, damit Ezekiel sie versteckt.",
       magier: "Arkanes Auge!", magierHinweis: "Ein Magier tastet regelmäßig mit einem Arkanen Auge durch Wände. Achte auf das violette Leuchten – dann ab ins Fass oder weg.",
@@ -90,6 +94,15 @@
       glasstabHinweis: "Glasstab ist hier. Sobald Alarm geschlagen wird, flieht er zum Ausgang – stell ihn, bevor er entkommt.",
       glasstabFlieht: "Glasstab flieht!", glasstabSieht: "Eindringling!", glasstabGefangen: "Glasstab gestellt!", glasstabSpruch: "„Die Spinne … wird euch …“", glasstabWeg: "Glasstab ist entkommen.",
       ilvaraHinweis: "Irgendwo hier lauert jemand, den ihr für tot gehalten habt.", ilvaraDa: "Ilvara! Den Sturz in den Fluss hat sie überlebt.",
+      /* Nacht-eigene Texte: überschreiben die allgemeinen, solange eine Karte dieser Nacht läuft */
+      ueber: {
+        6: { ziel: { schluessel: "Stiehl die Drachenmünze" }, schluesselDa: "Die Drachenmünze!", bossName: "Drokey", auftragBoss: "Stelle Drokey",
+          glasstabHinweis: "Drokey ist hier. Sobald Alarm geschlagen wird, flieht er zum Ausgang – stell ihn, bevor er entkommt.",
+          glasstabFlieht: "Drokey haut ab!", glasstabSieht: "Ein Schnüffler!", glasstabGefangen: "Drokey gestellt!", glasstabSpruch: "„Das Ei? Frag doch die Rotroben …“", glasstabWeg: "Drokey ist entkommen.",
+          drache: "„Leg das zurück, kleiner Dieb.“", dracheWach: "Themberchaud öffnet ein Auge …",
+          friedrich: ["Echo fragt den Händler nach Gundren. Wieder nein.", "Rex, bleib.", "Den Betäubungstrank hab ich vor fünf Minuten gekauft. Hat sich schon gelohnt.", "Lass mir was übrig."],
+          barradin: ["Psst – ich lenke sie ab!", "Ein Reim auf „Drachenei“? Ich arbeite dran.", "Echo fragt gerade einen Riesen nach Gundren. Ich hab Zeit."] }
+      },
       bed: {
         vollmond: ["🌕 Vollmond", "Selbst im Schatten sieht man dich auf größere Entfernung."],
         gewitter: ["⛈ Gewitter", "Blitze erhellen für einen Augenblick alles. Achte auf das Wetterleuchten."],
@@ -107,6 +120,7 @@
         n3: ["Goblin-Gekritzel", "„DRACHE ZÄHLT GOLD. JEDE NACHT. NICHT ANFASSEN. GRUK HAT ANGEFASST. GRUK IST JETZT GRÜN.“"],
         n4: ["Ein Befehl der Duergar", "„Der Riese in der Schmiedegasse hört wieder Stimmen. Doppelte Wachen an der Esse. Und niemand redet mit ihm über Spinnen.“"],
         n5: ["Ein Siegel des Hauses Mizzrym", "„Lasst niemanden ins Grab. Was dort leuchtet, gehört dem Haus Mizzrym. – I.“"],
+        n6: ["Ein Zettel mit Drachenkopf", "„Die Ware ist warm. Sehr warm. Nicht schütteln, nicht fallen lassen. Übergabe unten am Abfluss, wenn der Amboss dreimal schlägt. Und kein Wort zu den Rotroben. – D.“"],
         e1: ["Ein Steckbrief", "„Gesucht: gehörnter Dieb in scharlachroter Rüstung. Spricht wenig. Belohnung: 500 Gold.“ Darunter, in anderer Schrift: „Viel Glück.“"],
         e2: ["Eine vergilbte Skizze", "Eine Statue, mit Kohle gezeichnet. Auf der Rückseite ein Name – verwischt, unleserlich. Ezekiel steckt sie ein, ohne ein Wort."],
         e3: ["Ein Liedtext", "„Oh Ezekiel, der Schatten Sohn, / er nimmt dein Gold und dankt dir schon …“ Unterschrieben mit einem schwungvollen B."],
@@ -174,11 +188,11 @@
     },
     en: {
       label: "Rogue check", titel: "Ezekiel's Long Night",
-      text: "Five nights, fifteen places: Ezekiel empties strangers' pockets, stays in the shadows, cracks every chest and vanishes before anyone can shout \"Thief!\". What he is thinking, only Ezekiel knows.",
+      text: "Six nights, eighteen places: Ezekiel empties strangers' pockets, stays in the shadows, cracks every chest and vanishes before anyone can shout \"Thief!\". What he is thinking, only Ezekiel knows.",
       steuerung: "Tap a spot to sneak there. Tap guests, guards, candles and chests to do what a rogue does.",
       start: "▶ Into the night", los: "▶ Go", weiter: "▶ Continue", nochmal: "↻ New night", beenden: "End the night", erneut: "▶ Try again",
       pause: "Frozen in the shadows", pauseText: "Nobody notices you as long as you stay still.",
-      naechte: [["Phandalin", "The Sleeping Giant"], ["The castle ruin", "Among the Red Robes"], ["Thundertree", "The crumbling watchtower"], ["Gracklstugh", "City of the duergar"], ["The Underdark", "Ilvara's fortress"]],
+      naechte: [["Phandalin", "The Sleeping Giant"], ["The castle ruin", "Among the Red Robes"], ["Thundertree", "The crumbling watchtower"], ["Gracklstugh", "City of the duergar"], ["The Underdark", "Ilvara's fortress"], ["Gracklstugh", "The stolen dragon egg"]],
       nacht: n => "Night " + n, endlos: k => "Endless night · " + k, endlosUnter: "The night never ends",
       kurz: (n, s) => "N" + n + " · " + s + "/3", kurzEndlos: k => "∞ " + k,
       lv: [
@@ -196,7 +210,10 @@
         ["The magic forge", "The chest is sealed with blood runes: the golden field moves."],
         ["The cells", "Drow see in the dark. Shadows only help if you keep your distance. The jailer carries the key."],
         ["The webs", "Spider webs hold you fast – whoever has to pass through is slow."],
-        ["The tomb", "Here rests a blade that shines like a sunrise. Once you carry it, you shine too – and everyone sees you."]
+        ["The tomb", "Here rests a blade that shines like a sunrise. Once you carry it, you shine too – and everyone sees you."],
+        ["The Market of Blades", "A Grey Ghost mingles with the crowd. He wears their token: a fist-sized gold coin with a dragon's head. Take it from him – from behind."],
+        ["The Grey Ghosts' slums", "The very bottom of Gracklstugh. The Grey Ghost scouts are quick and see far in the dark. Drokey crouches by his chest – once the alarm is raised, he runs."],
+        ["Themberchaud's hall", "This is where the egg vanished. Lava along every edge gives you away with its glow, and on the mountain of gold sleeps the Master of Flames. Noise wakes him. And one coin from the pile … nobody will notice."]
       ],
       ziel: { schluessel: "Steal the key", truhe: "Crack the chest", frei: "Find the exit", schwert: "Take the blade", ausgang: "✓ To the exit!" },
       zielWort: "Goal: ",
@@ -223,9 +240,10 @@
         "Castle Crackmore. Red robes, dice, wine – and behind it all a name nobody says out loud: the Spider.",
         "Thundertree is deserted. Almost. Goblins, a sleeping bugbear – and something green asleep on gold.",
         "In Gracklstugh the forges burn day and night. And the giant in the alley hears voices again.",
-        "Ilvara's fortress. Chains, webs – and a tomb that has been waiting far too long."
+        "Ilvara's fortress. Chains, webs – and a tomb that has been waiting far too long.",
+        "Later, back in Gracklstugh: a dragon egg has been stolen. Ezekiel makes his own enquiries – the trail leads to a gold coin with a dragon's head and to a thief called Drokey."
       ],
-      alarmRuf: ["The bell of Phandalin rings!", "The cult bell booms through the ruin!", "A goblin blows the horn!", "The duergar beat the alarm on the anvil!", "A gong echoes through the Underdark!"],
+      alarmRuf: ["The bell of Phandalin rings!", "The cult bell booms through the ruin!", "A goblin blows the horn!", "The duergar beat the alarm on the anvil!", "A gong echoes through the Underdark!", "A whistle shrills through the alleys of Gracklstugh!"],
       alarm: "ALARM!", alarmSub: "Reinforcements are coming – the candles will soon be lit again.", alarmHinweis: "Once you reach the goal, the alarm is raised: reinforcements arrive, candles are lit again. The way back is the real test.",
       leiche: "A body! Alarm!", verborgen: "Hidden.", leichenHinweis: "Guards you took down will be found. Tap them so Ezekiel hides them.",
       magier: "Arcane eye!", magierHinweis: "A mage regularly probes through walls with an arcane eye. Watch for the violet glow – then into a barrel or away.",
@@ -233,6 +251,14 @@
       glasstabHinweis: "Glasstaff is here. Once the alarm is raised, he flees to the exit – catch him before he escapes.",
       glasstabFlieht: "Glasstaff flees!", glasstabSieht: "Intruder!", glasstabGefangen: "Glasstaff caught!", glasstabSpruch: "“The Spider … will …”", glasstabWeg: "Glasstaff escaped.",
       ilvaraHinweis: "Somewhere here lurks someone you thought was dead.", ilvaraDa: "Ilvara! She survived the fall into the river.",
+      ueber: {
+        6: { ziel: { schluessel: "Steal the dragon coin" }, schluesselDa: "The dragon coin!", bossName: "Drokey", auftragBoss: "Catch Drokey",
+          glasstabHinweis: "Drokey is here. Once the alarm is raised, he flees to the exit – catch him before he escapes.",
+          glasstabFlieht: "Drokey bolts!", glasstabSieht: "A snoop!", glasstabGefangen: "Drokey caught!", glasstabSpruch: "“The egg? Go ask the Red Robes …”", glasstabWeg: "Drokey escaped.",
+          drache: "“Put that back, little thief.”", dracheWach: "Themberchaud opens an eye …",
+          friedrich: ["Echo asks the merchant about Gundren. No again.", "Rex, stay.", "Bought that sleeping potion five minutes ago. Already worth it.", "Leave some for me."],
+          barradin: ["Psst – I'll distract them!", "A rhyme for “dragon egg”? Working on it.", "Echo is asking a giant about Gundren. I have time."] }
+      },
       bed: {
         vollmond: ["🌕 Full moon", "Even in the shadows you can be seen from further away."],
         gewitter: ["⛈ Thunderstorm", "Lightning lights up everything for a moment. Watch for the sheet lightning."],
@@ -250,6 +276,7 @@
         n3: ["Goblin scribbles", "“DRAGON COUNTS GOLD. EVERY NIGHT. NO TOUCH. GRUK TOUCHED. GRUK IS GREEN NOW.”"],
         n4: ["A duergar order", "“The giant in the forge alley hears voices again. Double guards at the forge. And nobody talks to him about spiders.”"],
         n5: ["A seal of House Mizzrym", "“Let no one into the tomb. What shines there belongs to House Mizzrym. – I.”"],
+        n6: ["A note with a dragon's head", "“The goods are warm. Very warm. Don't shake, don't drop. Handover down at the drain when the anvil strikes three times. And not a word to the Red Robes. – D.”"],
         e1: ["A wanted poster", "“Wanted: horned thief in scarlet armour. Speaks little. Reward: 500 gold.” Below, in a different hand: “Good luck.”"],
         e2: ["A yellowed sketch", "A statue, drawn in charcoal. On the back a name – smudged, illegible. Ezekiel pockets it without a word."],
         e3: ["Song lyrics", "“Oh Ezekiel, the shadow's son, / he takes your gold and thanks you, one by one …” Signed with a flourishing B."],
@@ -317,6 +344,10 @@
     }
   };
   const t = () => TX[sprache()];
+  /* Text mit Nacht-Überschreibung (TX.ueber[n]), z. B. Drokey statt Glasstab in Nacht 6 */
+  const tn = k => { const tx = t(), o = S && S.def && tx.ueber && tx.ueber[S.def.n]; return o && o[k] !== undefined ? o[k] : tx[k]; };
+  const zielName = z => { const o = tn("ziel"); return (o && o[z]) || t().ziel[z]; };
+  const auftragName = A => A.typ === "zeit" ? t().auftrag.zeit(A.limit) : A.typ === "glasstab" && tn("auftragBoss") ? tn("auftragBoss") : t().auftrag[A.typ];
 
   /* ---------- Welt ---------- */
   const COLS = 12, ROWS = 14, W = 400, C = W / COLS, OY = 42, GH = ROWS * C, H = 560, FUSS_Y = OY + GH;
@@ -337,6 +368,8 @@
     hauptmann: { sicht: 4.6, halb: 0.62, tempo: 1.2, jagd: 2.3, dunkel: 1.8, r: 0.37, mantel: "#5a1914", kopf: "#c49a74", haube: "#e0a046", hauptmann: true },
     ilvara:    { sicht: 4.8, halb: 0.65, tempo: 1.45, jagd: 2.5, dunkel: 3.4, r: 0.34, mantel: "#2a5a3a", kopf: "#4a4160", haar: "#ece8f4", auge: true, hauptmann: true },
     hund:      { sicht: 2.8, halb: 0.9, tempo: 1.7, jagd: 3.0, dunkel: 2.2, r: 0.27, mantel: "#7a5e44", kopf: "#8e6e50", hund: true, nase: 1.75 },
+    geist:     { sicht: 4.1, halb: 0.7, tempo: 1.5, jagd: 2.6, dunkel: 2.6, r: 0.3, mantel: "#4c4d54", kopf: "#8a8b92", haube: "#3a3b41" },
+    feuerpriester: { sicht: 4.3, halb: 0.6, tempo: 1.1, jagd: 2.15, dunkel: 2.0, r: 0.34, mantel: "#a3261a", kopf: "#8c8580", haube: "#c2331f", spitz: true, bart: true, fackel: true },
     wirt:      { sicht: 2.8, halb: 0.85, tempo: 0, jagd: 0, dunkel: 1.3, r: 0.33, mantel: "#cfc4ad", kopf: "#c99c78", ruft: true, schuerze: true }
   };
   const STUFEN = {
@@ -439,7 +472,21 @@
     { n: 5, boden: "unterreich", ziel: "schwert",
       karte: ["############", "#.c.#.X.#.c#", "#...#...#..#", "#O..##.##..#", "#..........#", "#.==....==.#", "#..........#", "#.==.L..==.#", "#..........#", "##.##..##.##", "#O...c....O#", "#..........#", "#S.........A", "############"],
       wachen: [{ typ: "drow", weg: [[10, 8], [1, 8], [1, 4], [10, 4]] }, { typ: "drow", weg: [[6, 4]], blicke: ["d", "l", "r"] }, { typ: "drow", weg: [[9, 11], [2, 11]] }, { typ: "hund", weg: [[1, 6], [10, 6]] }],
-      truhe: { gold: 200, pins: 6, runen: true, ziel: true, schwert: true }, flucht: ["ilvara"] }
+      truhe: { gold: 200, pins: 6, runen: true, ziel: true, schwert: true }, flucht: ["ilvara"] },
+    /* Nacht 6 – später in Gracklstugh: das gestohlene Drachenei */
+    { n: 6, boden: "schmiede", ziel: "schluessel",
+      karte: ["############", "#F..==..==F#", "#..........#", "#.o.=..=.o.#", "#...=..=...#", "#O........O#", "##.==..==.##", "#..........#", "#.L..oo..c.#", "#..........#", "#O.==..==.O#", "#..........#", "#S...~~....A", "############"],
+      wachen: [{ typ: "duergar", weg: [[10, 11], [1, 11]] }, { typ: "duergar", weg: [[1, 2], [10, 2], [10, 4], [8, 4]] }, { typ: "duergar", weg: [[5, 6]], blicke: ["u", "d"] }],
+      gaeste: [{ x: 3, y: 2, dir: "d", gold: 16, typ: "duergar" }, { x: 6, y: 3, dir: "l", gold: 18 }, { x: 8, y: 7, dir: "u", gold: 15, typ: "duergar" }, { x: 4, y: 9, dir: "u", gold: 14 }, { x: 7, y: 9, dir: "u", gold: 17, typ: "duergar" }, { x: 9, y: 9, dir: "l", gold: 24, typ: "geist", key: true }, { x: 5, y: 7, gold: 20, wandert: true, typ: "duergar" }],
+      freunde: { friedrich: [10, 3, "l"], rex: [9, 5], barradin: [1, 8, "r"] }, nezna: "katze" },
+    { n: 6, boden: "fels", ziel: "truhe",
+      karte: ["############", "#S..#..O..K#", "#...#......#", "#.O.~~.##..#", "#...#..#...#", "##.###.#.###", "#.....c....#", "#.O.~~...O.#", "#....##....#", "###.###.##.#", "#$..#.....~#", "#...~..O...#", "#O..#....$.A", "############"],
+      wachen: [{ typ: "geist", weg: [[10, 6], [1, 6], [1, 8], [10, 8]] }, { typ: "geist", weg: [[5, 1], [5, 4]] }, { typ: "geist", weg: [[5, 11], [10, 11], [10, 10], [5, 10]] }, { typ: "hund", weg: [[2, 10], [3, 12]] }],
+      truhe: { gold: 130, pins: 5, ziel: true }, boss: { x: 9, y: 3, dir: "l" } },
+    { n: 6, boden: "lava", ziel: "truhe",
+      karte: ["############", "#VV.c..c.VV#", "#V..$K.$..V#", "#....$$....#", "#V...DD...V#", "#V...DD...V#", "#...$..$...#", "#V........V#", "##VV.==.VV##", "#O........O#", "#.c..VV..c.#", "#....VV....#", "#S.........A", "############"],
+      wachen: [{ typ: "feuerpriester", weg: [[1, 6], [10, 6]] }, { typ: "feuerpriester", weg: [[2, 9], [9, 9]] }, { typ: "feuerpriester", weg: [[9, 3]], blicke: ["l", "d"] }],
+      drache: "themberchaud", truhe: { gold: 180, pins: 5, ziel: true } }
   ];
 
   function spiegeln(def) {
@@ -543,7 +590,7 @@
   function begehbar(x, y, wache) {
     const z = zeichen(x, y);
     if (!wache && (z === "o" || z === "=") && S.seil) return !S.belegt[y * COLS + x];
-    if ("#=ocLFKXD".indexOf(z) >= 0) return false;
+    if ("#=ocLFKXDV".indexOf(z) >= 0) return false; // V = Lava
     if (z === "A") return !wache && S.offen;
     if (wache && z === "O") return false;
     if (S.belegt[y * COLS + x]) return false;
@@ -633,6 +680,7 @@
       else if (z === "c") { const kz = { x, y, an: true, r: 2.6, art: "kerze", wird: false, phase: rnd() * 6 }; S.kerzen.push(kz); S.lichter.push(kz); }
       else if (z === "L") S.lichter.push({ x, y, an: true, r: 2.9, art: "laterne", phase: rnd() * 6 });
       else if (z === "F") S.lichter.push({ x, y, an: true, r: 3.3, art: "feuer", phase: rnd() * 6 });
+      else if (z === "V") S.lichter.push({ x, y, an: true, r: 1.5, art: "lava", phase: rnd() * 6 });
       else if (z === "$") S.gold[x + "," + y] = Math.round((12 + Math.floor(rnd() * 14) + (D.n - 1) * 4) * S.goldF);
       else if (z === "R") S.robe = { x, y };
       else if (z === "K" || z === "X") {
@@ -680,7 +728,7 @@
       }
     }
     // Boss (Glasstab)
-    if (D.boss) S.boss = { x: D.boss.x + 0.5, y: D.boss.y + 0.5, ang: DIRW[D.boss.dir || "u"], basis: DIRW[D.boss.dir || "u"], zustand: "wartet", pfad: [], a: 0, t: 0, gefangen: false, entkommen: false, zielAng: 0 };
+    if (D.boss) S.boss = { name: D.n === 6 ? "drokey" : "glasstab", x: D.boss.x + 0.5, y: D.boss.y + 0.5, ang: DIRW[D.boss.dir || "u"], basis: DIRW[D.boss.dir || "u"], zustand: "wartet", pfad: [], a: 0, t: 0, gefangen: false, entkommen: false, zielAng: 0 };
     neznaSetzen();
     auftragSetzen();
     hintergrundBauen();
@@ -981,7 +1029,7 @@
     if (!ok && !sofort && p.wachsam <= 0) { E.lauer = { ref: p, t: 0 }; return; } // kurz abwarten, bis er wegschaut
     if (ok) {
       if (p.gold > 0) { S.lvGold += p.gold; textAuf(p.x, p.y - 0.6, tx.gold(p.gold), "#e0a046", 19); funken(p.x, p.y, ["#e0a046", "#ffcf7a"], 8); KLANG.klau(); p.gold = 0; S.lvKlau++; }
-      if (p.key) { p.key = false; S.schluessel = true; textAuf(p.x, p.y - 1.05, tx.schluesselDa, "#ffcf7a", 22, 1.6); KLANG.schluessel(); zielPruefen(); }
+      if (p.key) { p.key = false; S.schluessel = true; textAuf(p.x, p.y - 1.05, tn("schluesselDa"), "#ffcf7a", 22, 1.6); KLANG.schluessel(); zielPruefen(); }
     } else {
       p.wachsam = 3.5; p.ang = nach; S.lvGesehen = true;
       textAuf(p.x, p.y - 0.7, p.schlaeft ? tx.bruell : tx.he, "#c4564a", 22); KLANG.he();
@@ -1065,8 +1113,8 @@
   function freund(f) {
     const tx = t();
     if (f.name === "rex") { if (!f.gestreichelt) { f.gestreichelt = true; textAuf(f.x, f.y - 0.7, tx.rexGut, "#ebe2cc", 17); funken(f.x, f.y - 0.3, ["#c4564a", "#e0a046"], 5, 0.5); } else textAuf(f.x, f.y - 0.7, "♥", "#c4564a", 22); return; }
-    if (f.name === "friedrich") { f.sprech = 2.2; f.spruch = zufall(tx.friedrich); return; }
-    if (f.name === "barradin") { f.sprech = 2.2; f.spruch = zufall(tx.barradin); if (S.lied) { S.lied.an = true; S.lied.t = 10; KLANG.laute(); } }
+    if (f.name === "friedrich") { f.sprech = 2.2; f.spruch = zufall(tn("friedrich")); return; }
+    if (f.name === "barradin") { f.sprech = 2.2; f.spruch = zufall(tn("barradin")); if (S.lied) { S.lied.an = true; S.lied.t = 10; KLANG.laute(); } }
   }
 
   /* ---------- Münze ---------- */
@@ -1145,7 +1193,7 @@
     const z = {};
     S.wachen.forEach(g => { if (g.T.tempo && !g.T.hund && !g.T.auge && !g.T.hauptmann) z[g.typ] = (z[g.typ] || 0) + 1; });
     const k = Object.keys(z).sort((a, b) => z[b] - z[a])[0];
-    return k || ["rotmantel", "rotrobe", "goblin", "duergar", "drow"][S.def.n - 1] || "rotmantel";
+    return k || ["rotmantel", "rotrobe", "goblin", "duergar", "drow", "geist"][S.def.n - 1] || "rotmantel";
   }
   function alarmAusloesen() {
     if (S.alarm || zustand !== "spiel") return;
@@ -1185,7 +1233,7 @@
       const dx = E.x - b.x, dy = E.y - b.y, d = Math.hypot(dx, dy);
       const sieht = !E.versteckt && d < 3 * S.mod.sicht && Math.abs(winkelDiff(b.ang, Math.atan2(dy, dx))) < 0.85 && sichtFrei(b.x, b.y, E.x, E.y) && (lichtBei(E.x, E.y) >= 0.3 || d < 1.6 || E.glut);
       b.sieht = sieht;
-      if (sieht) { b.a += dt * 1.4 * S.mod.rate; if (b.a >= 1) { textAuf(b.x, b.y - 0.8, t().glasstabSieht, "#c4564a", 20, 1.4); S.lvGesehen = true; alarmAusloesen(); } }
+      if (sieht) { b.a += dt * 1.4 * S.mod.rate; if (b.a >= 1) { textAuf(b.x, b.y - 0.8, tn("glasstabSieht"), "#c4564a", 20, 1.4); S.lvGesehen = true; alarmAusloesen(); } }
       else b.a = Math.max(0, b.a - dt * 0.5);
     } else if (b.zustand === "flieht") {
       b.t -= dt;
@@ -1193,27 +1241,27 @@
       if (!b.pfad.length) {
         const A = S.ausgang;
         b.pfad = A ? (pfadSuchen(Math.floor(b.x), Math.floor(b.y), (x, y) => Math.abs(x - A.x) + Math.abs(y - A.y) === 1, true) || []) : [];
-        if (!b.pfad.length) { b.entkommen = true; auftragFehl(); textAuf(b.x, b.y - 0.8, t().glasstabWeg, "#a89f8f", 17, 1.6); rauch(b.x, b.y, 10); return; }
+        if (!b.pfad.length) { b.entkommen = true; auftragFehl(); textAuf(b.x, b.y - 0.8, tn("glasstabWeg"), "#a89f8f", 17, 1.6); rauch(b.x, b.y, 10); return; }
         b.ziel = b.pfad[b.pfad.length - 1];
       }
       laufen(b, 1.8 * S.mod.tempo, dt); drehen(b, b.zielAng, 8 * dt);
       if (Math.random() < dt * 8) S.teilchen.push({ x: b.x, y: b.y, vx: 0, vy: 0, leben: 0.5, max: 0.5, farbe: "rgba(150,200,230,.5)", gr: 2 });
-      if (!b.pfad.length) { b.entkommen = true; auftragFehl(); textAuf(b.x, b.y - 0.8, t().glasstabWeg, "#a89f8f", 17, 1.6); rauch(b.x, b.y, 10); }
+      if (!b.pfad.length) { b.entkommen = true; auftragFehl(); textAuf(b.x, b.y - 0.8, tn("glasstabWeg"), "#a89f8f", 17, 1.6); rauch(b.x, b.y, 10); }
     }
   }
   function bossFlieht() {
     const b = S.boss; if (!b || b.zustand !== "wartet") return;
     b.zustand = "flieht"; b.t = 0.9; b.pfad = [];
-    textAuf(b.x, b.y - 0.8, t().glasstabFlieht, "#c4564a", 20, 1.6);
+    textAuf(b.x, b.y - 0.8, tn("glasstabFlieht"), "#c4564a", 20, 1.6);
   }
   function bossFangen(b) {
     if (b.gefangen || b.entkommen) return;
     const diff = Math.abs(winkelDiff(b.ang, Math.atan2(E.y - b.y, E.x - b.x)));
-    if (b.zustand === "wartet" && S.zornT <= 0 && diff < 1.1) { b.a = 1; textAuf(b.x, b.y - 0.8, t().glasstabSieht, "#c4564a", 20, 1.4); S.lvGesehen = true; alarmAusloesen(); return; }
+    if (b.zustand === "wartet" && S.zornT <= 0 && diff < 1.1) { b.a = 1; textAuf(b.x, b.y - 0.8, tn("glasstabSieht"), "#c4564a", 20, 1.4); S.lvGesehen = true; alarmAusloesen(); return; }
     const tx = t(), gold = 150;
     b.gefangen = true; S.lvGold += gold;
     funken(b.x, b.y, ["#9bd0ff", "#ebe2cc", "#e0a046"], 18); KLANG.aus(); KLANG.schluessel();
-    textAuf(b.x, b.y - 0.9, tx.glasstabGefangen, "#ebe2cc", 22, 2); textAuf(b.x, b.y - 0.3, tx.gold(gold), "#e0a046", 18, 1.8); textAuf(b.x, b.y - 1.5, tx.glasstabSpruch, "#a89f8f", 15, 3);
+    textAuf(b.x, b.y - 0.9, tn("glasstabGefangen"), "#ebe2cc", 22, 2); textAuf(b.x, b.y - 0.3, tx.gold(gold), "#e0a046", 18, 1.8); textAuf(b.x, b.y - 1.5, tn("glasstabSpruch"), "#a89f8f", 15, 3);
     if (S.auftrag && S.auftrag.typ === "glasstab") auftragOk();
     if (S.zornT <= 0) zornPlus(0.5);
   }
@@ -1477,11 +1525,11 @@
       }
       d.sieht = rate > 0;
       d.a = rate > 0 ? Math.min(1, d.a + rate * dt) : Math.max(0, d.a - 0.3 * dt);
-      if (d.a >= 1) { textAuf(d.x, d.y - 1.4, t().drache, "#c4564a", 22, 1.6); KLANG.bruellen(); S.beben = 0.7; d.a = 0; gefasst(null); return; }
+      if (d.a >= 1) { textAuf(d.x, d.y - 1.4, tn("drache"), "#c4564a", 22, 1.6); KLANG.bruellen(); S.beben = 0.7; d.a = 0; gefasst(null); return; }
       if (d.t <= 0) { d.wach = false; d.t = 6.5 + rnd() * 2.5; d.a = 0; }
     } else {
       d.sieht = false; d.ang += winkelDiff(d.ang, d.basis) * Math.min(1, dt * 2);
-      if (d.t <= 0) { d.wach = true; d.t = 3.6; d.sweep = rnd() * 6; }
+      if (d.t <= 0) { d.wach = true; d.t = 3.6; d.sweep = rnd() * 6; if (tn("dracheWach")) textAuf(d.x, d.y - 1.3, tn("dracheWach"), "#ffb07a", 16, 1.4); }
     }
   }
 
@@ -1713,7 +1761,8 @@
     stein:      { boden: "#29272c", fuge: "#1b1a1e", hell: "rgba(235,226,204,.04)", wand: "#18171b", wandOben: "#35323a", stein: true },
     fels:       { boden: "#2a2420", fuge: "#1b1714", hell: "rgba(168,159,143,.05)", wand: "#16120f", wandOben: "#302823", stein: true, fels: true },
     schmiede:   { boden: "#2b2320", fuge: "#1a1411", hell: "rgba(224,120,60,.06)", wand: "#1a1412", wandOben: "#3a2a22", stein: true },
-    unterreich: { boden: "#1f1d27", fuge: "#141219", hell: "rgba(140,120,200,.05)", wand: "#121019", wandOben: "#2a2536", stein: true, pilze: true }
+    unterreich: { boden: "#1f1d27", fuge: "#141219", hell: "rgba(140,120,200,.05)", wand: "#121019", wandOben: "#2a2536", stein: true, pilze: true },
+    lava:       { boden: "#2e1d17", fuge: "#1c100c", hell: "rgba(255,110,40,.07)", wand: "#1c0f0b", wandOben: "#3e1f16", stein: true, fels: true, glut: true }
   };
   function lcg(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 
@@ -1738,6 +1787,7 @@
         if (th.fels) { x.beginPath(); x.moveTo(px + r() * C, py); x.lineTo(px + r() * C, py + C * (0.4 + r() * 0.6)); x.stroke(); }
         else { x.strokeRect(px + 0.5, py + 0.5, C - 1, C - 1); if (r() < 0.5) { x.beginPath(); x.moveTo(px + C / 2, py); x.lineTo(px + C / 2, py + C); x.stroke(); } }
         if (th.pilze && r() < 0.08) { x.fillStyle = "rgba(120,200,190,.35)"; x.beginPath(); x.arc(px + r() * C, py + r() * C, 1.4, 0, 7); x.fill(); }
+        if (th.glut && r() < 0.1) { x.strokeStyle = "rgba(255,110,40,.35)"; x.lineWidth = 1.2; x.beginPath(); x.moveTo(px + r() * C, py + r() * C); x.lineTo(px + r() * C, py + r() * C); x.stroke(); x.lineWidth = 1; }
         if (S.def.boden === "schmiede" && r() < 0.06) { x.strokeStyle = "rgba(224,120,60,.3)"; x.beginPath(); x.moveTo(px + r() * C, py + r() * C); x.lineTo(px + r() * C, py + r() * C); x.stroke(); }
       }
     }
@@ -1770,7 +1820,7 @@
           if (r() < 0.6) { x.fillStyle = "#e0a046"; x.fillRect(px + C * 0.55, py + C * 0.3, 3, 3); }
         }
       } else if (z === "=") {
-        const holz = !th.stein || S.def.n === 4 && S.def.ziel !== "truhe";
+        const holz = !th.stein || S.def.n === 4 && S.def.ziel !== "truhe" || S.def.n === 6 && S.def.ziel === "schluessel"; // Tresen bzw. Marktstände
         const l = zeichen(xx - 1, y) === "=" || zeichen(xx - 1, y) === "K", rr = zeichen(xx + 1, y) === "=" || zeichen(xx + 1, y) === "K", o = zeichen(xx, y - 1) === "=", u = zeichen(xx, y + 1) === "=";
         const x0 = px + (l ? 0 : 3), x1 = px + C - (rr ? 0 : 3), y0 = py + (o ? 0 : 3), y1 = py + C - (u ? 0 : 3);
         x.fillStyle = holz ? "#4a321f" : "#3d3a40"; x.fillRect(x0, y0, x1 - x0, y1 - y0);
@@ -1798,6 +1848,13 @@
         x.fillStyle = "#2a2522"; x.beginPath(); x.arc(cx, cy, C * 0.46, 0, 7); x.fill();
         for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; x.fillStyle = k % 2 ? "#4a423c" : "#5a5048"; x.beginPath(); x.arc(cx + Math.cos(a) * C * 0.38, cy + Math.sin(a) * C * 0.38, 4, 0, 7); x.fill(); }
         x.fillStyle = "#140f0c"; x.beginPath(); x.arc(cx, cy, C * 0.26, 0, 7); x.fill();
+      } else if (z === "V") { // Lava
+        const v = x.createRadialGradient(px + C / 2, py + C / 2, 2, px + C / 2, py + C / 2, C * 0.75);
+        v.addColorStop(0, "#ffb347"); v.addColorStop(0.45, "#e5531c"); v.addColorStop(1, "#7a1a0c");
+        x.fillStyle = v; x.fillRect(px, py, C, C);
+        x.strokeStyle = "rgba(60,14,6,.75)"; x.lineWidth = 2;
+        for (let k = 0; k < 3; k++) { x.beginPath(); x.moveTo(px + r() * C, py + r() * C); x.quadraticCurveTo(px + r() * C, py + r() * C, px + r() * C, py + r() * C); x.stroke(); }
+        x.lineWidth = 1;
       } else if (z === "D") {
         x.fillStyle = "rgba(224,160,70,.12)"; x.fillRect(px, py, C, C);
         for (let k = 0; k < 6; k++) { x.fillStyle = r() < 0.5 ? "#c98a3a" : "#e0a046"; x.beginPath(); x.arc(px + r() * C, py + r() * C, 2 + r() * 2, 0, 7); x.fill(); }
@@ -1872,6 +1929,11 @@
         else if (rnd() < 0.02) S.teilchen.push({ x: q.x + 0.5, y: q.y + 0.2, vx: 0, vy: -0.3, leben: 0.9, max: 0.9, farbe: "rgba(168,159,143,.35)", gr: 3, rund: true });
       } else if (q.art === "laterne") flamme(px, py + 1, 3.6, q.phase);
       else if (q.art === "feuer") { flamme(px - 5, py + 2, 5, q.phase, "#e0a046"); flamme(px + 5, py + 3, 4.5, q.phase + 2, "#e0a046"); flamme(px, py, 6.5, q.phase + 1); }
+      else if (q.art === "lava") {
+        const p = ruhig ? 0.5 : 0.5 + 0.5 * Math.sin(S.zeit * 1.7 + q.phase);
+        ctx.fillStyle = "rgba(255,200,90," + (0.12 + 0.2 * p).toFixed(2) + ")"; ctx.fillRect(px - C / 2, py - C / 2, C, C);
+        if (!ruhig && rnd() < 0.012) S.teilchen.push({ x: q.x + 0.3 + rnd() * 0.4, y: q.y + 0.5, vx: (rnd() - 0.5) * 0.3, vy: -0.6, leben: 0.8, max: 0.8, farbe: "rgba(255,170,70,.8)", gr: 2 });
+      }
     });
     // warmer Schein über der Dunkelheit
     ctx.save(); ctx.globalCompositeOperation = "lighter";
@@ -1924,7 +1986,7 @@
     const nz = S.nezna;
     if (nz && !nz.gefangen && nz.cd <= 0) kegelZeichnen(nz.x, nz.y, nz.ang, 0.9, nz.form === "drow" ? 3.4 : 2.6, "rgba(180,138,216,A)");
     const d = S.drache;
-    if (d && d.wach) { const k = dracheKopf(); kegelZeichnen(k.x, k.y, d.ang, 0.62, 5.6 * S.mod.sicht, d.a > 0.3 ? "rgba(196,86,74,A)" : "rgba(160,200,90,A)"); }
+    if (d && d.wach) { const k = dracheKopf(); kegelZeichnen(k.x, k.y, d.ang, 0.62, 5.6 * S.mod.sicht, d.a > 0.3 ? "rgba(196,86,74,A)" : dracheRot() ? "rgba(255,150,70,A)" : "rgba(160,200,90,A)"); }
     S.gaeste.forEach(p => { if (p.schlaeft && p.wach > 0) kegelZeichnen(p.x, p.y, p.ang, 0.8, 3.2, "rgba(224,190,110,A)"); });
   }
 
@@ -2016,7 +2078,7 @@
   }
   function hundZeichnen(g, px, py, r) {
     const T = g.T, zahm = g.zahm, lauf = (g.pfad && g.pfad.length) ? Math.sin(S.zeit * 16) * 0.25 : 0;
-    const farbe = S.def.n >= 5 ? "#6a6070" : S.def.n === 3 ? "#7e7a72" : T.mantel, kopf = S.def.n >= 5 ? "#7e7488" : S.def.n === 3 ? "#949088" : T.kopf;
+    const farbe = S.def.n === 5 ? "#6a6070" : S.def.n === 3 ? "#7e7a72" : T.mantel, kopf = S.def.n === 5 ? "#7e7488" : S.def.n === 3 ? "#949088" : T.kopf;
     schatten(px, py, r * 1.1);
     ctx.save(); ctx.translate(px, py); ctx.rotate(g.ang);
     ctx.strokeStyle = farbe; ctx.lineWidth = 3; ctx.lineCap = "round";
@@ -2066,6 +2128,15 @@
     const px = PX(b.x), py = PY(b.y), r = C * 0.34;
     schatten(px, py, r);
     ctx.save(); ctx.translate(px, py); ctx.rotate(b.ang);
+    if (b.name === "drokey") { // Drokey: grauer Kapuzendieb, die Drachenmünze blitzt am Gürtel
+      ctx.strokeStyle = "#a8a29a"; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(r * 0.1, r * 0.85); ctx.lineTo(r * 1.05, r * 0.8); ctx.stroke();
+      ctx.fillStyle = "#3e3f46"; ctx.beginPath(); ctx.ellipse(-r * 0.08, 0, r * 0.76, r, 0, 0, 7); ctx.fill();
+      ctx.strokeStyle = "rgba(170,172,180,.6)"; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.fillStyle = "#2c2d33"; ctx.beginPath(); ctx.arc(r * 0.1, 0, r * 0.52, 0, 7); ctx.fill();
+      ctx.fillStyle = "#8c8580"; ctx.beginPath(); ctx.arc(r * 0.36, 0, r * 0.24, 0, 7); ctx.fill();
+      ctx.fillStyle = "#e0a046"; ctx.shadowColor = "#ffcf7a"; ctx.shadowBlur = 6 + 3 * Math.sin(S.zeit * 4); ctx.beginPath(); ctx.arc(-r * 0.2, -r * 0.72, 3.2, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.restore();
+    } else {
     ctx.strokeStyle = "#8a6a44"; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(-r * 0.3, r * 0.9); ctx.lineTo(r * 1.3, r * 0.7); ctx.stroke();
     ctx.fillStyle = "rgba(170,220,255,.9)"; ctx.shadowColor = "#9bd0ff"; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(r * 1.35, r * 0.68, 3.4, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
     ctx.fillStyle = "#7a1a16"; ctx.beginPath(); ctx.ellipse(-r * 0.08, 0, r * 0.78, r * 1.02, 0, 0, 7); ctx.fill();
@@ -2073,8 +2144,9 @@
     ctx.fillStyle = "#9b231b"; ctx.beginPath(); ctx.arc(r * 0.12, 0, r * 0.52, 0, 7); ctx.fill();
     ctx.fillStyle = "#d9b08c"; ctx.beginPath(); ctx.arc(r * 0.34, 0, r * 0.27, 0, 7); ctx.fill();
     ctx.restore();
+    }
     ctx.font = "600 13px " + FONT_H; ctx.fillStyle = "rgba(235,226,204,.85)"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-    ctx.fillText(sprache() === "en" ? "Glasstaff" : "Glasstab", px, py - r * 1.5);
+    ctx.fillText(tn("bossName") || (sprache() === "en" ? "Glasstaff" : "Glasstab"), px, py - r * 1.5);
     if (b.zustand === "wartet") {
       const rr = C * 0.95, g = ctx.createRadialGradient(px, py, r * 0.6, px, py, rr);
       g.addColorStop(0, "rgba(235,226,204,.3)"); g.addColorStop(1, "rgba(235,226,204,0)");
@@ -2244,33 +2316,37 @@
     ctx.fillText(txt, bx + tw / 2, by + th / 2 + 1, tw - 8);
     ctx.restore();
   }
+  /* Venomfang grün, Themberchaud rot (Nacht 6: nur Kulisse und Gefahr, kein Gegner) */
+  const DRACHE_FARBEN = { gruen: ["#3f5a2e", "#2f4524", "#4f6e38", "#6f8a4a", "#2a3a1c", "#1a2412"], rot: ["#7a2216", "#5a160e", "#9a2e1c", "#c4562e", "#3a0e08", "#2a0a06"] };
+  const dracheRot = () => S.def.drache === "themberchaud";
   function dracheZeichnen() {
     const d = S.drache; if (!d) return;
+    const F = DRACHE_FARBEN[dracheRot() ? "rot" : "gruen"];
     const px = PX(d.x), py = PY(d.y), atem = 1 + Math.sin(S.zeit * (d.wach ? 3 : 1.2)) * 0.03;
     ctx.save(); ctx.translate(px, py);
     ctx.fillStyle = "rgba(0,0,0,.4)"; ctx.beginPath(); ctx.ellipse(3, 5, C * 1.05, C * 0.85, 0, 0, 7); ctx.fill();
     // Schwanz
-    ctx.strokeStyle = "#3f5a2e"; ctx.lineWidth = 7; ctx.lineCap = "round";
+    ctx.strokeStyle = F[0]; ctx.lineWidth = 7; ctx.lineCap = "round";
     ctx.beginPath(); ctx.moveTo(-C * 0.3, C * 0.5); ctx.quadraticCurveTo(-C * 1.2, C * 0.9, -C * 0.9, C * 0.1); ctx.stroke();
     ctx.scale(atem, atem);
     // Flügel
-    ctx.fillStyle = "#2f4524";
+    ctx.fillStyle = F[1];
     [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s * C * 0.95, -C * 0.35); ctx.lineTo(s * C * 0.85, C * 0.35); ctx.lineTo(s * C * 0.4, C * 0.55); ctx.closePath(); ctx.fill(); });
-    ctx.fillStyle = "#4f6e38"; ctx.beginPath(); ctx.ellipse(0, C * 0.1, C * 0.55, C * 0.68, 0, 0, 7); ctx.fill();
-    ctx.fillStyle = "#6f8a4a"; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-4, C * (0.55 - i * 0.24)); ctx.lineTo(0, C * (0.45 - i * 0.24)); ctx.lineTo(4, C * (0.55 - i * 0.24)); ctx.fill(); }
+    ctx.fillStyle = F[2]; ctx.beginPath(); ctx.ellipse(0, C * 0.1, C * 0.55, C * 0.68, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = F[3]; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-4, C * (0.55 - i * 0.24)); ctx.lineTo(0, C * (0.45 - i * 0.24)); ctx.lineTo(4, C * (0.55 - i * 0.24)); ctx.fill(); }
     ctx.restore();
     // Kopf
     const k = dracheKopf(), kx = PX(k.x), ky = PY(k.y);
     ctx.save(); ctx.translate(kx, ky); ctx.rotate(d.ang);
-    ctx.fillStyle = "#4f6e38"; ctx.beginPath(); ctx.moveTo(C * 0.45, 0); ctx.lineTo(-C * 0.2, -C * 0.28); ctx.lineTo(-C * 0.3, C * 0.28); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = "#2a3a1c"; ctx.lineWidth = 2.5; [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(-C * 0.15, s * C * 0.18); ctx.lineTo(-C * 0.42, s * C * 0.34); ctx.stroke(); });
-    ctx.fillStyle = d.wach ? "#ffcf3a" : "#1a2412"; if (d.wach) { ctx.shadowColor = "#ffcf3a"; ctx.shadowBlur = 8; }
+    ctx.fillStyle = F[2]; ctx.beginPath(); ctx.moveTo(C * 0.45, 0); ctx.lineTo(-C * 0.2, -C * 0.28); ctx.lineTo(-C * 0.3, C * 0.28); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = F[4]; ctx.lineWidth = 2.5; [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(-C * 0.15, s * C * 0.18); ctx.lineTo(-C * 0.42, s * C * 0.34); ctx.stroke(); });
+    ctx.fillStyle = d.wach ? "#ffcf3a" : F[5]; if (d.wach) { ctx.shadowColor = "#ffcf3a"; ctx.shadowBlur = 8; }
     [-1, 1].forEach(s => { ctx.beginPath(); ctx.ellipse(C * 0.08, s * C * 0.12, d.wach ? 2.6 : 2.4, d.wach ? 2 : 0.7, 0, 0, 7); ctx.fill(); });
     ctx.restore();
   }
   function dracheZzz() {
     const d = S.drache; if (!d || d.wach) return;
-    ctx.font = "600 18px " + FONT_H; ctx.fillStyle = "rgba(160,200,90,.8)"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.font = "600 18px " + FONT_H; ctx.fillStyle = dracheRot() ? "rgba(255,150,90,.85)" : "rgba(160,200,90,.8)"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
     const k = (S.zeit * 0.6) % 1; ctx.globalAlpha = 1 - k; ctx.fillText("Z", PX(d.x) + C * 0.8 + k * 10, PY(d.y) - C * 0.9 - k * 16); ctx.globalAlpha = 1;
   }
 
@@ -2330,13 +2406,13 @@
     // Fußleiste
     ctx.fillStyle = "rgba(9,8,15,.82)"; ctx.fillRect(0, FUSS_Y, W, H - FUSS_Y);
     ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    const zielTxt = S.offen && S.def.ziel !== "frei" ? tx.ziel.ausgang : tx.zielWort + tx.ziel[S.def.ziel];
+    const zielTxt = S.offen && S.def.ziel !== "frei" ? tx.ziel.ausgang : tx.zielWort + zielName(S.def.ziel);
     ctx.font = "600 17px " + FONT_H; ctx.fillStyle = S.offen && S.def.ziel !== "frei" ? "#e0a046" : "#ebe2cc";
     const rand = W - 9 - knopfBreite();
     ctx.fillText(zielTxt, 9, FUSS_Y + 15, rand - 9);
     const A = S.auftrag;
     if (A) {
-      const atx = A.typ === "zeit" ? tx.auftrag.zeit(Math.max(0, Math.ceil(A.limit - S.spielZeit))) : tx.auftrag[A.typ];
+      const atx = A.typ === "zeit" ? tx.auftrag.zeit(Math.max(0, Math.ceil(A.limit - S.spielZeit))) : auftragName(A);
       ctx.font = "600 14px " + FONT_H; ctx.fillStyle = A.ok ? "#e0a046" : A.fehl ? "rgba(168,159,143,.6)" : "#c9b0e8";
       ctx.fillText((A.ok ? "✓ " : A.fehl ? "✗ " : "◆ ") + atx, 9, FUSS_Y + 36, rand - 9);
     }
@@ -2598,13 +2674,13 @@
       (S.def.ziel !== "frei" && S.lvIdx < 3 && !k && !tg ? extra(esc(tx.alarmHinweis)) : "") +
       (S.wachen.some(g => g.T.auge) ? extra(esc(tx.magierHinweis)) : "") +
       (S.wachen.some(g => g.T.hauptmann && !g.T.auge) ? extra(esc(tx.hauptmannHinweis)) : "") +
-      (S.boss ? extra(esc(tx.glasstabHinweis)) : "") +
+      (S.boss ? extra(esc(tn("glasstabHinweis"))) : "") +
       ((S.def.flucht || []).length && !tg ? extra(esc(tx.ilvaraHinweis)) : "") +
       (S.lvIdx >= 3 && S.lvIdx < 6 && !k && !tg ? extra(esc(tx.leichenHinweis)) : "") +
       (S.wachen.some(g => g.T.hund) ? '<p class="dn-extra">' + esc(tx.hundHinweis) + '</p>' : "") +
       (S.nezna ? '<p class="dn-extra">' + esc(S.nezna.form === "drow" ? tx.neznaDrow : tx.neznaHinweis) + '</p>' : "") +
-      '<p class="dn-zielzeile">' + esc(tx.zielWort + tx.ziel[S.def.ziel]) + '</p>' +
-      (A ? '<p class="dn-auftragzeile">◆ ' + esc(tx.auftragWort + (A.typ === "zeit" ? tx.auftrag.zeit(A.limit) : tx.auftrag[A.typ])) + '</p>' : "") +
+      '<p class="dn-zielzeile">' + esc(tx.zielWort + zielName(S.def.ziel)) + '</p>' +
+      (A ? '<p class="dn-auftragzeile">◆ ' + esc(tx.auftragWort + auftragName(A)) + '</p>' : "") +
       (!k && !tg ? sterneHtml(tx, sterneLesen()[S.lvIdx] || 0, 0) : "") +
       '<button type="button" class="tav-knopf dn-haupt" data-tun="los">' + esc(tx.los) + '</button>');
   }
