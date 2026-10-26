@@ -1,8 +1,8 @@
 /* =====================================================================
    ECHOS HORT – Raubzug, Wildgestalt und der Zorn des Hains
-   Acht Gebiete wie in der Kampagne (Wald an der Straße, Phandalin,
+   Neun Gebiete wie in der Kampagne (Wald an der Straße, Phandalin,
    Wachturm, magische Schmiede, Donnerbaum, Unterreich, See der Kuo-Toa,
-   Gracklstugh), je drei Level, danach geht es endlos weiter.
+   Gracklstugh, Themberchauds Hort), je drei Level, danach geht es endlos weiter.
    Jedes Level hat zwei Phasen:
    1. Raubzug: Echo schleudert seine Ranke in die Tiefe und zieht Gold,
       Edelsteine, Truhen und die Ressource des Gebiets hoch. Mit
@@ -41,7 +41,7 @@
   const TX = {
     de: {
       label: "Druiden-Probe", titel: "Echos Hort",
-      text: "Echo schleudert seine Ranke in die Tiefe, verwandelt sich in Rabe, Bär oder Ratte und rafft zusammen, was glänzt. Danach kommen die Plünderer, und der Hain muss den Hort verteidigen. Acht Gebiete wie in unserer Kampagne, viele Level, noch mehr Verbesserungen.",
+      text: "Echo schleudert seine Ranke in die Tiefe, verwandelt sich in Rabe, Bär oder Ratte und rafft zusammen, was glänzt. Danach kommen die Plünderer, und der Hain muss den Hort verteidigen. Neun Gebiete wie in unserer Kampagne, viele Level, noch mehr Verbesserungen.",
       steuerung: "Raubzug: Tippe, um die Ranke zu schleudern, die Knöpfe unten verwandeln Echo. Abwehr: Tippe auf einen Pflanzplatz, um einen Wächter wachsen zu lassen, und irgendwo auf die Karte für einen Feuerball.",
       neu: "▶ Neuer Raubzug", fortsetzen: (g, l) => "▶ Fortsetzen · " + g + " " + l + "/3", fortsetzenEndlos: n => "▶ Fortsetzen · Endlos, Runde " + n,
       weiter: "▶ Weiter", los: "▶ Los!", nochmal: "↻ Neuer Raubzug", beenden: "Raubzug beenden", zumHain: "▶ In den Hain", zurAbwehr: "▶ Den Hort verteidigen", nochmalLevel: "↻ Level wiederholen",
@@ -58,7 +58,8 @@
         ["Donnerbaum", "Ein verlassenes Dorf voller Blights, Zombies und eines Giftdrachen auf einem Schatz. Feuerball-Wetter."],
         ["Das Unterreich", "Gefesselt im Kerker. Doch Echo erinnert sich: Als Ratte kommt man überall durch. Durch Ketten. Durch Netze."],
         ["Der See der Kuo-Toa", "Unter der Wasseroberfläche liegen Perlen und Opfergaben. Und tief unten schläft etwas mit zwei Köpfen."],
-        ["Gracklstugh", "Die Festung der Duergar. Schmiedegold, Glut und ein Riese, der Stimmen hört."]
+        ["Gracklstugh", "Die Festung der Duergar. Schmiedegold, Glut und ein Riese, der Stimmen hört."],
+        ["Themberchauds Hort", "Eine Halle aus Glut, Lava an allen Rändern, in der Mitte ein Berg aus Gold. Echo rechnet schon, was er sich davon kaufen könnte. Und während er rechnet, schleichen die Grauen Geister zu seinem eigenen Hort."]
       ],
       endlosName: "Der endlose Raubzug", endlosText: n => "Runde " + n + ": Echo kennt jeden Schatz. Die Plünderer kennen Echo.",
       levelKurz: (g, l) => g + " · Level " + l + "/3", levelEndlos: n => "Endlos · Runde " + n,
@@ -74,8 +75,8 @@
         ratte: ["Ratte", "Nagt sich durch Netze."]
       },
       dinge: { muenze: "Münzen", beutel: "Goldbeutel", nugget: "Goldklumpen", edelstein: "Edelstein", stein: "Stein", truhe: "Truhe" },
-      res: ["Eicheln", "Gartenkräuter", "Turmmoos", "Leuchtkristalle", "Wurzelholz", "Sporenpilze", "Muscheln", "Feuermoos"],
-      relikt: ["Goblin-Krone", "Silberkelch", "Drow-Amulett", "Runenhammer", "Drachenschuppe", "Spinnenidol", "Kuo-Toa-Perle", "Duergar-Krone"],
+      res: ["Eicheln", "Gartenkräuter", "Turmmoos", "Leuchtkristalle", "Wurzelholz", "Sporenpilze", "Muscheln", "Feuermoos", "Drachenpfeffer"],
+      relikt: ["Goblin-Krone", "Silberkelch", "Drow-Amulett", "Runenhammer", "Drachenschuppe", "Spinnenidol", "Kuo-Toa-Perle", "Duergar-Krone", "Faustgroße Drachenmünze"],
       ev: {
         naturfrevel: "Die Natur grollt!", gekappt: "Ranke gekappt!", mimik: "Ein Mimik! Hmpf.", zuSchwer: "Zu schwer für den Raben!",
         fels: "Fels! Nur ein Bär …", netz: "Netz! Nur eine Ratte …", wildPlus: "+1 Wildgestalt", keineWild: "Keine Wildgestalt mehr!",
@@ -84,9 +85,9 @@
       ausbruch: { feuerball: "FEUERBALL!", blitz: "BLITZ!", baer: "BÄRENWUT!", grummeln: "Hmpf. Echo schmollt.", feuersturm: "FEUERSTURM!" },
       ausbruchTipp: "Der Zorn ist voll. Bei Echo weiß man nie, was jetzt passiert …",
       kommen: n => "Die Plünderer kommen in " + n + " …", jetzt: "Sofort kommen lassen", bereitLos: "Bereit – los geht's!", klaut: n => "−" + n + " Gold",
-      bossRuft: { anfuehrer: "Der Goblin-Anführer!", glasstab: "Glasstab, Anführer der Roten Roben!", bugbaer: "Der Bugbear vom Wachturm!", nezna: "Nezna, die Drow!", venomfang: "Venomfang!", vrock: "Ein Vrock!", demogorgon: "DEMOGORGON!", riese: "Der rasende Riese!" },
+      bossRuft: { anfuehrer: "Der Goblin-Anführer!", glasstab: "Glasstab, Anführer der Roten Roben!", bugbaer: "Der Bugbear vom Wachturm!", nezna: "Nezna, die Drow!", venomfang: "Venomfang!", vrock: "Ein Vrock!", demogorgon: "DEMOGORGON!", riese: "Der rasende Riese!", drokey: "Drokey, der Meisterdieb!" },
       demo: { text: "Demogorgon ist nicht zu besiegen. Halte ihn auf, bis er im See versinkt!", weg: "Demogorgon versinkt im See …", schrei: "Sein Schrei lässt die Magie erlöschen!" },
-      neznaFlieht: "Nezna wird zur Fledermaus!", gift: "Giftatem!", wurf: "Felswurf!", netzTreffer: "Eingesponnen!", geheimgang: "Geheimgang!",
+      neznaFlieht: "Nezna wird zur Fledermaus!", drokeyWeg: "Drokey entwischt durch einen Geheimgang – aber ohne Echos Gold!", gift: "Giftatem!", wurf: "Felswurf!", netzTreffer: "Eingesponnen!", geheimgang: "Geheimgang!",
       wachter: {
         dorn: ["Dornenranke", "Schießt Dornen auf einen Gegner."],
         wurzel: ["Wurzelgriff", "Bremst alle in der Nähe."],
@@ -115,8 +116,8 @@
       hain: "Echos Hain", hainText: "Hier wächst, was Echo stärker macht. Bezahlt wird mit Gold. Er tut es ungern.",
       beutel: n => n + " Gold im Beutel", kaufen: n => n + " Gold", max: "voll",
       hainGruppen: { raub: "Raubzug", wesen: "Gemüt", abwehr: "Abwehr", besonders: "Besonderes" },
-      feinde: { goblin: "Goblin", rotrobe: "Rote Robe", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Söldner", zombie: "Zombie", blight: "Blight", spinne: "Riesenspinne", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-Toa", duergar: "Duergar",
-        anfuehrer: "Goblin-Anführer", glasstab: "Glasstab", bugbaer: "Der Bugbear vom Wachturm", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "Der rasende Riese" },
+      feinde: { goblin: "Goblin", rotrobe: "Rote Robe", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Söldner", zombie: "Zombie", blight: "Blight", spinne: "Riesenspinne", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-Toa", duergar: "Duergar", graugeist: "Grauer Geist", glutkaefer: "Glutkäfer", flammenwahrer: "Bewahrer der Flamme",
+        anfuehrer: "Goblin-Anführer", glasstab: "Glasstab", bugbaer: "Der Bugbear vom Wachturm", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "Der rasende Riese", drokey: "Drokey, der Meisterdieb" },
       eig: { flug: "fliegt", schnell: "schnell", zaeh: "zäh", ausweichen: "weicht aus", unsichtbar: "zeitweise unsichtbar", netz: "spinnt Wächter ein", feuerSchwach: "feuerschwach", wurzelFest: "wurzelfest",
         ruft: "ruft Verstärkung", blinzeln: "nimmt Geheimgänge", gift: "Giftatem lähmt Wächter", schrei: "Schrei lähmt Wächter", wurf: "wirft Felsen auf Wächter", verwandeln: "flieht als Fledermaus", unbesiegbar: "unbesiegbar – nur aufhalten!" },
       zweige: {
@@ -183,10 +184,12 @@
         venomfang: ["Venomfang schläft", "Der Giftdrache schläft auf seinem Hort. Jeder Griff in seinen Schatz weckt ihn ein Stück mehr, bis er Gift speit."],
         dunkel: ["Die Dunkelheit", "Im Unterreich siehst du nur, was Echos Stab, die Leuchtpilze und die Ranke selbst erhellen."],
         stroemung: ["Die Strömung", "Die Beute treibt mit der Strömung durch das Wasser."],
-        geysir: ["Lavageysire", "Glühende Risse kündigen Lavafontänen an. Was dort liegt, schmilzt, und auch die Ranke verbrennt sich."]
+        geysir: ["Lavageysire", "Glühende Risse kündigen Lavafontänen an. Was dort liegt, schmilzt, und auch die Ranke verbrennt sich."],
+        lavastrom: ["Die Lavaströme", "Zwei Lavaströme ziehen quer durch die Halle. Wenn sie aufwallen, verbrennt jede Ranke, die hindurchreicht, und das Treibgut darin schmilzt. Unten wartet der Goldberg – mehr wert, aber hinter beiden Strömen."]
       },
       rev: { erwischt: "Erwischt!", goblinFlieht: "Husch! +15", goblinWeg: "Ein Goblin entkommt mit Beute!", wache: "Die Wache sieht dich! −3 s", bugbearWach: n => "Der Bugbear erwacht! −" + n + " Gold",
-        drache: "Venomfang erwacht! Giftatem!", gift: "Gift! −2 s", geschmolzen: "Geschmolzen!", verbrannt: "Autsch! Verbrannt!" },
+        drache: "Venomfang erwacht! Giftatem!", gift: "Gift! −2 s", geschmolzen: "Geschmolzen!", verbrannt: "Autsch! Verbrannt!", wallt: "Die Lava wallt auf!",
+        rechnet: ["Das reicht für ein Schiff …", "… und ein Schloss. Zwei Schlösser!", "Ein goldener Hund? Rex wird eifersüchtig.", "Davon kauf ich den ganzen Markt der Klingen.", "Kennt der Drache Gundren? Egal. Meins.", "Drei Wagenladungen. Mindestens.", "Was glänzt, gehört Echo."] },
       vorschau: "Es kommen", traegt: n => "+" + n + " zurück!", entkommt: n => "−" + n + " Gold entkommen!", leer: "Nichts mehr da!",
       raubHinweis: "Wer Gold stiehlt, rennt damit zum Eingang zurück. Halte ihn auf, dann ist es wieder deins!",
       schnell: ["⏩ ×2", "⏩ ×3", "▶ ×1"],
@@ -244,7 +247,7 @@
         freunde: ["Gute Freunde", "Rex, Barradin und Ezekiel kommen öfter vorbei."]
       },
       leben: n => "❤ " + n,
-      endeTitel: "Echos Raubzug endet", sieg: "Die ganze Kampagne geplündert!", siegText: "Alle acht Gebiete. Und Echo will trotzdem mehr. Ab jetzt geht es endlos weiter.",
+      endeTitel: "Echos Raubzug endet", sieg: "Die ganze Kampagne geplündert!", siegText: "Alle neun Gebiete. Und Echo will trotzdem mehr. Ab jetzt geht es endlos weiter.",
       punkte: "Punkte",
       wert: { level: "Level", gold: "Gold gesamt", erlegt: "Plünderer", schaetze: "Schätze" },
       spruch: {
@@ -271,7 +274,7 @@
     },
     en: {
       label: "Druid check", titel: "Echo's Hoard",
-      text: "Echo hurls his vine into the depths, turns into raven, bear or rat and grabs whatever glitters. Then the plunderers come, and the grove must defend the hoard. Eight regions like in our campaign, many levels, even more upgrades.",
+      text: "Echo hurls his vine into the depths, turns into raven, bear or rat and grabs whatever glitters. Then the plunderers come, and the grove must defend the hoard. Nine regions like in our campaign, many levels, even more upgrades.",
       steuerung: "Raid: tap to hurl the vine, the buttons below transform Echo. Defence: tap a planting spot to grow a guardian, and anywhere on the map for a fireball.",
       neu: "▶ New raid", fortsetzen: (g, l) => "▶ Continue · " + g + " " + l + "/3", fortsetzenEndlos: n => "▶ Continue · Endless, round " + n,
       weiter: "▶ Continue", los: "▶ Go!", nochmal: "↻ New raid", beenden: "End raid", zumHain: "▶ To the grove", zurAbwehr: "▶ Defend the hoard", nochmalLevel: "↻ Retry level",
@@ -288,7 +291,8 @@
         ["Thundertree", "An abandoned village full of blights, zombies and a poison dragon sitting on a treasure. Fireball weather."],
         ["The Underdark", "Shackled in a dungeon. But Echo remembers: as a rat you get through anything. Chains. Webs."],
         ["The lake of the Kuo-toa", "Beneath the surface lie pearls and offerings. And deep below sleeps something with two heads."],
-        ["Gracklstugh", "The fortress of the duergar. Forge gold, embers and a giant who hears voices."]
+        ["Gracklstugh", "The fortress of the duergar. Forge gold, embers and a giant who hears voices."],
+        ["Themberchaud's hoard", "A hall of embers, lava along every edge, a mountain of gold in the middle. Echo is already working out what he could buy with it. And while he counts, the Grey Ghosts creep towards his own hoard."]
       ],
       endlosName: "The endless raid", endlosText: n => "Round " + n + ": Echo knows every treasure. The plunderers know Echo.",
       levelKurz: (g, l) => g + " · Level " + l + "/3", levelEndlos: n => "Endless · Round " + n,
@@ -304,8 +308,8 @@
         ratte: ["Rat", "Gnaws through webs."]
       },
       dinge: { muenze: "Coins", beutel: "Gold pouch", nugget: "Gold nugget", edelstein: "Gem", stein: "Stone", truhe: "Chest" },
-      res: ["Acorns", "Garden herbs", "Tower moss", "Glow crystals", "Rootwood", "Spore mushrooms", "Shells", "Fire moss"],
-      relikt: ["Goblin crown", "Silver chalice", "Drow amulet", "Rune hammer", "Dragon scale", "Spider idol", "Kuo-toa pearl", "Duergar crown"],
+      res: ["Acorns", "Garden herbs", "Tower moss", "Glow crystals", "Rootwood", "Spore mushrooms", "Shells", "Fire moss", "Dragon peppers"],
+      relikt: ["Goblin crown", "Silver chalice", "Drow amulet", "Rune hammer", "Dragon scale", "Spider idol", "Kuo-toa pearl", "Duergar crown", "Fist-sized dragon coin"],
       ev: {
         naturfrevel: "Nature is angry!", gekappt: "Vine cut!", mimik: "A mimic! Hmph.", zuSchwer: "Too heavy for the raven!",
         fels: "Boulder! Only a bear …", netz: "Web! Only a rat …", wildPlus: "+1 wild shape", keineWild: "No wild shapes left!",
@@ -314,9 +318,9 @@
       ausbruch: { feuerball: "FIREBALL!", blitz: "LIGHTNING!", baer: "BEAR RAGE!", grummeln: "Hmph. Echo sulks.", feuersturm: "FIRESTORM!" },
       ausbruchTipp: "His rage is full. With Echo you never know what happens next …",
       kommen: n => "The plunderers arrive in " + n + " …", jetzt: "Bring them on now", bereitLos: "Ready – let's go!", klaut: n => "−" + n + " gold",
-      bossRuft: { anfuehrer: "The goblin boss!", glasstab: "Glasstaff, leader of the Redbrands!", bugbaer: "The bugbear of the watchtower!", nezna: "Nezna the drow!", venomfang: "Venomfang!", vrock: "A vrock!", demogorgon: "DEMOGORGON!", riese: "The raging giant!" },
+      bossRuft: { anfuehrer: "The goblin boss!", glasstab: "Glasstaff, leader of the Redbrands!", bugbaer: "The bugbear of the watchtower!", nezna: "Nezna the drow!", venomfang: "Venomfang!", vrock: "A vrock!", demogorgon: "DEMOGORGON!", riese: "The raging giant!", drokey: "Drokey, the master thief!" },
       demo: { text: "Demogorgon cannot be defeated. Hold him off until he sinks back into the lake!", weg: "Demogorgon sinks into the lake …", schrei: "His scream snuffs out all magic!" },
-      neznaFlieht: "Nezna turns into a bat!", gift: "Poison breath!", wurf: "Boulder throw!", netzTreffer: "Webbed!", geheimgang: "Secret passage!",
+      neznaFlieht: "Nezna turns into a bat!", drokeyWeg: "Drokey slips away through a secret passage – but without Echo's gold!", gift: "Poison breath!", wurf: "Boulder throw!", netzTreffer: "Webbed!", geheimgang: "Secret passage!",
       wachter: {
         dorn: ["Thorn vine", "Shoots thorns at one enemy."],
         wurzel: ["Root grip", "Slows everyone nearby."],
@@ -345,8 +349,8 @@
       hain: "Echo's grove", hainText: "Here grows what makes Echo stronger. Paid for in gold. He does it reluctantly.",
       beutel: n => n + " gold in the pouch", kaufen: n => n + " gold", max: "maxed",
       hainGruppen: { raub: "Raid", wesen: "Temper", abwehr: "Defence", besonders: "Special" },
-      feinde: { goblin: "Goblin", rotrobe: "Redbrand", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Mercenary", zombie: "Zombie", blight: "Blight", spinne: "Giant spider", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-toa", duergar: "Duergar",
-        anfuehrer: "Goblin boss", glasstab: "Glasstaff", bugbaer: "The watchtower bugbear", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "The raging giant" },
+      feinde: { goblin: "Goblin", rotrobe: "Redbrand", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Mercenary", zombie: "Zombie", blight: "Blight", spinne: "Giant spider", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-toa", duergar: "Duergar", graugeist: "Grey Ghost", glutkaefer: "Fire beetle", flammenwahrer: "Keeper of the Flame",
+        anfuehrer: "Goblin boss", glasstab: "Glasstaff", bugbaer: "The watchtower bugbear", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "The raging giant", drokey: "Drokey, the master thief" },
       eig: { flug: "flies", schnell: "fast", zaeh: "tough", ausweichen: "dodges", unsichtbar: "sometimes invisible", netz: "webs guardians", feuerSchwach: "weak to fire", wurzelFest: "root-proof",
         ruft: "calls for help", blinzeln: "uses secret passages", gift: "poison breath stuns guardians", schrei: "scream stuns guardians", wurf: "throws boulders at guardians", verwandeln: "flees as a bat", unbesiegbar: "invincible – just hold him off!" },
       zweige: {
@@ -413,10 +417,12 @@
         venomfang: ["Venomfang sleeps", "The poison dragon sleeps on his hoard. Every grab from his treasure wakes him a little more, until he breathes poison."],
         dunkel: ["The darkness", "In the Underdark you only see what Echo's staff, the glowing mushrooms and the vine itself light up."],
         stroemung: ["The current", "The loot drifts through the water with the current."],
-        geysir: ["Lava geysers", "Glowing cracks announce lava fountains. Whatever lies there melts, and the vine gets burned too."]
+        geysir: ["Lava geysers", "Glowing cracks announce lava fountains. Whatever lies there melts, and the vine gets burned too."],
+        lavastrom: ["The lava streams", "Two lava streams cross the hall. When they surge, any vine reaching through them burns, and the flotsam in them melts. Down below waits the mountain of gold – worth more, but behind both streams."]
       },
       rev: { erwischt: "Caught!", goblinFlieht: "Scram! +15", goblinWeg: "A goblin escapes with loot!", wache: "The guard spots you! −3 s", bugbearWach: n => "The bugbear wakes up! −" + n + " gold",
-        drache: "Venomfang wakes! Poison breath!", gift: "Poison! −2 s", geschmolzen: "Melted!", verbrannt: "Ouch! Burned!" },
+        drache: "Venomfang wakes! Poison breath!", gift: "Poison! −2 s", geschmolzen: "Melted!", verbrannt: "Ouch! Burned!", wallt: "The lava surges!",
+        rechnet: ["That buys a ship …", "… and a castle. Two castles!", "A golden dog? Rex will be jealous.", "I could buy the whole Market of Blades.", "Does the dragon know Gundren? Never mind. Mine.", "Three cartloads. At least.", "What glitters belongs to Echo."] },
       vorschau: "Coming", traegt: n => "+" + n + " back!", entkommt: n => "−" + n + " gold escaped!", leer: "Nothing left!",
       raubHinweis: "Whoever steals gold runs back to the entrance with it. Stop them and it's yours again!",
       schnell: ["⏩ ×2", "⏩ ×3", "▶ ×1"],
@@ -474,7 +480,7 @@
         freunde: ["Good friends", "Rex, Barradin and Ezekiel drop by more often."]
       },
       leben: n => "❤ " + n,
-      endeTitel: "Echo's raid ends", sieg: "The whole campaign plundered!", siegText: "All eight regions. And Echo still wants more. From now on it goes on endlessly.",
+      endeTitel: "Echo's raid ends", sieg: "The whole campaign plundered!", siegText: "All nine regions. And Echo still wants more. From now on it goes on endlessly.",
       punkte: "points",
       wert: { level: "Level", gold: "Total gold", erlegt: "Plunderers", schaetze: "Treasures" },
       spruch: {
@@ -523,7 +529,7 @@
   /* ===== DIE GEBIETE =====
      Neues Kampagnengebiet? Einfach hier einen Eintrag anhängen und in TX (de/en) bei gebiete, res und relikt
      je einen Eintrag ergänzen. Levelzahl, Levelwahl, Sterne, Endlosmodus und Bestenliste passen sich an.
-     k: Kennung · stil: Aussehen (horizont: tannen | daecher | turm | hoehle | ufer, deko: baeume | haeuser | steine,
+     k: Kennung · stil: Aussehen (horizont: tannen | daecher | turm | hoehle | ufer | halle, deko: baeume | haeuser | steine,
      res: Form der Ressource) · regel: Besonderheit im Raubzug (siehe REGELN) · musik: Musikprofil (siehe GEBIET_MUSIK)
      relikt: Form des Relikts · tier / stoerer: Tiere und Störenfriede im Raubzug · gegner: Plünderer mit Anteil · boss
      f: Farben */
@@ -551,7 +557,11 @@
       f: { himmel: ["#06090e", "#0e1824"], boden: ["#0f2230", "#06101a"], akzent: "#4aa0b0", stein: "#3d4c58", res: "#e8c8b0", weg: "#2a3a44", gras: "#10202a", wasser: true } },
     { k: "gracklstugh", stil: { ambient: "glut", horizont: "hoehle", glut: true, deko: "steine", res: "feuermoos" }, regel: "geysir", musik: "gracklstugh",
       relikt: "krone", tier: "fledermaus", stoerer: "spinne", gegner: [["duergar", 0.75], ["bugbear", 0.25]], boss: "riese",
-      f: { himmel: ["#0e0808", "#24120c"], boden: ["#2a1a14", "#120a08"], akzent: "#e0602a", stein: "#584a44", res: "#ff8a3a", weg: "#3a2a22", gras: "#22140f", lava: true } }
+      f: { himmel: ["#0e0808", "#24120c"], boden: ["#2a1a14", "#120a08"], akzent: "#e0602a", stein: "#584a44", res: "#ff8a3a", weg: "#3a2a22", gras: "#22140f", lava: true } },
+    /* Themberchauds Halle: Lava an allen Rändern, in der Mitte der Goldberg. Der Drache schaut nur zu. */
+    { k: "hort", stil: { ambient: "glut", horizont: "halle", glut: true, deko: "steine", res: "pfeffer", lavarand: true }, regel: "lavastrom", musik: "hort",
+      relikt: "drachenmuenze", tier: "salamander", stoerer: "rauch", gegner: [["graugeist", 0.5], ["glutkaefer", 0.25], ["flammenwahrer", 0.25]], boss: "drokey",
+      f: { himmel: ["#140806", "#3a140a"], boden: ["#34180e", "#140806"], akzent: "#ff7a2a", stein: "#5e4238", res: "#e0402a", weg: "#40261a", gras: "#2a120a", lava: true } }
   ];
   const GEBIETE_ANZAHL = GEB.length, KAMPAGNE = GEBIETE_ANZAHL * LEVEL_PRO_GEBIET;
 
@@ -570,6 +580,9 @@
     chasme:   { hp: 58, v: 36, klau: 20, r: 11, pkt: 15, farbe: "#3a4560", flug: true },
     kuotoa:   { hp: 72, v: 31, klau: 15, r: 10, pkt: 12, farbe: "#3f7a78" },
     duergar:  { hp: 78, v: 30, klau: 18, r: 10, pkt: 14, farbe: "#6a6460", unsichtbar: true },
+    graugeist:     { hp: 56, v: 48, klau: 24, r: 8, pkt: 13, farbe: "#55555f", unsichtbar: true, ausweichen: 0.15 },
+    glutkaefer:    { hp: 88, v: 34, klau: 10, r: 9, pkt: 11, farbe: "#7a2a14" },
+    flammenwahrer: { hp: 120, v: 27, klau: 20, r: 10, pkt: 17, farbe: "#8a2418" },
     // Bosse
     anfuehrer: { hp: 430, v: 24, klau: 60, r: 15, pkt: 100, farbe: "#5d6e35", boss: true, ruft: "goblin" },
     glasstab:  { hp: 580, v: 22, klau: 70, r: 14, pkt: 120, farbe: "#9b3a2f", boss: true, blinzeln: true },
@@ -578,7 +591,8 @@
     venomfang: { hp: 1550, v: 19, klau: 110, r: 20, pkt: 220, farbe: "#4d7a3a", boss: true, bild: "venomfang.jpg", bildY: 0.32, gift: true },
     vrock:     { hp: 1500, v: 26, klau: 110, r: 18, pkt: 220, farbe: "#8a8070", boss: true, bild: "vrock.jpg", bildY: 0.28, flug: true },
     demogorgon:{ hp: 1, v: 8.5, klau: 99999, r: 24, pkt: 500, farbe: "#9b3a2f", boss: true, bild: "demogorgon-karte.webp", bildY: 0.3, unbesiegbar: true, schrei: true },
-    riese:     { hp: 1800, v: 13, klau: 220, r: 22, pkt: 350, farbe: "#7a6a5a", boss: true, bild: "portrait-riese.jpg", bildY: 0.5, wurf: true }
+    riese:     { hp: 1800, v: 13, klau: 220, r: 22, pkt: 350, farbe: "#7a6a5a", boss: true, bild: "portrait-riese.jpg", bildY: 0.5, wurf: true },
+    drokey:    { hp: 1600, v: 25, klau: 240, r: 17, pkt: 380, farbe: "#4a4a56", boss: true, blinzeln: true, unsichtbar: true }
   };
 
   /* Wächter (Türme). ab = ab welchem Level (Index) verfügbar */
@@ -821,7 +835,8 @@
     donnerbaum:  { grund: [52, 53], modi: ["phrygisch", "aeolisch", "lokrisch"], tempo: [58, 76], walzer: 0.25, arp: ["harfe", "spic"], mel: ["oka", "stimme", "oboe"], bass: ["vctrem", "kb"], pad: ["vlntrem"], schlag: ["holz", "timp"], natur: "k_grillen" },
     unterreich:  { grund: [48, 46], modi: ["lokrisch", "phrygisch", "harm"], tempo: [52, 68], walzer: 0.2, arp: ["harfe"], mel: ["glock", "stimme", "fl"], bass: ["vctrem", "kb"], pad: ["orgel", "vlntrem"], schlag: ["gong", "timp"], natur: "k_bach", luecken: 0.4 },
     see:         { grund: [53, 55, 50], modi: ["lydisch", "ionisch", "dorisch"], tempo: [60, 82], walzer: 0.4, arp: ["harfe", "gitarre"], mel: ["pan", "fl", "stimme", "klar"], bass: ["vc", "kb"], pad: ["geigest", "flst"], schlag: ["shake", "schelle"], natur: "k_wellen" },
-    gracklstugh: { grund: [50, 49], modi: ["harm", "phrdom", "aeolisch"], tempo: [76, 96], walzer: 0.1, arp: ["gitarre", "spic"], mel: ["horn", "trp", "pos", "fag"], bass: ["tuba", "kb"], pad: ["orgel"], schlag: ["amboss", "timp", "bodh"], natur: "k_feuer" }
+    gracklstugh: { grund: [50, 49], modi: ["harm", "phrdom", "aeolisch"], tempo: [76, 96], walzer: 0.1, arp: ["gitarre", "spic"], mel: ["horn", "trp", "pos", "fag"], bass: ["tuba", "kb"], pad: ["orgel"], schlag: ["amboss", "timp", "bodh"], natur: "k_feuer" },
+    hort:        { grund: [50, 47, 52], modi: ["harm", "phrdom", "dorisch", "lydisch"], tempo: [66, 88], walzer: 0.15, arp: ["harfe", "gitarre"], mel: ["horn", "glock", "oboe", "trp"], bass: ["tuba", "kb"], pad: ["orgel", "vctrem"], schlag: ["timp", "gong", "amboss"], natur: "k_feuer" }
   };
   const PROBEN = {
     gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101],
@@ -1129,7 +1144,7 @@
     fortschrittMerken();
     /* Zweiter Tab: Hat ein anderer Tab inzwischen einen neueren Spielstand geschrieben, wird er nicht überschrieben. */
     if (!speichernErlaubt()) return;
-    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten(), laune: S.laune || null, kleinode: S.kleinode || [], angebot: S.angebot || null, erspart: S.erspart || 0,
+    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten(), laune: S.laune || null, kleinode: S.kleinode || [], angebot: S.angebot || null, erspart: S.erspart || 0, kampagne: KAMPAGNE,
       t: Math.max(Date.now(), (S.speicherT || 0) + 1), tab: TAB_ID };
     S.speicherT = k.t;
     schreib(SPEICHER, JSON.stringify(k));
@@ -1146,7 +1161,15 @@
   function speicherLoeschen() { if (!S || speichernErlaubt()) loesch(SPEICHER); }
   function gespeichert() {
     /* Obergrenze: weit hinter allem Spielbaren im Endlos-Modus – darüber würden die Gegner-Werte unendlich */
-    try { const v = JSON.parse(lies(SPEICHER, "null")); return v && STUFEN[v.stufe] && Number.isInteger(v.lv) && v.lv >= 0 && v.lv <= KAMPAGNE + 200 ? v : null; } catch (_) { return null; }
+    try { const v = JSON.parse(lies(SPEICHER, "null")); return v && STUFEN[v.stufe] && Number.isInteger(v.lv) && v.lv >= 0 && kampagneAngleichen(v) && v.lv <= KAMPAGNE + 200 ? v : null; } catch (_) { return null; }
+  }
+  /* Neues Gebiet angehängt? Ältere Spielstände kennen die Länge ihrer Kampagne nicht (bis Gracklstugh: 8 Gebiete = 24 Level).
+     Ein Endlos-Stand wird um die neuen Level verschoben, damit er Endlos bleibt und dieselbe Runde zeigt. */
+  function kampagneAngleichen(v) {
+    const alt = Number.isInteger(v.kampagne) && v.kampagne > 0 ? v.kampagne : 24;
+    if (alt !== KAMPAGNE && v.lv >= alt) v.lv += KAMPAGNE - alt;
+    v.kampagne = KAMPAGNE;
+    return true;
   }
   function laden(k) {
     neuesSpiel();
@@ -1324,12 +1347,12 @@
     R.dinge.forEach(d => {
       if (d.typ === "tier") {
         if (d.flieht) { d.x += d.v * 5 * dt; d.y -= 30 * dt; d.alpha = (d.alpha == null ? 1 : d.alpha) - dt * 1.5; return; }
-        d.ph += dt * 4; d.x += d.v * dt; d.y = d.by + (d.art === "fledermaus" ? Math.sin(d.ph) * 10 : d.art === "fisch" ? Math.sin(d.ph * 0.6) * 5 : -Math.abs(Math.sin(d.ph)) * 6);
+        d.ph += dt * 4; d.x += d.v * dt; d.y = d.by + (d.art === "fledermaus" ? Math.sin(d.ph) * 10 : d.art === "fisch" || d.art === "salamander" ? Math.sin(d.ph * 0.6) * 5 : -Math.abs(Math.sin(d.ph)) * 6);
         if (d.x < 20 || d.x > W - 20) { d.v *= -1; d.x = klemm(d.x, 20, W - 20); }
       } else if (d.typ === "stoerer") {
         d.ph += dt;
         if (d.art === "spinne") { d.y = d.by + Math.sin(d.ph * 1.3) * 70; d.y = klemm(d.y, 140, 430); }
-        else { d.x += d.v * dt; d.y = d.by + Math.sin(d.ph * 5) * (d.art === "aal" ? 6 : 12); if (d.x < 20 || d.x > W - 20) { d.v *= -1; d.x = klemm(d.x, 20, W - 20); } }
+        else { d.x += d.v * dt * (d.art === "rauch" ? 0.6 : 1); d.y = d.by + Math.sin(d.ph * (d.art === "rauch" ? 1.6 : 5)) * (d.art === "aal" ? 6 : d.art === "rauch" ? 16 : 12); if (d.x < 20 || d.x > W - 20) { d.v *= -1; d.x = klemm(d.x, 20, W - 20); } }
       }
     });
     R.dinge = R.dinge.filter(d => !(d.typ === "tier" && d.flieht && d.alpha <= 0));
@@ -1502,6 +1525,18 @@
     } else if (R.regel === "stroemung") {
       R.dinge.forEach(d => { d.strom = (Math.random() < 0.5 ? -1 : 1) * zw(9, 20) * (1 + innen * 0.15); });
     } else if (R.regel === "geysir") { R.geysire = []; R.geysirT = zw(2, 3.5); }
+    else if (R.regel === "lavastrom") {
+      /* zwei Ströme quer durch die Halle; sie wallen abwechselnd auf. Unten der Goldberg mit Themberchauds Gold. */
+      R.stroeme = [zw(212, 232), zw(316, 336)].map((y, i) => ({ y, h: 11, zustand: "ruhig", t: 0, dauer: zw(2.4, 3.4) + i * 1.6, v: (i ? -1 : 1) * zw(20, 30), ph: Math.random() * 6 }));
+      R.treibT = zw(1, 2);
+      R.berg = { x: zw(130, 270), y: 440 };
+      rings(R, R.berg.x, R.berg.y, 5, 30, 62, 434);
+      R.dinge.filter(d => d.hort).forEach(d => { d.wert = Math.round(d.wert * 1.3); });
+      R.dinge.forEach(d => {
+        if (!(WERTVOLL.includes(d.typ) || d.typ === "stein")) return;
+        R.stroeme.forEach(st => { if (Math.abs(d.y - st.y) < st.h + d.r + 4) d.y = d.y < st.y ? st.y - st.h - d.r - 6 : st.y + st.h + d.r + 6; });
+      });
+    }
   }
   function regelLaerm(R, n) {
     if (R.regel === "bugbear" && R.schlaefer && R.schlaefer.wachT <= 0) R.schlaefer.laerm = Math.min(100, R.schlaefer.laerm + n);
@@ -1509,6 +1544,8 @@
   function regelGriff(R, d) {
     if (R.regel === "bugbear" && abst(d.x, d.y, R.schlaefer.x, R.schlaefer.y) < 80) regelLaerm(R, 18);
     if (R.regel === "venomfang" && d.hort) R.drache.wach = Math.min(100, R.drache.wach + 26 + d.wert / 12);
+    /* Echo rechnet schon, was er sich vom Goldberg kaufen könnte */
+    if (R.regel === "lavastrom" && d.hort && S.quipT <= 0 && Math.random() < 0.75) { S.quip = { s: zufall(t().rev.rechnet), t: 0 }; S.quipT = 2.4; }
   }
   function wegnehmen(R, d) { const i = R.dinge.indexOf(d); if (i >= 0) R.dinge.splice(i, 1); }
   function regelUpdate(R, dt) {
@@ -1604,6 +1641,44 @@
       });
       if (h.zustand === "schwingen") h.verbrannt = false;
       R.geysire = R.geysire.filter(g => g.t < g.warn + g.aus + 0.3);
+    } else if (R.regel === "lavastrom") {
+      const innen = innenVon(S.lv);
+      R.stroeme.forEach(st => {
+        st.t += dt; st.ph += dt;
+        if (st.t < st.dauer) return;
+        st.t = 0;
+        if (st.zustand === "ruhig") { st.zustand = "warn"; st.dauer = 1.4 - innen * 0.1; if (!R.walltText) { R.walltText = true; text(W / 2, st.y - 30, T.wallt, "#ff8a3a", 14, 1.6); } }
+        else if (st.zustand === "warn") {
+          st.zustand = "heiss"; st.dauer = 1.5 + innen * 0.3; S.beben = 0.2; KLANG.boom(); vib(30);
+          let n = 0;
+          R.dinge.slice().forEach(d => { if (d.treib === st) { wegnehmen(R, d); n++; funken(d.x, d.y, 10, ["#ff8a3a", "#ffd34d", "#c4564a"], 80); } });
+          if (n) text(W / 2, st.y - 18, T.geschmolzen, "#ff8a3a", 14);
+        } else { st.zustand = "ruhig"; st.dauer = zw(2.6, 4.2) / (1 + innen * 0.15); }
+      });
+      // Treibgut: halb geschmolzene Schätze ziehen im ruhigen Strom vorbei
+      R.treibT -= dt;
+      if (R.treibT <= 0 && !R.fertig) {
+        R.treibT = zw(2.2, 3.6);
+        const st = zufall(R.stroeme);
+        if (st.zustand === "ruhig" && R.dinge.filter(d => d.treib).length < 3) {
+          const r = Math.random(), typ = r < 0.35 ? "nugget" : r < 0.6 ? "edelstein" : r < 0.8 ? "beutel" : "muenze";
+          const a = DINGE[typ], wf = (1 + 0.07 * Math.min(S.lv, KAMPAGNE)) * (1 + 0.1 * up("goldnase")), x0 = st.v > 0 ? -16 : W + 16;
+          R.dinge.push({ typ, x: x0, y: st.y, r: a.r * (typ === "nugget" ? 0.8 : 1), gewicht: a.gewicht * (typ === "nugget" ? 0.8 : 1), wert: Math.round(zw(a.wert[0], a.wert[1]) * wf * 1.15), dreh: 0, seed: Math.random(), treib: st });
+        }
+      }
+      R.dinge = R.dinge.filter(d => { if (!d.treib) return true; d.x += d.treib.v * dt; d.y = d.treib.y + Math.sin(R.rt * 2 + d.seed * 6) * 2; return d.x > -30 && d.x < W + 30; });
+      // aufwallende Lava verbrennt die Ranke, wenn sie hindurchreicht
+      if (h.zustand !== "schwingen" && !h.verbrannt) {
+        const st = R.stroeme.find(q => q.zustand === "heiss" && sp.y > q.y - q.h);
+        if (st) {
+          h.verbrannt = true;
+          if (h.last) { funken(sp.x, sp.y, 12, ["#ff8a3a", "#ffd34d"], 90); h.last = null; h.last2 = null; text(sp.x, sp.y - 30, T.geschmolzen, "#ff8a3a", 14); }
+          const kx = DREH.x + (sp.x - DREH.x) * (st.y - DREH.y) / Math.max(1, sp.y - DREH.y);
+          funken(kx, st.y, 14, ["#ff8a3a", "#ffd34d", "#c4564a"], 100);
+          h.zustand = "rein"; text(kx, st.y - 16, T.verbrannt, "#ff8a3a", 15); zornDazu(12); KLANG.grummeln();
+        }
+      }
+      if (h.zustand === "schwingen") h.verbrannt = false;
     }
   }
   function regelHaken(R, sp) {
@@ -1699,7 +1774,55 @@
       for (let i = 0; i < 10; i++) { const bx = (i * 47 + zeit * 20 * (i % 2 ? 1 : -1)) % (W + 20), by = LEISTE - ((zeit * 25 + i * 53) % (LEISTE - 110)); x.strokeStyle = "rgba(159,214,236,.35)"; x.lineWidth = 1; x.beginPath(); x.arc((bx + W + 20) % (W + 20) - 10, by, 2 + (i % 3), 0, Math.PI * 2); x.stroke(); }
       x.strokeStyle = "rgba(159,214,236,.08)"; x.lineWidth = 2;
       for (let y = 150; y < LEISTE; y += 60) { x.beginPath(); for (let xx = 0; xx <= W; xx += 20) { const yy = y + Math.sin(xx / 40 + zeit * 1.5) * 4; xx ? x.lineTo(xx, yy) : x.moveTo(xx, yy); } x.stroke(); }
+    } else if (R.regel === "lavastrom") {
+      malGoldberg(x, R.berg, zeit);
+      R.stroeme.forEach(st => malLavastrom(x, st, zeit));
     }
+  }
+  /* Themberchauds Goldberg: Münzen, Kelche, halb geschmolzene Schätze – und ein goldener Hund obendrauf */
+  function malGoldberg(x, B, zeit) {
+    x.save(); x.translate(B.x, B.y);
+    x.fillStyle = "rgba(0,0,0,.35)"; oval(x, 0, 6, 92, 12);
+    const g = x.createRadialGradient(-14, -34, 6, 0, 0, 96); g.addColorStop(0, "#fff0a0"); g.addColorStop(0.35, "#e8b23a"); g.addColorStop(1, "#7a4a14");
+    x.fillStyle = g; x.beginPath(); x.moveTo(-90, 6); x.quadraticCurveTo(-58, -30, -18, -44); x.quadraticCurveTo(0, -50, 20, -43); x.quadraticCurveTo(60, -28, 90, 6); x.closePath(); x.fill();
+    const rr = lcg(Math.floor(B.x * 13) + 5);
+    for (let i = 0; i < 46; i++) { const px = (rr() - 0.5) * 160, py = -rr() * 44 * (1 - Math.abs(px) / 95) + 2; x.fillStyle = rr() < 0.5 ? "#ffd34d" : "#c98a3a"; oval(x, px, py, 3.4, 1.6, rr() - 0.5); }
+    x.fillStyle = "#c4564a"; kreis(x, -30, -14, 2.2); x.fillStyle = "#4aa0b0"; kreis(x, 34, -10, 2); x.fillStyle = "#6fbf5a"; kreis(x, 8, -30, 1.8);
+    // ein umgekippter Kelch und der goldene Hund
+    x.fillStyle = "#d8a83a"; x.beginPath(); x.moveTo(44, -8); x.lineTo(56, -14); x.lineTo(58, -8); x.lineTo(48, -3); x.fill();
+    x.save(); x.translate(-6, -46);
+    x.fillStyle = "#c98a2a"; oval(x, 0, 0, 9, 4.5); kreis(x, -9, -5, 4); x.fillRect(-6, 1, 2, 5); x.fillRect(4, 1, 2, 5);
+    x.beginPath(); x.moveTo(-11, -8); x.lineTo(-9, -12); x.lineTo(-7, -8); x.fill(); x.strokeStyle = "#c98a2a"; x.lineWidth = 2; x.beginPath(); x.moveTo(8, -1); x.quadraticCurveTo(13, -6, 11, -10); x.stroke();
+    x.fillStyle = "rgba(255,248,210,.7)"; oval(x, -10, -7, 1.5, 1);
+    x.restore();
+    x.restore();
+  }
+  function malLavastrom(x, st, zeit) {
+    const heiss = st.zustand === "heiss", warn = st.zustand === "warn", u = warn ? st.t / st.dauer : 0, h = st.h + (heiss ? 3 + Math.sin(zeit * 9) * 1.5 : 0);
+    x.save();
+    x.fillStyle = "rgba(0,0,0,.4)"; x.fillRect(0, st.y - h - 3, W, h * 2 + 6);
+    const g = x.createLinearGradient(0, st.y - h, 0, st.y + h);
+    if (heiss) { g.addColorStop(0, "#ffd27a"); g.addColorStop(0.5, "#ff8a2a"); g.addColorStop(1, "#c4361a"); }
+    else { const a = 0.55 + u * 0.45; g.addColorStop(0, "rgba(140,40,16," + a + ")"); g.addColorStop(0.5, "rgba(" + Math.round(200 + u * 55) + "," + Math.round(70 + u * 60) + ",30," + a + ")"); g.addColorStop(1, "rgba(90,24,10," + a + ")"); }
+    x.fillStyle = g; x.beginPath(); x.moveTo(0, st.y - h);
+    for (let xx = 0; xx <= W; xx += 16) x.lineTo(xx, st.y - h + Math.sin(xx / 23 + st.ph * 1.3) * 1.6);
+    for (let xx = W; xx >= 0; xx -= 16) x.lineTo(xx, st.y + h + Math.sin(xx / 19 - st.ph * 1.1) * 1.6);
+    x.closePath(); x.fill();
+    if (!heiss) { // dunkle Kruste, die mit dem Strom zieht
+      x.fillStyle = "rgba(40,16,10," + (0.6 - u * 0.4) + ")";
+      for (let i = 0; i < 9; i++) { const kx = ((i * 53 + st.ph * st.v) % (W + 60) + W + 60) % (W + 60) - 30; oval(x, kx, st.y + Math.sin(i * 2.3) * 3, 14 + (i % 3) * 5, 3.2, Math.sin(i) * 0.2); }
+    }
+    x.strokeStyle = heiss ? "rgba(255,230,160,.8)" : "rgba(255,150,60," + (0.25 + u * 0.5) + ")"; x.lineWidth = 1;
+    x.beginPath(); for (let xx = 0; xx <= W; xx += 16) { const yy = st.y + Math.sin(xx / 30 + st.ph * 2) * (h * 0.4); xx ? x.lineTo(xx, yy) : x.moveTo(xx, yy); } x.stroke();
+    if (warn) {
+      for (let i = 0; i < 5; i++) { const bx = (i * 87 + st.ph * 37) % W, br = 1.5 + ((st.ph * 3 + i) % 1) * 3; x.strokeStyle = "rgba(255,210,120," + (0.4 + u * 0.5) + ")"; x.beginPath(); x.arc(bx, st.y - 2, br, 0, Math.PI * 2); x.stroke(); }
+      x.font = "13px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.globalAlpha = 0.5 + Math.sin(zeit * 14) * 0.4; x.fillText("⚠️", 18, st.y - h - 9); x.fillText("⚠️", W - 18, st.y - h - 9);
+    }
+    if (heiss) {
+      x.globalCompositeOperation = "lighter";
+      for (let i = 0; i < 14; i++) { const fx = (i * 31 + Math.sin(zeit * 3 + i) * 6) % W, fh = 8 + ((zeit * 5 + i * 0.37) % 1) * 14; const fg = x.createLinearGradient(0, st.y - h - fh, 0, st.y - h + 2); fg.addColorStop(0, "rgba(255,200,90,0)"); fg.addColorStop(1, "rgba(255,140,40,.55)"); x.fillStyle = fg; x.beginPath(); x.moveTo(fx - 5, st.y - h + 2); x.quadraticCurveTo(fx, st.y - h - fh * 0.5, fx + Math.sin(zeit * 9 + i) * 3, st.y - h - fh); x.quadraticCurveTo(fx + 2, st.y - h - fh * 0.4, fx + 5, st.y - h + 2); x.fill(); }
+    }
+    x.restore();
   }
   function laermBalken(x, cx, cy, u, sym, farbe) {
     x.fillStyle = "rgba(9,8,15,.7)"; x.fillRect(cx - 34, cy - 5, 68, 10);
@@ -2202,6 +2325,7 @@
     if (e.hp <= 0) {
       e.tot = true; A.erlegt++; S.erlegtGesamt++;
       if (d.boss && !d.unbesiegbar) { STAT.bosse[e.typ] = 1; erfolgPruefen("bosse"); }
+      if (e.typ === "drokey" && !still) { banner(t().drokeyWeg, "#c9c4bc", 2.4); funken(e.x, e.y, 24, ["#55555f", "#c9c4bc", "#ffd34d"], 90); }
       if (e.beute) goldZurueck(e);
       if (e.seuche && e.giftT > 0) A.feinde.forEach(o => { if (o !== e && !o.tot && abst(o.x, o.y, e.x, e.y) < 46) { o.gift = Math.max(o.gift, e.gift); o.giftT = 3; o.seuche = true; S.blitze.push({ art: "sporenwolke", x: o.x, y: o.y, r: 16, t: 0, dauer: 0.5 }); } });
       const zaeh = d.boss ? 1 : (A.hpBonus || 1), el = e.elite ? 1 : 0;
@@ -2803,6 +2927,10 @@
   const leinwand = document.createElement("canvas");
   const ctx = leinwand.getContext("2d");
   let skala = 1, hgBild = null, hgSchluessel = "";
+  /* Themberchaud schaut im Raubzug über den Rand seiner Halle – kein Feind, nur ein sehr großer Zuschauer */
+  const DRACHE = new Image(); DRACHE.decoding = "async";
+  DRACHE.onload = () => { const g = GEB.findIndex(G => G.stil.horizont === "halle"); if (hgSchluessel === "raub" + g) { hgSchluessel = ""; hintergrundRaub(g); } };
+  function dracheLaden() { if (!DRACHE.src) DRACHE.src = "themberchaud.webp"; }
   function lcg(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
   function neueLeinwand() {
     const f = 2, c = document.createElement("canvas"); c.width = W * f; c.height = H * f;
@@ -2813,6 +2941,7 @@
 
   /* --- Hintergrund des Raubzugs: oben Echos Platz, darunter ein Querschnitt durch das Gebiet --- */
   function hintergrundRaub(g) {
+    if (GEB[g].stil.horizont === "halle") dracheLaden();
     const k = "raub" + g; if (hgSchluessel === k) return; hgSchluessel = k;
     const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(11 + g * 7);
     let gr = x.createLinearGradient(0, 0, 0, 100);
@@ -2832,6 +2961,14 @@
       x.fillStyle = F.boden[1];
       x.beginPath(); x.moveTo(0, 0); for (let i = 0; i <= 20; i++) x.lineTo(i * 20, 10 + r() * 18 + (i % 3 === 0 ? 18 : 0)); x.lineTo(W, 0); x.fill();
       if (ST.glut) { gr = x.createLinearGradient(0, 60, 0, 100); gr.addColorStop(0, "rgba(224,96,42,0)"); gr.addColorStop(1, "rgba(224,96,42,.35)"); x.fillStyle = gr; x.fillRect(0, 60, W, 40); }
+    } else if (ST.horizont === "halle") {
+      // Themberchauds Halle: glühende Rückwand, Pfeiler, der Drache schaut über den Rand
+      x.fillStyle = "rgba(0,0,0,.3)"; x.fillRect(0, 0, W, 100);
+      gr = x.createLinearGradient(0, 40, 0, 100); gr.addColorStop(0, "rgba(255,90,30,0)"); gr.addColorStop(1, "rgba(255,90,30,.4)"); x.fillStyle = gr; x.fillRect(0, 40, W, 60);
+      for (const px of [26, 112, 288, 374]) { x.fillStyle = "#1e0e0a"; x.fillRect(px - 9, 0, 18, 100); x.fillStyle = "rgba(255,120,50,.18)"; x.fillRect(px + 6, 0, 3, 100); x.fillStyle = "#2a140e"; x.fillRect(px - 12, 0, 24, 6); }
+      x.fillStyle = "#c98a2a"; x.beginPath(); x.moveTo(250, 100); x.quadraticCurveTo(300, 74, 352, 100); x.fill();
+      x.fillStyle = "rgba(255,211,77,.55)"; for (let i = 0; i < 16; i++) x.fillRect(262 + r() * 80, 88 + r() * 11, 2, 1.2);
+      if (DRACHE.complete && DRACHE.naturalWidth) { const dh = 104, dw = dh * DRACHE.naturalWidth / DRACHE.naturalHeight; x.save(); x.globalAlpha = 0.92; x.drawImage(DRACHE, W - dw - 4, 100 - dh + 6, dw, dh); x.restore(); }
     } else if (ST.horizont === "ufer") {
       x.fillStyle = "rgba(0,0,0,.4)"; x.fillRect(0, 0, W, 100);
       x.fillStyle = "#0a1016"; x.beginPath(); x.moveTo(0, 0); for (let i = 0; i <= 20; i++) x.lineTo(i * 20, 8 + r() * 14); x.lineTo(W, 0); x.fill();
@@ -2890,6 +3027,9 @@
       for (let i = 0; i < 6; i++) { x.strokeStyle = "rgba(255,120,40,.45)"; x.lineWidth = 2; x.shadowColor = "#ff6a2a"; x.shadowBlur = 6; x.beginPath(); let px = r() * W, py = 140 + r() * 300; x.moveTo(px, py); for (let j = 0; j < 5; j++) { px += r() * 40 - 20; py += r() * 30 - 10; x.lineTo(px, py); } x.stroke(); }
       x.shadowBlur = 0;
     }
+    if (ST.lavarand) { // Lavaströme an den Rändern der Halle
+      [[0, 1], [W, -1]].forEach(([rx, s2]) => { gr = x.createLinearGradient(rx, 0, rx + s2 * 16, 0); gr.addColorStop(0, "rgba(255,150,60,.9)"); gr.addColorStop(0.45, "rgba(224,80,30,.7)"); gr.addColorStop(1, "rgba(120,30,10,0)"); x.fillStyle = gr; x.fillRect(Math.min(rx, rx + s2 * 16), 104, 16, H - 104); });
+    }
     // dunkle Vignette
     gr = x.createRadialGradient(W / 2, 290, 120, W / 2, 290, 340); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.45)");
     x.fillStyle = gr; x.fillRect(0, 100, W, H - 100);
@@ -2930,6 +3070,12 @@
       deko(30, (px, py) => { x.strokeStyle = "rgba(74,120,90,.55)"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + 3, py - 6, px - 1, py - 11); x.stroke(); }, 20);
     }
     if (F.lava) { x.strokeStyle = "rgba(255,110,40,.55)"; x.lineWidth = 3; x.shadowColor = "#ff6a2a"; x.shadowBlur = 10; for (let i = 0; i < 5; i++) { x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let j = 0; j < 6; j++) { px += r() * 50 - 25; py += r() * 50 - 25; x.lineTo(px, py); if (j % 2) L.push({ x: px, y: py, r: 42, f: "rgba(255,110,40,.13)", fl: 1 }); } x.stroke(); } x.shadowBlur = 0; }
+    if (ST.lavarand) { // Lavarahmen um die ganze Halle
+      x.save(); x.shadowColor = "#ff6a2a"; x.shadowBlur = 12; x.strokeStyle = "rgba(255,120,40,.75)"; x.lineWidth = 7; x.strokeRect(3.5, 3.5, W - 7, LEISTE - 7);
+      x.shadowBlur = 0; x.strokeStyle = "rgba(255,210,120,.5)"; x.lineWidth = 1.5; x.strokeRect(3.5, 3.5, W - 7, LEISTE - 7); x.restore();
+      for (let lx = 30; lx < W; lx += 90) { L.push({ x: lx, y: 6, r: 40, f: "rgba(255,110,40,.12)", fl: 1 }); L.push({ x: lx, y: LEISTE - 6, r: 40, f: "rgba(255,110,40,.12)", fl: 1 }); }
+      for (let ly = 60; ly < LEISTE; ly += 110) { L.push({ x: 6, y: ly, r: 40, f: "rgba(255,110,40,.12)", fl: 1 }); L.push({ x: W - 6, y: ly, r: 40, f: "rgba(255,110,40,.12)", fl: 1 }); }
+    }
     if (F.pilze) deko(22, (px, py) => { if (L.length < 40 && (px * 7 + py) % 3 < 1.4) L.push({ x: px, y: py, r: 30, f: "rgba(196,154,224,.11)" }); const g3 = x.createRadialGradient(px, py, 1, px, py, 12); g3.addColorStop(0, "rgba(196,154,224,.35)"); g3.addColorStop(1, "rgba(196,154,224,0)"); x.fillStyle = g3; kreis(x, px, py, 12); x.fillStyle = "#e8dcd0"; x.fillRect(px - 0.8, py - 1, 1.6, 4); x.fillStyle = "rgba(196,154,224,.85)"; oval(x, px, py - 1.5, 3.5, 2.2); });
     if (F.schienen) { x.strokeStyle = "rgba(138,128,112,.45)"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 60); x.lineTo(W, 120); x.moveTo(0, 67); x.lineTo(W, 127); x.stroke(); x.strokeStyle = "rgba(90,68,48,.6)"; x.lineWidth = 2.5; for (let xx = 0; xx < W; xx += 14) { const yy = 60 + xx * 60 / W; x.beginPath(); x.moveTo(xx, yy - 2); x.lineTo(xx + 1, yy + 9); x.stroke(); } }
     // Weg: Schatten, Grund, Staub, Spurrillen, Randsteine
@@ -2949,7 +3095,7 @@
       versatz(0, (px, py, s0, w) => { if (s0 % 18 > 2.9) return; const seite = Math.floor(s0 / 18) % 2 ? 3 : -3; x.save(); x.translate(px + Math.cos(w + Math.PI / 2) * seite, py + Math.sin(w + Math.PI / 2) * seite); x.rotate(w); x.fillStyle = "rgba(0,0,0,.2)"; oval(x, 0, 0, 2.6, 1.4); oval(x, 3.2, 0, 1.2, 1.1); x.restore(); });
     }
     // Laternen, Kristalle oder Glutbecken am Wegrand – geben dem Weg Licht
-    const k0 = G.k, lat = k0 === "schmiede" ? "kristall" : k0 === "unterreich" ? "pilzkristall" : k0 === "gracklstugh" ? "glut" : "laterne";
+    const k0 = G.k, lat = k0 === "schmiede" ? "kristall" : k0 === "unterreich" ? "pilzkristall" : k0 === "gracklstugh" || k0 === "hort" ? "glut" : "laterne";
     for (let s0 = 70, i = 0; s0 < P.gesamt - 40; s0 += 135, i++) {
       const a = pfadPunkt(P, s0), b = pfadPunkt(P, s0 + 2), w = Math.atan2(b.y - a.y, b.x - a.x), sd = i % 2 ? 1 : -1;
       const lx = a.x + Math.cos(w + Math.PI / 2) * 25 * sd, ly = a.y + Math.sin(w + Math.PI / 2) * 25 * sd;
@@ -3087,6 +3233,10 @@
     ];
     R.dinge.forEach(d => { if (SCHEIN_DING[d.typ]) Q.push({ x: d.x, y: d.y, r: 18 + d.r, f: SCHEIN_DING[d.typ] }); });
     const G = GEB[gebietVon(S.lv)];
+    if (R.regel === "lavastrom") {
+      R.stroeme.forEach(st => { const heiss = st.zustand === "heiss"; for (let lx = 20; lx < W; lx += 60) Q.push({ x: lx, y: st.y, r: heiss ? 70 : 46, f: heiss ? "rgba(255,140,50,.16)" : "rgba(255,110,40,.08)" }); });
+      Q.push({ x: R.berg.x, y: R.berg.y - 24, r: 110, f: "rgba(255,200,90,.12)" });
+    }
     if (G.regel === "dunkel") return; // das Unterreich hat schon seine eigene Dunkelheit
     lichtMalen(x, Q, G.f.wasser ? 0.42 : 0.38, zeit);
   }
@@ -3337,6 +3487,10 @@
     } else if (rs === "muscheln") {
       x.fillStyle = "#e8c8b0"; x.beginPath(); x.moveTo(0, 6); x.lineTo(-8, -2); x.quadraticCurveTo(0, -12, 8, -2); x.closePath(); x.fill();
       x.strokeStyle = "rgba(138,100,64,.6)"; x.lineWidth = 0.8; for (let i = -2; i <= 2; i++) { x.beginPath(); x.moveTo(0, 6); x.lineTo(i * 3.5, -7); x.stroke(); }
+    } else if (rs === "pfeffer") { // Drachenpfeffer: rote Schoten, die von innen glühen
+      x.save(); x.shadowColor = "#ff5a2a"; x.shadowBlur = 8;
+      for (const [ox, w] of [[-3.5, -0.35], [3.5, 0.3]]) { x.save(); x.translate(ox, 0); x.rotate(w); x.fillStyle = "#d8301a"; x.beginPath(); x.moveTo(-2.6, -5); x.quadraticCurveTo(-3, 3, 0, 8); x.quadraticCurveTo(3, 3, 2.6, -5); x.closePath(); x.fill(); x.fillStyle = "rgba(255,200,120,.6)"; oval(x, -0.9, -1, 0.8, 3); x.fillStyle = "#4d6b35"; x.fillRect(-1.4, -7.5, 2.8, 2.6); x.restore(); }
+      x.restore();
     } else { // Feuermoos
       x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 10;
       for (let i = 0; i < 6; i++) { x.fillStyle = i % 2 ? "#ff8a3a" : "#e0602a"; kreis(x, Math.cos(i) * 5, Math.sin(i * 1.3) * 4, 4); }
@@ -3371,6 +3525,11 @@
       x.fillStyle = "#e8c8b0"; x.beginPath(); x.moveTo(-r, r * 0.3); x.quadraticCurveTo(0, -r * 1.3, r, r * 0.3); x.closePath(); x.fill();
       const pg = x.createRadialGradient(-3, -3, 1, 0, 0, r * 0.6); pg.addColorStop(0, "#ffffff"); pg.addColorStop(1, "#c8c0d8");
       x.fillStyle = pg; kreis(x, 0, 0, r * 0.55);
+    } else if (art === "drachenmuenze") { // faustgroße Goldmünze mit Drachenkopf – das Abzeichen der Grauen Geister
+      kreis(x, 0, 0, r * 0.95);
+      x.shadowBlur = 0; x.strokeStyle = "#a8701e"; x.lineWidth = 1.4; x.beginPath(); x.arc(0, 0, r * 0.78, 0, Math.PI * 2); x.stroke();
+      x.fillStyle = "#a8701e"; x.beginPath(); x.moveTo(-r * 0.45, r * 0.15); x.quadraticCurveTo(-r * 0.2, -r * 0.45, r * 0.25, -r * 0.35); x.lineTo(r * 0.5, -r * 0.6); x.lineTo(r * 0.38, -r * 0.2); x.lineTo(r * 0.55, r * 0.05); x.quadraticCurveTo(r * 0.1, r * 0.05, -r * 0.05, r * 0.45); x.closePath(); x.fill();
+      x.fillStyle = "#c4564a"; kreis(x, r * 0.15, -r * 0.2, 1.3);
     }
     x.restore();
   }
@@ -3385,6 +3544,15 @@
       const f = Math.sin(zeit * 16) * 5;
       x.fillStyle = "#2a2632"; x.beginPath(); x.moveTo(0, 0); x.lineTo(-14, -4 - f); x.lineTo(-10, 2); x.lineTo(-6, 0); x.lineTo(0, 4); x.lineTo(6, 0); x.lineTo(10, 2); x.lineTo(14, -4 - f); x.closePath(); x.fill();
       oval(x, 0, 1, 3.5, 4.5); x.fillStyle = "#e0a046"; kreis(x, -1.3, 0, 0.8); kreis(x, 1.3, 0, 0.8);
+    } else if (art === "salamander") {
+      const w = Math.sin(zeit * 10) * 2;
+      x.save(); x.shadowColor = "#ff6a2a"; x.shadowBlur = 6;
+      x.strokeStyle = "#e0602a"; x.lineWidth = 3; x.lineCap = "round"; x.beginPath(); x.moveTo(4, 0); x.quadraticCurveTo(10, w, 15, -w); x.stroke();
+      x.fillStyle = "#e0602a"; oval(x, -1, 0, 7, 3.6); oval(x, -8, -0.5, 3.6, 3);
+      x.fillStyle = "#c4361a"; for (const [lx, ly] of [[-4, -4], [-4, 4], [3, -4], [3, 4]]) oval(x, lx + (ly > 0 ? w : -w) * 0.3, ly, 1.6, 1.2);
+      x.restore();
+      x.fillStyle = "#ffd34d"; kreis(x, -3, -1, 1); kreis(x, 1, 0.5, 1);
+      x.fillStyle = "#1a1210"; kreis(x, -9.5, -1.5, 0.9);
     } else { // Fisch
       x.fillStyle = "#4aa0b0"; oval(x, 0, 0, 10, 5);
       x.beginPath(); x.moveTo(8, 0); x.lineTo(15, -5 + Math.sin(zeit * 10) * 2); x.lineTo(15, 5 + Math.sin(zeit * 10) * 2); x.fill();
@@ -3405,6 +3573,9 @@
       for (let i = 0; i < 5; i++) x.lineTo(-12 + i * 6, Math.sin(zeit * 8 + i) * 3); x.stroke();
       x.fillStyle = "#f3e27a"; kreis(x, -12, -1, 1.2);
       x.restore();
+    } else if (d.art === "rauch") { // Rauchschwade mit Glutfunken
+      for (let i = 0; i < 4; i++) { const w = zeit * 1.5 + i * 1.7; x.fillStyle = "rgba(" + (40 + i * 8) + "," + (34 + i * 6) + "," + (32 + i * 6) + ",.72)"; kreis(x, Math.cos(w) * 4 + (i - 1.5) * 4, Math.sin(w * 1.3) * 3 - i, 7 - i * 0.6); }
+      x.fillStyle = "rgba(255," + Math.round(120 + Math.sin(zeit * 9) * 60) + ",40,.9)"; kreis(x, -3, -1, 1.3); kreis(x, 3.5, 1, 1.1); kreis(x, Math.sin(zeit * 4) * 4, -7 - (zeit * 8 % 6), 0.9);
     } else { // Wespe
       const f = Math.sin(zeit * 40) * 3;
       x.fillStyle = "rgba(235,226,204,.5)"; oval(x, -2, -6 - f * 0.3, 4, 6, -0.5); oval(x, 3, -6 + f * 0.3, 4, 6, 0.5);
@@ -3471,7 +3642,7 @@
     e.lx = e.x; e.ly = e.y;
     if (!MEDAILLONS[e.typ]) {
       x.save(); if (e.hw != null) x.rotate(e.hw + Math.PI / 2);
-      const krabbler = e.typ === "spinne" || e.typ === "ettercap" || e.typ === "blight" || e.flug;
+      const krabbler = e.typ === "spinne" || e.typ === "ettercap" || e.typ === "blight" || e.typ === "glutkaefer" || e.flug;
       if (!krabbler) { const sw = Math.sin(zeit * 13 + e.ph) * r * 0.38 * (e.festT > 0 || e.halt ? 0 : 1); x.fillStyle = "rgba(18,12,8,.85)"; oval(x, -r * 0.45, sw, r * 0.24, r * 0.32); oval(x, r * 0.45, -sw, r * 0.24, r * 0.32); }
       x.scale(1.12, 1.12);
       x.fillStyle = "rgba(8,6,4,.55)"; kreis(x, 0, 0.6, r + 1.4);
@@ -3517,7 +3688,7 @@
     if (e.schild > 0) { x.fillStyle = "rgba(0,0,0,.6)"; x.fillRect(e.x - b / 2 - 1, y - 4, b + 2, 3); x.fillStyle = "#e0a046"; x.fillRect(e.x - b / 2, y - 3.5, b * klemm(e.schild / e.schildMax, 0, 1), 2); }
   }
   function malFigur(x, typ, r, d, zeit, e) {
-    const k = { goblin: 0, rotrobe: 1, bandit: 1, bugbear: 2, soeldner: 3, zombie: 4, blight: 5, spinne: 6, drow: 7, ettercap: 8, chasme: 9, kuotoa: 10, duergar: 11, anfuehrer: 0, glasstab: 1, nezna: 7 }[typ];
+    const k = { goblin: 0, rotrobe: 1, bandit: 1, bugbear: 2, soeldner: 3, zombie: 4, blight: 5, spinne: 6, drow: 7, ettercap: 8, chasme: 9, kuotoa: 10, duergar: 11, graugeist: 12, glutkaefer: 13, flammenwahrer: 14, anfuehrer: 0, glasstab: 1, nezna: 7, drokey: 12 }[typ];
     const f = d.farbe;
     if (k === 6 || k === 8) { // Spinne / Ettercap
       x.strokeStyle = "#1a1416"; x.lineWidth = 1.6;
@@ -3533,6 +3704,16 @@
       x.strokeStyle = "#1a1416"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(0, -r * 0.3); x.lineTo(0, r * 0.2); x.stroke();
       return;
     }
+    if (k === 13) { // Glutkäfer: Panzer mit glühenden Drüsen
+      x.strokeStyle = "#2a120a"; x.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) { const w = Math.sin(zeit * 14 + i * 2) * 2; for (const s2 of [-1, 1]) { x.beginPath(); x.moveTo(s2 * r * 0.4, -r * 0.3 + i * r * 0.4); x.lineTo(s2 * (r + 2), -r * 0.5 + i * r * 0.5 + w * s2); x.stroke(); } }
+      x.fillStyle = f; oval(x, 0, r * 0.15, r * 0.7, r * 0.85);
+      x.strokeStyle = "rgba(0,0,0,.45)"; x.lineWidth = 1; x.beginPath(); x.moveTo(0, -r * 0.3); x.lineTo(0, r); x.stroke();
+      x.fillStyle = "#3a1a10"; oval(x, 0, -r * 0.75, r * 0.45, r * 0.3);
+      x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 8; x.fillStyle = "rgba(255," + Math.round(150 + Math.sin(zeit * 6) * 60) + ",60,.95)";
+      kreis(x, -r * 0.3, -r * 0.75, 1.6); kreis(x, r * 0.3, -r * 0.75, 1.6); kreis(x, 0, r * 0.55, 1.8); x.restore();
+      return;
+    }
     if (k === 5) { // Blight: Wurzelknäuel
       x.strokeStyle = f; x.lineWidth = 2.2; x.lineCap = "round";
       for (let i = 0; i < 6; i++) { const w = i / 6 * Math.PI * 2 + Math.sin(zeit * 6) * 0.2; x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(w) * r * 1.2, Math.sin(w) * r * 1.2); x.stroke(); }
@@ -3542,7 +3723,7 @@
     // humanoide Gestalten von oben: Schultern, Kopf, Merkmal
     x.fillStyle = "rgba(0,0,0,.25)"; kreis(x, 0, 1, r);
     x.fillStyle = f; oval(x, 0, 2, r, r * 0.75);
-    const kopf = { 0: "#7d8f43", 1: "#2a2622", 2: "#8a6a3a", 3: "#9a9fa6", 4: "#7a8a6a", 7: "#e8e2f0", 10: "#4aa0a0", 11: "#8a8480" }[k] || "#c9a88a";
+    const kopf = { 0: "#7d8f43", 1: "#2a2622", 2: "#8a6a3a", 3: "#9a9fa6", 4: "#7a8a6a", 7: "#e8e2f0", 10: "#4aa0a0", 11: "#8a8480", 12: "#3c3c46", 14: "#8a8480" }[k] || "#c9a88a";
     x.fillStyle = kopf; kreis(x, 0, -r * 0.25, r * 0.55);
     if (k === 0) { x.fillStyle = "#6b7d3e"; x.beginPath(); x.moveTo(-r * 0.45, -r * 0.4); x.lineTo(-r * 1.15, -r * 0.8); x.lineTo(-r * 0.35, -r * 0.1); x.fill(); x.beginPath(); x.moveTo(r * 0.45, -r * 0.4); x.lineTo(r * 1.15, -r * 0.8); x.lineTo(r * 0.35, -r * 0.1); x.fill(); x.fillStyle = "#ffd34d"; kreis(x, -1.8, -r * 0.35, 1); kreis(x, 1.8, -r * 0.35, 1); }
     if (k === 1) { x.fillStyle = typ === "bandit" ? "#3a2d20" : "#7a2f26"; kreis(x, 0, -r * 0.3, r * 0.58); x.fillStyle = "#c9a88a"; oval(x, 0, -r * 0.05, r * 0.3, r * 0.2); }
@@ -3558,6 +3739,23 @@
       x.fillStyle = "#ebe2cc"; kreis(x, -r * 0.35, -r * 0.35, 2.4); kreis(x, r * 0.35, -r * 0.35, 2.4); x.fillStyle = "#1a1210"; kreis(x, -r * 0.35, -r * 0.4, 1.1); kreis(x, r * 0.35, -r * 0.4, 1.1);
     }
     if (k === 11) { x.strokeStyle = "#3a3634"; x.lineWidth = 2; x.beginPath(); x.arc(0, -r * 0.25, r * 0.58, Math.PI * 0.95, Math.PI * 2.05); x.stroke(); x.fillStyle = "#4a4440"; x.beginPath(); x.moveTo(-r * 0.4, -r * 0.05); x.lineTo(0, r * 0.6); x.lineTo(r * 0.4, -r * 0.05); x.fill(); x.fillStyle = "#b8b0a8"; x.fillRect(-r * 0.95, -r * 0.2, 2, r * 1.1); }
+    if (k === 12) { // Grauer Geist: Kapuze, Tuch vor dem Gesicht, Dolch
+      x.fillStyle = "#2a2a32"; x.beginPath(); x.moveTo(-r * 0.55, -r * 0.1); x.quadraticCurveTo(0, -r * 1.25, r * 0.55, -r * 0.1); x.quadraticCurveTo(0, -r * 0.45, -r * 0.55, -r * 0.1); x.fill();
+      x.fillStyle = "#c9c4bc"; kreis(x, -r * 0.2, -r * 0.3, 0.9); kreis(x, r * 0.2, -r * 0.3, 0.9);
+      x.strokeStyle = "#c8c8d0"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(r * 0.8, r * 0.3); x.lineTo(r * 1.1, -r * 0.6); x.stroke();
+    }
+    if (k === 14) { // Bewahrer der Flamme: rote Robe, Kapuze, Flammenschale
+      x.fillStyle = "#6a1a10"; kreis(x, 0, -r * 0.28, r * 0.6); x.fillStyle = "#8a8480"; oval(x, 0, -r * 0.02, r * 0.3, r * 0.22);
+      x.fillStyle = "#3a3634"; x.fillRect(r * 0.6, -r * 0.2, 3, 3);
+      x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 10; x.fillStyle = "rgba(255," + Math.round(140 + Math.sin(zeit * 11) * 50) + ",50,.95)";
+      x.beginPath(); x.moveTo(r * 0.55, -r * 0.2); x.quadraticCurveTo(r * 0.75, -r * 0.9, r * 0.95 + Math.sin(zeit * 13) * 1.2, -r * 1.2); x.quadraticCurveTo(r * 1.05, -r * 0.7, r * 1.15, -r * 0.2); x.fill(); x.restore();
+    }
+    if (typ === "drokey") { // die Diebesmarke: faustgroße Goldmünze mit Drachenkopf
+      x.save(); x.shadowColor = "#ffd34d"; x.shadowBlur = 10; x.fillStyle = "#ffd34d"; kreis(x, 0, r * 0.42, r * 0.42); x.restore();
+      x.strokeStyle = "#a8701e"; x.lineWidth = 1; x.beginPath(); x.arc(0, r * 0.42, r * 0.32, 0, Math.PI * 2); x.stroke();
+      x.fillStyle = "#a8701e"; x.beginPath(); x.moveTo(-r * 0.2, r * 0.55); x.quadraticCurveTo(-r * 0.1, r * 0.2, r * 0.12, r * 0.25); x.lineTo(r * 0.24, r * 0.12); x.lineTo(r * 0.2, r * 0.36); x.quadraticCurveTo(0, r * 0.4, -r * 0.05, r * 0.6); x.closePath(); x.fill();
+      x.strokeStyle = "#c8c8d0"; x.lineWidth = 1.6; x.beginPath(); x.moveTo(-r * 0.8, r * 0.3); x.lineTo(-r * 1.1, -r * 0.6); x.stroke();
+    }
     if (typ === "anfuehrer") { x.fillStyle = "#ffd34d"; x.beginPath(); x.moveTo(-5, -r * 0.7); x.lineTo(-5, -r * 1.05); x.lineTo(-2, -r * 0.85); x.lineTo(0, -r * 1.15); x.lineTo(2, -r * 0.85); x.lineTo(5, -r * 1.05); x.lineTo(5, -r * 0.7); x.fill(); }
     if (typ === "glasstab") { x.save(); x.shadowColor = "#9fd6ec"; x.shadowBlur = 8; x.strokeStyle = "#cfeaf4"; x.lineWidth = 2.5; x.beginPath(); x.moveTo(r * 0.8, r * 0.6); x.lineTo(r * 1.1, -r * 1.1); x.stroke(); x.restore(); }
     if (typ === "nezna") { x.save(); x.shadowColor = "#8a6ad0"; x.shadowBlur = 10; x.strokeStyle = "rgba(196,154,224,.7)"; x.lineWidth = 1.5; x.beginPath(); x.arc(0, 0, r + 3, 0, Math.PI * 2); x.stroke(); x.restore(); }
@@ -5006,7 +5204,8 @@
   function tagSaat(datum) { let h = 2166136261; for (let i = 0; i < datum.length; i++) { h ^= datum.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) % 2147483645 + 1; }
   function tagInfo(datum) {
     const rng = lcg(tagSaat(datum)); rng(); rng();
-    const lv = 6 + Math.floor(rng() * (KAMPAGNE - 6));
+    /* Bis heute galt die Kampagne mit 24 Leveln – so bleibt die Aufgabe eines Tages für alle gleich */
+    const lv = 6 + Math.floor(rng() * ((datum < "2026-10-27" ? 24 : KAMPAGNE) - 6));
     const ln = launenFuer(lv), laune = ln[Math.floor(rng() * ln.length)];
     const ko = KLEINODE_REIHE.slice(), kl = [];
     for (let i = 0; i < 2; i++) kl.push(ko.splice(Math.floor(rng() * ko.length), 1)[0]);
