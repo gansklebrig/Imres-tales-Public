@@ -71,9 +71,9 @@
   const GEHALTEN = { fidel: 1, drehleier: 1, schalmei: 1, dudelsack: 1, illusion: 1, akkordeon: 1 };
   /* Die Instrumente der übrigen Band */
   const BAND = {
-    trommel: ["trommel", "pauke", "bodhran", "tamburin", "stoecke", "taiko"],
+    trommel: ["trommel", "pauke", "bodhran", "tamburin", "stoecke", "taiko", "marsch"],
     floete: ["floete", "panfloete", "okarina", "gesang", "horn", "klarinette", "oboe", "blockfloete", "piccolo", "pfeife", "shakuhachi", "englischhorn", "oohchor", "bratsche"],
-    ketten: ["ketten", "klatschen", "schnipsen", "rassel", "stampfen", "loeffel", "krug", "rahmentrommel", "kriegstrommel"]
+    ketten: ["ketten", "klatschen", "schnipsen", "rassel", "stampfen", "loeffel", "krug", "rahmentrommel", "kriegstrommel", "schellen"]
   };
   /* Hallräume: Nachhallzeit, Abklingkurve, Vorverzögerung, Helligkeit und frühe Reflexionen der Wände */
   const RAEUME = {
@@ -104,11 +104,13 @@
   const KLASSIKER = ["zirkus", "trauermarsch", "toccata", "zarathustra", "bergkoenig", "walkuere", "galopp", "hochzeit",
     "elise", "nachtmusik", "freude", "diesirae", "wiegenlied", "morgen", "zapfenstreich", "angriff", "kanon", "fruehling", "turca"];
   const COVER_LISTE = ["matrose", "washerwoman", "swallowtail", "morrison", "drowsymaggie", "cooley", "scarborough", "greensleeves", "folia", "korobeiniki", "amazinggrace", "bruderjakob", "sakura", "auldlangsyne", "shchedryk"];
-  const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE, KLASSIKER, COVER_LISTE);
+  /* Klänge der Welt: Unterwegs, Tiere, Belagerung, Handwerk, Abenteuer, Unheimliches – alles echte Aufnahmen */
+  const WELT_FX = ["kutsche", "anhalten", "wiehern", "hufschlag", "gruss", "dorfvolk", "zank", "rauferei", "hund", "katze", "kuh", "schaf", "huhn", "schwein", "eule", "wolf", "kraehe", "frosch", "moewe", "specht", "wal", "loewe", "elefant", "pfau", "pfeilhagel", "schwertkampf", "rammbock", "katapult", "balliste", "einsturz", "burgtor", "saege", "zimmern", "schmied", "bergbau", "holzhacken", "baumfall", "truhe", "schluessel", "schloss", "falle", "glas", "ruestung", "edelstein", "buch", "dolch", "holzbruch", "riesenschritte", "troll", "untot", "schatten", "schleim", "glocke", "gong", "kette"];
+  const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE, KLASSIKER, COVER_LISTE, WELT_FX);
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
-    trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢", taiko: "🥁" },
-    ketten: { ketten: "⛓", klatschen: "👏", schnipsen: "👌", rassel: "🥚", stampfen: "🦶", loeffel: "🥄", krug: "🍺", rahmentrommel: "🪘", kriegstrommel: "🥁" }
+    trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢", taiko: "🥁", marsch: "🥁" },
+    ketten: { ketten: "⛓", klatschen: "👏", schnipsen: "👌", rassel: "🥚", stampfen: "🦶", loeffel: "🥄", krug: "🍺", rahmentrommel: "🪘", kriegstrommel: "🥁", schellen: "🔔" }
   };
 
   /* ---------- Texte ---------- */
@@ -123,10 +125,10 @@
       rexZeilen: ["Wuff", "Heulen", "Knurren"], rexLaut: ["Wuff!", "Auuuuu!", "Grrrr …"],
       instrument: "Instrument", instrumente: { laute: "Laute", harfe: "Harfe", mandoline: "Mandoline", fidel: "Fidel", drehleier: "Drehleier", schalmei: "Schalmei", dudelsack: "Dudelsack", glocken: "Glockenspiel", illusion: "Flöte der Illusionen", hackbrett: "Hackbrett", cembalo: "Cembalo", akkordeon: "Akkordeon", sitar: "Sitar" },
       band: {
-        trommel: { trommel: "Landsknechttrommel", pauke: "Kesselpauke", bodhran: "Bodhrán", tamburin: "Schellentrommel", stoecke: "Holzstöcke", taiko: "Taiko-Trommel" },
+        trommel: { trommel: "Landsknechttrommel", pauke: "Kesselpauke", bodhran: "Bodhrán", tamburin: "Schellentrommel", stoecke: "Holzstöcke", taiko: "Taiko-Trommel", marsch: "Marschtrommel" },
         floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn", klarinette: "Klarinette", oboe: "Oboe",
           blockfloete: "Blockflöte", piccolo: "Piccoloflöte", pfeife: "Blechpfeife", shakuhachi: "Shakuhachi", englischhorn: "Englischhorn", oohchor: "Chor", bratsche: "Bratsche" },
-        ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch", rahmentrommel: "Rahmentrommel", kriegstrommel: "Kriegstrommeln" }
+        ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch", rahmentrommel: "Rahmentrommel", kriegstrommel: "Kriegstrommeln" , schellen: "Schlittenschellen" }
       },
       alleSpuren: "Alle", schritte: "Schritte",
       teil: "Teil bearbeiten", ablauf: "Ablauf", rolleVon: p => "Rolle von " + p, pattern: "Pattern", kette: "Kette",
@@ -185,8 +187,8 @@
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
       zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren).", zusDrin: "steckt schon in der Kulisse", zusAlleAus: "Alle Zusätze abschalten", zusAlleAusKurz: "Alle aus", zusAlleWeg: "Alle Zusätze aus", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
       kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %",
-      stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente & Klassik",
-      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
+      stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente, Welt & Klassik",
+      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabWelt: "🐴 Welt", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       stimmSpeichern: "💾 Stimmung speichern", stimmNeu: "⭐ Als neue Stimmung", stimmUeber: n => "✎ „" + n + "“ überschreiben", stimmZurueck: "↺ Original wiederherstellen",
@@ -210,10 +212,10 @@
       rexZeilen: ["Woof", "Howl", "Growl"], rexLaut: ["Woof!", "Awooooo!", "Grrrr …"],
       instrument: "Instrument", instrumente: { laute: "Lute", harfe: "Harp", mandoline: "Mandolin", fidel: "Fiddle", drehleier: "Hurdy-gurdy", schalmei: "Shawm", dudelsack: "Bagpipes", glocken: "Glockenspiel", illusion: "Flute of Illusions", hackbrett: "Hammered dulcimer", cembalo: "Harpsichord", akkordeon: "Accordion", sitar: "Sitar" },
       band: {
-        trommel: { trommel: "Field drum", pauke: "Kettledrum", bodhran: "Bodhrán", tamburin: "Tambourine", stoecke: "Wooden sticks", taiko: "Taiko drum" },
+        trommel: { trommel: "Field drum", pauke: "Kettledrum", bodhran: "Bodhrán", tamburin: "Tambourine", stoecke: "Wooden sticks", taiko: "Taiko drum", marsch: "Marching drum" },
         floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn", klarinette: "Clarinet", oboe: "Oboe",
           blockfloete: "Recorder", piccolo: "Piccolo", pfeife: "Tin whistle", shakuhachi: "Shakuhachi", englischhorn: "Cor anglais", oohchor: "Choir", bratsche: "Viola" },
-        ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table", rahmentrommel: "Frame drum", kriegstrommel: "War drums" }
+        ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table", rahmentrommel: "Frame drum", kriegstrommel: "War drums" , schellen: "Sleigh bells" }
       },
       alleSpuren: "All", schritte: "Steps",
       teil: "Edit part", ablauf: "Order", rolleVon: p => "Role of " + p, pattern: "Pattern", kette: "Chain",
@@ -272,8 +274,8 @@
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
       zusaetze: "Extras", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover).", zusDrin: "already part of the backdrop", zusAlleAus: "Switch off all extras", zusAlleAusKurz: "All off", zusAlleWeg: "All extras off", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
       kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %",
-      stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments & classics",
-      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
+      stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments, world & classics",
+      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabWelt: "🐴 World", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       stimmSpeichern: "💾 Save mood", stimmNeu: "⭐ As new mood", stimmUeber: n => "✎ Overwrite “" + n + "”", stimmZurueck: "↺ Restore original",
@@ -521,7 +523,7 @@
       bass: ["puls"], rhythmus: [[0, 4], [0, 6], [4]], lage: 5, dichte: .45, echo: "fern", schraeg: .25,
       klopf: [[]], schelle: [[]], trommel: [[0, 2], [0, 2, 8, 10]], ketten: [[0, 4, 8, 12]], rex: [2] },
     sieg: { hebung: 1, fanfare: 1, zier: "triller", terzen: 1, modus: ["ionisch", "mixolydisch"], tempo: [112, 124], transpose: [0, 2], swing: 0, bordun: 1, variation: 3,
-      instrument: ["laute", "dudelsack", "mandoline", "akkordeon"], band: { trommel: ["tamburin", "trommel", "pauke"], floete: ["horn", "floete", "piccolo", "pfeife"], ketten: ["klatschen", "stampfen", "krug"] },
+      instrument: ["laute", "dudelsack", "mandoline", "akkordeon"], band: { trommel: ["tamburin", "trommel", "pauke", "marsch"], floete: ["horn", "floete", "piccolo", "pfeife"], ketten: ["klatschen", "stampfen", "krug"] },
       ablauf: ["AABBCB", "AABBCD", "ABACAD"], akkorde: [[0, 2, 3, 0], [0, 5, 2, 3], [0, 6, 3, 0], [0, 4, 2, 0], [0, 2, 0, 3]],
       bass: ["viertel", "puls"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 4, 6], [0, 2, 3, 4]], lage: 4, dichte: 1, echo: "lang",
       klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [0, 2, 4, 6, 8, 10, 12, 14]], trommel: [[0, 4, 6, 8, 12, 14], [0, 2, 4, 6, 8, 10, 12, 13, 14, 15]],
@@ -534,7 +536,7 @@
     /* ---- Klangwelten: Volksmusik und Fantasy-Stile (eigene Melodien, nur der Charakter erinnert) ---- */
     /* grünes Hügelland: Dur, hüpfend, Flöte antwortet */
     auenland: { dreier: "jig", zier: "triller", terzen: 1, modus: ["ionisch"], tempo: [104, 112], transpose: [0, 2, -3], swing: 1, bordun: 1, variation: 3,
-      instrument: ["fidel", "harfe", "mandoline", "hackbrett", "akkordeon"], band: { trommel: ["bodhran", "tamburin"], floete: ["pfeife", "floete", "klarinette", "blockfloete", "panfloete"], ketten: ["klatschen", "loeffel", "schnipsen"] },
+      instrument: ["fidel", "harfe", "mandoline", "hackbrett", "akkordeon"], band: { trommel: ["bodhran", "tamburin"], floete: ["pfeife", "floete", "klarinette", "blockfloete", "panfloete"], ketten: ["klatschen", "loeffel", "schnipsen", "schellen"] },
       ablauf: ["AABA", "AABBCD", "ABACAD"], akkorde: [[0, 2, 3, 0], [0, 5, 2, 3], [0, 3, 5, 2], [0, 1, 2, 3], [0, 6, 3, 0], [0, 2, 0, 3]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 3, 4, 6, 7], [0, 2, 4, 5, 6]], lage: 4, dichte: .9, echo: "antwort",
       klopf: [[0, 8], [0, 6, 8, 14]], schelle: [[], [4, 12]], trommel: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
@@ -552,13 +554,13 @@
       klopf: [[0, 8]], schelle: [[]], trommel: [[0, 3, 6, 8, 11, 14], [0, 8]], ketten: [[0, 3, 6, 8, 11, 14], [3, 11]], rex: [0, 2] },
     /* Reiter über die Ebene: galoppierend, heroisch, Horn und Fidel */
     reiter: { fanfare: 1, gefuehl: "halb", zier: "triller", terzen: 1, modus: ["aeolisch", "dorisch"], tempo: [116, 126], transpose: [0, -2, 2], swing: 0, bordun: 1, variation: 3,
-      instrument: ["fidel", "dudelsack", "drehleier", "mandoline"], band: { trommel: ["taiko", "trommel", "bodhran"], floete: ["horn", "floete", "oohchor"], ketten: ["stampfen", "rassel", "kriegstrommel"] },
+      instrument: ["fidel", "dudelsack", "drehleier", "mandoline"], band: { trommel: ["taiko", "trommel", "bodhran", "marsch"], floete: ["horn", "floete", "oohchor"], ketten: ["stampfen", "rassel", "kriegstrommel"] },
       ablauf: ["AABACA", "AABCDD", "ABACAD"], akkorde: [[0, 5, 4, 0], [0, 5, 1, 4], [0, 4, 5, 4], [0, 4, 2, 0], [0, 1, 4, 0], [0, 2, 4, 0]],
       bass: ["galopp"], rhythmus: [[0, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 3, 4, 6]], lage: 4, dichte: .95, echo: "lang",
       klopf: [[0, 8]], schelle: [[]], trommel: [[0, 3, 4, 8, 11, 12], [0, 2, 3, 4, 8, 10, 11, 12]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0] },
     /* Volkstanz auf dem Dorfplatz: flott, Fiedel, Klatschen und Stampfen */
     dorffest: { hebung: 1, zier: "triller", terzen: 1, modus: ["mixolydisch"], tempo: [120, 130], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 3,
-      instrument: ["fidel", "dudelsack", "drehleier", "akkordeon", "hackbrett"], band: { trommel: ["bodhran", "tamburin", "stoecke"], floete: ["floete", "pfeife", "blockfloete", "piccolo"], ketten: ["klatschen", "stampfen", "krug"] },
+      instrument: ["fidel", "dudelsack", "drehleier", "akkordeon", "hackbrett"], band: { trommel: ["bodhran", "tamburin", "stoecke"], floete: ["floete", "pfeife", "blockfloete", "piccolo"], ketten: ["klatschen", "stampfen", "krug", "schellen"] },
       ablauf: ["AABBCB", "AABBCD", "ABABCD"], akkorde: [[0, 4, 2, 0], [0, 2, 4, 0], [0, 5, 2, 4], [0, 2, 0, 4], [0, 6, 4, 0]],
       bass: ["viertel", "puls"], rhythmus: [[0, 1, 2, 3, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 2, 4, 5, 6]], lage: 4, dichte: 1, echo: "antwort",
       klopf: [[0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [4, 12]], trommel: [[0, 4, 6, 8, 12, 14], [0, 2, 4, 6, 8, 10, 12, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0, 1] },
@@ -570,7 +572,7 @@
       klopf: [[], [0, 8]], schelle: [[]], trommel: [[], [0]], ketten: [[]], rex: [2] },
     /* Seemannslied: wiegend, die Mannschaft antwortet, Krüge auf dem Tisch */
     shanty: { dreier: "jig", zier: "triller", terzen: 1, modus: ["dorisch", "aeolisch"], tempo: [92, 100], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 3,
-      instrument: ["mandoline", "laute", "drehleier", "akkordeon"], band: { trommel: ["trommel", "bodhran"], floete: ["gesang", "horn", "klarinette", "pfeife", "oohchor"], ketten: ["krug", "stampfen", "klatschen"] },
+      instrument: ["mandoline", "laute", "drehleier", "akkordeon"], band: { trommel: ["trommel", "bodhran"], floete: ["gesang", "horn", "klarinette", "pfeife", "oohchor"], ketten: ["krug", "stampfen", "klatschen", "schellen"] },
       ablauf: ["AABACA", "ABABCB", "AABBCD"], akkorde: [[0, 4, 0, 3], [0, 1, 4, 0], [0, 2, 4, 0], [0, 5, 4, 0], [0, 5, 1, 4]],
       bass: ["viertel"], rhythmus: [[0, 2, 4, 6], [0, 3, 4, 6], [0, 2, 3, 4]], lage: 3, dichte: .85, echo: "antwort",
       klopf: [[0, 8]], schelle: [[]], trommel: [[0, 8], [0, 6, 8]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0] },
@@ -595,7 +597,7 @@
       klopf: [[0, 8]], schelle: [[4, 12], [2, 6, 10, 14]], trommel: [[0, 6, 8, 14], [0, 4, 8, 12]], ketten: [[2, 6, 10, 14], [4, 12]], rex: [0] },
     /* Königshof: feierlich, höfisch, Fanfaren */
     hof: { dreier: "walzer", zier: "vorhalt", terzen: 1, modus: ["ionisch"], tempo: [80, 90], transpose: [0, 2, -2], swing: 0, bordun: 0, variation: 2,
-      instrument: ["harfe", "laute", "fidel", "cembalo"], band: { trommel: ["pauke", "trommel"], floete: ["horn", "floete", "oboe", "blockfloete", "bratsche"], ketten: ["schnipsen"] },
+      instrument: ["harfe", "laute", "fidel", "cembalo"], band: { trommel: ["pauke", "trommel", "marsch"], floete: ["horn", "floete", "oboe", "blockfloete", "bratsche"], ketten: ["schnipsen"] },
       ablauf: ["AABACA", "AABBCD", "ABACAD"], akkorde: [[0, 6, 3, 0], [0, 2, 3, 0], [0, 5, 6, 3], [0, 1, 2, 3], [0, 3, 5, 2]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 4, 6], [0, 2, 4, 6], [0, 3, 4]], lage: 4, dichte: .75, echo: "lang",
       klopf: [[]], schelle: [[]], trommel: [[0, 8], [0, 6, 8]], ketten: [[]], rex: [2] },
@@ -607,7 +609,7 @@
       klopf: [[]], schelle: [[]], trommel: [[0], [0, 10]], ketten: [[7], [5, 13], []], rex: [1, 2] },
     /* Feenwald: verspielt, glitzernd, Schabernack */
     fey: { zier: "triller", terzen: 1, modus: ["lydisch", "ionisch"], tempo: [108, 118], transpose: [0, 2, 5], swing: 1, bordun: 0, variation: 3,
-      instrument: ["harfe", "glocken", "mandoline", "hackbrett"], band: { trommel: ["tamburin", "bodhran"], floete: ["panfloete", "floete", "piccolo", "blockfloete", "okarina"], ketten: ["schnipsen", "rassel"] },
+      instrument: ["harfe", "glocken", "mandoline", "hackbrett"], band: { trommel: ["tamburin", "bodhran"], floete: ["panfloete", "floete", "piccolo", "blockfloete", "okarina"], ketten: ["schnipsen", "rassel", "schellen"] },
       ablauf: ["AABACA", "ABAC", "AABBCD"], akkorde: [[0, 6, 0, 6], [0, 6, 5, 3], [0, 1, 5, 3], [0, 5, 6, 3], [0, 3, 5, 6]],
       bass: ["viertel", "halbe"], rhythmus: [[0, 1, 2, 4, 6], [0, 2, 3, 4, 6, 7], [0, 1, 3, 4, 6]], lage: 5, dichte: .9, echo: "antwort",
       klopf: [[]], schelle: [[2, 6, 10, 14], [0, 4, 8, 12]], trommel: [[0, 8], [0, 6, 8, 14]], ketten: [[4, 12], [2, 6, 10, 14]], rex: [0] },
@@ -623,13 +625,13 @@
     /* ---- Lieder mit ganzer Form (Strophe, Refrain, Schlussrefrain) ---- */
     /* Heldenlied: eine Hymne auf die Gefährten – breiter Refrain zum Mitsingen, Hörner, am Ende einen Ganzton höher */
     heldenlied: { hebung: 1, gefuehl: 1, form: "hymne", zier: "triller", terzen: 1, modus: ["ionisch", "mixolydisch"], tempo: [80, 92], transpose: [0, 2, -3], swing: 0, bordun: 1, variation: 2,
-      instrument: ["fidel", "laute", "harfe", "dudelsack"], band: { trommel: ["pauke", "taiko", "trommel"], floete: ["horn", "oohchor", "gesang", "floete"], ketten: ["stampfen", "klatschen", "kriegstrommel"] },
+      instrument: ["fidel", "laute", "harfe", "dudelsack"], band: { trommel: ["pauke", "taiko", "trommel", "marsch"], floete: ["horn", "oohchor", "gesang", "floete"], ketten: ["stampfen", "klatschen", "kriegstrommel"] },
       ablauf: ["AABACA"], akkorde: [[0, 4, 5, 3], [0, 5, 2, 3], [0, 2, 5, 3], [0, 3, 5, 2], [0, 6, 2, 3], [0, 4, 2, 3]],
       bass: ["viertel", "puls"], rhythmus: [[0, 2, 4, 6], [0, 3, 4, 6], [0, 2, 3, 4, 6], [0, 4, 6]], lage: 3, dichte: .9, echo: "lang",
       klopf: [[0, 8], [0, 4, 8, 12]], schelle: [[], [4, 12]], trommel: [[0, 8], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [4, 12]], rex: [0, 1] },
     /* Trinklied: Krüge hoch! Stampfen, Klatschen und ein Refrain, den nach dem dritten Krug jeder mitsingt */
     trinklied: { hebung: 1, form: "tanz", dreier: "jig", zier: "triller", terzen: 1, modus: ["mixolydisch", "ionisch"], tempo: [108, 118], transpose: [0, 2, -3], swing: 1, bordun: 1, variation: 3,
-      instrument: ["fidel", "laute", "dudelsack", "mandoline", "akkordeon"], band: { trommel: ["bodhran", "tamburin"], floete: ["gesang", "floete", "pfeife", "klarinette"], ketten: ["krug", "stampfen", "klatschen", "loeffel"] },
+      instrument: ["fidel", "laute", "dudelsack", "mandoline", "akkordeon"], band: { trommel: ["bodhran", "tamburin"], floete: ["gesang", "floete", "pfeife", "klarinette"], ketten: ["krug", "stampfen", "klatschen", "loeffel", "schellen"] },
       ablauf: ["AABBCD"], akkorde: [[0, 3, 0, 3], [0, 2, 3, 0], [0, 4, 0, 3], [0, 2, 0, 3], [0, 5, 2, 3]],
       bass: ["viertel", "puls"], rhythmus: [[0, 2, 3, 4, 6], [0, 1, 2, 4, 6], [0, 2, 4, 6], [0, 3, 4, 6]], lage: 3, dichte: 1, echo: "antwort",
       klopf: [[0, 8], [0, 4, 8, 12]], schelle: [[2, 6, 10, 14], [0, 2, 4, 6, 8, 10, 12, 14]], trommel: [[0, 6, 8, 14], [0, 3, 6, 8, 11, 14]], ketten: [[4, 12], [0, 4, 8, 12]], rex: [0, 1] },
@@ -1962,7 +1964,7 @@
     "a_wasserfall":.1828,"a_wind1":.0818,"a_wind2":.0963,"a_regen1":.0387,"a_regen2":.0462,"a_waldregen":.0248,"a_starkregen":.043,"a_zelt":.0196,"a_gewitter1":.0441,"a_gewitter2":.0412,
     "a_wellen1":.0623,"a_wellen2":.0559,"a_boot":.0343,"a_tropfen1":.0089,"a_tropfen2":.0249,"a_unterwasser":.1387,"a_kochen":.0825,"a_blubbern":.0647,
     "a_baumwind":.0829, "a_bienen":.143, "a_dschungel":.048, "a_fensterregen":.1195, "a_fluss":.0479, "a_gaeste":.0478, "a_gesang":.1534, "a_grillen2":.0479, "a_halle":.0474, "a_heulwind":.0772, "a_klangschale":.1555, "a_kochen2":.0477, "a_lagerfeuer":.0148, "a_laubregen":.0434, "a_leichtregen":.0482, "a_segel":.0394, "a_starkregen2":.0724, "a_tropfstein":.0896, "a_uhr":.0428, "a_wasserfall2":.0588, "a_wellen3":.0476, "a_zelt2":.0459,
-    "a_hof":.0499, "a_hafen":.0499, "a_markt":.0499, "a_tagvoegel":.0498, "a_rinnsal":.0496, "a_strom":.0485, "a_wildwasser":.0495, "a_brandung":.05, "a_klippen":.05, "a_regen3":.0499, "a_regen4":.0499, "a_schneesturm":.05, "a_wind3":.0444, "a_orkan":.05, "a_huehner":.05, "a_kuehe":.0491, "a_schafe":.0497, "a_schnurren":.0499, "a_schneeschritte":.0457, "a_kiesweg":.0255, "l_windspiel":.0274, "l_wal":.1221};
+    "a_hof":.0499, "a_hafen":.0499, "a_markt":.0499, "a_kinder":.0421, "a_tagvoegel":.0498, "a_rinnsal":.0496, "a_strom":.0485, "a_wildwasser":.0495, "a_brandung":.05, "a_klippen":.05, "a_regen3":.0499, "a_regen4":.0499, "a_schneesturm":.05, "a_wind3":.0444, "a_orkan":.05, "a_huehner":.05, "a_kuehe":.0491, "a_schafe":.0497, "a_schnurren":.0499, "a_schneeschritte":.0457, "a_kiesweg":.0255, "l_windspiel":.0274, "l_wal":.1221};
   const ambReihe = (p, n) => Array.from({ length: n }, (_, i) => p + (i + 1));
   /* Ereignisse aus Aufnahmen: f = Dateien, tempo = Abspieltempo, folge = [min, max Anzahl, Abstand min, max] */
   const AMB_EV = {
@@ -2036,9 +2038,9 @@
       ev: [["frosch", [3, 9], .45, .5], ["insekt", [6, 16], .3, .4], ["platsch", [15, 35], .3, .6], ["blubb", [8, 20], .3, .5], ["eule", [50, 120], .25, 1], ["kraehe", [40, 100], .22, .9], ["troll", [90, 200], .2, 1], ["nass", [40, 90], .25, .7]] },
     unterwasser: { raum: .6, betten: [["a_unterwasser", 1], ["a_blubbern", .3, { tief: 1500 }], ["a_wildwasser", .12, { tief: 300 }], ["l_wal", .12, { tief: 1500 }], ["a_wellen1", .15, { tief: 300 }]],
       ev: [["blubb", [5, 14], .3, .5], ["wal", [35, 90], .3, .8], ["monster", [70, 160], .15, 1], ["rumpf", [90, 200], .2, 1], ["kette", [120, 260], .15, 1]] },
-    dorf: { raum: .35, betten: [["a_hof", .8], ["a_tagvoegel", .45], ["a_huehner", .3], ["a_kuehe", .22], ["a_schafe", .15], ["a_wind3", .12, { tief: 1200 }], ["a_bienen", .06, { tief: 3000 }]],
+    dorf: { raum: .35, betten: [["a_hof", .8], ["a_tagvoegel", .45], ["a_huehner", .3], ["a_kuehe", .22], ["a_schafe", .15], ["a_wind3", .12, { tief: 1200 }], ["a_bienen", .06, { tief: 3000 }], ["a_kinder", 0.3]],
       ev: [["huhn", [8, 20], .35, .4], ["kuh", [20, 50], .35, .7], ["schaf", [25, 60], .3, .7], ["schwein", [40, 90], .3, .5], ["ross", [40, 100], .3, .6], ["hund", [50, 120], .25, .8], ["axt", [40, 90], .3, .8], ["zimmern", [50, 120], .25, .9], ["glocke", [120, 260], .2, 1]] },
-    markt: { raum: .35, betten: [["a_markt", 1], ["a_gaeste", .3, { tief: 2500 }], ["a_tagvoegel", .15], ["a_huehner", .1, { tief: 2500 }], ["a_wind3", .08, { tief: 1000 }], ["a_hof", .12, { tief: 2000 }], ["a_rinnsal", .08, { tief: 2500 }]],
+    markt: { raum: .35, betten: [["a_markt", 1], ["a_gaeste", .3, { tief: 2500 }], ["a_tagvoegel", .15], ["a_huehner", .1, { tief: 2500 }], ["a_wind3", .08, { tief: 1000 }], ["a_hof", .12, { tief: 2000 }], ["a_rinnsal", .08, { tief: 2500 }], ["a_kinder", 0.22]],
       ev: [["muenzen", [8, 20], .35, .3], ["hufe", [25, 60], .3, .5], ["ross", [40, 90], .25, .7], ["huhn", [30, 70], .25, .6], ["hund", [50, 120], .22, .8], ["krug", [20, 45], .3, .4], ["zimmern", [40, 90], .25, 1], ["hammer", [60, 140], .22, 1], ["glocke", [90, 200], .2, 1]] },
     hafen: { raum: .4, betten: [["a_hafen", 1], ["a_wellen3", .4], ["a_boot", .3], ["a_wind2", .2], ["a_segel", .2], ["a_brandung", .2, { tief: 1500 }], ["a_markt", .1, { tief: 2000 }]],
       ev: [["moewe", [8, 20], .35, .5], ["glocke", [50, 120], .25, .7], ["knarren", [12, 30], .3, .4], ["kette", [30, 70], .3, .5], ["rumpf", [25, 60], .3, .5], ["ruder", [40, 90], .3, .6], ["zimmern", [50, 110], .22, 1], ["muenzen", [60, 140], .22, .5]] },
@@ -2048,7 +2050,7 @@
       ev: [["hacke", [5, 14], .4, .6], ["erz", [12, 30], .35, .6], ["hammer", [30, 70], .3, .8], ["kette", [30, 70], .3, .6], ["steinschlag", [40, 90], .3, .8], ["blasebalg", [50, 120], .22, 1], ["zischen", [60, 140], .2, 1], ["kies", [40, 90], .25, .6]] },
     strasse: { raum: .3, betten: [["a_tagvoegel", .6], ["a_kiesweg", .25], ["a_wind1", .3, { tief: 2000 }], ["a_baumwind", .25], ["a_bienen", .06, { tief: 3000 }], ["a_rinnsal", .1, { tief: 2000 }]],
       ev: [["hufe", [10, 25], .35, .2], ["ross", [30, 70], .3, .3], ["leder", [20, 45], .25, .2], ["kettenhemd", [30, 70], .25, .2], ["vogel", [10, 25], .3, .6], ["kraehe", [50, 120], .22, .9], ["knarren", [25, 60], .25, .3], ["galopp", [120, 260], .25, 1]] },
-    burg: { raum: .6, betten: [["a_wind3", .3], ["a_tagvoegel", .2], ["a_feuer3", .2], ["a_markt", .1, { tief: 1200 }], ["a_huehner", .06, { tief: 2000 }], ["a_hof", .1, { tief: 1600 }]],
+    burg: { raum: .6, betten: [["a_wind3", .3], ["a_tagvoegel", .2], ["a_feuer3", .2], ["a_markt", .1, { tief: 1200 }], ["a_huehner", .06, { tief: 2000 }], ["a_hof", .1, { tief: 1600 }], ["a_kinder", 0.1, { tief: 1500 }]],
       ev: [["uebung", [12, 30], .3, .6], ["kettenhemd", [15, 35], .3, .4], ["hufe", [30, 70], .3, .5], ["ross", [40, 100], .25, .7], ["tor", [60, 140], .3, .7], ["hammer", [40, 90], .22, 1], ["glocke", [90, 200], .25, 1], ["hund", [70, 160], .22, .8], ["schluessel", [60, 140], .25, .4]] },
     ufer: { raum: .35, betten: [["a_strom", .8], ["a_rinnsal", .4], ["a_tagvoegel", .4], ["a_fluss", .3], ["a_wind1", .15, { tief: 1800 }], ["a_bienen", .05, { tief: 3000 }]],
       ev: [["frosch", [10, 25], .35, .6], ["platsch", [15, 35], .3, .5], ["ruder", [40, 90], .3, .6], ["vogel", [8, 20], .3, .6], ["specht", [40, 100], .22, .8], ["nass", [50, 110], .25, .5], ["insekt", [20, 45], .2, .4], ["moewe", [100, 220], .18, 1]] }
@@ -2079,7 +2081,7 @@
   let kulMix = {};
   try { kulMix = JSON.parse(localStorage.getItem("imres-lw-kulmix") || "{}") || {}; } catch (_) {}
   const kulMixWert = (art, i) => { const m = kulMix[art]; const v = m && (i === "ev" ? m.ev : m.b && m.b[i]); return typeof v === "number" ? v : 1; };
-  const KUL_SPUR_NAME = { de: {"@gemurmel": "Stimmengewirr", "a_bach1": "Bach", "a_bach2": "Fluss", "a_baumwind": "Rauschende Bäume", "a_bienen": "Bienen", "a_blubbern": "Blubbern", "a_boot": "Schiffsplanken", "a_brandung": "Brecher", "a_dschungel": "Insektenchor", "a_fensterregen": "Regen am Fenster", "a_feuer1": "Kaminfeuer", "a_feuer2": "Feuer", "a_feuer3": "Glut", "a_fluss": "Strömung", "a_gaeste": "Stimmen", "a_gesang": "Mönchsgesang", "a_gewitter1": "Gewitter", "a_gewitter2": "Unwetter", "a_grillen": "Grillen", "a_grillen2": "Grillenwiese", "a_hafen": "Kai", "a_halle": "Halle", "a_heulwind": "Heulende Böen", "a_hof": "Hof", "a_huehner": "Hühner", "a_kiesweg": "Kiesweg", "a_klippen": "Klippen", "a_kochen": "Kessel", "a_kochen2": "Sud", "a_kuehe": "Kühe", "a_lagerfeuer": "Holzscheite", "a_laub": "Laub", "a_laubregen": "Regen auf Laub", "a_leichtregen": "Nieselregen", "a_markt": "Gasse", "a_nacht": "Nacht", "a_orkan": "Orkan", "a_regen1": "Regen", "a_regen2": "Regen", "a_regen3": "Landregen", "a_regen4": "Schauer", "a_rinnsal": "Rinnsal", "a_schafe": "Schafe", "a_schneeschritte": "Schritte im Schnee", "a_schneesturm": "Schneetreiben", "a_schnurren": "Schnurrende Katze", "a_segel": "Takelage", "a_starkregen": "Starkregen", "a_starkregen2": "Platzregen", "a_strom": "Stromschnellen", "a_tagvoegel": "Singvögel", "a_tropfen1": "Tropfen", "a_tropfen2": "Rinnsal", "a_tropfstein": "Tropfsteine", "a_uhr": "Standuhr", "a_unterwasser": "Tiefe", "a_voegel1": "Vögel", "a_voegel2": "Baumkronen", "a_waldregen": "Waldregen", "a_wasserfall": "Wasserfall", "a_wasserfall2": "Gischt", "a_wellen1": "Brandung", "a_wellen2": "Wellen", "a_wellen3": "Uferwellen", "a_wildwasser": "Wildwasser", "a_wind1": "Wind", "a_wind2": "Weiter Wind", "a_wind3": "Kalter Wind", "a_zelt": "Zeltplane", "a_zelt2": "Plane"}, en: {"@gemurmel": "Chatter", "a_bach1": "Brook", "a_bach2": "River", "a_baumwind": "Rustling trees", "a_bienen": "Bees", "a_blubbern": "Bubbling", "a_boot": "Ship planks", "a_brandung": "Breakers", "a_dschungel": "Insect chorus", "a_fensterregen": "Rain at the window", "a_feuer1": "Hearth", "a_feuer2": "Fire", "a_feuer3": "Embers", "a_fluss": "Current", "a_gaeste": "Voices", "a_gesang": "Chanting", "a_gewitter1": "Thunderstorm", "a_gewitter2": "Tempest", "a_grillen": "Crickets", "a_grillen2": "Cricket meadow", "a_hafen": "Quay", "a_halle": "Hall", "a_heulwind": "Howling gusts", "a_hof": "Farmyard", "a_huehner": "Hens", "a_kiesweg": "Gravel road", "a_klippen": "Cliffs", "a_kochen": "Cauldron", "a_kochen2": "Brew", "a_kuehe": "Cows", "a_lagerfeuer": "Logs", "a_laub": "Leaves", "a_laubregen": "Rain on leaves", "a_leichtregen": "Drizzle", "a_markt": "Lane", "a_nacht": "Night", "a_orkan": "Gale", "a_regen1": "Rain", "a_regen2": "Rain", "a_regen3": "Steady rain", "a_regen4": "Shower", "a_rinnsal": "Trickle", "a_schafe": "Sheep", "a_schneeschritte": "Steps in snow", "a_schneesturm": "Drifting snow", "a_schnurren": "Purring cat", "a_segel": "Rigging", "a_starkregen": "Downpour", "a_starkregen2": "Cloudburst", "a_strom": "Rapids", "a_tagvoegel": "Songbirds", "a_tropfen1": "Drips", "a_tropfen2": "Trickle", "a_tropfstein": "Dripstones", "a_uhr": "Clock", "a_unterwasser": "Depths", "a_voegel1": "Birds", "a_voegel2": "Treetops", "a_waldregen": "Forest rain", "a_wasserfall": "Waterfall", "a_wasserfall2": "Spray", "a_wellen1": "Surf", "a_wellen2": "Waves", "a_wellen3": "Lapping waves", "a_wildwasser": "Torrent", "a_wind1": "Wind", "a_wind2": "Distant wind", "a_wind3": "Cold wind", "a_zelt": "Canvas", "a_zelt2": "Tarp"} };
+  const KUL_SPUR_NAME = { de: {"@gemurmel": "Stimmengewirr", "a_bach1": "Bach", "a_bach2": "Fluss", "a_baumwind": "Rauschende Bäume", "a_bienen": "Bienen", "a_blubbern": "Blubbern", "a_boot": "Schiffsplanken", "a_brandung": "Brecher", "a_dschungel": "Insektenchor", "a_fensterregen": "Regen am Fenster", "a_feuer1": "Kaminfeuer", "a_feuer2": "Feuer", "a_feuer3": "Glut", "a_fluss": "Strömung", "a_gaeste": "Stimmen", "a_gesang": "Mönchsgesang", "a_gewitter1": "Gewitter", "a_gewitter2": "Unwetter", "a_grillen": "Grillen", "a_grillen2": "Grillenwiese", "a_hafen": "Kai", "a_halle": "Halle", "a_heulwind": "Heulende Böen", "a_hof": "Hof", "a_huehner": "Hühner", "a_kiesweg": "Kiesweg", "a_klippen": "Klippen", "a_kinder": "Spielende Kinder", "a_kochen": "Kessel", "a_kochen2": "Sud", "a_kuehe": "Kühe", "a_lagerfeuer": "Holzscheite", "a_laub": "Laub", "a_laubregen": "Regen auf Laub", "a_leichtregen": "Nieselregen", "a_markt": "Gasse", "a_nacht": "Nacht", "a_orkan": "Orkan", "a_regen1": "Regen", "a_regen2": "Regen", "a_regen3": "Landregen", "a_regen4": "Schauer", "a_rinnsal": "Rinnsal", "a_schafe": "Schafe", "a_schneeschritte": "Schritte im Schnee", "a_schneesturm": "Schneetreiben", "a_schnurren": "Schnurrende Katze", "a_segel": "Takelage", "a_starkregen": "Starkregen", "a_starkregen2": "Platzregen", "a_strom": "Stromschnellen", "a_tagvoegel": "Singvögel", "a_tropfen1": "Tropfen", "a_tropfen2": "Rinnsal", "a_tropfstein": "Tropfsteine", "a_uhr": "Standuhr", "a_unterwasser": "Tiefe", "a_voegel1": "Vögel", "a_voegel2": "Baumkronen", "a_waldregen": "Waldregen", "a_wasserfall": "Wasserfall", "a_wasserfall2": "Gischt", "a_wellen1": "Brandung", "a_wellen2": "Wellen", "a_wellen3": "Uferwellen", "a_wildwasser": "Wildwasser", "a_wind1": "Wind", "a_wind2": "Weiter Wind", "a_wind3": "Kalter Wind", "a_zelt": "Zeltplane", "a_zelt2": "Plane"}, en: {"@gemurmel": "Chatter", "a_bach1": "Brook", "a_bach2": "River", "a_baumwind": "Rustling trees", "a_bienen": "Bees", "a_blubbern": "Bubbling", "a_boot": "Ship planks", "a_brandung": "Breakers", "a_dschungel": "Insect chorus", "a_fensterregen": "Rain at the window", "a_feuer1": "Hearth", "a_feuer2": "Fire", "a_feuer3": "Embers", "a_fluss": "Current", "a_gaeste": "Voices", "a_gesang": "Chanting", "a_gewitter1": "Thunderstorm", "a_gewitter2": "Tempest", "a_grillen": "Crickets", "a_grillen2": "Cricket meadow", "a_hafen": "Quay", "a_halle": "Hall", "a_heulwind": "Howling gusts", "a_hof": "Farmyard", "a_huehner": "Hens", "a_kiesweg": "Gravel road", "a_klippen": "Cliffs", "a_kinder": "Children playing", "a_kochen": "Cauldron", "a_kochen2": "Brew", "a_kuehe": "Cows", "a_lagerfeuer": "Logs", "a_laub": "Leaves", "a_laubregen": "Rain on leaves", "a_leichtregen": "Drizzle", "a_markt": "Lane", "a_nacht": "Night", "a_orkan": "Gale", "a_regen1": "Rain", "a_regen2": "Rain", "a_regen3": "Steady rain", "a_regen4": "Shower", "a_rinnsal": "Trickle", "a_schafe": "Sheep", "a_schneeschritte": "Steps in snow", "a_schneesturm": "Drifting snow", "a_schnurren": "Purring cat", "a_segel": "Rigging", "a_starkregen": "Downpour", "a_starkregen2": "Cloudburst", "a_strom": "Rapids", "a_tagvoegel": "Songbirds", "a_tropfen1": "Drips", "a_tropfen2": "Trickle", "a_tropfstein": "Dripstones", "a_uhr": "Clock", "a_unterwasser": "Depths", "a_voegel1": "Birds", "a_voegel2": "Treetops", "a_waldregen": "Forest rain", "a_wasserfall": "Waterfall", "a_wasserfall2": "Spray", "a_wellen1": "Surf", "a_wellen2": "Waves", "a_wellen3": "Lapping waves", "a_wildwasser": "Torrent", "a_wind1": "Wind", "a_wind2": "Distant wind", "a_wind3": "Cold wind", "a_zelt": "Canvas", "a_zelt2": "Tarp"} };
   function weltBett(k, [name, staerke, o], i) {
     o = o || {};
     const out = ctx.createGain(); out.gain.value = 0;
@@ -2187,6 +2189,7 @@
     schwein: { g: 3, de: "Schweine", en: "Pigs", raus: 1, betten: [], ev: [["schwein", [8, 22], .47, .4]] },
     katze: { g: 3, de: "Schnurrende Katze", en: "Purring cat", betten: [["a_schnurren", 1.15]], ev: [] },
     wal: { g: 3, de: "Wale", en: "Whales", raus: 1, betten: [], ev: [["wal", [18, 40], .41, .6]] },
+    kinder: { g: 4, de: "Spielende Kinder", en: "Children playing", raus: 1, betten: [["a_kinder", .7]], ev: [] },
     stimmen: { g: 4, de: "Stimmengewirr", en: "Chatter", betten: [["a_gaeste", .71]], ev: [] },
     markt: { g: 4, de: "Markt", en: "Market", raus: 1, betten: [["a_markt", .73]], ev: [] },
     hafen: { g: 4, de: "Hafen", en: "Harbour", raus: 1, betten: [["a_hafen", .88]], ev: [["moewe", [20, 50], .32, .7]] },
@@ -2205,6 +2208,7 @@
   /* Symbole der Zusätze: 24×24, Linien (1), gefüllte Flächen (2), weitere Linien (3) */
   const WOLKE = "M7 14.5h10.2a3.4 3.4 0 0 0 .3-6.8 5 5 0 0 0-9.7-.9A3.4 3.4 0 0 0 7 14.5z";
 const ZUS_ICON = {
+  kinder: ["M4.5 6a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM6.5 8v6M6.5 10.5l-3-3M6.5 10.5l3-3M6.5 14l-2 5.5M6.5 14l2 5.5M13 7.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM15 9.5V15M15 11.5l-3.2 1.5M15 11.5l3.2-1.2M15 15l-2.2 5M15 15l2.4 4.6", "M18.6 19a2 2 0 1 0 4 0 2 2 0 1 0-4 0z"],
   regen: [WOLKE + "M8.5 17.5l-1 2.5M12.5 17.5l-1 2.5M16.5 17.5l-1 2.5"],
   starkregen: [WOLKE + "M7.5 17l-1.6 4.5M10.5 17l-1.6 4.5M13.5 17l-1.6 4.5M16.5 17l-1.6 4.5M19 17l-1 3"],
   gewitter: [WOLKE, "M13 15l-3 4h3.2l-2.2 3.5 5-5h-3.2l1.7-2.5z"],
@@ -2442,6 +2446,11 @@ const ZUS_ICON = {
   /* Echte Aufnahmen für Effekte und Kulissen-Ereignisse (Kenney und OpenGameArt, alle CC0 – siehe klang/LIZENZ.txt).
      Je Effekt mehrere Varianten; eine Variante = Schichten [Datei, Versatz s, Tempo, Stärke]; s = Anteil des gerechneten Klangs obendrauf. */
   const ECHT = {"drache":{"v":[[["fx_cr2_roar_05",0,0.62,1],["fx_rd_creature_roar_03",0.35,0.7,0.6]],[["fx_cr2_monster_20",0,0.6,1],["fx_cr2_roar_06",0.4,0.68,0.7]],[["fx_rd_creature_roar_02",0,0.6,1],["fx_cr2_roar_04",0.5,0.66,0.7]]],"s":0.5},"schwert":{"v":[[["fx_rp_sword_unsheathe",0,1,1]],[["fx_rp_sword_unsheathe2",0,1,1]],[["fx_rp_sword_unsheathe3",0,1,1]],[["fx_rp_sword_unsheathe4",0,1,1]],[["fx_rp_sword_unsheathe5",0,1,1]]]},"tuer":{"v":[[["fx_ka_dooropen_2",0,0.9,1]],[["fx_ka_dooropen_1",0,0.85,1],["fx_ka_creak2",0.3,0.9,0.6]],[["fx_fo_door_01",0,1,1]],[["fx_rp_door",0,1,1]]]},"donner":{"v":[[["fx_fo2_sfx100v2_thunder_01",0,1,1]],[["fx_fo2_sfx100v2_thunder_01",0,0.85,1]],[["fx_fo2_sfx100v2_thunder_01",0,1.12,1]]],"s":0.45},"schrei":{"v":[[["fx_cr_scream_01",0,1,1]],[["fx_cr_scream_02",0,1,1]],[["fx_cr_scream_01",0,0.9,1]]]},"wuerfel":{"v":[[["fx_ca_dice_shake_1",0,1,0.8],["fx_ca_dice_throw_1",1.3,1,1]],[["fx_ca_dice_shake_2",0,1,0.8],["fx_ca_dice_throw_2",1.2,1,1],["fx_ca_die_throw_3",1.25,1,0.7]],[["fx_ca_dice_shake_3",0,1,0.8],["fx_ca_dice_throw_3",1.3,1,1]]]},"zauber":{"v":[[["fx_rp_spell",0,1,1]],[["fx_rd_spell_01",0,1,1],["fx_rd_spell_02",0.35,1.1,0.7]],[["fx_rp_magic1",0,1,1],["fx_rd_item_gem_04",0.2,1,0.6]]],"s":0.45},"bogen":{"v":[[["fx_ba_bow",0,1,1]],[["fx_ba_bow",0,0.92,1],["fx_ba_swish_3",0.08,1.2,0.5]]]},"pfeil":{"v":[[["fx_ba_swish_2",0,1.3,0.7],["fx_im_impactwood_heavy_000",0.22,1,1]],[["fx_ba_swish_4",0,1.3,0.7],["fx_im_impactwood_heavy_002",0.2,1,1]],[["fx_ba_swish_3",0,1.4,0.6],["fx_mw_wood_hit_03",0.22,1,1]]]},"hieb":{"v":[[["fx_rd_blade_01",0,1,1],["fx_im_impactpunch_heavy_000",0.12,1,0.6]],[["fx_rd_blade_02",0,1,1],["fx_ka_knifeslice",0.05,1,0.6]],[["fx_rd_blade_03",0,1,1],["fx_im_impactpunch_heavy_002",0.12,1,0.6]]]},"verfehlt":{"v":[[["fx_ba_swish_2",0,1,1]],[["fx_ba_swish_3",0,1,1]],[["fx_ba_swish_4",0,1,1]],[["fx_rp_swing",0,1,1],["fx_rp_swing2",0.18,1,0.7]]]},"block":{"v":[[["fx_im_impactmetal_heavy_000",0,1,1],["fx_rp_metal_ringing",0.02,1,0.6]],[["fx_im_impactplate_heavy_001",0,1,1],["fx_rp_metal_ringing",0.02,1.1,0.5]],[["fx_br_bfh1_metal_hit_02",0,1,1],["fx_im_impactmetal_heavy_003",0,1,0.7]]]},"wucht":{"v":[[["fx_im_impactpunch_heavy_001",0,0.8,1],["fx_br_bfh1_hit_02",0,0.85,0.8]],[["fx_hp_hit05",0,1,1]],[["fx_hp_hit08",0,1,1]],[["fx_im_impactpunch_heavy_003",0,0.75,1],["fx_br_bfh1_rock_breaking_02",0.02,1,0.5]]]},"schmerz":{"v":[[["fx_cr_hurt_02",0,1,1]],[["fx_cr_hurt_01",0,1,1]],[["fx_cr2_human_03",0,1,1]],[["fx_cr2_human_05",0,1,1]],[["fx_cr_hurt_05",0,1,1]]]},"sterben":{"v":[[["fx_cr2_die_02",0,0.95,1],["fx_im_impactsoft_heavy_001",0.55,0.9,0.7]],[["fx_cr2_die_03",0,0.95,1],["fx_im_impactsoft_heavy_003",0.6,0.9,0.7]],[["fx_cr2_die_04",0,0.95,1],["fx_im_impactsoft_heavy_000",0.7,0.9,0.7]]]},"feuerball":{"v":[[["fx_rd_spell_fire_03",0,1,1],["fx_fo_explosion",0.9,0.8,0.9]],[["fx_rd_spell_fire_04",0,1,1],["fx_fo_explosion",0.8,0.9,0.8]],[["fx_rd_spell_fire_01",0,1,1],["fx_fo_explosion",0.6,0.75,0.9]]],"s":0.35},"heiltrank":{"v":[[["fx_rp_bottle",0,1,1],["fx_wa_bubble_01",0.45,1,0.7],["fx_rp_bubble2",0.8,1,0.6]],[["fx_rp_bottle",0,0.95,1],["fx_rp_bubble",0.5,1,0.7],["fx_rp_bubble3",0.9,1,0.5]]],"s":0.4},"muenzen":{"v":[[["fx_ka_handlecoins",0,1,1],["fx_rd_item_coins_04",0.25,1,0.9]],[["fx_rd_item_coins_04",0,1,1]],[["fx_rp_coin2",0,1,1],["fx_ka_handlecoins2",0.4,1,0.8]]]},"ruelpser":{"v":[[["fx_rp_burp",0,1,1]],[["fx_cr_burp_01",0,0.9,1]],[["fx_cr_burp_02",0,0.9,1]]]},"schnarchen":{"v":[[["fx_cr2_snore_02",0,1,1],["fx_cr2_snore_02",1.6,0.95,0.9],["fx_cr2_snore_02",3.2,1,0.8]],[["fx_cr_snore",0,0.9,1],["fx_cr_snore",1.3,0.88,0.9],["fx_cr_snore",2.6,0.9,0.8]]]},"boing":{"v":[[["fx_fo_spring_01",0,1,1]],[["fx_fo_spring_02",0,1,1]],[["fx_fo_spring_06",0,1,1]]]},"boom":{"v":[[["fx_fo_explosion",0,0.7,1],["fx_br_bfh1_rock_breaking_01",0.05,0.8,0.6]],[["fx_fo_explosion",0,0.6,1],["fx_br_bfh1_rock_falling_04",0.3,1,0.6]]],"s":0.5},"bonk":{"v":[[["fx_im_impactwood_heavy_001",0,1,1],["fx_mw_wood_hit_05",0,0.9,0.6]],[["fx_mw_wood_hit_08",0,0.9,1],["fx_im_impactplank_medium_002",0,1,0.6]]],"s":0.6},"stuhl":{"v":[[["fx_mw_wood_squeak_01",0,1,1],["fx_ka_footstep04",0.4,1,0.5]],[["fx_mw_wood_squeak_02",0,1,1]],[["fx_fo_wooden_02",0,1,1]],[["fx_mw_wood_slam_02",0,1,0.7]]]},"krug":{"v":[[["fx_fo_glass_02",0,0.85,1]],[["fx_fo_glass_03",0,0.9,1]],[["fx_fo_dishes_01",0,1,0.8]],[["fx_fo_dishes_03",0,1,0.8]],[["fx_fo2_sfx100v2_glass_02",0,0.9,1]],[["fx_fo_pot_01",0,0.9,0.7]]]},"knarren":{"v":[[["fx_ka_creak1",0,1,1]],[["fx_ka_creak2",0,1,1]],[["fx_ka_creak3",0,0.9,1]],[["fx_mw_wood_squeak_01",0,0.8,1]]]},"schritte":{"v":[[["fx_ka_footstep00",0,1,1],["fx_ka_footstep01",0.42,1,0.9],["fx_ka_footstep02",0.85,1,0.8],["fx_ka_footstep03",1.28,1,0.7]],[["fx_im_footstep_wood_001",0,1,1],["fx_im_footstep_wood_002",0.4,1,0.9],["fx_im_footstep_wood_003",0.8,1,0.8]]]}};
+  /* Klänge der Welt: [Aufnahme, Einsatz s, Tempo, Pegel] – die Pegel sind auf gleiche Lautheit gerechnet */
+  Object.assign(TX.de.sfx, { gruss: "👋 Grüße", dorfvolk: "🧑‍🌾 Dorfvolk", zank: "😤 Zank", rauferei: "🤼 Rauferei", kutsche: "🐴 Kutsche", anhalten: "🛑 Kutsche hält", wiehern: "🐎 Wiehern", hufschlag: "🏇 Hufschlag", hund: "🐕 Hund", katze: "🐈 Katze", kuh: "🐄 Kuh", schaf: "🐑 Schaf", huhn: "🐔 Hühner", schwein: "🐖 Schwein", eule: "🦉 Eule", wolf: "🐺 Wolf", kraehe: "🐦‍⬛ Krähen", frosch: "🐸 Frösche", moewe: "🕊 Möwe", specht: "🌳 Specht", wal: "🐋 Wal", loewe: "🦁 Löwe", elefant: "🐘 Elefant", pfau: "🦚 Pfau", pfeilhagel: "🏹 Pfeilhagel", schwertkampf: "⚔ Schwertkampf", rammbock: "🪵 Rammbock", katapult: "☄ Katapult", balliste: "🎯 Balliste", einsturz: "🏚 Einsturz", burgtor: "🏰 Burgtor", saege: "🪚 Säge", zimmern: "🔨 Zimmern", schmied: "⚒ Schmied", bergbau: "⛏ Spitzhacke", holzhacken: "🪓 Holzhacken", baumfall: "🌲 Baum fällt", truhe: "🧰 Truhe", schluessel: "🗝 Schlüssel", schloss: "🔓 Schloss knacken", falle: "🪤 Falle", glas: "🍷 Glas zerbricht", ruestung: "🛡 Rüstung", edelstein: "💎 Edelstein", buch: "📖 Buch", dolch: "🗡 Dolch", holzbruch: "💥 Holz bricht", riesenschritte: "👣 Riesenschritte", troll: "👹 Troll", untot: "🧟 Untote", schatten: "👻 Schatten", schleim: "🟢 Schleim", glocke: "🔔 Glocke", gong: "🎐 Gong", kette: "⛓ Ketten" });
+  Object.assign(TX.en.sfx, { gruss: "👋 Greetings", dorfvolk: "🧑‍🌾 Villagers", zank: "😤 Quarrel", rauferei: "🤼 Brawl", kutsche: "🐴 Carriage", anhalten: "🛑 Carriage stops", wiehern: "🐎 Neigh", hufschlag: "🏇 Hoofbeats", hund: "🐕 Dog", katze: "🐈 Cat", kuh: "🐄 Cow", schaf: "🐑 Sheep", huhn: "🐔 Hens", schwein: "🐖 Pig", eule: "🦉 Owl", wolf: "🐺 Wolf", kraehe: "🐦‍⬛ Crows", frosch: "🐸 Frogs", moewe: "🕊 Gull", specht: "🌳 Woodpecker", wal: "🐋 Whale", loewe: "🦁 Lion", elefant: "🐘 Elephant", pfau: "🦚 Peacock", pfeilhagel: "🏹 Arrow volley", schwertkampf: "⚔ Sword fight", rammbock: "🪵 Battering ram", katapult: "☄ Catapult", balliste: "🎯 Ballista", einsturz: "🏚 Collapse", burgtor: "🏰 Castle gate", saege: "🪚 Saw", zimmern: "🔨 Carpentry", schmied: "⚒ Blacksmith", bergbau: "⛏ Pickaxe", holzhacken: "🪓 Chopping wood", baumfall: "🌲 Tree falls", truhe: "🧰 Chest", schluessel: "🗝 Keys", schloss: "🔓 Lockpicking", falle: "🪤 Trap", glas: "🍷 Glass breaks", ruestung: "🛡 Armour", edelstein: "💎 Gem", buch: "📖 Book", dolch: "🗡 Dagger", holzbruch: "💥 Wood breaks", riesenschritte: "👣 Giant steps", troll: "👹 Troll", untot: "🧟 Undead", schatten: "👻 Shades", schleim: "🟢 Slime", glocke: "🔔 Bell", gong: "🎐 Gong", kette: "⛓ Chains" });
+  const ECHT_WELT = {"kutsche":{"v":[[["fx_0_mstep110",0.0,1.0,2.55],["fx_0_mstep111",1.75,1.0,1.56],["fx_0_mstep112",3.5,1.0,1.84],["fx_0_ram_move",0.15,1.05,0.73],["fx_0_onager_moving_11",1.4,1,0.65],["fx_0_ram_move",3.0,0.95,0.52],["fx_0_horse_idle1",5.1,1,0.84]],[["fx_0_mstep113",0.0,1.0,2.17],["fx_0_mstep114",1.75,1.0,1.75],["fx_0_mstep115",3.5,1.0,2.44],["fx_0_ram_move",0.1,1,0.73],["fx_0_onager_moving_11",2.0,0.95,0.65],["fx_0_ram_move",3.4,1,0.52],["fx_0_horse_idle2",5.2,1,0.84]]]},"anhalten":{"v":[[["fx_0_mstep110",0,1,2.55],["fx_0_ram_move",0.1,1,0.73],["fx_0_mstep112",1.8,0.88,1.47],["fx_0_onager_moving_11",1.7,0.9,0.82],["fx_0_horse_idle3",3.3,1,1.05],["fx_0_horse_select2",4.6,1,0.74]]]},"wiehern":{"v":[[["fx_0_horse_select1",0,1,1.06]],[["fx_0_horse_select2",0,1,1.05]],[["fx_0_horse_select3",0,1,1.05]],[["fx_0_horse_attack1",0,1,1.05]],[["fx_0_horse_attack2",0,1,1.05]],[["fx_0_horse_attack3",0,1,1.05]]]},"hufschlag":{"v":[[["g_galopp_1",0,1,1.31]],[["e_hufe_1",0.0,1.0,3.01],["e_hufe_2",0.42,1.0,1.84],["e_hufe_3",0.84,1.0,2.18],["e_hufe_4",1.26,1.0,2.56],["e_hufe_5",1.68,1.0,2.1],["e_hufe_6",2.1,1.0,2.9]]]},"gruss":{"v":[[["fx_0_v_latin_female_hello_1",0,1,0.84],["fx_0_v_latin_male_hello_1",1.1,1,0.84]],[["fx_0_v_persian_male_hello_1",0,1,0.84],["fx_0_v_persian_female_hello_2",1.0,1,0.84]],[["fx_0_v_persian_female_hello_1",0,1,0.84],["fx_0_v_greek_male_asyouwish_1",1.1,1,0.84]],[["fx_0_v_persian_male_hello_2",0,1,0.84],["fx_0_v_greek_male_yes_1",1.0,1,0.84]]]},"dorfvolk":{"v":[[["fx_0_v_latin_male_work_land_1",0,1,0.73],["fx_0_v_greek_female_herd_1",0.9,1,0.58],["e_huhn_2",1.3,1,0.28],["fx_0_v_latin_female_fish_1",2.0,1,0.59],["fx_0_v_latin_male_build_1",3.0,1,0.74]],[["fx_0_v_latin_female_work_land_1",0,1,0.63],["fx_0_v_greek_female_my_lord_1",1.0,1,0.58],["e_kuh_3",1.6,1,0.26],["fx_0_v_persian_male_yes_1",2.2,1,0.58],["fx_0_v_greek_female_herd_2",2.9,1,0.53]]]},"zank":{"v":[[["fx_0_v_latin_male_what_is_it_1",0,1,0.87],["fx_0_v_greek_female_attack_1",1.0,1,0.84],["fx_0_v_latin_male_attack_1",2.0,1,1.25],["fx_0_v_latin_female_attack_1",2.9,1,0.84]],[["fx_0_v_greek_female_what_is_it_2",0,1,0.84],["fx_0_v_persian_male_attack_1",1.1,1,0.84],["fx_0_v_persian_female_attack_1",2.1,1,0.84],["fx_0_v_latin_male_go_out_against_1",3.0,1,0.94]]]},"rauferei":{"v":[[["fx_0_v_latin_male_fight_1",0,1,1.1],["g_leder_1",0.5,1,0.96],["fx_im_impactpunch_heavy_000",0.8,1,0.89],["fx_cr_hurt_01",1.0,1.05,0.64],["g_faust_1",1.5,1,0.86],["fx_0_v_greek_male_attack_10",1.8,1,0.74],["fx_im_impactpunch_heavy_002",2.4,0.95,0.78],["fx_cr2_human_03",2.6,1,0.44],["g_leder_3",2.9,1,0.5]],[["fx_0_v_persian_male_to_war_1",0,1,0.84],["g_faust_2",0.6,1,0.83],["fx_im_impactpunch_heavy_001",1.0,1,0.83],["fx_cr_hurt_02",1.2,1,0.37],["g_leder_2",1.5,1,0.78],["fx_0_v_latin_male_attack_1",1.9,1,1.1],["g_faust_3",2.4,1,0.78],["fx_im_impactpunch_heavy_003",2.75,0.95,0.82],["fx_cr2_human_05",3.0,1,0.63]]]},"hund":{"v":[[["fx_0_dog_bark",0,1,1.05]],[["e_bellen_1",0,1,0.96]],[["e_bellen_2",0,1,0.75]],[["e_bellen_3",0,1,0.92]],[["e_bellen_4",0,1,0.78]],[["e_bellen_5",0,1,0.65]],[["e_hund_1",0,1,0.79]],[["e_hund_2",0,1,0.62]]]},"kuh":{"v":[[["e_kuh_1",0,1,0.77]],[["e_kuh_2",0,1,0.6]],[["e_kuh_3",0,1,0.74]],[["e_kuh_4",0,1,0.58]],[["e_kuh_5",0,1,0.63]],[["e_kuh_6",0,1,0.64]],[["e_kuh_7",0,1,0.71]]]},"schaf":{"v":[[["e_schaf_1",0,1,0.55]],[["e_schaf_2",0,1,0.57]]]},"huhn":{"v":[[["e_huhn_1",0.0,1.0,0.84],["e_huhn_2",0.6,1.0,0.71],["e_huhn_3",1.2,1.0,0.9]],[["e_huhn_4",0.0,1.0,0.75],["e_huhn_2",0.7,1.0,0.71]]]},"schwein":{"v":[[["e_schwein_1",0,1,1.27]],[["e_schwein_2",0,1,0.63]],[["e_schwein_3",0,1,1.27]]]},"katze":{"v":[[["e_katze_1",0,1,1.82]],[["e_katze_2",0,1,1.7]],[["e_katze_3",0,1,1.75]],[["e_katze_4",0,1,1.93]]]},"eule":{"v":[[["e_eule_1",0,1,0.38]],[["e_eule_2",0,1,0.42]]]},"wolf":{"v":[[["e_wolf_1",0,1,0.58]],[["e_wolf_2",0,1,0.55]],[["e_wolf_3",0,1,0.6]],[["e_wolf_4",0,1,0.57]]]},"kraehe":{"v":[[["e_kraehe_1",0.0,1.0,0.76],["e_kraehe_3",0.7,1.0,0.66]],[["e_kraehe_2",0.0,1.0,0.7],["e_kraehe_5",0.6,1.0,0.83],["e_kraehe_6",1.2,1.0,0.72]],[["e_kraehe_4",0,1,0.88]],[["e_kraehe_7",0,1,0.81]]]},"frosch":{"v":[[["e_frosch_1",0.0,1.0,0.95],["e_frosch_3",0.45,1.0,0.9],["e_frosch_5",0.9,1.0,1.01]],[["e_frosch_2",0.0,1.0,0.81],["e_frosch_4",0.4,1.0,0.91],["e_frosch_6",0.8,1.0,0.96],["e_frosch_8",1.2,1.0,0.97]]]},"moewe":{"v":[[["e_moewe_1",0,1,0.92]],[["e_moewe_2",0,1,0.79]],[["e_moewe_3",0,1,0.81]],[["e_moewe_4",0,1,0.78]],[["e_moewe_5",0,1,0.83]],[["e_moewe_6",0,1,1.0]]]},"specht":{"v":[[["e_specht_1",0,1,1.44]],[["e_specht_2",0,1,1.46]],[["e_specht_3",0,1,3.12]],[["e_specht_4",0,1,2.16]]]},"wal":{"v":[[["e_wal_1",0,1,0.77]],[["e_wal_2",0,1,0.8]],[["e_wal_3",0,1,0.79]]]},"loewe":{"v":[[["fx_0_lion_attack1",0,1,1.05]],[["fx_0_lion_attack2",0,1,1.05]],[["fx_0_lion1",0,1,1.05]],[["fx_0_lion2",0,1,1.05]],[["fx_0_lion3",0,1,1.05]]]},"elefant":{"v":[[["fx_0_elephant_attack1",0,1,1.05]],[["fx_0_elephant_attack2",0,1,1.05]],[["fx_0_elephant_attack3",0,1,1.05]]]},"pfau":{"v":[[["fx_0_peacock_call_01",0,1,1.05]]]},"pfeilhagel":{"v":[[["fx_0_arrowfly_1",0.0,1,1.63],["fx_0_arrowfly_2",0.07,1,1.56],["fx_0_arrowfly_3",0.14,1,1.78],["fx_0_arrowfly_4",0.21,1,0.87],["fx_0_arrowfly_5",0.28,1,2.04],["fx_0_arrowfly_6",0.35,1,1.05],["fx_0_arrow_wood_1",0.55,1,0.79],["fx_0_arrow_dirt_1",0.61,1,0.79],["fx_0_arrow_metal_1",0.7,1,1.04],["fx_0_arrow_wood_2",0.75,1,0.79],["fx_0_arrow_dirt_2",0.86,1,0.89],["fx_0_arrow_wood_3",0.93,1,0.79],["fx_0_arrow_dirt_3",0.99,1,1.82],["fx_0_arrow_metal_2",1.08,1,0.79],["fx_0_arrow_wood_4",1.13,1,0.79],["fx_0_arrow_dirt_4",1.24,1,1.14]]]},"schwertkampf":{"v":[[["fx_0_swordhit_10",0.0,1.0,2.02],["fx_0_swordhit_11a",0.42,1.0,1.43],["fx_0_swordhit_12",0.7,1.0,1.41],["fx_0_swordhit_13a",1.25,1.0,1.24],["fx_0_swordhit_10a",1.58,1.0,2.04],["fx_0_swordhit_12b",2.08,1.0,1.87]],[["fx_0_swordhit_11",0.0,1.0,1.71],["fx_0_swordhit_13b",0.3,1.0,2.12],["fx_0_swordhit_10a",0.8,1.0,2.04],["fx_0_swordhit_12",1.15,1.0,1.41],["fx_0_swordhit_11a",1.6,1.0,1.43]]]},"rammbock":{"v":[[["fx_0_ram_attack",0.0,1.0,1.14],["fx_0_ram_attack",1.7,1.0,1.14],["fx_0_ram_attack",3.4,1.0,1.14]]]},"katapult":{"v":[[["fx_0_onager_shooting_11",0,1,1.05],["g_steinschlag_1",1.6,1,1.65]],[["fx_0_onager_shooting_11",0,0.95,1.05],["g_steinschlag_3",1.8,1,2.13]]]},"balliste":{"v":[[["fx_0_ballist_attack_01",0,1,1.81]],[["fx_0_ballist_attack_02",0,1,1.83]]]},"einsturz":{"v":[[["fx_0_building_collapse_large_01",0,1,1.2]],[["fx_0_building_collapse_large_02",0,1,1.36]]]},"burgtor":{"v":[[["e_tor_1",0,1,1.52]],[["e_tor_2",0,1,1.45]],[["e_tor_3",0,1,1.44]],[["e_tor_4",0,1,1.37]]]},"saege":{"v":[[["fx_0_saw_1",0.0,1.0,1.04],["fx_0_saw_2",0.95,1.0,1.05],["fx_0_saw_3",1.9,1.0,1.02]],[["fx_0_saw_4",0.0,1.0,1.07],["fx_0_saw_2",0.95,1.0,1.05],["fx_0_saw_1",1.9,1.0,1.04]]]},"zimmern":{"v":[[["fx_0_holz_1",0.0,1.0,2.05],["fx_0_holz_2",0.5,1.0,1.68],["fx_0_holz_3",1.0,1.0,1.52],["fx_0_holz_4",1.5,1.0,1.55]],[["fx_0_holz_5",0.0,1.0,1.77],["fx_0_holz_6",0.55,1.0,1.61],["fx_0_holz_2",1.1,1.0,1.68]]]},"schmied":{"v":[[["e_hammer_1",0.0,1.0,1.07],["e_hammer_2",0.55,1.0,1.77],["amboss",1.1,1.0,0.76],["e_hammer_3",1.65,1.0,1.75]],[["e_hammer_4",0.0,1.0,1.89],["e_hammer_5",0.6,1.0,2.3],["e_hammer_6",1.2,1.0,1.38]]]},"bergbau":{"v":[[["fx_0_erz_1",0.0,1.0,1.12],["fx_0_erz_2",0.7,1.0,1.04],["fx_0_erz_3",1.4,1.0,1.07]],[["fx_0_erz_4",0.0,1.0,1.06],["fx_0_erz_5",0.65,1.0,1.24],["fx_0_erz_6",1.3,1.0,1.34]]]},"holzhacken":{"v":[[["e_axt_1",0.0,1.0,2.55],["e_axt_2",0.9,1.0,1.72],["e_axt_3",1.8,1.0,1.96]],[["e_axt_4",0.0,1.0,2.0],["e_axt_5",0.85,1.0,1.97],["e_axt_6",1.7,1.0,1.48]]]},"baumfall":{"v":[[["e_baumfall_1",0,1,2.07]],[["e_baumfall_2",0,1,1.62]],[["e_baumfall_3",0,1,2.52]],[["e_baumfall_4",0,1,1.66]]]},"truhe":{"v":[[["g_truhe_1",0,1,1.7]],[["g_truhe_2",0,1,1.15]],[["g_truhe_3",0,1,1.58]]]},"schluessel":{"v":[[["g_schluessel_1",0,1,1.24]],[["g_schluessel_2",0,1,0.79]],[["g_schluessel_3",0,1,0.96]],[["g_schluessel_4",0,1,0.73]],[["g_schluessel_5",0,1,0.75]]]},"schloss":{"v":[[["g_schloss_1",0.0,1.0,1.25],["g_schloss_2",0.45,1.0,0.62],["g_schloss_3",0.9,1.0,0.57]],[["g_schloss_4",0.0,1.0,0.96],["g_schloss_5",0.4,1.0,1.39],["g_schloss_6",0.8,1.0,1.59],["g_schloss_7",1.2,1.0,1.91]]]},"falle":{"v":[[["g_falle_1",0,1,1.46]],[["g_falle_2",0,1,1.64]],[["g_falle_3",0,1,1.11]]]},"glas":{"v":[[["g_glasbruch_1",0,1,0.99]],[["g_glasbruch_2",0,1,1.37]],[["g_glasbruch_3",0,1,3.36]],[["g_glasbruch_4",0,1,2.06]]]},"ruestung":{"v":[[["g_kettenhemd_1",0,1,1.08]],[["g_kettenhemd_2",0,1,1.0]],[["g_kettenhemd_3",0,1,0.83]],[["g_kettenhemd_4",0,1,1.08]],[["g_kettenhemd_5",0,1,1.96]],[["g_ruestung_1",0,1,1.57]],[["g_ruestung_2",0,1,1.64]],[["g_ruestung_3",0,1,1.33]]]},"edelstein":{"v":[[["g_edelstein_1",0,1,1.76]],[["g_edelstein_2",0,1,2.11]],[["g_edelstein_3",0,1,2.54]]]},"buch":{"v":[[["g_buch_1",0,1,1.43]],[["g_buch_2",0,1,2.08]],[["g_buch_3",0,1,2.51]],[["g_buch_4",0,1,2.17]],[["g_buch_5",0,1,1.0]]]},"dolch":{"v":[[["g_dolch_1",0,1,0.74]],[["g_dolch_2",0,1,0.62]],[["g_dolch_3",0,1,1.91]]]},"holzbruch":{"v":[[["g_holzbruch_1",0,1,1.05]],[["g_holzbruch_2",0,1,1.29]],[["g_holzbruch_3",0,1,2.27]],[["g_holzbruch_4",0,1,2.34]],[["g_holzbruch_5",0,1,1.53]],[["g_holzbruch_6",0,1,2.1]],[["g_holzbruch_7",0,1,1.04]]]},"riesenschritte":{"v":[[["g_riese_1",0.0,1.0,0.82],["g_riese_2",0.9,1.0,0.72],["g_riese_3",1.8,1.0,0.92]],[["g_riese_4",0.0,1.0,0.66],["g_riese_5",0.95,1.0,0.69],["g_riese_1",1.9,1.0,0.82]]]},"troll":{"v":[[["g_troll_1",0,1,0.53]],[["g_troll_2",0,1,0.54]],[["g_troll_3",0,1,0.58]],[["g_troll_4",0,1,0.76]],[["g_troll_5",0,1,0.73]],[["g_troll_6",0,1,1.08]],[["g_troll_7",0,1,0.82]],[["g_troll_8",0,1,0.86]],[["g_troll_9",0,1,0.71]],[["g_troll_10",0,1,0.74]]]},"untot":{"v":[[["g_untot_1",0,1,0.96]],[["g_untot_2",0,1,0.82]],[["g_untot_3",0,1,0.64]],[["g_untot_4",0,1,0.63]],[["g_untot_5",0,1,0.57]],[["g_untot_6",0,1,0.69]],[["g_untot_7",0,1,0.94]],[["g_untot_8",0,1,0.93]]]},"schatten":{"v":[[["g_schatten_1",0,1,0.76]],[["g_schatten_2",0,1,0.86]],[["g_schatten_3",0,1,0.87]],[["g_schatten_4",0,1,0.87]],[["g_schatten_5",0,1,0.74]]]},"schleim":{"v":[[["g_schleim_1",0,1,1.21]],[["g_schleim_2",0,1,1.83]],[["g_schleim_3",0,1,1.12]],[["g_schleim_4",0,1,1.27]],[["g_schleim_5",0,1,1.57]]]},"glocke":{"v":[[["e_glocke_1",0,1,2.66]],[["e_glocke_2",0,1,2.15]],[["e_glocke_3",0,1,1.37]],[["e_glocke_4",0,1,0.43]]]},"gong":{"v":[[["e_gong_1",0,1,1.35]],[["e_gong_2",0,1,0.86]]]},"kette":{"v":[[["e_kette_1",0,1,0.62]],[["e_kette_2",0,1,0.5]],[["e_kette_3",0,1,0.76]],[["e_kette_4",0,1,0.96]]]}};
+  Object.assign(ECHT, ECHT_WELT);
   const ECHT_DAUER = {"fx_cr2_roar_05":0.944,"fx_rd_creature_roar_03":0.899,"fx_cr2_monster_20":1.235,"fx_cr2_roar_06":0.861,"fx_rd_creature_roar_02":0.899,"fx_cr2_roar_04":0.841,"fx_rp_sword_unsheathe":0.388,"fx_rp_sword_unsheathe2":0.333,"fx_rp_sword_unsheathe3":0.369,"fx_rp_sword_unsheathe4":0.33,"fx_rp_sword_unsheathe5":0.349,"fx_ka_dooropen_2":1.38,"fx_ka_dooropen_1":0.913,"fx_ka_creak2":0.781,"fx_fo_door_01":2.568,"fx_rp_door":0.746,"fx_fo2_sfx100v2_thunder_01":4.287,"fx_cr_scream_01":0.87,"fx_cr_scream_02":0.897,"fx_ca_dice_shake_1":1.351,"fx_ca_dice_throw_1":0.558,"fx_ca_dice_shake_2":1.215,"fx_ca_dice_throw_2":0.354,"fx_ca_die_throw_3":0.619,"fx_ca_dice_shake_3":1.479,"fx_ca_dice_throw_3":0.52,"fx_rp_spell":2.534,"fx_rd_spell_01":0.547,"fx_rd_spell_02":0.459,"fx_rp_magic1":0.646,"fx_rd_item_gem_04":0.552,"fx_ba_bow":0.339,"fx_ba_swish_3":0.57,"fx_ba_swish_2":0.238,"fx_im_impactwood_heavy_000":0.31,"fx_ba_swish_4":0.315,"fx_im_impactwood_heavy_002":0.31,"fx_mw_wood_hit_03":0.299,"fx_rd_blade_01":0.271,"fx_im_impactpunch_heavy_000":0.489,"fx_rd_blade_02":0.303,"fx_ka_knifeslice":0.396,"fx_rd_blade_03":0.307,"fx_im_impactpunch_heavy_002":0.366,"fx_rp_swing":0.148,"fx_rp_swing2":0.125,"fx_im_impactmetal_heavy_000":0.165,"fx_rp_metal_ringing":0.507,"fx_im_impactplate_heavy_001":0.349,"fx_br_bfh1_metal_hit_02":0.433,"fx_im_impactmetal_heavy_003":0.204,"fx_im_impactpunch_heavy_001":0.418,"fx_br_bfh1_hit_02":0.557,"fx_hp_hit05":0.59,"fx_hp_hit08":0.685,"fx_im_impactpunch_heavy_003":0.376,"fx_br_bfh1_rock_breaking_02":0.865,"fx_cr_hurt_02":0.403,"fx_cr_hurt_01":0.403,"fx_cr2_human_03":0.613,"fx_cr2_human_05":0.544,"fx_cr_hurt_05":0.352,"fx_cr2_die_02":0.573,"fx_im_impactsoft_heavy_001":0.569,"fx_cr2_die_03":0.564,"fx_im_impactsoft_heavy_003":0.541,"fx_cr2_die_04":0.769,"fx_im_impactsoft_heavy_000":0.527,"fx_rd_spell_fire_03":1.633,"fx_fo_explosion":0.321,"fx_rd_spell_fire_04":1.267,"fx_rd_spell_fire_01":0.882,"fx_rp_bottle":0.406,"fx_wa_bubble_01":0.579,"fx_rp_bubble2":0.355,"fx_rp_bubble":0.384,"fx_rp_bubble3":0.62,"fx_ka_handlecoins":0.738,"fx_rd_item_coins_04":1.559,"fx_rp_coin2":0.893,"fx_ka_handlecoins2":0.319,"fx_rp_burp":0.924,"fx_cr_burp_01":0.543,"fx_cr_burp_02":0.725,"fx_cr2_snore_02":0.79,"fx_cr_snore":0.396,"fx_fo_spring_01":0.946,"fx_fo_spring_02":1.106,"fx_fo_spring_06":0.756,"fx_br_bfh1_rock_breaking_01":0.535,"fx_br_bfh1_rock_falling_04":0.254,"fx_im_impactwood_heavy_001":0.31,"fx_mw_wood_hit_05":0.16,"fx_mw_wood_hit_08":0.332,"fx_im_impactplank_medium_002":0.44,"fx_mw_wood_squeak_01":0.385,"fx_ka_footstep04":0.286,"fx_mw_wood_squeak_02":0.298,"fx_fo_wooden_02":0.34,"fx_mw_wood_slam_02":0.397,"fx_fo_glass_02":0.356,"fx_fo_glass_03":0.373,"fx_fo_dishes_01":0.759,"fx_fo_dishes_03":0.658,"fx_fo2_sfx100v2_glass_02":0.424,"fx_fo_pot_01":0.275,"fx_ka_creak1":0.6,"fx_ka_creak3":0.318,"fx_ka_footstep00":0.224,"fx_ka_footstep01":0.249,"fx_ka_footstep02":0.229,"fx_ka_footstep03":0.253,"fx_im_footstep_wood_001":0.249,"fx_im_footstep_wood_002":0.248,"fx_im_footstep_wood_003":0.249};
   let echtGeladen = false;
   function echtVorladen() { if (echtGeladen) return; echtGeladen = true; Object.keys(ECHT_DAUER).forEach((n, i) => setTimeout(() => sampleLaden(n), 40 * i)); }
@@ -2461,6 +2470,28 @@ const ZUS_ICON = {
     });
     return { start: st, dauer: ende };
   }
+  /* Klang der Welt: eine Variante wählen, ihre Aufnahmen laden (beim ersten Mal) und dann spielen */
+  function weltFx(art, staerke, zeit) {
+    const v = zufall(ECHT_WELT[art].v), l = (staerke || 1) * .75;
+    Promise.all(v.map(([n]) => sampleLaden(n))).then(bs => {
+      if (!ctx || bs.some(b => !b)) return;
+      const st = Math.max(zeit || 0, ctx.currentTime + .02), t = zz(.97, 1.03); let ende = 0;
+      v.forEach(([n, o, r, g], i) => {
+        const b = bs[i], q = ctx.createBufferSource(), gn = ctx.createGain();
+        q.buffer = b; q.playbackRate.value = r * t; gn.gain.value = l * g;
+        q.connect(gn); gn.connect(sfxBus); q.start(st + o / t, b._start || 0);
+        ende = Math.max(ende, o / t + (b.duration - (b._start || 0)) / (r * t));
+      });
+      musikDucken(st, ende);
+    });
+  }
+  /* beim Öffnen des Reiters schon nach und nach laden, damit das erste Antippen sofort klingt */
+  let weltGeladen = false;
+  function weltVorladen() {
+    if (weltGeladen || !ctx) return; weltGeladen = true;
+    const namen = [...new Set(WELT_FX.flatMap(a => ECHT_WELT[a].v[0].map(([n]) => n)))];
+    namen.forEach((n, i) => setTimeout(() => sampleLaden(n), 60 * i));
+  }
   /* Grundpegel je Effekt (die gerechneten Klänge sind auf gleiche Spitze gebracht) */
   const FX_PEGEL = { drache: .6, schwert: .45, tuer: .6, donner: .5, schrei: .33, wuerfel: .9, zauber: .4, horn: .4, jubel: .55,
     bogen: .7, pfeil: .8, hieb: .7, verfehlt: .5, block: .8, wucht: .8, schmerz: .45, sterben: .5, feuerball: .7, blitz: .5, heiltrank: .55,
@@ -2472,6 +2503,7 @@ const ZUS_ICON = {
     if (!ctx) return;
     try { buehneFx(art); } catch (_) {}
     if (KLASSIK[art]) { klassikSpielen(art, staerke); return; }
+    if (ECHT_WELT[art]) { weltFx(art, staerke, zeit); return; }
     const z = Math.max(zeit || 0, ctx.currentTime + .02), l = staerke || 1, pg = (FX_PEGEL[art] || .7) * l;
     echtVorladen();
     const echt = echtSpielen(art, sfxBus, z, pg * (ECHT_PEGEL[art] || 1));
@@ -2488,8 +2520,8 @@ const ZUS_ICON = {
   const HALL_INSTR = {
     melodie: { harfe: 1.3, glocken: 1.4, illusion: 1.3, laute: .9, mandoline: .7, fidel: 1, drehleier: 1, schalmei: .8, dudelsack: .75, hackbrett: 1.1, cembalo: .7, akkordeon: .6, sitar: 1.2 },
     floete: { horn: 1.3, gesang: 1.3, oohchor: 1.5, shakuhachi: 1.4, okarina: 1.2, floete: 1, panfloete: 1.1, klarinette: .9, oboe: 1, englischhorn: 1.2, bratsche: 1.1, piccolo: .7, pfeife: .6, blockfloete: .8 },
-    trommel: { pauke: 1.2, taiko: 1.3, trommel: .5, bodhran: .45, tamburin: .4, stoecke: .3 },
-    kap: { ooh: 1.5, rgl: 1.6, cel: 1.4, spiel: 1.3, kal: 1, bra: 1.1, eh: 1.2, shaku: 1.4, bfl: .8, pic: .6, pfeife: .5, blech: 1.2, taiko: 1.3, pizz: .4, akk: .5, hack: .9, cemb: .6, mar: .7, xyl: .6, sitar: 1.1 }
+    trommel: { pauke: 1.2, taiko: 1.3, trommel: .5, bodhran: .45, tamburin: .4, stoecke: .3, marsch: .55 },
+    kap: { ooh: 1.5, rgl: 1.6, cel: 1.4, spiel: 1.3, kal: 1, bra: 1.1, eh: 1.2, shaku: 1.4, bfl: .8, pic: .6, pfeife: .5, blech: 1.2, taiko: 1.3, pizz: .4, akk: .5, koto: 1.2, shanai: .9, horn: 1.4, hack: .9, cemb: .6, mar: .7, xyl: .6, sitar: 1.1 }
   };
   const HALL_SPUR = { bass: .25, klopf: .3, schelle: .5, ketten: .6, rex: .8 };
   const HALL_WEISE = { umpa: .55, ostinato: .6, puls: 1, stoss: .85, halte: 1.3, glanz: 1.35, arp: .8 };
@@ -2939,6 +2971,8 @@ const ZUS_ICON = {
     } else if (art === "rahmentrommel") { /* gerechneter Ersatz, bis die Aufnahme geladen ist */
       schlagTon(z, "sine", 120, 62, .32, .8 * l, zeit, .08);
       rauschStoss(zeit, z, "lowpass", 700, .7, .3 * l, .08);
+    } else if (art === "schellen") { /* gerechneter Ersatz: helles Klingeln */
+      for (let i = 0; i < 3; i++) rauschStoss(zeit + i * .018, z, "bandpass", 6200 + i * 900, 6, .22 * l, .2);
     } else if (art === "kriegstrommel") {
       schlagTon(z, "sine", 98, 48, .45, .9 * l, zeit, .1);
       rauschStoss(zeit, z, "bandpass", 420, 1.2, .28 * l, .1);
@@ -3827,7 +3861,12 @@ const ZUS_ICON = {
   /* ---------- Echte Instrumente (Aufnahmen aus der Versilian Community Sample Library, CC0) ----------
      Jede Aufnahme liegt als kurze MP3 im Ordner klang/. Geladen wird erst, wenn ein Instrument gebraucht wird;
      bis dahin spielt der berechnete Klang. Zwischentöne entstehen durch leichtes Umstimmen der nächsten Aufnahme. */
-  const SAMPLE_KARTE = { /* Kapelle und neue Instrumente (FluidR3, CC BY 3.0) */ akk: [53,  56,  59,  62,  65,  68,  71,  74,  77,  80,  83,  86,  89], hack: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], cemb: [41,  44,  47,  50,  53,  56,  59,  62,  65,  68,  71,  74,  77,  80,  83,  86,  89], mar: [45,  48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], cel: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96,  99,  102,  105,  108], spiel: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96,  99,  102,  105], rgl: [60,  63,  66,  69,  72,  75,  78], taiko: [36,  42,  48], bfl: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], pic: [74,  77,  80,  83,  86,  89,  92,  95,  98,  101,  104], shaku: [55,  58,  61,  64,  67,  70,  73,  76,  79,  82], eh: [52,  55,  58,  61,  64,  67,  70,  73,  76,  79], sitar: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84], kal: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], bra: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84], pizz: [36,  39,  42,  45,  48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84], blech: [46,  49,  52,  55,  58,  61,  64,  67,  70,  73,  76,  79,  82], xyl: [65,  68,  71,  74,  77,  80,  83,  86,  89,  92,  95,  98,  101,  104], pfeife: [72,  75,  78,  81,  84,  87,  90,  93,  96], ooh: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78],
+  const SAMPLE_KARTE = { /* Blech kurz gestoßen (VSCO 2 CE): Hornrufe, Fanfaren, Kriegshorn */
+    hornst: [33, 36, 39, 43, 46, 50, 53, 57, 60, 74, 77], trpst: [53, 57, 60, 63, 65, 67, 70, 74, 77, 81, 84],
+    /* Aah-Chor, Koto, Schalmei (Shanai) und gestimmte Pauken (FluidR3, CC BY 3.0) */
+    aah: [48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81], koto: [48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93],
+    shanai: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93], timpt: [36, 39, 42, 45, 48, 51, 54, 57],
+    /* Kapelle und neue Instrumente (FluidR3, CC BY 3.0) */ akk: [53,  56,  59,  62,  65,  68,  71,  74,  77,  80,  83,  86,  89], hack: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], cemb: [41,  44,  47,  50,  53,  56,  59,  62,  65,  68,  71,  74,  77,  80,  83,  86,  89], mar: [45,  48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], cel: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96,  99,  102,  105,  108], spiel: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96,  99,  102,  105], rgl: [60,  63,  66,  69,  72,  75,  78], taiko: [36,  42,  48], bfl: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], pic: [74,  77,  80,  83,  86,  89,  92,  95,  98,  101,  104], shaku: [55,  58,  61,  64,  67,  70,  73,  76,  79,  82], eh: [52,  55,  58,  61,  64,  67,  70,  73,  76,  79], sitar: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84], kal: [60,  63,  66,  69,  72,  75,  78,  81,  84,  87,  90,  93,  96], bra: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84], pizz: [36,  39,  42,  45,  48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78,  81,  84], blech: [46,  49,  52,  55,  58,  61,  64,  67,  70,  73,  76,  79,  82], xyl: [65,  68,  71,  74,  77,  80,  83,  86,  89,  92,  95,  98,  101,  104], pfeife: [72,  75,  78,  81,  84,  87,  90,  93,  96], ooh: [48,  51,  54,  57,  60,  63,  66,  69,  72,  75,  78],
     vln: [55, 57, 59, 62, 66, 69, 72, 76, 79, 83, 86], vc: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77],
     spic: [36, 40, 43, 47, 50, 53, 57, 60, 64, 67, 71, 74, 77], horn: [36, 39, 43, 46, 50, 53, 57, 60],
     fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96], flst: [69, 72, 76, 81, 84, 88, 93, 96],
@@ -3837,7 +3876,7 @@ const ZUS_ICON = {
     fag: [34,  37,  41,  45,  46,  48,  55,  60,  63,  68,  69,  72], pos: [34,  37,  39,  41,  46,  50,  53,  60,  61,  63,  65], vctrem: [36,  40,  43,  50,  53,  57,  59,  60,  64,  67,  71,  74,  77], trp: [53,  57,  60,  63,  67,  70,  74,  77,  81,  84], oboest: [58,  62,  65,  70,  74,  77,  82,  89], kb: [28,  30,  31,  34,  36,  38,  40,  42,  44,  45,  49,  52,  56,  59], geigest: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], geige: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], tuba: [34,  39,  41,  46,  50,  53,  58], klar: [50,  53,  58,  62,  65,  70,  74,  77,  82,  86,  90], orgel: [36,  42,  48,  54,  60,  66,  72,  78,  84,  90,  96], vlntrem: [55,  57,  59,  62,  69,  72,  76,  79,  83,  86], oboe: [58,  62,  65,  70,  74,  77,  82,  86,  89] };
   /* Stimmung der Aufnahmen, nachgemessen (Cent zu hoch +, zu tief −): einige Flöten, die Harfe und manche Streicher waren
      bis zu 25 Cent verstimmt, eine Klarinetten-Aufnahme sogar einen Halbton – das wird beim Abspielen ausgeglichen */
-  const STIMM_KORR = {"akk":{"80":6,"83":6,"86":6,"89":11},"hack":{"63":7,"66":5},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"36":-24,"39":-11,"42":22,"45":24,"48":20,"51":22,"57":12,"60":5,"69":-13,"72":7,"78":-12,"81":-21},"blech":{"61":5,"64":5},"vln":{"69":5,"62":6,"66":-5},"vc":{"40":-11,"53":16},"spic":{"36":-6,"40":-8,"53":-16,"57":6,"60":23,"64":-9,"67":-18,"71":-7,"74":-7,"77":7,"43":-5},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":10,"50":5,"53":-5,"57":7,"59":23,"64":12,"67":-12,"71":-10,"74":-8,"77":14},"trp":{"53":-7,"67":10,"74":7,"81":9},"oboest":{"89":-13},"kb":{"30":-22,"34":-7,"36":-20,"38":7,"40":-14,"42":-5,"56":-28,"59":-13},"geigest":{"55":6,"60":-9,"72":6,"76":5,"84":5,"91":6},"geige":{"60":22,"64":7,"67":-5,"76":7,"79":7,"88":8,"84":-5},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10},"vlntrem":{"57":-11,"69":-8,"72":8,"79":-8},"flst":{"72":-8,"88":-17,"93":-7},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-9,"53":-7},"bfl":{"60":13,"75":10,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6,"63":10,"66":6,"69":5,"72":5},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":18,"81":6,"84":-7,"87":11,"90":15,"93":11},"shaku":{"55":-8,"58":-8,"61":-8,"64":-5},"eh":{"55":7,"64":-9,"67":9,"70":-7,"76":-8,"79":-9},"bra":{"54":14,"84":-6,"60":7,"63":-6,"81":9},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24}};
+  const STIMM_KORR = {"hornst":{"33":23,"36":14,"39":38,"53":6,"57":29,"77":8},"trpst":{"53":20,"57":9,"60":15,"65":-9,"67":9,"77":14,"81":13},"aah":{"48":-45,"51":-45,"54":-36,"57":-19,"60":-19,"63":-42,"66":5,"75":-17,"78":6,"81":-10},"akk":{"80":6,"83":6,"86":6,"89":11},"hack":{"63":7,"66":5},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"36":-24,"39":-11,"42":22,"45":24,"48":20,"51":22,"57":12,"60":5,"69":-13,"72":7,"78":-12,"81":-21},"blech":{"61":5,"64":5},"vln":{"69":5,"62":6,"66":-5},"vc":{"40":-11,"53":16},"spic":{"36":-6,"40":-8,"53":-16,"57":6,"60":23,"64":-9,"67":-18,"71":-7,"74":-7,"77":7,"43":-5},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":10,"50":5,"53":-5,"57":7,"59":23,"64":12,"67":-12,"71":-10,"74":-8,"77":14},"trp":{"53":-7,"67":10,"74":7,"81":9},"oboest":{"89":-13},"kb":{"30":-22,"34":-7,"36":-20,"38":7,"40":-14,"42":-5,"56":-28,"59":-13},"geigest":{"55":6,"60":-9,"72":6,"76":5,"84":5,"91":6},"geige":{"60":22,"64":7,"67":-5,"76":7,"79":7,"88":8,"84":-5},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10},"vlntrem":{"57":-11,"69":-8,"72":8,"79":-8},"flst":{"72":-8,"88":-17,"93":-7},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-9,"53":-7},"bfl":{"60":13,"75":10,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6,"63":10,"66":6,"69":5,"72":5},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":18,"81":6,"84":-7,"87":11,"90":15,"93":11},"shaku":{"55":-8,"58":-8,"61":-8,"64":-5},"eh":{"55":7,"64":-9,"67":9,"70":-7,"76":-8,"79":-9},"bra":{"54":14,"84":-6,"60":7,"63":-6,"81":9},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24}};
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
   function sampleLaden(name) {
@@ -3845,7 +3884,8 @@ const ZUS_ICON = {
     if (sampleLaedt.has(name)) return sampleLaedt.get(name);
     if (!ctx || rendert) return Promise.resolve(null);
     const c = ctx;
-    const pr = fetch(sampleBasis + encodeURIComponent(name) + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+    /* Einzelgeräusche der Klangwelten (e_*, g_*) liegen im Ordner amb/ */
+    const pr = fetch((/^[eg]_/.test(name) ? sampleBasis.replace(/klang\/$/, "amb/") : sampleBasis) + encodeURIComponent(name) + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
       .then(ab => new Promise((res, rej) => { const x = c.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); }))
       .then(b => {
         /* Einsatz suchen: MP3 bringt am Anfang etwas Stille mit – die überspringen wir, damit alles im Takt sitzt */
@@ -3859,9 +3899,9 @@ const ZUS_ICON = {
   }
   /* Lautstärke der Aufnahmen aus dem FluidR3-Klangsatz, abgestimmt auf die bisherigen Klänge */
   const PEGEL_ECHT = { laute: .5, dudelsack: .45, panfloete: .26, okarina: .26, bass: .6, gesang: .4, drehleier: .8,
-    trommel: 1.15, bodhran: 1.1, stoecke: 1.3, schelle: .5, klopf: 1, rassel: .65 };
+    trommel: 1.15, bodhran: 1.1, stoecke: 1.3, schelle: .5, klopf: 1, rassel: .65, marsch: .75, schellen: .42 };
   /* Schlagwerk aus Aufnahmen: [betonter Schlag, normaler Schlag] */
-  const SCHLAG_PROBE = { trommel: ["snare1", "snare2"], bodhran: ["bodh1", "bodh2"], stoecke: ["clave1", "clave2"], schelle: ["schelle1", "schelle2"], klopf: ["holz1", "holz2"], rassel: ["shake", "shake"] };
+  const SCHLAG_PROBE = { trommel: ["snare1", "snare2"], bodhran: ["bodh1", "bodh2"], stoecke: ["clave1", "clave2"], schelle: ["schelle1", "schelle2"], klopf: ["holz1", "holz2"], rassel: ["shake", "shake"], marsch: ["marsch1", "marsch4"], schellen: ["schellen3", "schellen4"] };
   function schlagProbe(art, betont, zeit, ziel, laut) {
     const p = SCHLAG_PROBE[art]; if (!p || rendert) return false;
     return probe(p[betont ? 0 : 1], 0, zeit, ziel, PEGEL_ECHT[art] * (betont ? 1 : .8) * (laut || 1), { dauer: 1.2, aus: .25 });
@@ -3877,6 +3917,7 @@ const ZUS_ICON = {
     const src = ctx.createBufferSource(), g = ctx.createGain();
     src.buffer = b; if (m != null) src.playbackRate.value = Math.pow(2, (midi - m) / 12 - ((STIMM_KORR[gruppe] && STIMM_KORR[gruppe][m]) || 0) / 1200);
     if (o.rate) src.playbackRate.value *= o.rate;
+    if (o.beuge) { const r0 = src.playbackRate.value; src.playbackRate.setValueAtTime(r0 * Math.pow(2, -o.beuge / 1200), zeit); src.playbackRate.linearRampToValueAtTime(r0, zeit + (o.beugeZeit || .35)); }
     const rate = src.playbackRate.value, lang = (b.duration - b._start) / rate, ein = o.ein || .004;
     const dauer = Math.min(lang, o.dauer || lang), aus = Math.min(o.aus || .2, dauer * .5), ende = zeit + dauer;
     g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(laut, zeit + ein);
@@ -3891,21 +3932,25 @@ const ZUS_ICON = {
      Höhepunkt (Teil D bzw. dem letzten Teil): davor Paukenwirbel und anschwellendes Becken, darauf Becken und große Trommel. */
   /* pad = Teppich (Stärke), farbe = welche Instrumente ihn spielen, ost = treibende Celli, horn/trp/pos = Blech im Höhepunkt,
      tuba = tiefes Fundament, amboss = Schmiedeschläge, glanz = Glöckchen, gross = große Schläge (2 Becken+Trommel, 1 Gong bzw. Pauke) */
+  /* dazu: ruf = Hornrufe am Anfang der Abschnitte, kriegshorn = tiefer Hornstoß zum Höhepunkt, fanfare = Trompeten-Fanfare,
+     marsch = Marschtrommel, riese = Riesentrommel, tpauke = gestimmte Pauken (Grundton/Quinte), glbaum = Glockenbaum,
+     nepal = Tempelglöckchen, becken = Beckenwirbel vor dem Höhepunkt */
   const ORCH = {
-    kampf: { pad: .8, ost: 1, horn: 1, trp: 1, pos: 1, gross: 2 }, sieg: { pad: .8, horn: 1, trp: 1, gross: 2 },
-    reiter: { pad: .7, ost: 1, horn: 1, trp: 1, gross: 2 }, zwerge: { pad: .7, horn: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1 },
-    spannung: { pad: .6, farbe: "trem", ost: 1, gross: 1 }, unterreich: { pad: .6, farbe: "trem", tief: 1, tuba: 1, gross: 1, gong: 1 },
-    elben: { pad: .7, hoch: 1, glanz: 1 }, boss: { pad: .9, ost: 1, horn: 1, trp: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1 },
-    grusel: { pad: .55, farbe: "trem", tief: 1, gross: 1, gong: 1 }, klage: { pad: .6 }, hof: { pad: .55, horn: 1, trp: 1, gross: 1 },
-    fey: { pad: .4, hoch: 1, glanz: 1 }, marktplatz: { pad: 0, volk: 1 }, pilger: { pad: .6, farbe: "orgel" }, reise: { pad: .5, gross: 1 },
+    kampf: { pad: .8, ost: 1, horn: 1, trp: 1, pos: 1, gross: 2, ruf: 1, kriegshorn: 1, riese: 1, tpauke: 1, becken: 1 }, sieg: { pad: .8, horn: 1, trp: 1, gross: 2, fanfare: 1, tpauke: 1, marsch: .6, becken: 1 },
+    reiter: { pad: .7, ost: 1, horn: 1, trp: 1, gross: 2, ruf: 1, fanfare: 1, marsch: 1, tpauke: 1 }, zwerge: { pad: .7, horn: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1, ruf: 1, kriegshorn: 1, riese: 1 },
+    spannung: { pad: .6, farbe: "trem", ost: 1, gross: 1, riese: .5 }, unterreich: { pad: .6, farbe: "trem", tief: 1, tuba: 1, gross: 1, gong: 1, kriegshorn: .6, riese: .7, nepal: 1 },
+    elben: { pad: .7, hoch: 1, glanz: 1, glbaum: 1, nepal: 1 }, boss: { pad: .9, ost: 1, horn: 1, trp: 1, pos: 1, tuba: 1, amboss: 1, gross: 2, tief: 1, ruf: 1, kriegshorn: 1, riese: 1, tpauke: 1, becken: 1 },
+    grusel: { pad: .55, farbe: "trem", tief: 1, gross: 1, gong: 1, riese: .5 }, klage: { pad: .6 }, hof: { pad: .55, horn: 1, trp: 1, gross: 1, fanfare: 1, marsch: .6 },
+    fey: { pad: .4, hoch: 1, glanz: 1, glbaum: 1 }, marktplatz: { pad: 0, volk: 1 }, pilger: { pad: .6, farbe: "orgel", nepal: 1 }, reise: { pad: .5, gross: 1, ruf: .6 },
     auenland: { pad: .45, farbe: "holz" }, shanty: { pad: .4, farbe: "holz" }, rast: { pad: .4, farbe: "holz" }, kamin: { pad: .35, farbe: "holz" },
     dorffest: { pad: 0, volk: 1 }, trinklied: { pad: 0, volk: 1 },
-    heldenlied: { pad: .7, horn: 1, trp: 1, pos: 1, gross: 2 }, verfolgung: { pad: .8, ost: 1, horn: 1, gross: 2 }, ruinen: { pad: .6, hoch: 1, glanz: 1, gong: 1, gross: 1 }
+    heldenlied: { pad: .7, horn: 1, trp: 1, pos: 1, gross: 2, ruf: 1, fanfare: 1, marsch: .8, tpauke: 1, becken: 1 }, verfolgung: { pad: .8, ost: 1, horn: 1, gross: 2, ruf: 1, riese: .7 },
+    ruinen: { pad: .6, hoch: 1, glanz: 1, gong: 1, gross: 1, glbaum: 1, nepal: 1, riese: .5 }
   };
-  const PAD_FARBE = { ooh: ["ooh", "ooh"], bratsche: ["vc", "bra"], trem: ["vctrem", "vlntrem"], orgel: ["orgel", "orgel"], holz: ["fag", "klar"], blech: ["pos", "horn"], chor: ["stimme", "stimme"], holz2: ["klar", "fl"] };
+  const PAD_FARBE = { ooh: ["ooh", "ooh"], bratsche: ["vc", "bra"], trem: ["vctrem", "vlntrem"], orgel: ["orgel", "orgel"], holz: ["fag", "klar"], blech: ["pos", "horn"], chor: ["stimme", "stimme"], holz2: ["klar", "fl"], aah: ["aah", "aah"] };
   /* Klangfarbe des Teppichs: je Stimmung mehrere, gewählt nach dem Thema – mit jedem neuen Thema klingt der Hintergrund anders */
-  const ORCH_FARBEN = { heldenlied: ["", "blech", "chor"], verfolgung: ["trem", "trem", ""], ruinen: ["chor", "holz2", "orgel", "ooh"], kampf: ["", "blech"], boss: ["", "blech", "chor", "ooh"], spannung: ["trem", "chor"], grusel: ["trem", "chor", "ooh"], unterreich: ["trem", "chor", "orgel"],
-    elben: ["", "chor", "holz2", "ooh"], klage: ["", "chor", "holz", "bratsche"], pilger: ["orgel", "chor", "ooh"], hof: ["", "blech", "holz2", "bratsche"], zwerge: ["", "blech", "chor"],
+  const ORCH_FARBEN = { heldenlied: ["", "blech", "chor", "aah"], verfolgung: ["trem", "trem", ""], ruinen: ["chor", "holz2", "orgel", "ooh", "aah"], kampf: ["", "blech", "aah"], boss: ["", "blech", "chor", "ooh", "aah"], spannung: ["trem", "chor"], grusel: ["trem", "chor", "ooh"], unterreich: ["trem", "chor", "orgel", "aah"],
+    elben: ["", "chor", "holz2", "ooh", "aah"], klage: ["", "chor", "holz", "bratsche", "aah"], pilger: ["orgel", "chor", "ooh", "aah"], hof: ["", "blech", "holz2", "bratsche"], zwerge: ["", "blech", "chor", "aah"],
     auenland: ["holz", "holz2"], shanty: ["holz", "chor"], rast: ["holz", "holz2"], kamin: ["holz", "holz2", "", "bratsche"], reise: ["", "holz2"], sieg: ["", "blech"], reiter: ["", "blech"], fey: ["", "holz2"] };
   function orchFarbe(pr) {
     const l = stilKey() && ORCH_FARBEN[stilKey()];
@@ -3916,7 +3961,7 @@ const ZUS_ICON = {
   /* der Teppich soll nicht dieselbe Klangfarbe haben wie Echo oder die Kapelle – sonst spielen zwei gleiche Stimmen dieselben Töne */
   function orchFrei(fa) {
     const e = S.band.floete, kap = (() => { try { return kapSpieler().map(p => p.inst); } catch (_) { return []; } })();
-    if ((fa === "chor" || fa === "ooh") && (e === "gesang" || e === "oohchor" || kap.includes("ooh"))) return "";
+    if ((fa === "chor" || fa === "ooh" || fa === "aah") && (e === "gesang" || e === "oohchor" || kap.includes("ooh"))) return "";
     if (fa === "holz2" && (e === "floete" || e === "blockfloete" || e === "piccolo" || e === "klarinette" || kap.includes("bfl"))) return e === "klarinette" ? "" : "holz";
     if (fa === "holz" && (e === "klarinette" || e === "oboe" || e === "englischhorn")) return "";
     if (fa === "blech" && (e === "horn" || kap.includes("blech"))) return "";
@@ -3975,7 +4020,29 @@ const ZUS_ICON = {
     if (pr.glanz) sampleLaden("gloeckchen");
     if (pr.gong) { sampleLaden("gong"); sampleLaden("bogen"); }
     if (pr.gross) ["timproll", "crash", "swell", "bd", "timp1"].forEach(sampleLaden);
+    if (pr.ruf) { probenLaden("hornst"); probenLaden("horn"); }
+    if (pr.kriegshorn) { probenLaden("horn"); probenLaden("pos"); probenLaden("tuba"); }
+    if (pr.fanfare) probenLaden("trpst");
+    if (pr.marsch) ["marsch1", "marsch2", "marsch3", "marsch4", "marsch5", "marschrim"].forEach(sampleLaden);
+    if (pr.riese) ["riese1", "riese2", "riese3"].forEach(sampleLaden);
+    if (pr.tpauke) probenLaden("timpt");
+    if (pr.glbaum) ["glbaum1", "glbaum2", "glbaum3", "glbaum4"].forEach(sampleLaden);
+    if (pr.nepal) ["nepal1", "nepal2", "nepal3", "nepal4"].forEach(sampleLaden);
+    if (pr.becken) sampleLaden("beckenroll");
   }
+  /* Hornrufe: kurze, gestoßene Motive auf Grundton, Terz, Quinte und Oktave (0 = Grund, 1 = Terz, 2 = Quinte, 3 = Oktave, −2 = Quinte tief);
+     [Schritt, Ton, Dauer in Schritten] – lange Töne spielt das gehaltene Horn, kurze das gestoßene */
+  const HORNRUFE = [
+    [[0, 0, 1], [3, 0, 1], [4, 2, 4], [8, 3, 8]],
+    [[0, -2, 2], [2, 0, 2], [4, 1, 2], [6, 2, 2], [8, 3, 8]],
+    [[0, 0, 1], [2, 0, 1], [3, 0, 1], [4, 2, 6], [12, 1, 4]],
+    [[0, 2, 3], [3, 2, 1], [4, 3, 4], [8, 2, 4], [12, 0, 4]],
+    [[0, 0, 6], [6, 2, 2], [8, 3, 8]]
+  ];
+  /* Fanfare der Trompeten: Triole auf der Eins, dann der lange Ton */
+  const FANFAREN = [[[0, 1, 1], [1, 1, 1], [2, 1, 1], [4, 2, 4]], [[0, 2, 1], [1, 2, 1], [2, 2, 1], [4, 3, 3], [8, 2, 1], [9, 2, 1], [10, 2, 1], [12, 3, 4]], [[0, 0, 2], [2, 1, 2], [4, 2, 2], [6, 3, 6]]];
+  /* Marschtrommel: 0 = Pause, 1 = leise, 2 = mittel, 3 = Akzent */
+  const MARSCH = [[3, 0, 1, 1, 2, 0, 1, 1, 3, 0, 1, 1, 2, 1, 2, 1], [3, 0, 0, 1, 2, 0, 1, 0, 3, 0, 0, 1, 2, 1, 1, 1], [3, 1, 1, 0, 2, 0, 2, 0, 3, 1, 1, 0, 2, 2, 2, 2]];
   /* Akkordtöne zur Bass-Zeile: Grundton, Terz, Quinte als MIDI-Noten */
   function akkordMidi(zeile) {
     const sk = MODI[S.modus], d = BASS_STUFEN[zeile || 0], st = i => sk[i % 7] + 12 * Math.floor(i / 7), tr = S.transpose + hebung;
@@ -4010,7 +4077,7 @@ const ZUS_ICON = {
       const dauer = n * sd + .35, l = pr.pad * (.5 + .5 * x) * (.6 + .5 * int) * (gastJetzt.length ? .72 : 1); /* Platz für die Gäste */
       const fa = orchFrei(orchFarbe(pr)), vl = pr.tief ? -12 : pr.hoch ? 12 : 0, [tief, hoch] = PAD_FARBE[fa] || ["vc", "vln"];
       const pt = fa === "holz" || fa === "holz2" ? orchPan.holz : fa === "blech" ? orchPan.horn : orchPan.vc, ph = fa === "holz" || fa === "holz2" ? orchPan.holz : fa === "blech" ? orchPan.horn : orchPan.vln;
-      const fk = { orgel: .45, holz: .8, holz2: .7, blech: .62, chor: .75, ooh: .8, bratsche: .9 }[fa] || 1, hk = fa === "holz" || fa === "chor" || fa === "blech" ? -12 : 0;
+      const fk = { orgel: .45, holz: .8, holz2: .7, blech: .62, chor: .75, ooh: .8, aah: .85, bratsche: .9 }[fa] || 1, hk = fa === "holz" || fa === "chor" || fa === "blech" || fa === "aah" ? -12 : 0;
       oprobe(tief, ak.grund, zeit, pt, .3 * l * fk, { ein: .28, aus: .45, dauer });
       if (!pr.tief || x > .6) {
         /* der Teppich bleibt unter Barradins Melodie (außer bei den Stimmungen, die oben schimmern sollen) */
@@ -4058,6 +4125,73 @@ const ZUS_ICON = {
         oprobe("timp1", 0, zeit, orchPan.gross, pr.gross > 1 ? .55 : .35);
         if (pr.gong) oprobe("gong", 0, zeit, orchPan.gross, .32);
       }
+    }
+    episch(pr, zeit, ab, x, int, ak, sd, bar);
+  }
+  /* Merkzahl des Lieds (aus der Melodie) – damit jedes Lied seine eigenen Rufe und Muster behält */
+  function liedZahl() {
+    const m = (S.teile && TEILE.map(p => S.teile[p] && S.teile[p].melodie).find(z => z && z.some(v => v >= 0))) || [];
+    return m.reduce((a, v, i) => a + (v + 2) * (i + 7), 0) + (S.arrSeed || 0);
+  }
+  /* Ton eines Rufs: Akkordton über dem Grundton (Terz und Quinte, wie sie in der Tonleiter liegen) */
+  function rufTon(basis, ak, ton) {
+    const it = ((ak.terz - ak.grund) % 12 + 12) % 12, iq = ((ak.quinte - ak.grund) % 12 + 12) % 12;
+    return basis + ({ 0: 0, 1: it, 2: iq, 3: 12, "-2": iq - 12 })[ton];
+  }
+  /* die epischen Klänge: Hornrufe, Kriegshorn, Fanfaren, Marsch- und Riesentrommel, gestimmte Pauken, Glocken */
+  function episch(pr, zeit, ab, x, int, ak, sd, bar) {
+    const L = S.ablauf.length, hoch = istHoch(ab), anfang = abschnittAnfang(ab), rolle = S.rollen ? rolleAn(ab) : hoch ? "h" : "v";
+    const vorHoch = !hoch && L > 1 && istHoch((ab + 1) % L), hochAnfang = hoch && anfang, hz = liedZahl(), r0 = MEL_GRUND + S.transpose, iv = .6 + .5 * int;
+    /* Hornrufe zu Beginn der großen Abschnitte – zwei Hörner im Oktavabstand */
+    if (pr.ruf && schritt === 0 && x >= .5 && (anfang || (hoch && sektionNr(ab) % 2 === 0)) && (rolle === "r" || rolle === "h" || S.intensitaet >= 7) && Math.random() < pr.ruf) {
+      const ruf = HORNRUFE[(hz + sektionNr(ab)) % HORNRUFE.length], basis = inLage(ak.grund, r0 - 10, r0 + 1), l = .3 * iv;
+      ruf.forEach(([st, t, d]) => {
+        const m = rufTon(basis, ak, t), z = zeit + st * sd;
+        if (d >= 4) { oprobe("horn", m, z, orchPan.horn, l, { ein: .05, aus: .35, dauer: d * sd + .15 }); oprobe("horn", m - 12, z, orchPan.horn, l * .55, { ein: .06, aus: .35, dauer: d * sd + .15 }); }
+        else { oprobe("hornst", m, z, orchPan.horn, l * 1.15, { dauer: Math.max(.22, d * sd * 1.3), aus: .08 }); oprobe("hornst", m - 12, z, orchPan.horn, l * .6, { dauer: Math.max(.22, d * sd * 1.3), aus: .08 }); }
+      });
+    }
+    /* Kriegshorn: ein tiefer, anschwellender Stoß, der sich am Anfang leicht nach oben zieht – zum Höhepunkt und am Anfang der Schlacht */
+    if (pr.kriegshorn && schritt === 0 && (hochAnfang || (ab === 0 && durchgang === 0) || (anfang && rolle === "r" && Math.random() < .35))) {
+      const m = inLage(ak.grund, 38, 49), l = .4 * pr.kriegshorn * iv, o = { ein: .22, aus: 1, dauer: Math.min(4.5, bar * 1.5), beuge: 80, beugeZeit: .5 };
+      oprobe("horn", m, zeit, orchPan.horn, l, o); oprobe("pos", m, zeit, orchPan.blech, l * .7, o); oprobe("tuba", m - 12, zeit, orchPan.blech, l * .55, o);
+    }
+    /* Trompeten-Fanfare auf dem Höhepunkt */
+    if (pr.fanfare && schritt === 0 && hoch && (anfang || sektionNr(ab) % 2 === 1 || Math.random() < .25)) {
+      const f = FANFAREN[hz % FANFAREN.length], basis = inLage(ak.grund, r0 - 3, r0 + 8), l = .24 * iv;
+      f.forEach(([st, t, d]) => {
+        const z = zeit + st * sd, du = Math.max(.2, d * sd * 1.25);
+        oprobe("trpst", rufTon(basis, ak, t), z, orchPan.blech, l, { dauer: du, aus: .1 });
+        oprobe("trpst", rufTon(basis, ak, Math.max(0, t - 1)), z, orchPan.blech, l * .7, { dauer: du, aus: .1 });
+      });
+    }
+    /* Marschtrommel (im Aufbau leiser, vor dem Höhepunkt ein Wirbel) */
+    if (pr.marsch && !leicht() && x >= .5 && S.intensitaet >= 3) {
+      const m = MARSCH[hz % MARSCH.length][schritt % 16], f = pr.marsch * (hoch ? 1 : .7);
+      if (vorHoch && schritt >= taktL() - 8) {
+        const k = schritt - (taktL() - 8);
+        [0, .5].forEach(h => oprobe(h ? "marsch5" : "marsch4", 0, zeit + h * sd, orchPan.gross, (.05 + .012 * k) * f));
+      } else if (m && (hoch || m >= 2)) {
+        const n = m === 3 ? (Math.random() < .15 ? "marschrim" : zufall(["marsch1", "marsch2"])) : m === 2 ? "marsch1" : zufall(["marsch4", "marsch5"]);
+        oprobe(n, 0, zeit, orchPan.gross, (m === 3 ? .13 : m === 2 ? .085 : .05) * f);
+      }
+    }
+    /* Riesentrommel: am Anfang der Abschnitte, im Höhepunkt auf jeder Eins (und bei Wucht auch auf der Drei) */
+    if (pr.riese && x >= .5 && ((schritt === 0 && (anfang || hoch)) || (hoch && schritt === taktL() / 2 && S.intensitaet >= 6)))
+      oprobe(zufall(["riese1", "riese2", "riese3"]), 0, zeit, orchPan.gross, .5 * pr.riese * iv * (schritt === 0 ? 1 : .75));
+    /* gestimmte Pauken: Grundton und Quinte im Höhepunkt */
+    if (pr.tpauke && hoch && (schritt === 0 || schritt === taktL() / 2 || (schritt === taktL() - 2 && S.intensitaet >= 7))) {
+      const m = schritt === taktL() / 2 ? inLage(ak.q2, 40, 54) : inLage(ak.grund, 38, 52);
+      oprobe("timpt", m, zeit, orchPan.gross, (schritt === 0 ? .34 : .26) * iv);
+    }
+    /* Glockenbaum zu Beginn eines Abschnitts, Tempelglöckchen ab und zu */
+    if (pr.glbaum && schritt === 0 && anfang && Math.random() < .6) oprobe(zufall(["glbaum1", "glbaum2", "glbaum3", "glbaum4"]), 0, zeit, orchPan.vln, .2);
+    if (pr.nepal && !leicht() && schritt === 0 && Math.random() < .14) oprobe(zufall(["nepal1", "nepal2", "nepal3", "nepal4"]), 0, zeit, orchPan.vln, .16);
+    /* Beckenwirbel, der genau auf der Eins des Höhepunkts gipfelt */
+    if (pr.becken && schritt === 0 && vorHoch && durchgang % 2 === 1) {
+      const b = sampleBuf.get("beckenroll");
+      if (b) oprobe("beckenroll", 0, zeit, orchPan.gross, .26, { ein: .05, dauer: bar + .05, aus: .06, versatz: Math.max(0, b._spitze - b._start - bar) });
+      else sampleLaden("beckenroll");
     }
   }
 
@@ -4550,7 +4684,7 @@ const ZUS_ICON = {
      Alle Melodien sind alte Volksweisen oder vor 1929 erschienen (gemeinfrei). */
   const LAGE_COVER = { fl: [60, 96], flst: [60, 96], bfl: [60, 93], pfeife: [72, 96], pic: [76, 100], geige: [55, 93], geigest: [55, 93], oboe: [58, 88], klar: [50, 86],
     dudel: [60, 86], stimme: [57, 81], ooh: [48, 76], harfe: [40, 96], gitarre: [40, 84], akk: [53, 86], hack: [52, 93], cemb: [45, 88], mar: [48, 90], xyl: [65, 100],
-    kal: [60, 93], cel: [60, 100], spiel: [64, 100], sitar: [50, 82], shaku: [55, 82], eh: [52, 79], bra: [48, 82], pizz: [40, 79], blech: [48, 80], horn: [41, 69], trp: [55, 82], vc: [36, 67], fag: [36, 67] };
+    kal: [60, 93], koto: [48, 93], shanai: [60, 90], cel: [60, 100], spiel: [64, 100], sitar: [50, 82], shaku: [55, 82], eh: [52, 79], bra: [48, 82], pizz: [40, 79], blech: [48, 80], horn: [41, 69], trp: [55, 82], vc: [36, 67], fag: [36, 67] };
   /* Akkordsymbol → Grundton (MIDI, um C3) und Akkordtöne als Tonklassen */
   function akkord(sym) {
     const m = /^([A-G])([#b]?)(m(?!aj))?(7)?(dim)?$/.exec(sym || "C"); if (!m) return { grund: 48, pk: [0, 4, 7] };
@@ -4986,6 +5120,12 @@ const ZUS_ICON = {
    <path d="M70 137 L70 142 Q97 151 124 142 L124 137 Q97 146 70 137 Z" fill="#5a3a20" stroke="#2a1a10" stroke-width="1"/>
    <ellipse cx="97" cy="137" rx="27" ry="8.5" fill="#efe2c2" stroke="#5a3a20" stroke-width="1.5"/>
    <path d="M89 137 q8 -6 16 0 q-8 6 -16 0 Z M93 134 q4 6 8 0" fill="none" stroke="#3f5a32" stroke-width="1"/></g>
+  <g class="req f-marsch">
+   <path d="M76 150 L70 192 M118 150 L124 192" stroke="#5a3a20" stroke-width="2.5"/>
+   <path d="M72 136 L72 162 Q97 172 122 162 L122 136 Q97 146 72 136 Z" fill="#e8dcc0" stroke="#3a2412" stroke-width="1"/>
+   <path d="M72 138 Q97 148 122 138 M72 160 Q97 170 122 160" stroke="#8a1e1e" stroke-width="3" fill="none"/>
+   <path d="M76 142 L83 158 L90 145 L97 161 L104 145 L111 158 L118 142" fill="none" stroke="#c9a24a" stroke-width="1.1"/>
+   <ellipse class="trommelfell" cx="97" cy="136" rx="25" ry="7.5" fill="#f4ecd8" stroke="#3a2412" stroke-width="1.4"/></g>
   <g class="req f-pauke">
    <path d="M78 168 L72 192 M116 168 L122 192" stroke="#5a3a20" stroke-width="3"/>
    <path d="M68 138 Q70 174 97 177 Q124 174 126 138 Q97 147 68 138 Z" fill="#b87333" stroke="#6b3f1a" stroke-width="1.2"/>
@@ -5276,6 +5416,8 @@ const ZUS_ICON = {
     <ellipse cx="115" cy="156" rx="13" ry="3.6" fill="#e3cfa2" stroke="#2a1008" stroke-width="1"/>
     <path d="M103 162 l6 7 l6 -7 l6 7 l6 -7 M103 176 l6 -7 l6 7 l6 -7 l6 7" fill="none" stroke="#c9934f" stroke-width="1" opacity=".85"/>
     <path d="M104 138 L114 153" stroke="#8a6440" stroke-width="2.6" stroke-linecap="round"/><circle cx="114.5" cy="153.5" r="2.4" fill="#e3cfa2"/></g>
+   <g class="req z-schellen"><path d="M100 134 Q114 140 110 160" stroke="#6b4423" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+    <g fill="#e0b84a" stroke="#8a6420" stroke-width=".6"><circle cx="104" cy="137" r="2.6"/><circle cx="109" cy="141" r="2.6"/><circle cx="112" cy="147" r="2.6"/><circle cx="112" cy="153" r="2.6"/><circle cx="110.5" cy="159" r="2.6"/></g></g>
    <g class="req z-krug"><rect x="99" y="131" width="13" height="16" rx="2" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
     <path d="M112 134 q6 1 5 6 q-1 4 -5 4" fill="none" stroke="#3a2412" stroke-width="2"/>
     <path d="M98 131 q3 -5 7 -2 q3 -4 7 0 q2 1 0 3 Z" fill="#fbf4e2"/><path d="M101 137 h9 M101 142 h9" stroke="#c9934f" stroke-width="1"/></g>
@@ -5916,39 +6058,40 @@ const ZUS_ICON = {
      Eintrag: [Instrument, Spielweise, Abschnitte, Oktavlage in Halbtönen, ab Intensität] */
   const KAP_INSTR = { akk: { g: .3, halt: 1 }, hack: { g: .36 }, cemb: { g: .3 }, mar: { g: .4 }, cel: { g: .3 }, spiel: { g: .28 }, rgl: { g: .24 },
     taiko: { g: .6 }, bfl: { g: .24, halt: 1 }, pic: { g: .17, halt: 1 }, pfeife: { g: .18, halt: 1 }, shaku: { g: .28, halt: 1 }, eh: { g: .26, halt: 1 },
-    sitar: { g: .3 }, kal: { g: .4 }, bra: { g: .28, halt: 1 }, pizz: { g: .4 }, blech: { g: .24, halt: 1 }, xyl: { g: .26 }, ooh: { g: .24, halt: 1 } };
+    sitar: { g: .3 }, kal: { g: .4 }, bra: { g: .28, halt: 1 }, pizz: { g: .4 }, blech: { g: .24, halt: 1 }, xyl: { g: .26 }, ooh: { g: .24, halt: 1 },
+    koto: { g: .36 }, shanai: { g: .22, halt: 1 }, horn: { g: .3, halt: 1 } };
   const KAPELLE = {
-    kampf: [["blech", "stoss", "srh"], ["taiko", "stampf", "svrbh"], ["pizz", "ostinato", "sv"], ["xyl", "unisono", "rh", 12, 5], ["ooh", "halte", "rh", -12]],
-    boss: [["blech", "stoss", "srh"], ["taiko", "stampf", "isvrbh"], ["ooh", "halte", "srh", -12], ["pizz", "ostinato", "sb"], ["bra", "unisono", "h", -12, 5]],
-    verfolgung: [["pizz", "ostinato", "svrh"], ["taiko", "stampf", "rh"], ["ooh", "halte", "rh", -12], ["blech", "stoss", "h"], ["bra", "terz", "r", -12]],
-    spannung: [["pizz", "ostinato", "srh"], ["rgl", "glanz", "h"], ["cel", "echo", "r", 0, 4], ["sitar", "ostinato", "s"], ["spiel", "echo", "b"]],
+    kampf: [["blech", "stoss", "srh"], ["taiko", "stampf", "svrbh"], ["pizz", "ostinato", "sv"], ["xyl", "unisono", "rh", 12, 5], ["ooh", "halte", "rh", -12], ["horn", "halte", "rh", -12]],
+    boss: [["blech", "stoss", "srh"], ["taiko", "stampf", "isvrbh"], ["ooh", "halte", "srh", -12], ["pizz", "ostinato", "sb"], ["bra", "unisono", "h", -12, 5], ["horn", "halte", "rh", -12]],
+    verfolgung: [["pizz", "ostinato", "svrh"], ["taiko", "stampf", "rh"], ["ooh", "halte", "rh", -12], ["blech", "stoss", "h"], ["bra", "terz", "r", -12], ["horn", "stoss", "rh"]],
+    spannung: [["pizz", "ostinato", "srh"], ["rgl", "glanz", "h"], ["cel", "echo", "r", 0, 4], ["sitar", "ostinato", "s"], ["spiel", "echo", "b"], ["shanai", "terz", "r", -12]],
     grusel: [["spiel", "unisono", "s", 12], ["ooh", "halte", "rh", -12], ["rgl", "glanz", "h"], ["cel", "echo", "b"], ["eh", "terz", "r", -12]],
-    unterreich: [["sitar", "ostinato", "srh"], ["taiko", "puls", "h"], ["shaku", "echo", "sb"], ["ooh", "halte", "h", -12], ["rgl", "glanz", "h"]],
-    ruinen: [["cel", "glanz", "srh"], ["shaku", "echo", "sr"], ["ooh", "halte", "h"], ["kal", "arp", "b"], ["sitar", "arp", "s"]],
-    reise: [["hack", "arp", "srh"], ["bfl", "unisono", "rh"], ["pizz", "umpa", "s"], ["akk", "halte", "h"], ["mar", "ostinato", "s"]],
-    reiter: [["blech", "stoss", "rh"], ["taiko", "puls", "svrh"], ["pizz", "ostinato", "s"], ["pic", "unisono", "h", 12, 6], ["hack", "arp", "s"]],
-    heldenlied: [["blech", "stoss", "rh"], ["ooh", "halte", "h"], ["hack", "arp", "s"], ["taiko", "puls", "vh"], ["bra", "terz", "r", -12]],
-    sieg: [["blech", "stoss", "srh"], ["pic", "unisono", "h", 12, 4], ["xyl", "glanz", "rh"], ["akk", "umpa", "s"], ["cemb", "arp", "s"]],
-    rast: [["kal", "arp", "srh"], ["bfl", "echo", "r"], ["akk", "halte", "h"], ["hack", "terz", "h", -12], ["spiel", "glanz", "b"]],
+    unterreich: [["sitar", "ostinato", "srh"], ["taiko", "puls", "h"], ["shaku", "echo", "sb"], ["ooh", "halte", "h", -12], ["rgl", "glanz", "h"], ["shanai", "echo", "rh"]],
+    ruinen: [["cel", "glanz", "srh"], ["shaku", "echo", "sr"], ["ooh", "halte", "h"], ["kal", "arp", "b"], ["sitar", "arp", "s"], ["shanai", "echo", "r"], ["koto", "arp", "s"]],
+    reise: [["hack", "arp", "srh"], ["bfl", "unisono", "rh"], ["pizz", "umpa", "s"], ["akk", "halte", "h"], ["mar", "ostinato", "s"], ["horn", "halte", "h", -12]],
+    reiter: [["blech", "stoss", "rh"], ["taiko", "puls", "svrh"], ["pizz", "ostinato", "s"], ["pic", "unisono", "h", 12, 6], ["hack", "arp", "s"], ["horn", "stoss", "rh"]],
+    heldenlied: [["blech", "stoss", "rh"], ["ooh", "halte", "h"], ["hack", "arp", "s"], ["taiko", "puls", "vh"], ["bra", "terz", "r", -12], ["horn", "halte", "rh", -12]],
+    sieg: [["blech", "stoss", "srh"], ["pic", "unisono", "h", 12, 4], ["xyl", "glanz", "rh"], ["akk", "umpa", "s"], ["cemb", "arp", "s"], ["horn", "stoss", "rh"]],
+    rast: [["kal", "arp", "srh"], ["bfl", "echo", "r"], ["akk", "halte", "h"], ["hack", "terz", "h", -12], ["spiel", "glanz", "b"], ["koto", "arp", "s"]],
     trinklied: [["akk", "umpa", "svrh"], ["hack", "unisono", "rh"], ["pfeife", "unisono", "h", 12, 5], ["xyl", "echo", "r"], ["mar", "ostinato", "s"]],
     kamin: [["hack", "arp", "srh"], ["bra", "terz", "rh", -12], ["spiel", "glanz", "ib"], ["eh", "echo", "s"], ["cemb", "arp", "s"]],
-    klage: [["bra", "terz", "rh", -12], ["ooh", "halte", "h"], ["rgl", "glanz", "h"], ["eh", "unisono", "s", -12], ["cel", "glanz", "ib"]],
+    klage: [["bra", "terz", "rh", -12], ["ooh", "halte", "h"], ["rgl", "glanz", "h"], ["eh", "unisono", "s", -12], ["cel", "glanz", "ib"], ["koto", "arp", "s"]],
     auenland: [["pfeife", "unisono", "rh", 12, 4], ["akk", "umpa", "srh"], ["mar", "ostinato", "s"], ["bfl", "echo", "r"], ["hack", "arp", "s"]],
-    elben: [["cel", "arp", "srh"], ["shaku", "echo", "rh"], ["ooh", "halte", "h"], ["kal", "glanz", "ib"], ["bra", "terz", "r", -12]],
-    fey: [["cel", "glanz", "srh"], ["xyl", "arp", "rh"], ["kal", "ostinato", "s"], ["pic", "unisono", "h", 12, 5], ["spiel", "echo", "b"]],
-    zwerge: [["taiko", "puls", "svrh"], ["blech", "stoss", "rh"], ["ooh", "halte", "h", -12], ["akk", "umpa", "s"], ["pizz", "umpa", "s"]],
+    elben: [["cel", "arp", "srh"], ["shaku", "echo", "rh"], ["ooh", "halte", "h"], ["kal", "glanz", "ib"], ["bra", "terz", "r", -12], ["koto", "arp", "sb"]],
+    fey: [["cel", "glanz", "srh"], ["xyl", "arp", "rh"], ["kal", "ostinato", "s"], ["pic", "unisono", "h", 12, 5], ["spiel", "echo", "b"], ["koto", "glanz", "r"]],
+    zwerge: [["taiko", "puls", "svrh"], ["blech", "stoss", "rh"], ["ooh", "halte", "h", -12], ["akk", "umpa", "s"], ["pizz", "umpa", "s"], ["horn", "halte", "rh", -12]],
     dorffest: [["akk", "umpa", "srh"], ["hack", "unisono", "rh"], ["pfeife", "echo", "h"], ["xyl", "arp", "s"], ["mar", "ostinato", "s"]],
-    marktplatz: [["mar", "ostinato", "srh"], ["hack", "echo", "rh"], ["bra", "terz", "rh", -12], ["cemb", "arp", "s"], ["sitar", "echo", "b"]],
-    hof: [["cemb", "arp", "srh"], ["blech", "stoss", "h"], ["bra", "terz", "rh", -12], ["bfl", "echo", "s"], ["cel", "glanz", "ib"]],
+    marktplatz: [["mar", "ostinato", "srh"], ["hack", "echo", "rh"], ["bra", "terz", "rh", -12], ["cemb", "arp", "s"], ["sitar", "echo", "b"], ["shanai", "unisono", "rh", 0, 5]],
+    hof: [["cemb", "arp", "srh"], ["blech", "stoss", "h"], ["bra", "terz", "rh", -12], ["bfl", "echo", "s"], ["cel", "glanz", "ib"], ["horn", "stoss", "rh"]],
     shanty: [["akk", "umpa", "srh"], ["pfeife", "unisono", "rh", 12, 4], ["pizz", "ostinato", "s"], ["ooh", "halte", "h", -12], ["bra", "terz", "r", -12]],
     pilger: [["ooh", "halte", "srh"], ["rgl", "glanz", "rh"], ["eh", "unisono", "b", -12], ["bfl", "echo", "h"], ["cel", "glanz", "b"]]
   };
   Object.assign(TX.de, { kapelle: "🎺 Kapelle", kapelleTipp: "Weitere Musiker spielen in den Stimmungen mit – bei jedem neuen Lied eine andere Besetzung.", kapNeu: "Andere Besetzung",
     kapName: { akk: "Akkordeon", hack: "Hackbrett", cemb: "Cembalo", mar: "Marimba", cel: "Celesta", spiel: "Spieluhr", rgl: "Röhrenglocken", taiko: "Taiko", bfl: "Blockflöte",
-      pic: "Piccolo", pfeife: "Blechpfeife", shaku: "Shakuhachi", eh: "Englischhorn", sitar: "Sitar", kal: "Kalimba", bra: "Bratsche", pizz: "Zupfstreicher", blech: "Bläsersatz", xyl: "Xylophon", ooh: "Chor" } });
+      pic: "Piccolo", pfeife: "Blechpfeife", shaku: "Shakuhachi", eh: "Englischhorn", sitar: "Sitar", kal: "Kalimba", bra: "Bratsche", pizz: "Zupfstreicher", blech: "Bläsersatz", xyl: "Xylophon", ooh: "Chor", koto: "Koto", shanai: "Shanai", horn: "Horn" } });
   Object.assign(TX.en, { kapelle: "🎺 Band", kapelleTipp: "More musicians join the moods – a different line-up for every new song.", kapNeu: "Different line-up",
     kapName: { akk: "accordion", hack: "hammered dulcimer", cemb: "harpsichord", mar: "marimba", cel: "celesta", spiel: "music box", rgl: "tubular bells", taiko: "taiko", bfl: "recorder",
-      pic: "piccolo", pfeife: "tin whistle", shaku: "shakuhachi", eh: "cor anglais", sitar: "sitar", kal: "kalimba", bra: "viola", pizz: "pizzicato strings", blech: "brass section", xyl: "xylophone", ooh: "choir" } });
+      pic: "piccolo", pfeife: "tin whistle", shaku: "shakuhachi", eh: "cor anglais", sitar: "sitar", kal: "kalimba", bra: "viola", pizz: "pizzicato strings", blech: "brass section", xyl: "xylophone", ooh: "choir", koto: "koto", shanai: "shehnai", horn: "horn" } });
   /* zwei bis drei Musiker aus dem Kreis der Stimmung – das Schlagwerk (Taiko) höchstens einmal */
   function kapelleWaehlen(k) {
     const pool = KAPELLE[k]; if (!pool) return [];
@@ -6079,7 +6222,7 @@ const ZUS_ICON = {
      (Ruf und Antwort), im Refrain spielen alle und ein Melodie-Instrument hat seine eigene Gegenstimme, ab dem zweiten Refrain
      verdoppelt der Bläsersatz den Ohrwurm. Im Zwischenteil bekommt abwechselnd ein Kapellenmusiker oder Echo bzw. ein Gast das Solo.
      Das Vorspiel deutet ein Kapellenmusiker mit dem Ohrwurm an. Spielt die Kapelle eine eigene Stimme, nimmt sich Echo zurück. */
-  const KAP_MELODISCH = ["bfl", "pfeife", "shaku", "eh", "bra", "pic", "sitar", "akk", "hack", "xyl", "mar", "cemb", "cel", "kal", "spiel"];
+  const KAP_MELODISCH = ["bfl", "pfeife", "shaku", "eh", "shanai", "bra", "pic", "sitar", "koto", "akk", "hack", "xyl", "mar", "cemb", "cel", "kal", "spiel"];
   const KAP_RHYTHMUS = ["puls", "ostinato", "umpa", "stoss", "stampf"];
   function vorkommen(ab) { const r = rolleAn(ab); let n = -1; for (let i = 0; i <= ab; i++) if (rolleAn(i) === r && abschnittAnfang(i)) n++; return Math.max(0, n); }
   const abschnittEnde = ab => { const L = S.ablauf.length, nx = ab + 1; return nx >= L || abschnittAnfang(nx); };
@@ -6381,6 +6524,23 @@ const ZUS_ICON = {
     ooh: { name: "Die Nebelstimmen", geist: 1, bild: [[20, 50, .82], [70, 50, .82], [45, 40, 1]].map(([x, y, s]) => '<g transform="translate(' + x + " " + y + ") scale(" + s + ')"><path d="M-14 86 Q-16 20 0 14 Q16 20 14 86 Q8 80 4 86 Q0 80 -4 86 Q-8 80 -14 86 Z" fill="#c8d8ec"/>' +
       '<path d="M-12 30 Q-14 2 0 0 Q14 2 12 30 Q6 20 0 20 Q-6 20 -12 30 Z" fill="#9ab0cc"/><circle cx="0" cy="18" r="9" fill="#e8f0fa"/><circle cx="-3.4" cy="16" r="1.4" fill="#2a3a5a"/><circle cx="3.4" cy="16" r="1.4" fill="#2a3a5a"/>' +
       '<ellipse class="mund" cx="0" cy="22.5" rx="2.4" ry="3" fill="#2a3a5a"/><rect x="-8" y="40" width="16" height="11" rx="1" fill="#6a4a2a"/><path d="M0 40 v11" stroke="#e8e0d0" stroke-width=".8"/></g>').join("") }
+,
+    koto: { name: "Saya", bild: npc({ ky: 40, haut: "#f4e0cc", kleid: "#5a3a7a", robe: 1, saum: "#e8b8d0", haar: "lang", haarFarbe: "#1a1424", elf: 1,
+      muster: '<path d="M34 60 Q45 70 56 60" stroke="#e8b8d0" stroke-width="1.6" fill="none"/>',
+      instr: '<path d="M18 110 v14 M72 102 v14" stroke="#3a2412" stroke-width="2.4"/><path d="M8 104 L82 94 L82 101 L8 111 Z" fill="#b07a40" stroke="#4a2a10" stroke-width="1.1"/>' +
+        [0, 1, 2, 3, 4].map(i => '<path d="M10 ' + (105.2 + i * 1.2) + ' L80 ' + (95.2 + i * 1.2) + '" stroke="#f0e6cc" stroke-width=".45"/>').join("") +
+        [[24, 103], [34, 101.6], [44, 100.2], [54, 98.8], [64, 97.4]].map(([x, y]) => '<path d="M' + (x - 1.4) + " " + (y + 2) + " L" + x + " " + (y - 1.2) + " L" + (x + 1.4) + " " + (y + 2) + ' Z" fill="#f4ecd8"/>').join(""),
+      arme: nArm(35, 56, 30, 82, 28, 100, "#5a3a7a") + nArm(55, 56, 62, 80, 62, 96, "#5a3a7a") + nH(28, 100, "#f4e0cc") + nH(62, 96, "#f4e0cc") }) },
+    shanai: { name: "Farid", bild: npc({ ky: 40, haut: "#b88660", kleid: "#8a2a4a", hut: "tuch", hutFarbe: "#e0b84a", haar: "kurz", haarFarbe: "#1a120c", bart: "#1a120c", gurt: "#e0b84a", hose: "#e8dcc0", blaest: 1,
+      muster: '<path d="M38 58 L45 66 L52 58" stroke="#e0b84a" stroke-width="1.6" fill="none"/>',
+      instr: '<path d="M46 46 L52 92" stroke="#5a3418" stroke-width="3.2" stroke-linecap="round"/><path d="M49.5 90 L55 90 L59 104 L45.5 104 Z" fill="#e0b84a" stroke="#8a6420" stroke-width=".9"/>' +
+        [58, 66, 74, 82].map(v => '<circle cx="' + (46.6 + (v - 46) * 6 / 46) + '" cy="' + v + '" r=".9" fill="#f0e2b8"/>').join(""),
+      arme: nArm(35, 54, 36, 68, 48, 62, "#8a2a4a") + nArm(55, 54, 60, 80, 51, 84, "#8a2a4a") + nH(48, 62, "#b88660") + nH(51, 84, "#b88660") }) },
+    horn: { name: "Brom Hornbart", bild: npc({ klein: 1, ky: 60, haut: "#e4b48a", kleid: "#5a3a24", hut: "hoerner", hutFarbe: "#9a9aa4", haar: "kurz", haarFarbe: "#a0521e", bart: "#b0602a", gurt: "#c9a24a", hose: "#3a2a1e", blaest: 1,
+      muster: '<path d="M36 84 H54" stroke="#c9a24a" stroke-width="2"/>',
+      instr: '<path d="M48 66 Q60 72 68 60 Q74 50 70 38" stroke="#e8d8b0" stroke-width="5.5" fill="none" stroke-linecap="round"/><path d="M48 66 Q60 72 68 60 Q74 50 70 38" stroke="#b89a60" stroke-width="1" fill="none" stroke-dasharray="2 4"/>' +
+        '<ellipse cx="70" cy="36" rx="6.5" ry="3.4" transform="rotate(-12 70 36)" fill="#f4ead0" stroke="#8a6a30"/><path d="M58 70 l3 -4 M66 62 l4 -2" stroke="#c9a24a" stroke-width="2"/>',
+      arme: nArm(37, 79, 48, 80, 58, 70, "#5a3a24") + nArm(53, 79, 66, 76, 67, 62, "#5a3a24") + nH(58, 70, "#e4b48a") + nH(67, 62, "#e4b48a") }) }
   };
   const KAP_HTML = Object.keys(KAP_FIG).map(id => '<svg class="lw-gast lw-kap kap-' + id + (KAP_FIG[id].geist ? " geist" : "") + ' seite-l" data-gast-bild="kap-' + id + '" viewBox="0 0 90 140" overflow="visible"><g class="gk">' + KAP_FIG[id].bild + "</g></svg>").join("");
   const GAESTE_HTML = '<div class="lw-gaeste" aria-hidden="true">' + KAP_HTML + GAESTE.map(g => '<svg class="lw-gast gast-' + g.id + (g.geist ? " geist" : "") + " seite-" + g.seite + '" data-gast-bild="' + g.id + '" viewBox="0 0 90 140" overflow="visible"><g class="gk">' + GAST_BILD[g.id] + "</g></svg>").join("") + "</div>";
@@ -6987,7 +7147,8 @@ const ZUS_ICON = {
   try { klangAuf = Object.assign(klangAuf, JSON.parse(localStorage.getItem("imres-lw-klangauf") || "{}") || {}); } catch (_) {}
   const KUL_KURZ = 9;
   function klangBox(T) {
-    const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : EFFEKTE;
+    const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : fxTab === "welt" ? WELT_FX : EFFEKTE;
+    if (fxTab === "welt" && klangAuf.fx) setTimeout(weltVorladen, 0);
     let kul = oben("k", KUL_ZEIGEN);
     if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
@@ -6996,7 +7157,7 @@ const ZUS_ICON = {
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) +
       klappe("fx", klangAuf.fx, T.fxKlappe) +
-      (klangAuf.fx ? reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["klassik", T.tabKlassik]], fxTab, T) +
+      (klangAuf.fx ? reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["welt", T.tabWelt], ["klassik", T.tabKlassik]], fxTab, T) +
         kleinRegler("💥", T.effekteKurz, "fxvol", S.fxVol, "lw-fval") +
         '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
 "</section>";

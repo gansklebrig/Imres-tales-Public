@@ -2,6 +2,9 @@ Die Instrumentenaufnahmen in diesem Ordner stammen aus der
 Versilian Community Sample Library (VSCO 2 Community Edition) von Versilian Studios
 https://github.com/sgossner/VSCO-2-CE
 Lizenz: CC0 1.0 Universal (gemeinfrei). Für Imres Tales gekürzt und als MP3 umgewandelt.
+  Erweiterung Oktober 2026: kurz gestoßene Hörner (hornst_*) und Trompeten (trpst_*), Marschtrommel (marsch*),
+  Riesentrommel (riese*), Beckenwirbel (beckenroll, beckenlang), Glockenbaum (glbaum*), Schlittenschellen (schellen*),
+  nepalesische Glöckchen (nepal*) – ebenfalls VSCO 2 CE, CC0.
 
 Die Orgel (orgel_*.mp3) wurde von Simon Dalzell (Ivy Audio) aufgenommen, Winter 2015/16;
 Versilian Studios erlaubt die Weitergabe. Dank an beide.
@@ -9,7 +12,8 @@ Versilian Studios erlaubt die Weitergabe. Dank an beide.
 Laute (gitarre_*), Dudelsack (dudel_*), Panflöte (pan_*), Okarina (oka_*), Gesang (stimme_*) und die Instrumente der Kapelle
 (Akkordeon akk_*, Hackbrett hack_*, Cembalo cemb_*, Marimba mar_*, Celesta cel_*, Spieluhr spiel_*, Röhrenglocken rgl_*, Taiko taiko_*,
 Blockflöte bfl_*, Piccolo pic_*, Blechpfeife pfeife_*, Shakuhachi shaku_*, Englischhorn eh_*, Sitar sitar_*, Kalimba kal_*, Bratsche bra_*,
-Zupfstreicher pizz_*, Bläsersatz blech_*, Xylophon xyl_*, Chor ooh_*) stammen aus dem
+Zupfstreicher pizz_*, Bläsersatz blech_*, Xylophon xyl_*, Chor ooh_*, Aah-Chor aah_*, Koto koto_*, Shanai shanai_*,
+gestimmte Pauken timpt_*) stammen aus dem
 Fluid-R3-GM-Klangsatz von Frank Wen, als Einzeltöne aufbereitet von Benjamin Gleitzman
 (https://github.com/gleitz/midi-js-soundfonts). Lizenz: Creative Commons Namensnennung 3.0
 (https://creativecommons.org/licenses/by/3.0/). Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.
@@ -89,3 +93,12 @@ Klangwelten · Erweiterung Oktober 2026 (amb/):
   aus Moodist (github.com/remvze/moodist, Pixabay-Inhaltslizenz bzw. CC0):
     Hühner (a_huehner), Kühe (a_kuehe), Schafe (a_schafe), schnurrende Katze (a_schnurren), Schritte im Schnee (a_schneeschritte),
     Kiesweg (a_kiesweg)
+
+Spielende Kinder (amb/a_kinder.mp3) – SFX Producer, „Playground“ (CC0), über die App Noisekun (github.com/mateusfg7/Noisekun).
+Für Imres Tales in Mono umgewandelt und neu kodiert.
+
+Klänge der Welt (klang/fx_0_*.mp3) – aus 0 A.D. von Wildfire Games (https://play0ad.com),
+Lizenz: Creative Commons Namensnennung – Weitergabe unter gleichen Bedingungen 3.0 (CC BY-SA 3.0):
+  Pferde (Schnauben, Wiehern), Hufschlag mit Geschirr, Holzräder, Rammbock, Katapult, Balliste, Einsturz, Pfeile und Einschläge,
+  Schwerthiebe, Löwe, Elefant, Pfau, Hund, Säge, Zimmern, Erzabbau sowie Rufe und Grüße der Dorfbewohner (fx_0_v_*).
+Für Imres Tales gekürzt, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert.
