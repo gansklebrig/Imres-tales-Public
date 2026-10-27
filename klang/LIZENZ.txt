@@ -102,3 +102,10 @@ Lizenz: Creative Commons Namensnennung – Weitergabe unter gleichen Bedingungen
   Pferde (Schnauben, Wiehern), Hufschlag mit Geschirr, Holzräder, Rammbock, Katapult, Balliste, Einsturz, Pfeile und Einschläge,
   Schwerthiebe, Löwe, Elefant, Pfau, Hund, Säge, Zimmern, Erzabbau sowie Rufe und Grüße der Dorfbewohner (fx_0_v_*).
 Für Imres Tales gekürzt, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert.
+
+Weitere Klangwelt-Geräusche (amb/e_husten_*, e_essen_*, e_spucken_*, e_schnueffeln_*, e_grunzen_*, e_atem_*, e_stampfen_*, e_geheul_*,
+e_kaefer_*, e_geschirr_*, e_werkzeug_*, e_kiste_*, e_knall_*, e_glocklein_*, e_holzpoltern_*) – rubberduck auf OpenGameArt.org,
+„80 CC0 creature SFX“ (1 und 2), „100 CC0 SFX“ (1 und 2), CC0 1.0, gesammelt im Open Game SFX Index.
+Aus 0 A.D. (CC BY-SA 3.0, siehe oben): Steinmetz (e_steinmetz_*), Feldarbeit (e_feldarbeit_*), Laub (e_laub_*), Steintor (e_steintor_*),
+Riemen (e_riemen_*); Signalhörner (e_signalhorn_*) aus den Hornaufnahmen von VSCO 2 CE (CC0) zusammengesetzt.
+Für Imres Tales gekürzt, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert.
