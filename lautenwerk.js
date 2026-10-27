@@ -1981,7 +1981,7 @@
     vogel: { f: ambReihe("e_vogel_", 10), tempo: [.92, 1.08] }, kraehe: { f: ambReihe("e_kraehe_", 7) }, wolf: { f: ambReihe("e_wolf_", 4), tempo: [.9, 1.03] },
     wal: { f: ambReihe("e_wal_", 3), tempo: [.8, 1] }, pferd: { f: ["e_pferd_1"], tempo: [.9, 1.06] }, katze: { f: ambReihe("e_katze_", 4) }, ruder: { f: ambReihe("e_ruder_", 3) },
     donner: { f: ["fx_fo2_sfx100v2_thunder_01"].concat(ambReihe("e_donner_", 4)), tempo: [.8, 1.05] },
-    chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1 },
+    chor: { f: ["stimme_57", "stimme_60", "stimme_63"], tempo: [.66, .9], lang: 1, ton: { stimme_57: 45, stimme_60: 48, stimme_63: 51 }, stufen: [0, 2, 4] },
     klangschale: { f: ["a_klangschale"], tempo: [.98, 1.02] },
     kuh: { f: ambReihe("e_kuh_", 7), tempo: [.9, 1.05] }, huhn: { f: ambReihe("e_huhn_", 4), tempo: [.92, 1.08], folge: [1, 3, .5, 1.1] }, schaf: { f: ambReihe("e_schaf_", 2), tempo: [.88, 1.1] },
     schwein: { f: ambReihe("e_schwein_", 3), tempo: [.9, 1.08] }, ross: { f: ambReihe("e_ross_", 6).concat(["e_pferd_1"]), tempo: [.92, 1.06] }, hufe: { f: ambReihe("e_hufe_", 6) },
@@ -2004,7 +2004,7 @@
     hieb: { f: ["fx_0_swordhit_10", "fx_0_swordhit_10a", "fx_0_swordhit_11", "fx_0_swordhit_11a", "fx_0_swordhit_12", "fx_0_swordhit_12b", "fx_0_swordhit_13a", "fx_0_swordhit_13b"], folge: [2, 5, .3, .6] },
     pfeil: { f: ["fx_0_arrowfly_1", "fx_0_arrowfly_2", "fx_0_arrowfly_3", "fx_0_arrowfly_4", "fx_0_arrowfly_5", "fx_0_arrowfly_6", "fx_0_arrow_wood_1", "fx_0_arrow_wood_2", "fx_0_arrow_wood_3", "fx_0_arrow_wood_4"], folge: [2, 3, .3, .6] },
     pfau: { f: ["fx_0_peacock_call_01"], tempo: [.95, 1.04] },
-    signalhorn: { f: ambReihe("e_signalhorn_", 3), tempo: [.97, 1.02] },
+    signalhorn: { f: ambReihe("e_signalhorn_", 3), tempo: [.97, 1.02], ton: { e_signalhorn_1: 46, e_signalhorn_2: 43, e_signalhorn_3: 49.91 }, stufen: [0, 4] },
     schellen: { f: ambReihe("e_schellen_", 2), tempo: [.92, 1.08] },
     nepal: { f: ambReihe("e_nepal_", 4), tempo: [.97, 1.03] },
     glbaum: { f: ambReihe("e_glbaum_", 4) },
@@ -2145,6 +2145,15 @@
     /* langsames Atmen der Lautstärke */
     if (ctx.currentTime > b.drift) { b.drift = ctx.currentTime + zz(8, 20); b.out.gain.setTargetAtTime(b.grund * b.regler * zz(.78, 1.15), ctx.currentTime, zz(2, 5)); }
   }
+  /* Tonhafte Geräusche (Signalhorn, Chor) in die Tonart der laufenden Musik rücken: auf den nächsten Ton der
+     erlaubten Stufen (0 = Grundton, 2 = Terz, 4 = Quinte) – sonst klängen sie gegen die Band schief */
+  function tonartRate(basis, ziel, stufen) {
+    if (!laeuft || !S || !MODI[S.modus]) return 0;
+    const sk = MODI[S.modus], grund = MEL_GRUND + S.transpose + hebung, pcs = (stufen || [0]).map(i => ((grund + sk[i]) % 12 + 12) % 12);
+    let best = null;
+    for (let m = Math.round(ziel) - 7; m <= Math.round(ziel) + 7; m++) if (pcs.includes(((m % 12) + 12) % 12) && (best == null || Math.abs(m - ziel) < Math.abs(best - ziel))) best = m;
+    return best == null ? 0 : Math.pow(2, (best - basis) / 12);
+  }
   function weltEreignis(k, [art, , staerke, fern]) {
     const weit = Math.random() < (fern || 0), laut = kulMixWert(k.art, "ev") * staerke * (k.wlaut || 1) * (weit ? zz(.3, .55) : zz(.65, 1));
     if (KUL_FX[art]) { kulFx(KUL_FX[art], ctx.currentTime + .05, laut * 1.3, weit ? { tief: zz(900, 2600) } : {}, k); return; }
@@ -2159,7 +2168,9 @@
     for (let i = 0; i < n; i++) {
       const name = zufall(e.f), b = ambPuffer(name);
       if (!b) { ambLaden(name); continue; }
-      const q = ctx.createBufferSource(), r = e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05); q.buffer = b; q.playbackRate.value = r;
+      let r = e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05);
+      if (e.ton && e.ton[name] != null) r = tonartRate(e.ton[name], e.ton[name] + 12 * Math.log2(r), e.stufen) || r;
+      const q = ctx.createBufferSource(); q.buffer = b; q.playbackRate.value = r;
       if (e.lang) { const gg = ctx.createGain(), d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(1, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); q.connect(gg); gg.connect(g); }
       else if (e.folge) { const gg = ctx.createGain(); gg.gain.value = zz(.7, 1); q.connect(gg); gg.connect(g); }
       else q.connect(g);
@@ -3891,7 +3902,7 @@ const ZUS_ICON = {
     fag: [34,  37,  41,  45,  46,  48,  55,  60,  63,  68,  69,  72], pos: [34,  37,  39,  41,  46,  50,  53,  60,  61,  63,  65], vctrem: [36,  40,  43,  50,  53,  57,  59,  60,  64,  67,  71,  74,  77], trp: [53,  57,  60,  63,  67,  70,  74,  77,  81,  84], oboest: [58,  62,  65,  70,  74,  77,  82,  89], kb: [28,  30,  31,  34,  36,  38,  40,  42,  44,  45,  49,  52,  56,  59], geigest: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], geige: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], tuba: [34,  39,  41,  46,  50,  53,  58], klar: [50,  53,  58,  62,  65,  70,  74,  77,  82,  86,  90], orgel: [36,  42,  48,  54,  60,  66,  72,  78,  84,  90,  96], vlntrem: [55,  57,  59,  62,  69,  72,  76,  79,  83,  86], oboe: [58,  62,  65,  70,  74,  77,  82,  86,  89] };
   /* Stimmung der Aufnahmen, nachgemessen (Cent zu hoch +, zu tief −): einige Flöten, die Harfe und manche Streicher waren
      bis zu 25 Cent verstimmt, eine Klarinetten-Aufnahme sogar einen Halbton – das wird beim Abspielen ausgeglichen */
-  const STIMM_KORR = {"hornst":{"33":23,"36":14,"39":38,"53":6,"57":29,"77":8},"trpst":{"53":20,"57":9,"60":15,"65":-9,"67":9,"77":14,"81":13},"aah":{"48":-45,"51":-45,"54":-36,"57":-19,"60":-19,"63":-42,"66":5,"75":-17,"78":6,"81":-10},"akk":{"80":6,"83":6,"86":6,"89":11},"hack":{"63":7,"66":5},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"36":-24,"39":-11,"42":22,"45":24,"48":20,"51":22,"57":12,"60":5,"69":-13,"72":7,"78":-12,"81":-21},"blech":{"61":5,"64":5},"vln":{"69":5,"62":6,"66":-5},"vc":{"40":-11,"53":16},"spic":{"36":-6,"40":-8,"53":-16,"57":6,"60":23,"64":-9,"67":-18,"71":-7,"74":-7,"77":7,"43":-5},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":10,"50":5,"53":-5,"57":7,"59":23,"64":12,"67":-12,"71":-10,"74":-8,"77":14},"trp":{"53":-7,"67":10,"74":7,"81":9},"oboest":{"89":-13},"kb":{"30":-22,"34":-7,"36":-20,"38":7,"40":-14,"42":-5,"56":-28,"59":-13},"geigest":{"55":6,"60":-9,"72":6,"76":5,"84":5,"91":6},"geige":{"60":22,"64":7,"67":-5,"76":7,"79":7,"88":8,"84":-5},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10},"vlntrem":{"57":-11,"69":-8,"72":8,"79":-8},"flst":{"72":-8,"88":-17,"93":-7},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-9,"53":-7},"bfl":{"60":13,"75":10,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6,"63":10,"66":6,"69":5,"72":5},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":18,"81":6,"84":-7,"87":11,"90":15,"93":11},"shaku":{"55":-8,"58":-8,"61":-8,"64":-5},"eh":{"55":7,"64":-9,"67":9,"70":-7,"76":-8,"79":-9},"bra":{"54":14,"84":-6,"60":7,"63":-6,"81":9},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24}};
+  const STIMM_KORR = {"timpt":{"36":-26},"hornst":{"33":-12,"36":-39,"39":9},"trpst":{"53":8,"60":9,"74":10,"77":10,"81":14},"aah":{"48":-21,"51":-41,"54":-25,"57":-26,"60":-14,"63":-25,"66":-12,"75":-28,"81":-11},"akk":{"80":6,"83":6,"86":6,"89":11},"hack":{"63":7,"66":5},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"36":-24,"39":-11,"42":22,"45":24,"48":20,"51":22,"57":12,"60":5,"69":-13,"72":7,"78":-12,"81":-21},"blech":{"61":5,"64":5},"vln":{"69":5,"62":6,"66":-5},"vc":{"40":-11,"53":16},"spic":{"36":-6,"40":-8,"53":-16,"57":6,"60":23,"64":-9,"67":-18,"71":-7,"74":-7,"77":7,"43":-5},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":10,"50":5,"53":-5,"57":7,"59":23,"64":12,"67":-12,"71":-10,"74":-8,"77":14},"trp":{"53":-7,"67":10,"74":7,"81":9},"oboest":{"89":-13},"kb":{"30":-22,"34":-7,"36":-20,"38":7,"40":-14,"42":-5,"56":-28,"59":-13},"geigest":{"55":6,"60":-9,"72":6,"76":5,"84":5,"91":6},"geige":{"60":22,"64":7,"67":-5,"76":7,"79":7,"88":8,"84":-5},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10},"vlntrem":{"57":-11,"69":-8,"72":8,"79":-8},"flst":{"72":-8,"88":-17,"93":-7},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-9,"53":-7},"bfl":{"60":13,"75":10,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6,"63":10,"66":6,"69":5,"72":5},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":18,"81":6,"84":-7,"87":11,"90":15,"93":11},"shaku":{"55":-8,"58":-8,"61":-8,"64":-5},"eh":{"55":7,"64":-9,"67":9,"70":-7,"76":-8,"79":-9},"bra":{"54":14,"84":-6,"60":7,"63":-6,"81":9},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24}};
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
   function sampleLaden(name) {
