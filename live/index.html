@@ -542,17 +542,25 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   }
 
   /* ---------- Einzelgeräusche: mal nah, mal fern, links und rechts ---------- */
-  function ereignis(art, staerke, fern, vonHand) {
+  /* weit = leiser, dumpfer, mehr Hall; dumpf = durch Mauern; wandern = zieht von einer Seite zur anderen vorbei */
+  function ereignis(art, staerke, fern, vonHand, o) {
     const e = EV[art]; if (!e) return;
+    o = vonHand ? {} : (o || {});
     const j = ctx.currentTime + .02, tf = tonFaktor();
-    const weit = !vonHand && Math.random() < (fern || 0), laut = staerke * (vonHand ? zz(.9, 1.05) : weit ? zz(.3, .55) : zz(.65, 1)) * trimVon(aktiv && aktiv.welt);
+    const weit = !vonHand && !o.dumpf && Math.random() < (fern || 0), laut = staerke * (vonHand ? zz(.9, 1.05) : o.dumpf ? zz(.55, .85) : weit ? zz(.3, .55) : zz(.65, 1)) * trimVon(aktiv && aktiv.welt);
+    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1, dauer = e.folge ? n * (e.folge[2] + e.folge[3]) / 2 + 1.5 : 5;
     const g = ctx.createGain(); g.gain.value = laut;
+    if (o.wandern) { g.gain.setValueAtTime(laut * .2, j); g.gain.linearRampToValueAtTime(laut, j + dauer * .5); g.gain.linearRampToValueAtTime(laut * .15, j + dauer); }
     let letzter = g;
-    if (weit) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = zz(900, 2600); g.connect(lp); letzter = lp; }
-    if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = vonHand ? zz(-.45, .45) : zz(-.8, .8); letzter.connect(pn); letzter = pn; }
-    letzter.connect(trocken); const s = ctx.createGain(); s.gain.value = weit ? .8 : .35; letzter.connect(s); s.connect(hallEin);
+    if (weit || o.dumpf) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = o.dumpf ? zz(450, 800) : zz(900, 2600); g.connect(lp); letzter = lp; }
+    if (ctx.createStereoPanner) {
+      const pn = ctx.createStereoPanner();
+      if (o.wandern) { const von = Math.random() < .5 ? -.95 : .95; pn.pan.setValueAtTime(von, j); pn.pan.linearRampToValueAtTime(-von, j + dauer); }
+      else pn.pan.value = vonHand ? zz(-.45, .45) : zz(-.8, .8);
+      letzter.connect(pn); letzter = pn;
+    }
+    letzter.connect(trocken); const s = ctx.createGain(); s.gain.value = o.dumpf ? 1.1 : weit ? .8 : .35; letzter.connect(s); s.connect(hallEin);
     if (e.s) { const b = synthEreignis(e.s); if (b) spiel(b, g, j, zz(.94, 1.06) * tf); return; }
-    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1;
     let t = j;
     for (let k = 0; k < n; k++) {
       const name = zufall(e.f), b = pufferHol(name), pg = PEGEL[name] || 1;
@@ -622,7 +630,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     aktiv.welt.ereignisse.forEach((ev, i) => {
       const [art, [a, b], st, fern] = ev;
       if (aktiv.naechst[i] == null) aktiv.naechst[i] = j + zz(a * .3, b) / aktiv.leben;
-      if (j >= aktiv.naechst[i]) { try { ereignis(art, st, fern, false); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / aktiv.leben; }
+      if (j >= aktiv.naechst[i]) { try { ereignis(art, st, fern, false, ev[4]); } catch (_) {} aktiv.naechst[i] = j + zz(a, b) / aktiv.leben; }
     });
   }
   const puls = $("puls");
