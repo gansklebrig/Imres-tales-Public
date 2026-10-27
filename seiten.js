@@ -35,6 +35,8 @@
         nsc: "Freund, Feind und Fragezeichen.",
         bestiarium: "Alles, was uns fressen wollte.",
         taverne: "Heldensturm, Friedrichs Jagd, Ezekiels lange Nacht, Echos Hort, Barradins Auftritt, Loblied & Spott und Bestiarium-Memory.",
+        /* schmale Kacheln (Handy): kurze Fassung, sonst passt der Text nicht hinein */
+        taverneKurz: "Würfeln, kämpfen, stehlen, singen – zieh dir einen Hocker ran.",
         buehne: "Lautenwerk und Spielleiter-Pult für eure Sessions."
       },
       zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "7 Spiele", buehne: () => "♪ Musik" }
@@ -54,6 +56,7 @@
         nsc: "Friend, foe and question mark.",
         bestiarium: "Everything that wanted to eat us.",
         taverne: "Heldensturm, Friedrich's Hunt, Ezekiel's Long Night, Echo's Hoard, Barradin's Performance, Praise & Mockery and Bestiary Memory.",
+        taverneKurz: "Roll, fight, steal, sing – pull up a stool.",
         buehne: "Lautenwerk and Dungeon Master's console for your sessions."
       },
       zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "7 games", buehne: () => "♪ Music" }
@@ -317,7 +320,7 @@
       '<a class="kachel k-' + id + '" href="#' + id + '" style="--i:' + i + '">' +
         '<img src="' + esc(klein(bild(id))) + '" data-gross="' + esc(bild(id)) + '" alt="" loading="lazy" onerror="if(this.dataset.gross&&this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross">' +
         '<span class="kachel-text"><span class="kachel-zahl">' + esc(T.zahl[id](anzahl(id))) + "</span>" +
-        "<b>" + esc(T.namen[id]) + "</b><small>" + esc(T.texte[id]) + "</small></span></a>").join("");
+        "<b>" + esc(T.namen[id]) + "</b><small>" + (T.texte[id + "Kurz"] ? '<span class="k-lang">' + esc(T.texte[id]) + '</span><span class="k-kurz">' + esc(T.texte[id + "Kurz"]) + "</span>" : esc(T.texte[id])) + "</small></span></a>").join("");
     if (window.IntersectionObserver && !ruhig) {
       const io = new IntersectionObserver(eintraege => eintraege.forEach(en => {
         if (en.isIntersecting) { en.target.classList.add("sichtbar"); io.unobserve(en.target); }
@@ -435,7 +438,7 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .kacheln { display: grid; gap: clamp(.7rem, 2vw, 1.1rem); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 760px) { .kacheln { grid-template-columns: repeat(4, minmax(0, 1fr)); } .kachel.k-chronik { grid-column: span 2; grid-row: span 2; } }
 .kachel {
-  position: relative; display: block; overflow: hidden; min-height: clamp(150px, 26vw, 210px); text-decoration: none;
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; min-height: clamp(150px, 26vw, 210px); text-decoration: none;
   border: 1px solid var(--line); background: var(--hall);
   opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease, border-color .3s, box-shadow .3s;
   transition-delay: calc(var(--i) * 70ms);
@@ -445,12 +448,15 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .kachel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(16,14,21,0) 30%, rgba(16,14,21,.92)); }
 .kachel:hover, .kachel:focus-visible { border-color: var(--ember); box-shadow: 0 0 0 1px var(--ember), 0 12px 34px rgba(0,0,0,.55), 0 0 26px rgba(224,160,70,.18); }
 .kachel:hover img, .kachel:focus-visible img { transform: scale(1.08); filter: saturate(1) brightness(.78); }
-.kachel-text { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; padding: .9rem; display: grid; gap: .15rem; }
+/* Text im Fluss statt absolut: wird er länger (schmales Handy, Englisch, „neu“-Zeichen), wächst die Kachel mit statt oben abzuschneiden */
+.kachel-text { position: relative; z-index: 1; padding: .9rem; display: grid; gap: .15rem; }
 .kachel-text b { font-family: var(--display); font-weight: 400; font-size: clamp(1.15rem, 2.8vw, 1.6rem); line-height: 1.05; color: var(--vellum); }
 .kachel.k-chronik .kachel-text b { font-size: clamp(1.5rem, 4vw, 2.6rem); }
 .kachel-text small { font-size: .82rem; line-height: 1.35; color: var(--ash); }
 .kachel-zahl { justify-self: start; font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--night); background: var(--ember); padding: .1rem .45rem; margin-bottom: .25rem; }
 .kachel.k-buehne .kachel-zahl { background: #7fd36b; }
+.kachel .k-kurz { display: none; }
+@media (max-width: 759px) { .kachel .k-lang { display: none; } .kachel .k-kurz { display: inline; } }
 
 .bereich-zurueck { display: inline-block; margin-bottom: 1.2rem; font-size: .88rem; color: var(--ash); text-decoration: none; }
 .bereich-zurueck:hover { color: var(--ember); }
