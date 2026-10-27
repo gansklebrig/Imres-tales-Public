@@ -24,11 +24,8 @@
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Schriften blockieren nichts: Hängt Google Fonts, steht die Seite trotzdem (erst mit Ersatzschrift, dann display=swap) -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap"></noscript>
+<link rel="stylesheet" href="schriften/schriften.css">
 <noscript><style>main > section.part { display: block !important; }</style></noscript>
 <style>
 /* Layout: ein nächtliches Gasthaus-Buch. Gruppenbild als Fries oben, dann Chronik, Reisekarte, Gefährten als abwechselnde Doppelseiten und das Bestiarium. Bewusst nur dunkel. */
@@ -1042,7 +1039,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
         '<h4>Klänge im Heldensturm</h4><p>Musik und Geräusche im Heldensturm stammen aus dem Lautenwerk: dieselben Stimmungen und dieselben Aufnahmen wie oben. Klingen, Pfeile und Hiebe entstehen aus gefiltertem Rauschen.</p>' +
         '<h4>Die Spiele der Taverne</h4><p>Friedrichs Jagd, Ezekiels lange Nacht, Echos Hort, Barradins Auftritt, Heldensturm, Loblied &amp; Spott und das Bestiarium-Memory sind eigens für diese Seite entstanden – Figuren, Karten, Kulissen und Texte werden im Browser gezeichnet bzw. geschrieben; die Jagd und die lange Nacht klingen mit gerechneten Klängen. Fremde Aufnahmen und Bilder darin sind die oben genannten. Die Vorschaubilder und Clips im Spielesaal sind Aufnahmen aus unseren eigenen Spielen.</p>' +
         '<h4>Technik</h4><p>Die Seite wohnt bei <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>; die gemeinsamen Bestenlisten und die Questtafel laufen über <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>. Der Heldensturm zählt dort außerdem anonym, wie oft und wie lange gespielt wird – ohne Namen, IP-Adresse oder Gerätekennung. Danke für die kostenlosen Plätze!</p>' +
-        '<h4>Schriften</h4><p>IM Fell English von Igino Marini, Spectral von Production Type, Caveat von Impallari Type und Alegreya Sans von Huerta Tipográfica – über <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a> unter der SIL Open Font License.</p>' +
+        '<h4>Schriften</h4><p>IM Fell English von Igino Marini, Spectral von Production Type, Caveat von Impallari Type und Alegreya Sans von Huerta Tipográfica – aus <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a>, liegen aber auf dieser Seite selbst (über <a href="https://fontsource.org" target="_blank" rel="noopener">Fontsource</a>), unter der SIL Open Font License.</p>' +
         '<p class="dank-klein">Seite, Spiele und Chronik: Georg (Barradin) – gebaut mit Hilfe von Claude (Anthropic).</p>' +
         '<p class="dank-schluss">Barradin dankt allen, die ihn ertragen.</p>',
       kapitel: "Kapitel", aufKarte: "Auf der Karte zeigen", aufKarteKurz: "Auf der Karte",
@@ -1107,7 +1104,7 @@ footer .fuss-recht a { color: inherit; text-underline-offset: .15em; }
         '<h4>Sounds in Heldensturm</h4><p>Music and sounds in Heldensturm come from the Lautenwerk: the same moods and the same recordings as above. Blades, arrows and blows are made from filtered noise.</p>' +
         '<h4>The tavern games</h4><p>Friedrich’s Hunt, Ezekiel’s Long Night, Echo’s Hoard, Barradin’s Performance, Heldensturm, Praise &amp; Mockery and the Bestiary Memory were made for this site – characters, maps, scenery and texts are drawn and written in the browser; the hunt and the long night use synthesized sounds. Any outside recordings and images in them are the ones credited above. The preview images and clips in the game hall are recordings of our own games.</p>' +
         '<h4>Technology</h4><p>The site lives on <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>; the shared leaderboards and the quest board run on <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>. Heldensturm also counts there, anonymously, how often and how long people play – no names, IP addresses or device IDs. Thanks for the free seats!</p>' +
-        '<h4>Typefaces</h4><p>IM Fell English by Igino Marini, Spectral by Production Type, Caveat by Impallari Type and Alegreya Sans by Huerta Tipográfica – via <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a> under the SIL Open Font License.</p>' +
+        '<h4>Typefaces</h4><p>IM Fell English by Igino Marini, Spectral by Production Type, Caveat by Impallari Type and Alegreya Sans by Huerta Tipográfica – from <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a>, but hosted on this site itself (via <a href="https://fontsource.org" target="_blank" rel="noopener">Fontsource</a>), under the SIL Open Font License.</p>' +
         '<p class="dank-klein">Site, games and chronicle: Georg (Barradin) – built with help from Claude (Anthropic).</p>' +
         '<p class="dank-schluss">Barradin thanks everyone who puts up with him.</p>',
       kapitel: "Chapter", aufKarte: "Show on the map", aufKarteKurz: "On the map",

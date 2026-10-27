@@ -5,7 +5,7 @@
 -- Was gespeichert wird (eine Zeile pro Besuch):
 --   eine zufällige Sitzungsnummer (sie wird auf dem Gerät nicht gespeichert, ein späterer Besuch bekommt eine neue),
 --   Beginn und letzte Meldung, aktive Spielzeit in Sekunden, Zahl der Läufe, weiteste Stufe, zuletzt gespielter Held und Modus,
---   Handy oder PC, größte Mitspielerzahl, ob online gespielt wurde und ob es der erste Besuch auf diesem Gerät war.
+--   Handy oder PC, größte Mitspielerzahl und ob online gespielt wurde.
 --   Keine Namen, keine IP-Adressen, keine Gerätekennung.
 -- Ansehen: https://imrestales.de/heldensturm.html#statistik – oder im Table Editor unter „hs_sitzung“.
 -- Alte Einträge (älter als zwei Jahre) werden nach und nach von selbst gelöscht.

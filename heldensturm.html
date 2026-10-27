@@ -11,8 +11,7 @@
 <style>[hidden]{display:none!important}body{margin:0}</style>
 <title>Heldensturm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="schriften/schriften.css">
 <style>
 /* Layout: Vollbild-Canvas als Spielwelt, darüber ein schlankes HUD und Pergament-dunkle Menüs. Eine einzige, bewusst dunkle Welt. */
 :root{
@@ -4509,7 +4508,7 @@ function hsServer(pfad,body){const h={apikey:HS_SERVER.key,'Content-Type':'appli
  return fetch(HS_SERVER.url+pfad,body===undefined?Object.assign({headers:h,cache:'no-store'},sg):Object.assign({method:'POST',headers:h,body:JSON.stringify(body)},sg)).then(r=>r.ok?(r.status===204?null:r.json()):r.text().then(t=>{let j=null;try{j=JSON.parse(t)}catch(e){}return Promise.reject({status:r.status,msg:j&&typeof j.message==='string'?j.message:''})},()=>Promise.reject({status:r.status,msg:''})),e=>Promise.reject(e&&e.status!==undefined?e:{status:0,msg:''})).finally(()=>clearTimeout(tm))}
 /* ================= Anonyme Spielstatistik =================
    Pro Besuch eine zufällige Sitzungsnummer (nur im Speicher, nicht auf dem Gerät), aktive Spielzeit, Läufe, weiteste Stufe.
-   Keine Namen, keine Gerätekennung. Nur auf imrestales.de. Server: Tabelle hs_sitzung (supabase-statistik.sql).
+   Keine Namen, keine Gerätekennung, nichts wird dafür auf dem Gerät gespeichert (§ 25 TDDDG). Nur auf imrestales.de. Server: Tabelle hs_sitzung (supabase-statistik.sql).
    Ansicht: heldensturm.html#statistik */
 const STAT={id:null,sek:0,laeufe:0,stufe:0,neu:false,last:''};
 const statAus=()=>{try{return localStorage.getItem('imres-statistik-aus')==='1'}catch(e){return false}};
@@ -4517,8 +4516,7 @@ function statUuid(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID
 function statPuls(force){if(!STAT.id||statAus())return;const b={p_id:STAT.id,p_sek:Math.round(STAT.sek),p_laeufe:STAT.laeufe,p_stufe:STAT.stufe,p_held:P&&P.id||null,p_modus:G.mode||null,p_geraet:MOBIL?'handy':'pc',p_spieler:Math.max(1,PL.length||1),p_online:!!(G.net||(typeof NET!=='undefined'&&NET.role)),p_neu:STAT.neu};
  const k=JSON.stringify(b);if(!force&&k===STAT.last)return;STAT.last=k;hsServer('/rest/v1/rpc/hs_puls',b).catch(()=>{})}
 function statStart(){if(STAT.id||location.hostname!=='imrestales.de'||statAus())return;STAT.id=statUuid();
- try{STAT.neu=localStorage.getItem('imres-statistik-alt')!=='1';localStorage.setItem('imres-statistik-alt','1')}catch(e){}
- statPuls(true);setInterval(()=>{if(G.state==='play'&&!G.paused&&!document.hidden&&!G.bot){STAT.sek++;STAT.stufe=Math.max(STAT.stufe,(G.stage||0)+1)}},1000);
+  statPuls(true);setInterval(()=>{if(G.state==='play'&&!G.paused&&!document.hidden&&!G.bot){STAT.sek++;STAT.stufe=Math.max(STAT.stufe,(G.stage||0)+1)}},1000);
  setInterval(()=>statPuls(),90000);document.addEventListener('visibilitychange',()=>{if(document.hidden)statPuls()});addEventListener('pagehide',()=>statPuls())}
 function statZeigen(){let d=document.getElementById('statBox');if(!d){d=document.createElement('div');d.id='statBox';d.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(8,6,10,.92);overflow:auto;padding:24px 16px;font-family:"Alegreya Sans",sans-serif;color:#e8dcc4';document.body.appendChild(d)}
  const zu=()=>{d.remove();if(location.hash==='#statistik')history.replaceState(null,'',location.pathname+location.search)};
@@ -4530,7 +4528,7 @@ function statZeigen(){let d=document.getElementById('statBox');if(!d){d=document
   const hel=Object.keys(H).length?`<h3 style="margin:18px 0 8px;color:#e5b454">Gespielte Helden</h3><div style="display:flex;gap:8px;flex-wrap:wrap">${Object.entries(H).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<span class="chip on">${esc(HEROES[k]?HEROES[k].name:k)}: ${n}</span>`).join('')}</div>`:'';
   const aus=statAus();
   d.innerHTML=rahmen(`<p style="opacity:.8;font-size:14px">Anonym gezählt seit ${S.erste?esc(new Date(S.erste).toLocaleDateString('de-DE')):'–'}. Ein Besuch = einmal die Seite geöffnet; „gespielt“ = mindestens 30 Sekunden gespielt.</p>
-   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px">${z(S.besuche,'Besuche insgesamt')}${z(S.neu,'davon zum ersten Mal auf dem Gerät','#8fe7ff')}${z(S.gespielt,'Besuche mit Spielzeit','#8ff08a')}${z(S.stunden+' h','Spielzeit insgesamt')}${z(S.schnitt_min+' min','im Schnitt pro Besuch','#8ff08a')}${z(S.laengste_min+' min','längster Besuch','#c8a0ff')}${z(S.laeufe,'Läufe gestartet')}${z(S.weiteste,'weiteste Stufe','#ff8a5a')}${z(S.heute,'Besuche in 24 Stunden','#8fe7ff')}${z(S.woche,'in 7 Tagen','#8fe7ff')}${z(S.monat,'in 30 Tagen','#8fe7ff')}${z(S.handy+' / '+S.pc,'Handy / PC','#c8a0ff')}${z(S.gemeinsam,'mit Mitspielern','#c8a0ff')}${z(S.online,'davon online','#c8a0ff')}</div>${tage}${hel}
+   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px">${z(S.besuche,'Besuche insgesamt')}${z(S.gespielt,'Besuche mit Spielzeit','#8ff08a')}${z(S.stunden+' h','Spielzeit insgesamt')}${z(S.schnitt_min+' min','im Schnitt pro Besuch','#8ff08a')}${z(S.laengste_min+' min','längster Besuch','#c8a0ff')}${z(S.laeufe,'Läufe gestartet')}${z(S.weiteste,'weiteste Stufe','#ff8a5a')}${z(S.heute,'Besuche in 24 Stunden','#8fe7ff')}${z(S.woche,'in 7 Tagen','#8fe7ff')}${z(S.monat,'in 30 Tagen','#8fe7ff')}${z(S.handy+' / '+S.pc,'Handy / PC','#c8a0ff')}${z(S.gemeinsam,'mit Mitspielern','#c8a0ff')}${z(S.online,'davon online','#c8a0ff')}</div>${tage}${hel}
    <div style="margin-top:20px;padding-top:14px;border-top:1px solid #3a2e40;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button id="statAusBtn" class="btn small">${aus?'Dieses Gerät wieder mitzählen':'Dieses Gerät nicht mehr mitzählen'}</button><span style="font-size:13px;opacity:.75">${aus?'Dieses Gerät wird gerade nicht gezählt.':'Praktisch für deine eigenen Geräte, damit nur andere Spieler zählen.'}</span></div>`);
   d.querySelector('#statZu').onclick=zu;d.querySelector('#statAusBtn').onclick=()=>{try{if(statAus())localStorage.removeItem('imres-statistik-aus');else localStorage.setItem('imres-statistik-aus','1')}catch(e){}statZeigen()}})
  .catch(e=>{d.innerHTML=rahmen(`<p>Die Statistik ist noch nicht erreichbar${e&&e.status===404?' – auf dem Server fehlt noch supabase-statistik.sql':''}.</p>`);d.querySelector('#statZu').onclick=zu})}
@@ -6323,8 +6321,8 @@ function nDec(v,res){if(typeof v==='string'){if(v[0]==='$')return netReg().get(v
 const nSame=(a,b)=>a===b||(a&&b&&typeof a==='object'&&typeof b==='object'&&JSON.stringify(a)===JSON.stringify(b));
 
 /* ---------- Transport ---------- */
-function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
-function netCfg(){return Object.assign({debug:0,config:{iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]}},window.__netcfg||{})}
+function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
+function netCfg(){return Object.assign({debug:0,config:{iceServers:[{urls:'stun:stun.cloudflare.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]}},window.__netcfg||{})}
 /* Eigener Kanal ohne Neuversand: verlorene Pakete stören nicht, das nächste ersetzt sie ohnehin */
 function netU(conn,onMsg){try{const pc=conn.peerConnection;if(!pc)return null;const u=pc.createDataChannel('hsu',{negotiated:true,id:77,ordered:false,maxRetransmits:0});u.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(er){return}onMsg(m)};return u}catch(e){return null}}
 function netSendR(conn,m){if(!conn||!conn.open){NET.tx.closed=(NET.tx.closed||0)+1;return}NET.tx[m.t]=(NET.tx[m.t]||0)+1;const go=()=>{try{conn.send(m)}catch(e){}};if(NET.sim)netSim(go);else go()}
