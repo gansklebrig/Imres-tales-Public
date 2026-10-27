@@ -6858,8 +6858,8 @@ const ZUS_ICON = {
       gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im Zwischenteil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
       mitspieler: "Band allein: nur Barradin, Friedrich, Echo, Ezekiel und Rex. Ein paar Mitspieler: dazu das Geister-Orchester, ein Musiker der Kapelle und die Gäste aus eurer Geschichte. Volle Big Band: die ganze Kapelle. Aufgeklappt lässt sich jede Gruppe einzeln an- und abschalten; die Gäste kommen nur in Stimmungen, die zu ihnen passen.",
       speichern: "Merkt sich die aktuelle Stimmung samt Intensität, Kulisse, Hall, Instrumenten und Gästen – als neue Stimmung (⭐) oder als eigene Fassung einer vorhandenen (✎).",
-      musik: "Stimmungen komponieren endlos neue Lieder im passenden Charakter – mit Vorspiel, Strophe, einem Refrain zum Mitsummen, Zwischenteil und großem Schlussrefrain. Lieder sind fertige Stücke der Band und Cover alter Volksweisen, unter „Eigene“ liegen deine gespeicherten Lieder.",
-      klang: "Kulissen sind Hintergrundgeräusche, die dauerhaft laufen. Effekte erklingen einmal auf Knopfdruck. Beide laufen über der Musik, die Lautstärke regelst du direkt über den Kacheln.",
+      musik: "Stimmungen komponieren endlos neue Lieder im passenden Charakter – mit Vorspiel, Strophe, einem Refrain zum Mitsummen, Zwischenteil und großem Schlussrefrain. Lieder sind fertige Stücke der Band und Cover alter Volksweisen, unter „Eigene“ liegen deine gespeicherten Lieder. Eine Kachel 2 Sekunden gedrückt halten heftet sie oben an (nochmal halten löst sie wieder).",
+      klang: "Kulissen sind Hintergrundgeräusche, die dauerhaft laufen. Effekte erklingen einmal auf Knopfdruck. Beide laufen über der Musik, die Lautstärke regelst du direkt über den Kacheln. Eine Kachel 2 Sekunden gedrückt halten heftet sie oben an.",
       hall: "Raumhall für die Musik, die Kulissen, Cover und Klassiker – die Geräuscheffekte bleiben trocken. „Raum“ wählt die Art des Raums, Echo-Hall gilt nur für Echos Flöte."
     },
     schritte: [
@@ -6882,8 +6882,8 @@ const ZUS_ICON = {
       gaeste: "Characters from your story join in fitting moods and get a solo in the bridge. Expand to switch single guests on or off.",
       mitspieler: "Band alone: just Barradin, Friedrich, Echo, Ezekiel and Rex. A few players: plus the ghost orchestra, one street-band musician and the guests from your story. Full big band: the whole street band. Expanded, every group can be switched on or off; guests only join moods that suit them.",
       speichern: "Saves the current mood with intensity, backdrop, reverb, instruments and guests – as a new mood (⭐) or as your own version of an existing one (✎).",
-      musik: "Moods keep composing new songs in their character – with intro, verse, a chorus to hum along, bridge and a big final chorus. Songs are finished pieces by the band and covers of old folk tunes; “Own” holds your saved songs.",
-      klang: "Backdrops are background sounds that keep running. Effects play once per tap. Both play over the music; set their volume right above the tiles.",
+      musik: "Moods keep composing new songs in their character – with intro, verse, a chorus to hum along, bridge and a big final chorus. Songs are finished pieces by the band and covers of old folk tunes; “Own” holds your saved songs. Hold a tile for 2 seconds to pin it to the top (hold again to unpin).",
+      klang: "Backdrops are background sounds that keep running. Effects play once per tap. Both play over the music; set their volume right above the tiles. Hold a tile for 2 seconds to pin it to the top.",
       hall: "Room reverb for music, backdrops, covers and classics – sound effects stay dry. “Room” picks the kind of space, echo reverb only applies to Echo's flute."
     },
     schritte: [
@@ -6988,8 +6988,8 @@ const ZUS_ICON = {
   document.addEventListener("keydown", e => { if (e.key === "Escape") infoZu(); });
   window.addEventListener("scroll", () => { if (infoBlase) infoZu(); }, { passive: true });
   /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
-  Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften" });
-  Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin" });
+  Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften", favGesetzt: n => "📌 " + n + " ist jetzt oben angeheftet – nochmal 2 Sekunden halten löst es wieder.", favGeloest: n => n + " ist nicht mehr angeheftet.", favPunktTipp: "Angeheftet – 2 Sekunden gedrückt halten löst es wieder" });
+  Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin", favGesetzt: n => "📌 " + n + " is now pinned to the top – hold for 2 seconds again to unpin.", favGeloest: n => n + " is no longer pinned.", favPunktTipp: "Pinned – hold for 2 seconds to unpin" });
   let favs = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-favs")); if (Array.isArray(x)) return x.filter(f => typeof f === "string").slice(0, 80); } catch (_) {} return []; })();
   function favsMerken() { try { localStorage.setItem("imres-lw-favs", JSON.stringify(favs)); } catch (_) {} }
   const FAV_Q = { "data-vorlage": "v", "data-sfx": "s", "data-kulisse": "k" };
@@ -6998,20 +6998,37 @@ const ZUS_ICON = {
     const rang = k => { const i = favs.indexOf(q + ":" + k); return i < 0 ? 1e4 : i; };
     return liste.map((k, i) => [k, i]).sort((x, y) => rang(x[0]) - rang(y[0]) || x[1] - y[1]).map(x => x[0]);
   }
-  /* der Punkt in der Ecke: ein eigener Tippbereich innerhalb der Kachel */
+  /* Anheften: Kachel 2 Sekunden gedrückt halten (nochmal halten löst es wieder). Der Punkt zeigt nur noch an, dass sie angeheftet ist –
+     als eigener Tippbereich wurde er zu oft aus Versehen getroffen. */
+  const FAV_HALTEN = 2000;
   function favPunkt(attr, wert) {
     const q = FAV_Q[attr]; if (!q || hoerer || wert === "zufall" || wert === "leer") return "";
-    const an = favs.includes(q + ":" + wert), T = t();
-    return '<span class="lw-pin' + (an ? " an" : "") + '" data-pin="' + esc(q + ":" + wert) + '" role="button" aria-pressed="' + an + '" title="' + esc(an ? T.favAus : T.favAn) + '" aria-label="' + esc(an ? T.favAus : T.favAn) + '"></span>';
+    return favs.includes(q + ":" + wert) ? '<span class="lw-pin an" title="' + esc(t().favPunktTipp) + '"></span>' : "";
   }
   function favMarkieren() {}
-  root.addEventListener("click", e => {
-    const p = e.target.closest("[data-pin]"); if (!p) return;
-    e.stopPropagation(); e.preventDefault();
-    const f = p.dataset.pin;
-    favs = favs.includes(f) ? favs.filter(x => x !== f) : favs.concat([f]); favsMerken();
-    boxNeu(f[0] === "v" ? "musik" : f[0] === "k" || f[0] === "s" && !COVER_LISTE.includes(f.slice(2)) ? "klang" : "musik");
-  }, true);
+  let favDruck = null, favSchlucken = 0;
+  function favAbbrechen() { if (!favDruck) return; clearTimeout(favDruck.timer); favDruck.el.classList.remove("lw-haelt"); favDruck = null; }
+  root.addEventListener("pointerdown", e => {
+    if (hoerer || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const el = e.target.closest("[data-vorlage],[data-sfx],[data-kulisse]"); if (!el || !el.closest(".lw-pult-gitter")) return;
+    const attr = el.hasAttribute("data-vorlage") ? "data-vorlage" : el.hasAttribute("data-sfx") ? "data-sfx" : "data-kulisse", wert = el.getAttribute(attr), q = FAV_Q[attr];
+    if (!q || wert === "zufall" || wert === "leer") return;
+    favAbbrechen();
+    el.classList.add("lw-haelt");
+    favDruck = { el, x: e.clientX, y: e.clientY, timer: setTimeout(() => {
+      const f = q + ":" + wert, war = favs.includes(f), name = (el.querySelector(".kt") || el).textContent.trim();
+      favs = war ? favs.filter(x => x !== f) : favs.concat([f]); favsMerken();
+      favDruck = null; favSchlucken = performance.now();
+      try { if (navigator.vibrate) navigator.vibrate(35); } catch (_) {}
+      boxNeu(q === "v" ? "musik" : q === "k" || !COVER_LISTE.includes(wert) ? "klang" : "musik");
+      status(war ? t().favGeloest(name) : t().favGesetzt(name));
+    }, FAV_HALTEN) };
+  });
+  root.addEventListener("pointermove", e => { if (favDruck && Math.hypot(e.clientX - favDruck.x, e.clientY - favDruck.y) > 12) favAbbrechen(); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(n => root.addEventListener(n, e => { if (n !== "pointerleave" || (favDruck && e.target === favDruck.el)) favAbbrechen(); }));
+  /* nach dem Anheften löst das Loslassen nicht auch noch die Kachel aus; das lange Drücken öffnet kein Kontextmenü */
+  root.addEventListener("click", e => { if (favSchlucken && performance.now() - favSchlucken < 1500 && e.target.closest("[data-vorlage],[data-sfx],[data-kulisse]")) { favSchlucken = 0; e.stopPropagation(); e.preventDefault(); } }, true);
+  root.addEventListener("contextmenu", e => { if (e.target.closest(".lw-pult-gitter [data-vorlage], .lw-pult-gitter [data-sfx], .lw-pult-gitter [data-kulisse]")) e.preventDefault(); });
 
   /* ---------- Oberfläche ---------- */
   function zeilenName(spur, z) {
@@ -8125,9 +8142,12 @@ const ZUS_ICON = {
 .lw-note.zirp { color: #a9c9a4; font-size: .95rem; font-style: italic; }
 .lw-pult-gitter button, .lw-effekte button, .lw-vorlagen button { position: relative; }
 .lw-pult-gitter button:has(.lw-pin) { padding-right: 1.2rem; }
-.lw-pin { position: absolute; top: 0; right: 0; bottom: 0; width: 1.3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.lw-pult-gitter button { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.lw-pin { position: absolute; top: 0; right: 0; bottom: 0; width: 1.3rem; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 .lw-pin::after { content: ""; width: .5rem; height: .5rem; border-radius: 50%; border: 1px solid rgba(224,160,70,.45); transition: transform .15s, background .15s; }
-.lw-pin:hover::after { border-color: var(--ember); transform: scale(1.3); }
+/* beim Gedrückthalten füllt sich die Kachel von links – nach 2 Sekunden ist sie angeheftet bzw. gelöst */
+.lw-pult-gitter button.lw-haelt { background-image: linear-gradient(90deg, rgba(224,160,70,.38) 0 50%, transparent 50% 100%) !important; background-size: 200% 100% !important; background-position: 100% 0; animation: lwHalten 2s linear forwards; }
+@keyframes lwHalten { from { background-position: 100% 0; } to { background-position: 0 0; } }
 .lw-pin.an::after { background: var(--ember); border-color: var(--ember); box-shadow: 0 0 6px rgba(224,160,70,.6); }
 button.an > .lw-pin::after { border-color: rgba(16,14,21,.5); }
 button.an > .lw-pin.an::after { background: var(--night); border-color: var(--night); box-shadow: none; }
