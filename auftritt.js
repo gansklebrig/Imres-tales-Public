@@ -732,8 +732,9 @@
       '<div class="at-ton"><button type="button" class="at-stumm"></button><label><span>' + T.ton + '</span><input type="range" class="at-laut" min="0" max="100" step="5"></label></div>' +
       (spiel || stimmt ? "" : kalibHtml(T)) +
       (imWeg ? (spiel || stimmt || kalib ? "" : '<div class="at-weg-fuss"><button type="button" class="at-zurueck">' + T.weg.zuruecksetzen + "</button></div>") :
-        (ergebnis && !spiel ? '<div class="at-eintrag-box">' + eintragHtml(T) + "</div>" : "") + '<div class="at-liste">' + listeHtml(T) + "</div>");
+        (ergebnis && !spiel && !ergebnis.duell ? '<div class="at-eintrag-box">' + eintragHtml(T) + "</div>" : "") + '<div class="at-liste">' + listeHtml(T) + "</div>");
     tonNeu(); pauseZeigen();
+    if (duell) duellZeichnen(); /* Online-Duell: Leiste, Gegner, gesperrte Wahl */
     if (kalib) return;
     malenRuhe();
     const pf = root.querySelector(".at-pfad"), akt = pf && pf.querySelector('[aria-pressed="true"]');
@@ -773,16 +774,18 @@
       (kalibMeldung ? '<p class="at-kalib-info" role="status">' + esc(kalibMeldung) + "</p>" : "") + "</div>";
   }
   function knoepfeHtml(T) {
+    if (duell && !kalib) return duellKnoepfe(T);
     if (kalib) return '<button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
     if (stimmt) return '<button type="button" class="tav-knopf at-start">' + T.stimmen_laden + "</button>";
     if (spiel) return '<button type="button" class="tav-knopf at-pause-knopf">' + T.pauseKnopf + '</button><button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
-    if (modus !== "weg") return '<button type="button" class="tav-knopf at-start">' + (ergebnis ? T.nochmal : T.start) + "</button>";
+    if (modus !== "weg") return '<button type="button" class="tav-knopf at-start">' + (ergebnis ? T.nochmal : T.start) + "</button>" + duellKnopfHtml();
     const W = T.weg, weiter = ergebnis && ergebnis.bestanden && wegStation < WEG.length - 1;
     return (weiter ? '<button type="button" class="tav-knopf at-weiter">' + W.weiter + "</button>" : "") +
-      '<button type="button" class="tav-knopf at-start">' + (!ergebnis ? W.start : ergebnis.bestanden ? W.wiederholen : W.nochmal) + "</button>";
+      '<button type="button" class="tav-knopf at-start">' + (!ergebnis ? W.start : ergebnis.bestanden ? W.wiederholen : W.nochmal) + "</button>" + duellKnopfHtml();
   }
   function ergebnisHtml(T) {
     const e = ergebnis;
+    if (e.duell) return duellErgebnisHtml(T);
     if (e.weg) {
       const W = T.weg, s = W.stationen[e.station];
       return '<p class="label">' + W.gegen(e.sg) + "</p>" +
@@ -899,6 +902,7 @@
       g.fillStyle = spiel.urteil.art === "daneben" ? "#c4564a" : spiel.urteil.art === "perfekt" ? "#ffd27a" : "#ebe2cc";
       g.fillText(t().urteil[spiel.urteil.art], spiel.urteil.spur * bahn + bahn / 2, y - 40 * dpr - (1 - a) * 20 * dpr); g.globalAlpha = 1;
     }
+    if (spiel.duell) duellMalen(g, w, h, dpr, jetzt);
     if (!spiel.pause && jetzt > spiel.daten.ende) { beenden(); return; }
     requestAnimationFrame(malen);
   }
@@ -935,6 +939,8 @@
      Alles hängt an der Audio-Uhr: ctx.suspend() hält Musik, Noten und Wertung gemeinsam an.
      Weiter geht es nach einem kurzen 3-2-1, damit man wieder hineinfindet. */
   function pausieren() {
+    /* Im Duell gibt es keine Pause – das Lied läuft weiter (sonst liefen beide auseinander); nur den Ton wieder anwerfen */
+    if (spiel && spiel.duell) { if (ctx.state !== "running" && ctx.state !== "closed") { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } return; }
     if (!spiel || spiel.pause === "pause") return;
     clearTimeout(spiel.pauseUhr);
     Object.keys(spiel.halt).forEach(k => loslassen(+k, true)); /* gehaltene Töne zählen als gehalten */
@@ -1041,6 +1047,7 @@
     if (kalib) { kalibEnde(true); return; }
     if (stimmt) { stimmt = null; zeichnen(); return; }
     if (!spiel) return;
+    if (spiel.duell) duellAufgabe();
     clearTimeout(spiel.pauseUhr);
     if (ctx.state !== "running") { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); }
     (spiel.knoten || []).forEach(n => { try { n.stop(); } catch (_) {} });
@@ -1091,6 +1098,7 @@
     if (prozent >= 95 && Math.random() < .6) w20 = 20;
     if (prozent < 20) w20 = 1;
     const ges = w20 + 7;
+    if (spiel.duell) { duellFertig({ w20, ges, prozent, getroffen, gesamt: liste.length }); return; }
     if (spiel.ort != null) { wegErgebnis(spiel.ort, { w20, ges, prozent, getroffen, gesamt: liste.length }); return; }
     const stufeText = w20 === 20 ? "krit" : w20 === 1 ? "patzer" : ges <= 11 ? "schwach" : ges <= 16 ? "maessig" : ges <= 21 ? "gut" : ges <= 25 ? "stark" : "legende";
     const rek = rekordLesen(), alt = rek[stufe] || 0, neu = ges > alt;
@@ -1354,6 +1362,407 @@
 .auftritt button, .at-pause { touch-action: manipulation; }
 `;
   document.head.appendChild(css);
+
+  /* ---------- Online-Duell (Verbindung und Lobby: duell.js) ----------
+     Beide spielen dasselbe Stück zur selben Zeit. Der Gastgeber wählt Publikum und Lied; die Noten
+     entstehen auf beiden Geräten aus derselben Vorlage (komponierte Lieder sind fest, ein erfundenes Lied
+     wird ganz mitgeschickt). Start: Der Gast misst den Uhrenversatz (Ping-Pong), der Gastgeber nennt eine
+     Startzeit in seiner Uhr, jeder rechnet sie in seine Audio-Uhr um. Unterwegs fliegen ~4× pro Sekunde
+     die Zwischenstände hin und her, am Ende das Ergebnis. Keine Pause im Duell; nichts landet in der Bestenliste. */
+  const DX = {
+    de: { info: "⚔ Online-Duell: Ihr spielt dasselbe Lied zur selben Zeit – wer trifft besser?", infoHost: "Wähle Publikum und Lied, dann „Duell starten“.", infoGast: n => n + " wählt Publikum und Lied.",
+      keinePause: "Im Duell gibt es keine Pause: Wechselst du den Tab, läuft dein Lied weiter und verpasste Noten zählen.",
+      warten: "Warte auf Gegner …", los: "⚔ Duell starten", waehlt: n => n + " wählt das Lied …", laden: "🎻 Instrumente werden gestimmt …", wartenAuf: n => "Warte auf " + n + " …",
+      bereit: "▶ Bereit", bereitText: "Bereit – gleich geht es los …", tippBereit: "Tippe auf „Bereit“, damit dein Gerät den Ton spielen darf.",
+      aufgeben: "Aufgeben", abbrechen: "Abbrechen", ergebnisWarte: n => "Warte auf das Ergebnis von " + n + " …",
+      revanche: "⚔ Revanche", anderesLied: "🎵 Anderes Lied", revWarte: n => "Warte auf " + n + " …", revWill: n => n + " will eine Revanche!",
+      titel: "Duell-Ergebnis", du: "Du", sieg: "🏆 Du gewinnst!", niederlage: n => n + " gewinnt!", remis: "Unentschieden!",
+      zeilen: ["Treffsicherheit", "Auftrittswurf", "Beste Serie", "Treffer", "Fehlgriffe"],
+      grund: { genau: "Die Treffsicherheit entscheidet.", wurf: "Gleich treffsicher – der Auftrittswurf entscheidet!", serie: "Gleichstand – die längere Serie entscheidet.", gleich: "Völliger Gleichstand.", aufgabe: n => n + " hat aufgegeben.", beide: "Beide haben aufgegeben." },
+      aufgegeben: "aufgegeben", pausiert: "⏸ Gegner pausiert", fertig: "✔ fertig", zuSpaet: "Den Start verpasst – diese Runde zählt als aufgegeben.", gleich: "Gleich geht es los!", weg: n => n + " ist nicht mehr da." },
+    en: { info: "⚔ Online duel: you both play the same song at the same time – who hits more?", infoHost: "Pick audience and song, then “Start duel”.", infoGast: n => n + " picks audience and song.",
+      keinePause: "There is no pause in a duel: if you switch tabs, your song keeps playing and missed notes count.",
+      warten: "Waiting for an opponent …", los: "⚔ Start duel", waehlt: n => n + " is picking the song …", laden: "🎻 Tuning the instruments …", wartenAuf: n => "Waiting for " + n + " …",
+      bereit: "▶ Ready", bereitText: "Ready – about to begin …", tippBereit: "Tap “Ready” so your device may play sound.",
+      aufgeben: "Give up", abbrechen: "Cancel", ergebnisWarte: n => "Waiting for " + n + "'s result …",
+      revanche: "⚔ Rematch", anderesLied: "🎵 Other song", revWarte: n => "Waiting for " + n + " …", revWill: n => n + " wants a rematch!",
+      titel: "Duel result", du: "You", sieg: "🏆 You win!", niederlage: n => n + " wins!", remis: "Draw!",
+      zeilen: ["Accuracy", "Performance check", "Best streak", "Hits", "Misplays"],
+      grund: { genau: "Accuracy decides.", wurf: "Equally accurate – the performance check decides!", serie: "Tied – the longer streak decides.", gleich: "A perfect tie.", aufgabe: n => n + " gave up.", beide: "Both gave up." },
+      aufgegeben: "gave up", pausiert: "⏸ Opponent paused", fertig: "✔ done", zuSpaet: "Missed the start – this round counts as given up.", gleich: "Here we go!", weg: n => n + " is no longer here." }
+  };
+  const dx = () => DX[sprache()];
+  const hat = (o, k) => typeof k === "string" && Object.prototype.hasOwnProperty.call(o, k);
+  const ganz = (x, a, b) => Number.isInteger(x) && x >= a && x <= b;
+  let duell = null;
+  /* duell = { s, phase: warten | wahl | laden | bereit | spiel | fertig | ende, r: Runde, cfg, vor: { daten, st, lied }, ichE, erE: Ergebnisse,
+     er: { stand, bereit }, rev: [ich, er], tippen: Ton braucht einen Tipp, alt: gemerkte Wahl, takt: Zeitgeber } */
+  function erfundenPruefen(x) {
+    if (!x || typeof x !== "object" || !hat(MODI, x.modus)) return null;
+    const E = TX.de.erfinden;
+    if (![60, 62, 63, 64, 65].includes(x.grund) || ![.92, 1, 1.05, 1.12].includes(x.tempo) || (x.takt !== 12 && x.takt !== 16)) return null;
+    if (!Array.isArray(x.folge) || x.folge.length !== 8 || !x.folge.every(g => ganz(g, 0, 6))) return null;
+    if (!Array.isArray(x.melodie) || x.melodie.length !== 8 || !x.melodie.every(z => typeof z === "string" && z.length === x.takt && /^[0-9a-c.-]+$/.test(z))) return null;
+    if (!Array.isArray(x.name) || x.name.length !== 3 || ![E.vorlage.length, E.adj.length, E.nom.length].every((m, i) => ganz(x.name[i], 0, m - 1))) return null;
+    return { modus: x.modus, grund: x.grund, tempo: x.tempo, takt: x.takt, folge: x.folge.slice(), melodie: x.melodie.slice(), name: x.name.slice() };
+  }
+  /* Wahl (Publikum + Lied) prüfen: nur bekannte Stufen und Lieder des freien Spiels */
+  function wahlPruefen(d) {
+    if (!d || !hat(STUFEN, d.stufe)) return null;
+    if (d.lied === "neu") { const n = erfundenPruefen(d.neu); return n ? { stufe: d.stufe, lied: "neu", neu: n } : null; }
+    return hat(LIEDER, d.lied) && !LIEDER[d.lied].nurWeg ? { stufe: d.stufe, lied: d.lied } : null;
+  }
+  const wahlJetzt = () => (liedWahl === "neu" ? { stufe, lied: "neu", neu: aktuellesLied() } : { stufe, lied: liedWahl });
+  const cfgLied = c => (c.lied === "neu" ? Object.assign({}, c.neu) : Object.assign({ key: c.lied }, LIEDER[c.lied]));
+  function wahlUebernehmen(c) {
+    stufe = c.stufe; liedWahl = c.lied;
+    if (c.lied === "neu") erfunden = Object.assign({}, c.neu);
+  }
+  const erName = () => (duell ? duell.s.gegnerName() : "?");
+  function duellBeginnen(s) {
+    if (spiel || stimmt || kalib) { const d0 = duell; duell = null; abbrechen(); duell = d0; }
+    duell = { s, phase: "warten", r: 0, cfg: null, vor: null, ichE: null, erE: null, er: { stand: null, bereit: -1 }, rev: [false, false], tippen: false,
+      alt: { stufe, liedWahl, modus, erfunden }, gesendet: "", standZeit: 0, standText: "", takt: null, gewertet: -1, losBei: null };
+    modus = "lieder"; ergebnis = null;
+    duell.takt = setInterval(duellTakt, 250);
+    s.on("wahl", d => { if (!duell || s.host) return; const c = wahlPruefen(d); if (!c) return; if (!spiel && (duell.phase === "wahl" || duell.phase === "ende" || duell.phase === "warten")) { wahlUebernehmen(c); if (duell.phase === "warten") duell.phase = "wahl"; zeichnen(); } });
+    s.on("runde", d => { if (!duell || s.host || !ganz(d.r, 1, 1e6) || d.r <= duell.r) return; const c = wahlPruefen(d); if (c) duellLaden(d.r, c); });
+    s.on("bereit", d => { if (!duell || !s.host || d.r !== duell.r) return; duell.er.bereit = d.r; if (duell.phase === "bereit") duellAnpfiff(); });
+    s.on("los", d => { if (!duell || s.host || d.r !== duell.r || typeof d.T !== "number" || !isFinite(d.T)) return; duell.losBei = d.T; if (duell.phase === "bereit") duellStart(); });
+    s.on("stand", d => {
+      if (!duell || d.r !== duell.r) return;
+      if (!ganz(d.p, 0, 1e7) || !ganz(d.s, 0, 1e5) || !ganz(d.b, 0, 1e5) || !(d.pr === null || ganz(d.pr, 0, 100))) return;
+      duell.er.stand = { p: d.p, s: d.s, b: d.b, pr: d.pr, h: d.h === 1 }; duellBalken();
+    });
+    s.on("ergebnis", d => { if (!duell || d.r !== duell.r || duell.erE) return; const e = ergebnisPruefen(d); if (!e) return; duell.erE = e; if (duell.phase === "fertig") duellEnde(); else duellBalken(); });
+    s.on("revanche", d => { if (!duell || d.r !== duell.r || duell.phase !== "ende") return; duell.rev[1] = true; if (s.host && duell.rev[0]) duellRunde(); else zeichnen(); });
+    s.on("zurueck", d => { if (!duell || !ganz(d.r, 0, 1e6) || d.r < duell.r) return; if (!spiel && duell.phase !== "fertig") duellZurWahl(false); });
+    s.on("sync?", () => { if (duell && s.host) duellZustandSenden(); });
+    s.on("zustand", d => {
+      if (!duell || s.host || !ganz(d.r, 0, 1e6)) return;
+      const c = d.cfg ? wahlPruefen(d.cfg) : null;
+      if (d.r > duell.r && c && (d.phase === "laden" || d.phase === "bereit")) duellLaden(d.r, c);
+      if (d.r === duell.r && typeof d.T === "number" && isFinite(d.T) && !spiel && (duell.phase === "laden" || duell.phase === "bereit")) { duell.losBei = d.T; if (duell.phase === "bereit") duellStart(); }
+      if (d.phase === "wahl" && d.r >= duell.r && !spiel && duell.phase !== "fertig" && duell.phase !== "ende") { if (c) wahlUebernehmen(c); duellZurWahl(false); }
+    });
+    s.status((art, d) => {
+      if (!duell || duell.s !== s) return;
+      if (art === "partner") {
+        if (d.neu && duell.phase !== "warten") { duellZurWahl(false); duell.erE = null; }
+        if (duell.phase === "warten") duell.phase = "wahl";
+        if (s.host) { duell.gesendet = ""; duellZustandSenden(); } else s.senden("sync?", {});
+        duellErneutSenden();
+      } else if (art === "verbindung" && d.ok && d.wieder) {
+        if (s.host) duellZustandSenden(); else s.senden("sync?", {});
+        duellErneutSenden();
+      }
+      if (!spiel) zeichnen(); else duellBalken();
+    });
+    zeichnen();
+  }
+  function duellBeenden(s) {
+    if (!duell || duell.s !== s) return;
+    const d = duell; duell = null;
+    clearInterval(d.takt);
+    if (spiel || stimmt) abbrechen();
+    stufe = d.alt.stufe; liedWahl = d.alt.liedWahl; modus = d.alt.modus; erfunden = d.alt.erfunden;
+    ergebnis = null; zeichnen(); bestenLaden();
+  }
+  function duellZustandSenden() {
+    const d = duell; if (!d || !d.s.host) return;
+    d.s.senden("wahl", wahlJetzt());
+    d.s.senden("zustand", { r: d.r, phase: d.phase === "wahl" || d.phase === "warten" ? "wahl" : d.phase, cfg: d.cfg, T: d.losT || null });
+  }
+  /* nach einer Unterbrechung: eigenes Ergebnis und Revanche-Wunsch noch einmal schicken */
+  function duellErneutSenden() {
+    const d = duell; if (!d) return;
+    if (d.ichE) d.s.senden("ergebnis", Object.assign({ r: d.r }, d.ichE));
+    if (d.phase === "ende" && d.rev[0]) d.s.senden("revanche", { r: d.r });
+    if (!d.s.host && d.phase === "bereit" && d.r) d.s.senden("bereit", { r: d.r });
+  }
+  function duellZurWahl(senden) {
+    const d = duell; if (!d) return;
+    if (senden) d.s.senden("zurueck", { r: d.r });
+    d.phase = d.s.partner ? "wahl" : "warten"; d.vor = null; d.losBei = null; d.losT = null; d.ichE = null; d.erE = null; d.rev = [false, false];
+    ergebnis = null;
+    if (!spiel) zeichnen();
+  }
+  /* Gastgeber: neue Runde mit der aktuellen Wahl */
+  function duellRunde() {
+    const d = duell; if (!d || !d.s.host || !d.s.da() || spiel) return;
+    audio();
+    const c = wahlPruefen(wahlJetzt()); if (!c) return;
+    const r = d.r + 1;
+    d.s.senden("runde", Object.assign({ r }, c));
+    duellLaden(r, c);
+  }
+  function duellLaden(r, c) {
+    const d = duell; if (!d) return;
+    if (kalib) kalibEnde(true);
+    if (spiel) { const d0 = duell; duell = null; abbrechen(); duell = d0; }
+    audio();
+    wahlUebernehmen(c);
+    d.r = r; d.cfg = c; d.phase = "laden"; d.ichE = null; d.erE = null; d.er = { stand: null, bereit: d.er.bereit }; d.rev = [false, false]; d.losBei = null; d.losT = null; d.vor = null; d.tippen = false;
+    ergebnis = null;
+    const lied = cfgLied(c), st = STUFEN[c.stufe], daten = noten(st, lied); daten.lied = lied;
+    zeichnen(); buehneZeigen();
+    const fertig = () => {
+      if (duell !== d || d.r !== r || d.phase !== "laden") return;
+      SK = skala(lied.modus); GRUND = lied.grund;
+      saite(hz(45), 1.8, .4986);
+      daten.liste.forEach(n => { if (n.spur === 2) return; const m = MIDI[n.spur](n.ton); if (!probeBuf.has(probeName(SPUR_PROBE[n.spur], m))) { if (n.spur === 0) saite(bassHz(n.ton), 1.8, .4986); else saite(melHz(n.ton), 1.4, .4979); } });
+      d.vor = { daten, st, lied };
+      duellBereit();
+    };
+    const uhr = d.s.host ? Promise.resolve(null) : d.s.uhr(8).then(u => { if (u) d.versatz = u.versatz; d.uhrRtt = u ? u.rtt : null; });
+    Promise.all([probenFuer(daten), uhr]).then(fertig);
+  }
+  function duellBereit() {
+    const d = duell; if (!d) return;
+    /* ohne laufende Audio-Uhr kein gemeinsamer Start: dann ein Tipp auf „Bereit“ */
+    const weiter = () => {
+      if (duell !== d || d.phase !== "laden" && d.phase !== "bereit") return;
+      if (ctx.state !== "running") { d.tippen = true; d.phase = "bereit"; zeichnen(); return; }
+      d.tippen = false; d.phase = "bereit";
+      if (d.s.host) { if (d.er.bereit === d.r) duellAnpfiff(); else zeichnen(); }
+      else { d.s.senden("bereit", { r: d.r }); if (d.losBei != null) duellStart(); else zeichnen(); }
+    };
+    if (ctx.state === "running") { weiter(); return; }
+    const p = ctx.resume();
+    let fertig = false; const einmal = () => { if (!fertig) { fertig = true; weiter(); } };
+    if (p && p.then) p.then(einmal, einmal);
+    setTimeout(einmal, 600);
+  }
+  /* Gastgeber: Startzeit festlegen – in vier Sekunden nach seiner Uhr */
+  function duellAnpfiff() {
+    const d = duell; if (!d || !d.s.host || d.phase !== "bereit" || d.tippen) return;
+    const T = d.s.jetzt() + 4000;
+    d.losT = T;
+    d.s.senden("los", { r: d.r, T });
+    d.losBei = T; duellStart();
+  }
+  function duellStart() {
+    const d = duell; if (!d || !d.vor || spiel || d.tippen || d.losBei == null) return;
+    const ziel = d.s.host ? d.losBei : d.losBei - (d.versatz || 0); /* Gastgeber-Uhr → eigene Uhr */
+    const msBis = ziel - d.s.jetzt();
+    if (msBis < -1500) { d.ichE = { aufgabe: true, prozent: 0, w20: 1, summe: 8, serie: 0, getroffen: 0, gesamt: d.vor.daten.liste.length, streu: 0, punkte: 0, spaet: true }; duellErgebnisSenden(); return; }
+    const v = d.vor;
+    SK = skala(v.lied.modus); GRUND = v.lied.grund;
+    bus = ctx.createGain(); bus.connect(ausg);
+    ergebnis = null;
+    spiel = { daten: v.daten, st: v.st, ort: null, start: hoerZeit() + msBis / 1000, punkte: 0, serie: 0, besteSerie: 0, streu: 0, blitz: [0, 0, 0], urteil: null, halt: {}, duell: true };
+    spiel.knoten = begleitung(v.daten, spiel.start);
+    /* für Tests: wann der Anfang des Lieds aus dem Lautsprecher kommt, in echter Uhrzeit (ohne Test-Versatz) */
+    d.startEcht = (performance.timeOrigin || 0) + performance.now() + (spiel.start - hoerZeit()) * 1000;
+    d.phase = "spiel"; d.standZeit = 0;
+    zeichnen(); buehneZeigen();
+    requestAnimationFrame(malen);
+  }
+  /* Zwischenstand: Treffsicherheit der Noten, die schon vorbei sind */
+  function duellLauf() {
+    if (!spiel) return null;
+    const jetzt = hoerZeit() - spiel.start - kalibWert;
+    let erreicht = 0, moeglich = 0;
+    spiel.daten.liste.forEach(n => { if (n.status || n.zeit < jetzt - FENSTER.knapp) { erreicht += (PUNKTE[n.status] || 0) + (n.bonus || 0); moeglich += 100 + (n.dauer ? HALT_BONUS : 0); } });
+    return moeglich ? Math.max(0, Math.min(100, Math.round((erreicht - spiel.streu * FEHLGRIFF) / moeglich * 100))) : null;
+  }
+  function duellTakt(sofort) {
+    const d = duell; if (!d) return;
+    if (spiel && spiel.duell) {
+      /* versteckter Tab: kein requestAnimationFrame – verpasste Noten und das Ende hier werten */
+      if (document.hidden) {
+        const gewertet = hoerZeit() - spiel.start - kalibWert;
+        Object.keys(spiel.halt).forEach(k => { const h = spiel.halt[k]; if (h && gewertet >= h.n.zeit + h.n.dauer) loslassen(+k, true); });
+        spiel.daten.liste.forEach(n => { if (!n.status && n.zeit - gewertet < -FENSTER.knapp) { n.status = "daneben"; spiel.serie = 0; } });
+        if (hoerZeit() - spiel.start > spiel.daten.ende) { beenden(); return; }
+      }
+      const st = { r: d.r, p: Math.round(spiel.punkte), s: spiel.serie, b: spiel.besteSerie, pr: duellLauf(), h: document.hidden ? 1 : 0 }, text = JSON.stringify(st);
+      if (sofort === true || text !== d.standText || Date.now() - d.standZeit > 1000) { d.standText = text; d.standZeit = Date.now(); d.s.senden("stand", st); }
+      d.ichStand = st;
+    }
+    duellBalken();
+  }
+  document.addEventListener("visibilitychange", () => { if (duell) duellTakt(true); });
+  function ergebnisPruefen(d) {
+    if (!ganz(d.prozent, 0, 100) || !ganz(d.w20, 1, 20) || !ganz(d.summe, 8, 27) || !ganz(d.serie, 0, 1e5) || !ganz(d.getroffen, 0, 1e5) || !ganz(d.gesamt, 0, 1e5) || !ganz(d.streu, 0, 1e6) || !ganz(d.punkte, 0, 1e8)) return null;
+    return { prozent: d.prozent, w20: d.w20, summe: d.summe, serie: d.serie, getroffen: d.getroffen, gesamt: d.gesamt, streu: d.streu, punkte: d.punkte, aufgabe: d.aufgabe === true };
+  }
+  function duellFertig(r) {
+    const d = duell;
+    d.ichE = { prozent: r.prozent, w20: r.w20, summe: r.ges, serie: spiel.besteSerie, getroffen: r.getroffen, gesamt: r.gesamt, streu: spiel.streu, punkte: Math.round(spiel.punkte), aufgabe: false };
+    spiel = null; bus = null;
+    duellErgebnisSenden();
+  }
+  function duellAufgabe() {
+    const d = duell; if (!d || !spiel || d.ichE) return;
+    d.ichE = { prozent: 0, w20: 1, summe: 8, serie: spiel.besteSerie, getroffen: spiel.daten.liste.filter(n => PUNKTE[n.status]).length, gesamt: spiel.daten.liste.length, streu: spiel.streu, punkte: Math.round(spiel.punkte), aufgabe: true };
+    d.s.senden("ergebnis", Object.assign({ r: d.r }, d.ichE));
+    d.phase = d.erE ? "ende" : "fertig"; if (d.erE) duellWerten();
+    ergebnis = { duell: true };
+  }
+  function duellErgebnisSenden() {
+    const d = duell;
+    d.s.senden("ergebnis", Object.assign({ r: d.r }, d.ichE));
+    ergebnis = { duell: true };
+    if (d.erE) duellEnde(); else { d.phase = "fertig"; zeichnen(); }
+  }
+  /* wer gewinnt: Aufgabe verliert; dann Treffsicherheit, dann Auftrittswurf, dann längste Serie */
+  function vergleich(a, b) {
+    if (a.aufgabe || b.aufgabe) return a.aufgabe && b.aufgabe ? [0, "beide"] : [a.aufgabe ? -1 : 1, "aufgabe"];
+    if (a.prozent !== b.prozent) return [a.prozent > b.prozent ? 1 : -1, "genau"];
+    if (a.summe !== b.summe) return [a.summe > b.summe ? 1 : -1, "wurf"];
+    if (a.serie !== b.serie) return [a.serie > b.serie ? 1 : -1, "serie"];
+    return [0, "gleich"];
+  }
+  function duellWerten() {
+    const d = duell;
+    if (d.gewertet === d.r) return;
+    d.gewertet = d.r;
+    const [v] = vergleich(d.ichE, d.erE);
+    if (window.ImresDuell) window.ImresDuell.bilanz("auftritt", v > 0 ? "sieg" : v < 0 ? "niederlage" : "remis");
+    if (ctx) publikum(v >= 0);
+  }
+  function duellEnde() {
+    const d = duell; if (!d || !d.ichE || !d.erE) return;
+    d.phase = "ende"; ergebnis = { duell: true };
+    duellWerten();
+    if (!spiel) zeichnen();
+  }
+  /* ---------- Duell: Oberfläche ---------- */
+  function duellKnoepfe(T) {
+    const D = dx(), d = duell, n = esc(erName()), host = d.s.host, da = d.s.da();
+    const text = x => '<p class="at-duell-text" role="status">' + x + "</p>";
+    if (spiel) return '<button type="button" class="tav-knopf at-start">' + D.aufgeben + "</button>";
+    if (d.phase === "warten") return text(D.warten);
+    if (d.phase === "wahl") return host ? '<button type="button" class="tav-knopf at-duell-los"' + (da ? "" : " disabled") + ">" + D.los + "</button>" : text(D.waehlt(n));
+    if (d.phase === "laden") return text(D.laden) + '<button type="button" class="tav-knopf at-duell-ab">' + D.abbrechen + "</button>";
+    if (d.phase === "bereit") {
+      if (d.tippen) return '<button type="button" class="tav-knopf at-duell-bereit">' + D.bereit + "</button>" + text(D.tippBereit);
+      return text(host ? D.wartenAuf(n) : D.bereitText) + '<button type="button" class="tav-knopf at-duell-ab">' + D.abbrechen + "</button>";
+    }
+    if (d.phase === "fertig") return text(D.ergebnisWarte(n));
+    if (d.phase === "ende") {
+      const zusatz = d.rev[0] ? D.revWarte(n) : d.rev[1] ? D.revWill(n) : "";
+      return '<button type="button" class="tav-knopf at-duell-revanche' + (d.rev[1] && !d.rev[0] ? " lockt" : "") + '"' + (d.rev[0] || !da ? " disabled" : "") + ">" + D.revanche + "</button>" +
+        (host ? '<button type="button" class="tav-knopf at-duell-wahl">' + D.anderesLied + "</button>" : "") + (zusatz ? text(zusatz) : "");
+    }
+    return "";
+  }
+  function duellErgebnisHtml(T) {
+    const D = dx(), d = duell; if (!d) return "";
+    const a = d.ichE, b = d.erE, n = erName();
+    let kopf = "", grund = "";
+    if (a && b) {
+      const [v, g] = vergleich(a, b);
+      kopf = v > 0 ? D.sieg : v < 0 ? D.niederlage(n) : D.remis;
+      grund = g === "aufgabe" ? D.grund.aufgabe(a.aufgabe ? D.du : n) : D.grund[g];
+    } else kopf = D.ergebnisWarte(n);
+    const wert = (e, f) => !e ? "…" : f(e);
+    const zeilen = [
+      e => e.aufgabe ? D.aufgegeben : e.prozent + " %",
+      e => e.aufgabe ? "–" : (sprache() === "en" ? "d20 " : "W20 ") + e.w20 + " → " + e.summe,
+      e => String(e.serie),
+      e => e.getroffen + " / " + e.gesamt,
+      e => String(e.streu)
+    ];
+    const besser = (i) => { if (!a || !b || i > 2) return ["", ""]; const x = [a.prozent, a.summe, a.serie][i], y = [b.prozent, b.summe, b.serie][i]; if (a.aufgabe || b.aufgabe || x === y) return ["", ""]; return x > y ? [" class=\"besser\"", ""] : ["", " class=\"besser\""]; };
+    return '<p class="label">' + D.titel + "</p>" +
+      '<p class="at-duell-sieger' + (a && b ? "" : " warte") + '">' + esc(kopf) + "</p>" +
+      '<table class="at-duell-tab"><thead><tr><th></th><th>' + esc(D.du) + "</th><th>" + esc(n) + "</th></tr></thead><tbody>" +
+      zeilen.map((f, i) => { const [x, y] = besser(i); return "<tr><td>" + D.zeilen[i] + "</td><td" + x + ">" + esc(wert(a, f)) + "</td><td" + y + ">" + esc(wert(b, f)) + "</td></tr>"; }).join("") +
+      "</tbody></table>" + (grund ? '<p class="at-werte">' + esc(grund) + "</p>" : "") +
+      (a && a.spaet ? '<p class="at-werte">' + D.zuSpaet + "</p>" : "") +
+      (d.s.partner && d.s.partner.weg && !b ? '<p class="at-werte">' + esc(D.weg(n)) + "</p>" : "");
+  }
+  function duellZeichnen() {
+    const d = duell, D = dx(), host = d.s.host;
+    root.prepend(d.s.leiste());
+    ["at-modus", "at-weg-fuss", "at-liste", "at-eintrag-box"].forEach(k => { const el = root.querySelector("." + k); if (el) el.remove(); });
+    const info = root.querySelector(".tav-info");
+    if (info) info.innerHTML = esc(D.info) + " " + esc(d.s.partner ? (host ? D.infoHost : D.infoGast(erName())) : "") + '<br><strong class="at-keine-pause">' + esc(D.keinePause) + "</strong>";
+    if (!host || d.phase !== "wahl" && d.phase !== "warten" && d.phase !== "ende") root.querySelectorAll("[data-stufe], [data-lied]").forEach(b => { b.disabled = true; });
+    const bh = root.querySelector(".at-buehne");
+    if (bh && !root.querySelector(".at-duell-bar")) { const bar = document.createElement("div"); bar.className = "at-duell-bar"; bh.before(bar); }
+    duellBalken();
+    /* Gastgeber: Wahl dem Gast zeigen */
+    if (host && d.s.da() && (d.phase === "wahl" || d.phase === "ende")) { const w = JSON.stringify(wahlJetzt()); if (w !== d.gesendet) { d.gesendet = w; d.s.senden("wahl", wahlJetzt()); } }
+  }
+  function duellBalken() {
+    const d = duell, bar = root.querySelector(".at-duell-bar"); if (!d || !bar) return;
+    const D = dx(), T = t(), ich = d.ichStand, er = d.er.stand, laeuft = d.phase === "spiel" || d.phase === "fertig" || d.phase === "ende";
+    bar.hidden = !laeuft || !d.s.partner;
+    if (bar.hidden) return;
+    const seite = (name, st, e, klasse, pause) => '<span class="at-db ' + klasse + '"><b>' + esc(name) + "</b> " +
+      (e ? (e.aufgabe ? esc(D.aufgegeben) : e.punkte + '<span class="at-db-wort"> ' + esc(T.punkte) + "</span> · " + e.prozent + " % <em>" + esc(D.fertig) + "</em>")
+        : st ? st.p + '<span class="at-db-wort"> ' + esc(T.punkte) + "</span>" + (st.pr != null ? " · " + st.pr + " %" : "") + (st.s >= 3 ? ' · <span class="at-db-serie">×' + st.s + "</span>" : "") : "–") +
+      (pause ? ' <em class="at-db-pause">' + esc(D.pausiert) + "</em>" : "") + "</span>";
+    const html = seite(D.du, ich && d.phase === "spiel" ? ich : null, d.phase !== "spiel" ? d.ichE : null, "ich", false) +
+      seite(erName(), er, d.erE, "er", !!(er && er.h && !d.erE) || !!(d.s.partner && d.s.partner.weg && !d.erE));
+    if (bar.innerHTML !== html) bar.innerHTML = html;
+  }
+  function duellMalen(g, w, h, dpr, jetzt) {
+    if (jetzt >= 0) return;
+    const D = dx(), y = h * .82, zahl = Math.ceil(-jetzt);
+    g.fillStyle = "rgba(16,14,21,.55)"; g.fillRect(0, 0, w, y - 30 * dpr);
+    g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillStyle = "#ffd27a"; g.shadowColor = "rgba(255,210,122,.6)"; g.shadowBlur = 24 * dpr;
+    g.font = (72 * dpr) + "px Georgia, serif"; g.fillText(String(zahl), w / 2, y * .42); g.shadowBlur = 0;
+    g.fillStyle = "rgba(235,226,204,.85)"; g.font = "italic " + (15 * dpr) + "px Georgia, serif";
+    g.fillText(D.gleich + "  ·  " + D.du + " vs " + erName(), w / 2, y * .42 + 58 * dpr);
+    g.textBaseline = "alphabetic";
+  }
+  function duellKnopfHtml() { return window.ImresDuell ? '<button type="button" class="tav-knopf duell-knopf at-duell-oeffnen">' + (sprache() === "en" ? "⚔ Online duel" : "⚔ Online-Duell") + "</button>" : ""; }
+  root.addEventListener("click", e => {
+    if (!duell) { if (e.target.closest(".at-duell-oeffnen") && window.ImresDuell) { duellAnmelden(); window.ImresDuell.oeffnen("auftritt"); } return; }
+    /* Gast: Publikum und Lied wählt der Gastgeber; Modus-Wechsel gibt es im Duell nicht */
+    if ((e.target.closest("[data-stufe], [data-lied]") && (!duell.s.host || (duell.phase !== "wahl" && duell.phase !== "warten" && duell.phase !== "ende"))) || e.target.closest("[data-modus], [data-station], .at-weiter, .at-zurueck, .at-eintragen")) { e.stopPropagation(); e.preventDefault(); return; }
+    if (e.target.closest("[data-stufe], [data-lied]") && duell.phase === "ende") { duell.phase = "wahl"; ergebnis = null; duell.s.senden("zurueck", { r: duell.r }); duell.ichE = null; duell.erE = null; duell.rev = [false, false]; return; }
+    if (e.target.closest(".at-duell-los")) { duellRunde(); return; }
+    if (e.target.closest(".at-duell-ab")) { duellZurWahl(true); return; }
+    if (e.target.closest(".at-duell-bereit")) { audio(); duellBereit(); return; }
+    if (e.target.closest(".at-duell-wahl")) { duellZurWahl(true); return; }
+    if (e.target.closest(".at-duell-revanche")) { if (duell.phase !== "ende" || duell.rev[0]) return; duell.rev[0] = true; duell.s.senden("revanche", { r: duell.r }); if (duell.s.host && duell.rev[1]) duellRunde(); else zeichnen(); }
+  }, true);
+  /* Ton im Duell bei jeder Berührung freischalten (iOS) */
+  root.addEventListener("pointerdown", () => { if (duell && (!ctx || ctx.state !== "running")) audio(); }, true);
+  function duellAnmelden() {
+    if (!window.ImresDuell || duellAnmelden.fertig) return;
+    duellAnmelden.fertig = true;
+    window.ImresDuell.registrieren("auftritt", { kartenId: "auftritt", titel: () => t().titel, hinweis: () => dx().keinePause, beginnen: duellBeginnen, beenden: duellBeenden, geste: () => { try { audio(); } catch (_) {} } });
+  }
+  document.addEventListener("imres:duell-bereit", duellAnmelden);
+  duellAnmelden();
+  const duellCss = document.createElement("style");
+  duellCss.textContent = `
+.at-duell-knopf-zeile { display: flex; justify-content: center; }
+.at-duell-text { margin: 0; flex-basis: 100%; text-align: center; font-family: var(--name); font-size: 1.05rem; color: var(--vellum); }
+.at-fuss .at-duell-text { order: 2; }
+.at-keine-pause { color: #ffd27a; font-weight: 400; font-size: .9em; }
+.at-duell-bar { max-width: 560px; width: 100%; margin: 0 auto -.4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; font-size: .82rem; }
+.at-duell-bar[hidden] { display: none; }
+.at-db { padding: .3rem .55rem; border: 1px solid var(--line); background: rgba(16,14,21,.7); color: var(--ash); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.at-db b { color: var(--vellum); font-weight: 600; }
+.at-db.ich { border-color: rgba(224,160,70,.55); }
+.at-db.er { border-color: rgba(127,178,255,.5); text-align: right; }
+.at-db em { font-style: normal; color: var(--ember); }
+.at-db .at-db-serie { color: #ffd27a; }
+.at-db .at-db-pause { color: #e08a7e; }
+.at-duell-sieger { margin: 0; font-family: var(--name); font-size: 1.5rem; color: #ffd27a; line-height: 1.1; }
+.at-duell-sieger.warte { font-size: 1.05rem; color: var(--vellum); }
+.at-duell-tab { border-collapse: collapse; font-size: .88rem; min-width: min(20rem, 100%); }
+.at-duell-tab th { font-weight: 600; color: var(--vellum); padding: .2rem .5rem; border-bottom: 1px solid var(--line); max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.at-duell-tab td { padding: .22rem .5rem; color: var(--vellum); border-bottom: 1px solid rgba(235,226,204,.06); }
+.at-duell-tab td:first-child { color: var(--ash); text-align: left; font-size: .8rem; }
+.at-duell-tab td.besser { color: #ffd27a; font-weight: 600; }
+.at-duell-revanche.lockt { background: var(--ember); color: var(--night); }
+.auftritt .at-fuss button:disabled { opacity: .55; cursor: default; }
+.auftritt .at-stufen button:disabled { cursor: default; }
+.auftritt .at-stufen button:disabled:not([aria-pressed="true"]) { opacity: .45; }
+@media (max-width: 520px) { .at-db-wort { display: none; } .at-db { font-size: .78rem; padding: .3rem .45rem; } .at-duell-tab { font-size: .8rem; } .at-duell-tab td, .at-duell-tab th { padding: .15rem .35rem; } .at-duell-sieger { font-size: 1.25rem; } }
+`;
+  document.head.appendChild(duellCss);
+  root._duell = () => duell && { phase: duell.phase, r: duell.r, host: duell.s.host, startEcht: duell.startEcht, versatz: duell.versatz, uhrRtt: duell.uhrRtt, cfg: duell.cfg, ichE: duell.ichE, erE: duell.erE,
+    er: duell.er.stand, rev: duell.rev.slice(), tippen: duell.tippen, noten: duell.vor ? duell.vor.daten.liste.map(n => [Math.round(n.zeit * 1e4), n.spur, n.ton, Math.round((n.dauer || 0) * 1e4)]) : null }; /* für automatische Tests */
 
   root._zustand = () => ({ spiel, ctx, stimmt, kalib, kalibWert, weg, proben: [...probeBuf.keys()], hoerZeit: ms => hoerZeit(ms) }); /* für automatische Tests */
   zeichnen();

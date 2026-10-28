@@ -1235,6 +1235,7 @@ html, body { overflow-x: clip; }
     $("memory-neu").textContent = T.memNeu;
   }
   function memoryKlick(e) {
+    if (md) { mdKlick(e); return; } /* Online-Duell: eigene Regeln, siehe unten */
     const el = e.target.closest(".mem-karte");
     if (!el || mem.sperre || el.classList.contains("offen") || el.classList.contains("weg")) return;
     el.classList.add("offen");
@@ -1277,7 +1278,238 @@ html, body { overflow-x: clip; }
     $("memory").addEventListener("click", memoryKlick);
     $("memory-neu").addEventListener("click", memoryNeu);
     memoryNeu();
+    mdKnopf();
   }
+
+  /* --- Bestiarium-Memory: Online-Duell zu zweit (Verbindung und Lobby in duell.js) ---
+     Klassische Regeln: abwechselnd zwei Karten aufdecken, wer ein Paar findet, ist noch einmal dran;
+     mehr Paare gewinnen. Der Gastgeber mischt und entscheidet: Der Gast schickt nur Zugwünsche,
+     der Gastgeber prüft sie und schickt den ganzen Stand (mit fortlaufender Nummer) an beide –
+     so liegen auf beiden Geräten immer dieselben Karten. */
+  Object.assign(TX.de, { mdTitel: "Bestiarium-Memory", mdHinweis: "Klassische Regeln: Wer ein Paar findet, ist gleich noch einmal dran. Wer am Ende mehr Paare hat, gewinnt.",
+    mdDran: "Du bist dran", mdGegnerDran: n => n + " ist dran", mdWarten: "Warte auf Gegner …", mdDu: "Du", mdPaare: n => n + (n === 1 ? " Paar" : " Paare"),
+    mdSieg: (a, b) => "Gewonnen – " + a + " : " + b + "!", mdNiederlage: (n, a, b) => n + " gewinnt – " + a + " : " + b, mdRemis: (a, b) => "Unentschieden – " + a + " : " + b,
+    mdSiegKurz: "Sieg!", mdNiederlageKurz: "Verloren", mdRemisKurz: "Remis", mdRevanche: "⚔ Revanche", mdRevancheWarte: n => "Warte auf " + n + " …", mdRevancheWill: n => n + " will eine Revanche!" });
+  Object.assign(TX.en, { mdTitel: "Bestiary Memory", mdHinweis: "Classic rules: find a pair and you go again. Whoever has more pairs at the end wins.",
+    mdDran: "Your turn", mdGegnerDran: n => n + "'s turn", mdWarten: "Waiting for an opponent …", mdDu: "You", mdPaare: n => n + (n === 1 ? " pair" : " pairs"),
+    mdSieg: (a, b) => "You win – " + a + " : " + b + "!", mdNiederlage: (n, a, b) => n + " wins – " + a + " : " + b, mdRemis: (a, b) => "Draw – " + a + " : " + b,
+    mdSiegKurz: "Victory!", mdNiederlageKurz: "Defeat", mdRemisKurz: "Draw", mdRevanche: "⚔ Rematch", mdRevancheWarte: n => "Waiting for " + n + " …", mdRevancheWill: n => n + " wants a rematch!" });
+  let md = null, mdAngemeldet = false;
+  const MD_MAX = 24;
+  const mdInt = (x, a, b) => Number.isInteger(x) && x >= a && x <= b;
+  function mdKnopf() {
+    const fuss = document.querySelector("#memory-karte .memory-fuss");
+    if (!fuss || $("memory-duell-knopf")) return;
+    /* „Neu mischen“ und „Online-Duell“ rechts zusammen – wie bisher steht links die Siegesmeldung */
+    const gruppe = document.createElement("span"); gruppe.className = "memory-knoepfe";
+    $("memory-neu").before(gruppe); gruppe.appendChild($("memory-neu"));
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tav-knopf duell-knopf"; b.id = "memory-duell-knopf";
+    b.textContent = sprache() === "en" ? "⚔ Online duel" : "⚔ Online-Duell";
+    b.addEventListener("click", () => {
+      if (window.ImresDuell) { mdAnmelden(); window.ImresDuell.oeffnen("memory"); }
+      else if (window.ImresNachladen) window.ImresNachladen("taverne").then(() => { mdAnmelden(); if (window.ImresDuell) window.ImresDuell.oeffnen("memory"); });
+    });
+    gruppe.appendChild(b);
+    mdAnmelden();
+  }
+  function mdAnmelden() {
+    if (mdAngemeldet || !window.ImresDuell || !$("memory")) return;
+    mdAngemeldet = true;
+    window.ImresDuell.registrieren("memory", { kartenId: "memory-karte", titel: () => t().mdTitel, hinweis: () => t().mdHinweis, beginnen: mdBeginnen, beenden: mdBeenden });
+  }
+  document.addEventListener("imres:duell-bereit", mdAnmelden);
+  function mdBeginnen(s) {
+    const karte = $("memory-karte"), kopf = karte && karte.querySelector(".memory-kopf");
+    if (!kopf) return;
+    md = { s, st: null, ich: s.host ? 0 : 1, rev: [false, false], gebaut: 0, gewertet: 0, warte: null, falschUhr: null, angefragt: "" };
+    karte.classList.add("mem-im-duell");
+    kopf.before(s.leiste());
+    let dk = $("mem-duell");
+    if (!dk) { dk = document.createElement("div"); dk.id = "mem-duell"; dk.className = "mem-duell"; kopf.after(dk); }
+    let rv = $("memory-revanche");
+    if (!rv) { rv = document.createElement("button"); rv.type = "button"; rv.id = "memory-revanche"; rv.className = "tav-knopf duell-knopf"; rv.hidden = true; rv.addEventListener("click", mdRevanche); $("memory-neu").after(rv); }
+    $("memory").innerHTML = ""; $("memory-sieg").textContent = "";
+    s.on("stand", mdStandBekommen);
+    s.on("zug", d => { if (!md || md.s !== s || !s.host || !md.st || d.nr !== md.st.nr) return; if (!mdZug(1, d.i)) mdSenden(); });
+    s.on("stand?", d => { if (!md || md.s !== s || !s.host) return; if (d.rev === true && md.st && md.st.aus && d.nr === md.st.nr) mdRevancheBekommen(d); if (md && md.st) mdSenden(); });
+    s.on("revanche", mdRevancheBekommen);
+    s.status((art, d) => {
+      if (!md || md.s !== s) return;
+      if (art === "partner") {
+        if (s.host) { if (d.neu || !md.st) mdNeuesSpiel(); else mdSenden(); }
+        else { if (d.neu) { md.st = null; md.gebaut = 0; mdMalen(); } s.senden("stand?", mdNachfrage()); }
+      } else if (art === "verbindung" && d.ok && d.wieder) {
+        if (s.host) mdSenden(); else s.senden("stand?", mdNachfrage());
+      }
+      mdKopf();
+    });
+    mdKopf();
+  }
+  const mdNachfrage = () => ({ nr: md && md.st ? md.st.nr : 0, rev: !!(md && md.rev[md.ich]) });
+  function mdBeenden(s) {
+    if (!md || md.s !== s) return;
+    clearTimeout(md.warte); clearTimeout(md.falschUhr);
+    md = null;
+    const karte = $("memory-karte"); if (karte) karte.classList.remove("mem-im-duell");
+    ["mem-duell", "memory-revanche"].forEach(id => { const el = $(id); if (el) el.remove(); });
+    memoryNeu();
+  }
+  function mdSenden() { if (md && md.s.host && md.st) md.s.senden("stand", { st: md.st }); }
+  /* Gastgeber: neues Spiel mischen; wer anfängt, wechselt von Spiel zu Spiel */
+  function mdNeuesSpiel() {
+    const alle = bestien().slice().sort(() => Math.random() - .5), wahl = alle.slice(0, Math.min(6, alle.length));
+    const k = []; wahl.forEach(b => { k.push(b.bild); k.push(b.bild); });
+    for (let i = k.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [k[i], k[j]] = [k[j], k[i]]; }
+    const alt = md.st, anfang = alt ? 1 - alt.anfang : 0;
+    md.st = { nr: alt ? alt.nr + 1 : 1, seq: (alt ? alt.seq : 0) + 1, k, w: k.map(() => -1), o: [], d: anfang, anfang, p: [0, 0], aus: false };
+    md.rev = [false, false];
+    mdSenden(); mdMalen();
+  }
+  /* Gastgeber: einen Zug prüfen und ausführen (wer: 0 = Gastgeber, 1 = Gast) */
+  function mdZug(wer, i) {
+    const st = md && md.st;
+    if (!st || st.aus || st.d !== wer || st.o.length >= 2 || !mdInt(i, 0, st.k.length - 1) || st.w[i] >= 0 || st.o.includes(i) || !md.s.da()) return false;
+    st.o = st.o.concat([i]); st.seq++;
+    mdSenden(); mdMalen();
+    if (st.o.length === 2) {
+      const [a, b] = st.o, seq = st.seq, passt = st.k[a] === st.k[b];
+      setTimeout(() => {
+        if (!md || md.st !== st || st.seq !== seq) return;
+        if (passt) { st.w[a] = wer; st.w[b] = wer; st.p[wer]++; if (st.w.every(x => x >= 0)) st.aus = true; }
+        else st.d = 1 - st.d;
+        st.o = []; st.seq++;
+        mdSenden(); mdMalen();
+      }, passt ? 350 : 1100);
+    }
+    return true;
+  }
+  /* Gast: Stand vom Gastgeber prüfen – nur Karten aus dem eigenen Bestiarium, alte Nummern verwerfen */
+  function mdStandBekommen(d) {
+    if (!md || md.s.host) return;
+    const st = d && d.st;
+    if (!st || typeof st !== "object") return;
+    const n = Array.isArray(st.k) ? st.k.length : 0, erlaubt = new Set(bestien().map(b => b.bild));
+    if (!mdInt(st.nr, 1, 1e6) || !mdInt(st.seq, 0, 1e9) || n < 2 || n > MD_MAX || n % 2) return;
+    if (!st.k.every(b => typeof b === "string" && erlaubt.has(b))) return;
+    if (!Array.isArray(st.w) || st.w.length !== n || !st.w.every(x => mdInt(x, -1, 1))) return;
+    if (!Array.isArray(st.o) || st.o.length > 2 || !st.o.every(x => mdInt(x, 0, n - 1) && st.w[x] < 0) || (st.o.length === 2 && st.o[0] === st.o[1])) return;
+    if (!mdInt(st.d, 0, 1) || !mdInt(st.anfang, 0, 1) || !Array.isArray(st.p) || st.p.length !== 2 || !st.p.every(x => mdInt(x, 0, n / 2))) return;
+    if (md.st && (st.nr < md.st.nr || st.seq <= md.st.seq)) return;
+    const neu = !md.st || md.st.nr !== st.nr;
+    md.st = { nr: st.nr, seq: st.seq, k: st.k.slice(), w: st.w.slice(), o: st.o.slice(), d: st.d, anfang: st.anfang, p: st.p.slice(), aus: st.aus === true };
+    if (neu) md.rev = [false, false];
+    clearTimeout(md.warte);
+    mdMalen();
+  }
+  function mdKlick(e) {
+    const el = e.target.closest(".mem-karte"), st = md && md.st;
+    if (!el || !st) return;
+    const i = +el.dataset.i;
+    if (st.aus || st.d !== md.ich || st.o.length >= 2 || st.w[i] >= 0 || st.o.includes(i) || !md.s.da()) return;
+    if (md.s.host) { mdZug(0, i); return; }
+    const schl = st.seq + ":" + i; if (md.angefragt === schl) return; /* doppelt getippt */
+    md.angefragt = schl;
+    md.s.senden("zug", { i, nr: st.nr, seq: st.seq });
+    el.classList.add("md-wartet");
+    clearTimeout(md.warte);
+    md.warte = setTimeout(() => { if (md) md.s.senden("stand?", mdNachfrage()); }, 2000);
+  }
+  function mdRevanche() {
+    if (!md || !md.st || !md.st.aus) return;
+    md.rev[md.ich] = true;
+    md.s.senden("revanche", { nr: md.st.nr });
+    if (md.s.host && md.rev[1]) { mdNeuesSpiel(); return; }
+    mdKopf();
+  }
+  function mdRevancheBekommen(d) {
+    if (!md || !md.st || !md.st.aus || !d || d.nr !== md.st.nr) return;
+    md.rev[1 - md.ich] = true;
+    if (md.s.host && md.rev[0]) { mdNeuesSpiel(); return; }
+    mdKopf();
+  }
+  function mdMalen() {
+    const grid = $("memory"); if (!grid || !md) return;
+    const st = md.st;
+    if (!st) { grid.innerHTML = ""; md.gebaut = 0; mdKopf(); return; }
+    if (md.gebaut !== st.nr || grid.children.length !== st.k.length) {
+      md.gebaut = st.nr;
+      grid.innerHTML = st.k.map((b, i) =>
+        '<button type="button" class="mem-karte" data-i="' + i + '" aria-label="' + esc(t().memKarte) + '"><span class="innen">' +
+        '<span class="seite rueck"><span>IT</span></span>' +
+        '<span class="seite vorne"><img src="' + esc(b) + '" alt="" loading="lazy"><em></em></span></span></button>').join("");
+    }
+    const liste = bestien();
+    grid.querySelectorAll(".mem-karte").forEach(el => {
+      const i = +el.dataset.i, weg = st.w[i] >= 0, offen = !weg && st.o.includes(i), b = liste.find(x => x.bild === st.k[i]);
+      el.classList.toggle("weg", weg); el.classList.toggle("offen", offen);
+      el.classList.toggle("von-mir", weg && st.w[i] === md.ich); el.classList.toggle("von-gegner", weg && st.w[i] !== md.ich);
+      if (!offen) el.classList.remove("falsch");
+      el.classList.remove("md-wartet");
+      el.querySelector("em").textContent = b ? b.name : "";
+      el.setAttribute("aria-label", offen || weg ? (b ? b.name : "") : t().memKarte);
+    });
+    clearTimeout(md.falschUhr);
+    if (st.o.length === 2 && st.k[st.o[0]] !== st.k[st.o[1]]) {
+      const seq = st.seq;
+      md.falschUhr = setTimeout(() => { if (!md || !md.st || md.st.seq !== seq) return; st.o.forEach(i => { const el = grid.querySelector('[data-i="' + i + '"]'); if (el) el.classList.add("falsch"); }); }, 450);
+    }
+    mdKopf();
+    if (st.aus && md.gewertet !== st.nr) {
+      md.gewertet = st.nr;
+      const ich = st.p[md.ich], er = st.p[1 - md.ich], art = ich > er ? "sieg" : ich < er ? "niederlage" : "remis";
+      if (window.ImresDuell) window.ImresDuell.bilanz("memory", art);
+      if (art === "sieg") setTimeout(() => { const r = grid.getBoundingClientRect(); konfetti(r.left + r.width / 2, r.top + r.height / 2, ["✦", "⚔", "★", "♪"], 34); }, 300);
+    }
+  }
+  function mdKopf() {
+    const dk = $("mem-duell"); if (!dk || !md) return;
+    const T = t(), st = md.st, s = md.s, gegner = s.gegnerName();
+    const p = st ? st.p : [0, 0], dran = st && !st.aus && s.da() ? st.d : -1;
+    const chip = (wer, name, klasse) => '<div class="md-spieler ' + klasse + (dran === wer ? " dran" : "") + '"><b>' + esc(name) + "</b><span>" + esc(T.mdPaare(p[wer])) + "</span></div>";
+    let mitte;
+    if (!st || !s.partner) mitte = T.mdWarten;
+    else if (st.aus) { const a = p[md.ich], b = p[1 - md.ich]; mitte = a > b ? T.mdSiegKurz : a < b ? T.mdNiederlageKurz : T.mdRemisKurz; }
+    else if (!s.da()) mitte = "…";
+    else mitte = st.d === md.ich ? T.mdDran : T.mdGegnerDran(gegner);
+    dk.innerHTML = chip(md.ich, T.mdDu + " · " + s.name, "ich") + '<p class="md-mitte" aria-live="polite">' + esc(mitte) + "</p>" + chip(1 - md.ich, gegner, "gegner");
+    dk.classList.toggle("ende", !!(st && st.aus));
+    const sieg = $("memory-sieg"), rv = $("memory-revanche");
+    if (st && st.aus) {
+      const a = p[md.ich], b = p[1 - md.ich];
+      sieg.textContent = a > b ? T.mdSieg(a, b) : a < b ? T.mdNiederlage(gegner, b, a) : T.mdRemis(a, b);
+      if (md.rev[md.ich]) sieg.textContent += " · " + T.mdRevancheWarte(gegner);
+      else if (md.rev[1 - md.ich]) sieg.textContent += " · " + T.mdRevancheWill(gegner);
+      if (rv) { rv.hidden = false; rv.textContent = T.mdRevanche; rv.disabled = md.rev[md.ich] || !s.da(); rv.classList.toggle("lockt", md.rev[1 - md.ich] && !md.rev[md.ich]); }
+    } else { sieg.textContent = ""; if (rv) rv.hidden = true; }
+  }
+  function mdSprache() {
+    const b = $("memory-duell-knopf"); if (b) b.textContent = sprache() === "en" ? "⚔ Online duel" : "⚔ Online-Duell";
+    if (md) mdMalen();
+  }
+  const mdCss = document.createElement("style");
+  mdCss.textContent = `
+.memory-knoepfe { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; margin-left: auto; }
+.mem-im-duell .memory-kopf, .mem-im-duell #memory-neu, .mem-im-duell #memory-duell-knopf { display: none; }
+.mem-duell { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: .5rem; }
+.md-spieler { display: grid; min-width: 0; padding: .35rem .6rem; border: 1px solid var(--line); background: rgba(0,0,0,.2); transition: border-color .3s, box-shadow .3s, background .3s; }
+.md-spieler b { font-family: var(--name); font-weight: 400; font-size: 1.02rem; color: var(--vellum); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.md-spieler span { font-size: .8rem; color: var(--ash); }
+.md-spieler.gegner { text-align: right; }
+.md-spieler.dran { border-color: var(--ember); background: rgba(224,160,70,.13); box-shadow: 0 0 14px rgba(224,160,70,.35); }
+.md-spieler.gegner.dran { border-color: #7fb2ff; background: rgba(127,178,255,.1); box-shadow: 0 0 14px rgba(127,178,255,.35); }
+.md-mitte { margin: 0; text-align: center; font-family: var(--hand); font-size: 1.35rem; line-height: 1.05; color: var(--ember); max-width: 10rem; }
+.mem-duell.ende .md-mitte { font-size: 1.6rem; color: #ffd27a; }
+.mem-karte.weg.von-gegner .vorne { border-color: #7fb2ff; box-shadow: 0 0 0 1px #7fb2ff, 0 0 18px rgba(127,178,255,.35); }
+.mem-karte.md-wartet .rueck span { opacity: 1; animation: mdPuls .6s ease-in-out infinite alternate; }
+@keyframes mdPuls { to { transform: scale(1.12); } }
+#memory-revanche.lockt { background: var(--ember); color: var(--night); animation: mdGlut .8s ease-in-out infinite alternate; }
+@keyframes mdGlut { from { box-shadow: 0 0 0 rgba(224,160,70,0); } to { box-shadow: 0 0 18px rgba(224,160,70,.75); } }
+#memory-revanche:disabled { opacity: .55; cursor: default; }
+@media (max-width: 440px) { .mem-duell { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .md-mitte { grid-column: 1 / -1; grid-row: 2; max-width: none; } }
+`;
+  document.head.appendChild(mdCss);
+  if (location.search.indexOf("duell-test") >= 0) window.__mdTest = () => md && { st: md.st, ich: md.ich, host: md.s.host, rev: md.rev.slice() }; /* für automatische Tests */
 
   /* ---------- Sprachwechsel ---------- */
   function sprachwechsel() {
@@ -1287,7 +1519,8 @@ html, body { overflow-x: clip; }
     if ($("w20-los")) $("w20-los").textContent = letzterWurf ? t().probeNochmal : t().probeWuerfeln;
     liedZeigen(false);
     inspirationZeigen();
-    if ($("memory") && mem.karten.length) { namenSetzen(); memoryStatus(); if (mem.paare === mem.gesamt && mem.gesamt) $("memory-sieg").textContent = t().memSieg(mem.zuege); }
+    mdSprache();
+    if ($("memory") && mem.karten.length && !md) { namenSetzen(); memoryStatus(); if (mem.paare === mem.gesamt && mem.gesamt) $("memory-sieg").textContent = t().memSieg(mem.zuege); }
     const r = document.querySelector(".rex-guckt"); if (r) r.setAttribute("aria-label", t().rexLabel);
     const l = document.querySelector(".laute-knopf"); if (l) l.setAttribute("aria-label", t().lauteKnopf);
     skizzenVerstecken(); buchKnopfAktualisieren();
