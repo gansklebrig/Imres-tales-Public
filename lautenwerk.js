@@ -1766,7 +1766,7 @@
     aus.gain.value = .7 * (1 - Math.max(...linien.map(l => l.fb)));
     return { ein, aus, connect: z => aus.connect(z), disconnect: () => { try { aus.disconnect(); } catch (_) {} } };
   }
-  let sparHallIn = null, sparAktiv = false, kompRef = null, hallHP = null, orchHall = null, gastHall = null;
+  let sparHallIn = null, sparAktiv = false, kompRef = null, kulKompRef = null, kulAusRef = null, hallHP = null, orchHall = null, gastHall = null;
   let atem = null, pumpBus = null, breiteGain = null, taktEcho = null, taktEchoNass = null, taktEchoEin = null;
   const pumpZiel = () => pumpBus || master;
   /* Hall-Netz nur dann am Ausgang, wenn überhaupt ein Hall läuft – sonst spart es die Rechenzeit ganz */
@@ -1798,6 +1798,8 @@
     hallFilter.frequency.setTargetAtTime(RAEUME[S.raum].hell, ctx.currentTime, .05);
   }
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
+  /* Kulisse läuft am Musikregler vorbei (eigener Regler im Pult); nur beim Zuhören über Funk gilt „Meine Lautstärke“ für alles */
+  const kulAusPegel = () => .6 * (hoerer ? masterPegel() : Math.pow(.8, 1.5));
   /* Effekte und Spieltisch-Momente haben ihren eigenen Pegel – unabhängig von der Musik */
   const fxPegel = () => .55 * Math.pow((typeof S.fxVol === "number" ? S.fxVol : 8) / 10, 1.5);
   let fxAusgang = null, ducken = null, duckEnde = 0, musikStumm = false;
@@ -2392,7 +2394,7 @@ const ZUS_ICON = {
   function zusAn(id) {
     if (zusLauf[id] || !ctx) return;
     const filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = zusDumpf(id) ? 750 : 18000;
-    if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kompRef || master); }
+    if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kulKompRef || kompRef || master); }
     const g = ctx.createGain(); g.gain.value = 0; g.connect(filt); filt.connect(kulBus);
     const z = { zusatz: true, aus: false, art: "z_" + id, g, filt, send: null, knoten: [], naechst: {}, schichten: [], phase: 1 };
     zusLauf[id] = z;
@@ -2444,7 +2446,7 @@ const ZUS_ICON = {
     const g = ctx.createGain(), j = ctx.currentTime;
     g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(kulPegel(), j + 2.5);
     /* eigener Weg an der Musik-Dämpfung vorbei: Anhalten, Wechsel-Übergänge und Effekte dämpfen nur die Musik, nicht die Kulisse */
-    if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kompRef || master); }
+    if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kulKompRef || kompRef || master); }
     g.connect(kulBus);
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
     kul = { art, g, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0, allein: !!sofort };
@@ -2697,6 +2699,7 @@ const ZUS_ICON = {
     if (!ctx) return;
     const j = ctx.currentTime;
     if (ausgang) ausgang.gain.setTargetAtTime(.6 * masterPegel(), j, .05);
+    if (kulAusRef) kulAusRef.gain.setTargetAtTime(kulAusPegel(), j, .05);
     if (fxAusgang) fxAusgang.gain.setTargetAtTime(fxPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
     hallSchalten();
@@ -2788,6 +2791,10 @@ const ZUS_ICON = {
       master.connect(atem); atem.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
       /* Pump-Bus: Teppich, Orchester, Kapelle, Gäste und Sub-Bass ducken sich bei jedem Kick kurz weg */
       pumpBus = ctx.createGain(); pumpBus.gain.value = 1; pumpBus.connect(master);
+      /* Kulisse und Zusatzgeräusche: eigener Weg zum Limiter, am Musikregler vorbei – so lassen sich Musik und Hintergrund
+         unabhängig voneinander einstellen (Pegel wie früher bei Musik auf 80 %) */
+      { const kk = ctx.createDynamicsCompressor(); kk.threshold.value = -20; kk.knee.value = 10; kk.ratio.value = 2; kk.attack.value = .006; kk.release.value = .25;
+        const ka = ctx.createGain(); ka.gain.value = kulAusPegel(); kk.connect(ka); ka.connect(limiter); kulKompRef = kk; kulAusRef = ka; }
       try { pegelMesser = ctx.createAnalyser(); pegelMesser.fftSize = 256; pegelDaten = new Uint8Array(pegelMesser.fftSize); limiter.connect(pegelMesser); } catch (_) { pegelMesser = null; }
       /* Bühne in Stereo: Friedrich links, Echo und Ezekiel rechts, Barradin in der Mitte */
       const PAN = { klopf: -.08, schelle: .18, bass: 0, melodie: -.12, trommel: -.42, floete: .4, ketten: .5, rex: .3 };
@@ -6945,7 +6952,7 @@ const ZUS_ICON = {
       speichern: "Merkt sich die aktuelle Stimmung samt Intensität, Kulisse, Hall, Instrumenten und Gästen – als neue Stimmung (⭐) oder als eigene Fassung einer vorhandenen (✎).",
       musik: "Stimmungen komponieren endlos neue Lieder im passenden Charakter – mit Vorspiel, Strophe, einem Refrain zum Mitsummen, Zwischenteil und großem Schlussrefrain. Lieder sind fertige Stücke der Band und Cover alter Volksweisen, unter „Eigene“ liegen deine gespeicherten Lieder. Eine Kachel 2 Sekunden gedrückt halten heftet sie oben an (nochmal halten löst sie wieder).",
       raum3d: "Nur mit Kopfhörern: Die Kulisse wird räumlich. Jede Schicht steht an ihrem eigenen Platz um dich herum, Geräusche kommen auch von hinten, Vögel und Drachen von oben, Schritte von unten, Reiter und Kutschen ziehen hörbar an dir vorbei, Fernes klingt weit weg. Über Lautsprecher lieber ausschalten – da klingt es seltsam. Die Musik selbst bleibt Stereo.",
-      klang: "Kulissen sind Hintergrundgeräusche, die dauerhaft laufen. Effekte erklingen einmal auf Knopfdruck. Beide laufen über der Musik, die Lautstärke regelst du direkt über den Kacheln. Eine Kachel 2 Sekunden gedrückt halten heftet sie oben an.",
+      klang: "Kulissen sind Hintergrundgeräusche, die dauerhaft laufen. Effekte erklingen einmal auf Knopfdruck. Beide laufen über der Musik und haben eigene Lautstärkeregler direkt über den Kacheln – unabhängig vom Musikregler. Eine Kachel 2 Sekunden gedrückt halten heftet sie oben an.",
       hall: "Raumhall für die Musik, die Kulissen, Cover und Klassiker – die Geräuscheffekte bleiben trocken. „Raum“ wählt die Art des Raums, Echo-Hall gilt nur für Echos Flöte."
     },
     schritte: [
@@ -6970,7 +6977,7 @@ const ZUS_ICON = {
       speichern: "Saves the current mood with intensity, backdrop, reverb, instruments and guests – as a new mood (⭐) or as your own version of an existing one (✎).",
       musik: "Moods keep composing new songs in their character – with intro, verse, a chorus to hum along, bridge and a big final chorus. Songs are finished pieces by the band and covers of old folk tunes; “Own” holds your saved songs. Hold a tile for 2 seconds to pin it to the top (hold again to unpin).",
       raum3d: "Headphones only: the backdrop becomes spatial. Every layer has its own place around you, sounds come from behind too, birds and dragons from above, footsteps from below, riders and carriages pass you by, distant things sound far away. Better switch it off on speakers – it sounds odd there. The music itself stays stereo.",
-      klang: "Backdrops are background sounds that keep running. Effects play once per tap. Both play over the music; set their volume right above the tiles. Hold a tile for 2 seconds to pin it to the top.",
+      klang: "Backdrops are background sounds that keep running. Effects play once per tap. Both play over the music and have their own volume sliders right above the tiles – independent of the music slider. Hold a tile for 2 seconds to pin it to the top.",
       hall: "Room reverb for music, backdrops, covers and classics – sound effects stay dry. “Room” picks the kind of space, echo reverb only applies to Echo's flute."
     },
     schritte: [
