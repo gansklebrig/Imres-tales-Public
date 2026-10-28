@@ -6,7 +6,7 @@
    bildschirmfüllend über die Seite. Beenden: Knopf ✕ oder Esc. */
 (function () {
   "use strict";
-  const KARTEN = ["auftritt", "diebesnacht", "echohort"];
+  const KARTEN = ["auftritt", "diebesnacht", "echohort", "charme-karte"];
   const TEXT = {
     de: { an: "Vollbild", aus: "Vollbild beenden" },
     en: { an: "Fullscreen", aus: "Exit fullscreen" }

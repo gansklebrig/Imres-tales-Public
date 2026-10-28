@@ -37,8 +37,8 @@
       plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4", nurVorschauClip: true, ton: "holz1.mp3" },
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")],
       plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, ton: "glock_91.mp3" },
-    { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: [B("charme-1"), B("charme-2"), B("charme-3")],
-      plakat: B("plakat-charme"), pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
+    { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: ["vorschau/charme-1.webp?v=4", "vorschau/charme-2.webp?v=4", "vorschau/charme-3.webp?v=4"],
+      plakat: "vorschau/plakat-charme.webp?v=4", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
   ];
   /* Sprüche aus Sicht der Helden, Kopf der Taverne, Fortschritt */
   const MEHR = {
@@ -165,7 +165,7 @@
           pc: "Karten anklicken.", handy: "Karten antippen." },
         charme: { titel: "Würfel auf Charme", kurz: "Barradin will jeden NSC verführen – der Spielleiter leidet.", genre: "Würfelspiel", wer: "Barradin & der Spielleiter",
           text: "Hinter dem Schirm sitzt der Spielleiter, vor ihm erscheinen nacheinander die NSC, die er spielt – von Gundren bis Themberchaud. Wähle einen Spruch, wirf den W20 und schau ihm ins Gesicht: Grinsen, Facepalm, blankes Entsetzen.",
-          punkte: ["Acht NSC aus der Kampagne – und ein geheimer Bonusgast", "Charmant, kühn, absurd oder passend: jeder Spruch hat sein eigenes Risiko", "Joker: Echos „Kennst du Gundren?“, Rex und die Flöte der Illusionen", "Die Geduld des Spielleiters ist begrenzt – und das Eroberungsbuch merkt sich alles"],
+          punkte: ["Acht NSC aus der Kampagne – und ein geheimer Bonusgast", "Charmant, kühn, absurd oder passend: jeder Spruch hat sein eigenes Risiko", "Joker: Echos „Kennst du Gundren?“, Rex und die Flöte der Illusionen", "Peinliche Stille inklusive: Manchmal sagt einfach niemand etwas. Sehr lange.", "Die Geduld des Spielleiters ist begrenzt – und das Eroberungsbuch merkt sich alles"],
           pc: "Spruch anklicken – der W20 rollt von allein.", handy: "Spruch antippen." }
       }
     },
@@ -204,7 +204,7 @@
           pc: "Click the cards.", handy: "Tap the cards." },
         charme: { titel: "Roll for Charm", kurz: "Barradin wants to seduce every NPC – the game master suffers.", genre: "Dice game", wer: "Barradin & the game master",
           text: "Behind the screen sits the game master, and in front of him the NPCs he voices appear one by one – from Gundren to Themberchaud. Pick a line, roll the d20 and watch his face: grin, facepalm, sheer horror.",
-          punkte: ["Eight NPCs from the campaign – and a secret bonus guest", "Charming, bold, absurd or fitting: every line has its own risk", "Jokers: Echo's \"Do you know Gundren?\", Rex and the flute of illusions", "The game master's patience is limited – and the Book of Conquests remembers everything"],
+          punkte: ["Eight NPCs from the campaign – and a secret bonus guest", "Charming, bold, absurd or fitting: every line has its own risk", "Jokers: Echo's \"Do you know Gundren?\", Rex and the flute of illusions", "Awkward silences included: sometimes nobody says anything. For a very long time.", "The game master's patience is limited – and the Book of Conquests remembers everything"],
           pc: "Click a line – the d20 rolls by itself.", handy: "Tap a line." }
       }
     }

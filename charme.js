@@ -47,6 +47,7 @@
       arten: { charmant: "Charmant", kuehn: "Kühn", absurd: "Absurd", passend: "Passend" },
       artInfo: { charmant: n => "SG " + n + " · 1 ♥", kuehn: n => "SG " + n + " · 2 ♥", absurd: () => "Glückssache · kostet Geduld", passend: n => "SG " + n + " · 1 ♥" },
       joker: { echo: "Echo: „Kennst du Gundren?“", rex: "Rex schickt", floete: "Flöte der Illusionen" },
+      jokerKurz: { echo: "🗣 „Gundren?“", rex: "🐕 Rex", floete: "🎶 Flöte" },
       jokerInfo: { echo: "Neue Sprüche + ein Zug mehr", rex: "+1 ♥, garantiert", floete: "Nächster Wurf mit Vorteil" },
       wurf: (w, b, s) => "W20: " + w + " + " + b + " Charisma = " + s,
       gegen: sg => "gegen SG " + sg,
@@ -61,117 +62,117 @@
       nsc: {
         gundren: { name: "Gundren Felsensucher", aufgabe: "Überrede ihn, den Lohn im Voraus zu zahlen.",
           intro: "„Ah, die Helden! Bereit für den Weg nach Phandalin?“",
-          charmant: ["„Gundren, dein Bart glänzt heute wie poliertes Erz.“", "„Mit dir würde ich jede Karawane begleiten. Auch eine leere.“", "„Ein Zwerg mit so viel Stil verdient Gefährten mit Stil. Also uns.“"],
-          kuehn: ["„Zahl uns jetzt, und ich schreibe dir eine Ballade. Mit Refrain.“", "„Du und ich, Gundren – das ist der Anfang einer langen Geschäftsbeziehung. Und vielleicht mehr.“"],
-          absurd: ["„Ich habe von dir geträumt. Du warst ein Pony. Ich war der Wagen.“", "„Darf ich deinen Hut tragen? Nur kurz. Für immer.“"],
-          passend: ["„Ich kenne da eine magische Schmiede … also, du kennst sie. Und ich kenne dich.“"],
-          ja: ["Gundren lacht dröhnend. „Ihr gefallt mir! Hier, die Hälfte jetzt.“", "„Ha! So ein Mundwerk. Na gut, na gut.“"],
-          nein: ["„Bezahlt wird in Phandalin. Wie immer.“", "Gundren zählt demonstrativ seine Münzen. Für sich."],
-          krit: "Gundren wird rot unter dem Bart und drückt dir den ganzen Beutel in die Hand.",
+          charmant: ["„Gundren, ist das Erz in deinem Bart, oder funkeln deine Augen einfach so, wenn du mich ansiehst?“", "„Ich würde jede Karawane mit dir begleiten. Am liebsten die, in der nur wir zwei sitzen.“", "„Dein Bart ist so prächtig geflochten. Darf ich … nur einmal kurz durchfahren?“", "„Weißt du, was in Phandalin am meisten glänzt? Nicht die Mine. Du.“"],
+          kuehn: ["„Zahl uns im Voraus, und ich zahle dich mit Küssen zurück. Mit Zinsen.“", "„Vergiss die verschollene Mine, Gundren. Den größten Schatz hast du gerade vor dir.“", "„Ein Kuss für jede Goldmünze. Ich hab Zeit.“"],
+          absurd: ["„Ich habe von dir geträumt. Du warst ein Pony. Ich war der Wagen. Wir waren glücklich.“", "„Darf ich deinen Hut tragen? Nur kurz. Für immer. Im Bett.“", "„Bist du eine Spitzhacke? Weil du mein Herz gerade freigelegt hast.“"],
+          passend: ["„Du suchst eine verlorene Schmiede? Ich hab da ein Feuer, das nur für dich brennt.“", "„Drei Brüder Felsensucher – und du bist eindeutig der Hübscheste.“"],
+          ja: ["Gundren zwirbelt verlegen seinen Bart. „Na, du bist mir einer …“", "Gundren wird rot bis unter die Hutkrempe. „Hör auf. Nein, mach weiter.“", "„Ha! Mit so einem Mundwerk solltest du Händler werden. Oder … mein Begleiter.“"],
+          nein: ["„Bezahlt wird in Phandalin. Auch für Charmeure.“", "Gundren zählt demonstrativ seine Münzen. Für sich. Und zwinkert nicht zurück."],
+          krit: "Gundren drückt dir den ganzen Beutel in die Hand – und einen Kuss auf die Wange. Durch den Bart. Es kitzelt.",
           patzer: "Gundren schreibt sich deinen Namen auf. Auf die Liste der Leute, die nichts bekommen.",
-          sieg: "Der Lohn klimpert im Voraus. Gundren winkt euch nach, ein bisschen verlegen.",
+          sieg: "Der Lohn klimpert im Voraus. Gundren winkt euch nach und haucht Barradin einen Luftkuss zu.",
           verloren: "„Wir sehen uns in Phandalin.“ Dort werdet ihr ihn so schnell nicht sehen …" },
         buergermeister: { name: "Der Bürgermeister von Phandalin", aufgabe: "Bring ihn dazu, die Belohnung ohne Feilschen auszuzahlen.",
           intro: "„Belohnung? Ich erinnere mich an keine Belohnung.“",
-          charmant: ["„Herr Bürgermeister, Ihre Amtskette steht Ihnen ausgezeichnet.“", "„Phandalin hat Glück, so einen weitsichtigen Mann zu haben.“", "„Ihr Pelzkragen ist das Weichste, was ich seit Neverwinter gesehen habe.“"],
-          kuehn: ["„Zahlen Sie, und ich singe auf dem Marktplatz, wie großzügig Sie sind.“", "„Ein so großer Mann sollte auch große Belohnungen zahlen.“"],
-          absurd: ["„Ich möchte Ihre Unterschrift. Auf meinem Herzen. Oder einem Scheck.“", "„Sind Sie ein Zauberer? Weil jedes Mal, wenn ich Sie ansehe, verschwindet mein Gold.“"],
-          passend: ["„Ich habe gehört, Sie zählen Ihre Münzen jeden Abend. Ich würde Ihnen dabei zusehen. Fasziniert.“"],
-          ja: ["Der Bürgermeister errötet. „Nun ja … ich will nicht so sein.“", "„So viel Verständnis für Verwaltung! Hier, nehmt.“"],
-          nein: ["„Schmeichelei kostet extra. Für euch.“", "Er schiebt den Geldbeutel ein Stück weiter weg."],
-          krit: "Der Bürgermeister zahlt – ohne zu feilschen. Phandalin hält kurz den Atem an.",
+          charmant: ["„Herr Bürgermeister, Ihre Amtskette steht Ihnen – aber Sie würden auch ohne sie glänzen.“", "„Sie haben eine so starke … Verwaltungsaura. Mir wird ganz warm.“", "„Ihr Pelzkragen ist das Weichste in Phandalin. Fast so weich wie Ihr Blick.“", "„Darf ich Ihnen sagen, dass Sie unterschreiben wie ein Poet?“"],
+          kuehn: ["„Zahlen Sie die volle Belohnung, und ich lade Sie zum Abendessen ein. Kerzenschein. Nur wir und die Steuerlisten.“", "„So ein großer Mann sollte auch große Gesten machen. Fangen wir mit der Belohnung an. Dann sehen wir weiter.“", "„Ich hätte da einen Antrag. Keinen Amtsantrag.“"],
+          absurd: ["„Ich möchte Ihre Unterschrift. Auf meinem Herzen. Oder einem Scheck. Am besten beides.“", "„Sind Sie ein Zauberer? Jedes Mal, wenn ich Sie ansehe, verschwindet mein Gold. Und mein Verstand.“"],
+          passend: ["„Ich habe gehört, Sie zählen jeden Abend Ihre Münzen. Ich würde gern danebensitzen. Ganz nah.“", "„Wählen Sie mich. Nicht ins Amt. In Ihr Herz.“"],
+          ja: ["Der Bürgermeister lockert die Amtskette. „Ist es hier warm geworden?“", "„Nun ja … ich will ja kein Unmensch sein.“ Er errötet bis zu den Ohren.", "Er tupft sich die Stirn. „Sie … Sie Schmeichler.“"],
+          nein: ["„Schmeichelei kostet extra. Für Sie doppelt.“", "Er schiebt den Geldbeutel ein Stück weiter weg. Und den Stuhl auch."],
+          krit: "Der Bürgermeister zahlt ohne Feilschen – und fragt, ob Barradin am Samstag schon etwas vorhat.",
           patzer: "Er erhebt eine Gebühr für Komplimente. Rückwirkend.",
-          sieg: "Ihr bekommt die volle Belohnung. Zum ersten Mal in der Geschichte Phandalins.",
+          sieg: "Ihr bekommt die volle Belohnung. Und der Bürgermeister schreibt Barradin ein Gedicht. Es reimt sich nicht.",
           verloren: "Er gibt euch eine Kupfermünze. Eine. Zum Teilen." },
         bugbear: { name: "Der Bugbear im Wachturm", aufgabe: "Lass dich durch die Tür, ohne zu kämpfen.",
           intro: "Ein riesiger, haariger Bugbear versperrt die Tür. „GRRR.“",
-          charmant: ["„Was für ein prächtiges Fell! Benutzt du eine Spülung?“", "„Du hast die schönsten Krallen im ganzen Wachturm.“", "„Weißt du, dass du ein sehr ausdrucksstarkes Knurren hast?“"],
-          kuehn: ["„Lass mich durch, und ich nenne meine nächste Laute nach dir.“", "„Du und ich, Großer. Kerzenlicht. Ein Fass Bier. Was meinst du?“"],
-          absurd: ["„Ich habe ein Fass. Du hast ein Fass. Siehst du? Wir haben so viel gemeinsam.“", "„Bist du ein Teppich? Ich würde nämlich gern auf dir liegen. Kurz.“"],
-          passend: ["„Grrr.“ (Barradin knurrt zärtlich zurück.)"],
-          ja: ["Der Bugbear schnurrt. Leise. Fast.", "„…Grrr?“ Er tritt ein kleines Stück zur Seite."],
-          nein: ["„GRRR!“", "Der Bugbear legt die Ohren an. Das ist kein gutes Zeichen."],
-          krit: "Der Bugbear öffnet die Tür, verbeugt sich und schenkt dir eine halbe Ratte.",
+          charmant: ["„Was für ein prächtiges Fell! Darf ich mal … kraulen?“", "„Du hast die schönsten Krallen im ganzen Wachturm. Und die schönsten Augen.“", "„Dein Knurren geht mir durch Mark und Bein. Auf die gute Art.“", "„So groß, so stark, so flauschig. Du bist mein Typ.“"],
+          kuehn: ["„Lass mich durch, und ich nenne meine nächste Laute nach dir. Und mein nächstes Kind.“", "„Du und ich, Großer. Kerzenlicht. Ein Fass Bier. Eine Decke aus deinem Fell. Also, mit dir drin.“", "„Komm her und gib mir eine von diesen Bärenumarmungen.“"],
+          absurd: ["„Ich habe ein Fass. Du hast ein Fass. Siehst du? Seelenverwandte.“", "„Bist du ein Teppich? Ich würde nämlich gern vor dem Kamin auf dir liegen.“"],
+          passend: ["„Grrr.“ (Barradin knurrt zärtlich zurück und zwinkert.)", "„Du bewachst diese Tür so leidenschaftlich. Bewach doch lieber mich.“"],
+          ja: ["Der Bugbear schnurrt. Leise. Verliebt.", "„…Grrr?“ Er klimpert mit den Wimpern. Er hat erstaunlich lange Wimpern.", "Der Bugbear streicht sich verlegen das Fell glatt."],
+          nein: ["„GRRR!“", "Der Bugbear legt die Ohren an. Das ist kein Flirt-Zeichen."],
+          krit: "Der Bugbear öffnet die Tür, verbeugt sich, schenkt dir eine halbe Ratte und ein Herz aus Knochen.",
           patzer: "Der Bugbear setzt sich auf dich. Es ist warm. Es ist schwer.",
-          sieg: "Die Tür steht offen. Der Bugbear schaut dir verträumt nach.",
+          sieg: "Die Tür steht offen. Der Bugbear schaut dir seufzend nach und malt ein Herz in den Staub.",
           verloren: "Ihr müsst doch kämpfen. Der Bugbear wirkt gekränkt." },
         ilvara: { name: "Ilvara Mizzrym", aufgabe: "Bring sie dazu, die Ketten ein wenig zu lockern.",
           intro: "„Sklaven reden nicht, wenn man sie nicht fragt.“",
-          charmant: ["„Herrin, Euer Blick ist schärfer als jede Drow-Klinge.“", "„In diesen Ketten fühle ich mich Euch so nah.“", "„Diese Festung ist düster. Ihr dagegen strahlt.“"],
-          kuehn: ["„Lockert die Ketten, und ich singe Euch ein Lied, das selbst Lolth erröten lässt.“", "„Ihr und ich, Herrin – wir wären ein unschlagbares Paar. Ich halte die Laute, Ihr die Peitsche.“"],
-          absurd: ["„Ich mag Spinnen. Sehr. Wirklich. Bitte.“", "„Seid Ihr eine Druidin? Ich frage nur, weil … oh. Oh nein.“"],
-          passend: ["„Eure Spinnen haben ausgezeichneten Geschmack. Sie bewachen Euch.“"],
-          ja: ["Ilvara hebt eine Augenbraue. Das ist bei ihr fast ein Lächeln.", "„Unterhaltsam. Das rettet dir vielleicht den Tag.“"],
+          charmant: ["„Herrin, Euer Blick ist schärfer als jede Drow-Klinge. Und ich würde mich gern daran schneiden.“", "„In diesen Ketten fühle ich mich Euch so nah.“", "„Diese Festung ist düster. Ihr dagegen strahlt wie das Licht, das ich so vermisse.“", "„Ihr seid die Einzige hier, für die ich freiwillig bleiben würde.“"],
+          kuehn: ["„Lockert die Ketten, und ich singe Euch ein Liebeslied, bei dem selbst Lolth errötet.“", "„Ihr und ich, Herrin – ich halte die Laute, Ihr die Peitsche. Ein Traumpaar.“", "„Nehmt mir die Ketten ab. Dann gehöre ich Euch trotzdem.“"],
+          absurd: ["„Ich mag Spinnen. Sehr. Acht Beine, acht Arme zum Umarmen. Bitte.“", "„Seid Ihr eine Druidin? Weil Ihr mich in einen verliebten Trottel verwandelt habt.“"],
+          passend: ["„Eure Spinnen haben ausgezeichneten Geschmack. Sie weichen Euch nie von der Seite. Ich verstehe sie.“", "„Ihr habt mich in Euer Netz gelockt, Herrin. Und ich will gar nicht raus.“"],
+          ja: ["Ilvara hebt eine Augenbraue. Bei ihr ist das fast ein Erröten.", "„Unterhaltsam.“ Sie lässt die Peitsche sinken. Langsam.", "Ilvara wendet sich ab, damit niemand ihr Lächeln sieht. Barradin sieht es trotzdem."],
           nein: ["„Noch ein Wort, und du fütterst die Spinnen.“", "Sie lässt die Peitsche knallen. Nicht nah. Aber nah genug."],
-          krit: "Ilvara lockert die Ketten – und schaut sich danach misstrauisch um, als hätte sie das nicht gewollt.",
+          krit: "Ilvara lockert die Ketten, beugt sich vor und flüstert: „Wenn du fliehst, Barde … flieh langsam.“",
           patzer: "Ilvara verdoppelt deine Ketten. „Zur Sicherheit.“",
-          sieg: "Die Ketten sitzen lockerer. Ilvara tut so, als wäre nichts gewesen.",
+          sieg: "Die Ketten sitzen lockerer. Ilvara tut so, als wäre nichts gewesen – aber sie schaut dir nach.",
           verloren: "„Abführen.“ Die Ketten klirren. Romantisch ist anders." },
         kuotoa: { name: "Ein Kuo-Toa-Wächter", aufgabe: "Er soll euch in die Stadt lassen.",
           intro: "Der Wächter glotzt. Lange. Ohne zu blinzeln.",
-          charmant: ["„Deine Schuppen schimmern wie der See im Mondlicht.“", "„Du hast die schönsten großen Augen, die ich je gesehen habe.“", "„Riechst du nach Algen? Ich liebe Algen.“"],
-          kuehn: ["„Lass uns rein, und ich singe dir ein Lied über den See. Mit Blubbern.“", "„Wir zwei, ein Boot, der unterirdische See … denk drüber nach.“"],
-          absurd: ["„Blubb.“ (Barradin blinzelt verführerisch.)", "„Bist du ein Fisch? Weil du mir den Atem raubst. Unter Wasser.“"],
-          passend: ["„Du hast etwas Göttliches an dir. Ein echtes, nicht ausgedachtes.“"],
-          ja: ["Der Wächter blubbert zufrieden.", "„Blubb.“ Es klingt freundlich. Vermutlich."],
-          nein: ["Der Wächter glotzt weiter. Unbeeindruckt. Und feucht.", "„Fremde. Verdächtig. Blubb.“"],
-          krit: "Der Wächter öffnet das Tor und winkt mit beiden Flossen.",
+          charmant: ["„Deine Schuppen schimmern wie der See im Mondlicht.“", "„Du hast die schönsten großen Augen, die ich je gesehen habe. Und du blinzelst nie weg. Romantisch.“", "„Du riechst nach Algen. Ich liebe Algen.“", "„So glänzend, so glitschig, so … geheimnisvoll.“"],
+          kuehn: ["„Lass uns rein, und ich nehme dich mit auf eine Bootsfahrt. Nur wir zwei und der unterirdische See.“", "„Gib mir einen feuchten Kuss, und ich vergesse, wie seltsam das hier gerade ist.“", "„Ich würde für dich sogar Kiemen kriegen wollen.“"],
+          absurd: ["„Blubb.“ (Barradin blinzelt verführerisch. Mit beiden Augen. Nacheinander.)", "„Bist du ein Fisch? Weil du mich am Haken hast.“"],
+          passend: ["„Du hast etwas Göttliches an dir. Ein echtes, nicht ausgedachtes. Ich würde dich anbeten.“", "„Ich bin zwar kein Fisch, aber ich schwimme auf dich.“"],
+          ja: ["Der Wächter blubbert zufrieden. Seine Flossen zittern.", "„Blubb.“ Es klingt verliebt. Vermutlich.", "Der Wächter wird an den Kiemen ganz rosa."],
+          nein: ["Der Wächter glotzt weiter. Unbeeindruckt. Und feucht.", "„Fremde. Verdächtig. Zu charmant. Blubb.“"],
+          krit: "Der Wächter öffnet das Tor, winkt mit beiden Flossen und schenkt Barradin eine Muschel. In Herzform. Fast.",
           patzer: "Der Wächter ruft drei Freunde. Sie glotzen jetzt alle.",
-          sieg: "Das Tor öffnet sich mit einem feuchten Quietschen.",
+          sieg: "Das Tor öffnet sich mit einem feuchten Quietschen. Der Wächter schmachtet euch nach.",
           verloren: "Ihr kommt trotzdem rein – gefesselt. Wie geplant. Irgendwie." },
         horga: { name: "König Horga Stahl V.", aufgabe: "Erbitte Gastrecht in Gracklstugh.",
           intro: "„Sprich, Barde. Aber fass dich kurz.“",
-          charmant: ["„Majestät, Euer Bart allein hat mehr Würde als ganz Phandalin.“", "„Eure Krone sitzt so vortrefflich, als wäre sie für Euch geschmiedet.“", "„Gracklstugh glüht – aber Ihr glüht heller.“"],
-          kuehn: ["„Gewährt uns Gastrecht, und ich komponiere Euch eine Hymne. Mit Amboss-Solo.“", "„Ein König wie Ihr verdient einen Barden wie mich. Täglich.“"],
-          absurd: ["„Darf ich Euren Bart flechten? Rein freundschaftlich.“", "„Seid Ihr ein Amboss? Weil mein Herz bei Euch schneller hämmert.“"],
-          passend: ["„Wir haben Euren Sohn gerettet. Und dabei an Euch gedacht. Die ganze Zeit.“"],
-          ja: ["Der König brummt. Das könnte Zustimmung sein.", "„Hmpf. Du hast Mut, Barde.“"],
-          nein: ["„Wache!“ Die Wachen rühren sich nicht. Aber sie schauen.", "Der König schaut, als hätte er in eine Zitrone gebissen."],
-          krit: "Der König lacht – zum ersten Mal seit fünfzig Jahren. Der Hof erstarrt.",
+          charmant: ["„Majestät, Euer Bart allein hat mehr Würde als ganz Phandalin. Und mehr Sexappeal.“", "„Eure Krone sitzt so vortrefflich. Aber ich wette, ohne seid Ihr noch schöner.“", "„Gracklstugh glüht – aber Ihr glüht heller. Ich schmelze.“", "„Wenn Ihr befehlt, gehorche ich. Gern. Immer.“"],
+          kuehn: ["„Gewährt uns Gastrecht, und ich komponiere Euch eine Liebeshymne. Mit Amboss-Solo.“", "„Ein König wie Ihr braucht einen Barden wie mich. An seiner Seite. Jeden Abend.“", "„Majestät, darf ich um diesen Tanz bitten? Auch wenn keine Musik spielt?“"],
+          absurd: ["„Darf ich Euren Bart flechten? Ganz langsam.“", "„Seid Ihr ein Amboss? Weil mein Herz bei Euch schneller hämmert.“"],
+          passend: ["„Wir haben Euren Sohn gerettet. Und dabei an seinen hinreißenden Vater gedacht. Die ganze Zeit.“", "„Ich habe noch nie einen so stählernen König gesehen. Hart, aber mit weichem Kern?“"],
+          ja: ["Der König brummt. Seine Ohren werden rot.", "„Hmpf. Du hast Mut, Barde.“ Er streicht sich geschmeichelt über den Bart.", "Der Hof tuschelt. Der König sagt nichts. Aber er lächelt."],
+          nein: ["„Wache!“ Die Wachen rühren sich nicht. Aber sie kichern.", "Der König schaut, als hätte er in eine Zitrone gebissen."],
+          krit: "Der König lacht – zum ersten Mal seit fünfzig Jahren – und bietet Barradin einen Ehrenplatz neben dem Thron an.",
           patzer: "Der König lässt dich höflich, aber bestimmt hinausrollen. In einem Fass.",
-          sieg: "Gastrecht gewährt. Kardal reibt sich peinlich berührt die Stirn.",
+          sieg: "Gastrecht gewährt. Und eine Einladung zum Abendessen. Kardal reibt sich peinlich berührt die Stirn.",
           verloren: "Ihr dürft bleiben – aber nur, weil ihr seinen Sohn gerettet habt." },
         hgraam: { name: "Der Steinsprecher", aufgabe: "Er soll euch seinen Steinsprecher-Kristall geben.",
           intro: "„Der Stein schreit. Hörst du ihn?“",
-          charmant: ["„Ihr seid so … standfest. Ich bewundere das.“", "„Eure Haut hat eine wundervolle Maserung. Granit?“", "„Wenn Ihr sprecht, höre ich den Berg singen.“"],
-          kuehn: ["„Gebt mir den Kristall, und ich singe für Euch, bis der Stein aufhört zu schreien.“", "„Ihr und ich – Fels und Fels. Naja. Fels und Barde.“"],
-          absurd: ["„Ich habe auch ein paar Steine. In der Tasche. Wollt Ihr sie sehen?“", "„Seid Ihr ein Steinbruch? Weil ich mich gerade in Euch verliere.“"],
-          passend: ["„Der Stein schreit? Ich auch. Vor Bewunderung.“"],
-          ja: ["Der Steinsprecher nickt langsam. Sehr langsam.", "„Der Stein … mag dich.“"],
-          nein: ["Der Steinsprecher spricht weiter in Rätseln. Über etwas völlig anderes.", "Er betrachtet dich wie ein Kiesel, der zu viel redet."],
-          krit: "Der Steinsprecher lächelt. Irgendwo in Gracklstugh fällt ein Fels vor Freude um.",
+          charmant: ["„Ihr seid so … standfest. Ich mag Männer, an die man sich anlehnen kann.“", "„Eure Haut hat eine wundervolle Maserung. Darf ich mal fühlen?“", "„Wenn Ihr sprecht, höre ich den Berg singen. Und mein Herz.“", "„Ihr seid ein Fels in der Brandung. Und ich bin die Brandung.“"],
+          kuehn: ["„Gebt mir den Kristall, und ich singe für Euch, bis der Stein aufhört zu schreien. Und anfängt zu seufzen.“", "„Ihr und ich – Fels und Barde. Ich klettere gern.“", "„Hebt mich hoch. Nur einmal. Bitte.“"],
+          absurd: ["„Ich habe auch ein paar Steine. In der Tasche. Für Euch gesammelt. Wollt Ihr sie sehen?“", "„Seid Ihr ein Steinbruch? Weil ich mich gerade in Euch verliere.“"],
+          passend: ["„Der Stein schreit? Ich auch. Vor Verlangen.“", "„Euch würde ich auch zuhören, wenn Ihr nur Rätsel sprecht. Gerade dann.“"],
+          ja: ["Der Steinsprecher nickt langsam. Sehr langsam. Sehr zärtlich.", "„Der Stein … mag dich.“ Er schaut weg. Riesen werden auch rot.", "Ein winziger Kiesel rollt verlegen von seiner Schulter."],
+          nein: ["Der Steinsprecher spricht weiter in Rätseln. Über etwas völlig anderes.", "Er betrachtet dich wie einen Kiesel, der zu viel flirtet."],
+          krit: "Der Steinsprecher lächelt und hebt Barradin hoch wie einen kostbaren Edelstein. Irgendwo fällt ein Fels vor Rührung um.",
           patzer: "Er hält dich für einen sprechenden Stein und legt dich zu den anderen.",
-          sieg: "Der Kristall liegt warm in deiner Hand. Der Stein schreit kurz leiser.",
+          sieg: "Der Kristall liegt warm in deiner Hand. Der Steinsprecher hat ihn zuvor kurz an sein Herz gedrückt.",
           verloren: "„Etwas Unersättliches regt sich.“ Er meint dich." },
         themberchaud: { name: "Themberchaud, der Meister der Flammen", aufgabe: "Überzeuge ihn, euch nicht zu fressen.",
           intro: "Der Drache landet auf dem Gold. Die Halle wird sehr warm. Sehr still.",
-          charmant: ["„Euer Schatz glänzt – aber nicht so wie Eure Schuppen.“", "„Ich habe noch nie einen so prachtvollen Drachen gesehen. Ehrlich gesagt überhaupt noch nie einen.“", "„Euer Feuer wärmt mein Herz. Und meine Augenbrauen.“"],
-          kuehn: ["„Lasst uns leben, und ich singe Euch eine Ballade über die Reise durch das ganze Unterreich. In Reimen.“", "„Ihr und ich, Meister – Ihr speit Feuer, ich spucke Verse.“"],
-          absurd: ["„Darf ich auf dem goldenen Hund sitzen? Er sieht bequem aus.“", "„Seid Ihr ein Vulkan? Weil ich bei Euch dahinschmelze. Wörtlich.“"],
-          passend: ["„Ein Wesen von Eurem Geschmack sammelt nur das Beste. Ich wäre gern Teil der Sammlung.“"],
-          ja: ["Themberchaud stößt eine zufriedene Rauchwolke aus.", "„Unterhaltsam.“ Das Wort hallt durch die Halle."],
+          charmant: ["„Euer Schatz glänzt – aber nicht so wie Eure Schuppen.“", "„Ich habe noch nie einen so prachtvollen Drachen gesehen. Ehrlich gesagt überhaupt noch nie einen. Aber Ihr setzt die Messlatte hoch.“", "„Euer Feuer wärmt mein Herz. Und meine Augenbrauen.“", "„Man nennt Euch Meister der Flammen. Ich verstehe jetzt, warum ich brenne.“"],
+          kuehn: ["„Lasst uns leben, und ich singe Euch jeden Abend ein Liebeslied. Direkt auf Eurem Goldberg.“", "„Ihr speit Feuer, ich spucke Verse. Lasst uns zusammen etwas entfachen.“", "„Ich wäre gern Euer kostbarstes Stück. Legt mich ganz oben auf den Hort.“"],
+          absurd: ["„Darf ich mit Euch auf dem goldenen Hund kuscheln? Er sieht bequem aus.“", "„Seid Ihr ein Vulkan? Weil ich bei Euch dahinschmelze. Wörtlich.“"],
+          passend: ["„Ein Wesen von Eurem Geschmack sammelt nur das Schönste. Und hier stehe ich.“", "„Bei Euch ist es heißer als in der Lava. Und es liegt nicht an der Lava.“"],
+          ja: ["Themberchaud stößt eine zufriedene, fast herzförmige Rauchwolke aus.", "„Unterhaltsam.“ Er senkt den Kopf und mustert Barradin. Lange.", "Die Lava blubbert. Themberchaud schnurrt. Beides klingt verdächtig nach Zuneigung."],
           nein: ["Ein warnendes Rauchwölkchen steigt aus seinen Nüstern.", "Die Laute wird plötzlich sehr warm."],
-          krit: "Themberchaud schnurrt. Echo fragt leise, ob er Gundren kennt. Er kennt ihn nicht – aber er ist bester Laune.",
+          krit: "Themberchaud schnurrt und legt Barradin eine Goldmünze in die Hand. „Zur Erinnerung an mich.“ Echo fragt leise, ob er Gundren kennt.",
           patzer: "Themberchaud niest. Barradins Haare sind jetzt kürzer.",
-          sieg: "Der Drache verschont euch und gibt euch einen Auftrag. Barradin nennt das ein Date.",
+          sieg: "Der Drache verschont euch, gibt euch einen Auftrag und zwinkert. Barradin nennt das ein Date.",
           verloren: "Ihr lebt – aber nur, weil Themberchaud jemanden für die Drecksarbeit braucht." },
         demogorgon: { name: "Demogorgon (Bonus)", aufgabe: "Bitte … einfach wieder gehen.",
           intro: "Zwei Köpfe. Tentakel. Der Spielleiter lächelt sehr breit.",
-          charmant: ["„Ihr … habt zwei wunderschöne Köpfe. Beide.“", "„Diese Tentakel! So … viele.“", "„Euer Schrei ist so durchdringend. So … musikalisch.“"],
-          kuehn: ["„Geht zurück in den Abgrund, und ich schreibe Euch ein Duett. Für beide Köpfe.“", "„Ihr und ich, Dämonenfürst. Was könnte schon schiefgehen?“"],
-          absurd: ["„Friedrich hat dich geboxt. Ich würde dich lieber umarmen.“", "„Welcher Kopf ist der romantische?“"],
-          passend: ["(Barradin hält die Flöte der Illusionen hoch und zeigt Demogorgon … Demogorgon.)"],
-          ja: ["Der linke Kopf kichert. Der rechte ist skeptisch.", "Die Tentakel winken. Ist das gut?"],
+          charmant: ["„Ihr habt zwei wunderschöne Köpfe. Ich kann mich nicht entscheiden, welchen ich zuerst anschmachte.“", "„Diese Tentakel! So viele. So … umarmend.“", "„Euer Schrei ist so durchdringend. So … leidenschaftlich.“"],
+          kuehn: ["„Geht zurück in den Abgrund, und ich schreibe Euch ein Liebesduett. Für beide Köpfe.“", "„Zwei Köpfe, zwei Küsse. Ich bin bereit.“", "„Ihr und ich, Dämonenfürst. Was könnte schon schiefgehen?“"],
+          absurd: ["„Friedrich hat dich geboxt. Ich würde dich lieber umarmen. Mit allen Tentakeln.“", "„Welcher Kopf ist der romantische? Ich frage für mich.“"],
+          passend: ["(Barradin hält die Flöte der Illusionen hoch und zaubert Demogorgon ein Herz aus Licht.)", "„Ihr seid der Fürst der Dämonen. Und der Fürst meines Herzens.“"],
+          ja: ["Der linke Kopf kichert verliebt. Der rechte ist eifersüchtig.", "Die Tentakel formen ein Herz. Ein schiefes, aber ein Herz."],
           nein: ["Beide Köpfe schreien. Gleichzeitig.", "Ein Tentakel tätschelt Barradin. Zu fest."],
-          krit: "Demogorgon … errötet. Auf beiden Köpfen. Und verschwindet verwirrt im See.",
+          krit: "Demogorgon errötet. Auf beiden Köpfen. Und verschwindet verwirrt im See – mit einem Blick zurück.",
           patzer: "Demogorgon frisst die Laute. Der Spielleiter muss kurz raus.",
-          sieg: "Demogorgon zieht sich zurück. Beide Köpfe schauen noch einmal zurück.",
+          sieg: "Demogorgon zieht sich zurück. Beide Köpfe werfen Barradin einen Luftkuss zu.",
           verloren: "Ihr rennt zum Boot. Wie damals. Nur peinlicher." }
       },
       sl: { /* Der Spielleiter kommentiert */
-        start: ["„Okay. Ihr steht vor …“", "„Ich ahne Schlimmes.“", "„Bitte. Bitte nicht wieder.“"],
+        start: ["„Okay. Ihr steht vor …“ – „Ich flirte.“ – „Ich hab noch gar nicht gesagt, vor wem!“", "„Ich ahne Schlimmes.“", "„Bitte. Bitte nicht wieder flirten.“", "„Barradin, er ist ein NSC. Ein NSC!“"],
         absurd: ["„Das ist nicht dein Ernst.“", "„Ich schreibe das auf.“", "„Ich hasse euch. Liebevoll.“", "„…Mach einen Wurf.“"],
-        erfolg: ["„Okay. Das zählt.“", "„Ich kann's nicht fassen.“", "„…Na gut.“", "„Er wird rot. Natürlich wird er rot.“"],
+        erfolg: ["„Okay. Das zählt.“", "„Ich kann's nicht fassen.“", "„…Na gut. Er wird rot.“", "„Warum funktioniert das IMMER?“", "„Ich spiele das jetzt mit Würde. Irgendwie.“"],
         misserfolg: ["„Nein.“", "„Das hat er nicht gehört. Absichtlich.“", "„Würfel lügen nicht.“", "„Nächster Versuch.“"],
         krit: ["„WAS?!“", "„Das … das gibt's nicht.“", "„Ich muss kurz meine Notizen umschreiben.“"],
         patzer: ["„HAHAHA – nein.“", "„Das wird Konsequenzen haben.“", "„Ich lass das einfach so stehen.“"],
@@ -179,8 +180,10 @@
         rex: ["„Gut, den Hund lieben alle. Das ist unfair.“", "„Rex. Natürlich Rex.“"],
         floete: ["„Nicht schon wieder Demogorgon.“", "„Ihr und eure Flöte.“"],
         korb: ["„Korb. Ich liebe Körbe.“", "„Das wars dann wohl.“"],
-        erobert: ["„Ich gebe auf.“", "„Ich hätte ihn nicht so nett schreiben sollen.“"],
-        schirm: "„Pause. Ich brauche einen Tee.“"
+        erobert: ["„Ich gebe auf.“", "„Ich hätte ihn nicht so nett schreiben sollen.“", "„Das kommt ins Abenteuertagebuch. Leider.“"],
+        schirm: "„Pause. Ich brauche einen Tee.“",
+        peinlich: ["(Der Spielleiter sagt nichts. Lange.)", "(Irgendwo zirpt eine Grille.)", "(Jemand am Tisch räuspert sich.)", "(Der Spielleiter schaut dich an. Und schaut. Und schaut.)", "(Echo raschelt sehr laut mit einer Chipstüte.)", "(Man hört die Uhr ticken.)", "„Er … … … sieht dich an.“", "(Der Spielleiter blinzelt nicht mehr.)", "„…“ – „…“ – „…Würfel einfach.“", "(Friedrich schaut aus dem Fenster.)"],
+        nachhall: ["…", "… …", "…Danke?", "…Okay.", "…Bitte geh.", "…Hm."]
       }
     },
     en: {
@@ -191,6 +194,7 @@
       arten: { charmant: "Charming", kuehn: "Bold", absurd: "Absurd", passend: "Fitting" },
       artInfo: { charmant: n => "DC " + n + " · 1 ♥", kuehn: n => "DC " + n + " · 2 ♥", absurd: () => "Pure luck · costs patience", passend: n => "DC " + n + " · 1 ♥" },
       joker: { echo: "Echo: \"Do you know Gundren?\"", rex: "Send in Rex", floete: "Flute of illusions" },
+      jokerKurz: { echo: "🗣 \"Gundren?\"", rex: "🐕 Rex", floete: "🎶 Flute" },
       jokerInfo: { echo: "New lines + one extra turn", rex: "+1 ♥, guaranteed", floete: "Next roll with advantage" },
       wurf: (w, b, s) => "d20: " + w + " + " + b + " Charisma = " + s,
       gegen: sg => "vs DC " + sg,
@@ -205,117 +209,117 @@
       nsc: {
         gundren: { name: "Gundren Rockseeker", aufgabe: "Talk him into paying in advance.",
           intro: "\"Ah, the heroes! Ready for the road to Phandalin?\"",
-          charmant: ["\"Gundren, your beard shines like polished ore today.\"", "\"I'd escort any caravan with you. Even an empty one.\"", "\"A dwarf with this much style deserves companions with style. That's us.\""],
-          kuehn: ["\"Pay us now and I'll write you a ballad. With a chorus.\"", "\"You and me, Gundren – the start of a long business relationship. And maybe more.\""],
-          absurd: ["\"I dreamt of you. You were a pony. I was the cart.\"", "\"May I wear your hat? Just briefly. Forever.\""],
-          passend: ["\"I know of a magic forge … well, you know it. And I know you.\""],
-          ja: ["Gundren roars with laughter. \"I like you! Here, half now.\"", "\"Ha! What a mouth on you. Fine, fine.\""],
-          nein: ["\"Payment in Phandalin. As always.\"", "Gundren counts his coins pointedly. For himself."],
-          krit: "Gundren blushes under his beard and presses the whole purse into your hand.",
+          charmant: ["\"Gundren, is that ore in your beard, or do your eyes always sparkle like that when you look at me?\"", "\"I'd escort any caravan with you. Ideally the one where it's just us two.\"", "\"Your beard is so beautifully braided. May I … just run my fingers through it once?\"", "\"You know what shines brightest in Phandalin? Not the mine. You.\""],
+          kuehn: ["\"Pay us in advance and I'll pay you back in kisses. With interest.\"", "\"Forget the lost mine, Gundren. The greatest treasure is standing right in front of you.\"", "\"One kiss for every gold coin. I've got time.\""],
+          absurd: ["\"I dreamt of you. You were a pony. I was the cart. We were happy.\"", "\"May I wear your hat? Just briefly. Forever. To bed.\"", "\"Are you a pickaxe? Because you just struck my heart.\""],
+          passend: ["\"You're looking for a lost forge? I've got a fire burning just for you.\"", "\"Three Rockseeker brothers – and you're clearly the handsome one.\""],
+          ja: ["Gundren twirls his beard bashfully. \"Oh, you're a smooth one …\"", "Gundren blushes right up to his hat brim. \"Stop it. No, keep going.\"", "\"Ha! With a mouth like that you should be a merchant. Or … my companion.\""],
+          nein: ["\"Payment in Phandalin. Even for charmers.\"", "Gundren counts his coins pointedly. For himself. And doesn't wink back."],
+          krit: "Gundren presses the whole purse into your hand – and a kiss on your cheek. Through the beard. It tickles.",
           patzer: "Gundren writes your name down. On the list of people who get nothing.",
-          sieg: "The reward jingles in advance. Gundren waves you off, a little flustered.",
+          sieg: "The reward jingles in advance. Gundren waves you off and blows Barradin a kiss.",
           verloren: "\"See you in Phandalin.\" You won't, not for a while …" },
         buergermeister: { name: "The Mayor of Phandalin", aufgabe: "Get him to pay the reward without haggling.",
           intro: "\"Reward? I recall no reward.\"",
-          charmant: ["\"Mister Mayor, your chain of office suits you splendidly.\"", "\"Phandalin is lucky to have such a far-sighted man.\"", "\"Your fur collar is the softest thing I've seen since Neverwinter.\""],
-          kuehn: ["\"Pay up, and I'll sing in the market square about how generous you are.\"", "\"Such a great man should pay great rewards.\""],
-          absurd: ["\"I'd like your signature. On my heart. Or a cheque.\"", "\"Are you a wizard? Because every time I look at you, my gold disappears.\""],
-          passend: ["\"I hear you count your coins every evening. I'd watch you do it. Fascinated.\""],
-          ja: ["The mayor blushes. \"Well … I don't want to be like that.\"", "\"Such understanding for administration! Here, take it.\""],
-          nein: ["\"Flattery costs extra. For you.\"", "He pushes the purse a little further away."],
-          krit: "The mayor pays – without haggling. Phandalin holds its breath.",
+          charmant: ["\"Mister Mayor, your chain of office suits you – but you'd shine without it too.\"", "\"You have such a strong … administrative aura. I'm getting all warm.\"", "\"Your fur collar is the softest thing in Phandalin. Almost as soft as your gaze.\"", "\"May I say you sign documents like a poet?\""],
+          kuehn: ["\"Pay the full reward and I'll take you to dinner. Candlelight. Just us and the tax rolls.\"", "\"A great man should make great gestures. Let's start with the reward. Then we'll see.\"", "\"I have a proposal. Not an official one.\""],
+          absurd: ["\"I'd like your signature. On my heart. Or a cheque. Ideally both.\"", "\"Are you a wizard? Every time I look at you, my gold disappears. And my mind.\""],
+          passend: ["\"I hear you count your coins every evening. I'd love to sit next to you. Very close.\"", "\"Vote for me. Not for office. For your heart.\""],
+          ja: ["The mayor loosens his chain of office. \"Has it got warm in here?\"", "\"Well … I don't want to be a brute.\" He blushes to his ears.", "He dabs his forehead. \"You … you flatterer.\""],
+          nein: ["\"Flattery costs extra. Double for you.\"", "He pushes the purse a little further away. And his chair."],
+          krit: "The mayor pays without haggling – and asks whether Barradin is free on Saturday.",
           patzer: "He charges a fee for compliments. Retroactively.",
-          sieg: "You get the full reward. For the first time in Phandalin's history.",
+          sieg: "You get the full reward. And the mayor writes Barradin a poem. It doesn't rhyme.",
           verloren: "He gives you a copper coin. One. To share." },
         bugbear: { name: "The bugbear in the watchtower", aufgabe: "Get through the door without a fight.",
           intro: "A huge, hairy bugbear blocks the door. \"GRRR.\"",
-          charmant: ["\"What magnificent fur! Do you use conditioner?\"", "\"You have the finest claws in the whole watchtower.\"", "\"Did you know you have a very expressive growl?\""],
-          kuehn: ["\"Let me through and I'll name my next lute after you.\"", "\"You and me, big guy. Candlelight. A barrel of beer. What do you say?\""],
-          absurd: ["\"I have a barrel. You have a barrel. See? We have so much in common.\"", "\"Are you a rug? Because I'd like to lie on you. Briefly.\""],
-          passend: ["\"Grrr.\" (Barradin growls back tenderly.)"],
-          ja: ["The bugbear purrs. Quietly. Almost.", "\"…Grrr?\" He steps aside a little."],
-          nein: ["\"GRRR!\"", "The bugbear flattens his ears. Not a good sign."],
-          krit: "The bugbear opens the door, bows and gives you half a rat.",
+          charmant: ["\"What magnificent fur! May I … give it a scratch?\"", "\"You have the finest claws in the whole watchtower. And the finest eyes.\"", "\"Your growl goes right through me. In a good way.\"", "\"So big, so strong, so fluffy. You're my type.\""],
+          kuehn: ["\"Let me through and I'll name my next lute after you. And my firstborn.\"", "\"You and me, big guy. Candlelight. A barrel of beer. A blanket made of your fur. With you in it.\"", "\"Come here and give me one of those bear hugs.\""],
+          absurd: ["\"I have a barrel. You have a barrel. See? Soulmates.\"", "\"Are you a rug? Because I'd love to lie on you in front of the fire.\""],
+          passend: ["\"Grrr.\" (Barradin growls back tenderly and winks.)", "\"You guard that door so passionately. Guard me instead.\""],
+          ja: ["The bugbear purrs. Quietly. Smitten.", "\"…Grrr?\" He flutters his lashes. He has surprisingly long lashes.", "The bugbear bashfully smooths down his fur."],
+          nein: ["\"GRRR!\"", "The bugbear flattens his ears. Not a flirting signal."],
+          krit: "The bugbear opens the door, bows, and gives you half a rat and a heart made of bones.",
           patzer: "The bugbear sits on you. It's warm. It's heavy.",
-          sieg: "The door is open. The bugbear gazes after you dreamily.",
+          sieg: "The door is open. The bugbear sighs after you and draws a heart in the dust.",
           verloren: "You have to fight after all. The bugbear looks hurt." },
         ilvara: { name: "Ilvara Mizzrym", aufgabe: "Get her to loosen the chains a little.",
           intro: "\"Slaves don't speak unless spoken to.\"",
-          charmant: ["\"Mistress, your gaze is sharper than any drow blade.\"", "\"In these chains I feel so close to you.\"", "\"This fortress is gloomy. You, however, shine.\""],
-          kuehn: ["\"Loosen the chains and I'll sing you a song that would make Lolth blush.\"", "\"You and me, mistress – an unbeatable pair. I hold the lute, you hold the whip.\""],
-          absurd: ["\"I like spiders. A lot. Really. Please.\"", "\"Are you a druid? I only ask because … oh. Oh no.\""],
-          passend: ["\"Your spiders have excellent taste. They guard you.\""],
-          ja: ["Ilvara raises an eyebrow. For her, that's almost a smile.", "\"Amusing. That might save your day.\""],
+          charmant: ["\"Mistress, your gaze is sharper than any drow blade. And I'd gladly cut myself on it.\"", "\"In these chains I feel so close to you.\"", "\"This fortress is gloomy. You, however, shine like the light I miss so much.\"", "\"You're the only one here I'd stay for willingly.\""],
+          kuehn: ["\"Loosen the chains and I'll sing you a love song that would make Lolth blush.\"", "\"You and me, mistress – I hold the lute, you hold the whip. A dream couple.\"", "\"Take off my chains. I'll still be yours.\""],
+          absurd: ["\"I like spiders. A lot. Eight legs, eight arms to hug. Please.\"", "\"Are you a druid? Because you've turned me into a lovesick fool.\""],
+          passend: ["\"Your spiders have excellent taste. They never leave your side. I understand them.\"", "\"You've lured me into your web, mistress. And I don't want to leave.\""],
+          ja: ["Ilvara raises an eyebrow. For her, that's almost a blush.", "\"Amusing.\" She lowers the whip. Slowly.", "Ilvara turns away so no one sees her smile. Barradin sees it anyway."],
           nein: ["\"One more word and you feed the spiders.\"", "She cracks the whip. Not close. But close enough."],
-          krit: "Ilvara loosens the chains – then looks around suspiciously, as if she hadn't meant to.",
+          krit: "Ilvara loosens the chains, leans in and whispers: \"If you flee, bard … flee slowly.\"",
           patzer: "Ilvara doubles your chains. \"For safety.\"",
-          sieg: "The chains sit looser. Ilvara pretends nothing happened.",
+          sieg: "The chains sit looser. Ilvara pretends nothing happened – but she watches you go.",
           verloren: "\"Take him away.\" The chains rattle. Not romantic." },
         kuotoa: { name: "A kuo-toa guard", aufgabe: "He should let you into the city.",
           intro: "The guard stares. For a long time. Without blinking.",
-          charmant: ["\"Your scales shimmer like the lake in moonlight.\"", "\"You have the most beautiful big eyes I've ever seen.\"", "\"Do you smell of algae? I love algae.\""],
-          kuehn: ["\"Let us in and I'll sing you a song about the lake. With bubbling.\"", "\"The two of us, a boat, the underground lake … think about it.\""],
-          absurd: ["\"Blub.\" (Barradin winks seductively.)", "\"Are you a fish? Because you take my breath away. Underwater.\""],
-          passend: ["\"There's something divine about you. A real one, not a made-up one.\""],
-          ja: ["The guard bubbles contentedly.", "\"Blub.\" It sounds friendly. Probably."],
-          nein: ["The guard keeps staring. Unimpressed. And damp.", "\"Strangers. Suspicious. Blub.\""],
-          krit: "The guard opens the gate and waves with both fins.",
+          charmant: ["\"Your scales shimmer like the lake in moonlight.\"", "\"You have the most beautiful big eyes I've ever seen. And you never look away. Romantic.\"", "\"You smell of algae. I love algae.\"", "\"So shiny, so slippery, so … mysterious.\""],
+          kuehn: ["\"Let us in and I'll take you on a boat ride. Just the two of us and the underground lake.\"", "\"Give me a wet kiss and I'll forget how strange this is.\"", "\"For you I'd even want gills.\""],
+          absurd: ["\"Blub.\" (Barradin winks seductively. With both eyes. One after the other.)", "\"Are you a fish? Because you've got me hooked.\""],
+          passend: ["\"There's something divine about you. A real one, not a made-up one. I'd worship you.\"", "\"I'm no fish, but I'm swimming in your direction.\""],
+          ja: ["The guard bubbles contentedly. His fins tremble.", "\"Blub.\" It sounds smitten. Probably.", "The guard's gills turn quite pink."],
+          nein: ["The guard keeps staring. Unimpressed. And damp.", "\"Strangers. Suspicious. Too charming. Blub.\""],
+          krit: "The guard opens the gate, waves with both fins and gives Barradin a shell. Heart-shaped. Almost.",
           patzer: "The guard calls three friends. Now they're all staring.",
-          sieg: "The gate opens with a wet squeak.",
+          sieg: "The gate opens with a wet squeak. The guard gazes after you longingly.",
           verloren: "You get in anyway – in chains. As planned. Sort of." },
         horga: { name: "King Horga Steel V", aufgabe: "Ask for hospitality in Gracklstugh.",
           intro: "\"Speak, bard. But be brief.\"",
-          charmant: ["\"Your Majesty, your beard alone has more dignity than all of Phandalin.\"", "\"Your crown fits as if it had been forged for you.\"", "\"Gracklstugh glows – but you glow brighter.\""],
-          kuehn: ["\"Grant us hospitality and I'll compose you an anthem. With an anvil solo.\"", "\"A king like you deserves a bard like me. Daily.\""],
-          absurd: ["\"May I braid your beard? Purely as friends.\"", "\"Are you an anvil? Because my heart hammers faster around you.\""],
-          passend: ["\"We saved your son. And thought of you the whole time.\""],
-          ja: ["The king grumbles. That could be approval.", "\"Hmph. You have nerve, bard.\""],
-          nein: ["\"Guards!\" The guards don't move. But they look.", "The king looks as if he'd bitten a lemon."],
-          krit: "The king laughs – for the first time in fifty years. The court freezes.",
+          charmant: ["\"Your Majesty, your beard alone has more dignity than all of Phandalin. And more allure.\"", "\"Your crown fits splendidly. But I bet you're even more handsome without it.\"", "\"Gracklstugh glows – but you glow brighter. I'm melting.\"", "\"When you command, I obey. Gladly. Always.\""],
+          kuehn: ["\"Grant us hospitality and I'll compose you a love anthem. With an anvil solo.\"", "\"A king like you needs a bard like me. At his side. Every evening.\"", "\"Your Majesty, may I have this dance? Even without music?\""],
+          absurd: ["\"May I braid your beard? Very slowly.\"", "\"Are you an anvil? Because my heart hammers faster around you.\""],
+          passend: ["\"We saved your son. And thought of his dashing father the whole time.\"", "\"I've never seen such a steely king. Hard on the outside, soft on the inside?\""],
+          ja: ["The king grumbles. His ears turn red.", "\"Hmph. You have nerve, bard.\" He strokes his beard, flattered.", "The court whispers. The king says nothing. But he smiles."],
+          nein: ["\"Guards!\" The guards don't move. But they giggle.", "The king looks as if he'd bitten a lemon."],
+          krit: "The king laughs – for the first time in fifty years – and offers Barradin a seat of honour beside the throne.",
           patzer: "The king has you politely but firmly rolled out. In a barrel.",
-          sieg: "Hospitality granted. Kardal rubs his forehead in embarrassment.",
+          sieg: "Hospitality granted. And a dinner invitation. Kardal rubs his forehead in embarrassment.",
           verloren: "You may stay – but only because you saved his son." },
         hgraam: { name: "The Stonespeaker", aufgabe: "He should give you his stonespeaker crystal.",
           intro: "\"The stone is screaming. Do you hear it?\"",
-          charmant: ["\"You are so … steadfast. I admire that.\"", "\"Your skin has a wonderful grain. Granite?\"", "\"When you speak, I hear the mountain sing.\""],
-          kuehn: ["\"Give me the crystal and I'll sing for you until the stone stops screaming.\"", "\"You and me – rock and rock. Well. Rock and bard.\""],
-          absurd: ["\"I have some stones too. In my pocket. Want to see?\"", "\"Are you a quarry? Because I'm losing myself in you.\""],
-          passend: ["\"The stone screams? So do I. With admiration.\""],
-          ja: ["The Stonespeaker nods slowly. Very slowly.", "\"The stone … likes you.\""],
-          nein: ["The Stonespeaker keeps speaking in riddles. About something else entirely.", "He regards you like a pebble that talks too much."],
-          krit: "The Stonespeaker smiles. Somewhere in Gracklstugh a rock falls over with joy.",
+          charmant: ["\"You are so … steadfast. I like men I can lean on.\"", "\"Your skin has a wonderful grain. May I touch it?\"", "\"When you speak, I hear the mountain sing. And my heart.\"", "\"You're a rock in the surf. And I'm the surf.\""],
+          kuehn: ["\"Give me the crystal and I'll sing for you until the stone stops screaming. And starts sighing.\"", "\"You and me – rock and bard. I do love climbing.\"", "\"Lift me up. Just once. Please.\""],
+          absurd: ["\"I have some stones too. In my pocket. Collected for you. Want to see?\"", "\"Are you a quarry? Because I'm losing myself in you.\""],
+          passend: ["\"The stone screams? So do I. With longing.\"", "\"I'd listen to you even if you only spoke in riddles. Especially then.\""],
+          ja: ["The Stonespeaker nods slowly. Very slowly. Very tenderly.", "\"The stone … likes you.\" He looks away. Giants blush too.", "A tiny pebble rolls bashfully off his shoulder."],
+          nein: ["The Stonespeaker keeps speaking in riddles. About something else entirely.", "He regards you like a pebble that flirts too much."],
+          krit: "The Stonespeaker smiles and lifts Barradin up like a precious gem. Somewhere a rock falls over, deeply moved.",
           patzer: "He mistakes you for a talking stone and puts you with the others.",
-          sieg: "The crystal lies warm in your hand. The stone screams a little quieter.",
+          sieg: "The crystal lies warm in your hand. The Stonespeaker held it to his heart for a moment first.",
           verloren: "\"Something insatiable is stirring.\" He means you." },
         themberchaud: { name: "Themberchaud, Master of Flames", aufgabe: "Convince him not to eat you.",
           intro: "The dragon lands on the gold. The hall gets very warm. Very quiet.",
-          charmant: ["\"Your hoard shines – but not like your scales.\"", "\"I've never seen such a magnificent dragon. To be honest, I've never seen one at all.\"", "\"Your fire warms my heart. And my eyebrows.\""],
-          kuehn: ["\"Let us live and I'll sing you a ballad of our journey through the whole Underdark. In rhyme.\"", "\"You and me, Master – you breathe fire, I spit verse.\""],
-          absurd: ["\"May I sit on the golden dog? It looks comfy.\"", "\"Are you a volcano? Because I'm melting. Literally.\""],
-          passend: ["\"A being of your taste only collects the best. I'd love to be part of the collection.\""],
-          ja: ["Themberchaud puffs out a contented cloud of smoke.", "\"Entertaining.\" The word echoes through the hall."],
+          charmant: ["\"Your hoard shines – but not like your scales.\"", "\"I've never seen such a magnificent dragon. Honestly, I've never seen one at all. But you set the bar high.\"", "\"Your fire warms my heart. And my eyebrows.\"", "\"They call you Master of Flames. Now I understand why I'm burning.\""],
+          kuehn: ["\"Let us live and I'll sing you a love song every evening. Right on top of your gold.\"", "\"You breathe fire, I spit verse. Let's kindle something together.\"", "\"I'd love to be your most precious piece. Put me right on top of the hoard.\""],
+          absurd: ["\"May I cuddle with you on the golden dog? It looks comfy.\"", "\"Are you a volcano? Because I'm melting. Literally.\""],
+          passend: ["\"A being of your taste only collects the most beautiful things. And here I stand.\"", "\"It's hotter near you than in the lava. And it's not the lava.\""],
+          ja: ["Themberchaud puffs out a contented, almost heart-shaped cloud of smoke.", "\"Entertaining.\" He lowers his head and studies Barradin. For a long time.", "The lava bubbles. Themberchaud purrs. Both sound suspiciously like affection."],
           nein: ["A warning wisp of smoke rises from his nostrils.", "The lute suddenly gets very warm."],
-          krit: "Themberchaud purrs. Echo quietly asks if he knows Gundren. He doesn't – but he's in the best of moods.",
+          krit: "Themberchaud purrs and puts a gold coin in Barradin's hand. \"Something to remember me by.\" Echo quietly asks if he knows Gundren.",
           patzer: "Themberchaud sneezes. Barradin's hair is shorter now.",
-          sieg: "The dragon spares you and gives you a task. Barradin calls it a date.",
+          sieg: "The dragon spares you, gives you a task and winks. Barradin calls it a date.",
           verloren: "You live – but only because Themberchaud needs someone for the dirty work." },
         demogorgon: { name: "Demogorgon (bonus)", aufgabe: "Please … just leave again.",
           intro: "Two heads. Tentacles. The game master smiles very widely.",
-          charmant: ["\"You … have two beautiful heads. Both of them.\"", "\"Those tentacles! So … many.\"", "\"Your scream is so piercing. So … musical.\""],
-          kuehn: ["\"Go back to the Abyss and I'll write you a duet. For both heads.\"", "\"You and me, demon prince. What could possibly go wrong?\""],
-          absurd: ["\"Friedrich punched you. I'd rather hug you.\"", "\"Which head is the romantic one?\""],
-          passend: ["(Barradin raises the flute of illusions and shows Demogorgon … Demogorgon.)"],
-          ja: ["The left head giggles. The right one is sceptical.", "The tentacles wave. Is that good?"],
+          charmant: ["\"You have two beautiful heads. I can't decide which one to swoon over first.\"", "\"Those tentacles! So many. So … huggy.\"", "\"Your scream is so piercing. So … passionate.\""],
+          kuehn: ["\"Go back to the Abyss and I'll write you a love duet. For both heads.\"", "\"Two heads, two kisses. I'm ready.\"", "\"You and me, demon prince. What could possibly go wrong?\""],
+          absurd: ["\"Friedrich punched you. I'd rather hug you. With all the tentacles.\"", "\"Which head is the romantic one? Asking for myself.\""],
+          passend: ["(Barradin raises the flute of illusions and conjures Demogorgon a heart of light.)", "\"You're the prince of demons. And the prince of my heart.\""],
+          ja: ["The left head giggles, smitten. The right one is jealous.", "The tentacles form a heart. A wonky one, but a heart."],
           nein: ["Both heads scream. At the same time.", "A tentacle pats Barradin. Too hard."],
-          krit: "Demogorgon … blushes. On both heads. And vanishes into the lake, confused.",
+          krit: "Demogorgon blushes. On both heads. And vanishes into the lake, confused – with one look back.",
           patzer: "Demogorgon eats the lute. The game master has to step out for a moment.",
-          sieg: "Demogorgon retreats. Both heads look back once more.",
+          sieg: "Demogorgon retreats. Both heads blow Barradin a kiss.",
           verloren: "You run for the boat. Like back then. Only more embarrassing." }
       },
       sl: {
-        start: ["\"Okay. You stand before …\"", "\"I have a bad feeling about this.\"", "\"Please. Please not again.\""],
+        start: ["\"Okay. You stand before …\" – \"I flirt.\" – \"I haven't even said who!\"", "\"I have a bad feeling about this.\"", "\"Please. Please don't flirt again.\"", "\"Barradin, he's an NPC. An NPC!\""],
         absurd: ["\"You can't be serious.\"", "\"I'm writing that down.\"", "\"I hate you. Lovingly.\"", "\"…Roll.\""],
-        erfolg: ["\"Okay. That counts.\"", "\"I can't believe it.\"", "\"…Fine.\"", "\"He blushes. Of course he blushes.\""],
+        erfolg: ["\"Okay. That counts.\"", "\"I can't believe it.\"", "\"…Fine. He blushes.\"", "\"Why does this ALWAYS work?\"", "\"I'll play this with dignity. Somehow.\""],
         misserfolg: ["\"No.\"", "\"He didn't hear that. On purpose.\"", "\"Dice don't lie.\"", "\"Next try.\""],
         krit: ["\"WHAT?!\"", "\"That … that's impossible.\"", "\"I need to rewrite my notes.\""],
         patzer: ["\"HAHAHA – no.\"", "\"That will have consequences.\"", "\"I'll just leave that there.\""],
@@ -323,8 +327,10 @@
         rex: ["\"Fine, everyone loves the dog. That's unfair.\"", "\"Rex. Of course Rex.\""],
         floete: ["\"Not Demogorgon again.\"", "\"You and your flute.\""],
         korb: ["\"Rejected. I love a rejection.\"", "\"Well, that's that.\""],
-        erobert: ["\"I give up.\"", "\"I shouldn't have written him so nice.\""],
-        schirm: "\"Break. I need a cup of tea.\""
+        erobert: ["\"I give up.\"", "\"I shouldn't have written him so nice.\"", "\"That's going in the adventure log. Sadly.\""],
+        schirm: "\"Break. I need a cup of tea.\"",
+        peinlich: ["(The game master says nothing. For a long time.)", "(Somewhere, a cricket chirps.)", "(Someone at the table clears their throat.)", "(The game master looks at you. And looks. And looks.)", "(Echo rustles a crisp packet very loudly.)", "(You can hear the clock ticking.)", "\"He … … … looks at you.\"", "(The game master has stopped blinking.)", "\"…\" – \"…\" – \"…Just roll.\"", "(Friedrich stares out of the window.)"],
+        nachhall: ["…", "… …", "…Thanks?", "…Okay.", "…Please leave.", "…Hm."]
       }
     }
   };
@@ -396,21 +402,37 @@
   <!-- Spielleiter -->
   <g class="ch-sl">
     <g class="ch-koerper">
-      <path d="M210 300 L 214 214 C 216 196 232 186 252 184 L 288 184 C 308 186 324 196 326 214 L 330 300 Z" fill="#2f4a3a"/>
-      <path d="M252 184 L 270 206 L 288 184 Z" fill="#284034"/>
-      <rect x="262" y="166" width="16" height="22" rx="6" fill="#e6b896"/>
+      <!-- schmale, nackte Schultern, dunkles Tanktop -->
+      <path d="M222 300 L 225 216 C 227 200 238 192 252 190 L 288 190 C 302 192 313 200 315 216 L 318 300 Z" fill="#ecc29f"/>
+      <path d="M236 300 L 237 222 C 238 208 245 198 254 193 L 257 191 L 262 203 Q 270 212 278 203 L 283 191 L 286 193 C 295 198 302 208 303 222 L 304 300 Z" fill="#1d2740"/>
+      <path d="M262 203 Q 270 212 278 203" fill="none" stroke="#2c3a5c" stroke-width="2"/>
+      <!-- Tattoos auf den Schultern -->
+      <path d="M229 208 c 3 -5 9 -5 9 1 c 0 5 -7 5 -6 0 M233 216 l 4 6" stroke="#2a3a52" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M308 206 l 3 5 l -5 2 l 3 5" stroke="#2a3a52" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <!-- Arme bis zum Tisch, mit Band-Tattoos -->
+      <g class="ch-arme">
+        <path d="M228 206 C 222 214 224 222 232 226" stroke="#ecc29f" stroke-width="12" fill="none" stroke-linecap="round"/>
+        <path class="arm-r" d="M312 206 C 318 214 316 222 308 226" stroke="#ecc29f" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </g>
+      <rect x="263" y="166" width="14" height="26" rx="6" fill="#e2b592"/>
       <g class="ch-kopf">
-        <ellipse cx="270" cy="138" rx="27" ry="32" fill="#efc4a2"/>
-        <ellipse cx="243" cy="142" rx="5" ry="8" fill="#e6b896"/><ellipse cx="297" cy="142" rx="5" ry="8" fill="#e6b896"/>
-        <!-- kurze braune Haare -->
-        <path d="M242 132 C 238 104 256 96 272 98 C 292 98 302 110 298 132 C 296 122 290 116 282 114 C 276 120 262 118 254 114 C 248 118 244 124 242 132 Z" fill="#6b4226"/>
-        <path d="M254 114 C 258 108 266 106 272 108" fill="none" stroke="#4e2f1a" stroke-width="1.6"/>
+        <!-- Dreads, hinten zum Dutt gebunden -->
+        <path d="M292 108 C 304 120 306 150 308 178 M296 112 C 310 126 312 152 316 176 M288 106 C 298 124 298 150 300 172" stroke="#8a6a44" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <circle cx="290" cy="98" r="11" fill="#8a6a44"/><path d="M282 94 q 8 -6 16 2 M284 101 q 7 -4 13 2" stroke="#6a4c2e" stroke-width="1.4" fill="none"/>
+        <ellipse cx="270" cy="139" rx="24" ry="31" fill="#ecc29f"/>
+        <ellipse cx="246" cy="142" rx="4.5" ry="7.5" fill="#e2b592"/><ellipse cx="294" cy="142" rx="4.5" ry="7.5" fill="#e2b592"/>
+        <!-- Haare nach hinten, dunkelblond-braun -->
+        <path d="M246 132 C 243 108 256 99 272 99 C 289 99 299 110 295 130 C 292 117 284 111 272 111 C 260 111 251 117 246 132 Z" fill="#8a6a44"/>
+        <path d="M256 108 C 264 103 276 103 286 108 M252 116 C 260 108 280 107 290 116" stroke="#a8875a" stroke-width="1.3" fill="none"/>
+        <!-- Vollbart mit Schnurrbart -->
+        <path d="M247 140 C 246 165 258 177 270 178 C 282 177 294 165 293 140 C 291 154 286 159 281 161 C 277 156 263 156 259 161 C 254 159 249 154 247 140 Z" fill="#7a5a3a"/>
+        <path d="M259 154 C 264 150 276 150 281 154 C 276 153 264 153 259 154 Z" fill="#6a4c2e"/>
         <!-- Augenbrauen -->
         <g class="ch-brauen">
-          <path class="b-normal" d="M253 128 q 6 -3 11 0 M276 128 q 6 -3 11 0" stroke="#4e2f1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-          <path class="b-hoch" d="M253 124 q 6 -5 11 -1 M276 123 q 6 -4 11 1" stroke="#4e2f1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-          <path class="b-boese" d="M253 126 q 6 1 11 4 M276 130 q 6 -3 11 -4" stroke="#4e2f1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-          <path class="b-muede" d="M253 130 q 6 -1 11 1 M276 131 q 6 -2 11 -1" stroke="#4e2f1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path class="b-normal" d="M253 128 q 6 -3 11 0 M276 128 q 6 -3 11 0" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path class="b-hoch" d="M253 124 q 6 -5 11 -1 M276 123 q 6 -4 11 1" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path class="b-boese" d="M253 126 q 6 1 11 4 M276 130 q 6 -3 11 -4" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path class="b-muede" d="M253 130 q 6 -1 11 1 M276 131 q 6 -2 11 -1" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
         </g>
         <!-- Augen -->
         <g class="ch-augen">
@@ -424,12 +446,12 @@
         <path d="M270 140 q -3 9 0 12 q 2 1 4 0" fill="none" stroke="#c99878" stroke-width="1.6" stroke-linecap="round"/>
         <!-- Münder -->
         <g class="ch-mund">
-          <path class="m-neutral" d="M262 158 q 8 2 16 0" stroke="#7a3a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <path class="m-grinsen" d="M260 156 q 10 9 20 0" stroke="#7a3a2a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path class="m-neutral" d="M262 158 q 8 2 16 0" stroke="#3e1a12" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path class="m-grinsen" d="M260 156 q 10 9 20 0" stroke="#3e1a12" stroke-width="2.2" fill="none" stroke-linecap="round"/>
           <g class="m-lachen"><path d="M258 154 q 12 16 24 0 Z" fill="#6a2222"/><path d="M261 155 h 18 l -2 3 h -14 Z" fill="#fff"/></g>
           <ellipse class="m-o" cx="270" cy="159" rx="5" ry="6.5" fill="#6a2222"/>
-          <path class="m-schief" d="M262 160 q 6 -3 16 -4" stroke="#7a3a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <path class="m-traurig" d="M262 161 q 8 -5 16 0" stroke="#7a3a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path class="m-schief" d="M262 160 q 6 -3 16 -4" stroke="#3e1a12" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path class="m-traurig" d="M262 161 q 8 -5 16 0" stroke="#3e1a12" stroke-width="2" fill="none" stroke-linecap="round"/>
         </g>
         <g class="ch-roete"><ellipse cx="252" cy="150" rx="5" ry="3" fill="#ff7a7a" opacity=".35"/><ellipse cx="288" cy="150" rx="5" ry="3" fill="#ff7a7a" opacity=".35"/></g>
         <g class="ch-zzz"><text x="300" y="112" font-size="11" fill="#cfe6ff" font-family="Georgia,serif">z</text><text x="308" y="102" font-size="14" fill="#cfe6ff" font-family="Georgia,serif">Z</text></g>
@@ -437,10 +459,10 @@
       </g>
       <!-- Hände -->
       <g class="ch-haende">
-        <g class="h-ruhe"><ellipse cx="236" cy="226" rx="11" ry="7" fill="#efc4a2"/><ellipse cx="304" cy="226" rx="11" ry="7" fill="#efc4a2"/></g>
-        <g class="h-facepalm"><path d="M300 228 C 304 200 292 176 284 160" stroke="#2f4a3a" stroke-width="13" fill="none" stroke-linecap="round"/><ellipse cx="272" cy="141" rx="15" ry="11" fill="#efc4a2"/><path d="M262 134 h 22 M261 140 h 23 M262 146 h 21" stroke="#d8a888" stroke-width="1"/><ellipse cx="236" cy="226" rx="11" ry="7" fill="#efc4a2"/></g>
-        <g class="h-daumen"><path d="M312 228 C 320 210 322 194 318 180" stroke="#2f4a3a" stroke-width="12" fill="none" stroke-linecap="round"/><rect x="309" y="160" width="16" height="18" rx="5" fill="#efc4a2"/><rect x="313" y="148" width="7" height="16" rx="3.5" fill="#efc4a2"/><ellipse cx="236" cy="226" rx="11" ry="7" fill="#efc4a2"/></g>
-        <g class="h-stift"><ellipse cx="236" cy="226" rx="11" ry="7" fill="#efc4a2"/><ellipse cx="300" cy="222" rx="11" ry="7" fill="#efc4a2"/><path d="M298 222 l 12 -18" stroke="#e0a046" stroke-width="3" stroke-linecap="round"/></g>
+        <g class="h-ruhe"><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/><ellipse cx="304" cy="226" rx="10" ry="6.5" fill="#ecc29f"/><path d="M226 222 l 3 8 M229 221 l 3 8" stroke="#22262e" stroke-width="1.6"/><rect x="309" y="221" width="3" height="9" fill="#c99a3a"/></g>
+        <g class="h-facepalm"><path d="M312 208 C 312 190 296 174 284 160" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M303 186 l 8 -6 M300 182 l 8 -6" stroke="#22262e" stroke-width="1.8"/><ellipse cx="272" cy="141" rx="14" ry="11" fill="#ecc29f"/><path d="M262 134 h 21 M261 140 h 22 M262 146 h 20" stroke="#d3a07e" stroke-width="1"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
+        <g class="h-daumen"><path d="M312 208 C 322 200 322 190 318 180" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M314 196 h 10 M314 192 h 10" stroke="#22262e" stroke-width="1.8"/><rect x="309" y="160" width="16" height="18" rx="5" fill="#ecc29f"/><rect x="313" y="148" width="7" height="16" rx="3.5" fill="#ecc29f"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
+        <g class="h-stift"><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/><ellipse cx="300" cy="222" rx="10" ry="6.5" fill="#ecc29f"/><path d="M298 222 l 12 -18" stroke="#e0a046" stroke-width="3" stroke-linecap="round"/></g>
       </g>
     </g>
   </g>
@@ -496,7 +518,8 @@
     genervt: { a: "halb", b: "muede", m: "traurig", h: "ruhe" },
     errötet: { a: "zu", b: "hoch", m: "grinsen", h: "ruhe", r: 1 },
     schwitzt: { a: "gross", b: "hoch", m: "schief", h: "ruhe", sw: 1 },
-    schlaeft: { a: "zu", b: "muede", m: "neutral", h: "ruhe", z: 1 }
+    schlaeft: { a: "zu", b: "muede", m: "neutral", h: "ruhe", z: 1 },
+    starr: { a: "offen", b: "normal", m: "neutral", h: "ruhe" }
   };
   let ausdruckUhr = 0, ruheUhr = 0;
   function gesicht(name, dauer, danach) {
@@ -561,6 +584,26 @@
     if (art === "absurd") { gesicht("facepalm", 1500); slSagt(T.sl.absurd, 1800); S.geduld = Math.max(0, S.geduld - 1); }
     else gesicht("notiert");
     zeichnen();
+    /* Manchmal wird es unangenehm still, bevor überhaupt gewürfelt wird */
+    const p = art === "absurd" ? .55 : art === "kuehn" ? .38 : .2;
+    if (!S.peinlichZuletzt && Math.random() < p) { S.peinlichZuletzt = true; peinlichePause(() => rollen(art)); }
+    else { S.peinlichZuletzt = false; rollen(art); }
+  }
+  function peinlichePause(weiterMit) {
+    const n = S.nsc, T = t(), dauer = ruhig ? 1800 : 4200 + Math.random() * 3200;
+    setTimeout(() => {
+      if (!S || S.nsc !== n) return;
+      gesicht("starr"); sl.classList.add("starr");
+      blase(slBlase, "…", 0); slBlase.classList.add("punkte");
+    }, 900);
+    setTimeout(() => { if (S && S.nsc === n) { nscBlase.classList.remove("barradin"); blase(nscBlase, "…", 0); nscBlase.classList.add("punkte"); } }, 2100);
+    setTimeout(() => { if (S && S.nsc === n) { slBlase.classList.remove("punkte"); blase(slBlase, zufall(T.sl.peinlich), 0); } }, 3300);
+    setTimeout(() => {
+      sl.classList.remove("starr"); slBlase.classList.remove("punkte"); nscBlase.classList.remove("punkte");
+      if (S && S.nsc === n) { gesicht("genervt"); weiterMit(); }
+    }, dauer + 900);
+  }
+  function rollen(art) {
     /* Würfel rollt */
     const w1 = 1 + Math.floor(Math.random() * 20), w2 = 1 + Math.floor(Math.random() * 20);
     const w = S.vorteil ? Math.max(w1, w2) : w1; const vort = S.vorteil; S.vorteil = false;
@@ -590,7 +633,14 @@
     if (art2 === "krit") { gesicht("schock", 1100, "stolz"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0); }
     else if (art2 === "patzer") { gesicht("facepalm", 1300, "lachen"); slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); }
     else if (art2 === "erfolg") { gesicht(S.herzen >= 3 ? "errötet" : "grinsen", 2400); slSagt(T.sl.erfolg); blase(nscBlase, zufall(NT.ja), 0); }
-    else { gesicht(summe >= sg - 3 ? "notiert" : "genervt", 2400); slSagt(T.sl.misserfolg); blase(nscBlase, zufall(NT.nein), 0); }
+    else {
+      gesicht(summe >= sg - 3 ? "notiert" : "genervt", 2400); slSagt(T.sl.misserfolg);
+      /* … und manchmal hängt die Antwort unangenehm lange in der Luft */
+      if (S.herzen < 3 && S.zuege > 0 && S.geduld > 0 && Math.random() < .35 && !ruhig) {
+        const nn = S.nsc; blase(nscBlase, zufall(T.sl.nachhall), 0); nscBlase.classList.add("punkte");
+        setTimeout(() => { if (S && S.nsc === nn && !S.wirft) { nscBlase.classList.remove("punkte"); blase(nscBlase, zufall(NT.nein), 0); } }, 2600);
+      } else blase(nscBlase, zufall(NT.nein), 0);
+    }
     S.wirft = false;
     if (S.herzen >= 3) nscEnde(true);
     else if (S.zuege <= 0 || S.geduld <= 0) nscEnde(false);
@@ -664,6 +714,7 @@
       $(".ch-herzen").innerHTML = [0, 1, 2].map(i => '<span class="' + (i < S.herzen ? "voll" : "") + '">♥</span>').join("");
     }
     buehne.classList.toggle("laeuft", ansicht === "spiel" && !!S && !S.ende);
+    root.classList.toggle("ch-laeuft", ansicht === "spiel" && !!S);
     if (ansicht === "buch") return buchZeichnen();
     if (ansicht === "start" || !S) {
       buehne.classList.remove("zu"); nscImg.hidden = true; wuerfel.hidden = true; nscBlase.classList.remove("da");
@@ -683,7 +734,8 @@
         '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt" data-tun="start">' + esc(T.nochmal) + '</button><button type="button" class="tav-knopf" data-tun="buch">' + esc(T.buch) + "</button></div>";
       return;
     }
-    let html = '<div class="ch-nsc-kopf"><b>' + esc(NT.name) + "</b><span>" + esc(T.aufgabe) + ": " + esc(NT.aufgabe) + "</span></div>";
+    let html = '<div class="ch-nsc-kopf"><b>' + esc(NT.name) + "</b>" + (S.fertig ? "" : '<em>' + esc(T.sprueche(S.zuege)) + "</em>") + "<span>" + esc(T.aufgabe) + ": " + esc(NT.aufgabe) + "</span></div>";
+    if (!S.letzt) html += '<p class="ch-wurf leer">&nbsp;</p>';
     if (S.letzt) {
       const L = S.letzt;
       html += '<p class="ch-wurf ' + L.art2 + '">' + esc(L.art2 === "krit" ? T.krit : L.art2 === "patzer" ? T.patzer : L.art2 === "erfolg" ? T.erfolg : T.misserfolg) +
@@ -693,14 +745,26 @@
       html += '<p class="ch-ergebnis ' + S.fertig + '">' + esc(S.fertig === "erobert" ? T.erobert : T.korb) + "</p>" +
         '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt" data-tun="weiter">' + esc(S.geduld <= 0 || S.i >= S.reihe.length - 1 && !(S.erobert >= 6 && !S.bonus) ? T.ende : T.weiter) + "</button></div>";
     } else {
-      html += '<p class="ch-klein">' + esc(T.sprueche(S.zuege)) + "</p>" +
-        '<div class="ch-sprueche">' + S.angebot.map(a => '<button type="button" class="ch-spruch art-' + a.art + '" data-art="' + a.art + '" data-idx="' + a.idx + '"' + (S.wirft ? " disabled" : "") + ">" +
+      html += '<div class="ch-sprueche">' + S.angebot.map(a => '<button type="button" class="ch-spruch art-' + a.art + '" data-art="' + a.art + '" data-idx="' + a.idx + '"' + (S.wirft ? " disabled" : "") + ">" +
           '<span class="ch-art">' + esc(T.arten[a.art]) + " · " + esc(T.artInfo[a.art](sgFuer(a.art, n))) + "</span>" + esc(NT[a.art][a.idx]) + "</button>").join("") + "</div>" +
         '<div class="ch-joker">' + ["echo", "rex", "floete"].map(k => '<button type="button" class="ch-jk" data-joker="' + k + '"' + (S.joker[k] && !S.wirft ? "" : " disabled") + ' title="' + esc(T.jokerInfo[k]) + '">' +
-          esc(T.joker[k]) + "<small>" + esc(T.jokerInfo[k]) + "</small></button>").join("") + "</div>";
+          '<span class="jk-lang">' + esc(T.joker[k]) + '</span><span class="jk-kurz">' + esc(T.jokerKurz[k]) + "</span><small>" + esc(T.jokerInfo[k]) + "</small></button>").join("") + "</div>";
     }
     tafel.innerHTML = html;
+    passen();
   }
+  /* Vollbild: Bühne so groß wie möglich, Tafel bleibt darunter ganz sichtbar */
+  function passen() {
+    if (!root.classList.contains("tav-voll")) { buehne.style.height = buehne.style.width = ""; return; }
+    const cs = getComputedStyle(root), innen = root.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const breite = root.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const tafelH = tafel.offsetHeight + parseFloat(getComputedStyle(tafel).marginTop || 0);
+    const h = Math.max(150, Math.floor(innen - tafelH - 4));
+    buehne.style.height = h + "px";
+    buehne.style.width = Math.min(breite, Math.round(h * 1.75), 1100) + "px";
+  }
+  window.addEventListener("resize", () => requestAnimationFrame(passen));
+  new MutationObserver(() => requestAnimationFrame(passen)).observe(root, { attributes: true, attributeFilter: ["class"] });
   function buchZeichnen() {
     const T = t(), B = buchLesen(), alle = NSC.concat([BONUS]);
     nscImg.hidden = true; wuerfel.hidden = true; nscBlase.classList.remove("da");
@@ -716,14 +780,22 @@
   /* ---------- Bedienung ---------- */
   root.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.disabled) return;
+    if (b.closest(".tav-voll-knopf")) return;
     if (b.dataset.art) { wuerfeln(b.dataset.art, +b.dataset.idx); return; }
     if (b.dataset.joker) { joker(b.dataset.joker); return; }
     const tun = b.dataset.tun;
-    if (tun === "start") { buehne.classList.remove("zu"); neueSitzung(); }
+    if (tun === "start") { buehne.classList.remove("zu"); neueSitzung(); einpassen(); }
     else if (tun === "weiter") weiter();
     else if (tun === "buch") { ansicht = "buch"; zeichnen(); }
     else if (tun === "zurueck") { ansicht = S && !S.ende ? "spiel" : "start"; if (ansicht === "start") S = null; zeichnen(); }
   });
+  /* Handy: Bühne direkt unter die Kopfleiste schieben, damit alles auf einen Bildschirm passt */
+  function einpassen() {
+    if (root.classList.contains("tav-voll") || window.innerWidth > 700) return;
+    const kopf = document.querySelector("header.top");
+    root.style.setProperty("--ch-oben", ((kopf ? kopf.getBoundingClientRect().height : 56) + 6) + "px");
+    requestAnimationFrame(() => buehne.scrollIntoView({ block: "start", behavior: ruhig ? "auto" : "smooth" }));
+  }
   /* Klick auf den Spielleiter: er schaut kurz auf */
   buehne.addEventListener("click", e => { if (e.target.closest(".ch-zimmer")) gesicht(zufall(["grinsen", "schock", "errötet", "genervt"]), 1200); });
 
@@ -731,7 +803,7 @@
   const css = document.createElement("style");
   css.textContent = `
 .charme .ch-buehne { position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid var(--line); background: #151017; user-select: none; -webkit-user-select: none; }
-@media (max-width: 600px) { .charme .ch-buehne { aspect-ratio: 4 / 3.6; } }
+
 .ch-zimmer, .ch-vorne { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ch-vorne { pointer-events: none; z-index: 3; }
 .ch-zimmer { z-index: 1; cursor: pointer; }
@@ -749,6 +821,12 @@
 .ch-sl[data-m="neutral"] .m-neutral, .ch-sl[data-m="grinsen"] .m-grinsen, .ch-sl[data-m="lachen"] .m-lachen, .ch-sl[data-m="o"] .m-o, .ch-sl[data-m="schief"] .m-schief, .ch-sl[data-m="traurig"] .m-traurig,
 .ch-sl[data-h="ruhe"] .h-ruhe, .ch-sl[data-h="facepalm"] .h-facepalm, .ch-sl[data-h="daumen"] .h-daumen, .ch-sl[data-h="stift"] .h-stift { display: inline; }
 .ch-roete, .ch-zzz, .ch-schweiss { display: none; }
+.ch-sl[data-h="facepalm"] .arm-r, .ch-sl[data-h="daumen"] .arm-r { display: none; }
+.ch-sl.starr .a-offen { animation: none; }
+.ch-sl.starr .ch-pupillen { transform: none !important; }
+.ch-sl.starr .ch-koerper { animation-play-state: paused; }
+.ch-sl-blase.punkte, .ch-nsc-blase.punkte { font-style: normal; letter-spacing: .25em; animation: chPunkte 1.4s ease-in-out infinite; }
+@keyframes chPunkte { 50% { opacity: .45; } }
 .ch-sl.rot .ch-roete, .ch-sl.zzz .ch-zzz, .ch-sl.schweiss .ch-schweiss { display: inline; }
 .ch-sl.zzz .ch-zzz { animation: chZzz 2s ease-in-out infinite; }
 @keyframes chZzz { 50% { transform: translateY(-4px); opacity: .6; } }
@@ -794,7 +872,11 @@
 @keyframes chHerz { to { transform: translateY(-160px) rotate(20deg); opacity: 0; } }
 /* Tafel unter der Bühne */
 .ch-tafel { display: grid; gap: .6rem; margin-top: .7rem; }
-.ch-nsc-kopf { display: grid; gap: .1rem; }
+.ch-nsc-kopf { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: .1rem .6rem; }
+.ch-nsc-kopf span { grid-column: 1 / -1; }
+.ch-nsc-kopf em { font-style: normal; font-size: .8rem; color: var(--ash); white-space: nowrap; }
+.ch-wurf.leer { min-height: 1.2em; }
+.jk-kurz { display: none; }
 .ch-nsc-kopf b { font-family: var(--name); font-weight: 400; font-size: 1.25rem; color: var(--vellum); }
 .ch-nsc-kopf span { font-size: .88rem; color: var(--ash); }
 .ch-klein { font-size: .82rem; color: var(--ash); margin: 0; }
@@ -828,6 +910,42 @@
 .ch-seite small { font-size: .72rem; color: #6a5a42; }
 .ch-seite.erobert small { color: #b0304a; font-weight: 600; }
 .ch-geheim { width: 100%; height: 84px; display: grid; place-items: center; font-family: var(--name); font-size: 2.6rem; color: #8a7a62; }
+/* Handy: alles auf einen Bildschirm – Bühne, Aufgabe, Sprüche, Joker */
+.charme .ch-buehne { scroll-margin-top: var(--ch-oben, 64px); }
+@media (max-width: 700px) {
+  .charme.ch-laeuft > .ch-text { display: none; }
+  .charme .ch-buehne { aspect-ratio: auto; height: clamp(190px, 33svh, 300px); }
+  .ch-tafel { gap: .35rem; margin-top: .45rem; }
+  .ch-nsc-kopf b { font-size: 1.05rem; }
+  .ch-nsc-kopf span { font-size: .78rem; line-height: 1.25; }
+  .ch-wurf { font-size: .85rem; line-height: 1.25; }
+  .ch-wurf small { font-size: .74rem; }
+  .ch-sprueche { gap: .3rem; }
+  .ch-spruch { padding: .38rem .6rem; font-size: .84rem; line-height: 1.28; gap: .1rem; }
+  .ch-art { font-size: .6rem; }
+  .ch-joker { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; }
+  .ch-jk { padding: .35rem .3rem; text-align: center; font-size: .8rem; }
+  .ch-jk .jk-lang, .ch-jk small { display: none; }
+  .ch-jk .jk-kurz { display: inline; }
+  .ch-nsc-blase, .ch-sl-blase { font-size: .7rem; padding: .3rem .5rem; max-width: 48%; }
+  .ch-wuerfel { width: 50px; height: 50px; margin: -25px 0 0 -25px; font-size: 1.25rem; }
+  .ch-ergebnis { font-size: 1.25rem; }
+  .ch-buch { grid-template-columns: repeat(3, 1fr); gap: .35rem; }
+  .ch-seite { padding: .35rem .25rem; }
+  .ch-seite img, .ch-geheim { height: 56px; }
+  .ch-seite b { font-size: .78rem; }
+  .ch-seite small { font-size: .64rem; }
+}
+@media (max-width: 700px) and (max-height: 780px) {
+  .charme .ch-buehne { height: clamp(160px, 25svh, 300px); }
+  .ch-spruch { font-size: .8rem; padding: .32rem .55rem; }
+  .ch-nsc-kopf span { font-size: .74rem; }
+}
+/* Vollbild: Größe der Bühne rechnet passen() aus – sie füllt den Platz über der Tafel */
+.charme.tav-voll { display: block; padding-top: 3rem; padding-bottom: .6rem; }
+.charme.tav-voll > .ch-buehne { aspect-ratio: auto; margin-inline: auto; }
+.charme.tav-voll > .ch-tafel { max-width: 1100px; margin-inline: auto; }
+@media (max-width: 700px) { .charme.tav-voll { padding: 3rem .5rem .5rem; } }
 @media (prefers-reduced-motion: reduce) { .ch-sl .ch-koerper, .ch-sl .a-offen, .ch-sl.hops .ch-kopf, .ch-sl[data-m="lachen"] .ch-kopf { animation: none; } .ch-nsc { transition: opacity .3s; } }
 `;
   document.head.appendChild(css);
