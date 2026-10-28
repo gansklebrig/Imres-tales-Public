@@ -627,6 +627,7 @@
     let ctx = null, master = null, musikBus = null, effektBus = null;
     let an = lies("imres-charme-ton", "1") === "1";
     const puffer = {}, laden = {};
+    let stimmen = 0;
     const FAM = {
       pos: [34, 37, 39, 41, 46, 50, 53, 60, 61, 63, 65],
       harfe: [52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89],
@@ -639,9 +640,11 @@
     function init() {
       if (ctx) { if (ctx.state === "suspended") ctx.resume(); return ctx; }
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
-      try { ctx = new AC(); } catch (_) { return null; }
-      master = ctx.createGain(); master.gain.value = .85;
-      const komp = ctx.createDynamicsCompressor(); master.connect(komp); komp.connect(ctx.destination);
+      try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC(); } catch (__) { return null; } }
+      master = ctx.createGain(); master.gain.value = .7;
+      const komp = ctx.createDynamicsCompressor();
+      komp.threshold.value = -16; komp.knee.value = 12; komp.ratio.value = 4; komp.attack.value = .006; komp.release.value = .25;
+      master.connect(komp); komp.connect(ctx.destination);
       musikBus = ctx.createGain(); musikBus.gain.value = 0; musikBus.connect(master);
       effektBus = ctx.createGain(); effektBus.gain.value = 1; effektBus.connect(master);
       Object.keys(FAM).forEach(f => FAM[f].forEach(n => hole(f + "_" + n)));
@@ -658,12 +661,13 @@
     function spiel(name, o) {
       o = o || {};
       if (!an || !ctx || !puffer[name]) return null;
+      if (o.bus === musikBus && stimmen >= 26) return null; /* nicht zu viele Stimmen gleichzeitig – sonst knackt es auf dem Handy */
       const q = ctx.createBufferSource(); q.buffer = puffer[name];
       q.playbackRate.value = o.rate || 1;
       if (o.detune) q.detune.value = o.detune;
       const g = ctx.createGain(), t0 = jetzt() + (o.zeit || 0), laut = o.laut == null ? .5 : o.laut;
-      g.gain.setValueAtTime(o.ein ? 0 : laut, t0);
-      if (o.ein) g.gain.linearRampToValueAtTime(laut, t0 + o.ein);
+      /* weicher Einsatz statt hartem Sprung – verhindert Knackser */
+      g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(laut, t0 + (o.ein || .008));
       let kette = q;
       if (o.filter) { const f = ctx.createBiquadFilter(); f.type = o.filter.typ || "lowpass"; f.frequency.value = o.filter.f; f.Q.value = o.filter.q || 1;
         if (o.filter.bis) { f.frequency.setValueAtTime(o.filter.f, t0); f.frequency.exponentialRampToValueAtTime(o.filter.bis, t0 + (o.filter.in || .3)); }
@@ -671,6 +675,7 @@
       if (o.vibrato) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = o.vibrato.f || 5.5; lg.gain.value = o.vibrato.tiefe || 30; l.connect(lg); lg.connect(q.detune); l.start(t0 + (o.vibrato.ab || 0)); l.stop(t0 + (o.dauer || 3) + .5); }
       kette.connect(g); g.connect(o.bus || effektBus);
       q.start(t0, o.ab || 0);
+      if (o.bus === musikBus) { stimmen++; q.onended = () => { stimmen--; }; }
       if (o.dauer) { g.gain.setValueAtTime(laut, t0 + o.dauer); g.gain.exponentialRampToValueAtTime(.001, t0 + o.dauer + (o.aus || .25)); q.stop(t0 + o.dauer + (o.aus || .25) + .05); }
       return { q, g };
     }
@@ -740,25 +745,70 @@
       auftritt() { fx.harfeHoch(0, 60); fx.chor(.15, [60, 64, 67, 71], .14, 1.2); },
       klapper() { spiel("clave1", { laut: .4 }); spiel("clave1", { zeit: .18, laut: .3, rate: 1.2 }); }
     };
-    /* ---------- Lounge-Musik: Bossa-Gitarre, Bass, Besen – und bei viel Liebe ein Chor ---------- */
-    const AKK = [
-      { b: 38, a: [53, 57, 60, 64] },  /* Dm9 */
-      { b: 43, a: [53, 57, 59, 64] },  /* G13 */
-      { b: 36, a: [52, 55, 59, 62] },  /* Cmaj9 */
-      { b: 45, a: [55, 58, 61, 64] }   /* A7b9 */
-    ];
+    /* ---------- Lounge-Musik: ein ganzes Stück (A A B A, 32 Takte) mit wechselnden Mustern,
+       Klarinetten-Melodien, Harfen-Übergängen und Pausentakten – und bei viel Liebe ein Chor ---------- */
+    const K = (b, a, sk) => ({ b, a, sk });
+    const PROG = {
+      A: [K(38, [53, 57, 60, 64], [62, 64, 65, 67, 69, 72, 74]), K(43, [53, 57, 59, 64], [62, 64, 65, 67, 69, 71, 74]),
+          K(36, [52, 55, 59, 62], [60, 62, 64, 67, 69, 71, 72]), K(45, [55, 58, 61, 64], [61, 64, 67, 69, 70, 73]),
+          K(38, [53, 57, 60, 64], [62, 65, 67, 69, 72, 74]), K(43, [53, 57, 59, 64], [62, 65, 67, 71, 74]),
+          K(40, [55, 58, 62, 64], [62, 64, 67, 70, 72, 74]), K(45, [55, 58, 61, 64], [61, 64, 67, 69, 70, 73])],
+      B: [K(46, [53, 57, 60, 62], [62, 65, 67, 69, 70, 72]), K(45, [55, 57, 61, 64], [61, 64, 67, 69, 72]),
+          K(38, [53, 57, 60, 64], [62, 64, 65, 69, 72, 74]), K(38, [54, 57, 60, 63], [62, 63, 66, 69, 72]),
+          K(43, [53, 57, 58, 62], [62, 65, 67, 69, 70, 74]), K(36, [52, 57, 58, 62], [60, 62, 64, 67, 69, 70, 72]),
+          K(41, [52, 57, 60, 64], [60, 62, 64, 65, 67, 69, 72]), K(40, [53, 56, 59, 62], [59, 62, 64, 65, 68, 71])]
+    };
+    const FORM = ["A", "A", "B", "A"];
+    const COMP = [[[0, 1.2], [1.5, .7], [2.5, .7]], [[0, .8], [1, .5], [2.5, .7], [3.5, .4]], [[.5, .8], [1.5, .7], [3, .8]], [[0, 3.6]], [[0, .7], [1.5, .5], [2, .5], [3, .8]]];
+    const BASS = [[[0, 0, 1.4], [2, 7, .9], [3.5, "nah", .4]], [[0, 0, .9], [1.5, 0, .5], [2, 7, .9], [3.5, 7, .4]], [[0, 0, .9], [1, 3, .9], [2, 7, .9], [3, "nah", .9]], [[0, 0, 1.8], [2.5, 7, 1.2]]];
+    const RHY = [[0, .5, 1, 2], [0, 1.5, 2], [.5, 1, 1.5, 2.5, 3], [0, 2, 2.5], [1, 1.5, 2, 3.5], [0, .75, 1.5]];
     const SCHLAG = .68;
     let musikAn = false, naechsterTakt = 0, takt = 0, uhr = 0, liebe = 0;
+    let comp = 0, bass = 0, melodie = false, letzteNote = 69;
+    const wahl = l => l[Math.floor(Math.random() * l.length)];
     function taktPlanen(t0, i) {
-      const A = AKK[i % 4], mb = musikBus;
-      const n = (fam, m, z, o) => note(fam, m, Object.assign({ zeit: z - jetzt(), bus: mb }, o));
-      n("gitarre", A.b, t0, { laut: .5, dauer: SCHLAG * 1.4, aus: .3 });
-      n("gitarre", A.b + 7, t0 + SCHLAG * 2, { laut: .38, dauer: SCHLAG * .9, aus: .3 });
-      n("gitarre", A.b, t0 + SCHLAG * 3.5, { laut: .3, dauer: SCHLAG * .4 });
-      [0, 1.5, 2.5].forEach((s, k) => A.a.forEach((m, j) => n("gitarre", m, t0 + SCHLAG * s + j * .012, { laut: k === 0 ? .17 : .12, dauer: SCHLAG * (k === 0 ? 1.2 : .7), aus: .2, filter: { f: 2400 } })));
-      for (let s = 0; s < 4; s++) spiel("shake", { zeit: t0 + SCHLAG * s + (s % 2 ? .04 : 0) - jetzt(), laut: s % 2 ? .1 : .05, bus: mb });
-      if (liebe >= 2) A.a.forEach(m => n("aah", m + 12, t0, { laut: liebe >= 3 ? .09 : .06, ein: .5, dauer: SCHLAG * 3.6, aus: .5 }));
-      if (liebe >= 1 && i % 2 === 1) [0, .5, 1].forEach((s, k) => n("klar", A.a[(k + i) % 4] + 12, t0 + SCHLAG * (2 + s), { laut: .1, dauer: SCHLAG * .45, vibrato: { f: 5.5, tiefe: 22 } }));
+      const pos = i % 32, teil = FORM[pos >> 3], bar = pos % 8, A = PROG[teil][bar];
+      const naechst = PROG[FORM[((pos + 1) % 32) >> 3]][(pos + 1) % 8];
+      const mb = musikBus, n = (fam, m, z, o) => note(fam, m, Object.assign({ zeit: z - jetzt(), bus: mb }, o));
+      /* neue Muster am Anfang jedes Teils (und gelegentlich mittendrin) */
+      if (bar === 0 || (bar === 4 && Math.random() < .4)) {
+        comp = teil === "B" ? wahl([1, 2, 4]) : wahl([0, 0, 1, 2, 4]);
+        bass = teil === "B" ? wahl([2, 1]) : wahl([0, 0, 1, 3]);
+        melodie = (pos >= 8 && Math.random() < .75) || liebe >= 1;
+      }
+      const pause = pos === 31 && Math.random() < .4;     /* Stop-Time-Takt vor dem Neuanfang */
+      const intim = liebe >= 2 && Math.random() < .3;   /* manchmal nur lange, gehaltene Akkorde */
+      /* Gitarrenbegleitung */
+      (pause ? [[0, .6]] : intim ? COMP[3] : COMP[comp]).forEach(([b, d], k) =>
+        A.a.forEach((m, j) => n("gitarre", m, t0 + SCHLAG * b + j * (intim ? .05 : .012), { laut: k === 0 ? .16 : .11, dauer: SCHLAG * d, aus: .25, filter: { f: 2300 } })));
+      /* Bass */
+      (pause ? [[0, 0, .6]] : BASS[bass]).forEach(([b, iv, d]) => {
+        const m = iv === "nah" ? naechst.b + wahl([-1, 1]) : A.b + iv;
+        n("gitarre", m, t0 + SCHLAG * b, { laut: b === 0 ? .48 : .36, dauer: SCHLAG * d, aus: .25 });
+      });
+      if (!pause) {
+        /* Besen / Shaker in Achteln, leicht geswingt */
+        for (let s8 = 0; s8 < 8; s8++) spiel("shake", { zeit: t0 + SCHLAG * (s8 / 2) + (s8 % 2 ? .05 : 0) - jetzt(), laut: s8 % 4 === 2 ? .1 : s8 % 2 ? .055 : .035, bus: mb });
+        /* Clave im B-Teil, leise Bassdrum ab dem dritten Teil */
+        if (teil === "B") (bar % 2 ? [1, 2] : [0, 1.5, 3]).forEach(b => spiel("clave1", { zeit: t0 + SCHLAG * b - jetzt(), laut: .07, rate: 1.1, bus: mb }));
+        if (pos >= 16) [0, 2].forEach(b => spiel("bd", { zeit: t0 + SCHLAG * b - jetzt(), laut: .14, bus: mb }));
+        if (Math.random() < .15) spiel("snare1", { zeit: t0 + SCHLAG * 3.5 - jetzt(), laut: .05, bus: mb });
+      }
+      /* Klarinetten-Melodie: Phrasen über zwei Takte, dann ein Takt Luft */
+      if (melodie && !pause && bar % 4 !== 3 && Math.random() < .85) {
+        const sk = A.sk.map(m => m + 12).filter(m => m >= 70 && m <= 88), r = wahl(RHY);
+        r.forEach((b, k) => {
+          let ziel = letzteNote + wahl([-3, -2, -1, 1, 2, 2, 3, 4]);
+          const best = sk.reduce((a, c) => Math.abs(c - ziel) < Math.abs(a - ziel) ? c : a, sk[0]);
+          letzteNote = best;
+          const dauer = (r[k + 1] != null ? r[k + 1] - b : 4 - b) * SCHLAG * .9;
+          n("klar", best, t0 + SCHLAG * b, { laut: .085, dauer: Math.min(dauer, SCHLAG * 1.8), aus: .3, vibrato: { f: 5.4, tiefe: 20, ab: .12 }, filter: { f: 2800 } });
+        });
+      }
+      /* Harfe als Übergang am Ende jedes Teils */
+      if (bar === 7 && !pause) A.a.concat(A.a.map(m => m + 12)).forEach((m, k) => n("harfe", m + 12, t0 + SCHLAG * 2 + k * .1, { laut: .07 }));
+      /* Chor bei viel Liebe */
+      if (liebe >= 2 && !pause) A.a.forEach(m => n("aah", m + 12, t0, { laut: liebe >= 3 ? .08 : .055, ein: .5, dauer: SCHLAG * 3.6, aus: .5 }));
     }
     function ticken() {
       if (!musikAn || !ctx) return;
@@ -768,7 +818,7 @@
       if (!ctx) return;
       if (soll && an) {
         if (!musikAn) { musikAn = true; naechsterTakt = jetzt() + .15; clearInterval(uhr); uhr = setInterval(ticken, 150); ticken(); }
-        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(.75, jetzt(), .4);
+        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(.7, jetzt(), .4);
       } else if (musikAn) {
         musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(0, jetzt(), .15);
         musikAn = false; clearInterval(uhr);
@@ -779,7 +829,7 @@
       if (!ctx || !musikAn) return;
       musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setValueAtTime(musikBus.gain.value, jetzt());
       musikBus.gain.linearRampToValueAtTime(0, jetzt() + .08);
-      musikBus.gain.setValueAtTime(0, jetzt() + dauer); musikBus.gain.linearRampToValueAtTime(.75, jetzt() + dauer + 1.2);
+      musikBus.gain.setValueAtTime(0, jetzt() + dauer); musikBus.gain.linearRampToValueAtTime(.7, jetzt() + dauer + 1.2);
     }
     return {
       init, fx, musik, stille,
@@ -922,6 +972,7 @@
     const n = S.reihe[S.i];
     S.nsc = n; S.herzen = 0; S.zuege = 4; S.fertig = null; S.letzt = null;
     S.angebot = spruchAngebot(n);
+    clearTimeout(wuerfelUhr); wuerfel.hidden = true; wuerfel.classList.remove("weg");
     nscZeigen(n); effekte.nsc();
     setTimeout(() => { if (S && S.nsc === n) { kamera("nsc", 1.9, "schnitt"); setTimeout(() => kamera(null, 1, "zieh"), 700); } }, 350);
     gesicht("grinsen", 1400);
@@ -970,10 +1021,12 @@
       if (S && S.nsc === n) { gesicht("seufzen", 1200); weiterMit(); }
     }, dauer + 900);
   }
+  let wuerfelUhr = 0;
   function rollen(art) {
     /* Würfel rollt */
     const w1 = 1 + Math.floor(Math.random() * 20), w2 = 1 + Math.floor(Math.random() * 20);
     const w = S.vorteil ? Math.max(w1, w2) : w1; const vort = S.vorteil; S.vorteil = false;
+    clearTimeout(wuerfelUhr);
     wuerfel.hidden = false; wuerfel.className = "ch-wuerfel rollt";
     const zahl = wuerfel.querySelector("span");
     const flimmer = setInterval(() => { zahl.textContent = 1 + Math.floor(Math.random() * 20); }, 60);
@@ -981,6 +1034,8 @@
     setTimeout(() => {
       clearInterval(flimmer); zahl.textContent = w;
       wuerfel.className = "ch-wuerfel" + (w === 20 ? " krit" : w === 1 ? " patzer" : "");
+      clearTimeout(wuerfelUhr);
+      wuerfelUhr = setTimeout(() => { wuerfel.classList.add("weg"); wuerfelUhr = setTimeout(() => { wuerfel.hidden = true; wuerfel.classList.remove("weg"); }, 450); }, w === 20 || w === 1 ? 2600 : 1900);
       auswerten(art, w, vort ? [w1, w2] : null);
     }, ruhig ? 200 : 1500);
   }
@@ -1246,6 +1301,8 @@
 .ch-wuerfel { position: absolute; z-index: 7; left: 50%; top: 42%; width: 64px; height: 64px; margin: -32px 0 0 -32px; display: grid; place-items: center;
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: linear-gradient(160deg, #6a3a7a, #2a1230);
   font: 800 1.6rem/1 Georgia, "Times New Roman", serif; font-variant-numeric: lining-nums; color: #f6ecd6; }
+.ch-wuerfel { transition: opacity .4s ease, transform .4s ease; }
+.ch-wuerfel.weg { opacity: 0; transform: scale(.6); }
 .ch-wuerfel.rollt { animation: chRoll .15s linear infinite; }
 @keyframes chRoll { to { transform: rotate(60deg) scale(1.08); } }
 .ch-wuerfel.krit { background: linear-gradient(160deg, #ffe07a, #a8741a); color: #2a1a08; animation: chLand .45s ease-out; }
