@@ -2223,8 +2223,10 @@
   function weltEreignis(k, [art, , staerke, fern, o]) {
     o = o || {};
     const weit = !o.dumpf && Math.random() < (fern || 0), laut = kulMixWert(k.art, "ev") * staerke * (k.wlaut || 1) * (o.dumpf ? zz(.55, .85) : weit ? zz(.3, .55) : zz(.65, 1));
-    if (KUL_FX[art]) { kulFx(KUL_FX[art], ctx.currentTime + .05, laut * 1.3, weit || o.dumpf ? { tief: o.dumpf ? zz(450, 800) : zz(900, 2600) } : {}, k); return; }
-    const e = AMB_EV[art]; if (!e) return;
+    if (KUL_FX[art]) { kulFx(KUL_FX[art], ctx.currentTime + .05, laut * 1.3, weit || o.dumpf ? { tief: o.dumpf ? zz(450, 800) : zz(900, 2600) } : {}, k); return true; }
+    const e = AMB_EV[art]; if (!e) return true;
+    /* Aufnahme noch nicht geladen: nachladen und gleich nochmal versuchen, statt das Geräusch still zu verschlucken */
+    if (!e.f.some(n => ambPuffer(n))) { e.f.forEach(ambLaden); return false; }
     const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1, j = ctx.currentTime + .05;
     const dauer = e.folge ? n * (e.folge[2] + e.folge[3]) / 2 + 1.5 : 5;
     const g = ctx.createGain(); g.gain.value = laut * WELT_GRUND; let letzter = g;
@@ -2263,6 +2265,7 @@
       q.start(t, b._start || 0);
       if (e.folge) t += zz(e.folge[2], e.folge[3]);
     }
+    return true;
   }
   /* ---------- Zusätze: einzelne Schichten über jede Kulisse legen (Regen über dem Kerker, Vögel in der Taverne …) ----------
      Jeder Zusatz läuft wie eine kleine eigene Kulisse; der Kulissen-Balken regelt alles gemeinsam.
@@ -2373,6 +2376,8 @@ const ZUS_ICON = {
   const DRINNEN = ["taverne", "hoehle", "unterreich", "kerker", "schmiede", "labor", "bibliothek", "tempel", "mine"];
   let zusWahl = {}, zusLauf = {}, zusPausiert = false;
   try { zusWahl = JSON.parse(localStorage.getItem("imres-lw-zusaetze") || "{}") || {}; } catch (_) {}
+  /* einmalig: Zusätze sind jetzt deutlich lauter – früher hochgedrehte Regler zurück auf 100 % */
+  try { if (!localStorage.getItem("imres-lw-zus-pegel2")) { Object.keys(zusWahl).forEach(id => { if (zusWahl[id] > 1) zusWahl[id] = 1; }); localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); localStorage.setItem("imres-lw-zus-pegel2", "1"); } } catch (_) {}
   /* frühere Zusätze, die aufgeteilt wurden */
   { const alt = { nacht: ["grillen", "eule"], hof: ["huhn", "kuh"] };
     Object.keys(zusWahl).forEach(id => { if (alt[id]) { alt[id].forEach(n => { if (!(n in zusWahl)) zusWahl[n] = zusWahl[id]; }); delete zusWahl[id]; } else if (!ZUSATZ[id]) delete zusWahl[id]; });
@@ -2386,10 +2391,14 @@ const ZUS_ICON = {
   /* steckt der Zusatz schon in der Grundkulisse? dann wird er nicht angeboten */
   const zusInKulisse = id => { const w = KUL_WELT[S.kulisse], z = ZUSATZ[id]; return !!w && z.betten.length > 0 && w.betten.some(([n]) => n === z.betten[0][0]); };
   const zusFaktor = () => { const n = Object.keys(zusLauf).length; return 1.3 * (n >= 3 ? Math.sqrt(2 / n) : 1); }; /* Zusätze: rund 4 dB über dem früheren Verhältnis zur Kulisse */
+  /* gemessener Ausgleich je Zusatz: bei 100 % klingt jeder etwa gleich laut, knapp unter der Musik */
+  const ZUS_NORM = {"sturm":1.33,"gewitter":1.46,"regen":1.82,"starkregen":2.02,"bach":1.62,"laub":0.9,"wind":1.07,"schnee":1.4,"wellen":2.14,"wasserfall":1.72,"blubbern":1.23,"tropfen":2.16,"feuer":1.5,"voegel":2.75,"grillen":1.8,"kessel":1.6,"frosch":2.11,"kraehe":3.31,"wolf":1.11,"eule":2.24,"specht":2.37,"moewe":2.45,"bienen":1.62,"fledermaus":10,"hund":3.89,"schaf":1.7,"pferd":2.16,"kuh":2.19,"huhn":3.13,"katze":0.8,"wal":1.05,"schwein":5.13,"stimmen":1.51,"kinder":1.78,"hafen":1.33,"markt":1.3,"segel":1.88,"hacke":5.37,"axt":3.72,"schmiede":2.69,"glocke":5.69,"uhr":4.42,"geist":4.22,"gesang":1.23,"ketten":8.41,"monster":2.85,"untot":2.04};
+  /* Regler 0–200 %: bis 100 % linear, darüber bis +10 dB – auf 200 % rückt das Geräusch ganz nah heran */
+  const zusKurve = w => w <= 1 ? w : Math.pow(10, .5 * (w - 1));
   const zusDumpf = id => ZUSATZ[id].raus && DRINNEN.includes(S.kulisse);
   function zusPegelSetzen() {
     if (!ctx) return; const j = ctx.currentTime, f = zusFaktor();
-    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id]; z.g.gain.setTargetAtTime(kulPegel() * f * zusWert(id), j, .15); z.filt.frequency.setTargetAtTime(zusDumpf(id) ? 750 : 18000, j, .3); });
+    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id]; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1), j, .15); z.filt.frequency.setTargetAtTime(zusDumpf(id) ? 750 : 18000, j, .3); });
   }
   function zusAn(id) {
     if (zusLauf[id] || !ctx) return;
@@ -2428,7 +2437,7 @@ const ZUS_ICON = {
       w.ev.forEach((x, i) => {
         /* ein angetippter Zusatz meldet sich gleich – sonst wüsste man nicht, ob er läuft */
         if (k.naechst[i] == null) { k.naechst[i] = jetzt + (k.zusatz ? zz(.4, 2.5) + i * 2 : zz(x[1][0] * .3, x[1][1] * .6)); return; }
-        if (jetzt >= k.naechst[i]) { k.naechst[i] = jetzt + zz(x[1][0], x[1][1]); try { weltEreignis(k, x); } catch (_) {} }
+        if (jetzt >= k.naechst[i]) { let ok = true; try { ok = weltEreignis(k, x) !== false; } catch (_) {} k.naechst[i] = jetzt + (ok ? zz(x[1][0], x[1][1]) : 1); }
       });
     }, 250);
   }
