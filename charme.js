@@ -427,7 +427,7 @@
         <path class="arm-r" d="M312 206 C 318 214 316 222 308 226" stroke="#ecc29f" stroke-width="12" fill="none" stroke-linecap="round"/>
       </g>
       <rect x="263" y="166" width="14" height="26" rx="6" fill="#e2b592"/>
-      <g class="ch-kopf">
+      <g class="ch-pose"><g class="ch-kopf">
         <!-- Dreads, hinten zum Dutt gebunden -->
         <path d="M292 108 C 304 120 306 150 308 178 M296 112 C 310 126 312 152 316 176 M288 106 C 298 124 298 150 300 172" stroke="#8a6a44" stroke-width="5" fill="none" stroke-linecap="round"/>
         <circle cx="290" cy="98" r="11" fill="#8a6a44"/><path d="M282 94 q 8 -6 16 2 M284 101 q 7 -4 13 2" stroke="#6a4c2e" stroke-width="1.4" fill="none"/>
@@ -445,6 +445,8 @@
           <path class="b-hoch" d="M253 124 q 6 -5 11 -1 M276 123 q 6 -4 11 1" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
           <path class="b-boese" d="M253 126 q 6 1 11 4 M276 130 q 6 -3 11 -4" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
           <path class="b-muede" d="M253 130 q 6 -1 11 1 M276 131 q 6 -2 11 -1" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path class="b-skeptisch" d="M253 130 q 6 0 11 1 M276 121 q 6 -5 11 0" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path class="b-traurig" d="M253 130 q 6 -1 11 -6 M276 124 q 5 5 11 6" stroke="#5a3e24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
         </g>
         <!-- Augen -->
         <g class="ch-augen">
@@ -453,6 +455,11 @@
           <g class="a-gross"><ellipse cx="259" cy="137" rx="6" ry="7" fill="#fff"/><ellipse cx="281" cy="137" rx="6" ry="7" fill="#fff"/><circle cx="259" cy="137" r="2" fill="#3a2a1a"/><circle cx="281" cy="137" r="2" fill="#3a2a1a"/></g>
           <g class="a-zu"><path d="M254 139 q 5 4 10 0 M276 139 q 5 4 10 0" stroke="#3a2a1a" stroke-width="2" fill="none" stroke-linecap="round"/></g>
           <g class="a-halb"><path d="M254 137 h 10 M276 137 h 10" stroke="#3a2a1a" stroke-width="2" stroke-linecap="round"/><path d="M255 138 q 4 3 8 0 M277 138 q 4 3 8 0" fill="#3a2a1a"/></g>
+          <g class="a-herz"><path d="M259 144 l -5.5 -5.5 a 3 3 0 0 1 5.5 -3.6 a 3 3 0 0 1 5.5 3.6 Z M281 144 l -5.5 -5.5 a 3 3 0 0 1 5.5 -3.6 a 3 3 0 0 1 5.5 3.6 Z" fill="#e8204a"/></g>
+          <g class="a-x"><path d="M254 134 l 8 4 l -8 4 M286 134 l -8 4 l 8 4" stroke="#3a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+          <g class="a-rollen"><ellipse cx="259" cy="138" rx="4.6" ry="5" fill="#fff"/><ellipse cx="281" cy="138" rx="4.6" ry="5" fill="#fff"/><circle cx="259.5" cy="134.6" r="2.3" fill="#3a2a1a"/><circle cx="281" cy="134.6" r="2.3" fill="#3a2a1a"/></g>
+          <g class="a-skeptisch"><path d="M254 139 h 10" stroke="#3a2a1a" stroke-width="2" stroke-linecap="round"/><path d="M255.5 139.5 q 3.5 2.5 7 0" fill="#3a2a1a"/><ellipse cx="281" cy="137" rx="5" ry="5.6" fill="#fff"/><circle cx="280" cy="137.5" r="2.4" fill="#3a2a1a"/></g>
+          <g class="a-lachzu"><path d="M254 140 q 5 -6 10 0 M276 140 q 5 -6 10 0" stroke="#3a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>
           <g class="a-unten"><ellipse cx="259" cy="140" rx="4.6" ry="4" fill="#fff"/><ellipse cx="281" cy="140" rx="4.6" ry="4" fill="#fff"/><circle cx="259" cy="142" r="2.2" fill="#3a2a1a"/><circle cx="281" cy="142" r="2.2" fill="#3a2a1a"/></g>
         </g>
         <path d="M270 140 q -3 9 0 12 q 2 1 4 0" fill="none" stroke="#c99878" stroke-width="1.6" stroke-linecap="round"/>
@@ -464,16 +471,25 @@
           <ellipse class="m-o" cx="270" cy="159" rx="5" ry="6.5" fill="#6a2222"/>
           <path class="m-schief" d="M262 160 q 6 -3 16 -4" stroke="#3e1a12" stroke-width="2" fill="none" stroke-linecap="round"/>
           <path class="m-traurig" d="M262 161 q 8 -5 16 0" stroke="#3e1a12" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <g class="m-zaehne"><rect x="261" y="154.5" width="18" height="7" rx="2.5" fill="#fff" stroke="#3e1a12" stroke-width="1.4"/><path d="M261 158 h 18 M265.5 154.5 v 7 M270 154.5 v 7 M274.5 154.5 v 7" stroke="#3e1a12" stroke-width=".8"/></g>
+          <path class="m-wellig" d="M261 159 q 2.3 -3 4.5 0 t 4.5 0 t 4.5 0 t 4.5 0" stroke="#3e1a12" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path class="m-smirk" d="M262 159 q 9 2 16 -5" stroke="#3e1a12" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path class="m-gepresst" d="M264 158 q 6 -1.5 12 0" stroke="#3e1a12" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <path class="m-strich" d="M263 158 h 14" stroke="#3e1a12" stroke-width="2" stroke-linecap="round"/>
         </g>
         <g class="ch-roete"><ellipse cx="252" cy="150" rx="5" ry="3" fill="#ff7a7a" opacity=".35"/><ellipse cx="288" cy="150" rx="5" ry="3" fill="#ff7a7a" opacity=".35"/></g>
         <g class="ch-zzz"><text x="300" y="112" font-size="11" fill="#cfe6ff" font-family="Georgia,serif">z</text><text x="308" y="102" font-size="14" fill="#cfe6ff" font-family="Georgia,serif">Z</text></g>
-        <g class="ch-schweiss"><path d="M300 124 q 3 6 0 8 q -3 -2 0 -8 Z" fill="#9fd6ff"/></g>
-      </g>
+        <g class="ch-schweiss"><path d="M300 124 q 3 6 0 8 q -3 -2 0 -8 Z" fill="#9fd6ff"/><path d="M243 128 q 2.5 5 0 7 q -2.5 -2 0 -7 Z" fill="#9fd6ff"/></g>
+        <g class="ch-traenen"><path class="tr1" d="M251 142 q 3 6 0 8 q -3 -2 0 -8 Z" fill="#9fd6ff"/><path class="tr2" d="M289 142 q 3 6 0 8 q -3 -2 0 -8 Z" fill="#9fd6ff"/></g>
+        <g class="ch-backen"><ellipse cx="251" cy="153" rx="6" ry="5" fill="#f2c8a8" stroke="#d3a07e" stroke-width=".8"/><ellipse cx="289" cy="153" rx="6" ry="5" fill="#f2c8a8" stroke="#d3a07e" stroke-width=".8"/></g>
+      </g></g>
       <!-- Hände -->
       <g class="ch-haende">
         <g class="h-ruhe"><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/><ellipse cx="304" cy="226" rx="10" ry="6.5" fill="#ecc29f"/><path d="M226 222 l 3 8 M229 221 l 3 8" stroke="#22262e" stroke-width="1.6"/><rect x="309" y="221" width="3" height="9" fill="#c99a3a"/></g>
         <g class="h-facepalm"><path d="M312 208 C 312 190 296 174 284 160" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M303 186 l 8 -6 M300 182 l 8 -6" stroke="#22262e" stroke-width="1.8"/><ellipse cx="272" cy="141" rx="14" ry="11" fill="#ecc29f"/><path d="M262 134 h 21 M261 140 h 22 M262 146 h 20" stroke="#d3a07e" stroke-width="1"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
         <g class="h-daumen"><path d="M312 208 C 322 200 322 190 318 180" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M314 196 h 10 M314 192 h 10" stroke="#22262e" stroke-width="1.8"/><rect x="309" y="160" width="16" height="18" rx="5" fill="#ecc29f"/><rect x="313" y="148" width="7" height="16" rx="3.5" fill="#ecc29f"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
+        <g class="h-mund"><path d="M312 208 C 316 190 298 178 282 168" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M304 190 l 8 -5 M301 186 l 8 -5" stroke="#22262e" stroke-width="1.8"/><ellipse cx="272" cy="160" rx="12" ry="8" fill="#ecc29f"/><path d="M262 157 h 17 M261 161 h 18" stroke="#d3a07e" stroke-width="1"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
+        <g class="h-kinn"><path d="M312 208 C 312 198 298 192 286 188" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M302 196 l 4 -8 M298 195 l 4 -8" stroke="#22262e" stroke-width="1.8"/><circle cx="280" cy="181" r="7.5" fill="#ecc29f"/><path d="M276 176 q 4 -2 8 0" stroke="#d3a07e" stroke-width="1" fill="none"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
         <g class="h-stift"><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/><ellipse cx="300" cy="222" rx="10" ry="6.5" fill="#ecc29f"/><path d="M298 222 l 12 -18" stroke="#e0a046" stroke-width="3" stroke-linecap="round"/></g>
       </g>
     </g>
@@ -524,10 +540,10 @@
   /* ---------- Aufbau ---------- */
   root.innerHTML =
     '<p class="label ch-label"></p><h3 class="ch-titel"></h3><p class="tav-info ch-text"></p>' +
-    '<div class="ch-buehne">' + ZIMMER +
-      '<div class="ch-sl-blase" aria-live="polite"></div>' +
+    '<div class="ch-buehne"><div class="ch-kamera">' + ZIMMER +
       '<img class="ch-nsc" alt="" hidden>' +
-      VORNE +
+      VORNE + "</div>" +
+      '<div class="ch-sl-blase" aria-live="polite"></div>' +
       '<div class="ch-nsc-blase" aria-live="polite"></div>' +
       '<div class="ch-wuerfel" hidden><span></span></div>' +
       '<div class="ch-kopfzeile"><div class="ch-geduld"><span class="ch-geduld-txt"></span><span class="ch-geduld-bar"><i></i></span></div><button type="button" class="ch-ton" data-tun="ton"></button><div class="ch-herzen"></div></div>' +
@@ -541,22 +557,35 @@
   const AUSDRUCK = {
     neutral: { a: "offen", b: "normal", m: "neutral", h: "ruhe" },
     grinsen: { a: "offen", b: "hoch", m: "grinsen", h: "ruhe" },
-    lachen: { a: "zu", b: "hoch", m: "lachen", h: "ruhe" },
+    lachen: { a: "lachzu", b: "hoch", m: "lachen", h: "ruhe", p: "zurueck" },
     facepalm: { a: "zu", b: "boese", m: "schief", h: "facepalm" },
-    schock: { a: "gross", b: "hoch", m: "o", h: "ruhe" },
+    schock: { a: "gross", b: "hoch", m: "o", h: "ruhe", p: "zurueck" },
     notiert: { a: "unten", b: "normal", m: "schief", h: "stift" },
     stolz: { a: "zu", b: "hoch", m: "grinsen", h: "daumen", r: 1 },
     genervt: { a: "halb", b: "muede", m: "traurig", h: "ruhe" },
-    errötet: { a: "zu", b: "hoch", m: "grinsen", h: "ruhe", r: 1 },
+    errötet: { a: "lachzu", b: "traurig", m: "gepresst", h: "ruhe", r: 1, p: "links" },
     schwitzt: { a: "gross", b: "hoch", m: "schief", h: "ruhe", sw: 1 },
     schlaeft: { a: "zu", b: "muede", m: "neutral", h: "ruhe", z: 1 },
-    starr: { a: "offen", b: "normal", m: "neutral", h: "ruhe" }
+    starr: { a: "offen", b: "normal", m: "strich", h: "ruhe", zk: 1 },
+    skeptisch: { a: "skeptisch", b: "skeptisch", m: "schief", h: "kinn", p: "vor" },
+    fremdscham: { a: "x", b: "traurig", m: "zaehne", h: "ruhe", p: "ducken", sw: 1 },
+    kichern: { a: "lachzu", b: "hoch", m: "gepresst", h: "mund", r: 1, p: "links" },
+    verliebt: { a: "herz", b: "hoch", m: "grinsen", h: "ruhe", r: 1, p: "rechts" },
+    augenrollen: { a: "rollen", b: "muede", m: "wellig", h: "ruhe", p: "zurueck" },
+    smirk: { a: "halb", b: "skeptisch", m: "smirk", h: "ruhe", p: "rechts" },
+    pokerface: { a: "offen", b: "normal", m: "strich", h: "ruhe" },
+    lachtraenen: { a: "lachzu", b: "hoch", m: "lachen", h: "ruhe", p: "zurueck", tr: 1 },
+    unglaeubig: { a: "gross", b: "hoch", m: "wellig", h: "ruhe", p: "vor" },
+    seufzen: { a: "zu", b: "traurig", m: "o", h: "ruhe", p: "ducken" },
+    verkneifen: { a: "lachzu", b: "boese", m: "gepresst", h: "ruhe", r: 1, bk: 1 }
   };
   let ausdruckUhr = 0, ruheUhr = 0;
   function gesicht(name, dauer, danach) {
     const A = AUSDRUCK[name] || AUSDRUCK.neutral;
     sl.dataset.a = A.a; sl.dataset.b = A.b; sl.dataset.m = A.m; sl.dataset.h = A.h;
     sl.classList.toggle("rot", !!A.r); sl.classList.toggle("zzz", !!A.z); sl.classList.toggle("schweiss", !!A.sw);
+    sl.classList.toggle("traenen", !!A.tr); sl.classList.toggle("backen", !!A.bk); sl.classList.toggle("zucken", !!A.zk);
+    sl.dataset.p = A.p || "";
     sl.classList.remove("hops"); void sl.getBBox; requestAnimationFrame(() => sl.classList.add("hops"));
     clearTimeout(ausdruckUhr);
     if (dauer) ausdruckUhr = setTimeout(() => gesicht(danach || "neutral"), dauer);
@@ -574,7 +603,14 @@
     el.textContent = text; el.classList.add("da");
     clearTimeout(el._uhr); if (dauer) el._uhr = setTimeout(() => el.classList.remove("da"), dauer);
   }
-  const slSagt = (pool, dauer) => blase(slBlase, typeof pool === "string" ? pool : zufall(pool), dauer || 2600);
+  let sprechUhr = 0;
+  const slSagt = (pool, dauer) => {
+    const txt = typeof pool === "string" ? pool : zufall(pool);
+    blase(slBlase, txt, dauer || 2600);
+    if (/^\(/.test(txt) || txt === "…" || ruhig) return;
+    sl.classList.add("spricht"); clearTimeout(sprechUhr);
+    sprechUhr = setTimeout(() => sl.classList.remove("spricht"), Math.min(2200, 300 + txt.length * 45));
+  };
 
   function nscZeigen(n) {
     nscImg.hidden = false; nscImg.classList.remove("da"); nscImg.src = n.bild; nscImg.style.objectPosition = n.pos;
@@ -767,8 +803,9 @@
   buehne.insertBefore(pracht, buehne.querySelector(".ch-sl-blase"));
   /* die Funken liegen hinter dem NSC, Licht & Effekte davor */
   const funken = pracht.querySelector(".ch-funken");
-  buehne.insertBefore(funken, buehne.querySelector(".ch-zimmer").nextSibling);
+  const zimmerEl = buehne.querySelector(".ch-zimmer"); zimmerEl.parentNode.insertBefore(funken, zimmerEl.nextSibling);
   const stempelEl = pracht.querySelector(".ch-stempel");
+  buehne.appendChild(stempelEl); /* über dem Würfel */
   let moodUhr = 0;
   function stimmung(mood, dauer) {
     buehne.dataset.mood = mood;
@@ -816,7 +853,7 @@
     ergebnis(art2) {
       buehne.classList.remove("spannung"); liebeSetzen();
       const T = sprache() === "en";
-      if (art2 === "krit") { stimmung("disco", 3600); stempel(T ? "NAT 20!" : "NATÜRLICHE 20!", "krit"); tonFx("disco"); flug(["✨", "💖", "⭐", "💋"], 22, "regen"); nscReagiert("verliebt", 3000); }
+      if (art2 === "krit") { stimmung("disco", 3600); stempel(T || window.innerWidth <= 700 ? "NAT 20!" : "NATÜRLICHE 20!", "krit"); tonFx("disco"); flug(["✨", "💖", "⭐", "💋"], 22, "regen"); nscReagiert("verliebt", 3000); }
       else if (art2 === "patzer") { stimmung("patzer", 3000); stempel(T ? "CRITICAL FAIL" : "PATZER!", "patzer"); tonFx("kratzer"); setTimeout(() => tonFx("posaune"), 300); nscReagiert("kalt", 1500); }
       else if (art2 === "erfolg") { stimmung("romantik", 2200); tonFx("kuss"); tonFx("harfeHoch", .1); tonFx("chor", .15, null, .16, 1.4); flug(["💗", "💕", "💖"], 6, "aufsteigen"); nscReagiert("verliebt"); }
       else { stimmung("frost", 1600); tonFx("posaune", true); nscReagiert("kalt", 900); }
@@ -842,6 +879,40 @@
   if ("IntersectionObserver" in window) new IntersectionObserver(e => { const sicht = e[0].isIntersecting; Ton.musik(sicht && ansicht === "spiel" && !!S && !S.ende); }).observe(buehne);
   document.addEventListener("visibilitychange", () => { if (document.hidden) Ton.musik(false); else if (ansicht === "spiel" && S && !S.ende) Ton.musik(true); });
 
+
+  /* ---------- Kamera: Nahaufnahmen von Spielleiter und NSC ---------- */
+  const kameraEl = buehne.querySelector(".ch-kamera");
+  let kamUhr = 0;
+  function szenePunkt(x, y) { /* SVG-Koordinate → Pixel in der Bühne (slice bzw. meet) */
+    const W = buehne.clientWidth, Hh = buehne.clientHeight, meet = window.innerWidth <= 700;
+    const sk = meet ? Math.min(W / 400, Hh / 300) : Math.max(W / 400, Hh / 300);
+    return [(W - 400 * sk) / 2 + x * sk, Hh - 300 * sk + y * sk];
+  }
+  function nscGesicht() {
+    const W = nscImg.offsetWidth, Hh = nscImg.offsetHeight, nw = nscImg.naturalWidth || 1, nh = nscImg.naturalHeight || 1;
+    const s = Math.min(W / nw, Hh / nh), bw = nw * s, bh = nh * s;
+    const links = nscImg.offsetLeft + (W - bw) / 2, oben = nscImg.offsetTop + (Hh - bh);
+    const f = { gundren: [.6, .2], buergermeister: [.62, .2], bugbear: [.4, .2], ilvara: [.5, .22], kuotoa: [.5, .33], horga: [.5, .2],
+      hgraam: [.76, .16], themberchaud: [.32, .42], demogorgon: [.5, .14] }[nscImg.dataset.nsc] || [.5, .2];
+    return [links + bw * f[0], oben + bh * f[1]];
+  }
+  function kamera(ziel, zoom, art) {
+    if (ruhig) return;
+    clearTimeout(kamUhr);
+    kameraEl.classList.remove("schnitt", "schleich");
+    if (art) kameraEl.classList.add(art);
+    const spot = (x, y, z) => { buehne.style.setProperty("--sx", (x / buehne.clientWidth * 100).toFixed(1) + "%"); buehne.style.setProperty("--sy", (y / buehne.clientHeight * 100).toFixed(1) + "%"); buehne.style.setProperty("--zr", z); };
+    if (!ziel || zoom <= 1) { kameraEl.style.transform = ""; buehne.classList.remove("kamera-nah"); const d = szenePunkt(270, 142); spot(d[0], d[1], 1); return; }
+    const W = buehne.clientWidth, Hh = buehne.clientHeight;
+    const [px, py] = ziel === "sl" ? szenePunkt(270, 142) : ziel === "nsc" ? nscGesicht() : (() => { const a = szenePunkt(270, 142), b = nscGesicht(); return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; })();
+    let tx = W / 2 - zoom * px, ty = Hh * .45 - zoom * py;
+    tx = Math.min(0, Math.max(W - zoom * W, tx)); ty = Math.min(0, Math.max(Hh - zoom * Hh, ty));
+    kameraEl.style.transform = "translate(" + tx.toFixed(1) + "px," + ty.toFixed(1) + "px) scale(" + zoom + ")";
+    const d = szenePunkt(270, 142); spot(tx + zoom * d[0], ty + zoom * d[1], zoom);
+    buehne.classList.toggle("kamera-nah", zoom >= 1.6);
+  }
+  /* Nahaufnahme für eine Weile, dann zurück in die Totale */
+  function nah(ziel, zoom, ms, art) { kamera(ziel, zoom, art); kamUhr = setTimeout(() => kamera(null), ms); }
   /* ---------- Ablauf ---------- */
   function neueSitzung() {
     S = { reihe: NSC.slice(), i: 0, geduld: 10, herzenGesamt: 0, erobert: 0, joker: { echo: 1, rex: 1, floete: 1 }, vorteil: false, bonus: false, ergebnisse: [] };
@@ -852,6 +923,7 @@
     S.nsc = n; S.herzen = 0; S.zuege = 4; S.fertig = null; S.letzt = null;
     S.angebot = spruchAngebot(n);
     nscZeigen(n); effekte.nsc();
+    setTimeout(() => { if (S && S.nsc === n) { kamera("nsc", 1.9, "schnitt"); setTimeout(() => kamera(null, 1, "zieh"), 700); } }, 350);
     gesicht("grinsen", 1400);
     slSagt(t().sl.start, 2000);
     setTimeout(() => { if (S && S.nsc === n) blase(nscBlase, t().nsc[n.id].intro, 0); }, 500);
@@ -872,8 +944,9 @@
     blase(nscBlase, "Barradin: " + NT[art][idx % NT[art].length], 0);
     nscBlase.classList.add("barradin");
     effekte.spruch(art);
-    if (art === "absurd") { gesicht("facepalm", 1500); slSagt(T.sl.absurd, 1800); S.geduld = Math.max(0, S.geduld - 1); }
-    else gesicht("notiert");
+    if (art === "absurd") { gesicht(zufall(["facepalm", "augenrollen", "unglaeubig"]), 1500); slSagt(T.sl.absurd, 1800); S.geduld = Math.max(0, S.geduld - 1); }
+    else gesicht({ charmant: "skeptisch", kuehn: zufall(["fremdscham", "verkneifen"]), passend: "smirk" }[art] || "notiert");
+    nah("nsc", 2.2, 1300);
     zeichnen();
     /* Manchmal wird es unangenehm still, bevor überhaupt gewürfelt wird */
     const p = art === "absurd" ? .55 : art === "kuehn" ? .38 : .2;
@@ -885,13 +958,16 @@
     setTimeout(() => {
       if (!S || S.nsc !== n) return;
       gesicht("starr"); sl.classList.add("starr"); effekte.peinlich(dauer / 1000);
+      kamera("sl", 1.7, "schnitt"); requestAnimationFrame(() => requestAnimationFrame(() => kamera("sl", 2.5, "schleich")));
       blase(slBlase, "…", 0); slBlase.classList.add("punkte");
     }, 900);
-    setTimeout(() => { if (S && S.nsc === n) { nscBlase.classList.remove("barradin"); blase(nscBlase, "…", 0); nscBlase.classList.add("punkte"); } }, 2100);
-    setTimeout(() => { if (S && S.nsc === n) { slBlase.classList.remove("punkte"); blase(slBlase, zufall(T.sl.peinlich), 0); } }, 3300);
+    setTimeout(() => { if (S && S.nsc === n) { nscBlase.classList.remove("barradin"); blase(nscBlase, "…", 0); nscBlase.classList.add("punkte"); kamera("nsc", 2.4, "schnitt"); } }, 2100);
+    setTimeout(() => { if (S && S.nsc === n) { slBlase.classList.remove("punkte"); blase(slBlase, zufall(T.sl.peinlich), 0); kamera("sl", 2.2, "schnitt"); gesicht(zufall(["starr", "fremdscham", "pokerface"])); sl.classList.add("starr");
+      requestAnimationFrame(() => requestAnimationFrame(() => kamera("sl", 3, "schleich"))); } }, 3300);
     setTimeout(() => {
       sl.classList.remove("starr"); slBlase.classList.remove("punkte"); nscBlase.classList.remove("punkte");
-      if (S && S.nsc === n) { gesicht("genervt"); weiterMit(); }
+      kamera(null, 1, "zieh");
+      if (S && S.nsc === n) { gesicht("seufzen", 1200); weiterMit(); }
     }, dauer + 900);
   }
   function rollen(art) {
@@ -921,11 +997,18 @@
     S.letzt = { art2, w, summe, sg: art === "absurd" ? null : sg, beide };
     nscBlase.classList.remove("barradin");
     effekte.ergebnis(art2);
-    if (art2 === "krit") { gesicht("schock", 1100, "stolz"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0); }
-    else if (art2 === "patzer") { gesicht("facepalm", 1300, "lachen"); slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); }
-    else if (art2 === "erfolg") { gesicht(S.herzen >= 3 ? "errötet" : "grinsen", 2400); slSagt(T.sl.erfolg); blase(nscBlase, zufall(NT.ja), 0); }
+    if (art2 === "krit") {
+      gesicht("schock", 1200, "verliebt"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0);
+      kamera("sl", 2.4, "schnitt"); kamUhr = setTimeout(() => { kamera("nsc", 1.8, "schnitt"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 1400); }, 1200);
+    }
+    else if (art2 === "patzer") { gesicht("fremdscham", 1300, "lachtraenen"); slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); nah("sl", 2.2, 2000, "schnitt"); }
+    else if (art2 === "erfolg") {
+      gesicht(S.herzen >= 3 ? "verliebt" : zufall(["kichern", "errötet", "verkneifen", "grinsen"]), 2600); slSagt(T.sl.erfolg); blase(nscBlase, zufall(NT.ja), 0);
+      if (Math.random() < .5) nah("nsc", 1.9, 1400); else nah("sl", 2.1, 1400);
+    }
     else {
-      gesicht(summe >= sg - 3 ? "notiert" : "genervt", 2400); slSagt(T.sl.misserfolg);
+      gesicht(summe >= sg - 3 ? zufall(["notiert", "smirk"]) : zufall(["augenrollen", "pokerface", "genervt", "smirk"]), 2400); slSagt(T.sl.misserfolg);
+      if (Math.random() < .45) nah("sl", 2, 1300);
       /* … und manchmal hängt die Antwort unangenehm lange in der Luft */
       if (S.herzen < 3 && S.zuege > 0 && S.geduld > 0 && Math.random() < .35 && !ruhig) {
         const nn = S.nsc; blase(nscBlase, zufall(T.sl.nachhall), 0); nscBlase.classList.add("punkte");
@@ -949,7 +1032,8 @@
       if (!S || S.nsc !== n) return;
       blase(nscBlase, gewonnen ? NT.sieg : NT.verloren, 0);
       slSagt(gewonnen ? T.sl.erobert : T.sl.korb, 2800);
-      gesicht(gewonnen ? "schwitzt" : "lachen", 2600);
+      gesicht(gewonnen ? zufall(["verliebt", "schwitzt", "errötet"]) : zufall(["lachtraenen", "smirk", "lachen"]), 2800);
+      if (gewonnen) { kamera("beide", 1.45, "zieh"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 2600); } else nah("sl", 2.2, 1800, "schnitt");
       if (gewonnen) herzRegen();
       effekte.ende(gewonnen);
       zeichnen();
@@ -968,7 +1052,7 @@
     const alt = rekord(); S.neuRekord = S.herzenGesamt > alt; if (S.neuRekord) schreib("imres-charme-rekord", String(S.herzenGesamt));
     nscImg.classList.remove("da");
     nscBlase.classList.remove("da");
-    effekte.schluss(zu);
+    effekte.schluss(zu); kamera(null);
     if (zu) { buehne.classList.add("zu"); gesicht("genervt"); slSagt(t().sl.schirm, 4000); }
     else gesicht("stolz", 3000, "grinsen");
     zeichnen();
@@ -976,9 +1060,9 @@
   function joker(k) {
     if (!S || S.fertig || S.wirft || !S.joker[k]) return;
     const T = t(); S.joker[k] = 0;
-    if (k === "echo") { S.zuege++; S.angebot = spruchAngebot(S.nsc); gesicht("genervt", 2200); slSagt(T.sl.echo); blase(nscBlase, sprache() === "en" ? "Echo: \"Do you know Gundren?\" – \"…Who?\"" : "Echo: „Kennst du Gundren?“ – „…Wen?“", 0); S.geduld = Math.max(0, S.geduld - 1); }
-    if (k === "rex") { S.herzen = Math.min(3, S.herzen + 1); gesicht("lachen", 2200); slSagt(T.sl.rex); blase(nscBlase, sprache() === "en" ? "Rex wags his tail. Resistance is futile." : "Rex wedelt. Widerstand ist zwecklos.", 0); if (S.herzen >= 3) nscEnde(true); }
-    if (k === "floete") { S.vorteil = true; gesicht("schock", 1400, "genervt"); slSagt(T.sl.floete); blase(nscBlase, sprache() === "en" ? "A tiny Demogorgon appears above the flute. Very impressive." : "Über der Flöte erscheint ein winziger Demogorgon. Sehr beeindruckend.", 0); S.geduld = Math.max(0, S.geduld - 1); }
+    if (k === "echo") { S.zuege++; S.angebot = spruchAngebot(S.nsc); gesicht("augenrollen", 2200); slSagt(T.sl.echo); nah("sl", 2, 1400); blase(nscBlase, sprache() === "en" ? "Echo: \"Do you know Gundren?\" – \"…Who?\"" : "Echo: „Kennst du Gundren?“ – „…Wen?“", 0); S.geduld = Math.max(0, S.geduld - 1); }
+    if (k === "rex") { S.herzen = Math.min(3, S.herzen + 1); gesicht("kichern", 2200); slSagt(T.sl.rex); blase(nscBlase, sprache() === "en" ? "Rex wags his tail. Resistance is futile." : "Rex wedelt. Widerstand ist zwecklos.", 0); if (S.herzen >= 3) nscEnde(true); }
+    if (k === "floete") { S.vorteil = true; gesicht("schock", 1400, "seufzen"); slSagt(T.sl.floete); nah("sl", 2.2, 1200, "schnitt"); blase(nscBlase, sprache() === "en" ? "A tiny Demogorgon appears above the flute. Very impressive." : "Über der Flöte erscheint ein winziger Demogorgon. Sehr beeindruckend.", 0); S.geduld = Math.max(0, S.geduld - 1); }
     effekte.joker(k);
     if (S.geduld <= 0 && !S.fertig) nscEnde(false);
     zeichnen();
@@ -1000,7 +1084,7 @@
     kopf.hidden = ansicht !== "spiel";
     if (ansicht === "spiel" && S) {
       $(".ch-geduld-txt").textContent = T.geduld;
-      const tk = $(".ch-ton"); tk.textContent = Ton.an() ? "🔊 " + (sprache() === "en" ? "Sound" : "Ton") : "🔇"; tk.setAttribute("aria-pressed", Ton.an());
+      const tk = $(".ch-ton"); tk.innerHTML = Ton.an() ? '🔊<span class="ton-txt"> ' + (sprache() === "en" ? "Sound" : "Ton") + "</span>" : "🔇"; tk.setAttribute("aria-pressed", Ton.an());
       liebeSetzen();
       const bar = $(".ch-geduld-bar i"); bar.style.width = (S.geduld * 10) + "%"; bar.parentNode.classList.toggle("knapp", S.geduld <= 3);
       $(".ch-herzen").innerHTML = [0, 1, 2].map(i => '<span class="' + (i < S.herzen ? "voll" : "") + '">♥</span>').join("");
@@ -1046,12 +1130,23 @@
     passen();
   }
   /* Vollbild: Bühne so groß wie möglich, Tafel bleibt darunter ganz sichtbar */
+  const handy = () => window.innerWidth <= 700;
+  /* Handy: Szene wird ganz gezeigt (meet) statt beschnitten (slice); --sz = Höhe der Szene */
+  function szeneMessen() {
+    const h = handy();
+    root.querySelectorAll(".ch-zimmer, .ch-vorne").forEach(svg => svg.setAttribute("preserveAspectRatio", h ? "xMidYMax meet" : "xMidYMax slice"));
+    if (h) buehne.style.setProperty("--sz", Math.round(Math.min(buehne.clientHeight, buehne.clientWidth * .75)) + "px");
+    else buehne.style.removeProperty("--sz");
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(() => szeneMessen()).observe(buehne);
   function passen() {
+    szeneMessen();
     if (!root.classList.contains("tav-voll")) { buehne.style.height = buehne.style.width = ""; return; }
     const cs = getComputedStyle(root), innen = root.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     const breite = root.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const tafelH = tafel.offsetHeight + parseFloat(getComputedStyle(tafel).marginTop || 0);
-    const h = Math.max(150, Math.floor(innen - tafelH - 4));
+    let h = Math.max(150, Math.floor(innen - tafelH - 4));
+    if (handy()) h = Math.min(h, Math.round(breite * .75 + 74));
     buehne.style.height = h + "px";
     buehne.style.width = Math.min(breite, Math.round(h * 1.75), 1100) + "px";
   }
@@ -1076,7 +1171,11 @@
     if (b.dataset.art) { wuerfeln(b.dataset.art, +b.dataset.idx); return; }
     if (b.dataset.joker) { joker(b.dataset.joker); return; }
     const tun = b.dataset.tun;
-    if (tun === "start") { buehne.classList.remove("zu"); effekte.start(); neueSitzung(); einpassen(); }
+    if (tun === "start") {
+      buehne.classList.remove("zu"); effekte.start(); neueSitzung();
+      const vk = root.querySelector(".tav-voll-knopf");
+      if (handy() && vk && !root.classList.contains("tav-voll")) vk.click(); else einpassen();
+    }
     else if (tun === "ton") { Ton.init(); const an = Ton.schalten(); if (an && ansicht === "spiel" && S && !S.ende) Ton.musik(true); zeichnen(); }
     else if (tun === "weiter") weiter();
     else if (tun === "buch") { ansicht = "buch"; Ton.musik(false); zeichnen(); }
@@ -1090,7 +1189,7 @@
     requestAnimationFrame(() => buehne.scrollIntoView({ block: "start", behavior: ruhig ? "auto" : "smooth" }));
   }
   /* Klick auf den Spielleiter: er schaut kurz auf */
-  buehne.addEventListener("click", e => { if (e.target.closest(".ch-zimmer")) gesicht(zufall(["grinsen", "schock", "errötet", "genervt"]), 1200); });
+  buehne.addEventListener("click", e => { if (e.target.closest(".ch-zimmer")) gesicht(zufall(["grinsen", "schock", "errötet", "genervt", "kichern", "verliebt", "skeptisch", "augenrollen", "smirk", "fremdscham"]), 1400); });
 
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");
@@ -1207,7 +1306,6 @@
 .charme .ch-buehne { scroll-margin-top: var(--ch-oben, 64px); }
 @media (max-width: 700px) {
   .charme.ch-laeuft > .ch-text { display: none; }
-  .charme .ch-buehne { aspect-ratio: auto; height: clamp(190px, 33svh, 300px); }
   .ch-tafel { gap: .35rem; margin-top: .45rem; }
   .ch-nsc-kopf b { font-size: 1.05rem; }
   .ch-nsc-kopf span { font-size: .78rem; line-height: 1.25; }
@@ -1220,8 +1318,6 @@
   .ch-jk { padding: .35rem .3rem; text-align: center; font-size: .8rem; }
   .ch-jk .jk-lang, .ch-jk small { display: none; }
   .ch-jk .jk-kurz { display: inline; }
-  .ch-nsc-blase, .ch-sl-blase { font-size: .7rem; padding: .3rem .5rem; max-width: 48%; }
-  .ch-wuerfel { width: 50px; height: 50px; margin: -25px 0 0 -25px; font-size: 1.25rem; }
   .ch-ergebnis { font-size: 1.25rem; }
   .ch-buch { grid-template-columns: repeat(3, 1fr); gap: .35rem; }
   .ch-seite { padding: .35rem .25rem; }
@@ -1230,7 +1326,6 @@
   .ch-seite small { font-size: .64rem; }
 }
 @media (max-width: 700px) and (max-height: 780px) {
-  .charme .ch-buehne { height: clamp(160px, 25svh, 300px); }
   .ch-spruch { font-size: .8rem; padding: .32rem .55rem; }
   .ch-nsc-kopf span { font-size: .74rem; }
 }
@@ -1238,7 +1333,7 @@
 .charme.tav-voll { display: block; padding-top: 3rem; padding-bottom: .6rem; }
 .charme.tav-voll > .ch-buehne { aspect-ratio: auto; margin-inline: auto; }
 .charme.tav-voll > .ch-tafel { max-width: 1100px; margin-inline: auto; }
-@media (max-width: 700px) { .charme.tav-voll { padding: 3rem .5rem .5rem; } }
+@media (max-width: 700px) { .charme.tav-voll { padding: 3rem .5rem .5rem; display: flex !important; flex-direction: column; justify-content: center; } }
 /* ===== Pracht: lebendiger Hintergrund ===== */
 .ch-buehne { --liebe: 0; }
 .ch-kette .kb { animation: chFunkeln 2.2s ease-in-out infinite; animation-delay: var(--d); }
@@ -1276,11 +1371,11 @@
 .ch-buehne[data-mood="korb"] .ch-stimmung { background: rgba(40,60,110,.42); mix-blend-mode: multiply; }
 /* Peinliche Stille: Licht aus, Spot auf den Spielleiter */
 .ch-buehne[data-mood="peinlich"] .ch-stimmung { mix-blend-mode: normal; transition: background 1.2s ease;
-  background: radial-gradient(circle at 67% 42%, transparent 0 14%, rgba(0,0,0,.72) 26%); }
+  background: radial-gradient(circle at var(--sx, 67%) var(--sy, 42%), transparent 0 calc(var(--zr, 1) * 11%), rgba(0,0,0,.72) calc(var(--zr, 1) * 22%)); }
 .ch-buehne[data-mood="peinlich"] .ch-kette .kb { animation: none; opacity: .15; }
 .ch-buehne[data-mood="peinlich"] .ch-funken { opacity: 0; transition: opacity 1s; }
 /* Patzer: alles grau, Wackeln, Regenwolke */
-.ch-buehne[data-mood="patzer"] > svg, .ch-buehne[data-mood="patzer"] .ch-nsc { filter: grayscale(.85) brightness(.75); transition: filter .3s; }
+.ch-buehne[data-mood="patzer"] .ch-kamera > svg, .ch-buehne[data-mood="patzer"] .ch-nsc { filter: grayscale(.85) brightness(.75); transition: filter .3s; }
 .ch-buehne[data-mood="patzer"] { animation: chWackeln .45s ease 2; }
 @keyframes chWackeln { 20% { transform: translate(-6px, 2px) rotate(-.6deg); } 40% { transform: translate(5px, -2px) rotate(.5deg); } 60% { transform: translate(-4px, 1px); } 80% { transform: translate(3px, 0); } }
 .ch-buehne[data-mood="patzer"] .ch-kette .kb { animation: chFunkeln .12s steps(2) infinite; }
@@ -1353,6 +1448,63 @@
   .ch-kette .kb, .ch-lava b, .ch-flamme, .ch-funken i, .ch-spots, .ch-buehne[data-mood], .ch-herzen span.voll, .ch-disco b { animation: none !important; }
 }
 
+
+/* ===== Mimik: neue Gesichtsteile, Posen, Sprechen ===== */
+.ch-sl[data-b="skeptisch"] .b-skeptisch, .ch-sl[data-b="traurig"] .b-traurig,
+.ch-sl[data-a="herz"] .a-herz, .ch-sl[data-a="x"] .a-x, .ch-sl[data-a="rollen"] .a-rollen, .ch-sl[data-a="skeptisch"] .a-skeptisch, .ch-sl[data-a="lachzu"] .a-lachzu,
+.ch-sl[data-m="zaehne"] .m-zaehne, .ch-sl[data-m="wellig"] .m-wellig, .ch-sl[data-m="smirk"] .m-smirk, .ch-sl[data-m="gepresst"] .m-gepresst, .ch-sl[data-m="strich"] .m-strich,
+.ch-sl[data-h="mund"] .h-mund, .ch-sl[data-h="kinn"] .h-kinn { display: inline; }
+.ch-sl[data-h="mund"] .arm-r, .ch-sl[data-h="kinn"] .arm-r { display: none; }
+.ch-traenen, .ch-backen { display: none; }
+.ch-sl.traenen .ch-traenen, .ch-sl.backen .ch-backen { display: inline; }
+.ch-sl.traenen .ch-traenen path { animation: chTraene .8s ease-in infinite; transform-box: fill-box; }
+.ch-sl.traenen .ch-traenen .tr2 { animation-delay: .35s; }
+@keyframes chTraene { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(0, 16px); opacity: 0; } }
+.ch-sl.backen .ch-backen { animation: chBacken .9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes chBacken { 50% { transform: scale(1.12); } }
+.a-herz { animation: chHerzAuge .6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes chHerzAuge { 50% { transform: scale(1.25); } }
+.ch-sl.zucken .ch-augen { animation: chZucken 1.3s infinite; transform-box: fill-box; transform-origin: 30% 50%; }
+@keyframes chZucken { 0%, 86%, 100% { transform: none; } 88% { transform: translate(.6px, -.4px) scaleY(.82); } 90% { transform: none; } 92% { transform: translate(-.4px, .3px) scaleY(.88); } 94% { transform: none; } }
+.ch-sl.rot .ch-roete ellipse { opacity: .55; }
+/* Kopfhaltung */
+.ch-pose { transition: transform .35s cubic-bezier(.3,1.4,.5,1); transform-box: view-box; transform-origin: 270px 178px; }
+.ch-sl[data-p="vor"] .ch-pose { transform: translateY(3px) scale(1.07); }
+.ch-sl[data-p="zurueck"] .ch-pose { transform: translateY(-5px) scale(.96); }
+.ch-sl[data-p="links"] .ch-pose { transform: rotate(-8deg); }
+.ch-sl[data-p="rechts"] .ch-pose { transform: rotate(7deg); }
+.ch-sl[data-p="ducken"] .ch-pose { transform: translateY(7px) rotate(-3deg); }
+/* Sprechen: Mund klappt auf und zu */
+.ch-sl.spricht .ch-mund > * { display: none !important; }
+.ch-sl.spricht .ch-mund .m-o { display: inline !important; animation: chSprechen .16s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes chSprechen { from { transform: scaleY(.25) scaleX(1.2); } to { transform: scaleY(.85); } }
+/* ===== Kamera ===== */
+.ch-kamera { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; transition: transform .55s cubic-bezier(.4,0,.2,1); }
+.ch-kamera.schnitt { transition: none; }
+.ch-kamera.schleich { transition: transform 3.2s cubic-bezier(.3,0,.6,1); }
+.ch-kamera.zieh { transition: transform 1.4s cubic-bezier(.2,.7,.2,1); }
+.ch-buehne.kamera-nah::before { content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none; box-shadow: inset 0 0 60px 20px rgba(0,0,0,.65); }
+@media (prefers-reduced-motion: reduce) { .ch-kamera { transition: none !important; } .ch-pose { transition: none; } }
+/* ===== Handy: ganze Szene sichtbar (nichts abgeschnitten), Sprechblasen im Band darüber ===== */
+@media (max-width: 700px) {
+  .charme .ch-buehne { aspect-ratio: 400 / 372; height: auto; margin-inline: -.5rem; background: linear-gradient(180deg, #120d12, #22181c 40%, #2a1d1f); }
+  .charme.tav-voll > .ch-buehne { margin-inline: auto; }
+  .ch-nsc { height: calc(var(--sz, 100%) * .84); bottom: calc(var(--sz, 100%) * .03); max-width: 50%; left: 1%; }
+  .ch-nsc[data-nsc="themberchaud"], .ch-nsc[data-nsc="demogorgon"] { height: calc(var(--sz, 100%) * .95); max-width: 56%; }
+  .ch-nsc[data-nsc="buergermeister"] { height: calc(var(--sz, 100%) * .6); }
+  .ch-nsc-blase, .ch-sl-blase { top: 1.5%; font-size: .72rem; line-height: 1.25; padding: .3rem .5rem; max-width: 49.5%; border-radius: 8px; }
+  .ch-nsc-blase { left: 1%; } .ch-sl-blase { right: 1%; }
+  .ch-wuerfel { width: 46px; height: 46px; margin: 0 0 0 -23px; top: auto; left: 52%; bottom: calc(var(--sz, 100%) * .47); font-size: 1.15rem; }
+  .ch-stempel { top: calc(100% - var(--sz, 100%) * .55); font-size: clamp(1.15rem, 6.4vw, 2rem); white-space: normal; text-align: center; max-width: 92%; }
+  .ch-wolke { top: calc(100% - var(--sz, 100%) * .98); }
+  .ch-geduld { font-size: .55rem; letter-spacing: .06em; }
+  .ch-geduld-bar { width: 22vw; }
+  .ch-ton .ton-txt { display: none; }
+  .ch-kopfzeile { bottom: 2%; left: 2.5%; right: 2.5%; }
+}
+@media (max-width: 700px) and (max-height: 780px) {
+  .charme:not(.tav-voll) .ch-buehne { aspect-ratio: 400 / 330; }
+}
 @media (prefers-reduced-motion: reduce) { .ch-sl .ch-koerper, .ch-sl .a-offen, .ch-sl.hops .ch-kopf, .ch-sl[data-m="lachen"] .ch-kopf { animation: none; } .ch-nsc { transition: opacity .3s; } }
 `;
   document.head.appendChild(css);
@@ -1360,5 +1512,5 @@
   gesicht("neutral");
   zeichnen();
   new MutationObserver(zeichnen).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  root._charme = { nsc: NSC, zustand: () => S, neu: neueSitzung, wuerfeln, joker, weiter, gesicht, effekte, stimmung, Ton };
+  root._charme = { nsc: NSC, zustand: () => S, neu: neueSitzung, wuerfeln, joker, weiter, gesicht, effekte, stimmung, Ton, kamera, peinlich: f => { S.wirft = true; peinlichePause(f || (() => { S.wirft = false; })); } };
 })();
