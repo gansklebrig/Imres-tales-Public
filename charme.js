@@ -1,5 +1,5 @@
 /* =====================================================================
-   WÜRFEL AUF CHARME – Barradin will jeden NSC bezirzen
+   GM SEDUCTION – Barradin will jeden NSC bezirzen
    ---------------------------------------------------------------------
    Hinter dem Spielleiterschirm sitzt der Spielleiter (namenlos) in seinem
    Zimmer mit Gitarren und Postern an der Wand. Vor ihm erscheinen nacheinander
@@ -40,7 +40,7 @@
   /* ---------- Texte ---------- */
   const TX = {
     de: {
-      label: "Würfelspiel", titel: "Würfel auf Charme",
+      label: "Würfelspiel", titel: "GM Seduction",
       text: "Jeder Barde kennt die Frage: Kann ich den NSC verführen? Barradin probiert es bei allen. Wähle einen Spruch, wirf den W20 – und schau dem Spielleiter ins Gesicht.",
       start: "▶ Ich würfle auf Charme", nochmal: "↻ Noch eine Sitzung", buch: "📖 Eroberungsbuch", zurueck: "Zurück",
       geduld: "Geduld des Spielleiters", aufgabe: "Aufgabe", sprueche: n => "Noch " + n + (n === 1 ? " Spruch" : " Sprüche"),
@@ -187,7 +187,7 @@
       }
     },
     en: {
-      label: "Dice game", titel: "Roll for Charm",
+      label: "Dice game", titel: "GM Seduction",
       text: "Every bard knows the question: can I seduce the NPC? Barradin tries it on everyone. Pick a line, roll the d20 – and watch the game master's face.",
       start: "▶ I roll for charm", nochmal: "↻ Another session", buch: "📖 Book of Conquests", zurueck: "Back",
       geduld: "Game master's patience", aufgabe: "Task", sprueche: n => n + (n === 1 ? " line" : " lines") + " left",
