@@ -366,7 +366,7 @@
       teilen: "📸 Bild teilen", teilenText: "Mein Abend bei „Würfel auf Verführen“ auf imrestales.de",
       titel: ["Ewiger Single der Schwertküste", "Charmanter Stümper", "Tavernen-Casanova", "Herzensbrecher von Gracklstugh", "Bezwinger aller Herzen", "Verführer des Abgrunds"],
       peinlich: "Peinlichster Moment", keinMoment: "Keiner. Unheimlich.", erobertVon: (e, n) => e + " von " + n + " NSC erobert",
-      glitzer: ["„…Ihr habt nichts gesehen.“", "„Die Hose bleibt unter uns.“"]
+      glitzer: ["„Ja. Die Hose glitzert. Gern geschehen.“", "„Pailletten sind kein Kleidungsstück. Pailletten sind eine Haltung.“", "„Diese Hose hat schon härtere Gegner bezirzt.“", "„Schaut ruhig hin. Dafür ist sie da.“"]
     },
     en: {
       laune: ["fuming", "annoyed", "neutral", "in a good mood", "thrilled"], launeLabel: "Mood",
@@ -396,7 +396,7 @@
       teilen: "📸 Share picture", teilenText: "My evening of \"Roll to Seduce\" on imrestales.de",
       titel: ["Eternal single of the Sword Coast", "Charming bungler", "Tavern Casanova", "Heartbreaker of Gracklstugh", "Conqueror of all hearts", "Seducer of the Abyss"],
       peinlich: "Most awkward moment", keinMoment: "None. Creepy.", erobertVon: (e, n) => e + " of " + n + " NPCs conquered",
-      glitzer: ["\"…You saw nothing.\"", "\"The trousers stay between us.\""]
+      glitzer: ["\"Yes. The trousers sparkle. You're welcome.\"", "\"Sequins aren't clothing. Sequins are an attitude.\"", "\"These trousers have charmed tougher foes.\"", "\"Go on, look. That's what they're for.\""]
     }
   };
   const NSC2 = {
@@ -987,7 +987,7 @@
     buehne.style.setProperty("--liebe", (l / 3).toFixed(2)); buehne.dataset.liebe = l; Ton.liebe(l);
   }
   /* ---------- Hooks in den Spielablauf ---------- */
-  const SPRUCH_FLUG = { charmant: "🌹", kuehn: "💋", absurd: ["🐟", "🧀", "🦆", "🥔"], passend: "✨", geheim: ["📜", "💘"] };
+  const SPRUCH_FLUG = { charmant: "🌹", kuehn: "🔥", absurd: ["🐟", "🧀", "🦆", "🥔"], passend: "✨", geheim: ["📜", "💘"] };
   const effekte = {
     start() { Ton.init(); tonFx("auftritt"); Ton.musik(true); },
     nsc() { tonFx("auftritt"); stimmung("auftritt", 1200); liebeSetzen(); },
@@ -1001,18 +1001,18 @@
       const busch = pracht.querySelector(".ch-busch"); busch.classList.remove("rollt"); busch.style.setProperty("--bw", buehne.clientWidth + "px"); void busch.offsetWidth; busch.classList.add("rollt");
       busch.style.animationDuration = Math.max(2.5, dauer - .5) + "s";
     },
-    ergebnis(art2) {
+    ergebnis(art2, super_) {
       buehne.classList.remove("spannung"); liebeSetzen();
       const T = sprache() === "en";
       if (art2 === "krit") { stimmung("disco", 3600); stempel(T || window.innerWidth <= 700 ? "NAT 20!" : "NATÜRLICHE 20!", "krit"); tonFx("disco"); flug(["✨", "💖", "⭐", "💋"], 22, "regen"); nscReagiert("verliebt", 3000); }
       else if (art2 === "patzer") { stimmung("patzer", 3000); stempel(T ? "CRITICAL FAIL" : "PATZER!", "patzer"); tonFx("kratzer"); setTimeout(() => tonFx("posaune"), 300); nscReagiert("kalt", 1500); }
-      else if (art2 === "erfolg") { stimmung("romantik", 2200); tonFx("kuss"); tonFx("harfeHoch", .1); tonFx("chor", .15, null, .16, 1.4); flug(["💗", "💕", "💖"], 6, "aufsteigen"); nscReagiert("verliebt"); }
+      else if (art2 === "erfolg") { stimmung("romantik", 2200); if (super_) { tonFx("kuss"); flug(["💋", "💖"], 4, "aufsteigen"); } tonFx("harfeHoch", .1); tonFx("chor", .15, null, .16, 1.4); flug(["💗", "💕", "💖"], 6, "aufsteigen"); nscReagiert("verliebt"); }
       else { stimmung("frost", 1600); tonFx("posaune", true); nscReagiert("kalt", 900); }
     },
-    ende(gewonnen) {
+    ende(gewonnen, super_) {
       const T = sprache() === "en";
-      if (gewonnen) { stimmung("erobert", 4200); stempel(T ? "CONQUERED ♥" : "EROBERT ♥", "erobert"); tonFx("wah"); tonFx("kuesse"); tonFx("chor", .1, [62, 66, 69, 74], .24, 2.6); setTimeout(() => tonFx("wah"), 1300);
-        flug(["🌹", "💋", "💖", "💘", "🌸"], 26, "regen"); nscReagiert("verliebt", 3500); }
+      if (gewonnen) { stimmung("erobert", 4200); stempel(T ? "CONQUERED ♥" : "EROBERT ♥", "erobert"); tonFx("wah"); if (super_) tonFx("kuesse"); tonFx("chor", .1, [62, 66, 69, 74], .24, 2.6); setTimeout(() => tonFx("wah"), 1300);
+        flug(super_ ? ["🌹", "💋", "💖", "💘", "🌸"] : ["🌹", "💖", "💘", "🌸"], 26, "regen"); nscReagiert("verliebt", 3500); }
       else { stimmung("korb", 3200); stempel(T ? "REJECTED" : "KORB!", "korb"); flug("🧺", 1, "korb"); tonFx("pfeifeRunter"); setTimeout(() => tonFx("boing"), 700); setTimeout(() => tonFx("posaune", true), 900); }
     },
     joker(k) {
@@ -1202,7 +1202,8 @@
     /* Serie → Rausch */
     if (art2 === "erfolg" || art2 === "krit") S.serie = (S.serie || 0) + 1; else S.serie = 0;
     nscBlase.classList.remove("barradin");
-    effekte.ergebnis(art2);
+    S.superWurf = art2 === "krit" || (art2 === "erfolg" && (w >= 17 || summe >= sg + 6));
+    effekte.ergebnis(art2, S.superWurf);
     if (art2 === "krit") {
       gesicht("schock", 1200, "verliebt"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0);
       kamera("sl", 2.4, "schnitt"); kamUhr = setTimeout(() => { kamera("nsc", 1.8, "schnitt"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 1400); }, 1200);
@@ -1282,7 +1283,7 @@
       const gut = Math.random() < .55;
       blase(nscBlase, gut ? g.gut : g.schlecht, 0);
       slSagt(gut ? T2.gruppeSl.gut : T2.gruppeSl.schlecht, 2400);
-      if (gut) { S.herzen = Math.min(3, S.herzen + 1); gesicht("kichern", 2000); nscReagiert("verliebt"); tonFx("kuss"); flug(["💗", "💕"], 5, "aufsteigen"); }
+      if (gut) { S.herzen = Math.min(3, S.herzen + 1); gesicht("kichern", 2000); nscReagiert("verliebt"); tonFx("harfeHoch", 0, 64); flug(["💗", "💕"], 5, "aufsteigen"); }
       else { S.herzen = Math.max(0, S.herzen - 1); if (wer === "ezekiel" || wer === "echo") S.geduld = Math.max(0, S.geduld - 1); gesicht("lachtraenen", 2200); nscReagiert("kalt", 900); tonFx("posaune", true); moment(2, g.schlecht); }
       S.wirft = false; liebeSetzen();
       if (S.herzen >= 3) return nscEnde(true);
@@ -1301,7 +1302,7 @@
       if (!S || S.nsc !== n) return;
       nscBlase.classList.remove("barradin");
       slSagt(T2.antwortSl[k], 2400);
-      if (k === "gut") { S.herzen = Math.min(3, S.herzen + 1); launeAendern(1); blase(nscBlase, zufall(NT.ja), 0); gesicht("errötet", 2200); nscReagiert("verliebt"); tonFx("kuss"); tonFx("harfeHoch", .1); flug(["💗", "💖"], 6, "aufsteigen"); }
+      if (k === "gut") { S.herzen = Math.min(3, S.herzen + 1); launeAendern(1); blase(nscBlase, zufall(NT.ja), 0); gesicht("errötet", 2200); nscReagiert("verliebt"); tonFx("harfeHoch", .1); flug(["💗", "💖"], 6, "aufsteigen"); }
       else if (k === "mittel") { blase(nscBlase, zufall(T2.mittelNsc), 0); gesicht("smirk", 1800); }
       else { S.herzen = Math.max(0, S.herzen - 1); S.geduld = Math.max(0, S.geduld - 1); launeAendern(-1); blase(nscBlase, zufall(NT.nein), 0); gesicht("facepalm", 1400, "lachtraenen"); nscReagiert("kalt", 900); tonFx("posaune", true); stimmung("frost", 1400); moment(3, "Barradin: " + A[k]); }
       S.wirft = false; liebeSetzen();
@@ -1327,7 +1328,7 @@
       if (gewonnen) { kamera("beide", 1.45, "zieh"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 2600); glitzerhose(); } else nah("sl", 2.2, 1800, "schnitt");
       if (gewonnen) herzRegen();
       if (S.neuGeheim) flug("📜", 3, "aufsteigen");
-      effekte.ende(gewonnen);
+      effekte.ende(gewonnen, !!S.superWurf);
       zeichnen();
     }, 1500);
     zeichnen();
@@ -1336,7 +1337,7 @@
   function glitzerhose() {
     if (ruhig) return;
     buehne.classList.add("glitzer");
-    setTimeout(() => { if (S && !S.ende) { slSagt(t2().glitzer, 2400); gesicht("errötet", 2000); } }, 2300);
+    setTimeout(() => { if (S && !S.ende) { slSagt(t2().glitzer, 2600); gesicht("stolz", 2200); } }, 2300);
     setTimeout(() => buehne.classList.remove("glitzer"), 3400);
   }
   function weiter() {
@@ -1428,7 +1429,7 @@
   });
   reglerEl.addEventListener("change", e => {
     const r = e.target.dataset.regler;
-    if (r === "effekte") tonFx("kuss");
+    if (r === "effekte") tonFx("harfeHoch", 0, 67);
     if (r === "leise") { Ton.init(); const soll = !e.target.checked; if (Ton.an() !== soll) Ton.schalten(); if (soll && ansicht === "spiel" && S && !S.ende) Ton.musik(true); zeichnen(); }
   });
 
