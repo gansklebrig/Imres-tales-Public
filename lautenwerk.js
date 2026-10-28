@@ -1799,7 +1799,7 @@
   }
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
   /* Kulisse läuft am Musikregler vorbei (eigener Regler im Pult); nur beim Zuhören über Funk gilt „Meine Lautstärke“ für alles */
-  const kulAusPegel = () => .6 * (hoerer ? masterPegel() : Math.pow(.8, 1.5));
+  const kulAusPegel = () => 1.5 * (hoerer ? masterPegel() : Math.pow(.8, 1.5)); /* gut 8 dB lauter als früher: auf 50 % deutlich hörbar, auf 100 % lauter als die Musik */
   /* Effekte und Spieltisch-Momente haben ihren eigenen Pegel – unabhängig von der Musik */
   const fxPegel = () => .55 * Math.pow((typeof S.fxVol === "number" ? S.fxVol : 8) / 10, 1.5);
   let fxAusgang = null, ducken = null, duckEnde = 0, musikStumm = false;
@@ -2385,7 +2385,7 @@ const ZUS_ICON = {
   const zusMax = () => { const b = Math.min(innerWidth || 1200, screen && screen.width ? Math.max(screen.width, 1) : 1e4); return b < 640 || (leicht() && b < 900) ? 2 : b < 1100 ? 4 : 6; };
   /* steckt der Zusatz schon in der Grundkulisse? dann wird er nicht angeboten */
   const zusInKulisse = id => { const w = KUL_WELT[S.kulisse], z = ZUSATZ[id]; return !!w && z.betten.length > 0 && w.betten.some(([n]) => n === z.betten[0][0]); };
-  const zusFaktor = () => { const n = Object.keys(zusLauf).length; return .8 * (n >= 3 ? Math.sqrt(2 / n) : 1); };
+  const zusFaktor = () => { const n = Object.keys(zusLauf).length; return 1.3 * (n >= 3 ? Math.sqrt(2 / n) : 1); }; /* Zusätze: rund 4 dB über dem früheren Verhältnis zur Kulisse */
   const zusDumpf = id => ZUSATZ[id].raus && DRINNEN.includes(S.kulisse);
   function zusPegelSetzen() {
     if (!ctx) return; const j = ctx.currentTime, f = zusFaktor();
