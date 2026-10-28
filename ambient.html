@@ -1431,14 +1431,32 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     audioStart();
     if (stumm) stumm.play().catch(() => {});
     const alt = aktiv;
-    if (alt) alt.betten.forEach(b => bettStopp(b, true));
     const m = merk.mix[welt.id] || {};
+    /* Schichten, die auch in der neuen Welt vorkommen (Wind, Regen, Brandung …), laufen ohne Bruch weiter – nur die Lautstärke gleitet */
+    const erben = {};
+    if (alt && !alt.welt.episch && !welt.episch) {
+      const neu = new Map(welt.betten.map(x => [x[0], (x[3] || {}).tief || FEUER_TIEF[x[0]] || 0]));
+      alt.betten.forEach(b => { if (b && b.buf && !b.aus && !b.ruht && neu.has(b.name) && !erben[b.name] && (b.o.tief || 0) === neu.get(b.name)) erben[b.name] = b; });
+    }
+    const uebernommen = new Set();
     if (welt.episch) epischStart();
     else { raumSetzen(welt.raum); hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2, ctx.currentTime, .3); }
     /* auf dem Handy spielen höchstens die sieben stärksten Schichten (im Sparmodus vier) – mehr bringt das Gerät ins Stocken */
     const kappe = welt.episch ? 99 : merk.spar ? 4 : mobil ? 7 : 99;
     const spielen = new Set(welt.betten.map((x, i) => [x[1], i]).sort((a, b) => b[0] - a[0]).slice(0, kappe).map(x => x[1]));
-    aktiv = { welt, betten: welt.betten.map((x, i) => welt.episch ? eBettStarten(welt, x, i) : bettStarten(welt, x, i, !spielen.has(i))), naechst: {}, leben: m.leben != null ? m.leben : 1, laedt: true };
+    aktiv = { welt, betten: welt.betten.map((x, i) => {
+      if (welt.episch) return eBettStarten(welt, x, i);
+      const e = erben[x[0]];
+      if (e && spielen.has(i)) {
+        delete erben[x[0]]; uebernommen.add(e);
+        e.staerke = x[1]; e.label = x[2]; e.regler = m.b && typeof m.b[i] === "number" ? m.b[i] : 1;
+        e.grund = x[1] * Math.min(1.15, .055 / (LAUTHEIT[x[0]] || .05)) * trimVon(welt);
+        const j = ctx.currentTime; e.out.gain.cancelScheduledValues(j); e.out.gain.setValueAtTime(e.out.gain.value, j); e.out.gain.linearRampToValueAtTime(e.grund * e.regler, j + 4); e.drift = j + 5;
+        return e;
+      }
+      return bettStarten(welt, x, i, !spielen.has(i));
+    }), naechst: {}, leben: m.leben != null ? m.leben : 1, laedt: true };
+    if (alt) alt.betten.forEach(b => { if (!uebernommen.has(b)) bettStopp(b, true); });
     /* Ladeanzeige an der Karte, bis alle Schichten da sind */
     const geladen = aktiv; Promise.all(aktiv.betten.filter(b => !b.ruht && !/^[~@]/.test(b.name)).map(b => laden(b.name))).then(() => { geladen.laedt = false; if (aktiv === geladen) zeichnen(); });
     welt.ereignisse.forEach(([art]) => { (EV[art].f || []).forEach(laden); if (EV[art].s) synthEreignis(EV[art].s); });

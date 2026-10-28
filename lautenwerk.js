@@ -2139,16 +2139,20 @@
   const KUL_SPUR_NAME = { de: {"@gemurmel": "Stimmengewirr", "a_bach1": "Bach", "a_bach2": "Fluss", "a_baumwind": "Rauschende Bäume", "a_bienen": "Bienen", "a_blubbern": "Blubbern", "a_boot": "Schiffsplanken", "a_brandung": "Brecher", "a_dschungel": "Insektenchor", "a_fensterregen": "Regen am Fenster", "a_feuer1": "Kaminfeuer", "a_feuer2": "Feuer", "a_feuer3": "Glut", "a_fluss": "Strömung", "a_gaeste": "Stimmen", "a_gesang": "Mönchsgesang", "a_gewitter1": "Gewitter", "a_gewitter2": "Unwetter", "a_grillen": "Grillen", "a_grillen2": "Grillenwiese", "a_hafen": "Kai", "a_halle": "Halle", "a_heulwind": "Heulende Böen", "a_hof": "Hof", "a_huehner": "Hühner", "a_kiesweg": "Kiesweg", "a_klippen": "Klippen", "a_kinder": "Spielende Kinder", "a_kochen": "Kessel", "a_kochen2": "Sud", "a_kuehe": "Kühe", "a_lagerfeuer": "Holzscheite", "a_laub": "Laub", "a_laubregen": "Regen auf Laub", "a_leichtregen": "Nieselregen", "a_markt": "Gasse", "a_nacht": "Nacht", "a_orkan": "Orkan", "a_regen1": "Regen", "a_regen2": "Regen", "a_regen3": "Landregen", "a_regen4": "Schauer", "a_rinnsal": "Rinnsal", "a_schafe": "Schafe", "a_schneeschritte": "Schritte im Schnee", "a_schneesturm": "Schneetreiben", "a_schnurren": "Schnurrende Katze", "a_segel": "Takelage", "a_starkregen": "Starkregen", "a_starkregen2": "Platzregen", "a_strom": "Stromschnellen", "a_tagvoegel": "Singvögel", "a_tropfen1": "Tropfen", "a_tropfen2": "Rinnsal", "a_tropfstein": "Tropfsteine", "a_uhr": "Standuhr", "a_unterwasser": "Tiefe", "a_voegel1": "Vögel", "a_voegel2": "Baumkronen", "a_waldregen": "Waldregen", "a_wasserfall": "Wasserfall", "a_wasserfall2": "Gischt", "a_wellen1": "Brandung", "a_wellen2": "Wellen", "a_wellen3": "Uferwellen", "a_wildwasser": "Wildwasser", "a_wind1": "Wind", "a_wind2": "Weiter Wind", "a_wind3": "Kalter Wind", "a_zelt": "Zeltplane", "a_zelt2": "Plane"}, en: {"@gemurmel": "Chatter", "a_bach1": "Brook", "a_bach2": "River", "a_baumwind": "Rustling trees", "a_bienen": "Bees", "a_blubbern": "Bubbling", "a_boot": "Ship planks", "a_brandung": "Breakers", "a_dschungel": "Insect chorus", "a_fensterregen": "Rain at the window", "a_feuer1": "Hearth", "a_feuer2": "Fire", "a_feuer3": "Embers", "a_fluss": "Current", "a_gaeste": "Voices", "a_gesang": "Chanting", "a_gewitter1": "Thunderstorm", "a_gewitter2": "Tempest", "a_grillen": "Crickets", "a_grillen2": "Cricket meadow", "a_hafen": "Quay", "a_halle": "Hall", "a_heulwind": "Howling gusts", "a_hof": "Farmyard", "a_huehner": "Hens", "a_kiesweg": "Gravel road", "a_klippen": "Cliffs", "a_kinder": "Children playing", "a_kochen": "Cauldron", "a_kochen2": "Brew", "a_kuehe": "Cows", "a_lagerfeuer": "Logs", "a_laub": "Leaves", "a_laubregen": "Rain on leaves", "a_leichtregen": "Drizzle", "a_markt": "Lane", "a_nacht": "Night", "a_orkan": "Gale", "a_regen1": "Rain", "a_regen2": "Rain", "a_regen3": "Steady rain", "a_regen4": "Shower", "a_rinnsal": "Trickle", "a_schafe": "Sheep", "a_schneeschritte": "Steps in snow", "a_schneesturm": "Drifting snow", "a_schnurren": "Purring cat", "a_segel": "Rigging", "a_starkregen": "Downpour", "a_starkregen2": "Cloudburst", "a_strom": "Rapids", "a_tagvoegel": "Songbirds", "a_tropfen1": "Drips", "a_tropfen2": "Trickle", "a_tropfstein": "Dripstones", "a_uhr": "Clock", "a_unterwasser": "Depths", "a_voegel1": "Birds", "a_voegel2": "Treetops", "a_waldregen": "Forest rain", "a_wasserfall": "Waterfall", "a_wasserfall2": "Spray", "a_wellen1": "Surf", "a_wellen2": "Waves", "a_wellen3": "Lapping waves", "a_wildwasser": "Torrent", "a_wind1": "Wind", "a_wind2": "Distant wind", "a_wind3": "Cold wind", "a_zelt": "Canvas", "a_zelt2": "Tarp"} };
   function weltBett(k, [name, staerke, o], i) {
     o = o || {};
+    /* dieselbe Aufnahme lief schon in der vorigen Kulisse: einfach weiterlaufen lassen statt neu anzufangen */
+    const geerbt = k.erben && k.erben[name];
+    if (geerbt) { delete k.erben[name]; if (geerbt.lp && o.tief) { geerbt.lp.frequency.setTargetAtTime(o.tief, ctx.currentTime, 1); geerbt.o = Object.assign({}, geerbt.o, { tief: o.tief }); } return bettUebernehmen(k, geerbt, staerke, i); }
     const out = ctx.createGain(); out.gain.value = 0;
+    let enden = null, lpKnoten = null;
     /* 3D: jede Schicht hat ihren Platz rundum, doppelt (zweite Seite leicht verzögert) – so umhüllt der Teppich statt aus einem Punkt zu kommen */
     let ziel = k.g;
     if (raum3d && ctx.createPanner) {
       const az = [0, 125, 235, 60, 180, 300, 30, 150, 270][i % 9], hoch = /wind|orkan|sturm|regen|gewitter|voegel|baumwind|laub/.test(name) ? 20 : /tropf|rinnsal|kies|schritte/.test(name) ? -15 : 3;
       const sum = ctx.createGain(); sum.gain.value = .72; const p1 = panner3d(az, hoch, 4), p2 = panner3d(az + 150, hoch, 5), dl = ctx.createDelay(.05); dl.delayTime.value = .011;
-      sum.connect(p1); sum.connect(dl); dl.connect(p2); p1.connect(k.g); p2.connect(k.g); ziel = sum;
+      sum.connect(p1); sum.connect(dl); dl.connect(p2); p1.connect(k.g); p2.connect(k.g); ziel = sum; enden = [p1, p2];
     }
-    if (o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = o.tief; out.connect(lp); lp.connect(ziel); } else out.connect(ziel);
-    const b = { out, o, naechst: 0, drift: 0, buf: null, pos: null, regler: kulMixWert(k.art, i) };
+    if (o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = o.tief; out.connect(lp); lp.connect(ziel); if (!enden) enden = [lp]; lpKnoten = lp; } else out.connect(ziel);
+    const b = { name, out, o, naechst: 0, drift: 0, buf: null, pos: null, regler: kulMixWert(k.art, i), enden: enden || [out], qs: [], k, lp: lpKnoten };
     if (name === "@gemurmel") { /* gerechnetes Stimmengewirr der Taverne */
       b.grund = 1; out.gain.value = b.regler; b.fest = true;
       kulSchleife("gemurmel", 22050, 1.1 * staerke * (k.wlaut || 1), out); return b;
@@ -2159,9 +2163,20 @@
       b.buf = buf; b.naechst = ctx.currentTime + .05;
       out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + 3);
       /* Aufnahmen mit unregelmäßigem Rhythmus (Pfützen-Tropfen): als ganze, nahtlose Endlosschleife – zerschnitten würden sie stolpern */
-      if (o.schleife) { const q = ctx.createBufferSource(); q.buffer = buf; q.loop = true; q.connect(out); q.start(ctx.currentTime + .05, Math.random() * buf.duration); k.knoten.push(q); }
+      if (o.schleife) { const q = ctx.createBufferSource(); q.buffer = buf; q.loop = true; q.connect(out); q.start(ctx.currentTime + .05, Math.random() * buf.duration); k.knoten.push(q); b.qs.push(q); }
       weltBettPlanen(k, b);
     });
+    return b;
+  }
+  /* eine laufende Schicht aus der vorigen Kulisse in die neue umhängen: Quellen, Weg und Planung wandern mit, nur die Lautstärke gleitet auf den neuen Wert */
+  function bettUebernehmen(k, b, staerke, i) {
+    const alt = b.k;
+    if (alt && alt.knoten) b.qs.forEach(q => { const n = alt.knoten.indexOf(q); if (n >= 0) alt.knoten.splice(n, 1); });
+    b.qs.forEach(q => k.knoten.push(q));
+    b.enden.forEach(n => { try { n.disconnect(alt.g); } catch (_) { try { n.disconnect(); } catch (__) {} } n.connect(k.gd); });
+    b.k = k; b.regler = kulMixWert(k.art, i);
+    b.grund = WELT_GRUND * (k.wlaut || 1) * staerke * Math.min(1.15, .055 / (AMB_LAUT[b.name] || .05));
+    const j = ctx.currentTime; b.out.gain.cancelScheduledValues(j); b.out.gain.setValueAtTime(b.out.gain.value, j); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, j + 3); b.drift = j + 4;
     return b;
   }
   /* immer neue, zufällige Ausschnitte mit weichen Überblendungen */
@@ -2186,7 +2201,8 @@
       const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b.buf; q.playbackRate.value = rate;
       g.gain.value = 0; g.gain.setValueCurveAtTime(b.o.takt ? LIN_EIN : KUL_EIN, t, X); g.gain.setValueCurveAtTime(b.o.takt ? LIN_AUS : KUL_AUS, t + len - X, X);
       q.connect(g); g.connect(b.out); q.start(t, off); q.stop(t + len + .05);
-      k.knoten.push(q); q.onended = () => { const i = k.knoten.indexOf(q); if (i >= 0) k.knoten.splice(i, 1); };
+      k.knoten.push(q); if (b.qs) b.qs.push(q);
+      q.onended = () => { const w = b.k || k, i = w.knoten.indexOf(q); if (i >= 0) w.knoten.splice(i, 1); if (b.qs) { const n = b.qs.indexOf(q); if (n >= 0) b.qs.splice(n, 1); } };
       b.naechst = t + len - X;
     }
     /* langsames Atmen der Lautstärke */
@@ -2378,6 +2394,34 @@ const ZUS_ICON = {
   const zusSvg = (id, gross) => { const a = ZUS_ICON[id] || []; return '<svg class="lw-zico' + (gross ? " gross" : "") + '" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
     (a[0] ? '<path d="' + a[0] + '"/>' : "") + (a[1] ? '<path d="' + a[1] + '" fill="currentColor" stroke="none"/>' : "") + (a[2] ? '<path d="' + a[2] + '"/>' : "") + "</svg>"; };
   const DRINNEN = ["taverne", "hoehle", "unterreich", "kerker", "schmiede", "labor", "bibliothek", "tempel", "mine"];
+  /* ---------- Tür zu: man geht hinein – draußen (Kulisse unter freiem Himmel, Wind, Regen, Vögel …) klingt nur noch gedämpft durch die Wand ---------- */
+  let tuerZu = false, aussen = null;
+  function aussenWeg() {
+    if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kulKompRef || kompRef || master); }
+    if (!aussen) { const f = ctx.createBiquadFilter(), g = ctx.createGain(); f.type = "lowpass"; f.frequency.value = 20000; f.Q.value = .5; g.gain.value = 1; f.connect(g); g.connect(kulBus); aussen = { f, g }; aussenAnwenden(0); }
+    return aussen.f;
+  }
+  function aussenAnwenden(ab, dauer) {
+    if (!ctx) return;
+    const j = ctx.currentTime + (ab || 0), d = dauer || .3, dumpf = tuerZu && !DRINNEN.includes(S.kulisse);
+    if (aussen) { aussen.f.frequency.cancelScheduledValues(j); aussen.f.frequency.setTargetAtTime(dumpf ? 650 : 20000, j, d / 3); aussen.g.gain.cancelScheduledValues(j); aussen.g.gain.setTargetAtTime(dumpf ? .5 : 1, j, d / 3); }
+    if (kul && kul.send && KUL_WELT[kul.art]) kul.send.gain.setTargetAtTime(KUL_WELT[kul.art].raum * (dumpf ? .25 : 1), j, d / 3);
+    try { zusPegelSetzen(); } catch (_) {}
+  }
+  function tuerUmschalten() {
+    audioStart(); if (!ctx) return;
+    tuerZu = !tuerZu;
+    const j = ctx.currentTime + .03, zu = AMB_EV.tuerzu;
+    if (tuerZu) { const n = zu && zufall(zu.f), b = n && ambPuffer(n);
+      if (b && sfxBus) { const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b; g.gain.value = .9; q.connect(g); g.connect(sfxBus); q.start(j, b._start || 0); }
+      else if (zu) zu.f.forEach(ambLaden);
+      aussenAnwenden(.12, .25);
+    } else {
+      if (!(sfxBus && echtSpielen("tuer", sfxBus, j, .8))) { const n = zu && zufall(zu.f), b = n && ambPuffer(n); if (b && sfxBus) { const q = ctx.createBufferSource(); q.buffer = b; q.playbackRate.value = 1.15; q.connect(sfxBus); q.start(j, b._start || 0); } }
+      aussenAnwenden(.35, .8);
+    }
+    root.querySelectorAll(".lw-tuer").forEach(b => { b.setAttribute("aria-pressed", tuerZu); b.textContent = tuerZu ? t().tuerAuf : t().tuerZu; });
+  }
   let zusWahl = {}, zusLauf = {}, zusPausiert = false;
   try { zusWahl = JSON.parse(localStorage.getItem("imres-lw-zusaetze") || "{}") || {}; } catch (_) {}
   /* einmalig: Zusätze sind jetzt deutlich lauter – früher hochgedrehte Regler zurück auf 100 % */
@@ -2399,10 +2443,10 @@ const ZUS_ICON = {
   const ZUS_NORM = {"sturm":1.33,"gewitter":1.46,"regen":1.82,"starkregen":2.02,"bach":1.62,"laub":0.9,"wind":1.07,"schnee":1.4,"wellen":2.14,"wasserfall":1.72,"blubbern":1.23,"tropfen":2.16,"feuer":1.5,"voegel":2.75,"grillen":1.8,"kessel":1.6,"frosch":2.11,"kraehe":3.31,"wolf":1.11,"eule":2.24,"specht":2.37,"moewe":2.45,"bienen":1.62,"fledermaus":10,"hund":3.89,"schaf":1.7,"pferd":2.16,"kuh":2.19,"huhn":3.13,"katze":0.8,"wal":1.05,"schwein":5.13,"stimmen":1.51,"kinder":1.78,"hafen":1.33,"markt":1.3,"segel":1.88,"hacke":5.37,"axt":3.72,"schmiede":2.69,"glocke":5.69,"uhr":4.42,"geist":4.22,"gesang":1.23,"ketten":8.41,"monster":2.85,"untot":2.04};
   /* Regler 0–200 %: bis 100 % linear, darüber bis +10 dB – auf 200 % rückt das Geräusch ganz nah heran */
   const zusKurve = w => w <= 1 ? w : Math.pow(10, .5 * (w - 1));
-  const zusDumpf = id => ZUSATZ[id].raus && DRINNEN.includes(S.kulisse);
+  const zusDumpf = id => ZUSATZ[id].raus && (DRINNEN.includes(S.kulisse) || tuerZu);
   function zusPegelSetzen() {
     if (!ctx) return; const j = ctx.currentTime, f = zusFaktor();
-    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id]; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1), j, .15); z.filt.frequency.setTargetAtTime(zusDumpf(id) ? 750 : 18000, j, .3); });
+    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id]; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (tuerZu && ZUSATZ[id].raus ? .55 : 1), j, .15); z.filt.frequency.setTargetAtTime(zusDumpf(id) ? 750 : 18000, j, .3); });
   }
   function zusAn(id) {
     if (zusLauf[id] || !ctx) return;
@@ -2452,19 +2496,28 @@ const ZUS_ICON = {
     try { zusSync(); } catch (_) {}
     /* läuft genau diese Kulisse schon, nicht neu starten (sonst kurzes Aus- und Einblenden) */
     if (kul && kul.art === S.kulisse && S.kulisse !== "keine") { if (sofort) kul.allein = true; return; }
-    kulisseStop();
     const art = S.kulisse;
+    /* Schichten, die auch in der neuen Kulisse vorkommen (Wind, Regen, Brandung …), laufen ohne Bruch weiter */
+    const erben = {};
+    if (kul && kul.betten && KUL_WELT[art] && art !== "keine" && (laeuft || sofort)) {
+      const neu = new Map(KUL_WELT[art].betten.slice(0, spar ? 2 : 9).map(x => [x[0], x[2] || {}]));
+      kul.betten.forEach(b => { if (b && b.buf && !b.fest && b.qs && neu.has(b.name) && !erben[b.name] && !!(b.o && b.o.tief) === !!neu.get(b.name).tief) erben[b.name] = b; });
+    }
+    kulisseStop(art !== "keine" && (laeuft || sofort));
     if (art === "keine" || (!laeuft && !sofort)) return;
     musikWieder();
     const g = ctx.createGain(), j = ctx.currentTime;
     g.gain.setValueAtTime(0, j); g.gain.linearRampToValueAtTime(kulPegel(), j + 2.5);
     /* eigener Weg an der Musik-Dämpfung vorbei: Anhalten, Wechsel-Übergänge und Effekte dämpfen nur die Musik, nicht die Kulisse */
     if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kulKompRef || kompRef || master); }
-    g.connect(kulBus);
+    g.connect(aussenWeg());
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
-    kul = { art, g, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0, allein: !!sofort };
+    if (AMB_EV.tuerzu) AMB_EV.tuerzu.f.forEach(ambLaden);
+    /* Durchgang für übernommene Schichten: sofort auf vollem Pegel, ohne das Einblenden der neuen Kulisse */
+    const gd = ctx.createGain(); gd.gain.value = kulPegel(); gd.connect(aussenWeg()); gd.connect(send);
+    kul = { art, g, gd, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0, allein: !!sofort, erben };
     kulMerk = null;
-    if (KUL_WELT[art]) { send.gain.value = KUL_WELT[art].raum; weltStart(kul, KUL_WELT[art]); try { miniAnzeigen(); } catch (_) {} return; }
+    if (KUL_WELT[art]) { send.gain.value = KUL_WELT[art].raum; weltStart(kul, KUL_WELT[art]); aussenAnwenden(0, .6); try { miniAnzeigen(); } catch (_) {} return; }
     const rest = KUL_SCHICHT[art] ? KUL_REST[art] || {} : {};
     (KUL_BETT[art] || []).filter((_, i) => !rest.betten || rest.betten.includes(i)).slice(0, spar ? 2 : 9).forEach(([f, l, lfo, opt]) => kul.knoten.push(...kulBett(g, f, l, lfo, opt)));
     const sk = rest.schleife == null ? 1 : rest.schleife;
@@ -2489,12 +2542,13 @@ const ZUS_ICON = {
       });
     }, 100);
   }
-  function kulisseStop() {
+  function kulisseStop(ueberblenden) {
     if (!kul) return;
+    const aus = ueberblenden ? 3.5 : 1.5; /* beim Wechsel länger, damit sich alte und neue Kulisse überlappen statt ein Loch zu lassen */
     const k = kul; kul = null; clearInterval(k.timer);
     const j = ctx.currentTime;
-    k.g.gain.cancelScheduledValues(j); k.g.gain.setValueAtTime(k.g.gain.value, j); k.g.gain.linearRampToValueAtTime(0, j + 1.5);
-    setTimeout(() => { k.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { k.g.disconnect(); } catch (_) {} }, 1700);
+    [k.g, k.gd].forEach(g => { if (g) { g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.linearRampToValueAtTime(0, j + aus); } });
+    setTimeout(() => { k.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { k.g.disconnect(); } catch (_) {} if (k.gd) { const gd = k.gd; setTimeout(() => { try { gd.disconnect(); } catch (_) {} }, 25000); } }, aus * 1000 + 200);
     try { miniAnzeigen(); } catch (_) {}
   }
 
@@ -2720,7 +2774,7 @@ const ZUS_ICON = {
     if (sparHallIn) sparHallIn.gain.setTargetAtTime(hallPegel() * SPAR_HALL, j, .08);
     sparAusgang();
     echoHallSchalten();
-    if (kul) kul.g.gain.setTargetAtTime(kulPegel(), j, .1);
+    if (kul) { kul.g.gain.setTargetAtTime(kulPegel(), j, .1); if (kul.gd) kul.gd.gain.setTargetAtTime(kulPegel(), j, .1); }
     try { zusPegelSetzen(); } catch (_) {}
     hallProfilAnwenden();
   }
@@ -6412,6 +6466,8 @@ const ZUS_ICON = {
   }
   function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
   /* ---------- Mitspieler: Orchester, Kapelle und Gäste unter einem Dach ---------- */
+  Object.assign(TX.de, { tuerZu: "🚪 Tür zu", tuerAuf: "🚪 Tür auf", tuerTipp: "Tür zu: Die Tür fällt ins Schloss, draußen (Wind, Regen, Vögel, eine Kulisse unter freiem Himmel) klingt nur noch gedämpft durch die Wand. Tür auf: wieder offen." });
+  Object.assign(TX.en, { tuerZu: "🚪 Close door", tuerAuf: "🚪 Open door", tuerTipp: "Close door: it falls shut, and everything outside (wind, rain, birds, an open-air backdrop) is muffled through the wall. Open door: open again." });
   Object.assign(TX.de, { schlaf: "⏾ Schlaf-Timer", schlafGleich: "blendet aus …", schlafTipp: "Antippen: 15, 30, 45, 60 oder 90 Minuten – danach blendet alles sanft aus und hält an. Nochmal tippen schaltet weiter, nach 90 Minuten aus.",
     schlafAn: m => "⏾ In " + m + " Minuten blendet alles aus.", schlafWeg: "⏾ Schlaf-Timer aus.", schlafFertig: "⏾ Gute Nacht – alles angehalten." });
   Object.assign(TX.en, { schlaf: "⏾ Sleep timer", schlafGleich: "fading out …", schlafTipp: "Tap: 15, 30, 45, 60 or 90 minutes – then everything fades out and stops. Tap again to step on; after 90 minutes it turns off.",
@@ -7432,7 +7488,7 @@ const ZUS_ICON = {
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + " " + info("klang") + "</h4></div>" +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
-      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + info("raum3d") + "</div>" +
+      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + info("raum3d") + "</div>" +
       kulSpuren(T) + zusBox(T) +
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) +
@@ -7992,6 +8048,7 @@ const ZUS_ICON = {
     if (e.target.closest('[data-aktion="kulumschalt"]')) { kulisseUmschalten(); return; }
     if (e.target.closest('[data-aktion="aufnahme"]')) { aufnahmeUmschalten(); return; }
     if (e.target.closest('[data-aktion="schlaf"]')) { schlafUmschalten(); return; }
+    if (e.target.closest('[data-aktion="tuer"]')) { tuerUmschalten(); return; }
     if (e.target.closest('[data-aktion="ausklang"]')) { if (laeuft && !ausklingt && !ausklangAb) { ausklangAb = -1; wechsel = null; wechselAb = 0; knoepfe(); status(t().ausklingt); } return; }
     if (e.target.closest('[data-aktion="kapelle"]')) { S.kapelle = S.kapelle === 0 ? 1 : 0; merken(); if (ctx) kapelleVorladen(); gaesteNeu(); return; }
     if (e.target.closest('[data-aktion="kapneu"]')) { if (S.stimmung) { S.kapWahl = kapelleWaehlen(S.stimmung); merken(); if (ctx) kapelleVorladen(); gaesteNeu(); } return; }
