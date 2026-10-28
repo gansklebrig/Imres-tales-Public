@@ -34,9 +34,9 @@
     { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")],
       plakat: B("plakat-auftritt"), pos: "center 20%", farbe: "#ffc24a", clip: "vorschau/auftritt-clip.mp4?v=4", ton: "gitarre_63.mp3", art: "update", stand: "2026-10-26" },
     { key: "probe", karte: "barden-probe", held: "barradin.jpg", bilder: [B("probe-1"), B("probe-2")],
-      plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4", nurVorschauClip: true, ton: "holz1.mp3" },
+      plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4", nurVorschauClip: true, direkt: true, ton: "holz1.mp3" },
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")],
-      plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, ton: "glock_91.mp3" },
+      plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, direkt: true, ton: "glock_91.mp3" },
     { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: ["vorschau/charme-1.webp?v=5", "vorschau/charme-2.webp?v=5", "vorschau/charme-3.webp?v=5"],
       plakat: "vorschau/plakat-charme.webp?v=5", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
   ];
@@ -331,6 +331,8 @@
   let offenKey = null;
   function vorschau(key) {
     const sp = nachKey(key); if (!sp) return;
+    /* Kleine Spiele (Memory, Loblied & Spott) öffnen sofort – ohne Vorschau-Fenster */
+    if (sp.direkt) { gesehen(sp.key); spielZeigen(sp.karte, true); return; }
     offenKey = key;
     const T = t(), M = m(), s = T.spiele[key], f = fortschritt(key);
     const medien = (sp.clip && !ruhig ? [{ clip: sp.clip, poster: sp.bilder[0] }] : []).concat(sp.bilder.map(b => ({ bild: b }))), n = medien.length;
