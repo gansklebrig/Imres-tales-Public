@@ -193,7 +193,8 @@
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       stimmSpeichern: "💾 Stimmung speichern", stimmNeu: "⭐ Als neue Stimmung", stimmUeber: n => "✎ „" + n + "“ überschreiben", stimmZurueck: "↺ Original wiederherstellen",
       stimmZurueckOk: "Die ursprüngliche Stimmung ist wiederhergestellt.", stimmNamePlatz: "Name der Stimmung",
-      stimmTipp: "Merkt sich Intensität, Instrumente, Kulisse samt Lautstärke, Hall, Raum, Echo-Hall und Orchester – in diesem Browser.",
+      stimmTipp: "Merkt sich Intensität, Instrumente, Kulisse samt Lautstärke und Schichten, Zusätze, Musiklautstärke, Bassdrum, Hall, Raum, Echo-Hall und Orchester – in diesem Browser.",
+      stimmUeberKurz: n => "„" + n + "“ speichern", gespeichertKurz: "Gespeichert", stimmMehr: "⭐ Neu / Original …",
       speichern: "💾 Speichern", loeschen: "🗑 Löschen", liedName: "Name des Liedes", fuerAlle: "Für alle speichern", nurHier: "Nur hier speichern", abbrechen: "Abbrechen",
       gespeichertOk: n => "„" + n + "“ wurde gespeichert.", geloescht: n => "„" + n + "“ wurde gelöscht.", liedGeladen: n => "„" + n + "“ geladen.",
       pwFrage: "Passwort der Questtafel (für gemeinsame Lieder):", pwFalsch: "Das Passwort stimmt nicht.", abmelden: "🔓 Abmelden", abmeldenTipp: "Passwort der Questtafel in diesem Tab vergessen", abgemeldet: "Abgemeldet – das Passwort ist vergessen.", serverFehler: "Der Server ist gerade nicht erreichbar.",
@@ -280,7 +281,8 @@
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       stimmSpeichern: "💾 Save mood", stimmNeu: "⭐ As new mood", stimmUeber: n => "✎ Overwrite “" + n + "”", stimmZurueck: "↺ Restore original",
       stimmZurueckOk: "The original mood has been restored.", stimmNamePlatz: "Mood name",
-      stimmTipp: "Remembers intensity, instruments, ambience and its volume, reverb, room, Echo reverb and orchestra – in this browser.",
+      stimmTipp: "Remembers intensity, instruments, ambience with its volume and layers, extras, music volume, bass drum, reverb, room, Echo reverb and orchestra – in this browser.",
+      stimmUeberKurz: n => "Save “" + n + "”", gespeichertKurz: "Saved", stimmMehr: "⭐ New / original …",
       speichern: "💾 Save", loeschen: "🗑 Delete", liedName: "Song name", fuerAlle: "Save for everyone", nurHier: "Save here only", abbrechen: "Cancel",
       gespeichertOk: n => "“" + n + "” was saved.", geloescht: n => "“" + n + "” was deleted.", liedGeladen: n => "“" + n + "” loaded.",
       pwFrage: "Quest board password (for shared songs):", pwFalsch: "That password is wrong.", abmelden: "🔓 Log out", abmeldenTipp: "Forget the quest board password in this tab", abgemeldet: "Logged out – the password has been forgotten.", serverFehler: "The server can't be reached right now.",
@@ -1588,7 +1590,8 @@
   try { eigeneStimmungen = JSON.parse(localStorage.getItem("imres-lw-stimmungen") || "{}") || {}; } catch (_) {}
   const stimmungenMerken = () => { try { localStorage.setItem("imres-lw-stimmungen", JSON.stringify(eigeneStimmungen)); } catch (_) {} };
   const STIMM_WERTE = () => ({ intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol, hall: S.hall, raum: S.raum, echoHall: S.echoHall,
-    orchester: S.orchester, kapelle: S.kapelle, kapStufe: S.kapStufe, instrument: S.instrument, band: Object.assign({}, S.band), gaeste: Object.assign({}, S.gaeste) });
+    orchester: S.orchester, kapelle: S.kapelle, kapStufe: S.kapStufe, instrument: S.instrument, band: Object.assign({}, S.band), gaeste: Object.assign({}, S.gaeste),
+    master: S.master, kick: S.kick, zus: Object.assign({}, zusWahl), kulMix: kulMix[S.kulisse] ? JSON.parse(JSON.stringify(kulMix[S.kulisse])) : null });
   const stimmName = k => eigeneStimmungen[k] && eigeneStimmungen[k].name ? eigeneStimmungen[k].name : (t().vorlagen[k] || "").replace(/^[^\wÄÖÜäöü]+/, "");
   try { lokaleLieder = JSON.parse(localStorage.getItem("imres-lautenwerk-lieder") || "[]") || []; } catch (_) {}
   const lokalMerken = () => { try { localStorage.setItem("imres-lautenwerk-lieder", JSON.stringify(lokaleLieder)); } catch (_) {} };
@@ -1766,6 +1769,7 @@
     aus.gain.value = .7 * (1 - Math.max(...linien.map(l => l.fb)));
     return { ein, aus, connect: z => aus.connect(z), disconnect: () => { try { aus.disconnect(); } catch (_) {} } };
   }
+  let endKnoten = null; /* letzter Knoten vor den Lautsprechern – hier hängt auch die Aufnahme */
   let sparHallIn = null, sparAktiv = false, kompRef = null, kulKompRef = null, kulAusRef = null, hallHP = null, orchHall = null, gastHall = null;
   let atem = null, pumpBus = null, breiteGain = null, taktEcho = null, taktEchoNass = null, taktEchoEin = null;
   const pumpZiel = () => pumpBus || master;
@@ -2797,7 +2801,7 @@ const ZUS_ICON = {
       ducken = ctx.createGain(); ducken.gain.value = 1;
       /* „Atem“: das kurze Luftholen vor einem Refrain (alles für einen Augenblick fast still) */
       atem = ctx.createGain(); atem.gain.value = 1;
-      master.connect(atem); atem.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination);
+      master.connect(atem); atem.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination); endKnoten = limiter;
       /* Pump-Bus: Teppich, Orchester, Kapelle, Gäste und Sub-Bass ducken sich bei jedem Kick kurz weg */
       pumpBus = ctx.createGain(); pumpBus.gain.value = 1; pumpBus.connect(master);
       /* Kulisse und Zusatzgeräusche: eigener Weg zum Limiter, am Musikregler vorbei – so lassen sich Musik und Hintergrund
@@ -6408,6 +6412,14 @@ const ZUS_ICON = {
   }
   function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
   /* ---------- Mitspieler: Orchester, Kapelle und Gäste unter einem Dach ---------- */
+  Object.assign(TX.de, { aufnehmen: "⏺ Aufnehmen", aufTipp: "Nimmt alles auf, was gerade erklingt – Musik, Kulisse, Zusätze und Effekte. Beim Beenden wird die Datei heruntergeladen.",
+    aufStopp: "Aufnahme beenden und herunterladen", aufLaeuft: "⏺ Aufnahme läuft – nochmal tippen zum Beenden.", aufFertig: n => "Aufnahme gespeichert: " + n,
+    aufGehtNicht: "Dieser Browser kann leider nicht aufnehmen." });
+  Object.assign(TX.en, { aufnehmen: "⏺ Record", aufTipp: "Records everything that is playing – music, ambience, extras and effects. The file downloads when you stop.",
+    aufStopp: "Stop recording and download", aufLaeuft: "⏺ Recording – tap again to stop.", aufFertig: n => "Recording saved: " + n,
+    aufGehtNicht: "Sorry, this browser cannot record." });
+  Object.assign(TX.de, { kulPause: "Kulisse und Zusätze anhalten", kulWeiter: "Kulisse und Zusätze weiterlaufen lassen" });
+  Object.assign(TX.en, { kulPause: "Pause ambience and extras", kulWeiter: "Resume ambience and extras" });
   Object.assign(TX.de, { kick: "Bassdrum", kickStufe: ["aus", "passend", "kräftig"], kickTipp: "Tiefe Trommel unter der Musik: bei Festen ein warmer Schlag, im Kampf ein treibender Kick, bei Grusel ein Herzschlag. Antippen wechselt aus – passend – kräftig." });
   Object.assign(TX.en, { kick: "Bass drum", kickStufe: ["off", "fitting", "strong"], kickTipp: "Deep drum under the music: a warm thump at feasts, a driving kick in battle, a heartbeat in horror. Tap to cycle off – fitting – strong." });
   Object.assign(TX.de, { mitspieler: "🎻 Mitspieler", msStufe: ["Band allein", "Ein paar", "Volle Big Band"], msEigen: "eigene Auswahl", msAuf: "Einzeln einstellen",
@@ -6868,10 +6880,101 @@ const ZUS_ICON = {
     if (S.stimmung && STIL[S.stimmung]) { if (laeuft) intensitaetVormerken(); else stimmungWeiter(); }
     leisteAktualisieren();
   }
+  /* Kulisse samt Zusätzen anhalten bzw. weiterlaufen lassen – so schnell erreichbar wie Play/Pause der Musik */
+  const kulisseLaeuft = () => !!kul || zusLaufen();
+  const kulisseDa = () => kulisseLaeuft() || S.kulisse !== "keine" || !!kulMerk || Object.keys(zusWahl).length > 0;
+  function kulisseUmschalten() {
+    audioStart();
+    if (kulisseLaeuft()) { if (kul) { kulMerk = S.kulisse; kulisseStop(); } if (zusLaufen()) { zusPausiert = true; zusSync(); } }
+    else { zusPausiert = false; if (S.kulisse === "keine" && kulMerk) S.kulisse = kulMerk; if (S.kulisse !== "keine") { merken(); kulisseStart(true); } else zusSync(); }
+    try { zeichnen(); knoepfe(); } catch (_) {}
+  }
+  function kulKnoepfe() {
+    const T = t(), an = kulisseLaeuft(), da = kulisseDa();
+    const setz = b => { b.hidden = !da; b.classList.toggle("laeuft", an); b.setAttribute("aria-pressed", an); b.title = an ? T.kulPause : T.kulWeiter; };
+    root.querySelectorAll(".lw-kulknopf").forEach(b => { setz(b); b.textContent = "🌧 " + (an ? "❚❚" : "▶"); b.setAttribute("aria-label", b.title); });
+    if (leiste) { const b = leiste.querySelector(".ll-kulk"); if (b) { setz(b); b.textContent = an ? "🌧❚❚" : "🌧▶"; b.setAttribute("aria-label", b.title); } }
+  }
+  /* Dateiname nur aus einfachen Zeichen – manche Browser verwerfen sonst den Namen */
+  const dateiName = x => String(x).replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/Ä/g, "Ae").replace(/Ö/g, "Oe").replace(/Ü/g, "Ue").replace(/ß/g, "ss")
+    .replace(/[–—]/g, "-").replace(/[^A-Za-z0-9 ._()-]+/g, "").replace(/\s+/g, " ").trim() || "Aufnahme";
+  /* Aufnahmen im WebM-Format haben vom Browser keine Längenangabe – manche Player zeigen dann 0:00 und können nicht spulen.
+     Hier wird die Dauer in den Dateikopf (Segment › Info › Duration) eingetragen. */
+  async function webmDauer(blob, ms) {
+    try {
+      const u = new Uint8Array(await blob.slice(0, Math.min(blob.size, 65536)).arrayBuffer());
+      const kennung = p => { const b = u[p], n = b & 0x80 ? 1 : b & 0x40 ? 2 : b & 0x20 ? 3 : b & 0x10 ? 4 : 0; if (!n || p + n > u.length) return null; let v = 0; for (let i = 0; i < n; i++) v = v * 256 + u[p + i]; return { n, v }; };
+      const groesse = p => { const b = u[p]; let n = 1, m = 0x80; while (n <= 8 && !(b & m)) { m >>= 1; n++; } if (n > 8 || p + n > u.length) return null; let v = b & (m - 1); for (let i = 1; i < n; i++) v = v * 256 + u[p + i]; return { n, v, offen: v === Math.pow(2, 7 * n) - 1 }; };
+      const verbinde = teile => { const l = teile.reduce((a, t) => a + t.length, 0), o = new Uint8Array(l); let p = 0; teile.forEach(t => { o.set(t, p); p += t.length; }); return o; };
+      let p = 0;
+      while (p < u.length) {
+        const k = kennung(p); if (!k) return blob; const g = groesse(p + k.n); if (!g) return blob; const start = p + k.n + g.n;
+        if (k.v === 0x18538067) {
+          let q = start;
+          while (q < u.length) {
+            const ck = kennung(q); if (!ck) return blob; const cg = groesse(q + ck.n); if (!cg) return blob; const cs = q + ck.n + cg.n;
+            if (ck.v === 0x1549A966) {
+              if (cg.offen || cs + cg.v > u.length) return blob;
+              let r = cs, skala = 1e6, dPos = -1, dEnde = -1;
+              while (r < cs + cg.v) { const ik = kennung(r), ig = ik && groesse(r + ik.n); if (!ik || !ig) return blob; const is = r + ik.n + ig.n;
+                if (ik.v === 0x2AD7B1) { let v = 0; for (let i = 0; i < ig.v; i++) v = v * 256 + u[is + i]; skala = v || 1e6; }
+                if (ik.v === 0x4489) { dPos = r; dEnde = is + ig.v; }
+                r = is + ig.v; }
+              const dauer = new Uint8Array(11); dauer[0] = 0x44; dauer[1] = 0x89; dauer[2] = 0x88; new DataView(dauer.buffer).setFloat64(3, ms * 1e6 / skala);
+              const inhalt = dPos >= 0 ? verbinde([u.slice(cs, dPos), dauer, u.slice(dEnde, cs + cg.v)]) : verbinde([u.slice(cs, cs + cg.v), dauer]);
+              const gr = new Uint8Array(8); gr[0] = 1; let v = inhalt.length; for (let i = 7; i >= 1; i--) { gr[i] = v & 255; v = Math.floor(v / 256); }
+              return new Blob([verbinde([u.slice(0, q + ck.n), gr, inhalt]), blob.slice(cs + cg.v)], { type: blob.type });
+            }
+            if (cg.offen) return blob;
+            q = cs + cg.v;
+          }
+          return blob;
+        }
+        if (g.offen) return blob;
+        p = start + g.v;
+      }
+    } catch (_) {}
+    return blob;
+  }
+  /* ---------- Aufnahme: alles, was das Lautenwerk gerade spielt (Musik, Kulisse, Zusätze, Effekte), als Datei ---------- */
+  let aufnahme = null;
+  const aufZeit = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  function aufnahmeKnoepfe() {
+    const T = t();
+    root.querySelectorAll(".lw-rec").forEach(b => { b.classList.toggle("an", !!aufnahme); b.setAttribute("aria-pressed", !!aufnahme);
+      b.textContent = aufnahme ? "⏹ " + aufZeit(Date.now() - aufnahme.ab) : T.aufnehmen; b.title = aufnahme ? T.aufStopp : T.aufTipp; });
+    if (leiste) { const b = leiste.querySelector(".ll-rec"); if (b) { b.hidden = !aufnahme; b.textContent = aufnahme ? "⏹ " + aufZeit(Date.now() - aufnahme.ab) : ""; b.title = T.aufStopp; } }
+  }
+  function aufnahmeUmschalten() {
+    const T = t();
+    if (aufnahme) { const a = aufnahme; aufnahme = null; clearInterval(a.timer); try { a.r.stop(); } catch (_) {} aufnahmeKnoepfe(); return; }
+    audioStart();
+    if (!ctx || !endKnoten || !window.MediaRecorder || !ctx.createMediaStreamDestination) { status(T.aufGehtNicht); return; }
+    const typ = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4", "audio/webm"].find(x => { try { return MediaRecorder.isTypeSupported(x); } catch (_) { return false; } }) || "";
+    const ziel = ctx.createMediaStreamDestination(); endKnoten.connect(ziel);
+    let r; try { r = new MediaRecorder(ziel.stream, typ ? { mimeType: typ, audioBitsPerSecond: 192000 } : {}); } catch (_) { try { endKnoten.disconnect(ziel); } catch (__) {} status(T.aufGehtNicht); return; }
+    const teile = [], titel = (S.titel || T.eigenesLied).replace(/[\\/:*?"<>|]+/g, "").trim() || "Lautenwerk";
+    r.ondataavailable = e => { if (e.data && e.data.size) teile.push(e.data); };
+    const ab = Date.now();
+    r.onstop = async () => {
+      try { endKnoten.disconnect(ziel); } catch (_) {}
+      if (!teile.length) return;
+      const mime = r.mimeType || typ || "audio/webm", endung = /mp4/.test(mime) ? "m4a" : /ogg/.test(mime) ? "ogg" : "webm";
+      let blob = new Blob(teile, { type: mime }); if (endung === "webm") blob = await webmDauer(blob, Date.now() - ab);
+      const d = new Date(), z = n => String(n).padStart(2, "0");
+      const name = "Lautenwerk – " + titel + " – " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + " " + z(d.getHours()) + "-" + z(d.getMinutes()) + "." + endung;
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = dateiName(name); document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000); status(T.aufFertig(name));
+    };
+    r.start(1000);
+    aufnahme = { r, ab: Date.now(), timer: setInterval(aufnahmeKnoepfe, 500) };
+    aufnahmeKnoepfe(); status(T.aufLaeuft);
+  }
   function leisteBauen() {
     if (leiste || hoerer || !document.body) return;
     leiste = document.createElement("div"); leiste.className = "lw-leiste"; leiste.hidden = true;
-    leiste.innerHTML = '<button type="button" class="ll-play"></button><button type="button" class="ll-aus" title="">🎼</button>' +
+    leiste.innerHTML = '<button type="button" class="ll-play"></button><button type="button" class="ll-kulk"></button><button type="button" class="ll-aus" title="">🎼</button><button type="button" class="ll-rec" hidden></button>' +
       '<span class="ll-titel"><span class="ll-name"></span><span class="ll-naechste"></span><i class="lw-wechselbalken"></i></span>' +
       '<span class="ll-int"><button type="button" class="ll-minus" aria-label="−">−</button><b class="ll-wert"></b><button type="button" class="ll-plus" aria-label="+">+</button></span>' +
       '<label class="ll-vol"><span aria-hidden="true">🔊</span><input type="range" min="0" max="10" step="1" data-ll="master"></label>' +
@@ -6887,12 +6990,8 @@ const ZUS_ICON = {
       else if (e.target.closest(".ll-minus")) intensitaetSetzen(S.intensitaet - 1);
       else if (e.target.closest(".ll-plus")) intensitaetSetzen(S.intensitaet + 1);
       else if (e.target.closest(".ll-einst")) { leisteAuf = !leisteAuf; }
-      else if (e.target.closest(".ll-kul")) {
-        audioStart();
-        if (kul || zusLaufen()) { if (kul) { kulMerk = S.kulisse; kulisseStop(); } if (zusLaufen()) { zusPausiert = true; zusSync(); } }
-        else { zusPausiert = false; if (S.kulisse === "keine" && kulMerk) S.kulisse = kulMerk; if (S.kulisse !== "keine") { merken(); kulisseStart(true); } else zusSync(); }
-        try { zeichnen(); knoepfe(); } catch (_) {}
-      }
+      else if (e.target.closest(".ll-kul, .ll-kulk")) kulisseUmschalten();
+      else if (e.target.closest(".ll-rec")) aufnahmeUmschalten();
       else if (e.target.closest(".ll-hin")) {
         leisteAuf = false;
         if (!root.offsetParent && window.ImresAnsicht) { try { window.ImresAnsicht.merkeScroll(); history.pushState(null, "", "#lautenwerk"); window.ImresAnsicht.zeige(root); } catch (_) {} }
@@ -6950,6 +7049,7 @@ const ZUS_ICON = {
     const st = !!(S.stimmung && STIL[S.stimmung]);
     leiste.querySelector(".ll-int").hidden = !st;
     leiste.querySelector(".ll-wert").textContent = "🔥 " + T.intStufen[S.intensitaet];
+    kulKnoepfe();
   }
   /* ---------- Rundgang: eingeblendet, Schritt für Schritt, ohne die Seite zu verlassen ---------- */
   Object.assign(TX.de, { rundgang: "❔ Rundgang", rundgangTipp: "Kurzer Rundgang durch das Pult", weiter: "Weiter", zurueck: "Zurück", fertig: "Fertig", beenden: "Beenden",
@@ -7203,11 +7303,13 @@ const ZUS_ICON = {
   const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + kachelText(text) + favPunkt(attr, wert) + "</button>";
   const reiter = (art, liste, aktiv, T) => '<div class="lw-tabs" role="tablist">' + liste.map(([k, txt]) =>
     '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
+  let stimmGespeichert = 0;
   function stimmSpeicherZeile(T) {
     if (hoerer || !S.stimmung || !STIL[S.stimmung]) return "";
     const aktiv = S.eigeneStimmung || S.stimmung, name = stimmName(aktiv) || S.titel || "";
-    if (!stimmForm) return '<div class="lw-eigene-zeile"><button type="button" class="lw-klein" data-aktion="stimmspeichern" title="' + esc(T.stimmTipp) + '">' + T.stimmSpeichern + "</button>" + info("speichern") + "</div>";
     const eigen = aktiv.startsWith("e_"), ueberschrieben = !eigen && eigeneStimmungen[aktiv];
+    if (!stimmForm) return '<div class="lw-eigene-zeile"><button type="button" class="lw-klein lw-schnellspeichern" data-aktion="stimmueber" title="' + esc(T.stimmTipp) + '">' + (Date.now() < stimmGespeichert ? "✓ " + esc(T.gespeichertKurz) : "💾 " + esc(T.stimmUeberKurz(name))) + "</button>" +
+      '<button type="button" class="lw-klein" data-aktion="stimmspeichern">' + T.stimmMehr + "</button>" + info("speichern") + "</div>";
     return '<div class="lw-eigene-zeile"><span class="lw-speicherform"><input type="text" maxlength="40" class="lw-stimmname" placeholder="' + esc(T.stimmNamePlatz) + '" value="' + esc(stimmForm.name) + '">' +
       '<button type="button" data-aktion="stimmneu">' + T.stimmNeu + "</button>" +
       '<button type="button" data-aktion="stimmueber">' + T.stimmUeber(name) + "</button>" +
@@ -7267,7 +7369,8 @@ const ZUS_ICON = {
     const regler = an.map(id => { const v = Math.round(zusWert(id) * 100);
       return '<div class="lw-zuszeile"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
         '<input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("");
-    return html + '<div class="lw-spuren lw-zus"><div class="lw-zgitter">' + knoepfe + '</div><p class="lw-zhinweis" aria-live="polite"></p>' + (regler ? '<div class="lw-zregler">' + regler + "</div>" : "") +
+    const zurueck = an.length ? '<button type="button" class="lw-klein lw-zurueck100" data-aktion="zus100">↺ ' + T.kulMixZurueck + "</button>" : "";
+    return html + '<div class="lw-spuren lw-zus"><div class="lw-zgitter">' + knoepfe + '</div><p class="lw-zhinweis" aria-live="polite"></p>' + (regler ? '<div class="lw-zregler">' + zurueck + regler + "</div>" : "") +
       '<p class="lw-tipp">' + T.zusTipp(an.length, zusMax()) + "</p></div>";
   }
   /* Rückmeldung direkt unter den Symbolen – die allgemeine Statuszeile liegt im Pult oft außer Sicht */
@@ -7285,9 +7388,9 @@ const ZUS_ICON = {
     if (!auf) return html;
     const zeile = (i, name) => { const v = Math.round(kulMixWert(S.kulisse, i) * 100);
       return '<label class="lw-spurzeile"><span>' + esc(name) + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-kulspur="' + i + '"><b>' + v + " %</b></label>"; };
-    html += '<div class="lw-spuren">' + w.betten.slice(0, spar ? 2 : 9).map(([n], i) => zeile(i, namen[n] || n.replace(/^a_/, ""))).join("") +
-      (w.ev.length ? zeile("ev", T.kulEinzel) : "") +
-      '<button type="button" class="lw-klein" data-aktion="kulmixzurueck">↺ ' + T.kulMixZurueck + "</button></div>";
+    html += '<div class="lw-spuren"><button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck">↺ ' + T.kulMixZurueck + "</button>" +
+      w.betten.slice(0, spar ? 2 : 9).map(([n], i) => zeile(i, namen[n] || n.replace(/^a_/, ""))).join("") +
+      (w.ev.length ? zeile("ev", T.kulEinzel) : "") + "</div>";
     return html;
   }
   try { klangAuf = Object.assign(klangAuf, JSON.parse(localStorage.getItem("imres-lw-klangauf") || "{}") || {}); } catch (_) {}
@@ -7333,8 +7436,9 @@ const ZUS_ICON = {
       '<div class="lw-pult">' +
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
+          '<button type="button" class="lw-kulknopf" data-aktion="kulumschalt" hidden></button>' +
           '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
-          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button></span></div>" +
+          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-rec" data-aktion="aufnahme" aria-pressed="false">' + T.aufnehmen + "</button>" + '<button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button></span></div>" +
         (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
         konsole(T, false) +
         werkstatt(T, true) +
@@ -7681,6 +7785,7 @@ const ZUS_ICON = {
     if (window.IntersectionObserver) new IntersectionObserver(e => { lautenwerkSichtbar = e[e.length - 1].isIntersecting; miniAnzeigen(); }).observe(root);
   }
   function miniAnzeigen() {
+    try { kulKnoepfe(); } catch (_) {}
     if (!mini) return;
     const T = t();
     const musik = laeuft || pausiert, geraeusch = !laeuft && (!!kul || !!klassikLauf || zusLaufen()), gemerkt = !laeuft && !geraeusch && !!kulMerk;
@@ -7704,6 +7809,7 @@ const ZUS_ICON = {
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
     root.querySelectorAll(".lw-ausklang").forEach(a => { a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; });
+    try { kulKnoepfe(); aufnahmeKnoepfe(); } catch (_) {}
   }
   function status(text) {
     const s = root.querySelector(".lw-status");
@@ -7801,7 +7907,11 @@ const ZUS_ICON = {
       neu.festBesetzung = eig.werte.instrument ? 1 : 0;
       /* gespeicherte Stimmung: ihre Einstellungen gewinnen */
       const w = eig.werte;
-      ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "kapelle", "kapStufe", "instrument", "gaeste"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
+      ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "kapelle", "kapStufe", "instrument", "gaeste", "master", "kick"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
+      /* auch Zusätze und die Schichten der Kulisse, wenn sie mitgespeichert wurden */
+      if (w.zus && typeof w.zus === "object") { zusWahl = Object.assign({}, w.zus); zusMerken(); setTimeout(() => { try { zusSync(); boxNeu("klang"); } catch (_) {} }, 0); }
+      if (w.kulMix && w.kulisse) { kulMix[w.kulisse] = JSON.parse(JSON.stringify(w.kulMix)); try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {} }
+      else if (w.kulisse && "kulMix" in w) { delete kulMix[w.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {} }
       if (w.band) neu.band = Object.assign({}, neu.band, w.band);
       neu.stimmung = eig.basis; neu.eigeneStimmung = k;
       if (KUL_WEG[neu.kulisse]) neu.kulisse = KUL_WEG[neu.kulisse];
@@ -7850,6 +7960,8 @@ const ZUS_ICON = {
       return;
     }
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
+    if (e.target.closest('[data-aktion="kulumschalt"]')) { kulisseUmschalten(); return; }
+    if (e.target.closest('[data-aktion="aufnahme"]')) { aufnahmeUmschalten(); return; }
     if (e.target.closest('[data-aktion="ausklang"]')) { if (laeuft && !ausklingt && !ausklangAb) { ausklangAb = -1; wechsel = null; wechselAb = 0; knoepfe(); status(t().ausklingt); } return; }
     if (e.target.closest('[data-aktion="kapelle"]')) { S.kapelle = S.kapelle === 0 ? 1 : 0; merken(); if (ctx) kapelleVorladen(); gaesteNeu(); return; }
     if (e.target.closest('[data-aktion="kapneu"]')) { if (S.stimmung) { S.kapWahl = kapelleWaehlen(S.stimmung); merken(); if (ctx) kapelleVorladen(); gaesteNeu(); } return; }
@@ -7888,6 +8000,9 @@ const ZUS_ICON = {
     }
     if (e.target.closest('[data-aktion="zusalleaus"]')) {
       zusWahl = {}; zusMerken(); zusSync(); boxNeu("klang"); zusHinweis(t().zusAlleWeg); return;
+    }
+    if (e.target.closest('[data-aktion="zus100"]')) {
+      Object.keys(zusWahl).forEach(id => { zusWahl[id] = 1; }); zusMerken(); zusPegelSetzen(); boxNeu("klang"); return;
     }
     if (e.target.closest('[data-aktion="kulmixzurueck"]')) {
       delete kulMix[S.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {}
@@ -7942,7 +8057,9 @@ const ZUS_ICON = {
         const id = a === "stimmneu" ? "e_" + Date.now().toString(36) : aktiv;
         const nm = name || stimmName(aktiv);
         eigeneStimmungen[id] = { name: nm, basis: S.stimmung, werte: STIMM_WERTE() };
-        stimmungenMerken(); S.eigeneStimmung = id; S.titel = nm; merken(); stimmForm = null; zeichnen(); knoepfe(); status(T.gespeichertOk(nm)); return;
+        stimmungenMerken(); S.eigeneStimmung = id; S.titel = nm; merken(); stimmForm = null;
+        stimmGespeichert = Date.now() + 2500; setTimeout(() => { try { boxNeu("musik"); } catch (_) {} }, 2600);
+        zeichnen(); knoepfe(); status(T.gespeichertOk(nm)); return;
       }
       if (a === "stimmzurueck" && eigeneStimmungen[aktiv] && !aktiv.startsWith("e_")) {
         delete eigeneStimmungen[aktiv]; stimmungenMerken(); S.eigeneStimmung = null; S.titel = stimmName(aktiv); merken(); stimmForm = null; zeichnen(); knoepfe(); status(T.stimmZurueckOk); return;
@@ -8335,6 +8452,9 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-ausklang { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; padding: .55rem 1rem; cursor: pointer; }
 .lw-ausklang:hover:not(:disabled) { border-color: var(--ember); color: var(--ember); }
 .lw-ausklang:disabled { opacity: .5; cursor: default; }
+.lw-kulknopf { border: 1px solid #6a9fb5; background: none; color: var(--vellum); font: inherit; padding: .55rem 1rem; cursor: pointer; min-width: 5.2rem; }
+.lw-kulknopf.laeuft { background: rgba(106,159,181,.22); }
+.lw-kulknopf[hidden] { display: none; }
 .lw-feld { display: grid; gap: .2rem; font-size: .78rem; letter-spacing: .06em; color: var(--ash); }
 .lw-feld b { color: var(--vellum); font-weight: 600; }
 .lw-feld select { font: inherit; font-size: .9rem; letter-spacing: 0; background: var(--night); color: var(--vellum); border: 1px solid var(--line); padding: .35rem .5rem; }
@@ -8568,6 +8688,14 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .ll-play.laeuft { background: none; color: var(--ember); }
 .ll-aus { width: 2.3rem; height: 2.3rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--vellum); }
 .ll-aus[hidden] { display: none; }
+.ll-kulk { height: 2.3rem; flex: 0 0 auto; border-radius: 1.2rem; border: 1px solid #6a9fb5; background: none; color: var(--vellum); padding: 0 .55rem; font-size: .85rem; white-space: nowrap; }
+.ll-kulk.laeuft { background: rgba(106,159,181,.22); }
+.ll-kulk[hidden] { display: none; }
+.ll-rec { height: 2.3rem; flex: 0 0 auto; border-radius: 1.2rem; border: 1px solid #c0392b; background: rgba(192,57,43,.25); color: var(--vellum); padding: 0 .55rem; font-size: .85rem; white-space: nowrap; }
+.ll-rec[hidden] { display: none; }
+@media (max-width: 520px) { .ll-vol input { width: 3.6rem; } .ll-vol span { display: none; } .ll-kulk, .ll-rec { padding: 0 .4rem; font-size: .8rem; } .ll-wert { min-width: 2.8rem; } .lw-leiste { gap: .3rem; } }
+.lw-rec.an { border-color: #c0392b; background: rgba(192,57,43,.25); animation: lw-rec-puls 1.6s ease-in-out infinite; }
+@keyframes lw-rec-puls { 50% { background: rgba(192,57,43,.08); } }
 .ll-aus:disabled { opacity: .4; }
 .ll-titel { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; padding-bottom: .25rem; }
 .ll-name { color: var(--vellum); font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

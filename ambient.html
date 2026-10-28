@@ -44,10 +44,15 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
 .misch{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1rem .6rem;margin:1rem 0 0}
 .misch h2{font-family:var(--fd);font-weight:400;font-size:1.3rem;margin:0 0 .6rem;display:flex;align-items:center;gap:.5rem}
 .misch h2 small{font-family:var(--fb);font-size:.8rem;color:var(--mute)}
-.misch h2 .zu{margin-left:auto;border:1px solid var(--line);background:none;border-radius:50%;width:2rem;height:2rem;color:var(--mute);display:none}
+.misch h2 .m100{margin-left:auto;border:1px solid var(--line);background:none;border-radius:1rem;padding:.25rem .7rem;color:var(--mute);font:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.misch h2 .m100:hover{color:var(--ember);border-color:var(--ember)}
+.misch h2 .zu{margin-left:.4rem;border:1px solid var(--line);background:none;border-radius:50%;width:2rem;height:2rem;color:var(--mute);display:none}
 .misch-knopf{display:none;flex:0 0 auto;width:2.4rem;height:2.4rem;border-radius:50%;border:1px solid var(--line);background:none;font-size:1rem;line-height:1}
 .misch-knopf[aria-expanded="true"]{border-color:var(--ember);background:rgba(224,160,70,.15)}
 .raum3d-knopf{display:block}
+.auf-knopf{display:block;color:#e06050}
+.auf-knopf[aria-pressed="true"]{border-color:#c0392b;background:rgba(192,57,43,.3);color:var(--vellum,#eee);animation:aufpuls 1.6s ease-in-out infinite}
+@keyframes aufpuls{50%{background:rgba(192,57,43,.08)}}
 .raum3d-knopf[aria-pressed="true"]{border-color:#6a9fb5;background:rgba(106,159,181,.28)}
 /* Rechner: Schichten oben in der mitlaufenden Spalte, kompakt */
 @media (min-width:980px){
@@ -232,6 +237,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   <label class="laut"><span aria-hidden="true">🔊</span><input type="range" id="gesamt" min="0" max="100" value="70" aria-label="Lautstärke"></label>
   <button type="button" class="misch-knopf" id="misch-knopf" aria-expanded="false" aria-controls="misch" title="Schichten">🎚</button>
   <button type="button" class="misch-knopf raum3d-knopf" id="raum3d" aria-pressed="false" title="3D-Kopfhörer">🎧</button>
+  <button type="button" class="misch-knopf auf-knopf" id="aufnahme" aria-pressed="false" title="Aufnehmen">⏺</button>
   <button type="button" class="aus-alles" id="aus-alles" aria-label="Alles sofort stoppen" title="Alles sofort stoppen (Esc)">✕</button>
 </div>
 <script>
@@ -241,7 +247,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   if (EN) document.documentElement.lang = "en";
   const T = EN ? {
     zurueck: "← Back to the Lautenwerk", titel: "Soundscapes", unter: "Pure ambience from real recordings – no music. The sounds are constantly rearranged, so nothing repeats noticeably.",
-    spielen: "Play", stopp: "Stop", laedt: "loading …", waehlen: "Choose a soundscape", ebenen: "Layers", leben: "Liveliness", raum: "Room echo", gesamt: "Volume",
+    alle100: "All layers and liveliness back to 100 %", aufTipp: "Record everything that is playing – the file downloads when you stop", aufStopp: "Stop recording and download", aufGehtNicht: "Sorry, this browser cannot record.", spielen: "Play", stopp: "Stop", laedt: "loading …", waehlen: "Choose a soundscape", ebenen: "Layers", leben: "Liveliness", raum: "Room echo", gesamt: "Volume",
     tippMisch: "Every soundscape remembers your mix.", laeuft: "playing", pausiert: "paused",
     funk: "📡 Listen in", funkStart: "📡 Broadcast to everyone", funkStopp: "Stop broadcast", funkTipp: "The others open this link and tap “Listen” – the soundscape then plays in their own browser and follows yours.",
     kopieren: "Copy link", kopiert: "Copied!", verbinde: "Connecting …", fehler: "No connection – retrying …", hoeren: n => n === 1 ? "1 listening" : n + " listening",
@@ -250,7 +256,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     hTitel: "Listening in", hWarte: "Nothing is playing right now – as soon as it starts, you will hear it.", hZuhoeren: "🎧 Listen", hStumm: "❚❚ Mute", hSelbst: "Choose soundscapes yourself"
   } : {
     zurueck: "← Zurück zum Lautenwerk", titel: "Klangwelten", unter: "Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.",
-    spielen: "Abspielen", stopp: "Anhalten", laedt: "lädt …", waehlen: "Wähle eine Klangwelt", ebenen: "Schichten", leben: "Lebendigkeit", raum: "Raumhall", gesamt: "Lautstärke",
+    alle100: "Alle Schichten und die Lebendigkeit zurück auf 100 %", aufTipp: "Alles aufnehmen, was gerade erklingt – beim Beenden wird die Datei heruntergeladen", aufStopp: "Aufnahme beenden und herunterladen", aufGehtNicht: "Dieser Browser kann leider nicht aufnehmen.", spielen: "Abspielen", stopp: "Anhalten", laedt: "lädt …", waehlen: "Wähle eine Klangwelt", ebenen: "Schichten", leben: "Lebendigkeit", raum: "Raumhall", gesamt: "Lautstärke",
     tippMisch: "Jede Klangwelt merkt sich deine Mischung.", laeuft: "läuft", pausiert: "pausiert",
     funk: "📡 Mitlauschen", funkStart: "📡 Für alle übertragen", funkStopp: "Übertragung beenden", funkTipp: "Die anderen öffnen diesen Link und tippen auf „Zuhören“ – die Klangwelt entsteht dann bei jedem selbst im Browser und folgt deiner.",
     kopieren: "Link kopieren", kopiert: "Kopiert!", verbinde: "Verbinde …", fehler: "Keine Verbindung – versuche es erneut …", hoeren: n => n === 1 ? "1 hört zu" : n + " hören zu",
@@ -710,6 +716,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   const zufall = l => l[Math.floor(Math.random() * l.length)];
 
   /* ---------- Audio ---------- */
+  let endKnoten = null, aufnahme = null;
   let ctx = null, gesamt, trocken, hallEin, hall, hallNass, aktiv = null, timer = 0, stumm = null;
   /* entpackte Aufnahmen: höchstens PUFFER_MAX Bytes; was am längsten nicht gebraucht wurde, fliegt raus
      (nie Schichten, die gerade laufen, und nichts, was in den letzten 3 Minuten erklungen ist) */
@@ -744,7 +751,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     /* letzte Sicherung gegen Übersteuern: unterhalb von 0,7 unverändert, darüber weich bis höchstens 0,98 abgerundet */
     const sc = ctx.createWaveShaper(), kurve = new Float32Array(2049);
     for (let i = 0; i < 2049; i++) { const x = i / 1024 - 1, a = Math.abs(x); kurve[i] = Math.sign(x) * (a < .7 ? a : .7 + .28 * Math.tanh((a - .7) / .28)); }
-    sc.curve = kurve; lim.connect(sc); sc.connect(ctx.destination);
+    sc.curve = kurve; lim.connect(sc); sc.connect(ctx.destination); endKnoten = sc;
     dunkel = ctx.createBiquadFilter(); dunkel.type = "lowpass"; dunkel.frequency.value = 20000; dunkel.Q.value = .4; dunkel.connect(gesamt);
     trocken = ctx.createGain(); trocken.connect(dunkel);
     hallEin = ctx.createGain(); hall = ctx.createConvolver(); hallNass = ctx.createGain(); hallNass.gain.value = .5;
@@ -1493,18 +1500,90 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       regler("spannung", "⚡ " + T.spannung, wert(merk.spannung, 0), 0, 100).replace('class="regler"', 'class="regler spannung"') + "</div>";
     if (!w) { mi.innerHTML = "<h2>🎚 " + esc(T.stimmung) + ' <button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' + stimmung; return; }
     const m = merk.mix[w.id] || {};
-    mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + '</small><button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' + stimmung + '<hr class="trenn">' +
+    mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + '</small><button type="button" class="m100" id="misch-100" title="' + esc(T.alle100) + '">↺ 100 %</button><button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' + stimmung + '<hr class="trenn">' +
       w.betten.map((x, i) => regler("b" + i, x[2] + (aktiv && aktiv.welt === w && aktiv.betten[i] && aktiv.betten[i].ruht ? " · " + T.ruht : ""), Math.round(wert(m.b && m.b[i], 1) * 100), 0, 150)).join("") +
       '<hr class="trenn">' + regler("leben", T.leben, Math.round(wert(m.leben, 1) * 100), 0, 200) +
       '<label class="spar"><input type="checkbox" id="bass"' + (bassSchutzAn() ? " checked" : "") + "> " + esc(T.bassSchutz) + "</label>" +
       (w.episch ? regler("ehall", T.ehall, wert(merk.ehall, 75), 0, 100) + regler("eweite", T.eweite, wert(merk.eweite, 45), 0, 100) : regler("raum", T.raum, wert(m.raum, 50), 0, 100)) +
       '<p class="tipp">' + esc(w.episch ? T.tippEpisch + " " + T.tippMisch : T.tippMisch) + "</p>";
   }
+  /* Dateiname nur aus einfachen Zeichen – manche Browser verwerfen sonst den Namen */
+  const dateiName = x => String(x).replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/Ä/g, "Ae").replace(/Ö/g, "Oe").replace(/Ü/g, "Ue").replace(/ß/g, "ss")
+    .replace(/[–—]/g, "-").replace(/[^A-Za-z0-9 ._()-]+/g, "").replace(/\s+/g, " ").trim() || "Aufnahme";
+  /* Aufnahmen im WebM-Format haben vom Browser keine Längenangabe – manche Player zeigen dann 0:00 und können nicht spulen.
+     Hier wird die Dauer in den Dateikopf (Segment › Info › Duration) eingetragen. */
+  async function webmDauer(blob, ms) {
+    try {
+      const u = new Uint8Array(await blob.slice(0, Math.min(blob.size, 65536)).arrayBuffer());
+      const kennung = p => { const b = u[p], n = b & 0x80 ? 1 : b & 0x40 ? 2 : b & 0x20 ? 3 : b & 0x10 ? 4 : 0; if (!n || p + n > u.length) return null; let v = 0; for (let i = 0; i < n; i++) v = v * 256 + u[p + i]; return { n, v }; };
+      const groesse = p => { const b = u[p]; let n = 1, m = 0x80; while (n <= 8 && !(b & m)) { m >>= 1; n++; } if (n > 8 || p + n > u.length) return null; let v = b & (m - 1); for (let i = 1; i < n; i++) v = v * 256 + u[p + i]; return { n, v, offen: v === Math.pow(2, 7 * n) - 1 }; };
+      const verbinde = teile => { const l = teile.reduce((a, t) => a + t.length, 0), o = new Uint8Array(l); let p = 0; teile.forEach(t => { o.set(t, p); p += t.length; }); return o; };
+      let p = 0;
+      while (p < u.length) {
+        const k = kennung(p); if (!k) return blob; const g = groesse(p + k.n); if (!g) return blob; const start = p + k.n + g.n;
+        if (k.v === 0x18538067) {
+          let q = start;
+          while (q < u.length) {
+            const ck = kennung(q); if (!ck) return blob; const cg = groesse(q + ck.n); if (!cg) return blob; const cs = q + ck.n + cg.n;
+            if (ck.v === 0x1549A966) {
+              if (cg.offen || cs + cg.v > u.length) return blob;
+              let r = cs, skala = 1e6, dPos = -1, dEnde = -1;
+              while (r < cs + cg.v) { const ik = kennung(r), ig = ik && groesse(r + ik.n); if (!ik || !ig) return blob; const is = r + ik.n + ig.n;
+                if (ik.v === 0x2AD7B1) { let v = 0; for (let i = 0; i < ig.v; i++) v = v * 256 + u[is + i]; skala = v || 1e6; }
+                if (ik.v === 0x4489) { dPos = r; dEnde = is + ig.v; }
+                r = is + ig.v; }
+              const dauer = new Uint8Array(11); dauer[0] = 0x44; dauer[1] = 0x89; dauer[2] = 0x88; new DataView(dauer.buffer).setFloat64(3, ms * 1e6 / skala);
+              const inhalt = dPos >= 0 ? verbinde([u.slice(cs, dPos), dauer, u.slice(dEnde, cs + cg.v)]) : verbinde([u.slice(cs, cs + cg.v), dauer]);
+              const gr = new Uint8Array(8); gr[0] = 1; let v = inhalt.length; for (let i = 7; i >= 1; i--) { gr[i] = v & 255; v = Math.floor(v / 256); }
+              return new Blob([verbinde([u.slice(0, q + ck.n), gr, inhalt]), blob.slice(cs + cg.v)], { type: blob.type });
+            }
+            if (cg.offen) return blob;
+            q = cs + cg.v;
+          }
+          return blob;
+        }
+        if (g.offen) return blob;
+        p = start + g.v;
+      }
+    } catch (_) {}
+    return blob;
+  }
+  /* ---------- Aufnahme: alles, was gerade erklingt, als Datei ---------- */
+  const aufZeit = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  function aufKnopf() { const b = $("aufnahme"); if (!b) return; b.setAttribute("aria-pressed", String(!!aufnahme)); b.textContent = aufnahme ? "⏹" : "⏺"; b.title = aufnahme ? T.aufStopp : T.aufTipp; b.setAttribute("aria-label", b.title); }
+  function aufnahmeUmschalten() {
+    if (aufnahme) { const a = aufnahme; aufnahme = null; clearInterval(a.timer); try { a.r.stop(); } catch (_) {} aufKnopf(); infoZeile(); return; }
+    audioStart();
+    if (!ctx || !endKnoten || !window.MediaRecorder || !ctx.createMediaStreamDestination) { alert(T.aufGehtNicht); return; }
+    const typ = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4", "audio/webm"].find(x => { try { return MediaRecorder.isTypeSupported(x); } catch (_) { return false; } }) || "";
+    const ziel = ctx.createMediaStreamDestination(); endKnoten.connect(ziel);
+    let r; try { r = new MediaRecorder(ziel.stream, typ ? { mimeType: typ, audioBitsPerSecond: 192000 } : {}); } catch (_) { try { endKnoten.disconnect(ziel); } catch (__) {} alert(T.aufGehtNicht); return; }
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), titel = ((w && w.name) || T.titel).replace(/[\\/:*?"<>|]+/g, "").trim() || "Klangwelten";
+    const teile = [];
+    r.ondataavailable = e => { if (e.data && e.data.size) teile.push(e.data); };
+    const ab = Date.now();
+    r.onstop = async () => {
+      try { endKnoten.disconnect(ziel); } catch (_) {}
+      if (!teile.length) return;
+      const mime = r.mimeType || typ || "audio/webm", endung = /mp4/.test(mime) ? "m4a" : /ogg/.test(mime) ? "ogg" : "webm";
+      let blob = new Blob(teile, { type: mime }); if (endung === "webm") blob = await webmDauer(blob, Date.now() - ab);
+      const d = new Date(), z = n => String(n).padStart(2, "0");
+      const name = T.titel + " – " + titel + " – " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + " " + z(d.getHours()) + "-" + z(d.getMinutes()) + "." + endung;
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = dateiName(name); document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    };
+    r.start(1000);
+    aufnahme = { r, ab: Date.now(), timer: setInterval(infoZeile, 500) };
+    aufKnopf(); infoZeile();
+  }
+  setTimeout(aufKnopf, 0);
   function infoZeile() {
     if (hoerer) return;
     const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), teile = [];
     if (aktiv) teile.push(T.laeuft); else if (w) teile.push(T.pausiert);
     if (laufend.size) teile.push("⏳ " + T.szLaeuft(laufend.size));
+    if (aufnahme) teile.push("⏺ " + aufZeit(Date.now() - aufnahme.ab));
     $("jetzt-info").textContent = teile.join(" · ");
   }
   const zeit = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
@@ -1569,6 +1648,13 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     }
     if (e.target.closest("#misch-knopf") || (e.target.closest(".jetzt") && !hoerer)) { mischBlatt(!document.body.classList.contains("misch-auf")); return; }
     if (e.target.closest("#misch-zu")) { mischBlatt(false); return; }
+    if (e.target.closest("#aufnahme")) { aufnahmeUmschalten(); return; }
+    if (e.target.closest("#misch-100")) {
+      /* alle Schichten und die Lebendigkeit der gewählten Welt zurück auf 100 % */
+      const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt); if (!w) return;
+      if (FERN) { w.betten.forEach((_, i) => fernSenden({ art: "regler", k: "b" + i, v: 100 })); fernSenden({ art: "regler", k: "leben", v: 100 }); return; }
+      w.betten.forEach((_, i) => reglerSetzen("b" + i, 100)); reglerSetzen("leben", 100); zeichnen(); return;
+    }
     if (document.body.classList.contains("misch-auf") && !e.target.closest("#misch")) mischBlatt(false);
     if (e.target.closest("#aus-alles")) { if (hoerer) { if (hoerer.an) hoererSchalten(); } else notAus(); return; }
     if (e.target.closest("#offline")) { if (offline.status !== "laedt") { if (offline.status !== "bereit" || confirm(T.offTipp)) offlineLaden(); } return; }
