@@ -37,8 +37,8 @@
       plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4", nurVorschauClip: true, direkt: true, ton: "holz1.mp3" },
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")],
       plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, direkt: true, ton: "glock_91.mp3" },
-    { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: ["vorschau/charme-1.webp?v=5", "vorschau/charme-2.webp?v=5", "vorschau/charme-3.webp?v=5"],
-      plakat: "vorschau/plakat-charme.webp?v=5", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
+    { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: ["vorschau/charme-1.webp?v=6", "vorschau/charme-2.webp?v=6", "vorschau/charme-3.webp?v=6", "vorschau/charme-4.webp?v=6"],
+      plakat: "vorschau/plakat-charme.webp?v=6", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
   ];
   /* Sprüche aus Sicht der Helden, Kopf der Taverne, Fortschritt */
   const MEHR = {
@@ -163,7 +163,7 @@
           text: "Unter den Karten lauern die Kreaturen aus dem Bestiarium. Decke immer zwei auf und finde alle Paare in möglichst wenigen Zügen.",
           punkte: ["Alle Kreaturen aus dem Bestiarium", "Eigener Rekord wird gespeichert", "Kurz und schnell – perfekt zwischendurch"],
           pc: "Karten anklicken.", handy: "Karten antippen." },
-        charme: { titel: "GM Seduction", kurz: "Barradin will jeden NSC verführen – der Spielleiter leidet.", genre: "Würfelspiel", wer: "Barradin & der Spielleiter",
+        charme: { titel: "Würfel auf Verführen", kurz: "Barradin will jeden NSC verführen – der Spielleiter leidet.", genre: "Würfelspiel", wer: "Barradin & der Spielleiter",
           text: "Hinter dem Schirm sitzt der Spielleiter, vor ihm erscheinen nacheinander die NSC, die er spielt – von Gundren bis Themberchaud. Wähle einen Spruch, wirf den W20 und schau ihm ins Gesicht: Grinsen, Facepalm, blankes Entsetzen.",
           punkte: ["Acht NSC aus der Kampagne – und ein geheimer Bonusgast", "Charmant, kühn, absurd oder passend: jeder Spruch hat sein eigenes Risiko", "Joker: Echos „Kennst du Gundren?“, Rex und die Flöte der Illusionen", "Peinliche Stille inklusive: Manchmal sagt einfach niemand etwas. Sehr lange.", "Die Geduld des Spielleiters ist begrenzt – und das Eroberungsbuch merkt sich alles"],
           pc: "Spruch anklicken – der W20 rollt von allein.", handy: "Spruch antippen." }
@@ -202,7 +202,7 @@
           text: "The creatures from the bestiary lurk beneath the cards. Turn over two at a time and find all pairs in as few moves as possible.",
           punkte: ["Every creature from the bestiary", "Your personal record is saved", "Short and quick – perfect in between"],
           pc: "Click the cards.", handy: "Tap the cards." },
-        charme: { titel: "GM Seduction", kurz: "Barradin wants to seduce every NPC – the game master suffers.", genre: "Dice game", wer: "Barradin & the game master",
+        charme: { titel: "Roll to Seduce", kurz: "Barradin wants to seduce every NPC – the game master suffers.", genre: "Dice game", wer: "Barradin & the game master",
           text: "Behind the screen sits the game master, and in front of him the NPCs he voices appear one by one – from Gundren to Themberchaud. Pick a line, roll the d20 and watch his face: grin, facepalm, sheer horror.",
           punkte: ["Eight NPCs from the campaign – and a secret bonus guest", "Charming, bold, absurd or fitting: every line has its own risk", "Jokers: Echo's \"Do you know Gundren?\", Rex and the flute of illusions", "Awkward silences included: sometimes nobody says anything. For a very long time.", "The game master's patience is limited – and the Book of Conquests remembers everything"],
           pc: "Click a line – the d20 rolls by itself.", handy: "Tap a line." }
