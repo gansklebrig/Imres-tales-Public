@@ -26,7 +26,8 @@
         diebesnacht: "Linker Stick: gehen · Rechter Stick: Ziel · A: dorthin / handeln · X Münze · Y Zorn · RB Rauch · B abbrechen · ☰ Pause",
         echohort: "Stick: Zeiger · Steuerkreuz: von Platz zu Platz · A: tippen · X: pflanzen/verstärken · LB / RB: Knöpfe unten · Y: nächste Welle · ☰ Pause",
         echohortRaub: "A: Echo flattert · ☰ Pause",
-        auftritt: "X · A · B (oder ◀ ▼ ▶): Bass · Laute · Flöte – bei Schweif gedrückt halten · ☰ Pause"
+        auftritt: "X · A · B (oder ◀ ▼ ▶): Bass · Laute · Flöte – bei Schweif gedrückt halten · ☰ Pause",
+        charme: "▲ ▼: Spruch wählen · A: würfeln · B: vorspulen · X / Y / RB: Echo · Rex · Flöte · ☰ Klang"
       }
     },
     en: {
@@ -38,7 +39,8 @@
         diebesnacht: "Left stick: walk · Right stick: target · A: go there / act · X coin · Y fury · RB smoke · B cancel · ☰ pause",
         echohort: "Stick: pointer · D-pad: spot to spot · A: tap · X: plant/upgrade · LB / RB: buttons below · Y: next wave · ☰ pause",
         echohortRaub: "A: Echo flutters · ☰ pause",
-        auftritt: "X · A · B (or ◀ ▼ ▶): bass · lute · flute – hold for tails · ☰ pause"
+        auftritt: "X · A · B (or ◀ ▼ ▶): bass · lute · flute – hold for tails · ☰ pause",
+        charme: "▲ ▼: pick a line · A: roll · B: skip · X / Y / RB: Echo · Rex · flute · ☰ sound"
       }
     }
   };
@@ -116,6 +118,26 @@
           if (tasten.some(neu)) taste(k, "keydown", window);
           if (tasten.some(los) && !tasten.some(gedrueckt)) taste(k, "keyup", window);
         });
+      } },
+    /* Würfel auf Verführen: Steuerkreuz wählt den Spruch, A würfelt, B spult vor, X/Y/RB sind die Joker */
+    { id: "charme-karte",
+      faengt: ({ z }) => z.aktiv(),
+      start({ z }) { z.wahl(0); },
+      ende({ z }) { z.wahl(-1); },
+      frame(s) {
+        const { z } = s;
+        hilfeEinmal("charme");
+        const a = stick(0), sy = Math.abs(a.y) > .6 ? Math.sign(a.y) : 0;
+        if (neu(KN.HOCH) || (sy < 0 && s.sy !== sy)) z.bewegen(-1);
+        if (neu(KN.RUNTER) || (sy > 0 && s.sy !== sy)) z.bewegen(1);
+        s.sy = sy;
+        if (neu(KN.A)) z.ok();
+        if (neu(KN.B)) z.skip();
+        if (neu(KN.X)) z.joker("echo");
+        if (neu(KN.Y)) z.joker("rex");
+        if (neu(KN.RB)) z.joker("floete");
+        if (neu(KN.MENUE)) z.regler();
+        if (neu(KN.ANSICHT)) { const k = s.el.querySelector(".tav-voll-knopf"); if (k) k.click(); }
       } },
     /* Friedrichs Jagd: Fadenkreuz mit dem Stick, A oder RT schießt (gedrückt halten = Dauerfeuer) */
     { id: "waldlauf",

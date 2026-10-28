@@ -42,7 +42,7 @@
     de: {
       label: "Würfelspiel", titel: "Würfel auf Verführen",
       text: "Jeder Barde kennt die Frage: Kann ich den NSC verführen? Barradin probiert es bei allen. Wähle einen Spruch, wirf den W20 – und schau dem Spielleiter ins Gesicht.",
-      start: "▶ Ich würfle auf Charme", nochmal: "↻ Noch eine Sitzung", buch: "📖 Eroberungsbuch", zurueck: "Zurück",
+      start: "▶ Ich würfle auf Verführen", nochmal: "↻ Noch eine Sitzung", buch: "📖 Eroberungsbuch", zurueck: "Zurück",
       geduld: "Geduld des Spielleiters", aufgabe: "Aufgabe", sprueche: n => "Noch " + n + (n === 1 ? " Spruch" : " Sprüche"),
       arten: { charmant: "Charmant", kuehn: "Kühn", absurd: "Absurd", passend: "Passend" },
       artInfo: { charmant: n => "SG " + n + " · 1 ♥", kuehn: n => "SG " + n + " · 2 ♥", absurd: () => "Glückssache · kostet Geduld", passend: n => "SG " + n + " · 1 ♥" },
@@ -189,7 +189,7 @@
     en: {
       label: "Dice game", titel: "Roll to Seduce",
       text: "Every bard knows the question: can I seduce the NPC? Barradin tries it on everyone. Pick a line, roll the d20 – and watch the game master's face.",
-      start: "▶ I roll for charm", nochmal: "↻ Another session", buch: "📖 Book of Conquests", zurueck: "Back",
+      start: "▶ I roll to seduce", nochmal: "↻ Another session", buch: "📖 Book of Conquests", zurueck: "Back",
       geduld: "Game master's patience", aufgabe: "Task", sprueche: n => n + (n === 1 ? " line" : " lines") + " left",
       arten: { charmant: "Charming", kuehn: "Bold", absurd: "Absurd", passend: "Fitting" },
       artInfo: { charmant: n => "DC " + n + " · 1 ♥", kuehn: n => "DC " + n + " · 2 ♥", absurd: () => "Pure luck · costs patience", passend: n => "DC " + n + " · 1 ♥" },
@@ -336,6 +336,95 @@
   };
   const t = () => TX[sprache()];
 
+  /* ---------- Texte für Laune, Folgefragen, Gruppe, Rausch, Geheimsprüche, Anleitung, Klang, Teilen ---------- */
+  const TX2 = {
+    de: {
+      laune: ["angefressen", "genervt", "neutral", "gut drauf", "begeistert"], launeLabel: "Laune",
+      vorteil: ["„Okay, das war gut. Nächster Wurf mit Vorteil.“", "„Ich bin heute großzügig. Vorteil.“"],
+      wuerde: "„Rettungswurf auf Würde. Jetzt.“", wuerdeOk: "„…Bestanden. Diesmal.“", wuerdeNein: "„Durchgefallen. Ein Herz weniger.“",
+      wuerdeWurf: (w, s) => "Rettungswurf auf Würde: W20 " + w + " + 2 = " + s + " gegen SG 12",
+      rausch: "BARDEN-RAUSCH!", rauschSl: ["„Er ist im Flow. Hilfe.“", "„Nein, nein, nein – drei hintereinander?!“"], rauschInfo: "🔥 Barden-Rausch: Der nächste Spruch zählt doppelt",
+      serie: n => "🔥 " + n + " in Folge",
+      geheim: "Geheimspruch", geheimInfo: n => "SG " + n + " · 2 ♥", geheimNeu: "📜 Neuer Geheimspruch freigeschaltet!", geheimBuch: "📜 Geheimspruch: ",
+      frageLabel: "Der NSC fragt nach …", antwortSl: { gut: ["„Gute Antwort. Leider.“", "„Verdammt, das war charmant.“"], mittel: ["„Mutig. Nicht.“", "„Okay …?“"], schlecht: ["„Oh nein.“", "„Das schreibe ich auf.“", "„Warum.“"] },
+      mittelNsc: ["(nickt verwirrt)", "„…Aha.“", "„Mhm.“"],
+      gruppe: {
+        friedrich: { an: "Friedrich legt einen Pfeil auf. „Soll ich?“", gut: "Der Pfeil trifft eine Fliege direkt neben dem NSC. Beeindruckt.", schlecht: "Der Pfeil trifft den Hut des NSC. Stimmung: weg." },
+        ezekiel: { an: "Ezekiel schleicht sich hinter den NSC …", gut: "Ezekiel klaut die Börse – Barradin gibt sie „zufällig gefunden“ zurück. Heldenhaft!", schlecht: "Ezekiel wird beim Klauen erwischt. Barradin tut so, als kenne er ihn nicht." },
+        echo: { an: "Echo beugt sich vor: „Kennst du Gundren?“", gut: "Der NSC muss lachen. Das Eis ist gebrochen.", schlecht: "„Nein.“ Peinliche Stille. Schon wieder." },
+        rex: { an: "Rex trottet zum NSC und schnüffelt …", gut: "Rex leckt dem NSC die Hand. Herz geschmolzen.", schlecht: "Rex hebt das Bein. Am NSC." }
+      },
+      gruppeSl: { gut: ["„Ihr seid unfair.“", "„Die Gruppe hilft. Natürlich.“"], schlecht: ["„HAHA – nein.“", "„Danke, Gruppe.“"] },
+      anleitungTitel: "So geht's",
+      anleitung: ["Wähle einen Spruch: <b>charmant</b> ist sicher, <b>kühn</b> bringt zwei Herzen, ist aber schwer, <b>absurd</b> ist Glückssache, <b>passend</b> ist leicht.",
+        "Gewürfelt wird W20 + 6 Charisma gegen den SG. <b>Drei Herzen</b> erobern den NSC – du hast vier Sprüche.",
+        "Achte auf die <b>Geduld</b> und die <b>Laune</b> des Spielleiters. Joker helfen einmal pro Abend. <b>Tippe auf die Bühne</b>, um Szenen zu überspringen."],
+      los: "Los geht's", anleitungKnopf: "❔ Anleitung",
+      klang: "Klang", musik: "Musik", effekte: "Effekte", leise: "Leise-Modus", fertig: "Fertig",
+      fortsetzen: (i, n) => "▶ Weiterspielen (NSC " + i + " von " + n + ")",
+      skip: "⏩ Tippen zum Überspringen", aushalten: "„Nein. Aushalten.“",
+      teilen: "📸 Bild teilen", teilenText: "Mein Abend bei „Würfel auf Verführen“ auf imrestales.de",
+      titel: ["Ewiger Single der Schwertküste", "Charmanter Stümper", "Tavernen-Casanova", "Herzensbrecher von Gracklstugh", "Bezwinger aller Herzen", "Verführer des Abgrunds"],
+      peinlich: "Peinlichster Moment", keinMoment: "Keiner. Unheimlich.", erobertVon: (e, n) => e + " von " + n + " NSC erobert",
+      glitzer: ["„…Ihr habt nichts gesehen.“", "„Die Hose bleibt unter uns.“"]
+    },
+    en: {
+      laune: ["fuming", "annoyed", "neutral", "in a good mood", "thrilled"], launeLabel: "Mood",
+      vorteil: ["\"Okay, that was good. Next roll with advantage.\"", "\"I'm feeling generous. Advantage.\""],
+      wuerde: "\"Dignity saving throw. Now.\"", wuerdeOk: "\"…Passed. This time.\"", wuerdeNein: "\"Failed. Lose a heart.\"",
+      wuerdeWurf: (w, s) => "Dignity save: d20 " + w + " + 2 = " + s + " vs DC 12",
+      rausch: "BARD FRENZY!", rauschSl: ["\"He's in the flow. Help.\"", "\"No, no, no – three in a row?!\""], rauschInfo: "🔥 Bard frenzy: the next line counts double",
+      serie: n => "🔥 " + n + " in a row",
+      geheim: "Secret line", geheimInfo: n => "DC " + n + " · 2 ♥", geheimNeu: "📜 New secret line unlocked!", geheimBuch: "📜 Secret line: ",
+      frageLabel: "The NPC asks …", antwortSl: { gut: ["\"Good answer. Sadly.\"", "\"Damn, that was charming.\""], mittel: ["\"Bold. Not.\"", "\"Okay …?\""], schlecht: ["\"Oh no.\"", "\"I'm writing that down.\"", "\"Why.\""] },
+      mittelNsc: ["(nods, confused)", "\"…I see.\"", "\"Mhm.\""],
+      gruppe: {
+        friedrich: { an: "Friedrich nocks an arrow. \"Shall I?\"", gut: "The arrow hits a fly right next to the NPC. Impressed.", schlecht: "The arrow hits the NPC's hat. Mood: gone." },
+        ezekiel: { an: "Ezekiel sneaks up behind the NPC …", gut: "Ezekiel steals the purse – Barradin returns it, \"found it by chance\". Heroic!", schlecht: "Ezekiel gets caught stealing. Barradin pretends not to know him." },
+        echo: { an: "Echo leans in: \"Do you know Gundren?\"", gut: "The NPC has to laugh. The ice is broken.", schlecht: "\"No.\" Awkward silence. Again." },
+        rex: { an: "Rex trots over to the NPC and sniffs …", gut: "Rex licks the NPC's hand. Heart melted.", schlecht: "Rex lifts his leg. On the NPC." }
+      },
+      gruppeSl: { gut: ["\"You're unfair.\"", "\"The party helps. Of course.\""], schlecht: ["\"HAHA – no.\"", "\"Thanks, party.\""] },
+      anleitungTitel: "How it works",
+      anleitung: ["Pick a line: <b>charming</b> is safe, <b>bold</b> gives two hearts but is hard, <b>absurd</b> is pure luck, <b>fitting</b> is easy.",
+        "You roll d20 + 6 Charisma against the DC. <b>Three hearts</b> conquer the NPC – you have four lines.",
+        "Watch the game master's <b>patience</b> and <b>mood</b>. Jokers help once per evening. <b>Tap the stage</b> to skip scenes."],
+      los: "Let's go", anleitungKnopf: "❔ How to play",
+      klang: "Sound", musik: "Music", effekte: "Effects", leise: "Quiet mode", fertig: "Done",
+      fortsetzen: (i, n) => "▶ Continue (NPC " + i + " of " + n + ")",
+      skip: "⏩ Tap to skip", aushalten: "\"No. Endure it.\"",
+      teilen: "📸 Share picture", teilenText: "My evening of \"Roll to Seduce\" on imrestales.de",
+      titel: ["Eternal single of the Sword Coast", "Charming bungler", "Tavern Casanova", "Heartbreaker of Gracklstugh", "Conqueror of all hearts", "Seducer of the Abyss"],
+      peinlich: "Most awkward moment", keinMoment: "None. Creepy.", erobertVon: (e, n) => e + " of " + n + " NPCs conquered",
+      glitzer: ["\"…You saw nothing.\"", "\"The trousers stay between us.\""]
+    }
+  };
+  const NSC2 = {
+    de: {
+      gundren: { geheim: "„Gundren, du suchst eine verlorene Mine? Mein Herz ist auch noch unentdeckt.“", frage: "„Und was bekomme ich dafür, wenn ich im Voraus zahle?“", gut: "„Meine ewige Dankbarkeit. Und eine Ballade.“", mittel: "„Äh … eine Quittung?“", schlecht: "„Ich verrate niemandem, wo deine Mine ist. Versprochen.“" },
+      buergermeister: { geheim: "„Für Sie würde ich sogar Steuern zahlen. Freiwillig.“", frage: "„Und was sagen Sie meinen Wählern?“", gut: "„Dass Phandalin den großzügigsten Bürgermeister der Schwertküste hat.“", mittel: "„Nichts. Ich bin diskret.“", schlecht: "„Dass Sie sehr gut im Zählen sind. Vor allem im Behalten.“" },
+      bugbear: { geheim: "„Ich hab dir eine Ratte mitgebracht. Eine ganze.“", frage: "„GRRR?“ (Er scheint eine Frage zu stellen.)", gut: "„Grrr.“ (zärtlich)", mittel: "„Ja?“", schlecht: "„Sitz!“" },
+      ilvara: { geheim: "„Lolth hat viele Diener. Aber nur einen, der für Euch singt.“", frage: "„Und was genau willst du dafür tun?“", gut: "„Alles, Herrin. Außer Spinnen füttern.“", mittel: "„Singen?“", schlecht: "„Fliehen. Also … später. Mit Euch!“" },
+      kuotoa: { geheim: "„Ich habe einen neuen Gott erfunden. Er heißt wie du.“", frage: "„Blubb? Wer ist dein Lieblingsgott?“", gut: "„Du.“", mittel: "„Ich hab mehrere.“", schlecht: "„Ich glaube nicht an ausgedachte Götter.“" },
+      horga: { geheim: "„Majestät, ich habe Euren Sohn gerettet. Darf ich jetzt Euren Abend retten?“", frage: "„Und was kann ein Barde einem König bieten?“", gut: "„Unsterblichkeit. In Liedform.“", mittel: "„Unterhaltung beim Essen?“", schlecht: "„Tipps zur Bartpflege.“" },
+      hgraam: { geheim: "„Der Stein hat mir verraten, dass er Euch mag. Ich auch.“", frage: "„Hörst du den Stein? Was sagt er?“", gut: "„Er sagt, Ihr seid weise. Und gutaussehend.“", mittel: "„Er sagt … Stein?“", schlecht: "„Er sagt, Ihr seid ein bisschen langsam.“" },
+      themberchaud: { geheim: "„Ich habe Eurem Hort etwas mitgebracht: mich. Mit Schleife.“", frage: "„Und warum sollte ich dich nicht einfach fressen?“", gut: "„Weil ich lebend viel unterhaltsamer bin.“", mittel: "„Ich bin zäh. Wirklich.“", schlecht: "„Echo schmeckt besser.“" },
+      demogorgon: { geheim: "„Zwei Köpfe. Ein Herz. Meins.“", frage: "(Beide Köpfe sehen dich fragend an.)", gut: "„Ich mag euch beide gleich gern.“", mittel: "„Hallo?“", schlecht: "„Der linke ist hübscher.“" }
+    },
+    en: {
+      gundren: { geheim: "\"Gundren, you're looking for a lost mine? My heart is still undiscovered too.\"", frage: "\"And what do I get if I pay in advance?\"", gut: "\"My eternal gratitude. And a ballad.\"", mittel: "\"Uh … a receipt?\"", schlecht: "\"I won't tell anyone where your mine is. Promise.\"" },
+      buergermeister: { geheim: "\"For you I'd even pay taxes. Voluntarily.\"", frage: "\"And what will you tell my voters?\"", gut: "\"That Phandalin has the most generous mayor on the Sword Coast.\"", mittel: "\"Nothing. I'm discreet.\"", schlecht: "\"That you're very good at counting. Especially at keeping.\"" },
+      bugbear: { geheim: "\"I brought you a rat. A whole one.\"", frage: "\"GRRR?\" (He seems to be asking something.)", gut: "\"Grrr.\" (tenderly)", mittel: "\"Yes?\"", schlecht: "\"Sit!\"" },
+      ilvara: { geheim: "\"Lolth has many servants. But only one who sings for you.\"", frage: "\"And what exactly will you do for it?\"", gut: "\"Anything, mistress. Except feed the spiders.\"", mittel: "\"Sing?\"", schlecht: "\"Escape. I mean … later. With you!\"" },
+      kuotoa: { geheim: "\"I invented a new god. It has your name.\"", frage: "\"Blub? Who is your favourite god?\"", gut: "\"You.\"", mittel: "\"I have several.\"", schlecht: "\"I don't believe in made-up gods.\"" },
+      horga: { geheim: "\"Your Majesty, I saved your son. May I save your evening now?\"", frage: "\"And what can a bard offer a king?\"", gut: "\"Immortality. In song.\"", mittel: "\"Dinner entertainment?\"", schlecht: "\"Beard care tips.\"" },
+      hgraam: { geheim: "\"The stone told me it likes you. So do I.\"", frage: "\"Do you hear the stone? What does it say?\"", gut: "\"It says you are wise. And handsome.\"", mittel: "\"It says … stone?\"", schlecht: "\"It says you're a bit slow.\"" },
+      themberchaud: { geheim: "\"I brought something for your hoard: me. With a bow.\"", frage: "\"And why shouldn't I simply eat you?\"", gut: "\"Because I'm far more entertaining alive.\"", mittel: "\"I'm tough. Really.\"", schlecht: "\"Echo tastes better.\"" },
+      demogorgon: { geheim: "\"Two heads. One heart. Mine.\"", frage: "(Both heads look at you questioningly.)", gut: "\"I like you both equally.\"", mittel: "\"Hello?\"", schlecht: "\"The left one is prettier.\"" }
+    }
+  };
+  const t2 = () => TX2[sprache()], n2 = id => NSC2[sprache()][id];
+
   /* ---------- Szene: Zimmer, Spielleiter, Schirm (SVG) ---------- */
   const ZIMMER = `
 <svg class="ch-zimmer" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -343,6 +432,7 @@
     <radialGradient id="chLicht" cx="72%" cy="18%" r="70%"><stop offset="0" stop-color="#5a3a26"/><stop offset=".55" stop-color="#2a1d1f"/><stop offset="1" stop-color="#151017"/></radialGradient>
     <linearGradient id="chHolz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b4528"/><stop offset="1" stop-color="#3a2416"/></linearGradient>
     <radialGradient id="chLampLicht"><stop offset="0" stop-color="#ff7ab8" stop-opacity=".35"/><stop offset=".5" stop-color="#ffb070" stop-opacity=".12"/><stop offset="1" stop-color="#ffb070" stop-opacity="0"/></radialGradient>
+    <pattern id="chPail" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#6f7fa8"/><circle cx="1.5" cy="1.5" r="1.45" fill="#e8f0ff"/><circle cx="4.5" cy="4.5" r="1.45" fill="#b8c8ff"/><circle cx="4.5" cy="1.5" r="1.25" fill="#9fb0d8"/><circle cx="1.5" cy="4.5" r="1.25" fill="#d8e0f8"/></pattern>
     <linearGradient id="chAkustik" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e2a35a"/><stop offset="1" stop-color="#9a5a24"/></linearGradient>
   </defs>
   <rect width="400" height="300" fill="url(#chLicht)"/>
@@ -418,6 +508,9 @@
       <path d="M222 300 L 225 216 C 227 200 238 192 252 190 L 288 190 C 302 192 313 200 315 216 L 318 300 Z" fill="#ecc29f"/>
       <path d="M236 300 L 237 222 C 238 208 245 198 254 193 L 257 191 L 262 203 Q 270 212 278 203 L 283 191 L 286 193 C 295 198 302 208 303 222 L 304 300 Z" fill="#1d2740"/>
       <path d="M262 203 Q 270 212 278 203" fill="none" stroke="#2c3a5c" stroke-width="2"/>
+      <!-- die Glitzerhose (sonst hinter dem Schirm versteckt) -->
+      <g class="ch-hose"><path d="M226 246 L 314 246 L 320 304 L 220 304 Z" fill="url(#chPail)"/><rect x="226" y="242" width="88" height="6" rx="2" fill="#24222a"/><rect x="264" y="242" width="12" height="6" fill="#c9a43a"/>
+        <g class="ch-glanz"><path d="M240 256 l 2 -6 l 2 6 l 6 2 l -6 2 l -2 6 l -2 -6 l -6 -2 Z" fill="#fff"/><path d="M290 268 l 1.5 -4 l 1.5 4 l 4 1.5 l -4 1.5 l -1.5 4 l -1.5 -4 l -4 -1.5 Z" fill="#fff"/><path d="M262 284 l 1.5 -4 l 1.5 4 l 4 1.5 l -4 1.5 l -1.5 4 l -1.5 -4 l -4 -1.5 Z" fill="#dfe8ff"/><path d="M304 252 l 1 -3 l 1 3 l 3 1 l -3 1 l -1 3 l -1 -3 l -3 -1 Z" fill="#fff"/></g></g>
       <!-- Tattoos auf den Schultern -->
       <path d="M229 208 c 3 -5 9 -5 9 1 c 0 5 -7 5 -6 0 M233 216 l 4 6" stroke="#2a3a52" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <path d="M308 206 l 3 5 l -5 2 l 3 5" stroke="#2a3a52" stroke-width="1.6" fill="none" stroke-linecap="round"/>
@@ -546,7 +639,7 @@
       '<div class="ch-sl-blase" aria-live="polite"></div>' +
       '<div class="ch-nsc-blase" aria-live="polite"></div>' +
       '<div class="ch-wuerfel" hidden><span></span></div>' +
-      '<div class="ch-kopfzeile"><div class="ch-geduld"><span class="ch-geduld-txt"></span><span class="ch-geduld-bar"><i></i></span></div><button type="button" class="ch-ton" data-tun="ton"></button><div class="ch-herzen"></div></div>' +
+      '<div class="ch-kopfzeile"><div class="ch-geduld"><span class="ch-geduld-txt"></span><span class="ch-geduld-bar"><i></i></span></div><span class="ch-laune" aria-live="polite"></span><button type="button" class="ch-ton" data-tun="ton"></button><div class="ch-herzen"></div></div>' +
     "</div>" +
     '<div class="ch-tafel"></div>';
   const $ = s => root.querySelector(s);
@@ -626,6 +719,8 @@
   const Ton = (() => {
     let ctx = null, master = null, musikBus = null, effektBus = null;
     let an = lies("imres-charme-ton", "1") === "1";
+    let musikLaut = parseFloat(lies("imres-charme-musik", ".7")), effektLaut = parseFloat(lies("imres-charme-effekte", "1"));
+    if (!(musikLaut >= 0)) musikLaut = .7; if (!(effektLaut >= 0)) effektLaut = 1;
     const puffer = {}, laden = {};
     let stimmen = 0;
     const FAM = {
@@ -646,7 +741,7 @@
       komp.threshold.value = -16; komp.knee.value = 12; komp.ratio.value = 4; komp.attack.value = .006; komp.release.value = .25;
       master.connect(komp); komp.connect(ctx.destination);
       musikBus = ctx.createGain(); musikBus.gain.value = 0; musikBus.connect(master);
-      effektBus = ctx.createGain(); effektBus.gain.value = 1; effektBus.connect(master);
+      effektBus = ctx.createGain(); effektBus.gain.value = effektLaut; effektBus.connect(master);
       Object.keys(FAM).forEach(f => FAM[f].forEach(n => hole(f + "_" + n)));
       EINZEL.forEach(hole);
       return ctx;
@@ -762,7 +857,7 @@
     const COMP = [[[0, 1.2], [1.5, .7], [2.5, .7]], [[0, .8], [1, .5], [2.5, .7], [3.5, .4]], [[.5, .8], [1.5, .7], [3, .8]], [[0, 3.6]], [[0, .7], [1.5, .5], [2, .5], [3, .8]]];
     const BASS = [[[0, 0, 1.4], [2, 7, .9], [3.5, "nah", .4]], [[0, 0, .9], [1.5, 0, .5], [2, 7, .9], [3.5, 7, .4]], [[0, 0, .9], [1, 3, .9], [2, 7, .9], [3, "nah", .9]], [[0, 0, 1.8], [2.5, 7, 1.2]]];
     const RHY = [[0, .5, 1, 2], [0, 1.5, 2], [.5, 1, 1.5, 2.5, 3], [0, 2, 2.5], [1, 1.5, 2, 3.5], [0, .75, 1.5]];
-    const SCHLAG = .68;
+    let SCHLAG = .68;
     let musikAn = false, naechsterTakt = 0, takt = 0, uhr = 0, liebe = 0;
     let comp = 0, bass = 0, melodie = false, letzteNote = 69;
     const wahl = l => l[Math.floor(Math.random() * l.length)];
@@ -818,7 +913,7 @@
       if (!ctx) return;
       if (soll && an) {
         if (!musikAn) { musikAn = true; naechsterTakt = jetzt() + .15; clearInterval(uhr); uhr = setInterval(ticken, 150); ticken(); }
-        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(.7, jetzt(), .4);
+        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(musikLaut, jetzt(), .4);
       } else if (musikAn) {
         musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(0, jetzt(), .15);
         musikAn = false; clearInterval(uhr);
@@ -829,11 +924,17 @@
       if (!ctx || !musikAn) return;
       musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setValueAtTime(musikBus.gain.value, jetzt());
       musikBus.gain.linearRampToValueAtTime(0, jetzt() + .08);
-      musikBus.gain.setValueAtTime(0, jetzt() + dauer); musikBus.gain.linearRampToValueAtTime(.7, jetzt() + dauer + 1.2);
+      musikBus.gain.setValueAtTime(0, jetzt() + dauer); musikBus.gain.linearRampToValueAtTime(musikLaut, jetzt() + dauer + 1.2);
     }
     return {
       init, fx, musik, stille,
       liebe: n => { liebe = n; },
+      tempo: f => { SCHLAG = .68 * f; },
+      laut: () => ({ musik: musikLaut, effekte: effektLaut }),
+      setzeLaut(art, v) {
+        if (art === "musik") { musikLaut = v; schreib("imres-charme-musik", String(v)); if (ctx && musikAn) { musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(v, jetzt(), .1); } }
+        else { effektLaut = v; schreib("imres-charme-effekte", String(v)); if (ctx) effektBus.gain.setTargetAtTime(v, jetzt(), .05); }
+      },
       an: () => an,
       schalten() { an = !an; schreib("imres-charme-ton", an ? "1" : "0"); if (!an) musik(false); return an; }
     };
@@ -886,13 +987,13 @@
     buehne.style.setProperty("--liebe", (l / 3).toFixed(2)); buehne.dataset.liebe = l; Ton.liebe(l);
   }
   /* ---------- Hooks in den Spielablauf ---------- */
-  const SPRUCH_FLUG = { charmant: "🌹", kuehn: "💋", absurd: ["🐟", "🧀", "🦆", "🥔"], passend: "✨" };
+  const SPRUCH_FLUG = { charmant: "🌹", kuehn: "💋", absurd: ["🐟", "🧀", "🦆", "🥔"], passend: "✨", geheim: ["📜", "💘"] };
   const effekte = {
     start() { Ton.init(); tonFx("auftritt"); Ton.musik(true); },
     nsc() { tonFx("auftritt"); stimmung("auftritt", 1200); liebeSetzen(); },
     spruch(art) {
       flug(SPRUCH_FLUG[art], art === "absurd" ? 3 : 1, "werfen");
-      if (art === "kuehn") tonFx("wah"); else if (art === "absurd") { tonFx("boing"); tonFx("klapper"); } else if (art === "passend") tonFx("harfeHoch", 0, 67); else tonFx("schmacht");
+      if (art === "kuehn") tonFx("wah"); else if (art === "absurd") { tonFx("boing"); tonFx("klapper"); } else if (art === "passend") tonFx("harfeHoch", 0, 67); else if (art === "geheim") { tonFx("zauber"); tonFx("schmacht"); } else tonFx("schmacht");
     },
     wurf() { tonFx("wuerfel"); buehne.classList.add("spannung"); },
     peinlich(dauer) {
@@ -964,78 +1065,121 @@
   /* Nahaufnahme für eine Weile, dann zurück in die Totale */
   function nah(ziel, zoom, ms, art) { kamera(ziel, zoom, art); kamUhr = setTimeout(() => kamera(null), ms); }
   /* ---------- Ablauf ---------- */
+  /* Zeitplan: alles, was „gleich passiert“, läuft über plan() – so lässt es sich mit einem Tipp vorspulen */
+  let plaene = [];
+  const skipEl = document.createElement("div"); skipEl.className = "ch-skip"; buehne.appendChild(skipEl);
+  function skipZeigen() { buehne.classList.toggle("kann-skip", plaene.length > 0 && ansicht === "spiel"); skipEl.textContent = t2().skip; }
+  function plan(fn, ms) {
+    const p = { fn, bis: performance.now() + ms };
+    p.id = setTimeout(() => { plaene = plaene.filter(x => x !== p); fn(); skipZeigen(); }, ms);
+    plaene.push(p); skipZeigen(); return p;
+  }
+  function planLeeren() { plaene.forEach(p => clearTimeout(p.id)); plaene = []; skipZeigen(); }
+  function vorspulen() {
+    if (!plaene.length) return false;
+    if (S && S.peinlichBis && performance.now() < S.peinlichBis) { blase(slBlase, t2().aushalten, 0); return true; } /* die Stille wird erst ausgehalten */
+    let n = 0;
+    while (plaene.length && n++ < 40) {
+      plaene.sort((a, b) => a.bis - b.bis);
+      const p = plaene.shift(); clearTimeout(p.id); p.fn();
+    }
+    skipZeigen(); return true;
+  }
+  const geheimLesen = () => { try { return JSON.parse(lies("imres-charme-geheim", "{}")) || {}; } catch (_) { return {}; } };
+  const klemm = (v, a, b) => Math.max(a, Math.min(b, v));
+  function launeAendern(d) { if (S) S.laune = klemm((S.laune || 0) + d, -3, 3); }
+  const LAUNE_ICON = ["😡", "😒", "😐", "🙂", "😍"];
+  const launeStufe = l => l <= -3 ? 0 : l <= -1 ? 1 : l === 0 ? 2 : l <= 2 ? 3 : 4;
+  function moment(p, text) { if (S && (!S.moment || p > S.moment.p)) S.moment = { p, text, wer: t().nsc[S.nsc.id].name }; }
+
   function neueSitzung() {
-    S = { reihe: NSC.slice(), i: 0, geduld: 10, herzenGesamt: 0, erobert: 0, joker: { echo: 1, rex: 1, floete: 1 }, vorteil: false, bonus: false, ergebnisse: [] };
+    planLeeren();
+    S = { reihe: NSC.slice(), i: 0, geduld: 10, herzenGesamt: 0, erobert: 0, joker: { echo: 1, rex: 1, floete: 1 }, vorteil: false, bonus: false, ergebnisse: [],
+      laune: 0, serie: 0, rausch: false, moment: null };
     ansicht = "spiel"; nscStart();
   }
-  function nscStart() {
+  function nscStart(fortgesetzt) {
     const n = S.reihe[S.i];
-    S.nsc = n; S.herzen = 0; S.zuege = 4; S.fertig = null; S.letzt = null;
-    S.angebot = spruchAngebot(n);
+    S.nsc = n;
+    if (!fortgesetzt) { S.herzen = 0; S.zuege = 4; S.fertig = null; S.letzt = null; S.letzt2 = null; S.frage = null; S.frageGehabt = false; S.gruppeZahl = 0; S.geheimGenutzt = false; S.neuGeheim = false; S.angebot = spruchAngebot(n); }
     clearTimeout(wuerfelUhr); wuerfel.hidden = true; wuerfel.classList.remove("weg");
     nscZeigen(n); effekte.nsc();
     setTimeout(() => { if (S && S.nsc === n) { kamera("nsc", 1.9, "schnitt"); setTimeout(() => kamera(null, 1, "zieh"), 700); } }, 350);
     gesicht("grinsen", 1400);
     slSagt(t().sl.start, 2000);
-    setTimeout(() => { if (S && S.nsc === n) blase(nscBlase, t().nsc[n.id].intro, 0); }, 500);
+    plan(() => { if (S && S.nsc === n) blase(nscBlase, S.frage ? n2(n.id).frage : t().nsc[n.id].intro, 0); }, 500);
     zeichnen();
   }
-  /* drei Sprüche: einer charmant, einer kühn, einer absurd – manchmal statt charmant der passende */
+  /* drei Sprüche: einer charmant, einer kühn, einer absurd – manchmal statt charmant der passende; freigeschaltete Geheimsprüche obendrauf */
   function spruchAngebot(n) {
     const T = t().nsc[n.id], arten = ["charmant", "kuehn", "absurd"];
     if (Math.random() < .45) arten[0] = "passend";
-    return arten.map(art => ({ art, idx: Math.floor(Math.random() * T[art].length) }));
+    const l = arten.map(art => ({ art, idx: Math.floor(Math.random() * T[art].length) }));
+    if (geheimLesen()[n.id] && !(S && S.geheimGenutzt)) l.unshift({ art: "geheim", idx: 0 });
+    return l;
   }
-  const sgFuer = (art, n) => art === "kuehn" ? n.sg + 4 : art === "passend" ? n.sg - 4 : n.sg;
+  const sgFuer = (art, n) => art === "kuehn" ? n.sg + 4 : art === "passend" ? n.sg - 4 : art === "geheim" ? n.sg - 6 : n.sg;
+  const spruchText = (art, idx, id) => art === "geheim" ? n2(id).geheim : t().nsc[id][art][idx % t().nsc[id][art].length];
 
   function wuerfeln(art, idx) {
-    if (!S || S.fertig || S.wirft) return;
-    const n = S.nsc, T = t(), NT = T.nsc[n.id];
-    S.wirft = true;
-    blase(nscBlase, "Barradin: " + NT[art][idx % NT[art].length], 0);
+    if (!S || S.fertig || S.wirft || S.frage) return;
+    const n = S.nsc, T = t();
+    S.wirft = true; S.spruch = spruchText(art, idx, n.id);
+    if (art === "geheim") S.geheimGenutzt = true;
+    blase(nscBlase, "Barradin: " + S.spruch, 0);
     nscBlase.classList.add("barradin");
     effekte.spruch(art);
     if (art === "absurd") { gesicht(zufall(["facepalm", "augenrollen", "unglaeubig"]), 1500); slSagt(T.sl.absurd, 1800); S.geduld = Math.max(0, S.geduld - 1); }
-    else gesicht({ charmant: "skeptisch", kuehn: zufall(["fremdscham", "verkneifen"]), passend: "smirk" }[art] || "notiert");
+    else gesicht({ charmant: "skeptisch", kuehn: zufall(["fremdscham", "verkneifen"]), passend: "smirk", geheim: "unglaeubig" }[art] || "notiert");
     nah("nsc", 2.2, 1300);
     zeichnen();
     /* Manchmal wird es unangenehm still, bevor überhaupt gewürfelt wird */
-    const p = art === "absurd" ? .55 : art === "kuehn" ? .38 : .2;
+    const p = art === "absurd" ? .55 : art === "kuehn" ? .38 : art === "geheim" ? 0 : .2;
     if (!S.peinlichZuletzt && Math.random() < p) { S.peinlichZuletzt = true; peinlichePause(() => rollen(art)); }
     else { S.peinlichZuletzt = false; rollen(art); }
   }
   function peinlichePause(weiterMit) {
     const n = S.nsc, T = t(), dauer = ruhig ? 1800 : 4200 + Math.random() * 3200;
-    setTimeout(() => {
+    S.peinlichBis = performance.now() + 900 + 2000;
+    launeAendern(-1);
+    plan(() => {
       if (!S || S.nsc !== n) return;
       gesicht("starr"); sl.classList.add("starr"); effekte.peinlich(dauer / 1000);
       kamera("sl", 1.7, "schnitt"); requestAnimationFrame(() => requestAnimationFrame(() => kamera("sl", 2.5, "schleich")));
       blase(slBlase, "…", 0); slBlase.classList.add("punkte");
     }, 900);
-    setTimeout(() => { if (S && S.nsc === n) { nscBlase.classList.remove("barradin"); blase(nscBlase, "…", 0); nscBlase.classList.add("punkte"); kamera("nsc", 2.4, "schnitt"); } }, 2100);
-    setTimeout(() => { if (S && S.nsc === n) { slBlase.classList.remove("punkte"); blase(slBlase, zufall(T.sl.peinlich), 0); kamera("sl", 2.2, "schnitt"); gesicht(zufall(["starr", "fremdscham", "pokerface"])); sl.classList.add("starr");
-      requestAnimationFrame(() => requestAnimationFrame(() => kamera("sl", 3, "schleich"))); } }, 3300);
-    setTimeout(() => {
+    plan(() => { if (S && S.nsc === n) { nscBlase.classList.remove("barradin"); blase(nscBlase, "…", 0); nscBlase.classList.add("punkte"); kamera("nsc", 2.4, "schnitt"); } }, 2100);
+    plan(() => {
+      if (!S || S.nsc !== n) return;
+      const satz = zufall(T.sl.peinlich);
+      slBlase.classList.remove("punkte"); blase(slBlase, satz, 0); kamera("sl", 2.2, "schnitt"); gesicht(zufall(["starr", "fremdscham", "pokerface"])); sl.classList.add("starr");
+      moment(2, "Barradin: " + S.spruch + " … " + satz);
+      requestAnimationFrame(() => requestAnimationFrame(() => kamera("sl", 3, "schleich")));
+    }, 3300);
+    plan(() => {
       sl.classList.remove("starr"); slBlase.classList.remove("punkte"); nscBlase.classList.remove("punkte");
-      kamera(null, 1, "zieh");
+      kamera(null, 1, "zieh"); if (S) S.peinlichBis = 0;
+      Ton.stille(0);
       if (S && S.nsc === n) { gesicht("seufzen", 1200); weiterMit(); }
     }, dauer + 900);
   }
   let wuerfelUhr = 0;
+  function wuerfelZeigen(w, rollend) {
+    clearTimeout(wuerfelUhr);
+    wuerfel.hidden = false; wuerfel.className = "ch-wuerfel" + (rollend ? " rollt" : w === 20 ? " krit" : w === 1 ? " patzer" : "");
+    if (!rollend) wuerfelUhr = setTimeout(() => { wuerfel.classList.add("weg"); wuerfelUhr = setTimeout(() => { wuerfel.hidden = true; wuerfel.classList.remove("weg"); }, 450); }, w === 20 || w === 1 ? 2600 : 1900);
+  }
   function rollen(art) {
     /* Würfel rollt */
     const w1 = 1 + Math.floor(Math.random() * 20), w2 = 1 + Math.floor(Math.random() * 20);
     const w = S.vorteil ? Math.max(w1, w2) : w1; const vort = S.vorteil; S.vorteil = false;
-    clearTimeout(wuerfelUhr);
-    wuerfel.hidden = false; wuerfel.className = "ch-wuerfel rollt";
+    wuerfelZeigen(0, true);
     const zahl = wuerfel.querySelector("span");
     const flimmer = setInterval(() => { zahl.textContent = 1 + Math.floor(Math.random() * 20); }, 60);
     effekte.wurf();
-    setTimeout(() => {
+    plan(() => {
       clearInterval(flimmer); zahl.textContent = w;
-      wuerfel.className = "ch-wuerfel" + (w === 20 ? " krit" : w === 1 ? " patzer" : "");
-      clearTimeout(wuerfelUhr);
-      wuerfelUhr = setTimeout(() => { wuerfel.classList.add("weg"); wuerfelUhr = setTimeout(() => { wuerfel.hidden = true; wuerfel.classList.remove("weg"); }, 450); }, w === 20 || w === 1 ? 2600 : 1900);
+      wuerfelZeigen(w);
       auswerten(art, w, vort ? [w1, w2] : null);
     }, ruhig ? 200 : 1500);
   }
@@ -1045,18 +1189,25 @@
     if (w === 20) { herz = 3; art2 = "krit"; }
     else if (w === 1) { herz = -1; art2 = "patzer"; S.geduld = Math.max(0, S.geduld - 2); }
     else if (art === "absurd") { if (w >= 10) { herz = 1; art2 = "erfolg"; } else { art2 = "misserfolg"; S.geduld = Math.max(0, S.geduld - 1); } }
-    else if (summe >= sg) { herz = art === "kuehn" ? 2 : 1; art2 = "erfolg"; }
+    else if (summe >= sg) { herz = art === "kuehn" || art === "geheim" ? 2 : 1; art2 = "erfolg"; }
     else { art2 = "misserfolg"; if (art === "kuehn") S.geduld = Math.max(0, S.geduld - 1); }
+    /* Barden-Rausch: dieser Spruch zählt doppelt */
+    const imRausch = S.rausch;
+    if (imRausch) { if (herz > 0) herz *= 2; S.rausch = false; buehne.classList.remove("rausch"); Ton.tempo(1); }
     S.herzen = Math.max(0, Math.min(3, S.herzen + herz));
     S.zuege--;
-    S.letzt = { art2, w, summe, sg: art === "absurd" ? null : sg, beide };
+    S.letzt = { art2, w, summe, sg: art === "absurd" ? null : sg, beide, rausch: imRausch && herz > 0 }; S.letzt2 = null;
+    /* Laune des Spielleiters */
+    launeAendern(art2 === "krit" ? 2 : art2 === "erfolg" ? 1 : art2 === "patzer" ? 1 : (art === "absurd" || art === "kuehn") ? -1 : 0);
+    /* Serie → Rausch */
+    if (art2 === "erfolg" || art2 === "krit") S.serie = (S.serie || 0) + 1; else S.serie = 0;
     nscBlase.classList.remove("barradin");
     effekte.ergebnis(art2);
     if (art2 === "krit") {
       gesicht("schock", 1200, "verliebt"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0);
       kamera("sl", 2.4, "schnitt"); kamUhr = setTimeout(() => { kamera("nsc", 1.8, "schnitt"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 1400); }, 1200);
     }
-    else if (art2 === "patzer") { gesicht("fremdscham", 1300, "lachtraenen"); slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); nah("sl", 2.2, 2000, "schnitt"); }
+    else if (art2 === "patzer") { gesicht("fremdscham", 1300, "lachtraenen"); slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); nah("sl", 2.2, 2000, "schnitt"); moment(3, NT.patzer); }
     else if (art2 === "erfolg") {
       gesicht(S.herzen >= 3 ? "verliebt" : zufall(["kichern", "errötet", "verkneifen", "grinsen"]), 2600); slSagt(T.sl.erfolg); blase(nscBlase, zufall(NT.ja), 0);
       if (Math.random() < .5) nah("nsc", 1.9, 1400); else nah("sl", 2.1, 1400);
@@ -1067,35 +1218,130 @@
       /* … und manchmal hängt die Antwort unangenehm lange in der Luft */
       if (S.herzen < 3 && S.zuege > 0 && S.geduld > 0 && Math.random() < .35 && !ruhig) {
         const nn = S.nsc; blase(nscBlase, zufall(T.sl.nachhall), 0); nscBlase.classList.add("punkte");
-        setTimeout(() => { if (S && S.nsc === nn && !S.wirft) { nscBlase.classList.remove("punkte"); blase(nscBlase, zufall(NT.nein), 0); } }, 2600);
+        plan(() => { if (S && S.nsc === nn) { nscBlase.classList.remove("punkte"); blase(nscBlase, zufall(NT.nein), 0); } }, 2600);
       } else blase(nscBlase, zufall(NT.nein), 0);
     }
     S.wirft = false;
-    if (S.herzen >= 3) nscEnde(true);
-    else if (S.zuege <= 0 || S.geduld <= 0) nscEnde(false);
-    else S.angebot = spruchAngebot(n);
+    if (S.herzen >= 3) return nscEnde(true);
+    if (S.zuege <= 0 || S.geduld <= 0) return nscEnde(false);
+    S.angebot = spruchAngebot(n);
+    nachDemWurf(art2);
     zeichnen();
+  }
+  /* Was nach einem Wurf noch passieren kann: Rausch, Laune, Folgefrage oder die Gruppe funkt dazwischen */
+  function nachDemWurf(art2) {
+    const n = S.nsc, T2 = t2();
+    if (S.serie >= 3 && !S.rausch) {
+      S.serie = 0; S.rausch = true;
+      plan(() => { if (!S || S.nsc !== n) return; buehne.classList.add("rausch"); stempel(T2.rausch, "rausch"); slSagt(T2.rauschSl, 2400); gesicht("unglaeubig", 1800); Ton.tempo(.82); tonFx("fanfare"); zeichnen(); }, 1700);
+      return;
+    }
+    if (S.laune >= 3) {
+      S.laune = 1; S.vorteil = true;
+      plan(() => { if (!S || S.nsc !== n) return; slSagt(T2.vorteil, 2600); gesicht("stolz", 1800); tonFx("harfeHoch", 0, 67); zeichnen(); }, 1800);
+      return;
+    }
+    if (S.laune <= -3) { S.wirft = true; zeichnen(); plan(() => wuerdeWurf(n), 1800); return; }
+    if (art2 === "erfolg" && !S.frageGehabt && Math.random() < .45) {
+      S.frageGehabt = true; S.wirft = true; zeichnen();
+      plan(() => {
+        if (!S || S.nsc !== n) return;
+        S.wirft = false; S.frage = ["gut", "mittel", "schlecht"].sort(() => Math.random() - .5);
+        blase(nscBlase, n2(n.id).frage, 0); nah("nsc", 2, 1500); gesicht("skeptisch", 1500); tonFx("klapper");
+        zeichnen();
+      }, 2000);
+      return;
+    }
+    if ((S.gruppeZahl || 0) < 2 && Math.random() < .24) { S.gruppeZahl = (S.gruppeZahl || 0) + 1; S.wirft = true; zeichnen(); plan(() => gruppeFunktDazwischen(n), 2100); }
+  }
+  function wuerdeWurf(n) {
+    if (!S || S.nsc !== n) return;
+    const T2 = t2();
+    slSagt(T2.wuerde, 2400); gesicht("skeptisch"); nah("sl", 2.2, 1400, "schnitt");
+    const w = 1 + Math.floor(Math.random() * 20), s = w + 2;
+    wuerfelZeigen(0, true); const zahl = wuerfel.querySelector("span");
+    const flimmer = setInterval(() => { zahl.textContent = 1 + Math.floor(Math.random() * 20); }, 60);
+    tonFx("wuerfel");
+    plan(() => {
+      clearInterval(flimmer); zahl.textContent = w; wuerfelZeigen(w);
+      S.laune = -1; S.wirft = false;
+      S.letzt2 = { text: T2.wuerdeWurf(w, s), ok: s >= 12 };
+      if (s >= 12) { slSagt(T2.wuerdeOk, 2200); gesicht("smirk", 1800); tonFx("harfeHoch", 0, 60); }
+      else { slSagt(T2.wuerdeNein, 2400); gesicht("lachtraenen", 2000); tonFx("posaune", true); S.herzen = Math.max(0, S.herzen - 1); S.geduld = Math.max(0, S.geduld - 1); stimmung("frost", 1400); }
+      if (S.geduld <= 0) return nscEnde(false);
+      zeichnen();
+    }, 1500);
+  }
+  const GRUPPE_ZEICHEN = { friedrich: ["🏹"], ezekiel: ["🗡️", "💰"], echo: ["❓", "🌿"], rex: ["🐕", "🦴"] };
+  function gruppeFunktDazwischen(n) {
+    if (!S || S.nsc !== n) return;
+    const T2 = t2(), wer = zufall(["friedrich", "ezekiel", "echo", "rex"]), g = T2.gruppe[wer];
+    slSagt(g.an, 2600); gesicht("unglaeubig", 1600); flug(GRUPPE_ZEICHEN[wer], 4, "aufsteigen"); tonFx(wer === "rex" ? "bellen" : "klapper");
+    plan(() => {
+      if (!S || S.nsc !== n) return;
+      const gut = Math.random() < .55;
+      blase(nscBlase, gut ? g.gut : g.schlecht, 0);
+      slSagt(gut ? T2.gruppeSl.gut : T2.gruppeSl.schlecht, 2400);
+      if (gut) { S.herzen = Math.min(3, S.herzen + 1); gesicht("kichern", 2000); nscReagiert("verliebt"); tonFx("kuss"); flug(["💗", "💕"], 5, "aufsteigen"); }
+      else { S.herzen = Math.max(0, S.herzen - 1); if (wer === "ezekiel" || wer === "echo") S.geduld = Math.max(0, S.geduld - 1); gesicht("lachtraenen", 2200); nscReagiert("kalt", 900); tonFx("posaune", true); moment(2, g.schlecht); }
+      S.wirft = false; liebeSetzen();
+      if (S.herzen >= 3) return nscEnde(true);
+      if (S.geduld <= 0) return nscEnde(false);
+      zeichnen();
+    }, 1900);
+  }
+  function antworten(k) {
+    if (!S || !S.frage) return;
+    const n = S.nsc, T2 = t2(), A = n2(n.id), NT = t().nsc[n.id];
+    S.frage = null; S.wirft = true;
+    blase(nscBlase, "Barradin: " + A[k], 0); nscBlase.classList.add("barradin");
+    gesicht(k === "gut" ? "verkneifen" : k === "mittel" ? "pokerface" : "fremdscham", 1200);
+    zeichnen();
+    plan(() => {
+      if (!S || S.nsc !== n) return;
+      nscBlase.classList.remove("barradin");
+      slSagt(T2.antwortSl[k], 2400);
+      if (k === "gut") { S.herzen = Math.min(3, S.herzen + 1); launeAendern(1); blase(nscBlase, zufall(NT.ja), 0); gesicht("errötet", 2200); nscReagiert("verliebt"); tonFx("kuss"); tonFx("harfeHoch", .1); flug(["💗", "💖"], 6, "aufsteigen"); }
+      else if (k === "mittel") { blase(nscBlase, zufall(T2.mittelNsc), 0); gesicht("smirk", 1800); }
+      else { S.herzen = Math.max(0, S.herzen - 1); S.geduld = Math.max(0, S.geduld - 1); launeAendern(-1); blase(nscBlase, zufall(NT.nein), 0); gesicht("facepalm", 1400, "lachtraenen"); nscReagiert("kalt", 900); tonFx("posaune", true); stimmung("frost", 1400); moment(3, "Barradin: " + A[k]); }
+      S.wirft = false; liebeSetzen();
+      if (S.herzen >= 3) return nscEnde(true);
+      if (S.geduld <= 0) return nscEnde(false);
+      zeichnen();
+    }, 1000);
   }
   function nscEnde(gewonnen) {
     const n = S.nsc, T = t(), NT = T.nsc[n.id];
-    S.fertig = gewonnen ? "erobert" : "korb";
+    S.fertig = gewonnen ? "erobert" : "korb"; S.wirft = false; S.frage = null;
+    if (S.rausch) { S.rausch = false; buehne.classList.remove("rausch"); Ton.tempo(1); }
     if (gewonnen) { S.erobert++; S.herzenGesamt += 3 + Math.max(0, S.zuege); }
-    else { S.herzenGesamt += S.herzen; S.geduld = Math.max(0, S.geduld - 1); }
+    else { S.herzenGesamt += S.herzen; S.geduld = Math.max(0, S.geduld - 1); moment(1, NT.verloren); }
     S.ergebnisse.push({ id: n.id, ok: gewonnen });
     const buch = buchLesen(); if (gewonnen || !buch[n.id]) buch[n.id] = gewonnen ? "erobert" : "korb"; schreib("imres-charme-buch", JSON.stringify(buch));
-    setTimeout(() => {
+    if (gewonnen) { const g = geheimLesen(); if (!g[n.id]) { g[n.id] = true; schreib("imres-charme-geheim", JSON.stringify(g)); S.neuGeheim = true; } }
+    plan(() => {
       if (!S || S.nsc !== n) return;
       blase(nscBlase, gewonnen ? NT.sieg : NT.verloren, 0);
       slSagt(gewonnen ? T.sl.erobert : T.sl.korb, 2800);
       gesicht(gewonnen ? zufall(["verliebt", "schwitzt", "errötet"]) : zufall(["lachtraenen", "smirk", "lachen"]), 2800);
-      if (gewonnen) { kamera("beide", 1.45, "zieh"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 2600); } else nah("sl", 2.2, 1800, "schnitt");
+      if (gewonnen) { kamera("beide", 1.45, "zieh"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 2600); glitzerhose(); } else nah("sl", 2.2, 1800, "schnitt");
       if (gewonnen) herzRegen();
+      if (S.neuGeheim) flug("📜", 3, "aufsteigen");
       effekte.ende(gewonnen);
       zeichnen();
     }, 1500);
+    zeichnen();
+  }
+  /* Bei einer Eroberung springt der Spielleiter auf, der Schirm kippt – und die Glitzerhose blitzt */
+  function glitzerhose() {
+    if (ruhig) return;
+    buehne.classList.add("glitzer");
+    setTimeout(() => { if (S && !S.ende) { slSagt(t2().glitzer, 2400); gesicht("errötet", 2000); } }, 2300);
+    setTimeout(() => buehne.classList.remove("glitzer"), 3400);
   }
   function weiter() {
     if (!S) return;
+    planLeeren();
     if (S.geduld <= 0) return sitzungEnde(true);
     S.i++;
     if (S.i >= S.reihe.length && !S.bonus && S.erobert >= 6) { S.bonus = true; S.reihe.push(BONUS); slSagt(t().bonusRuf, 3600); }
@@ -1103,23 +1349,27 @@
     nscStart();
   }
   function sitzungEnde(zu) {
+    planLeeren();
     S.ende = zu ? "schirm" : "fertig";
     const alt = rekord(); S.neuRekord = S.herzenGesamt > alt; if (S.neuRekord) schreib("imres-charme-rekord", String(S.herzenGesamt));
+    try { localStorage.removeItem("imres-charme-lauf"); } catch (_) {}
     nscImg.classList.remove("da");
     nscBlase.classList.remove("da");
+    buehne.classList.remove("rausch"); Ton.tempo(1);
     effekte.schluss(zu); kamera(null);
     if (zu) { buehne.classList.add("zu"); gesicht("genervt"); slSagt(t().sl.schirm, 4000); }
     else gesicht("stolz", 3000, "grinsen");
     zeichnen();
   }
   function joker(k) {
-    if (!S || S.fertig || S.wirft || !S.joker[k]) return;
+    if (!S || S.fertig || S.wirft || S.frage || !S.joker[k]) return;
     const T = t(); S.joker[k] = 0;
-    if (k === "echo") { S.zuege++; S.angebot = spruchAngebot(S.nsc); gesicht("augenrollen", 2200); slSagt(T.sl.echo); nah("sl", 2, 1400); blase(nscBlase, sprache() === "en" ? "Echo: \"Do you know Gundren?\" – \"…Who?\"" : "Echo: „Kennst du Gundren?“ – „…Wen?“", 0); S.geduld = Math.max(0, S.geduld - 1); }
-    if (k === "rex") { S.herzen = Math.min(3, S.herzen + 1); gesicht("kichern", 2200); slSagt(T.sl.rex); blase(nscBlase, sprache() === "en" ? "Rex wags his tail. Resistance is futile." : "Rex wedelt. Widerstand ist zwecklos.", 0); if (S.herzen >= 3) nscEnde(true); }
-    if (k === "floete") { S.vorteil = true; gesicht("schock", 1400, "seufzen"); slSagt(T.sl.floete); nah("sl", 2.2, 1200, "schnitt"); blase(nscBlase, sprache() === "en" ? "A tiny Demogorgon appears above the flute. Very impressive." : "Über der Flöte erscheint ein winziger Demogorgon. Sehr beeindruckend.", 0); S.geduld = Math.max(0, S.geduld - 1); }
+    if (k === "echo") { S.zuege++; S.angebot = spruchAngebot(S.nsc); gesicht("augenrollen", 2200); slSagt(T.sl.echo); nah("sl", 2, 1400); blase(nscBlase, sprache() === "en" ? "Echo: \"Do you know Gundren?\" – \"…Who?\"" : "Echo: „Kennst du Gundren?“ – „…Wen?“", 0); S.geduld = Math.max(0, S.geduld - 1); launeAendern(-1); }
+    if (k === "rex") { S.herzen = Math.min(3, S.herzen + 1); gesicht("kichern", 2200); slSagt(T.sl.rex); blase(nscBlase, sprache() === "en" ? "Rex wags his tail. Resistance is futile." : "Rex wedelt. Widerstand ist zwecklos.", 0); launeAendern(1); }
+    if (k === "floete") { S.vorteil = true; gesicht("schock", 1400, "seufzen"); slSagt(T.sl.floete); nah("sl", 2.2, 1200, "schnitt"); blase(nscBlase, sprache() === "en" ? "A tiny Demogorgon appears above the flute. Very impressive." : "Über der Flöte erscheint ein winziger Demogorgon. Sehr beeindruckend.", 0); S.geduld = Math.max(0, S.geduld - 1); launeAendern(-1); }
     effekte.joker(k);
-    if (S.geduld <= 0 && !S.fertig) nscEnde(false);
+    if (S.herzen >= 3) return nscEnde(true);
+    if (S.geduld <= 0 && !S.fertig) return nscEnde(false);
     zeichnen();
   }
   function herzRegen() {
@@ -1131,27 +1381,145 @@
     }
   }
 
+  /* ---------- Lauf speichern / fortsetzen ---------- */
+  const LAUF = "imres-charme-lauf";
+  const FELDER = ["i", "geduld", "herzenGesamt", "erobert", "joker", "vorteil", "bonus", "ergebnisse", "herzen", "zuege", "fertig", "letzt", "letzt2", "angebot", "laune", "serie", "geheimGenutzt", "frageGehabt", "frage", "gruppeZahl", "moment", "neuGeheim"];
+  function speichern() {
+    if (!S || S.ende || S.wirft) return;
+    const d = { v: 1, ids: S.reihe.map(n => n.id) }; FELDER.forEach(k => { d[k] = S[k]; });
+    schreib(LAUF, JSON.stringify(d));
+  }
+  function gespeichert() {
+    try { const d = JSON.parse(lies(LAUF, "null")); return d && d.v === 1 && Array.isArray(d.ids) && d.i < d.ids.length ? d : null; } catch (_) { return null; }
+  }
+  function fortsetzen() {
+    const d = gespeichert(); if (!d) return neueSitzung();
+    planLeeren();
+    S = { reihe: d.ids.map(id => id === BONUS.id ? BONUS : NSC.find(n => n.id === id)).filter(Boolean), rausch: false };
+    FELDER.forEach(k => { S[k] = d[k]; });
+    if (!S.reihe[S.i]) return neueSitzung();
+    ansicht = "spiel"; nscStart(true);
+  }
+
+  /* ---------- Anleitung & Klangregler ---------- */
+  const anleitungEl = document.createElement("div"); anleitungEl.className = "ch-anleitung"; anleitungEl.hidden = true; buehne.appendChild(anleitungEl);
+  const reglerEl = document.createElement("div"); reglerEl.className = "ch-regler"; reglerEl.hidden = true; buehne.appendChild(reglerEl);
+  let nachAnleitung = null;
+  function anleitungZeigen(dann) {
+    const T2 = t2(); nachAnleitung = dann || null;
+    anleitungEl.innerHTML = '<div class="ch-karte-innen"><h4>' + esc(T2.anleitungTitel) + "</h4><ol>" + T2.anleitung.map(s => "<li>" + s + "</li>").join("") + "</ol>" +
+      '<button type="button" class="tav-knopf ch-haupt" data-tun="anleitungZu" autofocus>' + esc(T2.los) + "</button></div>";
+    anleitungEl.hidden = false;
+  }
+  function reglerZeigen() {
+    const T2 = t2(), m = Math.round(Ton.laut().musik * 100), e = Math.round(Ton.laut().effekte * 100);
+    reglerEl.innerHTML = '<div class="ch-karte-innen"><h4>🎚 ' + esc(T2.klang) + "</h4>" +
+      '<label>' + esc(T2.musik) + ' <input type="range" min="0" max="100" step="5" value="' + m + '" data-regler="musik"></label>' +
+      '<label>' + esc(T2.effekte) + ' <input type="range" min="0" max="100" step="5" value="' + e + '" data-regler="effekte"></label>' +
+      '<label class="ch-leise"><input type="checkbox" data-regler="leise"' + (Ton.an() ? "" : " checked") + "> " + esc(T2.leise) + "</label>" +
+      '<button type="button" class="tav-knopf" data-tun="reglerZu">' + esc(T2.fertig) + "</button></div>";
+    reglerEl.hidden = false;
+  }
+  reglerEl.addEventListener("input", e => {
+    const r = e.target.dataset.regler; if (!r) return;
+    Ton.init();
+    if (r === "musik") Ton.setzeLaut("musik", e.target.value / 100);
+    if (r === "effekte") { Ton.setzeLaut("effekte", e.target.value / 100); }
+  });
+  reglerEl.addEventListener("change", e => {
+    const r = e.target.dataset.regler;
+    if (r === "effekte") tonFx("kuss");
+    if (r === "leise") { Ton.init(); const soll = !e.target.checked; if (Ton.an() !== soll) Ton.schalten(); if (soll && ansicht === "spiel" && S && !S.ende) Ton.musik(true); zeichnen(); }
+  });
+
+  /* ---------- Teilen-Bild ---------- */
+  function titelIndex() {
+    if (!S) return 0;
+    if (S.ergebnisse.some(e => e.id === "demogorgon" && e.ok)) return 5;
+    const e = S.erobert; return e === 0 ? 0 : e <= 2 ? 1 : e <= 4 ? 2 : e <= 6 ? 3 : 4;
+  }
+  const bildLaden = src => new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+  function umbrechen(c, text, x, y, breite, zeile) {
+    const woerter = String(text).split(" "); let z = "", yy = y;
+    woerter.forEach(w => { const probe = z ? z + " " + w : w; if (c.measureText(probe).width > breite && z) { c.fillText(z, x, yy); z = w; yy += zeile; } else z = probe; });
+    if (z) c.fillText(z, x, yy); return yy + zeile;
+  }
+  async function bildTeilen(knopf) {
+    if (!S) return;
+    const T = t(), T2 = t2(), W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    const c = cv.getContext("2d");
+    if (knopf) knopf.disabled = true;
+    const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#2a1530"); g.addColorStop(.6, "#1a1020"); g.addColorStop(1, "#120c14");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    const r = c.createRadialGradient(W / 2, 360, 40, W / 2, 360, 620); r.addColorStop(0, "rgba(255,90,160,.35)"); r.addColorStop(1, "rgba(255,90,160,0)");
+    c.fillStyle = r; c.fillRect(0, 0, W, H);
+    c.textAlign = "center"; c.fillStyle = "#e0a046"; c.font = "600 34px Georgia, serif"; c.fillText(T.titel.toUpperCase(), W / 2, 96);
+    c.fillStyle = "#ffd0e0"; c.font = "italic 30px Georgia, serif"; c.fillText(sprache() === "en" ? "Barradin is …" : "Barradin ist …", W / 2, 170);
+    c.fillStyle = "#ff8ac0"; c.font = "bold 66px Georgia, serif"; umbrechen(c, T2.titel[titelIndex()], W / 2, 250, 960, 74);
+    c.fillStyle = "#f6ecd6"; c.font = "40px Georgia, serif"; c.fillText(T2.erobertVon(S.erobert, S.ergebnisse.length) + " · " + S.herzenGesamt + " ♥", W / 2, 420);
+    /* NSC-Reihe */
+    const bilder = await Promise.all(S.ergebnisse.map(e => bildLaden((e.id === "demogorgon" ? BONUS : NSC.find(x => x.id === e.id)).bild)));
+    const n = S.ergebnisse.length, gr = Math.min(170, Math.floor(980 / Math.max(1, Math.ceil(n / 2)))), proZeile = Math.ceil(n / 2) || 1;
+    S.ergebnisse.forEach((e, k) => {
+      const zeile = Math.floor(k / proZeile), spalte = k % proZeile, inZeile = zeile === 0 ? Math.min(proZeile, n) : n - proZeile;
+      const x0 = W / 2 - inZeile * (gr + 14) / 2 + spalte * (gr + 14), y0 = 480 + zeile * (gr + 40);
+      c.fillStyle = e.ok ? "rgba(255,90,160,.18)" : "rgba(255,255,255,.05)"; c.fillRect(x0, y0, gr, gr);
+      c.strokeStyle = e.ok ? "#ff8ac0" : "#55485a"; c.lineWidth = 3; c.strokeRect(x0, y0, gr, gr);
+      const im = bilder[k];
+      if (im) { const s = Math.min((gr - 16) / im.width, (gr - 16) / im.height), bw = im.width * s, bh = im.height * s; c.globalAlpha = e.ok ? 1 : .45; c.drawImage(im, x0 + (gr - bw) / 2, y0 + gr - 8 - bh, bw, bh); c.globalAlpha = 1; }
+      c.font = "bold 44px Georgia, serif"; c.fillStyle = e.ok ? "#ff5a8a" : "#9fc4ff"; c.fillText(e.ok ? "♥" : "✗", x0 + gr - 26, y0 + 46);
+    });
+    /* Peinlichster Moment */
+    const yM = 480 + 2 * (gr + 40) + 30;
+    c.font = "italic 36px Georgia, serif";
+    const zeilen = (() => { let z = "", n = 1; String(S.moment ? S.moment.text : t2().keinMoment).split(" ").forEach(w => { const p = z ? z + " " + w : w; if (c.measureText(p).width > W - 220 && z) { n++; z = w; } else z = p; }); return n; })();
+    const hM = Math.min(H - 140 - yM, 150 + zeilen * 46);
+    c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(70, yM, W - 140, hM); c.strokeStyle = "rgba(224,160,70,.6)"; c.lineWidth = 2; c.strokeRect(70, yM, W - 140, hM);
+    c.fillStyle = "#e0a046"; c.font = "600 30px Georgia, serif"; c.fillText(T2.peinlich.toUpperCase(), W / 2, yM + 56);
+    c.fillStyle = "#f6ecd6"; c.font = "italic 36px Georgia, serif";
+    const m = S.moment;
+    let yy = umbrechen(c, m ? m.text : T2.keinMoment, W / 2, yM + 116, W - 220, 46);
+    if (m) { c.fillStyle = "#b8a890"; c.font = "28px Georgia, serif"; c.fillText("— " + m.wer, W / 2, Math.min(yy + 6, yM + hM - 24)); }
+    c.fillStyle = "#e0a046"; c.font = "600 32px Georgia, serif"; c.fillText("imrestales.de", W / 2, H - 60);
+    cv.toBlob(async blob => {
+      if (knopf) knopf.disabled = false;
+      if (!blob) return;
+      const datei = new File([blob], "wuerfel-auf-verfuehren.png", { type: "image/png" });
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [datei] })) { await navigator.share({ files: [datei], text: T2.teilenText }); return; }
+      } catch (_) { return; }
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = datei.name; document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    }, "image/png");
+  }
+
   /* ---------- Zeichnen ---------- */
   function zeichnen() {
-    const T = t();
+    const T = t(), T2 = t2();
     $(".ch-label").textContent = T.label; $(".ch-titel").textContent = T.titel; $(".ch-text").textContent = T.text;
     const kopf = $(".ch-kopfzeile");
     kopf.hidden = ansicht !== "spiel";
+    skipZeigen();
     if (ansicht === "spiel" && S) {
       $(".ch-geduld-txt").textContent = T.geduld;
-      const tk = $(".ch-ton"); tk.innerHTML = Ton.an() ? '🔊<span class="ton-txt"> ' + (sprache() === "en" ? "Sound" : "Ton") + "</span>" : "🔇"; tk.setAttribute("aria-pressed", Ton.an());
+      const tk = $(".ch-ton"); tk.innerHTML = Ton.an() ? '🎚<span class="ton-txt"> ' + esc(T2.klang) + "</span>" : "🔇"; tk.setAttribute("aria-label", T2.klang);
       liebeSetzen();
       const bar = $(".ch-geduld-bar i"); bar.style.width = (S.geduld * 10) + "%"; bar.parentNode.classList.toggle("knapp", S.geduld <= 3);
       $(".ch-herzen").innerHTML = [0, 1, 2].map(i => '<span class="' + (i < S.herzen ? "voll" : "") + '">♥</span>').join("");
+      const ls = launeStufe(S.laune || 0), le = $(".ch-laune");
+      le.textContent = LAUNE_ICON[ls]; le.title = T2.launeLabel + ": " + T2.laune[ls]; le.dataset.stufe = ls;
     }
     buehne.classList.toggle("laeuft", ansicht === "spiel" && !!S && !S.ende);
     root.classList.toggle("ch-laeuft", ansicht === "spiel" && !!S);
     if (ansicht === "buch") return buchZeichnen();
     if (ansicht === "start" || !S) {
       buehne.classList.remove("zu"); nscImg.hidden = true; wuerfel.hidden = true; nscBlase.classList.remove("da");
-      const r = rekord();
-      tafel.innerHTML = '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt" data-tun="start">' + esc(T.start) + "</button>" +
-        '<button type="button" class="tav-knopf" data-tun="buch">' + esc(T.buch) + "</button></div>" +
+      const r = rekord(), g = gespeichert();
+      tafel.innerHTML = '<div class="ch-knoepfe">' +
+        (g ? '<button type="button" class="tav-knopf ch-haupt haupt" data-tun="fortsetzen">' + esc(T2.fortsetzen(g.i + 1, g.ids.length)) + "</button>" : "") +
+        '<button type="button" class="tav-knopf' + (g ? "" : " ch-haupt haupt") + '" data-tun="start">' + esc(T.start) + "</button>" +
+        '<button type="button" class="tav-knopf" data-tun="buch">' + esc(T.buch) + "</button>" +
+        '<button type="button" class="tav-knopf" data-tun="anleitung">' + esc(T2.anleitungKnopf) + "</button></div>" +
         (r ? '<p class="ch-klein">' + esc(T.rekord(r)) + "</p>" : "");
       return;
     }
@@ -1159,10 +1527,11 @@
     if (S.ende) {
       wuerfel.hidden = true;
       tafel.innerHTML = '<p class="ch-ergebnis">' + esc(S.ende === "schirm" ? T.schirmZu : T.ende) + "</p>" +
+        '<p class="ch-rang">„' + esc(T2.titel[titelIndex()]) + '“</p>' +
         '<p class="ch-bilanz">' + esc(T.bilanz(S.erobert, S.ergebnisse.length, S.herzenGesamt)) + "</p>" +
         '<p class="ch-klein">' + esc(S.neuRekord ? T.neuRekord : T.rekord(rekord())) + "</p>" +
         '<div class="ch-reihe">' + S.ergebnisse.map(e => '<span class="' + (e.ok ? "ok" : "") + '" title="' + esc(T.nsc[e.id].name) + '"><img src="' + esc((e.id === "demogorgon" ? BONUS : NSC.find(x => x.id === e.id)).bild) + '" alt="">' + (e.ok ? "♥" : "✗") + "</span>").join("") + "</div>" +
-        '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt" data-tun="start">' + esc(T.nochmal) + '</button><button type="button" class="tav-knopf" data-tun="buch">' + esc(T.buch) + "</button></div>";
+        '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt haupt" data-tun="start">' + esc(T.nochmal) + '</button><button type="button" class="tav-knopf" data-tun="teilen">' + esc(T2.teilen) + '</button><button type="button" class="tav-knopf" data-tun="buch">' + esc(T.buch) + "</button></div>";
       return;
     }
     let html = '<div class="ch-nsc-kopf"><b>' + esc(NT.name) + "</b>" + (S.fertig ? "" : '<em>' + esc(T.sprueche(S.zuege)) + "</em>") + "<span>" + esc(T.aufgabe) + ": " + esc(NT.aufgabe) + "</span></div>";
@@ -1170,18 +1539,28 @@
     if (S.letzt) {
       const L = S.letzt;
       html += '<p class="ch-wurf ' + L.art2 + '">' + esc(L.art2 === "krit" ? T.krit : L.art2 === "patzer" ? T.patzer : L.art2 === "erfolg" ? T.erfolg : T.misserfolg) +
-        " <small>" + esc(T.wurf(L.beide ? L.beide.join("/") + " → " + L.w : L.w, CHA, L.summe)) + (L.sg ? " " + esc(T.gegen(L.sg)) : "") + "</small></p>";
+        " <small>" + esc(T.wurf(L.beide ? L.beide.join("/") + " → " + L.w : L.w, CHA, L.summe)) + (L.sg ? " " + esc(T.gegen(L.sg)) : "") + (L.rausch ? " · ×2 🔥" : "") + "</small></p>";
     }
+    if (S.letzt2) html += '<p class="ch-wurf ' + (S.letzt2.ok ? "erfolg" : "patzer") + '"><small>' + esc(S.letzt2.text) + "</small></p>";
+    if (S.rausch) html += '<p class="ch-hinweis rausch">' + esc(T2.rauschInfo) + "</p>";
+    else if (S.serie >= 2) html += '<p class="ch-hinweis">' + esc(T2.serie(S.serie)) + "</p>";
     if (S.fertig) {
       html += '<p class="ch-ergebnis ' + S.fertig + '">' + esc(S.fertig === "erobert" ? T.erobert : T.korb) + "</p>" +
-        '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt" data-tun="weiter">' + esc(S.geduld <= 0 || S.i >= S.reihe.length - 1 && !(S.erobert >= 6 && !S.bonus) ? T.ende : T.weiter) + "</button></div>";
+        (S.neuGeheim ? '<p class="ch-hinweis geheim">' + esc(T2.geheimNeu) + "</p>" : "") +
+        '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt haupt" data-tun="weiter">' + esc(S.geduld <= 0 || S.i >= S.reihe.length - 1 && !(S.erobert >= 6 && !S.bonus) ? T.ende : T.weiter) + "</button></div>";
+    } else if (S.frage) {
+      const A = n2(n.id);
+      html += '<p class="ch-frage">' + esc(T2.frageLabel) + "</p>" +
+        '<div class="ch-sprueche">' + S.frage.map(k => '<button type="button" class="ch-spruch ch-antwort" data-antwort="' + k + '">' + esc(A[k]) + "</button>").join("") + "</div>";
     } else {
       html += '<div class="ch-sprueche">' + S.angebot.map(a => '<button type="button" class="ch-spruch art-' + a.art + '" data-art="' + a.art + '" data-idx="' + a.idx + '"' + (S.wirft ? " disabled" : "") + ">" +
-          '<span class="ch-art">' + esc(T.arten[a.art]) + " · " + esc(T.artInfo[a.art](sgFuer(a.art, n))) + "</span>" + esc(NT[a.art][a.idx]) + "</button>").join("") + "</div>" +
+          '<span class="ch-art">' + esc(a.art === "geheim" ? "📜 " + T2.geheim : T.arten[a.art]) + " · " + esc(a.art === "geheim" ? T2.geheimInfo(sgFuer(a.art, n)) : T.artInfo[a.art](sgFuer(a.art, n))) + (S.vorteil && a.art !== "absurd" ? " · ⬆ Vorteil" : "") + "</span>" + esc(spruchText(a.art, a.idx, n.id)) + "</button>").join("") + "</div>" +
         '<div class="ch-joker">' + ["echo", "rex", "floete"].map(k => '<button type="button" class="ch-jk" data-joker="' + k + '"' + (S.joker[k] && !S.wirft ? "" : " disabled") + ' title="' + esc(T.jokerInfo[k]) + '">' +
           '<span class="jk-lang">' + esc(T.joker[k]) + '</span><span class="jk-kurz">' + esc(T.jokerKurz[k]) + "</span><small>" + esc(T.jokerInfo[k]) + "</small></button>").join("") + "</div>";
     }
     tafel.innerHTML = html;
+    padMarkieren();
+    speichern();
     passen();
   }
   /* Vollbild: Bühne so groß wie möglich, Tafel bleibt darunter ganz sichtbar */
@@ -1208,34 +1587,61 @@
   window.addEventListener("resize", () => requestAnimationFrame(passen));
   new MutationObserver(() => requestAnimationFrame(passen)).observe(root, { attributes: true, attributeFilter: ["class"] });
   function buchZeichnen() {
-    const T = t(), B = buchLesen(), alle = NSC.concat([BONUS]);
+    const T = t(), T2 = t2(), B = buchLesen(), G = geheimLesen(), alle = NSC.concat([BONUS]);
     nscImg.hidden = true; wuerfel.hidden = true; nscBlase.classList.remove("da");
     tafel.innerHTML = '<h4 class="ch-buch-titel">' + esc(T.buchTitel) + '</h4><p class="ch-klein">' + esc(T.buchText) + "</p>" +
       '<div class="ch-buch">' + alle.map(n => {
         const st = B[n.id] || "offen", geheim = n.id === "demogorgon" && st === "offen";
         return '<div class="ch-seite ' + st + '">' + (geheim ? '<span class="ch-geheim">?</span>' : '<img src="' + esc(n.bild) + '" alt="">') +
-          "<b>" + esc(geheim ? "???" : T.nsc[n.id].name) + "</b><small>" + esc(T.buchStand[st]) + "</small></div>";
+          "<b>" + esc(geheim ? "???" : T.nsc[n.id].name) + "</b><small>" + esc(T.buchStand[st]) + "</small>" +
+          (G[n.id] ? '<i class="ch-geheimspruch">' + esc(T2.geheimBuch) + esc(n2(n.id).geheim) + "</i>" : "") + "</div>";
       }).join("") + "</div>" +
-      '<div class="ch-knoepfe"><button type="button" class="tav-knopf" data-tun="zurueck">' + esc(T.zurueck) + "</button></div>";
+      '<div class="ch-knoepfe"><button type="button" class="tav-knopf haupt" data-tun="zurueck">' + esc(T.zurueck) + "</button></div>";
   }
 
   /* ---------- Bedienung ---------- */
+  function starten(fort) {
+    buehne.classList.remove("zu"); effekte.start();
+    if (fort) fortsetzen(); else neueSitzung();
+    const vk = root.querySelector(".tav-voll-knopf");
+    if (handy() && vk && !root.classList.contains("tav-voll")) vk.click(); else einpassen();
+  }
   root.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.disabled) return;
     if (b.closest(".tav-voll-knopf")) return;
     if (b.dataset.art) { wuerfeln(b.dataset.art, +b.dataset.idx); return; }
+    if (b.dataset.antwort) { antworten(b.dataset.antwort); return; }
     if (b.dataset.joker) { joker(b.dataset.joker); return; }
     const tun = b.dataset.tun;
-    if (tun === "start") {
-      buehne.classList.remove("zu"); effekte.start(); neueSitzung();
-      const vk = root.querySelector(".tav-voll-knopf");
-      if (handy() && vk && !root.classList.contains("tav-voll")) vk.click(); else einpassen();
+    if (tun === "start" || tun === "fortsetzen") {
+      const fort = tun === "fortsetzen";
+      if (!lies("imres-charme-anleitung")) {
+        schreib("imres-charme-anleitung", "1");
+        /* Handy: erst ins Vollbild, dann die Anleitung über der Bühne */
+        const vk = root.querySelector(".tav-voll-knopf");
+        if (handy() && vk && !root.classList.contains("tav-voll")) vk.click(); else einpassen();
+        Ton.init();
+        anleitungZeigen(() => starten(fort));
+      }
+      else starten(fort);
     }
-    else if (tun === "ton") { Ton.init(); const an = Ton.schalten(); if (an && ansicht === "spiel" && S && !S.ende) Ton.musik(true); zeichnen(); }
+    else if (tun === "anleitung") anleitungZeigen();
+    else if (tun === "anleitungZu") { anleitungEl.hidden = true; const f = nachAnleitung; nachAnleitung = null; if (f) f(); }
+    else if (tun === "ton") { Ton.init(); reglerEl.hidden ? reglerZeigen() : (reglerEl.hidden = true); }
+    else if (tun === "reglerZu") { reglerEl.hidden = true; zeichnen(); }
     else if (tun === "weiter") weiter();
+    else if (tun === "teilen") bildTeilen(b);
     else if (tun === "buch") { ansicht = "buch"; Ton.musik(false); zeichnen(); }
     else if (tun === "zurueck") { ansicht = S && !S.ende ? "spiel" : "start"; if (ansicht === "start") S = null; else Ton.musik(true); zeichnen(); }
   });
+  /* Tipp auf die Bühne: vorspulen – oder, wenn nichts läuft, schaut der Spielleiter auf */
+  buehne.addEventListener("click", e => {
+    if (e.target.closest("button, input, label, .ch-regler, .ch-anleitung")) return;
+    if (ansicht === "spiel" && vorspulen()) return;
+    if (e.target.closest(".ch-zimmer")) gesicht(zufall(["grinsen", "schock", "errötet", "genervt", "kichern", "verliebt", "skeptisch", "augenrollen", "smirk", "fremdscham"]), 1400);
+  });
+  /* Tastatur: Leertaste spult vor */
+  root.addEventListener("keydown", e => { if (e.key === " " && ansicht === "spiel" && !/INPUT|BUTTON/.test(e.target.tagName) && vorspulen()) e.preventDefault(); });
   /* Handy: Bühne direkt unter die Kopfleiste schieben, damit alles auf einen Bildschirm passt */
   function einpassen() {
     if (root.classList.contains("tav-voll") || window.innerWidth > 700) return;
@@ -1243,8 +1649,31 @@
     root.style.setProperty("--ch-oben", ((kopf ? kopf.getBoundingClientRect().height : 56) + 6) + "px");
     requestAnimationFrame(() => buehne.scrollIntoView({ block: "start", behavior: ruhig ? "auto" : "smooth" }));
   }
-  /* Klick auf den Spielleiter: er schaut kurz auf */
-  buehne.addEventListener("click", e => { if (e.target.closest(".ch-zimmer")) gesicht(zufall(["grinsen", "schock", "errötet", "genervt", "kichern", "verliebt", "skeptisch", "augenrollen", "smirk", "fremdscham"]), 1400); });
+
+  /* ---------- Xbox-Controller (controller.js ruft root._pad) ---------- */
+  let padWahl = -1;
+  const padOptionen = () => Array.from(tafel.querySelectorAll("[data-art], [data-antwort], [data-tun='weiter']")).filter(b => !b.disabled);
+  function padMarkieren() {
+    tafel.querySelectorAll(".pad-wahl").forEach(b => b.classList.remove("pad-wahl"));
+    if (padWahl < 0) return;
+    const l = padOptionen(); if (!l.length) return;
+    padWahl = Math.min(padWahl, l.length - 1); l[padWahl].classList.add("pad-wahl");
+  }
+  root._pad = {
+    aktiv: () => ansicht === "spiel" && !!S && !S.ende && anleitungEl.hidden && reglerEl.hidden,
+    wahl(i) { padWahl = i; padMarkieren(); },
+    bewegen(d) { const l = padOptionen(); if (!l.length) return; padWahl = padWahl < 0 ? 0 : (padWahl + d + l.length) % l.length; padMarkieren(); },
+    ok() {
+      if (vorspulen()) return;
+      const l = padOptionen(); if (!l.length) return;
+      if (padWahl < 0) padWahl = 0;
+      const b = l[Math.min(padWahl, l.length - 1)]; if (b) b.click();
+      requestAnimationFrame(padMarkieren);
+    },
+    skip() { vorspulen(); },
+    joker(k) { joker(k); },
+    regler() { Ton.init(); reglerZeigen(); }
+  };
 
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");
@@ -1542,6 +1971,54 @@
 .ch-kamera.zieh { transition: transform 1.4s cubic-bezier(.2,.7,.2,1); }
 .ch-buehne.kamera-nah::before { content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none; box-shadow: inset 0 0 60px 20px rgba(0,0,0,.65); }
 @media (prefers-reduced-motion: reduce) { .ch-kamera { transition: none !important; } .ch-pose { transition: none; } }
+
+/* ===== Laune, Rausch, Folgefragen, Geheimsprüche, Anleitung, Regler, Vorspulen, Glitzerhose, Controller ===== */
+.ch-laune { pointer-events: auto; align-self: end; font-size: clamp(1rem, 3.6vw, 1.4rem); line-height: 1; filter: drop-shadow(0 1px 2px #000); transition: transform .3s; cursor: help; }
+.ch-laune[data-stufe="0"] { animation: chWut .5s ease-in-out infinite; }
+.ch-laune[data-stufe="4"] { animation: chHerzSchlag 1s ease-in-out infinite; }
+@keyframes chWut { 25% { transform: translateX(-1.5px) rotate(-6deg); } 75% { transform: translateX(1.5px) rotate(6deg); } }
+.ch-kopfzeile { align-items: end; }
+.ch-hinweis { margin: 0; font-size: .82rem; color: #ffb36a; font-weight: 600; }
+.ch-hinweis.rausch { color: #ffd27a; text-shadow: 0 0 10px rgba(255,160,60,.6); animation: chPuls .8s ease-in-out infinite; }
+.ch-hinweis.geheim { color: #ffd27a; }
+.ch-frage { margin: 0; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ember); }
+.ch-antwort { border-style: dashed; }
+.ch-spruch.art-geheim { border-color: rgba(255,210,122,.7); background: linear-gradient(90deg, rgba(255,210,122,.12), rgba(255,255,255,.02)); }
+.ch-spruch.art-geheim .ch-art { color: #ffd27a; }
+.ch-rang { margin: 0; font-family: var(--name); font-size: 1.25rem; color: #ff8ac0; }
+.ch-geheimspruch { display: block; font-size: .66rem; line-height: 1.25; color: #7a4a10; font-style: italic; }
+/* Barden-Rausch: goldener Rand, alles etwas schneller */
+.ch-buehne.rausch { box-shadow: inset 0 0 0 3px rgba(255,190,80,.85), inset 0 0 40px rgba(255,150,40,.45); }
+.ch-buehne.rausch .ch-kette .kb { animation-duration: .5s; }
+.ch-buehne.rausch .ch-funken i { background: #ffd27a; box-shadow: 0 0 8px 3px rgba(255,180,60,.7); animation-duration: 3s; }
+.ch-stempel.rausch { color: #ffd27a; background: rgba(120,50,0,.55); }
+/* Vorspulen */
+.ch-skip { position: absolute; z-index: 9; left: 50%; bottom: 13%; transform: translateX(-50%); padding: .2rem .6rem; border-radius: 999px; background: rgba(0,0,0,.55);
+  color: rgba(255,227,166,.85); font-size: .7rem; letter-spacing: .04em; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .3s; }
+.ch-buehne.kann-skip .ch-skip { opacity: 1; transition-delay: .9s; }
+.ch-buehne.kann-skip { cursor: pointer; }
+/* Anleitung & Regler als Karte über der Bühne */
+.ch-anleitung, .ch-regler { position: absolute; inset: 0; z-index: 12; display: grid; place-items: center; padding: .6rem; background: rgba(10,6,12,.72); }
+.ch-anleitung[hidden], .ch-regler[hidden] { display: none; }
+.ch-karte-innen { width: min(30rem, 100%); max-height: 100%; overflow: auto; display: grid; gap: .55rem; padding: .9rem 1rem; border: 1px solid rgba(224,160,70,.6); background: #1d1520; color: var(--vellum); box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.ch-karte-innen h4 { margin: 0; font-family: var(--name); font-weight: 400; font-size: 1.3rem; }
+.ch-karte-innen ol { margin: 0; padding-left: 1.2rem; display: grid; gap: .35rem; font-size: .9rem; line-height: 1.4; }
+.ch-karte-innen b { color: #ffd27a; font-weight: 600; }
+.ch-karte-innen label { display: grid; gap: .2rem; font-size: .85rem; }
+.ch-karte-innen label.ch-leise { display: flex; align-items: center; gap: .45rem; }
+.ch-karte-innen input[type="range"] { width: 100%; accent-color: #e0a046; }
+@media (max-width: 700px) { .ch-karte-innen { padding: .7rem .8rem; gap: .4rem; } .ch-karte-innen ol { font-size: .8rem; } }
+/* Glitzerhose: Schirm kippt, Spielleiter springt auf */
+.ch-hose .ch-glanz path { animation: chGlanz 1.1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ch-hose .ch-glanz path:nth-child(2) { animation-delay: .3s; } .ch-hose .ch-glanz path:nth-child(3) { animation-delay: .6s; } .ch-hose .ch-glanz path:nth-child(4) { animation-delay: .85s; }
+@keyframes chGlanz { 0%, 100% { opacity: .2; transform: scale(.5); } 50% { opacity: 1; transform: scale(1.3); } }
+.ch-schirm { transition: transform .45s cubic-bezier(.4,1.6,.5,1); transform-box: fill-box; transform-origin: 50% 100%; }
+.ch-buehne.glitzer .ch-schirm { transform: scaleY(.12) skewX(-6deg); }
+.ch-buehne.glitzer .ch-sl .ch-koerper { animation: chAufspringen 3.2s ease-in-out forwards; }
+@keyframes chAufspringen { 0% { transform: none; } 15% { transform: translateY(-34px); } 22% { transform: translateY(-26px); } 30%, 85% { transform: translateY(-30px); } 100% { transform: none; } }
+.ch-buehne.glitzer .ch-hose { filter: drop-shadow(0 0 6px rgba(190,210,255,.9)); }
+/* Controller-Auswahl */
+.ch-tafel .pad-wahl { outline: 2px solid #ffd27a; outline-offset: 2px; border-color: #ffd27a; background: rgba(255,210,122,.1); }
 /* ===== Handy: ganze Szene sichtbar (nichts abgeschnitten), Sprechblasen im Band darüber ===== */
 @media (max-width: 700px) {
   .charme .ch-buehne { aspect-ratio: 400 / 372; height: auto; margin-inline: -.5rem; background: linear-gradient(180deg, #120d12, #22181c 40%, #2a1d1f); }
