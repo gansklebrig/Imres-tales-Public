@@ -342,6 +342,7 @@
   <defs>
     <radialGradient id="chLicht" cx="72%" cy="18%" r="70%"><stop offset="0" stop-color="#5a3a26"/><stop offset=".55" stop-color="#2a1d1f"/><stop offset="1" stop-color="#151017"/></radialGradient>
     <linearGradient id="chHolz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b4528"/><stop offset="1" stop-color="#3a2416"/></linearGradient>
+    <radialGradient id="chLampLicht"><stop offset="0" stop-color="#ff7ab8" stop-opacity=".35"/><stop offset=".5" stop-color="#ffb070" stop-opacity=".12"/><stop offset="1" stop-color="#ffb070" stop-opacity="0"/></radialGradient>
     <linearGradient id="chAkustik" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e2a35a"/><stop offset="1" stop-color="#9a5a24"/></linearGradient>
   </defs>
   <rect width="400" height="300" fill="url(#chLicht)"/>
@@ -391,6 +392,8 @@
     <circle cx="23" cy="-5" r="3" fill="#5a4a3a"/>
   </g>
   </g>
+  <!-- Lichterkette -->
+  <g class="ch-kette" transform="translate(0 50)"><path d="M-5 22 Q 100 64 205 26 Q 305 62 405 24" stroke="#1a1410" stroke-width="1.1" fill="none"/><g class="kb" style="--d:0.00s"><circle cx="16.0" cy="34.6" r="7" fill="#ffd27a" opacity=".22"/><ellipse cx="16.0" cy="33.6" rx="2.4" ry="3.4" fill="#ffd27a"/></g><g class="kb" style="--d:0.37s"><circle cx="37.0" cy="40.6" r="7" fill="#ff7ab0" opacity=".22"/><ellipse cx="37.0" cy="39.6" rx="2.4" ry="3.4" fill="#ff7ab0"/></g><g class="kb" style="--d:0.74s"><circle cx="58.0" cy="45.0" r="7" fill="#ffb060" opacity=".22"/><ellipse cx="58.0" cy="44.0" rx="2.4" ry="3.4" fill="#ffb060"/></g><g class="kb" style="--d:1.11s"><circle cx="79.0" cy="47.8" r="7" fill="#c9a0ff" opacity=".22"/><ellipse cx="79.0" cy="46.8" rx="2.4" ry="3.4" fill="#c9a0ff"/></g><g class="kb" style="--d:1.48s"><circle cx="100.0" cy="49.0" r="7" fill="#ff7ab0" opacity=".22"/><ellipse cx="100.0" cy="48.0" rx="2.4" ry="3.4" fill="#ff7ab0"/></g><g class="kb" style="--d:1.85s"><circle cx="121.0" cy="48.6" r="7" fill="#ffd27a" opacity=".22"/><ellipse cx="121.0" cy="47.6" rx="2.4" ry="3.4" fill="#ffd27a"/></g><g class="kb" style="--d:0.02s"><circle cx="142.0" cy="46.6" r="7" fill="#ffd27a" opacity=".22"/><ellipse cx="142.0" cy="45.6" rx="2.4" ry="3.4" fill="#ffd27a"/></g><g class="kb" style="--d:0.39s"><circle cx="163.0" cy="43.0" r="7" fill="#ff7ab0" opacity=".22"/><ellipse cx="163.0" cy="42.0" rx="2.4" ry="3.4" fill="#ff7ab0"/></g><g class="kb" style="--d:0.76s"><circle cx="184.0" cy="37.8" r="7" fill="#ffb060" opacity=".22"/><ellipse cx="184.0" cy="36.8" rx="2.4" ry="3.4" fill="#ffb060"/></g><g class="kb" style="--d:1.13s"><circle cx="225.0" cy="37.5" r="7" fill="#c9a0ff" opacity=".22"/><ellipse cx="225.0" cy="36.5" rx="2.4" ry="3.4" fill="#c9a0ff"/></g><g class="kb" style="--d:1.50s"><circle cx="245.0" cy="42.4" r="7" fill="#ff7ab0" opacity=".22"/><ellipse cx="245.0" cy="41.4" rx="2.4" ry="3.4" fill="#ff7ab0"/></g><g class="kb" style="--d:1.87s"><circle cx="265.0" cy="45.9" r="7" fill="#ffd27a" opacity=".22"/><ellipse cx="265.0" cy="44.9" rx="2.4" ry="3.4" fill="#ffd27a"/></g><g class="kb" style="--d:0.04s"><circle cx="285.0" cy="48.0" r="7" fill="#ffd27a" opacity=".22"/><ellipse cx="285.0" cy="47.0" rx="2.4" ry="3.4" fill="#ffd27a"/></g><g class="kb" style="--d:0.41s"><circle cx="305.0" cy="48.5" r="7" fill="#ff7ab0" opacity=".22"/><ellipse cx="305.0" cy="47.5" rx="2.4" ry="3.4" fill="#ff7ab0"/></g><g class="kb" style="--d:0.78s"><circle cx="325.0" cy="47.6" r="7" fill="#ffb060" opacity=".22"/><ellipse cx="325.0" cy="46.6" rx="2.4" ry="3.4" fill="#ffb060"/></g><g class="kb" style="--d:1.15s"><circle cx="345.0" cy="45.1" r="7" fill="#c9a0ff" opacity=".22"/><ellipse cx="345.0" cy="44.1" rx="2.4" ry="3.4" fill="#c9a0ff"/></g><g class="kb" style="--d:1.52s"><circle cx="365.0" cy="41.2" r="7" fill="#ff7ab0" opacity=".22"/><ellipse cx="365.0" cy="40.2" rx="2.4" ry="3.4" fill="#ff7ab0"/></g><g class="kb" style="--d:1.89s"><circle cx="385.0" cy="35.9" r="7" fill="#ffd27a" opacity=".22"/><ellipse cx="385.0" cy="34.9" rx="2.4" ry="3.4" fill="#ffd27a"/></g></g>
   <!-- Regal mit Würfeln und Büchern -->
   <g transform="translate(0 30)">
   <rect x="0" y="150" width="120" height="5" fill="#4a2e1a"/>
@@ -398,7 +401,16 @@
   <polygon points="52,150 58,140 64,150" fill="#7a3ab0"/><polygon points="70,150 75,142 80,150" fill="#d0a030"/><rect x="88" y="142" width="8" height="8" fill="#b02a2a" transform="rotate(12 92 146)"/>
   </g>
   <!-- Lampe -->
-  <circle cx="372" cy="128" r="30" fill="#ffcf7a" opacity=".08"/>
+  <circle class="ch-lampenschein" cx="372" cy="170" r="70" fill="url(#chLampLicht)"/>
+  <!-- Lavalampe auf dem Beistelltisch -->
+  <rect x="340" y="234" width="64" height="5" fill="#4a2e1a"/>
+  <g class="ch-lavalampe">
+    <circle cx="372" cy="206" r="26" fill="#ff5a9a" opacity=".12"/>
+    <path d="M362 234 L 366 226 L 378 226 L 382 234 Z" fill="#8a8aa0"/>
+    <path d="M366 226 L 362 190 Q 372 176 382 190 L 378 226 Z" fill="#5a1844" stroke="#c0c0d0" stroke-width=".8"/>
+    <g class="ch-lava"><ellipse cx="371" cy="220" rx="4" ry="4.5" fill="#ff7ab8"/><ellipse cx="374" cy="214" rx="3" ry="3.5" fill="#ff9acb"/><ellipse cx="369" cy="223" rx="3.2" ry="2.6" fill="#ff5aa0"/></g>
+    <path d="M364 190 Q 372 180 380 190 L 378 184 L 366 184 Z" fill="#8a8aa0"/>
+  </g>
   <!-- Spielleiter -->
   <g class="ch-sl">
     <g class="ch-koerper">
@@ -469,7 +481,7 @@
 </svg>`;
   const VORNE = `
 <svg class="ch-vorne" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-  <defs><linearGradient id="chSchirm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a1e24"/><stop offset="1" stop-color="#2a0d12"/></linearGradient></defs>
+  <defs><radialGradient id="chKerzenLicht"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".45"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/></radialGradient><linearGradient id="chSchirm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a1e24"/><stop offset="1" stop-color="#2a0d12"/></linearGradient></defs>
   <rect x="0" y="262" width="400" height="38" fill="url(#chHolz)"/>
   <rect x="0" y="260" width="400" height="4" fill="#8a5a34"/>
   <g class="ch-schirm">
@@ -480,7 +492,26 @@
     <polygon points="282,224 294,231 294,245 282,252 270,245 270,231" fill="none" stroke="#c9a46a" stroke-width="1.3"/>
     <path d="M330 252 l 8 -16 l 8 16 Z M338 236 v -8" fill="none" stroke="#c9a46a" stroke-width="1.3"/>
   </g>
-  <polygon points="150,274 158,266 166,274 158,282" fill="#7a3ab0"/><polygon points="168,282 174,272 180,282" fill="#d0a030"/>
+  <!-- Kerze mit Schein -->
+  <g transform="translate(118 0)">
+  <circle class="ch-kerzenschein" cx="66" cy="226" r="40" fill="url(#chKerzenLicht)"/>
+  <rect x="60" y="236" width="12" height="28" rx="2" fill="#f2e6cf"/><path d="M60 240 q 3 6 0 10" stroke="#e6d6b8" stroke-width="2" fill="none"/>
+  <path d="M66 236 v -4" stroke="#2a1a10" stroke-width="1.2"/>
+  <path class="ch-flamme" d="M66 220 C 61 227 62 233 66 233 C 70 233 71 227 66 220 Z" fill="#ffd36a"/>
+  <path class="ch-flamme" d="M66 225 C 64 229 64 232 66 232 C 68 232 68 229 66 225 Z" fill="#fff4c8"/>
+  </g>
+  <!-- Weinglas -->
+  <g transform="translate(64 0)">
+  <path d="M86 244 q 0 12 8 12 q 8 0 8 -12 Z" fill="rgba(220,230,255,.18)" stroke="rgba(230,235,255,.6)" stroke-width=".8"/>
+  <path d="M87 250 q 1 6 7 6 q 6 0 7 -6 Z" fill="#8a1030"/>
+  <path d="M94 256 v 7 M89 264 h 10" stroke="rgba(230,235,255,.6)" stroke-width="1.2"/>
+  </g>
+  <!-- Rose in der Vase -->
+  <path d="M378 264 L 380 244 Q 384 240 388 244 L 390 264 Z" fill="rgba(160,210,255,.35)" stroke="rgba(220,235,255,.6)" stroke-width=".8"/>
+  <path d="M384 244 C 383 232 386 226 385 214" stroke="#3a7a3a" stroke-width="1.6" fill="none"/>
+  <path d="M385 228 q 6 -4 9 -1 q -5 3 -9 1 Z" fill="#3a7a3a"/>
+  <circle cx="385" cy="212" r="6" fill="#c0183c"/><path d="M381 211 q 4 -5 8 0 M382 214 q 3 2 6 0" stroke="#7a0a20" stroke-width="1" fill="none"/>
+  <polygon points="118,280 126,272 134,280 126,288" fill="#7a3ab0"/><polygon points="138,286 144,276 150,286" fill="#d0a030"/>
   <rect x="104" y="268" width="26" height="18" rx="2" fill="#efe2c2" transform="rotate(-6 117 277)"/>
 </svg>`;
 
@@ -499,7 +530,7 @@
       VORNE +
       '<div class="ch-nsc-blase" aria-live="polite"></div>' +
       '<div class="ch-wuerfel" hidden><span></span></div>' +
-      '<div class="ch-kopfzeile"><div class="ch-geduld"><span class="ch-geduld-txt"></span><span class="ch-geduld-bar"><i></i></span></div><div class="ch-herzen"></div></div>' +
+      '<div class="ch-kopfzeile"><div class="ch-geduld"><span class="ch-geduld-txt"></span><span class="ch-geduld-bar"><i></i></span></div><button type="button" class="ch-ton" data-tun="ton"></button><div class="ch-herzen"></div></div>' +
     "</div>" +
     '<div class="ch-tafel"></div>';
   const $ = s => root.querySelector(s);
@@ -552,6 +583,265 @@
     buehne.classList.remove("rauch"); void buehne.offsetWidth; buehne.classList.add("rauch");
   }
 
+  /* =====================================================================
+     PRACHT & KLANG – Stimmungslicht, Disco, Regenwolke, Grillen, Posaune …
+     ===================================================================== */
+  /* ---------- Klang: Samples aus klang/ + ein paar Synth-Effekte ---------- */
+  const Ton = (() => {
+    let ctx = null, master = null, musikBus = null, effektBus = null;
+    let an = lies("imres-charme-ton", "1") === "1";
+    const puffer = {}, laden = {};
+    const FAM = {
+      pos: [34, 37, 39, 41, 46, 50, 53, 60, 61, 63, 65],
+      harfe: [52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89],
+      gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75],
+      aah: [57, 60, 63, 66, 69, 72, 75, 78],
+      klar: [58, 62, 65, 70, 74, 77, 82],
+      trp: [60, 63, 67, 70, 74, 77]
+    };
+    const EINZEL = ["bd", "shake", "crash", "k_grillen", "fx_0_dog_bark", "fx_ca_dice_shake_1", "fx_ca_dice_throw_1", "fx_fo_spring_01", "gong", "swell", "clave1", "snare1", "beckenroll"];
+    function init() {
+      if (ctx) { if (ctx.state === "suspended") ctx.resume(); return ctx; }
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+      try { ctx = new AC(); } catch (_) { return null; }
+      master = ctx.createGain(); master.gain.value = .85;
+      const komp = ctx.createDynamicsCompressor(); master.connect(komp); komp.connect(ctx.destination);
+      musikBus = ctx.createGain(); musikBus.gain.value = 0; musikBus.connect(master);
+      effektBus = ctx.createGain(); effektBus.gain.value = 1; effektBus.connect(master);
+      Object.keys(FAM).forEach(f => FAM[f].forEach(n => hole(f + "_" + n)));
+      EINZEL.forEach(hole);
+      return ctx;
+    }
+    function hole(name) {
+      if (puffer[name]) return Promise.resolve(puffer[name]);
+      if (!laden[name]) laden[name] = fetch("klang/" + name + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject())
+        .then(b => new Promise((ok, no) => ctx.decodeAudioData(b, ok, no))).then(b => (puffer[name] = b)).catch(() => null);
+      return laden[name];
+    }
+    const jetzt = () => ctx ? ctx.currentTime : 0;
+    function spiel(name, o) {
+      o = o || {};
+      if (!an || !ctx || !puffer[name]) return null;
+      const q = ctx.createBufferSource(); q.buffer = puffer[name];
+      q.playbackRate.value = o.rate || 1;
+      if (o.detune) q.detune.value = o.detune;
+      const g = ctx.createGain(), t0 = jetzt() + (o.zeit || 0), laut = o.laut == null ? .5 : o.laut;
+      g.gain.setValueAtTime(o.ein ? 0 : laut, t0);
+      if (o.ein) g.gain.linearRampToValueAtTime(laut, t0 + o.ein);
+      let kette = q;
+      if (o.filter) { const f = ctx.createBiquadFilter(); f.type = o.filter.typ || "lowpass"; f.frequency.value = o.filter.f; f.Q.value = o.filter.q || 1;
+        if (o.filter.bis) { f.frequency.setValueAtTime(o.filter.f, t0); f.frequency.exponentialRampToValueAtTime(o.filter.bis, t0 + (o.filter.in || .3)); }
+        kette.connect(f); kette = f; }
+      if (o.vibrato) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = o.vibrato.f || 5.5; lg.gain.value = o.vibrato.tiefe || 30; l.connect(lg); lg.connect(q.detune); l.start(t0 + (o.vibrato.ab || 0)); l.stop(t0 + (o.dauer || 3) + .5); }
+      kette.connect(g); g.connect(o.bus || effektBus);
+      q.start(t0, o.ab || 0);
+      if (o.dauer) { g.gain.setValueAtTime(laut, t0 + o.dauer); g.gain.exponentialRampToValueAtTime(.001, t0 + o.dauer + (o.aus || .25)); q.stop(t0 + o.dauer + (o.aus || .25) + .05); }
+      return { q, g };
+    }
+    function note(fam, midi, o) {
+      const l = FAM[fam]; let best = l[0];
+      l.forEach(n => { if (Math.abs(n - midi) < Math.abs(best - midi)) best = n; });
+      o = Object.assign({}, o, { rate: Math.pow(2, (midi - best) / 12) });
+      return spiel(fam + "_" + best, o);
+    }
+    /* reine Synth-Klänge */
+    function osz(typ, f0, f1, zeit, dauer, laut, bus) {
+      if (!an || !ctx) return;
+      const o = ctx.createOscillator(), g = ctx.createGain(), t0 = jetzt() + zeit;
+      o.type = typ; o.frequency.setValueAtTime(f0, t0); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t0 + dauer);
+      g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(laut, t0 + .02); g.gain.exponentialRampToValueAtTime(.0001, t0 + dauer);
+      o.connect(g); g.connect(bus || effektBus); o.start(t0); o.stop(t0 + dauer + .05);
+    }
+    function rauschen(zeit, dauer, laut, f0, f1, q) {
+      if (!an || !ctx) return;
+      const n = Math.floor(ctx.sampleRate * dauer), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      const s = ctx.createBufferSource(); s.buffer = b;
+      const f = ctx.createBiquadFilter(), g = ctx.createGain(), t0 = jetzt() + zeit;
+      f.type = "bandpass"; f.Q.value = q || 2; f.frequency.setValueAtTime(f0, t0); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t0 + dauer);
+      g.gain.setValueAtTime(laut, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + dauer);
+      s.connect(f); f.connect(g); g.connect(effektBus); s.start(t0);
+    }
+    /* ---------- Effekte ---------- */
+    const fx = {
+      harfeHoch(z, basis) { [0, 4, 7, 11, 14, 16, 19, 23, 26].forEach((s, i) => note("harfe", (basis || 62) + s, { zeit: (z || 0) + i * .045, laut: .32 })); },
+      chor(z, akkord, laut, dauer) { (akkord || [62, 66, 69, 73]).forEach(m => note("aah", m, { zeit: z || 0, laut: laut || .22, ein: .35, dauer: dauer || 1.6, aus: .8 })); },
+      kuss(z) { z = z || 0; rauschen(z, .09, .5, 2200, 900, 3); osz("sine", 520, 1300, z + .05, .16, .25); },
+      kuesse() { [0, .22, .38].forEach(z => fx.kuss(z)); },
+      herzschlag(n) { for (let i = 0; i < (n || 3); i++) { const z = i * (.62 - i * .06); osz("sine", 68, 38, z, .16, .7); osz("sine", 60, 34, z + .16, .14, .45); } },
+      wuerfel() { spiel("fx_ca_dice_shake_1", { laut: .5 }); spiel("fx_ca_dice_throw_1", { zeit: .65, laut: .6 }); fx.herzschlag(3); },
+      /* „Bow-chicka-wow-wow“: gedämpfte Gitarre durch ein Wah-Filter */
+      wah(z) {
+        z = z || 0;
+        const rhythmus = [[0, 45, .22, 400, 2400], [.3, 52, .12, 900, 2800], [.42, 52, .12, 900, 2800], [.6, 47, .34, 350, 3000], [1.0, 47, .4, 350, 2600]];
+        rhythmus.forEach(([t, m, d, f0, f1]) => note("gitarre", m, { zeit: z + t, laut: .55, dauer: d, aus: .12, filter: { typ: "bandpass", f: f0, bis: f1, in: d, q: 6 } }));
+        spiel("bd", { zeit: z, laut: .35 }); spiel("bd", { zeit: z + .6, laut: .3 });
+      },
+      /* schmachtende Klarinette mit viel Vibrato (Kneipen-Saxofon für Arme) */
+      schmacht(z) { z = z || 0; [[62, 0, .28], [65, .3, .28], [69, .6, .3], [67, .95, .9]].forEach(([m, t, d]) => note("klar", m, { zeit: z + t, laut: .42, dauer: d, aus: .3, vibrato: { f: 5.8, tiefe: 28, ab: .08 }, filter: { f: 2600 } })); },
+      boing(z) { spiel("fx_fo_spring_01", { zeit: z || 0, laut: .55 }); },
+      /* Wah-wah-wah-waaah */
+      posaune(kurz) {
+        const l = kurz ? [[53, 0, .32], [50, .38, .9]] : [[53, 0, .34], [52, .42, .34], [51, .84, .34], [50, 1.26, 1.5]];
+        l.forEach(([m, t, d], i) => note("pos", m, { zeit: t, laut: .6, dauer: d, aus: .3, vibrato: i === l.length - 1 ? { f: 6, tiefe: 45, ab: .25 } : null }));
+      },
+      kratzer() { rauschen(0, .22, .6, 900, 3800, 3); rauschen(.2, .18, .5, 3000, 700, 3); },
+      pfeifeRunter(z) { osz("sine", 1500, 260, z || 0, .7, .22); },
+      fanfare(z) { z = z || 0; [[67, 0, .14], [67, .16, .14], [67, .32, .14], [72, .5, .7]].forEach(([m, t, d]) => note("trp", m, { zeit: z + t, laut: .45, dauer: d })); },
+      /* Disco: zwei Takte vier auf den Boden */
+      disco() {
+        const b = .25;
+        for (let i = 0; i < 8; i++) { spiel("bd", { zeit: i * b * 2, laut: .5 }); spiel("shake", { zeit: i * b * 2 + b, laut: .25 }); note("gitarre", i % 4 < 2 ? 38 : 43, { zeit: i * b * 2, laut: .5, dauer: .2 }); note("gitarre", i % 4 < 2 ? 50 : 55, { zeit: i * b * 2 + b, laut: .35, dauer: .14 }); }
+        spiel("crash", { laut: .4 }); fx.chor(0, [69, 73, 76, 81], .26, 3.2); fx.fanfare(.1);
+      },
+      grillen(dauer) {
+        const s = spiel("k_grillen", { laut: .55, ein: .8, ab: Math.random() * 30, dauer: Math.max(1, dauer - .8), aus: .8 });
+        return s;
+      },
+      bellen() { spiel("fx_0_dog_bark", { laut: .6 }); },
+      zauber() { spiel("swell", { laut: .4, dauer: 1.6, aus: .6 }); fx.harfeHoch(.1, 74); },
+      gong() { spiel("gong", { laut: .5 }); },
+      auftritt() { fx.harfeHoch(0, 60); fx.chor(.15, [60, 64, 67, 71], .14, 1.2); },
+      klapper() { spiel("clave1", { laut: .4 }); spiel("clave1", { zeit: .18, laut: .3, rate: 1.2 }); }
+    };
+    /* ---------- Lounge-Musik: Bossa-Gitarre, Bass, Besen – und bei viel Liebe ein Chor ---------- */
+    const AKK = [
+      { b: 38, a: [53, 57, 60, 64] },  /* Dm9 */
+      { b: 43, a: [53, 57, 59, 64] },  /* G13 */
+      { b: 36, a: [52, 55, 59, 62] },  /* Cmaj9 */
+      { b: 45, a: [55, 58, 61, 64] }   /* A7b9 */
+    ];
+    const SCHLAG = .68;
+    let musikAn = false, naechsterTakt = 0, takt = 0, uhr = 0, liebe = 0;
+    function taktPlanen(t0, i) {
+      const A = AKK[i % 4], mb = musikBus;
+      const n = (fam, m, z, o) => note(fam, m, Object.assign({ zeit: z - jetzt(), bus: mb }, o));
+      n("gitarre", A.b, t0, { laut: .5, dauer: SCHLAG * 1.4, aus: .3 });
+      n("gitarre", A.b + 7, t0 + SCHLAG * 2, { laut: .38, dauer: SCHLAG * .9, aus: .3 });
+      n("gitarre", A.b, t0 + SCHLAG * 3.5, { laut: .3, dauer: SCHLAG * .4 });
+      [0, 1.5, 2.5].forEach((s, k) => A.a.forEach((m, j) => n("gitarre", m, t0 + SCHLAG * s + j * .012, { laut: k === 0 ? .17 : .12, dauer: SCHLAG * (k === 0 ? 1.2 : .7), aus: .2, filter: { f: 2400 } })));
+      for (let s = 0; s < 4; s++) spiel("shake", { zeit: t0 + SCHLAG * s + (s % 2 ? .04 : 0) - jetzt(), laut: s % 2 ? .1 : .05, bus: mb });
+      if (liebe >= 2) A.a.forEach(m => n("aah", m + 12, t0, { laut: liebe >= 3 ? .09 : .06, ein: .5, dauer: SCHLAG * 3.6, aus: .5 }));
+      if (liebe >= 1 && i % 2 === 1) [0, .5, 1].forEach((s, k) => n("klar", A.a[(k + i) % 4] + 12, t0 + SCHLAG * (2 + s), { laut: .1, dauer: SCHLAG * .45, vibrato: { f: 5.5, tiefe: 22 } }));
+    }
+    function ticken() {
+      if (!musikAn || !ctx) return;
+      while (naechsterTakt < jetzt() + .6) { taktPlanen(naechsterTakt, takt++); naechsterTakt += SCHLAG * 4; }
+    }
+    function musik(soll) {
+      if (!ctx) return;
+      if (soll && an) {
+        if (!musikAn) { musikAn = true; naechsterTakt = jetzt() + .15; clearInterval(uhr); uhr = setInterval(ticken, 150); ticken(); }
+        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(.75, jetzt(), .4);
+      } else if (musikAn) {
+        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(0, jetzt(), .15);
+        musikAn = false; clearInterval(uhr);
+      }
+    }
+    /* Musik bricht ab (peinliche Stille) und kommt wieder */
+    function stille(dauer) {
+      if (!ctx || !musikAn) return;
+      musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setValueAtTime(musikBus.gain.value, jetzt());
+      musikBus.gain.linearRampToValueAtTime(0, jetzt() + .08);
+      musikBus.gain.setValueAtTime(0, jetzt() + dauer); musikBus.gain.linearRampToValueAtTime(.75, jetzt() + dauer + 1.2);
+    }
+    return {
+      init, fx, musik, stille,
+      liebe: n => { liebe = n; },
+      an: () => an,
+      schalten() { an = !an; schreib("imres-charme-ton", an ? "1" : "0"); if (!an) musik(false); return an; }
+    };
+  })();
+  const tonFx = (name, ...a) => { try { if (Ton.an()) Ton.fx[name](...a); } catch (_) {} };
+
+  /* ---------- Bild: Stimmungslicht, Disco, Regen, Steppenläufer, Stempel ---------- */
+  const pracht = document.createElement("div");
+  pracht.className = "ch-pracht";
+  pracht.innerHTML =
+    '<div class="ch-funken">' + Array.from({ length: 18 }, (_, i) => '<i style="--x:' + (Math.random() * 100).toFixed(1) + "%;--y:" + (20 + Math.random() * 70).toFixed(1) + "%;--d:" + (Math.random() * 9).toFixed(2) + "s;--s:" + (6 + Math.random() * 7).toFixed(1) + 's"></i>').join("") + "</div>" +
+    '<div class="ch-stimmung"></div><div class="ch-spots"></div>' +
+    '<div class="ch-disco"><b></b></div>' +
+    '<div class="ch-wolke">☁️<span></span></div>' +
+    '<div class="ch-busch"></div>' +
+    '<div class="ch-stempel"></div>';
+  buehne.insertBefore(pracht, buehne.querySelector(".ch-sl-blase"));
+  /* die Funken liegen hinter dem NSC, Licht & Effekte davor */
+  const funken = pracht.querySelector(".ch-funken");
+  buehne.insertBefore(funken, buehne.querySelector(".ch-zimmer").nextSibling);
+  const stempelEl = pracht.querySelector(".ch-stempel");
+  let moodUhr = 0;
+  function stimmung(mood, dauer) {
+    buehne.dataset.mood = mood;
+    clearTimeout(moodUhr);
+    if (dauer) moodUhr = setTimeout(() => { if (buehne.dataset.mood === mood) buehne.dataset.mood = ""; }, dauer);
+  }
+  function stempel(text, art) {
+    stempelEl.textContent = text; stempelEl.className = "ch-stempel " + art;
+    void stempelEl.offsetWidth; stempelEl.classList.add("los");
+  }
+  function flug(zeichen, n, art) {
+    if (ruhig) return;
+    for (let i = 0; i < (n || 1); i++) {
+      const f = document.createElement("span"); f.className = "ch-flug " + (art || "werfen"); f.textContent = Array.isArray(zeichen) ? zufall(zeichen) : zeichen;
+      f.style.setProperty("--x", (Math.random() * 100).toFixed(0) + "%"); f.style.setProperty("--r", (Math.random() * 720 - 360).toFixed(0) + "deg");
+      f.style.animationDelay = (i * .07 + Math.random() * .25).toFixed(2) + "s"; f.style.fontSize = (16 + Math.random() * 18).toFixed(0) + "px";
+      f.style.setProperty("--bw", buehne.clientWidth + "px"); f.style.setProperty("--bh", buehne.clientHeight + "px");
+      buehne.appendChild(f); setTimeout(() => f.remove(), 3600);
+    }
+  }
+  function nscReagiert(klasse, dauer) {
+    nscImg.classList.remove("verliebt", "kalt", "hin");
+    void nscImg.offsetWidth; nscImg.classList.add(klasse);
+    setTimeout(() => nscImg.classList.remove(klasse), dauer || 1800);
+  }
+  function liebeSetzen() {
+    const l = S && !S.ende && ansicht === "spiel" ? S.herzen : 0;
+    buehne.style.setProperty("--liebe", (l / 3).toFixed(2)); buehne.dataset.liebe = l; Ton.liebe(l);
+  }
+  /* ---------- Hooks in den Spielablauf ---------- */
+  const SPRUCH_FLUG = { charmant: "🌹", kuehn: "💋", absurd: ["🐟", "🧀", "🦆", "🥔"], passend: "✨" };
+  const effekte = {
+    start() { Ton.init(); tonFx("auftritt"); Ton.musik(true); },
+    nsc() { tonFx("auftritt"); stimmung("auftritt", 1200); liebeSetzen(); },
+    spruch(art) {
+      flug(SPRUCH_FLUG[art], art === "absurd" ? 3 : 1, "werfen");
+      if (art === "kuehn") tonFx("wah"); else if (art === "absurd") { tonFx("boing"); tonFx("klapper"); } else if (art === "passend") tonFx("harfeHoch", 0, 67); else tonFx("schmacht");
+    },
+    wurf() { tonFx("wuerfel"); buehne.classList.add("spannung"); },
+    peinlich(dauer) {
+      Ton.stille(dauer + .6); tonFx("grillen", dauer + .4); stimmung("peinlich", dauer * 1000);
+      const busch = pracht.querySelector(".ch-busch"); busch.classList.remove("rollt"); busch.style.setProperty("--bw", buehne.clientWidth + "px"); void busch.offsetWidth; busch.classList.add("rollt");
+      busch.style.animationDuration = Math.max(2.5, dauer - .5) + "s";
+    },
+    ergebnis(art2) {
+      buehne.classList.remove("spannung"); liebeSetzen();
+      const T = sprache() === "en";
+      if (art2 === "krit") { stimmung("disco", 3600); stempel(T ? "NAT 20!" : "NATÜRLICHE 20!", "krit"); tonFx("disco"); flug(["✨", "💖", "⭐", "💋"], 22, "regen"); nscReagiert("verliebt", 3000); }
+      else if (art2 === "patzer") { stimmung("patzer", 3000); stempel(T ? "CRITICAL FAIL" : "PATZER!", "patzer"); tonFx("kratzer"); setTimeout(() => tonFx("posaune"), 300); nscReagiert("kalt", 1500); }
+      else if (art2 === "erfolg") { stimmung("romantik", 2200); tonFx("kuss"); tonFx("harfeHoch", .1); tonFx("chor", .15, null, .16, 1.4); flug(["💗", "💕", "💖"], 6, "aufsteigen"); nscReagiert("verliebt"); }
+      else { stimmung("frost", 1600); tonFx("posaune", true); nscReagiert("kalt", 900); }
+    },
+    ende(gewonnen) {
+      const T = sprache() === "en";
+      if (gewonnen) { stimmung("erobert", 4200); stempel(T ? "CONQUERED ♥" : "EROBERT ♥", "erobert"); tonFx("wah"); tonFx("kuesse"); tonFx("chor", .1, [62, 66, 69, 74], .24, 2.6); setTimeout(() => tonFx("wah"), 1300);
+        flug(["🌹", "💋", "💖", "💘", "🌸"], 26, "regen"); nscReagiert("verliebt", 3500); }
+      else { stimmung("korb", 3200); stempel(T ? "REJECTED" : "KORB!", "korb"); flug("🧺", 1, "korb"); tonFx("pfeifeRunter"); setTimeout(() => tonFx("boing"), 700); setTimeout(() => tonFx("posaune", true), 900); }
+    },
+    joker(k) {
+      if (k === "rex") { tonFx("bellen"); flug(["🐕", "🦴", "💗"], 8, "aufsteigen"); stimmung("romantik", 1800); }
+      if (k === "floete") { tonFx("zauber"); stimmung("zauber", 2200); flug(["✨", "🌟", "👹"], 10, "aufsteigen"); }
+      if (k === "echo") { tonFx("klapper"); flug(["❓", "🤷"], 4, "aufsteigen"); }
+      liebeSetzen();
+    },
+    schluss(zu) {
+      Ton.musik(false); liebeSetzen();
+      if (zu) { tonFx("gong"); stimmung("patzer", 2500); } else { tonFx("disco"); stimmung("erobert", 3000); }
+    }
+  };
+  /* Musik nur, solange das Spiel läuft und zu sehen ist */
+  if ("IntersectionObserver" in window) new IntersectionObserver(e => { const sicht = e[0].isIntersecting; Ton.musik(sicht && ansicht === "spiel" && !!S && !S.ende); }).observe(buehne);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) Ton.musik(false); else if (ansicht === "spiel" && S && !S.ende) Ton.musik(true); });
+
   /* ---------- Ablauf ---------- */
   function neueSitzung() {
     S = { reihe: NSC.slice(), i: 0, geduld: 10, herzenGesamt: 0, erobert: 0, joker: { echo: 1, rex: 1, floete: 1 }, vorteil: false, bonus: false, ergebnisse: [] };
@@ -561,7 +851,7 @@
     const n = S.reihe[S.i];
     S.nsc = n; S.herzen = 0; S.zuege = 4; S.fertig = null; S.letzt = null;
     S.angebot = spruchAngebot(n);
-    nscZeigen(n);
+    nscZeigen(n); effekte.nsc();
     gesicht("grinsen", 1400);
     slSagt(t().sl.start, 2000);
     setTimeout(() => { if (S && S.nsc === n) blase(nscBlase, t().nsc[n.id].intro, 0); }, 500);
@@ -581,6 +871,7 @@
     S.wirft = true;
     blase(nscBlase, "Barradin: " + NT[art][idx % NT[art].length], 0);
     nscBlase.classList.add("barradin");
+    effekte.spruch(art);
     if (art === "absurd") { gesicht("facepalm", 1500); slSagt(T.sl.absurd, 1800); S.geduld = Math.max(0, S.geduld - 1); }
     else gesicht("notiert");
     zeichnen();
@@ -593,7 +884,7 @@
     const n = S.nsc, T = t(), dauer = ruhig ? 1800 : 4200 + Math.random() * 3200;
     setTimeout(() => {
       if (!S || S.nsc !== n) return;
-      gesicht("starr"); sl.classList.add("starr");
+      gesicht("starr"); sl.classList.add("starr"); effekte.peinlich(dauer / 1000);
       blase(slBlase, "…", 0); slBlase.classList.add("punkte");
     }, 900);
     setTimeout(() => { if (S && S.nsc === n) { nscBlase.classList.remove("barradin"); blase(nscBlase, "…", 0); nscBlase.classList.add("punkte"); } }, 2100);
@@ -610,13 +901,12 @@
     wuerfel.hidden = false; wuerfel.className = "ch-wuerfel rollt";
     const zahl = wuerfel.querySelector("span");
     const flimmer = setInterval(() => { zahl.textContent = 1 + Math.floor(Math.random() * 20); }, 60);
-    klang("holz1.mp3", .35);
+    effekte.wurf();
     setTimeout(() => {
       clearInterval(flimmer); zahl.textContent = w;
       wuerfel.className = "ch-wuerfel" + (w === 20 ? " krit" : w === 1 ? " patzer" : "");
-      klang(w === 20 ? "gloeckchen.mp3" : w === 1 ? "timp1.mp3" : "holz2.mp3", .35);
       auswerten(art, w, vort ? [w1, w2] : null);
-    }, ruhig ? 200 : 1100);
+    }, ruhig ? 200 : 1500);
   }
   function auswerten(art, w, beide) {
     const n = S.nsc, T = t(), NT = T.nsc[n.id], sg = sgFuer(art, n), summe = w + CHA;
@@ -630,6 +920,7 @@
     S.zuege--;
     S.letzt = { art2, w, summe, sg: art === "absurd" ? null : sg, beide };
     nscBlase.classList.remove("barradin");
+    effekte.ergebnis(art2);
     if (art2 === "krit") { gesicht("schock", 1100, "stolz"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0); }
     else if (art2 === "patzer") { gesicht("facepalm", 1300, "lachen"); slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); }
     else if (art2 === "erfolg") { gesicht(S.herzen >= 3 ? "errötet" : "grinsen", 2400); slSagt(T.sl.erfolg); blase(nscBlase, zufall(NT.ja), 0); }
@@ -660,6 +951,7 @@
       slSagt(gewonnen ? T.sl.erobert : T.sl.korb, 2800);
       gesicht(gewonnen ? "schwitzt" : "lachen", 2600);
       if (gewonnen) herzRegen();
+      effekte.ende(gewonnen);
       zeichnen();
     }, 1500);
   }
@@ -676,6 +968,7 @@
     const alt = rekord(); S.neuRekord = S.herzenGesamt > alt; if (S.neuRekord) schreib("imres-charme-rekord", String(S.herzenGesamt));
     nscImg.classList.remove("da");
     nscBlase.classList.remove("da");
+    effekte.schluss(zu);
     if (zu) { buehne.classList.add("zu"); gesicht("genervt"); slSagt(t().sl.schirm, 4000); }
     else gesicht("stolz", 3000, "grinsen");
     zeichnen();
@@ -686,6 +979,7 @@
     if (k === "echo") { S.zuege++; S.angebot = spruchAngebot(S.nsc); gesicht("genervt", 2200); slSagt(T.sl.echo); blase(nscBlase, sprache() === "en" ? "Echo: \"Do you know Gundren?\" – \"…Who?\"" : "Echo: „Kennst du Gundren?“ – „…Wen?“", 0); S.geduld = Math.max(0, S.geduld - 1); }
     if (k === "rex") { S.herzen = Math.min(3, S.herzen + 1); gesicht("lachen", 2200); slSagt(T.sl.rex); blase(nscBlase, sprache() === "en" ? "Rex wags his tail. Resistance is futile." : "Rex wedelt. Widerstand ist zwecklos.", 0); if (S.herzen >= 3) nscEnde(true); }
     if (k === "floete") { S.vorteil = true; gesicht("schock", 1400, "genervt"); slSagt(T.sl.floete); blase(nscBlase, sprache() === "en" ? "A tiny Demogorgon appears above the flute. Very impressive." : "Über der Flöte erscheint ein winziger Demogorgon. Sehr beeindruckend.", 0); S.geduld = Math.max(0, S.geduld - 1); }
+    effekte.joker(k);
     if (S.geduld <= 0 && !S.fertig) nscEnde(false);
     zeichnen();
   }
@@ -697,10 +991,6 @@
       buehne.appendChild(h); setTimeout(() => h.remove(), 2200);
     }
   }
-  function klang(datei, laut) {
-    if (lies("imres-saal-ton") !== "1") return;
-    try { const a = new Audio("klang/" + datei); a.volume = laut; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (_) {}
-  }
 
   /* ---------- Zeichnen ---------- */
   function zeichnen() {
@@ -710,6 +1000,8 @@
     kopf.hidden = ansicht !== "spiel";
     if (ansicht === "spiel" && S) {
       $(".ch-geduld-txt").textContent = T.geduld;
+      const tk = $(".ch-ton"); tk.textContent = Ton.an() ? "🔊 " + (sprache() === "en" ? "Sound" : "Ton") : "🔇"; tk.setAttribute("aria-pressed", Ton.an());
+      liebeSetzen();
       const bar = $(".ch-geduld-bar i"); bar.style.width = (S.geduld * 10) + "%"; bar.parentNode.classList.toggle("knapp", S.geduld <= 3);
       $(".ch-herzen").innerHTML = [0, 1, 2].map(i => '<span class="' + (i < S.herzen ? "voll" : "") + '">♥</span>').join("");
     }
@@ -784,10 +1076,11 @@
     if (b.dataset.art) { wuerfeln(b.dataset.art, +b.dataset.idx); return; }
     if (b.dataset.joker) { joker(b.dataset.joker); return; }
     const tun = b.dataset.tun;
-    if (tun === "start") { buehne.classList.remove("zu"); neueSitzung(); einpassen(); }
+    if (tun === "start") { buehne.classList.remove("zu"); effekte.start(); neueSitzung(); einpassen(); }
+    else if (tun === "ton") { Ton.init(); const an = Ton.schalten(); if (an && ansicht === "spiel" && S && !S.ende) Ton.musik(true); zeichnen(); }
     else if (tun === "weiter") weiter();
-    else if (tun === "buch") { ansicht = "buch"; zeichnen(); }
-    else if (tun === "zurueck") { ansicht = S && !S.ende ? "spiel" : "start"; if (ansicht === "start") S = null; zeichnen(); }
+    else if (tun === "buch") { ansicht = "buch"; Ton.musik(false); zeichnen(); }
+    else if (tun === "zurueck") { ansicht = S && !S.ende ? "spiel" : "start"; if (ansicht === "start") S = null; else Ton.musik(true); zeichnen(); }
   });
   /* Handy: Bühne direkt unter die Kopfleiste schieben, damit alles auf einen Bildschirm passt */
   function einpassen() {
@@ -946,6 +1239,120 @@
 .charme.tav-voll > .ch-buehne { aspect-ratio: auto; margin-inline: auto; }
 .charme.tav-voll > .ch-tafel { max-width: 1100px; margin-inline: auto; }
 @media (max-width: 700px) { .charme.tav-voll { padding: 3rem .5rem .5rem; } }
+/* ===== Pracht: lebendiger Hintergrund ===== */
+.ch-buehne { --liebe: 0; }
+.ch-kette .kb { animation: chFunkeln 2.2s ease-in-out infinite; animation-delay: var(--d); }
+@keyframes chFunkeln { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.ch-buehne[data-liebe="2"] .ch-kette .kb, .ch-buehne[data-liebe="3"] .ch-kette .kb { animation-duration: 1s; }
+.ch-buehne[data-mood="disco"] .ch-kette .kb { animation: chFunkeln .25s steps(2) infinite; animation-delay: var(--d); }
+.ch-lampenschein { animation: chLampe 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes chLampe { 50% { opacity: .55; transform: scale(1.12); } }
+.ch-lava b { animation: chLava 7s ease-in-out infinite; transform-box: fill-box; }
+.ch-lava b:nth-child(2) { animation-duration: 9s; animation-delay: -3s; }
+.ch-lava b:nth-child(3) { animation-duration: 11s; animation-delay: -6s; }
+@keyframes chLava { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(-34px) scale(.8, 1.2); } }
+.ch-flamme { animation: chFlamme .18s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes chFlamme { from { transform: scale(1, 1) skewX(-3deg); } to { transform: scale(.88, 1.12) skewX(4deg); } }
+.ch-kerzenschein { animation: chKerze 2.4s ease-in-out infinite; }
+@keyframes chKerze { 0%, 100% { opacity: .9; } 30% { opacity: .65; } 60% { opacity: 1; } 80% { opacity: .75; } }
+/* schwebende Funken / Staub im Licht */
+.ch-funken { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+.ch-funken i { position: absolute; left: var(--x); top: var(--y); width: 3px; height: 3px; border-radius: 50%; background: #ffe2a8; box-shadow: 0 0 6px 2px rgba(255,200,120,.6);
+  opacity: 0; animation: chStaub var(--s) linear infinite; animation-delay: calc(var(--d) * -1); }
+@keyframes chStaub { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: .8; } 80% { opacity: .6; } 100% { opacity: 0; transform: translate(14px, -70px); } }
+.ch-buehne[data-liebe="2"] .ch-funken i, .ch-buehne[data-liebe="3"] .ch-funken i { background: #ffb3d1; box-shadow: 0 0 7px 3px rgba(255,110,170,.6); }
+.ch-pracht { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+/* Stimmungslicht: wird rosa, je mehr Herzen */
+.ch-stimmung { position: absolute; inset: 0; transition: background .8s ease, opacity .6s ease;
+  background: radial-gradient(ellipse at 30% 60%, rgba(255,70,150, calc(var(--liebe) * .28)), transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(255,120,180, calc(var(--liebe) * .18)), transparent 55%); mix-blend-mode: screen; }
+.ch-buehne[data-mood="romantik"] .ch-stimmung, .ch-buehne[data-mood="erobert"] .ch-stimmung {
+  background: radial-gradient(ellipse at 30% 60%, rgba(255,60,150,.42), transparent 62%), radial-gradient(ellipse at 75% 35%, rgba(255,140,200,.3), transparent 60%);
+  animation: chPuls 1.1s ease-in-out infinite; }
+@keyframes chPuls { 50% { opacity: .55; } }
+.ch-buehne[data-mood="auftritt"] .ch-stimmung { background: radial-gradient(ellipse at 22% 70%, rgba(255,230,160,.4), transparent 55%); }
+.ch-buehne[data-mood="zauber"] .ch-stimmung { background: radial-gradient(ellipse at 25% 50%, rgba(140,90,255,.45), transparent 60%); animation: chPuls .7s ease-in-out infinite; }
+.ch-buehne[data-mood="frost"] .ch-stimmung { background: rgba(70,110,180,.22); mix-blend-mode: multiply; }
+.ch-buehne[data-mood="korb"] .ch-stimmung { background: rgba(40,60,110,.42); mix-blend-mode: multiply; }
+/* Peinliche Stille: Licht aus, Spot auf den Spielleiter */
+.ch-buehne[data-mood="peinlich"] .ch-stimmung { mix-blend-mode: normal; transition: background 1.2s ease;
+  background: radial-gradient(circle at 67% 42%, transparent 0 14%, rgba(0,0,0,.72) 26%); }
+.ch-buehne[data-mood="peinlich"] .ch-kette .kb { animation: none; opacity: .15; }
+.ch-buehne[data-mood="peinlich"] .ch-funken { opacity: 0; transition: opacity 1s; }
+/* Patzer: alles grau, Wackeln, Regenwolke */
+.ch-buehne[data-mood="patzer"] > svg, .ch-buehne[data-mood="patzer"] .ch-nsc { filter: grayscale(.85) brightness(.75); transition: filter .3s; }
+.ch-buehne[data-mood="patzer"] { animation: chWackeln .45s ease 2; }
+@keyframes chWackeln { 20% { transform: translate(-6px, 2px) rotate(-.6deg); } 40% { transform: translate(5px, -2px) rotate(.5deg); } 60% { transform: translate(-4px, 1px); } 80% { transform: translate(3px, 0); } }
+.ch-buehne[data-mood="patzer"] .ch-kette .kb { animation: chFunkeln .12s steps(2) infinite; }
+.ch-wolke { position: absolute; left: 12%; top: 6%; font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; opacity: 0; transform: translateY(-40px); transition: opacity .4s, transform .5s cubic-bezier(.2,1.4,.4,1); filter: grayscale(1) brightness(.7); }
+.ch-wolke span { position: absolute; left: 15%; top: 70%; width: 70%; height: 160%;
+  background: repeating-linear-gradient(100deg, transparent 0 7px, rgba(150,190,255,.75) 7px 8.5px); background-size: 100% 30px; animation: chRegen .25s linear infinite;
+  -webkit-mask: linear-gradient(#000, transparent); mask: linear-gradient(#000, transparent); }
+@keyframes chRegen { to { background-position: -6px 30px; } }
+.ch-buehne[data-mood="patzer"] .ch-wolke, .ch-buehne[data-mood="korb"] .ch-wolke { opacity: 1; transform: none; }
+/* Disco bei der natürlichen 20 */
+.ch-disco { position: absolute; left: 50%; top: 0; width: clamp(42px, 9vw, 70px); aspect-ratio: 1; margin-left: calc(clamp(42px, 9vw, 70px) / -2); transform: translateY(-140%); transition: transform .7s cubic-bezier(.3,1.5,.5,1); }
+.ch-disco::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 1px; height: 200px; background: #888; }
+.ch-disco b { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 22px rgba(255,255,255,.6);
+  background: radial-gradient(circle at 35% 30%, #fff 0 8%, transparent 30%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 1px, transparent 1px 7px), repeating-linear-gradient(90deg, rgba(0,0,0,.35) 0 1px, transparent 1px 7px),
+    linear-gradient(135deg, #e8e8f0, #8a8aa0); animation: chKugel .6s linear infinite; }
+@keyframes chKugel { to { background-position: 0 0, 0 7px, 7px 0, 0 0; } }
+.ch-spots { position: absolute; inset: -60%; opacity: 0; transition: opacity .4s; mix-blend-mode: screen;
+  background: conic-gradient(from 0deg at 50% 50%, rgba(255,0,140,.55) 0 8deg, transparent 8deg 45deg, rgba(0,200,255,.5) 45deg 53deg, transparent 53deg 90deg,
+    rgba(255,220,0,.5) 90deg 98deg, transparent 98deg 135deg, rgba(140,255,90,.5) 135deg 143deg, transparent 143deg 180deg,
+    rgba(255,0,140,.55) 180deg 188deg, transparent 188deg 225deg, rgba(0,200,255,.5) 225deg 233deg, transparent 233deg 270deg, rgba(255,220,0,.5) 270deg 278deg, transparent 278deg 360deg); }
+.ch-buehne[data-mood="disco"] .ch-disco { transform: translateY(12%); }
+.ch-buehne[data-mood="disco"] .ch-spots { opacity: 1; animation: chDreh 2.4s linear infinite; }
+@keyframes chDreh { to { transform: rotate(360deg); } }
+.ch-buehne[data-mood="disco"] .ch-stimmung { background: rgba(40,0,60,.35); mix-blend-mode: multiply; }
+.ch-buehne[data-mood="disco"] .ch-sl .ch-koerper { animation: chTanz .5s ease-in-out infinite; }
+@keyframes chTanz { 25% { transform: translateY(-4px) rotate(-2deg); } 75% { transform: translateY(-4px) rotate(2deg); } }
+.ch-buehne[data-mood="erobert"] .ch-sl .ch-koerper { animation: chTanz .7s ease-in-out infinite; }
+/* Steppenläufer in der peinlichen Stille */
+.ch-busch { position: absolute; bottom: 9%; left: -12%; width: clamp(28px, 7vw, 54px); aspect-ratio: 1; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, transparent 30%, rgba(160,120,70,.9) 31% 34%, transparent 35% 50%, rgba(160,120,70,.9) 51% 54%, transparent 55%),
+    repeating-conic-gradient(rgba(140,100,55,.95) 0 6deg, transparent 6deg 24deg); }
+.ch-busch.rollt { animation: chBusch 5s linear forwards; }
+@keyframes chBusch { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 25% { transform: translate(calc(var(--bw) * .3), -14px) rotate(260deg); } 35% { transform: translate(calc(var(--bw) * .42), 0) rotate(380deg); }
+  70% { transform: translate(calc(var(--bw) * .8), -10px) rotate(760deg); } 100% { opacity: 1; transform: translate(calc(var(--bw) * 1.2), 0) rotate(1100deg); } }
+/* Stempel: NAT 20! / PATZER! / EROBERT ♥ / KORB! */
+.ch-stempel { position: absolute; left: 50%; top: 38%; z-index: 9; transform: translate(-50%, -50%) scale(0) rotate(-12deg); opacity: 0; white-space: nowrap;
+  font: 900 clamp(1.6rem, 7vw, 3.6rem)/1 Georgia, serif; letter-spacing: .04em; padding: .15em .45em; border: .12em solid currentColor; border-radius: .2em; text-shadow: 0 3px 0 rgba(0,0,0,.45); }
+.ch-stempel.los { animation: chStempel 2.4s cubic-bezier(.2,1.6,.4,1) forwards; }
+@keyframes chStempel { 0% { opacity: 0; transform: translate(-50%, -50%) scale(3) rotate(-12deg); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-8deg); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1.05) rotate(-8deg); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1) rotate(-8deg); } }
+.ch-stempel.krit { color: #ffe07a; background: rgba(80,30,100,.55); }
+.ch-stempel.patzer { color: #ff6a5a; background: rgba(40,10,10,.6); }
+.ch-stempel.erobert { color: #ff8ac0; background: rgba(90,10,50,.55); }
+.ch-stempel.korb { color: #9fc4ff; background: rgba(10,20,50,.6); }
+/* Fliegende Rosen, Küsse, Fische … */
+.ch-flug { position: absolute; z-index: 8; pointer-events: none; line-height: 1; }
+.ch-flug.werfen { right: 6%; bottom: 8%; animation: chWerfen 1.1s cubic-bezier(.3,.1,.5,1) forwards; }
+@keyframes chWerfen { 0% { opacity: 0; transform: translate(0, 0) rotate(0) scale(.6); } 15% { opacity: 1; } 55% { transform: translate(calc(var(--bw) * -.42), calc(var(--bh) * -.45)) rotate(var(--r)) scale(1.3); }
+  100% { opacity: 0; transform: translate(calc(var(--bw) * -.68), calc(var(--bh) * -.2)) rotate(var(--r)) scale(1); } }
+.ch-flug.regen { top: -10%; left: var(--x); animation: chRegnen 3.2s ease-in forwards; }
+@keyframes chRegnen { 0% { opacity: 0; transform: translateY(0) rotate(0); } 10% { opacity: 1; } 100% { opacity: .9; transform: translateY(calc(var(--bh) * 1.15)) rotate(var(--r)); } }
+.ch-flug.aufsteigen { bottom: 18%; left: calc(8% + var(--x) * .35); animation: chAuf 2.2s ease-out forwards; }
+@keyframes chAuf { 0% { opacity: 0; transform: scale(.4); } 20% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: translateY(-180px) rotate(calc(var(--r) * .1)); } }
+.ch-flug.korb { top: -20%; left: 18%; font-size: clamp(2.6rem, 10vw, 5rem) !important; animation: chKorb 1.6s cubic-bezier(.5,0,.7,1) forwards; }
+@keyframes chKorb { 0% { transform: translateY(0) rotate(-20deg); } 55% { transform: translateY(calc(var(--bh) * .55)) rotate(8deg); } 70% { transform: translateY(calc(var(--bh) * .44)) rotate(-6deg); } 85% { transform: translateY(calc(var(--bh) * .55)) rotate(3deg); } 100% { transform: translateY(calc(var(--bh) * .55)) rotate(0); } }
+/* NSC reagiert */
+.ch-nsc.da.verliebt { animation: chVerliebt .5s ease 3; filter: drop-shadow(0 0 24px rgba(255,90,160,.9)) drop-shadow(0 10px 18px rgba(0,0,0,.6)); }
+@keyframes chVerliebt { 50% { transform: translateY(-4%) scale(1.04) rotate(-2deg); } }
+.ch-nsc.da.kalt { animation: chKalt .4s ease 2; filter: drop-shadow(0 0 14px rgba(120,170,255,.7)) saturate(.6); }
+@keyframes chKalt { 25% { transform: translateX(-3%) rotate(-2deg); } 75% { transform: translateX(3%) rotate(2deg); } }
+/* Spannung beim Würfeln: Licht wird enger */
+.ch-buehne.spannung .ch-stimmung { background: radial-gradient(circle at 50% 42%, transparent 10%, rgba(0,0,0,.45) 60%); mix-blend-mode: normal; }
+.ch-buehne.spannung .ch-wuerfel { box-shadow: 0 0 30px rgba(200,120,255,.8); }
+/* Herzen schlagen */
+.ch-herzen span.voll { animation: chHerzSchlag 1s ease-in-out infinite; display: inline-block; }
+@keyframes chHerzSchlag { 0%, 60%, 100% { transform: scale(1.15); } 15% { transform: scale(1.4); } 30% { transform: scale(1.1); } 45% { transform: scale(1.3); } }
+.ch-ton { pointer-events: auto; align-self: end; padding: .15rem .45rem; border: 1px solid rgba(255,210,122,.5); border-radius: 999px; background: rgba(0,0,0,.55); color: #ffe3a6; font: inherit; font-size: .8rem; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) {
+  .ch-kette .kb, .ch-lava b, .ch-flamme, .ch-funken i, .ch-spots, .ch-buehne[data-mood], .ch-herzen span.voll, .ch-disco b { animation: none !important; }
+}
+
 @media (prefers-reduced-motion: reduce) { .ch-sl .ch-koerper, .ch-sl .a-offen, .ch-sl.hops .ch-kopf, .ch-sl[data-m="lachen"] .ch-kopf { animation: none; } .ch-nsc { transition: opacity .3s; } }
 `;
   document.head.appendChild(css);
@@ -953,5 +1360,5 @@
   gesicht("neutral");
   zeichnen();
   new MutationObserver(zeichnen).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  root._charme = { nsc: NSC, zustand: () => S, neu: neueSitzung, wuerfeln, joker, weiter, gesicht };
+  root._charme = { nsc: NSC, zustand: () => S, neu: neueSitzung, wuerfeln, joker, weiter, gesicht, effekte, stimmung, Ton };
 })();

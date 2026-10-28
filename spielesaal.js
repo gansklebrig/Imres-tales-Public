@@ -37,8 +37,8 @@
       plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4", nurVorschauClip: true, ton: "holz1.mp3" },
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")],
       plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, ton: "glock_91.mp3" },
-    { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: ["vorschau/charme-1.webp?v=4", "vorschau/charme-2.webp?v=4", "vorschau/charme-3.webp?v=4"],
-      plakat: "vorschau/plakat-charme.webp?v=4", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
+    { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: ["vorschau/charme-1.webp?v=5", "vorschau/charme-2.webp?v=5", "vorschau/charme-3.webp?v=5"],
+      plakat: "vorschau/plakat-charme.webp?v=5", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
   ];
   /* Sprüche aus Sicht der Helden, Kopf der Taverne, Fortschritt */
   const MEHR = {
