@@ -6412,10 +6412,14 @@ const ZUS_ICON = {
   }
   function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
   /* ---------- Mitspieler: Orchester, Kapelle und Gäste unter einem Dach ---------- */
-  Object.assign(TX.de, { aufnehmen: "⏺ Aufnehmen", aufTipp: "Nimmt alles auf, was gerade erklingt – Musik, Kulisse, Zusätze und Effekte. Beim Beenden wird die Datei heruntergeladen.",
+  Object.assign(TX.de, { schlaf: "⏾ Schlaf-Timer", schlafGleich: "blendet aus …", schlafTipp: "Antippen: 15, 30, 45, 60 oder 90 Minuten – danach blendet alles sanft aus und hält an. Nochmal tippen schaltet weiter, nach 90 Minuten aus.",
+    schlafAn: m => "⏾ In " + m + " Minuten blendet alles aus.", schlafWeg: "⏾ Schlaf-Timer aus.", schlafFertig: "⏾ Gute Nacht – alles angehalten." });
+  Object.assign(TX.en, { schlaf: "⏾ Sleep timer", schlafGleich: "fading out …", schlafTipp: "Tap: 15, 30, 45, 60 or 90 minutes – then everything fades out and stops. Tap again to step on; after 90 minutes it turns off.",
+    schlafAn: m => "⏾ Everything fades out in " + m + " minutes.", schlafWeg: "⏾ Sleep timer off.", schlafFertig: "⏾ Good night – everything stopped." });
+  Object.assign(TX.de, { aufnehmen: "⏺ Aufnehmen", aufTipp: "Nimmt alles auf, was gerade erklingt – Musik, Kulisse, Zusätze und Effekte – als WAV-Datei (etwa 10 MB pro Minute). Beim Beenden wird sie heruntergeladen.",
     aufStopp: "Aufnahme beenden und herunterladen", aufLaeuft: "⏺ Aufnahme läuft – nochmal tippen zum Beenden.", aufFertig: n => "Aufnahme gespeichert: " + n,
     aufGehtNicht: "Dieser Browser kann leider nicht aufnehmen." });
-  Object.assign(TX.en, { aufnehmen: "⏺ Record", aufTipp: "Records everything that is playing – music, ambience, extras and effects. The file downloads when you stop.",
+  Object.assign(TX.en, { aufnehmen: "⏺ Record", aufTipp: "Records everything that is playing – music, ambience, extras and effects – as a WAV file (about 10 MB per minute). It downloads when you stop.",
     aufStopp: "Stop recording and download", aufLaeuft: "⏺ Recording – tap again to stop.", aufFertig: n => "Recording saved: " + n,
     aufGehtNicht: "Sorry, this browser cannot record." });
   Object.assign(TX.de, { kulPause: "Kulisse und Zusätze anhalten", kulWeiter: "Kulisse und Zusätze weiterlaufen lassen" });
@@ -6898,79 +6902,103 @@ const ZUS_ICON = {
   /* Dateiname nur aus einfachen Zeichen – manche Browser verwerfen sonst den Namen */
   const dateiName = x => String(x).replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/Ä/g, "Ae").replace(/Ö/g, "Oe").replace(/Ü/g, "Ue").replace(/ß/g, "ss")
     .replace(/[–—]/g, "-").replace(/[^A-Za-z0-9 ._()-]+/g, "").replace(/\s+/g, " ").trim() || "Aufnahme";
-  /* Aufnahmen im WebM-Format haben vom Browser keine Längenangabe – manche Player zeigen dann 0:00 und können nicht spulen.
-     Hier wird die Dauer in den Dateikopf (Segment › Info › Duration) eingetragen. */
-  async function webmDauer(blob, ms) {
-    try {
-      const u = new Uint8Array(await blob.slice(0, Math.min(blob.size, 65536)).arrayBuffer());
-      const kennung = p => { const b = u[p], n = b & 0x80 ? 1 : b & 0x40 ? 2 : b & 0x20 ? 3 : b & 0x10 ? 4 : 0; if (!n || p + n > u.length) return null; let v = 0; for (let i = 0; i < n; i++) v = v * 256 + u[p + i]; return { n, v }; };
-      const groesse = p => { const b = u[p]; let n = 1, m = 0x80; while (n <= 8 && !(b & m)) { m >>= 1; n++; } if (n > 8 || p + n > u.length) return null; let v = b & (m - 1); for (let i = 1; i < n; i++) v = v * 256 + u[p + i]; return { n, v, offen: v === Math.pow(2, 7 * n) - 1 }; };
-      const verbinde = teile => { const l = teile.reduce((a, t) => a + t.length, 0), o = new Uint8Array(l); let p = 0; teile.forEach(t => { o.set(t, p); p += t.length; }); return o; };
-      let p = 0;
-      while (p < u.length) {
-        const k = kennung(p); if (!k) return blob; const g = groesse(p + k.n); if (!g) return blob; const start = p + k.n + g.n;
-        if (k.v === 0x18538067) {
-          let q = start;
-          while (q < u.length) {
-            const ck = kennung(q); if (!ck) return blob; const cg = groesse(q + ck.n); if (!cg) return blob; const cs = q + ck.n + cg.n;
-            if (ck.v === 0x1549A966) {
-              if (cg.offen || cs + cg.v > u.length) return blob;
-              let r = cs, skala = 1e6, dPos = -1, dEnde = -1;
-              while (r < cs + cg.v) { const ik = kennung(r), ig = ik && groesse(r + ik.n); if (!ik || !ig) return blob; const is = r + ik.n + ig.n;
-                if (ik.v === 0x2AD7B1) { let v = 0; for (let i = 0; i < ig.v; i++) v = v * 256 + u[is + i]; skala = v || 1e6; }
-                if (ik.v === 0x4489) { dPos = r; dEnde = is + ig.v; }
-                r = is + ig.v; }
-              const dauer = new Uint8Array(11); dauer[0] = 0x44; dauer[1] = 0x89; dauer[2] = 0x88; new DataView(dauer.buffer).setFloat64(3, ms * 1e6 / skala);
-              const inhalt = dPos >= 0 ? verbinde([u.slice(cs, dPos), dauer, u.slice(dEnde, cs + cg.v)]) : verbinde([u.slice(cs, cs + cg.v), dauer]);
-              const gr = new Uint8Array(8); gr[0] = 1; let v = inhalt.length; for (let i = 7; i >= 1; i--) { gr[i] = v & 255; v = Math.floor(v / 256); }
-              return new Blob([verbinde([u.slice(0, q + ck.n), gr, inhalt]), blob.slice(cs + cg.v)], { type: blob.type });
-            }
-            if (cg.offen) return blob;
-            q = cs + cg.v;
-          }
-          return blob;
-        }
-        if (g.offen) return blob;
-        p = start + g.v;
+  /* WAV-Mitschnitt: die Rohdaten direkt vom Ausgang (16 Bit, Stereo, Abtastrate des Klangs) – verlustfrei und überall abspielbar */
+  const MITSCHNITT_CODE = 'class M extends AudioWorkletProcessor{constructor(){super();this.l=new Float32Array(4096);this.r=new Float32Array(4096);this.n=0;this.port.onmessage=e=>{if(e.data==="ende"){if(this.n)this.port.postMessage([this.l.slice(0,this.n),this.r.slice(0,this.n)]);this.port.postMessage("fertig");this.aus=1;}};}' +
+    'process(i){if(this.aus)return false;const k=i[0];if(!k||!k.length)return true;const a=k[0],b=k[1]||k[0];for(let j=0;j<a.length;j++){this.l[this.n]=a[j];this.r[this.n]=b[j];if(++this.n===4096){this.port.postMessage([this.l,this.r]);this.l=new Float32Array(4096);this.r=new Float32Array(4096);this.n=0;}}return true;}}registerProcessor("mitschnitt",M);';
+  async function mitschnittStarten(c, quelle) {
+    const teile = []; let frames = 0, fertig = null;
+    const nimm = (l, r) => { const n = l.length, o = new Int16Array(n * 2); for (let j = 0; j < n; j++) { const a = Math.max(-1, Math.min(1, l[j])), b = Math.max(-1, Math.min(1, r[j])); o[2 * j] = a < 0 ? a * 32768 : a * 32767; o[2 * j + 1] = b < 0 ? b * 32768 : b * 32767; } teile.push(o); frames += n; };
+    const still = c.createGain(); still.gain.value = 0; still.connect(c.destination);
+    let knoten, ende;
+    if (c.audioWorklet && window.AudioWorkletNode) {
+      if (!c.__mitschnitt) { const url = URL.createObjectURL(new Blob([MITSCHNITT_CODE], { type: "application/javascript" })); c.__mitschnitt = c.audioWorklet.addModule(url); }
+      await c.__mitschnitt;
+      knoten = new AudioWorkletNode(c, "mitschnitt", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 2, channelCountMode: "explicit", channelInterpretation: "speakers" });
+      knoten.port.onmessage = e => { if (e.data === "fertig") { if (fertig) fertig(); } else nimm(e.data[0], e.data[1]); };
+      ende = () => new Promise(res => { fertig = res; knoten.port.postMessage("ende"); setTimeout(res, 800); });
+    } else {
+      knoten = c.createScriptProcessor(4096, 2, 1);
+      knoten.onaudioprocess = e => { const b = e.inputBuffer; nimm(b.getChannelData(0).slice(0), (b.numberOfChannels > 1 ? b.getChannelData(1) : b.getChannelData(0)).slice(0)); };
+      ende = () => Promise.resolve();
+    }
+    quelle.connect(knoten); knoten.connect(still);
+    return {
+      bytes: () => frames * 4,
+      async stopp() {
+        await ende();
+        try { quelle.disconnect(knoten); } catch (_) {} try { knoten.disconnect(); still.disconnect(); } catch (_) {}
+        const sr = Math.round(c.sampleRate), kopf = new DataView(new ArrayBuffer(44)), laenge = frames * 4;
+        const txt = (p, s) => { for (let i = 0; i < 4; i++) kopf.setUint8(p + i, s.charCodeAt(i)); };
+        txt(0, "RIFF"); kopf.setUint32(4, 36 + laenge, true); txt(8, "WAVE"); txt(12, "fmt "); kopf.setUint32(16, 16, true); kopf.setUint16(20, 1, true); kopf.setUint16(22, 2, true);
+        kopf.setUint32(24, sr, true); kopf.setUint32(28, sr * 4, true); kopf.setUint16(32, 4, true); kopf.setUint16(34, 16, true); txt(36, "data"); kopf.setUint32(40, laenge, true);
+        return new Blob([kopf.buffer].concat(teile), { type: "audio/wav" });
       }
-    } catch (_) {}
-    return blob;
+    };
   }
+  const mb = b => (b / 1048576).toFixed(b < 10485760 ? 1 : 0).replace(".", ",") + " MB";
   /* ---------- Aufnahme: alles, was das Lautenwerk gerade spielt (Musik, Kulisse, Zusätze, Effekte), als Datei ---------- */
   let aufnahme = null;
   const aufZeit = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
   function aufnahmeKnoepfe() {
     const T = t();
     root.querySelectorAll(".lw-rec").forEach(b => { b.classList.toggle("an", !!aufnahme); b.setAttribute("aria-pressed", !!aufnahme);
-      b.textContent = aufnahme ? "⏹ " + aufZeit(Date.now() - aufnahme.ab) : T.aufnehmen; b.title = aufnahme ? T.aufStopp : T.aufTipp; });
+      b.textContent = aufnahme ? "⏹ " + aufZeit(Date.now() - aufnahme.ab) + " · " + mb(aufnahme.m.bytes()) : T.aufnehmen; b.title = aufnahme ? T.aufStopp : T.aufTipp; });
     if (leiste) { const b = leiste.querySelector(".ll-rec"); if (b) { b.hidden = !aufnahme; b.textContent = aufnahme ? "⏹ " + aufZeit(Date.now() - aufnahme.ab) : ""; b.title = T.aufStopp; } }
   }
-  function aufnahmeUmschalten() {
+  /* ---------- Schlaf-Timer: nach Ablauf blendet alles sanft aus und hält an ---------- */
+  const SCHLAF_STUFEN = [0, 15, 30, 45, 60, 90], SCHLAF_AUS = 20;
+  let schlaf = null;
+  function schlafKnoepfe() {
+    const T = t(), txt = schlaf ? "⏾ " + (schlaf.blendet ? T.schlafGleich : aufZeit(Math.max(0, schlaf.bis - Date.now()))) : T.schlaf;
+    root.querySelectorAll(".lw-schlaf").forEach(b => { b.textContent = txt; b.classList.toggle("an", !!schlaf); b.setAttribute("aria-pressed", !!schlaf); b.title = T.schlafTipp; });
+    if (leiste) { const b = leiste.querySelector(".ll-schlaf"); if (b) { b.textContent = txt; b.classList.toggle("an", !!schlaf); } }
+  }
+  function schlafUmschalten() {
+    const T = t(), i = SCHLAF_STUFEN.indexOf(schlaf && !schlaf.blendet ? schlaf.min : 0), min = SCHLAF_STUFEN[(i + 1) % SCHLAF_STUFEN.length];
+    if (schlaf) { clearInterval(schlaf.timer); if (schlaf.blendet) { clearTimeout(schlaf.aus); try { effekteAnwenden(); } catch (_) {} } }
+    schlaf = min ? { min, bis: Date.now() + min * 60000, timer: setInterval(schlafPruefen, 1000) } : null;
+    schlafKnoepfe(); status(min ? T.schlafAn(min) : T.schlafWeg);
+  }
+  function schlafPruefen() {
+    if (!schlaf) return;
+    if (!schlaf.blendet && Date.now() >= schlaf.bis) {
+      schlaf.blendet = true;
+      if (ctx) { const j = ctx.currentTime; [ausgang, kulAusRef, fxAusgang].forEach(g => { if (g) { g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.linearRampToValueAtTime(0, j + SCHLAF_AUS); } }); }
+      schlaf.aus = setTimeout(() => {
+        const s0 = schlaf; if (s0) clearInterval(s0.timer); schlaf = null;
+        try { if (laeuft) stopp(true); } catch (_) {}
+        try { if (kul) { kulMerk = S.kulisse; kulisseStop(); } if (zusLaufen()) { zusPausiert = true; zusSync(); } } catch (_) {}
+        try { if (klassikLauf) klassikStopp(true); } catch (_) {}
+        if (aufnahme) aufnahmeUmschalten();
+        setTimeout(() => { try { effekteAnwenden(); } catch (_) {} }, 1800);
+        schlafKnoepfe(); try { zeichnen(); knoepfe(); } catch (_) {} status(t().schlafFertig);
+      }, SCHLAF_AUS * 1000 + 300);
+    }
+    schlafKnoepfe();
+  }
+  let aufStartet = false;
+  async function aufnahmeUmschalten() {
     const T = t();
-    if (aufnahme) { const a = aufnahme; aufnahme = null; clearInterval(a.timer); try { a.r.stop(); } catch (_) {} aufnahmeKnoepfe(); return; }
+    if (aufStartet) return;
+    if (aufnahme) {
+      if (aufnahme.endet) return;
+      const a = aufnahme; a.endet = true; clearInterval(a.timer);
+      const blob = await a.m.stopp(); aufnahme = null; aufnahmeKnoepfe();
+      const d = new Date(a.ab), z = n => String(n).padStart(2, "0");
+      const name = dateiName("Lautenwerk - " + a.titel + " - " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + " " + z(d.getHours()) + "-" + z(d.getMinutes())) + ".wav";
+      const url = URL.createObjectURL(blob), l = document.createElement("a");
+      l.href = url; l.download = name; document.body.appendChild(l); l.click(); l.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 120000); status(T.aufFertig(name)); return;
+    }
     audioStart();
-    if (!ctx || !endKnoten || !window.MediaRecorder || !ctx.createMediaStreamDestination) { status(T.aufGehtNicht); return; }
-    const typ = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4", "audio/webm"].find(x => { try { return MediaRecorder.isTypeSupported(x); } catch (_) { return false; } }) || "";
-    const ziel = ctx.createMediaStreamDestination(); endKnoten.connect(ziel);
-    let r; try { r = new MediaRecorder(ziel.stream, typ ? { mimeType: typ, audioBitsPerSecond: 192000 } : {}); } catch (_) { try { endKnoten.disconnect(ziel); } catch (__) {} status(T.aufGehtNicht); return; }
-    const teile = [], titel = (S.titel || T.eigenesLied).replace(/[\\/:*?"<>|]+/g, "").trim() || "Lautenwerk";
-    r.ondataavailable = e => { if (e.data && e.data.size) teile.push(e.data); };
-    const ab = Date.now();
-    r.onstop = async () => {
-      try { endKnoten.disconnect(ziel); } catch (_) {}
-      if (!teile.length) return;
-      const mime = r.mimeType || typ || "audio/webm", endung = /mp4/.test(mime) ? "m4a" : /ogg/.test(mime) ? "ogg" : "webm";
-      let blob = new Blob(teile, { type: mime }); if (endung === "webm") blob = await webmDauer(blob, Date.now() - ab);
-      const d = new Date(), z = n => String(n).padStart(2, "0");
-      const name = "Lautenwerk – " + titel + " – " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + " " + z(d.getHours()) + "-" + z(d.getMinutes()) + "." + endung;
-      const url = URL.createObjectURL(blob), a = document.createElement("a");
-      a.href = url; a.download = dateiName(name); document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000); status(T.aufFertig(name));
-    };
-    r.start(1000);
-    aufnahme = { r, ab: Date.now(), timer: setInterval(aufnahmeKnoepfe, 500) };
+    if (!ctx || !endKnoten) { status(T.aufGehtNicht); return; }
+    aufStartet = true;
+    let m; try { m = await mitschnittStarten(ctx, endKnoten); } catch (_) { aufStartet = false; status(T.aufGehtNicht); return; }
+    aufStartet = false;
+    aufnahme = { m, ab: Date.now(), titel: S.titel || T.eigenesLied, timer: setInterval(aufnahmeKnoepfe, 500) };
     aufnahmeKnoepfe(); status(T.aufLaeuft);
   }
+
   function leisteBauen() {
     if (leiste || hoerer || !document.body) return;
     leiste = document.createElement("div"); leiste.className = "lw-leiste"; leiste.hidden = true;
@@ -6981,7 +7009,7 @@ const ZUS_ICON = {
       '<button type="button" class="ll-einst" aria-expanded="false">⚙</button>' +
       '<div class="ll-panel" hidden>' +
         '<label class="lw-kleinregler"><span class="ll-pk"></span><input type="range" min="0" max="10" step="1" data-ll="kulvol"><b class="ll-pkw"></b></label>' +
-        '<div class="ll-knoepfe"><button type="button" class="lw-schalter ll-kul"></button><button type="button" class="lw-schalter ll-hin"></button></div>' +
+        '<div class="ll-knoepfe"><button type="button" class="lw-schalter ll-kul"></button><button type="button" class="lw-schalter ll-schlaf"></button><button type="button" class="lw-schalter ll-hin"></button></div>' +
       "</div>";
     document.body.appendChild(leiste);
     leiste.addEventListener("click", e => {
@@ -6992,6 +7020,7 @@ const ZUS_ICON = {
       else if (e.target.closest(".ll-einst")) { leisteAuf = !leisteAuf; }
       else if (e.target.closest(".ll-kul, .ll-kulk")) kulisseUmschalten();
       else if (e.target.closest(".ll-rec")) aufnahmeUmschalten();
+      else if (e.target.closest(".ll-schlaf")) schlafUmschalten();
       else if (e.target.closest(".ll-hin")) {
         leisteAuf = false;
         if (!root.offsetParent && window.ImresAnsicht) { try { window.ImresAnsicht.merkeScroll(); history.pushState(null, "", "#lautenwerk"); window.ImresAnsicht.zeige(root); } catch (_) {} }
@@ -7049,7 +7078,7 @@ const ZUS_ICON = {
     const st = !!(S.stimmung && STIL[S.stimmung]);
     leiste.querySelector(".ll-int").hidden = !st;
     leiste.querySelector(".ll-wert").textContent = "🔥 " + T.intStufen[S.intensitaet];
-    kulKnoepfe();
+    kulKnoepfe(); schlafKnoepfe();
   }
   /* ---------- Rundgang: eingeblendet, Schritt für Schritt, ohne die Seite zu verlassen ---------- */
   Object.assign(TX.de, { rundgang: "❔ Rundgang", rundgangTipp: "Kurzer Rundgang durch das Pult", weiter: "Weiter", zurueck: "Zurück", fertig: "Fertig", beenden: "Beenden",
@@ -7438,7 +7467,7 @@ const ZUS_ICON = {
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<button type="button" class="lw-kulknopf" data-aktion="kulumschalt" hidden></button>' +
           '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
-          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-rec" data-aktion="aufnahme" aria-pressed="false">' + T.aufnehmen + "</button>" + '<button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button></span></div>" +
+          '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-rec" data-aktion="aufnahme" aria-pressed="false">' + T.aufnehmen + "</button>" + '<button type="button" class="lw-schalter lw-schlaf" data-aktion="schlaf" aria-pressed="false">' + T.schlaf + "</button>" + '<button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button></span></div>" +
         (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
         konsole(T, false) +
         werkstatt(T, true) +
@@ -7809,7 +7838,7 @@ const ZUS_ICON = {
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
     root.querySelectorAll(".lw-ausklang").forEach(a => { a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; });
-    try { kulKnoepfe(); aufnahmeKnoepfe(); } catch (_) {}
+    try { kulKnoepfe(); aufnahmeKnoepfe(); schlafKnoepfe(); } catch (_) {}
   }
   function status(text) {
     const s = root.querySelector(".lw-status");
@@ -7962,6 +7991,7 @@ const ZUS_ICON = {
     if (e.target.closest(".lw-play")) { laeuft ? stopp() : start(); return; }
     if (e.target.closest('[data-aktion="kulumschalt"]')) { kulisseUmschalten(); return; }
     if (e.target.closest('[data-aktion="aufnahme"]')) { aufnahmeUmschalten(); return; }
+    if (e.target.closest('[data-aktion="schlaf"]')) { schlafUmschalten(); return; }
     if (e.target.closest('[data-aktion="ausklang"]')) { if (laeuft && !ausklingt && !ausklangAb) { ausklangAb = -1; wechsel = null; wechselAb = 0; knoepfe(); status(t().ausklingt); } return; }
     if (e.target.closest('[data-aktion="kapelle"]')) { S.kapelle = S.kapelle === 0 ? 1 : 0; merken(); if (ctx) kapelleVorladen(); gaesteNeu(); return; }
     if (e.target.closest('[data-aktion="kapneu"]')) { if (S.stimmung) { S.kapWahl = kapelleWaehlen(S.stimmung); merken(); if (ctx) kapelleVorladen(); gaesteNeu(); } return; }
@@ -8694,6 +8724,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .ll-rec { height: 2.3rem; flex: 0 0 auto; border-radius: 1.2rem; border: 1px solid #c0392b; background: rgba(192,57,43,.25); color: var(--vellum); padding: 0 .55rem; font-size: .85rem; white-space: nowrap; }
 .ll-rec[hidden] { display: none; }
 @media (max-width: 520px) { .ll-vol input { width: 3.6rem; } .ll-vol span { display: none; } .ll-kulk, .ll-rec { padding: 0 .4rem; font-size: .8rem; } .ll-wert { min-width: 2.8rem; } .lw-leiste { gap: .3rem; } }
+.lw-schlaf.an, .ll-schlaf.an { border-color: #8a7fc0; background: rgba(138,127,192,.25); }
 .lw-rec.an { border-color: #c0392b; background: rgba(192,57,43,.25); animation: lw-rec-puls 1.6s ease-in-out infinite; }
 @keyframes lw-rec-puls { 50% { background: rgba(192,57,43,.08); } }
 .ll-aus:disabled { opacity: .4; }

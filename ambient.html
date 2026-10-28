@@ -51,6 +51,8 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
 .misch-knopf[aria-expanded="true"]{border-color:var(--ember);background:rgba(224,160,70,.15)}
 .raum3d-knopf{display:block}
 .auf-knopf{display:block;color:#e06050}
+.schlaf-knopf{display:block;color:var(--mute);font-size:.8rem;width:auto;min-width:2.4rem;border-radius:1.2rem;padding:0 .5rem;white-space:nowrap}
+.schlaf-knopf[aria-pressed="true"]{border-color:#8a7fc0;background:rgba(138,127,192,.25);color:inherit}
 .auf-knopf[aria-pressed="true"]{border-color:#c0392b;background:rgba(192,57,43,.3);color:var(--vellum,#eee);animation:aufpuls 1.6s ease-in-out infinite}
 @keyframes aufpuls{50%{background:rgba(192,57,43,.08)}}
 .raum3d-knopf[aria-pressed="true"]{border-color:#6a9fb5;background:rgba(106,159,181,.28)}
@@ -238,6 +240,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   <button type="button" class="misch-knopf" id="misch-knopf" aria-expanded="false" aria-controls="misch" title="Schichten">🎚</button>
   <button type="button" class="misch-knopf raum3d-knopf" id="raum3d" aria-pressed="false" title="3D-Kopfhörer">🎧</button>
   <button type="button" class="misch-knopf auf-knopf" id="aufnahme" aria-pressed="false" title="Aufnehmen">⏺</button>
+  <button type="button" class="misch-knopf schlaf-knopf" id="schlaf" aria-pressed="false" title="Schlaf-Timer">⏾</button>
   <button type="button" class="aus-alles" id="aus-alles" aria-label="Alles sofort stoppen" title="Alles sofort stoppen (Esc)">✕</button>
 </div>
 <script>
@@ -247,7 +250,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   if (EN) document.documentElement.lang = "en";
   const T = EN ? {
     zurueck: "← Back to the Lautenwerk", titel: "Soundscapes", unter: "Pure ambience from real recordings – no music. The sounds are constantly rearranged, so nothing repeats noticeably.",
-    alle100: "All layers and liveliness back to 100 %", aufTipp: "Record everything that is playing – the file downloads when you stop", aufStopp: "Stop recording and download", aufGehtNicht: "Sorry, this browser cannot record.", spielen: "Play", stopp: "Stop", laedt: "loading …", waehlen: "Choose a soundscape", ebenen: "Layers", leben: "Liveliness", raum: "Room echo", gesamt: "Volume",
+    alle100: "All layers and liveliness back to 100 %", schlafTipp: "Sleep timer: tap for 15, 30, 45, 60 or 90 minutes – then everything fades out and stops", schlafGleich: "fading out …", aufTipp: "Record everything that is playing – the file downloads when you stop", aufStopp: "Stop recording and download", aufGehtNicht: "Sorry, this browser cannot record.", spielen: "Play", stopp: "Stop", laedt: "loading …", waehlen: "Choose a soundscape", ebenen: "Layers", leben: "Liveliness", raum: "Room echo", gesamt: "Volume",
     tippMisch: "Every soundscape remembers your mix.", laeuft: "playing", pausiert: "paused",
     funk: "📡 Listen in", funkStart: "📡 Broadcast to everyone", funkStopp: "Stop broadcast", funkTipp: "The others open this link and tap “Listen” – the soundscape then plays in their own browser and follows yours.",
     kopieren: "Copy link", kopiert: "Copied!", verbinde: "Connecting …", fehler: "No connection – retrying …", hoeren: n => n === 1 ? "1 listening" : n + " listening",
@@ -256,7 +259,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     hTitel: "Listening in", hWarte: "Nothing is playing right now – as soon as it starts, you will hear it.", hZuhoeren: "🎧 Listen", hStumm: "❚❚ Mute", hSelbst: "Choose soundscapes yourself"
   } : {
     zurueck: "← Zurück zum Lautenwerk", titel: "Klangwelten", unter: "Reine Geräuschkulissen aus echten Aufnahmen – ohne Musik. Die Klänge werden ständig neu zusammengesetzt, sodass sich nichts erkennbar wiederholt.",
-    alle100: "Alle Schichten und die Lebendigkeit zurück auf 100 %", aufTipp: "Alles aufnehmen, was gerade erklingt – beim Beenden wird die Datei heruntergeladen", aufStopp: "Aufnahme beenden und herunterladen", aufGehtNicht: "Dieser Browser kann leider nicht aufnehmen.", spielen: "Abspielen", stopp: "Anhalten", laedt: "lädt …", waehlen: "Wähle eine Klangwelt", ebenen: "Schichten", leben: "Lebendigkeit", raum: "Raumhall", gesamt: "Lautstärke",
+    alle100: "Alle Schichten und die Lebendigkeit zurück auf 100 %", schlafTipp: "Schlaf-Timer: antippen für 15, 30, 45, 60 oder 90 Minuten – danach blendet alles sanft aus und hält an", schlafGleich: "blendet aus …", aufTipp: "Alles aufnehmen, was gerade erklingt – beim Beenden wird die Datei heruntergeladen", aufStopp: "Aufnahme beenden und herunterladen", aufGehtNicht: "Dieser Browser kann leider nicht aufnehmen.", spielen: "Abspielen", stopp: "Anhalten", laedt: "lädt …", waehlen: "Wähle eine Klangwelt", ebenen: "Schichten", leben: "Lebendigkeit", raum: "Raumhall", gesamt: "Lautstärke",
     tippMisch: "Jede Klangwelt merkt sich deine Mischung.", laeuft: "läuft", pausiert: "pausiert",
     funk: "📡 Mitlauschen", funkStart: "📡 Für alle übertragen", funkStopp: "Übertragung beenden", funkTipp: "Die anderen öffnen diesen Link und tippen auf „Zuhören“ – die Klangwelt entsteht dann bei jedem selbst im Browser und folgt deiner.",
     kopieren: "Link kopieren", kopiert: "Kopiert!", verbinde: "Verbinde …", fehler: "Keine Verbindung – versuche es erneut …", hoeren: n => n === 1 ? "1 hört zu" : n + " hören zu",
@@ -1510,80 +1513,100 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   /* Dateiname nur aus einfachen Zeichen – manche Browser verwerfen sonst den Namen */
   const dateiName = x => String(x).replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/Ä/g, "Ae").replace(/Ö/g, "Oe").replace(/Ü/g, "Ue").replace(/ß/g, "ss")
     .replace(/[–—]/g, "-").replace(/[^A-Za-z0-9 ._()-]+/g, "").replace(/\s+/g, " ").trim() || "Aufnahme";
-  /* Aufnahmen im WebM-Format haben vom Browser keine Längenangabe – manche Player zeigen dann 0:00 und können nicht spulen.
-     Hier wird die Dauer in den Dateikopf (Segment › Info › Duration) eingetragen. */
-  async function webmDauer(blob, ms) {
-    try {
-      const u = new Uint8Array(await blob.slice(0, Math.min(blob.size, 65536)).arrayBuffer());
-      const kennung = p => { const b = u[p], n = b & 0x80 ? 1 : b & 0x40 ? 2 : b & 0x20 ? 3 : b & 0x10 ? 4 : 0; if (!n || p + n > u.length) return null; let v = 0; for (let i = 0; i < n; i++) v = v * 256 + u[p + i]; return { n, v }; };
-      const groesse = p => { const b = u[p]; let n = 1, m = 0x80; while (n <= 8 && !(b & m)) { m >>= 1; n++; } if (n > 8 || p + n > u.length) return null; let v = b & (m - 1); for (let i = 1; i < n; i++) v = v * 256 + u[p + i]; return { n, v, offen: v === Math.pow(2, 7 * n) - 1 }; };
-      const verbinde = teile => { const l = teile.reduce((a, t) => a + t.length, 0), o = new Uint8Array(l); let p = 0; teile.forEach(t => { o.set(t, p); p += t.length; }); return o; };
-      let p = 0;
-      while (p < u.length) {
-        const k = kennung(p); if (!k) return blob; const g = groesse(p + k.n); if (!g) return blob; const start = p + k.n + g.n;
-        if (k.v === 0x18538067) {
-          let q = start;
-          while (q < u.length) {
-            const ck = kennung(q); if (!ck) return blob; const cg = groesse(q + ck.n); if (!cg) return blob; const cs = q + ck.n + cg.n;
-            if (ck.v === 0x1549A966) {
-              if (cg.offen || cs + cg.v > u.length) return blob;
-              let r = cs, skala = 1e6, dPos = -1, dEnde = -1;
-              while (r < cs + cg.v) { const ik = kennung(r), ig = ik && groesse(r + ik.n); if (!ik || !ig) return blob; const is = r + ik.n + ig.n;
-                if (ik.v === 0x2AD7B1) { let v = 0; for (let i = 0; i < ig.v; i++) v = v * 256 + u[is + i]; skala = v || 1e6; }
-                if (ik.v === 0x4489) { dPos = r; dEnde = is + ig.v; }
-                r = is + ig.v; }
-              const dauer = new Uint8Array(11); dauer[0] = 0x44; dauer[1] = 0x89; dauer[2] = 0x88; new DataView(dauer.buffer).setFloat64(3, ms * 1e6 / skala);
-              const inhalt = dPos >= 0 ? verbinde([u.slice(cs, dPos), dauer, u.slice(dEnde, cs + cg.v)]) : verbinde([u.slice(cs, cs + cg.v), dauer]);
-              const gr = new Uint8Array(8); gr[0] = 1; let v = inhalt.length; for (let i = 7; i >= 1; i--) { gr[i] = v & 255; v = Math.floor(v / 256); }
-              return new Blob([verbinde([u.slice(0, q + ck.n), gr, inhalt]), blob.slice(cs + cg.v)], { type: blob.type });
-            }
-            if (cg.offen) return blob;
-            q = cs + cg.v;
-          }
-          return blob;
-        }
-        if (g.offen) return blob;
-        p = start + g.v;
+  /* WAV-Mitschnitt: die Rohdaten direkt vom Ausgang (16 Bit, Stereo, Abtastrate des Klangs) – verlustfrei und überall abspielbar */
+  const MITSCHNITT_CODE = 'class M extends AudioWorkletProcessor{constructor(){super();this.l=new Float32Array(4096);this.r=new Float32Array(4096);this.n=0;this.port.onmessage=e=>{if(e.data==="ende"){if(this.n)this.port.postMessage([this.l.slice(0,this.n),this.r.slice(0,this.n)]);this.port.postMessage("fertig");this.aus=1;}};}' +
+    'process(i){if(this.aus)return false;const k=i[0];if(!k||!k.length)return true;const a=k[0],b=k[1]||k[0];for(let j=0;j<a.length;j++){this.l[this.n]=a[j];this.r[this.n]=b[j];if(++this.n===4096){this.port.postMessage([this.l,this.r]);this.l=new Float32Array(4096);this.r=new Float32Array(4096);this.n=0;}}return true;}}registerProcessor("mitschnitt",M);';
+  async function mitschnittStarten(c, quelle) {
+    const teile = []; let frames = 0, fertig = null;
+    const nimm = (l, r) => { const n = l.length, o = new Int16Array(n * 2); for (let j = 0; j < n; j++) { const a = Math.max(-1, Math.min(1, l[j])), b = Math.max(-1, Math.min(1, r[j])); o[2 * j] = a < 0 ? a * 32768 : a * 32767; o[2 * j + 1] = b < 0 ? b * 32768 : b * 32767; } teile.push(o); frames += n; };
+    const still = c.createGain(); still.gain.value = 0; still.connect(c.destination);
+    let knoten, ende;
+    if (c.audioWorklet && window.AudioWorkletNode) {
+      if (!c.__mitschnitt) { const url = URL.createObjectURL(new Blob([MITSCHNITT_CODE], { type: "application/javascript" })); c.__mitschnitt = c.audioWorklet.addModule(url); }
+      await c.__mitschnitt;
+      knoten = new AudioWorkletNode(c, "mitschnitt", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 2, channelCountMode: "explicit", channelInterpretation: "speakers" });
+      knoten.port.onmessage = e => { if (e.data === "fertig") { if (fertig) fertig(); } else nimm(e.data[0], e.data[1]); };
+      ende = () => new Promise(res => { fertig = res; knoten.port.postMessage("ende"); setTimeout(res, 800); });
+    } else {
+      knoten = c.createScriptProcessor(4096, 2, 1);
+      knoten.onaudioprocess = e => { const b = e.inputBuffer; nimm(b.getChannelData(0).slice(0), (b.numberOfChannels > 1 ? b.getChannelData(1) : b.getChannelData(0)).slice(0)); };
+      ende = () => Promise.resolve();
+    }
+    quelle.connect(knoten); knoten.connect(still);
+    return {
+      bytes: () => frames * 4,
+      async stopp() {
+        await ende();
+        try { quelle.disconnect(knoten); } catch (_) {} try { knoten.disconnect(); still.disconnect(); } catch (_) {}
+        const sr = Math.round(c.sampleRate), kopf = new DataView(new ArrayBuffer(44)), laenge = frames * 4;
+        const txt = (p, s) => { for (let i = 0; i < 4; i++) kopf.setUint8(p + i, s.charCodeAt(i)); };
+        txt(0, "RIFF"); kopf.setUint32(4, 36 + laenge, true); txt(8, "WAVE"); txt(12, "fmt "); kopf.setUint32(16, 16, true); kopf.setUint16(20, 1, true); kopf.setUint16(22, 2, true);
+        kopf.setUint32(24, sr, true); kopf.setUint32(28, sr * 4, true); kopf.setUint16(32, 4, true); kopf.setUint16(34, 16, true); txt(36, "data"); kopf.setUint32(40, laenge, true);
+        return new Blob([kopf.buffer].concat(teile), { type: "audio/wav" });
       }
-    } catch (_) {}
-    return blob;
+    };
   }
+  const mb = b => (b / 1048576).toFixed(b < 10485760 ? 1 : 0).replace(".", ",") + " MB";
   /* ---------- Aufnahme: alles, was gerade erklingt, als Datei ---------- */
   const aufZeit = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
   function aufKnopf() { const b = $("aufnahme"); if (!b) return; b.setAttribute("aria-pressed", String(!!aufnahme)); b.textContent = aufnahme ? "⏹" : "⏺"; b.title = aufnahme ? T.aufStopp : T.aufTipp; b.setAttribute("aria-label", b.title); }
-  function aufnahmeUmschalten() {
-    if (aufnahme) { const a = aufnahme; aufnahme = null; clearInterval(a.timer); try { a.r.stop(); } catch (_) {} aufKnopf(); infoZeile(); return; }
+  /* ---------- Schlaf-Timer ---------- */
+  const SCHLAF_STUFEN = [0, 15, 30, 45, 60, 90], SCHLAF_AUS = 20;
+  let schlaf = null;
+  function schlafKnopf() { const b = $("schlaf"); if (!b) return; b.setAttribute("aria-pressed", String(!!schlaf)); b.textContent = schlaf ? "⏾ " + (schlaf.blendet ? "…" : Math.ceil(Math.max(0, schlaf.bis - Date.now()) / 60000) + "′") : "⏾"; b.title = T.schlafTipp; b.setAttribute("aria-label", T.schlafTipp); }
+  function schlafUmschalten() {
+    const i = SCHLAF_STUFEN.indexOf(schlaf && !schlaf.blendet ? schlaf.min : 0), min = SCHLAF_STUFEN[(i + 1) % SCHLAF_STUFEN.length];
+    if (schlaf) { clearInterval(schlaf.timer); if (schlaf.blendet) { clearTimeout(schlaf.aus); if (gesamt && ctx) { const j = ctx.currentTime; gesamt.gain.cancelScheduledValues(j); gesamt.gain.setValueAtTime(gesamt.gain.value, j); gesamt.gain.linearRampToValueAtTime(lautWert(), j + .5); } } }
+    schlaf = min ? { min, bis: Date.now() + min * 60000, timer: setInterval(schlafPruefen, 1000) } : null;
+    schlafKnopf(); infoZeile();
+  }
+  function schlafPruefen() {
+    if (!schlaf) return;
+    if (!schlaf.blendet && Date.now() >= schlaf.bis) {
+      schlaf.blendet = true;
+      if (ctx && gesamt) { const j = ctx.currentTime; gesamt.gain.cancelScheduledValues(j); gesamt.gain.setValueAtTime(gesamt.gain.value, j); gesamt.gain.linearRampToValueAtTime(0, j + SCHLAF_AUS); }
+      schlaf.aus = setTimeout(() => {
+        const s0 = schlaf; if (s0) clearInterval(s0.timer); schlaf = null;
+        if (aufnahme) aufnahmeUmschalten();
+        /* alles aus wie mit ✕ – nur das gewählte Wetter bleibt für das nächste Mal gemerkt */
+        const wetter = merk.wetter; try { notAus(); } catch (_) {}
+        setTimeout(() => { merk.wetter = wetter; speichern(); try { zeichnen(); } catch (_) {} schlafKnopf(); infoZeile(); }, 200);
+      }, SCHLAF_AUS * 1000 + 300);
+    }
+    schlafKnopf(); infoZeile();
+  }
+  setTimeout(schlafKnopf, 0);
+  let aufStartet = false;
+  async function aufnahmeUmschalten() {
+    if (aufStartet) return;
+    if (aufnahme) {
+      if (aufnahme.endet) return;
+      const a = aufnahme; a.endet = true; clearInterval(a.timer);
+      const blob = await a.m.stopp(); aufnahme = null; aufKnopf(); infoZeile();
+      const d = new Date(a.ab), z = n => String(n).padStart(2, "0");
+      const name = dateiName(T.titel + " - " + a.titel + " - " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + " " + z(d.getHours()) + "-" + z(d.getMinutes())) + ".wav";
+      const url = URL.createObjectURL(blob), l = document.createElement("a");
+      l.href = url; l.download = name; document.body.appendChild(l); l.click(); l.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 120000); return;
+    }
     audioStart();
-    if (!ctx || !endKnoten || !window.MediaRecorder || !ctx.createMediaStreamDestination) { alert(T.aufGehtNicht); return; }
-    const typ = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4", "audio/webm"].find(x => { try { return MediaRecorder.isTypeSupported(x); } catch (_) { return false; } }) || "";
-    const ziel = ctx.createMediaStreamDestination(); endKnoten.connect(ziel);
-    let r; try { r = new MediaRecorder(ziel.stream, typ ? { mimeType: typ, audioBitsPerSecond: 192000 } : {}); } catch (_) { try { endKnoten.disconnect(ziel); } catch (__) {} alert(T.aufGehtNicht); return; }
-    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), titel = ((w && w.name) || T.titel).replace(/[\\/:*?"<>|]+/g, "").trim() || "Klangwelten";
-    const teile = [];
-    r.ondataavailable = e => { if (e.data && e.data.size) teile.push(e.data); };
-    const ab = Date.now();
-    r.onstop = async () => {
-      try { endKnoten.disconnect(ziel); } catch (_) {}
-      if (!teile.length) return;
-      const mime = r.mimeType || typ || "audio/webm", endung = /mp4/.test(mime) ? "m4a" : /ogg/.test(mime) ? "ogg" : "webm";
-      let blob = new Blob(teile, { type: mime }); if (endung === "webm") blob = await webmDauer(blob, Date.now() - ab);
-      const d = new Date(), z = n => String(n).padStart(2, "0");
-      const name = T.titel + " – " + titel + " – " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + " " + z(d.getHours()) + "-" + z(d.getMinutes()) + "." + endung;
-      const url = URL.createObjectURL(blob), a = document.createElement("a");
-      a.href = url; a.download = dateiName(name); document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    };
-    r.start(1000);
-    aufnahme = { r, ab: Date.now(), timer: setInterval(infoZeile, 500) };
+    if (!ctx || !endKnoten) { alert(T.aufGehtNicht); return; }
+    aufStartet = true;
+    let m; try { m = await mitschnittStarten(ctx, endKnoten); } catch (_) { aufStartet = false; alert(T.aufGehtNicht); return; }
+    aufStartet = false;
+    const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt);
+    aufnahme = { m, ab: Date.now(), titel: (w && w.name) || T.titel, timer: setInterval(infoZeile, 500) };
     aufKnopf(); infoZeile();
   }
+
   setTimeout(aufKnopf, 0);
   function infoZeile() {
     if (hoerer) return;
     const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), teile = [];
     if (aktiv) teile.push(T.laeuft); else if (w) teile.push(T.pausiert);
     if (laufend.size) teile.push("⏳ " + T.szLaeuft(laufend.size));
-    if (aufnahme) teile.push("⏺ " + aufZeit(Date.now() - aufnahme.ab));
+    if (schlaf) teile.push("⏾ " + (schlaf.blendet ? T.schlafGleich : aufZeit(Math.max(0, schlaf.bis - Date.now()))));
+    if (aufnahme) teile.push("⏺ " + aufZeit(Date.now() - aufnahme.ab) + " · " + mb(aufnahme.m.bytes()));
     $("jetzt-info").textContent = teile.join(" · ");
   }
   const zeit = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
@@ -1649,6 +1672,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (e.target.closest("#misch-knopf") || (e.target.closest(".jetzt") && !hoerer)) { mischBlatt(!document.body.classList.contains("misch-auf")); return; }
     if (e.target.closest("#misch-zu")) { mischBlatt(false); return; }
     if (e.target.closest("#aufnahme")) { aufnahmeUmschalten(); return; }
+    if (e.target.closest("#schlaf")) { schlafUmschalten(); return; }
     if (e.target.closest("#misch-100")) {
       /* alle Schichten und die Lebendigkeit der gewählten Welt zurück auf 100 % */
       const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt); if (!w) return;
