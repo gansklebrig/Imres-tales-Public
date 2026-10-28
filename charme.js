@@ -25,16 +25,22 @@
   const CHA = 6; /* Barradins Charisma-Bonus */
 
   /* ---------- Die NSC ---------- */
+  /* alle NSC in der Reihenfolge der Geschichte – pro Sitzung kommen acht davon dran (Gundren zuerst, Themberchaud zuletzt) */
   const NSC = [
-    { id: "gundren", bild: "gundren-frei.webp", sg: 9, pos: "50% 10%" },
-    { id: "buergermeister", bild: "buergermeister-frei.webp", sg: 10, pos: "50% 20%" },
-    { id: "bugbear", bild: "bugbear-frei.webp", sg: 12, pos: "50% 30%" },
-    { id: "ilvara", bild: "ilvara-wahr.webp", sg: 13, pos: "50% 8%" },
-    { id: "kuotoa", bild: "kuo-toa-frei.webp", sg: 13, pos: "50% 20%" },
-    { id: "horga", bild: "koenig-horga.webp", sg: 14, pos: "50% 10%" },
-    { id: "hgraam", bild: "riese-frei.webp", sg: 15, pos: "50% 15%" },
-    { id: "themberchaud", bild: "themberchaud.webp", sg: 17, pos: "50% 20%" }
+    { id: "gundren", bild: "gundren-frei.webp", pos: "50% 10%" },
+    { id: "buergermeister", bild: "buergermeister-frei.webp", pos: "50% 20%" },
+    { id: "blight", bild: "blight-frei.webp", pos: "50% 100%" },
+    { id: "bugbear", bild: "bugbear-frei.webp", pos: "50% 30%" },
+    { id: "ilvara", bild: "ilvara-wahr.webp", pos: "50% 8%" },
+    { id: "chasme", bild: "chasme-frei.webp", pos: "50% 20%" },
+    { id: "vrock", bild: "vrock-frei.webp", pos: "50% 20%" },
+    { id: "kuotoa", bild: "kuo-toa-frei.webp", pos: "50% 20%" },
+    { id: "horga", bild: "koenig-horga.webp", pos: "50% 10%" },
+    { id: "hgraam", bild: "riese-frei.webp", pos: "50% 15%" },
+    { id: "themberchaud", bild: "themberchaud.webp", pos: "50% 20%" }
   ];
+  const SG_REIHE = [9, 10, 11, 12, 13, 14, 15, 17];
+  const mitSg = (n, i) => Object.assign({}, n, { sg: n.id === "demogorgon" ? 20 : SG_REIHE[Math.min(i, SG_REIHE.length - 1)] });
   const BONUS = { id: "demogorgon", bild: "demogorgon.webp", sg: 20, pos: "50% 30%" };
 
   /* ---------- Texte ---------- */
@@ -424,6 +430,221 @@
     }
   };
   const t2 = () => TX2[sprache()], n2 = id => NSC2[sprache()][id];
+
+  /* ---------- Mehr Sprüche für alle – und neue NSC (Blight, Chasme, Vrock) ----------
+     Wird beim Start in TX.de/en.nsc eingemischt. Pro Sitzung erscheinen nicht alle Sprüche:
+     Wer alle hören will, muss öfter spielen. */
+  const MEHR_SPRUECHE = {
+    de: {
+      gundren: {
+        charmant: ["„Gundren, wenn du so lachst, vergesse ich glatt, dass wir Wagen bewachen.“", "„Du riechst nach Eisen und Abenteuer. Mein Lieblingsduft.“", "„Ich hab schon viele Zwerge getroffen. Aber keinen, der so schön feilscht.“", "„Deine Hände sind rau. Ehrliche Arbeit. Ich mag das.“"],
+        kuehn: ["„Gundren, lass uns die Karawane vergessen und einfach zu zweit nach Phandalin reiten.“", "„Ich würde mir für dich den Bart wachsen lassen. Ernsthaft. Gib mir drei Jahre.“", "„Bezahl mich nicht mit Gold. Bezahl mich mit einem Abendessen.“"],
+        absurd: ["„Ich hab mal ein Pony nach dir benannt. Es hat mich gebissen. Ich hab's trotzdem geliebt.“", "„Bist du ein Erzvorkommen? Ich würde dich nämlich gern abbauen. Also … nein. Anders gemeint.“", "„Darf ich in deinem Bart wohnen? Nur bis Phandalin.“"],
+        passend: ["„Von allen Zwergen, die ich kenne, hast du das schönste Lachen.“", "„Wenn du mir die Karte zur Mine zeigst, zeig ich dir die Karte zu meinem Herzen.“"]
+      },
+      buergermeister: {
+        charmant: ["„Ihr Siegelring blendet mich. Oder sind es Ihre Augen?“", "„Sie haben eine Stimme wie ein gut geführtes Steuerbuch. Beruhigend.“", "„Ganz Phandalin spricht von Ihnen. Ich jetzt auch. Und zwar nur Gutes.“", "„Sie tragen Verantwortung so elegant wie Ihren Mantel.“"],
+        kuehn: ["„Lassen Sie mich Ihr persönlicher Berater werden. Für alles. Auch nach Feierabend.“", "„Wenn Sie zahlen, schreibe ich ein Lied über Sie. Wenn nicht, auch – aber ein anderes.“", "„Ich habe noch nie einen Mann gesehen, der so sinnlich eine Urkunde stempelt.“"],
+        absurd: ["„Ich möchte einen Antrag stellen. Formular 7b: Herz.“", "„Sind Sie eine Steuererklärung? Sie machen mich nämlich ganz nervös.“", "„Haben Sie eine Münze für mich? Ich möchte sie mir unters Kopfkissen legen. Und an Sie denken.“"],
+        passend: ["„Sie feilschen so leidenschaftlich. Stellen Sie sich vor, Sie würden so lieben.“", "„Ich biete Ihnen etwas, das man nicht kaufen kann: mich. Na gut, für die Belohnung.“"]
+      },
+      bugbear: {
+        charmant: ["„Du bist wie ein großer, gefährlicher Teddy. Mein Typ.“", "„Deine Zähne sind so … zahlreich.“", "„Hat dir schon mal jemand gesagt, dass du wunderschöne Ohren hast? Nein? Dann jetzt.“", "„So einen Bizeps hab ich noch nie gesehen. Darf ich mal fühlen?“"],
+        kuehn: ["„Gib mir die Tür – und eine Umarmung. In der Reihenfolge, die dir lieber ist.“", "„Ich hab gehört, Bugbears schleichen sich gern an. Schleich dich an mein Herz.“", "„Nach dem Wachdienst? Du, ich, ein Lagerfeuer. Ich bring die Laute.“"],
+        absurd: ["„Ich hab auch Haare an den Armen. Siehst du? Wir sind fast verwandt.“", "„Grr grr? (Barradin glaubt, er hat gerade ‚Du bist süß‘ gesagt.)“", "„Möchtest du meinen Hut fressen? Als Zeichen meiner Zuneigung.“"],
+        passend: ["„Du bewachst diesen Turm so gut. Ich wünschte, jemand würde mich so bewachen.“", "„Du bist der flauschigste Wachposten der ganzen Schwertküste.“"]
+      },
+      ilvara: {
+        charmant: ["„Eure Ohren sind spitzer als meine Pointen.“", "„Selbst im Dunkeln seid Ihr das Hellste hier.“", "„Ihr befehlt so elegant. Man möchte glatt gehorchen.“", "„Euer Haar fällt wie Spinnenseide. Nur schöner.“"],
+        kuehn: ["„Herrin, wenn Ihr mich schon gefangen haltet, dann doch bitte in Eurer Nähe.“", "„Ich habe einen Vorschlag: Ihr nehmt die Peitsche weg, ich nehme Eure Hand.“", "„Ich singe Euch heute Nacht ein Lied. Ihr müsst nicht zuhören. Aber Ihr werdet.“"],
+        absurd: ["„Ich hab mir einen Spinnen-Tanz ausgedacht. Acht Schritte. Ich hab nur zwei Beine.“", "„Ist das eine Peitsche in Eurer Hand oder freut Ihr Euch, mich zu sehen? … Es ist eine Peitsche.“", "„Darf ich Euch Herrin Herzensbrecherin nennen?“"],
+        passend: ["„Ihr seid eine Meisterin der Verwandlung. Verwandelt mich in Euren Lieblingsgefangenen.“", "„Velkynvelve ist trist. Aber Ihr seid der Grund, warum ich nicht fliehen will. Heute.“"]
+      },
+      kuotoa: {
+        charmant: ["„Deine Flossen sind so … flossig. Wunderschön flossig.“", "„Dein Blick geht mir durch Mark und Schuppen.“", "„Du glänzt wie frisch aus dem See. Ach, du bist frisch aus dem See.“", "„Du hast eine sehr gepflegte Schleimschicht.“"],
+        kuehn: ["„Lass uns gemeinsam im See abtauchen. Ich halte die Luft an. So lange ich kann.“", "„Wenn du mich reinlässt, bete ich dich an. Ein bisschen. Heimlich.“", "„Ich würde für dich sogar Fisch essen. Roh.“"],
+        absurd: ["„Blubb blubb. (Barradin versucht, Kuo-Toa zu flirten. Es klingt wie ein verstopfter Abfluss.)“", "„Ich habe Schuppen. Auf dem Kopf. Wir passen zusammen.“", "„Darf ich dein Aquarium sein?“"],
+        passend: ["„Bei dir fühle ich mich wie ein Fisch im Wasser. Also wie du.“", "„Ich hab nichts gegen glitschig. Ehrlich nicht.“"]
+      },
+      horga: {
+        charmant: ["„Majestät, Eure Rüstung glänzt. Aber Euer Charakter glänzt mehr.“", "„Ihr regiert mit eiserner Hand. Ich würde sie trotzdem halten.“", "„Ein König mit Stil. Eine Seltenheit im Unterreich.“", "„Eure Stimme hallt durch die Halle wie Donner. Wohliger Donner.“"],
+        kuehn: ["„Majestät, braucht Ihr einen Hofbarden? Einen persönlichen? Einen sehr persönlichen?“", "„Ich würde für Euch sogar Grau tragen. Und Ihr wisst, wie sehr ich Farben liebe.“", "„Lasst uns die Audienz unter vier Augen fortsetzen.“"],
+        absurd: ["„Darf ich auf Eurem Thron sitzen? Mit Euch drauf?“", "„Ich habe ein Gedicht über Euren Bart geschrieben. Es hat 47 Strophen.“", "„Seid Ihr ein Duergar-König? Weil Ihr mein Herz gerade unsichtbar gemacht habt.“"],
+        passend: ["„Euer Sohn ist reizend. Ich frage mich, von wem er das hat.“", "„Gracklstugh ist dunkel und heiß. Wie Ihr. Also … heiß.“"]
+      },
+      hgraam: {
+        charmant: ["„Ihr seid groß, weise und schweigsam. Das ist eine gefährliche Mischung.“", "„Ich könnte Euch stundenlang beim Schweigen zuhören.“", "„Eure Hände könnten Berge versetzen. Und mein Herz.“", "„Ihr seid wie ein Fels: stark, beständig, ein bisschen moosig. Charmant.“"],
+        kuehn: ["„Ich möchte eine Nacht lang neben Euch sitzen und dem Stein lauschen.“", "„Darf ich auf Eure Schulter klettern? Für die Aussicht. Und die Nähe.“", "„Ich habe noch nie einen Riesen geküsst. Ich bin bereit, dazuzulernen.“"],
+        absurd: ["„Ich nenne Euch ab jetzt ‚Kieselchen‘.“", "„Wollt Ihr meine Steinsammlung sehen? Sie ist in meiner Hose. Also in der Tasche!“", "„Wenn Ihr niest, gibt's dann eine Lawine?“"],
+        passend: ["„Ihr sprecht in Rätseln. Ich antworte in Reimen. Wir wären ein Gedicht.“", "„Der Stein flüstert, ich solle Euch umarmen. Ich höre auf den Stein.“"]
+      },
+      themberchaud: {
+        charmant: ["„Ihr seid gefährlich, mächtig und unglaublich gut gekleidet. In Schuppen.“", "„Eure Flügel sind beeindruckend. Darf ich mich darunter verstecken?“", "„Euer Atem ist heiß. Euer Blick heißer.“", "„Ihr thront auf Gold, als wäre es für Euch geschmiedet worden.“"],
+        kuehn: ["„Meister der Flammen, entzündet mein Herz. Aber nur das Herz.“", "„Ich würde Euer Ei suchen. Und Euch danach zum Essen ausführen.“", "„Ich bin der kostbarste Schatz, den Ihr nie hattet.“"],
+        absurd: ["„Darf ich Euch Themmi nennen?“", "„Wie viel Gold müsste ich Euch geben, damit Ihr mich nicht fresst? Ich habe drei Kupfer und einen Knopf.“", "„Seid Ihr ein Kamin? Weil ich mich bei Euch sofort zu Hause fühle.“"],
+        passend: ["„Ihr misstraut Eurem Hohepriester. Vertraut stattdessen mir. Ich bin sehr vertrauenswürdig. Und hübsch.“", "„Ein Schatz wie Ihr verdient einen Barden, der ihn besingt. Jeden Tag.“"]
+      },
+      demogorgon: {
+        charmant: ["„Ihr seid so … imposant. Und zweiköpfig. Imposant zweiköpfig.“", "„Eure Präsenz bringt die Luft zum Flimmern. Und meine Knie.“", "„Ihr habt Ausstrahlung. Sehr viel. Sie brennt ein bisschen.“"],
+        kuehn: ["„Lasst uns gemeinsam Chaos stiften. Romantisches Chaos.“", "„Ein Kopf für mich, einer für die Weltherrschaft. Fair?“", "„Ich würde Euch in den Abgrund folgen. Nicht ganz rein. Bis zum Rand.“"],
+        absurd: ["„Kann ich ein Autogramm? Von beiden Köpfen?“", "„Ich habe gehört, Ihr seid der Prinz der Dämonen. Ich bin der Prinz der Pointen.“", "„Wer von euch beiden bezahlt das Abendessen?“"],
+        passend: ["„Selbst Ihr habt zwei Gesichter. Ich verspreche, beide zu lieben.“", "„Ihr seid aus dem See gestiegen wie eine Göttin aus dem Schaum. Nur mit mehr Tentakeln.“"]
+      }
+    },
+    en: {
+      gundren: {
+        charmant: ['"Gundren, when you laugh like that I forget we\'re guarding wagons."', '"You smell of iron and adventure. My favourite scent."', '"I\'ve met many dwarves. But none who haggles so beautifully."', '"Your hands are rough. Honest work. I like that."'],
+        kuehn: ['"Gundren, let\'s forget the caravan and just ride to Phandalin, the two of us."', '"I\'d grow a beard for you. Seriously. Give me three years."', '"Don\'t pay me in gold. Pay me with dinner."'],
+        absurd: ['"I once named a pony after you. It bit me. I loved it anyway."', '"Are you an ore deposit? Because I\'d like to mine you. Wait. That came out wrong."', '"May I live in your beard? Just until Phandalin."'],
+        passend: ['"Of all the dwarves I know, you have the loveliest laugh."', '"Show me the map to the mine and I\'ll show you the map to my heart."']
+      },
+      buergermeister: {
+        charmant: ['"Your signet ring dazzles me. Or is it your eyes?"', '"You have a voice like a well-kept ledger. Soothing."', '"All of Phandalin talks about you. Now so do I. Only good things."', '"You wear responsibility as elegantly as your coat."'],
+        kuehn: ['"Let me be your personal advisor. For everything. After hours too."', '"If you pay, I\'ll write a song about you. If not, also – but a different one."', '"I\'ve never seen a man stamp a deed so sensually."'],
+        absurd: ['"I\'d like to file an application. Form 7b: heart."', '"Are you a tax return? Because you make me very nervous."', '"Do you have a coin for me? I want to put it under my pillow. And think of you."'],
+        passend: ['"You haggle so passionately. Imagine if you loved like that."', '"I offer you something money can\'t buy: me. Fine, for the reward."']
+      },
+      bugbear: {
+        charmant: ['"You\'re like a big, dangerous teddy bear. My type."', '"Your teeth are so … numerous."', '"Has anyone ever told you that you have beautiful ears? No? Well, now."', '"I\'ve never seen biceps like that. May I feel them?"'],
+        kuehn: ['"Give me the door – and a hug. In whichever order you like."', '"I hear bugbears love to sneak up on people. Sneak up on my heart."', '"After your shift? You, me, a campfire. I\'ll bring the lute."'],
+        absurd: ['"I\'ve got hairy arms too. See? We\'re practically family."', '"Grr grr? (Barradin thinks he just said \'you\'re cute\'.)"', '"Would you like to eat my hat? As a token of my affection."'],
+        passend: ['"You guard this tower so well. I wish someone would guard me like that."', '"You\'re the fluffiest sentry on the whole Sword Coast."']
+      },
+      ilvara: {
+        charmant: ['"Your ears are sharper than my punchlines."', '"Even in the dark you\'re the brightest thing here."', '"You command so elegantly. One almost wants to obey."', '"Your hair falls like spider silk. Only prettier."'],
+        kuehn: ['"Mistress, if you must keep me captive, at least keep me close."', '"A proposal: you put the whip away, I take your hand."', '"I\'ll sing you a song tonight. You don\'t have to listen. But you will."'],
+        absurd: ['"I made up a spider dance. Eight steps. I only have two legs."', '"Is that a whip in your hand or are you happy to see me? … It\'s a whip."', '"May I call you Mistress Heartbreaker?"'],
+        passend: ['"You\'re a master of transformation. Turn me into your favourite prisoner."', '"Velkynvelve is grim. But you\'re the reason I don\'t want to escape. Today."']
+      },
+      kuotoa: {
+        charmant: ['"Your fins are so … finny. Beautifully finny."', '"Your gaze goes right through my bones. And scales."', '"You shine like you\'re fresh out of the lake. Oh, you are."', '"You have a very well-kept layer of slime."'],
+        kuehn: ['"Let\'s dive into the lake together. I\'ll hold my breath. As long as I can."', '"If you let me in, I\'ll worship you. A bit. Secretly."', '"I\'d even eat fish for you. Raw."'],
+        absurd: ['"Blub blub. (Barradin tries to flirt in kuo-toa. It sounds like a blocked drain.)"', '"I have dandruff. Scales on my head. We\'re a match."', '"May I be your aquarium?"'],
+        passend: ['"With you I feel like a fish in water. So, like you."', '"I don\'t mind slippery. Honestly."']
+      },
+      horga: {
+        charmant: ['"Your Majesty, your armour gleams. But your character gleams brighter."', '"You rule with an iron hand. I\'d still hold it."', '"A king with style. A rarity in the Underdark."', '"Your voice echoes through the hall like thunder. Cosy thunder."'],
+        kuehn: ['"Your Majesty, do you need a court bard? A personal one? A very personal one?"', '"I\'d even wear grey for you. And you know how much I love colours."', '"Let\'s continue this audience in private."'],
+        absurd: ['"May I sit on your throne? With you on it?"', '"I wrote a poem about your beard. It has 47 verses."', '"Are you a duergar king? Because you just made my heart invisible."'],
+        passend: ['"Your son is charming. I wonder where he gets it."', '"Gracklstugh is dark and hot. Like you. Well … hot."']
+      },
+      hgraam: {
+        charmant: ['"You are tall, wise and quiet. A dangerous combination."', '"I could listen to you being silent for hours."', '"Your hands could move mountains. And my heart."', '"You\'re like a rock: strong, steady, a little mossy. Charming."'],
+        kuehn: ['"I\'d like to sit beside you all night and listen to the stone."', '"May I climb onto your shoulder? For the view. And the closeness."', '"I\'ve never kissed a giant. I\'m willing to learn."'],
+        absurd: ['"From now on I\'ll call you \'Pebble\'."', '"Want to see my rock collection? It\'s in my trousers. My pocket! In my pocket!"', '"If you sneeze, is there an avalanche?"'],
+        passend: ['"You speak in riddles. I answer in rhymes. Together we\'d be a poem."', '"The stone whispers that I should hug you. I listen to the stone."']
+      },
+      themberchaud: {
+        charmant: ['"You\'re dangerous, powerful and incredibly well dressed. In scales."', '"Your wings are impressive. May I hide beneath them?"', '"Your breath is hot. Your gaze is hotter."', '"You sit on gold as if it were forged for you."'],
+        kuehn: ['"Master of Flames, set my heart on fire. Only the heart, please."', '"I\'d find your egg. And then take you out to dinner."', '"I\'m the most precious treasure you never had."'],
+        absurd: ['"May I call you Themmy?"', '"How much gold would it take for you not to eat me? I have three copper and a button."', '"Are you a fireplace? Because I feel at home with you right away."'],
+        passend: ['"You distrust your high priest. Trust me instead. I\'m very trustworthy. And handsome."', '"A treasure like you deserves a bard to sing of it. Every day."']
+      },
+      demogorgon: {
+        charmant: ['"You\'re so … imposing. And two-headed. Imposingly two-headed."', '"Your presence makes the air shimmer. And my knees."', '"You have charisma. A lot of it. It burns a little."'],
+        kuehn: ['"Let\'s cause chaos together. Romantic chaos."', '"One head for me, one for world domination. Fair?"', '"I\'d follow you into the Abyss. Not all the way. To the edge."'],
+        absurd: ['"Can I have an autograph? From both heads?"', '"I hear you\'re the prince of demons. I\'m the prince of punchlines."', '"Which of you is paying for dinner?"'],
+        passend: ['"Even you have two faces. I promise to love both."', '"You rose from the lake like a goddess from the foam. Just with more tentacles."']
+      }
+    }
+  };
+  /* Neue NSC aus der Geschichte (mit freigestellten Bildern aus dem Bestiarium) */
+  const NEUE_NSC = {
+    de: {
+      blight: { name: "Ein Blight aus Donnerbaum", aufgabe: "Er soll aufhören, euch zu umranken.",
+        intro: "Knirsch. Raschel. Rubinrote Augen leuchten zwischen den Zweigen.",
+        charmant: ["„Deine Augen leuchten wie zwei Rubine im Laub.“", "„Du hast so eine … verwurzelte Ausstrahlung.“", "„So schlank, so biegsam, so knorrig. Du bist ein Kunstwerk.“", "„Du raschelst so verführerisch.“", "„Du riechst nach Wald und Abenteuer.“", "„Selbst Echo würde dich nicht verbrennen. Vielleicht.“"],
+        kuehn: ["„Wickle mich ein. Aber zärtlich.“", "„Lass uns zusammen Wurzeln schlagen.“", "„Ich gieße dich jeden Tag. Versprochen.“", "„Du und ich, im Mondlicht, zwischen den Ruinen. Wie romantisch ist das denn?“", "„Ich würde mich von dir sogar umtopfen lassen.“"],
+        absurd: ["„Bist du ein Baum? Weil ich gerade Gefühle für dich wachsen spüre.“", "„Darf ich ein Blatt von dir behalten? Für mein Herbarium. Für mein Herz.“", "„Ich hab Holzwürmer im Bauch. Also Schmetterlinge. Holzschmetterlinge.“", "„Knirsch?“"],
+        passend: ["„Echo hat deine Freunde verbrannt. Ich hab ihn nicht aufgehalten. Aber ich hab's bereut. Ein bisschen.“", "„Donnerbaum ist verlassen. Aber mit dir ist es gleich viel gemütlicher.“", "„Du bist der hübscheste Zweig im ganzen Dorf.“"],
+        ja: ["Der Blight raschelt. Ein Blatt fällt verliebt zu Boden.", "Die rubinroten Augen flackern rosa. Fast.", "Er knirscht. Zärtlich."],
+        nein: ["Ein Ast schlägt nach Barradins Hut.", "„KNIRSCH!“"],
+        krit: "Der Blight treibt eine Blüte aus. Eine einzige. Für Barradin.",
+        patzer: "Barradin tritt auf eine Wurzel. Es war sein Fuß. Also der des Blights.",
+        sieg: "Der Blight lässt los und winkt mit allen Zweigen.",
+        verloren: "Der Blight umrankt Barradin. Echo hebt die Hand. Feuerball? Lieber nicht." },
+      chasme: { name: "Die Chasme", aufgabe: "Sie soll nicht stechen.",
+        intro: "SSSSSSSSSSSS. Ein riesiger Stachel. Viele Augen. Sehr viele.",
+        charmant: ["„Dein Summen ist wie Musik. Laute, schreckliche, wunderbare Musik.“", "„Du hast so viele Augen. Und alle schauen mich an.“", "„Deine Flügel schimmern wie Seide.“", "„Was für ein … durchdringender Blick.“", "„Du bist der eleganteste Dämon, den ich je gesehen habe. Zugegeben: Ich kenne zwei.“", "„Deine Beine sind so lang. Und so viele.“"],
+        kuehn: ["„Lass das Stechen. Lass uns lieber summen. Zusammen. Im Duett.“", "„Ich hab gehört, Chasmen schläfern ihre Opfer ein. Schläfer mich ein. Mit einem Schlaflied.“", "„Steck den Stachel weg, Liebes. Ich bin hier, um zu flirten.“", "„Komm her und flüster mir was. Bitte leiser als sonst.“", "„Ich würde mit dir bis in den Abyss fliegen. Wenn ich fliegen könnte.“"],
+        absurd: ["„Bist du eine Wespe? Weil ich gerade sehr allergisch auf dich reagiere. Vor Liebe.“", "„Darf ich deinen Stachel als Stricknadel benutzen?“", "„Summ summ. Bin ich jetzt einer von euch?“", "„Ezekiel hat sich entschuldigt. Also, nein. Aber ich tue es für ihn.“"],
+        passend: ["„Friedrich ist noch etwas wackelig. Du bist einfach … überwältigend.“", "„Du kamst aus dem Nichts in mein Leben. Und mitten in unseren Ausbruch.“", "„Ich mag Frauen mit Stachel.“"],
+        ja: ["Das Summen wird tiefer. Fast ein Schnurren.", "Alle Augen blinzeln gleichzeitig. Es ist … fast süß.", "Der Stachel senkt sich ein kleines Stück."],
+        nein: ["SSSSSSSSS!", "Der Stachel zuckt gefährlich nah an Barradins Laute vorbei."],
+        krit: "Die Chasme summt ein Liebeslied. Es ist ohrenbetäubend. Barradin weint vor Rührung. Und Ohrenschmerzen.",
+        patzer: "Die Chasme sticht zu. In die Laute. Die Laute ist jetzt eingeschläfert.",
+        sieg: "Die Chasme schwirrt davon – und schaut sich noch dreimal um.",
+        verloren: "Ezekiel wirft einen Dolch. Es wird kein Date." },
+      vrock: { name: "Der Vrock", aufgabe: "Er soll euch nicht vom Hof jagen.",
+        intro: "KRAAAAH! Zerzauste Schwingen. Ein Schnabel. Ein sehr schlechter Geruch.",
+        charmant: ["„Was für eine Spannweite!“", "„Dein Gefieder ist so … wild. Ungezähmt. Ich mag das.“", "„Du hast eine Stimme, die durch Mark und Bein geht.“", "„So einen Schnabel sieht man nicht alle Tage.“", "„Du bist ein Raubvogel. Und mein Herz ist deine Beute.“", "„Du hast etwas Verwegenes an dir.“"],
+        kuehn: ["„Nimm mich mit in die Lüfte, großer Vogel.“", "„Ich würde für dich sogar eine Feder in meinen Hut stecken. Deine.“", "„Lass uns zusammen kreischen. Im Takt.“", "„Ich hab keine Angst vor dir. Nur ein bisschen. Das macht's spannender.“", "„Komm her. Ich mag die verruchten Typen.“"],
+        absurd: ["„Riechst du immer so? Es ist … einzigartig.“", "„Darf ich dich Federchen nennen?“", "„Ich hab Brotkrumen dabei. Magst du Brotkrumen?“", "„KRAAAH! (Barradin versucht es auf Vrockisch.)“"],
+        passend: ["„Echo hat einen Blitz für dich. Ich habe nur mein Herz. Wähl weise.“", "„Ilvaras Wachen hassen dich. Ich finde dich faszinierend.“", "„Du tanzt so wild im Hof. Tanz mit mir.“"],
+        ja: ["Der Vrock plustert sich auf. Geschmeichelt.", "„Kraah.“ Leiser als sonst. Fast zärtlich.", "Er neigt den Kopf. Eine Feder fällt. Für Barradin."],
+        nein: ["„KRAAAAAH!“", "Der Vrock schlägt mit den Flügeln. Barradins Haare sind jetzt anders."],
+        krit: "Der Vrock schenkt Barradin eine Feder und fliegt eine Ehrenrunde über den Hof.",
+        patzer: "Der Vrock kreischt so laut, dass Barradins Hut davonfliegt. Mit Barradin dran.",
+        sieg: "Der Vrock zieht ab – mit einem letzten, verliebten Kraah.",
+        verloren: "Echo holt den Blitz raus. Romantik vorbei." }
+    },
+    en: {
+      blight: { name: "A blight from Thundertree", aufgabe: "He should stop entangling you.",
+        intro: "Creak. Rustle. Ruby-red eyes glow between the twigs.",
+        charmant: ['"Your eyes glow like two rubies in the leaves."', '"You have such a … rooted presence."', '"So slender, so flexible, so gnarly. You\'re a work of art."', '"You rustle so seductively."', '"You smell of forest and adventure."', '"Even Echo wouldn\'t burn you. Probably."'],
+        kuehn: ['"Wrap me up. But gently."', '"Let\'s put down roots together."', '"I\'ll water you every day. Promise."', '"You and me, in the moonlight, among the ruins. How romantic is that?"', '"I\'d even let you repot me."'],
+        absurd: ['"Are you a tree? Because I feel something growing for you."', '"May I keep a leaf of yours? For my herbarium. For my heart."', '"I have woodworms in my stomach. Butterflies, I mean. Wood butterflies."', '"Creak?"'],
+        passend: ['"Echo burned your friends. I didn\'t stop him. But I regretted it. A little."', '"Thundertree is abandoned. But with you it\'s so much cosier."', '"You\'re the prettiest twig in the whole village."'],
+        ja: ["The blight rustles. A leaf falls to the ground, lovestruck.", "The ruby eyes flicker pink. Almost.", "He creaks. Tenderly."],
+        nein: ["A branch swipes at Barradin's hat.", '"CREAK!"'],
+        krit: "The blight sprouts a blossom. A single one. For Barradin.",
+        patzer: "Barradin steps on a root. It was the blight's foot.",
+        sieg: "The blight lets go and waves with all its twigs.",
+        verloren: "The blight entangles Barradin. Echo raises his hand. Fireball? Better not." },
+      chasme: { name: "The chasme", aufgabe: "She shouldn't sting.",
+        intro: "BZZZZZZZZZZZ. A huge stinger. Many eyes. Very many.",
+        charmant: ['"Your buzzing is like music. Loud, terrible, wonderful music."', '"You have so many eyes. And they\'re all looking at me."', '"Your wings shimmer like silk."', '"What a … piercing gaze."', '"You\'re the most elegant demon I\'ve ever seen. Admittedly, I know two."', '"Your legs are so long. And so many."'],
+        kuehn: ['"Stop stinging. Let\'s hum instead. Together. A duet."', '"I hear chasmes put their victims to sleep. Put me to sleep. With a lullaby."', '"Put the stinger away, darling. I\'m here to flirt."', '"Come here and whisper something. Quieter than usual, please."', '"I\'d fly to the Abyss with you. If I could fly."'],
+        absurd: ['"Are you a wasp? Because I\'m having a severe reaction to you. Of love."', '"May I use your stinger as a knitting needle?"', '"Bzz bzz. Am I one of you now?"', '"Ezekiel apologised. Well, no. But I\'m doing it for him."'],
+        passend: ['"Friedrich is still a bit wobbly. You\'re simply … overwhelming."', '"You came into my life out of nowhere. Right in the middle of our escape."', '"I like a lady with a stinger."'],
+        ja: ["The buzzing deepens. Almost a purr.", "All the eyes blink at once. It's … almost sweet.", "The stinger lowers a little."],
+        nein: ["BZZZZZZZZZ!", "The stinger twitches dangerously close to Barradin's lute."],
+        krit: "The chasme buzzes a love song. It's deafening. Barradin weeps with emotion. And earache.",
+        patzer: "The chasme stings. The lute. The lute is now asleep.",
+        sieg: "The chasme buzzes away – and looks back three times.",
+        verloren: "Ezekiel throws a dagger. There will be no date." },
+      vrock: { name: "The vrock", aufgabe: "He shouldn't chase you out of the courtyard.",
+        intro: "SKRAAAAH! Ragged wings. A beak. A very bad smell.",
+        charmant: ['"What a wingspan!"', '"Your plumage is so … wild. Untamed. I like that."', '"You have a voice that goes right through me."', '"You don\'t see a beak like that every day."', '"You\'re a bird of prey. And my heart is your prey."', '"There\'s something daring about you."'],
+        kuehn: ['"Take me up into the skies, big bird."', '"I\'d even put a feather in my hat for you. Yours."', '"Let\'s screech together. In time."', '"I\'m not afraid of you. Only a little. Makes it more exciting."', '"Come here. I like the bad boys."'],
+        absurd: ['"Do you always smell like this? It\'s … unique."', '"May I call you Feathers?"', '"I brought breadcrumbs. Do you like breadcrumbs?"', '"SKRAAAH! (Barradin tries it in vrockish.)"'],
+        passend: ['"Echo has a lightning bolt for you. I only have my heart. Choose wisely."', '"Ilvara\'s guards hate you. I find you fascinating."', '"You dance so wildly in the courtyard. Dance with me."'],
+        ja: ["The vrock puffs up. Flattered.", '"Skraah." Quieter than usual. Almost tender.', "He tilts his head. A feather falls. For Barradin."],
+        nein: ['"SKRAAAAAH!"', "The vrock flaps his wings. Barradin's hair is different now."],
+        krit: "The vrock gives Barradin a feather and flies a lap of honour over the courtyard.",
+        patzer: "The vrock screeches so loudly that Barradin's hat flies away. With Barradin attached.",
+        sieg: "The vrock leaves – with one last, lovestruck skraah.",
+        verloren: "Echo brings out the lightning. Romance over." }
+    }
+  };
+  const NEUE_NSC2 = {
+    de: {
+      blight: { geheim: "„Ich habe dir Dünger mitgebracht. Den besten. Nur für dich.“", frage: "„Knirsch?“ (Er scheint wissen zu wollen, ob du Feuer dabeihast.)", gut: "„Kein Feuer. Nur Gefühle.“", mittel: "„Nur ein ganz kleines.“", schlecht: "„Echo hat welches. Viel.“" },
+      chasme: { geheim: "„Du hast mir das Herz durchbohrt. Ohne Stachel.“", frage: "„Sssss? Warum hast du keine Angst?“", gut: "„Weil Schönheit mich mutig macht.“", mittel: "„Hab ich. Ich zeig's nur nicht.“", schlecht: "„Weil Ezekiel einen Dolch hat.“" },
+      vrock: { geheim: "„Du bist der einzige Geier, dem ich mein Herz überlassen würde.“", frage: "„Kraah? Was willst du von mir, kleiner Mensch?“", gut: "„Nur einen Tanz. Und vielleicht eine Feder.“", mittel: "„Eigentlich nur den Ausgang.“", schlecht: "„Dass du duschst.“" }
+    },
+    en: {
+      blight: { geheim: '"I brought you fertiliser. The best. Just for you."', frage: '"Creak?" (He seems to want to know if you\'re carrying fire.)', gut: '"No fire. Only feelings."', mittel: '"Just a tiny one."', schlecht: '"Echo has some. Lots."' },
+      chasme: { geheim: '"You pierced my heart. Without a stinger."', frage: '"Bzzz? Why aren\'t you afraid?"', gut: '"Because beauty makes me brave."', mittel: '"I am. I just don\'t show it."', schlecht: '"Because Ezekiel has a dagger."' },
+      vrock: { geheim: '"You\'re the only vulture I\'d trust with my heart."', frage: '"Skraah? What do you want from me, little human?"', gut: '"Just a dance. And maybe a feather."', mittel: '"Actually just the exit."', schlecht: '"For you to take a bath."' }
+    }
+  };
+  ["de", "en"].forEach(l => {
+    Object.keys(MEHR_SPRUECHE[l]).forEach(id => Object.keys(MEHR_SPRUECHE[l][id]).forEach(art => { TX[l].nsc[id][art] = TX[l].nsc[id][art].concat(MEHR_SPRUECHE[l][id][art]); }));
+    Object.assign(TX[l].nsc, NEUE_NSC[l]);
+    Object.assign(NSC2[l], NEUE_NSC2[l]);
+  });
+
 
   /* ---------- Szene: Zimmer, Spielleiter, Schirm (SVG) ---------- */
   const ZIMMER = `
@@ -1044,7 +1265,7 @@
     const s = Math.min(W / nw, Hh / nh), bw = nw * s, bh = nh * s;
     const links = nscImg.offsetLeft + (W - bw) / 2, oben = nscImg.offsetTop + (Hh - bh);
     const f = { gundren: [.6, .2], buergermeister: [.62, .2], bugbear: [.4, .2], ilvara: [.5, .22], kuotoa: [.5, .33], horga: [.5, .2],
-      hgraam: [.76, .16], themberchaud: [.32, .42], demogorgon: [.5, .14] }[nscImg.dataset.nsc] || [.5, .2];
+      hgraam: [.76, .16], themberchaud: [.32, .42], demogorgon: [.5, .14], blight: [.62, .7], vrock: [.45, .72], chasme: [.5, .38] }[nscImg.dataset.nsc] || [.5, .2];
     return [links + bw * f[0], oben + bh * f[1]];
   }
   function kamera(ziel, zoom, art) {
@@ -1092,9 +1313,17 @@
   const launeStufe = l => l <= -3 ? 0 : l <= -1 ? 1 : l === 0 ? 2 : l <= 2 ? 3 : 4;
   function moment(p, text) { if (S && (!S.moment || p > S.moment.p)) S.moment = { p, text, wer: t().nsc[S.nsc.id].name }; }
 
+  /* acht NSC pro Abend: Gundren und Themberchaud fest, dazwischen sechs – bevorzugt solche, die noch nicht erobert sind */
+  function reiheBauen() {
+    const B = buchLesen(), mitte = NSC.slice(1, -1);
+    const gewicht = n => (B[n.id] === "erobert" ? 1 : B[n.id] ? 2 : 3) + Math.random() * 2.2;
+    const wahl = mitte.map(n => ({ n, g: gewicht(n) })).sort((a, b) => b.g - a.g).slice(0, 6).map(x => x.n);
+    const reihe = [NSC[0]].concat(mitte.filter(n => wahl.includes(n)), [NSC[NSC.length - 1]]);
+    return reihe.map(mitSg);
+  }
   function neueSitzung() {
     planLeeren();
-    S = { reihe: NSC.slice(), i: 0, geduld: 10, herzenGesamt: 0, erobert: 0, joker: { echo: 1, rex: 1, floete: 1 }, vorteil: false, bonus: false, ergebnisse: [],
+    S = { reihe: reiheBauen(), i: 0, geduld: 10, herzenGesamt: 0, erobert: 0, joker: { echo: 1, rex: 1, floete: 1 }, vorteil: false, bonus: false, ergebnisse: [],
       laune: 0, serie: 0, rausch: false, moment: null };
     ansicht = "spiel"; nscStart();
   }
@@ -1111,10 +1340,22 @@
     zeichnen();
   }
   /* drei Sprüche: einer charmant, einer kühn, einer absurd – manchmal statt charmant der passende; freigeschaltete Geheimsprüche obendrauf */
+  const gehoertLesen = () => { try { return JSON.parse(lies("imres-charme-gehoert", "{}")) || {}; } catch (_) { return {}; } };
+  function gehoertMerken(id, art, idx) {
+    if (art === "geheim") return;
+    const g = gehoertLesen(), l = g[id] || (g[id] = []), k = art + ":" + idx;
+    if (!l.includes(k)) { l.push(k); schreib("imres-charme-gehoert", JSON.stringify(g)); }
+  }
+  const spruchZahl = id => ["charmant", "kuehn", "absurd", "passend"].reduce((a, art) => a + TX.de.nsc[id][art].length, 0);
   function spruchAngebot(n) {
-    const T = t().nsc[n.id], arten = ["charmant", "kuehn", "absurd"];
+    const T = t().nsc[n.id], arten = ["charmant", "kuehn", "absurd"], G = gehoertLesen()[n.id] || [];
     if (Math.random() < .45) arten[0] = "passend";
-    const l = arten.map(art => ({ art, idx: Math.floor(Math.random() * T[art].length) }));
+    /* noch nicht gehörte Sprüche kommen bevorzugt dran */
+    const ziehen = art => {
+      const alle = T[art].map((_, i) => i), neu = alle.filter(i => !G.includes(art + ":" + i));
+      return zufall(neu.length && Math.random() < .8 ? neu : alle);
+    };
+    const l = arten.map(art => ({ art, idx: ziehen(art) }));
     if (geheimLesen()[n.id] && !(S && S.geheimGenutzt)) l.unshift({ art: "geheim", idx: 0 });
     return l;
   }
@@ -1124,7 +1365,7 @@
   function wuerfeln(art, idx) {
     if (!S || S.fertig || S.wirft || S.frage) return;
     const n = S.nsc, T = t();
-    S.wirft = true; S.spruch = spruchText(art, idx, n.id);
+    S.wirft = true; S.spruch = spruchText(art, idx, n.id); gehoertMerken(n.id, art, idx);
     if (art === "geheim") S.geheimGenutzt = true;
     blase(nscBlase, "Barradin: " + S.spruch, 0);
     nscBlase.classList.add("barradin");
@@ -1325,7 +1566,7 @@
       blase(nscBlase, gewonnen ? NT.sieg : NT.verloren, 0);
       slSagt(gewonnen ? T.sl.erobert : T.sl.korb, 2800);
       gesicht(gewonnen ? zufall(["verliebt", "schwitzt", "errötet"]) : zufall(["lachtraenen", "smirk", "lachen"]), 2800);
-      if (gewonnen) { kamera("beide", 1.45, "zieh"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 2600); glitzerhose(); } else nah("sl", 2.2, 1800, "schnitt");
+      if (gewonnen) { kamera("beide", 1.45, "zieh"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 2600); if (Math.random() < (S.superWurf ? .35 : .12)) glitzerhose(); } else nah("sl", 2.2, 1800, "schnitt");
       if (gewonnen) herzRegen();
       if (S.neuGeheim) flug("📜", 3, "aufsteigen");
       effekte.ende(gewonnen, !!S.superWurf);
@@ -1396,7 +1637,7 @@
   function fortsetzen() {
     const d = gespeichert(); if (!d) return neueSitzung();
     planLeeren();
-    S = { reihe: d.ids.map(id => id === BONUS.id ? BONUS : NSC.find(n => n.id === id)).filter(Boolean), rausch: false };
+    S = { reihe: d.ids.map(id => id === BONUS.id ? BONUS : NSC.find(n => n.id === id)).filter(Boolean).map(mitSg), rausch: false };
     FELDER.forEach(k => { S[k] = d[k]; });
     if (!S.reihe[S.i]) return neueSitzung();
     ansicht = "spiel"; nscStart(true);
@@ -1595,6 +1836,7 @@
         const st = B[n.id] || "offen", geheim = n.id === "demogorgon" && st === "offen";
         return '<div class="ch-seite ' + st + '">' + (geheim ? '<span class="ch-geheim">?</span>' : '<img src="' + esc(n.bild) + '" alt="">') +
           "<b>" + esc(geheim ? "???" : T.nsc[n.id].name) + "</b><small>" + esc(T.buchStand[st]) + "</small>" +
+          (geheim ? "" : '<small class="ch-gehoert">💬 ' + ((gehoertLesen()[n.id] || []).length) + " / " + spruchZahl(n.id) + "</small>") +
           (G[n.id] ? '<i class="ch-geheimspruch">' + esc(T2.geheimBuch) + esc(n2(n.id).geheim) + "</i>" : "") + "</div>";
       }).join("") + "</div>" +
       '<div class="ch-knoepfe"><button type="button" class="tav-knopf haupt" data-tun="zurueck">' + esc(T.zurueck) + "</button></div>";
@@ -1717,6 +1959,8 @@
 .ch-nsc.da { opacity: 1; transform: none; }
 .ch-nsc[data-nsc="themberchaud"], .ch-nsc[data-nsc="demogorgon"] { height: 92%; max-width: 55%; left: 0; }
 .ch-nsc[data-nsc="buergermeister"] { height: 58%; }
+.ch-nsc[data-nsc="blight"] { height: 52%; max-width: 56%; }
+.ch-nsc[data-nsc="chasme"] { height: 70%; }
 .ch-buehne.rauch::after { content: ""; position: absolute; z-index: 5; left: 2%; bottom: 0; width: 46%; height: 70%; pointer-events: none;
   background: radial-gradient(closest-side, rgba(235,226,204,.45), transparent); animation: chRauch .9s ease-out forwards; }
 @keyframes chRauch { from { opacity: 1; transform: scale(.6); } to { opacity: 0; transform: scale(1.4); } }
@@ -1787,6 +2031,7 @@
 .ch-seite.offen img { filter: brightness(0) opacity(.35); }
 .ch-seite b { font-family: var(--name); font-weight: 400; font-size: .92rem; line-height: 1.1; }
 .ch-seite small { font-size: .72rem; color: #6a5a42; }
+.ch-seite small.ch-gehoert { font-size: .66rem; color: #8a7a62; }
 .ch-seite.erobert small { color: #b0304a; font-weight: 600; }
 .ch-geheim { width: 100%; height: 84px; display: grid; place-items: center; font-family: var(--name); font-size: 2.6rem; color: #8a7a62; }
 /* Handy: alles auf einen Bildschirm – Bühne, Aufgabe, Sprüche, Joker */
@@ -2027,6 +2272,8 @@
   .ch-nsc { height: calc(var(--sz, 100%) * .84); bottom: calc(var(--sz, 100%) * .03); max-width: 50%; left: 1%; }
   .ch-nsc[data-nsc="themberchaud"], .ch-nsc[data-nsc="demogorgon"] { height: calc(var(--sz, 100%) * .95); max-width: 56%; }
   .ch-nsc[data-nsc="buergermeister"] { height: calc(var(--sz, 100%) * .6); }
+  .ch-nsc[data-nsc="blight"] { height: calc(var(--sz, 100%) * .55); max-width: 58%; }
+  .ch-nsc[data-nsc="chasme"] { height: calc(var(--sz, 100%) * .72); }
   .ch-nsc-blase, .ch-sl-blase { top: 1.5%; font-size: .72rem; line-height: 1.25; padding: .3rem .5rem; max-width: 49.5%; border-radius: 8px; }
   .ch-nsc-blase { left: 1%; } .ch-sl-blase { right: 1%; }
   .ch-wuerfel { width: 46px; height: 46px; margin: 0 0 0 -23px; top: auto; left: 52%; bottom: calc(var(--sz, 100%) * .47); font-size: 1.15rem; }
