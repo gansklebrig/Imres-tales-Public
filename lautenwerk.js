@@ -2381,8 +2381,8 @@ const ZUS_ICON = {
   const zusIst = id => Object.prototype.hasOwnProperty.call(zusWahl, id);
   const zusWert = id => typeof zusWahl[id] === "number" ? zusWahl[id] : 1;
   const zusMerken = () => { try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {} };
-  /* Handy 2, Tablet 4, großer Bildschirm 6 */
-  const zusMax = () => { const b = Math.min(innerWidth || 1200, screen && screen.width ? Math.max(screen.width, 1) : 1e4); return b < 640 || (leicht() && b < 900) ? 2 : b < 1100 ? 4 : 6; };
+  /* bis zu 10 Zusätze auf allen Geräten */
+  const zusMax = () => 10;
   /* steckt der Zusatz schon in der Grundkulisse? dann wird er nicht angeboten */
   const zusInKulisse = id => { const w = KUL_WELT[S.kulisse], z = ZUSATZ[id]; return !!w && z.betten.length > 0 && w.betten.some(([n]) => n === z.betten[0][0]); };
   const zusFaktor = () => { const n = Object.keys(zusLauf).length; return 1.3 * (n >= 3 ? Math.sqrt(2 / n) : 1); }; /* Zusätze: rund 4 dB über dem früheren Verhältnis zur Kulisse */
