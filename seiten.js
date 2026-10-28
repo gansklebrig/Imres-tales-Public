@@ -39,7 +39,7 @@
         taverneKurz: "Würfeln, kämpfen, stehlen, singen – zieh dir einen Hocker ran.",
         buehne: "Lautenwerk und Spielleiter-Pult für eure Sessions."
       },
-      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "7 Spiele", buehne: () => "♪ Musik" }
+      zahl: { chronik: n => n + (n === 1 ? " Kapitel" : " Kapitel"), questtafel: n => n + " Zettel", reise: n => n + " Stationen", gefaehrten: () => "5 Gefährten", nsc: n => n + " Gesichter", bestiarium: n => n + " Kreaturen", taverne: () => "8 Spiele", buehne: () => "♪ Musik" }
     },
     en: {
       uebersicht: "← Overview", zurueck: "Back", weiter: "Next",
@@ -59,7 +59,7 @@
         taverneKurz: "Roll, fight, steal, sing – pull up a stool.",
         buehne: "Lautenwerk and Dungeon Master's console for your sessions."
       },
-      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "7 games", buehne: () => "♪ Music" }
+      zahl: { chronik: n => n + (n === 1 ? " chapter" : " chapters"), questtafel: n => n + " notes", reise: n => n + " stops", gefaehrten: () => "5 companions", nsc: n => n + " faces", bestiarium: n => n + " creatures", taverne: () => "8 games", buehne: () => "♪ Music" }
     }
   };
   const t = () => TX[sprache()];

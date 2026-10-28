@@ -36,7 +36,9 @@
     { key: "probe", karte: "barden-probe", held: "barradin.jpg", bilder: [B("probe-1"), B("probe-2")],
       plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4", nurVorschauClip: true, ton: "holz1.mp3" },
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")],
-      plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, ton: "glock_91.mp3" }
+      plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, ton: "glock_91.mp3" },
+    { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: [B("charme-1"), B("charme-2"), B("charme-3")],
+      plakat: B("plakat-charme"), pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
   ];
   /* Sprüche aus Sicht der Helden, Kopf der Taverne, Fortschritt */
   const MEHR = {
@@ -44,9 +46,9 @@
       spruch: { heldensturm: "Vier Helden. Tausend Goblins. Ein sehr müder Barde.", jagd: "Wie viele Goblins schaffst du, bevor Rex heiser ist?",
         nacht: "Ezekiel nimmt nur, was niemand vermisst. Meistens.", hort: "Was glänzt, gehört Echo. Was nicht glänzt, auch.",
         auftritt: "Vom Hinterhof bis zu den Göttern – kein Ton daneben.", probe: "Eine 20 macht Helden. Eine 1 macht Lieder über dich.",
-        memory: "Erinnerst du dich an jedes Monster, das uns fressen wollte?" },
+        memory: "Erinnerst du dich an jedes Monster, das uns fressen wollte?", charme: "Kann ich den NSC verführen? – Würfel auf Charisma." },
       kopfLabel: "Zeitvertreib", kopfTitel: "Die Taverne",
-      kopfText: "Krüge hoch, Würfel raus! Sieben Spiele aus unserer Kampagne – vom Hordenkampf bis zum Loblied. Zieh dir einen Hocker ran.",
+      kopfText: "Krüge hoch, Würfel raus! Acht Spiele aus unserer Kampagne – vom Hordenkampf bis zum Loblied. Zieh dir einen Hocker ran.",
       heute: "Heute in der Taverne", jetzt: "▶ Jetzt spielen", mehr: "Mehr erfahren", spielen: "▶ Spielen", weiter: "▶ Weiterspielen",
       neu: "Neu", update: "Frisch", spiele: n => n + " Spiele", rekorde: n => n + (n === 1 ? " Rekord" : " Rekorde"), neuZahl: n => n + " neu",
       tonAn: "Tavernenklänge an", tonAus: "Tavernenklänge aus", nieGespielt: "Noch nie gespielt – trau dich!", deinStand: "Dein Stand",
@@ -55,18 +57,19 @@
         jagd: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : "", d.kapitel > 1 ? "Kapitel " + d.kapitel : ""],
         nacht: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : "", d.nacht > 1 ? "Nacht " + d.nacht : "", d.taeglich ? "📅 Tägliche Nacht wartet" : ""],
         hort: d => [d.weiter ? "▶ Level " + d.weiter + " gespeichert" : "", d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : ""],
-        auftritt: d => [d.sterne ? "★ " + d.sterne + "/33" : "", d.buehne > 1 ? "Bühne " + d.buehne + "/11" : ""],
+        auftritt: d => [d.sterne ? "★ " + d.sterne + "/36" : "", d.buehne > 1 ? "Bühne " + d.buehne + "/12" : ""],
         probe: () => ["🎲 Ein Wurf genügt"],
-        memory: d => [d.rekord ? "🏆 " + d.rekord + " Züge" : ""]
+        memory: d => [d.rekord ? "🏆 " + d.rekord + " Züge" : ""],
+        charme: d => [d.erobert ? "♥ " + d.erobert + "/9 erobert" : "", d.rekord ? "🏆 " + d.rekord + " ♥" : ""]
       }
     },
     en: {
       spruch: { heldensturm: "Four heroes. A thousand goblins. One very tired bard.", jagd: "How many goblins can you drop before Rex goes hoarse?",
         nacht: "Ezekiel only takes what no one will miss. Mostly.", hort: "If it shines, it's Echo's. If it doesn't – also Echo's.",
         auftritt: "From the back alley to the gods – not one wrong note.", probe: "A 20 makes heroes. A 1 makes songs about you.",
-        memory: "Do you remember every monster that tried to eat us?" },
+        memory: "Do you remember every monster that tried to eat us?", charme: "Can I seduce the NPC? – Roll Charisma." },
       kopfLabel: "Pastimes", kopfTitel: "The Tavern",
-      kopfText: "Raise your tankards, roll the dice! Seven games from our campaign – from horde battles to songs of praise. Pull up a stool.",
+      kopfText: "Raise your tankards, roll the dice! Eight games from our campaign – from horde battles to songs of praise. Pull up a stool.",
       heute: "Tonight at the tavern", jetzt: "▶ Play now", mehr: "Learn more", spielen: "▶ Play", weiter: "▶ Continue",
       neu: "New", update: "Fresh", spiele: n => n + " games", rekorde: n => n + (n === 1 ? " record" : " records"), neuZahl: n => n + " new",
       tonAn: "Tavern sounds on", tonAus: "Tavern sounds off", nieGespielt: "Never played – dare you!", deinStand: "Your progress",
@@ -75,9 +78,10 @@
         jagd: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : "", d.kapitel > 1 ? "Chapter " + d.kapitel : ""],
         nacht: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : "", d.nacht > 1 ? "Night " + d.nacht : "", d.taeglich ? "📅 Daily night awaits" : ""],
         hort: d => [d.weiter ? "▶ Level " + d.weiter + " saved" : "", d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : ""],
-        auftritt: d => [d.sterne ? "★ " + d.sterne + "/33" : "", d.buehne > 1 ? "Stage " + d.buehne + "/11" : ""],
+        auftritt: d => [d.sterne ? "★ " + d.sterne + "/36" : "", d.buehne > 1 ? "Stage " + d.buehne + "/12" : ""],
         probe: () => ["🎲 One roll is all it takes"],
-        memory: d => [d.rekord ? "🏆 " + d.rekord + " moves" : ""]
+        memory: d => [d.rekord ? "🏆 " + d.rekord + " moves" : ""],
+        charme: d => [d.erobert ? "♥ " + d.erobert + "/9 conquered" : "", d.rekord ? "🏆 " + d.rekord + " ♥" : ""]
       }
     }
   };
@@ -99,6 +103,7 @@
     if (key === "auftritt") { const w = json("imres-auftritt-weg"); if (w) { d.sterne = (Array.isArray(w.sterne) ? w.sterne : []).reduce((a, b) => a + (+b || 0), 0); d.buehne = (w.frei | 0) + 1; }
       d.gespielt = !!lies("imres-auftritt-rekord") || !!d.sterne; }
     if (key === "memory") d.rekord = parseInt(lies("imres-memory-rekord"), 10) || 0;
+    if (key === "charme") { const b = json("imres-charme-buch") || {}; d.erobert = Object.values(b).filter(v => v === "erobert").length; d.rekord = parseInt(lies("imres-charme-rekord"), 10) || 0; }
     const zeilen = m().stand[key](d).filter(Boolean);
     const gespielt = key === "probe" ? true : zeilen.length > 0 || d.gespielt;
     return { zeilen, gespielt, weiter: !!d.weiter, rekord: !!(d.rekord || d.sterne || d.laeufe) };
@@ -157,7 +162,11 @@
         memory: { titel: "Bestiarium-Memory", kurz: "Finde die Paare aus dem Bestiarium.", genre: "Gedächtnis", wer: "Für alle",
           text: "Unter den Karten lauern die Kreaturen aus dem Bestiarium. Decke immer zwei auf und finde alle Paare in möglichst wenigen Zügen.",
           punkte: ["Alle Kreaturen aus dem Bestiarium", "Eigener Rekord wird gespeichert", "Kurz und schnell – perfekt zwischendurch"],
-          pc: "Karten anklicken.", handy: "Karten antippen." }
+          pc: "Karten anklicken.", handy: "Karten antippen." },
+        charme: { titel: "Würfel auf Charme", kurz: "Barradin will jeden NSC verführen – der Spielleiter leidet.", genre: "Würfelspiel", wer: "Barradin & der Spielleiter",
+          text: "Hinter dem Schirm sitzt der Spielleiter, vor ihm erscheinen nacheinander die NSC, die er spielt – von Gundren bis Themberchaud. Wähle einen Spruch, wirf den W20 und schau ihm ins Gesicht: Grinsen, Facepalm, blankes Entsetzen.",
+          punkte: ["Acht NSC aus der Kampagne – und ein geheimer Bonusgast", "Charmant, kühn, absurd oder passend: jeder Spruch hat sein eigenes Risiko", "Joker: Echos „Kennst du Gundren?“, Rex und die Flöte der Illusionen", "Die Geduld des Spielleiters ist begrenzt – und das Eroberungsbuch merkt sich alles"],
+          pc: "Spruch anklicken – der W20 rollt von allein.", handy: "Spruch antippen." }
       }
     },
     en: {
@@ -192,7 +201,11 @@
         memory: { titel: "Bestiary Memory", kurz: "Find the pairs from the bestiary.", genre: "Memory", wer: "For everyone",
           text: "The creatures from the bestiary lurk beneath the cards. Turn over two at a time and find all pairs in as few moves as possible.",
           punkte: ["Every creature from the bestiary", "Your personal record is saved", "Short and quick – perfect in between"],
-          pc: "Click the cards.", handy: "Tap the cards." }
+          pc: "Click the cards.", handy: "Tap the cards." },
+        charme: { titel: "Roll for Charm", kurz: "Barradin wants to seduce every NPC – the game master suffers.", genre: "Dice game", wer: "Barradin & the game master",
+          text: "Behind the screen sits the game master, and in front of him the NPCs he voices appear one by one – from Gundren to Themberchaud. Pick a line, roll the d20 and watch his face: grin, facepalm, sheer horror.",
+          punkte: ["Eight NPCs from the campaign – and a secret bonus guest", "Charming, bold, absurd or fitting: every line has its own risk", "Jokers: Echo's \"Do you know Gundren?\", Rex and the flute of illusions", "The game master's patience is limited – and the Book of Conquests remembers everything"],
+          pc: "Click a line – the d20 rolls by itself.", handy: "Tap a line." }
       }
     }
   };
