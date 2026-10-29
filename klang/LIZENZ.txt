@@ -109,3 +109,15 @@ e_kaefer_*, e_geschirr_*, e_werkzeug_*, e_kiste_*, e_knall_*, e_glocklein_*, e_h
 Aus 0 A.D. (CC BY-SA 3.0, siehe oben): Steinmetz (e_steinmetz_*), Feldarbeit (e_feldarbeit_*), Laub (e_laub_*), Steintor (e_steintor_*),
 Riemen (e_riemen_*); Signalhörner (e_signalhorn_*) aus den Hornaufnahmen von VSCO 2 CE (CC0) zusammengesetzt.
 Für Imres Tales gekürzt, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert.
+
+Erweiterung der Tier- und Hintergrundgeräusche (Oktober 2026):
+  Aus dem freien Spiel Widelands (https://www.widelands.org), Lizenz: GNU General Public License, Version 2 oder später
+  (https://www.gnu.org/licenses/old-licenses/gpl-2.0.html), Urheber: das Widelands-Entwicklungsteam:
+    Enten (e_ente_*), Esel (e_esel_1), Ochsen (e_ochse_*), Hirsche und Elche (e_hirsch_*), Wildschwein (e_keiler_1),
+    weitere Wölfe (e_wolf_5–7), weitere Vögel (e_vogel_11–30), Frosch (e_frosch_9), Sense (e_sense_1),
+    Schleifstein (e_schleifen_1), Webstuhl (e_webstuhl_1) und das drehende Mühlrad (a_muehle).
+  Aus dem freien Spiel Battle for Wesnoth (https://www.wesnoth.org), Lizenz: GNU GPL, Version 2 oder später,
+  Urheber: das Wesnoth-Projekt: Greifenschrei (e_greif_*), Schlangenzischen (e_schlange_*), Bergbestie (e_yeti_*).
+  Aus 0 A.D. von Wildfire Games (CC BY-SA 3.0, siehe oben): Ziegen (e_ziege_*).
+  Für Imres Tales geschnitten, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert (das Mühlrad als
+  nahtlose Schleife). Diese Bearbeitungen stehen unter denselben Lizenzen wie die Originale.
