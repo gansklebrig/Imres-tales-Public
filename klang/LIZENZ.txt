@@ -145,3 +145,9 @@ Kampf- und Zaubergeräusche (Oktober 2026):
     pfeil_holz_*, pfeil_metall_*.
   Für Imres Tales geschnitten, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert. Die Bearbeitungen
   stehen unter denselben Lizenzen wie die Originale.
+
+Kampfschauplätze (amb/a_schlacht, e_jubel_*, e_raunen_*, e_kampfruf_*, e_tischbruch_*, klang/fx_0_siegeprojectilehit_*) –
+für Imres Tales zusammengemischt aus: Rufen der Dorfbewohner und Krieger, Schwerthieben, Schildtreffern, Pfeilen,
+Hufschlag und Belagerungstreffern aus 0 A.D. (CC BY-SA 3.0), Schmerzens- und Kampfrufen aus Battle for Wesnoth
+(GPL 2+), der vollen Gaststube und dem Markt aus Moodist bzw. 0 A.D., dem Ooh-Chor aus FluidR3 (CC BY 3.0) sowie
+Holz- und Glasbruch und Geschirr von rubberduck/OpenGameArt (CC0). Die Mischungen stehen unter CC BY-SA 3.0.
