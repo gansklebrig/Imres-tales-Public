@@ -140,7 +140,7 @@
       umgewandelt: "In vier Pattern umgewandelt: A Strophe, B Refrain, C Zwischenteil, D Höhepunkt.",
       rollen: { i: "Vorspiel", s: "Strophe", v: "Aufbau", r: "Refrain", b: "Zwischenteil", h: "Höhepunkt" }, kopierenNach: a => a + " kopieren nach", ueberschreiben: b => b + " überschreiben?", kopiert2: (a, b) => "Teil " + a + " wurde nach " + b + " kopiert.",
       sicher: b => "Teil " + b + " ist nicht leer – zum Überschreiben noch einmal tippen.",
-      uebergang: "Übergang", uebStufe: n => n === 1 ? "schnell, 1 Takt" : n + " Takte, nahtlos",
+      uebergang: "Übergang", uebStufe: n => n === 1 ? "schnell, ohne Überleitung" : "Überleitung " + (n <= 3 ? 1 : n <= 6 ? 2 : 3) + (n <= 3 ? " Takt" : " Takte"),
       lieder: "Lieder", stimmungen: "Stimmungen", intensitaet: "Intensität", intStufen: ["kaum hörbar", "sehr ruhig", "ruhig", "gelassen", "gemäßigt", "normal", "lebhaft", "bewegt", "drängend", "wild", "entfesselt"],
       vorlagen: { taverne: "Tavernentanz", ballade: "Ballade", hafen: "⚓ Hafenlied", wald: "🌲 Waldweise", schmiede: "⚒ Schmiede", trauer: "Trauerlied", wiegen: "Wiegenlied",
         kampf: "⚔ Kampf", unterreich: "🦇 Unterreich", reise: "🗺 Reise", spannung: "👁 Spannung", sieg: "🏆 Sieg", rast: "🔥 Lager",
@@ -228,7 +228,7 @@
       umgewandelt: "Turned into four patterns: A verse, B chorus, C bridge, D finale.",
       rollen: { i: "Intro", s: "Verse", v: "Build-up", r: "Chorus", b: "Bridge", h: "Finale" }, kopierenNach: a => "Copy " + a + " to", ueberschreiben: b => "Overwrite " + b + "?", kopiert2: (a, b) => "Part " + a + " was copied to " + b + ".",
       sicher: b => "Part " + b + " is not empty – tap again to overwrite it.",
-      uebergang: "Transition", uebStufe: n => n === 1 ? "quick, 1 bar" : n + " bars, seamless",
+      uebergang: "Transition", uebStufe: n => n === 1 ? "quick, no bridge" : (n <= 3 ? 1 : n <= 6 ? 2 : 3) + "-bar bridge",
       lieder: "Songs", stimmungen: "Moods", intensitaet: "Intensity", intStufen: ["barely there", "very calm", "calm", "relaxed", "moderate", "normal", "lively", "driving", "urgent", "wild", "unleashed"],
       vorlagen: { taverne: "Tavern dance", ballade: "Ballad", hafen: "⚓ Harbour shanty", wald: "🌲 Forest air", schmiede: "⚒ Forge", trauer: "Lament", wiegen: "Lullaby",
         kampf: "⚔ Battle", unterreich: "🦇 Underdark", reise: "🗺 Journey", spannung: "👁 Suspense", sieg: "🏆 Victory", rast: "🔥 Camp",
@@ -3781,13 +3781,89 @@ const ZUS_ICON = {
     wechselAb = T; wechselStart = jetzt; ausduennen = !dr;
     master.gain.cancelScheduledValues(jetzt); master.gain.setValueAtTime(master.gain.value, jetzt);
     master.gain.linearRampToValueAtTime(.38 * (dr ? .3 : .22), T);
-    if (dr && !rendert) {
+    if (bruecke) {
+      /* alles für Überleitung und neues Stück schon jetzt laden */
+      { const alt = S; S = neu; try { orchVorladen(); gaesteVorladen(); kapelleVorladen(); } catch (_) {} S = alt; }
+      const pr = ORCH[neu.stimmung] || {}; ((pr.farbe && PAD_FARBE[pr.farbe]) || ["vc", "vln"]).concat(["harfe"]).forEach(probenLaden);
+      if (dr) ["timproll", "swell", "crash", "timp1"].forEach(sampleLaden);
+    }
+    if (dr && !rendert && !bruecke) {
       ["timproll", "swell", "crash", "timp1"].forEach(sampleLaden);
       const z = brueckeZiel(), lang = Math.min(T - jetzt - .05, 3);
       probe("timproll", 0, T - lang, z, dr > 1 ? .55 : .4, { ein: Math.min(.8, lang * .6), dauer: lang + .08, aus: .08 });
       const sw = sampleBuf.get("swell");
       if (sw && dr > 1) probe("swell", 0, T - lang, z, .3, { ein: .05, dauer: lang + .05, aus: .05, versatz: Math.max(0, sw._spitze - sw._start - lang) });
     }
+  }
+  /* ---------- Überleitung zwischen zwei Stimmungen ----------
+     Statt das laufende Stück Takt für Takt in die neue Tonart zu schieben (dabei rutschte die Melodie hörbar schräg), klingt das alte
+     Stück am Taktende aus, und eine kleine komponierte Überleitung führt hinüber: gehaltene Akkorde (Teppich in der Klangfarbe der neuen
+     Stimmung, darunter der Bass, dazu eine gezupfte Harfe), sauber stimmgeführt – erst ein Akkord, den beide Tonarten gemeinsam haben,
+     dann die Dominante der neuen Tonart, die sich auf der Eins des neuen Stücks auflöst. In den gehaltenen Klängen gibt es keinen Takt,
+     daher fallen Tempo- und Taktartwechsel nicht mehr auf. Dramatische Ziele bekommen dazu einen Paukenwirbel. */
+  let bruecke = null, brueckeBis = 0;
+  const MOLL = { aeolisch: 1, dorisch: 1, phrygisch: 1 };
+  const tonleiterPc = (tr, mod) => new Set((MODI[mod] || MODI.ionisch).slice(0, 7).map(x => (((x + 62 + tr) % 12) + 12) % 12));
+  /* Dreiklang auf Stufe d (0 = Grundton) der Tonleiter, als Tonhöhen ab dem Grundton der Tonart */
+  function stufenAkkord(tr, mod, d) { const sk = MODI[mod] || MODI.ionisch, st = i => sk[i % 7] + 12 * Math.floor(i / 7); return [st(d), st(d + 2), st(d + 4)].map(x => 62 + tr + x); }
+  /* drei Oberstimmen mit möglichst kleinen Schritten zur vorigen Lage (Stimmführung), alle im Bereich g – g'' */
+  function legen(akk, vorher) {
+    const pcs = akk.map(x => ((x % 12) + 12) % 12), kand = [];
+    for (let a = 55; a <= 74; a++) if (pcs.includes(a % 12)) for (let b = a + 2; b <= a + 9; b++) if (pcs.includes(b % 12) && b % 12 !== a % 12) for (let c = b + 2; c <= b + 9 && c <= 79; c++)
+      if (pcs.includes(c % 12) && new Set([a % 12, b % 12, c % 12]).size === 3) kand.push([a, b, c]);
+    const ziel = vorher || [62, 66, 69];
+    kand.sort((x, y) => x.reduce((s, v, i) => s + Math.abs(v - ziel[i]), 0) - y.reduce((s, v, i) => s + Math.abs(v - ziel[i]), 0));
+    return kand[0] || akk;
+  }
+  function brueckeAkkorde(alt, neu, takte) {
+    const trA = alt.transpose + hebung, trB = neu.transpose, mA = alt.modus, mB = neu.modus;
+    const altPc = tonleiterPc(trA, mA), V = stufenAkkord(trB, "ionisch", 4); /* Dominante immer mit großer Terz – sie zieht zum Grundton */
+    const Vsus = [V[0], V[0] + 5, V[2]];
+    /* gemeinsamer Akkord: Stufe IV, ii, vi oder I der neuen Tonart, deren Töne auch in der alten Tonleiter liegen */
+    let pivot = null;
+    /* nur Dur- und Molldreiklänge (reine Quinte) – ein verminderter Akkord als Brücke klänge schräg */
+    for (const d of [3, 1, 5, 0]) { const a = stufenAkkord(trB, mB, d); if (a[2] - a[0] === 7 && a.every(x => altPc.has(((x % 12) + 12) % 12))) { pivot = a; break; } }
+    const gleich = trA === trB && mA === mB;
+    if (!pivot) { pivot = stufenAkkord(trB, mB, 3); if (pivot[2] - pivot[0] !== 7) pivot = stufenAkkord(trB, mB, 1); if (pivot[2] - pivot[0] !== 7) pivot = stufenAkkord(trB, "ionisch", 3); }
+    const tonikaA = stufenAkkord(trA, mA, 0), subA = stufenAkkord(trA, mA, 3);
+    /* je Takt zwei Hälften */
+    if (takte <= 1) return [[pivot, 1], [V, 1]];
+    if (takte === 2) return gleich ? [[subA, 2], [Vsus, 1], [V, 1]] : [[tonikaA, 1], [pivot, 1], [Vsus, 1], [V, 1]];
+    return [[tonikaA, 2], [pivot, 2], [Vsus, 1], [V, 1]];
+  }
+  /* die Überleitung einplanen; gibt das Ende zurück (dort beginnt das neue Stück) */
+  function brueckeSpielen(T) {
+    const neu = wechsel, alt = S, takte = bruecke ? bruecke.takte : 1, z = brueckeZiel();
+    /* Tempo der Überleitung: zwischen altem und neuem, ein Takt = vier Schläge */
+    const tempo = ((tempoJetzt || alt.tempo) + neu.tempo) / 2, halb = 2 * 60 / tempo;
+    const folge = brueckeAkkorde(alt, neu, takte), pr = ORCH[neu.stimmung] || {}, farbe = (pr.farbe && PAD_FARBE[pr.farbe]) || ["vc", "vln"];
+    const dr = neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
+    let t = T, vorher = null;
+    const ruhig = !dr;
+    folge.forEach(([akk, n], i) => {
+      const dauer = n * halb, oben = legen(akk, vorher), bass = inLage(akk[0], 38, 50); vorher = oben;
+      const ende = i === folge.length - 1, l = ruhig ? .85 : 1;
+      probe(farbe[0], bass, t, z, .3 * l, { ein: i ? .25 : .6, aus: ende ? .8 : .35, dauer: dauer + (ende ? .9 : .3) });
+      oben.forEach((m, k) => probe(farbe[1], m, t, z, (k === 2 ? .17 : .2) * l, { ein: i ? .3 : .7, aus: ende ? .9 : .4, dauer: dauer + (ende ? 1 : .35) }));
+      /* gezupfte Harfe: der Akkord gebrochen, aufwärts */
+      if (!leicht() || i === 0) [bass + 12].concat(oben).forEach((m, k) => probe("harfe", m, t + .06 + k * Math.min(.11, halb / 10), z, .22 * l, { dauer: 2.4, aus: .4 }));
+      t += dauer;
+    });
+    /* Auflösung: der Grundakkord der neuen Tonart klingt noch über den Beginn des neuen Stücks und trägt in sein Vorspiel hinein */
+    { const I = stufenAkkord(neu.transpose, neu.modus, 0), oben = legen(I, vorher), bass = inLage(I[0], 38, 50), d = 4 * halb;
+      probe(farbe[0], bass, t, z, .26, { ein: .05, aus: d * .6, dauer: d });
+      oben.forEach((m, k) => probe(farbe[1], m, t, z, k === 2 ? .14 : .17, { ein: .06, aus: d * .65, dauer: d }));
+      if (!dr) [bass + 12].concat(oben).forEach((m, k) => probe("harfe", m, t + .04 + k * Math.min(.11, halb / 10), z, .2, { dauer: 2.6, aus: .5 })); }
+    /* dramatisches Ziel: Paukenwirbel und anschwellendes Becken über der Dominante, der Schlag kommt auf der Eins des neuen Stücks */
+    if (dr && !rendert) {
+      ["timproll", "swell", "crash", "timp1"].forEach(sampleLaden);
+      const lang = Math.min(folge[folge.length - 1][1] * halb + (folge.length > 1 ? folge[folge.length - 2][1] * halb : 0), 3.2);
+      probe("timproll", 0, t - lang, z, dr > 1 ? .5 : .36, { ein: Math.min(.9, lang * .6), dauer: lang + .06, aus: .06 });
+      const sw = sampleBuf.get("swell");
+      if (sw && dr > 1) probe("swell", 0, t - lang, z, .28, { ein: .05, dauer: lang + .05, aus: .05, versatz: Math.max(0, sw._spitze - sw._start - lang) });
+    }
+    ["harfe"].forEach(probenLaden);
+    return t;
   }
   const schrittDauer = () => 60 / (tempoJetzt || S.tempo) / 4;
   const taktL = () => S.takt === 12 ? 12 : SCHRITTE;
@@ -3817,7 +3893,7 @@ const ZUS_ICON = {
     else if (st.gefuehl && st.gefuehl !== "halb" && ab === c && energie && durchgang % 2 === 0 && TL === 16 && S.intensitaet >= 6) gefuehl = "doppelt";
   }
   /* Wechsel am Taktanfang: neues Stück übernehmen, Tempo gleitet, kurzer Lautstärke-Atemzug */
-  function wechselAnwenden(zeit, sanft) {
+  function wechselAnwenden(zeit, sanft, nachBruecke) {
     const neu = wechsel; wechsel = null; wechselAb = 0;
     const raumAlt = S.raum;
     /* Umbau: das neue Stück beginnt in der Tonart, die gerade klingt, und gleitet danach in seine eigene */
@@ -3839,8 +3915,9 @@ const ZUS_ICON = {
       /* das neue Stück blendet sich ein – bei dramatischen Zielen schnell und mit Schlag auf der Eins, sonst sanft */
       const mg = master.gain;
       if (mg.cancelAndHoldAtTime) mg.cancelAndHoldAtTime(zeit); else { mg.cancelScheduledValues(zeit); mg.setValueAtTime(.38 * (dr ? .3 : .22), zeit); }
-      if (!dr) mg.setTargetAtTime(.38 * .2, zeit, .15); /* kurz zurücknehmen, dann langsam aufblenden */
-      mg.setTargetAtTime(.38, zeit + (dr ? 0 : .4), dr ? .12 : 2.8);
+      if (!dr && !nachBruecke) mg.setTargetAtTime(.38 * .2, zeit, .15); /* kurz zurücknehmen, dann langsam aufblenden */
+      /* nach der Überleitung: die Auflösung soll gleich tragen – zügiger aufblenden */
+      mg.setTargetAtTime(.38, zeit + (dr || nachBruecke ? 0 : .4), dr ? .12 : nachBruecke ? 1.1 : 2.8);
       if (dr > 1) { probe("crash", 0, zeit, brueckeZiel(), .3); probe("timp1", 0, zeit, brueckeZiel(), .5); }
       else if (dr) probe("timp1", 0, zeit, brueckeZiel(), .4);
     }
@@ -3860,9 +3937,15 @@ const ZUS_ICON = {
     if (ausklingt) return;
     if (musikPauseAb && naechste >= musikPauseAb) { if (naechste < ctx.currentTime) naechste = ctx.currentTime; return; }
     if (morph && wechsel) morph.tempoB = wechsel.tempo;
-    if (wechsel && !wechselAb) { if (uebergang > 1 && !hoerer) morphStarten(); else brueckeStarten(); }
+    if (wechsel && !wechselAb) { bruecke = uebergang > 1 && !hoerer ? { takte: uebergang <= 3 ? 1 : uebergang <= 6 ? 2 : 3 } : null; brueckeStarten(); }
     if (ausklangAb === -1) { ausklangAb = taktEnde(); ausklangStart = ctx.currentTime; }
     while (naechste < ctx.currentTime + vorlauf && !(musikPauseAb && naechste >= musikPauseAb)) {
+      /* während der Überleitung ruht der Sequenzer; an ihrem Ende beginnt das neue Stück */
+      if (brueckeBis) {
+        if (!wechsel) { brueckeBis = 0; bruecke = null; }
+        else if (ctx.currentTime + vorlauf < brueckeBis - .02) return;
+        else { naechste = brueckeBis; brueckeBis = 0; bruecke = null; schritt = 0; tempoJetzt = wechsel.tempo; wechselAnwenden(naechste, false, true); continue; }
+      }
       if (schritt === 0 && ausklangAb && naechste >= ausklangAb - 2 * schrittDauer()) { schlussAkkord(naechste); return; }
       if (schritt === 0 && hoerer) funkAusrichten(false);
       if (schritt === 0 && morph) {
@@ -3872,7 +3955,10 @@ const ZUS_ICON = {
         if (morph.takt >= morph.N) morph = null;
       }
       if (schritt === 0 && tonZiel && !wechsel) tonWeiter();
-      if (schritt === 0 && wechsel && !morph && naechste >= wechselAb - 2 * schrittDauer()) wechselAnwenden(naechste);
+      if (schritt === 0 && wechsel && !morph && naechste >= wechselAb - 2 * schrittDauer()) {
+        if (bruecke) { brueckeBis = brueckeSpielen(naechste); wechselAb = brueckeBis; return; }
+        wechselAnwenden(naechste);
+      }
       else if (schritt === 0 && intensitaetNeu && (intVorrat || naechste - ctx.currentTime < .15)) { intensitaetNeu = false; const v = intVorrat; intVorrat = null; stimmungWeiter(false, v); }
       if (schritt === 0) { teilPlanen(abschnitt % S.ablauf.length); try { kapJetzt = stilKey() && S.kapelle !== 0 ? kapPlan(abschnitt % S.ablauf.length) : null; } catch (_) { kapJetzt = null; } }
       const zielTempo = ausduennen && wechsel ? wechsel.tempo : S.tempo;
@@ -4029,7 +4115,7 @@ const ZUS_ICON = {
     knoepfe(); funkAenderung(); medienStand();
   }
   function stopp(pause) {
-    morph = null; morphEin = false; einblendMax = EINBLEND;
+    morph = null; morphEin = false; einblendMax = EINBLEND; bruecke = null; brueckeBis = 0;
     /* mitten im Hinübergleiten angehalten: das Stück steht gleich in seiner eigenen Tonart */
     if (tonZiel) { S.transpose = tonZiel.ziel; S.modus = tonZiel.modus; tonZiel = null; merken(); }
     laeuft = false; pausiert = !!pause; clearInterval(timer); taktgeber(false); wechselAb = 0; ausklangAb = 0; ausklingt = false; musikPauseAb = 0; if (klassikLauf) klassikStopp(true);
@@ -7142,7 +7228,7 @@ const ZUS_ICON = {
   /* ---------- Rundgang: eingeblendet, Schritt für Schritt, ohne die Seite zu verlassen ---------- */
   Object.assign(TX.de, { rundgang: "❔ Rundgang", rundgangTipp: "Kurzer Rundgang durch das Pult", weiter: "Weiter", zurueck: "Zurück", fertig: "Fertig", beenden: "Beenden",
     info: {
-      uebergang: "Wie lange der Wechsel zur nächsten Stimmung dauert. Ab 2 Takten wird das laufende Stück Takt für Takt umgebaut: Das Tempo gleitet, das Schlagwerk steigt nach und nach auf den neuen Rhythmus um, in der Mitte übernimmt die neue Melodie. Liegt die neue Stimmung in einer anderen Tonart, rückt die Musik vorher schrittweise an sie heran und gleitet danach in Ruhe ganz hinüber – im Moment des Wechsels klingt nichts schief. Bei 1 Takt wechselt es schnell – bei dramatischen Stimmungen mit Paukenwirbel.",
+      uebergang: "Wie der Wechsel zur nächsten Stimmung klingt. Ab 2: Das laufende Stück klingt am Taktende aus, dann führt eine kleine Überleitung hinüber – gehaltene Akkorde in der Klangfarbe der neuen Stimmung mit Harfe, erst ein Akkord, den beide Tonarten teilen, dann die Dominante, die sich im neuen Stück auflöst. Weil die Überleitung keinen Takt schlägt, fallen Tempo- und Taktartwechsel nicht auf. Je weiter der Regler, desto länger die Überleitung (1, 2 oder 3 Takte); dramatische Ziele bekommen einen Paukenwirbel. Bei 1 wechselt es ohne Überleitung schnell.",
       intensitaet: "Wie viel los ist: links ruhig und sparsam, rechts dicht und wild. Die Änderung greift am nächsten Taktanfang.",
       gaeste: "Figuren aus eurer Geschichte spielen in passenden Stimmungen mit und bekommen im Zwischenteil ein Solo. Aufklappen, um einzelne an- oder abzuwählen.",
       mitspieler: "Band allein: nur Barradin, Friedrich, Echo, Ezekiel und Rex. Ein paar Mitspieler: dazu das Geister-Orchester, ein Musiker der Kapelle und die Gäste aus eurer Geschichte. Volle Big Band: die ganze Kapelle. Aufgeklappt lässt sich jede Gruppe einzeln an- und abschalten; die Gäste kommen nur in Stimmungen, die zu ihnen passen.",
@@ -7167,7 +7253,7 @@ const ZUS_ICON = {
     ] });
   Object.assign(TX.en, { rundgang: "❔ Tour", rundgangTipp: "A short tour of the console", weiter: "Next", zurueck: "Back", fertig: "Done", beenden: "Close",
     info: {
-      uebergang: "How long the change to the next mood takes. From 2 bars on, the playing piece is rebuilt bar by bar: the tempo glides, the percussion switches to the new rhythm one by one, and halfway through the new melody takes over. If the new mood is in another key, the music moves towards it step by step beforehand and glides the rest of the way afterwards – nothing sounds off at the moment of the change. At 1 bar it changes quickly – with a timpani roll for dramatic moods.",
+      uebergang: "How the change to the next mood sounds. From 2: the playing piece rings out at the end of the bar, then a short bridge leads across – held chords in the new mood's colours with harp, first a chord both keys share, then the dominant that resolves into the new piece. Since the bridge has no beat, tempo and metre changes go unnoticed. The further right, the longer the bridge (1, 2 or 3 bars); dramatic targets get a timpani roll. At 1 it changes quickly without a bridge.",
       intensitaet: "How busy it gets: left is calm and sparse, right is dense and wild. Changes take effect at the next bar.",
       gaeste: "Characters from your story join in fitting moods and get a solo in the bridge. Expand to switch single guests on or off.",
       mitspieler: "Band alone: just Barradin, Friedrich, Echo, Ezekiel and Rex. A few players: plus the ghost orchestra, one street-band musician and the guests from your story. Full big band: the whole street band. Expanded, every group can be switched on or off; guests only join moods that suit them.",
