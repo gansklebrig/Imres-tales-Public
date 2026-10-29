@@ -223,6 +223,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       <footer id="dank"></footer>
     </div>
     <aside class="seite" id="ger-box">
+      <div id="sprache-ort"></div>
       <section class="misch" id="misch" hidden></section>
       <h2 class="abschnitt"><span data-t="hGer">🎭 Geräusche &amp; Einschläge</span>
         <label class="mini"><span aria-hidden="true">🔊</span><input type="range" id="ger-laut" min="0" max="150" value="100"></label></h2>
@@ -1618,6 +1619,40 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
 
   setTimeout(aufKnopf, 0);
+  /* ---------- Sprachsteuerung (nur am Rechner): Taste halten, Stichwort sagen – Welt, Szene, Wetter oder Geräusch startet ---------- */
+  const SPRACH_WELT = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke"], lagerfeuer: ["feuer", "lager", "lagerfeuer"], waldtag: ["wald", "forst"], waldnacht: ["nachtwald", "nacht", "wald nachts"],
+    zelt: ["zelt"], hoehle: ["höhle", "grotte"], kerker: ["kerker", "verlies", "gefängnis"], kueste: ["küste", "meer", "strand", "brandung"], schiff: ["an deck", "deck", "schiff", "segeln"], fluss: ["wasserfall"],
+    labor: ["alchemist", "labor", "alchemie"], tempel: ["tempel", "kirche", "kloster"], sumpf: ["sumpf", "moor"], unterwasser: ["unter wasser", "unterwasser", "tauchen"], dorf: ["bauernhof", "hof", "dorf"],
+    markt: ["markt", "marktplatz"], gebirge: ["gebirge", "berge", "bergpass", "pass"], mine: ["mine", "zwergenmine", "bergwerk", "stollen", "zwerge"], strasse: ["unterwegs", "straße", "landstraße", "weg"],
+    burg: ["burg", "burghof", "festung"], ufer: ["fluss", "ufer", "flussufer", "bach"], kathedrale: ["kathedrale", "dom"], gipfel: ["gipfel", "sturm über dem gipfel"], abgrund: ["abgrund"], ozean: ["ozean"],
+    hort: ["drachenhort", "hort", "drache"], gefallene: ["halle der gefallenen", "gefallene", "totenhalle"], sterne: ["sterne", "weltall", "zwischen den sternen"], schlachtfeld: ["schlachtfeld"] };
+  const FUELL = new Set(["der", "die", "das", "den", "dem", "des", "im", "am", "auf", "über", "unter", "bei", "zu", "zieht", "und", "ein", "eine", "danach"]);
+  function sprachBefehle() {
+    const raus = [], add = (p, text, tun) => raus.push({ p, text, tun }), D = x => x;
+    add(["stopp", "stop", "stille", "ruhe", "alles aus"], "alles aus", () => notAus());
+    add(["welt aus", "welt stopp"], "Welt anhalten", () => stoppen());
+    add(["wetter aus", "klar", "kein wetter"], "Wetter aus", () => wetterSetzen(""));
+    WELTEN.forEach(w => add([w.name].concat(SPRACH_WELT[w.id] || []), "Welt " + w.name, () => weltStarten(w)));
+    WETTER.forEach(x => add(["wetter " + x.name, x.name], "Wetter " + x.name, () => wetterSetzen(x.id)));
+    SZENEN.forEach(z => add([z.name, "szene " + z.name], "Szene " + z.name, () => szeneSchalten(z.id)));
+    EINSCHLAEGE.forEach(a => add([a.name], a.name, () => ausloesen(a.id)));
+    GERAEUSCHE.forEach(g => add([g.name], g.name, () => geraeusch(g.id)));
+    /* einzelne Wörter aus den Namen, sofern noch frei */
+    const wort = (n, b) => String(n).toLowerCase().split(/[^a-zäöüß]+/).filter(x => x.length >= 4 && !FUELL.has(x)).forEach(x => add([x], b.text, b.tun));
+    WELTEN.forEach(w => wort(w.name, { text: "Welt " + w.name, tun: () => weltStarten(w) }));
+    SZENEN.forEach(z => wort(z.name, { text: "Szene " + z.name, tun: () => szeneSchalten(z.id) }));
+    EINSCHLAEGE.forEach(a => wort(a.name, { text: a.name, tun: () => ausloesen(a.id) }));
+    GERAEUSCHE.forEach(g => wort(g.name, { text: g.name, tun: () => geraeusch(g.id) }));
+    return raus;
+  }
+  setTimeout(() => {
+    let rechner = false; try { rechner = matchMedia("(pointer: fine)").matches && matchMedia("(hover: hover)").matches; } catch (_) {}
+    if (!rechner || FERN || hoerer) return;
+    const ort = $("sprache-ort"); if (!ort) return;
+    const sk = document.createElement("script"); sk.src = "sprache/sprache.js?v=1";
+    sk.onload = () => window.ImresSprache && window.ImresSprache.einrichten({ ort, befehle: sprachBefehle });
+    document.head.appendChild(sk);
+  }, 300);
   function infoZeile() {
     if (hoerer) return;
     const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), teile = [];

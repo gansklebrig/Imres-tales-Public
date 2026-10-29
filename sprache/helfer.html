@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Imres-Taste · Imres Tales</title>
+<meta name="theme-color" content="#100e15">
+<link rel="stylesheet" href="../schriften/schriften.css">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+:root{--night:#100e15;--hall:#19161f;--vellum:#ebe2cc;--ash:#a89f8f;--ember:#e0a046;--line:rgba(224,160,70,.28);
+ --display:"IM Fell English SC","Palatino Linotype",Palatino,Georgia,serif;--body:"Spectral",Georgia,"Times New Roman",serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--vellum);font-family:var(--body);font-size:1.0625rem;line-height:1.7}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1rem 4rem}
+a{color:var(--ember)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);line-height:1.15;margin:.4rem 0 1.4rem;color:var(--ember)}
+h2{font-family:var(--display);font-weight:400;font-size:1.45rem;margin:2.2rem 0 .5rem;padding-top:1rem;border-top:1px solid var(--line)}
+.leise{color:var(--ash);font-size:.95rem}
+.laden{display:inline-block;margin:.6rem 0;padding:.7rem 1.4rem;border:1px solid var(--ember);border-radius:2rem;text-decoration:none;font-family:var(--display);letter-spacing:.04em;font-size:1.15rem}
+.laden:hover{background:rgba(224,160,70,.15)}
+code{background:var(--hall);padding:.05rem .35rem;border-radius:4px;font-size:.92em;word-break:break-all}
+ol,ul{padding-left:1.3rem}
+</style>
+</head>
+<body>
+<main>
+<a href="../index.html#buehne">← Zurück zur Bühne</a>
+<h1>Imres-Taste</h1>
+<p>Ein kleiner Helfer für Windows, damit die Sprachsteuerung auch funktioniert, wenn gerade ein anderes Fenster vorne ist – etwa deine Notizen oder ein PDF. Er beobachtet nur die eine gewählte Taste und meldet Drücken und Loslassen an die geöffnete Bühne oder die Klangwelten. Die Spracherkennung selbst läuft weiterhin offline im Browser.</p>
+<a class="laden" href="ImresTaste.exe" download>⬇ ImresTaste.exe herunterladen</a>
+<p class="leise">Windows 10/11, 64 Bit · etwa 6 MB · keine Installation nötig</p>
+
+<h2>So geht’s</h2>
+<ol>
+<li>Datei herunterladen und doppelklicken. Windows zeigt beim ersten Mal vermutlich „Der Computer wurde durch Windows geschützt“ – das liegt daran, dass das Programm nicht kostenpflichtig signiert ist. Auf <b>„Weitere Informationen“</b> und dann <b>„Trotzdem ausführen“</b> klicken.</li>
+<li>Ein kleines Fenster „Imres-Taste“ öffnet sich. Es darf minimiert werden, muss aber offen bleiben.</li>
+<li>Im Browser die Bühne oder die Klangwelten öffnen und bei „Kulisse &amp; Effekte“ die <b>🎙 Sprachsteuerung</b> einschalten. Dort steht dann „🟢 Helfer verbunden“.</li>
+<li>Jetzt kannst du in jedem Fenster die Taste halten, ein Stichwort sagen und loslassen.</li>
+</ol>
+
+<h2>Taste ändern</h2>
+<p>Jederzeit auf der Webseite: auf „⌨ Taste: …“ klicken und die neue Taste drücken – der Helfer übernimmt sie sofort. Oder im Helfer-Fenster <code>t</code> eintippen, Enter drücken und dann die neue Taste drücken. Die Wahl wird gemerkt.</p>
+<p class="leise">Gut geeignet sind Tasten, die du sonst nie brauchst: F-Tasten, Pause, Rollen, Strg rechts. Die Taste wird nicht abgefangen, andere Programme sehen sie weiterhin.</p>
+
+<h2>Automatisch mit Windows starten</h2>
+<p>Mit <b>Windows-Taste + R</b> den Befehl <code>shell:startup</code> öffnen und eine Verknüpfung zu <code>ImresTaste.exe</code> in diesen Ordner legen.</p>
+
+<h2>Sicherheit</h2>
+<ul>
+<li>Der Helfer lauscht nur auf deinem eigenen Rechner (<code>127.0.0.1:47321</code>), ist aus dem Netz nicht erreichbar und schickt nichts ins Internet.</li>
+<li>Verbinden dürfen sich nur Seiten von imrestales.de – andere Webseiten werden abgewiesen.</li>
+<li>Er wertet ausschließlich die eine gewählte Taste aus; alles andere wird nicht beachtet und nicht gespeichert.</li>
+<li>Manche Virenscanner werden bei Programmen misstrauisch, die Tasten beobachten. Der vollständige Quelltext liegt offen: <a href="helfer-quelltext/main.go">main.go</a>, <a href="helfer-quelltext/hook_windows.go">hook_windows.go</a>.</li>
+</ul>
+<p class="leise">SHA-256 der Datei: <code>2e0e79a1c7bd79701b888fc00932e0e6b32a67be20cf099e5fc75341b3ea2c22</code></p>
+
+<h2>Spracherkennung</h2>
+<p class="leise">Erkannt wird mit <a href="https://github.com/ccoreilly/vosk-browser">vosk-browser</a> und dem deutschen Modell „vosk-model-small-de-0.15“ von Alpha Cephei (Apache-Lizenz 2.0, <a href="MODELL-LIZENZ.txt">Lizenztext</a>). Beides läuft vollständig in deinem Browser.</p>
+</main>
+</body>
+</html>

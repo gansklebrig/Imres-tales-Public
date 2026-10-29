@@ -7488,6 +7488,7 @@ const ZUS_ICON = {
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     return '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + " " + info("klang") + "</h4></div>" +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
+      (amRechner() && !hoerer ? '<div class="lw-sprache-ort"></div>' : "") +
       '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + info("raum3d") + "</div>" +
       kulSpuren(T) + zusBox(T) +
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
@@ -7502,7 +7503,46 @@ const ZUS_ICON = {
   function boxNeu(welche) {
     const T = t(), alt = root.querySelector(welche === "musik" ? ".lw-musik" : ".lw-klang");
     if (alt) alt.outerHTML = welche === "musik" ? musikBox(T, !S.pult && !hoerer) : klangBox(T);
-    klassikKnoepfe();
+    klassikKnoepfe(); spracheOrt();
+  }
+  /* ---------- Sprachsteuerung (nur am Rechner): Taste halten, Stichwort sagen – Kulisse, Zusatz, Stimmung oder Effekt startet ---------- */
+  const amRechner = () => { try { return matchMedia("(pointer: fine)").matches && matchMedia("(hover: hover)").matches; } catch (_) { return false; } };
+  let spracheGeladen = false;
+  function spracheOrt() {
+    if (hoerer || !amRechner()) return;
+    const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
+    if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
+    if (spracheOrt.laedt) return; spracheOrt.laedt = true;
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=1"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+  }
+  /* zusätzliche Stichwörter je Kulisse */
+  const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lager", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "nacht", "wald nachts"],
+    regen: ["regen"], sturm: ["gewitter", "unwetter"], meer: ["küste", "meer", "strand", "brandung"], schiff: ["an deck", "deck", "schiff", "segeln"], wasserfall: ["wasserfall"], hoehle: ["höhle", "grotte"],
+    unterreich: ["unterreich"], kerker: ["kerker", "verlies", "gefängnis"], sumpf: ["sumpf", "moor"], unterwasser: ["unter wasser", "unterwasser", "tauchen"], schmiede: ["schmiede"], labor: ["alchemist", "labor", "alchemie", "zauberer"],
+    bibliothek: ["bibliothek", "bücherei"], tempel: ["tempel", "kirche", "kloster"], dorf: ["bauernhof", "hof", "dorf"], markt: ["markt", "marktplatz"], hafen: ["hafen"], gebirge: ["gebirge", "berge", "bergpass", "pass", "schnee"],
+    mine: ["mine", "zwergenmine", "bergwerk", "stollen", "zwerge"], strasse: ["unterwegs", "straße", "landstraße", "weg"], burg: ["burg", "burghof", "festung"], ufer: ["fluss", "ufer", "flussufer"] };
+  function sprachBefehle() {
+    const T = TX.de, raus = [], add = (p, text, tun) => raus.push({ p, text, tun });
+    const ohneSym = x => String(x || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
+    add(["stopp", "stop", "stille", "ruhe", "alles aus"], "alles anhalten", () => { if (laeuft) stopp(true); if (kulisseLaeuft()) kulisseUmschalten(); knoepfe(); });
+    add(["musik aus", "musik stopp", "musik pause"], "Musik anhalten", () => { if (laeuft) { stopp(true); knoepfe(); } });
+    add(["musik an", "musik weiter", "musik"], "Musik weiter", () => { audioStart(); if (!laeuft) { pausiert = false; start(true); } knoepfe(); });
+    add(["kulisse aus", "kulisse stopp"], "Kulisse anhalten", () => { if (kulisseLaeuft()) kulisseUmschalten(); });
+    add(["kulisse an", "kulisse weiter"], "Kulisse weiter", () => { if (!kulisseLaeuft()) kulisseUmschalten(); });
+    add(["tür zu"], "Tür zu", () => { if (!tuerZu) tuerUmschalten(); });
+    add(["tür auf"], "Tür auf", () => { if (tuerZu) tuerUmschalten(); });
+    add(["zusätze aus"], "alle Zusätze aus", () => { zusWahl = {}; zusMerken(); zusSync(); boxNeu("klang"); });
+    const kulWahl = k => () => { audioStart(); S.kulisse = k; merken(); kulisseStart(true); zeichnen(); knoepfe(); };
+    KUL_ZEIGEN.filter(k => k !== "keine").forEach(k => add([ohneSym(T.kulissen[k])].concat(SPRACH_KUL[k] || []), "Kulisse " + ohneSym(T.kulissen[k]), kulWahl(k)));
+    const zusSchalt = (id, an) => () => { audioStart(); if (an) { if (!zusIst(id)) { if (Object.keys(zusWahl).length >= zusMax()) return; zusWahl[id] = 1; } } else delete zusWahl[id]; zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang"); };
+    Object.keys(ZUSATZ).forEach(id => { const n = ZUSATZ[id].de; add(["dazu " + n, "plus " + n, "mit " + n], "Zusatz " + n, zusSchalt(id, true)); add([n + " aus", "ohne " + n], "Zusatz " + n + " aus", zusSchalt(id, false)); });
+    const stWahl = k => () => { vorlageWaehlen(k); if (!laeuft && !hoerer) { pausiert = false; start(); } };
+    Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add(["musik " + ohneSym(T.vorlagen[k]), "stimmung " + ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k)));
+    Object.keys(T.sfx || {}).forEach(k => add([ohneSym(T.sfx[k])], "Effekt " + ohneSym(T.sfx[k]), () => { audioStart(); try { effekt(k); } catch (_) {} }));
+    /* ohne Vorsilbe: Zusätze und Stimmungen, sofern das Wort nicht schon vergeben ist (die Liste oben hat Vorrang) */
+    Object.keys(ZUSATZ).forEach(id => add([ZUSATZ[id].de], "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
+    Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add([ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k)));
+    return raus;
   }
   function eigenLaden(wert) {
     planenVoraus(1.2);
@@ -7530,6 +7570,7 @@ const ZUS_ICON = {
       "</div>" +
       '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
     spalten = []; aktiv = -1; figurCache = {};
+    setTimeout(() => { try { spracheOrt(); } catch (_) {} }, 0);
   }
   /* ---------- Mitlauschen: Supabase Realtime (Broadcast + Presence) über einen schlichten WebSocket ---------- */
   function funkKanal(raum, rolle, beiNachricht, beiStatus) {
@@ -7894,7 +7935,7 @@ const ZUS_ICON = {
     const b = root.querySelector(".lw-play");
     if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
     root.querySelectorAll(".lw-ausklang").forEach(a => { a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; });
-    try { kulKnoepfe(); aufnahmeKnoepfe(); schlafKnoepfe(); } catch (_) {}
+    try { kulKnoepfe(); } catch (_) {} try { aufnahmeKnoepfe(); } catch (_) {} try { schlafKnoepfe(); } catch (_) {} try { spracheOrt(); } catch (e) { console.warn("Sprache", e); }
   }
   function status(text) {
     const s = root.querySelector(".lw-status");
