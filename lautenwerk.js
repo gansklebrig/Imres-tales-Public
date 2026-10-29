@@ -7513,7 +7513,7 @@ const ZUS_ICON = {
     const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
     if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
     if (spracheOrt.laedt) return; spracheOrt.laedt = true;
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=1"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=2"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
   }
   /* zusätzliche Stichwörter je Kulisse */
   const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lager", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "nacht", "wald nachts"],

@@ -15,6 +15,8 @@
   const SPEICHER = "imres-sprache";
   let E = { an: false, taste: "F9" };
   try { E = Object.assign(E, JSON.parse(localStorage.getItem(SPEICHER) || "{}") || {}); } catch (_) {}
+  /* nach dem Neuladen immer aus: das Sprachmodell (≈ 50 MB) wird nur geladen, wenn man die Sprachsteuerung selbst einschaltet */
+  E.an = false;
   const merken = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(E)); } catch (_) {} };
 
   /* Tastennamen zum Anzeigen */
@@ -209,7 +211,7 @@
     einrichten(o) {
       st = { ort: o.ort, befehle: o.befehle, listeAuf: false };
       karte = null; zeichnen();
-      if (E.an) { helferVerbinden(); modellHolen().catch(() => {}); }
+      /* hier wird nichts geladen – erst der Knopf „Sprachsteuerung“ holt Bibliothek und Modell */
     },
     /* wenn sich die Seite neu zeichnet: neuen Platz fürs Bedienfeld setzen, Stichwörter neu einlesen */
     ort(el) { if (st) { st.ort = el; zeichnen(); } },
