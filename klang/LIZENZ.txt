@@ -121,3 +121,27 @@ Erweiterung der Tier- und Hintergrundgeräusche (Oktober 2026):
   Aus 0 A.D. von Wildfire Games (CC BY-SA 3.0, siehe oben): Ziegen (e_ziege_*).
   Für Imres Tales geschnitten, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert (das Mühlrad als
   nahtlose Schleife). Diese Bearbeitungen stehen unter denselben Lizenzen wie die Originale.
+
+Handpan (klang/hpan_*.mp3) – Aufnahmen einer Spacedrum aus dem Projekt „DIY e-HandPan“ von Benoit Collin,
+Dominique Fourer und Eric Genotelle (https://github.com/dfourer/eHandPan, Ordner AudioSamples/Samples Spacedrum),
+Lizenz: Creative Commons Namensnennung 4.0 International (https://creativecommons.org/licenses/by/4.0/).
+Für Imres Tales in Mono umgewandelt, auf den Cent nachgestimmt, in der Lautheit angeglichen und neu kodiert;
+die Töne unter A3 und über A#4 sind aus den Aufnahmen um eine Oktave versetzt.
+
+Handtrommeln und Kleinschlagwerk (klang/bongo*, conga*, triangel*, schlitz*) – VSCO 2 Community Edition
+(Versilian Studios, VSCO 1 Percussion), CC0 1.0. Für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert.
+
+Kampf- und Zaubergeräusche (Oktober 2026):
+  Aus Battle for Wesnoth (https://www.wesnoth.org), GNU GPL 2 oder später, Urheber: das Wesnoth-Projekt:
+    klang/fx_wn_* (Bogen, Armbrust, Schwert, Axt, Beil, Messer, Streitkolben, Keule, Flegel, Stab, Speer, Wurfmesser,
+    Schleuder, Faust, Feuer, Flammen, Fackel, Explosion, Blitz, heilige, dunkle und arkane Magie, Ranken, Gift,
+    Versteinern, Wasserstoß, Heilung, Trank, Gold, Truhe, Einsturz, Hornsignale, Drache, Biss, Klauen, Schwanz,
+    Schmerzensrufe und Todesschreie von Menschen, Zwergen und Elfen),
+    amb/g_troll_11–31 (Trolle, Oger, Orks, Goblins), amb/g_untot_9–23 (Zombies, Skelette, Lich),
+    amb/g_schatten_6–9 (Wehklagen), amb/g_schleim_6–10, amb/e_knurren_* (knurrende Wölfe),
+    amb/a_kriegstrommeln (Kriegstrommeln).
+  Aus 0 A.D. von Wildfire Games (CC BY-SA 3.0, siehe oben): klang/fx_0_schwert_*, schild_metall_*, schild_holz_*,
+    bogen_*, speer_*, pike_*, wurfspeer_*, schleuder_*, stein_treffer_*, fleisch_*, fleisch_stich_*, pfeilflug_*,
+    pfeil_holz_*, pfeil_metall_*.
+  Für Imres Tales geschnitten, in Mono umgewandelt, in der Lautheit angeglichen und neu kodiert. Die Bearbeitungen
+  stehen unter denselben Lizenzen wie die Originale.
