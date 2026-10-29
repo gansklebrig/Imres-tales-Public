@@ -188,7 +188,7 @@
       zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren).", zusDrin: "steckt schon in der Kulisse", raum3d: "3D-Kopfhörer", raum3dTipp: "Räumlicher Klang für Kopfhörer: Geräusche kommen von überall, auch von hinten und oben", raum3dAn: "🎧 3D an – mit Kopfhörern hört man jetzt, woher alles kommt.", raum3dAus: "3D aus – wieder normales Stereo.", zusAlleAus: "Alle Zusätze abschalten", zusAlleAusKurz: "Alle aus", zusAlleWeg: "Alle Zusätze aus", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
       kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %",
       stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente, Welt & Klassik",
-      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabWelt: "🐴 Welt", tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
+      tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabWelt: "🐴 Welt", tabFav: "★ Favoriten", favLeer: "Noch leer: halte einen Knopf aus Effekte, Kampf, Momente, Welt oder Klassik 2 Sekunden gedrückt – dann landet er hier.", weltGr: { alle: "Alle", unterwegs: "🐴 Unterwegs & Volk", tiere: "🐾 Tiere", belagerung: "🏰 Belagerung", handwerk: "🔨 Handwerk", abenteuer: "🗝 Abenteuer", wesen: "👹 Wesen & Spuk", weitere: "Weitere" }, tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
       musik: "Musik", klang: "Kulisse & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       stimmSpeichern: "💾 Stimmung speichern", stimmNeu: "⭐ Als neue Stimmung", stimmUeber: n => "✎ „" + n + "“ überschreiben", stimmZurueck: "↺ Original wiederherstellen",
@@ -276,7 +276,7 @@
       zusaetze: "Extras", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover).", zusDrin: "already part of the backdrop", raum3d: "3D headphones", raum3dTipp: "Spatial sound for headphones: sounds come from everywhere, even from behind and above", raum3dAn: "🎧 3D on – with headphones you can now hear where everything comes from.", raum3dAus: "3D off – back to normal stereo.", zusAlleAus: "Switch off all extras", zusAlleAusKurz: "All off", zusAlleWeg: "All extras off", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
       kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %",
       stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments, world & classics",
-      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabWelt: "🐴 World", tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
+      tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabWelt: "🐴 World", tabFav: "★ Favourites", favLeer: "Empty for now: hold any button in Effects, Combat, Moments, World or Classics for 2 seconds and it lands here.", weltGr: { alle: "All", unterwegs: "🐴 Road & folk", tiere: "🐾 Animals", belagerung: "🏰 Siege", handwerk: "🔨 Crafts", abenteuer: "🗝 Adventure", wesen: "👹 Creatures & spooks", weitere: "More" }, tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
       musik: "Music", klang: "Ambience & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       stimmSpeichern: "💾 Save mood", stimmNeu: "⭐ As new mood", stimmUeber: n => "✎ Overwrite “" + n + "”", stimmZurueck: "↺ Restore original",
@@ -7575,8 +7575,8 @@ const ZUS_ICON = {
   document.addEventListener("keydown", e => { if (e.key === "Escape") infoZu(); });
   window.addEventListener("scroll", () => { if (infoBlase) infoZu(); }, { passive: true });
   /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
-  Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften", favGesetzt: n => "📌 " + n + " ist jetzt oben angeheftet – nochmal 2 Sekunden halten löst es wieder.", favGeloest: n => n + " ist nicht mehr angeheftet.", favPunktTipp: "Angeheftet – 2 Sekunden gedrückt halten löst es wieder" });
-  Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin", favGesetzt: n => "📌 " + n + " is now pinned to the top – hold for 2 seconds again to unpin.", favGeloest: n => n + " is no longer pinned.", favPunktTipp: "Pinned – hold for 2 seconds to unpin" });
+  Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften", favGesetzt: n => "📌 " + n + " ist jetzt oben angeheftet (Effekte auch unter ★ Favoriten) – nochmal 2 Sekunden halten löst es wieder.", favGeloest: n => n + " ist nicht mehr angeheftet.", favPunktTipp: "Angeheftet – 2 Sekunden gedrückt halten löst es wieder" });
+  Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin", favGesetzt: n => "📌 " + n + " is now pinned to the top (effects also under ★ Favourites) – hold for 2 seconds again to unpin.", favGeloest: n => n + " is no longer pinned.", favPunktTipp: "Pinned – hold for 2 seconds to unpin" });
   let favs = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-favs")); if (Array.isArray(x)) return x.filter(f => typeof f === "string").slice(0, 80); } catch (_) {} return []; })();
   function favsMerken() { try { localStorage.setItem("imres-lw-favs", JSON.stringify(favs)); } catch (_) {} }
   const FAV_Q = { "data-vorlage": "v", "data-sfx": "s", "data-kulisse": "k" };
@@ -7681,8 +7681,20 @@ const ZUS_ICON = {
   Object.assign(TX.de, { einstMusik: "Klang & Raum", einstKlang: "Lautstärke Kulisse & Effekte", wechselZu: "wechselt zu", ausklangKommt: "Ausklang", leisePlus: "Intensität", funkKurz: "Mitlauschen" });
   Object.assign(TX.en, { einstMusik: "Sound & room", einstKlang: "Backdrop & effects volume", wechselZu: "switching to", ausklangKommt: "Fade-out", leisePlus: "Intensity", funkKurz: "Listen in" });
   /* ---------- Gemeinsame Bedienfelder für Pult und komplette Ansicht ---------- */
-  let musikTab = "stimmungen", fxTab = "effekte";
-  try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; } catch (_) {}
+  let musikTab = "stimmungen", fxTab = "effekte", weltGr = "alle";
+  /* Unterreiter der Welt-Aufnahmen; was hier fehlt, landet von selbst unter „Weitere“ */
+  const WELT_GRUPPEN = [
+    ["unterwegs", ["kutsche", "anhalten", "wiehern", "hufschlag", "gruss", "dorfvolk", "zank", "rauferei", "glocke", "gong"]],
+    ["tiere", ["hund", "katze", "kuh", "schaf", "huhn", "schwein", "eule", "wolf", "kraehe", "frosch", "moewe", "specht", "wal", "loewe", "elefant", "pfau"]],
+    ["belagerung", ["pfeilhagel", "schwertkampf", "rammbock", "katapult", "balliste", "einsturz", "burgtor"]],
+    ["handwerk", ["saege", "zimmern", "schmied", "bergbau", "holzhacken", "baumfall"]],
+    ["abenteuer", ["truhe", "schluessel", "schloss", "falle", "glas", "ruestung", "edelstein", "buch", "dolch", "holzbruch"]],
+    ["wesen", ["riesenschritte", "troll", "untot", "schatten", "schleim", "kette"]]];
+  const weltListe = g => { if (g === "alle") return WELT_FX; if (g === "weitere") { const drin = new Set(WELT_GRUPPEN.flatMap(x => x[1])); return WELT_FX.filter(f => !drin.has(f)); }
+    const x = WELT_GRUPPEN.find(y => y[0] === g); return x ? x[1].filter(f => WELT_FX.includes(f)) : WELT_FX; };
+  /* alle angehefteten Effekte aus allen Reitern (in der Reihenfolge des Anheftens) */
+  const favFx = () => favs.filter(f => f.startsWith("s:")).map(f => f.slice(2)).filter(f => ALLE_FX.includes(f) && !COVER_LISTE.includes(f));
+  try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; weltGr = localStorage.getItem("imres-lw-weltgr") || "alle"; } catch (_) {}
   const kachelText = text => { const m = /^([^\p{L}\p{N}\s–&<]+)\s+([\s\S]+)$/u.exec(text); return m ? '<span class="ki">' + m[1] + '</span><span class="kt">' + m[2] + "</span>" : '<span class="kt">' + text + "</span>"; };
   const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + kachelText(text) + favPunkt(attr, wert) + "</button>";
   const reiter = (art, liste, aktiv, T) => '<div class="lw-tabs" role="tablist">' + liste.map(([k, txt]) =>
@@ -7780,8 +7792,10 @@ const ZUS_ICON = {
   try { klangAuf = Object.assign(klangAuf, JSON.parse(localStorage.getItem("imres-lw-klangauf") || "{}") || {}); } catch (_) {}
   const KUL_KURZ = 9;
   function klangBox(T) {
-    const liste = fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : fxTab === "welt" ? WELT_FX : EFFEKTE;
-    if (fxTab === "welt" && klangAuf.fx) setTimeout(weltVorladen, 0);
+    const liste = fxTab === "fav" ? favFx() : fxTab === "kampf" ? KAMPF_FX : fxTab === "momente" ? MOMENTE : fxTab === "klassik" ? KLASSIKER : fxTab === "welt" ? weltListe(weltGr) : EFFEKTE;
+    if ((fxTab === "welt" || fxTab === "fav") && klangAuf.fx) setTimeout(weltVorladen, 0);
+    const weitere = weltListe("weitere").length;
+    const unterReiter = fxTab !== "welt" ? "" : '<div class="lw-unterreiter">' + reiter("weltgr", [["alle", T.weltGr.alle]].concat(WELT_GRUPPEN.map(([g]) => [g, T.weltGr[g]]), weitere ? [["weitere", T.weltGr.weitere]] : []), weltGr, T) + "</div>";
     let kul = oben("k", KUL_ZEIGEN);
     if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
@@ -7793,9 +7807,11 @@ const ZUS_ICON = {
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) +
       klappe("fx", klangAuf.fx, T.fxKlappe) +
-      (klangAuf.fx ? reiter("fxtab", [["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["welt", T.tabWelt], ["klassik", T.tabKlassik]], fxTab, T) +
+      (klangAuf.fx ? reiter("fxtab", [["fav", T.tabFav + (favFx().length ? " " + favFx().length : "")], ["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["welt", T.tabWelt], ["klassik", T.tabKlassik]], fxTab, T) +
         kleinRegler("💥", T.effekteKurz, "fxvol", S.fxVol, "lw-fval") +
-        '<div class="lw-pult-gitter lw-pult-fx">' + oben("s", liste).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
+        unterReiter +
+        (fxTab === "fav" && !liste.length ? '<p class="lw-favleer">' + T.favLeer + "</p>" : "") +
+        '<div class="lw-pult-gitter lw-pult-fx">' + (fxTab === "fav" ? liste : oben("s", liste)).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
 "</section>";
   }
   const konsole = (T, voll) => '<div class="lw-konsole">' + musikBox(T, voll) + klangBox(T) + "</div>";
@@ -8443,6 +8459,8 @@ const ZUS_ICON = {
     if (ka) { const k = ka.dataset.klangauf; klangAuf[k] = !klangAuf[k]; try { localStorage.setItem("imres-lw-klangauf", JSON.stringify(klangAuf)); } catch (_) {} boxNeu(k === "st" ? "musik" : "klang"); return; }
     const ft = e.target.closest("[data-fxtab]");
     if (ft) { fxTab = ft.dataset.fxtab; try { localStorage.setItem("imres-lw-fxtab", fxTab); } catch (_) {} boxNeu("klang"); return; }
+    const wg = e.target.closest("[data-weltgr]");
+    if (wg) { weltGr = wg.dataset.weltgr; try { localStorage.setItem("imres-lw-weltgr", weltGr); } catch (_) {} boxNeu("klang"); return; }
     const eg = e.target.closest("[data-eigen]");
     if (eg) { audioStart(); eigenLaden(eg.dataset.eigen); return; }
     const fk = e.target.closest('[data-aktion="funk"], [data-aktion="funkkopie"], [data-aktion="hoeren"]');
@@ -8931,6 +8949,10 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-tabs { display: flex; gap: .25rem; flex-wrap: wrap; }
 .lw-tabs button { border: 1px solid var(--line); border-radius: 999px; background: none; color: var(--ash); font: inherit; font-size: .8rem; padding: .25rem .7rem; cursor: pointer; }
 .lw-tabs button[aria-selected="true"] { border-color: var(--ember); color: var(--night); background: var(--ember); }
+.lw-unterreiter { margin: .35rem 0 .1rem; padding-left: .6rem; border-left: 2px solid var(--line); min-width: 0; max-width: 100%; overflow: hidden; }
+.lw-unterreiter .lw-tabs button { font-size: .74rem; padding: .18rem .55rem; }
+.lw-unterreiter .lw-tabs button[aria-selected="true"] { background: rgba(224,160,70,.18); color: var(--ember); }
+.lw-favleer { color: var(--ash); font-size: .85rem; margin: .4rem 0; }
 .lw-box .lw-stimm-mix { margin-top: 0; }
 .lw-box .lw-intensitaet { margin-top: 0; }
 .lw-leer { grid-column: 1 / -1; margin: .2rem 0; }
