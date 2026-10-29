@@ -3188,7 +3188,7 @@ const ZUS_ICON = {
     /* Holzflöte, Panflöte und Okarina eine Oktave tiefer: warm und rund, unter der Melodie */
     if (art === "floete" || art === "panfloete" || art === "okarina") freq = freq / 2;
     if ((art === "floete" || art === "horn") && !rendert) {
-      const m = Math.round(69 + 12 * Math.log2(freq / 440)) + (art === "horn" ? -12 : 0), d = Math.max(.18, dauer || .25);
+      const m = Math.round(69 + 12 * Math.log2(freq / 440)) + (art === "horn" ? -24 : 0), d = Math.max(.18, dauer || .25); /* Horn zwei Oktaven unter Echos Stimme – dort liegen die Aufnahmen; höher klänge es verzerrt */
       const ok = art === "horn" ? probe("horn", m, zeit, ziel, .5 * l, { ein: .06, aus: .18, dauer: d + .1 })
         : d >= .32 ? probe("fl", m, zeit, ziel, .36 * l, { ein: .05, aus: .2, dauer: d + .08 }) : probe("flst", m, zeit, ziel, .38 * l, { dauer: Math.max(.25, d), aus: .08 });
       if (ok) return;
@@ -4061,7 +4061,7 @@ const ZUS_ICON = {
     fag: [34,  37,  41,  45,  46,  48,  55,  60,  63,  68,  69,  72], pos: [34,  37,  39,  41,  46,  50,  53,  60,  61,  63,  65], vctrem: [36,  40,  43,  50,  53,  57,  59,  60,  64,  67,  71,  74,  77], trp: [53,  57,  60,  63,  67,  70,  74,  77,  81,  84], oboest: [58,  62,  65,  70,  74,  77,  82,  89], kb: [28,  30,  31,  34,  36,  38,  40,  42,  44,  45,  49,  52,  56,  59], geigest: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], geige: [55,  57,  60,  64,  67,  69,  72,  76,  79,  81,  84,  88,  91,  93,  96], tuba: [34,  39,  41,  46,  50,  53,  58], klar: [50,  53,  58,  62,  65,  70,  74,  77,  82,  86,  90], orgel: [36,  42,  48,  54,  60,  66,  72,  78,  84,  90,  96], vlntrem: [55,  57,  59,  62,  69,  72,  76,  79,  83,  86], oboe: [58,  62,  65,  70,  74,  77,  82,  86,  89] };
   /* Stimmung der Aufnahmen, nachgemessen (Cent zu hoch +, zu tief −): einige Flöten, die Harfe und manche Streicher waren
      bis zu 25 Cent verstimmt, eine Klarinetten-Aufnahme sogar einen Halbton – das wird beim Abspielen ausgeglichen */
-  const STIMM_KORR = {"timpt":{"45":12,"48":14,"51":12,"54":15,"57":12},"hornst":{"36":-23,"39":9,"46":6,"57":-7},"trpst":{"53":7,"60":13,"74":10,"77":10,"81":9,"57":-5},"aah":{"48":-21,"51":-41,"54":-25,"57":-26,"60":-14,"63":-25,"66":-12,"75":-28,"81":-11},"akk":{"80":6,"83":6,"86":6,"89":11,"53":8,"56":8,"59":8},"hack":{"63":7,"66":5,"69":8,"72":7},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"42":9,"45":10,"48":10,"51":6,"57":6,"60":5,"72":16,"78":12,"63":9,"66":10,"75":14,"54":8},"blech":{"61":5,"64":5,"55":5,"58":5},"vln":{"62":6,"69":5},"vc":{"40":-4},"spic":{"36":4,"40":-8,"43":-5,"57":6,"60":6,"74":8,"77":7},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":-6,"50":-6,"57":-5,"59":23,"74":-8},"trp":{"53":-7,"67":5,"74":7},"oboest":{"89":-13},"kb":{"36":8,"38":7,"40":-8,"56":-6,"59":-13,"31":-17,"45":16,"44":8},"geigest":{"55":6,"72":6,"76":5,"84":5},"geige":{"60":22,"64":7,"67":-5,"76":7,"84":-5,"88":8},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10,"54":5},"vlntrem":{"57":-5,"59":-10,"55":-10},"flst":{"88":-7,"93":-7,"81":-7,"69":-4},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-4,"53":-7},"bfl":{"60":5,"63":4,"66":6,"69":5,"72":5,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":7,"81":6,"84":8,"87":11,"90":15,"93":11,"75":9,"78":10,"96":10},"eh":{"64":-9,"70":-7,"76":-8,"79":-9},"bra":{"63":-6,"81":-4,"72":-7},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24},"kal":{"60":-12,"63":-11,"69":-6}};
+  const STIMM_KORR = {"timpt":{"45":12,"48":14,"51":12,"54":15,"57":12},"hornst":{"36":-23,"39":9,"46":6,"57":-7},"trpst":{"53":7,"60":13,"74":10,"77":10,"81":9,"57":-5},"aah":{"48":-21,"51":-41,"54":-25,"57":-26,"60":-14,"63":-25,"66":-12,"75":-28,"81":-11},"akk":{"80":6,"83":6,"86":6,"89":11,"53":8,"56":8,"59":8},"hack":{"63":7,"66":5,"69":8,"72":7},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"42":9,"45":10,"48":10,"51":6,"57":6,"60":5,"72":16,"78":12,"63":9,"66":10,"75":14,"54":8},"blech":{"61":5,"64":5,"55":5,"58":5},"vln":{"62":6,"69":5},"vc":{"40":-4},"spic":{"36":4,"40":-8,"43":-5,"57":6,"60":6,"74":8,"77":7},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":-6,"50":-6,"57":-5,"59":23,"74":-8},"trp":{"53":-7,"67":5,"74":7},"oboest":{"89":-13},"kb":{"36":8,"38":7,"40":-8,"56":-6,"59":-13,"31":-17,"45":16,"44":8},"geigest":{"55":6,"72":6,"76":5,"84":5},"geige":{"60":22,"64":7,"67":-5,"76":7,"84":-5,"88":8},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10,"54":5},"vlntrem":{"57":-5,"59":-10,"55":-10},"flst":{"88":-7,"93":-7,"81":-7,"69":-4},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-4,"53":-7},"bfl":{"60":5,"63":4,"66":6,"69":5,"72":5,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":7,"81":6,"84":8,"87":11,"90":15,"93":11,"75":9,"78":10,"96":10},"eh":{"64":-9,"70":-7,"76":-8,"79":-9},"bra":{"63":-6,"81":-4,"72":-7},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24},"kal":{"60":-12,"63":-11}};
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
   function sampleLaden(name) {
@@ -4097,6 +4097,9 @@ const ZUS_ICON = {
   function probe(gruppe, midi, zeit, ziel, laut, o) {
     if (rendert || !ctx) return false;
     o = o || {};
+    /* weit weg von der nächsten Aufnahme (außerhalb der Lage oder in einer Lücke) klingt eine Aufnahme verzerrt und schief – dann die Oktave nehmen, in der eine Aufnahme nahe liegt */
+    if (SAMPLE_KARTE[gruppe]) { const k = SAMPLE_KARTE[gruppe], ab = x => k.reduce((b, v) => Math.min(b, Math.abs(v - x)), 99);
+      let d = ab(midi); if (d > 3) [midi - 12, midi + 12, midi - 24, midi + 24].forEach(v => { const dv = ab(v); if (dv < d - .5) { midi = v; d = dv; } }); }
     const m = SAMPLE_KARTE[gruppe] ? naechsteProbe(gruppe, midi) : null, name = m == null ? gruppe : gruppe + "_" + m, b = sampleBuf.get(name);
     if (!b) { sampleLaden(name); return false; }
     const src = ctx.createBufferSource(), g = ctx.createGain();
@@ -4279,8 +4282,8 @@ const ZUS_ICON = {
     }
     /* Hörner im Höhepunkt (bei hoher Intensität schon früher) */
     if (pr.horn && (istHoch(ab) || (S.rollen && rolleAn(ab) === "r" && S.intensitaet >= 6) || S.intensitaet >= 8) && schritt % 8 === 0) {
-      oprobe("horn", ak.grund - 12 + 12, zeit, orchPan.horn, .26 * (.6 + .5 * int), { ein: .12, aus: .35, dauer: 8 * sd + .2 });
-      oprobe("horn", ak.q2, zeit, orchPan.horn, .18 * (.6 + .5 * int), { ein: .14, aus: .35, dauer: 8 * sd + .2 });
+      oprobe("horn", inLage(ak.grund, 50, 62), zeit, orchPan.horn, .26 * (.6 + .5 * int), { ein: .12, aus: .35, dauer: 8 * sd + .2 });
+      oprobe("horn", inLage(ak.q2, 50, 62), zeit, orchPan.horn, .18 * (.6 + .5 * int), { ein: .14, aus: .35, dauer: 8 * sd + .2 });
     }
     /* Blech im Höhepunkt: Trompeten auf Terz und Quinte, Posaune auf dem Grundton */
     if (istHoch(ab) && schritt % 8 === 0 && (pr.trp || pr.pos)) {
