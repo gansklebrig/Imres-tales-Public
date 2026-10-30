@@ -7933,6 +7933,20 @@ const ZUS_ICON = {
     else if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); rundgangSchritt(rundgang.i + 1); }
     else if (e.key === "ArrowLeft") { e.preventDefault(); rundgangSchritt(rundgang.i - 1); }
   });
+  /* Klick-Blitz: der Knopf (oder sein Nachfolger, falls die Box neu gezeichnet wurde) leuchtet kurz auf */
+  function klickBlitz(b) {
+    const attrs = [...b.attributes].filter(a => a.name.startsWith("data-") && a.name !== "data-vorlage-fav").map(a => "[" + a.name + '="' + CSS.escape(a.value) + '"]').join("");
+    const cls = [...b.classList].filter(c => /^lw-/.test(c) && c !== "lw-blitz" && c !== "lw-haelt").slice(0, 1).map(c => "." + CSS.escape(c)).join("");
+    const setzen = () => {
+      let el = b.isConnected ? b : null;
+      if (!el && (attrs || cls)) try { el = root.querySelector("button" + cls + attrs); } catch (_) {}
+      if (!el) return;
+      el.classList.remove("lw-blitz"); void el.offsetWidth; el.classList.add("lw-blitz");
+      clearTimeout(el._blitzT); el._blitzT = setTimeout(() => el.classList.remove("lw-blitz"), 520);
+    };
+    setTimeout(setzen, 0); setTimeout(() => { if (!b.isConnected) setzen(); }, 60);
+  }
+  root.addEventListener("click", e => { const b = e.target.closest && e.target.closest("button, a.lw-schalter"); if (b && root.contains(b) && !b.disabled) klickBlitz(b); }, true);
   root.addEventListener("click", e => { if (e.target.closest('[data-aktion="rundgang"]')) { e.stopPropagation(); rundgangStart(); } }, true);
   const rundgangNeu = () => { try { return !localStorage.getItem("imres-lw-rundgang"); } catch (_) { return false; } };
 
@@ -8076,7 +8090,10 @@ const ZUS_ICON = {
   const favFx = () => favs.filter(f => f.startsWith("s:")).map(f => f.slice(2)).filter(f => ALLE_FX.includes(f) && !COVER_LISTE.includes(f));
   try { musikTab = localStorage.getItem("imres-lw-musiktab") || "stimmungen"; fxTab = localStorage.getItem("imres-lw-fxtab") || "effekte"; weltGr = localStorage.getItem("imres-lw-weltgr") || "alle"; } catch (_) {}
   const kachelText = text => { const m = /^([^\p{L}\p{N}\s–&<]+)\s+([\s\S]+)$/u.exec(text); return m ? '<span class="ki">' + m[1] + '</span><span class="kt">' + m[2] + "</span>" : '<span class="kt">' + text + "</span>"; };
-  const kachel = (attr, wert, text, an) => '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an ? ' class="an"' : "") + ">" + kachelText(text) + favPunkt(attr, wert) + "</button>";
+  /* die Stimmung, zu der gerade gewechselt wird, blinkt, bis sie übernimmt */
+  const wechselZiel = () => wechsel && laeuft ? (wechsel.eigeneStimmung || wechsel.stimmung || null) : null;
+  const kachel = (attr, wert, text, an) => { const w = !an && attr === "data-vorlage" && wechselZiel() === wert;
+    return '<button type="button" ' + attr + '="' + esc(wert) + '"' + (an || w ? ' class="' + (an ? "an" : "wartet") + '"' : "") + ">" + kachelText(text) + favPunkt(attr, wert) + "</button>"; };
   const reiter = (art, liste, aktiv, T) => '<div class="lw-tabs" role="tablist">' + liste.map(([k, txt]) =>
     '<button type="button" role="tab" data-' + art + '="' + k + '" aria-selected="' + (k === aktiv) + '">' + txt + "</button>").join("") + "</div>";
   let stimmGespeichert = 0;
@@ -9391,6 +9408,11 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-intensitaet input { width: 100%; accent-color: #c0502a; }
 .lw-master input, .lw-hallregler input, .lw-kulregler input { width: 7rem; }
 .lw-vorlagen button.wartet { border-color: var(--ember); color: var(--ember); animation: lwpuls 1s ease-in-out infinite; }
+.lw-pult-gitter button.wartet { border-color: var(--ember); color: var(--ember); animation: lwWartet .85s ease-in-out infinite; }
+@keyframes lwWartet { 0%, 100% { background: rgba(16,14,21,.6); box-shadow: none; } 50% { background: rgba(224,160,70,.38); box-shadow: 0 0 10px rgba(224,160,70,.45); color: var(--vellum); } }
+/* jeder Druck auf einen Knopf leuchtet kurz auf – auch wenn er nichts dauerhaft umschaltet */
+#lautenwerk .lw-blitz { animation: lwKlick .5s ease-out !important; }
+@keyframes lwKlick { 0% { box-shadow: 0 0 0 2px rgba(224,160,70,.85), 0 0 14px rgba(224,160,70,.55); filter: brightness(1.45); } 100% { box-shadow: 0 0 0 0 rgba(224,160,70,0); filter: none; } }
 .lw-effekte button.blitz, .lw-pult-fx button.blitz { animation: lwblitz .5s ease-out; }
 @keyframes lwblitz { 0% { background: var(--ember); color: var(--night); } }
 /* Konsole: Musik links, Kulisse & Effekte rechts – auf schmalen Bildschirmen untereinander */
