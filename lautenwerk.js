@@ -8230,14 +8230,14 @@ const ZUS_ICON = {
     const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
     if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
     if (spracheOrt.laedt) return; spracheOrt.laedt = true;
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=4"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=5"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
   }
   /* zusätzliche Stichwörter je Kulisse */
-  const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lager", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "nacht", "wald nachts"],
-    regen: ["regen"], sturm: ["gewitter", "unwetter"], meer: ["küste", "meer", "strand", "brandung"], schiff: ["an deck", "deck", "schiff", "segeln"], wasserfall: ["wasserfall"], hoehle: ["höhle", "grotte"],
+  const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "wald nachts", "wald bei nacht"],
+    regen: ["regen"], sturm: ["gewitter", "unwetter"], meer: ["küste", "meer", "strand", "brandung"], schiff: ["an deck", "schiff", "segeln"], wasserfall: ["wasserfall"], hoehle: ["höhle", "grotte"],
     unterreich: ["unterreich"], kerker: ["kerker", "verlies", "gefängnis"], sumpf: ["sumpf", "moor"], unterwasser: ["unter wasser", "unterwasser", "tauchen"], schmiede: ["schmiede"], labor: ["alchemist", "labor", "alchemie", "zauberer"],
-    bibliothek: ["bibliothek", "bücherei"], tempel: ["tempel", "kirche", "kloster"], dorf: ["bauernhof", "hof", "dorf"], markt: ["markt", "marktplatz"], hafen: ["hafen"], gebirge: ["gebirge", "berge", "bergpass", "pass", "schnee"],
-    mine: ["mine", "zwergenmine", "bergwerk", "stollen", "zwerge"], strasse: ["unterwegs", "straße", "landstraße", "weg"], burg: ["burg", "burghof", "festung"], ufer: ["fluss", "ufer", "flussufer"], schlacht: ["schlacht", "krieg", "kriegsschauplatz", "schlachtfeld"], schlaegerei: ["schlägerei", "prügelei", "kneipenschlägerei", "rauferei"], duell: ["duell", "zweikampf", "arena"] };
+    bibliothek: ["bibliothek", "bücherei"], tempel: ["tempel", "kirche", "kloster"], dorf: ["bauernhof", "dorf"], markt: ["markt", "marktplatz"], hafen: ["hafen"], gebirge: ["gebirge", "berge", "bergpass", "schnee"],
+    mine: ["mine", "zwergenmine", "bergwerk", "stollen"], strasse: ["unterwegs", "straße", "landstraße"], burg: ["burg", "burghof", "festung"], ufer: ["fluss", "ufer", "flussufer"], schlacht: ["schlacht", "krieg", "kriegsschauplatz", "schlachtfeld"], schlaegerei: ["schlägerei", "prügelei", "kneipenschlägerei", "rauferei"], duell: ["duell", "zweikampf", "arena"] };
   function sprachBefehle() {
     const T = TX.de, raus = [], add = (p, text, tun) => raus.push({ p, text, tun });
     const ohneSym = x => String(x || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
@@ -8268,7 +8268,7 @@ const ZUS_ICON = {
     /* ohne Vorsilbe: Zusätze und Stimmungen, sofern das Wort nicht schon vergeben ist (die Liste oben hat Vorrang) */
     Object.keys(ZUSATZ).forEach(id => add([ZUSATZ[id].de], "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
     /* frühere Kulissen-Wörter führen jetzt zum Zusatz */
-    [["feuer", ["lagerfeuer", "dazu lagerfeuer", "lager"]], ["gewitter", ["unwetter"]]].forEach(([id, w]) => ZUSATZ[id] && add(w, "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
+    [["feuer", ["lagerfeuer", "dazu lagerfeuer"]], ["gewitter", ["unwetter"]]].forEach(([id, w]) => ZUSATZ[id] && add(w, "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
     Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add([ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k)));
     return raus;
   }

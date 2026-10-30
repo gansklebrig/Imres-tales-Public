@@ -2027,10 +2027,10 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 
   setTimeout(aufKnopf, 0);
   /* ---------- Sprachsteuerung (nur am Rechner): Taste halten, Stichwort sagen – Welt, Szene, Wetter oder Geräusch startet ---------- */
-  const SPRACH_WELT = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke"], lagerfeuer: ["feuer", "lager", "lagerfeuer"], waldtag: ["wald", "forst"], waldnacht: ["nachtwald", "nacht", "wald nachts"],
-    zelt: ["zelt"], hoehle: ["höhle", "grotte"], kerker: ["kerker", "verlies", "gefängnis"], kueste: ["küste", "meer", "strand", "brandung"], schiff: ["an deck", "deck", "schiff", "segeln"], fluss: ["wasserfall"],
-    labor: ["alchemist", "labor", "alchemie"], tempel: ["tempel", "kirche", "kloster"], sumpf: ["sumpf", "moor"], unterwasser: ["unter wasser", "unterwasser", "tauchen"], dorf: ["bauernhof", "hof", "dorf"],
-    markt: ["markt", "marktplatz"], gebirge: ["gebirge", "berge", "bergpass", "pass"], mine: ["mine", "zwergenmine", "bergwerk", "stollen", "zwerge"], strasse: ["unterwegs", "straße", "landstraße", "weg"],
+  const SPRACH_WELT = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke"], lagerfeuer: ["feuer", "lagerfeuer"], waldtag: ["wald", "forst"], waldnacht: ["nachtwald", "wald nachts", "wald bei nacht"],
+    zelt: ["zelt"], hoehle: ["höhle", "grotte"], kerker: ["kerker", "verlies", "gefängnis"], kueste: ["küste", "meer", "strand", "brandung"], schiff: ["an deck", "schiff", "segeln"], fluss: ["wasserfall"],
+    labor: ["alchemist", "labor", "alchemie"], tempel: ["tempel", "kirche", "kloster"], sumpf: ["sumpf", "moor"], unterwasser: ["unter wasser", "unterwasser", "tauchen"], dorf: ["bauernhof", "dorf"],
+    markt: ["markt", "marktplatz"], gebirge: ["gebirge", "berge", "bergpass"], mine: ["mine", "zwergenmine", "bergwerk", "stollen"], strasse: ["unterwegs", "straße", "landstraße"],
     burg: ["burg", "burghof", "festung"], ufer: ["fluss", "ufer", "flussufer", "bach"], kriegsschauplatz: ["schlacht", "krieg", "kriegsschauplatz"], schlaegerei: ["schlägerei", "prügelei", "kneipenschlägerei", "rauferei"], duell: ["duell", "zweikampf", "arena"], kathedrale: ["kathedrale", "dom"], gipfel: ["gipfel", "sturm über dem gipfel"], abgrund: ["abgrund"], ozean: ["ozean"],
     hort: ["drachenhort", "hort", "drache"], gefallene: ["halle der gefallenen", "gefallene", "totenhalle"], sterne: ["sterne", "weltall", "zwischen den sternen"], schlachtfeld: ["schlachtfeld"] };
   const FUELL = new Set(["der", "die", "das", "den", "dem", "des", "im", "am", "auf", "über", "unter", "bei", "zu", "zieht", "und", "ein", "eine", "danach"]);
@@ -2062,7 +2062,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     let rechner = false; try { rechner = matchMedia("(pointer: fine)").matches && matchMedia("(hover: hover)").matches; } catch (_) {}
     if (!rechner || FERN || hoerer) return;
     const ort = $("sprache-ort"); if (!ort) return;
-    const sk = document.createElement("script"); sk.src = "sprache/sprache.js?v=4";
+    const sk = document.createElement("script"); sk.src = "sprache/sprache.js?v=5";
     sk.onload = () => window.ImresSprache && window.ImresSprache.einrichten({ ort, befehle: sprachBefehle });
     document.head.appendChild(sk);
   }, 300);
