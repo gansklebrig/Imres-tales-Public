@@ -2027,7 +2027,7 @@ function itemDelta(it){const slot=bestSlotFor(it);const eq=Object.assign({},P.eq
 /* ================= DOM ================= */
 const $=id=>document.getElementById(id);
 const cv=$('cv');let cx=cv.getContext('2d',{alpha:false});
-const scr=$('scr'),hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
+let scr=$('scr');const hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
 /* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
@@ -3543,8 +3543,8 @@ function updPlayer(dt){
  let ix=0,iy=0;
  if(G.bot){const v=botMove();ix=v[0];iy=v[1]}
  else if(netIs(P.dev)){const I=P.netIn;if(I&&!P.netGone){const Q=P.netMQ;if(Q&&(Q.length||P.netLast)&&dt>0){let need=dt,ax=0,ay=0,sp=0;while(need>1e-6&&Q.length){const e=Q[0],t=Math.min(need,e.d);ax+=e.mx*t;ay+=e.my*t;sp=sp||e.s;e.d-=t;need-=t;P.netLast=e;if(e.d<=1e-6){P.netAck=e.q;Q.shift()}}
-   if(need>1e-6&&P.netLast){const e=P.netLast;ax+=e.mx*need;ay+=e.my*need;sp=sp||e.s;if(e.mx||e.my)P.netDebt=Math.min(0.15,(P.netDebt||0)+need)}ix=ax/dt;iy=ay/dt;P.sprint=!!sp&&(P.sprint||P.stam>(P.puste?35:5))}
-  else{ix=I.mx;iy=I.my;P.sprint=I.spr&&(P.sprint||P.stam>(P.puste?35:5))}}else P.sprint=false;if(P.netGone)P.inv=Math.max(P.inv,0.5);
+   if(need<=1e-6)P.netXt=0;if(need>1e-6&&P.netLast&&(P.netXt||0)<0.2){const e=P.netLast,u=Math.min(need,0.2-(P.netXt||0));P.netXt=(P.netXt||0)+u;ax+=e.mx*u;ay+=e.my*u;sp=sp||e.s;if(e.mx||e.my)P.netDebt=Math.min(0.15,(P.netDebt||0)+u)}ix=ax/dt;iy=ay/dt;P.sprint=!!sp&&(P.sprint||P.stam>(P.puste?35:5))}
+  else if(performance.now()-(P.netInT||0)<400){ix=I.mx;iy=I.my;P.sprint=I.spr&&(P.sprint||P.stam>(P.puste?35:5))}}else P.sprint=false;if(P.netGone)P.inv=Math.max(P.inv,0.5);
   if(P.netQ&&P.netQ.length){const Q=P.netQ.splice(0);for(const[k,v]of Q){if(k==='skill')useSkill(v);else if(k==='pot')usePotion();else if(k==='ult')teamUlt()}if(G.paused||G.state!=='play')return}}
  else{const kb=!P.dev||P.dev==='kb';if(kb){if(keys.ArrowLeft||keys.KeyA)ix--;if(keys.ArrowRight||keys.KeyD)ix++;if(keys.ArrowUp||keys.KeyW)iy--;if(keys.ArrowDown||keys.KeyS)iy++;
   if(joy&&joy.on){const dx=joy.x-joy.ox,dy=joy.y-joy.oy,dd=Math.hypot(dx,dy);if(dd>6){const m=Math.min(1,dd/50);ix=dx/dd*m;iy=dy/dd*m}}}
@@ -4346,6 +4346,7 @@ function renderWorld(dt){
  drawBanner(dt);
  const tgt=G.boss||G.guardE||G.portal;if(tgt){const sxp=(tgt.x-camX)*ZOOM,syp=(tgt.y-camY)*ZOOM;if(sxp<0||syp<0||sxp>W||syp>H){const a=Math.atan2(syp-H/2,sxp-W/2);const m=46;const ex=clamp(W/2+Math.cos(a)*W,m,W-m),ey=clamp(H/2+Math.sin(a)*H,m+60,H-m);cx.save();cx.translate(ex,ey);cx.rotate(a);poly(cx,tgt===G.portal?'#c48cff':'#ff5a4a',14,0,-8,-9,-8,9);cx.restore()}}
  if(mouseAim()&&G.state==='play'&&!G.overlay){const mx=MOUSE.x,my=MOUSE.y;cx.strokeStyle='rgba(255,230,170,.85)';cx.lineWidth=2;cx.beginPath();cx.arc(mx,my,11,0,TAU);cx.stroke();for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){cx.beginPath();cx.moveTo(mx+a*6,my+b*6);cx.lineTo(mx+a*17,my+b*17);cx.stroke()}}
+ if(G.paused&&!G.overlay&&G.vmPause&&G.vmWho&&!(G.resumeT>0)){cx.fillStyle='rgba(10,7,12,.35)';cx.fillRect(0,0,W,H);const tx='⏸ '+G.vmWho+' ist im Menü';cx.font='800 20px "Alegreya Sans",sans-serif';cx.textAlign='center';cx.lineWidth=5;cx.strokeStyle='rgba(0,0,0,.85)';cx.strokeText(tx,W/2,H*0.2);cx.fillStyle='#e5b454';cx.fillText(tx,W/2,H*0.2);cx.font='600 14px "Alegreya Sans",sans-serif';const t2='Du kannst währenddessen selbst in Beutel und Talente schauen';cx.strokeText(t2,W/2,H*0.2+26);cx.fillStyle='#e8dcc4';cx.fillText(t2,W/2,H*0.2+26)}
  if(G.paused&&!G.overlay&&G.resumeT>0){cx.fillStyle='rgba(10,7,12,.35)';cx.fillRect(0,0,W,H);const cxm=W/2,cym=H*0.42,f=G.resumeT/0.5;circ(cx,cxm,cym,46,'rgba(16,12,18,.85)');cx.strokeStyle='#e5b454';cx.lineWidth=5;cx.beginPath();cx.arc(cxm,cym,46,-Math.PI/2,-Math.PI/2+TAU*f);cx.stroke();cx.fillStyle='#f0e6d4';cx.font='800 30px "Alegreya Sans",sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(String(Math.ceil(G.resumeT*2)/2).replace('.',','),cxm,cym+1);cx.font='700 14px "Alegreya Sans",sans-serif';cx.fillText('Gleich geht’s weiter',cxm,cym+66);cx.textBaseline='alphabetic'}
  if(joy&&joy.on){cx.globalAlpha=0.35;circ(cx,joy.ox,joy.oy,52,'#000');cx.globalAlpha=0.6;cx.strokeStyle='#e5b454';cx.lineWidth=2;cx.beginPath();cx.arc(joy.ox,joy.oy,52,0,TAU);cx.stroke();const dx=joy.x-joy.ox,dy=joy.y-joy.oy,dd=Math.hypot(dx,dy),m=Math.min(dd,46)/(dd||1);circ(cx,joy.ox+dx*m,joy.oy+dy*m,22,'#e5b454');cx.globalAlpha=1}
 }
@@ -4904,13 +4905,13 @@ window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(
 window.addEventListener('keyup',ev=>{keys[ev.code]=false});
 document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target&&ev.target.id==='hsName'){ev.preventDefault();hsEintragen()}});
 window.addEventListener('gamepadconnected',()=>{toast('Controller verbunden','#8fe7ff');setTimeout(()=>{try{if(P&&P.skBtns&&P.skBtns.length)buildSkillBar();if(G.overlay==='tree')renderTree(true)}catch(e){}},400);if(G.state==='title')setTimeout(()=>showTitle(true),50)});
-window.addEventListener('pointerup',ev=>{if(ev.pointerType==='mouse'&&ev.button===0)MOUSE.down=false});
-window.addEventListener('blur',()=>{MOUSE.down=false;for(const k in keys)keys[k]=false});
+window.addEventListener('pointerup',ev=>{if(ev.pointerType==='mouse'&&ev.button===0)MOUSE.down=false;if(joy&&ev.pointerId===joy.id)endJoy(ev)});
+window.addEventListener('blur',()=>{MOUSE.down=false;for(const k in keys)keys[k]=false;if(joy){if(joy.spr===1&&P)P.sprint=false;else if(joy.spr===2)NET.sprT=false;joy=null}});
 $('btnPot').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();usePotion()});
 $('btnSprint').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();if(NET.role==='guest'&&G.netGuestRun){NET.sprT=!NET.sprT;return}if(G.state==='play'&&!G.paused){P.sprint=!P.sprint&&P.stam>5}});
 cv.addEventListener('pointerdown',ev=>{audioInit();if(G.segR&&G.mp&&G.state==='play'&&!G.overlay&&!G.paused){const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top,S=G.segR;if(x>S.x-12&&x<S.x+S.w+12&&y>S.y-16&&y<S.y+30){teamUlt();ev.preventDefault();return}}if(ev.pointerType==='mouse'){MOUSE.has=true;MOUSE.t=performance.now();MOUSE.x=ev.clientX;MOUSE.y=ev.clientY;if(ev.button===0)MOUSE.down=true;if(SAVE.aim)return}if(G.state!=='play'||G.overlay)return;if(joy&&joy.on)return;joy={on:true,id:ev.pointerId,ox:ev.clientX,oy:ev.clientY,x:ev.clientX,y:ev.clientY,sx:ev.clientX,sy:ev.clientY,t0:performance.now(),touch:ev.pointerType!=='mouse'};try{cv.setPointerCapture(ev.pointerId)}catch(e){}ev.preventDefault()});
-cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='mouse'){MOUSE.has=true;if(Math.abs(ev.clientX-MOUSE.x)+Math.abs(ev.clientY-MOUSE.y)>4)MOUSE.t=performance.now();MOUSE.x=ev.clientX;MOUSE.y=ev.clientY}if(joy&&joy.on&&ev.pointerId===joy.id){joy.x=ev.clientX;joy.y=ev.clientY;if(joy.touch&&!joy.fl&&performance.now()-joy.t0<190&&Math.hypot(joy.x-joy.sx,joy.y-joy.sy)>70){joy.fl=1;if(NET.role==='guest'&&G.netGuestRun){NET.sprT=true;joy.spr=2}else if(G.state==='play'&&!G.paused&&P&&P.stam>5){P.sprint=true;joy.spr=1}}const dx=joy.x-joy.ox,dy=joy.y-joy.oy,d=Math.hypot(dx,dy);if(d>90){joy.ox=joy.x-dx/d*90;joy.oy=joy.y-dy/d*90}}});
-const endJoy=ev=>{if(joy&&ev.pointerId===joy.id){if(joy.spr===1&&P)P.sprint=false;else if(joy.spr===2)NET.sprT=false;joy=null}};cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);
+cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='mouse'){MOUSE.has=true;if(Math.abs(ev.clientX-MOUSE.x)+Math.abs(ev.clientY-MOUSE.y)>4)MOUSE.t=performance.now();MOUSE.x=ev.clientX;MOUSE.y=ev.clientY}if(joy&&joy.on&&ev.pointerId===joy.id&&!joy.touch&&ev.buttons===0){endJoy(ev);return}if(joy&&joy.on&&ev.pointerId===joy.id){joy.x=ev.clientX;joy.y=ev.clientY;if(joy.touch&&!joy.fl&&performance.now()-joy.t0<190&&Math.hypot(joy.x-joy.sx,joy.y-joy.sy)>70){joy.fl=1;if(NET.role==='guest'&&G.netGuestRun){NET.sprT=true;joy.spr=2}else if(G.state==='play'&&!G.paused&&P&&P.stam>5){P.sprint=true;joy.spr=1}}const dx=joy.x-joy.ox,dy=joy.y-joy.oy,d=Math.hypot(dx,dy);if(d>90){joy.ox=joy.x-dx/d*90;joy.oy=joy.y-dy/d*90}}});
+var endJoy=ev=>{if(joy&&ev.pointerId===joy.id){if(joy.spr===1&&P)P.sprint=false;else if(joy.spr===2)NET.sprT=false;joy=null}};cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);cv.addEventListener('lostpointercapture',endJoy);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){persist();if(SAVE.cloud)cloudSave();if(G.state==='play'&&!G.paused)openOverlay('pause');if(AC&&AC.state==='running')try{AC.suspend();AC._hid=1}catch(e){}}
  else{if(AC&&AC._hid){AC._hid=0;try{AC.resume()}catch(e){}}if(SAVE.cloud&&Date.now()-CLOUD.chk>60000&&!CLOUD.busy)cloudSync()}});
 window.addEventListener('contextmenu',e=>e.preventDefault());
@@ -6389,20 +6390,38 @@ function netStagePkt(){const S=STAGES[G.stage]||{};const s={};for(const k in S){
  return{t:'stage',stage:G.stage,theme:G.themeKey,road:G.road,deco:G.deco.map(d=>({x:Math.round(d.x),y:Math.round(d.y),k:d.k,s:Math.round((d.s||1)*100)/100,v:d.v,edge:d.edge})),S:s,mode:G.mode,diff:G.diff,rl:G.rl,room:G.room?nEncSafe(G.room):null,depth:G.depth,n:STAGES.length}}
 function nEncSafe(v){netReg();NENT=new Set();return nEnc(v,1)}
 function netHostInput(g,m){const p=g.p;if(!p)return;const mq=+m.q;if(!isFinite(mq)||mq<=(g.inQ||-1))return;g.inQ=mq;if(Array.isArray(m.R)){const Q=p.netMQ||(p.netMQ=[]);for(const e of m.R.slice(-8)){if(!Array.isArray(e)||!(+e[0]>(g.rq||0))||!isFinite(+e[0]))continue;g.rq=+e[0];let d=clamp(+e[3]||0,0,0.25);if(p.netDebt>0){const c=Math.min(p.netDebt,d);p.netDebt-=c;d-=c}if(d>0)Q.push({q:g.rq,mx:clamp(+e[1]||0,-1,1),my:clamp(+e[2]||0,-1,1),d,s:e[4]?1:0});else p.netAck=g.rq}let tot=0;for(const x of Q)tot+=x.d;while(tot>0.2&&Q.length>1){const x=Q.shift();tot-=x.d;p.netAck=x.q}}if(isFinite(+m.k)&&+m.k>g.ack)g.ack=+m.k;g.echo=[nNum(m.tc,0,1e13,0),performance.now()];if(m.rtt){g.ping=nInt(m.rtt,0,99999,0);p.ping=g.ping}
- const mm=Array.isArray(m.m)?m.m:[];p.netIn={mx:clamp(+mm[0]||0,-1,1),my:clamp(+mm[1]||0,-1,1),spr:!!m.s,au:!!m.au,q:mq};
+ const mm=Array.isArray(m.m)?m.m:[];p.netIn={mx:clamp(+mm[0]||0,-1,1),my:clamp(+mm[1]||0,-1,1),spr:!!m.s,au:!!m.au,q:mq};p.netInT=performance.now();
  p.padAim=typeof m.a==='number'&&isFinite(m.a)?m.a:null;p.netCur=Array.isArray(m.c)&&isFinite(+m.c[0])&&isFinite(+m.c[1])?{x:clamp(+m.c[0],0,WORLD),y:clamp(+m.c[1],0,WORLD),down:!!m.c[2]}:null;if(m.vw){p.vw=clamp(+m.vw||1400,300,3000);p.vh=clamp(+m.vh||900,300,3000)}
  if(Array.isArray(m.A))for(const A of m.A.slice(-24)){if(!Array.isArray(A)||!(+A[0]>g.aa)||!isFinite(+A[0]))continue;g.aa=+A[0];netHostAct(g,A[1],A[2])}}
 function netHostAct(g,k,v){const p=g.p,i=PL.indexOf(p);if(i<0)return;
  if(k==='skill'||k==='pot'||k==='ult'){if(k==='skill'&&!(Number.isInteger(v)&&v>=0&&v<6))return;const Q=p.netQ||(p.netQ=[]);if(Q.length<16)Q.push([k,k==='skill'?v:0]);return}
- if(k==='menu'){if(v!=='inv'&&v!=='tree')return;if(G.overlay&&G.menuP!==i)return;if(G.state==='play'){if(G.overlay)switchOverlay(v);else openOverlay(v,i)}else if(G.state==='between'){G.menuP=i;P=p;G.overlay=v;G.invSel=null;if(v==='inv')renderInv();else if(v==='tree')renderTree()}return}
- if(k==='close'){if(G.overlay&&G.menuP===i){if(G.state==='between'){P=PL[0];G.overlay=null;G.atIntro?showStageIntro():showChapterDone()}else closeOverlay()}return}
+ if(k==='menu'){if(v!=='inv'&&v!=='tree')return;if(G.state!=='play'&&G.state!=='between')return;vmOpen(g,v);vmPauseTick();return}
+ if(k==='close'){vmClose(g);vmPauseTick();return}
+ if(k==='pz'){vmOf(g).pz=!!v;vmPauseTick();return}
  if(k==='leave'){netHsPush(true);netGuestGone(g);netLobbyDrop(g);const j=PL.indexOf(p);if(j>0)mpRemove(j);NET.guests=NET.guests.filter(x=>x!==g);try{g.conn.close()}catch(e){}}}
 /* Klicks der Gäste in gespiegelten Menüs */
 const NETNOCLK=/^(mp-menu|giveup|start|fs|gfx|vol|sound|auto|aim|ctl|camfx|perf|music|run-|to-camp|hs-|net-|split|rumble|mp-on|mp-dev|mp-kick|mp-loot|cloud|lang)/;
-function netHostClick(g,m){const i=PL.indexOf(g.p);if(i<0)return;const v=netView(g);if(!v.can)return;
+/* Jeder Online-Gast hat sein eigenes, unsichtbares Menü beim Gastgeber: Beutel und Talente lassen sich gleichzeitig ansehen.
+   Solange irgendwer im Menü ist, pausiert das Spiel für alle. */
+const VMK=['overlay','invSel','trSel','treeSel','barPick','smithSel','lagerSel','bestSub','rolleSel','treeOpen','treeDet','treeBr','treeRec','confirmDrop','statsOpen'];
+function vmOf(g){if(!g.vm){const el=document.createElement('div');el.className='screen';el.hidden=true;el.style.display='none';el.setAttribute('aria-hidden','true');document.body.appendChild(el);g.vm={el,pz:false};for(const k of VMK)g.vm[k]=null}return g.vm}
+function vmWith(g,fn){const V=vmOf(g),i=PL.indexOf(g.p);if(i<0)return;const sv={scr,P,menuP:G.menuP};for(const k of VMK)sv[k]=G[k];
+ scr=V.el;P=g.p;G.menuP=i;for(const k of VMK)G[k]=V[k];NET.vm=g;
+ try{fn()}catch(e){NET.lastErr=String(e)}finally{for(const k of VMK)V[k]=G[k];for(const k of VMK)G[k]=sv[k];scr=sv.scr;P=sv.P;G.menuP=sv.menuP;NET.vm=null;try{if(P)updateInvBadge()}catch(e){}}}
+function vmOpen(g,v){if(v!=='inv'&&v!=='tree')return;vmWith(g,()=>{G.overlay=v;if(v==='inv'){G.invSel=null;renderInv()}else renderTree()});sfx(v==='inv'?'beutel':'buch')}
+function vmClose(g){const V=g.vm;if(!V)return;V.overlay=null;V.barPick=null;V.el.innerHTML=''}
+function vmDrop(g){if(g.vm){try{g.vm.el.remove()}catch(e){}g.vm=null}}
+function vmPauseTick(){if(NET.role!=='host')return;const L=NET.guests.filter(g=>!g.gone&&g.vm&&(g.vm.overlay||g.vm.pz)&&g.p&&PL.includes(g.p));
+ G.vmWho=L.length?L.map(g=>g.p.netName||g.name||g.p.hero.name).join(', '):'';
+ if(G.state!=='play')return;
+ if(L.length){if(!G.paused||G.resumeT>0){G.paused=true;G.resumeT=0}G.vmPause=1}else if(G.vmPause){G.vmPause=0;if(!G.overlay&&G.paused){G.resumeT=0.5}}}
+function netHostClick(g,m){const i=PL.indexOf(g.p);if(i<0)return;
+ if(g.vm&&g.vm.overlay){if(!Number.isInteger(m.i)||m.i<0)return;vmWith(g,()=>{const el=scr.querySelectorAll('*')[m.i];if(!el)return;const b=el.closest('[data-act]');const a=b?b.dataset.act:'';if(a!==(m.act||''))return;if(a&&NETNOCLK.test(a))return;if(a==='mtab'&&!/^(inv|tree)$/.test(b.dataset.m||''))return;NET.cf=i;try{el.click()}finally{NET.cf=undefined}});return}
+ const v=netView(g);if(!v.can)return;
  if(!Number.isInteger(m.i)||m.i<0)return;const el=scr.querySelectorAll('*')[m.i];if(!el)return;const b=el.closest('[data-act]');const a=b?b.dataset.act:'';if(a!==(m.act||''))return;if(a&&NETNOCLK.test(a)&&!(a==='mp-menu'&&+b.dataset.i===i))return;if(a==='mtab'&&b.dataset.m==='pause')return;
  const P0=P;if(G.overlay&&G.menuP===i)P=g.p;NET.cf=i;try{el.click()}finally{NET.cf=undefined;if(!(G.overlay&&G.menuP===i)&&G.state!=='between')P=PL[0]||P0}}
 function netView(g){const i=PL.indexOf(g.p);if(G.state==='title'||!g.p)return{v:'none'};
+ if(g.vm&&g.vm.overlay&&G.state!=='end')return{v:'scr',can:true,own:true,vm:1};
  if(G.overlay&&G.menuP!==i){const q=PL[G.menuP||0];return{v:'busy',who:q?(q.netName||q.hero.name):'Jemand'}}
  if(scr.hidden)return{v:'none'};return{v:'scr',can:G.state!=='end'&&(!G.overlay||G.menuP===i),own:!!G.overlay&&G.menuP===i}}
 
@@ -6411,7 +6430,7 @@ function netWorld(){netReg();NENT=new Set();const W={};for(const c of NETCAT){co
  for(const c of NETCAT){const M=new Map();for(const o of (G[c]||[])){if(o.dead&&c!=='allies'&&c!=='props')continue;M.set(nid(o),nRec(o,NETW[c]))}W[c]=M}
  const pm=new Map();for(const p of PL){const r=nRec(p,null,NETPBL);r.eq=netEq(p.eq);r.ci=PL.indexOf(p);r.nn=p.netName||null;r.gone=p.netGone?1:0;r.netAck=p.netAck||(p.netIn?p.netIn.q:0);r.ping=netIs(p.dev)?(NET.guests.find(g=>g.p===p)||{}).ping||0:0;pm.set(nid(p),r)}W.pl=pm;
  const gr={};for(const k in G){if(NETGBL.has(k))continue;const v=G[k];if(v===undefined||typeof v==='function')continue;const x=nEnc(v,1);if(x!==NOPE)gr[k]=x}
- if(G.wx)gr.wx={i:G.wx.i,run:G.wx.run,w:nEnc(G.wx.w,2),z:G.wx.z,t:Math.round((G.wx.t||0)*100)/100,strikeT:Math.round((G.wx.strikeT||0)*10)/10};gr.pz=G.paused&&G.overlay&&G.state==='play'?1:0;gr.tm=Math.round(G.time*1000)/1000;gr.mpn=G.overlay?(PL[G.menuP||0]||{}).netName||((PL[G.menuP||0]||{}).hero||{}).name||'':'';
+ if(G.wx)gr.wx={i:G.wx.i,run:G.wx.run,w:nEnc(G.wx.w,2),z:G.wx.z,t:Math.round((G.wx.t||0)*100)/100,strikeT:Math.round((G.wx.strikeT||0)*10)/10};gr.pz=G.paused&&(G.overlay||G.vmPause)&&G.state==='play'?1:0;gr.tm=Math.round(G.time*1000)/1000;gr.mpn=G.overlay?(PL[G.menuP||0]||{}).netName||((PL[G.menuP||0]||{}).hero||{}).name||'':G.vmWho||'';
  W.g=new Map([[0,gr]]);return W}
 function netEq(eq){const o={};for(const s in (eq||{})){const it=eq[s];if(it)o[s]={base:it.base||null,rar:it.rar,slot:it.slot,name:it.name,set:it.set||null,ilvl:it.ilvl}}return o}
 function netFilter(W,p){const vw=(p.vw||1400)/2+260,vh=(p.vh||900)/2+260,o={};
@@ -6424,8 +6443,8 @@ function netFx(name,args){if(NET.role!=='host'||!NET.inUpd||!G.net)return;const 
 function netFxR(m){if(NET.role!=='host'||!G.net)return;NET.evR.push(m)}
 function netScanNew(){for(const k of['fxs','nums','corpses']){const A=G[k];if(!A)continue;for(let i=A.length-1;i>=0;i--){const o=A[i];if(o.__n)break;o.__n=1;if(k==='nums'&&!o.crit&&Math.random()<0.4)continue;const r=nRec(o,null,new Set(['__n','follow','own','fn','onEnd']));NET.ev.push(['+'+k,r])}}}
 function netHostTick(dt){if(NET.role!=='host')return;const now=performance.now();
- for(const g of NET.guests){if(g.gone){if(g.p&&now-g.gone>120000){const j=PL.indexOf(g.p);if(j>0)mpRemove(j);g.p=null;netLobbyDrop(g)}continue}if(now-g.last>8000)netGuestGone(g)}
- NET.guests=NET.guests.filter(g=>!g.gone||g.p&&PL.includes(g.p));if(G.state==='play')for(const g of NET.guests)if(g.pend&&!g.gone){g.pend=0;netJoinRun(g)}if(G.net&&G.state==='play')G.net=PL.some(p=>netIs(p.dev));
+ vmPauseTick();for(const g of NET.guests){if(g.gone&&g.vm){vmClose(g);g.vm.pz=false}if(g.gone){if(g.p&&now-g.gone>120000){const j=PL.indexOf(g.p);if(j>0)mpRemove(j);g.p=null;netLobbyDrop(g)}continue}if(now-g.last>8000)netGuestGone(g)}
+ for(const g of NET.guests)if(g.gone&&!(g.p&&PL.includes(g.p)))vmDrop(g);NET.guests=NET.guests.filter(g=>!g.gone||g.p&&PL.includes(g.p));if(G.state==='play')for(const g of NET.guests)if(g.pend&&!g.gone){g.pend=0;netJoinRun(g)}if(G.net&&G.state==='play')G.net=PL.some(p=>netIs(p.dev));
  if(!G.net||(G.state!=='play'&&G.state!=='between'&&G.state!=='end'))return;
  if(G.state==='play'&&!G.paused)netScanNew();
  const live=NET.guests.filter(g=>!g.gone&&g.p&&PL.includes(g.p));if(!live.length){NET.ev.length=0;NET.evR.length=0;return}
@@ -6437,8 +6456,8 @@ function netHostTick(dt){if(NET.role!=='host')return;const now=performance.now()
    const viaU=netSendU(g.conn,g.u,pk);g.hist.set(q,F);if(g.hist.size>48)g.hist.delete(q-48);
    const bu=g.u&&g.u.bufferedAmount||0;g.iv=bu>60000?Math.min(110,g.iv*1.3):Math.max(50,g.iv*0.97);g.sendAt=now+g.iv-4;if(!viaU&&!base)g.sendAt=now+90}}
  if(NET.evR.length){const L=NET.evR.splice(0);for(const g of live)netSendR(g.conn,{t:'r',L})}
- if(now>=NET.scrT){NET.scrT=now+130;for(const g of live){const v=netView(g);let key=v.v+'|'+(v.who||'')+'|'+(v.can?1:0)+(v.own?1:0),html='';if(v.v==='scr'){html=scr.innerHTML;key+='|'+NET.scrVer}
-   if(key!==g.scrK||(v.v==='scr'&&html!==g.scrH)){g.scrK=key;g.scrH=html;netSendR(g.conn,{t:'scr',v:v.v,who:v.who,can:v.can,own:v.own,html:v.v==='scr'?html:'',cls:scr.className.replace(/^screen\s*/,''),ver:NET.scrVer})}}}
+ if(now>=NET.scrT){NET.scrT=now+130;for(const g of live){const v=netView(g);const SE=v.vm?g.vm.el:scr;let key=v.v+'|'+(v.who||'')+'|'+(v.can?1:0)+(v.own?1:0)+(v.vm?'v':''),html='';if(v.v==='scr'){html=SE.innerHTML;key+='|'+NET.scrVer}
+   if(key!==g.scrK||(v.v==='scr'&&html!==g.scrH)){g.scrK=key;g.scrH=html;netSendR(g.conn,{t:'scr',v:v.v,who:v.who,can:v.can,own:v.own,html:v.v==='scr'?html:'',cls:SE.className.replace(/^screen\s*/,''),ver:NET.scrVer})}}}
  if(!NET.hsT||now>NET.hsT){NET.hsT=now+3000;netHsPush(false)}}
 function netHsPush(force){for(const g of NET.guests){if(g.gone||!g.p)continue;const id=g.p.id;if(G.rl&&!G.bot)withP(g.p,rlSync);const d=NET.hsOv[id];if(!d)continue;const j=JSON.stringify(d);if(!force&&j===g.hsJ&&g.gold===G.goldRun)continue;g.hsJ=j;g.gold=G.goldRun;netSendR(g.conn,{t:'hs',id,d,gold:G.goldRun,run:G.runId})}}
 function netCloseRoom(){netHsPush(true);for(const g of NET.guests)netSendR(g.conn,{t:'bye',why:'Der Gastgeber hat den Raum geschlossen.'});if(G.state!=='title')for(let i=PL.length-1;i>0;i--)if(netIs(PL[i].dev))mpRemove(i);setTimeout(()=>{try{NET.peer&&NET.peer.destroy()}catch(e){}},300);
@@ -6603,7 +6622,7 @@ function netShowRemote(){const m=NET.rs;if(!G.netGuestRun)return;
  if(!m||m.v==='none'||m.v==='busy'){if(G.overlay==='remote'){G.overlay=null;hideScreen();hud.hidden=false}netBarSet();return}
  G.overlay='remote';NET.rsCan=!!m.can;NET.rsOwn=!!m.own;NET.rsVer=m.ver;showScreen(netSan(m.html),m.cls,true);hud.hidden=true;netBarSet()}
 function netMenuHtml(){const me=NET.mine,q=netQual();return`<div class="wrap narrow"><div class="spread"><h2>Menü</h2><button class="btn" data-act="net-close">Weiter</button></div>
- <div class="card"><div class="row"><button class="btn" data-act="net-inv">Beutel</button><button class="btn" data-act="net-tree">Talente${me&&me.sp>0?` (${me.sp})`:''}</button></div><p class="muted" style="margin:8px 0 0;font-size:13px">Online läuft das Spiel weiter, solange du hier bist. Beutel und Talente pausieren kurz für alle.</p></div>
+ <div class="card"><div class="row"><button class="btn" data-act="net-inv">Beutel</button><button class="btn" data-act="net-tree">Talente${me&&me.sp>0?` (${me.sp})`:''}</button></div><p class="muted" style="margin:8px 0 0;font-size:13px">Solange du hier oder in Beutel und Talenten bist, pausiert das Spiel für alle. Jeder kann dabei frei in seine eigenen Sachen schauen.</p></div>
  <div class="card ups"><div class="up"><div><div class="t">Verbindung</div><div class="d">Raum ${esc(NET.code)} · ${q.txt}</div></div><span class="netq ${q.cls}">${q.ms} ms</span></div>
   <div class="up"><div><div class="t">Fähigkeiten automatisch wirken</div><div class="d">Fähigkeiten feuern von selbst, sobald Gegner in Reichweite sind.</div></div><button class="btn ${SAVE.auto?'gold':''}" data-act="auto">${SAVE.auto?'An':'Aus'}</button></div>
   <div class="up"><div><div class="t">Mit der Maus zielen (PC)</div><div class="d">Angriffe fliegen zum Mauszeiger.</div></div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div>
@@ -6622,10 +6641,10 @@ function netInit(){
  const _useSkill=useSkill;useSkill=function(i){if(NET.role==='guest'&&G.netGuestRun){if(G.overlay)return;netAct('skill',i);return}return _useSkill.apply(this,arguments)};
  const _usePotion=usePotion;usePotion=function(){if(NET.role==='guest'&&G.netGuestRun){if(!G.overlay)netAct('pot');return}return _usePotion.apply(this,arguments)};
  const _teamUlt=teamUlt;teamUlt=function(){if(NET.role==='guest'&&G.netGuestRun){if(!G.overlay)netAct('ult');return}return _teamUlt.apply(this,arguments)};
- const _open=openOverlay;openOverlay=function(k,pi){if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='netmenu'){netMenuClose();return}if(G.overlay==='remote'&&NET.rsOwn){netAct('close');return}if(k==='pause'){G.overlay='netmenu';showScreen(netMenuHtml());hud.hidden=true;for(const kk in keys)keys[kk]=false;joy=null;netBarSet();return}netAct('menu',k);return}return _open.apply(this,arguments)};
- const _close=closeOverlay;closeOverlay=function(){if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='netmenu')netMenuClose();else if(G.overlay==='remote'&&NET.rsOwn)netAct('close');return}return _close.apply(this,arguments)};
- const _switch=switchOverlay;switchOverlay=function(k){if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='remote'&&NET.rsOwn)netAct('menu',k);return}return _switch.apply(this,arguments)};
- const _rp=renderPause;renderPause=function(keep){if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='netmenu')showScreen(netMenuHtml(),'',true);return}return _rp.apply(this,arguments)};
+ const _open=openOverlay;openOverlay=function(k,pi){if(NET.vm){if(k==='inv'||k==='tree'){G.overlay=k;if(k==='inv'){G.invSel=null;renderInv()}else renderTree()}return}if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='netmenu'){netMenuClose();return}if(G.overlay==='remote'&&NET.rsOwn){netAct('close');return}if(k==='pause'){G.overlay='netmenu';netAct('pz',1);showScreen(netMenuHtml());hud.hidden=true;for(const kk in keys)keys[kk]=false;joy=null;netBarSet();return}netAct('menu',k);return}return _open.apply(this,arguments)};
+ const _close=closeOverlay;closeOverlay=function(){if(NET.vm){vmClose(NET.vm);G.overlay=null;G.barPick=null;scr.innerHTML='';return}if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='netmenu')netMenuClose();else if(G.overlay==='remote'&&NET.rsOwn)netAct('close');return}return _close.apply(this,arguments)};
+ const _switch=switchOverlay;switchOverlay=function(k){if(NET.vm){if(k==='inv'||k==='tree'){G.overlay=k;if(k==='inv'){G.invSel=null;renderInv()}else renderTree()}return}if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='remote'&&NET.rsOwn)netAct('menu',k);return}return _switch.apply(this,arguments)};
+ const _rp=renderPause;renderPause=function(keep){if(NET.vm)return;if(NET.role==='guest'&&G.netGuestRun){if(G.overlay==='netmenu')showScreen(netMenuHtml(),'',true);return}return _rp.apply(this,arguments)};
  const _hs=hsave;hsave=function(id){if(NET.role==='host'&&NET.hsOv[id]&&netHsMine(id))return NET.hsOv[id];return _hs(id)};
  const _sr=startRun;startRun=function(){const r=_sr.apply(this,arguments);if(NET.role==='host')netHostStart();return r};
  const _st=showTitle;showTitle=function(keep){if(G.netJoin&&NET.role!=='host'){netJoinScreen();return}if(NET.role==='host'&&G.net){netHsPush(true);G.net=false}const r=_st.apply(this,arguments);if(NET.role==='host')netLobbyCast();return r};
@@ -6655,7 +6674,7 @@ function netInit(){
  for(const ev of['beforeunload','pagehide'])window.addEventListener(ev,()=>{if(NET.byeSent)return;NET.byeSent=1;try{if(NET.role==='guest')netSendR(NET.conn,{t:'bye'});else if(NET.role==='host')for(const g of NET.guests)netSendR(g.conn,{t:'bye',why:'Der Gastgeber hat das Spiel geschlossen.'})}catch(e){}});
  const m=/[#&]raum=([A-Za-z0-9]{4})/.exec(location.hash||'');if(m)setTimeout(()=>netJoinScreen(m[1].toUpperCase()),300)}
 function netHsMine(id){if(G.state==='title'?id===G.sel:PL[0]&&PL[0].id===id)return false;return(G.lobby||[]).some(s=>netIs(s.dev)&&s.hero===id)||G.state!=='title'&&PL.some(p=>p.id===id&&netIs(p.dev))||NET.guests.some(g=>!g.gone&&g.hero===id)}
-function netMenuClose(){G.overlay=null;hideScreen();hud.hidden=false;if(NET.rs&&NET.rs.v==='scr')netShowRemote();netBarSet()}
+function netMenuClose(){if(G.overlay==='netmenu')netAct('pz',0);G.overlay=null;hideScreen();hud.hidden=false;if(NET.rs&&NET.rs.v==='scr')netShowRemote();netBarSet()}
 function netAction(a,b){
  if(a==='net-host'){netHost();return true}
  if(a==='net-closeroom'){netCloseRoom();return true}
