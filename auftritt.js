@@ -20,7 +20,7 @@
       label: "Bühnenprobe", titel: "Barradins Auftritt",
       text: "Barradin spielt auf – und du greifst in die Saiten! Tippe die Noten, sobald sie die goldene Linie erreichen. Am Ende entscheidet dein Taktgefühl über den Auftrittswurf.",
       steuerung: "Tasten A · S · D (oder J · K · L, ← ↓ →) – auf dem Handy einfach auf die Spur tippen. Noten mit Schweif gedrückt halten, bis der Schweif endet.",
-      publikum: "Publikum",
+      publikum: "Schwierigkeitsgrad",
       stufen: { leicht: "🍺 Bauern in Phandalin", mittel: "👑 Am Hof von König Horga", schwer: "🐉 Ein Drache hört zu" },
       spuren: ["Bass", "Laute", "Flöte"],
       start: "▶ Auftritt beginnen", nochmal: "↻ Noch ein Auftritt", abbrechen: "Abbrechen",
@@ -126,7 +126,7 @@
       label: "Stage rehearsal", titel: "Barradin's Performance",
       text: "Barradin strikes up – and you play along! Hit the notes as soon as they reach the golden line. In the end your sense of rhythm decides the performance check.",
       steuerung: "Keys A · S · D (or J · K · L, ← ↓ →) – on a phone just tap the lane. Notes with a tail: keep holding until the tail ends.",
-      publikum: "Audience",
+      publikum: "Difficulty",
       stufen: { leicht: "🍺 Farmers in Phandalin", mittel: "👑 At King Horga's court", schwer: "🐉 A dragon is listening" },
       spuren: ["Bass", "Lute", "Flute"],
       start: "▶ Begin performance", nochmal: "↻ Another performance", abbrechen: "Cancel",
@@ -743,10 +743,10 @@
   function liederHtml(T) {
     return '<div class="at-stufen"><span>' + T.publikum + ":</span>" +
         Object.keys(STUFEN).map(k => '<button type="button" data-stufe="' + k + '" aria-pressed="' + (k === stufe) + '">' + T.stufen[k] + "</button>").join("") + "</div>" +
-      '<div class="at-stufen at-lieder"><span>' + T.lied + ":</span>" +
-        Object.keys(LIEDER).filter(k => !LIEDER[k].nurWeg).map(k => '<button type="button" data-lied="' + k + '" aria-pressed="' + (k === liedWahl) + '">' + T.lieder[k] + "</button>").join("") +
-        '<button type="button" data-lied="neu" aria-pressed="' + (liedWahl === "neu") + '">' + T.neuesLied + "</button>" +
-        (liedWahl === "neu" ? '<span class="at-erfunden">♪ ' + esc(liedName(aktuellesLied(), T)) + "</span>" : "") + "</div>";
+      '<div class="at-stufen at-lieder"><label for="at-liedwahl">' + T.lied + ":</label>" +
+        '<select id="at-liedwahl" class="at-liedwahl">' + Object.keys(LIEDER).filter(k => !LIEDER[k].nurWeg).map(k => '<option value="' + k + '"' + (k === liedWahl ? " selected" : "") + ">" + esc(T.lieder[k]) + "</option>").join("") +
+          '<option value="neu"' + (liedWahl === "neu" ? " selected" : "") + ">" + esc(T.neuesLied) + "</option></select>" +
+        (liedWahl === "neu" ? '<button type="button" data-lied="neu" title="' + esc(T.neuesLied) + '">🎲</button><span class="at-erfunden">♪ ' + esc(liedName(aktuellesLied(), T)) + "</span>" : "") + "</div>";
   }
   function wegHtml(T) {
     const W = T.weg, s = W.stationen[wegStation], st = WEG[wegStation], stern = weg.sterne.reduce((a, b) => a + (b || 0), 0);
@@ -902,9 +902,29 @@
       g.fillStyle = spiel.urteil.art === "daneben" ? "#c4564a" : spiel.urteil.art === "perfekt" ? "#ffd27a" : "#ebe2cc";
       g.fillText(t().urteil[spiel.urteil.art], spiel.urteil.spur * bahn + bahn / 2, y - 40 * dpr - (1 - a) * 20 * dpr); g.globalAlpha = 1;
     }
-    if (spiel.duell) duellMalen(g, w, h, dpr, jetzt);
+    if (spiel.duell) {
+      duellMalen(g, w, h, dpr, jetzt); try { gegnerMalen(jetzt); } catch (_) {}
+      /* auf der eigenen Bühne: kurzer Hinweis, wenn der Gegner patzt */
+      const ep = duell && duell.erPatzer;
+      if (ep && jetzt - ep.t < 1.1 && jetzt >= 0) {
+        const a = Math.min(1, (1.1 - (jetzt - ep.t)) / .4);
+        const txt = dx().patzt(erName(), ep.n);
+        g.globalAlpha = a; g.font = "italic 600 " + (14 * dpr) + "px Georgia, serif"; g.textAlign = "center";
+        const tb = g.measureText(txt).width + 22 * dpr;
+        g.fillStyle = "rgba(16,14,21,.82)"; g.strokeStyle = "rgba(127,178,255,.55)"; g.lineWidth = 1 * dpr;
+        g.beginPath(); g.roundRect ? g.roundRect(w / 2 - tb / 2, 31 * dpr, tb, 22 * dpr, 11 * dpr) : g.rect(w / 2 - tb / 2, 31 * dpr, tb, 22 * dpr); g.fill(); g.stroke();
+        g.fillStyle = "#7fb2ff"; g.textBaseline = "middle"; g.fillText(txt, w / 2, 42 * dpr); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
+      }
+    }
     if (!spiel.pause && jetzt > spiel.daten.ende) { beenden(); return; }
     requestAnimationFrame(malen);
+  }
+  /* Online-Duell: was ich spiele, geht gesammelt an den Gegner (Note, Urteil) – so sieht er meine Spur neben seiner */
+  const ART_NR = { perfekt: 1, gut: 2, knapp: 3 }, NR_ART = { 1: "perfekt", 2: "gut", 3: "knapp" };
+  function zugMerken(n, art, spur) {
+    if (!spiel || !spiel.duell || !duell) return;
+    const i = n === -1 ? -1 : spiel.daten.liste.indexOf(n);
+    (spiel.zuege = spiel.zuege || []).push(i === -1 ? [-1, art, spur, Math.round((hoerZeit() - spiel.start) * 100)] : [i, art]);
   }
   function zeigeUrteil(art, spur) { spiel.urteil = { art, spur, zeit: hoerZeit() - spiel.start }; }
 
@@ -1063,9 +1083,9 @@
     spiel.blitz[spur] = 1;
     let best = null;
     spiel.daten.liste.forEach(n => { if (n.spur === spur && !n.status && Math.abs(n.zeit - jetzt) <= FENSTER.knapp && (!best || Math.abs(n.zeit - jetzt) < Math.abs(best.zeit - jetzt))) best = n; });
-    if (!best) { daneben(ctx.currentTime); spiel.serie = 0; spiel.streu++; zeigeUrteil("daneben", spur); spiel.punkte = Math.max(0, spiel.punkte - FEHLGRIFF); return; }
+    if (!best) { daneben(ctx.currentTime); spiel.serie = 0; spiel.streu++; zeigeUrteil("daneben", spur); spiel.punkte = Math.max(0, spiel.punkte - FEHLGRIFF); zugMerken(-1, 9, spur); return; }
     const d = Math.abs(best.zeit - jetzt), art = d <= FENSTER.perfekt ? "perfekt" : d <= FENSTER.gut ? "gut" : "knapp";
-    best.status = art; spiel.serie++; spiel.besteSerie = Math.max(spiel.besteSerie, spiel.serie);
+    best.status = art; spiel.serie++; spiel.besteSerie = Math.max(spiel.besteSerie, spiel.serie); zugMerken(best, ART_NR[art]);
     spiel.punkte += PUNKTE[art] * (1 + Math.min(spiel.serie, 20) * .025);
     /* zu früh getippt? Dann erklingt der Ton trotzdem genau im Takt */
     if (best.dauer) {
@@ -1083,8 +1103,8 @@
     const anteil = fertig ? 1 : Math.max(0, Math.min(1, (hoerZeit() - spiel.start - kalibWert - n.zeit) / n.dauer));
     n.bonus = Math.round(HALT_BONUS * (anteil >= .85 ? 1 : anteil));
     spiel.punkte += n.bonus * (1 + Math.min(spiel.serie, 20) * .025);
-    if (anteil >= .85) zeigeUrteil("gehalten", spur);
-    else { n.losgelassen = hoerZeit() - spiel.start; hg.gain.setTargetAtTime(0, ctx.currentTime, .06); }
+    if (anteil >= .85) { zeigeUrteil("gehalten", spur); zugMerken(n, 4); }
+    else { n.losgelassen = hoerZeit() - spiel.start; hg.gain.setTargetAtTime(0, ctx.currentTime, .06); zugMerken(n, 5); }
   }
   function beenden() {
     Object.keys(spiel.halt || {}).forEach(k => loslassen(+k, true));
@@ -1158,6 +1178,18 @@
   const finger = new Map();
   const fingerWeg = e => { if (!finger.has(e.pointerId)) return; const spur = finger.get(e.pointerId); finger.delete(e.pointerId); if (![...finger.values()].includes(spur)) loslassen(spur); };
   window.addEventListener("pointerup", fingerWeg); window.addEventListener("pointercancel", fingerWeg);
+  /* Lied aus der Auswahlliste */
+  root.addEventListener("change", e => {
+    const sel = e.target.closest && e.target.closest(".at-liedwahl"); if (!sel) return;
+    if (spiel || stimmt) { sel.value = liedWahl; return; }
+    if (duell) {
+      if (!duell.s.host || (duell.phase !== "wahl" && duell.phase !== "warten" && duell.phase !== "ende")) { sel.value = liedWahl; return; }
+      if (duell.phase === "ende") { duell.phase = "wahl"; ergebnis = null; duell.s.senden("zurueck", { r: duell.r }); duell.ichE = null; duell.erE = null; duell.rev = [false, false]; }
+    }
+    liedWahl = sel.value; if (liedWahl === "neu") erfunden = liedErfinden();
+    try { localStorage.setItem("imres-auftritt-lied", liedWahl); } catch (_) {}
+    ergebnis = null; zeichnen(); bestenLaden();
+  });
   root.addEventListener("click", e => {
     const st = e.target.closest("[data-stufe]");
     if (st && !spiel && !stimmt) { stufe = st.dataset.stufe; try { localStorage.setItem("imres-auftritt-stufe", stufe); } catch (_) {} ergebnis = null; zeichnen(); bestenLaden(); return; }
@@ -1283,6 +1315,8 @@
 .auftritt { grid-column: 1 / -1; }
 .at-stufen { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; font-size: .85rem; color: var(--ash); }
 .at-stufen button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .85rem; padding: .35rem .8rem; cursor: pointer; }
+.at-liedwahl { font: inherit; font-size: .85rem; color: var(--vellum); background: rgba(16,14,21,.85); border: 1px solid var(--ember); padding: .35rem .6rem; max-width: 100%; cursor: pointer; }
+.at-liedwahl:disabled { opacity: .55; cursor: default; }
 .at-stufen button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
 .at-buehne { position: relative; max-width: 560px; width: 100%; margin: 0 auto; }
 .at-canvas { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(224,160,70,.14), transparent 70%), rgba(16,14,21,.7); border: 1px solid var(--line); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
@@ -1370,7 +1404,8 @@
      Startzeit in seiner Uhr, jeder rechnet sie in seine Audio-Uhr um. Unterwegs fliegen ~4× pro Sekunde
      die Zwischenstände hin und her, am Ende das Ergebnis. Keine Pause im Duell; nichts landet in der Bestenliste. */
   const DX = {
-    de: { info: "⚔ Online-Duell: Ihr spielt dasselbe Lied zur selben Zeit – wer trifft besser?", infoHost: "Wähle Publikum und Lied, dann „Duell starten“.", infoGast: n => n + " wählt Publikum und Lied.",
+    de: { info: "⚔ Online-Duell: Ihr spielt dasselbe Lied zur selben Zeit – wer trifft besser?", infoHost: "Wähle Schwierigkeitsgrad und Lied, dann „Duell starten“.", infoGast: n => n + " wählt Schwierigkeitsgrad und Lied.",
+      patzt: (n, k) => "😬 " + n + (k > 2 ? " patzt und patzt!" : k > 1 ? " patzt schon wieder!" : " patzt!"),
       keinePause: "Im Duell gibt es keine Pause: Wechselst du den Tab, läuft dein Lied weiter und verpasste Noten zählen.",
       warten: "Warte auf Gegner …", los: "⚔ Duell starten", waehlt: n => n + " wählt das Lied …", laden: "🎻 Instrumente werden gestimmt …", wartenAuf: n => "Warte auf " + n + " …",
       bereit: "▶ Bereit", bereitText: "Bereit – gleich geht es los …", tippBereit: "Tippe auf „Bereit“, damit dein Gerät den Ton spielen darf.",
@@ -1380,7 +1415,8 @@
       zeilen: ["Treffsicherheit", "Auftrittswurf", "Beste Serie", "Treffer", "Fehlgriffe"],
       grund: { genau: "Die Treffsicherheit entscheidet.", wurf: "Gleich treffsicher – der Auftrittswurf entscheidet!", serie: "Gleichstand – die längere Serie entscheidet.", gleich: "Völliger Gleichstand.", aufgabe: n => n + " hat aufgegeben.", beide: "Beide haben aufgegeben." },
       aufgegeben: "aufgegeben", pausiert: "⏸ Gegner pausiert", fertig: "✔ fertig", zuSpaet: "Den Start verpasst – diese Runde zählt als aufgegeben.", gleich: "Gleich geht es los!", weg: n => n + " ist nicht mehr da." },
-    en: { info: "⚔ Online duel: you both play the same song at the same time – who hits more?", infoHost: "Pick audience and song, then “Start duel”.", infoGast: n => n + " picks audience and song.",
+    en: { info: "⚔ Online duel: you both play the same song at the same time – who hits more?", infoHost: "Pick difficulty and song, then “Start duel”.", infoGast: n => n + " picks difficulty and song.",
+      patzt: (n, k) => "😬 " + n + (k > 2 ? " fumbles again and again!" : k > 1 ? " fumbles again!" : " fumbles!"),
       keinePause: "There is no pause in a duel: if you switch tabs, your song keeps playing and missed notes count.",
       warten: "Waiting for an opponent …", los: "⚔ Start duel", waehlt: n => n + " is picking the song …", laden: "🎻 Tuning the instruments …", wartenAuf: n => "Waiting for " + n + " …",
       bereit: "▶ Ready", bereitText: "Ready – about to begin …", tippBereit: "Tap “Ready” so your device may play sound.",
@@ -1429,6 +1465,16 @@
     s.on("runde", d => { if (!duell || s.host || !ganz(d.r, 1, 1e6) || d.r <= duell.r) return; const c = wahlPruefen(d); if (c) duellLaden(d.r, c); });
     s.on("bereit", d => { if (!duell || !s.host || d.r !== duell.r) return; duell.er.bereit = d.r; if (duell.phase === "bereit") duellAnpfiff(); });
     s.on("los", d => { if (!duell || s.host || d.r !== duell.r || typeof d.T !== "number" || !isFinite(d.T)) return; duell.losBei = d.T; if (duell.phase === "bereit") duellStart(); });
+    s.on("zug", d => {
+      if (!duell || d.r !== duell.r || !Array.isArray(d.z) || !duell.vor) return;
+      const liste = duell.vor.daten.liste, e = duell.erSpur = duell.erSpur || { status: new Map(), fehl: [] };
+      d.z.slice(0, 200).forEach(z => {
+        if (!Array.isArray(z)) return;
+        if (z[0] === -1 && ganz(z[2], 0, 2) && typeof z[3] === "number") e.fehl.push({ spur: z[2], t: z[3] / 100 });
+        else if (ganz(z[0], 0, liste.length - 1) && ganz(z[1], 1, 5)) { const alt = e.status.get(z[0]) || {}; if (z[1] <= 3) alt.art = NR_ART[z[1]]; else if (z[1] === 4) alt.gehalten = true; else alt.los = true; e.status.set(z[0], alt); }
+      });
+      if (e.fehl.length > 40) e.fehl.splice(0, e.fehl.length - 40);
+    });
     s.on("stand", d => {
       if (!duell || d.r !== duell.r) return;
       if (!ganz(d.p, 0, 1e7) || !ganz(d.s, 0, 1e5) || !ganz(d.b, 0, 1e5) || !(d.pr === null || ganz(d.pr, 0, 100))) return;
@@ -1502,7 +1548,7 @@
     if (spiel) { const d0 = duell; duell = null; abbrechen(); duell = d0; }
     audio();
     wahlUebernehmen(c);
-    d.r = r; d.cfg = c; d.phase = "laden"; d.ichE = null; d.erE = null; d.er = { stand: null, bereit: d.er.bereit }; d.rev = [false, false]; d.losBei = null; d.losT = null; d.vor = null; d.tippen = false;
+    d.r = r; d.cfg = c; d.phase = "laden"; d.ichE = null; d.erE = null; d.erSpur = null; d.er = { stand: null, bereit: d.er.bereit }; d.rev = [false, false]; d.losBei = null; d.losT = null; d.vor = null; d.tippen = false;
     ergebnis = null;
     const lied = cfgLied(c), st = STUFEN[c.stufe], daten = noten(st, lied); daten.lied = lied;
     zeichnen(); buehneZeigen();
@@ -1578,6 +1624,7 @@
       }
       const st = { r: d.r, p: Math.round(spiel.punkte), s: spiel.serie, b: spiel.besteSerie, pr: duellLauf(), h: document.hidden ? 1 : 0 }, text = JSON.stringify(st);
       if (sofort === true || text !== d.standText || Date.now() - d.standZeit > 1000) { d.standText = text; d.standZeit = Date.now(); d.s.senden("stand", st); }
+      if (spiel.zuege && spiel.zuege.length) { d.s.senden("zug", { r: d.r, z: spiel.zuege.splice(0, 120) }); }
       d.ichStand = st;
     }
     duellBalken();
@@ -1680,10 +1727,10 @@
     ["at-modus", "at-weg-fuss", "at-liste", "at-eintrag-box"].forEach(k => { const el = root.querySelector("." + k); if (el) el.remove(); });
     const info = root.querySelector(".tav-info");
     if (info) info.innerHTML = esc(D.info) + " " + esc(d.s.partner ? (host ? D.infoHost : D.infoGast(erName())) : "") + '<br><strong class="at-keine-pause">' + esc(D.keinePause) + "</strong>";
-    if (!host || d.phase !== "wahl" && d.phase !== "warten" && d.phase !== "ende") root.querySelectorAll("[data-stufe], [data-lied]").forEach(b => { b.disabled = true; });
+    if (!host || d.phase !== "wahl" && d.phase !== "warten" && d.phase !== "ende") root.querySelectorAll("[data-stufe], [data-lied], .at-liedwahl").forEach(b => { b.disabled = true; });
     const bh = root.querySelector(".at-buehne");
     if (bh && !root.querySelector(".at-duell-bar")) { const bar = document.createElement("div"); bar.className = "at-duell-bar"; bh.before(bar); }
-    duellBalken();
+    duellBalken(); gegnerFlaeche();
     /* Gastgeber: Wahl dem Gast zeigen */
     if (host && d.s.da() && (d.phase === "wahl" || d.phase === "ende")) { const w = JSON.stringify(wahlJetzt()); if (w !== d.gesendet) { d.gesendet = w; d.s.senden("wahl", wahlJetzt()); } }
   }
@@ -1699,6 +1746,82 @@
     const html = seite(D.du, ich && d.phase === "spiel" ? ich : null, d.phase !== "spiel" ? d.ichE : null, "ich", false) +
       seite(erName(), er, d.erE, "er", !!(er && er.h && !d.erE) || !!(d.s.partner && d.s.partner.weg && !d.erE));
     if (bar.innerHTML !== html) bar.innerHTML = html;
+  }
+  /* Gegner-Spur neben der eigenen: dieselben Noten, eingefärbt nach seinen Treffern.
+     Sie läuft eine gute halbe Sekunde hinterher – so sind seine Treffer schon angekommen, wenn die Note die Linie erreicht. */
+  const ER_VERZUG = .6;
+  function gegnerMalen(jetztIch) {
+    const c = root.querySelector(".at-canvas-er"); if (!c || !duell || !duell.vor || c.offsetParent === null) return;
+    /* gleiche Höhe wie die eigene Bühne – dann liegen beide goldenen Linien auf einer Höhe */
+    const eigen = canvas(); if (eigen && eigen.offsetHeight && Math.abs(c.offsetHeight - eigen.offsetHeight) > 1) c.style.height = eigen.offsetHeight + "px";
+    const { w, h, dpr } = maße(c), g = c.getContext("2d"), jetzt = jetztIch - ER_VERZUG, e = duell.erSpur || { status: new Map(), fehl: [] };
+    g.clearRect(0, 0, w, h);
+    const bahn = w / 3, y = h * .82, flug = spiel.st.flug, liste = duell.vor.daten.liste, blau = "127,178,255";
+    /* Patzer des Gegners: verpasste Note oder Fehlgriff – kurz rot, ein dumpfer Ton und ein Hinweis auf der eigenen Bühne */
+    e.gemeldet = e.gemeldet || new Set(); e.patzer = e.patzer || [];
+    const patzer = (schluessel, spur) => { if (e.gemeldet.has(schluessel)) return; e.gemeldet.add(schluessel); if (jetztIch < 0) return;
+      e.patzer.push({ spur, t: jetzt }); duell.erPatzer = { t: jetztIch, n: (duell.erPatzer && jetztIch - duell.erPatzer.t < 1.2 ? duell.erPatzer.n + 1 : 1) };
+      try { const z = ctx.currentTime; rauschen(z, "bandpass", 520, .16, .06); zupfen(hz(36), z, .12, true); } catch (_) {} };
+    liste.forEach((n, i) => { if (!e.status.has(i) && n.zeit < jetzt - FENSTER.knapp - .25 && n.zeit > jetzt - 1.5) patzer("n" + i, n.spur); });
+    e.fehl.forEach(f => { if (jetzt >= f.t && jetzt - f.t < 1) patzer("f" + f.t + ":" + f.spur, f.spur); });
+    if (e.patzer.length > 20) e.patzer.splice(0, e.patzer.length - 20);
+    const blitz = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+      const grad = g.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, "rgba(" + blau + ",0.02)"); grad.addColorStop(1, "rgba(" + blau + ",0.07)");
+      g.fillStyle = grad; g.fillRect(i * bahn + 2 * dpr, 0, bahn - 4 * dpr, h);
+    }
+    /* Treffer-Leuchten und Fehlgriffe der letzten Augenblicke */
+    liste.forEach((n, i) => { const st = e.status.get(i); if (st && st.art) { const dt = jetzt - n.zeit; if (dt >= 0 && dt < .3) blitz[n.spur] = Math.max(blitz[n.spur], 1 - dt / .3); } });
+    blitz.forEach((b, i) => { if (b > 0) { g.fillStyle = "rgba(255,210,122," + (.22 * b) + ")"; g.fillRect(i * bahn + 2 * dpr, 0, bahn - 4 * dpr, h); } });
+    e.patzer.forEach(f => { const dt = jetzt - f.t; if (dt >= 0 && dt < .45) { g.fillStyle = "rgba(196,86,74," + (.38 * (1 - dt / .45)) + ")"; g.fillRect(f.spur * bahn + 2 * dpr, 0, bahn - 4 * dpr, h); } });
+    g.strokeStyle = "rgba(" + blau + ",.9)"; g.lineWidth = 3 * dpr; g.shadowColor = "rgba(" + blau + ",.8)"; g.shadowBlur = 10 * dpr;
+    g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); g.shadowBlur = 0;
+    for (let i = 0; i < 3; i++) { g.strokeStyle = "rgba(" + blau + ",.5)"; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 16 * dpr, 0, Math.PI * 2); g.stroke(); }
+    const r = Math.min(17 * dpr, bahn * .22);
+    liste.forEach((n, i) => {
+      const st = e.status.get(i) || {}, vorbei = n.zeit < jetzt - FENSTER.knapp - .25;
+      const x = n.spur * bahn + bahn / 2;
+      if (n.dauer) {
+        const ende = n.zeit + n.dauer; if (ende - jetzt < -.1 || n.zeit - jetzt > flug) return;
+        const haelt = st.art && !st.los && !st.gehalten && jetzt >= n.zeit && jetzt < ende;
+        const kopf = haelt ? y : y - ((n.zeit - jetzt) / flug) * y, yEnde = Math.max(0, y - ((ende - jetzt) / flug) * y);
+        if (kopf > yEnde && !(st.art && jetzt > n.zeit && !haelt)) { g.globalAlpha = (!st.art && vorbei) || st.los ? .2 : haelt ? .9 : .5; g.fillStyle = FARBEN[n.spur]; g.fillRect(x - 6 * dpr, yEnde, 12 * dpr, kopf - yEnde); g.globalAlpha = 1; }
+      }
+      if (st.art && jetzt >= n.zeit) return; /* getroffen: verschwindet an der Linie */
+      const dt = n.zeit - jetzt; if (dt > flug || dt < -.4) return;
+      const ny = y - (dt / flug) * y;
+      g.globalAlpha = vorbei ? .28 : 1; g.fillStyle = FARBEN[n.spur];
+      g.beginPath(); g.roundRect ? g.roundRect(x - r * 1.4, ny - r * .7, r * 2.8, r * 1.4, 6 * dpr) : g.rect(x - r * 1.4, ny - r * .7, r * 2.8, r * 1.4); g.fill();
+      g.fillStyle = "#16121a"; g.font = (13 * dpr) + "px serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(ZEICHEN[n.spur], x, ny + 1); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
+    });
+    /* „Daneben!“ beim Gegner */
+    const lp = e.patzer[e.patzer.length - 1];
+    if (lp && jetzt - lp.t < .6) { const a = 1 - (jetzt - lp.t) / .6; g.globalAlpha = a; g.textAlign = "center"; g.font = "bold " + (18 * dpr) + "px Georgia, serif"; g.fillStyle = "#c4564a";
+      g.fillText(t().urteil.daneben, lp.spur * bahn + bahn / 2, y - 60 * dpr - (1 - a) * 16 * dpr); g.globalAlpha = 1; }
+    /* letztes Urteil */
+    let letzt = null;
+    liste.forEach((n, i) => { const st = e.status.get(i); if (st && st.art && n.zeit <= jetzt && (!letzt || n.zeit > letzt.n.zeit)) letzt = { n, art: st.art }; });
+    if (letzt && jetzt - letzt.n.zeit < .6) {
+      const a = 1 - (jetzt - letzt.n.zeit) / .6; g.globalAlpha = a; g.textAlign = "center"; g.font = "bold " + (18 * dpr) + "px Georgia, serif";
+      g.fillStyle = letzt.art === "perfekt" ? "#ffd27a" : "#ebe2cc"; g.fillText(t().urteil[letzt.art], letzt.n.spur * bahn + bahn / 2, y - 36 * dpr - (1 - a) * 16 * dpr); g.globalAlpha = 1;
+    }
+    const er = duell.er.stand;
+    g.fillStyle = "rgba(" + blau + ",1)"; g.textAlign = "left"; g.font = "600 " + (14 * dpr) + "px Georgia, serif";
+    g.fillText(erName(), 10 * dpr, 22 * dpr);
+    g.fillStyle = "#ebe2cc"; g.font = (13 * dpr) + "px Georgia, serif";
+    if (er) { g.fillText(er.p + " " + t().punkte, 10 * dpr, 40 * dpr); if (er.s >= 5) { g.textAlign = "right"; g.fillStyle = "#e0a046"; g.fillText(t().serie(er.s), w - 10 * dpr, 22 * dpr); } }
+    if (jetztIch < 0) { g.fillStyle = "rgba(16,14,21,.5)"; g.fillRect(0, 0, w, y - 30 * dpr); }
+  }
+  /* Bühne im Duell zweigeteilt: links ich, rechts der Gegner */
+  function gegnerFlaeche() {
+    const d = duell, bh = root.querySelector(".at-buehne"); if (!d || !bh) return;
+    const zeigen = d.phase === "spiel" && !!spiel && d.s.partner;
+    let zwei = root.querySelector(".at-zwei");
+    if (zeigen && !zwei) {
+      zwei = document.createElement("div"); zwei.className = "at-zwei"; bh.before(zwei); zwei.appendChild(bh);
+      const er = document.createElement("div"); er.className = "at-er"; er.innerHTML = '<canvas class="at-canvas-er" aria-label="' + esc(erName()) + '"></canvas>'; zwei.appendChild(er);
+    } else if (!zeigen && zwei) { zwei.before(bh); zwei.remove(); }
+    root.classList.toggle("at-im-duell", !!zeigen);
   }
   function duellMalen(g, w, h, dpr, jetzt) {
     if (jetzt >= 0) return;
@@ -1735,6 +1858,12 @@
   const duellCss = document.createElement("style");
   duellCss.textContent = `
 .at-duell-knopf-zeile { display: flex; justify-content: center; }
+.at-zwei { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: .5rem; max-width: 1000px; width: 100%; margin: 0 auto; align-items: start; }
+.at-zwei .at-buehne { max-width: none; margin: 0; }
+.at-er { min-width: 0; }
+.at-canvas-er { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(127,178,255,.1), transparent 70%), rgba(16,14,21,.7); border: 1px solid rgba(127,178,255,.4); pointer-events: none; }
+@media (min-width: 900px) { .at-zwei { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.auftritt.at-im-duell .at-duell-bar { max-width: 1000px; }
 .at-duell-text { margin: 0; flex-basis: 100%; text-align: center; font-family: var(--name); font-size: 1.05rem; color: var(--vellum); }
 .at-fuss .at-duell-text { order: 2; }
 .at-keine-pause { color: #ffd27a; font-weight: 400; font-size: .9em; }
@@ -1762,7 +1891,7 @@
 `;
   document.head.appendChild(duellCss);
   root._duell = () => duell && { phase: duell.phase, r: duell.r, host: duell.s.host, startEcht: duell.startEcht, versatz: duell.versatz, uhrRtt: duell.uhrRtt, cfg: duell.cfg, ichE: duell.ichE, erE: duell.erE,
-    er: duell.er.stand, rev: duell.rev.slice(), tippen: duell.tippen, noten: duell.vor ? duell.vor.daten.liste.map(n => [Math.round(n.zeit * 1e4), n.spur, n.ton, Math.round((n.dauer || 0) * 1e4)]) : null }; /* für automatische Tests */
+    er: duell.er.stand, erZuege: duell.erSpur ? duell.erSpur.status.size : 0, rev: duell.rev.slice(), tippen: duell.tippen, noten: duell.vor ? duell.vor.daten.liste.map(n => [Math.round(n.zeit * 1e4), n.spur, n.ton, Math.round((n.dauer || 0) * 1e4)]) : null }; /* für automatische Tests */
 
   root._zustand = () => ({ spiel, ctx, stimmt, kalib, kalibWert, weg, proben: [...probeBuf.keys()], hoerZeit: ms => hoerZeit(ms) }); /* für automatische Tests */
   zeichnen();
