@@ -644,6 +644,422 @@
     Object.assign(TX[l].nsc, NEUE_NSC[l]);
     Object.assign(NSC2[l], NEUE_NSC2[l]);
   });
+  /* ---------- Gespräche: jede Antwort hat ihre eigene Reaktion und führt zu einer eigenen Folgefrage ----------
+     Form: { f: Frage, a: [[Qualität, Barradins Antwort, Reaktion des NSC, (Folgefrage)], …] } */
+  const GESPRAECHE = {
+    de: {
+      gundren: { f: "„Im Voraus zahlen? Hm. Und was hab ich davon, Barde?“", a: [
+        ["gut", "„Die Gewissheit, dass ich dich bis Phandalin keine Sekunde aus den Augen lasse.“", "„Ha! Das klingt wie eine Drohung. Eine charmante Drohung. Gefällt mir.“",
+          { f: "„Und wenn uns Goblins überfallen? Lässt du mich dann auch nicht aus den Augen?“", a: [
+            ["gut", "„Ich werfe mich zwischen dich und jeden Pfeil. Theatralisch. Mit Gesang.“", "„Mit Gesang? Na, dann hören die Goblins dich wenigstens kommen. Du bist verrückt, Junge. Ich mag verrückt.“"],
+            ["mittel", "„Ich lasse Friedrich nicht aus den Augen. Der lässt dich nicht aus den Augen. Das zählt doch.“", "„Eine Kette aus Augäpfeln. Sehr beruhigend. Und sehr umständlich.“"],
+            ["schlecht", "„Danach schreibe ich eine wunderschöne Ballade über deine Rettung. Oder deinen Tod. Je nachdem.“", "„JE NACHDEM?! Ich zahle niemandem im Voraus, der schon meinen Nachruf reimt!“"]] }],
+        ["mittel", "„Eine Quittung. Handgeschrieben. Mit Herzchen.“", "„Mit … Herzchen. Dreißig Jahre im Handel, aber eine Quittung mit Herzchen hat mir noch keiner angeboten.“",
+          { f: "„Und was steht auf dieser Quittung, außer Herzchen?“", a: [
+            ["gut", "„‚Erhalten: Gold. Gegeben: mein Herz. Gültig bis Phandalin. Verlängerung möglich.‘“", "„Verlängerung möglich … Du bist ein gerissener Händler, Barde. Fast so gerissen wie ich. Fast.“"],
+            ["mittel", "„Nur noch mehr Herzchen. Ich kann nicht so gut schreiben.“", "„Ein Barde, der nicht schreiben kann. Na, wenigstens bist du ehrlich. Das ist selten in der Branche.“"],
+            ["schlecht", "„‚Zwerg hat bezahlt. Zwerg ist selbst schuld.‘“", "„Selbst schuld?! Gib mir sofort meinen Vorschuss zurück! Den, den ich dir noch gar nicht gegeben habe!“"]] }],
+        ["schlecht", "„Dann hast du weniger Gold, das dir Banditen klauen können. Ich mach das aus reiner Nächstenliebe.“", "„Ach so. Du klaust mir das Gold, bevor es die Banditen tun. Wie aufmerksam. Wie überaus aufmerksam.“",
+          { f: "„Gib mir einen einzigen Grund, dich nicht sofort vom Wagen zu werfen.“", a: [
+            ["gut", "„Weil dich sonst niemand so zum Lachen bringt. Gib's zu, du hast gerade gegrinst.“", "„Ich hab nicht gegrinst. Das ist … der Bart. Der bewegt sich manchmal von allein. Na schön. Ein Grinsen. Ein kleines.“"],
+            ["mittel", "„Weil Rex den Wagen schon ins Herz geschlossen hat. Schau, er hat schon markiert.“", "„Er hat WAS? … Na gut. Dann gehört der Wagen jetzt wohl euch. Und der Geruch auch.“"],
+            ["schlecht", "„Weil Echo dich sonst bis Phandalin fragt, ob du Gundren kennst.“", "„Ich BIN Gundren! … Moment. Das ist die Drohung, oder? Das ist eine ganz furchtbare Drohung.“"]] }]] },
+
+      buergermeister: { f: "„Die volle Belohnung? Nun … wie würden Sie die Arbeit Ihrer Gruppe denn … beziffern?“", a: [
+        ["gut", "„Unbezahlbar. Aber für Sie machen wir einen Freundschaftspreis.“", "„Ein Freundschaftspreis! Wie zuvorkommend. Ich wusste gar nicht, dass wir Freunde sind.“",
+          { f: "„Und was, äh, gehört zu so einer Freundschaft dazu?“", a: [
+            ["gut", "„Gemeinsame Abende, ehrliche Worte und eine pünktlich gezahlte Belohnung.“", "„Das Letzte klang verdächtig nach einer Vertragsklausel. Aber charmant formuliert. Sehr charmant.“"],
+            ["mittel", "„Ich weiß nicht. Ich hatte noch nie einen Freund mit Amtskette.“", "„Oh. Nun. Ich auch nicht. Also, keinen ohne. Das ist gerade ein seltsames Gefühl.“"],
+            ["schlecht", "„Dass Sie mir Ihre Schatzkammer zeigen. Rein freundschaftlich. Ich bring einen Sack mit.“", "„Einen SACK? Wache! … Ach, wir haben ja keine Wache. Deswegen haben wir ja euch angeheuert.“"]] }],
+        ["mittel", "„In Goblinohren. Wir haben siebzehn. Wollen Sie nachzählen?“", "„Bitte legen Sie die nicht auf meinen Schreibtisch. Bitte. Das ist Eiche.“",
+          { f: "„Gibt es denn eine … weniger organische Art, Ihre Leistung zu belegen?“", a: [
+            ["gut", "„Ganz Phandalin lebt noch. Das ist der schönste Beleg, den ich Ihnen schenken kann.“", "„Das … ist tatsächlich ein sehr guter Punkt. Und sehr hübsch gesagt. Ich bin gerührt. Ein wenig.“"],
+            ["mittel", "„Ein Lied! Ich singe Ihnen alle siebzehn Ohren vor. Einzeln.“", "„Nein, nein, schon gut, ich glaube Ihnen. Bitte nicht singen. Bitte keine Ohren.“"],
+            ["schlecht", "„Draußen liegt noch ein ganzer Goblin. Soll ich ihn reinholen?“", "„Einen GANZEN? Solange der da draußen liegt, zahle ich gar nichts!“"]] }],
+        ["schlecht", "„Wir sind teuer. Aber Sie sind reich. Das passt doch perfekt.“", "„Reich? Ich? Ich bin ein bescheidener Diener dieser Stadt. Mit einem sehr großen Haus. Zufällig.“",
+          { f: "„Also. Was wollen Sie wirklich, Barde?“", a: [
+            ["gut", "„Ihr Vertrauen, Herr Bürgermeister. Das Gold ist nur die Verpackung.“", "„Mein Vertrauen. Hm. Das wollte noch nie jemand. Die meisten wollen nur das Gold.“"],
+            ["mittel", "„Ehrlich gesagt? Ein Bad. Und dann das Gold.“", "„Das Bad bekommen Sie umsonst. Beim Gold reden wir noch mal.“"],
+            ["schlecht", "„Ihren Hut. Er steht Ihnen nicht.“", "„Mein … Hut? Der war ein Geschenk meiner Mutter! Raus! Nein, warten Sie, die Belohnung! Nein, doch raus!“"]] }]] },
+
+      blight: { f: "„Knirsch? Knarz?“ (Der Blight deutet zitternd auf deine Fackel.)", a: [
+        ["gut", "(Barradin löscht die Fackel.) „Keine Flammen heute Nacht. Nur Funken.“", "(Der Blight raschelt erleichtert. Ein Zweig legt sich vorsichtig um Barradins Finger. Fast wie Händchenhalten.)",
+          { f: "„Knirsch!“ (Er zeigt auf Echo. Der hält schon wieder einen Feuerball bereit.)", a: [
+            ["gut", "„Echo! Bitte! Wir haben ein Date!“", "(Echo lässt den Feuerball sinken. Der Blight blüht auf. Wörtlich: Eine kleine Blüte öffnet sich an seinem Kopf.)"],
+            ["mittel", "„Keine Sorge. Echo zielt sowieso immer daneben.“", "(Der verkohlte Ast neben euch sagt etwas anderes. Der Blight zittert wie Espenlaub. Er ist Espenlaub.)"],
+            ["schlecht", "„Er will nur kurz Marshmallows rösten.“", "(Der Blight versteht nur ‚rösten‘. Er krallt sich panisch in Barradins Stiefel. Es tut sehr weh.)"]] }],
+        ["mittel", "„Das ist keine Fackel. Das ist ein … sehr warmes Geschenk. Für dich.“", "(Der Blight streckt einen Zweig aus. Der fängt Feuer. Er pustet hektisch. Seine Augen sagen: ‚Das war ein schlechtes Geschenk.‘)",
+          { f: "„Knarz!!“ (Er wedelt anklagend mit dem angekokelten Zweig.)", a: [
+            ["gut", "(Barradin pustet zärtlich auf den Zweig.) „Ich mach's wieder gut. Versprochen.“", "(Der Blight hält ihm den Zweig hin wie eine verletzte Pfote. Es knistert. Diesmal romantisch.)"],
+            ["mittel", "„Steht dir aber. So ein bisschen Ruß. Sehr verwegen.“", "(Der Blight betrachtet sich in einer Pfütze. Er ist unsicher. Aber ein bisschen eitel ist er auch.)"],
+            ["schlecht", "„Siehst du? Jetzt bist du ein Feuerholz-Blight. Das ist eine Beförderung.“", "(Der Blight wirft Barradin eine Eichel an den Kopf. Mit erstaunlicher Wucht. Und Zielgenauigkeit.)"]] }],
+        ["schlecht", "„Keine Angst. Ich verbrenne nur Blights, die nicht flirten wollen.“", "(Das Rascheln stoppt schlagartig. Rubinrote Augen fixieren Barradin. Irgendwo knackt ein Ast. Sehr bedrohlich.)",
+          { f: "„…Knirsch.“ (Es klingt wie eine letzte Warnung.)", a: [
+            ["gut", "„Das war ein Witz! Ein schlechter. Ich mache schlechte Witze, wenn ich nervös bin. Und du machst mich nervös.“", "(Der Blight legt den Kopf schief. Nervös? Wegen ihm? Ein Blatt färbt sich rot. Herbst kann so schön sein.)"],
+            ["mittel", "(Barradin lässt die Fackel in eine Pfütze fallen.) „Ups.“", "(Zischend geht sie aus. Der Blight entspannt sich ein wenig. Nur ein wenig.)"],
+            ["schlecht", "„Echo, Feuerball! – Nein, warte, das war ein Scherz!“", "(Echo hebt schon die Hand. Der Blight umrankt Barradins Bein. Fest. Sehr fest. Es ist keine Umarmung.)"]] }]] },
+
+      bugbear: { f: "„GRRR. Passwort?“", a: [
+        ["gut", "„‚Du hast die schönsten Augen im ganzen Wachturm.‘“", "„…Grr. Falsches Passwort. Aber richtig schöner Satz. Noch mal sagen.“",
+          { f: "„Was noch schön an mir? GRRR. Sag schnell.“", a: [
+            ["gut", "„Dein Lächeln. Alle sechzig Zähne davon.“", "„Zweiundsechzig! Du hast gezählt? Niemand zählt. GRRR. Du darfst rein. Fast.“"],
+            ["mittel", "„Dein … Fell? Es ist so … vorhanden.“", "„Vorhanden. Grr. Wie Dach vorhanden. Wie Stein vorhanden. Bugbear ist traurig.“"],
+            ["schlecht", "„Deine Tür. Die ist echt schön. Darf ich durch?“", "„TÜR schöner als Bugbear?! Tür bleibt zu. Für immer. Bugbear heiratet Tür.“"]] }],
+        ["mittel", "„Ähm … ‚Passwort‘?“", "„GRRR. Das ist … das ist tatsächlich das Passwort. Wer hat dir verraten?!“",
+          { f: "„Niemand wissen Passwort. Woher du wissen? GRRR?“", a: [
+            ["gut", "„Ich hab dir in die Augen geschaut. Da stand's.“", "„…In meine Augen. Grr. Bugbear muss sich setzen. Bugbear hat Gefühle.“"],
+            ["mittel", "„Geraten. Wie fast alles in meinem Leben.“", "„Geraten. Grr. Du hast Glück. Bugbear mag Glück. Bugbear mag dich ein bisschen.“"],
+            ["schlecht", "„Ezekiel hat es aus deiner Hosentasche geklaut. Es stand auf einem Zettel.“", "„Bugbear hat keine Hose! … GRRR! Wo ist Zettel?! Wo ist Hose?!“"]] }],
+        ["schlecht", "„Ich brauch kein Passwort. Ich hab einen Bogenschützen.“", "(Friedrich winkt von hinten. Der Bugbear winkt nicht zurück. Er lässt die Fingerknöchel knacken.)",
+          { f: "„GRRR. Letzte Chance, kleiner Mann. Warum soll ich dich nicht zerquetschen?“", a: [
+            ["gut", "„Weil ich dir jeden Abend ein Lied vor deiner Tür singen würde. Du wärst nie mehr allein auf Wache.“", "„…Nie mehr allein. Grr. Das ist gemein. Gemein schön. Bugbear überlegt.“"],
+            ["mittel", "„Weil ich nur aus Knochen bestehe. Schmeckt nicht.“", "„Bugbear mag Knochen. Aber du hast recht, du bist zu dünn. Grr. Iss mehr.“"],
+            ["schlecht", "„Weil Rex dich sonst beißt. Er ist sehr gefährlich.“", "(Rex rollt sich auf den Rücken und lässt sich vom Bugbear den Bauch kraulen. Verräter.)"]] }]] },
+
+      ilvara: { f: "„Du willst also, dass ich die Ketten lockere. Was genau bietest du mir dafür, Sklave?“", a: [
+        ["gut", "„Unterhaltung, Herrin. Die Festung ist so still. Ich kann das ändern.“", "„Still ist sie, ja. Still und langweilig. Bah. Na schön, sprich weiter. Aber sei gut.“",
+          { f: "„Dann unterhalte mich. Was ist das Gefährlichste, das du je getan hast?“", a: [
+            ["gut", "„Ich flirte gerade mit einer Drow-Priesterin, die mich mit einem Wort an die Spinnen verfüttern kann. Und es ist das Beste, was ich je getan habe.“", "„…Das ist allerdings gefährlich. Und dumm. Und mutig. Die Spinnen müssen warten.“"],
+            ["mittel", "„Ich habe einmal mit Rex eine Wurst geteilt. Er hat sie mir fast aus dem Mund gerissen.“", "„Das ist … erbärmlich. Aber auf eine Art, die mich zum Lachen bringt. Ich hasse es.“"],
+            ["schlecht", "„Euch zu sagen, dass Ihr in Donnerbaum eine furchtbare Druidin wart.“", "„Furchtbar?! Ich war eine HERVORRAGENDE Druidin! Wache! Mehr Ketten!“"]] }],
+        ["mittel", "„Ein Lied? Eine Ballade? Ein Fußbad?“", "„Ein Fußbad. Du bietest einer Herrin des Hauses Mizzrym ein Fußbad an.“",
+          { f: "„…Mit welchem Öl?“", a: [
+            ["gut", "„Lavendel. Und dazu lese ich Euch Gedichte vor. Über Euch.“", "„Lavendel. Gedichte. Über mich. … Na schön. Ein Kettenglied. Nur eins.“"],
+            ["mittel", "„Spinnenöl? Gibt es das? Ich improvisiere.“", "„Es gibt kein Spinnenöl, Narr. … Aber die Idee ist nicht schlecht. Ich behalte sie.“"],
+            ["schlecht", "„Öl? Ich hatte an das Brackwasser aus der Zelle gedacht.“", "„Brackwasser. Für meine Füße. Ich lasse dich in Brackwasser einlegen. Wie eine Gurke.“"]] }],
+        ["schlecht", "„Freiheit für mich. Und für Euch die Chance, mich zu vermissen.“", "„Vermissen. Dich. Ich vermisse nicht einmal meine Peitsche, wenn sie mal in der Waffenkammer liegt.“",
+          { f: "„Gib mir einen Grund, dich nicht sofort auspeitschen zu lassen.“", a: [
+            ["gut", "„Weil ich der einzige Gefangene bin, der Euch zum Lächeln bringt. Da – Ihr tut es schon wieder.“", "„Tue ich nicht. Das ist ein Zucken. Ein Drow-Zucken. Hör auf zu grinsen.“"],
+            ["mittel", "„Weil meine Haut sehr empfindlich ist. Ich hab eine Salbe dafür.“", "„Eine Salbe. Du bist der verweichlichste Sklave, den ich je hatte. Fast niedlich.“"],
+            ["schlecht", "„Weil wir sowieso bald ausbrechen. … Ups.“", "„AUSBRECHEN?! Wache! Doppelte Ketten für alle! Und für den Barden dreifache!“"]] }]] },
+
+      chasme: { f: "„SSSSS? Warum du nicht fliehen wie andere kleine Fleischsäcke?“", a: [
+        ["gut", "„Weil ich noch nie so ein faszinierendes Summen gehört habe.“", "„Sss … fasssziniert? Niemand je fasssziniert. Alle nur schreien. Und Dolch in Auge stechen.“",
+          { f: "„Ssso. Was gefällt dir am bessssten an mir?“", a: [
+            ["gut", "„Deine Augen. Alle siebzehn. Jedes schaut mich an, als wäre ich etwas Besonderes.“", "„Achtzehn! Eins ist hinten. SSSS. Aber du hassst sie fast alle gezählt. Das isss Liebe.“"],
+            ["mittel", "„Dass du gerade nicht stichst.“", "„Nnnoch nicht. SSSS. Aber die Ehrlichkeit gefällt mir. Ein bissschen.“"],
+            ["schlecht", "„Die Augenklappe, seit Ezekiel dir den Dolch reingerammt hat. Sehr geheimnisvoll.“", "„DAS ISSST KEIN ACCESSOIRE! SSSSSSSSS!“"]] }],
+        ["mittel", "„Ich bin gelähmt vor Angst. Das sieht nur aus wie Mut.“", "„SSSS. Ehrlicher Fleischsack. Ehrliche Fleischsäcke ssselten.“",
+          { f: "„Und wenn ich dich jetzt ssssteche, wasss dann?“", a: [
+            ["gut", "„Dann schlafe ich ein und träume von dir. Kein schlechter Tausch.“", "„Träumen … von mir. SSS. Keiner träumt von mir. Nur Albträume. Das hier isss neu.“"],
+            ["mittel", "„Dann schreit Friedrich. Wieder. Er hat Übung darin.“", "„Ja. Er hat sehr ssschön gessschrien. SSS. Ich erinnere mich gern.“"],
+            ["schlecht", "„Dann ruft Echo einen Blitz. Er ist da sehr großzügig.“", "„Drohung? Beim erssssten Date? SSSSS! Stachel wird ganz unruhig!“"]] }],
+        ["schlecht", "„Fliehen? Vor einer zu groß geratenen Mücke? Niemals.“", "„MÜCKE?! Ich bin Dämon aus dem Abysss! MÜCKE!!“",
+          { f: "„Entschuldige dich. Ssssofort. Ssssonst …“", a: [
+            ["gut", "„Verzeih. Du bist keine Mücke. Du bist die schönste Katastrophe, die je auf mich zugeflogen ist.“", "„Ssschönssste Katastrophe … SSS. Darf ich das auf meinen Grabstein ssschreiben?“"],
+            ["mittel", "„Entschuldigung. Du bist eine sehr große Wespe.“", "„Sssschon besser. Aber nicht viel. SSS.“"],
+            ["schlecht", "(Barradin klatscht reflexartig in die Hände.)", "„Hassst du gerade versucht, mich zu erschlagen?! SSSSSSSSSSSSSS!“"]] }]] },
+
+      vrock: { f: "„KRAAH! Warum du schnüffeln an mir, kleiner Mensch?“", a: [
+        ["gut", "„Ich wollte wissen, wie wildes Abenteuer riecht. Jetzt weiß ich's.“", "„Kraah … wildes Abenteuer. Ich rieche nach Aas und Abyss. Aber wildes Abenteuer klingt besser.“",
+          { f: "„Du mögen meine Federn? Sie sehr zerzaust. Kraah.“", a: [
+            ["gut", "„Zerzaust ist sexy. Gekämmt kann jeder.“", "„KRAAAH! Ich wusste es! Alle anderen Vrocks lachen über mich. Jetzt lache ich.“"],
+            ["mittel", "„Ich hätte da einen Kamm. Nur so. Als Angebot.“", "„Kamm. Kraah. Den Letzten, der mich gekämmt hat, habe ich gefressen. Aber du darfst es versuchen.“"],
+            ["schlecht", "„Sie sehen aus wie ein Kissen nach einem Kampf mit Rex.“", "(Rex knurrt beleidigt. Der Vrock kreischt beleidigt. Barradin ist der Einzige, der nicht beleidigt ist. Noch.)"]] }],
+        ["mittel", "„Ich hab nicht geschnüffelt. Ich hab … tief geatmet. Vor Nervosität.“", "„Tief atmen in meiner Nähe. Kraah. Mutig. Oder du hast keine Nase.“",
+          { f: "„Du nervös wegen mir? Kraah? Warum?“", a: [
+            ["gut", "„Weil du der erste Dämon bist, der mich anschaut, als wäre ich mehr als ein Snack.“", "„Du bist immer noch ein bisschen Snack. Kraah. Aber jetzt auch … mehr.“"],
+            ["mittel", "„Weil du sehr laut bist. Ich bin sehr leise. Gegensätze und so.“", "„GEGENSÄTZE! Kraah! Ich mag Gegensätze! Zum Beispiel lebendig und tot!“"],
+            ["schlecht", "„Weil du immer noch qualmst, seit Echo dich mit seinem Blitz gegrillt hat.“", "„Ich qualme nicht! Das ist … Aura! KRAAAAH!“"]] }],
+        ["schlecht", "„Ehrlich? Ich wollte wissen, ob das Gestank ist oder ein Zauber.“", "„Das ist mein PARFÜM! Eau de Abyss! KRAAAH!“",
+          { f: "„Du willst mich beleidigen? Oder du willst überleben?“", a: [
+            ["gut", "„Überleben. Und dich zum Essen einladen. Du darfst die Hauptspeise wählen – solange ich es nicht bin.“", "„Kraah … Abendessen. Mit dir. Ich wähle Ilvaras Wachen. Romantisch.“"],
+            ["mittel", "„Beides? Geht beides?“", "„Geht nicht. Kraah. Aber du darfst kurz überlegen. Sehr kurz.“"],
+            ["schlecht", "„Ich will einfach nur weg. Gegen den Wind.“", "(Der Vrock schlägt beleidigt mit den Flügeln. Barradin fliegt drei Meter weit. Mit dem Wind.)"]] }]] },
+
+      kuotoa: { f: "„Blubb. Fremde müssen beten. Zu welchem Gott betest du?“", a: [
+        ["gut", "„Zu dem, der mir gerade gegenübersteht.“", "„Blubb. Ich … bin kein Gott. Ich bin Wächter. Aber ich könnte Gott werden. Wenn genug Leute an mich glauben.“",
+          { f: "„Wie würdest du mich anbeten, Fremder? Blubb?“", a: [
+            ["gut", "„Mit Liedern, Opfergaben und jeden Morgen mit einem Kompliment für deine Schuppen.“", "„Komplimente für Schuppen … Blubb. Neue Religion. Ich gründe sie sofort.“"],
+            ["mittel", "„Ich würde dir Fisch opfern. Ist das komisch? Das ist komisch, oder?“", "„Sehr komisch. Blubb. Aber Fisch ist Fisch. Ich nehme den Fisch.“"],
+            ["schlecht", "„Ich würde dich jeden Tag gießen. Damit du nicht austrocknest.“", "„GIESSEN?! Ich bin keine PFLANZE! Blubb! Wache! … Ah. Ich bin die Wache.“"]] }],
+        ["mittel", "„Zum … Gott der … Eintrittskarten?“", "„Den kenne ich nicht. Blubb. Aber jetzt, wo du es sagst, glaube ich an ihn.“",
+          { f: "„Was verlangt der Gott der Eintrittskarten von mir?“", a: [
+            ["gut", "„Dass du das Tor öffnest und mich dabei anlächelst. Er ist da sehr streng.“", "„Lächeln. Blubb. Ich habe nicht geübt. Ist das so gut? … Sehr gut, sagt dein Gesicht.“"],
+            ["mittel", "„Dass du sehr lange glotzt. Ohne zu blinzeln. Oh. Das machst du ja schon.“", "„Blubb. Dann bin ich wohl schon sehr gläubig.“"],
+            ["schlecht", "„Fünf Goldstücke. An mich. Ich bin sein Prophet.“", "„Du lügst. Blubb. Ich mag keine Lügen. Nur Götter dürfen lügen.“"]] }],
+        ["schlecht", "„Ich glaube nicht an ausgedachte Götter.“", "„…Alle Götter sind ausgedacht. Darum sind sie ja so mächtig. Blubb. Du bist ein Ketzer.“",
+          { f: "„Ketzer werden dem See geopfert. Letzte Worte? Blubb.“", a: [
+            ["gut", "„Wenn ich schon geopfert werde, dann bitte mit dir zusammen. Als Ausflug zu zweit.“", "„…Ein Ausflug. Zu zweit. Blubb. Mich hat noch nie jemand zu einem Ausflug eingeladen.“"],
+            ["mittel", "„Darf ich vorher noch mal aufs Klo?“", "„Blubb. Der See ist das Klo. Jetzt weißt du, warum wir nicht darin schwimmen.“"],
+            ["schlecht", "„Blubb?“", "„Du machst dich über die heilige Sprache lustig! BLUBB! BLUBB BLUBB!“"]] }]] },
+
+      horga: { f: "„Ein Barde will Gastrecht in Gracklstugh. Was kann ein Spielmann für meine Stadt tun?“", a: [
+        ["gut", "„Euer Lob in jede Taverne zwischen hier und der Oberfläche tragen. Und das Lob Eures Barts.“", "„Meines … Barts? Hmpf. Der Bart ist allerdings legendär. Weiter, Barde.“",
+          { f: "„Und wie würde dieses Lied über mich anfangen?“", a: [
+            ["gut", "„‚In Feuer geschmiedet, in Stahl gekrönt, von seinem Sohn geliebt, von seinem Volk verehrt …‘“", "„…Von seinem Sohn geliebt. Hmpf. Hat Kardal das gesagt? Hat er? Sing weiter. Später. Unter vier Augen.“"],
+            ["mittel", "„‚Es war einmal ein König, der war sehr groß. Also, nicht groß. Aber würdevoll.‘“", "„‚Nicht groß.‘ Hmpf. Die zweite Strophe streichen wir. Die erste auch.“"],
+            ["schlecht", "„‚Horga, Horga, grau wie ein Schuh, hört seinem Sohn nie richtig zu …‘“", "„WACHE! Schafft diesen Reimschmied in den tiefsten Schacht! Samt Schuh!“"]] }],
+        ["mittel", "„Ich kann jonglieren. Mit Fackeln. Meistens.“", "„Meistens. In einer Stadt aus Kohle und Schwefel. Hmpf. Wie beruhigend.“",
+          { f: "„Und was passiert in den anderen Fällen?“", a: [
+            ["gut", "„Dann rettet mich ein starker König aus den Flammen. Ich hoffe, Ihr seid in der Nähe.“", "„Hmpf. Ich bin immer in der Nähe. Das ist das Problem mit Königen. Wir sind überall.“"],
+            ["mittel", "„Dann hat die Taverne eine neue Geschichte.“", "„Die Tavernen hier haben genug Geschichten über brennende Fremde. Hmpf.“"],
+            ["schlecht", "„Dann ist es nicht mehr meine Stadt, die brennt.“", "„Das war eine Drohung. Das war doch eine Drohung, oder? Kardal! War das eine Drohung?!“"]] }],
+        ["schlecht", "„Ich habe Euren Sohn gerettet. Das sollte doch wohl reichen.“", "„Ihr habt meinen Sohn gerettet. Und Ihr werdet es mir bis ans Ende meiner Tage vorhalten, wie ich sehe.“",
+          { f: "„Wollt Ihr Dank oder wollt Ihr Gastrecht, Barde? Beides bekommt man hier selten.“", a: [
+            ["gut", "„Ich will nur, dass Ihr lächelt, Majestät. Kardal sagt, das macht Ihr nie. Ich wollte es einmal sehen.“", "„…Kardal sagt das? Hmpf. Ihr bekommt das Gastrecht. Und ich lächle nicht. Das ist der Bart.“"],
+            ["mittel", "„Gastrecht. Und Frühstück. Ist Frühstück dabei?“", "„Das Frühstück hier ist Steinsuppe. Ihr werdet sie hassen. Gastrecht gewährt. Hmpf.“"],
+            ["schlecht", "„Beides. Und Euren Thron. Am Wochenende.“", "„Am WOCHENENDE?! Unverschämt! … Und der Thron ist sehr unbequem, das sage ich Euch gleich.“"]] }]] },
+
+      hgraam: { f: "„Der Stein schreit. Hörst du ihn, kleiner Mensch?“", a: [
+        ["gut", "„Ich höre ihn. Er sagt, dass Ihr zu viel allein seid.“", "„…Das sagt der Stein? Mir sagt er das nie. Mir sagt er nur ‚unersättlich‘.“",
+          { f: "„Was sagt der Stein noch über mich?“", a: [
+            ["gut", "„Dass Ihr einen Freund verdient, der Euch zuhört. Auch wenn Ihr in Rätseln sprecht. Gerade dann.“", "„Ein Freund … Der Stein ist weise. Weiser als ich. Nimm den Kristall. Und komm wieder.“"],
+            ["mittel", "„Dass Ihr ein bisschen moosig seid. Aber das steht Euch.“", "„Moos ist ein Zeichen von Alter. Und Würde. Danke, Stein. Danke, kleiner Mensch.“"],
+            ["schlecht", "„Dass Ihr ihn bitte nicht mehr anfassen sollt. Ihr habt ihn ganz warm gemacht.“", "„…Der Stein wollte nie angefasst werden? In all den Jahren? Das … erklärt sehr viel.“"]] }],
+        ["mittel", "„Ich höre nur meinen Magen. Ist das der Stein?“", "„Das ist dein Magen. Er ist sehr laut. Lauter als der Stein. Das ist … beeindruckend.“",
+          { f: "„Hast du Hunger? Riesen haben immer Brot. Großes Brot.“", a: [
+            ["gut", "„Mit Euch würde ich sogar Steinbrot essen. Hauptsache, Ihr sitzt dabei.“", "„Steinbrot gibt es nicht. Aber ich werde es backen. Für dich.“"],
+            ["mittel", "„Ein kleines Stück. Also für Euch klein. Für mich vermutlich eine Woche.“", "(Hgraam reicht Barradin einen Krümel. Er ist so groß wie Barradins Kopf. Es ist rührend.)"],
+            ["schlecht", "„Ich hätte lieber Euren Kristall. Zum Draufbeißen.“", "„Der Kristall ist kein Brot. Der Kristall ist heilig. Du bist hungrig und unheilig.“"]] }],
+        ["schlecht", "„Steine schreien nicht. Ihr braucht Urlaub.“", "(Stille. Lange Stille. Irgendwo in Gracklstugh bröckelt ein Fels.)",
+          { f: "„Urlaub. Was ist Urlaub, kleiner Mensch?“", a: [
+            ["gut", "„Ein Tag ohne schreiende Steine. Mit mir, einer Laute und einem Sonnenuntergang. Ich zeig's Euch.“", "„Ein Sonnenuntergang … Hier unten gibt es keine Sonne. Aber für dich werde ich mir einen vorstellen.“"],
+            ["mittel", "„Wenn man irgendwohin fährt, wo es genauso ist wie zu Hause. Nur teurer.“", "„Das klingt sinnlos. Der Stein stimmt mir zu.“"],
+            ["schlecht", "„Wenn sich Riesen einfach mal hinlegen. Lange. Sehr lange. Bitte.“", "„Wenn sich ein Riese hinlegt, ist danach ein Tal da. Willst du ein Tal? Du wärst darunter.“"]] }]] },
+
+      themberchaud: { f: "„Ein Barde. In meinem Hort. Warum sollte ich dich nicht einfach fressen?“", a: [
+        ["gut", "„Weil ich lebendig unterhaltsamer bin. Tot bin ich nur ein Snack mit Laute.“", "„Ein Snack mit Laute. Hmmm. Der Satz gefällt mir. Du darfst noch ein wenig leben.“",
+          { f: "„Unterhalte mich also. Was ist das Wertvollste in meinem Hort?“", a: [
+            ["gut", "„Der goldene Hund ist hübsch. Aber das Wertvollste liegt obendrauf und speit Feuer.“", "„…Schmeichelei. Durchschaubar. Wirksam. Hmmm. Du lebst. Vorerst. Für weitere Schmeicheleien.“"],
+            ["mittel", "„Der goldene Hund. Darf ich ihn streicheln? Rex wird eifersüchtig sein.“", "„Niemand streichelt den goldenen Hund. Er ist ein Kunstwerk. … Na gut. Einmal. Vorsichtig.“"],
+            ["schlecht", "„Echo hat ausgerechnet, dass es das Stück ist, das er gerade in der Tasche hat.“", "(Ein Grollen erschüttert die Halle. Echo legt sehr, sehr langsam eine Münze zurück.)"]] }],
+        ["mittel", "„Weil ich sehr zäh bin. Ehrlich. Ich bestehe zu achtzig Prozent aus Lautensaiten.“", "„Ich habe schon Rüstungen gegessen. Lautensaiten sind für mich Zahnseide. Hmmm.“",
+          { f: "„Hast du einen besseren Grund, Barde?“", a: [
+            ["gut", "„Ja: Ich finde Euer Ei. Und danach singe ich Euch jeden Abend, wie ich es gefunden habe.“", "„…Das Ei. Ja. Du findest es. Und das Lied … darf lang sein. Sehr lang.“"],
+            ["mittel", "„Ich kenne fast Gundren. Also, Echo fragt immer nach ihm.“", "„Wer ist Gundren? Und warum fragen mich das alle?“"],
+            ["schlecht", "„Euer Hohepriester wäre bestimmt leckerer.“", "„…Das ist kein schlechter Gedanke. Aber du hast ihn laut ausgesprochen. Das ist der schlechte Teil.“"]] }],
+        ["schlecht", "„Weil Ihr Diät haltet. Sieht man. Also … nicht. Man sieht's nicht.“", "(Die Lava blubbert. Die Halle wird zwanzig Grad heißer. Barradins Augenbrauen bereuen alles.)",
+          { f: "„Wiederhole das. Ganz langsam. Wenn du dich traust.“", a: [
+            ["gut", "„Ihr seid vollkommen, Meister der Flammen. Jede Schuppe sitzt genau da, wo sie hingehört. Und es sind viele. Und alle wunderschön.“", "„…Viele. Wunderschön. Hmmm. Ich lasse es dir durchgehen. Dieses eine Mal.“"],
+            ["mittel", "„Ich sagte: Ihr … haltet die Halle sehr sauber?“", "„Die Halle ist voller Lava. Lügner. Aber ein flinker Lügner.“"],
+            ["schlecht", "(Barradin spielt nervös die ersten Töne eines Liedes über dicke Drachen.)", "(Themberchaud atmet tief ein. Alle gehen in Deckung. Die Laute ist ab jetzt leicht angekokelt.)"]] }]] },
+
+      demogorgon: { f: "(Eine doppelte Stimme in deinem Kopf:) „WELCHEN VON UNS BEIDEN LIEBST DU MEHR?“", a: [
+        ["gut", "„Den, der mich gerade nicht fressen will.“", "(Beide Köpfe schauen sich an. Beide hören auf, fressen zu wollen. Es ist ein Wettbewerb geworden.)",
+          { f: "(Doppelt in deinem Kopf:) „WAS SCHENKST DU UNS?“", a: [
+            ["gut", "„Mein Herz. Ich hab zwar nur eins, aber ich teile es gerecht.“", "(Die Tentakel formen ein Herz. Dann zwei. Der Abyss hat noch nie so verwirrt ausgesehen.)"],
+            ["mittel", "„Ein Duett. Ihr singt beide, ich spiele.“", "(Es ist der schrecklichste Gesang aller Ebenen. Friedrich weint. Barradin klatscht trotzdem.)"],
+            ["schlecht", "„Einen Spiegel. Dann könnt ihr euch gegenseitig anhimmeln.“", "(Beide Köpfe schauen hinein. Beide schreien. Der Spiegel zerspringt. Barradins Laune auch.)"]] }],
+        ["mittel", "„Ähm … links? Nein, rechts! Nein! Ich mag Kompromisse!“", "(Der linke Kopf freut sich. Der rechte Kopf beißt den linken. Familienstreit.)",
+          { f: "(Der rechte Kopf, sehr leise in deinem Kopf:) „…und ich?“", a: [
+            ["gut", "„Du hast das schönere Lächeln. Sag's ihm nicht.“", "(Der rechte Kopf grinst. Sehr breit. Viel zu breit. Aber auf eine romantische Art.)"],
+            ["mittel", "„Du bist … auch da. Sehr präsent.“", "(Der rechte Kopf seufzt. Ein Dämonenfürst, der seufzt. Barradin hat das geschafft.)"],
+            ["schlecht", "„Du bist der Grund, warum wir damals mit dem Boot geflohen sind.“", "(Der rechte Kopf erinnert sich. Er ist immer noch wütend wegen des Boots.)"]] }],
+        ["schlecht", "„Ehrlich? Als Illusion aus meiner Flöte wart ihr hübscher.“", "(Beide Köpfe drehen sich langsam zu Barradin. Der See beginnt zu kochen.)",
+          { f: "(Doppelt, sehr laut in deinem Kopf:) „ERKLÄRE DICH, STERBLICHER.“", a: [
+            ["gut", "„Die Illusion war hübsch. Aber ihr seid echt. Echt ist gefährlich. Und gefährlich ist mein Typ.“", "(Der See hört auf zu kochen. Er simmert jetzt nur noch. Romantisch.)"],
+            ["mittel", "„Ich meinte … die Beleuchtung. Die war damals besser.“", "(Ein Tentakel dreht einen leuchtenden Pilz ein bisschen heller. Demogorgon posiert.)"],
+            ["schlecht", "(Barradin zückt die Flöte, um es zu beweisen.)", "(Neben Demogorgon erscheint ein zweiter Demogorgon. Jetzt sind vier Köpfe beleidigt.)"]] }]] }
+    },
+    en: {
+      gundren: { f: '"Pay in advance? Hm. And what\'s in it for me, bard?"', a: [
+        ["gut", '"The certainty that I won\'t let you out of my sight for a second until Phandalin."', '"Ha! That sounds like a threat. A charming threat. I like it."',
+          { f: '"And if goblins ambush us? Will you keep your eyes on me then too?"', a: [
+            ["gut", '"I\'ll throw myself between you and every arrow. Dramatically. With singing."', '"With singing? Well, at least the goblins will hear you coming. You\'re mad, lad. I like mad."'],
+            ["mittel", '"I\'ll keep my eyes on Friedrich. And he\'ll keep his on you. That counts, right?"', '"A chain of eyeballs. Very reassuring. And very complicated."'],
+            ["schlecht", '"Afterwards I\'ll write a beautiful ballad about your rescue. Or your death. Depends."', '"DEPENDS?! I\'m not paying anyone in advance who\'s already rhyming my obituary!"']] }],
+        ["mittel", '"A receipt. Handwritten. With little hearts."', '"With … little hearts. Thirty years in trade and nobody ever offered me a receipt with little hearts."',
+          { f: '"And what does this receipt say, besides little hearts?"', a: [
+            ["gut", '"\'Received: gold. Given: my heart. Valid until Phandalin. Extension possible.\'"', '"Extension possible … You\'re a cunning merchant, bard. Almost as cunning as me. Almost."'],
+            ["mittel", '"Just more little hearts. I\'m not great at writing."', '"A bard who can\'t write. Well, at least you\'re honest. That\'s rare in your trade."'],
+            ["schlecht", '"\'Dwarf has paid. Dwarf has only himself to blame.\'"', '"Only himself to blame?! Give me back my advance at once! The one I haven\'t even given you yet!"']] }],
+        ["schlecht", '"Then you\'ll have less gold for bandits to steal. I\'m doing this out of pure kindness."', '"Ah, I see. You steal my gold before the bandits do. How thoughtful. How extremely thoughtful."',
+          { f: '"Give me one single reason not to throw you off the wagon right now."', a: [
+            ["gut", '"Because nobody else makes you laugh like this. Admit it, you just grinned."', '"I didn\'t grin. That\'s … the beard. It moves by itself sometimes. Fine. One grin. A small one."'],
+            ["mittel", '"Because Rex has already taken the wagon to his heart. Look, he\'s marked it."', '"He did WHAT? … Fine. I suppose the wagon is yours now. And the smell too."'],
+            ["schlecht", '"Because otherwise Echo will ask you if you know Gundren. All the way to Phandalin."', '"I AM Gundren! … Wait. That\'s the threat, isn\'t it? That\'s a terrible threat."']] }]] },
+
+      buergermeister: { f: '"The full reward? Well … how would you, er, put a figure on your party\'s work?"', a: [
+        ["gut", '"Priceless. But for you we\'ll do a friendship rate."', '"A friendship rate! How obliging. I didn\'t even know we were friends."',
+          { f: '"And what, er, does such a friendship involve?"', a: [
+            ["gut", '"Evenings together, honest words and a reward paid on time."', '"That last part sounded suspiciously like a contract clause. But charmingly put. Very charmingly."'],
+            ["mittel", '"No idea. I\'ve never had a friend with a chain of office."', '"Oh. Well. Me neither. I mean, none without one. This is a strange feeling."'],
+            ["schlecht", '"You showing me your treasury. Purely as friends. I\'ll bring a sack."', '"A SACK? Guards! … Oh, we don\'t have guards. That\'s why we hired you."']] }],
+        ["mittel", '"In goblin ears. We have seventeen. Want to count them?"', '"Please don\'t put those on my desk. Please. It\'s oak."',
+          { f: '"Is there a … less organic way to prove your work?"', a: [
+            ["gut", '"All of Phandalin is still alive. That\'s the finest proof I can give you."', '"That … is actually a very good point. And beautifully said. I\'m touched. A little."'],
+            ["mittel", '"A song! I\'ll sing you all seventeen ears. One by one."', '"No, no, it\'s fine, I believe you. Please don\'t sing. Please, no ears."'],
+            ["schlecht", '"There\'s a whole goblin outside. Shall I bring him in?"', '"A WHOLE one? As long as that thing is out there, I\'m paying nothing!"']] }],
+        ["schlecht", '"We\'re expensive. But you\'re rich. It\'s a perfect match."', '"Rich? Me? I\'m a humble servant of this town. With a very big house. By coincidence."',
+          { f: '"So. What do you really want, bard?"', a: [
+            ["gut", '"Your trust, Mister Mayor. The gold is just the wrapping."', '"My trust. Hm. Nobody has ever wanted that. Most people just want the gold."'],
+            ["mittel", '"Honestly? A bath. Then the gold."', '"The bath is free. We\'ll talk about the gold."'],
+            ["schlecht", '"Your hat. It doesn\'t suit you."', '"My … hat? That was a gift from my mother! Out! No, wait, the reward! No, out after all!"']] }]] },
+
+      blight: { f: '"Creak? Crack?" (The blight points at your torch, trembling.)', a: [
+        ["gut", '(Barradin puts out the torch.) "No flames tonight. Only sparks."', "(The blight rustles with relief. A twig carefully wraps around Barradin's finger. Almost like holding hands.)",
+          { f: '"Creak!" (He points at Echo. Who is holding a fireball again.)', a: [
+            ["gut", '"Echo! Please! We\'re on a date!"', "(Echo lowers the fireball. The blight blossoms. Literally: a tiny flower opens on his head.)"],
+            ["mittel", '"Don\'t worry. Echo always misses anyway."', "(The charred branch next to you says otherwise. The blight trembles like an aspen leaf. He is an aspen leaf.)"],
+            ["schlecht", '"He just wants to roast some marshmallows."', "(The blight only hears 'roast'. He clings to Barradin's boot in panic. It hurts a lot.)"]] }],
+        ["mittel", '"This isn\'t a torch. It\'s a … very warm gift. For you."', "(The blight reaches out a twig. It catches fire. He blows on it frantically. His eyes say: 'That was a bad gift.')",
+          { f: '"Crack!!" (He waves the singed twig accusingly.)', a: [
+            ["gut", '(Barradin blows gently on the twig.) "I\'ll make it up to you. Promise."', "(The blight holds out the twig like an injured paw. It crackles. Romantically this time.)"],
+            ["mittel", '"It suits you, though. A bit of soot. Very daring."', "(The blight looks at himself in a puddle. He's unsure. But he's a little vain too.)"],
+            ["schlecht", '"See? Now you\'re a firewood blight. That\'s a promotion."', "(The blight throws an acorn at Barradin's head. With surprising force. And precision.)"]] }],
+        ["schlecht", '"Don\'t worry. I only burn blights who won\'t flirt."', "(The rustling stops dead. Ruby eyes fix on Barradin. Somewhere a branch cracks. Very menacing.)",
+          { f: '"…Creak." (It sounds like a final warning.)', a: [
+            ["gut", '"That was a joke! A bad one. I make bad jokes when I\'m nervous. And you make me nervous."', "(The blight tilts his head. Nervous? Because of him? A leaf turns red. Autumn can be so lovely.)"],
+            ["mittel", '(Barradin drops the torch into a puddle.) "Oops."', "(It goes out with a hiss. The blight relaxes a little. Only a little.)"],
+            ["schlecht", '"Echo, fireball! – No, wait, that was a joke!"', "(Echo is already raising his hand. The blight wraps itself around Barradin's leg. Tight. Very tight. It is not a hug.)"]] }]] },
+
+      bugbear: { f: '"GRRR. Password?"', a: [
+        ["gut", '"\'You have the most beautiful eyes in the whole watchtower.\'"', '"…Grr. Wrong password. But really nice sentence. Say again."',
+          { f: '"What else beautiful about me? GRRR. Say quick."', a: [
+            ["gut", '"Your smile. All sixty teeth of it."', '"Sixty-two! You counted? Nobody counts. GRRR. You may enter. Almost."'],
+            ["mittel", '"Your … fur? It\'s so … present."', '"Present. Grr. Like roof present. Like stone present. Bugbear is sad."'],
+            ["schlecht", '"Your door. It\'s really nice. Can I go through?"', '"DOOR prettier than bugbear?! Door stays shut. Forever. Bugbear marries door."']] }],
+        ["mittel", '"Um … \'password\'?"', '"GRRR. That is … that is actually the password. Who told you?!"',
+          { f: '"Nobody know password. How you know? GRRR?"', a: [
+            ["gut", '"I looked into your eyes. It was written there."', '"…In my eyes. Grr. Bugbear must sit down. Bugbear has feelings."'],
+            ["mittel", '"Guessed. Like almost everything in my life."', '"Guessed. Grr. You lucky. Bugbear likes lucky. Bugbear likes you a little."'],
+            ["schlecht", '"Ezekiel pinched it from your trouser pocket. It was on a note."', '"Bugbear has no trousers! … GRRR! Where is note?! Where is trousers?!"']] }],
+        ["schlecht", '"I don\'t need a password. I have an archer."', "(Friedrich waves from the back. The bugbear doesn't wave back. He cracks his knuckles.)",
+          { f: '"GRRR. Last chance, little man. Why should I not squash you?"', a: [
+            ["gut", '"Because I\'d sing you a song outside your door every evening. You\'d never be alone on watch again."', '"…Never alone again. Grr. That\'s mean. Mean nice. Bugbear is thinking."'],
+            ["mittel", '"Because I\'m all bones. Tastes awful."', '"Bugbear likes bones. But you\'re right, you\'re too thin. Grr. Eat more."'],
+            ["schlecht", '"Because Rex will bite you. He\'s very dangerous."', "(Rex rolls onto his back and lets the bugbear scratch his belly. Traitor.)"]] }]] },
+
+      ilvara: { f: '"So you want me to loosen the chains. What exactly do you offer me in return, slave?"', a: [
+        ["gut", '"Entertainment, mistress. This fortress is so quiet. I can change that."', '"Quiet, yes. Quiet and dull. Bah. Very well, go on. But be good."',
+          { f: '"Then entertain me. What\'s the most dangerous thing you\'ve ever done?"', a: [
+            ["gut", '"Flirting with a drow priestess who could feed me to the spiders with one word. And it\'s the best thing I\'ve ever done."', '"…That is indeed dangerous. And stupid. And brave. The spiders can wait."'],
+            ["mittel", '"I once shared a sausage with Rex. He nearly tore it out of my mouth."', '"That is … pathetic. But in a way that makes me laugh. I hate it."'],
+            ["schlecht", '"Telling you that you were a terrible druid back in Thundertree."', '"Terrible?! I was an EXCELLENT druid! Guards! More chains!"']] }],
+        ["mittel", '"A song? A ballad? A foot bath?"', '"A foot bath. You offer a mistress of House Mizzrym a foot bath."',
+          { f: '"…With which oil?"', a: [
+            ["gut", '"Lavender. And I\'ll read you poems while you soak. About you."', '"Lavender. Poems. About me. … Very well. One link of chain. Only one."'],
+            ["mittel", '"Spider oil? Does that exist? I\'m improvising."', '"There is no spider oil, fool. … But the idea isn\'t bad. I\'ll keep it."'],
+            ["schlecht", '"Oil? I was thinking of the brackish water from my cell."', '"Brackish water. For my feet. I\'ll have you pickled in brackish water. Like a gherkin."']] }],
+        ["schlecht", '"Freedom for me. And for you, the chance to miss me."', '"Miss you. I don\'t even miss my whip when it\'s in the armoury."',
+          { f: '"Give me one reason not to have you whipped right now."', a: [
+            ["gut", '"Because I\'m the only prisoner who makes you smile. There – you\'re doing it again."', '"I am not. That\'s a twitch. A drow twitch. Stop grinning."'],
+            ["mittel", '"Because my skin is very sensitive. I have an ointment for it."', '"An ointment. You\'re the softest slave I\'ve ever owned. Almost cute."'],
+            ["schlecht", '"Because we\'re breaking out soon anyway. … Oops."', '"BREAKING OUT?! Guards! Double chains for everyone! And triple for the bard!"']] }]] },
+
+      chasme: { f: '"BZZZ? Why you not flee like other little meat sacks?"', a: [
+        ["gut", '"Because I\'ve never heard such fascinating buzzing."', '"Bzz … fasscinated? Nobody ever fasscinated. Everybody just scream. And stab dagger in eye."',
+          { f: '"Ssso. What you like bessst about me?"', a: [
+            ["gut", '"Your eyes. All seventeen. Each one looks at me like I\'m something special."', '"Eighteen! One is at the back. BZZZ. But you counted almossst all. That isss love."'],
+            ["mittel", '"That you\'re not stinging right now."', '"Not yet. BZZZ. But I like the honesssty. A little."'],
+            ["schlecht", '"The eyepatch look, ever since Ezekiel put his dagger in. Very mysterious."', '"THAT ISSS NOT AN ACCESSORY! BZZZZZZZZ!"']] }],
+        ["mittel", '"I\'m paralysed with fear. It just looks like courage."', '"BZZZ. Honessst meat sack. Honessst meat sacks rare."',
+          { f: '"And if I ssssting you now, what then?"', a: [
+            ["gut", '"Then I fall asleep and dream of you. Not a bad trade."', '"Dream … of me. BZZ. Nobody dreams of me. Only nightmares. This isss new."'],
+            ["mittel", '"Then Friedrich screams. Again. He\'s had practice."', '"Yesss. He ssscreamed very nicely. BZZ. I remember fondly."'],
+            ["schlecht", '"Then Echo calls down lightning. He\'s very generous with it."', '"A threat? On the firssst date? BZZZZ! Stinger getting very twitchy!"']] }],
+        ["schlecht", '"Flee? From an oversized mosquito? Never."', '"MOSQUITO?! I am demon from the Abysss! MOSQUITO!!"',
+          { f: '"Apologise. At once. Or elssse …"', a: [
+            ["gut", '"Forgive me. You\'re no mosquito. You\'re the most beautiful disaster that ever flew at me."', '"Mossst beautiful disaster … BZZ. May I put that on my gravestone?"'],
+            ["mittel", '"Sorry. You\'re a very large wasp."', '"Better. But not much. BZZ."'],
+            ["schlecht", "(Barradin claps his hands reflexively.)", '"Did you jussst try to swat me?! BZZZZZZZZZZZZ!"']] }]] },
+
+      vrock: { f: '"SKRAAH! Why you sniffing me, little human?"', a: [
+        ["gut", '"I wanted to know what wild adventure smells like. Now I know."', '"Skraah … wild adventure. I smell of carrion and Abyss. But wild adventure sounds better."',
+          { f: '"You like my feathers? They very scruffy. Skraah."', a: [
+            ["gut", '"Scruffy is sexy. Anyone can be combed."', '"SKRAAAH! I knew it! All other vrocks laugh at me. Now I laugh."'],
+            ["mittel", '"I happen to have a comb. Just saying. An offer."', '"Comb. Skraah. The last one who combed me, I ate. But you may try."'],
+            ["schlecht", '"They look like a pillow after a fight with Rex."', "(Rex growls, offended. The vrock screeches, offended. Barradin is the only one not offended. Yet.)"]] }],
+        ["mittel", '"I wasn\'t sniffing. I was … breathing deeply. Out of nervousness."', '"Breathing deeply near me. Skraah. Brave. Or you have no nose."',
+          { f: '"You nervous because of me? Skraah? Why?"', a: [
+            ["gut", '"Because you\'re the first demon who looks at me like I\'m more than a snack."', '"You are still a little snack. Skraah. But now also … more."'],
+            ["mittel", '"Because you\'re very loud. I\'m very quiet. Opposites and all that."', '"OPPOSITES! Skraah! I like opposites! For example alive and dead!"'],
+            ["schlecht", '"Because you\'re still smoking since Echo grilled you with his lightning."', '"I not smoking! That is … aura! SKRAAAAH!"']] }],
+        ["schlecht", '"Honestly? I wanted to know if that\'s a stench or a spell."', '"That is my PERFUME! Eau de Abyss! SKRAAAH!"',
+          { f: '"You want to insult me? Or you want to survive?"', a: [
+            ["gut", '"Survive. And invite you to dinner. You choose the main course – as long as it isn\'t me."', '"Skraah … dinner. With you. I choose Ilvara\'s guards. Romantic."'],
+            ["mittel", '"Both? Can I have both?"', '"Cannot. Skraah. But you may think briefly. Very briefly."'],
+            ["schlecht", '"I just want to get away. Upwind."', "(The vrock beats his wings in offence. Barradin flies three metres. Downwind.)"]] }]] },
+
+      kuotoa: { f: '"Blub. Strangers must pray. Which god do you pray to?"', a: [
+        ["gut", '"To the one standing right in front of me."', '"Blub. I … am no god. I am guard. But I could become a god. If enough people believe in me."',
+          { f: '"How would you worship me, stranger? Blub?"', a: [
+            ["gut", '"With songs, offerings and every morning a compliment for your scales."', '"Compliments for scales … Blub. New religion. I found it at once."'],
+            ["mittel", '"I\'d sacrifice fish to you. Is that weird? That\'s weird, isn\'t it?"', '"Very weird. Blub. But fish is fish. I take the fish."'],
+            ["schlecht", '"I\'d water you every day. So you don\'t dry out."', '"WATER?! I am not a PLANT! Blub! Guards! … Ah. I am the guard."']] }],
+        ["mittel", '"To the … god of … admission tickets?"', '"I do not know him. Blub. But now that you say it, I believe in him."',
+          { f: '"What does the god of admission tickets ask of me?"', a: [
+            ["gut", '"That you open the gate and smile at me while you do it. He\'s very strict about that."', '"Smile. Blub. I have not practised. Is this good? … Very good, says your face."'],
+            ["mittel", '"That you stare for a very long time. Without blinking. Oh. You already do."', '"Blub. Then I am already very devout."'],
+            ["schlecht", '"Five gold pieces. To me. I\'m his prophet."', '"You lie. Blub. I do not like lies. Only gods may lie."']] }],
+        ["schlecht", '"I don\'t believe in made-up gods."', '"…All gods are made up. That is why they are so powerful. Blub. You are a heretic."',
+          { f: '"Heretics are sacrificed to the lake. Last words? Blub."', a: [
+            ["gut", '"If I\'m to be sacrificed, then please together with you. A trip for two."', '"…A trip. For two. Blub. Nobody has ever invited me on a trip."'],
+            ["mittel", '"Can I go to the loo first?"', '"Blub. The lake is the loo. Now you know why we do not swim in it."'],
+            ["schlecht", '"Blub?"', '"You mock the holy language! BLUB! BLUB BLUB!"']] }]] },
+
+      horga: { f: '"A bard wants hospitality in Gracklstugh. What can a minstrel do for my city?"', a: [
+        ["gut", '"Carry your praise into every tavern between here and the surface. And the praise of your beard."', '"My … beard? Hmph. The beard is indeed legendary. Go on, bard."',
+          { f: '"And how would this song about me begin?"', a: [
+            ["gut", '"\'Forged in fire, crowned in steel, loved by his son, revered by his people …\'"', '"…Loved by his son. Hmph. Did Kardal say that? Did he? Keep singing. Later. In private."'],
+            ["mittel", '"\'Once upon a time there was a king who was very tall. Well, not tall. But dignified.\'"', '"\'Not tall.\' Hmph. We\'ll cut the second verse. And the first."'],
+            ["schlecht", '"\'Horga, Horga, grey as a shoe, never listens to his son, it\'s true …\'"', '"GUARDS! Throw this rhymesmith down the deepest shaft! Shoe and all!"']] }],
+        ["mittel", '"I can juggle. With torches. Mostly."', '"Mostly. In a city of coal and sulphur. Hmph. How reassuring."',
+          { f: '"And what happens the other times?"', a: [
+            ["gut", '"Then a strong king rescues me from the flames. I hope you\'ll be nearby."', '"Hmph. I\'m always nearby. That\'s the problem with kings. We\'re everywhere."'],
+            ["mittel", '"Then the tavern has a new story."', '"The taverns here have enough stories about burning strangers. Hmph."'],
+            ["schlecht", '"Then it\'s no longer my city that burns."', '"That was a threat. That was a threat, wasn\'t it? Kardal! Was that a threat?!"']] }],
+        ["schlecht", '"I rescued your son. That should be enough, surely."', '"You rescued my son. And you\'ll remind me of it until the end of my days, I see."',
+          { f: '"Do you want thanks or hospitality, bard? You rarely get both here."', a: [
+            ["gut", '"I only want to see you smile, Your Majesty. Kardal says you never do. I wanted to see it once."', '"…Kardal says that? Hmph. You have your hospitality. And I\'m not smiling. That\'s the beard."'],
+            ["mittel", '"Hospitality. And breakfast. Does it include breakfast?"', '"Breakfast here is stone soup. You\'ll hate it. Hospitality granted. Hmph."'],
+            ["schlecht", '"Both. And your throne. At weekends."', '"At WEEKENDS?! Outrageous! … And the throne is very uncomfortable, I\'ll tell you that now."']] }]] },
+
+      hgraam: { f: '"The stone is screaming. Do you hear it, little human?"', a: [
+        ["gut", '"I hear it. It says you\'re alone too much."', '"…The stone says that? It never tells me that. It only ever says \'insatiable\'."',
+          { f: '"What else does the stone say about me?"', a: [
+            ["gut", '"That you deserve a friend who listens. Even when you speak in riddles. Especially then."', '"A friend … The stone is wise. Wiser than me. Take the crystal. And come back."'],
+            ["mittel", '"That you\'re a little mossy. But it suits you."', '"Moss is a sign of age. And dignity. Thank you, stone. Thank you, little human."'],
+            ["schlecht", '"That you should please stop touching it. You\'ve made it all warm."', '"…The stone never wanted to be touched? All these years? That … explains a lot."']] }],
+        ["mittel", '"I only hear my stomach. Is that the stone?"', '"That is your stomach. It is very loud. Louder than the stone. That is … impressive."',
+          { f: '"Are you hungry? Giants always have bread. Big bread."', a: [
+            ["gut", '"I\'d even eat stone bread with you. As long as you\'re sitting with me."', '"There is no stone bread. But I will bake it. For you."'],
+            ["mittel", '"A small piece. Small for you, I mean. For me probably a week."', "(Hgraam hands Barradin a crumb. It's the size of Barradin's head. It's touching.)"],
+            ["schlecht", '"I\'d rather have your crystal. To bite on."', '"The crystal is not bread. The crystal is sacred. You are hungry and unholy."']] }],
+        ["schlecht", '"Stones don\'t scream. You need a holiday."', "(Silence. Long silence. Somewhere in Gracklstugh a rock crumbles.)",
+          { f: '"Holiday. What is a holiday, little human?"', a: [
+            ["gut", '"A day without screaming stones. With me, a lute and a sunset. I\'ll show you."', '"A sunset … There is no sun down here. But for you I will imagine one."'],
+            ["mittel", '"Going somewhere exactly like home. Just more expensive."', '"That sounds pointless. The stone agrees with me."'],
+            ["schlecht", '"When giants just lie down. For a long time. A very long time. Please."', '"When a giant lies down, afterwards there is a valley. Do you want a valley? You would be under it."']] }]] },
+
+      themberchaud: { f: '"A bard. In my hoard. Why shouldn\'t I simply eat you?"', a: [
+        ["gut", '"Because I\'m more entertaining alive. Dead I\'m just a snack with a lute."', '"A snack with a lute. Hmmm. I like that sentence. You may live a little longer."',
+          { f: '"Entertain me, then. What is the most precious thing in my hoard?"', a: [
+            ["gut", '"The golden dog is pretty. But the most precious thing lies on top and breathes fire."', '"…Flattery. Transparent. Effective. Hmmm. You live. For now. For more flattery."'],
+            ["mittel", '"The golden dog. May I pet it? Rex will be jealous."', '"Nobody pets the golden dog. It is a work of art. … Very well. Once. Carefully."'],
+            ["schlecht", '"Echo has worked out it\'s the piece he currently has in his pocket."', "(A rumble shakes the hall. Echo very, very slowly puts a coin back.)"]] }],
+        ["mittel", '"Because I\'m very tough. Honestly. I\'m eighty per cent lute strings."', '"I have eaten armour. Lute strings are dental floss to me. Hmmm."',
+          { f: '"Do you have a better reason, bard?"', a: [
+            ["gut", '"Yes: I\'ll find your egg. And then sing you every evening how I found it."', '"…The egg. Yes. You will find it. And the song … may be long. Very long."'],
+            ["mittel", '"I almost know Gundren. I mean, Echo always asks about him."', '"Who is Gundren? And why does everyone ask me that?"'],
+            ["schlecht", '"Your high priest would surely taste better."', '"…Not a bad thought. But you said it out loud. That is the bad part."']] }],
+        ["schlecht", '"Because you\'re on a diet. It shows. I mean … it doesn\'t. It doesn\'t show."', "(The lava bubbles. The hall gets twenty degrees hotter. Barradin's eyebrows regret everything.)",
+          { f: '"Repeat that. Very slowly. If you dare."', a: [
+            ["gut", '"You are perfect, Master of Flames. Every scale sits exactly where it belongs. And there are many. And all of them beautiful."', '"…Many. Beautiful. Hmmm. I will let it go. This one time."'],
+            ["mittel", '"I said: you … keep the hall very tidy?"', '"The hall is full of lava. Liar. But a quick liar."'],
+            ["schlecht", "(Barradin nervously plays the first notes of a song about fat dragons.)", "(Themberchaud takes a deep breath. Everyone takes cover. From now on the lute is slightly singed.)"]] }]] },
+
+      demogorgon: { f: '(A double voice in your head:) "WHICH OF US DO YOU LOVE MORE?"', a: [
+        ["gut", '"The one who isn\'t trying to eat me right now."', "(Both heads look at each other. Both stop wanting to eat him. It has become a competition.)",
+          { f: '(Doubled in your head:) "WHAT WILL YOU GIVE US?"', a: [
+            ["gut", '"My heart. I only have one, but I\'ll share it fairly."', "(The tentacles form a heart. Then two. The Abyss has never looked so confused.)"],
+            ["mittel", '"A duet. You both sing, I play."', "(It is the most horrible singing on all planes. Friedrich weeps. Barradin applauds anyway.)"],
+            ["schlecht", '"A mirror. Then you can adore each other."', "(Both heads look in. Both scream. The mirror shatters. So does Barradin's mood.)"]] }],
+        ["mittel", '"Um … left? No, right! No! I like compromises!"', "(The left head is delighted. The right head bites the left. Family feud.)",
+          { f: '(The right head, very quietly in your head:) "…and me?"', a: [
+            ["gut", '"You have the nicer smile. Don\'t tell him."', "(The right head grins. Very wide. Far too wide. But in a romantic way.)"],
+            ["mittel", '"You\'re … also there. Very present."', "(The right head sighs. A demon prince, sighing. Barradin made that happen.)"],
+            ["schlecht", '"You\'re the reason we fled in that boat back then."', "(The right head remembers. He's still angry about the boat.)"]] }],
+        ["schlecht", '"Honestly? You were prettier as an illusion from my flute."', "(Both heads slowly turn towards Barradin. The lake starts to boil.)",
+          { f: '(Doubled, very loud in your head:) "EXPLAIN YOURSELF, MORTAL."', a: [
+            ["gut", '"The illusion was pretty. But you\'re real. Real is dangerous. And dangerous is my type."', "(The lake stops boiling. Now it only simmers. Romantically.)"],
+            ["mittel", '"I meant … the lighting. It was better back then."', "(A tentacle turns a glowing mushroom up a little. Demogorgon poses.)"],
+            ["schlecht", "(Barradin pulls out the flute to prove it.)", "(A second Demogorgon appears beside Demogorgon. Now four heads are offended.)"]] }]] }
+    }
+
+  };
+  const gespraech = id => GESPRAECHE[sprache()][id];
 
 
   /* ---------- Szene: Zimmer, Spielleiter, Schirm (SVG) ---------- */
@@ -794,6 +1210,7 @@
         <g class="ch-roete"><ellipse cx="252" cy="150" rx="5" ry="3" fill="#ff7a7a" opacity=".35"/><ellipse cx="288" cy="150" rx="5" ry="3" fill="#ff7a7a" opacity=".35"/></g>
         <g class="ch-zzz"><text x="300" y="112" font-size="11" fill="#cfe6ff" font-family="Georgia,serif">z</text><text x="308" y="102" font-size="14" fill="#cfe6ff" font-family="Georgia,serif">Z</text></g>
         <g class="ch-schweiss"><path d="M300 124 q 3 6 0 8 q -3 -2 0 -8 Z" fill="#9fd6ff"/><path d="M243 128 q 2.5 5 0 7 q -2.5 -2 0 -7 Z" fill="#9fd6ff"/></g>
+        <g class="ch-spray"><circle cx="262" cy="162" r="2.2" fill="#9fd6ff"/><circle cx="258" cy="158" r="1.6" fill="#9fd6ff"/><circle cx="255" cy="165" r="1.8" fill="#b9e4ff"/><circle cx="251" cy="160" r="1.3" fill="#9fd6ff"/><circle cx="259" cy="168" r="1.4" fill="#cfeeff"/><circle cx="248" cy="166" r="1.1" fill="#9fd6ff"/></g>
         <g class="ch-traenen"><path class="tr1" d="M251 142 q 3 6 0 8 q -3 -2 0 -8 Z" fill="#9fd6ff"/><path class="tr2" d="M289 142 q 3 6 0 8 q -3 -2 0 -8 Z" fill="#9fd6ff"/></g>
         <g class="ch-backen"><ellipse cx="251" cy="153" rx="6" ry="5" fill="#f2c8a8" stroke="#d3a07e" stroke-width=".8"/><ellipse cx="289" cy="153" rx="6" ry="5" fill="#f2c8a8" stroke="#d3a07e" stroke-width=".8"/></g>
       </g></g>
@@ -804,6 +1221,12 @@
         <g class="h-daumen"><path d="M312 208 C 322 200 322 190 318 180" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M314 196 h 10 M314 192 h 10" stroke="#22262e" stroke-width="1.8"/><rect x="309" y="160" width="16" height="18" rx="5" fill="#ecc29f"/><rect x="313" y="148" width="7" height="16" rx="3.5" fill="#ecc29f"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
         <g class="h-mund"><path d="M312 208 C 316 190 298 178 282 168" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M304 190 l 8 -5 M301 186 l 8 -5" stroke="#22262e" stroke-width="1.8"/><ellipse cx="272" cy="160" rx="12" ry="8" fill="#ecc29f"/><path d="M262 157 h 17 M261 161 h 18" stroke="#d3a07e" stroke-width="1"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
         <g class="h-kinn"><path d="M312 208 C 312 198 298 192 286 188" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M302 196 l 4 -8 M298 195 l 4 -8" stroke="#22262e" stroke-width="1.8"/><circle cx="280" cy="181" r="7.5" fill="#ecc29f"/><path d="M276 176 q 4 -2 8 0" stroke="#d3a07e" stroke-width="1" fill="none"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
+        <g class="h-tasse"><path d="M312 208 C 318 192 304 178 290 170" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M305 192 l 8 -5 M302 188 l 8 -5" stroke="#22262e" stroke-width="1.8"/>
+          <rect x="276" y="150" width="15" height="18" rx="2" fill="#d94a3a"/><path d="M291 154 q 6 1 0 9" fill="none" stroke="#d94a3a" stroke-width="2.4"/><rect x="276" y="150" width="15" height="3" fill="#f2e6cf"/><ellipse cx="287" cy="166" rx="7" ry="5" fill="#ecc29f"/><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
+        <g class="h-klatschen"><path d="M228 206 C 236 200 248 196 258 192" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M312 206 C 304 200 292 196 282 192" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/>
+          <ellipse class="kl-l" cx="262" cy="188" rx="6" ry="9" fill="#ecc29f"/><ellipse class="kl-r" cx="278" cy="188" rx="6" ry="9" fill="#ecc29f"/><path d="M296 196 l 6 -6 M292 194 l 6 -6" stroke="#22262e" stroke-width="1.8"/></g>
+        <g class="h-faecheln"><path d="M312 208 C 322 192 318 176 308 164" stroke="#ecc29f" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M314 192 h 9 M313 188 h 9" stroke="#22262e" stroke-width="1.8"/>
+          <g class="faecher"><ellipse cx="305" cy="152" rx="7" ry="11" fill="#ecc29f"/><path d="M300 143 v 8 M304 141 v 9 M308 142 v 8" stroke="#d3a07e" stroke-width="1"/></g><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/></g>
         <g class="h-stift"><ellipse cx="236" cy="226" rx="10" ry="6.5" fill="#ecc29f"/><ellipse cx="300" cy="222" rx="10" ry="6.5" fill="#ecc29f"/><path d="M298 222 l 12 -18" stroke="#e0a046" stroke-width="3" stroke-linecap="round"/></g>
       </g>
     </g>
@@ -891,13 +1314,18 @@
     lachtraenen: { a: "lachzu", b: "hoch", m: "lachen", h: "ruhe", p: "zurueck", tr: 1 },
     unglaeubig: { a: "gross", b: "hoch", m: "wellig", h: "ruhe", p: "vor" },
     seufzen: { a: "zu", b: "traurig", m: "o", h: "ruhe", p: "ducken" },
-    verkneifen: { a: "lachzu", b: "boese", m: "gepresst", h: "ruhe", r: 1, bk: 1 }
+    verkneifen: { a: "lachzu", b: "boese", m: "gepresst", h: "ruhe", r: 1, bk: 1 },
+    trinken: { a: "unten", b: "normal", m: "neutral", h: "tasse" },
+    prusten: { a: "gross", b: "hoch", m: "o", h: "tasse", p: "zurueck", sp: 1 },
+    klatschen: { a: "lachzu", b: "hoch", m: "lachen", h: "klatschen", p: "zurueck" },
+    faecheln: { a: "halb", b: "hoch", m: "gepresst", h: "faecheln", r: 1, sw: 1, p: "links" }
   };
   let ausdruckUhr = 0, ruheUhr = 0;
   function gesicht(name, dauer, danach) {
     const A = AUSDRUCK[name] || AUSDRUCK.neutral;
     sl.dataset.a = A.a; sl.dataset.b = A.b; sl.dataset.m = A.m; sl.dataset.h = A.h;
     sl.classList.toggle("rot", !!A.r); sl.classList.toggle("zzz", !!A.z); sl.classList.toggle("schweiss", !!A.sw);
+    sl.classList.toggle("spray", !!A.sp);
     sl.classList.toggle("traenen", !!A.tr); sl.classList.toggle("backen", !!A.bk); sl.classList.toggle("zucken", !!A.zk);
     sl.dataset.p = A.p || "";
     sl.classList.remove("hops"); void sl.getBBox; requestAnimationFrame(() => sl.classList.add("hops"));
@@ -914,7 +1342,7 @@
   }, 2600);
 
   function blase(el, text, dauer) {
-    el.textContent = text; el.classList.add("da");
+    el.textContent = text; el.classList.add("da"); el.classList.toggle("lang", String(text).length > 110);
     clearTimeout(el._uhr); if (dauer) el._uhr = setTimeout(() => el.classList.remove("da"), dauer);
   }
   let sprechUhr = 0;
@@ -1059,6 +1487,9 @@
       zauber() { spiel("swell", { laut: .4, dauer: 1.6, aus: .6 }); fx.harfeHoch(.1, 74); },
       gong() { spiel("gong", { laut: .5 }); },
       auftritt() { fx.harfeHoch(0, 60); fx.chor(.15, [60, 64, 67, 71], .14, 1.2); },
+      prust() { rauschen(0, .35, .55, 2400, 700, 1.4); osz("sawtooth", 180, 90, 0, .25, .08); },
+      dumpf() { osz("sine", 110, 45, 0, .22, .7); rauschen(0, .12, .35, 600, 200, 2); },
+      applaus() { for (let i = 0; i < 18; i++) rauschen(i * .09 + Math.random() * .04, .06, .22, 1800 + Math.random() * 1500, 900, 3); },
       klapper() { spiel("clave1", { laut: .4 }); spiel("clave1", { zeit: .18, laut: .3, rate: 1.2 }); }
     };
     /* ---------- Lounge-Musik: ein ganzes Stück (A A B A, 32 Takte) mit wechselnden Mustern,
@@ -1199,7 +1630,7 @@
     }
   }
   function nscReagiert(klasse, dauer) {
-    nscImg.classList.remove("verliebt", "kalt", "hin");
+    nscImg.classList.remove("verliebt", "kalt", "hin", "zuneigen", "zurueckweichen", "grübeln", "huepfen");
     void nscImg.offsetWidth; nscImg.classList.add(klasse);
     setTimeout(() => nscImg.classList.remove(klasse), dauer || 1800);
   }
@@ -1268,9 +1699,12 @@
       hgraam: [.76, .16], themberchaud: [.32, .42], demogorgon: [.5, .14], blight: [.62, .7], vrock: [.45, .72], chasme: [.5, .38] }[nscImg.dataset.nsc] || [.5, .2];
     return [links + bw * f[0], oben + bh * f[1]];
   }
+  let letztesZiel = null;
   function kamera(ziel, zoom, art) {
     if (ruhig) return;
     clearTimeout(kamUhr);
+    if (art === "schnitt" && ziel && letztesZiel && ziel !== letztesZiel) { buehne.classList.remove("wisch"); void buehne.offsetWidth; buehne.classList.add("wisch"); setTimeout(() => buehne.classList.remove("wisch"), 220); }
+    letztesZiel = zoom > 1 ? ziel : null;
     kameraEl.classList.remove("schnitt", "schleich");
     if (art) kameraEl.classList.add(art);
     const spot = (x, y, z) => { buehne.style.setProperty("--sx", (x / buehne.clientWidth * 100).toFixed(1) + "%"); buehne.style.setProperty("--sy", (y / buehne.clientHeight * 100).toFixed(1) + "%"); buehne.style.setProperty("--zr", z); };
@@ -1285,6 +1719,63 @@
   }
   /* Nahaufnahme für eine Weile, dann zurück in die Totale */
   function nah(ziel, zoom, ms, art) { kamera(ziel, zoom, art); kamUhr = setTimeout(() => kamera(null), ms); }
+  /* Ein ganzes Repertoire an Kamerafahrten – damit nicht jede Reaktion gleich aussieht */
+  let fahrtUhren = [];
+  function fahrtStopp() { fahrtUhren.forEach(clearTimeout); fahrtUhren = []; kameraEl.classList.remove("kippen", "kippen-r", "wackeln"); }
+  const nachher = (fn, ms) => fahrtUhren.push(setTimeout(fn, ms));
+  function wisch() { buehne.classList.remove("wisch"); void buehne.offsetWidth; buehne.classList.add("wisch"); nachher(() => buehne.classList.remove("wisch"), 220); }
+  function kamFahrt(name) {
+    if (ruhig || !name || name === "keine") return;
+    fahrtStopp(); clearTimeout(kamUhr);
+    const raus = (ms, art) => nachher(() => { kameraEl.classList.remove("kippen", "kippen-r", "wackeln"); kamera(null, 1, art || "zieh"); }, ms);
+    switch (name) {
+      case "nah-nsc": kamera("nsc", 2, "schnitt"); raus(1400); break;
+      case "nah-sl": kamera("sl", 2.1, "schnitt"); raus(1400); break;
+      case "punch-sl": kamera("sl", 2.8, "schnitt"); buehne.classList.add("blitz"); nachher(() => buehne.classList.remove("blitz"), 160); raus(1000); break;
+      case "punch-nsc": kamera("nsc", 2.5, "schnitt"); raus(1000); break;
+      case "dolly-nsc": kamera(null, 1, "schnitt"); requestAnimationFrame(() => requestAnimationFrame(() => kamera("nsc", 2.2, "schleich"))); raus(3000); break;
+      case "dolly-sl": kamera(null, 1, "schnitt"); requestAnimationFrame(() => requestAnimationFrame(() => kamera("sl", 2.4, "schleich"))); raus(3000); break;
+      case "zweier": kamera("beide", 1.5, "zieh"); raus(2000); break;
+      case "rueckzug": kamera("sl", 2.7, "schnitt"); nachher(() => kamera(null, 1, "schleich"), 250); break;
+      case "pingpong": {
+        const z = ["nsc", "sl", "nsc", "sl"];
+        z.forEach((ziel, k) => nachher(() => { wisch(); kamera(ziel, ziel === "sl" ? 2.3 : 2.1, "schnitt"); }, k * 420));
+        raus(z.length * 420 + 500); break;
+      }
+      case "dutch": kameraEl.classList.add(Math.random() < .5 ? "kippen" : "kippen-r"); kamera("sl", 1.7, "zieh"); raus(1700); break;
+      case "wackel-nsc": kameraEl.classList.add("wackeln"); kamera("nsc", 1.9, "schnitt"); raus(1300); break;
+      case "wackel-sl": kameraEl.classList.add("wackeln"); kamera("sl", 2.2, "schnitt"); raus(1300); break;
+      case "reiss": wisch(); kamera("nsc", 1.8, "schnitt"); nachher(() => { wisch(); kamera("sl", 2.4, "schnitt"); }, 700); raus(1700); break;
+    }
+  }
+  /* ---------- Kleine Aktionen des Spielleiters ---------- */
+  function spuckTake() {
+    if (ruhig) return gesicht("facepalm", 1400);
+    gesicht("trinken");
+    setTimeout(() => { gesicht("prusten", 1300, "lachtraenen"); tonFx("prust"); kamFahrt("punch-sl"); }, 700);
+  }
+  function abtauchen() {
+    gesicht("fremdscham");
+    sl.classList.add("abgetaucht");
+    setTimeout(() => { sl.classList.add("lugt"); }, 900);
+    setTimeout(() => { sl.classList.remove("abgetaucht", "lugt"); gesicht("seufzen", 1200); }, 1900);
+  }
+  function kopfAufTisch() {
+    gesicht("seufzen");
+    sl.classList.add("kopftisch");
+    setTimeout(() => tonFx("dumpf"), 260);
+    setTimeout(() => { sl.classList.remove("kopftisch"); gesicht("lachtraenen", 1400); }, 1500);
+  }
+  const faecheln = () => gesicht("faecheln", 2200);
+  const klatschen = () => { gesicht("klatschen", 2000); tonFx("applaus"); };
+  /* kleines Gefühls-Symbol über dem Kopf des NSC */
+  function nscEmoji(zeichen) {
+    if (ruhig || nscImg.hidden) return;
+    const [x, y] = nscGesicht(), e = document.createElement("span");
+    e.className = "ch-nsc-emoji"; e.textContent = zeichen;
+    e.style.left = (x / buehne.clientWidth * 100).toFixed(1) + "%"; e.style.top = Math.max(4, y / buehne.clientHeight * 100 - 14).toFixed(1) + "%";
+    buehne.appendChild(e); setTimeout(() => e.remove(), 1800);
+  }
   /* ---------- Ablauf ---------- */
   /* Zeitplan: alles, was „gleich passiert“, läuft über plan() – so lässt es sich mit einem Tipp vorspulen */
   let plaene = [];
@@ -1330,13 +1821,14 @@
   function nscStart(fortgesetzt) {
     const n = S.reihe[S.i];
     S.nsc = n;
-    if (!fortgesetzt) { S.herzen = 0; S.zuege = 4; S.fertig = null; S.letzt = null; S.letzt2 = null; S.frage = null; S.frageGehabt = false; S.gruppeZahl = 0; S.geheimGenutzt = false; S.neuGeheim = false; S.angebot = spruchAngebot(n); }
+    if (!fortgesetzt) { S.herzen = 0; S.zuege = 4; S.fertig = null; S.letzt = null; S.letzt2 = null; S.frage = null; S.dialog = null; S.frageGehabt = false; S.gruppeZahl = 0; S.geheimGenutzt = false; S.neuGeheim = false; S.angebot = spruchAngebot(n); }
     clearTimeout(wuerfelUhr); wuerfel.hidden = true; wuerfel.classList.remove("weg");
     nscZeigen(n); effekte.nsc();
     setTimeout(() => { if (S && S.nsc === n) { kamera("nsc", 1.9, "schnitt"); setTimeout(() => kamera(null, 1, "zieh"), 700); } }, 350);
     gesicht("grinsen", 1400);
     slSagt(t().sl.start, 2000);
-    plan(() => { if (S && S.nsc === n) blase(nscBlase, S.frage ? n2(n.id).frage : t().nsc[n.id].intro, 0); }, 500);
+    if (S.frage && !S.frage.reihe) S.frage = null; /* alter Spielstand */
+    plan(() => { if (S && S.nsc === n) blase(nscBlase, S.frage ? frageKnoten().f : t().nsc[n.id].intro, 0); }, 500);
     zeichnen();
   }
   /* drei Sprüche: einer charmant, einer kühn, einer absurd – manchmal statt charmant der passende; freigeschaltete Geheimsprüche obendrauf */
@@ -1365,14 +1857,30 @@
   function wuerfeln(art, idx) {
     if (!S || S.fertig || S.wirft || S.frage) return;
     const n = S.nsc, T = t();
-    S.wirft = true; S.spruch = spruchText(art, idx, n.id); gehoertMerken(n.id, art, idx);
+    S.wirft = true; S.dialog = null; S.spruch = spruchText(art, idx, n.id); gehoertMerken(n.id, art, idx);
     if (art === "geheim") S.geheimGenutzt = true;
     blase(nscBlase, "Barradin: " + S.spruch, 0);
     nscBlase.classList.add("barradin");
     effekte.spruch(art);
-    if (art === "absurd") { gesicht(zufall(["facepalm", "augenrollen", "unglaeubig"]), 1500); slSagt(T.sl.absurd, 1800); S.geduld = Math.max(0, S.geduld - 1); }
-    else gesicht({ charmant: "skeptisch", kuehn: zufall(["fremdscham", "verkneifen"]), passend: "smirk", geheim: "unglaeubig" }[art] || "notiert");
-    nah("nsc", 2.2, 1300);
+    /* Reaktion auf den Spruch – jedes Mal ein bisschen anders */
+    const r = Math.random();
+    if (art === "absurd") {
+      S.geduld = Math.max(0, S.geduld - 1); slSagt(T.sl.absurd, 1800);
+      if (r < .35) spuckTake(); else gesicht(zufall(["facepalm", "augenrollen", "unglaeubig", "fremdscham"]), 1500);
+      if (r >= .35) kamFahrt(zufall(["pingpong", "punch-sl", "dutch", "reiss"]));
+      nscEmoji(zufall(["❓", "⁉️", "🤨", "😶"]));
+    } else if (art === "kuehn") {
+      if (r < .3) abtauchen(); else gesicht(zufall(["fremdscham", "verkneifen", "unglaeubig"]), 1500);
+      kamFahrt(zufall(["wackel-nsc", "punch-nsc", "reiss", "dolly-nsc"]));
+      nscEmoji(zufall(["😳", "🫣", "❗", "😮"]));
+    } else if (art === "charmant") {
+      if (r < .25) faecheln(); else gesicht(zufall(["skeptisch", "smirk", "verkneifen"]), 1500);
+      kamFahrt(zufall(["dolly-nsc", "nah-nsc", "zweier"]));
+      if (Math.random() < .5) nscEmoji(zufall(["☺️", "😊", "🙂"]));
+    } else if (art === "passend") {
+      gesicht(zufall(["smirk", "notiert", "skeptisch"]), 1500);
+      kamFahrt(zufall(["nah-nsc", "zweier", "dolly-sl"]));
+    } else { gesicht("unglaeubig", 1500); kamFahrt("dolly-nsc"); nscEmoji("😳"); }
     zeichnen();
     /* Manchmal wird es unangenehm still, bevor überhaupt gewürfelt wird */
     const p = art === "absurd" ? .55 : art === "kuehn" ? .38 : art === "geheim" ? 0 : .2;
@@ -1385,6 +1893,7 @@
     launeAendern(-1);
     plan(() => {
       if (!S || S.nsc !== n) return;
+      fahrtStopp();
       gesicht("starr"); sl.classList.add("starr"); effekte.peinlich(dauer / 1000);
       kamera("sl", 1.7, "schnitt"); requestAnimationFrame(() => requestAnimationFrame(() => kamera("sl", 2.5, "schleich")));
       blase(slBlase, "…", 0); slBlase.classList.add("punkte");
@@ -1443,20 +1952,30 @@
     /* Serie → Rausch */
     if (art2 === "erfolg" || art2 === "krit") S.serie = (S.serie || 0) + 1; else S.serie = 0;
     nscBlase.classList.remove("barradin");
+    fahrtStopp();
     S.superWurf = art2 === "krit" || (art2 === "erfolg" && (w >= 17 || summe >= sg + 6));
     effekte.ergebnis(art2, S.superWurf);
     if (art2 === "krit") {
-      gesicht("schock", 1200, "verliebt"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0);
+      gesicht("schock", 1200, Math.random() < .5 ? "klatschen" : "verliebt"); slSagt(T.sl.krit); blase(nscBlase, NT.krit, 0); nscEmoji(zufall(["😍", "🤩", "💘"]));
       kamera("sl", 2.4, "schnitt"); kamUhr = setTimeout(() => { kamera("nsc", 1.8, "schnitt"); kamUhr = setTimeout(() => kamera(null, 1, "zieh"), 1400); }, 1200);
     }
-    else if (art2 === "patzer") { gesicht("fremdscham", 1300, "lachtraenen"); slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); nah("sl", 2.2, 2000, "schnitt"); moment(3, NT.patzer); }
+    else if (art2 === "patzer") {
+      if (Math.random() < .45) kopfAufTisch(); else gesicht("fremdscham", 1300, "lachtraenen");
+      slSagt(T.sl.patzer); blase(nscBlase, NT.patzer, 0); kamFahrt(zufall(["wackel-sl", "dutch", "punch-sl", "rueckzug"])); moment(3, NT.patzer);
+      nscEmoji(zufall(["😱", "🤢", "💀", "😵"])); setTimeout(() => nscReagiert("zurueckweichen", 1400), 300);
+    }
     else if (art2 === "erfolg") {
-      gesicht(S.herzen >= 3 ? "verliebt" : zufall(["kichern", "errötet", "verkneifen", "grinsen"]), 2600); slSagt(T.sl.erfolg); blase(nscBlase, zufall(NT.ja), 0);
-      if (Math.random() < .5) nah("nsc", 1.9, 1400); else nah("sl", 2.1, 1400);
+      const r = Math.random();
+      if (S.herzen >= 3) gesicht("verliebt", 2600); else if (r < .2) faecheln(); else if (r < .3) klatschen(); else gesicht(zufall(["kichern", "errötet", "verkneifen", "grinsen"]), 2600);
+      slSagt(T.sl.erfolg); blase(nscBlase, zufall(NT.ja), 0);
+      kamFahrt(zufall(["nah-nsc", "nah-sl", "zweier", "rueckzug", "dolly-nsc"]));
+      nscEmoji(zufall(["😳", "💓", "☺️", "😊", "💗"])); setTimeout(() => nscReagiert(zufall(["verliebt", "zuneigen"]), 1800), 200);
     }
     else {
-      gesicht(summe >= sg - 3 ? zufall(["notiert", "smirk"]) : zufall(["augenrollen", "pokerface", "genervt", "smirk"]), 2400); slSagt(T.sl.misserfolg);
-      if (Math.random() < .45) nah("sl", 2, 1300);
+      if (Math.random() < .18) kopfAufTisch(); else gesicht(summe >= sg - 3 ? zufall(["notiert", "smirk"]) : zufall(["augenrollen", "pokerface", "genervt", "smirk"]), 2400);
+      slSagt(T.sl.misserfolg);
+      kamFahrt(zufall(["punch-sl", "dutch", "rueckzug", "keine", "nah-sl", "nah-nsc"]));
+      nscEmoji(zufall(["😒", "🙄", "💢", "😐", "🥱"])); setTimeout(() => nscReagiert(zufall(["kalt", "zurueckweichen", "grübeln"]), 1200), 200);
       /* … und manchmal hängt die Antwort unangenehm lange in der Luft */
       if (S.herzen < 3 && S.zuege > 0 && S.geduld > 0 && Math.random() < .35 && !ruhig) {
         const nn = S.nsc; blase(nscBlase, zufall(T.sl.nachhall), 0); nscBlase.classList.add("punkte");
@@ -1484,14 +2003,9 @@
       return;
     }
     if (S.laune <= -3) { S.wirft = true; zeichnen(); plan(() => wuerdeWurf(n), 1800); return; }
-    if (art2 === "erfolg" && !S.frageGehabt && Math.random() < .45) {
+    if (art2 === "erfolg" && !S.frageGehabt && gespraech(n.id) && Math.random() < .55) {
       S.frageGehabt = true; S.wirft = true; zeichnen();
-      plan(() => {
-        if (!S || S.nsc !== n) return;
-        S.wirft = false; S.frage = ["gut", "mittel", "schlecht"].sort(() => Math.random() - .5);
-        blase(nscBlase, n2(n.id).frage, 0); nah("nsc", 2, 1500); gesicht("skeptisch", 1500); tonFx("klapper");
-        zeichnen();
-      }, 2000);
+      plan(() => frageStellen(n, []), 2000);
       return;
     }
     if ((S.gruppeZahl || 0) < 2 && Math.random() < .24) { S.gruppeZahl = (S.gruppeZahl || 0) + 1; S.wirft = true; zeichnen(); plan(() => gruppeFunktDazwischen(n), 2100); }
@@ -1532,25 +2046,61 @@
       zeichnen();
     }, 1900);
   }
-  function antworten(k) {
+  /* ---------- Gespräch ---------- */
+  function frageKnoten() {
+    const g = gespraech(S.nsc.id); if (!g || !S.frage) return null;
+    return S.frage.pfad.length ? g.a[S.frage.pfad[0]][3] : g;
+  }
+  function frageStellen(n, pfad) {
+    if (!S || S.nsc !== n) return;
+    S.wirft = false;
+    S.frage = { pfad, reihe: [0, 1, 2].sort(() => Math.random() - .5) };
+    const K = frageKnoten();
+    nscBlase.classList.remove("barradin", "punkte");
+    blase(nscBlase, K.f, 0); nscEmoji(pfad.length ? "❔" : "❓");
+    if (pfad.length) kamFahrt(zufall(["dolly-nsc", "zweier", "nah-nsc"])); else kamFahrt(zufall(["nah-nsc", "dolly-nsc"]));
+    gesicht(zufall(["skeptisch", "unglaeubig", "notiert"]), 1600); tonFx("klapper");
+    zeichnen();
+  }
+  const ohneSprecher = txt => /^\(/.test(txt) ? txt : "Barradin: " + txt;
+  function antworten(i) {
     if (!S || !S.frage) return;
-    const n = S.nsc, T2 = t2(), A = n2(n.id), NT = t().nsc[n.id];
-    S.frage = null; S.wirft = true;
-    blase(nscBlase, "Barradin: " + A[k], 0); nscBlase.classList.add("barradin");
-    gesicht(k === "gut" ? "verkneifen" : k === "mittel" ? "pokerface" : "fremdscham", 1200);
+    const n = S.nsc, T2 = t2(), K = frageKnoten(), A = K && K.a[+i]; if (!A) return;
+    const [k, text, reaktion, weiter] = A, stufe = S.frage.pfad.length;
+    S.frage = null; S.wirft = true; S.dialog = null;
+    blase(nscBlase, ohneSprecher(text), 0); nscBlase.classList.add("barradin");
+    /* der Spielleiter reagiert schon auf Barradins Antwort */
+    if (k === "gut") gesicht(zufall(["verkneifen", "unglaeubig", "skeptisch"]), 1200);
+    else if (k === "mittel") gesicht(zufall(["pokerface", "augenrollen", "smirk"]), 1200);
+    else if (Math.random() < .4) abtauchen(); else if (Math.random() < .5) spuckTake(); else gesicht("fremdscham", 1300);
+    kamFahrt(k === "schlecht" ? zufall(["punch-sl", "dutch", "pingpong"]) : zufall(["nah-nsc", "dolly-nsc", "zweier"]));
     zeichnen();
     plan(() => {
       if (!S || S.nsc !== n) return;
       nscBlase.classList.remove("barradin");
+      blase(nscBlase, reaktion, 0); S.dialog = { text: reaktion, k };
       slSagt(T2.antwortSl[k], 2400);
-      if (k === "gut") { S.herzen = Math.min(3, S.herzen + 1); launeAendern(1); blase(nscBlase, zufall(NT.ja), 0); gesicht("errötet", 2200); nscReagiert("verliebt"); tonFx("harfeHoch", .1); flug(["💗", "💖"], 6, "aufsteigen"); }
-      else if (k === "mittel") { blase(nscBlase, zufall(T2.mittelNsc), 0); gesicht("smirk", 1800); }
-      else { S.herzen = Math.max(0, S.herzen - 1); S.geduld = Math.max(0, S.geduld - 1); launeAendern(-1); blase(nscBlase, zufall(NT.nein), 0); gesicht("facepalm", 1400, "lachtraenen"); nscReagiert("kalt", 900); tonFx("posaune", true); stimmung("frost", 1400); moment(3, "Barradin: " + A[k]); }
-      S.wirft = false; liebeSetzen();
-      if (S.herzen >= 3) return nscEnde(true);
-      if (S.geduld <= 0) return nscEnde(false);
+      if (k === "gut") {
+        S.herzen = Math.min(3, S.herzen + 1); launeAendern(1);
+        if (Math.random() < .35) faecheln(); else gesicht(zufall(["errötet", "kichern", "verliebt"]), 2200);
+        nscReagiert(zufall(["verliebt", "zuneigen"]), 2000); nscEmoji(zufall(["😳", "💓", "☺️", "💘"]));
+        tonFx("harfeHoch", .1); flug(["💗", "💖"], 6, "aufsteigen"); kamFahrt(zufall(["zweier", "nah-nsc"]));
+      }
+      else if (k === "mittel") { gesicht(zufall(["smirk", "pokerface", "kichern"]), 1800); nscEmoji(zufall(["🤨", "😐", "🙃"])); nscReagiert("grübeln", 1400); }
+      else {
+        S.herzen = Math.max(0, S.herzen - 1); S.geduld = Math.max(0, S.geduld - 1); launeAendern(-1);
+        if (Math.random() < .4) kopfAufTisch(); else gesicht("facepalm", 1400, "lachtraenen");
+        nscReagiert(zufall(["kalt", "zurueckweichen"]), 1200); nscEmoji(zufall(["💢", "😤", "😱", "🙄"])); tonFx("posaune", true); stimmung("frost", 1400);
+        moment(3, ohneSprecher(text) + " – " + reaktion); kamFahrt(zufall(["punch-sl", "wackel-nsc", "rueckzug"]));
+      }
+      liebeSetzen();
+      if (S.herzen >= 3) { S.wirft = false; return nscEnde(true); }
+      if (S.geduld <= 0) { S.wirft = false; return nscEnde(false); }
+      /* das Gespräch geht weiter: jede Antwort hat ihre eigene Folgefrage */
+      if (stufe === 0 && weiter) { zeichnen(); plan(() => frageStellen(n, [+i]), 3600); return; }
+      S.wirft = false;
       zeichnen();
-    }, 1000);
+    }, 1100);
   }
   function nscEnde(gewonnen) {
     const n = S.nsc, T = t(), NT = T.nsc[n.id];
@@ -1791,10 +2341,11 @@
         (S.neuGeheim ? '<p class="ch-hinweis geheim">' + esc(T2.geheimNeu) + "</p>" : "") +
         '<div class="ch-knoepfe"><button type="button" class="tav-knopf ch-haupt haupt" data-tun="weiter">' + esc(S.geduld <= 0 || S.i >= S.reihe.length - 1 && !(S.erobert >= 6 && !S.bonus) ? T.ende : T.weiter) + "</button></div>";
     } else if (S.frage) {
-      const A = n2(n.id);
-      html += '<p class="ch-frage">' + esc(T2.frageLabel) + "</p>" +
-        '<div class="ch-sprueche">' + S.frage.map(k => '<button type="button" class="ch-spruch ch-antwort" data-antwort="' + k + '">' + esc(A[k]) + "</button>").join("") + "</div>";
+      const K = frageKnoten();
+      html += '<p class="ch-frage">' + esc(T2.frageLabel) + '</p><p class="ch-dialog frage">' + esc(K.f) + "</p>" +
+        '<div class="ch-sprueche">' + S.frage.reihe.map(i => '<button type="button" class="ch-spruch ch-antwort" data-antwort="' + i + '">' + esc(K.a[i][1]) + "</button>").join("") + "</div>";
     } else {
+      if (S.dialog) html += '<p class="ch-dialog ' + S.dialog.k + '">' + esc(S.dialog.text) + "</p>";
       html += '<div class="ch-sprueche">' + S.angebot.map(a => '<button type="button" class="ch-spruch art-' + a.art + '" data-art="' + a.art + '" data-idx="' + a.idx + '"' + (S.wirft ? " disabled" : "") + ">" +
           '<span class="ch-art">' + esc(a.art === "geheim" ? "📜 " + T2.geheim : T.arten[a.art]) + " · " + esc(a.art === "geheim" ? T2.geheimInfo(sgFuer(a.art, n)) : T.artInfo[a.art](sgFuer(a.art, n))) + (S.vorteil && a.art !== "absurd" ? " · ⬆ Vorteil" : "") + "</span>" + esc(spruchText(a.art, a.idx, n.id)) + "</button>").join("") + "</div>" +
         '<div class="ch-joker">' + ["echo", "rex", "floete"].map(k => '<button type="button" class="ch-jk" data-joker="' + k + '"' + (S.joker[k] && !S.wirft ? "" : " disabled") + ' title="' + esc(T.jokerInfo[k]) + '">' +
@@ -2265,6 +2816,44 @@
 .ch-buehne.glitzer .ch-hose { filter: drop-shadow(0 0 6px rgba(190,210,255,.9)); }
 /* Controller-Auswahl */
 .ch-tafel .pad-wahl { outline: 2px solid #ffd27a; outline-offset: 2px; border-color: #ffd27a; background: rgba(255,210,122,.1); }
+
+/* ===== Mehr Reaktionen: Tasse, Applaus, Fächeln, Abtauchen, Kopf auf den Tisch, Kamera-Kniffe ===== */
+.ch-sl[data-h="tasse"] .h-tasse, .ch-sl[data-h="klatschen"] .h-klatschen, .ch-sl[data-h="faecheln"] .h-faecheln { display: inline; }
+.ch-sl[data-h="tasse"] .arm-r, .ch-sl[data-h="klatschen"] .ch-arme, .ch-sl[data-h="faecheln"] .arm-r { display: none; }
+.ch-spray { display: none; }
+.ch-sl.spray .ch-spray { display: inline; }
+.ch-sl.spray .ch-spray circle { animation: chSpray .7s ease-out forwards; transform-box: fill-box; }
+.ch-sl.spray .ch-spray circle:nth-child(2n) { animation-duration: .9s; }
+@keyframes chSpray { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(-26px, 6px); opacity: 0; } }
+.h-klatschen .kl-l { animation: chKlatschL .22s ease-in-out infinite alternate; transform-box: fill-box; }
+.h-klatschen .kl-r { animation: chKlatschR .22s ease-in-out infinite alternate; transform-box: fill-box; }
+@keyframes chKlatschL { from { transform: translateX(-4px); } to { transform: translateX(2px); } }
+@keyframes chKlatschR { from { transform: translateX(4px); } to { transform: translateX(-2px); } }
+.h-faecheln .faecher { animation: chFaecher .18s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes chFaecher { from { transform: rotate(-18deg); } to { transform: rotate(14deg); } }
+.ch-sl { transition: transform .4s cubic-bezier(.4,1.4,.5,1); transform-box: view-box; }
+.ch-sl.abgetaucht { transform: translateY(64px); transition-duration: .25s; }
+.ch-sl.abgetaucht.lugt { transform: translateY(40px); }
+.ch-sl.kopftisch .ch-pose { transform: translateY(40px) rotate(6deg) !important; transition: transform .25s cubic-bezier(.6,0,.9,.5); }
+.ch-nsc.da.zuneigen { transform: translateX(5%) rotate(3deg) scale(1.03); filter: drop-shadow(0 0 20px rgba(255,90,160,.7)) drop-shadow(0 10px 18px rgba(0,0,0,.6)); }
+.ch-nsc.da.zurueckweichen { transform: translateX(-6%) scale(.92) rotate(-3deg); filter: saturate(.6) drop-shadow(0 10px 18px rgba(0,0,0,.6)); }
+.ch-nsc.da.grübeln { animation: chGruebeln 1.4s ease-in-out; }
+@keyframes chGruebeln { 30% { transform: rotate(-4deg); } 60% { transform: rotate(3deg); } }
+.ch-nsc-emoji { position: absolute; z-index: 8; transform: translate(-50%, 0); font-size: clamp(1.4rem, 5vw, 2.4rem); pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); animation: chEmoji 1.8s cubic-bezier(.2,1.6,.4,1) forwards; }
+@keyframes chEmoji { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.3); } 18% { opacity: 1; transform: translate(-50%, 0) scale(1.15); } 75% { opacity: 1; transform: translate(-50%, -14px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(.9); } }
+.ch-kamera.kippen { rotate: -4deg; transition: transform .55s cubic-bezier(.4,0,.2,1), rotate .5s ease; }
+.ch-kamera.kippen-r { rotate: 4deg; transition: transform .55s cubic-bezier(.4,0,.2,1), rotate .5s ease; }
+.ch-kamera { rotate: 0deg; transition: transform .55s cubic-bezier(.4,0,.2,1), rotate .5s ease; }
+.ch-kamera.wackeln { animation: chHandkamera .5s steps(3) infinite; }
+@keyframes chHandkamera { 0% { translate: 0 0; } 33% { translate: -3px 2px; } 66% { translate: 2px -2px; } 100% { translate: 1px 3px; } }
+.ch-buehne.wisch .ch-kamera { filter: blur(3px); }
+.ch-buehne.blitz::after { content: ""; position: absolute; inset: 0; z-index: 7; background: rgba(255,255,255,.35); pointer-events: none; }
+.ch-dialog { margin: 0; padding: .35rem .6rem; border-left: 3px solid var(--ember); background: rgba(255,255,255,.03); font-style: italic; font-size: .88rem; line-height: 1.35; color: var(--vellum); }
+.ch-dialog.frage { border-left-color: #ffd27a; font-style: normal; }
+.ch-dialog.gut { border-left-color: #ff8ac0; } .ch-dialog.schlecht { border-left-color: #9fc4ff; }
+.ch-nsc-blase.lang { font-size: clamp(.66rem, 2vw, .84rem); }
+@media (max-width: 700px) { .ch-dialog { font-size: .78rem; padding: .25rem .5rem; } }
+@media (prefers-reduced-motion: reduce) { .ch-kamera.wackeln, .h-klatschen *, .h-faecheln .faecher, .ch-nsc-emoji { animation: none !important; } }
 /* ===== Handy: ganze Szene sichtbar (nichts abgeschnitten), Sprechblasen im Band darüber ===== */
 @media (max-width: 700px) {
   .charme .ch-buehne { aspect-ratio: 400 / 372; height: auto; margin-inline: -.5rem; background: linear-gradient(180deg, #120d12, #22181c 40%, #2a1d1f); }
@@ -2294,5 +2883,5 @@
   gesicht("neutral");
   zeichnen();
   new MutationObserver(zeichnen).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  root._charme = { nsc: NSC, zustand: () => S, neu: neueSitzung, wuerfeln, joker, weiter, gesicht, effekte, stimmung, Ton, kamera, zeichnen, sag: (wer, txt) => wer === "sl" ? slSagt(txt, 60000) : blase(nscBlase, txt, 0), buch: () => { ansicht = "buch"; zeichnen(); }, peinlich: f => { S.wirft = true; peinlichePause(f || (() => { S.wirft = false; })); } };
+  root._charme = { nsc: NSC, zustand: () => S, neu: neueSitzung, wuerfeln, joker, weiter, gesicht, effekte, stimmung, Ton, kamera, kamFahrt, zeichnen, frage: () => frageStellen(S.nsc, []), aktion: n => ({ spuckTake, abtauchen, kopfAufTisch, faecheln, klatschen })[n](), sag: (wer, txt) => wer === "sl" ? slSagt(txt, 60000) : blase(nscBlase, txt, 0), buch: () => { ansicht = "buch"; zeichnen(); }, peinlich: f => { S.wirft = true; peinlichePause(f || (() => { S.wirft = false; })); } };
 })();
