@@ -85,14 +85,25 @@
   };
   const KULISSEN = ["keine", "taverne", "feuer", "wald", "waldnacht", "regen", "zelt", "sturm", "meer", "schiff", "wasserfall", "hoehle", "unterreich", "kerker", "sumpf", "unterwasser", "schmiede", "labor", "bibliothek", "tempel", "dorf", "markt", "hafen", "gebirge", "mine", "strasse", "burg", "ufer", "schlacht", "schlaegerei", "duell"];
   /* abgeschaffte Kulissen bleiben in der Liste (alte Links zählen nach ihrer Stelle), werden aber nicht mehr angeboten und laden als Ersatz */
-  const KUL_WEG = { zelt: "regen" };
+  /* reine Wetter-Kulissen und das Lagerfeuer gibt es als Zusatz – als Kulisse verwirrten sie (auch die Sprachsteuerung).
+     Wer sie noch gespeichert hat, bekommt die passende Kulisse und den Zusatz dazu. */
+  const KUL_WEG = { zelt: "keine", regen: "keine", sturm: "keine", feuer: "wald" };
+  const KUL_WEG_ZUS = { zelt: "regen", regen: "regen", sturm: "gewitter", feuer: "feuer" };
+  function kulWeg(alt) {
+    const id = KUL_WEG_ZUS[alt];
+    if (id) {
+      try { const z = JSON.parse(localStorage.getItem("imres-lw-zusaetze") || "{}") || {}; if (!z[id]) { z[id] = 1; localStorage.setItem("imres-lw-zusaetze", JSON.stringify(z)); } } catch (_) {}
+      try { if (!zusWahl[id]) { zusWahl[id] = 1; setTimeout(() => { try { zusSync(); } catch (_) {} }, 0); } } catch (_) { /* noch nicht geladen – kommt aus dem Speicher */ }
+    }
+    return KUL_WEG[alt];
+  }
   const KUL_ZEIGEN = KULISSEN.filter(k => !KUL_WEG[k]);
   /* Bühnenbild für die neueren Kulissen: nächstliegendes vorhandenes Bild */
   const KUL_BILD = { waldnacht: "wald", zelt: "regen", schiff: "meer", wasserfall: "wald", unterreich: "hoehle", kerker: "hoehle", sumpf: "wald", unterwasser: "meer", schmiede: "feuer", labor: "taverne", bibliothek: "taverne", tempel: "hoehle", dorf: "wald", markt: "taverne", hafen: "meer", gebirge: "sturm", mine: "hoehle", strasse: "wald", burg: "taverne", ufer: "wald", schlacht: "sturm", schlaegerei: "taverne", duell: "feuer" };
-  const KULISSE_ZU = { rast: "feuer", unterreich: "hoehle", reise: "strasse", spannung: "hoehle", sieg: "taverne", kampf: "keine",
-    taverne: "taverne", hafen: "hafen", wald: "wald", schmiede: "schmiede", wiegen: "feuer", trauer: "regen", ballade: "taverne",
-    auenland: "wald", elben: "wald", zwerge: "mine", reiter: "strasse", dorffest: "taverne", kamin: "feuer", shanty: "meer", pilger: "regen",
-    klage: "regen", marktplatz: "markt", hof: "burg", grusel: "hoehle", fey: "wald", boss: "sturm",
+  const KULISSE_ZU = { rast: "wald", unterreich: "hoehle", reise: "strasse", spannung: "hoehle", sieg: "taverne", kampf: "keine",
+    taverne: "taverne", hafen: "hafen", wald: "wald", schmiede: "schmiede", wiegen: "taverne", trauer: "tempel", ballade: "taverne",
+    auenland: "wald", elben: "wald", zwerge: "mine", reiter: "strasse", dorffest: "taverne", kamin: "taverne", shanty: "meer", pilger: "strasse",
+    klage: "tempel", marktplatz: "markt", hof: "burg", grusel: "hoehle", fey: "wald", boss: "kerker",
     heldenlied: "burg", trinklied: "taverne", verfolgung: "strasse", ruinen: "tempel" };
   const EFFEKTE = ["drache", "schwert", "tuer", "donner", "schrei", "wuerfel", "zauber", "horn", "jubel"];
   /* lustige Spieltisch-Momente */
@@ -1549,7 +1560,7 @@
     if (typeof s.master !== "number") s.master = 8;
     if (typeof s.hall !== "number") s.hall = 0;
     if (!RAEUME[s.raum]) s.raum = "taverne";
-    if (KUL_WEG[s.kulisse]) s.kulisse = KUL_WEG[s.kulisse];
+    if (KUL_WEG[s.kulisse]) s.kulisse = kulWeg(s.kulisse);
     if (!KULISSEN.includes(s.kulisse)) s.kulisse = "keine";
     if (typeof s.kulisseVol !== "number") s.kulisseVol = 5;
     if (typeof s.intensitaet !== "number") s.intensitaet = 5;
@@ -8239,6 +8250,8 @@ const ZUS_ICON = {
     Object.keys(T.sfx || {}).forEach(k => add([ohneSym(T.sfx[k])], "Effekt " + ohneSym(T.sfx[k]), () => { audioStart(); try { effekt(k); } catch (_) {} }));
     /* ohne Vorsilbe: Zusätze und Stimmungen, sofern das Wort nicht schon vergeben ist (die Liste oben hat Vorrang) */
     Object.keys(ZUSATZ).forEach(id => add([ZUSATZ[id].de], "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
+    /* frühere Kulissen-Wörter führen jetzt zum Zusatz */
+    [["feuer", ["lagerfeuer", "dazu lagerfeuer", "lager"]], ["gewitter", ["unwetter"]]].forEach(([id, w]) => ZUSATZ[id] && add(w, "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
     Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add([ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k)));
     return raus;
   }
@@ -8414,7 +8427,7 @@ const ZUS_ICON = {
     if (!neu) neu = dekodieren(d.lied);
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
-      kulisse: KUL_WEG[d.kulisse] || (KULISSEN.includes(d.kulisse) ? d.kulisse : "keine"), kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
+      kulisse: KUL_WEG[d.kulisse] ? kulWeg(d.kulisse) : (KULISSEN.includes(d.kulisse) ? d.kulisse : "keine"), kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
       raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, kapStufe: d.kapStufe === 1 ? 1 : 2, gaeste: Object.assign(Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), { _aus: d.gaeste && d.gaeste._aus ? 1 : 0 }), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun, x.takt].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
@@ -8738,7 +8751,7 @@ const ZUS_ICON = {
       else if (w.kulisse && "kulMix" in w) { delete kulMix[w.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {} }
       if (w.band) neu.band = Object.assign({}, neu.band, w.band);
       neu.stimmung = eig.basis; neu.eigeneStimmung = k;
-      if (KUL_WEG[neu.kulisse]) neu.kulisse = KUL_WEG[neu.kulisse];
+      if (KUL_WEG[neu.kulisse]) neu.kulisse = kulWeg(neu.kulisse);
       if (!KULISSEN.includes(neu.kulisse)) neu.kulisse = "keine";
       if (!RAEUME[neu.raum]) neu.raum = "taverne";
     }
