@@ -4,12 +4,18 @@
    kein Ton verlässt den Rechner. Das Modell (≈ 46 MB) wird beim ersten Einschalten geladen und danach vom Browser zwischengespeichert.
    Mit dem kleinen Windows-Helfer „Imres-Taste“ wirkt die Taste auch, wenn ein anderes Fenster vorne ist (Verbindung über ws://127.0.0.1:47321).
 
-   Einbindung: ImresSprache.einrichten({ ort: Element, befehle: () => [{ p: ["bach", "fluss"], text: "Zusatz Bach", tun() {} }, …] }) */
+   Einbindung: ImresSprache.einrichten({ ort: Element, befehle: () => [{ p: ["bach", "fluss"], text: "Zusatz Bach", tun() {} }, …], ducken: an => {} })
+   – ducken (freiwillig): solange zugehört wird, die eigene Musik leiser stellen, damit das Mikrofon nicht die Lautsprecher hört.
+
+   Genauigkeit: das kleine Modell kennt nur die Wörter seines Wortschatzes (wortschatz.gz, ≈ 220 000 Wörter). Ein unbekanntes Wort
+   in der Grammatik wird von Vosk stillschweigend verworfen – „Unterreich“, „Zwergenmine“ oder „Feenwald“ konnten so nie erkannt werden
+   und landeten auf ähnlich klingenden Stichwörtern. Darum wird jedes unbekannte Wort in bekannte Teile zerlegt („unter reich“,
+   „zwergen mine“, „feen wald“); was sich nicht zerlegen lässt, fällt aus der Grammatik, statt falsche Treffer zu erzeugen. */
 (function () {
   "use strict";
   if (window.ImresSprache) return;
   const BASIS = (() => { const s = document.currentScript && document.currentScript.src; return s ? s.replace(/sprache\.js.*$/, "") : "sprache/"; })();
-  const MODELL = BASIS + "vosk-model-small-de-0.15.tar.gz", BIBLIOTHEK = BASIS + "vosk.js", HELFER = "ws://127.0.0.1:47321";
+  const MODELL = BASIS + "vosk-model-small-de-0.15.tar.gz", BIBLIOTHEK = BASIS + "vosk.js", WORTSCHATZ = BASIS + "wortschatz.gz", HELFER = "ws://127.0.0.1:47321";
   const EN = (() => { try { return localStorage.getItem("imres-lang") === "en"; } catch (_) { return false; } })();
   const W = (de, en) => EN ? en : de;
   const SPEICHER = "imres-sprache";
@@ -25,7 +31,7 @@
     Backquote: "^", ContextMenu: W("Menü-Taste", "Menu key"), NumpadEnter: W("Enter (Ziffernblock)", "Numpad Enter") }[c] || c.replace(/^Key/, "").replace(/^Digit/, "").replace(/^Numpad/, W("Ziffernblock ", "Numpad ")));
 
   let st = null; /* { ort, befehle } */
-  let modell = null, modellLaedt = null, erkenner = null, grammatik = "", karte = null;
+  let modell = null, modellLaedt = null, erkenner = null, grammatik = "", karte = null, wortschatz = null, gesprochen = null;
   let mikro = null; /* { strom, ctx, knoten, vorlauf: [] } */
   let sammel = [];
   let hoert = false, nachlauf = 0, wartet = null, helfer = null, helferOk = false, helferTimer = 0, tasteWaehlen = false, letzte = "", zustand = "";
@@ -71,16 +77,39 @@
 
   /* ---------- Befehle → Grammatik ---------- */
   const norm = s => String(s).toLowerCase().replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}️‍]/gu, "").replace(/[^a-zäöüß0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+  /* Wörter, die das Modell nicht kennt und die sich nicht sinnvoll zerlegen lassen: gleich klingende bekannte Wörter */
+  const ERSATZ = { "20": "zwanzig", niesel: "nieselregen", "rülpser": "rülpsen", schnurrende: "schnurrend", brodelnder: "brodelnde", "gerüstete": "gerüsteten",
+    zzz: "schnarchen", ooooh: "oh", oooh: "oh", sakura: "kirschblüte", tss: "", wah: "", psst: "pst", shanty: "shantys", drunken: "", sailor: "seemann" };
+  const zerlegtSpeicher = new Map();
+  function zerlegen(w) {
+    if (!wortschatz || wortschatz.has(w)) return w;
+    if (w in ERSATZ) return ERSATZ[w] && (wortschatz.has(ERSATZ[w].split(" ")[0]) ? ERSATZ[w] : null);
+    if (zerlegtSpeicher.has(w)) return zerlegtSpeicher.get(w);
+    /* in möglichst wenige bekannte Teile (je mindestens zwei Buchstaben) zerlegen – klingt hintereinander gesprochen genauso */
+    const n = w.length, best = new Array(n + 1).fill(null); best[n] = [];
+    for (let i = n - 1; i >= 0; i--) for (let j = n; j >= i + 2; j--) {
+      if (!best[j] || !wortschatz.has(w.slice(i, j))) continue;
+      const c = [w.slice(i, j)].concat(best[j]); if (!best[i] || c.length < best[i].length) best[i] = c;
+    }
+    const r = best[0] && best[0].length <= 4 ? best[0].join(" ") : null;
+    zerlegtSpeicher.set(w, r); return r;
+  }
+  /* Schreibweise → was der Erkenner liefern kann (null: nicht sprechbar) */
+  function sprechform(k) {
+    const teile = [];
+    for (const w of k.split(" ")) { const z = zerlegen(w); if (z === null) return null; if (z) teile.push(z); }
+    return teile.join(" ") || null;
+  }
   function karteBauen() {
-    karte = new Map();
-    (st.befehle() || []).forEach(b => (b.p || []).forEach(p => { const k = norm(p); if (k && !karte.has(k)) karte.set(k, b); }));
+    karte = new Map(); gesprochen = new Map();
+    (st.befehle() || []).forEach(b => (b.p || []).forEach(p => { const k = norm(p), g = k && sprechform(k); if (g && !karte.has(g)) { karte.set(g, b); gesprochen.set(g, k); } }));
     const g = JSON.stringify([...karte.keys()].concat(["[unk]"]));
     if (g !== grammatik) { grammatik = g; if (erkenner) { try { erkenner.remove(); } catch (_) {} erkenner = null; } }
   }
   function befehlsListe() {
     if (!karte) karteBauen();
     const nach = new Map();
-    karte.forEach((b, p) => { if (!nach.has(b)) nach.set(b, []); nach.get(b).push(p); });
+    karte.forEach((b, p) => { if (!nach.has(b)) nach.set(b, []); nach.get(b).push(gesprochen.get(p) || p); });
     return [...nach.entries()].map(([b, ps]) => [ps.slice(0, 3).join(" / "), b.text]);
   }
 
@@ -90,10 +119,23 @@
     if (modell) return Promise.resolve(modell);
     if (modellLaedt) return modellLaedt;
     stand(W("⏳ Sprachmodell wird geladen …", "⏳ Loading speech model …"));
-    modellLaedt = skriptLaden(BIBLIOTHEK).then(() => window.Vosk.createModel(MODELL, -1)).then(m => { modell = m; stand(W("✅ Bereit – ", "✅ Ready – ") + W("Taste ", "key ") + tastenName(E.taste) + W(" halten und sprechen", " hold and speak")); return m; })
+    modellLaedt = Promise.all([skriptLaden(BIBLIOTHEK).then(() => window.Vosk.createModel(MODELL, -1)), wortschatzHolen()]).then(([m]) => { modell = m; karte = null; stand(W("✅ Bereit – ", "✅ Ready – ") + W("Taste ", "key ") + tastenName(E.taste) + W(" halten und sprechen", " hold and speak")); return m; })
       .catch(e => { modellLaedt = null; stand(W("⚠ Sprachmodell konnte nicht geladen werden.", "⚠ Could not load the speech model.")); throw e; });
     return modellLaedt;
   }
+  /* Wortschatz des Modells (gzip; manche Server entpacken schon selbst – dann liegt gleich Text an) */
+  async function wortschatzHolen() {
+    if (wortschatz) return;
+    try {
+      const roh = new Uint8Array(await (await fetch(WORTSCHATZ)).arrayBuffer());
+      let text;
+      if (roh[0] === 0x1f && roh[1] === 0x8b && window.DecompressionStream) text = await new Response(new Blob([roh]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+      else text = new TextDecoder().decode(roh);
+      const s = new Set(text.split("\n")); if (s.size > 1000) wortschatz = s;
+    } catch (_) { /* ohne Wortschatz geht es weiter wie bisher */ }
+  }
+  let geduckt = false;
+  function ducken(an) { if (an === geduckt || !st || typeof st.ducken !== "function") return; geduckt = an; try { st.ducken(an); } catch (_) {} }
   async function mikroHolen() {
     if (mikro) return mikro;
     const strom = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }, video: false });
@@ -125,7 +167,7 @@
     try { await modellHolen(); await mikroHolen(); } catch (_) { zeige(W("⚠ Mikrofon oder Sprachmodell nicht verfügbar", "⚠ Microphone or speech model unavailable")); return; }
     if (mikro.ctx.state === "suspended") { try { await mikro.ctx.resume(); } catch (_) {} }
     karteBauen(); if (!erkennerHolen()) return;
-    hoert = true; nachlauf = 0; sammel = [];
+    hoert = true; nachlauf = 0; sammel = []; ducken(true);
     /* die letzte knappe halbe Sekunde vor dem Drücken mitnehmen – oft beginnt man schon beim Drücken zu sprechen */
     mikro.vorlauf.forEach(d => erkenner.acceptWaveformFloat(d, mikro.ctx.sampleRate)); mikro.vorlauf = [];
     zeige(W("Hört zu …", "Listening …"), true);
@@ -137,8 +179,8 @@
     nachlauf = Math.max(1, Math.round(mikro.ctx.sampleRate * .3 / 4096));
   }
   function abschliessen() {
-    if (!erkenner) return;
-    const fertig = () => { clearTimeout(zeit); wartet = null; const alle = sammel; sammel = [];
+    if (!erkenner) { ducken(false); return; }
+    const fertig = () => { clearTimeout(zeit); wartet = null; const alle = sammel; sammel = []; ducken(false);
       auswerten({ text: alle.map(r => r.text || "").join(" "), result: [].concat(...alle.map(r => r.result || [])) }); };
     const zeit = setTimeout(fertig, 2000);
     wartet = fertig;
@@ -152,10 +194,13 @@
     [...karte.keys()].sort((a, b) => b.length - a.length).some(p => { if ((" " + text + " ").includes(" " + p + " ")) { treffer = p; return true; } return false; });
     if (!treffer) { zeige(W("? „", "? “") + text + W("“ – kein Stichwort", "” – not a keyword")); return; }
     const teile = treffer.split(" "), conf = woerter.filter(w => teile.includes(w.word)).map(w => w.conf), sicher = conf.length ? conf.reduce((a, b) => a + b, 0) / conf.length : 1;
-    if (sicher < .55) { zeige(W("? Unsicher: „", "? Unsure: “") + treffer + W("“ – bitte nochmal", "” – please repeat")); return; }
+    /* weitere Stichwort-Wörter neben dem Treffer heißen meist: das Modell hat in Geräusch oder Musik etwas hineingehört – nur bei hoher Sicherheit ausführen */
+    const uebrig = text.split(" ").filter(w => w && !teile.includes(w)).length;
+    const zeigeWort = gesprochen.get(treffer) || treffer;
+    if (sicher < .7 || (uebrig && sicher < .9)) { zeige(W("? Unsicher: „", "? Unsure: “") + zeigeWort + W("“ – bitte nochmal", "” – please repeat")); return; }
     const b = karte.get(treffer);
-    letzte = "🎙 " + treffer + " → " + b.text;
-    zeige("✓ " + treffer + " → " + b.text);
+    letzte = "🎙 " + zeigeWort + " → " + b.text;
+    zeige("✓ " + zeigeWort + " → " + b.text);
     try { b.tun(); } catch (e) { console.warn(e); }
     zeichnen();
   }
@@ -209,7 +254,7 @@
 
   window.ImresSprache = {
     einrichten(o) {
-      st = { ort: o.ort, befehle: o.befehle, listeAuf: false };
+      st = { ort: o.ort, befehle: o.befehle, ducken: o.ducken, listeAuf: false };
       karte = null; zeichnen();
       /* hier wird nichts geladen – erst der Knopf „Sprachsteuerung“ holt Bibliothek und Modell */
     },
