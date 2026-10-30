@@ -197,7 +197,7 @@
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
       zusaetze: "Zusätze", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren).", zusDrin: "steckt schon in der Kulisse", raum3d: "3D-Kopfhörer", raum3dTipp: "Räumlicher Klang für Kopfhörer: Geräusche kommen von überall, auch von hinten und oben", raum3dAn: "🎧 3D an – mit Kopfhörern hört man jetzt, woher alles kommt.", raum3dAus: "3D aus – wieder normales Stereo.", zusAlleAus: "Alle Zusätze abschalten", zusAlleAusKurz: "Alle aus", zusAlleWeg: "Alle Zusätze aus", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
-      kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %",
+      kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %", spurenKurz: "Spuren", spurenAlsPop: "Als Pop-up", spurenAlsFeld: "Als Feld", spurenLeer: "Erst eine Kulisse wählen – dann lässt sich hier jede ihrer Schichten einzeln regeln.",
       stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente, Welt & Klassik",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabWelt: "🐴 Welt", tabFav: "★ Favoriten", favLeer: "Noch leer: halte einen Knopf aus Effekte, Kampf, Momente, Welt oder Klassik 2 Sekunden gedrückt – dann landet er hier.", weltGr: { alle: "Alle", unterwegs: "🐴 Unterwegs & Volk", tiere: "🐾 Tiere", belagerung: "🏰 Belagerung", handwerk: "🔨 Handwerk", abenteuer: "🗝 Abenteuer", wesen: "👹 Wesen & Spuk", weitere: "Weitere" }, tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
       musik: "Musik", klang: "Kulisse & Effekte", steuer: "Raum & Leben", kulTitel: "Kulisse", extrasTitel: "Zusätze & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
@@ -285,7 +285,7 @@
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
       zusaetze: "Extras", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover).", zusDrin: "already part of the backdrop", raum3d: "3D headphones", raum3dTipp: "Spatial sound for headphones: sounds come from everywhere, even from behind and above", raum3dAn: "🎧 3D on – with headphones you can now hear where everything comes from.", raum3dAus: "3D off – back to normal stereo.", zusAlleAus: "Switch off all extras", zusAlleAusKurz: "All off", zusAlleWeg: "All extras off", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
-      kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %",
+      kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %", spurenKurz: "Layers", spurenAlsPop: "As pop-up", spurenAlsFeld: "As panel", spurenLeer: "Pick a backdrop first – then each of its layers can be adjusted here.",
       stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments, world & classics",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabWelt: "🐴 World", tabFav: "★ Favourites", favLeer: "Empty for now: hold any button in Effects, Combat, Moments, World or Classics for 2 seconds and it lands here.", weltGr: { alle: "All", unterwegs: "🐴 Road & folk", tiere: "🐾 Animals", belagerung: "🏰 Siege", handwerk: "🔨 Crafts", abenteuer: "🗝 Adventure", wesen: "👹 Creatures & spooks", weitere: "More" }, tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
       musik: "Music", klang: "Ambience & effects", steuer: "Space & life", kulTitel: "Backdrop", extrasTitel: "Extras & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
@@ -8173,19 +8173,27 @@ const ZUS_ICON = {
     h.textContent = text; h.classList.toggle("warn", !!warn);
     clearTimeout(zusHinweis.t); zusHinweis.t = setTimeout(() => { h.textContent = ""; }, 4000);
   }
-  /* aufklappbar unter dem Kulissen-Balken: jede Schicht der gewählten Kulisse einzeln regeln */
-  function kulSpuren(T) {
-    const w = KUL_WELT[S.kulisse]; if (!w) return "";
-    const auf = !!klangAuf.spuren, namen = KUL_SPUR_NAME[sprache()] || KUL_SPUR_NAME.de;
-    let html = '<button type="button" class="lw-klappe lw-spurklappe" data-klangauf="spuren" aria-expanded="' + auf + '">🎚 ' + T.kulSpuren + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
-    if (!auf) return html;
+  /* die Regler allein – fürs eigene Feld „Spuren einzeln“ und fürs Pop-up an der Kulisse */
+  function spurenInhalt(T) {
+    const w = KUL_WELT[S.kulisse];
+    if (!w) return '<p class="lw-tipp">' + T.spurenLeer + "</p>";
+    const namen = KUL_SPUR_NAME[sprache()] || KUL_SPUR_NAME.de;
     const zeile = (i, name) => { const v = Math.round(kulMixWert(S.kulisse, i) * 100);
       return '<label class="lw-spurzeile"><span>' + esc(name) + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-kulspur="' + i + '"><b>' + v + " %</b></label>"; };
-    html += '<div class="lw-spuren"><button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck">↺ ' + T.kulMixZurueck + "</button>" +
+    return '<div class="lw-spuren"><button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck">↺ ' + T.kulMixZurueck + "</button>" +
       w.betten.slice(0, spar ? 2 : 9).map(([n], i) => zeile(i, namen[n] || n.replace(/^a_/, ""))).join("") +
       (w.ev.length ? zeile("ev", T.kulEinzel) : "") + "</div>";
-    return html;
   }
+  /* Spuren als Pop-up statt als eigenes Feld (wird gemerkt) */
+  let spurenPop = false, spurPopAuf = false;
+  /* Pop-up schließt bei Klick daneben oder Esc */
+  document.addEventListener("pointerdown", e => {
+    if (!spurPopAuf || !e.target.closest) return;
+    if (e.target.closest(".lw-spurpop") || e.target.closest('[data-aktion="spurpopauf"]')) return;
+    spurPopAuf = false; try { boxNeu("klang"); } catch (_) {}
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && spurPopAuf) { spurPopAuf = false; try { boxNeu("klang"); } catch (_) {} } });
+  try { spurenPop = localStorage.getItem("imres-lw-spurenpop") === "1"; } catch (_) {}
   try { klangAuf = Object.assign(klangAuf, JSON.parse(localStorage.getItem("imres-lw-klangauf") || "{}") || {}); } catch (_) {}
   const KUL_KURZ = 9;
   function klangBox(T) {
@@ -8196,14 +8204,17 @@ const ZUS_ICON = {
     let kul = oben("k", KUL_ZEIGEN);
     if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
-    const kulBox = '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.kulTitel + " " + info("klang") + "</h4></div>" +
+    const kulBox = '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.kulTitel + " " + info("klang") + "</h4>" +
+      (spurenPop ? '<button type="button" class="lw-schalter lw-spurpopknopf" data-aktion="spurpopauf" aria-expanded="' + spurPopAuf + '" title="' + esc(T.kulSpuren) + '">🎚 ' + T.spurenKurz + "</button>" : "") + "</div>" +
+      (spurenPop && spurPopAuf ? '<div class="lw-spurpop" role="dialog" aria-label="' + esc(T.kulSpuren) + '"><div class="lw-spurpop-kopf"><b>🎚 ' + T.kulSpuren + '</b><span><button type="button" class="lw-klein" data-aktion="spurenfeld" title="' + esc(T.spurenAlsFeld) + '">⧉ ' + T.spurenAlsFeld + '</button><button type="button" class="lw-klein" data-aktion="spurpopzu" aria-label="✕">✕</button></span></div>' + spurenInhalt(T) + "</div>" : "") +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) + "</section>";
     const lebenFeld = '<section class="lw-box lw-lebenfeld"><div class="lw-box-kopf"><h4>🎛 ' + T.steuer + "</h4></div>" +
       (amRechner() && !hoerer ? '<div class="lw-sprache-ort"></div>' : "") +
       '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + info("raum3d") + "</div>" +
-      lebenBox(T) + kulSpuren(T) + "</section>";
+      lebenBox(T) + "</section>";
+    const spurFeld = '<section class="lw-box lw-spurfeld"><div class="lw-box-kopf"><h4>🎚 ' + T.kulSpuren + '</h4><button type="button" class="lw-klein" data-aktion="spurenpop" title="' + esc(T.spurenAlsPop) + '">⧉ ' + T.spurenAlsPop + "</button></div>" + spurenInhalt(T) + "</section>";
     const zusFeld = '<section class="lw-box lw-zusfeld"><div class="lw-box-kopf"><h4>✚ ' + T.zusaetze + "</h4></div>" + zusBox(T) + "</section>";
     const fxFeld = '<section class="lw-box lw-fxfeld"><div class="lw-box-kopf"><h4>💥 ' + T.effekte + "</h4></div>" +
       klappe("fx", klangAuf.fx, T.fxKlappe) +
@@ -8213,16 +8224,19 @@ const ZUS_ICON = {
         (fxTab === "fav" && !liste.length ? '<p class="lw-favleer">' + T.favLeer + "</p>" : "") +
         '<div class="lw-pult-gitter lw-pult-fx">' + (fxTab === "fav" ? liste : oben("s", liste)).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
       "</section>";
-    return { kulisse: feld("kulisse", kulBox), leben: feld("leben", lebenFeld), zusaetze: feld("zusaetze", zusFeld), effekte: feld("effekte", fxFeld) };
+    return { kulisse: feld("kulisse", kulBox), spuren: spurenPop ? "" : feld("spuren", spurFeld), leben: feld("leben", lebenFeld), zusaetze: feld("zusaetze", zusFeld), effekte: feld("effekte", fxFeld) };
   }
   /* ---------- Anordnung des Pults am Rechner: Felder frei in Spalten verschieben, Spaltenzahl und -breiten wählbar ---------- */
-  const FELDER = ["musik", "kulisse", "leben", "zusaetze", "effekte"];
-  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "leben"], ["zusaetze", "effekte"]], breiten: [1, 1, 1] });
+  const FELDER = ["musik", "kulisse", "spuren", "leben", "zusaetze", "effekte"];
+  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "spuren", "leben"], ["zusaetze", "effekte"]], breiten: [1, 1, 1] });
   let anordnung = ANORDNUNG_START();
   function anordnungPruefen(a) {
     const n = Math.max(1, Math.min(5, (a && a.spalten && a.spalten.length) || 3)), sp = [], gesehen = new Set();
     for (let i = 0; i < n; i++) sp.push(((a.spalten[i] || []).filter(id => FELDER.includes(id) && !gesehen.has(id) && gesehen.add(id))));
-    FELDER.forEach(id => { if (!gesehen.has(id)) sp[sp.length - 1].push(id); });
+    /* neu hinzugekommene Felder: die Spuren gehören unter die Kulisse, alles andere ans Ende */
+    FELDER.forEach(id => { if (gesehen.has(id)) return;
+      const k = id === "spuren" && sp.find(c => c.includes("kulisse"));
+      if (k) k.splice(k.indexOf("kulisse") + 1, 0, id); else sp[sp.length - 1].push(id); });
     const br = sp.map((_, i) => { const w = a.breiten && +a.breiten[i]; return w > .15 && w < 8 ? w : 1; });
     return { spalten: sp, breiten: br };
   }
@@ -8316,7 +8330,7 @@ const ZUS_ICON = {
   function boxNeu(welche) {
     const T = t();
     if (welche === "musik") { const alt = root.querySelector('[data-feld="musik"]'); if (alt) alt.outerHTML = feld("musik", musikBox(T, !S.pult && !hoerer)); }
-    else { const f = klangBox(T); ["kulisse", "leben", "zusaetze", "effekte"].forEach(id => { const alt = root.querySelector('[data-feld="' + id + '"]'); if (alt) alt.outerHTML = f[id]; }); }
+    else { const f = klangBox(T); ["kulisse", "spuren", "leben", "zusaetze", "effekte"].forEach(id => { const alt = root.querySelector('[data-feld="' + id + '"]'); if (alt) alt.outerHTML = f[id]; }); }
     klassikKnoepfe(); spracheOrt();
   }
   /* ---------- Sprachsteuerung (nur am Rechner): Taste halten, Stichwort sagen – Kulisse, Zusatz, Stimmung oder Effekt startet ---------- */
@@ -8976,6 +8990,10 @@ const ZUS_ICON = {
     if (e.target.closest('[data-aktion="zus100"]')) {
       Object.keys(zusWahl).forEach(id => { zusWahl[id] = 1; }); zusMerken(); zusPegelSetzen(); boxNeu("klang"); return;
     }
+    if (e.target.closest('[data-aktion="spurenpop"]')) { spurenPop = true; spurPopAuf = true; try { localStorage.setItem("imres-lw-spurenpop", "1"); } catch (_) {} konsoleNeu(); return; }
+    if (e.target.closest('[data-aktion="spurenfeld"]')) { spurenPop = false; spurPopAuf = false; try { localStorage.setItem("imres-lw-spurenpop", "0"); } catch (_) {} konsoleNeu(); return; }
+    if (e.target.closest('[data-aktion="spurpopauf"]')) { spurPopAuf = !spurPopAuf; boxNeu("klang"); return; }
+    if (e.target.closest('[data-aktion="spurpopzu"]')) { spurPopAuf = false; boxNeu("klang"); return; }
     if (e.target.closest('[data-aktion="kulmixzurueck"]')) {
       delete kulMix[S.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {}
       if (kul && kul.betten) kul.betten.forEach(x => { x.regler = 1; x.out.gain.setTargetAtTime(bettZiel(x), ctx.currentTime, .08); });
@@ -9540,6 +9558,12 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
   /* die ganze Bühnen-Seite wird breiter, das Pult bleibt sauber im Rahmen der Karte */
   #buehne .wrap:has(#lautenwerk.lw-pultmodus) { max-width: min(112rem, 100%); }
 }
+.lw-klang { position: relative; }
+.lw-spurpopknopf { margin-left: auto; font-size: .78rem; padding: .2rem .6rem; }
+.lw-spurpop { position: absolute; z-index: 40; top: 2.6rem; right: .6rem; width: min(26rem, calc(100% - 1.2rem)); padding: .7rem .8rem; background: #17131d; border: 1px solid var(--ember); border-radius: 6px; box-shadow: 0 14px 40px rgba(0,0,0,.6); display: grid; gap: .4rem; }
+.lw-spurpop-kopf { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .8rem; color: var(--ember); }
+.lw-spurpop-kopf span { display: flex; gap: .3rem; }
+.lw-spurfeld .lw-box-kopf > .lw-klein { margin-left: auto; font-size: .72rem; padding: .15rem .5rem; }
 .lw-box { display: grid; gap: .55rem; padding: .75rem .8rem; border: 1px solid var(--line); background: rgba(235,226,204,.025); min-width: 0; }
 .lw-box h4 { margin: 0; font-family: var(--body); font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ember); }
 .lw-box-kopf { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem .8rem; }
