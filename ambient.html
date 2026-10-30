@@ -337,6 +337,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     salve: { f: ["fx_0_pfeilflug_1", "fx_0_pfeilflug_2", "fx_0_pfeilflug_3"].concat(["fx_0_pfeil_holz_1", "fx_0_pfeil_holz_2", "fx_0_pfeil_holz_3", "fx_0_pfeil_holz_4", "fx_0_pfeil_holz_5", "fx_0_pfeil_holz_6"], ["fx_0_pfeil_metall_1", "fx_0_pfeil_metall_2", "fx_0_pfeil_metall_3", "fx_0_pfeil_metall_4"]), folge: [4, 9, .05, .22] },
     einschlag: { f: ["fx_0_siegeprojectilehit_1", "fx_0_siegeprojectilehit_2", "fx_0_siegeprojectilehit_3", "fx_0_siegeprojectilehit_4", "fx_wn_explosion", "fx_wn_einsturz"], tempo: [.85, 1] },
     faustkampf: { f: ["fx_wn_faust", "fx_im_impactpunch_heavy_000", "fx_im_impactpunch_heavy_001", "fx_im_impactpunch_heavy_002", "fx_im_impactpunch_heavy_003", "fx_0_fleisch_1", "fx_0_fleisch_2", "fx_0_fleisch_3"].concat(reihe("g_faust_", 4)), folge: [2, 5, .25, .6] },
+    knurren: { f: reihe("e_knurren_", 4), tempo: [.85, 1] },
     sense: { f: ["e_sense_1"], g: 1.5, tempo: [.95, 1.05] }, schleifen: { f: ["e_schleifen_1"], tempo: [.95, 1.05] }, webstuhl: { f: ["e_webstuhl_1"], g: 3, tempo: [.97, 1.03] },
     wal: { f: reihe("e_wal_", 3), tempo: [.8, 1] }, pferd: { f: ["e_pferd_1"], tempo: [.9, 1.06] }, katze: { f: reihe("e_katze_", 4) }, ruder: { f: reihe("e_ruder_", 3) },
     lachen: { s: "lachen" }, fledermaus: { s: "fledermaus" },
@@ -912,24 +913,31 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     const m = merk.mix[welt.id]; if (m && m.b && typeof m.b[i] === "number") b.regler = m.b[i];
     b.out.gain.value = 0;
     let ziel = b.out;
+    const az = i >= 100 ? zz(0, 360) : [0, 125, 235, 60, 180, 300, 30, 150, 270][i % 9], hoch = /wind|orkan|sturm|regen|gewitter|voegel|baumwind|laub/.test(name) ? 20 : /tropf|rinnsal|kies|schritte/.test(name) ? -15 : 3;
+    b.az0 = az; b.hoch = hoch; b.gs = zz(.6, 1.4);
+    const dahin = ortBus();
     if (raum3d && ctx.createPanner) {
       /* rundum, doppelt mit leichter Verzögerung – der Teppich umhüllt statt aus einem Punkt zu kommen */
-      const az = [0, 125, 235, 60, 180, 300, 30, 150, 270][i % 9], hoch = /wind|orkan|sturm|regen|gewitter|voegel|baumwind|laub/.test(name) ? 20 : /tropf|rinnsal|kies|schritte/.test(name) ? -15 : 3;
-      const vor = ctx.createGain(); vor.gain.value = .72; const p1 = panner3d(az, hoch, 4), p2 = panner3d(az + 150, hoch, 5), dl = ctx.createDelay(.05); dl.delayTime.value = .011;
+      const vor = ctx.createGain(); vor.gain.value = .72; const p1 = panner3d(az, hoch, 4), p2 = panner3d(az + 150, hoch, 5), dl = ctx.createDelay(.05); dl.delayTime.value = .011; b.p1 = p1; b.p2 = p2;
       b.out.connect(vor); vor.connect(p1); vor.connect(dl); dl.connect(p2);
       const lp = b.o.tief ? ctx.createBiquadFilter() : null; if (lp) { lp.type = "lowpass"; lp.frequency.value = b.o.tief; }
       [p1, p2].forEach(p => { const a = lp || p; if (lp) { p.connect(lp); } });
       const ende = lp || null, quelle = ende ? [ende] : [p1, p2];
-      quelle.forEach(q => { q.connect(trocken); const s = ctx.createGain(); s.gain.value = b.o.tief ? .35 : .25; q.connect(s); s.connect(hallEin); });
-    } else if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(trocken); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); b.out.connect(lp); }
-    else { b.out.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; b.out.connect(s); s.connect(hallEin); }
+      quelle.forEach(q => { q.connect(dahin); const s = ctx.createGain(); s.gain.value = b.o.tief ? .35 : .25; q.connect(s); s.connect(hallEin); });
+    } else {
+      /* leicht seitlich verteilt – beim Weiterziehen wandern die Schichten vorbei */
+      let von = b.out;
+      if (!mobil && ctx.createStereoPanner && welt && !/^_/.test(welt.id)) { const pn = ctx.createStereoPanner(); pn.pan.value = Math.sin(grad(az)) * .45; b.out.connect(pn); von = pn; b.pn = pn; }
+      if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(dahin); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); von.connect(lp); }
+      else { von.connect(dahin); const s = ctx.createGain(); s.gain.value = .25; von.connect(s); s.connect(hallEin); }
+    }
     /* auf gleiche Lautheit bringen – aber nie so weit, dass knackende Spitzen (Feuer, Tropfen) übersteuern */
     b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)) * trimVon(welt);
     if (ruht) return b;
     laden(name).then(buf => {
       if (!buf || b.aus) return;
-      b.buf = buf; b.naechst = ctx.currentTime + .05;
-      b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(b.grund * b.regler, ctx.currentTime + 4);
+      b.buf = buf; b.naechst = ctx.currentTime + .05; b.bereitAb = ctx.currentTime + 4.1;
+      b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(bGain(b), ctx.currentTime + 4);
       /* Aufnahmen mit unregelmäßigem Rhythmus (Pfützen-Tropfen): als ganze, nahtlose Endlosschleife – zerschnitten würden sie stolpern */
       if (b.o.schleife) { const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.connect(b.out); s.start(ctx.currentTime + .05, Math.random() * buf.duration); b.quellen.push(s); }
       bettPlanen(b);
@@ -961,7 +969,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       b.naechst = t + len - X;
     }
     /* langsames Atmen der Lautstärke */
-    if (ctx.currentTime > b.drift) { b.drift = ctx.currentTime + zz(8, 20); b.out.gain.setTargetAtTime(b.grund * b.regler * zz(.78, 1.15), ctx.currentTime, zz(2, 5)); }
+    if (ctx.currentTime > b.drift) { b.drift = ctx.currentTime + zz(8, 20); b.atem = zz(.78, 1.15); if (ctx.currentTime > (b.bereitAb || 0)) b.out.gain.setTargetAtTime(bGain(b) * b.atem, ctx.currentTime, zz(2, 5)); }
   }
   function bettStopp(b, sanft) {
     b.aus = true; const j = ctx.currentTime;
@@ -975,6 +983,11 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   function ereignis(welt, [art, , staerke, fern, o]) {
     o = o || {};
     const e = EV[art], j = ctx.currentTime + .05;
+    if (!e) return;
+    /* lebendige Welt: Stille, verstummte Vögel, Tageszeit, Spannung und Wetter lassen manches ausfallen */
+    const meins = welt && aktiv && welt === aktiv.welt && !welt.episch && aktiv.extra;
+    if (!o.szene && stilleBis > ctx.currentTime) return;
+    if (meins && !o.szene) { const p = belebtEvP(art); if (p < 1 && Math.random() > p) return; }
     const weit = !o.dumpf && Math.random() < (fern || 0), laut = (e.g || 1) * staerke * (o.dumpf ? zz(.55, .85) : weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv && aktiv.leben > 1 ? 1 : .9) * trimVon(welt);
     const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1, dauer = e.folge ? n * (e.folge[2] + e.folge[3]) / 2 + 1.5 : 5;
     let ziel;
@@ -988,19 +1001,37 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       if (o.wandern) {
         const seite = Math.random() < .5 ? -1 : 1, vorn = Math.random() < .65 ? 1 : -1, ab = zz(5, 10);
         p = panner3d(0, 0, 1); ort3d(p, seite * 25, ab * Math.sin(grad(el)), -vorn * ab, j); ort3d(p, -seite * 25, ab * Math.sin(grad(el)), -vorn * ab, j + dauer, true);
-      } else p = panner3d(zz(0, 360), el, o.dumpf ? zz(6, 12) : weit ? zz(12, 30) : zz(2, 7));
+      } else if (o.nah) {
+        /* ganz nah: huscht einmal um den Kopf */
+        const a0 = zz(50, 110) * (Math.random() < .5 ? 1 : -1); p = panner3d(a0, 0, .7);
+        pos3d(p, zz(-20, 20), 10, .5, j + dauer * .4, true); pos3d(p, -a0 + zz(-20, 20), -5, 1.2, j + dauer, true);
+      } else if (o.schritt) p = panner3d(zz(-40, 40), -40, 1.2);
+      else { const d = o.dumpf ? zz(6, 12) : weit ? zz(12, 30) : zz(2, 7); p = panner3d(meins ? ortAz(o.ort && o.ort.az != null ? o.ort.az : heimat(art) + zz(-25, 25)) : zz(0, 360), el, d); }
       letzter.connect(p); letzter = p;
     } else if (ctx.createStereoPanner) {
       const pn = ctx.createStereoPanner();
-      if (o.wandern) { const von = Math.random() < .5 ? -.95 : .95; pn.pan.setValueAtTime(von, j); pn.pan.linearRampToValueAtTime(-von, j + dauer); } else pn.pan.value = zz(-.8, .8);
+      if (o.wandern) { const von = Math.random() < .5 ? -.95 : .95; pn.pan.setValueAtTime(von, j); pn.pan.linearRampToValueAtTime(-von, j + dauer); }
+      else if (o.nah) { const von = Math.random() < .5 ? -.9 : .9; pn.pan.setValueAtTime(von, j); pn.pan.linearRampToValueAtTime(-von * .7, j + dauer); }
+      else if (o.schritt) pn.pan.value = zz(-.2, .2);
+      else if (meins) { const az = ortAz(o.ort && o.ort.az != null ? o.ort.az : heimat(art) + zz(-25, 25)); pn.pan.value = Math.max(-.9, Math.min(.9, Math.sin(grad(az)) * .85)); }
+      else pn.pan.value = zz(-.8, .8);
       letzter.connect(pn); letzter = pn;
     }
-    letzter.connect(trocken); const s = ctx.createGain(); s.gain.value = o.dumpf ? 1.1 : weit ? .8 : .3; letzter.connect(s); s.connect(hallEin);
+    if (o.nah) { g.gain.setValueAtTime(laut * .2, j); g.gain.linearRampToValueAtTime(laut, j + dauer * .4); g.gain.linearRampToValueAtTime(laut * .1, j + dauer); }
+    if (meins && aktiv.evHall && !o.nah && !o.schritt) { const hg = ctx.createGain(); hg.gain.value = aktiv.evHallMix * (weit ? 1.4 : 1); letzter.connect(hg); hg.connect(aktiv.evHall); }
+    if (meins) {
+      /* Antwort aus einer anderen Richtung – und nach lautem Krach verstummen die Vögel */
+      const ra = REAKTION[art], a = aktiv;
+      if (ra && !o.antwort && EV[ra[0]] && Math.random() < ra[1]) { const az2 = (o.ort && o.ort.az != null ? o.ort.az : heimat(art)) + 180 + zz(-50, 50); setTimeout(() => { if (lebtNoch(a) && !(stilleBis > ctx.currentTime)) ereignis(welt, [ra[0], null, staerke * zz(.6, .95), Math.max(fern || 0, .5), { antwort: 1, szene: 1, ort: { az: az2 } }]); }, zz(ra[2], ra[3]) * 1000); }
+      if (SCHRECK[art]) { a.verstummtBis = ctx.currentTime + zz(5, 10); belebtAnwenden(.35); }
+    }
+    letzter.connect(ortBus()); const s = ctx.createGain(); s.gain.value = o.dumpf ? 1.1 : weit ? .8 : .3; letzter.connect(s); s.connect(hallEin);
     ziel = g;
     if (e.s) { const b = synthEreignis(e.s); if (b) spiel(b, ziel, j, zz(.94, 1.06)); return; }
     let t = j;
     for (let k = 0; k < n; k++) {
-      const name = zufall(e.f), b = puffer.get(name);
+      const da = e.f.filter(x => puffer.get(x)), name = zufall(da.length ? da : e.f), b = puffer.get(name);
+      if (da.length < e.f.length && Math.random() < .5) laden(zufall(e.f));
       if (!b) { laden(name); continue; }
       const pg = PEGEL[name] || 1;
       if (e.lang) { const gg = ctx.createGain(), r = zz(e.tempo[0], e.tempo[1]), d = b.duration / r; gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(pg, t + d * .35); gg.gain.linearRampToValueAtTime(0, t + d); gg.connect(ziel); spiel(b, gg, t, r); continue; }
@@ -1329,7 +1360,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     gesamt.gain.cancelScheduledValues(j); gesamt.gain.setValueAtTime(gesamt.gain.value, j); gesamt.gain.linearRampToValueAtTime(0, j + .05);
     setTimeout(() => {
       const hart = b => { b.aus = true; b.quellen.forEach(q => { try { q.stop(); } catch (_) {} }); try { b.out.disconnect(); if (b.lfo) b.lfo.stop(); } catch (_) {} };
-      if (aktiv) { aktiv.betten.forEach(hart); aktiv = null; }
+      if (aktiv) { aktiv.betten.forEach(hart); (aktiv.extra || []).forEach(hart); if (aktiv.drohn) aktiv.drohn.q.forEach(x => { try { x.stop(); } catch (_) {} }); aktiv = null; }
       if (wetterAktiv) { wetterAktiv.betten.forEach(hart); wetterAktiv = null; }
       if (wIn) { try { wIn.disconnect(); } catch (_) {} wIn = wFilter = null; }
       if (spDrohne) { hart(spDrohne); spDrohne = null; }
@@ -1379,7 +1410,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (!def || !ctx) return;
     if (!wIn) {
       wIn = ctx.createGain(); wFilter = ctx.createBiquadFilter(); wFilter.type = "lowpass"; wFilter.frequency.value = 20000;
-      wIn.connect(wFilter); wFilter.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; wFilter.connect(s); s.connect(hallEin);
+      wIn.connect(wFilter); wFilter.connect(ortBus()); const s = ctx.createGain(); s.gain.value = .25; wFilter.connect(s); s.connect(hallEin);
     }
     wetterAktiv = { def, naechst: {}, betten: def.betten.map(([n, st], i) => { const b = bettStarten({ id: "_wetter" }, [n, st, "", {}], i); b.out.disconnect(); b.out.connect(wIn); return b; }) };
     (def.ev || []).forEach(([art]) => EV[art].f.forEach(laden));
@@ -1434,6 +1465,342 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     const st = (sp - .35) / .65, z = eAusgang(E.trocken, 1.2, .25, true, zz(-.6, .6));
     z.gain.value = .18 + st * .35; eSpiel(roll, z, j + .05, zz(.38, .46), 1, "auf");
     schwellNaechst = j + zz(28, 60) / (.6 + st);
+  }
+
+  T.bel = EN ? { titel: "Alive", passiert: "⚡ Something happens", stille: "🤫 Silence", gehen: "🚶 Move on", nachlegen: "🪵 Add wood", zeit: "Time of day", zeitN: { auto: "as the soundscape", tag: "☀ day", daemmerung: "🌇 dusk", nacht: "🌙 night" }, zeitLauf: "⏳ Time passes",
+      ort: "Where you are", ortDrin: { mitten: "In the middle", rand: "By the window", nebenan: "Outside the door", darunter: "In the cellar" }, ortDraussen: { mitten: "In the middle", rand: "At the edge", nebenan: "Inside a hut", darunter: "In a cellar" }, szenen: "🎬 Little scenes", nah: "👂 Close to the ear" }
+    : { titel: "Lebendig", passiert: "⚡ Etwas passiert", stille: "🤫 Stille", gehen: "🚶 Weiterziehen", nachlegen: "🪵 Nachlegen", zeit: "Tageszeit", zeitN: { auto: "wie die Klangwelt", tag: "☀ Tag", daemmerung: "🌇 Dämmerung", nacht: "🌙 Nacht" }, zeitLauf: "⏳ Zeit vergeht",
+      ort: "Standort", ortDrin: { mitten: "Mittendrin", rand: "Am Fenster", nebenan: "Vor der Tür", darunter: "Im Keller" }, ortDraussen: { mitten: "Mittendrin", rand: "Am Rand", nebenan: "In einer Hütte", darunter: "Im Keller" }, szenen: "🎬 Kleine Szenen", nah: "👂 Nah am Ohr" };
+
+  /* ---------- Lebendige Klangwelt (wie die Kulissen im Pult) ----------
+     Kleine Szenen, Antworten aus anderer Richtung, feste Orte, Tageszeit, Standort, Weiterziehen, Nah am Ohr,
+     „Etwas passiert“, Stille, Raumklang und tiefe Grundierung. Wetter und Spannung hat die Seite schon – sie wirken hier mit. */
+  const LW_DRINNEN = ["taverne", "hoehle", "unterreich", "kerker", "schmiede", "labor", "bibliothek", "tempel", "mine", "schlaegerei"];
+  const LW_ID = { lagerfeuer: "feuer", waldtag: "wald", kueste: "meer", fluss: "wasserfall", kriegsschauplatz: "schlacht" };
+  const lid = id => LW_ID[id] || id;
+  const UNTER = ["hoehle", "unterreich", "kerker", "mine", "unterwasser"];
+  const WALDIG = ["wald", "waldnacht", "feuer", "sumpf", "ufer", "wasserfall"];
+  const NACHT_KUL = { waldnacht: 1, feuer: 1, sumpf: .6 };
+  function kulKlasse(art) {
+    if (UNTER.includes(art)) return "unter";
+    if (LW_DRINNEN.includes(art)) return "drinnen";
+    if (WALDIG.includes(art)) return "wald";
+    if (["meer", "schiff", "hafen"].includes(art)) return "wasser";
+    if (art === "gebirge") return "gebirge";
+    if (["schlacht", "duell"].includes(art)) return "kampf";
+    return "draussen";
+  }
+  const kulDraussen = art => !["unter", "drinnen"].includes(kulKlasse(art));
+  const TAG_BETT = /voegel|kinder|markt|_hof|bienen|huehner|kuehe|schafe|dschungel/, NACHT_BETT = /nacht|grillen/, FEUER_BETT = /feuer|lagerfeuer/,
+    VOGEL_BETT = /voegel/, VOLK_BETT = /markt|kinder|gaeste|_hof|hafen/, STILL_BLEIBT = /wind|tropf|rinnsal|_nacht|unterwasser|strom|fluss|muehle/;
+  const mengeVon = l => Object.fromEntries(l.map(x => [x, 1]));
+  const TAG_EV = mengeVon(["vogel", "specht", "kraehe", "kinder", "volk", "huhn", "kuh", "schaf", "ziege", "esel", "ente", "moewe", "sense", "feldarbeit", "schwein", "axt", "saege", "zimmern", "steinmetz", "werkzeug", "webstuhl", "muenzen", "ochse"]);
+  const VOGEL_EV = mengeVon(["vogel", "specht", "kraehe", "moewe", "ente"]);
+  const FRIEDLICH_EV = mengeVon(["vogel", "specht", "kinder", "volk", "huhn", "kuh", "schaf", "ziege", "ente", "lachen", "muenzen", "krug", "sense", "webstuhl"]);
+  const VOLK_EV = mengeVon(["volk", "kinder", "muenzen", "zank", "feldarbeit", "sense"]);
+  /* lautes Geräusch: die Vögel verstummen einen Moment */
+  const SCHRECK = mengeVon(["donner", "einschlag", "drache", "monster", "knall", "grollen", "steinschlag", "baumfall", "einsturz", "belagerung", "holzbruch", "tischbruch"]);
+  /* Antworten: [Antwort-Art, Wahrscheinlichkeit, Abstand von, bis] – kommt aus einer anderen Richtung */
+  const REAKTION = { wolf: ["wolf", .55, 2.5, 7], heulen: ["wolf", .35, 3, 8], hund: ["hund", .4, 1.5, 5], eule: ["eule", .35, 3, 9], kraehe: ["kraehe", .4, 1, 4],
+    moewe: ["moewe", .35, .6, 2.5], kuh: ["kuh", .25, 3, 8], esel: ["esel", .2, 4, 9], hirsch: ["hirsch", .3, 4, 10], frosch: ["frosch", .45, .5, 2], kampfruf: ["kampfruf", .45, .4, 1.8],
+    ziege: ["ziege", .3, 1.5, 5], greif: ["greif", .25, 4, 10], wal: ["wal", .3, 6, 14], zank: ["zank", .4, 1, 3], huhn: ["huhn", .3, .8, 3] };
+  /* kleine Szenen: [Sekunden ab Beginn, Art, { gegen: andere Seite, fern, wandern, nah, laut }] – „!verstummen“ lässt die Vögel schweigen */
+  const SZ = (...s) => s;
+  const KUL_SZENEN = {
+    taverne: [SZ([0, "tuerauf"], [1.4, "holzschritte"], [4, "stuhl"], [5.5, "volk"], [7.5, "krug"]), SZ([0, "muenzen"], [1.5, "krug"], [2.4, "krug", { gegen: 1 }], [3.4, "lachen"]),
+      SZ([0, "wuerfel"], [2.2, "volk"], [3.6, "lachen", { gegen: 1 }]), SZ([0, "zank"], [2.5, "zank", { gegen: 1 }], [4, "stuhl"], [6, "tuerzu", { fern: 1 }])],
+    markt: [SZ([0, "volk"], [2, "muenzen"], [3.5, "volk", { gegen: 1 }]), SZ([0, "hufe", { wandern: 1 }], [2.2, "wiehern"]), SZ([0, "hund"], [.8, "huhn", { gegen: 1 }], [2, "hund"]), SZ([0, "esel"], [2, "zank"], [4, "muenzen"])],
+    dorf: [SZ([0, "hund"], [1.5, "huhn", { gegen: 1 }], [3, "ente"]), SZ([0, "axt"], [2.5, "axt"], [5, "holzpoltern"]), SZ([0, "hufe", { wandern: 1 }], [3, "esel"]), SZ([0, "kuh"], [3, "kuh", { gegen: 1 }], [5, "ziege"])],
+    wald: [SZ([0, "ast"], [.3, "!verstummen"], [1.5, "laubschritt"], [3.5, "hirsch", { fern: 1 }]), SZ([0, "specht"], [3, "kraehe"], [4.2, "kraehe", { gegen: 1 }]),
+      SZ([0, "axt", { fern: 1 }], [3, "axt", { fern: 1 }], [6.5, "baumfall", { fern: 1 }]), SZ([0, "keiler"], [1, "laub"], [2.5, "keiler"])],
+    waldnacht: [SZ([0, "wolf", { fern: 1 }], [4, "wolf", { gegen: 1, fern: 1 }], [8, "wolf", { fern: 1 }]), SZ([0, "eule"], [5, "eule", { gegen: 1 }]), SZ([0, "ast"], [.2, "!verstummen"], [1, "laubschritt"], [4.5, "eule"])],
+    feuer: [SZ([0, "leder"], [1.5, "laubschritt"], [4, "ast"], [6, "schnauben", { gegen: 1 }]), SZ([0, "ast"], [1, "holzpoltern"]), SZ([0, "heulen", { fern: 1 }], [5, "wolf", { gegen: 1, fern: 1 }])],
+    sumpf: [SZ([0, "platsch"], [1.5, "blubb"], [3, "schlange"]), SZ([0, "frosch"], [1, "frosch", { gegen: 1 }], [2, "frosch"])],
+    ufer: [SZ([0, "ente"], [1, "platsch"], [2.5, "ente", { gegen: 1 }]), SZ([0, "ruder", { wandern: 1 }], [3, "volk", { fern: 1 }])],
+    wasserfall: [SZ([0, "vogel"], [1.5, "platsch"], [3, "vogel", { gegen: 1 }])],
+    hoehle: [SZ([0, "stein"], [.6, "stein"], [1.4, "steinschlag", { fern: 1 }]), SZ([0, "atem", { fern: 1 }], [3, "schnueffeln", { fern: 1 }])],
+    unterreich: [SZ([0, "stein"], [.6, "stein"], [1.4, "steinschlag", { fern: 1 }]), SZ([0, "atem", { fern: 1 }], [3, "schnueffeln"], [5, "grunzen", { gegen: 1 }])],
+    mine: [SZ([0, "hacke"], [1.5, "hacke"], [3, "erz"], [4.5, "kette", { gegen: 1 }]), SZ([0, "stein"], [1, "steinschlag", { fern: 1 }])],
+    kerker: [SZ([0, "steinschritte"], [3, "schluessel"], [4.5, "riegel"], [6, "kette", { gegen: 1 }], [7.5, "stoehnen", { gegen: 1 }]), SZ([0, "kette"], [2, "stoehnen"])],
+    hafen: [SZ([0, "glocke", { fern: 1 }], [2, "kette"], [4, "rumpf"], [5, "volk"]), SZ([0, "moewe"], [.6, "moewe"], [1.4, "moewe", { gegen: 1 }])],
+    meer: [SZ([0, "moewe"], [.6, "moewe"], [1.4, "moewe", { gegen: 1 }])],
+    schiff: [SZ([0, "knarren"], [1.5, "holzschritte"], [3, "tuch"], [4.5, "glocke", { fern: 1 }])],
+    burg: [SZ([0, "signalhorn", { fern: 1 }], [2, "kettenhemd"], [3.5, "steinschritte"], [5, "tor"]), SZ([0, "schwertziehen"], [1, "uebung"], [5, "volk"])],
+    strasse: [SZ([0, "galopp", { wandern: 1 }], [3, "wiehern"], [4, "volk"]), SZ([0, "kutsche", { wandern: 1 }], [3, "esel"])],
+    schmiede: [SZ([0, "blasebalg"], [2, "hammer"], [6, "zischen"], [8, "metall"])],
+    bibliothek: [SZ([0, "buch"], [2, "papier"], [4, "husten", { gegen: 1 }], [6, "holzschritte"])],
+    tempel: [SZ([0, "glocke"], [4, "chor"], [9, "gong"])],
+    labor: [SZ([0, "blubb"], [1, "zischen"], [2.5, "krug"], [4, "buch"])],
+    gebirge: [SZ([0, "grollen", { fern: 1 }], [1, "steinschlag", { fern: 1 }], [1.2, "!verstummen"]), SZ([0, "greif", { fern: 1 }], [4, "greif", { gegen: 1, fern: 1 }]), SZ([0, "ziege"], [1.5, "stein"], [3, "ziege", { gegen: 1 }])],
+    regen: [SZ([0, "donner", { fern: 1 }], [.2, "!verstummen"])], sturm: [SZ([0, "donner"], [.2, "!verstummen"], [4, "windstoss"])], zelt: [SZ([0, "windstoss"], [1, "tuch"])],
+    schlacht: [SZ([0, "signalhorn", { fern: 1 }], [1.5, "kampfruf"], [2, "kampfruf", { gegen: 1 }], [3, "galopp", { wandern: 1 }], [4.5, "klingen"], [6, "aua"]),
+      SZ([0, "kampfruf"], [1, "salve"], [2.5, "aua"], [3.2, "tod", { gegen: 1 }]), SZ([0, "belagerung", { fern: 1 }], [2.5, "einschlag"], [2.6, "!verstummen"], [4, "aua", { gegen: 1 }])],
+    schlaegerei: [SZ([0, "zank"], [1, "faustkampf"], [2.5, "tischbruch"], [3.5, "jubel", { gegen: 1 }]), SZ([0, "faustkampf"], [1.2, "aua"], [1.8, "holzpoltern"], [2.5, "raunen", { gegen: 1 }])],
+    duell: [SZ([0, "klingen"], [2.5, "aua"], [3, "raunen", { gegen: 1 }], [5, "jubel"]), SZ([0, "kampfruf"], [1, "jubel", { gegen: 1 }], [2.5, "klingen"])],
+    unterwasser: [SZ([0, "wal", { fern: 1 }], [6, "wal", { gegen: 1, fern: 1 }])]
+  };
+  /* „Etwas passiert“: ein großer Moment, passend zur Kulisse („!stille“ lässt alles verstummen) */
+  const G_WALD = SZ([0, "!verstummen"], [0, "holzbruch", { laut: 1.5 }], [.4, "ast", { laut: 1.3 }], [.8, "keiler", { laut: 1.5 }], [1, "laubschritt", { wandern: 1, laut: 1.6 }], [2.2, "monster", { laut: 1.1 }], [2.6, "holzbruch", { laut: 1.2 }]);
+  const G_TUER = SZ([0, "tor", { laut: 1.6, nahdran: 1 }], [.1, "!stille", { d: 5 }], [1, "holzschritte", { laut: 1.3 }], [6.2, "raunen", { laut: 1.2 }]);
+  const G_TIEF = SZ([0, "!verstummen"], [0, "grollen", { laut: 1.5 }], [.8, "einsturz", { laut: 1.3 }], [1.5, "steinschlag", { laut: 1.4 }], [3, "monster", { laut: 1.4 }]);
+  const KUL_GROSS = {
+    wald: G_WALD, waldnacht: G_WALD, feuer: G_WALD, sumpf: G_WALD, ufer: G_WALD, wasserfall: G_WALD, dorf: G_WALD, strasse: G_WALD,
+    taverne: G_TUER, markt: G_TUER, bibliothek: G_TUER, labor: G_TUER,
+    hoehle: G_TIEF, mine: G_TIEF, unterreich: G_TIEF, kerker: SZ([0, "riegel", { laut: 1.5 }], [.5, "tuerauf", { laut: 1.4 }], [.6, "!stille", { d: 4 }], [1.5, "steinschritte", { laut: 1.4 }], [5, "kette", { laut: 1.3 }]),
+    schlacht: SZ([0, "signalhorn", { laut: 1.5 }], [1.5, "kampfruf", { laut: 1.3 }], [1.8, "kampfruf", { gegen: 1, laut: 1.3 }], [2, "trommler"], [2.5, "galopp", { wandern: 1, laut: 1.5 }], [4, "kampfruf", { laut: 1.3 }]),
+    burg: SZ([0, "signalhorn", { laut: 1.5 }], [1.5, "tor", { laut: 1.4 }], [2.5, "kettenhemd"], [3, "galopp", { wandern: 1, laut: 1.4 }]),
+    schlaegerei: SZ([0, "tischbruch", { laut: 1.5 }], [.2, "!stille", { d: 4 }], [.5, "zank", { laut: 1.4 }], [5, "raunen"]),
+    duell: SZ([0, "klingen", { laut: 1.3 }], [1.5, "tod", { laut: 1.3 }], [1.6, "!stille", { d: 3 }], [2, "raunen", { laut: 1.3 }], [5, "jubel", { laut: 1.5 }]),
+    hafen: SZ([0, "glocke", { laut: 1.4 }], [1, "donner"], [2, "rumpf", { laut: 1.3 }], [3, "volk", { laut: 1.3 }]), meer: SZ([0, "donner", { laut: 1.4 }], [1, "rumpf"], [2, "windstoss", { laut: 1.3 }]),
+    schiff: SZ([0, "rumpf", { laut: 1.5 }], [.5, "knarren", { laut: 1.4 }], [1.5, "glocke", { laut: 1.3 }], [2.5, "holzschritte", { laut: 1.3 }]),
+    gebirge: SZ([0, "!verstummen"], [0, "grollen", { laut: 1.5 }], [.5, "einsturz", { laut: 1.3 }], [1, "steinschlag", { laut: 1.4 }], [4, "greif", { laut: 1.2 }]),
+    tempel: SZ([0, "gong", { laut: 1.5 }], [.3, "!stille", { d: 4 }], [4.5, "chor", { laut: 1.2 }]),
+    schmiede: SZ([0, "metall", { laut: 1.5 }], [.2, "zischen", { laut: 1.3 }], [1, "aua"], [2, "zank"]),
+    regen: SZ([0, "!verstummen"], [0, "donner", { laut: 1.6 }], [2, "windstoss", { laut: 1.3 }]), sturm: SZ([0, "!verstummen"], [0, "donner", { laut: 1.6 }], [2, "holzbruch", { laut: 1.3 }]),
+    zelt: SZ([0, "donner", { laut: 1.6 }], [1, "tuch", { laut: 1.4 }], [2, "windstoss", { laut: 1.3 }]), unterwasser: SZ([0, "monster", { laut: 1.3 }], [2, "wal", { laut: 1.2 }])
+  };
+  /* Spannung: was sich mit steigender Bedrohung einschleicht – [Art, Abstand, Stärke, fern, ab welcher Spannung] */
+  const GEFAHR = {
+    draussen: [["ast", [10, 25], .32, .3, .2], ["knurren", [25, 60], .3, .4, .45], ["laubschritt", [18, 40], .26, .3, .3], ["kraehe", [30, 70], .24, .7, .2], ["wolf", [40, 90], .26, .9, .55], ["atem", [50, 110], .22, 0, .75]],
+    unter: [["stein", [12, 28], .3, .4, .15], ["grollen", [25, 60], .3, .8, .3], ["atem", [30, 70], .25, .1, .45], ["schnueffeln", [35, 80], .25, .2, .5], ["grunzen", [40, 90], .25, .4, .55], ["kette", [40, 90], .22, .6, .4], ["steinschlag", [60, 140], .25, .8, .5], ["monster", [90, 200], .25, .9, .75]],
+    drinnen: [["knarren", [12, 30], .3, .3, .15], ["holzschritte", [25, 60], .28, .5, .3], ["riegel", [50, 110], .25, .6, .45], ["tuerauf", [70, 150], .25, .6, .5], ["atem", [60, 130], .2, 0, .75]],
+    kampf: [["kampfruf", [10, 25], .3, .5, .2], ["tod", [30, 60], .28, .6, .5], ["signalhorn", [40, 90], .25, 1, .6]]
+  };
+  GEFAHR.wald = GEFAHR.draussen; GEFAHR.gebirge = GEFAHR.draussen; GEFAHR.wasser = GEFAHR.draussen.filter(x => x[0] !== "laubschritt");
+  /* Nah am Ohr: was einem ganz nah kommt */
+  const NAH = { tag: ["insekt"], nacht: ["insekt"], unter: ["kaefer", "insekt"], drinnen: ["insekt"], gruselig: ["atem", "schnueffeln", "schatten"] };
+  /* Schritte beim Weiterziehen */
+  const SCHRITT_ART = { wald: "laubschritt", waldnacht: "laubschritt", feuer: "laubschritt", sumpf: "laubschritt", gebirge: "schnee", ufer: "kies", wasserfall: "kies",
+    strasse: "kies", dorf: "kies", markt: "kies", burg: "kies", duell: "kies", schlacht: "kies", regen: "kies", sturm: "kies",
+    hoehle: "steinschritte", mine: "steinschritte", unterreich: "steinschritte", kerker: "steinschritte", tempel: "steinschritte",
+    taverne: "holzschritte", bibliothek: "holzschritte", labor: "holzschritte", schiff: "holzschritte", hafen: "holzschritte", schmiede: "holzschritte", schlaegerei: "holzschritte" };
+  /* Raumklang der Einzelgeräusche: Holz, Stein, Weite, Wald */
+  const RAUM_TYP = { taverne: "holz", bibliothek: "holz", labor: "holz", schiff: "holz", schlaegerei: "holz", schmiede: "holz",
+    hoehle: "stein", mine: "stein", unterreich: "stein", kerker: "stein", tempel: "stein", burg: "stein",
+    gebirge: "weit", schlacht: "weit", meer: "weit", strasse: "weit", duell: "weit",
+    wald: "wald", waldnacht: "wald", feuer: "wald", sumpf: "wald", ufer: "wald", wasserfall: "wald", dorf: "wald", markt: "wald" };
+  const RAUM_MIX = { holz: .35, stein: .55, weit: .42, wald: .24 };
+  const raumIR = {};
+  function raumAntwort(typ) {
+    if (raumIR[typ]) return raumIR[typ];
+    const sr = ctx.sampleRate, lang = { holz: .5, stein: 2.2, weit: 3.2, wald: .9 }[typ], n = Math.floor(sr * lang), b = ctx.createBuffer(2, n, sr);
+    for (let c = 0; c < 2; c++) {
+      const d = b.getChannelData(c); let lp = 0;
+      const hell = { holz: .55, stein: .35, weit: .25, wald: .2 }[typ];
+      for (let i = 0; i < n; i++) { const t = i / sr, r = Math.random() * 2 - 1; lp += hell * (r - lp); d[i] = lp * Math.exp(-t * 6.9 / lang) * (t < .008 ? 0 : 1); }
+      /* Bergpass und Schlachtfeld: einzelne Echos von fernen Wänden */
+      if (typ === "weit") [[.32, .5], [.71, .32], [1.18, .2]].forEach(([t, a]) => { const i0 = Math.floor((t + c * .013) * sr); for (let k = 0; k < sr * .04 && i0 + k < n; k++) d[i0 + k] += a * (Math.random() * 2 - 1) * Math.exp(-k / (sr * .012)); });
+      if (typ === "holz") for (let k = 0; k < 6; k++) { const i0 = Math.floor((.011 + k * .009 + c * .003) * sr); if (i0 < n) d[i0] += .6 - k * .08; }
+    }
+    return (raumIR[typ] = b);
+  }
+  const DROHN = { unterreich: .5, mine: .32, kerker: .35, hoehle: .3, unterwasser: .45, tempel: .12, schlacht: .3, gebirge: .08 };
+  function wanderAz(a0, w) {
+    const a = ((a0 % 360) + 360) % 360, rechts = a <= 180, m = ((rechts ? a : 360 - a) + w) % 180;
+    return rechts ? m : 360 - m;
+  }
+  const belebt = { zeit: "auto", zeitLauf: false, standort: "mitten", gehen: false, szenen: true, nah: true };
+  try { const m = JSON.parse(localStorage.getItem("imres-klangwelten-leben") || "{}") || {}; if (typeof m.szenen === "boolean") belebt.szenen = m.szenen; if (typeof m.nah === "boolean") belebt.nah = m.nah; } catch (_) {}
+  const belebtMerken = () => { try { localStorage.setItem("imres-klangwelten-leben", JSON.stringify({ szenen: belebt.szenen, nah: belebt.nah })); } catch (_) {} };
+  let stilleBis = 0, ortIn = null, ortF = null, ortG = null, rauschPuffer = null;
+  const lebendig = () => aktiv && !aktiv.welt.episch;
+  const aLid = () => aktiv ? lid(aktiv.welt.id) : "";
+  /* Wetter der Seite als Stärke 0–3 (für leere Märkte und stille Vögel) */
+  const WETTER_STAERKE = { niesel: 1, regen: 2, gewitter: 3, sturm: 2.2, schnee: 1.2, wind: .3 };
+  const wStaerke = () => WETTER_STAERKE[merk.wetter] || 0;
+  /* Standort: alles der Welt (auch Wetter und Einzelgeräusche) läuft durch diesen Filter */
+  const STANDORT = { mitten: { f: 20000, g: 1, raum: 1 }, rand: { f: 6500, g: .72, raum: .7 }, nebenan: { f: 900, g: .55, raum: .35 }, darunter: { f: 380, g: .5, raum: .2 } };
+  function ortBus() {
+    if (!ctx) return trocken;
+    if (!ortIn) { ortIn = ctx.createGain(); ortF = ctx.createBiquadFilter(); ortF.type = "lowpass"; ortF.frequency.value = 20000; ortF.Q.value = .5; ortG = ctx.createGain(); ortIn.connect(ortF); ortF.connect(ortG); ortG.connect(trocken); standortAnwenden(0); }
+    return ortIn;
+  }
+  function standortAnwenden(tau) {
+    if (!ortF) return;
+    const st = STANDORT[belebt.standort] || STANDORT.mitten, j = ctx.currentTime;
+    ortF.frequency.setTargetAtTime(st.f, j, tau == null ? .4 : tau); ortG.gain.setTargetAtTime(st.g, j, tau == null ? .4 : tau);
+    if (aktiv && !aktiv.welt.episch) { const m = merk.mix[aktiv.welt.id] || {}; hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2 * st.raum, j, .4); }
+  }
+  const pos3d = (p, az, el, d, t, rampe) => ort3d(p, d * Math.sin(grad(az)) * Math.cos(grad(el)), d * Math.sin(grad(el)), -d * Math.cos(grad(az)) * Math.cos(grad(el)), t, rampe);
+  const ortAz = a0 => aktiv && aktiv.gang ? wanderAz(a0, aktiv.gang) : a0;
+  function heimat(art) { const o = aktiv.orte || (aktiv.orte = {}); if (o[art] == null) o[art] = zz(0, 360); return o[art]; }
+  const zeitBasis = () => belebt.zeit === "tag" ? 0 : belebt.zeit === "daemmerung" ? .5 : belebt.zeit === "nacht" ? 1 : null;
+  function zeitIst() {
+    const l = aLid(); if (!kulDraussen(l)) return NACHT_KUL[l] || 0;
+    const b = zeitBasis(), t0 = b == null ? (NACHT_KUL[l] || 0) : b;
+    return Math.max(0, Math.min(1, t0 + (belebt.zeitLauf ? (ctx.currentTime - (aktiv.zeitAb || ctx.currentTime)) / 1800 : 0)));
+  }
+  function belebtEvP(art) {
+    const l = aLid(), t = zeitIst(), t0 = NACHT_KUL[l] || 0, sp = spWert(); let p = 1;
+    if (TAG_EV[art] && kulDraussen(l) && t > t0) p *= Math.max(0, 1 - (t - t0) * 1.1);
+    if (FRIEDLICH_EV[art]) p *= Math.max(.05, 1 - Math.max(0, sp - .35) * 1.4);
+    if (kulDraussen(l) && (VOLK_EV[art] || VOGEL_EV[art])) p *= Math.max(.1, 1 - .28 * wStaerke());
+    if (VOGEL_EV[art] && aktiv.verstummtBis > ctx.currentTime) p = 0;
+    return p;
+  }
+  function bettFaktor(b, wetter) {
+    const j = ctx.currentTime, still = stilleBis > j;
+    if (wetter) return still ? .04 : 1;
+    let f = b.extra != null ? b.extra : 1;
+    const n = b.name, l = aLid(), t = zeitIst(), t0 = NACHT_KUL[l] || 0, drauf = kulDraussen(l), sp = spWert(), w = wStaerke();
+    if (drauf && b.extra == null) {
+      if (TAG_BETT.test(n)) f *= Math.max(.04, 1 - Math.max(0, t - t0) * 1.05);
+      if (NACHT_BETT.test(n)) f *= Math.min(1.6, (.25 + t) / (.25 + t0));
+      if (VOLK_BETT.test(n)) f *= 1 - .25 * Math.min(2.4, w);
+    }
+    if (VOGEL_BETT.test(n) || (TAG_BETT.test(n) && drauf)) f *= Math.max(.1, 1 - Math.max(0, sp - .3) * 1.2);
+    if (VOGEL_BETT.test(n)) { if (aktiv.verstummtBis > j) f *= .12; if (drauf) f *= 1 - .3 * Math.min(3, w); }
+    if (FEUER_BETT.test(n) && aktiv.glut != null) f *= aktiv.glut;
+    if (belebt.gehen && aktiv.gang && b.az0 != null) f *= .55 + .6 * Math.abs(Math.sin(grad(wanderAz(b.az0, aktiv.gang * (b.gs || 1)))));
+    if (still) f *= STILL_BLEIBT.test(n) ? .5 : .03;
+    return f;
+  }
+  const bGain = b => b.grund * b.regler * (b.lf == null ? 1 : b.lf);
+  function belebtAnwenden(tau, immer) {
+    if (!ctx) return;
+    const j = ctx.currentTime;
+    const setz = (b, wetter) => {
+      if (!b || !b.out || b.aus || b.ruht || b.e) return;
+      const lf = lebendig() || wetter ? bettFaktor(b, wetter) : 1; b.lf = lf;
+      if (!b.buf || j <= (b.bereitAb || 0)) return;
+      if (!immer && b.lfGesetzt != null && Math.abs(lf - b.lfGesetzt) < .015) return;
+      b.lfGesetzt = lf; b.out.gain.setTargetAtTime(bGain(b) * (b.atem || 1), j, tau || 1.5);
+    };
+    if (aktiv) { aktiv.betten.forEach(b => setz(b)); (aktiv.extra || []).forEach(b => setz(b)); }
+    if (wetterAktiv) wetterAktiv.betten.forEach(b => setz(b, true));
+  }
+  function extraSchicht(name, staerke) {
+    const b = bettStarten(aktiv.welt, [name, staerke, "", {}], 100 + aktiv.extra.length);
+    b.extra = 0; b.lf = 0; aktiv.extra.push(b); return b;
+  }
+  function belebtStart() {
+    if (!lebendig()) return;
+    const a = aktiv, j = ctx.currentTime, l = aLid();
+    Object.assign(a, { extra: [], zeitAb: j, glut: 1, verstummtBis: 0, gang: 0, lebenT: j, szeneNaechst: j + zz(25, 60), nahNaechst: j + zz(40, 90), gefahr: {}, zeitEv: {}, schrittNaechst: 0, untenNaechst: 0 });
+    a.feuer = a.welt.betten.some(([n]) => FEUER_BETT.test(n));
+    const typ = RAUM_TYP[l];
+    if (typ && !mobil && ctx.createConvolver) { const c = ctx.createConvolver(); c.buffer = raumAntwort(typ); c.connect(ortBus()); a.evHall = c; a.evHallMix = RAUM_MIX[typ]; }
+    if (DROHN[l] && !mobil) drohnStart(a, DROHN[l]);
+    (KUL_SZENEN[l] || []).concat([KUL_GROSS[l] || []]).forEach(sz => sz.forEach(([, x]) => { const e = EV[x]; if (e && e.f) e.f.slice(0).sort(() => Math.random() - .5).slice(0, 3).forEach(laden); }));
+    const sa = EV[SCHRITT_ART[l]]; if (sa && sa.f) sa.f.slice(0, 3).forEach(laden);
+    standortAnwenden(.6);
+  }
+  function belebtStopp(a) {
+    if (!a) return;
+    (a.extra || []).forEach(b => bettStopp(b, true));
+    if (a.drohn) { const g = a.drohn.g, j = ctx.currentTime; g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.linearRampToValueAtTime(0, j + 3); const q = a.drohn.q; setTimeout(() => q.forEach(x => { try { x.stop(); } catch (_) {} }), 3400); }
+    if (a.evHall) { const c = a.evHall; setTimeout(() => { try { c.disconnect(); } catch (_) {} }, 6000); }
+  }
+  function drohnStart(a, v) {
+    if (!rauschPuffer) { const n = ctx.sampleRate * 2; rauschPuffer = ctx.createBuffer(1, n, ctx.sampleRate); const d = rauschPuffer.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; }
+    const q = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), o = ctx.createOscillator(), og = ctx.createGain();
+    q.buffer = rauschPuffer; q.loop = true; f.type = "lowpass"; f.frequency.value = 80; f.Q.value = .9; o.type = "sine"; o.frequency.value = 38 + Math.random() * 6; og.gain.value = .05;
+    q.connect(f); f.connect(g); o.connect(og); og.connect(g); g.gain.value = 0; g.connect(ortBus());
+    const j = ctx.currentTime + .05; q.start(j); o.start(j); g.gain.linearRampToValueAtTime(1.1 * v * trimVon(a.welt), j + 5);
+    a.drohn = { g, v, q: [q, o] };
+  }
+  const lebtNoch = a => a && aktiv === a;
+  function belebtEreignis(a, art, staerke, o) {
+    if (!lebtNoch(a)) return;
+    if (art === "!verstummen") { a.verstummtBis = ctx.currentTime + zz(5, 10); belebtAnwenden(.35); return; }
+    if (art === "!stille") { stilleStart((o && o.d) || 5); return; }
+    if (!EV[art]) return;
+    try { ereignis(a.welt, [art, null, staerke, o && o.fern ? 1 : 0, Object.assign({ szene: 1 }, o)]); } catch (_) {}
+  }
+  function szeneSpielen(a, schritte, laut) {
+    const az = zz(0, 360), gegen = az + 180 + zz(-40, 40);
+    schritte.forEach(([t, art, o]) => { o = o || {}; const ort = { az: (o.gegen ? gegen : az) + zz(-12, 12) }; setTimeout(() => belebtEreignis(a, art, .38 * (o.laut || 1) * (laut || 1), Object.assign({ ort }, o)), t * 1000); });
+  }
+  function etwasPassiert() {
+    audioStart(); if (!ctx) return;
+    if (!lebendig()) { if (EV.donner) ereignis(null, ["donner", null, .6, 0]); return; }
+    szeneSpielen(aktiv, KUL_GROSS[aLid()] || G_TIEF, 1);
+    aktiv.szeneNaechst = Math.max(aktiv.szeneNaechst || 0, ctx.currentTime + 30);
+  }
+  function stilleStart(d) {
+    audioStart(); if (!ctx) return;
+    stilleBis = ctx.currentTime + d; belebtAnwenden(.35, true); stilleKnopf(true);
+    if (aktiv && aktiv.drohn) aktiv.drohn.g.gain.setTargetAtTime(1.1 * aktiv.drohn.v * trimVon(aktiv.welt) * .35, ctx.currentTime, .5);
+    setTimeout(() => { if (ctx.currentTime + .05 < stilleBis) return; belebtAnwenden(2.2, true); stilleKnopf(false); if (aktiv && aktiv.drohn) aktiv.drohn.g.gain.setTargetAtTime(1.1 * aktiv.drohn.v * trimVon(aktiv.welt), ctx.currentTime, 2); }, d * 1000 + 30);
+  }
+  function stilleKnopf(an) { document.querySelectorAll('[data-belebt="stille"]').forEach(b => b.classList.toggle("an", an)); }
+  function nachlegen() { audioStart(); if (!lebendig()) return; aktiv.glut = 1; belebtEreignis(aktiv, "holzpoltern", .4, {}); setTimeout(() => belebtEreignis(aktiv, "ast", .35, {}), 700); belebtAnwenden(2, true); }
+  function nahEreignis(a) {
+    const kl = kulKlasse(aLid()), nacht = zeitIst() > .5, sp = spWert();
+    let l = kl === "unter" ? NAH.unter : kl === "drinnen" ? NAH.drinnen : nacht ? NAH.nacht : NAH.tag;
+    if (sp > .45 && Math.random() < sp) l = NAH.gruselig;
+    if (kl === "drinnen" && l !== NAH.gruselig && Math.random() < .6) return;
+    const art = zufall(l.filter(x => EV[x] && EV[x].f)); if (art) belebtEreignis(a, art, .3, { nah: 1 });
+  }
+  /* jeder Takt (alle 250 ms) */
+  function belebtTakt(j) {
+    if (!lebendig() || !aktiv.extra) return;
+    const a = aktiv, l = aLid(), kl = kulKlasse(l), dt = Math.min(2, j - (a.lebenT || j)), still = stilleBis > j, sp = spWert();
+    if (dt < .45) return; a.lebenT = j;
+    a.extra.forEach(bettPlanen);
+    /* Tageszeit: fehlende Nachtschichten bzw. Tagvögel dazuholen, nachts Eulen und Wölfe */
+    if (kulDraussen(l) && kl !== "kampf") {
+      const t = zeitIst(), t0 = NACHT_KUL[l] || 0, hat = re => a.welt.betten.some(([n]) => re.test(n));
+      if (t > t0 + .15 && !a.nachtDa && !hat(NACHT_BETT)) a.nachtDa = [extraSchicht("a_nacht", .35), extraSchicht("a_grillen", .3)];
+      if (t < t0 - .15 && !a.tagDa && !hat(/voegel/)) a.tagDa = [extraSchicht("a_tagvoegel", .35)];
+      (a.nachtDa || []).forEach(b => { b.extra = Math.max(0, (t - t0 - .1) / .8); });
+      (a.tagDa || []).forEach(b => { b.extra = Math.max(0, (t0 - t - .1) / .8); });
+      const ex = t > t0 + .3 ? [["eule", [25, 60], .3, .6], ["wolf", [70, 160], .26, 1], ["insekt", [30, 70], .22, .4]] : t < t0 - .3 ? [["vogel", [8, 20], .3, .5], ["specht", [40, 90], .25, .7]] : [];
+      ex.forEach(x => { const key = x[0]; if (a.zeitEv[key] == null) a.zeitEv[key] = j + zz(x[1][0] * .4, x[1][1] * .6); else if (j > a.zeitEv[key]) { if (!still) belebtEreignis(a, key, x[2] * Math.min(1, Math.abs(t - t0) * 1.3), { fern: Math.random() < x[3] ? 1 : 0 }); a.zeitEv[key] = j + zz(x[1][0], x[1][1]); } });
+    }
+    if (a.feuer) a.glut = belebt.zeitLauf ? Math.max(.3, a.glut - dt / 1500) : Math.min(1, a.glut + dt / 20);
+    /* Spannung der Seite: Bedrohliches schleicht sich ein */
+    if (sp > .05 && !still) (GEFAHR[kl] || []).forEach((x, i) => {
+      if (sp < x[4]) return;
+      const f = .3 + sp * 1.4;
+      if (a.gefahr[i] == null) { a.gefahr[i] = j + zz(x[1][0], x[1][1]) / f * .5; return; }
+      if (j > a.gefahr[i]) { belebtEreignis(a, x[0], x[2] * (.7 + .5 * sp), { fern: Math.random() < x[3] ? 1 : 0 }); a.gefahr[i] = j + zz(x[1][0], x[1][1]) / f; }
+    });
+    if (belebt.szenen && j > a.szeneNaechst) { a.szeneNaechst = j + zz(70, 160); const sz = KUL_SZENEN[l]; if (sz && sz.length && !still) { let i = Math.floor(Math.random() * sz.length); if (sz.length > 1 && i === a.letzteSzene) i = (i + 1) % sz.length; a.letzteSzene = i; szeneSpielen(a, sz[i]); } }
+    if (belebt.nah && j > a.nahNaechst) { a.nahNaechst = j + zz(60, 150) / (1 + sp); if (!still) nahEreignis(a); }
+    if (belebt.gehen) {
+      a.gang += dt * 4.5;
+      if (j > a.schrittNaechst && EV[SCHRITT_ART[l]]) { a.schrittNaechst = j + zz(2.3, 3.1); if (!still) belebtEreignis(a, SCHRITT_ART[l], .24, { schritt: 1 }); }
+      a.betten.concat(a.extra).forEach(b => {
+        if (!b || b.az0 == null || b.ruht) return;
+        const az = wanderAz(b.az0, a.gang * (b.gs || 1)), t = j + .5;
+        if (b.p1) { pos3d(b.p1, az, b.hoch || 0, 4, t, true); if (b.p2) pos3d(b.p2, az + 150, b.hoch || 0, 5, t, true); }
+        else if (b.pn) b.pn.pan.linearRampToValueAtTime(Math.sin(grad(az)) * .8, t);
+      });
+    }
+    if (belebt.standort === "darunter" && j > a.untenNaechst) { if (a.untenNaechst && !still) belebtEreignis(a, "holzschritte", .4, { dumpf: 1 }); a.untenNaechst = j + zz(18, 40); }
+    belebtAnwenden(1.5);
+  }
+  function belebtGeaendert() { if (ctx) { standortAnwenden(1); belebtAnwenden(2, true); } }
+  /* Bedienung im Mischpult */
+  function belebtBlock(w) {
+    if (!w || w.episch || FERN) return "";
+    const L = T.bel, l = lid(w.id), drin = !kulDraussen(l), feuer = w.betten.some(([n]) => FEUER_BETT.test(n));
+    const chip = (attr, wert, text, an) => '<button type="button" class="chip' + (an ? " an" : "") + '" data-' + attr + '="' + wert + '">' + text + "</button>";
+    const orte = drin ? L.ortDrin : L.ortDraussen;
+    return '<div class="stimmung belebt"><h3>✨ ' + esc(L.titel) + '</h3><div class="chips">' +
+      chip("belebt", "passiert", L.passiert) + chip("belebt", "stille", L.stille, ctx && stilleBis > ctx.currentTime) + chip("belebt", "gehen", L.gehen, belebt.gehen) + (feuer ? chip("belebt", "nachlegen", L.nachlegen) : "") + "</div>" +
+      (drin ? (feuer ? '<h3>' + esc(L.zeit) + '</h3><div class="chips">' + chip("belebt", "zeitlauf", L.zeitLauf, belebt.zeitLauf) + "</div>" : "")
+        : '<h3>' + esc(L.zeit) + '</h3><div class="chips">' + ["auto", "tag", "daemmerung", "nacht"].map(z => chip("tageszeit", z, L.zeitN[z], belebt.zeit === z)).join("") + chip("belebt", "zeitlauf", L.zeitLauf, belebt.zeitLauf) + "</div>") +
+      '<h3>' + esc(L.ort) + '</h3><div class="chips">' + ["mitten", "rand", "nebenan", "darunter"].map(o => chip("standort", o, orte[o], belebt.standort === o)).join("") + "</div>" +
+      '<div class="chips">' + chip("belebt", "szenen", L.szenen, belebt.szenen) + chip("belebt", "nah", L.nah, belebt.nah) + "</div></div>";
+  }
+  function belebtKlick(e) {
+    const b = e.target.closest("[data-belebt]");
+    if (b) {
+      const a = b.dataset.belebt; audioStart();
+      if (a === "passiert") { etwasPassiert(); return true; }
+      if (a === "stille") { stilleStart(5); return true; }
+      if (a === "nachlegen") { nachlegen(); return true; }
+      if (a === "zeitlauf") { belebt.zeitLauf = !belebt.zeitLauf; if (aktiv && ctx) aktiv.zeitAb = ctx.currentTime; }
+      else belebt[a] = !belebt[a];
+      belebtMerken(); belebtGeaendert(); zeichnen(); return true;
+    }
+    const z = e.target.closest("[data-tageszeit]");
+    if (z) { audioStart(); belebt.zeit = z.dataset.tageszeit; if (aktiv && ctx) aktiv.zeitAb = ctx.currentTime; belebtGeaendert(); zeichnen(); return true; }
+    const s = e.target.closest("[data-standort]");
+    if (s) { audioStart(); belebt.standort = s.dataset.standort; belebtGeaendert(); zeichnen(); return true; }
+    return false;
   }
 
   /* ---------- Offline: einmal alles laden, danach läuft die Seite auch ohne Internet ---------- */
@@ -1491,12 +1858,13 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
         delete erben[x[0]]; uebernommen.add(e);
         e.staerke = x[1]; e.label = x[2]; e.regler = m.b && typeof m.b[i] === "number" ? m.b[i] : 1;
         e.grund = x[1] * Math.min(1.15, .055 / (LAUTHEIT[x[0]] || .05)) * trimVon(welt);
-        const j = ctx.currentTime; e.out.gain.cancelScheduledValues(j); e.out.gain.setValueAtTime(e.out.gain.value, j); e.out.gain.linearRampToValueAtTime(e.grund * e.regler, j + 4); e.drift = j + 5;
+        const j = ctx.currentTime; e.out.gain.cancelScheduledValues(j); e.out.gain.setValueAtTime(e.out.gain.value, j); e.out.gain.linearRampToValueAtTime(bGain(e), j + 4); e.drift = j + 5; e.bereitAb = j + 4.1;
         return e;
       }
       return bettStarten(welt, x, i, !spielen.has(i));
     }), naechst: {}, leben: m.leben != null ? m.leben : 1, laedt: true };
-    if (alt) alt.betten.forEach(b => { if (!uebernommen.has(b)) bettStopp(b, true); });
+    if (alt) { alt.betten.forEach(b => { if (!uebernommen.has(b)) bettStopp(b, true); }); belebtStopp(alt); }
+    try { belebtStart(); } catch (_) {}
     /* Ladeanzeige an der Karte, bis alle Schichten da sind */
     const geladen = aktiv; Promise.all(aktiv.betten.filter(b => !b.ruht && !/^[~@]/.test(b.name)).map(b => laden(b.name))).then(() => { geladen.laedt = false; if (aktiv === geladen) zeichnen(); });
     welt.ereignisse.forEach(([art]) => { (EV[art].f || []).forEach(laden); if (EV[art].s) synthEreignis(EV[art].s); });
@@ -1514,7 +1882,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     laufend.forEach(l => { if (l.s.folge) folgePlanen(l); });
     fortschritt();
     const j = ctx.currentTime;
-    wetterTakt(j); spannungTakt(j);
+    wetterTakt(j); spannungTakt(j); try { belebtTakt(j); } catch (_) {}
     if (!aktiv) return;
     aktiv.betten.forEach(b => b.e ? eBettPlanen(b) : bettPlanen(b));
     if (aktiv.leben <= 0) return;
@@ -1528,7 +1896,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
   function stoppen() {
     if (!aktiv) return;
-    aktiv.betten.forEach(b => bettStopp(b, true));
+    aktiv.betten.forEach(b => bettStopp(b, true)); belebtStopp(aktiv);
     aktiv = null;
     if (wetterAktiv) { wetterAktiv.betten.forEach(b => bettStopp(b, true)); wetterAktiv = null; }
     if (stumm && !laufend.size) stumm.pause();
@@ -1558,7 +1926,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     const stimmung = '<div class="stimmung"><h3>' + esc(T.wetter) + '</h3><div class="chips">' +
       ['<button type="button" class="chip' + (!merk.wetter ? " an" : "") + '" data-wetter="">☀ ' + esc(T.keinWetter) + "</button>"].concat(WETTER.map(x => '<button type="button" class="chip' + (merk.wetter === x.id ? " an" : "") + '" data-wetter="' + x.id + '">' + x.sym + " " + esc(x.name) + "</button>")).join("") + "</div>" +
       (merk.wetter ? regler("wlaut", T.wlaut, wert(merk.wLaut, 100), 0, 150) : "") +
-      regler("spannung", "⚡ " + T.spannung, wert(merk.spannung, 0), 0, 100).replace('class="regler"', 'class="regler spannung"') + "</div>";
+      regler("spannung", "⚡ " + T.spannung, wert(merk.spannung, 0), 0, 100).replace('class="regler"', 'class="regler spannung"') + "</div>" + belebtBlock(aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt));
     if (!w) { mi.innerHTML = "<h2>🎚 " + esc(T.stimmung) + ' <button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' + stimmung; return; }
     const m = merk.mix[w.id] || {};
     mi.innerHTML = "<h2>" + w.sym + " " + esc(w.name) + " <small>" + esc(T.ebenen) + '</small><button type="button" class="m100" id="misch-100" title="' + esc(T.alle100) + '">↺ 100 %</button><button type="button" class="zu" id="misch-zu" aria-label="Schließen">✕</button></h2>' + stimmung + '<hr class="trenn">' +
@@ -1671,6 +2039,12 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     add(["stopp", "stop", "stille", "ruhe", "alles aus"], "alles aus", () => notAus());
     add(["welt aus", "welt stopp"], "Welt anhalten", () => stoppen());
     add(["wetter aus", "klar", "kein wetter"], "Wetter aus", () => wetterSetzen(""));
+    add(["etwas passiert", "überraschung", "plötzlich"], "Etwas passiert", () => etwasPassiert());
+    add(["psst", "schweigen", "lauscht", "horcht"], "Stille", () => stilleStart(5));
+    const bel = f => () => { audioStart(); f(); belebtGeaendert(); zeichnen(); };
+    add(["weiterziehen", "weitergehen", "losgehen", "wir gehen"], "Weiterziehen", bel(() => { belebt.gehen = true; }));
+    add(["stehen bleiben", "halt an"], "Stehen bleiben", bel(() => { belebt.gehen = false; }));
+    [["es wird tag", "tag"], ["dämmerung", "daemmerung"], ["es wird nacht", "nacht"]].forEach(([w, v]) => add([w], w, bel(() => { belebt.zeit = v; if (aktiv && ctx) aktiv.zeitAb = ctx.currentTime; })));
     WELTEN.forEach(w => add([w.name].concat(SPRACH_WELT[w.id] || []), "Welt " + w.name, () => weltStarten(w)));
     WETTER.forEach(x => add(["wetter " + x.name, x.name], "Wetter " + x.name, () => wetterSetzen(x.id)));
     SZENEN.forEach(z => add([z.name, "szene " + z.name], "Szene " + z.name, () => szeneSchalten(z.id)));
@@ -1780,6 +2154,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       if (c) { const id = c.dataset.ger || c.dataset.aus, i = merk.gfav.indexOf(id); if (i >= 0) merk.gfav.splice(i, 1); else merk.gfav.push(id); speichern(); padZeichnen(); return; }
     }
     const wt = e.target.closest("[data-wetter]"); if (wt && !hoerer) { wetterSetzen(wt.dataset.wetter); return; }
+    if (!hoerer && !FERN && belebtKlick(e)) return;
     if (!hoerer) {
       const a = e.target.closest("[data-aus]"); if (a) { ausloesen(a.dataset.aus); return; }
       const ge = e.target.closest("[data-ger]"); if (ge) { geraeusch(ge.dataset.ger); return; }
@@ -1811,7 +2186,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       const m = merk.mix[w.id] = merk.mix[w.id] || {};
       if (k[0] === "b") {
         const i = +k.slice(1); m.b = m.b || []; m.b[i] = v / 100;
-        if (aktiv && aktiv.welt === w && aktiv.betten[i]) { const b = aktiv.betten[i]; b.regler = v / 100; b.drift = 0; b.out.gain.setTargetAtTime(b.grund * b.regler, ctx.currentTime, .1); }
+        if (aktiv && aktiv.welt === w && aktiv.betten[i]) { const b = aktiv.betten[i]; b.regler = v / 100; b.drift = 0; b.out.gain.setTargetAtTime(bGain(b), ctx.currentTime, .1); }
       } else if (k === "leben") { m.leben = v / 100; if (aktiv && aktiv.welt === w) { aktiv.leben = m.leben; aktiv.naechst = {}; } }
       else if (k === "raum") { m.raum = v; if (ctx && aktiv && aktiv.welt === w) hallNass.gain.setTargetAtTime(v / 100 * 1.2, ctx.currentTime, .1); }
       else return;
