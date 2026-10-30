@@ -2955,7 +2955,7 @@ function bossDeathSig(e){const id=BAKEY(e),x=e.x,y=e.y,r=e.r;try{
 function drawEnemy(e,t){const d=e.def,k=e.r/12,c=cx;
  if(e.flying){ell(c,e.x,e.y+e.r*0.85,e.r*0.8,e.r*0.3,'rgba(0,0,0,.45)');if(e.flyHigh>0.6)return}
  else ell(c,e.x,e.y+e.r*0.85,e.r*0.95,e.r*0.35,'rgba(0,0,0,.35)');
- const age=G.time-(e.born===undefined?-9:e.born),rise=age<0.32&&!e.flying?Math.max(0,age/0.32):1;if(rise<1){c.globalAlpha=0.7*(1-rise);ell(c,e.x,e.y+e.r*0.8,e.r*1.6*(0.6+rise),e.r*0.55*(0.6+rise),e.summon?'#1f3a1f':'#140818');c.globalAlpha=Math.max(0.2,rise)}const sq=e.hitAt&&G.time-e.hitAt<0.12?(1-(G.time-e.hitAt)/0.12)*(e.boss||e.guard?0.05:0.13):0;c.save();c.translate(e.x,e.y-(e.flying?e.flyHigh*60:0)+(1-rise)*e.r*0.9);const fl=(e.faceX!==undefined?e.faceX:P.x)<e.x?-1:1;{const A=enemyAnim(e,t);if(A.on){c.translate(A.dx*fl,e.r*0.8+A.dy);c.rotate(A.rot*fl);c.translate(0,-e.r*0.8)}}c.scale(k*fl*(1+sq),k*(1-sq)*(0.5+0.5*rise));
+ const age=G.time-(e.born===undefined?-9:e.born),rise=age<0.32&&!e.flying?Math.max(0,age/0.32):1;if(rise<1){c.globalAlpha=0.7*(1-rise);ell(c,e.x,e.y+e.r*0.8,e.r*1.6*(0.6+rise),e.r*0.55*(0.6+rise),e.summon?'#1f3a1f':'#140818');c.globalAlpha=Math.max(0.2,rise)}const sq=e.hitAt&&G.time-e.hitAt<0.12?(1-(G.time-e.hitAt)/0.12)*(e.boss||e.guard?0.05:0.13):0;c.save();{const rk=e.recT?Math.max(0,1-(G.time-e.recT)/0.12)*(e.recK||1)*5:0;c.translate(e.x+(rk?Math.cos(e.recA)*rk:0),e.y-(e.flying?e.flyHigh*60:0)+(1-rise)*e.r*0.9+(rk?Math.sin(e.recA)*rk*0.6:0))}const fl=(e.faceX!==undefined?e.faceX:P.x)<e.x?-1:1;{const A=enemyAnim(e,t);if(A.on){c.translate(A.dx*fl,e.r*0.8+A.dy);c.rotate(A.rot*fl);c.translate(0,-e.r*0.8)}}c.scale(k*fl*(1+sq),k*(1-sq)*(0.5+0.5*rise));
  if(e.elite||e.guard&&!d.gx){c.globalAlpha=0.3+0.08*Math.sin(t*4+e.seed);circ(c,0,-2,17,e.guard?'#ff7a4a':e.rare?'#f2d24c':e.champ?'#62a8ff':'#e5b454');c.globalAlpha=1}
  if(e.affix&&e.affix.gepanzert){c.strokeStyle='#c8c8d0';c.lineWidth=1.5;c.beginPath();c.arc(0,-2,15,0,TAU);c.stroke()}
  if(e.shield>0){c.globalAlpha=0.35+0.15*Math.sin(t*8);circ(c,0,-2,19,'#9fe6ff');c.globalAlpha=1}
@@ -3156,7 +3156,7 @@ function dealDmg(e,base,o){if(e.dead)return 0;if(e.flying&&e.flyHigh>0.4)return 
  let ls=P.st.ls;if(paOn)ls+=0.03*pa;if(paOn&&P.pactAlly&&!o.dot&&!P.pactAlly.down)P.pactAlly.hp=Math.min(P.pactAlly.st.maxHp,P.pactAlly.hp+amt*0.015*pa);
  if(P.zdN>=10&&o.melee&&!o.zdBoom){P.zdN=0;P.zdW=0;const R2=170*P.st.area;aoe(P.x,P.y,R2,sk(2+0.5*rank('z_destroyer')),{zdBoom:1,knock:240,fx:P.x,fy:P.y});ring(P.x,P.y,R2,'#ff3b4a',0.7,7);G.fxs.push({k:'shock',x:P.x,y:P.y,r:R2,c:'#ff3b4a',t:0,life:0.5});chunks(P.x,P.y,'#5a3a2a',10,260);G.shake+=6;sfx('boom')}
  if(ls>0&&!o.noLs&&!o.dot)heal(Math.min(amt*ls,P.st.maxHp*0.015));
- if(!o.quiet||amt>P.st.dmg*0.25)num(e.x+rnd(-6,6),e.y-e.r-4,amt,crit,false,o.dot);if(crit&&!o.dot&&!o.quiet)critFx(e,amt);else if(!o.dot&&!o.quiet&&fxQ()>1&&Math.random()<0.6)sparks(e.x,e.y-e.r*0.3,o.holy?'#ffe9a0':o.lightning?'#9fd8ff':'#fff2d8',2,230);
+ if(!o.quiet||amt>P.st.dmg*0.25)num(e.x+rnd(-6,6),e.y-e.r-4,amt,crit,false,o.dot);if(crit&&!o.dot&&!o.quiet)critFx(e,amt);else if(!o.dot&&!o.quiet&&fxQ()>1&&Math.random()<0.6)sparks(e.x,e.y-e.r*0.3,o.holy?'#ffe9a0':o.lightning?'#9fd8ff':'#fff2d8',2,230);if(!o.dot&&!o.quiet&&(o.basic||o.melee||o.arrow))hitFx(e,o,crit);
  if(o.stun)stunE(e,o.stun);
  if(o.root&&!e.boss&&!e.ccImmune)e.root=Math.max(e.root,o.root*(e.guard?0.5:1));
  if(o.slow){e.slowT=Math.max(e.slowT,o.slowT||0.5);e.slowA=Math.max(e.slowT>0?e.slowA:0,o.slow)}
@@ -3181,7 +3181,7 @@ function onBasicHit(e,crit,amt,o){
 }
 function aoe(x,y,R,amt,o){let n=0;if(!(o&&o.noProp))hitProps(x,y,R);o=Object.assign({fx:x,fy:y},o||{});query(x,y,R+50,e=>{const dx=e.x-x,dy=e.y-y;if(dx*dx+dy*dy<(R+e.r)*(R+e.r)){dealDmg(e,amt,o);n++}});return n}
 function cone(x,y,a,arc,R,amt,o){let n=0;hitPropsCone(x,y,a,arc,R);query(x,y,R+50,e=>{const dx=e.x-x,dy=e.y-y,dd=Math.hypot(dx,dy);if(dd>R+e.r)return;let da=Math.atan2(dy,dx)-a;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)<arc/2+Math.atan2(e.r,Math.max(dd,1))||dd<e.r+12){dealDmg(e,amt,o);n++}});return n}
-function shoot(o){G.projs.push({team:'p',x:o.x,y:o.y,vx:Math.cos(o.a)*o.spd,vy:Math.sin(o.a)*o.spd,spd:o.spd,a:o.a,r:o.r||6,dmg:o.dmg,pierce:o.pierce||0,kind:o.kind,c:o.c,hit:o.hit,knock:o.knock,life:o.life||1.4,life0:o.life||1.4,hits:null,basic:o.basic,boom:o.boom,ret:o.ret,exec:o.exec,crit:o.crit,arrow:o.kind==='arrow'})}
+function shoot(o){G.projs.push({oi:G.net&&PL.length>1?PL.indexOf(P):-1,team:'p',x:o.x,y:o.y,vx:Math.cos(o.a)*o.spd,vy:Math.sin(o.a)*o.spd,spd:o.spd,a:o.a,r:o.r||6,dmg:o.dmg,pierce:o.pierce||0,kind:o.kind,c:o.c,hit:o.hit,knock:o.knock,life:o.life||1.4,life0:o.life||1.4,hits:null,basic:o.basic,boom:o.boom,ret:o.ret,exec:o.exec,crit:o.crit,arrow:o.kind==='arrow'})}
 function arrow(a,d,h){shoot({x:P.x,y:P.y-4,a,spd:760,dmg:d,r:6,pierce:1,kind:'arrow',c:'#efe0b8',hit:h,basic:1})}
 function daggerRing(n,amt){for(let i=0;i<n;i++)shoot({x:P.x,y:P.y-4,a:i/n*TAU,spd:560,dmg:amt,r:6,pierce:1,kind:'dagger',c:'#d8dde3',life:0.7})}
 function projBoom(p){const b=p.boom;aoe(p.x,p.y,b.R,b.dmg,{onHit:b.burn?(e=>dot(e,'burn',b.burn,3)):null});explodeFx(p.x,p.y,b.R,'#ff8a2a');sfxAt('boom',p.x,p.y);
@@ -3218,6 +3218,15 @@ function updTraps(dt){for(const tr of G.traps){tr.life-=dt;tr.arm-=dt;if(tr.arm>
 
 /* ---------- Effekte ---------- */
 function ring(x,y,r,c,life,w){G.fxs.push({k:'ring',x,y,r,c,t:0,life:life||0.4,w:w||3})}
+const HMAT={skel:'bone',wraith:'geist',ghost:'geist',golem:'stein',statue:'stein',magmin:'glut',blob:'schleim',slime:'schleim',eye:'schleim',beetle:'panzer',spider:'panzer',mimic:'holz',duergar:'fleisch'};
+const HMCOL={bone:'#ece6d4',stein:'#c8b8a0',glut:'#ffb040',geist:'#bfe6ff',schleim:'#9fd860',panzer:'#b8a07a',holz:'#9a6a3a',fleisch:'#9a1c26'};
+/* Splitter fliegen in Schlagrichtung weg: Knochen, Steinsplitter, Glut, Schleim, Holz oder (dezent) Blut */
+function spray(x,y,a,col,n,spd,heavy){if(fxQ()<1)return;if(fxQ()<2)n=Math.ceil(n*0.6);for(let i=0;i<n;i++){const b=a+rnd(-0.55,0.55),s=rnd(0.45,1)*spd;part(heavy?{k:'chunk',x,y,vx:Math.cos(b)*s,vy:Math.sin(b)*s*0.7,z:rnd(6,14),vz:rnd(60,170),life:rnd(0.35,0.7),c:col,s:rnd(1.6,3.2),rot:rnd(TAU),vr:rnd(-10,10),drag:0.92}:{k:'spark',x,y,vx:Math.cos(b)*s,vy:Math.sin(b)*s,life:rnd(0.15,0.4),c:col,s:rnd(1.3,2.6),drag:0.88,g:0})}}
+function hitFx(e,o,crit){if(G.bot||fxQ()<1)return;if((e.hfT||0)>G.time)return;e.hfT=G.time+0.05;const src=o.fx!==undefined&&o.fy!==undefined?{x:o.fx,y:o.fy}:P;const a=ang(src,e);
+ const m=HMAT[e.def.shape]||'fleisch',col=HMCOL[m],x=e.x-Math.cos(a)*e.r*0.35,y=e.y-e.r*0.35,heavy=m==='fleisch'||m==='schleim'||m==='holz'||m==='stein';
+ spray(x,y,a,col,Math.round((crit?8:4)*(o.melee?1.4:1)),(o.melee?260:200)*(crit?1.3:1),heavy);if(m==='stein'||m==='panzer'||m==='bone')sparks(x,y,'#fff2d8',crit?3:1,240);
+ const big=e.boss||e.guard;e.recA=a;e.recT=G.time;e.recK=big?0.35:1;
+ if(o.melee&&crit&&!G.net)hitstop(0.03)}
 function slash(x,y,a,arc,r,c,life,big){G.fxs.push({k:'slash',x,y,a,arc,r,c,t:0,life:life||0.2,big})}
 
 /* ================= Gegner ================= */
@@ -5121,10 +5130,12 @@ function openChest(p){p.open=true;if(p.mimic){p.dead=true;const e=spawnEnemy(MIM
 function findSecret(p){p.found=true;const rc=roomCol(p);word(p.x,p.y-30,'Ein Geheimgang!',rc);sparks(p.x,p.y,rc,16,300,1);light(p.x,p.y,260,rc,0.8,1);sfx('magic');say('secret')}
 /* Schatzkammer: der Rest der Stufe wird kurz beiseitegelegt und danach genau so wiederhergestellt */
 const SWAPK=['enemies','projs','zones','ezones','loot','orbs','props','deco','ground','road','theme','themeKey','tele','traps','decals','amb','lights','spawnT','firstWave','thiefT','portal','boss','guardE'];
-function enterSecret(p){if(G.bot&&!G.roomTest||G.room)return;p.used=true;sfx('geheim');const keep={px:P.x,py:P.y};for(const k of SWAPK)keep[k]=G[k];G.saved=keep;
+function enterSecret(p){if(G.bot&&!G.roomTest||G.room)return;p.used=true;sfx('geheim');const keep={px:P.x,py:P.y,sp:p};for(const k of SWAPK)keep[k]=G[k];G.saved=keep;
+ if(p.rs){const st=p.rs;p.rs=null;for(const k of SWAPK)G[k]=st[k];G.room=st.room;G.room.t=Math.max(G.room.t,1.2);const R=ROOMS[G.room.type]||ROOMS.schatz;P.x=WORLD/2;P.y=G.room.y1-150;P.dash=null;mpRoomIn(WORLD/2,G.room.y1-300);for(const a of G.allies){a.x=P.x-30;a.y=P.y+10}
+  G.fxs.push({k:'shock',x:P.x,y:P.y,r:200,c:R.c,t:0,life:0.6});sfx('portal');banner(R.n,'Zurück im Geheimraum',R.c,{dur:2,size:40});musAk('geheim');return}
  G.enemies=[];G.projs=[];G.zones=[];G.ezones=[];G.loot=[];G.orbs=[];G.tele=[];G.traps=[];G.decals=[];G.amb=[];G.props=[];G.lights=[];G.thiefT=-1;G.firstWave=0;G.portal=null;G.boss=null;G.guardE=null;
  enterRoom(p.type&&ROOMS[p.type]?p.type:'schatz',p);musAk('geheim')}
-function leaveSecret(){const k=G.saved;if(!k)return;const left=(G.loot||[]).filter(L=>!L.taken);for(const key of SWAPK)G[key]=k[key];P.x=k.px;P.y=k.py+40;for(const L of left){const a=rnd(TAU),r=rnd(40,90);L.x=clamp(P.x+Math.cos(a)*r,20,WORLD-20);L.y=clamp(P.y+Math.sin(a)*r,20,WORLD-20);L.z=0;L.land=1;G.loot.push(L)}P.dash=null;mpRoomOut(k);for(const a of G.allies){a.x=P.x-30;a.y=P.y+10}G.saved=null;G.room=null;G.fxs.push({k:'shock',x:P.x,y:P.y,r:160,c:'#ffd04a',t:0,life:0.5});sfx('blink');musAk('zurueck')}
+function leaveSecret(){const k=G.saved;if(!k)return;const left=(G.loot||[]).filter(L=>!L.taken);if(k.sp&&G.room){const st={room:G.room};for(const key of SWAPK)st[key]=G[key];st.loot=[];st.orbs=[];st.projs=[];st.tele=[];k.sp.rs=st;k.sp.used=false;k.sp.away=1}for(const key of SWAPK)G[key]=k[key];P.x=k.px;P.y=k.py+40;for(const L of left){const a=rnd(TAU),r=rnd(40,90);L.x=clamp(P.x+Math.cos(a)*r,20,WORLD-20);L.y=clamp(P.y+Math.sin(a)*r,20,WORLD-20);L.z=0;L.land=1;G.loot.push(L)}P.dash=null;mpRoomOut(k);for(const a of G.allies){a.x=P.x-30;a.y=P.y+10}G.saved=null;G.room=null;G.fxs.push({k:'shock',x:P.x,y:P.y,r:160,c:'#ffd04a',t:0,life:0.5});sfx('blink');musAk('zurueck')}
 function spawnThief(x,y){const e=spawnEnemy(THIEF,x,y,{});e.hp*=1+0.05*SL();e.maxHp=e.hp;e.thief=0;toast('Ein Schatzgoblin! Schnapp ihn dir, bevor er verschwindet!','#ffd04a');sfx('elite');word(x,y-30,'Hihihi!','#ffd04a');return e}
 function thiefAI(e,dt){e.thief+=dt;if(e.stun>0||e.root>0)return;const dx=e.x-P.x,dy=e.y-P.y,d=Math.hypot(dx,dy)||1;let mx=dx/d,my=dy/d;const w=Math.sin(G.time*1.7+e.seed*3);mx+=-my*w*0.7;my+=mx*w*0.7;
  const sp=e.sp*(e.slowT>0?1-e.slowA:1)*(d>650?0.35:1);e.x=clamp(e.x+mx*sp*dt,30,WORLD-30);e.y=clamp(e.y+my*sp*dt,30,WORLD-30);if(G.room){e.x=clamp(e.x,G.room.x0+20,G.room.x1-20);e.y=clamp(e.y,G.room.y0+20,G.room.y1-20)}
@@ -5151,7 +5162,7 @@ function worldTick(dt){
   if((p.k==='crate'||p.k==='urn'||p.k==='goldpile')&&touch)breakProp(p,'touch');
   else if(p.k==='shrine'&&!p.used&&touch)useShrine(p);
   else if(p.k==='chest'&&!p.open&&touch)openChest(p);
-  else if(p.k==='secret'){if(!p.found&&nearS)findSecret(p);else if(p.found&&!p.used&&touch)enterSecret(p)}
+  else if(p.k==='secret'){if(!p.found&&nearS)findSecret(p);else if(p.away){if(!touch)p.away=0}else if(p.found&&!p.used&&touch)enterSecret(p)}
   else if(p.k==='exit'&&touch&&G.room&&G.room.t>1){if(p.locked){if(!G.room.lockW||G.time>G.room.lockW){G.room.lockW=G.time+2.5;toast('Die Tür ist verriegelt!','#ff8a7a')}}else leaveSecret()}
   else propTouch2(p,touch,P0);P=P0}
  G.props=G.props.filter(p=>!p.dead);
@@ -6361,8 +6372,8 @@ const NET={rx:{},tx:{},bytes:0,pctx:0,plT:0,role:null,peer:null,code:'',st:'',ms
  sim:null};
 const NETCAT=['enemies','projs','zones','ezones','tele','allies','loot','orbs','traps','props'];
 const NETW={
- enemies:'x y r hp maxHp def elite boss guard summon add champ rare affix affixNames stun root fearT vulnT vuln flash seed dead dots shield flying flyHigh heldT born hitAt faceX mv blindT chillT markT weakT tether phase2 fuse kind prop corpse atkA charging survive id'.split(' '),
- projs:'x y vx vy a r c kind team big'.split(' '),
+ enemies:'x y r hp maxHp def elite boss guard summon add champ rare affix affixNames stun root fearT vulnT vuln flash seed dead dots shield flying flyHigh heldT born hitAt faceX mv blindT chillT markT weakT tether phase2 fuse kind prop corpse atkA charging survive id recA recT recK ph castA'.split(' '),
+ projs:'x y vx vy a r c kind team big oi'.split(' '),
  zones:'x y r t dur kind seeds poison'.split(' '),
  ezones:'x y r t dur kind c'.split(' '),
  tele:'x y a arc c delay k len r rock screen t vial w gap gapW dur max spd av done'.split(' '),
@@ -6370,7 +6381,7 @@ const NETW={
  loot:'x y it t z born land'.split(' '),
  orbs:'x y k v'.split(' '),
  traps:'x y done arm'.split(' '),
- props:'x y r k prop boom found mimic open type used vx vy dead hp locked price prog minR lab col pakt rich'.split(' ')};
+ props:'x y r k prop boom found mimic open type used vx vy dead hp locked price prog minR lab col pakt rich b w h fake act desc nest tell seed karte'.split(' ')};
 const NETPBL=new Set(['eq','hero','bag','lp','cur','skBtns','actives','up','own','tp','netIn','netQ','netCur','netAA','netIn0','vcam','netConn','netPing','padAim','sprintKey','padSpr']);
 const NETGBL=new Set(['blk','blkG','enemies','projs','zones','ezones','allies','loot','orbs','parts','fxs','nums','tele','timers','traps','deco','props','lights','decals','amb','ghosts','corpses','ground','theme','road','paused','overlay','resumeT','menuP','barPick','invSel','campTab','sel','seldiff','selMode','lbMode','bot','confirmNew','lastSave','musT','lobby','p1dev','cam','camStage','joinArm','rlStart','hbT','sayCd','vp','upCount','banner','daily','wx','kt','time','zp','shake','hsT','smT','atIntro','ev','lowSay','mpz','evs','netJoin','netGuestRun','hostPaused','hostMenu','cf','tBase']);
 const NOPE={};
@@ -6620,12 +6631,12 @@ function netApply(S,hc,me){const res=[];const O=NET.objs,seen=new Set();
 function netFixRefs(){const O=NET.objs,f=v=>typeof v==='string'&&v[0]==='@'?(O.get(+v.slice(1))||null):v;for(const o of O.values())for(const k of['tgt','own','follow'])if(typeof o[k]==='string')o[k]=f(o[k]);if(typeof G.boss==='string')G.boss=f(G.boss);if(typeof G.guardE==='string')G.guardE=f(G.guardE)}
 function netStateChange(prev){if(G.state==='title'){netBackToLobby();return}if(G.state==='play'&&prev!=='play'){if(G.overlay==='remote'&&!(NET.rs&&NET.rs.v==='scr')){G.overlay=null;hideScreen()}hud.hidden=!!G.overlay}}
 /* Effekte beim Gast nachbauen */
-const NETFXF={burst,sparks,embers,puffs,chunks,wisps,light,decal,num,sfx:(n,x,y)=>x===undefined?sfx(n):sfx(n,{x,y}),ring,slash,word};
+const NETFXF={burst,sparks,embers,puffs,chunks,wisps,light,decal,spray,num,sfx:(n,x,y)=>x===undefined?sfx(n):sfx(n,{x,y}),ring,slash,word};
 const NETFXN=new Set(['burst','sparks','embers','puffs','chunks','wisps']);
 function netCol(c){return typeof c==='string'&&/^(#[0-9a-f]{3,8}|rgba?\([\d.,\s%]{1,40}\)|[a-z]{3,20})$/i.test(c)?c:undefined}
 function netBanO(o){if(!isObj(o))return null;const r={};if(o.dur!=null)r.dur=nNum(o.dur,0.2,12,2.6);if(o.size!=null)r.size=nNum(o.size,8,160,56);if(o.y!=null)r.y=nNum(o.y,0,5000,300);if(o.bars)r.bars=true;if(o.force)r.force=true;return r}
 function netRemoteFx(e){if(!Array.isArray(e)||typeof e[0]!=='string')return;if(!G.netGuestRun&&e[0]!=='toast')return;try{const k=e[0];
- if(k[0]==='+'){if(k!=='+fxs'&&k!=='+nums'&&k!=='+corpses')return;const A=G[k.slice(1)];if(!Array.isArray(A)||A.length>800||!isObj(e[1]))return;const o=nDec(e[1],[]);if(k==='+corpses'){o.dots=null}A.push(o);return}
+ if(k[0]==='+'){if(k!=='+fxs'&&k!=='+nums'&&k!=='+corpses')return;const A=G[k.slice(1)];if(!Array.isArray(A)||A.length>800||!isObj(e[1]))return;const o=nDec(e[1],[]);if(k==='+corpses'){o.dots=null}if(k==='+fxs'){const me=NET.mine;if(me&&me._r&&typeof o.x==='number'&&Math.hypot(o.x-me._r.x,o.y-me._r.y)<45){o.x+=me.x-me._r.x;o.y+=me.y-me._r.y}}A.push(o);return}
  if(k==='toast'){toast(netSan(e[1]),netCol(e[2]));return}if(k==='banner'){banner(String(e[1]==null?'':e[1]).slice(0,120),e[2]==null?'':String(e[2]).slice(0,200),netCol(e[3]),netBanO(e[4]));return}
  if(k==='shake'){G.shake=Math.max(G.shake||0,nNum(e[1],0,60,0));return}if(k==='zp'){G.zp=Math.max(G.zp||0,nNum(e[1],0,5,0));return}
  if(k==='bub2'){const id=String(e[1]||'');if(!HEROES[id])return;const B=G.bubs||(G.bubs=[]);B.push({who:id,txt:String(e[2]==null?'':e[2]).slice(0,200),t:-nNum(e[3],0,10,0),dur:2.7});if(B.length>8)B.shift();return}
@@ -6635,7 +6646,8 @@ function netRemoteFx(e){if(!Array.isArray(e)||typeof e[0]!=='string')return;if(!
 function netInterp(dt){const now=performance.now();if(NET.off===null)return;const delay=Math.min(220,NET.interval*1.6+Math.min(80,NET.jit*1.5)+12);const rt=now-NET.off-delay;NET.delay=delay;if(NET.tBase!==undefined)G.time=NET.tBase+clamp((rt-NET.tHc)/1000,-0.25,0.35);
  for(const o of NET.objs.values()){if(o===NET.mine)continue;const s=o._s;if(!s||s.length<6||s[s.length-2]===undefined)continue;let i=s.length-3;while(i>0&&s[i]>rt)i-=3;
   const t0=s[i],t1=s[i+3];if(t1===undefined){if(s[i+1]!==undefined){o.x=s[i+1];o.y=s[i+2]}continue}const k=t1>t0?clamp((rt-t0)/(t1-t0),0,1):1;const x0=s[i+1],y0=s[i+2],x1=s[i+4],y1=s[i+5];if(x0===undefined||x1===undefined)continue;
-  if(Math.abs(x1-x0)>400||Math.abs(y1-y0)>400){o.x=x1;o.y=y1;continue}o.x=x0+(x1-x0)*k;o.y=y0+(y1-y0)*k;if(o.vx!==undefined&&o.team!==undefined&&k>=1){}}}
+  if(Math.abs(x1-x0)>400||Math.abs(y1-y0)>400){o.x=x1;o.y=y1;continue}o.x=x0+(x1-x0)*k;o.y=y0+(y1-y0)*k;if(o.vx!==undefined&&o.team!==undefined&&k>=1){}}
+ {const me=NET.mine;if(me&&me._r&&me.ci!==undefined)for(const p of G.projs){if(p.oi!==me.ci||p.team!=='p')continue;if(p._ob===undefined){p._ob=now;p._ox=me.x-me._r.x;p._oy=me.y-me._r.y}const f=Math.max(0,1-(now-p._ob)/450);if(f>0){p.x+=p._ox*f;p.y+=p._oy*f}}}}
 /* Eigene Bewegung sofort zeigen, Abweichungen vom Gastgeber sanft ausgleichen */
 function netPredict(dt){const me=NET.mine;if(!me||!me.st)return;const r=me._r;if(!r)return;const sx=r.x,sy=r.y;let px=sx,py=sy;
  if(!me.dash&&!me.down&&!(me.rootT>0)&&!(me.stunT>0)){const sp=(me.st.speed||200)*(me.slowT>0?1-(me.slowA||0):1)*(me.chan?(me.chan.move?0.75:0):1);const ack=NET.ackIn||0;
@@ -6731,6 +6743,7 @@ function netInit(){
  {const f=embers;embers=function(){netFx('embers',arguments);return f.apply(this,arguments)}}
  {const f=puffs;puffs=function(){netFx('puffs',arguments);return f.apply(this,arguments)}}
  {const f=chunks;chunks=function(){netFx('chunks',arguments);return f.apply(this,arguments)}}
+ {const f=spray;spray=function(){netFx('spray',arguments);return f.apply(this,arguments)}}
  {const f=wisps;wisps=function(){netFx('wisps',arguments);return f.apply(this,arguments)}}
  {const f=light;light=function(){netFx('light',arguments);return f.apply(this,arguments)}}
  {const f=decal;decal=function(){netFx('decal',arguments);return f.apply(this,arguments)}}
