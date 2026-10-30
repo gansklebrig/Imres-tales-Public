@@ -1922,7 +1922,7 @@ const AFFIX={
  dornen:{n:'Dornenpanzer',c:'#d0a060'},
  rasend:{n:'Rasend',c:'#ff3030',tick(e){if(!e.raged&&e.hp<e.maxHp*0.5){e.raged=1;e.sp*=1.4;e.dmg*=1.4;if(e.dmg0)e.dmg0*=1.4;ring(e.x,e.y,e.r+20,'#ff3030',0.5,5);sfx('roar')}}},
  elektrisch:{n:'Elektrisch',c:'#9fe0ff',hit(e){if((e.zT||0)>G.time)return;e.zT=G.time+0.5;if(Math.random()<0.35){const gp=Math.random();for(let i=0;i<3;i++)eShot(e.x,e.y,rnd(TAU),210,e.dmg*0.45,{c:'#bfefff',r:5,grp:gp})}}},
- heilend:{n:'Heilend',c:'#6aff9a',tick(e,dt){e.hT=(e.hT||rnd(2,4))-dt;if(e.hT<=0){e.hT=4;let n=0;query(e.x,e.y,240,o=>{if(o!==e&&!o.boss&&o.hp<o.maxHp){o.hp=Math.min(o.maxHp,o.hp+o.maxHp*0.15);n++}});if(n)ring(e.x,e.y,240,'#6aff9a',0.5,3)}}},
+ heilend:{n:'Heilend',c:'#6aff9a',tick(e,dt){e.hT=(e.hT||rnd(2,4))-dt;if(e.hT<=0){e.hT=4;let n=0;query(e.x,e.y,240,o=>{if(o!==e&&!o.boss&&!o.guard&&!o.add&&o.hp<o.maxHp){o.hp=Math.min(o.maxHp,o.hp+o.maxHp*0.15);n++}});if(n)ring(e.x,e.y,240,'#6aff9a',0.5,3)}}},
  spiegelnd:{n:'Spiegelnd',c:'#e8e8ff',hit(e,o){if(o.melee||o.pet||(e.rfl||0)>G.time)return;e.rfl=G.time+0.8;if(Math.random()<0.3){eShot(e.x,e.y,ang(e,P),280,e.dmg*0.35,{c:'#e8e8ff',r:6});ring(e.x,e.y,e.r+8,'#e8e8ff',0.25,2)}}},
  wirbelnd:{n:'Wirbelnd',c:'#ff9adf',tick(e,dt){e.wT=(e.wT||rnd(2,4))-dt;if(e.wT<=0&&d2(e,P)<560*560){if(!e.wN){e.wN=10;e.wA=rnd(TAU)}e.wA+=0.55;eShot(e.x,e.y,e.wA,190,e.dmg*0.3,{c:'#ff9adf',r:5});eShot(e.x,e.y,e.wA+Math.PI,190,e.dmg*0.3,{c:'#ff9adf',r:5});e.wN--;e.wT=e.wN>0?0.14:4.5}}},
  fesselnd:{n:'Fesselnd',c:'#b0a080',tick(e,dt){e.fT=(e.fT||rnd(2,4))-dt;if(e.fT<=0&&d2(e,P)<480*480&&!P.stealthT){e.fT=6;eShot(e.x,e.y,ang(e,P),260,e.dmg*0.4,{c:'#d8c8a0',r:8,root:1.1});sfxAt('thunk',e.x,e.y)}}},
@@ -3238,9 +3238,9 @@ function spawnEnemy(def,x,y,o){o=o||{};const sc=scale();const big=o.boss||o.guar
 /* Wächter wachsen mit der Ausrüstung der Gruppe mit: Mindestleben = Grundschaden der Helden × einige Sekunden, damit sie nicht in ein paar Schlägen fallen */
 function guardFloor(boss){let s=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const d=dpsOf(q.st);s+=Math.max(d.m,d.r)*(GUARD_HK[q.id]||1.5)}return s*(boss?BOSS_T0+Math.min(BOSS_T1,SL()*BOSS_TS):GUARD_T0+Math.min(GUARD_T1,SL()*GUARD_TS))*(HARD()?1.35:1)}
 /* Bosse: immer ein richtiger Kampf, auch mit starker Ausrüstung */
-let BOSS_T0=40,BOSS_T1=30,BOSS_TS=2.5;
+let BOSS_T0=32,BOSS_T1=20,BOSS_TS=2;
 /* Helden mit viel Fähigkeiten-/Flächenschaden machen weit mehr, als der Grundschaden verrät */
-const GUARD_HK={barradin:1.5,echo:1.4,friedrich:2.3,ezekiel:3};let GUARD_T0=16,GUARD_T1=14,GUARD_TS=2;
+const GUARD_HK={barradin:1.3,echo:1.25,friedrich:1.85,ezekiel:2.3};let GUARD_T0=12,GUARD_T1=10,GUARD_TS=1.5;
 function pickFoe(prog){const S=STAGES[G.stage];const ids=Object.keys(S.foes).filter(id=>FOES[id].k!=='tank'||prog>0.2);let s=ids.reduce((a,id)=>a+S.foes[id],0)*Math.random();for(const id of ids){s-=S.foes[id];if(s<=0)return FOES[id]}return FOES[ids[0]]}
 function viewEdgePoint(m){const Z=ZOOM*(G.mp&&!SAVE.split?(G.mpz||1):SAVE.split&&G.mp?0.8:1),C0=splitOn()?(pick(PL).vcam||P):(G.cam||P);let C=C0,hw=W/Z/2+(m||60),hh=H/Z/2+(m||60);if(G.net){const L=PL.filter(p=>!p.down&&!p.netGone),q=L.length?pick(L):PL[0];if(q&&netIs(q.dev)){C=q;hw=(q.vw||W/Z)/2+(m||60);hh=(q.vh||H/Z)/2+(m||60)}}let x=C.x,y=C.y;for(let tr=0;tr<10;tr++){const side=ri(0,3),t=rnd(-1,1);x=C.x+(side<2?t*hw:(side===2?-hw:hw));y=C.y+(side<2?(side===0?-hh:hh):t*hh);if(x>20&&y>20&&x<WORLD-20&&y<WORLD-20)break}return{x:clamp(x,20,WORLD-20),y:clamp(y,20,WORLD-20)}}
 function firstWave(){if(G.mode==='bossrausch')return;if(modHas('ambush')){const pt=edgePoint(380);spawnPack(pickFoe(0.5),pt.x,pt.y)}for(let g=0;g<(graceOn()?1:SL()<2?2:3);g++){const a=rnd(TAU),d=rnd(330,450),x=clamp(P.x+Math.cos(a)*d,40,WORLD-40),y=clamp(P.y+Math.sin(a)*d,40,WORLD-40),f=pickFoe(0);for(let i=0;i<ri(3,4);i++)spawnEnemy(f,x+rnd(-50,50),y+rnd(-50,50))}}
@@ -3285,7 +3285,7 @@ function updEnemy(e,dt){
  else if(e.fleeT>0){e.fleeT-=dt;mx=-mx;my=-my;sp*=1.25}
  else if(k==='ranged'||k==='caster'||k==='netter'||k==='healer'||kite){const keep=k==='caster'?260:k==='netter'?220:k==='healer'?300:kite?240:280;if(d<keep-110){mx=-mx;my=-my}else if(d<keep+20){const s=Math.sin(e.seed+G.time*0.7);mx=-my*s;my=mx*s*0.5}
   const pd=Math.sqrt(d2(e,P));
-  if(k==='healer'&&e.atkCd<=0){e.atkCd=rnd(3,4);let n=0;query(e.x,e.y,230,o=>{if(o!==e&&!o.boss&&o.hp<o.maxHp){o.hp=Math.min(o.maxHp,o.hp+o.maxHp*0.22);n++;burst(o.x,o.y,'#6aff9a',4,60)}});if(n)ring(e.x,e.y,230,'#6aff9a',0.5,3)}
+  if(k==='healer'&&e.atkCd<=0){e.atkCd=rnd(3,4);let n=0;query(e.x,e.y,230,o=>{if(o!==e&&!o.boss&&!o.guard&&!o.add&&o.hp<o.maxHp){o.hp=Math.min(o.maxHp,o.hp+o.maxHp*0.22);n++;burst(o.x,o.y,'#6aff9a',4,60)}});if(n)ring(e.x,e.y,230,'#6aff9a',0.5,3)}
   else if(!e.boss&&!e.guard&&!e.add&&pd<420&&e.atkCd<=0&&!unseen&&onScr(e)){
    if(k==='caster'){e.atkCd=rnd(2.8,3.6);e.atkA=G.time;tele({k:'circle',x:P.x+rnd(-20,20),y:P.y+rnd(-20,20),r:58,delay:0.95,dmg:e.dmg*1.3,c:e.def.pc||'#ff8a3a'})}
    else if(k==='netter'){e.atkCd=rnd(2.4,3);eShot(e.x,e.y-4,ang(e,P),260,e.dmg*0.6,{kind:'eweb',c:'#ececf4',r:8,slow:0.55})}
@@ -3299,13 +3299,13 @@ function updEnemy(e,dt){
  if(e.slT>0){e.slT-=dt;if(mx||my){mx=mx*0.25+e.slX;my=my*0.25+e.slY;const l=Math.hypot(mx,my)||1;mx/=l;my/=l}}
  e.mv=(mx||my)&&sp>0?1:0;e.x+=mx*sp*dt;e.y+=my*sp*dt;
  if(tg!==e.wander&&d<e.r+(tg.r||14)+2&&e.hitCd<=0&&e.fearT<=0){e.hitCd=0.85*(e.atkMul||1);e.atkA=G.time;if(!e.boss&&!e.guard){const sh=e.def.shape;sfxAt(sh==='beast'||sh==='rat'||sh==='bat'||sh==='blight'||sh==='spider'?'e_klaue':(e.def.size||1)>=1.3||sh==='golem'||sh==='zombie'?'e_wucht':'e_hieb',e.x,e.y)}if(e.blindT>0&&Math.random()<0.75){word(e.x,e.y-e.r-8,'daneben','#aaa');return}
-  if(tg===P){hurt(e.dmg);if(e.affix&&e.affix.vampir){e.hp=Math.min(e.maxHp,e.hp+e.dmg*4);burst(e.x,e.y,'#ff4a6a',5,60)}}else{tg.hp-=e.dmg;tg.hit=0.1}}
+  if(tg===P){hurt(e.dmg);if(e.affix&&e.affix.vampir&&!e.boss&&!e.guard&&!e.add){e.hp=Math.min(e.maxHp,e.hp+e.dmg*4);burst(e.x,e.y,'#ff4a6a',5,60)}}else{tg.hp-=e.dmg;tg.hit=0.1}}
 }
 
 /* ---------- Bosse und Wächter ---------- */
 function bossAI(e,dt){const def=e.def;
  if(e.survive>0){e.survive-=dt;if(e.survive<=0&&!G.portal){const p=edgePoint(240);G.portal={x:p.x,y:p.y,t:0,boat:1};toast('Das Boot! Springt hinein!','#9fe6ff');sfx('portal')}}
- if(e.tether){const tt=e.tether;tt.t-=dt;const dd=Math.sqrt(d2(e,P));if(tt.t<=0||dd>440||P.inv>0){e.tether=null}else{const dmg=e.dmg*0.9*dt;hurtDot(dmg);e.hp=Math.min(e.maxHp,e.hp+dmg*4)}}
+ if(e.tether){const tt=e.tether;tt.t-=dt;const dd=Math.sqrt(d2(e,P));if(tt.t<=0||dd>440||P.inv>0){e.tether=null}else{const dmg=e.dmg*0.9*dt;hurtDot(dmg)}}
  if(e.charging>0){e.charging-=dt;e.x+=e.cvx*dt;e.y+=e.cvy*dt;e.x=clamp(e.x,30,WORLD-30);e.y=clamp(e.y,30,WORLD-30);
   if(d2(e,P)<(e.r+P.r)*(e.r+P.r)&&e.hitCd<=0){e.hitCd=0.6;hurt(e.dmg*(e.stingHit?2.4:1.6))}if(Math.random()<0.5)burst(e.x,e.y+e.r*0.6,'#8a7a6a',2,60);
   if(e.charging<=0){e.stingHit=0;if(e.rampage>0){e.rampage--;later(0.15,()=>{if(!e.dead)BM.charge(e,false,0.45)})}}return true}
