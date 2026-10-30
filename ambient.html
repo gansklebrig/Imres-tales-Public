@@ -761,7 +761,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 
   /* ---------- Audio ---------- */
   let endKnoten = null, aufnahme = null;
-  let ctx = null, spracheLeise = null, gesamt, trocken, hallEin, hall, hallNass, aktiv = null, timer = 0, stumm = null;
+  let ctx = null, gesamt, trocken, hallEin, hall, hallNass, aktiv = null, timer = 0, stumm = null;
   /* entpackte Aufnahmen: höchstens PUFFER_MAX Bytes; was am längsten nicht gebraucht wurde, fliegt raus
      (nie Schichten, die gerade laufen, und nichts, was in den letzten 3 Minuten erklungen ist) */
   const PUFFER_MAX = (mobil ? 150 : 300) * 1048576, pGr = b => b.length * b.numberOfChannels * 4, pZeit = new Map();
@@ -795,7 +795,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     /* letzte Sicherung gegen Übersteuern: unterhalb von 0,7 unverändert, darüber weich bis höchstens 0,98 abgerundet */
     const sc = ctx.createWaveShaper(), kurve = new Float32Array(2049);
     for (let i = 0; i < 2049; i++) { const x = i / 1024 - 1, a = Math.abs(x); kurve[i] = Math.sign(x) * (a < .7 ? a : .7 + .28 * Math.tanh((a - .7) / .28)); }
-    sc.curve = kurve; lim.connect(sc); spracheLeise = ctx.createGain(); sc.connect(spracheLeise); spracheLeise.connect(ctx.destination); endKnoten = sc;
+    sc.curve = kurve; lim.connect(sc); sc.connect(ctx.destination); endKnoten = sc;
     dunkel = ctx.createBiquadFilter(); dunkel.type = "lowpass"; dunkel.frequency.value = 20000; dunkel.Q.value = .4; dunkel.connect(gesamt);
     trocken = ctx.createGain(); trocken.connect(dunkel);
     hallEin = ctx.createGain(); hall = ctx.createConvolver(); hallNass = ctx.createGain(); hallNass.gain.value = .5;
@@ -2058,17 +2058,12 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     GERAEUSCHE.forEach(g => wort(g.name, { text: g.name, tun: () => geraeusch(g.id) }));
     return raus;
   }
-  /* während der Sprachsteuerung zuhört: alles kurz leiser, damit das Mikrofon die eigenen Lautsprecher kaum hört */
-  function spracheDucken(an) {
-    if (!ctx || !spracheLeise) return; const g = spracheLeise.gain, n = ctx.currentTime;
-    g.cancelScheduledValues(n); g.setValueAtTime(g.value, n); g.linearRampToValueAtTime(an ? .18 : 1, n + (an ? .12 : .7));
-  }
   setTimeout(() => {
     let rechner = false; try { rechner = matchMedia("(pointer: fine)").matches && matchMedia("(hover: hover)").matches; } catch (_) {}
     if (!rechner || FERN || hoerer) return;
     const ort = $("sprache-ort"); if (!ort) return;
-    const sk = document.createElement("script"); sk.src = "sprache/sprache.js?v=3";
-    sk.onload = () => window.ImresSprache && window.ImresSprache.einrichten({ ort, befehle: sprachBefehle, ducken: spracheDucken });
+    const sk = document.createElement("script"); sk.src = "sprache/sprache.js?v=4";
+    sk.onload = () => window.ImresSprache && window.ImresSprache.einrichten({ ort, befehle: sprachBefehle });
     document.head.appendChild(sk);
   }, 300);
   function infoZeile() {

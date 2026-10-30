@@ -1734,7 +1734,7 @@
   } catch (_) {}
 
   /* ---------- Klang ---------- */
-  let ctx = null, spracheLeise = null, master = null, rauschen = null, illusionEcho = null;
+  let ctx = null, master = null, rauschen = null, illusionEcho = null;
   const spurGain = {}, hallSend = {};
   let ausgang = null, hallEin = null, hallNass = null, hallNode = null, hallFilter = null;
   const hallCache = {};
@@ -3273,7 +3273,7 @@ const ZUS_ICON = {
       ducken = ctx.createGain(); ducken.gain.value = 1;
       /* „Atem“: das kurze Luftholen vor einem Refrain (alles für einen Augenblick fast still) */
       atem = ctx.createGain(); atem.gain.value = 1;
-      master.connect(atem); atem.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); spracheLeise = ctx.createGain(); limiter.connect(spracheLeise); spracheLeise.connect(ctx.destination); endKnoten = limiter;
+      master.connect(atem); atem.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination); endKnoten = limiter;
       /* Pump-Bus: Teppich, Orchester, Kapelle, Gäste und Sub-Bass ducken sich bei jedem Kick kurz weg */
       pumpBus = ctx.createGain(); pumpBus.gain.value = 1; pumpBus.connect(master);
       /* Kulisse und Zusatzgeräusche: eigener Weg zum Limiter, am Musikregler vorbei – so lassen sich Musik und Hintergrund
@@ -8198,9 +8198,9 @@ const ZUS_ICON = {
   function spracheOrt() {
     if (hoerer || !amRechner()) return;
     const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
-    if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle, ducken: spracheDucken }); } else window.ImresSprache.ort(el); return; }
+    if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
     if (spracheOrt.laedt) return; spracheOrt.laedt = true;
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=3"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=4"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
   }
   /* zusätzliche Stichwörter je Kulisse */
   const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lager", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "nacht", "wald nachts"],
@@ -8208,11 +8208,6 @@ const ZUS_ICON = {
     unterreich: ["unterreich"], kerker: ["kerker", "verlies", "gefängnis"], sumpf: ["sumpf", "moor"], unterwasser: ["unter wasser", "unterwasser", "tauchen"], schmiede: ["schmiede"], labor: ["alchemist", "labor", "alchemie", "zauberer"],
     bibliothek: ["bibliothek", "bücherei"], tempel: ["tempel", "kirche", "kloster"], dorf: ["bauernhof", "hof", "dorf"], markt: ["markt", "marktplatz"], hafen: ["hafen"], gebirge: ["gebirge", "berge", "bergpass", "pass", "schnee"],
     mine: ["mine", "zwergenmine", "bergwerk", "stollen", "zwerge"], strasse: ["unterwegs", "straße", "landstraße", "weg"], burg: ["burg", "burghof", "festung"], ufer: ["fluss", "ufer", "flussufer"], schlacht: ["schlacht", "krieg", "kriegsschauplatz", "schlachtfeld"], schlaegerei: ["schlägerei", "prügelei", "kneipenschlägerei", "rauferei"], duell: ["duell", "zweikampf", "arena"] };
-  /* während der Sprachsteuerung zuhört: alles kurz leiser, damit das Mikrofon die eigenen Lautsprecher kaum hört */
-  function spracheDucken(an) {
-    if (!ctx || !spracheLeise) return; const g = spracheLeise.gain, n = ctx.currentTime;
-    g.cancelScheduledValues(n); g.setValueAtTime(g.value, n); g.linearRampToValueAtTime(an ? .18 : 1, n + (an ? .12 : .7));
-  }
   function sprachBefehle() {
     const T = TX.de, raus = [], add = (p, text, tun) => raus.push({ p, text, tun });
     const ohneSym = x => String(x || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
@@ -9391,7 +9386,8 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 @media (min-width: 1100px) and (hover: hover) {
   .lw-konsole { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr) minmax(0, 1.15fr); }
   .lw-klangseite { display: contents; }
-  #lautenwerk.lw-pultmodus .lw-konsole { width: min(calc(100vw - 48px), 104rem); margin-left: calc(50% - min(calc(50vw - 24px), 52rem)); }
+  /* die ganze Bühnen-Seite wird breiter, das Pult bleibt sauber im Rahmen der Karte */
+  #buehne .wrap:has(#lautenwerk.lw-pultmodus) { max-width: min(112rem, 100%); }
 }
 .lw-box { display: grid; gap: .55rem; padding: .75rem .8rem; border: 1px solid var(--line); background: rgba(235,226,204,.025); min-width: 0; }
 .lw-box h4 { margin: 0; font-family: var(--body); font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ember); }

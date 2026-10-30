@@ -19,10 +19,10 @@
   const EN = (() => { try { return localStorage.getItem("imres-lang") === "en"; } catch (_) { return false; } })();
   const W = (de, en) => EN ? en : de;
   const SPEICHER = "imres-sprache";
-  let E = { an: false, taste: "F9" };
+  let E = { an: false, taste: "F9", gelernt: {} };
   try { E = Object.assign(E, JSON.parse(localStorage.getItem(SPEICHER) || "{}") || {}); } catch (_) {}
   /* nach dem Neuladen immer aus: das Sprachmodell (≈ 50 MB) wird nur geladen, wenn man die Sprachsteuerung selbst einschaltet */
-  E.an = false;
+  E.an = false; if (!E.gelernt || typeof E.gelernt !== "object") E.gelernt = {};
   const merken = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(E)); } catch (_) {} };
 
   /* Tastennamen zum Anzeigen */
@@ -34,6 +34,7 @@
   let modell = null, modellLaedt = null, erkenner = null, grammatik = "", karte = null, wortschatz = null, gesprochen = null;
   let mikro = null; /* { strom, ctx, knoten, vorlauf: [] } */
   let sammel = [];
+  let frei = null, aktiv = null, lernen = null; /* lernen: { text } – Anlernen: freie Erkennung ohne Grammatik */
   let hoert = false, nachlauf = 0, wartet = null, helfer = null, helferOk = false, helferTimer = 0, tasteWaehlen = false, letzte = "", zustand = "";
 
   /* ---------- Anzeige ---------- */
@@ -49,6 +50,10 @@
 .is-hinweis{position:fixed;left:50%;top:1rem;transform:translateX(-50%);z-index:200;background:rgba(20,16,24,.94);color:#f3e7cf;border:1px solid #e0a046;border-radius:1.4rem;
   padding:.55rem 1.1rem;font:500 1rem/1.3 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.45);pointer-events:none;transition:opacity .3s;opacity:0;max-width:90vw;text-align:center}
 .is-hinweis.da{opacity:1}
+.is-lernen{display:grid;gap:.4rem;padding:.5rem .6rem;border:1px dashed rgba(224,160,70,.45);border-radius:10px}
+.is-lernen input{font:inherit;background:rgba(0,0,0,.25);color:inherit;border:1px solid rgba(224,160,70,.45);border-radius:.6rem;padding:.3rem .6rem;min-width:0;width:100%;box-sizing:border-box}
+.is-alias{display:inline-flex;align-items:center;gap:.25rem;border:1px solid rgba(224,160,70,.35);border-radius:1rem;padding:.1rem .2rem .1rem .6rem;font-size:.82rem}
+.is-box .is-alias button{padding:0 .45rem;border:0}
 .is-hinweis.hoert{border-color:#c0392b}
 .is-hinweis.hoert::before{content:"";display:inline-block;width:.65rem;height:.65rem;border-radius:50%;background:#e74c3c;margin-right:.5rem;vertical-align:middle;animation:is-puls 1s ease-in-out infinite}
 @keyframes is-puls{50%{opacity:.25}}`;
@@ -66,14 +71,30 @@
     st.ort.innerHTML = '<div class="is-box">' +
       '<div class="is-zeile"><button type="button" data-is="an" aria-pressed="' + E.an + '">🎙 ' + (E.an ? W("Sprachsteuerung an", "Voice control on") : W("Sprachsteuerung aus", "Voice control off")) + "</button>" +
       (E.an ? '<button type="button" data-is="taste"' + (tasteWaehlen ? ' class="warte"' : "") + ">⌨ " + (tasteWaehlen ? W("Neue Taste drücken … (Esc: abbrechen)", "Press the new key … (Esc: cancel)") : W("Taste: ", "Key: ") + tastenName(E.taste)) + "</button>" +
-        '<button type="button" data-is="liste">' + W("Stichwörter", "Keywords") + "</button>" : "") + "</div>" +
-      '<div class="is-stand">' + (E.an ? (zustand || "") + (letzte ? " · " + letzte : "") : W("Taste gedrückt halten, ein Stichwort sagen, loslassen – erkannt wird offline auf diesem Rechner. Beim ersten Einschalten wird ein Sprachmodell (≈ 46 MB) geladen.",
-        "Hold the key, say a keyword, release – recognition runs offline on this computer. The first time, a speech model (≈ 46 MB) is loaded.")) + "</div>" +
+        '<button type="button" data-is="liste">' + W("Stichwörter", "Keywords") + "</button>" +
+        '<button type="button" data-is="lernen" aria-pressed="' + !!st.lernAuf + '">🎓 ' + W("Anlernen", "Train") + "</button>" : "") + "</div>" +
+      (st.lernAuf && E.an ? lernTeil() : "") +
+      '<div class="is-stand">' + (E.an ? (zustand || "") + (letzte ? " · " + letzte : "") : W("Taste gedrückt halten, ein Stichwort oder einen ganzen Satz sagen („Wir betreten die Taverne, es regnet, dazu Hühner“), loslassen – erkannt wird offline auf diesem Rechner. Beim ersten Einschalten wird ein Sprachmodell (≈ 46 MB) geladen.",
+        "Hold the key, say a keyword or a whole sentence, release – recognition runs offline on this computer. The first time, a speech model (≈ 46 MB) is loaded.")) + "</div>" +
       (E.an ? '<div class="is-stand">' + helferText + ' <a href="' + BASIS + 'helfer.html" target="_blank" rel="noopener">' + W("Windows-Helfer „Imres-Taste“", "Windows helper “Imres-Taste”") + "</a></div>" : "") +
-      (st.listeAuf && E.an ? '<ul class="is-liste">' + befehlsListe().map(([p, t]) => "<li><b>" + p + "</b> – " + t + "</li>").join("") + "</ul>" : "") +
+      (st.listeAuf && E.an ? '<ul class="is-liste">' + befehlsListe().map(([p, t]) => "<li><b>" + esc(p) + "</b> – " + esc(t) + "</li>").join("") + "</ul>" : "") +
       "</div>";
   }
   function stand(t) { zustand = t; zeichnen(); }
+  /* Anlernen: Befehl wählen, dann das Wort ein paar Mal sagen – was das Modell bei dieser Stimme hört, wird als eigenes Stichwort gemerkt */
+  function lernTeil() {
+    const befehle = alleBefehle(), wahl = lernen && lernen.text, gel = wahl ? (E.gelernt[wahl] || []) : [];
+    const alleGelernt = Object.keys(E.gelernt).filter(t => (E.gelernt[t] || []).length);
+    return '<div class="is-lernen"><input type="text" list="is-befehle" data-is-wahl placeholder="' + W("Befehl suchen, z. B. Kulisse Zwergenmine", "Find a command, e.g. Backdrop Dwarf mine") + '" value="' + esc(wahl || "") + '">' +
+      '<datalist id="is-befehle">' + befehle.map(t => '<option value="' + esc(t) + '">').join("") + "</datalist>" +
+      '<div class="is-stand">' + (wahl ? W("Jetzt ", "Now hold ") + tastenName(E.taste) + W(" halten und so sagen, wie du es im Spiel sagst – 2–3 Mal, gern auch leicht verschieden.", " and say it the way you would in play – 2–3 times, slightly differently is fine.") + (lernen.meldung ? "<br>" + lernen.meldung : "")
+        : W("Erst den Befehl wählen, der oft falsch erkannt wird. Danach versteht die Steuerung genau deine Aussprache.", "First pick the command that is often misheard. Afterwards voice control understands your pronunciation.")) + "</div>" +
+      (gel.length ? '<div class="is-zeile">' + gel.map(a => '<span class="is-alias">🎓 ' + esc(a) + ' <button type="button" data-is-weg="' + esc(wahl + "\u0001" + a) + '" title="' + W("vergessen", "forget") + '">✕</button></span>').join("") + "</div>" : "") +
+      (alleGelernt.length ? '<div class="is-stand">' + W("Angelernt: ", "Trained: ") + alleGelernt.map(t => esc(t)).join(" · ") + "</div>" : "") +
+      "</div>";
+  }
+  const esc = x => String(x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function alleBefehle() { const s = new Set(); (st.befehle() || []).forEach(b => s.add(b.text)); return [...s]; }
 
   /* ---------- Befehle → Grammatik ---------- */
   const norm = s => String(s).toLowerCase().replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}️‍]/gu, "").replace(/[^a-zäöüß0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
@@ -100,10 +121,17 @@
     for (const w of k.split(" ")) { const z = zerlegen(w); if (z === null) return null; if (z) teile.push(z); }
     return teile.join(" ") || null;
   }
+  /* Füllwörter: geben dem Erkenner bei ganzen Sätzen einen Platz für alles, was kein Stichwort ist –
+     sonst presst er „wir gehen in die …“ in irgendein Stichwort. Sie lösen selbst nichts aus. */
+  const FUELLER = "und oder aber dann denn doch noch schon jetzt gleich bald hier da dort so also ja nein nicht kein keine okay ok gut genau ich du er sie es wir ihr mich dich uns euch ihn ihm ihnen mein dein sein unser euer der die das den dem des ein eine einen einem einer eines dies diese dieser dieses jener in im an am auf aus bei von vom zu zum zur nach vor hinter über unter neben zwischen durch gegen ohne um bis seit ist sind war waren wird werden wurde hat haben hatte hatten kann können muss müssen soll sollen will wollen darf geht gehen ging kommt kommen kam sieht sehen sah steht stehen stand liegt liegen sitzt sitzen läuft laufen betritt betreten betreten öffnet öffnen schließt schließen hört hören hörte riecht spürt erreicht erreichen macht machen tut tun gibt geben nimmt nehmen findet finden sucht suchen kämpft kämpfen zieht ziehen langsam schnell plötzlich leise laut weit nah ganz sehr etwas viel viele wenig alle alles nichts helden gruppe abenteurer party leute mann frau kind wirt gast weg raum halle tür treppe straße ort stadt land zeit moment augenblick mal bitte danke also äh ähm hm naja eigentlich vielleicht wieder weiter wo wie was wer warum wann welche welcher neu alt groß klein dunkel hell kalt warm dunklen dunkle dunkler dunkles großen große großer großes kleinen kleine kleiner kleines alten alte alter altes neuen neue neuer langen lange langer kurzen kurze hohen hohe tiefen tiefe engen enge breiten breite stillen stille kalten kalte warmen warme nun endlich zusammen allein vorsichtig leise drinnen draußen oben unten hinein heraus herein hinaus hinauf hinunter vorbei sagt sagen fragt fragen antwortet ruft rufen spricht sprechen erzählt erzählen meint denkt glaubt weiß wissen merkt merken bemerkt bemerken beginnt beginnen fängt fangen endet enden passiert passieren bleibt bleiben wartet warten folgt folgen führt führen bringt bringen trägt tragen hält spielt spielen spielt nimm lass lasst mach macht gib geht los komm kommt schau seht nächste nächsten erste ersten letzte letzten andere anderen ihre ihren ihrem seine seinen seinem meine meinen deine unsere eure heute morgen abend nacht tag stunde minute".split(" ");
   function karteBauen() {
     karte = new Map(); gesprochen = new Map();
-    (st.befehle() || []).forEach(b => (b.p || []).forEach(p => { const k = norm(p), g = k && sprechform(k); if (g && !karte.has(g)) { karte.set(g, b); gesprochen.set(g, k); } }));
-    const g = JSON.stringify([...karte.keys()].concat(["[unk]"]));
+    const befehle = st.befehle() || [];
+    /* angelernte Wendungen zuerst – die eigene Aussprache hat Vorrang */
+    befehle.forEach(b => (E.gelernt[b.text] || []).forEach(a => { const g = norm(a); if (g && !karte.has(g)) { karte.set(g, b); gesprochen.set(g, "🎓 " + g); } }));
+    befehle.forEach(b => (b.p || []).forEach(p => { const k = norm(p), g = k && sprechform(k); if (g && !karte.has(g)) { karte.set(g, b); gesprochen.set(g, k); } }));
+    const fueller = wortschatz ? FUELLER.filter(w => wortschatz.has(w) && !karte.has(w)) : [];
+    const g = JSON.stringify([...karte.keys()].concat([...new Set(fueller)], ["[unk]"]));
     if (g !== grammatik) { grammatik = g; if (erkenner) { try { erkenner.remove(); } catch (_) {} erkenner = null; } }
   }
   function befehlsListe() {
@@ -144,13 +172,13 @@
     const m = { strom, ctx, knoten, vorlauf: [] };
     knoten.onaudioprocess = e => {
       const d = e.inputBuffer.getChannelData(0).slice(0);
-      if (hoert || nachlauf > 0) { if (erkenner) erkenner.acceptWaveformFloat(d, ctx.sampleRate); if (!hoert && --nachlauf === 0) abschliessen(); }
+      if (hoert || nachlauf > 0) { if (aktiv) aktiv.acceptWaveformFloat(d, ctx.sampleRate); if (!hoert && --nachlauf === 0) abschliessen(); }
       else { m.vorlauf.push(d); while (m.vorlauf.length > Math.ceil(ctx.sampleRate * .45 / 4096)) m.vorlauf.shift(); }
     };
     quelle.connect(knoten); knoten.connect(still); still.connect(ctx.destination);
     mikro = m; return m;
   }
-  function mikroAus() { if (!mikro) return; try { mikro.strom.getTracks().forEach(t => t.stop()); mikro.ctx.close(); } catch (_) {} mikro = null; }
+  function mikroAus() { if (!mikro) return; [erkenner, frei].forEach(r => { try { r && r.remove(); } catch (_) {} }); erkenner = frei = aktiv = null; try { mikro.strom.getTracks().forEach(t => t.stop()); mikro.ctx.close(); } catch (_) {} mikro = null; }
   function erkennerHolen() {
     if (!karte) karteBauen();
     if (!erkenner && modell && mikro) {
@@ -160,17 +188,24 @@
     }
     return erkenner;
   }
+  function freiHolen() {
+    if (!frei && modell && mikro) {
+      frei = new modell.KaldiRecognizer(mikro.ctx.sampleRate); frei.setWords(true);
+      frei.on("result", m => { if (m && m.result) sammel.push(m.result); if (wartet) { const w = wartet; wartet = null; w(); } });
+    }
+    return frei;
+  }
 
   /* ---------- Drücken / Loslassen ---------- */
   async function druck() {
     if (!E.an || hoert) return;
     try { await modellHolen(); await mikroHolen(); } catch (_) { zeige(W("⚠ Mikrofon oder Sprachmodell nicht verfügbar", "⚠ Microphone or speech model unavailable")); return; }
     if (mikro.ctx.state === "suspended") { try { await mikro.ctx.resume(); } catch (_) {} }
-    karteBauen(); if (!erkennerHolen()) return;
+    karteBauen(); aktiv = lernen ? freiHolen() : erkennerHolen(); if (!aktiv) return;
     hoert = true; nachlauf = 0; sammel = []; ducken(true);
     /* die letzte knappe halbe Sekunde vor dem Drücken mitnehmen – oft beginnt man schon beim Drücken zu sprechen */
-    mikro.vorlauf.forEach(d => erkenner.acceptWaveformFloat(d, mikro.ctx.sampleRate)); mikro.vorlauf = [];
-    zeige(W("Hört zu …", "Listening …"), true);
+    mikro.vorlauf.forEach(d => aktiv.acceptWaveformFloat(d, mikro.ctx.sampleRate)); mikro.vorlauf = [];
+    zeige(lernen ? W("🎓 Hört zu – sag „", "🎓 Listening – say “") + lernen.text.replace(/^\S+ /, "") + W("“ …", "” …") : W("Hört zu …", "Listening …"), true);
   }
   function los() {
     if (!hoert) return;
@@ -179,30 +214,52 @@
     nachlauf = Math.max(1, Math.round(mikro.ctx.sampleRate * .3 / 4096));
   }
   function abschliessen() {
-    if (!erkenner) { ducken(false); return; }
+    const r = aktiv; if (!r) { ducken(false); return; }
     const fertig = () => { clearTimeout(zeit); wartet = null; const alle = sammel; sammel = []; ducken(false);
-      auswerten({ text: alle.map(r => r.text || "").join(" "), result: [].concat(...alle.map(r => r.result || [])) }); };
+      (r === frei ? lernAuswerten : auswerten)({ text: alle.map(r => r.text || "").join(" "), result: [].concat(...alle.map(r => r.result || [])) }); };
     const zeit = setTimeout(fertig, 2000);
     wartet = fertig;
-    try { erkenner.retrieveFinalResult(); } catch (_) {}
+    try { r.retrieveFinalResult(); } catch (_) {}
   }
   function auswerten(r) {
-    const woerter = (r && r.result) || [], text = norm(((r && r.text) || "").replace(/\[unk\]/g, " "));
+    const woerter = ((r && r.result) || []).filter(w => w.word && w.word !== "[unk]"), text = norm(((r && r.text) || "").replace(/\[unk\]/g, " "));
     if (!text) { zeige(W("? Nicht verstanden", "? Not understood")); return; }
-    /* längste bekannte Wendung im Erkannten finden */
-    let treffer = null;
-    [...karte.keys()].sort((a, b) => b.length - a.length).some(p => { if ((" " + text + " ").includes(" " + p + " ")) { treffer = p; return true; } return false; });
-    if (!treffer) { zeige(W("? „", "? “") + text + W("“ – kein Stichwort", "” – not a keyword")); return; }
-    const teile = treffer.split(" "), conf = woerter.filter(w => teile.includes(w.word)).map(w => w.conf), sicher = conf.length ? conf.reduce((a, b) => a + b, 0) / conf.length : 1;
-    /* weitere Stichwort-Wörter neben dem Treffer heißen meist: das Modell hat in Geräusch oder Musik etwas hineingehört – nur bei hoher Sicherheit ausführen */
-    const uebrig = text.split(" ").filter(w => w && !teile.includes(w)).length;
-    const zeigeWort = gesprochen.get(treffer) || treffer;
-    if (sicher < .7 || (uebrig && sicher < .9)) { zeige(W("? Unsicher: „", "? Unsure: “") + zeigeWort + W("“ – bitte nochmal", "” – please repeat")); return; }
-    const b = karte.get(treffer);
-    letzte = "🎙 " + zeigeWort + " → " + b.text;
-    zeige("✓ " + zeigeWort + " → " + b.text);
-    try { b.tun(); } catch (e) { console.warn(e); }
-    zeichnen();
+    /* ganze Sätze: von vorn nach hinten jeweils die längste bekannte Wendung nehmen, Füllwörter überspringen */
+    const maxL = Math.max(1, ...[...karte.keys()].map(k => k.split(" ").length)), funde = [];
+    for (let i = 0; i < woerter.length;) {
+      let L = Math.min(maxL, woerter.length - i);
+      for (; L > 0; L--) { const k = woerter.slice(i, i + L).map(w => w.word).join(" "); if (karte.has(k)) break; }
+      if (!L) { i++; continue; }
+      const teil = woerter.slice(i, i + L), k = teil.map(w => w.word).join(" ");
+      funde.push({ k, b: karte.get(k), sicher: teil.reduce((a, w) => a + (w.conf == null ? 1 : w.conf), 0) / L }); i += L;
+    }
+    if (!funde.length) { zeige(W("? „", "? “") + text + W("“ – kein Stichwort", "” – not a keyword")); return; }
+    /* ein einzelnes Stichwort muss sicherer sein als eines mitten im Satz (dort hilft der Zusammenhang der Füllwörter) */
+    const grenze = funde.length === 1 && woerter.length <= 3 ? .7 : .62;
+    const gut = [], unsicher = [];
+    funde.forEach(f => { if (f.sicher < grenze) unsicher.push(f); else if (!gut.some(g => g.b === f.b)) gut.push(f); });
+    const wort = f => (gesprochen.get(f.k) || f.k);
+    if (!gut.length) { zeige(W("? Unsicher: „", "? Unsure: “") + unsicher.map(wort).join(", ") + W("“ – bitte nochmal", "” – please repeat")); return; }
+    letzte = "🎙 " + gut.map(f => wort(f) + " → " + f.b.text).join(" · ");
+    zeige("✓ " + gut.map(f => wort(f) + " → " + f.b.text).join("  ·  ") + (unsicher.length ? W("   (unsicher, ausgelassen: ", "   (unsure, skipped: ") + unsicher.map(wort).join(", ") + ")" : ""), false, 2600 + 900 * gut.length);
+    /* nacheinander ausführen – manche Befehle bauen die Oberfläche neu */
+    gut.forEach((f, i) => setTimeout(() => { try { f.b.tun(); } catch (e) { console.warn(e); } if (i === gut.length - 1) zeichnen(); }, i * 160));
+  }
+  function lernAuswerten(r) {
+    if (!lernen) return;
+    const text = norm(((r && r.text) || "").replace(/\[unk\]/g, " "));
+    if (!text) { lernen.meldung = W("Nichts verstanden – bitte nochmal, etwas lauter.", "Didn't catch anything – please again, a bit louder."); zeige("? " + lernen.meldung); zeichnen(); return; }
+    if (!karte) karteBauen();
+    const schon = karte.get(text), liste = E.gelernt[lernen.text] || [];
+    if (schon && schon.text === lernen.text) lernen.meldung = W("✓ „", "✓ “") + text + W("“ – wird schon richtig erkannt.", "” – already recognized correctly.");
+    else if (schon) lernen.meldung = W("⚠ Gehört: „", "⚠ Heard: “") + text + W("“ – das ist schon das Stichwort für „", "” – that is already the keyword for “") + schon.text + W("“. Nicht übernommen – etwas anders betonen oder ein anderes Wort wählen.", "”. Not saved – stress it differently or pick another word.");
+    else if (text.split(" ").length > 5) lernen.meldung = W("⚠ Zu lang – bitte nur das Stichwort sagen.", "⚠ Too long – please say just the keyword.");
+    else if (liste.includes(text)) lernen.meldung = W("✓ „", "✓ “") + text + W("“ – schon gelernt.", "” – already learned.");
+    else {
+      E.gelernt[lernen.text] = liste.concat([text]).slice(-6); merken(); karte = null;
+      lernen.meldung = W("🎓 Gelernt: „", "🎓 Learned: “") + text + W("“ bedeutet jetzt „", "” now means “") + lernen.text + "“.";
+    }
+    zeige(lernen.meldung, false, 3500); zeichnen();
   }
 
   /* ---------- Tastatur auf der Seite ---------- */
@@ -250,11 +307,23 @@
       zeichnen();
     } else if (a === "taste") { tasteWaehlen = !tasteWaehlen; zeichnen(); }
     else if (a === "liste") { st.listeAuf = !st.listeAuf; zeichnen(); }
+    else if (a === "lernen") { st.lernAuf = !st.lernAuf; if (!st.lernAuf) lernen = null; zeichnen(); }
   });
 
+  document.addEventListener("click", e => {
+    const k = e.target.closest && e.target.closest("[data-is-weg]"); if (!k) return;
+    const [t, a] = k.dataset.isWeg.split("\u0001"); E.gelernt[t] = (E.gelernt[t] || []).filter(x => x !== a); if (!E.gelernt[t].length) delete E.gelernt[t];
+    merken(); karte = null; if (lernen) lernen.meldung = ""; zeichnen();
+  });
+  /* Befehl fürs Anlernen gewählt (aus der Vorschlagsliste oder getippt) */
+  document.addEventListener("change", e => {
+    const el = e.target; if (!el || !el.matches || !el.matches("[data-is-wahl]")) return;
+    const v = el.value.trim(), t = alleBefehle().find(x => x.toLowerCase() === v.toLowerCase());
+    lernen = t ? { text: t, meldung: "" } : null; zeichnen();
+  });
   window.ImresSprache = {
     einrichten(o) {
-      st = { ort: o.ort, befehle: o.befehle, ducken: o.ducken, listeAuf: false };
+      st = { ort: o.ort, befehle: o.befehle, listeAuf: false };
       karte = null; zeichnen();
       /* hier wird nichts geladen – erst der Knopf „Sprachsteuerung“ holt Bibliothek und Modell */
     },
