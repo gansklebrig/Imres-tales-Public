@@ -189,7 +189,7 @@
       kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %",
       stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente, Welt & Klassik",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabWelt: "🐴 Welt", tabFav: "★ Favoriten", favLeer: "Noch leer: halte einen Knopf aus Effekte, Kampf, Momente, Welt oder Klassik 2 Sekunden gedrückt – dann landet er hier.", weltGr: { alle: "Alle", unterwegs: "🐴 Unterwegs & Volk", tiere: "🐾 Tiere", belagerung: "🏰 Belagerung", handwerk: "🔨 Handwerk", abenteuer: "🗝 Abenteuer", wesen: "👹 Wesen & Spuk", weitere: "Weitere" }, tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
-      musik: "Musik", klang: "Kulisse & Effekte", steuer: "Raum & Leben", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
+      musik: "Musik", klang: "Kulisse & Effekte", steuer: "Raum & Leben", kulTitel: "Kulisse", extrasTitel: "Zusätze & Effekte", keineEigenen: "Noch keine gespeicherten Lieder – im Raster komponieren und speichern.",
       eigene: "Eigene Lieder", gespeichert: n => "📂 Gespeicherte Lieder (" + n + ")", gruppe: "Für die ganze Gruppe", lokal: "Nur auf diesem Gerät",
       stimmSpeichern: "💾 Stimmung speichern", stimmNeu: "⭐ Als neue Stimmung", stimmUeber: n => "✎ „" + n + "“ überschreiben", stimmZurueck: "↺ Original wiederherstellen",
       stimmZurueckOk: "Die ursprüngliche Stimmung ist wiederhergestellt.", stimmNamePlatz: "Name der Stimmung",
@@ -277,7 +277,7 @@
       kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %",
       stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments, world & classics",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabWelt: "🐴 World", tabFav: "★ Favourites", favLeer: "Empty for now: hold any button in Effects, Combat, Moments, World or Classics for 2 seconds and it lands here.", weltGr: { alle: "All", unterwegs: "🐴 Road & folk", tiere: "🐾 Animals", belagerung: "🏰 Siege", handwerk: "🔨 Crafts", abenteuer: "🗝 Adventure", wesen: "👹 Creatures & spooks", weitere: "More" }, tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
-      musik: "Music", klang: "Ambience & effects", steuer: "Space & life", keineEigenen: "No saved songs yet – compose in the grid and save.",
+      musik: "Music", klang: "Ambience & effects", steuer: "Space & life", kulTitel: "Backdrop", extrasTitel: "Extras & effects", keineEigenen: "No saved songs yet – compose in the grid and save.",
       eigene: "Your songs", gespeichert: n => "📂 Saved songs (" + n + ")", gruppe: "For the whole party", lokal: "Only on this device",
       stimmSpeichern: "💾 Save mood", stimmNeu: "⭐ As new mood", stimmUeber: n => "✎ Overwrite “" + n + "”", stimmZurueck: "↺ Restore original",
       stimmZurueckOk: "The original mood has been restored.", stimmNamePlatz: "Mood name",
@@ -8168,15 +8168,16 @@ const ZUS_ICON = {
     let kul = oben("k", KUL_ZEIGEN);
     if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
-    /* Spalte „Raum & Leben“: Sprache, Tür, 3D, Mehr Leben – Spalte „Kulisse & Effekte“: Kulissen oben, darunter Zusätze und Effekte */
-    return '<div class="lw-klangseite"><section class="lw-box lw-steuer"><div class="lw-box-kopf"><h4>🎛 ' + T.steuer + "</h4></div>" +
-      (amRechner() && !hoerer ? '<div class="lw-sprache-ort"></div>' : "") +
-      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + info("raum3d") + "</div>" +
-      lebenBox(T) + kulSpuren(T) + "</section>" +
-      '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.klang + " " + info("klang") + "</h4></div>" +
+    /* drei Spalten am PC: Musik | Kulissen, darunter Raum & Leben | Zusätze und Effekte */
+    const kulBox = '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.kulTitel + " " + info("klang") + "</h4></div>" +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
-      klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) +
+      klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) + "</section>";
+    const steuerBox = '<section class="lw-box lw-steuer"><div class="lw-box-kopf"><h4>🎛 ' + T.steuer + "</h4></div>" +
+      (amRechner() && !hoerer ? '<div class="lw-sprache-ort"></div>' : "") +
+      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + info("raum3d") + "</div>" +
+      lebenBox(T) + kulSpuren(T) + "</section>";
+    const extraBox = '<section class="lw-box lw-extras"><div class="lw-box-kopf"><h4>✚ ' + T.extrasTitel + "</h4></div>" +
       zusBox(T) +
       klappe("fx", klangAuf.fx, T.fxKlappe) +
       (klangAuf.fx ? reiter("fxtab", [["fav", T.tabFav + (favFx().length ? " " + favFx().length : "")], ["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["welt", T.tabWelt], ["klassik", T.tabKlassik]], fxTab, T) +
@@ -8184,7 +8185,8 @@ const ZUS_ICON = {
         unterReiter +
         (fxTab === "fav" && !liste.length ? '<p class="lw-favleer">' + T.favLeer + "</p>" : "") +
         '<div class="lw-pult-gitter lw-pult-fx">' + (fxTab === "fav" ? liste : oben("s", liste)).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
-"</section></div>";
+      "</section>";
+    return '<div class="lw-klangseite"><div class="lw-mitte">' + kulBox + steuerBox + "</div>" + extraBox + "</div>";
   }
   const konsole = (T, voll) => '<div class="lw-konsole">' + musikBox(T, voll) + klangBox(T) + "</div>";
   function boxNeu(welche) {
@@ -9382,9 +9384,10 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-konsole { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; align-items: start; margin: .2rem 0 .9rem; }
 @media (max-width: 760px) { .lw-konsole { grid-template-columns: 1fr; } }
 .lw-klangseite { display: grid; gap: .7rem; align-items: start; min-width: 0; }
-/* großer Bildschirm: drei Spalten – Musik | Raum & Leben | Kulisse & Effekte; das Pult nutzt dafür die volle Fensterbreite */
+.lw-mitte { display: grid; gap: .7rem; align-items: start; min-width: 0; }
+/* großer Bildschirm: drei Spalten – Musik | Kulisse + Raum & Leben | Zusätze & Effekte; das Pult nutzt dafür die volle Fensterbreite */
 @media (min-width: 1100px) and (hover: hover) {
-  .lw-konsole { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr) minmax(0, 1.15fr); }
+  .lw-konsole { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); }
   .lw-klangseite { display: contents; }
   /* die ganze Bühnen-Seite wird breiter, das Pult bleibt sauber im Rahmen der Karte */
   #buehne .wrap:has(#lautenwerk.lw-pultmodus) { max-width: min(112rem, 100%); }
