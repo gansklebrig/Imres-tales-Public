@@ -472,6 +472,8 @@ const SND_FILES2=['horn_46','horn_39','fx_ba_bow','fx_ba_swish_3','fx_cr2_human_
 /* Ausgang für alles (Musik, Geräusche, Klangteppiche): am Handy nimmt ein Bass-Schutz die tiefen Töne weg, bei denen
    kleine Lautsprecher schnarren; danach fängt ein Begrenzer Spitzen ab, damit nichts übersteuert. Wie in den Klangwelten. */
 const MOBIL=(()=>{try{return matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)}catch(e){return false}})();
+/* Am Computer startet das Spiel mit Maus-Zielen (einmalig auch für bestehende Spielstände; danach gilt, was man selbst einstellt) */
+if(!SAVE.aimV){SAVE.aimV=1;if(!MOBIL)SAVE.aim=true}
 let OUTN=null,BASSF=null;const bassOn=()=>SAVE.bass===undefined?MOBIL:!!SAVE.bass;
 function hsOut(){if(OUTN)return OUTN;if(!AC)return null;try{const pre=AC.createGain();pre.gain.value=MOBIL?0.82:0.92;
   BASSF=[AC.createBiquadFilter(),AC.createBiquadFilter()];BASSF.forEach(f=>{f.type='highpass';f.Q.value=0.6;f.frequency.value=bassOn()?150:30});
