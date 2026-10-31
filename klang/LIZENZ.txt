@@ -151,3 +151,75 @@ für Imres Tales zusammengemischt aus: Rufen der Dorfbewohner und Krieger, Schwe
 Hufschlag und Belagerungstreffern aus 0 A.D. (CC BY-SA 3.0), Schmerzens- und Kampfrufen aus Battle for Wesnoth
 (GPL 2+), der vollen Gaststube und dem Markt aus Moodist bzw. 0 A.D., dem Ooh-Chor aus FluidR3 (CC BY 3.0) sowie
 Holz- und Glasbruch und Geschirr von rubberduck/OpenGameArt (CC0). Die Mischungen stehen unter CC BY-SA 3.0.
+
+Weitere echte Tieraufnahmen (2026-10-31, rauscharm, ersetzen u. a. die bisherigen Krähen):
+  e_kraehe_1: Benboncan – CC BY (Freesound) (Original freesound.org/s/96950) – über github.com/karolpiczak/ESC-50
+  e_kraehe_2: Benboncan – CC BY (Freesound) (Original freesound.org/s/96950) – über github.com/karolpiczak/ESC-50
+  e_kraehe_3: Benboncan – CC BY (Freesound) (Original freesound.org/s/96950) – über github.com/karolpiczak/ESC-50
+  e_kraehe_4: Benboncan – CC BY (Freesound) (Original freesound.org/s/96950) – über github.com/karolpiczak/ESC-50
+  e_kraehe_5: Benboncan – CC BY (Freesound) (Original freesound.org/s/96950) – über github.com/karolpiczak/ESC-50
+  e_kraehe_6: pepv – CC0 (Original freesound.org/s/188287) – über github.com/karolpiczak/ESC-50
+  e_kraehe_7: pepv – CC0 (Original freesound.org/s/188287) – über github.com/karolpiczak/ESC-50
+  e_kraehe_8: pepv – CC0 (Original freesound.org/s/188287) – über github.com/karolpiczak/ESC-50
+  e_kraehe_9: nigelcoop – CC0 (Original freesound.org/s/75162) – über github.com/karolpiczak/ESC-50
+  e_kraehe_10: nigelcoop – CC0 (Original freesound.org/s/75162) – über github.com/karolpiczak/ESC-50
+  e_kraehe_11: nigelcoop – CC0 (Original freesound.org/s/75162) – über github.com/karolpiczak/ESC-50
+  e_kraehe_12: Jonathan Shaw (InspectorJ) – CC BY 3.0 (Original freesound.org/s/418262) – über github.com/arianne/stendhal
+  e_kraehe_13: Samuel Strågefors (straget) – CC0 (Original freesound.org/s/404687) – über github.com/arianne/stendhal
+  e_kraehe_14: Samuel Strågefors (straget) – CC0 (Original freesound.org/s/404687) – über github.com/arianne/stendhal
+  e_kraehe_15: dauser – CC0 (Original freesound.org/s/328846) – über github.com/arianne/stendhal
+  e_kraehe_16: dauser – CC0 (Original freesound.org/s/328846) – über github.com/arianne/stendhal
+  e_hund_3: felix.blume – CC0 (Original freesound.org/s/199261) – über github.com/karolpiczak/ESC-50
+  e_hund_4: fabiopx – CC0 (Original freesound.org/s/170015) – über github.com/karolpiczak/ESC-50
+  e_hund_5: pgonsilva – CC BY (Freesound) (Original freesound.org/s/182395) – über github.com/karolpiczak/ESC-50
+  e_hund_6: soundscalpel.com – CC BY (Freesound) (Original freesound.org/s/110389) – über github.com/karolpiczak/ESC-50
+  e_hund_7: unfa – CC BY (Freesound) (Original freesound.org/s/212454) – über github.com/karolpiczak/ESC-50
+  e_hund_8: moffet – CC0 (Original freesound.org/s/72579) – über github.com/arianne/stendhal
+  e_kuh_8: felix.blume – CC0 (Original freesound.org/s/163727) – über github.com/karolpiczak/ESC-50
+  e_kuh_9: Benboncan – CC BY (Freesound) (Original freesound.org/s/69422) – über github.com/karolpiczak/ESC-50
+  e_kuh_10: Benboncan – CC BY (Freesound) (Original freesound.org/s/69422) – über github.com/karolpiczak/ESC-50
+  e_kuh_11: lolamadeus – CC0 (Original freesound.org/s/194899) – über github.com/karolpiczak/ESC-50
+  e_kuh_12: lolamadeus – CC0 (Original freesound.org/s/194899) – über github.com/karolpiczak/ESC-50
+  e_kuh_13: YleArkisto – CC BY (Freesound) (Original freesound.org/s/253085) – über github.com/karolpiczak/ESC-50
+  e_schaf_3: reinsamba – CC BY (Freesound) (Original freesound.org/s/119161) – über github.com/karolpiczak/ESC-50
+  e_schaf_4: reinsamba – CC BY (Freesound) (Original freesound.org/s/119161) – über github.com/karolpiczak/ESC-50
+  e_schaf_5: reinsamba – CC BY (Freesound) (Original freesound.org/s/119161) – über github.com/karolpiczak/ESC-50
+  e_schaf_6: YleArkisto – CC BY (Freesound) (Original freesound.org/s/250864) – über github.com/karolpiczak/ESC-50
+  e_schwein_4: tompallant – CC0 (Original freesound.org/s/257858) – über github.com/karolpiczak/ESC-50
+  e_schwein_5: tompallant – CC0 (Original freesound.org/s/257858) – über github.com/karolpiczak/ESC-50
+  e_schwein_6: YleArkisto – CC BY (Freesound) (Original freesound.org/s/253084) – über github.com/karolpiczak/ESC-50
+  e_schwein_7: YleArkisto – CC BY (Freesound) (Original freesound.org/s/253084) – über github.com/karolpiczak/ESC-50
+  e_schwein_8: YleArkisto – CC BY (Freesound) (Original freesound.org/s/253084) – über github.com/karolpiczak/ESC-50
+  e_schwein_9: Bruno Coudoin (GCompris) – GPL-3.0-only – über github.com/gcompris/GCompris-qt
+  e_huhn_5: pillonoise – CC BY (Freesound) (Original freesound.org/s/164216) – über github.com/karolpiczak/ESC-50
+  e_huhn_6: SquaredGlasses – CC BY (Freesound) (Original freesound.org/s/253649) – über github.com/karolpiczak/ESC-50
+  e_huhn_7: Bruno Coudoin (GCompris) – GPL-3.0-only – über github.com/gcompris/GCompris-qt
+  e_hahn_1: cocoricosound – CC0 (Original freesound.org/s/208021) – über github.com/karolpiczak/ESC-50
+  e_hahn_2: signorvaso – CC0 (Original freesound.org/s/154957) – über github.com/karolpiczak/ESC-50
+  e_hahn_3: soundmary – CC BY (Freesound) (Original freesound.org/s/194930) – über github.com/karolpiczak/ESC-50
+  e_katze_5: peridactyloptrix – CC0 (Original freesound.org/s/214759) – über github.com/karolpiczak/ESC-50
+  e_katze_6: peridactyloptrix – CC0 (Original freesound.org/s/214759) – über github.com/karolpiczak/ESC-50
+  e_katze_7: Oneirophile – CC0 (Original freesound.org/s/120160) – über github.com/karolpiczak/ESC-50
+  e_katze_8: telesik – CC BY (Freesound) (Original freesound.org/s/172639) – über github.com/karolpiczak/ESC-50
+  e_katze_9: aminut – CC0 (Original freesound.org/s/177614) – über github.com/karolpiczak/ESC-50
+  e_katze_10: SelsRoyalNavy – CC0 (Original freesound.org/s/427081) – über github.com/VoxeLibre/VoxeLibre
+  e_frosch_10: daveincamas – CC BY (Freesound) (Original freesound.org/s/71964) – über github.com/karolpiczak/ESC-50
+  e_insekt_5: CGEffex – CC BY (Freesound) (Original freesound.org/s/99955) – über github.com/karolpiczak/ESC-50
+  e_insekt_6: CGEffex – CC BY (Freesound) (Original freesound.org/s/99955) – über github.com/karolpiczak/ESC-50
+  e_vogel_31: Jonathan Shaw (InspectorJ) – CC BY 3.0 (laut Begleitdatei; .toml nennt CC BY 4.0) (Original freesound.org/s/456440) – über github.com/librosa/data
+  e_vogel_32: DaforLynx – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  e_vogel_33: DaforLynx – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  e_vogel_34: DaforLynx – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  e_vogel_35: DaforLynx – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  e_knurren_5: tbsounddesigns – CC BY 3.0 (Original freesound.org/s/416859) – über github.com/VoxeLibre/VoxeLibre
+  e_knurren_6: tbsounddesigns – CC BY 3.0 (Original freesound.org/s/416853) – über github.com/VoxeLibre/VoxeLibre
+  e_knurren_7: tbsounddesigns – CC BY 3.0 (Original freesound.org/s/416855) – über github.com/VoxeLibre/VoxeLibre
+  e_eule_3: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard, Urheber in credits.ron „Unknown“) – über github.com/veloren/veloren
+  e_eule_4: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard, Urheber in credits.ron „Unknown“) – über github.com/veloren/veloren
+  e_ross_7: ERH – CC BY 3.0 (Original freesound.org/s/32043) – über github.com/VoxeLibre/VoxeLibre
+  e_wiehern_1: Bruno Coudoin (GCompris) – GPL-3.0-only – über github.com/gcompris/GCompris-qt
+  e_ente_4: Bruno Coudoin (GCompris) – GPL-3.0-only – über github.com/gcompris/GCompris-qt
+  e_specht_5: Benboncan – CC BY 3.0 (Original freesound.org/s/66955) – über github.com/arianne/stendhal
+  e_schlange_4: Florian Reichelt – CC0 (Original freesound.org/s/423454) – über github.com/arianne/stendhal
+  ESC-50 (K. J. Piczak) ist insgesamt CC BY-NC; verwendet wurden nur Ausschnitte, deren Freesound-Originale CC0 bzw. CC BY sind.
+  Bearbeitet: Ausschnitt, Hochpass, Ein-/Ausblendung, Pegel, MP3.
