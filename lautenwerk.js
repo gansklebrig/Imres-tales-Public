@@ -2541,14 +2541,17 @@ const ZUS_ICON = {
   const zusDumpf = id => ZUSATZ[id].raus && (DRINNEN.includes(S.kulisse) || tuerZu);
   function zusPegelSetzen(tau) {
     if (!ctx) return; const j = ctx.currentTime, f = zusFaktor(), st = standortWert(), still = stilleBis > j ? .04 : 1;
-    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id], rm = typeof zusRaum === "function" ? zusRaum(id) : { g: 1, f: 18000, pan: 0 }; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (tuerZu && ZUSATZ[id].raus ? .55 : 1) * st.g * still * rm.g, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(Math.min(zusDumpf(id) ? 750 : 18000, st.f, rm.f), j, Math.min(.3, tau || .3)); if (z.pan) z.pan.pan.setTargetAtTime(rm.pan, j, tau || .15); });
+    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id], rm = typeof zusRaum === "function" ? zusRaum(id) : { g: 1, f: 18000, pan: 0 }; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (tuerZu && ZUSATZ[id].raus ? .55 : 1) * st.g * still * rm.g, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(Math.min(zusDumpf(id) ? 750 : 18000, st.f, rm.f), j, Math.min(.3, tau || .3)); if (z.pan) { if (z.pan.pan) z.pan.pan.setTargetAtTime(rm.pan, j, tau || .15); else if (z.pan.positionX) { z.pan.positionX.setTargetAtTime(rm.pos[0], j, tau || .15); z.pan.positionY.setTargetAtTime(rm.pos[1], j, tau || .15); z.pan.positionZ.setTargetAtTime(rm.pos[2], j, tau || .15); } else if (z.pan.setPosition) z.pan.setPosition(rm.pos[0], rm.pos[1], rm.pos[2]); } });
   }
   function zusAn(id) {
     if (zusLauf[id] || !ctx) return;
     const filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = zusDumpf(id) ? 750 : 18000;
     if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kulKompRef || kompRef || master); }
     const g = ctx.createGain(); g.gain.value = 0; g.connect(filt);
-    const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; if (pan) { filt.connect(pan); pan.connect(kulBus); } else filt.connect(kulBus);
+    /* 3D: HRTF-Panner (mit Kopfhörern auch vorne/hinten hörbar); die Entfernung regelt zusRaum selbst, daher ohne Abfall */
+    let pan = null;
+    try { pan = ctx.createPanner(); pan.panningModel = "HRTF"; pan.distanceModel = "inverse"; pan.refDistance = 1; pan.rolloffFactor = 0; pan.coneOuterGain = 1; } catch (_) { pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; }
+    if (pan) { filt.connect(pan); pan.connect(kulBus); } else filt.connect(kulBus);
     const z = { zusatz: true, aus: false, art: "z_" + id, g, filt, pan, send: null, knoten: [], naechst: {}, schichten: [], phase: 1 };
     zusLauf[id] = z;
     weltStart(z, ZUSATZ[id]);
@@ -2761,7 +2764,7 @@ const ZUS_ICON = {
       ["🐺", "Rudel kommt näher", "The pack draws near", SZ([0, "!verstummen"], [0, "wolf", ML(1.3, { fern: 1 })], [2, "wolf", ML(1.4, { gegen: 1 })], [4, "knurren", ML(1.5)], [5, "laubschritt", ML(1.3)])],
       ["🦉", "Eule schreckt auf", "An owl takes flight", SZ([0, "eule", ML(1.5)], [.6, "laub", ML(1.3)], [1.5, "eule", ML(1.3, { gegen: 1 })])],
       ["👁", "Augen im Dunkeln", "Eyes in the dark", SZ([0, "!stille", { d: 4 }], [1, "ast", ML(1.4)], [2.5, "atem", ML(1.4, { nah: 1 })], [4.5, "knurren", ML(1.4)])],
-      ["🕯", "Irrlicht", "Will-o'-the-wisp", SZ([0, "glocklein", ML(1.4)], [1.5, "zauber", ML(1.2)], [3, "glocklein", ML(1.2, { gegen: 1 })])]],
+      ["🕯", "Irrlicht", "Will-o'-the-wisp", SZ([0, "glbaum", ML(1.4)], [1.5, "zauber", ML(1.2)], [3, "glbaum", ML(1.2, { gegen: 1 })])]],
     regen: [
       ["⚡", "Blitzeinschlag", "Lightning strike", SZ([0, "!verstummen"], [0, "donner", ML(1.7)], [.6, "holzbruch", ML(1.3)], [2.5, "windstoss", ML(1.3)])],
       ["💨", "Sturmböe", "Gust of wind", SZ([0, "windstoss", ML(1.6)], [1, "tuch", ML(1.3)], [2, "holzpoltern", ML(1.2)])],
@@ -2805,7 +2808,7 @@ const ZUS_ICON = {
     sumpf: [
       ["🐍", "Schlange im Schilf", "Snake in the reeds", SZ([0, "!verstummen"], [0, "schlange", ML(1.6, { nah: 1 })], [2, "platsch", ML(1.3)])],
       ["🫧", "Etwas taucht auf", "Something surfaces", SZ([0, "blubb", ML(1.5)], [1, "blubb", ML(1.4)], [2, "platsch", ML(1.6)], [2.8, "monster", ML(1.3)])],
-      ["👻", "Irrlicht lockt", "A will-o'-wisp lures", SZ([0, "glocklein", ML(1.4)], [1.5, "heulen", ML(1.2, { fern: 1 })], [3, "glocklein", ML(1.3, { gegen: 1 })])],
+      ["👻", "Irrlicht lockt", "A will-o'-wisp lures", SZ([0, "glbaum", ML(1.4)], [1.5, "heulen", ML(1.2, { fern: 1 })], [3, "glbaum", ML(1.3, { gegen: 1 })])],
       ["🐸", "Froschkonzert", "Frog concert", SZ([0, "frosch", ML(1.5)], [.4, "frosch", ML(1.4, { gegen: 1 })], [.8, "frosch", ML(1.4)], [1.2, "frosch", ML(1.4, { gegen: 1 })])]],
     unterwasser: [
       ["🐙", "Ungeheuer der Tiefe", "Monster of the deep", SZ([0, "monster", ML(1.5)], [2, "blubb", ML(1.4)])],
@@ -2819,7 +2822,7 @@ const ZUS_ICON = {
       ["⚔", "Kunde prüft die Klinge", "Testing the blade", SZ([0, "schwertziehen", ML(1.4)], [1, "klingen", ML(1.3)], [3, "muenzen", ML(1.3)])]],
     labor: [
       ["💥", "Trank explodiert", "Potion explodes", SZ([0, "knall", ML(1.6)], [.2, "glasbruch", ML(1.4)], [1, "zischen", ML(1.3)], [2, "husten", ML(1.2)])],
-      ["✨", "Zauber gelingt", "Spell succeeds", SZ([0, "zauber", ML(1.5)], [1.5, "glocklein", ML(1.3)], [3, "lachen", ML(1.1)])],
+      ["✨", "Zauber gelingt", "Spell succeeds", SZ([0, "zauber", ML(1.5)], [1.5, "glbaum", ML(1.3)], [3, "lachen", ML(1.1)])],
       ["🧪", "Kessel kocht über", "Cauldron boils over", SZ([0, "blubb", ML(1.5)], [.5, "blubb", ML(1.5)], [1.2, "zischen", ML(1.4)])],
       ["📚", "Regal stürzt", "Shelf collapses", SZ([0, "holzpoltern", ML(1.5)], [.4, "buch", ML(1.5)], [.8, "glasbruch", ML(1.3)])]],
     bibliothek: [
@@ -2904,7 +2907,7 @@ const ZUS_ICON = {
       ["🐦", "Vogelschwarm fliegt auf", "A flock takes off", SZ([0, "vogel", ML(1.5)], [.2, "vogel", ML(1.4, { gegen: 1 })], [.4, "laub", ML(1.4)], [.8, "vogel", ML(1.3)], [1.2, "!verstummen"])],
       ["🪓", "Holzfäller bei der Arbeit", "Woodcutters at work", SZ([0, "axt", ML(1.4)], [1.8, "axt", ML(1.4)], [3.6, "axt", ML(1.4)], [6, "baumfall", ML(1.5, { fern: 1 })])],
       ["🐺", "Wolf beobachtet euch", "A wolf watches you", SZ([0, "!verstummen"], [0, "ast", ML(1.3)], [1.5, "knurren", ML(1.5)], [4, "laubschritt", ML(1.2, { wandern: 1 })])],
-      ["🍄", "Feenkreis", "A fairy ring", SZ([0, "glocklein", ML(1.4)], [1, "zauber", ML(1.2)], [2, "lachen", ML(1, { fern: 1 })], [3, "glocklein", ML(1.2, { gegen: 1 })])],
+      ["🍄", "Feenkreis", "A fairy ring", SZ([0, "glbaum", ML(1.4)], [1, "zauber", ML(1.2)], [2, "lachen", ML(1, { fern: 1 })], [3, "glbaum", ML(1.2, { gegen: 1 })])],
       ["🕸", "Riesenspinne", "Giant spider", SZ([0, "!stille", { d: 3 }], [.5, "kaefer", ML(1.6, { nah: 1 })], [2.5, "zischen", ML(1.4)], [3.5, "laub", ML(1.3)])],
       ["🐿", "Eichhörnchen schimpft", "A squirrel scolds", SZ([0, "specht", ML(1.3)], [.8, "ast", ML(1.1)], [1.2, "insekt", ML(1.2)], [2, "vogel", ML(1.3)])],
       ["🐻", "Bär am Bach", "Bear by the stream", SZ([0, "!verstummen"], [0, "monster", ML(1.2, { fern: 1 })], [2, "platsch", ML(1.4)], [3.5, "holzbruch", ML(1.2)])],
@@ -2937,7 +2940,7 @@ const ZUS_ICON = {
       ["🐋", "Wal unter dem Kiel", "Whale under the keel", SZ([0, "wal", ML(1.5)], [1.5, "rumpf", ML(1.5)], [2.5, "raunen", ML(1.1)])],
       ["⚓", "Kapitän gibt Befehle", "Captain's orders", SZ([0, "kampfruf", ML(1.3)], [1, "holzschritte", ML(1.3)], [2, "kette", ML(1.3)], [3, "tuch", ML(1.2)])]],
     wasserfall: [
-      ["🌈", "Gischt und Regenbogen", "Spray and rainbow", SZ([0, "glocklein", ML(1.2)], [1, "vogel", ML(1.3)], [2, "platsch", ML(1.2)])],
+      ["🌈", "Gischt und Regenbogen", "Spray and rainbow", SZ([0, "glbaum", ML(1.2)], [1, "vogel", ML(1.3)], [2, "platsch", ML(1.2)])],
       ["🐟", "Lachse springen", "Salmon leap", SZ([0, "platsch", ML(1.4)], [.8, "platsch", ML(1.3, { gegen: 1 })], [1.6, "platsch", ML(1.3)])],
       ["🪵", "Treibholz kracht", "Driftwood crashes", SZ([0, "holzbruch", ML(1.5)], [.5, "platsch", ML(1.5)], [1.5, "holzpoltern", ML(1.2)])],
       ["🕳", "Höhle hinter dem Fall", "Cave behind the falls", SZ([0, "stein", ML(1.3)], [1.5, "fledermaus", ML(1.3)], [3, "atem", ML(1.2, { fern: 1 })])],
@@ -2951,11 +2954,11 @@ const ZUS_ICON = {
       ["🐛", "Krabbeln an den Wänden", "Crawling on the walls", SZ([0, "kaefer", ML(1.5, { nah: 1 })], [1.5, "kaefer", ML(1.4, { gegen: 1 })])],
       ["👣", "Fremde Schritte", "Strange footsteps", SZ([0, "steinschritte", ML(1.4, { fern: 1 })], [2.5, "steinschritte", ML(1.3)], [4, "!stille", { d: 2 }])],
       ["🪨", "Felsbrocken rollt", "A boulder rolls", SZ([0, "grollen", ML(1.4)], [1, "steinschlag", ML(1.5, { wandern: 1 })], [3, "einsturz", ML(1.2)])],
-      ["💎", "Glitzernder Kristall", "Glittering crystal", SZ([0, "edelstein", ML(1.4)], [1, "glocklein", ML(1.2)], [2.5, "klangschale", ML(1.1)])],
+      ["💎", "Glitzernder Kristall", "Glittering crystal", SZ([0, "edelstein", ML(1.3)], [.7, "glbaum", ML(.9)], [1.9, "zauber", ML(.8)], [3.2, "edelstein", ML(1, { gegen: 1 })])],
       ["🐉", "Drachenatem", "Dragon's breath", SZ([0, "!stille", { d: 2 }], [1, "drache", ML(1.5, { fern: 1 })], [3, "grollen", ML(1.3)])],
       ["🕳", "Echo aus der Tiefe", "Echo from the depths", SZ([0, "schrei", ML(1.2, { fern: 1 })], [2, "schrei", ML(.8, { fern: 1, gegen: 1 })], [3.5, "stein", ML(1.2)])]],
     unterreich: [
-      ["🍄", "Leuchtpilze knistern", "Glowing fungi crackle", SZ([0, "glocklein", ML(1.2)], [1, "zischen", ML(1.1)], [2, "insekt", ML(1.2)])],
+      ["🍄", "Leuchtpilze knistern", "Glowing fungi crackle", SZ([0, "glbaum", ML(1.2)], [1, "zischen", ML(1.1)], [2, "insekt", ML(1.2)])],
       ["🛡", "Drow-Patrouille", "Drow patrol", SZ([0, "!stille", { d: 2 }], [1, "kettenhemd", ML(1.3)], [2, "steinschritte", ML(1.3, { wandern: 1 })], [4, "zank", ML(1, { fern: 1 })])],
       ["🐛", "Riesenwurm", "Giant worm", SZ([0, "grollen", ML(1.5)], [1, "einsturz", ML(1.3)], [2, "monster", ML(1.5)], [3, "steinschlag", ML(1.3)])],
       ["⛓", "Sklavenkarawane", "Slave caravan", SZ([0, "kette", ML(1.4)], [1, "stoehnen", ML(1.3)], [2, "hieb", ML(1.2)], [3, "kette", ML(1.2)])],
@@ -2998,14 +3001,14 @@ const ZUS_ICON = {
       ["💰", "Bezahlung", "Payment", SZ([0, "muenzen", ML(1.4)], [1.5, "lachen", ML(1.1)], [2.5, "tuerzu", ML(1.2)])],
       ["🪓", "Axt wird geschliffen", "An axe is sharpened", SZ([0, "schleifen", ML(1.5)], [3, "axt", ML(1.2)])],
       ["🏺", "Löschen im Fass", "Quenching in the barrel", SZ([0, "zischen", ML(1.6)], [.5, "blubb", ML(1.3)])],
-      ["⚔", "Meisterwerk vollendet", "Masterwork finished", SZ([0, "hammer", ML(1.4)], [1.5, "schwertziehen", ML(1.4)], [2.5, "glocklein", ML(1.2)], [3.5, "jubel", ML(1.1)])]],
+      ["⚔", "Meisterwerk vollendet", "Masterwork finished", SZ([0, "hammer", ML(1.4)], [1.5, "schwertziehen", ML(1.4)], [2.5, "metall", ML(1.2)], [3.5, "jubel", ML(1.1)])]],
     labor: [
       ["🐸", "Verwandlung missglückt", "A failed transformation", SZ([0, "zauber", ML(1.4)], [1, "frosch", ML(1.5)], [2, "lachen", ML(1.2)])],
-      ["📜", "Uralte Schriftrolle", "An ancient scroll", SZ([0, "papier", ML(1.4)], [1.5, "zauber", ML(1.2)], [3, "glocklein", ML(1.1)])],
+      ["📜", "Uralte Schriftrolle", "An ancient scroll", SZ([0, "papier", ML(1.4)], [1.5, "zauber", ML(1.2)], [3, "glbaum", ML(1.1)])],
       ["🔥", "Flamme schießt hoch", "A flame shoots up", SZ([0, "zischen", ML(1.6)], [.4, "knall", ML(1.3)], [1, "husten", ML(1.2)])],
       ["🐈", "Katze wirft Phiolen um", "The cat topples vials", SZ([0, "katze", ML(1.2)], [.6, "glasbruch", ML(1.4)], [1.2, "glasbruch", ML(1.2)], [2, "zank", ML(1.2)])],
       ["👹", "Beschwörung", "A summoning", SZ([0, "!stille", { d: 2 }], [1, "zauber", ML(1.5)], [2.5, "monster", ML(1.4)], [3.5, "schrei", ML(1.2)])],
-      ["⚗", "Destille blubbert", "The still bubbles", SZ([0, "blubb", ML(1.4)], [1, "blubb", ML(1.3)], [2, "zischen", ML(1.2)], [3, "glocklein", ML(1.1)])],
+      ["⚗", "Destille blubbert", "The still bubbles", SZ([0, "blubb", ML(1.4)], [1, "blubb", ML(1.3)], [2, "zischen", ML(1.2)], [3, "blubb", ML(1.1)])],
       ["💀", "Schädel spricht", "The skull speaks", SZ([0, "stoehnen", ML(1.3)], [2, "lachen", ML(1.2)], [3.5, "wehklagen", ML(1.1)])],
       ["✨", "Golem erwacht", "A golem awakens", SZ([0, "zauber", ML(1.4)], [1.5, "stampfen", ML(1.5)], [3, "stampfen", ML(1.4)])]],
     bibliothek: [
@@ -3018,7 +3021,7 @@ const ZUS_ICON = {
       ["🦉", "Eule im Gebälk", "An owl in the rafters", SZ([0, "eule", ML(1.3)], [1, "laub", ML(1.1)])],
       ["🕰", "Uhr schlägt Mitternacht", "The clock strikes midnight", SZ([0, "glocke", ML(1.3)], [2, "glocke", ML(1.2)], [4, "glocke", ML(1.2)], [6, "!stille", { d: 2 }])]],
     tempel: [
-      ["🕯", "Kerzen flackern", "Candles flicker", SZ([0, "windstoss", ML(1.3)], [1, "glocklein", ML(1.2)], [2, "chor", ML(1.1)])],
+      ["🕯", "Kerzen flackern", "Candles flicker", SZ([0, "windstoss", ML(1.3)], [1, "glbaum", ML(1.2)], [2, "chor", ML(1.1)])],
       ["🔥", "Weihrauch und Gebet", "Incense and prayer", SZ([0, "klangschale", ML(1.3)], [2, "chor", ML(1.2)])],
       ["⚔", "Tempelwache", "Temple guard", SZ([0, "steinschritte", ML(1.3)], [1.5, "kettenhemd", ML(1.3)], [3, "schwertziehen", ML(1.2)])],
       ["😇", "Göttliche Stimme", "A divine voice", SZ([0, "!stille", { d: 3 }], [.5, "glbaum", ML(1.4)], [2, "chor", ML(1.5)])],
@@ -3491,13 +3494,16 @@ const ZUS_ICON = {
       const x = 8 + (h % 84), y = LUFT.includes(id) ? 18 + (h >> 7) % 16 : 40 + (h >> 7) % 18;
       o.zus[id] = [x, y];
     }
+    if (o.zus[id].length < 3) { let h = 7; for (const c of id) h = (h * 17 + c.charCodeAt(0)) >>> 0; o.zus[id][2] = 20 + h % 60; }
     return o.zus[id];
   }
   function figurOrt() {
-    const o = kOrt();
-    if (o.fig) return o.fig;
-    const z = kartePlatz(); return [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5];
+    const o = kOrt(), fz = typeof o.figz === "number" ? o.figz : 55;
+    if (o.fig) return [o.fig[0], o.fig[1], fz];
+    const z = kartePlatz(); return [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5, fz];
   }
+  /* Ansicht: von der Seite (links/rechts, oben/unten) oder von oben (links/rechts, vorne/hinten) */
+  let karteSicht = (() => { try { return localStorage.getItem("imres-lw-karte-sicht") === "oben" ? "oben" : "seite"; } catch (_) { return "seite"; } })();
   function zoneBei(x, y) {
     const zonen = KARTE[kartenArt()], d = a => Math.hypot(x - (a.r[0] + a.r[2] / 2), (y - (a.r[1] + a.r[3] / 2)) * .6);
     return zonen.find(a => x >= a.r[0] && x <= a.r[0] + a.r[2] && y - 2 >= a.r[1] && y - 2 <= a.r[1] + a.r[3]) || zonen.slice().sort((a, b) => d(a) - d(b))[0];
@@ -3508,9 +3514,12 @@ const ZUS_ICON = {
   }
   /* Raumklang je Zusatz: Abstand (in Kartenbreiten, Höhe gestaucht) → Pegel und Höhen; seitlich → Stereo */
   function zusRaum(id) {
-    if (UEBERALL.includes(id) || !KUL_WELT[S.kulisse]) return { g: 1, f: 18000, pan: 0 };
-    const [fx, fy] = figurOrt(), [x, y] = zusOrt(id), dx = x - fx, dy = (y - fy) * .44, d = Math.hypot(dx, dy);
-    return { g: Math.min(1.55, 1.5 / (1 + Math.pow(d / 24, 1.35))), f: Math.max(1800, 18000 * Math.pow(10, -Math.max(0, d - 12) / 105)), pan: Math.max(-.85, Math.min(.85, dx / 42)) };
+    if (UEBERALL.includes(id) || !KUL_WELT[S.kulisse]) return { g: 1, f: 18000, pan: 0, pos: [0, 0, -1] };
+    const [fx, fy, fz] = figurOrt(), [x, y, z] = zusOrt(id), dx = x - fx, dy = (y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
+    /* 3D-Lage für den Raumklang: rechts = +x, oben = +y, vorne = −z (dorthin blickt der Hörer) */
+    const n = Math.max(1, Math.hypot(dx, dy, dz));
+    return { g: Math.min(1.55, 1.5 / (1 + Math.pow(d / 24, 1.35))), f: Math.max(1800, 18000 * Math.pow(10, -Math.max(0, d - 12) / 105)), pan: Math.max(-.85, Math.min(.85, dx / 42)),
+      pos: [dx / n, -dy / n, (dz / n) || -.01] };
   }
 
   /* ---------- Bildbausteine (viewBox 160 × 70, Boden bei y = 45) ---------- */
@@ -3594,6 +3603,7 @@ const ZUS_ICON = {
       R(121.6, 18, 38.4, 27, hw) + P("M118 18.5 L140.8 6 L163 18.5 Z", hd) + R(140, 24, 9, 7, "#e0b060", .45) + R(121.6, 47, 38.4, 23, "#1d1712") + s.vorne +
       '<g class="k-tuerg">' + R(118.4, tuerY, tuerZu ? 3.2 : 1, tuerH, tuerZu ? "#b07440" : "#8a5a32") + (tuerZu ? "" : R(110, tuerY, 8.4, tuerH, "#f0c070", .1)) + "</g>";
   }
+    szeneBild.szene = () => KARTE_SZENE[S.kulisse];
     return szeneBild;
   })();
   /* Icon-Leiste neben der Karte: das Wichtigste aus „Mehr Leben“ mit einem Tipp */
@@ -3605,11 +3615,11 @@ const ZUS_ICON = {
     const zus = id => ZUSATZ[id] ? k("data-kzus", id, { sturm: "🌪", schnee: "❄", wind: "🍃" }[id], ZUSATZ[id][en ? "en" : "de"], zusIst(id)) : "";
     const sp = leben.spannung, spStufe = sp < .1 ? 0 : sp < .4 ? 1 : sp < .7 ? 2 : 3;
     const zeile = (sym, titel, inhalt) => '<div class="lw-klz"><span title="' + esc(titel) + '">' + sym + "</span>" + inhalt + "</div>";
-    return '<div class="lw-kleiste">' +
+    return '<div class="lw-kleiste' + (karteGross ? " gross" : "") + '">' +
       zeile("🌦", L.wetter, ["☀", "🌦", "🌧", "⛈"].map((sy, x) => k("data-wetter", x, sy, L.wetterN[x], !leben.schauer && leben.wetter === x)).join("") + k("data-wetter", "schauer", "🌫", L.schauer, leben.schauer) + zus("wind") + zus("sturm") + zus("schnee")) +
-      (drin ? "" : zeile("🕰", L.zeit, k("data-zeit", "auto", "🅰", L.zeitN.auto, leben.zeit === "auto") + k("data-zeit", "tag", "🌞", ohne(L.zeitN.tag), leben.zeit === "tag") + k("data-zeit", "daemmerung", "🌇", ohne(L.zeitN.daemmerung), leben.zeit === "daemmerung") + k("data-zeit", "nacht", "🌙", ohne(L.zeitN.nacht), leben.zeit === "nacht") + k("data-aktion", "zeitlauf", "⏳", L.zeitLauf, leben.zeitLauf))) +
-      zeile("👁", L.spannung, [[0, "😌"], [.3, "🙂"], [.6, "😟"], [.95, "😨"]].map(([v, sy], i) => k("data-lspann", v, sy, L.spannStufe(Math.round(v * 100)), spStufe === i)).join("")) +
-      zeile("✨", L.titel || "Leben", k("data-aktion", "gehen", "🚶", L.gehen, leben.gehen) + k("data-aktion", "stille", "🤫", L.stille, ctx && stilleBis > ctx.currentTime) + (feuer ? k("data-aktion", "nachlegen", "🪵", L.nachlegen, false) : "") + k("data-aktion", "szenen", "🎭", L.szenen, leben.szenen) + k("data-aktion", "nah", "👂", L.nah, leben.nah)) +
+      (!karteGross || drin ? "" : zeile("🕰", L.zeit, k("data-zeit", "auto", "🅰", L.zeitN.auto, leben.zeit === "auto") + k("data-zeit", "tag", "🌞", ohne(L.zeitN.tag), leben.zeit === "tag") + k("data-zeit", "daemmerung", "🌇", ohne(L.zeitN.daemmerung), leben.zeit === "daemmerung") + k("data-zeit", "nacht", "🌙", ohne(L.zeitN.nacht), leben.zeit === "nacht") + k("data-aktion", "zeitlauf", "⏳", L.zeitLauf, leben.zeitLauf))) +
+      (!karteGross ? "" : zeile("👁", L.spannung, [[0, "😌"], [.3, "🙂"], [.6, "😟"], [.95, "😨"]].map(([v, sy], i) => k("data-lspann", v, sy, L.spannStufe(Math.round(v * 100)), spStufe === i)).join("")) +
+      zeile("✨", L.titel || "Leben", k("data-aktion", "gehen", "🚶", L.gehen, leben.gehen) + k("data-aktion", "stille", "🤫", L.stille, ctx && stilleBis > ctx.currentTime) + (feuer ? k("data-aktion", "nachlegen", "🪵", L.nachlegen, false) : "") + k("data-aktion", "szenen", "🎭", L.szenen, leben.szenen) + k("data-aktion", "nah", "👂", L.nah, leben.nah))) +
       "</div>";
   }
   /* Wetter und Tageszeit im Bild: Nacht dunkelt den Himmel, Regen fällt draußen, Gewitter blitzt */
@@ -3626,27 +3636,38 @@ const ZUS_ICON = {
     if (leben.spannung > .55) h += '<rect x="0" y="0" width="160" height="70" fill="#300a14" opacity="' + (.12 + (leben.spannung - .55) * .4).toFixed(2) + '"/>';
     return h;
   }
+  /* Draufsicht: Boden, Ringe um die Figur, vorne oben / hinten unten */
+  function obenBild(fx, fz) {
+    const sz = szeneBild.szene() || {}, boden = sz.boden || (kartenArt() === "drin" ? "#3a2a1e" : "#2a3a22");
+    const cx = fx * 1.6, cy = fz * .7;
+    let h = '<rect x="0" y="0" width="160" height="70" fill="' + boden + '"/><rect x="0" y="0" width="160" height="70" fill="#000" opacity=".25"/>';
+    [10, 22, 36].forEach((r, i) => { h += '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + r * 1.15 + '" ry="' + r * .78 + '" fill="none" stroke="#e0a046" stroke-width=".35" opacity="' + (.45 - i * .12) + '" stroke-dasharray="1.2 1.4"/>'; });
+    h += '<path d="M' + cx + ' ' + (cy - 3) + ' L' + (cx - 30) + ' 0 L' + (cx + 30) + ' 0 Z" fill="#e0a046" opacity=".07"/>';
+    h += '<text x="80" y="5" text-anchor="middle" font-size="3.4" fill="#e8dcc0" opacity=".7">' + (sprache() === "en" ? "▲ in front" : "▲ vorne") + '</text><text x="80" y="68.5" text-anchor="middle" font-size="3.4" fill="#e8dcc0" opacity=".7">' + (sprache() === "en" ? "▼ behind" : "▼ hinten") + "</text>";
+    return h;
+  }
   function karteHTML(T) {
     if (!KUL_WELT[S.kulisse]) return "";
-    const art = kartenArt(), zonen = KARTE[art], en = sprache() === "en", [fx, fy] = figurOrt(), hier = zoneBei(fx, fy);
+    const art = kartenArt(), zonen = KARTE[art], en = sprache() === "en", [fx, fy, fz] = figurOrt(), hier = zoneBei(fx, fy), oben = karteSicht === "oben";
     const zus = Object.keys(zusWahl).filter(id => ZUSATZ[id]);
     const wetter = zus.filter(id => UEBERALL.includes(id)), frei = zus.filter(id => !UEBERALL.includes(id));
     const tx = art === "drin" ? 17 : 74, ty = art === "drin" ? 30 : 33, th = art === "drin" ? 34 : 31;
-    return '<div class="lw-karte' + (karteGross ? " gross" : "") + '" data-karte="' + art + '" data-kkul="' + S.kulisse + '" data-zus="' + zus.slice().sort().join() + '">' +
-      '<svg class="lw-kbild" viewBox="0 0 160 70" preserveAspectRatio="none" aria-hidden="true">' + szeneBild(art) + karteStimmung(art) + "</svg>" +
+    return '<div class="lw-karte' + (karteGross ? " gross" : "") + (oben ? " oben" : "") + '" data-karte="' + art + '" data-kkul="' + S.kulisse + '" data-zus="' + zus.slice().sort().join() + '">' +
+      '<svg class="lw-kbild" viewBox="0 0 160 70" preserveAspectRatio="none" aria-hidden="true">' + (oben ? obenBild(fx, fz) : szeneBild(art) + karteStimmung(art)) + "</svg>" +
       (wetter.length ? '<div class="lw-ksym">' + wetter.map(id => '<span title="' + esc(ZUSATZ[id][en ? "en" : "de"]) + '">' + zusSvg(id) + "</span>").join("") + "</div>" : "") +
-      zonen.map(z => '<button type="button" class="lw-kzone' + (z === hier ? " hier" : "") + '" data-kzone="' + z.id + '" title="' + esc(zonenName(z, en)) + '" style="left:' + z.r[0] + "%;top:" + z.r[1] + "%;width:" + z.r[2] + "%;height:" + z.r[3] + '%"><span>' + esc(zonenName(z, en)) + "</span></button>").join("") +
-      '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tx - 2.5) + "%;top:" + ty + "%;height:" + th + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>' +
-      frei.map(id => { const [x, y] = zusOrt(id); return '<div class="lw-kquelle" data-zq="' + id + '" style="left:' + x + "%;top:" + y + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
-      '<div class="lw-kfigur" style="left:' + fx + "%;top:" + fy + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
+      (oben ? "" : zonen.map(z => '<button type="button" class="lw-kzone' + (z === hier ? " hier" : "") + '" data-kzone="' + z.id + '" title="' + esc(zonenName(z, en)) + '" style="left:' + z.r[0] + "%;top:" + z.r[1] + "%;width:" + z.r[2] + "%;height:" + z.r[3] + '%"><span>' + esc(zonenName(z, en)) + "</span></button>").join("")) +
+      (oben ? "" : '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tx - 2.5) + "%;top:" + ty + "%;height:" + th + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>') +
+      frei.map(id => { const [x, y, z] = zusOrt(id); return '<div class="lw-kquelle" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
+      '<div class="lw-kfigur" style="left:' + fx + "%;top:" + (oben ? fz : fy) + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
+      '<button type="button" class="lw-ksicht" data-ksicht="1" title="' + esc(oben ? T.karteSeite : T.karteOben) + '" aria-label="' + esc(oben ? T.karteSeite : T.karteOben) + '">' + (oben ? "👁" : "🧭") + "</button>" +
       '<div class="lw-kmuell" title="' + esc(T.karteMuell) + '" aria-hidden="true">🗑</div>' +
       '<button type="button" class="lw-kgross" data-kgross="1" title="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '" aria-label="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '">' + (karteGross ? "⤡" : "⤢") + "</button>" +
       "</div>";
   }
   Object.assign(TX.de, { karteFigur: "Das bist du – zieh dich irgendwohin. Der Bereich unter dir bestimmt, wie der Ort klingt (drinnen, vor der Tür, im Keller …).", karteTipp: "Zieh die Figur oder tippe einen Bereich an. Geräusche lassen sich ebenfalls ziehen: näher = lauter, seitlich = von der Seite. Die Tür lässt sich antippen.",
-    karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer – in den Mülleimer gezogen ist es aus", karteMuell: "Geräusch hierher ziehen, um es auszuschalten", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern" });
+    karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer – in den Mülleimer gezogen ist es aus", karteMuell: "Geräusch hierher ziehen, um es auszuschalten", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern", karteOben: "Von oben ansehen – Geräusche nach vorne oder hinten ziehen", karteSeite: "Von der Seite ansehen – oben/unten, Tür und Räume" });
   Object.assign(TX.en, { karteFigur: "That's you – drag yourself anywhere. The area under you decides how the place sounds (inside, at the door, in the cellar …).", karteTipp: "Drag the figure or tap an area. Sounds can be dragged too: closer = louder, to the side = from that side. Tap the door to open or close it.",
-    karteQuelle: "drag: closer to you = louder, further away = quieter and duller – drop it in the bin to switch it off", karteMuell: "Drag a sound here to switch it off", karteGrossT: "Enlarge map", karteKlein: "Shrink map" });
+    karteQuelle: "drag: closer to you = louder, further away = quieter and duller – drop it in the bin to switch it off", karteMuell: "Drag a sound here to switch it off", karteGrossT: "Enlarge map", karteKlein: "Shrink map", karteOben: "View from above – drag sounds in front of or behind you", karteSeite: "View from the side – up/down, door and rooms" });
   function karteWirken(z) {
     if (z.id !== leben.platz || z.st !== leben.standort) {
       leben.platz = z.id; leben.standort = z.st;
@@ -3660,7 +3681,10 @@ const ZUS_ICON = {
     audioStart(); kOrt().fig = [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5]; karteSpeichern();
     karteWirken(z); karteNeu(); try { boxNeu("klang"); } catch (_) {}
   }
-  function karteNeu() { const T = t(); root.querySelectorAll(".lw-karte").forEach(k => { const n = document.createElement("div"); n.innerHTML = karteHTML(T); if (n.firstChild) k.replaceWith(n.firstChild); else k.remove(); }); }
+  function karteNeu() { const T = t();
+    root.querySelectorAll(".lw-kblock").forEach(b => b.classList.toggle("gross", karteGross));
+    root.querySelectorAll(".lw-kleiste").forEach(k => { const n = document.createElement("div"); n.innerHTML = karteLeiste(T); if (n.firstChild) k.replaceWith(n.firstChild); });
+    root.querySelectorAll(".lw-karte").forEach(k => { const n = document.createElement("div"); n.innerHTML = karteHTML(T); if (n.firstChild) k.replaceWith(n.firstChild); else k.remove(); }); }
   function karteTuer() {
     tuerUmschalten();
     /* draußen: wer die Hüttentür schließt, ist drinnen */
@@ -3677,7 +3701,16 @@ const ZUS_ICON = {
   });
   root.addEventListener("pointermove", e => {
     if (!kZug || e.pointerId !== kZug.id) return;
-    const { r, f } = kZug, x = Math.max(2, Math.min(98, (e.clientX - r.left) / r.width * 100)), y = Math.max(kZug.zq ? 8 : 16, Math.min(kZug.zq ? 94 : 99, (e.clientY - r.top) / r.height * 100 + (kZug.zq ? 0 : 12)));
+    const oben = karteSicht === "oben", { r, f } = kZug, x = Math.max(2, Math.min(98, (e.clientX - r.left) / r.width * 100));
+    if (oben) {
+      const z = Math.max(8, Math.min(92, (e.clientY - r.top) / r.height * 100));
+      f.style.left = x + "%"; f.style.top = z + "%"; kZug.bewegt = true;
+      if (kZug.zq) { const o = zusOrt(kZug.zq); o[0] = x; o[2] = z; } else { const o = kOrt(), alt = figurOrt(); o.fig = [x, alt[1]]; o.figz = z; kZug.x = x; kZug.y = alt[1]; }
+      if (kZug.zq) { const m = kZug.k.querySelector(".lw-kmuell"); if (m) { const mr = m.getBoundingClientRect(); kZug.muell = e.clientX >= mr.left - 8 && e.clientX <= mr.right + 8 && e.clientY >= mr.top - 8 && e.clientY <= mr.bottom + 8; m.classList.toggle("ziel", kZug.muell); kZug.f.classList.toggle("weg", kZug.muell); } }
+      const j = performance.now(); if (j - kZugT > 60) { kZugT = j; try { zusPegelSetzen(.08); } catch (_) {} }
+      return;
+    }
+    const y = Math.max(kZug.zq ? 8 : 16, Math.min(kZug.zq ? 94 : 99, (e.clientY - r.top) / r.height * 100 + (kZug.zq ? 0 : 12)));
     f.style.left = x + "%"; f.style.top = y + "%"; kZug.bewegt = true; kZug.x = x; kZug.y = y;
     if (kZug.zq) zusOrt(kZug.zq).splice(0, 2, x, y); else kOrt().fig = [x, y];
     if (!kZug.zq) { const z = zoneBei(x, y); kZug.k.querySelectorAll(".lw-kzone").forEach(b => b.classList.toggle("ziel", b.dataset.kzone === z.id)); }
@@ -9083,7 +9116,7 @@ const ZUS_ICON = {
      Alltagssprache, Beispielsätze, Abend-Sets, eine Mitmach-Einführung und der „Was ist das?“-Knopf (der auch im vollen Pult gilt). */
   let einfach = true;
   try { einfach = localStorage.getItem("imres-lw-modus") !== "alles"; } catch (_) {}
-  let eTab = "musik", eMehr = { st: false, kul: false, fx: false }, wasIst = false, abendSet = "";
+  let eTab = "musik", eMehr = { st: false, kul: false, fx: false, spuren: false }, wasIst = false, abendSet = "";
   try { eTab = localStorage.getItem("imres-lw-etab") || "musik"; abendSet = localStorage.getItem("imres-lw-abendset") || ""; } catch (_) {}
   /* wie oft etwas angetippt wurde – Häufiges rückt nach vorn */
   let nutzung = {};
@@ -9199,6 +9232,15 @@ const ZUS_ICON = {
   /* Hintergrund aus/an direkt neben seinem Regler */
   function hgKnopf(T) { const an = kulisseLaeuft(); return '<button type="button" class="lw-ehgaus' + (an ? "" : " aus") + '" data-aktion="kulumschalt" data-hgaus="1" aria-pressed="' + !an + '"' + (kulisseDa() ? "" : " hidden") + ">" + (an ? T.einf.hgAusK : T.einf.hgAnK) + "</button>"; }
   Object.assign(TX.de.einf, { hgAusK: "🔇 Aus", hgAnK: "🔊 An" }); Object.assign(TX.en.einf, { hgAusK: "🔇 Off", hgAnK: "🔊 On" });
+  /* einfache Ansicht, aufgeklappt: jedes aktive Zusatz-Geräusch mit eigenem Regler */
+  function zusSpurRegler(T) {
+    const an = Object.keys(zusWahl).filter(id => ZUSATZ[id]); if (!an.length) return "";
+    const en = sprache() === "en";
+    return "<h5>" + T.einf.spurenZus + "</h5>" + an.map(id => { const v = Math.round(zusWert(id) * 100), n = esc(ZUSATZ[id][en ? "en" : "de"]);
+      return '<label class="lw-spurzeile"><span>' + zusSvg(id) + " " + n + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + n + '"><b>' + v + " %</b></label>"; }).join("");
+  }
+  Object.assign(TX.de.einf, { spurenEinzeln: "Einzelne Spuren: Ort und Geräusche getrennt regeln", spurenOrt: "Schichten des Ortes", spurenZus: "Zusatz-Geräusche" });
+  Object.assign(TX.en.einf, { spurenEinzeln: "Single tracks: adjust place and sounds separately", spurenOrt: "Layers of the place", spurenZus: "Extra sounds" });
   let abendAuf = false;
   function abendWahl(T) {
     if (!abendAuf) return "";
@@ -9230,7 +9272,9 @@ const ZUS_ICON = {
     return '<p class="lw-zweck">' + E.zweckOrt + "</p>" +
       '<div class="lw-eortkopf"><div class="lw-eortlinks"><span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
       (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") + "</div>" +
-      karteLeiste(T) + karteHTML(T) + "</div>" +
+      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + karteLeiste(T) + karteHTML(T) + "</div></div>" +
+      (KUL_WELT[S.kulisse] || Object.keys(zusWahl).length ? '<button type="button" class="lw-klappe lw-espurklappe" data-emehr="spuren" aria-expanded="' + eMehr.spuren + '">🎚 ' + E.spurenEinzeln + " <span>" + (eMehr.spuren ? "▴" : "▾") + "</span></button>" +
+        (eMehr.spuren ? '<div class="lw-espuren">' + (KUL_WELT[S.kulisse] ? "<h5>" + E.spurenOrt + "</h5>" + spurenInhalt(T) : "") + zusSpurRegler(T) + "</div>" : "") : "") +
       '<div class="lw-egitter lw-ekul">' + kern.map(tile).join("") + (eMehr.kul ? rest.map(tile).join("") : "") + "</div>" +
       '<button type="button" class="lw-klappe" data-emehr="kul" aria-expanded="' + eMehr.kul + '">' + (eMehr.kul ? E.weniger : E.mehrKul(alle.length)) + " <span>" + (eMehr.kul ? "▴" : "▾") + "</span></button>" +
       (KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "") +
@@ -9335,6 +9379,7 @@ const ZUS_ICON = {
     if (el.classList && el.classList.contains("lw-kfigur")) return T.karteFigur;
     if (d.zq) return (ZUSATZ[d.zq] ? ZUSATZ[d.zq][sprache() === "en" ? "en" : "de"] + ": " : "") + T.karteQuelle;
     if (d.kgross) return karteGross ? T.karteKlein : T.karteGrossT;
+    if (d.ksicht) return karteSicht === "oben" ? T.karteSeite : T.karteOben;
     if (d.momblatt != null) return W.momblatt;
     if (d.hgaus) return W.hgAus;
     if (d.moment != null) { const m = momenteVon(S.kulisse)[+d.moment]; return W.moment(m ? (sprache() === "en" ? m[2] : m[1]) : ""); }
@@ -10154,6 +10199,7 @@ const ZUS_ICON = {
     const kz = e.target.closest("[data-kzone]");
     if (kz) { karteGehen(kz.dataset.kzone); return; }
     if (e.target.closest("[data-ktuer]")) { karteTuer(); return; }
+    if (e.target.closest("[data-ksicht]")) { karteSicht = karteSicht === "oben" ? "seite" : "oben"; try { localStorage.setItem("imres-lw-karte-sicht", karteSicht); } catch (_) {} karteNeu(); return; }
     if (e.target.closest("[data-kgross]")) { karteGross = !karteGross; try { localStorage.setItem("imres-lw-karte-gross", karteGross ? "1" : "0"); } catch (_) {} karteNeu(); return; }
     const mb = e.target.closest("[data-momblatt]");
     if (mb) { momBlaettern(+mb.dataset.momblatt); return; }
@@ -11136,7 +11182,12 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kbild .k-blitz { opacity: 0; animation: lwKBlitz 5s infinite; }
 @keyframes lwKBlitz { 0%, 86%, 92%, 100% { opacity: 0; } 88%, 90% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .lw-kbild .k-regen, .lw-kbild .k-schnee, .lw-kbild .k-blitz { animation: none; } }
-.lw-kleiste { display: grid; gap: .2rem; flex: 0 0 auto; align-self: center; }
+.lw-kblock { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; margin-left: auto; flex: 0 1 auto; max-width: 100%; }
+.lw-kblock.gross { flex-basis: 100%; align-items: center; }
+.lw-kblock .lw-karte { margin-left: 0; }
+.lw-kleiste { display: grid; gap: .2rem; flex: 0 0 auto; }
+.lw-kleiste:not(.gross) .lw-klz > span { display: none; }
+.lw-kleiste:not(.gross) .lw-kl { width: 1.6rem; height: 1.6rem; font-size: .85rem; }
 .lw-klz { display: flex; align-items: center; gap: .15rem; flex-wrap: wrap; }
 .lw-klz > span { width: 1.3rem; text-align: center; font-size: .8rem; opacity: .6; cursor: help; }
 .lw-kl { width: 1.85rem; height: 1.85rem; padding: 0; border: 1px solid rgba(224,160,70,.28); background: rgba(224,160,70,.05); border-radius: 7px; font-size: .95rem; line-height: 1; cursor: pointer; color: var(--vellum); }
@@ -11146,6 +11197,16 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-karte.gross .lw-kmuell { width: 2rem; height: 2rem; font-size: 1.1rem; }
 .lw-kmuell.ziel { opacity: 1; transform: scale(1.35); background: rgba(160,50,40,.6); border-color: #e07060; }
 .lw-kquelle.weg { opacity: .45; border-color: #e07060; }
+.lw-ksicht { position: absolute; right: 1.75rem; bottom: .2rem; z-index: 5; width: 1.35rem; height: 1.35rem; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); font-size: .78rem; line-height: 1; cursor: pointer; }
+.lw-karte.gross .lw-ksicht { right: 2.1rem; }
+.lw-ksicht:hover { border-color: var(--ember); }
+.lw-karte.oben .lw-kfigur { transform: translate(-50%, -50%); }
+.lw-karte.oben .lw-kfigur.zieht { transform: translate(-50%, -50%) scale(1.2); }
+.lw-espurklappe { margin-top: .3rem; }
+.lw-espuren { border: 1px solid var(--line); border-radius: 10px; padding: .5rem .7rem; margin: .3rem 0 .5rem; background: rgba(255,255,255,.02); }
+.lw-espuren h5 { margin: .3rem 0 .2rem; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ember); font-weight: 600; }
+.lw-espuren .lw-spurzeile span { display: inline-flex; align-items: center; gap: .3rem; }
+.lw-espuren .lw-zico { width: 15px; height: 15px; }
 .lw-kgross { position: absolute; right: .2rem; bottom: .2rem; z-index: 5; width: 1.35rem; height: 1.35rem; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); color: var(--vellum); font-size: .85rem; line-height: 1; cursor: pointer; }
 .lw-kgross:hover { border-color: var(--ember); color: var(--ember); }
 @media (max-width: 520px) { .lw-karte { width: min(210px, 100%); } .lw-kzone span { font-size: .56rem; } }
