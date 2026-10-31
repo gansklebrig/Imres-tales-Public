@@ -2642,7 +2642,7 @@ const ZUS_ICON = {
   /* ---------- Lebendige Kulisse ----------
      Kleine Szenen, Antworten (ein Wolf antwortet dem anderen), feste Orte, Tageszeit, Wetter, Standort, Weiterziehen,
      Nah am Ohr, Spannung, „Etwas passiert“, Stille, Raumhall und tiefe Grundierung – alles über den Kulissen der Klangwelten. */
-  const LEBEN_GRUND = { spannung: 0, wetter: 0, schauer: false, zeit: "auto", zeitLauf: false, standort: "mitten", gehen: false };
+  const LEBEN_GRUND = { spannung: 0, wetter: 0, schauer: false, zeit: "auto", zeitLauf: false, standort: "mitten", platz: "", gehen: false };
   let leben = Object.assign({}, LEBEN_GRUND, { szenen: true, nah: true });
   try { const m = JSON.parse(localStorage.getItem("imres-lw-leben") || "{}") || {}; if (typeof m.szenen === "boolean") leben.szenen = m.szenen; if (typeof m.nah === "boolean") leben.nah = m.nah; } catch (_) {}
   const lebenMerken = () => { try { localStorage.setItem("imres-lw-leben", JSON.stringify({ szenen: leben.szenen, nah: leben.nah })); } catch (_) {} };
@@ -3420,6 +3420,90 @@ const ZUS_ICON = {
     if (kul && KUL_WELT[kul.art]) { if (kul.drohn) drohnSetzen(kul); lebenAnwenden(kul, 2, true); }
     try { aussenAnwenden(0, 1.2); } catch (_) {}
   }
+  /* ---------- Umgebungskarte: kleine Szene, in der eine Figur steht – ziehen oder antippen setzt den Standort ---------- */
+  Object.assign(STANDORT, { nebenraum: { f: 1500, g: .62, raum: .45 } });
+  /* Bereiche in Prozent der Kartenfläche: [x, y, b, h], Standort, Tür (true: beim Hingehen öffnen) */
+  const KARTE = {
+    drin: [
+      { id: "draussen", r: [0, 6, 17, 58], st: "nebenan", auf: true, de: "Vor der Tür", en: "Outside" },
+      { id: "mitte", r: [19, 6, 37, 58], st: "mitten", de: "Mittendrin", en: "In the middle" },
+      { id: "fenster", r: [56, 6, 17, 58], st: "rand", de: "Am Fenster", en: "By the window" },
+      { id: "nebenraum", r: [75, 6, 25, 58], st: "nebenraum", de: "Nebenraum", en: "Next room" },
+      { id: "keller", r: [19, 68, 81, 32], st: "darunter", de: "Im Keller", en: "Cellar" }],
+    draussen: [
+      { id: "waldrand", r: [0, 6, 20, 58], st: "rand", auf: true, de: "Am Rand", en: "At the edge" },
+      { id: "mitte", r: [20, 6, 38, 58], st: "mitten", auf: true, de: "Mittendrin", en: "In the middle" },
+      { id: "vortuer", r: [58, 6, 16, 58], st: "rand", auf: true, de: "Vor der Hütte", en: "By the hut" },
+      { id: "huette", r: [76, 22, 24, 42], st: "nebenan", de: "In der Hütte", en: "In the hut" },
+      { id: "keller", r: [76, 68, 24, 32], st: "darunter", de: "Im Keller", en: "Cellar" }]
+  };
+  const kartenArt = () => kulDraussen(S.kulisse) ? "draussen" : "drin";
+  function kartePlatz() {
+    const z = KARTE[kartenArt()];
+    return z.find(x => x.id === leben.platz && x.st === leben.standort) || z.find(x => x.st === leben.standort) || z.find(x => x.id === "mitte");
+  }
+  function karteHTML(T) {
+    if (!KUL_WELT[S.kulisse]) return "";
+    const art = kartenArt(), zonen = KARTE[art], hier = kartePlatz(), en = sprache() === "en";
+    const tuerX = art === "drin" ? 17 : 74, tuerY = art === "drin" ? 30 : 34, tuerH = art === "drin" ? 34 : 30;
+    const bild = art === "drin"
+      ? '<rect x="0" y="0" width="100" height="64" class="k-himmel"/><rect x="0" y="64" width="17" height="36" class="k-boden"/>' +
+        '<rect x="17" y="2" width="83" height="62" class="k-raum"/><rect x="74" y="2" width="1.6" height="62" class="k-wand"/><rect x="74" y="8" width="1.6" height="26" class="k-durchgang"/>' +
+        '<rect x="17" y="64" width="83" height="36" class="k-keller"/><rect x="17" y="64" width="83" height="2" class="k-wand"/><rect x="30" y="64" width="8" height="2" class="k-luke"/>' +
+        '<rect x="62" y="14" width="9" height="14" rx="1" class="k-fenster"/><line x1="66.5" y1="14" x2="66.5" y2="28" class="k-sprosse"/>'
+      : '<rect x="0" y="0" width="100" height="64" class="k-himmel"/><rect x="0" y="64" width="100" height="36" class="k-boden"/>' +
+        '<path d="M3 64 L9 30 L15 64 Z M10 64 L16 22 L22 64 Z" class="k-baum"/><rect x="74" y="26" width="26" height="38" class="k-raum"/><path d="M72 27 L87 12 L102 27 Z" class="k-dach"/>' +
+        '<rect x="76" y="64" width="24" height="36" class="k-keller"/><rect x="88" y="34" width="7" height="9" rx="1" class="k-fenster"/>';
+    const tuer = '<rect x="' + tuerX + '" y="' + tuerY + '" width="' + (tuerZu ? 2.2 : .8) + '" height="' + tuerH + '" class="k-tuer' + (tuerZu ? " zu" : "") + '"/>' + (tuerZu ? "" : '<rect x="' + (tuerX - 5.5) + '" y="' + tuerY + '" width="5.5" height="' + tuerH + '" class="k-tuerauf"/>');
+    const zus = Object.keys(zusWahl).filter(id => ZUSATZ[id]).slice(0, 8);
+    const symbole = zus.length ? '<div class="lw-ksym">' + zus.map(id => '<span title="' + esc(ZUSATZ[id][en ? "en" : "de"]) + '">' + zusSvg(id) + "</span>").join("") + "</div>" : "";
+    const fx = hier.r[0] + hier.r[2] / 2, fy = hier.r[1] + hier.r[3] - 1.5;
+    return '<div class="lw-karte" data-karte="' + art + '">' +
+      '<svg class="lw-kbild" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + bild + tuer + "</svg>" + symbole +
+      zonen.map(z => '<button type="button" class="lw-kzone' + (z === hier ? " hier" : "") + '" data-kzone="' + z.id + '" style="left:' + z.r[0] + "%;top:" + z.r[1] + "%;width:" + z.r[2] + "%;height:" + z.r[3] + '%"><span>' + esc(en ? z.en : z.de) + "</span></button>").join("") +
+      '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tuerX - 2.5) + "%;top:" + tuerY + "%;height:" + tuerH + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>' +
+      '<div class="lw-kfigur" style="left:' + fx + "%;top:" + fy + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
+      "</div>";
+  }
+  Object.assign(TX.de, { karteFigur: "Das bist du – ziehen oder einen Bereich antippen. Wo du stehst, verändert, wie die Welt klingt.", karteTipp: "Tippe einen Bereich an oder zieh die Figur. Die Tür lässt sich antippen." });
+  Object.assign(TX.en, { karteFigur: "That's you – drag it or tap an area. Where you stand changes how the world sounds.", karteTipp: "Tap an area or drag the figure. Tap the door to open or close it." });
+  function karteGehen(id) {
+    const z = KARTE[kartenArt()].find(x => x.id === id); if (!z) return;
+    audioStart(); leben.platz = z.id; leben.standort = z.st;
+    if (z.auf && tuerZu) tuerUmschalten();
+    lebenGeaendert(); karteNeu(); try { boxNeu("klang"); } catch (_) {}
+  }
+  function karteNeu() { const T = t(); root.querySelectorAll(".lw-karte").forEach(k => { const n = document.createElement("div"); n.innerHTML = karteHTML(T); if (n.firstChild) k.replaceWith(n.firstChild); }); }
+  function karteTuer() {
+    tuerUmschalten();
+    /* draußen: wer die Hüttentür schließt, ist drinnen */
+    if (tuerZu && kartenArt() === "draussen" && !["huette", "keller"].includes(kartePlatz().id)) { leben.platz = "huette"; leben.standort = "nebenan"; lebenGeaendert(); }
+    karteNeu();
+  }
+  /* Figur ziehen: folgt dem Finger, beim Loslassen rastet sie im Bereich darunter ein */
+  let kZug = null;
+  root.addEventListener("pointerdown", e => {
+    const f = e.target.closest && e.target.closest(".lw-kfigur"); if (!f) return;
+    e.preventDefault(); const k = f.closest(".lw-karte"); kZug = { f, k, r: k.getBoundingClientRect(), id: e.pointerId, bewegt: false };
+    try { f.setPointerCapture(e.pointerId); } catch (_) {}
+    f.classList.add("zieht");
+  });
+  root.addEventListener("pointermove", e => {
+    if (!kZug || e.pointerId !== kZug.id) return;
+    const { r, f } = kZug, x = Math.max(2, Math.min(98, (e.clientX - r.left) / r.width * 100)), y = Math.max(16, Math.min(99, (e.clientY - r.top) / r.height * 100 + 12));
+    f.style.left = x + "%"; f.style.top = y + "%"; kZug.bewegt = true; kZug.x = x; kZug.y = y;
+    kZug.k.querySelectorAll(".lw-kzone").forEach(z => { const a = KARTE[kartenArt()].find(q => q.id === z.dataset.kzone); z.classList.toggle("ziel", !!a && x >= a.r[0] && x <= a.r[0] + a.r[2] && y >= a.r[1] && y <= a.r[1] + a.r[3] + 4); });
+  });
+  const kLos = e => {
+    if (!kZug || e.pointerId !== kZug.id) return;
+    const z = kZug; kZug = null; z.f.classList.remove("zieht");
+    if (!z.bewegt) return;
+    const zonen = KARTE[kartenArt()], d = a => Math.hypot(z.x - (a.r[0] + a.r[2] / 2), (z.y - (a.r[1] + a.r[3] / 2)) * .6);
+    const drin = zonen.find(a => z.x >= a.r[0] && z.x <= a.r[0] + a.r[2] && z.y >= a.r[1] && z.y <= a.r[1] + a.r[3] + 4) || zonen.slice().sort((a, b) => d(a) - d(b))[0];
+    karteGehen(drin.id);
+  };
+  root.addEventListener("pointerup", kLos); root.addEventListener("pointercancel", kLos);
+  setInterval(() => { if (!S || kZug) return; const k = root.querySelector(".lw-karte"); if (!k) return; const art = KUL_WELT[S.kulisse] ? kartenArt() : ""; if (k.dataset.karte !== art || !!k.querySelector(".k-tuer.zu") !== tuerZu || k.querySelectorAll(".lw-ksym span").length !== Math.min(8, Object.keys(zusWahl).filter(id => ZUSATZ[id]).length)) karteNeu(); }, 1000);
   function nachlegen() {
     audioStart(); if (!kul) return;
     kul.glut = 1; lebenEreignis(kul, "holzpoltern", .4, {}); setTimeout(() => lebenEreignis(kul, "ast", .35, {}), 700); lebenAnwenden(kul, 2, true);
@@ -8946,6 +9030,7 @@ const ZUS_ICON = {
     return '<p class="lw-zweck">' + E.zweckOrt + "</p>" +
       '<div class="lw-ekopf-reihe"><span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
       (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") + "</div>" +
+      karteHTML(T) +
       '<div class="lw-egitter lw-ekul">' + kern.map(tile).join("") + (eMehr.kul ? rest.map(tile).join("") : "") + "</div>" +
       '<button type="button" class="lw-klappe" data-emehr="kul" aria-expanded="' + eMehr.kul + '">' + (eMehr.kul ? E.weniger : E.mehrKul(alle.length)) + " <span>" + (eMehr.kul ? "▴" : "▾") + "</span></button>" +
       (KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "") +
@@ -9045,6 +9130,9 @@ const ZUS_ICON = {
   function erklaerung(el) {
     const T = t(), W = T.wi, d = el.dataset || {};
     if (d.vorlage != null) { const k = d.vorlage; return W.vorlage(ohneZeichen(T.vorlagen[k] || stimmName(k) || k), (T.stBsp || {})[k]); }
+    if (d.kzone) { const z = KARTE[kartenArt()].find(x => x.id === d.kzone); return (z ? (sprache() === "en" ? z.en : z.de) + ": " : "") + T.karteTipp; }
+    if (d.ktuer) return tuerZu ? T.tuerAuf : T.tuerZu;
+    if (el.classList && el.classList.contains("lw-kfigur")) return T.karteFigur;
     if (d.momblatt != null) return W.momblatt;
     if (d.hgaus) return W.hgAus;
     if (d.moment != null) { const m = momenteVon(S.kulisse)[+d.moment]; return W.moment(m ? (sprache() === "en" ? m[2] : m[1]) : ""); }
@@ -9858,6 +9946,9 @@ const ZUS_ICON = {
     if (e.target.closest('[data-aktion="aufnahme"]')) { aufnahmeUmschalten(); return; }
     if (e.target.closest('[data-aktion="schlaf"]')) { schlafUmschalten(); return; }
     if (e.target.closest('[data-aktion="tuer"]')) { tuerUmschalten(); return; }
+    const kz = e.target.closest("[data-kzone]");
+    if (kz) { karteGehen(kz.dataset.kzone); return; }
+    if (e.target.closest("[data-ktuer]")) { karteTuer(); return; }
     const mb = e.target.closest("[data-momblatt]");
     if (mb) { momBlaettern(+mb.dataset.momblatt); return; }
     const mo = e.target.closest("[data-moment]");
@@ -9877,7 +9968,7 @@ const ZUS_ICON = {
     const lz = e.target.closest("[data-zeit]");
     if (lz) { audioStart(); leben.zeit = lz.dataset.zeit; if (kul && ctx) kul.zeitAb = ctx.currentTime; lebenGeaendert(); boxNeu("klang"); return; }
     const lst = e.target.closest("[data-standort]");
-    if (lst) { audioStart(); leben.standort = lst.dataset.standort; lebenGeaendert(); boxNeu("klang"); return; }
+    if (lst) { audioStart(); leben.standort = lst.dataset.standort; leben.platz = ""; lebenGeaendert(); boxNeu("klang"); return; }
     if (e.target.closest('[data-aktion="ausklang"]')) { if (laeuft && !ausklingt && !ausklangAb) { ausklangAb = -1; wechsel = null; wechselAb = 0; knoepfe(); status(t().ausklingt); } return; }
     if (e.target.closest('[data-aktion="kapelle"]')) { S.kapelle = S.kapelle === 0 ? 1 : 0; merken(); if (ctx) kapelleVorladen(); gaesteNeu(); return; }
     if (e.target.closest('[data-aktion="kapneu"]')) { if (S.stimmung) { S.kapWahl = kapelleWaehlen(S.stimmung); merken(); if (ctx) kapelleVorladen(); gaesteNeu(); } return; }
@@ -10093,7 +10184,7 @@ const ZUS_ICON = {
       '<button type="button" class="lw-schalter" data-aktion="passiert">' + L.passiert + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="' + !!(ctx && stilleBis > ctx.currentTime) + '">' + L.stille + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="gehen" aria-pressed="' + leben.gehen + '">' + L.gehen + "</button>" +
-      (feuer ? '<button type="button" class="lw-schalter" data-aktion="nachlegen">' + L.nachlegen + "</button>" : "") + info("leben") + "</div>" + momenteZeile(T, S.kulisse);
+      (feuer ? '<button type="button" class="lw-schalter" data-aktion="nachlegen">' + L.nachlegen + "</button>" : "") + info("leben") + "</div>" + momenteZeile(T, S.kulisse) + (einfach ? "" : karteHTML(T));
     h += '<button type="button" class="lw-klappe lw-spurklappe" data-klangauf="leben" aria-expanded="' + auf + '">✨ ' + L.mehr + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     if (!auf) return h;
     const sp = Math.round(leben.spannung * 100), orte = drin ? L.ortDrin : L.ortDraussen;
@@ -10802,6 +10893,26 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ehgaus:hover { background: rgba(106,159,181,.3); }
 .lw-ehgaus.aus { border-color: var(--ember); background: rgba(224,160,70,.18); }
 .lw-ehgaus[hidden] { display: none; }
+.lw-karte { position: relative; width: 100%; max-width: 560px; aspect-ratio: 16 / 7; margin: .5rem auto .6rem; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #15111b; touch-action: none; user-select: none; }
+.lw-kbild { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lw-kbild .k-himmel { fill: #1c2233; } .lw-kbild .k-boden { fill: #23301f; } .lw-kbild .k-raum { fill: #3a2a1e; } .lw-kbild .k-keller { fill: #1d1712; }
+.lw-kbild .k-wand { fill: #5a4330; } .lw-kbild .k-durchgang { fill: #2c2017; } .lw-kbild .k-luke { fill: #6b5038; } .lw-kbild .k-baum { fill: #1f3a24; } .lw-kbild .k-dach { fill: #5b3524; }
+.lw-kbild .k-fenster { fill: #6b8fb0; opacity: .55; } .lw-kbild .k-sprosse { stroke: #3a2a1e; stroke-width: .6; }
+.lw-kbild .k-tuer { fill: #8a5a32; } .lw-kbild .k-tuer.zu { fill: #b07440; } .lw-kbild .k-tuerauf { fill: #f0c070; opacity: .1; }
+.lw-kzone { position: absolute; border: 1px dashed transparent; background: transparent; border-radius: 8px; cursor: pointer; padding: 0; display: flex; align-items: flex-start; justify-content: center; color: var(--vellum); font: inherit; }
+.lw-kzone span { font-size: .66rem; line-height: 1.15; margin-top: .2rem; padding: .05rem .3rem; border-radius: 6px; background: rgba(10,8,14,.55); color: var(--ash); white-space: nowrap; pointer-events: none; }
+.lw-kzone:hover, .lw-kzone.ziel { border-color: rgba(224,160,70,.55); background: rgba(224,160,70,.08); }
+.lw-kzone.hier span { color: var(--ember); background: rgba(10,8,14,.75); }
+.lw-ktuer { position: absolute; width: 5%; border: 0; background: transparent; cursor: pointer; padding: 0; z-index: 2; }
+.lw-ktuer:hover { background: rgba(224,160,70,.18); border-radius: 3px; }
+.lw-kfigur { position: absolute; width: 22px; height: 33px; transform: translate(-50%, -100%); cursor: grab; z-index: 3; transition: left .35s ease, top .35s ease; touch-action: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+.lw-kfigur svg { width: 100%; height: 100%; fill: var(--ember); }
+.lw-kfigur.zieht { transition: none; cursor: grabbing; transform: translate(-50%, -100%) scale(1.15); }
+.lw-ksym { position: absolute; top: .3rem; right: .4rem; display: flex; gap: .2rem; z-index: 1; pointer-events: auto; }
+.lw-ksym span { display: inline-flex; color: #cfe0f0; opacity: .85; }
+.lw-ksym .lw-zico { width: 16px; height: 16px; }
+.lw-karte[data-karte="drin"] .lw-ksym { left: .4rem; right: auto; flex-direction: column; }
+@media (max-width: 520px) { .lw-kzone span { font-size: .58rem; padding: .02rem .2rem; } .lw-kfigur { width: 18px; height: 27px; } }
 .lw-schweb.lw-schweb-name { font-size: .95rem; font-weight: 600; padding: .3rem .65rem; white-space: nowrap; max-width: none; }
 .lw-moment { display: grid; justify-items: center; gap: .1rem; border: 1px solid rgba(224,160,70,.35); background: rgba(224,160,70,.06); color: var(--vellum); font: inherit; border-radius: 10px; padding: .35rem .25rem .3rem; cursor: pointer; min-width: 0; }
 .lw-moment .ms { font-size: 1.35rem; line-height: 1.1; }
