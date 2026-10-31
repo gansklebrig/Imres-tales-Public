@@ -2541,7 +2541,7 @@ const ZUS_ICON = {
   const zusDumpf = id => ZUSATZ[id].raus && (DRINNEN.includes(S.kulisse) || tuerZu);
   function zusPegelSetzen(tau) {
     if (!ctx) return; const j = ctx.currentTime, f = zusFaktor(), st = standortWert(), still = stilleBis > j ? .04 : 1;
-    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id], rm = typeof zusRaum === "function" ? zusRaum(id) : { g: 1, f: 18000, pan: 0 }; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (tuerZu && ZUSATZ[id].raus ? .55 : 1) * st.g * still * rm.g, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(Math.min(zusDumpf(id) ? 750 : 18000, st.f, rm.f), j, Math.min(.3, tau || .3)); if (z.pan) { if (z.pan.pan) z.pan.pan.setTargetAtTime(rm.pan, j, tau || .15); else if (z.pan.positionX) { z.pan.positionX.setTargetAtTime(rm.pos[0], j, tau || .15); z.pan.positionY.setTargetAtTime(rm.pos[1], j, tau || .15); z.pan.positionZ.setTargetAtTime(rm.pos[2], j, tau || .15); } else if (z.pan.setPosition) z.pan.setPosition(rm.pos[0], rm.pos[1], rm.pos[2]); } });
+    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id], rm = typeof zusRaum === "function" ? zusRaum(id) : { g: 1, f: 18000, pan: 0 }; const alt = !rm.raum; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (alt && tuerZu && ZUSATZ[id].raus ? .55 : 1) * (alt ? st.g : 1) * still * rm.g, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(alt ? Math.min(zusDumpf(id) ? 750 : 18000, st.f, rm.f) : rm.f, j, Math.min(.3, tau || .3)); if (z.pan) { if (z.pan.pan) z.pan.pan.setTargetAtTime(rm.pan, j, tau || .15); else if (z.pan.positionX) { z.pan.positionX.setTargetAtTime(rm.pos[0], j, tau || .15); z.pan.positionY.setTargetAtTime(rm.pos[1], j, tau || .15); z.pan.positionZ.setTargetAtTime(rm.pos[2], j, tau || .15); } else if (z.pan.setPosition) z.pan.setPosition(rm.pos[0], rm.pos[1], rm.pos[2]); } });
   }
   function zusAn(id) {
     if (zusLauf[id] || !ctx) return;
@@ -3698,7 +3698,8 @@ const ZUS_ICON = {
     if (!o.zus[id]) {
       /* fester, aber für jedes Geräusch anderer Startplatz */
       let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-      const x = 8 + (h % 84), y = LUFT.includes(id) ? 18 + (h >> 7) % 16 : 40 + (h >> 7) % 18;
+      const raus = kartenArt() === "drin" && ZUSATZ[id] && ZUSATZ[id].raus;
+      const x = raus ? 3 + (h % 12) : kartenArt() === "drin" ? 22 + (h % 48) : 8 + (h % 62), y = LUFT.includes(id) ? 18 + (h >> 7) % 16 : 40 + (h >> 7) % 18;
       o.zus[id] = [x, y];
     }
     if (o.zus[id].length < 3) { let h = 7; for (const c of id) h = (h * 17 + c.charCodeAt(0)) >>> 0; o.zus[id][2] = 20 + h % 60; }
@@ -3719,14 +3720,37 @@ const ZUS_ICON = {
     const z = KARTE[kartenArt()];
     return z.find(x => x.id === leben.platz && x.st === leben.standort) || z.find(x => x.st === leben.standort) || z.find(x => x.id === "mitte");
   }
+  /* Räume der Karte: welcher Bereich zu welchem Raum gehört, und was zwischen zwei Räumen liegt (Tür, Wand, Decke) */
+  const RAUM_VON = { drin: { draussen: "aussen", mitte: "haupt", fenster: "haupt", nebenraum: "neben", keller: "keller" }, draussen: { waldrand: "aussen", mitte: "aussen", vortuer: "aussen", huette: "haupt", keller: "keller" } };
+  function raumGrenze(a, b) {
+    const k = [a, b].sort().join("|");
+    if (k === "aussen|haupt") return tuerZu ? { f: 600, g: .38 } : { f: 3200, g: .72 };   /* Haustür */
+    if (k === "haupt|neben") return { f: 1700, g: .6 };                                   /* Wand mit Durchgang */
+    if (k === "haupt|keller") return { f: 480, g: .42 };                                  /* Boden/Decke */
+    if (k === "keller|neben") return { f: 380, g: .34 };
+    return null;
+  }
+  /* bester Weg durch die Räume: Pegel multipliziert sich, die Höhen nimmt die dumpfeste Grenze (und jede weitere noch etwas) */
+  function raumWeg(a, b) {
+    if (a === b) return { f: 20000, g: 1 };
+    const R = ["aussen", "haupt", "neben", "keller"]; let best = null;
+    const gehe = (r, besucht, g, f, n) => { if (r === b) { const ff = f * Math.pow(.8, Math.max(0, n - 1)); if (!best || g > best.g) best = { f: ff, g }; return; }
+      R.forEach(x => { if (besucht.includes(x)) return; const w = raumGrenze(r, x); if (w) gehe(x, besucht.concat([x]), g * w.g, Math.min(f, w.f), n + 1); }); };
+    gehe(a, [a], 1, 20000, 0);
+    return best || { f: 500, g: .3 };
+  }
+  const raumBei = (x, y) => RAUM_VON[kartenArt()][zoneBei(x, y).id] || "aussen";
   /* Raumklang je Zusatz: Abstand (in Kartenbreiten, Höhe gestaucht) → Pegel und Höhen; seitlich → Stereo */
   function zusRaum(id) {
-    if (UEBERALL.includes(id) || !KUL_WELT[S.kulisse]) return { g: 1, f: 18000, pan: 0, pos: [0, 0, -1] };
-    const [fx, fy, fz] = figurOrt(), [x, y, z] = zusOrt(id), dx = x - fx, dy = (y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
+    if (!KUL_WELT[S.kulisse]) return { g: 1, f: 18000, pan: 0, pos: [0, 0, -1] };
+    const [fx, fy, fz] = figurOrt(), hier = raumBei(fx, fy);
+    /* Wetter ist immer draußen: nur der Weg durch die Räume zählt */
+    if (UEBERALL.includes(id)) { const w = raumWeg(hier, "aussen"); return { g: w.g, f: w.f, pan: 0, pos: [0, .3, -1], raum: true }; }
+    const [x, y, z] = zusOrt(id), w = raumWeg(hier, raumBei(x, y)), dx = x - fx, dy = (y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
     /* 3D-Lage für den Raumklang: rechts = +x, oben = +y, vorne = −z (dorthin blickt der Hörer) */
     const n = Math.max(1, Math.hypot(dx, dy, dz));
-    return { g: Math.min(1.55, 1.5 / (1 + Math.pow(d / 24, 1.35))), f: Math.max(1800, 18000 * Math.pow(10, -Math.max(0, d - 12) / 105)), pan: Math.max(-.85, Math.min(.85, dx / 42)),
-      pos: [dx / n, -dy / n, (dz / n) || -.01] };
+    return { g: Math.min(1.55, 1.5 / (1 + Math.pow(d / 24, 1.35))) * w.g, f: Math.min(w.f, Math.max(1800, 18000 * Math.pow(10, -Math.max(0, d - 12) / 105))), pan: Math.max(-.85, Math.min(.85, dx / 42)),
+      pos: [dx / n, -dy / n, (dz / n) || -.01], raum: true };
   }
 
   /* ---------- Bildbausteine (viewBox 160 × 70, Boden bei y = 45) ---------- */
@@ -3864,7 +3888,7 @@ const ZUS_ICON = {
       (wetter.length ? '<div class="lw-ksym">' + wetter.map(id => '<span title="' + esc(ZUSATZ[id][en ? "en" : "de"]) + '">' + zusSvg(id) + "</span>").join("") + "</div>" : "") +
       (oben ? "" : zonen.map(z => '<button type="button" class="lw-kzone' + (z === hier ? " hier" : "") + '" data-kzone="' + z.id + '" title="' + esc(zonenName(z, en)) + '" style="left:' + z.r[0] + "%;top:" + z.r[1] + "%;width:" + z.r[2] + "%;height:" + z.r[3] + '%"><span>' + esc(zonenName(z, en)) + "</span></button>").join("")) +
       (oben ? "" : '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tx - 2.5) + "%;top:" + ty + "%;height:" + th + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>') +
-      frei.map(id => { const [x, y, z] = zusOrt(id); return '<div class="lw-kquelle" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
+      frei.map(id => { const [x, y, z] = zusOrt(id), fern = raumBei(x, y) !== raumBei(fx, fy); return '<div class="lw-kquelle' + (fern ? " anderer" : "") + '" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
       '<div class="lw-kfigur" style="left:' + fx + "%;top:" + (oben ? fz : fy) + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
       '<button type="button" class="lw-ksicht" data-ksicht="1" title="' + esc(oben ? T.karteSeite : T.karteOben) + '" aria-label="' + esc(oben ? T.karteSeite : T.karteOben) + '">' + (oben ? "👁" : "🧭") + "</button>" +
       '<div class="lw-kmuell" title="' + esc(T.karteMuell) + '" aria-hidden="true">🗑</div>' +
@@ -11427,6 +11451,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-karte.gross .lw-kmuell { width: 2.8rem; height: 2.8rem; font-size: 1.5rem; left: .4rem; bottom: .4rem; }
 .lw-kmuell.ziel { opacity: 1; transform: scale(1.35); background: rgba(160,50,40,.6); border-color: #e07060; }
 .lw-kquelle.weg { opacity: .45; border-color: #e07060; }
+.lw-kquelle.anderer { opacity: .6; border-style: dashed; box-shadow: none; }
 .lw-ksicht { position: absolute; right: 1.75rem; bottom: .2rem; z-index: 5; width: 1.35rem; height: 1.35rem; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); font-size: .78rem; line-height: 1; cursor: pointer; }
 .lw-karte.gross .lw-ksicht { right: 3.4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
 .lw-karte.gross .lw-kgross { right: .4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
