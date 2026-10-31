@@ -3596,6 +3596,36 @@ const ZUS_ICON = {
   }
     return szeneBild;
   })();
+  /* Icon-Leiste neben der Karte: das Wichtigste aus „Mehr Leben“ mit einem Tipp */
+  function karteLeiste(T) {
+    const w = KUL_WELT[S.kulisse]; if (!w) return "";
+    const L = T.leben, drin = !kulDraussen(S.kulisse), feuer = w.betten.some(([n]) => FEUER_BETT.test(n)), en = sprache() === "en";
+    const k = (attr, wert, sym, titel, an) => '<button type="button" class="lw-kl" ' + attr + '="' + wert + '" aria-pressed="' + !!an + '" title="' + esc(titel) + '" aria-label="' + esc(titel) + '">' + sym + "</button>";
+    const ohne = x => String(x).replace(/^\S+\s/, "");
+    const zus = id => ZUSATZ[id] ? k("data-kzus", id, { sturm: "🌪", schnee: "❄", wind: "🍃" }[id], ZUSATZ[id][en ? "en" : "de"], zusIst(id)) : "";
+    const sp = leben.spannung, spStufe = sp < .1 ? 0 : sp < .4 ? 1 : sp < .7 ? 2 : 3;
+    const zeile = (sym, titel, inhalt) => '<div class="lw-klz"><span title="' + esc(titel) + '">' + sym + "</span>" + inhalt + "</div>";
+    return '<div class="lw-kleiste">' +
+      zeile("🌦", L.wetter, ["☀", "🌦", "🌧", "⛈"].map((sy, x) => k("data-wetter", x, sy, L.wetterN[x], !leben.schauer && leben.wetter === x)).join("") + k("data-wetter", "schauer", "🌫", L.schauer, leben.schauer) + zus("wind") + zus("sturm") + zus("schnee")) +
+      (drin ? "" : zeile("🕰", L.zeit, k("data-zeit", "auto", "🅰", L.zeitN.auto, leben.zeit === "auto") + k("data-zeit", "tag", "🌞", ohne(L.zeitN.tag), leben.zeit === "tag") + k("data-zeit", "daemmerung", "🌇", ohne(L.zeitN.daemmerung), leben.zeit === "daemmerung") + k("data-zeit", "nacht", "🌙", ohne(L.zeitN.nacht), leben.zeit === "nacht") + k("data-aktion", "zeitlauf", "⏳", L.zeitLauf, leben.zeitLauf))) +
+      zeile("👁", L.spannung, [[0, "😌"], [.3, "🙂"], [.6, "😟"], [.95, "😨"]].map(([v, sy], i) => k("data-lspann", v, sy, L.spannStufe(Math.round(v * 100)), spStufe === i)).join("")) +
+      zeile("✨", L.titel || "Leben", k("data-aktion", "gehen", "🚶", L.gehen, leben.gehen) + k("data-aktion", "stille", "🤫", L.stille, ctx && stilleBis > ctx.currentTime) + (feuer ? k("data-aktion", "nachlegen", "🪵", L.nachlegen, false) : "") + k("data-aktion", "szenen", "🎭", L.szenen, leben.szenen) + k("data-aktion", "nah", "👂", L.nah, leben.nah)) +
+      "</div>";
+  }
+  /* Wetter und Tageszeit im Bild: Nacht dunkelt den Himmel, Regen fällt draußen, Gewitter blitzt */
+  function karteStimmung(art) {
+    let h = ""; const nacht = leben.zeit === "nacht" || (leben.zeit === "auto" && S.kulisse === "waldnacht"), daemmer = leben.zeit === "daemmerung";
+    const himmel = art === "drin" ? [0, 0, 27, 45] : [0, 0, 160, 45];
+    if (nacht) h += '<rect x="' + himmel[0] + '" y="0" width="' + himmel[2] + '" height="45" fill="#050814" opacity=".55"/>' + (art === "drin" ? "" : [[14, 6], [38, 9], [72, 4], [96, 8], [128, 5]].map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r=".45" fill="#e8e4cf" opacity=".8"/>').join(""));
+    if (daemmer) h += '<rect x="' + himmel[0] + '" y="0" width="' + himmel[2] + '" height="45" fill="#c0603a" opacity=".22"/>';
+    const regen = leben.schauer ? 2 : leben.wetter, zr = zusIst("regen") || zusIst("starkregen") || zusIst("gewitter");
+    const st = Math.max(regen, zr ? 2 : 0);
+    if (st) { const n = st === 1 ? 14 : 34, b = art === "drin" ? 27 : 160; let r = ""; for (let i = 0; i < n; i++) { const x = (i * 37) % b, y = (i * 13) % 40; r += '<line x1="' + x + '" y1="' + y + '" x2="' + (x - 1.2) + '" y2="' + (y + 4) + '" stroke="#9ac0e0" stroke-width=".35" opacity=".55"/>'; } h += '<g class="k-regen">' + r + "</g>"; }
+    if (leben.wetter === 3 || zusIst("gewitter")) h += '<path class="k-blitz" d="M' + (art === "drin" ? 12 : 70) + ' 2 l-3 9 h3 l-4 10 l7 -12 h-3 l3 -7 Z" fill="#fff6c0"/>';
+    if (zusIst("schnee")) { let r = ""; for (let i = 0; i < 26; i++) r += '<circle cx="' + ((i * 29) % (art === "drin" ? 27 : 160)) + '" cy="' + ((i * 11) % 44) + '" r=".5" fill="#fff" opacity=".8"/>'; h += '<g class="k-schnee">' + r + "</g>"; }
+    if (leben.spannung > .55) h += '<rect x="0" y="0" width="160" height="70" fill="#300a14" opacity="' + (.12 + (leben.spannung - .55) * .4).toFixed(2) + '"/>';
+    return h;
+  }
   function karteHTML(T) {
     if (!KUL_WELT[S.kulisse]) return "";
     const art = kartenArt(), zonen = KARTE[art], en = sprache() === "en", [fx, fy] = figurOrt(), hier = zoneBei(fx, fy);
@@ -3603,19 +3633,20 @@ const ZUS_ICON = {
     const wetter = zus.filter(id => UEBERALL.includes(id)), frei = zus.filter(id => !UEBERALL.includes(id));
     const tx = art === "drin" ? 17 : 74, ty = art === "drin" ? 30 : 33, th = art === "drin" ? 34 : 31;
     return '<div class="lw-karte' + (karteGross ? " gross" : "") + '" data-karte="' + art + '" data-kkul="' + S.kulisse + '" data-zus="' + zus.slice().sort().join() + '">' +
-      '<svg class="lw-kbild" viewBox="0 0 160 70" preserveAspectRatio="none" aria-hidden="true">' + szeneBild(art) + "</svg>" +
+      '<svg class="lw-kbild" viewBox="0 0 160 70" preserveAspectRatio="none" aria-hidden="true">' + szeneBild(art) + karteStimmung(art) + "</svg>" +
       (wetter.length ? '<div class="lw-ksym">' + wetter.map(id => '<span title="' + esc(ZUSATZ[id][en ? "en" : "de"]) + '">' + zusSvg(id) + "</span>").join("") + "</div>" : "") +
       zonen.map(z => '<button type="button" class="lw-kzone' + (z === hier ? " hier" : "") + '" data-kzone="' + z.id + '" title="' + esc(zonenName(z, en)) + '" style="left:' + z.r[0] + "%;top:" + z.r[1] + "%;width:" + z.r[2] + "%;height:" + z.r[3] + '%"><span>' + esc(zonenName(z, en)) + "</span></button>").join("") +
       '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tx - 2.5) + "%;top:" + ty + "%;height:" + th + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>' +
       frei.map(id => { const [x, y] = zusOrt(id); return '<div class="lw-kquelle" data-zq="' + id + '" style="left:' + x + "%;top:" + y + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
       '<div class="lw-kfigur" style="left:' + fx + "%;top:" + fy + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
+      '<div class="lw-kmuell" title="' + esc(T.karteMuell) + '" aria-hidden="true">🗑</div>' +
       '<button type="button" class="lw-kgross" data-kgross="1" title="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '" aria-label="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '">' + (karteGross ? "⤡" : "⤢") + "</button>" +
       "</div>";
   }
   Object.assign(TX.de, { karteFigur: "Das bist du – zieh dich irgendwohin. Der Bereich unter dir bestimmt, wie der Ort klingt (drinnen, vor der Tür, im Keller …).", karteTipp: "Zieh die Figur oder tippe einen Bereich an. Geräusche lassen sich ebenfalls ziehen: näher = lauter, seitlich = von der Seite. Die Tür lässt sich antippen.",
-    karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern" });
+    karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer – in den Mülleimer gezogen ist es aus", karteMuell: "Geräusch hierher ziehen, um es auszuschalten", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern" });
   Object.assign(TX.en, { karteFigur: "That's you – drag yourself anywhere. The area under you decides how the place sounds (inside, at the door, in the cellar …).", karteTipp: "Drag the figure or tap an area. Sounds can be dragged too: closer = louder, to the side = from that side. Tap the door to open or close it.",
-    karteQuelle: "drag: closer to you = louder, further away = quieter and duller", karteGrossT: "Enlarge map", karteKlein: "Shrink map" });
+    karteQuelle: "drag: closer to you = louder, further away = quieter and duller – drop it in the bin to switch it off", karteMuell: "Drag a sound here to switch it off", karteGrossT: "Enlarge map", karteKlein: "Shrink map" });
   function karteWirken(z) {
     if (z.id !== leben.platz || z.st !== leben.standort) {
       leben.platz = z.id; leben.standort = z.st;
@@ -3650,12 +3681,18 @@ const ZUS_ICON = {
     f.style.left = x + "%"; f.style.top = y + "%"; kZug.bewegt = true; kZug.x = x; kZug.y = y;
     if (kZug.zq) zusOrt(kZug.zq).splice(0, 2, x, y); else kOrt().fig = [x, y];
     if (!kZug.zq) { const z = zoneBei(x, y); kZug.k.querySelectorAll(".lw-kzone").forEach(b => b.classList.toggle("ziel", b.dataset.kzone === z.id)); }
+    else { const m = kZug.k.querySelector(".lw-kmuell"); if (m) { const mr = m.getBoundingClientRect(); kZug.muell = e.clientX >= mr.left - 8 && e.clientX <= mr.right + 8 && e.clientY >= mr.top - 8 && e.clientY <= mr.bottom + 8; m.classList.toggle("ziel", kZug.muell); kZug.f.classList.toggle("weg", kZug.muell); } }
     const j = performance.now(); if (j - kZugT > 60) { kZugT = j; try { zusPegelSetzen(.08); } catch (_) {} }
   });
   const kLos = e => {
     if (!kZug || e.pointerId !== kZug.id) return;
     const z = kZug; kZug = null; z.f.classList.remove("zieht");
     if (!z.bewegt) return;
+    if (z.zq && z.muell) {
+      const id = z.zq; delete zusWahl[id]; const o = kOrt(); if (o.zus) delete o.zus[id]; karteSpeichern();
+      zusPausiert = false; zusMerken(); zusSync(); karteNeu(); try { boxNeu("klang"); } catch (_) {}
+      status("🗑 " + (ZUSATZ[id] ? ZUSATZ[id][sprache() === "en" ? "en" : "de"] : id)); return;
+    }
     karteSpeichern();
     if (!z.zq) karteWirken(zoneBei(z.x, z.y));
     try { zusPegelSetzen(.15); } catch (_) {}
@@ -9193,7 +9230,7 @@ const ZUS_ICON = {
     return '<p class="lw-zweck">' + E.zweckOrt + "</p>" +
       '<div class="lw-eortkopf"><div class="lw-eortlinks"><span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
       (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") + "</div>" +
-      karteHTML(T) + "</div>" +
+      karteLeiste(T) + karteHTML(T) + "</div>" +
       '<div class="lw-egitter lw-ekul">' + kern.map(tile).join("") + (eMehr.kul ? rest.map(tile).join("") : "") + "</div>" +
       '<button type="button" class="lw-klappe" data-emehr="kul" aria-expanded="' + eMehr.kul + '">' + (eMehr.kul ? E.weniger : E.mehrKul(alle.length)) + " <span>" + (eMehr.kul ? "▴" : "▾") + "</span></button>" +
       (KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "") +
@@ -10134,6 +10171,10 @@ const ZUS_ICON = {
     }
     const lw = e.target.closest("[data-wetter]");
     if (lw) { audioStart(); const v = lw.dataset.wetter; if (v === "schauer") leben.schauer = !leben.schauer; else { leben.schauer = false; leben.wetter = +v; } lebenGeaendert(); boxNeu("klang"); return; }
+    const lsp = e.target.closest("[data-lspann]");
+    if (lsp) { audioStart(); leben.spannung = +lsp.dataset.lspann; lebenGeaendert(); boxNeu("klang"); return; }
+    const kzs = e.target.closest("[data-kzus]");
+    if (kzs) { audioStart(); const id = kzs.dataset.kzus; if (zusIst(id)) delete zusWahl[id]; else if (Object.keys(zusWahl).length < zusMax()) zusWahl[id] = 1; zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang"); return; }
     const lz = e.target.closest("[data-zeit]");
     if (lz) { audioStart(); leben.zeit = lz.dataset.zeit; if (kul && ctx) kul.zeitAb = ctx.currentTime; lebenGeaendert(); boxNeu("klang"); return; }
     const lst = e.target.closest("[data-standort]");
@@ -11089,6 +11130,22 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ksym span { display: inline-flex; color: #cfe0f0; opacity: .85; }
 .lw-ksym .lw-zico { width: 12px; height: 12px; }
 .lw-karte.gross .lw-ksym .lw-zico { width: 16px; height: 16px; }
+.lw-kbild .k-regen { animation: lwKRegen .6s linear infinite; }
+@keyframes lwKRegen { from { transform: translateY(-4px); } to { transform: translateY(0); } }
+.lw-kbild .k-schnee { animation: lwKRegen 2.4s linear infinite; }
+.lw-kbild .k-blitz { opacity: 0; animation: lwKBlitz 5s infinite; }
+@keyframes lwKBlitz { 0%, 86%, 92%, 100% { opacity: 0; } 88%, 90% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lw-kbild .k-regen, .lw-kbild .k-schnee, .lw-kbild .k-blitz { animation: none; } }
+.lw-kleiste { display: grid; gap: .2rem; flex: 0 0 auto; align-self: center; }
+.lw-klz { display: flex; align-items: center; gap: .15rem; flex-wrap: wrap; }
+.lw-klz > span { width: 1.3rem; text-align: center; font-size: .8rem; opacity: .6; cursor: help; }
+.lw-kl { width: 1.85rem; height: 1.85rem; padding: 0; border: 1px solid rgba(224,160,70,.28); background: rgba(224,160,70,.05); border-radius: 7px; font-size: .95rem; line-height: 1; cursor: pointer; color: var(--vellum); }
+.lw-kl:hover { border-color: var(--ember); }
+.lw-kl[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.28); box-shadow: 0 0 6px rgba(224,160,70,.35); }
+.lw-kmuell { position: absolute; left: .25rem; bottom: .2rem; z-index: 2; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; font-size: .8rem; border-radius: 6px; background: rgba(10,8,14,.6); border: 1px dashed rgba(220,120,110,.5); opacity: .7; pointer-events: none; transition: transform .15s ease; }
+.lw-karte.gross .lw-kmuell { width: 2rem; height: 2rem; font-size: 1.1rem; }
+.lw-kmuell.ziel { opacity: 1; transform: scale(1.35); background: rgba(160,50,40,.6); border-color: #e07060; }
+.lw-kquelle.weg { opacity: .45; border-color: #e07060; }
 .lw-kgross { position: absolute; right: .2rem; bottom: .2rem; z-index: 5; width: 1.35rem; height: 1.35rem; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); color: var(--vellum); font-size: .85rem; line-height: 1; cursor: pointer; }
 .lw-kgross:hover { border-color: var(--ember); color: var(--ember); }
 @media (max-width: 520px) { .lw-karte { width: min(210px, 100%); } .lw-kzone span { font-size: .56rem; } }
