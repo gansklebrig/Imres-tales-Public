@@ -76,13 +76,15 @@
       intervalle: ["Grundton", "kl. Sekunde", "Sekunde", "kl. Terz", "Terz", "Quarte", "Tritonus", "Quinte", "kl. Sexte", "Sexte", "kl. Septime", "Septime", "Oktave"],
       echoZeile: "♪ Echo spielt vor …",
       vorher: { ort: "Bühne", publikum: "Publikum", sg: sg => "Schwierigkeitsgrad " + sg, tonart: "Tonlage", auto: "angepasst", fuehr: "Führstimme",
-        fuehrAus: "Ohne Kopfhörer bleibt die Führstimme aus – sonst hört das Mikrofon den Chor statt dich.", los: "▶ Los!", laedt: "🎻 Instrumente werden gestimmt …",
+        fuehrAus: "Ohne Kopfhörer hört das Mikrofon die Führstimme mit – das kann die Wertung verfälschen.", klang: "Klang", klaenge: { chor: "Chor", floete: "Flöte", harfe: "Harfe" },
+        einsatz: "Einsatzton", einsatzInfo: "Vor jeder Zeile klingt kurz der erste Ton an – so findest du den Einstieg.", tempo: "Tempo", tempoInfo: "Unter 100 % zählt es nicht für Bestwert und Bestenliste.",
+        probe: "👂 Erst anhören", probeInfo: "Hör dir das Stück einmal mit lauter Führstimme an, ohne Wertung.", los: "▶ Los!", laedt: "🎻 Instrumente werden gestimmt …",
         messen: "Erst Stimme einmessen", messenTipp: "Tipp: Miss zuerst deine Stimme ein – dann liegen die Lieder genau in deiner Lage.", deutsch: "",
         grundton: "Grundton", leiter: "Tonleiter", dur: "Dur", moll: "Moll", gegner: "Gegner", schnoerkel: "✦ = Schnörkel-Note: Mit schönem Vibrato gibt's Bonuspunkte." },
       spiel: { pause: "Pause", pausiert: "Pausiert", weiter: "▶ Weiter", neu: "↻ Von vorn", aufhoeren: "Aufhören", leise: "Ich höre dich nicht – näher ans Mikrofon?",
         urteil: { perfekt: "Meisterhaft!", gut: "Gut!", knapp: "Knapp …", daneben: "Daneben!" }, serie: n => n + "× in Folge!", schnoerkel: "✦ Schnörkel!",
         insp: "Bardische Inspiration", inspWurf: (w, p) => "🎲 " + w + " – Inspiration! +" + p + " %", inspLeer: "Erst eine Zeile singen …",
-        stopp: "■ Stopp", wiedergabe: "🎧 Wiedergabe" },
+        stopp: "■ Stopp", wiedergabe: "🎧 Wiedergabe", probe: "👂 Probehören" },
       duell: { fassung: "Barradin", runde: n => "Runde " + n, ko: "K.O.!", einknick: "Barradin verliert die Fassung …", gegnerLeben: "Lebenspunkte",
         sieg: "Sieg!", pleite: "Niederlage", rest: (n, h) => n + " hat noch " + h + " Lebenspunkte.", deutsch: "" },
       erg: { punkte: "Punkte", getroffen: (a, b) => a + " von " + b + " Tönen getroffen", rekord: "Neuer Bestwert!", bisher: p => "Bisher bester Wert: " + p + " %",
@@ -98,7 +100,11 @@
         ["Meisterlich! Selbst Ezekiel hat kurz mit dem Fuß gewippt.", "Zugaberufe! Ich verbeuge mich. Einmal, zweimal … ach, dauerhaft.", "Das Publikum wirft Rosen. Und einen Hering. Ich nehme beides."],
         ["Eine goldene Kehle! Man wird Lieder über dieses Lied singen.", "Natürliche 20 in Stimme! Die Götter lehnen sich vor, um besser zu hören.", "Selbst Imre legt den Würfel zur Seite und applaudiert."]
       ],
+      willkommen: { titel: "Willkommen auf der Bühne!", text: "Bevor du loslegst: Lass mich kurz deine Stimme hören. Du singst einen tiefen und einen hohen Ton, die sich bequem anfühlen – danach liegen alle Lieder genau in deiner Lage. Das dauert eine halbe Minute.",
+        knopf: "🎙 Stimme einmessen", empfohlen: "empfohlen", spaeter: "Später", banner: "Noch nicht eingemessen", bannerText: "30 Sekunden – danach passen alle Lieder zu deiner Stimme." },
       einmessen: { titel: "Stimme einmessen", still: "Einen Moment ganz still sein – ich höre, wie laut es bei dir ist …",
+        bereitTief: "Bereit? Atme durch, tippe auf den Knopf und sing dann deinen tiefen Ton.", tiefLos: "▶ Tiefen Ton singen", hochLos: "▶ Weiter: hohen Ton singen", tiefNochmal: "↻ Tiefen Ton nochmal",
+        tiefOk: t => "Tiefer Ton: " + t + " ✔ Atme kurz durch – wenn du bereit bist, geht's mit dem hohen Ton weiter.", hoerZu: "Ich höre zu …",
         tief: "Sing einen tiefen Ton, der sich noch bequem anfühlt – auf „Aaa“ – und halte ihn.", hoch: "Und jetzt einen hohen, bequemen Ton. Nicht quetschen!",
         halten: "Gut, halten …", fertig: (a, b, n) => "Fertig! Dein Bereich: " + a + " bis " + b + " (" + n + " Halbtöne).", zuEng: "Das liegt sehr eng beieinander – versuch's ruhig noch einmal mit mehr Abstand.",
         nochmal: "↻ Nochmal", fertigKnopf: "✔ Übernehmen", nichts: "Ich höre noch nichts – sing ruhig etwas lauter." },
@@ -114,7 +120,7 @@
         tendenz: "Wo du danebenliegst", zuWenig: "Sing noch ein paar Lieder, dann sehe ich mehr.", ton: (n, c) => n + ": " + (Math.abs(c) < 8 ? "fast genau" : Math.abs(c) + " Cent " + (c < 0 ? "zu tief" : "zu hoch")),
         schnitt: c => "Insgesamt: " + (Math.abs(c) < 8 ? "fast genau auf dem Ton" : "im Schnitt " + Math.abs(c) + " Cent " + (c < 0 ? "zu tief" : "zu hoch")), loeschen: "Stimmbuch leeren" },
       einst: { titel: "Einstellungen", grad: "Schwierigkeit", kopf: "Kopfhörer", kopfJa: "🎧 Ja", kopfNein: "🔈 Nein", kopfInfo: "Ohne Kopfhörer schaltet das Spiel die Echo-Unterdrückung des Browsers ein und spielt leiser.",
-        fuehr: "Führstimme", an: "An", aus: "Aus", aufnahme: "Aufnahme zum Anhören", publikum: "Publikum",
+        fuehr: "Führstimme", an: "An", aus: "Aus", aufnahme: "Aufnahme zum Anhören", publikum: "Publikum", fuehrLaut: "Lautstärke der Führstimme", klang: "Klang der Führstimme", einsatz: "Einsatzton vor jeder Zeile",
         laut: "Lautstärke der Musik", versatz: "Verzögerung ausgleichen", versatzInfo: "Mit Bluetooth-Kopfhörern kommt die Musik später an. Am einfachsten automatisch messen.", messen: "🎯 Automatisch messen", ms: v => v + " ms" },
       liste: { titel: "🏆 Bestenliste", leer: "Noch niemand – sei die erste Legende!", nurHier: "Server nicht erreichbar – nur auf diesem Gerät.", eintragen: "🏆 Eintragen", sendet: "Wird eingetragen …",
         eingetragen: p => "Eingetragen – Platz " + p + "!", eingetragenOhne: "Eingetragen!", fehler: "Eintrag hat nicht geklappt – bitte später nochmal.", spalten: ["#", "Name", "%", "Wurf"] },
@@ -160,13 +166,15 @@
       intervalle: ["Root", "minor 2nd", "2nd", "minor 3rd", "3rd", "4th", "tritone", "5th", "minor 6th", "6th", "minor 7th", "7th", "octave"],
       echoZeile: "♪ Echo plays first …",
       vorher: { ort: "Stage", publikum: "Audience", sg: sg => "Difficulty class " + sg, tonart: "Key", auto: "adjusted", fuehr: "Guide voice",
-        fuehrAus: "Without headphones the guide voice stays off – otherwise the microphone hears the choir instead of you.", los: "▶ Go!", laedt: "🎻 Tuning the instruments …",
+        fuehrAus: "Without headphones the microphone hears the guide voice too – that can skew the score.", klang: "Sound", klaenge: { chor: "Choir", floete: "Flute", harfe: "Harp" },
+        einsatz: "Cue note", einsatzInfo: "Before each line the first note sounds briefly – so you find your way in.", tempo: "Tempo", tempoInfo: "Below 100 % it doesn't count for your best and the leaderboard.",
+        probe: "👂 Listen first", probeInfo: "Hear the piece once with a loud guide voice, without scoring.", los: "▶ Go!", laedt: "🎻 Tuning the instruments …",
         messen: "Measure my voice first", messenTipp: "Tip: measure your voice first – then the songs sit right in your range.", deutsch: "Lyrics in German – singing along on „la“ counts too.",
         grundton: "Root", leiter: "Scale", dur: "Major", moll: "Minor", gegner: "Foe", schnoerkel: "✦ = flourish note: sing it with a nice vibrato for bonus points." },
       spiel: { pause: "Pause", pausiert: "Paused", weiter: "▶ Continue", neu: "↻ Restart", aufhoeren: "Stop", leise: "I can't hear you – closer to the mic?",
         urteil: { perfekt: "Masterful!", gut: "Good!", knapp: "Close …", daneben: "Missed!" }, serie: n => n + " in a row!", schnoerkel: "✦ Flourish!",
         insp: "Bardic Inspiration", inspWurf: (w, p) => "🎲 " + w + " – Inspiration! +" + p + " %", inspLeer: "Sing a line first …",
-        stopp: "■ Stop", wiedergabe: "🎧 Playback" },
+        stopp: "■ Stop", wiedergabe: "🎧 Playback", probe: "👂 Listening" },
       duell: { fassung: "Barradin", runde: n => "Round " + n, ko: "K.O.!", einknick: "Barradin loses his composure …", gegnerLeben: "Hit points",
         sieg: "Victory!", pleite: "Defeat", rest: (n, h) => n + " still has " + h + " hit points.", deutsch: "Duel lyrics are German – singing on „la“ counts too." },
       erg: { punkte: "Points", getroffen: (a, b) => a + " of " + b + " notes hit", rekord: "New best!", bisher: p => "Previous best: " + p + " %",
@@ -182,7 +190,11 @@
         ["Masterful! Even Ezekiel tapped his foot for a moment.", "Encore! I bow. Once, twice … oh, permanently.", "The crowd throws roses. And a herring. I'll take both."],
         ["A golden throat! They'll sing songs about this song.", "Natural 20 on voice! The gods lean in to hear better.", "Even Imre puts down the die and applauds."]
       ],
+      willkommen: { titel: "Welcome to the stage!", text: "Before you start: let me hear your voice. You sing one low and one high note that feel comfortable – after that every song sits right in your range. It takes half a minute.",
+        knopf: "🎙 Measure my voice", empfohlen: "recommended", spaeter: "Later", banner: "Voice not measured yet", bannerText: "30 seconds – then every song fits your voice." },
       einmessen: { titel: "Measure your voice", still: "Stay quiet for a moment – I'm listening to how loud it is around you …",
+        bereitTief: "Ready? Take a breath, tap the button and then sing your low note.", tiefLos: "▶ Sing the low note", hochLos: "▶ Next: sing the high note", tiefNochmal: "↻ Low note again",
+        tiefOk: t => "Low note: " + t + " ✔ Take a breath – when you're ready, go on with the high note.", hoerZu: "Listening …",
         tief: "Sing a low note that still feels comfortable – on „aah“ – and hold it.", hoch: "Now a high, comfortable note. Don't squeeze!",
         halten: "Good, hold it …", fertig: (a, b, n) => "Done! Your range: " + a + " to " + b + " (" + n + " semitones).", zuEng: "Those are very close together – feel free to try again with more distance.",
         nochmal: "↻ Again", fertigKnopf: "✔ Use this", nichts: "I can't hear anything yet – sing a little louder." },
@@ -198,7 +210,7 @@
         tendenz: "Where you drift", zuWenig: "Sing a few more songs, then I'll see more.", ton: (n, c) => n + ": " + (Math.abs(c) < 8 ? "almost spot on" : Math.abs(c) + " cents " + (c < 0 ? "flat" : "sharp")),
         schnitt: c => "Overall: " + (Math.abs(c) < 8 ? "almost spot on" : "on average " + Math.abs(c) + " cents " + (c < 0 ? "flat" : "sharp")), loeschen: "Clear voice book" },
       einst: { titel: "Settings", grad: "Difficulty", kopf: "Headphones", kopfJa: "🎧 Yes", kopfNein: "🔈 No", kopfInfo: "Without headphones the game turns on the browser's echo cancellation and plays more quietly.",
-        fuehr: "Guide voice", an: "On", aus: "Off", aufnahme: "Recording for playback", publikum: "Audience",
+        fuehr: "Guide voice", an: "On", aus: "Off", aufnahme: "Recording for playback", publikum: "Audience", fuehrLaut: "Guide voice volume", klang: "Guide voice sound", einsatz: "Cue note before each line",
         laut: "Music volume", versatz: "Latency compensation", versatzInfo: "With Bluetooth headphones the music arrives later. Easiest: measure it automatically.", messen: "🎯 Measure automatically", ms: v => v + " ms" },
       liste: { titel: "🏆 Leaderboard", leer: "Nobody yet – be the first legend!", nurHier: "Server unreachable – only on this device.", eintragen: "🏆 Submit", sendet: "Submitting …",
         eingetragen: p => "Submitted – rank " + p + "!", eingetragenOhne: "Submitted!", fehler: "Didn't work – please try again later.", spalten: ["#", "Name", "%", "Roll"] },
@@ -214,9 +226,11 @@
      EINSTELLUNGEN UND SPEICHER
      ================================================================= */
   const K = { einst: "imres-kehle-einst", weg: "imres-kehle-weg", rekorde: "imres-kehle-rekorde", buch: "imres-kehle-buch", duelle: "imres-kehle-duelle", liste: "imres-kehle-liste" };
-  const E = Object.assign({ grad: "mittel", kopf: true, fuehr: true, laut: .8, versatz: 0, tief: null, hoch: null, boden: null, trans: {}, aufnahme: true, publikum: true, bordunTon: null, bordunModus: "moll" }, json(K.einst) || {});
+  const E = Object.assign({ grad: "mittel", kopf: true, fuehr: true, laut: .8, versatz: 0, tief: null, hoch: null, boden: null, trans: {}, aufnahme: true, publikum: true, bordunTon: null, bordunModus: "moll", fuehrLaut: .6, fuehrKlang: "chor", einsatz: true, tempo: 1 }, json(K.einst) || {});
   if (!E.trans || typeof E.trans !== "object") E.trans = {};
   if (!["leicht", "mittel", "schwer"].includes(E.grad)) E.grad = "mittel";
+  if (![1, .85, .7].includes(E.tempo)) E.tempo = 1;
+  if (!["chor", "floete", "harfe"].includes(E.fuehrKlang)) E.fuehrKlang = "chor";
   const einstSpeichern = () => schreib(K.einst, JSON.stringify(E));
   const TOL = { leicht: 75, mittel: 50, schwer: 30 };
   const gemessen = () => typeof E.tief === "number" && typeof E.hoch === "number" && E.hoch > E.tief;
@@ -343,6 +357,9 @@
     return st.noten.length ? fertigBauen(st) : null;
   }
   function fertigBauen(st) {
+    /* langsameres Üben: Lieder, Duelle und Bühnenmelodien lassen sich bremsen */
+    st.tempo = st.fest ? 1 : E.tempo;
+    if (st.tempo !== 1) st.bpm = Math.round(st.bpm * st.tempo);
     st.spb = 60 / st.bpm;
     st.takte = Math.ceil(st.ende / st.takt) + 1; /* + ein Schlusstakt */
     st.ende = st.takte * st.takt;
@@ -631,11 +648,19 @@
       }
     });
     /* Führstimme (Chor), Echos Flöte, Stimme des Gegners */
-    const fuehr = !o.ohneFuehrung && E.kopf && E.fuehr && !st.ohneFuehrung;
+    const fuehr = o.fuehrImmer || (!o.ohneFuehrung && E.fuehr && !st.ohneFuehrung);
+    const fk = { chor: "ooh", floete: "fl", harfe: "harfe" }[E.fuehrKlang] || "ooh";
+    const fLaut = o.fuehrImmer ? .5 : (.12 + .45 * E.fuehrLaut) * (E.kopf ? 1 : .6);
+    /* Einsatzton: der erste Ton jeder Zeile klingt kurz an – vor der Zeile, wenn Platz ist */
+    if ((E.einsatz || o.fuehrImmer) && !o.ohneFuehrung && !st.ohneFuehrung) st.zeilen.forEach((z, k) => {
+      if (z.vor || !z.noten.length) return;
+      const n0 = st.noten[z.noten[0]], prev = k > 0 ? st.zeilen[k - 1] : null, frei = prev ? n0.b - prev.b1 : n0.b;
+      add(frei >= 1 ? n0.b - 1 : n0.b, "harfe", lage(g0 + n0.s, 55), frei >= 1 ? .32 : .18, 1.4);
+    });
     st.noten.forEach(n => {
       const m = g0 + n.s;
       if (n.vor) { const g = n.instr || "fl"; add(n.b, g, inLage(g, m), g === "fl" ? .32 : .42, n.d * .95); }
-      else if (fuehr) add(n.b, "ooh", m, .2, n.d * .98);
+      else if (fuehr) add(n.b, fk, fk === "fl" ? inLage("fl", m) : m, fk === "harfe" ? fLaut * 1.1 : fLaut, n.d * .98);
     });
     ev.sort((a, b) => a.z - b.z);
     return ev;
@@ -1372,7 +1397,7 @@
     let a = 0, z = 0; sing.forEach(n => { a += n.abw; z += n.abwZ; });
     const tendenz = z > .5 ? Math.round(a / z) : null;
     const stummAnteil = S.gehoert > 3 ? S.stumm / S.gehoert : 0;
-    const rek = rekorde(), alt = rek[st.id] | 0, neu = pct > alt;
+    const rek = rekorde(), alt = rek[st.id] | 0, neu = pct > alt && st.tempo === 1;
     if (neu) { rek[st.id] = pct; schreib(K.rekorde, JSON.stringify(rek)); }
     /* Stimmbuch: Tonstatistik, Verlauf, Tageswerte, Einsing-Strähne */
     const buch = buchLesen(), tag = heute();
@@ -1412,7 +1437,7 @@
     }
     abbrechen();
     ansicht = "ergebnis"; zeigen();
-    if (wurf && (st.lied || station != null)) listeLaden();
+    if (wurf && (st.lied || station != null) && st.tempo === 1) listeLaden();
   }
 
   /* ---------- Wiedergabe: eigene Aufnahme + Begleitung, die Notenbahn läuft mit ---------- */
@@ -1442,9 +1467,34 @@
     if (!takt) takt = setInterval(() => { if (S && !S.pause) planen(); }, 100);
     cancelAnimationFrame(raf); raf = requestAnimationFrame(rahmen);
   }
+  /* Probehören: das Stück mit lauter Führstimme abspielen, ohne Mikrofon und ohne Wertung */
+  function probehoeren(st) {
+    audio();
+    if (S) abbrechen(true);
+    const schieb = verschiebung(st);
+    vorbereitenNoten(st, schieb);
+    const ev = begleitung(st, schieb, { fuehrImmer: true });
+    const bus = ctx.createGain(); bus.gain.value = 1; bus.connect(ausgang);
+    S = { st, schieb, ev, ei: 0, t0: ctx.currentTime + .3, pause: false, wiedergabe: true, probe: true, spur: [], spurAll: [], spurIdx: 0, punkte: 0, bonus: 0, ende: st.ende * st.spb, bus,
+      funken: [], wuerfe: [], laune: .5, insp: 0, letzteZeile: null, zeileJetzt: -1, pub: publikumFuer(st), tol: TOL[E.grad], stumm: 0, gehoert: 0, ni: 0 };
+    const ms = st.noten.map(n => n.m);
+    let lo = Math.min(...ms) - 3, hi = Math.max(...ms) + 3;
+    if (hi - lo < 14) { const mit = (hi + lo) / 2; lo = mit - 7; hi = mit + 7; }
+    S.lo = lo; S.hi = hi;
+    probenFuer(ev).then(() => {
+      if (!S || !S.probe) return;
+      S.t0 = ctx.currentTime + .2;
+      ansicht = "spiel"; zeigen();
+      planen();
+      if (!takt) takt = setInterval(() => { if (S && !S.pause) planen(); }, 100);
+      cancelAnimationFrame(raf); raf = requestAnimationFrame(rahmen);
+    });
+  }
   function wiedergabeEnde() {
     if (!S || !S.wiedergabe) return;
+    const probe = S.probe;
     abbrechen(true);
+    if (probe) { ansicht = "vorher"; zeigen(); if (gewaehlt) gewaehlt.bereit = true; return; }
     ansicht = "ergebnis"; zeigen();
     if (ergebnis && ergebnis.liste) listeNeu();
   }
@@ -1525,9 +1575,10 @@
     const e = erkennen(), jetzt = performance.now(), em = einmess;
     if (em.schritt === "still") {
       em.boden.push(e.rms);
-      if (jetzt - em.seit > 1400) { const s = em.boden.slice().sort((a, b) => a - b); const b = s[Math.floor(s.length * .6)] || .004; if (mic) mic.boden = b; E.boden = b; em.schritt = "tief"; em.seit = jetzt; einmessAnzeige(); }
+      if (jetzt - em.seit > 1400) { const s = em.boden.slice().sort((a, b) => a - b); const b = s[Math.floor(s.length * .6)] || .004; if (mic) mic.boden = b; E.boden = b; em.schritt = "bereitTief"; em.seit = jetzt; einmessAnzeige(); }
       return;
     }
+    if (em.schritt === "bereitTief" || em.schritt === "bereitHoch") { erkennen(); return; }
     if (em.schritt === "tief" || em.schritt === "hoch") {
       if (e.m != null) {
         em.werte.push(e.m); if (em.werte.length > 70) em.werte.shift();
@@ -1536,7 +1587,7 @@
         em.aktuell = med; em.halten = stabil ? em.halten + 1 : Math.max(0, em.halten - 2);
         if (em.halten > 50) {
           em[em.schritt] = med; em.werte = []; em.halten = 0;
-          if (em.schritt === "tief") { em.schritt = "hoch"; tonBestaetigen(med); }
+          if (em.schritt === "tief") { em.schritt = "bereitHoch"; tonBestaetigen(med); }
           else { em.schritt = "fertig"; tonBestaetigen(med); if (em.tief > em.hoch) { const x = em.tief; em.tief = em.hoch; em.hoch = x; } micAus(); cancelAnimationFrame(raf); }
           em.seit = jetzt; einmessAnzeige(); return;
         }
@@ -1730,7 +1781,7 @@
       });
     }
     $(".kh-pause").textContent = "⏸"; $(".kh-pause").setAttribute("aria-label", tx.spiel.pause);
-    if (S) $(".kh-hud-titel").textContent = (S.wiedergabe ? tx.spiel.wiedergabe + " · " : "") + S.st.titel;
+    if (S) $(".kh-hud-titel").textContent = (S.probe ? tx.spiel.probe + " · " : S.wiedergabe ? tx.spiel.wiedergabe + " · " : "") + S.st.titel;
     hudKnoepfe();
     duellAnzeigen(); if (!spielt && ansicht !== "pause") $(".kh-duell").hidden = true;
     if (!spielt) panel.innerHTML = '<div class="kh-karte">' + (ANSICHT[ansicht] || ANSICHT.menue)() + "</div>";
@@ -1739,18 +1790,25 @@
   }
 
   const ANSICHT = {
+    willkommen() {
+      const tx = T().willkommen;
+      return '<div class="kh-willkommen"><span class="kh-w-symbol" aria-hidden="true">🎙</span><h4 class="kh-kopf">' + esc(tx.titel) + "</h4><p>" + esc(tx.text) + "</p>" +
+        '<button type="button" class="tav-knopf haupt kh-riesig" data-tun="willkommenMessen">' + esc(tx.knopf) + " <small>(" + esc(tx.empfohlen) + ")</small></button>" +
+        '<button type="button" class="kh-leise" data-tun="willkommenSpaeter">' + esc(tx.spaeter) + "</button></div>";
+    },
     menue() {
       const tx = T(), w = wegLesen(), summe = w.sterne.reduce((a, b) => a + b, 0), b = buchLesen(), ds = duellStand();
       const besiegt = DUELLE.filter(d => ds[d.id]).length;
       return '<h4 class="kh-kopf">' + esc(tx.menueKopf) + "</h4>" +
-        '<p class="kh-klein' + (gemessen() ? "" : " kh-hinweis") + '">' + esc(umfangText()) + "</p>" +
+        (gemessen() ? '<p class="kh-klein">' + esc(umfangText()) + "</p>" :
+          '<button type="button" class="kh-banner gross" data-tun="einmessen"><b>🎙 ' + esc(tx.willkommen.knopf) + " <em>" + esc(tx.willkommen.empfohlen) + "</em></b><span>" + esc(tx.willkommen.bannerText) + "</span></button>") +
         '<div class="kh-raster">' +
           '<button type="button" class="kh-gross haupt" data-tun="tournee"><b>' + esc(tx.menue.tournee) + "</b><small>" + esc(tx.tourneeInfo(summe, rangVon(summe))) + "</small></button>" +
           '<button type="button" class="kh-gross rot" data-tun="duelle"><b>' + esc(tx.menue.duelle) + "</b><small>" + esc(tx.duellInfo(besiegt, DUELLE.length)) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="lieder"><b>' + esc(tx.menue.lieder) + "</b><small>" + esc(tx.lieder(DATEN.lieder.length)) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="uebung" data-wert="taeglich"><b>' + esc(tx.menue.taeglich) + "</b><small>" + esc(tx.taeglichInfo(straehne(b), b.einsingen.includes(heute()))) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="uebungen"><b>' + esc(tx.menue.uebungen) + "</b><small>" + esc(tx.uebText) + "</small></button>" +
-          '<button type="button" class="kh-gross" data-tun="einmessen"><b>' + esc(tx.menue.einmessen) + "</b><small>" + esc(gemessen() ? tonName(E.tief) + " – " + tonName(E.hoch) : "30 s") + "</small></button>" +
+          (gemessen() ? '<button type="button" class="kh-gross" data-tun="einmessen"><b>' + esc(tx.menue.einmessen) + "</b><small>" + esc(tonName(E.tief) + " – " + tonName(E.hoch)) + "</small></button>" : "") +
         "</div>" +
         '<div class="kh-reihe">' + knopf("gabel", esc(tx.menue.gabel)) + knopf("buch", esc(tx.menue.buch)) + knopf("einst", esc(tx.menue.einst)) + "</div>" +
         '<p class="kh-klein">' + esc(tx.kopfTipp) + '</p><p class="kh-klein kh-privat">🔒 ' + esc(tx.privat) + "</p>";
@@ -1808,17 +1866,22 @@
       return kopf + (st.duell ? "" : '<h4 class="kh-lied">' + esc(st.titel) + "</h4>") +
         (st.lied && st.deutsch && V.deutsch ? '<p class="kh-klein">' + esc(V.deutsch) + "</p>" : "") +
         (st.uebung ? '<p class="kh-klein">' + esc(tx.ueb[st.uebung][1]) + "</p>" : "") +
-        (gemessen() ? "" : '<p class="kh-klein kh-hinweis">' + esc(V.messenTipp) + "</p>") +
+        (gemessen() ? "" : '<button type="button" class="kh-banner" data-tun="einmessen"><b>🎙 ' + esc(tx.willkommen.banner) + "</b><span>" + esc(V.messenTipp) + "</span></button>") +
         '<div class="kh-zeile2"><span>' + esc(tx.einst.grad) + "</span>" + gradKnoepfe() + "</div>" +
         (st.bordun ? '<div class="kh-zeile2"><span>' + esc(V.grundton) + '</span><div class="kh-wahl"><button type="button" data-tun="bordunTon" data-wert="-1" aria-label="−">−</button><output>' + esc(tonName(st.grund)) +
             '</output><button type="button" data-tun="bordunTon" data-wert="1" aria-label="+">+</button></div></div>' +
           '<div class="kh-zeile2"><span>' + esc(V.leiter) + '</span><div class="kh-wahl" role="radiogroup">' + ["dur", "moll"].map(k => '<button type="button" role="radio" aria-checked="' + (st.modus === k) + '" data-tun="bordunModus" data-wert="' + k + '">' + esc(V[k]) + "</button>").join("") + "</div></div>" : "") +
         (st.fest ? "" : '<div class="kh-zeile2"><span>' + esc(V.tonart) + '</span><div class="kh-wahl"><button type="button" data-tun="trans" data-wert="-1" aria-label="−">−</button><output>' +
           esc(tonName(st.grund + schieb)) + (eigen ? " (" + (eigen > 0 ? "+" : "") + eigen + ")" : " · " + esc(V.auto)) + '</output><button type="button" data-tun="trans" data-wert="1" aria-label="+">+</button></div></div>') +
-        (st.ohneFuehrung ? "" : '<div class="kh-zeile2"><span>' + esc(V.fuehr) + "</span>" + (E.kopf ? schalter("fuehr", E.fuehr) : '<small class="kh-klein">' + esc(V.fuehrAus) + "</small>") + "</div>") +
+        (st.ohneFuehrung ? "" : '<div class="kh-zeile2"><span>' + esc(V.fuehr) + '</span><div class="kh-wahl">' + schalter("fuehr", E.fuehr).replace(/^<div class="kh-wahl">|<\/div>$/g, "") +
+            (E.fuehr ? ["chor", "floete", "harfe"].map(k => '<button type="button" role="radio" aria-checked="' + (E.fuehrKlang === k) + '" data-tun="fuehrKlang" data-wert="' + k + '">' + esc(V.klaenge[k]) + "</button>").join("") : "") + "</div></div>" +
+          (E.fuehr && !E.kopf ? '<p class="kh-klein">' + esc(V.fuehrAus) + "</p>" : "") +
+          '<div class="kh-zeile2"><span>' + esc(V.einsatz) + "</span>" + schalter("einsatz", E.einsatz) + "</div>") +
+        (st.fest ? "" : '<div class="kh-zeile2"><span>' + esc(V.tempo) + '</span><div class="kh-wahl" role="radiogroup">' + [1, .85, .7].map(f => '<button type="button" role="radio" aria-checked="' + (E.tempo === f) + '" data-tun="tempo" data-wert="' + f + '">' + Math.round(f * 100) + " %</button>").join("") + "</div></div>" +
+          (E.tempo !== 1 ? '<p class="kh-klein">' + esc(V.tempoInfo) + "</p>" : "")) +
         (st.lied || st.duell ? '<p class="kh-klein">' + esc(V.schnoerkel) + "</p>" : "") +
         '<p class="kh-klein kh-laden" aria-live="polite"></p>' +
-        '<div class="kh-reihe">' + knopf("los", esc(V.los), "haupt") + (gemessen() ? "" : knopf("einmessen", esc(V.messen))) +
+        '<div class="kh-reihe">' + knopf("los", esc(V.los), "haupt") + (st.uebung === "echo" ? "" : knopf("probe", esc(V.probe), "", ' title="' + esc(V.probeInfo) + '"')) + (gemessen() ? "" : knopf("einmessen", esc(V.messen))) +
           knopf(station != null ? "tournee" : st.duell ? "duelle" : st.uebung ? "uebungen" : "lieder", esc(tx.zurueck)) + "</div>";
     },
     pause() {
@@ -1862,9 +1925,13 @@
           '<p class="kh-klein">' + esc(tx.fertig(tonName(em.tief), tonName(em.hoch), n)) + "</p>" + (n < 7 ? '<p class="kh-klein kh-hinweis">' + esc(tx.zuEng) + "</p>" : "") +
           '<div class="kh-reihe">' + knopf("messenOk", esc(tx.fertigKnopf), "haupt") + knopf("einmessen", esc(tx.nochmal)) + "</div>";
       }
+      const sch = em.schritt, bereit = sch === "bereitTief" || sch === "bereitHoch";
       return '<h4 class="kh-kopf">🎙 ' + esc(tx.titel) + "</h4>" +
-        '<ol class="kh-schritte"><li class="' + (em.schritt === "still" ? "jetzt" : "fertig") + '">' + esc(tx.still) + '</li><li class="' + (em.schritt === "tief" ? "jetzt" : em.tief != null ? "fertig" : "") + '">' + esc(tx.tief) + (em.tief != null ? " ✔ " + esc(tonName(em.tief)) : "") + '</li><li class="' + (em.schritt === "hoch" ? "jetzt" : "") + '">' + esc(tx.hoch) + "</li></ol>" +
-        '<div class="kh-mess"><span class="kh-gross-ton kh-m-ton">–</span><span class="kh-m-ring"><i></i></span><span class="kh-klein kh-m-info"></span></div>' +
+        '<ol class="kh-schritte"><li class="' + (sch === "still" ? "jetzt" : "fertig") + '">' + esc(tx.still) + '</li><li class="' + (sch === "tief" || sch === "bereitTief" ? "jetzt" : em.tief != null ? "fertig" : "") + '">' + esc(tx.tief) + (em.tief != null ? " ✔ " + esc(tonName(em.tief)) : "") + '</li><li class="' + (sch === "hoch" || sch === "bereitHoch" ? "jetzt" : "") + '">' + esc(tx.hoch) + "</li></ol>" +
+        (bereit ? '<div class="kh-bereit"><p>' + esc(sch === "bereitTief" ? tx.bereitTief : tx.tiefOk(tonName(em.tief))) + "</p>" +
+            '<button type="button" class="tav-knopf haupt kh-riesig" data-tun="' + (sch === "bereitTief" ? "messTief" : "messHoch") + '">' + esc(sch === "bereitTief" ? tx.tiefLos : tx.hochLos) + "</button>" +
+            (sch === "bereitHoch" ? knopf("messTiefNeu", esc(tx.tiefNochmal)) : "") + "</div>"
+          : '<div class="kh-mess"><span class="kh-gross-ton kh-m-ton">–</span><span class="kh-m-ring"><i></i></span><span class="kh-klein kh-m-info">' + (sch === "still" ? "" : esc(tx.hoerZu)) + "</span></div>") +
         '<div class="kh-reihe">' + knopf("menue", esc(T().zurueck)) + "</div>";
     },
     gabel() {
@@ -1924,7 +1991,10 @@
         '<div class="kh-zeile2"><span>' + esc(tx.grad) + "</span>" + gradKnoepfe() + "</div>" +
         '<div class="kh-zeile2"><span>' + esc(tx.kopf) + '</span><div class="kh-wahl"><button type="button" role="radio" aria-checked="' + E.kopf + '" data-tun="kopf" data-wert="1">' + esc(tx.kopfJa) + '</button><button type="button" role="radio" aria-checked="' + !E.kopf + '" data-tun="kopf" data-wert="0">' + esc(tx.kopfNein) + "</button></div></div>" +
         (E.kopf ? "" : '<p class="kh-klein">' + esc(tx.kopfInfo) + "</p>") +
-        '<div class="kh-zeile2"><span>' + esc(tx.fuehr) + "</span>" + schalter("fuehr", E.fuehr && E.kopf, !E.kopf) + "</div>" +
+        '<div class="kh-zeile2"><span>' + esc(tx.fuehr) + "</span>" + schalter("fuehr", E.fuehr) + "</div>" +
+        (E.fuehr ? '<div class="kh-zeile2"><span>' + esc(tx.klang) + '</span><div class="kh-wahl" role="radiogroup">' + ["chor", "floete", "harfe"].map(k => '<button type="button" role="radio" aria-checked="' + (E.fuehrKlang === k) + '" data-tun="fuehrKlang" data-wert="' + k + '">' + esc(T().vorher.klaenge[k]) + "</button>").join("") + "</div></div>" +
+          '<label class="kh-zeile2"><span>' + esc(tx.fuehrLaut) + '</span><input type="range" min="0" max="1" step="0.05" value="' + E.fuehrLaut + '" data-regler="fuehrLaut"></label>' : "") +
+        '<div class="kh-zeile2"><span>' + esc(tx.einsatz) + "</span>" + schalter("einsatz", E.einsatz) + "</div>" +
         '<div class="kh-zeile2"><span>' + esc(tx.publikum) + "</span>" + schalter("publikum", E.publikum) + "</div>" +
         '<div class="kh-zeile2"><span>' + esc(tx.aufnahme) + "</span>" + schalter("aufnahme", E.aufnahme, !window.MediaRecorder) + "</div>" +
         '<label class="kh-zeile2"><span>' + esc(tx.laut) + '</span><input type="range" min="0" max="1" step="0.05" value="' + E.laut + '" data-regler="laut"></label>' +
@@ -2016,6 +2086,15 @@
         break;
       }
       case "gabel": nebenlaeufigeStoppen(); gabelStarten(); break;
+      case "messTief": case "messHoch": case "messTiefNeu":
+        if (einmess) { einmess.schritt = tun === "messHoch" ? "hoch" : "tief"; if (tun === "messTiefNeu") einmess.tief = null; einmess.werte = []; einmess.halten = 0; einmess.aktuell = null; zeigen(); }
+        break;
+      case "willkommenMessen": schreib("imres-kehle-willkommen", "1"); einmessenStarten("menue"); break;
+      case "willkommenSpaeter": schreib("imres-kehle-willkommen", "1"); ansicht = "menue"; zeigen(); break;
+      case "fuehrKlang": E.fuehrKlang = wert; einstSpeichern(); if (ansicht === "vorher") { gewaehlt.bereit = false; vorbereiten(gewaehlt.st); } else zeigen(); break;
+      case "einsatz": E.einsatz = !E.einsatz; einstSpeichern(); if (ansicht === "vorher") neuZeichnenVorher(); else zeigen(); break;
+      case "tempo": E.tempo = +wert; einstSpeichern(); if (gewaehlt && ansicht === "vorher") vorbereiten(neuBauen(gewaehlt.st)); break;
+      case "probe": { const st = gewaehlt && gewaehlt.st; if (st) probehoeren(st); break; }
       case "bordunSchalter": if (bordun) bordunStoppen(); else bordunStarten(bordunGrund()); zeigen(); break;
       case "gabelTon": { E.bordunTon = klemm(bordunGrund() + (+wert), 36, 72); einstSpeichern(); if (bordun) bordunStarten(E.bordunTon); zeigen(); break; }
       case "vorspielen": if (gabel) { const m = bordun ? bordun.m + 12 : gabel.letzte != null ? gabel.letzte : 57; probeLaden(probeName("harfe", m)).then(() => spielen("harfe", m, ctx.currentTime + .02, .35, 1.6, ausgang)); } break;
@@ -2029,6 +2108,7 @@
   root.addEventListener("input", ev => {
     const r = ev.target.closest("[data-regler]"); if (!r) return;
     if (r.dataset.regler === "laut") { E.laut = +r.value; lautSetzen(); }
+    if (r.dataset.regler === "fuehrLaut") E.fuehrLaut = +r.value;
     if (r.dataset.regler === "versatz") { E.versatz = +r.value; const o = panel.querySelector(".kh-ms"); if (o) o.textContent = T().einst.ms(E.versatz); }
     einstSpeichern();
   });
@@ -2049,6 +2129,7 @@
     if (["spiel", "pause", "einmessen", "gabel", "mikro", "atem", "latenz"].includes(ansicht)) { ansicht = "menue"; zeigen(); }
   };
   /* Für Tests und Vorschaubilder: eine künstliche Stimme einspeisen */
+  if (!gemessen() && lies("imres-kehle-willkommen") !== "1") ansicht = "willkommen";
   root._test = {
     stimme(fn) { testStimme = fn; micAus(); },
     zustand: () => ({ ansicht, S, ergebnis, atem, latenz, bordun }),
@@ -2093,6 +2174,19 @@
 .kh-gross.rot { border-color: rgba(224,96,90,.55); background: linear-gradient(135deg, rgba(224,96,90,.16), rgba(224,96,90,.03)); }
 .kh-gross.rot b { color: #ff9a8a; }
 .kh-gross:hover, .kh-gross:focus-visible, .kh-eintrag:hover:not(:disabled), .kh-eintrag:focus-visible { border-color: var(--ember); background: rgba(224,160,70,.14); }
+.kh-banner { display: grid; gap: .25rem; text-align: left; width: 100%; padding: .7rem .85rem; border: 1px solid #ffd27a; background: linear-gradient(135deg, rgba(255,210,122,.2), rgba(255,210,122,.05)); color: var(--vellum); font: inherit; cursor: pointer; animation: khPuls 2.2s ease-in-out infinite; touch-action: manipulation; }
+.kh-banner b { color: #ffd27a; font-size: 1rem; }
+.kh-banner b em { font-style: normal; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; padding: .1rem .4rem; margin-left: .35rem; border-radius: 3px; background: #ffd27a; color: var(--night); vertical-align: middle; }
+.kh-banner span { font-size: .84rem; color: var(--ash); }
+.kh-banner.gross { padding: 1rem 1.1rem; } .kh-banner.gross b { font-size: 1.2rem; }
+.kh-willkommen { display: grid; justify-items: center; text-align: center; gap: .9rem; padding: clamp(.5rem, 4vh, 2.2rem) 0; }
+.kh-willkommen p { margin: 0; max-width: 34em; font-size: clamp(.95rem, 2.4vw, 1.08rem); line-height: 1.55; color: var(--vellum); }
+.kh-w-symbol { font-size: 3rem; line-height: 1; filter: drop-shadow(0 0 18px rgba(255,210,122,.5)); }
+.kh-riesig { font-size: 1.1rem !important; padding: .8rem 1.6rem !important; animation: khPuls 2s ease-in-out infinite; }
+.kh-riesig small { font-size: .8em; opacity: .8; }
+.kh-leise { border: 0; background: none; color: var(--ash); font: inherit; font-size: .88rem; text-decoration: underline; cursor: pointer; }
+.kh-bereit { display: grid; justify-items: center; gap: .7rem; text-align: center; padding: .4rem 0; }
+.kh-bereit p { margin: 0; color: var(--vellum); font-size: .95rem; line-height: 1.5; }
 .kh-reihe { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
 .kh-reihe.senk { flex-direction: column; align-items: stretch; max-width: 260px; margin: 0 auto; width: 100%; }
 .kh-reihe .tav-knopf { touch-action: manipulation; }
