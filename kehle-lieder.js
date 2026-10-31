@@ -35,6 +35,12 @@ window.KEHLE_LIEDER = {
         ["C", ["Ei|ne Schmie|de, alt und ma|gisch,", "und ein Lohn, der Hel|den lockt!", "E|cho grinst so|gar – wie tra|gisch,", "sonst nur mür|risch, stur, ver|stockt."]],
         ["V", ["Da stand ein Wald|mann samt dem Hun|de,", "ein Horn|kopf mit Ge|wit|ter|mun|de,", "ein Dar|kin, rot und re|gungs|los –", "und ich? Na ja, ich war fa|mos."]],
         ["C", ["Ei|ne Schmie|de, alt und ma|gisch,", "und ein Lohn, der Hel|den lockt!", "E|cho grinst so|gar – wie tra|gisch,", "sonst nur mür|risch, stur, ver|stockt."]]
+      ],
+      folgeEn: [
+        ["V", ["A let|ter came with dwar|ven seal|ing,", "I read it, tank|ard high and reel|ing:", "„Where gulls are scream|ing by the tide,", "be rich, be he|roes far and wide!“"]],
+        ["C", ["Find a forge of an|cient ma|gic,", "and a purse to fill your hand!", "E|ven E|cho smiles – how tra|gic,", "grim|mest grump in all the land."]],
+        ["V", ["A ran|ger stood be|side his hound there,", "a horned and storm|y dru|id frowned there,", "a Dar|kin, red, with mar|ble face –", "and me? Well, I was full of grace."]],
+        ["C", ["Find a forge of an|cient ma|gic,", "and a purse to fill your hand!", "E|ven E|cho smiles – how tra|gic,", "grim|mest grump in all the land."]]
       ]
     },
     /* ---------- 2 · Die Straße nach Phandalin ---------- */
@@ -52,6 +58,14 @@ window.KEHLE_LIEDER = {
         ["C", ["Gob|lin, Gob|lin, klei|ner Wicht,", "dein Ge|sicht – ein Schund|ge|dicht!", "Schief und grün und vol|ler Ris|se,", "und dein A|tem riecht nach Pis|se!"]],
         ["V", ["Ge|fang|ne Wöl|fe jau|len laut,", "wir schnei|den los, was Gob|lin klaut.", "Dann rein ins Nest, mal still, mal nicht –", "der Boss kriegt Stahl ins An|ge|sicht."]],
         ["C", ["Gob|lin, Gob|lin, klei|ner Wicht,", "dein Ge|sicht – ein Schund|ge|dicht!", "Schief und grün und vol|ler Ris|se,", "und dein A|tem riecht nach Pis|se!"]]
+      ],
+      folgeEn: [
+        ["V", ["Our cart rolls on to Phan|da|lin,", "and there's a wreck – we're boxed right in.", "From bush|es jumps a green|ish crowd,", "with crook|ed teeth and farts so loud."]],
+        ["C", ["Gob|lin, gob|lin, lit|tle twit,", "with a face like po|et's shit!", "Crook|ed, green, with bits all miss|ing,", "and your breath smells like stale piss|ing!"]],
+        ["V", ["We swing and miss, all four of us,", "with to|tal con|fi|dence and fuss.", "But Rex bites down and Fried|rich hits,", "and E|cho free|zes them to bits."]],
+        ["C", ["Gob|lin, gob|lin, lit|tle twit,", "with a face like po|et's shit!", "Crook|ed, green, with bits all miss|ing,", "and your breath smells like stale piss|ing!"]],
+        ["V", ["Some cap|tured wolves are howl|ing loud,", "we cut them free, we're feel|ing proud.", "Then through the nest, half stealth, half fight –", "the boss eats steel and says good|night."]],
+        ["C", ["Gob|lin, gob|lin, lit|tle twit,", "with a face like po|et's shit!", "Crook|ed, green, with bits all miss|ing,", "and your breath smells like stale piss|ing!"]]
       ]
     },
     /* ---------- 3 · Schloss Crackmore ---------- */
@@ -69,6 +83,14 @@ window.KEHLE_LIEDER = {
         ["C", ["O Glas|stab, du Glied, du ver|glas|ter, du Wicht,", "dein Stab ist aus Glas, doch dein Rück|grat ist's nicht!", "Man sieht dir durchs Hirn bis zum Hin|tern hin|durch,", "du Glas|kol|ben|furz, du La|bor|rat|ten|lurch!"]],
         ["V", ["Sei|ne Leu|te, die sof|fen sich voll, Krug um Krug,", "bis wir aus|sah'n wie zwölf – und dann war es ge|nug.", "Dann der Dolch von E|ze|kiel – der Glas|stab, er lief,", "doch ich zog ihn zu|rück: Fried|richs Pfeil, und zwar tief."]],
         ["C", ["O Glas|stab, du Glied, du ver|glas|ter, du Wicht,", "dein Stab ist aus Glas, doch dein Rück|grat ist's nicht!", "Man sieht dir durchs Hirn bis zum Hin|tern hin|durch,", "du Glas|kol|ben|furz, du La|bor|rat|ten|lurch!"]]
+      ],
+      folgeEn: [
+        ["V", ["There's a rab|bit, a bush, and then Rex in pur|suit –", "and a tun|nel shows up – who needs troops on the route?", "Then we pulled on the Red Robes we stripped from the dead,", "but E|ze|kiel stood out in his ar|mour of red."]],
+        ["C", ["Oh Glass|staff, you tool, you trans|par|ent old prick,", "your staff may be glass, but your spine's a wet stick!", "One sees through your skull all the way to your arse,", "you glass bea|ker fart, you lab rat in a farce!"]],
+        ["V", ["Then I knocked o|ver glass – what a clat|ter and crash –", "and then Glass|staff walked in, all a|bris|tle with 'tache.", "„We're the brand new re|cruits!“ – and he swal|lowed it whole,", "for the brain in his skull was the size of a mole."]],
+        ["C", ["Oh Glass|staff, you tool, you trans|par|ent old prick,", "your staff may be glass, but your spine's a wet stick!", "One sees through your skull all the way to your arse,", "you glass bea|ker fart, you lab rat in a farce!"]],
+        ["V", ["All his lack|eys got ham|mered with mug af|ter mug,", "till they saw twelve of us and they slumped on the rug.", "Then a stab from E|ze|kiel – and Glass|staff took flight,", "but I dragged him back in: Fried|rich's ar|row – good|night!"]],
+        ["C", ["Oh Glass|staff, you tool, you trans|par|ent old prick,", "your staff may be glass, but your spine's a wet stick!", "One sees through your skull all the way to your arse,", "you glass bea|ker fart, you lab rat in a farce!"]]
       ]
     },
     /* ---------- 4 · Donnerbaum ---------- */
@@ -86,6 +108,14 @@ window.KEHLE_LIEDER = {
         ["C", ["Ve|nom|fang, du Ech|sen|furz,", "dei|ne Flü|gel sind zu kurz!", "Spuckst du Gift, dann spuck ich Spott –", "E|cho macht dich zu Kom|pott!"]],
         ["V", ["Er schlug nach Fried|rich, knapp vor|bei,", "E|ze|kiels Pfeil: der Kopf ent|zwei!", "Dann stopf ich mir die Pfei|fe fein,", "und E|cho sackt die Beu|te ein."]],
         ["C", ["Ve|nom|fang, du Ech|sen|furz,", "dei|ne Flü|gel sind zu kurz!", "Spuckst du Gift, dann spuck ich Spott –", "E|cho macht dich zu Kom|pott!"]]
+      ],
+      folgeEn: [
+        ["V", ["In Thun|der|tree, up rot|ten stairs,", "we climbed the tow|er, un|a|wares;", "then from the woods a shriek rang out:", "a green and ven|om spit|ting lout."]],
+        ["C", ["Ve|nom|fang, you liz|ard fart,", "flap|ping wings that fall a|part!", "Spit your ven|om, I spit spite –", "E|cho grills you well to|night!"]],
+        ["V", ["The ven|om hit our E|cho square,", "he coughed up green and cursed the air.", "Then I be|gan to sing – the beast", "fell in my rain|bow spell, at least."]],
+        ["C", ["Ve|nom|fang, you liz|ard fart,", "flap|ping wings that fall a|part!", "Spit your ven|om, I spit spite –", "E|cho grills you well to|night!"]],
+        ["V", ["He swiped at Fried|rich, missed the head,", "E|ze|kiel's ar|row – drag|on dead!", "I stuff my pipe with some|thing fine,", "while E|cho bags the loot: „It's mine!“"]],
+        ["C", ["Ve|nom|fang, you liz|ard fart,", "flap|ping wings that fall a|part!", "Spit your ven|om, I spit spite –", "E|cho grills you well to|night!"]]
       ]
     },
     /* ---------- 5 · Ilvaras Feste ---------- */
@@ -103,6 +133,14 @@ window.KEHLE_LIEDER = {
         ["C", ["„Die Spin|ne wird euch krie|gen!“,", "schreit je|de Drow im Flie|gen.", "Doch wir be|ma|len Spin|nen", "mit Pim|meln – und ge|win|nen!"]],
         ["V", ["Ich schimpf' die Wa|chen bis aufs Blut,", "sie stür|men rein vor lau|ter Wut.", "Ein Dä|mon summt, die Fes|te bebt,", "Il|va|ra springt und ü|ber|lebt."]],
         ["C", ["„Die Spin|ne wird euch krie|gen!“,", "schreit je|de Drow im Flie|gen.", "Doch wir be|ma|len Spin|nen", "mit Pim|meln – und ge|win|nen!"]]
+      ],
+      folgeEn: [
+        ["V", ["A cot|tage deep in for|est green,", "the kind|est dru|id ev|er seen,", "with fox and spar|row, stew on hob –", "then fog, and ev|ery head's a throb."]],
+        ["C", ["„The Spi|der will be com|ing!“", "each drow screams, bat wings drum|ming.", "We paint dicks on the spin|ners –", "and that's how we're the win|ners!"]],
+        ["V", ["We woke in chains, all wet and sore,", "two guards were grin|ning at the door.", "But E|cho turned in|to a rat,", "chewed through our ropes, brought gear – that's that."]],
+        ["C", ["„The Spi|der will be com|ing!“", "each drow screams, bat wings drum|ming.", "We paint dicks on the spin|ners –", "and that's how we're the win|ners!"]],
+        ["V", ["I curse the guards till they see red,", "they storm right in – and end up dead.", "A de|mon buzz|es, walls all shake,", "Il|va|ra jumps – and lives, the snake."]],
+        ["C", ["„The Spi|der will be com|ing!“", "each drow screams, bat wings drum|ming.", "We paint dicks on the spin|ners –", "and that's how we're the win|ners!"]]
       ]
     },
     /* ---------- 6 · Der See der Kuo-Toa ---------- */
@@ -120,6 +158,14 @@ window.KEHLE_LIEDER = {
         ["V", ["Der klei|ne Fa|gas fiel im Strei|te,", "der Gnom, so treu an uns|rer Sei|te.", "Dann stieg der Zwei|kopf aus dem See,", "und al|les wur|de Schutt und Weh."]],
         ["V", ["Du standst am Tem|pel, Arm' er|ho|ben,", "als rings|um Fels und Was|ser to|ben.", "Ein Fang|arm fiel, so schwer wie Blei –", "und nichts blieb üb|rig. Nichts. Vor|bei."]],
         ["C", ["O Ploop|ploo|peen, du Herr der Tie|fe,", "dir war ein fro|hes Lied ver|spro|chen.", "Wenn ich dich nur noch ein|mal rie|fe …", "Nun klingt es lei|se und ge|bro|chen."]]
+      ],
+      folgeEn: [
+        ["V", ["Be|side the lake where mush|rooms glim|mer,", "a voice came drift|ing through the shim|mer.", "For weeks I called him Blu|blu|pin,", "he on|ly smiled and took it in."]],
+        ["V", ["He asked our help to save his na|tion,", "half lost to a false god's temp|ta|tion.", "We walked in bound, a play of chains,", "we trust|ed him; his trust re|mains."]],
+        ["C", ["O Ploop|ploo|peen, you deep sea keep|er,", "I prom|ised you a song of glad|ness,", "if I could call you back, O sleep|er …", "it sounds so soft and full of sad|ness."]],
+        ["V", ["Our lit|tle Fa|gas fell be|side us,", "the loy|al gnome who'd helped to guide us.", "Then from the lake two heads a|rose,", "and all was rub|ble, grief and woes."]],
+        ["V", ["You stood up|on your tem|ple, pray|ing,", "while all a|round, the stone was sway|ing.", "A ten|dril fell, as dark as doom –", "and noth|ing stayed. No psalm. No tomb."]],
+        ["C", ["O Ploop|ploo|peen, you deep sea keep|er,", "I prom|ised you a song of glad|ness,", "if I could call you back, O sleep|er …", "it sounds so soft and full of sad|ness."]]
       ]
     },
     /* ---------- 7 · Die Flucht über den See ---------- */
@@ -137,6 +183,14 @@ window.KEHLE_LIEDER = {
         ["C", ["Hört, ihr Leut', es ist kein Spott:", "Fried|rich box|te ei|nen Gott!", "Wir|kung null – doch das ist gleich,", "er er|zählt's in je|dem Reich!"]],
         ["V", ["Wir rann|ten, wie nie je ge|rannt,", "zum Boot an dem ret|ten|den Strand,", "und Fried|rich er|zählt es bis heut',", "und kei|ner, der's hört, ist er|freut."]],
         ["C", ["Hört, ihr Leut', es ist kein Spott:", "Fried|rich box|te ei|nen Gott!", "Wir|kung null – doch das ist gleich,", "er er|zählt's in je|dem Reich!"]]
+      ],
+      folgeEn: [
+        ["V", ["Two heads and a ten|ta|cle scream,", "and ma|gic was gone like a dream,", "and ev|ery|one's knees knocked with fright –", "but mine just from pit|y, all right."]],
+        ["C", ["Lis|ten, folks, and give a nod:", "Fried|rich punched a might|y god!", "Did no dam|age – nev|er mind,", "he will tell all hu|man|kind!"]],
+        ["V", ["He drew back his bow|string so cool", "and shot at the god from the pool.", "The ar|row bounced off like a flea –", "and Fried|rich? As proud as could be."]],
+        ["C", ["Lis|ten, folks, and give a nod:", "Fried|rich punched a might|y god!", "Did no dam|age – nev|er mind,", "he will tell all hu|man|kind!"]],
+        ["V", ["We ran like we'd nev|er once fled,", "the boat on the shore up a|head,", "and Fried|rich still tells it to|day,", "and no|bod|y's hap|py, I'd say."]],
+        ["C", ["Lis|ten, folks, and give a nod:", "Fried|rich punched a might|y god!", "Did no dam|age – nev|er mind,", "he will tell all hu|man|kind!"]]
       ]
     },
     /* ---------- 8 · Am Hof von König Horga ---------- */
@@ -154,6 +208,14 @@ window.KEHLE_LIEDER = {
         ["C", ["Heil dir, Hor|ga, Herr der Hal|len,", "Ham|mer, Am|boss, Bart und Kro|ne!", "Mö|gen Fein|de vor dir fal|len –", "und dein Bier ist auch nicht oh|ne!"]],
         ["V", ["Wir sa|hen De|mo|gor|gon stei|gen,", "zwei Köp|fe, Grau|en, Schrei und Schlund.", "Wir flo|hen – und ich will nicht schwei|gen:", "Die Un|ter|welt ist nicht ge|sund."]],
         ["C", ["Heil dir, Hor|ga, Herr der Hal|len,", "Ham|mer, Am|boss, Bart und Kro|ne!", "Mö|gen Fein|de vor dir fal|len –", "und dein Bier ist auch nicht oh|ne!"]]
+      ],
+      folgeEn: [
+        ["V", ["O Hor|ga, Stahl the Fifth, in splen|dour,", "your throne of rock, your word of ore,", "your beard's a wall, a stout de|fend|er,", "be|neath the steel, a gold|en core!"]],
+        ["C", ["Hail, King Hor|ga, might|y ham|mer,", "an|vil, beard and crown so stead|y!", "May your foes all fall and stam|mer –", "and your ale is strong and head|y!"]],
+        ["V", ["We brought your son home out of dan|ger,", "Prince Kar|dal, whole and safe and sound.", "He played a scout, a hum|ble stran|ger –", "I knew. Al|most. With grace pro|found."]],
+        ["C", ["Hail, King Hor|ga, might|y ham|mer,", "an|vil, beard and crown so stead|y!", "May your foes all fall and stam|mer –", "and your ale is strong and head|y!"]],
+        ["V", ["We saw the De|mo|gor|gon ris|ing,", "two heads, a scream, a gap|ing maw.", "We fled – and I'll be sum|ma|ris|ing:", "this Un|der|dark has got a flaw."]],
+        ["C", ["Hail, King Hor|ga, might|y ham|mer,", "an|vil, beard and crown so stead|y!", "May your foes all fall and stam|mer –", "and your ale is strong and head|y!"]]
       ]
     },
     /* ---------- 9 · Markt der Klingen & Dorf der Riesen ---------- */
@@ -171,6 +233,14 @@ window.KEHLE_LIEDER = {
         ["C", ["Kennst du Gun|dren? Kennst du Gun|dren?", "Zwerg mit Bart und schwar|zem Haar!", "Kennst du Gun|dren? Kennst du Gun|dren?", "Nein? Na gut. Dann nächs|tes Jahr!"]],
         ["V", ["Und vor dem Dra|chen, Glut und Feu|er,", "da wird die Fra|ge rich|tig teu|er:", "Ich hielt die Luft an – und er spricht", "ganz ein|fach wei|ter. Heißt wohl: nicht."]],
         ["C", ["Kennst du Gun|dren? Kennst du Gun|dren?", "Zwerg mit Bart und schwar|zem Haar!", "Kennst du Gun|dren? Kennst du Gun|dren?", "Nein? Na gut. Dann nächs|tes Jahr!"]]
+      ],
+      folgeEn: [
+        ["V", ["A tra|der, sword in hand, was sell|ing,", "and pushed on E|cho, loud|ly yell|ing.", "But E|cho asks, quite grave, quite plain,", "for Gun|dren. No. Not known. A|gain."]],
+        ["C", ["Know of Gun|dren? Know of Gun|dren?", "Dwarf with beard and ra|ven hair!", "Know of Gun|dren? Know of Gun|dren?", "No? Al|right. Next year, I swear!"]],
+        ["V", ["A|mong the gi|ants' carts and boul|ders,", "one gi|ant stopped, with might|y shoul|ders.", "He looked a long, long way be|low,", "and pat|ted Rex. The an|swer? No."]],
+        ["C", ["Know of Gun|dren? Know of Gun|dren?", "Dwarf with beard and ra|ven hair!", "Know of Gun|dren? Know of Gun|dren?", "No? Al|right. Next year, I swear!"]],
+        ["V", ["Be|fore the drag|on, fire and em|bers,", "the ques|tion's priced in limbs and mem|bers:", "I held my breath. He did|n't blink,", "just car|ried on. So: no, I think."]],
+        ["C", ["Know of Gun|dren? Know of Gun|dren?", "Dwarf with beard and ra|ven hair!", "Know of Gun|dren? Know of Gun|dren?", "No? Al|right. Next year, I swear!"]]
       ]
     },
     /* ---------- 10 · Die Halle der Flamme ---------- */
@@ -188,6 +258,14 @@ window.KEHLE_LIEDER = {
         ["V", ["Wir sah'n die Stadt der Fi|sche un|ter|gehn,", "den Dä|mon|fürs|ten aus den Flu|ten stehn;", "wir flo|hen ü|ber Wel|len, schwarz und ban|ge,", "und ka|men her zu dir mit dem Ge|san|ge."]],
         ["C", ["Ver|scho|ne uns, o Them|ber|chaud!", "Dein Schatz ist hoch, dein Bauch ist rund,", "wir sind nur Würst|chen, schmal wie Stroh,", "und schme|cken gräss|lich – nicht ge|sund!"]],
         ["C", ["Ver|scho|ne uns, o Them|ber|chaud!", "Dein Schatz ist hoch, dein Bauch ist rund,", "wir sind nur Würst|chen, schmal wie Stroh,", "und schme|cken gräss|lich – nicht ge|sund!"]]
+      ],
+      folgeEn: [
+        ["V", ["O Mas|ter of the Flames, O Lord of Fire,", "up|on your gold|en bed, whom all ad|mire,", "now hear the song of four who came here crawl|ing", "through night and web, your fi|ery name re|call|ing."]],
+        ["C", ["Oh, spare us, might|y Them|ber|chaud!", "Your hoard is high, your bel|ly round,", "we're scraw|ny saus|a|ges, you know,", "and taste dis|gust|ing – most un|sound!"]],
+        ["V", ["In Thun|der|tree a drow cooked up a stew,", "a soup of lies, and down the hatch it flew.", "We fought through pris|ons, webs and spi|ders creep|ing", "to take Dawn|bring|er from a grave's dark keep|ing."]],
+        ["V", ["We saw the cit|y of the fish folk drown,", "the de|mon prince rise up and tear it down;", "we fled a|cross the waves, all black and roar|ing,", "and came to you, our song be|fore you pour|ing."]],
+        ["C", ["Oh, spare us, might|y Them|ber|chaud!", "Your hoard is high, your bel|ly round,", "we're scraw|ny saus|a|ges, you know,", "and taste dis|gust|ing – most un|sound!"]],
+        ["C", ["Oh, spare us, might|y Them|ber|chaud!", "Your hoard is high, your bel|ly round,", "we're scraw|ny saus|a|ges, you know,", "and taste dis|gust|ing – most un|sound!"]]
       ]
     }
   ],
