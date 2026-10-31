@@ -2450,13 +2450,13 @@
   const WOLKE = "M7 14.5h10.2a3.4 3.4 0 0 0 .3-6.8 5 5 0 0 0-9.7-.9A3.4 3.4 0 0 0 7 14.5z";
 const ZUS_ICON = {
   kriegstrommeln: ["M4 9c0-1.7 3.6-3 8-3s8 1.3 8 3v8c0 1.7-3.6 3-8 3s-8-1.3-8-3zM4 9c0 1.7 3.6 3 8 3s8-1.3 8-3M6 12.2l3 6.5M12 12v8M18 12.2l-3 6.5M9 3.5l2.5 4M17 2.5l-3 5"],
-  ente: ["M3 14.5h11.5V9.5a3.2 3.2 0 0 0-6.4 0v1.2H5.4M14.5 14.5c3 0 5.4-1.4 6.5-3.8-.8 5-4 8.8-9.5 8.8-4.4 0-7.4-1.8-8.5-5", "M10.4 9.3a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
-  esel: ["M8 2.5l1.4 7.5M16 2.5l-1.4 7.5M8.6 10h6.8l1.1 7c0 2.1-2 3.5-4.5 3.5S7.5 19.1 7.5 17zM10 18h4", "M9.6 13a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM12.8 13a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
+  ente: ["M6.5 13h7c2.5 0 5-1 6.8-2.6.8 4.8-2.8 8.1-8.3 8.1-3.6 0-6.2-1.6-6.8-4.5M6.4 8a2.6 2.6 0 1 0 5.2 0 2.6 2.6 0 1 0-5.2 0zM6.4 8.4H3.5l2.6 1.8M8 10.4c-.7 1-.7 1.9 0 2.6M2 21.5h20", "M8.9 7.4a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"],
+  esel: ["M7 21.5v-6c0-3 1.4-5.4 3.8-6.8L9.5 2.5l3.4 4.6 1.6-4.6.8 5.5c1.5 1 2.6 2.5 3.2 4.4l1.9 4.3c.4 1-.3 2-1.4 2h-2.2c-1 0-1.9-.5-2.5-1.3L13 15.4v6.1M10.8 8.7c-1.3 1.4-1.8 3-1.6 4.8", "M13.6 10.5a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM18.4 16.3a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z"],
   ziege: ["M8 7C6.6 5 7 3 9.2 2.6M16 7c1.4-2 1-4-1.2-4.4M5 8.5l3 .5M19 8.5l-3 .5M8 7h8l-1 8-3 3-3-3zM11 18l1 3.5 1-3.5", "M9.6 10.5a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM12.8 10.5a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
   hirsch: ["M9 13h6l-1 6.5h-4zM9 13C6 11 5 8 5 3.5M5 7.5L2.8 6M6.8 10.5l-2.6.6M15 13c3-2 4-5 4-9.5M19 7.5L21.2 6M17.2 10.5l2.6.6M7.5 13.5l-2 .5M16.5 13.5l2 .5"],
-  keiler: ["M3 14c0-3.5 3.5-6 8-6 3.5 0 6 1.5 7.5 3.5l2.5.8v3.2l-2.5.6c-1.5 2-4 3.4-7.5 3.4-4.5 0-8-2-8-5.5zM6.5 19v2.5M13.5 19v2.5M18.6 15.6c-.1 1.6.6 2.6 1.6 3M11 8l1-2.5 1.5 2.6", "M15.2 11.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
+  keiler: ["M3 14c0-3.5 3.5-6 8-6 3.5 0 6 1.5 7.5 3.5l2.5.8v3.2l-2.5.6c-1.5 2-4 3.4-7.5 3.4-4.5 0-8-2-8-5.5zM6.5 19v2.5M13.5 19v2.5M18.8 15.5c1.3-.2 2.2-1.2 2.2-2.8M11 8l1-2.5 1.5 2.6M7.5 8.6l.4-1.9M14.8 8.8l.6-1.6", "M15.2 11.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
   muehle: ["M4 12a8 8 0 1 0 16 0 8 8 0 1 0-16 0zM12 4v16M4 12h16M6.3 6.3l11.4 11.4M17.7 6.3L6.3 17.7M10 12a2 2 0 1 0 4 0 2 2 0 1 0-4 0z"],
-  greif: ["M12 9C9.5 5 6 3.5 2.5 4c1.5 3 3.5 5 6.2 6M12 9c2.5-4 6-5.5 9.5-5-1.5 3-3.5 5-6.2 6M9 10c0 4 1 7 3 10.5 2-3.5 3-6.5 3-10.5a3 3 0 0 0-6 0z", "M12 8.6l-1.4 2.2h2.8z"],
+  greif: ["M3 19c0-6.5 3.2-11.2 9-12.2-1.4 1.8-1.9 3.4-1.9 4.9 1.5-1.4 3.1-2.1 5-2.1-1.5 1.5-2.3 3-2.5 4.5 1.4-.8 2.9-1.2 4.5-1.1-2.5 3.2-6.6 5.6-14.1 6zM14.5 7.5c0-2 1.6-3.5 3.6-3.5 1.4 0 2.6.8 3.2 2l1.2 2.2-2.6-.3c-.2 1.3-1.3 2.3-2.6 2.4", "M17.4 5.6a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"],
   schlange: ["M17 4.5c-3-1.5-7 0-7 3s7 2.5 7 6-4 4.5-7 4.5-5-1-6-2.5M17.2 4.8l2.6-.6M17.2 4.8l1.6 1.8", "M14.6 4.8a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"],
   yeti: ["M7 9.5C7 6 9 3.5 12 3.5S17 6 17 9.5V15c0 3.4-2.2 5.5-5 5.5S7 18.4 7 15zM7 11l-3.5 4M17 11l3.5 4M9.5 16.5l1.2-1 1.3 1 1.3-1 1.2 1M8.5 3.8l-.5 2M15.5 3.8l.5 2", "M9.4 10a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM13 10a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
   kinder: ["M4.5 6a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM6.5 8v6M6.5 10.5l-3-3M6.5 10.5l3-3M6.5 14l-2 5.5M6.5 14l2 5.5M13 7.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM15 9.5V15M15 11.5l-3.2 1.5M15 11.5l3.2-1.2M15 15l-2.2 5M15 15l2.4 4.6", "M18.6 19a2 2 0 1 0 4 0 2 2 0 1 0-4 0z"],
@@ -2475,13 +2475,13 @@ const ZUS_ICON = {
   feuer: ["M12 2.5c1 3.4 5 5.3 5 9.6a5 5 0 0 1-10 0c0-2.5 1.4-4 2.5-5 .3 1.6 1 2.6 2 3.1.6-2.4.6-5.2.5-7.7z", "M4.5 21l15-3.2M4.5 17.8l15 3.2"],
   kessel: ["M4.5 10.5h15M6 10.5c0 4.8 2.6 7.8 6 7.8s6-3 6-7.8M8.5 18l-1.2 2.8M15.5 18l1.2 2.8M9 7.2a1.2 1.2 0 1 0 2.4 0 1.2 1.2 0 1 0-2.4 0zM13 4.5a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0z"],
   voegel: ["M3 15.5c2.6.2 4.8-1.3 5.8-4.2.9-2.6 2.8-4.3 5.3-4.3 2 0 3.4 1.4 3.6 3.3l2.3.6-2.3.9c-.6 3.8-3.6 6.7-8 6.7H8.5L6 21M10.5 13.5c1.8.4 3.6-.3 4.6-2"],
-  grillen: ["M7.5 14.2c0-1.6 1.5-2.6 3.5-2.6h6c1.5 0 2.5.9 2.5 2s-1 2-2.5 2h-6c-2 0-3.5-.2-3.5-1.4zM3.6 13.8a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM15 11.8l3-5.3 2.8 9.6M9.5 15.6L8 19.5M12.5 15.6l-.6 3.9M4.6 12.2C3.4 9 4.3 5.8 7.3 3.8M6 11.9c.4-3 2.4-5.6 5.5-6.6"],
+  grillen: ["M7 14c0-1.4 2-2.4 5-2.4h4.5c1.6 0 2.8.9 2.8 2.1s-1.2 2.3-2.8 2.3H12c-3 0-5-.6-5-2zM3.8 14.2a2.2 2.2 0 1 0 4.4 0 2.2 2.2 0 1 0-4.4 0zM15 12l3.5-5.5L21 17M9.5 16.2L8.3 19.5M12.5 16.4l.3 3.1M4.8 12.4C4.2 9 4.8 6 7.3 3.5M6.6 12.2c1-3 3-5.2 6-6", "M5.4 13.8a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z"],
   eule: ["M6 9c0-3 2.4-4.5 6-4.5S18 6 18 9v5.5c0 3.9-2.6 6.2-6 6.2s-6-2.3-6-6.2zM6.3 6.8L5 3.2l3.4 2M17.7 6.8L19 3.2l-3.4 2M7.4 10a2.3 2.3 0 1 0 4.6 0 2.3 2.3 0 1 0-4.6 0zM12 10a2.3 2.3 0 1 0 4.6 0 2.3 2.3 0 1 0-4.6 0z", "M12 12.2l-.9 1.5h1.8zM9.2 9.9a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0zM13.6 9.9a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z"],
   frosch: ["M3.5 15c0-3.8 3.8-6.3 8.5-6.3s8.5 2.5 8.5 6.3c0 3-3.8 5-8.5 5s-8.5-2-8.5-5zM5.2 8.3a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0zM13.2 8.3a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0zM7.5 15.2c2.8 1.7 6.2 1.7 9 0", "M7.2 8.3a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM15 8.3a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"],
   wolf: ["M4.5 3l3.2 5h8.6l3.2-5 .8 8.5-3.3 3.3-2 5.7h-6l-2-5.7-3.3-3.3zM8.5 11.5l2 .8M15.5 11.5l-2 .8M10 17.5l2 1.3 2-1.3", "M11 15.6h2l-1 1.2z"],
   kraehe: ["M5 21.5h14.5M10 19.2v2.3M13 19v2.5", "M2.5 9.3L6 8.2C6.6 6.3 8 5.2 9.8 5.2c2.2 0 3.7 1.5 4 3.6 2.4 1.3 4.6 3.6 6.6 6.9l1.1 1.8-3.3-.9c-1.4 1.4-3.4 2.2-5.7 2.2-3.4 0-5.7-2-5.7-5 0-1.5.5-2.8 1.2-3.7L6 9.9z"],
-  moewe: ["M2 10.5c3-2.4 6.5-2.2 10 1.8 3.5-4 7-4.2 10-1.8M4 18.5c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"],
-  specht: ["M18 2v20M21.5 2v20M14.5 9.5l3.5.5M15 11.5c-1.4 0-2.6-1-2.8-2.5-.2-1.8 1.1-3.3 2.9-3.2l-1 9.5c-1.5 2.5-3.3 4.5-5.6 6M12.4 7.5c.5-.8 1.4-1.3 2.4-1.4", "M12.2 8.5a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z", "M3 8l2 .8M3 11.5h2.3M3 15l2-.8"],
+  moewe: ["M2 12.5c2.6-2.6 5.6-2.8 8.6.4l1.4 1.5 1.4-1.5c3-3.2 6-3 8.6-.4M13.5 6.2c1-.9 2.1-1 3.1.2 1-1.2 2.1-1.1 3.1-.2M4 20c1.6-1 3.2-1 4.8 0s3.2 1 4.8 0", "M11.2 14.2a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
+  specht: ["M17.5 2v20M21.5 2v20M9.8 7a2.2 2.2 0 1 0 4.4 0 2.2 2.2 0 1 0-4.4 0zM14.2 7h3M10.3 8.8c-1.8 1.7-2.4 4.6-1.5 7.4l3.4 2.4 2.1-1.3c.6-3-.1-6.3-1.6-8.3M9.2 16.5L7.8 21", "M11.6 6.5a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z", "M2.5 6.5l2.2.6M2.5 10.5h2.4"],
   bienen: ["M7 14.5a5 4 0 1 0 10 0 5 4 0 1 0-10 0zM10.2 10.8v7.4M13.8 10.8v7.4M17 14.5h2.5M10 10.5C7.5 8 8 4.5 10 4.5s2.3 3 1.5 5.5M14 10.5c2.5-2.5 2-6-.2-6-1.8 0-2 3-1.3 5.5"],
   fledermaus: ["", "M12 9.5l-1-2.2v3.2c-1.2-.4-2.6-.1-3.4.8C6.6 9.8 4.5 9.2 2 10c1.4 1.6 1.7 4.1 1 6 1.6-1 3.6-1 5 .2.9-1.2 2.4-1.5 4-.4 1.6-1.1 3.1-.8 4 .4 1.4-1.2 3.4-1.2 5-.2-.7-1.9-.4-4.4 1-6-2.5-.8-4.6-.2-5.6 1.3-.8-.9-2.2-1.2-3.4-.8V7.3z"],
   hund: ["M8 5.5h8c2 0 3 1.6 3 4v4c0 3.6-3 6.5-7 6.5s-7-2.9-7-6.5v-4c0-2.4 1-4 3-4zM8 5.5C5 5.5 2.6 7.6 3.2 12l2.3 2.2M16 5.5c3 0 5.4 2.1 4.8 6.5l-2.3 2.2M10 16.5c1.3 1 2.7 1 4 0", "M8.9 10.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.3 10.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM10.6 13.2h2.8l-1.4 1.6z"],
@@ -2491,7 +2491,7 @@ const ZUS_ICON = {
   huhn: ["M7 11.5c0-3 2-5 4.5-5 2.2 0 3.6 1.5 3.6 3.6v1.1c2 0 3.8-1.8 4.9-4.2 1.2 3.4.2 8.2-2.8 10.2-2.1 1.4-5.2 1.6-7.3.2C7.9 16.3 7 14 7 11.5zM10.5 18.4v3M13.5 18.4v3", "M9.7 6.8c-.6-1.5.4-3 1.6-2.4.5-1.2 2.2-.7 2.2.7zM7 9.6l-2.2.8 2.2.8zM9.2 9.3a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"],
   schwein: ["M4 12.5c0-4.2 3.6-7 8-7s8 2.8 8 7-3.6 7.5-8 7.5-8-3.3-8-7.5zM6 7.8L5 3.8l4 2.3M18 7.8l1-4-4 2.3M9 14.5a3 2.2 0 1 0 6 0 3 2.2 0 1 0-6 0z", "M10.5 14.5a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0zM12.1 14.5a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0zM8 10.3a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM14.4 10.3a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
   katze: ["M5 4l3.6 4h6.8L19 4l.6 8.6c0 4.4-3.4 7.4-7.6 7.4s-7.6-3-7.6-7.4zM1.5 13.5h5.5M1.8 16.5l5.2-1.4M22.5 13.5H17M22.2 16.5L17 15.1M10.5 16.2c.9.7 2.1.7 3 0", "M8.3 11.8l2.2.4-2.2.6zM15.7 11.8l-2.2.4 2.2.6zM11 14h2l-1 1.1z"],
-  wal: ["M2.5 13.5c0-3 4-5 9-5 4.2 0 7 2 8 4.6l2.3-2.2v5.4l-2.3-1.6c-1.1 2.6-4 4.3-8 4.3-5 0-9-2.4-9-5.5zM10 6.2V3M10 6.2C10 4.5 11 3.5 12 3.3M10 6.2C10 4.5 9 3.5 8 3.3M3.5 15.5c2.5 1.2 6 1.5 9 1", "M6 12.2a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"],
+  wal: ["M12 19v-6.5c0-2.1-1.5-3.6-3.5-4.6-2-1-4.5-1-6 .5 2.5.5 4.8 1.6 5.8 3.6M12 12.5c0-2.1 1.5-3.6 3.5-4.6 2-1 4.5-1 6 .5-2.5.5-4.8 1.6-5.8 3.6M2 20c1.7-1.2 3.3-1.2 5 0s3.3 1.2 5 0 3.3-1.2 5 0 3.3 1.2 5 0", "M10.8 4.6a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.4 2.8a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"],
   stimmen: ["M3 4.5h11.5v7.5H8.2L5 15v-3H3zM10 14.5h6.8L20 17.5v-3h1V8h-4.5"],
   markt: ["M3 9.5L5 4h14l2 5.5M3 9.5a2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0M5 12v8.5M19 12v8.5M3 20.5h18M9.5 4l-.8 5.5M14.5 4l.8 5.5", "M7.5 17.2a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0zM11 17.2a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0z"],
   hafen: ["M10 4.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0zM12 6.5v14.5M8 10h8M4 13.5c0 4.3 3.6 7.5 8 7.5s8-3.2 8-7.5M2.3 15.3L4 13.5l1.8 1.8M18.2 15.3l1.8-1.8 1.7 1.8"],
@@ -2500,7 +2500,7 @@ const ZUS_ICON = {
   uhr: ["M3.5 12a8.5 8.5 0 1 0 17 0 8.5 8.5 0 1 0-17 0zM12 7v5l3.3 2.2M12 3.5v1.3M20.5 12h-1.3M12 20.5v-1.3M3.5 12h1.3"],
   gesang: ["M5.5 21.5c0-5.4 1.5-9.4 3.1-12.1C9.7 7.4 10.8 5.8 12 5.8s2.3 1.6 3.4 3.6c1.6 2.7 3.1 6.7 3.1 12.1zM8.5 21.5c.3-2 1.6-3.2 3.5-3.2s3.2 1.2 3.5 3.2", "M9.6 13.8c0-1.7 1-3 2.4-3s2.4 1.3 2.4 3v1.9H9.6zM16.6 8a1.4 1.1 0 1 0 2.8 0 1.4 1.1 0 1 0-2.8 0z", "M19.3 7.9V2.5l2.4 1.1"],
   segel: ["M12 2.5v15M12 3.5l7.5 11.7H12M12 6.5l-6.5 8.7H12M3.5 17.5h17l-2.6 3.8H6.1z"],
-  axt: ["M4 21.5L15.5 6M12.8 4.6c2.2-1.7 5.2-1.6 7.1.3l-4.3 6.3-3.3-2.5z", "M2.5 21.5h9"],
+  axt: ["M14.5 22V2.5M14.5 5.5L8.3 3.2C5.6 6.4 5.6 11.6 8.3 14.8l6.2-2.3M14.5 6.2h2.6v5.6h-2.6", "", "M3 21.5h8"],
   hacke: ["M3.5 9.5C7.6 4.4 14.6 3.5 20.5 7M11.4 5.4L6.4 21.5", "M15.5 18.5l2-2.3 2.6.8.5 2.5-2.4 1.3zM20.2 14.3l1-.6.6 1-.9.6z"],
   geist: ["M6 21V10a6 6 0 0 1 12 0v11l-2-1.6-2 1.6-2-1.6-2 1.6-2-1.6zM10 15.5a2 2.2 0 1 0 4 0 2 2.2 0 1 0-4 0z", "M8.8 10.8a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0zM13.2 10.8a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0z"],
   untot: ["M3 21.5h18M5.5 21.5l1.2-1.2M17 21.5l1.4-1.6M9.5 21.5V12l-1.8-3.4c-.4-.8.6-1.5 1.2-.8l1.3 1.6V4.8a.9.9 0 0 1 1.8 0v4.5V3.8a.9.9 0 0 1 1.8 0v5.5V5a.9.9 0 0 1 1.8 0v5.5l.6-1.5c.4-.9 1.8-.5 1.6.5L18 14c-.3 1.6-1.4 2.6-3 3v4.5"],
@@ -2571,7 +2571,7 @@ const ZUS_ICON = {
     const j = ctx.currentTime, [fx, fy, fz] = figurOrt(), hier = raumBei(fx, fy), br = { sanft: .35, mittel: .6, rundum: .9 }[raumBreite] || .6;
     kul.betten.forEach(b => {
       if (!b || !b.rf) return;
-      const [x, y, z] = schichtOrt(quellIcon(b.urname)), w = raumWeg(hier, raumBei(x, y)), dx = x - fx, d = Math.hypot(dx, (y - fy) * .44, (z - fz) * .6);
+      const [x, y, z] = schichtOrt(quellIcon(b.urname)), w = raumWeg(hier, raumBei(x, y), [fx, fy], [x, y]), dx = x - fx, d = Math.hypot(dx, (y - fy) * .44, (z - fz) * .6);
       /* Schichten sind Teppiche: im Abstand sanfter als Einzelgeräusche, aber hinter Wänden genauso dumpf.
          Bezug: in gewohnter Entfernung (≈ 30 % Kartenbreite, im selben Raum) bleibt die abgestimmte Mischung unverändert */
       const roh = dd => 1.25 / (1 + Math.pow(dd / 26, 1.7));
@@ -3835,11 +3835,24 @@ const ZUS_ICON = {
     return null;
   }
   /* bester Weg durch die Räume: Pegel multipliziert sich, die Höhen nimmt die dumpfeste Grenze (und jede weitere noch etwas) */
-  function raumWeg(a, b) {
+  /* Öffnungen zwischen den Räumen (Kartenprozent): Haustür, Durchgang, Kellerluke. Was nah an der Öffnung klingt
+     (oder wer nah daran steht), kommt deutlich klarer durch als etwas weit hinten im Raum */
+  const RAUM_OEFFNUNG = { drin: { "aussen|haupt": [17.5, 50], "haupt|neben": [74, 50], "haupt|keller": [27.2, 66] },
+    draussen: { "aussen|haupt": [75, 50], "haupt|keller": [81.5, 66] } };
+  function oeffnungNaehe(k, pa, pb) {
+    const o = pa && pb && (RAUM_OEFFNUNG[kartenArt()] || {})[k]; if (!o) return null;
+    const ab = p => Math.hypot(p[0] - o[0], (p[1] - o[1]) * .44);
+    return .6 * Math.exp(-ab(pb) / 14) + .4 * Math.exp(-ab(pa) / 14);
+  }
+  function raumWeg(a, b, pa, pb) {
     if (a === b) return { f: 20000, g: 1 };
     const R = ["aussen", "haupt", "neben", "keller"]; let best = null;
     const gehe = (r, besucht, g, f, n) => { if (r === b) { const ff = f * Math.pow(.8, Math.max(0, n - 1)); if (!best || g > best.g) best = { f: ff, g }; return; }
-      R.forEach(x => { if (besucht.includes(x)) return; const w = raumGrenze(r, x); if (w) gehe(x, besucht.concat([x]), g * w.g, Math.min(f, w.f), n + 1); }); };
+      R.forEach(x => { if (besucht.includes(x)) return; let w = raumGrenze(r, x); if (!w) return;
+        /* nah an der Tür: bis ~+3 dB und heller; weit hinten: bis ~-3 dB und dumpfer */
+        const na = oeffnungNaehe([r, x].sort().join("|"), pa, pb);
+        if (na != null) w = { g: Math.min(1, w.g * (.7 + .75 * na)), f: Math.min(16000, w.f * (.72 + 1.3 * na)) };
+        gehe(x, besucht.concat([x]), g * w.g, Math.min(f, w.f), n + 1); }); };
     gehe(a, [a], 1, 20000, 0);
     return best || { f: 500, g: .3 };
   }
@@ -3859,7 +3872,7 @@ const ZUS_ICON = {
   function momentKlang(mo, gegen) {
     const [fx, fy, fz] = figurOrt(); let x = mo.x, z = mo.z;
     if (gegen) { x = Math.max(2, Math.min(98, 2 * fx - x)); z = Math.max(5, Math.min(95, 2 * fz - z)); }
-    const w = raumWeg(raumBei(fx, fy), raumBei(x, mo.y)), dx = x - fx, dy = (mo.y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
+    const w = raumWeg(raumBei(fx, fy), raumBei(x, mo.y), [fx, fy], [x, mo.y]), dx = x - fx, dy = (mo.y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
     /* ein Moment ist ein Ereignis, das man hören soll: Wände und Abstand färben ihn, verschlucken ihn aber nie (höchstens ~-7 dB) */
     const g = Math.max(.45, Math.max(.4, Math.min(1.3, 1.3 / (1 + Math.pow(d / 22, 1.8)))) * Math.sqrt(w.g));
     const breite = { sanft: .45, mittel: .7, rundum: 1 }[raumBreite] || 1;
@@ -3970,7 +3983,7 @@ const ZUS_ICON = {
     const [fx, fy, fz] = figurOrt(), hier = raumBei(fx, fy);
     /* Wetter ist immer draußen: nur der Weg durch die Räume zählt */
     if (UEBERALL.includes(id)) { const w = raumWeg(hier, "aussen"); return { g: w.g, f: w.f, pan: 0, pos: [0, .3, -1], raum: true }; }
-    const [x, y, z] = zusOrt(id), w = raumWeg(hier, raumBei(x, y)), dx = x - fx, dy = (y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
+    const [x, y, z] = zusOrt(id), w = raumWeg(hier, raumBei(x, y), [fx, fy], [x, y]), dx = x - fx, dy = (y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
     /* 3D-Lage für den Raumklang: rechts = +x, oben = +y, vorne = −z (dorthin blickt der Hörer) */
     const n = Math.max(1, Math.hypot(dx, dy, dz));
     /* Entfernung: nah voll da, über die Kartenbreite bis kaum hörbar (≈ −30 dB), dazu verlieren ferne Geräusche ihre Höhen */
@@ -4323,7 +4336,7 @@ const ZUS_ICON = {
   let kPal = null, kPalZug = false;
   root.addEventListener("click", e => { if (kPalZug && e.target.closest && e.target.closest("[data-zusatz],[data-kpal]")) { e.stopPropagation(); e.preventDefault(); kPalZug = false; } }, true);
   root.addEventListener("pointerdown", e => {
-    const b = e.target.closest && e.target.closest("[data-kpal], .lw-ezus-oben [data-zusatz]"); if (!b || b.disabled) return;
+    const b = e.target.closest && e.target.closest("[data-kpal], .lw-ezus-oben [data-zusatz]"); if (!b || b.disabled || b.getAttribute("aria-disabled") === "true") return;
     kPal = { id: b.dataset.kpal || b.dataset.zusatz, x: e.clientX, y: e.clientY, geist: null, pid: e.pointerId }; kPalZug = false;
   });
   document.addEventListener("pointermove", e => {
@@ -9561,7 +9574,7 @@ const ZUS_ICON = {
     const knoepfe = Object.keys(ZUSATZ).map(id => {
       const z = ZUSATZ[id], ist = zusIst(id), drin = !ist && zusInKulisse(id);
       const trenn = z.g !== gr && gr >= 0 ? '<span class="lw-ztrenn" aria-hidden="true"></span>' : ""; gr = z.g;
-      return trenn + '<button type="button" class="lw-zknopf' + (drin ? " drin" : "") + '" data-zusatz="' + id + '" aria-pressed="' + ist + '" title="' + name(id) + (drin ? " – " + T.zusDrin : "") + '" aria-label="' + name(id) + '"' + (drin ? " disabled" : "") + ">" + zusSvg(id, 1) + "</button>";
+      return trenn + '<button type="button" class="lw-zknopf' + (drin ? " drin" : "") + '" data-zusatz="' + id + '" aria-pressed="' + ist + '" title="' + name(id) + (drin ? " – " + T.zusDrin : "") + '" aria-label="' + name(id) + '"' + (drin ? ' aria-disabled="true"' : "") + ">" + zusSvg(id, 1) + "</button>";
     }).join("");
     const regler = an.map(id => { const v = Math.round(zusWert(id) * 100);
       return '<div class="lw-zuszeile"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
@@ -10112,15 +10125,19 @@ const ZUS_ICON = {
   /* ---------- Am Rechner: Maus eine halbe Sekunde ruhig über einem Knopf – eine Mini-Erklärung erscheint ---------- */
   let schwebT = 0, schwebEl = null, schwebX = 0, schwebY = 0, schwebBlase = null;
   const schwebOk = () => { try { return matchMedia("(hover: hover) and (pointer: fine)").matches; } catch (_) { return false; } };
+  let schwebWarm = 0;
   function schwebZu() {
     clearTimeout(schwebT); schwebT = 0;
-    if (schwebBlase) { schwebBlase.remove(); schwebBlase = null; }
+    if (schwebBlase) { schwebBlase.remove(); schwebBlase = null; schwebWarm = performance.now(); }
     if (schwebEl && schwebEl.dataset.schwebTitel != null) { schwebEl.setAttribute("title", schwebEl.dataset.schwebTitel); delete schwebEl.dataset.schwebTitel; }
   }
   function schwebZeigen(el) {
     if (wasIst || intro || !el.isConnected) return;
     /* Zusatz-Geräusche: nur der Name, groß und gut lesbar – was sie tun, ist überall gleich */
-    const zn = el.dataset && el.dataset.zusatz != null && ZUSATZ[el.dataset.zusatz] ? ZUSATZ[el.dataset.zusatz][sprache()] || ZUSATZ[el.dataset.zusatz].de : "";
+    const zid = el.dataset && (el.dataset.zusatz != null ? el.dataset.zusatz : el.dataset.zq);
+    let zn = zid != null && ZUSATZ[zid] ? ZUSATZ[zid][sprache()] || ZUSATZ[zid].de : "";
+    if (!zn && el.dataset && el.dataset.zs) try { zn = quellName(el.dataset.zs); } catch (_) {}
+    if (zn && el.classList.contains("drin")) zn += " – " + t().zusDrin;
     let text = zn || erklaerung(el); if (!text) return;
     /* nur der erste Satz – kurz und knapp */
     const m = zn ? null : /^(.{25}?[.!?…])\s/.exec(text); if (m) text = m[1];
@@ -10133,14 +10150,14 @@ const ZUS_ICON = {
   }
   root.addEventListener("pointermove", e => {
     if (e.pointerType !== "mouse" || !schwebOk() || !e.target.closest) return;
-    const el = e.target.closest("button, a.lw-schalter, a.lw-klein, input[type=range], label.lw-kleinregler");
+    const el = e.target.closest("button, a.lw-schalter, a.lw-klein, input[type=range], label.lw-kleinregler, .lw-kquelle");
+    if (el === schwebEl && (schwebBlase || schwebT)) return;
     if (el !== schwebEl) { schwebZu(); schwebEl = el; }
-    else if (schwebBlase) { if (Math.hypot(e.clientX - schwebX, e.clientY - schwebY) < 6) return; }
-    if (!el || !root.contains(el)) return;
-    if (schwebBlase) return;
+    if (!el || !root.contains(el) || (kZug && el.classList.contains("lw-kquelle"))) return;
     schwebX = e.clientX; schwebY = e.clientY;
-    clearTimeout(schwebT);
-    schwebT = setTimeout(() => { const ziel = el.matches("label") ? el.querySelector("input") || el : el; schwebZeigen(ziel); }, 500);
+    /* Geräusch-Symbole: Name sofort (nach einem Wimpernschlag); wer gerade schon einen Namen gesehen hat, bekommt den nächsten ohne Warten */
+    const nurName = el.matches("[data-zusatz], .lw-kquelle"), warm = performance.now() - schwebWarm < 900;
+    schwebT = setTimeout(() => { schwebT = 0; const ziel = el.matches("label") ? el.querySelector("input") || el : el; schwebZeigen(ziel); }, nurName ? (warm ? 0 : 90) : warm ? 120 : 500);
   });
   root.addEventListener("pointerleave", () => { schwebZu(); schwebEl = null; });
   ["pointerdown", "wheel", "keydown"].forEach(n => addEventListener(n, () => { if (schwebT || schwebBlase) schwebZu(); }, { passive: true, capture: true }));
@@ -10943,6 +10960,7 @@ const ZUS_ICON = {
     if (mt) { musikTab = mt.dataset.musiktab; try { localStorage.setItem("imres-lw-musiktab", musikTab); } catch (_) {} boxNeu("musik"); return; }
     const zb = e.target.closest("[data-zusatz]");
     if (zb) {
+      if (zb.getAttribute("aria-disabled") === "true") return;
       const id = zb.dataset.zusatz; audioStart();
       if (!ZUSATZ[id]) return;
       const war = zusIst(id), nm = ZUSATZ[id][sprache()] || ZUSATZ[id].de;
@@ -11962,7 +11980,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ezus-oben .lw-zkopf .lw-klappe { pointer-events: none; }
 .lw-ezus-oben .lw-zkopf .lw-klappe > span:last-child { display: none; }
 .lw-ezus-oben .lw-zregler { display: none; }
-@media (hover: hover) and (pointer: fine) { .lw-ezus-oben .lw-zknopf:not([disabled]) { cursor: grab; touch-action: none; } }
+@media (hover: hover) and (pointer: fine) { .lw-ezus-oben .lw-zknopf:not([disabled]):not(.drin) { cursor: grab; touch-action: none; } }
 @media (hover: hover) and (pointer: fine) { .lw-ezus-oben .lw-zknopf { width: 3.3rem; height: 3.3rem; padding: .45rem; } .lw-ezus-oben .lw-zknopf .lw-zico { width: 100%; height: 100%; } }
 .lw-ezugtipp { font-size: .78rem; color: var(--ash); margin: 0 0 .3rem; }
 .lw-kpalette { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; justify-content: flex-end; max-width: 100%; }
