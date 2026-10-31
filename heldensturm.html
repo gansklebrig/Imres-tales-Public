@@ -493,7 +493,7 @@ function volInit(){if(SAVE.volSfx===undefined)SAVE.volSfx=SAVE.sound===false?0:0
 function tone(f,d,type,v,f2,delay){const t=AC.currentTime+(delay||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+d+0.03);return true}
 function honk(p,v,dl){if(!AC)return false;const t=AC.currentTime+(dl||0),dur=0.22/Math.sqrt(p);const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=1150*p;f.Q.value=2.2;const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.02);g.gain.setValueAtTime(v,t+dur*0.6);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);f.connect(g);g.connect(OUT());
  for(const dv of[0,7]){const o=AC.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(300*p+dv,t);o.frequency.linearRampToValueAtTime(360*p+dv,t+dur*0.25);o.frequency.exponentialRampToValueAtTime(250*p,t+dur);o.connect(f);o.start(t);o.stop(t+dur+0.05)}return true}
-function smp(n,v,o){const b=BUF[n];if(!b)return false;o=o||{};const t=AC.currentTime+(o.d||0);const s=AC.createBufferSource();s.buffer=b;let rr=o.r||1;{const q=/^(harfe|glock)_(\d+)$/.exec(n);if(q)try{rr*=Math.pow(2,-MUSIK.korr(q[1],+q[2])/1200)}catch(e){}}s.playbackRate.value=rr;const g=AC.createGain();g.gain.setValueAtTime(v,t);
+function smp(n,v,o){const b=BUF[n];if(!b)return false;o=o||{};const t=AC.currentTime+(o.d||0);const s=AC.createBufferSource();s.buffer=b;let rr=o.r||1;{const q=/^(harfe|glock)_(\d+)$/.exec(n);if(q)try{rr*=Math.pow(2,-MUSIK.korr(q[1],+q[2])/1200)}catch(e){}}s.playbackRate.value=rr;const g=AC.createGain();if(o.ein){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+o.ein)}else g.gain.setValueAtTime(v,t);
  s.connect(g);g.connect(OUT());s.start(t);if(o.len){g.gain.setValueAtTime(v,t+o.len*0.55);g.gain.exponentialRampToValueAtTime(0.0001,t+o.len);s.stop(t+o.len+0.05)}return true}
 function noiseBuf(){if(!NOISE){NOISE=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NOISE.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NOISE}
 function whoosh(dur,f1,f2,v,q,delay){const t=AC.currentTime+(delay||0);const s=AC.createBufferSource();s.buffer=noiseBuf();const f=AC.createBiquadFilter();f.type='bandpass';f.Q.value=q||1.2;f.frequency.setValueAtTime(f1,t);f.frequency.exponentialRampToValueAtTime(f2,t+dur);
@@ -584,7 +584,7 @@ const SND={
  falle:()=>smp('amb/g_falle_1',0.4)||smp('fx_fo_spring_01',0.4),
  /* Zwischenbosse: Stimmen */
  gv_gob:()=>smp('amb/g_troll_'+ri(1,3),0.32,{r:1.15+Math.random()*0.15})||SND.roar(),
- gv_wolf:()=>smp('amb/e_wolf_'+ri(1,3),0.36,{r:0.9+Math.random()*0.15})||SND.roar(),
+ gv_wolf:()=>{const n=performance.now();if(n<(SND._wolfT||0))return true;SND._wolfT=n+5000;return smp('amb/e_wolf_'+ri(1,3),0.22,{r:0.92+Math.random()*0.12,ein:0.35,len:1.9})||SND.roar()},
  gv_hum:()=>smp(pick(['fx_cr2_human_03','fx_cr2_human_05']),0.3,{r:0.85+Math.random()*0.15})||thump(140,70,0.2,0.2),
  gv_zomb:()=>smp('amb/g_untot_'+pick([1,3,5]),0.34,{r:0.8})||SND.roar(),
  gv_spin:()=>smp('amb/e_zischen_'+ri(1,2),0.3,{r:0.8+Math.random()*0.2})||whoosh(0.4,3000,900,0.12,3),
