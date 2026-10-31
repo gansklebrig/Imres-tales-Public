@@ -3741,6 +3741,7 @@ const ZUS_ICON = {
   let karteMerk = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-karte")); if (x && typeof x === "object") return x; } catch (_) {} return {}; })();
   const karteSpeichern = () => { try { localStorage.setItem("imres-lw-karte", JSON.stringify(karteMerk)); } catch (_) {} };
   const kOrt = () => { const k = S.kulisse || "keine"; return karteMerk[k] || (karteMerk[k] = {}); };
+  let kartenTippZeigen = (() => { try { return localStorage.getItem("imres-lw-kartentipp") !== "1"; } catch (_) { return true; } })();
   let karteGross = (() => { try { return localStorage.getItem("imres-lw-karte-gross") === "1"; } catch (_) { return false; } })();
   /* Geräusche, die von überall kommen – sie stehen nicht im Bild, sondern oben als Wetter */
   const UEBERALL = ["regen", "starkregen", "gewitter", "sturm", "wind", "schnee"];
@@ -4037,7 +4038,7 @@ const ZUS_ICON = {
     return '<div class="lw-kleiste' + (karteGross ? " gross" : "") + '">' +
       ["☀", "🌦", "🌧", "⛈"].map((sy, x) => k("data-wetter", x, sy, L.wetter + ": " + L.wetterN[x], !leben.schauer && leben.wetter === x)).join("") + k("data-wetter", "schauer", "🌫", L.schauer, leben.schauer) + zus("wind") + zus("sturm") + zus("schnee") +
       (drin ? "" : trenn + k("data-zeit", "auto", "🅰", L.zeit + ": " + L.zeitN.auto, leben.zeit === "auto") + k("data-zeit", "tag", "🌞", ohne(L.zeitN.tag), leben.zeit === "tag") + k("data-zeit", "daemmerung", "🌇", ohne(L.zeitN.daemmerung), leben.zeit === "daemmerung") + k("data-zeit", "nacht", "🌙", ohne(L.zeitN.nacht), leben.zeit === "nacht") + k("data-aktion", "zeitlauf", "⏳", L.zeitLauf, leben.zeitLauf)) +
-      (!karteGross ? "" : trenn + [[0, "😌"], [.3, "🙂"], [.6, "😟"], [.95, "😨"]].map(([v, sy], i) => k("data-lspann", v, sy, L.spannung + ": " + L.spannStufe(Math.round(v * 100)), spStufe === i)).join("")) +
+      trenn + k("data-aktion", "gehen", "🚶", L.gehen, leben.gehen) + (feuer ? k("data-aktion", "nachlegen", "🪵", L.nachlegen, false) : "") + k("data-aktion", "szenen", "🎭", L.szenen, leben.szenen) + k("data-aktion", "nah", "👂", L.nah, leben.nah) +
       "</div>";
   }
   /* Wetter und Tageszeit im Bild: Nacht dunkelt den Himmel, Regen fällt draußen, Gewitter blitzt */
@@ -4095,6 +4096,7 @@ const ZUS_ICON = {
       frei.map(id => { const [x, y, z] = zusOrt(id), fern = raumBei(x, y) !== raumBei(fx, fy); return '<div class="lw-kquelle' + (fern ? " anderer" : "") + '" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
       wegeSvg(frei, oben) + kMenueHTML(T, oben) +
       '<div class="lw-kfigur" style="left:' + fx + "%;top:" + (oben ? fz : fy) + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
+      (kartenTippZeigen ? '<div class="lw-ktipp">' + T.einf.kartenTipp + "</div>" : "") +
       '<div class="lw-kmuell" title="' + esc(T.karteMuell) + '" aria-hidden="true">🗑</div>' +
       '<div class="lw-kknoepfe">' + (wegeDa() ? '<button type="button" class="lw-kknopf" data-kwegepause="1" title="' + esc(wegePause ? T.karteWegeWeiter : T.karteWegePause) + '" aria-label="' + esc(wegePause ? T.karteWegeWeiter : T.karteWegePause) + '">' + (wegePause ? "▶" : "⏸") + "</button>" +
         '<button type="button" class="lw-kknopf" data-kwegeweg="1" title="' + esc(T.karteWegeWeg) + '" aria-label="' + esc(T.karteWegeWeg) + '">⤫</button><i class="lw-ktrenn"></i>' : "") +
@@ -4223,6 +4225,7 @@ const ZUS_ICON = {
   const kLos = e => {
     if (!kZug || e.pointerId !== kZug.id) return;
     const z = kZug; kZug = null; z.f.classList.remove("zieht");
+    if (z.bewegt && kartenTippZeigen) { kartenTippZeigen = false; try { localStorage.setItem("imres-lw-kartentipp", "1"); } catch (_) {} root.querySelectorAll(".lw-ktipp").forEach(x => x.remove()); }
     if (!z.bewegt) { if (z.zq) kMenue(z.zq); return; }
     if (z.zs) { karteSpeichern(); try { zusPegelSetzen(.15); } catch (_) {} karteNeu(); return; }
     if (z.zq && wegAufnahme === z.zq && wegPunkte && wegPunkte.length > 3) {
@@ -4242,11 +4245,17 @@ const ZUS_ICON = {
     karteNeu(); if (!z.zq) try { boxNeu("klang"); } catch (_) {}
   };
   root.addEventListener("pointerup", kLos); root.addEventListener("pointercancel", kLos);
+  function hlSetzen(q, s2, an) {
+    if (q) root.querySelectorAll('[data-hlq="' + q + '"], .lw-kquelle[data-zq="' + q + '"]').forEach(x => x.classList.toggle("hl", an));
+    if (s2) root.querySelectorAll('[data-hls="' + s2 + '"], .lw-kquelle[data-zs="' + s2 + '"]').forEach(x => x.classList.toggle("hl", an));
+  }
+  root.addEventListener("pointerover", e => { const z = e.target.closest && e.target.closest("[data-hlq],[data-hls],.lw-kquelle"); if (!z) return; hlSetzen(z.dataset.hlq || z.dataset.zq, z.dataset.hls || z.dataset.zs, true); });
+  root.addEventListener("pointerout", e => { const z = e.target.closest && e.target.closest("[data-hlq],[data-hls],.lw-kquelle"); if (!z) return; hlSetzen(z.dataset.hlq || z.dataset.zq, z.dataset.hls || z.dataset.zs, false); });
   /* aus der Leiste in die Karte ziehen: ein Geist folgt dem Finger, losgelassen über der Karte erklingt das Geräusch dort */
   let kPal = null, kPalZug = false;
   root.addEventListener("click", e => { if (kPalZug && e.target.closest && e.target.closest("[data-zusatz],[data-kpal]")) { e.stopPropagation(); e.preventDefault(); kPalZug = false; } }, true);
   root.addEventListener("pointerdown", e => {
-    const b = e.target.closest && e.target.closest("[data-kpal], .lw-ezus-oben .lw-zgitter [data-zusatz]"); if (!b || b.disabled) return;
+    const b = e.target.closest && e.target.closest("[data-kpal], .lw-ezus-oben [data-zusatz]"); if (!b || b.disabled) return;
     kPal = { id: b.dataset.kpal || b.dataset.zusatz, x: e.clientX, y: e.clientY, geist: null, pid: e.pointerId }; kPalZug = false;
   });
   document.addEventListener("pointermove", e => {
@@ -4267,7 +4276,7 @@ const ZUS_ICON = {
   /* Einzelspuren so hoch wie das Bild daneben (Leiste + Karte + Geräusche-Leiste) – immer ein ruhiger Überblick */
   function spurenHoehe() {
     root.querySelectorAll(".lw-eort3").forEach(g => {
-      const kb = g.querySelector(".lw-kblock"), sp = g.querySelector(".lw-espalte .lw-espuren"); if (!kb || !sp) return;
+      const kb = g.querySelector(".lw-kblock"), sp = g.querySelector(".lw-klingt .lw-klingtliste") || g.querySelector(".lw-espalte .lw-espuren"); if (!kb || !sp) return;
       const neben = getComputedStyle(g).gridTemplateColumns.split(" ").length >= 3 && !g.classList.contains("kino");
       if (!neben) { if (sp.style.maxHeight) sp.style.maxHeight = ""; return; }
       const h = Math.max(160, Math.round(kb.getBoundingClientRect().bottom - sp.getBoundingClientRect().top));
@@ -9785,11 +9794,14 @@ const ZUS_ICON = {
     return "<h5>" + T.einf.spurenZus + "</h5>" + an.map(id => { const v = Math.round(zusWert(id) * 100), n = esc(ZUSATZ[id][en ? "en" : "de"]);
       return '<label class="lw-spurzeile"><span>' + zusSvg(id) + " " + n + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + n + '"><b>' + v + " %</b></label>"; }).join("");
   }
+  Object.assign(TX.de.einf, { ueWo: "Wo seid ihr?", ueWie: "Wie klingt es dort?", ueKlingt: "Was gerade klingt", ueNoch: "Was klingt noch?", keineZus: "Noch keine – unten antippen oder in die Karte ziehen.", kartenTipp: "Zieh dich und die Geräusche herum – Abstand und Räume verändern den Klang.",
+    zusGr: { wetter: "Wetter", wasser: "Wasser", haus: "Feuer & Haus", wild: "Wildtiere", hof: "Hoftiere", menschen: "Menschen", handwerk: "Handwerk", grusel: "Unheimliches", weitere: "Weitere" } });
+  Object.assign(TX.en.einf, { ueWo: "Where are you?", ueWie: "How does it sound there?", ueKlingt: "Playing now", ueNoch: "What else can sound?", keineZus: "None yet – tap below or drag into the map.", kartenTipp: "Drag yourself and the sounds around – distance and rooms change the sound.",
+    zusGr: { wetter: "Weather", wasser: "Water", haus: "Fire & house", wild: "Wild animals", hof: "Farm animals", menschen: "People", handwerk: "Crafts", grusel: "Eerie", weitere: "More" } });
   Object.assign(TX.de.einf, { alleEinst: "Alle Einstellungen: Wetter, Tageszeit, Standort, Szenen, Nah-Geräusche", geraeuscheZiehen: "Antippen schaltet ein oder aus – oder direkt an die gewünschte Stelle in die Karte ziehen." }); Object.assign(TX.en.einf, { alleEinst: "All settings: weather, time of day, position, scenes, close sounds", geraeuscheZiehen: "Tap to switch on or off – or drag straight to the spot you want in the map." });
   /* alle Geräusche direkt unter dem Bild, immer offen; jeder Knopf lässt sich in die Karte ziehen */
   function einfachGeraeusche(T) {
-    const war = klangAuf.zus; klangAuf.zus = true; let h = ""; try { h = zusBox(T); } finally { klangAuf.zus = war; }
-    return '<div class="lw-ezus lw-ezus-oben"><p class="lw-ezugtipp">' + T.einf.geraeuscheZiehen + "</p>" + h + "</div>";
+    return '<div class="lw-ezus lw-ezus-oben"><p class="lw-ezugtipp">' + T.einf.geraeuscheZiehen + ' <span class="lw-zhinweis" aria-live="polite"></span></p><div class="lw-zgruppen">' + zusGruppenHTML(T) + "</div></div>";
   }
   Object.assign(TX.de.einf, { szenen: "Szenen", szeneMerken: "Szene merken", szeneMerkenT: "Merkt Ort, deine Position, alle Geräusche mit Lage und Laufweg, Wetter, Tageszeit, Spannung und Tür", szeneLadenT: "Szene laden – mit Übergang", szeneWeg: "Szene löschen" });
   Object.assign(TX.en.einf, { szenen: "Scenes", szeneMerken: "Save scene", szeneMerkenT: "Saves place, your position, all sounds with position and path, weather, time, tension and door", szeneLadenT: "Load scene – with a transition", szeneWeg: "Delete scene" });
@@ -9829,22 +9841,51 @@ const ZUS_ICON = {
     const E = T.einf, alle = KUL_ZEIGEN.filter(k => k !== "keine");
     let kern = nachNutzung("k", KERN_KUL.filter(k => alle.includes(k)));
     if (S.kulisse && S.kulisse !== "keine" && !kern.includes(S.kulisse) && !eMehr.kul) kern = kern.slice(0, 7).concat([S.kulisse]);
-    const rest = nachNutzung("k", alle.filter(k => !kern.includes(k)));
-    const tile = k => eKachel("data-kulisse", k, T.kulissen[k], S.kulisse === k && !!kul);
     const chip = k => '<button type="button" class="lw-ochip' + (S.kulisse === k ? " an" : "") + (S.kulisse === k && !kul ? " still" : "") + '" data-kulisse="' + k + '">' + esc(T.kulissen[k]) + "</button>";
     /* links untereinander: der aktuelle Ort zuerst, dann die meistgenutzten */
     const vorschlag = (S.kulisse && S.kulisse !== "keine" ? [S.kulisse] : []).concat(kern.filter(k => k !== S.kulisse)).slice(0, 7);
-    return '<p class="lw-zweck">' + E.zweckOrt + "</p>" +
-      '<div class="lw-eortkopf lw-eort3' + (karteGross ? " kino" : "") + '"><div class="lw-eortlinks"><span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
+    const ue = (t, cls) => '<h4 class="lw-eue ' + (cls || "") + '">' + t + "</h4>";
+    return '<div class="lw-eortkopf lw-eort3 lw-eort4' + (karteGross ? " kino" : "") + '">' +
+      '<div class="lw-eortlinks">' + ue(E.ueWo) + '<span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
       (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") +
       '<div class="lw-ochips">' + vorschlag.map(chip).join("") + "</div>" +
       '<label class="lw-owahl"><span>' + E.alleOrteL + "</span>" + kulisseWahl(T) + "</label>" + szenenHTML(T) + "</div>" +
-      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + karteLeiste(T) + karteHTML(T) + "</div>" +
-      (KUL_WELT[S.kulisse] || Object.keys(zusWahl).length ? '<div class="lw-espalte' + (eMehr.spuren ? " auf" : "") + '"><button type="button" class="lw-klappe lw-espurklappe" data-emehr="spuren" aria-expanded="' + eMehr.spuren + '" title="' + esc(E.spurenEinzeln) + '">🎚 ' + E.spurenKurz + " <span>" + (eMehr.spuren ? "▴" : "▾") + "</span></button>" +
-        (eMehr.spuren ? '<div class="lw-espuren">' + (KUL_WELT[S.kulisse] ? "<h5>" + E.spurenOrt + "</h5>" + spurenInhalt(T) : "") + zusSpurRegler(T) + "</div>" : '<p class="lw-espurtipp">' + E.spurenTipp + "</p>") + "</div>" : "") + "</div>" +
-      einfachGeraeusche(T) +
-      '<button type="button" class="lw-klappe lw-ealleklappe" data-emehr="alle" aria-expanded="' + !!eMehr.alle + '">⚙ ' + E.alleEinst + " <span>" + (eMehr.alle ? "▴" : "▾") + "</span></button>" +
-      (eMehr.alle && KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "");
+      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + ue(E.ueWie) + karteLeiste(T) + karteHTML(T) + "</div>" +
+      '<div class="lw-espalte lw-klingt">' + ue(E.ueKlingt) + klingtHTML(T) + "</div>" +
+      '<div class="lw-egeraeusche">' + ue(E.ueNoch) + einfachGeraeusche(T) + "</div>" +
+      "</div>";
+  }
+  /* rechts: alles, was gerade klingt – Schichten des Ortes und Zusatz-Geräusche, je mit Regler; Zeile ↔ Symbol in der Karte leuchten gemeinsam */
+  function klingtHTML(T) {
+    const w = KUL_WELT[S.kulisse], E = T.einf, en = sprache() === "en", N = KUL_SPUR_NAME[sprache()] || KUL_SPUR_NAME.de;
+    const zeile = (sym, name, regler, extra, hl) => '<div class="lw-kzeile"' + (hl || "") + '><span class="lw-kzsym">' + sym + '</span><span class="lw-kzname">' + name + "</span>" + regler + (extra || "") + "</div>";
+    const reg = (attr, wert, v, lab) => '<input type="range" min="0" max="200" step="5" value="' + v + '" ' + attr + '="' + wert + '" aria-label="' + esc(lab) + '"><b>' + v + " %</b>";
+    let h = "";
+    if (w) {
+      h += "<h5>" + E.spurenOrt + '<button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck" title="' + esc(T.kulMixZurueck) + '">↺</button></h5>';
+      w.betten.slice(0, spar ? 2 : 9).forEach(([n], i) => { const ic = quellIcon(n), v = Math.round(kulMixWert(S.kulisse, i) * 100), nm = esc(N[n] || n.replace(/^a_/, ""));
+        h += zeile(ic ? zusSvg(ic) : '<i class="lw-kzpunkt"></i>', nm, reg("data-kulspur", i, v, nm), "", ic ? ' data-hls="' + ic + '"' : ""); });
+      if (w.ev.length) { const v = Math.round(kulMixWert(S.kulisse, "ev") * 100); h += zeile('<i class="lw-kzpunkt"></i>', esc(T.kulEinzel), reg("data-kulspur", "ev", v, T.kulEinzel)); }
+    }
+    const an = Object.keys(zusWahl).filter(id => ZUSATZ[id]);
+    h += "<h5>" + E.spurenZus + (an.length ? '<button type="button" class="lw-klein" data-aktion="zusalleaus" title="' + esc(T.zusAlleAus) + '">✕ ' + T.zusAlleAusKurz + "</button>" : "") + "</h5>";
+    h += an.length ? an.map(id => { const nm = esc(ZUSATZ[id][en ? "en" : "de"]), v = Math.round(zusWert(id) * 100);
+      return zeile(zusSvg(id), nm, reg("data-zusvol", id, v, nm), '<button type="button" class="lw-kzweg" data-zusatz="' + id + '" title="' + esc(nm + " – " + T.zusAus) + '" aria-label="' + esc(nm + " – " + T.zusAus) + '">✕</button>', ' data-hlq="' + id + '"'); }).join("")
+      : '<p class="lw-espurtipp">' + E.keineZus + "</p>";
+    return '<div class="lw-klingtliste">' + h + "</div>";
+  }
+  /* Geräusche in beschrifteten Gruppen */
+  const ZUS_GRUPPEN = [["wetter", "regen starkregen gewitter sturm wind laub schnee"], ["wasser", "bach wellen wasserfall tropfen blubbern"], ["haus", "feuer kessel uhr katze glocke muehle"],
+    ["wild", "voegel grillen eule frosch wolf kraehe moewe specht bienen fledermaus wal ente hirsch keiler greif schlange"], ["hof", "hund pferd kuh schaf huhn schwein esel ziege"],
+    ["menschen", "kinder stimmen markt hafen segel gesang"], ["handwerk", "schmiede axt hacke"], ["grusel", "geist untot ketten monster yeti kriegstrommeln"]];
+  function zusGruppenHTML(T) {
+    const en = sprache() === "en", G = T.einf.zusGr, schon = new Set(), name = id => esc(ZUSATZ[id][en ? "en" : "de"]);
+    const knopf = id => { const ist = zusIst(id), drin = !ist && zusInKulisse(id); schon.add(id);
+      return '<button type="button" class="lw-zknopf' + (drin ? " drin" : "") + '" data-zusatz="' + id + '" aria-pressed="' + ist + '" title="' + name(id) + (drin ? " – " + T.zusDrin : "") + '" aria-label="' + name(id) + '"' + (drin ? " disabled" : "") + ">" + zusSvg(id, 1) + "</button>"; };
+    let h = ZUS_GRUPPEN.map(([k, l]) => { const ids = l.split(" ").filter(id => ZUSATZ[id]); return ids.length ? '<div class="lw-zgruppe"><span>' + G[k] + '</span><div class="lw-zgitter">' + ids.map(knopf).join("") + "</div></div>" : ""; }).join("");
+    const rest = Object.keys(ZUSATZ).filter(id => !schon.has(id));
+    if (rest.length) h += '<div class="lw-zgruppe"><span>' + G.weitere + '</span><div class="lw-zgitter">' + rest.map(knopf).join("") + "</div></div>";
+    return h;
   }
   function einfachFx(T) {
     const E = T.einf, set = abendSet && ABEND_SETS[abendSet];
@@ -11877,6 +11918,43 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kbreite:hover { border-color: var(--ember); }
 .lw-karte.oben .lw-kfigur { transform: translate(-50%, -50%); }
 .lw-karte.oben .lw-kfigur.zieht { transform: translate(-50%, -50%) scale(1.2); }
+/* Aufbau 4: Orte links über die ganze Höhe | Karte | Was gerade klingt; darunter (Mitte + rechts) die Geräusche */
+.lw-eort4 { grid-template-columns: minmax(10.5rem, 13.5rem) minmax(0, 1fr) minmax(13rem, 18rem); grid-template-rows: auto auto; }
+.lw-eort4 .lw-eortlinks { grid-column: 1; grid-row: 1 / 3; }
+.lw-eort4 .lw-kblock { grid-column: 2; grid-row: 1; }
+.lw-eort4 .lw-klingt { grid-column: 3; grid-row: 1; min-width: 0; }
+.lw-eort4 .lw-egeraeusche { grid-column: 2 / 4; grid-row: 2; min-width: 0; }
+.lw-eue { margin: 0 0 .35rem; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ember); font-weight: 600; }
+.lw-eort4 .lw-kblock .lw-eue { text-align: left; }
+.lw-klingtliste { border: 1px solid var(--line); border-radius: 10px; padding: .4rem .55rem; background: rgba(255,255,255,.02); overflow-y: auto; }
+.lw-klingtliste h5 { display: flex; justify-content: space-between; align-items: center; margin: .25rem 0 .2rem; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ash); font-weight: 600; }
+.lw-klingtliste h5 .lw-klein { font-size: .7rem; padding: .1rem .35rem; text-transform: none; letter-spacing: 0; }
+.lw-kzeile { display: grid; grid-template-columns: 1.3rem minmax(0, 1fr) auto auto; grid-template-rows: auto auto; align-items: center; gap: 0 .35rem; padding: .2rem .25rem; border-radius: 6px; }
+.lw-kzeile .lw-kzsym { grid-row: 1 / 3; display: grid; place-items: center; color: #cfe0f0; }
+.lw-kzeile[data-hls] .lw-kzsym { color: #f0d9a0; }
+.lw-kzeile .lw-kzsym .lw-zico { width: 1.1rem; height: 1.1rem; }
+.lw-kzpunkt { width: .4rem; height: .4rem; border-radius: 50%; background: var(--line); display: block; }
+.lw-kzname { font-size: .8rem; color: var(--vellum); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lw-kzeile b { font-size: .72rem; color: var(--ash); font-weight: 500; text-align: right; }
+.lw-kzeile input { grid-column: 2 / 4; grid-row: 2; width: 100%; min-width: 0; }
+.lw-kzweg { grid-column: 4; grid-row: 1 / 3; border: 0; background: none; color: var(--ash); cursor: pointer; font-size: .8rem; padding: 0 .2rem; }
+.lw-kzweg:hover { color: #e07060; }
+.lw-kzeile.hl { background: rgba(224,160,70,.14); }
+.lw-kquelle.hl { box-shadow: 0 0 0 3px rgba(240,200,90,.75) !important; z-index: 4; }
+.lw-zgruppen { display: flex; flex-wrap: wrap; gap: .55rem 1.1rem; align-items: flex-start; }
+.lw-zgruppe { display: flex; flex-direction: column; gap: .2rem; padding: .3rem .45rem .4rem; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; background: rgba(255,255,255,.015); }
+.lw-zgruppe > span { font-size: .72rem; letter-spacing: .04em; color: var(--ash); }
+.lw-zgruppe .lw-zgitter { display: flex; flex-wrap: wrap; gap: .3rem; }
+.lw-ezus-oben { margin-top: 0; }
+.lw-ktipp { position: absolute; left: 50%; top: .5rem; transform: translateX(-50%); z-index: 5; max-width: 80%; font-size: clamp(.68rem, 1.6cqw, .9rem); padding: .3rem .6rem; border-radius: 8px; background: rgba(16,12,20,.88); border: 1px solid var(--ember); color: var(--vellum); pointer-events: none; text-align: center; animation: lwPulsTipp 2.4s ease-in-out infinite; }
+@keyframes lwPulsTipp { 50% { border-color: rgba(224,160,70,.35); } }
+@media (max-width: 1000px) { .lw-eort4 { grid-template-columns: minmax(9.5rem, 12rem) minmax(0, 1fr); } .lw-eort4 .lw-eortlinks { grid-row: 1 / 2; } .lw-eort4 .lw-klingt { grid-column: 1 / -1; grid-row: auto; } .lw-eort4 .lw-egeraeusche { grid-column: 1 / -1; grid-row: auto; } }
+@media (max-width: 1000px) { .lw-eort4 .lw-klingtliste { max-height: 19rem; overflow-y: auto; } }
+@media (max-width: 640px) { .lw-eort4 { grid-template-columns: 1fr; } .lw-eort4 .lw-kblock, .lw-eort4 .lw-eortlinks { grid-column: 1; grid-row: auto; } }
+.lw-eort4.kino .lw-kblock { grid-column: 1 / -1; grid-row: 1; }
+.lw-eort4.kino .lw-eortlinks { grid-column: 1; grid-row: 2; }
+.lw-eort4.kino .lw-klingt { grid-column: 2 / -1; grid-row: 2; }
+.lw-eort4.kino .lw-egeraeusche { grid-column: 1 / -1; grid-row: 3; }
 /* Kino: Karte über die volle Breite, so groß wie es die Höhe erlaubt; Orte und Spuren darunter nebeneinander */
 .lw-eort3.kino { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .lw-eort3.kino .lw-kblock { grid-column: 1 / -1; order: -1; }
