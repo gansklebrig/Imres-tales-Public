@@ -8717,7 +8717,7 @@ const ZUS_ICON = {
       sprechen: "Sprachsteuerung: gedrückt halten, ein Stichwort oder einen Satz sagen („Wir betreten die Taverne, es regnet“), loslassen. Beim ersten Mal wird ein Sprachmodell geladen (≈ 46 MB), danach geht es auch ohne Internet. Kein Ton verlässt dein Gerät. Am PC geht es auch mit der Taste F9." },
     wetter: "Wetter über dem Ort: von trocken bis Gewitter.", zeit: "Tageszeit des Ortes: nachts zirpen Grillen und rufen Eulen.", standort: "Wo ihr steht: mittendrin, am Rand, nebenan oder darunter – klingt entsprechend gedämpft.",
     spannung: "Spannung: je weiter rechts, desto bedrohlicher klingt der Ort.", tab: "Wechselt den Bereich.", mehr: "Zeigt mehr Auswahl oder wieder weniger.", int: "Wie viel los ist: ruhig, normal oder wild.",
-    set: n => "Spielabend „" + n + "“: Passende Stimmungen und Effekte stehen dann vorne.", keinOrt: "Kein Hintergrund: Die Ortsgeräusche hören auf, die Musik läuft weiter.", moment: n => "Großer Moment „" + n + "“: passend zum Ort geschieht genau das – laut und mit allem Drum und Dran. ⚡ Etwas passiert wählt einen der vier zufällig.", info: "Kleine Erklärung zu diesem Bereich.", sonst: "Ein Knopf des Lautenwerks." } });
+    set: n => "Spielabend „" + n + "“: Passende Stimmungen und Effekte stehen dann vorne.", keinOrt: "Kein Hintergrund: Die Ortsgeräusche hören auf, die Musik läuft weiter.", etab: { musik: "Musik: Stimmungen für das, was gerade am Tisch passiert.", ort: "Ort & Geräusche: wo ihr seid – Taverne, Wald, Höhle … dazu Wetter und Spannung.", fx: "Effekte: einzelne Geräusche für einen Moment, z. B. Schwerthieb oder Tür." }, moment: n => "Großer Moment „" + n + "“: passend zum Ort geschieht genau das – laut und mit allem Drum und Dran. ⚡ Etwas passiert wählt einen der vier zufällig.", info: "Kleine Erklärung zu diesem Bereich.", sonst: "Ein Knopf des Lautenwerks." } });
   Object.assign(TX.en, { wi: {
     vorlage: (n, b) => "Mood “" + n + "”" + (b ? " – " + b : "") + ". Tap: the music changes smoothly to this mood at the end of the bar, and the fitting place sounds along. Hold 2 seconds to pin it.",
     kulisse: n => "Place “" + n + "”: background sounds that keep running under the music. Tap to switch there.",
@@ -8737,7 +8737,7 @@ const ZUS_ICON = {
       sprechen: "Voice control: hold, say a keyword or a sentence (German keywords), release. The first time a speech model is loaded (≈ 46 MB), afterwards it also works offline. No audio leaves your device. On a computer the F9 key works too." },
     wetter: "Weather over the place: from dry to thunderstorm.", zeit: "Time of day: at night crickets chirp and owls call.", standort: "Where you stand: in the middle, at the edge, next door or below – sounds muffled accordingly.",
     spannung: "Tension: the further right, the more menacing the place sounds.", tab: "Switches the section.", mehr: "Shows more choice or less again.", int: "How busy: calm, normal or wild.",
-    set: n => "Game night “" + n + "”: fitting moods and effects come first.", keinOrt: "No background: the place sounds stop, the music keeps playing.", moment: n => "Big moment “" + n + "”: exactly this happens, fitting the place – loud and with all the trimmings. ⚡ Something happens picks one of the four at random.", info: "A short explanation of this part.", sonst: "A button of the Lautenwerk." } });
+    set: n => "Game night “" + n + "”: fitting moods and effects come first.", keinOrt: "No background: the place sounds stop, the music keeps playing.", etab: { musik: "Music: moods for whatever is happening at the table.", ort: "Place & sounds: where you are – tavern, forest, cave … plus weather and tension.", fx: "Effects: single sounds for a moment, e.g. a sword strike or a door." }, moment: n => "Big moment “" + n + "”: exactly this happens, fitting the place – loud and with all the trimmings. ⚡ Something happens picks one of the four at random.", info: "A short explanation of this part.", sonst: "A button of the Lautenwerk." } });
   const ohneZeichen = x => String(x || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
   function erklaerung(el) {
     const T = t(), W = T.wi, d = el.dataset || {};
@@ -8750,6 +8750,7 @@ const ZUS_ICON = {
     if (d.aktion && W.aktion[d.aktion]) return W.aktion[d.aktion];
     if (d.feld && W.feld[d.feld]) return W.feld[d.feld];
     if (d.wetter != null) return W.wetter; if (d.zeit != null) return W.zeit; if (d.standort != null) return W.standort; if (d.leben === "spannung") return W.spannung;
+    if (d.etab && W.etab[d.etab]) return W.etab[d.etab];
     if (d.etab || d.fxtab || d.musiktab || d.weltgr) return W.tab; if (d.emehr || d.klangauf) return W.mehr; if (d.eint != null) return W.int;
     if (d.abend != null) return d.abend ? W.set(T.einf.abendNamen[d.abend]) : W.aktion.abend;
     if (el.classList.contains("lw-play")) return W.play; if (el.classList.contains("lw-info")) return W.info;
@@ -8786,6 +8787,40 @@ const ZUS_ICON = {
   document.addEventListener("click", e => { if (wiBlase && !e.target.closest(".lw-wi-blase") && !root.contains(e.target)) wiZu(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && wasIst) wasIstUmschalten(); });
 
+  /* ---------- Am Rechner: Maus eine halbe Sekunde ruhig über einem Knopf – eine Mini-Erklärung erscheint ---------- */
+  let schwebT = 0, schwebEl = null, schwebX = 0, schwebY = 0, schwebBlase = null;
+  const schwebOk = () => { try { return matchMedia("(hover: hover) and (pointer: fine)").matches; } catch (_) { return false; } };
+  function schwebZu() {
+    clearTimeout(schwebT); schwebT = 0;
+    if (schwebBlase) { schwebBlase.remove(); schwebBlase = null; }
+    if (schwebEl && schwebEl.dataset.schwebTitel != null) { schwebEl.setAttribute("title", schwebEl.dataset.schwebTitel); delete schwebEl.dataset.schwebTitel; }
+  }
+  function schwebZeigen(el) {
+    if (wasIst || intro || !el.isConnected) return;
+    let text = erklaerung(el); if (!text) return;
+    /* nur der erste Satz – kurz und knapp */
+    const m = /^(.{25,}?[.!?…])\s/.exec(text); if (m) text = m[1];
+    if (el.hasAttribute("title")) { el.dataset.schwebTitel = el.getAttribute("title"); el.removeAttribute("title"); }
+    const b = document.createElement("div"); b.className = "lw-info-blase lw-schweb"; b.setAttribute("role", "tooltip"); b.textContent = text;
+    document.body.appendChild(b); schwebBlase = b;
+    const r = el.getBoundingClientRect(), w = b.offsetWidth, h = b.offsetHeight;
+    let top = r.top - 8 - h + scrollY; if (r.top - 8 - h < 8) top = r.bottom + 8 + scrollY;
+    b.style.top = top + "px"; b.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + scrollX + "px";
+  }
+  root.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse" || !schwebOk() || !e.target.closest) return;
+    const el = e.target.closest("button, a.lw-schalter, a.lw-klein, input[type=range], label.lw-kleinregler");
+    if (el !== schwebEl) { schwebZu(); schwebEl = el; }
+    else if (schwebBlase) { if (Math.hypot(e.clientX - schwebX, e.clientY - schwebY) < 6) return; }
+    if (!el || !root.contains(el)) return;
+    if (schwebBlase) return;
+    schwebX = e.clientX; schwebY = e.clientY;
+    clearTimeout(schwebT);
+    schwebT = setTimeout(() => { const ziel = el.matches("label") ? el.querySelector("input") || el : el; schwebZeigen(ziel); }, 500);
+  });
+  root.addEventListener("pointerleave", () => { schwebZu(); schwebEl = null; });
+  ["pointerdown", "wheel", "keydown"].forEach(n => addEventListener(n, () => { if (schwebT || schwebBlase) schwebZu(); }, { passive: true, capture: true }));
+  addEventListener("scroll", () => { if (schwebBlase) schwebZu(); }, { passive: true });
   /* ---------- Einführung zum Mitmachen: drei kleine Aufgaben, jederzeit überspringbar ---------- */
   let intro = null;
   const INTRO_ZIEL = [() => root.querySelector('.lw-einfach [data-vorlage="trinklied"]'), () => root.querySelector('.lw-einfach [data-vorlage="kampf"]'), () => root.querySelector('.lw-einfach .lw-ekopf [data-aktion="passiert"]'), () => root.querySelector('.lw-einfach .lw-ekopf [data-aktion="sprechen"]'), () => null];
@@ -10491,6 +10526,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-erklaert button, .lw-erklaert input, .lw-erklaert a { cursor: help !important; }
 .lw-erklaert .lw-pult-gitter button, .lw-erklaert .lw-etile, .lw-erklaert .lw-schalter, .lw-erklaert .lw-lchip { outline: 1px dashed rgba(127,176,122,.55); outline-offset: 1px; }
 .lw-wi-blase { border-color: #7fb07a; }
+.lw-schweb { pointer-events: none; font-size: .8rem; max-width: min(16rem, calc(100vw - 16px)); padding: .4rem .6rem; animation: lwSchweb .15s ease-out; }
+@keyframes lwSchweb { from { opacity: 0; transform: translateY(3px); } }
 .lw-intro { position: fixed; z-index: 10001; width: min(22rem, calc(100vw - 20px)); background: #1b151e; border: 1px solid var(--ember); border-radius: 12px; padding: .8rem .95rem .7rem; box-shadow: 0 12px 34px rgba(0,0,0,.6); color: var(--vellum); transition: top .3s ease, left .3s ease; }
 .lw-intro h4 { margin: .1rem 0 .3rem; font-size: 1.1rem; color: var(--ember); }
 .lw-intro p { margin: 0 0 .5rem; font-size: .95rem; line-height: 1.45; }
