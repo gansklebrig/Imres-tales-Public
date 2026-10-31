@@ -3514,7 +3514,12 @@ const ZUS_ICON = {
     k.letzteSzene = i; szeneSpielen(k, l[i]);
   }
   /* Momente als Knöpfe: Symbol und kurzer Name, vier je Seite – ‹ › blättert, angeheftete (2 s halten) stehen vorne */
-  const MOM_SEITE = 4, momSeite = {};
+  const momSeite = {};
+  /* am Rechner wählbar: 1–3 Reihen, auf breitem Schirm fünf je Reihe; „Alle“ klappt die ganze Liste auf */
+  const momRechner = () => { try { return matchMedia("(hover: hover) and (pointer: fine)").matches; } catch (_) { return false; } };
+  let momZeilen = (() => { try { const v = +localStorage.getItem("imres-lw-momzeilen"); return v >= 1 && v <= 3 ? v : 1; } catch (_) { return 1; } })(), momAlle = false;
+  const momJeReihe = () => { try { return momRechner() && matchMedia("(min-width: 900px)").matches ? 5 : 4; } catch (_) { return 4; } };
+  const momSeiteGr = () => (momRechner() ? momZeilen : 1) * (momZeilen > 1 && momRechner() ? momJeReihe() : 4);
   const momFav = (art, i) => favs.includes("m:" + art + ":" + i);
   function momenteOrdnung(art) {
     const m = momenteVon(art), rang = i => { const r = favs.indexOf("m:" + art + ":" + i); return r < 0 ? 1e4 : r; };
@@ -3522,18 +3527,25 @@ const ZUS_ICON = {
   }
   function momenteZeile(T, art) {
     const m = momenteVon(art); if (!m.length) return "";
+    const MOM_SEITE = momSeiteGr(), jr = MOM_SEITE > 4 ? momJeReihe() : 4;
     const en = sprache() === "en", ord = momenteOrdnung(art), seiten = Math.ceil(ord.length / MOM_SEITE);
     const s = ((momSeite[art] || 0) % seiten + seiten) % seiten; momSeite[art] = s;
     const zeig = ord.slice(s * MOM_SEITE, s * MOM_SEITE + MOM_SEITE);
     const knopf = i => { const x = m[i], n = esc(en ? x[2] : x[1]), f = momFav(art, i);
       return '<button type="button" class="lw-moment' + (f ? " fav" : "") + '" data-moment="' + i + '" title="' + n + '"><span class="ms">' + x[0] + '</span><span class="mt">' + n + "</span>" + (f ? '<i class="lw-momstern">★</i>' : "") + "</button>"; };
     const pfeil = (r, z) => '<button type="button" class="lw-momblatt" data-momblatt="' + r + '" title="' + esc(r < 0 ? T.momZurueck : T.momWeiter) + '" aria-label="' + esc(r < 0 ? T.momZurueck : T.momWeiter) + '">' + z + "</button>";
-    const punkte = seiten > 1 ? '<div class="lw-mompunkte" aria-hidden="true">' + Array.from({ length: seiten }, (_, i) => "<i" + (i === s ? ' class="an"' : "") + "></i>").join("") + "</div>" : "";
+    const punkte = seiten > 1 ? '<span class="lw-mompunkte" aria-hidden="true">' + Array.from({ length: seiten }, (_, i) => "<i" + (i === s ? ' class="an"' : "") + "></i>").join("") + "</span>" : "<span></span>";
+    const st = (a, txt, titel, aus) => '<button type="button" class="lw-momst" data-momst="' + a + '" title="' + esc(titel) + '"' + (aus ? " disabled" : "") + ">" + txt + "</button>";
+    const steuer = '<div class="lw-momsteuer">' + (momRechner() ? '<span class="lw-momst-g">' + st("weniger", "−", T.momWeniger, momZeilen <= 1) + st("mehr", "+", T.momMehr, momZeilen >= 3) + "</span>" : "<span></span>") + punkte +
+      st("alle", (momAlle ? "▴ " : "☰ ") + T.momAlle(m.length), T.momAlleT, false) + "</div>";
+    const alle = momAlle ? '<div class="lw-momalle">' + ord.map(knopf).join("") + "</div>" : "";
     return '<div class="lw-momente' + (seiten > 1 ? " blaettern" : "") + '" data-kul="' + art + '">' + (seiten > 1 ? pfeil(-1, "‹") : "") +
-      '<div class="lw-momreihe">' + zeig.map(knopf).join("") + "</div>" + (seiten > 1 ? pfeil(1, "›") : "") + punkte + "</div>";
+      '<div class="lw-momreihe" style="grid-template-columns: repeat(' + jr + ', minmax(0, 1fr))">' + zeig.map(knopf).join("") + "</div>" + (seiten > 1 ? pfeil(1, "›") : "") + steuer + alle + "</div>";
   }
   function momenteNeu() { const T = t(); root.querySelectorAll(".lw-momente").forEach(z => { const neu = momenteZeile(T, z.dataset.kul); if (neu) z.outerHTML = neu; }); }
   function momBlaettern(r) { const art = S.kulisse; momSeite[art] = (momSeite[art] || 0) + r; momenteNeu(); }
+  Object.assign(TX.de, { momWeniger: "Eine Reihe Momente weniger", momMehr: "Eine Reihe Momente mehr", momAlle: n => "Alle " + n, momAlleT: "Alle Momente dieses Ortes auf einen Blick" });
+  Object.assign(TX.en, { momWeniger: "One row of moments less", momMehr: "One more row of moments", momAlle: n => "All " + n, momAlleT: "All moments of this place at a glance" });
   Object.assign(TX.de, { momZurueck: "Vorige Momente", momWeiter: "Weitere Momente", momGesetzt: n => "★ „" + n + "“ angeheftet – steht jetzt vorne.", momGeloest: n => "„" + n + "“ nicht mehr angeheftet." });
   Object.assign(TX.en, { momZurueck: "Previous moments", momWeiter: "More moments", momGesetzt: n => "★ “" + n + "” pinned – now comes first.", momGeloest: n => "“" + n + "” unpinned." });
   setInterval(() => { if (!S) return; root.querySelectorAll(".lw-momente").forEach(z => { if (z.dataset.kul !== S.kulisse) { const neu = momenteZeile(t(), S.kulisse); if (neu) z.outerHTML = neu; else z.innerHTML = ""; } }); }, 1000);
@@ -10396,6 +10408,8 @@ const ZUS_ICON = {
     if (e.target.closest("[data-ktuer]")) { karteTuer(); return; }
     if (e.target.closest("[data-ksicht]")) { karteSicht = karteSicht === "oben" ? "seite" : "oben"; try { localStorage.setItem("imres-lw-karte-sicht", karteSicht); } catch (_) {} karteNeu(); return; }
     if (e.target.closest("[data-kgross]")) { karteGross = !karteGross; try { localStorage.setItem("imres-lw-karte-gross", karteGross ? "1" : "0"); } catch (_) {} karteNeu(); return; }
+    const mst = e.target.closest("[data-momst]");
+    if (mst) { const a = mst.dataset.momst; if (a === "alle") momAlle = !momAlle; else { momZeilen = Math.max(1, Math.min(3, momZeilen + (a === "mehr" ? 1 : -1))); try { localStorage.setItem("imres-lw-momzeilen", momZeilen); } catch (_) {} } momenteNeu(); try { kopfKleben(); } catch (_) {} return; }
     const mb = e.target.closest("[data-momblatt]");
     if (mb) { momBlaettern(+mb.dataset.momblatt); return; }
     const mo = e.target.closest("[data-moment]");
@@ -11329,9 +11343,20 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-momente { display: grid; grid-template-columns: minmax(0, 1fr); gap: .3rem; position: relative; }
 .lw-momente.blaettern { grid-template-columns: 1.7rem minmax(0, 1fr) 1.7rem; align-items: stretch; }
 .lw-momreihe { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3rem; min-width: 0; }
+.lw-momente.blaettern .lw-momblatt[data-momblatt="-1"] { grid-column: 1; grid-row: 1; }
+.lw-momente.blaettern .lw-momreihe { grid-column: 2; grid-row: 1; }
+.lw-momente.blaettern .lw-momblatt[data-momblatt="1"] { grid-column: 3; grid-row: 1; }
 .lw-momblatt { border: 1px solid rgba(224,160,70,.35); background: rgba(224,160,70,.1); color: var(--ember); font: inherit; font-size: 1.4rem; line-height: 1; border-radius: 10px; cursor: pointer; padding: 0; }
 .lw-momblatt:hover { border-color: var(--ember); background: rgba(224,160,70,.2); }
-.lw-mompunkte { grid-column: 1 / -1; display: flex; justify-content: center; gap: .3rem; margin-top: -.05rem; }
+.lw-mompunkte { display: flex; justify-content: center; align-items: center; gap: .3rem; }
+.lw-momsteuer { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .4rem; margin-top: -.05rem; }
+.lw-momst-g { display: flex; gap: .2rem; }
+.lw-momst { border: 1px solid rgba(224,160,70,.3); background: rgba(224,160,70,.06); color: var(--ash); font: inherit; font-size: .72rem; line-height: 1; padding: .2rem .45rem; border-radius: 6px; cursor: pointer; }
+.lw-momst:hover:not([disabled]) { border-color: var(--ember); color: var(--vellum); }
+.lw-momst[disabled] { opacity: .35; cursor: default; }
+.lw-momst[data-momst="alle"] { justify-self: end; }
+.lw-momalle { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: .3rem; max-height: 42vh; overflow-y: auto; padding: .3rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,.18); }
+.lw-momalle .lw-moment .ms { font-size: 1.15rem; }
 .lw-mompunkte i { width: .38rem; height: .38rem; border-radius: 50%; background: rgba(224,160,70,.25); }
 .lw-mompunkte i.an { background: var(--ember); }
 .lw-moment { position: relative; }
