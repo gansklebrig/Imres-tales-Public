@@ -3855,10 +3855,11 @@ const ZUS_ICON = {
     zusMerken(); zusSync(); karteNeu(); try { boxNeu("klang"); } catch (_) {}
   }
   /* Laufwege: aufgezeichnete Punkte, das Geräusch pendelt sie hin und her */
-  let wegAufnahme = null, wegPunkte = null, kMenueId = null;
+  let wegAufnahme = null, wegPunkte = null, kMenueId = null, wegePause = false;
+  const wegeDa = () => { const w = kOrt().weg || {}; return Object.keys(w).some(id => zusIst(id) && w[id] && w[id].p && w[id].p.length > 1); };
   const kWeg = id => (kOrt().weg || {})[id];
   setInterval(() => {
-    if (!S || !KUL_WELT[S.kulisse] || kZug) return;
+    if (!S || !KUL_WELT[S.kulisse] || kZug || wegePause) return;
     const wege = kOrt().weg || {}, ids = Object.keys(wege).filter(id => zusIst(id) && wege[id] && wege[id].p && wege[id].p.length > 1); if (!ids.length) return;
     const j = performance.now() / 1000, oben = karteSicht === "oben";
     ids.forEach(id => {
@@ -4094,18 +4095,22 @@ const ZUS_ICON = {
       frei.map(id => { const [x, y, z] = zusOrt(id), fern = raumBei(x, y) !== raumBei(fx, fy); return '<div class="lw-kquelle' + (fern ? " anderer" : "") + '" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
       wegeSvg(frei, oben) + kMenueHTML(T, oben) +
       '<div class="lw-kfigur" style="left:' + fx + "%;top:" + (oben ? fz : fy) + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
-      '<button type="button" class="lw-ksicht" data-ksicht="1" title="' + esc(oben ? T.karteSeite : T.karteOben) + '" aria-label="' + esc(oben ? T.karteSeite : T.karteOben) + '">' + (oben ? "👁" : "🧭") + "</button>" +
-      '<button type="button" class="lw-kbreite" data-kbreite="1" title="' + esc(T.karteBreite[raumBreite]) + '" aria-label="' + esc(T.karteBreite[raumBreite]) + '">🎧<small>' + { sanft: "◦", mittel: "◎", rundum: "◉" }[raumBreite] + "</small></button>" +
       '<div class="lw-kmuell" title="' + esc(T.karteMuell) + '" aria-hidden="true">🗑</div>' +
-      '<button type="button" class="lw-kgross" data-kgross="1" title="' + esc(karteGross ? T.karteKinoAus : T.karteKino) + '" aria-label="' + esc(karteGross ? T.karteKinoAus : T.karteKino) + '">' + (karteGross ? "✕" : "🎬") + "</button>" +
+      '<div class="lw-kknoepfe">' + (wegeDa() ? '<button type="button" class="lw-kknopf" data-kwegepause="1" title="' + esc(wegePause ? T.karteWegeWeiter : T.karteWegePause) + '" aria-label="' + esc(wegePause ? T.karteWegeWeiter : T.karteWegePause) + '">' + (wegePause ? "▶" : "⏸") + "</button>" +
+        '<button type="button" class="lw-kknopf" data-kwegeweg="1" title="' + esc(T.karteWegeWeg) + '" aria-label="' + esc(T.karteWegeWeg) + '">⤫</button><i class="lw-ktrenn"></i>' : "") +
+      '<button type="button" class="lw-kknopf lw-kbreite" data-kbreite="1" title="' + esc(T.karteBreite[raumBreite]) + '" aria-label="' + esc(T.karteBreite[raumBreite]) + '">🎧<small>' + { sanft: "◦", mittel: "◎", rundum: "◉" }[raumBreite] + "</small></button>" +
+      '<button type="button" class="lw-kknopf" data-ksicht="1" title="' + esc(oben ? T.karteSeite : T.karteOben) + '" aria-label="' + esc(oben ? T.karteSeite : T.karteOben) + '">' + (oben ? "👁" : "🧭") + "</button>" +
+      '<button type="button" class="lw-kknopf" data-kgross="1" title="' + esc(karteGross ? T.karteKinoAus : T.karteKino) + '" aria-label="' + esc(karteGross ? T.karteKinoAus : T.karteKino) + '">' + (karteGross ? "✕" : "🎬") + "</button></div>" +
       "</div>";
   }
   Object.assign(TX.de, { karteFigur: "Das bist du – zieh dich irgendwohin. Der Bereich unter dir bestimmt, wie der Ort klingt (drinnen, vor der Tür, im Keller …).", karteTipp: "Zieh die Figur oder tippe einen Bereich an. Geräusche lassen sich ebenfalls ziehen: näher = lauter, seitlich = von der Seite. Die Tür lässt sich antippen.",
     karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer – in den Mülleimer gezogen ist es aus", karteMuell: "Geräusch hierher ziehen, um es auszuschalten", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern", kartePalette: "in die Karte ziehen (oder antippen) – erklingt dort", kartePaletteK: "＋", karteWegAuf: "🚶 Laufweg aufnehmen", karteWegAus: "✖ Laufweg löschen", karteWegHinweis: "Zieh das Geräusch jetzt den Weg entlang – beim Loslassen läuft es ihn hin und her.", karteEntf: "🗑 Entfernen", karteSchliessen: "Schließen",
+    karteWegePause: "Laufwege anhalten (dann lassen sich die Geräusche leicht antippen)", karteWegeWeiter: "Laufwege weiterlaufen lassen", karteWegeWeg: "Alle Laufwege löschen",
     karteSchicht: "Teil des Ortes – ziehen: näher = lauter, anderer Raum = dumpfer", karteKino: "Kino: Karte groß über die ganze Breite (Orte und Spuren rücken darunter)", karteKinoAus: "Kino beenden",
     karteBreite: { sanft: "Raumbreite: sanft – Richtung nur angedeutet, nichts kommt aus nur einem Ohr (tippen: mittel)", mittel: "Raumbreite: mittel (tippen: rundum)", rundum: "Raumbreite: rundum – voller 3D-Klang, Geräusche kreisen um dich (tippen: sanft)" }, karteOben: "Von oben ansehen – Geräusche nach vorne oder hinten ziehen", karteSeite: "Von der Seite ansehen – oben/unten, Tür und Räume" });
   Object.assign(TX.en, { karteFigur: "That's you – drag yourself anywhere. The area under you decides how the place sounds (inside, at the door, in the cellar …).", karteTipp: "Drag the figure or tap an area. Sounds can be dragged too: closer = louder, to the side = from that side. Tap the door to open or close it.",
     karteQuelle: "drag: closer to you = louder, further away = quieter and duller – drop it in the bin to switch it off", karteMuell: "Drag a sound here to switch it off", karteGrossT: "Enlarge map", karteKlein: "Shrink map", kartePalette: "drag into the map (or tap) – it plays there", kartePaletteK: "＋", karteWegAuf: "🚶 Record a path", karteWegAus: "✖ Delete path", karteWegHinweis: "Now drag the sound along its path – when you let go it walks it back and forth.", karteEntf: "🗑 Remove", karteSchliessen: "Close",
+    karteWegePause: "Pause paths (then the sounds are easy to tap)", karteWegeWeiter: "Let paths run again", karteWegeWeg: "Delete all paths",
     karteSchicht: "part of the place – drag: closer = louder, other room = duller", karteKino: "Cinema: map large across the full width (places and tracks move below)", karteKinoAus: "Leave cinema",
     karteBreite: { sanft: "Spatial width: gentle – direction only hinted, nothing in just one ear (tap: medium)", mittel: "Spatial width: medium (tap: surround)", rundum: "Spatial width: surround – full 3D, sounds circle around you (tap: gentle)" }, karteOben: "View from above – drag sounds in front of or behind you", karteSeite: "View from the side – up/down, door and rooms" });
   function karteWirken(z) {
@@ -9941,6 +9946,8 @@ const ZUS_ICON = {
     if (d.zq) return (ZUSATZ[d.zq] ? ZUSATZ[d.zq][sprache() === "en" ? "en" : "de"] + ": " : "") + T.karteQuelle;
     if (d.kgross) return karteGross ? T.karteKinoAus : T.karteKino;
     if (d.kbreite) return T.karteBreite[raumBreite];
+    if (d.kwegepause) return wegePause ? T.karteWegeWeiter : T.karteWegePause;
+    if (d.kwegeweg) return T.karteWegeWeg;
     if (d.ksicht) return karteSicht === "oben" ? T.karteSeite : T.karteOben;
     if (d.momblatt != null) return W.momblatt;
     if (d.hgaus) return W.hgAus;
@@ -10771,6 +10778,8 @@ const ZUS_ICON = {
       karteNeu(); if (a === "auf") root.querySelectorAll('.lw-kquelle[data-zq="' + id + '"]').forEach(q => q.classList.add("aufnahme")); return; }
     const kpal = e.target.closest("[data-kpal]");
     if (kpal && !kPalZug) { zusHinein(kpal.dataset.kpal); return; }
+    if (e.target.closest("[data-kwegepause]")) { wegePause = !wegePause; karteNeu(); status(wegePause ? t().karteWegePause : t().karteWegeWeiter); return; }
+    if (e.target.closest("[data-kwegeweg]")) { const o = kOrt(); o.weg = {}; karteSpeichern(); wegePause = false; karteNeu(); status(t().karteWegeWeg); return; }
     if (e.target.closest("[data-kbreite]")) { raumBreite = { sanft: "mittel", mittel: "rundum", rundum: "sanft" }[raumBreite]; try { localStorage.setItem("imres-lw-breite", raumBreite); } catch (_) {} try { zusPegelSetzen(.2); } catch (_) {} karteNeu(); status(t().karteBreite[raumBreite].split(" (")[0].split(" – ")[0] + " · " + (t().karteBreite[raumBreite].split(" – ")[1] || "").split(" (")[0]); return; }
     if (e.target.closest("[data-ksicht]")) { karteSicht = karteSicht === "oben" ? "seite" : "oben"; try { localStorage.setItem("imres-lw-karte-sicht", karteSicht); } catch (_) {} karteNeu(); return; }
     if (e.target.closest("[data-kgross]")) { karteGross = !karteGross; try { localStorage.setItem("imres-lw-karte-gross", karteGross ? "1" : "0"); } catch (_) {} karteNeu(); return; }
@@ -11759,10 +11768,23 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kzone.hier span { color: var(--ember); background: rgba(10,8,14,.78); }
 .lw-ktuer { position: absolute; width: 5%; border: 0; background: transparent; cursor: pointer; padding: 0; z-index: 2; }
 .lw-ktuer:hover { background: rgba(224,160,70,.2); border-radius: 3px; }
+.lw-karte { container-type: inline-size; }
+.lw-kknoepfe { position: absolute; right: .3rem; bottom: .3rem; z-index: 5; display: flex; gap: .3rem; align-items: center; }
+.lw-kknopf { width: clamp(1.45rem, 4.4cqw, 2.7rem); height: clamp(1.45rem, 4.4cqw, 2.7rem); padding: 0; border: 1px solid var(--line); border-radius: 8px; background: rgba(10,8,14,.78); color: var(--vellum); font-size: clamp(.78rem, 2.3cqw, 1.35rem); line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: .1rem; }
+.lw-kknopf:hover { border-color: var(--ember); color: var(--ember); }
+.lw-kknopf.lw-kbreite { width: auto; padding: 0 .35rem; position: static; }
+.lw-kknopf small { font-size: .65em; color: var(--ember); }
+.lw-ktrenn { width: 1px; align-self: stretch; background: var(--line); margin: .15rem .1rem; }
 .lw-kfigur, .lw-kquelle { position: absolute; z-index: 3; touch-action: none; cursor: grab; }
 .lw-kfigur { width: 14px; height: 21px; transform: translate(-50%, -100%); transition: left .35s ease, top .35s ease; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
 .lw-karte.gross .lw-kfigur { width: 22px; height: 33px; }
 .lw-kfigur svg { width: 100%; height: 100%; fill: var(--ember); }
+.lw-karte .lw-kfigur { width: clamp(14px, 2.6cqw, 30px); height: clamp(21px, 3.9cqw, 45px); }
+.lw-karte .lw-kquelle { width: clamp(20px, 4.6cqw, 46px); height: clamp(20px, 4.6cqw, 46px); }
+.lw-karte .lw-kquelle .lw-zico { width: 68%; height: 68%; }
+.lw-karte .lw-kmuell { width: clamp(1.45rem, 4.4cqw, 2.7rem); height: clamp(1.45rem, 4.4cqw, 2.7rem); font-size: clamp(.8rem, 2.4cqw, 1.4rem); left: .3rem; bottom: .3rem; }
+.lw-karte .lw-kzone span { font-size: clamp(.58rem, 1.5cqw, .85rem); }
+.lw-karte .lw-kblitz { font-size: clamp(1.1rem, 3.6cqw, 2.2rem); }
 .lw-kquelle { width: 18px; height: 18px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(20,16,26,.82); border: 1px solid rgba(160,200,230,.65); color: #cfe0f0; display: grid; place-items: center; box-shadow: 0 0 6px rgba(140,190,230,.35); }
 .lw-karte.gross .lw-kquelle { width: 28px; height: 28px; }
 .lw-kquelle .lw-zico { width: 72%; height: 72%; }
@@ -11790,7 +11812,6 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kl:hover { border-color: var(--ember); }
 .lw-kl[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.28); box-shadow: 0 0 6px rgba(224,160,70,.35); }
 .lw-kmuell { position: absolute; left: .25rem; bottom: .2rem; z-index: 2; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; font-size: .8rem; border-radius: 6px; background: rgba(10,8,14,.6); border: 1px dashed rgba(220,120,110,.5); opacity: .7; pointer-events: none; transition: transform .15s ease; }
-.lw-karte.gross .lw-kmuell { width: 2.8rem; height: 2.8rem; font-size: 1.5rem; left: .4rem; bottom: .4rem; }
 .lw-kmuell.ziel { opacity: 1; transform: scale(1.35); background: rgba(160,50,40,.6); border-color: #e07060; }
 .lw-kquelle.weg { opacity: .45; border-color: #e07060; }
 .lw-kquelle { animation: lwKAtmen 3.2s ease-in-out infinite; }
@@ -11822,6 +11843,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ezus-oben .lw-zkopf .lw-klappe > span:last-child { display: none; }
 .lw-ezus-oben .lw-zregler { display: none; }
 @media (hover: hover) and (pointer: fine) { .lw-ezus-oben .lw-zknopf:not([disabled]) { cursor: grab; touch-action: none; } }
+@media (hover: hover) and (pointer: fine) { .lw-ezus-oben .lw-zknopf { width: 3.3rem; height: 3.3rem; padding: .45rem; } .lw-ezus-oben .lw-zknopf .lw-zico { width: 100%; height: 100%; } }
 .lw-ezugtipp { font-size: .78rem; color: var(--ash); margin: 0 0 .3rem; }
 .lw-kpalette { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; justify-content: flex-end; max-width: 100%; }
 .lw-kblock.gross .lw-kpalette { justify-content: center; }
@@ -11850,13 +11872,9 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kquelle.schicht.anderer { border-color: rgba(240,200,90,.4); }
 .lw-kquelle.anderer { opacity: .6; border-style: dashed; box-shadow: none; }
 .lw-ksicht { position: absolute; right: 1.75rem; bottom: .2rem; z-index: 5; width: 1.35rem; height: 1.35rem; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); font-size: .78rem; line-height: 1; cursor: pointer; }
-.lw-karte.gross .lw-ksicht { right: 3.4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
-.lw-karte.gross .lw-kgross { right: .4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
 .lw-ksicht:hover { border-color: var(--ember); }
-.lw-kbreite { position: absolute; right: 3.3rem; bottom: .2rem; z-index: 5; height: 1.35rem; padding: 0 .25rem; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); color: var(--vellum); font-size: .72rem; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; gap: .1rem; }
 .lw-kbreite small { font-size: .7rem; color: var(--ember); }
 .lw-kbreite:hover { border-color: var(--ember); }
-.lw-karte.gross .lw-kbreite { right: 6.4rem; bottom: .4rem; height: 2.6rem; padding: 0 .5rem; font-size: 1.2rem; border-radius: 8px; }
 .lw-karte.oben .lw-kfigur { transform: translate(-50%, -50%); }
 .lw-karte.oben .lw-kfigur.zieht { transform: translate(-50%, -50%) scale(1.2); }
 /* Kino: Karte über die volle Breite, so groß wie es die Höhe erlaubt; Orte und Spuren darunter nebeneinander */
