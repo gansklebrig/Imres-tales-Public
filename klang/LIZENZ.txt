@@ -574,3 +574,495 @@ Weitere Hintergrund-Schichten (abwechselnd mit den bisherigen, 2026-10-31):
   a_lagerfeuer_n1: Bertram (Loop aus Spandau, freesound.org/s/40699) – CC0 – über github.com/ValyriaTear/ValyriaTear
   a_markt_n1: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
   a_nacht_n4: Flare-Team (flarerpg.org) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+
+Dritte Sammlung (2026-10-31): weitere Einzelgeräusche
+  n_erdschritte_7: Pfau – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_erdschritte_8: Pfau – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_erdschritte_9: Pfau – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_erdschritte_10: Pfau – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_erdschritte_11: Pfau – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_erdschritte_12: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/51147) – über github.com/karolpiczak/ESC-50
+  n_erdschritte_13: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/51147) – über github.com/karolpiczak/ESC-50
+  n_erdschritte_14: mlsulli – CC0 (Original https://freesound.org/people/mlsulli/sounds/234855) – über github.com/karolpiczak/ESC-50
+  n_erdschritte_15: Ryding – CC0 (Original https://freesound.org/people/Ryding/sounds/94344) – über github.com/karolpiczak/ESC-50
+  n_erdschritte_16: Ryding – CC0 (Original https://freesound.org/people/Ryding/sounds/94344) – über github.com/karolpiczak/ESC-50
+  n_erdschritte_17: mlsulli – CC0 (Original https://freesound.org/people/mlsulli/sounds/234855) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_6: Daxter31 – CC BY (Freesound) (Original https://freesound.org/people/Daxter31/sounds/114609) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_7: everythingsounds – CC BY (Freesound) (Original https://freesound.org/people/everythingsounds/sounds/197454) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_8: scarfield – CC0 (Original https://freesound.org/people/scarfield/sounds/52001) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_9: Erik Pritzens – CC0 (Original https://freesound.org/people/Erik%20Pritzens/sounds/151557) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_10: scarfield – CC0 (Original https://freesound.org/people/scarfield/sounds/52001) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_11: thorvandahl – CC BY (Freesound) (Original https://freesound.org/people/thorvandahl/sounds/184237) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_12: Erdie – CC BY (Freesound) (Original https://freesound.org/people/Erdie/sounds/47923) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_13: mingusassin – CC0 (Original https://freesound.org/people/mingusassin/sounds/234145) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_14: Brotherprovisional – CC BY (Freesound) (Original https://freesound.org/people/Brotherprovisional/sounds/53444) – über github.com/karolpiczak/ESC-50
+  n_trinken_1: scottc6115 – CC0 (Original https://freesound.org/people/scottc6115/sounds/204202) – über github.com/karolpiczak/ESC-50
+  n_trinken_2: freakinbehemoth – CC0 (Original https://freesound.org/people/freakinbehemoth/sounds/243635) – über github.com/karolpiczak/ESC-50
+  n_trinken_3: D W – CC BY (Freesound) (Original https://freesound.org/people/D%20W/sounds/144253) – über github.com/karolpiczak/ESC-50
+  n_trinken_4: AshFox – CC BY (Freesound) (Original https://freesound.org/people/AshFox/sounds/174866) – über github.com/karolpiczak/ESC-50
+  n_trinken_5: Q.K. – CC0 (Original https://freesound.org/people/Q.K./sounds/56270) – über github.com/karolpiczak/ESC-50
+  n_trinken_6: CGEffex – CC BY (Freesound) (Original https://freesound.org/people/CGEffex/sounds/102581) – über github.com/karolpiczak/ESC-50
+  n_trinken_7: D W – CC BY (Freesound) (Original https://freesound.org/people/D%20W/sounds/144259) – über github.com/karolpiczak/ESC-50
+  n_trinken_8: CGEffex – CC BY (Freesound) (Original https://freesound.org/people/CGEffex/sounds/102581) – über github.com/karolpiczak/ESC-50
+  n_trinken_9: Razzvio – CC BY (Freesound) (Original https://freesound.org/people/Razzvio/sounds/79146) – über github.com/karolpiczak/ESC-50
+  n_trinken_10: MentalSanityOff – CC0 (Original https://freesound.org/people/MentalSanityOff/sounds/188191) – über github.com/karolpiczak/ESC-50
+  n_trinken_11: alienistcog – CC0 (Original https://freesound.org/people/alienistcog/sounds/122763) – über github.com/karolpiczak/ESC-50
+  n_trinken_12: MentalSanityOff – CC0 (Original https://freesound.org/people/MentalSanityOff/sounds/188191) – über github.com/karolpiczak/ESC-50
+  n_trinken_13: MentalSanityOff – CC0 (Original https://freesound.org/people/MentalSanityOff/sounds/188191) – über github.com/karolpiczak/ESC-50
+  n_trinken_14: sagetyrtle – CC0 (Original https://freesound.org/people/sagetyrtle/sounds/37226) – über github.com/karolpiczak/ESC-50
+  n_trinken_15: alienistcog – CC0 (Original https://freesound.org/people/alienistcog/sounds/122763) – über github.com/karolpiczak/ESC-50
+  n_trinken_16: marcjunker – CC0 (Original https://freesound.org/people/marcjunker/sounds/204114) – über github.com/karolpiczak/ESC-50
+  n_husten_9: OwlStorm – CC BY (Freesound) (Original https://freesound.org/people/OwlStorm/sounds/151213) – über github.com/karolpiczak/ESC-50
+  n_husten_10: qubodup – CC0 (Original https://freesound.org/people/qubodup/sounds/169726) – über github.com/karolpiczak/ESC-50
+  n_husten_11: husky70 – CC0 (Original https://freesound.org/people/husky70/sounds/157296) – über github.com/karolpiczak/ESC-50
+  n_husten_12: husky70 – CC0 (Original https://freesound.org/people/husky70/sounds/157296) – über github.com/karolpiczak/ESC-50
+  n_husten_13: Zabuhailo – CC BY (Freesound) (Original https://freesound.org/people/Zabuhailo/sounds/149042) – über github.com/karolpiczak/ESC-50
+  n_husten_14: AderuMoro – CC BY (Freesound) (Original https://freesound.org/people/AderuMoro/sounds/251489) – über github.com/karolpiczak/ESC-50
+  n_husten_15: CarlosSolano019 – CC BY (Freesound) (Original https://freesound.org/people/CarlosSolano019/sounds/132601) – über github.com/karolpiczak/ESC-50
+  n_husten_16: Nmb910 – CC BY (Freesound) (Original https://freesound.org/people/Nmb910/sounds/152995) – über github.com/karolpiczak/ESC-50
+  n_husten_17: poorenglishjuggler – CC0 (Original https://freesound.org/people/poorenglishjuggler/sounds/155650) – über github.com/karolpiczak/ESC-50
+  n_husten_18: smokeyvw – CC BY (Freesound) (Original https://freesound.org/people/smokeyvw/sounds/85292) – über github.com/karolpiczak/ESC-50
+  n_husten_19: poorenglishjuggler – CC0 (Original https://freesound.org/people/poorenglishjuggler/sounds/155650) – über github.com/karolpiczak/ESC-50
+  n_husten_20: poorenglishjuggler – CC0 (Original https://freesound.org/people/poorenglishjuggler/sounds/155650) – über github.com/karolpiczak/ESC-50
+  n_husten_21: Fratz – CC BY (Freesound) (Original https://freesound.org/people/Fratz/sounds/19118) – über github.com/karolpiczak/ESC-50
+  n_husten_22: Harris85 – CC0 (Original https://freesound.org/people/Harris85/sounds/208761) – über github.com/karolpiczak/ESC-50
+  n_husten_23: TheWah – CC0 (Original https://freesound.org/people/TheWah/sounds/98676) – über github.com/karolpiczak/ESC-50
+  n_husten_24: BIGTexan7213 – CC BY (Freesound) (Original https://freesound.org/people/BIGTexan7213/sounds/178997) – über github.com/karolpiczak/ESC-50
+  n_laubschritt_8: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_laubschritt_9: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_holzschritte_9: Fewes – CC BY (Freesound) (Original https://freesound.org/people/Fewes/sounds/234263) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_10: Fewes – CC BY (Freesound) (Original https://freesound.org/people/Fewes/sounds/234263) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_11: sinatra314 – CC BY (Freesound) (Original https://freesound.org/people/sinatra314/sounds/209472) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_12: Yoyodaman234 – CC0 (Original https://freesound.org/people/Yoyodaman234/sounds/223162) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_13: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/155858) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_14: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/155858) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_15: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/155858) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_16: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/155858) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_17: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/155858) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_18: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/155858) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_19: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/155858) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_20: sinatra314 – CC BY (Freesound) (Original https://freesound.org/people/sinatra314/sounds/209472) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_21: sinatra314 – CC BY (Freesound) (Original https://freesound.org/people/sinatra314/sounds/209471) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_22: sinatra314 – CC BY (Freesound) (Original https://freesound.org/people/sinatra314/sounds/209478) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_23: sinatra314 – CC BY (Freesound) (Original https://freesound.org/people/sinatra314/sounds/209474) – über github.com/karolpiczak/ESC-50
+  n_holzschritte_24: sinatra314 – CC BY (Freesound) (Original https://freesound.org/people/sinatra314/sounds/209478) – über github.com/karolpiczak/ESC-50
+  n_tuerzu_8: hullum – CC0 (Original https://freesound.org/people/hullum/sounds/415579/;) – über github.com/sonic-pi-net/sonic-pi
+  n_niesen_9: wjoojoo – CC BY (Freesound) (Original https://freesound.org/people/wjoojoo/sounds/194533) – über github.com/karolpiczak/ESC-50
+  n_niesen_10: Electron John – CC0 (Original https://freesound.org/people/Electron%20John/sounds/82538) – über github.com/karolpiczak/ESC-50
+  n_niesen_11: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/47273) – über github.com/karolpiczak/ESC-50
+  n_niesen_12: stevenpam – CC BY (Freesound) (Original https://freesound.org/people/stevenpam/sounds/81883) – über github.com/karolpiczak/ESC-50
+  n_niesen_13: unfa – CC BY (Freesound) (Original https://freesound.org/people/unfa/sounds/185415) – über github.com/karolpiczak/ESC-50
+  n_niesen_14: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/47273) – über github.com/karolpiczak/ESC-50
+  n_niesen_15: unfa – CC BY (Freesound) (Original https://freesound.org/people/unfa/sounds/184434) – über github.com/karolpiczak/ESC-50
+  n_niesen_16: Huminaatio – CC0 (Original https://freesound.org/people/Huminaatio/sounds/202220) – über github.com/karolpiczak/ESC-50
+  n_niesen_17: transitking – CC0 (Original https://freesound.org/people/transitking/sounds/59324) – über github.com/karolpiczak/ESC-50
+  n_niesen_18: sagetyrtle – CC0 (Original https://freesound.org/people/sagetyrtle/sounds/54505) – über github.com/karolpiczak/ESC-50
+  n_niesen_19: HerbertBoland – CC BY (Freesound) (Original https://freesound.org/people/HerbertBoland/sounds/29680) – über github.com/karolpiczak/ESC-50
+  n_niesen_20: loisgwenllian – CC0 (Original https://freesound.org/people/loisgwenllian/sounds/142601) – über github.com/karolpiczak/ESC-50
+  n_niesen_21: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/47274) – über github.com/karolpiczak/ESC-50
+  n_niesen_22: Shapeshifter242 – CC BY (Freesound) (Original https://freesound.org/people/Shapeshifter242/sounds/148330) – über github.com/karolpiczak/ESC-50
+  n_niesen_23: Ndheger – CC BY (Freesound) (Original https://freesound.org/people/Ndheger/sounds/118104) – über github.com/karolpiczak/ESC-50
+  n_niesen_24: chrisbrowne626 – CC BY (Freesound) (Original https://freesound.org/people/chrisbrowne626/sounds/201274) – über github.com/karolpiczak/ESC-50
+  n_lachen_9: tagirov – CC BY (Freesound) (Original https://freesound.org/people/tagirov/sounds/107123) – über github.com/karolpiczak/ESC-50
+  n_lachen_10: Nanakisan – CC BY (Freesound) (Original https://freesound.org/people/Nanakisan/sounds/132816) – über github.com/karolpiczak/ESC-50
+  n_lachen_11: choplin – CC BY (Freesound) (Original https://freesound.org/people/choplin/sounds/109759) – über github.com/karolpiczak/ESC-50
+  n_lachen_12: Nanakisan – CC BY (Freesound) (Original https://freesound.org/people/Nanakisan/sounds/253534) – über github.com/karolpiczak/ESC-50
+  n_lachen_13: OBXJohn – CC BY (Freesound) (Original https://freesound.org/people/OBXJohn/sounds/242932) – über github.com/karolpiczak/ESC-50
+  n_lachen_14: choplin – CC BY (Freesound) (Original https://freesound.org/people/choplin/sounds/109759) – über github.com/karolpiczak/ESC-50
+  n_lachen_15: OBXJohn – CC BY (Freesound) (Original https://freesound.org/people/OBXJohn/sounds/242932) – über github.com/karolpiczak/ESC-50
+  n_lachen_16: sagetyrtle – CC0 (Original https://freesound.org/people/sagetyrtle/sounds/36164) – über github.com/karolpiczak/ESC-50
+  n_lachen_17: OBXJohn – CC BY (Freesound) (Original https://freesound.org/people/OBXJohn/sounds/242932) – über github.com/karolpiczak/ESC-50
+  n_lachen_18: Nanakisan – CC BY (Freesound) (Original https://freesound.org/people/Nanakisan/sounds/253534) – über github.com/karolpiczak/ESC-50
+  n_lachen_19: klankbeeld – CC BY (Freesound) (Original https://freesound.org/people/klankbeeld/sounds/133674) – über github.com/karolpiczak/ESC-50
+  n_lachen_20: scottemoil – CC0 (Original https://freesound.org/people/scottemoil/sounds/263775) – über github.com/karolpiczak/ESC-50
+  n_lachen_21: klankbeeld – CC BY (Freesound) (Original https://freesound.org/people/klankbeeld/sounds/126113) – über github.com/karolpiczak/ESC-50
+  n_lachen_22: nicStage – CC BY (Freesound) (Original https://freesound.org/people/nicStage/sounds/1791) – über github.com/karolpiczak/ESC-50
+  n_lachen_23: sagetyrtle – CC0 (Original https://freesound.org/people/sagetyrtle/sounds/36164) – über github.com/karolpiczak/ESC-50
+  n_lachen_24: JulieBaka – CC0 (Original https://freesound.org/people/JulieBaka/sounds/181599) – über github.com/karolpiczak/ESC-50
+  n_einschenken_5: datSilencer – CC BY (Freesound) (Original https://freesound.org/people/datSilencer/sounds/187504) – über github.com/karolpiczak/ESC-50
+  n_einschenken_6: Taira Komori – CC BY (Freesound) (Original https://freesound.org/people/Taira%20Komori/sounds/212734) – über github.com/karolpiczak/ESC-50
+  n_einschenken_7: datSilencer – CC BY (Freesound) (Original https://freesound.org/people/datSilencer/sounds/187504) – über github.com/karolpiczak/ESC-50
+  n_einschenken_8: edhutschek – CC0 (Original https://freesound.org/people/edhutschek/sounds/214362) – über github.com/karolpiczak/ESC-50
+  n_einschenken_9: deankonidaris – CC BY (Freesound) (Original https://freesound.org/people/deankonidaris/sounds/102414) – über github.com/karolpiczak/ESC-50
+  n_einschenken_10: runirasmussen – CC0 (Original https://freesound.org/people/runirasmussen/sounds/172377) – über github.com/karolpiczak/ESC-50
+  n_einschenken_11: deankonidaris – CC BY (Freesound) (Original https://freesound.org/people/deankonidaris/sounds/102414) – über github.com/karolpiczak/ESC-50
+  n_einschenken_12: deankonidaris – CC BY (Freesound) (Original https://freesound.org/people/deankonidaris/sounds/102414) – über github.com/karolpiczak/ESC-50
+  n_einschenken_13: deankonidaris – CC BY (Freesound) (Original https://freesound.org/people/deankonidaris/sounds/102414) – über github.com/karolpiczak/ESC-50
+  n_einschenken_14: lucaslara – CC0 (Original https://freesound.org/people/lucaslara/sounds/154439) – über github.com/karolpiczak/ESC-50
+  n_einschenken_15: RTFS – CC0 (Original https://freesound.org/people/RTFS/sounds/180453) – über github.com/karolpiczak/ESC-50
+  n_einschenken_16: Swoboman87 – CC0 (Original https://freesound.org/people/Swoboman87/sounds/108451) – über github.com/karolpiczak/ESC-50
+  n_einschenken_17: vibe_crc – CC0 (Original https://freesound.org/people/vibe_crc/sounds/50625) – über github.com/karolpiczak/ESC-50
+  n_einschenken_18: vibe_crc – CC0 (Original https://freesound.org/people/vibe_crc/sounds/51436) – über github.com/karolpiczak/ESC-50
+  n_einschenken_19: Zabuhailo – CC0 (Original https://freesound.org/people/Zabuhailo/sounds/145719) – über github.com/karolpiczak/ESC-50
+  n_einschenken_20: ericlichtenberg – CC0 (Original https://freesound.org/people/ericlichtenberg/sounds/432350) – über github.com/arianne/stendhal
+  n_klopfen_7: RutgerMuller – CC0 (Original https://freesound.org/people/RutgerMuller/sounds/103995) – über github.com/karolpiczak/ESC-50
+  n_klopfen_8: bcimmet – CC BY (Freesound) (Original https://freesound.org/people/bcimmet/sounds/218980) – über github.com/karolpiczak/ESC-50
+  n_klopfen_9: Suprasummun – CC BY (Freesound) (Original https://freesound.org/people/Suprasummun/sounds/188878) – über github.com/karolpiczak/ESC-50
+  n_klopfen_10: GodofPH – CC0 (Original https://freesound.org/people/GodofPH/sounds/114254) – über github.com/karolpiczak/ESC-50
+  n_klopfen_11: bcimmet – CC BY (Freesound) (Original https://freesound.org/people/bcimmet/sounds/218981) – über github.com/karolpiczak/ESC-50
+  n_klopfen_12: OTBTechno – CC BY (Freesound) (Original https://freesound.org/people/OTBTechno/sounds/152594) – über github.com/karolpiczak/ESC-50
+  n_klopfen_13: semccab – CC0 (Original https://freesound.org/people/semccab/sounds/154378) – über github.com/karolpiczak/ESC-50
+  n_knarren_9: beskhu – CC BY (Freesound) (Original https://freesound.org/people/beskhu/sounds/70366) – über github.com/karolpiczak/ESC-50
+  n_knarren_10: beskhu – CC BY (Freesound) (Original https://freesound.org/people/beskhu/sounds/70367) – über github.com/karolpiczak/ESC-50
+  n_knarren_11: kyles – CC0 (Original https://freesound.org/people/kyles/sounds/51805) – über github.com/karolpiczak/ESC-50
+  n_knarren_12: Filipe Chagas – CC0 (Original https://freesound.org/people/Filipe%20Chagas/sounds/91912) – über github.com/karolpiczak/ESC-50
+  n_knarren_13: Filipe Chagas – CC0 (Original https://freesound.org/people/Filipe%20Chagas/sounds/91912) – über github.com/karolpiczak/ESC-50
+  n_knarren_14: stijnjobse – CC0 (Original https://freesound.org/people/stijnjobse/sounds/103401) – über github.com/karolpiczak/ESC-50
+  n_knarren_15: tec studios – CC0 (Original https://freesound.org/people/tec%20studios/sounds/107122) – über github.com/karolpiczak/ESC-50
+  n_knarren_16: stijnjobse – CC0 (Original https://freesound.org/people/stijnjobse/sounds/103401) – über github.com/karolpiczak/ESC-50
+  n_knarren_17: stijnjobse – CC0 (Original https://freesound.org/people/stijnjobse/sounds/103401) – über github.com/karolpiczak/ESC-50
+  n_knarren_18: bmcken – CC BY (Freesound) (Original https://freesound.org/people/bmcken/sounds/118194) – über github.com/karolpiczak/ESC-50
+  n_knarren_19: tec studios – CC0 (Original https://freesound.org/people/tec%20studios/sounds/107120) – über github.com/karolpiczak/ESC-50
+  n_knarren_20: Anton – CC BY (Freesound) (Original https://freesound.org/people/Anton/sounds/160036) – über github.com/karolpiczak/ESC-50
+  n_knarren_21: matucha – CC BY (Freesound) (Original https://freesound.org/people/matucha/sounds/181458) – über github.com/karolpiczak/ESC-50
+  n_knarren_22: morosopher – CC0 (Original https://freesound.org/people/morosopher/sounds/191497) – über github.com/karolpiczak/ESC-50
+  n_lachen_boese_3: klankbeeld – CC BY 3.0 (Original https://freesound.org/people/klankbeeld/sounds/126113/;) – über github.com/arianne/stendhal
+  n_lachen_boese_4: ShadowFlayer – CC0 (Original https://freesound.org/people/ShadowFlayer/sounds/401605/;) – über github.com/arianne/stendhal
+  n_lachen_boese_5: ShadowFlayer – CC0 (Original https://freesound.org/people/ShadowFlayer/sounds/401605/;) – über github.com/arianne/stendhal
+  n_lachen_boese_6: danlucaz – CC0 (Original https://freesound.org/people/danlucaz/sounds/500028/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_lachen_boese_7: spookymodem – CC0 (Original https://freesound.org/people/spookymodem/sounds/202096/;) – über github.com/arianne/stendhal
+  n_lachen_boese_8: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_lachen_boese_9: scorpion67890 – CC0 (Original https://freesound.org/people/scorpion67890/sounds/205751/;) – über github.com/arianne/stendhal
+  n_laub_1: vibe_crc – CC0 (Original https://freesound.org/people/vibe_crc/sounds/59315/;) – über github.com/arianne/stendhal
+  n_kies_7: soundmary – CC0 (Original https://freesound.org/people/soundmary/sounds/117627) – über github.com/karolpiczak/ESC-50
+  n_kies_8: soundmary – CC0 (Original https://freesound.org/people/soundmary/sounds/117627) – über github.com/karolpiczak/ESC-50
+  n_atem_1: cidchili – CC0 (Original https://freesound.org/people/cidchili/sounds/54961) – über github.com/karolpiczak/ESC-50
+  n_atem_2: cidchili – CC0 (Original https://freesound.org/people/cidchili/sounds/54962) – über github.com/karolpiczak/ESC-50
+  n_atem_3: thanvannispen – CC BY (Freesound) (Original https://freesound.org/people/thanvannispen/sounds/36393) – über github.com/karolpiczak/ESC-50
+  n_atem_4: The Baron – CC BY (Freesound) (Original https://freesound.org/people/The%20Baron/sounds/98392) – über github.com/karolpiczak/ESC-50
+  n_atem_5: thanvannispen – CC BY (Freesound) (Original https://freesound.org/people/thanvannispen/sounds/36400) – über github.com/karolpiczak/ESC-50
+  n_atem_6: nickrave – CC0 (Original https://freesound.org/people/nickrave/sounds/112557) – über github.com/karolpiczak/ESC-50
+  n_kampflaut_1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_2: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_3: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_4: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_5: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_6: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_7: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_9: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampflaut_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_9: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_12: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_13: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_14: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_15: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_16: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_17: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_18: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_19: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_20: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_21: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_klingen_22: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_klingen_23: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_klingen_24: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_kampfruf_1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kampfruf_2: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_hieb_1: hullum – CC0 (Original https://freesound.org/people/hullum/sounds/415580/;) – über github.com/sonic-pi-net/sonic-pi
+  n_hieb_2: Veloren-Projekt (credits.ron) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_hieb_3: qubodup – CC0 (Original https://freesound.org/people/qubodup/sounds/60009/;) – über github.com/sonic-pi-net/sonic-pi
+  n_hieb_4: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_peitsche_1: CGEffex – CC BY 3.0 (Original https://freesound.org/people/CGEffex/sounds/93100/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_katapult_1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_katapult_2: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_katapult_3: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_katapult_4: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_katapult_5: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wiehern_4: foxen10 – CC0 (Original https://freesound.org/people/foxen10/sounds/149024/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_wiehern_5: GoodListener – CC BY 3.0 (Original https://freesound.org/people/GoodListener/sounds/322443/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_wiehern_6: GoodListener – CC BY 3.0 (Original https://freesound.org/people/GoodListener/sounds/322454/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_wiehern_7: GoodListener – CC BY 3.0 (Original https://freesound.org/people/GoodListener/sounds/322445/;) – über github.com/minetest-mirrors/mob_horse
+  n_aufprall_1: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_schwertziehen_4: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_galopp_1: maugusto_sfx – CC0 (Original https://freesound.org/people/maugusto_sfx/sounds/468030/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_tod_9: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_12: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_13: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_14: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_15: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_16: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_17: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_18: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_19: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_20: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_21: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_22: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_23: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_tod_24: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_faustkampf_8: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_faustkampf_9: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_faustkampf_10: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_faustkampf_11: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_pfeil_9: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_pfeil_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_pfeil_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_pfeil_12: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_pfeil_13: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_pfeil_14: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_pfeil_15: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_knochen_1: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_kriegstrommel_1: Heigh-hoo – CC0 (Original https://freesound.org/people/Heigh-hoo/sounds/19433) – über github.com/sonic-pi-net/sonic-pi
+  n_signalhorn_1: Bruno Coudoin und andere (GCompris, REUSE.toml) – GPL-3.0-only – über github.com/gcompris/GCompris-qt
+  n_signalhorn_2: Wesnoth-Projekt – GPL-2.0-or-later – über github.com/wesnoth/wesnoth
+  n_donner_9: IllusiaProductions – CC BY-SA (Original https://freesound.org/people/IllusiaProductions/sounds/249950) – über github.com/minetest-mods/lightning
+  n_donner_10: hantorio – CC BY-SA (Original https://freesound.org/people/hantorio/sounds/121945/;) – über github.com/minetest-mods/lightning
+  n_donner_11: juskiddink – CC BY-SA (Original https://freesound.org/people/juskiddink/sounds/101948/;) – über github.com/minetest-mods/lightning
+  n_donner_12: csengeri – CC BY (Freesound) (Original https://freesound.org/people/csengeri/sounds/125072) – über github.com/karolpiczak/ESC-50
+  n_donner_13: chrscrwfrd18 – CC0 (Original https://freesound.org/people/chrscrwfrd18/sounds/156993) – über github.com/karolpiczak/ESC-50
+  n_donner_14: kijjaz – CC0 (Original https://freesound.org/people/kijjaz/sounds/144891) – über github.com/karolpiczak/ESC-50
+  n_donner_15: csengeri – CC BY (Freesound) (Original https://freesound.org/people/csengeri/sounds/39945) – über github.com/karolpiczak/ESC-50
+  n_donner_16: csengeri – CC BY (Freesound) (Original https://freesound.org/people/csengeri/sounds/115521) – über github.com/karolpiczak/ESC-50
+  n_donner_17: csengeri – CC BY (Freesound) (Original https://freesound.org/people/csengeri/sounds/103051) – über github.com/karolpiczak/ESC-50
+  n_donner_18: csengeri – CC BY (Freesound) (Original https://freesound.org/people/csengeri/sounds/125070) – über github.com/karolpiczak/ESC-50
+  n_greif_1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_greif_2: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_vogel_1: mcmalonzo – CC0 (Original https://freesound.org/people/mcmalonzo/sounds/342094/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_vogel_2: RSilveira_88 – CC BY (Freesound) (Original https://freesound.org/people/RSilveira_88/sounds/216211) – über github.com/karolpiczak/ESC-50
+  n_vogel_3: urupin – CC0 (Original https://freesound.org/people/urupin/sounds/122616) – über github.com/karolpiczak/ESC-50
+  n_vogel_4: urupin – CC BY (Freesound) (Original https://freesound.org/people/urupin/sounds/159609) – über github.com/karolpiczak/ESC-50
+  n_vogel_5: urupin – CC0 (Original https://freesound.org/people/urupin/sounds/122616) – über github.com/karolpiczak/ESC-50
+  n_vogel_6: RSilveira_88 – CC BY (Freesound) (Original https://freesound.org/people/RSilveira_88/sounds/216211) – über github.com/karolpiczak/ESC-50
+  n_eis_8: ecfike – CC0 (Original https://freesound.org/people/ecfike/sounds/177212) – über github.com/minetest-mirrors/ambience
+  n_eis_9: ecfike – CC0 (Original https://freesound.org/people/ecfike/sounds/177212) – über github.com/minetest-mirrors/ambience
+  n_bienen_1: CGEffex – CC BY 3.0 (Original https://freesound.org/people/CGEffex/sounds/99956/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_bienen_2: nps.gov – public domain – über github.com/arianne/stendhal
+  n_bienen_3: CGEffex – CC BY (Freesound) (Original https://freesound.org/people/CGEffex/sounds/99955) – über github.com/karolpiczak/ESC-50
+  n_bienen_4: delphidebrain – CC BY (Freesound) (Original https://freesound.org/people/delphidebrain/sounds/233787) – über github.com/karolpiczak/ESC-50
+  n_bienen_5: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_bienen_6: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_bienen_7: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_bienen_8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_eule_1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_eule_2: Mike Koenig (soundbible.com) – CC BY 3.0 – über github.com/minetest-mirrors/ambience
+  n_eule_3: Mike Koenig (soundbible.com) – CC BY 3.0 – über github.com/minetest-mirrors/ambience
+  n_fliegen_1: toyoto – CC BY (Freesound) (Original https://freesound.org/people/toyoto/sounds/130891) – über github.com/karolpiczak/ESC-50
+  n_fliegen_2: unbekannt (laut license.txt Public Domain) – gemeinfrei (Public Domain) – über github.com/D00Med/dmobs
+  n_fliegen_3: dobroide – CC BY (Freesound) (Original https://freesound.org/people/dobroide/sounds/19501) – über github.com/karolpiczak/ESC-50
+  n_kraehe_1: Bansemer – CC0 (Original https://freesound.org/people/Bansemer/sounds/117293) – über github.com/karolpiczak/ESC-50
+  n_kraehe_2: Bansemer – CC0 (Original https://freesound.org/people/Bansemer/sounds/117293) – über github.com/karolpiczak/ESC-50
+  n_frosch_1: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/15689) – über github.com/karolpiczak/ESC-50
+  n_frosch_2: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/15689) – über github.com/karolpiczak/ESC-50
+  n_frosch_3: aguasonic – CC BY (Freesound) (Original https://freesound.org/people/aguasonic/sounds/52085) – über github.com/karolpiczak/ESC-50
+  n_frosch_4: aguasonic – CC BY (Freesound) (Original https://freesound.org/people/aguasonic/sounds/52085) – über github.com/karolpiczak/ESC-50
+  n_frosch_5: daveincamas – CC BY (Freesound) (Original https://freesound.org/people/daveincamas/sounds/71964) – über github.com/karolpiczak/ESC-50
+  n_frosch_6: daveincamas – CC BY (Freesound) (Original https://freesound.org/people/daveincamas/sounds/71964) – über github.com/karolpiczak/ESC-50
+  n_frosch_7: daveincamas – CC BY (Freesound) (Original https://freesound.org/people/daveincamas/sounds/71964) – über github.com/karolpiczak/ESC-50
+  n_frosch_8: juskiddink – CC BY (Freesound) (Original https://freesound.org/people/juskiddink/sounds/99644) – über github.com/karolpiczak/ESC-50
+  n_frosch_9: snottyboy (soundbible.com) – CC BY 3.0 – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_frosch_10: klankbeeld – CC BY (Freesound) (Original https://freesound.org/people/klankbeeld/sounds/237499) – über github.com/karolpiczak/ESC-50
+  n_tropfen_9: Adam_N – CC0 (Original https://freesound.org/people/Adam_N/sounds/164593) – über github.com/karolpiczak/ESC-50
+  n_tropfen_10: vibe_crc – CC0 (Original https://freesound.org/people/vibe_crc/sounds/50623) – über github.com/karolpiczak/ESC-50
+  n_tropfen_11: vibe_crc – CC0 (Original https://freesound.org/people/vibe_crc/sounds/50623) – über github.com/karolpiczak/ESC-50
+  n_tropfen_12: Adam_N – CC0 (Original https://freesound.org/people/Adam_N/sounds/164595) – über github.com/karolpiczak/ESC-50
+  n_tropfen_13: mich3d – CC BY (Freesound) (Original https://freesound.org/people/mich3d/sounds/12654) – über github.com/karolpiczak/ESC-50
+  n_tropfen_14: willstepp – CC0 (Original https://freesound.org/people/willstepp/sounds/188293) – über github.com/karolpiczak/ESC-50
+  n_tropfen_15: willstepp – CC0 (Original https://freesound.org/people/willstepp/sounds/188293) – über github.com/karolpiczak/ESC-50
+  n_tropfen_16: alienistcog – CC0 (Original https://freesound.org/people/alienistcog/sounds/124564) – über github.com/karolpiczak/ESC-50
+  n_tropfen_17: mich3d – CC BY (Freesound) (Original https://freesound.org/people/mich3d/sounds/12654) – über github.com/karolpiczak/ESC-50
+  n_tropfen_18: willstepp – CC0 (Original https://freesound.org/people/willstepp/sounds/188293) – über github.com/karolpiczak/ESC-50
+  n_tropfen_19: mich3d – CC BY (Freesound) (Original https://freesound.org/people/mich3d/sounds/12654) – über github.com/karolpiczak/ESC-50
+  n_tropfen_20: willstepp – CC0 (Original https://freesound.org/people/willstepp/sounds/188293) – über github.com/karolpiczak/ESC-50
+  n_tropfen_21: doxent – CC BY (Freesound) (Original https://freesound.org/people/doxent/sounds/254832) – über github.com/karolpiczak/ESC-50
+  n_tropfen_22: l3ardoc – CC0 (Original https://freesound.org/people/l3ardoc/sounds/212604) – über github.com/karolpiczak/ESC-50
+  n_tropfen_23: kddekadenz (Dripping Water Mod) – CC0 – über github.com/minetest-mirrors/ambience
+  n_feuerstoss_5: Julien Matthey – CC0 (Original https://freesound.org/people/Julien%20Matthey/sounds/105016) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_feuerstoss_6: SilverIllusionist – CC BY 3.0 (Original https://freesound.org/people/SilverIllusionist) – über github.com/minetest-mods/nether
+  n_grillen_1: Veloren-Projekt (credits.ron) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_grillen_2: Mike Koenig (soundbible.com) – CC BY 3.0 – über github.com/minetest-mirrors/ambience
+  n_grillen_3: Mike Koenig (soundbible.com) – CC BY 3.0 – über github.com/minetest-mirrors/ambience
+  n_grillen_4: ianjuby – CC0 (Original https://freesound.org/people/ianjuby/sounds/134802) – über github.com/karolpiczak/ESC-50
+  n_platsch_9: Alexander (orangefreesounds.com) – CC BY 4.0 – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_platsch_10: qubodup – CC0 (Original https://freesound.org/people/qubodup/sounds/442773/;) – über github.com/minetest-mirrors/ambience
+  n_feuerknistern_3: skyklan47 – CC BY (Freesound) (Original https://freesound.org/people/skyklan47/sounds/193473) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_4: lgarrett – CC BY (Freesound) (Original https://freesound.org/people/lgarrett/sounds/17150) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_5: amether – CC BY (Freesound) (Original https://freesound.org/people/amether/sounds/189237) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_6: SoundCollectah – CC0 (Original https://freesound.org/people/SoundCollectah/sounds/158476) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_7: skyklan47 – CC BY (Freesound) (Original https://freesound.org/people/skyklan47/sounds/193473) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_8: pcaeldries – CC BY (Freesound) (Original https://freesound.org/people/pcaeldries/sounds/28314) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_9: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/18766) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_10: sagetyrtle – CC0 (Original https://freesound.org/people/sagetyrtle/sounds/145774) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_11: kingsrow – CC0 (Original https://freesound.org/people/kingsrow/sounds/182368) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_12: Krisboruff – CC BY (Freesound) (Original https://freesound.org/people/Krisboruff/sounds/17742) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_13: Benboncan – CC BY (Freesound) (Original https://freesound.org/people/Benboncan/sounds/61311) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_14: markfrancombe – CC BY (Freesound) (Original https://freesound.org/people/markfrancombe/sounds/17565) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_15: Everard – CC0 (Original https://freesound.org/people/Everard/sounds/17808) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_16: matucha – CC BY (Freesound) (Original https://freesound.org/people/matucha/sounds/170247) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_17: pcaeldries – CC BY (Freesound) (Original https://freesound.org/people/pcaeldries/sounds/28314) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_18: dobroide – CC BY (Freesound) (Original https://freesound.org/people/dobroide/sounds/120644) – über github.com/karolpiczak/ESC-50
+  n_welle_1: Aiyumi – CC BY (Freesound) (Original https://freesound.org/people/Aiyumi/sounds/187710) – über github.com/karolpiczak/ESC-50
+  n_welle_2: Slapbass – CC BY (Freesound) (Original https://freesound.org/people/Slapbass/sounds/124662) – über github.com/karolpiczak/ESC-50
+  n_welle_3: miastodzwiekow – CC BY (Freesound) (Original https://freesound.org/people/miastodzwiekow/sounds/219379) – über github.com/karolpiczak/ESC-50
+  n_welle_4: m.newlove – CC BY (Freesound) (Original https://freesound.org/people/m.newlove/sounds/195497) – über github.com/karolpiczak/ESC-50
+  n_fackel_1: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_wal_1: NOAA / U.S. National Park Service (über Wikimedia Commons) – gemeinfrei (Public Domain) – über github.com/D00Med/dmobs
+  n_klangschale_1: hullum – CC0 (Original https://freesound.org/people/hullum/sounds/415559/;) – über github.com/sonic-pi-net/sonic-pi
+  n_klangschale_2: AlaskaRobotics – CC0 (Original https://freesound.org/people/AlaskaRobotics/sounds/221515) – über github.com/sonic-pi-net/sonic-pi
+  n_saege_1: BitsyMcNics – CC0 (Original https://freesound.org/people/BitsyMcNics/sounds/251645) – über github.com/karolpiczak/ESC-50
+  n_saege_2: BitsyMcNics – CC0 (Original https://freesound.org/people/BitsyMcNics/sounds/251645) – über github.com/karolpiczak/ESC-50
+  n_saege_3: Pingel – CC0 (Original https://freesound.org/people/Pingel/sounds/9886) – über github.com/karolpiczak/ESC-50
+  n_saege_4: Pingel – CC0 (Original https://freesound.org/people/Pingel/sounds/9887) – über github.com/karolpiczak/ESC-50
+  n_saege_5: Pingel – CC0 (Original https://freesound.org/people/Pingel/sounds/9887) – über github.com/karolpiczak/ESC-50
+  n_saege_6: CGEffex – CC BY (Freesound) (Original https://freesound.org/people/CGEffex/sounds/102583) – über github.com/karolpiczak/ESC-50
+  n_saege_7: CGEffex – CC BY (Freesound) (Original https://freesound.org/people/CGEffex/sounds/102583) – über github.com/karolpiczak/ESC-50
+  n_saege_8: BitsyMcNics – CC0 (Original https://freesound.org/people/BitsyMcNics/sounds/251645) – über github.com/karolpiczak/ESC-50
+  n_saege_9: YleArkisto – CC BY (Freesound) (Original https://freesound.org/people/YleArkisto/sounds/253101) – über github.com/karolpiczak/ESC-50
+  n_saege_10: CGEffex – CC BY (Freesound) (Original https://freesound.org/people/CGEffex/sounds/102583) – über github.com/karolpiczak/ESC-50
+  n_saege_11: BitsyMcNics – CC0 (Original https://freesound.org/people/BitsyMcNics/sounds/251645) – über github.com/karolpiczak/ESC-50
+  n_saege_12: YleArkisto – CC BY (Freesound) (Original https://freesound.org/people/YleArkisto/sounds/253101) – über github.com/karolpiczak/ESC-50
+  n_steinschlag_5: Bertsz – CC0 (Original https://freesound.org/people/Bertsz/;) – über github.com/minetest-mods/nether
+  n_holzbruch_2: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_holzbruch_3: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  n_buch_4: PilzAdam – CC BY-SA 3.0 – über github.com/minetest-mods/nether
+  n_glasbruch_9: RSilveira_88 – CC BY (Freesound) (Original https://freesound.org/people/RSilveira_88/sounds/216284) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_10: m1a2t3z4 – CC0 (Original https://freesound.org/people/m1a2t3z4/sounds/112213) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_11: m1a2t3z4 – CC0 (Original https://freesound.org/people/m1a2t3z4/sounds/112213) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_12: m1a2t3z4 – CC0 (Original https://freesound.org/people/m1a2t3z4/sounds/112213) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_13: m1a2t3z4 – CC0 (Original https://freesound.org/people/m1a2t3z4/sounds/112213) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_14: Tomlija – CC BY (Freesound) (Original https://freesound.org/people/Tomlija/sounds/106881) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_15: Tomlija – CC BY (Freesound) (Original https://freesound.org/people/Tomlija/sounds/106881) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_16: RSilveira_88 – CC BY (Freesound) (Original https://freesound.org/people/RSilveira_88/sounds/216280) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_17: speedygonzo – CC BY (Freesound) (Original https://freesound.org/people/speedygonzo/sounds/257642) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_18: Aiwha – CC BY (Freesound) (Original https://freesound.org/people/Aiwha/sounds/250710) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_19: Aiwha – CC BY (Freesound) (Original https://freesound.org/people/Aiwha/sounds/250710) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_20: gevaroy – CC0 (Original https://freesound.org/people/gevaroy/sounds/173618) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_21: RoganDerrick – CC BY (Freesound) (Original https://freesound.org/people/RoganDerrick/sounds/260432) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_22: unfa – CC BY (Freesound) (Original https://freesound.org/people/unfa/sounds/221529) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_23: C_Rogers – CC0 (Original https://freesound.org/people/C_Rogers/sounds/203373) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_24: speedygonzo – CC BY (Freesound) (Original https://freesound.org/people/speedygonzo/sounds/257642) – über github.com/karolpiczak/ESC-50
+  n_metall_1: alienistcog – CC0 (Original https://freesound.org/people/alienistcog/sounds/124711) – über github.com/arianne/stendhal
+  n_metall_2: lostchocolatelab – CC0 (Original https://freesound.org/people/lostchocolatelab/sounds/1468/;) – über github.com/arianne/stendhal
+  n_windspiel_1: smand – CC0 (Original https://freesound.org/people/smand/sounds/525052/;) – über github.com/abetusk/noixer
+  n_axt_8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_axt_9: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_axt_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_hacke_9: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_hacke_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_hacke_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_hacke_12: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_hacke_13: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wolf_7: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wolf_8: rogerforeman – CC BY 3.0 (Original https://freesound.org/people/rogerforeman/sounds/68068) – über github.com/minetest-mirrors/ambience
+  n_wolf_9: Alexander (orangefreesounds.com) – gemeinfrei (Public Domain) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_wolf_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_huhn_1: wildear1 – CC BY (Freesound) (Original https://freesound.org/people/wildear1/sounds/95258) – über github.com/karolpiczak/ESC-50
+  n_huhn_2: ecfike – CC0 (Original https://freesound.org/people/ecfike/sounds/183487) – über github.com/karolpiczak/ESC-50
+  n_huhn_3: cclaretc – CC BY (Freesound) (Original https://freesound.org/people/cclaretc/sounds/164064) – über github.com/karolpiczak/ESC-50
+  n_huhn_4: Setuniman – CC BY (Freesound) (Original https://freesound.org/people/Setuniman/sounds/134049) – über github.com/karolpiczak/ESC-50
+  n_huhn_5: dobroide – CC BY (Freesound) (Original https://freesound.org/people/dobroide/sounds/95035) – über github.com/karolpiczak/ESC-50
+  n_huhn_6: InspectorJ – CC BY 4.0 (Original https://freesound.org/people/InspectorJ/sounds/439472/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_keiler_1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_keiler_2: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_keiler_3: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_monster_9: GeekyGami – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_monster_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_monster_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_monster_12: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_monster_13: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_monster_14: GeekyGami – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_monster_15: deleted_user_4798915 – CC BY 3.0 (Original https://freesound.org/s/276443/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_monster_16: apolloaiello – CC0 (Original https://freesound.org/people/apolloaiello/sounds/276267/;) – über github.com/arianne/stendhal
+  n_monster_17: apolloaiello – CC0 (Original https://freesound.org/people/apolloaiello/sounds/276267/;) – über github.com/arianne/stendhal
+  n_monster_18: Alexander (orangefreesounds.com) – CC BY 4.0 – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_monster_19: Cyberpangolin – WTFPL – über github.com/minetest-mirrors/mobs_monster
+  n_monster_20: apolloaiello – CC0 (Original https://freesound.org/people/apolloaiello/sounds/276267/;) – über github.com/arianne/stendhal
+  n_monster_21: Cyberpangolin – WTFPL – über github.com/minetest-mirrors/mobs_monster
+  n_monster_22: Mike Koenig (soundbible.com) – CC BY 3.0 – über github.com/D00Med/dmobs
+  n_monster_23: NicknameLarry – CC0 (Original https://freesound.org/people/NicknameLarry/sounds/489901/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_monster_24: Cyberpangolin – WTFPL – über github.com/minetest-mirrors/mobs_monster
+  n_monster_25: CGEffex – CC BY 3.0 (Original https://freesound.org/people/CGEffex/sounds/98337/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_monster_26: Mike Koenig (soundbible.com) – CC BY 3.0 – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_stoehnen_9: Alexander (orangefreesounds.com) – CC BY 4.0 – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_stoehnen_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_stoehnen_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_stoehnen_12: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_stoehnen_13: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_stoehnen_14: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_stoehnen_15: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_ziege_1: beskhu – CC0 (Original https://freesound.org/people/beskhu/sounds/273911/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_ziege_2: Julalvr – CC0 (Original https://freesound.org/people/Julalvr/sounds/429871) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_zauber_1: EcoDTR – CC0 (Original https://freesound.org/people/EcoDTR/sounds/27281/;) – über github.com/sonic-pi-net/sonic-pi
+  n_katze_1: FairhavenCollection – CC0 (Original https://freesound.org/people/FairhavenCollection/sounds/372900/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_katze_2: ebcrosby – CC BY 3.0 (Original https://freesound.org/people/ebcrosby/sounds/334434/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_katze_3: temawas – CC0 (Original https://freesound.org/people/temawas/sounds/133047) – über github.com/karolpiczak/ESC-50
+  n_katze_4: tuberatanka – CC0 (Original https://freesound.org/people/tuberatanka/sounds/110010) – über github.com/karolpiczak/ESC-50
+  n_katze_5: temawas – CC0 (Original https://freesound.org/people/temawas/sounds/133047) – über github.com/karolpiczak/ESC-50
+  n_katze_6: Zabuhailo – CC0 (Original https://freesound.org/people/Zabuhailo/sounds/146972) – über github.com/karolpiczak/ESC-50
+  n_drache_6: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_7: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_9: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_10: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_11: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_12: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_13: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_drache_14: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_schaf_1: Alexander (orangefreesounds.com) – CC BY 4.0 – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_schaf_2: Alexander (orangefreesounds.com) – CC BY 4.0 – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_schaf_3: cognito perceptu – CC0 (Original https://freesound.org/people/cognito%20perceptu/sounds/88423/;) – über github.com/arianne/stendhal
+  n_schaf_4: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_schaf_5: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/119161) – über github.com/karolpiczak/ESC-50
+  n_schaf_6: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_schaf_7: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_schaf_8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_schaf_9: reinsamba – CC BY (Freesound) (Original https://freesound.org/people/reinsamba/sounds/57795) – über github.com/karolpiczak/ESC-50
+  n_schaf_10: bone666138 – CC BY (Freesound) (Original https://freesound.org/people/bone666138/sounds/198891) – über github.com/karolpiczak/ESC-50
+  n_schaf_11: bone666138 – CC BY (Freesound) (Original https://freesound.org/people/bone666138/sounds/198891) – über github.com/karolpiczak/ESC-50
+  n_schaf_12: bone666138 – CC BY (Freesound) (Original https://freesound.org/people/bone666138/sounds/198891) – über github.com/karolpiczak/ESC-50
+  n_wehklagen_1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wehklagen_2: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wehklagen_3: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wehklagen_4: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wehklagen_5: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wehklagen_6: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wehklagen_7: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_wehklagen_8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  n_kuh_1: lolamadeus – CC0 (Original https://freesound.org/people/lolamadeus/sounds/194899) – über github.com/karolpiczak/ESC-50
+  n_kuh_2: lolamadeus – CC0 (Original https://freesound.org/people/lolamadeus/sounds/194899) – über github.com/karolpiczak/ESC-50
+  n_kuh_3: lolamadeus – CC0 (Original https://freesound.org/people/lolamadeus/sounds/194899) – über github.com/karolpiczak/ESC-50
+  n_kuh_4: lolamadeus – CC0 (Original https://freesound.org/people/lolamadeus/sounds/194899) – über github.com/karolpiczak/ESC-50
+  n_kuh_5: YleArkisto – CC BY (Freesound) (Original https://freesound.org/people/YleArkisto/sounds/253085) – über github.com/karolpiczak/ESC-50
+  n_kuh_6: klankbeeld – CC BY (Freesound) (Original https://freesound.org/people/klankbeeld/sounds/242492) – über github.com/karolpiczak/ESC-50
+  n_knurren_1: videog – CC BY 3.0 (Original https://freesound.org/people/videog/sounds/149190/;) – über github.com/arianne/stendhal
+  n_knurren_2: U.S. Fish & Wildlife Service – public domain: https://fws.gov/video/sound.htm – über github.com/arianne/stendhal
+  n_knurren_3: d1523825 – CC BY 3.0 (Original https://freesound.org/people/d1523825/sounds/504636/;) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_knurren_4: U.S. Fish & Wildlife Service – public domain: https://fws.gov/video/sound.htm – über github.com/arianne/stendhal
+  n_schwein_1: yottasounds – CC BY 3.0 (Original https://freesound.org/people/yottasounds/sounds/174615) – über github.com/yl-whosit/petz (Fork von runsy/petz)
+  n_schwein_2: YleArkisto – CC BY (Freesound) (Original https://freesound.org/people/YleArkisto/sounds/253084) – über github.com/karolpiczak/ESC-50
+  n_schwein_3: YleArkisto – CC BY (Freesound) (Original https://freesound.org/people/YleArkisto/sounds/253084) – über github.com/karolpiczak/ESC-50
+  n_schwein_4: YleArkisto – CC BY (Freesound) (Original https://freesound.org/people/YleArkisto/sounds/253084) – über github.com/karolpiczak/ESC-50
+  n_schwein_5: JarredGibb – CC0 (Original https://freesound.org/people/JarredGibb/sounds/233151) – über github.com/karolpiczak/ESC-50
+  n_schwein_6: confusion_music – CC BY (Freesound) (Original https://freesound.org/people/confusion_music/sounds/103421) – über github.com/karolpiczak/ESC-50
+  n_hund_1: urupin – CC BY (Freesound) (Original https://freesound.org/people/urupin/sounds/157695) – über github.com/karolpiczak/ESC-50
+  n_hund_2: urupin – CC BY (Freesound) (Original https://freesound.org/people/urupin/sounds/157695) – über github.com/karolpiczak/ESC-50
+  n_hund_3: bspiller5 – CC BY (Freesound) (Original https://freesound.org/people/bspiller5/sounds/180256) – über github.com/karolpiczak/ESC-50
+  n_hund_4: plingativator – CC BY (Freesound) (Original https://freesound.org/people/plingativator/sounds/114280) – über github.com/karolpiczak/ESC-50
+  n_hund_5: plingativator – CC BY (Freesound) (Original https://freesound.org/people/plingativator/sounds/114280) – über github.com/karolpiczak/ESC-50
+  n_hund_6: bspiller5 – CC BY (Freesound) (Original https://freesound.org/people/bspiller5/sounds/180256) – über github.com/karolpiczak/ESC-50
+
+Dritte Sammlung: weitere Hintergrund-Schichten (im Wechsel)
+  a_wind_n7: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  a_wind_n5: Wolfire Games (Lugaru) – CC BY-SA 3.0 – über github.com/osslugaru/lugaru
+  a_gaeste_n1: epicwizard – CC0 (Original freesound.org/s/394290) – über github.com/abetusk/noixer
+  a_brandung_n1: florianreichelt – CC0 (Original freesound.org/s/450755) – über github.com/abetusk/noixer
+  a_wasserfall_n1: ali@k – CC0 (Original freesound.org/s/155940) – über github.com/abetusk/noixer
+  a_lagerfeuer_n2: cagancelik – CC0 (Original freesound.org/s/433783) – über github.com/abetusk/noixer
+  a_nacht_n7: greysound – CC0 (Original freesound.org/s/32655) – über github.com/abetusk/noixer
+  a_leichtregen_n3: ali@k – CC0 (Original freesound.org/s/156049) – über github.com/abetusk/noixer
+  a_gewitter_n2: ionizing – CC0 (Original freesound.org/s/19283) – über github.com/abetusk/noixer
+  a_tropfstein_n2: Veloren-Projekt (Urheber in credits.ron nicht genannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  a_laub_n1: Veloren-Projekt (Urheber in credits.ron nicht genannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  a_dschungel_n2: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_dschungel_n1: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_voegel_n8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_nacht_n5: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_wind_n6: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_nacht_n6: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_voegel_n7: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_nacht_n8: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  a_regen_n2: MegaGlest-Team (megaglest.org) – CC BY-SA 3.0 – über github.com/MegaGlest/megaglest-data
+  ESC-50 nur mit CC0-/CC-BY-Originalen; Luanti-Mods je Datei geprüft.
