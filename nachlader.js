@@ -51,7 +51,7 @@
   document.addEventListener("pointerdown", e => {
     const a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a) return;
     const h = a.getAttribute("href");
-    if (/^#(taverne|waldlauf|diebesnacht|echohort|auftritt|barden-probe|memory-karte)$/.test(h)) laden("taverne");
+    if (/^#(taverne|waldlauf|diebesnacht|echohort|auftritt|barden-probe|memory-karte|charme-karte|kehle)$/.test(h)) laden("taverne");
     if (h === "#buehne" || h === "#lautenwerk") laden("buehne");
   }, { passive: true, capture: true });
 

@@ -38,7 +38,9 @@
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: [B("memory-1")],
       plakat: B("memory-plakat"), pos: "center 15%", farbe: "#7fb2ff", clip: "vorschau/memory-clip.mp4", nurVorschauClip: true, direkt: true, ton: "glock_91.mp3" },
     { key: "charme", karte: "charme-karte", held: "barradin.jpg", bilder: ["vorschau/charme-1.webp?v=6", "vorschau/charme-2.webp?v=6", "vorschau/charme-3.webp?v=6", "vorschau/charme-4.webp?v=6"],
-      plakat: "vorschau/plakat-charme.webp?v=6", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" }
+      plakat: "vorschau/plakat-charme.webp?v=6", pos: "center 40%", farbe: "#ff7aa2", ton: "gloeckchen.mp3", art: "neu", stand: "2026-10-28" },
+    { key: "kehle", karte: "kehle", held: "barradin.jpg", bilder: ["vorschau/kehle-1.webp?v=1", "vorschau/kehle-2.webp?v=1", "vorschau/kehle-3.webp?v=1"],
+      plakat: "vorschau/plakat-kehle.webp?v=1", pos: "center 35%", farbe: "#ffd27a", clip: "vorschau/kehle-clip.mp4?v=1", ton: "ooh_60.mp3", art: "neu", stand: "2026-10-31" }
   ];
   /* Sprüche aus Sicht der Helden, Kopf der Taverne, Fortschritt */
   const MEHR = {
@@ -46,9 +48,10 @@
       spruch: { heldensturm: "Vier Helden. Tausend Goblins. Ein sehr müder Barde.", jagd: "Wie viele Goblins schaffst du, bevor Rex heiser ist?",
         nacht: "Ezekiel nimmt nur, was niemand vermisst. Meistens.", hort: "Was glänzt, gehört Echo. Was nicht glänzt, auch.",
         auftritt: "Vom Hinterhof bis zu den Göttern – kein Ton daneben.", probe: "Eine 20 macht Helden. Eine 1 macht Lieder über dich.",
-        memory: "Erinnerst du dich an jedes Monster, das uns fressen wollte?", charme: "Kann ich den NSC verführen? – Würfel auf Charisma." },
+        memory: "Erinnerst du dich an jedes Monster, das uns fressen wollte?", charme: "Kann ich den NSC verführen? – Würfel auf Charisma.",
+        kehle: "Hier würfelt keiner. Hier singst du. Echt." },
       kopfLabel: "Zeitvertreib", kopfTitel: "Die Taverne",
-      kopfText: "Krüge hoch, Würfel raus! Acht Spiele aus unserer Kampagne – vom Hordenkampf bis zum Loblied. Zieh dir einen Hocker ran.",
+      kopfText: "Krüge hoch, Würfel raus! Neun Spiele aus unserer Kampagne – vom Hordenkampf bis zum Gesang. Zieh dir einen Hocker ran.",
       heute: "Heute in der Taverne", jetzt: "▶ Jetzt spielen", mehr: "Mehr erfahren", spielen: "▶ Spielen", weiter: "▶ Weiterspielen",
       neu: "Neu", update: "Frisch", spiele: n => n + " Spiele", rekorde: n => n + (n === 1 ? " Rekord" : " Rekorde"), neuZahl: n => n + " neu",
       tonAn: "Tavernenklänge an", tonAus: "Tavernenklänge aus", nieGespielt: "Noch nie gespielt – trau dich!", deinStand: "Dein Stand",
@@ -60,16 +63,18 @@
         auftritt: d => [d.sterne ? "★ " + d.sterne + "/36" : "", d.buehne > 1 ? "Bühne " + d.buehne + "/12" : ""],
         probe: () => ["🎲 Ein Wurf genügt"],
         memory: d => [d.rekord ? "🏆 " + d.rekord + " Züge" : ""],
-        charme: d => [d.erobert ? "♥ " + d.erobert + "/12 erobert" : "", d.rekord ? "🏆 " + d.rekord + " ♥" : ""]
+        charme: d => [d.erobert ? "♥ " + d.erobert + "/12 erobert" : "", d.rekord ? "🏆 " + d.rekord + " ♥" : ""],
+        kehle: d => [d.sterne ? "★ " + d.sterne + "/" + d.max : "", d.rekord ? "🏆 " + d.rekord + " %" : ""]
       }
     },
     en: {
       spruch: { heldensturm: "Four heroes. A thousand goblins. One very tired bard.", jagd: "How many goblins can you drop before Rex goes hoarse?",
         nacht: "Ezekiel only takes what no one will miss. Mostly.", hort: "If it shines, it's Echo's. If it doesn't – also Echo's.",
         auftritt: "From the back alley to the gods – not one wrong note.", probe: "A 20 makes heroes. A 1 makes songs about you.",
-        memory: "Do you remember every monster that tried to eat us?", charme: "Can I seduce the NPC? – Roll Charisma." },
+        memory: "Do you remember every monster that tried to eat us?", charme: "Can I seduce the NPC? – Roll Charisma.",
+        kehle: "No dice here. You sing. For real." },
       kopfLabel: "Pastimes", kopfTitel: "The Tavern",
-      kopfText: "Raise your tankards, roll the dice! Eight games from our campaign – from horde battles to songs of praise. Pull up a stool.",
+      kopfText: "Raise your tankards, roll the dice! Nine games from our campaign – from horde battles to singing. Pull up a stool.",
       heute: "Tonight at the tavern", jetzt: "▶ Play now", mehr: "Learn more", spielen: "▶ Play", weiter: "▶ Continue",
       neu: "New", update: "Fresh", spiele: n => n + " games", rekorde: n => n + (n === 1 ? " record" : " records"), neuZahl: n => n + " new",
       tonAn: "Tavern sounds on", tonAus: "Tavern sounds off", nieGespielt: "Never played – dare you!", deinStand: "Your progress",
@@ -81,7 +86,8 @@
         auftritt: d => [d.sterne ? "★ " + d.sterne + "/36" : "", d.buehne > 1 ? "Stage " + d.buehne + "/12" : ""],
         probe: () => ["🎲 One roll is all it takes"],
         memory: d => [d.rekord ? "🏆 " + d.rekord + " moves" : ""],
-        charme: d => [d.erobert ? "♥ " + d.erobert + "/12 conquered" : "", d.rekord ? "🏆 " + d.rekord + " ♥" : ""]
+        charme: d => [d.erobert ? "♥ " + d.erobert + "/12 conquered" : "", d.rekord ? "🏆 " + d.rekord + " ♥" : ""],
+        kehle: d => [d.sterne ? "★ " + d.sterne + "/" + d.max : "", d.rekord ? "🏆 " + d.rekord + " %" : ""]
       }
     }
   };
@@ -104,6 +110,8 @@
       d.gespielt = !!lies("imres-auftritt-rekord") || !!d.sterne; }
     if (key === "memory") d.rekord = parseInt(lies("imres-memory-rekord"), 10) || 0;
     if (key === "charme") { const b = json("imres-charme-buch") || {}; d.erobert = Object.values(b).filter(v => v === "erobert").length; d.rekord = parseInt(lies("imres-charme-rekord"), 10) || 0; }
+    if (key === "kehle") { const w = json("imres-kehle-weg"), r = json("imres-kehle-rekorde") || {}; d.sterne = w && Array.isArray(w.sterne) ? w.sterne.reduce((a, b) => a + (+b || 0), 0) : 0;
+      d.max = ((window.KEHLE_LIEDER && window.KEHLE_LIEDER.weg) || []).length * 3 || 30; d.rekord = Object.values(r).reduce((a, b) => Math.max(a, +b || 0), 0); }
     const zeilen = m().stand[key](d).filter(Boolean);
     const gespielt = key === "probe" ? true : zeilen.length > 0 || d.gespielt;
     return { zeilen, gespielt, weiter: !!d.weiter, rekord: !!(d.rekord || d.sterne || d.laeufe) };
@@ -166,7 +174,11 @@
         charme: { titel: "Würfel auf Verführen", kurz: "Barradin will jeden NSC verführen – der Spielleiter leidet.", genre: "Würfelspiel", wer: "Barradin & der Spielleiter",
           text: "Hinter dem Schirm sitzt der Spielleiter, vor ihm erscheinen nacheinander die NSC, die er spielt – von Gundren bis Themberchaud. Wähle einen Spruch, wirf den W20 und schau ihm ins Gesicht: Grinsen, Facepalm, blankes Entsetzen.",
           punkte: ["Elf NSC aus der Kampagne, jeden Abend acht davon – und ein geheimer Bonusgast", "Charmant, kühn, absurd oder passend: jeder Spruch hat sein eigenes Risiko", "Joker: Echos „Kennst du Gundren?“, Rex und die Flöte der Illusionen", "Nachfragen der NSC, Zwischenrufe der Gruppe, Barden-Rausch und freischaltbare Geheimsprüche", "Die Laune des Spielleiters entscheidet mit – von Vorteil bis Rettungswurf auf Würde", "Peinliche Stille inklusive: Manchmal sagt einfach niemand etwas. Sehr lange.", "Die Geduld des Spielleiters ist begrenzt – und das Eroberungsbuch merkt sich alles"],
-          pc: "Spruch anklicken – der W20 rollt von allein. Leertaste oder Klick auf die Bühne spult vor. Xbox-Controller: Steuerkreuz wählen, A würfeln, B vorspulen, X/Y/RB Joker.", handy: "Spruch antippen, auf die Bühne tippen spult vor. Startet automatisch im Vollbild." }
+          pc: "Spruch anklicken – der W20 rollt von allein. Leertaste oder Klick auf die Bühne spult vor. Xbox-Controller: Steuerkreuz wählen, A würfeln, B vorspulen, X/Y/RB Joker.", handy: "Spruch antippen, auf die Bühne tippen spult vor. Startet automatisch im Vollbild." },
+        kehle: { titel: "Barradins goldene Kehle", kurz: "Sing die Lieder unserer Kampagne – das Mikrofon hört zu.", genre: "Gesangsspiel", wer: "Barradin – und deine Stimme",
+          text: "Die Notenblöcke ziehen vorbei, dein Mikrofon hört zu: Triff die Töne, halte sie, und das Publikum liegt dir zu Füßen. Zehn neue Lieder erzählen unsere Kampagne nach – mit Reimen, für die sich kein Barde schämen muss, und Beleidigungen, für die sich jeder Gegner schämen sollte.",
+          punkte: ["Die Tournee: zehn Bühnen vom Hafen in Neverwinter bis vor Themberchauds Goldberg – mit Auftrittswurf, Sternen und Rängen", "Zehn eigene Lieder, vom „Goblin, kleiner Wicht“ bis zum Klagelied für Ploopploopeen", "Übungsraum: Einsingen, Ton halten, Echos Ruf (Flöte vor, du nach) und Sprünge – passend zu deiner Stimme", "Stimme einmessen: Die Lieder rutschen automatisch in deine Lage. Oktave egal – tief oder hoch, beides zählt", "Stimmgabel und Stimmbuch: Wo singst du zu hoch, wo zu tief?", "Leise Führstimme mit Kopfhörern, Begleitung mit echten Instrumentenaufnahmen", "Deine Stimme wird nur auf deinem Gerät ausgewertet – nichts wird aufgenommen oder gesendet"],
+          pc: "Mikrofon erlauben, Kopfhörer auf, singen. Leertaste = Pause.", handy: "Mikrofon erlauben, Kopfhörer auf, singen. Oben rechts ⏸ für Pause." }
       }
     },
     en: {
@@ -205,7 +217,11 @@
         charme: { titel: "Roll to Seduce", kurz: "Barradin wants to seduce every NPC – the game master suffers.", genre: "Dice game", wer: "Barradin & the game master",
           text: "Behind the screen sits the game master, and in front of him the NPCs he voices appear one by one – from Gundren to Themberchaud. Pick a line, roll the d20 and watch his face: grin, facepalm, sheer horror.",
           punkte: ["Eleven NPCs from the campaign, eight of them each evening – and a secret bonus guest", "Charming, bold, absurd or fitting: every line has its own risk", "Jokers: Echo's \"Do you know Gundren?\", Rex and the flute of illusions", "NPC follow-up questions, party interruptions, bard frenzy and unlockable secret lines", "The game master's mood matters – from advantage to a dignity saving throw", "Awkward silences included: sometimes nobody says anything. For a very long time.", "The game master's patience is limited – and the Book of Conquests remembers everything"],
-          pc: "Click a line – the d20 rolls by itself. Space or a click on the stage skips. Xbox controller: D-pad picks, A rolls, B skips, X/Y/RB jokers.", handy: "Tap a line, tap the stage to skip. Starts in fullscreen automatically." }
+          pc: "Click a line – the d20 rolls by itself. Space or a click on the stage skips. Xbox controller: D-pad picks, A rolls, B skips, X/Y/RB jokers.", handy: "Tap a line, tap the stage to skip. Starts in fullscreen automatically." },
+        kehle: { titel: "Barradin's Golden Throat", kurz: "Sing the songs of our campaign – the microphone is listening.", genre: "Singing game", wer: "Barradin – and your voice",
+          text: "The note blocks scroll by and your microphone listens: hit the notes, hold them, and the crowd is yours. Ten new songs retell our campaign – with rhymes no bard need be ashamed of, and insults every foe should be ashamed of. (Lyrics in German.)",
+          punkte: ["The Tour: ten stages from the harbour of Neverwinter to Themberchaud's mountain of gold – with performance checks, stars and ranks", "Ten original songs, from „Goblin, kleiner Wicht“ to the lament for Ploopploopeen", "Practice room: warm-up, hold the note, Echo's call (flute first, then you) and leaps – fitted to your voice", "Measure your voice: songs move into your range automatically. Any octave counts – low or high", "Tuning fork and voice book: where do you go sharp, where flat?", "Soft guide voice with headphones, accompaniment with real instrument recordings", "Your voice is analysed only on your device – nothing is recorded or sent"],
+          pc: "Allow the microphone, put on headphones, sing. Space = pause.", handy: "Allow the microphone, put on headphones, sing. Tap ⏸ top right to pause." }
       }
     }
   };
@@ -253,7 +269,7 @@
   }
 
   /* ---------- Kopf: Kerzenschein, Einladung, „Heute in der Taverne“ ---------- */
-  const TAGES = ["heldensturm", "jagd", "nacht", "hort", "auftritt"];
+  const TAGES = ["heldensturm", "jagd", "nacht", "hort", "auftritt", "kehle"];
   function heutigesSpiel() {
     const tag = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
     const l = TAGES.map(nachKey).filter(sp => sp && vorhanden(sp));
@@ -394,6 +410,9 @@
     /* Barradins Auftritt spielt Musik weiter, wenn man ihn nur ausblendet – also abbrechen */
     const at = document.getElementById("auftritt");
     if (at && ausser !== "auftritt" && at._zustand) { const z = at._zustand(); if (z.spiel || z.stimmt) { const k = at.querySelector(".at-start"); if (k) k.click(); } }
+    /* Barradins goldene Kehle: Musik anhalten und das Mikrofon freigeben */
+    const kh = document.getElementById("kehle");
+    if (kh && ausser !== "kehle" && kh._stoppen) kh._stoppen();
     /* Vollbild der Tavernenkarte beenden */
     const v = buehne.querySelector(".tav-karte.tav-voll > .tav-voll-knopf"); if (v) v.click();
   }
@@ -422,7 +441,7 @@
     if (hoeheWache) { hoeheWache.disconnect(); const k = document.getElementById(kartenId); if (k) hoeheWache.observe(k); }
   }
   /* Spielfläche so hoch machen, wie unter Leiste und Steuerungshinweis noch Platz im Fenster ist */
-  const FLAECHE = { waldlauf: [".wl-buehne", 14], diebesnacht: [".dn-buehne", 14], echohort: [".eh-buehne", 14], auftritt: [".at-canvas", 120] };
+  const FLAECHE = { waldlauf: [".wl-buehne", 14], diebesnacht: [".dn-buehne", 14], echohort: [".eh-buehne", 14], auftritt: [".at-canvas", 120], kehle: [".kh-buehne", 104] };
   /* Unterkante des nutzbaren Fensters: über der Handy-Leiste (falls sichtbar), sonst über dem sicheren Rand (Home-Balken) */
   let randMesser = null;
   function sichererRand() {
