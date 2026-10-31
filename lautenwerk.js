@@ -2539,9 +2539,13 @@ const ZUS_ICON = {
   /* Regler 0–200 %: bis 100 % linear, darüber bis +10 dB – auf 200 % rückt das Geräusch ganz nah heran */
   const zusKurve = w => w <= 1 ? w : Math.pow(10, .5 * (w - 1));
   const zusDumpf = id => ZUSATZ[id].raus && (DRINNEN.includes(S.kulisse) || tuerZu);
+  /* Raumbreite: sanft (Richtung angedeutet, nie nur ein Ohr), mittel, rundum (voller 3D-Klang) – [Raumklang, Mitte] */
+  const BREITE_MIX = { sanft: [.5, .86], mittel: [.76, .65], rundum: [1, 0] };
+  let raumBreite = (() => { try { const v = localStorage.getItem("imres-lw-breite"); return BREITE_MIX[v] ? v : "sanft"; } catch (_) { return "sanft"; } })();
   function zusPegelSetzen(tau) {
     if (!ctx) return; const j = ctx.currentTime, f = zusFaktor(), st = standortWert(), still = stilleBis > j ? .04 : 1;
-    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id], rm = typeof zusRaum === "function" ? zusRaum(id) : { g: 1, f: 18000, pan: 0 }; const alt = !rm.raum; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (alt && tuerZu && ZUSATZ[id].raus ? .55 : 1) * (alt ? st.g : 1) * still * rm.g, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(alt ? Math.min(zusDumpf(id) ? 750 : 18000, st.f, rm.f) : rm.f, j, Math.min(.3, tau || .3)); if (z.pan) { if (z.pan.pan) z.pan.pan.setTargetAtTime(rm.pan, j, tau || .15); else if (z.pan.positionX) { z.pan.positionX.setTargetAtTime(rm.pos[0], j, tau || .15); z.pan.positionY.setTargetAtTime(rm.pos[1], j, tau || .15); z.pan.positionZ.setTargetAtTime(rm.pos[2], j, tau || .15); } else if (z.pan.setPosition) z.pan.setPosition(rm.pos[0], rm.pos[1], rm.pos[2]); } });
+    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id], rm = typeof zusRaum === "function" ? zusRaum(id) : { g: 1, f: 18000, pan: 0 }; const alt = !rm.raum; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (alt && tuerZu && ZUSATZ[id].raus ? .55 : 1) * (alt ? st.g : 1) * still * rm.g, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(alt ? Math.min(zusDumpf(id) ? 750 : 18000, st.f, rm.f) : rm.f, j, Math.min(.3, tau || .3)); if (z.panG) { const [wa, wb] = BREITE_MIX[raumBreite]; z.panG.gain.setTargetAtTime(wa, j, .2); z.mitteG.gain.setTargetAtTime(wb, j, .2); }
+      if (z.pan) { if (z.pan.pan) z.pan.pan.setTargetAtTime(rm.pan, j, tau || .15); else if (z.pan.positionX) { z.pan.positionX.setTargetAtTime(rm.pos[0], j, tau || .15); z.pan.positionY.setTargetAtTime(rm.pos[1], j, tau || .15); z.pan.positionZ.setTargetAtTime(rm.pos[2], j, tau || .15); } else if (z.pan.setPosition) z.pan.setPosition(rm.pos[0], rm.pos[1], rm.pos[2]); } });
   }
   function zusAn(id) {
     if (zusLauf[id] || !ctx) return;
@@ -2551,8 +2555,10 @@ const ZUS_ICON = {
     /* 3D: HRTF-Panner (mit Kopfhörern auch vorne/hinten hörbar); die Entfernung regelt zusRaum selbst, daher ohne Abfall */
     let pan = null;
     try { pan = ctx.createPanner(); pan.panningModel = "HRTF"; pan.distanceModel = "inverse"; pan.refDistance = 1; pan.rolloffFactor = 0; pan.coneOuterGain = 1; } catch (_) { pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; }
-    if (pan) { filt.connect(pan); pan.connect(kulBus); } else filt.connect(kulBus);
-    const z = { zusatz: true, aus: false, art: "z_" + id, g, filt, pan, send: null, knoten: [], naechst: {}, schichten: [], phase: 1 };
+    /* zwei Wege: durch den Raumklang und mittig auf beide Ohren – das Verhältnis ist die „Raumbreite“ */
+    const panG = ctx.createGain(), mitteG = ctx.createGain(); const [wa, wb] = BREITE_MIX[raumBreite]; panG.gain.value = wa; mitteG.gain.value = wb;
+    if (pan) { filt.connect(pan); pan.connect(panG); panG.connect(kulBus); filt.connect(mitteG); mitteG.connect(kulBus); } else filt.connect(kulBus);
+    const z = { zusatz: true, aus: false, art: "z_" + id, g, filt, pan, panG, mitteG, send: null, knoten: [], naechst: {}, schichten: [], phase: 1 };
     zusLauf[id] = z;
     weltStart(z, ZUSATZ[id]);
     zusPegelSetzen();
@@ -3892,14 +3898,15 @@ const ZUS_ICON = {
       frei.map(id => { const [x, y, z] = zusOrt(id), fern = raumBei(x, y) !== raumBei(fx, fy); return '<div class="lw-kquelle' + (fern ? " anderer" : "") + '" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
       '<div class="lw-kfigur" style="left:' + fx + "%;top:" + (oben ? fz : fy) + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
       '<button type="button" class="lw-ksicht" data-ksicht="1" title="' + esc(oben ? T.karteSeite : T.karteOben) + '" aria-label="' + esc(oben ? T.karteSeite : T.karteOben) + '">' + (oben ? "👁" : "🧭") + "</button>" +
+      '<button type="button" class="lw-kbreite" data-kbreite="1" title="' + esc(T.karteBreite[raumBreite]) + '" aria-label="' + esc(T.karteBreite[raumBreite]) + '">🎧<small>' + { sanft: "◦", mittel: "◎", rundum: "◉" }[raumBreite] + "</small></button>" +
       '<div class="lw-kmuell" title="' + esc(T.karteMuell) + '" aria-hidden="true">🗑</div>' +
       '<button type="button" class="lw-kgross" data-kgross="1" title="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '" aria-label="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '">' + (karteGross ? "⤡" : "⤢") + "</button>" +
       "</div>";
   }
   Object.assign(TX.de, { karteFigur: "Das bist du – zieh dich irgendwohin. Der Bereich unter dir bestimmt, wie der Ort klingt (drinnen, vor der Tür, im Keller …).", karteTipp: "Zieh die Figur oder tippe einen Bereich an. Geräusche lassen sich ebenfalls ziehen: näher = lauter, seitlich = von der Seite. Die Tür lässt sich antippen.",
-    karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer – in den Mülleimer gezogen ist es aus", karteMuell: "Geräusch hierher ziehen, um es auszuschalten", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern", karteOben: "Von oben ansehen – Geräusche nach vorne oder hinten ziehen", karteSeite: "Von der Seite ansehen – oben/unten, Tür und Räume" });
+    karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer – in den Mülleimer gezogen ist es aus", karteMuell: "Geräusch hierher ziehen, um es auszuschalten", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern", karteBreite: { sanft: "Raumbreite: sanft – Richtung nur angedeutet, nichts kommt aus nur einem Ohr (tippen: mittel)", mittel: "Raumbreite: mittel (tippen: rundum)", rundum: "Raumbreite: rundum – voller 3D-Klang, Geräusche kreisen um dich (tippen: sanft)" }, karteOben: "Von oben ansehen – Geräusche nach vorne oder hinten ziehen", karteSeite: "Von der Seite ansehen – oben/unten, Tür und Räume" });
   Object.assign(TX.en, { karteFigur: "That's you – drag yourself anywhere. The area under you decides how the place sounds (inside, at the door, in the cellar …).", karteTipp: "Drag the figure or tap an area. Sounds can be dragged too: closer = louder, to the side = from that side. Tap the door to open or close it.",
-    karteQuelle: "drag: closer to you = louder, further away = quieter and duller – drop it in the bin to switch it off", karteMuell: "Drag a sound here to switch it off", karteGrossT: "Enlarge map", karteKlein: "Shrink map", karteOben: "View from above – drag sounds in front of or behind you", karteSeite: "View from the side – up/down, door and rooms" });
+    karteQuelle: "drag: closer to you = louder, further away = quieter and duller – drop it in the bin to switch it off", karteMuell: "Drag a sound here to switch it off", karteGrossT: "Enlarge map", karteKlein: "Shrink map", karteBreite: { sanft: "Spatial width: gentle – direction only hinted, nothing in just one ear (tap: medium)", mittel: "Spatial width: medium (tap: surround)", rundum: "Spatial width: surround – full 3D, sounds circle around you (tap: gentle)" }, karteOben: "View from above – drag sounds in front of or behind you", karteSeite: "View from the side – up/down, door and rooms" });
   function karteWirken(z) {
     if (z.id !== leben.platz || z.st !== leben.standort) {
       leben.platz = z.id; leben.standort = z.st;
@@ -9614,6 +9621,7 @@ const ZUS_ICON = {
     if (el.classList && el.classList.contains("lw-kfigur")) return T.karteFigur;
     if (d.zq) return (ZUSATZ[d.zq] ? ZUSATZ[d.zq][sprache() === "en" ? "en" : "de"] + ": " : "") + T.karteQuelle;
     if (d.kgross) return karteGross ? T.karteKlein : T.karteGrossT;
+    if (d.kbreite) return T.karteBreite[raumBreite];
     if (d.ksicht) return karteSicht === "oben" ? T.karteSeite : T.karteOben;
     if (d.momblatt != null) return W.momblatt;
     if (d.hgaus) return W.hgAus;
@@ -10434,6 +10442,7 @@ const ZUS_ICON = {
     const kz = e.target.closest("[data-kzone]");
     if (kz) { karteGehen(kz.dataset.kzone); return; }
     if (e.target.closest("[data-ktuer]")) { karteTuer(); return; }
+    if (e.target.closest("[data-kbreite]")) { raumBreite = { sanft: "mittel", mittel: "rundum", rundum: "sanft" }[raumBreite]; try { localStorage.setItem("imres-lw-breite", raumBreite); } catch (_) {} try { zusPegelSetzen(.2); } catch (_) {} karteNeu(); status(t().karteBreite[raumBreite].split(" (")[0].split(" – ")[0] + " · " + (t().karteBreite[raumBreite].split(" – ")[1] || "").split(" (")[0]); return; }
     if (e.target.closest("[data-ksicht]")) { karteSicht = karteSicht === "oben" ? "seite" : "oben"; try { localStorage.setItem("imres-lw-karte-sicht", karteSicht); } catch (_) {} karteNeu(); return; }
     if (e.target.closest("[data-kgross]")) { karteGross = !karteGross; try { localStorage.setItem("imres-lw-karte-gross", karteGross ? "1" : "0"); } catch (_) {} karteNeu(); return; }
     const mst = e.target.closest("[data-momst]");
@@ -11457,6 +11466,10 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-karte.gross .lw-ksicht { right: 3.4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
 .lw-karte.gross .lw-kgross { right: .4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
 .lw-ksicht:hover { border-color: var(--ember); }
+.lw-kbreite { position: absolute; right: 3.3rem; bottom: .2rem; z-index: 5; height: 1.35rem; padding: 0 .25rem; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); color: var(--vellum); font-size: .72rem; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; gap: .1rem; }
+.lw-kbreite small { font-size: .7rem; color: var(--ember); }
+.lw-kbreite:hover { border-color: var(--ember); }
+.lw-karte.gross .lw-kbreite { right: 6.4rem; bottom: .4rem; height: 2.6rem; padding: 0 .5rem; font-size: 1.2rem; border-radius: 8px; }
 .lw-karte.oben .lw-kfigur { transform: translate(-50%, -50%); }
 .lw-karte.oben .lw-kfigur.zieht { transform: translate(-50%, -50%) scale(1.2); }
 .lw-espalte { flex: 0 0 auto; display: flex; flex-direction: column; gap: .3rem; align-self: flex-start; }
