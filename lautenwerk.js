@@ -3545,10 +3545,17 @@ const ZUS_ICON = {
     if (art === "!stille") { stilleStart((o && o.d) || 5); return; }
     try { weltEreignis(k, [art, null, staerke * (MOM_NORM[art] || 1), o && o.fern ? 1 : 0, Object.assign({ szene: 1 }, o)]); } catch (_) {}
   }
+  /* Pegel je Art im Moment (lautestes Stück nach Ausgleich, dB) – damit jeder gewollte Moment einen klar hörbaren Höhepunkt hat */
+  const MOM_PEGEL = {"applaus":-18.9,"armbrust":-17.2,"ast":-24.2,"atem":-14.7,"aua":-14.6,"aufprall":-14.2,"axt":-17.9,"baumfall":-16.6,"belagerung":-16.0,"bienen":-15.1,"blasebalg":-17.1,"blubb":-15.1,"buch":-21.2,"chor":-12.4,"donner":-14.0,"drache":-14.8,"edelstein":-22.3,"einschenken":-17.8,"einschlag":-12.9,"einsturz":-14.0,"eis":-20.2,"ente":-14.3,"erdschritte":-19.1,"erz":-18.0,"esel":-14.1,"essen":-20.3,"eule":-12.3,"fackel":-13.4,"falle":-20.4,"faustkampf":-14.3,"feldarbeit":-17.1,"feuerknistern":-24.4,"feuerstoss":-14.3,"fledermaus":-18.8,"fliegen":-14.9,"frosch":-15.6,"galopp":-15.5,"geheul":-16.0,"geschirr":-18.8,"glasbruch":-18.5,"glbaum":-19.0,"glocke":-15.4,"glocklein":-22.8,"gong":-14.7,"gras":-19.4,"greif":-15.3,"grillen":-25.8,"grollen":-14.5,"grunzen":-16.4,"hacke":-18.6,"hahn":-12.9,"hammer":-20.2,"heulen":-12.3,"hieb":-20.9,"hirsch":-14.1,"holzbruch":-23.1,"holzpoltern":-18.6,"holzschritte":-17.7,"hufe":-19.2,"huhn":-13.7,"hund":-14.6,"husten":-15.5,"insekt":-18.1,"jubel":-14.2,"kaefer":-20.6,"kampflaut":-14.0,"kampfruf":-13.1,"katapult":-14.7,"katze":-15.2,"keiler":-11.6,"kette":-20.8,"kettenhemd":-17.6,"kies":-18.6,"kiste":-24.8,"klangschale":-15.0,"klingen":-15.0,"klopfen":-17.8,"knall":-17.7,"knarren":-16.8,"knochen":-18.5,"knurren":-14.1,"kraehe":-14.1,"kriegstrommel":-14.4,"kuh":-14.0,"kutsche":-17.8,"lachen":-14.9,"lachen_boese":-14.9,"laub":-22.7,"laubschritt":-19.9,"leder":-18.1,"metall":-16.7,"moewe":-15.3,"monster":-14.2,"muenzen":-27.8,"nass":-18.8,"nepal":-19.8,"niesen":-15.2,"ochse":-13.5,"papier":-20.6,"peitsche":-17.7,"pfau":-17.5,"pfeil":-17.6,"pferd":-14.6,"platsch":-17.2,"ratte":-17.6,"rauferei":-14.1,"raunen":-13.0,"riegel":-20.7,"riemen":-16.3,"riese":-13.6,"ross":-15.2,"ruder":-15.3,"ruelpser":-13.2,"rumpf":-15.1,"saege":-15.2,"salve":-17.3,"schaf":-14.5,"schatten":-14.0,"schellen":-18.5,"schild":-17.0,"schlange":-16.1,"schleifen":-19.0,"schleim":-18.8,"schloss":-21.4,"schluessel":-25.5,"schnarchen":-14.7,"schnauben":-14.5,"schnee":-17.2,"schnueffeln":-16.9,"schrei":-15.6,"schwein":-15.0,"schwertziehen":-21.1,"sense":-17.9,"signalhorn":-14.8,"specht":-17.6,"spucken":-18.8,"stampfen":-15.2,"stein":-23.1,"steinmetz":-20.4,"steinschlag":-18.3,"steinschritte":-18.0,"steintor":-15.1,"stoehnen":-15.2,"stuhl":-15.2,"tischbruch":-18.5,"tod":-14.2,"tor":-15.5,"trinken":-16.1,"troll":-14.2,"trommler":-16.0,"tropfen":-19.0,"truhe":-16.8,"tuch":-16.4,"tuerauf":-17.3,"tuerzu":-15.3,"uebung":-17.4,"untot":-15.1,"vogel":-17.5,"volk":-14.9,"wal":-12.4,"webstuhl":-17.3,"wehklagen":-17.2,"welle":-15.1,"werkzeug":-21.3,"wiehern":-15.4,"windspiel":-14.4,"windstoss":-14.9,"wolf":-11.9,"wuerfel":-20.8,"yeti":-15.3,"zank":-15.1,"zauber":-14.3,"ziege":-15.1,"zimmern":-19.2,"zischen":-20.1};
+  function momentAnheben(schritte) {
+    let sp = -99; schritte.forEach(([, art, o]) => { if (art.startsWith("!") || MOM_PEGEL[art] == null) return; o = o || {}; sp = Math.max(sp, MOM_PEGEL[art] + 20 * Math.log10(o.laut || 1) - (o.fern ? 7 : 0)); });
+    return sp < -90 ? 1 : Math.max(1, Math.min(2.2, Math.pow(10, (-13 - sp) / 20)));
+  }
   function szeneSpielen(k, schritte, laut, gewollt, sym) {
     const az = zz(0, 360), gegen = az + 180 + zz(-40, 40);
     /* von selbst kommende kleine Szenen sitzen so ruhig im Teppich wie die übrigen Einzelgeräusche */
     if (!gewollt && k && RUHE.ev[k.art]) laut = (laut == null ? 1 : laut) * Math.sqrt(RUHE.ev[k.art]);
+    if (gewollt) laut = (laut == null ? 1 : laut) * momentAnheben(schritte);
     /* gewollte Momente kommen aus einem Ort in der Karte: Raum, Abstand und Richtung wie bei den Geräuschen */
     const mo = gewollt && KUL_WELT[S.kulisse] ? momentOrt(schritte) : null;
     if (mo) try { karteBlitz(mo.x, mo.y, mo.z, sym || "✦"); } catch (_) {}
@@ -3853,10 +3860,11 @@ const ZUS_ICON = {
     const [fx, fy, fz] = figurOrt(); let x = mo.x, z = mo.z;
     if (gegen) { x = Math.max(2, Math.min(98, 2 * fx - x)); z = Math.max(5, Math.min(95, 2 * fz - z)); }
     const w = raumWeg(raumBei(fx, fy), raumBei(x, mo.y)), dx = x - fx, dy = (mo.y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
-    const g = Math.max(.22, Math.min(1.3, 1.3 / (1 + Math.pow(d / 22, 1.8)))) * w.g;
+    /* ein Moment ist ein Ereignis, das man hören soll: Wände und Abstand färben ihn, verschlucken ihn aber nie (höchstens ~-7 dB) */
+    const g = Math.max(.45, Math.max(.4, Math.min(1.3, 1.3 / (1 + Math.pow(d / 22, 1.8)))) * Math.sqrt(w.g));
     const breite = { sanft: .45, mittel: .7, rundum: 1 }[raumBreite] || 1;
     const az = Math.atan2(dx, -dz || -.01) * 180 / Math.PI * breite;
-    return { g, f: Math.min(w.f, Math.max(1400, 18000 * Math.pow(10, -Math.max(0, d - 12) / 90))), az };
+    return { g, f: Math.max(1100, Math.min(w.f * 1.6, Math.max(1400, 18000 * Math.pow(10, -Math.max(0, d - 12) / 90)))), az };
   }
   /* passende Geräusche je Ortsart – als Leiste unter der Karte zum Hineinziehen */
   const ZUS_PALETTE = {
