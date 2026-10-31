@@ -2533,14 +2533,15 @@ const ZUS_ICON = {
   const zusDumpf = id => ZUSATZ[id].raus && (DRINNEN.includes(S.kulisse) || tuerZu);
   function zusPegelSetzen(tau) {
     if (!ctx) return; const j = ctx.currentTime, f = zusFaktor(), st = standortWert(), still = stilleBis > j ? .04 : 1;
-    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id]; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (tuerZu && ZUSATZ[id].raus ? .55 : 1) * st.g * still, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(Math.min(zusDumpf(id) ? 750 : 18000, st.f), j, .3); });
+    Object.keys(zusLauf).forEach(id => { const z = zusLauf[id], rm = typeof zusRaum === "function" ? zusRaum(id) : { g: 1, f: 18000, pan: 0 }; z.g.gain.setTargetAtTime(kulPegel() * f * zusKurve(zusWert(id)) * (ZUS_NORM[id] || 1) * (tuerZu && ZUSATZ[id].raus ? .55 : 1) * st.g * still * rm.g, j, still < 1 ? .35 : tau || .15); z.filt.frequency.setTargetAtTime(Math.min(zusDumpf(id) ? 750 : 18000, st.f, rm.f), j, Math.min(.3, tau || .3)); if (z.pan) z.pan.pan.setTargetAtTime(rm.pan, j, tau || .15); });
   }
   function zusAn(id) {
     if (zusLauf[id] || !ctx) return;
     const filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = zusDumpf(id) ? 750 : 18000;
     if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kulKompRef || kompRef || master); }
-    const g = ctx.createGain(); g.gain.value = 0; g.connect(filt); filt.connect(kulBus);
-    const z = { zusatz: true, aus: false, art: "z_" + id, g, filt, send: null, knoten: [], naechst: {}, schichten: [], phase: 1 };
+    const g = ctx.createGain(); g.gain.value = 0; g.connect(filt);
+    const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; if (pan) { filt.connect(pan); pan.connect(kulBus); } else filt.connect(kulBus);
+    const z = { zusatz: true, aus: false, art: "z_" + id, g, filt, pan, send: null, knoten: [], naechst: {}, schichten: [], phase: 1 };
     zusLauf[id] = z;
     weltStart(z, ZUSATZ[id]);
     zusPegelSetzen();
@@ -3420,9 +3421,10 @@ const ZUS_ICON = {
     if (kul && KUL_WELT[kul.art]) { if (kul.drohn) drohnSetzen(kul); lebenAnwenden(kul, 2, true); }
     try { aussenAnwenden(0, 1.2); } catch (_) {}
   }
-  /* ---------- Umgebungskarte: kleine Szene, in der eine Figur steht – ziehen oder antippen setzt den Standort ---------- */
+  /* ---------- Umgebungskarte: kleines Bild des Ortes, in dem du (die Figur) und die Zusatz-Geräusche frei stehen.
+     Der Bereich unter der Figur setzt den Standort (Tür, Nebenraum, Keller …); Abstand und Richtung zu jedem Geräusch
+     bestimmen dessen Lautstärke, Dumpfheit und Seite im Stereobild. ---------- */
   Object.assign(STANDORT, { nebenraum: { f: 1500, g: .62, raum: .45 } });
-  /* Bereiche in Prozent der Kartenfläche: [x, y, b, h], Standort, Tür (true: beim Hingehen öffnen) */
   const KARTE = {
     drin: [
       { id: "draussen", r: [0, 6, 17, 58], st: "nebenan", auf: true, de: "Vor der Tür", en: "Outside" },
@@ -3437,73 +3439,226 @@ const ZUS_ICON = {
       { id: "huette", r: [76, 22, 24, 42], st: "nebenan", de: "In der Hütte", en: "In the hut" },
       { id: "keller", r: [76, 68, 24, 32], st: "darunter", de: "Im Keller", en: "Cellar" }]
   };
-  const kartenArt = () => kulDraussen(S.kulisse) ? "draussen" : "drin";
+  /* Namen, wo „Hütte“ oder „Keller“ nicht passt */
+  const KARTE_NAMEN = {
+    schiff: { huette: ["Kajüte", "Cabin"], keller: ["Laderaum", "Hold"], vortuer: ["An der Kajüte", "By the cabin"], waldrand: ["An der Reling", "At the rail"] },
+    meer: { huette: ["Fischerhütte", "Fisher's hut"], waldrand: ["Am Wasser", "By the water"] },
+    unterwasser: { huette: ["Im Wrack", "In the wreck"], keller: ["Im Laderaum", "In the hold"], vortuer: ["Am Wrack", "By the wreck"], waldrand: ["Im Tang", "In the kelp"] },
+    gebirge: { huette: ["Berghütte", "Mountain hut"], waldrand: ["Am Abgrund", "At the edge"] },
+    burg: { huette: ["Wachstube", "Guardroom"], keller: ["Verlies", "Dungeon"], vortuer: ["Vor der Wachstube", "By the guardroom"], waldrand: ["An der Mauer", "By the wall"] },
+    schlacht: { huette: ["Im Zelt", "In the tent"], keller: ["Im Graben", "In the trench"], vortuer: ["Vor dem Zelt", "By the tent"], waldrand: ["Am Rand des Feldes", "Edge of the field"] },
+    duell: { huette: ["Im Zelt", "In the tent"], keller: ["Unter der Tribüne", "Under the stands"], vortuer: ["Am Zelt", "By the tent"], waldrand: ["Bei den Zuschauern", "With the crowd"] },
+    markt: { huette: ["Im Laden", "In the shop"], waldrand: ["Am Marktrand", "Edge of the market"], vortuer: ["Vor dem Laden", "By the shop"] },
+    hafen: { huette: ["Im Lagerhaus", "In the warehouse"], waldrand: ["Am Kai", "On the quay"], vortuer: ["Vor dem Lagerhaus", "By the warehouse"] },
+    dorf: { waldrand: ["Am Dorfrand", "Edge of the village"] },
+    strasse: { huette: ["In der Herberge", "In the inn"], vortuer: ["Vor der Herberge", "By the inn"], waldrand: ["Am Wegesrand", "By the roadside"] },
+    ufer: { waldrand: ["Am Wasser", "By the water"] }, sumpf: { waldrand: ["Im Schilf", "In the reeds"] },
+    wasserfall: { waldrand: ["An der Gischt", "In the spray"] },
+    hoehle: { draussen: ["Am Eingang", "At the entrance"], mitte: ["In der Grotte", "In the grotto"], fenster: ["An der Felswand", "By the rock wall"], nebenraum: ["Seitengang", "Side tunnel"], keller: ["Tiefer unten", "Deeper down"] },
+    unterreich: { draussen: ["Am Zugang", "At the passage"], mitte: ["In der Halle", "In the hall"], fenster: ["Am Pilzhain", "By the fungi"], nebenraum: ["Seitengang", "Side tunnel"], keller: ["Im Abgrund", "In the abyss"] },
+    mine: { draussen: ["Am Stolleneingang", "At the adit"], mitte: ["Im Stollen", "In the tunnel"], fenster: ["Vor Ort", "At the face"], nebenraum: ["Querschlag", "Crosscut"], keller: ["Tiefere Sohle", "Lower level"] },
+    kerker: { draussen: ["Im Gang", "In the corridor"], mitte: ["In der Zelle", "In the cell"], fenster: ["Am Gitter", "At the bars"], nebenraum: ["Nachbarzelle", "Next cell"], keller: ["Verlies", "Oubliette"] },
+    tempel: { mitte: ["Im Schiff", "In the nave"], fenster: ["Am Altar", "By the altar"], nebenraum: ["Sakristei", "Vestry"], keller: ["Krypta", "Crypt"] },
+    bibliothek: { fenster: ["Am Lesepult", "At the lectern"], nebenraum: ["Archiv", "Archive"] },
+    labor: { fenster: ["Am Kessel", "By the cauldron"], nebenraum: ["Vorratskammer", "Storeroom"] },
+    schmiede: { fenster: ["An der Esse", "By the forge"], nebenraum: ["Lager", "Store"] },
+    taverne: { fenster: ["Am Kamin", "By the hearth"], nebenraum: ["Küche", "Kitchen"] },
+    schlaegerei: { fenster: ["Am Tresen", "By the bar"], nebenraum: ["Küche", "Kitchen"] }
+  };
+  const kartenArt = () => kulDraussen(S.kulisse) || S.kulisse === "unterwasser" ? "draussen" : "drin";
+  const zonenName = (z, en) => { const n = (KARTE_NAMEN[S.kulisse] || {})[z.id]; return n ? n[en ? 1 : 0] : (en ? z.en : z.de); };
+  /* gemerkt: Figur und Geräusche je Ort */
+  let karteMerk = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-karte")); if (x && typeof x === "object") return x; } catch (_) {} return {}; })();
+  const karteSpeichern = () => { try { localStorage.setItem("imres-lw-karte", JSON.stringify(karteMerk)); } catch (_) {} };
+  const kOrt = () => { const k = S.kulisse || "keine"; return karteMerk[k] || (karteMerk[k] = {}); };
+  let karteGross = (() => { try { return localStorage.getItem("imres-lw-karte-gross") === "1"; } catch (_) { return false; } })();
+  /* Geräusche, die von überall kommen – sie stehen nicht im Bild, sondern oben als Wetter */
+  const UEBERALL = ["regen", "starkregen", "gewitter", "sturm", "wind", "schnee"];
+  const LUFT = ["voegel", "eule", "kraehe", "specht", "fledermaus", "greif", "moewe", "bienen", "geist"];
+  function zusOrt(id) {
+    const o = kOrt(); o.zus = o.zus || {};
+    if (!o.zus[id]) {
+      /* fester, aber für jedes Geräusch anderer Startplatz */
+      let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+      const x = 8 + (h % 84), y = LUFT.includes(id) ? 18 + (h >> 7) % 16 : 40 + (h >> 7) % 18;
+      o.zus[id] = [x, y];
+    }
+    return o.zus[id];
+  }
+  function figurOrt() {
+    const o = kOrt();
+    if (o.fig) return o.fig;
+    const z = kartePlatz(); return [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5];
+  }
+  function zoneBei(x, y) {
+    const zonen = KARTE[kartenArt()], d = a => Math.hypot(x - (a.r[0] + a.r[2] / 2), (y - (a.r[1] + a.r[3] / 2)) * .6);
+    return zonen.find(a => x >= a.r[0] && x <= a.r[0] + a.r[2] && y - 2 >= a.r[1] && y - 2 <= a.r[1] + a.r[3]) || zonen.slice().sort((a, b) => d(a) - d(b))[0];
+  }
   function kartePlatz() {
     const z = KARTE[kartenArt()];
     return z.find(x => x.id === leben.platz && x.st === leben.standort) || z.find(x => x.st === leben.standort) || z.find(x => x.id === "mitte");
   }
+  /* Raumklang je Zusatz: Abstand (in Kartenbreiten, Höhe gestaucht) → Pegel und Höhen; seitlich → Stereo */
+  function zusRaum(id) {
+    if (UEBERALL.includes(id) || !KUL_WELT[S.kulisse]) return { g: 1, f: 18000, pan: 0 };
+    const [fx, fy] = figurOrt(), [x, y] = zusOrt(id), dx = x - fx, dy = (y - fy) * .44, d = Math.hypot(dx, dy);
+    return { g: Math.min(1.55, 1.5 / (1 + Math.pow(d / 24, 1.35))), f: Math.max(1800, 18000 * Math.pow(10, -Math.max(0, d - 12) / 105)), pan: Math.max(-.85, Math.min(.85, dx / 42)) };
+  }
+
+  /* ---------- Bildbausteine (viewBox 160 × 70, Boden bei y = 45) ---------- */
+  const szeneBild = (() => {
+  const P = (d, c, o) => '<path d="' + d + '" fill="' + c + '"' + (o ? ' opacity="' + o + '"' : "") + "/>";
+  const R = (x, y, w, h, c, o) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + c + '"' + (o ? ' opacity="' + o + '"' : "") + "/>";
+  const C = (x, y, r, c, o) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + c + '"' + (o ? ' opacity="' + o + '"' : "") + "/>";
+  const tanne = (x, h, c) => P("M" + (x - h * .28) + " 45 L" + x + " " + (45 - h) + " L" + (x + h * .28) + " 45 Z", c || "#1d3a24") + R(x - .8, 44, 1.6, 2, "#3a2a1a");
+  const laubbaum = (x, h, c) => R(x - 1, 45 - h * .55, 2, h * .55, "#4a3322") + C(x, 45 - h * .7, h * .32, c || "#2a4a2a") + C(x - h * .2, 45 - h * .55, h * .22, c || "#2a4a2a") + C(x + h * .2, 45 - h * .57, h * .22, c || "#2f5230");
+  const fels = (x, w, c) => P("M" + (x - w / 2) + " 45 Q" + (x - w / 3) + " " + (45 - w * .55) + " " + x + " " + (45 - w * .6) + " Q" + (x + w / 3) + " " + (45 - w * .5) + " " + (x + w / 2) + " 45 Z", c || "#4a4a52");
+  const welle = (y, c, o) => P("M0 " + y + " q5 -2 10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 V70 H0 Z", c, o);
+  const haus = (x, w, h, wand, dach) => R(x, 45 - h, w, h, wand || "#5a4330") + P("M" + (x - 2) + " " + (45 - h + .5) + " L" + (x + w / 2) + " " + (45 - h - w * .4) + " L" + (x + w + 2) + " " + (45 - h + .5) + " Z", dach || "#5b3524") + R(x + w * .55, 45 - h * .55, w * .22, h * .25, "#e0b060", .5);
+  const fass = (x, y) => R(x, y - 5, 4, 5, "#6a4428") + R(x, y - 3.8, 4, .5, "#3a2414") + R(x, y - 1.6, 4, .5, "#3a2414");
+  const tisch = (x, y, w) => R(x, y - 4, w || 8, 1, "#7a5232") + R(x + .8, y - 3, .8, 3, "#5a3a22") + R(x + (w || 8) - 1.6, y - 3, .8, 3, "#5a3a22");
+  const regal = (x, y, w, h, buecher) => R(x, y - h, w, h, "#4a3020") + [.25, .5, .75].map(f => R(x, y - h * f, w, .5, "#2a1a10") + (buecher ? [0, 1, 2, 3, 4].map(i => R(x + .5 + i * (w - 1) / 5, y - h * f - 3.2, (w - 1) / 6, 3, ["#8a3a2a", "#3a5a7a", "#7a6a2a", "#4a6a3a", "#6a3a6a"][i])).join("") : C(x + w * .3, y - h * f - 1.2, 1.1, "#7ac0a0", .8) + C(x + w * .7, y - h * f - 1.2, 1.1, "#c07ac0", .8))).join("");
+  const flamme = (x, y, s) => P("M" + (x - 2 * s) + " " + y + " Q" + (x - 2 * s) + " " + (y - 3 * s) + " " + x + " " + (y - 5 * s) + " Q" + (x + 2 * s) + " " + (y - 3 * s) + " " + (x + 2 * s) + " " + y + " Z", "#ff9a3a") + P("M" + (x - 1 * s) + " " + y + " Q" + (x - 1 * s) + " " + (y - 2 * s) + " " + x + " " + (y - 3 * s) + " Q" + (x + 1 * s) + " " + (y - 2 * s) + " " + (x + 1 * s) + " " + y + " Z", "#ffe08a");
+  const kamin = (x, y) => R(x, y - 12, 12, 12, "#5a5048") + R(x + 2, y - 7, 8, 7, "#1a0e08") + flamme(x + 6, y, 1) + R(x - 1, y - 13, 14, 1.5, "#6a5e54");
+  const fackel = (x, y) => R(x - .4, y, .8, 4, "#5a3a22") + flamme(x, y, .55);
+  const saeule = (x, y, h) => R(x - 2, y - h, 4, h, "#8a8478") + R(x - 3, y - h, 6, 1.4, "#9a9488") + R(x - 3, y - 1.4, 6, 1.4, "#9a9488");
+  const tropfsteine = (y, c) => [8, 21, 33, 48, 62, 77, 90, 104, 118, 131, 146].map((x, i) => P("M" + (x - 2.5) + " " + y + " L" + x + " " + (y + 4 + (i * 7) % 6) + " L" + (x + 2.5) + " " + y + " Z", c || "#3a3436")).join("");
+  const sterne = () => [[12, 8], [30, 5], [47, 11], [66, 4], [83, 9], [101, 6], [124, 10], [140, 5], [152, 12]].map(([x, y]) => C(x, y, .45, "#e8e4cf", .8)).join("");
+  const mond = (x, y) => C(x, y, 4, "#e8e4cf", .9) + C(x + 1.6, y - 1, 3.4, "#1c2233");
+  const schilf = (x) => [0, 1.5, 3, 4.5].map(i => R(x + i, 37 + (i * 3) % 5, .5, 9 - (i * 3) % 5, "#5a6a3a") + R(x + i - .3, 36 + (i * 3) % 5, 1.1, 2.2, "#6a4a2a")).join("");
+  const zelt = (x, w, c) => P("M" + x + " 45 L" + (x + w / 2) + " " + (45 - w * .6) + " L" + (x + w) + " 45 Z", c || "#8a6a4a") + P("M" + (x + w * .42) + " 45 L" + (x + w / 2) + " " + (45 - w * .3) + " L" + (x + w * .58) + " 45 Z", "#2a1a10");
+  const banner = (x, c) => R(x, 22, .7, 23, "#5a4a3a") + P("M" + (x + .7) + " 22 h7 l-2 3 l2 3 h-7 Z", c || "#a02a2a");
+  const zaun = (x0, x1) => { let h = R(x0, 41, x1 - x0, .6, "#6a5038") + R(x0, 43, x1 - x0, .6, "#6a5038"); for (let x = x0; x <= x1; x += 4) h += R(x, 39.5, .8, 5.5, "#7a5a3a"); return h; };
+  const berg = (x, w, h, c, schnee) => P("M" + (x - w / 2) + " 45 L" + x + " " + (45 - h) + " L" + (x + w / 2) + " 45 Z", c || "#3a4250") + (schnee ? P("M" + (x - w * .12) + " " + (45 - h * .76) + " L" + x + " " + (45 - h) + " L" + (x + w * .12) + " " + (45 - h * .76) + " Z", "#e8eef4") : "");
+  const stand = (x, c) => R(x, 36, 12, 9, "#6a4a2a") + P("M" + (x - 1) + " 36 L" + (x + 6) + " 31 L" + (x + 13) + " 36 Z", c || "#a04030") + R(x + 1, 38, 10, 1.5, "#c0a050", .7);
+  const pilz = (x, s, c) => R(x - .5 * s, 45 - 3 * s, s, 3 * s, "#c8c0b0") + P("M" + (x - 2.5 * s) + " " + (45 - 3 * s) + " Q" + x + " " + (45 - 6 * s) + " " + (x + 2.5 * s) + " " + (45 - 3 * s) + " Z", c || "#7a5ac0");
+  const amboss = (x, y) => P("M" + x + " " + (y - 5) + " h9 l-1 2 h-2 v2 h2 v1 h-8 v-1 h2 v-2 h-2 Z", "#3a3a40");
+  const kessel = (x, y) => P("M" + (x - 4) + " " + (y - 6) + " Q" + (x - 4.5) + " " + y + " " + x + " " + y + " Q" + (x + 4.5) + " " + y + " " + (x + 4) + " " + (y - 6) + " Z", "#2a2a2e") + R(x - 4.5, y - 6.5, 9, 1, "#3a3a40") + C(x - 1, y - 7.5, 1, "#7ac070", .8) + C(x + 1.5, y - 8.5, .8, "#7ac070", .6) + flamme(x, y + 1.5, .6);
+  const gitter = (x0, x1, y0, y1) => { let h = ""; for (let x = x0; x <= x1; x += 3) h += R(x, y0, .7, y1 - y0, "#5a5a60"); return h + R(x0, y0, x1 - x0 + .7, .8, "#5a5a60"); };
+  const kette = (x, y, l) => { let h = ""; for (let i = 0; i < l; i++) h += '<ellipse cx="' + x + '" cy="' + (y + i * 1.6) + '" rx=".6" ry=".9" fill="none" stroke="#6a6a70" stroke-width=".35"/>'; return h; };
+  const mast = (x) => R(x - .8, 6, 1.6, 39, "#5a3a22") + P("M" + (x + .8) + " 8 Q" + (x + 16) + " 18 " + (x + .8) + " 32 Z", "#d8cfb8", .9) + R(x - 10, 12, 20, .8, "#5a3a22");
+  const altar = (x, y) => R(x, y - 5, 12, 5, "#8a8478") + R(x - 1, y - 6, 14, 1.2, "#9a9488") + fackel(x + 2, y - 10) + fackel(x + 10, y - 10);
+
+  /* Szene je Ort: Grundfarben und Ausstattung. drin = Schnitt durch ein Gebäude, draussen = offene Landschaft mit Hütte */
+  const SZ_DRIN = (t) => Object.assign({ himmel: "#1c2233", boden: "#23301f", raum: "#3a2a1e", wand: "#5a4330", keller: "#1d1712", fenster: true, deko: "" }, t);
+  const SZ_RAUS = (t) => Object.assign({ himmel: "#1c2a44", boden: "#2a3a22", huette: ["#5a4330", "#5b3524"], deko: "", vorne: "" }, t);
+  const HOEHLE = { raum: "#2a2628", wand: "#3a3436", keller: "#151214", fenster: false, fels: true };
+  const KARTE_SZENE = {
+    taverne: SZ_DRIN({ deko: kamin(92, 45) + tisch(40, 45, 10) + tisch(58, 45, 8) + fass(124, 45) + fass(129, 45) + fass(126.5, 40) + R(32, 22, 8, .8, "#5a3a22") + fass(60, 64) + fass(66, 64) + fass(140, 64) }),
+    schlaegerei: SZ_DRIN({ deko: R(88, 38, 26, 7, "#6a4428") + R(87, 37, 28, 1.2, "#7a5232") + P("M40 45 L44 40 L50 42 L46 45 Z", "#7a5232") + P("M52 45 l3 -5 l1 1 l-2 4 Z", "#5a3a22") + tisch(58, 45, 8) + fass(124, 45) + fass(129, 45) + fass(60, 64) }),
+    schmiede: SZ_DRIN({ raum: "#33241c", deko: R(88, 30, 16, 15, "#4a4038") + R(91, 34, 10, 6, "#ff7a2a", .8) + flamme(96, 40, .9) + amboss(66, 45) + R(42, 30, .8, 15, "#5a5048") + R(40, 30, 14, .8, "#5a5048") + R(124, 36, 10, 9, "#4a3020") + fass(146, 64) }),
+    labor: SZ_DRIN({ raum: "#2a2430", deko: kessel(92, 45) + regal(36, 45, 14, 20) + regal(124, 45, 12, 18) + R(54, 38, 12, 1, "#5a3a22") + C(57, 36.5, 1.3, "#c07ac0", .8) + C(62, 36.5, 1, "#7ac0a0", .8) }),
+    bibliothek: SZ_DRIN({ raum: "#2e2418", deko: regal(32, 45, 14, 26, true) + regal(48, 45, 14, 26, true) + R(92, 36, 8, 9, "#5a3a22") + P("M90 36 l6 -3 l6 3 Z", "#7a5232") + regal(124, 45, 14, 24, true) + regal(140, 45, 14, 24, true) + fackel(70, 26) }),
+    tempel: SZ_DRIN({ raum: "#2a2a30", wand: "#6a6458", fenster: false, deko: saeule(36, 45, 36) + saeule(56, 45, 36) + altar(90, 45) + saeule(130, 45, 34) + R(40, 62, 10, 6, "#3a3632") + R(80, 62, 10, 6, "#3a3632") + R(120, 62, 10, 6, "#3a3632") }),
+    kerker: SZ_DRIN(Object.assign({}, HOEHLE, { raum: "#262426", deko: gitter(108, 118, 8, 45) + kette(50, 8, 10) + kette(70, 8, 8) + fackel(36, 22) + R(90, 42, 10, 3, "#5a4a32") + gitter(28, 36, 8, 45) })),
+    hoehle: SZ_DRIN(Object.assign({}, HOEHLE, { deko: tropfsteine(2, "#3a3436") + fels(50, 10, "#3a3436") + fels(96, 14, "#3a3436") + C(70, 43, 2.2, "#4a6a8a", .7) + fels(130, 12, "#3a3436") + tropfsteine(47, "#2a2628") })),
+    unterreich: SZ_DRIN(Object.assign({}, HOEHLE, { raum: "#221e2a", deko: tropfsteine(2, "#2e2a36") + pilz(44, 1.2, "#7a5ac0") + pilz(50, .8, "#5ac0b0") + pilz(92, 1.4, "#c05aa0") + pilz(98, .9, "#7a5ac0") + pilz(134, 1.1, "#5ac0b0") + P("M30 70 L60 55 L90 70 Z", "#0a080e") })),
+    mine: SZ_DRIN(Object.assign({}, HOEHLE, { raum: "#2a2420", deko: R(28, 8, 1.5, 37, "#6a4a2a") + R(28, 8, 90, 1.5, "#6a4a2a") + R(72, 8, 1.5, 37, "#6a4a2a") + R(40, 44, 70, .6, "#7a7a80") + R(50, 38, 10, 6, "#4a3a2a") + C(52, 44, 1.2, "#2a2a2e") + C(58, 44, 1.2, "#2a2a2e") + fackel(64, 20) + C(96, 34, 1.2, "#c0e0ff", .7) + R(70, 47, 1.5, 23, "#6a4a2a") })),
+    wald: SZ_RAUS({ himmel: "#2a3e5a", deko: laubbaum(42, 26) + laubbaum(60, 20, "#2f5230") + tanne(100, 30) + laubbaum(112, 22), vorne: laubbaum(8, 34) + tanne(22, 38) }),
+    waldnacht: SZ_RAUS({ himmel: "#0c1222", boden: "#16221a", deko: sterne() + mond(70, 10) + tanne(44, 30, "#13261a") + tanne(58, 24, "#13261a") + tanne(104, 32, "#13261a"), vorne: tanne(8, 38, "#10201a") + tanne(22, 42, "#10201a") }),
+    meer: SZ_RAUS({ himmel: "#2a3a5a", boden: "#c8b07a", deko: welle(30, "#2a5a7a") + welle(34, "#3a6a8a", .7) + P("M0 45 Q80 38 160 45 V70 H0 Z", "#c8b07a"), vorne: fels(12, 16, "#5a5a62") }),
+    schiff: SZ_RAUS({ himmel: "#2a3a5a", boden: "#6a4a2a", huette: ["#6a4a2a", "#4a2a1a"], deko: welle(40, "#2a5a7a") + R(0, 44, 160, 2, "#7a5232") + mast(60) + R(20, 41, 1, 4, "#5a3a22") + R(40, 41, 1, 4, "#5a3a22") + R(0, 40.5, 118, .7, "#5a3a22"), vorne: "" }),
+    wasserfall: SZ_RAUS({ deko: R(88, 4, 26, 41, "#4a4a52") + R(96, 4, 10, 41, "#8ac0e0", .8) + R(98, 4, 2, 41, "#e0f0ff", .7) + P("M90 45 Q101 38 112 45 Z", "#e0f0ff", .7) + laubbaum(60, 22) + R(0, 46, 160, 3, "#3a6a8a", .7), vorne: fels(14, 18) }),
+    sumpf: SZ_RAUS({ himmel: "#2a3430", boden: "#2a3226", deko: R(26, 44, 80, 3, "#3a4a2a", .9) + laubbaum(46, 20, "#3a4a2a") + schilf(70) + schilf(92) + C(60, 45, 1.2, "#5a6a3a", .8), vorne: schilf(6) + schilf(14) }),
+    unterwasser: SZ_RAUS({ himmel: "#123048", boden: "#2a3a3a", huette: ["#3a3022", "#2a2018"], deko: C(40, 20, 1.2, "#9ad0f0", .6) + C(44, 14, .8, "#9ad0f0", .5) + C(90, 24, 1, "#9ad0f0", .5) + P("M60 45 q-2 -8 0 -16 q2 -6 0 -12", "none") + [56, 62, 100].map(x => P("M" + x + " 45 q-2 -6 0 -12 q2 -5 0 -10 h1 q2 5 0 10 q-2 6 0 12 Z", "#2a6a4a")).join(""), vorne: [6, 14, 20].map(x => P("M" + x + " 45 q-2 -6 0 -12 q2 -5 0 -10 h1 q2 5 0 10 q-2 6 0 12 Z", "#2a6a4a")).join("") }),
+    dorf: SZ_RAUS({ himmel: "#3a5a7a", deko: haus(30, 16, 12) + haus(52, 14, 10, "#6a5038") + zaun(70, 110) + laubbaum(100, 20), vorne: laubbaum(10, 28) }),
+    markt: SZ_RAUS({ himmel: "#3a5a7a", boden: "#5a5048", deko: stand(30, "#a04030") + stand(50, "#3a6a9a") + stand(90, "#c0a040") + haus(22, 12, 18, "#6a5038") + R(70, 30, 1, 15, "#5a4a3a") + C(70.5, 29, 1.5, "#c0a040"), vorne: stand(4, "#5a8a4a") }),
+    hafen: SZ_RAUS({ himmel: "#2a3a5a", boden: "#5a4a3a", deko: welle(36, "#2a5a7a") + R(0, 44, 118, 2, "#6a4a2a") + [20, 40, 60, 80, 100].map(x => R(x, 44, 1.2, 6, "#4a3020")).join("") + mast(84) + P("M70 40 h28 l-4 5 h-20 Z", "#5a3a22") + fass(40, 44) + fass(46, 44), vorne: "" }),
+    gebirge: SZ_RAUS({ himmel: "#3a4a6a", boden: "#4a4a4a", deko: berg(40, 60, 36, "#3a4250", true) + berg(90, 70, 40, "#454e5e", true) + berg(130, 50, 26, "#3a4250") + tanne(66, 16), vorne: fels(10, 18, "#5a5a62") }),
+    strasse: SZ_RAUS({ himmel: "#3a5a7a", deko: P("M20 70 L60 45 H96 L118 70 Z", "#6a5a44") + R(56, 30, 1, 15, "#5a3a22") + P("M57 30 h8 l2 2 l-2 2 h-8 Z", "#7a5232") + laubbaum(38, 20) + laubbaum(104, 18), vorne: tanne(10, 34) }),
+    burg: SZ_RAUS({ himmel: "#2a3a5a", boden: "#4a4a44", deko: R(20, 18, 98, 27, "#6a6458") + [20, 32, 44, 56, 68, 80, 92, 104].map(x => R(x, 14, 6, 4, "#6a6458")).join("") + R(54, 8, 18, 37, "#7a7468") + R(58, 32, 10, 13, "#2a2018") + banner(62, "#3a5aa0") + R(28, 26, 3, 5, "#2a2018") + R(100, 26, 3, 5, "#2a2018"), vorne: "" }),
+    ufer: SZ_RAUS({ deko: R(30, 41, 90, 4, "#3a6a8a") + P("M30 41 Q75 36 120 41 Z", "#3a6a8a") + schilf(34) + schilf(100) + laubbaum(64, 22), vorne: laubbaum(10, 30) }),
+    schlacht: SZ_RAUS({ himmel: "#3a2a2a", boden: "#3a3426", deko: banner(30, "#a02a2a") + banner(46, "#2a4aa0") + banner(80, "#a02a2a") + banner(100, "#2a4aa0") + P("M0 45 Q40 42 80 44 T160 43 V45 H0 Z", "#2a2418") + C(60, 18, 6, "#5a5a5a", .4) + C(68, 14, 5, "#5a5a5a", .3), vorne: "" }),
+    duell: SZ_RAUS({ himmel: "#3a4a6a", boden: "#7a6a4a", deko: zaun(24, 112) + [28, 36, 44, 52, 60, 68, 76, 84, 92, 100, 108].map((x, i) => C(x, 36 - (i % 2), 1.6, "#c09070") + R(x - 1.6, 37 - (i % 2), 3.2, 3, ["#8a3a3a", "#3a5a8a", "#6a7a3a", "#7a4a7a"][i % 4])).join("") + banner(20, "#c0a040"), vorne: "" })
+  };
+  function szeneBild(art) {
+    const s = KARTE_SZENE[S.kulisse] || (art === "drin" ? SZ_DRIN({}) : SZ_RAUS({}));
+    if (art === "drin") {
+      const tuerY = 21, tuerH = 24;
+      return R(0, 0, 160, 45, s.himmel) + R(0, 45, 27, 25, s.boden) + R(27, 3, 133, 42, s.raum) +
+        (s.fels ? P("M27 3 Q60 0 90 4 T160 3 V0 H27 Z", s.wand) : R(27, 2, 133, 1.5, s.wand)) +
+        R(118, 3, 2, 42, s.wand) + R(118, 12, 2, 18, s.raum, .6) + R(27, 47, 133, 23, s.keller) + R(27, 45, 133, 2, s.wand) + R(48, 45, 10, 2, "#6b5038") +
+        (s.fenster ? R(96, 12, 12, 10, "#6b8fb0", .5) + R(101.6, 12, .8, 10, s.wand) : "") +
+        s.deko + '<g class="k-tuerg">' + R(26.4, tuerY, tuerZu ? 2.6 : 1, tuerH, tuerZu ? "#b07440" : "#8a5a32") + (tuerZu ? "" : R(19, tuerY, 7.4, tuerH, "#f0c070", .1)) + "</g>";
+    }
+    const [hw, hd] = s.huette, tuerY = 23, tuerH = 22;
+    return R(0, 0, 160, 45, s.himmel) + R(0, 45, 160, 25, s.boden) + s.deko +
+      R(121.6, 18, 38.4, 27, hw) + P("M118 18.5 L140.8 6 L163 18.5 Z", hd) + R(140, 24, 9, 7, "#e0b060", .45) + R(121.6, 47, 38.4, 23, "#1d1712") + s.vorne +
+      '<g class="k-tuerg">' + R(118.4, tuerY, tuerZu ? 3.2 : 1, tuerH, tuerZu ? "#b07440" : "#8a5a32") + (tuerZu ? "" : R(110, tuerY, 8.4, tuerH, "#f0c070", .1)) + "</g>";
+  }
+    return szeneBild;
+  })();
   function karteHTML(T) {
     if (!KUL_WELT[S.kulisse]) return "";
-    const art = kartenArt(), zonen = KARTE[art], hier = kartePlatz(), en = sprache() === "en";
-    const tuerX = art === "drin" ? 17 : 74, tuerY = art === "drin" ? 30 : 34, tuerH = art === "drin" ? 34 : 30;
-    const bild = art === "drin"
-      ? '<rect x="0" y="0" width="100" height="64" class="k-himmel"/><rect x="0" y="64" width="17" height="36" class="k-boden"/>' +
-        '<rect x="17" y="2" width="83" height="62" class="k-raum"/><rect x="74" y="2" width="1.6" height="62" class="k-wand"/><rect x="74" y="8" width="1.6" height="26" class="k-durchgang"/>' +
-        '<rect x="17" y="64" width="83" height="36" class="k-keller"/><rect x="17" y="64" width="83" height="2" class="k-wand"/><rect x="30" y="64" width="8" height="2" class="k-luke"/>' +
-        '<rect x="62" y="14" width="9" height="14" rx="1" class="k-fenster"/><line x1="66.5" y1="14" x2="66.5" y2="28" class="k-sprosse"/>'
-      : '<rect x="0" y="0" width="100" height="64" class="k-himmel"/><rect x="0" y="64" width="100" height="36" class="k-boden"/>' +
-        '<path d="M3 64 L9 30 L15 64 Z M10 64 L16 22 L22 64 Z" class="k-baum"/><rect x="74" y="26" width="26" height="38" class="k-raum"/><path d="M72 27 L87 12 L102 27 Z" class="k-dach"/>' +
-        '<rect x="76" y="64" width="24" height="36" class="k-keller"/><rect x="88" y="34" width="7" height="9" rx="1" class="k-fenster"/>';
-    const tuer = '<rect x="' + tuerX + '" y="' + tuerY + '" width="' + (tuerZu ? 2.2 : .8) + '" height="' + tuerH + '" class="k-tuer' + (tuerZu ? " zu" : "") + '"/>' + (tuerZu ? "" : '<rect x="' + (tuerX - 5.5) + '" y="' + tuerY + '" width="5.5" height="' + tuerH + '" class="k-tuerauf"/>');
-    const zus = Object.keys(zusWahl).filter(id => ZUSATZ[id]).slice(0, 8);
-    const symbole = zus.length ? '<div class="lw-ksym">' + zus.map(id => '<span title="' + esc(ZUSATZ[id][en ? "en" : "de"]) + '">' + zusSvg(id) + "</span>").join("") + "</div>" : "";
-    const fx = hier.r[0] + hier.r[2] / 2, fy = hier.r[1] + hier.r[3] - 1.5;
-    return '<div class="lw-karte" data-karte="' + art + '">' +
-      '<svg class="lw-kbild" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + bild + tuer + "</svg>" + symbole +
-      zonen.map(z => '<button type="button" class="lw-kzone' + (z === hier ? " hier" : "") + '" data-kzone="' + z.id + '" style="left:' + z.r[0] + "%;top:" + z.r[1] + "%;width:" + z.r[2] + "%;height:" + z.r[3] + '%"><span>' + esc(en ? z.en : z.de) + "</span></button>").join("") +
-      '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tuerX - 2.5) + "%;top:" + tuerY + "%;height:" + tuerH + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>' +
+    const art = kartenArt(), zonen = KARTE[art], en = sprache() === "en", [fx, fy] = figurOrt(), hier = zoneBei(fx, fy);
+    const zus = Object.keys(zusWahl).filter(id => ZUSATZ[id]);
+    const wetter = zus.filter(id => UEBERALL.includes(id)), frei = zus.filter(id => !UEBERALL.includes(id));
+    const tx = art === "drin" ? 17 : 74, ty = art === "drin" ? 30 : 33, th = art === "drin" ? 34 : 31;
+    return '<div class="lw-karte' + (karteGross ? " gross" : "") + '" data-karte="' + art + '" data-kkul="' + S.kulisse + '" data-zus="' + zus.slice().sort().join() + '">' +
+      '<svg class="lw-kbild" viewBox="0 0 160 70" preserveAspectRatio="none" aria-hidden="true">' + szeneBild(art) + "</svg>" +
+      (wetter.length ? '<div class="lw-ksym">' + wetter.map(id => '<span title="' + esc(ZUSATZ[id][en ? "en" : "de"]) + '">' + zusSvg(id) + "</span>").join("") + "</div>" : "") +
+      zonen.map(z => '<button type="button" class="lw-kzone' + (z === hier ? " hier" : "") + '" data-kzone="' + z.id + '" title="' + esc(zonenName(z, en)) + '" style="left:' + z.r[0] + "%;top:" + z.r[1] + "%;width:" + z.r[2] + "%;height:" + z.r[3] + '%"><span>' + esc(zonenName(z, en)) + "</span></button>").join("") +
+      '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tx - 2.5) + "%;top:" + ty + "%;height:" + th + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>' +
+      frei.map(id => { const [x, y] = zusOrt(id); return '<div class="lw-kquelle" data-zq="' + id + '" style="left:' + x + "%;top:" + y + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
       '<div class="lw-kfigur" style="left:' + fx + "%;top:" + fy + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
+      '<button type="button" class="lw-kgross" data-kgross="1" title="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '" aria-label="' + esc(karteGross ? T.karteKlein : T.karteGrossT) + '">' + (karteGross ? "⤡" : "⤢") + "</button>" +
       "</div>";
   }
-  Object.assign(TX.de, { karteFigur: "Das bist du – ziehen oder einen Bereich antippen. Wo du stehst, verändert, wie die Welt klingt.", karteTipp: "Tippe einen Bereich an oder zieh die Figur. Die Tür lässt sich antippen." });
-  Object.assign(TX.en, { karteFigur: "That's you – drag it or tap an area. Where you stand changes how the world sounds.", karteTipp: "Tap an area or drag the figure. Tap the door to open or close it." });
+  Object.assign(TX.de, { karteFigur: "Das bist du – zieh dich irgendwohin. Der Bereich unter dir bestimmt, wie der Ort klingt (drinnen, vor der Tür, im Keller …).", karteTipp: "Zieh die Figur oder tippe einen Bereich an. Geräusche lassen sich ebenfalls ziehen: näher = lauter, seitlich = von der Seite. Die Tür lässt sich antippen.",
+    karteQuelle: "ziehen: näher an dich = lauter, weiter weg = leiser und dumpfer", karteGrossT: "Karte vergrößern", karteKlein: "Karte verkleinern" });
+  Object.assign(TX.en, { karteFigur: "That's you – drag yourself anywhere. The area under you decides how the place sounds (inside, at the door, in the cellar …).", karteTipp: "Drag the figure or tap an area. Sounds can be dragged too: closer = louder, to the side = from that side. Tap the door to open or close it.",
+    karteQuelle: "drag: closer to you = louder, further away = quieter and duller", karteGrossT: "Enlarge map", karteKlein: "Shrink map" });
+  function karteWirken(z) {
+    if (z.id !== leben.platz || z.st !== leben.standort) {
+      leben.platz = z.id; leben.standort = z.st;
+      if (z.auf && tuerZu) tuerUmschalten();
+      lebenGeaendert();
+    }
+    try { zusPegelSetzen(.25); } catch (_) {}
+  }
   function karteGehen(id) {
     const z = KARTE[kartenArt()].find(x => x.id === id); if (!z) return;
-    audioStart(); leben.platz = z.id; leben.standort = z.st;
-    if (z.auf && tuerZu) tuerUmschalten();
-    lebenGeaendert(); karteNeu(); try { boxNeu("klang"); } catch (_) {}
+    audioStart(); kOrt().fig = [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5]; karteSpeichern();
+    karteWirken(z); karteNeu(); try { boxNeu("klang"); } catch (_) {}
   }
-  function karteNeu() { const T = t(); root.querySelectorAll(".lw-karte").forEach(k => { const n = document.createElement("div"); n.innerHTML = karteHTML(T); if (n.firstChild) k.replaceWith(n.firstChild); }); }
+  function karteNeu() { const T = t(); root.querySelectorAll(".lw-karte").forEach(k => { const n = document.createElement("div"); n.innerHTML = karteHTML(T); if (n.firstChild) k.replaceWith(n.firstChild); else k.remove(); }); }
   function karteTuer() {
     tuerUmschalten();
     /* draußen: wer die Hüttentür schließt, ist drinnen */
-    if (tuerZu && kartenArt() === "draussen" && !["huette", "keller"].includes(kartePlatz().id)) { leben.platz = "huette"; leben.standort = "nebenan"; lebenGeaendert(); }
+    if (tuerZu && kartenArt() === "draussen" && !["huette", "keller"].includes(zoneBei(...figurOrt()).id)) { const z = KARTE.draussen.find(x => x.id === "huette"); kOrt().fig = [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5]; karteSpeichern(); leben.platz = "huette"; leben.standort = "nebenan"; lebenGeaendert(); }
     karteNeu();
   }
-  /* Figur ziehen: folgt dem Finger, beim Loslassen rastet sie im Bereich darunter ein */
-  let kZug = null;
+  /* Ziehen: Figur oder Geräusch folgt dem Finger; der Klang ändert sich schon während des Ziehens */
+  let kZug = null, kZugT = 0;
   root.addEventListener("pointerdown", e => {
-    const f = e.target.closest && e.target.closest(".lw-kfigur"); if (!f) return;
-    e.preventDefault(); const k = f.closest(".lw-karte"); kZug = { f, k, r: k.getBoundingClientRect(), id: e.pointerId, bewegt: false };
+    const f = e.target.closest && e.target.closest(".lw-kfigur, .lw-kquelle"); if (!f) return;
+    e.preventDefault(); const k = f.closest(".lw-karte"); kZug = { f, k, r: k.getBoundingClientRect(), id: e.pointerId, bewegt: false, zq: f.dataset.zq || null };
     try { f.setPointerCapture(e.pointerId); } catch (_) {}
-    f.classList.add("zieht");
+    f.classList.add("zieht"); audioStart();
   });
   root.addEventListener("pointermove", e => {
     if (!kZug || e.pointerId !== kZug.id) return;
-    const { r, f } = kZug, x = Math.max(2, Math.min(98, (e.clientX - r.left) / r.width * 100)), y = Math.max(16, Math.min(99, (e.clientY - r.top) / r.height * 100 + 12));
+    const { r, f } = kZug, x = Math.max(2, Math.min(98, (e.clientX - r.left) / r.width * 100)), y = Math.max(kZug.zq ? 8 : 16, Math.min(kZug.zq ? 94 : 99, (e.clientY - r.top) / r.height * 100 + (kZug.zq ? 0 : 12)));
     f.style.left = x + "%"; f.style.top = y + "%"; kZug.bewegt = true; kZug.x = x; kZug.y = y;
-    kZug.k.querySelectorAll(".lw-kzone").forEach(z => { const a = KARTE[kartenArt()].find(q => q.id === z.dataset.kzone); z.classList.toggle("ziel", !!a && x >= a.r[0] && x <= a.r[0] + a.r[2] && y >= a.r[1] && y <= a.r[1] + a.r[3] + 4); });
+    if (kZug.zq) zusOrt(kZug.zq).splice(0, 2, x, y); else kOrt().fig = [x, y];
+    if (!kZug.zq) { const z = zoneBei(x, y); kZug.k.querySelectorAll(".lw-kzone").forEach(b => b.classList.toggle("ziel", b.dataset.kzone === z.id)); }
+    const j = performance.now(); if (j - kZugT > 60) { kZugT = j; try { zusPegelSetzen(.08); } catch (_) {} }
   });
   const kLos = e => {
     if (!kZug || e.pointerId !== kZug.id) return;
     const z = kZug; kZug = null; z.f.classList.remove("zieht");
     if (!z.bewegt) return;
-    const zonen = KARTE[kartenArt()], d = a => Math.hypot(z.x - (a.r[0] + a.r[2] / 2), (z.y - (a.r[1] + a.r[3] / 2)) * .6);
-    const drin = zonen.find(a => z.x >= a.r[0] && z.x <= a.r[0] + a.r[2] && z.y >= a.r[1] && z.y <= a.r[1] + a.r[3] + 4) || zonen.slice().sort((a, b) => d(a) - d(b))[0];
-    karteGehen(drin.id);
+    karteSpeichern();
+    if (!z.zq) karteWirken(zoneBei(z.x, z.y));
+    try { zusPegelSetzen(.15); } catch (_) {}
+    karteNeu(); if (!z.zq) try { boxNeu("klang"); } catch (_) {}
   };
   root.addEventListener("pointerup", kLos); root.addEventListener("pointercancel", kLos);
-  setInterval(() => { if (!S || kZug) return; const k = root.querySelector(".lw-karte"); if (!k) return; const art = KUL_WELT[S.kulisse] ? kartenArt() : ""; if (k.dataset.karte !== art || !!k.querySelector(".k-tuer.zu") !== tuerZu || k.querySelectorAll(".lw-ksym span").length !== Math.min(8, Object.keys(zusWahl).filter(id => ZUSATZ[id]).length)) karteNeu(); }, 1000);
+  setInterval(() => {
+    if (!S || kZug) return; const k = root.querySelector(".lw-karte"); if (!k) return;
+    const frei = Object.keys(zusWahl).filter(id => ZUSATZ[id]).sort().join();
+    if (k.dataset.kkul !== S.kulisse || !!k.querySelector(".k-tuerg rect[width='3.2'], .k-tuerg rect[width='2.6']") !== tuerZu || k.dataset.zus !== frei) { karteNeu(); }
+  }, 1000);
   function nachlegen() {
     audioStart(); if (!kul) return;
     kul.glut = 1; lebenEreignis(kul, "holzpoltern", .4, {}); setTimeout(() => lebenEreignis(kul, "ast", .35, {}), 700); lebenAnwenden(kul, 2, true);
@@ -9028,9 +9183,9 @@ const ZUS_ICON = {
     const rest = nachNutzung("k", alle.filter(k => !kern.includes(k)));
     const tile = k => eKachel("data-kulisse", k, T.kulissen[k], S.kulisse === k && !!kul);
     return '<p class="lw-zweck">' + E.zweckOrt + "</p>" +
-      '<div class="lw-ekopf-reihe"><span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
+      '<div class="lw-eortkopf"><div class="lw-eortlinks"><span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
       (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") + "</div>" +
-      karteHTML(T) +
+      karteHTML(T) + "</div>" +
       '<div class="lw-egitter lw-ekul">' + kern.map(tile).join("") + (eMehr.kul ? rest.map(tile).join("") : "") + "</div>" +
       '<button type="button" class="lw-klappe" data-emehr="kul" aria-expanded="' + eMehr.kul + '">' + (eMehr.kul ? E.weniger : E.mehrKul(alle.length)) + " <span>" + (eMehr.kul ? "▴" : "▾") + "</span></button>" +
       (KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "") +
@@ -9130,9 +9285,11 @@ const ZUS_ICON = {
   function erklaerung(el) {
     const T = t(), W = T.wi, d = el.dataset || {};
     if (d.vorlage != null) { const k = d.vorlage; return W.vorlage(ohneZeichen(T.vorlagen[k] || stimmName(k) || k), (T.stBsp || {})[k]); }
-    if (d.kzone) { const z = KARTE[kartenArt()].find(x => x.id === d.kzone); return (z ? (sprache() === "en" ? z.en : z.de) + ": " : "") + T.karteTipp; }
+    if (d.kzone) { const z = KARTE[kartenArt()].find(x => x.id === d.kzone); return (z ? zonenName(z, sprache() === "en") + ": " : "") + T.karteTipp; }
     if (d.ktuer) return tuerZu ? T.tuerAuf : T.tuerZu;
     if (el.classList && el.classList.contains("lw-kfigur")) return T.karteFigur;
+    if (d.zq) return (ZUSATZ[d.zq] ? ZUSATZ[d.zq][sprache() === "en" ? "en" : "de"] + ": " : "") + T.karteQuelle;
+    if (d.kgross) return karteGross ? T.karteKlein : T.karteGrossT;
     if (d.momblatt != null) return W.momblatt;
     if (d.hgaus) return W.hgAus;
     if (d.moment != null) { const m = momenteVon(S.kulisse)[+d.moment]; return W.moment(m ? (sprache() === "en" ? m[2] : m[1]) : ""); }
@@ -9258,13 +9415,16 @@ const ZUS_ICON = {
       if (!intro) return;
       const vw = innerWidth, vh = innerHeight, bw = b.offsetWidth, bh = b.offsetHeight;
       if (!z) { pf.hidden = true; b.style.left = Math.max(10, (vw - bw) / 2) + "px"; b.style.top = Math.max(10, (vh - bh) / 2) + "px"; return; }
-      const r = z.getBoundingClientRect(); let top = r.bottom + 14, unten = true;
-      if (top + bh > vh - 10) { top = r.top - 14 - bh; unten = false; } if (top < 10) top = 10;
-      b.style.top = top + "px"; b.style.left = Math.max(10, Math.min(vw - bw - 10, r.left + r.width / 2 - bw / 2)) + "px";
-      /* Pfeil auf der freien Seite des Ziels: zeigt von oben (oder von unten) direkt auf den Knopf */
-      pf.hidden = false; const oben = unten ? r.top > 56 : r.bottom + 56 > vh;
-      pf.textContent = oben ? "⬇" : "⬆"; pf.classList.toggle("hoch", !oben);
-      pf.style.left = (r.left + r.width / 2 - 18) + "px"; pf.style.top = (oben ? r.top - 46 : r.bottom + 4) + "px";
+      const r = z.getBoundingClientRect(), ABST = 58; let top = r.bottom + ABST, unten = true;
+      if (top + bh > vh - 10) { top = r.top - ABST - bh; unten = false; } if (top < 10) top = 10;
+      const left = Math.max(10, Math.min(vw - bw - 10, r.left + r.width / 2 - bw / 2));
+      b.style.top = top + "px"; b.style.left = left + "px";
+      /* Pfeil vom Kasten zum Knopf: sitzt in der Lücke dazwischen und zeigt schräg genau auf das Ziel */
+      const zx = r.left + r.width / 2, zy = unten ? r.bottom : r.top;
+      const kx = Math.max(left + 24, Math.min(left + bw - 24, zx)), ky = unten ? top : top + bh;
+      const dx = zx - kx, dy = zy - ky, w = Math.atan2(dy, dx) * 180 / Math.PI;
+      pf.hidden = false; pf.textContent = "➜";
+      pf.style.left = (kx + dx * .5 - 18) + "px"; pf.style.top = (ky + dy * .5 - 20) + "px"; pf.style.setProperty("--w", w + "deg");
     };
     setz(); if (scrollen) { setTimeout(setz, 400); setTimeout(setz, 800); }
   }
@@ -9949,6 +10109,7 @@ const ZUS_ICON = {
     const kz = e.target.closest("[data-kzone]");
     if (kz) { karteGehen(kz.dataset.kzone); return; }
     if (e.target.closest("[data-ktuer]")) { karteTuer(); return; }
+    if (e.target.closest("[data-kgross]")) { karteGross = !karteGross; try { localStorage.setItem("imres-lw-karte-gross", karteGross ? "1" : "0"); } catch (_) {} karteNeu(); return; }
     const mb = e.target.closest("[data-momblatt]");
     if (mb) { momBlaettern(+mb.dataset.momblatt); return; }
     const mo = e.target.closest("[data-moment]");
@@ -10893,26 +11054,36 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ehgaus:hover { background: rgba(106,159,181,.3); }
 .lw-ehgaus.aus { border-color: var(--ember); background: rgba(224,160,70,.18); }
 .lw-ehgaus[hidden] { display: none; }
-.lw-karte { position: relative; width: 100%; max-width: 560px; aspect-ratio: 16 / 7; margin: .5rem auto .6rem; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #15111b; touch-action: none; user-select: none; }
+.lw-eortkopf { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .5rem .8rem; margin: .2rem 0 .4rem; }
+.lw-eortlinks { display: flex; flex-direction: column; align-items: flex-start; gap: .45rem; flex: 1 1 9rem; min-width: 0; }
+.lw-karte { position: relative; flex: 0 0 auto; width: min(250px, 100%); aspect-ratio: 16 / 7; margin-left: auto; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #15111b; touch-action: none; user-select: none; }
+.lw-karte.gross { flex-basis: 100%; width: 100%; max-width: 680px; margin: .2rem auto .4rem; }
+.lw-lebenfeld .lw-karte, .lw-pult .lw-karte { margin: .4rem 0 .4rem auto; }
 .lw-kbild { position: absolute; inset: 0; width: 100%; height: 100%; }
-.lw-kbild .k-himmel { fill: #1c2233; } .lw-kbild .k-boden { fill: #23301f; } .lw-kbild .k-raum { fill: #3a2a1e; } .lw-kbild .k-keller { fill: #1d1712; }
-.lw-kbild .k-wand { fill: #5a4330; } .lw-kbild .k-durchgang { fill: #2c2017; } .lw-kbild .k-luke { fill: #6b5038; } .lw-kbild .k-baum { fill: #1f3a24; } .lw-kbild .k-dach { fill: #5b3524; }
-.lw-kbild .k-fenster { fill: #6b8fb0; opacity: .55; } .lw-kbild .k-sprosse { stroke: #3a2a1e; stroke-width: .6; }
-.lw-kbild .k-tuer { fill: #8a5a32; } .lw-kbild .k-tuer.zu { fill: #b07440; } .lw-kbild .k-tuerauf { fill: #f0c070; opacity: .1; }
-.lw-kzone { position: absolute; border: 1px dashed transparent; background: transparent; border-radius: 8px; cursor: pointer; padding: 0; display: flex; align-items: flex-start; justify-content: center; color: var(--vellum); font: inherit; }
-.lw-kzone span { font-size: .66rem; line-height: 1.15; margin-top: .2rem; padding: .05rem .3rem; border-radius: 6px; background: rgba(10,8,14,.55); color: var(--ash); white-space: nowrap; pointer-events: none; }
+.lw-kzone { position: absolute; border: 1px dashed transparent; background: transparent; border-radius: 6px; cursor: pointer; padding: 0; display: flex; align-items: flex-start; justify-content: center; color: var(--vellum); font: inherit; }
+.lw-kzone span { display: none; font-size: .64rem; line-height: 1.15; margin-top: .2rem; padding: .05rem .3rem; border-radius: 6px; background: rgba(10,8,14,.6); color: var(--ash); white-space: nowrap; pointer-events: none; }
+.lw-karte.gross .lw-kzone span { display: block; }
 .lw-kzone:hover, .lw-kzone.ziel { border-color: rgba(224,160,70,.55); background: rgba(224,160,70,.08); }
-.lw-kzone.hier span { color: var(--ember); background: rgba(10,8,14,.75); }
+.lw-kzone.hier span { color: var(--ember); background: rgba(10,8,14,.78); }
 .lw-ktuer { position: absolute; width: 5%; border: 0; background: transparent; cursor: pointer; padding: 0; z-index: 2; }
-.lw-ktuer:hover { background: rgba(224,160,70,.18); border-radius: 3px; }
-.lw-kfigur { position: absolute; width: 22px; height: 33px; transform: translate(-50%, -100%); cursor: grab; z-index: 3; transition: left .35s ease, top .35s ease; touch-action: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+.lw-ktuer:hover { background: rgba(224,160,70,.2); border-radius: 3px; }
+.lw-kfigur, .lw-kquelle { position: absolute; z-index: 3; touch-action: none; cursor: grab; }
+.lw-kfigur { width: 14px; height: 21px; transform: translate(-50%, -100%); transition: left .35s ease, top .35s ease; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.lw-karte.gross .lw-kfigur { width: 22px; height: 33px; }
 .lw-kfigur svg { width: 100%; height: 100%; fill: var(--ember); }
-.lw-kfigur.zieht { transition: none; cursor: grabbing; transform: translate(-50%, -100%) scale(1.15); }
-.lw-ksym { position: absolute; top: .3rem; right: .4rem; display: flex; gap: .2rem; z-index: 1; pointer-events: auto; }
+.lw-kquelle { width: 18px; height: 18px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(20,16,26,.82); border: 1px solid rgba(160,200,230,.65); color: #cfe0f0; display: grid; place-items: center; box-shadow: 0 0 6px rgba(140,190,230,.35); }
+.lw-karte.gross .lw-kquelle { width: 28px; height: 28px; }
+.lw-kquelle .lw-zico { width: 72%; height: 72%; }
+.lw-kfigur.zieht, .lw-kquelle.zieht { transition: none; cursor: grabbing; z-index: 4; }
+.lw-kfigur.zieht { transform: translate(-50%, -100%) scale(1.2); }
+.lw-kquelle.zieht { transform: translate(-50%, -50%) scale(1.2); border-color: var(--ember); }
+.lw-ksym { position: absolute; top: .2rem; left: .3rem; display: flex; gap: .15rem; z-index: 1; }
 .lw-ksym span { display: inline-flex; color: #cfe0f0; opacity: .85; }
-.lw-ksym .lw-zico { width: 16px; height: 16px; }
-.lw-karte[data-karte="drin"] .lw-ksym { left: .4rem; right: auto; flex-direction: column; }
-@media (max-width: 520px) { .lw-kzone span { font-size: .58rem; padding: .02rem .2rem; } .lw-kfigur { width: 18px; height: 27px; } }
+.lw-ksym .lw-zico { width: 12px; height: 12px; }
+.lw-karte.gross .lw-ksym .lw-zico { width: 16px; height: 16px; }
+.lw-kgross { position: absolute; right: .2rem; bottom: .2rem; z-index: 5; width: 1.35rem; height: 1.35rem; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); color: var(--vellum); font-size: .85rem; line-height: 1; cursor: pointer; }
+.lw-kgross:hover { border-color: var(--ember); color: var(--ember); }
+@media (max-width: 520px) { .lw-karte { width: min(210px, 100%); } .lw-kzone span { font-size: .56rem; } }
 .lw-schweb.lw-schweb-name { font-size: .95rem; font-weight: 600; padding: .3rem .65rem; white-space: nowrap; max-width: none; }
 .lw-moment { display: grid; justify-items: center; gap: .1rem; border: 1px solid rgba(224,160,70,.35); background: rgba(224,160,70,.06); color: var(--vellum); font: inherit; border-radius: 10px; padding: .35rem .25rem .3rem; cursor: pointer; min-width: 0; }
 .lw-moment .ms { font-size: 1.35rem; line-height: 1.1; }
@@ -10929,7 +11100,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-pfeil { position: fixed; z-index: 10002; width: 36px; text-align: center; font-size: 34px; line-height: 40px; color: var(--ember); text-shadow: 0 0 10px rgba(224,160,70,.8), 0 2px 4px rgba(0,0,0,.8); pointer-events: none; animation: lwPfeil .9s ease-in-out infinite; transition: left .3s ease, top .3s ease; }
 .lw-intro-pfeil.hoch { animation-name: lwPfeilHoch; }
 .lw-intro-pfeil[hidden] { display: none; }
-@keyframes lwPfeil { 50% { transform: translateY(8px); } }
+.lw-intro-pfeil { transform: rotate(var(--w, 90deg)); }
+@keyframes lwPfeil { 0%, 100% { transform: rotate(var(--w, 90deg)) translateX(-4px); } 50% { transform: rotate(var(--w, 90deg)) translateX(7px); } }
 @keyframes lwPfeilHoch { 50% { transform: translateY(-8px); } }
 
 /* ---------- Einfacher Modus ---------- */
