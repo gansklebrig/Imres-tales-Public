@@ -3847,7 +3847,8 @@ const ZUS_ICON = {
     return '<div class="lw-kpalette" title="' + esc(T.kartePalette) + '"><span>' + T.kartePaletteK + "</span>" + l.map(id => '<button type="button" class="lw-kpal" data-kpal="' + id + '" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.kartePalette) + '">' + zusSvg(id) + "</button>").join("") + "</div>";
   }
   function zusHinein(id, x, y) {
-    if (!ZUSATZ[id] || zusIst(id)) return;
+    if (!ZUSATZ[id]) return;
+    if (zusIst(id)) { if (x == null) return; const o = kOrt(); o.zus = o.zus || {}; const alt = zusOrt(id); o.zus[id] = karteSicht === "oben" ? [x, alt[1], y] : [x, y, alt[2]]; karteSpeichern(); try { zusPegelSetzen(.2); } catch (_) {} karteNeu(); return; }
     if (Object.keys(zusWahl).length >= zusMax()) { status(t().zusVoll || "Zu viele Geräusche"); return; }
     audioStart(); zusWahl[id] = 1; zusPausiert = false;
     if (x != null) { const o = kOrt(); o.zus = o.zus || {}; const alt = zusOrt(id); if (karteSicht === "oben") o.zus[id] = [x, alt[1], y]; else o.zus[id] = [x, y, alt[2]]; karteSpeichern(); }
@@ -4238,15 +4239,17 @@ const ZUS_ICON = {
   root.addEventListener("pointerup", kLos); root.addEventListener("pointercancel", kLos);
   /* aus der Leiste in die Karte ziehen: ein Geist folgt dem Finger, losgelassen über der Karte erklingt das Geräusch dort */
   let kPal = null, kPalZug = false;
+  root.addEventListener("click", e => { if (kPalZug && e.target.closest && e.target.closest("[data-zusatz],[data-kpal]")) { e.stopPropagation(); e.preventDefault(); kPalZug = false; } }, true);
   root.addEventListener("pointerdown", e => {
-    const b = e.target.closest && e.target.closest("[data-kpal]"); if (!b) return;
-    kPal = { id: b.dataset.kpal, x: e.clientX, y: e.clientY, geist: null, pid: e.pointerId }; kPalZug = false;
+    const b = e.target.closest && e.target.closest("[data-kpal], .lw-ezus-oben .lw-zgitter [data-zusatz]"); if (!b || b.disabled) return;
+    kPal = { id: b.dataset.kpal || b.dataset.zusatz, x: e.clientX, y: e.clientY, geist: null, pid: e.pointerId }; kPalZug = false;
   });
   document.addEventListener("pointermove", e => {
     if (!kPal || e.pointerId !== kPal.pid) return;
     if (!kPal.geist && Math.hypot(e.clientX - kPal.x, e.clientY - kPal.y) > 6) { const g = document.createElement("div"); g.className = "lw-kgeist"; g.innerHTML = zusSvg(kPal.id); document.body.appendChild(g); kPal.geist = g; kPalZug = true; }
     if (kPal.geist) { kPal.geist.style.left = e.clientX + "px"; kPal.geist.style.top = e.clientY + "px"; e.preventDefault(); }
   }, { passive: false });
+  document.addEventListener("pointercancel", e => { if (kPal && e.pointerId === kPal.pid) { if (kPal.geist) kPal.geist.remove(); kPal = null; } });
   document.addEventListener("pointerup", e => {
     if (!kPal || e.pointerId !== kPal.pid) return;
     const p = kPal; kPal = null;
@@ -4254,7 +4257,7 @@ const ZUS_ICON = {
     p.geist.remove();
     const k = root.querySelector(".lw-karte"); if (k) { const r = k.getBoundingClientRect();
       if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) zusHinein(p.id, (e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100); }
-    setTimeout(() => { kPalZug = false; }, 50);
+    setTimeout(() => { kPalZug = false; }, 120);
   });
   /* Einzelspuren so hoch wie das Bild daneben (Leiste + Karte + Geräusche-Leiste) – immer ein ruhiger Überblick */
   function spurenHoehe() {
@@ -9777,7 +9780,12 @@ const ZUS_ICON = {
     return "<h5>" + T.einf.spurenZus + "</h5>" + an.map(id => { const v = Math.round(zusWert(id) * 100), n = esc(ZUSATZ[id][en ? "en" : "de"]);
       return '<label class="lw-spurzeile"><span>' + zusSvg(id) + " " + n + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + n + '"><b>' + v + " %</b></label>"; }).join("");
   }
-  Object.assign(TX.de.einf, { alleEinst: "Alle Einstellungen: alle Zusatz-Geräusche, Wetter, Tageszeit, Standort, Szenen, Nah-Geräusche" }); Object.assign(TX.en.einf, { alleEinst: "All settings: every extra sound, weather, time of day, position, scenes, close sounds" });
+  Object.assign(TX.de.einf, { alleEinst: "Alle Einstellungen: Wetter, Tageszeit, Standort, Szenen, Nah-Geräusche", geraeuscheZiehen: "Antippen schaltet ein oder aus – oder direkt an die gewünschte Stelle in die Karte ziehen." }); Object.assign(TX.en.einf, { alleEinst: "All settings: weather, time of day, position, scenes, close sounds", geraeuscheZiehen: "Tap to switch on or off – or drag straight to the spot you want in the map." });
+  /* alle Geräusche direkt unter dem Bild, immer offen; jeder Knopf lässt sich in die Karte ziehen */
+  function einfachGeraeusche(T) {
+    const war = klangAuf.zus; klangAuf.zus = true; let h = ""; try { h = zusBox(T); } finally { klangAuf.zus = war; }
+    return '<div class="lw-ezus lw-ezus-oben"><p class="lw-ezugtipp">' + T.einf.geraeuscheZiehen + "</p>" + h + "</div>";
+  }
   Object.assign(TX.de.einf, { szenen: "Szenen", szeneMerken: "Szene merken", szeneMerkenT: "Merkt Ort, deine Position, alle Geräusche mit Lage und Laufweg, Wetter, Tageszeit, Spannung und Tür", szeneLadenT: "Szene laden – mit Übergang", szeneWeg: "Szene löschen" });
   Object.assign(TX.en.einf, { szenen: "Scenes", szeneMerken: "Save scene", szeneMerkenT: "Saves place, your position, all sounds with position and path, weather, time, tension and door", szeneLadenT: "Load scene – with a transition", szeneWeg: "Delete scene" });
   Object.assign(TX.de.einf, { alleOrte: "Alle Orte:", alleOrteL: "Alle anderen Orte", spurenTipp: "Jede Schicht des Ortes und jedes Geräusch einzeln lauter oder leiser." }); Object.assign(TX.en.einf, { alleOrte: "All places:", alleOrteL: "All other places", spurenTipp: "Make each layer of the place and each sound louder or quieter on its own." });
@@ -9826,11 +9834,12 @@ const ZUS_ICON = {
       (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") +
       '<div class="lw-ochips">' + vorschlag.map(chip).join("") + "</div>" +
       '<label class="lw-owahl"><span>' + E.alleOrteL + "</span>" + kulisseWahl(T) + "</label>" + szenenHTML(T) + "</div>" +
-      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + karteLeiste(T) + karteHTML(T) + paletteHTML(T) + "</div>" +
+      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + karteLeiste(T) + karteHTML(T) + "</div>" +
       (KUL_WELT[S.kulisse] || Object.keys(zusWahl).length ? '<div class="lw-espalte' + (eMehr.spuren ? " auf" : "") + '"><button type="button" class="lw-klappe lw-espurklappe" data-emehr="spuren" aria-expanded="' + eMehr.spuren + '" title="' + esc(E.spurenEinzeln) + '">🎚 ' + E.spurenKurz + " <span>" + (eMehr.spuren ? "▴" : "▾") + "</span></button>" +
         (eMehr.spuren ? '<div class="lw-espuren">' + (KUL_WELT[S.kulisse] ? "<h5>" + E.spurenOrt + "</h5>" + spurenInhalt(T) : "") + zusSpurRegler(T) + "</div>" : '<p class="lw-espurtipp">' + E.spurenTipp + "</p>") + "</div>" : "") + "</div>" +
+      einfachGeraeusche(T) +
       '<button type="button" class="lw-klappe lw-ealleklappe" data-emehr="alle" aria-expanded="' + !!eMehr.alle + '">⚙ ' + E.alleEinst + " <span>" + (eMehr.alle ? "▴" : "▾") + "</span></button>" +
-      (eMehr.alle ? (KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "") + '<div class="lw-ezus">' + zusBox(T) + "</div>" : "");
+      (eMehr.alle && KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "");
   }
   function einfachFx(T) {
     const E = T.einf, set = abendSet && ABEND_SETS[abendSet];
@@ -11808,6 +11817,12 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-eregler .lw-espann { grid-column: 1 / -1; }
 .lw-momst.an { border-color: var(--ember); color: var(--vellum); background: rgba(224,160,70,.2); }
 .lw-vorgeraet { font: inherit; font-size: .7rem; max-width: 9rem; background: #1a1420; color: var(--vellum); border: 1px solid var(--line); border-radius: 6px; }
+.lw-ezus-oben { margin-top: .7rem; }
+.lw-ezus-oben .lw-zkopf .lw-klappe { pointer-events: none; }
+.lw-ezus-oben .lw-zkopf .lw-klappe > span:last-child { display: none; }
+.lw-ezus-oben .lw-zregler { display: none; }
+@media (hover: hover) and (pointer: fine) { .lw-ezus-oben .lw-zknopf:not([disabled]) { cursor: grab; touch-action: none; } }
+.lw-ezugtipp { font-size: .78rem; color: var(--ash); margin: 0 0 .3rem; }
 .lw-kpalette { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; justify-content: flex-end; max-width: 100%; }
 .lw-kblock.gross .lw-kpalette { justify-content: center; }
 .lw-kpalette > span { font-size: .9rem; color: var(--ember); margin-right: .1rem; }
