@@ -223,3 +223,354 @@ Weitere echte Tieraufnahmen (2026-10-31, rauscharm, ersetzen u. a. die bisherige
   e_schlange_4: Florian Reichelt – CC0 (Original freesound.org/s/423454) – über github.com/arianne/stendhal
   ESC-50 (K. J. Piczak) ist insgesamt CC BY-NC; verwendet wurden nur Ausschnitte, deren Freesound-Originale CC0 bzw. CC BY sind.
   Bearbeitet: Ausschnitt, Hochpass, Ein-/Ausblendung, Pegel, MP3.
+
+Weitere Einzelgeräusche (2026-10-31, n_<art>_<n>: Taverne, Schritte, Kampf, Natur, Handwerk, Wesen):
+  n_geschirr_1: MordinSolus – CC0 (Original https://freesound.org/people/MordinSolus/sounds/632337) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_einschenken_1: edhutschek – CC0 – über github.com/karolpiczak/ESC-50
+  n_einschenken_2: justingregoire – CC0 – über github.com/karolpiczak/ESC-50
+  n_einschenken_3: Swoboman87 – CC0 – über github.com/karolpiczak/ESC-50
+  n_einschenken_4: ancorapazzo – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_lachen_boese_1: Nanakisan – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_lachen_boese_2: Nanakisan – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_husten_1: Eelke – CC0 – über github.com/karolpiczak/ESC-50
+  n_husten_2: Eelke – CC0 – über github.com/karolpiczak/ESC-50
+  n_husten_3: unfa – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_husten_4: tgfcoder – CC0 – über github.com/karolpiczak/ESC-50
+  n_husten_5: OwlStorm – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_husten_6: unfa – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_husten_7: Bramdv – CC0 – über github.com/karolpiczak/ESC-50
+  n_husten_8: unfa – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_ruelpser_1: ohnobones – CC0 (Original https://freesound.org/people/ohnobones/sounds/416968/;) – über github.com/arianne/stendhal
+  n_klopfen_1: hintringer – CC0 – über github.com/karolpiczak/ESC-50
+  n_klopfen_2: ripper351 – CC0 – über github.com/karolpiczak/ESC-50
+  n_klopfen_3: RutgerMuller – CC0 – über github.com/karolpiczak/ESC-50
+  n_klopfen_4: colo777 – CC0 – über github.com/karolpiczak/ESC-50
+  n_klopfen_5: thecluegeek – CC0 – über github.com/karolpiczak/ESC-50
+  n_klopfen_6: HunteR4708 – CC0 – über github.com/karolpiczak/ESC-50
+  n_tuerzu_1: E-Audio – CC0 – über github.com/karolpiczak/ESC-50
+  n_tuerzu_2: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_tuerzu_3: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_tuerzu_4: ragamuffin – CC0 – über github.com/karolpiczak/ESC-50
+  n_tuerzu_5: ragamuffin – CC0 – über github.com/karolpiczak/ESC-50
+  n_tuerzu_6: bennstir – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_tuerzu_7: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_muenzen_1: monotraum – CC0 (Original https://freesound.org/people/monotraum/sounds/162192) – über github.com/arianne/stendhal
+  n_muenzen_2: Lucish_ – CC BY 3.0 (Original https://freesound.org/s/554841/;) – über github.com/arianne/stendhal
+  n_muenzen_3: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_muenzen_4: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_stuhl_1: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_stuhl_2: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_niesen_1: thomasevd – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_niesen_2: WIM – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_niesen_3: organicmanpl – CC0 – über github.com/karolpiczak/ESC-50
+  n_niesen_4: thomasevd – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_niesen_5: JGrayArt – CC0 – über github.com/karolpiczak/ESC-50
+  n_niesen_6: higginsdj – CC0 – über github.com/karolpiczak/ESC-50
+  n_niesen_7: husky70 – CC0 – über github.com/karolpiczak/ESC-50
+  n_niesen_8: husky70 – CC0 – über github.com/karolpiczak/ESC-50
+  n_schnarchen_1: sirplus – CC0 – über github.com/karolpiczak/ESC-50
+  n_schnarchen_2: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_schnarchen_3: Daxter31 – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_4: lebosqui – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_schnarchen_5: Daxter31 – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_knarren_1: Benboncan – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_knarren_2: Benboncan – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_knarren_3: Benboncan – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_knarren_4: TimPryor – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_knarren_5: alienistcog – CC0 – über github.com/karolpiczak/ESC-50
+  n_knarren_6: alienistcog – CC0 – über github.com/karolpiczak/ESC-50
+  n_knarren_7: dheming – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_knarren_8: Ryding – CC0 – über github.com/karolpiczak/ESC-50
+  n_laubschritt_1: Flammos – CC BY 3.0 (Original https://freesound.org/s/613205) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_laubschritt_2: soundmary – CC0 – über github.com/karolpiczak/ESC-50
+  n_laubschritt_3: MentalSanityOff – CC0 – über github.com/karolpiczak/ESC-50
+  n_laubschritt_4: MentalSanityOff – CC0 – über github.com/karolpiczak/ESC-50
+  n_laubschritt_5: MentalSanityOff – CC0 – über github.com/karolpiczak/ESC-50
+  n_laubschritt_6: spycrah – CC BY 3.0 (Original https://freesound.org/s/535222) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_laubschritt_7: TinyWorlds – CC0 – über github.com/Andrettin/Wyrmsun
+  n_kies_1: ali-6868 – CC0 (Original https://freesound.org/s/384871) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kies_2: ali-6868 – CC0 (Original https://freesound.org/s/384877) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kies_3: ali-6868 – CC0 (Original https://freesound.org/s/384874) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kies_4: ali-6868 – CC0 (Original https://freesound.org/s/384880/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kies_5: ali-6868 – CC0 (Original https://freesound.org/s/384878/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kies_6: ali-6868 – CC0 (Original https://freesound.org/s/384872/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_lachen_1: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_lachen_2: Eneasz – CC0 – über github.com/karolpiczak/ESC-50
+  n_lachen_3: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_lachen_4: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_lachen_5: sagetyrtle – CC0 – über github.com/karolpiczak/ESC-50
+  n_lachen_6: sagetyrtle – CC0 – über github.com/karolpiczak/ESC-50
+  n_lachen_7: sagetyrtle – CC0 – über github.com/karolpiczak/ESC-50
+  n_lachen_8: Ch0cchi – CC BY 3.0 (Original https://freesound.org/people/Ch0cchi/sounds/15288/;) – über github.com/arianne/stendhal
+  n_applaus_1: issalcake – CC0 – über github.com/karolpiczak/ESC-50
+  n_applaus_2: sonsdebarcelona – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_applaus_3: GB01 – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_applaus_4: klankbeeld – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_applaus_5: toiletrolltube – CC0 – über github.com/karolpiczak/ESC-50
+  n_tuerauf_1: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_tuerauf_2: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_tuerauf_3: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_tuerauf_4: kyles – CC0 – über github.com/karolpiczak/ESC-50
+  n_tuerauf_5: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_tuerauf_6: kyles – CC0 – über github.com/karolpiczak/ESC-50
+  n_tuerauf_7: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_tuerauf_8: kyles – CC0 – über github.com/karolpiczak/ESC-50
+  n_holzschritte_1: kretopi – CC0 (Original https://freesound.org/s/406747) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_holzschritte_2: kretopi – CC0 (Original https://freesound.org/s/406745) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_holzschritte_3: kretopi – CC0 (Original https://freesound.org/s/406746) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_holzschritte_4: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_holzschritte_5: Mydo1 – CC0 – über github.com/karolpiczak/ESC-50
+  n_holzschritte_6: RutgerMuller – CC0 – über github.com/karolpiczak/ESC-50
+  n_holzschritte_7: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_holzschritte_8: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_steinschritte_1: alfy – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_steinschritte_2: alfy – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_steinschritte_3: alfy – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_steinschritte_4: Erdie – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_steinschritte_5: Jute – GPL-2.0 – über github.com/Andrettin/Wyrmsun
+  n_steinschritte_6: Jute – GPL-2.0 – über github.com/Andrettin/Wyrmsun
+  n_steinschritte_7: Jute – GPL-2.0 – über github.com/Andrettin/Wyrmsun
+  n_steinschritte_8: samulis – CC0 (Original https://freesound.org/s/197778) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_erdschritte_1: Jute – GPL-2.0 – über github.com/Andrettin/Wyrmsun
+  n_erdschritte_2: Jute – GPL-2.0 – über github.com/Andrettin/Wyrmsun
+  n_erdschritte_3: Jute – GPL-2.0 – über github.com/Andrettin/Wyrmsun
+  n_erdschritte_4: nuFF3 – CC BY (Freesound) (Original https://freesound.org/s/477390) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_erdschritte_5: nuFF3 – CC BY (Freesound) (Original https://freesound.org/s/477395/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_erdschritte_6: nuFF3 – CC BY (Freesound) (Original https://freesound.org/s/477391) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_schnee_1: Ellinia – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_schnee_2: Ellinia – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_schnee_3: Ellinia – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_schwertziehen_1: Eden – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_schwertziehen_2: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_schwertziehen_3: Oolnokk, bearb. DaforLynx – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_pfeil_1: Ellinia – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_pfeil_2: Ellinia – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_pfeil_3: Ellinia – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_pfeil_4: Checkmaty – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_pfeil_5: Checkmaty – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_pfeil_6: Storyteller – GPL – über github.com/arianne/stendhal
+  n_pfeil_7: Zesterer – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_pfeil_8: Checkmaty – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_armbrust_1: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_armbrust_2: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_klingen_1: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_klingen_2: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_klingen_3: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_klingen_4: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_klingen_5: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_klingen_6: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_klingen_7: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_klingen_8: Checkmaty – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_schild_1: Checkmaty – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_schild_2: Checkmaty – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_schild_3: Checkmaty – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_schild_4: alfy – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_schild_5: alfy – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_schild_6: alfy – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_faustkampf_1: Independent.nu (OGA) – CC0 – über github.com/ValyriaTear/ValyriaTear
+  n_faustkampf_2: deleted_user_7146007 – CC0 (Original https://freesound.org/people/deleted_user_7146007/sounds/383882) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_faustkampf_3: deleted_user_7146007 – CC0 (Original https://freesound.org/people/deleted_user_7146007/sounds/383882) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_faustkampf_4: deleted_user_7146007 – CC0 (Original https://freesound.org/people/deleted_user_7146007/sounds/383882) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_faustkampf_5: mateusboga – CC0 (Original https://freesound.org/people/mateusboga/sounds/426065/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_faustkampf_6: SilverIllusionist – CC BY 3.0 (Original https://freesound.org/people/SilverIllusionist/sounds/470587) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_faustkampf_7: original_sound – CC BY 3.0 (Original https://freesound.org/people/original_sound/sounds/376818/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_aua_1: Reitanna – CC0 (Original https://freesound.org/people/Reitanna/sounds/344004/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_aua_2: Reitanna – CC0 (Original https://freesound.org/people/Reitanna/sounds/242623/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_aua_3: alex36917 – CC BY 4.0 (Original https://freesound.org/people/alex36917/sounds/585604/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_aua_4: Legnalegna55 – CC0 (Original https://freesound.org/people/Legnalegna55/sounds/547344/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_aua_5: micahlg – CC0 (Original https://freesound.org/people/micahlg/sounds/413181/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_tod_1: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_tod_2: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_tod_3: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_tod_4: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_tod_5: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_tod_6: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_tod_7: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_tod_8: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_wiehern_1: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_wiehern_2: foxen10 – CC0 (Original https://freesound.org/people/foxen10/sounds/149024/;) – über github.com/arianne/stendhal
+  n_wiehern_3: Jonathan Shaw (InspectorJ) – CC BY 3.0 (Original https://freesound.org/people/InspectorJ/sounds/419231/;) – über github.com/arianne/stendhal
+  n_schnauben_1: Andune – CC BY 3.0 (Original https://freesound.org/people/Andune/sounds/61605) – über github.com/arianne/stendhal
+  n_windstoss_1: Ringwaul – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_tropfen_1: Adam_N – CC0 – über github.com/karolpiczak/ESC-50
+  n_tropfen_2: arseniiv – CC0 – über github.com/karolpiczak/ESC-50
+  n_tropfen_3: Adam_N – CC0 – über github.com/karolpiczak/ESC-50
+  n_tropfen_4: arseniiv – CC0 – über github.com/karolpiczak/ESC-50
+  n_tropfen_5: kMoon – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_tropfen_6: Adam_N – CC0 – über github.com/karolpiczak/ESC-50
+  n_tropfen_7: kijjaz – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_tropfen_8: Elfman-Rox – CC0 – über github.com/karolpiczak/ESC-50
+  n_zischen_1: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_zischen_2: Bart K. (OGA) – CC0 – über github.com/ValyriaTear/ValyriaTear
+  n_zischen_3: Mirors_ – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_zischen_4: qubodup – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_feuerknistern_1: reinsamba – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_feuerknistern_2: Glaneur de sons – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_donner_1: sphion – CC0 (Original https://freesound.org/people/sphion/sounds/158525/;) – über github.com/arianne/stendhal
+  n_donner_2: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_donner_3: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_donner_4: Dave Welsh – CC0 (Original https://freesound.org/people/Dave%20Welsh/sounds/194364) – über github.com/arianne/stendhal
+  n_donner_5: sphion – CC0 (Original https://freesound.org/people/sphion/sounds/158525/;) – über github.com/arianne/stendhal
+  n_donner_6: csengeri – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_donner_7: Erdie – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_donner_8: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_ast_1: mrjingles – CC0 (Original https://freesound.org/people/mrjingles/sounds/17184) – über github.com/arianne/stendhal
+  n_baumfall_1: Blender Foundation (apricot.blender.org) – CC BY 3.0 – über github.com/ValyriaTear/ValyriaTear
+  n_baumfall_2: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_baumfall_3: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_baumfall_4: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_steinschlag_1: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_steinschlag_2: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_steinschlag_3: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_steinschlag_4: SoundsnapFX – CC BY 3.0 (Original https://freesound.org/people/SoundsnapFX/sounds/583964/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_platsch_1: Adam_N – CC0 – über github.com/karolpiczak/ESC-50
+  n_platsch_2: Veloren-Projekt – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_platsch_3: Michel Baradari (OGA) – CC BY 3.0 – über github.com/ValyriaTear/ValyriaTear
+  n_platsch_4: Veloren-Projekt – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_platsch_5: CGEffex – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_platsch_6: Ellinia – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_platsch_7: Adam_N – CC0 – über github.com/karolpiczak/ESC-50
+  n_platsch_8: pawsound – CC0 (Original https://freesound.org/people/pawsound/sounds/154881) – über github.com/arianne/stendhal
+  n_feuerstoss_1: Julien Matthey – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_feuerstoss_2: Nic3_one – CC0 (Original https://freesound.org/people/Nic3_one/sounds/166555/;) – über github.com/arianne/stendhal
+  n_feuerstoss_3: CGEffex – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_feuerstoss_4: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_eis_1: dheming – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_eis_2: Angel_Perez_Grandi – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_eis_3: dheming – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_eis_4: dheming – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_eis_5: InspectorJ – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_eis_6: InspectorJ – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_eis_7: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_blubb_1: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_blubb_2: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_blubb_3: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_hammer_1: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_hammer_2: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_hammer_3: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_hammer_4: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_hammer_5: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_hammer_6: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_hammer_7: Eden – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_axt_1: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_axt_2: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_axt_3: super8ude – CC0 (Original https://freesound.org/s/442538) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_axt_4: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_axt_5: Christian James Muise (hazure) – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_axt_6: Christian James Muise (hazure) – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_axt_7: Christian James Muise (hazure) – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_gong_1: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_kette_1: Breviceps – CC0 (Original https://freesound.org/people/Breviceps/sounds/458963/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kette_2: datasoundsample – CC BY 4.0 (Original https://freesound.org/people/datasoundsample/sounds/638636/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kette_3: Breviceps – CC0 (Original https://freesound.org/people/Breviceps/sounds/458963/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_kette_4: daveincamas – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_schluessel_1: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_buch_1: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_buch_2: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_buch_3: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_schleifen_1: j1987 – CC0 (Original https://freesound.org/people/j1987/sounds/95007/;) – über github.com/arianne/stendhal
+  n_truhe_1: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_truhe_2: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_truhe_3: sofar (aus Sevin7 CC0, Percy Duke, kingsamas, bulbastre CC BY 3.0, Yoyodaman234 CC0) – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_truhe_4: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  n_truhe_5: sofar (aus Sevin7 CC0, Percy Duke, kingsamas, bulbastre CC BY 3.0, Yoyodaman234 CC0) – CC BY 3.0 – über github.com/luanti-org/minetest_game
+  n_glasbruch_1: cmusounddesign – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_2: lsprice – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_3: RHumphries – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_4: RSilveira_88 – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_glasbruch_5: gevaroy – CC0 – über github.com/karolpiczak/ESC-50
+  n_glasbruch_6: gevaroy – CC0 – über github.com/karolpiczak/ESC-50
+  n_glasbruch_7: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_glasbruch_8: spookymodem (OGA) – CC BY-SA 3.0 – über github.com/ValyriaTear/ValyriaTear
+  n_holzbruch_1: egomassive – CC0 (Original https://freesound.org/people/egomassive/sounds/536777/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_hacke_1: Ringwaul / K-Pone – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_hacke_2: qubodup – CC0 (Original https://freesound.org/people/qubodup/sounds/182821/;) – über github.com/arianne/stendhal
+  n_hacke_3: qubodup – CC0 (Original https://freesound.org/people/qubodup/sounds/182821/;) – über github.com/arianne/stendhal
+  n_hacke_4: Ringwaul / K-Pone – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_hacke_5: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_hacke_6: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_hacke_7: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_hacke_8: TechspiredMinds – CC BY 4.0 (Original https://freesound.org/s/728759/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_glocke_1: edsward (bearb. sorcerykid) – CC0 – über github.com/VoxeLibre/VoxeLibre
+  n_glocke_2: Storyteller (Stendhal) – GPL – über github.com/arianne/stendhal
+  n_glocke_3: Peaveycroquette – CC BY (Freesound) – über github.com/karolpiczak/ESC-50
+  n_glocke_4: JarredGibb – CC0 – über github.com/karolpiczak/ESC-50
+  n_schloss_1: satrebor – CC0 (Original https://freesound.org/people/satrebor/sounds/113218/;) – über github.com/arianne/stendhal
+  n_schloss_2: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_stoehnen_1: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_stoehnen_2: LittleRobotSoundFactory – CC BY (Freesound) (Original https://freesound.org/people/LittleRobotSoundFactory/sounds/316208/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_stoehnen_3: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_stoehnen_4: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_stoehnen_5: tonsil5 – CC0 (Original https://freesound.org/people/tonsil5/sounds/555412/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_stoehnen_6: ArriGD – CC0 (Original https://freesound.org/people/ArriGD/sounds/144005/;) – über github.com/arianne/stendhal
+  n_stoehnen_7: bananplyte – CC0 (Original https://freesound.org/people/bananplyte/sounds/452347/;) – über github.com/Fris0uman/CDDA-Soundpacks
+  n_stoehnen_8: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_schlange_1: columbia23 – CC BY 3.0 (Original https://freesound.org/people/columbia23/sounds/395396/;) – über github.com/arianne/stendhal
+  n_schlange_2: columbia23 – CC BY 3.0 (Original https://freesound.org/people/columbia23/sounds/395396/;) – über github.com/arianne/stendhal
+  n_schlange_3: columbia23 – CC BY 3.0 (Original https://freesound.org/people/columbia23/sounds/395396/;) – über github.com/arianne/stendhal
+  n_schlange_4: poots – CC BY 3.0 (Original https://freesound.org/people/poots/sounds/71031/;) – über github.com/arianne/stendhal
+  n_schlange_5: poots – CC BY 3.0 (Original https://freesound.org/people/poots/sounds/71031/;) – über github.com/arianne/stendhal
+  n_schlange_6: Zabuhailo – CC0 (Original https://freesound.org/s/146960/;) – über github.com/arianne/stendhal
+  n_insekt_1: OpenClonk-Team – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_wolf_1: GeekyGami – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_wolf_2: GeekyGami – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_wolf_3: GeekyGami – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_wolf_4: Widelands-Entwicklungsteam – GPL-2.0-or-later – über github.com/widelands/widelands
+  n_wolf_5: NaturesTemper – CC0 (Original https://freesound.org/people/NaturesTemper/sounds/398430/;) – über github.com/arianne/stendhal
+  n_wolf_6: y89312 – CC BY 3.0 (Original https://freesound.org/people/y89312/sounds/139901/;) – über github.com/arianne/stendhal
+  n_monster_1: Ringwaul – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_monster_2: AP3850 – CC0 (Original https://freesound.org/people/AP3850/sounds/221798/;) – über github.com/arianne/stendhal
+  n_monster_3: -sihiL – CC BY 3.0 (Original https://freesound.org/people/-sihiL/sounds/213846/;) – über github.com/arianne/stendhal
+  n_monster_4: ketamineface – CC0 (Original https://freesound.org/people/ketamineface/sounds/242057/;) – über github.com/arianne/stendhal
+  n_monster_5: -sihiL – CC BY 3.0 (Original https://freesound.org/people/-sihiL/sounds/213846/;) – über github.com/arianne/stendhal
+  n_monster_6: peridactyloptrix – CC0 (Original https://freesound.org/people/peridactyloptrix/sounds/202528/;) – über github.com/arianne/stendhal
+  n_monster_7: noahpardo – CC0 (Original https://freesound.org/people/noahpardo/sounds/345734) – über github.com/arianne/stendhal
+  n_monster_8: -sihiL – CC BY 3.0 (Original https://freesound.org/people/-sihiL/sounds/213846/;) – über github.com/arianne/stendhal
+  n_drache_1: frasbr – CC0 (Original https://freesound.org/people/frasbr/sounds/145729/;) – über github.com/arianne/stendhal
+  n_drache_2: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_drache_3: cylon8472 – CC BY 3.0 (Original https://freesound.org/people/cylon8472/sounds/249686/;) – über github.com/arianne/stendhal
+  n_drache_4: Flare-Team (flarerpg.org, siehe CREDITS.txt) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  n_drache_5: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_fledermaus_1: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_fledermaus_2: polymorpheva – CC0 (Original https://freesound.org/people/polymorpheva/sounds/104205/;) – über github.com/arianne/stendhal
+  n_fledermaus_3: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_fledermaus_4: ala – CC BY 3.0 – über github.com/openclonk/openclonk
+  n_fledermaus_5: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_fledermaus_6: Veloren-Projekt (Urheber unbekannt) – GPL-3.0 (Veloren-Standard) – über github.com/veloren/veloren
+  n_fledermaus_7: polymorpheva – CC0 (Original https://freesound.org/people/polymorpheva/sounds/104205) – über github.com/arianne/stendhal
+  n_fledermaus_8: polymorpheva – CC0 (Original https://freesound.org/people/polymorpheva/sounds/104205/;) – über github.com/arianne/stendhal
+  n_ratte_1: Jordan Irwin (AntumDeluge) – CC0 – über github.com/arianne/stendhal
+  n_ratte_2: shyguy014 – CC0 (Original https://freesound.org/people/shyguy014/sounds/463789) – über github.com/arianne/stendhal
+  n_ratte_3: Zabuhailo – CC0 (Original https://freesound.org/people/Zabuhailo/sounds/146968/;) – über github.com/arianne/stendhal
+  n_ratte_4: Deganoth – CC BY 3.0 (Original https://freesound.org/people/Deganoth/sounds/348700/;) – über github.com/arianne/stendhal
+  n_ratte_5: toefur – CC0 (Original https://freesound.org/people/toefur/sounds/288941/;) – über github.com/arianne/stendhal
+  n_ratte_6: JoseAgudelo – CC0 (Original https://freesound.org/people/JoseAgudelo/sounds/472399/;) – über github.com/arianne/stendhal
+  Bearbeitet: Ausschnitt, Hochpass, Ein-/Ausblendung, Pegel, MP3. ESC-50 nur mit CC0-/CC-BY-Originalen.
+
+Weitere Hintergrund-Schichten (abwechselnd mit den bisherigen, 2026-10-31):
+  a_voegel_n1: klankbeeld – CC BY 3.0 (Original freesound.org/s/520904) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_voegel_n2: klankbeeld – CC BY 3.0 (Original freesound.org/s/436105) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_voegel_n6: klankbeeld – CC BY 3.0 (Original freesound.org/s/324409) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_voegel_n3: dobroide – CC BY 3.0 (Original freesound.org/s/26254) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_voegel_n4: klankbeeld – CC BY 3.0 (Original freesound.org/s/475943) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_wind_n4: klankbeeld – CC BY 3.0 (Original freesound.org/s/337083) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_voegel_n5: klankbeeld – CC BY 3.0 (Original freesound.org/s/432780) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_nacht_n1: rsn267 – CC0 (Original freesound.org/s/275595) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_nacht_n3: GiovanniProvenzale – CC BY 4.0 (Original freesound.org/s/237161) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_nacht_n2: rgbrobot – CC0 (Original freesound.org/s/209804) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_leichtregen_n1: sergeeo – CC BY 3.0 (Original freesound.org/s/178636) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_starkregen_n1: Ali@k – CC0 (Original freesound.org/s/128907) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_gewitter_n1: bruno.auzet – CC0 (Original freesound.org/s/531041) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_schneesturm_n1: guyburns – CC0 (Original freesound.org/s/473815) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_schneesturm_n2: florianreichelt – CC0 (Original freesound.org/s/453167) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_tropfstein_n1: Kinoton – CC0 (Original freesound.org/s/421826) – über github.com/Fris0uman/CDDA-Soundpacks
+  a_regen_n1: klangfabrik – CC0 (Original freesound.org/s/157149) – über github.com/arianne/stendhal
+  a_leichtregen_n2: Zepp2010 – CC0 (Original freesound.org/s/163264) – über github.com/arianne/stendhal
+  a_fluss_n1: Adam_N – CC0 (Original freesound.org/s/166310) – über github.com/arianne/stendhal
+  a_wind_n3: Félix Blume – CC0 (Original freesound.org/s/146436) – über github.com/arianne/stendhal
+  a_heulwind_n1: stewdio2003 – CC0 (Original freesound.org/s/238374) – über github.com/arianne/stendhal
+  a_wind_n2: Dennis Johansson (MrAuralization) – CC0 (Original freesound.org/s/243617) – über github.com/arianne/stendhal
+  a_wind_n1: Flare-Team (flarerpg.org) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
+  a_lagerfeuer_n1: Bertram (Loop aus Spandau, freesound.org/s/40699) – CC0 – über github.com/ValyriaTear/ValyriaTear
+  a_markt_n1: Hero of Allacrost – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear
+  a_nacht_n4: Flare-Team (flarerpg.org) – CC BY-SA 3.0 – über github.com/flareteam/flare-game
