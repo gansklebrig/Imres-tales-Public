@@ -128,13 +128,18 @@
   /* Füllwörter: geben dem Erkenner bei ganzen Sätzen einen Platz für alles, was kein Stichwort ist –
      sonst presst er „wir gehen in die …“ in irgendein Stichwort. Sie lösen selbst nichts aus. */
   const FUELLER = "und oder aber dann denn doch noch schon jetzt gleich bald hier da dort so also ja nein nicht kein keine okay ok gut genau ich du er sie es wir ihr mich dich uns euch ihn ihm ihnen mein dein sein unser euer der die das den dem des ein eine einen einem einer eines dies diese dieser dieses jener in im an am auf aus bei von vom zu zum zur nach vor hinter über unter neben zwischen durch gegen ohne um bis seit ist sind war waren wird werden wurde hat haben hatte hatten kann können muss müssen soll sollen will wollen darf geht gehen ging kommt kommen kam sieht sehen sah steht stehen stand liegt liegen sitzt sitzen läuft laufen betritt betreten betreten öffnet öffnen schließt schließen hört hören hörte riecht spürt erreicht erreichen macht machen tut tun gibt geben nimmt nehmen findet finden sucht suchen kämpft kämpfen zieht ziehen langsam schnell plötzlich leise laut weit nah ganz sehr etwas viel viele wenig alle alles nichts helden gruppe abenteurer party leute mann frau kind wirt gast weg raum halle tür treppe straße ort stadt land zeit moment augenblick mal bitte danke also äh ähm hm naja eigentlich vielleicht wieder weiter wo wie was wer warum wann welche welcher neu alt groß klein dunkel hell kalt warm dunklen dunkle dunkler dunkles großen große großer großes kleinen kleine kleiner kleines alten alte alter altes neuen neue neuer langen lange langer kurzen kurze hohen hohe tiefen tiefe engen enge breiten breite stillen stille kalten kalte warmen warme nun endlich zusammen allein vorsichtig leise drinnen draußen oben unten hinein heraus herein hinaus hinauf hinunter vorbei sagt sagen fragt fragen antwortet ruft rufen spricht sprechen erzählt erzählen meint denkt glaubt weiß wissen merkt merken bemerkt bemerken beginnt beginnen fängt fangen endet enden passiert passieren bleibt bleiben wartet warten folgt folgen führt führen bringt bringen trägt tragen hält spielt spielen spielt nimm lass lasst mach macht gib geht los komm kommt schau seht nächste nächsten erste ersten letzte letzten andere anderen ihre ihren ihrem seine seinen seinem meine meinen deine unsere eure heute morgen abend nacht tag stunde minute".split(" ");
+  /* Vor- und Nachwörter, die die Bedeutung des nächsten (bzw. vorigen) Stichworts umdrehen:
+     „verlassen Taverne“, „ohne Regen“, „keine Tiere mehr“ → aus; „Tiere aus“, „Wölfe weg“ → aus; „dazu“, „wieder an“ → an */
+  const NEG_VOR = new Set("verlassen verlasse verlässt beende beenden beendet stopp stoppe stoppen stoppt halt ohne kein keine keinen schluss genug weg".split(" "));
+  const NEG_NACH = new Set("aus weg stopp raus verstummen verstummt verschwinden verschwindet beenden beendet still ruhig schluss nicht".split(" "));
+  const POS_WORT = new Set("an dazu mit plus wieder starte starten startet spiel spiele spielt betreten betrete betritt zurück her".split(" "));
   function karteBauen() {
     karte = new Map(); gesprochen = new Map();
     const befehle = st.befehle() || [];
     /* angelernte Wendungen zuerst – die eigene Aussprache hat Vorrang */
     befehle.forEach(b => (E.gelernt[b.text] || []).forEach(a => { const g = norm(a); if (g && !karte.has(g)) { karte.set(g, b); gesprochen.set(g, "🎓 " + g); } }));
     befehle.forEach(b => (b.p || []).forEach(p => { const k = norm(p), g = k && sprechform(k); if (g && !karte.has(g)) { karte.set(g, b); gesprochen.set(g, k); } }));
-    const fueller = wortschatz ? FUELLER.filter(w => wortschatz.has(w) && !karte.has(w)) : [];
+    const fueller = wortschatz ? FUELLER.concat([...NEG_VOR, ...NEG_NACH, ...POS_WORT, "mehr"]).filter(w => wortschatz.has(w) && !karte.has(w)) : [];
     const g = JSON.stringify([...karte.keys()].concat([...new Set(fueller)], ["[unk]"]));
     if (g !== grammatik) { grammatik = g; if (erkenner) { try { erkenner.remove(); } catch (_) {} erkenner = null; } }
   }
@@ -272,24 +277,38 @@
     if (!text) { zeige(W("? Nicht verstanden", "? Not understood") + nachlernTipp, false, 3800); zeichnen(); return; }
     /* ganze Sätze: von vorn nach hinten jeweils die längste bekannte Wendung nehmen, Füllwörter überspringen */
     const maxL = Math.max(1, ...[...karte.keys()].map(k => k.split(" ").length)), funde = [];
+    const sucheAb = i => { for (let L = Math.min(maxL, woerter.length - i); L > 0; L--) { const k = woerter.slice(i, i + L).map(w => w.word).join(" "); if (karte.has(k)) return L; } return 0; };
+    let neg = false;
     for (let i = 0; i < woerter.length;) {
-      let L = Math.min(maxL, woerter.length - i);
-      for (; L > 0; L--) { const k = woerter.slice(i, i + L).map(w => w.word).join(" "); if (karte.has(k)) break; }
-      if (!L) { i++; continue; }
-      const teil = woerter.slice(i, i + L), k = teil.map(w => w.word).join(" ");
-      funde.push({ k, b: karte.get(k), sicher: teil.reduce((a, w) => a + (w.conf == null ? 1 : w.conf), 0) / L }); i += L;
+      const L = sucheAb(i), w = woerter[i].word;
+      if (!L) {
+        /* Nachwort: dreht das gerade gefundene Stichwort um („Tiere aus“) */
+        if (NEG_NACH.has(w) && funde.length && funde[funde.length - 1].ende === i && !funde[funde.length - 1].neg && !(w === "nicht" && i + 1 < woerter.length && sucheAb(i + 1))) funde[funde.length - 1].neg = true;
+        else if (NEG_VOR.has(w)) neg = true;
+        else if (POS_WORT.has(w)) neg = false;
+        i++; continue;
+      }
+      /* ein Befehlswort, das hier nur Vorwort ist („stopp Musik“): umdrehen statt ausführen */
+      if (L === 1 && NEG_VOR.has(w) && i + 1 < woerter.length && sucheAb(i + 1)) { neg = true; i++; continue; }
+      const teil = woerter.slice(i, i + L), k = teil.map(x => x.word).join(" ");
+      funde.push({ k, b: karte.get(k), neg, ende: i + L, sicher: teil.reduce((a, x) => a + (x.conf == null ? 1 : x.conf), 0) / L }); neg = false; i += L;
     }
     if (!funde.length) { zeige(W("? „", "? “") + text + W("“ – kein Stichwort", "” – not a keyword") + nachlernTipp, false, 3800); zeichnen(); return; }
     /* ein einzelnes Stichwort muss sicherer sein als eines mitten im Satz (dort hilft der Zusammenhang der Füllwörter) */
     const grenze = funde.length === 1 && woerter.length <= 3 ? .7 : .62;
     const gut = [], unsicher = [];
-    funde.forEach(f => { if (f.sicher < grenze) unsicher.push(f); else if (!gut.some(g => g.b === f.b)) gut.push(f); });
-    const wort = f => (gesprochen.get(f.k) || f.k);
+    funde.forEach(f => { if (f.sicher < grenze) unsicher.push(f); else if (!gut.some(g => g.b === f.b && g.neg === f.neg)) gut.push(f); });
+    const wort = f => (gesprochen.get(f.k) || f.k) + (f.neg ? W(" (aus)", " (off)") : "");
+    /* umgedreht, aber ohne Aus-Fassung: lieber nichts tun als das Gegenteil */
+    const ohneAus = gut.filter(f => f.neg && typeof f.b.aus !== "function");
+    ohneAus.forEach(f => gut.splice(gut.indexOf(f), 1));
+    if (!gut.length) { zeige(W("? „", "? “") + ohneAus.map(f => gesprochen.get(f.k) || f.k).join(", ") + W("“ lässt sich nicht ausschalten", "” can't be switched off"), false, 3200); zeichnen(); return; }
+    const was = f => f.neg ? (f.b.ausText || f.b.text + W(" aus", " off")) : f.b.text;
     if (!gut.length) { zeige(W("? Unsicher: „", "? Unsure: “") + unsicher.map(wort).join(", ") + W("“ – bitte nochmal", "” – please repeat") + nachlernTipp, false, 3800); zeichnen(); return; }
-    letzte = "🎙 " + gut.map(f => wort(f) + " → " + f.b.text).join(" · ");
-    zeige("✓ " + gut.map(f => wort(f) + " → " + f.b.text).join("  ·  ") + (unsicher.length ? W("   (unsicher, ausgelassen: ", "   (unsure, skipped: ") + unsicher.map(wort).join(", ") + ")" : ""), false, 2600 + 900 * gut.length);
+    letzte = "🎙 " + gut.map(f => wort(f) + " → " + was(f)).join(" · ");
+    zeige("✓ " + gut.map(f => wort(f) + " → " + was(f)).join("  ·  ") + (unsicher.length ? W("   (unsicher, ausgelassen: ", "   (unsure, skipped: ") + unsicher.map(wort).join(", ") + ")" : ""), false, 2600 + 900 * gut.length);
     /* nacheinander ausführen – manche Befehle bauen die Oberfläche neu */
-    gut.forEach((f, i) => setTimeout(() => { try { f.b.tun(); } catch (e) { console.warn(e); } if (i === gut.length - 1) zeichnen(); }, i * 160));
+    gut.forEach((f, i) => setTimeout(() => { try { f.neg ? f.b.aus() : f.b.tun(); } catch (e) { console.warn(e); } if (i === gut.length - 1) zeichnen(); }, i * 160));
   }
   function lernAuswerten(r) {
     if (!lernen) return;
@@ -373,6 +392,8 @@
     zeichnen();
   });
   window.ImresSprache = {
+    /* nur für Tests: einen erkannten Satz direkt auswerten, ohne Mikrofon */
+    _probe(satz) { if (!st) return; if (!karte) karteBauen(); const w = String(satz).toLowerCase().split(/\s+/).filter(Boolean); auswerten({ text: w.join(" "), result: w.map(word => ({ word, conf: 1 })) }); return letzte; },
     einrichten(o) {
       st = { ort: o.ort, befehle: o.befehle, listeAuf: false };
       karte = null; zeichnen();

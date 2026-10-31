@@ -2284,6 +2284,7 @@
     o = o || {};
     /* Lebendige Kulisse: Stille, verstummte Vögel, Tageszeit, Spannung und Wetter lassen manches ausfallen */
     if (!o.szene && stilleBis > ctx.currentTime) return true;
+    if (!o.moment && ohneGr.size && grStumm(art)) return true;
     if (!o.szene && !k.zusatz && KUL_WELT[k.art]) { const p = lebenEvP(k, art); if (p < 1 && Math.random() > p) return true; }
     const weit = !o.dumpf && Math.random() < (fern || 0), laut = kulMixWert(k.art, "ev") * staerke * (k.wlaut || 1) * ((AMB_EV[art] && AMB_EV[art].g) || 1) * (o.dumpf ? zz(.55, .85) : weit ? zz(.3, .55) : zz(.65, 1));
     if (KUL_FX[art]) { kulFx(KUL_FX[art], ctx.currentTime + .05, laut * 1.3, weit || o.dumpf ? { tief: o.dumpf ? zz(450, 800) : zz(900, 2600) } : {}, k); return true; }
@@ -2875,6 +2876,245 @@ const ZUS_ICON = {
       ["🎉", "Die Menge tobt", "The crowd roars", SZ([0, "jubel", ML(1.6)], [1.5, "jubel", ML(1.4, { gegen: 1 })], [3, "kampfruf", ML(1.2)])],
       ["🤺", "Ausweichen in letzter Sekunde", "Last-second dodge", SZ([0, "klingen", ML(1.3)], [.6, "raunen", ML(1.5)], [2, "kies", ML(1.3)], [3, "jubel", ML(1.3)])]]
   };
+
+  /* weitere Momente je Kulisse – hängen sich an die ersten vier an (zusammen zwölf) */
+  const KUL_MOMENTE_MEHR = {
+    taverne: [
+      ["🎻", "Barde gibt eine Runde aus", "The bard buys a round", SZ([0, "lachen", ML(1.2)], [1, "jubel", ML(1.4)], [2.2, "krug", ML(1.2)], [2.8, "krug", ML(1.1, { gegen: 1 })], [3.4, "krug", ML(1.1)])],
+      ["🤢", "Gast kotzt in die Ecke", "A guest throws up", SZ([0, "ruelpser", ML(1.3)], [1.5, "spucken", ML(1.5)], [2.5, "raunen", ML(1.3)], [3.5, "lachen", ML(1.2, { gegen: 1 })])],
+      ["😴", "Betrunkener schnarcht", "A drunk snores", SZ([0, "schnarchen", ML(1.4)], [3, "lachen", ML(1.1, { gegen: 1 })], [4, "schnarchen", ML(1.3)])],
+      ["🥂", "Krug zerschellt", "A tankard shatters", SZ([0, "glasbruch", ML(1.6)], [.4, "!stille", { d: 2 }], [2.5, "lachen", ML(1.3)], [3, "jubel", ML(1.1)])],
+      ["🐕", "Hund klaut die Wurst", "The dog steals a sausage", SZ([0, "hund", ML(1.4)], [.5, "geschirr", ML(1.4)], [1, "zank", ML(1.4)], [1.6, "laubschritt", ML(1.2, { wandern: 1 })], [2.5, "lachen", ML(1.2)])],
+      ["🗡", "Messer im Tisch", "Knife in the table", SZ([0, "hieb", ML(1.5)], [.2, "!stille", { d: 3 }], [3.5, "zank", ML(1.2)])],
+      ["🕯", "Fremder tritt ein", "A stranger enters", SZ([0, "tuerauf", ML(1.4)], [.2, "!stille", { d: 4 }], [.5, "windstoss", ML(1.1)], [1.5, "holzschritte", ML(1.4)], [4.5, "tuerzu", ML(1.2)])],
+      ["🎉", "Hochzeitsgesellschaft", "A wedding party", SZ([0, "tuerauf", ML(1.2)], [.5, "jubel", ML(1.5)], [2, "schellen", ML(1.3)], [3, "lachen", ML(1.2)], [4, "krug", ML(1.2)])]],
+    wald: [
+      ["🐦", "Vogelschwarm fliegt auf", "A flock takes off", SZ([0, "vogel", ML(1.5)], [.2, "vogel", ML(1.4, { gegen: 1 })], [.4, "laub", ML(1.4)], [.8, "vogel", ML(1.3)], [1.2, "!verstummen"])],
+      ["🪓", "Holzfäller bei der Arbeit", "Woodcutters at work", SZ([0, "axt", ML(1.4)], [1.8, "axt", ML(1.4)], [3.6, "axt", ML(1.4)], [6, "baumfall", ML(1.5, { fern: 1 })])],
+      ["🐺", "Wolf beobachtet euch", "A wolf watches you", SZ([0, "!verstummen"], [0, "ast", ML(1.3)], [1.5, "knurren", ML(1.5)], [4, "laubschritt", ML(1.2, { wandern: 1 })])],
+      ["🍄", "Feenkreis", "A fairy ring", SZ([0, "glocklein", ML(1.4)], [1, "zauber", ML(1.2)], [2, "lachen", ML(1, { fern: 1 })], [3, "glocklein", ML(1.2, { gegen: 1 })])],
+      ["🕸", "Riesenspinne", "Giant spider", SZ([0, "!stille", { d: 3 }], [.5, "kaefer", ML(1.6, { nah: 1 })], [2.5, "zischen", ML(1.4)], [3.5, "laub", ML(1.3)])],
+      ["🐿", "Eichhörnchen schimpft", "A squirrel scolds", SZ([0, "specht", ML(1.3)], [.8, "ast", ML(1.1)], [1.2, "insekt", ML(1.2)], [2, "vogel", ML(1.3)])],
+      ["🐻", "Bär am Bach", "Bear by the stream", SZ([0, "!verstummen"], [0, "monster", ML(1.2, { fern: 1 })], [2, "platsch", ML(1.4)], [3.5, "holzbruch", ML(1.2)])],
+      ["🧝", "Elfenpfeil, Warnschuss", "Elven warning shot", SZ([0, "pfeil", ML(1.6)], [.3, "!stille", { d: 3 }], [3, "laubschritt", ML(1.2, { gegen: 1 })])]],
+    waldnacht: [
+      ["👻", "Geisterstimme", "A ghostly voice", SZ([0, "!stille", { d: 3 }], [.5, "wehklagen", ML(1.4, { fern: 1 })], [3.5, "eule", ML(1.2)])],
+      ["🦇", "Fledermäuse streifen vorbei", "Bats sweep past", SZ([0, "fledermaus", ML(1.6)], [.5, "fledermaus", ML(1.5, { gegen: 1 })])],
+      ["🐗", "Wildschwein wühlt", "A boar roots around", SZ([0, "keiler", ML(1.5)], [1.2, "laub", ML(1.3)], [2.5, "grunzen", ML(1.3)])],
+      ["🔥", "Fackeln zwischen den Bäumen", "Torches among the trees", SZ([0, "volk", ML(1.2, { fern: 1 })], [1.5, "laubschritt", ML(1.3, { wandern: 1 })], [3, "kettenhemd", ML(1.2)])],
+      ["🌲", "Ein Ast bricht – ganz nah", "A branch snaps – close", SZ([0, "!verstummen"], [0, "ast", ML(1.7, { nah: 1 })], [.2, "!stille", { d: 3 }])],
+      ["🐺", "Wolf heult allein", "A lone wolf howls", SZ([0, "heulen", ML(1.5, { fern: 1 })], [5, "eule", ML(1.1)])],
+      ["🧟", "Etwas schlurft heran", "Something shambles closer", SZ([0, "stoehnen", ML(1.4, { fern: 1 })], [2, "laubschritt", ML(1.3)], [4, "untot", ML(1.4)])],
+      ["🌕", "Werwolf", "Werewolf", SZ([0, "!stille", { d: 2 }], [2, "heulen", ML(1.7)], [4, "knurren", ML(1.5, { gegen: 1 })])]],
+    meer: [
+      ["🐬", "Delfine springen", "Dolphins leap", SZ([0, "platsch", ML(1.4)], [.8, "platsch", ML(1.3, { gegen: 1 })], [1.6, "platsch", ML(1.3)], [2.5, "moewe", ML(1.1)])],
+      ["🧜", "Sirenengesang", "Siren song", SZ([0, "chor", ML(1.3, { fern: 1 })], [4, "chor", ML(1.2, { gegen: 1, fern: 1 })])],
+      ["⛵", "Fremdes Segel am Horizont", "A sail on the horizon", SZ([0, "glocke", ML(1.2, { fern: 1 })], [2, "signalhorn", ML(1.2, { fern: 1 })])],
+      ["🪨", "Brandung an den Klippen", "Surf on the cliffs", SZ([0, "rumpf", ML(1.4)], [.6, "platsch", ML(1.6)], [2, "windstoss", ML(1.3)])],
+      ["🐙", "Krake", "Kraken", SZ([0, "!verstummen"], [0, "blubb", ML(1.5)], [1.5, "monster", ML(1.6)], [2.5, "platsch", ML(1.5)])],
+      ["🦀", "Krabben im Sand", "Crabs in the sand", SZ([0, "kaefer", ML(1.4)], [1, "kies", ML(1.2)], [2, "moewe", ML(1.2)])],
+      ["🌫", "Nebelhorn", "Foghorn", SZ([0, "signalhorn", ML(1.5, { fern: 1 })], [4, "signalhorn", ML(1.3, { fern: 1 })])],
+      ["🌊", "Flut kommt", "The tide rolls in", SZ([0, "platsch", ML(1.4)], [1.5, "platsch", ML(1.5)], [3, "rumpf", ML(1.3)])]],
+    schiff: [
+      ["🔭", "Land in Sicht!", "Land ho!", SZ([0, "kampfruf", ML(1.4)], [1, "jubel", ML(1.4)], [2.5, "glocke", ML(1.2)])],
+      ["🪢", "Segel reißt", "A sail tears", SZ([0, "windstoss", ML(1.5)], [.5, "tuch", ML(1.6)], [1.2, "zank", ML(1.3)], [2, "holzschritte", ML(1.2)])],
+      ["🐀", "Ratten im Laderaum", "Rats in the hold", SZ([0, "kaefer", ML(1.4, { nah: 1 })], [1, "kiste", ML(1.3)], [2, "fledermaus", ML(1.2)])],
+      ["🍺", "Matrosen singen", "Sailors sing", SZ([0, "chor", ML(1.2)], [2, "stampfen", ML(1.3)], [3.5, "jubel", ML(1.2)])],
+      ["💥", "Kanonen... äh, Ballisten", "Ballista volley", SZ([0, "belagerung", ML(1.5)], [2, "einschlag", ML(1.5, { fern: 1 })], [3, "jubel", ML(1.2)])],
+      ["🧭", "Mann über Bord!", "Man overboard!", SZ([0, "schrei", ML(1.4)], [.5, "platsch", ML(1.6)], [1.5, "kampfruf", ML(1.3)], [2.5, "holzschritte", ML(1.3)])],
+      ["🐋", "Wal unter dem Kiel", "Whale under the keel", SZ([0, "wal", ML(1.5)], [1.5, "rumpf", ML(1.5)], [2.5, "raunen", ML(1.1)])],
+      ["⚓", "Kapitän gibt Befehle", "Captain's orders", SZ([0, "kampfruf", ML(1.3)], [1, "holzschritte", ML(1.3)], [2, "kette", ML(1.3)], [3, "tuch", ML(1.2)])]],
+    wasserfall: [
+      ["🌈", "Gischt und Regenbogen", "Spray and rainbow", SZ([0, "glocklein", ML(1.2)], [1, "vogel", ML(1.3)], [2, "platsch", ML(1.2)])],
+      ["🐟", "Lachse springen", "Salmon leap", SZ([0, "platsch", ML(1.4)], [.8, "platsch", ML(1.3, { gegen: 1 })], [1.6, "platsch", ML(1.3)])],
+      ["🪵", "Treibholz kracht", "Driftwood crashes", SZ([0, "holzbruch", ML(1.5)], [.5, "platsch", ML(1.5)], [1.5, "holzpoltern", ML(1.2)])],
+      ["🕳", "Höhle hinter dem Fall", "Cave behind the falls", SZ([0, "stein", ML(1.3)], [1.5, "fledermaus", ML(1.3)], [3, "atem", ML(1.2, { fern: 1 })])],
+      ["🦦", "Otter spielen", "Otters play", SZ([0, "platsch", ML(1.2)], [1, "frosch", ML(1.1)], [2, "platsch", ML(1.2, { gegen: 1 })])],
+      ["🦅", "Adler fängt Fisch", "An eagle catches fish", SZ([0, "greif", ML(1.2)], [1, "platsch", ML(1.5)], [2, "vogel", ML(1.2)])],
+      ["🧜", "Nixe im Becken", "A nixie in the pool", SZ([0, "chor", ML(1.2)], [2, "platsch", ML(1.2)], [3, "lachen", ML(1, { fern: 1 })])],
+      ["🪨", "Rutschige Steine", "Slippery rocks", SZ([0, "kies", ML(1.3)], [.6, "aua", ML(1.3)], [1, "platsch", ML(1.4)])]],
+    hoehle: [
+      ["💧", "Tropfen in die Stille", "Drops into silence", SZ([0, "!stille", { d: 5 }], [1, "platsch", ML(1.2)], [3, "platsch", ML(1.1, { gegen: 1 })])],
+      ["🔦", "Fackel erlischt", "The torch goes out", SZ([0, "zischen", ML(1.5)], [.3, "!stille", { d: 3 }], [3, "atem", ML(1.3)])],
+      ["🐛", "Krabbeln an den Wänden", "Crawling on the walls", SZ([0, "kaefer", ML(1.5, { nah: 1 })], [1.5, "kaefer", ML(1.4, { gegen: 1 })])],
+      ["👣", "Fremde Schritte", "Strange footsteps", SZ([0, "steinschritte", ML(1.4, { fern: 1 })], [2.5, "steinschritte", ML(1.3)], [4, "!stille", { d: 2 }])],
+      ["🪨", "Felsbrocken rollt", "A boulder rolls", SZ([0, "grollen", ML(1.4)], [1, "steinschlag", ML(1.5, { wandern: 1 })], [3, "einsturz", ML(1.2)])],
+      ["💎", "Glitzernder Kristall", "Glittering crystal", SZ([0, "edelstein", ML(1.4)], [1, "glocklein", ML(1.2)], [2.5, "klangschale", ML(1.1)])],
+      ["🐉", "Drachenatem", "Dragon's breath", SZ([0, "!stille", { d: 2 }], [1, "drache", ML(1.5, { fern: 1 })], [3, "grollen", ML(1.3)])],
+      ["🕳", "Echo aus der Tiefe", "Echo from the depths", SZ([0, "schrei", ML(1.2, { fern: 1 })], [2, "schrei", ML(.8, { fern: 1, gegen: 1 })], [3.5, "stein", ML(1.2)])]],
+    unterreich: [
+      ["🍄", "Leuchtpilze knistern", "Glowing fungi crackle", SZ([0, "glocklein", ML(1.2)], [1, "zischen", ML(1.1)], [2, "insekt", ML(1.2)])],
+      ["🛡", "Drow-Patrouille", "Drow patrol", SZ([0, "!stille", { d: 2 }], [1, "kettenhemd", ML(1.3)], [2, "steinschritte", ML(1.3, { wandern: 1 })], [4, "zank", ML(1, { fern: 1 })])],
+      ["🐛", "Riesenwurm", "Giant worm", SZ([0, "grollen", ML(1.5)], [1, "einsturz", ML(1.3)], [2, "monster", ML(1.5)], [3, "steinschlag", ML(1.3)])],
+      ["⛓", "Sklavenkarawane", "Slave caravan", SZ([0, "kette", ML(1.4)], [1, "stoehnen", ML(1.3)], [2, "hieb", ML(1.2)], [3, "kette", ML(1.2)])],
+      ["🕳", "Abgrund", "The chasm", SZ([0, "stein", ML(1.3)], [3, "stein", ML(.7, { fern: 1 })], [5, "!stille", { d: 2 }])],
+      ["👁", "Betrachter schwebt heran", "A beholder drifts closer", SZ([0, "!stille", { d: 3 }], [.5, "zauber", ML(1.4)], [2.5, "atem", ML(1.4, { nah: 1 })], [4, "monster", ML(1.2)])],
+      ["🧪", "Schleim tropft herab", "Slime drips down", SZ([0, "schleim", ML(1.5)], [1.5, "schleim", ML(1.4, { gegen: 1 })], [3, "zischen", ML(1.2)])],
+      ["🪓", "Duergar-Mine", "Duergar mine", SZ([0, "hacke", ML(1.3, { fern: 1 })], [1.5, "hammer", ML(1.2, { fern: 1 })], [3, "grunzen", ML(1.2)])]],
+    kerker: [
+      ["🔨", "Folterknecht bei der Arbeit", "The torturer at work", SZ([0, "metall", ML(1.4, { fern: 1 })], [1.5, "schrei", ML(1.4, { fern: 1 })], [3.5, "stoehnen", ML(1.2)])],
+      ["🍞", "Essen wird gebracht", "Food is brought", SZ([0, "schluessel", ML(1.3)], [1, "riegel", ML(1.3)], [2, "geschirr", ML(1.3)], [3, "essen", ML(1.2)])],
+      ["🗝", "Ausbruch!", "Breakout!", SZ([0, "schloss", ML(1.4)], [1.5, "riegel", ML(1.5)], [2.5, "laubschritt", ML(1.3, { wandern: 1 })], [4, "signalhorn", ML(1.3, { fern: 1 })])],
+      ["💀", "Gefangener stirbt", "A prisoner dies", SZ([0, "stoehnen", ML(1.4)], [2, "tod", ML(1.3)], [2.5, "!stille", { d: 4 }])],
+      ["🕯", "Flüstern in der Nachbarzelle", "Whispers next door", SZ([0, "atem", ML(1.3, { nah: 1 })], [2, "kette", ML(1.1)], [3, "stoehnen", ML(1.1, { gegen: 1 })])],
+      ["🐕", "Wachhund schlägt an", "Guard dog barks", SZ([0, "hund", ML(1.5)], [1, "hund", ML(1.3)], [2, "zank", ML(1.2)])],
+      ["🚪", "Schwere Tür fällt zu", "Heavy door slams", SZ([0, "tuerzu", ML(1.6)], [.3, "riegel", ML(1.4)], [.5, "!stille", { d: 3 }])],
+      ["👻", "Geist eines Gefangenen", "A prisoner's ghost", SZ([0, "!stille", { d: 3 }], [.5, "wehklagen", ML(1.4)], [3, "kette", ML(1.3)])]],
+    sumpf: [
+      ["🦟", "Mückenschwarm", "Mosquito swarm", SZ([0, "insekt", ML(1.6, { nah: 1 })], [1, "insekt", ML(1.4, { gegen: 1 })], [2, "aua", ML(1)])],
+      ["🐊", "Krokodil", "Crocodile", SZ([0, "!verstummen"], [0, "platsch", ML(1.5)], [1, "zischen", ML(1.3)], [2, "monster", ML(1.3)])],
+      ["🧙", "Sumpfhexe lacht", "The bog witch laughs", SZ([0, "lachen", ML(1.4, { fern: 1 })], [2, "blubb", ML(1.3)], [3, "zauber", ML(1.2)])],
+      ["🦶", "Im Schlamm stecken", "Stuck in the mud", SZ([0, "nass", ML(1.5)], [1, "nass", ML(1.4)], [2, "aua", ML(1.1)], [3, "platsch", ML(1.2)])],
+      ["🐦", "Reiher fliegt auf", "A heron takes off", SZ([0, "vogel", ML(1.4)], [.3, "platsch", ML(1.3)], [1, "kraehe", ML(1.2, { gegen: 1 })])],
+      ["🧟", "Moorleiche", "Bog corpse", SZ([0, "blubb", ML(1.4)], [1.5, "stoehnen", ML(1.4)], [3, "untot", ML(1.3)])],
+      ["🌫", "Faulgas steigt auf", "Swamp gas rises", SZ([0, "blubb", ML(1.5)], [.6, "blubb", ML(1.4)], [1.2, "zischen", ML(1.3)], [2, "husten", ML(1.1)])],
+      ["🐍", "Würgeschlange", "Constrictor", SZ([0, "schlange", ML(1.5)], [1.5, "aua", ML(1.3)], [2.5, "zischen", ML(1.3)])]],
+    unterwasser: [
+      ["🐠", "Fischschwarm", "School of fish", SZ([0, "blubb", ML(1.4)], [.5, "blubb", ML(1.3, { gegen: 1 })], [1, "blubb", ML(1.3)])],
+      ["🦈", "Hai kreist", "A shark circles", SZ([0, "!stille", { d: 3 }], [.5, "blubb", ML(1.4, { wandern: 1 })], [3, "monster", ML(1.2)])],
+      ["🧜", "Meervolk singt", "Merfolk sing", SZ([0, "chor", ML(1.3)], [3, "chor", ML(1.2, { gegen: 1 })])],
+      ["💎", "Schatztruhe", "Treasure chest", SZ([0, "truhe", ML(1.4)], [1, "muenzen", ML(1.3)], [2, "blubb", ML(1.2)])],
+      ["🌋", "Unterwasservulkan", "Underwater volcano", SZ([0, "grollen", ML(1.5)], [1, "blubb", ML(1.5)], [2, "blubb", ML(1.4, { gegen: 1 })])],
+      ["⛓", "Ankerkette sinkt", "An anchor chain sinks", SZ([0, "kette", ML(1.5)], [2, "rumpf", ML(1.3)])],
+      ["🐢", "Riesenschildkröte", "Giant turtle", SZ([0, "wal", ML(1.1, { fern: 1 })], [2, "blubb", ML(1.3)])],
+      ["🫧", "Luft wird knapp", "Air runs low", SZ([0, "atem", ML(1.5, { nah: 1 })], [2, "blubb", ML(1.5)], [3, "atem", ML(1.3)])]],
+    schmiede: [
+      ["⚒", "Lehrling lässt alles fallen", "Apprentice drops everything", SZ([0, "holzpoltern", ML(1.5)], [.3, "metall", ML(1.4)], [1.2, "zank", ML(1.3)])],
+      ["🐴", "Pferd wird beschlagen", "A horse is shod", SZ([0, "schnauben", ML(1.3)], [1, "hammer", ML(1.3)], [2.5, "wiehern", ML(1.2)], [3.5, "hammer", ML(1.2)])],
+      ["🛡", "Rüstung anprobieren", "Trying on armour", SZ([0, "kettenhemd", ML(1.4)], [1.5, "kettenhemd", ML(1.3)], [3, "lachen", ML(1.1)])],
+      ["🔥", "Funkenregen", "Shower of sparks", SZ([0, "hammer", ML(1.5)], [.4, "zischen", ML(1.4)], [1, "hammer", ML(1.4)])],
+      ["💰", "Bezahlung", "Payment", SZ([0, "muenzen", ML(1.4)], [1.5, "lachen", ML(1.1)], [2.5, "tuerzu", ML(1.2)])],
+      ["🪓", "Axt wird geschliffen", "An axe is sharpened", SZ([0, "schleifen", ML(1.5)], [3, "axt", ML(1.2)])],
+      ["🏺", "Löschen im Fass", "Quenching in the barrel", SZ([0, "zischen", ML(1.6)], [.5, "blubb", ML(1.3)])],
+      ["⚔", "Meisterwerk vollendet", "Masterwork finished", SZ([0, "hammer", ML(1.4)], [1.5, "schwertziehen", ML(1.4)], [2.5, "glocklein", ML(1.2)], [3.5, "jubel", ML(1.1)])]],
+    labor: [
+      ["🐸", "Verwandlung missglückt", "A failed transformation", SZ([0, "zauber", ML(1.4)], [1, "frosch", ML(1.5)], [2, "lachen", ML(1.2)])],
+      ["📜", "Uralte Schriftrolle", "An ancient scroll", SZ([0, "papier", ML(1.4)], [1.5, "zauber", ML(1.2)], [3, "glocklein", ML(1.1)])],
+      ["🔥", "Flamme schießt hoch", "A flame shoots up", SZ([0, "zischen", ML(1.6)], [.4, "knall", ML(1.3)], [1, "husten", ML(1.2)])],
+      ["🐈", "Katze wirft Phiolen um", "The cat topples vials", SZ([0, "katze", ML(1.2)], [.6, "glasbruch", ML(1.4)], [1.2, "glasbruch", ML(1.2)], [2, "zank", ML(1.2)])],
+      ["👹", "Beschwörung", "A summoning", SZ([0, "!stille", { d: 2 }], [1, "zauber", ML(1.5)], [2.5, "monster", ML(1.4)], [3.5, "schrei", ML(1.2)])],
+      ["⚗", "Destille blubbert", "The still bubbles", SZ([0, "blubb", ML(1.4)], [1, "blubb", ML(1.3)], [2, "zischen", ML(1.2)], [3, "glocklein", ML(1.1)])],
+      ["💀", "Schädel spricht", "The skull speaks", SZ([0, "stoehnen", ML(1.3)], [2, "lachen", ML(1.2)], [3.5, "wehklagen", ML(1.1)])],
+      ["✨", "Golem erwacht", "A golem awakens", SZ([0, "zauber", ML(1.4)], [1.5, "stampfen", ML(1.5)], [3, "stampfen", ML(1.4)])]],
+    bibliothek: [
+      ["🕯", "Kerze erlischt", "A candle goes out", SZ([0, "zischen", ML(1.2)], [.3, "!stille", { d: 3 }], [3, "knarren", ML(1.2)])],
+      ["🐈", "Katze springt aufs Regal", "The cat jumps onto a shelf", SZ([0, "katze", ML(1.2)], [.6, "buch", ML(1.3)], [1.2, "holzpoltern", ML(1.1)])],
+      ["📖", "Buch blättert von selbst", "A book turns its pages", SZ([0, "papier", ML(1.4)], [1, "papier", ML(1.3)], [2, "zauber", ML(1.1)])],
+      ["🧙", "Bibliothekar räuspert sich", "The librarian clears his throat", SZ([0, "husten", ML(1.4)], [1.5, "holzschritte", ML(1.2)])],
+      ["🔒", "Verbotene Abteilung", "The forbidden section", SZ([0, "schluessel", ML(1.3)], [1, "schloss", ML(1.4)], [2.5, "knarren", ML(1.3)], [4, "wehklagen", ML(1, { fern: 1 })])],
+      ["🪜", "Leiter kippt", "A ladder tips over", SZ([0, "holzpoltern", ML(1.5)], [.5, "aua", ML(1.2)], [1.5, "buch", ML(1.2)])],
+      ["🦉", "Eule im Gebälk", "An owl in the rafters", SZ([0, "eule", ML(1.3)], [1, "laub", ML(1.1)])],
+      ["🕰", "Uhr schlägt Mitternacht", "The clock strikes midnight", SZ([0, "glocke", ML(1.3)], [2, "glocke", ML(1.2)], [4, "glocke", ML(1.2)], [6, "!stille", { d: 2 }])]],
+    tempel: [
+      ["🕯", "Kerzen flackern", "Candles flicker", SZ([0, "windstoss", ML(1.3)], [1, "glocklein", ML(1.2)], [2, "chor", ML(1.1)])],
+      ["🔥", "Weihrauch und Gebet", "Incense and prayer", SZ([0, "klangschale", ML(1.3)], [2, "chor", ML(1.2)])],
+      ["⚔", "Tempelwache", "Temple guard", SZ([0, "steinschritte", ML(1.3)], [1.5, "kettenhemd", ML(1.3)], [3, "schwertziehen", ML(1.2)])],
+      ["😇", "Göttliche Stimme", "A divine voice", SZ([0, "!stille", { d: 3 }], [.5, "glbaum", ML(1.4)], [2, "chor", ML(1.5)])],
+      ["🧎", "Pilger treffen ein", "Pilgrims arrive", SZ([0, "steintor", ML(1.2)], [1.5, "volk", ML(1.2)], [3, "glocke", ML(1.1)])],
+      ["🐍", "Entweihung", "Desecration", SZ([0, "glasbruch", ML(1.4)], [.5, "zank", ML(1.3)], [2, "gong", ML(1.4)])],
+      ["🔔", "Glockenspiel", "Carillon", SZ([0, "glocke", ML(1.3)], [1, "glocklein", ML(1.2)], [2, "nepal", ML(1.2)], [3, "glocke", ML(1.2)])],
+      ["💀", "Gruft öffnet sich", "The crypt opens", SZ([0, "steintor", ML(1.5)], [1.5, "stoehnen", ML(1.2)], [3, "windstoss", ML(1.1)])]],
+    dorf: [
+      ["🐓", "Hahn kräht", "The rooster crows", SZ([0, "huhn", ML(1.5)], [2, "hund", ML(1.2, { fern: 1 })], [3, "kuh", ML(1.1)])],
+      ["🐖", "Schwein ausgebüxt", "A pig escapes", SZ([0, "schwein", ML(1.5)], [.8, "laubschritt", ML(1.3, { wandern: 1 })], [1.5, "zank", ML(1.3)], [2.5, "lachen", ML(1.2)])],
+      ["🌾", "Ernte", "Harvest", SZ([0, "sense", ML(1.4)], [2, "sense", ML(1.3)], [3.5, "feldarbeit", ML(1.2)], [5, "volk", ML(1.1)])],
+      ["🔥", "Scheune brennt!", "The barn is on fire!", SZ([0, "schrei", ML(1.3)], [1, "zischen", ML(1.4)], [1.5, "glocke", ML(1.4)], [2.5, "kuh", ML(1.4)], [3.5, "volk", ML(1.3)])],
+      ["🐑", "Herde zieht vorbei", "A flock passes", SZ([0, "schaf", ML(1.4)], [1, "schaf", ML(1.3, { gegen: 1 })], [2, "hund", ML(1.2)], [3, "hufe", ML(1.1, { wandern: 1 })])],
+      ["🔨", "Zimmermann", "The carpenter", SZ([0, "zimmern", ML(1.4)], [3, "saege", ML(1.3)])],
+      ["🪓", "Holz für den Winter", "Wood for winter", SZ([0, "axt", ML(1.4)], [1.5, "axt", ML(1.4)], [3, "holzpoltern", ML(1.3)])],
+      ["🦊", "Fuchs im Hühnerstall", "A fox in the henhouse", SZ([0, "huhn", ML(1.6)], [.5, "huhn", ML(1.4, { gegen: 1 })], [1, "hund", ML(1.5)], [2, "zank", ML(1.2)])]],
+    markt: [
+      ["🍎", "Obstkarren kippt", "A fruit cart tips", SZ([0, "holzpoltern", ML(1.5)], [.6, "kiste", ML(1.3)], [1.5, "zank", ML(1.3)], [2.5, "lachen", ML(1.1)])],
+      ["🐔", "Hühner entwischen", "Chickens escape", SZ([0, "huhn", ML(1.5)], [.6, "huhn", ML(1.4, { gegen: 1 })], [1.5, "lachen", ML(1.2)])],
+      ["⚖", "Feilschen", "Haggling", SZ([0, "volk", ML(1.3)], [1.5, "zank", ML(1.2)], [3, "muenzen", ML(1.3)], [4, "lachen", ML(1.1)])],
+      ["🛡", "Stadtwache marschiert", "City watch marches", SZ([0, "kettenhemd", ML(1.3, { wandern: 1 })], [1, "steinschritte", ML(1.3, { wandern: 1 })], [3, "raunen", ML(1)])],
+      ["🔔", "Mittagsglocke", "Noon bell", SZ([0, "glocke", ML(1.4, { fern: 1 })], [2, "glocke", ML(1.3, { fern: 1 })], [4, "volk", ML(1.2)])],
+      ["🐐", "Ziege frisst den Stand", "A goat eats the stall", SZ([0, "ziege", ML(1.4)], [1, "tuch", ML(1.2)], [1.6, "zank", ML(1.3)])],
+      ["🎶", "Straßenmusikant", "A street musician", SZ([0, "schellen", ML(1.2)], [2, "muenzen", ML(1.2)], [3, "jubel", ML(1)])],
+      ["👑", "Adlige Sänfte", "A noble's litter", SZ([0, "signalhorn", ML(1.2)], [1, "hufe", ML(1.3, { wandern: 1 })], [2.5, "raunen", ML(1.2)])]],
+    hafen: [
+      ["🐟", "Fischer kehren heim", "Fishermen return", SZ([0, "ruder", ML(1.3, { wandern: 1 })], [2, "rumpf", ML(1.3)], [3, "volk", ML(1.2)], [4, "moewe", ML(1.3)])],
+      ["📦", "Kisten werden entladen", "Crates are unloaded", SZ([0, "kiste", ML(1.4)], [1, "holzpoltern", ML(1.3)], [2, "kette", ML(1.3)], [3, "zank", ML(1.1)])],
+      ["🍺", "Seemannskneipe", "A sailors' pub", SZ([0, "tuerauf", ML(1.2)], [.5, "jubel", ML(1.3)], [1.5, "krug", ML(1.2)], [2.5, "tuerzu", ML(1.1)])],
+      ["🏴‍☠️", "Piraten gesichtet!", "Pirates sighted!", SZ([0, "glocke", ML(1.5)], [.8, "glocke", ML(1.5)], [1.5, "kampfruf", ML(1.3)], [2.5, "schwertziehen", ML(1.3)])],
+      ["🦜", "Papagei schimpft", "A parrot squawks", SZ([0, "vogel", ML(1.5)], [1, "lachen", ML(1.2)], [2, "vogel", ML(1.3)])],
+      ["🪝", "Kran knarrt", "A crane creaks", SZ([0, "knarren", ML(1.5)], [1.5, "kette", ML(1.4)], [3, "holzpoltern", ML(1.2)])],
+      ["🐱", "Hafenkatze", "Harbour cat", SZ([0, "katze", ML(1.3)], [1, "moewe", ML(1.4)], [2, "platsch", ML(1.1)])],
+      ["🌫", "Nebel zieht auf", "Fog rolls in", SZ([0, "signalhorn", ML(1.3, { fern: 1 })], [2, "!stille", { d: 3 }], [5, "glocke", ML(1.1, { fern: 1 })])]],
+    gebirge: [
+      ["🪨", "Steinlawine", "Rockslide", SZ([0, "steinschlag", ML(1.6, { wandern: 1 })], [1.5, "stein", ML(1.3)], [2.5, "!verstummen"])],
+      ["🐐", "Bergziegen", "Mountain goats", SZ([0, "ziege", ML(1.4)], [1, "stein", ML(1.2)], [2, "ziege", ML(1.3, { gegen: 1 })])],
+      ["🏔", "Gletscher knackt", "The glacier cracks", SZ([0, "grollen", ML(1.4)], [.8, "holzbruch", ML(1.3)], [2, "!stille", { d: 2 }])],
+      ["🧗", "Seil reißt fast", "A rope nearly snaps", SZ([0, "tuch", ML(1.4)], [.5, "schrei", ML(1.3)], [1, "stein", ML(1.3)], [2, "atem", ML(1.3, { nah: 1 })])],
+      ["🦅", "Adlerhorst", "Eagle's eyrie", SZ([0, "greif", ML(1.3, { fern: 1 })], [2, "vogel", ML(1.2)], [3.5, "windstoss", ML(1.2)])],
+      ["⛏", "Zwergenhorn ruft", "A dwarven horn calls", SZ([0, "signalhorn", ML(1.4, { fern: 1 })], [3, "signalhorn", ML(1.2, { fern: 1, gegen: 1 })])],
+      ["🐉", "Drache über dem Gipfel", "Dragon over the peak", SZ([0, "!verstummen"], [0, "drache", ML(1.6, { fern: 1 })], [2.5, "windstoss", ML(1.4)])],
+      ["❄", "Schneebrett", "Snow slab", SZ([0, "schnee", ML(1.5)], [.8, "grollen", ML(1.4)], [2, "schnee", ML(1.3)])]],
+    mine: [
+      ["🔔", "Schichtwechsel", "Shift change", SZ([0, "glocke", ML(1.3)], [1.5, "steinschritte", ML(1.3, { wandern: 1 })], [3, "volk", ML(1.2)])],
+      ["💥", "Sprengung", "Blasting", SZ([0, "kampfruf", ML(1.2)], [1.5, "knall", ML(1.6)], [2, "steinschlag", ML(1.5)], [3, "husten", ML(1.2)])],
+      ["🕯", "Grubengas!", "Firedamp!", SZ([0, "zischen", ML(1.4)], [1, "schrei", ML(1.3)], [1.5, "laubschritt", ML(1.3, { wandern: 1 })])],
+      ["🍺", "Zwerge singen", "Dwarves sing", SZ([0, "chor", ML(1.2)], [2, "stampfen", ML(1.3)], [3.5, "krug", ML(1.2)])],
+      ["🐀", "Ratten im Stollen", "Rats in the tunnel", SZ([0, "kaefer", ML(1.4, { nah: 1 })], [1.5, "kaefer", ML(1.3, { gegen: 1 })])],
+      ["⚒", "Hammer in der Schmiede", "Hammer at the forge", SZ([0, "hammer", ML(1.4)], [1.5, "blasebalg", ML(1.3)], [3, "zischen", ML(1.2)])],
+      ["🪜", "Leiter bricht", "A ladder breaks", SZ([0, "holzbruch", ML(1.5)], [.4, "aua", ML(1.3)], [1, "stein", ML(1.2)])],
+      ["💧", "Wassereinbruch", "Water breaks in", SZ([0, "platsch", ML(1.5)], [.8, "platsch", ML(1.5, { gegen: 1 })], [1.5, "kampfruf", ML(1.3)])]],
+    strasse: [
+      ["🧳", "Händlerkarawane", "Merchant caravan", SZ([0, "kutsche", ML(1.4, { wandern: 1 })], [2, "esel", ML(1.3)], [3.5, "volk", ML(1.2)])],
+      ["🧙", "Wanderer grüßt", "A wanderer greets you", SZ([0, "kies", ML(1.3)], [1.5, "volk", ML(1.3)], [3, "lachen", ML(1.1)])],
+      ["🐺", "Wölfe am Wegesrand", "Wolves by the roadside", SZ([0, "!verstummen"], [0, "knurren", ML(1.4)], [1.5, "wolf", ML(1.4, { gegen: 1 })], [3, "wiehern", ML(1.3)])],
+      ["🐎", "Pferd lahmt", "A horse goes lame", SZ([0, "wiehern", ML(1.4)], [1, "schnauben", ML(1.3)], [2.5, "zank", ML(1.1)])],
+      ["🏰", "Zollstation", "Toll station", SZ([0, "signalhorn", ML(1.2)], [1.5, "kettenhemd", ML(1.3)], [3, "muenzen", ML(1.3)])],
+      ["🌉", "Brücke knarrt", "The bridge creaks", SZ([0, "knarren", ML(1.5)], [1, "hufe", ML(1.3)], [2, "platsch", ML(1.2, { fern: 1 })])],
+      ["🐄", "Herde blockiert den Weg", "A herd blocks the road", SZ([0, "kuh", ML(1.4)], [1, "kuh", ML(1.3, { gegen: 1 })], [2, "hund", ML(1.2)], [3, "zank", ML(1)])],
+      ["⚔", "Duell am Kreuzweg", "Duel at the crossroads", SZ([0, "schwertziehen", ML(1.4)], [1, "klingen", ML(1.4)], [3, "aua", ML(1.2)])]],
+    burg: [
+      ["🏹", "Bogenschützen üben", "Archers practise", SZ([0, "riemen", ML(1.3)], [.8, "pfeil", ML(1.3)], [2, "riemen", ML(1.2)], [2.8, "pfeil", ML(1.2)], [4, "jubel", ML(1)])],
+      ["🐎", "Turnier", "Tournament", SZ([0, "signalhorn", ML(1.3)], [1, "galopp", ML(1.5, { wandern: 1 })], [3, "schild", ML(1.6)], [3.5, "jubel", ML(1.4)])],
+      ["🍖", "Festbankett", "A great feast", SZ([0, "jubel", ML(1.3)], [1, "geschirr", ML(1.3)], [2, "krug", ML(1.2)], [3, "lachen", ML(1.2)])],
+      ["⛓", "Zugbrücke senkt sich", "The drawbridge lowers", SZ([0, "kette", ML(1.6)], [2.5, "tor", ML(1.5)], [3.5, "hufe", ML(1.2)])],
+      ["🔔", "Alarm auf den Zinnen", "Alarm on the battlements", SZ([0, "glocke", ML(1.5)], [.8, "kampfruf", ML(1.3)], [1.5, "steinschritte", ML(1.4, { wandern: 1 })], [2.5, "schwertziehen", ML(1.2)])],
+      ["🦚", "Pfau im Garten", "A peacock in the garden", SZ([0, "pfau", ML(1.4)], [2, "lachen", ML(1)])],
+      ["🗝", "Schatzkammer", "The treasury", SZ([0, "schluessel", ML(1.3)], [1, "steintor", ML(1.3)], [2.5, "truhe", ML(1.3)], [3.5, "muenzen", ML(1.3)])],
+      ["⚔", "Verrat!", "Treason!", SZ([0, "hieb", ML(1.5)], [.3, "schrei", ML(1.3)], [.6, "!stille", { d: 2 }], [3, "kampfruf", ML(1.4)])]],
+    ufer: [
+      ["🐸", "Frösche verstummen", "The frogs fall silent", SZ([0, "frosch", ML(1.3)], [1, "!verstummen"], [1, "!stille", { d: 3 }], [4, "platsch", ML(1.2)])],
+      ["🎣", "Fisch am Haken", "Fish on the hook", SZ([0, "platsch", ML(1.3)], [1, "platsch", ML(1.4)], [2, "jubel", ML(1.1)])],
+      ["🦢", "Schwäne streiten", "Swans quarrel", SZ([0, "ente", ML(1.5)], [.5, "zischen", ML(1.3)], [1, "platsch", ML(1.4)])],
+      ["🧺", "Waschfrauen am Fluss", "Washerwomen at the river", SZ([0, "tuch", ML(1.3)], [1, "platsch", ML(1.2)], [2, "lachen", ML(1.2)], [3, "volk", ML(1.1)])],
+      ["🐴", "Pferde saufen", "Horses drink", SZ([0, "schnauben", ML(1.3)], [1, "platsch", ML(1.2)], [2.5, "wiehern", ML(1.1)])],
+      ["🌉", "Furt durchqueren", "Crossing the ford", SZ([0, "nass", ML(1.4)], [1, "nass", ML(1.3)], [2, "platsch", ML(1.3)], [3, "kies", ML(1.2)])],
+      ["🦫", "Biber fällt einen Baum", "A beaver fells a tree", SZ([0, "ast", ML(1.2)], [2, "baumfall", ML(1.3, { fern: 1 })], [4, "platsch", ML(1.3)])],
+      ["🏹", "Jäger im Schilf", "Hunter in the reeds", SZ([0, "!verstummen"], [0, "riemen", ML(1.3)], [.8, "pfeil", ML(1.3)], [1.5, "ente", ML(1.4)])]],
+    schlacht: [
+      ["🛡", "Schildwall hält", "The shield wall holds", SZ([0, "schild", ML(1.5)], [.6, "schild", ML(1.4, { gegen: 1 })], [1.2, "kampfruf", ML(1.4)], [2, "schild", ML(1.4)])],
+      ["🐉", "Drache greift ein", "A dragon joins the fight", SZ([0, "!verstummen"], [0, "drache", ML(1.7)], [1.5, "schrei", ML(1.4)], [2.5, "einschlag", ML(1.3)])],
+      ["🚩", "Banner fällt", "The banner falls", SZ([0, "holzbruch", ML(1.4)], [.5, "raunen", ML(1.4)], [2, "kampfruf", ML(1.4, { gegen: 1 })])],
+      ["🏳", "Rückzug!", "Retreat!", SZ([0, "signalhorn", ML(1.5)], [1, "signalhorn", ML(1.4)], [2, "galopp", ML(1.4, { wandern: 1 })], [3.5, "kampfruf", ML(1.2)])],
+      ["🩸", "Held fällt", "A hero falls", SZ([0, "klingen", ML(1.3)], [1, "tod", ML(1.5)], [1.5, "!stille", { d: 3 }], [4.5, "kampfruf", ML(1.5)])],
+      ["🐘", "Kriegselefanten", "War elephants", SZ([0, "riese", ML(1.5)], [1, "stampfen", ML(1.5)], [2, "schrei", ML(1.3)])],
+      ["⚔", "Nahkampf", "Melee", SZ([0, "klingen", ML(1.5)], [.8, "hieb", ML(1.4, { gegen: 1 })], [1.5, "aua", ML(1.3)], [2.2, "klingen", ML(1.4)], [3, "schild", ML(1.3)])],
+      ["🎺", "Verstärkung!", "Reinforcements!", SZ([0, "signalhorn", ML(1.4, { gegen: 1 })], [1, "trommler", ML(1.3)], [2, "jubel", ML(1.4)], [3, "galopp", ML(1.4, { wandern: 1 })])]],
+    schlaegerei: [
+      ["🍺", "Bier ins Gesicht", "Ale in the face", SZ([0, "platsch", ML(1.4)], [.5, "lachen", ML(1.3)], [1, "zank", ML(1.4)])],
+      ["🪟", "Durchs Fenster geworfen", "Thrown through the window", SZ([0, "faustkampf", ML(1.4)], [.6, "glasbruch", ML(1.6)], [1.2, "holzpoltern", ML(1.3)], [2, "jubel", ML(1.3)])],
+      ["🤼", "Ringkampf auf dem Tisch", "Wrestling on the table", SZ([0, "holzpoltern", ML(1.4)], [1, "geschirr", ML(1.4)], [2, "tischbruch", ML(1.4)], [3, "raunen", ML(1.3)])],
+      ["🔔", "Stadtwache kommt", "The watch arrives", SZ([0, "tuerauf", ML(1.5)], [.3, "!stille", { d: 2 }], [.8, "kettenhemd", ML(1.4)], [2.5, "laubschritt", ML(1.3, { wandern: 1 })])],
+      ["🪑", "Bank kippt um", "A bench tips over", SZ([0, "holzpoltern", ML(1.5)], [.8, "aua", ML(1.2)], [1.5, "lachen", ML(1.3)])],
+      ["🥄", "Kellnerin wehrt sich", "The barmaid fights back", SZ([0, "faustkampf", ML(1.4)], [.5, "aua", ML(1.3)], [1.2, "jubel", ML(1.5)])],
+      ["🗡", "Klinge gezogen", "A blade is drawn", SZ([0, "schwertziehen", ML(1.5)], [.3, "!stille", { d: 3 }], [3.5, "raunen", ML(1.3)])],
+      ["😂", "Alle lachen plötzlich", "Suddenly everyone laughs", SZ([0, "lachen", ML(1.5)], [.6, "lachen", ML(1.4, { gegen: 1 })], [1.5, "jubel", ML(1.2)], [2.5, "krug", ML(1.2)])]],
+    duell: [
+      ["🎺", "Herold kündigt an", "The herald announces", SZ([0, "signalhorn", ML(1.4)], [2, "jubel", ML(1.4)], [3.5, "schwertziehen", ML(1.3)])],
+      ["🩸", "Erster Treffer", "First blood", SZ([0, "klingen", ML(1.3)], [.8, "aua", ML(1.4)], [1.2, "raunen", ML(1.5)])],
+      ["🛡", "Schild zerbricht", "A shield breaks", SZ([0, "schild", ML(1.6)], [.4, "holzbruch", ML(1.4)], [1, "raunen", ML(1.4)])],
+      ["🙇", "Gnade!", "Mercy!", SZ([0, "klingen", ML(1.3)], [1, "!stille", { d: 3 }], [4, "jubel", ML(1.5)])],
+      ["😤", "Spott von den Rängen", "Jeers from the stands", SZ([0, "zank", ML(1.3, { fern: 1 })], [1, "lachen", ML(1.3)], [2, "kampfruf", ML(1.2)])],
+      ["🌹", "Rose wird geworfen", "A rose is thrown", SZ([0, "jubel", ML(1.4)], [1.5, "lachen", ML(1.1)], [2.5, "jubel", ML(1.2, { gegen: 1 })])],
+      ["⚔", "Schneller Schlagabtausch", "A rapid exchange", SZ([0, "klingen", ML(1.5)], [1.2, "klingen", ML(1.4, { gegen: 1 })], [2.4, "raunen", ML(1.3)])],
+      ["🏆", "Sieger wird gekürt", "The victor is crowned", SZ([0, "signalhorn", ML(1.4)], [1, "jubel", ML(1.6)], [2.5, "trommler", ML(1.2)], [3.5, "jubel", ML(1.4)])]]
+  };
+  Object.keys(KUL_MOMENTE_MEHR).forEach(k => { KUL_MOMENTE[k] = (KUL_MOMENTE[k] || []).concat(KUL_MOMENTE_MEHR[k]); });
   const momenteVon = art => KUL_MOMENTE[art] || [];
   /* Spannung: was sich mit steigender Bedrohung einschleicht – [Art, Abstand, Stärke, fern, ab welcher Spannung] */
   const GEFAHR = {
@@ -2966,7 +3206,30 @@ const ZUS_ICON = {
     return p;
   }
   /* Lautstärke-Faktor jeder Schicht */
+  /* Klanggruppen zum Stummschalten per Sprache („Tiere aus“, „ohne Vögel“, „keine Leute mehr“) */
+  const KLANG_GR = {
+    tiere: { de: "Tiere", en: "animals", w: ["tiere", "die tiere", "viecher", "alle tiere", "tiergeräusche"],
+      ev: "heulen hund frosch eule moewe specht vogel kraehe wolf ente esel ochse ziege hirsch keiler greif schlange wal pferd katze kuh huhn schaf schwein ross wiehern schnauben pfau insekt kaefer fledermaus knurren",
+      zus: "voegel grillen eule frosch wolf kraehe moewe specht bienen fledermaus hund pferd kuh schaf huhn schwein katze wal ente esel ziege hirsch keiler greif schlange", bett: /schnurren|grillen|voegel|bienen|huehner|kuehe|schafe|dschungel|^a_nacht$/ },
+    voegel: { de: "Vögel", en: "birds", w: ["vögel", "vogel", "vogelgezwitscher", "gezwitscher"], ev: "vogel eule moewe specht kraehe ente pfau", zus: "voegel eule kraehe moewe specht ente", bett: /voegel/ },
+    wetter: { de: "Wetter", en: "weather", w: ["wetter", "das wetter", "unwetter weg"], ev: "donner", zus: "regen starkregen gewitter sturm wind schnee", bett: /regen|gewitter|orkan|heulwind|schneesturm/ },
+    leute: { de: "Leute", en: "people", w: ["leute", "menschen", "stimmen", "gerede", "die leute"], ev: "volk zank lachen jubel raunen kampfruf husten ruelpser schnarchen spucken essen chor", zus: "kinder stimmen markt gesang", bett: /gaeste|markt|kinder|gesang/ },
+    monster: { de: "Ungeheuer", en: "monsters", w: ["monster", "ungeheuer", "bestien", "untote"], ev: "monster troll untot schatten drache riese yeti stoehnen wehklagen geheul", zus: "monster untot geist yeti", bett: /^$/ }
+  };
+  Object.values(KLANG_GR).forEach(g => { g.ev = new Set(g.ev.split(" ")); g.zus = g.zus.split(" "); });
+  const ohneGr = new Set(), ohneZus = {};
+  const grStumm = art => { for (const g of ohneGr) if (KLANG_GR[g].ev.has(art)) return true; return false; };
+  function gruppeSchalten(g, aus) {
+    const G = KLANG_GR[g]; if (!G) return;
+    if (aus) { ohneGr.add(g); ohneZus[g] = G.zus.filter(id => zusWahl[id] != null); ohneZus[g].forEach(id => { ohneZus[g][id] = zusWahl[id]; delete zusWahl[id]; }); }
+    else { ohneGr.delete(g); (ohneZus[g] || []).forEach(id => { if (ZUSATZ[id] && zusWahl[id] == null && Object.keys(zusWahl).length < zusMax()) zusWahl[id] = ohneZus[g][id] || 1; }); delete ohneZus[g]; }
+    try { zusMerken(); zusSync(); } catch (_) {}
+    if (kul) lebenAnwenden(kul, .6, true);
+    try { boxNeu("klang"); } catch (_) {}
+    status((aus ? "🔇 " : "🔊 ") + (sprache() === "en" ? G.en + (aus ? " off" : " back") : G.de + (aus ? " aus" : " wieder da")));
+  }
   function bettFaktor(k, b) {
+    for (const g of ohneGr) if (KLANG_GR[g].bett.test(b.name)) return 0;
     if (b.wetter != null) return wetterStufe(k.w || 0, b.wetter) * (stilleBis > ctx.currentTime ? .04 : 1);
     let f = b.extra != null ? b.extra : 1;
     const n = b.name, t = zeitIst(k), t0 = NACHT_KUL[k.art] || 0, drauf = kulDraussen(k.art);
@@ -3025,12 +3288,12 @@ const ZUS_ICON = {
     if (art === "!stille") { stilleStart((o && o.d) || 5); return; }
     try { weltEreignis(k, [art, null, staerke, o && o.fern ? 1 : 0, Object.assign({ szene: 1 }, o)]); } catch (_) {}
   }
-  function szeneSpielen(k, schritte, laut) {
+  function szeneSpielen(k, schritte, laut, gewollt) {
     const az = zz(0, 360), gegen = az + 180 + zz(-40, 40);
     schritte.forEach(([t, art, o]) => {
       o = o || {};
       const ort = { az: (o.gegen ? gegen : az) + zz(-12, 12) };
-      setTimeout(() => lebenEreignis(k, art, .38 * (o.laut || 1) * (laut || 1), Object.assign({ ort }, o)), t * 1000);
+      setTimeout(() => lebenEreignis(k, art, .38 * (o.laut || 1) * (laut || 1), Object.assign({ ort, moment: gewollt ? 1 : 0 }, o)), t * 1000);
     });
   }
   function szeneZufall(k) {
@@ -3038,20 +3301,37 @@ const ZUS_ICON = {
     let i = Math.floor(Math.random() * l.length); if (l.length > 1 && i === k.letzteSzene) i = (i + 1) % l.length;
     k.letzteSzene = i; szeneSpielen(k, l[i]);
   }
-  /* Momente als Knöpfe: Symbol und kurzer Name, je Kulisse vier */
+  /* Momente als Knöpfe: Symbol und kurzer Name, vier je Seite – ‹ › blättert, angeheftete (2 s halten) stehen vorne */
+  const MOM_SEITE = 4, momSeite = {};
+  const momFav = (art, i) => favs.includes("m:" + art + ":" + i);
+  function momenteOrdnung(art) {
+    const m = momenteVon(art), rang = i => { const r = favs.indexOf("m:" + art + ":" + i); return r < 0 ? 1e4 : r; };
+    return m.map((_, i) => i).sort((a, b) => rang(a) - rang(b) || a - b);
+  }
   function momenteZeile(T, art) {
     const m = momenteVon(art); if (!m.length) return "";
-    const en = sprache() === "en";
-    return '<div class="lw-momente" data-kul="' + art + '">' + m.map((x, i) => '<button type="button" class="lw-moment" data-moment="' + i + '" title="' + esc(en ? x[2] : x[1]) + '"><span class="ms">' + x[0] + '</span><span class="mt">' + esc(en ? x[2] : x[1]) + "</span></button>").join("") + "</div>";
+    const en = sprache() === "en", ord = momenteOrdnung(art), seiten = Math.ceil(ord.length / MOM_SEITE);
+    const s = ((momSeite[art] || 0) % seiten + seiten) % seiten; momSeite[art] = s;
+    const zeig = ord.slice(s * MOM_SEITE, s * MOM_SEITE + MOM_SEITE);
+    const knopf = i => { const x = m[i], n = esc(en ? x[2] : x[1]), f = momFav(art, i);
+      return '<button type="button" class="lw-moment' + (f ? " fav" : "") + '" data-moment="' + i + '" title="' + n + '"><span class="ms">' + x[0] + '</span><span class="mt">' + n + "</span>" + (f ? '<i class="lw-momstern">★</i>' : "") + "</button>"; };
+    const pfeil = (r, z) => '<button type="button" class="lw-momblatt" data-momblatt="' + r + '" title="' + esc(r < 0 ? T.momZurueck : T.momWeiter) + '" aria-label="' + esc(r < 0 ? T.momZurueck : T.momWeiter) + '">' + z + "</button>";
+    const punkte = seiten > 1 ? '<div class="lw-mompunkte" aria-hidden="true">' + Array.from({ length: seiten }, (_, i) => "<i" + (i === s ? ' class="an"' : "") + "></i>").join("") + "</div>" : "";
+    return '<div class="lw-momente' + (seiten > 1 ? " blaettern" : "") + '" data-kul="' + art + '">' + (seiten > 1 ? pfeil(-1, "‹") : "") +
+      '<div class="lw-momreihe">' + zeig.map(knopf).join("") + "</div>" + (seiten > 1 ? pfeil(1, "›") : "") + punkte + "</div>";
   }
+  function momenteNeu() { const T = t(); root.querySelectorAll(".lw-momente").forEach(z => { const neu = momenteZeile(T, z.dataset.kul); if (neu) z.outerHTML = neu; }); }
+  function momBlaettern(r) { const art = S.kulisse; momSeite[art] = (momSeite[art] || 0) + r; momenteNeu(); }
+  Object.assign(TX.de, { momZurueck: "Vorige Momente", momWeiter: "Weitere Momente", momGesetzt: n => "★ „" + n + "“ angeheftet – steht jetzt vorne.", momGeloest: n => "„" + n + "“ nicht mehr angeheftet." });
+  Object.assign(TX.en, { momZurueck: "Previous moments", momWeiter: "More moments", momGesetzt: n => "★ “" + n + "” pinned – now comes first.", momGeloest: n => "“" + n + "” unpinned." });
   setInterval(() => { if (!S) return; root.querySelectorAll(".lw-momente").forEach(z => { if (z.dataset.kul !== S.kulisse) { const neu = momenteZeile(t(), S.kulisse); if (neu) z.outerHTML = neu; else z.innerHTML = ""; } }); }, 1000);
   function etwasPassiert(nr) {
     audioStart(); if (!ctx) return;
     /* Kulisse gewählt, aber still: erst einschalten, dann geschieht es */
     if ((!kul || kul.art !== S.kulisse) && KUL_WELT[S.kulisse]) { kulisseStart(true); try { knoepfe(); } catch (_) {} setTimeout(() => etwasPassiert(nr), 1600); return; }
     if (!kul || !KUL_WELT[kul.art]) { effekt("donner", 1); return; }
-    const m = momenteVon(kul.art), x = nr != null && m[nr] ? m[nr] : m.length ? zufall(m) : null;
-    szeneSpielen(kul, x ? x[3] : KUL_GROSS[kul.art] || G_TIEF, 1);
+    const m = momenteVon(kul.art), fv = m.filter((_, i) => momFav(kul.art, i)), x = nr != null && m[nr] ? m[nr] : fv.length && Math.random() < .5 ? zufall(fv) : m.length ? zufall(m) : null;
+    szeneSpielen(kul, x ? x[3] : KUL_GROSS[kul.art] || G_TIEF, 1, true);
     kul.szeneNaechst = Math.max(kul.szeneNaechst, ctx.currentTime + 30);
   }
   function stilleStart(d) {
@@ -7793,6 +8073,7 @@ const ZUS_ICON = {
   function kulKnoepfe() {
     const T = t(), an = kulisseLaeuft(), da = kulisseDa();
     const setz = b => { b.hidden = !da; b.classList.toggle("laeuft", an); b.setAttribute("aria-pressed", an); b.title = an ? T.kulPause : T.kulWeiter; };
+    root.querySelectorAll(".lw-ehgaus").forEach(b => { b.hidden = !da; b.classList.toggle("aus", !an); b.setAttribute("aria-pressed", !an); b.textContent = an ? T.einf.hgAusK : T.einf.hgAnK; });
     root.querySelectorAll(".lw-kulknopf").forEach(b => { setz(b); b.textContent = "🌧 " + (an ? "❚❚" : "▶"); b.setAttribute("aria-label", b.title); });
     if (leiste) { const b = leiste.querySelector(".ll-kulk"); if (b) { setz(b); b.textContent = an ? "🌧❚❚" : "🌧▶"; b.setAttribute("aria-label", b.title); } }
   }
@@ -8133,7 +8414,7 @@ const ZUS_ICON = {
   /* ---------- Favoriten: ein kleiner Punkt an jeder Kachel heftet sie oben in ihrer eigenen Liste an ---------- */
   Object.assign(TX.de, { favAn: "Oben anheften", favAus: "Nicht mehr anheften", favGesetzt: n => "📌 " + n + " ist jetzt oben angeheftet (Effekte auch unter ★ Favoriten) – nochmal 2 Sekunden halten löst es wieder.", favGeloest: n => n + " ist nicht mehr angeheftet.", favPunktTipp: "Angeheftet – 2 Sekunden gedrückt halten löst es wieder" });
   Object.assign(TX.en, { favAn: "Pin to top", favAus: "Unpin", favGesetzt: n => "📌 " + n + " is now pinned to the top (effects also under ★ Favourites) – hold for 2 seconds again to unpin.", favGeloest: n => n + " is no longer pinned.", favPunktTipp: "Pinned – hold for 2 seconds to unpin" });
-  let favs = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-favs")); if (Array.isArray(x)) return x.filter(f => typeof f === "string").slice(0, 80); } catch (_) {} return []; })();
+  let favs = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-favs")); if (Array.isArray(x)) return x.filter(f => typeof f === "string").slice(0, 200); } catch (_) {} return []; })();
   function favsMerken() { try { localStorage.setItem("imres-lw-favs", JSON.stringify(favs)); } catch (_) {} }
   const FAV_Q = { "data-vorlage": "v", "data-sfx": "s", "data-kulisse": "k" };
   /* angeheftete zuerst (in der Reihenfolge des Anheftens), danach der Rest wie gewohnt */
@@ -8153,6 +8434,20 @@ const ZUS_ICON = {
   function favAbbrechen() { if (!favDruck) return; clearTimeout(favDruck.timer); favDruck.el.classList.remove("lw-haelt"); favDruck = null; }
   root.addEventListener("pointerdown", e => {
     if (hoerer || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const mom = e.target.closest("[data-moment]");
+    if (mom && mom.closest(".lw-momente")) {
+      favAbbrechen(); mom.classList.add("lw-haelt");
+      const art = mom.closest(".lw-momente").dataset.kul, i = +mom.dataset.moment;
+      favDruck = { el: mom, x: e.clientX, y: e.clientY, timer: setTimeout(() => {
+        const f = "m:" + art + ":" + i, war = favs.includes(f), x = momenteVon(art)[i], name = x ? (sprache() === "en" ? x[2] : x[1]) : "";
+        favs = war ? favs.filter(y => y !== f) : favs.concat([f]); favsMerken();
+        favDruck = null; favSchlucken = performance.now();
+        try { if (navigator.vibrate) navigator.vibrate(35); } catch (_) {}
+        if (!war) momSeite[art] = 0;
+        momenteNeu(); status(war ? t().momGeloest(name) : t().momGesetzt(name));
+      }, FAV_HALTEN) };
+      return;
+    }
     const el = e.target.closest("[data-vorlage],[data-sfx],[data-kulisse]"); if (!el || !el.closest(".lw-pult-gitter")) return;
     const attr = el.hasAttribute("data-vorlage") ? "data-vorlage" : el.hasAttribute("data-sfx") ? "data-sfx" : "data-kulisse", wert = el.getAttribute(attr), q = FAV_Q[attr];
     if (!q || wert === "zufall" || wert === "leer") return;
@@ -8170,8 +8465,8 @@ const ZUS_ICON = {
   root.addEventListener("pointermove", e => { if (favDruck && Math.hypot(e.clientX - favDruck.x, e.clientY - favDruck.y) > 12) favAbbrechen(); });
   ["pointerup", "pointercancel", "pointerleave"].forEach(n => root.addEventListener(n, e => { if (n !== "pointerleave" || (favDruck && e.target === favDruck.el)) favAbbrechen(); }));
   /* nach dem Anheften löst das Loslassen nicht auch noch die Kachel aus; das lange Drücken öffnet kein Kontextmenü */
-  root.addEventListener("click", e => { if (favSchlucken && performance.now() - favSchlucken < 1500 && e.target.closest("[data-vorlage],[data-sfx],[data-kulisse]")) { favSchlucken = 0; e.stopPropagation(); e.preventDefault(); } }, true);
-  root.addEventListener("contextmenu", e => { if (e.target.closest(".lw-pult-gitter [data-vorlage], .lw-pult-gitter [data-sfx], .lw-pult-gitter [data-kulisse]")) e.preventDefault(); });
+  root.addEventListener("click", e => { if (favSchlucken && performance.now() - favSchlucken < 1500 && e.target.closest("[data-vorlage],[data-sfx],[data-kulisse],[data-moment]")) { favSchlucken = 0; e.stopPropagation(); e.preventDefault(); } }, true);
+  root.addEventListener("contextmenu", e => { if (e.target.closest(".lw-pult-gitter [data-vorlage], .lw-pult-gitter [data-sfx], .lw-pult-gitter [data-kulisse], .lw-momente [data-moment]")) e.preventDefault(); });
 
   /* ---------- Oberfläche ---------- */
   function zeilenName(spur, z) {
@@ -8603,7 +8898,7 @@ const ZUS_ICON = {
       '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
       "</div>" +
       '<p class="lw-ejetzt" aria-live="polite">' + jetztText(T) + "</p>" +
-      '<div class="lw-ekopf-reihe lw-eregler">' + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + "</div>" +
+      '<div class="lw-ekopf-reihe lw-eregler">' + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") + '<div class="lw-ehg">' + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + hgKnopf(T) + "</div></div>" +
       '<div class="lw-ekopf-reihe lw-eknoepfe"><button type="button" class="lw-schalter" data-aktion="passiert">' + T.leben.passiert + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="false">' + T.leben.stille + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="abend" aria-expanded="' + abendAuf + '">' + E.abend + (abendSet ? " · " + ABEND_SETS[abendSet].sym : "") + "</button>" +
@@ -8612,6 +8907,9 @@ const ZUS_ICON = {
       momenteZeile(T, S.kulisse) +
       (wasIst ? '<p class="lw-ewasist-hinweis">' + E.wasIstHinweis + "</p>" : "") + "</div>";
   }
+  /* Hintergrund aus/an direkt neben seinem Regler */
+  function hgKnopf(T) { const an = kulisseLaeuft(); return '<button type="button" class="lw-ehgaus' + (an ? "" : " aus") + '" data-aktion="kulumschalt" data-hgaus="1" aria-pressed="' + !an + '"' + (kulisseDa() ? "" : " hidden") + ">" + (an ? T.einf.hgAusK : T.einf.hgAnK) + "</button>"; }
+  Object.assign(TX.de.einf, { hgAusK: "🔇 Aus", hgAnK: "🔊 An" }); Object.assign(TX.en.einf, { hgAusK: "🔇 Off", hgAnK: "🔊 On" });
   let abendAuf = false;
   function abendWahl(T) {
     if (!abendAuf) return "";
@@ -8717,7 +9015,7 @@ const ZUS_ICON = {
       sprechen: "Sprachsteuerung: gedrückt halten, ein Stichwort oder einen Satz sagen („Wir betreten die Taverne, es regnet“), loslassen. Beim ersten Mal wird ein Sprachmodell geladen (≈ 46 MB), danach geht es auch ohne Internet. Kein Ton verlässt dein Gerät. Am PC geht es auch mit der Taste F9." },
     wetter: "Wetter über dem Ort: von trocken bis Gewitter.", zeit: "Tageszeit des Ortes: nachts zirpen Grillen und rufen Eulen.", standort: "Wo ihr steht: mittendrin, am Rand, nebenan oder darunter – klingt entsprechend gedämpft.",
     spannung: "Spannung: je weiter rechts, desto bedrohlicher klingt der Ort.", tab: "Wechselt den Bereich.", mehr: "Zeigt mehr Auswahl oder wieder weniger.", int: "Wie viel los ist: ruhig, normal oder wild.",
-    set: n => "Spielabend „" + n + "“: Passende Stimmungen und Effekte stehen dann vorne.", keinOrt: "Kein Hintergrund: Die Ortsgeräusche hören auf, die Musik läuft weiter.", etab: { musik: "Musik: Stimmungen für das, was gerade am Tisch passiert.", ort: "Ort & Geräusche: wo ihr seid – Taverne, Wald, Höhle … dazu Wetter und Spannung.", fx: "Effekte: einzelne Geräusche für einen Moment, z. B. Schwerthieb oder Tür." }, moment: n => "Großer Moment „" + n + "“: passend zum Ort geschieht genau das – laut und mit allem Drum und Dran. ⚡ Etwas passiert wählt einen der vier zufällig.", info: "Kleine Erklärung zu diesem Bereich.", sonst: "Ein Knopf des Lautenwerks." } });
+    set: n => "Spielabend „" + n + "“: Passende Stimmungen und Effekte stehen dann vorne.", keinOrt: "Kein Hintergrund: Die Ortsgeräusche hören auf, die Musik läuft weiter.", etab: { musik: "Musik: Stimmungen für das, was gerade am Tisch passiert.", ort: "Ort & Geräusche: wo ihr seid – Taverne, Wald, Höhle … dazu Wetter und Spannung.", fx: "Effekte: einzelne Geräusche für einen Moment, z. B. Schwerthieb oder Tür." }, moment: n => "Großer Moment „" + n + "“: passend zum Ort geschieht genau das – laut und mit allem Drum und Dran. ‹ › blättert zu weiteren Momenten, 2 Sekunden halten heftet ihn vorne an (★). ⚡ Etwas passiert wählt zufällig einen – angeheftete öfter.", info: "Kleine Erklärung zu diesem Bereich.", momblatt: "Blättern: zeigt die nächsten vier Momente für diesen Ort.", hgAus: "Schaltet den Hintergrund (Ortsgeräusche und Zusätze) aus oder wieder an – die Musik läuft weiter.", sonst: "Ein Knopf des Lautenwerks." } });
   Object.assign(TX.en, { wi: {
     vorlage: (n, b) => "Mood “" + n + "”" + (b ? " – " + b : "") + ". Tap: the music changes smoothly to this mood at the end of the bar, and the fitting place sounds along. Hold 2 seconds to pin it.",
     kulisse: n => "Place “" + n + "”: background sounds that keep running under the music. Tap to switch there.",
@@ -8737,11 +9035,13 @@ const ZUS_ICON = {
       sprechen: "Voice control: hold, say a keyword or a sentence (German keywords), release. The first time a speech model is loaded (≈ 46 MB), afterwards it also works offline. No audio leaves your device. On a computer the F9 key works too." },
     wetter: "Weather over the place: from dry to thunderstorm.", zeit: "Time of day: at night crickets chirp and owls call.", standort: "Where you stand: in the middle, at the edge, next door or below – sounds muffled accordingly.",
     spannung: "Tension: the further right, the more menacing the place sounds.", tab: "Switches the section.", mehr: "Shows more choice or less again.", int: "How busy: calm, normal or wild.",
-    set: n => "Game night “" + n + "”: fitting moods and effects come first.", keinOrt: "No background: the place sounds stop, the music keeps playing.", etab: { musik: "Music: moods for whatever is happening at the table.", ort: "Place & sounds: where you are – tavern, forest, cave … plus weather and tension.", fx: "Effects: single sounds for a moment, e.g. a sword strike or a door." }, moment: n => "Big moment “" + n + "”: exactly this happens, fitting the place – loud and with all the trimmings. ⚡ Something happens picks one of the four at random.", info: "A short explanation of this part.", sonst: "A button of the Lautenwerk." } });
+    set: n => "Game night “" + n + "”: fitting moods and effects come first.", keinOrt: "No background: the place sounds stop, the music keeps playing.", etab: { musik: "Music: moods for whatever is happening at the table.", ort: "Place & sounds: where you are – tavern, forest, cave … plus weather and tension.", fx: "Effects: single sounds for a moment, e.g. a sword strike or a door." }, moment: n => "Big moment “" + n + "”: exactly this happens, fitting the place – loud and with all the trimmings. ‹ › pages to more moments, hold for 2 seconds to pin it to the front (★). ⚡ Something happens picks one at random – pinned ones more often.", info: "A short explanation of this part.", momblatt: "Page through: shows the next four moments for this place.", hgAus: "Turns the background (place sounds and extras) off or back on – the music keeps playing.", sonst: "A button of the Lautenwerk." } });
   const ohneZeichen = x => String(x || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
   function erklaerung(el) {
     const T = t(), W = T.wi, d = el.dataset || {};
     if (d.vorlage != null) { const k = d.vorlage; return W.vorlage(ohneZeichen(T.vorlagen[k] || stimmName(k) || k), (T.stBsp || {})[k]); }
+    if (d.momblatt != null) return W.momblatt;
+    if (d.hgaus) return W.hgAus;
     if (d.moment != null) { const m = momenteVon(S.kulisse)[+d.moment]; return W.moment(m ? (sprache() === "en" ? m[2] : m[1]) : ""); }
     if (d.kulisse === "keine") return W.keinOrt;
     if (d.kulisse != null) return W.kulisse(ohneZeichen(T.kulissen[d.kulisse]));
@@ -8797,11 +9097,13 @@ const ZUS_ICON = {
   }
   function schwebZeigen(el) {
     if (wasIst || intro || !el.isConnected) return;
-    let text = erklaerung(el); if (!text) return;
+    /* Zusatz-Geräusche: nur der Name, groß und gut lesbar – was sie tun, ist überall gleich */
+    const zn = el.dataset && el.dataset.zusatz != null && ZUSATZ[el.dataset.zusatz] ? ZUSATZ[el.dataset.zusatz][sprache()] || ZUSATZ[el.dataset.zusatz].de : "";
+    let text = zn || erklaerung(el); if (!text) return;
     /* nur der erste Satz – kurz und knapp */
-    const m = /^(.{25,}?[.!?…])\s/.exec(text); if (m) text = m[1];
+    const m = zn ? null : /^(.{25,}?[.!?…])\s/.exec(text); if (m) text = m[1];
     if (el.hasAttribute("title")) { el.dataset.schwebTitel = el.getAttribute("title"); el.removeAttribute("title"); }
-    const b = document.createElement("div"); b.className = "lw-info-blase lw-schweb"; b.setAttribute("role", "tooltip"); b.textContent = text;
+    const b = document.createElement("div"); b.className = "lw-info-blase lw-schweb" + (zn ? " lw-schweb-name" : ""); b.setAttribute("role", "tooltip"); b.textContent = text;
     document.body.appendChild(b); schwebBlase = b;
     const r = el.getBoundingClientRect(), w = b.offsetWidth, h = b.offsetHeight;
     let top = r.top - 8 - h + scrollY; if (r.top - 8 - h < 8) top = r.bottom + 8 + scrollY;
@@ -8917,7 +9219,7 @@ const ZUS_ICON = {
   function spracheLaden(dann) {
     const fertig = () => { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: root.querySelector(".lw-sprache-ort"), befehle: sprachBefehle }); } dann(); };
     if (window.ImresSprache) { fertig(); return; }
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=6"; sk.onload = fertig; document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=7"; sk.onload = fertig; document.head.appendChild(sk);
   }
   let sprichtKnopf = null, sprichtAb = 0;
   const sprechKnopf = T => '<button type="button" class="lw-schalter lw-sprechen" data-aktion="sprechen" title="' + esc(T.sprechTipp) + '">' + T.sprechen + "</button>";
@@ -8945,7 +9247,7 @@ const ZUS_ICON = {
     const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
     if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
     if (spracheOrt.laedt) return; spracheOrt.laedt = true;
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=6"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=7"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
   }
   /* zusätzliche Stichwörter je Kulisse */
   const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "wald nachts", "wald bei nacht"],
@@ -8954,14 +9256,18 @@ const ZUS_ICON = {
     bibliothek: ["bibliothek", "bücherei"], tempel: ["tempel", "kirche", "kloster"], dorf: ["bauernhof", "dorf"], markt: ["markt", "marktplatz"], hafen: ["hafen"], gebirge: ["gebirge", "berge", "bergpass", "schnee"],
     mine: ["mine", "zwergenmine", "bergwerk", "stollen"], strasse: ["unterwegs", "straße", "landstraße"], burg: ["burg", "burghof", "festung"], ufer: ["fluss", "ufer", "flussufer"], schlacht: ["schlacht", "krieg", "kriegsschauplatz", "schlachtfeld"], schlaegerei: ["schlägerei", "prügelei", "kneipenschlägerei", "rauferei"], duell: ["duell", "zweikampf", "arena"] };
   function sprachBefehle() {
-    const T = TX.de, raus = [], add = (p, text, tun) => raus.push({ p, text, tun });
+    const T = TX.de, raus = [], add = (p, text, tun, aus, ausText) => raus.push({ p, text, tun, aus, ausText });
     const ohneSym = x => String(x || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
     add(["stopp", "stop", "stille", "ruhe", "alles aus"], "alles anhalten", () => { if (laeuft) stopp(true); if (kulisseLaeuft()) kulisseUmschalten(); knoepfe(); });
     add(["musik aus", "musik stopp", "musik pause"], "Musik anhalten", () => { if (laeuft) { stopp(true); knoepfe(); } });
-    add(["musik an", "musik weiter", "musik"], "Musik weiter", () => { audioStart(); if (!laeuft) { pausiert = false; start(true); } knoepfe(); });
+    const musikAus = () => { if (laeuft) { stopp(true); knoepfe(); } };
+    add(["musik an", "musik weiter", "musik"], "Musik weiter", () => { audioStart(); if (!laeuft) { pausiert = false; start(true); } knoepfe(); }, musikAus, "Musik anhalten");
     add(["kulisse aus", "kulisse stopp"], "Kulisse anhalten", () => { if (kulisseLaeuft()) kulisseUmschalten(); });
-    add(["kulisse an", "kulisse weiter"], "Kulisse weiter", () => { if (!kulisseLaeuft()) kulisseUmschalten(); });
-    add(["tür zu"], "Tür zu", () => { if (!tuerZu) tuerUmschalten(); });
+    add(["kulisse an", "kulisse weiter", "kulisse", "hintergrund", "hintergrund an"], "Kulisse weiter", () => { if (!kulisseLaeuft()) kulisseUmschalten(); }, () => { if (kulisseLaeuft()) kulisseUmschalten(); }, "Kulisse anhalten");
+    add(["hintergrund aus"], "Kulisse anhalten", () => { if (kulisseLaeuft()) kulisseUmschalten(); });
+    /* Klanggruppen: „Tiere aus“, „ohne Vögel“, „keine Leute mehr“, „Tiere wieder an“ */
+    Object.keys(KLANG_GR).forEach(g => add(KLANG_GR[g].w, KLANG_GR[g].de + " wieder an", () => { audioStart(); gruppeSchalten(g, false); }, () => { audioStart(); gruppeSchalten(g, true); }, KLANG_GR[g].de + " aus"));
+    add(["tür zu"], "Tür zu", () => { if (!tuerZu) tuerUmschalten(); }, () => { if (tuerZu) tuerUmschalten(); }, "Tür auf");
     add(["tür auf"], "Tür auf", () => { if (tuerZu) tuerUmschalten(); });
     add(["zusätze aus"], "alle Zusätze aus", () => { zusWahl = {}; zusMerken(); zusSync(); boxNeu("klang"); });
     /* Lebendige Kulisse */
@@ -8969,23 +9275,26 @@ const ZUS_ICON = {
     add(["etwas passiert", "überraschung", "plötzlich"], "Etwas passiert", () => etwasPassiert());
     [...new Set(Object.values(KUL_MOMENTE).flatMap(l => l.map(x => x[1].toLowerCase().replace(/[!?.]/g, ""))))].forEach(n => add([n], n, () => { const i = momenteVon(S.kulisse).findIndex(x => x[1].toLowerCase().replace(/[!?.]/g, "") === n); if (i >= 0) etwasPassiert(i); }));
     add(["psst", "schweigen", "lauscht", "horcht"], "Stille", () => { audioStart(); stilleStart(5); });
-    add(["weiterziehen", "weitergehen", "losgehen", "wir gehen"], "Weiterziehen", lebenSetz(() => { leben.gehen = true; }));
+    add(["weiterziehen", "weitergehen", "losgehen", "wir gehen"], "Weiterziehen", lebenSetz(() => { leben.gehen = true; }), lebenSetz(() => { leben.gehen = false; }), "Stehen bleiben");
     add(["stehen bleiben", "halt an", "rast"], "Stehen bleiben", lebenSetz(() => { leben.gehen = false; }));
-    [["wetter trocken", 0], ["nieselregen", 1], ["es regnet", 2], ["gewitter zieht auf", 3]].forEach(([w, v]) => add([w], "Wetter " + w, lebenSetz(() => { leben.schauer = false; leben.wetter = v; })));
+    [["wetter trocken", 0], ["nieselregen", 1], ["es regnet", 2], ["gewitter zieht auf", 3]].forEach(([w, v]) => add([w], "Wetter " + w, lebenSetz(() => { leben.schauer = false; leben.wetter = v; }), lebenSetz(() => { leben.schauer = false; leben.wetter = 0; }), "Wetter trocken"));
     [["es wird tag", "tag"], ["dämmerung", "daemmerung"], ["es wird nacht", "nacht"]].forEach(([w, v]) => add([w], w, lebenSetz(() => { leben.zeit = v; if (kul) kul.zeitAb = ctx.currentTime; })));
-    [["friedlich", 0], ["wachsam", .3], ["unheimlich", .6], ["bedrohlich", .95]].forEach(([w, v]) => add([w, "spannung " + w], "Spannung " + w, lebenSetz(() => { leben.spannung = v; })));
+    add(["spannung aus", "spannung weg", "keine spannung", "entspannt"], "Spannung friedlich", lebenSetz(() => { leben.spannung = 0; }));
+    [["friedlich", 0], ["wachsam", .3], ["unheimlich", .6], ["bedrohlich", .95]].forEach(([w, v]) => add([w, "spannung " + w], "Spannung " + w, lebenSetz(() => { leben.spannung = v; }), lebenSetz(() => { leben.spannung = 0; }), "Spannung friedlich"));
     const kulWahl = k => () => { audioStart(); S.kulisse = k; merken(); kulisseStart(true); zeichnen(); knoepfe(); };
-    KUL_ZEIGEN.filter(k => k !== "keine").forEach(k => add([ohneSym(T.kulissen[k])].concat(SPRACH_KUL[k] || []), "Kulisse " + ohneSym(T.kulissen[k]), kulWahl(k)));
+    /* „Wir verlassen die Taverne“: nur wenn das gerade der Ort ist */
+    const kulWeg = k => () => { if (kul && kul.art === k) { kulMerk = S.kulisse; kulisseStop(); try { zeichnen(); knoepfe(); } catch (_) {} } };
+    KUL_ZEIGEN.filter(k => k !== "keine").forEach(k => add([ohneSym(T.kulissen[k])].concat(SPRACH_KUL[k] || []), "Kulisse " + ohneSym(T.kulissen[k]), kulWahl(k), kulWeg(k), ohneSym(T.kulissen[k]) + " verlassen"));
     const zusSchalt = (id, an) => () => { audioStart(); if (an) { if (!zusIst(id)) { if (Object.keys(zusWahl).length >= zusMax()) return; zusWahl[id] = 1; } } else delete zusWahl[id]; zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang"); };
-    Object.keys(ZUSATZ).forEach(id => { const n = ZUSATZ[id].de; add(["dazu " + n, "plus " + n, "mit " + n], "Zusatz " + n, zusSchalt(id, true)); add([n + " aus", "ohne " + n], "Zusatz " + n + " aus", zusSchalt(id, false)); });
+    Object.keys(ZUSATZ).forEach(id => { const n = ZUSATZ[id].de; add(["dazu " + n, "plus " + n, "mit " + n], "Zusatz " + n, zusSchalt(id, true), zusSchalt(id, false), "Zusatz " + n + " aus"); add([n + " aus", "ohne " + n], "Zusatz " + n + " aus", zusSchalt(id, false)); });
     const stWahl = k => () => { vorlageWaehlen(k); if (!laeuft && !hoerer) { pausiert = false; start(); } };
-    Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add(["musik " + ohneSym(T.vorlagen[k]), "stimmung " + ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k)));
+    Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add(["musik " + ohneSym(T.vorlagen[k]), "stimmung " + ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k), musikAus, "Musik anhalten"));
     Object.keys(T.sfx || {}).forEach(k => add([ohneSym(T.sfx[k])], "Effekt " + ohneSym(T.sfx[k]), () => { audioStart(); try { effekt(k); } catch (_) {} }));
     /* ohne Vorsilbe: Zusätze und Stimmungen, sofern das Wort nicht schon vergeben ist (die Liste oben hat Vorrang) */
-    Object.keys(ZUSATZ).forEach(id => add([ZUSATZ[id].de], "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
+    Object.keys(ZUSATZ).forEach(id => add([ZUSATZ[id].de], "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true), zusSchalt(id, false), "Zusatz " + ZUSATZ[id].de + " aus"));
     /* frühere Kulissen-Wörter führen jetzt zum Zusatz */
-    [["feuer", ["lagerfeuer", "dazu lagerfeuer"]], ["gewitter", ["unwetter"]]].forEach(([id, w]) => ZUSATZ[id] && add(w, "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true)));
-    Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add([ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k)));
+    [["feuer", ["lagerfeuer", "dazu lagerfeuer"]], ["gewitter", ["unwetter"]]].forEach(([id, w]) => ZUSATZ[id] && add(w, "Zusatz " + ZUSATZ[id].de, zusSchalt(id, true), zusSchalt(id, false), "Zusatz " + ZUSATZ[id].de + " aus"));
+    Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add([ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k), musikAus, "Musik anhalten"));
     return raus;
   }
   function eigenLaden(wert) {
@@ -9544,6 +9853,8 @@ const ZUS_ICON = {
     if (e.target.closest('[data-aktion="aufnahme"]')) { aufnahmeUmschalten(); return; }
     if (e.target.closest('[data-aktion="schlaf"]')) { schlafUmschalten(); return; }
     if (e.target.closest('[data-aktion="tuer"]')) { tuerUmschalten(); return; }
+    const mb = e.target.closest("[data-momblatt]");
+    if (mb) { momBlaettern(+mb.dataset.momblatt); return; }
     const mo = e.target.closest("[data-moment]");
     if (mo) { etwasPassiert(+mo.dataset.moment); return; }
     const la = e.target.closest('[data-aktion="passiert"],[data-aktion="stille"],[data-aktion="gehen"],[data-aktion="nachlegen"],[data-aktion="zeitlauf"],[data-aktion="szenen"],[data-aktion="nah"]');
@@ -10468,7 +10779,25 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kleinregler b { flex: 0 0 2.6rem; text-align: right; color: var(--vellum); font-weight: 600; font-size: .8rem; }
 .lw-buehne .lw-figur, .lw-buehne .lw-geister { transform: translateX(var(--band-x, 0%)) scale(var(--band-s, 1)); transform-origin: 50% 100%; transition: transform 1.1s cubic-bezier(.4,.1,.3,1); }
 
-.lw-momente { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3rem; }
+.lw-momente { display: grid; grid-template-columns: minmax(0, 1fr); gap: .3rem; position: relative; }
+.lw-momente.blaettern { grid-template-columns: 1.7rem minmax(0, 1fr) 1.7rem; align-items: stretch; }
+.lw-momreihe { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3rem; min-width: 0; }
+.lw-momblatt { border: 1px solid rgba(224,160,70,.35); background: rgba(224,160,70,.1); color: var(--ember); font: inherit; font-size: 1.4rem; line-height: 1; border-radius: 10px; cursor: pointer; padding: 0; }
+.lw-momblatt:hover { border-color: var(--ember); background: rgba(224,160,70,.2); }
+.lw-mompunkte { grid-column: 1 / -1; display: flex; justify-content: center; gap: .3rem; margin-top: -.05rem; }
+.lw-mompunkte i { width: .38rem; height: .38rem; border-radius: 50%; background: rgba(224,160,70,.25); }
+.lw-mompunkte i.an { background: var(--ember); }
+.lw-moment { position: relative; }
+.lw-moment.fav { border-color: rgba(240,200,90,.75); background: rgba(240,200,90,.12); }
+.lw-momstern { position: absolute; top: .1rem; right: .25rem; font-style: normal; font-size: .7rem; color: #f0c85a; }
+.lw-moment.lw-haelt { background-image: linear-gradient(90deg, rgba(240,200,90,.4) 0 50%, transparent 50% 100%); background-size: 200% 100%; background-position: 100% 0; animation: lwHalten 2s linear forwards; }
+.lw-ehg { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.lw-ehg .lw-kleinregler { flex: 1 1 auto; min-width: 0; }
+.lw-ehgaus { flex: 0 0 auto; border: 1px solid #6a9fb5; background: rgba(106,159,181,.16); color: var(--vellum); font: inherit; font-size: .82rem; font-weight: 600; padding: .3rem .65rem; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.lw-ehgaus:hover { background: rgba(106,159,181,.3); }
+.lw-ehgaus.aus { border-color: var(--ember); background: rgba(224,160,70,.18); }
+.lw-ehgaus[hidden] { display: none; }
+.lw-schweb.lw-schweb-name { font-size: .95rem; font-weight: 600; padding: .3rem .65rem; white-space: nowrap; max-width: none; }
 .lw-moment { display: grid; justify-items: center; gap: .1rem; border: 1px solid rgba(224,160,70,.35); background: rgba(224,160,70,.06); color: var(--vellum); font: inherit; border-radius: 10px; padding: .35rem .25rem .3rem; cursor: pointer; min-width: 0; }
 .lw-moment .ms { font-size: 1.35rem; line-height: 1.1; }
 .lw-moment .mt { font-size: .72rem; line-height: 1.2; color: var(--ash); text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
