@@ -8558,7 +8558,7 @@ const ZUS_ICON = {
     i2: ["Hörst du's?", "Musik und Taverne laufen. Jetzt wird es ernst: Tippe auf ⚔ Kampf. Die Musik wechselt sanft am Ende des Takts."],
     i3: ["Für besondere Momente", "Tippe oben auf ⚡ Etwas passiert – passend zum Ort geschieht etwas Überraschendes."],
     i4: ["Geschafft! 🎉", "Das ist schon alles Wichtige. Unter 💥 Effekte findest du einzelne Geräusche, mit 🌙 Spielabend stellst du dir den Abend zusammen, und ❔ erklärt jeden Knopf. Mit „🎛 Alle Regler“ siehst du später alles."],
-    ueberspringen: "Überspringen", losGehts: "Los geht's" } });
+    ueberspringen: "Einführung überspringen", ok: "OK", losGehts: "Los geht's" } });
   Object.assign(TX.en, { einf: {
     titel: "What's happening at the table?", tabMusik: "🎵 Music", tabOrt: "🌲 Place & sounds", tabFx: "💥 Effects",
     zweckMusik: "The music keeps playing. Tap whatever is happening at the table right now – it changes smoothly at the end of the bar, and the fitting place sounds along.",
@@ -8578,7 +8578,7 @@ const ZUS_ICON = {
     i2: ["Hear it?", "Music and tavern are playing. Now things get serious: tap ⚔ Combat. The music changes smoothly at the end of the bar."],
     i3: ["For special moments", "Tap ⚡ Something happens at the top – something surprising happens, fitting the place."],
     i4: ["Done! 🎉", "That's all the important stuff. Under 💥 Effects you'll find single sounds, 🌙 Game night sets up your evening, and ❔ explains every button. “🎛 All controls” shows everything later."],
-    ueberspringen: "Skip", losGehts: "Let's go" } });
+    ueberspringen: "Skip introduction", ok: "OK", losGehts: "Let's go" } });
   const intStufe = () => S.intensitaet <= 3 ? 0 : S.intensitaet <= 6 ? 1 : 2;
   const eKachel = (attr, wert, text, an, bsp) => '<button type="button" class="lw-etile' + (an ? " an" : "") + (attr === "data-vorlage" && wechselZiel() === wert ? " wartet" : "") + '" ' + attr + '="' + esc(wert) + '">' + kachelText(text) + (bsp ? "<small>" + esc(bsp) + "</small>" : "") + favPunkt(attr, wert) + "</button>";
   function jetztText(T) {
@@ -8808,7 +8808,8 @@ const ZUS_ICON = {
     intro.i = i;
     const E = t().einf, [titel, text] = E["i" + (i + 1)], letzt = i === 3;
     intro.el.innerHTML = '<p class="lw-tour-nr">' + (i + 1) + ' / 4</p><h4>' + titel + "</h4><p>" + text + '</p><div class="lw-tour-knoepfe">' +
-      (letzt ? '<span></span><button type="button" class="lw-tour-weiter" data-intro="ende">' + E.losGehts + "</button>" : '<button type="button" class="lw-klein" data-intro="ende">' + E.ueberspringen + "</button><span></span>") + "</div>";
+      (letzt ? '<button type="button" class="lw-tour-weiter" data-intro="ende">' + E.losGehts + "</button><span></span>"
+        : '<button type="button" class="lw-tour-weiter" data-intro="weiter">' + E.ok + '</button><span></span><button type="button" class="lw-intro-skip" data-intro="ende">' + E.ueberspringen + "</button>") + "</div>";
     introLage(true);
   }
   function introLage(scrollen) {
@@ -8826,7 +8827,11 @@ const ZUS_ICON = {
     };
     setz(); if (scrollen) { setTimeout(setz, 400); setTimeout(setz, 800); }
   }
-  document.addEventListener("click", e => { if (intro && e.target.closest && e.target.closest('[data-intro="ende"]')) introEnde(); });
+  document.addEventListener("click", e => {
+    if (!intro || !e.target.closest) return;
+    if (e.target.closest('[data-intro="ende"]')) introEnde();
+    else if (e.target.closest('[data-intro="weiter"]')) introSchritt(intro.i + 1);
+  });
   document.addEventListener("keydown", e => { if (intro && e.key === "Escape") introEnde(); });
   /* der nächste Schritt kommt, sobald die Aufgabe erledigt ist */
   root.addEventListener("click", e => {
@@ -10444,6 +10449,9 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro h4 { margin: .1rem 0 .3rem; font-size: 1.1rem; color: var(--ember); }
 .lw-intro p { margin: 0 0 .5rem; font-size: .95rem; line-height: 1.45; }
 .lw-intro .lw-tour-nr { font-size: .75rem; color: var(--ash); margin: 0; }
+.lw-intro .lw-tour-weiter { min-width: 4.5rem; font-weight: 600; }
+.lw-intro-skip { border: 1px solid rgba(214,110,80,.55); background: rgba(214,110,80,.12); color: #e8b8a8; font: inherit; font-size: .78rem; padding: .3rem .7rem; border-radius: 999px; cursor: pointer; }
+.lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
 @media (max-width: 520px) { .lw-egitter { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lw-eregler { grid-template-columns: 1fr; } .lw-etile small { font-size: .7rem; }
   .lw-ekopf { padding: .5rem .55rem; gap: .35rem; }
