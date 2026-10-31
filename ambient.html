@@ -2224,7 +2224,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     let rechner = false; try { rechner = matchMedia("(pointer: fine)").matches && matchMedia("(hover: hover)").matches; } catch (_) {}
     if (!rechner || FERN || hoerer) return;
     const ort = $("sprache-ort"); if (!ort) return;
-    const sk = document.createElement("script"); sk.src = "sprache/sprache.js?v=5";
+    const sk = document.createElement("script"); sk.src = "sprache/sprache.js?v=6";
     sk.onload = () => window.ImresSprache && window.ImresSprache.einrichten({ ort, befehle: sprachBefehle });
     document.head.appendChild(sk);
   }, 300);

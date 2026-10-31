@@ -35,6 +35,7 @@
   let mikro = null; /* { strom, ctx, knoten, vorlauf: [] } */
   let sammel = [], aufnahme = [], letzterVersuch = null; /* letzterVersuch: { stuecke, gehoert } – fürs Nachlernen */
   let frei = null, aktiv = null, lernen = null; /* lernen: { text } – Anlernen: freie Erkennung ohne Grammatik */
+  let knopf = false;
   let hoert = false, nachlauf = 0, wartet = null, helfer = null, helferOk = false, helferTimer = 0, tasteWaehlen = false, letzte = "", zustand = "";
 
   /* ---------- Anzeige ---------- */
@@ -380,6 +381,15 @@
     /* wenn sich die Seite neu zeichnet: neuen Platz fürs Bedienfeld setzen, Stichwörter neu einlesen */
     ort(el) { if (st) { st.ort = el; zeichnen(); } },
     neu() { karte = null; },
-    get an() { return E.an; }
+    get an() { return E.an; },
+    /* Knopf „Halten & sprechen“ (auch am Handy): beim ersten Mal einschalten und das Modell laden, dann zuhören, solange gedrückt */
+    halten() {
+      knopf = true;
+      if (!E.an) { E.an = true; merken(); zeichnen(); zeige(W("⏳ Sprachmodell wird geladen (≈ 46 MB, nur beim ersten Mal) …", "⏳ Loading the speech model (≈ 46 MB, first time only) …"), true); }
+      Promise.all([modellHolen(), mikroHolen()]).then(() => { vorbereiten(); if (knopf) druck().then(() => { if (!knopf) los(); }); else zeige(W("✓ Bereit – jetzt gedrückt halten und sprechen", "✓ Ready – now hold and speak")); })
+        .catch(() => zeige(W("⚠ Mikrofon oder Sprachmodell nicht verfügbar – bitte das Mikrofon im Browser erlauben.", "⚠ Microphone or speech model unavailable – please allow the microphone in your browser.")));
+    },
+    loslassen() { knopf = false; los(); },
+    get hoert() { return hoert; }
   };
 })();

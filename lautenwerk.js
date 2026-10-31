@@ -8374,7 +8374,7 @@ const ZUS_ICON = {
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) + "</section>";
     const lebenFeld = '<section class="lw-box lw-lebenfeld"><div class="lw-box-kopf"><h4>🎛 ' + T.steuer + "</h4></div>" +
       (amRechner() && !hoerer ? '<div class="lw-sprache-ort"></div>' : "") +
-      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + info("raum3d") + "</div>" +
+      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + sprechKnopf(T) + info("raum3d") + "</div>" +
       lebenBox(T) + "</section>";
     const spurFeld = '<section class="lw-box lw-spurfeld"><div class="lw-box-kopf"><h4>🎚 ' + T.kulSpuren + '</h4><button type="button" class="lw-klein" data-aktion="spurenpop" title="' + esc(T.spurenAlsPop) + '">⧉ ' + T.spurenAlsPop + "</button></div>" + spurenInhalt(T) + "</section>";
     const zusFeld = '<section class="lw-box lw-zusfeld"><div class="lw-box-kopf"><h4>✚ ' + T.zusaetze + "</h4></div>" + zusBox(T) + "</section>";
@@ -8557,7 +8557,8 @@ const ZUS_ICON = {
     i1: ["Willkommen! 👋", "Probieren wir es gleich aus: Tippe auf 🍻 Trinklied – die Musik startet, und die Taverne klingt im Hintergrund mit."],
     i2: ["Hörst du's?", "Musik und Taverne laufen. Jetzt wird es ernst: Tippe auf ⚔ Kampf. Die Musik wechselt sanft am Ende des Takts."],
     i3: ["Für besondere Momente", "Tippe oben auf ⚡ Etwas passiert – passend zum Ort geschieht etwas Überraschendes."],
-    i4: ["Geschafft! 🎉", "Das ist schon alles Wichtige. Unter 💥 Effekte findest du einzelne Geräusche, mit 🌙 Spielabend stellst du dir den Abend zusammen, und ❔ erklärt jeden Knopf. Mit „🎛 Alle Regler“ siehst du später alles."],
+    i4: ["🎙 Auch per Stimme – wenn du magst", "Halte 🎙 Sprechen gedrückt und sag z. B. „Taverne“, „Kampf“ oder „Etwas passiert“, dann loslassen. Ganz freiwillig: Beim ersten Mal wird ein Sprachmodell geladen (≈ 46 MB), erkannt wird nur auf deinem Gerät. Am PC geht es auch mit der Taste F9."],
+    i5: ["Geschafft! 🎉", "Das ist schon alles Wichtige. Unter 💥 Effekte findest du einzelne Geräusche, mit 🌙 Spielabend stellst du dir den Abend zusammen, und ❔ erklärt jeden Knopf. Mit „🎛 Alle Regler“ siehst du später alles."],
     ueberspringen: "Einführung überspringen", ok: "OK", losGehts: "Los geht's" } });
   Object.assign(TX.en, { einf: {
     titel: "What's happening at the table?", tabMusik: "🎵 Music", tabOrt: "🌲 Place & sounds", tabFx: "💥 Effects",
@@ -8577,7 +8578,8 @@ const ZUS_ICON = {
     i1: ["Welcome! 👋", "Let's try it right away: tap 🍻 Drinking song – the music starts, and the tavern sounds along in the background."],
     i2: ["Hear it?", "Music and tavern are playing. Now things get serious: tap ⚔ Combat. The music changes smoothly at the end of the bar."],
     i3: ["For special moments", "Tap ⚡ Something happens at the top – something surprising happens, fitting the place."],
-    i4: ["Done! 🎉", "That's all the important stuff. Under 💥 Effects you'll find single sounds, 🌙 Game night sets up your evening, and ❔ explains every button. “🎛 All controls” shows everything later."],
+    i4: ["🎙 Voice too – if you like", "Hold 🎙 Speak and say e.g. “Taverne”, “Kampf” or “Etwas passiert” (German keywords), then release. Entirely optional: the first time a speech model is loaded (≈ 46 MB), recognition stays on your device. On a computer the F9 key works too."],
+    i5: ["Done! 🎉", "That's all the important stuff. Under 💥 Effects you'll find single sounds, 🌙 Game night sets up your evening, and ❔ explains every button. “🎛 All controls” shows everything later."],
     ueberspringen: "Skip introduction", ok: "OK", losGehts: "Let's go" } });
   const intStufe = () => S.intensitaet <= 3 ? 0 : S.intensitaet <= 6 ? 1 : 2;
   const eKachel = (attr, wert, text, an, bsp) => '<button type="button" class="lw-etile' + (an ? " an" : "") + (attr === "data-vorlage" && wechselZiel() === wert ? " wartet" : "") + '" ' + attr + '="' + esc(wert) + '">' + kachelText(text) + (bsp ? "<small>" + esc(bsp) + "</small>" : "") + favPunkt(attr, wert) + "</button>";
@@ -8605,6 +8607,7 @@ const ZUS_ICON = {
       '<div class="lw-ekopf-reihe lw-eknoepfe"><button type="button" class="lw-schalter" data-aktion="passiert">' + T.leben.passiert + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="false">' + T.leben.stille + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="abend" aria-expanded="' + abendAuf + '">' + E.abend + (abendSet ? " · " + ABEND_SETS[abendSet].sym : "") + "</button>" +
+      sprechKnopf(T) +
       '<button type="button" class="lw-schalter lw-ewasist" data-aktion="wasist" aria-pressed="' + wasIst + '" title="' + esc(E.wasIstTipp) + '">' + (wasIst ? E.wasIstAn : E.wasIst) + "</button></div>" +
       momenteZeile(T, S.kulisse) +
       (wasIst ? '<p class="lw-ewasist-hinweis">' + E.wasIstHinweis + "</p>" : "") + "</div>";
@@ -8710,7 +8713,8 @@ const ZUS_ICON = {
       rundgang: "Kurzer Rundgang, der jeden Bereich des Pults zeigt.", funkauf: "Mitlauschen: ein Link für die Runde, damit alle mithören.", tuer: "Tür zu: Draußen klingt nur noch gedämpft wie durch eine Wand.",
       raum3d: "Nur mit Kopfhörern: Geräusche kommen von allen Seiten.", ausklang: "Beendet das Stück sauber mit einem Schlussakkord.", zusalleaus: "Schaltet alle dazugelegten Geräusche aus.",
       pult: "Wechselt zur kompletten Ansicht mit allen Spuren und Noten.", komponieren: "Öffnet ein leeres Notenblatt für ein eigenes Lied.", zeitlauf: "Die Tageszeit vergeht langsam von selbst.",
-      szenen: "Ab und zu spielt sich eine kleine Szene ab.", nah: "Ab und zu kommt einem etwas ganz nah ans Ohr." },
+      szenen: "Ab und zu spielt sich eine kleine Szene ab.", nah: "Ab und zu kommt einem etwas ganz nah ans Ohr.",
+      sprechen: "Sprachsteuerung: gedrückt halten, ein Stichwort oder einen Satz sagen („Wir betreten die Taverne, es regnet“), loslassen. Beim ersten Mal wird ein Sprachmodell geladen (≈ 46 MB), danach geht es auch ohne Internet. Kein Ton verlässt dein Gerät. Am PC geht es auch mit der Taste F9." },
     wetter: "Wetter über dem Ort: von trocken bis Gewitter.", zeit: "Tageszeit des Ortes: nachts zirpen Grillen und rufen Eulen.", standort: "Wo ihr steht: mittendrin, am Rand, nebenan oder darunter – klingt entsprechend gedämpft.",
     spannung: "Spannung: je weiter rechts, desto bedrohlicher klingt der Ort.", tab: "Wechselt den Bereich.", mehr: "Zeigt mehr Auswahl oder wieder weniger.", int: "Wie viel los ist: ruhig, normal oder wild.",
     set: n => "Spielabend „" + n + "“: Passende Stimmungen und Effekte stehen dann vorne.", keinOrt: "Kein Hintergrund: Die Ortsgeräusche hören auf, die Musik läuft weiter.", moment: n => "Großer Moment „" + n + "“: passend zum Ort geschieht genau das – laut und mit allem Drum und Dran. ⚡ Etwas passiert wählt einen der vier zufällig.", info: "Kleine Erklärung zu diesem Bereich.", sonst: "Ein Knopf des Lautenwerks." } });
@@ -8729,7 +8733,8 @@ const ZUS_ICON = {
       rundgang: "A short tour showing every part of the console.", funkauf: "Listen in: a link so the whole group can listen.", tuer: "Door closed: outside sounds only muffled, as through a wall.",
       raum3d: "Headphones only: sounds come from all sides.", ausklang: "Ends the piece cleanly with a final chord.", zusalleaus: "Switches off all layered sounds.",
       pult: "Switches to the full view with all tracks and notes.", komponieren: "Opens an empty sheet for your own song.", zeitlauf: "The time of day passes slowly by itself.",
-      szenen: "Now and then a little scene plays out.", nah: "Now and then something comes right up to your ear." },
+      szenen: "Now and then a little scene plays out.", nah: "Now and then something comes right up to your ear.",
+      sprechen: "Voice control: hold, say a keyword or a sentence (German keywords), release. The first time a speech model is loaded (≈ 46 MB), afterwards it also works offline. No audio leaves your device. On a computer the F9 key works too." },
     wetter: "Weather over the place: from dry to thunderstorm.", zeit: "Time of day: at night crickets chirp and owls call.", standort: "Where you stand: in the middle, at the edge, next door or below – sounds muffled accordingly.",
     spannung: "Tension: the further right, the more menacing the place sounds.", tab: "Switches the section.", mehr: "Shows more choice or less again.", int: "How busy: calm, normal or wild.",
     set: n => "Game night “" + n + "”: fitting moods and effects come first.", keinOrt: "No background: the place sounds stop, the music keeps playing.", moment: n => "Big moment “" + n + "”: exactly this happens, fitting the place – loud and with all the trimmings. ⚡ Something happens picks one of the four at random.", info: "A short explanation of this part.", sonst: "A button of the Lautenwerk." } });
@@ -8783,7 +8788,7 @@ const ZUS_ICON = {
 
   /* ---------- Einführung zum Mitmachen: drei kleine Aufgaben, jederzeit überspringbar ---------- */
   let intro = null;
-  const INTRO_ZIEL = [() => root.querySelector('.lw-einfach [data-vorlage="trinklied"]'), () => root.querySelector('.lw-einfach [data-vorlage="kampf"]'), () => root.querySelector('.lw-einfach .lw-ekopf [data-aktion="passiert"]'), () => null];
+  const INTRO_ZIEL = [() => root.querySelector('.lw-einfach [data-vorlage="trinklied"]'), () => root.querySelector('.lw-einfach [data-vorlage="kampf"]'), () => root.querySelector('.lw-einfach .lw-ekopf [data-aktion="passiert"]'), () => root.querySelector('.lw-einfach .lw-ekopf [data-aktion="sprechen"]'), () => null];
   const introNeu = () => { try { return !localStorage.getItem("imres-lw-intro"); } catch (_) { return false; } };
   function introStart(manuell) {
     if (intro || hoerer || !einfach) return;
@@ -8801,13 +8806,13 @@ const ZUS_ICON = {
   function introEnde() {
     if (!intro) return;
     removeEventListener("scroll", intro.nach); removeEventListener("resize", intro.nach);
-    intro.el.remove(); root.querySelectorAll(".lw-intro-ziel").forEach(x => x.classList.remove("lw-intro-ziel")); intro = null;
+    intro.el.remove(); if (intro.pfeil) intro.pfeil.remove(); root.querySelectorAll(".lw-intro-ziel").forEach(x => x.classList.remove("lw-intro-ziel")); intro = null;
   }
   function introSchritt(i) {
     if (!intro) return;
     intro.i = i;
-    const E = t().einf, [titel, text] = E["i" + (i + 1)], letzt = i === 3;
-    intro.el.innerHTML = '<p class="lw-tour-nr">' + (i + 1) + ' / 4</p><h4>' + titel + "</h4><p>" + text + '</p><div class="lw-tour-knoepfe">' +
+    const E = t().einf, [titel, text] = E["i" + (i + 1)], letzt = i === INTRO_ZIEL.length - 1;
+    intro.el.innerHTML = '<p class="lw-tour-nr">' + (i + 1) + " / " + INTRO_ZIEL.length + "</p><h4>" + titel + "</h4><p>" + text + '</p><div class="lw-tour-knoepfe">' +
       (letzt ? '<button type="button" class="lw-tour-weiter" data-intro="ende">' + E.losGehts + "</button><span></span>"
         : '<button type="button" class="lw-tour-weiter" data-intro="weiter">' + E.ok + '</button><span></span><button type="button" class="lw-intro-skip" data-intro="ende">' + E.ueberspringen + "</button>") + "</div>";
     introLage(true);
@@ -8817,13 +8822,19 @@ const ZUS_ICON = {
     root.querySelectorAll(".lw-intro-ziel").forEach(x => x.classList.remove("lw-intro-ziel"));
     const z = INTRO_ZIEL[intro.i](), b = intro.el;
     if (z) { z.classList.add("lw-intro-ziel"); if (scrollen) z.scrollIntoView({ block: "center", behavior: ruhig ? "auto" : "smooth" }); }
+    if (!intro.pfeil) { intro.pfeil = document.createElement("div"); intro.pfeil.className = "lw-intro-pfeil"; intro.pfeil.setAttribute("aria-hidden", "true"); document.body.appendChild(intro.pfeil); }
+    const pf = intro.pfeil;
     const setz = () => {
       if (!intro) return;
       const vw = innerWidth, vh = innerHeight, bw = b.offsetWidth, bh = b.offsetHeight;
-      if (!z) { b.style.left = Math.max(10, (vw - bw) / 2) + "px"; b.style.top = Math.max(10, (vh - bh) / 2) + "px"; return; }
-      const r = z.getBoundingClientRect(); let top = r.bottom + 14;
-      if (top + bh > vh - 10) top = r.top - 14 - bh; if (top < 10) top = 10;
+      if (!z) { pf.hidden = true; b.style.left = Math.max(10, (vw - bw) / 2) + "px"; b.style.top = Math.max(10, (vh - bh) / 2) + "px"; return; }
+      const r = z.getBoundingClientRect(); let top = r.bottom + 14, unten = true;
+      if (top + bh > vh - 10) { top = r.top - 14 - bh; unten = false; } if (top < 10) top = 10;
       b.style.top = top + "px"; b.style.left = Math.max(10, Math.min(vw - bw - 10, r.left + r.width / 2 - bw / 2)) + "px";
+      /* Pfeil auf der freien Seite des Ziels: zeigt von oben (oder von unten) direkt auf den Knopf */
+      pf.hidden = false; const oben = unten ? r.top > 56 : r.bottom + 56 > vh;
+      pf.textContent = oben ? "⬇" : "⬆"; pf.classList.toggle("hoch", !oben);
+      pf.style.left = (r.left + r.width / 2 - 18) + "px"; pf.style.top = (oben ? r.top - 46 : r.bottom + 4) + "px";
     };
     setz(); if (scrollen) { setTimeout(setz, 400); setTimeout(setz, 800); }
   }
@@ -8838,7 +8849,7 @@ const ZUS_ICON = {
     if (!intro || wasIst || !e.target.closest) return;
     const z = INTRO_ZIEL[intro.i](); if (!z) return;
     const ziel = e.target.closest("button"); if (!ziel) return;
-    const passt = intro.i === 0 ? ziel.dataset.vorlage === "trinklied" : intro.i === 1 ? ziel.dataset.vorlage === "kampf" : ziel.dataset.aktion === "passiert";
+    const passt = intro.i === 0 ? ziel.dataset.vorlage === "trinklied" : intro.i === 1 ? ziel.dataset.vorlage === "kampf" : intro.i === 2 ? ziel.dataset.aktion === "passiert" : false;
     if (passt) setTimeout(() => introSchritt(intro.i + 1), intro.i === 0 ? 1600 : 1200);
   });
   /* beim ersten Besuch startet die Einführung, sobald das Pult zu sehen ist */
@@ -8867,12 +8878,39 @@ const ZUS_ICON = {
   /* ---------- Sprachsteuerung (nur am Rechner): Taste halten, Stichwort sagen – Kulisse, Zusatz, Stimmung oder Effekt startet ---------- */
   const amRechner = () => { try { return matchMedia("(pointer: fine)").matches && matchMedia("(hover: hover)").matches; } catch (_) { return false; } };
   let spracheGeladen = false;
+  /* 🎙-Knopf: lädt die Sprachsteuerung bei Bedarf (auch am Handy) und hört zu, solange er gedrückt ist */
+  function spracheLaden(dann) {
+    const fertig = () => { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: root.querySelector(".lw-sprache-ort"), befehle: sprachBefehle }); } dann(); };
+    if (window.ImresSprache) { fertig(); return; }
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=6"; sk.onload = fertig; document.head.appendChild(sk);
+  }
+  let sprichtKnopf = null, sprichtAb = 0;
+  const sprechKnopf = T => '<button type="button" class="lw-schalter lw-sprechen" data-aktion="sprechen" title="' + esc(T.sprechTipp) + '">' + T.sprechen + "</button>";
+  root.addEventListener("pointerdown", e => {
+    if (wasIst || hoerer || !e.target.closest) return;
+    const b = e.target.closest('[data-aktion="sprechen"]'); if (!b || (e.pointerType === "mouse" && e.button !== 0)) return;
+    e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {}
+    sprichtKnopf = b; sprichtAb = Date.now(); b.classList.add("lw-hoert");
+    spracheLaden(() => { if (sprichtKnopf) window.ImresSprache.halten(); });
+  });
+  const sprechLos = () => {
+    if (!sprichtKnopf) return;
+    sprichtKnopf.classList.remove("lw-hoert"); sprichtKnopf = null;
+    if (window.ImresSprache && window.ImresSprache.loslassen) window.ImresSprache.loslassen();
+    if (Date.now() - sprichtAb < 350) status(t().sprechKurz);
+  };
+  ["pointerup", "pointercancel"].forEach(n => addEventListener(n, sprechLos));
+  root.addEventListener("contextmenu", e => { if (e.target.closest && e.target.closest('[data-aktion="sprechen"]')) e.preventDefault(); });
+  Object.assign(TX.de, { sprechen: "🎙 Sprechen", sprechTipp: "Gedrückt halten, sprechen, loslassen – z. B. „Taverne“, „Kampf“, „es regnet“ oder „Etwas passiert“. Beim ersten Mal wird ein Sprachmodell geladen (≈ 46 MB); erkannt wird nur auf diesem Gerät.",
+    sprechKurz: "🎙 Gedrückt halten, sprechen, dann loslassen." });
+  Object.assign(TX.en, { sprechen: "🎙 Speak", sprechTipp: "Hold, speak, release – e.g. “tavern”, “combat”, “it's raining” or “something happens” (German keywords). The first time a speech model is loaded (≈ 46 MB); recognition stays on this device.",
+    sprechKurz: "🎙 Hold, speak, then release." });
   function spracheOrt() {
     if (hoerer || !amRechner()) return;
     const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
     if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
     if (spracheOrt.laedt) return; spracheOrt.laedt = true;
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=5"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=6"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
   }
   /* zusätzliche Stichwörter je Kulisse */
   const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "wald nachts", "wald bei nacht"],
@@ -10405,6 +10443,14 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 @media (max-width: 700px) { .lw-ekopf.lw-geklebt .lw-moment .mt { display: none; } }
 /* im einfachen Modus stehen Etwas passiert, Stille und die Momente schon in der Leiste oben */
 .lw-eleben .lw-momente, .lw-eleben .lw-lebenzeile [data-aktion="passiert"], .lw-eleben .lw-lebenzeile [data-aktion="stille"] { display: none; }
+
+.lw-sprechen { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.lw-sprechen.lw-hoert { border-color: #e06050; color: #ffd7cf; background: rgba(224,96,80,.25); animation: lw-rec-puls 1s ease-in-out infinite; }
+.lw-intro-pfeil { position: fixed; z-index: 10002; width: 36px; text-align: center; font-size: 34px; line-height: 40px; color: var(--ember); text-shadow: 0 0 10px rgba(224,160,70,.8), 0 2px 4px rgba(0,0,0,.8); pointer-events: none; animation: lwPfeil .9s ease-in-out infinite; transition: left .3s ease, top .3s ease; }
+.lw-intro-pfeil.hoch { animation-name: lwPfeilHoch; }
+.lw-intro-pfeil[hidden] { display: none; }
+@keyframes lwPfeil { 50% { transform: translateY(8px); } }
+@keyframes lwPfeilHoch { 50% { transform: translateY(-8px); } }
 
 /* ---------- Einfacher Modus ---------- */
 .lw-einfach { display: grid; gap: .6rem; }
