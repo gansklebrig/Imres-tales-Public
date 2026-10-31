@@ -2177,7 +2177,7 @@
   let kulMix = {};
   try { kulMix = JSON.parse(localStorage.getItem("imres-lw-kulmix") || "{}") || {}; } catch (_) {}
   const kulMixWert = (art, i) => { const m = kulMix[art]; const v = m && (i === "ev" ? m.ev : m.b && m.b[i]); return typeof v === "number" ? v : 1; };
-  const KUL_SPUR_NAME = { de: {"@gemurmel": "Stimmengewirr", "a_bach1": "Bach", "a_bach2": "Fluss", "a_baumwind": "Rauschende Bäume", "a_bienen": "Bienen", "a_blubbern": "Blubbern", "a_boot": "Schiffsplanken", "a_brandung": "Brecher", "a_dschungel": "Insektenchor", "a_fensterregen": "Regen am Fenster", "a_feuer1": "Kaminfeuer", "a_feuer2": "Feuer", "a_feuer3": "Glut", "a_fluss": "Strömung", "a_gaeste": "Stimmen", "a_gesang": "Mönchsgesang", "a_gewitter1": "Gewitter", "a_gewitter2": "Unwetter", "a_grillen": "Grillen", "a_grillen2": "Grillenwiese", "a_hafen": "Kai", "a_halle": "Halle", "a_heulwind": "Heulende Böen", "a_hof": "Hof", "a_huehner": "Hühner", "a_kiesweg": "Kiesweg", "a_klippen": "Klippen", "a_kinder": "Spielende Kinder", "a_kochen": "Kessel", "a_kochen2": "Sud", "a_kuehe": "Kühe", "a_muehle": "Mühlrad", "a_kriegstrommeln": "Kriegstrommeln", "a_schlacht": "Schlachtgetümmel", "a_lagerfeuer": "Holzscheite", "a_laub": "Laub", "a_laubregen": "Regen auf Laub", "a_leichtregen": "Nieselregen", "a_markt": "Gasse", "a_nacht": "Nacht", "a_orkan": "Orkan", "a_regen1": "Regen", "a_regen2": "Regen", "a_regen3": "Landregen", "a_regen4": "Schauer", "a_rinnsal": "Rinnsal", "a_schafe": "Schafe", "a_schneeschritte": "Schritte im Schnee", "a_schneesturm": "Schneetreiben", "a_schnurren": "Schnurrende Katze", "a_segel": "Takelage", "a_starkregen": "Starkregen", "a_starkregen2": "Platzregen", "a_strom": "Stromschnellen", "a_tagvoegel": "Singvögel", "a_tropfen1": "Tropfen", "a_tropfen2": "Rinnsal", "a_tropfstein": "Tropfsteine", "a_uhr": "Standuhr", "a_unterwasser": "Tiefe", "a_voegel1": "Vögel", "a_voegel2": "Baumkronen", "a_waldregen": "Waldregen", "a_wasserfall": "Wasserfall", "a_wasserfall2": "Gischt", "a_wellen1": "Brandung", "a_wellen2": "Wellen", "a_wellen3": "Uferwellen", "a_wildwasser": "Wildwasser", "a_wind1": "Wind", "a_wind2": "Weiter Wind", "a_wind3": "Kalter Wind", "a_zelt": "Zeltplane", "a_zelt2": "Plane"}, en: {"@gemurmel": "Chatter", "a_bach1": "Brook", "a_bach2": "River", "a_baumwind": "Rustling trees", "a_bienen": "Bees", "a_blubbern": "Bubbling", "a_boot": "Ship planks", "a_brandung": "Breakers", "a_dschungel": "Insect chorus", "a_fensterregen": "Rain at the window", "a_feuer1": "Hearth", "a_feuer2": "Fire", "a_feuer3": "Embers", "a_fluss": "Current", "a_gaeste": "Voices", "a_gesang": "Chanting", "a_gewitter1": "Thunderstorm", "a_gewitter2": "Tempest", "a_grillen": "Crickets", "a_grillen2": "Cricket meadow", "a_hafen": "Quay", "a_halle": "Hall", "a_heulwind": "Howling gusts", "a_hof": "Farmyard", "a_huehner": "Hens", "a_kiesweg": "Gravel road", "a_klippen": "Cliffs", "a_kinder": "Children playing", "a_kochen": "Cauldron", "a_kochen2": "Brew", "a_kuehe": "Cows", "a_muehle": "Mill wheel", "a_kriegstrommeln": "War drums", "a_schlacht": "Battle din", "a_lagerfeuer": "Logs", "a_laub": "Leaves", "a_laubregen": "Rain on leaves", "a_leichtregen": "Drizzle", "a_markt": "Lane", "a_nacht": "Night", "a_orkan": "Gale", "a_regen1": "Rain", "a_regen2": "Rain", "a_regen3": "Steady rain", "a_regen4": "Shower", "a_rinnsal": "Trickle", "a_schafe": "Sheep", "a_schneeschritte": "Steps in snow", "a_schneesturm": "Drifting snow", "a_schnurren": "Purring cat", "a_segel": "Rigging", "a_starkregen": "Downpour", "a_starkregen2": "Cloudburst", "a_strom": "Rapids", "a_tagvoegel": "Songbirds", "a_tropfen1": "Drips", "a_tropfen2": "Trickle", "a_tropfstein": "Dripstones", "a_uhr": "Clock", "a_unterwasser": "Depths", "a_voegel1": "Birds", "a_voegel2": "Treetops", "a_waldregen": "Forest rain", "a_wasserfall": "Waterfall", "a_wasserfall2": "Spray", "a_wellen1": "Surf", "a_wellen2": "Waves", "a_wellen3": "Lapping waves", "a_wildwasser": "Torrent", "a_wind1": "Wind", "a_wind2": "Distant wind", "a_wind3": "Cold wind", "a_zelt": "Canvas", "a_zelt2": "Tarp"} };
+  const KUL_SPUR_NAME = { de: {"l_windspiel": "Windspiel", "l_wal": "Walgesang", "@gemurmel": "Stimmengewirr", "a_bach1": "Bach", "a_bach2": "Fluss", "a_baumwind": "Rauschende Bäume", "a_bienen": "Bienen", "a_blubbern": "Blubbern", "a_boot": "Schiffsplanken", "a_brandung": "Brecher", "a_dschungel": "Insektenchor", "a_fensterregen": "Regen am Fenster", "a_feuer1": "Kaminfeuer", "a_feuer2": "Feuer", "a_feuer3": "Glut", "a_fluss": "Strömung", "a_gaeste": "Stimmen", "a_gesang": "Mönchsgesang", "a_gewitter1": "Gewitter", "a_gewitter2": "Unwetter", "a_grillen": "Grillen", "a_grillen2": "Grillenwiese", "a_hafen": "Kai", "a_halle": "Halle", "a_heulwind": "Heulende Böen", "a_hof": "Hof", "a_huehner": "Hühner", "a_kiesweg": "Kiesweg", "a_klippen": "Klippen", "a_kinder": "Spielende Kinder", "a_kochen": "Kessel", "a_kochen2": "Sud", "a_kuehe": "Kühe", "a_muehle": "Mühlrad", "a_kriegstrommeln": "Kriegstrommeln", "a_schlacht": "Schlachtgetümmel", "a_lagerfeuer": "Holzscheite", "a_laub": "Laub", "a_laubregen": "Regen auf Laub", "a_leichtregen": "Nieselregen", "a_markt": "Gasse", "a_nacht": "Nacht", "a_orkan": "Orkan", "a_regen1": "Regen", "a_regen2": "Regen", "a_regen3": "Landregen", "a_regen4": "Schauer", "a_rinnsal": "Rinnsal", "a_schafe": "Schafe", "a_schneeschritte": "Schritte im Schnee", "a_schneesturm": "Schneetreiben", "a_schnurren": "Schnurrende Katze", "a_segel": "Takelage", "a_starkregen": "Starkregen", "a_starkregen2": "Platzregen", "a_strom": "Stromschnellen", "a_tagvoegel": "Singvögel", "a_tropfen1": "Tropfen", "a_tropfen2": "Rinnsal", "a_tropfstein": "Tropfsteine", "a_uhr": "Standuhr", "a_unterwasser": "Tiefe", "a_voegel1": "Vögel", "a_voegel2": "Baumkronen", "a_waldregen": "Waldregen", "a_wasserfall": "Wasserfall", "a_wasserfall2": "Gischt", "a_wellen1": "Brandung", "a_wellen2": "Wellen", "a_wellen3": "Uferwellen", "a_wildwasser": "Wildwasser", "a_wind1": "Wind", "a_wind2": "Weiter Wind", "a_wind3": "Kalter Wind", "a_zelt": "Zeltplane", "a_zelt2": "Plane"}, en: {"l_windspiel": "Wind chimes", "l_wal": "Whale song", "@gemurmel": "Chatter", "a_bach1": "Brook", "a_bach2": "River", "a_baumwind": "Rustling trees", "a_bienen": "Bees", "a_blubbern": "Bubbling", "a_boot": "Ship planks", "a_brandung": "Breakers", "a_dschungel": "Insect chorus", "a_fensterregen": "Rain at the window", "a_feuer1": "Hearth", "a_feuer2": "Fire", "a_feuer3": "Embers", "a_fluss": "Current", "a_gaeste": "Voices", "a_gesang": "Chanting", "a_gewitter1": "Thunderstorm", "a_gewitter2": "Tempest", "a_grillen": "Crickets", "a_grillen2": "Cricket meadow", "a_hafen": "Quay", "a_halle": "Hall", "a_heulwind": "Howling gusts", "a_hof": "Farmyard", "a_huehner": "Hens", "a_kiesweg": "Gravel road", "a_klippen": "Cliffs", "a_kinder": "Children playing", "a_kochen": "Cauldron", "a_kochen2": "Brew", "a_kuehe": "Cows", "a_muehle": "Mill wheel", "a_kriegstrommeln": "War drums", "a_schlacht": "Battle din", "a_lagerfeuer": "Logs", "a_laub": "Leaves", "a_laubregen": "Rain on leaves", "a_leichtregen": "Drizzle", "a_markt": "Lane", "a_nacht": "Night", "a_orkan": "Gale", "a_regen1": "Rain", "a_regen2": "Rain", "a_regen3": "Steady rain", "a_regen4": "Shower", "a_rinnsal": "Trickle", "a_schafe": "Sheep", "a_schneeschritte": "Steps in snow", "a_schneesturm": "Drifting snow", "a_schnurren": "Purring cat", "a_segel": "Rigging", "a_starkregen": "Downpour", "a_starkregen2": "Cloudburst", "a_strom": "Rapids", "a_tagvoegel": "Songbirds", "a_tropfen1": "Drips", "a_tropfen2": "Trickle", "a_tropfstein": "Dripstones", "a_uhr": "Clock", "a_unterwasser": "Depths", "a_voegel1": "Birds", "a_voegel2": "Treetops", "a_waldregen": "Forest rain", "a_wasserfall": "Waterfall", "a_wasserfall2": "Spray", "a_wellen1": "Surf", "a_wellen2": "Waves", "a_wellen3": "Lapping waves", "a_wildwasser": "Torrent", "a_wind1": "Wind", "a_wind2": "Distant wind", "a_wind3": "Cold wind", "a_zelt": "Canvas", "a_zelt2": "Tarp"} };
   /* Abwechslung: beim Start eines Ortes nimmt jede Schicht zufällig das Original oder eine gleichwertige weitere Aufnahme */
   const BETT_VAR = {"a_voegel1": ["a_voegel_n1", "a_voegel_n2", "a_voegel_n7"], "a_voegel2": ["a_voegel_n3", "a_voegel_n5"], "a_tagvoegel": ["a_voegel_n4", "a_voegel_n6", "a_voegel_n8"], "a_nacht": ["a_nacht_n1", "a_nacht_n2", "a_nacht_n3", "a_nacht_n4", "a_nacht_n5", "a_nacht_n6", "a_nacht_n7", "a_nacht_n8"], "a_leichtregen": ["a_leichtregen_n1", "a_leichtregen_n2", "a_leichtregen_n3"], "a_regen2": ["a_regen_n1", "a_regen_n2"], "a_starkregen": ["a_starkregen_n1"], "a_gewitter1": ["a_gewitter_n1"], "a_schneesturm": ["a_schneesturm_n1", "a_schneesturm_n2"], "a_tropfstein": ["a_tropfstein_n1", "a_tropfstein_n2"], "a_wind3": ["a_wind_n1"], "a_fluss": ["a_fluss_n1"], "a_lagerfeuer": ["a_lagerfeuer_n1", "a_lagerfeuer_n2"], "a_markt": ["a_markt_n1"], "a_wind1": ["a_wind_n2", "a_wind_n7"], "a_wind2": ["a_wind_n3", "a_wind_n4", "a_wind_n5", "a_wind_n6"], "a_heulwind": ["a_heulwind_n1"], "a_laub": ["a_laub_n1"], "a_brandung": ["a_brandung_n1"], "a_dschungel": ["a_dschungel_n1", "a_dschungel_n2"], "a_gewitter2": ["a_gewitter_n2"], "a_gaeste": ["a_gaeste_n1"], "a_wasserfall2": ["a_wasserfall_n1"]};
   Object.assign(AMB_LAUT, {"a_wind_n5":0.1309,"a_wind_n6":0.1075,"a_wind_n7":0.1229,"a_voegel_n8":0.0881,"a_laub_n1":0.0676,"a_brandung_n1":0.108,"a_dschungel_n1":0.0763,"a_dschungel_n2":0.0717,"a_leichtregen_n3":0.0871,"a_voegel_n7":0.0648,"a_gewitter_n2":0.1163,"a_tropfstein_n2":0.1025,"a_lagerfeuer_n2":0.1087,"a_nacht_n5":0.0789,"a_nacht_n6":0.0532,"a_regen_n2":0.072,"a_nacht_n7":0.081,"a_gaeste_n1":0.111,"a_nacht_n8":0.0656,"a_wasserfall_n1":0.0979}, {"a_voegel_n1":0.1371,"a_voegel_n2":0.1016,"a_voegel_n3":0.092,"a_voegel_n4":0.175,"a_voegel_n5":0.1405,"a_voegel_n6":0.1552,"a_nacht_n1":0.1857,"a_nacht_n2":0.129,"a_nacht_n3":0.0801,"a_nacht_n4":0.0598,"a_leichtregen_n1":0.0878,"a_leichtregen_n2":0.0874,"a_regen_n1":0.0713,"a_starkregen_n1":0.1023,"a_gewitter_n1":0.1443,"a_schneesturm_n1":0.1903,"a_schneesturm_n2":0.1608,"a_tropfstein_n1":0.165,"a_wind_n1":0.1118,"a_fluss_n1":0.1049,"a_lagerfeuer_n1":0.1741,"a_markt_n1":0.1083,"a_wind_n2":0.1239,"a_wind_n3":0.1295,"a_heulwind_n1":0.1049,"a_wind_n4":0.1407});
@@ -3822,11 +3822,11 @@ const ZUS_ICON = {
     const zus = id => ZUSATZ[id] ? k("data-kzus", id, { sturm: "🌪", schnee: "❄", wind: "🍃" }[id], ZUSATZ[id][en ? "en" : "de"], zusIst(id)) : "";
     const sp = leben.spannung, spStufe = sp < .1 ? 0 : sp < .4 ? 1 : sp < .7 ? 2 : 3;
     const zeile = (sym, titel, inhalt) => '<div class="lw-klz"><span title="' + esc(titel) + '">' + sym + "</span>" + inhalt + "</div>";
+    const trenn = '<i class="lw-kltrenn" aria-hidden="true"></i>';
     return '<div class="lw-kleiste' + (karteGross ? " gross" : "") + '">' +
-      zeile("🌦", L.wetter, ["☀", "🌦", "🌧", "⛈"].map((sy, x) => k("data-wetter", x, sy, L.wetterN[x], !leben.schauer && leben.wetter === x)).join("") + k("data-wetter", "schauer", "🌫", L.schauer, leben.schauer) + zus("wind") + zus("sturm") + zus("schnee")) +
-      (!karteGross || drin ? "" : zeile("🕰", L.zeit, k("data-zeit", "auto", "🅰", L.zeitN.auto, leben.zeit === "auto") + k("data-zeit", "tag", "🌞", ohne(L.zeitN.tag), leben.zeit === "tag") + k("data-zeit", "daemmerung", "🌇", ohne(L.zeitN.daemmerung), leben.zeit === "daemmerung") + k("data-zeit", "nacht", "🌙", ohne(L.zeitN.nacht), leben.zeit === "nacht") + k("data-aktion", "zeitlauf", "⏳", L.zeitLauf, leben.zeitLauf))) +
-      (!karteGross ? "" : zeile("👁", L.spannung, [[0, "😌"], [.3, "🙂"], [.6, "😟"], [.95, "😨"]].map(([v, sy], i) => k("data-lspann", v, sy, L.spannStufe(Math.round(v * 100)), spStufe === i)).join("")) +
-      zeile("✨", L.titel || "Leben", k("data-aktion", "gehen", "🚶", L.gehen, leben.gehen) + k("data-aktion", "stille", "🤫", L.stille, ctx && stilleBis > ctx.currentTime) + (feuer ? k("data-aktion", "nachlegen", "🪵", L.nachlegen, false) : "") + k("data-aktion", "szenen", "🎭", L.szenen, leben.szenen) + k("data-aktion", "nah", "👂", L.nah, leben.nah))) +
+      ["☀", "🌦", "🌧", "⛈"].map((sy, x) => k("data-wetter", x, sy, L.wetter + ": " + L.wetterN[x], !leben.schauer && leben.wetter === x)).join("") + k("data-wetter", "schauer", "🌫", L.schauer, leben.schauer) + zus("wind") + zus("sturm") + zus("schnee") +
+      (!karteGross || drin ? "" : trenn + k("data-zeit", "auto", "🅰", L.zeit + ": " + L.zeitN.auto, leben.zeit === "auto") + k("data-zeit", "tag", "🌞", ohne(L.zeitN.tag), leben.zeit === "tag") + k("data-zeit", "daemmerung", "🌇", ohne(L.zeitN.daemmerung), leben.zeit === "daemmerung") + k("data-zeit", "nacht", "🌙", ohne(L.zeitN.nacht), leben.zeit === "nacht") + k("data-aktion", "zeitlauf", "⏳", L.zeitLauf, leben.zeitLauf)) +
+      (!karteGross ? "" : trenn + [[0, "😌"], [.3, "🙂"], [.6, "😟"], [.95, "😨"]].map(([v, sy], i) => k("data-lspann", v, sy, L.spannung + ": " + L.spannStufe(Math.round(v * 100)), spStufe === i)).join("")) +
       "</div>";
   }
   /* Wetter und Tageszeit im Bild: Nacht dunkelt den Himmel, Regen fällt draußen, Gewitter blitzt */
@@ -9446,8 +9446,9 @@ const ZUS_ICON = {
     return "<h5>" + T.einf.spurenZus + "</h5>" + an.map(id => { const v = Math.round(zusWert(id) * 100), n = esc(ZUSATZ[id][en ? "en" : "de"]);
       return '<label class="lw-spurzeile"><span>' + zusSvg(id) + " " + n + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + n + '"><b>' + v + " %</b></label>"; }).join("");
   }
-  Object.assign(TX.de.einf, { spurenEinzeln: "Einzelne Spuren: Ort und Geräusche getrennt regeln", spurenOrt: "Schichten des Ortes", spurenZus: "Zusatz-Geräusche" });
-  Object.assign(TX.en.einf, { spurenEinzeln: "Single tracks: adjust place and sounds separately", spurenOrt: "Layers of the place", spurenZus: "Extra sounds" });
+  Object.assign(TX.de.einf, { alleOrte: "Alle Orte:" }); Object.assign(TX.en.einf, { alleOrte: "All places:" });
+  Object.assign(TX.de.einf, { spurenKurz: "Einzelspuren", spurenEinzeln: "Einzelne Spuren: Ort und Geräusche getrennt regeln", spurenOrt: "Schichten des Ortes", spurenZus: "Zusatz-Geräusche" });
+  Object.assign(TX.en.einf, { spurenKurz: "Single tracks", spurenEinzeln: "Single tracks: adjust place and sounds separately", spurenOrt: "Layers of the place", spurenZus: "Extra sounds" });
   let abendAuf = false;
   function abendWahl(T) {
     if (!abendAuf) return "";
@@ -9476,14 +9477,16 @@ const ZUS_ICON = {
     if (S.kulisse && S.kulisse !== "keine" && !kern.includes(S.kulisse) && !eMehr.kul) kern = kern.slice(0, 7).concat([S.kulisse]);
     const rest = nachNutzung("k", alle.filter(k => !kern.includes(k)));
     const tile = k => eKachel("data-kulisse", k, T.kulissen[k], S.kulisse === k && !!kul);
+    const chip = k => '<button type="button" class="lw-ochip' + (S.kulisse === k && kul ? " an" : "") + '" data-kulisse="' + k + '">' + esc(T.kulissen[k]) + "</button>";
+    const vorschlag = kern.filter(k => k !== S.kulisse).slice(0, 6);
     return '<p class="lw-zweck">' + E.zweckOrt + "</p>" +
       '<div class="lw-eortkopf"><div class="lw-eortlinks"><span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
-      (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") + "</div>" +
-      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + karteLeiste(T) + karteHTML(T) + "</div></div>" +
-      (KUL_WELT[S.kulisse] || Object.keys(zusWahl).length ? '<button type="button" class="lw-klappe lw-espurklappe" data-emehr="spuren" aria-expanded="' + eMehr.spuren + '">🎚 ' + E.spurenEinzeln + " <span>" + (eMehr.spuren ? "▴" : "▾") + "</span></button>" +
-        (eMehr.spuren ? '<div class="lw-espuren">' + (KUL_WELT[S.kulisse] ? "<h5>" + E.spurenOrt + "</h5>" + spurenInhalt(T) : "") + zusSpurRegler(T) + "</div>" : "") : "") +
-      '<div class="lw-egitter lw-ekul">' + kern.map(tile).join("") + (eMehr.kul ? rest.map(tile).join("") : "") + "</div>" +
-      '<button type="button" class="lw-klappe" data-emehr="kul" aria-expanded="' + eMehr.kul + '">' + (eMehr.kul ? E.weniger : E.mehrKul(alle.length)) + " <span>" + (eMehr.kul ? "▴" : "▾") + "</span></button>" +
+      (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") +
+      '<div class="lw-ochips">' + vorschlag.map(chip).join("") + "</div>" +
+      '<label class="lw-owahl"><span>' + E.alleOrte + "</span>" + kulisseWahl(T) + "</label></div>" +
+      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + karteLeiste(T) + karteHTML(T) + "</div>" +
+      (KUL_WELT[S.kulisse] || Object.keys(zusWahl).length ? '<div class="lw-espalte' + (eMehr.spuren ? " auf" : "") + '"><button type="button" class="lw-klappe lw-espurklappe" data-emehr="spuren" aria-expanded="' + eMehr.spuren + '" title="' + esc(E.spurenEinzeln) + '">🎚 ' + E.spurenKurz + " <span>" + (eMehr.spuren ? "▴" : "▾") + "</span></button>" +
+        (eMehr.spuren ? '<div class="lw-espuren">' + (KUL_WELT[S.kulisse] ? "<h5>" + E.spurenOrt + "</h5>" + spurenInhalt(T) : "") + zusSpurRegler(T) + "</div>" : "") + "</div>" : "") + "</div>" +
       (KUL_WELT[S.kulisse] ? '<div class="lw-eleben">' + lebenBox(T) + "</div>" : "") +
       '<div class="lw-ezus">' + zusBox(T) + "</div>";
   }
@@ -11369,9 +11372,17 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ehgaus:hover { background: rgba(106,159,181,.3); }
 .lw-ehgaus.aus { border-color: var(--ember); background: rgba(224,160,70,.18); }
 .lw-ehgaus[hidden] { display: none; }
-.lw-eortkopf { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .5rem .8rem; margin: .2rem 0 .4rem; }
+.lw-eortkopf { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .6rem 1rem; margin: .2rem 0 .4rem; }
+.lw-ochips { display: flex; flex-wrap: wrap; gap: .3rem; }
+.lw-ochip { border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--vellum); font: inherit; font-size: .85rem; padding: .3rem .6rem; border-radius: 999px; cursor: pointer; }
+.lw-ochip:hover { border-color: var(--ember); }
+.lw-ochip.an { border-color: var(--ember); background: rgba(224,160,70,.2); }
+.lw-owahl { display: flex; align-items: center; gap: .4rem; font-size: .85rem; color: var(--ash); flex-wrap: wrap; }
+.lw-owahl select { max-width: 100%; }
+.lw-owahl button, .lw-owahl .lw-klein { display: none; }
+@media (max-width: 560px) { .lw-kblock { flex: 1 1 100%; align-items: stretch; } .lw-kblock .lw-karte { width: 100%; } .lw-kleiste { justify-content: center; gap: .2rem; } .lw-kblock .lw-kleiste .lw-kl { width: 1.95rem; height: 1.95rem; font-size: 1rem; } }
 .lw-eortlinks { display: flex; flex-direction: column; align-items: flex-start; gap: .45rem; flex: 1 1 9rem; min-width: 0; }
-.lw-karte { position: relative; flex: 0 0 auto; width: min(250px, 100%); aspect-ratio: 16 / 7; margin-left: auto; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #15111b; touch-action: none; user-select: none; }
+.lw-karte { position: relative; flex: 0 0 auto; width: min(380px, 100%); aspect-ratio: 16 / 7; margin-left: auto; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #15111b; touch-action: none; user-select: none; }
 .lw-karte.gross { flex-basis: 100%; width: 100%; max-width: 680px; margin: .2rem auto .4rem; }
 .lw-lebenfeld .lw-karte, .lw-pult .lw-karte { margin: .4rem 0 .4rem auto; }
 .lw-kbild { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -11405,24 +11416,29 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kblock { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; margin-left: auto; flex: 0 1 auto; max-width: 100%; }
 .lw-kblock.gross { flex-basis: 100%; align-items: center; }
 .lw-kblock .lw-karte { margin-left: 0; }
-.lw-kleiste { display: grid; gap: .2rem; flex: 0 0 auto; }
-.lw-kleiste:not(.gross) .lw-klz > span { display: none; }
-.lw-kleiste:not(.gross) .lw-kl { width: 1.6rem; height: 1.6rem; font-size: .85rem; }
-.lw-klz { display: flex; align-items: center; gap: .15rem; flex-wrap: wrap; }
-.lw-klz > span { width: 1.3rem; text-align: center; font-size: .8rem; opacity: .6; cursor: help; }
-.lw-kl { width: 1.85rem; height: 1.85rem; padding: 0; border: 1px solid rgba(224,160,70,.28); background: rgba(224,160,70,.05); border-radius: 7px; font-size: .95rem; line-height: 1; cursor: pointer; color: var(--vellum); }
+.lw-kleiste { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; justify-content: flex-end; }
+.lw-kblock.gross .lw-kleiste { justify-content: center; }
+.lw-kltrenn { width: 1px; height: 1.6rem; background: var(--line); margin: 0 .25rem; }
+.lw-kl { width: 2.15rem; height: 2.15rem; padding: 0; border: 1px solid rgba(224,160,70,.28); background: rgba(224,160,70,.05); border-radius: 8px; font-size: 1.15rem; line-height: 1; cursor: pointer; color: var(--vellum); }
+.lw-kblock.gross .lw-kl { width: 2.5rem; height: 2.5rem; font-size: 1.35rem; }
 .lw-kl:hover { border-color: var(--ember); }
 .lw-kl[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.28); box-shadow: 0 0 6px rgba(224,160,70,.35); }
 .lw-kmuell { position: absolute; left: .25rem; bottom: .2rem; z-index: 2; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; font-size: .8rem; border-radius: 6px; background: rgba(10,8,14,.6); border: 1px dashed rgba(220,120,110,.5); opacity: .7; pointer-events: none; transition: transform .15s ease; }
-.lw-karte.gross .lw-kmuell { width: 2rem; height: 2rem; font-size: 1.1rem; }
+.lw-karte.gross .lw-kmuell { width: 2.8rem; height: 2.8rem; font-size: 1.5rem; left: .4rem; bottom: .4rem; }
 .lw-kmuell.ziel { opacity: 1; transform: scale(1.35); background: rgba(160,50,40,.6); border-color: #e07060; }
 .lw-kquelle.weg { opacity: .45; border-color: #e07060; }
 .lw-ksicht { position: absolute; right: 1.75rem; bottom: .2rem; z-index: 5; width: 1.35rem; height: 1.35rem; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: rgba(10,8,14,.75); font-size: .78rem; line-height: 1; cursor: pointer; }
-.lw-karte.gross .lw-ksicht { right: 2.1rem; }
+.lw-karte.gross .lw-ksicht { right: 3.4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
+.lw-karte.gross .lw-kgross { right: .4rem; bottom: .4rem; width: 2.6rem; height: 2.6rem; font-size: 1.35rem; border-radius: 8px; }
 .lw-ksicht:hover { border-color: var(--ember); }
 .lw-karte.oben .lw-kfigur { transform: translate(-50%, -50%); }
 .lw-karte.oben .lw-kfigur.zieht { transform: translate(-50%, -50%) scale(1.2); }
-.lw-espurklappe { margin-top: .3rem; }
+.lw-espalte { flex: 0 0 auto; display: flex; flex-direction: column; gap: .3rem; align-self: flex-start; }
+.lw-espalte.auf { flex: 1 1 17rem; max-width: 26rem; }
+.lw-espalte .lw-espurklappe { margin: 0; width: auto; }
+.lw-espalte .lw-espuren { margin: 0; max-height: 22rem; overflow-y: auto; }
+.lw-espalte .lw-spurzeile input { min-width: 5rem; }
+@media (max-width: 760px) { .lw-espalte, .lw-espalte.auf { flex: 1 1 100%; max-width: none; } }
 .lw-espuren { border: 1px solid var(--line); border-radius: 10px; padding: .5rem .7rem; margin: .3rem 0 .5rem; background: rgba(255,255,255,.02); }
 .lw-espuren h5 { margin: .3rem 0 .2rem; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ember); font-weight: 600; }
 .lw-espuren .lw-spurzeile span { display: inline-flex; align-items: center; gap: .3rem; }
