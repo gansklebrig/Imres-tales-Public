@@ -3749,7 +3749,8 @@ const ZUS_ICON = {
     const [x, y, z] = zusOrt(id), w = raumWeg(hier, raumBei(x, y)), dx = x - fx, dy = (y - fy) * .44, dz = (z - fz) * .6, d = Math.hypot(dx, dy, dz);
     /* 3D-Lage für den Raumklang: rechts = +x, oben = +y, vorne = −z (dorthin blickt der Hörer) */
     const n = Math.max(1, Math.hypot(dx, dy, dz));
-    return { g: Math.min(1.55, 1.5 / (1 + Math.pow(d / 24, 1.35))) * w.g, f: Math.min(w.f, Math.max(1800, 18000 * Math.pow(10, -Math.max(0, d - 12) / 105))), pan: Math.max(-.85, Math.min(.85, dx / 42)),
+    /* Entfernung: nah voll da, über die Kartenbreite bis kaum hörbar (≈ −30 dB), dazu verlieren ferne Geräusche ihre Höhen */
+    return { g: Math.min(1.6, 1.6 / (1 + Math.pow(d / 14, 2.2))) * w.g, f: Math.min(w.f, Math.max(900, 18000 * Math.pow(10, -Math.max(0, d - 10) / 70))), pan: Math.max(-.85, Math.min(.85, dx / 42)),
       pos: [dx / n, -dy / n, (dz / n) || -.01], raum: true };
   }
 
