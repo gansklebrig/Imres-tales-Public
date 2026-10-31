@@ -2155,6 +2155,21 @@
   const WELT_GRUND = 2.6;
   /* leise Klangwelten etwas anheben, damit alle Kulissen ähnlich präsent sind */
   const WELT_PEGEL = { taverne: 0.98, feuer: 1.39, wald: 0.91, waldnacht: 0.99, regen: 1.16, zelt: 1.55, sturm: 0.92, hoehle: 1.95, unterreich: 1.97, kerker: 2.58, meer: 1.07, schiff: 1.16, wasserfall: 0.9, schmiede: 1.57, labor: 0.99, bibliothek: 2.33, tempel: 2.27, sumpf: 1.35, unterwasser: 0.99, dorf: 1.05, markt: 1, hafen: 0.93, gebirge: 1.15, mine: 2.66, strasse: 1.49, burg: 2.82, ufer: 1.03, schlacht: 1, schlaegerei: 1, duell: 1 };
+  /* Entspannter Grundmix (gemessen: Lautheit jeder Schicht, Spitzen der Einzelgeräusche, Dichte):
+     – Varianten einer Schicht klingen gleich laut wie ihr Original (vorher bis zu 10 dB Unterschied je nach Zufallswahl)
+     – gleichmäßig zischende Dauerschichten (Rinnsal, Zikaden, Grillen) treten zurück
+     – Einzelgeräusche sitzen im Teppich statt herauszuspringen, laute Ausreißer gedeckelt, dichte Orte ruhiger getaktet
+     Wer es intensiver will, legt Geräusche dazu oder dreht „Was gerade klingt“ hoch. */
+  const BETT_GLEICH = {"a_voegel1": 0.7, "a_voegel_n1": 1.63, "a_voegel_n2": 1.27, "a_voegel_n7": 0.79, "a_voegel2": 0.76, "a_voegel_n5": 1.51, "a_tagvoegel": 0.48, "a_voegel_n4": 1.51, "a_voegel_n6": 1.32, "a_voegel_n8": 0.76, "a_nacht_n1": 2, "a_nacht_n2": 1.47, "a_nacht_n4": 0.69, "a_nacht_n6": 0.61, "a_nacht_n8": 0.74, "a_schneesturm": 0.56, "a_schneesturm_n1": 1.2, "a_tropfstein": 0.83, "a_tropfstein_n1": 1.63, "a_lagerfeuer_n1": 0.51, "a_lagerfeuer_n2": 0.49, "a_wind_n2": 0.7, "a_wind_n7": 0.69, "a_wind_n3": 0.82, "a_wind_n5": 0.83, "a_wind_n6": 0.67, "a_heulwind_n1": 0.71, "a_laub_n1": 0.4};
+  const RUHE = { bett: {"feuer": {"a_grillen": 0.53, "a_nacht": 0.66}, "waldnacht": {"a_nacht": 0.69, "a_grillen": 0.74}, "hoehle": {"a_tropfen2": 0.37}, "kerker": {"a_tropfen2": 0.25}, "sumpf": {"a_grillen": 0.63, "a_nacht": 0.61}, "mine": {"a_tropfen2": 0.21}, "ufer": {"a_strom": 0.89}},
+    ev: {"taverne": 0.78, "zelt": 0.61, "sturm": 0.82, "unterreich": 0.81, "kerker": 0.51, "meer": 0.91, "schmiede": 0.62, "bibliothek": 0.73, "tempel": 0.36, "sumpf": 0.71, "unterwasser": 0.49, "gebirge": 0.81, "mine": 0.59, "burg": 0.72, "schlacht": 0.62, "duell": 0.71},
+    art: {"taverne": {"ruelpser": 0.94}, "feuer": {"eule": 0.48, "heulen": 0.65, "wolf": 0.6}, "waldnacht": {"eule": 0.73, "heulen": 0.95}, "unterreich": {"monster": 0.65, "schatten": 0.74, "troll": 0.78, "riese": 0.97}, "kerker": {"stoehnen": 0.82, "hund": 0.95, "tuerzu": 0.89}, "schmiede": {"schnauben": 0.95}, "bibliothek": {"katze": 0.93}, "tempel": {"chor": 0.76}, "gebirge": {"wolf": 0.96}},
+    takt: {"taverne": 1.35, "wald": 1.19, "kerker": 1.14, "schiff": 1.29, "schmiede": 1.33, "labor": 1.16, "sumpf": 1.43, "dorf": 1.39, "markt": 1.36, "hafen": 1.29, "mine": 1.23, "strasse": 1.27, "burg": 1.27, "ufer": 1.24} };
+  Object.keys(KUL_WELT).forEach(k => {
+    const w = KUL_WELT[k], rb = RUHE.bett[k] || {}, re = RUHE.ev[k] || 1, ra = RUHE.art[k] || {}, rt = RUHE.takt[k] || 1;
+    w.betten = w.betten.map(b => rb[b[0]] ? [b[0], b[1] * rb[b[0]]].concat(b.slice(2)) : b);
+    w.ev = w.ev.map(e => [e[0], [e[1][0] * rt, e[1][1] * rt], e[2] * re * (ra[e[0]] || 1)].concat(e.slice(3)));
+  });
   const ambBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "amb/") : "amb/"; })();
   const ambBuf = new Map(), ambLaedt = new Map();
   function ambLaden(name) {
@@ -2211,7 +2226,7 @@
       b.grund = 1; out.gain.value = b.regler; b.fest = true;
       kulSchleife("gemurmel", 22050, 1.1 * staerke * (k.wlaut || 1), out); return b;
     }
-    b.grund = WELT_GRUND * (k.wlaut || 1) * staerke * Math.min(1.15, .055 / (AMB_LAUT[name] || .05));
+    b.grund = WELT_GRUND * (k.wlaut || 1) * staerke * Math.min(1.15, .055 / (AMB_LAUT[name] || .05)) * (BETT_GLEICH[name] || 1);
     ambLaden(name).then(buf => {
       if (!buf || (k.zusatz ? k.aus : kul !== k)) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05; b.bereitAb = ctx.currentTime + 3.1;
@@ -3367,7 +3382,7 @@ const ZUS_ICON = {
   /* Wetter über jeder Kulisse: Niesel, Regen, Gewitter – je nach Ort aufs Laub, an die Fenster oder als Tropfen in der Tiefe */
   const WETTER_SCHICHT = {
     drinnen: [[["a_fensterregen", .35]], [["a_fensterregen", .7], ["a_regen2", .3, { tief: 900 }]], [["a_gewitter1", .45, { tief: 800 }]]],
-    unter: [[["a_tropfen2", .25]], [["a_tropfen1", .4], ["a_rinnsal", .25]], [["a_gewitter1", .25, { tief: 300 }]]],
+    unter: [[["a_tropfen2", .1]], [["a_tropfen1", .4], ["a_rinnsal", .12]], [["a_gewitter1", .25, { tief: 300 }]]],
     wald: [[["a_leichtregen", .45]], [["a_laubregen", .6], ["a_waldregen", .4]], [["a_gewitter1", .55]]],
     wasser: [[["a_leichtregen", .45]], [["a_regen1", .55], ["a_regen3", .3]], [["a_gewitter2", .5]]],
     draussen: [[["a_leichtregen", .45]], [["a_regen1", .55], ["a_regen3", .3]], [["a_gewitter1", .55], ["a_regen4", .3]]]
@@ -3532,6 +3547,8 @@ const ZUS_ICON = {
   }
   function szeneSpielen(k, schritte, laut, gewollt, sym) {
     const az = zz(0, 360), gegen = az + 180 + zz(-40, 40);
+    /* von selbst kommende kleine Szenen sitzen so ruhig im Teppich wie die übrigen Einzelgeräusche */
+    if (!gewollt && k && RUHE.ev[k.art]) laut = (laut == null ? 1 : laut) * Math.sqrt(RUHE.ev[k.art]);
     /* gewollte Momente kommen aus einem Ort in der Karte: Raum, Abstand und Richtung wie bei den Geräuschen */
     const mo = gewollt && KUL_WELT[S.kulisse] ? momentOrt(schritte) : null;
     if (mo) try { karteBlitz(mo.x, mo.y, mo.z, sym || "✦"); } catch (_) {}
