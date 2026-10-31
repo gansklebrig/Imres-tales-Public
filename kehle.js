@@ -536,6 +536,8 @@
     return ctx;
   }
   const lautSetzen = () => { if (ausgang) ausgang.gain.setTargetAtTime(E.laut * E.laut, ctx.currentTime, .05); };
+  /* Gemessene Verstimmung einzelner Aufnahmen in Cent (über die Obertöne bestimmt) – wird beim Abspielen ausgeglichen */
+  const KORREKTUR = {"kb_28": -5, "kb_31": -12, "kb_36": 13, "kb_38": 8, "kb_40": -12, "kb_45": 9, "kb_56": -26, "kb_59": -13, "harfe_101": -30, "harfe_28": -23, "harfe_31": -27, "harfe_35": -16, "harfe_38": -7, "harfe_41": -8, "harfe_45": -5, "harfe_52": -5, "harfe_55": -9, "harfe_59": -14, "harfe_62": -13, "harfe_69": -11, "harfe_72": -11, "harfe_76": -12, "harfe_79": -4, "harfe_83": -9, "harfe_86": -7, "harfe_89": -6, "harfe_93": -19, "harfe_95": -10, "harfe_98": -8, "fl_93": 6, "tuba_50": -6, "tuba_53": -6, "tuba_58": 6, "orgel_36": -9, "orgel_42": -4, "orgel_54": 5, "vc_40": -10, "vc_77": 5};
   const naechste = (g, m) => KARTE[g].reduce((b, x) => Math.abs(x - m) < Math.abs(b - m) ? x : b);
   const probeName = (g, m) => KARTE[g] ? g + "_" + naechste(g, m) : g;
   const puffer = new Map(), laedt = new Map();
@@ -559,7 +561,7 @@
     const name = probeName(g, m), b = puffer.get(name), out = ziel || ausgang;
     if (!b) return ersatz(g, m, z, laut, dauer, out, ein);
     const src = ctx.createBufferSource(), gn = ctx.createGain();
-    src.buffer = b; if (KARTE[g]) src.playbackRate.value = Math.pow(2, (m - naechste(g, m)) / 12);
+    src.buffer = b; if (KARTE[g]) src.playbackRate.value = Math.pow(2, (m - naechste(g, m)) / 12 - (KORREKTUR[name] || 0) / 1200);
     const lang = (b.duration - b._start) / src.playbackRate.value;
     const d = Math.min(lang, dauer || lang), aus = Math.min(ein ? ein : .25, d * .4);
     const a = ein || (WEICH[g] ? .05 : .004);
@@ -1436,6 +1438,7 @@
       });
     }
     abbrechen();
+    if (st.schule && schule) { schulePruefungFertig(pct, stummAnteil > .8); return; }
     ansicht = "ergebnis"; zeigen();
     if (wurf && (st.lied || station != null) && st.tempo === 1) listeLaden();
   }
@@ -1734,6 +1737,221 @@
     });
   }
 
+
+  /* =================================================================
+     GESANGSSCHULE – Schritt für Schritt, jeder Schritt erst weiter, wenn er sitzt
+     Schrittarten: text · ton (Ton treffen und halten) · folge (Töne nacheinander) ·
+     echo (Flöte spielt vor, nachsingen) · gleiten (Sirene über den Umfang) ·
+     atem (Ton lange halten) · pruefung (Übung/Lied im Takt, Mindestwert)
+     ================================================================= */
+  const SCHULE = [
+    { id: "ton", titel: { de: "Der erste Ton", en: "Your first note" }, schritte: [
+      { art: "text", de: "Stell dich locker hin: Füße schulterbreit, Schultern runter, Kiefer locker, als würdest du gleich gähnen. Gleich hörst du einen Ton. Sing ihn auf „Aaa“ nach und halte ihn, bis der Balken voll ist.\n\nKeine Sorge um die Oktave: Ob du ihn tiefer oder höher singst als vorgespielt, zählt gleich.",
+        en: "Stand relaxed: feet shoulder-width apart, shoulders down, jaw loose, as if you were about to yawn. In a moment you'll hear a note. Sing it back on „aah“ and hold it until the bar is full.\n\nDon't worry about the octave: singing it lower or higher than played counts just the same." },
+      { art: "ton", ton: 0, halten: 1.5, de: "Hör zu – dann sing den Ton nach und halte ihn.", en: "Listen – then sing the note back and hold it." },
+      { art: "ton", ton: 2, halten: 1.5, de: "Ein Ton höher. Lieber leise und sauber als laut und schief.", en: "One step higher. Better quiet and clean than loud and off." },
+      { art: "ton", ton: 4, halten: 2, de: "Noch einer. Achte auf den Pfeil: Er zeigt, ob du höher oder tiefer musst.", en: "One more. Watch the arrow: it shows whether to go up or down." }
+    ] },
+    { id: "atem", titel: { de: "Atem und Stütze", en: "Breath and support" }, schritte: [
+      { art: "text", de: "Singen beginnt im Bauch. Leg eine Hand auf den Bauch und atme durch die Nase ein, sodass sich der Bauch hebt – nicht die Schultern. Beim Singen lässt du die Luft langsam und gleichmäßig ausströmen, als würdest du durch einen Strohhalm pusten.",
+        en: "Singing starts in the belly. Put a hand on your stomach and breathe in through your nose so your belly rises – not your shoulders. While singing, let the air flow out slowly and evenly, as if blowing through a straw." },
+      { art: "atem", sekunden: 5, de: "Tief einatmen, dann einen bequemen Ton auf „Ooo“ halten – 5 Sekunden.", en: "Breathe in deeply, then hold a comfortable note on „ooh“ – 5 seconds." },
+      { art: "atem", sekunden: 8, de: "Jetzt 8 Sekunden. Teil dir die Luft ein – nicht alles am Anfang verpulvern.", en: "Now 8 seconds. Budget your air – don't blow it all at the start." },
+      { art: "ton", ton: 2, halten: 3.5, de: "Und jetzt einen vorgegebenen Ton 3,5 Sekunden lang gerade halten.", en: "Now hold a given note steadily for 3.5 seconds." }
+    ] },
+    { id: "sirene", titel: { de: "Die Sirene", en: "The siren" }, schritte: [
+      { art: "text", de: "Mach ein „Uuu“ wie eine Sirene – oder wie Rex, wenn er den Mond anheult: ganz weich von deinem tiefsten bis zu deinem höchsten bequemen Ton und wieder zurück. Ohne Druck, ohne Sprünge. Das lockert die Stimme und zeigt dir deinen ganzen Umfang.",
+        en: "Make an „ooo“ like a siren – or like Rex howling at the moon: softly from your lowest to your highest comfortable note and back again. No pressure, no jumps. It loosens your voice and shows you your whole range." },
+      { art: "gleiten", de: "Gleite rauf und runter, bis die ganze Leiste leuchtet.", en: "Glide up and down until the whole strip lights up." },
+      { art: "ton", ton: 7, halten: 1.5, de: "Nach der Sirene: diesen Ton treffen und halten.", en: "After the siren: hit and hold this note." }
+    ] },
+    { id: "schritte", titel: { de: "Schritt für Schritt", en: "Step by step" }, schritte: [
+      { art: "text", de: "Jetzt geht es die Tonleiter hinauf: Do – Re – Mi. Jeder Ton muss kurz sitzen, dann leuchtet der nächste auf. Nimm dir Zeit – hier läuft keine Uhr.",
+        en: "Now we climb the scale: do – re – mi. Each note has to sit for a moment, then the next one lights up. Take your time – no clock is running here." },
+      { art: "folge", toene: [0, 2, 4], silben: ["Do", "Re", "Mi"], de: "Do – Re – Mi, einer nach dem anderen.", en: "Do – re – mi, one after another." },
+      { art: "folge", toene: [0, 2, 4, 5, 7], silben: ["Do", "Re", "Mi", "Fa", "Sol"], de: "Fünf Töne aufwärts.", en: "Five notes up." },
+      { art: "folge", toene: [7, 5, 4, 2, 0], silben: ["Sol", "Fa", "Mi", "Re", "Do"], de: "Und wieder hinunter. Abwärts rutscht man gern zu tief – bleib oben dran.", en: "And back down. Going down, people tend to go flat – stay on top of it." }
+    ] },
+    { id: "hoeren", titel: { de: "Hören und Nachsingen", en: "Listen and repeat" }, schritte: [
+      { art: "text", de: "Echo spielt dir ein paar Töne auf der Flöte vor. Merk sie dir und sing sie in derselben Reihenfolge nach. Du kannst sie dir so oft vorspielen lassen, wie du willst – gute Sänger hören mehr, als sie singen.",
+        en: "Echo plays you a few notes on his flute. Remember them and sing them back in the same order. You can have them played as often as you like – good singers listen more than they sing." },
+      { art: "echo", laenge: 3, de: "Drei Töne – zuhören, dann nachsingen.", en: "Three notes – listen, then sing them back." },
+      { art: "echo", laenge: 3, de: "Eine neue Melodie.", en: "A new melody." },
+      { art: "echo", laenge: 4, de: "Jetzt vier Töne.", en: "Now four notes." }
+    ] },
+    { id: "spruenge", titel: { de: "Sprünge", en: "Leaps" }, schritte: [
+      { art: "text", de: "Nicht jede Melodie geht in kleinen Schritten. Bei Sprüngen hilft ein Trick: Hör den Zielton zuerst in deinem Kopf, dann spring hinein – nicht hinrutschen.",
+        en: "Not every melody moves in small steps. For leaps there's a trick: hear the target note in your head first, then jump right onto it – don't slide." },
+      { art: "folge", toene: [0, 4, 7], de: "Ein Dreiklang: Grundton, Terz, Quinte.", en: "A triad: root, third, fifth." },
+      { art: "folge", toene: [0, 7, 0, 5, 0], de: "Hin und her springen.", en: "Jump back and forth." },
+      { art: "folge", toene: [0, "okt", 7, 4, 0], de: "Der große Sprung – und in Schritten zurück.", en: "The big leap – and back in steps." }
+    ] },
+    { id: "fein", titel: { de: "Feinarbeit", en: "Fine tuning" }, schritte: [
+      { art: "text", de: "Jetzt wird es genau: Die grüne Zone ist schmaler. Halbtöne liegen ganz dicht beieinander. Hör genau hin und korrigiere in winzigen Schritten, statt den Ton neu anzusetzen.",
+        en: "Now it gets precise: the green zone is narrower. Semitones sit very close together. Listen carefully and correct in tiny steps instead of starting the note again." },
+      { art: "ton", ton: 0, halten: 2, tol: 22, de: "Diesen Ton ganz genau treffen.", en: "Hit this note very precisely." },
+      { art: "folge", toene: [0, 1, 0], tol: 30, de: "Ein Halbton hoch und zurück – der kleinste Schritt der Musik.", en: "One semitone up and back – the smallest step in music." },
+      { art: "ton", ton: 3, halten: 2, tol: 22, de: "Und noch einmal ganz genau.", en: "And once more, very precisely." }
+    ] },
+    { id: "takt", titel: { de: "Im Takt", en: "In time" }, schritte: [
+      { art: "text", de: "Bisher durftest du dir Zeit lassen. Jetzt laufen die Töne im Takt, so wie in den Liedern: Die Blöcke ziehen von rechts heran, und du singst, wenn sie die goldene Linie erreichen. Mit 60 % hast du bestanden.",
+        en: "So far you could take your time. Now the notes run in time, like in the songs: the blocks come in from the right and you sing when they reach the golden line. 60 % passes." },
+      { art: "pruefung", uebung: "tonleiter", ziel: 60, de: "Die Tonleiter im Takt – mindestens 60 %.", en: "The scale in time – at least 60 %." }
+    ] },
+    { id: "lied", titel: { de: "Dein erstes Lied", en: "Your first song" }, schritte: [
+      { art: "text", de: "Zeit für die Bühne! Sing den „Brief mit Zwergensiegel“ – mit Führstimme und Einsatzton. Ab 50 % hast du die Gesangsschule bestanden. Tipp: Mit „Erst anhören“ im Liederbuch kannst du das Lied vorher kennenlernen.",
+        en: "Time for the stage! Sing „The Letter with the Dwarven Seal“ – with guide voice and cue notes. 50 % and you've graduated from the singing school. Tip: „Listen first“ in the songbook lets you get to know the song beforehand." },
+      { art: "pruefung", lied: "brief", ziel: 50, de: "Dein erstes ganzes Lied – mindestens 50 %.", en: "Your first full song – at least 50 %." }
+    ] }
+  ];
+  const SCHULE_TX = {
+    de: { titel: "Gesangsschule", text: "Neun Lektionen von deinem ersten Ton bis zum ersten Lied. Jeder Schritt geht erst weiter, wenn er sitzt – ohne Zeitdruck.", lektion: n => "Lektion " + n, schritt: (a, b) => "Schritt " + a + " von " + b,
+      fertigL: "✔ bestanden", offenL: "", gesperrt: "🔒", weiter: "Weiter ▶", los: "▶ Los geht's", vorspielen: "🔔 Vorspielen", geschafft: "✔ Geschafft!", lektionFertig: "Lektion bestanden!",
+      naechste: "▶ Nächste Lektion", zurLeiste: "Zur Übersicht", ziel: "Ziel", du: "Du", genau: "Genau so – halten!", hoeher: n => "höher" + (n > 1 ? " (≈ " + n + " Halbtöne)" : "") + " ↑", tiefer: n => "tiefer" + (n > 1 ? " (≈ " + n + " Halbtöne)" : "") + " ↓",
+      sing: "Sing einfach los …", hoer: "🔔 Hör zu …", tipp: "Tipp", tipps: ["Summ den Ton zuerst mit geschlossenem Mund – das ist leichter – und öffne dann zu „Aaa“.", "Lass ihn dir noch einmal vorspielen und sing ganz leise mit, während er klingt.", "Rutsch langsam vom eigenen Ton hoch oder runter, bis der Balken grün wird."],
+      lockerer: "Ich drück ein Auge zu: Die grüne Zone ist jetzt etwas breiter.", ueberspringen: "Überspringen", sekunden: s => s + " s", gleiten: "Gleiten",
+      pruefLos: "▶ Prüfung starten", pruefOk: p => "Bestanden mit " + p + " %!", pruefNein: (p, z) => p + " % – für diese Prüfung brauchst du " + z + " %. Versuch's nochmal!", pruefStumm: "Ich habe kaum etwas gehört – ist das Mikrofon an?",
+      abschluss: "🎓 Du hast die Gesangsschule bestanden! Barradin überreicht dir feierlich sein Diplom. Es riecht nach Pfeifenkraut. Ab jetzt wartet die Tournee – und die Duelle.", nochmal: "↻ Lektion wiederholen", menueTile: (a, b) => a + " von " + b + " Lektionen" },
+    en: { titel: "Singing school", text: "Nine lessons from your first note to your first song. Each step only moves on once it works – no time pressure.", lektion: n => "Lesson " + n, schritt: (a, b) => "Step " + a + " of " + b,
+      fertigL: "✔ passed", offenL: "", gesperrt: "🔒", weiter: "Next ▶", los: "▶ Let's go", vorspielen: "🔔 Play it", geschafft: "✔ Done!", lektionFertig: "Lesson passed!",
+      naechste: "▶ Next lesson", zurLeiste: "To the overview", ziel: "Target", du: "You", genau: "Exactly – hold it!", hoeher: n => "higher" + (n > 1 ? " (≈ " + n + " semitones)" : "") + " ↑", tiefer: n => "lower" + (n > 1 ? " (≈ " + n + " semitones)" : "") + " ↓",
+      sing: "Just start singing …", hoer: "🔔 Listen …", tipp: "Tip", tipps: ["Hum the note with your mouth closed first – that's easier – then open to „aah“.", "Have it played again and sing along very softly while it sounds.", "Slide slowly up or down from your own note until the bar turns green."],
+      lockerer: "I'll turn a blind eye: the green zone is a little wider now.", ueberspringen: "Skip", sekunden: s => s + " s", gleiten: "Glide",
+      pruefLos: "▶ Start the test", pruefOk: p => "Passed with " + p + " %!", pruefNein: (p, z) => p + " % – this test needs " + z + " %. Try again!", pruefStumm: "I barely heard anything – is the microphone on?",
+      abschluss: "🎓 You've graduated from the singing school! Barradin solemnly hands you his diploma. It smells of pipe-weed. The tour awaits – and the duels.", nochmal: "↻ Repeat lesson", menueTile: (a, b) => a + " of " + b + " lessons" }
+  };
+  const ST = () => SCHULE_TX[sprache()];
+  const schuleStand = () => { const v = json("imres-kehle-schule"); return v && Array.isArray(v.fertig) ? v : { fertig: [] }; };
+  let schule = null;
+  /* Grundton der Lektionen: im unteren Drittel des eigenen Umfangs */
+  function schulBasis() { const { lo, hi } = bereich(); return Math.round(lo + Math.max(2, (hi - lo) * .3)); }
+  function schulTon(t) { const { hi } = bereich(), b = schulBasis(); if (t === "okt") return b + 12 <= hi + 1 ? b + 12 : b + 7; return b + t; }
+  function lektionStarten(i) {
+    const L = SCHULE[i]; if (!L) return;
+    schule = { lek: i, schritt: 0, laufend: false };
+    schrittVorbereiten();
+    ansicht = "schule"; zeigen();
+  }
+  function schrittVorbereiten() {
+    const S2 = schule, sch = SCHULE[S2.lek].schritte[S2.schritt];
+    Object.assign(S2, { zustand: sch.art === "text" ? "text" : "bereit", halten: 0, idx: 0, zeit: 0, still: 0, tol: sch.tol || 50, locker: false, tippAn: false, gedeckt: new Set(), letzte: null, ignorierBis: 0, abw: null, pruefPct: null });
+    if (sch.art === "echo") { const p = [0, 2, 4, 7, 9].filter(x => schulBasis() + x <= bereich().hi + 1); const f = []; let k = Math.floor(Math.random() * 3); for (let i = 0; i < sch.laenge; i++) { f.push(p[k]); k = klemm(k + [-2, -1, 1, 1, 2][Math.floor(Math.random() * 5)], 0, p.length - 1); } S2.echoToene = f; }
+    if (sch.art === "gleiten") { const { lo, hi } = bereich(); S2.gLo = Math.round(lo + 1); S2.gHi = Math.round(hi - 1); }
+  }
+  /* Zieltöne des aktuellen Schritts (absolute MIDI-Töne) */
+  function schulZiele() { const sch = SCHULE[schule.lek].schritte[schule.schritt]; if (sch.art === "ton") return [schulTon(sch.ton)]; if (sch.art === "folge") return sch.toene.map(schulTon); if (sch.art === "echo") return schule.echoToene.map(schulTon); return []; }
+  function schulVorspielen() {
+    audio();
+    const sch = SCHULE[schule.lek].schritte[schule.schritt], z = schulZiele(), t0 = ctx.currentTime + .1;
+    if (!z.length) return;
+    let dauer;
+    if (sch.art === "echo") { z.forEach((m, i) => spielen("fl", inLage("fl", m), t0 + i * .6, .45, .55, ausgang)); dauer = z.length * .6 + .3; }
+    else if (sch.art === "folge") { z.forEach((m, i) => { spielen("harfe", lage(m, 52), t0 + i * .55, .32, 1, ausgang); spielen("ooh", m, t0 + i * .55, .3, .5, ausgang); }); dauer = z.length * .55 + .4; }
+    else { spielen("harfe", lage(z[0], 52), t0, .32, 1.8, ausgang); spielen("ooh", z[0], t0, .38, 1.6, ausgang); dauer = 1.7; }
+    schule.ignorierBis = performance.now() + dauer * 1000; /* während des Vorspielens nicht werten (ohne Kopfhörer hört das Mikrofon mit) */
+  }
+  function schulLadenUndLos() {
+    const z = schulZiele(), namen = new Set();
+    z.forEach(m => { namen.add(probeName("harfe", lage(m, 52))); namen.add(probeName("ooh", m)); namen.add(probeName("fl", inLage("fl", m))); });
+    Promise.race([Promise.all([...namen].map(probeLaden)), new Promise(r2 => setTimeout(r2, 3000))]).then(() => {
+      if (ansicht !== "schule" || !schule) return;
+      schule.zustand = "laeuft"; schule.letzte = performance.now(); zeigen();
+      if (z.length) schulVorspielen();
+      cancelAnimationFrame(raf); raf = requestAnimationFrame(schuleRahmen);
+    });
+  }
+  function schuleRahmen() {
+    if (ansicht !== "schule" || !schule || schule.zustand !== "laeuft") return;
+    raf = requestAnimationFrame(schuleRahmen);
+    if (root.offsetParent === null || document.hidden) return;
+    const S2 = schule, sch = SCHULE[S2.lek].schritte[S2.schritt], jetzt = performance.now();
+    const dt = Math.min(.06, (jetzt - S2.letzte) / 1000); S2.letzte = jetzt;
+    let e = erkennen(); if (jetzt < S2.ignorierBis) e = { m: null, rms: 0 };
+    S2.zeit += dt;
+    if (e.m == null) S2.still += dt; else S2.still = 0;
+    /* nach einer Weile helfen: Tipp zeigen, später die Zone lockern */
+    if (!S2.tippAn && S2.zeit > 20 && /ton|folge|echo/.test(sch.art)) { S2.tippAn = true; S2.tippText = zufall(ST().tipps); schulAnzeige(true); }
+    if (!S2.locker && S2.zeit > 40 && /ton|folge|echo/.test(sch.art)) { S2.locker = true; S2.tol = Math.round(S2.tol * 1.5); schulAnzeige(true); }
+    if (sch.art === "ton" || sch.art === "folge" || sch.art === "echo") {
+      const ziele = schulZiele(), ziel = ziele[S2.idx], noetig = sch.art === "ton" ? sch.halten : .6;
+      if (e.m != null) {
+        const f = falte(e.m, ziel); S2.glatt = S2.glatt == null || Math.abs(f - S2.glatt) > 1 ? f : S2.glatt + (f - S2.glatt) * Math.min(1, dt / .1);
+        S2.abw = (S2.glatt - ziel) * 100;
+        if (Math.abs(S2.abw) <= S2.tol) S2.halten += dt; else S2.halten = Math.max(0, S2.halten - dt * 1.5);
+      } else { S2.glatt = null; S2.abw = null; S2.halten = Math.max(0, S2.halten - dt * (sch.art === "ton" ? .8 : .5)); }
+      if (S2.halten >= noetig) {
+        spielen("harfe", lage(ziel, 64), ctx.currentTime + .01, .22, .8, ausgang);
+        S2.idx++; S2.halten = 0; S2.glatt = null;
+        if (S2.idx >= ziele.length) { schrittGeschafft(); return; }
+      }
+      S2.anteil = S2.halten / noetig;
+    } else if (sch.art === "atem") {
+      if (e.m != null) { if (!S2.atemStart) { S2.atemStart = jetzt; S2.werte = []; } S2.atemLetzte = jetzt; S2.werte.push(e.m); }
+      if (S2.atemStart) {
+        if (jetzt - S2.atemLetzte > 350) { S2.atemStart = null; S2.anteil = 0; }
+        else { const d = (jetzt - S2.atemStart) / 1000; S2.anteil = d / sch.sekunden; S2.atemDauer = d; if (d >= sch.sekunden) { schrittGeschafft(); return; } }
+      }
+    } else if (sch.art === "gleiten") {
+      if (e.m != null) { const m = Math.round(e.m); for (let x = S2.gLo; x <= S2.gHi; x++) if (Math.abs(x - e.m) < .6 || (m === x)) S2.gedeckt.add(x); S2.aktuell = e.m; } else S2.aktuell = null;
+      const n = S2.gHi - S2.gLo + 1; S2.anteil = S2.gedeckt.size / n;
+      if (S2.anteil >= .85) { schrittGeschafft(); return; }
+    }
+    schulAnzeige(false);
+  }
+  function schrittGeschafft() {
+    const S2 = schule; S2.zustand = "geschafft"; cancelAnimationFrame(raf);
+    const m = schulZiele()[0] || schulBasis(), t0 = ctx.currentTime + .05;
+    [0, 4, 7, 12].forEach((s2, i) => spielen("harfe", lage(m, 55) + s2, t0 + i * .07, .25, 1.2, ausgang));
+    const L = SCHULE[S2.lek];
+    if (S2.schritt >= L.schritte.length - 1) lektionGeschafft();
+    zeigen();
+  }
+  function lektionGeschafft() {
+    const st2 = schuleStand(), id = SCHULE[schule.lek].id;
+    if (!st2.fertig.includes(id)) { st2.fertig.push(id); schreib("imres-kehle-schule", JSON.stringify(st2)); }
+    schule.lektionFertig = true;
+  }
+  function schulePruefungFertig(pct, stumm) {
+    const S2 = schule, sch = SCHULE[S2.lek].schritte[S2.schritt];
+    S2.pruefPct = pct; S2.pruefStumm = stumm;
+    if (pct >= sch.ziel) { S2.zustand = "geschafft"; if (S2.schritt >= SCHULE[S2.lek].schritte.length - 1) lektionGeschafft(); }
+    else S2.zustand = "nochmal";
+    ansicht = "schule"; zeigen();
+  }
+  function schulPruefungStarten() {
+    const sch = SCHULE[schule.lek].schritte[schule.schritt];
+    const st = sch.uebung ? uebungBauen(sch.uebung) : liedBauen(DATEN.lieder.find(x => x.id === sch.lied));
+    st.schule = true; station = null;
+    const ev = begleitung(st, verschiebung(st));
+    schule.zustand = "laedt"; zeigen();
+    probenFuer(ev).then(() => mikroDann(() => starten(st)));
+  }
+  /* Live-Anzeige ohne die ganze Karte neu zu bauen */
+  function schulAnzeige(ganz) {
+    if (ganz) { zeigen(); return; }
+    const S2 = schule, el = panel.querySelector(".kh-schule-live"); if (!el) return;
+    const tx = ST(), sch = SCHULE[S2.lek].schritte[S2.schritt];
+    const ring = el.querySelector(".kh-s-balken i"); if (ring) ring.style.transform = "scaleX(" + klemm(S2.anteil || 0, 0, 1).toFixed(3) + ")";
+    if (sch.art === "ton" || sch.art === "folge" || sch.art === "echo") {
+      const zeiger = el.querySelector(".kh-s-zeiger"), info = el.querySelector(".kh-s-info"), zone = el.querySelector(".kh-s-zone");
+      if (zone) zone.style.width = (S2.tol / 150 * 50 * 2) + "%";
+      if (S2.abw == null) { zeiger.style.opacity = ".15"; info.textContent = S2.still > 4 ? tx.sing : ""; info.className = "kh-s-info"; }
+      else {
+        zeiger.style.opacity = "1"; zeiger.style.left = (50 + klemm(S2.abw, -150, 150) / 150 * 50) + "%";
+        const ok = Math.abs(S2.abw) <= S2.tol, hs = Math.round(Math.abs(S2.abw) / 100);
+        info.textContent = ok ? tx.genau : S2.abw < 0 ? tx.hoeher(hs) : tx.tiefer(hs);
+        info.className = "kh-s-info " + (ok ? "ok" : "weg");
+        zeiger.classList.toggle("ok", ok);
+      }
+      el.querySelectorAll(".kh-s-blase").forEach((b, i) => { b.classList.toggle("fertig", i < S2.idx); b.classList.toggle("jetzt", i === S2.idx); });
+      const du = el.querySelector(".kh-s-du"); if (du) du.textContent = S2.glatt != null ? tonName(S2.glatt) : "–";
+    } else if (sch.art === "atem") {
+      el.querySelector(".kh-s-zeit").textContent = (S2.atemStart ? S2.atemDauer : 0).toFixed(1) + " / " + sch.sekunden + " s";
+    } else if (sch.art === "gleiten") {
+      el.querySelectorAll(".kh-s-zelle").forEach(z => { const m = +z.dataset.m; z.classList.toggle("an", S2.gedeckt.has(m)); z.classList.toggle("jetzt", S2.aktuell != null && Math.round(S2.aktuell) === m); });
+    }
+  }
+
   /* =================================================================
      ANSICHTEN
      ================================================================= */
@@ -1790,6 +2008,64 @@
   }
 
   const ANSICHT = {
+    schulListe() {
+      const tx = ST(), st2 = schuleStand(), L = sprache();
+      let frei = true;
+      return '<h4 class="kh-kopf">🎓 ' + esc(tx.titel) + '</h4><p class="kh-klein">' + esc(tx.text) + "</p>" +
+        (gemessen() ? "" : '<button type="button" class="kh-banner" data-tun="einmessen"><b>🎙 ' + esc(T().willkommen.banner) + "</b><span>" + esc(T().vorher.messenTipp) + "</span></button>") +
+        '<ol class="kh-liste">' + SCHULE.map((l, i) => {
+          const fertig = st2.fertig.includes(l.id), offen = frei; if (!fertig) frei = false;
+          return '<li><button type="button" class="kh-eintrag' + (offen ? "" : " zu") + '" data-tun="lektion" data-wert="' + i + '"' + (offen ? "" : " disabled") + '><span class="kh-nr' + (fertig ? " ok" : "") + '">' + (fertig ? "✔" : i + 1) + '</span><span class="kh-was"><b>' + esc(l.titel[L] || l.titel.de) + "</b><small>" + esc(offen ? tx.lektion(i + 1) + (fertig ? " · " + tx.fertigL : "") : tx.gesperrt) + "</small></span></button></li>";
+        }).join("") + "</ol>" +
+        (st2.fertig.length >= SCHULE.length ? '<p class="kh-zitat">' + esc(tx.abschluss) + "</p>" : "") +
+        '<div class="kh-reihe">' + knopf("menue", esc(T().zurueck)) + "</div>";
+    },
+    schule() {
+      const tx = ST(), S2 = schule, Lk = SCHULE[S2.lek], sch = Lk.schritte[S2.schritt], L = sprache();
+      const punkte = '<div class="kh-s-punkte">' + Lk.schritte.map((_, i) => '<i class="' + (i < S2.schritt || (i === S2.schritt && S2.zustand === "geschafft") ? "fertig" : i === S2.schritt ? "jetzt" : "") + '"></i>').join("") + "</div>";
+      let html = '<p class="label">🎓 ' + esc(tx.lektion(S2.lek + 1)) + " · " + esc(tx.schritt(S2.schritt + 1, Lk.schritte.length)) + '</p><h4 class="kh-kopf">' + esc(Lk.titel[L] || Lk.titel.de) + "</h4>" + punkte;
+      const text = sch[L] || sch.de;
+      if (sch.art === "text") {
+        return html + '<div class="kh-s-lehre">' + text.split("\n\n").map(t2 => "<p>" + esc(t2) + "</p>").join("") + "</div>" +
+          '<div class="kh-reihe">' + knopf("schulWeiter", esc(tx.weiter), "haupt kh-riesig") + knopf("schulListe", esc(T().zurueck)) + "</div>";
+      }
+      html += '<p class="kh-s-auftrag">' + esc(text) + "</p>";
+      if (S2.zustand === "geschafft") {
+        const letzte = S2.schritt >= Lk.schritte.length - 1;
+        return html + '<div class="kh-bereit"><p class="kh-s-jubel">' + esc(letzte ? "🎉 " + tx.lektionFertig : tx.geschafft) + "</p>" +
+          (S2.pruefPct != null ? '<p class="kh-klein">' + esc(tx.pruefOk(S2.pruefPct)) + "</p>" : "") +
+          (letzte && S2.lek === SCHULE.length - 1 ? '<p class="kh-zitat">' + esc(tx.abschluss) + "</p>" : "") +
+          (letzte ? (S2.lek < SCHULE.length - 1 ? knopf("lektion", esc(tx.naechste), "haupt kh-riesig", ' data-wert="' + (S2.lek + 1) + '"') : "") + knopf("schulListe", esc(tx.zurLeiste))
+            : knopf("schulWeiter", esc(tx.weiter), "haupt kh-riesig") + knopf("schulListe", esc(T().zurueck))) + "</div>";
+      }
+      if (sch.art === "pruefung") {
+        return html + (S2.zustand === "nochmal" ? '<p class="kh-klein kh-hinweis">' + esc(S2.pruefStumm ? tx.pruefStumm : tx.pruefNein(S2.pruefPct, sch.ziel)) + "</p>" : "") +
+          (S2.zustand === "laedt" ? '<p class="kh-klein">' + esc(T().vorher.laedt) + "</p>" : "") +
+          '<div class="kh-reihe">' + knopf("schulPruefung", esc(tx.pruefLos), "haupt kh-riesig", S2.zustand === "laedt" ? " disabled" : "") + knopf("schulListe", esc(T().zurueck)) + "</div>";
+      }
+      if (S2.zustand === "bereit") {
+        return html + '<div class="kh-bereit">' + knopf("schulLos", esc(tx.los), "haupt kh-riesig") + "</div>" + '<div class="kh-reihe">' + knopf("schulListe", esc(T().zurueck)) + "</div>";
+      }
+      /* laufender Schritt */
+      let live = "";
+      if (sch.art === "ton" || sch.art === "folge" || sch.art === "echo") {
+        const ziele = schulZiele();
+        const namen = sch.art === "echo" ? ziele.map(() => "♪") : ziele.map((m, i) => sch.silben ? sch.silben[i] : tonName(m));
+        live = (ziele.length > 1 ? '<div class="kh-s-blasen">' + namen.map((n, i) => '<span class="kh-s-blase' + (i === S2.idx ? " jetzt" : "") + '">' + esc(n) + "</span>").join("") + "</div>"
+            : '<div class="kh-s-ziel"><small>' + esc(tx.ziel) + "</small><b>" + esc(tonName(ziele[0])) + '</b><small>' + esc(tx.du) + '</small><b class="kh-s-du">–</b></div>') +
+          '<div class="kh-s-skala"><span class="kh-s-zone"></span><i class="kh-s-zeiger"></i></div><p class="kh-s-info"></p>' +
+          '<span class="kh-m-ring kh-s-balken"><i></i></span>';
+      } else if (sch.art === "atem") {
+        live = '<p class="kh-gross-ton kh-s-zeit">0.0 / ' + sch.sekunden + ' s</p><span class="kh-m-ring kh-s-balken"><i></i></span>';
+      } else if (sch.art === "gleiten") {
+        const z = []; for (let m = S2.gHi; m >= S2.gLo; m--) z.push('<span class="kh-s-zelle" data-m="' + m + '">' + (m === S2.gHi || m === S2.gLo || m % 12 === 0 ? esc(tonName(m)) : "") + "</span>");
+        live = '<div class="kh-s-gleiten">' + z.join("") + '</div><span class="kh-m-ring kh-s-balken"><i></i></span>';
+      }
+      return html + '<div class="kh-schule-live">' + live + "</div>" +
+        (S2.tippAn ? '<p class="kh-s-tipp"><b>💡 ' + esc(tx.tipp) + ":</b> " + esc(S2.tippText) + "</p>" : "") + (S2.locker ? '<p class="kh-klein">' + esc(tx.lockerer) + "</p>" : "") +
+        '<div class="kh-reihe">' + (/ton|folge|echo/.test(sch.art) ? knopf("schulVorspielen", esc(tx.vorspielen), "haupt") : "") + knopf("schulListe", esc(T().zurueck)) +
+          (S2.zeit > 60 ? knopf("schulUeberspringen", esc(tx.ueberspringen)) : "") + "</div>";
+    },
     willkommen() {
       const tx = T().willkommen;
       return '<div class="kh-willkommen"><span class="kh-w-symbol" aria-hidden="true">🎙</span><h4 class="kh-kopf">' + esc(tx.titel) + "</h4><p>" + esc(tx.text) + "</p>" +
@@ -1804,6 +2080,7 @@
           '<button type="button" class="kh-banner gross" data-tun="einmessen"><b>🎙 ' + esc(tx.willkommen.knopf) + " <em>" + esc(tx.willkommen.empfohlen) + "</em></b><span>" + esc(tx.willkommen.bannerText) + "</span></button>") +
         '<div class="kh-raster">' +
           '<button type="button" class="kh-gross haupt" data-tun="tournee"><b>' + esc(tx.menue.tournee) + "</b><small>" + esc(tx.tourneeInfo(summe, rangVon(summe))) + "</small></button>" +
+          '<button type="button" class="kh-gross gruen" data-tun="schulListe"><b>🎓 ' + esc(ST().titel) + "</b><small>" + esc(ST().menueTile(schuleStand().fertig.length, SCHULE.length)) + "</small></button>" +
           '<button type="button" class="kh-gross rot" data-tun="duelle"><b>' + esc(tx.menue.duelle) + "</b><small>" + esc(tx.duellInfo(besiegt, DUELLE.length)) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="lieder"><b>' + esc(tx.menue.lieder) + "</b><small>" + esc(tx.lieder(DATEN.lieder.length)) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="uebung" data-wert="taeglich"><b>' + esc(tx.menue.taeglich) + "</b><small>" + esc(tx.taeglichInfo(straehne(b), b.einsingen.includes(heute()))) + "</small></button>" +
@@ -2038,7 +2315,7 @@
     if (st.buehne) return buehnenLiedBauen() || st;
     return liedBauen(DATEN.lieder.find(x => x.id === st.id));
   }
-  function nebenlaeufigeStoppen() { if (ansicht === "gabel") bordunStoppen(); if (ansicht === "gabel" || ansicht === "atem" || ansicht === "latenz" || ansicht === "einmessen") { cancelAnimationFrame(raf); micAus(); } }
+  function nebenlaeufigeStoppen() { if (ansicht === "gabel") bordunStoppen(); if (ansicht === "gabel" || ansicht === "atem" || ansicht === "latenz" || ansicht === "einmessen" || ansicht === "schule") { cancelAnimationFrame(raf); micAus(); } }
   root.addEventListener("click", ev => {
     const b = ev.target.closest("[data-tun]"); if (!b || !root.contains(b) || b.disabled) return;
     const tun = b.dataset.tun, wert = b.dataset.wert;
@@ -2072,7 +2349,7 @@
       case "insp": inspirieren(); break;
       case "stopp": wiedergabeEnde(); break;
       case "neu": { const st = S && S.st; abbrechen(true); if (st) starten(neuBauen(st)); break; }
-      case "aufhoeren": abbrechen(); wechsel(station != null ? "tournee" : "menue"); break;
+      case "aufhoeren": { const ausSchule = S && S.st.schule && schule; abbrechen(); if (ausSchule) { schule.zustand = "bereit"; ansicht = "schule"; zeigen(); break; } wechsel(station != null ? "tournee" : "menue"); break; }
       case "nochmal": { const st = ergebnis && ergebnis.st; if (!st) break; const frisch = neuBauen(st); mikroDann(() => starten(frisch)); break; }
       case "anhoeren": wiedergabeStarten(); break;
       case "eintragen": eintragen(); break;
@@ -2089,6 +2366,13 @@
       case "messTief": case "messHoch": case "messTiefNeu":
         if (einmess) { einmess.schritt = tun === "messHoch" ? "hoch" : "tief"; if (tun === "messTiefNeu") einmess.tief = null; einmess.werte = []; einmess.halten = 0; einmess.aktuell = null; zeigen(); }
         break;
+      case "schulListe": nebenlaeufigeStoppen(); cancelAnimationFrame(raf); micAus(); schule = null; ansicht = "schulListe"; zeigen(); break;
+      case "lektion": cancelAnimationFrame(raf); lektionStarten(+wert); break;
+      case "schulWeiter": schule.schritt++; if (schule.schritt >= SCHULE[schule.lek].schritte.length) { ansicht = "schulListe"; schule = null; zeigen(); break; } schrittVorbereiten(); zeigen(); break;
+      case "schulLos": schule.zustand = "laedt"; mikroDann(() => { schule.zustand = "bereit"; schulLadenUndLos(); }); break;
+      case "schulVorspielen": schulVorspielen(); break;
+      case "schulUeberspringen": cancelAnimationFrame(raf); schrittGeschafft(); break;
+      case "schulPruefung": schulPruefungStarten(); break;
       case "willkommenMessen": schreib("imres-kehle-willkommen", "1"); einmessenStarten("menue"); break;
       case "willkommenSpaeter": schreib("imres-kehle-willkommen", "1"); ansicht = "menue"; zeigen(); break;
       case "fuehrKlang": E.fuehrKlang = wert; einstSpeichern(); if (ansicht === "vorher") { gewaehlt.bereit = false; vorbereiten(gewaehlt.st); } else zeigen(); break;
@@ -2120,19 +2404,19 @@
     if (ev.key === " " || ev.key === "Escape" || ev.key === "p" || ev.key === "P") { ev.preventDefault(); if (S.wiedergabe) wiedergabeEnde(); else if (S.pause) fortsetzen(); else pausieren(); }
     if ((ev.key === "i" || ev.key === "I") && !S.pause) { ev.preventDefault(); inspirieren(); }
   });
-  document.addEventListener("visibilitychange", () => { if (document.hidden) { if (S) pausieren(); else if (["gabel", "einmessen", "atem", "latenz"].includes(ansicht)) { nebenlaeufigeStoppen(); ansicht = "menue"; zeigen(); } } });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { if (S) pausieren(); else if (["gabel", "einmessen", "atem", "latenz", "schule"].includes(ansicht)) { nebenlaeufigeStoppen(); ansicht = "menue"; zeigen(); } } });
   window.addEventListener("resize", () => { if (!S) requestAnimationFrame(ruhebild); });
   new MutationObserver(() => { if (!S) zeigen(); else $(".kh-pause").setAttribute("aria-label", T().spiel.pause); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   /* Spielesaal: beim Wechsel zu einem anderen Spiel alles anhalten und das Mikrofon freigeben */
   root._stoppen = () => {
     if (S) abbrechen(); nebenlaeufigeStoppen(); bordunStoppen(); micAus(); cancelAnimationFrame(raf);
-    if (["spiel", "pause", "einmessen", "gabel", "mikro", "atem", "latenz"].includes(ansicht)) { ansicht = "menue"; zeigen(); }
+    if (["spiel", "pause", "einmessen", "gabel", "mikro", "atem", "latenz", "schule"].includes(ansicht)) { ansicht = "menue"; zeigen(); }
   };
   /* Für Tests und Vorschaubilder: eine künstliche Stimme einspeisen */
   if (!gemessen() && lies("imres-kehle-willkommen") !== "1") ansicht = "willkommen";
   root._test = {
     stimme(fn) { testStimme = fn; micAus(); },
-    zustand: () => ({ ansicht, S, ergebnis, atem, latenz, bordun }),
+    zustand: () => ({ ansicht, S, ergebnis, atem, latenz, bordun, schule }), schulZiele: () => schule ? schulZiele() : [], korrektur: KORREKTUR,
     lied: id => { const l = DATEN.lieder.find(x => x.id === id); return l ? liedBauen(l) : null; },
     duell: id => { const d = DUELLE.find(x => x.id === id); return d ? duellBauen(d) : null; },
     buehne: () => buehnenLiedBauen(),
@@ -2187,6 +2471,37 @@
 .kh-leise { border: 0; background: none; color: var(--ash); font: inherit; font-size: .88rem; text-decoration: underline; cursor: pointer; }
 .kh-bereit { display: grid; justify-items: center; gap: .7rem; text-align: center; padding: .4rem 0; }
 .kh-bereit p { margin: 0; color: var(--vellum); font-size: .95rem; line-height: 1.5; }
+.kh-gross.gruen { border-color: rgba(95,214,184,.6); background: linear-gradient(135deg, rgba(95,214,184,.16), rgba(95,214,184,.03)); }
+.kh-gross.gruen b { color: #8fe8cf; }
+.kh-nr.ok { background: rgba(159,224,143,.2); border-color: #9fe08f; color: #9fe08f; }
+.kh-s-punkte { display: flex; gap: .35rem; }
+.kh-s-punkte i { flex: 1; height: 5px; border-radius: 3px; background: rgba(235,226,204,.12); }
+.kh-s-punkte i.fertig { background: #9fe08f; } .kh-s-punkte i.jetzt { background: #ffd27a; }
+.kh-s-lehre { display: grid; gap: .7rem; }
+.kh-s-lehre p, .kh-s-auftrag { margin: 0; font-size: clamp(1rem, 2.3vw, 1.12rem); line-height: 1.6; color: var(--vellum); }
+.kh-s-auftrag { font-family: var(--name); font-size: clamp(1.05rem, 2.6vw, 1.25rem); color: #ffe7b8; }
+.kh-s-jubel { font-family: var(--display); font-size: clamp(1.4rem, 5vw, 2rem) !important; color: #9fe08f !important; }
+.kh-schule-live { display: grid; justify-items: center; gap: .6rem; padding: .3rem 0; }
+.kh-s-ziel { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: .1rem 1rem; }
+.kh-s-ziel small { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ash); }
+.kh-s-ziel b { font-family: var(--display); font-weight: 400; font-size: clamp(2.4rem, 10vw, 3.4rem); line-height: 1; color: #ffd27a; }
+.kh-s-ziel b.kh-s-du { color: var(--vellum); font-size: clamp(1.6rem, 6vw, 2.2rem); }
+.kh-s-blasen { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; }
+.kh-s-blase { min-width: 3.1rem; padding: .55rem .6rem; text-align: center; border: 1px solid var(--line); border-radius: 999px; font-family: var(--name); font-size: 1.15rem; color: var(--ash); transition: all .2s; }
+.kh-s-blase.jetzt { border-color: #ffd27a; color: #ffd27a; transform: scale(1.12); box-shadow: 0 0 14px rgba(255,210,122,.35); }
+.kh-s-blase.fertig { border-color: #9fe08f; background: rgba(159,224,143,.18); color: #9fe08f; }
+.kh-s-skala { position: relative; width: min(360px, 92%); height: 40px; border-bottom: 1px solid var(--line); background: linear-gradient(90deg, rgba(208,106,90,.18), rgba(208,106,90,.04) 35%, rgba(208,106,90,.04) 65%, rgba(208,106,90,.18)); }
+.kh-s-zone { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 33%; background: rgba(159,224,143,.22); border-left: 1px solid rgba(159,224,143,.6); border-right: 1px solid rgba(159,224,143,.6); }
+.kh-s-zeiger { position: absolute; top: -4px; bottom: -4px; left: 50%; width: 6px; margin-left: -3px; border-radius: 3px; background: #ebe2cc; opacity: .15; transition: left .08s linear; display: block; }
+.kh-s-zeiger.ok { background: #9fe08f; box-shadow: 0 0 10px #9fe08f; }
+.kh-s-info { margin: 0; min-height: 1.4em; font-size: clamp(1rem, 3vw, 1.2rem); font-weight: 600; color: var(--ash); }
+.kh-s-info.ok { color: #9fe08f; } .kh-s-info.weg { color: #e8a24a; }
+.kh-s-balken { width: min(360px, 92%); height: 12px; }
+.kh-s-gleiten { display: grid; gap: 2px; width: min(240px, 70%); }
+.kh-s-zelle { height: 14px; font-size: .62rem; line-height: 14px; padding-left: .3rem; color: var(--ash); background: rgba(235,226,204,.06); transition: background .2s; }
+.kh-s-zelle.an { background: rgba(159,224,143,.45); color: #0e0b12; }
+.kh-s-zelle.jetzt { background: #ffd27a; color: #0e0b12; }
+.kh-s-tipp { margin: 0; padding: .6rem .8rem; border-left: 2px solid #5fd6b8; background: rgba(95,214,184,.08); font-size: .92rem; line-height: 1.5; color: var(--vellum); }
 .kh-reihe { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
 .kh-reihe.senk { flex-direction: column; align-items: stretch; max-width: 260px; margin: 0 auto; width: 100%; }
 .kh-reihe .tav-knopf { touch-action: manipulation; }
