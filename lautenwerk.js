@@ -2724,6 +2724,158 @@ const ZUS_ICON = {
     regen: SZ([0, "!verstummen"], [0, "donner", { laut: 1.6 }], [2, "windstoss", { laut: 1.3 }]), sturm: SZ([0, "!verstummen"], [0, "donner", { laut: 1.6 }], [2, "holzbruch", { laut: 1.3 }]),
     zelt: SZ([0, "donner", { laut: 1.6 }], [1, "tuch", { laut: 1.4 }], [2, "windstoss", { laut: 1.3 }]), unterwasser: SZ([0, "monster", { laut: 1.3 }], [2, "wal", { laut: 1.2 }])
   };
+
+  /* „Etwas passiert“ je Kulisse: vier Momente mit Symbol zum gezielten Auslösen – ⚡ wählt einen davon zufällig.
+     [Symbol, Name deutsch, Name englisch, Ablauf] – Ablauf wie die kleinen Szenen: [Sekunde, Art, { laut, gegen, fern, wandern, nah }] */
+  const ML = (x, o) => Object.assign({ laut: x }, o || {});
+  const KUL_MOMENTE = {
+    taverne: [
+      ["🚪", "Tür fliegt auf", "Door bursts open", SZ([0, "tor", ML(1.6)], [.1, "!stille", { d: 5 }], [1, "holzschritte", ML(1.3)], [6.2, "raunen", ML(1.2)])],
+      ["🍺", "Runde für alle", "A round for all", SZ([0, "muenzen", ML(1.3)], [.6, "jubel", ML(1.3)], [1.6, "krug", ML(1.2)], [2.2, "krug", ML(1.2, { gegen: 1 })], [3, "lachen", ML(1.2)])],
+      ["🤼", "Rauferei", "A brawl", SZ([0, "zank", ML(1.4)], [1, "faustkampf", ML(1.4)], [2.2, "tischbruch", ML(1.3)], [3.2, "raunen", ML(1.2, { gegen: 1 })])],
+      ["🎲", "Würfelglück", "Lucky roll", SZ([0, "wuerfel", ML(1.4)], [2, "raunen", ML(1.1)], [3.2, "jubel", ML(1.3)], [4, "muenzen", ML(1.2)])]],
+    feuer: [
+      ["🐺", "Wölfe heulen", "Wolves howl", SZ([0, "!verstummen"], [0, "wolf", ML(1.4, { fern: 1 })], [2.5, "wolf", ML(1.3, { gegen: 1, fern: 1 })], [5, "wolf", ML(1.4)])],
+      ["🌿", "Etwas im Gebüsch", "Something in the bushes", SZ([0, "ast", ML(1.5)], [.2, "!verstummen"], [1, "laubschritt", ML(1.4)], [3, "knurren", ML(1.3)])],
+      ["🔥", "Feuer flammt auf", "Fire flares up", SZ([0, "zischen", ML(1.3)], [.3, "holzpoltern", ML(1.4)], [1, "ast", ML(1.2)], [2, "schnauben", ML(1.1, { gegen: 1 })])],
+      ["🐎", "Reiter in der Nacht", "Rider in the night", SZ([0, "galopp", ML(1.5, { wandern: 1 })], [3, "wiehern", ML(1.3)], [4.5, "leder", ML(1.2)])]],
+    wald: [
+      ["🐗", "Bricht durchs Unterholz", "Bursts through the undergrowth", SZ([0, "!verstummen"], [0, "holzbruch", ML(1.5)], [.4, "ast", ML(1.3)], [.8, "keiler", ML(1.5)], [1, "laubschritt", ML(1.6, { wandern: 1 })], [2.6, "holzbruch", ML(1.2)])],
+      ["🌲", "Baum stürzt", "A tree falls", SZ([0, "!verstummen"], [0, "baumfall", ML(1.6)], [2.5, "kraehe", ML(1.2, { gegen: 1 })])],
+      ["🏹", "Pfeil aus dem Hinterhalt", "Arrow from ambush", SZ([0, "!verstummen"], [0, "pfeil", ML(1.6)], [1.2, "laubschritt", ML(1.3, { gegen: 1 })], [2.5, "schwertziehen", ML(1.3)])],
+      ["🦌", "Hirsch röhrt", "A stag bellows", SZ([0, "hirsch", ML(1.5)], [3, "hirsch", ML(1.3, { gegen: 1, fern: 1 })], [4.5, "laub", ML(1.2)])]],
+    waldnacht: [
+      ["🐺", "Rudel kommt näher", "The pack draws near", SZ([0, "!verstummen"], [0, "wolf", ML(1.3, { fern: 1 })], [2, "wolf", ML(1.4, { gegen: 1 })], [4, "knurren", ML(1.5)], [5, "laubschritt", ML(1.3)])],
+      ["🦉", "Eule schreckt auf", "An owl takes flight", SZ([0, "eule", ML(1.5)], [.6, "laub", ML(1.3)], [1.5, "eule", ML(1.3, { gegen: 1 })])],
+      ["👁", "Augen im Dunkeln", "Eyes in the dark", SZ([0, "!stille", { d: 4 }], [1, "ast", ML(1.4)], [2.5, "atem", ML(1.4, { nah: 1 })], [4.5, "knurren", ML(1.4)])],
+      ["🕯", "Irrlicht", "Will-o'-the-wisp", SZ([0, "glocklein", ML(1.4)], [1.5, "zauber", ML(1.2)], [3, "glocklein", ML(1.2, { gegen: 1 })])]],
+    regen: [
+      ["⚡", "Blitzeinschlag", "Lightning strike", SZ([0, "!verstummen"], [0, "donner", ML(1.7)], [.6, "holzbruch", ML(1.3)], [2.5, "windstoss", ML(1.3)])],
+      ["💨", "Sturmböe", "Gust of wind", SZ([0, "windstoss", ML(1.6)], [1, "tuch", ML(1.3)], [2, "holzpoltern", ML(1.2)])],
+      ["🐴", "Reiter im Regen", "Rider in the rain", SZ([0, "galopp", ML(1.5, { wandern: 1 })], [3, "wiehern", ML(1.3)])],
+      ["🏚", "Etwas kracht ein", "Something collapses", SZ([0, "holzbruch", ML(1.5)], [.5, "einsturz", ML(1.3)], [2, "platsch", ML(1.2)])]],
+    sturm: [
+      ["⚡", "Blitz schlägt ein", "Lightning strikes", SZ([0, "!verstummen"], [0, "donner", ML(1.7)], [.5, "holzbruch", ML(1.4)])],
+      ["🌲", "Baum bricht", "A tree breaks", SZ([0, "windstoss", ML(1.5)], [.8, "baumfall", ML(1.5)], [3, "donner", ML(1.2, { fern: 1 })])],
+      ["🌪", "Orkanböe", "Hurricane gust", SZ([0, "windstoss", ML(1.7)], [.6, "windstoss", ML(1.5, { gegen: 1 })], [1.5, "holzpoltern", ML(1.3)], [2.5, "tuch", ML(1.3)])],
+      ["⛈", "Donnerschlag", "Thunderclap", SZ([0, "donner", ML(1.8)], [.3, "!stille", { d: 3 }], [3.5, "grollen", ML(1.3)])]],
+    meer: [
+      ["🌊", "Riesenwelle", "Giant wave", SZ([0, "rumpf", ML(1.5)], [.5, "platsch", ML(1.5)], [1.5, "windstoss", ML(1.3)])],
+      ["🐋", "Wal taucht auf", "A whale surfaces", SZ([0, "wal", ML(1.5)], [2, "platsch", ML(1.3)], [4, "wal", ML(1.3, { gegen: 1, fern: 1 })])],
+      ["⛈", "Sturm zieht auf", "Storm rising", SZ([0, "donner", ML(1.5, { fern: 1 })], [1.5, "windstoss", ML(1.5)], [3, "moewe", ML(1.2)])],
+      ["🔔", "Glocke in der Ferne", "Distant bell", SZ([0, "glocke", ML(1.4, { fern: 1 })], [3, "glocke", ML(1.3, { fern: 1 })], [5, "moewe", ML(1.2)])]],
+    schiff: [
+      ["🌊", "Brecher über Deck", "Wave over deck", SZ([0, "rumpf", ML(1.6)], [.4, "platsch", ML(1.5)], [1, "knarren", ML(1.4)], [2, "holzpoltern", ML(1.3)])],
+      ["🔔", "Alarmglocke", "Alarm bell", SZ([0, "glocke", ML(1.5)], [.8, "glocke", ML(1.5)], [1.6, "holzschritte", ML(1.4)], [2.5, "kampfruf", ML(1.2)])],
+      ["⚓", "Anker los", "Drop anchor", SZ([0, "kette", ML(1.6)], [1.5, "platsch", ML(1.4)], [2.5, "rumpf", ML(1.2)])],
+      ["🏴‍☠️", "Entern!", "Boarding!", SZ([0, "kampfruf", ML(1.4)], [.6, "rumpf", ML(1.5)], [1.5, "klingen", ML(1.4)], [3, "aua", ML(1.2)])]],
+    wasserfall: [
+      ["🪨", "Steinschlag", "Rockfall", SZ([0, "!verstummen"], [0, "steinschlag", ML(1.5)], [1, "platsch", ML(1.4)])],
+      ["💦", "Jemand stürzt ins Wasser", "Someone falls in", SZ([0, "aua", ML(1.2)], [.5, "platsch", ML(1.6)], [2, "platsch", ML(1.2)])],
+      ["🦅", "Greif über dem Fall", "Gryphon above the falls", SZ([0, "greif", ML(1.5)], [3, "greif", ML(1.3, { gegen: 1 })])],
+      ["🐻", "Tier am Ufer", "Animal on the bank", SZ([0, "ast", ML(1.3)], [1, "keiler", ML(1.4)], [2.5, "platsch", ML(1.2)])]],
+    hoehle: [
+      ["🪨", "Einsturz", "Cave-in", G_TIEF],
+      ["🦇", "Fledermausschwarm", "Bat swarm", SZ([0, "fledermaus", ML(1.6)], [.4, "fledermaus", ML(1.5, { gegen: 1 })], [1, "fledermaus", ML(1.5)])],
+      ["🐉", "Etwas erwacht", "Something wakes", SZ([0, "!stille", { d: 3 }], [.5, "atem", ML(1.5)], [3, "monster", ML(1.5)], [4, "steinschlag", ML(1.2)])],
+      ["💧", "Wasser bricht ein", "Water breaks in", SZ([0, "grollen", ML(1.4)], [1, "platsch", ML(1.5)], [1.5, "platsch", ML(1.4, { gegen: 1 })], [2.5, "stein", ML(1.2)])]],
+    unterreich: [
+      ["🕷", "Spinnen krabbeln", "Spiders crawl", SZ([0, "kaefer", ML(1.6, { nah: 1 })], [1.5, "kaefer", ML(1.4, { gegen: 1 })], [3, "schleim", ML(1.2)])],
+      ["👹", "Orks im Gang", "Orcs in the tunnel", SZ([0, "troll", ML(1.5, { fern: 1 })], [1.5, "troll", ML(1.4, { gegen: 1 })], [3, "steinschritte", ML(1.3)], [4, "kette", ML(1.2)])],
+      ["🐙", "Etwas aus der Tiefe", "Something from the deep", SZ([0, "!stille", { d: 3 }], [.5, "blubb", ML(1.4)], [2, "monster", ML(1.6)], [3, "grollen", ML(1.3)])],
+      ["🪨", "Einsturz", "Cave-in", G_TIEF]],
+    kerker: [
+      ["🗝", "Wache kommt", "Guard approaches", KUL_GROSS.kerker],
+      ["⛓", "Gefangener rüttelt", "Prisoner rattles", SZ([0, "kette", ML(1.6)], [.6, "kette", ML(1.5)], [1.4, "stoehnen", ML(1.4)], [2.5, "zank", ML(1.2)])],
+      ["😱", "Schrei aus der Zelle", "Scream from a cell", SZ([0, "schrei", ML(1.5, { fern: 1 })], [.2, "!stille", { d: 3 }], [3.5, "stoehnen", ML(1.2)])],
+      ["🐀", "Ratten", "Rats", SZ([0, "kaefer", ML(1.5, { nah: 1 })], [1, "schnueffeln", ML(1.3)], [2, "kaefer", ML(1.3, { gegen: 1 })])]],
+    sumpf: [
+      ["🐍", "Schlange im Schilf", "Snake in the reeds", SZ([0, "!verstummen"], [0, "schlange", ML(1.6, { nah: 1 })], [2, "platsch", ML(1.3)])],
+      ["🫧", "Etwas taucht auf", "Something surfaces", SZ([0, "blubb", ML(1.5)], [1, "blubb", ML(1.4)], [2, "platsch", ML(1.6)], [2.8, "monster", ML(1.3)])],
+      ["👻", "Irrlicht lockt", "A will-o'-wisp lures", SZ([0, "glocklein", ML(1.4)], [1.5, "heulen", ML(1.2, { fern: 1 })], [3, "glocklein", ML(1.3, { gegen: 1 })])],
+      ["🐸", "Froschkonzert", "Frog concert", SZ([0, "frosch", ML(1.5)], [.4, "frosch", ML(1.4, { gegen: 1 })], [.8, "frosch", ML(1.4)], [1.2, "frosch", ML(1.4, { gegen: 1 })])]],
+    unterwasser: [
+      ["🐙", "Ungeheuer der Tiefe", "Monster of the deep", SZ([0, "monster", ML(1.5)], [2, "blubb", ML(1.4)])],
+      ["🐋", "Walgesang", "Whale song", SZ([0, "wal", ML(1.5)], [4, "wal", ML(1.4, { gegen: 1 })])],
+      ["⚓", "Wrack ächzt", "Wreck groans", SZ([0, "rumpf", ML(1.5)], [1.5, "kette", ML(1.3)], [3, "knarren", ML(1.3)])],
+      ["🫧", "Luftblasen", "Air bubbles", SZ([0, "blubb", ML(1.6, { nah: 1 })], [.6, "blubb", ML(1.4)], [1.2, "blubb", ML(1.3, { gegen: 1 })])]],
+    schmiede: [
+      ["🔨", "Klinge wird geschmiedet", "A blade is forged", SZ([0, "hammer", ML(1.5)], [2, "zischen", ML(1.5)], [3, "schleifen", ML(1.3)])],
+      ["🔥", "Esse faucht", "The forge roars", SZ([0, "blasebalg", ML(1.6)], [1, "blasebalg", ML(1.5)], [2, "zischen", ML(1.3)])],
+      ["💥", "Missgeschick", "Mishap", SZ([0, "metall", ML(1.5)], [.2, "zischen", ML(1.3)], [1, "aua", ML(1.2)], [2, "zank", ML(1.2)])],
+      ["⚔", "Kunde prüft die Klinge", "Testing the blade", SZ([0, "schwertziehen", ML(1.4)], [1, "klingen", ML(1.3)], [3, "muenzen", ML(1.3)])]],
+    labor: [
+      ["💥", "Trank explodiert", "Potion explodes", SZ([0, "knall", ML(1.6)], [.2, "glasbruch", ML(1.4)], [1, "zischen", ML(1.3)], [2, "husten", ML(1.2)])],
+      ["✨", "Zauber gelingt", "Spell succeeds", SZ([0, "zauber", ML(1.5)], [1.5, "glocklein", ML(1.3)], [3, "lachen", ML(1.1)])],
+      ["🧪", "Kessel kocht über", "Cauldron boils over", SZ([0, "blubb", ML(1.5)], [.5, "blubb", ML(1.5)], [1.2, "zischen", ML(1.4)])],
+      ["📚", "Regal stürzt", "Shelf collapses", SZ([0, "holzpoltern", ML(1.5)], [.4, "buch", ML(1.5)], [.8, "glasbruch", ML(1.3)])]],
+    bibliothek: [
+      ["📚", "Bücher fallen", "Books fall", SZ([0, "buch", ML(1.5)], [.3, "holzpoltern", ML(1.4)], [1, "buch", ML(1.3, { gegen: 1 })], [2, "!stille", { d: 3 }])],
+      ["🤫", "Pssst!", "Shhh!", SZ([0, "!stille", { d: 5 }], [.5, "husten", ML(1.2, { gegen: 1 })])],
+      ["👻", "Geist zwischen den Regalen", "Ghost between the shelves", SZ([0, "wehklagen", ML(1.4, { fern: 1 })], [2, "papier", ML(1.4)], [3.5, "knarren", ML(1.3)])],
+      ["🗝", "Geheimtür", "Secret door", SZ([0, "riegel", ML(1.4)], [1, "steintor", ML(1.5)], [3, "steinschritte", ML(1.2)])]],
+    tempel: [
+      ["🔔", "Großer Gong", "Great gong", KUL_GROSS.tempel],
+      ["🙏", "Chor erhebt sich", "The choir rises", SZ([0, "chor", ML(1.5)], [3, "chor", ML(1.4, { gegen: 1 })], [6, "glocke", ML(1.2)])],
+      ["✨", "Wunder", "Miracle", SZ([0, "!stille", { d: 3 }], [.5, "klangschale", ML(1.6)], [2.5, "glbaum", ML(1.3)], [4, "chor", ML(1.3)])],
+      ["🚪", "Pforte öffnet sich", "Gate opens", SZ([0, "steintor", ML(1.5)], [2, "steinschritte", ML(1.3)], [4, "glocke", ML(1.2)])]],
+    dorf: [
+      ["🐺", "Wolf im Stall", "Wolf in the barn", SZ([0, "wolf", ML(1.4)], [1, "hund", ML(1.5)], [1.5, "schaf", ML(1.4, { gegen: 1 })], [2.5, "huhn", ML(1.4)])],
+      ["🐂", "Ochse bricht aus", "An ox breaks loose", SZ([0, "ochse", ML(1.5)], [1, "holzbruch", ML(1.4)], [1.6, "huhn", ML(1.4)], [2.5, "zank", ML(1.3)])],
+      ["🐴", "Reiter kommt", "A rider arrives", SZ([0, "galopp", ML(1.5, { wandern: 1 })], [3, "wiehern", ML(1.3)], [4, "volk", ML(1.3)])],
+      ["🔔", "Sturmglocke", "Alarm bell", SZ([0, "glocke", ML(1.6)], [1, "glocke", ML(1.5)], [2, "volk", ML(1.3)], [3, "hund", ML(1.2)])]],
+    markt: [
+      ["👛", "Taschendieb!", "Pickpocket!", SZ([0, "muenzen", ML(1.4)], [.6, "zank", ML(1.5)], [1.4, "laubschritt", ML(1.3, { wandern: 1 })], [3, "raunen", ML(1.2)])],
+      ["📯", "Ausrufer", "Town crier", SZ([0, "signalhorn", ML(1.4)], [1.5, "volk", ML(1.4)], [3, "raunen", ML(1.2)])],
+      ["🐴", "Kutsche rast durch", "Carriage races through", SZ([0, "kutsche", ML(1.6, { wandern: 1 })], [1.5, "zank", ML(1.3)], [2.5, "huhn", ML(1.3)])],
+      ["🤹", "Gaukler", "Jugglers", SZ([0, "schellen", ML(1.4)], [1.5, "jubel", ML(1.3)], [3, "lachen", ML(1.2)])]],
+    hafen: [
+      ["🔔", "Sturmglocke", "Storm bell", KUL_GROSS.hafen],
+      ["⛵", "Schiff legt an", "A ship docks", SZ([0, "glocke", ML(1.4, { fern: 1 })], [2, "rumpf", ML(1.5)], [3, "kette", ML(1.4)], [4, "volk", ML(1.3)])],
+      ["🦜", "Möwen stürzen herab", "Gulls dive", SZ([0, "moewe", ML(1.6)], [.4, "moewe", ML(1.5, { gegen: 1 })], [.8, "moewe", ML(1.4)])],
+      ["🤼", "Hafenkeilerei", "Dockside brawl", SZ([0, "zank", ML(1.4)], [1, "faustkampf", ML(1.4)], [2, "platsch", ML(1.4)], [3, "lachen", ML(1.2)])]],
+    gebirge: [
+      ["🏔", "Lawine", "Avalanche", KUL_GROSS.gebirge],
+      ["🦅", "Greif stößt herab", "Gryphon dives", SZ([0, "greif", ML(1.6)], [1, "windstoss", ML(1.4)], [2.5, "greif", ML(1.4, { gegen: 1 })])],
+      ["🧌", "Bergbestie", "Mountain beast", SZ([0, "!verstummen"], [0, "yeti", ML(1.6)], [2, "stampfen", ML(1.4)], [3, "steinschlag", ML(1.2)])],
+      ["❄", "Eisiger Sturm", "Icy storm", SZ([0, "windstoss", ML(1.6)], [1, "schnee", ML(1.4)], [2, "windstoss", ML(1.4, { gegen: 1 })])]],
+    mine: [
+      ["🪨", "Einsturz", "Cave-in", G_TIEF],
+      ["💎", "Ader gefunden!", "Struck a vein!", SZ([0, "hacke", ML(1.4)], [.8, "edelstein", ML(1.5)], [1.8, "jubel", ML(1.3)])],
+      ["🚂", "Lore rast heran", "Mine cart rushes in", SZ([0, "kutsche", ML(1.5, { wandern: 1 })], [2, "kette", ML(1.4)], [3, "zank", ML(1.2)])],
+      ["👹", "Etwas in den Stollen", "Something in the tunnels", SZ([0, "!stille", { d: 3 }], [.5, "grunzen", ML(1.4, { fern: 1 })], [2.5, "troll", ML(1.5)], [3.5, "stein", ML(1.2)])]],
+    strasse: [
+      ["🏹", "Überfall!", "Ambush!", SZ([0, "pfeil", ML(1.6)], [.6, "kampfruf", ML(1.4)], [1.2, "schwertziehen", ML(1.4)], [2, "wiehern", ML(1.3)])],
+      ["🐴", "Reiter jagt vorbei", "A rider gallops past", SZ([0, "galopp", ML(1.6, { wandern: 1 })], [2.5, "wiehern", ML(1.3)])],
+      ["🛞", "Kutsche bricht ein", "Carriage breaks down", SZ([0, "kutsche", ML(1.4)], [1.5, "holzbruch", ML(1.5)], [2.2, "wiehern", ML(1.3)], [3, "zank", ML(1.2)])],
+      ["⛈", "Gewitter zieht auf", "Storm brewing", SZ([0, "!verstummen"], [0, "donner", ML(1.5, { fern: 1 })], [2, "windstoss", ML(1.4)])]],
+    burg: [
+      ["📯", "Horn zum Angriff", "Horn to battle", KUL_GROSS.burg],
+      ["🚪", "Tor wird geöffnet", "Gate opens", SZ([0, "kette", ML(1.5)], [1, "tor", ML(1.6)], [2.5, "hufe", ML(1.3, { wandern: 1 })])],
+      ["👑", "Der König kommt", "The king arrives", SZ([0, "signalhorn", ML(1.5)], [1.5, "trommler", ML(1.3)], [3, "jubel", ML(1.4)])],
+      ["⚔", "Zweikampf im Hof", "Duel in the yard", SZ([0, "schwertziehen", ML(1.4)], [1, "klingen", ML(1.5)], [3, "raunen", ML(1.2)], [4.5, "jubel", ML(1.2)])]],
+    ufer: [
+      ["💦", "Jemand fällt ins Wasser", "Someone falls in", SZ([0, "aua", ML(1.2)], [.5, "platsch", ML(1.6)], [2, "lachen", ML(1.2)])],
+      ["🦆", "Enten fliegen auf", "Ducks take off", SZ([0, "ente", ML(1.6)], [.3, "platsch", ML(1.4)], [.8, "ente", ML(1.4, { gegen: 1 })])],
+      ["🛶", "Boot treibt heran", "A boat drifts in", SZ([0, "ruder", ML(1.4, { wandern: 1 })], [3, "rumpf", ML(1.3)], [4, "volk", ML(1.2)])],
+      ["🐊", "Etwas im Fluss", "Something in the river", SZ([0, "!verstummen"], [0, "platsch", ML(1.6)], [1.5, "blubb", ML(1.3)], [2.5, "monster", ML(1.2)])]],
+    schlacht: [
+      ["📯", "Angriff!", "Charge!", KUL_GROSS.schlacht],
+      ["🏹", "Pfeilhagel", "Arrow storm", SZ([0, "kampfruf", ML(1.4)], [.8, "salve", ML(1.6)], [1.6, "salve", ML(1.5, { gegen: 1 })], [2.5, "aua", ML(1.3)])],
+      ["☄", "Katapulttreffer", "Catapult hit", SZ([0, "belagerung", ML(1.5)], [2.5, "einschlag", ML(1.7)], [2.6, "!verstummen"], [3.5, "aua", ML(1.3)])],
+      ["🐎", "Reiterei bricht durch", "Cavalry breaks through", SZ([0, "galopp", ML(1.6, { wandern: 1 })], [1.5, "kampfruf", ML(1.4)], [2.5, "klingen", ML(1.4)], [3.5, "tod", ML(1.2)])]],
+    schlaegerei: [
+      ["🪑", "Stuhl fliegt", "A chair flies", SZ([0, "zank", ML(1.4)], [.8, "stuhl", ML(1.5)], [1.2, "holzbruch", ML(1.5)], [2, "jubel", ML(1.2)])],
+      ["🍺", "Wirt greift ein", "The innkeeper steps in", KUL_GROSS.schlaegerei],
+      ["🥊", "K.-o.-Schlag", "Knockout", SZ([0, "faustkampf", ML(1.5)], [.8, "aua", ML(1.4)], [1.4, "holzpoltern", ML(1.5)], [1.6, "!stille", { d: 2 }], [3.8, "jubel", ML(1.4)])],
+      ["🪟", "Fenster splittert", "Window shatters", SZ([0, "glasbruch", ML(1.6)], [.3, "glasbruch", ML(1.3)], [1, "raunen", ML(1.3)])]],
+    duell: [
+      ["⚔", "Entscheidender Treffer", "Decisive hit", KUL_GROSS.duell],
+      ["🗡", "Klinge zerbricht", "A blade breaks", SZ([0, "klingen", ML(1.4)], [1, "metall", ML(1.6)], [1.2, "raunen", ML(1.4)])],
+      ["🎉", "Die Menge tobt", "The crowd roars", SZ([0, "jubel", ML(1.6)], [1.5, "jubel", ML(1.4, { gegen: 1 })], [3, "kampfruf", ML(1.2)])],
+      ["🤺", "Ausweichen in letzter Sekunde", "Last-second dodge", SZ([0, "klingen", ML(1.3)], [.6, "raunen", ML(1.5)], [2, "kies", ML(1.3)], [3, "jubel", ML(1.3)])]]
+  };
+  const momenteVon = art => KUL_MOMENTE[art] || [];
   /* Spannung: was sich mit steigender Bedrohung einschleicht – [Art, Abstand, Stärke, fern, ab welcher Spannung] */
   const GEFAHR = {
     draussen: [["ast", [10, 25], .32, .3, .2], ["knurren", [25, 60], .3, .4, .45], ["laubschritt", [18, 40], .26, .3, .3], ["kraehe", [30, 70], .24, .7, .2], ["wolf", [40, 90], .26, .9, .55], ["atem", [50, 110], .22, 0, .75]],
@@ -2886,10 +3038,20 @@ const ZUS_ICON = {
     let i = Math.floor(Math.random() * l.length); if (l.length > 1 && i === k.letzteSzene) i = (i + 1) % l.length;
     k.letzteSzene = i; szeneSpielen(k, l[i]);
   }
-  function etwasPassiert() {
+  /* Momente als Knöpfe: Symbol und kurzer Name, je Kulisse vier */
+  function momenteZeile(T, art) {
+    const m = momenteVon(art); if (!m.length) return "";
+    const en = sprache() === "en";
+    return '<div class="lw-momente" data-kul="' + art + '">' + m.map((x, i) => '<button type="button" class="lw-moment" data-moment="' + i + '" title="' + esc(en ? x[2] : x[1]) + '"><span class="ms">' + x[0] + '</span><span class="mt">' + esc(en ? x[2] : x[1]) + "</span></button>").join("") + "</div>";
+  }
+  setInterval(() => { if (!S) return; root.querySelectorAll(".lw-momente").forEach(z => { if (z.dataset.kul !== S.kulisse) { const neu = momenteZeile(t(), S.kulisse); if (neu) z.outerHTML = neu; else z.innerHTML = ""; } }); }, 1000);
+  function etwasPassiert(nr) {
     audioStart(); if (!ctx) return;
+    /* Kulisse gewählt, aber still: erst einschalten, dann geschieht es */
+    if ((!kul || kul.art !== S.kulisse) && KUL_WELT[S.kulisse]) { kulisseStart(true); try { knoepfe(); } catch (_) {} setTimeout(() => etwasPassiert(nr), 1600); return; }
     if (!kul || !KUL_WELT[kul.art]) { effekt("donner", 1); return; }
-    szeneSpielen(kul, KUL_GROSS[kul.art] || G_TIEF, 1);
+    const m = momenteVon(kul.art), x = nr != null && m[nr] ? m[nr] : m.length ? zufall(m) : null;
+    szeneSpielen(kul, x ? x[3] : KUL_GROSS[kul.art] || G_TIEF, 1);
     kul.szeneNaechst = Math.max(kul.szeneNaechst, ctx.currentTime + 30);
   }
   function stilleStart(d) {
@@ -8444,6 +8606,7 @@ const ZUS_ICON = {
       '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="false">' + T.leben.stille + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="abend" aria-expanded="' + abendAuf + '">' + E.abend + (abendSet ? " · " + ABEND_SETS[abendSet].sym : "") + "</button>" +
       '<button type="button" class="lw-schalter lw-ewasist" data-aktion="wasist" aria-pressed="' + wasIst + '" title="' + esc(E.wasIstTipp) + '">' + (wasIst ? E.wasIstAn : E.wasIst) + "</button></div>" +
+      momenteZeile(T, S.kulisse) +
       (wasIst ? '<p class="lw-ewasist-hinweis">' + E.wasIstHinweis + "</p>" : "") + "</div>";
   }
   let abendAuf = false;
@@ -8550,7 +8713,7 @@ const ZUS_ICON = {
       szenen: "Ab und zu spielt sich eine kleine Szene ab.", nah: "Ab und zu kommt einem etwas ganz nah ans Ohr." },
     wetter: "Wetter über dem Ort: von trocken bis Gewitter.", zeit: "Tageszeit des Ortes: nachts zirpen Grillen und rufen Eulen.", standort: "Wo ihr steht: mittendrin, am Rand, nebenan oder darunter – klingt entsprechend gedämpft.",
     spannung: "Spannung: je weiter rechts, desto bedrohlicher klingt der Ort.", tab: "Wechselt den Bereich.", mehr: "Zeigt mehr Auswahl oder wieder weniger.", int: "Wie viel los ist: ruhig, normal oder wild.",
-    set: n => "Spielabend „" + n + "“: Passende Stimmungen und Effekte stehen dann vorne.", keinOrt: "Kein Hintergrund: Die Ortsgeräusche hören auf, die Musik läuft weiter.", info: "Kleine Erklärung zu diesem Bereich.", sonst: "Ein Knopf des Lautenwerks." } });
+    set: n => "Spielabend „" + n + "“: Passende Stimmungen und Effekte stehen dann vorne.", keinOrt: "Kein Hintergrund: Die Ortsgeräusche hören auf, die Musik läuft weiter.", moment: n => "Großer Moment „" + n + "“: passend zum Ort geschieht genau das – laut und mit allem Drum und Dran. ⚡ Etwas passiert wählt einen der vier zufällig.", info: "Kleine Erklärung zu diesem Bereich.", sonst: "Ein Knopf des Lautenwerks." } });
   Object.assign(TX.en, { wi: {
     vorlage: (n, b) => "Mood “" + n + "”" + (b ? " – " + b : "") + ". Tap: the music changes smoothly to this mood at the end of the bar, and the fitting place sounds along. Hold 2 seconds to pin it.",
     kulisse: n => "Place “" + n + "”: background sounds that keep running under the music. Tap to switch there.",
@@ -8569,11 +8732,12 @@ const ZUS_ICON = {
       szenen: "Now and then a little scene plays out.", nah: "Now and then something comes right up to your ear." },
     wetter: "Weather over the place: from dry to thunderstorm.", zeit: "Time of day: at night crickets chirp and owls call.", standort: "Where you stand: in the middle, at the edge, next door or below – sounds muffled accordingly.",
     spannung: "Tension: the further right, the more menacing the place sounds.", tab: "Switches the section.", mehr: "Shows more choice or less again.", int: "How busy: calm, normal or wild.",
-    set: n => "Game night “" + n + "”: fitting moods and effects come first.", keinOrt: "No background: the place sounds stop, the music keeps playing.", info: "A short explanation of this part.", sonst: "A button of the Lautenwerk." } });
+    set: n => "Game night “" + n + "”: fitting moods and effects come first.", keinOrt: "No background: the place sounds stop, the music keeps playing.", moment: n => "Big moment “" + n + "”: exactly this happens, fitting the place – loud and with all the trimmings. ⚡ Something happens picks one of the four at random.", info: "A short explanation of this part.", sonst: "A button of the Lautenwerk." } });
   const ohneZeichen = x => String(x || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
   function erklaerung(el) {
     const T = t(), W = T.wi, d = el.dataset || {};
     if (d.vorlage != null) { const k = d.vorlage; return W.vorlage(ohneZeichen(T.vorlagen[k] || stimmName(k) || k), (T.stBsp || {})[k]); }
+    if (d.moment != null) { const m = momenteVon(S.kulisse)[+d.moment]; return W.moment(m ? (sprache() === "en" ? m[2] : m[1]) : ""); }
     if (d.kulisse === "keine") return W.keinOrt;
     if (d.kulisse != null) return W.kulisse(ohneZeichen(T.kulissen[d.kulisse]));
     if (d.sfx != null) return W.sfx(ohneZeichen(T.sfx[d.sfx]));
@@ -8725,6 +8889,7 @@ const ZUS_ICON = {
     /* Lebendige Kulisse */
     const lebenSetz = f => () => { audioStart(); f(); lebenGeaendert(); boxNeu("klang"); };
     add(["etwas passiert", "überraschung", "plötzlich"], "Etwas passiert", () => etwasPassiert());
+    [...new Set(Object.values(KUL_MOMENTE).flatMap(l => l.map(x => x[1].toLowerCase().replace(/[!?.]/g, ""))))].forEach(n => add([n], n, () => { const i = momenteVon(S.kulisse).findIndex(x => x[1].toLowerCase().replace(/[!?.]/g, "") === n); if (i >= 0) etwasPassiert(i); }));
     add(["psst", "schweigen", "lauscht", "horcht"], "Stille", () => { audioStart(); stilleStart(5); });
     add(["weiterziehen", "weitergehen", "losgehen", "wir gehen"], "Weiterziehen", lebenSetz(() => { leben.gehen = true; }));
     add(["stehen bleiben", "halt an", "rast"], "Stehen bleiben", lebenSetz(() => { leben.gehen = false; }));
@@ -9301,6 +9466,8 @@ const ZUS_ICON = {
     if (e.target.closest('[data-aktion="aufnahme"]')) { aufnahmeUmschalten(); return; }
     if (e.target.closest('[data-aktion="schlaf"]')) { schlafUmschalten(); return; }
     if (e.target.closest('[data-aktion="tuer"]')) { tuerUmschalten(); return; }
+    const mo = e.target.closest("[data-moment]");
+    if (mo) { etwasPassiert(+mo.dataset.moment); return; }
     const la = e.target.closest('[data-aktion="passiert"],[data-aktion="stille"],[data-aktion="gehen"],[data-aktion="nachlegen"],[data-aktion="zeitlauf"],[data-aktion="szenen"],[data-aktion="nah"]');
     if (la) {
       audioStart(); const a = la.dataset.aktion;
@@ -9532,7 +9699,7 @@ const ZUS_ICON = {
       '<button type="button" class="lw-schalter" data-aktion="passiert">' + L.passiert + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="' + !!(ctx && stilleBis > ctx.currentTime) + '">' + L.stille + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="gehen" aria-pressed="' + leben.gehen + '">' + L.gehen + "</button>" +
-      (feuer ? '<button type="button" class="lw-schalter" data-aktion="nachlegen">' + L.nachlegen + "</button>" : "") + info("leben") + "</div>";
+      (feuer ? '<button type="button" class="lw-schalter" data-aktion="nachlegen">' + L.nachlegen + "</button>" : "") + info("leben") + "</div>" + momenteZeile(T, S.kulisse);
     h += '<button type="button" class="lw-klappe lw-spurklappe" data-klangauf="leben" aria-expanded="' + auf + '">✨ ' + L.mehr + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     if (!auf) return h;
     const sp = Math.round(leben.spannung * 100), orte = drin ? L.ortDrin : L.ortDraussen;
@@ -10222,6 +10389,17 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kleinregler input { flex: 1 1 auto; min-width: 4rem; max-width: 16rem; accent-color: var(--ember); }
 .lw-kleinregler b { flex: 0 0 2.6rem; text-align: right; color: var(--vellum); font-weight: 600; font-size: .8rem; }
 .lw-buehne .lw-figur, .lw-buehne .lw-geister { transform: translateX(var(--band-x, 0%)) scale(var(--band-s, 1)); transform-origin: 50% 100%; transition: transform 1.1s cubic-bezier(.4,.1,.3,1); }
+
+.lw-momente { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3rem; }
+.lw-moment { display: grid; justify-items: center; gap: .1rem; border: 1px solid rgba(224,160,70,.35); background: rgba(224,160,70,.06); color: var(--vellum); font: inherit; border-radius: 10px; padding: .35rem .25rem .3rem; cursor: pointer; min-width: 0; }
+.lw-moment .ms { font-size: 1.35rem; line-height: 1.1; }
+.lw-moment .mt { font-size: .72rem; line-height: 1.2; color: var(--ash); text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lw-moment:hover { border-color: var(--ember); }
+.lw-moment:hover .mt { color: var(--vellum); }
+.lw-lebenfeld .lw-momente, .lw-eleben .lw-momente { margin: .35rem 0 .2rem; }
+@media (max-width: 700px) { .lw-ekopf.lw-geklebt .lw-moment .mt { display: none; } }
+/* im einfachen Modus stehen Etwas passiert, Stille und die Momente schon in der Leiste oben */
+.lw-eleben .lw-momente, .lw-eleben .lw-lebenzeile [data-aktion="passiert"], .lw-eleben .lw-lebenzeile [data-aktion="stille"] { display: none; }
 
 /* ---------- Einfacher Modus ---------- */
 .lw-einfach { display: grid; gap: .6rem; }
