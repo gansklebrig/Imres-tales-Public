@@ -39,14 +39,14 @@ html body #auftritt > .at-buehne { grid-column: 2; grid-row: 1 / span 8; max-wid
 html body #auftritt > :is(.at-steuer, .at-fuss, .at-ton, .at-kalib-zeile, .at-liste) { grid-column: 3; max-width: 30rem !important; justify-self: start; width: 100%; }
 html body #auftritt > .at-steuer { grid-row: 1; } html body #auftritt > .at-fuss { grid-row: 2; } html body #auftritt > .at-ton { grid-row: 3; }
 html body #auftritt > .at-kalib-zeile { grid-row: 4; } html body #auftritt > .at-liste { grid-row: 5 / span 4; }
-html body #taverne.saal-einzeln .tav-karte#auftritt:not(.tav-voll) .at-canvas { height: calc(100vh - 13rem); }
+html body #taverne.saal-einzeln .tav-karte#auftritt:not(.tav-voll) .at-canvas { height: calc(100vh - 16rem); }
 html body .tav-karte.tav-voll#auftritt .at-canvas { height: calc(100vh - 8rem) !important; }
 html body #auftritt .at-zwei { max-width: none; }
 
 /* ---------- Bestiarium-Memory: Karten so groß, dass alles auf einen Blick passt ---------- */
 html body #taverne.saal-einzeln #memory-karte { max-width: none; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-rows: repeat(5, max-content) 1fr; column-gap: 2.2rem; align-items: start; }
 html body #memory-karte > :is(.label, h3, .tav-info, .memory-kopf) { grid-column: 1; }
-html body #memory-karte > .memory { grid-column: 2; grid-row: 1 / span 6; width: calc(100vh - 11rem); }
+html body #memory-karte > .memory { grid-column: 2; grid-row: 1 / span 6; width: calc(100vh - 15rem); }
 html body #memory-karte > .memory-fuss { grid-column: 3; grid-row: 1; }
 
 /* ---------- Loblied & Spott: breiter und großzügiger ---------- */
@@ -59,7 +59,7 @@ html body .tav-karte.charme > :is(.ch-label, .ch-titel, .ch-text) { grid-column:
 html body .tav-karte.charme > .ch-tafel { grid-column: 2; grid-row: 4; margin-top: .4rem; max-width: none; }
 html body .tav-karte.charme:is(.ch-laeuft, .tav-voll) > .ch-tafel { grid-row: 1 / span 4; margin-top: 0; }
 html body .tav-karte.charme.ch-laeuft > :is(.ch-label, .ch-titel, .ch-text) { display: none; }
-html body .tav-karte.charme:not(.tav-voll) .ch-buehne { aspect-ratio: 16 / 10; height: calc(100vh - 10rem); width: auto; max-width: 100%; justify-self: center; }
+html body .tav-karte.charme:not(.tav-voll) .ch-buehne { aspect-ratio: 16 / 10; height: calc(100vh - 14.5rem); width: auto; max-width: 100%; justify-self: center; }
 html body .tav-karte.charme.tav-voll { display: grid !important; }
 html body .tav-karte.charme .ch-knoepfe { flex-direction: column; align-items: stretch; }
 
