@@ -68,6 +68,44 @@
     nsc: "buergermeister-streit.jpg", bestiarium: "demogorgon-karte.webp", taverne: "vorschau/taverne-kopf.webp", buehne: "kuo-toa-stadt.jpg"
   };
 
+  /* ---------- Kacheln als Collagen: freigestellte Figuren, Fotos, Skizzen und Zettel in Ebenen – jede Kachel mit eigenem Look ---------- */
+  const kImg = (src, cls, d, stil) => '<img class="k-l ' + cls + '" src="' + src + '" alt="" loading="lazy" decoding="async" style="--d:' + d + (stil ? ";" + stil : "") + '">';
+  const kKlein = f => "vorschau/klein/" + String(f).split("/").pop().replace(/\.(jpe?g|png|webp)$/i, ".webp");
+  const kFoto = (src, cls, d, gross) => '<span class="k-l k-foto ' + cls + '" style="--d:' + d + '"><img src="' + kKlein(src) + '" data-gross="' + src + '" alt="" loading="lazy" decoding="async" onerror="if(this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross"></span>';
+  const COLLAGE = {
+    /* aufgeschlagene Geschichte: Fotos der Kapitel wie in ein Tagebuch geklebt, davor der Erzähler */
+    chronik: b => kImg(kKlein(b), "k-grund k-sepia", 0) +
+      kFoto("hinterhalt-sieg.jpg", "k-c1", 1) + kFoto("gracklstugh.jpg", "k-c2", 1.4) + kFoto(b, "k-c3", 2) +
+      '<span class="k-l k-tinte" style="--d:.6"></span>' + kImg("barradin-frei.webp", "k-held k-c-barradin", 3),
+    /* das Brett: Zettel, Nadeln und rote Fäden */
+    questtafel: () => kImg(kKlein("questtafel-wand.jpg"), "k-grund k-holz", 0) +
+      '<svg class="k-l k-faeden" viewBox="0 0 100 100" preserveAspectRatio="none" style="--d:1"><path d="M22 24 L70 18 L58 58 L22 24 M58 58 L84 70"/></svg>' +
+      '<span class="k-l k-zettel k-z1" style="--d:1.2"><i>?</i></span><span class="k-l k-zettel k-z2" style="--d:1.6"><i>!</i></span><span class="k-l k-zettel k-z3" style="--d:1.3"></span>' +
+      '<span class="k-l k-nadel" style="--d:1.2;left:22%;top:24%"></span><span class="k-l k-nadel" style="--d:1.6;left:70%;top:18%"></span><span class="k-l k-nadel" style="--d:1.3;left:58%;top:58%"></span><span class="k-l k-nadel" style="--d:1;left:84%;top:70%"></span>',
+    /* alte Karte mit Reiseroute, Siegel und Windrose */
+    reise: () => kImg(kKlein("weltkarte.jpg"), "k-grund k-karte", 0) +
+      '<svg class="k-l k-route" viewBox="0 0 100 100" preserveAspectRatio="none" style="--d:1"><path d="M8 78 C 22 60, 30 70, 40 52 S 58 30, 70 38 S 86 20, 92 14"/>' +
+      '<circle cx="8" cy="78" r="2.2"/><circle cx="40" cy="52" r="2.2"/><circle cx="70" cy="38" r="2.2"/><circle cx="92" cy="14" r="3"/></svg>' +
+      '<span class="k-l k-rose" style="--d:1.6">✦</span><span class="k-l k-siegel" style="--d:2">I</span>',
+    /* alle fünf als Gruppenbild am Feuer */
+    gefaehrten: () => '<span class="k-l k-feuerglut" style="--d:0"></span>' +
+      kImg("echo-frei.webp", "k-held k-g-echo", 1.2) + kImg("friedrich-frei.webp", "k-held k-g-friedrich", 1.6) +
+      kImg("barradin-frei.webp", "k-held k-g-barradin", 2.2) + kImg("ezekiel-frei.webp", "k-held k-g-ezekiel", 1.4) + kImg("rex-frei.webp", "k-held k-g-rex", 2.8) + '<span class="k-l k-funken" style="--d:3"></span>',
+    /* Steckbriefe und Porträts an der Wand, davor wer gerade schimpft */
+    nsc: () => '<span class="k-l k-wand" style="--d:0"></span>' + kFoto("portrait-koenig.jpg", "k-n1", 1) + kFoto("ploopploopeen.jpg", "k-n2", 1.3) + kFoto("portrait-riese.jpg", "k-n3", 1.1) +
+      kImg("gundren-frei.webp", "k-held k-n-gundren", 2) + kImg("buergermeister-frei.webp", "k-held k-n-buerger", 2.6),
+    /* Skizzenbuch: Tuschezeichnungen auf Pergament, eine Kreatur bricht heraus, Krallenspuren */
+    bestiarium: () => '<span class="k-l k-pergament" style="--d:0"></span>' +
+      kImg("skizze-demogorgon.webp", "k-skizze k-s1", .6) + kImg("skizze-chasme.webp", "k-skizze k-s2", .8) +
+      '<span class="k-l k-kralle" style="--d:1.4"></span>' + kImg("vrock-frei.webp", "k-held k-b-vrock", 2.6),
+    /* die Spiele als aufgefächertes Blatt Karten */
+    taverne: b => kImg(b.indexOf("vorschau/") === 0 ? b : kKlein(b), "k-grund k-dunkel", 0) +
+      ["heldensturm", "jagd", "hort", "nacht", "kehle"].map((n, i) => kImg("vorschau/plakat-" + n + ".webp", "k-plakat", 1 + i * .35, "--n:" + (i - 2))).join(""),
+    /* Bühne: Vorhang, Lichtkegel, eine leuchtende Laute und Noten */
+    buehne: () => '<span class="k-l k-vorhang" style="--d:0"></span><span class="k-l k-licht" style="--d:.5"></span>' +
+      kImg("skizze-laute.webp", "k-laute", 2) + '<span class="k-l k-noten" style="--d:2.6"><i>♪</i><i>♫</i><i>♩</i><i>♬</i></span>'
+  };
+
   /* ---------- Ansichten ---------- */
   const sektion = id => { const s = $(id); return s && s.matches("section.part") ? s : null; };
   const vorhanden = id => { const s = sektion(id); return !!s && !s.hidden; };
@@ -318,9 +356,14 @@
     const bild = id => id === "chronik" ? ((letztes && letztes.bild) || "aufbruch-neverwinter.jpg") : BILDER[id];
     $("kacheln").innerHTML = kacheln.map((id, i) =>
       '<a class="kachel k-' + id + '" href="#' + id + '" style="--i:' + i + '">' +
-        '<img src="' + esc(klein(bild(id))) + '" data-gross="' + esc(bild(id)) + '" alt="" loading="lazy" onerror="if(this.dataset.gross&&this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross">' +
+        (COLLAGE[id] ? '<span class="k-collage" aria-hidden="true">' + COLLAGE[id](bild(id), klein) + "</span>" : '<img src="' + esc(klein(bild(id))) + '" data-gross="' + esc(bild(id)) + '" alt="" loading="lazy" onerror="if(this.dataset.gross&&this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross">') +
         '<span class="kachel-text"><span class="kachel-zahl">' + esc(T.zahl[id](anzahl(id))) + "</span>" +
         "<b>" + esc(T.namen[id]) + "</b><small>" + (T.texte[id + "Kurz"] ? '<span class="k-lang">' + esc(T.texte[id]) + '</span><span class="k-kurz">' + esc(T.texte[id + "Kurz"]) + "</span>" : esc(T.texte[id])) + "</small></span></a>").join("");
+    if (!ruhig && matchMedia("(hover: hover)").matches) document.querySelectorAll("#kacheln .kachel").forEach(k => {
+      const c = k.querySelector(".k-collage"); if (!c) return;
+      k.addEventListener("pointermove", e => { const r = k.getBoundingClientRect(); c.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3)); c.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3)); });
+      k.addEventListener("pointerleave", () => { c.style.setProperty("--mx", 0); c.style.setProperty("--my", 0); });
+    });
     if (window.IntersectionObserver && !ruhig) {
       const io = new IntersectionObserver(eintraege => eintraege.forEach(en => {
         if (en.isIntersecting) { en.target.classList.add("sichtbar"); io.unobserve(en.target); }
@@ -450,12 +493,80 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .kachel:hover img, .kachel:focus-visible img { transform: scale(1.08); filter: saturate(1) brightness(.78); }
 /* Text im Fluss statt absolut: wird er länger (schmales Handy, Englisch, „neu“-Zeichen), wächst die Kachel mit statt oben abzuschneiden */
 .kachel-text { position: relative; z-index: 1; padding: .9rem; display: grid; gap: .15rem; }
-.kachel-text b { font-family: var(--display); font-weight: 400; font-size: clamp(1.15rem, 2.8vw, 1.6rem); line-height: 1.05; color: var(--vellum); }
+.kachel-text b { font-family: var(--display); font-weight: 400; font-size: clamp(1.15rem, 2.8vw, 1.6rem); line-height: 1.05; color: var(--vellum); text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.8); }
+.kachel-text small { text-shadow: 0 1px 6px rgba(0,0,0,.95); }
 .kachel.k-chronik .kachel-text b { font-size: clamp(1.5rem, 4vw, 2.6rem); }
 .kachel-text small { font-size: .82rem; line-height: 1.35; color: var(--ash); }
 .kachel-zahl { justify-self: start; font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--night); background: var(--ember); padding: .1rem .45rem; margin-bottom: .25rem; }
 .kachel.k-buehne .kachel-zahl { background: #7fd36b; }
 .kachel .k-kurz { display: none; }
+/* ---------- Collagen ---------- */
+.k-collage { position: absolute; inset: 0; overflow: hidden; --mx: 0; --my: 0; }
+.kachel .k-collage img { inset: auto; width: auto; height: auto; max-width: none; object-fit: contain; filter: none; transition: transform .7s cubic-bezier(.2,.8,.3,1), filter .6s; }
+.kachel:hover .k-collage img, .kachel:focus-visible .k-collage img { transform: translate(calc(var(--mx) * var(--d, 1) * -7px), calc(var(--my) * var(--d, 1) * -5px)) var(--t, ); }
+.kachel .k-collage .k-foto img { position: static; width: 100%; height: 100%; object-fit: cover; filter: sepia(.25) saturate(.85); transform: none; }
+.k-l { position: absolute; display: block; transition: transform .7s cubic-bezier(.2,.8,.3,1), filter .6s; transform: translate(calc(var(--mx) * var(--d, 1) * -7px), calc(var(--my) * var(--d, 1) * -5px)) var(--t, ); }
+.kachel:hover .k-l, .kachel:focus-visible .k-l { transition-duration: .25s; }
+.kachel .k-collage .k-grund { inset: -6%; width: 112%; height: 112%; object-fit: cover; }
+.kachel .k-collage .k-sepia { filter: sepia(.55) saturate(.7) brightness(.42) blur(1.5px); }
+.kachel .k-collage .k-holz { filter: saturate(.85) brightness(.62); }
+.kachel .k-collage .k-karte { filter: sepia(.8) saturate(.9) brightness(.55) contrast(1.1); }
+.kachel .k-collage .k-dunkel { filter: saturate(.7) brightness(.32) blur(1px); }
+.kachel:hover .k-collage .k-grund { filter: saturate(1) brightness(.6); }
+/* Fotos: Pergamentrand, Klebestreifen */
+.k-foto { padding: 3.5% 3.5% 9%; background: #e8dcc0; box-shadow: 0 6px 18px rgba(0,0,0,.6); }
+.k-foto img { display: block; width: 100%; height: 100%; object-fit: cover; filter: sepia(.25) saturate(.85); }
+.k-foto::before { content: ""; position: absolute; left: 50%; top: -6%; width: 34%; height: 11%; transform: translateX(-50%) rotate(-3deg); background: rgba(235,226,204,.55); box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.k-c1 { left: 5%; top: 6%; width: 38%; height: 34%; --t: rotate(-7deg); }
+.k-c2 { left: 40%; top: 4%; width: 32%; height: 30%; --t: rotate(5deg); }
+.k-c3 { left: 14%; top: 34%; width: 44%; height: 36%; --t: rotate(-2deg); }
+.k-tinte { inset: 0; background: radial-gradient(ellipse 60% 50% at 30% 30%, transparent 60%, rgba(16,14,21,.5)), repeating-linear-gradient(-8deg, transparent 0 22px, rgba(224,160,70,.03) 22px 23px); }
+.kachel .k-collage .k-held { filter: drop-shadow(0 0 1px rgba(255,210,140,.6)) drop-shadow(0 10px 14px rgba(0,0,0,.7)); }
+.kachel .k-collage .k-c-barradin { right: -3%; bottom: 0; height: 74%; }
+.kachel:hover .k-collage .k-held { filter: drop-shadow(0 0 2px rgba(255,200,120,.9)) drop-shadow(0 0 16px rgba(224,160,70,.45)) drop-shadow(0 10px 14px rgba(0,0,0,.7)); }
+/* Questtafel */
+.k-faeden { inset: 0; width: 100%; height: 100%; } .k-faeden path { fill: none; stroke: #c0392b; stroke-width: .7; vector-effect: non-scaling-stroke; stroke-width: 1.6; opacity: .9; }
+.k-zettel { width: 26%; height: 34%; background: linear-gradient(#efe4c6, #dccb9f); box-shadow: 0 4px 10px rgba(0,0,0,.55); background-image: linear-gradient(#efe4c6, #dccb9f), repeating-linear-gradient(transparent 0 7px, rgba(90,70,40,.25) 7px 8px); background-blend-mode: multiply; display: grid; place-items: center; }
+.k-zettel i { font-style: normal; font-family: var(--display); font-size: clamp(1.4rem, 4vw, 2.4rem); color: #6a2a1a; opacity: .8; }
+.k-z1 { left: 12%; top: 18%; --t: rotate(-6deg); } .k-z2 { left: 60%; top: 10%; --t: rotate(7deg); width: 22%; } .k-z3 { left: 48%; top: 50%; --t: rotate(-3deg); width: 20%; height: 22%; }
+.k-nadel { width: 9px; height: 9px; margin: -4px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ff8a7a, #a3201a 60%); box-shadow: 0 2px 3px rgba(0,0,0,.6); }
+/* Reise */
+.k-route { inset: 0; width: 100%; height: 100%; } .k-route path { fill: none; stroke: #e0a046; stroke-width: 2; stroke-dasharray: 6 5; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 3px rgba(224,160,70,.6)); }
+.k-route circle { fill: #e0a046; stroke: #3a2414; stroke-width: .6; }
+.kachel:hover .k-route path { animation: kRoute 2.5s linear infinite; } @keyframes kRoute { to { stroke-dashoffset: -44; } }
+.k-rose { right: 7%; bottom: 30%; font-size: clamp(1.8rem, 5vw, 3rem); color: rgba(235,226,204,.55); text-shadow: 0 0 8px rgba(0,0,0,.6); --t: rotate(12deg); }
+.k-siegel { left: 64%; top: 8%; width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 35%, #c0392b, #7a1410 70%); color: #f3c9a0; font-family: var(--display); font-size: 1.1rem; box-shadow: 0 3px 8px rgba(0,0,0,.6), inset 0 0 0 3px rgba(0,0,0,.18); --t: rotate(-12deg); }
+/* Gefährten */
+.k-feuerglut { inset: 0; background: radial-gradient(ellipse 70% 55% at 50% 105%, rgba(224,120,40,.55), rgba(120,50,20,.25) 45%, transparent 70%), linear-gradient(#141019, #1d1420); }
+.kachel .k-collage .k-g-echo { left: -18%; bottom: -10%; height: 98%; filter: brightness(.6) drop-shadow(0 8px 12px rgba(0,0,0,.7)); }
+.kachel .k-collage .k-g-ezekiel { right: -30%; bottom: -16%; height: 98%; filter: brightness(.8) drop-shadow(0 8px 12px rgba(0,0,0,.7)); }
+.kachel .k-collage .k-g-friedrich { left: 2%; bottom: -20%; height: 108%; }
+.kachel .k-collage .k-g-barradin { left: 22%; bottom: -24%; height: 112%; }
+.kachel .k-collage .k-g-rex { right: -6%; bottom: -8%; height: 56%; }
+.k-funken { inset: 0; background: radial-gradient(1.5px 1.5px at 20% 70%, #ffcf80, transparent), radial-gradient(1.5px 1.5px at 60% 50%, #ffcf80, transparent), radial-gradient(1px 1px at 80% 65%, #ffcf80, transparent), radial-gradient(1px 1px at 40% 35%, #ffcf80, transparent); opacity: .7; }
+/* Bekanntschaften */
+.k-wand { inset: 0; background: repeating-linear-gradient(90deg, #2a2024 0 34px, #261d21 34px 36px), #2a2024; }
+.k-n1 { left: 5%; top: 8%; width: 28%; height: 44%; --t: rotate(-6deg); } .k-n2 { left: 36%; top: 4%; width: 26%; height: 40%; --t: rotate(4deg); } .k-n3 { left: 64%; top: 10%; width: 27%; height: 42%; --t: rotate(-3deg); }
+.kachel .k-collage .k-n-gundren { left: -2%; bottom: -4%; height: 66%; }
+.kachel .k-collage .k-n-buerger { right: -6%; bottom: -2%; height: 74%; }
+/* Bestiarium */
+.k-pergament { inset: 0; background: radial-gradient(ellipse at 50% 40%, #cdb688, #9a8058 85%); }
+.kachel .k-collage .k-skizze { filter: brightness(.3) sepia(1) saturate(1.6) hue-rotate(-10deg); opacity: .8; mix-blend-mode: multiply; }
+.kachel .k-collage .k-s1 { left: -4%; top: 2%; height: 80%; --t: rotate(-8deg); } .k-s2 { right: -6%; top: -6%; height: 70%; --t: rotate(10deg); }
+.k-kralle { right: 22%; top: 12%; width: 26%; height: 56%; background: linear-gradient(105deg, transparent 44%, rgba(70,15,10,.75) 46%, transparent 49%) 0 0 / 34% 100% repeat-x; --t: rotate(18deg); opacity: .8; }
+.kachel .k-collage .k-b-vrock { right: -10%; top: -4%; height: 100%; filter: brightness(1.25) saturate(1.2) drop-shadow(0 0 2px rgba(0,0,0,.8)) drop-shadow(0 10px 14px rgba(0,0,0,.7)); }
+/* Taverne: Spiele als aufgefächerte Karten */
+.kachel .k-collage .k-plakat { left: calc(58% + var(--n) * 7%); bottom: -18%; height: 92%; aspect-ratio: 2 / 3; object-fit: cover; border: 3px solid #e8dcc0; border-radius: 4px; box-shadow: 0 8px 20px rgba(0,0,0,.7); transform-origin: 50% 120%; --t: rotate(calc(var(--n) * 11deg)); }
+.kachel:hover .k-plakat { --t: rotate(calc(var(--n) * 15deg)) translateY(-6%); }
+/* Bühne */
+.k-vorhang { inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.55)), repeating-linear-gradient(90deg, #5a1420 0 18px, #7a1d2a 18px 30px, #4a0f19 30px 40px); }
+.k-licht { inset: -10% -10% 0; background: conic-gradient(from 160deg at 30% -5%, transparent 0deg, rgba(255,220,150,.22) 12deg, transparent 26deg), conic-gradient(from 175deg at 72% -5%, transparent 0deg, rgba(160,220,255,.18) 12deg, transparent 26deg); }
+.kachel .k-collage .k-laute { left: 20%; top: 6%; height: 74%; filter: brightness(1.4) sepia(1) saturate(3) hue-rotate(-5deg) drop-shadow(0 0 6px rgba(255,190,90,.7)); --t: rotate(-18deg); }
+.k-noten { inset: 0; } .k-noten i { position: absolute; font-style: normal; color: #ffd78a; text-shadow: 0 0 8px rgba(255,190,90,.8); font-size: clamp(1rem, 2.6vw, 1.6rem); }
+.k-noten i:nth-child(1) { left: 62%; top: 14%; } .k-noten i:nth-child(2) { left: 74%; top: 30%; font-size: 1.4em; } .k-noten i:nth-child(3) { left: 84%; top: 10%; } .k-noten i:nth-child(4) { left: 54%; top: 36%; }
+.kachel:hover .k-noten i { animation: kNote 2.2s ease-in-out infinite; } .kachel:hover .k-noten i:nth-child(2n) { animation-delay: -1.1s; }
+@keyframes kNote { 50% { transform: translateY(-8px) rotate(8deg); } }
+@media (prefers-reduced-motion: reduce) { .k-l { transition: none; transform: var(--t, none); } .kachel:hover .k-noten i, .kachel:hover .k-route path { animation: none; } }
 @media (max-width: 759px) { .kachel .k-lang { display: none; } .kachel .k-kurz { display: inline; } }
 
 .bereich-zurueck { display: inline-block; margin-bottom: 1.2rem; font-size: .88rem; color: var(--ash); text-decoration: none; }
