@@ -10101,6 +10101,7 @@ const ZUS_ICON = {
     if (d.vorlage != null) { const k = d.vorlage; return W.vorlage(ohneZeichen(T.vorlagen[k] || stimmName(k) || k), (T.stBsp || {})[k]); }
     if (d.kzone) { const z = KARTE[kartenArt()].find(x => x.id === d.kzone); return (z ? zonenName(z, sprache() === "en") + ": " : "") + T.karteTipp; }
     if (d.ktuer) return tuerZu ? T.tuerAuf : T.tuerZu;
+    if (d.kluke) return lukeAuf() ? T.lukeZuT : T.lukeAufT;
     if (el.classList && el.classList.contains("lw-kfigur")) return T.karteFigur;
     if (d.zq) return (ZUSATZ[d.zq] ? ZUSATZ[d.zq][sprache() === "en" ? "en" : "de"] + ": " : "") + T.karteQuelle;
     if (d.kgross) return karteGross ? T.karteKinoAus : T.karteKino;
@@ -10189,8 +10190,8 @@ const ZUS_ICON = {
     if (!el || !root.contains(el) || (kZug && el.classList.contains("lw-kquelle"))) return;
     schwebX = e.clientX; schwebY = e.clientY;
     /* Geräusch-Symbole: Name sofort (nach einem Wimpernschlag); wer gerade schon einen Namen gesehen hat, bekommt den nächsten ohne Warten */
-    const nurName = el.matches("[data-zusatz], .lw-kquelle"), warm = performance.now() - schwebWarm < 900;
-    schwebT = setTimeout(() => { schwebT = 0; const ziel = el.matches("label") ? el.querySelector("input") || el : el; schwebZeigen(ziel); }, nurName ? (warm ? 0 : 90) : warm ? 120 : 500);
+    const nurName = el.matches("[data-zusatz], .lw-kquelle"), warm = performance.now() - schwebWarm < 900, karte = el.matches(".lw-kknopf, .lw-kl, .lw-kluke, .lw-ktuer, .lw-kzone, .lw-momst, .lw-ehgaus");
+    schwebT = setTimeout(() => { schwebT = 0; const ziel = el.matches("label") ? el.querySelector("input") || el : el; schwebZeigen(ziel); }, nurName ? (warm ? 0 : 90) : warm ? 120 : karte ? 220 : 500);
   });
   root.addEventListener("pointerleave", () => { schwebZu(); schwebEl = null; });
   ["pointerdown", "wheel", "keydown"].forEach(n => addEventListener(n, () => { if (schwebT || schwebBlase) schwebZu(); }, { passive: true, capture: true }));
@@ -12101,7 +12102,11 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-eort3.kino .lw-kblock .lw-karte { width: min(100%, calc(74vh * 16 / 7)); margin: 0 auto; }
 .lw-eort3.kino .lw-espalte { grid-column: auto; }
 .lw-ealleklappe { margin-top: .8rem; }
-@media (max-width: 640px) { .lw-eort3.kino { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .lw-eort3.kino { grid-template-columns: 1fr; }
+  /* schmaler Schirm: Kino gibt es nicht (die Karte ist ohnehin so breit wie möglich) – nichts darf sich verschieben */
+  .lw-eort4.kino > * { grid-column: 1 / -1 !important; grid-row: auto !important; }
+  .lw-eort3.kino .lw-kblock .lw-karte, .lw-kblock.gross .lw-karte { width: 100% !important; margin: 0 !important; }
+  .lw-kblock.gross .lw-kl { width: 1.95rem; height: 1.95rem; font-size: 1rem; } }
 /* Ort-Bereich in drei Spalten: Orte | Bild | Einzelspuren */
 .lw-eort3 { display: grid; grid-template-columns: minmax(10.5rem, 13.5rem) minmax(0, 1fr) minmax(12rem, 17rem); gap: .8rem; align-items: start; }
 .lw-eort3 .lw-eortlinks { flex: none; gap: .4rem; align-items: stretch; }
@@ -12258,6 +12263,13 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
   .lw-ekopf.lw-geklebt .lw-eknoepfe .lw-ik { font-size: .95rem; }
   .lw-etabs button { font-size: .76rem; padding: .4rem .2rem; line-height: 1.15; min-width: 0; }
   .lw-ekopf .lw-eknoepfe .lw-kurz { font-size: clamp(9px, 2.7vw, .66rem); }
+  /* Karte: Knöpfe schmal unten rechts in die Ecke, Mülleimer klein unten links – das Bild bleibt frei */
+  .lw-karte .lw-kknoepfe { inset: auto 3px 3px auto !important; gap: 2px; transform: none !important; }
+  .lw-karte .lw-kknopf { width: 1.45rem !important; height: 1.45rem !important; font-size: .72rem !important; border-radius: 6px; background: rgba(10,8,14,.55); }
+  .lw-karte .lw-kknopf small { display: none; }
+  .lw-karte [data-kgross] { display: none !important; }
+  .lw-karte .lw-kmuell { inset: auto auto 3px 3px !important; width: 1.3rem !important; height: 1.3rem !important; font-size: .7rem !important; transform: none; }
+  .lw-karte .lw-kmuell.ziel { transform: scale(1.4); }
   /* weniger Rand ringsum – auf dem kleinen Schirm zählt jeder Pixel */
   .wrap:has(> .buehne .lautenwerk) { padding-left: 6px; padding-right: 6px; }
   .tav-karte.lautenwerk { padding: .55rem .45rem; }
