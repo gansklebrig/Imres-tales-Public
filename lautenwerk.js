@@ -3617,6 +3617,8 @@ const ZUS_ICON = {
     const zeig = ord.slice(s * MOM_SEITE, s * MOM_SEITE + MOM_SEITE);
     const knopf = i => { const x = m[i], n = esc(en ? x[2] : x[1]), f = momFav(art, i);
       return '<button type="button" class="lw-moment' + (f ? " fav" : "") + '" data-moment="' + i + '" title="' + n + '"><span class="ms">' + x[0] + '</span><span class="mt">' + n + "</span>" + (f ? '<i class="lw-momstern">★</i>' : "") + "</button>"; };
+    /* eigenes Pult: alle Momente auf einmal – das Fenster bestimmt, wie viele man ohne Scrollen sieht */
+    if (freiAktiv()) return '<div class="lw-momente lw-momfrei" data-kul="' + art + '">' + ord.map(knopf).join("") + "</div>";
     const pfeil = (r, z) => '<button type="button" class="lw-momblatt" data-momblatt="' + r + '" title="' + esc(r < 0 ? T.momZurueck : T.momWeiter) + '" aria-label="' + esc(r < 0 ? T.momZurueck : T.momWeiter) + '">' + z + "</button>";
     const punkte = seiten > 1 ? '<span class="lw-mompunkte" aria-hidden="true">' + Array.from({ length: seiten }, (_, i) => "<i" + (i === s ? ' class="an"' : "") + "></i>").join("") + "</span>" : "<span></span>";
     const st = (a, txt, titel, aus) => '<button type="button" class="lw-momst" data-momst="' + a + '" title="' + esc(titel) + '"' + (aus ? " disabled" : "") + ">" + txt + "</button>";
@@ -9965,22 +9967,27 @@ const ZUS_ICON = {
       '<button type="button" class="lw-klappe" data-emehr="st" aria-expanded="' + eMehr.st + '">' + (eMehr.st ? E.weniger : E.mehrSt(STIMMUNGEN.length + eig.length)) + " <span>" + (eMehr.st ? "▴" : "▾") + "</span></button>" +
       '<div class="lw-lgruppe lw-eint"><span>' + E.wieViel + "</span>" + E.int.map((x, i) => '<button type="button" class="lw-lchip" data-eint="' + i + '" aria-pressed="' + (intStufe() === i) + '">' + x + "</button>").join("") + "</div>";
   }
-  function einfachOrt(T) {
+  const eUe = (t, cls) => '<h4 class="lw-eue ' + (cls || "") + '">' + t + "</h4>";
+  function ortLinksHTML(T, ohneUe) {
     const E = T.einf, alle = KUL_ZEIGEN.filter(k => k !== "keine");
     let kern = nachNutzung("k", KERN_KUL.filter(k => alle.includes(k)));
     if (S.kulisse && S.kulisse !== "keine" && !kern.includes(S.kulisse) && !eMehr.kul) kern = kern.slice(0, 7).concat([S.kulisse]);
     const chip = k => '<button type="button" class="lw-ochip' + (S.kulisse === k ? " an" : "") + (S.kulisse === k && !kul ? " still" : "") + '" data-kulisse="' + k + '">' + esc(T.kulissen[k]) + "</button>";
-    /* links untereinander: der aktuelle Ort zuerst, dann die meistgenutzten */
+    /* der aktuelle Ort zuerst, dann die meistgenutzten */
     const vorschlag = (S.kulisse && S.kulisse !== "keine" ? [S.kulisse] : []).concat(kern.filter(k => k !== S.kulisse)).slice(0, 7);
-    const ue = (t, cls) => '<h4 class="lw-eue ' + (cls || "") + '">' + t + "</h4>";
-    return '<div class="lw-eortkopf lw-eort3 lw-eort4' + (karteGross ? " kino" : "") + '">' +
-      '<div class="lw-eortlinks">' + ue(E.ueWo) + '<span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
+    return (ohneUe ? "" : eUe(E.ueWo)) + '<span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
       (kul || S.kulisse !== "keine" ? '<div class="lw-esteuer lw-esteuer-hg"><button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + "</div>" : "") +
       '<div class="lw-ochips">' + vorschlag.map(chip).join("") + "</div>" +
-      '<label class="lw-owahl"><span>' + E.alleOrteL + "</span>" + kulisseWahl(T) + "</label>" + szenenHTML(T) + "</div>" +
-      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + ue(E.ueWie) + (KUL_WELT[S.kulisse] ? karteLeiste(T) + karteHTML(T) : '<p class="lw-zhinweis">' + E.ortWaehlen + "</p>") + "</div>" +
-      '<div class="lw-espalte lw-klingt">' + ue(E.ueKlingt) + klingtHTML(T) + "</div>" +
-      '<div class="lw-egeraeusche">' + ue(E.ueNoch) + einfachGeraeusche(T) + "</div>" +
+      '<label class="lw-owahl"><span>' + E.alleOrteL + "</span>" + kulisseWahl(T) + "</label>" + szenenHTML(T);
+  }
+  const ortKarteHTML = (T, ohneUe) => (ohneUe ? "" : eUe(T.einf.ueWie)) + (KUL_WELT[S.kulisse] ? karteLeiste(T) + karteHTML(T) : '<p class="lw-zhinweis">' + T.einf.ortWaehlen + "</p>");
+  function einfachOrt(T) {
+    const E = T.einf;
+    return '<div class="lw-eortkopf lw-eort3 lw-eort4' + (karteGross ? " kino" : "") + '">' +
+      '<div class="lw-eortlinks">' + ortLinksHTML(T) + "</div>" +
+      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + ortKarteHTML(T) + "</div>" +
+      '<div class="lw-espalte lw-klingt">' + eUe(E.ueKlingt) + klingtHTML(T) + "</div>" +
+      '<div class="lw-egeraeusche">' + eUe(E.ueNoch) + einfachGeraeusche(T) + "</div>" +
       "</div>";
   }
   /* rechts: alles, was gerade klingt – Schichten des Ortes und Zusatz-Geräusche, je mit Regler; Zeile ↔ Symbol in der Karte leuchten gemeinsam */
@@ -10034,18 +10041,138 @@ const ZUS_ICON = {
   }
   function einfachInhalt(T) {
     const E = T.einf;
+    if (freiAktiv()) return '<div class="lw-einfach-inhalt">' + freiGitter(T) + "</div>";
     return '<div class="lw-einfach-inhalt">' + abendWahl(T) +
       '<div class="lw-tabs lw-etabs" role="tablist">' + [["musik", E.tabMusik], ["ort", E.tabOrt], ["fx", E.tabFx]].map(([k, x]) => '<button type="button" role="tab" data-etab="' + k + '" aria-selected="' + (eTab === k) + '">' + x + "</button>").join("") + "</div>" +
       '<section class="lw-box lw-ebereich">' + (eTab === "ort" ? einfachOrt(T) : eTab === "fx" ? einfachFx(T) : einfachMusik(T)) + "</section></div>";
   }
+  /* ---------- Eigenes Pult (PC): jedes Fenster frei verschieben, größer/kleiner ziehen, einklappen oder ausblenden ---------- */
+  const F_SPALTEN = 24;
+  const FENSTER = { steuer: ["🎛", "Steuerung", "Controls", 6, 3], knoepfe: ["⚡", "Schnellknöpfe", "Quick buttons", 4, 2], momente: ["✨", "Etwas passiert", "Something happens", 5, 3],
+    musik: ["🎵", "Musik & Stimmungen", "Music & moods", 6, 5], orte: ["🧭", "Wo seid ihr?", "Where are you?", 4, 5], karte: ["🗺", "Wie klingt es dort?", "How does it sound there?", 6, 5],
+    klingt: ["🎚", "Was gerade klingt", "Playing now", 4, 4], noch: ["➕", "Was klingt noch?", "What else can sound?", 5, 3], effekte: ["💥", "Effekte", "Effects", 5, 4] };
+  const F_STANDARD = { steuer: { x: 0, y: 0, w: 15, h: 6 }, knoepfe: { x: 15, y: 0, w: 9, h: 6 }, momente: { x: 0, y: 6, w: 24, h: 6 },
+    orte: { x: 0, y: 12, w: 5, h: 18 }, karte: { x: 5, y: 12, w: 13, h: 12 }, klingt: { x: 18, y: 12, w: 6, h: 18 }, noch: { x: 5, y: 24, w: 13, h: 10 },
+    musik: { x: 0, y: 34, w: 12, h: 14 }, effekte: { x: 12, y: 34, w: 12, h: 14 } };
+  let frei = (() => { try { const v = JSON.parse(localStorage.getItem("imres-lw-frei") || "null"); if (v && v.L) return v; } catch (_) {} return { an: false, fest: false, L: {} }; })();
+  Object.keys(F_STANDARD).forEach(id => { if (!frei.L[id]) frei.L[id] = Object.assign({}, F_STANDARD[id]); });
+  const freiMerken = () => { try { localStorage.setItem("imres-lw-frei", JSON.stringify(frei)); } catch (_) {} };
+  const freiMoeglich = () => { try { return innerWidth >= 1100 && matchMedia("(pointer: fine)").matches; } catch (_) { return false; } };
+  const freiAktiv = () => !!(frei.an && einfach && S && S.pult && !hoerer && freiMoeglich());
+  const fH = p => p.zu ? 1 : p.h;
+  const fKoll = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + fH(b) && b.y < a.y + fH(a);
+  /* wie ein Raster-Baukasten: was im Weg ist, rutscht nach unten; Lücken schließen sich nach oben */
+  function freiOrdnen(festId) {
+    const ids = Object.keys(frei.L).filter(id => FENSTER[id] && !frei.L[id].weg);
+    ids.forEach(id => { const p = frei.L[id]; p.w = Math.max(FENSTER[id][3], Math.min(F_SPALTEN, p.w)); p.h = Math.max(FENSTER[id][4], p.h); p.x = Math.max(0, Math.min(F_SPALTEN - p.w, p.x)); p.y = Math.max(0, p.y); });
+    const ord = ids.filter(id => id !== festId).sort((a, b) => frei.L[a].y - frei.L[b].y || frei.L[a].x - frei.L[b].x);
+    const gesetzt = festId && frei.L[festId] && !frei.L[festId].weg ? [frei.L[festId]] : [];
+    ord.forEach(id => { const p = frei.L[id];
+      while (p.y > 0 && !gesetzt.some(q => fKoll(Object.assign({}, p, { y: p.y - 1 }), q))) p.y--;
+      for (let n = 0; n < 200; n++) { const k = gesetzt.filter(q => fKoll(p, q)); if (!k.length) break; p.y = Math.max(...k.map(q => q.y + fH(q))); }
+      gesetzt.push(p); });
+  }
+  const fStil = p => "grid-column:" + (p.x + 1) + " / span " + p.w + ";grid-row:" + (p.y + 1) + " / span " + fH(p);
+  function freiInhalt(id, T) {
+    const E = T.einf;
+    if (id === "steuer") return '<div class="lw-ekopf lw-ekopf-frei"><div class="lw-ekopf-reihe"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
+      '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span></div>' +
+      '<p class="lw-ejetzt" aria-live="polite">' + jetztText(T) + "</p>" +
+      '<div class="lw-ekopf-reihe lw-eregler">' + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") + spannRegler(T) + '<div class="lw-ehg">' + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + hgKnopf(T) + "</div></div></div>";
+    if (id === "knoepfe") return '<div class="lw-ekopf lw-ekopf-frei"><div class="lw-ekopf-reihe lw-eknoepfe"><button type="button" class="lw-schalter" data-aktion="passiert">' + ikonText(T.leben.passiert, E.kurz.passiert) + "</button>" +
+      '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="false">' + ikonText(T.leben.stille, E.kurz.stille) + "</button>" +
+      '<button type="button" class="lw-schalter" data-aktion="abend" aria-expanded="' + abendAuf + '">' + ikonText(E.abend + (abendSet ? " · " + ABEND_SETS[abendSet].sym : ""), E.kurz.abend) + "</button>" +
+      sprechKnopf(T) + '<button type="button" class="lw-schalter lw-ewasist" data-aktion="wasist" aria-pressed="' + wasIst + '" title="' + esc(E.wasIstTipp) + '">' + ikonText(wasIst ? E.wasIstAn : E.wasIst, E.kurz.wasist) + "</button></div>" +
+      (wasIst ? '<p class="lw-ewasist-hinweis">' + E.wasIstHinweis + "</p>" : "") + abendWahl(T) + "</div>";
+    if (id === "momente") return momenteZeile(T, S.kulisse) || '<p class="lw-zhinweis">' + E.ortWaehlen + "</p>";
+    if (id === "musik") return einfachMusik(T);
+    if (id === "orte") return ortLinksHTML(T, true);
+    if (id === "karte") return '<div class="lw-kblock">' + ortKarteHTML(T, true) + "</div>";
+    if (id === "klingt") return '<div class="lw-klingt">' + klingtHTML(T) + "</div>";
+    if (id === "noch") return '<div class="lw-egeraeusche">' + einfachGeraeusche(T) + "</div>";
+    if (id === "effekte") return einfachFx(T);
+    return "";
+  }
+  function freiGitter(T) {
+    freiOrdnen(null); const en = sprache() === "en";
+    const ids = Object.keys(FENSTER).filter(id => !frei.L[id].weg);
+    return '<div class="lw-frei' + (frei.fest ? " fest" : "") + '">' + ids.map(id => { const p = frei.L[id], f = FENSTER[id];
+      return '<div class="lw-fenster lw-f-' + id + (p.zu ? " zu" : "") + '" data-fenster="' + id + '" style="' + fStil(p) + '">' +
+        '<div class="lw-fkopf" data-fzieh="' + id + '"><span class="lw-fpunkte" aria-hidden="true">⠿</span><b>' + f[0] + " " + (en ? f[2] : f[1]) + "</b>" +
+        '<button type="button" data-fzu="' + id + '" title="' + esc(p.zu ? T.einf.fAuf : T.einf.fZu) + '" aria-label="' + esc(p.zu ? T.einf.fAuf : T.einf.fZu) + '">' + (p.zu ? "▸" : "▾") + "</button>" +
+        '<button type="button" data-fweg="' + id + '" title="' + esc(T.einf.fWeg) + '" aria-label="' + esc(T.einf.fWeg) + '">✕</button></div>' +
+        '<div class="lw-fkoerper">' + (p.zu ? "" : freiInhalt(id, T)) + "</div>" +
+        '<i class="lw-fgroesse" data-fgroesse="' + id + '" title="' + esc(T.einf.fGroesse) + '"></i></div>'; }).join("") + "</div>";
+  }
+  function freiLeiste(T) {
+    const E = T.einf, en = sprache() === "en", weg = Object.keys(FENSTER).filter(id => frei.L[id].weg);
+    return '<div class="lw-fleiste"><span class="lw-fleiste-t">🧩 ' + E.fTitel + "</span>" +
+      '<button type="button" class="lw-klein" data-ffest="1" aria-pressed="' + !!frei.fest + '" title="' + esc(E.fFestT) + '">' + (frei.fest ? "🔒 " + E.fFest : "🔓 " + E.fLose) + "</button>" +
+      (weg.length ? '<select class="lw-fneu" data-fneu="1" aria-label="' + esc(E.fNeu) + '"><option value="">➕ ' + E.fNeu + " (" + weg.length + ")</option>" + weg.map(id => '<option value="' + id + '">' + FENSTER[id][0] + " " + (en ? FENSTER[id][2] : FENSTER[id][1]) + "</option>").join("") + "</select>" : "") +
+      '<button type="button" class="lw-klein" data-fstandard="1" title="' + esc(E.fStandardT) + '">↺ ' + E.fStandard + "</button>" +
+      '<span class="lw-fhinweis">' + E.fHinweis + "</span></div>";
+  }
+  Object.assign(TX.de.einf, { fTitel: "Eigenes Pult", fFest: "Fixiert", fLose: "Verschiebbar", fFestT: "Fenster festhalten bzw. wieder verschiebbar machen", fNeu: "Fenster zurückholen", fStandard: "Standard", fStandardT: "Alle Fenster auf die Ausgangs-Anordnung zurücksetzen",
+    fHinweis: "Fenster an der Titelleiste ziehen · Ecke unten rechts: Größe · ▾ einklappen · ✕ ausblenden", fZu: "Einklappen", fAuf: "Aufklappen", fWeg: "Ausblenden (oben über „Fenster zurückholen“ wieder holbar)", fGroesse: "Ziehen: Fenster größer oder kleiner",
+    fAn: "🧩 Eigenes Pult", fAnT: "Alle Bereiche als frei verschiebbare, größenveränderbare Fenster – stell dir dein Pult selbst zusammen", fAus: "🧭 Zurück zum einfachen Pult" });
+  Object.assign(TX.en.einf, { fTitel: "Custom desk", fFest: "Locked", fLose: "Movable", fFestT: "Lock windows in place or make them movable again", fNeu: "Bring back a window", fStandard: "Default", fStandardT: "Reset all windows to the default arrangement",
+    fHinweis: "Drag a window by its title bar · bottom-right corner: size · ▾ collapse · ✕ hide", fZu: "Collapse", fAuf: "Expand", fWeg: "Hide (bring it back via “Bring back a window” above)", fGroesse: "Drag: make the window bigger or smaller",
+    fAn: "🧩 Custom desk", fAnT: "All sections as freely movable, resizable windows – build your own desk", fAus: "🧭 Back to the simple desk" });
+  function freiAnwenden() { root.querySelectorAll(".lw-fenster[data-fenster]").forEach(el => { const p = frei.L[el.dataset.fenster]; if (p) { el.style.cssText = fStil(p); el.classList.toggle("zu", !!p.zu); } }); }
+  /* Ziehen und Größe ändern: rastet im Gitter ein, die anderen weichen live aus */
+  let fZug = null;
+  root.addEventListener("pointerdown", e => {
+    if (!e.target.closest || frei.fest || e.button !== 0) return;
+    const kopf = e.target.closest("[data-fzieh]"), griff = e.target.closest("[data-fgroesse]");
+    if (!kopf && !griff) return; if (kopf && e.target.closest("button")) return;
+    const g = root.querySelector(".lw-frei"); if (!g) return;
+    const id = (kopf || griff).dataset.fzieh || griff.dataset.fgroesse, p = frei.L[id]; if (!p) return;
+    const gs = getComputedStyle(g), luecke = parseFloat(gs.columnGap) || 8, rz = parseFloat(gs.gridAutoRows) || 32, b = g.getBoundingClientRect();
+    fZug = { id, groesse: !!griff, sx: e.clientX, sy: e.clientY, p0: Object.assign({}, p), sw: (b.width + luecke) / F_SPALTEN, sh: rz + luecke, pid: e.pointerId };
+    e.preventDefault(); try { (kopf || griff).setPointerCapture(e.pointerId); } catch (_) {}
+    root.querySelector('.lw-fenster[data-fenster="' + id + '"]').classList.add("zieht"); g.classList.add("ordnet");
+  });
+  root.addEventListener("pointermove", e => {
+    if (!fZug || e.pointerId !== fZug.pid) return;
+    const dx = Math.round((e.clientX - fZug.sx) / fZug.sw), dy = Math.round((e.clientY - fZug.sy) / fZug.sh), p = frei.L[fZug.id], a = fZug.p0;
+    const n = fZug.groesse ? { x: a.x, y: a.y, w: a.w + dx, h: a.h + dy } : { x: a.x + dx, y: Math.max(0, a.y + dy), w: a.w, h: a.h };
+    if (n.x === p.x && n.y === p.y && n.w === p.w && n.h === p.h) return;
+    if (fZug.groesse && p.zu) p.zu = false;
+    Object.assign(p, n); freiOrdnen(fZug.id); freiAnwenden();
+  });
+  const fLos = e => {
+    if (!fZug || e.pointerId !== fZug.pid) return;
+    const id = fZug.id; fZug = null; freiOrdnen(null); freiAnwenden(); freiMerken();
+    root.querySelectorAll(".lw-fenster.zieht").forEach(x => x.classList.remove("zieht")); root.querySelectorAll(".lw-frei.ordnet").forEach(x => x.classList.remove("ordnet"));
+    if (id === "momente") try { momenteNeu(); } catch (_) {}
+  };
+  root.addEventListener("pointerup", fLos); root.addEventListener("pointercancel", fLos);
+  root.addEventListener("click", e => {
+    if (!e.target.closest) return;
+    const zu = e.target.closest("[data-fzu]"), weg = e.target.closest("[data-fweg]");
+    if (zu) { const p = frei.L[zu.dataset.fzu]; p.zu = !p.zu; freiOrdnen(zu.dataset.fzu); freiMerken(); einfachNeu(); return; }
+    if (weg) { frei.L[weg.dataset.fweg].weg = true; freiOrdnen(null); freiMerken(); einfachNeu(); return; }
+    if (e.target.closest("[data-ffest]")) { frei.fest = !frei.fest; freiMerken(); einfachNeu(); return; }
+    if (e.target.closest("[data-fstandard]")) { Object.keys(F_STANDARD).forEach(id => { frei.L[id] = Object.assign({}, F_STANDARD[id]); }); freiMerken(); einfachNeu(); return; }
+    if (e.target.closest("[data-frei]")) { frei.an = !frei.an; freiMerken(); zeichnen(); knoepfe(); root.scrollIntoView({ block: "start" }); return; }
+  });
+  root.addEventListener("change", e => {
+    const s2 = e.target.closest && e.target.closest("[data-fneu]"); if (!s2 || !s2.value) return;
+    const p = frei.L[s2.value]; p.weg = false; p.zu = false; p.y = 999; freiOrdnen(null); freiMerken(); einfachNeu();
+  });
+  let freiWar = null;
+  addEventListener("resize", () => { const j = freiAktiv(); if (freiWar !== null && j !== freiWar && einfach && S && S.pult) { zeichnen(); knoepfe(); } freiWar = j; });
   function einfachZeichnen(T) {
+    freiWar = freiAktiv();
+    const freiKnopf = freiMoeglich() && !hoerer ? '<button type="button" class="lw-klein lw-freiknopf" data-frei="1" title="' + esc(T.einf.fAnT) + '">' + (freiAktiv() ? T.einf.fAus : T.einf.fAn) + "</button>" : "";
+    if (freiAktiv()) return '<div class="lw-pult lw-einfach lw-freipult">' + freiLeiste(T) + einfachInhalt(T) + '<div class="lw-emodus">' + freiKnopf + '<button type="button" class="lw-klein" data-aktion="modus" title="' + esc(T.einf.alleTipp) + '">' + T.einf.alleRegler + '</button><a class="lw-klein lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a></div></div>";
     return '<div class="lw-pult lw-einfach">' + einfachKopf(T) + einfachInhalt(T) +
-      '<div class="lw-emodus"><button type="button" class="lw-klein" data-aktion="modus" title="' + esc(T.einf.alleTipp) + '">' + T.einf.alleRegler + '</button><button type="button" class="lw-klein" data-aktion="intro">' + T.einf.intro + '</button><a class="lw-klein lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a></div></div>";
+      '<div class="lw-emodus">' + freiKnopf + '<button type="button" class="lw-klein" data-aktion="modus" title="' + esc(T.einf.alleTipp) + '">' + T.einf.alleRegler + '</button><button type="button" class="lw-klein" data-aktion="intro">' + T.einf.intro + '</button><a class="lw-klein lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a></div></div>";
   }
   function einfachNeu() {
     const alt = root.querySelector(".lw-einfach-inhalt"); if (!alt) return false;
     const T = t(); htmlAngleichen(alt, einfachInhalt(T));
-    const k = root.querySelector(".lw-ekopf"); if (k) { const kl = k.classList.contains("lw-geklebt"); htmlAngleichen(k, einfachKopf(T)); const k2 = root.querySelector(".lw-ekopf"); if (k2 && kl) k2.classList.add("lw-geklebt"); }
+    const k = freiAktiv() ? null : root.querySelector(".lw-ekopf"); if (k) { const kl = k.classList.contains("lw-geklebt"); htmlAngleichen(k, einfachKopf(T)); const k2 = root.querySelector(".lw-ekopf"); if (k2 && kl) k2.classList.add("lw-geklebt"); }
     /* klebender Kopf sofort wieder kleben – sonst springt alles darunter kurz um seine Höhe nach unten */
     try { kopfKleben(); } catch (_) {}
     klassikKnoepfe(); try { knoepfe(); } catch (_) {} if (intro) introLage();
@@ -10286,7 +10413,7 @@ const ZUS_ICON = {
   }
   let zuKopf = false;
   function kopfKleben() {
-    const k = root.querySelector(".lw-ekopf"); if (!k) return;
+    const k = root.querySelector(".lw-ekopf"); if (!k || k.classList.contains("lw-ekopf-frei")) return;
     /* alle Momente offen: der Kopf ist dann länger als der Bildschirm – nicht anheften, sonst springt beim Scrollen alles */
     k.classList.toggle("lw-frei", momAlle);
     if (momAlle) { if (k.classList.contains("lw-geklebt")) { k.classList.remove("lw-geklebt"); k.style.marginBottom = ""; } return; }
@@ -12222,6 +12349,52 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
 .lw-ekopf .lw-ik { font-style: normal; }
+/* ---------- Eigenes Pult ---------- */
+.lw-freiknopf { border-color: var(--ember) !important; color: var(--ember) !important; }
+.lw-fleiste { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin-bottom: .55rem; padding: .35rem .55rem; border: 1px dashed rgba(224,160,70,.35); border-radius: 10px; font-size: .82rem; }
+.lw-fleiste-t { color: var(--ember); font-weight: 600; letter-spacing: .03em; }
+.lw-fleiste .lw-klein { padding: .25rem .6rem; font-size: .8rem; }
+.lw-fneu { font: inherit; font-size: .8rem; background: #15111b; color: var(--vellum); border: 1px solid var(--line); border-radius: 6px; padding: .22rem .4rem; }
+.lw-fhinweis { margin-left: auto; color: var(--ash); font-size: .74rem; }
+.lw-frei { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); grid-auto-rows: 2rem; gap: .5rem; position: relative; }
+.lw-frei.ordnet { background-image: linear-gradient(rgba(224,160,70,.05) 1px, transparent 1px); background-size: 100% 2.5rem; }
+.lw-fenster { display: flex; flex-direction: column; min-width: 0; min-height: 0; position: relative; border: 1px solid var(--line); border-radius: 10px; background: rgba(20,16,24,.94); overflow: hidden; }
+.lw-fenster.zieht { outline: 2px solid var(--ember); z-index: 6; box-shadow: 0 12px 34px rgba(0,0,0,.55); }
+.lw-fkopf { flex: 0 0 2rem; height: 2rem; box-sizing: border-box; display: flex; align-items: center; gap: .35rem; padding: 0 .3rem 0 .45rem; cursor: grab; user-select: none; touch-action: none; border-bottom: 1px solid var(--line); background: rgba(224,160,70,.06); font-size: .8rem; color: var(--ember); letter-spacing: .03em; }
+.lw-fenster.zieht .lw-fkopf { cursor: grabbing; }
+.lw-fpunkte { color: rgba(224,160,70,.5); font-size: .9rem; }
+.lw-fkopf b { flex: 1 1 auto; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lw-fkopf button { flex: 0 0 auto; width: 1.55rem; height: 1.55rem; padding: 0; border: 0; border-radius: 5px; background: none; color: var(--ash); cursor: pointer; font-size: .85rem; line-height: 1; }
+.lw-fkopf button:hover { background: rgba(255,255,255,.08); color: var(--vellum); }
+.lw-fkoerper { flex: 1 1 auto; min-height: 0; overflow: auto; padding: .5rem .6rem; container-type: size; scrollbar-width: thin; }
+.lw-fenster.zu .lw-fkopf { border-bottom: 0; }
+.lw-fenster.zu .lw-fkoerper, .lw-fenster.zu .lw-fgroesse { display: none; }
+.lw-fgroesse { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize; touch-action: none; z-index: 3; background: linear-gradient(135deg, transparent 52%, rgba(224,160,70,.55) 52%, rgba(224,160,70,.55) 62%, transparent 62%, transparent 72%, rgba(224,160,70,.55) 72%, rgba(224,160,70,.55) 82%, transparent 82%); }
+.lw-frei.fest .lw-fkopf { cursor: default; } .lw-frei.fest .lw-fgroesse, .lw-frei.fest .lw-fpunkte { display: none; }
+/* Inhalte passen sich dem Fenster an */
+.lw-ekopf-frei { position: static !important; display: grid; gap: .45rem; padding: 0; border: 0; background: none; box-shadow: none; backdrop-filter: none; }
+.lw-ekopf-frei .lw-eregler { display: grid; grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr)) !important; gap: .4rem .5rem; }
+.lw-ekopf-frei .lw-eregler .lw-espann { grid-column: auto !important; }
+.lw-ekopf-frei .lw-espann b { min-width: 0 !important; }
+.lw-ekopf-frei .lw-eregler > .lw-kleinregler, .lw-ekopf-frei .lw-eregler > .lw-ehg { border: 1px solid var(--line); border-radius: 10px; padding: .3rem .55rem; background: rgba(255,255,255,.025); }
+.lw-ekopf-frei .lw-kleinregler input { max-width: none; }
+.lw-ekopf-frei .lw-eknoepfe { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .35rem; }
+.lw-ekopf-frei .lw-eknoepfe .lw-schalter { justify-content: center; }
+@container (max-width: 26rem) { .lw-ekopf-frei .lw-eknoepfe { grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr)); } .lw-ekopf-frei .lw-eknoepfe .lw-lbl { display: none; } .lw-ekopf-frei .lw-eknoepfe .lw-ik { font-size: 1.2rem; } }
+@container (max-width: 22rem) { .lw-ekopf-frei .lw-kleinregler .lw-lbl, .lw-ekopf-frei .lw-ejetzt { display: none; } .lw-ekopf-frei .lw-play.lw-play-gross { min-width: 0; padding: .4rem .8rem; font-size: 1rem; } }
+.lw-momfrei { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: .35rem; }
+@container (max-width: 20rem) { .lw-momfrei { grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); } }
+.lw-fkoerper .lw-egitter { grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)) !important; }
+.lw-fkoerper .lw-ochips { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .3rem; }
+.lw-fkoerper .lw-ochip { text-align: left; border-radius: 9px; padding: .42rem .6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lw-fkoerper .lw-esteuer-hg { margin: .3rem 0 .45rem; }
+.lw-fkoerper .lw-owahl { display: grid; gap: .2rem; margin-top: .45rem; }
+.lw-f-karte .lw-fkoerper { padding: .35rem .45rem; }
+.lw-fkoerper .lw-kblock { display: flex; flex-direction: column; align-items: center; gap: .3rem; height: 100%; }
+.lw-fkoerper .lw-kblock .lw-kleiste { justify-content: center; }
+.lw-fkoerper .lw-kblock .lw-karte { flex: 0 0 auto; width: min(100%, calc((100cqh - 3rem) * 16 / 7)) !important; margin: 0 auto !important; }
+.lw-fkoerper [data-kgross] { display: none !important; }
+.lw-fkoerper .lw-zgruppen { gap: .45rem .7rem; }
 /* Steuerzeile in den Reitern: Spielen + Musik bzw. Hintergrund an/aus + Lautstärke – das Wichtigste dort, wo man gerade ist */
 .lw-esteuer { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.02); }
 .lw-esteuer .lw-kleinregler { flex: 1 1 12rem; min-width: 0; }
