@@ -12468,6 +12468,14 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-sprachklappe > summary:hover { color: var(--vellum); }
 .lw-sprachklappe[open] > .lw-sprache-ort { padding: 0 .5rem .5rem; }
 .lw-lebenfeld .lw-3dzeile .lw-schalter { padding: .3rem .7rem; font-size: .82rem; }
+/* Spalten: nichts darf in die Nachbarspalte ragen – zu Breites scrollt im eigenen Feld */
+.lw-konsole > .lw-spalte { min-width: 0; }
+.lw-konsole > .lw-spalte > [data-feld] { min-width: 0; max-width: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+.lw-konsole [data-feld] .lw-pult-gitter { grid-template-columns: repeat(auto-fill, minmax(min(6.4rem, 100%), 1fr)) !important; }
+.lw-konsole [data-feld] .lw-pult-gitter button, .lw-konsole [data-feld] .lw-schalter, .lw-konsole [data-feld] .lw-moment { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lw-konsole [data-feld] input[type=range] { min-width: 0; }
+.lw-konsole [data-feld] .lw-kleinregler { flex-wrap: wrap; min-width: 0; }
+.lw-konsole [data-feld] .lw-momreihe { grid-template-columns: repeat(auto-fill, minmax(min(5.5rem, 100%), 1fr)) !important; }
 /* „Alle Regler“ frei angeordnet */
 .lw-konsole-frei { display: block !important; }
 .lw-konsole-frei .lw-anordnung { display: flex !important; margin-bottom: .6rem; }
