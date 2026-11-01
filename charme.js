@@ -2358,6 +2358,7 @@
   }
   /* Vollbild: Bühne so groß wie möglich, Tafel bleibt darunter ganz sichtbar */
   const handy = () => window.innerWidth <= 700;
+  const breitbild = () => { try { return matchMedia("(min-width: 2200px) and (min-height: 1200px) and (min-aspect-ratio: 19/10)").matches; } catch (_) { return false; } };
   /* Handy: Szene wird ganz gezeigt (meet) statt beschnitten (slice); --sz = Höhe der Szene */
   function szeneMessen() {
     const h = handy();
@@ -2372,6 +2373,11 @@
     const cs = getComputedStyle(root), innen = root.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     const breite = root.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const tafelH = tafel.offsetHeight + parseFloat(getComputedStyle(tafel).marginTop || 0);
+    /* Breitbild (UWQHD): Tafel steht rechts neben der Bühne – dann zählt die volle Höhe */
+    if (breitbild()) {
+      const h = Math.max(200, Math.floor(innen - 4)), frei = breite - tafel.offsetWidth - 28;
+      buehne.style.height = h + "px"; buehne.style.width = Math.max(300, Math.min(frei, Math.round(h * 1.75))) + "px"; return;
+    }
     let h = Math.max(150, Math.floor(innen - tafelH - 4));
     if (handy()) h = Math.min(h, Math.round(breite * .75 + 74));
     buehne.style.height = h + "px";

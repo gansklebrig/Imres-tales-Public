@@ -654,9 +654,9 @@
 /* kleine Handys: Steuerungshinweis kompakter, damit die Spielfläche über die Handy-Leiste passt */
 @media (max-width: 420px) { #taverne.saal-einzeln :is(.wl-steuerung, .dn-steuerung, .eh-steuerung) { font-size: .8rem; line-height: 1.35; margin-top: 0; margin-bottom: 0; } }
 #taverne.saal-einzeln .wl-fuss, #taverne.saal-einzeln .eh-fuss, #taverne.saal-einzeln .dn-fuss { width: 100%; justify-self: center; }
-#taverne.saal-einzeln .at-buehne, #taverne.saal-einzeln .at-liste { max-width: min(100%, 820px); }
+#taverne.saal-einzeln .at-buehne, #taverne.saal-einzeln .at-liste { max-width: min(100%, 51rem); }
 #taverne.saal-einzeln .tav-karte:not(.tav-voll) .at-canvas { height: clamp(300px, var(--sh), 600px); }
-#taverne.saal-einzeln #barden-probe, #taverne.saal-einzeln #memory-karte { max-width: 820px; width: 100%; justify-self: center; }
+#taverne.saal-einzeln #barden-probe, #taverne.saal-einzeln #memory-karte { max-width: 51rem; width: 100%; justify-self: center; }
 #taverne.saal-einzeln .tav-karte > .tav-info, #taverne.saal-einzeln .wl-steuerung, #taverne.saal-einzeln .dn-steuerung, #taverne.saal-einzeln .eh-steuerung { max-width: 48rem; }
 
 /* Vorschau-Fenster */

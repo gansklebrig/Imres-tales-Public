@@ -47,7 +47,7 @@ html.tav-voll-offen, html.tav-voll-offen body { overflow: hidden; }
 .tav-karte.tav-voll .dn-fuss, .tav-karte.tav-voll .eh-fuss { width: 100%; max-width: var(--vb); justify-self: center; }
 .tav-karte.tav-voll .dn-steuerung, .tav-karte.tav-voll .eh-steuerung { text-align: center; margin: 0; }
 
-.auftritt.tav-voll .at-buehne, .auftritt.tav-voll .at-liste { max-width: min(100%, 980px); }
+.auftritt.tav-voll .at-buehne, .auftritt.tav-voll .at-liste { max-width: min(100%, 61rem); }
 .auftritt.tav-voll { padding-top: 1rem; }
 .auftritt.tav-voll .at-canvas { height: max(280px, calc(100vh - 20rem)); }
 .auftritt.tav-voll:has(.at-pfad) .at-canvas { height: max(280px, calc(100vh - 27rem)); }

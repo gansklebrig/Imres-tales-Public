@@ -1,0 +1,67 @@
+/* =====================================================================
+   BREITBILD (UWQHD, z. B. 3440 × 1440)
+   ---------------------------------------------------------------------
+   Wird nur auf sehr breiten, hohen Bildschirmen geladen (siehe media-Attribut
+   im <link> in index.html). Die Schrift wächst dort mit der Bildschirmhöhe
+   (index.html), hier bekommen die Spiele ein Breitbild-Layout:
+   Spielfeld in der Mitte so hoch wie möglich, Steuerung und Bestenliste
+   links und rechts daneben statt darunter.
+   ===================================================================== */
+
+/* mehr Platz für Spiele und Bühne */
+html body #taverne.saal-einzeln .wrap, html body #buehne .wrap { max-width: min(96vw, 150rem); }
+html body #taverne.saal-einzeln { --sh: calc(100vh - 9.5rem); }
+
+/* ---------- Friedrichs Jagd, Ezekiels lange Nacht, Echos Hort: hohe Spielfelder ---------- */
+html body #taverne.saal-einzeln :is(#waldlauf, #diebesnacht, #echohort),
+html body .tav-karte.tav-voll:is(#diebesnacht, #echohort) {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-rows: max-content max-content 1fr; column-gap: 2.2rem; row-gap: .8rem; align-items: start; align-content: start;
+}
+html body :is(#waldlauf, #diebesnacht, #echohort) > :is(.wl-steuerung, .dn-steuerung, .eh-steuerung) { grid-column: 1; grid-row: 1; margin: 0; padding-right: 0 !important; font-size: 1rem; line-height: 1.5; }
+html body :is(#waldlauf, #diebesnacht, #echohort) > :is(.wl-fuss, .dn-fuss, .eh-fuss) { grid-column: 1; grid-row: 2; max-width: 26rem !important; justify-self: end; }
+html body :is(#waldlauf, #diebesnacht, #echohort) > :is(.wl-liste, .dn-liste, .eh-liste) { grid-column: 3; grid-row: 1 / span 3; max-width: 28rem !important; justify-self: start; }
+html body #waldlauf > .wl-rahmen, html body :is(#diebesnacht, #echohort) > :is(.dn-buehne, .eh-buehne) { grid-column: 2; grid-row: 1 / span 3; }
+html body #waldlauf > .wl-rahmen { width: auto; }
+html body #taverne.saal-einzeln #waldlauf .wl-buehne:not(.voll *),
+html body #taverne.saal-einzeln #echohort .eh-buehne { width: calc(var(--sh) * .8); max-width: none; }
+html body #taverne.saal-einzeln #diebesnacht .dn-buehne { width: calc(var(--sh) * 400 / 560); max-width: none; }
+/* im Vollbild der Karte die ganze Höhe */
+html body .tav-karte.tav-voll#echohort .eh-buehne { width: calc((100vh - 5rem) * .8); max-width: none; }
+html body .tav-karte.tav-voll#diebesnacht .dn-buehne { width: calc((100vh - 5rem) * 400 / 560); max-width: none; }
+html body .tav-karte.tav-voll:is(#diebesnacht, #echohort) :is(.dn-fuss, .eh-fuss, .dn-liste, .eh-liste) { max-width: 28rem !important; }
+
+/* ---------- Barradins Auftritt: Auswahl links, Bühne in der Mitte, Wertung rechts ---------- */
+html body #taverne.saal-einzeln #auftritt, html body .tav-karte.tav-voll#auftritt {
+  grid-template-columns: minmax(0, 1fr) minmax(32rem, 44rem) minmax(0, 1fr); grid-template-rows: repeat(7, max-content) 1fr; column-gap: 2.2rem; row-gap: .7rem; align-items: start; align-content: start;
+}
+html body #auftritt > :is(.at-modus, .tav-info, .at-stufen) { grid-column: 1; }
+html body #auftritt > .at-buehne { grid-column: 2; grid-row: 1 / span 8; max-width: none !important; width: 100%; }
+html body #auftritt > :is(.at-steuer, .at-fuss, .at-ton, .at-kalib-zeile, .at-liste) { grid-column: 3; max-width: 30rem !important; justify-self: start; width: 100%; }
+html body #auftritt > .at-steuer { grid-row: 1; } html body #auftritt > .at-fuss { grid-row: 2; } html body #auftritt > .at-ton { grid-row: 3; }
+html body #auftritt > .at-kalib-zeile { grid-row: 4; } html body #auftritt > .at-liste { grid-row: 5 / span 4; }
+html body #taverne.saal-einzeln .tav-karte#auftritt:not(.tav-voll) .at-canvas { height: calc(100vh - 13rem); }
+html body .tav-karte.tav-voll#auftritt .at-canvas { height: calc(100vh - 8rem) !important; }
+html body #auftritt .at-zwei { max-width: none; }
+
+/* ---------- Bestiarium-Memory: Karten so groß, dass alles auf einen Blick passt ---------- */
+html body #taverne.saal-einzeln #memory-karte { max-width: none; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-rows: repeat(5, max-content) 1fr; column-gap: 2.2rem; align-items: start; }
+html body #memory-karte > :is(.label, h3, .tav-info, .memory-kopf) { grid-column: 1; }
+html body #memory-karte > .memory { grid-column: 2; grid-row: 1 / span 6; width: calc(100vh - 11rem); }
+html body #memory-karte > .memory-fuss { grid-column: 3; grid-row: 1; }
+
+/* ---------- Loblied & Spott: breiter und großzügiger ---------- */
+html body #taverne.saal-einzeln #barden-probe { max-width: 72rem; }
+
+/* ---------- Würfel auf Verführen: Bühne links, Titel/Start bzw. Sprüche rechts daneben ---------- */
+html body .tav-karte.charme { max-width: none; grid-template-columns: minmax(0, 1fr) minmax(26rem, 36rem); grid-template-rows: max-content max-content max-content 1fr; column-gap: 1.6rem; row-gap: .5rem; align-items: start; }
+html body .tav-karte.charme > .ch-buehne { grid-column: 1; grid-row: 1 / span 4; }
+html body .tav-karte.charme > :is(.ch-label, .ch-titel, .ch-text) { grid-column: 2; margin: 0; }
+html body .tav-karte.charme > .ch-tafel { grid-column: 2; grid-row: 4; margin-top: .4rem; max-width: none; }
+html body .tav-karte.charme:is(.ch-laeuft, .tav-voll) > .ch-tafel { grid-row: 1 / span 4; margin-top: 0; }
+html body .tav-karte.charme.ch-laeuft > :is(.ch-label, .ch-titel, .ch-text) { display: none; }
+html body .tav-karte.charme:not(.tav-voll) .ch-buehne { aspect-ratio: 16 / 10; height: calc(100vh - 10rem); width: auto; max-width: 100%; justify-self: center; }
+html body .tav-karte.charme.tav-voll { display: grid !important; }
+html body .tav-karte.charme .ch-knoepfe { flex-direction: column; align-items: stretch; }
+
+/* ---------- Spielesaal-Übersicht: mehr Spiele nebeneinander ---------- */
+html body #taverne:not(.saal-einzeln) .wrap { max-width: min(94vw, 120rem); }

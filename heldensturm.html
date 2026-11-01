@@ -2149,7 +2149,7 @@ const GF=()=>GFX[gfxL()];
 const sharpOn=()=>SAVE.sharp===undefined?(window.devicePixelRatio||1)>=2:!!SAVE.sharp;
 function resize(){W=window.innerWidth;H=window.innerHeight;const dpr=window.devicePixelRatio||1;DPR=Math.min(dpr,GF().dpr,Math.max(1,Math.sqrt(GF().px/Math.max(1,W*H))))*RSC;
  let px=false;if(sharpOn()&&dpr>=1.5&&DPR<dpr*0.97){let k=2;while(dpr/k>DPR*1.12&&k<4)k++;DPR=dpr/k;px=true}
- cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';cv.style.imageRendering=px?'pixelated':'';ZOOM=Math.min(1.75,Math.max(clamp(Math.min(W,H)/560,0.7,1.2),H/720))}
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';cv.style.imageRendering=px?'pixelated':'';ZOOM=Math.min(W>=2200&&H>=1200?2.1:1.75,Math.max(clamp(Math.min(W,H)/560,0.7,1.2),H/720))}
 window.addEventListener('resize',resize);resize();window.addEventListener('resize',()=>{try{menuZoom()}catch(e){}});
 /* Meldungen: 0 = alle in der Mitte, 1 = ruhig (Kleinkram läuft dezent am linken Rand, weniger Sprechblasen), 2 = minimal */
 const msgL=()=>SAVE.msg===undefined?1:SAVE.msg;
@@ -8352,9 +8352,9 @@ function hurtFb(a){const q=a/Math.max(1,P.st.maxHp),lok=!netIs(P.dev);
 (()=>{try{const st=document.createElement('style');st.textContent=`.wsl{color:#e8d8b0}`;document.head.appendChild(st)}catch(e){}})();
 
 /* Menüs wachsen am PC mit dem Fenster mit (Rand bleibt frei): Faktor 1 bis 1,8 je nach Breite und Höhe */
-function menuZoom(){let z=1;try{const fein=matchMedia('(hover:hover) and (pointer:fine)').matches,w=innerWidth,h=innerHeight;if(fein&&w>1150)z=Math.max(1,Math.min(1.8,w/1100,h/680))}catch(e){}document.documentElement.style.setProperty('--mz',z.toFixed(3))}
+function menuZoom(){let z=1,hz=1;try{const fein=matchMedia('(hover:hover) and (pointer:fine)').matches,w=innerWidth,h=innerHeight,breit=w>=2200&&h>=1200;if(fein&&w>1150)z=Math.max(1,Math.min(breit?2.3:1.8,w/1100,h/680));if(breit)hz=Math.max(1,Math.min(1.7,h/880))}catch(e){}document.documentElement.style.setProperty('--mz',z.toFixed(3));document.documentElement.style.setProperty('--hz',hz.toFixed(3))}
 menuZoom();
-(()=>{try{const st=document.createElement('style');st.textContent=`#scr .wrap{zoom:var(--mz,1)}#scr .wrap .lead,#scr .wrap p{line-height:1.5}`;document.head.appendChild(st)}catch(e){}})();
+(()=>{try{const st=document.createElement('style');st.textContent=`#scr .wrap{zoom:var(--mz,1)}#scr .wrap .lead,#scr .wrap p{line-height:1.5}#hud>*,#feed,#toast{zoom:var(--hz,1)}`;document.head.appendChild(st)}catch(e){}})();
 
 /* ================= Online: mitten im Lauf einladen, Menü-Rechte, Markieren =================
    Gastgeber kann im Pausemenü jederzeit einen Online-Raum öffnen; neue Gäste steigen in die laufende Stufe ein

@@ -1318,7 +1318,7 @@
 .at-liedwahl { font: inherit; font-size: .85rem; color: var(--vellum); background: rgba(16,14,21,.85); border: 1px solid var(--ember); padding: .35rem .6rem; max-width: 100%; cursor: pointer; }
 .at-liedwahl:disabled { opacity: .55; cursor: default; }
 .at-stufen button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
-.at-buehne { position: relative; max-width: 560px; width: 100%; margin: 0 auto; }
+.at-buehne { position: relative; max-width: 35rem; width: 100%; margin: 0 auto; }
 .at-canvas { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(224,160,70,.14), transparent 70%), rgba(16,14,21,.7); border: 1px solid var(--line); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
 .at-ergebnis { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: .45rem; padding: 1rem; text-align: center; background: rgba(16,14,21,.88); border: 1px solid var(--ember); }
 .at-ergebnis[hidden] { display: none; }
@@ -1338,7 +1338,7 @@
 .at-eintrag { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
 .at-name { background: rgba(0,0,0,.3); border: 1px solid var(--line); color: var(--vellum); font: inherit; padding: .45rem .7rem; min-width: 0; width: 12rem; }
 .at-eingetragen { text-align: center; color: var(--ember); margin: 0; }
-.at-liste { max-width: 560px; width: 100%; margin: 0 auto; }
+.at-liste { max-width: 35rem; width: 100%; margin: 0 auto; }
 .at-liste h4 { font-family: var(--display); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); margin: .4rem 0; }
 .at-liste table { width: 100%; border-collapse: collapse; font-size: .88rem; }
 .at-liste th { text-align: left; font-weight: normal; color: var(--ash); font-size: .75rem; border-bottom: 1px solid var(--line); padding: .25rem .4rem; }
@@ -1858,16 +1858,16 @@
   const duellCss = document.createElement("style");
   duellCss.textContent = `
 .at-duell-knopf-zeile { display: flex; justify-content: center; }
-.at-zwei { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: .5rem; max-width: 1000px; width: 100%; margin: 0 auto; align-items: start; }
+.at-zwei { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: .5rem; max-width: 62.5rem; width: 100%; margin: 0 auto; align-items: start; }
 .at-zwei .at-buehne { max-width: none; margin: 0; }
 .at-er { min-width: 0; }
 .at-canvas-er { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(127,178,255,.1), transparent 70%), rgba(16,14,21,.7); border: 1px solid rgba(127,178,255,.4); pointer-events: none; }
 @media (min-width: 900px) { .at-zwei { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
-.auftritt.at-im-duell .at-duell-bar { max-width: 1000px; }
+.auftritt.at-im-duell .at-duell-bar { max-width: 62.5rem; }
 .at-duell-text { margin: 0; flex-basis: 100%; text-align: center; font-family: var(--name); font-size: 1.05rem; color: var(--vellum); }
 .at-fuss .at-duell-text { order: 2; }
 .at-keine-pause { color: #ffd27a; font-weight: 400; font-size: .9em; }
-.at-duell-bar { max-width: 560px; width: 100%; margin: 0 auto -.4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; font-size: .82rem; }
+.at-duell-bar { max-width: 35rem; width: 100%; margin: 0 auto -.4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; font-size: .82rem; }
 .at-duell-bar[hidden] { display: none; }
 .at-db { padding: .3rem .55rem; border: 1px solid var(--line); background: rgba(16,14,21,.7); color: var(--ash); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .at-db b { color: var(--vellum); font-weight: 600; }
