@@ -3844,7 +3844,8 @@ function ambiWunsch0(){const W={};if(G.state==='camp'||G.state==='title'&&scr&&!
  return W}
 function ambiTick(){try{if(AC&&MASTER&&AC.state==='running')kulTick((SAVE.volSfx==null?0.6:SAVE.volSfx)*0.6)}catch(e){}if(WXF&&AC){const S=STAGES[G.stage],out=G.state==='play'&&!G.room&&S&&OUTDOOR.has(S.theme),w=out&&G.wx&&G.wx.i===G.stage?G.wx.w:'',f=w==='gewitter'?2600:w==='regen'?3600:w==='nebel'?2900:w==='schnee'?6000:20000;if(f!==wxFk){wxFk=f;WXF.frequency.cancelScheduledValues(AC.currentTime);WXF.frequency.setTargetAtTime(f,AC.currentTime,0.8)}}
  if(!AC||!MASTER||G.bot||AC.state!=='running')return;const W=SAVE.sound&&SAVE.amb!==false?ambiWunsch():{},v=(SAVE.volSfx==null?0.6:SAVE.volSfx)*0.6*(G.paused?0.5:1),now=AC.currentTime;
- for(const n in W){const a=ambiEl(n);if(a._bad||!a._g)continue;if(a.paused){a.currentTime=Math.random()*20;a.play().catch(()=>{})}const z=W[n]*v*ambiAtem(n,now);if(a._lp){const tf=AMBI_TIEF[n]||20000;if(a._tf!==tf){a._tf=tf;a._lp.frequency.setTargetAtTime(tf,now,0.5)}}if(Math.abs((AMBI.on[n]||0)-z)>0.01){a._g.gain.cancelScheduledValues(now);a._g.gain.setTargetAtTime(z,now,(AMBI.on[n]||0)<0.005?4:2);AMBI.on[n]=z}}
+ const ambS=Object.values(W).reduce((a,b)=>a+(+b||0),0),ambK=ambS>0.85?Math.pow(0.85/ambS,0.8):1,ambE=ambiEin(now);
+ for(const n in W){const a=ambiEl(n);if(a._bad||!a._g)continue;if(a.paused){a.currentTime=Math.random()*20;a.play().catch(()=>{})}const z=Math.min(0.36,W[n]*ambK)*ambE*v*ambiAtem(n,now);if(a._lp){const tf=AMBI_TIEF[n]||20000;if(a._tf!==tf){a._tf=tf;a._lp.frequency.setTargetAtTime(tf,now,0.5)}}if(Math.abs((AMBI.on[n]||0)-z)>0.01){a._g.gain.cancelScheduledValues(now);a._g.gain.setTargetAtTime(z,now,(AMBI.on[n]||0)<0.005?7:2);AMBI.on[n]=z}}
  for(const n in AMBI.on){if(W[n])continue;const a=AMBI.el[n];if(!a||!a._g){delete AMBI.on[n];continue}if(AMBI.on[n]>0){a._g.gain.cancelScheduledValues(now);a._g.gain.setTargetAtTime(0,now,0.7);AMBI.on[n]=0;a._off=now}else if(now-(a._off||0)>4&&!a.paused){a.pause();delete AMBI.on[n]}}}
 function bossMood(){const b=G.boss;if(!b)return 'boss';if(b.survive0||b.survive)return 'verfolgung';if(b.musId===undefined){const S=STAGES[G.stage];b.musId=S&&S.boss&&BOSSES[S.boss]===b.def?S.boss:Object.keys(BOSSES).find(k=>BOSSES[k]===b.def)||''}return b.musId&&MUSIK.hat('boss_'+b.musId)?'boss_'+b.musId:'boss'}
 const ROOMMOOD={schatz:'fey',arena:'kampf',goblin:'dorffest',fallen:'spannung',altar:'pilger',haendler:'marktplatz',fluch:'grusel',pilzkreis:'elben',ballsaal:'hof',schmiede:'zwerge',hain:'elben',karte:'spannung',gericht:'hof',mimicnest:'spannung',gans:'dorffest'};
@@ -8250,10 +8251,10 @@ function kulSpiel(x,v){const D=KULD,e=D.EV[x[0]];if(!e)return true;const bufs=e.
  let t=now;for(let i=0;i<n;i++){const b=bufs[Math.floor(Math.random()*bufs.length)],s=AC.createBufferSource();s.buffer=b;s.playbackRate.value=e.t?rnd(e.t[0],e.t[1]):rnd(0.95,1.05);s.connect(g);s.start(t);t+=e.q?rnd(e.q[2],e.q[3]):0}
  KUL.n=(KUL.n||0)+1;KUL.last=x[0];return true}
 function kulTick(v){if(!KULD||!AC||G.bot)return;const sp=kulSpec();const id=sp?sp.id+'|'+(sp.k||''):'';const now=AC.currentTime;
- if(id!==KUL.id){KUL.id=id;KUL.t0=now;KUL.ph=rnd(0,TAU);KUL.ev=sp?kulEvListe(sp):[];KUL.next=KUL.ev.map(x=>now+5+rnd(x[1][0]*0.5,x[1][1])*(MOBIL?1.5:1));for(const x of KUL.ev){const e=KULD.EV[x[0]];if(e)e.f.slice(0,2).forEach(kulLaden)}}
+ if(id!==KUL.id){KUL.id=id;KUL.t0=now;KUL.ph=rnd(0,TAU);KUL.ev=sp?kulEvListe(sp):[];KUL.next=KUL.ev.map((x,i)=>now+10+i*rnd(5,9)+rnd(x[1][0]*0.5,x[1][1])*(MOBIL?1.5:1));KUL.lastT=now;for(const x of KUL.ev){const e=KULD.EV[x[0]];if(e)e.f.slice(0,2).forEach(kulLaden)}}
  if(!sp||G.paused||G.state!=='play'&&!(G.state==='title'&&G.camp)&&G.state!=='camp'||!SAVE.sound||SAVE.amb===false||v<=0)return;
- const ein=Math.min(1,Math.max(0.15,(now-(KUL.t0||0))/30)),akt=0.4+0.6*(0.5+0.5*Math.sin(now/100*TAU+(KUL.ph||0)));
- KUL.ev.forEach((x,i)=>{if(now<KUL.next[i])return;if(Math.random()>akt){KUL.next[i]=now+rnd(x[1][0],x[1][1])*0.5;return}let ok=true;try{ok=kulSpiel(x,v*ein)}catch(e){}KUL.next[i]=now+(ok?rnd(x[1][0],x[1][1])*(MOBIL?1.5:1):1.5)})}
+ const ein=Math.min(1,Math.max(0.08,(now-(KUL.t0||0))/45)),akt=0.4+0.6*(0.5+0.5*Math.sin(now/100*TAU+(KUL.ph||0)));
+ KUL.ev.forEach((x,i)=>{if(now<KUL.next[i])return;if(now-(KUL.lastT||0)<2.5){KUL.next[i]=now+rnd(1.5,3.5);return}if(Math.random()>akt){KUL.next[i]=now+rnd(x[1][0],x[1][1])*0.5;return}let ok=true;try{ok=kulSpiel(x,v*ein)}catch(e){}if(ok)KUL.lastT=now;KUL.next[i]=now+(ok?rnd(x[1][0],x[1][1])*(MOBIL?1.5:1):1.5)})}
 
 /* Klare Aussage oben in der Item-Ansicht: lohnt sich das Anlegen? */
 function urteilHtml(it,cur){const d=itemDelta(it),p=Math.round(Math.abs(d)*100),nm=cur?`„${esc(cur.name)}“`:'';
@@ -10000,6 +10001,9 @@ function fussWeiter(){try{const w=scr&&scr.querySelector('.wrap');if(!w)return;c
 function beuteB(){const k=(G.mode||'')+':'+G.stage;if(!G.beute||G.beute.k!==k)G.beute={k,n:0,leg:0};return G.beute}
 function beuteF(){return 1/(1+beuteB().n/8)}
 function legDaempf(){if(!G||G.bot)return 1;const l=beuteB().leg;return l<=0?1:l===1?0.3:0.1}
+
+/* Kulisse beim Stufenstart: von leise sanft auf volle Stärke (ca. 25 s) */
+const AMBE={k:'',t0:0};function ambiEin(now){const key=G.state+':'+(G.mode||'')+':'+G.stage;if(key!==AMBE.k){AMBE.k=key;AMBE.t0=now}const k=Math.min(1,Math.max(0,(now-AMBE.t0)/25));return 0.3+0.7*k*k*(3-2*k)}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
