@@ -4234,7 +4234,7 @@ const ZUS_ICON = {
     status("📌 " + sz.name);
   }
   function szenenHTML(T) {
-    const E = T.einf;
+    const E = T.einf; if (!szenen.length && !KUL_WELT[S.kulisse]) return "";
     return '<div class="lw-szenen"><span>' + E.szenen + "</span>" + szenen.map((sz, i) => '<span class="lw-szeintrag"><button type="button" class="lw-szchip" data-szene="' + i + '" title="' + esc(E.szeneLadenT) + '">' + esc(sz.name) + '</button><button type="button" class="lw-szweg" data-szweg="' + i + '" title="' + esc(E.szeneWeg) + '" aria-label="' + esc(E.szeneWeg) + '">✕</button></span>').join("") +
       (KUL_WELT[S.kulisse] ? '<button type="button" class="lw-szneu" data-szneu="1" title="' + esc(E.szeneMerkenT) + '">📌 ' + E.szeneMerken + "</button>" : "") + "</div>";
   }
@@ -9483,7 +9483,7 @@ const ZUS_ICON = {
   const uebRegler = T => '<label class="lw-feld lw-regler lw-uebergang"><span>🌊 ' + T.uebergang + ' <b class="lw-uval">' + T.uebStufe(uebergang) + '</b> ' + info("uebergang") + '</span><input type="range" min="1" max="8" step="1" value="' + uebergang + '" data-feld="uebergang"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b> ' + info("intensitaet") + '</span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
-  const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler"><span>' + sym + " " + text + '</span><input type="range" min="0" max="10" step="1" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + wert * 10 + " %</b></label>";
+  const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler" title="' + esc(text) + '"><span><i class="lw-ik">' + sym + '</i><span class="lw-lbl"> ' + text + '</span></span><input type="range" min="0" max="10" step="1" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + wert * 10 + " %</b></label>";
   Object.assign(TX.de, { kulisseKurz: "Hintergrund", effekteKurz: "Effekte", einstKurz: "Lautstärke und Kulisse", zumLautenwerk: "↑ Zum Lautenwerk" });
   Object.assign(TX.en, { kulisseKurz: "Background", effekteKurz: "Effects", einstKurz: "Volume and backdrop", zumLautenwerk: "↑ To the Lautenwerk" });
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
@@ -9877,6 +9877,10 @@ const ZUS_ICON = {
   }
   function jetztAktualisieren() { const el = root.querySelector(".lw-ejetzt"); if (el) { const T = t(), h = jetztText(T); if (el.innerHTML !== h) el.innerHTML = h; } }
   setInterval(() => { if (einfach && S && S.pult && !hoerer) jetztAktualisieren(); }, 1000);
+  /* „⚡ Etwas passiert“ → Symbol und Text getrennt, damit das kleine Handy eine kompakte Leiste daraus machen kann */
+  const ikonText = (x, kurz) => { const m = /^(\S+)\s+(.*)$/.exec(String(x)); return m ? '<i class="lw-ik">' + m[1] + '</i><span class="lw-lbl">' + m[2] + "</span>" + (kurz ? '<span class="lw-kurz">' + kurz + "</span>" : "") : x; };
+  Object.assign(TX.de.einf, { kurz: { passiert: "Passiert", stille: "Stille", abend: "Abend", sprechen: "Sprechen", wasist: "Hilfe" } });
+  Object.assign(TX.en.einf, { kurz: { passiert: "Event", stille: "Silence", abend: "Session", sprechen: "Voice", wasist: "Help" } });
   function einfachKopf(T) {
     const E = T.einf;
     return '<div class="lw-pult-kopf lw-ekopf">' +
@@ -9885,11 +9889,11 @@ const ZUS_ICON = {
       "</div>" +
       '<p class="lw-ejetzt" aria-live="polite">' + jetztText(T) + "</p>" +
       '<div class="lw-ekopf-reihe lw-eregler">' + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") + spannRegler(T) + '<div class="lw-ehg">' + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + hgKnopf(T) + "</div></div>" +
-      '<div class="lw-ekopf-reihe lw-eknoepfe"><button type="button" class="lw-schalter" data-aktion="passiert">' + T.leben.passiert + "</button>" +
-      '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="false">' + T.leben.stille + "</button>" +
-      '<button type="button" class="lw-schalter" data-aktion="abend" aria-expanded="' + abendAuf + '">' + E.abend + (abendSet ? " · " + ABEND_SETS[abendSet].sym : "") + "</button>" +
+      '<div class="lw-ekopf-reihe lw-eknoepfe"><button type="button" class="lw-schalter" data-aktion="passiert">' + ikonText(T.leben.passiert, E.kurz.passiert) + "</button>" +
+      '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="false">' + ikonText(T.leben.stille, E.kurz.stille) + "</button>" +
+      '<button type="button" class="lw-schalter" data-aktion="abend" aria-expanded="' + abendAuf + '">' + ikonText(E.abend + (abendSet ? " · " + ABEND_SETS[abendSet].sym : ""), E.kurz.abend + (abendSet ? " " + ABEND_SETS[abendSet].sym : "")) + "</button>" +
       sprechKnopf(T) +
-      '<button type="button" class="lw-schalter lw-ewasist" data-aktion="wasist" aria-pressed="' + wasIst + '" title="' + esc(E.wasIstTipp) + '">' + (wasIst ? E.wasIstAn : E.wasIst) + "</button></div>" +
+      '<button type="button" class="lw-schalter lw-ewasist" data-aktion="wasist" aria-pressed="' + wasIst + '" title="' + esc(E.wasIstTipp) + '">' + ikonText(wasIst ? E.wasIstAn : E.wasIst, E.kurz.wasist) + "</button></div>" +
       momenteZeile(T, S.kulisse) +
       (wasIst ? '<p class="lw-ewasist-hinweis">' + E.wasIstHinweis + "</p>" : "") + "</div>";
   }
@@ -9903,6 +9907,8 @@ const ZUS_ICON = {
     return "<h5>" + T.einf.spurenZus + "</h5>" + an.map(id => { const v = Math.round(zusWert(id) * 100), n = esc(ZUSATZ[id][en ? "en" : "de"]);
       return '<label class="lw-spurzeile"><span>' + zusSvg(id) + " " + n + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + n + '"><b>' + v + " %</b></label>"; }).join("");
   }
+  Object.assign(TX.de.einf, { ortWaehlen: "Wähle links bzw. oben einen Ort – dann erscheint hier sein Bild mit allen Geräuschen zum Verschieben." });
+  Object.assign(TX.en.einf, { ortWaehlen: "Pick a place – its picture appears here with all sounds to move around." });
   Object.assign(TX.de.einf, { ueWo: "Wo seid ihr?", ueWie: "Wie klingt es dort?", ueKlingt: "Was gerade klingt", ueNoch: "Was klingt noch?", keineZus: "Noch keine – unten antippen oder in die Karte ziehen.", kartenTipp: "Zieh dich und die Geräusche herum – Abstand und Räume verändern den Klang.",
     zusGr: { wetter: "Wetter", wasser: "Wasser", haus: "Feuer & Haus", wild: "Wildtiere", hof: "Hoftiere", menschen: "Menschen", handwerk: "Handwerk", grusel: "Unheimliches", weitere: "Weitere" } });
   Object.assign(TX.en.einf, { ueWo: "Where are you?", ueWie: "How does it sound there?", ueKlingt: "Playing now", ueNoch: "What else can sound?", keineZus: "None yet – tap below or drag into the map.", kartenTipp: "Drag yourself and the sounds around – distance and rooms change the sound.",
@@ -9959,7 +9965,7 @@ const ZUS_ICON = {
       (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") +
       '<div class="lw-ochips">' + vorschlag.map(chip).join("") + "</div>" +
       '<label class="lw-owahl"><span>' + E.alleOrteL + "</span>" + kulisseWahl(T) + "</label>" + szenenHTML(T) + "</div>" +
-      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + ue(E.ueWie) + karteLeiste(T) + karteHTML(T) + "</div>" +
+      '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + ue(E.ueWie) + (KUL_WELT[S.kulisse] ? karteLeiste(T) + karteHTML(T) : '<p class="lw-zhinweis">' + E.ortWaehlen + "</p>") + "</div>" +
       '<div class="lw-espalte lw-klingt">' + ue(E.ueKlingt) + klingtHTML(T) + "</div>" +
       '<div class="lw-egeraeusche">' + ue(E.ueNoch) + einfachGeraeusche(T) + "</div>" +
       "</div>";
@@ -10269,7 +10275,10 @@ const ZUS_ICON = {
     const h = document.querySelector("header.top"), oben = h ? Math.round(h.getBoundingClientRect().height) : 0;
     root.style.setProperty("--lw-oben", oben + "px");
     const r = k.getBoundingClientRect(), klebt = r.top <= oben + 1 && root.getBoundingClientRect().top < oben - 20;
-    k.classList.toggle("lw-geklebt", klebt);
+    if (klebt === k.classList.contains("lw-geklebt")) return;
+    /* beim Ankleben wird der Kopf kleiner – die frei gewordene Höhe bleibt als Abstand darunter stehen, sonst springt der Inhalt hoch */
+    if (klebt) { const h0 = k.offsetHeight; k.classList.add("lw-geklebt"); k.style.marginBottom = Math.max(0, h0 - k.offsetHeight) + "px"; }
+    else { k.classList.remove("lw-geklebt"); k.style.marginBottom = ""; }
   }
   addEventListener("scroll", () => { if (einfach) requestAnimationFrame(kopfKleben); }, { passive: true });
   addEventListener("resize", () => { if (einfach) kopfKleben(); });
@@ -10290,7 +10299,7 @@ const ZUS_ICON = {
     const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=7"; sk.onload = fertig; document.head.appendChild(sk);
   }
   let sprichtKnopf = null, sprichtAb = 0;
-  const sprechKnopf = T => '<button type="button" class="lw-schalter lw-sprechen" data-aktion="sprechen" title="' + esc(T.sprechTipp) + '">' + T.sprechen + "</button>";
+  const sprechKnopf = T => '<button type="button" class="lw-schalter lw-sprechen" data-aktion="sprechen" title="' + esc(T.sprechTipp) + '">' + ikonText(T.sprechen, T.einf.kurz.sprechen) + "</button>";
   root.addEventListener("pointerdown", e => {
     if (wasIst || hoerer || !e.target.closest) return;
     const b = e.target.closest('[data-aktion="sprechen"]'); if (!b || (e.pointerType === "mouse" && e.button !== 0)) return;
@@ -12188,6 +12197,68 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-skip { border: 1px solid rgba(214,110,80,.55); background: rgba(214,110,80,.12); color: #e8b8a8; font: inherit; font-size: .78rem; padding: .3rem .7rem; border-radius: 999px; cursor: pointer; }
 .lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
+.lw-ekopf .lw-ik { font-style: normal; }
+.lw-ekopf .lw-kurz { display: none; }
+/* ---------- kleines Handy: kompakter Kopf als Leiste – alles bleibt da, nur übersichtlicher ---------- */
+@media (max-width: 560px) {
+  .lw-einfach, .lw-einfach-inhalt, .lw-ekopf, .lw-ekopf-reihe { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .lw-ekopf { grid-template-columns: minmax(0, 1fr); padding: .45rem .5rem; gap: .35rem; border-radius: 10px; }
+  .lw-ekopf > .lw-ekopf-reihe:first-child { flex-wrap: nowrap; gap: .5rem; }
+  .lw-ekopf .lw-play.lw-play-gross { flex: 0 0 auto; padding: .4rem .75rem; font-size: .95rem; }
+  .lw-ekopf .lw-pult-titel { flex: 1 1 auto; min-width: 0; }
+  .lw-ekopf .lw-titel-name { display: block; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lw-ekopf .lw-ejetzt { margin: 0; font-size: .74rem; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Regler: Musik | Hintergrund nebeneinander, nur Symbole; Spannung darunter über die ganze Breite */
+  .lw-ekopf .lw-eregler { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .25rem .6rem; }
+  .lw-ekopf .lw-eregler .lw-espann { grid-column: 1 / -1; order: 3; }
+  .lw-ekopf .lw-kleinregler { gap: .35rem; min-width: 0; font-size: .8rem; }
+  .lw-ekopf .lw-kleinregler .lw-lbl { display: none; }
+  .lw-ekopf .lw-kleinregler input { min-width: 0; max-width: none; width: 100%; }
+  .lw-ekopf .lw-kleinregler b { flex: 0 0 auto; min-width: 0; font-size: .7rem; }
+  .lw-ekopf .lw-eregler .lw-mval, .lw-ekopf .lw-eregler .lw-kval { display: none; }
+  .lw-ekopf .lw-espann > span:first-child { display: none; }
+  .lw-ekopf .lw-espann b { min-width: 0 !important; font-size: .7rem; max-width: 5.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lw-ekopf .lw-ehg { gap: .3rem; }
+  .lw-ekopf .lw-ehgaus { padding: .2rem .4rem; font-size: .72rem; }
+  /* Knöpfe als Werkzeugleiste: Symbol oben, kurzer Text darunter, alle in einer Reihe */
+  .lw-ekopf .lw-eknoepfe { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: .3rem; }
+  .lw-ekopf .lw-eknoepfe .lw-schalter { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .05rem; padding: .3rem .15rem; min-width: 0; border-radius: 9px; font-size: .62rem; line-height: 1.15; }
+  .lw-ekopf .lw-eknoepfe .lw-ik { font-size: 1.05rem; line-height: 1.1; }
+  .lw-ekopf .lw-eknoepfe .lw-lbl { display: none; }
+  .lw-ekopf .lw-eknoepfe .lw-kurz { display: block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Stimmungs-Kacheln: Symbol und Name nebeneinander, Beschreibung einzeilig */
+  .lw-etile { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: .45rem; padding: .45rem .5rem; font-size: .88rem; }
+  .lw-etile .ki { grid-row: span 2; font-size: 1.15rem; }
+  .lw-etile small { font-size: .68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Momente: zwei Reihen à zwei statt vier gequetschter Karten */
+  .lw-ekopf .lw-momente.blaettern { grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem; }
+  .lw-ekopf .lw-momreihe { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .lw-ekopf .lw-moment { grid-template-columns: auto minmax(0, 1fr); justify-items: start; align-items: center; gap: .35rem; padding: .3rem .4rem; }
+  .lw-ekopf .lw-moment .ms { font-size: 1.1rem; }
+  .lw-ekopf .lw-moment .mt { text-align: left; font-size: .7rem; -webkit-line-clamp: 2; }
+  .lw-ekopf.lw-geklebt .lw-moment .mt { display: -webkit-box; }
+  .lw-ekopf.lw-geklebt .lw-momsteuer, .lw-ekopf.lw-geklebt .lw-mompunkte { display: none; }
+  /* angeklebt so flach wie möglich: eine Momente-Reihe, kleinerer Spielen-Knopf, Knöpfe ohne Text */
+  .lw-ekopf.lw-geklebt .lw-momreihe > .lw-moment:nth-child(n+3) { display: none; }
+  .lw-ekopf.lw-geklebt .lw-play.lw-play-gross { padding: .25rem .6rem; font-size: .85rem; }
+  .lw-ekopf.lw-geklebt .lw-titel-name { font-size: .9rem; }
+  .lw-ekopf.lw-geklebt .lw-eknoepfe .lw-schalter { flex-direction: row; gap: .25rem; padding: .22rem .15rem; }
+  .lw-ekopf.lw-geklebt .lw-eknoepfe .lw-kurz { display: none; }
+  .lw-ekopf.lw-geklebt .lw-eknoepfe .lw-ik { font-size: .95rem; }
+  .lw-etabs button { font-size: .76rem; padding: .4rem .2rem; line-height: 1.15; min-width: 0; }
+  .lw-ekopf .lw-eknoepfe .lw-kurz { font-size: clamp(9px, 2.7vw, .66rem); }
+  /* weniger Rand ringsum – auf dem kleinen Schirm zählt jeder Pixel */
+  .wrap:has(> .buehne .lautenwerk) { padding-left: 6px; padding-right: 6px; }
+  .tav-karte.lautenwerk { padding: .55rem .45rem; }
+  .lw-einfach .lw-ebereich { padding: .6rem .55rem; }
+  /* Orte: kompakte Kacheln in zwei Spalten statt einer langen Liste */
+  .lw-eort3 .lw-ochips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem; }
+  .lw-eort3 .lw-ochip { width: auto; font-size: .85rem; padding: .42rem .55rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 380px) {
+
+  .lw-ekopf .lw-play.lw-play-gross { padding: .35rem .6rem; font-size: .9rem; }
+}
 @media (max-width: 520px) { .lw-egitter { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lw-eregler { grid-template-columns: 1fr; } .lw-etile small { font-size: .7rem; }
   .lw-ekopf { padding: .5rem .55rem; gap: .35rem; }
   .lw-ekopf .lw-play.lw-play-gross { padding: .42rem .8rem; font-size: 1rem; min-width: 0; width: auto; }
