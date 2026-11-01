@@ -9986,6 +9986,13 @@ drawCorpses=function(inView,t){const A=G.corpses;if(!A||!A.length)return;const q
   const sk=al<1?(1-al)*c.r*0.25:0;cx.translate(c.x,c.y-c.z+sk);cx.rotate(c.rot);cx.translate(-c.x,-c.y);drawEnemy(c,0);cx.restore()}
  cx.globalAlpha=1;G.corpses=A.filter(c=>c.t<((c.mat&&c.mat!=='flesh'&&c.life)||life))};
 
+/* Handy: Weiter-Knopf auch ganz unten im Menü */
+function fussWeiter(){try{const w=scr&&scr.querySelector('.wrap');if(!w)return;const bs=w.querySelectorAll('[data-act="close"]');if(!bs.length)return;
+ const b=bs[0],last=w.lastElementChild;if(last&&(last.contains(bs[bs.length-1])&&bs.length>1||last.classList.contains('fussweiter')))return;
+ const d=document.createElement('div');d.className='fussweiter';const n=document.createElement('button');n.className='btn gold';n.dataset.act='close';n.textContent=(b.textContent||'Weiter').trim();d.appendChild(n);w.appendChild(d)}catch(e){}}
+{const _fw=showScreen;showScreen=function(){const r=_fw.apply(this,arguments);fussWeiter();return r}}
+{const st=document.createElement('style');st.textContent='.fussweiter{display:none}@media (max-width:820px),(pointer:coarse){.fussweiter{display:flex;justify-content:center;padding:6px 0 4px}.fussweiter .btn{min-width:min(320px,100%);min-height:52px;font-size:17px}}';document.head.appendChild(st)}
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
