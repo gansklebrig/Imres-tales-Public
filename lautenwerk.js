@@ -9668,7 +9668,7 @@ const ZUS_ICON = {
       '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) + "</section>";
     const lebenFeld = '<section class="lw-box lw-lebenfeld"><div class="lw-box-kopf"><h4>🎛 ' + T.steuer + "</h4></div>" +
-      (amRechner() && !hoerer ? '<div class="lw-sprache-ort"></div>' : "") +
+      (amRechner() && !hoerer ? '<details class="lw-sprachklappe"' + (spracheAuf ? " open" : "") + '><summary>🎙 ' + T.spracheKlappe + '</summary><div class="lw-sprache-ort"></div></details>' : "") +
       '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + sprechKnopf(T) + info("raum3d") + "</div>" +
       lebenBox(T) + "</section>";
     const spurFeld = '<section class="lw-box lw-spurfeld"><div class="lw-box-kopf"><h4>🎚 ' + T.kulSpuren + '</h4><button type="button" class="lw-klein" data-aktion="spurenpop" title="' + esc(T.spurenAlsPop) + '">⧉ ' + T.spurenAlsPop + "</button></div>" + spurenInhalt(T) + "</section>";
@@ -9681,18 +9681,20 @@ const ZUS_ICON = {
         (fxTab === "fav" && !liste.length ? '<p class="lw-favleer">' + T.favLeer + "</p>" : "") +
         '<div class="lw-pult-gitter lw-pult-fx">' + (fxTab === "fav" ? liste : oben("s", liste)).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
       "</section>";
-    return { kulisse: feld("kulisse", kulBox), spuren: spurenPop ? "" : feld("spuren", spurFeld), leben: feld("leben", lebenFeld), zusaetze: feld("zusaetze", zusFeld), effekte: feld("effekte", fxFeld) };
+    const karteFeld = '<section class="lw-box lw-kartefeld"><div class="lw-box-kopf"><h4>🗺 ' + T.einf.ueWie + "</h4></div>" +
+      (KUL_WELT[S.kulisse] ? '<div class="lw-kblock">' + karteLeiste(T) + karteHTML(T) + "</div>" : '<p class="lw-zhinweis">' + T.einf.ortWaehlen + "</p>") + "</section>";
+    return { kulisse: feld("kulisse", kulBox), karte: feld("karte", karteFeld), spuren: spurenPop ? "" : feld("spuren", spurFeld), leben: feld("leben", lebenFeld), zusaetze: feld("zusaetze", zusFeld), effekte: feld("effekte", fxFeld) };
   }
   /* ---------- Anordnung des Pults am Rechner: Felder frei in Spalten verschieben, Spaltenzahl und -breiten wählbar ---------- */
-  const FELDER = ["musik", "kulisse", "spuren", "leben", "zusaetze", "effekte"];
-  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "spuren", "leben"], ["zusaetze", "effekte"]], breiten: [1, 1, 1] });
+  const FELDER = ["musik", "kulisse", "karte", "spuren", "leben", "zusaetze", "effekte"];
+  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "karte", "spuren", "leben"], ["zusaetze", "effekte"]], breiten: [1, 1.15, 1] });
   let anordnung = ANORDNUNG_START();
   function anordnungPruefen(a) {
     const n = Math.max(1, Math.min(5, (a && a.spalten && a.spalten.length) || 3)), sp = [], gesehen = new Set();
     for (let i = 0; i < n; i++) sp.push(((a.spalten[i] || []).filter(id => FELDER.includes(id) && !gesehen.has(id) && gesehen.add(id))));
     /* neu hinzugekommene Felder: die Spuren gehören unter die Kulisse, alles andere ans Ende */
     FELDER.forEach(id => { if (gesehen.has(id)) return;
-      const k = id === "spuren" && sp.find(c => c.includes("kulisse"));
+      const k = (id === "spuren" || id === "karte") && sp.find(c => c.includes("kulisse"));
       if (k) k.splice(k.indexOf("kulisse") + 1, 0, id); else sp[sp.length - 1].push(id); });
     const br = sp.map((_, i) => { const w = a.breiten && +a.breiten[i]; return w > .15 && w < 8 ? w : 1; });
     return { spalten: sp, breiten: br };
@@ -9700,11 +9702,11 @@ const ZUS_ICON = {
   try { const g = JSON.parse(localStorage.getItem("imres-lw-anordnung") || "null"); if (g) anordnung = anordnungPruefen(g); } catch (_) {}
   const anordnungMerken = () => { try { localStorage.setItem("imres-lw-anordnung", JSON.stringify(anordnung)); } catch (_) {} };
   const AT = () => sprache() === "en"
-    ? { griff: "Drag to move this panel", spalten: n => n + (n === 1 ? " column" : " columns"), mehr: "One more column", weniger: "One column less", zurueck: "Default layout", tipp: "Drag panels by ⠿ · drag the gap between columns to resize", leer: "Drag a panel here" }
-    : { griff: "Ziehen, um dieses Feld zu verschieben", spalten: n => n + (n === 1 ? " Spalte" : " Spalten"), mehr: "Eine Spalte mehr", weniger: "Eine Spalte weniger", zurueck: "Standard-Anordnung", tipp: "Felder am ⠿ ziehen · Lücke zwischen Spalten ziehen ändert die Breite", leer: "Feld hierher ziehen" };
+    ? { frei: "Free", zuSpalten: "Columns", freiT: "Place every panel freely and resize it – or back to columns", freiTipp: "Drag panels by ⠿ anywhere · bottom-right corner: size", groesse: "Drag: make this panel bigger or smaller", griff: "Drag to move this panel", spalten: n => n + (n === 1 ? " column" : " columns"), mehr: "One more column", weniger: "One column less", zurueck: "Default layout", tipp: "Drag panels by ⠿ · drag the gap between columns to resize", leer: "Drag a panel here" }
+    : { frei: "Frei", zuSpalten: "Spalten", freiT: "Jedes Feld frei platzieren und in der Größe ziehen – oder zurück zu Spalten", freiTipp: "Felder am ⠿ beliebig verschieben · Ecke unten rechts: Größe", groesse: "Ziehen: Feld größer oder kleiner", griff: "Ziehen, um dieses Feld zu verschieben", spalten: n => n + (n === 1 ? " Spalte" : " Spalten"), mehr: "Eine Spalte mehr", weniger: "Eine Spalte weniger", zurueck: "Standard-Anordnung", tipp: "Felder am ⠿ ziehen · Lücke zwischen Spalten ziehen ändert die Breite", leer: "Feld hierher ziehen" };
   /* Feld-Hülle: Kennung und Griff in die Kopfzeile */
-  const ZWECK = { de: { musik: "Läuft ohne Ende weiter – tippe an, was gerade am Tisch passiert.", kulisse: "Geräusche des Ortes, sie laufen unter der Musik weiter.", spuren: "Jede Geräuschschicht des Ortes einzeln lauter oder leiser.", leben: "Macht den Ort lebendig: Überraschungen, Stille, Wetter, Tageszeit.", zusaetze: "Einzelne Geräusche zusätzlich dazulegen, z. B. Regen über die Taverne.", effekte: "Für einen Moment am Tisch: ein Schwerthieb, ein Würfelwurf …" },
-    en: { musik: "Keeps playing – tap whatever is happening at the table.", kulisse: "Sounds of the place, they keep running under the music.", spuren: "Each sound layer of the place louder or quieter.", leben: "Brings the place to life: surprises, silence, weather, time of day.", zusaetze: "Layer single sounds on top, e.g. rain over the tavern.", effekte: "For a moment at the table: a sword strike, a dice roll …" } };
+  const ZWECK = { de: { karte: "Dich und die Geräusche herumziehen – Abstand und Räume verändern den Klang.", musik: "Läuft ohne Ende weiter – tippe an, was gerade am Tisch passiert.", kulisse: "Geräusche des Ortes, sie laufen unter der Musik weiter.", spuren: "Jede Geräuschschicht des Ortes einzeln lauter oder leiser.", leben: "Macht den Ort lebendig: Überraschungen, Stille, Wetter, Tageszeit.", zusaetze: "Einzelne Geräusche zusätzlich dazulegen, z. B. Regen über die Taverne.", effekte: "Für einen Moment am Tisch: ein Schwerthieb, ein Würfelwurf …" },
+    en: { karte: "Drag yourself and the sounds around – distance and rooms change the sound.", musik: "Keeps playing – tap whatever is happening at the table.", kulisse: "Sounds of the place, they keep running under the music.", spuren: "Each sound layer of the place louder or quieter.", leben: "Brings the place to life: surprises, silence, weather, time of day.", zusaetze: "Layer single sounds on top, e.g. rain over the tavern.", effekte: "For a moment at the table: a sword strike, a dice roll …" } };
   function feld(id, html) {
     const zw = (ZWECK[sprache()] || ZWECK.de)[id];
     if (zw) html = html.replace("</h4>", "</h4>" + '<p class="lw-zweck lw-zweck-kopf">' + zw + "</p>");
@@ -9713,11 +9715,40 @@ const ZUS_ICON = {
   }
   const spaltenVorlage = () => anordnung.breiten.map(w => "minmax(0, " + w + "fr)").join(" ");
   let letzteVoll = false;
+  /* freie Anordnung: jedes Feld an jede Stelle, Größe an der Ecke ziehen – wie beim eigenen einfachen Pult */
+  let kfrei = (() => { try { const v = JSON.parse(localStorage.getItem("imres-lw-konsole-frei") || "null"); if (v && v.L) return v; } catch (_) {} return { an: false, L: {} }; })();
+  const kfreiMerken = () => { try { localStorage.setItem("imres-lw-konsole-frei", JSON.stringify(kfrei)); } catch (_) {} };
+  function kfreiStart() {
+    /* aus den Spalten ableiten: Breite nach Spaltenanteil, Felder untereinander */
+    const sum = anordnung.breiten.reduce((a, b) => a + b, 0); let x = 0; const L = {};
+    anordnung.spalten.forEach((ids, i) => { const w = i === anordnung.spalten.length - 1 ? 24 - x : Math.max(5, Math.round(24 * anordnung.breiten[i] / sum)); let y = 0;
+      ids.forEach(id => { const h = id === "musik" ? 20 : id === "zusaetze" ? 16 : 12; L[id] = { x, y, w, h }; y += h; }); x += w; });
+    return L;
+  }
+  function kOrdnen(festId) {
+    const ids = Object.keys(kfrei.L).filter(id => FELDER.includes(id));
+    ids.forEach(id => { const p = kfrei.L[id]; p.w = Math.max(5, Math.min(24, p.w)); p.h = Math.max(4, p.h); p.x = Math.max(0, Math.min(24 - p.w, p.x)); p.y = Math.max(0, p.y); });
+    const ko = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+    const ord = ids.filter(id => id !== festId).sort((a, b) => kfrei.L[a].y - kfrei.L[b].y || kfrei.L[a].x - kfrei.L[b].x), gesetzt = festId && kfrei.L[festId] ? [kfrei.L[festId]] : [];
+    ord.forEach(id => { const p = kfrei.L[id];
+      while (p.y > 0 && !gesetzt.some(q => ko(Object.assign({}, p, { y: p.y - 1 }), q))) p.y--;
+      for (let n = 0; n < 200; n++) { const k = gesetzt.filter(q => ko(p, q)); if (!k.length) break; p.y = Math.max(...k.map(q => q.y + q.h)); }
+      gesetzt.push(p); });
+  }
+  const kStil = p => "grid-column:" + (p.x + 1) + " / span " + p.w + ";grid-row:" + (p.y + 1) + " / span " + p.h;
   function konsole(T, voll) {
     letzteVoll = voll;
     const f = Object.assign({ musik: feld("musik", musikBox(T, voll)) }, klangBox(T)), a = AT(), n = anordnung.spalten.length;
+    const umschalt = '<button type="button" class="lw-klein lw-kfreiknopf" data-kfrei="1" title="' + esc(a.freiT) + '">' + (kfrei.an ? "▦ " + a.zuSpalten : "⬚ " + a.frei) + "</button>";
+    if (kfrei.an && freiMoeglich()) {
+      FELDER.forEach(id => { if (!kfrei.L[id]) { const st = kfreiStart(); kfrei.L[id] = st[id] || { x: 0, y: 999, w: 12, h: 12 }; } }); kOrdnen(null);
+      return '<div class="lw-konsole lw-konsole-frei"><div class="lw-anordnung"><span class="lw-tipp">' + a.freiTipp + "</span>" + umschalt +
+        '<button type="button" class="lw-klein" data-anordnung="zurueck" title="' + esc(a.zurueck) + '">↺</button></div><div class="lw-kfrei">' +
+        FELDER.filter(id => f[id]).map(id => '<div class="lw-kfeld" data-kid="' + id + '" style="' + kStil(kfrei.L[id]) + '">' + f[id] + '<i class="lw-fgroesse" data-kgroesse="' + id + '" title="' + esc(a.groesse) + '"></i></div>').join("") +
+        "</div></div>";
+    }
     return '<div class="lw-konsole" style="--lw-spalten:' + spaltenVorlage() + '">' +
-      '<div class="lw-anordnung"><span class="lw-tipp">' + a.tipp + "</span>" +
+      '<div class="lw-anordnung"><span class="lw-tipp">' + a.tipp + "</span>" + umschalt +
         '<button type="button" class="lw-klein" data-anordnung="weniger" title="' + esc(a.weniger) + '"' + (n <= 1 ? " disabled" : "") + ">−</button>" +
         "<span>▦ " + a.spalten(n) + "</span>" +
         '<button type="button" class="lw-klein" data-anordnung="mehr" title="' + esc(a.mehr) + '"' + (n >= 5 ? " disabled" : "") + ">+</button>" +
@@ -9725,6 +9756,9 @@ const ZUS_ICON = {
       anordnung.spalten.map((ids, i) => '<div class="lw-spalte" data-spalte="' + i + '" data-leer="' + esc(a.leer) + '">' + ids.map(id => f[id]).join("") + (i < n - 1 ? '<i class="lw-spaltenrand" data-rand="' + i + '"></i>' : "") + "</div>").join("") +
       "</div>";
   }
+  let spracheAuf = (() => { try { return localStorage.getItem("imres-lw-sprache-auf") === "1"; } catch (_) { return false; } })();
+  root.addEventListener("toggle", e => { if (e.target.classList && e.target.classList.contains("lw-sprachklappe")) { spracheAuf = e.target.open; try { localStorage.setItem("imres-lw-sprache-auf", spracheAuf ? "1" : "0"); } catch (_) {} } }, true);
+  Object.assign(TX.de, { spracheKlappe: "Sprachsteuerung einrichten (Taste, Stichwörter, Anlernen)" }); Object.assign(TX.en, { spracheKlappe: "Set up voice control (key, keywords, training)" });
   function konsoleNeu() {
     const alt = root.querySelector(".lw-konsole"); if (!alt) return;
     alt.outerHTML = konsole(t(), letzteVoll); klassikKnoepfe(); spracheOrt();
@@ -9734,16 +9768,18 @@ const ZUS_ICON = {
     anordnung = anordnungPruefen({ spalten: sp, breiten: anordnung.breiten }); anordnungMerken();
   }
   root.addEventListener("click", e => {
+    if (e.target.closest && e.target.closest("[data-kfrei]")) { kfrei.an = !kfrei.an; if (kfrei.an && !Object.keys(kfrei.L).length) kfrei.L = kfreiStart(); kfreiMerken(); konsoleNeu(); return; }
     const b = e.target.closest && e.target.closest("[data-anordnung]"); if (!b) return;
     const w = b.dataset.anordnung, sp = anordnung.spalten;
     if (w === "mehr" && sp.length < 5) { sp.push([]); anordnung.breiten.push(1); }
     else if (w === "weniger" && sp.length > 1) { const rest = sp.pop(); sp[sp.length - 1].push(...rest); anordnung.breiten.pop(); }
-    else if (w === "zurueck") anordnung = ANORDNUNG_START();
+    else if (w === "zurueck") { anordnung = ANORDNUNG_START(); if (kfrei.an) { kfrei.L = kfreiStart(); kfreiMerken(); } }
     anordnung = anordnungPruefen(anordnung); anordnungMerken(); konsoleNeu();
   });
   /* Ziehen: Feld am Griff packen, ein Platzhalter zeigt, wo es landet */
   root.addEventListener("pointerdown", e => {
     const g = e.target.closest && e.target.closest(".lw-griff"); if (!g || e.button !== 0) return;
+    if (g.closest(".lw-kfrei")) return;
     const el = g.closest("[data-feld]"), kon = el && el.closest(".lw-konsole"); if (!el || !kon) return;
     e.preventDefault();
     const r = el.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
@@ -9772,6 +9808,34 @@ const ZUS_ICON = {
     };
     addEventListener("pointermove", zug); addEventListener("pointerup", los); addEventListener("pointercancel", los);
   });
+  /* freie Anordnung: am ⠿ verschieben, an der Ecke Größe ändern – rastet im Gitter ein, die anderen weichen aus */
+  let kZug2 = null;
+  root.addEventListener("pointerdown", e => {
+    if (!e.target.closest || e.button !== 0) return;
+    const g = e.target.closest(".lw-kfrei .lw-griff"), gr = e.target.closest("[data-kgroesse]"); if (!g && !gr) return;
+    const gitter = root.querySelector(".lw-kfrei"); if (!gitter) return;
+    const el = (g || gr).closest(".lw-kfeld"), id = el && el.dataset.kid, p = id && kfrei.L[id]; if (!p) return;
+    const gs = getComputedStyle(gitter), lu = parseFloat(gs.columnGap) || 12, rz = parseFloat(gs.gridAutoRows) || 32, b = gitter.getBoundingClientRect();
+    kZug2 = { id, el, groesse: !!gr, sx: e.clientX, sy: e.clientY, p0: Object.assign({}, p), sw: (b.width + lu) / 24, sh: rz + (parseFloat(gs.rowGap) || lu), pid: e.pointerId };
+    e.preventDefault(); try { (g || gr).setPointerCapture(e.pointerId); } catch (_) {}
+    el.classList.add("lw-kzieht"); gitter.classList.add("ordnet");
+  });
+  root.addEventListener("pointermove", e => {
+    if (!kZug2 || e.pointerId !== kZug2.pid) return;
+    const dx = Math.round((e.clientX - kZug2.sx) / kZug2.sw), dy = Math.round((e.clientY - kZug2.sy) / kZug2.sh), a = kZug2.p0, p = kfrei.L[kZug2.id];
+    const n = kZug2.groesse ? { x: a.x, y: a.y, w: a.w + dx, h: a.h + dy } : { x: a.x + dx, y: Math.max(0, a.y + dy), w: a.w, h: a.h };
+    if (n.x === p.x && n.y === p.y && n.w === p.w && n.h === p.h) return;
+    Object.assign(p, n); kOrdnen(kZug2.id);
+    root.querySelectorAll(".lw-kfrei > .lw-kfeld").forEach(x => { const q = kfrei.L[x.dataset.kid]; if (q) x.style.cssText = kStil(q); });
+    if (e.clientY < 70) scrollBy(0, -14); else if (e.clientY > innerHeight - 50) scrollBy(0, 14);
+  });
+  const kLos2 = e => {
+    if (!kZug2 || e.pointerId !== kZug2.pid) return;
+    kZug2.el.classList.remove("lw-kzieht"); kZug2 = null; kOrdnen(null); kfreiMerken();
+    root.querySelectorAll(".lw-kfrei > .lw-kfeld").forEach(x => { const q = kfrei.L[x.dataset.kid]; if (q) x.style.cssText = kStil(q); });
+    root.querySelectorAll(".lw-kfrei.ordnet").forEach(x => x.classList.remove("ordnet"));
+  };
+  root.addEventListener("pointerup", kLos2); root.addEventListener("pointercancel", kLos2);
   /* Spaltenbreite: Lücke zwischen zwei Spalten ziehen */
   root.addEventListener("pointerdown", e => {
     const rd = e.target.closest && e.target.closest(".lw-spaltenrand"); if (!rd || e.button !== 0) return;
@@ -11339,7 +11403,7 @@ const ZUS_ICON = {
       '<button type="button" class="lw-schalter" data-aktion="passiert">' + L.passiert + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="stille" aria-pressed="' + !!(ctx && stilleBis > ctx.currentTime) + '">' + L.stille + "</button>" +
       '<button type="button" class="lw-schalter" data-aktion="gehen" aria-pressed="' + leben.gehen + '">' + L.gehen + "</button>" +
-      (feuer ? '<button type="button" class="lw-schalter" data-aktion="nachlegen">' + L.nachlegen + "</button>" : "") + info("leben") + "</div>" + momenteZeile(T, S.kulisse) + (einfach ? "" : karteHTML(T));
+      (feuer ? '<button type="button" class="lw-schalter" data-aktion="nachlegen">' + L.nachlegen + "</button>" : "") + info("leben") + "</div>" + momenteZeile(T, S.kulisse);
     h += '<button type="button" class="lw-klappe lw-spurklappe" data-klangauf="leben" aria-expanded="' + auf + '">✨ ' + L.mehr + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     if (!auf) return h;
     const sp = Math.round(leben.spannung * 100), orte = drin ? L.ortDrin : L.ortDraussen;
@@ -12349,6 +12413,31 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
 .lw-ekopf .lw-ik { font-style: normal; }
+/* Karte als eigenes Feld: so groß wie das Feld */
+.lw-kartefeld .lw-kblock { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; width: 100% !important; max-width: none !important; margin: 0 !important; flex: 1 1 auto; }
+.lw-kartefeld .lw-kleiste { justify-content: center; }
+.lw-kartefeld [data-kgross] { display: none !important; }
+.lw-kartefeld .lw-karte { width: 100% !important; margin: 0 !important; }
+.lw-kfeld > .lw-kartefeld { container-type: size !important; display: flex; flex-direction: column; }
+.lw-kfeld > .lw-kartefeld .lw-kblock { flex: 1 1 auto; min-height: 0; align-items: center; }
+.lw-kfeld > .lw-kartefeld .lw-karte { width: min(100%, calc((100cqh - 6.5rem) * 16 / 7)) !important; }
+/* Sprachsteuerung: eingeklappt nur eine Zeile */
+.lw-sprachklappe { margin: .2rem 0 .5rem; border: 1px solid var(--line); border-radius: 8px; }
+.lw-sprachklappe > summary { cursor: pointer; padding: .3rem .6rem; font-size: .8rem; color: var(--ash); list-style: none; }
+.lw-sprachklappe > summary::after { content: " ▾"; } .lw-sprachklappe[open] > summary::after { content: " ▴"; }
+.lw-sprachklappe > summary:hover { color: var(--vellum); }
+.lw-sprachklappe[open] > .lw-sprache-ort { padding: 0 .5rem .5rem; }
+.lw-lebenfeld .lw-3dzeile .lw-schalter { padding: .3rem .7rem; font-size: .82rem; }
+/* „Alle Regler“ frei angeordnet */
+.lw-konsole-frei { display: block !important; }
+.lw-konsole-frei .lw-anordnung { display: flex !important; margin-bottom: .6rem; }
+.lw-kfrei { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); grid-auto-rows: 2rem; gap: .6rem; }
+.lw-kfrei.ordnet { background-image: linear-gradient(rgba(224,160,70,.05) 1px, transparent 1px); background-size: 100% 2.6rem; }
+.lw-kfeld { position: relative; min-width: 0; min-height: 0; display: flex; }
+.lw-kfeld > [data-feld] { flex: 1 1 auto; min-width: 0; min-height: 0; margin: 0 !important; overflow: auto; scrollbar-width: thin; align-content: start; align-self: stretch; container-type: inline-size; }
+.lw-kfeld.lw-kzieht { outline: 2px solid var(--ember); z-index: 6; box-shadow: 0 12px 34px rgba(0,0,0,.55); }
+.lw-kfrei .lw-griff { cursor: grab; }
+.lw-kfreiknopf { border-color: var(--ember) !important; color: var(--ember) !important; }
 /* ---------- Eigenes Pult ---------- */
 .lw-freiknopf { border-color: var(--ember) !important; color: var(--ember) !important; }
 .lw-fleiste { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin-bottom: .55rem; padding: .35rem .55rem; border: 1px dashed rgba(224,160,70,.35); border-radius: 10px; font-size: .82rem; }
@@ -12426,7 +12515,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ekopf.lw-frei { position: relative; top: auto; }
 .lw-ekopf { scroll-margin-top: calc(var(--lw-oben, 0px) + 6px); }
 .lw-momalle .lw-momzu { grid-column: 1 / -1; justify-self: stretch; margin-top: .3rem; padding: .5rem; font-size: .85rem; }
-.lw-ekopf .lw-kurz { display: none; }
+.lw-kurz { display: none; }
 /* ---------- kleines Handy: kompakter Kopf als Leiste – alles bleibt da, nur übersichtlicher ---------- */
 @media (max-width: 560px) {
   .lw-einfach, .lw-einfach-inhalt, .lw-ekopf, .lw-ekopf-reihe { min-width: 0; max-width: 100%; box-sizing: border-box; }
