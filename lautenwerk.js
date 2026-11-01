@@ -3916,8 +3916,9 @@ const ZUS_ICON = {
     unter: ["tropfen", "blubbern", "ketten", "geist", "untot", "monster", "fledermaus", "feuer", "hacke"],
     siedlung: ["markt", "kinder", "stimmen", "hund", "pferd", "huhn", "kuh", "schaf", "schmiede", "glocke", "feuer", "muehle", "regen", "kriegstrommeln"]
   };
+  const paletteGruppe = art => { const kl = kulKlasse(art); return kl === "wasser" ? "wasser" : kl === "drinnen" ? "drinnen" : kl === "unter" ? "unter" : ["dorf", "markt", "burg", "schlacht", "duell", "hafen", "strasse"].includes(art) ? "siedlung" : "natur"; };
   function paletteVon(art) {
-    const kl = kulKlasse(art), g = kl === "wasser" ? "wasser" : kl === "drinnen" ? "drinnen" : kl === "unter" ? "unter" : ["dorf", "markt", "burg", "schlacht", "duell", "hafen", "strasse"].includes(art) ? "siedlung" : "natur";
+    const g = paletteGruppe(art);
     const da = aktiveQuellen();
     return ZUS_PALETTE[g].filter(id => ZUSATZ[id] && !zusIst(id) && !da.includes(id)).slice(0, 10);
   }
@@ -9620,7 +9621,7 @@ const ZUS_ICON = {
       return '<div class="lw-zuszeile"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
         '<input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("");
     const zurueck = an.length ? '<button type="button" class="lw-klein lw-zurueck100" data-aktion="zus100">↺ ' + T.kulMixZurueck + "</button>" : "";
-    return html + '<div class="lw-spuren lw-zus"><div class="lw-zgitter">' + knoepfe + '</div><p class="lw-zhinweis" aria-live="polite"></p>' + (regler ? '<div class="lw-zregler">' + zurueck + regler + "</div>" : "") +
+    return html + '<div class="lw-spuren lw-zus"><div class="lw-zgwrap">' + zusGruppenHTML(T) + '</div><p class="lw-zhinweis" aria-live="polite"></p>' + (regler ? '<div class="lw-zregler">' + zurueck + regler + "</div>" : "") +
       '<p class="lw-tipp">' + T.zusTipp(an.length, zusMax()) + "</p></div>";
   }
   /* Rückmeldung direkt unter den Symbolen – die allgemeine Statuszeile liegt im Pult oft außer Sicht */
@@ -9994,7 +9995,7 @@ const ZUS_ICON = {
   Object.assign(TX.de.einf, { alleEinst: "Alle Einstellungen: Wetter, Tageszeit, Standort, Szenen, Nah-Geräusche", geraeuscheZiehen: "Antippen schaltet ein oder aus – oder direkt an die gewünschte Stelle in die Karte ziehen." }); Object.assign(TX.en.einf, { alleEinst: "All settings: weather, time of day, position, scenes, close sounds", geraeuscheZiehen: "Tap to switch on or off – or drag straight to the spot you want in the map." });
   /* alle Geräusche direkt unter dem Bild, immer offen; jeder Knopf lässt sich in die Karte ziehen */
   function einfachGeraeusche(T) {
-    return '<div class="lw-ezus lw-ezus-oben"><p class="lw-ezugtipp">' + T.einf.geraeuscheZiehen + ' <span class="lw-zhinweis" aria-live="polite"></span></p><div class="lw-zgruppen">' + zusGruppenHTML(T) + "</div></div>";
+    return '<div class="lw-ezus lw-ezus-oben"><p class="lw-ezugtipp">' + T.einf.geraeuscheZiehen + ' <span class="lw-zhinweis" aria-live="polite"></span></p><div class="lw-zgwrap">' + zusGruppenHTML(T) + "</div></div>";
   }
   Object.assign(TX.de.einf, { szenen: "Szenen", szeneMerken: "Szene merken", szeneMerkenT: "Merkt Ort, deine Position, alle Geräusche mit Lage und Laufweg, Wetter, Tageszeit, Spannung und Tür", szeneLadenT: "Szene laden – mit Übergang", szeneWeg: "Szene löschen" });
   Object.assign(TX.en.einf, { szenen: "Scenes", szeneMerken: "Save scene", szeneMerkenT: "Saves place, your position, all sounds with position and path, weather, time, tension and door", szeneLadenT: "Load scene – with a transition", szeneWeg: "Delete scene" });
@@ -10077,15 +10078,41 @@ const ZUS_ICON = {
   const ZUS_GRUPPEN = [["wetter", "regen starkregen gewitter sturm wind laub schnee"], ["wasser", "bach wellen wasserfall tropfen blubbern"], ["haus", "feuer kessel uhr katze glocke muehle"],
     ["wild", "voegel grillen eule frosch wolf kraehe moewe specht bienen fledermaus wal ente hirsch keiler greif schlange"], ["hof", "hund pferd kuh schaf huhn schwein esel ziege"],
     ["menschen", "kinder stimmen markt hafen segel gesang"], ["handwerk", "schmiede axt hacke"], ["grusel", "geist untot ketten monster yeti kriegstrommeln"]];
+  /* Geräusche in Gruppen: Gruppen einzeln ein-/ausklappen, Symbolgröße S/M/L, auf Wunsch nur was zum Ort passt */
+  let zg = (() => { try { const v = JSON.parse(localStorage.getItem("imres-lw-zg") || "null"); if (v) return { zu: v.zu || [], gr: v.gr || "m", passend: !!v.passend }; } catch (_) {} return { zu: [], gr: "m", passend: false }; })();
+  const zgMerken = () => { try { localStorage.setItem("imres-lw-zg", JSON.stringify(zg)); } catch (_) {} };
   function zusGruppenHTML(T) {
-    const en = sprache() === "en", G = T.einf.zusGr, schon = new Set(), name = id => esc(ZUSATZ[id][en ? "en" : "de"]);
-    const knopf = id => { const ist = zusIst(id), drin = !ist && zusInKulisse(id); schon.add(id);
-      return '<button type="button" class="lw-zknopf' + (drin ? " drin" : "") + '" data-zusatz="' + id + '" aria-pressed="' + ist + '" title="' + name(id) + (drin ? " – " + T.zusDrin : "") + '" aria-label="' + name(id) + '"' + (drin ? " disabled" : "") + ">" + zusSvg(id, 1) + "</button>"; };
-    let h = ZUS_GRUPPEN.map(([k, l]) => { const ids = l.split(" ").filter(id => ZUSATZ[id]); return ids.length ? '<div class="lw-zgruppe"><span>' + G[k] + '</span><div class="lw-zgitter">' + ids.map(knopf).join("") + "</div></div>" : ""; }).join("");
-    const rest = Object.keys(ZUSATZ).filter(id => !schon.has(id));
-    if (rest.length) h += '<div class="lw-zgruppe"><span>' + G.weitere + '</span><div class="lw-zgitter">' + rest.map(knopf).join("") + "</div></div>";
-    return h;
+    const en = sprache() === "en", G = T.einf.zusGr, E = T.einf, schon = new Set(), name = id => esc(ZUSATZ[id][en ? "en" : "de"]);
+    const pass = zg.passend && KUL_WELT[S.kulisse] ? new Set(ZUS_PALETTE[paletteGruppe(S.kulisse)] || []) : null;
+    const knopf = id => { const ist = zusIst(id), drin = !ist && zusInKulisse(id);
+      return '<button type="button" class="lw-zknopf' + (drin ? " drin" : "") + '" data-zusatz="' + id + '" aria-pressed="' + ist + '" title="' + name(id) + (drin ? " – " + T.zusDrin : "") + '" aria-label="' + name(id) + '"' + (drin ? ' aria-disabled="true"' : "") + ">" + zusSvg(id, 1) + "</button>"; };
+    const gruppe = (k, ids) => { ids.forEach(id => schon.add(id));
+      const sicht = pass ? ids.filter(id => pass.has(id) || zusIst(id)) : ids; if (!sicht.length) return "";
+      const zu = zg.zu.includes(k), an = sicht.filter(id => zusIst(id));
+      return '<div class="lw-zgruppe' + (zu ? " zu" : "") + '"><button type="button" class="lw-zgkopf" data-zgruppe="' + k + '" aria-expanded="' + !zu + '">' + (zu ? "▸ " : "▾ ") + G[k] + " <small>" + sicht.length + "</small></button>" +
+        '<div class="lw-zgitter">' + (zu ? an : sicht).map(knopf).join("") + "</div></div>"; };
+    let h = ZUS_GRUPPEN.map(([k, l]) => gruppe(k, l.split(" ").filter(id => ZUSATZ[id]))).join("");
+    const rest = Object.keys(ZUSATZ).filter(id => !schon.has(id)); if (rest.length) h += gruppe("weitere", rest);
+    const gk = (g, t) => '<button type="button" class="lw-zgk" data-zggroesse="' + g + '" aria-pressed="' + (zg.gr === g) + '" title="' + esc(E.zgGroesseT) + '">' + t + "</button>";
+    const alleZu = ZUS_GRUPPEN.every(([k]) => zg.zu.includes(k));
+    return '<div class="lw-zgleiste"><span class="lw-zgk-g">' + gk("s", "S") + gk("m", "M") + gk("l", "L") + "</span>" +
+      '<button type="button" class="lw-zgk" data-zgpassend="1" aria-pressed="' + zg.passend + '" title="' + esc(E.zgPassendT) + '">★ ' + E.zgPassend + "</button>" +
+      '<button type="button" class="lw-zgk" data-zgalle="1">' + (alleZu ? "▾ " + E.zgAlleAuf : "▸ " + E.zgAlleZu) + "</button></div>" +
+      '<div class="lw-zgruppen gr-' + zg.gr + '">' + h + "</div>";
   }
+  Object.assign(TX.de.einf, { zgGroesseT: "Symbolgröße", zgPassend: "Passend zum Ort", zgPassendT: "Nur Geräusche zeigen, die zu diesem Ort passen (eingeschaltete bleiben immer sichtbar)", zgAlleAuf: "Alle Gruppen auf", zgAlleZu: "Alle Gruppen zu" });
+  Object.assign(TX.en.einf, { zgGroesseT: "Icon size", zgPassend: "Fits this place", zgPassendT: "Only show sounds that fit this place (active ones always stay visible)", zgAlleAuf: "Expand all groups", zgAlleZu: "Collapse all groups" });
+  root.addEventListener("click", e => {
+    if (!e.target.closest) return;
+    const k = e.target.closest("[data-zgruppe]"), gr = e.target.closest("[data-zggroesse]");
+    if (k) { const id = k.dataset.zgruppe; zg.zu = zg.zu.includes(id) ? zg.zu.filter(x => x !== id) : zg.zu.concat([id]); }
+    else if (gr) zg.gr = gr.dataset.zggroesse;
+    else if (e.target.closest("[data-zgpassend]")) zg.passend = !zg.passend;
+    else if (e.target.closest("[data-zgalle]")) { const alle = ZUS_GRUPPEN.map(([x]) => x).concat(["weitere"]); zg.zu = ZUS_GRUPPEN.every(([x]) => zg.zu.includes(x)) ? [] : alle; }
+    else return;
+    zgMerken(); const T = t();
+    root.querySelectorAll(".lw-zgwrap").forEach(w => htmlAngleichen(w, '<div class="lw-zgwrap">' + zusGruppenHTML(T) + "</div>"));
+  });
   function einfachFx(T) {
     const E = T.einf, set = abendSet && ABEND_SETS[abendSet];
     const kern = [...new Set(favFx().concat(set ? set.fx : [], nachNutzung("s", ALLE_FX.filter(f => !COVER_LISTE.includes(f) && !KLASSIK[f] && (nutzung["s:" + f] || 0) > 0)), KERN_FX))].filter(f => T.sfx[f]).slice(0, 8);
@@ -12413,6 +12440,19 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
 .lw-ekopf .lw-ik { font-style: normal; }
+/* Geräuschgruppen: Leiste, einklappbare Gruppen, Symbolgröße */
+.lw-zgleiste { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .45rem; margin: .1rem 0 .45rem; font-size: .76rem; }
+.lw-zgk { border: 1px solid var(--line); background: rgba(255,255,255,.02); color: var(--ash); font: inherit; font-size: .76rem; padding: .18rem .5rem; border-radius: 6px; cursor: pointer; }
+.lw-zgk[aria-pressed="true"] { border-color: var(--ember); color: var(--ember); background: rgba(224,160,70,.1); }
+.lw-zgk:hover { color: var(--vellum); }
+.lw-zgk-g { display: inline-flex; gap: 2px; } .lw-zgk-g .lw-zgk { min-width: 1.6rem; padding: .18rem .3rem; }
+.lw-zgkopf { display: block; border: 0; background: none; padding: 0 0 .15rem; font: inherit; font-size: .72rem; letter-spacing: .04em; color: var(--ash); cursor: pointer; text-align: left; }
+.lw-zgkopf:hover { color: var(--ember); } .lw-zgkopf small { opacity: .6; }
+.lw-zgruppe.zu { padding-bottom: .25rem; } .lw-zgruppe.zu .lw-zgitter:empty { display: none; }
+.lw-zgruppen.gr-s .lw-zknopf { width: 2rem !important; height: 2rem !important; padding: .2rem !important; }
+.lw-zgruppen.gr-l .lw-zknopf { width: 3.6rem !important; height: 3.6rem !important; padding: .5rem !important; }
+.lw-zgruppen.gr-l .lw-zknopf .lw-zico, .lw-zgruppen.gr-s .lw-zknopf .lw-zico { width: 100%; height: 100%; }
+.lw-zus .lw-zgruppen { display: flex; flex-wrap: wrap; gap: .45rem .8rem; }
 /* Karte als eigenes Feld: so groß wie das Feld */
 .lw-kartefeld .lw-kblock { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; width: 100% !important; max-width: none !important; margin: 0 !important; flex: 1 1 auto; }
 .lw-kartefeld .lw-kleiste { justify-content: center; }
