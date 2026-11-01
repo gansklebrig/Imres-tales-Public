@@ -414,6 +414,7 @@ main.beben { animation: beben .7s linear; }
 .mem-karte, .memory-fuss button, .tav-knopf { touch-action: manipulation; }
 .kerze svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .kerze .schein { fill: rgba(224,160,70,.18); filter: blur(4px); transition: opacity 1s; animation: kerzenatem 3.4s ease-in-out infinite; }
+@media (pointer: coarse) { .kerze .schein { filter: none; opacity: .75; } }
 .kerze .flamme { fill: #e0a046; transform-origin: 20px 22px; animation: flamme 1.7s ease-in-out infinite; transition: opacity .25s, transform .25s; }
 .kerze .flamme-kern { fill: #fff1c9; transform-origin: 20px 21px; animation: flamme 1.3s ease-in-out infinite reverse; transition: opacity .2s; }
 .kerze .docht { stroke: #2a2118; stroke-width: 1.4; stroke-linecap: round; }
@@ -563,8 +564,10 @@ html, body { overflow-x: clip; }
         hell: .15 + Math.random() * .3
       };
     }
+    const handyFunken = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") || matchMedia("(pointer: coarse)").matches;
     function groesse() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      /* Handy: die Funken sind weiche Lichtpunkte – in einfacher Auflösung sieht man keinen Unterschied, spart aber drei Viertel der Pixel */
+      dpr = Math.min(window.devicePixelRatio || 1, handyFunken ? 1 : 2);
       B = window.innerWidth; H = window.innerHeight;
       cv.width = Math.round(B * dpr); cv.height = Math.round(H * dpr);
       cv.style.width = B + "px"; cv.style.height = H + "px";
@@ -592,6 +595,8 @@ html, body { overflow-x: clip; }
 
     let zuletzt = performance.now(), laeuft = true;
     function bild(jetzt) {
+      /* Handy: 30 statt 60 Bilder pro Sekunde – die Funken steigen langsam, das Auge merkt es nicht, der Akku schon */
+      if (handyFunken && !ruhig && jetzt - zuletzt < 30) { if (laeuft) { if (verdeckt()) laeuft = false; else requestAnimationFrame(bild); } return; }
       const dt = Math.min(.05, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
       const zeit = jetzt / 1000;
       ctx.clearRect(0, 0, B, H);

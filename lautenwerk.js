@@ -2593,7 +2593,7 @@ const ZUS_ICON = {
     const g = ctx.createGain(); g.gain.value = 0; g.connect(filt);
     /* 3D: HRTF-Panner (mit Kopfhörern auch vorne/hinten hörbar); die Entfernung regelt zusRaum selbst, daher ohne Abfall */
     let pan = null;
-    try { pan = ctx.createPanner(); pan.panningModel = "HRTF"; pan.distanceModel = "inverse"; pan.refDistance = 1; pan.rolloffFactor = 0; pan.coneOuterGain = 1; } catch (_) { pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; }
+    try { pan = ctx.createPanner(); pan.panningModel = leicht() ? "equalpower" : "HRTF"; pan.distanceModel = "inverse"; pan.refDistance = 1; pan.rolloffFactor = 0; pan.coneOuterGain = 1; } catch (_) { pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; }
     /* zwei Wege: durch den Raumklang und mittig auf beide Ohren – das Verhältnis ist die „Raumbreite“ */
     const panG = ctx.createGain(), mitteG = ctx.createGain(); const [wa, wb] = BREITE_MIX[raumBreite]; panG.gain.value = wa; mitteG.gain.value = wb;
     if (pan) { filt.connect(pan); pan.connect(panG); panG.connect(kulBus); filt.connect(mitteG); mitteG.connect(kulBus); } else filt.connect(kulBus);
@@ -3937,7 +3937,7 @@ const ZUS_ICON = {
   const wegeDa = () => { const w = kOrt().weg || {}; return Object.keys(w).some(id => zusIst(id) && w[id] && w[id].p && w[id].p.length > 1); };
   const kWeg = id => (kOrt().weg || {})[id];
   setInterval(() => {
-    if (!S || !KUL_WELT[S.kulisse] || kZug || wegePause) return;
+    if (!S || !KUL_WELT[S.kulisse] || kZug || wegePause || document.hidden) return;
     const wege = kOrt().weg || {}, ids = Object.keys(wege).filter(id => zusIst(id) && wege[id] && wege[id].p && wege[id].p.length > 1); if (!ids.length) return;
     const j = performance.now() / 1000, oben = karteSicht === "oben";
     ids.forEach(id => {
@@ -4391,12 +4391,12 @@ const ZUS_ICON = {
       if (sp.style.maxHeight !== h + "px") sp.style.maxHeight = h + "px";
     });
   }
-  setInterval(() => { try { spurenHoehe(); } catch (_) {} }, 400);
+  setInterval(() => { if (document.hidden || !root.querySelector(".lw-klingtliste, .lw-espuren")) return; try { spurenHoehe(); } catch (_) {} }, 400);
   addEventListener("resize", () => { try { spurenHoehe(); } catch (_) {} });
   /* bei „Zeit vergeht“ den Himmel alle paar Sekunden nachziehen */
   setInterval(() => { if (!S || kZug || !leben.zeitLauf || karteSicht === "oben") return; root.querySelectorAll(".lw-karte .lw-kbild").forEach(sv => { sv.innerHTML = szeneBild(kartenArt()) + karteStimmung(kartenArt()); }); }, 5000);
   setInterval(() => {
-    if (!S || kZug) return; const k = root.querySelector(".lw-karte"); if (!k) return;
+    if (!S || kZug || document.hidden) return; const k = root.querySelector(".lw-karte"); if (!k) return;
     const frei = Object.keys(zusWahl).filter(id => ZUSATZ[id]).sort().join() + "|" + aktiveQuellen().join();
     if (k.dataset.kkul !== S.kulisse || !!k.querySelector(".k-tuerg rect[width='3.2'], .k-tuerg rect[width='2.6']") !== tuerZu || k.dataset.zus !== frei) { karteNeu(); }
   }, 1000);
@@ -4699,7 +4699,8 @@ const ZUS_ICON = {
       const AC = window.AudioContext || window.webkitAudioContext;
       /* Sparmodus: mit halber Abtastrate rechnen (24 kHz) – halbiert die gesamte Rechenlast, Höhen bis 12 kHz bleiben */
       leichtFest = spar || mobil;
-      try { ctx = spar ? new AC({ latencyHint: .25, sampleRate: 24000 }) : new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
+      /* Handy: etwas größerer Puffer (Bluetooth-Kopfhörer kommen mit, kein Knistern) und 32 kHz – Höhen bis 16 kHz, gut ein Drittel weniger Rechenlast */
+      try { ctx = spar ? new AC({ latencyHint: .25, sampleRate: 24000 }) : mobil ? new AC({ latencyHint: .2, sampleRate: 32000 }) : new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor(); kompRef = komp;
@@ -7925,6 +7926,11 @@ const ZUS_ICON = {
   /* Orchester-Töne gehen über diese Hülle, damit die Geister wissen, wann sie spielen */
   function oprobe(gr, m, zeit, ...rest) { geistMerken(gr, zeit); return probe(gr, m, zeit, ...rest); }
   function malenStarten() { if (!malt) { malt = true; requestAnimationFrame(malen); } }
+  /* Akku: Bühne und Karte nur zeichnen bzw. animieren, solange sie auf dem Bildschirm zu sehen sind */
+  let buehneSicht = true; const sichtIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(x => {
+    x.target.classList.toggle("verdeckt", !x.isIntersecting); if (x.target.classList.contains("lw-buehne")) { buehneSicht = x.isIntersecting; if (buehneSicht) malenStarten(); } }), { rootMargin: "40px" }) : null;
+  const sichtBeobachtet = new WeakSet();
+  setInterval(() => { if (!sichtIO) return; root.querySelectorAll(".lw-buehne, .lw-karte").forEach(e => { if (!sichtBeobachtet.has(e)) { sichtBeobachtet.add(e); sichtIO.observe(e); } }); if (!root.querySelector(".lw-buehne")) buehneSicht = true; }, 700);
   /* eine Spur der Band sichtbar machen (aus der Musik oder aus einem Klassiker) */
   function spurZeigen(k, wert) {
     const jetzt = performance.now();
@@ -8007,8 +8013,13 @@ const ZUS_ICON = {
       teilAnzeige(ev.teil);
       spalte(ev.teil === bearbeite ? ev.schritt : -1);
       haelfteAnzeige(ev.teil === bearbeite ? ev.schritt : -1);
-      if (ev.schritt % 4 === 0) publikumSchlag();
-      ["klopf", "schelle", "bass", "melodie", "trommel", "floete", "ketten", "rex"].forEach(k => { if (k in sp) spurZeigen(k, sp[k]); });
+      if (buehneSicht && ev.schritt % 4 === 0) publikumSchlag();
+      if (buehneSicht) ["klopf", "schelle", "bass", "melodie", "trommel", "floete", "ketten", "rex"].forEach(k => { if (k in sp) spurZeigen(k, sp[k]); });
+    }
+    if (!buehneSicht) {
+      /* Bühne weggescrollt: nur noch die Warteschlangen leeren (das Raster unten läuft weiter), 8 statt 60 Mal pro Sekunde */
+      klassikQ.length = 0; geistQ.length = 0; gastQ.length = 0; kapQ.length = 0; try { wechselAnzeige(); } catch (_) {}
+      setTimeout(malen, 125); return;
     }
     while (klassikQ.length && klassikQ[0][0] <= jetzt) spurZeigen(klassikQ.shift()[1]);
     buehneTick(b);
@@ -12211,6 +12222,9 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
 .lw-ekopf .lw-ik { font-style: normal; }
+/* nicht sichtbar = keine Animation (Akku) */
+.lw-buehne.verdeckt *, .lw-karte.verdeckt * { animation-play-state: paused !important; }
+@media (pointer: coarse) { .lw-kquelle:not(.puls) { animation: none; } }
 .lw-ekopf.lw-frei { position: relative; top: auto; }
 .lw-ekopf { scroll-margin-top: calc(var(--lw-oben, 0px) + 6px); }
 .lw-momalle .lw-momzu { grid-column: 1 / -1; justify-self: stretch; margin-top: .3rem; padding: .5rem; font-size: .85rem; }
