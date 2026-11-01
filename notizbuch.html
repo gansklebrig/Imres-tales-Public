@@ -42,6 +42,9 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.6rem, 9vw
 .seite figcaption { font-family: var(--hand); font-size: 1.35rem; line-height: 1.2; color: var(--vellum); }
 .seite figcaption small { display: block; font-family: var(--body); font-size: .85rem; color: var(--ash); font-style: italic; }
 footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; color: var(--ash); font-size: .9rem; }
+
+/* Großbildschirme: alles wächst mit */
+@media (min-width: 2200px) { html { font-size: clamp(16px, calc(9px + .36vw), 22px); } }
 </style>
 </head>
 <body>

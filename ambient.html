@@ -213,6 +213,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 .leise{border:1px solid var(--line);background:none;border-radius:999px;padding:.25rem .7rem;color:var(--mute);font-size:.8rem}
 .leise:hover{border-color:var(--ember);color:var(--ember)}
 @media (prefers-reduced-motion:reduce){.knopf.blitz{animation:none}}
+
+/* Großbildschirme: alles wächst mit */
+@media (min-width: 2200px) { html { font-size: clamp(16px, calc(9px + .36vw), 22px); } }
 </style>
 </head>
 <body>

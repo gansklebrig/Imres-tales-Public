@@ -66,6 +66,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--ember); outline
 .ort-toast a { color: var(--ember); }
 @media (max-width: 760px) { .ort-toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); } }
 .wrap { max-width: 68rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+/* Großbildschirme (WQHD, UWQHD, 4K): alles wächst mit – Schrift, Abstände und die Breite der Seite sind in rem angelegt */
+@media (min-width: 2200px) { html { font-size: clamp(16px, calc(9px + .36vw), 22px); } }
 h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
 p { margin: 0; }
 .label {
@@ -958,7 +960,7 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
 <script src="spott.js?v=20261022p" defer></script>
 <script src="extras.js?v=20261101a" defer></script>
 <script type="text/plain" data-nachladen="buehne" src="klangwerk.js?v=20261021b"></script>
-<script type="text/plain" data-nachladen="buehne" src="lautenwerk.js?v=20261101d"></script>
+<script type="text/plain" data-nachladen="buehne" src="lautenwerk.js?v=20261101f"></script>
 <script type="text/plain" data-nachladen="taverne" src="duell.js?v=20261028a"></script>
 <script type="text/plain" data-nachladen="taverne" src="auftritt.js?v=20261031a"></script>
 <script type="text/plain" data-nachladen="taverne" src="waldlauf-figuren.js?v=20261026a"></script>

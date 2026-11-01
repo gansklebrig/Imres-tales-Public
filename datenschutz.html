@@ -23,6 +23,9 @@ p,li{color:var(--vellum)}
 .leise{color:var(--ash);font-size:.95rem}
 .zurueck{font-family:var(--display);text-decoration:none;letter-spacing:.04em}
 ul{padding-left:1.2rem}
+
+/* Großbildschirme: alles wächst mit */
+@media (min-width: 2200px) { html { font-size: clamp(16px, calc(9px + .36vw), 22px); } }
 </style>
 </head>
 <body>

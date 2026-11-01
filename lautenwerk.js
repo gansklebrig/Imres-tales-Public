@@ -9957,7 +9957,8 @@ const ZUS_ICON = {
     if (jetzt && STIL[jetzt] && !kern.includes(jetzt) && !eMehr.st) kern = kern.slice(0, 7).concat([jetzt]);
     const tile = k => eKachel("data-vorlage", k, T.vorlagen[k], S.stimmung === k && !S.eigeneStimmung, (T.stBsp || {})[k]);
     const eig = Object.keys(eigeneStimmungen).filter(id => id.startsWith("e_") && STIL[eigeneStimmungen[id].basis]);
-    return '<h4 class="lw-eh">' + E.titel + "</h4>" + (set ? '<p class="lw-eset">' + ABEND_SETS[abendSet].sym + " " + E.heute(E.abendNamen[abendSet]) + "</p>" : "") +
+    return '<div class="lw-esteuer"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") + "</div>" +
+      '<h4 class="lw-eh">' + E.titel + "</h4>" + (set ? '<p class="lw-eset">' + ABEND_SETS[abendSet].sym + " " + E.heute(E.abendNamen[abendSet]) + "</p>" : "") +
       '<p class="lw-zweck">' + E.zweckMusik + "</p>" +
       '<div class="lw-egitter">' + kern.map(tile).join("") + "</div>" +
       (eMehr.st ? '<div class="lw-egitter">' + rest.filter(k => !kern.includes(k)).map(tile).join("") + eig.map(k => eKachel("data-vorlage", k, "⭐ " + esc(eigeneStimmungen[k].name), S.eigeneStimmung === k)).join("") + "</div>" : "") +
@@ -9974,7 +9975,7 @@ const ZUS_ICON = {
     const ue = (t, cls) => '<h4 class="lw-eue ' + (cls || "") + '">' + t + "</h4>";
     return '<div class="lw-eortkopf lw-eort3 lw-eort4' + (karteGross ? " kino" : "") + '">' +
       '<div class="lw-eortlinks">' + ue(E.ueWo) + '<span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
-      (kul || S.kulisse !== "keine" ? '<button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" : "") +
+      (kul || S.kulisse !== "keine" ? '<div class="lw-esteuer lw-esteuer-hg"><button type="button" class="lw-schalter" data-aktion="kulumschalt">' + (kul ? E.ortAus : E.ortAn) + "</button>" + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + "</div>" : "") +
       '<div class="lw-ochips">' + vorschlag.map(chip).join("") + "</div>" +
       '<label class="lw-owahl"><span>' + E.alleOrteL + "</span>" + kulisseWahl(T) + "</label>" + szenenHTML(T) + "</div>" +
       '<div class="lw-kblock' + (karteGross ? " gross" : "") + '">' + ue(E.ueWie) + (KUL_WELT[S.kulisse] ? karteLeiste(T) + karteHTML(T) : '<p class="lw-zhinweis">' + E.ortWaehlen + "</p>") + "</div>" +
@@ -10786,8 +10787,7 @@ const ZUS_ICON = {
   }
   function knoepfe() {
     miniAnzeigen(); try { favMarkieren(); leisteBauen(); leisteAktualisieren(); wechselMerk = "\u0000"; wechselAnzeige(); } catch (_) {}
-    const b = root.querySelector(".lw-play");
-    if (b) { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); }
+    root.querySelectorAll(".lw-play").forEach(b => { b.textContent = laeuft ? t().stopp : t().spielen; b.classList.toggle("laeuft", laeuft); });
     root.querySelectorAll(".lw-ausklang").forEach(a => { a.hidden = !laeuft; a.disabled = ausklingt || !!ausklangAb; });
     try { kulKnoepfe(); } catch (_) {} try { aufnahmeKnoepfe(); } catch (_) {} try { schlafKnoepfe(); } catch (_) {} try { spracheOrt(); } catch (e) { console.warn("Sprache", e); }
   }
@@ -11230,7 +11230,7 @@ const ZUS_ICON = {
     if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
     if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = S.master * 10 + " %"); root.querySelectorAll('[data-feld="master"]').forEach(r => { if (r !== e.target) r.value = S.master; }); merken(); effekteAnwenden(); try { leisteAktualisieren(); } catch (_) {} }
-    if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); root.querySelectorAll('[data-feld="kulvol"]').forEach(r => { if (r !== e.target) r.value = S.kulisseVol; }); merken(); effekteAnwenden(); }
     if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.zusvol) {
@@ -12222,6 +12222,31 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
 .lw-ekopf .lw-ik { font-style: normal; }
+/* Steuerzeile in den Reitern: Spielen + Musik bzw. Hintergrund an/aus + Lautstärke – das Wichtigste dort, wo man gerade ist */
+.lw-esteuer { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.02); }
+.lw-esteuer .lw-kleinregler { flex: 1 1 12rem; min-width: 0; }
+.lw-esteuer .lw-kleinregler input { max-width: none; }
+.lw-esteuer-hg { flex-direction: column; align-items: stretch; padding: .35rem .5rem; gap: .35rem; }
+.lw-esteuer-hg .lw-kleinregler { flex: 0 0 auto; gap: .4rem; }
+.lw-esteuer-hg .lw-kleinregler > span:first-child .lw-lbl { display: none; }
+.lw-esteuer-hg .lw-schalter { align-self: flex-start; }
+@media (min-width: 561px) {
+  /* großer Spielen-Knopf */
+  .lw-ekopf .lw-play.lw-play-gross, .lw-esteuer .lw-play.lw-play-gross { font-size: 1.2rem; padding: .65rem 1.6rem; min-width: 10rem; border-radius: 10px; }
+  .lw-esteuer .lw-play.lw-play-gross { padding: .5rem 1.3rem; }
+  /* jeder Regler in seinem eigenen Kästchen – Name, Regler, Wert und Aus-Knopf gehören sichtbar zusammen */
+  .lw-ekopf .lw-eregler { gap: .4rem .6rem; }
+  .lw-ekopf .lw-eregler > .lw-kleinregler, .lw-ekopf .lw-eregler > .lw-ehg { border: 1px solid var(--line); border-radius: 10px; padding: .3rem .6rem; background: rgba(255,255,255,.025); }
+  .lw-ekopf .lw-eregler .lw-kleinregler input { max-width: none; }
+  .lw-ekopf .lw-eregler .lw-kleinregler > span:first-child { min-width: 6.2rem; color: var(--vellum); }
+}
+/* breiter Schirm: Musik · Spannung · Hintergrund als drei gleich hohe Kästchen nebeneinander */
+@media (min-width: 1100px) {
+  .lw-ekopf .lw-eregler { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr); align-items: stretch; }
+  .lw-ekopf .lw-eregler .lw-espann { grid-column: auto; }
+  .lw-ekopf .lw-eregler .lw-kleinregler > span:first-child { min-width: 0; }
+  .lw-ekopf .lw-eregler .lw-espann b { min-width: 5.5rem; }
+}
 /* nicht sichtbar = keine Animation (Akku) */
 .lw-buehne.verdeckt *, .lw-karte.verdeckt * { animation-play-state: paused !important; }
 @media (pointer: coarse) { .lw-kquelle:not(.puls) { animation: none; } }
