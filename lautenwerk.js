@@ -3622,10 +3622,11 @@ const ZUS_ICON = {
     const st = (a, txt, titel, aus) => '<button type="button" class="lw-momst" data-momst="' + a + '" title="' + esc(titel) + '"' + (aus ? " disabled" : "") + ">" + txt + "</button>";
     const steuer = '<div class="lw-momsteuer">' + (momRechner() ? '<span class="lw-momst-g">' + st("weniger", "−", T.momWeniger, momZeilen <= 1) + st("mehr", "+", T.momMehr, momZeilen >= 3) + '<button type="button" class="lw-momst' + (vorAn ? " an" : "") + '" data-momst="vor" title="' + esc(T.vorTipp) + '">👂 ' + (vorAn ? T.vorAn : T.vorAus) + "</button>" + (vorAn && window.HTMLMediaElement && (window.AudioContext || {}).prototype && "setSinkId" in AudioContext.prototype ? '<select class="lw-vorgeraet" data-vorgeraet="1" title="' + esc(T.vorGeraetT) + '"><option value="">' + esc(T.vorStandard) + "</option></select>" : "") + "</span>" : "<span></span>") + punkte +
       st("alle", (momAlle ? "▴ " : "☰ ") + T.momAlle(m.length), T.momAlleT, false) + "</div>";
-    const alle = momAlle ? '<div class="lw-momalle">' + ord.map(knopf).join("") + "</div>" : "";
+    const alle = momAlle ? '<div class="lw-momalle">' + ord.map(knopf).join("") + '<button type="button" class="lw-momst lw-momzu" data-momst="alle" data-momzu="1">▴ ' + esc(T.momZu) + "</button></div>" : "";
     return '<div class="lw-momente' + (seiten > 1 ? " blaettern" : "") + '" data-kul="' + art + '">' + (seiten > 1 ? pfeil(-1, "‹") : "") +
       '<div class="lw-momreihe" style="grid-template-columns: repeat(' + jr + ', minmax(0, 1fr))">' + zeig.map(knopf).join("") + "</div>" + (seiten > 1 ? pfeil(1, "›") : "") + steuer + alle + "</div>";
   }
+  Object.assign(TX.de, { momZu: "Alle Momente wieder einklappen" }); Object.assign(TX.en, { momZu: "Collapse all moments again" });
   function momenteNeu() { const T = t(); root.querySelectorAll(".lw-momente").forEach(z => { const neu = momenteZeile(T, z.dataset.kul); if (neu) z.outerHTML = neu; }); }
   function momBlaettern(r) { const art = S.kulisse; momSeite[art] = (momSeite[art] || 0) + r; momenteNeu(); }
   Object.assign(TX.de, { vorTipp: "Vorhören: über einem Moment oder Geräusch kurz verweilen spielt eine leise Vorschau – wähle daneben einen eigenen Ausgang (z. B. Kopfhörer), dann hören die Spieler nichts", vorAn: "Vorhören an", vorAus: "Vorhören", vorGeraetT: "Ausgang fürs Vorhören", vorStandard: "gleicher Ausgang" });
@@ -10270,8 +10271,12 @@ const ZUS_ICON = {
     const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting && x.intersectionRatio > .25)) { io.disconnect(); setTimeout(() => { if (einfach && S.pult && root.querySelector(".lw-einfach")) introStart(false); }, 900); } }, { threshold: [.25] });
     io.observe(ziel);
   }
+  let zuKopf = false;
   function kopfKleben() {
     const k = root.querySelector(".lw-ekopf"); if (!k) return;
+    /* alle Momente offen: der Kopf ist dann länger als der Bildschirm – nicht anheften, sonst springt beim Scrollen alles */
+    k.classList.toggle("lw-frei", momAlle);
+    if (momAlle) { if (k.classList.contains("lw-geklebt")) { k.classList.remove("lw-geklebt"); k.style.marginBottom = ""; } return; }
     const h = document.querySelector("header.top"), oben = h ? Math.round(h.getBoundingClientRect().height) : 0;
     root.style.setProperty("--lw-oben", oben + "px");
     const r = k.getBoundingClientRect(), klebt = r.top <= oben + 1 && root.getBoundingClientRect().top < oben - 20;
@@ -10951,7 +10956,10 @@ const ZUS_ICON = {
     if (e.target.closest("[data-kgross]")) { karteGross = !karteGross; try { localStorage.setItem("imres-lw-karte-gross", karteGross ? "1" : "0"); } catch (_) {} karteNeu(); return; }
     const mst = e.target.closest("[data-momst]");
     if (mst && mst.dataset.momst === "vor") { vorAn = !vorAn; try { localStorage.setItem("imres-lw-vorhoeren", vorAn ? "1" : "0"); } catch (_) {} if (!vorAn) vorStopp(); momenteNeu(); vorGeraeteFuellen(); status(vorAn ? t().vorTipp : t().vorAus); return; }
-    if (mst) { const a = mst.dataset.momst; if (a === "alle") momAlle = !momAlle; else { momZeilen = Math.max(1, Math.min(3, momZeilen + (a === "mehr" ? 1 : -1))); try { localStorage.setItem("imres-lw-momzeilen", momZeilen); } catch (_) {} } momenteNeu(); try { kopfKleben(); } catch (_) {} return; }
+    if (mst) { const a = mst.dataset.momst; if (a === "alle") { momAlle = !momAlle; if (!momAlle && mst.dataset.momzu) zuKopf = true; } else { momZeilen = Math.max(1, Math.min(3, momZeilen + (a === "mehr" ? 1 : -1))); try { localStorage.setItem("imres-lw-momzeilen", momZeilen); } catch (_) {} } momenteNeu(); try { kopfKleben(); } catch (_) {}
+      /* unten eingeklappt: zurück zur Momente-Leiste, statt irgendwo weiter unten zu landen */
+      if (zuKopf) { zuKopf = false; const k = root.querySelector(".lw-ekopf"); if (k && k.getBoundingClientRect().top < 0) k.scrollIntoView({ block: "start" }); }
+      return; }
     const mb = e.target.closest("[data-momblatt]");
     if (mb) { momBlaettern(+mb.dataset.momblatt); return; }
     const mo = e.target.closest("[data-moment]");
@@ -12198,6 +12206,9 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-intro-skip:hover { background: rgba(214,110,80,.25); color: var(--vellum); }
 .lw-intro-ziel { box-shadow: 0 0 0 3px var(--ember), 0 0 22px rgba(224,160,70,.7) !important; animation: lwEPuls 1.2s ease-in-out infinite; position: relative; z-index: 2; }
 .lw-ekopf .lw-ik { font-style: normal; }
+.lw-ekopf.lw-frei { position: relative; top: auto; }
+.lw-ekopf { scroll-margin-top: calc(var(--lw-oben, 0px) + 6px); }
+.lw-momalle .lw-momzu { grid-column: 1 / -1; justify-self: stretch; margin-top: .3rem; padding: .5rem; font-size: .85rem; }
 .lw-ekopf .lw-kurz { display: none; }
 /* ---------- kleines Handy: kompakter Kopf als Leiste – alles bleibt da, nur übersichtlicher ---------- */
 @media (max-width: 560px) {
