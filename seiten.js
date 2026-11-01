@@ -95,9 +95,11 @@
     nsc: () => '<span class="k-l k-wand" style="--d:0"></span>' + kFoto("portrait-koenig.jpg", "k-n1", 1) + kFoto("ploopploopeen.jpg", "k-n2", 1.3) + kFoto("portrait-riese.jpg", "k-n3", 1.1) +
       kImg("gundren-frei.webp", "k-held k-n-gundren", 2) + kImg("buergermeister-frei.webp", "k-held k-n-buerger", 2.6),
     /* Skizzenbuch: Tuschezeichnungen auf Pergament, eine Kreatur bricht heraus, Krallenspuren */
-    bestiarium: () => '<span class="k-l k-pergament" style="--d:0"></span>' +
-      kImg("skizze-demogorgon.webp", "k-skizze k-s1", .6) + kImg("skizze-chasme.webp", "k-skizze k-s2", .8) +
-      '<span class="k-l k-kralle" style="--d:1.4"></span>' + kImg("vrock-frei.webp", "k-held k-b-vrock", 2.6),
+    bestiarium: () => '<span class="k-l k-hoehle" style="--d:0"></span>' +
+      kImg("themberchaud-frei.webp", "k-mon k-m-drache", .4) + kImg("demogorgon-frei.webp", "k-mon k-m-demo", .7) + '<span class="k-l k-nebel" style="--d:.8"></span>' +
+      kImg("riese-frei.webp", "k-mon k-m-riese", 1.2) + kImg("chasme-frei.webp", "k-mon k-m-chasme", 1.6) +
+      '<span class="k-l k-nebel k-nebel2" style="--d:1.8"></span>' +
+      kImg("bugbear-frei.webp", "k-mon k-m-bugbear", 2.2) + kImg("kuo-toa-frei.webp", "k-mon k-m-kuotoa", 2.6) + kImg("blight-frei.webp", "k-mon k-m-blight", 3),
     /* die Spiele als aufgefächertes Blatt Karten */
     taverne: b => kImg(b.indexOf("vorschau/") === 0 ? b : kKlein(b), "k-grund k-dunkel", 0) +
       ["heldensturm", "jagd", "hort", "nacht", "kehle"].map((n, i) => kImg("vorschau/plakat-" + n + ".webp", "k-plakat", 1 + i * .35, "--n:" + (i - 2))).join(""),
@@ -549,12 +551,20 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .k-n1 { left: 5%; top: 8%; width: 28%; height: 44%; --t: rotate(-6deg); } .k-n2 { left: 36%; top: 4%; width: 26%; height: 40%; --t: rotate(4deg); } .k-n3 { left: 64%; top: 10%; width: 27%; height: 42%; --t: rotate(-3deg); }
 .kachel .k-collage .k-n-gundren { left: -2%; bottom: -4%; height: 66%; }
 .kachel .k-collage .k-n-buerger { right: -6%; bottom: -2%; height: 74%; }
-/* Bestiarium */
-.k-pergament { inset: 0; background: radial-gradient(ellipse at 50% 40%, #cdb688, #9a8058 85%); }
-.kachel .k-collage .k-skizze { filter: brightness(.3) sepia(1) saturate(1.6) hue-rotate(-10deg); opacity: .8; mix-blend-mode: multiply; }
-.kachel .k-collage .k-s1 { left: -4%; top: 2%; height: 80%; --t: rotate(-8deg); } .k-s2 { right: -6%; top: -6%; height: 70%; --t: rotate(10deg); }
-.k-kralle { right: 22%; top: 12%; width: 26%; height: 56%; background: linear-gradient(105deg, transparent 44%, rgba(70,15,10,.75) 46%, transparent 49%) 0 0 / 34% 100% repeat-x; --t: rotate(18deg); opacity: .8; }
-.kachel .k-collage .k-b-vrock { right: -10%; top: -4%; height: 100%; filter: brightness(1.25) saturate(1.2) drop-shadow(0 0 2px rgba(0,0,0,.8)) drop-shadow(0 10px 14px rgba(0,0,0,.7)); }
+/* Bestiarium: eine Horde greift an – vorne die Kleinen, hinten immer größer und epischer, im Dunst */
+.k-hoehle { inset: 0; background: radial-gradient(ellipse 80% 60% at 60% 20%, rgba(150,40,30,.45), transparent 70%), radial-gradient(ellipse 70% 50% at 20% 35%, rgba(90,40,120,.35), transparent 70%), linear-gradient(#120c14, #1d1218 60%, #120d12); }
+.k-nebel { left: -10%; right: -10%; height: 36%; top: 34%; background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(120,80,110,.35), transparent 70%); filter: blur(6px); }
+.k-nebel2 { top: 48%; height: 30%; background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(70,40,60,.5), transparent 70%); }
+.kachel .k-collage .k-mon { filter: drop-shadow(0 6px 10px rgba(0,0,0,.75)); }
+.kachel .k-collage .k-m-drache { right: -10%; top: -20%; height: 118%; filter: brightness(.62) saturate(.9) drop-shadow(0 0 22px rgba(220,50,20,.55)); }
+.kachel .k-collage .k-m-demo { left: -16%; top: -6%; height: 80%; filter: brightness(.5) saturate(.75) drop-shadow(0 0 14px rgba(120,40,140,.5)); }
+.kachel .k-collage .k-m-riese { left: 22%; top: 6%; height: 56%; filter: brightness(.7) saturate(.85) drop-shadow(0 0 10px rgba(200,120,60,.35)) drop-shadow(0 6px 10px rgba(0,0,0,.7)); }
+.kachel .k-collage .k-m-vrock { left: 0; top: -2%; height: 28%; filter: brightness(.8) drop-shadow(0 6px 10px rgba(0,0,0,.7)); --t: rotate(-10deg); }
+.kachel .k-collage .k-m-chasme { right: 26%; top: 2%; height: 24%; filter: brightness(.85) drop-shadow(0 6px 10px rgba(0,0,0,.7)); --t: rotate(12deg); }
+.kachel .k-collage .k-m-bugbear { left: -2%; top: 30%; height: 42%; filter: brightness(1) drop-shadow(0 0 2px rgba(255,200,140,.4)) drop-shadow(0 8px 12px rgba(0,0,0,.85)); }
+.kachel .k-collage .k-m-kuotoa { left: 30%; top: 34%; height: 40%; filter: brightness(1.2) drop-shadow(0 0 2px rgba(180,220,255,.45)) drop-shadow(0 8px 12px rgba(0,0,0,.85)); }
+.kachel .k-collage .k-m-blight { right: -10%; top: 40%; height: 30%; filter: brightness(1.2) drop-shadow(0 8px 12px rgba(0,0,0,.85)); }
+.kachel:hover .k-collage .k-m-drache { filter: brightness(.6) saturate(.9) drop-shadow(0 0 24px rgba(230,60,20,.7)); }
 /* Taverne: Spiele als aufgefächerte Karten */
 .kachel .k-collage .k-plakat { left: calc(58% + var(--n) * 7%); bottom: -18%; height: 92%; aspect-ratio: 2 / 3; object-fit: cover; border: 3px solid #e8dcc0; border-radius: 4px; box-shadow: 0 8px 20px rgba(0,0,0,.7); transform-origin: 50% 120%; --t: rotate(calc(var(--n) * 11deg)); }
 .kachel:hover .k-plakat { --t: rotate(calc(var(--n) * 15deg)) translateY(-6%); }
