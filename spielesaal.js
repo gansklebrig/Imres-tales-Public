@@ -140,7 +140,7 @@
   const TX = {
     de: {
       alle: "← Alle Spiele", spielen: "▶ Spielen", oeffnen: "▶ Spiel öffnen", schliessen: "Schließen", mehr: "Mehr erfahren",
-      steuerung: "Steuerung", pc: "PC", handy: "Handy", bild: (a, b) => "Bild " + a + " von " + b, zurueck: "Vorheriges Bild", vor: "Nächstes Bild",
+      steuerung: "Steuerung", ueber: "Worum’s geht", highlights: "Highlights", pause: "Angehalten – zum Weiterblättern antippen", pc: "PC", handy: "Handy", bild: (a, b) => "Bild " + a + " von " + b, zurueck: "Vorheriges Bild", vor: "Nächstes Bild",
       schnell: "Spiel wechseln", eigeneSeite: "öffnet eine eigene Seite",
       spiele: {
         heldensturm: { titel: "Heldensturm", kurz: "Die ganze Kampagne als Hordenkampf – bis nach Gracklstugh.", genre: "Roguelike", wer: "Alle vier Helden",
@@ -183,7 +183,7 @@
     },
     en: {
       alle: "← All games", spielen: "▶ Play", oeffnen: "▶ Open game", schliessen: "Close", mehr: "Learn more",
-      steuerung: "Controls", pc: "PC", handy: "Phone", bild: (a, b) => "Image " + a + " of " + b, zurueck: "Previous image", vor: "Next image",
+      steuerung: "Controls", ueber: "About", highlights: "Highlights", pause: "Paused – tap to continue", pc: "PC", handy: "Phone", bild: (a, b) => "Image " + a + " of " + b, zurueck: "Previous image", vor: "Next image",
       schnell: "Switch game", eigeneSeite: "opens its own page",
       spiele: {
         heldensturm: { titel: "Heldensturm", kurz: "The whole campaign as a horde battle – all the way to Gracklstugh.", genre: "Roguelike", wer: "All four heroes",
@@ -362,13 +362,11 @@
             '<div class="sd-punkte">' + medien.map((b, i) => '<button type="button" data-bild="' + i + '" aria-label="' + esc(T.bild(i + 1, n)) + '"' + (i ? "" : ' aria-current="true"') + "></button>").join("") + "</div>" : "") +
         "</div>" +
         '<div class="sd-text">' +
-          '<p class="sd-genre">' + esc(s.genre) + " · " + esc(s.wer) + "</p>" +
+          '<div class="sd-kopf"><p class="sd-genre">' + esc(s.genre) + " · " + esc(s.wer) + "</p>" +
           '<h3 id="sd-titel"><img src="' + sp.held + '" alt="" class="sd-held">' + esc(s.titel) + "</h3>" +
           '<p class="sd-spruch">„' + esc(M.spruch[key]) + "“</p>" +
-          "<p>" + esc(s.text) + "</p>" +
-          '<ul class="sd-punkteliste">' + s.punkte.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>" +
-          '<div class="sd-steuer"><p class="sd-steuer-titel">' + esc(T.steuerung) + '</p><p><b>' + esc(T.pc) + ":</b> " + esc(s.pc) + "</p><p><b>" + esc(T.handy) + ":</b> " + esc(s.handy) + "</p></div>" +
-          (f.gespielt && f.zeilen.length && key !== "probe" ? '<p class="sd-stand"><b>' + esc(M.deinStand) + ":</b> " + esc(f.zeilen.join(" · ")) + "</p>" : "") +
+          (f.gespielt && f.zeilen.length && key !== "probe" ? '<p class="sd-stand"><b>' + esc(M.deinStand) + ":</b> " + esc(f.zeilen.join(" · ")) + "</p>" : "") + "</div>" +
+          '<div class="sd-reiter" role="tablist"></div><div class="sd-info" aria-live="polite"></div>' +
           '<div class="sd-aktionen">' + (sp.extern
             ? '<a class="sd-los" href="' + sp.extern + '" data-gesehen="' + key + '">' + esc(T.spielen) + ' <small>↗</small></a>'
             : '<button type="button" class="sd-los" data-los="' + key + '">' + esc(f.weiter ? M.weiter : T.spielen) + "</button>") +
@@ -386,7 +384,93 @@
     }, { passive: true });
     band.addEventListener("keydown", e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); blaettern(e.key === "ArrowRight" ? 1 : -1); } });
     const los = dialog.querySelector(".sd-los"); if (los) los.focus({ preventScroll: true });
+    infoTeile = [
+      { titel: T.ueber, fliess: true, bloecke: (s.text.match(/[^.!?…]+[.!?…]+[“”"»«)]*\s*|[^.!?…]+$/g) || [s.text]).map(x => "<span>" + esc(x) + "</span>") },
+      { titel: T.highlights, bloecke: s.punkte.map(p => '<li>' + esc(p) + "</li>"), liste: true },
+      { titel: T.steuerung, bloecke: ['<p><b>' + esc(T.pc) + ":</b> " + esc(s.pc) + "</p>", "<p><b>" + esc(T.handy) + ":</b> " + esc(s.handy) + "</p>"] }
+    ];
+    requestAnimationFrame(infoAufbauen);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (dialog.open && offenKey === key) infoAufbauen(); });
   }
+
+  /* ---------- Infobereich im Vorschau-Fenster: blättert von selbst, nie scrollen ----------
+     Beschreibung, Besonderheiten und Steuerung teilen sich einen festen Bereich. Was nicht auf eine
+     Seite passt, wird auf mehrere Seiten verteilt. Die Seiten wechseln automatisch (Dauer je nach
+     Textlänge), die Reiter oben zeigen den Fortschritt. Maus darüber / Antippen hält an. */
+  let infoTeile = [], infoSeiten = [], infoIndex = 0, infoUhr = 0, infoPause = false, infoPauseUhr = 0;
+  function infoAufbauen() {
+    const info = dialog.querySelector(".sd-info"), reiter = dialog.querySelector(".sd-reiter");
+    if (!info || !infoTeile.length) return;
+    clearTimeout(infoUhr);
+    info.innerHTML = ""; infoSeiten = [];
+    /* Reiter zuerst setzen, damit die gemessene Höhe stimmt */
+    const reiterHtml = () => infoTeile.map((teil, i) => {
+      return '<button type="button" role="tab" data-info="' + i + '"><span>' + esc(teil.titel) + "" + '</span><i></i></button>';
+    }).join("");
+    reiter.innerHTML = reiterHtml(false);
+    const hoehe = info.clientHeight;
+    infoTeile.forEach((teil, ti) => {
+      let seite = null, behaelter = null;
+      const neueSeite = () => {
+        seite = document.createElement("div"); seite.className = "sd-seite messen";
+        behaelter = teil.liste ? document.createElement("ul") : teil.fliess ? document.createElement("p") : seite;
+        if (teil.liste) behaelter.className = "sd-punkteliste";
+        if (behaelter !== seite) seite.appendChild(behaelter);
+        if (ti === 2) seite.classList.add("sd-steuer");
+        info.appendChild(seite); infoSeiten.push({ el: seite, teil: ti });
+      };
+      neueSeite();
+      teil.bloecke.forEach(html => {
+        const t = document.createElement("template"); t.innerHTML = html.trim(); const knoten = t.content.firstChild;
+        behaelter.appendChild(knoten);
+        /* passt nicht mehr? Dann auf eine neue Seite (aber nie eine leere Seite zurücklassen) */
+        if (hoehe > 40 && seite.scrollHeight > hoehe + 1 && behaelter.children.length > 1) { behaelter.removeChild(knoten); neueSeite(); behaelter.appendChild(knoten); }
+        /* selbst ein einzelner Satz zu lang? Dann kleiner setzen */
+        if (hoehe > 40 && seite.scrollHeight > hoehe + 1) seite.classList.add("eng");
+        if (hoehe > 40 && seite.scrollHeight > hoehe + 1) seite.classList.add("enger");
+      });
+    });
+    infoSeiten.forEach(x => x.el.classList.remove("messen"));
+    reiter.innerHTML = reiterHtml(true);
+    infoZeigen(0);
+  }
+  function infoZeigen(i) {
+    if (!infoSeiten.length) return;
+    infoIndex = (i + infoSeiten.length) % infoSeiten.length;
+    const akt = infoSeiten[infoIndex];
+    infoSeiten.forEach((x, k) => { x.el.classList.toggle("da", k === infoIndex); x.el.setAttribute("aria-hidden", k === infoIndex ? "false" : "true"); });
+    dialog.querySelectorAll(".sd-reiter button").forEach(b => {
+      const an = +b.dataset.info === akt.teil; b.setAttribute("aria-selected", an ? "true" : "false");
+      const balken = b.querySelector("i"); balken.style.animation = "none"; void balken.offsetWidth; balken.style.animation = "";
+    });
+    /* Lesezeit: 4 s Grundzeit plus etwa 1 s je 70 Zeichen */
+    const dauer = Math.min(16, 4 + akt.el.textContent.length / 70);
+    dialog.style.setProperty("--info-dauer", dauer + "s");
+    infoWeiter(dauer * 1000);
+  }
+  let infoRest = 0, infoStart = 0;
+  function infoWeiter(ms) {
+    clearTimeout(infoUhr); infoRest = ms; infoStart = performance.now();
+    if (ruhig || infoPause || infoSeiten.length < 2) return;
+    infoUhr = setTimeout(() => infoZeigen(infoIndex + 1), ms);
+  }
+  function infoAnhalten(an) {
+    if (an === infoPause) return;
+    infoPause = an; dialog.classList.toggle("info-pause", an);
+    if (an) { clearTimeout(infoUhr); infoRest = Math.max(800, infoRest - (performance.now() - infoStart)); }
+    else infoWeiter(infoRest);
+  }
+  dialog.addEventListener("mouseover", e => { if (e.target.closest(".sd-info")) infoAnhalten(true); });
+  dialog.addEventListener("mouseout", e => { const z = e.relatedTarget; if (e.target.closest(".sd-info") && !(z && z.closest && z.closest(".sd-info"))) infoAnhalten(false); });
+  /* Antippen: anhalten bzw. eine Seite weiter */
+  dialog.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" || !e.target.closest(".sd-info")) return;
+    clearTimeout(infoPauseUhr);
+    if (infoPause) { infoAnhalten(false); infoZeigen(infoIndex + 1); }
+    else { infoAnhalten(true); infoPauseUhr = setTimeout(() => infoAnhalten(false), 12000); }
+  });
+  let infoGroesseUhr = 0;
+  window.addEventListener("resize", () => { if (!dialog.open) return; clearTimeout(infoGroesseUhr); infoGroesseUhr = setTimeout(infoAufbauen, 200); });
   function blaettern(schritt, ziel) {
     const band = dialog.querySelector(".sd-band"); if (!band) return;
     const n = band.children.length, w = band.clientWidth;
@@ -395,11 +479,12 @@
     band.scrollTo({ left: i * w, behavior: "smooth" });
   }
   function vorschauZu() { if (dialog.open) { if (dialog.close) dialog.close(); else dialog.removeAttribute("open"); } }
-  dialog.addEventListener("close", () => { const dv = dialog.querySelector("video"); if (dv) dv.pause(); offenKey = null; document.documentElement.classList.remove("saal-dialog-offen"); });
+  dialog.addEventListener("close", () => { const dv = dialog.querySelector("video"); if (dv) dv.pause(); offenKey = null; clearTimeout(infoUhr); infoTeile = []; infoSeiten = []; document.documentElement.classList.remove("saal-dialog-offen"); });
   dialog.addEventListener("click", e => {
     if (e.target === dialog) { vorschauZu(); return; } /* Klick neben das Fenster */
     const p = e.target.closest("[data-schritt]"); if (p) { blaettern(+p.dataset.schritt); return; }
     const d = e.target.closest("[data-bild]"); if (d) { blaettern(0, +d.dataset.bild); return; }
+    const r = e.target.closest("[data-info]"); if (r) { const i = infoSeiten.findIndex(x => x.teil === +r.dataset.info); infoAnhalten(false); infoZeigen(infoSeiten[infoIndex] && infoSeiten[infoIndex].teil === +r.dataset.info ? infoIndex + 1 : i); return; }
     if (e.target.closest("[data-zu]")) { vorschauZu(); return; }
     const l = e.target.closest("[data-los]"); if (l) { const sp = nachKey(l.dataset.los); vorschauZu(); if (sp) { gesehen(sp.key); spielZeigen(sp.karte, true); } }
   });
@@ -660,7 +745,7 @@
 #taverne.saal-einzeln .tav-karte > .tav-info, #taverne.saal-einzeln .wl-steuerung, #taverne.saal-einzeln .dn-steuerung, #taverne.saal-einzeln .eh-steuerung { max-width: 48rem; }
 
 /* Vorschau-Fenster */
-.saal-dialog { --farbe: var(--ember); width: min(1040px, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); padding: 0; border: 1px solid var(--farbe); background: var(--hall, #16121a); color: var(--vellum); box-shadow: 0 30px 80px rgba(0,0,0,.7); overflow: hidden; }
+.saal-dialog { --farbe: var(--ember); width: min(66rem, calc(100vw - 2rem)); height: min(calc(100vh - 2rem), 40rem); max-height: calc(100vh - 2rem); padding: 0; border: 1px solid var(--farbe); background: var(--hall, #16121a); color: var(--vellum); box-shadow: 0 30px 80px rgba(0,0,0,.7); overflow: hidden; }
 .saal-dialog[open] { display: flex; flex-direction: column; animation: sdEin .25s ease; }
 @keyframes sdEin { from { opacity: 0; transform: translateY(14px) scale(.985); } }
 .saal-dialog::backdrop { background: rgba(6,5,10,.78); backdrop-filter: blur(3px); }
@@ -668,26 +753,49 @@ html.saal-dialog-offen { overflow: hidden; }
 .sd-zu-form { position: absolute; top: .5rem; right: .5rem; z-index: 3; margin: 0; }
 .sd-zu { width: 2.4rem; height: 2.4rem; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.7); color: var(--vellum); font-size: 1.4rem; line-height: 1; cursor: pointer; }
 .sd-zu:hover { border-color: var(--ember); color: var(--ember); }
-.sd-inhalt { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); min-height: 0; overflow: auto; }
+.sd-inhalt { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .sd-bilder { position: relative; background: #08070c; }
-.saal-dialog { --bh: min(72vh, 640px); }
+.saal-dialog { --bh: 100%; }
+.sd-bilder { min-height: 0; }
 .sd-band { display: flex; height: var(--bh); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; outline: none; }
 .sd-band::-webkit-scrollbar { display: none; }
 .sd-band figure { flex: 0 0 100%; height: 100%; box-sizing: border-box; margin: 0; scroll-snap-align: center; display: grid; place-items: center; padding: .8rem .8rem 1.8rem; }
-.sd-band img { max-width: 100%; max-height: calc(var(--bh) - 2.6rem); object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.sd-band img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
 .sd-pfeil { position: absolute; top: 50%; transform: translateY(-50%); width: 2.6rem; height: 2.6rem; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.7); color: var(--vellum); font-size: 1.6rem; line-height: 1; cursor: pointer; }
 .sd-pfeil.links { left: .6rem; } .sd-pfeil.rechts { right: .6rem; }
 .sd-pfeil:hover { border-color: var(--ember); color: var(--ember); }
 .sd-punkte { position: absolute; left: 0; right: 0; bottom: .5rem; display: flex; justify-content: center; gap: .45rem; }
 .sd-punkte button { width: .7rem; height: .7rem; padding: 0; border: 1px solid var(--vellum); border-radius: 50%; background: transparent; opacity: .6; cursor: pointer; }
 .sd-punkte button[aria-current] { background: var(--farbe); border-color: var(--farbe); opacity: 1; }
-.sd-text { display: grid; align-content: start; gap: .8rem; padding: clamp(1.2rem, 3vw, 2rem); padding-top: clamp(1.4rem, 3vw, 2.4rem); }
+.sd-text { display: flex; flex-direction: column; gap: .7rem; min-height: 0; overflow: hidden; padding: clamp(1rem, 2.6vw, 2rem); padding-top: clamp(1.2rem, 3vw, 2.4rem); }
+.sd-kopf { display: grid; gap: .55rem; flex: none; }
+.sd-genre { padding-right: 2.6rem; }
+/* Reiter mit Fortschrittsbalken */
+.sd-reiter { display: flex; gap: .3rem; flex: none; border-bottom: 1px solid var(--line); }
+.sd-reiter button { position: relative; flex: 1 1 auto; min-width: 0; padding: .45rem .25rem .55rem; border: 0; background: none; color: var(--ash); font: inherit; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sd-reiter button small { font-size: .9em; opacity: .7; text-transform: none; letter-spacing: 0; }
+.sd-reiter button[aria-selected="true"] { color: var(--vellum); }
+.sd-reiter button i { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: var(--farbe); }
+.sd-reiter button[aria-selected="true"] i { animation: sdLauf var(--info-dauer, 7s) linear forwards; }
+.saal-dialog.info-pause .sd-reiter button i { animation-play-state: paused; }
+@keyframes sdLauf { from { width: 0; } to { width: 100%; } }
+/* Infobereich: Seiten liegen übereinander und blenden über */
+.sd-info { position: relative; flex: 1 1 auto; min-height: 3rem; overflow: hidden; }
+.sd-seite { position: absolute; inset: 0; display: grid; align-content: start; gap: .45rem; opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; pointer-events: none; overflow: hidden; }
+.sd-seite.da { opacity: 1; transform: none; pointer-events: auto; }
+.sd-seite.eng { font-size: .9em; } .sd-seite.eng p, .sd-seite.eng li { line-height: 1.38; }
+.sd-seite.enger { font-size: .8em; }
+.sd-seite.messen { position: absolute; inset: 0 0 auto 0; visibility: hidden; opacity: 0; }
+.sd-seite p { margin: 0; color: var(--ash); line-height: 1.6; }
+.sd-info .sd-steuer { border: 0; background: none; padding: 0; }
+.sd-info .sd-steuer p { font-size: .92rem; }
+.saal-dialog.info-pause .sd-info::after { content: "❚❚"; position: absolute; right: 0; bottom: 0; font-size: .7rem; color: var(--ash); opacity: .7; }
 .sd-text p { margin: 0; color: var(--ash); line-height: 1.6; }
 .sd-genre { font-size: .7rem !important; letter-spacing: .16em; text-transform: uppercase; color: var(--farbe) !important; }
 .sd-spruch { font-family: var(--name); font-style: italic; font-size: 1.12rem !important; color: #f3e6cf !important; }
 .sd-stand { font-size: .88rem; color: var(--farbe) !important; }
 .sd-stand b { color: var(--vellum); }
-.sd-band video { max-width: 100%; max-height: calc(var(--bh) - 2.6rem); object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.sd-band video { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
 .sd-text h3 { margin: 0; display: flex; align-items: center; gap: .7rem; font-family: var(--name); font-weight: 400; font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.05; color: var(--vellum); padding-right: 2rem; }
 .sd-held { flex: none; width: 2.8rem; height: 2.8rem; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--farbe); }
 .sd-punkteliste { margin: 0; padding: 0; list-style: none; display: grid; gap: .4rem; }
@@ -697,7 +805,7 @@ html.saal-dialog-offen { overflow: hidden; }
 .sd-steuer p { font-size: .85rem; line-height: 1.45; }
 .sd-steuer b { color: var(--vellum); font-weight: 600; }
 .sd-steuer-titel { font-size: .68rem !important; letter-spacing: .16em; text-transform: uppercase; color: var(--ember) !important; }
-.sd-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-top: .2rem; }
+.sd-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-top: .2rem; flex: none; }
 .sd-los { display: inline-flex; align-items: center; gap: .4rem; padding: .75rem 1.6rem; border: 1px solid var(--farbe); background: var(--farbe); color: #120e14; font: inherit; font-size: 1.05rem; font-weight: 700; text-decoration: none; cursor: pointer; }
 .sd-los:hover, .sd-los:focus-visible { filter: brightness(1.12); outline: none; box-shadow: 0 0 26px color-mix(in srgb, var(--farbe) 50%, transparent); }
 .sd-leise { border: 0; background: none; color: var(--ash); font: inherit; font-size: .9rem; text-decoration: underline; cursor: pointer; padding: .5rem; }
@@ -706,12 +814,29 @@ html.saal-dialog-offen { overflow: hidden; }
 /* Handy: Fenster über den ganzen Bildschirm, Bilder oben zum Wischen, Spielen-Knopf immer sichtbar */
 @media (max-width: 760px) {
   .saal-dialog { width: 100vw; max-width: 100vw; height: 100%; max-height: 100%; margin: 0; border: 0; }
-  .sd-inhalt { grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; flex: 1 1 auto; }
-  .saal-dialog { --bh: min(48vh, 420px); }
+  .sd-inhalt { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .sd-band { height: clamp(140px, 31vh, 360px); }
+  .sd-band figure { padding: .5rem .5rem 1.5rem; }
   .sd-pfeil { display: none; }
-  .sd-text { padding-bottom: 0; }
-  .sd-aktionen { position: sticky; bottom: 0; margin: 0 calc(-1 * clamp(1.2rem, 3vw, 2rem)); padding: .8rem clamp(1.2rem, 3vw, 2rem) calc(.8rem + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, rgba(22,18,26,.85), var(--hall, #16121a) 35%); border-top: 1px solid var(--line); }
+  .sd-text { padding: .9rem 1rem 0; gap: .55rem; }
+  .sd-text h3 { font-size: clamp(1.4rem, 6.5vw, 1.9rem); }
+  .sd-held { width: 2.3rem; height: 2.3rem; }
+  .sd-spruch { font-size: 1rem !important; line-height: 1.4 !important; }
+  .sd-aktionen { margin: 0 -1rem; padding: .7rem 1rem calc(.7rem + env(safe-area-inset-bottom, 0px)); background: var(--hall, #16121a); border-top: 1px solid var(--line); }
   .sd-los { flex: 1; justify-content: center; }
+}
+/* niedrige Fenster (Handy quer, kleine Laptops): kompakter */
+@media (max-height: 560px) {
+  .saal-dialog { height: calc(100vh - 1rem); max-height: calc(100vh - 1rem); }
+  .sd-spruch { display: none; }
+  .sd-text { padding-top: 1rem; gap: .45rem; }
+  .sd-text h3 { font-size: 1.4rem; }
+  .sd-held { width: 2rem; height: 2rem; }
+  .sd-los { padding: .5rem 1.2rem; }
+}
+@media (max-height: 560px) and (max-width: 760px) {
+  .sd-inhalt { grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .sd-band { height: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .saal-kachel, .saal-dialog[open], .sk-kopf-bild, .sk-kopf-licht, .sk-kopf-titel, .sk-heute, .sk-heute-los, .sk-neu.neu { animation: none !important; } .sk-funken { display: none; } .saal-kachel, .saal-kachel img { transition: none; } }
 `;
