@@ -6680,9 +6680,9 @@ function drawDown(t){const p=P,k=Math.min(1,(p.revT||0)/2.5);cx.save();cx.global
 function drawMpTag(){const i=PL.indexOf(P);if(i<0||P.down)return;const col=PCOL[i];cx.globalAlpha=0.6;cx.strokeStyle=col;cx.lineWidth=2.5;cx.beginPath();cx.ellipse(P.x,P.y+14,19,7,0,0,TAU);cx.stroke();cx.globalAlpha=1;
  const y=P.y-40,w=34,f=Math.max(0,P.hp/P.st.maxHp);cx.fillStyle='rgba(0,0,0,.6)';cx.fillRect(P.x-w/2-1,y-1,w+2,5);cx.fillStyle=f<0.3?'#ff4a4a':'#d8394a';cx.fillRect(P.x-w/2,y,w*f,3);
  cx.font='900 10px "Alegreya Sans",sans-serif';cx.textAlign='center';cx.lineWidth=3;cx.strokeStyle='rgba(0,0,0,.85)';cx.strokeText('P'+(i+1),P.x,y-4);cx.fillStyle=col;cx.fillText('P'+(i+1),P.x,y-4)}
-function drawMpHud(){if(!G.mp||PL.length<2)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);const L=PL.filter(p=>p!==mainP()),n=L.length,w=Math.min(230,(W-24)/n),y0=W<700?(splitOn()?H*0.5-35:H-250):H-84;
- {const tb=G.team||0,bw=260,bx=W/2-bw/2,by=y0-22,rdy=tb>=1;c.fillStyle='rgba(12,9,14,.8)';c.fillRect(bx-2,by-2,bw+4,14);c.fillStyle=rdy?`rgba(255,226,122,${0.75+0.25*Math.sin(G.time*8)})`:'#c8a050';c.fillRect(bx,by,bw*tb,10);c.font='800 10px "Alegreya Sans",sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle=rdy?'#1a1010':'#f0e6d4';G.segR=rdy?{x:bx,y:by,w:bw}:null;c.fillText(rdy?'Imres Segen bereit – '+segHint()+'!':'Imres Segen '+Math.floor(tb*100)+'%',W/2,by+5);c.textBaseline='alphabetic'}
- L.forEach((p,k)=>{const i=PL.indexOf(p),x=(W<700?W/2-(n*w)/2:Math.max(12,Math.min(W/2-(n*w)/2,W-250-n*w)))+k*w+5,ww=w-10,col=PCOL[i];c.globalAlpha=0.92;c.fillStyle='rgba(14,10,16,.86)';c.beginPath();if(c.roundRect)c.roundRect(x,y0,ww,70,12);else c.rect(x,y0,ww,70);c.fill();c.strokeStyle=col;c.lineWidth=1.5;c.stroke();c.globalAlpha=1;
+function drawMpHud(){if(!G.mp||PL.length<2)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);const L=PL.filter(p=>p!==mainP()),n=L.length,w=Math.min(230,(mpHudR()-12)/n),y0=W<700?(splitOn()?H*0.5-35:H-250):H-84;
+ {const tb=G.team||0,bw=Math.min(260,mpHudR()-24),bx=Math.min(W/2,mpHudR()-bw/2-6)-bw/2,by=y0-22,rdy=tb>=1;c.fillStyle='rgba(12,9,14,.8)';c.fillRect(bx-2,by-2,bw+4,14);c.fillStyle=rdy?`rgba(255,226,122,${0.75+0.25*Math.sin(G.time*8)})`:'#c8a050';c.fillRect(bx,by,bw*tb,10);c.font='800 10px "Alegreya Sans",sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle=rdy?'#1a1010':'#f0e6d4';G.segR=rdy?{x:bx,y:by,w:bw}:null;c.fillText(rdy?'Imres Segen bereit – '+segHint()+'!':'Imres Segen '+Math.floor(tb*100)+'%',bx+bw/2,by+5);c.textBaseline='alphabetic'}
+ L.forEach((p,k)=>{const i=PL.indexOf(p),x=(W<700?W/2-(n*w)/2:Math.max(12,Math.min(W/2-(n*w)/2,mpHudR()-n*w)))+k*w+5,ww=w-10,col=PCOL[i];c.globalAlpha=0.92;c.fillStyle='rgba(14,10,16,.86)';c.beginPath();if(c.roundRect)c.roundRect(x,y0,ww,70,12);else c.rect(x,y0,ww,70);c.fill();c.strokeStyle=col;c.lineWidth=1.5;c.stroke();c.globalAlpha=1;
   c.textAlign='left';c.textBaseline='alphabetic';c.font='800 13px "Alegreya Sans",sans-serif';{const rt=ww<170?`St. ${p.level}${p.sp>0?' ●':''}`:`Stufe ${p.level}${p.sp>0?' · '+p.sp+' frei':''}`,rw=c.measureText(rt).width,av=ww-24-rw;let lt=ww<170?`P${i+1} ${pName(p)}`:`P${i+1} · ${pName(p)}`;if(c.measureText(lt).width>av){while(lt.length>2&&c.measureText(lt+'…').width>av)lt=lt.slice(0,-1);lt+='…'}c.fillStyle=col;c.fillText(lt,x+10,y0+17);c.textAlign='right';c.fillStyle='#f0e6d4';c.fillText(rt,x+ww-10,y0+17)}
   const bw=ww-20,f=p.down?0:Math.max(0,p.hp/p.st.maxHp);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x+10,y0+24,bw,9);c.fillStyle=p.down?'#555':'#c8303e';c.fillRect(x+10,y0+24,bw*f,9);
   c.textAlign='center';c.font='700 9px "Alegreya Sans",sans-serif';c.fillStyle='#fff';c.fillText(p.netGone||p.gone?'Verbindung weg …':p.down?'gefallen':`${fmt(Math.max(0,p.hp))} / ${fmt(p.st.maxHp)}`,x+10+bw/2,y0+32);
@@ -13053,11 +13053,11 @@ function hiCss(){if(document.getElementById('hiCss'))return;const s=document.cre
 @media (max-width:520px){#hiBox .hic h2{font-size:22px}#hiBox .hic p{font-size:15px}}`;document.head.appendChild(s)}
 function hiTxtHalten(){const pad=PL&&PL.some(q=>q&&q.pad!=null)||(navigator.getGamepads&&[...navigator.getGamepads()].some(g=>g));const touch=matchMedia('(pointer:coarse)').matches;
  return touch&&!pad?'Bildschirm 1 Sekunde gedrückt halten':pad?'Beliebigen Knopf oder eine Taste 1 Sekunde halten':'Beliebige Taste oder Maustaste 1 Sekunde halten'}
-function hiOpen(ids){if(HI.on||!ids.length)return;hiCss();HI.on=true;HI.ids=ids;HI.held=0;HI.src.clear();
+function hiOpen(ids){SAVE.hIntro=SAVE.hIntro||{};ids=(ids||[]).filter(id=>!SAVE.hIntro[id]);if(HI.on||!ids.length)return;hiCss();HI.on=true;HI.ids=ids;HI.held=0;HI.hs=null;HI.src.clear();
  const solo=!NET.role||NET.role==='none';HI.pause=solo&&G.state==='play';
  if(HI.pause){HI.ov0=G.overlay;G.paused=true;G.overlay='heldIntro';for(const k in keys)keys[k]=false;joy=null}
  const el=document.createElement('div');el.id='hiBox';const C=2*Math.PI*19;
- el.innerHTML=`<div class="hiw">${ids.map((id,i)=>`<div class="hic" style="--c:${HCOL[id]||'#e5b454'};animation-delay:${i*0.08}s"><div class="eyebrow">Neu im Sturm</div><h2>${esc(HEROES[id].name)}</h2><p>${esc(HMECH[id])}</p></div>`).join('')}
+ el.innerHTML=`<div class="hiw">${ids.map((id,i)=>hiKarte(id,i)).join('')}
   <div class="hih"><svg class="hir" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.18)"/><circle class="hibar" cx="23" cy="23" r="19" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><span>${hiTxtHalten()}</span></div></div>`;
  document.body.appendChild(el);HI.el=el;HI.C=C;
  el.addEventListener('pointerdown',ev=>{ev.preventDefault();HI.src.add('p'+ev.pointerId)});
@@ -13066,7 +13066,7 @@ function hiOpen(ids){if(HI.on||!ids.length)return;hiCss();HI.on=true;HI.ids=ids;
  HI.last=performance.now();HI.raf=requestAnimationFrame(hiTick)}
 function hiTick(now){if(!HI.on)return;HI.raf=requestAnimationFrame(hiTick);const dt=Math.min(0.6,(now-HI.last)/1000);HI.last=now;
  let pad=false;try{for(const g of navigator.getGamepads?navigator.getGamepads():[]){if(!g)continue;if(g.buttons.some(b=>b&&(b.pressed||b.value>0.5)))pad=true;if(g.axes.some(a=>Math.abs(a)>0.6))pad=true}}catch(e){}
- const hold=HI.src.size>0||pad;HI.held=hold?HI.held+dt:Math.max(0,HI.held-dt*2);
+ const hold=HI.src.size>0||pad;if(hold){if(HI.hs==null)HI.hs=now-HI.held*1000;HI.held=(now-HI.hs)/1000}else{HI.hs=null;HI.held=Math.max(0,HI.held-dt*2)}
  const k=Math.min(1,HI.held/1);const bar=HI.el.querySelector('.hibar');if(bar)bar.style.strokeDashoffset=String(HI.C*(1-k));HI.el.classList.toggle('hold',hold);
  if(HI.held>=1)hiClose()}
 function hiClose(){if(!HI.on)return;HI.on=false;cancelAnimationFrame(HI.raf);SAVE.hIntro=SAVE.hIntro||{};for(const id of HI.ids)SAVE.hIntro[id]=1;try{persist()}catch(e){}
@@ -13599,6 +13599,97 @@ window.__hsW={wlAn,wlBau,wlNachSetup,wlBevoelkern,wlBfs,wlNavBau,wlFluss,wlWeck,
 
 /* weniger, dafür gesuchte Gegner: Erfahrung und Gold je Sieg etwas höher (gleicht das kleinere Kill-Ziel aus) */
 {const ob0=orb;orb=function(x,y,k,v){if(G.wl&&G.wl.an&&!G.room&&(k==='xp'||k==='gold')&&typeof v==='number')v=k==='xp'?v*(1.3+0.3*Math.max(0,1-SL()/6)):Math.max(1,Math.round(v*1.2));return ob0.call(this,x,y,k,v)}}
+
+/* ================= QA Mehrspieler-Anzeige (Paket „qa_mp“) =================
+   qaSplitZeit: im geteilten Bildschirm laufen gemeinsame Bildschirm-Zeitgeber (Banner, Ulti-/Treffer-Vignette, Blitz, Nachbilder) nur einmal pro Bild statt je Bildausschnitt.
+   wlDaecher (Split): Dächer werden je Bildausschnitt nur für den eigenen Helden durchsichtig.
+   tutTick: Tutorial-Kasten zählt nur einmal pro Bild, verschwindet außerhalb von Stufe 0; Hinweis-Meldungen rutschen unter den Kasten.
+   wlMiniOrt: kleinere Minimap auf niedrigen Bildschirmen (Handy quer). mpHudR: Mitspieler-Karten weichen den Schnellknöpfen aus.
+   hiOpen: mehrere neue Helden nebeneinander, „halten“-Hinweis immer sichtbar. dmCard: „P3 · Held“ auch ohne Schaden. */
+const QAMP={};
+function qaSplitSnap(){const b=G.banner;return{b,bt:b&&b.t,ultV:G.ultV,hurtV:G.hurtV,sf:G.sf,sfa:G.sf&&G.sf.a,gh:G.ghosts,ght:(G.ghosts||[]).map(g=>g.t)}}
+function qaSplitBack(s){if(!s)return;G.banner=s.b;if(s.b)s.b.t=s.bt;G.ultV=s.ultV;G.hurtV=s.hurtV;G.sf=s.sf;if(s.sf)s.sf.a=s.sfa;G.ghosts=s.gh;if(s.gh)s.gh.forEach((g,i)=>{if(s.ght[i]!=null)g.t=s.ght[i]})}
+{const rw0=renderWorld;renderWorld=function(dt){if(!G.vp)return rw0.apply(this,arguments);const k=PL.indexOf(P);
+ if(k<=0){const r=rw0.apply(this,arguments);QAMP.snap=qaSplitSnap();return r}
+ try{return rw0.apply(this,arguments)}finally{qaSplitBack(QAMP.snap)}}}
+/* Dächer je Bildausschnitt */
+{const wd0=wlDaecher;wlDaecher=function(){if(!G.vp)return wd0.apply(this,arguments);const Wd=G.wl;if(!Wd||!Wd.an||G.room||!Wd.haus.length)return;
+ const k=Math.max(0,PL.indexOf(P)),tk='v'+k,now=performance.now()/1000,dt=Math.min(0.1,Math.max(0,now-(WLDT[tk]||now)));WLDT[tk]=now;const V=wlSicht(),c=cx,q=P;
+ for(const H of Wd.haus){if(!H.dach||H.ruin)continue;if(H.x+H.w<V.x0||H.x>V.x1||H.y+H.h<V.y0||H.y>V.y1)continue;
+  const drin=!!q&&q.x>H.x-14&&q.x<H.x+H.w+14&&q.y>H.y-20&&q.y<H.y+H.h+26;H.av=H.av||[];const a0=H.av[k]==null?1:H.av[k],a=a0+((drin?0.1:1)-a0)*Math.min(1,dt*7);H.av[k]=a;if(a<0.03)continue;
+  if(!H.cv)H.cv=wlDachBild(H);c.globalAlpha=a;c.drawImage(H.cv,H.x-10,H.y-26);c.globalAlpha=1}}}
+/* Tutorial-Kasten */
+function qaTutToast(){const el=TUT.el,now=performance.now();if(!el&&!QAMP.tTop)return;if(QAMP.tT&&now-QAMP.tT<300&&el)return;QAMP.tT=now;const t=document.getElementById('toast');if(!t)return;let top='';
+ if(el&&el.isConnected&&el.style.display!=='none'){const r=el.getBoundingClientRect();if(r.height>0){const z=parseFloat(getComputedStyle(t).zoom)||1;top=Math.round((r.bottom+8)/z)+'px'}}
+ QAMP.tTop=top;if(t.style.top!==top)t.style.top=top}
+{const tt0=tutTick;tutTick=function(dt){if(G.vp&&P!==PL[0])return;
+ if(TUT.el&&(G.stage!==0||G.mode!=='kampagne'||G.state==='title')){TUT.el.remove();TUT.el=null;if(TUT.i<5)TUT.i=-1}
+ const r=tt0.apply(this,arguments);try{qaTutToast()}catch(e){}return r}}
+/* Minimap auf niedrigen Bildschirmen */
+{const mo0=wlMiniOrt;wlMiniOrt=function(){if(H>=520||W<700)return mo0.apply(this,arguments);const now=performance.now();if(WLMM.box&&now-WLMM.boxT<1000)return WLMM.box;WLMM.boxT=now;
+ const S=Math.max(84,Math.min(120,Math.round(H*0.27)));let top=70;try{const el=document.querySelector('#hud .top');if(el){const r=el.getBoundingClientRect();if(r.height>0)top=r.bottom+8}}catch(er){}
+ WLMM.box={x:W-S-10,y:Math.max(8,Math.min(top,H-S-90)),S};return WLMM.box}}
+/* Mitspieler-Karten: rechte Grenze vor den Schnellknöpfen (Trank/Sprint) */
+function mpHudR(){if(W<700)return W-12;const now=performance.now();if(!QAMP.rT||now-QAMP.rT>500){QAMP.rT=now;let L=W-250;try{for(const id of ['btnPot','btnSprint']){const e=document.getElementById(id);if(!e)continue;const r=e.getBoundingClientRect();if(r.width>0&&r.bottom>H-120)L=Math.min(L,r.left-8)}}catch(e){}QAMP.r=L}return Math.max(W*0.5,QAMP.r||W-250)}
+/* Helden-Erklärfenster mit mehreren Helden */
+(()=>{try{const s=document.createElement('style');s.textContent=`#hiBox .hih{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(14,10,16,0),rgba(14,10,16,.94) 30%);padding:10px 0 4px}
+@media (min-width:900px){#hiBox .hiw.hiM{max-width:min(1500px,96vw);display:grid;grid-template-columns:repeat(var(--hn,2),minmax(0,1fr));align-items:stretch}#hiBox .hiw.hiM .hih{grid-column:1/-1}#hiBox .hiw.hiM .hic p{font-size:15px}}
+@media (min-width:900px) and (max-width:1300px){#hiBox .hiw.hiM.hi4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:900px) and (max-height:760px){#hiBox .hiw.hiM .hic{padding:12px 14px}#hiBox .hiw.hiM .hic p{font-size:14px;line-height:1.42}#hiBox .hiw.hiM .hic h2{font-size:22px;margin-bottom:4px}}`;document.head.appendChild(s)}catch(e){}})();
+{const ho0=hiOpen;hiOpen=function(ids){const r=ho0.apply(this,arguments);try{const w=HI.el&&HI.el.querySelector('.hiw');if(w&&ids&&ids.length>1){w.classList.add('hiM');if(ids.length>=4)w.classList.add('hi4');w.style.setProperty('--hn',String(Math.min(4,ids.length)))}}catch(e){}return r}}
+/* Schadensquellen: Spielernummer auch bei Helden ohne Schaden */
+{const dc0=dmCard;dmCard=function(q,D,title,idx){let h=dc0.apply(this,arguments);try{if(idx!=null&&G.mp&&h.indexOf('Noch kein Schaden')>0){const Hh=HEROES[q.id],n=esc(Hh?Hh.name:'');h=h.replace('>'+n+'</b>','>P'+(idx+1)+' · '+n+'</b>')}}catch(e){}return h}}
+window.__hsQA={QAMP,qaSplitSnap,qaTutToast,mpHudR,toast:(...a)=>toast(...a)};
+
+/* ---------- Neue Stufenart beim ersten Mal erklären (gleiches Fenster wie die Helden-Einführung: 1 s halten schließt, Stufe startet erst danach) ---------- */
+const LVI={
+ welt:{c:'#e5b454',n:'Erkundung',d:'Die Gegner lauern überall auf der Karte – in Lagern, auf Streife, schlafend oder im Hinterhalt hinter Mauern und in Häusern. Besiegt genug von ihnen (Zähler oben), dann erscheint der Wächter der Stufe; der rote Pfeil führt euch zu ihm. Die Karte oben rechts (Taste M) zeigt, was ihr schon erkundet habt.'},
+ eskorte:{c:'#e5b454',n:'Geleit: Der Vorratskarren',d:'Der Karren rollt nur, wenn ihr bei ihm seid. Hinterhalte kommen zu zufälligen Zeiten von vorn oder hinten – Gegner am Karren halten ihn auf. Bringt ihn heil bis zum Lager.'},
+ steine:{c:'#e8c070',n:'Verteidigung: Die Schutzsteine',d:'Drei Schutzsteine müssen das Ritual überstehen. Gegner greifen sie in Wellen an – steht zwischen ihnen und den Steinen, bis das Ritual vollendet ist.'},
+ gefangene:{c:'#8ff08a',n:'Befreiung: Die Gefangenen',d:'Drei Gefangene sitzen in Käfigen, bewacht von ruhenden Wachen. Stellt euch kurz an einen Käfig, um ihn zu öffnen – Befreite kämpfen danach an eurer Seite.'},
+ dieb:{c:'#ffd04a',n:'Verfolgung: Der Beutelschneider',d:'Ein Dieb hat eure Reisekasse gestohlen und flieht über die Karte. Holt ihn ein und streckt ihn nieder, bevor er entkommt – dann gibt es das Gold zurück.'},
+ flucht:{c:'#ff8a5a',n:'Flucht',d:'Etwas Gewaltiges rollt von hinten heran. Lauft zum Ausgang, bevor es euch einholt – kämpft nur, wenn euch jemand den Weg versperrt.'},
+ halten:{c:'#c8a0ff',n:'Die Stellung',d:'Bleibt im leuchtenden Kreis, bis die Verstärkung eintrifft. Verlasst ihr ihn, stockt der Fortschritt.'},
+ boss:{c:'#ff6a5a',n:'Bosskampf',d:'Ein mächtiger Gegner wartet am Ende dieser Stufe. Achtet auf die roten Warnflächen am Boden – wer sie rechtzeitig verlässt, nimmt keinen Schaden. Unter 40 % Leben wird der Boss wilder.'},
+ escape:{c:'#ff9a6a',n:'Überleben',d:'Hier geht es nicht ums Besiegen, sondern ums Durchhalten: Bleibt am Leben, bis der Weg frei wird. Bewegung ist alles.'}};
+function lvArt(){const S=STAGES[G.stage];if(!S||G.room)return null;if(G.mode==='bossrausch')return null;
+ if(G.obj&&LVI[G.obj.k])return G.obj.k;if(S.escape)return'escape';if(S.boss)return'boss';if(G.wl&&G.wl.an&&!G.wl.gast)return'welt';return null}
+function lvNeu(){if(G.bot||NET.role==='guest')return[];if(navigator.webdriver&&!window.__hiTest)return[];SAVE.hIntro=SAVE.hIntro||{};const a=lvArt();return a&&!SAVE.hIntro['z:'+a]?['z:'+a]:[]}
+function hiKarte(id,i){if(id.startsWith('z:')){const L=LVI[id.slice(2)];if(!L)return'';return`<div class="hic" style="--c:${L.c};animation-delay:${i*0.08}s"><div class="eyebrow">Neue Stufenart</div><h2>${esc(L.n)}</h2><p>${esc(L.d)}</p></div>`}
+ return`<div class="hic" style="--c:${HCOL[id]||'#e5b454'};animation-delay:${i*0.08}s"><div class="eyebrow">Neu im Sturm</div><h2>${esc(HEROES[id].name)}</h2><p>${esc(HMECH[id])}</p></div>`}
+/* Sobald eine neue Stufe wirklich läuft (kein Menü, keine Pause): Erklärung zeigen – zusammen mit neuen Helden in einem Fenster */
+{const ss=setupStage;setupStage=function(){const r=ss.apply(this,arguments);try{G.lviS=G.stage;G.lviT=0}catch(e){}return r}}
+setInterval(()=>{try{if(G.lviS==null||G.lviS!==G.stage||HI.on)return;if(G.state!=='play'||G.paused||G.overlay||!scr.hidden)return;
+ G.lviT=(G.lviT||0)+1;if(G.lviT<2)return;G.lviS=null;const L=lvNeu();if(!L.length)return;hiOpen(hiNeu().concat(L))}catch(e){}},100);
+window.__hsLV={LVI,lvArt,lvNeu};
+
+/* ---------- Selbst zielen: Wer einmal aktiv mit Maus oder rechtem Stick angreift, schießt nicht mehr automatisch –
+   bis 15 s lang gar keine Eingabe kam (scheinbar abwesend). Dann greift der Held wieder von selbst an, wenn Gegner kommen. ---------- */
+const MAN={kbT:0,afk:15000,tip:0};
+addEventListener('keydown',()=>{MAN.kbT=performance.now()},true);
+addEventListener('pointerdown',()=>{MAN.kbT=performance.now()},true);
+function manNow(){return performance.now()}
+/* jüngste Eingabe dieses Spielers (Tastatur/Maus nur für den Tastatur-Spieler, Controller über eigene Bewegung/Stick, Online-Gäste über ihr Netz-Signal) */
+function manIn(p){const now=manNow();const kb=!p.dev||p.dev==='kb';
+ const remote=p.netIn||p.netCur;let t=p.manInT||0;
+ if(p.moving||p.padHeld)t=now;
+ if(remote){const ni=p.netIn;if(ni&&(Math.abs(ni.mx||0)>0.1||Math.abs(ni.my||0)>0.1||ni.a!=null))t=now;if(p.netCur&&p.netCur.down)t=now}
+ else if(kb&&!(NET.role==='host'&&p.netCur))t=Math.max(t,MAN.kbT,MOUSE.t||0);
+ p.manInT=t;return t}
+function manTip(){if(MAN.tip||G.bot||(SAVE.manTip||0)>=2)return;MAN.tip=1;SAVE.manTip=(SAVE.manTip||0)+1;try{persist()}catch(e){}
+ try{toast('Du zielst selbst – automatisches Angreifen ist aus. Nach 15 s ohne Eingabe greift dein Held wieder von allein an.','#e5b454')}catch(e){}}
+{const bt=bTarget;bTarget=function(range,meleeR){try{if(G.bot||!P)return bt.apply(this,arguments);
+  const remote=NET.role==='host'&&(P.netIn||P.netCur)&&P!==mainP();
+  /* aktives Zielen erkennen */
+  const mouseDown=remote?!!(P.netCur&&P.netCur.down):(mouseAim()&&MOUSE.down);
+  const stick=remote?!!(P.netIn&&P.netIn.a!=null):(!!P.padHeld&&P.touchAim==null&&(manNow()-(PADS.t||0))<1500);
+  if(mouseDown||stick){if(!P.manAtk){P.manAtk=1;if(P===mainP())manTip()}}
+  const tin=manIn(P);
+  if(P.manAtk&&manNow()-tin<MAN.afk){
+   if(!mouseDown&&!stick)return null; /* nicht angreifen, solange man nicht selbst zielt */
+  }
+ }catch(e){}return bt.apply(this,arguments)}}
+window.__hsMAN={MAN,manIn};
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
