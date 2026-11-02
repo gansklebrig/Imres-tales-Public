@@ -9773,7 +9773,18 @@ const ZUS_ICON = {
      die Effekte und Momente sind zugeklappt, bis man sie braucht – das merkt sich die Seite */
   let klangAuf = { kul: false, fx: false, spuren: false };
   /* aufklappbar unter dem Kulissen-Balken: einzelne Schichten über die Kulisse legen */
-  function zusBox(T) {
+  /* die laufenden Zusatzgeräusche mit ihren Reglern – ein eigenes Fenster neben der Auswahl */
+  function zusReglerInhalt(T) {
+    const sp = sprache(), an = Object.keys(zusWahl).filter(id => ZUSATZ[id]), name = id => esc(ZUSATZ[id][sp] || ZUSATZ[id].de);
+    if (!an.length) return '<p class="lw-tipp lw-zrleer">' + T.zusReglerLeer + "</p>";
+    return '<div class="lw-spuren lw-zregler"><div class="lw-zrkopf"><button type="button" class="lw-klein lw-zurueck100" data-aktion="zus100">↺ ' + T.kulMixZurueck + '</button><button type="button" class="lw-klein" data-aktion="zusalleaus" title="' + esc(T.zusAlleAus) + '">✕ ' + T.zusAlleAusKurz + "</button></div>" +
+      alleRegler(T) + an.map(id => { const v = Math.round(zusWert(id) * 100);
+        return '<div class="lw-zuszeile" data-hlq="' + id + '"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
+          '<span class="lw-zrname">' + name(id) + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("") + "</div>";
+  }
+  Object.assign(TX.de, { zusRegler: "Laufende Geräusche", zusReglerLeer: "Noch nichts dazugelegt – bei „✚ Mehr Geräusche“ ein Symbol antippen oder ins Bild ziehen." });
+  Object.assign(TX.en, { zusRegler: "Layered sounds", zusReglerLeer: "Nothing layered yet – tap a symbol in “✚ More sounds” or drag it onto the map." });
+  function zusBox(T, ohneRegler) {
     const auf = !!klangAuf.zus, sp = sprache(), an = Object.keys(zusWahl), name = id => esc(ZUSATZ[id][sp] || ZUSATZ[id].de);
     const kurz = an.length ? '<span class="lw-zkurz">' + an.map(id => zusSvg(id)).join("") + "</span>" : "";
     const alleAus = an.length ? '<button type="button" class="lw-zalle" data-aktion="zusalleaus" title="' + esc(T.zusAlleAus) + '">✕ ' + T.zusAlleAusKurz + "</button>" : "";
@@ -9789,7 +9800,7 @@ const ZUS_ICON = {
       return '<div class="lw-zuszeile"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
         '<input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("");
     const zurueck = an.length ? '<button type="button" class="lw-klein lw-zurueck100" data-aktion="zus100">↺ ' + T.kulMixZurueck + "</button>" : "";
-    return html + '<div class="lw-spuren lw-zus"><div class="lw-zgwrap">' + zusGruppenHTML(T) + '</div><p class="lw-zhinweis" aria-live="polite"></p>' + (regler ? '<div class="lw-zregler">' + zurueck + regler + "</div>" : "") +
+    return html + '<div class="lw-spuren lw-zus"><div class="lw-zgwrap">' + zusGruppenHTML(T) + '</div><p class="lw-zhinweis" aria-live="polite"></p>' + (regler && !ohneRegler ? '<div class="lw-zregler">' + zurueck + regler + "</div>" : "") +
       '<p class="lw-tipp">' + T.zusTipp(an.length, zusMax()) + "</p></div>";
   }
   /* Rückmeldung direkt unter den Symbolen – die allgemeine Statuszeile liegt im Pult oft außer Sicht */
@@ -9870,7 +9881,8 @@ const ZUS_ICON = {
       '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + sprechKnopf(T) + info("raum3d") + "</div>" +
       lebenBox(T) + "</section>";
     const spurFeld = '<section class="lw-box lw-spurfeld"><div class="lw-box-kopf"><h4>🎚 ' + T.kulSpuren + '</h4><button type="button" class="lw-klein" data-aktion="spurenpop" title="' + esc(T.spurenAlsPop) + '">⧉ ' + T.spurenAlsPop + "</button></div>" + spurenInhalt(T) + "</section>";
-    const zusFeld = '<section class="lw-box lw-zusfeld"><div class="lw-box-kopf"><h4>✚ ' + T.zusaetze + "</h4></div>" + zusBox(T) + "</section>";
+    const zusFeld = '<section class="lw-box lw-zusfeld"><div class="lw-box-kopf"><h4>✚ ' + T.zusaetze + "</h4></div>" + zusBox(T, true) + "</section>";
+    const zusReglerFeld = '<section class="lw-box lw-zusreglerfeld"><div class="lw-box-kopf"><h4>🎚 ' + T.zusRegler + (Object.keys(zusWahl).length ? ' <span class="lw-zrzahl">' + Object.keys(zusWahl).length + "</span>" : "") + "</h4></div>" + zusReglerInhalt(T) + "</section>";
     const fxFeld = '<section class="lw-box lw-fxfeld"><div class="lw-box-kopf"><h4>💥 ' + T.effekte + "</h4></div>" +
       klappe("fx", klangAuf.fx, T.fxKlappe) +
       (klangAuf.fx ? reiter("fxtab", [["fav", T.tabFav + (favFx().length ? " " + favFx().length : "")], ["effekte", T.tabEffekte], ["kampf", T.tabKampf], ["momente", T.tabMomente], ["welt", T.tabWelt], ["klassik", T.tabKlassik]], fxTab, T) +
@@ -9880,12 +9892,12 @@ const ZUS_ICON = {
         '<div class="lw-pult-gitter lw-pult-fx">' + (fxTab === "fav" ? liste : oben("s", liste)).map(f => kachel("data-sfx", f, T.sfx[f])).join("") + "</div>" : "") +
       "</section>";
     const karteFeld = '<section class="lw-box lw-kartefeld"><div class="lw-box-kopf"><h4>🗺 ' + T.einf.ueWie + "</h4></div>" +
-      (KUL_WELT[S.kulisse] ? '<div class="lw-kblock">' + karteLeiste(T) + karteHTML(T) + "</div>" : '<p class="lw-zhinweis">' + T.einf.ortWaehlen + "</p>") + "</section>";
-    return { kulisse: feld("kulisse", kulBox), karte: feld("karte", karteFeld), spuren: spurenPop ? "" : feld("spuren", spurFeld), leben: feld("leben", lebenFeld), zusaetze: feld("zusaetze", zusFeld), effekte: feld("effekte", fxFeld) };
+      (KUL_WELT[S.kulisse] ? '<div class="lw-kblock">' + karteLeiste(T) + karteHTML(T) + karteSpann(T) + "</div>" : '<p class="lw-zhinweis">' + T.einf.ortWaehlen + "</p>") + "</section>";
+    return { kulisse: feld("kulisse", kulBox), karte: feld("karte", karteFeld), spuren: spurenPop ? "" : feld("spuren", spurFeld), leben: feld("leben", lebenFeld), zusaetze: feld("zusaetze", zusFeld), zusregler: feld("zusregler", zusReglerFeld), effekte: feld("effekte", fxFeld) };
   }
   /* ---------- Anordnung des Pults am Rechner: Felder frei in Spalten verschieben, Spaltenzahl und -breiten wählbar ---------- */
-  const FELDER = ["musik", "kulisse", "karte", "spuren", "leben", "zusaetze", "effekte"];
-  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "karte", "spuren", "leben"], ["zusaetze", "effekte"]], breiten: [1, 1.15, 1], hoehen: {} });
+  const FELDER = ["musik", "kulisse", "karte", "spuren", "leben", "zusaetze", "zusregler", "effekte"];
+  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "karte", "spuren", "leben"], ["zusaetze", "zusregler", "effekte"]], breiten: [1, 1.15, 1], hoehen: {} });
   let anordnung = Object.assign(ANORDNUNG_START(), { hoehen: {} });
   function anordnungPruefen(a) {
     const n = Math.max(1, Math.min(5, (a && a.spalten && a.spalten.length) || 3)), sp = [], gesehen = new Set();
@@ -9893,7 +9905,8 @@ const ZUS_ICON = {
     /* neu hinzugekommene Felder: die Spuren gehören unter die Kulisse, alles andere ans Ende */
     FELDER.forEach(id => { if (gesehen.has(id)) return;
       const k = (id === "spuren" || id === "karte") && sp.find(c => c.includes("kulisse"));
-      if (k) k.splice(k.indexOf("kulisse") + 1, 0, id); else sp[sp.length - 1].push(id); });
+      const z = id === "zusregler" && sp.find(c => c.includes("zusaetze"));
+      if (k) k.splice(k.indexOf("kulisse") + 1, 0, id); else if (z) z.splice(z.indexOf("zusaetze") + 1, 0, id); else sp[sp.length - 1].push(id); });
     const br = sp.map((_, i) => { const w = a.breiten && +a.breiten[i]; return w > .15 && w < 8 ? w : 1; });
     const ho = {}; if (a.hoehen && typeof a.hoehen === "object") FELDER.forEach(id => { const h = +a.hoehen[id]; if (h >= 80 && h <= 4000) ho[id] = Math.round(h); });
     return { spalten: sp, breiten: br, hoehen: ho };
@@ -9904,8 +9917,8 @@ const ZUS_ICON = {
     ? { hoeheF: "Drag: taller or shorter", breiteF: "Drag: wider or narrower", hoehe: "Drag: make this panel taller or shorter · double-click: automatic height", frei: "Free", zuSpalten: "Columns", freiT: "Place every panel freely and resize it – or back to columns", freiTipp: "Drag panels by ⠿ anywhere · bottom edge: height · right edge: width · corner: both", groesse: "Drag: make this panel bigger or smaller", griff: "Drag to move this panel", spalten: n => n + (n === 1 ? " column" : " columns"), mehr: "One more column", weniger: "One column less", zurueck: "Default layout", tipp: "Drag panels by ⠿ · gap between columns: width · lower edge of a panel: height", leer: "Drag a panel here" }
     : { hoeheF: "Ziehen: höher oder niedriger", breiteF: "Ziehen: breiter oder schmaler", hoehe: "Ziehen: Feld höher oder niedriger · Doppelklick: Höhe wieder automatisch", frei: "Frei", zuSpalten: "Spalten", freiT: "Jedes Feld frei platzieren und in der Größe ziehen – oder zurück zu Spalten", freiTipp: "Felder am ⠿ beliebig verschieben · unterer Rand: Höhe · rechter Rand: Breite · Ecke: beides", groesse: "Ziehen: Feld größer oder kleiner", griff: "Ziehen, um dieses Feld zu verschieben", spalten: n => n + (n === 1 ? " Spalte" : " Spalten"), mehr: "Eine Spalte mehr", weniger: "Eine Spalte weniger", zurueck: "Standard-Anordnung", tipp: "Felder am ⠿ ziehen · Lücke zwischen Spalten: Breite · unterer Rand eines Feldes: Höhe", leer: "Feld hierher ziehen" };
   /* Feld-Hülle: Kennung und Griff in die Kopfzeile */
-  const ZWECK = { de: { karte: "Dich und die Geräusche herumziehen – Abstand und Räume verändern den Klang.", musik: "Läuft ohne Ende weiter – tippe an, was gerade am Tisch passiert.", kulisse: "Geräusche des Ortes, sie laufen unter der Musik weiter.", spuren: "Jede Geräuschschicht des Ortes einzeln lauter oder leiser.", leben: "Macht den Ort lebendig: Überraschungen, Stille, Wetter, Tageszeit.", zusaetze: "Einzelne Geräusche zusätzlich dazulegen, z. B. Regen über die Taverne.", effekte: "Für einen Moment am Tisch: ein Schwerthieb, ein Würfelwurf …" },
-    en: { karte: "Drag yourself and the sounds around – distance and rooms change the sound.", musik: "Keeps playing – tap whatever is happening at the table.", kulisse: "Sounds of the place, they keep running under the music.", spuren: "Each sound layer of the place louder or quieter.", leben: "Brings the place to life: surprises, silence, weather, time of day.", zusaetze: "Layer single sounds on top, e.g. rain over the tavern.", effekte: "For a moment at the table: a sword strike, a dice roll …" } };
+  const ZWECK = { de: { karte: "Dich und die Geräusche herumziehen – Abstand und Räume verändern den Klang.", musik: "Läuft ohne Ende weiter – tippe an, was gerade am Tisch passiert.", kulisse: "Geräusche des Ortes, sie laufen unter der Musik weiter.", spuren: "Jede Geräuschschicht des Ortes einzeln lauter oder leiser.", leben: "Macht den Ort lebendig: Überraschungen, Stille, Wetter, Tageszeit.", zusaetze: "Hinzufügen: antippen oder ins Bild „Wie klingt es dort?“ ziehen – z. B. Regen über die Taverne.", zusregler: "Was gerade dazuläuft: Lautstärke je Geräusch, ✕ schaltet es aus.", effekte: "Für einen Moment am Tisch: ein Schwerthieb, ein Würfelwurf …" },
+    en: { karte: "Drag yourself and the sounds around – distance and rooms change the sound.", musik: "Keeps playing – tap whatever is happening at the table.", kulisse: "Sounds of the place, they keep running under the music.", spuren: "Each sound layer of the place louder or quieter.", leben: "Brings the place to life: surprises, silence, weather, time of day.", zusaetze: "Add: tap or drag onto the “How does it sound there?” map – e.g. rain over the tavern.", zusregler: "What is layered right now: volume per sound, ✕ switches it off.", effekte: "For a moment at the table: a sword strike, a dice roll …" } };
   function feld(id, html) {
     const zw = (ZWECK[sprache()] || ZWECK.de)[id];
     if (zw) html = html.replace("</h4>", "</h4>" + '<p class="lw-zweck lw-zweck-kopf">' + zw + "</p>");
@@ -9923,7 +9936,7 @@ const ZUS_ICON = {
     /* aus den Spalten ableiten: Breite nach Spaltenanteil, Felder untereinander */
     const sum = anordnung.breiten.reduce((a, b) => a + b, 0); let x = 0; const L = {};
     anordnung.spalten.forEach((ids, i) => { const w = i === anordnung.spalten.length - 1 ? 24 - x : Math.max(5, Math.round(24 * anordnung.breiten[i] / sum)); let y = 0;
-      ids.forEach(id => { const h = id === "musik" ? 20 : id === "zusaetze" ? 16 : 12; L[id] = { x, y, w, h }; y += h; }); x += w; });
+      ids.forEach(id => { const h = id === "musik" ? 20 : id === "zusaetze" ? 14 : id === "zusregler" ? 9 : 12; L[id] = { x, y, w, h }; y += h; }); x += w; });
     return L;
   }
   function kOrdnen(festId) {
@@ -10262,7 +10275,9 @@ const ZUS_ICON = {
       '<div class="lw-ochips">' + vorschlag.map(chip).join("") + "</div>" +
       '<label class="lw-owahl"><span>' + E.alleOrteL + "</span>" + kulisseWahl(T) + "</label>" + szenenHTML(T);
   }
-  const ortKarteHTML = (T, ohneUe) => (ohneUe ? "" : eUe(T.einf.ueWie)) + (KUL_WELT[S.kulisse] ? karteLeiste(T) + karteHTML(T) : '<p class="lw-zhinweis">' + T.einf.ortWaehlen + "</p>");
+  /* Spannung gleich unter der Karte: wie viel dort gerade los ist, ohne nach oben zu müssen */
+  const karteSpann = T => '<div class="lw-kspann">' + spannRegler(T) + "</div>";
+  const ortKarteHTML = (T, ohneUe) => (ohneUe ? "" : eUe(T.einf.ueWie)) + (KUL_WELT[S.kulisse] ? karteLeiste(T) + karteHTML(T) + karteSpann(T) : '<p class="lw-zhinweis">' + T.einf.ortWaehlen + "</p>");
   function einfachOrt(T) {
     const E = T.einf;
     return '<div class="lw-eortkopf lw-eort3 lw-eort4' + (karteGross ? " kino" : "") + '">' +
@@ -10740,7 +10755,7 @@ const ZUS_ICON = {
     if (einfach && S.pult && !hoerer && einfachNeu()) return;
     const T = t();
     if (welche === "musik") { const alt = root.querySelector('[data-feld="musik"]'); if (alt) alt.outerHTML = feld("musik", musikBox(T, !S.pult && !hoerer)); }
-    else { const f = klangBox(T); ["kulisse", "spuren", "leben", "zusaetze", "effekte"].forEach(id => { const alt = root.querySelector('[data-feld="' + id + '"]'); if (alt) alt.outerHTML = f[id]; }); }
+    else { const f = klangBox(T); ["kulisse", "spuren", "leben", "zusaetze", "zusregler", "effekte"].forEach(id => { const alt = root.querySelector('[data-feld="' + id + '"]'); if (alt) alt.outerHTML = f[id]; }); }
     klassikKnoepfe(); spracheOrt();
   }
   /* ---------- Sprachsteuerung (nur am Rechner): Taste halten, Stichwort sagen – Kulisse, Zusatz, Stimmung oder Effekt startet ---------- */
@@ -11994,8 +12009,8 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-ausklang { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; padding: .55rem 1rem; cursor: pointer; }
 .lw-ausklang:hover:not(:disabled) { border-color: var(--ember); color: var(--ember); }
 .lw-ausklang:disabled { opacity: .5; cursor: default; }
-.lw-kulknopf { border: 1px solid #6a9fb5; background: none; color: var(--vellum); font: inherit; padding: .55rem 1rem; cursor: pointer; min-width: 5.2rem; }
-.lw-kulknopf.laeuft { background: rgba(106,159,181,.22); }
+.lw-kulknopf { border: 1px solid #d9a63a; background: none; color: var(--vellum); font: inherit; padding: .55rem 1rem; cursor: pointer; min-width: 5.2rem; }
+.lw-kulknopf.laeuft { background: rgba(217,166,58,.22); }
 .lw-kulknopf[hidden] { display: none; }
 .lw-feld { display: grid; gap: .2rem; font-size: .78rem; letter-spacing: .06em; color: var(--ash); }
 .lw-feld b { color: var(--vellum); font-weight: 600; }
@@ -12278,8 +12293,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .ll-play.laeuft { background: none; color: var(--ember); }
 .ll-aus { width: 2.3rem; height: 2.3rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--vellum); }
 .ll-aus[hidden] { display: none; }
-.ll-kulk { height: 2.3rem; flex: 0 0 auto; border-radius: 1.2rem; border: 1px solid #6a9fb5; background: none; color: var(--vellum); padding: 0 .55rem; font-size: .85rem; white-space: nowrap; }
-.ll-kulk.laeuft { background: rgba(106,159,181,.22); }
+.ll-kulk { height: 2.3rem; flex: 0 0 auto; border-radius: 1.2rem; border: 1px solid #d9a63a; background: none; color: var(--vellum); padding: 0 .55rem; font-size: .85rem; white-space: nowrap; }
+.ll-kulk.laeuft { background: rgba(217,166,58,.22); }
 .ll-kulk[hidden] { display: none; }
 .ll-rec { height: 2.3rem; flex: 0 0 auto; border-radius: 1.2rem; border: 1px solid #c0392b; background: rgba(192,57,43,.25); color: var(--vellum); padding: 0 .55rem; font-size: .85rem; white-space: nowrap; }
 .ll-rec[hidden] { display: none; }
@@ -12327,10 +12342,21 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kleinregler { display: flex; align-items: center; gap: .6rem; font-size: .82rem; color: var(--ash); }
 .lw-spurklappe { margin: -.15rem 0 .1rem; font-size: .78rem; }
 .lw-spuren { display: grid; gap: .3rem; padding: .5rem .6rem; margin-bottom: .2rem; border: 1px solid var(--line); background: rgba(235,226,204,.03); }
+/* Geräusche: Gold mit Edelstein-Schliff – passend zu Barradin (statt Blau) */
+.lw-zknopf[aria-pressed="true"], .lw-zknopf.an { background: linear-gradient(150deg, rgba(255,226,140,.34) 0%, rgba(217,166,58,.22) 42%, rgba(120,62,20,.3) 100%) !important; border-color: #e8b84a !important;
+  box-shadow: inset 0 1px 0 rgba(255,240,200,.45), inset 0 -1px 0 rgba(90,40,10,.5), 0 0 9px rgba(232,170,60,.32); color: #fff0c8 !important; }
+.lw-kquelle { background: radial-gradient(circle at 35% 30%, rgba(90,62,30,.95), rgba(26,18,14,.92) 70%) !important; border-color: rgba(232,190,90,.85) !important; color: #fbe6b4 !important; }
+.lw-kquelle.hl, .lw-kzeile.hl, .lw-zuszeile.hl { box-shadow: 0 0 0 3px rgba(255,236,190,.85) !important; }
+.lw-zusfeld { border-top: 3px dashed rgba(217,166,58,.55) !important; }
+.lw-zusreglerfeld { border-top: 3px solid #d9a63a !important; }
+.lw-zusreglerfeld .lw-zuszeile { display: grid; grid-template-columns: auto minmax(5rem, 8rem) 1fr 3.2rem; align-items: center; gap: .45rem; padding: .15rem .25rem; border-radius: 6px; }
+.lw-zusreglerfeld .lw-zrname { font-size: .82rem; color: var(--vellum); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lw-zrkopf { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .4rem; }
+.lw-zrzahl { display: inline-grid; place-items: center; min-width: 1.3rem; height: 1.3rem; padding: 0 .3rem; margin-left: .3rem; border-radius: .7rem; background: linear-gradient(150deg, #f2cf6a, #a8701e); color: #1a1008; font-size: .72rem; font-weight: 700; vertical-align: middle; }
 .lw-allespur, .lw-kzalle { border: 1px solid rgba(224,160,70,.35); border-radius: 8px; padding: .3rem .45rem; margin: .1rem 0 .45rem; background: rgba(224,160,70,.06); }
 .lw-allespur > span, .lw-kzalle .lw-kzname, .lw-kzalle .lw-kzsym { color: var(--ember); font-weight: 600; }
 .lw-spurzeile { display: grid; grid-template-columns: minmax(6.5rem, 9rem) 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; color: var(--vellum); }
-.lw-spurzeile input { width: 100%; accent-color: #6a9fb5; }
+.lw-spurzeile input { width: 100%; accent-color: #d9a63a; }
 .lw-spurzeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
 .lw-leben .lw-spurzeile { grid-template-columns: 5.2rem 1fr 6.8rem; }
 .lw-leben .lw-spurzeile input { accent-color: #b5566a; }
@@ -12344,7 +12370,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-lchip[aria-pressed="true"] { border-color: var(--ember); color: var(--ember); background: rgba(224,160,70,.15); }
 .lw-schalter[data-aktion="stille"][aria-pressed="true"] { border-color: var(--ember); color: var(--ember); }
 .lw-3d { font-size: .8rem; }
-.lw-3d[aria-pressed="true"] { border-color: #6a9fb5; background: rgba(106,159,181,.25); color: #cfe6ef; }
+.lw-3d[aria-pressed="true"] { border-color: #d9a63a; background: rgba(217,166,58,.25); color: #fbe8b8; }
 .lw-zkopf { display: flex; gap: .4rem; align-items: stretch; margin: .3rem 0 .1rem; }
 .lw-zkopf .lw-klappe { flex: 1; min-width: 0; margin: 0; }
 .lw-zalle { flex: none; border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .8rem; padding: 0 .7rem; border-radius: 8px; cursor: pointer; white-space: nowrap; }
@@ -12353,7 +12379,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ztrenn { width: .45rem; }
 .lw-zknopf { width: 2.6rem; height: 2.6rem; padding: .3rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); background: rgba(255,255,255,.02); color: var(--vellum); cursor: pointer; border-radius: 6px; transition: background .15s, border-color .15s, color .15s; }
 .lw-zknopf:hover { border-color: var(--ember); color: var(--ember); }
-.lw-zknopf[aria-pressed="true"] { border-color: #6a9fb5; background: rgba(106,159,181,.25); color: #cfe6ef; }
+.lw-zknopf[aria-pressed="true"] { border-color: #d9a63a; background: rgba(217,166,58,.25); color: #fbe8b8; }
 .lw-zknopf.drin { opacity: .3; cursor: default; }
 .lw-zknopf.drin:hover { border-color: var(--line); color: var(--vellum); }
 .lw-zico { width: 1.25rem; height: 1.25rem; vertical-align: -.25rem; flex: none; }
@@ -12363,7 +12389,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-zhinweis.warn { color: var(--ember); }
 .lw-zregler { display: grid; gap: .3rem; margin-top: .5rem; }
 .lw-zuszeile { display: grid; grid-template-columns: 2.6rem 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; }
-.lw-zuszeile input { width: 100%; accent-color: #6a9fb5; }
+.lw-zuszeile input { width: 100%; accent-color: #d9a63a; }
 .lw-zuszeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
 @media (max-width: 640px) { .lw-zknopf { width: 2.75rem; height: 2.75rem; } .lw-ztrenn { width: .2rem; } }
 .lw-zus .lw-tipp { margin: .2rem 0 0; font-size: .74rem; color: var(--ash); }
@@ -12397,8 +12423,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-moment.lw-haelt { background-image: linear-gradient(90deg, rgba(240,200,90,.4) 0 50%, transparent 50% 100%); background-size: 200% 100%; background-position: 100% 0; animation: lwHalten 2s linear forwards; }
 .lw-ehg { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 .lw-ehg .lw-kleinregler { flex: 1 1 auto; min-width: 0; }
-.lw-ehgaus { flex: 0 0 auto; border: 1px solid #6a9fb5; background: rgba(106,159,181,.16); color: var(--vellum); font: inherit; font-size: .82rem; font-weight: 600; padding: .3rem .65rem; border-radius: 8px; cursor: pointer; white-space: nowrap; }
-.lw-ehgaus:hover { background: rgba(106,159,181,.3); }
+.lw-ehgaus { flex: 0 0 auto; border: 1px solid #d9a63a; background: rgba(217,166,58,.16); color: var(--vellum); font: inherit; font-size: .82rem; font-weight: 600; padding: .3rem .65rem; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.lw-ehgaus:hover { background: rgba(217,166,58,.3); }
 .lw-ehgaus.aus { border-color: var(--ember); background: rgba(224,160,70,.18); }
 .lw-ehgaus[hidden] { display: none; }
 .lw-eortkopf { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .6rem 1rem; margin: .2rem 0 .4rem; }
@@ -12445,14 +12471,14 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-karte .lw-kmuell { width: clamp(20px, 4.4cqw, 44px); height: clamp(20px, 4.4cqw, 44px); font-size: clamp(11px, 2.4cqw, 22px); left: clamp(3px, .7cqw, .4rem); bottom: clamp(3px, .7cqw, .4rem); }
 .lw-karte .lw-kzone span { font-size: clamp(9px, 1.5cqw, 14px); }
 .lw-karte .lw-kblitz { font-size: clamp(16px, 3.6cqw, 34px); }
-.lw-kquelle { width: 18px; height: 18px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(20,16,26,.82); border: 1px solid rgba(160,200,230,.65); color: #cfe0f0; display: grid; place-items: center; box-shadow: 0 0 6px rgba(140,190,230,.35); }
+.lw-kquelle { width: 18px; height: 18px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(20,16,26,.82); border: 1px solid rgba(232,196,110,.65); color: #f6e2b0; display: grid; place-items: center; box-shadow: 0 0 6px rgba(240,190,90,.35); }
 .lw-karte.gross .lw-kquelle { width: 28px; height: 28px; }
 .lw-kquelle .lw-zico { width: 72%; height: 72%; }
 .lw-kfigur.zieht, .lw-kquelle.zieht { transition: none; cursor: grabbing; z-index: 4; }
 .lw-kfigur.zieht { transform: translate(-50%, -100%) scale(1.2); }
 .lw-kquelle.zieht { transform: translate(-50%, -50%) scale(1.2); border-color: var(--ember); }
 .lw-ksym { position: absolute; top: .2rem; left: .3rem; display: flex; gap: .15rem; z-index: 1; }
-.lw-ksym span { display: inline-flex; color: #cfe0f0; opacity: .85; }
+.lw-ksym span { display: inline-flex; color: #f6e2b0; opacity: .85; }
 .lw-ksym .lw-zico { width: 12px; height: 12px; }
 .lw-karte.gross .lw-ksym .lw-zico { width: 16px; height: 16px; }
 .lw-kbild .k-regen { animation: lwKRegen .6s linear infinite; }
@@ -12475,7 +12501,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kmuell.ziel { opacity: 1; transform: scale(1.35); background: rgba(160,50,40,.6); border-color: #e07060; }
 .lw-kquelle.weg { opacity: .45; border-color: #e07060; }
 .lw-kquelle { animation: lwKAtmen 3.2s ease-in-out infinite; }
-@keyframes lwKAtmen { 0%, 100% { box-shadow: 0 0 4px rgba(140,190,230,.25); } 50% { box-shadow: 0 0 10px rgba(140,190,230,.6); } }
+@keyframes lwKAtmen { 0%, 100% { box-shadow: 0 0 4px rgba(240,190,90,.25); } 50% { box-shadow: 0 0 10px rgba(240,190,90,.6); } }
 .lw-kquelle.puls { animation: lwKPuls .7s ease-out; }
 @keyframes lwKPuls { 0% { box-shadow: 0 0 0 0 rgba(240,200,90,.9); transform: translate(-50%, -50%) scale(1.25); border-color: #f0c85a; } 100% { box-shadow: 0 0 0 14px rgba(240,200,90,0); transform: translate(-50%, -50%) scale(1); } }
 .lw-szenen { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; margin-top: .4rem; }
@@ -12493,6 +12519,9 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-espann input::-webkit-slider-thumb { -webkit-appearance: none; width: 1.05rem; height: 1.05rem; border-radius: 50%; background: var(--vellum); border: 2px solid #201820; cursor: pointer; }
 .lw-espann input::-moz-range-thumb { width: 1rem; height: 1rem; border-radius: 50%; background: var(--vellum); border: 2px solid #201820; cursor: pointer; }
 .lw-espann .lw-sp-g { font-size: .9rem; }
+.lw-kspann { align-self: stretch; width: 100%; flex: 0 0 auto; }
+.lw-kspann .lw-kleinregler { max-width: none; width: 100%; margin: 0; }
+.lw-kspann .lw-kleinregler input { max-width: none; }
 .lw-espann b { flex: 0 0 auto !important; min-width: 6.5rem; text-align: left !important; }
 .lw-eregler { grid-template-columns: 1fr 1fr; }
 .lw-eregler .lw-espann { grid-column: 1 / -1; }
@@ -12508,15 +12537,15 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kpalette { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; justify-content: flex-end; max-width: 100%; }
 .lw-kblock.gross .lw-kpalette { justify-content: center; }
 .lw-kpalette > span { font-size: .9rem; color: var(--ember); margin-right: .1rem; }
-.lw-kpal { width: 1.9rem; height: 1.9rem; padding: 0; display: grid; place-items: center; border: 1px dashed rgba(160,200,230,.45); background: rgba(20,16,26,.6); color: #cfe0f0; border-radius: 50%; cursor: grab; touch-action: none; }
+.lw-kpal { width: 1.9rem; height: 1.9rem; padding: 0; display: grid; place-items: center; border: 1px dashed rgba(232,196,110,.45); background: rgba(20,16,26,.6); color: #f6e2b0; border-radius: 50%; cursor: grab; touch-action: none; }
 .lw-kpal:hover { border-color: var(--ember); color: var(--vellum); }
 .lw-kpal .lw-zico { width: 60%; height: 60%; }
 .lw-karte.lw-kabwurf { outline: 2px dashed var(--ember); outline-offset: -2px; }
 .lw-zknopf[data-zusatz] { touch-action: pan-y; }
-.lw-kgeist { position: fixed; z-index: 10050; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; display: grid; place-items: center; background: rgba(20,16,26,.9); border: 2px solid var(--ember); color: #cfe0f0; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.lw-kgeist { position: fixed; z-index: 10050; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; display: grid; place-items: center; background: rgba(20,16,26,.9); border: 2px solid var(--ember); color: #f6e2b0; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
 .lw-kgeist .lw-zico { width: 60%; height: 60%; }
 .lw-kwege { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
-.lw-kwege polyline { fill: none; stroke: rgba(160,200,230,.55); stroke-width: .6; stroke-dasharray: 1.4 1.4; vector-effect: non-scaling-stroke; }
+.lw-kwege polyline { fill: none; stroke: rgba(232,196,110,.55); stroke-width: .6; stroke-dasharray: 1.4 1.4; vector-effect: non-scaling-stroke; }
 .lw-kmenu { position: absolute; z-index: 6; display: flex; flex-direction: column; gap: .2rem; padding: .35rem; background: rgba(16,12,20,.95); border: 1px solid var(--ember); border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.6); min-width: 9rem; }
 .lw-kmenu b { font-size: .72rem; color: var(--ember); padding: 0 .2rem; }
 .lw-kmenu button { font: inherit; font-size: .75rem; text-align: left; background: rgba(255,255,255,.04); border: 1px solid var(--line); color: var(--vellum); border-radius: 6px; padding: .2rem .4rem; cursor: pointer; }
@@ -12551,13 +12580,13 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-klingtliste h5 { display: flex; justify-content: space-between; align-items: center; margin: .25rem 0 .2rem; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ash); font-weight: 600; }
 .lw-klingtliste h5 .lw-klein { font-size: .7rem; padding: .1rem .35rem; text-transform: none; letter-spacing: 0; }
 .lw-kzeile { display: grid; grid-template-columns: 1.3rem minmax(0, 1fr) auto auto; grid-template-rows: auto auto; align-items: center; gap: 0 .35rem; padding: .2rem .25rem; border-radius: 6px; }
-.lw-kzeile .lw-kzsym { grid-row: 1 / 3; display: grid; place-items: center; color: #cfe0f0; }
+.lw-kzeile .lw-kzsym { grid-row: 1 / 3; display: grid; place-items: center; color: #f6e2b0; }
 .lw-kzeile[data-hls] .lw-kzsym { color: #f0d9a0; }
 .lw-kzeile .lw-kzsym .lw-zico { width: 1.1rem; height: 1.1rem; }
 .lw-kzpunkt { width: .4rem; height: .4rem; border-radius: 50%; background: var(--line); display: block; }
 .lw-kzname { font-size: .8rem; color: var(--vellum); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-kzeile b { font-size: .72rem; color: var(--ash); font-weight: 500; text-align: right; }
-.lw-kzeile input { grid-column: 2 / 4; grid-row: 2; width: 100%; min-width: 0; }
+.lw-kzeile input { grid-column: 2 / 4; grid-row: 2; width: 100%; min-width: 0; accent-color: #d9a63a; }
 .lw-kzweg { grid-column: 4; grid-row: 1 / 3; border: 0; background: none; color: var(--ash); cursor: pointer; font-size: .8rem; padding: 0 .2rem; }
 .lw-kzweg:hover { color: #e07060; }
 .lw-kzeile.hl { background: rgba(224,160,70,.14); }
@@ -12711,7 +12740,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kartefeld .lw-karte { width: 100% !important; margin: 0 !important; }
 .lw-kfeld > .lw-kartefeld { container-type: size !important; display: flex; flex-direction: column; }
 .lw-kfeld > .lw-kartefeld .lw-kblock { flex: 1 1 auto; min-height: 0; align-items: center; }
-.lw-kfeld > .lw-kartefeld .lw-karte { width: min(100%, calc((100cqh - 6.5rem) * 16 / 7)) !important; }
+.lw-kfeld > .lw-kartefeld .lw-karte { width: min(100%, calc((100cqh - 9rem) * 16 / 7)) !important; }
 /* Sprachsteuerung: eingeklappt nur eine Zeile */
 .lw-sprachklappe { margin: .2rem 0 .5rem; border: 1px solid var(--line); border-radius: 8px; }
 .lw-sprachklappe > summary { cursor: pointer; padding: .3rem .6rem; font-size: .8rem; color: var(--ash); list-style: none; }
@@ -12794,7 +12823,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-f-karte .lw-fkoerper { padding: .35rem .45rem; }
 .lw-fkoerper .lw-kblock { display: flex; flex-direction: column; align-items: center; gap: .3rem; height: 100%; }
 .lw-fkoerper .lw-kblock .lw-kleiste { justify-content: center; }
-.lw-fkoerper .lw-kblock .lw-karte { flex: 0 0 auto; width: min(100%, calc((100cqh - 3rem) * 16 / 7)) !important; margin: 0 auto !important; }
+.lw-fkoerper .lw-kblock .lw-karte { flex: 0 0 auto; width: min(100%, calc((100cqh - 5.5rem) * 16 / 7)) !important; margin: 0 auto !important; }
 .lw-fkoerper [data-kgross] { display: none !important; }
 .lw-fkoerper .lw-zgruppen { gap: .45rem .7rem; }
 /* Steuerzeile in den Reitern: Spielen + Musik bzw. Hintergrund an/aus + Lautstärke – das Wichtigste dort, wo man gerade ist */
