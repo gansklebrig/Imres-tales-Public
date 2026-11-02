@@ -95,11 +95,7 @@
     nsc: () => '<span class="k-l k-wand" style="--d:0"></span>' + kFoto("portrait-koenig.jpg", "k-n1", 1) + kFoto("ploopploopeen.jpg", "k-n2", 1.3) + kFoto("portrait-riese.jpg", "k-n3", 1.1) +
       kImg("gundren-frei.webp", "k-held k-n-gundren", 2) + kImg("buergermeister-frei.webp", "k-held k-n-buerger", 2.6),
     /* Skizzenbuch: Tuschezeichnungen auf Pergament, eine Kreatur bricht heraus, Krallenspuren */
-    bestiarium: () => '<span class="k-l k-hoehle" style="--d:0"></span>' +
-      kImg("themberchaud-frei.webp", "k-mon k-m-drache", .4) + kImg("demogorgon-frei.webp", "k-mon k-m-demo", .7) + '<span class="k-l k-nebel" style="--d:.8"></span>' +
-      kImg("riese-frei.webp", "k-mon k-m-riese", 1.2) + kImg("chasme-frei.webp", "k-mon k-m-chasme", 1.6) +
-      '<span class="k-l k-nebel k-nebel2" style="--d:1.8"></span>' +
-      kImg("bugbear-frei.webp", "k-mon k-m-bugbear", 2.2) + kImg("kuo-toa-frei.webp", "k-mon k-m-kuotoa", 2.6) + kImg("blight-frei.webp", "k-mon k-m-blight", 3),
+    bestiarium: () => kImg("bestiarium-kachel.webp?v=1", "k-grund k-best", .5) + '<span class="k-l k-nebel k-nebel2" style="--d:1.4"></span>',
     /* die Spiele als aufgefächertes Blatt Karten */
     taverne: b => kImg(b.indexOf("vorschau/") === 0 ? b : kKlein(b), "k-grund k-dunkel", 0) +
       ["heldensturm", "jagd", "hort", "nacht", "kehle"].map((n, i) => kImg("vorschau/plakat-" + n + ".webp", "k-plakat", 1 + i * .35, "--n:" + (i - 2))).join(""),
@@ -515,6 +511,8 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .kachel .k-collage .k-karte { filter: sepia(.8) saturate(.9) brightness(.55) contrast(1.1); }
 .kachel .k-collage .k-dunkel { filter: saturate(.7) brightness(.32) blur(1px); }
 .kachel:hover .k-collage .k-grund { filter: saturate(1) brightness(.6); }
+.kachel .k-collage .k-best { filter: brightness(.82) saturate(.95); transform: scale(1.02); }
+.kachel:hover .k-collage .k-best, .kachel:focus-visible .k-collage .k-best { filter: brightness(.95) saturate(1.05); }
 /* Fotos: Pergamentrand, Klebestreifen */
 .k-foto { padding: 3.5% 3.5% 9%; background: #e8dcc0; box-shadow: 0 6px 18px rgba(0,0,0,.6); }
 .k-foto img { display: block; width: 100%; height: 100%; object-fit: cover; filter: sepia(.25) saturate(.85); }
