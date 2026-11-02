@@ -67,13 +67,13 @@
   const rolleVon = (s, p) => (s.rollen && s.rollen[TEILE.indexOf(p)]) || ROLLE_ALT[p] || "s";
   const ABLAEUFE = ["A", "AB", "AABB", "AABA", "ABAB", "AAAB", "ABC", "ABAC", "AABC", "ABCB", "AABACA", "AABBCC", "ABCD", "ABCABCD", "ABACABAD", "AABBCCDD"];
   /* Barradins Instrumente für die Melodie-Spur */
-  const INSTRUMENTE = ["laute", "harfe", "mandoline", "fidel", "drehleier", "schalmei", "dudelsack", "glocken", "illusion", "hackbrett", "cembalo", "akkordeon", "sitar", "handpan"];
+  const INSTRUMENTE = ["laute", "harfe", "mandoline", "fidel", "drehleier", "schalmei", "dudelsack", "glocken", "illusion", "hackbrett", "cembalo", "akkordeon", "sitar", "handpan", "psalter", "zither", "balafon"];
   const GEHALTEN = { fidel: 1, drehleier: 1, schalmei: 1, dudelsack: 1, illusion: 1, akkordeon: 1 };
   /* Die Instrumente der übrigen Band */
   const BAND = {
-    trommel: ["trommel", "pauke", "bodhran", "tamburin", "stoecke", "taiko", "marsch", "bongos", "conga"],
+    trommel: ["trommel", "pauke", "bodhran", "tamburin", "stoecke", "taiko", "marsch", "bongos", "conga", "darbuka"],
     floete: ["floete", "panfloete", "okarina", "gesang", "horn", "klarinette", "oboe", "blockfloete", "piccolo", "pfeife", "shakuhachi", "englischhorn", "oohchor", "bratsche"],
-    ketten: ["ketten", "klatschen", "schnipsen", "rassel", "stampfen", "loeffel", "krug", "rahmentrommel", "kriegstrommel", "schellen", "triangel", "schlitztrommel"]
+    ketten: ["ketten", "klatschen", "schnipsen", "rassel", "stampfen", "loeffel", "krug", "rahmentrommel", "kriegstrommel", "schellen", "triangel", "schlitztrommel", "windspiel"]
   };
   /* Hallräume: Nachhallzeit, Abklingkurve, Vorverzögerung, Helligkeit und frühe Reflexionen der Wände */
   const RAEUME = {
@@ -120,8 +120,8 @@
   const ALLE_FX = EFFEKTE.concat(KAMPF_FX, MOMENTE, KLASSIKER, COVER_LISTE, WELT_FX);
   const BAND_START = () => ({ trommel: "trommel", floete: "floete", ketten: "ketten" });
   const SYMBOL = {
-    trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢", taiko: "🥁", marsch: "🥁", bongos: "🪘", conga: "🪘" },
-    ketten: { ketten: "⛓", klatschen: "👏", schnipsen: "👌", rassel: "🥚", stampfen: "🦶", loeffel: "🥄", krug: "🍺", rahmentrommel: "🪘", kriegstrommel: "🥁", schellen: "🔔", triangel: "🔺", schlitztrommel: "🪵" }
+    trommel: { trommel: "🥁", pauke: "🥁", bodhran: "🥁", tamburin: "🥁", stoecke: "🥢", taiko: "🥁", marsch: "🥁", bongos: "🪘", conga: "🪘", darbuka: "🪘" },
+    ketten: { ketten: "⛓", klatschen: "👏", schnipsen: "👌", rassel: "🥚", stampfen: "🦶", loeffel: "🥄", krug: "🍺", rahmentrommel: "🪘", kriegstrommel: "🥁", schellen: "🔔", triangel: "🔺", schlitztrommel: "🪵", windspiel: "🎐" }
   };
 
   /* ---------- Texte ---------- */
@@ -134,12 +134,12 @@
       wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
       spuren: { klopf: "Klopfen", schelle: "Schellen", bass: "Bass", melodie: "Laute", trommel: "Trommel", floete: "Flöte", ketten: "Ketten", rex: "Rex" },
       rexZeilen: ["Wuff", "Heulen", "Knurren"], rexLaut: ["Wuff!", "Auuuuu!", "Grrrr …"],
-      instrument: "Instrument", instrumente: { laute: "Laute", harfe: "Harfe", mandoline: "Mandoline", fidel: "Fidel", drehleier: "Drehleier", schalmei: "Schalmei", dudelsack: "Dudelsack", glocken: "Glockenspiel", illusion: "Flöte der Illusionen", hackbrett: "Hackbrett", cembalo: "Cembalo", akkordeon: "Akkordeon", sitar: "Sitar", handpan: "Handpan" },
+      instrument: "Instrument", instrumente: { laute: "Laute", harfe: "Harfe", mandoline: "Mandoline", fidel: "Fidel", drehleier: "Drehleier", schalmei: "Schalmei", dudelsack: "Dudelsack", glocken: "Glockenspiel", illusion: "Flöte der Illusionen", hackbrett: "Hackbrett", cembalo: "Cembalo", akkordeon: "Akkordeon", sitar: "Sitar", handpan: "Handpan", psalter: "Psalter", zither: "Zither", balafon: "Balafon" },
       band: {
-        trommel: { trommel: "Landsknechttrommel", pauke: "Kesselpauke", bodhran: "Bodhrán", tamburin: "Schellentrommel", stoecke: "Holzstöcke", taiko: "Taiko-Trommel", marsch: "Marschtrommel", bongos: "Bongos", conga: "Conga" },
+        trommel: { trommel: "Landsknechttrommel", pauke: "Kesselpauke", bodhran: "Bodhrán", tamburin: "Schellentrommel", stoecke: "Holzstöcke", taiko: "Taiko-Trommel", marsch: "Marschtrommel", bongos: "Bongos", conga: "Conga", darbuka: "Darbuka" },
         floete: { floete: "Holzflöte", panfloete: "Panflöte", okarina: "Okarina", gesang: "Gesang", horn: "Hirtenhorn", klarinette: "Klarinette", oboe: "Oboe",
           blockfloete: "Blockflöte", piccolo: "Piccoloflöte", pfeife: "Blechpfeife", shakuhachi: "Shakuhachi", englischhorn: "Englischhorn", oohchor: "Chor", bratsche: "Bratsche" },
-        ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch", rahmentrommel: "Rahmentrommel", kriegstrommel: "Kriegstrommeln", schellen: "Schlittenschellen", triangel: "Triangel", schlitztrommel: "Schlitztrommel" }
+        ketten: { ketten: "Ketten", klatschen: "Klatschen", schnipsen: "Schnipsen", rassel: "Rassel", stampfen: "Stampfen", loeffel: "Löffel", krug: "Krug auf den Tisch", rahmentrommel: "Rahmentrommel", kriegstrommel: "Kriegstrommeln", schellen: "Schlittenschellen", triangel: "Triangel", schlitztrommel: "Schlitztrommel", windspiel: "Windspiel" }
       },
       alleSpuren: "Alle", schritte: "Schritte",
       teil: "Teil bearbeiten", ablauf: "Ablauf", rolleVon: p => "Rolle von " + p, pattern: "Pattern", kette: "Kette",
@@ -222,12 +222,12 @@
       wer: { barradin: "Barradin", friedrich: "Friedrich", echo: "Echo", ezekiel: "Ezekiel", rex: "Rex" },
       spuren: { klopf: "Knock", schelle: "Bells", bass: "Bass", melodie: "Lute", trommel: "Drum", floete: "Flute", ketten: "Chains", rex: "Rex" },
       rexZeilen: ["Woof", "Howl", "Growl"], rexLaut: ["Woof!", "Awooooo!", "Grrrr …"],
-      instrument: "Instrument", instrumente: { laute: "Lute", harfe: "Harp", mandoline: "Mandolin", fidel: "Fiddle", drehleier: "Hurdy-gurdy", schalmei: "Shawm", dudelsack: "Bagpipes", glocken: "Glockenspiel", illusion: "Flute of Illusions", hackbrett: "Hammered dulcimer", cembalo: "Harpsichord", akkordeon: "Accordion", sitar: "Sitar", handpan: "Handpan" },
+      instrument: "Instrument", instrumente: { laute: "Lute", harfe: "Harp", mandoline: "Mandolin", fidel: "Fiddle", drehleier: "Hurdy-gurdy", schalmei: "Shawm", dudelsack: "Bagpipes", glocken: "Glockenspiel", illusion: "Flute of Illusions", hackbrett: "Hammered dulcimer", cembalo: "Harpsichord", akkordeon: "Accordion", sitar: "Sitar", handpan: "Handpan", psalter: "Psaltery", zither: "Zither", balafon: "Balafon" },
       band: {
-        trommel: { trommel: "Field drum", pauke: "Kettledrum", bodhran: "Bodhrán", tamburin: "Tambourine", stoecke: "Wooden sticks", taiko: "Taiko drum", marsch: "Marching drum", bongos: "Bongos", conga: "Conga" },
+        trommel: { trommel: "Field drum", pauke: "Kettledrum", bodhran: "Bodhrán", tamburin: "Tambourine", stoecke: "Wooden sticks", taiko: "Taiko drum", marsch: "Marching drum", bongos: "Bongos", conga: "Conga", darbuka: "Darbuka" },
         floete: { floete: "Wooden flute", panfloete: "Pan flute", okarina: "Ocarina", gesang: "Singing", horn: "Shepherd's horn", klarinette: "Clarinet", oboe: "Oboe",
           blockfloete: "Recorder", piccolo: "Piccolo", pfeife: "Tin whistle", shakuhachi: "Shakuhachi", englischhorn: "Cor anglais", oohchor: "Choir", bratsche: "Viola" },
-        ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table", rahmentrommel: "Frame drum", kriegstrommel: "War drums", schellen: "Sleigh bells", triangel: "Triangle", schlitztrommel: "Slit drum" }
+        ketten: { ketten: "Chains", klatschen: "Clapping", schnipsen: "Finger snaps", rassel: "Shaker", stampfen: "Stomping", loeffel: "Spoons", krug: "Tankard on the table", rahmentrommel: "Frame drum", kriegstrommel: "War drums", schellen: "Sleigh bells", triangel: "Triangle", schlitztrommel: "Slit drum", windspiel: "Wind chimes" }
       },
       alleSpuren: "All", schritte: "Steps",
       teil: "Edit part", ablauf: "Order", rolleVon: p => "Role of " + p, pattern: "Pattern", kette: "Chain",
@@ -670,6 +670,14 @@
   Object.keys(STIL_MEHR).forEach(k => { const st = STIL[k], m = STIL_MEHR[k]; if (!st) return;
     (m.instrument || []).forEach(i => { if (INSTRUMENTE.includes(i) && !st.instrument.includes(i)) st.instrument.push(i); });
     (m.floete || []).forEach(i => { if (st.band && st.band.floete && !st.band.floete.includes(i)) st.band.floete.push(i); }); });
+
+  /* die neuen Aufnahmen (VCSL, CC0): Psalter, Zither, Balafon für Barradin, Darbuka für Friedrich, Windspiel für Ezekiel */
+  const STIL_NEU = { psalter: ["elben", "fey", "kamin", "klage", "pilger", "hof", "rast", "auenland"], zither: ["rast", "elben", "ruinen", "marktplatz", "klage", "kamin", "spannung", "unterreich"],
+    balafon: ["dorffest", "marktplatz", "trinklied", "reise", "auenland", "fey", "zwerge", "rast"] };
+  const BAND_NEU = { trommel: { darbuka: ["marktplatz", "unterreich", "ruinen", "reise", "verfolgung", "dorffest", "spannung"] },
+    ketten: { windspiel: ["elben", "fey", "ruinen", "rast", "kamin", "pilger", "klage", "grusel"] } };
+  Object.keys(STIL_NEU).forEach(i => STIL_NEU[i].forEach(k => { const st = STIL[k]; if (st && Array.isArray(st.instrument) && !st.instrument.includes(i)) st.instrument.push(i); }));
+  Object.keys(BAND_NEU).forEach(sp => Object.keys(BAND_NEU[sp]).forEach(i => BAND_NEU[sp][i].forEach(k => { const st = STIL[k]; if (st && st.band && Array.isArray(st.band[sp]) && !st.band[sp].includes(i)) st.band[sp].push(i); })));
 
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
@@ -4567,10 +4575,10 @@ const ZUS_ICON = {
      Jede Stimmung hat dazu einen Grundcharakter (nass) und ihre „Helden“, die besonders weit klingen; welcher Held es ist,
      wechselt mit dem Lied. Der Hall-Regler bleibt der Meister über alles, die 🏛-Knöpfe schalten einzelne Spuren ganz trocken. */
   const HALL_INSTR = {
-    melodie: { harfe: 1.3, glocken: 1.4, illusion: 1.3, laute: .9, mandoline: .7, fidel: 1, drehleier: 1, schalmei: .8, dudelsack: .75, hackbrett: 1.1, cembalo: .7, akkordeon: .6, sitar: 1.2, handpan: 1.25 },
+    melodie: { harfe: 1.3, glocken: 1.4, illusion: 1.3, laute: .9, mandoline: .7, fidel: 1, drehleier: 1, schalmei: .8, dudelsack: .75, hackbrett: 1.1, cembalo: .7, akkordeon: .6, sitar: 1.2, handpan: 1.25, psalter: 1.2, zither: 1.1, balafon: .7 },
     floete: { horn: 1.3, gesang: 1.3, oohchor: 1.5, shakuhachi: 1.4, okarina: 1.2, floete: 1, panfloete: 1.1, klarinette: .9, oboe: 1, englischhorn: 1.2, bratsche: 1.1, piccolo: .7, pfeife: .6, blockfloete: .8 },
-    trommel: { pauke: 1.2, taiko: 1.3, trommel: .5, bodhran: .45, tamburin: .4, stoecke: .3, marsch: .55, bongos: .4, conga: .45 },
-    kap: { ooh: 1.5, rgl: 1.6, cel: 1.4, spiel: 1.3, kal: 1, bra: 1.1, eh: 1.2, shaku: 1.4, bfl: .8, pic: .6, pfeife: .5, blech: 1.2, taiko: 1.3, pizz: .4, akk: .5, koto: 1.2, shanai: .9, horn: 1.4, hack: .9, cemb: .6, mar: .7, xyl: .6, sitar: 1.1 }
+    trommel: { pauke: 1.2, taiko: 1.3, trommel: .5, bodhran: .45, tamburin: .4, stoecke: .3, marsch: .55, bongos: .4, conga: .45, darbuka: .5 },
+    kap: { ooh: 1.5, rgl: 1.6, cel: 1.4, spiel: 1.3, kal: 1, bra: 1.1, eh: 1.2, shaku: 1.4, bfl: .8, pic: .6, pfeife: .5, blech: 1.2, taiko: 1.3, pizz: .4, akk: .5, koto: 1.2, shanai: .9, horn: 1.4, hack: .9, cemb: .6, mar: .7, xyl: .6, sitar: 1.1, psab: 1.2, glas: 1.5, didge: .9, rorg: 1.3, hglo: 1.4, mbira: .9, fharfe: 1.2, strum: .6 }
   };
   const HALL_SPUR = { bass: .25, klopf: .3, schelle: .5, ketten: .6, rex: .8 };
   const HALL_WEISE = { umpa: .55, ostinato: .6, puls: 1, stoss: .85, halte: 1.3, glanz: 1.35, arp: .8 };
@@ -5179,7 +5187,7 @@ const ZUS_ICON = {
     });
   }
   /* Barradins neue Instrumente: [Aufnahme, Pegel, Ausklang in s (0 = gehalten wie ein Balg)] */
-  const MEL_NEU = { handpan: ["hpan", .52, 2.4], hackbrett: ["hack", .42, 2.4], cembalo: ["cemb", .36, 2.2], sitar: ["sitar", .38, 2.6], akkordeon: ["akk", .34, 0] };
+  const MEL_NEU = { handpan: ["hpan", .52, 2.4], hackbrett: ["hack", .42, 2.4], cembalo: ["cemb", .36, 2.2], sitar: ["sitar", .38, 2.6], akkordeon: ["akk", .34, 0], psalter: ["psa", .46, 2.4], zither: ["zit", .55, 2.4], balafon: ["bal", .58, 1] };
   function melodieSpielen(freq, zeit, dauer, laut) {
     const l = laut || 1, ziel = spurGain.melodie, art = S.instrument;
     if (MEL_NEU[art]) {
@@ -5399,11 +5407,13 @@ const ZUS_ICON = {
     live(zeit, laut);
     if (!rendert) vorrendern(key, art === "pauke" ? .95 : .6, () => live(0, 1), null);
   }
+  let windZuletzt = -9;
   function spielen(spur, zeile, zeit, schritt, laut, dauer) {
     const betont = schritt % 4 === 0;
     if (spur === "klopf") { if (!schlagProbe("klopf", betont, zeit, spurGain.klopf, laut)) perk("klopf", "klopf", betont, zeit, laut, (z, l) => klopfen(z, betont, l)); }
     else if (spur === "schelle") { if (!schlagProbe("schelle", Math.random() < .5, zeit, spurGain.schelle, laut)) perk("schelle", "schelle", false, zeit, laut, (z, l) => schellen(z, l)); }
     else if (spur === "trommel") {
+      if (S.band.trommel === "darbuka" && probe(betont ? "darb_1" : Math.random() < .65 ? "darb_2" : "darb_3", 0, zeit, spurGain.trommel, 1.5 * (betont ? 1 : .72) * (laut || 1), { dauer: 1.2, aus: .25 })) return;
       if (schlagProbe(S.band.trommel, betont, zeit, spurGain.trommel, laut)) return;
       if (S.band.trommel === "tamburin" && probe(betont ? "tamb1" : "tamb2", 0, zeit, spurGain.trommel, (betont ? .75 : .54) * (laut || 1), { dauer: .7, aus: .2 })) return;
       if (S.band.trommel === "taiko" && probe("taiko", betont ? 36 : 42, zeit, spurGain.trommel, (betont ? .9 : .6) * (laut || 1), { dauer: 1.6, aus: .4 })) return;
@@ -5413,7 +5423,14 @@ const ZUS_ICON = {
     else if (spur === "ketten") {
       /* Ezekiels Trommeln: Rahmentrommel tief und weich (Bodhrán, tiefer gestimmt), Kriegstrommeln = zwei Taikos im Wechsel, höher als Friedrichs */
       const zr = (Math.random() - .5) * .03;
+      /* Rahmentrommel: echte Aufnahme (VCSL, CC0) – tief auf der Eins, sonst hoch oder gedämpft */
+      if (S.band.ketten === "rahmentrommel" && probe(betont ? "rahm_1" : Math.random() < .6 ? "rahm_2" : "rahm_4", 0, zeit, spurGain.ketten, (betont ? 1.4 : .9) * (laut || 1), { dauer: 1.3, aus: .3, rate: 1 + zr })) return;
       if (S.band.ketten === "rahmentrommel" && probe(betont ? "bodh1" : "bodh2", 0, zeit, spurGain.ketten, (betont ? .95 : .6) * (laut || 1), { dauer: 1, aus: .3, rate: (betont ? .7 : .78) + zr })) return;
+      /* Windspiel: ein Glissando der Klangstäbe, höchstens alle paar Sekunden, dazwischen ab und zu der Glockenbaum */
+      if (S.band.ketten === "windspiel") {
+        if (zeit - windZuletzt > 3.6) { if (probe("mtree_" + (1 + Math.floor(Math.random() * 3)), 0, zeit, spurGain.ketten, .34 * (laut || 1), { dauer: 5, aus: .9 })) windZuletzt = zeit; }
+        else if (betont && zeit - windZuletzt > 1.6 && Math.random() < .25) probe("btree_" + (1 + Math.floor(Math.random() * 5)), 0, zeit, spurGain.ketten, .3 * (laut || 1), { dauer: 3.5, aus: .8 });
+        return; }
       if (S.band.ketten === "kriegstrommel" && probe("taiko", betont ? 43 : 48, zeit, spurGain.ketten, (betont ? .75 : .45) * (laut || 1), { dauer: 1.3, aus: .35 })) return;
       if (schlagProbe(S.band.ketten, betont, zeit, spurGain.ketten, laut)) return; if (S.band.ketten === "ketten") ezekielSpielen(zeit, laut); else perk("ketten", S.band.ketten, betont, zeit, laut, (z, l) => ezekielSpielen(z, l)); }
     else if (spur === "rex") rexLaut(zeit, zeile, laut);
@@ -6144,6 +6161,9 @@ const ZUS_ICON = {
   /* Stimmung der Aufnahmen, nachgemessen (Cent zu hoch +, zu tief −): einige Flöten, die Harfe und manche Streicher waren
      bis zu 25 Cent verstimmt, eine Klarinetten-Aufnahme sogar einen Halbton – das wird beim Abspielen ausgeglichen */
   const STIMM_KORR = {"timpt":{"45":12,"48":14,"51":12,"54":15,"57":12},"hornst":{"36":-23,"39":9,"46":6,"57":-7},"trpst":{"53":7,"60":13,"74":10,"77":10,"81":9,"57":-5},"aah":{"48":-21,"51":-41,"54":-25,"57":-26,"60":-14,"63":-25,"66":-12,"75":-28,"81":-11},"akk":{"80":6,"83":6,"86":6,"89":11,"53":8,"56":8,"59":8},"hack":{"63":7,"66":5,"69":8,"72":7},"cel":{"84":10,"87":10,"96":6,"99":6,"102":6,"105":6,"108":6},"pizz":{"42":9,"45":10,"48":10,"51":6,"57":6,"60":5,"72":16,"78":12,"63":9,"66":10,"75":14,"54":8},"blech":{"61":5,"64":5,"55":5,"58":5},"vln":{"62":6,"69":5},"vc":{"40":-4},"spic":{"36":4,"40":-8,"43":-5,"57":6,"60":6,"74":8,"77":7},"harfe":{"28":-22,"31":-27,"35":-17,"38":-6,"41":-7,"45":-5,"52":-5,"55":-11,"59":-14,"62":-13,"69":-9,"72":-12,"76":-11,"79":-5,"83":-9,"86":-8,"89":-6,"93":-19,"95":-11,"98":-8,"101":-30},"vctrem":{"36":-6,"40":-6,"50":-6,"57":-5,"59":23,"74":-8},"trp":{"53":-7,"67":5,"74":7},"oboest":{"89":-13},"kb":{"36":8,"38":7,"40":-8,"56":-6,"59":-13,"31":-17,"45":16,"44":8},"geigest":{"55":6,"72":6,"76":5,"84":5},"geige":{"60":22,"64":7,"67":-5,"76":7,"84":-5,"88":8},"tuba":{"50":-6,"53":-6,"58":8},"orgel":{"36":-10,"54":5},"vlntrem":{"57":-5,"59":-10,"55":-10},"flst":{"88":-7,"93":-7,"81":-7,"69":-4},"klar":{"65":6,"77":6,"86":6,"90":-98},"stimme":{"84":-10,"87":-10},"horn":{"39":-7,"50":-4,"53":-7},"bfl":{"60":5,"63":4,"66":6,"69":5,"72":5,"78":8,"84":7,"87":7,"90":7,"93":7,"96":6},"pic":{"74":7,"77":8,"95":8},"pfeife":{"72":7,"81":6,"84":8,"87":11,"90":15,"93":11,"75":9,"78":10,"96":10},"eh":{"64":-9,"70":-7,"76":-8,"79":-9},"bra":{"63":-6,"81":-4,"72":-7},"glock":{"79":8,"84":12,"91":12,"96":15,"103":16,"108":24},"kal":{"60":-12,"63":-11}};
+  /* neue Instrumente (VCSL, CC0): Psalter gezupft/gestrichen, Zither (Dan Tranh), Balafon, Glasharfe, Didgeridoo, Orgel, Handglocken, Scheitholt, Harfe, Mbira */
+  Object.assign(SAMPLE_KARTE, {"psa":[70,72,74,76,78,80,82,84,86,88,90],"psab":[70,72,74,76,78,80,82,84,86,88,90],"zit":[47,49,51,54,56,59,61,63,66,68,71,73,75,78,80,83],"bal":[61,65,72,77,84,89],"glas":[75,78,86],"didge":[37],"rorg":[36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88],"hglo":[60,62,64,66,68,70,72,74,76,78,80,81,84,86,88,90,92,94,96],"strum":[50,52,54,55,57,59,61,62,64,66,67,69,71,73,74,76,78,79,81],"fharfe":[36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92],"mbira":[46,48,50,51,53,55,56,58,60,62,63,65,67,68,70,72,73,74,75]});
+  Object.assign(STIMM_KORR, {"zit":{"49":15,"59":-5,"61":38,"63":7,"66":-12,"73":-10},"bal":{"61":10,"65":19,"89":-14},"glas":{"75":35,"78":-7,"86":12},"hglo":{"60":14,"62":12,"64":7,"66":12},"fharfe":{"36":9,"40":7,"48":-7,"76":-6},"mbira":{"46":-12,"48":-20,"50":-26,"51":-13,"53":12,"55":-9,"56":13,"62":-28,"63":-16,"65":-13,"70":-29,"72":-22,"73":-37,"74":-6,"75":10}});
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
   function sampleLaden(name) {
@@ -6166,10 +6186,11 @@ const ZUS_ICON = {
   }
   /* Lautstärke der Aufnahmen aus dem FluidR3-Klangsatz, abgestimmt auf die bisherigen Klänge */
   const PEGEL_ECHT = { laute: .5, dudelsack: .45, panfloete: .26, okarina: .26, bass: .6, gesang: .4, drehleier: .8,
-    trommel: 1.15, bodhran: 1.1, stoecke: 1.3, schelle: .5, klopf: 1, rassel: .65, marsch: .75, schellen: .42, bongos: 1.05, conga: 1.05, triangel: .3, schlitztrommel: .9 };
+    trommel: 1.15, bodhran: 1.1, stoecke: 1.3, schelle: .5, klopf: 1, rassel: .65, marsch: .75, schellen: .42, bongos: 1.05, conga: 1.05, triangel: .3, schlitztrommel: .9, darbuka: 1.5 };
   /* Schlagwerk aus Aufnahmen: [betonter Schlag, normaler Schlag] */
   const SCHLAG_PROBE = { trommel: ["snare1", "snare2"], bodhran: ["bodh1", "bodh2"], stoecke: ["clave1", "clave2"], schelle: ["schelle1", "schelle2"], klopf: ["holz1", "holz2"], rassel: ["shake", "shake"], marsch: ["marsch1", "marsch4"], schellen: ["schellen3", "schellen4"],
-    /* Handtrommeln, Triangel und Schlitztrommel (VSCO 2 CE, CC0) */ bongos: ["bongo1", "bongo2"], conga: ["conga1", "conga2"], triangel: ["triangel1", "triangel2"], schlitztrommel: ["schlitz1", "schlitz2"] };
+    /* Handtrommeln, Triangel und Schlitztrommel (VSCO 2 CE, CC0) */ bongos: ["bongo1", "bongo2"], conga: ["conga1", "conga2"], triangel: ["triangel1", "triangel2"], schlitztrommel: ["schlitz1", "schlitz2"],
+    /* Darbuka (VCSL, CC0): Dum und Tek */ darbuka: ["darb_1", "darb_2"] };
   function schlagProbe(art, betont, zeit, ziel, laut) {
     const p = SCHLAG_PROBE[art]; if (!p || rendert) return false;
     return probe(p[betont ? 0 : 1], 0, zeit, ziel, PEGEL_ECHT[art] * (betont ? 1 : .8) * (laut || 1), { dauer: 1.2, aus: .25 });
@@ -6265,7 +6286,9 @@ const ZUS_ICON = {
     if (S.instrument === "mandoline") probenLaden("gitarre");
     if (S.instrument === "drehleier") probenLaden("geige");
     [S.band.trommel, S.band.ketten, "schelle", "klopf"].forEach(a => (SCHLAG_PROBE[a] || []).forEach(sampleLaden));
-    if (S.band.ketten === "rahmentrommel") ["bodh1", "bodh2"].forEach(sampleLaden);
+    if (S.band.ketten === "rahmentrommel") ["rahm_1", "rahm_2", "rahm_4", "bodh1", "bodh2"].forEach(sampleLaden);
+    if (S.band.ketten === "windspiel") ["mtree_1", "mtree_2", "mtree_3", "btree_1", "btree_2", "btree_3", "btree_4", "btree_5"].forEach(sampleLaden);
+    if (S.band.trommel === "darbuka") sampleLaden("darb_3");
     if (S.band.ketten === "kriegstrommel") probenLaden("taiko");
     if (S.instrument === "schalmei") { probenLaden("oboe"); probenLaden("oboest"); }
     if (MEL_NEU[S.instrument]) probenLaden(MEL_NEU[S.instrument][0]);
@@ -6956,6 +6979,7 @@ const ZUS_ICON = {
   const LAGE_COVER = { fl: [60, 96], flst: [60, 96], bfl: [60, 93], pfeife: [72, 96], pic: [76, 100], geige: [55, 93], geigest: [55, 93], oboe: [58, 88], klar: [50, 86],
     dudel: [60, 86], stimme: [57, 81], ooh: [48, 76], harfe: [40, 96], gitarre: [40, 84], akk: [53, 86], hack: [52, 93], cemb: [45, 88], mar: [48, 90], xyl: [65, 100],
     kal: [60, 93], koto: [48, 93], shanai: [60, 90], cel: [60, 100], spiel: [64, 100], sitar: [50, 82], shaku: [55, 82], eh: [52, 79], bra: [48, 82], pizz: [40, 79], blech: [48, 80], horn: [41, 69], trp: [55, 82], vc: [36, 67], fag: [36, 67] };
+  Object.assign(LAGE_COVER, { psa: [62, 92], psab: [62, 92], zit: [47, 86], bal: [58, 92], glas: [72, 89], didge: [31, 43], rorg: [36, 88], hglo: [58, 96], strum: [48, 83], fharfe: [36, 92], mbira: [44, 77] });
   /* Akkordsymbol → Grundton (MIDI, um C3) und Akkordtöne als Tonklassen */
   function akkord(sym) {
     const m = /^([A-G])([#b]?)(m(?!aj))?(7)?(dim)?$/.exec(sym || "C"); if (!m) return { grund: 48, pk: [0, 4, 7] };
@@ -7291,6 +7315,12 @@ const ZUS_ICON = {
     sitar: { griff: [214, 82, "Q168 94"], schlag: [161, 126, "Q104 124 118 128 L"] },
     handpan: { griff: [190, 119, "Q162 100"], schlag: [148, 122, "Q104 122 118 126 L"],
       bewegung: { mel: [[".barradin .hand-griff", "translate(0, 4px)", 130]], bass: [[".barradin .arm-schlag", "translate(0, 4px)", 150]], klopf: [[".barradin .arm-schlag", "translate(1px, 3px)", 120]] } },
+    psalter: { griff: [190, 120, "Q160 106"], schlag: [156, 140, "Q104 126 118 132 L"],
+      bewegung: { mel: [[".barradin .hand-griff", "translate(-1px, 3px)", 150]], bass: [[".barradin .arm-schlag", "translate(1px, 3px)", 150]] } },
+    zither: { griff: [212, 118, "Q172 104"], schlag: [152, 140, "Q104 126 118 132 L"],
+      bewegung: { mel: [[".barradin .hand-griff", "translate(0, 3px)", 140]], bass: [[".barradin .arm-schlag", "translate(2px, 2px)", 150]] } },
+    balafon: { griff: [196, 104, "Q160 104"], schlag: [150, 114, "Q104 120 118 126 L"],
+      bewegung: { mel: [[".barradin .hand-griff", "translate(-2px, 6px)", 160]], bass: [[".barradin .arm-schlag", "translate(1px, 6px)", 160]] } },
     glocken: { griff: [197, 99, "Q160 104"], schlag: [160, 128, "Q104 126 118 132 L"],
       bewegung: { mel: [[".barradin .hand-griff", "translate(-2px, 6px)", 200]] } }
   };
@@ -7422,6 +7452,11 @@ const ZUS_ICON = {
    <path d="M93 142 H99" stroke="#c9a24a" stroke-width="3"/>
    <ellipse class="trommelfell" cx="83" cy="134" rx="12" ry="4.2" fill="#efe2c2" stroke="#4a2410" stroke-width="1.2"/>
    <ellipse cx="110" cy="136" rx="11" ry="3.8" fill="#efe2c2" stroke="#4a2410" stroke-width="1.2"/></g>
+  <g class="req f-darbuka">
+   <path d="M84 134 Q82 150 93 158 L91 176 Q97 180 103 176 L101 158 Q112 150 110 134 Z" fill="#c08a3a" stroke="#5a3410" stroke-width="1.1"/>
+   <path d="M86 142 Q97 148 108 142" stroke="#e0c070" stroke-width="1.2" fill="none"/><path d="M89 149 l2.6 3 l2.6 -3 l2.6 3 l2.6 -3 l2.6 3 l2.6 -3" stroke="#2a3a6a" stroke-width="1.1" fill="none"/>
+   <path d="M91 172 Q97 175 103 172" stroke="#e0c070" stroke-width="1" fill="none"/>
+   <ellipse class="trommelfell" cx="97" cy="134" rx="13" ry="4.2" fill="#efe2c2" stroke="#5a3410" stroke-width="1.2"/></g>
   <g class="req f-conga">
    <path d="M86 168 Q84 182 90 192 M108 168 Q110 182 104 192" stroke="#3a2412" stroke-width="3" fill="none"/>
    <path d="M79 134 Q74 152 84 172 L110 172 Q120 152 115 134 Z" fill="#8a3a1a" stroke="#3a1a0a" stroke-width="1.2"/>
@@ -7566,6 +7601,23 @@ const ZUS_ICON = {
     <ellipse cx="194" cy="125" rx="6" ry="2.5" transform="rotate(-6 194 125)"/><ellipse cx="188" cy="133" rx="6.5" ry="2.8" transform="rotate(-6 188 133)"/>
     <ellipse cx="166" cy="137" rx="7" ry="3" transform="rotate(-6 166 137)"/><ellipse cx="146" cy="138" rx="6.5" ry="2.8" transform="rotate(-6 146 138)"/></g>
    <path d="M126 132 Q166 150 207 124" fill="none" stroke="#e8d2a2" stroke-width=".8" opacity=".35"/></g>
+  <g class="req m-psalter">
+   <path d="M132 150 Q146 120 174 112 L208 122 Q198 144 160 158 Z" fill="#b8804a" stroke="#4a2a10" stroke-width="1.2"/>
+   <circle cx="170" cy="134" r="6" fill="#3a2412"/><circle cx="170" cy="134" r="8.5" fill="none" stroke="#e0b84a" stroke-width=".8" stroke-dasharray="2 1.6"/>
+   <path class="saiten" d="M140 146 L204 124 M143 150 L205 128 M146 153 L204 132 M150 155 L202 136 M138 141 L198 121 M142 134 L190 118" stroke="#efe2c2" stroke-width=".55"/>
+   <g fill="#d8dce6"><circle cx="204" cy="124" r=".9"/><circle cx="205" cy="128" r=".9"/><circle cx="204" cy="132" r=".9"/><circle cx="202" cy="136" r=".9"/></g></g>
+  <g class="req m-zither">
+   <path d="M118 150 L236 108 L240 118 L122 160 Z" fill="#9a6230" stroke="#3a2010" stroke-width="1.2"/>
+   <path d="M118 150 Q112 156 122 160" fill="#6a3a18"/>
+   <path class="saiten" d="M124 151 L234 112 M125 153.5 L235 114.5 M126 156 L236 117" stroke="#f0e6cc" stroke-width=".5"/>
+   <g fill="#f4ecd8"><path d="M150 141 l2 -5 l2 5 Z"/><path d="M168 135 l2 -5 l2 5 Z"/><path d="M186 128.5 l2 -5 l2 5 Z"/><path d="M204 122 l2 -5 l2 5 Z"/></g>
+   <circle cx="232" cy="112" r="2" fill="#e0b84a"/></g>
+  <g class="req m-balafon">
+   <path d="M126 138 L124 162 M210 132 L214 160" stroke="#3a2412" stroke-width="2.6"/>
+   <g fill="#c9902e" stroke="#6a4a14" stroke-width=".6"><ellipse cx="136" cy="146" rx="5" ry="6"/><ellipse cx="148" cy="145" rx="4.6" ry="5.4"/><ellipse cx="160" cy="143.5" rx="4.2" ry="5"/><ellipse cx="172" cy="142" rx="3.8" ry="4.5"/><ellipse cx="184" cy="140.5" rx="3.4" ry="4"/><ellipse cx="196" cy="139" rx="3" ry="3.6"/></g>
+   <path d="M122 134 L214 124" stroke="#3a2412" stroke-width="2"/>
+   <g fill="#8a4a1e" stroke="#3a1a08" stroke-width=".6"><rect x="129" y="128" width="10" height="9" rx="1.5"/><rect x="141" y="127" width="10" height="8.4" rx="1.5"/><rect x="153" y="125.6" width="10" height="8" rx="1.5"/><rect x="165" y="124.4" width="10" height="7.4" rx="1.5"/><rect x="177" y="123" width="10" height="7" rx="1.5"/><rect x="189" y="121.8" width="10" height="6.6" rx="1.5"/><rect x="201" y="120.6" width="9" height="6" rx="1.5"/></g>
+   <path d="M196 104 L184 120 M150 114 L160 126" stroke="#d8c49a" stroke-width="1.8"/><circle cx="183.5" cy="121" r="2.8" fill="#2a1a10"/><circle cx="160.5" cy="126.5" r="2.8" fill="#2a1a10"/></g>
   <g class="req m-illusion">
    <path d="M129 74 L202 90" stroke="#b98cff" stroke-width="3.6" stroke-linecap="round"/>
    <path d="M129 74 L202 90" stroke="#efe2ff" stroke-width="1" stroke-linecap="round"/>
@@ -7715,6 +7767,8 @@ const ZUS_ICON = {
     <path d="M104 138 L114 153" stroke="#8a6440" stroke-width="2.6" stroke-linecap="round"/><circle cx="114.5" cy="153.5" r="2.4" fill="#e3cfa2"/></g>
    <g class="req z-schellen"><path d="M100 134 Q114 140 110 160" stroke="#6b4423" stroke-width="3.4" fill="none" stroke-linecap="round"/>
     <g fill="#e0b84a" stroke="#8a6420" stroke-width=".6"><circle cx="104" cy="137" r="2.6"/><circle cx="109" cy="141" r="2.6"/><circle cx="112" cy="147" r="2.6"/><circle cx="112" cy="153" r="2.6"/><circle cx="110.5" cy="159" r="2.6"/></g></g>
+   <g class="req z-windspiel"><path d="M100 132 H130" stroke="#5a3a20" stroke-width="2.4" stroke-linecap="round"/>
+    <g stroke="#dfe3ec" stroke-width="1.7"><path d="M102.5 133 v24"/><path d="M105.5 133 v22.2"/><path d="M108.5 133 v20.4"/><path d="M111.5 133 v18.6"/><path d="M114.5 133 v16.8"/><path d="M117.5 133 v15"/><path d="M120.5 133 v13.2"/><path d="M123.5 133 v11.4"/><path d="M126.5 133 v9.6"/></g></g>
    <g class="req z-krug"><rect x="99" y="131" width="13" height="16" rx="2" fill="#8a5a32" stroke="#3a2412" stroke-width="1"/>
     <path d="M112 134 q6 1 5 6 q-1 4 -5 4" fill="none" stroke="#3a2412" stroke-width="2"/>
     <path d="M98 131 q3 -5 7 -2 q3 -4 7 0 q2 1 0 3 Z" fill="#fbf4e2"/><path d="M101 137 h9 M101 142 h9" stroke="#c9934f" stroke-width="1"/></g>
@@ -8372,7 +8426,9 @@ const ZUS_ICON = {
   const KAP_INSTR = { akk: { g: .3, halt: 1 }, hack: { g: .36 }, cemb: { g: .3 }, mar: { g: .4 }, cel: { g: .3 }, spiel: { g: .28 }, rgl: { g: .24 },
     taiko: { g: .6 }, bfl: { g: .24, halt: 1 }, pic: { g: .17, halt: 1 }, pfeife: { g: .18, halt: 1 }, shaku: { g: .28, halt: 1 }, eh: { g: .26, halt: 1 },
     sitar: { g: .3 }, kal: { g: .4 }, bra: { g: .28, halt: 1 }, pizz: { g: .4 }, blech: { g: .24, halt: 1 }, xyl: { g: .26 }, ooh: { g: .24, halt: 1 },
-    koto: { g: .36 }, shanai: { g: .22, halt: 1 }, horn: { g: .3, halt: 1 } };
+    koto: { g: .36 }, shanai: { g: .22, halt: 1 }, horn: { g: .3, halt: 1 },
+    /* neue Musiker (VCSL, CC0) */
+    psab: { g: .32, halt: 1 }, glas: { g: .26, halt: 1, ein: .1 }, didge: { g: .34, halt: 1, ein: .12 }, rorg: { g: .3, halt: 1 }, hglo: { g: .4 }, mbira: { g: .5 }, fharfe: { g: .39 }, strum: { g: .34 } };
   const KAPELLE = {
     kampf: [["blech", "stoss", "srh"], ["taiko", "stampf", "svrbh"], ["pizz", "ostinato", "sv"], ["xyl", "unisono", "rh", 12, 5], ["ooh", "halte", "rh", -12], ["horn", "halte", "rh", -12]],
     boss: [["blech", "stoss", "srh"], ["taiko", "stampf", "isvrbh"], ["ooh", "halte", "srh", -12], ["pizz", "ostinato", "sb"], ["bra", "unisono", "h", -12, 5], ["horn", "halte", "rh", -12]],
@@ -8401,10 +8457,12 @@ const ZUS_ICON = {
   };
   Object.assign(TX.de, { kapelle: "🎺 Kapelle", kapelleTipp: "Weitere Musiker spielen in den Stimmungen mit – bei jedem neuen Lied eine andere Besetzung.", kapNeu: "Andere Besetzung",
     kapName: { akk: "Akkordeon", hack: "Hackbrett", cemb: "Cembalo", mar: "Marimba", cel: "Celesta", spiel: "Spieluhr", rgl: "Röhrenglocken", taiko: "Taiko", bfl: "Blockflöte",
-      pic: "Piccolo", pfeife: "Blechpfeife", shaku: "Shakuhachi", eh: "Englischhorn", sitar: "Sitar", kal: "Kalimba", bra: "Bratsche", pizz: "Zupfstreicher", blech: "Bläsersatz", xyl: "Xylophon", ooh: "Chor", koto: "Koto", shanai: "Shanai", horn: "Horn" } });
+      pic: "Piccolo", pfeife: "Blechpfeife", shaku: "Shakuhachi", eh: "Englischhorn", sitar: "Sitar", kal: "Kalimba", bra: "Bratsche", pizz: "Zupfstreicher", blech: "Bläsersatz", xyl: "Xylophon", ooh: "Chor", koto: "Koto", shanai: "Shanai", horn: "Horn",
+      psab: "Streichpsalter", glas: "Glasharfe", didge: "Didgeridoo", rorg: "Orgel", hglo: "Handglocken", mbira: "Mbira", fharfe: "Harfe", strum: "Scheitholt" } });
   Object.assign(TX.en, { kapelle: "🎺 Band", kapelleTipp: "More musicians join the moods – a different line-up for every new song.", kapNeu: "Different line-up",
     kapName: { akk: "accordion", hack: "hammered dulcimer", cemb: "harpsichord", mar: "marimba", cel: "celesta", spiel: "music box", rgl: "tubular bells", taiko: "taiko", bfl: "recorder",
-      pic: "piccolo", pfeife: "tin whistle", shaku: "shakuhachi", eh: "cor anglais", sitar: "sitar", kal: "kalimba", bra: "viola", pizz: "pizzicato strings", blech: "brass section", xyl: "xylophone", ooh: "choir", koto: "koto", shanai: "shehnai", horn: "horn" } });
+      pic: "piccolo", pfeife: "tin whistle", shaku: "shakuhachi", eh: "cor anglais", sitar: "sitar", kal: "kalimba", bra: "viola", pizz: "pizzicato strings", blech: "brass section", xyl: "xylophone", ooh: "choir", koto: "koto", shanai: "shehnai", horn: "horn",
+      psab: "bowed psaltery", glas: "glass harp", didge: "didgeridoo", rorg: "organ", hglo: "handbells", mbira: "mbira", fharfe: "harp", strum: "strumstick" } });
   /* zwei bis drei Musiker aus dem Kreis der Stimmung – das Schlagwerk (Taiko) höchstens einmal */
   /* mehr Abwechslung: die neueren Musiker (Koto, Schalmei, Hornist …) spielen in viel mehr Stimmungen mit.
      Nur angehängt – gemerkte Besetzungen (Nummern im Pool) bleiben gültig. */
@@ -8421,6 +8479,18 @@ const ZUS_ICON = {
     dorffest: [["horn", "stoss", "h"], ["koto", "arp", "b"], ["pizz", "umpa", "s"]], marktplatz: [["koto", "arp", "s"], ["akk", "umpa", "s"]],
     hof: [["koto", "arp", "b"], ["shanai", "unisono", "h", 0, 5]], shanty: [["horn", "stoss", "h"], ["hack", "arp", "s"], ["xyl", "echo", "b"]],
     pilger: [["koto", "arp", "s"], ["shanai", "echo", "r"], ["horn", "halte", "h", -12]] };
+  /* die neuen Musiker – ebenfalls nur angehängt, damit gemerkte Besetzungen gültig bleiben */
+  const KAP_NEU = {
+    psab: [["klage", "terz", "rh", -12], ["grusel", "halte", "rh"], ["elben", "unisono", "rh"], ["pilger", "halte", "srh"], ["kamin", "terz", "r", -12], ["spannung", "halte", "h"], ["fey", "echo", "b"]],
+    glas: [["grusel", "halte", "sb"], ["fey", "glanz", "srh"], ["elben", "glanz", "rh"], ["ruinen", "halte", "h"], ["spannung", "glanz", "b"], ["unterreich", "glanz", "b"], ["klage", "glanz", "ib"]],
+    didge: [["unterreich", "bordun", "svrh"], ["ruinen", "bordun", "rh"], ["grusel", "bordun", "sh"], ["zwerge", "bordun", "rh"], ["kampf", "bordun", "h"], ["boss", "bordun", "svh"],
+      ["spannung", "bordun", "rh"], ["reise", "bordun", "b"], ["pilger", "bordun", "s"], ["verfolgung", "bordun", "rh"]],
+    rorg: [["pilger", "halte", "srh"], ["hof", "halte", "rh", -12], ["klage", "halte", "h"], ["heldenlied", "halte", "h"], ["grusel", "halte", "h", -12], ["sieg", "stoss", "h"], ["boss", "halte", "h", -12], ["kamin", "halte", "b"]],
+    hglo: [["pilger", "glanz", "rh"], ["sieg", "glanz", "rh"], ["hof", "glanz", "h"], ["dorffest", "glanz", "h"], ["auenland", "echo", "b"], ["fey", "arp", "s"], ["elben", "glanz", "b"], ["heldenlied", "glanz", "h"], ["kamin", "glanz", "ib"]],
+    mbira: [["rast", "ostinato", "srh"], ["fey", "ostinato", "s"], ["marktplatz", "arp", "s"], ["auenland", "arp", "s"], ["dorffest", "ostinato", "s"], ["unterreich", "ostinato", "s"], ["spannung", "ostinato", "s"], ["reise", "arp", "b"], ["kamin", "arp", "s"]],
+    fharfe: [["elben", "arp", "srh"], ["klage", "arp", "s"], ["kamin", "arp", "s"], ["rast", "arp", "s"], ["hof", "arp", "s"], ["heldenlied", "arp", "s"], ["pilger", "arp", "b"], ["auenland", "arp", "b"], ["ruinen", "arp", "b"]],
+    strum: [["trinklied", "umpa", "s"], ["dorffest", "arp", "s"], ["shanty", "umpa", "s"], ["reise", "arp", "s"], ["auenland", "arp", "s"], ["rast", "arp", "b"], ["marktplatz", "ostinato", "s"], ["zwerge", "umpa", "s"], ["reiter", "ostinato", "s"]] };
+  Object.keys(KAP_NEU).forEach(inst => KAP_NEU[inst].forEach(([k, ...e]) => { (KAP_MEHR[k] = KAP_MEHR[k] || []).push([inst, ...e]); }));
   Object.keys(KAP_MEHR).forEach(k => { if (KAPELLE[k]) KAP_MEHR[k].forEach(e => { if (!KAPELLE[k].some(x => x[0] === e[0] && x[1] === e[1])) KAPELLE[k].push(e); }); });
   function kapelleWaehlen(k) {
     const pool = KAPELLE[k]; if (!pool) return [];
@@ -8454,7 +8524,7 @@ const ZUS_ICON = {
   /* Lagen der Kapelle, damit sich niemand mit Barradins Melodie (r … r+24) oder Echo im selben Bereich reibt:
      Begleitung (Umpa, Stöße, gehaltene Akkorde, Muster) unter der Melodie, helle Instrumente (Glöckchen & Co.) darüber,
      Melodie-Verdopplung immer eine Oktave entfernt, die Gegenstimme auf der Seite, wo Echo gerade nicht spielt */
-  const KAP_HELL = ["xyl", "cel", "spiel", "kal", "pic", "pfeife", "rgl"];
+  const KAP_HELL = ["xyl", "cel", "spiel", "kal", "pic", "pfeife", "rgl", "hglo", "glas"];
   function kapFenster(p, weise) {
     /* spielt Barradin selbst Glöckchen (eine Oktave höher), rücken die hellen Kapellen-Instrumente nach unten */
     const r = MEL_GRUND + S.transpose, hell = KAP_HELL.includes(p.inst) && S.instrument !== "glocken";
@@ -8473,7 +8543,8 @@ const ZUS_ICON = {
   function kapTon(p, midi, zeit, dauer, laut, int, nichtGleich) {
     const def = KAP_INSTR[p.inst], karte = SAMPLE_KARTE[p.inst]; if (!def || !karte) return;
     let lo = karte[0] - 2, hi = karte[karte.length - 1] + 2;
-    const f = p.inst === "taiko" ? null : kapFenster(p, p.jetzt);
+    if (p.inst === "didge") { lo = 31; hi = 43; } /* ein Didgeridoo hat nur seinen einen Grundton – höchstens eine Quarte daneben */
+    const f = p.inst === "taiko" || p.inst === "didge" ? null : kapFenster(p, p.jetzt);
     if (f && Math.min(hi, f[1]) - Math.max(lo, f[0]) >= 11) { lo = Math.max(lo, f[0]); hi = Math.min(hi, f[1]); }
     let m = p.inst === "taiko" ? midi : inLage(midi, lo, hi);
     /* eine Verdopplung soll nie genau auf Barradins Ton landen – dann lieber die andere Oktave oder gar nicht */
@@ -8482,7 +8553,7 @@ const ZUS_ICON = {
     zeit += (Math.random() - .5) * .01; /* die Kapelle spielt nicht roboterhaft genau */
     const ziel = kapZiel(p.pan), hw = kapHallAnteil(p);
     if (ziel._hall && Math.abs(ziel._hallWert - hw) > .02) { ziel._hall.gain.setTargetAtTime(hw, Math.max(ctx.currentTime, zeit - .02), .05); ziel._hallWert = hw; }
-    if (probe(p.inst, m, zeit, ziel, l, def.halt ? { ein: .04, aus: Math.min(.25, dauer * .4), dauer: dauer + .06 } : { dauer: Math.max(dauer, 1.2), aus: .3 }) && kapQ.length < 300) kapQ.push([zeit, p.inst]);
+    if (probe(p.inst, m, zeit, ziel, l, def.halt ? { ein: def.ein || .04, aus: Math.min(.25, dauer * .4), dauer: dauer + .06 } : { dauer: Math.max(dauer, 1.2), aus: .3 }) && kapQ.length < 300) kapQ.push([zeit, p.inst]);
   }
   const kapQ = [], kapZuletzt = {}, kapSeiteMerk = {};
   const KAP_WEISE = {
@@ -8543,6 +8614,14 @@ const ZUS_ICON = {
       if (schritt % viertel === 0) kapTon(p, schritt === 0 ? 36 : 42, z, 1, schritt === 0 ? 1 : .75, x.int);
       else if (x.ende && schritt >= x.L - 3) kapTon(p, 48, z, .5, .55, x.int);
     },
+    /* Didgeridoo: der Bordun auf dem Grundton der Tonart, jeden Takt neu geatmet – im Höhepunkt ab und zu ein Ruf */
+    bordun(p, z, sd, ak, x) {
+      if (schritt === 0) kapTon(p, BASS_GRUND + S.transpose + hebung, z, x.L * sd + .3, .9, x.int);
+      else if (x.rolle === "h" && schritt === x.mitte && Math.random() < .55) {
+        let m = BASS_GRUND + S.transpose + hebung; while (m > 43) m -= 12; while (m < 31) m += 12;
+        probe("didgefx_" + (1 + Math.floor(Math.random() * 3)), 0, z, kapZiel(p.pan), KAP_INSTR.didge.g * .9 * (.55 + .55 * x.int), { dauer: 1.6, aus: .25, rate: Math.pow(2, (m - 37) / 12) });
+      }
+    },
     /* lang gehaltener Akkord bei jedem Akkordwechsel */
     halte(p, z, sd, ak, x) { if (!x.wechselt) return; const d = x.n * sd + .3; [ak.terz, ak.quinte].forEach((m, i) => kapTon(p, m + p.lage, z, d, i ? .66 : .82, x.int)); }
   };
@@ -8551,7 +8630,7 @@ const ZUS_ICON = {
      (Ruf und Antwort), im Refrain spielen alle und ein Melodie-Instrument hat seine eigene Gegenstimme, ab dem zweiten Refrain
      verdoppelt der Bläsersatz den Ohrwurm. Im Zwischenteil bekommt abwechselnd ein Kapellenmusiker oder Echo bzw. ein Gast das Solo.
      Das Vorspiel deutet ein Kapellenmusiker mit dem Ohrwurm an. Spielt die Kapelle eine eigene Stimme, nimmt sich Echo zurück. */
-  const KAP_MELODISCH = ["bfl", "pfeife", "shaku", "eh", "shanai", "bra", "pic", "sitar", "koto", "akk", "hack", "xyl", "mar", "cemb", "cel", "kal", "spiel"];
+  const KAP_MELODISCH = ["bfl", "pfeife", "shaku", "eh", "shanai", "bra", "psab", "pic", "sitar", "koto", "fharfe", "strum", "akk", "hack", "xyl", "mar", "cemb", "mbira", "cel", "kal", "spiel"];
   const KAP_RHYTHMUS = ["puls", "ostinato", "umpa", "stoss", "stampf"];
   function vorkommen(ab) { const r = rolleAn(ab); let n = -1; for (let i = 0; i <= ab; i++) if (rolleAn(i) === r && abschnittAnfang(i)) n++; return Math.max(0, n); }
   const abschnittEnde = ab => { const L = S.ablauf.length, nx = ab + 1; return nx >= L || abschnittAnfang(nx); };
@@ -8608,7 +8687,7 @@ const ZUS_ICON = {
       try { KAP_WEISE[weise](p, zeit, sd, ak, x, daten); } catch (_) {}
     });
   }
-  function kapelleVorladen() { kapSpieler().forEach(p => probenLaden(p.inst)); }
+  function kapelleVorladen() { kapSpieler().forEach(p => { probenLaden(p.inst); if (p.inst === "didge") ["didgefx_1", "didgefx_2", "didgefx_3"].forEach(sampleLaden); }); }
   /* ---------- Mitspieler: Orchester, Kapelle und Gäste unter einem Dach ---------- */
   Object.assign(TX.de, { wechselZurueck: "Wechsel abgebrochen – es geht mit der laufenden Stimmung weiter." });
   Object.assign(TX.en, { wechselZurueck: "Change cancelled – the current mood plays on." });
@@ -8781,6 +8860,48 @@ const ZUS_ICON = {
   }
   /* die Musiker der Kapelle: Name, ob Geist, und ihr Bild (viewBox 0 0 90 140) */
   const KAP_FIG = {
+    /* neue Musiker (VCSL, CC0) */
+    psab: { name: "Ilsa", bild: npc({ ky: 40, haut: "#f2d2b4", kleid: "#2f5a5a", haar: "lang", haarFarbe: "#c87a3a", hose: "#3a2a1e", gurt: "#c9a24a",
+      instr: '<path d="M26 110 L64 104 L40 64 Z" fill="#b07a40" stroke="#4a2a10" stroke-width="1.1"/><circle cx="44" cy="96" r="3.2" fill="#4a2a10"/>' +
+        [30, 36, 42, 48, 54, 60].map(x => '<path d="M40 66 L' + x + " " + (110 - (x - 26) * 6 / 38).toFixed(1) + '" stroke="#f0e6cc" stroke-width=".45"/>').join("") +
+        '<g class="bogen"><path d="M44 86 L84 70" stroke="#5a3418" stroke-width="1.7" stroke-linecap="round"/><path d="M46 87.5 L83 72.5" stroke="#efe6d0" stroke-width=".6"/></g>',
+      arme: nArm(35, 56, 26, 80, 32, 104, "#2f5a5a") + nArm(55, 56, 66, 68, 62, 79, "#2f5a5a") + nH(32, 104, "#f2d2b4") + nH(62, 79, "#f2d2b4") }) },
+    glas: { name: "Vesna", bild: npc({ ky: 40, haut: "#f0d8c8", kleid: "#4a4a8a", robe: 1, saum: "#b8c8f0", haar: "dutt", haarFarbe: "#e8e0d0",
+      instr: '<path d="M16 104 L14 134 M74 104 L76 134" stroke="#3a2412" stroke-width="2.4"/><rect x="8" y="100" width="74" height="5" rx="1" fill="#6a4020" stroke="#2a1a10" stroke-width=".8"/>' +
+        [[15, 9], [25, 11], [35, 13], [55, 12], [65, 10], [75, 8]].map(([x, h]) => '<path d="M' + x + ' 100 v-6 M' + (x - 3) + ' 100 h6" stroke="#d8ecf8" stroke-width=".9"/>' +
+          '<path d="M' + (x - 4) + " " + (94 - h) + " Q" + (x - 4) + " 94 " + x + " 94 Q" + (x + 4) + " 94 " + (x + 4) + " " + (94 - h) + ' Z" fill="rgba(200,230,250,.3)" stroke="#e4f2fc" stroke-width=".8"/>' +
+          '<path d="M' + (x - 3.6) + " " + (94 - h * .45) + " Q" + x + " " + (95 - h * .2) + " " + (x + 3.6) + " " + (94 - h * .45) + " Q" + x + " 94.5 " + (x - 3.6) + " " + (94 - h * .45) + ' Z" fill="rgba(120,180,230,.55)"/>').join(""),
+      arme: nArm(35, 56, 30, 76, 35, 81, "#4a4a8a") + nArm(55, 56, 60, 76, 55, 82, "#4a4a8a") + nH(35, 81, "#f0d8c8") + nH(55, 82, "#f0d8c8") }) },
+    didge: { name: "Tarrok", bild: npc({ ky: 40, haut: "#9a6a48", kleid: "#7a4a2a", haar: "locken", haarFarbe: "#2a1a10", bart: "#2a1a10", hose: "#4a3420", gurt: "#c0702a", blaest: 1,
+      instr: '<path d="M46 46 L80 131" stroke="#8a4a20" stroke-width="6" stroke-linecap="round"/><path d="M48 52 L79 128" stroke="#e0a050" stroke-width="2" stroke-dasharray="2 6" opacity=".75"/>' +
+        '<path d="M54 66 l4 -1.5 M62 86 l4 -1.5 M70 106 l4 -1.5" stroke="#f0e0c0" stroke-width="1.2"/><ellipse cx="80.5" cy="131" rx="4.6" ry="2.4" fill="#3a1a0a"/>' +
+        '<g class="backen"><circle cx="39.5" cy="45" r="2.8" fill="#b07a54"/><circle cx="50.5" cy="45" r="2.8" fill="#b07a54"/></g>',
+      arme: nArm(35, 56, 42, 76, 57, 74, "#7a4a2a") + nArm(55, 56, 74, 86, 68, 102, "#7a4a2a") + nH(57, 74, "#9a6a48") + nH(68, 102, "#9a6a48") }) },
+    rorg: { name: "Bruder Anselm", bild: npc({ ky: 38, haut: "#ecc4a0", kleid: "#5a4630", robe: 1, saum: "#2a1e12", haar: "keins", hut: "kapuze", hutFarbe: "#4a3a26",
+      instr: '<path d="M20 108 L18 134 M70 108 L72 134" stroke="#2a1a0a" stroke-width="2.4"/>' +
+        [0, 1, 2, 3, 4, 5, 6].map(i => '<rect x="' + (47 + i * 3.6) + '" y="' + (92 - (34 - i * 3.6)) + '" width="3" height="' + (34 - i * 3.6) + '" rx="1.2" fill="#d8c08a" stroke="#7a5a20" stroke-width=".5"/>').join("") +
+        '<rect x="16" y="92" width="58" height="16" rx="2" fill="#5a3418" stroke="#2a1a0a" stroke-width="1"/><path d="M20 97 H70" stroke="#c9a24a" stroke-width=".8"/>' +
+        '<rect x="18" y="88" width="30" height="4.5" fill="#f4f0e6" stroke="#2a1a10" stroke-width=".5"/>' + [21, 26, 33, 38, 43].map(x => '<rect x="' + x + '" y="88" width="2" height="2.6" fill="#1a1010"/>').join(""),
+      arme: nArm(35, 54, 26, 70, 25, 87, "#5a4630") + nArm(55, 54, 50, 72, 40, 87, "#5a4630") + nH(25, 87, "#ecc4a0") + nH(40, 87, "#ecc4a0") }) },
+    hglo: { name: "Pim Glockenhell", bild: npc({ klein: 1, ky: 62, haut: "#f0c8a8", kleid: "#2a5a3a", haar: "kurz", haarFarbe: "#8a5a2a", hut: "kappe", hutFarbe: "#a8302a", hose: "#4a3a2a", gurt: "#e0b84a",
+      instr: [[24, 84, -14], [66, 80, 14]].map(([x, y, r]) => '<g class="glocke" transform="rotate(' + r + " " + x + " " + (y - 6) + ')"><rect x="' + (x - 1.3) + '" y="' + (y - 10) + '" width="2.6" height="8" rx="1" fill="#3a2412"/>' +
+        '<path d="M' + (x - 6) + " " + (y + 8) + " Q" + (x - 5) + " " + (y - 2) + " " + x + " " + (y - 2.5) + " Q" + (x + 5) + " " + (y - 2) + " " + (x + 6) + " " + (y + 8) + ' Z" fill="#e0b84a" stroke="#8a6420" stroke-width=".9"/>' +
+        '<path d="M' + (x - 6.5) + " " + (y + 8) + " H" + (x + 6.5) + '" stroke="#c99a30" stroke-width="1.6"/><circle cx="' + x + '" cy="' + (y + 9.5) + '" r="1.3" fill="#5a3a10"/></g>').join(""),
+      arme: nArm(36, 79, 28, 82, 25, 76, "#2a5a3a") + nArm(54, 79, 62, 80, 65, 72, "#2a5a3a") + nH(25, 75, "#f0c8a8") + nH(65, 71, "#f0c8a8") }) },
+    mbira: { name: "Nala", bild: npc({ ky: 40, haut: "#7a5038", kleid: "#c0802a", haar: "locken", haarFarbe: "#1a1210", hose: "#5a3a20",
+      muster: '<path d="M33 100 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 l4 -4" stroke="#5a2a10" stroke-width="1.4" fill="none"/>',
+      instr: '<ellipse cx="45" cy="92" rx="15" ry="9" fill="#b07030" stroke="#5a3010" stroke-width="1"/><rect x="33" y="76" width="24" height="18" rx="3" fill="#8a5a2a" stroke="#3a2412" stroke-width=".9"/>' +
+        '<path d="M34 84 H56" stroke="#9a9aa4" stroke-width="1.4"/>' + [36, 38.5, 41, 43.5, 46.5, 49, 51.5, 54].map((x, i) => '<path d="M' + x + ' 85 V' + (78 + Math.abs(i - 3.5) * 1.1).toFixed(1) + '" stroke="#d8dce6" stroke-width="1.1"/>').join(""),
+      arme: nArm(35, 56, 28, 74, 33, 86, "#c0802a") + nArm(55, 56, 62, 74, 57, 86, "#c0802a") + nH(33, 86, "#7a5038") + nH(57, 86, "#7a5038") }) },
+    fharfe: { name: "Liora", bild: npc({ ky: 40, haut: "#f4dcc4", kleid: "#2a6a5a", robe: 1, saum: "#e0c070", haar: "lang", haarFarbe: "#e8c060", elf: 1,
+      instr: '<path d="M64 58 L66 132" stroke="#7a4a20" stroke-width="3.5" stroke-linecap="round"/><path d="M64 58 Q46 50 27 72" stroke="#7a4a20" stroke-width="3.5" fill="none" stroke-linecap="round"/>' +
+        '<path d="M26 71 L61 131 L67 131 L31 69 Z" fill="#a8683a" stroke="#4a2a10" stroke-width="1"/>' +
+        [[32, 64], [37, 60], [42, 57.5], [47, 56.3], [52, 56], [57, 56.6]].map(([x, y]) => '<path d="M' + x + " " + y + " V" + (71 + (x - 28) * 59 / 35).toFixed(1) + '" stroke="#f0e6cc" stroke-width=".5"/>').join(""),
+      arme: nArm(35, 56, 30, 72, 39, 80, "#2a6a5a") + nArm(55, 56, 58, 80, 50, 94, "#2a6a5a") + nH(39, 80, "#f4dcc4") + nH(50, 94, "#f4dcc4") }) },
+    strum: { name: "Jory", bild: npc({ klein: 1, ky: 62, haut: "#e8bc96", kleid: "#7a5a2a", haar: "kurz", haarFarbe: "#d0a050", hut: "feder", hutFarbe: "#3a5a2a", hose: "#3a2a1e", gurt: "#3a2414",
+      instr: '<path d="M18 104 Q20 94 32 96 L74 82 L77 87 L36 104 Q24 112 18 104 Z" fill="#c08a4a" stroke="#4a2a10" stroke-width="1"/><rect x="74" y="78" width="9" height="6" rx="1.5" transform="rotate(-18 78 81)" fill="#6a3a1a"/>' +
+        '<circle cx="28" cy="102" r="2.2" fill="#4a2a10"/><path d="M22 103 L76 84.5 M23 105 L76.5 86" stroke="#f0e6cc" stroke-width=".45"/>' + [44, 52, 60, 68].map(x => '<path d="M' + x + " " + (98.5 - (x - 36) * .33) + ' l-1 -3" stroke="#e0b84a" stroke-width=".7"/>').join(""),
+      arme: nArm(36, 79, 30, 92, 32, 100, "#7a5a2a") + nArm(54, 79, 66, 76, 70, 84, "#7a5a2a") + nH(32, 100, "#e8bc96") + nH(70, 84, "#e8bc96") }) },
     akk: { name: "Mira", bild: npc({ klein: 1, ky: 62, haut: "#e8b896", kleid: "#8a3a5a", haar: "dutt", haarFarbe: "#7a4a22", hose: "#4a2e2a",
       instr: '<rect x="27" y="84" width="8" height="26" rx="2" fill="#efe6d4" stroke="#6b1a14"/><g class="balg"><path d="M35 84 L38 87 L35 90 L38 93 L35 96 L38 99 L35 102 L38 105 L35 110 H55 L52 105 L55 102 L52 99 L55 96 L52 93 L55 90 L52 87 L55 84 Z" fill="#b0302a" stroke="#5a1010" stroke-width=".8"/>' +
         '<path d="M38 87 H52 M38 93 H52 M38 99 H52 M38 105 H52" stroke="#e0b84a" stroke-width=".7"/></g><rect x="55" y="84" width="8" height="26" rx="2" fill="#b0302a" stroke="#5a1010"/>' +
