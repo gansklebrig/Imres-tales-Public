@@ -4359,7 +4359,7 @@ const ZUS_ICON = {
       const z = Math.max(8, Math.min(92, (e.clientY - r.top) / r.height * 100));
       f.style.left = x + "%"; f.style.top = z + "%"; kZug.bewegt = true;
       if (kZug.zq) { const o = zusOrt(kZug.zq); o[0] = x; o[2] = z; if (wegPunkte && wegAufnahme === kZug.zq) wegPunkte.push([x, o[1], z]); } else { const o = kOrt(), alt = figurOrt(); o.fig = [x, alt[1]]; o.figz = z; kZug.x = x; kZug.y = alt[1]; }
-      if (kZug.zq) { const m = kZug.k.querySelector(".lw-kmuell"); if (m) { const mr = m.getBoundingClientRect(); kZug.muell = e.clientX >= mr.left - 8 && e.clientX <= mr.right + 8 && e.clientY >= mr.top - 8 && e.clientY <= mr.bottom + 8; m.classList.toggle("ziel", kZug.muell); kZug.f.classList.toggle("weg", kZug.muell); } }
+      if (kZug.zq) { const m = kZug.k.querySelector(".lw-kmuell"); if (m) { const mr = m.getBoundingClientRect(); const tol = 8 + ((kZug.f && kZug.f.offsetWidth) || 20) / 2; kZug.muell = e.clientX >= mr.left - tol && e.clientX <= mr.right + tol && e.clientY >= mr.top - tol && e.clientY <= mr.bottom + tol; m.classList.toggle("ziel", kZug.muell); kZug.f.classList.toggle("weg", kZug.muell); } }
       const j = performance.now(); if (j - kZugT > 60) { kZugT = j; try { zusPegelSetzen(.08); } catch (_) {} }
       return;
     }
@@ -4367,7 +4367,7 @@ const ZUS_ICON = {
     f.style.left = x + "%"; f.style.top = y + "%"; kZug.bewegt = true; kZug.x = x; kZug.y = y;
     if (kZug.zq) { const o = zusOrt(kZug.zq); o.splice(0, 2, x, y); if (wegPunkte && wegAufnahme === kZug.zq) wegPunkte.push([x, y, o[2]]); } else kOrt().fig = [x, y];
     if (!kZug.zq) { const z = zoneBei(x, y); kZug.k.querySelectorAll(".lw-kzone").forEach(b => b.classList.toggle("ziel", b.dataset.kzone === z.id)); }
-    else { const m = kZug.k.querySelector(".lw-kmuell"); if (m) { const mr = m.getBoundingClientRect(); kZug.muell = e.clientX >= mr.left - 8 && e.clientX <= mr.right + 8 && e.clientY >= mr.top - 8 && e.clientY <= mr.bottom + 8; m.classList.toggle("ziel", kZug.muell); kZug.f.classList.toggle("weg", kZug.muell); } }
+    else { const m = kZug.k.querySelector(".lw-kmuell"); if (m) { const mr = m.getBoundingClientRect(); const tol = 8 + ((kZug.f && kZug.f.offsetWidth) || 20) / 2; kZug.muell = e.clientX >= mr.left - tol && e.clientX <= mr.right + tol && e.clientY >= mr.top - tol && e.clientY <= mr.bottom + tol; m.classList.toggle("ziel", kZug.muell); kZug.f.classList.toggle("weg", kZug.muell); } }
     const j = performance.now(); if (j - kZugT > 60) { kZugT = j; try { zusPegelSetzen(.08); } catch (_) {} }
   });
   const kLos = e => {
@@ -12497,7 +12497,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kblock.gross .lw-kl { width: 2.5rem; height: 2.5rem; font-size: 1.35rem; }
 .lw-kl:hover { border-color: var(--ember); }
 .lw-kl[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.28); box-shadow: 0 0 6px rgba(224,160,70,.35); }
-.lw-kmuell { position: absolute; left: .25rem; bottom: .2rem; z-index: 2; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; font-size: .8rem; border-radius: 6px; background: rgba(10,8,14,.6); border: 1px dashed rgba(220,120,110,.5); opacity: .7; pointer-events: none; transition: transform .15s ease; }
+.lw-kmuell { position: absolute; left: .25rem; bottom: .2rem; z-index: 5; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; font-size: .8rem; border-radius: 6px; background: rgba(10,8,14,.6); border: 1px dashed rgba(220,120,110,.5); opacity: .7; pointer-events: none; transition: transform .15s ease; }
 .lw-kmuell.ziel { opacity: 1; transform: scale(1.35); background: rgba(160,50,40,.6); border-color: #e07060; }
 .lw-kquelle.weg { opacity: .45; border-color: #e07060; }
 .lw-kquelle { animation: lwKAtmen 3.2s ease-in-out infinite; }
