@@ -660,7 +660,17 @@
       ablauf: ["ABAC"], akkorde: [[0, 6, 0, 5], [0, 1, 6, 0], [0, 5, 6, 0], [0, 6, 5, 6], [0, 2, 0, 6]],
       bass: ["orgel", "halbe"], rhythmus: [[0, 4], [0, 4, 6], [0, 3, 4], [0, 6]], lage: 4, dichte: .55, echo: "fern",
       klopf: [[]], schelle: [[]], trommel: [[0], [0, 12]], ketten: [[], [6, 14]], rex: [2] }
-  };
+  };  /* mehr Klangfarben je Stimmung: Hauptinstrument und Bläser/Gesang werden pro Lied aus diesen Listen gewählt */
+  const STIL_MEHR = {
+    kampf: { instrument: ["schalmei"] }, boss: { instrument: ["dudelsack", "schalmei"] }, reiter: { instrument: ["schalmei"] },
+    dorffest: { instrument: ["schalmei"] }, hof: { instrument: ["schalmei", "hackbrett"] }, trinklied: { instrument: ["hackbrett"] },
+    heldenlied: { instrument: ["drehleier"] }, sieg: { instrument: ["hackbrett", "fidel"] }, zwerge: { instrument: ["akkordeon"] },
+    klage: { instrument: ["sitar", "handpan"], floete: ["shakuhachi"] }, grusel: { instrument: ["sitar", "handpan"] }, marktplatz: { instrument: ["sitar"], floete: ["oboe"] },
+    verfolgung: { instrument: ["dudelsack"] }, pilger: { floete: ["okarina"] }, shanty: { instrument: ["fidel"] } };
+  Object.keys(STIL_MEHR).forEach(k => { const st = STIL[k], m = STIL_MEHR[k]; if (!st) return;
+    (m.instrument || []).forEach(i => { if (INSTRUMENTE.includes(i) && !st.instrument.includes(i)) st.instrument.push(i); });
+    (m.floete || []).forEach(i => { if (st.band && st.band.floete && !st.band.floete.includes(i)) st.band.floete.push(i); }); });
+
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
   const naechsterTon = (ziel, erlaubt) => {
@@ -8396,6 +8406,22 @@ const ZUS_ICON = {
     kapName: { akk: "accordion", hack: "hammered dulcimer", cemb: "harpsichord", mar: "marimba", cel: "celesta", spiel: "music box", rgl: "tubular bells", taiko: "taiko", bfl: "recorder",
       pic: "piccolo", pfeife: "tin whistle", shaku: "shakuhachi", eh: "cor anglais", sitar: "sitar", kal: "kalimba", bra: "viola", pizz: "pizzicato strings", blech: "brass section", xyl: "xylophone", ooh: "choir", koto: "koto", shanai: "shehnai", horn: "horn" } });
   /* zwei bis drei Musiker aus dem Kreis der Stimmung – das Schlagwerk (Taiko) höchstens einmal */
+  /* mehr Abwechslung: die neueren Musiker (Koto, Schalmei, Hornist …) spielen in viel mehr Stimmungen mit.
+     Nur angehängt – gemerkte Besetzungen (Nummern im Pool) bleiben gültig. */
+  const KAP_MEHR = {
+    kampf: [["shanai", "unisono", "rh", 0, 5]], boss: [["rgl", "glanz", "h"], ["shanai", "terz", "rh", 0, 5]],
+    verfolgung: [["koto", "ostinato", "s"], ["sitar", "ostinato", "s"]], spannung: [["koto", "echo", "s"], ["horn", "halte", "h", -12]],
+    grusel: [["shaku", "echo", "s"], ["horn", "halte", "h", -12], ["koto", "echo", "b"]], unterreich: [["koto", "arp", "s"], ["horn", "halte", "h", -12]],
+    ruinen: [["horn", "halte", "h", -12]], reise: [["koto", "arp", "b"], ["pfeife", "unisono", "h", 12, 5]],
+    reiter: [["shanai", "unisono", "h", 0, 5], ["xyl", "echo", "r"]], heldenlied: [["shanai", "echo", "b"], ["cel", "glanz", "ib"]],
+    sieg: [["taiko", "puls", "h"], ["ooh", "halte", "h", -12]], rast: [["horn", "halte", "h", -12], ["sitar", "arp", "b"]],
+    trinklied: [["horn", "stoss", "h"], ["pizz", "umpa", "s"], ["cemb", "arp", "b"]], kamin: [["koto", "arp", "b"], ["horn", "halte", "h", -12], ["kal", "glanz", "ib"]],
+    klage: [["shaku", "echo", "s"], ["horn", "halte", "h", -12], ["shanai", "echo", "b"]], auenland: [["koto", "arp", "b"], ["kal", "glanz", "s"], ["horn", "halte", "h", -12]],
+    elben: [["horn", "halte", "h", -12], ["rgl", "glanz", "h"]], fey: [["shaku", "echo", "b"]], zwerge: [["shanai", "unisono", "h", 0, 5], ["mar", "ostinato", "s"]],
+    dorffest: [["horn", "stoss", "h"], ["koto", "arp", "b"], ["pizz", "umpa", "s"]], marktplatz: [["koto", "arp", "s"], ["akk", "umpa", "s"]],
+    hof: [["koto", "arp", "b"], ["shanai", "unisono", "h", 0, 5]], shanty: [["horn", "stoss", "h"], ["hack", "arp", "s"], ["xyl", "echo", "b"]],
+    pilger: [["koto", "arp", "s"], ["shanai", "echo", "r"], ["horn", "halte", "h", -12]] };
+  Object.keys(KAP_MEHR).forEach(k => { if (KAPELLE[k]) KAP_MEHR[k].forEach(e => { if (!KAPELLE[k].some(x => x[0] === e[0] && x[1] === e[1])) KAPELLE[k].push(e); }); });
   function kapelleWaehlen(k) {
     const pool = KAPELLE[k]; if (!pool) return [];
     /* Kampfmusik: Bläser und Taiko sind immer dabei */
