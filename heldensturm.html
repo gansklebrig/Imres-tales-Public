@@ -5420,8 +5420,8 @@ function rolleArt(c,e,t){if(e.schild){c.fillStyle='#5a5a66';c.strokeStyle='#2020
 /* ================= Zusammenspiel: zwei Helden treffen denselben Gegner kurz nacheinander mit Fähigkeiten ================= */
 const KOMBOS={'barradin+echo':'Wilde Weise','barradin+friedrich':'Jagdlied','barradin+ezekiel':'Dissonanz','echo+friedrich':'Rankenfalle','echo+ezekiel':'Dornenstoß','ezekiel+friedrich':'Kreuzfeuer'};
 function teamKombo(e,o){if(!G.mp||PL.length<2||o.dot||o.basic||o.pet||o.kombo||o.setFx||!P||e.dead)return;const k0=e.kh;e.kh={p:P,t:G.time};if(!k0||k0.p===P||G.time-k0.t>1.3||!PL.includes(k0.p))return;
- const ids=[k0.p.id,P.id].sort(),key=ids.join('+');G.kcd=G.kcd||{};if((G.kcd[key]||0)>G.time)return;G.kcd[key]=G.time+3.5;const name=KOMBOS[key]||'Zusammenspiel',x=e.x,y=e.y,c1=HCOL[k0.p.id]||'#e5b454',c2=HCOL[P.id]||'#e5b454';
- const R=160*P.st.area;aoe(x,y,R,sk(3.2)+withP(k0.p,()=>sk(3.2)),{kombo:1,stun:0.7,knock:220});ring(x,y,R,c1,0.6,6);ring(x,y,R*0.7,c2,0.6,6);G.fxs.push({k:'shock',x,y,r:R,c:c2,t:0,life:0.5});
+ const ids=[k0.p.id,P.id].sort(),key=ids.join('+');G.kcd=G.kcd||{};if((G.kcd[key]||0)>G.time||(G.kcd.$||0)>G.time)return;G.kcd[key]=G.time+6;G.kcd.$=G.time+4;const name=KOMBOS[key]||'Zusammenspiel',x=e.x,y=e.y,c1=HCOL[k0.p.id]||'#e5b454',c2=HCOL[P.id]||'#e5b454';
+ const R=160*P.st.area;aoe(x,y,R,sk(1.6)+withP(k0.p,()=>sk(1.6)),{kombo:1,stun:0.7,knock:220});ring(x,y,R,c1,0.6,6);ring(x,y,R*0.7,c2,0.6,6);G.fxs.push({k:'shock',x,y,r:R,c:c2,t:0,life:0.5});
  G.fxs.push({k:'vineline',x:k0.p.x,y:k0.p.y,x2:x,y2:y,t:0,life:0.45});G.fxs.push({k:'vineline',x:P.x,y:P.y,x2:x,y2:y,t:0,life:0.45});
  sparks(x,y,c1,10,360);sparks(x,y,c2,10,360);word(x,y-60,name+'!','#ffd04a');sfx('kombo');G.shake+=4;if(typeof teamGain==='function')teamGain(0.04)}
 
@@ -6713,7 +6713,7 @@ const COMBOS={
  'friedrich+ezekiel':{n:'Kreuzfeuer',c:'#ffb050',f(e){for(let i=0;i<12;i++)shoot({x:e.x,y:e.y,a:i/12*TAU,spd:640,dmg:sk(0.9),r:6,pierce:2,kind:i%2?'arrow':'dagger',c:i%2?'#efe0b8':'#d8dde3',life:0.6})}}};
 const comboKey=(a,b)=>[a,b].sort((x,y)=>HERO_IDS.indexOf(x)-HERO_IDS.indexOf(y)).join('+');
 function comboHit(e){if(!G.mp||e.dead)return;const now=G.time,me=P;const L=e.skHit;
- if(L&&L.p!==me&&!L.p.down&&now-L.t<3&&!(e.comboT>now)&&!((G.comboCd||{})[comboKey(L.p.id,me.id)]>now)){const k=comboKey(L.p.id,me.id),C=COMBOS[k];if(C){e.comboT=now+1.5;(G.comboCd=G.comboCd||{})[k]=now+2.5;
+ if(L&&L.p!==me&&!L.p.down&&now-L.t<3&&!(e.comboT>now)&&!((G.comboCd||{})[comboKey(L.p.id,me.id)]>now)&&!((G.comboCd||{}).$>now)){const k=comboKey(L.p.id,me.id),C=COMBOS[k];if(C){e.comboT=now+1.5;(G.comboCd=G.comboCd||{})[k]=now+5;G.comboCd.$=now+3;
   const x=e.x,y=e.y;C.f(e);word(x,y-e.r-28,'KOMBO: '+C.n+'!',C.c);G.fxs.push({k:'shock',x,y,r:150,c:C.c,t:0,life:0.5});sfx('kombo');me.stCombo=(me.stCombo||0)+1;L.p.stCombo=(L.p.stCombo||0)+1;teamGain(0.05);rumble(me,0.35,140);rumble(L.p,0.35,140);e.skHit=null;return}}
  e.skHit={p:me,t:now}}
 /* ---------- Rücken an Rücken ---------- */
@@ -12284,6 +12284,195 @@ hook('draw',(t,c)=>{fmBeuteZeichne(t,c);fmTarnZeichne(t,c);fmRexZeichne(t,c)},'f
 Object.assign(HFX,{
  fm_blatt(f,k,c){const p=f.t;c.save();c.translate(f.x+(f.vx||0)*p+Math.sin(p*7+f.a)*5,f.y+p*34);c.rotate(f.a+p*4);c.globalAlpha=1-k;c.fillStyle=f.c||'#6a9a3a';c.beginPath();c.ellipse(0,0,4,1.8,0,0,TAU);c.fill();c.restore()},
  fm_satz(f,k,c){c.globalAlpha=0.5*(1-k);c.strokeStyle='#e8b070';c.lineWidth=3;c.beginPath();c.moveTo(f.x,f.y);c.quadraticCurveTo((f.x+f.x2)/2,(f.y+f.y2)/2-30,f.x2,f.y2);c.stroke();c.globalAlpha=1}});
+
+/* ================= Paket „kombo“: Zusammenspiel – zustandsbasierte Kombos zwischen Helden (nur Mehrspieler) =================
+   Ein Held bereitet einen Zustand vor (Barradin hält/fesselt, Echo unterkühlt/verhext/lädt auf, Friedrich wählt Jagdbeute),
+   ein anderer Held nutzt ihn aus. Schaden über dmK/DMO 'kombo:<id>' messbar. Abklingzeit je Kombo und Ziel (cd) plus kurz je Kombo (gcd).
+   Neue Namen (Präfix kz): KZ (Liste), KZ_IN, KZG, KZUI, kzGebunden, kzHeld, kzFire, kzDmg, kzKill, kzTxt, kzHtml, kzCss, kzZaehl;
+   Felder: e.kzB (Barradin-Kontrolle bis), e.kzE (Echos Frost bis), e.kzLad (Sturmbeute, Sekunden, gespiegelt), e.kzCd{}, e.kzKopf;
+   P.kzN {id:Anzahl} (gespiegelt, Übersicht), P.kzNr (Lauf), P.kzHiT (Friedrichs Hinterhalt-Fenster).
+   HFX: kz_txt, kz_nagel, kz_wurf, kz_saite, kz_dieb, kz_blitz, kz_huhn, kz_splitter, kz_beutel, kz_kopf. */
+let KZ_IN=0;const KZG={run:null,t:{}};const KZUI={open:true};
+if(!NETW.enemies.includes('kzLad'))NETW.enemies.push('kzLad');
+DMFIX['kombo']=['Treffer-Kombos','✧'];
+function kzHeld(id){for(const q of PL)if(q&&q.id===id&&q!==P)return q;return null}
+/* Barradin hält/fesselt/kniet/staunt: Festhalten (heldT), Ranken (vineT+root), Majestät (gmKn), sonst eigene Kontrolle (kzB) */
+function kzGebunden(e){if(!e||e.dead||e.gmB>0)return false;if(e.heldT>0||e.gmKn>0)return true;if(e.vineT>G.time&&e.root>0)return true;
+ return (e.kzB||0)>G.time&&(e.stun>0||e.root>0||e.fearT>0||e.gmSt>0)}
+const kzPfeil=o=>typeof fmIstPfeil==='function'?fmIstPfeil(o):!!(o&&o.bounced!==undefined&&!o.pet&&!o.melee);
+const kzSrc=o=>{try{return dmSrc(o)}catch(x){return''}};
+const kzNorm=e=>!e.boss&&!e.guard&&!e.elite&&!e.champ&&!e.rare;
+function kzDmg(e,v,o){if(!e||e.dead)return 0;return dealDmg(e,v,Object.assign({kombo:1,noLs:1,dmK:DMO||'kombo'},o||{}))}
+/* sofort erlegen (ohne Riesenzahl): Restleben zählt als Kombo-Schaden */
+function kzKill(e){if(!e||e.dead||e.hp<=0)return;const hp0=e.hp;e.hp=0;dmAdd({dmK:DMO||'kombo'},hp0);if(G.mp)P.stDmg=(P.stDmg||0)+hp0;num(e.x,e.y-e.r-6,hp0,true);e.flash=0.12;killEnemy(e,{kombo:1})}
+function kzNah(e,R,f){const L=[];query(e.x,e.y,R,g=>{if(g!==e&&!g.dead&&!(g.gmB>0)&&targetable(g)&&d2(g,e)<R*R&&(!f||f(g)))L.push(g)});return L}
+
+const KZ=[
+ {id:'gnadenschuss',a:'barradin',b:'friedrich',n:'Gnadenschuss',ic:'🏹',c:'#ffd86a',cd:8,gcd:3,
+  w:'Barradin hält einen Gegner fest oder fesselt ihn',t:'Friedrich trifft ihn mit Weitschuss, Hinterhalt oder dem einen Pfeil',d:'Normale Gegner fallen sofort, starke erleiden schweren Schaden',
+  ok(e,o){return kzPfeil(o)&&kzGebunden(e)&&(d2(e,P)>=300*300||(P.kzHiT||0)>G.time||kzSrc(o)==='f_onearrow')},
+  f(e){G.fxs.push({k:'kz_nagel',x:e.x,y:e.y,r:e.r,a:Math.atan2(e.y-P.y,e.x-P.x),t:0,life:1.1});light(e.x,e.y,200,'#ffd86a',0.5,0.9);sfxAt('hold',e.x,e.y);
+   if(kzNorm(e))kzKill(e);else kzDmg(e,e.boss||e.guard?sk(20):Math.min(e.maxHp*0.4,sk(40)),{noCrit:1,stun:0.6})}},
+ {id:'zerren',a:'barradin',b:'friedrich',n:'Herausgezerrt',ic:'🐾',c:'#c9e07a',cd:10,gcd:4,
+  w:'Barradin fesselt einen Gegner (Ranken, Festhalten, Knien …)',t:'Rex beißt zu',d:'Rex zerrt ihn heraus und schleudert ihn fort',
+  ok(e,o){return o.rex&&!e.boss&&!e.guard&&kzGebunden(e)},
+  f(e){const a=Math.atan2(e.y-P.y,e.x-P.x)+rnd(-0.5,0.5),D=(e.elite||e.champ?110:190)/(e.def.size||1),x0=e.x,y0=e.y;
+   e.root=0;e.heldT=0;e.kx+=Math.cos(a)*D*9;e.ky+=Math.sin(a)*D*9;
+   kzDmg(e,sk(10),{noCrit:1});if(!e.dead)stunE(e,1);
+   G.fxs.push({k:'kz_wurf',x:x0,y:y0,x2:x0+Math.cos(a)*D,y2:y0+Math.sin(a)*D,r:e.r,t:0,life:0.9});chunks(x0,y0,'#4a7a2a',8,240);puffs(x0,y0,'#bba88a',6,80,12);sfxAt('e_klaue',x0,y0)}},
+ {id:'donner',a:'barradin',b:'echo',n:'Donnerballade',ic:'⚡',c:'#9fd8ff',cd:8,gcd:5,
+  w:'Barradin hält Gegner fest',t:'Echo trifft einen davon mit einem Zauber',d:'Blitze springen wie über Saiten zwischen allen Gefesselten',
+  ok(e,o){return !o.basic&&!o.pet&&kzGebunden(e)},
+  f(e){const L=[e,...kzNah(e,430,kzGebunden).slice(0,5)],pts=[];for(const g of L)pts.push(Math.round(g.x),Math.round(g.y-g.r*0.5));
+   G.fxs.push({k:'kz_saite',x:e.x,y:e.y,pts,t:0,life:0.9});for(const g of L){kzDmg(g,sk(g===e?8:9),{lightning:1,noCrit:1,stun:0.3});light(g.x,g.y,90,'#9fd8ff',0.3,0.7)}sfxAt('blitz',e.x,e.y);G.shake+=3}},
+ {id:'ablenkung',a:'barradin',b:'ezekiel',n:'Ablenkungsmanöver',ic:'🗡',c:'#d68cff',cd:10,gcd:4,
+  w:'Barradin lenkt einen Gegner ab (festhalten, fesseln, knien, staunen)',t:'Ezekiel schlägt zu',d:'Sicherer Rückenstich – und ein paar Münzen wechseln den Besitzer',
+  ok(e,o){return !o.pet&&(kzGebunden(e)||e.gmSt>0)},
+  f(e){G.fxs.push({k:'kz_dieb',x:e.x,y:e.y-e.r*0.4,r:e.r,t:0,life:0.8});kzDmg(e,sk(9),{crit:1});
+   for(let i=0;i<2;i++)orb(e.x,e.y,'gold',Math.max(1,Math.round(ri(2,4)*P.st.gold)));P.stealthT=Math.max(P.stealthT||0,0.6);sfxAt('glas',e.x,e.y)}},
+ {id:'sturmbeute',a:'echo',b:'friedrich',n:'Sturmbeute',ic:'🌩',c:'#7fd0ff',cd:8,gcd:5,
+  w:'Echos Zauber trifft Friedrichs Jagdbeute – sie knistert',t:'Friedrichs Pfeil oder Rex trifft die Beute',d:'Die Ladung entlädt sich als Kettenblitz',
+  ok(e,o){return (o.rex||kzPfeil(o))&&e.kzLad>0&&e.fmBeuteP===P},
+  f(e){e.kzLad=0;G.fxs.push({k:'kz_blitz',x:e.x,y:e.y,r:e.r,t:0,life:0.7});chainLightning(e,6,sk(6),340);bolt(e.x,e.y);sfxAt('blitz',e.x,e.y);G.shake+=3}},
+ {id:'huhn',a:'echo',b:'friedrich',n:'Hühnerjagd',ic:'🐔',c:'#fff0c0',cd:3,gcd:0.5,
+  w:'Echos wilde Magie verwandelt einen Gegner in ein Huhn',t:'Rex oder ein Pfeil erwischt es',d:'Sofort erlegt – und es legt ein goldenes Ei',
+  ok(e,o){return (e.emHuhn||0)>G.time&&(o.rex||kzPfeil(o))},
+  f(e){const x=e.x,y=e.y;G.fxs.push({k:'kz_huhn',x,y,t:0,life:1.4});puffs(x,y,'#ffffff',10,120,10);sfxAt('honk',x,y);kzKill(e);
+   for(let i=0;i<3;i++)orb(x,y,'gold',Math.max(1,Math.round(ri(4,8)*P.st.gold)))}},
+ {id:'splitter',a:'echo',b:'ezekiel',n:'Eissplitter',ic:'❄',c:'#bdf0ff',cd:8,gcd:4,
+  w:'Echos Frost unterkühlt einen Gegner',t:'Ezekiels Klinge trifft ihn',d:'Er zerspringt in Eissplitter, die ringsum schneiden',
+  ok(e,o){return !o.pet&&(e.kzE||0)>G.time&&e.chillT>0},
+  f(e){e.chillT=0;e.kzE=0;const R=150*P.st.area;G.fxs.push({k:'kz_splitter',x:e.x,y:e.y-e.r*0.4,r:R,s:Math.floor(rnd(0,99)),t:0,life:0.8});
+   kzDmg(e,sk(7),{noCrit:1});aoe(e.x,e.y,R,sk(8),{kombo:1,noLs:1,dmK:DMO,noCrit:1,onHit:g=>chill(g,1.2)});sfxAt('ice',e.x,e.y);sfxAt('glas',e.x,e.y)}},
+ {id:'beutel',a:'echo',b:'ezekiel',n:'Beutelschneider',ic:'💰',c:'#ffd04a',cd:15,gcd:14,
+  w:'Ein Gegner hat nur Augen für Echo und ihr Gold',t:'Ezekiel erwischt ihn dabei',d:'Bonusschaden und ein beherzter Griff in seine Börse',
+  ok(e,o){const q=e.tgt;return !o.pet&&q&&q.id==='echo'&&q!==P&&PL.includes(q)&&d2(e,q)<340*340},
+  f(e){G.fxs.push({k:'kz_beutel',x:e.x,y:e.y-e.r*0.5,x2:P.x,y2:P.y-20,t:0,life:0.9});kzDmg(e,sk(8),{noCrit:1});
+   for(let i=0;i<3;i++)orb(P.x+rnd(-20,20),P.y+rnd(-20,20),'gold',Math.max(1,Math.round(ri(3,6)*P.st.gold)));sfxAt('b_feder',e.x,e.y)}},
+ {id:'kopfgeld',a:'friedrich',b:'ezekiel',n:'Kopfgeld',ic:'🎯',c:'#ff9a5a',cd:10,gcd:6,
+  w:'Friedrich hat seine Jagdbeute gewählt',t:'Ezekiel trifft sie',d:'Harter Treffer – fällt sie bald, regnet es Gold für beide',
+  ok(e,o){return !o.pet&&e.fmBeuteP&&e.fmBeuteP!==P&&PL.includes(e.fmBeuteP)},
+  f(e,a){G.fxs.push({k:'kz_kopf',x:e.x,y:e.y-e.r*0.4,r:e.r,t:0,life:1});kzDmg(e,sk(6),{crit:1});e.kzKopf=G.time+5;e.kzKopfP=[P,a];sfxAt('hold',e.x,e.y)}}];
+const KZI=Object.fromEntries(KZ.map(C=>[C.id,C]));
+const KZB={};for(const C of KZ)(KZB[C.b]||(KZB[C.b]=[])).push(C);
+
+function kzZaehl(q,id){if(!q)return;if(q.kzNr!==G.runId||!q.kzN){q.kzN={};q.kzNr=G.runId}q.kzN[id]=(q.kzN[id]||0)+1}
+function kzFire(C,e,a,o){const now=G.time;(e.kzCd||(e.kzCd={}))[C.id]=now+C.cd;KZG.t[C.id]=now+C.gcd;e.kzT=now+1.2;
+ const x=e.x,y=e.y-e.r,c1=HCOL[a.id]||C.c,c2=HCOL[P.id]||C.c;
+ KZ_IN++;const d=DMO,s=DMS;DMO=DMS='kombo:'+C.id;try{C.f(e,a,o)}catch(err){console.error('kombo '+C.id,err)}finally{DMO=d;DMS=s;KZ_IN--}
+ kzTxt(x,y-52,C.n,c1,c2,C.c);sfx('kombo');G.shake+=2;kzZaehl(P,C.id);kzZaehl(a,C.id);
+ P.stCombo=(P.stCombo||0)+1;a.stCombo=(a.stCombo||0)+1;if(typeof teamGain==='function')teamGain(0.04);rumble(P,0.4,160);rumble(a,0.4,160);
+ if(!SAVE.kzTip&&!G.bot){SAVE.kzTip=1;try{persist()}catch(x){}later(0.8,()=>toast(`<b>Zusammenspiel!</b> ${esc(HEROES[a.id].name)} bereitet vor, ${esc(HEROES[P.id].name)} vollendet. Welche Kombos eure Gruppe kann, steht im Pausenmenü.`,'#ffd86a'))}}
+function kzTxt(x,y,n,c1,c2,c){if(G.fxs.length>170)return;G.fxs.push({k:'kz_txt',x,y,n,c1,c2,c,t:0,life:1.7})}
+
+/* Auslöser: vor dem Schaden prüfen (dmgMul-Haken, Faktor 1) und merken – so unterdrückt die Zusammenspiel-Kombo die alten
+   Treffer-Kombos desselben Treffers; nach dem Treffer (hit-Haken) auslösen, wenn der Gegner noch lebt. Billig: früh raus. */
+let KZQ=null;
+hook('dmgMul',(e,o)=>{if(!G.mp||KZ_IN||!P||o.dot||o.kombo||o.setFx||e.dead)return 1;const L=KZB[P.id];if(!L)return 1;
+ if(KZG.run!==G.runId){KZG.run=G.runId;KZG.t={}}const now=G.time,cd=e.kzCd;
+ for(const C of L){if((KZG.t[C.id]||0)>now||cd&&(cd[C.id]||0)>now)continue;const a=kzHeld(C.a);if(!a)continue;let ok=false;try{ok=C.ok(e,o)}catch(x){}if(ok){o.kzC=C;o.kzA=a;KZQ=e;break}}return 1});
+hook('hit',(e,o)=>{if(!o.kzC)return;const C=o.kzC,a=o.kzA;o.kzC=null;if(KZQ===e)KZQ=null;if(KZ_IN||e.dead||!(e.hp>0)||!PL.includes(a))return;kzFire(C,e,a,o)});
+/* Vorbereitung: Barradins Kontrolle merken (Festhalten/Ranken/Majestät erkennt kzGebunden direkt) */
+hook('hit',(e,o)=>{if(!G.mp||KZ_IN||e.dead)return;if(o.stun||o.root||o.fear)e.kzB=G.time+Math.max(o.stun||0,o.root||0,o.fear||0,1)+0.5},'barradin');
+/* Echos Zauber laden Friedrichs Jagdbeute auf */
+hook('hit',(e,o)=>{if(!G.mp||KZ_IN||o.dot||o.pet||o.basic||o.kombo||e.dead||!e.fmBeuteP||!PL.includes(e.fmBeuteP))return;
+ if(!(e.kzLad>0)){sparks(e.x,e.y-e.r*0.5,'#9fd8ff',6,160);if(Math.random()<0.5)word(e.x,e.y-e.r-26,'knister …','#9fd8ff')}e.kzLad=5},'echo');
+/* Echos Frost merken */
+{const c0=chill;chill=function(e,t){const r=c0.apply(this,arguments);if(G.mp&&P&&P.id==='echo'&&e&&!KZ_IN)e.kzE=G.time+(e.chillT||0);return r}}
+/* Friedrichs Hinterhalt: kurzes Fenster für den Gnadenschuss */
+/* zugleich Schutz gegen Endlosschleife (vorbestehend): Legendär „Falke“ schießt in vtFire Zusatzpfeile → shoot → friedVoll;
+   mit Tarnung setzte die Tarn-Hülle die Spannung wieder auf voll → Rekursion bis Stapelüberlauf. Zusatzpfeile sind nie Volltreffer. */
+if(typeof friedVoll==='function'){const fv=friedVoll;let inV=0;friedVoll=function(o){if(inV)return;const amb=G.mp&&P&&P.id==='friedrich'&&P.fmTarn;inV=1;let r;try{r=fv.apply(this,arguments)}finally{inV=0}if(amb)P.kzHiT=G.time+1.5;return r}}
+/* Kopfgeld kassiert */
+hook('kill',(e)=>{if(!G.mp||!(e.kzKopf>G.time)||!e.kzKopfP)return;const [z,f]=e.kzKopfP;e.kzKopf=0;
+ for(const q of [z,f])if(q&&PL.includes(q))withP(q,()=>{for(let i=0;i<2;i++)orb(e.x+rnd(-20,20),e.y+rnd(-20,20),'gold',Math.max(1,Math.round(ri(5,9)*P.st.gold)))});
+ G.fxs.push({k:'kz_kopf',x:e.x,y:e.y-e.r*0.4,r:e.r,end:1,t:0,life:1});word(e.x,e.y-e.r-30,'Kopfgeld kassiert!','#ffd04a');sfxAt('b_feder',e.x,e.y)});
+/* Sturmbeute zählt herunter (Gastgeber) und knistert sichtbar (auch beim Gast) */
+{const ue=updEnemy;updEnemy=function(e,dt){if(e.kzLad>0){e.kzLad-=dt;if(e.kzLad<0)e.kzLad=0}return ue.apply(this,arguments)}}
+{const de=drawEnemy;drawEnemy=function(e,t){const r=de.apply(this,arguments);try{if(e&&e.kzLad>0&&!e.dead){const c=cx,x=e.x,y=e.y-e.r*0.5,R=e.r+10;c.save();c.globalCompositeOperation='lighter';glow(x,y,R*1.6,'#7fd0ff',0.25+0.1*Math.sin(t*20),true);
+  c.strokeStyle='#cfefff';c.lineWidth=1.6;c.lineCap='round';const s=Math.floor(t*14);for(let i=0;i<3;i++){const a0=((s*7+i*13)%17)/17*TAU;c.globalAlpha=0.85;c.beginPath();let px=x+Math.cos(a0)*R,py=y+Math.sin(a0)*R*0.7;c.moveTo(px,py);
+   for(let j=1;j<=4;j++){const a=a0+j*0.32,rr=R*(1+(((s+j*3+i)%5)-2)*0.07);px=x+Math.cos(a)*rr;py=y+Math.sin(a)*rr*0.7;c.lineTo(px,py)}c.stroke()}c.restore()}}catch(x){}return r}}
+/* alte Treffer-Kombos nicht durch Zusammenspiel-Schaden auslösen */
+{const no=e=>KZ_IN||KZQ===e||e&&e.kzT>G.time;const ch=comboHit;comboHit=function(e){if(no(e))return;return ch.apply(this,arguments)};const tk=teamKombo;teamKombo=function(e,o){if(no(e)||o&&o.kzC)return;return tk.apply(this,arguments)}}
+/* Schadensübersicht: Kombo-Namen */
+{const di=dmInfo;dmInfo=function(k){if(typeof k==='string'&&k.indexOf('kombo:')===0){const C=KZI[k.slice(6)];return{n:C?'Zusammenspiel: '+C.n:'Zusammenspiel',ic:C?C.ic:'✧'}}return di.apply(this,arguments)}}
+
+/* ---------- Effekte ---------- */
+const KZF="'IM Fell English SC','Palatino Linotype',Georgia,serif";
+Object.assign(HFX,{
+ kz_txt(f,k,c,t){const q=Math.min(1,f.t/0.18),s=q<1?0.4+0.6*(1+2.7*Math.pow(q-1,3)+1.7*Math.pow(q-1,2)):1,al=k<0.72?1:Math.max(0,(1-k)/0.28),x=f.x,y=f.y-14*k;
+  c.globalAlpha=al;c.textAlign='center';c.textBaseline='middle';
+  if(f.t<0.5){c.globalCompositeOperation='lighter';glow(x,y+6,90*s,f.c||'#ffd86a',0.45*(1-f.t/0.5),true);c.globalCompositeOperation='source-over'}
+  c.font=`${Math.round(13*s)}px ${KZF}`;const w1=c.measureText('Zusammenspiel!').width;c.lineWidth=3;c.strokeStyle='rgba(20,10,0,.85)';c.strokeText('Zusammenspiel!',x,y-12*s);c.fillStyle='#ffe6a0';c.fillText('Zusammenspiel!',x,y-12*s);
+  const dx=w1/2+9;for(const [sx,col] of [[-1,f.c1],[1,f.c2]]){c.save();c.translate(x+sx*dx,y-12*s);c.rotate(Math.PI/4+t*2*sx);c.fillStyle=col||'#ffd86a';c.strokeStyle='rgba(20,10,0,.85)';c.lineWidth=1.5;c.fillRect(-3.5*s,-3.5*s,7*s,7*s);c.strokeRect(-3.5*s,-3.5*s,7*s,7*s);c.restore()}
+  c.font=`800 ${Math.round(22*s)}px "Alegreya Sans",sans-serif`;const w2=c.measureText(f.n).width;const g=c.createLinearGradient(x-w2/2,0,x+w2/2,0);g.addColorStop(0,f.c1||'#ffd86a');g.addColorStop(0.5,'#fff6dc');g.addColorStop(1,f.c2||'#ffd86a');
+  c.lineWidth=5;c.strokeStyle='rgba(20,10,0,.85)';c.lineJoin='round';c.strokeText(f.n,x,y+10*s);c.fillStyle=g;c.fillText(f.n,x,y+10*s);
+  if(f.t<0.6){const n=6;for(let i=0;i<n;i++){const a=i/n*TAU+f.t*2,r=w2*0.55+f.t*40;c.globalAlpha=al*(1-f.t/0.6);circ(c,x+Math.cos(a)*r,y+2+Math.sin(a)*r*0.35,2.2,'#fff6dc')}}c.globalAlpha=1},
+ kz_nagel(f,k,c,t){const x=f.x,y=f.y,q=Math.min(1,k/0.14);c.globalCompositeOperation='lighter';
+  if(k<0.35){const b=1-k/0.35;c.globalAlpha=b*0.8;const g=c.createLinearGradient(x,y-280,x,y);g.addColorStop(0,'rgba(255,216,106,0)');g.addColorStop(1,'rgba(255,240,190,1)');c.fillStyle=g;c.fillRect(x-7*b-2,y-280,14*b+4,280)}
+  c.globalAlpha=(1-k)*0.9;c.strokeStyle='#ffd86a';c.lineWidth=3;c.beginPath();c.ellipse(x,y+f.r*0.3,(f.r+14)+k*40,(f.r+14)*0.45+k*16,0,0,TAU);c.stroke();
+  for(let i=0;i<8;i++){const a=i/8*TAU+k*1.5;c.globalAlpha=(1-k)*0.8;circ(c,x+Math.cos(a)*(f.r+20+k*30),y+f.r*0.3+Math.sin(a)*(f.r+20+k*30)*0.45,2,'#fff2c0')}
+  c.globalCompositeOperation='source-over';c.globalAlpha=k<0.8?1:(1-k)/0.2;c.save();c.translate(x,y+f.r*0.2);c.rotate(-0.5);c.scale(1.5,1.5);const L=30+f.r*0.3,dy=-(1-q)*90;
+  c.translate(0,dy);ln(c,'#5a3a1a',3.5,0,-L,0,0);c.fillStyle='#e8e8f0';c.beginPath();c.moveTo(0,4);c.lineTo(-4.5,-6);c.lineTo(4.5,-6);c.closePath();c.fill();
+  c.fillStyle='#ffd86a';c.beginPath();c.moveTo(0,-L+10);c.lineTo(-6,-L-2);c.lineTo(0,-L+4);c.lineTo(6,-L-2);c.closePath();c.fill();c.restore();c.globalAlpha=1},
+ kz_wurf(f,k,c,t){const q=Math.min(1,k/0.55),x=f.x+(f.x2-f.x)*q,y=f.y+(f.y2-f.y)*q-Math.sin(q*Math.PI)*60;
+  c.globalAlpha=(1-k)*0.7;c.strokeStyle='#d8c8a0';c.lineWidth=3;c.setLineDash([5,7]);c.beginPath();c.moveTo(f.x,f.y);c.quadraticCurveTo((f.x+f.x2)/2,(f.y+f.y2)/2-120,x,y);c.stroke();c.setLineDash([]);
+  for(let i=0;i<6;i++){const a=i*1.05+k*6,r=10+k*60;c.save();c.translate(f.x+Math.cos(a)*r,f.y+Math.sin(a)*r*0.5-k*20);c.rotate(a+k*8);c.globalAlpha=(1-k);ell(c,0,0,7,2.6,i%2?'#4a8a2e':'#6aa83a');c.restore()}
+  if(k>0.5){const p=(k-0.5)/0.5;c.globalAlpha=(1-p)*0.7;c.strokeStyle='#e8d8b8';c.lineWidth=2.5;c.beginPath();c.ellipse(f.x2,f.y2+f.r*0.4,f.r+p*40,(f.r+p*40)*0.4,0,0,TAU);c.stroke()}
+  c.globalAlpha=(1-k);c.font='800 15px "Alegreya Sans",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.8)';c.strokeText('Wuff!',f.x,f.y-f.r-6-k*20);c.fillStyle='#ffe0a8';c.fillText('Wuff!',f.x,f.y-f.r-6-k*20);c.globalAlpha=1},
+ kz_saite(f,k,c,t){const P0=f.pts||[];if(P0.length<2)return;const x0=P0[0],y0=P0[1];c.globalCompositeOperation='lighter';c.lineCap='round';const s=Math.floor(t*30);
+  for(let i=2;i<P0.length;i+=2){const x1=P0[i],y1=P0[i+1],d=Math.hypot(x1-x0,y1-y0),n=Math.max(4,Math.round(d/28));
+   for(const [w,col,a] of [[7,'#7fbfff',0.35],[2.6,'#fff6dc',1]]){c.globalAlpha=a*(1-k);c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x0,y0);
+    for(let j=1;j<n;j++){const q=j/n,o=Math.sin(q*Math.PI)*(((s*7+j*13+i)%9)-4)*3.2;c.lineTo(x0+(x1-x0)*q+o*(y1-y0)/d*-1,y0+(y1-y0)*q+o*(x1-x0)/d)}c.lineTo(x1,y1);c.stroke()}
+   glow(x1,y1,26,'#9fd8ff',0.6*(1-k),true)}
+  glow(x0,y0,40,'#ffd86a',0.7*(1-k),true);c.globalCompositeOperation='source-over';c.font='700 18px serif';c.textAlign='center';
+  for(let i=0;i<4;i++){const a=i*1.7,r=20+k*50;c.globalAlpha=(1-k);c.fillStyle=i%2?'#ffd86a':'#cfefff';c.fillText(i%2?'♪':'♫',x0+Math.cos(a)*r,y0-20-k*40+Math.sin(a)*10)}c.globalAlpha=1},
+ kz_dieb(f,k,c,t){const x=f.x,y=f.y,R=f.r+22,q=Math.min(1,k/0.25);c.globalCompositeOperation='lighter';c.lineCap='round';
+  for(const [sx,col] of [[1,'#d68cff'],[-1,'#ff5a6a']]){c.globalAlpha=(1-k)*0.95;c.strokeStyle=col;c.lineWidth=5*(1-k)+1;c.beginPath();c.moveTo(x-R*sx,y-R);c.lineTo(x-R*sx+2*R*sx*q,y-R+2*R*q);c.stroke()}
+  glow(x,y,R*1.4,'#b070ff',0.5*(1-k),true);c.globalCompositeOperation='source-over';
+  for(let i=0;i<5;i++){const a=-Math.PI/2+(i-2)*0.45,r=10+k*55,cx0=x+Math.cos(a)*r,cy0=y+Math.sin(a)*r+k*k*60;c.globalAlpha=1-k;ell(c,cx0,cy0,4.5,4.5*Math.abs(Math.cos(t*9+i)),'#ffd04a');ell(c,cx0,cy0,2.4,2.4*Math.abs(Math.cos(t*9+i)),'#fff2a0')}c.globalAlpha=1},
+ kz_blitz(f,k,c,t){const x=f.x,y=f.y-f.r*0.5;c.globalCompositeOperation='lighter';glow(x,y,(f.r+30)*(1+k),'#7fd0ff',0.8*(1-k),true);c.globalAlpha=(1-k);c.strokeStyle='#e8f8ff';c.lineWidth=2.5;
+  for(let i=0;i<10;i++){const a=i/10*TAU,r0=f.r*0.5,r1=f.r+20+k*50;c.beginPath();c.moveTo(x+Math.cos(a)*r0,y+Math.sin(a)*r0);c.lineTo(x+Math.cos(a+0.12)*(r0+r1)/2,y+Math.sin(a+0.12)*(r0+r1)/2);c.lineTo(x+Math.cos(a)*r1,y+Math.sin(a)*r1);c.stroke()}c.globalAlpha=1},
+ kz_huhn(f,k,c,t){const x=f.x,y=f.y;for(let i=0;i<9;i++){const a=i*0.7+1,r=14+k*70,fx=x+Math.cos(a)*r+Math.sin(t*4+i)*6,fy=y-30+Math.sin(a)*r*0.4-30*(1-k)+k*k*70;c.save();c.translate(fx,fy);c.rotate(Math.sin(t*5+i)*0.8);c.globalAlpha=Math.min(1,(1-k)*1.6);
+   ell(c,0,0,8,3,i%3?'#ffffff':'#f0c890');ln(c,'rgba(150,120,90,.7)',1,-7,0,7,0);c.restore()}
+  const q=Math.min(1,k/0.4),ey=y-6-Math.abs(Math.sin(q*Math.PI*2))*28*(1-q);c.globalAlpha=k<0.85?1:(1-k)/0.15;c.globalCompositeOperation='lighter';glow(x,ey,26,'#ffd04a',0.5,true);c.globalCompositeOperation='source-over';
+  ell(c,x,ey,11,14,'#e8b020');ell(c,x-3.5,ey-5,4,5.5,'#fff2a0');c.strokeStyle='rgba(90,60,0,.6)';c.lineWidth=1.5;c.beginPath();c.ellipse(x,ey,11,14,0,0,TAU);c.stroke();c.globalAlpha=1},
+ kz_splitter(f,k,c,t){const x=f.x,y=f.y;let s=f.s||1;const rr=()=>{s=(s*9301+49297)%233280;return s/233280};c.globalCompositeOperation='lighter';
+  if(k<0.3){glow(x,y,f.r*0.8,'#bdf0ff',(1-k/0.3)*0.8,true)}c.globalAlpha=(1-k)*0.6;c.strokeStyle='#dff8ff';c.lineWidth=2;c.beginPath();c.ellipse(x,y+10,f.r*Math.min(1,k*2.5),f.r*Math.min(1,k*2.5)*0.45,0,0,TAU);c.stroke();
+  c.globalCompositeOperation='source-over';for(let i=0;i<14;i++){const a=rr()*TAU,sp=0.5+rr()*0.6,r=f.r*sp*Math.min(1,k*1.8),L=7+rr()*9;c.save();c.translate(x+Math.cos(a)*r,y+Math.sin(a)*r*0.6);c.rotate(a+k*rr()*6);c.globalAlpha=(1-k);
+   c.fillStyle=i%3?'#dff8ff':'#9fe0ff';c.strokeStyle='rgba(60,120,160,.8)';c.lineWidth=1;c.beginPath();c.moveTo(L,0);c.lineTo(0,-L*0.28);c.lineTo(-L*0.5,0);c.lineTo(0,L*0.28);c.closePath();c.fill();c.stroke();c.restore()}c.globalAlpha=1},
+ kz_beutel(f,k,c,t){for(let i=0;i<6;i++){const q=Math.min(1,Math.max(0,k*1.6-i*0.09));if(q<=0||q>=1)continue;const x=f.x+(f.x2-f.x)*q,y=f.y+(f.y2-f.y)*q-Math.sin(q*Math.PI)*70;c.globalAlpha=1;
+   ell(c,x,y,5,5*Math.abs(Math.cos(t*10+i)),'#ffd04a');ell(c,x,y,2.6,2.6*Math.abs(Math.cos(t*10+i)),'#fff2a0')}
+  const p=Math.min(1,k/0.3);c.globalAlpha=1-k;c.save();c.translate(f.x,f.y-6-p*14);c.scale(0.8+p*0.3,0.8+p*0.3);ell(c,0,4,11,10,'#8a5a2a');ell(c,0,-6,6,3,'#6a4020');ln(c,'#ffd04a',2,-5,-4,5,-4);
+  c.font='800 11px "Alegreya Sans",sans-serif';c.textAlign='center';c.fillStyle='#ffd04a';c.fillText('$',0,8);c.restore();c.globalAlpha=1},
+ kz_kopf(f,k,c,t){const x=f.x,y=f.y,R=f.r+18+(f.end?k*40:0),q=Math.min(1,k/0.2);c.globalAlpha=(1-k);c.strokeStyle=f.end?'#ffd04a':'#ff9a5a';c.lineWidth=3;
+  c.beginPath();c.arc(x,y,R*(1.6-0.6*q),0,TAU);c.stroke();for(let i=0;i<4;i++){const a=i*Math.PI/2+t*(f.end?4:1.5);ln(c,c.strokeStyle,3,x+Math.cos(a)*R*0.55,y+Math.sin(a)*R*0.55,x+Math.cos(a)*R*1.25,y+Math.sin(a)*R*1.25)}
+  if(!f.end){c.save();c.translate(x,y);c.rotate(-0.8+0.2*(1-q));ln(c,'#d8dde3',4,-R*0.9,0,R*0.6,0);ln(c,'#5a2a2a',5,-R*1.15,0,-R*0.9,0);c.restore()}
+  else{for(let i=0;i<8;i++){const a=i/8*TAU,r=10+k*70;ell(c,x+Math.cos(a)*r,y+Math.sin(a)*r*0.6-k*20,5,5*Math.abs(Math.cos(t*9+i)),'#ffd04a')}}c.globalAlpha=1}});
+
+/* ---------- Übersicht „Zusammenspiel“ (Pause, Gast-Menü) ---------- */
+function kzHtml(){try{const L=mpL().filter(Boolean);if(!(G.mp||G.netGuestRun)||L.length<2)return'';const ids=new Set(L.map(q=>q.id));
+ const list=KZ.filter(C=>ids.has(C.a)&&ids.has(C.b));if(!list.length)return'';kzCss();
+ const cnt=id=>L.reduce((m,q)=>Math.max(m,q.kzN&&(G.netGuestRun||q.kzNr===G.runId)?q.kzN[id]||0:0),0),HN=id=>esc(HEROES[id]?HEROES[id].name:id);
+ const done=list.filter(C=>cnt(C.id)>0).length;
+ return`<details class="card kzDet" ${KZUI.open?'open':''}><summary><span class="eyebrow" style="margin:0">Zusammenspiel</span><span class="muted" style="font-size:12px">${done} von ${list.length} entdeckt</span></summary>
+ <div class="kzL">${list.map(C=>{const n=cnt(C.id);return`<div class="kzR${n?' on':''}"><span class="kzI" style="--a:${HCOL[C.a]};--b:${HCOL[C.b]}">${C.ic}</span>
+ <div class="kzT"><div><b>${esc(C.n)}</b> <span class="kzW"><i style="color:${HCOL[C.a]}">${HN(C.a)}</i> → <i style="color:${HCOL[C.b]}">${HN(C.b)}</i></span></div><div class="kzD">${esc(C.w)} · ${esc(C.t)}.<br><span class="kzE">${esc(C.d)}.</span></div></div>
+ <span class="kzM">${n?'✓ '+n+'×':'–'}</span></div>`}).join('')}</div></details>`}catch(e){return''}}
+let KZCSS=0;function kzCss(){if(KZCSS)return;KZCSS=1;const s=document.createElement('style');s.textContent=`
+.kzDet>summary{display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;list-style:none}.kzDet>summary::-webkit-details-marker{display:none}
+.kzL{display:grid;gap:6px;margin-top:10px}
+.kzR{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.kzR.on{border-color:rgba(255,216,106,.5);background:linear-gradient(90deg,rgba(255,216,106,.12),rgba(255,255,255,.03))}
+.kzI{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;line-height:1;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.3),transparent 60%),linear-gradient(135deg,var(--a),var(--b));box-shadow:inset 0 0 0 2px rgba(0,0,0,.3),0 0 10px rgba(0,0,0,.25)}
+.kzR:not(.on) .kzI{filter:saturate(.45) brightness(.75)}
+.kzT{min-width:0}.kzT b{font-family:var(--fd);font-weight:400;font-size:16px;color:#ffe6a0}.kzW{font-size:12px;white-space:nowrap}.kzW i{font-style:normal;font-weight:700}
+.kzD{font-size:12.5px;line-height:1.35;opacity:.85;margin-top:1px}.kzE{color:#f3e2b8}
+.kzM{font-size:13px;font-weight:800;color:#ffd86a;white-space:nowrap}.kzR:not(.on) .kzM{opacity:.35;color:inherit}`;document.head.appendChild(s)}
+document.addEventListener('toggle',ev=>{const d=ev.target;if(d&&d.classList&&d.classList.contains('kzDet'))KZUI.open=d.open},true);
+{const dp=dmPauseHtml;dmPauseHtml=function(){return dp.apply(this,arguments)+(G.state==='play'?kzHtml():'')}}
+{const dg=dmGuestHtml;dmGuestHtml=function(me){return dg.apply(this,arguments)+kzHtml()}}
+window.__hsK={KZ,KZG,kzGebunden,chill:(e,t)=>chill(e,t),kzHtml};
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
