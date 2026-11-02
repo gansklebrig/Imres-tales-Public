@@ -72,6 +72,18 @@
   const kImg = (src, cls, d, stil) => '<img class="k-l ' + cls + '" src="' + src + '" alt="" loading="lazy" decoding="async" style="--d:' + d + (stil ? ";" + stil : "") + '">';
   const kKlein = f => "vorschau/klein/" + String(f).split("/").pop().replace(/\.(jpe?g|png|webp)$/i, ".webp");
   const kFoto = (src, cls, d, gross) => '<span class="k-l k-foto ' + cls + '" style="--d:' + d + '"><img src="' + kKlein(src) + '" data-gross="' + src + '" alt="" loading="lazy" decoding="async" onerror="if(this.src.indexOf(this.dataset.gross)<0)this.src=this.dataset.gross"></span>';
+  /* Bestiarium-Kachel: Georgs Collage aus seinem Format-Projekt, Ebene für Ebene (Name, x %, y %, Breite %, Drehung, Tiefe, Filter) */
+  const BEST_EBENEN = [
+    ["drache2",82.73,78.32,53.51,0.0,0.35,""],
+    ["drache",66.83,40.38,77.35,0.0,0.4,"drop-shadow(0 0 1.3px rgba(222,178,90,0.89)) drop-shadow(0 3px 6px rgba(0,0,0,0.64))"],
+    ["demogorgon",72.67,64.30,79.76,13.8,0.8,"drop-shadow(0 0 1.0px rgba(222,178,90,0.71)) drop-shadow(0 3px 6px rgba(0,0,0,0.65))"],
+    ["riese",36.71,85.83,38.98,0.0,1.4,"drop-shadow(0 0 0.9px rgba(222,178,90,0.65)) drop-shadow(0 3px 6px rgba(0,0,0,0.38))"],
+    ["bugbear",15.80,77.92,56.26,0.0,2.2,"drop-shadow(0 0 0.9px rgba(222,178,90,0.65)) drop-shadow(0 3px 6px rgba(0,0,0,0.51))"],
+    ["chasme",12.44,24.45,41.49,-33.7,1.8,"drop-shadow(0 0 1.1px rgba(222,178,90,0.77)) drop-shadow(0 3px 6px rgba(0,0,0,0.47))"],
+    ["kuotoa2",59.56,84.92,28.39,0.0,2.4,"drop-shadow(0 0 0.9px rgba(222,178,90,0.65)) drop-shadow(0 3px 6px rgba(0,0,0,0.49))"],
+    ["kuotoa",78.26,82.14,37.40,0.0,2.8,"drop-shadow(0 0 1.1px rgba(222,178,90,0.77)) drop-shadow(0 3px 6px rgba(0,0,0,0.70))"],
+    ["blight",32.45,87.60,47.50,0.0,3,"drop-shadow(0 0 0.8px rgba(222,178,90,0.55)) drop-shadow(0 3px 6px rgba(0,0,0,0.73))"]
+  ];
   const COLLAGE = {
     /* aufgeschlagene Geschichte: Fotos der Kapitel wie in ein Tagebuch geklebt, davor der Erzähler */
     chronik: b => kImg(kKlein(b), "k-grund k-sepia", 0) +
@@ -95,7 +107,9 @@
     nsc: () => '<span class="k-l k-wand" style="--d:0"></span>' + kFoto("portrait-koenig.jpg", "k-n1", 1) + kFoto("ploopploopeen.jpg", "k-n2", 1.3) + kFoto("portrait-riese.jpg", "k-n3", 1.1) +
       kImg("gundren-frei.webp", "k-held k-n-gundren", 2) + kImg("buergermeister-frei.webp", "k-held k-n-buerger", 2.6),
     /* Skizzenbuch: Tuschezeichnungen auf Pergament, eine Kreatur bricht heraus, Krallenspuren */
-    bestiarium: () => kImg("bestiarium-kachel.webp?v=1", "k-grund k-best", .5) + '<span class="k-l k-nebel k-nebel2" style="--d:1.4"></span>',
+    bestiarium: () => '<span class="k-best-buehne"><img class="k-bl k-bl-grund" src="bestiarium-grund.webp?v=5" alt="" loading="lazy" style="--d:0">' +
+      BEST_EBENEN.map(([n, x, y, w, r, d, f]) => '<img class="k-bl" src="bestiarium-' + n + '.webp?v=5" alt="" loading="lazy" decoding="async" style="--d:' + d + ";left:" + x + "%;top:" + y + "%;width:" + w + "%;rotate:" + r + "deg;filter:" + (f || "none") + '">').join("") +
+      '</span><span class="k-l k-nebel k-nebel2" style="--d:1.4"></span>',
     /* die Spiele als aufgefächertes Blatt Karten */
     taverne: b => kImg(b.indexOf("vorschau/") === 0 ? b : kKlein(b), "k-grund k-dunkel", 0) +
       ["heldensturm", "jagd", "hort", "nacht", "kehle"].map((n, i) => kImg("vorschau/plakat-" + n + ".webp", "k-plakat", 1 + i * .35, "--n:" + (i - 2))).join(""),
@@ -511,8 +525,12 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .kachel .k-collage .k-karte { filter: sepia(.8) saturate(.9) brightness(.55) contrast(1.1); }
 .kachel .k-collage .k-dunkel { filter: saturate(.7) brightness(.32) blur(1px); }
 .kachel:hover .k-collage .k-grund { filter: saturate(1) brightness(.6); }
-.kachel .k-collage .k-best { filter: brightness(.82) saturate(.95); transform: scale(1.02); }
-.kachel:hover .k-collage .k-best, .kachel:focus-visible .k-collage .k-best { filter: brightness(.95) saturate(1.05); }
+.k-collage:has(.k-best-buehne) { container-type: size; }
+.k-best-buehne { position: absolute; left: 50%; top: 50%; width: max(100cqw, calc(100cqh * 955 / 840)); aspect-ratio: 955 / 840; translate: -50% -50%; }
+.kachel .k-collage .k-bl { position: absolute; height: auto; max-width: none; translate: -50% -50%; }
+.kachel .k-collage .k-bl-grund { left: 50%; top: 50%; width: 102%; }
+.kachel .k-collage .k-best-buehne { filter: brightness(.86); transition: filter .6s; }
+.kachel:hover .k-collage .k-best-buehne, .kachel:focus-visible .k-collage .k-best-buehne { filter: brightness(1); }
 /* Fotos: Pergamentrand, Klebestreifen */
 .k-foto { padding: 3.5% 3.5% 9%; background: #e8dcc0; box-shadow: 0 6px 18px rgba(0,0,0,.6); }
 .k-foto img { display: block; width: 100%; height: 100%; object-fit: cover; filter: sepia(.25) saturate(.85); }
