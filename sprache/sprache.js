@@ -152,11 +152,16 @@
 
   /* ---------- Modell und Mikrofon ---------- */
   function skriptLaden(src) { return new Promise((res, rej) => { if (window.Vosk) return res(); const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+  const gespeichert = () => { try { return localStorage.getItem("imres-sprachmodell") === MODELL; } catch (_) { return false; } };
   function modellHolen() {
     if (modell) return Promise.resolve(modell);
     if (modellLaedt) return modellLaedt;
-    stand(W("⏳ Sprachmodell wird geladen …", "⏳ Loading speech model …"));
-    modellLaedt = Promise.all([skriptLaden(BIBLIOTHEK).then(() => window.Vosk.createModel(MODELL, -1)), wortschatzHolen()]).then(([m]) => { modell = m; karte = null; stand(W("✅ Bereit – ", "✅ Ready – ") + W("Taste ", "key ") + tastenName(E.taste) + W(" halten und sprechen", " hold and speak")); return m; })
+    /* Nach dem ersten Mal liegt das Modell entpackt im Browser-Speicher dieser Seite (IndexedDB, genau eine Kopie, sie wächst nicht).
+       Dann wird nichts mehr heruntergeladen – es wird nur in den Arbeitsspeicher geholt, das dauert ein paar Sekunden. */
+    const da = gespeichert();
+    stand(da ? W("⏳ Sprachmodell wird aus dem Speicher dieses Rechners geholt (kein Download) …", "⏳ Loading the speech model from this computer's storage (no download) …")
+      : W("⏳ Sprachmodell wird geladen (≈ 46 MB, nur beim ersten Mal) …", "⏳ Loading speech model (≈ 46 MB, first time only) …"));
+    modellLaedt = Promise.all([skriptLaden(BIBLIOTHEK).then(() => window.Vosk.createModel(MODELL, -1)), wortschatzHolen()]).then(([m]) => { modell = m; karte = null; try { localStorage.setItem("imres-sprachmodell", MODELL); } catch (_) {} stand(W("✅ Bereit – ", "✅ Ready – ") + W("Taste ", "key ") + tastenName(E.taste) + W(" halten und sprechen", " hold and speak")); return m; })
       .catch(e => { modellLaedt = null; stand(W("⚠ Sprachmodell konnte nicht geladen werden.", "⚠ Could not load the speech model.")); throw e; });
     return modellLaedt;
   }
@@ -397,7 +402,10 @@
     einrichten(o) {
       st = { ort: o.ort, befehle: o.befehle, listeAuf: false };
       karte = null; zeichnen();
-      /* hier wird nichts geladen – erst der Knopf „Sprachsteuerung“ holt Bibliothek und Modell */
+      /* hier wird nichts geladen – erst der Knopf „Sprachsteuerung“ holt Bibliothek und Modell.
+         Ausnahme: Ist die Sprachsteuerung an und das Modell schon auf dem Rechner, wird es still im Hintergrund vorbereitet,
+         damit beim ersten Tastendruck nicht gewartet werden muss (kein Download, nur aus dem Speicher). */
+      if (E.an && gespeichert()) { const los2 = () => modellHolen().catch(() => {}); if (window.requestIdleCallback) requestIdleCallback(los2, { timeout: 4000 }); else setTimeout(los2, 1500); }
     },
     /* wenn sich die Seite neu zeichnet: neuen Platz fürs Bedienfeld setzen, Stichwörter neu einlesen */
     ort(el) { if (st) { st.ort = el; zeichnen(); } },
@@ -412,7 +420,7 @@
     /* Knopf „Halten & sprechen“ (auch am Handy): beim ersten Mal einschalten und das Modell laden, dann zuhören, solange gedrückt */
     halten() {
       knopf = true;
-      if (!E.an) { E.an = true; merken(); zeichnen(); zeige(W("⏳ Sprachmodell wird geladen (≈ 46 MB, nur beim ersten Mal) …", "⏳ Loading the speech model (≈ 46 MB, first time only) …"), true); }
+      if (!E.an) { E.an = true; merken(); zeichnen(); zeige(gespeichert() ? W("⏳ Sprachmodell wird vorbereitet (liegt schon auf diesem Rechner) …", "⏳ Preparing the speech model (already on this computer) …") : W("⏳ Sprachmodell wird geladen (≈ 46 MB, nur beim ersten Mal) …", "⏳ Loading the speech model (≈ 46 MB, first time only) …"), true); }
       Promise.all([modellHolen(), mikroHolen()]).then(() => { vorbereiten(); if (knopf) druck().then(() => { if (!knopf) los(); }); else zeige(W("✓ Bereit – jetzt gedrückt halten und sprechen", "✓ Ready – now hold and speak")); })
         .catch(() => zeige(W("⚠ Mikrofon oder Sprachmodell nicht verfügbar – bitte das Mikrofon im Browser erlauben.", "⚠ Microphone or speech model unavailable – please allow the microphone in your browser.")));
     },

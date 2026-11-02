@@ -10750,7 +10750,7 @@ const ZUS_ICON = {
   function spracheLaden(dann) {
     const fertig = () => { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: root.querySelector(".lw-sprache-ort"), befehle: sprachBefehle }); } dann(); };
     if (window.ImresSprache) { fertig(); return; }
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=8"; sk.onload = fertig; document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=9"; sk.onload = fertig; document.head.appendChild(sk);
   }
   let sprichtKnopf = null, sprichtAb = 0;
   const sprechKnopf = T => '<span class="lw-sprechgruppe"><button type="button" class="lw-schalter lw-sprechen" data-aktion="sprechen" title="' + esc(T.sprechTipp) + '">' + ikonText(T.sprechen, T.einf.kurz.sprechen) + "</button>" +
@@ -10798,7 +10798,7 @@ const ZUS_ICON = {
     const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
     if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
     if (spracheOrt.laedt) return; spracheOrt.laedt = true;
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=8"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=9"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
   }
   /* zusätzliche Stichwörter je Kulisse */
   const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "wald nachts", "wald bei nacht"],
