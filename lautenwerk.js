@@ -10721,10 +10721,30 @@ const ZUS_ICON = {
   function spracheLaden(dann) {
     const fertig = () => { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: root.querySelector(".lw-sprache-ort"), befehle: sprachBefehle }); } dann(); };
     if (window.ImresSprache) { fertig(); return; }
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=7"; sk.onload = fertig; document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=8"; sk.onload = fertig; document.head.appendChild(sk);
   }
   let sprichtKnopf = null, sprichtAb = 0;
-  const sprechKnopf = T => '<button type="button" class="lw-schalter lw-sprechen" data-aktion="sprechen" title="' + esc(T.sprechTipp) + '">' + ikonText(T.sprechen, T.einf.kurz.sprechen) + "</button>";
+  const sprechKnopf = T => '<span class="lw-sprechgruppe"><button type="button" class="lw-schalter lw-sprechen" data-aktion="sprechen" title="' + esc(T.sprechTipp) + '">' + ikonText(T.sprechen, T.einf.kurz.sprechen) + "</button>" +
+    (amRechner() ? '<button type="button" class="lw-schalter lw-lernknopf" data-aktion="sprachlernen" title="' + esc(T.lernTipp) + '" aria-label="' + esc(T.lernTipp) + '">🎓</button>' : "") + "</span>";
+  /* Anlernen auch in der einfachen Ansicht: das Bedienfeld der Sprachsteuerung in einem eigenen Fenster, gleich im Anlern-Modus */
+  Object.assign(TX.de, { lernTipp: "Sprachsteuerung anlernen: Befehl wählen und ein paar Mal sagen – danach versteht sie deine Stimme besser. Hier auch Taste und Stichwörter.", lernTitel: "🎓 Sprachsteuerung anlernen", lernZu: "Schließen" });
+  Object.assign(TX.en, { lernTipp: "Train voice control: pick a command and say it a few times – then it understands your voice better. Key and keywords are here too.", lernTitel: "🎓 Train voice control", lernZu: "Close" });
+  function lernFenster() {
+    if (hoerer) return;
+    const T = t(); let d = document.querySelector(".lw-lerndialog");
+    if (!d) {
+      d = document.createElement("dialog"); d.className = "lw-lerndialog";
+      d.innerHTML = '<div class="lw-lernkopf"><b></b><button type="button" class="lw-lernzu"></button></div><div class="lw-lernort"></div>';
+      document.body.appendChild(d);
+      d.querySelector(".lw-lernzu").addEventListener("click", () => d.close());
+      d.addEventListener("click", e => { if (e.target === d) d.close(); });
+      d.addEventListener("close", () => { const z = root.querySelector(".lw-sprache-ort"); if (window.ImresSprache && z) window.ImresSprache.ort(z); });
+    }
+    d.querySelector(".lw-lernkopf b").textContent = T.lernTitel; d.querySelector(".lw-lernzu").textContent = "✕ " + T.lernZu;
+    try { d.showModal(); } catch (_) { d.setAttribute("open", ""); }
+    spracheLaden(() => { const S2 = window.ImresSprache; S2.ort(d.querySelector(".lw-lernort")); if (S2.anlernen) S2.anlernen(); });
+  }
+  root.addEventListener("click", e => { const b = e.target.closest && e.target.closest('[data-aktion="sprachlernen"]'); if (!b) return; e.preventDefault(); e.stopPropagation(); lernFenster(); }, true);
   root.addEventListener("pointerdown", e => {
     if (wasIst || hoerer || !e.target.closest) return;
     const b = e.target.closest('[data-aktion="sprechen"]'); if (!b || (e.pointerType === "mouse" && e.button !== 0)) return;
@@ -10749,7 +10769,7 @@ const ZUS_ICON = {
     const el = root.querySelector(".lw-sprache-ort"); if (!el) return;
     if (window.ImresSprache) { if (!spracheGeladen) { spracheGeladen = true; window.ImresSprache.einrichten({ ort: el, befehle: sprachBefehle }); } else window.ImresSprache.ort(el); return; }
     if (spracheOrt.laedt) return; spracheOrt.laedt = true;
-    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=7"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
+    const sk = document.createElement("script"); sk.src = ambBasis.replace(/amb\/$/, "sprache/") + "sprache.js?v=8"; sk.onload = () => spracheOrt(); document.head.appendChild(sk);
   }
   /* zusätzliche Stichwörter je Kulisse */
   const SPRACH_KUL = { taverne: ["wirtshaus", "kneipe", "gasthaus", "schenke", "schänke"], feuer: ["feuer", "lagerfeuer"], wald: ["wald", "forst", "wald am tag"], waldnacht: ["nachtwald", "wald nachts", "wald bei nacht"],
@@ -12720,6 +12740,15 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ekopf-frei .lw-kleinregler input { max-width: none; }
 .lw-ekopf-frei .lw-eknoepfe { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .35rem; }
 .lw-ekopf-frei .lw-eknoepfe .lw-schalter { justify-content: center; }
+.lw-sprechgruppe { display: inline-flex; gap: 2px; min-width: 0; }
+.lw-sprechgruppe > .lw-sprechen { flex: 1 1 auto; min-width: 0; border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
+.lw-sprechgruppe > .lw-lernknopf { flex: 0 0 auto; width: auto; min-width: 2rem; padding-left: .35rem; padding-right: .35rem; border-top-left-radius: 3px; border-bottom-left-radius: 3px; font-size: 1rem; }
+.lw-lerndialog { width: min(36rem, calc(100vw - 2rem)); max-height: calc(100vh - 3rem); overflow: auto; padding: .8rem 1rem 1rem; border: 1px solid rgba(224,160,70,.55); border-radius: 12px; background: #17131d; color: #ebe2cc; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
+.lw-lerndialog::backdrop { background: rgba(5,3,8,.6); }
+.lw-lernkopf { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .6rem; }
+.lw-lernkopf b { color: #e0a046; font-size: 1rem; }
+.lw-lernzu { border: 1px solid rgba(235,226,204,.3); background: none; color: inherit; border-radius: 8px; padding: .25rem .6rem; cursor: pointer; font: inherit; font-size: .85rem; }
+.lw-lernzu:hover { border-color: #e0a046; color: #e0a046; }
 @container (max-width: 26rem) { .lw-ekopf-frei .lw-eknoepfe { grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr)); } .lw-ekopf-frei .lw-eknoepfe .lw-lbl { display: none; } .lw-ekopf-frei .lw-eknoepfe .lw-ik { font-size: 1.2rem; } }
 @container (max-width: 22rem) { .lw-ekopf-frei .lw-kleinregler .lw-lbl, .lw-ekopf-frei .lw-ejetzt { display: none; } .lw-ekopf-frei .lw-play.lw-play-gross { min-width: 0; padding: .4rem .8rem; font-size: 1rem; } }
 .lw-momfrei { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: .35rem; }

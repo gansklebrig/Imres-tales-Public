@@ -401,6 +401,12 @@
     },
     /* wenn sich die Seite neu zeichnet: neuen Platz fürs Bedienfeld setzen, Stichwörter neu einlesen */
     ort(el) { if (st) { st.ort = el; zeichnen(); } },
+    /* gleich im Anlern-Modus öffnen (einfache Ansicht): schaltet die Sprachsteuerung dafür ein */
+    anlernen() {
+      if (!st) return;
+      if (!E.an) { E.an = true; merken(); Promise.all([modellHolen(), mikroHolen()]).then(vorbereiten).catch(() => {}); mikroHolen().catch(() => stand(W("⚠ Kein Zugriff aufs Mikrofon – bitte im Browser erlauben.", "⚠ No microphone access – please allow it in the browser."))); helferVerbinden(); }
+      st.lernAuf = true; zeichnen();
+    },
     neu() { karte = null; },
     get an() { return E.an; },
     /* Knopf „Halten & sprechen“ (auch am Handy): beim ersten Mal einschalten und das Modell laden, dann zuhören, solange gedrückt */
