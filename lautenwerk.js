@@ -9847,8 +9847,8 @@ const ZUS_ICON = {
   function zusReglerInhalt(T) {
     const sp = sprache(), an = Object.keys(zusWahl).filter(id => ZUSATZ[id]), name = id => esc(ZUSATZ[id][sp] || ZUSATZ[id].de);
     if (!an.length) return '<p class="lw-tipp lw-zrleer">' + T.zusReglerLeer + "</p>";
-    return '<div class="lw-spuren lw-zregler"><div class="lw-zrkopf"><button type="button" class="lw-klein lw-zurueck100" data-aktion="zus100">↺ ' + T.kulMixZurueck + '</button><button type="button" class="lw-klein" data-aktion="zusalleaus" title="' + esc(T.zusAlleAus) + '">✕ ' + T.zusAlleAusKurz + "</button></div>" +
-      alleRegler(T) + an.map(id => { const v = Math.round(zusWert(id) * 100);
+    return '<div class="lw-spuren lw-zregler">' +
+      alleRegler(T, zurueckKnopf(T, "zus100") + '<button type="button" class="lw-klein lw-allek" data-aktion="zusalleaus" title="' + esc(T.zusAlleAus) + '" aria-label="' + esc(T.zusAlleAus) + '">✕</button>') + an.map(id => { const v = Math.round(zusWert(id) * 100);
         return '<div class="lw-zuszeile" data-hlq="' + id + '"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
           '<span class="lw-zrname">' + name(id) + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("") + "</div>";
   }
@@ -9881,7 +9881,8 @@ const ZUS_ICON = {
     clearTimeout(zusHinweis.t); zusHinweis.t = setTimeout(() => { h.textContent = ""; }, 4000);
   }
   /* ein Regler für alle: verschiebt jede Spur (und jedes Zusatzgeräusch im selben Fenster) um denselben Prozentsatz – die Mischung bleibt, alles wird gemeinsam leiser oder lauter */
-  const alleRegler = T => '<label class="lw-spurzeile lw-allespur" title="' + esc(T.alleSpurTipp) + '"><span>' + T.alleSpur + '</span><input type="range" min="0" max="200" step="1" value="100" data-allespur="1" aria-label="' + esc(T.alleSpurTipp) + '"><b>100 %</b></label>';
+  const alleRegler = (T, extra) => '<div class="lw-spurzeile lw-allespur" title="' + esc(T.alleSpurTipp) + '"><span>' + T.alleSpur + '</span><input type="range" min="0" max="200" step="1" value="100" data-allespur="1" aria-label="' + esc(T.alleSpurTipp) + '"><b>100 %</b>' + (extra || "") + "</div>";
+  const zurueckKnopf = (T, aktion) => '<button type="button" class="lw-klein lw-allek" data-aktion="' + aktion + '" title="' + esc(T.kulMixZurueck) + '" aria-label="' + esc(T.kulMixZurueck) + '">↺</button>';
   Object.assign(TX.de, { alleSpur: "⇕ Alle gemeinsam", alleSpurTipp: "Alle Spuren und Geräusche in diesem Fenster gleichzeitig dimmen oder anheben – jede um denselben Prozentsatz, die Mischung bleibt erhalten." });
   Object.assign(TX.en, { alleSpur: "⇕ All together", alleSpurTipp: "Dim or raise every layer and sound in this panel at once – each by the same percentage, the mix stays the same." });
   let alleStart = null;
@@ -9916,7 +9917,7 @@ const ZUS_ICON = {
     const namen = KUL_SPUR_NAME[sprache()] || KUL_SPUR_NAME.de;
     const zeile = (i, name) => { const v = Math.round(kulMixWert(S.kulisse, i) * 100);
       return '<label class="lw-spurzeile"><span>' + esc(name) + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-kulspur="' + i + '"><b>' + v + " %</b></label>"; };
-    return '<div class="lw-spuren"><button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck">↺ ' + T.kulMixZurueck + "</button>" + alleRegler(T) +
+    return '<div class="lw-spuren">' + alleRegler(T, zurueckKnopf(T, "kulmixzurueck")) +
       w.betten.slice(0, spar ? 2 : 9).map(([n], i) => zeile(i, namen[n] || n.replace(/^a_/, ""))).join("") +
       (w.ev.length ? zeile("ev", T.kulEinzel) : "") + "</div>";
   }
@@ -12428,6 +12429,25 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-zusreglerfeld .lw-zrname { font-size: .82rem; color: var(--vellum); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-zrkopf { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .4rem; }
 .lw-zrzahl { display: inline-grid; place-items: center; min-width: 1.3rem; height: 1.3rem; padding: 0 .3rem; margin-left: .3rem; border-radius: .7rem; background: linear-gradient(150deg, #f2cf6a, #a8701e); color: #1a1008; font-size: .72rem; font-weight: 700; vertical-align: middle; }
+.lw-spurzeile.lw-allespur { grid-template-columns: minmax(5.5rem, 9rem) 1fr 3.2rem auto auto; }
+.lw-allek { min-width: 1.9rem; padding: .1rem .35rem !important; }
+/* schmale Felder: alles bleibt einzeilig – Namen kürzer, Prozent knapper, Symbole kleiner; die Kartenleiste rollt statt umzubrechen */
+.lw-box, .lw-spuren, .lw-klingt, .lw-fkoerper { container-type: inline-size; }
+@container (max-width: 24rem) {
+  .lw-spurzeile { grid-template-columns: minmax(3.2rem, 32%) minmax(0, 1fr) 2.5rem !important; gap: .3rem !important; font-size: .74rem !important; }
+  .lw-spurzeile > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lw-spurzeile b { font-size: .7rem; }
+  .lw-spurzeile.lw-allespur { grid-template-columns: minmax(0, 1fr) 2.6rem auto auto !important; row-gap: .15rem !important; }
+  .lw-spurzeile.lw-allespur input { grid-column: 1 / -1; grid-row: 2; }
+  .lw-zusreglerfeld .lw-zuszeile, .lw-zuszeile { grid-template-columns: 1.9rem minmax(0, 1fr) 2.5rem !important; gap: .3rem !important; }
+  .lw-zuszeile .lw-zrname { display: none; }
+  .lw-zuszeile .lw-zknopf { width: 1.9rem; height: 1.9rem; }
+  .lw-spuren { padding: .35rem .4rem; gap: .2rem; }
+  .lw-kleiste { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: thin; gap: .15rem; }
+  .lw-kleiste .lw-kl, .lw-kblock.gross .lw-kleiste .lw-kl { flex: 0 0 auto; width: 1.75rem; height: 1.75rem; font-size: .92rem; }
+  .lw-kspann .lw-kleinregler > span:first-child { display: none; }
+  .lw-kspann .lw-espann b { min-width: 0 !important; font-size: .72rem; }
+}
 .lw-allespur, .lw-kzalle { border: 1px solid rgba(224,160,70,.35); border-radius: 8px; padding: .3rem .45rem; margin: .1rem 0 .45rem; background: rgba(224,160,70,.06); }
 .lw-allespur > span, .lw-kzalle .lw-kzname, .lw-kzalle .lw-kzsym { color: var(--ember); font-weight: 600; }
 .lw-spurzeile { display: grid; grid-template-columns: minmax(6.5rem, 9rem) 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; color: var(--vellum); }
