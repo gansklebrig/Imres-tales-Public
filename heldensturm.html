@@ -418,7 +418,7 @@ function nNum(v,a,b,d){v=typeof v==='number'||typeof v==='string'||typeof v==='b
 function nInt(v,a,b,d){v=nNum(v,a,b,NaN);return isFinite(v)?clamp(Math.round(v),a,b):d}
 function sTxt(v,n){return(typeof v==='string'||typeof v==='number'?String(v):'').replace(/[<>&"'`\\\u0000-\u001f]/g,'').slice(0,n||60)}
 function okHero(id){return typeof id==='string'&&HERO_IDS.includes(id)}
-try{saveFix(SAVE)}catch(e){SAVE=defSave()}
+try{saveFix(SAVE)}catch(e){SAVE=defSave()}hsBakLoad();
 function hsave(id){return SAVE.heroes[id]||(SAVE.heroes[id]={up:{},best:-1,runs:0,clears:0})}
 /* Mehrere Tabs: STRAW = zuletzt gesehener gespeicherter Text, SBASE = Stand, auf dem dieser Tab aufbaut.
    Hat ein anderer Tab inzwischen gespeichert, wird vor dem Schreiben dreiseitig zusammengeführt (Basis/meins/fremd):
@@ -435,7 +435,7 @@ function saveMerge(raw){let t,b;try{t=JSON.parse(raw);b=JSON.parse(SBASE)}catch(
  const r=saveFix(Object.assign(defSave(),mrg3(b,JSON.parse(JSON.stringify(SAVE)),t,'')));runFix(r);saveInto(SAVE,r);BESTB=null}
 const saveSig=S=>JSON.stringify(S,(k,v)=>k==='savedAt'||k==='cloudRev'?undefined:v);
 function persist(){let raw=null;try{raw=localStorage.getItem(SKEY)}catch(e){}if(raw&&raw!==STRAW)try{saveMerge(raw)}catch(e){}
- let same=false;try{same=!!SAVE.savedAt&&saveSig(SAVE)===saveSig(JSON.parse(SBASE))}catch(e){}if(!same)SAVE.savedAt=Date.now();try{const s=JSON.stringify(SAVE);localStorage.setItem(SKEY,s);STRAW=s;SBASE=s}catch(e){}cloudSoon()}
+ let same=false;try{same=!!SAVE.savedAt&&saveSig(SAVE)===saveSig(JSON.parse(SBASE))}catch(e){}if(!same)SAVE.savedAt=Date.now();try{const s=JSON.stringify(SAVE);try{localStorage.setItem(SKEY,s)}catch(q){hsBakDrop();localStorage.setItem(SKEY,s)}STRAW=s;SBASE=s}catch(e){}cloudSoon()}
 addEventListener('storage',e=>{if(e.key!==SKEY||!e.newValue||e.newValue===STRAW||G.bot)return;
  if(G.state!=='title'||G.mp||NET.role)return;/* mitten im Lauf: beim nächsten Speichern zusammenführen */
  if(JSON.stringify(SAVE)!==SBASE){persist();return}
@@ -2326,7 +2326,7 @@ function startRun(id,diff,mode,opt){mode=mode||'kampagne';opt=opt||{};G.runId=Ma
   if(G.rl){const cp=Math.min(...opt.mp.map(s=>rlCp(s.hero,diff)));st0=ortStart(Math.max(0,Math.min(opt.start===undefined?cp:opt.start,cp)))}}
  setupStage(st0);showStageIntro();
 }
-function saveRun(){if(!P||G.bot)return;if(G.state==='camp'){rlSync();persist();return}if(G.mp){for(const q of PL)withP(q,rlSync);persist();return}SAVE.run={id:P.id,diff:G.diff,hard:HARD()?1:0,stage:G.stage,level:P.level,xp:P.xp,sp:P.sp,ranks:P.ranks,aeste:P.aeste,sf:P.sf,learn:P.learn,use:P.use||{},eq:P.eq,bag:P.bag,revives:P.revives,kills:G.kills,goldRun:G.goldRun,time:G.time,itemId:ITEMID,score:G.score,bar:P.bar,pots:P.pots,mode:G.mode,depth:G.depth,tag:G.daily?G.daily.tag:null,stages:G.mode!=='kampagne'?STAGES.slice():null,gems:P.gems,mods:P.mods,potMax:P.potMax,rl:!!G.rl};rlSync();persist()}
+function saveRun(){if(!P||G.bot)return;if(G.state==='camp'){rlSync();persist();return}if(G.mp||G.hcmp){for(const q of PL)withP(q,rlSync);mprSave();persist();return}SAVE.run={id:P.id,diff:G.diff,hard:HARD()?1:0,stage:G.stage,level:P.level,xp:P.xp,sp:P.sp,ranks:P.ranks,aeste:P.aeste,sf:P.sf,learn:P.learn,use:P.use||{},eq:P.eq,bag:P.bag,revives:P.revives,kills:G.kills,goldRun:G.goldRun,time:G.time,itemId:ITEMID,score:G.score,bar:P.bar,pots:P.pots,mode:G.mode,depth:G.depth,tag:G.daily?G.daily.tag:null,stages:G.mode!=='kampagne'?STAGES.slice():null,gems:P.gems,mods:P.mods,potMax:P.potMax,rl:!!G.rl,rid:hsRid()};rlSync();persist()}
 function clearRun(){delete SAVE.run;persist()}
 
 function starterWeapon(slot,il,id){const H=HEROES[id],w=(slot==='ranged'?H.rangedW:H.meleeW)[0],it=makeItem(slot,il,0,id);it.base=w.n;it.name=w.n;it.wrate=w.r;it.wdmg=Math.round((3+il*1.6)*w.d);it.aff=[];return it}
@@ -3912,7 +3912,7 @@ function enterPortal(){sfx('portal');const S=STAGES[G.stage];
  if(G.mode==='abstieg'&&G.stage>=STAGES.length-1){const d=STAGES[G.stage].depth||1;STAGES.push(makeDepth(d+1));SAVE.deepest=Math.max(SAVE.deepest||0,d)}
  if(G.stage>=STAGES.length-1){endRun(true);return}
  G.state='between';saveRunNext();showChapterDone()}
-function saveRunNext(){if(!P||G.bot)return;saveRun();if(SAVE.run&&!G.mp)SAVE.run.stage=G.stage+1;persist()}
+function saveRunNext(){if(!P||G.bot)return;saveRun();if(SAVE.run&&!G.mp&&!G.hcmp)SAVE.run.stage=G.stage+1;if(G.hcmp&&SAVE.mpRun)SAVE.mpRun.stage=G.stage+1;persist()}
 /* Musik je nach Lage */
 
 /* ================= Klangteppiche =================
@@ -4944,7 +4944,7 @@ function showChapterDone(){hud.hidden=true;clearHudFx();G.atIntro=0;const S=STAG
   <div class="row" style="justify-content:center;align-items:center"><button class="btn" data-act="stay-stage" title="Zurück in die Stufe – das Portal bleibt offen">↩ Noch bleiben</button><button class="btn-main" data-act="next-stage">Weiterziehen</button></div></div>`)}
 function endRun(win){if(G.state==='end')return;G.state='end';clearHudFx();truheDeposit();if(G.mp&&PL[0])P=PL[0];if(G.rl){for(const q of mpL())withP(q,()=>{q.chan=null;q.form=null;rlSync()})}G.victory=win;hud.hidden=true;joy=null;const hs=hsave(P.id);
  const reached=G.stage+(win?1:0);const camp=G.mode==='kampagne';if(camp)hs.best2=Math.max(hs.best2||0,G.diff*100+reached);let unlock='';unseedRng();
- if(win&&camp){hs.clears++;if(G.diff+1>SAVE.maxDiff){SAVE.maxDiff=G.diff+1;unlock=diffName(G.diff+1)}}if(!G.mp)clearRun();persist();sfx(win?'portal':'boss');
+ if(win&&camp){hs.clears++;if(G.diff+1>SAVE.maxDiff){SAVE.maxDiff=G.diff+1;unlock=diffName(G.diff+1)}}if(!G.mp&&!G.hcmp)clearRun();persist();sfx(win?'portal':'boss');
  const S=STAGES[G.stage],mins=Math.floor(G.time/60),secs=Math.floor(G.time%60);
  const punkte=modePoints(win,reached);const stufen=G.mode==='abstieg'?G.depth:reached;G.hsRun={held:P.id,diff:G.diff,stufen,punkte,level:P.level,sent:false,modus:G.mode,tag:G.daily?G.daily.tag:null};if(G.mode==='taeglich'){SAVE.daily=SAVE.daily||{};SAVE.daily[G.daily.tag]=Math.max(SAVE.daily[G.daily.tag]||0,punkte)}if(G.mode==='abstieg')SAVE.deepest=Math.max(SAVE.deepest||0,G.depth);persist();HSL.m=null;HSL.liste=null;hsLaden(G.mode);
  showScreen(`<div class="wrap narrow">
@@ -5752,7 +5752,7 @@ function smithAct(a,b){const it=smithSel();if(!it)return;let ok=false;
  else if(a==='smith-unsock'){const i=+b.dataset.i,g=it.sock&&it.sock[i];if(g&&SAVE.gold>=UNSOCK){SAVE.gold-=UNSOCK;P.gems[g]=(P.gems[g]||0)+1;it.sock[i]=null;ok=true;sfx('equip')}}
  if(ok){recalc();updateInvBadge();if(G.rl)rlSync();persist();saveRunKeep()}renderSmith(true)}
 function sparkleUI(){const el=scr.querySelector('.smdet');if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
-function saveRunKeep(){if(!P||G.bot||!SAVE.run)return;const st=SAVE.run.stage;saveRun();SAVE.run.stage=st;persist()}
+function saveRunKeep(){if(!P||G.bot)return;const K=()=>G.hcmp?SAVE.mpRun:SAVE.run,R0=K();if(!R0)return;const st=R0.stage;saveRun();const R1=K();if(R1)R1.stage=st;persist()}
 
 /* ================= Sets =================
    Heldensets gehören zu einem Helden (je eines pro Talentbaum) und sind seltener.
@@ -12473,6 +12473,135 @@ document.addEventListener('toggle',ev=>{const d=ev.target;if(d&&d.classList&&d.c
 {const dp=dmPauseHtml;dmPauseHtml=function(){return dp.apply(this,arguments)+(G.state==='play'?kzHtml():'')}}
 {const dg=dmGuestHtml;dmGuestHtml=function(me){return dg.apply(this,arguments)+kzHtml()}}
 window.__hsK={KZ,KZG,kzGebunden,chill:(e,t)=>chill(e,t),kzHtml};
+
+/* ================= Gemeinsamer Hardcore-Lauf speichern + Sicherungskopie (Paket hcmp) =================
+   SAVE.mpRun: Hardcore-Lauf im Mehrspieler (lokal + online beim Gastgeber). Gespeichert wie der Einzellauf
+   (Stufenbeginn, nach dem Boss, Portal = nächste Stufe, Schmied, „Noch bleiben“). Tod/Ende löscht ihn (endRun).
+   Pro Held: Stufe, XP, Punkte, Ränge, Äste, Leiste, Ausrüstung (ohne Leihausrüstung), Beutel, Edelsteine, Segen, Tränke, Zweite Chancen,
+   dazu Gerät (kb / pad:n / net:<Gast-Kennung>) und Name. Wer fehlt, „ruht“ (rest:1) und kann jederzeit wieder einsteigen.
+   Funktionen: mprSave, mprEntry, mprApply, mprFix, mprGo (fortsetzen), mprEnter (Lobby zum Fortsetzen), mprTitle (Karte im Titel), mprAct.
+   Sicherungskopie: hsBakLoad (beim Laden, falls Hauptstand fehlt/kaputt), hsBakWrite (nach persist, gedrosselt), hsBakDrop. */
+const MPR={newRun:0,codeTried:0};
+function hsRid(){return G.rid||(G.rid=Math.random().toString(36).slice(2,10))}
+const MPR_DEV=/^(kb|pad:[0-9]|net:[A-Za-z0-9_-]{1,20})$/;
+const MPR_K=['level','xp','sp','ranks','aeste','sf','learn','bar','eq','bag','gems','mods','pots','potMax','revives'];
+function mprEntry(q){return withP(q,()=>{const e={id:q.id,dev:typeof q.dev==='string'&&MPR_DEV.test(q.dev)?q.dev:'kb',level:q.level,xp:q.xp,sp:q.sp,ranks:rlClone(q.ranks||{}),aeste:Array.isArray(q.aeste)?q.aeste.slice():undefined,sf:q.sf,learn:(q.learn||[]).slice(),bar:(q.bar||[]).slice(),use:rlClone(q.use||{}),
+ eq:mzEqSave(),bag:mzBagSave(),gems:rlClone(q.gems||{}),mods:rlClone(q.mods||[]),pots:q.pots,potMax:q.potMax,revives:q.revives||0};if(netIs(q.dev))e.name=sTxt(q.netName||'Gast',16);return e})}
+function mprSave(){if(NET.role==='guest'||G.bot||G.rl||G.mode!=='kampagne'||G.daily||!PL.length)return;
+ if(!G.hcmp){if(!G.mp)return;if(SAVE.mpRun&&SAVE.mpRun.rid!==hsRid()&&!MPR.newRun)return;/* fremden gespeicherten Gruppenlauf nie still überschreiben */
+  G.hcmp=1;if(SAVE.run&&SAVE.run.rid===G.rid)delete SAVE.run/* Einzellauf, dem jemand beigetreten ist, lebt als Gruppenlauf weiter */}
+ const pl=PL.map(mprEntry);for(const e of G.mprRest||[])if(pl.length<4&&!pl.some(x=>x.id===e.id))pl.push(Object.assign({},e,{rest:1}));
+ const old=SAVE.mpRun;SAVE.mpRun={v:1,rid:hsRid(),diff:G.diff,hard:HARD()?1:0,stage:G.stage,kills:G.kills||0,goldRun:G.goldRun||0,time:G.time||0,score:G.score||0,itemId:ITEMID,at:Date.now(),
+  net:pl.some(e=>netIs(e.dev))?1:0,code:NET.role==='host'&&NET.code?NET.code:old&&old.code||undefined,pl}}
+/* Gespeicherte Werte auf P übertragen (wie continueRun); pre=1 vor setupStage (das zählt Segen-Stufen herunter) */
+function mprApply(r,pre){const rLearn=Array.isArray(r.learn)&&r.learn.length?r.learn:P.learn;
+ Object.assign(P,{level:+r.level||P.level,xp:+r.xp||0,sp:+r.sp||0,ranks:isObj(r.ranks)?r.ranks:P.ranks,learn:rLearn,bar:Array.isArray(r.bar)?r.bar:rLearn.slice(0,6),use:isObj(r.use)?r.use:{},eq:isObj(r.eq)?r.eq:{},bag:Array.isArray(r.bag)?r.bag:[],revives:r.revives||0,pots:r.pots!==undefined?r.pots:P.pots});
+ for(const id of Object.keys(P.ranks))if(!P.hero.tree.find(n=>n.id===id))delete P.ranks[id];P.learn=P.learn.filter(id=>P.hero.tree.find(n=>n.id===id));P.bar=P.bar.filter(id=>P.learn.includes(id));
+ if(astOk(P.id,r.aeste))P.aeste=r.aeste.slice();P.sf=typeof r.sf==='string'?r.sf:P.sf;astBereinigen(P);migrateWeapons();P.gems=isObj(r.gems)?r.gems:{};P.mods=(Array.isArray(r.mods)?r.mods:[]).map(m=>Object.assign({},m,{st:(m.st||0)+(pre?1:0)}));if(r.potMax)P.potMax=r.potMax}
+/* Prüfen wie runFix: Unbrauchbares verwerfen statt abzustürzen */
+function mprEntryFix(e){if(!isObj(e)||!okHero(e.id))return null;const t=Object.assign({},e,{stage:0,diff:0});runVals(t);const o={id:e.id,dev:typeof e.dev==='string'&&MPR_DEV.test(e.dev)?e.dev:'kb'};
+ for(const k of MPR_K)if(t[k]!==undefined)o[k]=t[k];if(isObj(e.use)){o.use={};for(const k in e.use)if(/^\w{1,30}$/.test(k)&&typeof e.use[k]==='number'&&isFinite(e.use[k]))o.use[k]=e.use[k]}
+ if(e.name!==undefined)o.name=sTxt(e.name,16)||'Gast';if(e.rest)o.rest=1;return o}
+function mprFix(S){try{const R=S.mpRun;if(R===undefined)return;if(!isObj(R)||!Array.isArray(R.pl)){delete S.mpRun;return}const st=nInt(R.stage,0,1e6,-1);if(st<0||st>=CAMP_STAGES.length){delete S.mpRun;return}
+ const seen=new Set(),pl=[];for(const e of R.pl.slice(0,4)){const x=mprEntryFix(e);if(x&&!seen.has(x.id)){seen.add(x.id);pl.push(x)}}if(!pl.length){delete S.mpRun;return}
+ const o={v:1,rid:sTxt(R.rid,20)||Math.random().toString(36).slice(2,10),diff:nInt(R.diff,0,DMAX,0),hard:R.hard?1:0,stage:st,itemId:nNum(R.itemId,0,1e15,0),at:nNum(R.at,0,1e15,0),net:R.net?1:0,pl};
+ for(const k of['kills','goldRun','time','score'])o[k]=nNum(R[k],0,1e15,0);if(typeof R.code==='string'&&/^[A-Z0-9]{4}$/.test(R.code))o.code=R.code;S.mpRun=o}catch(e){delete S.mpRun}}
+/* Gespeicherten Gruppenlauf starten: Plätze aus der Lobby (P1 + G.lobby) bekommen den gespeicherten Helden gleichen Namens,
+   gespeicherte Helden ohne Spieler ruhen (G.mprRest), neue Helden steigen wie mitten im Lauf ein (mpAddPlayer) */
+function mprGo(){const R=SAVE.mpRun;if(!R)return;const slots=mpSlots(),ent=rlClone(R.pl);
+ if(!ent.some(e=>e.id===slots[0].hero)){toast('Spieler 1 übernimmt einen der gespeicherten Helden.','#ff8a7a');return}
+ const dd=nInt(R.diff,0,DMAX,0),st=nInt(R.stage,0,CAMP_STAGES.length-1,0);unseedRng();setStages(CAMP_STAGES);audioInit();
+ const sm=G.selMode,lm=G.lbMode,lob=G.lobby,pd=G.p1dev;G=newGame();Object.assign(G,{selMode:sm,lbMode:lm,lobby:lob,p1dev:pd,mode:'kampagne',rl:false,mp:false,daily:null,depth:1,sel:slots[0].hero,diff:dd,seldiff:dd,hard:!!R.hard&&dd===0,state:'play',hcmp:1,rid:R.rid,runId:Math.random(),karte:0,gansDone:0,rareE:null,rareT:-1,stage:st});
+ PL=[];const fresh=[];for(const s of slots){const e=ent.find(x=>x.id===s.hero);if(!e){fresh.push(s);continue}newHero(e.id,dd);mprApply(e,1);P.dev=s.dev;P.skBtns=[];if(netIs(s.dev))P.netName=s.name||e.name||'Gast';recalc();P.hp=P.st.maxHp;PL.push(P)}
+ G.mprRest=ent.filter(e=>!PL.some(q=>q.id===e.id)).map(e=>(delete e.rest,e));P=PL[0];
+ ITEMID=Math.max(ITEMID,R.itemId||1);G.kills=R.kills||0;G.goldRun=R.goldRun||0;G.time=R.time||0;G.score=R.score||0;
+ if(fresh.length){G.mp=true;for(const s of fresh)mpAddPlayer(s.dev,s.hero);P=PL[0]}G.mp=PL.length>1;mzUpdate();
+ setupStage(st);showStageIntro();if(NET.role==='host')netHostStart();
+ if(G.mprRest.length)setTimeout(()=>{if(G.hcmp&&G.mprRest&&G.mprRest.length&&G.state!=='title')toast(`${G.mprRest.map(e=>HEROES[e.id].name).join(', ')} ${G.mprRest.length>1?'ruhen':'ruht'} – ${G.mprRest.length>1?'sie können':'kann'} jederzeit wieder einsteigen.`,'#c8bca8')},1200)}
+/* Lobby zum Fortsetzen vorbereiten: Geräte neu zuordnen (gleiches Gerät, sonst ein freies; sonst ruht der Held) */
+function mprEnter(){const R=SAVE.mpRun;if(!R)return;Object.assign(G,{mprRes:1,mprDrop:0,mprAsk:0,confirmNew:false,confirmDrop:false,selMode:'kampagne',campTab:'held',seldiff:R.diff,rlStart:undefined});SAVE.mpOn=true;SAVE.hc=true;MPR.codeTried=0;
+ const avail=['kb'].concat(Object.keys(PADS.st).map(i=>'pad:'+i)),used=new Set(),as={};const loc=R.pl.filter(e=>!netIs(e.dev)).sort((a,b)=>(a.rest?1:0)-(b.rest?1:0));
+ for(const e of loc)if(avail.includes(e.dev)&&!used.has(e.dev)){as[e.id]=e.dev;used.add(e.dev)}
+ for(const e of loc)if(!as[e.id]){const d=avail.find(x=>!used.has(x));if(d){as[e.id]=d;used.add(d)}}
+ const net=(G.lobby||[]).filter(s=>netIs(s.dev)),order=R.pl.filter(e=>as[e.id]);
+ if(!order.length){const e=R.pl[0];as[e.id]='kb';order.push(e)}/* nur Online-Helden gespeichert: P1 übernimmt den ersten */
+ const p1=order.find(e=>as[e.id]==='kb')||order[0];G.sel=p1.id;G.p1dev=as[p1.id];G.lobby=order.filter(e=>e!==p1).map(e=>({dev:as[e.id],hero:e.id}));
+ for(const s of net){const e=R.pl.find(x=>x.dev===s.dev);if(e&&!as[e.id])s.hero=e.id;const g=NET.guests.find(x=>'net:'+x.cid===s.dev);if(g)g.hero=s.hero;if(G.lobby.length<3)G.lobby.push(s)}
+ const rest=loc.filter(e=>!as[e.id]);if(rest.length)toast(`${rest.map(e=>HEROES[e.id].name).join(', ')}: kein Controller frei – Controller anschließen und A drücken.`,'#ffd04a');
+ if(R.net&&!NET.role)netHost();showTitle(true)}
+const mprDevTxt=d=>d==='kb'?'⌨️':/^pad:/.test(d||'')?'🎮 '+(padIdx(d)+1):'🌐';
+function mprCardHtml(){const R=SAVE.mpRun;if(!R||!R.pl||!R.pl.length)return'';const S=CAMP_STAGES[Math.min(R.stage,CAMP_STAGES.length-1)],O=S&&ORTE[S.ort];if(!O)return'';
+ const res=!!G.mprRes,slots=res?mpSlots():[];
+ const who=R.pl.map(e=>{const k=slots.findIndex(s=>s.hero===e.id),on=k>=0;let tag;
+  if(res)tag=on?`P${k+1} · ${mprDevTxt(slots[k].dev)}${netIs(slots[k].dev)?' '+esc(slots[k].name||'Gast'):''}`:netIs(e.dev)?`wartet auf ${esc(e.name||'Gast')}`:'ruht';
+  else tag=netIs(e.dev)?'🌐 '+esc(e.name||'Gast'):mprDevTxt(e.dev);
+  return`<span class="mpr-h${res&&!on||!res&&e.rest?' rest':''}" style="--pc:${HCOL[e.id]}"><i></i><b>${HEROES[e.id].name}</b><small>St. ${e.level}</small><em>${tag}</em></span>`}).join('');
+ const head=`<div class="eyebrow">${res?'Gemeinsamen Lauf fortsetzen':'Gemeinsamer Lauf'} · Hardcore${R.net?' · Online':''}</div><div class="rc-t">${esc(O.name)} – ${esc(S.name)} <span class="muted" style="font-weight:600">· ${esc(R.hard?'Schwer':diffName(R.diff))}</span></div>`;
+ if(res){const miss=R.pl.filter(e=>!slots.some(s=>s.hero===e.id));
+  return`<div class="runcard mprcard"><div class="mpr-top"><div>${head}</div><button class="btn small" data-act="mpr-cancel">Abbrechen</button></div><div class="mpr-list">${who}</div>
+  <p class="muted" style="margin:0;font-size:13px">${miss.length?`Wer fehlt, ruht und kann später jederzeit wieder einsteigen${R.pl.some(e=>!netIs(e.dev))?' – am Controller <b>A</b> drücken':''}. `:'Alle sind wieder da. '}${R.net?(NET.role==='host'&&NET.st==='open'?`Online-Mitspieler treten mit Raumcode <b>${esc(NET.code)}</b> wieder bei und bekommen ihren Helden zurück.`:'Der Online-Raum wird geöffnet …'):''}</p></div>`}
+ return`<div class="runcard mprcard"><div class="mpr-top"><div>${head}</div><div class="row">${G.mprDrop?'<span class="muted" style="font-size:13px">Wirklich verwerfen?</span><button class="btn" data-act="mpr-drop-no">Nein</button><button class="btn" style="border-color:var(--blood)" data-act="mpr-drop-yes">Ja</button>':'<button class="btn" data-act="mpr-drop">Verwerfen</button><button class="btn gold" data-act="mpr-go">Fortsetzen</button>'}</div></div><div class="mpr-list">${who}</div></div>`}
+const mprNewMp=()=>(G.selMode||'kampagne')==='kampagne'&&mpActive()&&mpSlots().length>1&&!!SAVE.hc;
+function mprTitle(){if(G.state!=='title'||G.netJoin||!scr||scr.hidden)return;const top=scr.querySelector('.camp-top');if(!top)return;
+ if(!SAVE.mpRun){G.mprRes=0;G.mprAsk=0;G.mprDrop=0}if(G.mprRes&&!mpActive())G.mprRes=0;
+ const h=mprCardHtml();if(h){const old=scr.querySelector('.camp>.runcard:not(.mprcard)');(old||top).insertAdjacentHTML('afterend',h)}
+ if(G.mprRes&&SAVE.mpRun&&SAVE.mpRun.pl.some(e=>e.id===G.sel)){const a=scr.querySelector('[data-act="ast-wahl"]'),c=a&&a.closest('.card');if(c)c.outerHTML='<div class="facts"><div><span>Talentäste</span>wie im gespeicherten Lauf</div></div>'}
+ const si=scr.querySelector('.startbar .startin');if(si){
+  if(G.mprRes){const R=SAVE.mpRun,n=R.pl.filter(e=>mpSlots().some(s=>s.hero===e.id)).length;si.innerHTML=`<div class="muted" style="flex:1 1 200px;font-size:14px">${n} von ${R.pl.length} Helden dabei${mpSlots().length>n?` · ${mpSlots().length-n} neu`:''}</div><button class="btn" data-act="mpr-cancel">Abbrechen</button><button class="btn-main" data-act="start">Gemeinsam weiter</button>`}
+  else if(G.mprAsk&&SAVE.mpRun)si.innerHTML=`<div class="muted" style="flex:1 1 200px;font-size:14px">Ein neuer gemeinsamer Lauf ersetzt den gespeicherten (${SAVE.mpRun.pl.map(e=>HEROES[e.id].name).join(', ')}).</div><button class="btn" data-act="mpr-no">Abbrechen</button><button class="btn-main" data-act="mpr-new">Neu beginnen</button>`;
+  const sb=scr.querySelector('.startbar');if(sb)scr.style.paddingBottom=`calc(env(safe-area-inset-bottom,0px) + ${Math.ceil(sb.getBoundingClientRect().height)+24}px)`}}
+function mprAct(a){switch(a){
+ case'mpr-go':mprEnter();return;
+ case'mpr-cancel':G.mprRes=0;G.lobby=(G.lobby||[]).filter(s=>netIs(s.dev));break;
+ case'mpr-drop':G.mprDrop=1;break;case'mpr-drop-no':G.mprDrop=0;break;
+ case'mpr-drop-yes':G.mprDrop=0;G.mprRes=0;delete SAVE.mpRun;persist();break;
+ case'mpr-no':G.mprAsk=0;break;
+ case'mpr-new':G.mprAsk=0;delete SAVE.mpRun;persist();startRun(G.sel,G.seldiff,G.selMode,{rl:!SAVE.hc,start:G.rlStart,mp:mpSlots()});return}
+ showTitle(true)}
+/* ---------- Einbindung ---------- */
+NETGBL.add('mprRest');NETGBL.add('rid');
+{const f=runFix;runFix=function(S){const r=f.apply(this,arguments);mprFix(S);return r}}
+{const f=mrg3;mrg3=function(b,m,t,k){if(k==='mpRun'){const J=JSON.stringify;if(J(m)===J(b))return t;if(J(t)===J(b))return m;return m||t}return f.apply(this,arguments)}}
+{const f=startRun;startRun=function(id,diff,mode,opt){MPR.newRun=!!(opt&&opt.mp&&opt.mp.length>1&&!opt.rl&&(mode||'kampagne')==='kampagne');try{return f.apply(this,arguments)}finally{MPR.newRun=0}}}
+{const f=endRun;endRun=function(win){if(G.state!=='end'){if(G.hcmp&&SAVE.mpRun&&(!SAVE.mpRun.rid||SAVE.mpRun.rid===G.rid))delete SAVE.mpRun;if(SAVE.run&&SAVE.run.rid&&SAVE.run.rid===G.rid)delete SAVE.run;G.mprRest=null}return f.apply(this,arguments)}}
+{const f=mpRemove;mpRemove=function(i){const q=PL[i];if(q&&i>0&&G.hcmp&&G.state!=='end'){try{const e=mprEntry(q);G.mprRest=(G.mprRest||[]).filter(x=>x.id!==e.id);G.mprRest.push(e)}catch(e){}}return f.apply(this,arguments)}}
+{const f=mpAddPlayer;mpAddPlayer=function(dev,want){const RS=G.hcmp&&G.mprRest&&G.mprRest.length?G.mprRest:null;let e=null;
+ if(RS&&G.state==='play'){const used=new Set(PL.map(q=>q.id));if(want){if(!used.has(want))e=RS.find(x=>x.id===want)||null}else{e=RS.find(x=>x.dev===dev&&!used.has(x.id))||RS.find(x=>!netIs(x.dev)&&!used.has(x.id))||null;if(e)want=e.id}}
+ const n0=PL.length,r=f.call(this,dev,want);
+ if(e&&PL.length>n0){const np=PL[PL.length-1];if(np.id===e.id){G.mprRest=RS.filter(x=>x!==e);withP(np,()=>{mprApply(rlClone(e),0);P.mzOrig={};recalc();P.hp=P.st.maxHp;buildSkillBar()});mzUpdate();toast(`${np.hero.name} ist zurück – Stufe ${np.level}.`,'#8fe7ff')}}return r}}
+{const f=mpFreeHero;mpFreeHero=function(skip){if(G.mprRes&&SAVE.mpRun){const S=mpSlots(),e=SAVE.mpRun.pl.find(x=>!netIs(x.dev)&&!S.some((s,k)=>k!==skip&&s.hero===x.id));if(e)return e.id}return f.apply(this,arguments)}}
+{const f=netPickHero;netPickHero=function(g,h){try{if(g&&!g.hero&&g.cid){const L=G.state==='title'?(G.mprRes&&SAVE.mpRun?SAVE.mpRun.pl:null):(G.hcmp?G.mprRest:null);
+ if(L&&L.length){const on=x=>NET.guests.some(o=>o!==g&&!o.gone&&'net:'+o.cid===x.dev),busy=x=>G.state==='title'?mpSlots().some(s=>s.hero===x.id&&s.dev!=='net:'+g.cid):PL.some(q=>q.id===x.id);
+  const e=L.find(x=>x.dev==='net:'+g.cid&&!busy(x))||L.find(x=>netIs(x.dev)&&!on(x)&&!busy(x));if(e)h=e.id}}}catch(e){}return f.call(this,g,h)}}
+{const f=netCode;netCode=function(){if(G.state==='title'&&G.mprRes&&SAVE.mpRun&&SAVE.mpRun.code&&!MPR.codeTried){MPR.codeTried=1;return SAVE.mpRun.code}return f.apply(this,arguments)}}
+{const f=showTitle;showTitle=function(keep){const r=f.apply(this,arguments);try{mprTitle()}catch(e){console.error('mprTitle',e)}return r}}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act;const stop=()=>{ev.stopPropagation();ev.preventDefault()};
+ if(/^mpr-/.test(a)){stop();audioInit();sfx('ui');mprAct(a);return}
+ if(G.state!=='title')return;
+ if(a==='start'){if(G.mprRes&&SAVE.mpRun){stop();audioInit();mprGo();return}if(SAVE.mpRun&&!G.mprAsk&&mprNewMp()){stop();sfx('ui');G.mprAsk=1;showTitle(true);return}}
+ if(a==='start-no')G.mprAsk=0;
+ if(G.mprRes&&SAVE.mpRun&&(a==='sel-hero'||a==='mp-hero'&&b.dataset.k==='0')&&!SAVE.mpRun.pl.some(e=>e.id===b.dataset.id)){stop();toast('Spieler 1 übernimmt einen der gespeicherten Helden.','#ffd04a')}},true);
+(()=>{try{const st=document.createElement('style');st.textContent=`.mprcard{flex-direction:column;align-items:stretch;gap:8px;border-color:rgba(143,231,255,.55);background:linear-gradient(135deg,rgba(143,231,255,.07),rgba(229,180,84,.07))}
+.mpr-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.mpr-list{display:flex;flex-wrap:wrap;gap:6px}
+.mpr-h{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-width:0;padding:4px 11px 4px 8px;border-radius:999px;border:1px solid var(--pc);background:rgba(0,0,0,.28);font-size:13px;line-height:1.2}
+.mpr-h i{flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:var(--pc);box-shadow:0 0 6px var(--pc)}
+.mpr-h small{color:var(--mute)}.mpr-h em{font-style:normal;color:var(--mute);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.mpr-h.rest{opacity:.6;border-style:dashed}.mpr-h.rest i{box-shadow:none;opacity:.5}`;document.head.appendChild(st)}catch(e){}})();
+/* ---------- Sicherungskopie ---------- */
+/* Läuft sehr früh (direkt nach dem Einlesen, Zeile ~409): Hauptstand fehlt, ist kein Objekt, kein JSON oder saveFix wirft → Kopie nehmen */
+function hsBakLoad(){let raw=null,bad=false;try{raw=localStorage.getItem(SKEY)}catch(e){return}
+ if(raw==null)bad=true;else{try{const d=JSON.parse(raw);if(!d||typeof d!=='object'||Array.isArray(d))bad=true;else saveFix(Object.assign(defSave(),d))}catch(e){bad=true}}
+ if(!bad)return;let b=null;try{b=localStorage.getItem('imres-heldensturm-v1-bak')}catch(e){}if(!b)return;
+ try{const d=JSON.parse(b);if(!d||typeof d!=='object'||Array.isArray(d))return;SAVE=saveFix(Object.assign(defSave(),d));window.__hsBakRest=raw==null?1:2}catch(e){}}
+const HSBAK={t:0,sig:''};
+function hsBakDrop(){try{localStorage.removeItem('imres-heldensturm-v1-bak')}catch(e){}try{HSBAK.t=0;HSBAK.sig=''}catch(e){}}
+function hsBakWrite(){if(G&&G.bot)return;const now=Date.now(),R=SAVE.run,M=SAVE.mpRun,sig=[G.runId||'',G.stage,R?R.stage:'-',M?M.stage:'-'].join('|');if(now-HSBAK.t<30000&&sig===HSBAK.sig)return;
+ let s=null;try{s=localStorage.getItem(SKEY)}catch(e){return}if(!s||s!==STRAW)return;/* nur einen gerade erfolgreich geschriebenen Hauptstand kopieren */
+ try{localStorage.setItem('imres-heldensturm-v1-bak',s);HSBAK.t=now;HSBAK.sig=sig}catch(e){hsBakDrop()/* Speicher voll: Kopie verwerfen, der Hauptstand hat Vorrang */}}
+{const f=persist;persist=function(){const r=f.apply(this,arguments);try{hsBakWrite()}catch(e){}return r}}
+window.__hsMPR={persist:()=>persist(),cloudAdopt:(d,c)=>cloudAdopt(d,c),mrg3:(...a)=>mrg3(...a),mprSave,mprGo,mprEnter,mprFix,mprEntry,hsBakWrite,hsBakDrop,saveRun:()=>saveRun(),HSBAK,MPR};
+if(window.__hsBakRest){setTimeout(()=>{try{persist();toast('Spielstand aus Sicherungskopie wiederhergestellt','#8fe7ff')}catch(e){}},700)}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
