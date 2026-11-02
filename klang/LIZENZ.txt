@@ -1068,3 +1068,192 @@ Dritte Sammlung: weitere Hintergrund-Schichten (im Wechsel)
   ESC-50 nur mit CC0-/CC-BY-Originalen; Luanti-Mods je Datei geprüft.
 Instrumentenklänge (Dateien psa_*, psab_*, zit_*, bal_*, glas_*, didge_*, didgefx_*, rorg_*, hglo_*, strum_*, fharfe_*, mbira_*, darb_*, rahm_*, tamb_*, mtree_*, btree_*): Aufnahmen aus der Versilian Community Sample Library (VCSL) von Versilian Studios (Sam Gossner u. a.), https://github.com/sgossner/VCSL, veröffentlicht unter CC0 1.0 (gemeinfrei). Verwendet wurden Psalter (gezupft und gestrichen), Dan Tranh (vietnamesische Wölbbrettzither), Balafon, Weingläser, Didgeridoo, Renaissance-Orgel (8'-Register), Handglocken, Strumstick, Volksharfe, Mbira Mavembe (Gandanga), Darbuka, Rahmentrommel, Tamburin, Mark Trees (Röhrenglockenspiel) und Glockenbaum. Die Aufnahmen wurden für Imres Tales gekürzt, in Mono umgewandelt und neu kodiert (MP3); außerdem wurden sie in der Lautstärke angeglichen, einzelne Anschlagspitzen leicht begrenzt und die Ausklänge ausgeblendet.
 
+Klangwelten · Erweiterung „Wesen, Düsteres, Behagliches“ (November 2026, amb/e_<id>_<n>.mp3 und amb/a_<id>.mp3)
+Für Imres Tales geschnitten, in Mono (44,1 kHz) umgewandelt, Hochpass, Stille vorn/hinten entfernt, ein-/ausgeblendet,
+in der Lautheit an den Bestand angeglichen (Spitzen begrenzt) und als MP3 neu kodiert. Einzelne Dateien sind zusätzlich
+tiefer gestimmt, mit künstlichem Hall/Tiefpass „in die Ferne gerückt“ oder – bei Schleifen – aus mehreren Stücken
+überblendet bzw. aus Einzelrufen zu einer nahtlosen Schleife gestreut. Die Bearbeitungen stehen unter denselben Lizenzen
+wie die Originale (bei CC BY-SA 3.0/4.0 bzw. GPL entsprechend weitergegeben).
+Lizenztexte: CC0 1.0 https://creativecommons.org/publicdomain/zero/1.0/ · CC BY 2.0/3.0/4.0 https://creativecommons.org/licenses/by/4.0/
+· CC BY-SA 3.0/4.0 https://creativecommons.org/licenses/by-sa/4.0/ · MIT https://opensource.org/license/mit
+· GPL 2.0 oder später https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+Hinweise: ESC-50 (K. J. Piczak) ist als Sammlung CC BY-NC; verwendet wurden nur Ausschnitte, deren Freesound-Originale
+CC0 bzw. CC BY sind. Bei dfcaverns (Flüstern, Trommeln) nennt die Mod nur die Liste der Quellaufnahmen, nicht die Zuordnung
+je Datei – genannt sind daher alle in Frage kommenden Urheber, Lizenz sicherheitshalber CC BY 3.0 (alle Quellen sind CC0 oder CC BY).
+Der Brunnen (a_brunnen) stammt aus Allacrost/Valyria Tear und steht unter GPL 2.0 oder später (keine freiere Quelle gefunden).
+
+  e_hexe_1: DarkReaven (Filter: Herowl) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/vl_witch_laugh.ogg
+  e_hexe_2: DarkReaven (Filter: Herowl) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/vl_witch_laugh.2.ogg
+  e_hexe_3: DarkReaven (Filter: Herowl) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/vl_witch_attack.ogg
+  e_hexe_4: DarkReaven (Filter: Herowl) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/vl_witch_attack.1.ogg
+  e_hexe_5: DarkReaven (Filter: Herowl) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/vl_witch_death.ogg
+  e_goblin_1: artisticdude bzw. Ogrebane (OpenGameArt-Pakete, laut README) – CC0 – über github.com/FreeLikeGNU/goblins – sounds/goblins_goblin_cackle.ogg
+  e_goblin_2: artisticdude bzw. Ogrebane (OpenGameArt-Pakete, laut README) – CC0 – über github.com/FreeLikeGNU/goblins – sounds/goblins_goblin_cackle.1.ogg
+  e_goblin_3: artisticdude bzw. Ogrebane (OpenGameArt-Pakete, laut README) – CC0 – über github.com/FreeLikeGNU/goblins – sounds/goblins_goblin_war_cry.ogg
+  e_goblin_4: spookymodem (freesound.org/s/249813) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/goblin-01.flac
+  e_oger_1: Tim Kahn (freesound.org/s/163728) – CC BY 3.0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/ogre-yell-01.flac
+  e_oger_2: pandaplague (freesound.org/s/89359) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/cyclops-scream-01.flac
+  e_oger_3: qubodup (freesound.org/s/212764) – CC BY 3.0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/orc-snarl-01.flac
+  e_oger_4: J0ck0 (freesound.org/s/397054) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_gorilla_roar.flac
+  e_drachenbruellen_1: ElCeejo (Mod draconis) – MIT – über github.com/ElCeejo/draconis – sounds/fire_dragon/draconis_fire_dragon.1.ogg
+  e_drachenbruellen_2: ElCeejo (Mod draconis) – MIT – über github.com/ElCeejo/draconis – sounds/fire_dragon/draconis_fire_dragon.3.ogg
+  e_drachenbruellen_3: ElCeejo (Mod draconis) – MIT – über github.com/ElCeejo/draconis – sounds/ice_dragon/draconis_ice_dragon_random_2.ogg
+  e_drachenbruellen_4: Joel Azzopardi / JoelAudio (freesound.org/s/85568) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/roar-dragon-1.flac
+  e_drachenbruellen_5: ibm5155 (freesound.org/s/174913) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/roar-large-1.flac
+  e_drachenbruellen_6: NPXcoot – CC BY-SA 4.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_ender_dragon_shoot.ogg
+  e_fluegelschlag_1: dave.des (freesound.org/s/127197) – CC0 – über github.com/arianne/stendhal – data/sounds/wings-flap-large-1.ogg
+  e_fluegelschlag_2: dave.des (freesound.org/s/127197) – CC0 – über github.com/arianne/stendhal – data/sounds/wings-flap-large-1.ogg (tiefer gestimmt)
+  e_fluegelschlag_3: winsx87 (freesound.org/s/152024) – CC0 – über github.com/arianne/stendhal – data/sounds/bird-pigeon-flap-1.ogg (stark tiefer gestimmt)
+  e_lindwurm_1: ElCeejo (Mod draconis) – MIT – über github.com/ElCeejo/draconis – sounds/draconis_jungle_wyvern.1.ogg
+  e_lindwurm_2: ElCeejo (Mod draconis) – MIT – über github.com/ElCeejo/draconis – sounds/draconis_jungle_wyvern.2.ogg
+  e_lindwurm_3: ElCeejo (Mod draconis) – MIT – über github.com/ElCeejo/draconis – sounds/draconis_jungle_wyvern.1.ogg (tiefer gestimmt)
+  e_spinne_1: columbia23 (freesound.org/s/395395) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_spider_random.ogg
+  e_spinne_2: columbia23 (freesound.org/s/395395) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_spider_attack.1.ogg
+  e_spinne_3: columbia23 (freesound.org/s/395395) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_spider_attack.2.ogg
+  e_spinne_4: columbia23 (freesound.org/s/395395) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_spider_death.ogg
+  e_spinne_5: Darsycho (freesound.org/s/505185) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_spider_hurt.1.ogg
+  e_spinne_6: Darsycho (freesound.org/s/505185) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_spider_hurt.3.ogg
+  e_skelett_1: Baŝto (Bearbeitung) nach kantouth (freesound.org/s/115113) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_skeleton_random.1.ogg
+  e_skelett_2: Baŝto (Bearbeitung) nach kantouth (freesound.org/s/115113) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_skeleton_random.2.ogg
+  e_skelett_3: Cribbler (freesound.org/s/381859) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_skeleton_hurt.ogg
+  e_ghul_1: Under7dude (freesound.org/s/163440) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_zombie_growl_01.flac
+  e_ghul_2: Under7dude (freesound.org/s/163444) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_zombie_growl_02.flac
+  e_ghul_3: Under7dude (freesound.org/s/163445) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_zombie_growl_03.flac
+  e_ghul_4: Under7dude (freesound.org/s/163442) – CC0 – über github.com/AntumMT/mod-sounds – sounds/sounds_zombie_death.ogg
+  e_ghul_5: Under7dude (freesound.org/s/163447) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_zombie_damage.flac
+  e_geisterfluestern_1: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.3.ogg
+  e_geisterfluestern_2: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.4.ogg
+  e_geisterfluestern_3: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.5.ogg
+  e_geisterfluestern_4: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.6.ogg
+  e_geisterfluestern_5: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.1.ogg
+  e_geisterfluestern_6: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.2.ogg
+  e_spuk_1: HorrorAudio (freesound.org/s/431979) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/ghost-01.flac
+  e_spuk_2: HorrorAudio (freesound.org/s/431980) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/ghost-02.flac
+  e_spuk_3: HorrorAudio (freesound.org/s/431981) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/ghost-03.flac
+  e_spuk_4: BlockMen (Mod cme) – CC BY-SA 3.0 – über github.com/AntumMT/mod-sounds – sounds/sounds_ghost_01.ogg
+  e_spuk_5: BlockMen (Mod cme) – CC BY-SA 3.0 – über github.com/AntumMT/mod-sounds – sounds/sounds_ghost_02.ogg
+  e_spuk_6: BlockMen (Mod cme) – CC BY-SA 3.0 – über github.com/AntumMT/mod-sounds – sounds/sounds_ghost_death.ogg
+  e_geisterheulen_1: PhonosUPF (freesound.org/s/499700–499706) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_howling.1.ogg
+  e_geisterheulen_2: PhonosUPF (freesound.org/s/499700–499706) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_howling.2.ogg
+  e_geisterheulen_3: PhonosUPF (freesound.org/s/499700–499706) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_howling.3.ogg
+  e_geisterheulen_4: PhonosUPF (freesound.org/s/499700–499706) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_howling.4.ogg
+  e_geisterheulen_5: PhonosUPF (freesound.org/s/499700–499706) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_howling.6.ogg
+  e_daemon_1: bevibeldesign (freesound.org/s/366095) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_wither_spawn.ogg
+  e_daemon_2: TinTinOko (Freesound) – CC BY 3.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_monster_sigh_cave.ogg (tiefer gestimmt)
+  e_daemon_3: SmallQuadruped (freesound.org/s/42201) – CC0 – über github.com/arianne/stendhal – data/sounds/lossless_sources/growl-large-3.flac (tiefer gestimmt)
+  e_daemon_4: LukeIRL (freesound.org/s/176123), bearbeitet für VoxeLibre – CC BY 4.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_magma_cube_big.ogg
+  e_baer_1: YleArkisto (freesound.org/s/249441) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_bear_attack.1.ogg
+  e_baer_2: YleArkisto (freesound.org/s/249441) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_bear_attack.2.ogg
+  e_baer_3: YleArkisto (freesound.org/s/249441) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_bear_death.1.ogg
+  e_baer_4: tbsounddesigns (freesound.org/s/416862) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_bear_growl.3.ogg
+  e_hyaene_1: Mathevon N., Koralek A., Weldele M., Glickman S., Theunissen F. (Wikimedia Commons) – CC BY 2.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_hyena_01.flac
+  e_hyaene_2: Mathevon N., Koralek A., Weldele M., Glickman S., Theunissen F. (Wikimedia Commons) – CC BY 2.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_hyena_02.flac
+  e_hyaene_3: Mathevon N., Koralek A., Weldele M., Glickman S., Theunissen F. (Wikimedia Commons) – CC BY 2.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_hyena_03.flac
+  e_baumhirte_1: Department64 (freesound.org/s/95262) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_tree_creak.flac
+  e_baumhirte_2: Department64 (freesound.org/s/95262) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_tree_creak.flac (tiefer gestimmt)
+  e_baumhirte_3: Department64 (freesound.org/s/95262) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_tree_creak.flac (tiefer gestimmt)
+  e_golem_1: FreqMan (freesound.org/s/25845) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_underworld_items/sounds/dfcaverns_grinding_stone.1.ogg
+  e_golem_2: FreqMan (freesound.org/s/25846) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_underworld_items/sounds/dfcaverns_grinding_stone.2.ogg
+  e_golem_3: FreqMan (freesound.org/s/25847) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_underworld_items/sounds/dfcaverns_grinding_stone.3.ogg
+  e_golem_4: nebulousflynn (freesound.org/s/234360) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/hunter_statue/sounds/hunter_statue_turn_grind.1.ogg
+  e_golem_5: nebulousflynn (freesound.org/s/234360) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/hunter_statue/sounds/hunter_statue_turn_grind.2.ogg
+  e_feuerwesen_1: daufinsyd – MIT – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/vl_elemental_fire_breath.ogg
+  e_feuerwesen_2: daufinsyd – MIT – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/vl_elemental_fire_died.ogg
+  e_seeungeheuer_1: pointparkcinema (freesound.org/s/407252) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_guardian_random.1.ogg
+  e_seeungeheuer_2: nornalbion (freesound.org/s/195733) – CC BY 3.0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_guardian_random.3.ogg
+  e_seeungeheuer_3: TheBuilder15 (Quelle laut VoxeLibre: freesound.org/s/407252) – CC0 – über github.com/VoxeLibre/VoxeLibre – mods/ENTITIES/mobs_mc/sounds/mobs_mc_guardian_death.ogg (tiefer gestimmt)
+  e_hoehlengesang_1: InspectorJ (freesound.org/s/469312) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_exotic_creature_song.1.ogg
+  e_hoehlengesang_2: InspectorJ (freesound.org/s/469312) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_exotic_creature_song.2.ogg
+  e_hoehlengesang_3: InspectorJ (freesound.org/s/469312) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_exotic_creature_song.3.ogg
+  e_hoehlengesang_4: InspectorJ (freesound.org/s/469312) – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_exotic_creature_song.4.ogg
+  e_sirene_1: poots (freesound.org/s/123092) – CC BY 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_mermaid_song_01.flac
+  e_sirene_2: poots (freesound.org/s/123092) – CC BY 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_mermaid_song_02.flac
+  e_sirene_3: poots (freesound.org/s/123092) – CC BY 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_mermaid_song_03.flac
+  e_sirene_4: poots (freesound.org/s/123092) – CC BY 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_mermaid_song_04.flac
+  e_sirene_5: poots (freesound.org/s/123092) – CC BY 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_mermaid_song_05.flac
+  e_raubkatze_1: schots (freesound.org/s/439280) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_tiger_snarl_02.flac
+  e_raubkatze_2: schots (freesound.org/s/439280) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_tiger_snarl_03.flac
+  e_raubkatze_3: schots (freesound.org/s/439280) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_tiger_snarl_04.flac
+  e_raubkatze_4: felix.blume (freesound.org/s/405211) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_lion_bellow.flac
+  e_fernschrei_1: Bertram nach Macro (OpenGameArt „Screaming“) – CC BY 3.0 – über github.com/ValyriaTear/ValyriaTear – data/sounds/low_scream_long.ogg
+  e_fernschrei_2: NeoPhyTe – gemeinfrei (Public Domain, soundbible.com) – über github.com/arianne/stendhal – data/sounds/scream-fem-2.ogg
+  e_tuerknarren_1: Rudmer_Rotteveel (freesound.org/s/590948–590950) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_creaky_door_open.1.ogg
+  e_tuerknarren_2: Rudmer_Rotteveel (freesound.org/s/590948–590950) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_creaky_door_open.2.ogg
+  e_tuerknarren_3: Rudmer_Rotteveel (freesound.org/s/590948–590950) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_creaky_door_close.ogg
+  e_tuerknarren_4: Jonathan Shaw / InspectorJ (freesound.org/s/346212) – CC BY 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_door_creak.flac
+  e_ritualtrommel_1: TA-AT, adharca, szegvari [CC0]; InSintesi, 13NHarri [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_drums.1.ogg
+  e_ritualtrommel_2: TA-AT, adharca, szegvari [CC0]; InSintesi, 13NHarri [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_drums.1.ogg
+  e_ritualtrommel_3: TA-AT, adharca, szegvari [CC0]; InSintesi, 13NHarri [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_drums.6.ogg
+  e_ritualtrommel_4: TA-AT, adharca, szegvari [CC0]; InSintesi, 13NHarri [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_drums.7.ogg
+  e_ritualtrommel_5: TA-AT, adharca, szegvari [CC0]; InSintesi, 13NHarri [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_drums.3.ogg
+  e_fernglocken_1: felix.blume (freesound.org/s/501115) – CC0 – über github.com/abetusk/noixer – assets/501115__felix-blume__peal-of-church-bells-on-sunday-in-paris.mp3
+  e_fernglocken_2: felix.blume (freesound.org/s/501115) – CC0 – über github.com/abetusk/noixer – assets/501115__felix-blume__peal-of-church-bells-on-sunday-in-paris.mp3
+  e_fernglocken_3: felix.blume (freesound.org/s/501115) – CC0 – über github.com/abetusk/noixer – assets/501115__felix-blume__peal-of-church-bells-on-sunday-in-paris.mp3
+  e_fernglocken_4: Jonathan Shaw / InspectorJ (freesound.org/s/371267) – CC BY 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_church_bells_01.flac
+  e_fernglocken_5: Nox_Sound (freesound.org/s/563885) – CC0 – über github.com/Fris0uman/CDDA-Soundpacks – sound/CC-Sounds/environment/ambient/church_bells.ogg
+  e_schreibfeder_1: NachtmahrTV (freesound.org/s/571800) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_pencil_write.flac
+  e_schreibfeder_2: thavis360 (freesound.org/s/178433) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_chalk_write_01.flac
+  e_schreibfeder_3: thavis360 (freesound.org/s/178433) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_chalk_write_02.flac
+  e_seetaucher_1: Jonathon Jongsma (xeno-canto.org/139388) – CC BY-SA 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_loon_01.flac
+  e_seetaucher_2: Jonathon Jongsma (xeno-canto.org/139387) – CC BY-SA 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_loon_02.flac
+  e_seetaucher_3: Jonathon Jongsma (xeno-canto.org/139387) – CC BY-SA 3.0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_loon_03.flac
+  e_brutzeln_1: qubodup (freesound.org/s/194635) – CC BY 3.0 – über github.com/openclonk/openclonk – planet/Sound.ocg/Liquids.ocg/Sizzle.ogg
+  e_brutzeln_2: luffy (freesound.org/s/17299) – CC BY 3.0 – über github.com/openclonk/openclonk – planet/Sound.ocg/Liquids.ocg/SmokeSizzle.ogg
+  e_teeaufguss_1: LanDub (freesound.org/s/182839 „Filling Teapot“) – CC0 – über github.com/karolpiczak/ESC-50 – audio/4-182839-A-17.wav
+  e_teeaufguss_2: DrZoom (freesound.org/s/186693 „Fill Cup of Tea“) – CC BY 3.0 – über github.com/karolpiczak/ESC-50 – audio/4-186693-A-17.wav
+  e_teeaufguss_3: Taira Komori (freesound.org/s/212736 „Pouring_cold_tea“) – CC BY 3.0 – über github.com/karolpiczak/ESC-50 – audio/5-212736-A-17.wav
+  e_stubenlachen_1: Corsica_S (freesound.org/s/30043 „small group laugh 6“) – CC BY 3.0 – über github.com/karolpiczak/ESC-50 – audio/1-30043-A-26.wav
+  e_stubenlachen_2: Corsica_S (freesound.org/s/30039 „small group laugh 2“) – CC BY 3.0 – über github.com/karolpiczak/ESC-50 – audio/1-30039-A-26.wav
+  e_stubenlachen_3: sagetyrtle (freesound.org/s/33658 „laughter“) – CC0 – über github.com/karolpiczak/ESC-50 – audio/1-33658-A-26.wav
+  e_stubenlachen_4: Eneasz (freesound.org/s/119459 „Male Laughter“) – CC0 – über github.com/karolpiczak/ESC-50 – audio/3-119459-A-26.wav
+  a_fluestern: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.1.ogg
+  a_fluestern: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.2.ogg
+  a_fluestern: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.3.ogg
+  a_fluestern: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.4.ogg
+  a_fluestern: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.5.ogg
+  a_fluestern: dimbark1 (freesound.org/s/316797), Black Boe (freesound.org/s/22328–22330) [CC0]; thanvannispen, ohnobones (freesound.org/s/412769) [CC BY 3.0] – Zuordnung je Datei in dfcaverns nicht angegeben – CC BY 3.0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_whispers.6.ogg
+  a_grabesdroehnen: LittleRobotSoundFactory (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_cave_1.ogg
+  a_grabesdroehnen: LittleRobotSoundFactory (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_cave_2.ogg
+  a_grabesdroehnen: LittleRobotSoundFactory (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_cave_6.ogg
+  a_grabesdroehnen: LittleRobotSoundFactory (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_cave_7.ogg
+  a_grabesdroehnen: LittleRobotSoundFactory (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_cave_8.ogg
+  a_grabesdroehnen: LittleRobotSoundFactory (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_cave_9.ogg
+  a_geisterhauch: klankbeeld (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_ghost_2.ogg
+  a_geisterhauch: kaligari (freesound.org/s/35392) – CC0 – über github.com/sonic-pi-net/sonic-pi – etc/samples/ambi_haunted_hum.flac
+  a_geisterhauch: klankbeeld (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_ghost_4.ogg
+  a_geisterhauch: klankbeeld (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_ghost_6.ogg
+  a_geisterhauch: klankbeeld (Freesound) – CC BY 4.0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_ghost_3.ogg
+  a_herzschlag: daandraait (freesound.org/s/249716) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_mapitems/sounds/dfcaverns_slow_heartbeat.ogg
+  a_herzschlag: bart (OpenGameArt „Heartbeat sounds“) – CC0 – über github.com/ValyriaTear/ValyriaTear – data/sounds/heartbeat_slow.wav
+  a_friedhof: mistersherlock (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_graveyard_2.ogg
+  a_friedhof: mistersherlock (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_graveyard_3.ogg
+  a_friedhof: mistersherlock (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_graveyard_4.ogg
+  a_friedhof: mistersherlock (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_graveyard_5.ogg
+  a_friedhof: mistersherlock (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_graveyard_6.ogg
+  a_ruinenwind: SaltedMutton72 (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_wind_cave_1.ogg
+  a_ruinenwind: shelbyshark (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_wind_cave_3.ogg
+  a_ruinenwind: shelbyshark (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_wind_cave_4.ogg
+  a_ruinenwind: shelbyshark (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_wind_cave_5.ogg
+  a_ruinenwind: shelbyshark (Freesound) – CC0 – über github.com/EmptyStar/asuna (Mod everness von SaKeL) – mods/everness/sounds/everness_ambience_wind_cave_2.ogg
+  a_geisterchor: jjbbllkk (freesound.org/s/530715) – CC0 – über github.com/abetusk/noixer – assets/530715__jjbbllkk__rmr-morphagene-reels-choirs-02.mp3
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.1.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.2.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.3.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.4.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.5.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.6.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.7.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.8.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.9.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.10.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.11.ogg
+  a_fliegenschwarm: TRP (freesound.org/s/567732) – CC0 – über github.com/MeseCraft/mesecraft (Mod dfcaverns von FaceDeer) – mods/MODULES/dfcaverns/df_ambience/sounds/dfcaverns_flies.12.ogg
+  a_sommerwiese: straget (freesound.org/s/401939) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_grasshopper.flac
+  a_sommerwiese: sinewave1kHz (freesound.org/s/207374) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_cicada_05.flac
+  a_sommerwiese: Ian Davies (freesound.org/s/434330) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_cicada_06.flac
+  a_sommerwiese: Jedo (freesound.org/s/396809) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_cicada_07.flac
+  a_sommerwiese: GB01 (freesound.org/s/530477) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_cricket.flac
+  a_sommerwiese: macdaddyno1 (freesound.org/s/321591) – CC0 – über github.com/AntumMT/mod-sounds – sounds_src/sounds_cicada_04.flac
+  a_brunnen: Hero of Allacrost (Allacrost-Projekt) – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear – data/sounds/fountain_large.ogg
+  a_brunnen: Hero of Allacrost (Allacrost-Projekt) – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear – data/sounds/fountain_small.ogg
+
