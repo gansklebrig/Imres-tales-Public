@@ -9799,6 +9799,35 @@ const ZUS_ICON = {
     h.textContent = text; h.classList.toggle("warn", !!warn);
     clearTimeout(zusHinweis.t); zusHinweis.t = setTimeout(() => { h.textContent = ""; }, 4000);
   }
+  /* ein Regler für alle: verschiebt jede Spur (und jedes Zusatzgeräusch im selben Fenster) um denselben Prozentsatz – die Mischung bleibt, alles wird gemeinsam leiser oder lauter */
+  const alleRegler = T => '<label class="lw-spurzeile lw-allespur" title="' + esc(T.alleSpurTipp) + '"><span>' + T.alleSpur + '</span><input type="range" min="0" max="200" step="1" value="100" data-allespur="1" aria-label="' + esc(T.alleSpurTipp) + '"><b>100 %</b></label>';
+  Object.assign(TX.de, { alleSpur: "⇕ Alle gemeinsam", alleSpurTipp: "Alle Spuren und Geräusche in diesem Fenster gleichzeitig dimmen oder anheben – jede um denselben Prozentsatz, die Mischung bleibt erhalten." });
+  Object.assign(TX.en, { alleSpur: "⇕ All together", alleSpurTipp: "Dim or raise every layer and sound in this panel at once – each by the same percentage, the mix stays the same." });
+  let alleStart = null;
+  function alleSpurenZiehen(r, fertig) {
+    const box = r.closest(".lw-spuren, .lw-klingt, .lw-espuren, .lw-kfeld, [data-feld], .lw-fkoerper") || root, art = S.kulisse;
+    if (!alleStart) {
+      alleStart = { kul: [], zus: [] };
+      box.querySelectorAll("[data-kulspur]").forEach(x => { const i = x.dataset.kulspur === "ev" ? "ev" : +x.dataset.kulspur; if (!alleStart.kul.some(k => k[0] === i)) alleStart.kul.push([i, kulMixWert(art, i)]); });
+      box.querySelectorAll("[data-zusvol]").forEach(x => { const id = x.dataset.zusvol; if (zusIst(id) && !alleStart.zus.some(k => k[0] === id)) alleStart.zus.push([id, zusWert(id)]); });
+    }
+    const f = (+r.value) / 100, b = r.parentNode.querySelector("b"); if (b) b.textContent = Math.round(f * 100) + " %";
+    const neuW = v => Math.max(0, Math.min(2, v * f));
+    if (alleStart.kul.length) {
+      const m = kulMix[art] = kulMix[art] || { b: [] };
+      alleStart.kul.forEach(([i, v0]) => { const v = neuW(v0); if (i === "ev") m.ev = v; else m.b[i] = v;
+        if (kul && kul.art === art && i !== "ev" && kul.betten && kul.betten[i]) { const x = kul.betten[i]; x.regler = v; x.out.gain.setTargetAtTime(bettZiel(x), ctx.currentTime, .08); }
+        root.querySelectorAll('[data-kulspur="' + i + '"]').forEach(x => { x.value = Math.round(v * 100); const bb = x.parentNode.querySelector("b"); if (bb) bb.textContent = Math.round(v * 100) + " %"; }); });
+      try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {}
+    }
+    if (alleStart.zus.length) {
+      alleStart.zus.forEach(([id, v0]) => { const v = neuW(v0); zusWahl[id] = v;
+        root.querySelectorAll('[data-zusvol="' + id + '"]').forEach(x => { x.value = Math.round(v * 100); const bb = x.parentNode.querySelector("b"); if (bb) bb.textContent = Math.round(v * 100) + " %"; }); });
+      zusMerken(); zusPegelSetzen();
+    }
+    /* losgelassen: der gemeinsame Regler springt zurück auf 100 % – die neuen Werte sind jetzt der Ausgangspunkt */
+    if (fertig) { alleStart = null; r.value = 100; if (b) b.textContent = "100 %"; }
+  }
   /* die Regler allein – fürs eigene Feld „Spuren einzeln“ und fürs Pop-up an der Kulisse */
   function spurenInhalt(T) {
     const w = KUL_WELT[S.kulisse];
@@ -9806,7 +9835,7 @@ const ZUS_ICON = {
     const namen = KUL_SPUR_NAME[sprache()] || KUL_SPUR_NAME.de;
     const zeile = (i, name) => { const v = Math.round(kulMixWert(S.kulisse, i) * 100);
       return '<label class="lw-spurzeile"><span>' + esc(name) + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-kulspur="' + i + '"><b>' + v + " %</b></label>"; };
-    return '<div class="lw-spuren"><button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck">↺ ' + T.kulMixZurueck + "</button>" +
+    return '<div class="lw-spuren"><button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck">↺ ' + T.kulMixZurueck + "</button>" + alleRegler(T) +
       w.betten.slice(0, spar ? 2 : 9).map(([n], i) => zeile(i, namen[n] || n.replace(/^a_/, ""))).join("") +
       (w.ev.length ? zeile("ev", T.kulEinzel) : "") + "</div>";
   }
@@ -10248,7 +10277,7 @@ const ZUS_ICON = {
     const w = KUL_WELT[S.kulisse], E = T.einf, en = sprache() === "en", N = KUL_SPUR_NAME[sprache()] || KUL_SPUR_NAME.de;
     const zeile = (sym, name, regler, extra, hl) => '<div class="lw-kzeile"' + (hl || "") + '><span class="lw-kzsym">' + sym + '</span><span class="lw-kzname">' + name + "</span>" + regler + (extra || "") + "</div>";
     const reg = (attr, wert, v, lab) => '<input type="range" min="0" max="200" step="5" value="' + v + '" ' + attr + '="' + wert + '" aria-label="' + esc(lab) + '"><b>' + v + " %</b>";
-    let h = "";
+    let h = (w || Object.keys(zusWahl).some(id => ZUSATZ[id])) ? '<div class="lw-kzeile lw-kzalle" title="' + esc(T.alleSpurTipp) + '"><span class="lw-kzsym">⇕</span><span class="lw-kzname">' + T.alleSpur.replace(/^\S+\s/, "") + '</span><input type="range" min="0" max="200" step="1" value="100" data-allespur="1" aria-label="' + esc(T.alleSpurTipp) + '"><b>100 %</b></div>' : "";
     if (w) {
       h += "<h5>" + E.spurenOrt + '<button type="button" class="lw-klein lw-zurueck100" data-aktion="kulmixzurueck" title="' + esc(T.kulMixZurueck) + '">↺</button></h5>';
       w.betten.slice(0, spar ? 2 : 9).forEach(([n], i) => { const ic = quellIcon(n), v = Math.round(kulMixWert(S.kulisse, i) * 100), nm = esc(N[n] || n.replace(/^a_/, ""));
@@ -11651,6 +11680,7 @@ const ZUS_ICON = {
       '<div class="lw-lgruppe"><span>' + L.ort + "</span>" + ["mitten", "rand", "nebenan", "darunter"].map(o => chip("standort", o, orte[o], leben.standort === o)).join("") + "</div>" +
       '<div class="lw-lgruppe"><span></span>' + schalter("szenen", L.szenen, leben.szenen) + schalter("nah", L.nah, leben.nah) + "</div></div>";
   }
+  root.addEventListener("change", e => { if (e.target.dataset && e.target.dataset.allespur) alleSpurenZiehen(e.target, true); });
   root.addEventListener("input", e => {
     const d = e.target.dataset || {};
     if (d.vol) { S.vol[d.vol] = +e.target.value; merken(); mixAnwenden(); return; }
@@ -11660,6 +11690,7 @@ const ZUS_ICON = {
     if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); root.querySelectorAll('[data-feld="kulvol"]').forEach(r => { if (r !== e.target) r.value = S.kulisseVol; }); merken(); effekteAnwenden(); }
     if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
     if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.allespur) { alleSpurenZiehen(e.target, false); return; }
     if (d.zusvol) {
       const id = d.zusvol, v = (+e.target.value) / 100; if (!zusIst(id)) return;
       zusWahl[id] = v; zusMerken(); const b = e.target.parentNode.querySelector("b"); if (b) b.textContent = Math.round(v * 100) + " %";
@@ -12296,6 +12327,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kleinregler { display: flex; align-items: center; gap: .6rem; font-size: .82rem; color: var(--ash); }
 .lw-spurklappe { margin: -.15rem 0 .1rem; font-size: .78rem; }
 .lw-spuren { display: grid; gap: .3rem; padding: .5rem .6rem; margin-bottom: .2rem; border: 1px solid var(--line); background: rgba(235,226,204,.03); }
+.lw-allespur, .lw-kzalle { border: 1px solid rgba(224,160,70,.35); border-radius: 8px; padding: .3rem .45rem; margin: .1rem 0 .45rem; background: rgba(224,160,70,.06); }
+.lw-allespur > span, .lw-kzalle .lw-kzname, .lw-kzalle .lw-kzsym { color: var(--ember); font-weight: 600; }
 .lw-spurzeile { display: grid; grid-template-columns: minmax(6.5rem, 9rem) 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; color: var(--vellum); }
 .lw-spurzeile input { width: 100%; accent-color: #6a9fb5; }
 .lw-spurzeile b { font-weight: normal; color: var(--ash); text-align: right; font-size: .76rem; }
