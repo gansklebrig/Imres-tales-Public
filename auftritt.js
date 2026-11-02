@@ -546,6 +546,15 @@
   const MIDI = [n => GRUND - 24 + SK[n % 7], n => GRUND + SK[n], n => GRUND + 12 + SK[n]];
   const KARTE = { harfe: [28, 31, 35, 38, 41, 45, 48, 52, 55, 59, 62, 65, 69, 72, 76, 79, 83, 86, 89, 93, 95, 98, 101], kb: [28, 30, 31, 34, 36, 38, 40, 42, 44, 45, 49, 52, 56, 59],
     gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], fl: [60, 64, 69, 72, 76, 81, 84, 88, 93, 96] };
+  /* jede Bühne mit eigener Klangfarbe: statt der Harfe ein anderes Zupf- oder Schlaginstrument unter der Melodie, dazu eine andere Trommel
+     (Psalter, Zither, Balafon, Mbira, Volksharfe, Scheitholt, Handglocken: VCSL, CC0; Hackbrett wie im Lautenwerk) */
+  Object.assign(KARTE, {"psa":[70,72,74,76,78,80,82,84,86,88,90],"zit":[47,49,51,54,56,59,61,63,66,68,71,73,75,78,80,83],"bal":[61,65,72,77,84,89],"mbira":[46,48,50,51,53,55,56,58,60,62,63,65,67,68,70,72,73,74,75],"fharfe":[36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92],"strum":[50,52,54,55,57,59,61,62,64,66,67,69,71,73,74,76,78,79,81],"hglo":[60,62,64,66,68,70,72,74,76,78,80,81,84,86,88,90,92,94,96],"hack":[48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,96]});
+  const FARBE = { klage: { t: "psa", f: 1.6 }, seemann: { t: "strum", f: 1.15, tr: "rahm" }, buerger: { t: "strum", f: 1.15 }, walzer: { t: "fharfe", f: 1.4 },
+    schatten: { t: "zit", f: 1.8, tr: "darb" }, schmiede: { t: "bal", f: 1.7, tr: "darb" }, palast: { t: "hack", f: 1.1 }, elfen: { t: "psa", f: 1.6, tr: "rahm" },
+    goetter: { t: "hglo", f: 1.5, tr: "rahm" }, flammen: { t: "mbira", f: 1.7, tr: "darb" }, ploop: { t: "bal", f: 1.7 }, rex: { t: "strum", f: 1.15 }, venom: { t: "zit", f: 1.8, tr: "darb" } };
+  const TROMMEL_PROBE = { rahm: ["rahm_1", "rahm_2", 1.5], darb: ["darb_1", "darb_2", 1.5] };
+  const imBereich = (g, m) => { const k = KARTE[g]; if (!k) return m; while (m < k[0] - 2) m += 12; while (m > k[k.length - 1] + 2) m -= 12; return m; };
+  const farbe = daten => (daten && daten.lied && FARBE[daten.lied.key]) || {};
   const SPUR_PROBE = ["kb", "gitarre", "fl"];
   const probeBuf = new Map(), probeLaedt = new Map();
   const probeBasis = (() => { const sk = document.querySelector('script[src*="auftritt"]'); return sk ? sk.src.replace(/auftritt\.js.*$/, "klang/") : "klang/"; })();
@@ -583,10 +592,10 @@
   }
   /* alle Aufnahmen für ein Lied laden (höchstens ein paar Sekunden warten, dann geht es notfalls mit dem Ersatzklang los) */
   function probenFuer(daten) {
-    const namen = new Set(["bodh1", "bodh2", "holz1", "holz2"]);
+    const fb = farbe(daten), tp = fb.t || "harfe", namen = new Set(["bodh1", "bodh2", "holz1", "holz2"].concat(fb.tr ? TROMMEL_PROBE[fb.tr].slice(0, 2) : []));
     daten.liste.forEach(n => namen.add(probeName(SPUR_PROBE[n.spur], MIDI[n.spur](n.ton))));
     (daten.auto || []).forEach(a => namen.add(probeName(SPUR_PROBE[a.spur], MIDI[a.spur](a.ton))));
-    if (daten.modus) { const MO = MODI[daten.modus]; daten.akkorde.forEach(g => [0, 4, 7, 9, 11].forEach(o => { const d = g + o; namen.add(probeName("harfe", GRUND - 12 + MO[d % 7] + 12 * Math.floor(d / 7))); })); }
+    if (daten.modus) { const MO = MODI[daten.modus]; daten.akkorde.forEach(g => [0, 4, 7, 9, 11].forEach(o => { const d = g + o; namen.add(probeName(tp, imBereich(tp, GRUND - 12 + MO[d % 7] + 12 * Math.floor(d / 7)))); })); }
     return Promise.race([Promise.all([...namen].map(probeLaden)), new Promise(r => setTimeout(r, 4000))]);
   }
   /* Ersatz-Flöte: weicher Sinus mit etwas Hauch und Vibrato */
@@ -637,7 +646,8 @@
     /* Einzählen auf dem Holzblock */
     for (let i = 0; i < 4; i++) { const z = start + i * 4 * s; if (!probe(i ? "holz2" : "holz1", 0, z, .7, { dauer: .4, aus: .1 })) { rauschen(z, "bandpass", 2200, .35, .04); schlag(z, 900, 700, .05, .05); } }
     /* Bodhrán: schwerer Schlag auf der Eins, leichtere dazwischen */
-    const trommel = (z, schwer, laut) => { if (!probe(schwer ? "bodh1" : "bodh2", 0, z, laut, { dauer: .9, aus: .25 })) { if (schwer) schlag(z, 105, 46, .55, .32); else rauschen(z, "bandpass", 1300, .12, .05); } };
+    const fb = farbe(daten), tp = fb.t || "harfe", tf = fb.f || 1, tr = fb.tr && TROMMEL_PROBE[fb.tr];
+    const trommel = (z, schwer, laut) => { if (!(tr && probe(schwer ? tr[0] : tr[1], 0, z, laut * tr[2], { dauer: .9, aus: .25 })) && !probe(schwer ? "bodh1" : "bodh2", 0, z, laut, { dauer: .9, aus: .25 })) { if (schwer) schlag(z, 105, 46, .55, .32); else rauschen(z, "bandpass", 1300, .12, .05); } };
     /* Die Band spielt alles, was gerade nicht deine Noten sind – so klingt das Lied immer vollständig */
     (daten.auto || []).forEach(a => ton(a.spur, a.ton, start + a.zeit, a.klang, null, a.spur === 2 ? .8 : .75));
     /* Harfe: gezupfte Akkordbrechung in Achteln – der Teppich unter allem */
@@ -646,7 +656,7 @@
       const muster = L === 12 ? [0, 4, 7, 9, 7, 4] : [0, 4, 7, 9, 11, 9, 7, 4];
       daten.akkorde.forEach((g, takt) => {
         const z0 = start + daten.vor + takt * L * s, schluss = takt === daten.akkorde.length - 1;
-        muster.forEach((o, k) => { if (schluss && k > 0) return; probe("harfe", stufeMidi(g + o), z0 + k * 2 * s, k === 0 ? .2 : .13, { dauer: schluss ? 2.5 : 1.2, aus: .4 }); });
+        muster.forEach((o, k) => { if (schluss && k > 0) return; if (!probe(tp, imBereich(tp, stufeMidi(g + o)), z0 + k * 2 * s, (k === 0 ? .2 : .13) * tf, { dauer: schluss ? 2.5 : 1.2, aus: .4 })) probe("harfe", stufeMidi(g + o), z0 + k * 2 * s, k === 0 ? .2 : .13, { dauer: schluss ? 2.5 : 1.2, aus: .4 }); });
       });
     }
     daten.akkorde.forEach((g, takt) => {

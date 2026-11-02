@@ -853,8 +853,24 @@
     geige: 0.22, geigest: 0.16, kb: 0.4, spic: 0.42, klar: 0.24, oboe: 0.2, oboest: 0.15, fag: 0.28, pos: 0.24, trp: 0.2, orgel: 0.13, vlntrem: 0.14,
     amboss: 0.28, bodh1: 0.45, bodh2: 0.38, gong: 0.32, timp1: 0.42, timp3: 0.38, timp5: 0.36, timproll: 0.35, bd: 0.4, crash: 0.22, snare1: 0.22, snare2: 0.18,
     schelle1: 0.2, schelle2: 0.16, tamb1: 0.2, tamb2: 0.16, holz1: 0.3, holz2: 0.26, shake: 0.18, natur: 0.12 };
+  /* neue Instrumente wie im Lautenwerk (VCSL, CC0): Psalter, Streichpsalter, Zither, Balafon, Mbira, Volksharfe, Scheitholt, Handglocken, Orgel, Glasharfe,
+     dazu Didgeridoo als Bordun, Darbuka und Rahmentrommel */
+  Object.assign(PROBEN, {"psa":[70,72,74,76,78,80,82,84,86,88,90],"psab":[70,72,74,76,78,80,82,84,86,88,90],"zit":[47,49,51,54,56,59,61,63,66,68,71,73,75,78,80,83],"bal":[61,65,72,77,84,89],"mbira":[46,48,50,51,53,55,56,58,60,62,63,65,67,68,70,72,73,74,75],"fharfe":[36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92],"strum":[50,52,54,55,57,59,61,62,64,66,67,69,71,73,74,76,78,79,81],"hglo":[60,62,64,66,68,70,72,74,76,78,80,81,84,86,88,90,92,94,96],"rorg":[36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88],"glas":[75,78,86]});
+  Object.assign(PEGEL, { psa: 0.6, psab: 0.3, zit: 0.7, bal: 0.7, mbira: 0.7, fharfe: 0.6, strum: 0.5, hglo: 0.25, rorg: 0.3, glas: 0.22, didge_37: 0.5,
+    darb_1: 0.62, darb_2: 0.5, darb_3: 0.42, rahm_1: 0.62, rahm_2: 0.5 });
+  const GEBIET_NEU = {
+    wald: { arp: ["fharfe", "mbira"], mel: ["psa"], pad: ["psab"], schlag: ["rahm"] },
+    dorf: { arp: ["strum", "bal"], mel: ["hglo"], schlag: ["darb"] },
+    turm: { arp: ["zit"], pad: ["rorg"], schlag: ["rahm"] },
+    schmiede: { pad: ["rorg"], bass: ["didge"], schlag: ["darb"] },
+    donnerbaum: { arp: ["mbira", "zit"], pad: ["glas"], bass: ["didge"], schlag: ["rahm"] },
+    unterreich: { arp: ["zit", "mbira"], pad: ["glas"], bass: ["didge"], schlag: ["darb"] },
+    see: { arp: ["fharfe", "psa"], mel: ["hglo"], pad: ["glas", "psab"] },
+    gracklstugh: { arp: ["bal"], bass: ["didge"], schlag: ["darb"] },
+    hort: { arp: ["fharfe"], mel: ["hglo"], pad: ["rorg"] } };
+  Object.keys(GEBIET_NEU).forEach(k => Object.keys(GEBIET_NEU[k]).forEach(f => GEBIET_NEU[k][f].forEach(i => { if (!GEBIET_MUSIK[k][f].includes(i)) GEBIET_MUSIK[k][f].push(i); })));
   /* Lagen für die Melodie: wohin welches Instrument gehört */
-  const LAGE = { fl: 12, flst: 12, oka: 12, pan: 12, glock: 24, stimme: 12, geige: 12, klar: 0, oboe: 12, horn: -12, fag: -12, pos: -12, trp: 0, dudel: 12, gitarre: 0, harfe: 12 };
+  const LAGE = { psa: 12, psab: 12, hglo: 12, fl: 12, flst: 12, oka: 12, pan: 12, glock: 24, stimme: 12, geige: 12, klar: 0, oboe: 12, horn: -12, fag: -12, pos: -12, trp: 0, dudel: 12, gitarre: 0, harfe: 12 };
   const probeBasis = (() => { const sk = document.querySelector('script[src*="echohort"]'); return sk ? sk.src.replace(/echohort\.js.*$/, "klang/") : "klang/"; })();
   const probePuffer = new Map(), probeLaedt = new Map();
   function probeLaden(name) {
@@ -866,18 +882,21 @@
       .catch(() => { probeLaedt.delete(name); }));
   }
   const naechste = (fam, midi) => PROBEN[fam].reduce((b, m) => Math.abs(m - midi) < Math.abs(b - midi) ? m : b, PROBEN[fam][0]);
-  function note(fam, midi, zeit, dauer, laut) {
+  /* weit weg von jeder Aufnahme (außerhalb der Lage) klingt sie verzerrt – dann die Oktave nehmen, in der eine nahe liegt */
+  const inLage = (fam, midi) => { const k = PROBEN[fam]; if (!k) return midi; while (midi < k[0] - 3) midi += 12; while (midi > k[k.length - 1] + 3) midi -= 12; return midi; };
+  function note(fam, midi, zeit, dauer, laut, rate) {
     if (!ac || EINST.musik <= 0) return;
+    midi = inLage(fam, midi);
     const m = PROBEN[fam] ? naechste(fam, midi) : null, name = m == null ? fam : fam + "_" + m, b = probePuffer.get(name);
     if (!b) { probeLaden(name); return; }
     const q = ac.createBufferSource(), g = ac.createGain();
-    q.buffer = b; if (m != null) q.playbackRate.value = Math.pow(2, (midi - m) / 12);
+    q.buffer = b; if (m != null) q.playbackRate.value = Math.pow(2, (midi - m) / 12); if (rate) q.playbackRate.value *= rate;
     const l = Math.min((b.duration - b._start) / q.playbackRate.value, dauer), v = (PEGEL[fam] || 0.3) * (laut || 1) * (MZ.pegel || 1);
     g.gain.setValueAtTime(0, zeit); g.gain.linearRampToValueAtTime(v, zeit + 0.012);
     g.gain.setValueAtTime(v, Math.max(zeit + 0.012, zeit + l - 0.25)); g.gain.linearRampToValueAtTime(0, zeit + l);
     q.connect(g); g.connect(musikBus); q.start(zeit, b._start); q.stop(zeit + l + 0.05);
   }
-  function famVorladen(fam, a, b) { if (PROBEN[fam]) PROBEN[fam].filter(m => m >= a - 5 && m <= b + 5).forEach(m => probeLaden(fam + "_" + m)); else probeLaden(fam); }
+  function famVorladen(fam, a, b) { if (fam === "didge") { probeLaden("didge_37"); return; } if (PROBEN[fam]) { const d = inLage(fam, a) - a; a += d; b += d; } if (PROBEN[fam]) PROBEN[fam].filter(m => m >= a - 5 && m <= b + 5).forEach(m => probeLaden(fam + "_" + m)); else probeLaden(fam); }
   const MZ = { an: false, k: "", lage: 0, st: null, teil: 0, takt: 0, pos: 0, naechste: 0, timer: 0, pause: 0, pegel: 1, bossStueck: false, natur: null, naturGain: null };
 
   function motivBauen(walzer) {
@@ -910,7 +929,7 @@
     };
     // Instrumente rechtzeitig laden
     Object.values(teile).forEach(T => { famVorladen(T.arp, st.grund, st.grund + 26); famVorladen(T.mel, st.grund + (LAGE[T.mel] || 0) - 2, st.grund + (LAGE[T.mel] || 0) + 22); famVorladen(T.bass, st.grund - 26, st.grund - 4); famVorladen(T.pad, st.grund, st.grund + 16); });
-    ["bodh1", "bodh2", "schelle1", "schelle2", "tamb1", "tamb2", "holz1", "holz2", "shake", "timp1", "timp3", "timproll", "crash", "bd", "snare1", "snare2", "gong", "amboss", st.natur].forEach(n => n && probeLaden(n));
+    ["darb_1", "darb_2", "darb_3", "rahm_1", "rahm_2", "bodh1", "bodh2", "schelle1", "schelle2", "tamb1", "tamb2", "holz1", "holz2", "shake", "timp1", "timp3", "timproll", "crash", "bd", "snare1", "snare2", "gong", "amboss", st.natur].forEach(n => n && probeLaden(n));
     return st;
   }
   const teilLaenge = (st, t) => t === "I" ? 2 : t === "O" ? 2 : t === "C" ? 4 : 8;
@@ -982,8 +1001,9 @@
       MZ.pegel = tName === "O" ? 1 - (takt * st.achtel + pos) / (2 * st.achtel) * 0.6 : tName === "I" ? 0.7 + (takt * st.achtel + pos) / (2 * st.achtel) * 0.3 : 1;
       const takte = st.achtel;
       // Bass
-      if (pos === 0) note(T.bass, akkord[0] - 12, z, achtel * takte, energie === 0 ? 0.8 : 1);
-      else if (voll >= 2 && pos === takte / 2 && !st.walzer) note(T.bass, akkord[voll >= 3 ? 2 : 0] - 12, z, achtel * 3, 0.7);
+      if (T.bass === "didge") { if (pos === 0) { let g = st.grund - 12; while (g > 43) g -= 12; while (g < 31) g += 12; note("didge_37", 0, z, achtel * takte + 0.3, 0.9, Math.pow(2, (g - 37) / 12)); } }
+      else if (pos === 0) note(T.bass, akkord[0] - 12, z, achtel * takte, energie === 0 ? 0.8 : 1);
+      else if (T.bass !== "didge" && voll >= 2 && pos === takte / 2 && !st.walzer) note(T.bass, akkord[voll >= 3 ? 2 : 0] - 12, z, achtel * 3, 0.7);
       // Klangteppich in ruhigen Teilen und bei voller Besetzung
       if (pos === 0 && (energie === 0 || voll >= 3 || tName === "B")) { note(T.pad, akkord[1], z, achtel * takte * 1.05, 0.7); if (voll >= 3) note(T.pad, akkord[2] + 12, z, achtel * takte, 0.5); }
       // Arpeggio
@@ -1010,6 +1030,8 @@
         if (s === "tamb" && pos % 2 === 1) note(pos === 3 ? "tamb1" : "tamb2", 0, z, 1, 0.8);
         if (s === "holz" && (pos === 2 || pos === 6)) note(pos === 2 ? "holz1" : "holz2", 0, z, 1, 0.8);
         if (s === "shake" && pos % 2 === 1) note("shake", 0, z, 1, 0.7);
+        if (s === "darb") { if (pos === 0 || (!st.walzer && pos === 4 && takt % 2)) note("darb_1", 0, z, 1.2, 1); else if (st.walzer ? pos === 2 || pos === 4 : pos === 1 || pos === 3 || pos === 6) note(pos === 3 ? "darb_3" : "darb_2", 0, z, 1, 0.8); }
+        if (s === "rahm" && (pos === 0 || pos === (st.walzer ? 3 : 4))) note(pos === 0 ? "rahm_1" : "rahm_2", 0, z, 1.3, pos === 0 ? 1 : 0.7);
         if (s === "amboss" && pos === 0 && takt % 2 === 0) note("amboss", 0, z, 1.5, 1);
         if (s === "gong" && pos === 0 && takt === 0) note("gong", 0, z, 4, 0.8);
         if (s === "timp" && (pos === 0 || (lage === 3 && pos === takte / 2))) note(takt % 2 ? "timp3" : "timp1", 0, z, 2, 1);
