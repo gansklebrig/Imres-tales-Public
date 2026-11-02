@@ -2016,16 +2016,16 @@ const HEROES={
     cast(r){P.buffs.ascend=8+2*r;P.ascendR=r;recalc();ring(P.x,P.y,120,'#ff3b4a',0.8,8);burst(P.x,P.y,'#ff3b4a',40,260);G.shake+=6;sfx('boss')}},
    {id:'z_step',b:2,row:0,a:1,ic:'⇝',name:'Schattenschritt',cd:r=>Math.max(3,6.5-0.4*r),d:r=>`Ezekiel teleportiert sich mitten unter die Gegner und verursacht dort ${pc(0.9+0.2*r)} Schaden. Kurz unverwundbar.`,
     cast(r){const p=aimPoint(430);smoke(P.x,P.y);P.x=clamp(p.x,20,WORLD-20);P.y=clamp(p.y,20,WORLD-20);P.inv=Math.max(P.inv,0.5);const as=rank('z_assassin');if(as)P.ambush=Math.max(P.ambush||0,0.5*as);
-     const R=100*P.st.area,k0=G.kills;aoe(P.x,P.y,R,sk(0.9+0.2*r),{knock:220,fx:P.x,fy:P.y});smoke(P.x,P.y);ring(P.x,P.y,R,'#8a2a8a',0.35,4);sfx('blink');if(as&&G.kills>k0)later(0.01,()=>{P.cds.z_step=0})}},
-   {id:'z_murder',b:2,row:1,ic:'☓',name:'Mordlust',d:r=>`Jeder Kill verkürzt alle Abklingzeiten um ${f1(0.12*r)} s.`},
+     const R=100*P.st.area,k0=G.kills;aoe(P.x,P.y,R,sk(0.9+0.2*r),{knock:220,fx:P.x,fy:P.y});smoke(P.x,P.y);ring(P.x,P.y,R,'#8a2a8a',0.35,4);sfx('blink');if(as&&G.kills>k0)later(0.01,()=>{P.cds.z_step=Math.min(P.cds.z_step||0,1)})}},
+   {id:'z_murder',b:2,row:4,ic:'☓',name:'Mordlust',d:r=>`Jeder Kill verkürzt alle Abklingzeiten um ${f1(0.05*r)} s – höchstens um 1 s pro Sekunde.`},
    {id:'z_destroyer',b:2,row:2,ic:'✠',name:'Der Zerstörer',d:r=>`Jeder Kill nährt die Klinge: Ein Zerstörer-Stapel (8 s, bis 10) gibt +${f1(0.8*r)}% Schaden und +${r}% Kritischen Schaden. Bei 10 Stapeln reißt der nächste Nahkampftreffer den Boden auf: ${pc(3+0.75*r)} Schaden im weiten Umkreis – danach beginnt die Jagd von vorn.`},
    {id:'z_smoke',b:2,row:3,c:0,a:1,ic:'☁',name:'Rauchbombe',cd:()=>14,d:r=>`Eine Rauchwolke (5 s): Darin sind Ezekiel und Mitspieler unsichtbar, und Gegner im Rauch treffen kaum noch. Der erste Angriff aus dem Rauch verursacht +${60+15*r}% Schaden.`,
     cast(r){zone({x:P.x,y:P.y,r:150*P.st.area,dur:5,dps:0,kind:'smoke',blind:1});P.ambush=Math.max(P.ambush||0,0.6+0.15*r);smoke(P.x,P.y);smoke(P.x+30,P.y);sfx('blink')}},
    {id:'z_clone',b:2,row:3,c:1,a:1,ic:'⧉',name:'Schattenklon',cd:()=>20,d:r=>`Ein Klon aus Schatten kämpft ${8+r} s lang und wiederholt Ezekiels Angriffe mit ${50+12*r}% Schaden.`,
     cast(r){spawnPet('clone',P.x-30,P.y,{life:8+r,dmg:()=>P.st.dmg*(0.5+0.12*r),hp:P.st.maxHp*0.6,every:1/Math.max(0.8,P.st.rate),r:14});smoke(P.x-30,P.y);sfx('blink')}},
-   {id:'z_mark',b:2,row:4,a:1,ic:'⊘',name:'Todesmal',cd:()=>16,d:r=>`Markiert den stärksten Gegner – bis dahin erleidet er von allen 15% mehr Schaden. Nach 3 s explodiert das Mal: ${30+8*r}% des Schadens, den er währenddessen erlitten hat, plus ${pc(3.6+1*r)}.`,
+   {id:'z_mark',b:2,row:1,a:1,ic:'⊘',name:'Todesmal',cd:()=>16,d:r=>`Markiert den stärksten Gegner – bis dahin erleidet er von allen 15% mehr Schaden. Nach 3 s explodiert das Mal: ${30+8*r}% des Schadens, den er währenddessen erlitten hat, plus ${pc(3.6+1*r)}.`,
     cast(r){const t=aimTarget(480,true);if(!t)return false;t.markT=3;t.markSrc=P;t.vuln=Math.max(t.vulnT>0?t.vuln:0,0.15);t.vulnT=3;t.markAcc=0;t.markP=0.3+0.08*r;t.markB=sk(3.6+1*r);ring(t.x,t.y,t.r+16,'#ff3b4a',0.5,4);sfx('hold')}},
-   {id:'z_assassin',b:2,row:5,ult:1,ic:'♠',name:'Meuchelmörder',d:r=>`Nach einem Schattenschritt verursacht der nächste Treffer +${50*r}% Schaden. Tötet ein Schattenschritt einen Gegner, ist er sofort wieder bereit.`},
+   {id:'z_assassin',b:2,row:5,ult:1,ic:'♠',name:'Meuchelmörder',d:r=>`Nach einem Schattenschritt verursacht der nächste Treffer +${50*r}% Schaden. Tötet ein Schattenschritt einen Gegner, ist er nach 1 s wieder bereit.`},
    {id:'z_d_griff',b:3,row:0,a:1,ic:'✋',name:'Griff in die Tasche',cd:()=>5,d:r=>`Ezekiel huscht ${200+8*r} Schritt weit durch die Gegner und greift im Vorbeigehen in jede Tasche: ${pc(1.6+0.4*r)} Schaden an allen auf dem Weg. Champions verlieren eine ihrer Eigenschaften – Ezekiel trägt sie ein paar Sekunden lang selbst. Anderen fällt manchmal eine Münze aus der Tasche.`,
     cast(r){return zdGriff(r)}},
    {id:'z_d_finger',b:3,row:1,ic:'☌',name:'Flinke Finger',d:r=>`+${3*r}% Angriffstempo. Normale Angriffe stehlen mit ${4*r}% Chance, und eine Ausweichrolle an Gegnern vorbei bestiehlt bis zu zwei von ihnen im Vorbeigehen. Gestohlene Kräfte halten ${f1(8+0.6*r)} s.`,mod:(s,r)=>{s.rateP+=0.03*r}},
@@ -3690,7 +3690,7 @@ function killEnemy(e,o){if(e.dead)return;e.dead=true;addCorpse(e,o);comboKill();
  else if(e.guard)for(let i=0;i<2;i++){const a=rnd(TAU);dropItem(e.x+Math.cos(a)*120,e.y+Math.sin(a)*120,randomItem(e.il+2,0.8+0.02*SL(),i===0?2:1))}
  else if(e.rare){dropItem(e.x,e.y,randomItem(e.il+2,1+0.02*SL(),2));if(Math.random()<0.12)dropItem(e.x+rnd(-30,30),e.y+rnd(-30,30),randomItem(e.il+1,0.6,1))}
  else if(!e.noLoot&&Math.random()<(e.elite?0.3:e.summon?0.004:0.011)*beuteF()&&++beuteB().n)dropItem(e.x,e.y,randomItem(e.il+(e.elite?1:0),(e.elite?0.6:0)+0.02*SL()+0.15*prog,e.elite?1:0));
- const mr=rank('z_murder');if(mr)for(const k in P.cds)P.cds[k]=Math.max(0,P.cds[k]-0.12*mr);
+ const mr=rank('z_murder');if(mr){const t=G.time||0;if((P.zmrT||0)<t-1){P.zmrT=t-1;}const red=Math.min(0.05*mr,t+0-(P.zmrT||0));if(red>0){P.zmrT=(P.zmrT||0)+red;for(const k in P.cds)P.cds[k]=Math.max(0,P.cds[k]-red)}}
  if(e.boss){if(e.roomBoss)gansBesiegt(e);else bossDefeated(e)}else if(e.guard)guardDefeated(e)}
 function clearPortalLoot(){const p=G.portal;if(!p)return;for(const L of G.loot){const dd=Math.sqrt(d2(L,p));if(dd<100){const a=dd<1?rnd(TAU):ang(p,L),d=rnd(110,150);L.x=clamp(p.x+Math.cos(a)*d,20,WORLD-20);L.y=clamp(p.y+Math.sin(a)*d,20,WORLD-20)}}}
 function guardDefeated(e){G.guardE=null;G.guardDone=true;guardDeathFx(e);G.shake+=6;sfx('portal');ring(e.x,e.y,160,'#e5b454',0.9,7);
