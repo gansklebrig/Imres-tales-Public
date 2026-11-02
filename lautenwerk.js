@@ -9835,8 +9835,8 @@ const ZUS_ICON = {
   }
   /* ---------- Anordnung des Pults am Rechner: Felder frei in Spalten verschieben, Spaltenzahl und -breiten wählbar ---------- */
   const FELDER = ["musik", "kulisse", "karte", "spuren", "leben", "zusaetze", "effekte"];
-  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "karte", "spuren", "leben"], ["zusaetze", "effekte"]], breiten: [1, 1.15, 1] });
-  let anordnung = ANORDNUNG_START();
+  const ANORDNUNG_START = () => ({ spalten: [["musik"], ["kulisse", "karte", "spuren", "leben"], ["zusaetze", "effekte"]], breiten: [1, 1.15, 1], hoehen: {} });
+  let anordnung = Object.assign(ANORDNUNG_START(), { hoehen: {} });
   function anordnungPruefen(a) {
     const n = Math.max(1, Math.min(5, (a && a.spalten && a.spalten.length) || 3)), sp = [], gesehen = new Set();
     for (let i = 0; i < n; i++) sp.push(((a.spalten[i] || []).filter(id => FELDER.includes(id) && !gesehen.has(id) && gesehen.add(id))));
@@ -9845,20 +9845,23 @@ const ZUS_ICON = {
       const k = (id === "spuren" || id === "karte") && sp.find(c => c.includes("kulisse"));
       if (k) k.splice(k.indexOf("kulisse") + 1, 0, id); else sp[sp.length - 1].push(id); });
     const br = sp.map((_, i) => { const w = a.breiten && +a.breiten[i]; return w > .15 && w < 8 ? w : 1; });
-    return { spalten: sp, breiten: br };
+    const ho = {}; if (a.hoehen && typeof a.hoehen === "object") FELDER.forEach(id => { const h = +a.hoehen[id]; if (h >= 80 && h <= 4000) ho[id] = Math.round(h); });
+    return { spalten: sp, breiten: br, hoehen: ho };
   }
   try { const g = JSON.parse(localStorage.getItem("imres-lw-anordnung") || "null"); if (g) anordnung = anordnungPruefen(g); } catch (_) {}
   const anordnungMerken = () => { try { localStorage.setItem("imres-lw-anordnung", JSON.stringify(anordnung)); } catch (_) {} };
   const AT = () => sprache() === "en"
-    ? { frei: "Free", zuSpalten: "Columns", freiT: "Place every panel freely and resize it – or back to columns", freiTipp: "Drag panels by ⠿ anywhere · bottom-right corner: size", groesse: "Drag: make this panel bigger or smaller", griff: "Drag to move this panel", spalten: n => n + (n === 1 ? " column" : " columns"), mehr: "One more column", weniger: "One column less", zurueck: "Default layout", tipp: "Drag panels by ⠿ · drag the gap between columns to resize", leer: "Drag a panel here" }
-    : { frei: "Frei", zuSpalten: "Spalten", freiT: "Jedes Feld frei platzieren und in der Größe ziehen – oder zurück zu Spalten", freiTipp: "Felder am ⠿ beliebig verschieben · Ecke unten rechts: Größe", groesse: "Ziehen: Feld größer oder kleiner", griff: "Ziehen, um dieses Feld zu verschieben", spalten: n => n + (n === 1 ? " Spalte" : " Spalten"), mehr: "Eine Spalte mehr", weniger: "Eine Spalte weniger", zurueck: "Standard-Anordnung", tipp: "Felder am ⠿ ziehen · Lücke zwischen Spalten ziehen ändert die Breite", leer: "Feld hierher ziehen" };
+    ? { hoeheF: "Drag: taller or shorter", breiteF: "Drag: wider or narrower", hoehe: "Drag: make this panel taller or shorter · double-click: automatic height", frei: "Free", zuSpalten: "Columns", freiT: "Place every panel freely and resize it – or back to columns", freiTipp: "Drag panels by ⠿ anywhere · bottom edge: height · right edge: width · corner: both", groesse: "Drag: make this panel bigger or smaller", griff: "Drag to move this panel", spalten: n => n + (n === 1 ? " column" : " columns"), mehr: "One more column", weniger: "One column less", zurueck: "Default layout", tipp: "Drag panels by ⠿ · gap between columns: width · lower edge of a panel: height", leer: "Drag a panel here" }
+    : { hoeheF: "Ziehen: höher oder niedriger", breiteF: "Ziehen: breiter oder schmaler", hoehe: "Ziehen: Feld höher oder niedriger · Doppelklick: Höhe wieder automatisch", frei: "Frei", zuSpalten: "Spalten", freiT: "Jedes Feld frei platzieren und in der Größe ziehen – oder zurück zu Spalten", freiTipp: "Felder am ⠿ beliebig verschieben · unterer Rand: Höhe · rechter Rand: Breite · Ecke: beides", groesse: "Ziehen: Feld größer oder kleiner", griff: "Ziehen, um dieses Feld zu verschieben", spalten: n => n + (n === 1 ? " Spalte" : " Spalten"), mehr: "Eine Spalte mehr", weniger: "Eine Spalte weniger", zurueck: "Standard-Anordnung", tipp: "Felder am ⠿ ziehen · Lücke zwischen Spalten: Breite · unterer Rand eines Feldes: Höhe", leer: "Feld hierher ziehen" };
   /* Feld-Hülle: Kennung und Griff in die Kopfzeile */
   const ZWECK = { de: { karte: "Dich und die Geräusche herumziehen – Abstand und Räume verändern den Klang.", musik: "Läuft ohne Ende weiter – tippe an, was gerade am Tisch passiert.", kulisse: "Geräusche des Ortes, sie laufen unter der Musik weiter.", spuren: "Jede Geräuschschicht des Ortes einzeln lauter oder leiser.", leben: "Macht den Ort lebendig: Überraschungen, Stille, Wetter, Tageszeit.", zusaetze: "Einzelne Geräusche zusätzlich dazulegen, z. B. Regen über die Taverne.", effekte: "Für einen Moment am Tisch: ein Schwerthieb, ein Würfelwurf …" },
     en: { karte: "Drag yourself and the sounds around – distance and rooms change the sound.", musik: "Keeps playing – tap whatever is happening at the table.", kulisse: "Sounds of the place, they keep running under the music.", spuren: "Each sound layer of the place louder or quieter.", leben: "Brings the place to life: surprises, silence, weather, time of day.", zusaetze: "Layer single sounds on top, e.g. rain over the tavern.", effekte: "For a moment at the table: a sword strike, a dice roll …" } };
   function feld(id, html) {
     const zw = (ZWECK[sprache()] || ZWECK.de)[id];
     if (zw) html = html.replace("</h4>", "</h4>" + '<p class="lw-zweck lw-zweck-kopf">' + zw + "</p>");
-    return html.replace('<section class="lw-box', '<section data-feld="' + id + '" class="lw-box')
+    const fh = anordnung.hoehen && anordnung.hoehen[id];
+    html = html.replace(/<\/section>\s*$/, '<i class="lw-feldrand" data-hrand="' + id + '" title="' + esc(AT().hoehe) + '"></i></section>');
+    return html.replace('<section class="lw-box', '<section data-feld="' + id + '"' + (fh ? ' style="--lw-fh:' + fh + 'px"' : "") + ' class="lw-box' + (fh ? " lw-fhoch" : ""))
       .replace('<div class="lw-box-kopf">', '<div class="lw-box-kopf"><button type="button" class="lw-griff" data-griff="' + id + '" title="' + esc(AT().griff) + '" aria-label="' + esc(AT().griff) + '">⠿</button>');
   }
   const spaltenVorlage = () => anordnung.breiten.map(w => "minmax(0, " + w + "fr)").join(" ");
@@ -9892,7 +9895,7 @@ const ZUS_ICON = {
       FELDER.forEach(id => { if (!kfrei.L[id]) { const st = kfreiStart(); kfrei.L[id] = st[id] || { x: 0, y: 999, w: 12, h: 12 }; } }); kOrdnen(null);
       return '<div class="lw-konsole lw-konsole-frei"><div class="lw-anordnung"><span class="lw-tipp">' + a.freiTipp + "</span>" + umschalt +
         '<button type="button" class="lw-klein" data-anordnung="zurueck" title="' + esc(a.zurueck) + '">↺</button></div><div class="lw-kfrei">' +
-        FELDER.filter(id => f[id]).map(id => '<div class="lw-kfeld" data-kid="' + id + '" style="' + kStil(kfrei.L[id]) + '">' + f[id] + '<i class="lw-fgroesse" data-kgroesse="' + id + '" title="' + esc(a.groesse) + '"></i></div>').join("") +
+        FELDER.filter(id => f[id]).map(id => '<div class="lw-kfeld" data-kid="' + id + '" style="' + kStil(kfrei.L[id]) + '">' + f[id] + '<i class="lw-frand lw-frand-u" data-kgroesse="' + id + '" data-achse="h" title="' + esc(a.hoeheF) + '"></i><i class="lw-frand lw-frand-r" data-kgroesse="' + id + '" data-achse="w" title="' + esc(a.breiteF) + '"></i><i class="lw-fgroesse" data-kgroesse="' + id + '" title="' + esc(a.groesse) + '"></i></div>').join("") +
         "</div></div>";
     }
     return '<div class="lw-konsole" style="--lw-spalten:' + spaltenVorlage() + '">' +
@@ -9913,7 +9916,7 @@ const ZUS_ICON = {
   }
   function anordnungAusDom() {
     const sp = [...root.querySelectorAll(".lw-konsole > .lw-spalte")].map(c => [...c.querySelectorAll(":scope > [data-feld]")].map(e => e.dataset.feld));
-    anordnung = anordnungPruefen({ spalten: sp, breiten: anordnung.breiten }); anordnungMerken();
+    anordnung = anordnungPruefen({ spalten: sp, breiten: anordnung.breiten, hoehen: anordnung.hoehen }); anordnungMerken();
   }
   root.addEventListener("click", e => {
     if (e.target.closest && e.target.closest("[data-kfrei]")) { kfrei.an = !kfrei.an; if (kfrei.an && !Object.keys(kfrei.L).length) kfrei.L = kfreiStart(); kfreiMerken(); konsoleNeu(); return; }
@@ -9964,14 +9967,14 @@ const ZUS_ICON = {
     const gitter = root.querySelector(".lw-kfrei"); if (!gitter) return;
     const el = (g || gr).closest(".lw-kfeld"), id = el && el.dataset.kid, p = id && kfrei.L[id]; if (!p) return;
     const gs = getComputedStyle(gitter), lu = parseFloat(gs.columnGap) || 12, rz = parseFloat(gs.gridAutoRows) || 32, b = gitter.getBoundingClientRect();
-    kZug2 = { id, el, groesse: !!gr, sx: e.clientX, sy: e.clientY, p0: Object.assign({}, p), sw: (b.width + lu) / 24, sh: rz + (parseFloat(gs.rowGap) || lu), pid: e.pointerId };
+    kZug2 = { id, el, groesse: !!gr, achse: gr && gr.dataset.achse, sx: e.clientX, sy: e.clientY, p0: Object.assign({}, p), sw: (b.width + lu) / 24, sh: rz + (parseFloat(gs.rowGap) || lu), pid: e.pointerId };
     e.preventDefault(); try { (g || gr).setPointerCapture(e.pointerId); } catch (_) {}
     el.classList.add("lw-kzieht"); gitter.classList.add("ordnet");
   });
   root.addEventListener("pointermove", e => {
     if (!kZug2 || e.pointerId !== kZug2.pid) return;
     const dx = Math.round((e.clientX - kZug2.sx) / kZug2.sw), dy = Math.round((e.clientY - kZug2.sy) / kZug2.sh), a = kZug2.p0, p = kfrei.L[kZug2.id];
-    const n = kZug2.groesse ? { x: a.x, y: a.y, w: a.w + dx, h: a.h + dy } : { x: a.x + dx, y: Math.max(0, a.y + dy), w: a.w, h: a.h };
+    const n = kZug2.groesse ? { x: a.x, y: a.y, w: a.w + (kZug2.achse === "h" ? 0 : dx), h: a.h + (kZug2.achse === "w" ? 0 : dy) } : { x: a.x + dx, y: Math.max(0, a.y + dy), w: a.w, h: a.h };
     if (n.x === p.x && n.y === p.y && n.w === p.w && n.h === p.h) return;
     Object.assign(p, n); kOrdnen(kZug2.id);
     root.querySelectorAll(".lw-kfrei > .lw-kfeld").forEach(x => { const q = kfrei.L[x.dataset.kid]; if (q) x.style.cssText = kStil(q); });
@@ -9984,6 +9987,23 @@ const ZUS_ICON = {
     root.querySelectorAll(".lw-kfrei.ordnet").forEach(x => x.classList.remove("ordnet"));
   };
   root.addEventListener("pointerup", kLos2); root.addEventListener("pointercancel", kLos2);
+  /* Feldhöhe in der Spalten-Ansicht: unteren Rand eines Feldes ziehen, Doppelklick = wieder automatisch */
+  root.addEventListener("pointerdown", e => {
+    const rd = e.target.closest && e.target.closest(".lw-feldrand"); if (!rd || e.button !== 0) return;
+    const el = rd.closest("[data-feld]"), kon = el && el.closest(".lw-konsole"); if (!el || !kon || !el.parentNode.classList.contains("lw-spalte")) return;
+    e.preventDefault(); try { rd.setPointerCapture(e.pointerId); } catch (_) {}
+    const id = rd.dataset.hrand, h0 = el.getBoundingClientRect().height, y0 = e.clientY;
+    kon.classList.add("lw-ordnet", "lw-hoeht"); el.classList.add("lw-fhoch");
+    const zug = ev => { const h = Math.round(Math.max(90, h0 + ev.clientY - y0)); el.style.setProperty("--lw-fh", h + "px"); anordnung.hoehen[id] = h;
+      if (ev.clientY > innerHeight - 40) scrollBy(0, 14); };
+    const los = () => { rd.removeEventListener("pointermove", zug); rd.removeEventListener("pointerup", los); rd.removeEventListener("pointercancel", los); kon.classList.remove("lw-ordnet", "lw-hoeht"); anordnungMerken(); };
+    rd.addEventListener("pointermove", zug); rd.addEventListener("pointerup", los); rd.addEventListener("pointercancel", los);
+  });
+  root.addEventListener("dblclick", e => {
+    const rd = e.target.closest && e.target.closest(".lw-feldrand"); if (!rd) return;
+    const el = rd.closest("[data-feld]"); delete anordnung.hoehen[rd.dataset.hrand]; anordnungMerken();
+    if (el) { el.style.removeProperty("--lw-fh"); el.classList.remove("lw-fhoch"); }
+  });
   /* Spaltenbreite: Lücke zwischen zwei Spalten ziehen */
   root.addEventListener("pointerdown", e => {
     const rd = e.target.closest && e.target.closest(".lw-spaltenrand"); if (!rd || e.button !== 0) return;
@@ -10340,6 +10360,7 @@ const ZUS_ICON = {
         '<button type="button" data-fzu="' + id + '" title="' + esc(p.zu ? T.einf.fAuf : T.einf.fZu) + '" aria-label="' + esc(p.zu ? T.einf.fAuf : T.einf.fZu) + '">' + (p.zu ? "▸" : "▾") + "</button>" +
         '<button type="button" data-fweg="' + id + '" title="' + esc(T.einf.fWeg) + '" aria-label="' + esc(T.einf.fWeg) + '">✕</button></div>' +
         '<div class="lw-fkoerper">' + (p.zu ? "" : freiInhalt(id, T)) + "</div>" +
+        '<i class="lw-frand lw-frand-u" data-fgroesse="' + id + '" data-achse="h" title="' + esc(T.einf.fHoehe) + '"></i><i class="lw-frand lw-frand-r" data-fgroesse="' + id + '" data-achse="w" title="' + esc(T.einf.fBreite) + '"></i>' +
         '<i class="lw-fgroesse" data-fgroesse="' + id + '" title="' + esc(T.einf.fGroesse) + '"></i></div>'; }).join("") + "</div>";
   }
   function freiLeiste(T) {
@@ -10351,10 +10372,10 @@ const ZUS_ICON = {
       '<span class="lw-fhinweis">' + E.fHinweis + "</span></div>";
   }
   Object.assign(TX.de.einf, { fTitel: "Eigenes Pult", fFest: "Fixiert", fLose: "Verschiebbar", fFestT: "Fenster festhalten bzw. wieder verschiebbar machen", fNeu: "Fenster zurückholen", fStandard: "Standard", fStandardT: "Alle Fenster auf die Ausgangs-Anordnung zurücksetzen",
-    fHinweis: "Fenster an der Titelleiste ziehen · Ecke unten rechts: Größe · ▾ einklappen · ✕ ausblenden", fZu: "Einklappen", fAuf: "Aufklappen", fWeg: "Ausblenden (oben über „Fenster zurückholen“ wieder holbar)", fGroesse: "Ziehen: Fenster größer oder kleiner",
+    fHinweis: "Fenster an der Titelleiste ziehen · unterer Rand: Höhe · rechter Rand: Breite · Ecke: beides · ▾ einklappen · ✕ ausblenden", fZu: "Einklappen", fAuf: "Aufklappen", fWeg: "Ausblenden (oben über „Fenster zurückholen“ wieder holbar)", fGroesse: "Ziehen: Fenster größer oder kleiner",
     fAn: "🧩 Eigenes Pult", fAnT: "Alle Bereiche als frei verschiebbare, größenveränderbare Fenster – stell dir dein Pult selbst zusammen", fAus: "🧭 Zurück zum einfachen Pult" });
   Object.assign(TX.en.einf, { fTitel: "Custom desk", fFest: "Locked", fLose: "Movable", fFestT: "Lock windows in place or make them movable again", fNeu: "Bring back a window", fStandard: "Default", fStandardT: "Reset all windows to the default arrangement",
-    fHinweis: "Drag a window by its title bar · bottom-right corner: size · ▾ collapse · ✕ hide", fZu: "Collapse", fAuf: "Expand", fWeg: "Hide (bring it back via “Bring back a window” above)", fGroesse: "Drag: make the window bigger or smaller",
+    fHinweis: "Drag a window by its title bar · bottom edge: height · right edge: width · corner: both · ▾ collapse · ✕ hide", fZu: "Collapse", fAuf: "Expand", fWeg: "Hide (bring it back via “Bring back a window” above)", fGroesse: "Drag: make the window bigger or smaller", fHoehe: "Drag: taller or shorter", fBreite: "Drag: wider or narrower",
     fAn: "🧩 Custom desk", fAnT: "All sections as freely movable, resizable windows – build your own desk", fAus: "🧭 Back to the simple desk" });
   function freiAnwenden() { root.querySelectorAll(".lw-fenster[data-fenster]").forEach(el => { const p = frei.L[el.dataset.fenster]; if (p) { el.style.cssText = fStil(p); el.classList.toggle("zu", !!p.zu); } }); }
   /* Ziehen und Größe ändern: rastet im Gitter ein, die anderen weichen live aus */
@@ -10366,14 +10387,14 @@ const ZUS_ICON = {
     const g = root.querySelector(".lw-frei"); if (!g) return;
     const id = (kopf || griff).dataset.fzieh || griff.dataset.fgroesse, p = frei.L[id]; if (!p) return;
     const gs = getComputedStyle(g), luecke = parseFloat(gs.columnGap) || 8, rz = parseFloat(gs.gridAutoRows) || 32, b = g.getBoundingClientRect();
-    fZug = { id, groesse: !!griff, sx: e.clientX, sy: e.clientY, p0: Object.assign({}, p), sw: (b.width + luecke) / F_SPALTEN, sh: rz + luecke, pid: e.pointerId };
+    fZug = { id, groesse: !!griff, achse: griff && griff.dataset.achse, sx: e.clientX, sy: e.clientY, p0: Object.assign({}, p), sw: (b.width + luecke) / F_SPALTEN, sh: rz + luecke, pid: e.pointerId };
     e.preventDefault(); try { (kopf || griff).setPointerCapture(e.pointerId); } catch (_) {}
     root.querySelector('.lw-fenster[data-fenster="' + id + '"]').classList.add("zieht"); g.classList.add("ordnet");
   });
   root.addEventListener("pointermove", e => {
     if (!fZug || e.pointerId !== fZug.pid) return;
     const dx = Math.round((e.clientX - fZug.sx) / fZug.sw), dy = Math.round((e.clientY - fZug.sy) / fZug.sh), p = frei.L[fZug.id], a = fZug.p0;
-    const n = fZug.groesse ? { x: a.x, y: a.y, w: a.w + dx, h: a.h + dy } : { x: a.x + dx, y: Math.max(0, a.y + dy), w: a.w, h: a.h };
+    const n = fZug.groesse ? { x: a.x, y: a.y, w: a.w + (fZug.achse === "h" ? 0 : dx), h: a.h + (fZug.achse === "w" ? 0 : dy) } : { x: a.x + dx, y: Math.max(0, a.y + dy), w: a.w, h: a.h };
     if (n.x === p.x && n.y === p.y && n.w === p.w && n.h === p.h) return;
     if (fZug.groesse && p.zu) p.zu = false;
     Object.assign(p, n); freiOrdnen(fZug.id); freiAnwenden();
@@ -11951,7 +11972,7 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
 .lw-spalte { display: grid; gap: .7rem; align-content: start; min-width: 0; position: relative; }
 .lw-konsole > .lw-spalte[data-spalte="0"] { grid-column: 1; grid-row: 1 / span 20; }
 .lw-konsole > .lw-spalte:not([data-spalte="0"]) { grid-column: 2; }
-.lw-anordnung, .lw-griff, .lw-spaltenrand { display: none; }
+.lw-anordnung, .lw-griff, .lw-spaltenrand, .lw-feldrand { display: none; }
 @media (max-width: 760px) { .lw-konsole { grid-template-columns: 1fr; } .lw-konsole > .lw-spalte { grid-column: 1 !important; grid-row: auto !important; } }
 @media (min-width: 1100px) and (hover: hover) {
   .lw-konsole { grid-template-columns: var(--lw-spalten, repeat(3, minmax(0, 1fr))); column-gap: 1.1rem; }
@@ -11969,6 +11990,13 @@ button:has(> .lw-pin.an) { border-color: rgba(224,160,70,.55); }
   .lw-ordnet > .lw-spalte { outline: 1px dashed rgba(224,160,70,.22); outline-offset: 3px; }
   .lw-spaltenrand { display: block; position: absolute; top: 0; bottom: 0; right: -.85rem; width: .6rem; cursor: col-resize; border-radius: 3px; z-index: 2; }
   .lw-spaltenrand:hover, .lw-ordnet .lw-spaltenrand { background: rgba(224,160,70,.22); }
+  .lw-konsole > .lw-spalte > [data-feld] { position: relative; }
+  .lw-konsole > .lw-spalte > [data-feld] > .lw-feldrand { display: block; position: absolute; left: 0; right: 0; bottom: 0; height: .55rem; cursor: row-resize; touch-action: none; z-index: 3; border-radius: 0 0 4px 4px; }
+  .lw-konsole > .lw-spalte > [data-feld] > .lw-feldrand::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 2.4rem; height: 3px; margin-left: -1.2rem; border-radius: 2px; background: rgba(224,160,70,.28); }
+  .lw-konsole > .lw-spalte > [data-feld] > .lw-feldrand:hover, .lw-hoeht .lw-feldrand { background: rgba(224,160,70,.18); }
+  .lw-konsole > .lw-spalte > [data-feld] > .lw-feldrand:hover::after { background: var(--ember); }
+  .lw-konsole > .lw-spalte > [data-feld].lw-fhoch { height: var(--lw-fh); min-height: 90px; overflow-y: auto !important; padding-bottom: .9rem; }
+  .lw-hoeht, .lw-hoeht * { cursor: row-resize !important; }
   .lw-konsole > .lw-spalte:not(:has([data-feld])) { border: 1px dashed rgba(224,160,70,.3); border-radius: 4px; min-height: 8rem; }
   .lw-konsole > .lw-spalte:not(:has([data-feld]))::before { content: attr(data-leer); margin: auto; padding: 2.5rem 1rem; font-size: .8rem; color: var(--ash); opacity: .6; text-align: center; }
   /* die ganze Bühnen-Seite wird breiter, das Pult bleibt sauber im Rahmen der Karte */
@@ -12654,7 +12682,12 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-fenster.zu .lw-fkopf { border-bottom: 0; }
 .lw-fenster.zu .lw-fkoerper, .lw-fenster.zu .lw-fgroesse { display: none; }
 .lw-fgroesse { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize; touch-action: none; z-index: 3; background: linear-gradient(135deg, transparent 52%, rgba(224,160,70,.55) 52%, rgba(224,160,70,.55) 62%, transparent 62%, transparent 72%, rgba(224,160,70,.55) 72%, rgba(224,160,70,.55) 82%, transparent 82%); }
-.lw-frei.fest .lw-fkopf { cursor: default; } .lw-frei.fest .lw-fgroesse, .lw-frei.fest .lw-fpunkte { display: none; }
+.lw-frei.fest .lw-fkopf { cursor: default; } .lw-frei.fest .lw-fgroesse, .lw-frei.fest .lw-fpunkte, .lw-frei.fest .lw-frand, .lw-fenster.zu .lw-frand { display: none; }
+.lw-frand { position: absolute; touch-action: none; z-index: 2; }
+.lw-frand-u { left: 0; right: 16px; bottom: 0; height: 7px; cursor: ns-resize; }
+.lw-frand-r { top: 0; bottom: 16px; right: 0; width: 7px; cursor: ew-resize; }
+.lw-frand:hover { background: rgba(224,160,70,.25); }
+.lw-frand-u::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 2.2rem; height: 3px; margin-left: -1.1rem; border-radius: 2px; background: rgba(224,160,70,.3); }
 /* Inhalte passen sich dem Fenster an */
 .lw-ekopf-frei { position: static !important; display: grid; gap: .45rem; padding: 0; border: 0; background: none; box-shadow: none; backdrop-filter: none; }
 .lw-ekopf-frei .lw-eregler { display: grid; grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr)) !important; gap: .4rem .5rem; }
