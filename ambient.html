@@ -518,6 +518,11 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 
   /* ---------- Episch: tief gestimmte Welten, auslösbare Einschläge und minutenlange Szenen ----------
      Alles Epische läuft über einen eigenen Strang: eigener langer Nachhall, Ping-Pong-Echos („Weite“), eigener Begrenzer, dann in die Gesamtlautstärke. */
+  /* weitere Aufnahmen derselben Schicht: bei jedem Start wird zufällig eine gewählt (wie im Pult), gleich laut angeglichen */
+  const BETT_VAR = {"a_voegel1": ["a_voegel_n1", "a_voegel_n2", "a_voegel_n7"], "a_voegel2": ["a_voegel_n3", "a_voegel_n5"], "a_tagvoegel": ["a_voegel_n4", "a_voegel_n6", "a_voegel_n8"], "a_nacht": ["a_nacht_n1", "a_nacht_n2", "a_nacht_n3", "a_nacht_n4", "a_nacht_n5", "a_nacht_n6", "a_nacht_n7", "a_nacht_n8"], "a_leichtregen": ["a_leichtregen_n1", "a_leichtregen_n2", "a_leichtregen_n3"], "a_regen2": ["a_regen_n1", "a_regen_n2"], "a_starkregen": ["a_starkregen_n1"], "a_gewitter1": ["a_gewitter_n1"], "a_schneesturm": ["a_schneesturm_n1", "a_schneesturm_n2"], "a_tropfstein": ["a_tropfstein_n1", "a_tropfstein_n2"], "a_wind3": ["a_wind_n1"], "a_fluss": ["a_fluss_n1"], "a_lagerfeuer": ["a_lagerfeuer_n1", "a_lagerfeuer_n2"], "a_markt": ["a_markt_n1"], "a_wind1": ["a_wind_n2", "a_wind_n7"], "a_wind2": ["a_wind_n3", "a_wind_n4", "a_wind_n5", "a_wind_n6"], "a_heulwind": ["a_heulwind_n1"], "a_laub": ["a_laub_n1"], "a_brandung": ["a_brandung_n1"], "a_dschungel": ["a_dschungel_n1", "a_dschungel_n2"], "a_gewitter2": ["a_gewitter_n2"], "a_gaeste": ["a_gaeste_n1"], "a_wasserfall2": ["a_wasserfall_n1"]};
+  const BETT_GLEICH = {"a_voegel1": 0.7, "a_voegel_n1": 1.63, "a_voegel_n2": 1.27, "a_voegel_n7": 0.79, "a_voegel2": 0.76, "a_voegel_n5": 1.51, "a_tagvoegel": 0.48, "a_voegel_n4": 1.51, "a_voegel_n6": 1.32, "a_voegel_n8": 0.76, "a_nacht_n1": 2, "a_nacht_n2": 1.47, "a_nacht_n4": 0.69, "a_nacht_n6": 0.61, "a_nacht_n8": 0.74, "a_schneesturm": 0.56, "a_schneesturm_n1": 1.2, "a_tropfstein": 0.83, "a_tropfstein_n1": 1.63, "a_lagerfeuer_n1": 0.51, "a_lagerfeuer_n2": 0.49, "a_wind_n2": 0.7, "a_wind_n7": 0.69, "a_wind_n3": 0.82, "a_wind_n5": 0.83, "a_wind_n6": 0.67, "a_heulwind_n1": 0.71, "a_laub_n1": 0.4};
+  Object.assign(LAUTHEIT, {});
+  Object.assign(LAUTHEIT, {"a_voegel_n1": 1.63, "a_voegel_n2": 1.27, "a_voegel_n7": 0.79, "a_voegel_n3": 0.092, "a_voegel_n5": 1.51, "a_voegel_n4": 1.51, "a_voegel_n6": 1.32, "a_voegel_n8": 0.76, "a_nacht_n1": 2.0, "a_nacht_n2": 1.47, "a_nacht_n3": 0.0801, "a_nacht_n4": 0.69, "a_nacht_n5": 0.0789, "a_nacht_n6": 0.61, "a_nacht_n7": 0.081, "a_nacht_n8": 0.74, "a_leichtregen_n1": 0.0878, "a_leichtregen_n2": 0.0874, "a_leichtregen_n3": 0.0871, "a_regen_n1": 0.0713, "a_regen_n2": 0.072, "a_starkregen_n1": 0.1023, "a_gewitter_n1": 0.1443, "a_schneesturm_n1": 1.2, "a_schneesturm_n2": 0.1608, "a_tropfstein_n1": 1.63, "a_tropfstein_n2": 0.1025, "a_wind_n1": 0.1118, "a_fluss_n1": 0.1049, "a_lagerfeuer_n1": 0.51, "a_lagerfeuer_n2": 0.49, "a_markt_n1": 0.1083, "a_wind_n2": 0.7, "a_wind_n7": 0.69, "a_wind_n3": 0.82, "a_wind_n4": 0.1407, "a_wind_n5": 0.83, "a_wind_n6": 0.67, "a_heulwind_n1": 0.71, "a_laub_n1": 0.4, "a_brandung_n1": 0.108, "a_dschungel_n1": 0.0763, "a_dschungel_n2": 0.0717, "a_gewitter_n2": 0.1163, "a_gaeste_n1": 0.111, "a_wasserfall_n1": 0.0979});
   Object.assign(LAUTHEIT, { l_sturm: .0384, l_gewitter: .0376, l_wind: .0703, l_windspiel: .0274, l_tempel: .174, l_donner: .0396, l_wal: .1221 });
   const DONNER_T = ["fx_fo2_sfx100v2_thunder_01"].concat(reihe("e_donner_", 4));
   const BRUELLEN = ["fx_cr2_roar_04", "fx_cr2_roar_05", "fx_cr2_roar_06", "fx_rd_creature_roar_02", "fx_rd_creature_roar_03"];
@@ -658,9 +663,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     { id: "g_keiler", gr: "wesen", sym: "🐗", name: W("Wildschwein", "Wild boar"), lagen: [{ f: ["e_keiler_1"], g: 1 }] },
     { id: "g_ziege", gr: "wesen", sym: "🐐", name: W("Ziege meckert", "Goat bleats"), lagen: [{ f: reihe("e_ziege_", 6), g: .8 }] },
     { id: "g_esel", gr: "wesen", sym: "🫏", name: W("Esel schreit", "Donkey brays"), lagen: [{ f: ["e_esel_1"], g: .8 }] },
-    { id: "g_ente", gr: "wesen", sym: "🦆", name: W("Enten", "Ducks"), lagen: [{ f: reihe("e_ente_", 3), g: 1, n: 2, abstand: [.4, .8] }] },
+    { id: "g_ente", gr: "wesen", sym: "🦆", name: W("Enten", "Ducks"), lagen: [{ f: reihe("e_ente_", 4), g: 1, n: 2, abstand: [.4, .8] }] },
     { id: "g_greif", gr: "wesen", sym: "🦅", name: W("Greif kreischt", "Gryphon shrieks"), lagen: [{ f: reihe("e_greif_", 2), g: .85, r: [.85, .98] }] },
-    { id: "g_schlange", gr: "wesen", sym: "🐍", name: W("Schlange zischt", "Snake hisses"), lagen: [{ f: reihe("e_schlange_", 3), g: .85 }] },
+    { id: "g_schlange", gr: "wesen", sym: "🐍", name: W("Schlange zischt", "Snake hisses"), lagen: [{ f: reihe("e_schlange_", 4), g: .85 }] },
     { id: "g_yeti", gr: "wesen", sym: "❄", name: W("Bergbestie brüllt", "Mountain beast roars"), lagen: [{ f: reihe("e_yeti_", 2), g: .85, r: [.7, .85] }] },
     { id: "g_hund", gr: "wesen", sym: "🐕", name: W("Hund bellt", "Dog barks"), lagen: [{ f: reihe("e_bellen_", 5).concat(reihe("e_hund_", 8)), g: .8 }] },
     { id: "g_pferd", gr: "wesen", sym: "🐴", name: W("Pferd wiehert", "Horse neighs"), lagen: [{ f: ["e_pferd_1"].concat(["fx_0_horse_select1", "fx_0_horse_select2", "fx_0_horse_select3", "fx_0_horse_attack1", "fx_0_horse_attack2", "fx_0_horse_attack3"]), g: .8 }] },
@@ -683,9 +688,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     { id: "g_hahn", gr: "wesen", sym: "🐓", name: W("Hahn kräht", "Rooster crows"), lagen: [{ f: reihe("e_hahn_", 3), g: 0.8 }] },
     { id: "g_schwein", gr: "wesen", sym: "🐖", name: W("Schweine grunzen", "Pigs grunt"), lagen: [{ f: reihe("e_schwein_", 9), g: 0.8, n: 2, abstand: [.5, 1] }] },
     { id: "g_katze", gr: "wesen", sym: "🐈", name: W("Katze miaut", "Cat meows"), lagen: [{ f: reihe("e_katze_", 10), g: 0.8 }] },
-    { id: "g_frosch", gr: "wesen", sym: "🐸", name: W("Frösche", "Frogs"), lagen: [{ f: reihe("e_frosch_", 8), g: 0.8, n: 4, abstand: [.3, .6] }] },
+    { id: "g_frosch", gr: "wesen", sym: "🐸", name: W("Frösche", "Frogs"), lagen: [{ f: reihe("e_frosch_", 10), g: 0.8, n: 4, abstand: [.3, .6] }] },
     { id: "g_moewe", gr: "wesen", sym: "🕊", name: W("Möwen", "Gulls"), lagen: [{ f: reihe("e_moewe_", 10), g: 0.75, n: 2, abstand: [.5, 1.2] }] },
-    { id: "g_specht", gr: "wesen", sym: "🌳", name: W("Specht", "Woodpecker"), lagen: [{ f: reihe("e_specht_", 4), g: 0.8 }] },
+    { id: "g_specht", gr: "wesen", sym: "🌳", name: W("Specht", "Woodpecker"), lagen: [{ f: reihe("e_specht_", 5), g: 0.8 }] },
     { id: "g_wal", gr: "wesen", sym: "🐋", name: W("Walgesang", "Whale song"), lagen: [{ f: reihe("e_wal_", 3), g: 0.8 }] },
     { id: "g_loewe", gr: "wesen", sym: "🦁", name: W("Raubkatze brüllt", "Big cat roars"), lagen: [{ f: ["fx_0_lion_attack1", "fx_0_lion_attack2", "fx_0_lion1", "fx_0_lion2", "fx_0_lion3"], g: 0.85 }] },
     { id: "g_elefant", gr: "wesen", sym: "🐘", name: W("Elefant", "Elephant"), lagen: [{ f: ["fx_0_elephant_attack1", "fx_0_elephant_attack2", "fx_0_elephant_attack3"], g: 0.85 }] },
@@ -932,6 +937,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   function raum3dKnopf() { const k = document.getElementById("raum3d"); if (k) { k.setAttribute("aria-pressed", String(raum3d)); k.title = EN ? "3D headphones" + (raum3d ? " (on)" : "") : "3D-Kopfhörer" + (raum3d ? " (an)" : ""); } }
   setTimeout(raum3dKnopf, 0);
   function bettStarten(welt, [name, staerke, label, o], i, ruht) {
+    const datei = BETT_VAR[name] && !(o && (o.fest || o.ton)) ? zufall([name].concat(BETT_VAR[name])) : name;
     const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false, pos: null, ruht: !!ruht };
     /* Feuer: das Knistern klang zu spitz – die obersten Höhen weich abrunden */
     if (!b.o.tief && FEUER_TIEF[name]) b.o = Object.assign({}, b.o, { tief: FEUER_TIEF[name] });
@@ -957,9 +963,9 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       else { von.connect(dahin); const s = ctx.createGain(); s.gain.value = .25; von.connect(s); s.connect(hallEin); }
     }
     /* auf gleiche Lautheit bringen – aber nie so weit, dass knackende Spitzen (Feuer, Tropfen) übersteuern */
-    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)) * trimVon(welt);
+    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[datei] || .05)) * (BETT_GLEICH[datei] || 1) * trimVon(welt);
     if (ruht) return b;
-    laden(name).then(buf => {
+    laden(datei).then(buf => {
       if (!buf || b.aus) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05; b.bereitAb = ctx.currentTime + 4.1;
       b.out.gain.setValueAtTime(0, ctx.currentTime); b.out.gain.linearRampToValueAtTime(bGain(b), ctx.currentTime + 4);
@@ -1147,6 +1153,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
 
   /* Teppiche der epischen Welten: tiefer gestimmt, lange überblendet, langsam durch den Raum wandernd */
   function eBettStarten(welt, [name, staerke, label, o], i) {
+    const datei = BETT_VAR[name] && !(o && (o.fest || o.ton)) ? zufall([name].concat(BETT_VAR[name])) : name;
     const b = { e: 1, name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false };
     const m = merk.mix[welt.id]; if (m && m.b && typeof m.b[i] === "number") b.regler = m.b[i];
     b.out.gain.value = 0;
@@ -1169,8 +1176,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       Promise.all(b.o.ton.map(laden)).then(() => { if (b.aus) return; b.naechst = ctx.currentTime + .05; b.bereit = true; eAnblenden(b); eTonPlanen(b); });
     } else {
       /* Pegel angleichen, aber nie so weit, dass knackende Spitzen übersteuern */
-      b.grund = Math.min(1.4, staerke * p * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)));
-      laden(name).then(buf => { if (!buf || b.aus) return; b.buf = buf; b.naechst = ctx.currentTime + .05; eAnblenden(b); eBettPlanen(b); });
+      b.grund = Math.min(1.4, staerke * p * Math.min(1.15, .055 / (LAUTHEIT[datei] || .05)) * (BETT_GLEICH[datei] || 1));
+      laden(datei).then(buf => { if (!buf || b.aus) return; b.buf = buf; b.naechst = ctx.currentTime + .05; eAnblenden(b); eBettPlanen(b); });
     }
     return b;
   }
