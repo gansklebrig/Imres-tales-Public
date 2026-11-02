@@ -97,7 +97,10 @@
     }
     return KUL_WEG[alt];
   }
-  const KUL_ZEIGEN = KULISSEN.filter(k => !KUL_WEG[k]);
+  /* Wald bei Tag und bei Nacht sind ein Ort: angeboten wird nur „Wald“, die Tageszeit wählt die Klänge (siehe waldZeit) */
+  const KUL_ZEIGEN = KULISSEN.filter(k => !KUL_WEG[k] && k !== "waldnacht");
+  const kulRaum = k => k === "waldnacht" ? "wald" : k;
+  const kulGleich = k => kulRaum(S.kulisse) === kulRaum(k);
   /* Bühnenbild für die neueren Kulissen: nächstliegendes vorhandenes Bild */
   const KUL_BILD = { waldnacht: "wald", zelt: "regen", schiff: "meer", wasserfall: "wald", unterreich: "hoehle", kerker: "hoehle", sumpf: "wald", unterwasser: "meer", schmiede: "feuer", labor: "taverne", bibliothek: "taverne", tempel: "hoehle", dorf: "wald", markt: "taverne", hafen: "meer", gebirge: "sturm", mine: "hoehle", strasse: "wald", burg: "taverne", ufer: "wald", schlacht: "sturm", schlaegerei: "taverne", duell: "feuer" };
   const KULISSE_ZU = { rast: "wald", unterreich: "hoehle", reise: "strasse", spannung: "hoehle", sieg: "taverne", kampf: "keine",
@@ -2653,7 +2656,28 @@ const ZUS_ICON = {
   }
   /* sofort = vom Nutzer selbst angetippt: diese Kulisse bleibt, bis man sie selbst ändert – auch über Musik-Stopp und Stimmungswechsel hinweg.
      Ohne sofort kommt sie von der Stimmung und geht mit der Musik. */
+  /* Wald: nachts (🌙 gewählt oder die Zeit ist mit „Zeit vergeht“ in die Nacht gelaufen) klingt der Nachtwald, sonst der Wald am Tag */
+  let waldMerk = null;
+  function waldZeit() {
+    if (kulRaum(S.kulisse) !== "wald") return false;
+    let nacht;
+    if (leben.zeit === "nacht") nacht = true;
+    else if (leben.zeit === "tag" || leben.zeit === "daemmerung") nacht = leben.zeitLauf && kul && ctx ? zeitIst(kul) >= .8 : false;
+    else { if (waldMerk === null) waldMerk = S.kulisse === "waldnacht"; nacht = waldMerk; } /* automatisch: bleibt, wie es zuletzt war */
+    const soll = nacht ? "waldnacht" : "wald"; waldMerk = nacht;
+    if (soll === S.kulisse) return false;
+    S.kulisse = soll; try { merken(); } catch (_) {}
+    return true;
+  }
+  function waldZeitWechsel() {
+    if (!waldZeit()) return;
+    kulisseStart(true);
+    status(S.kulisse === "waldnacht" ? (sprache() === "en" ? "🌙 Night falls over the forest" : "🌙 Über dem Wald wird es Nacht") : (sprache() === "en" ? "🌲 Day breaks in the forest" : "🌲 Im Wald wird es Tag"));
+    setTimeout(() => { try { zeichnen(); knoepfe(); } catch (_) {} }, 0);
+  }
+  setInterval(() => { if (leben.zeitLauf && !document.hidden) try { waldZeitWechsel(); } catch (_) {} }, 20000);
   function kulisseStart(sofort) {
+    try { waldZeit(); } catch (_) {}
     try { raumWechselPruefen(); } catch (_) {}
     if (!ctx) return;
     try { zusSync(); } catch (_) {}
@@ -3760,6 +3784,7 @@ const ZUS_ICON = {
     lebenAnwenden(k, 1.5);
   }
   function lebenGeaendert() {
+    try { waldZeitWechsel(); } catch (_) {}
     if (kul && KUL_WELT[kul.art]) { if (kul.drohn) drohnSetzen(kul); lebenAnwenden(kul, 2, true); }
     try { aussenAnwenden(0, 1.2); } catch (_) {}
   }
@@ -3812,13 +3837,13 @@ const ZUS_ICON = {
   /* gemerkt: Figur und Geräusche je Ort */
   let karteMerk = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-karte")); if (x && typeof x === "object") return x; } catch (_) {} return {}; })();
   const karteSpeichern = () => { try { localStorage.setItem("imres-lw-karte", JSON.stringify(karteMerk)); } catch (_) {} };
-  const kOrt = () => { const k = S.kulisse || "keine"; return karteMerk[k] || (karteMerk[k] = {}); };
+  const kOrt = () => { const k = kulRaum(S.kulisse || "keine"); return karteMerk[k] || (karteMerk[k] = {}); };
   /* Jede Kulisse ist ein fester Raum: welche Zusätze dort laufen (mit Lautstärke und Platz auf der Karte), bleibt dort.
      Beim Wechsel bleiben sie zurück; kommt man wieder, ist alles wie verlassen. Ein neuer Ort beginnt ohne Zusätze. */
   let zusKul = null;
   function raumZusMerken() { if (zusKul === null) return; try { localStorage.setItem("imres-lw-zuskul", zusKul); } catch (_) {} const o = karteMerk[zusKul] || (karteMerk[zusKul] = {}); o.wahl = Object.assign({}, zusWahl); karteSpeichern(); }
   function raumWechselPruefen() {
-    const neu = S.kulisse || "keine";
+    const neu = kulRaum(S.kulisse || "keine");
     if (zusKul === null) { let w = null; try { w = localStorage.getItem("imres-lw-zuskul"); } catch (_) {} zusKul = w || neu; raumZusMerken(); }
     if (neu === zusKul) return;
     raumZusMerken(); zusKul = neu; try { localStorage.setItem("imres-lw-zuskul", neu); } catch (_) {}
@@ -3827,7 +3852,7 @@ const ZUS_ICON = {
   }
   /* Zusätze für eine bestimmte Kulisse setzen (gemerkte Szene, eigene Stimmung): gilt sofort, wenn man dort ist, sonst beim Hinkommen */
   function zusFuerKulisse(k, z) {
-    k = k || S.kulisse || "keine"; if (zusKul === null) raumWechselPruefen();
+    k = kulRaum(k || S.kulisse || "keine"); if (zusKul === null) raumWechselPruefen();
     if (k === zusKul) { zusWahl = Object.assign({}, z); zusMerken(); }
     else { (karteMerk[k] || (karteMerk[k] = {})).wahl = Object.assign({}, z); karteSpeichern(); }
   }
@@ -4259,14 +4284,14 @@ const ZUS_ICON = {
   }
   function szeneMerken() {
     if (!KUL_WELT[S.kulisse]) return;
-    szenen.unshift({ name: szeneName(), kulisse: S.kulisse, zus: Object.assign({}, zusWahl), karte: JSON.parse(JSON.stringify(karteMerk[S.kulisse] || {})),
+    szenen.unshift({ name: szeneName(), kulisse: S.kulisse, zus: Object.assign({}, zusWahl), karte: JSON.parse(JSON.stringify(karteMerk[kulRaum(S.kulisse)] || {})),
       leben: { spannung: leben.spannung, wetter: leben.wetter, schauer: leben.schauer, zeit: leben.zeit, zeitLauf: leben.zeitLauf, standort: leben.standort, platz: leben.platz }, tuer: tuerZu, vol: S.kulisseVol });
     szenen = szenen.slice(0, 30); szenenMerken(); status("📌 " + szenen[0].name); try { einfachNeu(); } catch (_) {}
   }
   function szeneLaden(i) {
     const sz = szenen[i]; if (!sz || !KUL_WELT[sz.kulisse]) return;
     audioStart();
-    karteMerk[sz.kulisse] = JSON.parse(JSON.stringify(sz.karte || {})); karteSpeichern();
+    karteMerk[kulRaum(sz.kulisse)] = JSON.parse(JSON.stringify(sz.karte || {})); karteSpeichern();
     zusFuerKulisse(sz.kulisse, sz.zus || {}); zusPausiert = false;
     Object.assign(leben, sz.leben || {});
     if (!!sz.tuer !== tuerZu) try { tuerUmschalten(); } catch (_) {}
@@ -4282,14 +4307,14 @@ const ZUS_ICON = {
   function ortWechsel(neu) {
     audioStart(); if (!ctx) return;
     const alt = kul && KUL_WELT[kul.art] ? kul : null, tuerSpiel = alt && (kulKlasse(alt.art) === "drinnen" || kulKlasse(neu) === "drinnen");
-    if (!alt || !KUL_WELT[neu] || neu === S.kulisse) { S.kulisse = neu; merken(); kulisseStart(true); zeichnen(); knoepfe(); return; }
+    if (!alt || !KUL_WELT[neu] || neu === S.kulisse || kulGleich(neu)) { S.kulisse = neu; merken(); kulisseStart(true); zeichnen(); knoepfe(); return; }
     const j = ctx.currentTime;
     if (tuerSpiel) try { effekt("tuer"); } catch (_) {}
     /* alter Ort: Höhen weg, dann aus (kulisseStop blendet ohnehin über) */
     try { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(16000, j); lp.frequency.exponentialRampToValueAtTime(420, j + 2.2);
       [alt.g, alt.gd].forEach(g => { if (g) { g.disconnect(); g.connect(lp); } }); lp.connect(aussenWeg()); setTimeout(() => { try { lp.disconnect(); } catch (_) {} }, 6000); } catch (_) {}
     /* du kommst am Eingang an: drinnen gleich hinter der Tür, draußen am Rand */
-    const o = karteMerk[neu] || (karteMerk[neu] = {});
+    const o = karteMerk[kulRaum(neu)] || (karteMerk[kulRaum(neu)] = {});
     if (!o.fig) o.fig = kulDraussen(neu) || neu === "unterwasser" ? [10, 62.5] : [24, 62.5];
     leben.platz = ""; leben.standort = "mitten"; karteSpeichern();
     setTimeout(() => { S.kulisse = neu; merken(); kulisseStart(true); try { lebenGeaendert(); } catch (_) {} zeichnen(); knoepfe(); }, 650);
@@ -9654,7 +9679,7 @@ const ZUS_ICON = {
     return html;
   }
   const raumWahl = T => '<label class="lw-feld"><span>' + T.raum + '</span><select data-feld="raum">' + Object.keys(RAEUME).map(r => '<option value="' + r + '"' + (r === S.raum ? " selected" : "") + ">" + T.raeume[r] + "</option>").join("") + "</select></label>";
-  const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KUL_ZEIGEN.map(k => '<option value="' + k + '"' + (k === S.kulisse ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
+  const kulisseWahl = T => '<select class="lw-gespeichert" data-feld="kulisse" aria-label="' + esc(T.kulisse) + '">' + KUL_ZEIGEN.map(k => '<option value="' + k + '"' + (kulGleich(k) ? " selected" : "") + ">" + T.kulissen[k] + "</option>").join("") + "</select>" +
     '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
   const sparKnopf = T => '<button type="button" class="lw-schalter lw-spar" data-aktion="spar" aria-pressed="' + spar + '" title="' + esc(T.sparTipp) + '">' + T.spar + "</button>";
   const mixRegler = (T, ohneMusik) =>
@@ -9868,13 +9893,13 @@ const ZUS_ICON = {
     const weitere = weltListe("weitere").length;
     const unterReiter = fxTab !== "welt" ? "" : '<div class="lw-unterreiter">' + reiter("weltgr", [["alle", T.weltGr.alle]].concat(WELT_GRUPPEN.map(([g]) => [g, T.weltGr[g]]), weitere ? [["weitere", T.weltGr.weitere]] : []), weltGr, T) + "</div>";
     let kul = oben("k", KUL_ZEIGEN);
-    if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(S.kulisse)) kurz[KUL_KURZ - 1] = S.kulisse; kul = kurz; }
+    if (!klangAuf.kul) { const kurz = kul.slice(0, KUL_KURZ); if (!kurz.includes(kulRaum(S.kulisse))) kurz[KUL_KURZ - 1] = kulRaum(S.kulisse); kul = kurz; }
     const klappe = (k, auf, text) => '<button type="button" class="lw-klappe" data-klangauf="' + k + '" aria-expanded="' + auf + '">' + text + " <span>" + (auf ? "▴" : "▾") + "</span></button>";
     const kulBox = '<section class="lw-box lw-klang"><div class="lw-box-kopf"><h4>🔊 ' + T.kulTitel + " " + info("klang") + "</h4>" +
       (spurenPop ? '<button type="button" class="lw-schalter lw-spurpopknopf" data-aktion="spurpopauf" aria-expanded="' + spurPopAuf + '" title="' + esc(T.kulSpuren) + '">🎚 ' + T.spurenKurz + "</button>" : "") + "</div>" +
       (spurenPop && spurPopAuf ? '<div class="lw-spurpop" role="dialog" aria-label="' + esc(T.kulSpuren) + '"><div class="lw-spurpop-kopf"><b>🎚 ' + T.kulSpuren + '</b><span><button type="button" class="lw-klein" data-aktion="spurenfeld" title="' + esc(T.spurenAlsFeld) + '">⧉ ' + T.spurenAlsFeld + '</button><button type="button" class="lw-klein" data-aktion="spurpopzu" aria-label="✕">✕</button></span></div>' + spurenInhalt(T) + "</div>" : "") +
       kleinRegler("🌧", T.kulisseKurz, "kulvol", S.kulisseVol, "lw-kval") +
-      '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], S.kulisse === k)).join("") + "</div>" +
+      '<div class="lw-pult-gitter lw-kul-gitter">' + kul.map(k => kachel("data-kulisse", k, T.kulissen[k], kulGleich(k))).join("") + "</div>" +
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) + "</section>";
     const lebenFeld = '<section class="lw-box lw-lebenfeld"><div class="lw-box-kopf"><h4>🎛 ' + T.steuer + "</h4></div>" +
       (amRechner() && !hoerer ? '<details class="lw-sprachklappe"' + (spracheAuf ? " open" : "") + '><summary>🎙 ' + T.spracheKlappe + '</summary><div class="lw-sprache-ort"></div></details>' : "") +
@@ -10267,7 +10292,7 @@ const ZUS_ICON = {
     const E = T.einf, alle = KUL_ZEIGEN.filter(k => k !== "keine");
     let kern = nachNutzung("k", KERN_KUL.filter(k => alle.includes(k)));
     if (S.kulisse && S.kulisse !== "keine" && !kern.includes(S.kulisse) && !eMehr.kul) kern = kern.slice(0, 7).concat([S.kulisse]);
-    const chip = k => '<button type="button" class="lw-ochip' + (S.kulisse === k ? " an" : "") + (S.kulisse === k && !kul ? " still" : "") + '" data-kulisse="' + k + '">' + esc(T.kulissen[k]) + "</button>";
+    const chip = k => '<button type="button" class="lw-ochip' + (kulGleich(k) ? " an" : "") + (kulGleich(k) && !kul ? " still" : "") + '" data-kulisse="' + k + '">' + esc(T.kulissen[k]) + "</button>";
     /* der aktuelle Ort zuerst, dann die meistgenutzten */
     const vorschlag = (S.kulisse && S.kulisse !== "keine" ? [S.kulisse] : []).concat(kern.filter(k => k !== S.kulisse)).slice(0, 7);
     return (ohneUe ? "" : eUe(E.ueWo)) + '<span class="lw-eortjetzt">' + E.jetztOrt + " <b>" + (kul ? esc(T.kulissen[kul.art]) : E.keinOrt) + "</b></span>" +
