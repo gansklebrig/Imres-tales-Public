@@ -479,11 +479,15 @@ function hsOut(){if(OUTN)return OUTN;if(!AC)return null;try{const pre=AC.createG
   BASSF=[AC.createBiquadFilter(),AC.createBiquadFilter()];BASSF.forEach(f=>{f.type='highpass';f.Q.value=0.6;f.frequency.value=bassOn()?150:30});
   const lim=AC.createDynamicsCompressor();lim.threshold.value=-3;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.12;
   pre.connect(BASSF[0]);BASSF[0].connect(BASSF[1]);if(MOBIL){const hs=AC.createBiquadFilter();hs.type='lowpass';hs.frequency.value=10000;hs.Q.value=0.5;BASSF[1].connect(hs);hs.connect(lim)}else BASSF[1].connect(lim);lim.connect(AC.destination);OUTN=pre}catch(e){OUTN=AC.destination}return OUTN}
+/* Startwert merken und beim Ansteuern verankern: cancelScheduledValues(jetzt) löscht sonst das .value=-Ereignis desselben Takts,
+   und manche Browser beginnen die Kurve dann beim Grundwert (Gain 1.0 = Vollpegel, Filter 350 Hz) */
+function parInit(p,v){p.value=v;p._init=v}
+function parZiel(p,z,t,tc){const v=p._init!==undefined?p._init:p.value;p._init=undefined;p.cancelScheduledValues(t);p.setValueAtTime(v,t);p.setTargetAtTime(z,t,tc)}
 function bassSet(){if(BASSF&&AC)BASSF.forEach(f=>f.frequency.setTargetAtTime(bassOn()?150:30,AC.currentTime,0.05))}
 function makeIR(sec){const n=Math.floor(AC.sampleRate*sec),b=AC.createBuffer(2,n,AC.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.8)}return b}
 function audioInit(){if(!AC){try{const ACK=window.AudioContext||window.webkitAudioContext;try{AC=MOBIL?new ACK({latencyHint:'balanced'}):new ACK()}catch(e){AC=new ACK()}MASTER=AC.createGain();MASTER.gain.value=0.9;let end=hsOut();
   try{const comp=AC.createDynamicsCompressor();comp.threshold.value=-12;comp.knee.value=10;comp.ratio.value=3;comp.attack.value=0.003;comp.release.value=0.22;comp.connect(end);end=comp}catch(e){}
-  MASTER.connect(end);SFXB=AC.createGain();volInit();SFXB.gain.value=SAVE.volSfx;try{WXF=AC.createBiquadFilter();WXF.type='lowpass';WXF.frequency.value=20000;WXF.Q.value=0.5;SFXB.connect(WXF);WXF.connect(MASTER)}catch(e){WXF=null;SFXB.connect(MASTER)}
+  MASTER.connect(end);SFXB=AC.createGain();volInit();SFXB.gain.value=SAVE.volSfx;try{WXF=AC.createBiquadFilter();WXF.type='lowpass';parInit(WXF.frequency,20000);WXF.Q.value=0.5;SFXB.connect(WXF);WXF.connect(MASTER)}catch(e){WXF=null;SFXB.connect(MASTER)}
   try{const conv=AC.createConvolver();conv.buffer=makeIR(MOBIL?0.9:1.7);const send=AC.createGain();send.gain.value=0.2;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=4200;SFXB.connect(send);send.connect(conv);conv.connect(lp);lp.connect(MASTER)}catch(e){}
  }catch(e){AC=null}}
  if(AC&&AC.state==='suspended')AC.resume();
@@ -1044,7 +1048,7 @@ function laden(name){if(buf.has(name)||laedt.has(name)||!AC)return;laedt.add(nam
  fetch(SND_BASE+name+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((res,rej)=>AC.decodeAudioData(b,res,rej))).then(b=>{const d=b.getChannelData(0);let m=0;for(let k=0;k<d.length;k+=4){const a=Math.abs(d[k]);if(a>m)m=a}let i=0;while(i<d.length&&Math.abs(d[i])<m*.02)i++;b._start=Math.max(0,i-b.sampleRate*.003)/b.sampleRate;buf.set(name,b)}).catch(()=>{laedt.delete(name)})}
 function gruppeLaden(g){if(KARTE[g])KARTE[g].forEach(m=>laden(g+'_'+m));else laden(g)}
 let ruG=null,ruF=null,ruW=-1;
-function busBauen(){if(bus||!AC)return;bus=AC.createGain();bus.gain.value=an_?vol*0.55:0;try{filt=AC.createBiquadFilter();filt.type='lowpass';filt.frequency.value=20000;filt.Q.value=0.6;duck=AC.createGain();bus.connect(filt);filt.connect(duck);try{ruG=AC.createGain();ruF=AC.createBiquadFilter();ruF.type='lowpass';ruF.frequency.value=20000;duck.connect(ruF);ruF.connect(ruG);ruG.connect(hsOut()||AC.destination)}catch(e){ruG=ruF=null;duck.connect(hsOut()||AC.destination)}}catch(e){filt=duck=null;bus.connect(hsOut()||AC.destination)}
+function busBauen(){if(bus||!AC)return;bus=AC.createGain();bus.gain.value=an_?vol*0.55:0;try{filt=AC.createBiquadFilter();filt.type='lowpass';parInit(filt.frequency,20000);filt.Q.value=0.6;duck=AC.createGain();parInit(duck.gain,1);bus.connect(filt);filt.connect(duck);try{ruG=AC.createGain();ruF=AC.createBiquadFilter();ruF.type='lowpass';parInit(ruF.frequency,20000);parInit(ruG.gain,1);duck.connect(ruF);ruF.connect(ruG);ruG.connect(hsOut()||AC.destination)}catch(e){ruG=ruF=null;duck.connect(hsOut()||AC.destination)}}catch(e){filt=duck=null;bus.connect(hsOut()||AC.destination)}
  try{const cv=AC.createConvolver(),n=Math.floor(AC.sampleRate*(MOBIL?1.2:2.4)),b=AC.createBuffer(2,n,AC.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3)}cv.buffer=b;
   hallIn=AC.createGain();hallIn.gain.value=.22;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=5000;hallIn.connect(cv);cv.connect(lp);lp.connect(bus)}catch(e){hallIn=null}}
 function panNode(p){const k=String(p);if(pans[k])return pans[k];let n=AC.createGain();if(p&&AC.createStereoPanner){const s=AC.createStereoPanner();s.pan.value=p;n.connect(s);s.connect(bus);if(hallIn)s.connect(hallIn)}else{n.connect(bus);if(hallIn)n.connect(hallIn)}return pans[k]=n}
@@ -1058,7 +1062,7 @@ const MEL_LADEN={hackbrett:['hack'],sitar:['sitar'],psalter:['psa'],zither:['zit
 const FL_INST={blockfloete:'bfl',shakuhachi:'shaku',oboe:'oboe',floete:'fl',horn:'horn',okarina:'oka',gesang:'stimme',panfloete:'pan',oohchor:'ooh',englischhorn:'eh',bratsche:'bra',pfeife:'pfeife',klarinette:'klar',piccolo:'pic'};
 const TROMMEL={marsch:['marsch1','marsch4'],darbuka:['darb_1','darb_2'],trommel:['snare1','snare2'],pauke:['timp1','timp3'],bodhran:['bodh1','bodh2'],tamburin:['tamb1','tamb2'],stoecke:['clave1','clave2'],taiko:['taiko:43','taiko:48'],bongos:['bongo1','bongo2'],conga:['conga1','conga2']};
 const KETTE={schellen:['schellen3','schellen4'],windspiel:['mtree_1','btree_2'],kriegstrommel:['taiko:43','taiko:48'],rahmentrommel:['rahm_1','rahm_2'],ketten:['shake','shake'],stampfen:['bd','bd'],klatschen:['clave1','clave2'],rassel:['shake','shake'],schnipsen:['clave2','clave2'],loeffel:['clave2','clave1'],krug:['holz1','holz2'],triangel:['triangel1','triangel2'],schlitztrommel:['schlitz1','schlitz2']};
-function vorladen(s){kapSpieler(s).forEach(q=>{gruppeLaden(q.inst);if(q.inst==='didge')['didgefx_1','didgefx_2','didgefx_3'].forEach(laden)});{const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt)gruppeLaden(mt.inst)}(MEL_LADEN[s.instrument]||[]).forEach(gruppeLaden);gruppeLaden(FL_INST[s.band.floete]);if(s.band.floete==='floete')gruppeLaden('flst');
+function vorladen(s){kapSpieler(s).forEach(q=>{gruppeLaden(q.inst);if(q.inst==='didge')['didgefx_1','didgefx_2','didgefx_3'].forEach(laden)});{const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt)gruppeLaden(mt.inst);if(s.gegen)gruppeLaden(s.gegen.inst)}(MEL_LADEN[s.instrument]||[]).forEach(gruppeLaden);gruppeLaden(FL_INST[s.band.floete]);if(s.band.floete==='floete')gruppeLaden('flst');
  const lx=n=>{if(n.indexOf(':')>0){const q=n.split(':');ld(q[0],+q[1])}else laden(n)};(TROMMEL[s.band.trommel]||[]).forEach(lx);(KETTE[s.band.ketten]||[]).forEach(lx);['bd','schelle1','schelle2','holz1','holz2'].forEach(laden);if(s.band.ketten==='windspiel')['mtree_2','mtree_3'].forEach(laden);if(s.band.trommel==='darbuka')laden('darb_3');
  const pr=ORCH[s.mood];if(!pr||pr.volk)gruppeLaden('gitarre');if(!pr)return;if(!pr.volk)gruppeLaden('kb');
  if(pr.pad)(PAD_FARBE[pr.farbe]||['vc','vln']).forEach(gruppeLaden);if(pr.ost)gruppeLaden('spic');['horn','trp','pos','tuba'].forEach(k=>{if(pr[k])gruppeLaden(k)});
@@ -1343,14 +1347,58 @@ function kapelleSchritt(s,p,i,zeit,sd,ab){if(wechsel>0||s.int<2||!s.kapWahl)retu
   if(rolle==='i')w=null;
   else if((rolle==='r'||rolle==='h')){w=q.weise;if(k===mel)w='terz';if(k===bl&&(s.mood==='kampf'||mBasis(s.mood)==='boss'))w='fanfare'}
   if(!w||!KAP_WEISE[w]||s.int<q.min||(k>0&&s.int<=3))return;q.jetzt=w;try{KAP_WEISE[w](s,q,i,zeit,sd,ak,x,p)}catch(e){}})}
-function komponieren(mood,int,behalten,alt){const roh=STIL[mood]||STIL.reise,st=mitIntensitaet(roh,int);
+
+/* ---------- Abwechslung ----------
+   Jedes Stück bekommt eine eigene Färbung. Bossthemen behalten ihr Leitmotiv (Motiv-Instrument und Tonfolge, als Tonleiterstufen –
+   es klingt also in jeder Tonart/jedem Modus wie es selbst), variieren aber nach Boss + Ort (fest je Kombination, damit derselbe Kampf am
+   selben Ort wiedererkennbar bleibt), Schwierigkeit (schneller, dichter) und Zufall (Band, Kick-Muster, Gegenstimme). */
+const VAR_MODI={phrygisch:['aeolisch'],aeolisch:['dorisch','phrygisch'],dorisch:['aeolisch','mixolydisch']};
+const VAR_KICK=[[0,4,8,12],[0,3,8,11],[0,6,8,14],[0,4,8,11,12],[0,3,6,8,12]];
+const VAR_GEGEN=['horn','vln','ooh','bra','fl','eh','stimme'];
+const varH=x=>{let v=7;x=String(x);for(let i=0;i<x.length;i++)v=(v*31+x.charCodeAt(i))|0;return(Math.abs(v)%1000)/1000};
+function varKontext(){try{const S=STAGES[G.stage];return{ort:S&&S.theme||'',diff:+G.diff||0,hart:!!G.hard}}catch(e){return{ort:'',diff:0,hart:false}}}
+const varMehr=(l,x)=>l.concat([].concat(x).filter(v=>v!=null&&!l.includes(v)));
+/* Stil-Rahmen vor dem Komponieren aufweiten (die eigentliche Wahl trifft weiter komponieren: zufall bzw. tonWahl zum vorigen Stück) */
+function stilVariante(st,mood,behalten){if(behalten&&cur&&cur.mood===mood)return st;const b=mBasis(mood),id=b==='boss'&&mood!=='boss'?mood.slice(5):'',K=varKontext();
+ if(b==='boss'){/* Schwierigkeit: je Stufe etwas schneller (höchstens +10) */const d=Math.min(10,K.diff*2+(K.hart?2:0));st.tempo=[st.tempo[0]+d,st.tempo[1]+d]}
+ if(!id||typeof BOSSTHEMA==='undefined'||!BOSSTHEMA[id])return st;const T=BOSSTHEMA[id].s,B=STIL.boss,f=varH(id+'|'+K.ort);
+ /* Ort färbt fest: verwandter Moll-Modus dazu, Tempo um bis zu ±6 versetzt */
+ const m0=T.modus[0],ex=(VAR_MODI[m0]||[]).filter(x=>!T.modus.includes(x));if(ex.length&&f<.7)st.modus=T.modus.concat(ex[Math.floor(f*10)%ex.length]);
+ const dt=Math.round((f-.5)*12);st.tempo=[st.tempo[0]+dt,st.tempo[1]+dt];
+ st.transpose=varMehr((T.transpose||B.transpose).slice(),f<.5?[2]:[-5]);
+ /* Melodie-Instrument: meist das des Themas, sonst eines aus dem Boss-/Kampf-Kreis */
+ const alt=varMehr(B.instrument.slice(),STIL.kampf?STIL.kampf.instrument:[]).filter(x=>!T.instrument.includes(x));
+ if(alt.length)st.instrument=T.instrument.concat(T.instrument,[alt[Math.floor(f*alt.length)],alt[Math.floor(Math.random()*alt.length)]]);
+ /* Band: jede Stimme hat eine zweite Wahl */
+ const bd={};for(const k of ['trommel','floete','ketten']){const own=(T.band&&T.band[k])||B.band[k],pool=varMehr(B.band[k].slice(),STIL.kampf&&STIL.kampf.band?STIL.kampf.band[k]:[]).filter(x=>!own.includes(x));bd[k]=pool.length?own.concat(pool[Math.floor(Math.random()*pool.length)]):own}
+ st.band=bd;return st}
+/* nach dem Komponieren: Kick-Muster, Gegenstimme, kleine Tempo-Schwankung, Farbwechsel bei festen Kampf-Liedern */
+function variieren(s,st,behalten){if(behalten&&cur&&cur.mood===s.mood){for(const k of ['kick','gegen','phase2','var'])if(cur[k]!==undefined)s[k]=cur[k];return s}
+ const b=mBasis(s.mood),id=b==='boss'&&s.mood!=='boss'?s.mood.slice(5):'',K=varKontext(),mt=STIL[s.mood]&&STIL[s.mood].motiv;
+ if(s.liedNr!=null){/* feste Lieder: gleiche Noten, aber ab und zu anders besetzt */
+  if(Math.random()<.4&&st.instrument&&st.instrument.length>1){const l=st.instrument.filter(x=>x!==s.instrument);if(l.length)s.instrument=l[Math.floor(Math.random()*l.length)]}
+  if(st.band)for(const k of ['trommel','floete','ketten'])if(Math.random()<.3&&st.band[k]&&st.band[k].length>1){const l=st.band[k].filter(x=>x!==s.band[k]);if(l.length)s.band[k]=l[Math.floor(Math.random()*l.length)]}}
+ if(!DRAMA[b]&&b!=='kampf')s.tempo=Math.round(s.tempo*(1+(Math.random()-.5)*.06)/2)*2;
+ if((b==='boss'||b==='kampf'||b==='verfolgung')&&KICK[b]&&Math.random()<.6)s.kick=VAR_KICK[1+Math.floor(Math.random()*(VAR_KICK.length-1))];
+ if(mt&&id){const f=varH(id+'|'+K.ort+'|g'),l=VAR_GEGEN.filter(g=>g!==mt.inst&&KARTE[g]);
+  s.gegen={inst:l[Math.floor((f+Math.random())*l.length)%l.length],art:f<.5?'umkehr':'antwort',ab:K.diff>=2||Math.random()<.5?1:2};try{gruppeLaden(s.gegen.inst)}catch(e){}}
+ s.var={modus:s.modus,tempo:s.tempo,tr:s.transpose,inst:s.instrument,band:Object.assign({},s.band),kick:s.kick?s.kick.join(','):'',gegen:s.gegen?s.gegen.inst+'/'+s.gegen.art:''};return s}
+/* lange laufende Stücke: nach drei Durchläufen wechselt eine Stimme der Band */
+function bandFrisch(c,st){if(!c.band||!(c.durch>=3)||!st.band)return c.band;const k=['trommel','floete','ketten'][Math.floor(Math.random()*3)],l=(st.band[k]||[]).filter(x=>x!==c.band[k]);
+ if(!l.length||c.liedNr!=null&&Math.random()<.5)return c.band;return Object.assign({},c.band,{[k]:l[Math.floor(Math.random()*l.length)]})}
+/* Gegenstimme zum Leitmotiv: Umkehrung um die Quinte oder Antwort auf der Dominante, in einer anderen Klangfarbe, leiser als das Motiv */
+function gegenStimme(s,mt,ab,i,zeit,sp,tr,sk){const g=s.gegen;if(!g)return;const c=hoehepunkt(s);
+ if(!(s.phase2||ab===c&&s.int>=6||g.ab===1&&ab%2===1&&s.int>=5))return;
+ for(const n of mt.n){if(n[0]!==i)continue;const d=g.art==='umkehr'?4-n[1]:n[1]+4;
+  spiel(g.inst,MEL_GRUND+tr+ton(sk,d)+12*(mt.okt||0),zeit+(g.art==='antwort'?0:sp*.02),mt.l*(s.phase2?.62:.5),n[2]*sp+.08,{ein:.03,aus:.2,pan:-.28})}}
+function komponieren(mood,int,behalten,alt){const roh=STIL[mood]||STIL.reise,st=stilVariante(mitIntensitaet(roh,int),mood,behalten);
  const LL=KAMPF_LIEDER[mood];if(LL&&LL.length){const gleich=behalten&&cur&&cur.mood===mood&&cur.liedNr!=null;let nr=gleich?cur.liedNr:Math.floor(Math.random()*LL.length);if(!gleich&&alt&&alt.mood===mood&&LL.length>1&&nr===alt.liedNr)nr=(nr+1)%LL.length;
   const v=liedVonNoten(LL[nr]),tr=gleich?cur.transpose:alt?tonWahl(st,alt,[v.modus]).tr:zufall(st.transpose);
-  return{mood,int,tempo:tempoFuer(roh,int),swing:v.swing,transpose:tr,modus:v.modus,instrument:v.instrument,band:Object.assign({},v.band),ablauf:v.ablauf,rollen:v.rollen,teile:v.teile,liedNr:nr,seed:Math.floor(Math.random()*97),durch:0,kapWahl:gleich&&cur.kapWahl?cur.kapWahl:kapelleWaehlen(mood)}}
- let basis;if(behalten&&cur&&cur.mood===mood)basis={transpose:cur.transpose,modus:cur.modus,instrument:cur.instrument,band:cur.band,ablauf:cur.ablauf,seed:cur.seed};
+  return variieren({mood,int,tempo:tempoFuer(st,int),swing:v.swing,transpose:tr,modus:v.modus,instrument:gleich?cur.instrument:v.instrument,band:gleich?Object.assign({},bandFrisch(cur,st)):Object.assign({},v.band),ablauf:v.ablauf,rollen:v.rollen,teile:v.teile,liedNr:nr,seed:Math.floor(Math.random()*97),durch:0,kapWahl:gleich&&cur.kapWahl?cur.kapWahl:kapelleWaehlen(mood)},st,gleich)}
+ let basis;if(behalten&&cur&&cur.mood===mood)basis={transpose:cur.transpose,modus:cur.modus,instrument:cur.instrument,band:bandFrisch(cur,st),ablauf:cur.ablauf,seed:cur.seed};
  else{const tw=alt?tonWahl(st,alt,st.modus):null,tr=tw?tw.tr:zufall(st.transpose);
   basis={transpose:tr,modus:tw?tw.m:zufall(st.modus),instrument:zufall(st.instrument),band:{trommel:zufall(st.band.trommel),floete:zufall(st.band.floete),ketten:zufall(st.band.ketten)},ablauf:zufall(st.ablauf),seed:Math.floor(Math.random()*97)}}
- return Object.assign(basis,{mood,int,tempo:tempoFuer(roh,int),swing:st.swing,teile:stimmungTeile(st,basis.modus),durch:0,kapWahl:behalten&&cur&&cur.mood===mood&&cur.kapWahl?cur.kapWahl:kapelleWaehlen(mood)})}
+ return variieren(Object.assign(basis,{mood,int,tempo:tempoFuer(st,int),swing:st.swing,teile:stimmungTeile(st,basis.modus),durch:0,kapWahl:behalten&&cur&&cur.mood===mood&&cur.kapWahl?cur.kapWahl:kapelleWaehlen(mood)}),st,behalten)}
 const SCHLAG={trommel:1,klopf:1,schelle:1,ketten:1};
 /* Bassdrum: warmer Schlag bei Festen, treibender Kick bei Kampf und Hymnen, Herzschlag bei Grusel */
 const KICK={trinklied:{k:[0,8],l:.2},heldenlied:{k:[0,8],l:.24},verfolgung:{k:[0,3,6,8,11,14],l:.26},kampf:{k:[0,4,8,12],l:.3},boss:{k:[0,4,8,12],l:.34},reiter:{k:[0,6,8,14],l:.24},sieg:{k:[0,4,8,12],l:.24},zwerge:{k:[0,8],l:.26},dorffest:{k:[0,8],l:.2},marktplatz:{k:[0,8],l:.18},shanty:{k:[0,8],l:.2},grusel:{k:[0,3],l:.2},spannung:{k:[0,3],l:.16}};
@@ -1363,7 +1411,7 @@ function planen(s,i,zeit,sp){const ab=teil,p=s.teile[s.ablauf[ab]]||s.teile.A;
  v=p.floete[i];if(v>=0&&!solist)echoStimme(s,FLOETE_GRUND+tr+ton(sk,v),zeit,laenge(p.floete,i)*sp*.95,(gaeste.length?.8:1)*(i%4===0?1:.85)*melF);
  if(!ruhe){const lk=halb?.55:1;
   if(p.trommel[i]>=0&&(lay>=.22||i===0)){const t=TROMMEL[s.band.trommel]||TROMMEL.trommel;spiel(s.band.trommel==='darbuka'&&i%4&&Math.random()<.35?'darb_3':t[i%4===0?0:1],0,zeit,(i%4===0?.42:.3)*lk*(s.band.trommel==='darbuka'?1.5:1),1.4,{aus:.3});if(i===0&&(s.mood==='kampf'||mBasis(s.mood)==='boss'))spiel('bd',0,zeit,.4*lk,1)}
-  {const kk=KICK[mBasis(s.mood)];if(kk&&lay>=.45&&s.int>=4){if(kk.k.includes(i)&&!(i===0&&p.trommel[0]>=0&&(s.mood==='kampf'||mBasis(s.mood)==='boss')))spiel('bd',0,zeit,kk.l*(i%4===0?1:.7)*lk,.9)}else if(lay>.72&&i%4===0&&!(p.trommel[i]>=0))spiel('bd',0,zeit,.26*lk,1)}
+  {const kk=s.kick&&KICK[mBasis(s.mood)]?{k:s.kick,l:KICK[mBasis(s.mood)].l}:KICK[mBasis(s.mood)];if(kk&&lay>=.45&&s.int>=4){if(kk.k.includes(i)&&!(i===0&&p.trommel[0]>=0&&(s.mood==='kampf'||mBasis(s.mood)==='boss')))spiel('bd',0,zeit,kk.l*(i%4===0?1:.7)*lk,.9)}else if(lay>.72&&i%4===0&&!(p.trommel[i]>=0))spiel('bd',0,zeit,.26*lk,1)}
   /* Anlauf in den Refrain: Becken schwillt an, die Snare wirbelt hinauf, ein Atemzug – und der Refrain kommt mit einem großen Schlag */
   if(s.rollen&&lay>=.4){const jetzt=rolleVon(s,ab),nx=rolleVon(s,ab+1),vor=rolleVon(s,ab-1);
    if((nx==='r'||nx==='h')&&jetzt!=='r'&&jetzt!=='h'){if(i===8)spiel('swell',0,zeit,.15*lk,sp*8,{ein:sp*7});if(i>=12&&i<15)spiel(i%2?'snare2':'snare1',0,zeit,(.09+.05*(i-12))*lk,.3)}
@@ -1373,7 +1421,7 @@ function planen(s,i,zeit,sp){const ab=teil,p=s.teile[s.ablauf[ab]]||s.teile.A;
   if(p.ketten[i]>=0&&lay>=.22&&s.band.ketten==='windspiel'){if(zeit-windZ>3.6){spiel('mtree_'+(1+Math.floor(Math.random()*3)),0,zeit,.07*lk,5,{aus:.9});windZ=zeit}}
   else if(p.ketten[i]>=0&&lay>=.22){const k=KETTE[s.band.ketten]||KETTE.rassel;spiel(k[i%4===0?0:1],0,zeit,(s.band.ketten==='rahmentrommel'?.18:s.band.ketten==='stampfen'?.22:s.band.ketten==='triangel'?.06:s.band.ketten==='schlitztrommel'?.17:.12)*lk,.5)}}
  orchester(s,p,i,zeit,sp,ab);if(!ruhe)kapelleSchritt(s,p,i,zeit,sp,ab);gaesteSchritt(s,p,i,zeit,sp,ab);
- {const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt&&!ruhe&&(ab%2===0||ab===hoehepunkt(s)))for(const n of mt.n)if(n[0]===i)spiel(mt.inst,MEL_GRUND+tr+ton(sk,n[1])+12*(mt.okt||0),zeit,mt.l*(.75+.25*Math.min(1,s.int/9)),n[2]*sp+.06,{ein:.02,aus:.14,pan:.18})}}
+ {const mt=STIL[s.mood]&&STIL[s.mood].motiv;if(mt&&s.gegen&&!ruhe)gegenStimme(s,mt,ab,i,zeit,sp,tr,sk);if(mt&&!ruhe&&(ab%2===0||ab===hoehepunkt(s)||s.phase2))for(const n of mt.n)if(n[0]===i)spiel(mt.inst,MEL_GRUND+tr+ton(sk,n[1])+12*(mt.okt||0),zeit,mt.l*(.75+.25*Math.min(1,s.int/9)),n[2]*sp+.06,{ein:.02,aus:.14,pan:.18})}}
 /* ---------- Überleitung zwischen zwei Stimmungen (wie auf der Bühne) ----------
    Statt das Stück am Taktende umzubauen, klingt das alte Stück über einen Takt aus (darunter schwillt schon ein Teppich-Akkord
    in der Klangfarbe der neuen Stimmung an), dann führt eine kleine komponierte Überleitung hinüber: ein Akkord, den beide
@@ -1514,7 +1562,7 @@ function akzent(a){if(!an_||!AC||AC.state!=='running')return;busBauen();if(!bus)
   S('crash',0,3.25,.36,3);S('bd',0,3.25,.62,1.2);S('timp1',0,3.25,.5,2);S('pos',38,3.25,.34,1.4,{ein:.02,aus:.5});S('pos',45,3.25,.3,1.4,{ein:.02,aus:.5});S('trp',62,3.25,.22,1.2,{ein:.02,aus:.5});schnitt(bossMood(),9,3.25,0,D_MOLL)}
  else if(a==='phase'){if(!cur||mBasis(cur.mood)!=='boss')return;ducken(0.3,.6,.25);S('crash',0,0,.36,3);S('bd',0,0,.6,1);S('timp1',0,0,.5,2);S('swell',0,0,.2,1.5);
   [0,.19,.38].forEach((d,i)=>S('taiko',i===1?48:43,d,.5,1.2,{aus:.3}));[60,63,67].forEach(m=>S('ooh',m,0,.22,1.8,{ein:.15,aus:.6}));[63,67,70].forEach((m,i)=>S('trp',m,.38,.24-i*.03,.8,{ein:.02,aus:.3}));
-  cur.transpose+=1;cur.tempo=Math.round(cur.tempo*1.08);naechste=Math.max(naechste,AC.currentTime+.6);schritt=0;if(cur.rollen){const h=hoehepunkt(cur);if(h>=0)teil=h}}
+  cur.transpose+=1;cur.tempo=Math.round(cur.tempo*1.08);cur.phase2=1;cur.kick=[0,3,6,8,11,14];if(cur.var){cur.var.phase2=1;cur.var.kick=cur.kick.join(',')}if(!cur.gegen&&STIL[cur.mood]&&STIL[cur.mood].motiv){cur.gegen={inst:'horn',art:'umkehr',ab:1};gruppeLaden('horn')}naechste=Math.max(naechste,AC.currentTime+.6);schritt=0;if(cur.rollen){const h=hoehepunkt(cur);if(h>=0)teil=h}}
  else if(a==='sieg'){ducken(0.05,4.2,0.05);S('crash',0,.05,.36,3.5);S('gong',0,.05,.36,5);S('timproll',0,.05,.36,1.5,{aus:.2});S('timp1',0,1.5,.5,2);
   [[62,.5,.32],[62,.82,.16],[66,1.0,.16],[69,1.18,.5],[74,1.5,1.8]].forEach(([m,d,l])=>{S('trp',m,d,.32,l+.1,{ein:.015,aus:.12,pan:.2})});
   S('trp',66,1.5,.24,1.8,{ein:.02,aus:.6,pan:-.2});S('trp',69,1.5,.24,1.8,{ein:.02,aus:.6,pan:-.2});S('horn',50,1.5,.34,2.2,{ein:.05,aus:.8});S('horn',57,1.5,.3,2.2,{ein:.05,aus:.8});
@@ -1536,11 +1584,11 @@ const HLOG=[];
 /* der Akkord, der in diesem Moment wirklich erklingt – die Musik ist bis zu 0,2 s im Voraus geplant */
 function harmonie(){if(!cur||!an_)return null;if(AC&&HLOG.length){const n=AC.currentTime+0.01;for(let k=HLOG.length-1;k>=0;k--)if(HLOG[k].t<=n){const h=HLOG[k];return{akk:h.akk,grund:h.grund,leiter:h.leiter}}}const p=cur.teile[cur.ablauf[teil]]||cur.teile.A;if(!p||!p.bass)return null;const zeile=klingt(p.bass,(schritt+SCHRITTE-1)%SCHRITTE),sk=MODI[cur.modus]||MODI.dorisch,d=BASS_STUFEN[zeile||0],g=MEL_GRUND+cur.transpose;
  return{akk:[0,2,4].map(k=>g+ton(sk,d+k)),grund:g+ton(sk,0),leiter:[0,1,2,3,4,5,6].map(k=>g+ton(sk,k))}}
-function gefahr(z){if(!filt||z===gefahrS)return;gefahrS=z;const n=AC.currentTime;filt.frequency.cancelScheduledValues(n);filt.frequency.setTargetAtTime(z===2?380:z===1?1100:20000,n,z?0.25:0.6)}
+function gefahr(z){if(!filt||z===gefahrS)return;gefahrS=z;const n=AC.currentTime;parZiel(filt.frequency,z===2?380:z===1?1100:20000,n,z?0.25:0.6)}
 function stopp(){HLOG.length=0;cur=null;ueb=null;nachKl=null;ein_=null;zurF=null;lautF=1;melF=1;spAkt=0;if(uhr){clearInterval(uhr);uhr=null}}
 function schalten(on){an_=on;if(!on){stopp();if(bus)bus.gain.value=0}else{if(bus)bus.gain.value=vol*0.55;setzen(want.mood,want.int)}}
 function lautstaerke(v){vol=v;if(bus)bus.gain.value=an_?vol*0.55:0}
-return{ruhe:x=>{if(!ruG||!AC)return;x=Math.round(x*10)/10;if(x===ruW)return;ruW=x;const n=AC.currentTime,tc=x>0?0.4:1.4;ruG.gain.cancelScheduledValues(n);ruG.gain.setTargetAtTime(1-0.42*x,n,tc);ruF.frequency.cancelScheduledValues(n);ruF.frequency.setTargetAtTime(x>0?20000-17500*x:20000,n,tc)},schlag:()=>{if(!AC||!cur||AC.state!=='running')return null;const sp=spAkt||60/cur.tempo/4,now=AC.currentTime-(AC.outputLatency||AC.baseLatency||0),sn=schritt-(naechste-now)/sp,q=Math.round(sn/4)*4;return{d:(sn-q)*sp,beat:sp*4,phase:(((sn/4)%1)+1)%1}},korr:(g,m)=>(STIMM_KORR[g]&&STIMM_KORR[g][m])||0,setzen,stopp,schalten,lautstaerke,akzent,gefahr,harmonie,hat:m=>!!STIL[m],getuemmel:x=>{lay=lay+(Math.max(0,Math.min(1,x))-lay)*0.35},gruppen:()=>Object.keys(KARTE),aktuell:()=>cur&&{mood:cur.mood,int:cur.int,tempo:cur.tempo,inst:cur.instrument,gaeste:gaeste.map(g=>g.id),solist:solist&&solist.id},
+return{ruhe:x=>{if(!ruG||!AC)return;x=Math.round(x*10)/10;if(x===ruW)return;ruW=x;const n=AC.currentTime,tc=x>0?0.4:1.4;parZiel(ruG.gain,1-0.42*x,n,tc);parZiel(ruF.frequency,x>0?20000-17500*x:20000,n,tc)},schlag:()=>{if(!AC||!cur||AC.state!=='running')return null;const sp=spAkt||60/cur.tempo/4,now=AC.currentTime-(AC.outputLatency||AC.baseLatency||0),sn=schritt-(naechste-now)/sp,q=Math.round(sn/4)*4;return{d:(sn-q)*sp,beat:sp*4,phase:(((sn/4)%1)+1)%1}},korr:(g,m)=>(STIMM_KORR[g]&&STIMM_KORR[g][m])||0,setzen,stopp,schalten,lautstaerke,akzent,gefahr,harmonie,hat:m=>!!STIL[m],getuemmel:x=>{lay=lay+(Math.max(0,Math.min(1,x))-lay)*0.35},gruppen:()=>Object.keys(KARTE),aktuell:()=>cur&&{mood:cur.mood,int:cur.int,tempo:cur.tempo,inst:cur.instrument,var:cur.var,modus:cur.modus,tr:cur.transpose,band:cur.band,gaeste:gaeste.map(g=>g.id),solist:solist&&solist.id},
  _test:{async render(mood,int,sec){stopp();const c0=komponieren(mood,int,false);vorladen(c0);for(let k=0;k<80&&[...laedt].some(n=>!buf.has(n));k++)await new Promise(r=>setTimeout(r,100));
   stopp();const real=AC,rb=bus,rh=hallIn,rp=Object.assign({},pans);for(const k in pans)delete pans[k];
   const oc=new OfflineAudioContext(2,44100*sec,44100);AC=oc;bus=null;hallIn=null;let n=0;const orig=spiel;
@@ -3924,7 +3972,7 @@ const AMB_ORT={hoehle:'a_tropfen1',tunnel:'a_tropfen2',mine:'a_tropfen1',minenet
  gracklstugh:'a_feuer2',schmiede:'a_feuer1',labor:'a_kochen',kuostadt:'a_wellen2',see:'a_wellen1',wachhaus:'a_feuer3',schloss:'a_wind1',hof:'a_wind1',turm:'a_wind2',flucht:'a_fluss',wurzeldorf:'a_baumwind',steinbruch:'a_tropfen1',glutgang:'a_feuer3',slums:'a_tropfen2',markt:'a_markt',hort:'a_feuer3',teich:'a_wellen1'};
 const AMB_RAUM={schatz:'a_tropfstein',arena:'a_halle',goblin:'a_tropfen1',fallen:'a_feuer3',altar:'a_gesang',haendler:'a_markt',fluch:'a_heulwind',pilzkreis:'a_bienen',ballsaal:'a_halle',schmiede:'a_feuer1',hain:'a_voegel2'};
 function ambiEl(n){let a=AMBI.el[n];if(a)return a;a=new Audio();a.loop=true;a.preload='auto';a.src='amb/'+n+'.mp3';a.onerror=()=>{a._bad=1};
- try{const src=AC.createMediaElementSource(a),g=AC.createGain(),lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;g.gain.value=0;src.connect(lp);lp.connect(g);g.connect(MASTER);a._g=g;a._lp=lp}catch(e){a._bad=1}return AMBI.el[n]=a}
+ try{const src=AC.createMediaElementSource(a),g=AC.createGain(),lp=AC.createBiquadFilter();lp.type='lowpass';parInit(lp.frequency,20000);parInit(g.gain,0);src.connect(lp);lp.connect(g);g.connect(MASTER);a._g=g;a._lp=lp}catch(e){a._bad=1}return AMBI.el[n]=a}
 function ambiWunsch(){AMBI_TIEF={};const sp=KULD?kulSpec():null;if(sp){const W={};kulBetten(sp,W);if(!G.room&&G.state!=='camp'&&!(G.state==='title'&&G.camp)&&sp.k!=='regen'&&sp.k!=='sturm')ambiWetter(W);if(MOBIL){const k=Object.keys(W).sort((a,b)=>W[b]-W[a]);for(const n of k.slice(3))delete W[n]}return W}return ambiWunsch0()}
 function ambiWetter(W){const S=STAGES[G.stage];if(!S)return;const out=OUTDOOR.has(S.theme),wx=G.wx&&G.wx.i===G.stage?G.wx:null,w=wx&&wx.w;
  if(out){if(w==='regen'){W.a_regen1=0.42;W.a_regen3=0.22}else if(w==='gewitter'){W.a_gewitter1=0.5;W.a_regen3=0.25}else if(w==='schnee')W.a_schneesturm=0.4;else if(w==='nebel')W.a_wind3=Math.max(W.a_wind3||0,0.3)}
@@ -3943,11 +3991,11 @@ function ambiWunsch0(){const W={};if(G.state==='camp'||G.state==='title'&&scr&&!
  /* am Handy höchstens drei Teppiche gleichzeitig – sonst stockt und kratzt der Ton */
  if(MOBIL){const k=Object.keys(W).sort((a,b)=>W[b]-W[a]);for(const n of k.slice(3))delete W[n]}
  return W}
-function ambiTick(){try{if(AC&&MASTER&&AC.state==='running')kulTick((SAVE.volSfx==null?0.6:SAVE.volSfx)*0.6)}catch(e){}if(WXF&&AC){const S=STAGES[G.stage],out=G.state==='play'&&!G.room&&S&&OUTDOOR.has(S.theme),w=out&&G.wx&&G.wx.i===G.stage?G.wx.w:'',f=w==='gewitter'?2600:w==='regen'?3600:w==='nebel'?2900:w==='schnee'?6000:20000;if(f!==wxFk){wxFk=f;WXF.frequency.cancelScheduledValues(AC.currentTime);WXF.frequency.setTargetAtTime(f,AC.currentTime,0.8)}}
+function ambiTick(){try{if(AC&&MASTER&&AC.state==='running')kulTick((SAVE.volSfx==null?0.6:SAVE.volSfx)*0.6)}catch(e){}if(WXF&&AC){const S=STAGES[G.stage],out=G.state==='play'&&!G.room&&S&&OUTDOOR.has(S.theme),w=out&&G.wx&&G.wx.i===G.stage?G.wx.w:'',f=w==='gewitter'?2600:w==='regen'?3600:w==='nebel'?2900:w==='schnee'?6000:20000;if(f!==wxFk){wxFk=f;parZiel(WXF.frequency,f,AC.currentTime,0.8)}}
  if(!AC||!MASTER||G.bot||AC.state!=='running')return;const W=SAVE.sound&&SAVE.amb!==false?ambiWunsch():{},v=(SAVE.volSfx==null?0.6:SAVE.volSfx)*0.6*(G.paused?0.5:1),now=AC.currentTime;
  const ambS=Object.values(W).reduce((a,b)=>a+(+b||0),0),ambK=ambS>0.85?Math.pow(0.85/ambS,0.8):1,ambE=ambiEin(now);
- for(const n in W){const a=ambiEl(n);if(a._bad||!a._g)continue;if(a.paused){a.currentTime=Math.random()*20;a.play().catch(()=>{})}const z=Math.min(0.36,W[n]*ambK)*ambE*v*ambiAtem(n,now);if(a._lp){const tf=AMBI_TIEF[n]||20000;if(a._tf!==tf){a._tf=tf;a._lp.frequency.setTargetAtTime(tf,now,0.5)}}if(Math.abs((AMBI.on[n]||0)-z)>0.01){a._g.gain.cancelScheduledValues(now);a._g.gain.setTargetAtTime(z,now,(AMBI.on[n]||0)<0.005?7:2);AMBI.on[n]=z}}
- for(const n in AMBI.on){if(W[n])continue;const a=AMBI.el[n];if(!a||!a._g){delete AMBI.on[n];continue}if(AMBI.on[n]>0){a._g.gain.cancelScheduledValues(now);a._g.gain.setTargetAtTime(0,now,0.7);AMBI.on[n]=0;a._off=now}else if(now-(a._off||0)>4&&!a.paused){a.pause();delete AMBI.on[n]}}}
+ for(const n in W){const a=ambiEl(n);if(a._bad||!a._g)continue;if(a.paused){a.currentTime=Math.random()*20;a.play().catch(()=>{})}const z=Math.min(0.36,W[n]*ambK)*ambE*v*ambiAtem(n,now);if(a._lp){const tf=AMBI_TIEF[n]||20000;if(a._tf!==tf){a._tf=tf;parZiel(a._lp.frequency,tf,now,0.5)}}if(Math.abs((AMBI.on[n]||0)-z)>0.01){parZiel(a._g.gain,z,now,(AMBI.on[n]||0)<0.005?7:2);AMBI.on[n]=z}}
+ for(const n in AMBI.on){if(W[n])continue;const a=AMBI.el[n];if(!a||!a._g){delete AMBI.on[n];continue}if(AMBI.on[n]>0){parZiel(a._g.gain,0,now,0.7);AMBI.on[n]=0;a._off=now}else if(now-(a._off||0)>4&&!a.paused){a.pause();delete AMBI.on[n]}}}
 function bossMood(){const b=G.boss;if(!b)return 'boss';if(b.survive0||b.survive)return 'verfolgung';if(b.musId===undefined){const S=STAGES[G.stage];b.musId=S&&S.boss&&BOSSES[S.boss]===b.def?S.boss:Object.keys(BOSSES).find(k=>BOSSES[k]===b.def)||''}return b.musId&&MUSIK.hat('boss_'+b.musId)?'boss_'+b.musId:'boss'}
 const ROOMMOOD={schatz:'fey',arena:'kampf',goblin:'dorffest',fallen:'spannung',altar:'pilger',haendler:'marktplatz',fluch:'grusel',pilzkreis:'elben',ballsaal:'hof',schmiede:'zwerge',hain:'elben',karte:'spannung',gericht:'hof',mimicnest:'spannung',gans:'dorffest'};
 /* Akzente in der Musik – auch bei Online-Gästen (siehe Netz) */
