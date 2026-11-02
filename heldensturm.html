@@ -12603,6 +12603,434 @@ function hsBakWrite(){if(G&&G.bot)return;const now=Date.now(),R=SAVE.run,M=SAVE.
 window.__hsMPR={persist:()=>persist(),cloudAdopt:(d,c)=>cloudAdopt(d,c),mrg3:(...a)=>mrg3(...a),mprSave,mprGo,mprEnter,mprFix,mprEntry,hsBakWrite,hsBakDrop,saveRun:()=>saveRun(),HSBAK,MPR};
 if(window.__hsBakRest){setTimeout(()=>{try{persist();toast('Spielstand aus Sicherungskopie wiederhergestellt','#8fe7ff')}catch(e){}},700)}
 
+/* ================= Sternbild-Talentkreis (Paket „stern“) =================
+   Alle 5 Äste jedes Helden sind immer offen. Der Talentbildschirm ist ein Sternbild wie bei Nioh: in der Mitte der Kern
+   (Heldenmechanik), 5 Strahlen nach außen (die Äste, Ulti an der Spitze), zwischen benachbarten Strahlen je zwei
+   Brückensterne (innen ab Stufe 8, außen ab Stufe 17), die beide Äste verbinden. Gelernt wird nur, was an einen schon
+   gelernten Stern (oder den Kern) grenzt. Talentpunkte pro Stufe bleiben gleich – es gibt also mehr Wege, nicht mehr Punkte.
+   Funktionen: stG (Graph+Lage), stRender (Bildschirm), stLayout (Zoom/Verschieben/Lage, auch beim Online-Gast),
+   stNb (Richtungsnachbar), stBotLearn (Bot-Builds), stRec (Vorschlag), stBridges (Brückentalente). */
+const ST_ORD={barradin:[2,3,1,0,4],echo:[0,3,1,4,2],friedrich:[0,1,4,2,3],ezekiel:[1,4,2,3,0]};
+const ST_BCOL={barradin:['#c9a0ff','#86d46e','#8fd8ff','#e6efff','#ff9ad5'],echo:['#9fd8ff','#e0a868','#f2d36a','#b8a8ff','#bfe27a'],
+ friedrich:['#f0e2b8','#a9d27e','#f0a860','#f6f08a','#ff8a6a'],ezekiel:['#d4dcea','#ff4a55','#a68aff','#ffd04a','#8affd0']};
+const ST_R=[92,162,232,302,372,448],ST_RB={i:197,o:410},ST_LBL=502,ST_FIT=560;
+const ST={g:{},v:{},lastSel:{},drag:0};
+const stCol=(id,b)=>(ST_BCOL[id]||[])[b]||HCOL[id]||'#e5b454';
+
+/* ---------- Brückentalente (je Held 10: zwischen Strahl k und k+1, innen „i“ / außen „o“) ---------- */
+const STB={
+ barradin:[
+  {k:0,lv:'i',id:'b_st_spiegel',ic:'⚔',name:'Spiegelfechter',d:r=>`Rapierstiche und Klingentanz-Fähigkeiten treffen Gegner, neben denen ein Trugbild steht (130 Schritt), ${pc(0.06*r)} härter.`},
+  {k:0,lv:'o',id:'b_st_spiegtanz',ic:'✧',name:'Tanz der Spiegel',d:r=>`Klingentanz-Fähigkeiten lassen mit ${pc(0.1+0.15*r)} Chance ein Trugbild an Barradins Ausgangspunkt zurück (zerplatzt wie das Spiegelbild).`},
+  {k:1,lv:'i',id:'b_st_dornklinge',ic:'🗡',name:'Dornenklinge',d:r=>`Normale Angriffe und Klingentanz-Schwünge treffen gefesselte oder verlangsamte Gegner ${pc(0.06*r)} härter.`},
+  {k:1,lv:'o',id:'b_st_rosentanz',ic:'❀',name:'Rosentanz',d:r=>`Jede Ausweichrolle lässt am Ausgangspunkt Dornenranken sprießen (höchstens alle 2 s): Gegner darin sind 2 s gefesselt und erleiden ${pc(0.5+0.25*r)} Schaden pro Sekunde.`},
+  {k:2,lv:'i',id:'b_st_dornweise',ic:'♫',name:'Dornige Weise',d:r=>`Betäubte oder gefesselte Gegner erleiden ${pc(0.04*r)} mehr Schaden von Barradin.`},
+  {k:2,lv:'o',id:'b_st_verse',ic:'❦',name:'Verwurzelte Verse',d:r=>`Betäubungen und Fesselungen durch Barradin halten ${pc(0.08*r)} länger.`,mod:(s,r)=>{s.ctrlP+=0.08*r}},
+  {k:3,lv:'i',id:'b_st_bann',ic:'♥',name:'Betörender Bann',d:r=>`Betäubt Barradin einen Gegner, verfällt dieser mit ${pc(0.08*r)} Chance 3 s lang als Bewunderer (Bosse und Wächter nicht).`},
+  {k:3,lv:'o',id:'b_st_ehrfurcht',ic:'♛',name:'Ehrfurcht',d:r=>`Solange ein Bewunderer oder ein betäubter Gegner in der Nähe ist (260 Schritt), erleidet Barradin ${pc(0.05*r)} weniger Schaden.`},
+  {k:4,lv:'i',id:'b_st_schimmer',ic:'☾',name:'Schillernde Trugbilder',d:r=>`Trugbilder halten ${r} s länger und schlagen ${pc(0.1*r)} härter zu.`},
+  {k:4,lv:'o',id:'b_st_feenspiegel',ic:'✦',name:'Feenspiegel',d:r=>`Wird Barradin getroffen, erscheint mit ${pc(0.05+0.1*r)} Chance ein Trugbild an seiner Seite (höchstens alle 4 s).`}],
+ echo:[
+  {k:0,lv:'i',id:'e_st_funke',ic:'✶',name:'Himmelsfunke',d:r=>`Blitz- und Sternentreffer verursachen ${pc(0.04*r)} mehr Schaden.`},
+  {k:0,lv:'o',id:'e_st_sturm',ic:'⚡',name:'Sternensturm',d:r=>`Kettenblitze springen zu einem weiteren Gegner. Jeder Blitztreffer spaltet mit ${pc(0.06*r)} Chance einen Sternsplitter ab (80% Schaden im kleinen Umkreis).`},
+  {k:1,lv:'i',id:'e_st_wandel',ic:'☯',name:'Gestaltenwandler',d:r=>`Nach jedem Gestaltwechsel (Bär, Ratte, Sternengestalt – auch zurück) 4 s lang ${pc(0.05*r)} mehr Schaden.`},
+  {k:1,lv:'o',id:'e_st_pelz',ic:'✺',name:'Sternenpelz',d:r=>`In jeder Gestalt erleidet Echo ${pc(0.05*r)} weniger Schaden.`},
+  {k:2,lv:'i',id:'e_st_myzel',ic:'❋',name:'Myzelpelz',d:r=>`Nahkampf- und Prankenhiebe befallen Gegner mit ${pc(0.15*r)} Chance mit Sporen (wie der Sporenwurf).`},
+  {k:2,lv:'o',id:'e_st_frucht',ic:'✹',name:'Wilde Fruchtung',d:r=>`Tötet Echo in Bärengestalt einen Gegner, platzt ein Bovist (höchstens 1× pro Sekunde): ${pc(0.7+0.5*r)} Schaden ringsum, alle Getroffenen sind befallen.`},
+  {k:3,lv:'i',id:'e_st_pilzgold',ic:'⛀',name:'Pilzgold',d:r=>`Befallene oder vergiftete Gegner lassen beim Tod mit ${pc(0.1*r)} Chance zusätzlich Gold fallen.`},
+  {k:3,lv:'o',id:'e_st_wald',ic:'♣',name:'Ruf des Waldes',d:r=>`Echos Begleiter (Baumhirte, Pilzdiener) treffen ${pc(0.08*r)} härter.`},
+  {k:4,lv:'i',id:'e_st_goldblitz',ic:'☈',name:'Goldgewitter',d:r=>`Jedes aufgesammelte Gold ruft mit ${pc(0.04*r)} Chance einen Blitz auf einen Gegner in der Nähe herab: 180% Schaden und kurze Betäubung.`},
+  {k:4,lv:'o',id:'e_st_wetter',ic:'☁',name:'Wetterleuchten',d:r=>`Alle ${10-r} s schlägt ein Blitz in den stärksten Gegner in der Nähe: ${pc(1.5+0.5*r)} Schaden und 0,5 s Betäubung.`}],
+ friedrich:[
+  {k:0,lv:'i',id:'f_st_jagdbogen',ic:'➶',name:'Jagdbogen',d:r=>`Pfeile treffen Gegner unter 50% Leben ${pc(0.05*r)} härter.`},
+  {k:0,lv:'o',id:'f_st_atem',ic:'↺',name:'Zweiter Atem',d:r=>`Nach einer Ausweichrolle oder dem Rückzugssprung ist der nächste Treffer kritisch (höchstens alle ${f1(9.5-1.5*r)} s).`},
+  {k:1,lv:'i',id:'f_st_fallenjaeger',ic:'⚒',name:'Fallenjäger',d:r=>`Gefesselte oder in Fallen gefangene Gegner erleiden ${pc(0.05*r)} mehr Schaden von Friedrich.`},
+  {k:1,lv:'o',id:'f_st_netz',ic:'⌗',name:'Netz und Messer',d:r=>`Nahkampfhiebe fesseln Gegner mit ${pc(0.05+0.05*r)} Chance 1,2 s lang (Bosse nicht, Wächter kürzer).`},
+  {k:2,lv:'i',id:'f_st_spuer',ic:'✣',name:'Spürnase',d:r=>`Rex beißt gefesselte, gefangene oder verlangsamte Gegner ${pc(0.1*r)} härter.`},
+  {k:2,lv:'o',id:'f_st_treib',ic:'➾',name:'Treibjagd',d:r=>`Rex' Bisse verlangsamen Gegner 2 s lang um ${pc(0.15+0.1*r)} – so laufen sie leichter in deine Fallen.`},
+  {k:3,lv:'i',id:'f_st_gluehfell',ic:'✷',name:'Glühfell',d:r=>`Rex und alle Begleiter treffen ${pc(0.06*r)} härter.`,mod:(s,r)=>{s.petP+=0.06*r}},
+  {k:3,lv:'o',id:'f_st_leucht',ic:'✺',name:'Leuchtspur',d:r=>`Tötet Rex einen Gegner, sticht der Schwarm ringsum nach: ${pc(0.35+0.35*r)} Schaden im Umkreis.`},
+  {k:4,lv:'i',id:'f_st_gluehpfeil',ic:'➹',name:'Glühpfeile',d:r=>`Kritische Pfeiltreffer lassen den Schwarm nachstechen: ${pc(0.1+0.1*r)} des Treffers als zusätzlicher Schaden.`},
+  {k:4,lv:'o',id:'f_st_auge',ic:'◉',name:'Schwarmauge',d:r=>`Steht Friedrich still, kreist ein Schwarmring um ihn: Gegner bis 150 Schritt erleiden jede Sekunde ${pc(0.2+0.2*r)} Schaden.`}],
+ ezekiel:[
+  {k:0,lv:'i',id:'z_st_trunk',ic:'☠',name:'Seelentrunk',d:r=>`Jeder Kill heilt Ezekiel um ${f1(0.25*r)}% Leben (höchstens 2% pro Sekunde).`},
+  {k:0,lv:'o',id:'z_st_totentanz',ic:'☽',name:'Totentanz',d:r=>`Fällt Ezekiel unter 30% Leben, wird er ${f1(1.5+0.5*r)} s lang körperlos und erleidet 50% weniger Schaden (höchstens alle 25 s).`},
+  {k:1,lv:'i',id:'z_st_jenseits',ic:'⟡',name:'Aus dem Jenseits',d:r=>`Nach einer Ausweichrolle oder einem Schattenschritt 2 s lang ${pc(0.06*r)} mehr Schaden.`},
+  {k:1,lv:'o',id:'z_st_schattseel',ic:'◐',name:'Schattenseelen',d:r=>`Unsichtbar (Rauch, Schatten) treffen Ezekiels Angriffe ${pc(0.08*r)} härter.`},
+  {k:2,lv:'i',id:'z_st_griff',ic:'✋',name:'Griff aus dem Schatten',d:r=>`Die erste Fähigkeit nach einer Ausweichrolle lädt ${pc(0.1*r)} schneller auf.`},
+  {k:2,lv:'o',id:'z_st_fisch',ic:'⛁',name:'Großer Fisch',d:r=>`Champions, Wächter und Bosse erleiden ${pc(0.05*r)} mehr Schaden von Ezekiel.`},
+  {k:3,lv:'i',id:'z_st_kraehe',ic:'⁂',name:'Krähenfußklingen',d:r=>`Normale Angriffe treffen verlangsamte Gegner ${pc(0.06*r)} härter.`},
+  {k:3,lv:'o',id:'z_st_messer',ic:'🗡',name:'Messerwerfer',d:r=>`Alle ${8-r} s wirft Ezekiel 4 Wurfdolche auf Gegner in der Nähe: je ${pc(0.55+0.15*r)} Schaden.`},
+  {k:4,lv:'i',id:'z_st_blutklinge',ic:'❥',name:'Blutklingen',d:r=>`Vergiftete und blutende Gegner erleiden ${pc(0.04*r)} mehr Schaden von Ezekiel.`},
+  {k:4,lv:'o',id:'z_st_rot',ic:'♦',name:'Rote Klingen',d:r=>`Unter 50% Leben treffen Ezekiels normale Angriffe ${pc(0.08*r)} härter.`}]};
+/* Brückenknoten in die Bäume einhängen (passiv, max. 3 Ränge, b:-1 = keinem Ast zugeordnet) */
+for(const hid in STB){const H=HEROES[hid];if(!H)continue;for(const d of STB[hid]){if(H.tree.some(n=>n.id===d.id))continue;
+ const n={id:d.id,b:-1,row:d.lv==='i'?2:4,c:0,max:3,ic:d.ic,name:d.name,d:d.d,br:1,stK:d.k,stLv:d.lv};if(d.mod)n.mod=d.mod;H.tree.push(n);d.node=n}}
+
+/* ---------- Alle Äste offen: Astwahl entfällt (alte Funktionen liefern jetzt immer alle Äste) ---------- */
+function stAlle(id){const H=HEROES[id];return H?H.branches.map((x,b)=>b).filter(b=>H.tree.some(n=>n.b===b)):[0,1,2]}
+astOk=function(id,a){const H=HEROES[id];if(!H||!Array.isArray(a)||!a.length||a.length>H.branches.length)return false;if(new Set(a).size!==a.length)return false;
+ return a.every(b=>Number.isInteger(b)&&b>=0&&b<H.branches.length&&H.tree.some(n=>n.b===b))};
+aesteVon=function(id){return stAlle(id)};
+aeste=function(q){q=q||P;return q&&q.id?stAlle(q.id):[0,1,2]};
+astAn=function(n,q){return true};
+aTree=function(q){q=q||P;return q.hero.tree};
+astWahlAct=function(){};
+astWahlHtml=function(id,ctx){const H=HEROES[id];if(!H||ctx==='net')return'';const O=ST_ORD[id]||stAlle(id);
+ return`<div class="facts stfacts"><div><span>Sternbild</span>Alle fünf Äste sind offen – im Talentkreis lernst du vom Kern aus in jede Richtung: ${O.map(b=>`<b style="color:${stCol(id,b)}">${esc(H.branches[b])}</b>`).join(' · ')}. Brückensterne verbinden benachbarte Äste.</div></div>`};
+
+/* ---------- Graph: Lage der Sterne (Welt-Koordinaten um den Kern 0,0) und Nachbarschaft ---------- */
+function stG(id){if(ST.g[id])return ST.g[id];const H=HEROES[id],O=ST_ORD[id]||stAlle(id),N={},E=[],dir=k=>-Math.PI/2+k*TAU/O.length;
+ const link=(a,b)=>{N[a].adj.push(b);if(b!=='core')N[b].adj.push(a);E.push([a,b])};
+ O.forEach((b,k)=>{const a=dir(k),ca=Math.cos(a),sa=Math.sin(a);for(const n of H.tree){if(n.b!==b)continue;const two=H.tree.some(m=>m!==n&&m.b===b&&m.row===n.row),off=two?(n.c?1:-1)*36:0,R=ST_R[n.row]||ST_R[5];
+  N[n.id]={n,x:ca*R-sa*off,y:sa*R+ca*off,k,b,lv:ROWLV[n.row]||1,adj:[]}}});
+ O.forEach(b=>{for(let row=0;row<6;row++){const A=H.tree.filter(x=>x.b===b&&x.row===row),B=H.tree.filter(x=>x.b===b&&x.row===row+1);
+  if(row===0)for(const n of A){N[n.id].adj.push('core');E.push([n.id,'core'])}for(const x of A)for(const y of B)link(x.id,y.id)}});
+ for(const d of STB[id]||[]){const n=d.node;if(!n)continue;const a=dir(d.k+0.5),R=ST_RB[d.lv],br=[O[d.k],O[(d.k+1)%O.length]];
+  N[n.id]={n,x:Math.cos(a)*R,y:Math.sin(a)*R,k:d.k+0.5,b:-1,lv:ROWLV[d.lv==='i'?2:4],adj:[],br};const row=d.lv==='i'?1:4;
+  for(const bb of br)for(const m of H.tree)if(m.b===bb&&m.row===row)link(n.id,m.id)}
+ return ST.g[id]={N,E,O}}
+/* Lernen nur angrenzend: Kern oder ein gelernter Nachbarstern. Schon gelernte Sterne bleiben gültig (auch ohne Pfad, z. B. aus alten Spielständen). */
+prereq=function(n){if(!P||!P.hero||!n)return false;const m=stG(P.id).N[n.id];if(!m)return false;if(P.level<m.lv)return false;if(rank(n.id)>0)return true;
+ for(const x of m.adj)if(x==='core'||rank(x)>0)return true;return false};
+function stReach(n){const m=P&&P.hero&&stG(P.id).N[n.id];if(!m)return false;if(rank(n.id)>0)return true;for(const x of m.adj)if(x==='core'||rank(x)>0)return true;return false}
+function stBrName(m){const H=P.hero;return m.br?m.br.map(b=>H.branches[b]).join(' und '):H.branches[m.b]}
+
+/* ---------- Bot: verschiedene Builds (window.__stb = 'mix' | 'rand' | 'bruecke' | 'ast:<b>'; alte Sims mit __bb/__bpick wie bisher) ---------- */
+const _stBotOld=botLearn;
+botLearn=function(){if(window.__bb!=null||(window.__bpick&&window.__bpick.length))return _stBotOld.apply(this,arguments);let guard=0;
+ while(P.sp>0&&guard++<20){const opts=P.hero.tree.filter(canLearn);if(!opts.length)break;learn(stBotPick(opts))}
+ if(P.bar.length>=6){const ul=P.learn.find(id=>{const n=P.hero.tree.find(x=>x.id===id);return n&&n.ult&&!P.bar.includes(id)});if(ul){P.bar.splice(1,1);P.bar.push(ul);buildSkillBar()}}};
+function stBotPick(opts){const g=stG(P.id),O=g.O,mode=String(window.__stb||P.stBot||'mix');if(window.__stNoBr){const o2=opts.filter(n=>!n.br);if(o2.length)opts=o2}
+ if(mode==='rand'){if(!P.stSeed)P.stSeed=1+Math.floor(Math.random()*1e6);const W=opts.map(n=>{const m=g.N[n.id];return(n.a?2.5:1)*(n.ult?3:1)*(m&&m.b<0?1.2:1)*(rank(n.id)?0.8:1)});
+  let t=Math.random()*W.reduce((a,v)=>a+v,0);for(let i=0;i<opts.length;i++){t-=W[i];if(t<=0)return opts[i]}return opts[0]}
+ let main=O[0],sec=O[1];if(/^ast:\d$/.test(mode)){main=+mode.slice(4);const k=O.indexOf(main);sec=O[(k+1)%O.length]}
+ else if(mode==='mix'){const k=O.indexOf(P.hero.tree.find(n=>n.id===P.hero.sig).b);main=O[Math.max(0,k)];if(P.stSec==null)P.stSec=Math.random()<0.5?1:O.length-1;sec=O[(Math.max(0,k)+P.stSec)%O.length]}
+ const sc=n=>{const m=g.N[n.id],r=rank(n.id);let v=-r*0.45-(m.lv||1)*0.01;if(n.a)v+=1.5;if(n.ult)v+=3;
+  if(mode==='bruecke'){if(m.b<0)v+=8;else v+=Math.max(0,3-Math.abs((n.row||0)-(n.row<=2?1:4)))*0.6}
+  else if(mode.startsWith('ast:')){if(m.b===main)v+=10;else if(m.b<0&&m.br.includes(main))v+=2.5;else if(m.b===sec)v+=1}
+  else{if(m.b===main)v+=6;else if(m.b===sec)v+=4.5;else if(m.b<0&&m.br.includes(main)&&m.br.includes(sec))v+=5.5;else if(m.b<0)v+=0.5}
+  if(n.a&&!n.ult&&!r&&aktivN()>=slotsFrei()-1&&!P.hero.tree.some(x=>x.ult&&rank(x.id)))v-=6;/* letzten Fähigkeitsplatz für eine Ulti frei halten */
+  return v};
+ return opts.slice().sort((a,b)=>sc(b)-sc(a))[0]}
+/* Vorschlag: bleibt bei den Ästen mit den meisten Punkten, nimmt die Brücke dazwischen, Meisterfähigkeiten und Leisten-Fähigkeiten */
+recNode=function(){const T=P.hero.tree,opts=T.filter(canLearn);if(!opts.length)return null;const g=stG(P.id),inv={};for(const n of T)if(n.b>=0)inv[n.b]=(inv[n.b]||0)+rank(n.id);
+ const top=Object.keys(inv).map(Number).sort((a,b)=>inv[b]-inv[a]),t0=top[0],t1=top[1],mx=Math.max(1,inv[t0]||0);
+ const sc=n=>{const m=g.N[n.id],r=rank(n.id);let v=m.b>=0?(inv[m.b]||0)/mx*3:(m.br.includes(t0)?1.6:0)+(m.br.includes(t1)?1.2:0);if(n.ult)v+=5;if(n.a&&P.bar.includes(n.id))v+=2.2;if(n.a&&!r&&P.bar.length<6)v+=1.6;if(!n.a)v+=0.8;return v-r*0.35+(n.row||0)*0.25};
+ return opts.sort((a,b)=>sc(b)-sc(a))[0]};
+
+/* ---------- Bildschirm ---------- */
+function stOwn(){try{return netMayEdit(P)}catch(e){return true}}
+function stDefSel(){const H=P.hero,g=stG(P.id),L=H.tree.filter(n=>g.N[n.id]);const c=L.filter(n=>canLearn(n)).sort((a,b)=>{const A=g.N[a.id],B=g.N[b.id];return Math.hypot(A.x,A.y)-Math.hypot(B.x,B.y)})[0];return c||H.tree.find(n=>n.id===(P.sf||H.sig))||L[0]}
+function stKind(n){return n.br?'Brücke':n.ult?'Meister':n.a?'Aktiv':'Passiv'}
+function stRender(keep){const H=P.hero,id=P.id,g=stG(id),N=g.N,own=stOwn();if(!keep){G.treeOpen=false;G.treeDet=false}
+ let sel=G.treeSel&&N[G.treeSel]&&H.tree.find(n=>n.id===G.treeSel);if(!sel)sel=stDefSel();G.treeSel=sel.id;const open=!!G.treeOpen||!!G.barPick;
+ let mk=null;try{const m=netMarkGet&&netMarkGet(P);mk=m&&m.tr?m.tr.id:null}catch(e){}
+ const lit=x=>x==='core'||rank(x)>0,hc=HCOL[id]||'#e5b454';
+ const colOf=m=>m.b>=0?stCol(id,m.b):null;
+ /* Linien */
+ const lines=g.E.map(([a,b])=>{const A=a==='core'?{x:0,y:0}:N[a],B=b==='core'?{x:0,y:0}:N[b];const la=lit(a),lb=lit(b);
+  const ca=a==='core'?hc:(colOf(N[a])||stCol(id,N[a].br[0])),cb=b==='core'?hc:(colOf(N[b])||stCol(id,N[b].br[1]));
+  const cls=la&&lb?'on':la||lb?'half':'';const rev=!la&&lb;
+  return`<i class="stl ${cls}${rev?' rev':''}" data-x1="${A.x.toFixed(1)}" data-y1="${A.y.toFixed(1)}" data-x2="${B.x.toFixed(1)}" data-y2="${B.y.toFixed(1)}" style="--c1:${ca};--c2:${cb}"></i>`}).join('');
+ /* Astnamen an den Spitzen */
+ const lbls=g.O.map((b,k)=>{const a=-Math.PI/2+k*TAU/g.O.length,pts=H.tree.filter(n=>n.b===b).reduce((s,n)=>s+rank(n.id),0),me=pts>=MEIST_N;
+  return`<span class="stlb${me?' me':''}" data-ox="${Math.cos(a).toFixed(3)}" data-oy="${Math.sin(a).toFixed(3)}" data-x="${(Math.cos(a)*ST_LBL).toFixed(1)}" data-y="${(Math.sin(a)*ST_LBL).toFixed(1)}" style="--c:${stCol(id,b)}" title="${esc(MEIST[id]&&MEIST[id][H.branches[b]]||'')}"><b>${esc(H.branches[b])}</b><small>${pts} Pkt.${me?' · Meister ✦':` · ${Math.min(pts,MEIST_N)}/${MEIST_N}`}</small></span>`}).join('');
+ /* Sterne */
+ const stars=H.tree.filter(n=>N[n.id]).map(n=>{const m=N[n.id],r=rank(n.id),can=own&&canLearn(n),reach=stReach(n),isSel=n.id===sel.id,armed=isSel&&open&&can;
+  const c1=m.b>=0?stCol(id,m.b):stCol(id,m.br[0]),c2=m.b>=0?c1:stCol(id,m.br[1]);
+  const cls=['stn',n.br?'brk':n.ult?'ult':n.a?'act':'pas',r?'lit':'',r>=n.max?'max':'',can?'can':'',!r&&!reach?'far':'',isSel?'sel':'',armed?'armed':'',P.bar.includes(n.id)?'inbar':'',mk===n.id?'netmk':''].filter(Boolean).join(' ');
+  const t=shortD(n.d(Math.max(1,r)));
+  return`<button class="${cls}" data-act="${armed?'tree-learn':'tree-sel'}" data-id="${n.id}" data-x="${m.x.toFixed(1)}" data-y="${m.y.toFixed(1)}" data-n="${esc(n.name)}" data-r="${r}/${n.max}" data-k="${stKind(n)}" data-t="${esc(t).slice(0,290)}" style="--c:${c1};--c2:${c2}" aria-label="${esc(n.name)} ${r}/${n.max}"><span class="sto"><span class="stg">${esc(n.ic||'✦')}</span>${skIco(n,n.ult?'bar':'slot')}</span><span class="stp">${'<i class="on"></i>'.repeat(r)}${'<i></i>'.repeat(n.max-r)}</span><span class="stnm">${esc(n.name)}</span></button>`}).join('');
+ const nebs=g.O.map((b,k)=>{const a=-Math.PI/2+k*TAU/g.O.length;return`<i class="stneb" data-x="${(Math.cos(a)*300).toFixed(1)}" data-y="${(Math.sin(a)*300).toFixed(1)}" style="--c:${stCol(id,b)}"></i>`}).join('');
+ const core=`<span class="stcore" data-x="0" data-y="0" title="${esc(HMECH[id]||'')}"><b>${P.sp}</b><small>Punkt${P.sp===1?'':'e'}</small></span>`;
+ /* Detail */
+ const m=N[sel.id],r=rank(sel.id),can=own&&canLearn(sel);let req='';
+ if(!own)req='';else if(r>=sel.max)req='';else if(P.level<m.lv)req=`Benötigt Heldenstufe ${m.lv}.`;else if(!stReach(sel))req='Noch nicht verbunden – lerne zuerst einen angrenzenden Stern (Linie zum Kern).';else if(aktivSperre(sel)&&P.sp>0)req=aktivSperre(sel);else if(P.sp<=0)req='Kein Talentpunkt frei – der nächste kommt mit der nächsten Stufe.';
+ const inBar=P.bar.includes(sel.id);
+ const barBtn=own&&sel.a&&r&&!inBar&&G.barPick!==sel.id?`<button class="btn" data-act="tree-bar">${P.bar.length>=6?'In die Leiste (ersetzen)':'In die Leiste'}</button>`:'';
+ const barInfo=sel.a&&r&&inBar?`<div class="muted" style="font-size:13px">Platz ${P.bar.indexOf(sel.id)+1} in der Leiste.</div>`:G.barPick===sel.id?`<div class="barpick"><div style="font-weight:800">Die Leiste ist voll. Welche Fähigkeit soll ${esc(sel.name)} ersetzen?</div><div class="bpick">${P.bar.map((bid,i)=>{const n=H.tree.find(x=>x.id===bid);return n?`<button class="btn small" data-act="bar-rep" data-i="${i}"><span class="bpi">${skIco(n,'pick')}</span> ${esc(n.name)}</button>`:''}).join('')}</div><button class="btn small" data-act="bar-cancel">Nicht in die Leiste</button></div>`:'';
+ const where=sel.br?`Brücke zwischen <b style="color:${stCol(id,m.br[0])}">${esc(H.branches[m.br[0]])}</b> und <b style="color:${stCol(id,m.br[1])}">${esc(H.branches[m.br[1]])}</b> · ab Stufe ${m.lv}`
+  :`Ast <b style="color:${stCol(id,m.b)}">${esc(H.branches[m.b])}</b> · Stern ${(sel.row||0)+1} von 6 · ab Stufe ${m.lv}`;
+ const bname=m.b>=0?H.branches[m.b]:null,mp=bname?astPunkte(m.b):0,mtxt=bname&&MEIST[id]&&MEIST[id][bname];
+ const meistL=mtxt?`<div class="stme ${mp>=MEIST_N?'on':''}"><b>Meisterschaft ${Math.min(mp,MEIST_N)}/${MEIST_N}</b> ${esc(mtxt)}</div>`:'';
+ const det=`<div class="tdet card stdet" style="--c:${m.b>=0?stCol(id,m.b):stCol(id,m.br[0])}"><div class="tdh"><span class="tdi">${skIco(sel,'det')||esc(sel.ic||'')}</span><div class="tdn"><h3>${esc(sel.name)}</h3><div class="eyebrow">${stKind(sel)} · ${sel.a?f1(sel.cd(Math.max(1,r)))+(r&&r<sel.max&&sel.cd(r+1)!==sel.cd(r)?`<span class="v1 upv"> → ${f1(sel.cd(r+1))}</span>`:'')+' s · ':''}Rang ${r}/${sel.max}</div></div></div>
+   <div class="stwo">${where}</div>${vorschauHtml(sel)}
+   ${G.treeDet?'':`<div class="tds">${r&&r<sel.max?`<span class="v0">${esc(shortD(sel.d(r)))}</span><span class="v1">${upDiff(shortD(sel.d(r)),shortD(sel.d(r+1)))}</span>`:esc(shortD(sel.d(Math.max(1,r))))}</div>`}
+   ${G.treeDet?`<div class="tdmore">${r?`<div><b>Aktuell:</b> ${r<sel.max?`<span class="v0">${sel.d(r)}</span><span class="v1">${upDiff(sel.d(r),sel.d(r+1))}</span>`:sel.d(r)}</div>`:''}${r<sel.max?`<div class="${r?'muted':''}"><b>${r?'Nächster Rang':'Rang 1'}:</b> ${sel.d(r+1)}</div>`:''}</div>`:''}
+   ${meistL}${req?`<div class="bad" style="font-size:13px;font-weight:700">${req}</div>`:''}${barInfo}
+   <div class="row"><button class="btn gold" data-act="tree-learn" ${can?'':'disabled'}>${r>=sel.max?'Gemeistert':r?'Verbessern · 1 Punkt':'Lernen · 1 Punkt'}</button>${barBtn}<button class="btn tdtog" data-act="tree-det">${G.treeDet?'Weniger ▴':'Details ▾'}</button></div>
+   ${can&&open?'<div class="sthint">Tipp: Den leuchtenden Stern noch einmal antippen lernt ihn.</div>':''}</div>`;
+ const slots=[0,1,2,3,4,5].map(i=>{const bid=P.bar[i],n=bid&&H.tree.find(x=>x.id===bid);return`<button class="bslot ${n?'':'empty'} ${G.barPick&&n?'pick':''}" data-i="${i}" ${n?`data-act="tree-sel" data-id="${n.id}"`:'disabled'} title="${n?esc(n.name):'frei'}"><span>${n?skIco(n,'slot'):''}</span><i>${skKey(i)}</i></button>`}).join('');
+ const nx=SLOTLV.find(l=>l>P.level);
+ const zk='p'+Math.max(0,PL.indexOf(P));
+ showScreen(`<div class="wrap tree-wrap stwrap">
+  ${menuTabs('tree')}${hinwHtml('tree')}
+  <div class="stgrid">
+   <div class="stmap" data-zk="${zk}" data-sel="${sel.id}" style="--hc:${hc}"><div class="stsky"></div><div class="stw">${nebs}${lines}${lbls}${core}${stars}</div>
+    <div class="stzoom"><span class="stz" data-act="st-zoom" data-z="1" title="Näher">+</span><span class="stz" data-act="st-zoom" data-z="-1" title="Weiter weg">−</span><span class="stz" data-act="st-zoom" data-z="0" title="Ganzes Sternbild">⌖</span></div></div>
+   <div class="stside">
+    <div class="inv-head sthead"><div><h2>Sternbild</h2><div class="sp">${P.sp} Punkt${P.sp===1?'':'e'} frei · Stufe ${P.level} · Fähigkeiten ${aktivN()}/${slotsFrei()}${nx?` <span class="muted" style="font-size:12px">(nächster Platz ab Stufe ${nx})</span>`:''}</div></div>
+     <div class="row">${own&&P.sp>0&&H.tree.some(canLearn)?`<button class="btn hint" data-act="tree-rec" title="Zeigt einen passenden nächsten Stern – du entscheidest selbst">Vorschlag?</button>`:''}<button class="btn gold" data-act="close">${G.state==='camp'?'Fertig':G.state==='between'?'Zurück':'Weiter'}</button></div></div>
+    ${det}
+    <div class="barrow"><span class="eyebrow">Leiste</span><div class="bslots">${slots}</div></div>
+   </div>
+  </div>
+ </div>`,'',keep)}
+{const _rt=renderTree;renderTree=function(keep){if(!P||!P.hero||!stG(P.id))return _rt.apply(this,arguments);stRender(keep);try{netMenuDeco('tree')}catch(e){}}}
+
+/* ---------- Lage, Zoom und Verschieben (läuft überall lokal: Gastgeber, Spalten im lokalen Mehrspieler, Online-Gast) ---------- */
+function stKey(m){return NET.role==='guest'?'g':(m.dataset.zk||'p0')}
+function stView(m){const k=stKey(m);return ST.v[k]||(ST.v[k]={z:0,cx:0,cy:0})}
+function stScale(m){const W=m.clientWidth,H=m.clientHeight;const fit=Math.max(0.12,Math.min(W,H)/2/ST_FIT),v=stView(m);if(!v.user||!v.z)v.z=clamp((H<340?0.36:0.42)/fit,1,1.7);v.z=clamp(v.z,1,3.2/fit>4?4:Math.max(1.2,3.2/fit));return{W,H,s:fit*v.z,fit,v}}
+function stLayout(m){if(!m||!m.isConnected)return;const W=m.clientWidth,H=m.clientHeight;if(W<40||H<40)return;const L=stScale(m),s=L.s,v=L.v;
+ const k=stKey(m),sid=m.dataset.sel;if(sid&&ST.lastSel[k]!==sid){const el=m.querySelector(`.stn[data-id="${CSS.escape(sid)}"]`);if(el&&ST.lastSel[k]!==undefined){const x=+el.dataset.x,y=+el.dataset.y,X=W/2+(x-v.cx)*s,Y=H/2+(y-v.cy)*s,mg=Math.min(70,W*0.18);
+   if(X<mg||X>W-mg||Y<mg||Y>H-mg){v.cx+=(X-clamp(X,mg,W-mg))/s*1.6;v.cy+=(Y-clamp(Y,mg,H-mg))/s*1.6}}ST.lastSel[k]=sid}
+ const lim=ST_FIT*0.95;v.cx=clamp(v.cx,-lim,lim);v.cy=clamp(v.cy,-lim,lim);
+ const sx=x=>W/2+(x-v.cx)*s,sy=y=>H/2+(y-v.cy)*s,ss=clamp(s/0.55,0.78,1.35);m.style.setProperty('--ss',ss.toFixed(3));m.style.setProperty('--px',(-v.cx*s*0.3).toFixed(0)+'px');m.style.setProperty('--py',(-v.cy*s*0.3).toFixed(0)+'px');
+ m.classList.toggle('stnear',s>=0.8);
+ for(const el of m.querySelectorAll('.stn,.stcore'))el.style.transform=`translate(${sx(+el.dataset.x).toFixed(1)}px,${sy(+el.dataset.y).toFixed(1)}px) translate(-50%,-50%)`;
+ for(const el of m.querySelectorAll('.stlb')){const ox=+el.dataset.ox||0,oy=+el.dataset.oy||0;el.style.transform=`translate(${sx(+el.dataset.x).toFixed(1)}px,${sy(+el.dataset.y).toFixed(1)}px) translate(${(-50+45*ox).toFixed(0)}%,${(-50+50*oy).toFixed(0)}%)`}
+ for(const el of m.querySelectorAll('.stneb'))el.style.transform=`translate(${sx(+el.dataset.x).toFixed(1)}px,${sy(+el.dataset.y).toFixed(1)}px) translate(-50%,-50%) scale(${(s/0.55).toFixed(3)})`;
+ for(const el of m.querySelectorAll('.stl')){const x1=sx(+el.dataset.x1),y1=sy(+el.dataset.y1),x2=sx(+el.dataset.x2),y2=sy(+el.dataset.y2),dx=x2-x1,dy=y2-y1;
+  el.style.width=Math.hypot(dx,dy).toFixed(1)+'px';el.style.transform=`translate(${x1.toFixed(1)}px,${y1.toFixed(1)}px) rotate(${Math.atan2(dy,dx).toFixed(4)}rad)`}}
+/* Kartenhöhe passend zum Bildschirm (PC: Karte links, Details rechts · Handy hoch: Karte oben · Handy quer: nebeneinander) */
+function stSize(m){const sc=m.closest('.screen');if(!sc)return;const k=m.getBoundingClientRect().width/Math.max(1,m.offsetWidth)||1;const sd=m.parentNode&&m.parentNode.querySelector('.stside'),side=!!sd&&Math.abs(sd.offsetTop-m.offsetTop)<6;
+ const sr=sc.getBoundingClientRect(),hs=sc.style.height,visH=Math.min(sc.clientHeight,innerHeight-Math.max(0,sr.top),/%$/.test(hs)?innerHeight*parseFloat(hs)/100:1e9),top=(m.getBoundingClientRect().top-sr.top+sc.scrollTop)/k,avail=visH/k-top-(side?20:12);
+ const h=side?clamp(avail,260,900):clamp(Math.min(avail-170,m.offsetWidth*1.12),260,600);if(Math.abs((parseFloat(m.style.height)||0)-h)>2)m.style.height=Math.round(h)+'px'}
+const STRO=typeof ResizeObserver!=='undefined'?new ResizeObserver(es=>{for(const e of es)try{const t=e.target;if(t.classList.contains('stmap')){stSize(t);stLayout(t)}else for(const m of t.querySelectorAll('.stmap')){stSize(m);stLayout(m)}}catch(x){}}):null;
+function stLayoutIn(root){if(!root||!root.querySelectorAll)return;for(const m of root.querySelectorAll('.stmap')){try{stSize(m);stLayout(m);if(STRO&&!m._stro){m._stro=1;STRO.observe(m)}const sc=m.closest('.screen');if(STRO&&sc&&!sc._stro){sc._stro=1;STRO.observe(sc)}}catch(e){console.error('stern',e)}}}
+{const _ss=showScreen;showScreen=function(){const r=_ss.apply(this,arguments);try{if(scr&&scr.querySelector('.stmap'))stLayoutIn(scr)}catch(e){}return r}}
+addEventListener('resize',()=>setTimeout(()=>{for(const sc of document.querySelectorAll('.screen'))stLayoutIn(sc)},30));
+function stZoomBy(m,f,cx,cy){const L=stScale(m),v=L.v,s0=L.s;const W=L.W,H=L.H;cx=cx==null?W/2:cx;cy=cy==null?H/2:cy;const wx=v.cx+(cx-W/2)/s0,wy=v.cy+(cy-H/2)/s0;
+ v.z=v.z*f;v.user=1;const s1=stScale(m).s;v.cx=wx-(cx-W/2)/s1;v.cy=wy-(cy-H/2)/s1;stLayout(m)}
+function stLocal(ev,m){const r=m.getBoundingClientRect(),k=r.width/Math.max(1,m.offsetWidth)||1;return{x:(ev.clientX-r.left)/k,y:(ev.clientY-r.top)/k,k}}
+/* Finger und Maus: ziehen = verschieben, zwei Finger = zoomen, Rad = zoomen */
+const STP={m:null,pts:new Map(),mv:0,p0:null};
+addEventListener('pointerdown',ev=>{const m=ev.target&&ev.target.closest&&ev.target.closest('.stmap');if(!m||ev.target.closest('.stzoom'))return;if(STP.m!==m){STP.pts.clear();STP.m=m}
+ STP.pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});STP.mv=0;STP.p0={x:ev.clientX,y:ev.clientY};if(STP.pts.size===2){const [a,b]=[...STP.pts.values()];STP.pd=Math.hypot(a.x-b.x,a.y-b.y)}},true);
+addEventListener('pointermove',ev=>{const m=STP.m;if(!m||!STP.pts.has(ev.pointerId))return;if(!m.isConnected){STP.pts.clear();STP.m=null;return}const o=STP.pts.get(ev.pointerId),L=stLocal(ev,m);
+ if(STP.pts.size===1){const dx=(ev.clientX-o.x)/L.k,dy=(ev.clientY-o.y)/L.k;if(!STP.mv&&Math.hypot(ev.clientX-STP.p0.x,ev.clientY-STP.p0.y)<7)return;STP.mv=1;m.classList.add('stdrag');const v=stView(m),s=stScale(m).s;v.cx-=dx/s;v.cy-=dy/s;o.x=ev.clientX;o.y=ev.clientY;stLayout(m)}
+ else if(STP.pts.size===2){o.x=ev.clientX;o.y=ev.clientY;const [a,b]=[...STP.pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(STP.pd>0&&d>0){const r=m.getBoundingClientRect();STP.mv=1;stZoomBy(m,d/STP.pd,((a.x+b.x)/2-r.left)/L.k,((a.y+b.y)/2-r.top)/L.k)}STP.pd=d}},true);
+function stUp(ev){if(!STP.pts.has(ev.pointerId))return;STP.pts.delete(ev.pointerId);if(STP.mv){ST.drag=performance.now();ST.dragC=1}if(!STP.pts.size){if(STP.m)STP.m.classList.remove('stdrag');STP.pd=0}else STP.pd=0}
+addEventListener('pointerup',stUp,true);addEventListener('pointercancel',stUp,true);
+addEventListener('wheel',ev=>{const m=ev.target&&ev.target.closest&&ev.target.closest('.stmap');if(!m)return;ev.preventDefault();const L=stLocal(ev,m);stZoomBy(m,Math.exp(-clamp(ev.deltaY,-120,120)*0.0018),L.x,L.y)},{passive:false});
+/* Klicks: nach dem Ziehen keinen Stern auslösen; Zoom-Knöpfe nur lokal (auch beim Online-Gast) */
+addEventListener('click',ev=>{const t=ev.target;if(!t||!t.closest)return;const m=t.closest('.stmap');if(!m)return;
+ if(ST.dragC){ST.dragC=0;if(performance.now()-ST.drag<400){ev.stopImmediatePropagation();ev.preventDefault();return}}
+ const z=t.closest('[data-act="st-zoom"]');if(z){ev.stopImmediatePropagation();ev.preventDefault();const f=+z.dataset.z;if(f===0){const v=stView(m);v.cx=0;v.cy=0;v.z=1;v.user=1;stLayout(m)}else stZoomBy(m,f>0?1.35:1/1.35);try{sfx('ui')}catch(e){}}},true);
+/* Tooltip am PC (Maus über einem Stern) – liegt außerhalb der Menüs, damit die Klick-Nummern beim Online-Gast stimmen */
+const STTIP=(()=>{const d=document.createElement('div');d.className='sttip';d.hidden=true;document.body.appendChild(d);return d})();
+addEventListener('pointerover',ev=>{if(ev.pointerType!=='mouse')return;const s=ev.target&&ev.target.closest&&ev.target.closest('.stn');if(!s){STTIP.hidden=true;return}
+ STTIP.innerHTML=`<b>${esc(s.dataset.n||'')}</b><small>${esc(s.dataset.k||'')} · Rang ${esc(s.dataset.r||'')}</small><span>${esc(s.dataset.t||'')}</span>`;STTIP.style.setProperty('--c',s.style.getPropertyValue('--c')||'#e5b454');
+ const r=s.getBoundingClientRect();STTIP.hidden=false;const w=STTIP.offsetWidth,h=STTIP.offsetHeight;let x=r.left+r.width/2-w/2,y=r.top-h-10;if(y<6)y=r.bottom+10;STTIP.style.left=clamp(x,6,innerWidth-w-6)+'px';STTIP.style.top=clamp(y,6,innerHeight-h-6)+'px'},true);
+addEventListener('pointerdown',()=>{STTIP.hidden=true},true);
+{const _ho=hideScreen;hideScreen=function(){STTIP.hidden=true;return _ho.apply(this,arguments)}}
+
+/* ---------- Richtungsnachbar (Controller, Tastatur) ---------- */
+function stNb(cont,cur,dx,dy){const L=[...cont.querySelectorAll('.stn')];if(!cur)return L.find(e=>e.classList.contains('sel'))||L[0]||null;const x0=+cur.dataset.x,y0=+cur.dataset.y;
+ const id=P&&P.hero&&cur.dataset.id,g=P&&P.hero&&stG(P.id),adj=g&&g.N[id]?new Set(g.N[id].adj):new Set();let best=null,bs=1e9;
+ for(const e of L){if(e===cur)continue;const vx=+e.dataset.x-x0,vy=+e.dataset.y-y0,d=Math.hypot(vx,vy);if(d<1)continue;const c=(vx*dx+vy*dy)/d;if(c<0.42)continue;
+  const sc=d*(1+(1-c)*2.2)*(adj.has(e.dataset.id)?0.62:1);if(sc<bs){bs=sc;best=e}}return best}
+/* Controller: Steuerkreuz/Stick springt von Stern zu Stern und zeigt ihn an, A lernt (zweimal A = sicher), B schließt */
+{const _st=padStep;padStep=function(L,cur,dx,dy){if(cur&&cur.classList&&cur.classList.contains('stn')){const m=cur.closest('.stmap');const nb=m&&stNb(m,cur,dx,dy);if(nb)return nb}return _st.apply(this,arguments)}}
+{const _pc=padCur;padCur=function(L){const c=_pc.apply(this,arguments);if(c&&c.classList&&c.classList.contains('stn')&&!c.classList.contains('sel')){const s=L.find(e=>e.classList&&e.classList.contains('stn')&&e.classList.contains('sel'));if(s)return s}return c}}
+{const _dd=padDefault;padDefault=function(L){const s=L.find(e=>e.classList&&e.classList.contains('stn')&&e.classList.contains('sel'));if(s&&!PADNAV.det)return s;return _dd.apply(this,arguments)}}
+{const _pm=padMark;padMark=function(el,noScroll){if(el&&el.classList&&el.classList.contains('stn')){if(!el.classList.contains('sel')&&el.dataset.act==='tree-sel'&&!scr.querySelector('.barpick')){el.click();const n=scr.querySelector('.stn.sel');if(n)el=n}
+  const r=_pm.call(this,el,true);try{const m=el.closest('.stmap');if(m)m.scrollIntoView({block:'nearest'})}catch(e){}return r}return _pm.apply(this,arguments)}}
+{const _ptab=padTab;padTab=function(d){const r=_ptab.apply(this,arguments);try{if(r&&scr.querySelector('.stmap')){const n=scr.querySelector('.stn.sel');if(n){PADNAV.el=null;PADNAV.sig=padSig(n);PADNAV.det=0;PADNAV.dirty=true}}}catch(e){}return r}}
+{const _pb=padBack;padBack=function(){if(scr.querySelector('.stmap')&&!scr.querySelector('[data-act="bar-cancel"]')){const c=[...scr.querySelectorAll('[data-act="close"]')].find(e=>!e.disabled&&e.offsetParent);if(c){PADNAV.det=0;c.click();return}}return _pb.apply(this,arguments)}}
+/* Tastatur: Pfeile/WASD wählen den Nachbarstern, Enter/Leertaste lernt, +/− zoomt */
+function stKbCont(){if(NET.role==='guest'&&G.overlay==='remote')return scr.querySelector('.stmap')?scr:null;if(G.overlay!=='tree')return null;
+ try{if(lmOn()){const kq=lmKb();if(!kq)return null;if(G.lmOwn!==kq){const g=lmPane(kq);return g&&g.vm.overlay==='tree'?g.vm.el:null}}}catch(e){}
+ if(P&&netIs(P.dev))return null;return scr.querySelector('.stmap')?scr:null}
+addEventListener('keydown',ev=>{if(ev.ctrlKey||ev.metaKey||ev.altKey)return;if(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))return;const D={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[ev.code];
+ const zoom=ev.code==='Equal'||ev.code==='NumpadAdd'||ev.code==='BracketRight'?1:ev.code==='Minus'||ev.code==='NumpadSubtract'||ev.code==='Slash'?-1:0,ent=ev.code==='Enter'||ev.code==='NumpadEnter'||ev.code==='Space';
+ if(!D&&!zoom&&!ent)return;const ae=document.activeElement;if(ent&&ae&&ae.tagName==='BUTTON'&&!ae.classList.contains('stn'))return;const C=stKbCont();if(!C)return;const m=C.querySelector('.stmap');if(!m)return;ev.preventDefault();ev.stopPropagation();for(const k in D?{KeyW:1,KeyA:1,KeyS:1,KeyD:1}:{})keys[k]=false;
+ if(zoom){stZoomBy(m,zoom>0?1.3:1/1.3);return}const cur=m.querySelector('.stn.sel');
+ if(ent){if(cur)cur.click();return}const nb=stNb(m,cur,D[0],D[1]);if(nb)nb.click()},true);
+
+/* ---------- Brückentalente: Wirkungen ---------- */
+TBUFFS.push('stWandel','stGeist');
+const stR=id=>rank(id);
+/* Barradin */
+hook('dmgMul',(e,o)=>{let f=1;if(o.dot)return f;
+ const r1=stR('b_st_spiegel');if(r1&&(o.basic||o.kt)&&G.allies.some(a=>a.kind==='ill'&&!a.dead&&a.life>0&&d2(a,e)<130*130))f*=1+0.06*r1;
+ const r2=stR('b_st_dornklinge');if(r2&&(o.basic||o.kt)&&(e.root>0||e.slowT>0))f*=1+0.06*r2;
+ const r3=stR('b_st_dornweise');if(r3&&(e.stun>0||e.root>0))f*=1+0.04*r3;
+ const r4=stR('b_st_schimmer');if(r4&&o.pet&&DMS&&String(DMS).indexOf('trugbild')>=0)f*=1+0.1*r4;return f},'barradin');
+hook('precast',n=>{P.stPx=P.x;P.stPy=P.y},'barradin');
+hook('cast',n=>{const r=stR('b_st_spiegtanz');if(!r||typeof KT==='undefined'||!KT.has(n.id))return;if(Math.random()<0.1+0.15*r){illusion(P.stPx!=null?P.stPx:P.x,P.stPy!=null?P.stPy:P.y,rank('b_mirror')||1);if(fxOk())ring(P.stPx,P.stPy,40,'#8fd8ff',0.4,3)}},'barradin');
+hook('roll',a=>{const r=stR('b_st_rosentanz');if(!r||(P.stRoseT||0)>G.time)return;P.stRoseT=G.time+2;const x=P.x,y=P.y;
+ dmRun('b_st_rosentanz',()=>zone({x,y,r:75*P.st.area,dur:2,dps:sk(0.5+0.25*r),root:1,kind:'vines',vine:1}));if(fxOk())puffs(x,y,'#86d46e',6,50,8)},'barradin');
+hook('hurtMul',raw=>{let f=1;const r=stR('b_st_ehrfurcht');if(r){let near=false;for(const e of G.enemies){if(e.dead)continue;if((e.gmB>0||e.stun>0)&&d2(e,P)<260*260){near=true;break}}if(near)f*=1-0.05*r}
+ const r2=stR('b_st_feenspiegel');if(r2&&(P.stFeeT||-1)<G.time&&Math.random()<0.05+0.1*r2){P.stFeeT=G.time+4;const a=rnd(TAU);illusion(P.x+Math.cos(a)*50,P.y+Math.sin(a)*50,rank('b_mirror')||1);word(P.x,P.y-50,'Feenspiegel!','#ff9ad5')}return f},'barradin');
+{const _ill=illusion;illusion=function(x,y,r,o){const n0=G.allies.length;const res=_ill.apply(this,arguments);try{const sr=P&&P.id==='barradin'?stR('b_st_schimmer'):0;if(sr)for(let i=n0;i<G.allies.length;i++){const a=G.allies[i];if(a.kind==='ill')a.life+=sr}}catch(e){}return res}}
+{const _se=stunE;stunE=function(e,t){const s0=e&&e.stun;const res=_se.apply(this,arguments);try{if(P&&P.id==='barradin'&&e&&!e.dead&&e.stun>(s0||0)&&!e.boss&&!e.guard){const r=stR('b_st_bann');if(r&&!(e.gmB>0)&&(e.stBannT||-1)<G.time&&Math.random()<0.08*r&&typeof gmBez==='function'){e.stBannT=G.time+6;gmBez(e,3,'b_st_bann')}}}catch(x){}return res}}
+/* Echo */
+hook('dmgMul',(e,o)=>{let f=1;const r1=stR('e_st_funke');if(r1&&!o.dot&&(o.lightning||(DMS&&/^e_s_/.test(String(DMS)))))f*=1+0.04*r1;
+ const r2=stR('e_st_wald');if(r2&&o.pet)f*=1+0.08*r2;return f},'echo');
+{const _cl=chainLightning;chainLightning=function(t,n,dmg,jr){if(P&&P.id==='echo'&&stR('e_st_sturm'))n=(n||0)+1;return _cl.call(this,t,n,dmg,jr)}}
+hook('hit',(e,o,amt,crit)=>{if(o.dot||o.stSpl)return;
+ const r=stR('e_st_sturm');if(r&&o.lightning&&Math.random()<0.06*r){const x=e.x,y=e.y;later(0.05,()=>{aoe(x,y,55*P.st.area,sk(0.8),{quiet:1,stSpl:1,dmK:'e_st_sturm',noProp:1});if(fxOk()){sparks(x,y-10,'#b8a8ff',8,220);ring(x,y,40,'#d8ccff',0.3,2)}})}
+ const r2=stR('e_st_myzel');if(r2&&(o.melee||(o.basic&&P.form==='bear'))&&Math.random()<0.15*r2&&typeof epBef==='function'){epBef(e);if(fxOk()&&Math.random()<0.5)puffs(e.x,e.y,'#bfe27a',3,26,6)}},'echo');
+hook('tick',dt=>{const r=stR('e_st_wandel');const f=P.form||'';if(P.stLF===undefined)P.stLF=f;if(f!==P.stLF){P.stLF=f;if(r){P.buffs.stWandel=4;P.stWandelR=r;recalc();if(fxOk())ring(P.x,P.y,46,'#b8a8ff',0.45,3)}}
+ const w=stR('e_st_wetter');if(w&&G.state==='play'){P.stWetT=(P.stWetT==null?10-w:P.stWetT)-dt;if(P.stWetT<=0){P.stWetT=10-w;let b=null;for(const e of G.enemies)if(targetable(e)&&d2(e,P)<420*420&&(!b||e.maxHp>b.maxHp))b=e;
+  if(b){bolt(b.x,b.y);dmRun('e_st_wetter',()=>dealDmg(b,sk(1.5+0.5*w),{lightning:1,stun:0.5}));if(Math.random()<0.6)sfx('thunder')}else P.stWetT=1}}},'echo');
+hook('stats',s=>{if(P.buffs.stWandel>0)s.dmgP+=0.05*(P.stWandelR||1)},'echo');
+hook('hurtMul',()=>{const r=stR('e_st_pelz');return r&&P.form?1-0.05*r:1},'echo');
+hook('kill',(e,o)=>{const r=stR('e_st_frucht');if(r&&P.form==='bear'&&(P.stFrT||-1)<G.time){P.stFrT=G.time+1;const x=e.x,y=e.y;dmRun('e_st_frucht',()=>aoe(x,y,95*P.st.area,sk(0.7+0.5*r),{quiet:1,onHit:t=>{if(typeof epBef==='function')epBef(t)}}));if(fxOk()){puffs(x,y,'#bfe27a',10,70,12);ring(x,y,90,'#bfe27a',0.4,4)}}
+ const g=stR('e_st_pilzgold');if(g&&(e.epBef>G.time||(e.dots&&e.dots.some(d=>/^(poison|venom)/.test(d.k))))&&Math.random()<0.1*g)orb(e.x,e.y,'gold',Math.max(1,Math.round(ri(2,5)*P.st.gold)))},'echo');
+{const _gp=greedPick;greedPick=function(){const r0=_gp.apply(this,arguments);try{if(P&&P.id==='echo'){const r=stR('e_st_goldblitz');if(r&&Math.random()<0.04*r){const e=randomEnemy(P.x,P.y,380);if(e){bolt(e.x,e.y);dmRun('e_st_goldblitz',()=>dealDmg(e,sk(1.8),{lightning:1,stun:0.3}));sfx('thunder')}}}}catch(x){}return r0}}
+/* Friedrich */
+hook('dmgMul',(e,o)=>{let f=1;if(o.dot)return f;const r1=stR('f_st_jagdbogen');if(r1&&o.arrow&&e.hp<e.maxHp*0.5)f*=1+0.05*r1;
+ const r2=stR('f_st_fallenjaeger');if(r2&&!o.rex&&(e.root>0||e.fstGef>0))f*=1+0.05*r2;
+ const r3=stR('f_st_spuer');if(r3&&o.rex&&(e.root>0||e.fstGef>0||e.slowT>0))f*=1+0.1*r3;return f},'friedrich');
+function stAtem(){const r=stR('f_st_atem');if(!r||(P.stAtemT||0)>G.time)return;P.stAtemT=G.time+9.5-1.5*r;P.critNext=Math.max(P.critNext||0,1);word(P.x,P.y-48,'Zweiter Atem','#f0e2b8')}
+hook('roll',()=>stAtem(),'friedrich');hook('cast',n=>{if(n.id==='f_leap')stAtem()},'friedrich');
+hook('hit',(e,o,amt,crit)=>{if(o.dot)return;
+ const r=stR('f_st_netz');if(r&&o.melee&&!e.boss&&!e.ccImmune&&Math.random()<0.05+0.05*r){e.root=Math.max(e.root||0,ccZaeh(e,1.2*(e.guard?0.5:1),e.root||0));if(fxOk())ring(e.x,e.y,e.r+8,'#a9d27e',0.35,2)}
+ const t=stR('f_st_treib');if(t&&o.rex&&!e.dead){e.slowT=Math.max(e.slowT||0,2);e.slowA=Math.max(e.slowT>0?(e.slowA||0):0,0.15+0.1*t)}
+ const g=stR('f_st_gluehpfeil');if(g&&crit&&o.arrow&&!o.stG&&!e.dead&&amt>0){const v=amt*(0.1+0.1*g);later(0.12,()=>{if(!e.dead){dealDmg(e,v,{noCrit:1,quiet:1,stG:1,dmK:'f_st_gluehpfeil'});if(fxOk())sparks(e.x,e.y-e.r*0.4,'#f6f08a',5,160)}})}},'friedrich');
+hook('kill',(e,o)=>{const r=stR('f_st_leucht');if(r&&o&&o.rex&&(P.stLeuT||-1)<G.time){P.stLeuT=G.time+0.5;const x=e.x,y=e.y;dmRun('f_st_leucht',()=>aoe(x,y,95*P.st.area,sk(0.35+0.35*r),{quiet:1,noProp:1}));if(fxOk()){sparks(x,y-8,'#f6f08a',10,200);light(x,y,90,'#f6f08a',0.3,0.5)}}},'friedrich');
+hook('tick',dt=>{const r=stR('f_st_auge');if(!r||G.state!=='play'){P.stAuge=0;return}if(P.moving){P.stAugT=0;P.stAuge=0;return}P.stAugT=(P.stAugT||0)+dt;P.stAuge=P.stAugT>0.4?1:0;
+ if(P.stAugT>=1.4){P.stAugT=0.4;dmRun('f_st_auge',()=>aoe(P.x,P.y,150*P.st.area,sk(0.2+0.2*r),{quiet:1,noProp:1}))}},'friedrich');
+hook('draw',(t,c)=>{if(!P.stAuge)return;c.save();c.globalCompositeOperation='lighter';for(let i=0;i<9;i++){const a=t*1.6+i*TAU/9,R=(150*((P.st&&P.st.area)||1))*(0.85+0.08*Math.sin(t*3+i)),x=P.x+Math.cos(a)*R,y=P.y+Math.sin(a)*R*0.55;glow(x,y,7,'#f6f08a',0.55,true);c.globalAlpha=0.9;c.fillStyle='#fffbd0';c.fillRect(x-1,y-1,2,2)}c.restore()},'friedrich');
+/* Ezekiel */
+hook('dmgMul',(e,o)=>{let f=1;if(o.dot)return f;const r1=stR('z_st_jenseits');if(r1&&P.stJenT>0)f*=1+0.06*r1;
+ const r2=stR('z_st_schattseel');if(r2&&P.stealthT>0)f*=1+0.08*r2;
+ const r3=stR('z_st_fisch');if(r3&&(e.elite||e.guard||e.boss))f*=1+0.05*r3;
+ const r4=stR('z_st_kraehe');if(r4&&o.basic&&e.slowT>0)f*=1+0.06*r4;
+ const r5=stR('z_st_blutklinge');if(r5&&e.dots&&e.dots.some(d=>/^(poison|bleed|venom)/.test(d.k)))f*=1+0.04*r5;
+ const r6=stR('z_st_rot');if(r6&&o.basic&&P.hp<P.st.maxHp*0.5)f*=1+0.08*r6;return f},'ezekiel');
+hook('kill',()=>{const r=stR('z_st_trunk');if(!r)return;const s=Math.floor(G.time);if(P.stTrS!==s){P.stTrS=s;P.stTrV=0}const v=Math.min(0.0025*r,0.02-(P.stTrV||0));if(v>0){P.stTrV=(P.stTrV||0)+v;heal(P.st.maxHp*v)}},'ezekiel');
+hook('hurtMul',raw=>{const r=stR('z_st_totentanz');if(!r)return 1;if(P.buffs.stGeist>0)return 0.5;
+ if((P.stGeistT||-1)<G.time&&P.hp-raw<P.st.maxHp*0.3){P.stGeistT=G.time+25;P.buffs.stGeist=1.5+0.5*r;word(P.x,P.y-56,'Totentanz!','#8affd0');if(fxOk())ring(P.x,P.y,60,'#8affd0',0.5,4);return 0.5}return 1},'ezekiel');
+hook('roll',()=>{if(stR('z_st_jenseits'))P.stJenT=2;if(stR('z_st_griff'))P.stGriffT=3},'ezekiel');
+hook('cast',n=>{if(n.id==='z_step'&&stR('z_st_jenseits'))P.stJenT=2},'ezekiel');
+hook('precast',(n,ctx)=>{const r=stR('z_st_griff');if(r&&P.stGriffT>0&&ctx){ctx.cdF=(ctx.cdF||1)*(1-0.1*r);P.stGriffT=0}},'ezekiel');
+hook('tick',dt=>{if(P.stJenT>0)P.stJenT-=dt;if(P.stGriffT>0)P.stGriffT-=dt;const r=stR('z_st_messer');if(!r||G.state!=='play')return;P.stMesT=(P.stMesT==null?8-r:P.stMesT)-dt;if(P.stMesT>0)return;
+ const L=[];for(const e of G.enemies)if(targetable(e)&&d2(e,P)<420*420)L.push(e);if(!L.length){P.stMesT=0.8;return}P.stMesT=8-r;L.sort((a,b)=>d2(a,P)-d2(b,P));
+ dmRun('z_st_messer',()=>{for(let i=0;i<4;i++){const t=L[i%L.length],a=ang(P,t)+(i>=L.length?rnd(-0.15,0.15):0);shoot({x:P.x,y:P.y-12,a,spd:780,dmg:sk(0.55+0.15*r),r:7,pierce:0,kind:'dagger',c:'#d4dcea',life:Math.min(0.75,Math.sqrt(d2(P,t))/780+0.12)})}});sfx('stab')},'ezekiel');
+hook('draw',(t,c)=>{if(!(P.buffs&&P.buffs.stGeist>0))return;c.save();c.globalCompositeOperation='lighter';glow(P.x,P.y-16,34+4*Math.sin(t*8),'#8affd0',0.45,true);c.restore()},'ezekiel');
+hook('stage',()=>{P.stLF=P.form||'';P.stJenT=0;P.stGriffT=0;P.stAuge=0},null);
+
+/* ---------- Symbole der Brückensterne: zwei Ast-Zeichen in den Farben der beiden Äste ---------- */
+const ST_MOT={barradin:['note','thorn','mask','blade','crown'],echo:['bolt','paw','moon','star','spore'],friedrich:['arrow','knife','paw','fly','net'],ezekiel:['dagger','drop','eye','coin','skull']};
+(function(){const A=typeof KSY!=='undefined'&&KSY.ART;if(!A||typeof ASY==='undefined')return;const {F,FL,S,GL,c_,e_,p_,l_,a_,star,xf}=ASY;
+ const M={
+  note:c=>[FL(c,g=>{e_(g,-8,14,9,7,-0.4)},{ol:1}),S(c,4,g=>{l_(g,0,12,0,-20);g.quadraticCurveTo(10,-14,12,-4)})],
+  thorn:c=>[S(c,5,g=>{g.moveTo(-16,18);g.bezierCurveTo(-4,0,10,8,14,-18)}),FL(c,g=>{p_(g,-6,8,-14,2,-3,3);p_(g,5,0,14,4,6,-6);p_(g,10,-10,4,-16,13,-14)},{ol:1})],
+  mask:c=>[F(c,g=>{g.moveTo(-18,-12);g.quadraticCurveTo(0,-20,18,-12);g.quadraticCurveTo(18,14,0,20);g.quadraticCurveTo(-18,14,-18,-12);g.closePath()},{ol:1}),FL('#160d18',g=>{e_(g,-7,-3,4.5,2.6,0.25);e_(g,7,-3,4.5,2.6,-0.25);g.moveTo(-6,9);g.quadraticCurveTo(0,13,6,9);g.quadraticCurveTo(0,11,-6,9)},{no:1})],
+  blade:c=>[F(c,g=>{p_(g,-18,18,-14,14,14,-18,18,-18,18,-14,-14,14)},{ol:1}),S('#ffffff',1.5,g=>{l_(g,-12,12,14,-14)},{no:1,a:.7}),FL(c,g=>{p_(g,-20,10,-10,20,-8,18,-18,8)},{ol:1})],
+  crown:c=>[F(c,g=>{p_(g,-18,12,-18,-8,-9,2,0,-14,9,2,18,-8,18,12)},{ol:1}),FL('#ffffff',g=>{c_(g,0,-15,2.6);c_(g,-18,-9,2.2);c_(g,18,-9,2.2)},{no:1})],
+  bolt:c=>[F(c,g=>{p_(g,-2,-22,10,-22,3,-5,12,-5,-8,22,-2,3,-11,3)},{ol:1})],
+  paw:c=>[FL(c,g=>{e_(g,0,8,10,8);e_(g,-12,-4,4.5,5.5,-0.3);e_(g,-4,-12,4.5,5.5,-0.1);e_(g,5,-12,4.5,5.5,0.1);e_(g,13,-4,4.5,5.5,0.3)},{ol:1})],
+  moon:c=>[F(c,g=>{g.moveTo(4,-20);g.arc(0,0,20,-1.37,1.37,true);g.arc(10,0,15,1.9,-1.9,false);g.closePath()},{ol:1})],
+  star:c=>[F(c,g=>star(g,0,0,5,20,8),{ol:1})],
+  spore:c=>[FL(c,g=>{c_(g,0,4,10);c_(g,-12,-8,6);c_(g,11,-10,5);c_(g,-14,10,4)},{ol:1}),FL('#ffffff',g=>{c_(g,-3,1,2.4);c_(g,-13,-9,1.6)},{no:1,a:.7})],
+  arrow:c=>[S(c,4,g=>l_(g,-18,18,14,-14)),FL(c,g=>p_(g,18,-18,6,-14,14,-6),{ol:1}),S(c,3,g=>{l_(g,-18,18,-24,12);l_(g,-18,18,-12,24)})],
+  knife:c=>[F(c,g=>{g.moveTo(-6,6);g.lineTo(14,-16);g.quadraticCurveTo(18,-8,2,8);g.closePath()},{ol:1}),FL('#7a4e28',g=>p_(g,-6,4,-2,8,-14,20,-18,16),{ol:1})],
+  fly:c=>[GL(c,0,4,16,.8),FL(c,g=>e_(g,0,4,5,8),{ol:1}),FL('#ffffff',g=>{e_(g,-8,-6,7,4,-0.5);e_(g,8,-6,7,4,0.5)},{ol:1,a:.75})],
+  net:c=>[S(c,2.5,g=>{for(const k of[-12,-4,4,12]){l_(g,k,-16,k,16);l_(g,-16,k,16,k)}}),S(c,3.5,g=>c_(g,0,0,18))],
+  dagger:c=>[F(c,g=>p_(g,0,-22,5,-6,2,8,-2,8,-5,-6),{ol:1}),FL(c,g=>p_(g,-10,8,10,8,10,12,-10,12),{ol:1}),FL('#5a3a2a',g=>p_(g,-2.5,12,2.5,12,2.5,22,-2.5,22),{ol:1})],
+  drop:c=>[F(c,g=>{g.moveTo(0,-20);g.bezierCurveTo(6,-10,14,-2,14,6);g.arc(0,6,14,0,Math.PI);g.bezierCurveTo(-14,-2,-6,-10,0,-20);g.closePath()},{ol:1}),FL('#ffffff',g=>e_(g,-5,2,3,5,0.3),{no:1,a:.55})],
+  eye:c=>[F(c,g=>{g.moveTo(-20,0);g.quadraticCurveTo(0,-16,20,0);g.quadraticCurveTo(0,16,-20,0);g.closePath()},{ol:1}),FL('#160d18',g=>c_(g,0,0,6),{no:1}),FL('#ffffff',g=>c_(g,-2,-2,2),{no:1})],
+  coin:c=>[F(c,g=>c_(g,0,0,17),{ol:1}),S('#ffffff',2,g=>c_(g,0,0,11),{no:1,a:.6}),FL('#ffffff',g=>star(g,0,0,4,6,2),{no:1,a:.85})],
+  skull:c=>[F(c,g=>{g.moveTo(-15,2);g.arc(0,-2,15,Math.PI*0.9,Math.PI*0.1);g.lineTo(9,14);g.lineTo(-9,14);g.closePath()},{ol:1}),FL('#160d18',g=>{c_(g,-6,-1,4);c_(g,6,-1,4);p_(g,0,5,-2,9,2,9)},{no:1})]};
+ for(const hid in STB){const O=ST_ORD[hid],mo=ST_MOT[hid];for(const d of STB[hid]){const b1=O[d.k],b2=O[(d.k+1)%O.length],c1=stCol(hid,b1),c2=stCol(hid,b2),m1=M[mo[b1]],m2=M[mo[b2]];if(!m1||!m2)continue;
+  A[d.id]=()=>{const out=[GL(c1,30,34,42,.5),GL(c2,70,66,42,.5)];const T=(fn,x,y,s,a)=>fn.map(l=>{if(l.k==='g')return Object.assign({},l,{x:x+l.x*s,y:y+l.y*s,r:l.r*s});const p=l.p;return Object.assign({},l,{p:xf(x,y,a||0,s,p)})});
+   if(d.lv==='o')out.push(S('#fff3c8',2,g=>{for(let i=0;i<12;i++){const a=i*Math.PI/6;g.moveTo(50+Math.cos(a)*44,50+Math.sin(a)*44);g.arc(50+Math.cos(a)*44,50+Math.sin(a)*44,1.2,0,Math.PI*2)}},{no:1,a:.8}));
+   out.push(S('#fff3c8',2.5,g=>l_(g,34,66,66,34),{no:1,a:.55,dash:[3,5]}));
+   out.push(...T(m1(c1),31,34,1.05),...T(m2(c2),69,66,1.05));out.push(FL('#ffffff',g=>star(g,50,50,4,7,1.8),{no:1}));return out}}}})();
+
+
+/* Sternenhimmel: einmal als Kachel vorgerendert (statisch, billig zu zeichnen) */
+(function(){try{const N=420,cv=document.createElement('canvas');cv.width=cv.height=N;const g=cv.getContext('2d');let sd=7;const R=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
+ const C=['#ffffff','#fff6d8','#dfe6ff','#cfe0ff','#ffe6f2'];for(let i=0;i<150;i++){const x=R()*N,y=R()*N,r=R()<0.88?0.4+R()*0.7:1+R()*0.9,c=C[Math.floor(R()*C.length)];g.globalAlpha=0.35+R()*0.6;
+  if(r>1){const gr=g.createRadialGradient(x,y,0,x,y,r*4);gr.addColorStop(0,c);gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.globalAlpha*=0.35;g.fillRect(x-r*4,y-r*4,r*8,r*8);g.globalAlpha=0.9}
+  g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,TAU);g.fill()}
+ const st=document.createElement('style');st.textContent=`.stmap{--stsky:url(${cv.toDataURL('image/png')})}`;document.head.appendChild(st)}catch(e){}})();
+(function(){try{const st=document.createElement('style');st.textContent=`
+.wrap.stwrap{max-width:1440px;gap:12px}
+.stgrid{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.stmap{position:relative;flex:999 1 420px;min-width:0;height:520px;overflow:hidden;border-radius:18px;border:1px solid rgba(255,255,255,.07);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
+ background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--hc) 16%,transparent) 0,transparent 42%),radial-gradient(ellipse 70% 55% at 18% 12%,rgba(120,80,200,.22),transparent 70%),radial-gradient(ellipse 60% 50% at 88% 86%,rgba(40,110,190,.2),transparent 70%),radial-gradient(ellipse 50% 40% at 85% 15%,rgba(190,70,120,.12),transparent 70%),linear-gradient(180deg,#0a0814,#06050b);
+ box-shadow:inset 0 0 90px rgba(0,0,0,.65),0 10px 30px -18px #000}
+.stmap.stdrag{cursor:grabbing}
+.stsky{position:absolute;inset:0;pointer-events:none;background-image:var(--stsky,none);background-size:420px 420px;background-position:var(--px,0) var(--py,0);opacity:.95}
+.stw{position:absolute;inset:0;pointer-events:none}
+.stneb{position:absolute;left:0;top:0;width:340px;height:300px;border-radius:50%;pointer-events:none;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 22%,transparent),color-mix(in srgb,var(--c) 8%,transparent) 55%,transparent);opacity:.9}
+.stl{position:absolute;left:0;top:0;height:2px;margin-top:-1px;transform-origin:0 50%;background:rgba(200,190,255,.17);pointer-events:none}
+.stl.half{background:linear-gradient(90deg,var(--c1),rgba(255,255,255,.08));opacity:.6}
+.stl.half.rev{background:linear-gradient(270deg,var(--c2),rgba(255,255,255,.08))}
+.stl.on{height:3px;margin-top:-1.5px;background:linear-gradient(90deg,var(--c1),var(--c2));box-shadow:0 0 8px color-mix(in srgb,var(--c1) 70%,transparent);opacity:.95}
+.stn{position:absolute;left:0;top:0;--sz:36px;width:calc(var(--ss,1)*var(--sz));height:calc(var(--ss,1)*var(--sz));padding:0;margin:0;border:0;background:none;pointer-events:auto;cursor:pointer;color:var(--c);display:block;font:inherit;outline:none;-webkit-tap-highlight-color:transparent}
+.stn.ult{--sz:50px}.stn.pas{--sz:31px}.stn.brk{--sz:30px}
+.stn::before{content:'';position:absolute;left:50%;top:50%;width:260%;height:260%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity .25s;
+ background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 55%,transparent),transparent),linear-gradient(90deg,transparent 48%,rgba(255,255,255,.75) 50%,transparent 52%),linear-gradient(0deg,transparent 48%,rgba(255,255,255,.75) 50%,transparent 52%);
+ -webkit-mask:radial-gradient(closest-side,#000 18%,transparent 100%);mask:radial-gradient(closest-side,#000 18%,transparent 100%)}
+.stn.lit::before{opacity:.75}.stn.ult.lit::before{opacity:1;width:320%;height:320%}
+.stn .sto{position:absolute;inset:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 35%,#2a2234,#0c0911 72%);border:2px solid color-mix(in srgb,var(--c) 34%,#2a2230);box-shadow:0 0 0 1px rgba(0,0,0,.65),0 2px 6px rgba(0,0,0,.6);transition:transform .15s,box-shadow .2s,border-color .2s}
+.stn.pas .sto{border-radius:32%}
+.stn.brk .sto{border-radius:7px;transform:rotate(45deg);border:2px solid transparent;background:radial-gradient(circle at 40% 35%,#2a2234,#0c0911 72%) padding-box,linear-gradient(135deg,color-mix(in srgb,var(--c) 45%,#2a2230),color-mix(in srgb,var(--c2) 45%,#2a2230)) border-box}
+.stn.brk .sto>*{transform:rotate(-45deg)}
+.stn.ult .sto{border-width:3px;box-shadow:0 0 0 1px rgba(0,0,0,.65),0 0 0 5px color-mix(in srgb,var(--c) 14%,transparent),0 2px 8px rgba(0,0,0,.6)}
+.stn .sto img{width:84%;height:84%;object-fit:contain;filter:grayscale(.75) brightness(.55);transition:filter .2s;pointer-events:none}
+.stn.brk .sto img{width:96%;height:96%}
+.stn .stg{font-size:calc(var(--ss,1)*15px);line-height:1;color:var(--c);opacity:.65;font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols',var(--fb)}
+.stn .sto:has(img) .stg{display:none}
+.stn.far{opacity:.55}.stn.far .sto{border-color:rgba(255,255,255,.13)}.stn.far .sto img{filter:grayscale(.85) brightness(.45)}
+.stn.can .sto{border-color:var(--c)}.stn.can .sto::after{content:'';position:absolute;inset:-4px;border-radius:inherit;box-shadow:0 0 12px 3px color-mix(in srgb,var(--c) 75%,transparent);opacity:0;animation:stPuls 1.8s ease-in-out infinite;pointer-events:none;will-change:opacity}.stn.brk.can .sto{background:radial-gradient(circle at 40% 35%,#2a2234,#0c0911 72%) padding-box,linear-gradient(135deg,var(--c),var(--c2)) border-box}
+.stn.can .sto img{filter:grayscale(.3) brightness(.85)}
+@keyframes stPuls{0%,100%{opacity:0}50%{opacity:1}}
+.stn.lit .sto{border-color:var(--c);background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--c) 42%,#2a2234),#120c16 76%);box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 14px color-mix(in srgb,var(--c) 75%,transparent),0 0 34px -6px var(--c)}
+.stn.brk.lit .sto{background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--c) 38%,#2a2234),#120c16 76%) padding-box,linear-gradient(135deg,var(--c),var(--c2)) border-box}
+.stn.lit .sto img{filter:none}.stn.lit .stg{opacity:1}
+.stn.max .sto{border-color:#fff3c8}
+.stn.sel .sto{outline:2px solid #fff3c8;outline-offset:4px;transform:scale(1.1)}.stn.brk.sel .sto{transform:rotate(45deg) scale(1.1)}
+.stn.armed .sto{outline-color:#ffd04a}.stn.armed .sto::before{content:'';position:absolute;inset:-9px;border-radius:inherit;border:2px solid #ffd04a;opacity:.8;animation:stArm 1s ease-out infinite;pointer-events:none;will-change:transform,opacity}
+@keyframes stArm{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.stn.armed::after{content:'+';position:absolute;right:-9px;top:-9px;width:19px;height:19px;border-radius:50%;background:#ffd04a;color:#1a1208;font:900 15px/19px var(--fb);text-align:center;box-shadow:0 0 10px #ffd04a;pointer-events:none}
+.stn.netmk .sto{box-shadow:0 0 0 3px #ffd04a,0 0 20px #ffd04a}
+.stn.padf .sto,.stn:focus-visible .sto{outline:3px solid #8fe7ff;outline-offset:4px}
+@media (hover:hover){.stn:hover .sto{transform:scale(1.12)}.stn.brk:hover .sto{transform:rotate(45deg) scale(1.12)}}
+.stn .stp{position:absolute;top:100%;left:50%;transform:translateX(-50%);display:flex;gap:2px;margin-top:3px;pointer-events:none}
+.stn .stp i{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.2)}.stn .stp i.on{background:var(--c);box-shadow:0 0 4px var(--c)}
+.stn.far .stp{display:none}
+.stn .stnm{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:10px;white-space:nowrap;font-size:11px;font-weight:700;color:#e8dcc8;text-shadow:0 1px 2px #000,0 0 6px #000;pointer-events:none}
+.stmap.stnear .stn .stnm{display:block}.stmap.stnear .stn.far .stnm{opacity:.6}
+.stcore{position:absolute;left:0;top:0;width:calc(var(--ss,1)*76px);height:calc(var(--ss,1)*76px);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:help;color:#1a1208;
+ background:radial-gradient(circle at 50% 42%,#fff8e4 0,color-mix(in srgb,var(--hc) 85%,#fff) 26%,color-mix(in srgb,var(--hc) 45%,#120c16) 58%,transparent 71%);box-shadow:0 0 34px 6px color-mix(in srgb,var(--hc) 35%,transparent)}
+.stcore::before{content:'';position:absolute;inset:-12%;border-radius:50%;border:1.5px dashed color-mix(in srgb,var(--hc) 55%,transparent);animation:stRot 50s linear infinite;will-change:transform}
+@keyframes stRot{to{transform:rotate(360deg)}}
+.stcore b{font:400 calc(var(--ss,1)*24px)/1 var(--fd);margin-top:-2px}.stcore small{font-size:calc(var(--ss,1)*8.5px);font-weight:900;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.stlb{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:0;white-space:nowrap;pointer-events:auto;cursor:help;text-align:center}
+.stlb b{font-family:var(--fd);font-weight:400;font-size:calc(var(--ss,1)*15px);color:var(--c);text-shadow:0 0 12px color-mix(in srgb,var(--c) 55%,transparent),0 1px 2px #000}
+.stlb small{font-size:calc(var(--ss,1)*10.5px);color:#a99a8b;text-shadow:0 1px 2px #000}.stlb.me small{color:#ffd04a}
+.stzoom{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.stz{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(18,12,22,.82);border:1px solid rgba(255,255,255,.14);color:#f0e6d4;font-size:19px;line-height:1;cursor:pointer;user-select:none}
+.stz:hover{border-color:var(--gold,#e5b454)}
+.stside{flex:1 0 300px;min-width:0;max-width:100%;display:flex;flex-direction:column;gap:12px}
+.stside .sthead{align-items:flex-start}.stside .sthead h2{margin:0}.stside .sthead .row{gap:8px;flex-wrap:wrap}
+.tdet.stdet{position:static;max-height:none;overflow:visible;box-shadow:none;border-color:color-mix(in srgb,var(--c) 40%,#3d3140);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 8%,#1f1723),#1b151e)}
+.stdet .tdn h3{color:var(--c)}
+.stwo{font-size:13px;color:var(--mute,#a99a8b)}
+.stme{font-size:12.5px;color:var(--mute,#a99a8b);border-left:2px solid #3d3140;padding-left:8px;line-height:1.35}.stme b{color:var(--text,#f0e6d4)}.stme.on{border-color:#ffd04a}.stme.on b{color:#ffd04a}
+.sthint{font-size:12px;color:#ffd04a}
+.stfacts b{font-weight:800}
+.sttip{position:fixed;z-index:90;max-width:270px;background:rgba(18,12,22,.97);border:1px solid color-mix(in srgb,var(--c) 60%,#3d3140);border-radius:10px;padding:8px 11px;display:flex;flex-direction:column;gap:2px;pointer-events:none;box-shadow:0 10px 26px rgba(0,0,0,.65);font-size:13px;color:#f0e6d4}
+.sttip[hidden]{display:none}.sttip b{color:var(--c);font-size:14px}.sttip small{color:#a99a8b;font-size:11px}.sttip span{line-height:1.35}
+@media (pointer:coarse){.stzoom{flex-direction:row;right:8px;top:8px;bottom:auto;gap:6px}.stz{width:36px;height:36px;font-size:18px;background:rgba(18,12,22,.7)}}
+@media (max-width:560px){.stmap{border-radius:14px}.stside .sthead h2{font-size:24px}}
+@media (prefers-reduced-motion:reduce){.stn.can .sto::after,.stn.armed .sto::before,.stcore::before{animation:none}}`;document.head.appendChild(st)}catch(e){}})();
+
+/* ---------- Hinweise, Erst-Hinweis, Testzugang ---------- */
+try{HINW.tree=['Jede Stufe bringt einen <b>Talentpunkt</b> – lerne vom <b>Kern</b> aus Stern für Stern nach außen.','Alle fünf Äste sind offen. <b>Brückensterne</b> zwischen zwei Ästen verbinden sie (innen ab Stufe 8, außen ab Stufe 17).','Antippen zeigt einen Stern, noch einmal antippen lernt ihn. Ziehen verschiebt, zwei Finger oder das Mausrad zoomen. Ab 8 Punkten in einem Ast gibt es eine <b>Meisterschaft</b>.']}catch(e){}
+{const _sti=showTitle;showTitle=function(keep){try{if(SAVE&&!SAVE.astTip)SAVE.astTip=1}catch(e){}const r=_sti.apply(this,arguments);
+ try{if(!SAVE.stTip&&G.state==='title'&&!G.netJoin&&!G.bot){SAVE.stTip=1;persist();setTimeout(()=>{if(G.state==='title')toast('Neu: Das Sternbild! Alle fünf Talentäste sind offen – im Talentkreis lernst du vom Kern aus in jede Richtung, Brückensterne verbinden die Äste.','#b8a8ff')},900)}}catch(e){}return r}}
+window.__hsS={ST,STB,ST_ORD,stG,stLayout,stNb,stBotPick,stRender,stReach,prereq:n=>prereq(n),view:()=>ST.v};
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
