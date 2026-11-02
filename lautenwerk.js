@@ -196,7 +196,7 @@
       raeume: { stube: "Kleine Stube", taverne: "Taverne", kapelle: "Kapelle", palast: "Thronsaal", hoehle: "Tropfsteinhöhle" }, hallSpur: "Hall für diese Spur an/aus", miniPause: "Musik pausieren", miniWeiter: "Musik fortsetzen", miniKulStopp: "Geräusche anhalten", miniKulWeiter: "Geräusche wieder starten", miniZur: "Zum Lautenwerk", eigenesLied: "Eigenes Lied",
       orchester: "🎻 Orchester", orchTipp: "Streicher, Hörner und Pauken (echte Aufnahmen) unter den Stimmungen – bauen sich bis zum Höhepunkt auf.",
       echoHall: "Echo-Hall", spar: "🔋 Sparmodus", sparTipp: "Für Handys: weniger Rechenlast, keine Aussetzer. Wirkt nach dem Neuladen der Seite vollständig.", sparAn: "Sparmodus an – lade die Seite neu, damit er ganz greift.", sparAus: "Sparmodus aus – lade die Seite neu, damit es ganz greift.",
-      zusaetze: "Mehr Geräusche", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren).", zusDrin: "steckt schon in der Kulisse", raum3d: "3D-Kopfhörer", raum3dTipp: "Räumlicher Klang für Kopfhörer: Geräusche kommen von überall, auch von hinten und oben", raum3dAn: "🎧 3D an – mit Kopfhörern hört man jetzt, woher alles kommt.", raum3dAus: "3D aus – wieder normales Stereo.", zusAlleAus: "Alle Zusätze abschalten", zusAlleAusKurz: "Alle aus", zusAlleWeg: "Alle Zusätze aus", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
+      zusaetze: "Mehr Geräusche", zusMini: "Zusätze", zusTipp: (n, m) => n + " von " + m + " · Über jede Kulisse legbar, drinnen klingt Wetter gedämpft wie durch Mauern. Beim Antippen steht der Name unter den Symbolen (am PC auch beim Darüberfahren). Symbol in die Karte ziehen: Das Geräusch startet genau an dieser Stelle.", zusDrin: "steckt schon in der Kulisse", raum3d: "3D-Kopfhörer", raum3dTipp: "Räumlicher Klang für Kopfhörer: Geräusche kommen von überall, auch von hinten und oben", raum3dAn: "🎧 3D an – mit Kopfhörern hört man jetzt, woher alles kommt.", raum3dAus: "3D aus – wieder normales Stereo.", zusAlleAus: "Alle Zusätze abschalten", zusAlleAusKurz: "Alle aus", zusAlleWeg: "Alle Zusätze aus", zusAus: "abschalten", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "Höchstens " + n + " Zusätze gleichzeitig – erst einen abschalten.",
       kulSpuren: "Spuren einzeln", kulEinzel: "Einzelgeräusche", kulMixZurueck: "Alle auf 100 %", spurenKurz: "Spuren", spurenAlsPop: "Als Pop-up", spurenAlsFeld: "Als Feld", spurenLeer: "Erst eine Kulisse wählen – dann lässt sich hier jede ihrer Schichten einzeln regeln.",
       stAlle: n => "Alle " + n + " Stimmungen", stWeniger: "Weniger Stimmungen", kulAlle: n => "Alle " + n + " Kulissen", kulWeniger: "Weniger Kulissen", fxKlappe: "💥 Effekte, Kampf, Momente, Welt & Klassik",
       tabStimmungen: "🎭 Stimmungen", tabLieder: "🎼 Lieder", tabEigene: "💾 Eigene", tabEffekte: "💥 Effekte", tabKampf: "⚔ Kampf", tabMomente: "🎭 Momente", tabWelt: "🐴 Welt", tabFav: "★ Favoriten", favLeer: "Noch leer: halte einen Knopf aus Effekte, Kampf, Momente, Welt oder Klassik 2 Sekunden gedrückt – dann landet er hier.", weltGr: { alle: "Alle", unterwegs: "🐴 Unterwegs & Volk", tiere: "🐾 Tiere", belagerung: "🏰 Belagerung", handwerk: "🔨 Handwerk", abenteuer: "🗝 Abenteuer", wesen: "👹 Wesen & Spuk", weitere: "Weitere" }, tabKlassik: "🎻 Klassiker", coverTitel: "🎤 Cover der Band – alte Volkslieder (nochmal tippen = aus)", vorlagenTitel: "🎵 Lieder der Band",
@@ -284,7 +284,7 @@
       raeume: { stube: "Small room", taverne: "Tavern", kapelle: "Chapel", palast: "Throne hall", hoehle: "Cavern" }, hallSpur: "Reverb for this track on/off", miniPause: "Pause music", miniWeiter: "Resume music", miniKulStopp: "Stop ambience", miniKulWeiter: "Restart ambience", miniZur: "Go to the lute machine", eigenesLied: "Your song",
       orchester: "🎻 Orchestra", orchTipp: "Strings, horns and timpani (real recordings) under the moods – building up to the climax.",
       echoHall: "Echo reverb", spar: "🔋 Power saving", sparTipp: "For phones: less processing load, no dropouts. Fully applies after reloading the page.", sparAn: "Power saving on – reload the page for full effect.", sparAus: "Power saving off – reload the page for full effect.",
-      zusaetze: "More sounds", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover).", zusDrin: "already part of the backdrop", raum3d: "3D headphones", raum3dTipp: "Spatial sound for headphones: sounds come from everywhere, even from behind and above", raum3dAn: "🎧 3D on – with headphones you can now hear where everything comes from.", raum3dAus: "3D off – back to normal stereo.", zusAlleAus: "Switch off all extras", zusAlleAusKurz: "All off", zusAlleWeg: "All extras off", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
+      zusaetze: "More sounds", zusMini: "Extras", zusTipp: (n, m) => n + " of " + m + " · Can be layered over any backdrop – indoors, weather sounds muffled as if through walls. Tapping shows the name below the symbols (on a computer also on hover). Drag a symbol onto the map: the sound starts exactly there.", zusDrin: "already part of the backdrop", raum3d: "3D headphones", raum3dTipp: "Spatial sound for headphones: sounds come from everywhere, even from behind and above", raum3dAn: "🎧 3D on – with headphones you can now hear where everything comes from.", raum3dAus: "3D off – back to normal stereo.", zusAlleAus: "Switch off all extras", zusAlleAusKurz: "All off", zusAlleWeg: "All extras off", zusAus: "switch off", zusAn: n => "✚ " + n, zusWeg: n => "– " + n, zusVoll: n => "At most " + n + " extras at once – switch one off first.",
       kulSpuren: "Single layers", kulEinzel: "Single sounds", kulMixZurueck: "All to 100 %", spurenKurz: "Layers", spurenAlsPop: "As pop-up", spurenAlsFeld: "As panel", spurenLeer: "Pick a backdrop first – then each of its layers can be adjusted here.",
       stAlle: n => "All " + n + " moods", stWeniger: "Fewer moods", kulAlle: n => "All " + n + " backdrops", kulWeniger: "Fewer backdrops", fxKlappe: "💥 Effects, combat, moments, world & classics",
       tabStimmungen: "🎭 Moods", tabLieder: "🎼 Songs", tabEigene: "💾 Saved", tabEffekte: "💥 Effects", tabKampf: "⚔ Combat", tabMomente: "🎭 Moments", tabWelt: "🐴 World", tabFav: "★ Favourites", favLeer: "Empty for now: hold any button in Effects, Combat, Moments, World or Classics for 2 seconds and it lands here.", weltGr: { alle: "All", unterwegs: "🐴 Road & folk", tiere: "🐾 Animals", belagerung: "🏰 Siege", handwerk: "🔨 Crafts", abenteuer: "🗝 Adventure", wesen: "👹 Creatures & spooks", weitere: "More" }, tabKlassik: "🎻 Classics", coverTitel: "🎤 The band’s covers – old folk songs (tap again = stop)", vorlagenTitel: "🎵 The band’s own songs",
@@ -2570,7 +2570,7 @@ const ZUS_ICON = {
   /* gewählt = Eintrag vorhanden (auch bei 0 %); Wert = Lautstärke 0–2 */
   const zusIst = id => Object.prototype.hasOwnProperty.call(zusWahl, id);
   const zusWert = id => typeof zusWahl[id] === "number" ? zusWahl[id] : 1;
-  const zusMerken = () => { try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {} };
+  const zusMerken = () => { try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {} try { raumZusMerken(); } catch (_) {} };
   /* bis zu 10 Zusätze auf allen Geräten */
   const zusMax = () => 10;
   /* steckt der Zusatz schon in der Grundkulisse? dann wird er nicht angeboten */
@@ -2654,6 +2654,7 @@ const ZUS_ICON = {
   /* sofort = vom Nutzer selbst angetippt: diese Kulisse bleibt, bis man sie selbst ändert – auch über Musik-Stopp und Stimmungswechsel hinweg.
      Ohne sofort kommt sie von der Stimmung und geht mit der Musik. */
   function kulisseStart(sofort) {
+    try { raumWechselPruefen(); } catch (_) {}
     if (!ctx) return;
     try { zusSync(); } catch (_) {}
     /* läuft genau diese Kulisse schon, nicht neu starten (sonst kurzes Aus- und Einblenden) */
@@ -3812,6 +3813,24 @@ const ZUS_ICON = {
   let karteMerk = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-karte")); if (x && typeof x === "object") return x; } catch (_) {} return {}; })();
   const karteSpeichern = () => { try { localStorage.setItem("imres-lw-karte", JSON.stringify(karteMerk)); } catch (_) {} };
   const kOrt = () => { const k = S.kulisse || "keine"; return karteMerk[k] || (karteMerk[k] = {}); };
+  /* Jede Kulisse ist ein fester Raum: welche Zusätze dort laufen (mit Lautstärke und Platz auf der Karte), bleibt dort.
+     Beim Wechsel bleiben sie zurück; kommt man wieder, ist alles wie verlassen. Ein neuer Ort beginnt ohne Zusätze. */
+  let zusKul = null;
+  function raumZusMerken() { if (zusKul === null) return; try { localStorage.setItem("imres-lw-zuskul", zusKul); } catch (_) {} const o = karteMerk[zusKul] || (karteMerk[zusKul] = {}); o.wahl = Object.assign({}, zusWahl); karteSpeichern(); }
+  function raumWechselPruefen() {
+    const neu = S.kulisse || "keine";
+    if (zusKul === null) { let w = null; try { w = localStorage.getItem("imres-lw-zuskul"); } catch (_) {} zusKul = w || neu; raumZusMerken(); }
+    if (neu === zusKul) return;
+    raumZusMerken(); zusKul = neu; try { localStorage.setItem("imres-lw-zuskul", neu); } catch (_) {}
+    const o = kOrt(); zusWahl = Object.assign({}, o.wahl || {});
+    try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {}
+  }
+  /* Zusätze für eine bestimmte Kulisse setzen (gemerkte Szene, eigene Stimmung): gilt sofort, wenn man dort ist, sonst beim Hinkommen */
+  function zusFuerKulisse(k, z) {
+    k = k || S.kulisse || "keine"; if (zusKul === null) raumWechselPruefen();
+    if (k === zusKul) { zusWahl = Object.assign({}, z); zusMerken(); }
+    else { (karteMerk[k] || (karteMerk[k] = {})).wahl = Object.assign({}, z); karteSpeichern(); }
+  }
   let kartenTippZeigen = (() => { try { return localStorage.getItem("imres-lw-kartentipp") !== "1"; } catch (_) { return true; } })();
   let karteGross = (() => { try { return localStorage.getItem("imres-lw-karte-gross") === "1"; } catch (_) { return false; } })();
   /* Geräusche, die von überall kommen – sie stehen nicht im Bild, sondern oben als Wetter */
@@ -4248,7 +4267,7 @@ const ZUS_ICON = {
     const sz = szenen[i]; if (!sz || !KUL_WELT[sz.kulisse]) return;
     audioStart();
     karteMerk[sz.kulisse] = JSON.parse(JSON.stringify(sz.karte || {})); karteSpeichern();
-    zusWahl = Object.assign({}, sz.zus || {}); zusPausiert = false; zusMerken();
+    zusFuerKulisse(sz.kulisse, sz.zus || {}); zusPausiert = false;
     Object.assign(leben, sz.leben || {});
     if (!!sz.tuer !== tuerZu) try { tuerUmschalten(); } catch (_) {}
     if (sz.kulisse !== S.kulisse && kul) ortWechsel(sz.kulisse); else { S.kulisse = sz.kulisse; merken(); kulisseStart(true); zeichnen(); knoepfe(); }
@@ -4384,22 +4403,24 @@ const ZUS_ICON = {
   let kPal = null, kPalZug = false;
   root.addEventListener("click", e => { if (kPalZug && e.target.closest && e.target.closest("[data-zusatz],[data-kpal]")) { e.stopPropagation(); e.preventDefault(); kPalZug = false; } }, true);
   root.addEventListener("pointerdown", e => {
-    const b = e.target.closest && e.target.closest("[data-kpal], .lw-ezus-oben [data-zusatz]"); if (!b || b.disabled || b.getAttribute("aria-disabled") === "true") return;
+    const b = e.target.closest && e.target.closest("[data-kpal], [data-zusatz]:not(.lw-kzweg)"); if (!b || e.button > 0 || !root.querySelector(".lw-karte") || b.disabled || b.getAttribute("aria-disabled") === "true") return;
     kPal = { id: b.dataset.kpal || b.dataset.zusatz, x: e.clientX, y: e.clientY, geist: null, pid: e.pointerId }; kPalZug = false;
   });
   document.addEventListener("pointermove", e => {
     if (!kPal || e.pointerId !== kPal.pid) return;
     if (!kPal.geist && Math.hypot(e.clientX - kPal.x, e.clientY - kPal.y) > 6) { const g = document.createElement("div"); g.className = "lw-kgeist"; g.innerHTML = zusSvg(kPal.id); document.body.appendChild(g); kPal.geist = g; kPalZug = true; }
-    if (kPal.geist) { kPal.geist.style.left = e.clientX + "px"; kPal.geist.style.top = e.clientY + "px"; e.preventDefault(); }
+    if (kPal.geist) { kPal.geist.style.left = e.clientX + "px"; kPal.geist.style.top = e.clientY + "px"; e.preventDefault();
+      root.querySelectorAll(".lw-karte").forEach(k => { const r = k.getBoundingClientRect(); k.classList.toggle("lw-kabwurf", !!r.width && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom); }); }
   }, { passive: false });
-  document.addEventListener("pointercancel", e => { if (kPal && e.pointerId === kPal.pid) { if (kPal.geist) kPal.geist.remove(); kPal = null; } });
+  document.addEventListener("pointercancel", e => { if (kPal && e.pointerId === kPal.pid) { if (kPal.geist) kPal.geist.remove(); kPal = null; root.querySelectorAll(".lw-kabwurf").forEach(k => k.classList.remove("lw-kabwurf")); } });
   document.addEventListener("pointerup", e => {
     if (!kPal || e.pointerId !== kPal.pid) return;
     const p = kPal; kPal = null;
     if (!p.geist) return;
-    p.geist.remove();
-    const k = root.querySelector(".lw-karte"); if (k) { const r = k.getBoundingClientRect();
-      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) zusHinein(p.id, (e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100); }
+    p.geist.remove(); root.querySelectorAll(".lw-kabwurf").forEach(k => k.classList.remove("lw-kabwurf"));
+    /* die Karte, über der losgelassen wurde (es kann mehrere geben, z. B. in Fenstern) */
+    const k = [...root.querySelectorAll(".lw-karte")].find(k => { const r = k.getBoundingClientRect(); return r.width && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; });
+    if (k) { const r = k.getBoundingClientRect(); zusHinein(p.id, (e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100); }
     setTimeout(() => { kPalZug = false; }, 120);
   });
   /* Einzelspuren so hoch wie das Bild daneben (Leiste + Karte + Geräusche-Leiste) – immer ein ruhiger Überblick */
@@ -11275,7 +11296,7 @@ const ZUS_ICON = {
       const w = eig.werte;
       ["intensitaet", "kulisse", "kulisseVol", "hall", "raum", "echoHall", "orchester", "kapelle", "kapStufe", "instrument", "gaeste", "master", "kick"].forEach(f => { if (w[f] != null) neu[f] = w[f]; });
       /* auch Zusätze und die Schichten der Kulisse, wenn sie mitgespeichert wurden */
-      if (w.zus && typeof w.zus === "object") { zusWahl = Object.assign({}, w.zus); zusMerken(); setTimeout(() => { try { zusSync(); boxNeu("klang"); } catch (_) {} }, 0); }
+      if (w.zus && typeof w.zus === "object") { zusFuerKulisse(neu.kulisse, w.zus); setTimeout(() => { try { zusSync(); boxNeu("klang"); } catch (_) {} }, 0); }
       if (w.kulMix && w.kulisse) { kulMix[w.kulisse] = JSON.parse(JSON.stringify(w.kulMix)); try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {} }
       else if (w.kulisse && "kulMix" in w) { delete kulMix[w.kulisse]; try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {} }
       if (w.band) neu.band = Object.assign({}, neu.band, w.band);
@@ -12355,8 +12376,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-ktuer { position: absolute; width: 5%; border: 0; background: transparent; cursor: pointer; padding: 0; z-index: 2; }
 .lw-ktuer:hover { background: rgba(224,160,70,.2); border-radius: 3px; }
 .lw-karte { container-type: inline-size; }
-.lw-kknoepfe { position: absolute; right: .3rem; bottom: .3rem; z-index: 5; display: flex; gap: .3rem; align-items: center; }
-.lw-kknopf { width: clamp(1.45rem, 4.4cqw, 2.7rem); height: clamp(1.45rem, 4.4cqw, 2.7rem); padding: 0; border: 1px solid var(--line); border-radius: 8px; background: rgba(10,8,14,.78); color: var(--vellum); font-size: clamp(.78rem, 2.3cqw, 1.35rem); line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: .1rem; }
+.lw-kknoepfe { position: absolute; right: clamp(3px, .7cqw, .4rem); bottom: clamp(3px, .7cqw, .4rem); z-index: 5; display: flex; gap: clamp(2px, .6cqw, .3rem); align-items: center; }
+.lw-kknopf { width: clamp(20px, 4.4cqw, 44px); height: clamp(20px, 4.4cqw, 44px); padding: 0; border: 1px solid var(--line); border-radius: 8px; background: rgba(10,8,14,.78); color: var(--vellum); font-size: clamp(11px, 2.3cqw, 22px); line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: .1rem; }
 .lw-kknopf:hover { border-color: var(--ember); color: var(--ember); }
 .lw-kknopf.lw-kbreite { width: auto; padding: 0 .35rem; position: static; }
 .lw-kknopf small { font-size: .65em; color: var(--ember); }
@@ -12368,9 +12389,9 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-karte .lw-kfigur { width: clamp(14px, 2.6cqw, 30px); height: clamp(21px, 3.9cqw, 45px); }
 .lw-karte .lw-kquelle { width: clamp(20px, 4.6cqw, 46px); height: clamp(20px, 4.6cqw, 46px); }
 .lw-karte .lw-kquelle .lw-zico { width: 68%; height: 68%; }
-.lw-karte .lw-kmuell { width: clamp(1.45rem, 4.4cqw, 2.7rem); height: clamp(1.45rem, 4.4cqw, 2.7rem); font-size: clamp(.8rem, 2.4cqw, 1.4rem); left: .3rem; bottom: .3rem; }
-.lw-karte .lw-kzone span { font-size: clamp(.58rem, 1.5cqw, .85rem); }
-.lw-karte .lw-kblitz { font-size: clamp(1.1rem, 3.6cqw, 2.2rem); }
+.lw-karte .lw-kmuell { width: clamp(20px, 4.4cqw, 44px); height: clamp(20px, 4.4cqw, 44px); font-size: clamp(11px, 2.4cqw, 22px); left: clamp(3px, .7cqw, .4rem); bottom: clamp(3px, .7cqw, .4rem); }
+.lw-karte .lw-kzone span { font-size: clamp(9px, 1.5cqw, 14px); }
+.lw-karte .lw-kblitz { font-size: clamp(16px, 3.6cqw, 34px); }
 .lw-kquelle { width: 18px; height: 18px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(20,16,26,.82); border: 1px solid rgba(160,200,230,.65); color: #cfe0f0; display: grid; place-items: center; box-shadow: 0 0 6px rgba(140,190,230,.35); }
 .lw-karte.gross .lw-kquelle { width: 28px; height: 28px; }
 .lw-kquelle .lw-zico { width: 72%; height: 72%; }
@@ -12437,6 +12458,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-kpal { width: 1.9rem; height: 1.9rem; padding: 0; display: grid; place-items: center; border: 1px dashed rgba(160,200,230,.45); background: rgba(20,16,26,.6); color: #cfe0f0; border-radius: 50%; cursor: grab; touch-action: none; }
 .lw-kpal:hover { border-color: var(--ember); color: var(--vellum); }
 .lw-kpal .lw-zico { width: 60%; height: 60%; }
+.lw-karte.lw-kabwurf { outline: 2px dashed var(--ember); outline-offset: -2px; }
+.lw-zknopf[data-zusatz] { touch-action: pan-y; }
 .lw-kgeist { position: fixed; z-index: 10050; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; display: grid; place-items: center; background: rgba(20,16,26,.9); border: 2px solid var(--ember); color: #cfe0f0; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
 .lw-kgeist .lw-zico { width: 60%; height: 60%; }
 .lw-kwege { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
