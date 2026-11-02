@@ -9980,23 +9980,25 @@ const ZUS_ICON = {
       if (k) k.splice(k.indexOf("kulisse") + 1, 0, id); else if (z) z.splice(z.indexOf("zusaetze") + 1, 0, id); else sp[sp.length - 1].push(id); });
     const br = sp.map((_, i) => { const w = a.breiten && +a.breiten[i]; return w > .15 && w < 8 ? w : 1; });
     const ho = {}; if (a.hoehen && typeof a.hoehen === "object") FELDER.forEach(id => { const h = +a.hoehen[id]; if (h >= 80 && h <= 4000) ho[id] = Math.round(h); });
-    return { spalten: sp, breiten: br, hoehen: ho };
+    const zu = Array.isArray(a.zu) ? a.zu.filter(id => FELDER.includes(id)) : [];
+    return { spalten: sp, breiten: br, hoehen: ho, zu, kompakt: !!a.kompakt };
   }
   try { const g = JSON.parse(localStorage.getItem("imres-lw-anordnung") || "null"); if (g) anordnung = anordnungPruefen(g); } catch (_) {}
   const anordnungMerken = () => { try { localStorage.setItem("imres-lw-anordnung", JSON.stringify(anordnung)); } catch (_) {} };
   const AT = () => sprache() === "en"
-    ? { hoeheF: "Drag: taller or shorter", breiteF: "Drag: wider or narrower", hoehe: "Drag: make this panel taller or shorter · double-click: automatic height", frei: "Free", zuSpalten: "Columns", freiT: "Place every panel freely and resize it – or back to columns", freiTipp: "Drag panels by ⠿ anywhere · bottom edge: height · right edge: width · corner: both", groesse: "Drag: make this panel bigger or smaller", griff: "Drag to move this panel", spalten: n => n + (n === 1 ? " column" : " columns"), mehr: "One more column", weniger: "One column less", zurueck: "Default layout", tipp: "Drag panels by ⠿ · gap between columns: width · lower edge of a panel: height", leer: "Drag a panel here" }
-    : { hoeheF: "Ziehen: höher oder niedriger", breiteF: "Ziehen: breiter oder schmaler", hoehe: "Ziehen: Feld höher oder niedriger · Doppelklick: Höhe wieder automatisch", frei: "Frei", zuSpalten: "Spalten", freiT: "Jedes Feld frei platzieren und in der Größe ziehen – oder zurück zu Spalten", freiTipp: "Felder am ⠿ beliebig verschieben · unterer Rand: Höhe · rechter Rand: Breite · Ecke: beides", groesse: "Ziehen: Feld größer oder kleiner", griff: "Ziehen, um dieses Feld zu verschieben", spalten: n => n + (n === 1 ? " Spalte" : " Spalten"), mehr: "Eine Spalte mehr", weniger: "Eine Spalte weniger", zurueck: "Standard-Anordnung", tipp: "Felder am ⠿ ziehen · Lücke zwischen Spalten: Breite · unterer Rand eines Feldes: Höhe", leer: "Feld hierher ziehen" };
+    ? { einklappen: "Collapse this panel (title only)", aufklappen: "Expand this panel", kompakt: "Compact", kompaktT: "Compact: hide explanations, tighter spacing – more fits on screen", hoeheF: "Drag: taller or shorter", breiteF: "Drag: wider or narrower", hoehe: "Drag: make this panel taller or shorter · double-click: automatic height", frei: "Free", zuSpalten: "Columns", freiT: "Place every panel freely and resize it – or back to columns", freiTipp: "Drag panels by ⠿ anywhere · bottom edge: height · right edge: width · corner: both", groesse: "Drag: make this panel bigger or smaller", griff: "Drag to move this panel", spalten: n => n + (n === 1 ? " column" : " columns"), mehr: "One more column", weniger: "One column less", zurueck: "Default layout", tipp: "Drag panels by ⠿ · gap between columns: width · lower edge of a panel: height", leer: "Drag a panel here" }
+    : { einklappen: "Feld einklappen (nur der Titel bleibt)", aufklappen: "Feld aufklappen", kompakt: "Kompakt", kompaktT: "Kompakt: Erklärtexte aus, engere Abstände – mehr passt auf den Bildschirm", hoeheF: "Ziehen: höher oder niedriger", breiteF: "Ziehen: breiter oder schmaler", hoehe: "Ziehen: Feld höher oder niedriger · Doppelklick: Höhe wieder automatisch", frei: "Frei", zuSpalten: "Spalten", freiT: "Jedes Feld frei platzieren und in der Größe ziehen – oder zurück zu Spalten", freiTipp: "Felder am ⠿ beliebig verschieben · unterer Rand: Höhe · rechter Rand: Breite · Ecke: beides", groesse: "Ziehen: Feld größer oder kleiner", griff: "Ziehen, um dieses Feld zu verschieben", spalten: n => n + (n === 1 ? " Spalte" : " Spalten"), mehr: "Eine Spalte mehr", weniger: "Eine Spalte weniger", zurueck: "Standard-Anordnung", tipp: "Felder am ⠿ ziehen · Lücke zwischen Spalten: Breite · unterer Rand eines Feldes: Höhe", leer: "Feld hierher ziehen" };
   /* Feld-Hülle: Kennung und Griff in die Kopfzeile */
   const ZWECK = { de: { karte: "Dich und die Geräusche herumziehen – Abstand und Räume verändern den Klang.", musik: "Läuft ohne Ende weiter – tippe an, was gerade am Tisch passiert.", kulisse: "Geräusche des Ortes, sie laufen unter der Musik weiter.", spuren: "Jede Geräuschschicht des Ortes einzeln lauter oder leiser.", leben: "Macht den Ort lebendig: Überraschungen, Stille, Wetter, Tageszeit.", zusaetze: "Hinzufügen: antippen oder ins Bild „Wie klingt es dort?“ ziehen – z. B. Regen über die Taverne.", zusregler: "Was gerade dazuläuft: Lautstärke je Geräusch, ✕ schaltet es aus.", effekte: "Für einen Moment am Tisch: ein Schwerthieb, ein Würfelwurf …" },
     en: { karte: "Drag yourself and the sounds around – distance and rooms change the sound.", musik: "Keeps playing – tap whatever is happening at the table.", kulisse: "Sounds of the place, they keep running under the music.", spuren: "Each sound layer of the place louder or quieter.", leben: "Brings the place to life: surprises, silence, weather, time of day.", zusaetze: "Add: tap or drag onto the “How does it sound there?” map – e.g. rain over the tavern.", zusregler: "What is layered right now: volume per sound, ✕ switches it off.", effekte: "For a moment at the table: a sword strike, a dice roll …" } };
   function feld(id, html) {
     const zw = (ZWECK[sprache()] || ZWECK.de)[id];
     if (zw) html = html.replace("</h4>", "</h4>" + '<p class="lw-zweck lw-zweck-kopf">' + zw + "</p>");
-    const fh = anordnung.hoehen && anordnung.hoehen[id];
+    const fh = anordnung.hoehen && anordnung.hoehen[id], fzu = Array.isArray(anordnung.zu) && anordnung.zu.includes(id);
     html = html.replace(/<\/section>\s*$/, '<i class="lw-feldrand" data-hrand="' + id + '" title="' + esc(AT().hoehe) + '"></i></section>');
-    return html.replace('<section class="lw-box', '<section data-feld="' + id + '"' + (fh ? ' style="--lw-fh:' + fh + 'px"' : "") + ' class="lw-box' + (fh ? " lw-fhoch" : ""))
-      .replace('<div class="lw-box-kopf">', '<div class="lw-box-kopf"><button type="button" class="lw-griff" data-griff="' + id + '" title="' + esc(AT().griff) + '" aria-label="' + esc(AT().griff) + '">⠿</button>');
+    return html.replace('<section class="lw-box', '<section data-feld="' + id + '"' + (fh && !fzu ? ' style="--lw-fh:' + fh + 'px"' : "") + ' class="lw-box' + (fh && !fzu ? " lw-fhoch" : "") + (fzu ? " lw-feld-zu" : ""))
+      .replace('<div class="lw-box-kopf">', '<div class="lw-box-kopf"><button type="button" class="lw-griff" data-griff="' + id + '" title="' + esc(AT().griff) + '" aria-label="' + esc(AT().griff) + '">⠿</button>' +
+        '<button type="button" class="lw-feldzu" data-feldzu="' + id + '" aria-expanded="' + !fzu + '" title="' + esc(fzu ? AT().aufklappen : AT().einklappen) + '" aria-label="' + esc(fzu ? AT().aufklappen : AT().einklappen) + '">' + (fzu ? "▸" : "▾") + "</button>");
   }
   const spaltenVorlage = () => anordnung.breiten.map(w => "minmax(0, " + w + "fr)").join(" ");
   let letzteVoll = false;
@@ -10012,27 +10014,29 @@ const ZUS_ICON = {
   }
   function kOrdnen(festId) {
     const ids = Object.keys(kfrei.L).filter(id => FELDER.includes(id));
-    ids.forEach(id => { const p = kfrei.L[id]; p.w = Math.max(5, Math.min(24, p.w)); p.h = Math.max(4, p.h); p.x = Math.max(0, Math.min(24 - p.w, p.x)); p.y = Math.max(0, p.y); });
-    const ko = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+    ids.forEach(id => { const p = kfrei.L[id]; p._zu = Array.isArray(anordnung.zu) && anordnung.zu.includes(id); p.w = Math.max(5, Math.min(24, p.w)); p.h = Math.max(4, p.h); p.x = Math.max(0, Math.min(24 - p.w, p.x)); p.y = Math.max(0, p.y); });
+    const ko = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + kH(b) && b.y < a.y + kH(a);
     const ord = ids.filter(id => id !== festId).sort((a, b) => kfrei.L[a].y - kfrei.L[b].y || kfrei.L[a].x - kfrei.L[b].x), gesetzt = festId && kfrei.L[festId] ? [kfrei.L[festId]] : [];
     ord.forEach(id => { const p = kfrei.L[id];
       while (p.y > 0 && !gesetzt.some(q => ko(Object.assign({}, p, { y: p.y - 1 }), q))) p.y--;
-      for (let n = 0; n < 200; n++) { const k = gesetzt.filter(q => ko(p, q)); if (!k.length) break; p.y = Math.max(...k.map(q => q.y + q.h)); }
+      for (let n = 0; n < 200; n++) { const k = gesetzt.filter(q => ko(p, q)); if (!k.length) break; p.y = Math.max(...k.map(q => q.y + kH(q))); }
       gesetzt.push(p); });
   }
-  const kStil = p => "grid-column:" + (p.x + 1) + " / span " + p.w + ";grid-row:" + (p.y + 1) + " / span " + p.h;
+  const kH = p => p._zu ? 2 : p.h;
+  const kStil = p => "grid-column:" + (p.x + 1) + " / span " + p.w + ";grid-row:" + (p.y + 1) + " / span " + kH(p);
   function konsole(T, voll) {
     letzteVoll = voll;
     const f = Object.assign({ musik: feld("musik", musikBox(T, voll)) }, klangBox(T)), a = AT(), n = anordnung.spalten.length;
-    const umschalt = '<button type="button" class="lw-klein lw-kfreiknopf" data-kfrei="1" title="' + esc(a.freiT) + '">' + (kfrei.an ? "▦ " + a.zuSpalten : "⬚ " + a.frei) + "</button>";
+    const umschalt = '<button type="button" class="lw-klein lw-kompaktknopf" data-kkompakt="1" aria-pressed="' + !!anordnung.kompakt + '" title="' + esc(a.kompaktT) + '">▤ ' + a.kompakt + "</button>" +
+      '<button type="button" class="lw-klein lw-kfreiknopf" data-kfrei="1" title="' + esc(a.freiT) + '">' + (kfrei.an ? "▦ " + a.zuSpalten : "⬚ " + a.frei) + "</button>";
     if (kfrei.an && freiMoeglich()) {
       FELDER.forEach(id => { if (!kfrei.L[id]) { const st = kfreiStart(); kfrei.L[id] = st[id] || { x: 0, y: 999, w: 12, h: 12 }; } }); kOrdnen(null);
-      return '<div class="lw-konsole lw-konsole-frei"><div class="lw-anordnung"><span class="lw-tipp">' + a.freiTipp + "</span>" + umschalt +
+      return '<div class="lw-konsole lw-konsole-frei' + (anordnung.kompakt ? " lw-kompakt" : "") + '"><div class="lw-anordnung"><span class="lw-tipp">' + a.freiTipp + "</span>" + umschalt +
         '<button type="button" class="lw-klein" data-anordnung="zurueck" title="' + esc(a.zurueck) + '">↺</button></div><div class="lw-kfrei">' +
         FELDER.filter(id => f[id]).map(id => '<div class="lw-kfeld" data-kid="' + id + '" style="' + kStil(kfrei.L[id]) + '">' + f[id] + '<i class="lw-frand lw-frand-u" data-kgroesse="' + id + '" data-achse="h" title="' + esc(a.hoeheF) + '"></i><i class="lw-frand lw-frand-r" data-kgroesse="' + id + '" data-achse="w" title="' + esc(a.breiteF) + '"></i><i class="lw-fgroesse" data-kgroesse="' + id + '" title="' + esc(a.groesse) + '"></i></div>').join("") +
         "</div></div>";
     }
-    return '<div class="lw-konsole" style="--lw-spalten:' + spaltenVorlage() + '">' +
+    return '<div class="lw-konsole' + (anordnung.kompakt ? " lw-kompakt" : "") + '" style="--lw-spalten:' + spaltenVorlage() + '">' +
       '<div class="lw-anordnung"><span class="lw-tipp">' + a.tipp + "</span>" + umschalt +
         '<button type="button" class="lw-klein" data-anordnung="weniger" title="' + esc(a.weniger) + '"' + (n <= 1 ? " disabled" : "") + ">−</button>" +
         "<span>▦ " + a.spalten(n) + "</span>" +
@@ -10050,9 +10054,12 @@ const ZUS_ICON = {
   }
   function anordnungAusDom() {
     const sp = [...root.querySelectorAll(".lw-konsole > .lw-spalte")].map(c => [...c.querySelectorAll(":scope > [data-feld]")].map(e => e.dataset.feld));
-    anordnung = anordnungPruefen({ spalten: sp, breiten: anordnung.breiten, hoehen: anordnung.hoehen }); anordnungMerken();
+    anordnung = anordnungPruefen({ spalten: sp, breiten: anordnung.breiten, hoehen: anordnung.hoehen, zu: anordnung.zu, kompakt: anordnung.kompakt }); anordnungMerken();
   }
   root.addEventListener("click", e => {
+    const fz = e.target.closest && e.target.closest("[data-feldzu]");
+    if (fz) { const id = fz.dataset.feldzu, l = anordnung.zu || (anordnung.zu = []), i = l.indexOf(id); if (i >= 0) l.splice(i, 1); else l.push(id); anordnungMerken(); if (kfrei.an) kOrdnen(null); konsoleNeu(); return; }
+    if (e.target.closest && e.target.closest("[data-kkompakt]")) { anordnung.kompakt = !anordnung.kompakt; anordnungMerken(); konsoleNeu(); return; }
     if (e.target.closest && e.target.closest("[data-kfrei]")) { kfrei.an = !kfrei.an; if (kfrei.an && !Object.keys(kfrei.L).length) kfrei.L = kfreiStart(); kfreiMerken(); konsoleNeu(); return; }
     const b = e.target.closest && e.target.closest("[data-anordnung]"); if (!b) return;
     const w = b.dataset.anordnung, sp = anordnung.spalten;
@@ -12448,6 +12455,25 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
   .lw-kspann .lw-kleinregler > span:first-child { display: none; }
   .lw-kspann .lw-espann b { min-width: 0 !important; font-size: .72rem; }
 }
+/* Titelzeile mit Griff bleibt oben stehen, wenn im Feld gescrollt wird */
+.lw-kfeld > [data-feld] > .lw-box-kopf, .lw-konsole > .lw-spalte > [data-feld].lw-fhoch > .lw-box-kopf { position: sticky; top: -.75rem; z-index: 6; margin: -.75rem -.8rem 0; padding: .55rem .8rem .4rem; background: #18141e; border-bottom: 1px solid rgba(224,160,70,.14); }
+.lw-feldzu { display: none; border: 0; background: none; color: var(--ash); cursor: pointer; font-size: .9rem; line-height: 1; padding: .15rem .3rem; border-radius: 4px; }
+.lw-feldzu:hover { color: var(--ember); background: rgba(224,160,70,.12); }
+.lw-konsole .lw-feldzu { display: inline-flex; }
+.lw-feld-zu > :not(.lw-box-kopf):not(.lw-feldrand):not(.lw-frand):not(.lw-fgroesse) { display: none !important; }
+.lw-feld-zu { padding-bottom: .5rem !important; height: auto !important; }
+.lw-feld-zu .lw-zweck { display: none !important; }
+.lw-kfeld:has(> .lw-feld-zu) .lw-frand-u, .lw-kfeld:has(> .lw-feld-zu) .lw-fgroesse { display: none; }
+.lw-kompaktknopf[aria-pressed="true"] { border-color: var(--ember); color: var(--ember); }
+/* Kompakt: Erklärtexte aus, engere Abstände */
+.lw-kompakt .lw-zweck, .lw-kompakt [data-feld] .lw-tipp:not(.lw-zrleer), .lw-kompakt .lw-anordnung .lw-tipp { display: none !important; }
+.lw-kompakt [data-feld] { padding: .5rem .55rem !important; gap: .4rem !important; }
+.lw-kompakt.lw-konsole { row-gap: .45rem; }
+.lw-kompakt .lw-spalte { gap: .45rem !important; }
+.lw-kompakt [data-feld] h4 { font-size: .74rem; }
+.lw-kompakt .lw-kfeld > [data-feld] > .lw-box-kopf, .lw-kompakt .lw-spalte > [data-feld].lw-fhoch > .lw-box-kopf { margin: -.5rem -.55rem 0; padding: .4rem .55rem .3rem; top: -.5rem; }
+.lw-kompakt .lw-spuren { padding: .35rem .45rem; gap: .2rem; }
+.lw-kompakt .lw-spurzeile { font-size: .76rem; }
 .lw-allespur, .lw-kzalle { border: 1px solid rgba(224,160,70,.35); border-radius: 8px; padding: .3rem .45rem; margin: .1rem 0 .45rem; background: rgba(224,160,70,.06); }
 .lw-allespur > span, .lw-kzalle .lw-kzname, .lw-kzalle .lw-kzsym { color: var(--ember); font-weight: 600; }
 .lw-spurzeile { display: grid; grid-template-columns: minmax(6.5rem, 9rem) 1fr 3.2rem; align-items: center; gap: .5rem; font-size: .8rem; color: var(--vellum); }
