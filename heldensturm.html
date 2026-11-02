@@ -1766,43 +1766,43 @@ const HEROES={
    {id:'b_hold',b:0,row:0,a:1,ic:'◎',name:'Person festhalten',cd:r=>Math.max(5,8-0.4*r),d:r=>`Hält den stärksten Gegner in der Nähe ${f1(3+0.3*r)} s lang fest (Bosse kürzer) und verursacht ${pc(2+0.6*r)} Schaden. Für ${f1(9+0.3*r)} s erleidet er ${25+7*r}% mehr Schaden durch alle Angriffe.`,
     cast(r){const t=aimTarget(520,true);if(!t)return false;const d=3+0.3*r;t.vuln=Math.max(t.vulnT>0?t.vuln:0,0.25+0.07*r);t.vulnT=Math.max(t.vulnT,6+d);stunE(t,d);t.heldT=Math.max(0,t.stun);
      dealDmg(t,sk(2+0.6*r),{});ring(t.x,t.y,t.r+28,'#f6d77c',0.6,4);burst(t.x,t.y,'#f6d77c',14,140);sfx('hold')}},
-   {id:'b_laugh',b:0,row:1,a:1,ic:'♫',name:'Verwirrende Weise',cd:()=>7,d:r=>`Betäubt alle Gegner im Zielgebiet ${f1(1.2+0.2*r)} s lang und verursacht ${pc(1.2+0.3*r)} Schaden.`,
-    cast(r){const p=aimPoint(440),R=(90+10*r)*P.st.area;aoe(p.x,p.y,R,sk(1.2+0.3*r),{stun:1.2+0.2*r});ring(p.x,p.y,R,'#f6d77c',0.5,4);burst(p.x,p.y,'#f6d77c',16,160);sfx('magic')}},
-   {id:'b_pattern',b:0,row:2,a:1,ic:'✺',name:'Hypnotisches Muster',cd:r=>22-r,d:r=>`Ein schillerndes Muster um Barradin betäubt alle Gegner ${f1(2.5+0.4*r)} s lang und verursacht ${pc(2+0.6*r)} Schaden.`,
+   {id:'b_laugh',b:0,row:1,a:1,ic:'♫',name:'Verwirrende Weise',cd:()=>7,d:r=>`Betäubt alle Gegner im Zielgebiet ${f1(1.2+0.2*r)} s lang und verursacht ${pc(1.4+0.35*r)} Schaden.`,
+    cast(r){const p=aimPoint(440),R=(90+10*r)*P.st.area;aoe(p.x,p.y,R,sk(1.4+0.35*r),{stun:1.2+0.2*r});ring(p.x,p.y,R,'#f6d77c',0.5,4);burst(p.x,p.y,'#f6d77c',16,160);sfx('magic')}},
+   {id:'b_pattern',b:0,row:2,a:1,ic:'✺',name:'Hypnotisches Muster',cd:r=>18-r,d:r=>`Ein schillerndes Muster um Barradin betäubt alle Gegner ${f1(2.5+0.4*r)} s lang und verursacht ${pc(2+0.6*r)} Schaden.`,
     cast(r){const R=280*P.st.area;aoe(P.x,P.y,R,sk(2+0.6*r),{stun:2.5+0.4*r});ring(P.x,P.y,R,'#d68cff',0.8,6);ring(P.x,P.y,R*0.6,'#f6d77c',0.7,4);G.shake+=4;sfx('big')}},
    {id:'b_mock',b:0,row:3,c:0,a:1,ic:'❢',name:'Bösartiger Spott',cd:()=>3.5,d:r=>`Barradins schärfste Waffe: ${3+(r>>1)} Gegner bekommen eine vernichtende Beleidigung ab – ${pc(1.6+0.35*r)} Schaden, und sie richten 6 s lang ${20+4*r}% weniger Schaden an.`,
     cast(r){const L=targetsNear(420,3+(r>>1));if(!L.length)return false;L.forEach((e,i)=>later(i*0.08,()=>{if(e.dead)return;dealDmg(e,sk(1.6+0.35*r),{});weaken(e,0.2+0.04*r,6);word(e.x,e.y-e.r-12,pick(INSULTS),'#ffb0d8')}));sfx('note')}},
    {id:'b_tongue',b:0,row:3,c:1,ic:'✎',name:'Goldene Zunge',d:r=>`Kritische Treffer normaler Angriffe verspotten das Ziel: Es richtet 4 s lang ${15+3*r}% weniger Schaden an. +${3*r}% Kritische Trefferchance.`,mod:(s,r)=>{s.crit+=0.03*r}},
-   {id:'b_dissonant',b:0,row:4,a:1,ic:'☈',name:'Dissonantes Flüstern',cd:()=>9,d:r=>`Flüstert dem stärksten Gegner Schreckliches ein: ${pc(4+1.2*r)} Schaden und 2,5 s Flucht. Stirbt er daran, breitet sich die Angst aus: Alle Gegner im weiten Umkreis fliehen und erleiden ${pc(1+0.3*r)} Schaden.`,
-    cast(r){const t=aimTarget(480,true);if(!t)return false;const x=t.x,y=t.y;dealDmg(t,sk(4+1.2*r),{fear:2.5});ring(x,y,t.r+20,'#c48cff',0.5,4);word(x,y-t.r-14,'…!','#c48cff');
+   {id:'b_dissonant',b:0,row:4,a:1,ic:'☈',name:'Dissonantes Flüstern',cd:()=>9,d:r=>`Flüstert dem stärksten Gegner Schreckliches ein: ${pc(4.4+1.3*r)} Schaden und 2,5 s Flucht. Stirbt er daran, breitet sich die Angst aus: Alle Gegner im weiten Umkreis fliehen und erleiden ${pc(1+0.3*r)} Schaden.`,
+    cast(r){const t=aimTarget(480,true);if(!t)return false;const x=t.x,y=t.y;dealDmg(t,sk(4.4+1.3*r),{fear:2.5});ring(x,y,t.r+20,'#c48cff',0.5,4);word(x,y-t.r-14,'…!','#c48cff');
      if(t.dead){aoe(x,y,240*P.st.area,sk(1+0.3*r),{fear:2.5,fx:x,fy:y});ring(x,y,240*P.st.area,'#b06cff',0.7,6);G.fxs.push({k:'phantom',x,y:y-30,t:0,life:1});sfx('big')}else sfx('magic')}},
    {id:'b_ballad',b:0,row:5,a:1,ult:1,ic:'♬',name:'Ballade der Helden',cd:()=>40,d:r=>`Barradin spielt ${8+2*r} s lang die Ballade der Helden: +${30+15*r}% Schaden, +${20+10*r}% Angriffstempo und ${1+r}% Leben pro Sekunde für ihn und seine Verbündeten. Leuchtende Noten umkreisen ihn und treffen jeden Gegner, den sie berühren.`,
     cast(r){P.buffs.ballad=8+2*r;P.balladR=r;P.balladOwn=1;teamBuff('ballad',8+2*r,q=>{q.balladR=r;q.balladOwn=0});recalc();ring(P.x,P.y,120,'#f6d77c',0.8,6);burst(P.x,P.y,'#f6d77c',30,220);sfx('level')}},
-   {id:'b_vine',b:1,row:0,a:1,ic:'❦',name:'Rankenfessel',cd:()=>9,d:r=>`Ranken fesseln Gegner ${f1((4+rank('b_thorns'))*(1+0.5*rank('b_overgrowth')))} s lang am Boden und verursachen ${pc((0.7+0.18*r)*(1+0.25*rank('b_thorns')))} Schaden pro Sekunde.`,
-    cast(r){const p=aimPoint(440),t=rank('b_thorns');zone({x:p.x,y:p.y,r:(100+10*r)*P.st.area,dur:(4+t)*(1+0.5*rank('b_overgrowth')),dps:sk((0.7+0.18*r)*(1+0.25*t)),root:1,vuln:0.04*t,kind:'vines',vine:1});sfx('vine')}},
+   {id:'b_vine',b:1,row:0,a:1,ic:'❦',name:'Rankenfessel',cd:()=>9,d:r=>`Ranken fesseln Gegner ${f1((4+rank('b_thorns'))*(1+0.5*rank('b_overgrowth')))} s lang am Boden und verursachen ${pc((0.65+0.16*r)*(1+0.25*rank('b_thorns')))} Schaden pro Sekunde.`,
+    cast(r){const p=aimPoint(440),t=rank('b_thorns');zone({x:p.x,y:p.y,r:(100+10*r)*P.st.area,dur:(4+t)*(1+0.5*rank('b_overgrowth')),dps:sk((0.65+0.16*r)*(1+0.25*t)),root:1,vuln:0.04*t,kind:'vines',vine:1});sfx('vine')}},
    {id:'b_thorns',b:1,row:1,ic:'✿',name:'Wuchernde Dornen',d:r=>`Rankenfessel hält ${r} s länger und verursacht +${25*r}% Schaden. Gefesselte Gegner erleiden +${4*r}% Schaden.`},
    {id:'b_song',b:1,row:2,ic:'❀',name:'Bardische Inspiration',d:r=>`+${6*r}% Schaden, +${5*r}% Angriffstempo, ${f1(0.4*r)}% Leben pro Sekunde. Normale Angriffe betäuben mit ${5*r}% Chance. Aura: Mitspieler in der Nähe erhalten die Hälfte.`,mod:(s,r)=>{s.dmgP+=0.06*r;s.rateP+=0.05*r;s.regenP+=0.004*r}},
-   {id:'b_wall',b:1,row:3,c:0,a:1,ic:'⋔',name:'Dornenwall',cd:()=>10,d:r=>`Quer vor Barradin wächst eine Wand aus Dornen (${f1(6*(1+0.5*rank('b_overgrowth')))} s): Wer hindurch will, wird um 60% verlangsamt und erleidet ${pc(1.2+0.3*r)} Schaden pro Sekunde.`,
+   {id:'b_wall',b:1,row:3,c:0,a:1,ic:'⋔',name:'Dornenwall',cd:()=>10,d:r=>`Quer vor Barradin wächst eine Wand aus Dornen (${f1(6*(1+0.5*rank('b_overgrowth')))} s): Wer hindurch will, wird um 60% verlangsamt und erleidet ${pc(1.4+0.35*r)} Schaden pro Sekunde.`,
     cast(r){const a=aimAng(380),cx_=P.x+Math.cos(a)*130,cy_=P.y+Math.sin(a)*130,px=-Math.sin(a),py=Math.cos(a),L=(150+15*r)*P.st.area,dur=6*(1+0.5*rank('b_overgrowth'));
-     for(let i=-3;i<=3;i++)zone({x:cx_+px*L*i/3,y:cy_+py*L*i/3,r:40,dur,dps:sk(1.2+0.3*r),slow:0.6,kind:'thorns',vine:1});sfx('vine')}},
+     for(let i=-3;i<=3;i++)zone({x:cx_+px*L*i/3,y:cy_+py*L*i/3,r:40,dur,dps:sk(1.4+0.35*r),slow:0.6,kind:'thorns',vine:1});sfx('vine')}},
    {id:'b_bloom',b:1,row:3,c:1,ic:'❁',name:'Blühende Heilung',d:r=>`Gegner, die in Ranken oder Dornen sterben, heilen Barradin und Mitspieler in der Nähe um ${f1(0.6*r)}% Leben und lassen mit ${10*r}% Chance neue Ranken sprießen.`},
-   {id:'b_strangle',b:1,row:4,a:1,ic:'⥀',name:'Würgeranken',cd:()=>12,d:r=>`Ranken packen bis zu ${5+r} Gegner im Zielgebiet, reißen sie zusammen und verursachen ${pc(2.2+0.5*r)} Schaden. Danach sind sie 2 s gefesselt.`,
+   {id:'b_strangle',b:1,row:4,a:1,ic:'⥀',name:'Würgeranken',cd:()=>12,d:r=>`Ranken packen bis zu ${5+r} Gegner im Zielgebiet, reißen sie zusammen und verursachen ${pc(2.8+0.65*r)} Schaden. Danach sind sie 2 s gefesselt.`,
     cast(r){const p=aimPoint(460);const L=[];query(p.x,p.y,260,e=>{if(L.length<5+r&&d2(e,p)<260*260)L.push(e)});if(!L.length)return false;
-     for(const e of L){G.fxs.push({k:'vineline',x:e.x,y:e.y,x2:p.x,y2:p.y,t:0,life:0.5});if(!e.boss&&!e.guard){e.x+=(p.x-e.x)*0.75;e.y+=(p.y-e.y)*0.75;e.root=Math.max(e.root,ccZaeh(e,2,e.root))}dealDmg(e,sk(2.2+0.5*r),{})}ring(p.x,p.y,70,'#5aa04a',0.5,5);sfx('vine')}},
+     for(const e of L){G.fxs.push({k:'vineline',x:e.x,y:e.y,x2:p.x,y2:p.y,t:0,life:0.5});if(!e.boss&&!e.guard){e.x+=(p.x-e.x)*0.75;e.y+=(p.y-e.y)*0.75;e.root=Math.max(e.root,ccZaeh(e,2,e.root))}dealDmg(e,sk(2.8+0.65*r),{})}ring(p.x,p.y,70,'#5aa04a',0.5,5);sfx('vine')}},
    {id:'b_overgrowth',b:1,row:5,ult:1,ic:'♣',name:'Wucherwald',d:r=>`Rankenfessel, Dornenwall und Würgeranken halten ${50*r}% länger. Jede Sekunde in Ranken lässt einen Gegner 5% mehr Schaden erleiden (bis +${25*r}%).`},
    {id:'b_mirror',b:2,row:0,a:1,ic:'◈',name:'Spiegelbild',cd:()=>14,d:r=>`Erschafft ${1+(r>>1)} Trugbild${(1+(r>>1))>1?'er':''}, die Gegner ${8+rank('b_phantom')} s lang ablenken und dann für ${pc(1.5+0.3*r)} Schaden zerplatzen.`,
     cast(r){const n=1+(r>>1);for(let i=0;i<n;i++){const a=rnd(TAU);illusion(P.x+Math.cos(a)*70,P.y+Math.sin(a)*70,r)}ring(P.x,P.y,70,'#9fd8ff',0.4,3);sfx('magic')}},
    {id:'b_phantom',b:2,row:1,ic:'✧',name:'Trugbild-Barden',d:r=>`Trugbilder spielen mit und greifen mit ${30+10*r}% deines Schadens an. Sie halten ${r} s länger.`},
-   {id:'b_fear',b:2,row:2,a:1,ic:'✶',name:'Phantasmagorie',cd:()=>18,d:r=>`Ein riesiges Schreckensbild lässt alle Gegner im Umkreis ${f1(3+0.3*r)} s lang fliehen und verursacht ${pc(1.5+0.4*r)} Schaden.`,
-    cast(r){const R=260*P.st.area;aoe(P.x,P.y,R,sk(1.5+0.4*r),{fear:3+0.3*r,fx:P.x,fy:P.y});G.fxs.push({k:'phantom',x:P.x,y:P.y-30,t:0,life:1.3});ring(P.x,P.y,R,'#b06cff',0.7,5);sfx('big')}},
-   {id:'b_flute',b:2,row:3,c:0,a:1,ic:'♪',name:'Flöte der Illusionen',cd:()=>24,d:r=>`Die Flöte aus Gracklstugh beschwört einen kleinen Demogorgon, der ${6+r} s lang mit seinen Tentakeln Gegner zerschmettert: ${pc(1.5+0.35*r)} Schaden je Schlag.`,
-    cast(r){const p=aimPoint(260);spawnPet('demo',p.x,p.y,{life:6+r,dmg:()=>sk(1.5+0.35*r),hp:P.st.maxHp*2,every:0.9,r:20});ring(p.x,p.y,60,'#ff6ab0',0.6,5);smoke(p.x,p.y);sfx('magic')}},
+   {id:'b_fear',b:2,row:2,a:1,ic:'✶',name:'Phantasmagorie',cd:()=>18,d:r=>`Ein riesiges Schreckensbild lässt alle Gegner im Umkreis ${f1(3+0.3*r)} s lang fliehen und verursacht ${pc(2+0.5*r)} Schaden.`,
+    cast(r){const R=260*P.st.area;aoe(P.x,P.y,R,sk(2+0.5*r),{fear:3+0.3*r,fx:P.x,fy:P.y});G.fxs.push({k:'phantom',x:P.x,y:P.y-30,t:0,life:1.3});ring(P.x,P.y,R,'#b06cff',0.7,5);sfx('big')}},
+   {id:'b_flute',b:2,row:3,c:0,a:1,ic:'♪',name:'Flöte der Illusionen',cd:()=>24,d:r=>`Die Flöte aus Gracklstugh beschwört einen kleinen Demogorgon, der ${6+r} s lang mit seinen Tentakeln Gegner zerschmettert: ${pc(1.9+0.45*r)} Schaden je Schlag.`,
+    cast(r){const p=aimPoint(260);spawnPet('demo',p.x,p.y,{life:6+r,dmg:()=>sk(1.9+0.45*r),hp:P.st.maxHp*2,every:0.9,r:20});ring(p.x,p.y,60,'#ff6ab0',0.6,5);smoke(p.x,p.y);sfx('magic')}},
    {id:'b_juggle',b:2,row:3,c:1,a:1,ic:'♨',name:'Feuerjonglage',cd:()=>14,d:r=>`Wie auf dem Nachtmarkt: Barradin jongliert ${f1(6+r)} s lang ${3+(r>>1)} brennende Fackeln. Sie wirbeln um ihn herum und versengen jeden Gegner, den sie streifen (${pc(0.9+0.2*r)} Schaden und Brand). Seine Trugbilder machen die Show mit und werfen jede Sekunde eine Fackel (${pc(0.8+0.2*r)} im Umkreis). Zum großen Finale fliegen alle Fackeln auf die nächsten Gegner: je ${pc(1.6+0.4*r)} Schaden.`,
     cast(r){P.jug={t:6+r,n:3+(r>>1),r,a:0,hitT:0};ring(P.x,P.y,75,'#ff9a3a',0.5,4);embers(P.x,P.y-20,'#ffb04a',12,30);light(P.x,P.y,200,'#ff9a3a',0.6,0.8);sfx('fire')}},
    {id:'b_door',b:2,row:4,a:1,ic:'⌂',name:'Dimensionstür',cd:()=>7,d:r=>`Barradin springt an den Zielort (ohne Maus: weg von den Gegnern). Am Startpunkt bleibt ein Trugbild zurück, das nach 1 s für ${pc(2+0.5*r)} Schaden zerplatzt.`,
     cast(r){const p=mouseAim()?aimPoint(380):escapePoint(340);const ox=P.x,oy=P.y;illusion(ox,oy,r,{life:1,boom:sk(2+0.5*r)});smoke(ox,oy);P.x=clamp(p.x,20,WORLD-20);P.y=clamp(p.y,20,WORLD-20);P.inv=Math.max(P.inv,0.3);smoke(P.x,P.y);ring(P.x,P.y,40,'#9fd8ff',0.4,3);sfx('blink')}},
    {id:'b_hall',b:2,row:5,ult:1,ic:'❖',name:'Spiegelkabinett',d:r=>`Alle ${12-2*r} s erscheint von selbst ein Trugbild an Barradins Seite. Alle Trugbilder verursachen +${25*r}% Schaden und zerplatzen stärker.`},
-   {id:'b_k_schnitt',b:3,row:0,a:1,ic:'☾',name:'Schneidender Schwung',cd:()=>4,d:r=>`Ein Klingenschwung des Kollegs der Schwerter: Barradin gleitet vor und zieht das Rapier in zwei Halbmonden durch alles vor ihm – Vorhand ${pc(1.4+0.35*r)}, Rückhand ${pc(0.7+0.18*r)} Schaden.`,
+   {id:'b_k_schnitt',b:3,row:0,a:1,ic:'☾',name:'Schneidender Schwung',cd:()=>4,d:r=>`Ein Klingenschwung des Kollegs der Schwerter: Barradin gleitet vor und zieht das Rapier in zwei Halbmonden durch alles vor ihm – Vorhand ${pc(1.3+0.32*r)}, Rückhand ${pc(0.7+0.18*r)} Schaden.`,
     cast(r){if(!nearest(P.x,P.y,320))return false;ktSchwung(r,1)}},
    {id:'b_k_fuss',b:3,row:1,ic:'⁘',name:'Tänzerische Beinarbeit',d:r=>`Blendende Schritte des Kollegs des Tanzes: +${3*r}% Lauftempo, Rapierstiche reichen ${Math.round(14*r/85*100)}% weiter und treffen +${6*r}% härter. Nach einer Ausweichrolle oder einem Gleitenden Schwung ist der nächste Treffer innerhalb von 3 s eine Riposte: +${60+12*r}% Schaden.`,mod:(s,r)=>{s.speedP+=0.03*r;s.meleeP+=0.06*r}},
    {id:'b_k_abwehr',b:3,row:2,a:1,ic:'◍',name:'Abwehrschwung',cd:()=>12,d:r=>`Ein Klingenwirbel stößt alle Gegner ringsum zurück (${pc(1+0.25*r)} Schaden). ${f1(3+0.4*r)} s lang pariert Barradin die nächsten ${1+(r>>1)} Treffer vollständig und kontert jeden mit einem Stich (${pc(1.2+0.3*r)} Schaden).`,
@@ -1821,7 +1821,7 @@ const HEROES={
      later(st*5+0.04,()=>{if(P.down)return;aoe(p.x,p.y,R*1.15,sk(2.2+0.5*r),{kt:1,stun:0.5,onHit:e=>blind(e,2)});light(p.x,p.y,R*2,'#ffd27a',0.4,1);G.shake+=4;sfx('big');bigHit()})}},
    {id:'b_k_ballett',b:3,row:5,a:1,ult:1,ic:'⚔',name:'Klingenballett',cd:()=>45,d:r=>`${10+2*r} s lang tanzen drei Geisterrapiere um Barradin und stoßen fünfmal pro Sekunde auf Gegner in der Nähe (je ${pc(0.7+0.2*r)} Schaden). +${20+10*r}% Angriffstempo, und jede Ausweichrolle zieht einen Schneidenden Schwung.`,
     cast(r){P.buffs.kballett=10+2*r;P.kbR=r;P.kbT=0;recalc();G.fxs.push({k:'kt_wheel',x:P.x,y:P.y,r:150,gold:1,t:0,life:0.6});burst(P.x,P.y,'#e6efff',24,220);sfx('ult')}},
-   {id:'b_g_kuss',b:4,row:0,a:1,ic:'❣',name:'Schmetterlingskuss',cd:()=>4.5,d:r=>`Barradin will einfach jeden bezirzen: Er haucht einen Kuss, und ein Schwarm schillernder Feywild-Schmetterlinge flattert zum Ziel – ${pc(2.2+0.5*r)} Schaden, dann zerstieben zwei Falter zu weiteren Gegnern (je ${pc(0.7+0.17*r)}). Das Ziel wird ${f1(3+0.4*r)} s lang zum Bewunderer: Es kämpft funkelnd für Barradin und zieht die Wut seiner alten Kumpane auf sich (Elite halb so lang; Bosse und Wächter staunen nur: −20% Schaden). Höchstens 2 Bewunderer zugleich.`,
+   {id:'b_g_kuss',b:4,row:0,a:1,ic:'❣',name:'Schmetterlingskuss',cd:()=>4.5,d:r=>`Barradin will einfach jeden bezirzen: Er haucht einen Kuss, und ein Schwarm schillernder Feywild-Schmetterlinge flattert zum Ziel – ${pc(1.6+0.35*r)} Schaden, dann zerstieben zwei Falter zu weiteren Gegnern (je ${pc(1+0.25*r)}). Das Ziel wird ${f1(3+0.4*r)} s lang zum Bewunderer: Es kämpft funkelnd für Barradin und zieht die Wut seiner alten Kumpane auf sich (Elite halb so lang; Bosse und Wächter staunen nur: −20% Schaden). Höchstens 2 Bewunderer zugleich.`,
     cast(r){const t=gmKussZiel();if(!t)return false;gmKussShoot(P.x+(P.flip||1)*8,P.y-22,t,r,1);if(fxOk())G.fxs.push({k:'gm_mund',x:P.x+(P.flip||1)*8,y:P.y-26,a:ang(P,t),t:0,life:0.5});sfx('b_fluegel');sfx('note')}},
    {id:'b_g_mantel',b:4,row:1,a:1,ic:'❧',name:'Mantel der Inspiration',cd:()=>14,d:r=>`Barradin wirbelt seinen schimmernden Feenmantel: Er und Mitspieler in der Nähe erhalten einen Schild aus ${10+2*r}% ihres Lebens und huschen 3 s lang frei umher (+30% Lauftempo). Aufstiebende Blütenblätter stoßen Gegner zurück (${pc(1.8+0.45*r)} Schaden), und Bewunderer bleiben 2 s länger.`,
     cast(r){gmMantel(r)}},
@@ -1831,7 +1831,7 @@ const HEROES={
    {id:'b_g_unzer',b:4,row:3,c:1,ic:'♔',name:'Unzerbrechliche Majestät',d:r=>`Wer Barradin angreift, zögert: Alle ${10-r} s wird ein Treffer vollständig abgewehrt. Der Angreifer erleidet ${pc(1.5+0.4*r)} Schaden und wird 3 s lang zum Bewunderer (Bosse erstarren nur kurz). Eine kleine Krone über Barradin zeigt, wann es bereit ist. +${4*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.04*r}},
    {id:'b_g_darb',b:4,row:4,a:1,ic:'✤',name:'Fesselnde Darbietung',cd:()=>16,d:r=>`Ein Auftritt wie im Palast: Ein Lichtkegel fällt auf Barradin, Feenlichter tanzen im Kreis – dann verfallen bis zu ${3+(r>>1)} Gegner ringsum ${f1(5+0.6*r)} s lang der Vorstellung und werden zu Bewunderern (auch über die Obergrenze hinaus). Alle im Kreis erleiden ${pc(1.8+0.45*r)} Schaden; wer nicht verfällt, staunt (−20% Schaden).`,
     cast(r){gmDarbietung(r)}},
-   {id:'b_g_krone',b:4,row:5,a:1,ult:1,ic:'♕',name:'Krone der Majestät',cd:()=>50,d:r=>`Eine Krone aus Feenlicht und Perlmutt senkt sich ${10+2*r} s lang auf Barradin (Glanzwelle: ${pc(2.5+0.6*r)} Schaden). Er erleidet ${15+5*r}% weniger Schaden, jede Sekunde verfällt ihm der nächste Gegner als Bewunderer (bis zu ${3+r} zugleich), und alle Bewunderer schlagen um 50% härter zu.`,
+   {id:'b_g_krone',b:4,row:5,a:1,ult:1,ic:'♕',name:'Krone der Majestät',cd:()=>50,d:r=>`Eine Krone aus Feenlicht und Perlmutt senkt sich ${10+2*r} s lang auf Barradin (Glanzwelle: ${pc(3.2+0.8*r)} Schaden). Er erleidet ${15+5*r}% weniger Schaden, jede Sekunde verfällt ihm der nächste Gegner als Bewunderer (bis zu ${3+r} zugleich), und alle Bewunderer schlagen um 50% härter zu.`,
     cast(r){gmKrone(r)}}
   ]},
  echo:{name:'Echo',cls:'Gehörnter Druide',role:'Zauber & Wildgestalt',dm:0.86,hp:92,dmg:10,rate:1.5,speed:162,range:350,sig:'e_wave',
@@ -1846,8 +1846,8 @@ const HEROES={
    {id:'e_wave',b:0,row:0,a:1,ic:'≋',name:'Donnerwoge',cd:()=>6,d:r=>`Eine donnernde Welle um Echo schleudert Gegner zurück und verursacht ${pc(1.4+0.35*r)} Schaden.`,
     cast(r){const R=(135+8*r)*P.st.area;aoe(P.x,P.y,R,sk(1.4+0.35*r),{knock:430,stun:0.3,fx:P.x,fy:P.y});ring(P.x,P.y,R,'#9fe0ff',0.45,6);G.shake+=3;sfx('thunder')}},
    {id:'e_storm',b:0,row:1,ic:'✦',name:'Statische Ladung',d:r=>`Jede gewirkte Fähigkeit lädt Echo auf (bis 4 Ladungen, sichtbar als Funken um ihn). Bei 4 Ladungen entlädt sich ein Kettenblitz auf ${3+r} Gegner (${pc(1.2+0.3*r)} je Treffer), und alle Abklingzeiten sinken um ${f1(0.3*r)} s. +${4*r}% Fertigkeitsschaden.`,mod:(s,r)=>{s.skill+=0.04*r}},
-   {id:'e_call',b:0,row:2,a:1,ic:'ϟ',name:'Ruf des Blitzes',cd:()=>10,d:r=>`Ruft ${3+r} Blitze herab, die je ${pc(1.8+0.4*r)} Schaden verursachen und kurz betäuben.`,
-    cast(r){const n=3+r;for(let i=0;i<n;i++)later(i*0.2,()=>{const e=mouseAim()?nearestTo(cursorW(),160):randomEnemy(P.x,P.y,500);const c=cursorW();const x=e?e.x:(mouseAim()?c.x+rnd(-60,60):P.x+rnd(-220,220)),y=e?e.y:(mouseAim()?c.y+rnd(-60,60):P.y+rnd(-220,220));bolt(x,y);aoe(x,y,62*P.st.area,sk(1.8+0.4*r),{stun:0.4,lightning:1});sfx('thunder')})}},
+   {id:'e_call',b:0,row:2,a:1,ic:'ϟ',name:'Ruf des Blitzes',cd:()=>10,d:r=>`Ruft ${3+r} Blitze herab, die je ${pc(2+0.45*r)} Schaden verursachen und kurz betäuben.`,
+    cast(r){const n=3+r;for(let i=0;i<n;i++)later(i*0.2,()=>{const e=mouseAim()?nearestTo(cursorW(),160):randomEnemy(P.x,P.y,500);const c=cursorW();const x=e?e.x:(mouseAim()?c.x+rnd(-60,60):P.x+rnd(-220,220)),y=e?e.y:(mouseAim()?c.y+rnd(-60,60):P.y+rnd(-220,220));bolt(x,y);aoe(x,y,62*P.st.area,sk(2+0.45*r),{stun:0.4,lightning:1});sfx('thunder')})}},
    {id:'e_fireball',b:0,row:3,c:0,a:1,ic:'☄',name:'Feuerball',cd:()=>6,d:r=>`Echos Lieblingsantwort auf freche Gegner: Ein Feuerball explodiert am Ziel – ${pc(3+0.7*r)} Schaden im Umkreis und 3 s brennender Boden (${pc(0.6+0.15*r)} pro Sekunde).`,
     cast(r){const p=aimPoint(460),a=ang(P,p),dist=Math.max(60,Math.sqrt(d2(P,p)));shoot({x:P.x,y:P.y-8,a,spd:560,dmg:0,r:13,pierce:0,kind:'fireball',c:'#ff8a2a',life:dist/560,boom:{R:(95+8*r)*P.st.area,dmg:sk(3+0.7*r),fire:sk(0.6+0.15*r)}});sfx('fire')}},
    {id:'e_icefan',b:0,row:3,c:1,a:1,ic:'❄',name:'Eisfächer',cd:()=>5,d:r=>`Wie damals gegen die Drow im Wachturm: Ein Fächer aus Eis trifft alles vor Echo – ${pc(1.8+0.4*r)} Schaden und 3 s Unterkühlung (−50% Tempo). Unterkühlte Gegner erleiden +${5*r}% Schaden durch Blitze.`,
@@ -1867,21 +1867,21 @@ const HEROES={
    {id:'e_roar',b:1,row:4,a:1,ic:'ᗣ',name:'Urgebrüll',cd:()=>14,d:r=>`Gegner im Umkreis fliehen 2 s und richten 6 s lang ${20+5*r}% weniger Schaden an. Echo und Mitspieler in der Nähe erleiden 6 s lang 15% weniger Schaden. Als Bär brüllt Echo stattdessen über die Bärenleiste (Brüllen): Spott, größerer Umkreis (+${10*r}), Heilung ${4+r}%.`,
     cast(r){P.buffs.roarG=6;teamBuff('roarG',6);const R=230*P.st.area;let n=0;query(P.x,P.y,R+40,e=>{if(d2(e,P)<R*R){weaken(e,0.2+0.05*r,6);dealDmg(e,sk(0.5),{fear:2});n++}});if(P.form==='bear')heal(P.st.maxHp*(0.05+0.02*r));ring(P.x,P.y,R,'#e8b070',0.6,7);G.shake+=4;sfx('roar')}},
    {id:'e_primal',b:1,row:5,ult:1,ic:'✸',name:'Ewige Bestie',d:r=>`Bärengestalt hält ${40*r}% länger. In Bärengestalt verlängert jeder Kill die Gestalt um 0,5 s und heilt ${r}% Leben.`},
-   {id:'e_bark',b:2,row:0,ic:'▣',name:'Rindenhaut',d:r=>`+${r*6} Rüstung, plus ${r} je zwei Heldenstufen. Aura: Mitspieler in der Nähe erhalten die Hälfte.`,mod:(s,r)=>{s.armor+=r*(6+P.level*0.5)}},
-   {id:'e_moon',b:2,row:1,a:1,ic:'☾',name:'Mondstrahl',cd:()=>12,d:r=>`Ein Mondstrahl jagt ${f1(6+0.5*r)} s lang Gegnern hinterher und verursacht ${pc(1.5+0.4*r)} Schaden pro Sekunde.`,
-    cast(r){const p=aimPoint(420);zone({x:p.x,y:p.y,r:72*P.st.area,dur:6+0.5*r,dps:sk(1.5+0.4*r),follow:125,kind:'moon'});sfx('magic')}},
+   {id:'e_bark',b:2,row:0,ic:'▣',name:'Rindenhaut',d:r=>`+${r*9} Rüstung, plus ${r} je zwei Heldenstufen. Aura: Mitspieler in der Nähe erhalten die Hälfte.`,mod:(s,r)=>{s.armor+=r*(9+P.level*0.5)}},
+   {id:'e_moon',b:2,row:1,a:1,ic:'☾',name:'Mondstrahl',cd:()=>12,d:r=>`Ein Mondstrahl jagt ${f1(6+0.5*r)} s lang Gegnern hinterher und verursacht ${pc(1.65+0.45*r)} Schaden pro Sekunde.`,
+    cast(r){const p=aimPoint(420);zone({x:p.x,y:p.y,r:72*P.st.area,dur:6+0.5*r,dps:sk(1.65+0.45*r),follow:125,kind:'moon'});sfx('magic')}},
    {id:'e_greed',b:2,row:2,ic:'◆',name:'Goldgier',d:r=>`Echo riecht Schätze: +${15*r}% Gold und +${8*r}% bessere Beute. Jedes aufgesammelte Gold hat ${4*r}% Chance auf einen Goldrausch: 5 s lang +${20+4*r}% Angriffstempo und +15% Lauftempo – auch für Mitspieler in der Nähe, denn am Ende landet alles auf dem gemeinsamen Haufen.`,mod:(s,r)=>{s.gold+=0.15*r;s.luck+=0.08*r}},
    {id:'e_swarm',b:2,row:3,c:0,a:1,ic:'⁙',name:'Insektenschwarm',cd:()=>9,d:r=>`Ein Insektenschwarm verfolgt ${f1(6+0.5*r)} s lang die Gegner: ${pc(0.9+0.25*r)} Schaden pro Sekunde und −30% Tempo.`,
     cast(r){const p=aimPoint(420);zone({x:p.x,y:p.y,r:85*P.st.area,dur:6+0.5*r,dps:sk(0.9+0.25*r),follow:150,slow:0.3,kind:'swarm'});sfx('vine')}},
-   {id:'e_treant',b:2,row:3,c:1,a:1,ic:'♠',name:'Baumhirte',cd:()=>25,d:r=>`Ein Baumhirte kämpft ${15+2*r} s lang an Echos Seite – oder bei einem verwundeten Mitspieler –, zieht Gegner auf sich und schlägt mit ${40+10*r}% von Echos Schaden zu.`,
-    cast(r){const tq=woundedNear(P)||P;spawnPet('treant',tq.x+rnd(-50,50),tq.y+rnd(-50,50),{life:15+2*r,dmg:()=>P.st.dmg*(0.4+0.1*r),hp:P.st.maxHp*(0.8+0.15*r),every:1,r:20,taunt:tq===P?140:190});if(tq!==P)word(tq.x,tq.y-40,'Der Hain schützt dich!','#6ab04a');ring(P.x,P.y,60,'#6ab04a',0.6,5);sfx('vine')}},
+   {id:'e_treant',b:2,row:3,c:1,a:1,ic:'♠',name:'Baumhirte',cd:()=>25,d:r=>`Ein Baumhirte kämpft ${15+2*r} s lang an Echos Seite – oder bei einem verwundeten Mitspieler –, zieht Gegner auf sich und schlägt mit ${55+12*r}% von Echos Schaden zu.`,
+    cast(r){const tq=woundedNear(P)||P;spawnPet('treant',tq.x+rnd(-50,50),tq.y+rnd(-50,50),{life:15+2*r,dmg:()=>P.st.dmg*(0.55+0.12*r),hp:P.st.maxHp*(0.8+0.15*r),every:1,r:20,taunt:tq===P?140:190});if(tq!==P)word(tq.x,tq.y-40,'Der Hain schützt dich!','#6ab04a');ring(P.x,P.y,60,'#6ab04a',0.6,5);sfx('vine')}},
    {id:'e_hoard',b:2,row:4,ic:'⛁',name:'Drachenhort',d:r=>`Jedes eingesammelte Gold gibt 8 s lang +1% Schaden (bis +${6*r}%). Gold fliegt aus doppelter Entfernung herbei. +${10*r}% Goldfund.`,mod:(s,r)=>{s.gold+=0.1*r;s.dmgP+=Math.min(0.06*r,(P.hoard||0)*0.01)}},
-   {id:'e_wrath',b:2,row:5,a:1,ult:1,ic:'❧',name:'Zorn der Natur',cd:()=>40,d:r=>`An ${4+r} Stellen brechen riesige Wurzeln aus dem Boden: je ${pc(4+r)} Schaden und 2,5 s gefesselt. Echo heilt ${8+4*r}% Leben.`,
+   {id:'e_wrath',b:2,row:5,a:1,ult:1,ic:'❧',name:'Zorn der Natur',cd:()=>32,d:r=>`An ${4+r} Stellen brechen riesige Wurzeln aus dem Boden: je ${pc(4+r)} Schaden und 2,5 s gefesselt. Echo heilt ${8+4*r}% Leben.`,
     cast(r){heal(P.st.maxHp*(0.08+0.04*r));const L=targetsNear(520,4+r);while(L.length<4+r)L.push({x:P.x+rnd(-250,250),y:P.y+rnd(-250,250)});
      L.forEach((e,i)=>later(i*0.12,()=>{const x=e.x,y=e.y;G.fxs.push({k:'roots',x,y,t:0,life:0.8});aoe(x,y,90*P.st.area,sk(4+r),{root:2.5});G.shake+=2;sfx('vine')}))}},
-   {id:'e_s_bolt',b:3,row:0,a:1,ic:'✧',name:'Leitbolzen',cd:()=>4,d:r=>`Echo liest die Sterne und schleudert einen Lichtbolzen: ${pc(2.6+0.6*r)} Schaden, beim Aufprall zerspringt er in Sternsplitter (${pc((2.6+0.6*r)*0.4)} an allen ringsum). Das Ziel trägt 4 s ein Sternenmal – der nächste Treffer darauf, egal von wem, richtet +${40+8*r}% Schaden an.`,
+   {id:'e_s_bolt',b:3,row:0,a:1,ic:'✧',name:'Leitbolzen',cd:()=>4,d:r=>`Echo liest die Sterne und schleudert einen Lichtbolzen: ${pc(3.1+0.75*r)} Schaden, beim Aufprall zerspringt er in Sternsplitter (${pc((3.1+0.75*r)*0.4)} an allen ringsum). Das Ziel trägt 4 s ein Sternenmal – der nächste Treffer darauf, egal von wem, richtet +${40+8*r}% Schaden an.`,
     cast(r){esBoltCast(r)}},
-   {id:'e_s_form',b:3,row:1,a:1,ic:'✴',name:'Sternengestalt',cd:r=>21-r,d:r=>`Echos Körper wird zu Sternenlicht – eine dritte Gestalt neben Bär und Ratte, ${f1(10+2*r)} s lang; das Sternenlicht hält 10% des Schadens ab. Über ihm leuchtet ein Sternbild: Bogenschütze (jede Sekunde ein Lichtpfeil, ${pc(1.1+0.25*r)} Schaden; Fernangriffe werden zu durchbohrenden Lichtpfeilen), Kelch (jede Fähigkeit heilt Echo und den verletztesten Mitspieler um ${f1(2+0.5*r)}% Leben) oder Drache (−${10+2*r}% erlittener Schaden, keine Betäubung, +${5+r}% Fertigkeitsschaden). Erneut wirken wechselt das Sternbild.`,
+   {id:'e_s_form',b:3,row:1,a:1,ic:'✴',name:'Sternengestalt',cd:r=>21-r,d:r=>`Echos Körper wird zu Sternenlicht – eine dritte Gestalt neben Bär und Ratte, ${f1(10+2*r)} s lang; das Sternenlicht hält 10% des Schadens ab. Über ihm leuchtet ein Sternbild: Bogenschütze (jede Sekunde ein Lichtpfeil, ${pc(1.25+0.3*r)} Schaden; Fernangriffe werden zu durchbohrenden Lichtpfeilen), Kelch (jede Fähigkeit heilt Echo und den verletztesten Mitspieler um ${f1(2+0.5*r)}% Leben) oder Drache (−${10+2*r}% erlittener Schaden, keine Betäubung, +${5+r}% Fertigkeitsschaden). Erneut wirken wechselt das Sternbild.`,
     cast(r){esFormCast(r)}},
    {id:'e_s_karte',b:3,row:2,ic:'✺',name:'Sternenkarte',d:r=>`Echos Sternenkarte – Leuchtpunkte auf einer Schieferplatte, die er niemandem zeigt. +${3*r}% Fertigkeitsschaden. Jede 3. Fähigkeit (in Sternengestalt jede 2.) feuert gratis einen Leitbolzen mit ${pc(0.5+0.1*r)} seines Schadens auf einen Gegner in der Nähe.`,mod:(s,r)=>{s.skill+=0.03*r}},
    {id:'e_s_omen',b:3,row:3,c:0,a:1,ic:'⚀',name:'Leuchtendes Omen',cd:()=>13,d:r=>`Echo wirft einen leuchtenden W20 – ${pc(2.2+0.5*r)} Schaden, wo er landet. Gerade Zahl, Glück: Echo und Mitspieler in der Nähe richten 6 s lang +${12+3*r}% Schaden an und erleiden 10% weniger. Ungerade Zahl, Pech: Getroffene Gegner erleiden 6 s lang +${12+3*r}% Schaden und richten 20% weniger an. Eine 20 bringt beides, bei einer 1 flucht Echo – und das Pech wirkt doppelt.`,
@@ -1889,7 +1889,7 @@ const HEROES={
    {id:'e_s_funkel',b:3,row:3,c:1,ic:'❈',name:'Funkelnde Sternbilder',d:r=>`Die Sternbilder funkeln heller: ihre Wirkung +${12*r}%. Jeder Sternbildwechsel lässt einen Sternenregen niedergehen (6 Splitter, je ${pc(0.7+0.18*r)} Schaden), und der Drache verleiht Flügel: +${4*r}% Lauftempo.`},
    {id:'e_s_fessel',b:3,row:4,a:1,ic:'⋇',name:'Sternbildfessel',cd:()=>12,d:r=>`Echo zeichnet ein Sternbild auf den Boden: Bis zu ${4+r} Gegner werden zu seinen Sternen, Linien verbinden sie. Dann flammt das Bild auf – je ${pc(2+0.45*r)} Schaden (+10% je weiterem Stern im Bild), 1,5 s gefesselt und zur Mitte gezogen.`,
     cast(r){esFessel(r)}},
-   {id:'e_s_nacht',b:3,row:5,a:1,ult:1,ic:'☾',name:'Sternennacht',cd:()=>50,d:r=>`Wie in jener sternklaren Nacht vor dem Wachturm: ${8+r} s lang senkt sich der Nachthimmel um Echo. Er nimmt Sternengestalt an, alle drei Sternbilder leuchten zugleich, und zweieinhalbmal pro Sekunde fällt eine Sternschnuppe auf einen Gegner (${pc(1.2+0.3*r)} Schaden im Umkreis).`,
+   {id:'e_s_nacht',b:3,row:5,a:1,ult:1,ic:'☾',name:'Sternennacht',cd:()=>50,d:r=>`Wie in jener sternklaren Nacht vor dem Wachturm: ${8+r} s lang senkt sich der Nachthimmel um Echo. Er nimmt Sternengestalt an, alle drei Sternbilder leuchten zugleich, und zweieinhalbmal pro Sekunde fällt eine Sternschnuppe auf einen Gegner (${pc(0.65+0.15*r)} Schaden im Umkreis).`,
     cast(r){const T=8+r;P.buffs.esNacht=T;if(P.form!=='star'){P.sb=P.sb||P.sbW||'b';setForm('star',T)}else P.formT=Math.max(P.formT||0,T);recalc();zone({x:P.x,y:P.y,r:360*P.st.area,dur:T,dps:0,kind:'es_nacht',d:{r}});light(P.x,P.y,400,'#7f9cff',0.6,1);sfx('ult');sfx('glas')}},
    {id:'e_p_wurf',b:4,row:0,a:1,ic:'❍',name:'Sporenwurf',cd:()=>5,d:r=>`Echo wirft einen reifen Bovist. Er platzt am Ziel (${pc(1.6+0.4*r)} Schaden) und hinterlässt 4 s eine Sporenwolke (${pc(1+0.25*r)} pro Sekunde). Getroffene Gegner sind befallen.`,
     cast(r){epWurf(r)}},
@@ -1899,12 +1899,12 @@ const HEROES={
    {id:'e_p_befall',b:4,row:3,c:0,ic:'♣',name:'Pilzbefall',d:r=>`Befallene Gegner, die sterben, stehen mit ${30+10*r}% Chance als Pilzdiener wieder auf (bis zu ${2+Math.ceil(r/2)} zugleich, je ${10+2*r} s): Sie schlurfen auf Gegner zu, schlagen mit ${pc(0.8+0.2*r)} von Echos Schaden zu und ziehen Aufmerksamkeit auf sich. Zum Schluss platzen sie in einer Sporenwolke – vorher leeren sie auf Echos Geheiß noch ihre Taschen.`},
    {id:'e_p_ring',b:4,row:3,c:1,a:1,ic:'◌',name:'Hexenring',cd:()=>14,d:r=>`Wie der Pilzkreis tief im Unterreich: Ein Ring aus leuchtenden Pilzen sprießt am Ziel. ${f1(5+0.5*r)} s lang müssen Gegner darin tanzen – gefesselt (Bosse und Wächter verlangsamt), befallen und ${pc(0.9+0.22*r)} Schaden pro Sekunde.`,
     cast(r){const p=aimPoint(420);zone({x:p.x,y:p.y,r:125*P.st.area,dur:5+0.5*r,dps:sk(0.9+0.22*r),root:1,kind:'ep_ring'});light(p.x,p.y,200,'#c8a0f0',0.4,0.8);sfx('vine');sfx('magic')}},
-   {id:'e_p_platz',b:4,row:4,a:1,ic:'✹',name:'Bovistplatzer',cd:()=>12,d:r=>`„Platzt!“ – Alle Pilzdiener zerplatzen (je ${pc(2.6+0.6*r)} Schaden im Umkreis und eine Sporenwolke), und jeder befallene Gegner in der Nähe stößt Sporen aus (${pc(1+0.25*r)} Schaden um ihn herum). Ist nichts zum Platzen da, platzt Echos eigener Sporenkranz (${pc(1.6+0.4*r)}).`,
+   {id:'e_p_platz',b:4,row:4,a:1,ic:'✹',name:'Bovistplatzer',cd:()=>12,d:r=>`„Platzt!“ – Alle Pilzdiener zerplatzen (je ${pc(2.3+0.55*r)} Schaden im Umkreis und eine Sporenwolke), und jeder befallene Gegner in der Nähe stößt Sporen aus (${pc(1+0.25*r)} Schaden um ihn herum). Ist nichts zum Platzen da, platzt Echos eigener Sporenkranz (${pc(1.6+0.4*r)}).`,
     cast(r){epPlatz(r)}},
-   {id:'e_p_frucht',b:4,row:5,a:1,ult:1,ic:'❀',name:'Große Fruchtung',cd:()=>50,d:r=>`Echo stampft mürrisch auf – ein Myzelnetz breitet sich ${8+r} s lang weit um ihn aus und verbindet alle Gegner darin. Sie sind verlangsamt, befallen und erleiden +${15+5*r}% Schaden. Zweimal pro Sekunde bricht unter einem von ihnen ein Riesenpilz hervor (${pc(2+0.5*r)} Schaden), und wer im Netz stirbt, steht sicher als Pilzdiener auf.`,
+   {id:'e_p_frucht',b:4,row:5,a:1,ult:1,ic:'❀',name:'Große Fruchtung',cd:()=>50,d:r=>`Echo stampft mürrisch auf – ein Myzelnetz breitet sich ${8+r} s lang weit um ihn aus und verbindet alle Gegner darin. Sie sind verlangsamt, befallen und erleiden +${15+5*r}% Schaden. Zweimal pro Sekunde bricht unter einem von ihnen ein Riesenpilz hervor (${pc(1.7+0.42*r)} Schaden), und wer im Netz stirbt, steht sicher als Pilzdiener auf.`,
     cast(r){zone({x:P.x,y:P.y,r:330*P.st.area,dur:8+r,dps:0,kind:'ep_netz',d:{r}});if(fxOk())G.fxs.push({k:'ep_myzel',x:P.x,y:P.y,r:300,t:0,life:0.9});G.shake+=5;light(P.x,P.y,380,'#b8d88a',0.5,1);sfx('ult');sfx('vine')}}
   ]},
- friedrich:{name:'Friedrich',cls:'Menschlicher Waldläufer',role:'Fernkampf & Rex',dm:1.35,hp:122,dmg:9.5,rate:1.75,speed:172,range:440,sig:'f_fan',
+ friedrich:{name:'Friedrich',cls:'Menschlicher Waldläufer',role:'Fernkampf & Rex',dm:1.35,hp:132,dmg:10,rate:1.75,speed:172,range:440,sig:'f_fan',
   blurb:'Trifft auf jede Entfernung, beendet Kämpfe mit einem einzigen Pfeil und hat Rex an seiner Seite – der wird mit jedem Talent bissiger. Als flinker Waldläufer weicht er jedem achten Treffer aus.',
   branches:['Schützenkunst','Jäger','Rex','Schwarmhüter','Fallensteller'],
   meleeW:[{n:'Jagdmesser',r:1.2,d:0.85},{n:'Kurzschwert',r:1,d:1,imp:['crit',4]},{n:'Waldaxt',r:0.8,d:1.3,imp:['critd',15]}],rangedW:[{n:'Langbogen',r:0.9,d:1.18},{n:'Kurzbogen',r:1.25,d:0.8},{n:'Kompositbogen',r:1,d:1,imp:['crit',5]},{n:'Armbrust',r:0.72,d:1.5,imp:['critd',20]}],
@@ -1915,16 +1915,16 @@ const HEROES={
   tree:[
    {id:'f_fan',b:0,row:0,a:1,ic:'⇶',name:'Fächerschuss',cd:()=>4,d:r=>`Feuert ${5+r} Pfeile im Fächer, je ${pc(0.8+0.15*r)} Schaden. Jeder Pfeil durchbohrt einen Gegner.`,
     cast(r){const a=aimAng(540),n=5+r,sp=0.95;for(let i=0;i<n;i++)shoot({x:P.x,y:P.y-4,a:a-sp/2+sp*i/(n-1),spd:760,dmg:sk(0.8+0.15*r),r:6,pierce:1,kind:'arrow',c:'#efe0b8'});sfx('bow')}},
-   {id:'f_double',b:0,row:1,ic:'⇉',name:'Doppelschuss',d:r=>`${8*r}% Chance auf zwei zusätzliche Pfeile. +${5*r}% Angriffstempo.`,mod:(s,r)=>{s.rateP+=0.05*r}},
-   {id:'f_rain',b:0,row:2,a:1,ic:'⇊',name:'Pfeilhagel',cd:()=>11,d:r=>`Ein Pfeilhagel prasselt 4 s lang nieder: ${pc(1.8+0.45*r)} Schaden pro Sekunde und 40% Verlangsamung.`,
-    cast(r){const p=aimPoint(500);zone({x:p.x,y:p.y,r:(125+8*r)*P.st.area,dur:4,dps:sk(1.8+0.45*r),slow:0.4,kind:'arrows'});sfx('bow')}},
-   {id:'f_explode',b:0,row:3,c:0,a:1,ic:'✺',name:'Sprengpfeil',cd:()=>5,d:r=>`Ein Pfeil mit Sprengladung explodiert beim Aufprall: ${pc(2.5+0.6*r)} Schaden im Umkreis, und die Getroffenen brennen 3 s lang (${pc(0.5+0.12*r)} pro Sekunde).`,
-    cast(r){const a=aimAng(560);shoot({x:P.x,y:P.y-4,a,spd:820,dmg:0,r:8,pierce:0,kind:'firearrow',c:'#ff9a3a',life:0.75,boom:{R:(90+6*r)*P.st.area,dmg:sk(2.5+0.6*r),burn:sk(0.5+0.12*r)}});sfx('bow')}},
-   {id:'f_ricochet',b:0,row:3,c:1,ic:'↯',name:'Abpraller',d:r=>`Normale Pfeile prallen ${Math.ceil(r/2)}× zum nächsten Gegner ab und verursachen dabei ${50+8*r}% Schaden.`},
-   {id:'f_strafe',b:0,row:4,a:1,ic:'⋰',name:'Kugelhagel',cd:()=>12,d:r=>`${f1(3+0.3*r)} s lang schießt Friedrich im Laufen ununterbrochen auf Gegner in der Nähe – 8 Pfeile pro Sekunde, je ${pc(0.55+0.12*r)} Schaden.`,
-    cast(r){startChan({t:3+0.3*r,every:0.125,move:1,fn:()=>{const e=mouseAim()?nearestTo(cursorW(),200)||randomEnemy(P.x,P.y,450):randomEnemy(P.x,P.y,450);if(!e)return;const a=ang(P,e)+rnd(-0.06,0.06);shoot({x:P.x,y:P.y-4,a,spd:800,dmg:sk(0.55+0.12*r),r:6,pierce:0,kind:'arrow',c:'#efe0b8'});sfx('bow')}})}},
-   {id:'f_onearrow',b:0,row:5,a:1,ult:1,ic:'➳',name:'Der eine Pfeil',cd:()=>30,d:r=>`Friedrich beendet Kämpfe oft mit einem einzigen Pfeil: 0,8 s spannen, dann ${pc(15+6*r)} Schaden. Gegner (keine Bosse) unter ${20+5*r}% Leben sterben sofort.`,
-    cast(r){const a0=aimAng(800);startChan({t:0.8,every:9,move:0,draw:'aim',a:a0,end:()=>{const a=mouseAim()?aimAng(800):a0;shoot({x:P.x,y:P.y-4,a,spd:1300,dmg:sk(15+6*r),r:16,pierce:999,kind:'bigarrow',c:'#ffe9a0',life:1,exec:0.2+0.05*r,knock:300});G.shake+=6;sfx('pierce')}})}},
+   {id:'f_double',b:0,row:1,ic:'⇉',name:'Doppelschuss',d:r=>`${8*r}% Chance auf zwei zusätzliche Pfeile. +${8*r}% Angriffstempo, +${7*r}% Leben.`,mod:(s,r)=>{s.rateP+=0.08*r;s.hpP+=0.07*r}},
+   {id:'f_rain',b:0,row:2,a:1,ic:'⇊',name:'Pfeilhagel',cd:()=>9,d:r=>`Ein Pfeilhagel prasselt 4 s lang nieder: ${pc(2+0.5*r)} Schaden pro Sekunde und 40% Verlangsamung.`,
+    cast(r){const p=aimPoint(500);zone({x:p.x,y:p.y,r:(125+8*r)*P.st.area,dur:4,dps:sk(2+0.5*r),slow:0.4,kind:'arrows'});sfx('bow')}},
+   {id:'f_explode',b:0,row:3,c:0,a:1,ic:'✺',name:'Sprengpfeil',cd:()=>5,d:r=>`Ein Pfeil mit Sprengladung explodiert beim Aufprall: ${pc(2.8+0.7*r)} Schaden im Umkreis, und die Getroffenen brennen 3 s lang (${pc(0.55+0.14*r)} pro Sekunde).`,
+    cast(r){const a=aimAng(560);shoot({x:P.x,y:P.y-4,a,spd:820,dmg:0,r:8,pierce:0,kind:'firearrow',c:'#ff9a3a',life:0.75,boom:{R:(90+6*r)*P.st.area,dmg:sk(2.8+0.7*r),burn:sk(0.55+0.14*r)}});sfx('bow')}},
+   {id:'f_ricochet',b:0,row:3,c:1,ic:'↯',name:'Abpraller',d:r=>`Normale Pfeile prallen ${Math.ceil(r/2)}× zum nächsten Gegner ab und verursachen dabei ${60+10*r}% Schaden.`},
+   {id:'f_strafe',b:0,row:4,a:1,ic:'⋰',name:'Kugelhagel',cd:()=>12,d:r=>`${f1(3.5+0.35*r)} s lang schießt Friedrich im Laufen ununterbrochen auf Gegner in der Nähe – 8 Pfeile pro Sekunde, je ${pc(0.75+0.17*r)} Schaden.`,
+    cast(r){startChan({t:3.5+0.35*r,every:0.125,move:1,fn:()=>{const e=mouseAim()?nearestTo(cursorW(),200)||randomEnemy(P.x,P.y,450):randomEnemy(P.x,P.y,450);if(!e)return;const a=ang(P,e)+rnd(-0.06,0.06);shoot({x:P.x,y:P.y-4,a,spd:800,dmg:sk(0.75+0.17*r),r:6,pierce:0,kind:'arrow',c:'#efe0b8'});sfx('bow')}})}},
+   {id:'f_onearrow',b:0,row:5,a:1,ult:1,ic:'➳',name:'Der eine Pfeil',cd:()=>20,d:r=>`Friedrich beendet Kämpfe oft mit einem einzigen Pfeil: 0,8 s spannen, dann ${pc(18+7*r)} Schaden. Gegner (keine Bosse) unter ${20+5*r}% Leben sterben sofort.`,
+    cast(r){const a0=aimAng(800);startChan({t:0.8,every:9,move:0,draw:'aim',a:a0,end:()=>{const a=mouseAim()?aimAng(800):a0;shoot({x:P.x,y:P.y-4,a,spd:1300,dmg:sk(18+7*r),r:16,pierce:999,kind:'bigarrow',c:'#ffe9a0',life:1,exec:0.2+0.05*r,knock:300});G.shake+=6;sfx('pierce')}})}},
    {id:'f_pierce',b:1,row:0,a:1,ic:'➶',name:'Durchbohrender Schuss',cd:()=>6,d:r=>`Ein gewaltiger Pfeil durchschlägt alle Gegner in einer Linie: ${pc(3+0.8*r)} Schaden und Rückstoß.`,
     cast(r){const a=aimAng(700);shoot({x:P.x,y:P.y-4,a,spd:980,dmg:sk(3+0.8*r),r:15,pierce:999,kind:'bigarrow',c:'#fff1c2',knock:260,life:1.1});G.shake+=2;sfx('pierce')}},
    {id:'f_mark',b:1,row:1,ic:'⌖',name:'Jägermal',d:r=>`Normale Pfeile markieren Gegner: Sie erleiden von allen ${6*r}% mehr Schaden. +${3*r}% Kritische Trefferchance.`,mod:(s,r)=>{s.crit+=0.03*r}},
@@ -1935,22 +1935,22 @@ const HEROES={
    {id:'f_leap',b:1,row:4,a:1,ic:'⤺',name:'Rückzugssprung',cd:()=>8,d:r=>`Friedrich springt zurück und hinterlässt ein Netz (−60% Tempo, 4 s). Die nächsten ${2+(r>>1)} Treffer sind kritisch.`,
     cast(r){const a=mouseAim()?aimAng(400)+Math.PI:escapeAng();zone({x:P.x,y:P.y,r:95,dur:4,dps:sk(0.3),slow:0.6,kind:'net'});dash(a,230,0.22,0,{});P.critNext=(P.critNext||0)+2+(r>>1);sfx('blink')}},
    {id:'f_tenth',b:1,row:5,ult:1,ic:'✪',name:'Meisterschuss',d:r=>`Jeder ${10-r}. normale Pfeil ist ein durchbohrender Meisterschuss mit ${250+50*r}% Schaden, der sicher kritisch trifft.`},
-   {id:'f_rex',b:2,row:0,a:1,ic:'⊛',name:'Rex, fass!',cd:()=>7,d:r=>`Rex springt den stärksten Gegner in der Nähe an: ${pc(2.5+0.6*r)} Schaden und 1,5 s Betäubung. Holt Rex sofort zurück, falls er k.o. ist.`,
+   {id:'f_rex',b:2,row:0,a:1,ic:'⊛',name:'Rex, fass!',cd:()=>6,d:r=>`Rex springt den stärksten Gegner in der Nähe an: ${pc(3.2+0.8*r)} Schaden und 1,5 s Betäubung. Holt Rex sofort zurück, falls er k.o. ist.`,
     cast(r){const rex=G.allies.find(a=>a.kind==='rex');if(!rex)return;if(rex.dead){rex.dead=false;rex.hp=rex.maxHp;rex.x=P.x;rex.y=P.y}
-     const t=aimTarget(500,true);if(t){const a=ang(t,P);rex.x=t.x+Math.cos(a)*(t.r+8);rex.y=t.y+Math.sin(a)*(t.r+8);rex.tgt=t;aoe(t.x,t.y,72*P.st.area,sk(2.5+0.6*r),{stun:1.5});ring(t.x,t.y,72*P.st.area,'#e8b070',0.4,4)}
+     const t=aimTarget(500,true);if(t){const a=ang(t,P);rex.x=t.x+Math.cos(a)*(t.r+8);rex.y=t.y+Math.sin(a)*(t.r+8);rex.tgt=t;aoe(t.x,t.y,72*P.st.area,sk(3.2+0.8*r),{stun:1.5});ring(t.x,t.y,72*P.st.area,'#e8b070',0.4,4)}
      burst(rex.x,rex.y,'#c8a070',12,140);sfx('bark')}},
-   {id:'f_loyal',b:2,row:1,ic:'✚',name:'Treuer Gefährte',d:r=>`Rex erhält +${25*r}% Leben und +${20*r}% Schaden. Wird Friedrich oder ein Mitspieler in Rex’ Nähe getroffen, springt Rex dem Angreifer an die Kehle (alle ${f1(Math.max(2,6-0.6*r))} s): ${pc(1.2+0.3*r)} Schaden und 0,8 s Betäubung.`},
-   {id:'f_pack',b:2,row:2,ic:'⁂',name:'Rudelführer',d:r=>`Rex beißt ${15*r}% schneller, betäubt mit ${10*r}% Chance, und jeder Biss heilt Friedrich um ${f1(0.5*r)}% Leben.`},
+   {id:'f_loyal',b:2,row:1,ic:'✚',name:'Treuer Gefährte',d:r=>`Rex erhält +${35*r}% Leben und +${35*r}% Schaden. Wird Friedrich oder ein Mitspieler in Rex’ Nähe getroffen, springt Rex dem Angreifer an die Kehle (alle ${f1(Math.max(2,6-0.6*r))} s): ${pc(1.2+0.3*r)} Schaden und 0,8 s Betäubung. Friedrich: +${4*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.04*r}},
+   {id:'f_pack',b:2,row:2,ic:'⁂',name:'Rudelführer',d:r=>`Rex beißt ${15*r}% schneller, betäubt mit ${10*r}% Chance, und jeder Biss heilt Friedrich um ${f1(0.9*r)}% Leben.`},
    {id:'f_howl',b:2,row:3,c:0,a:1,ic:'❂',name:'Heulen',cd:()=>15,d:r=>`Rex heult: 6 s lang +${20+5*r}% Schaden und +20% Tempo für Friedrich, Rex und alle Verbündeten. Gegner nahe Rex fliehen 1,5 s.`,
     cast(r){P.buffs.howl=6;P.howlR=r;teamBuff('howl',6,q=>{q.howlR=r});recalc();const rex=G.allies.find(a=>a.kind==='rex'&&!a.dead)||P;aoe(rex.x,rex.y,170,sk(0.3),{fear:1.5,fx:rex.x,fy:rex.y});ring(rex.x,rex.y,170,'#e8b070',0.7,6);sfx('bark')}},
    {id:'f_fetch',b:2,row:3,c:1,ic:'⚲',name:'Apport!',d:r=>`Rex bringt Beute aus großer Entfernung herbei. Von Rex besiegte Gegner lassen ${15*r}% öfter Gold fallen. +${5*r}% bessere Beute.`,mod:(s,r)=>{s.luck+=0.05*r}},
-   {id:'f_wolves',b:2,row:4,a:1,ic:'ᴥ',name:'Die befreiten Wölfe',cd:()=>30,d:r=>`Die Wölfe aus der Goblinhöhle haben euch nicht vergessen: ${2+(r>>1)} Wölfe kämpfen ${12+r} s lang mit, je ${35+8*r}% Schaden pro Biss.`,
-    cast(r){for(let i=0;i<2+(r>>1);i++){const p=edgePoint(Math.min(300,Math.hypot(W,H)/2/ZOOM));spawnPet('wolf',p.x,p.y,{life:12+r,dmg:()=>P.st.dmg*(0.35+0.08*r),hp:P.st.maxHp*0.5,every:0.7,r:13,speed:240})}sfx('bark')}},
+   {id:'f_wolves',b:2,row:4,a:1,ic:'ᴥ',name:'Die befreiten Wölfe',cd:()=>22,d:r=>`Die Wölfe aus der Goblinhöhle haben euch nicht vergessen: ${2+(r>>1)} Wölfe kämpfen ${12+r} s lang mit, je ${45+10*r}% Schaden pro Biss.`,
+    cast(r){for(let i=0;i<2+(r>>1);i++){const p=edgePoint(Math.min(300,Math.hypot(W,H)/2/ZOOM));spawnPet('wolf',p.x,p.y,{life:12+r,dmg:()=>P.st.dmg*(0.45+0.1*r),hp:P.st.maxHp*0.5,every:0.7,r:13,speed:240})}sfx('bark')}},
    {id:'f_bigrex',b:2,row:5,ult:1,ic:'♛',name:'Rex der Große',d:r=>`Rex wird größer, erhält +${50*r}% Leben, seine Bisse treffen alle Gegner um ihn herum, und Gegner in seiner Nähe greifen bevorzugt ihn an.`},
-   {id:'f_s_hetz',b:3,row:0,a:1,ic:'❉',name:'Schwarmhetze',cd:()=>7,d:r=>`Friedrich hetzt seinen Glühwürmchen-Schwarm auf ein Ziel: Die Wolke verfolgt es ${f1(3+0.2*r)} s lang, sticht alles darin (${pc(0.6+0.14*r)} Schaden pro Sekunde), blendet jeden Gegner beim ersten Kontakt 1 s lang und verlangsamt um 25%. Rex folgt dem Leuchten.`,
+   {id:'f_s_hetz',b:3,row:0,a:1,ic:'❉',name:'Schwarmhetze',cd:()=>7,d:r=>`Friedrich hetzt seinen Glühwürmchen-Schwarm auf ein Ziel: Die Wolke verfolgt es ${f1(3+0.2*r)} s lang, sticht alles darin (${pc(0.5+0.11*r)} Schaden pro Sekunde), blendet jeden Gegner beim ersten Kontakt 1 s lang und verlangsamt um 25%. Rex folgt dem Leuchten.`,
     cast(r){const t=aimTarget(480,true);if(!t&&!mouseAim()&&padA()==null&&!nearest(P.x,P.y,480))return false;const p=t?{x:t.x,y:t.y}:aimPoint(460),dur=3+0.2*r;
      for(const z of G.zones)if(z.kind==='fsw_hetz'&&z.own===P)z.dur=Math.min(z.dur,z.t+0.2);
-     const z={x:p.x,y:p.y,r:(90+5*r)*P.st.area,dur,kind:'fsw_hetz',own:P,d:{dps:sk(0.6+0.14*r),rx:rank('f_s_rex')?1:0}};zone(z);z.tick=1e9;z.tgt=t||null;
+     const z={x:p.x,y:p.y,r:(90+5*r)*P.st.area,dur,kind:'fsw_hetz',own:P,d:{dps:sk(0.5+0.11*r),rx:rank('f_s_rex')?1:0}};zone(z);z.tick=1e9;z.tgt=t||null;
      P.fswHz=dur;P.fswHzD=dur;P.fswHx=p.x;P.fswHy=p.y;P.fswHr=z.r;if(t){P.rexCmd=t;t.rexZiel=G.time}sfx('b_fluegel');sfx('magic')}},
    {id:'f_s_stich',b:3,row:1,ic:'✧',name:'Gesammelter Schwarm',d:r=>`Wie bei den Schwarmhütern: Treffen Friedrichs Pfeile oder Fähigkeiten einen Gegner, sticht der Schwarm nach (${pc(0.35+0.1*r)} Schaden, je Gegner höchstens einmal pro Sekunde). Jeder dritte Stich stößt den Gegner ein Stück weg. +${2*r}% Angriffstempo.`,mod:(s,r)=>{s.rateP+=0.02*r}},
    {id:'f_s_flug',b:3,row:2,a:1,ic:'➹',name:'Schwarmflug',cd:r=>Math.max(4,8-0.4*r),d:r=>`Der Schwarm trägt Friedrich ${280+15*r} Schritt weit davon – unverwundbar und über Gegner hinweg. Wer im Weg ist, wird gestochen (${pc(1.1+0.25*r)} Schaden) und zur Seite gestoßen. Fliegt in Laufrichtung, sonst zum Ziel. Abklingzeit ${f1(Math.max(4,8-0.4*r))} s.`,
@@ -1963,7 +1963,7 @@ const HEROES={
    {id:'f_s_woge',b:3,row:4,a:1,ic:'◎',name:'Schwarmwoge',cd:()=>14,d:r=>`Der Schwarm bricht als leuchtende Woge aus Friedrich hervor: ${pc(2+0.5*r)} Schaden, und alle Gegner ringsum werden weit weggestoßen. ${f1(2+0.3*r)} s lang kreist danach ein Schwarmwall um ihn, der jeden zurückwirft, der hindurch will (${pc(0.4+0.1*r)} Schaden je Stoß).`,
     cast(r){const R=(190+8*r)*P.st.area;aoe(P.x,P.y,R,sk(2+0.5*r),{fswSt:1,onHit:e=>fswStoss(e,P.x,P.y,1400)});P.fswWo=2+0.3*r;P.fswWoD=P.fswWo;P.fswWoR=R;P.fswWoK=r;P.fswWoT=0.25;
      G.fxs.push({k:'fsw_woge',x:P.x,y:P.y-8,r:R,t:0,life:0.6});G.shake+=3;sfx('g_wind');sfx('b_fluegel')}},
-   {id:'f_s_macht',b:3,row:5,a:1,ult:1,ic:'❋',name:'Mächtiger Schwarm',cd:()=>45,d:r=>`${10+2*r} s lang wächst der Schwarm gewaltig an, und Krähen schließen sich ihm an: Friedrich erleidet ${15+5*r}% weniger Schaden, jeder Treffer lässt den Schwarm nachstechen (oft, mit 30% Chance wirft der Stich den Gegner um), und alle 0,8 s stößt eine Krähe auf einen Gegner herab (${pc(1.2+0.3*r)} Schaden).`,
+   {id:'f_s_macht',b:3,row:5,a:1,ult:1,ic:'❋',name:'Mächtiger Schwarm',cd:()=>45,d:r=>`${10+2*r} s lang wächst der Schwarm gewaltig an, und Krähen schließen sich ihm an: Friedrich erleidet ${15+5*r}% weniger Schaden, jeder Treffer lässt den Schwarm nachstechen (oft, mit 30% Chance wirft der Stich den Gegner um), und alle 0,5 s stößt eine Krähe auf einen Gegner herab (${pc(2.5+0.6*r)} Schaden).`,
     cast(r){P.buffs.fswMacht=10+2*r;P.fswMaR=r;P.fswKrT=0.3;recalc();G.fxs.push({k:'fsw_macht',x:P.x,y:P.y,t:0,life:0.9});light(P.x,P.y,260,'#c8f048',0.6,0.9);G.shake+=4;sfx('ult');sfx('b_fluegel')}},
    {id:'f_f_draht',b:4,row:0,a:1,ic:'⌇',name:'Stolperdraht',cd:()=>5,d:r=>`Friedrich spannt einen Stolperdraht (${220+10*r} Schritt) zwischen zwei Pflöcke, quer zur Zielrichtung. Er hält 25 s und bringt bis zu ${3+(r>>1)} Gegner zu Fall: je ${pc(1.6+0.4*r)} Schaden, ${f1(1.2+0.1*r)} s am Boden. Höchstens 3 Drähte gleichzeitig.`,
     cast(r){const p=fstPunkt(400),a=(d2(p,P)>25*25?ang(P,p):P.face)+Math.PI/2;fstGrenze('fst_draht',3);const z=fstDraht(p.x,p.y,a,r,25);fstBau(z.x-Math.cos(a)*z.d.L,z.y-Math.sin(a)*z.d.L);fstBau(z.x+Math.cos(a)*z.d.L,z.y+Math.sin(a)*z.d.L);sfx('holz');sfx('g_whip')}},
@@ -1974,7 +1974,7 @@ const HEROES={
    {id:'f_f_schlinge',b:4,row:3,c:0,a:1,ic:'➰',name:'Schlingfalle',cd:()=>9,d:r=>`Friedrich biegt ein junges Bäumchen herunter und legt ${r>=3?'zwei Schlingen':'eine Schlinge'} (halten 30 s, höchstens 4). Wer hineintritt, wird an einem Bein hochgerissen und hängt ${f1(2+0.2*r)} s kopfüber – wehrlos und mit 30% mehr erlittenem Schaden –, dann schlägt er für ${pc(2.4+0.6*r)} Schaden auf. Bosse werden nur verlangsamt.`,
     cast(r){const p=fstPunkt(380),n=r>=3?2:1,a=d2(p,P)>25*25?ang(P,p)+Math.PI/2:0;for(let i=0;i<n;i++){fstGrenze('fst_schlinge',4);const o=(i-(n-1)/2)*70,z=fstSchlinge(p.x+Math.cos(a)*o,p.y+Math.sin(a)*o,r,30);fstBau(z.x,z.y)}sfx('holz')}},
    {id:'f_f_hinterhalt',b:4,row:3,c:1,ic:'⇝',name:'Hinterhalt',d:r=>`Rex treibt Gegner in deine Fallen: Alle ${f1(Math.max(2.5,5-0.4*r))} s umrundet er einen Gegner nahe einer scharfen Falle, packt ihn mit seinem Mal und jagt ihn hinein. Rex beißt gefangene Gegner ${15*r}% härter.`},
-   {id:'f_f_spreng',b:4,row:4,a:1,ic:'✹',name:'Sprengfalle',cd:()=>10,d:r=>`Friedrich gräbt einen Pulvertopf ein (hält 30 s, höchstens 2). Kommt ein Gegner nahe, brennt kurz die Lunte – dann fliegt alles im Umkreis durch die Luft: ${pc(3+0.7*r)} Schaden, Gegner werden hochgeschleudert und weggeworfen. Andere Sprengfallen in der Nähe gehen mit hoch.`,
+   {id:'f_f_spreng',b:4,row:4,a:1,ic:'✹',name:'Sprengfalle',cd:()=>10,d:r=>`Friedrich gräbt einen Pulvertopf ein (hält 30 s, höchstens 2). Kommt ein Gegner nahe, brennt kurz die Lunte – dann fliegt alles im Umkreis durch die Luft: ${pc(2.7+0.6*r)} Schaden, Gegner werden hochgeschleudert und weggeworfen. Andere Sprengfallen in der Nähe gehen mit hoch.`,
     cast(r){const p=fstPunkt(400);fstGrenze('fst_spreng',2);const z=fstSpreng(p.x,p.y,r,30);fstBau(z.x,z.y);sfx('holz');sfx('thunk')}},
    {id:'f_f_revier',b:4,row:5,a:1,ult:1,ic:'⚑',name:'Jagdrevier',cd:()=>50,d:r=>`Friedrich steckt ein Jagdrevier ab: Pflöcke mit roten Bändern umringen es, und blitzschnell entstehen darin ${5+r} Fallen – Stolperdrähte, Schlingen und Sprengtöpfe. ${16+2*r} s lang sind Gegner im Revier um 20% verlangsamt und erleiden von Friedrich und Rex ${15+5*r}% mehr Schaden; Rex treibt alle 2 s einen Gegner in die Fallen.`,
     cast(r){const p0=fstPunkt(380),p=fstPos(p0.x,p0.y),R=260*P.st.area,dur=16+2*r,rr=2+r,n=5+r,K=['spreng','draht','schlinge','draht','spreng','schlinge','draht','spreng'];
@@ -1991,41 +1991,41 @@ const HEROES={
    return basicStd({meleeR:100,arc:1.9,mm:1.3,mc:'#ff5a5a',mopt:{onHit:ring8},
     ranged:(a)=>{shoot({x:P.x,y:P.y-4,a,spd:680,dmg:P.st.dmg*0.85,r:6,pierce:0,kind:'dagger',c:'#d8dde3',basic:1,hit:ring8});sfx('throw')}})},
   tree:[
-   {id:'z_rain',b:0,row:0,a:1,ic:'✢',name:'Dolchregen',cd:()=>8,d:r=>`Ein Regen aus Dolchen geht auf ein Gebiet nieder: insgesamt ${pc(3+0.7*r)} Schaden.`,
-    cast(r){const p=aimPoint(470);zone({x:p.x,y:p.y,r:(115+10*r)*P.st.area,dur:1.6,dps:sk((3+0.7*r)/1.6),kind:'daggers'});sfx('throw')}},
-   {id:'z_whirl',b:0,row:1,ic:'✣',name:'Klingenwirbel',d:r=>`Treffer normaler Angriffe entfesseln mit ${5*r}% Chance einen Ring aus 8 Dolchen.`},
+   {id:'z_rain',b:0,row:0,a:1,ic:'✢',name:'Dolchregen',cd:()=>8,d:r=>`Ein Regen aus Dolchen geht auf ein Gebiet nieder: insgesamt ${pc(3.8+0.9*r)} Schaden.`,
+    cast(r){const p=aimPoint(470);zone({x:p.x,y:p.y,r:(115+10*r)*P.st.area,dur:1.6,dps:sk((3.8+0.9*r)/1.6),kind:'daggers'});sfx('throw')}},
+   {id:'z_whirl',b:0,row:1,ic:'✣',name:'Klingenwirbel',d:r=>`Treffer normaler Angriffe entfesseln mit ${5*r}% Chance einen Ring aus 8 Dolchen. +${4*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.04*r}},
    {id:'z_sneak',b:0,row:2,ic:'◐',name:'Hinterhältiger Angriff',d:r=>`Gegner mit vollem Leben erleiden +${40*r}% Schaden. +${3*r}% Kritische Trefferchance.`,mod:(s,r)=>{s.crit+=0.03*r}},
-   {id:'z_fan',b:0,row:3,c:0,a:1,ic:'⋇',name:'Messerfächer',cd:()=>4,d:r=>`${8+r} Dolche fliegen im Fächer hinaus und kehren zu Ezekiel zurück – je ${pc(0.7+0.15*r)} Schaden auf dem Hin- und auf dem Rückweg.`,
-    cast(r){const a=aimAng(420),n=8+r,sp=1.3;for(let i=0;i<n;i++)shoot({x:P.x,y:P.y-4,a:a-sp/2+sp*i/(n-1),spd:620,dmg:sk(0.7+0.15*r),r:7,pierce:99,kind:'dagger',c:'#d8dde3',life:1.4,ret:0.45});sfx('throw')}},
+   {id:'z_fan',b:0,row:3,c:0,a:1,ic:'⋇',name:'Messerfächer',cd:()=>4,d:r=>`${8+r} Dolche fliegen im Fächer hinaus und kehren zu Ezekiel zurück – je ${pc(0.9+0.2*r)} Schaden auf dem Hin- und auf dem Rückweg.`,
+    cast(r){const a=aimAng(420),n=8+r,sp=1.3;for(let i=0;i<n;i++)shoot({x:P.x,y:P.y-4,a:a-sp/2+sp*i/(n-1),spd:620,dmg:sk(0.9+0.2*r),r:7,pierce:99,kind:'dagger',c:'#d8dde3',life:1.4,ret:0.45});sfx('throw')}},
    {id:'z_poison',b:0,row:3,c:1,ic:'☠',name:'Giftklingen',d:r=>`Normale Angriffe vergiften: ${20+6*r}% des Treffers pro Sekunde über 4 s, stapelbar bis 5×.`},
-   {id:'z_spin',b:0,row:4,a:1,ic:'✇',name:'Klingensturm',cd:()=>10,d:r=>`${f1(2.5+0.3*r)} s lang wirbelt Ezekiel durch die Gegner und kann dabei laufen: alle 0,2 s ${pc(0.5+0.1*r)} Schaden im Umkreis.`,
-    cast(r){startChan({t:2.5+0.3*r,every:0.2,move:1,spin:1,fn:()=>{const R=115*P.st.area;aoe(P.x,P.y,R,sk(0.5+0.1*r),{knock:60,melee:1});G.fxs.push({k:'spin',x:P.x,y:P.y,r:R,t:0,life:0.2});sfx('slash')}})}},
-   {id:'z_lotus',b:0,row:5,a:1,ult:1,ic:'❃',name:'Todeslotus',cd:()=>45,d:r=>`2,5 s lang schleudert Ezekiel Dolche in alle Richtungen – ${40+10*r} Dolche, je ${pc(0.9+0.25*r)} Schaden.`,
-    cast(r){const n=40+10*r,ev=2.5/n;let k=0;startChan({t:2.5,every:ev,move:0,spin:1,fn:()=>{const a=k++*2.39;shoot({x:P.x,y:P.y-4,a,spd:640,dmg:sk(0.9+0.25*r),r:7,pierce:1,kind:'dagger',c:'#ff8a8a',life:0.9});if(k%4===0)sfx('throw')}})}},
-   {id:'z_cleave',b:1,row:0,a:1,ic:'⌒',name:'Darkin-Schnitt',cd:()=>5,d:r=>`Ein gewaltiger, gefächerter Hieb trifft alle Gegner vor Ezekiel: ${pc(2.5+0.6*r)} Schaden und Rückstoß.`,
-    cast(r){const a=aimAng(400),R=(175+10*r)*P.st.area;faceA(a);cone(P.x,P.y,a,2.45,R,sk(2.5+0.6*r),{knock:300,melee:1});slash(P.x,P.y,a,2.45,R,'#ff3b4a',0.35,1);G.shake+=3;sfx('cleave')}},
+   {id:'z_spin',b:0,row:4,a:1,ic:'✇',name:'Klingensturm',cd:()=>10,d:r=>`${f1(2.5+0.3*r)} s lang wirbelt Ezekiel durch die Gegner und kann dabei laufen: alle 0,2 s ${pc(0.65+0.14*r)} Schaden im Umkreis.`,
+    cast(r){startChan({t:2.5+0.3*r,every:0.2,move:1,spin:1,fn:()=>{const R=115*P.st.area;aoe(P.x,P.y,R,sk(0.65+0.14*r),{knock:60,melee:1});G.fxs.push({k:'spin',x:P.x,y:P.y,r:R,t:0,life:0.2});sfx('slash')}})}},
+   {id:'z_lotus',b:0,row:5,a:1,ult:1,ic:'❃',name:'Todeslotus',cd:()=>45,d:r=>`2,5 s lang schleudert Ezekiel Dolche in alle Richtungen – ${40+10*r} Dolche, je ${pc(1.2+0.35*r)} Schaden.`,
+    cast(r){const n=40+10*r,ev=2.5/n;let k=0;startChan({t:2.5,every:ev,move:0,spin:1,fn:()=>{const a=k++*2.39;shoot({x:P.x,y:P.y-4,a,spd:640,dmg:sk(1.2+0.35*r),r:7,pierce:1,kind:'dagger',c:'#ff8a8a',life:0.9});if(k%4===0)sfx('throw')}})}},
+   {id:'z_cleave',b:1,row:0,a:1,ic:'⌒',name:'Darkin-Schnitt',cd:()=>5,d:r=>`Ein gewaltiger, gefächerter Hieb trifft alle Gegner vor Ezekiel: ${pc(2.15+0.5*r)} Schaden und Rückstoß.`,
+    cast(r){const a=aimAng(400),R=(175+10*r)*P.st.area;faceA(a);cone(P.x,P.y,a,2.45,R,sk(2.15+0.5*r),{knock:300,melee:1});slash(P.x,P.y,a,2.45,R,'#ff3b4a',0.35,1);G.shake+=3;sfx('cleave')}},
    {id:'z_wrath',b:1,row:1,ic:'✹',name:'Darkin-Zorn',d:r=>`Je 10% fehlendem Leben +${f1(1.5*r)}% Schaden. +${f1(1.5*r)}% Lebensraub.`,mod:(s,r)=>{s.ls+=0.015*r}},
    {id:'z_frenzy',b:1,row:2,a:1,ic:'✷',name:'Blutrausch',cd:()=>18,d:r=>`6 s lang +${40+8*r}% Angriffstempo, +15% Bewegungstempo und +8% Lebensraub. Mitspieler in der Nähe erhalten 8% Lebensraub.`,
     cast(r){P.buffs.frenzy=6;teamBuff('frenzyG',6);recalc();ring(P.x,P.y,55,'#ff3b4a',0.5,5);burst(P.x,P.y,'#ff3b4a',18,160);sfx('roar')}},
-   {id:'z_dawn',b:1,row:3,c:0,a:1,ic:'☼',name:'Dawnbringer',cd:()=>7,d:r=>`Ein Hieb aus Sonnenlicht in weitem Bogen: ${pc(3+0.7*r)} Schaden, die Getroffenen brennen. Untote und Dämonen erleiden doppelten Schaden.`,
-    cast(r){const a=aimAng(380),R=(200+10*r)*P.st.area;faceA(a);cone(P.x,P.y,a,2,R,sk(3+0.7*r),{holy:1,melee:1,onHit:e=>dot(e,'burn',sk(0.4+0.1*r),3)});slash(P.x,P.y,a,2,R,'#ffe08a',0.4,1);burst(P.x+Math.cos(a)*R*0.6,P.y+Math.sin(a)*R*0.6,'#fff0b0',20,200);sfx('cleave')}},
+   {id:'z_dawn',b:1,row:3,c:0,a:1,ic:'☼',name:'Dawnbringer',cd:()=>7,d:r=>`Ein Hieb aus Sonnenlicht in weitem Bogen: ${pc(2.5+0.55*r)} Schaden, die Getroffenen brennen. Untote und Dämonen erleiden doppelten Schaden.`,
+    cast(r){const a=aimAng(380),R=(200+10*r)*P.st.area;faceA(a);cone(P.x,P.y,a,2,R,sk(2.5+0.55*r),{holy:1,melee:1,onHit:e=>dot(e,'burn',sk(0.4+0.1*r),3)});slash(P.x,P.y,a,2,R,'#ffe08a',0.4,1);burst(P.x+Math.cos(a)*R*0.6,P.y+Math.sin(a)*R*0.6,'#fff0b0',20,200);sfx('cleave')}},
    {id:'z_pact',b:1,row:3,c:1,ic:'♥',name:'Blutpakt',d:r=>`Unter 50% Leben – oder wenn ein Mitspieler in der Nähe unter 30% fällt – erwacht der Pakt: +${3*r}% Lebensraub, +${6*r}% Schaden, und jeder Treffer heilt diesen Mitspieler um ${f1(1.5*r)}% des Schadens. Einmal pro Stufe weigert sich der Darkin zu sterben: Ein tödlicher Treffer lässt Ezekiel mit ${10+4*r}% Leben und 1,5 s unverwundbar zurück.`},
-   {id:'z_leap',b:1,row:4,a:1,ic:'⤊',name:'Darkin-Sprung',cd:()=>8,d:r=>`Ezekiel springt zum Ziel und schlägt ein: ${pc(2.5+0.6*r)} Schaden im Umkreis und 1 s Betäubung.`,
-    cast(r){const p=aimPoint(420),a=ang(P,p),dist=Math.max(40,Math.sqrt(d2(P,p)));P.leap={t:0.32,T:0.32};dash(a,dist,0.32,0,{},()=>{const R=120*P.st.area;aoe(P.x,P.y,R,sk(2.5+0.6*r),{stun:1,knock:200,fx:P.x,fy:P.y});ring(P.x,P.y,R,'#ff3b4a',0.5,6);burst(P.x,P.y,'#a89a8a',20,240);G.shake+=6;sfx('boom')});sfx('roar')}},
+   {id:'z_leap',b:1,row:4,a:1,ic:'⤊',name:'Darkin-Sprung',cd:()=>8,d:r=>`Ezekiel springt zum Ziel und schlägt ein: ${pc(2.2+0.5*r)} Schaden im Umkreis und 1 s Betäubung.`,
+    cast(r){const p=aimPoint(420),a=ang(P,p),dist=Math.max(40,Math.sqrt(d2(P,p)));P.leap={t:0.32,T:0.32};dash(a,dist,0.32,0,{},()=>{const R=120*P.st.area;aoe(P.x,P.y,R,sk(2.2+0.5*r),{stun:1,knock:200,fx:P.x,fy:P.y});ring(P.x,P.y,R,'#ff3b4a',0.5,6);burst(P.x,P.y,'#a89a8a',20,240);G.shake+=6;sfx('boom')});sfx('roar')}},
    {id:'z_ascend',b:1,row:5,a:1,ult:1,ic:'♆',name:'Erwachter Darkin',cd:()=>50,d:r=>`${8+2*r} s lang erwacht der Darkin in Ezekiel: +${40+15*r}% Schaden, +30% Wirkungsbereich, +10% Lebensraub, immun gegen Betäubung, Fesseln und Verlangsamung.`,
     cast(r){P.buffs.ascend=8+2*r;P.ascendR=r;recalc();ring(P.x,P.y,120,'#ff3b4a',0.8,8);burst(P.x,P.y,'#ff3b4a',40,260);G.shake+=6;sfx('boss')}},
-   {id:'z_step',b:2,row:0,a:1,ic:'⇝',name:'Schattenschritt',cd:r=>Math.max(2.5,6-0.4*r),d:r=>`Ezekiel teleportiert sich mitten unter die Gegner und verursacht dort ${pc(1.5+0.4*r)} Schaden. Kurz unverwundbar.`,
-    cast(r){const p=aimPoint(430);smoke(P.x,P.y);P.x=clamp(p.x,20,WORLD-20);P.y=clamp(p.y,20,WORLD-20);P.inv=Math.max(P.inv,0.5);const as=rank('z_assassin');if(as)P.ambush=Math.max(P.ambush||0,1*as);
-     const R=100*P.st.area,k0=G.kills;aoe(P.x,P.y,R,sk(1.5+0.4*r),{knock:220,fx:P.x,fy:P.y});smoke(P.x,P.y);ring(P.x,P.y,R,'#8a2a8a',0.35,4);sfx('blink');if(as&&G.kills>k0)later(0.01,()=>{P.cds.z_step=0})}},
+   {id:'z_step',b:2,row:0,a:1,ic:'⇝',name:'Schattenschritt',cd:r=>Math.max(3,6.5-0.4*r),d:r=>`Ezekiel teleportiert sich mitten unter die Gegner und verursacht dort ${pc(0.9+0.2*r)} Schaden. Kurz unverwundbar.`,
+    cast(r){const p=aimPoint(430);smoke(P.x,P.y);P.x=clamp(p.x,20,WORLD-20);P.y=clamp(p.y,20,WORLD-20);P.inv=Math.max(P.inv,0.5);const as=rank('z_assassin');if(as)P.ambush=Math.max(P.ambush||0,0.5*as);
+     const R=100*P.st.area,k0=G.kills;aoe(P.x,P.y,R,sk(0.9+0.2*r),{knock:220,fx:P.x,fy:P.y});smoke(P.x,P.y);ring(P.x,P.y,R,'#8a2a8a',0.35,4);sfx('blink');if(as&&G.kills>k0)later(0.01,()=>{P.cds.z_step=0})}},
    {id:'z_murder',b:2,row:1,ic:'☓',name:'Mordlust',d:r=>`Jeder Kill verkürzt alle Abklingzeiten um ${f1(0.12*r)} s.`},
-   {id:'z_destroyer',b:2,row:2,ic:'✠',name:'Der Zerstörer',d:r=>`Jeder Kill nährt die Klinge: Ein Zerstörer-Stapel (8 s, bis 10) gibt +${f1(0.8*r)}% Schaden und +${r}% Kritischen Schaden. Bei 10 Stapeln reißt der nächste Nahkampftreffer den Boden auf: ${pc(2+0.5*r)} Schaden im weiten Umkreis – danach beginnt die Jagd von vorn.`},
+   {id:'z_destroyer',b:2,row:2,ic:'✠',name:'Der Zerstörer',d:r=>`Jeder Kill nährt die Klinge: Ein Zerstörer-Stapel (8 s, bis 10) gibt +${f1(0.8*r)}% Schaden und +${r}% Kritischen Schaden. Bei 10 Stapeln reißt der nächste Nahkampftreffer den Boden auf: ${pc(3+0.75*r)} Schaden im weiten Umkreis – danach beginnt die Jagd von vorn.`},
    {id:'z_smoke',b:2,row:3,c:0,a:1,ic:'☁',name:'Rauchbombe',cd:()=>14,d:r=>`Eine Rauchwolke (5 s): Darin sind Ezekiel und Mitspieler unsichtbar, und Gegner im Rauch treffen kaum noch. Der erste Angriff aus dem Rauch verursacht +${60+15*r}% Schaden.`,
     cast(r){zone({x:P.x,y:P.y,r:150*P.st.area,dur:5,dps:0,kind:'smoke',blind:1});P.ambush=Math.max(P.ambush||0,0.6+0.15*r);smoke(P.x,P.y);smoke(P.x+30,P.y);sfx('blink')}},
-   {id:'z_clone',b:2,row:3,c:1,a:1,ic:'⧉',name:'Schattenklon',cd:()=>20,d:r=>`Ein Klon aus Schatten kämpft ${8+r} s lang und wiederholt Ezekiels Angriffe mit ${40+10*r}% Schaden.`,
-    cast(r){spawnPet('clone',P.x-30,P.y,{life:8+r,dmg:()=>P.st.dmg*(0.4+0.1*r),hp:P.st.maxHp*0.6,every:1/Math.max(0.8,P.st.rate),r:14});smoke(P.x-30,P.y);sfx('blink')}},
-   {id:'z_mark',b:2,row:4,a:1,ic:'⊘',name:'Todesmal',cd:()=>16,d:r=>`Markiert den stärksten Gegner – bis dahin erleidet er von allen 15% mehr Schaden. Nach 3 s explodiert das Mal: ${30+8*r}% des Schadens, den er währenddessen erlitten hat, plus ${pc(3+0.8*r)}.`,
-    cast(r){const t=aimTarget(480,true);if(!t)return false;t.markT=3;t.markSrc=P;t.vuln=Math.max(t.vulnT>0?t.vuln:0,0.15);t.vulnT=3;t.markAcc=0;t.markP=0.3+0.08*r;t.markB=sk(3+0.8*r);ring(t.x,t.y,t.r+16,'#ff3b4a',0.5,4);sfx('hold')}},
-   {id:'z_assassin',b:2,row:5,ult:1,ic:'♠',name:'Meuchelmörder',d:r=>`Nach einem Schattenschritt verursacht der nächste Treffer +${100*r}% Schaden. Tötet ein Schattenschritt einen Gegner, ist er sofort wieder bereit.`},
+   {id:'z_clone',b:2,row:3,c:1,a:1,ic:'⧉',name:'Schattenklon',cd:()=>20,d:r=>`Ein Klon aus Schatten kämpft ${8+r} s lang und wiederholt Ezekiels Angriffe mit ${50+12*r}% Schaden.`,
+    cast(r){spawnPet('clone',P.x-30,P.y,{life:8+r,dmg:()=>P.st.dmg*(0.5+0.12*r),hp:P.st.maxHp*0.6,every:1/Math.max(0.8,P.st.rate),r:14});smoke(P.x-30,P.y);sfx('blink')}},
+   {id:'z_mark',b:2,row:4,a:1,ic:'⊘',name:'Todesmal',cd:()=>16,d:r=>`Markiert den stärksten Gegner – bis dahin erleidet er von allen 15% mehr Schaden. Nach 3 s explodiert das Mal: ${30+8*r}% des Schadens, den er währenddessen erlitten hat, plus ${pc(3.6+1*r)}.`,
+    cast(r){const t=aimTarget(480,true);if(!t)return false;t.markT=3;t.markSrc=P;t.vuln=Math.max(t.vulnT>0?t.vuln:0,0.15);t.vulnT=3;t.markAcc=0;t.markP=0.3+0.08*r;t.markB=sk(3.6+1*r);ring(t.x,t.y,t.r+16,'#ff3b4a',0.5,4);sfx('hold')}},
+   {id:'z_assassin',b:2,row:5,ult:1,ic:'♠',name:'Meuchelmörder',d:r=>`Nach einem Schattenschritt verursacht der nächste Treffer +${50*r}% Schaden. Tötet ein Schattenschritt einen Gegner, ist er sofort wieder bereit.`},
    {id:'z_d_griff',b:3,row:0,a:1,ic:'✋',name:'Griff in die Tasche',cd:()=>5,d:r=>`Ezekiel huscht ${200+8*r} Schritt weit durch die Gegner und greift im Vorbeigehen in jede Tasche: ${pc(1.6+0.4*r)} Schaden an allen auf dem Weg. Champions verlieren eine ihrer Eigenschaften – Ezekiel trägt sie ein paar Sekunden lang selbst. Anderen fällt manchmal eine Münze aus der Tasche.`,
     cast(r){return zdGriff(r)}},
    {id:'z_d_finger',b:3,row:1,ic:'☌',name:'Flinke Finger',d:r=>`+${3*r}% Angriffstempo. Normale Angriffe stehlen mit ${4*r}% Chance, und eine Ausweichrolle an Gegnern vorbei bestiehlt bis zu zwei von ihnen im Vorbeigehen. Gestohlene Kräfte halten ${f1(8+0.6*r)} s.`,mod:(s,r)=>{s.rateP+=0.03*r}},
@@ -2036,7 +2036,7 @@ const HEROES={
    {id:'z_d_hehler',b:3,row:3,c:1,ic:'⚖',name:'Hehlerware',d:r=>`Ezekiel trägt bis zu 3 gestohlene Kräfte gleichzeitig (statt 2), und sie wirken ${10*r}% stärker. Jede gestohlene Kraft lädt einen halben Darkin-Blutstropfen.`},
    {id:'z_d_raub',b:3,row:4,a:1,ic:'⚓',name:'Kraftraub',cd:()=>12,d:r=>`Ein Enterhaken packt den stärksten Gegner: ${pc(2.5+0.6*r)} Schaden, 0,8 s Betäubung, und Ezekiel reißt ihn zu sich heran. Champions verlieren ALLE Eigenschaften an Ezekiel, Bosse und Wächter ihren Riesenzorn, alle anderen ihren Mumm. Abschluss: verbraucht Darkin-Blut – jeder Tropfen lässt die geraubten Kräfte 1 s länger halten.`,
     cast(r){return zdRaub(r)}},
-   {id:'z_d_coup',b:3,row:5,a:1,ult:1,ic:'♛',name:'Der große Coup',cd:()=>50,d:r=>`Ezekiel verschwindet in einem Münzwirbel und huscht nacheinander zu bis zu ${6+r} Gegnern – je ${pc(2+0.5*r)} Schaden, und jeder wird bestohlen. Dann reißt er den Beutel auf: ${pc(3.5+0.8*r)} Schaden ringsum, und alle gestohlenen Kräfte halten 6 s länger. Währenddessen ist er unverwundbar.`,
+   {id:'z_d_coup',b:3,row:5,a:1,ult:1,ic:'♛',name:'Der große Coup',cd:()=>40,d:r=>`Ezekiel verschwindet in einem Münzwirbel und huscht nacheinander zu bis zu ${6+r} Gegnern – je ${pc(3.5+0.9*r)} Schaden, und jeder wird bestohlen. Dann reißt er den Beutel auf: ${pc(6+1.5*r)} Schaden ringsum, und alle gestohlenen Kräfte halten 6 s länger. Währenddessen ist er unverwundbar.`,
     cast(r){return zdCoup(r)}},
    {id:'z_p_klage',b:4,row:0,a:1,ic:'☠',name:'Klagelied',cd:()=>4,d:r=>`Ein heulender Geisterschädel fliegt auf einen Gegner zu: ${pc(2+0.5*r)} Schaden, und sein Heulen trifft Gegner ringsum mit der Hälfte. Danach klagt er weiter zum nächsten Gegner (60% Schaden). Hat Ezekiel eine Seele, verbraucht er sie – dann springt das Klagelied auf drei Gegner über.`,
     cast(r){return zpKlage(r)}},
@@ -2047,7 +2047,7 @@ const HEROES={
    {id:'z_p_wache',b:4,row:3,c:1,ic:'⛨',name:'Totenwache',d:r=>`Die kreisenden Seelen wachen über Ezekiel: Alle ${f1(4-0.4*r)} s fängt eine Seele ein feindliches Geschoss ab und schleudert es als Geisterecho auf den nächsten Gegner (${pc(1+0.25*r)} Schaden). Die Seele bleibt erhalten.`},
    {id:'z_p_ernte',b:4,row:4,a:1,ic:'⚚',name:'Seelenernte',cd:()=>9,d:r=>`Ezekiel lässt alle Seelen los (zwei Geister erscheinen auch ohne): Jede stürzt sich heulend auf einen Gegner – je ${pc(1.6+0.4*r)} Schaden – und heilt Ezekiel um 2% Leben. Abschluss: verbraucht Darkin-Blut.`,
     cast(r){return zpErnte(r)}},
-   {id:'z_p_schrei',b:4,row:5,a:1,ult:1,ic:'☊',name:'Todesschrei',cd:()=>45,d:r=>`Ein Schrei aus dem Grab: ${pc(4+r)} Schaden ringsum, und die Gegner fliehen 2 s in Furcht. Danach ist Ezekiel ${8+2*r} s lang ein Freund des Todes: Jeder Kill fängt sicher eine Seele, bis zu 3 Seelen mehr kreisen um ihn, und jeder Treffer hallt als Wehklagen nach (mindestens 30%).`,
+   {id:'z_p_schrei',b:4,row:5,a:1,ult:1,ic:'☊',name:'Todesschrei',cd:()=>35,d:r=>`Ein Schrei aus dem Grab: ${pc(12+3*r)} Schaden ringsum, und die Gegner fliehen 2 s in Furcht. Danach ist Ezekiel ${8+2*r} s lang ein Freund des Todes: Jeder Kill fängt sicher eine Seele, bis zu 3 Seelen mehr kreisen um ihn, und jeder Treffer hallt als Wehklagen nach (mindestens 30%).`,
     cast(r){return zpSchrei(r)}},
   ]}
 };
@@ -3357,7 +3357,7 @@ function dealDmg(e,base,o){if(e.dead)return 0;if(e.flying&&e.flyHigh>0.4)return 
  if(e.schild)m*=schildBlock(e,o);m*=heroDmgMul(e,o)*hookMul('dmgMul',e,o);const amt=base*m*(1-(e.dr||0));const hp0=e.hp;e.hp-=amt;dmAdd(o,amt<hp0?amt:hp0>0?hp0:0);{const os=G.ortS;if(os&&P){if(amt>os.best){os.best=amt;os.by=P.id}os.dmg[P.id]=(os.dmg[P.id]||0)+amt}}if(G.mp){P.stDmg=(P.stDmg||0)+amt;if(!o.basic&&!o.dot&&!o.pet&&!o.setFx)comboHit(e)}if(e.def.k==='thief'&&!o.dot&&Math.random()<0.35)orb(e.x,e.y,'gold',Math.max(1,Math.round(ri(1,3)*P.st.gold)));e.flash=0.07;if(!o.dot)e.hitAt=G.time;
  if(e.markT>0&&!o.noMark)e.markAcc+=amt;
  let ls=P.st.ls;if(paOn)ls+=0.03*pa;if(paOn&&P.pactAlly&&!o.dot&&!P.pactAlly.down)P.pactAlly.hp=Math.min(P.pactAlly.st.maxHp,P.pactAlly.hp+amt*0.015*pa);
- if(P.zdN>=10&&o.melee&&!o.zdBoom){P.zdN=0;P.zdW=0;const R2=170*P.st.area;aoe(P.x,P.y,R2,sk(2+0.5*rank('z_destroyer')),{zdBoom:1,knock:240,fx:P.x,fy:P.y});ring(P.x,P.y,R2,'#ff3b4a',0.7,7);G.fxs.push({k:'shock',x:P.x,y:P.y,r:R2,c:'#ff3b4a',t:0,life:0.5});chunks(P.x,P.y,'#5a3a2a',10,260);G.shake+=6;sfx('boom')}
+ if(P.zdN>=10&&o.melee&&!o.zdBoom){P.zdN=0;P.zdW=0;const R2=170*P.st.area;aoe(P.x,P.y,R2,sk(3+0.75*rank('z_destroyer')),{zdBoom:1,knock:240,fx:P.x,fy:P.y});ring(P.x,P.y,R2,'#ff3b4a',0.7,7);G.fxs.push({k:'shock',x:P.x,y:P.y,r:R2,c:'#ff3b4a',t:0,life:0.5});chunks(P.x,P.y,'#5a3a2a',10,260);G.shake+=6;sfx('boom')}
  if(ls>0&&!o.noLs&&!o.dot)heal(Math.min(amt*ls,P.st.maxHp*0.015));
  if(!o.quiet||amt>P.st.dmg*0.25)num(e.x+rnd(-6,6),e.y-e.r-4,amt,crit,false,o.dot);if(crit&&!o.dot&&!o.quiet)critFx(e,amt);else if(!o.dot&&!o.quiet&&fxQ()>1&&Math.random()<0.6)sparks(e.x,e.y-e.r*0.3,o.holy?'#ffe9a0':o.lightning?'#9fd8ff':'#fff2d8',2,230);if(!o.dot&&!o.quiet&&(o.basic||o.melee||o.arrow))hitFx(e,o,crit);legend2Hit(e,o,crit);teamKombo(e,o);heroOnHit(e,o);hookRun('hit',e,o,amt,crit);
  if(o.stun)stunE(e,o.stun);
@@ -3380,7 +3380,7 @@ function onBasicHit(e,crit,amt,o){
  const ma=rank('e_maul');if(ma&&(o.melee||P.form==='bear'))dot(e,'bleed',amt*(0.3+0.08*ma),4);
  const po=rank('z_poison');if(po)dot(e,'poison',amt*(0.2+0.06*po),4);
  const ri=rank('f_ricochet');if(ri&&o.arrow&&!o.bounced){let n=o.bounces!==undefined?o.bounces:Math.ceil(ri/2);if(n>0){let t=null,bd=260*260;for(const f of G.enemies){if(f===e||!targetable(f))continue;const dd=d2(f,e);if(dd<bd){bd=dd;t=f}}
-  if(t){const a=ang(e,t);G.projs.push({team:'p',x:e.x,y:e.y,vx:Math.cos(a)*760,vy:Math.sin(a)*760,a,r:6,dmg:amt*(0.5+0.08*ri)/Math.max(1,(crit?P.st.critd:1)),pierce:0,kind:'arrow',c:'#bfe6ff',life:0.6,hits:[e],basic:1,arrow:1,bounces:n-1})}}}
+  if(t){const a=ang(e,t);G.projs.push({team:'p',x:e.x,y:e.y,vx:Math.cos(a)*760,vy:Math.sin(a)*760,a,r:6,dmg:amt*(0.6+0.1*ri)/Math.max(1,(crit?P.st.critd:1)),pierce:0,kind:'arrow',c:'#bfe6ff',life:0.6,hits:[e],basic:1,arrow:1,bounces:n-1})}}}
 }
 function aoe(x,y,R,amt,o){let n=0;if(!(o&&o.noProp))hitProps(x,y,R);o=Object.assign({fx:x,fy:y},o||{});const lw=!!G.blkG&&!G.room&&R<=280&&!o.durch;query(x,y,R+50,e=>{const dx=e.x-x,dy=e.y-y;if(dx*dx+dy*dy<(R+e.r)*(R+e.r)){if(lw&&dx*dx+dy*dy>(e.r+30)*(e.r+30)&&!losFrei({x,y},e))return;dealDmg(e,amt,o);n++}});return n}
 function cone(x,y,a,arc,R,amt,o){let n=0;hitPropsCone(x,y,a,arc,R);const lw=!!G.blkG&&!G.room;query(x,y,R+50,e=>{const dx=e.x-x,dy=e.y-y,dd=Math.hypot(dx,dy);if(dd>R+e.r)return;if(lw&&dd>e.r+20&&!losFrei({x,y},e))return;let da=Math.atan2(dy,dx)-a;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)<arc/2+Math.atan2(e.r,Math.max(dd,1))||dd<e.r+12){dealDmg(e,amt,o);n++}});return n}
@@ -3709,7 +3709,7 @@ function dropItem(x,y,it){it=ancRoll(it);if(G.portal&&d2({x,y},G.portal)<100*100
 /* ================= Spieler ================= */
 const keys={};let joy=null;
 function absorb(a){if(P.shieldHp>0){const t=Math.min(P.shieldHp,a);P.shieldHp-=t;a-=t;if(P.shieldHp<=0)burst(P.x,P.y,'#9fe6ff',12,140)}return a}
-function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1);a=absorb(a);if(G.mode==='abstieg')a=Math.min(a,P.st.maxHp*0.7);/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
+function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1);a=absorb(a);a=Math.min(a,P.st.maxHp*(G.mode==='abstieg'?0.7:0.75));/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
 function hurtDot(a){if(P.inv>0||P.down||G.state!=='play')return;a=a*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(a<=0)return;P.hp-=a;P.dotAcc=(P.dotAcc||0)+a;if(P.dotAcc>P.st.maxHp*0.03){num(P.x+rnd(-8,8),P.y-26,P.dotAcc,false,true);P.dotAcc=0}if(P.hp<=0)die()}
 function die(){if(pactSave())return;if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
@@ -3759,7 +3759,7 @@ function drawSkx(t){const J=P.jug;if(J)for(let i=0;i<J.n;i++){const q=jugPos(J,i
 function heroTick0(dt){
  try{P.jug?dmRun('b_juggle',()=>skTick(dt)):skTick(dt)}catch(e){}
  if(P.buffs.ballad>0&&P.balladOwn!==0){P.notesT=(P.notesT||0)-dt;if(P.notesT<=0){P.notesT=0.2;const r=rank('b_ballad');for(let i=0;i<4;i++){const a=G.time*2.4+i*TAU/4,x=P.x+Math.cos(a)*95,y=P.y+Math.sin(a)*95;aoe(x,y,26,sk(0.35+0.1*r),{quiet:1,noCrit:1})}}}
- if(P.buffs.tempest>0){P.tempT=(P.tempT||0)-dt;if(P.tempT<=0){P.tempT=0.25;const e=randomEnemy(P.x,P.y,300);if(e){bolt(e.x,e.y);aoe(e.x,e.y,60*P.st.area,sk(1.4+0.4*(P.tempestR||1)),{lightning:1,knock:180,fx:P.x,fy:P.y,quiet:1});if(Math.random()<0.4)sfx('thunder')}}}
+ if(P.buffs.tempest>0){P.tempT=(P.tempT||0)-dt;if(P.tempT<=0){P.tempT=0.25;const e=randomEnemy(P.x,P.y,300);if(e){bolt(e.x,e.y);aoe(e.x,e.y,60*P.st.area,sk(1.4+0.4*(P.tempestR||1)),{lightning:1,knock:180,fx:P.x,fy:P.y,quiet:1,dmK:'e_tempest'});if(Math.random()<0.4)sfx('thunder')}}}
  const hl=rank('b_hall');if(hl){P.hallT=(P.hallT||12-2*hl)-dt;if(P.hallT<=0){P.hallT=12-2*hl;if(G.enemies.length){const a=rnd(TAU);illusion(P.x+Math.cos(a)*60,P.y+Math.sin(a)*60,rank('b_mirror')||1);ring(P.x,P.y,50,'#9fd8ff',0.4,3)}}}
 }
 function updPlayer(dt){
@@ -3845,7 +3845,7 @@ function update(dt){
   if(p.ret&&!p.back&&p.life<p.life0-p.ret){p.back=1;p.hits=[];p.life=1.2}
   if(p.back){const a=ang(p,P);p.vx=Math.cos(a)*p.spd*1.1;p.vy=Math.sin(a)*p.spd*1.1;p.a=a;if(d2(p,P)<24*24){p.dead=1;continue}}
   if(p.life<=0){p.dead=1;if(p.boom&&!p.boomed){p.boomed=1;projBoom(p)}continue}
-  if(p.team==='p'){if(G.props.length&&projHitsProp(p)){if(p.boom&&!p.boomed){p.boomed=1;p.dead=1;projBoom(p);continue}if(!(p.pierce>0)){p.dead=1;continue}}query(p.x,p.y,p.r+60,e=>{if(p.dead||e.dead)return;if(p.hits&&p.hits.includes(e))return;const m=p.r+e.r;if(d2(p,e)<m*m){(p.hits||(p.hits=[])).push(e);
+  if(p.team==='p'){if(G.props.length&&projHitsProp(p)){if(p.boom&&!p.boomed){p.boomed=1;p.dead=1;projBoom(p);continue}if(!(p.pierce>0)){p.dead=1;continue}}query(p.x,p.y,p.r+60,e=>{if(p.dead||e.dead||e.gmB>0)return;if(p.hits&&p.hits.includes(e))return;const m=p.r+e.r;if(d2(p,e)<m*m){(p.hits||(p.hits=[])).push(e);
    if(p.boom){p.dead=1;if(!p.boomed){p.boomed=1;projBoom(p)}return}
    if(p.exec&&!e.boss&&!e.guard&&e.hp<e.maxHp*p.exec){word(e.x,e.y-e.r-14,'Ein Pfeil!','#ffe9a0');dealDmg(e,e.hp+1,{noCrit:1});}else dealDmg(e,p.dmg,{knock:p.knock,fx:p.x-p.vx,fy:p.y-p.vy,onHit:p.hit,basic:p.basic,arrow:p.arrow,bounces:p.bounces,bounced:p.bounces===0,crit:p.crit,pet:p.pet,noLs:p.pet,rex:0});
    if(p.pierce--<=0)p.dead=1;burst(p.x,p.y,p.c,2,80)}})}
@@ -3890,7 +3890,7 @@ function update(dt){
 function updAlly(a,dt){
  if(a.kind==='obj')return;if(a.hit>0)a.hit-=dt;
  if(a.kind==='pet'){updPet(a,dt);return}
- if(a.kind==='rex'){const lo=rank('f_loyal'),pk=rank('f_pack'),br=rank('f_bigrex'),fe=rank('f_fetch');a.r=11*(1+0.18*br);const mh=P.st.maxHp*0.55*(1+0.25*lo+0.5*br);if(Math.abs(mh-a.maxHp)>0.5){a.hp=a.hp/a.maxHp*mh;a.maxHp=mh}
+ if(a.kind==='rex'){const lo=rank('f_loyal'),pk=rank('f_pack'),br=rank('f_bigrex'),fe=rank('f_fetch');a.r=11*(1+0.18*br);const mh=P.st.maxHp*0.55*(1+0.35*lo+0.5*br);if(Math.abs(mh-a.maxHp)>0.5){a.hp=a.hp/a.maxHp*mh;a.maxHp=mh}
   if(a.dead){a.resp-=dt;if(a.resp<=0){a.dead=false;a.hp=a.maxHp*0.6;a.x=P.x;a.y=P.y;burst(a.x,a.y,'#c8a070',10,100)}return}
   if(a.hp<=0){a.dead=true;a.resp=9;burst(a.x,a.y,'#8a5a32',14,120);toast('Rex ist k.o. – er erholt sich gleich.','#c8a070');return}
   a.hp=Math.min(a.maxHp,a.hp+a.maxHp*0.01*dt);
@@ -3901,7 +3901,7 @@ function updAlly(a,dt){
   const dx=tx-a.x,dy=ty-a.y,dd=Math.hypot(dx,dy);a.moving=false;const reach=a.tgt?a.tgt.r+a.r+4:10;
   if(dd>reach){const s=Math.min(dd-reach,250*dt*(a.tgt?1:Math.min(1.6,dd/60)));a.x+=dx/dd*s;a.y+=dy/dd*s;a.moving=true;if(Math.abs(dx)>2)a.flip=dx<0?-1:1}
   if(dd>900){a.x=P.x;a.y=P.y}
-  a.atk-=dt;if(a.tgt&&dd<=reach+6&&a.atk<=0){rexPack(a,a.tgt);pawFx(a.tgt);a.atk=0.8/(1+0.15*pk);const dmg=P.st.dmg*0.65*(1+0.2*lo)*petDmgMul();const ro={noLs:true,pet:1,rex:1,stun:(pk&&Math.random()<0.1*pk)?0.6:0};if(br){aoe(a.x,a.y,a.r+50,dmg*(0.8+0.2*br),ro);ring(a.x,a.y,a.r+50,'#e8b070',0.25,3)}else dealDmg(a.tgt,dmg,ro);if(pk)heal(P.st.maxHp*0.005*pk);burst(a.tgt?a.tgt.x:a.x,a.tgt?a.tgt.y:a.y,'#fff',3,60)}
+  a.atk-=dt;if(a.tgt&&dd<=reach+6&&a.atk<=0){rexPack(a,a.tgt);pawFx(a.tgt);a.atk=0.8/(1+0.15*pk);const dmg=P.st.dmg*0.65*(1+0.35*lo)*petDmgMul();const ro={noLs:true,pet:1,rex:1,stun:(pk&&Math.random()<0.1*pk)?0.6:0};if(br){aoe(a.x,a.y,a.r+50,dmg*(0.8+0.2*br),ro);ring(a.x,a.y,a.r+50,'#e8b070',0.25,3)}else dealDmg(a.tgt,dmg,ro);if(pk)heal(P.st.maxHp*0.009*pk);burst(a.tgt?a.tgt.x:a.x,a.tgt?a.tgt.y:a.y,'#fff',3,60)}
   return}
  if(a.kind==='ill'){a.life-=dt;a.t+=dt;illTreffer(a);if(a.hp<=0)a.life=0;
   const ph=rank('b_phantom');a.atk-=dt;if(ph&&a.atk<=0){const t=nearest(a.x,a.y,360);if(t){a.atk=0.9;a.flip=t.x<a.x?-1:1;shoot({x:a.x,y:a.y-6,a:ang(a,t),spd:520,dmg:P.st.dmg*(0.3+0.1*ph)*(1+0.25*rank('b_hall'))*petDmgMul(),r:7,pierce:0,kind:'note',c:'#bfe6ff'})}}
@@ -6705,8 +6705,8 @@ function rumble(p,s,ms){if(p&&!G.bot&&s>=0.3&&(!G.mp||p===PL[0])&&!(p.dev&&p.dev
 const rumbleAll=(s,ms)=>{for(const q of mpL())rumble(q,s,ms)};
 /* ---------- Kombos zwischen Helden ---------- */
 const COMBOS={
- 'barradin+echo':{n:'Gewitterballade',c:'#9fd8ff',f(e){chainLightning(e,6,sk(2.2),300);bolt(e.x,e.y)}},
- 'barradin+friedrich':{n:'Ballade des Jägers',c:'#f6d77c',f(e){const R=170*P.st.area;query(e.x,e.y,R+40,o=>{if(d2(o,e)<R*R){stunE(o,1);o.vuln=Math.max(o.vulnT>0?o.vuln:0,0.3);o.vulnT=5}});ring(e.x,e.y,R,'#f6d77c',0.5,5)}},
+ 'barradin+echo':{n:'Gewitterballade',c:'#9fd8ff',f(e){chainLightning(e,7,sk(4.2),300);bolt(e.x,e.y)}},
+ 'barradin+friedrich':{n:'Ballade des Jägers',c:'#f6d77c',f(e){const R=170*P.st.area;query(e.x,e.y,R+40,o=>{if(d2(o,e)<R*R){stunE(o,1);dealDmg(o,sk(2.5),{});o.vuln=Math.max(o.vulnT>0?o.vuln:0,0.3);o.vulnT=5}});ring(e.x,e.y,R,'#f6d77c',0.5,5)}},
  'barradin+ezekiel':{n:'Spott und Klinge',c:'#ff7ab0',f(e){aoe(e.x,e.y,160*P.st.area,sk(2.5),{fear:2,crit:1});daggerRing(8,sk(0.8))}},
  'echo+friedrich':{n:'Wilde Jagd',c:'#7fe07a',f(e){for(let i=0;i<2;i++)spawnPet('wolf',e.x+rnd(-50,50),e.y+rnd(-50,50),{life:10,dmg:()=>P.st.dmg*0.7,hp:P.st.maxHp*0.5,every:0.7,r:12,speed:250});howlFx()}},
  'echo+ezekiel':{n:'Blutgewitter',c:'#ff3a4a',f(e){aoe(e.x,e.y,190*P.st.area,sk(3.5),{lightning:1,onHit:o=>dot(o,'bleed',sk(0.5),4)});explodeFx(e.x,e.y,110,'#ff3a4a',{shake:5})}},
@@ -10305,7 +10305,7 @@ function ktGlide(a,d){const x0=P.x,y0=P.y;P.x=clamp(P.x+Math.cos(a)*d,16,WORLD-1
 /* Schneidender Schwung: gleitet vor, Vorhand-Halbmond und Rückhand-Halbmond */
 function ktSchwung(r,f,a){r=Math.max(1,r||1);f=f||1;a=a==null?aimAng(260):a;faceA(a);const R=(150+8*r)*P.st.area,arc=2.3,dmK=f<1?'b_k_schnitt':undefined;
  ktGlide(a,f<1?28:46);P.inv=Math.max(P.inv,0.12);
- const o={knock:90,kt:1,onHit:e=>ktCut(e,a)};if(dmK)o.dmK=dmK;cone(P.x,P.y,a,arc,R,sk((1.4+0.35*r)*f),o);
+ const o={knock:90,kt:1,onHit:e=>ktCut(e,a)};if(dmK)o.dmK=dmK;cone(P.x,P.y,a,arc,R,sk((1.3+0.32*r)*f),o);
  G.fxs.push({k:'kt_arc',x:P.x,y:P.y,a,arc,r:R,s:1,t:0,life:0.34});light(P.x,P.y,R*0.9,'#e6efff',0.18,0.5);sfx('slash');
  later(0.16,()=>{if(P.down)return;const a2=a+0.3,o2={knock:70,kt:1,onHit:e=>ktCut(e,a2+Math.PI)};if(dmK)o2.dmK=dmK;cone(P.x,P.y,a2,arc,R*0.88,sk((0.7+0.18*r)*f),o2);
   G.fxs.push({k:'kt_arc',x:P.x,y:P.y,a:a2,arc,r:R*0.88,s:-1,t:0,life:0.3,rose:1});sfx('bstab')})}
@@ -10521,7 +10521,7 @@ function zdRaub(r){const t=aimTarget(480,true);if(!t)return false;const fin=P.db
  return true}
 function zdCoup(r){const L=[];for(const e of G.enemies){if(!targetable(e)||d2(e,P)>420*420)continue;L.push(e)}if(!L.length)return false;
  L.sort((a,b)=>(b.elite||b.boss||b.guard?1:0)-(a.elite||a.boss||a.guard?1:0)||d2(a,P)-d2(b,P));
- const N=Math.min(L.length,6+r),T=0.13,D=sk(2+0.5*r),DB=sk(3.5+0.8*r),tot=N*T+0.35;P.inv=Math.max(P.inv,tot+0.2);P.zdCoup=tot;
+ const N=Math.min(L.length,6+r),T=0.13,D=sk(3.5+0.9*r),DB=sk(6+1.5*r),tot=N*T+0.35;P.inv=Math.max(P.inv,tot+0.2);P.zdCoup=tot;
  G.fxs.push({k:'zd_coup',x:P.x,y:P.y,r:120,st:1,t:0,life:0.5});sfx('ult');sfxAt('g_coins',P.x,P.y);
  for(let i=0;i<N;i++){const e=L[i];later(0.12+i*T,()=>{if(P.down||G.state!=='play')return;const fx=P.x,fy=P.y,a=rnd(TAU);P.dash=null;
    P.x=e.x+Math.cos(a)*(e.r+18);P.y=e.y+Math.sin(a)*(e.r+18);zClampP();faceA(ang(P,e));
@@ -10563,7 +10563,7 @@ function zpErnte(r){let n=P.zpN||0;const keep=meist('Phantom')?Math.floor(n/2):0
  for(let i=0;i<N;i++){const a=-Math.PI/2+(i-(N-1)/2)*0.6+rnd(-0.1,0.1);later(i*0.06,()=>{if(P.down)return;zShoot({x:P.x+Math.cos(a)*26,y:P.y-18+Math.sin(a)*16,a,spd:330,dmg:D,r:10,pierce:0,kind:'zp_geist',c:ZE.geist,life:2.2,d:{s:i%3},
    hit:()=>{heal(P.st.maxHp*0.02);if(fxQ()>1)sparks(P.x,P.y-20,'#9fffe6',3,90,1)}});if(i%2===0)sfx('b_seele')})}
  G.fxs.push({k:'zp_schrei',x:P.x,y:P.y,r:90,t:0,life:0.5,mini:1});if(keep)later(0.6,()=>word(P.x,P.y-76,keep===1?'1 Seele kehrt zurück':keep+' Seelen kehren zurück',ZE.geist));return true}
-function zpSchrei(r){const R=240*P.st.area;aoe(P.x,P.y,R,sk(4+r),{fear:2,fx:P.x,fy:P.y,dmK:'z_p_schrei'});P.buffs.zpFreund=8+2*r;recalc();
+function zpSchrei(r){const R=240*P.st.area;aoe(P.x,P.y,R,sk(12+3*r),{fear:2,fx:P.x,fy:P.y,dmK:'z_p_schrei'});P.buffs.zpFreund=8+2*r;recalc();
  G.fxs.push({k:'zp_schrei',x:P.x,y:P.y,r:R,t:0,life:0.9});light(P.x,P.y,R*1.6,ZE.geist,0.6,0.9);G.shake+=6;sfx('ult');sfx('b_seele');sfx('roar');bigHit();
  word(P.x,P.y-92,'Freund des Todes',ZE.geist);return true}
 hook('kill',(e,o)=>{const tr=rank('z_p_troph');if(!tr&&!(P.buffs.zpFreund>0))return;if(d2(e,P)>380*380)return;const sure=e.elite||e.boss||e.guard||P.buffs.zpFreund>0;
@@ -10828,8 +10828,8 @@ hook('tick',dt=>{
  if(!(P.fswSl>0))P.fswSlN=0;
  if(P.fswWo>0){P.fswWoT=(P.fswWoT||0)-dt;if(P.fswWoT<=0){P.fswWoT=0.2;const R=(P.fswWoR||190)*0.62,r=P.fswWoK||1;
   dmRun('f_s_woge',()=>query(P.x,P.y,R+40,e=>{const dd=d2(e,P);if(dd>(R+e.r)*(R+e.r))return;fswStoss(e,P.x,P.y,760);if((e.fswWoT||0)<G.time){e.fswWoT=G.time+0.6;dealDmg(e,sk(0.4+0.1*r),{fswSt:1,quiet:1})}}))}}
- if(P.buffs.fswMacht>0){P.fswKrT=(P.fswKrT||0)-dt;if(P.fswKrT<=0){P.fswKrT=0.8;const e=randomEnemy(P.x,P.y,420);if(e){const r=P.fswMaR||1,s=e.x<P.x?-1:1;G.fxs.push({k:'fsw_kraehe',x:e.x,y:e.y-e.r*0.5,s,t:0,life:0.7});
-   dmRun('f_s_macht',()=>later(0.3,()=>{if(e.dead)return;dealDmg(e,sk(1.2+0.3*r),{fswSt:1,dmK:'f_s_macht'});fswStoss(e,e.x-s*40,e.y-60,380);if(fxOk())sparks(e.x,e.y-e.r*0.4,'#3a3248',5,160);sfxAt('b_feder',e.x,e.y)}))}}}
+ if(P.buffs.fswMacht>0){P.fswKrT=(P.fswKrT||0)-dt;if(P.fswKrT<=0){P.fswKrT=0.5;const e=randomEnemy(P.x,P.y,420);if(e){const r=P.fswMaR||1,s=e.x<P.x?-1:1;G.fxs.push({k:'fsw_kraehe',x:e.x,y:e.y-e.r*0.5,s,t:0,life:0.7});
+   dmRun('f_s_macht',()=>later(0.3,()=>{if(e.dead)return;dealDmg(e,sk(2.5+0.6*r),{fswSt:1,dmK:'f_s_macht'});fswStoss(e,e.x-s*40,e.y-60,380);if(fxOk())sparks(e.x,e.y-e.r*0.4,'#3a3248',5,160);sfxAt('b_feder',e.x,e.y)}))}}}
  else P.fswMaR=P.fswMaR||0;
 },'friedrich');
 hook('stage',()=>{P.fswHz=0;P.fswFl=0;P.fswSl=0;P.fswSlN=0;P.fswWo=0},'friedrich');
@@ -10904,7 +10904,7 @@ function fstGrenze(kind,n){const L=G.zones.filter(z=>z.kind===kind&&z.own===P&&z
 function fstBau(x,y){if(fxOk())G.fxs.push({k:'fst_bau',x,y,t:0,life:0.4})}
 function fstDraht(x,y,a,r,dur,rv){const L=(220+10*r)/2;return fstZone('fst_draht',x,y,L,dur,{a,L,n:3+(r>>1),dmg:sk(1.6+0.4*r),st:1.2+0.1*r,arm:0.5,tw:0,used:0,rv:rv?1:0})}
 function fstSchlinge(x,y,r,dur,rv){return fstZone('fst_schlinge',x,y,44,dur,{dmg:sk(2.4+0.6*r),ht:2+0.2*r,arm:0.5,rv:rv?1:0,f:rnd()<0.5?-1:1})}
-function fstSpreng(x,y,r,dur,rv){return fstZone('fst_spreng',x,y,(130+8*r)*P.st.area,dur,{dmg:sk(3+0.7*r),R:(130+8*r)*P.st.area,arm:0.6,fz:0,rv:rv?1:0})}
+function fstSpreng(x,y,r,dur,rv){return fstZone('fst_spreng',x,y,(130+8*r)*P.st.area,dur,{dmg:sk(2.7+0.6*r),R:(130+8*r)*P.st.area,arm:0.6,fz:0,rv:rv?1:0})}
 
 ZONEART.fst_draht={
  upd(z,dt){const d=z.d;if(d.tw>0)d.tw=Math.max(0,d.tw-dt);if(d.done)return;if(d.arm>0){d.arm-=dt;return}d.q=(d.q||0)-dt;if(d.q>0)return;d.q=0.06;const ca=Math.cos(d.a),sa=Math.sin(d.a);
@@ -11147,7 +11147,7 @@ function esRegen(){const r=Math.max(1,rank('e_s_funkel')),L=[];for(const e of G.
   if(fxOk())G.fxs.push({k:'es_splitter',x,y,a:rnd(-0.5,0.5),t:-i*0.05,life:0.45});
   later(0.16+i*0.05,()=>{if(e&&!e.dead)dealDmg(e,sk(0.7+0.18*r),{dmK:'e_s_funkel',quiet:1});else aoe(x,y,40,sk(0.7+0.18*r),{dmK:'e_s_funkel',quiet:1})})}}
 /* Leitbolzen */
-function esBoltCast(r){const t=aimTarget(460,false),a=t?ang(P,t):aimAng(460);faceA(a);esBolzen(a,sk(2.6+0.6*r),r,1);sfx('magic');sfx('glas')}
+function esBoltCast(r){const t=aimTarget(460,false),a=t?ang(P,t):aimAng(460);faceA(a);esBolzen(a,sk(3.1+0.75*r),r,1);sfx('magic');sfx('glas')}
 function esBolzen(a,dmg,r,big){shoot({x:P.x+Math.cos(a)*14,y:P.y-12+Math.sin(a)*8,a,spd:big?680:760,dmg,r:big?11:8,pierce:0,kind:'es_bolt',c:'#e8f0ff',life:0.95,
  hit:(e)=>{esMalSet(e,r);aoe(e.x,e.y,(big?75:55)*P.st.area,dmg*0.4,{quiet:1});if(fxOk())G.fxs.push({k:'es_hit',x:e.x,y:e.y-e.r*0.4,r:big?46:32,t:0,life:0.4});light(e.x,e.y,120,'#cfe0ff',0.25,0.7)},d:{big:big?1:0}})}
 function esFreiBolzen(){const e=randomEnemy(P.x,P.y,450);if(!e)return;const rb=Math.max(1,rank('e_s_bolt')),rk=Math.max(1,rank('e_s_karte'));
@@ -11155,7 +11155,7 @@ function esFreiBolzen(){const e=randomEnemy(P.x,P.y,450);if(!e)return;const rb=M
 function esMalSet(e,r){if(e.dead)return;e.esMal=G.time+4;e.esMalV=0.4+0.08*(r||1)}
 /* Lichtpfeil des Bogenschützen */
 function esPfeil(e){const r=Math.max(1,rank('e_s_form')),sx=P.x-(P.flip||1)*6,sy=P.y-64,a=Math.atan2(e.y-e.r*0.3-sy,e.x-sx);
- shoot({x:sx,y:sy,a,spd:880,dmg:sk((1.1+0.25*r)*esK()),r:7,pierce:1,kind:'es_pfeil',c:'#e8f0ff',life:0.75,d:{s:1}});if(Math.random()<0.5)sfx('bow')}
+ shoot({x:sx,y:sy,a,spd:880,dmg:sk((1.25+0.3*r)*esK()),r:7,pierce:1,kind:'es_pfeil',c:'#e8f0ff',life:0.75,d:{s:1}});if(Math.random()<0.5)sfx('bow')}
 function esPfeilBasic(a){shoot({x:P.x,y:P.y-8,a,spd:780,dmg:P.st.dmg*1.15,r:7,pierce:2,kind:'es_pfeil',c:'#cfe0ff',basic:1,life:0.8,d:{s:0}});sfx('bow')}
 /* Leuchtendes Omen: W20 */
 function esOmen(r){const p=aimPoint(420),x=p.x,y=p.y,n=1+Math.floor(Math.random()*20),gl=n%2===0||n===20,pe=n%2===1||n===20,v=0.12+0.03*r,R=130*P.st.area;
@@ -11198,7 +11198,7 @@ function epDiener(e,r,net){const d=e.def||{};const a=spawnPet('pilz',e.x,e.y,{li
  if(fxOk())G.fxs.push({k:'ep_auf',x:e.x,y:e.y,t:0,life:0.7});puffs(e.x,e.y+6,'#9a7ac0',6,60,12);sfxAt('aufstehen',e.x,e.y);
  if(!SAVE.epTip&&!G.bot){SAVE.epTip=1;try{persist()}catch(x){}toast('Pilzbefall: Von Sporen befallene Gegner stehen als Pilzdiener wieder auf – Bovistplatzer lässt sie platzen.','#b8d88a')}}
 function epDienerPlatz(a,f,src,r){r=r||1;const x=a.x,y=a.y,R=(f>=1?110:80)*P.st.area;
- dmRun(src,()=>{aoe(x,y,R,sk((2.6+0.6*r)*f),{onHit:epBef});zone({x,y,r:80*P.st.area,dur:f>=1?3:2,dps:sk((0.6+0.15*r)*f),kind:'ep_wolke'})});
+ dmRun(src,()=>{aoe(x,y,R,sk((2.3+0.55*r)*f),{onHit:epBef});zone({x,y,r:80*P.st.area,dur:f>=1?3:2,dps:sk((0.6+0.15*r)*f),kind:'ep_wolke'})});
  if(fxOk())G.fxs.push({k:'ep_puff',x,y,r:R,t:0,life:0.6});puffs(x,y,'#9a7ac0',8,90,14);sfxAt('nass',x,y);
  if(Math.random()<0.6)orb(x,y,'gold',Math.max(1,Math.round(ri(1,3)*P.st.gold)))}
 PETART.pilz={upd(a,dt){const d=a.d||(a.d={});
@@ -11271,7 +11271,7 @@ ZONEART.ep_ring={upd(z,dt){z.mk=(z.mk||0)-dt;if(z.mk<=0){z.mk=0.5;query(z.x,z.y,
    circ(c,x-s*0.3,y-s*1.05,s*0.12,'#f4eedc');circ(c,x+s*0.25,y-s*1.12,s*0.1,'#f4eedc');c.globalCompositeOperation='lighter';glow(x,y-s,s*1.6,'#c8a0f0',fade*0.45*g,true);c.globalCompositeOperation='source-over'}}};
 ZONEART.ep_netz={upd(z,dt){const d=z.d||(z.d={});const r=d.r||1;z.mk=(z.mk||0)-dt;if(z.mk<=0){z.mk=0.25;const v=0.15+0.05*r;query(z.x,z.y,z.r+40,e=>{if(d2(e,z)<z.r*z.r){e.epNet=G.time+0.45;e.epNetV=v;e.epNetO=P;epBef(e);e.slowT=Math.max(e.slowT,0.4);e.slowA=Math.max(e.slowA,0.35)}})}
   z.ft=(z.ft||0.3)-dt;if(z.ft<=0){z.ft=0.5;const e=randomEnemy(z.x,z.y,z.r);const x=e?e.x:z.x+rnd(-z.r*0.6,z.r*0.6),y=e?e.y:z.y+rnd(-z.r*0.4,z.r*0.4);
-   if(fxOk())G.fxs.push({k:'ep_frucht',x,y,t:0,life:0.8});later(0.22,()=>{aoe(x,y,80*P.st.area,sk(2+0.5*r),{onHit:epBef});sfxAt('nass',x,y)})}},
+   if(fxOk())G.fxs.push({k:'ep_frucht',x,y,t:0,life:0.8});later(0.22,()=>{aoe(x,y,80*P.st.area,sk(1.7+0.42*r),{onHit:epBef});sfxAt('nass',x,y)})}},
  draw(z,t,c){const fade=Math.min(1,z.t*2.5,(z.dur-z.t)*2),S=z.seeds||[],gr=Math.min(1,z.t/0.6),R=z.r*gr;
   c.globalAlpha=fade*0.18;c.fillStyle='#2a1a34';c.beginPath();c.ellipse(z.x,z.y,R,R*0.6,0,0,TAU);c.fill();
   c.lineCap='round';c.lineJoin='round';c.globalAlpha=fade*0.32;c.strokeStyle='#d8e8b8';c.lineWidth=1.2;
@@ -11283,7 +11283,7 @@ ZONEART.ep_netz={upd(z,dt){const d=z.d||(z.d={});const r=d.r||1;z.mk=(z.mk||0)-d
   glow(z.x,z.y,60+8*Math.sin(t*3),'#b8d88a',fade*0.4,true);c.globalCompositeOperation='source-over';
   for(let i=0;i<20;i++){const a=i*TAU/20+0.1,x=z.x+Math.cos(a)*R,y=z.y+Math.sin(a)*R*0.6,s=5+(i%3)*2;c.globalAlpha=fade*gr;c.fillStyle='#ece4cc';c.fillRect(x-1.2,y-s*0.8,2.4,s*0.8);c.fillStyle=i%2?'#8a5aa8':'#a8c47a';c.beginPath();c.ellipse(x,y-s*0.8,s*0.7,s*0.42,0,Math.PI,0);c.closePath();c.fill()}}};
 ZONEART.es_nacht={upd(z,dt){z.x=P.x;z.y=P.y;const d=z.d||(z.d={});const r=d.r||1;z.ft=(z.ft||0.25)-dt;if(z.ft<=0){z.ft=0.4;const e=randomEnemy(P.x,P.y,420);if(!e)return;const x=e.x,y=e.y;
-  if(fxOk())G.fxs.push({k:'es_schnuppe',x,y,s:Math.random()<0.5?1:-1,t:0,life:0.55});later(0.2,()=>{aoe(x,y,70*P.st.area,sk(1.2+0.3*r),{quiet:1});if(Math.random()<0.5)sfxAt('glas',x,y)})}},
+  if(fxOk())G.fxs.push({k:'es_schnuppe',x,y,s:Math.random()<0.5?1:-1,t:0,life:0.55});later(0.2,()=>{aoe(x,y,70*P.st.area,sk(0.65+0.15*r),{quiet:1});if(Math.random()<0.5)sfxAt('glas',x,y)})}},
  draw(z,t,c){const fade=Math.min(1,z.t*2,(z.dur-z.t)*1.5),R=z.r;const g=c.createRadialGradient(z.x,z.y,R*0.15,z.x,z.y,R);g.addColorStop(0,'rgba(14,22,84,.6)');g.addColorStop(0.75,'rgba(12,18,70,.5)');g.addColorStop(1,'rgba(12,18,70,0)');
   c.globalAlpha=fade;c.fillStyle=g;c.beginPath();c.ellipse(z.x,z.y,R,R*0.7,0,0,TAU);c.fill();
   c.globalCompositeOperation='lighter';const S=z.seeds||[];for(let i=0;i<28;i++){const s=S[i%S.length]||[i,0.5,i],a=s[0]+i*0.9,rr=R*(0.15+0.8*((i*0.37+s[1])%1)),x=z.x+Math.cos(a)*rr,y=z.y+Math.sin(a)*rr*0.7,tw=0.5+0.5*Math.sin(t*(2+i%4)+s[2]);
@@ -11675,9 +11675,9 @@ hook('tick',dt=>{P.emGT=(P.emGT||0)-dt;if(P.emGT<=0){P.emGT=0.5;const g=Math.rou
 /* Ziele: Spott (Brüllen) und Gier */
 {const pt=pickTarget;pickTarget=function(e){const b=pt.apply(this,arguments);try{if(!P||P.down)return b;
   if(e.emSpott>G.time&&e.emSpottP===P&&!(P.stealthT>0))return P;
-  if(P.id==='echo'&&b&&b!==P&&b.kind!=='ill'&&(P.emGier||0)>0.1&&!(P.stealthT>0)&&Math.random()<P.emGier*0.6&&d2(e,P)<d2(e,b)*2.25)return P}catch(x){}return b}}
+  if(P.id==='echo'&&b&&b!==P&&b.kind!=='ill'&&(P.emGier||0)>0.1&&!(P.stealthT>0)&&Math.random()<P.emGier*0.45&&d2(e,P)<d2(e,b)*1.69)return P}catch(x){}return b}}
 {const ep=enemyP;enemyP=function(e){try{const q=e.emSpottP;if(e.emSpott>G.time&&q&&PL.includes(q)&&!q.down&&!q.netGone){e.tp=q;return q}}catch(x){}
- const t0=e.tpT,r=ep.apply(this,arguments);try{if(e.tpT!==t0&&r)for(const q of PL){if(q===r||q.id!=='echo'||q.down||q.netGone||!(q.emGier>0.1)||q.stealthT>0)continue;const k=1-0.35*q.emGier;if(d2(e,q)*k*k<d2(e,r)){e.tp=q;return q}}}catch(x){}return r}}
+ const t0=e.tpT,r=ep.apply(this,arguments);try{if(e.tpT!==t0&&r)for(const q of PL){if(q===r||q.id!=='echo'||q.down||q.netGone||!(q.emGier>0.1)||q.stealthT>0)continue;const k=1-0.2*q.emGier;if(d2(e,q)*k*k<d2(e,r)){e.tp=q;return q}}}catch(x){}return r}}
 
 /* ---------- Ausweichrolle ---------- */
 hook('roll',a=>{if(P.form==='star')return;P.emRollT=0.3;P.emRP=0;
@@ -11776,7 +11776,7 @@ window.__hsM={EM_BAR,emFormBar,emWild:(w)=>{const n=P.actives.find(x=>!x.ult)||P
    Statt der Ausweichrolle: Bühnen-Teleport (gleiche Strecke, Dauer, Unverwundbarkeit, Ausdauer) mit Trugbild am Startpunkt.
    Zustand am Spieler (wird zum Online-Gast gespiegelt): apl, bmZug, bmL1/bmL2, bmIdle, bmBuhT, bmGainT, bmZugT, bmTp.
    Funktionen: bmAdd, bmVoll, bmBuh, bmZugabe, bmRuf, bmDraw, bmTeleport, bmTpDraw, PETART.bm_double, HFX bm_*. */
-const BMA={MAX:100,NEU:10,WECHSEL:5,TAKT:12,BRAVO:8,REFRAIN:20,BUH:15,KILL:1,SPOTT:4,KT:1,RIPO:6,PARADE:6,OOH:5,OOHF:7,IDLE:3.5,ZUGIDLE:7,ABFALL:7,ZUGMUL:1.25};
+const BMA={MAX:100,NEU:10,WECHSEL:5,TAKT:12,BRAVO:8,REFRAIN:20,BUH:15,KILL:1,SPOTT:4,KT:0.6,RIPO:4,PARADE:4,OOH:5,OOHF:7,IDLE:3.5,ZUGIDLE:7,ABFALL:7,ZUGMUL:1.25};
 SND_FILES2.push('amb/e_jubel_1','amb/e_jubel_3','amb/e_jubel_5','amb/e_raunen_1','amb/e_raunen_2');
 Object.assign(SND,{bm_jubel:()=>smp('amb/e_jubel_'+pick([1,3,5]),0.2,{len:2.6})||SND.kombo(),bm_raunen:()=>smp('amb/e_raunen_'+pick([1,2]),0.15,{len:1.7})||SND.ui()});
 /* Zurufe aus dem Publikum: vor der Bühne (unter Barradin) */
@@ -11962,10 +11962,10 @@ hook('dmgMul',(e,o)=>e.gmB>0&&!o.gmBew?0.35:1);
 /* Ziel: wie üblich (stärkster/anvisierter) – ohne Maus-/Stickzielen lieber einen, der verfallen kann */
 function gmKussZiel(){let t=aimTarget(480,true);if(t&&gmImmun(t)&&!mouseAim()&&padA()==null){let b=null,bd=480*480;for(const e of G.enemies){if(!targetable(e)||gmImmun(e))continue;const d=d2(e,P);if(d<bd){bd=d;b=e}}if(b)t=b}return t}
 function gmKussShoot(x,y,t,r,f){const a=Math.atan2(t.y-y,t.x-x);f=f||1;
- shoot({x,y,a,spd:430,dmg:sk((2.2+0.5*r)*f),r:13,pierce:0,kind:'gm_falter',c:'#8a3a62',life:1.8,d:{n:f<1?3:5},
-  hit:(e)=>{gmBez(e,(3+0.4*r)*(f<1?0.7:1),'b_g_kuss');light(e.x,e.y,110,GMC.R,0.3,0.6);sfxAt('glas',e.x,e.y);
+ shoot({x,y,a,spd:430,dmg:sk((1.6+0.35*r)*f),r:13,pierce:0,kind:'gm_falter',c:'#8a3a62',life:1.8,d:{n:f<1?3:5},
+  hit:(e)=>{gmBez(e.dead?(nearest(e.x,e.y,240)||e):e,(3+0.4*r)*(f<1?0.7:1),'b_g_kuss');light(e.x,e.y,110,GMC.R,0.3,0.6);sfxAt('glas',e.x,e.y);
    if(f<1)return;const L=[];query(e.x,e.y,240,g=>{if(g!==e&&targetable(g)&&L.length<2)L.push(g)});
-   for(const g of L){const b=Math.atan2(g.y-e.y,g.x-e.x);shoot({x:e.x,y:e.y-e.r*0.4,a:b,spd:360,dmg:sk(0.7+0.17*r),r:9,pierce:0,kind:'gm_falter',c:'#1f6a64',life:1.2,d:{n:1,mini:1}});const p=G.projs[G.projs.length-1];if(p)p.tg=g}}});
+   for(const g of L){const b=Math.atan2(g.y-e.y,g.x-e.x);shoot({x:e.x,y:e.y-e.r*0.4,a:b,spd:360,dmg:sk(1+0.25*r),r:9,pierce:0,kind:'gm_falter',c:'#1f6a64',life:1.2,d:{n:1,mini:1}});const p=G.projs[G.projs.length-1];if(p)p.tg=g}}});
  const p=G.projs[G.projs.length-1];if(p)p.tg=t}
 PROJART.gm_falter={upd(p,dt){if(!p.tg||p.tg.dead||p.tg.gmB>0)p.tg=nearest(p.x,p.y,320);const e=p.tg;if(!e)return;const want=ang(p,e);let d=Math.atan2(Math.sin(want-p.a),Math.cos(want-p.a));const mx=7*dt;d=clamp(d,-mx,mx);p.a+=d;const sp=p.spd||420;p.vx=Math.cos(p.a)*sp;p.vy=Math.sin(p.a)*sp},
  draw(p,t,c){const d=p.d||{},n=d.n||3,mini=d.mini;if(p.tr)p.tr.length=0;/* eigene Funkelspur statt der Standard-Schleppe */c.globalCompositeOperation='lighter';
@@ -12020,7 +12020,7 @@ function gmDarbietung(r){const R=(250+8*r)*P.st.area,x=P.x,y=P.y,N=3+(r>>1);
   G.shake+=3;sfx('b_feder');sfx('glas')})}
 
 /* ---------- Krone der Majestät ---------- */
-function gmKrone(r){const T=10+2*r;P.buffs.gmKrone=T;P.gmKrR=r;P.gmKrT=0.5;recalc();aoe(P.x,P.y,240*P.st.area,sk(2.5+0.6*r),{knock:160,fx:P.x,fy:P.y});
+function gmKrone(r){const T=10+2*r;P.buffs.gmKrone=T;P.gmKrR=r;P.gmKrT=0.5;recalc();aoe(P.x,P.y,240*P.st.area,sk(3.2+0.8*r),{knock:160,fx:P.x,fy:P.y});
  G.fxs.push({k:'gm_kronfx',x:P.x,y:P.y,r:240*P.st.area,t:0,life:1.2});light(P.x,P.y,380,GMC.G,1,0.55);G.shake+=5;sfx('ult');sfx('edelstein');sfx('level')}
 hook('hurtMul',()=>P.buffs.gmKrone>0?1-(0.15+0.05*(P.gmKrR||1)):1,'barradin');
 hook('tick',dt=>{if(P.gmUzT>0)P.gmUzT=Math.max(0,P.gmUzT-dt);
@@ -12310,21 +12310,21 @@ function kzNah(e,R,f){const L=[];query(e.x,e.y,R,g=>{if(g!==e&&!g.dead&&!(g.gmB>
 const KZ=[
  {id:'gnadenschuss',a:'barradin',b:'friedrich',n:'Gnadenschuss',ic:'🏹',c:'#ffd86a',cd:8,gcd:3,
   w:'Barradin hält einen Gegner fest oder fesselt ihn',t:'Friedrich trifft ihn mit Weitschuss, Hinterhalt oder dem einen Pfeil',d:'Normale Gegner fallen sofort, starke erleiden schweren Schaden',
-  ok(e,o){return kzPfeil(o)&&kzGebunden(e)&&(d2(e,P)>=300*300||(P.kzHiT||0)>G.time||kzSrc(o)==='f_onearrow')},
+  ok(e,o){return kzPfeil(o)&&kzGebunden(e)&&(d2(e,P)>=230*230||(P.kzHiT||0)>G.time||kzSrc(o)==='f_onearrow')},
   f(e){G.fxs.push({k:'kz_nagel',x:e.x,y:e.y,r:e.r,a:Math.atan2(e.y-P.y,e.x-P.x),t:0,life:1.1});light(e.x,e.y,200,'#ffd86a',0.5,0.9);sfxAt('hold',e.x,e.y);
    if(kzNorm(e))kzKill(e);else kzDmg(e,e.boss||e.guard?sk(20):Math.min(e.maxHp*0.4,sk(40)),{noCrit:1,stun:0.6})}},
- {id:'zerren',a:'barradin',b:'friedrich',n:'Herausgezerrt',ic:'🐾',c:'#c9e07a',cd:10,gcd:4,
+ {id:'zerren',a:'barradin',b:'friedrich',n:'Herausgezerrt',ic:'🐾',c:'#c9e07a',cd:7,gcd:3,
   w:'Barradin fesselt einen Gegner (Ranken, Festhalten, Knien …)',t:'Rex beißt zu',d:'Rex zerrt ihn heraus und schleudert ihn fort',
   ok(e,o){return o.rex&&!e.boss&&!e.guard&&kzGebunden(e)},
   f(e){const a=Math.atan2(e.y-P.y,e.x-P.x)+rnd(-0.5,0.5),D=(e.elite||e.champ?110:190)/(e.def.size||1),x0=e.x,y0=e.y;
    e.root=0;e.heldT=0;e.kx+=Math.cos(a)*D*9;e.ky+=Math.sin(a)*D*9;
-   kzDmg(e,sk(10),{noCrit:1});if(!e.dead)stunE(e,1);
+   kzDmg(e,sk(12),{noCrit:1});if(!e.dead)stunE(e,1);
    G.fxs.push({k:'kz_wurf',x:x0,y:y0,x2:x0+Math.cos(a)*D,y2:y0+Math.sin(a)*D,r:e.r,t:0,life:0.9});chunks(x0,y0,'#4a7a2a',8,240);puffs(x0,y0,'#bba88a',6,80,12);sfxAt('e_klaue',x0,y0)}},
- {id:'donner',a:'barradin',b:'echo',n:'Donnerballade',ic:'⚡',c:'#9fd8ff',cd:8,gcd:5,
+ {id:'donner',a:'barradin',b:'echo',n:'Donnerballade',ic:'⚡',c:'#9fd8ff',cd:6,gcd:4,
   w:'Barradin hält Gegner fest',t:'Echo trifft einen davon mit einem Zauber',d:'Blitze springen wie über Saiten zwischen allen Gefesselten',
   ok(e,o){return !o.basic&&!o.pet&&kzGebunden(e)},
   f(e){const L=[e,...kzNah(e,430,kzGebunden).slice(0,5)],pts=[];for(const g of L)pts.push(Math.round(g.x),Math.round(g.y-g.r*0.5));
-   G.fxs.push({k:'kz_saite',x:e.x,y:e.y,pts,t:0,life:0.9});for(const g of L){kzDmg(g,sk(g===e?8:9),{lightning:1,noCrit:1,stun:0.3});light(g.x,g.y,90,'#9fd8ff',0.3,0.7)}sfxAt('blitz',e.x,e.y);G.shake+=3}},
+   G.fxs.push({k:'kz_saite',x:e.x,y:e.y,pts,t:0,life:0.9});for(const g of L){kzDmg(g,sk(g===e?12:13),{lightning:1,noCrit:1,stun:0.3});light(g.x,g.y,90,'#9fd8ff',0.3,0.7)}sfxAt('blitz',e.x,e.y);G.shake+=3}},
  {id:'ablenkung',a:'barradin',b:'ezekiel',n:'Ablenkungsmanöver',ic:'🗡',c:'#d68cff',cd:10,gcd:4,
   w:'Barradin lenkt einen Gegner ab (festhalten, fesseln, knien, staunen)',t:'Ezekiel schlägt zu',d:'Sicherer Rückenstich – und ein paar Münzen wechseln den Besitzer',
   ok(e,o){return !o.pet&&(kzGebunden(e)||e.gmSt>0)},
@@ -12373,7 +12373,7 @@ hook('dmgMul',(e,o)=>{if(!G.mp||KZ_IN||!P||o.dot||o.kombo||o.setFx||e.dead)retur
  for(const C of L){if((KZG.t[C.id]||0)>now||cd&&(cd[C.id]||0)>now)continue;const a=kzHeld(C.a);if(!a)continue;let ok=false;try{ok=C.ok(e,o)}catch(x){}if(ok){o.kzC=C;o.kzA=a;KZQ=e;break}}return 1});
 hook('hit',(e,o)=>{if(!o.kzC)return;const C=o.kzC,a=o.kzA;o.kzC=null;if(KZQ===e)KZQ=null;if(KZ_IN||e.dead||!(e.hp>0)||!PL.includes(a))return;kzFire(C,e,a,o)});
 /* Vorbereitung: Barradins Kontrolle merken (Festhalten/Ranken/Majestät erkennt kzGebunden direkt) */
-hook('hit',(e,o)=>{if(!G.mp||KZ_IN||e.dead)return;if(o.stun||o.root||o.fear)e.kzB=G.time+Math.max(o.stun||0,o.root||0,o.fear||0,1)+0.5},'barradin');
+hook('hit',(e,o)=>{if(!G.mp||KZ_IN||e.dead)return;if(o.stun||o.root||o.fear)e.kzB=G.time+Math.max(o.stun||0,o.root||0,o.fear||0,1)+1.5},'barradin');
 /* Echos Zauber laden Friedrichs Jagdbeute auf */
 hook('hit',(e,o)=>{if(!G.mp||KZ_IN||o.dot||o.pet||o.basic||o.kombo||e.dead||!e.fmBeuteP||!PL.includes(e.fmBeuteP))return;
  if(!(e.kzLad>0)){sparks(e.x,e.y-e.r*0.5,'#9fd8ff',6,160);if(Math.random()<0.5)word(e.x,e.y-e.r-26,'knister …','#9fd8ff')}e.kzLad=5},'echo');
