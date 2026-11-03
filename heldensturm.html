@@ -3571,7 +3571,7 @@ function updEnemy(e,dt){
  else if(k==='diver'){if(d<170&&e.atkCd<=0){e.atkCd=rnd(2,2.8);e.dashT=0.42;e.cvx=mx*sp*3.2;e.cvy=my*sp*3.2;return}}
  else if(k==='drunk'){const w=Math.sin(G.time*2.5+e.seed*3);const ox=-my*w*0.9,oy=mx*w*0.9;mx+=ox;my+=oy}
  else if(k==='exploder'){if(!e.fuse&&d<e.r+28)e.fuse=0.45}
- if(e.fuse>0){e.fuse-=dt;mx=my=0;if(e.fuse<=0){const R=75;ring(e.x,e.y,R,'#ffb040',0.35,6);burst(e.x,e.y,'#ffb040',18,220);sfx('boom');if(d2(e,P)<(R+P.r)*(R+P.r))hurt(e.dmg);for(const a of G.allies)if(!a.dead&&d2(e,a)<R*R)a.hp-=e.dmg;e.dead=true;e.noLoot=true;G.kills++;G.stageKills++;return}}
+ if(e.fuse>0){e.fuse-=dt;mx=my=0;if(e.fuse<=0){const R=75;ring(e.x,e.y,R,'#ffb040',0.35,6);burst(e.x,e.y,'#ffb040',18,220);sfx('boom');if(d2(e,P)<(R+P.r)*(R+P.r))hurt(e.dmg);for(const a of G.allies)if(!a.dead&&d2(e,a)<R*R)a.hp-=e.dmg;e.dead=true;e.noLoot=true;G.kills++;if(!e.arA)G.stageKills++;return}}
  if(e.root>0){mx=0;my=0}
  if(e.peek>G.time&&(k==='ranged'||k==='netter')&&(mx||my)){const sg=(e.seed%2<1)?1:-1;const nx=-(dy/d)*sg,ny=(dx/d)*sg;mx=nx;my=ny}
  if(e.slT>0){e.slT-=dt;if(mx||my){mx=mx*0.25+e.slX;my=my*0.25+e.slY;const l=Math.hypot(mx,my)||1;mx/=l;my/=l}}
@@ -3725,7 +3725,7 @@ function spawnBoss(){const S=STAGES[G.stage];const def=BOSSES[S.boss];const p=ed
  const b=spawnEnemy(def,p.x,p.y,{boss:1});G.boss=b;rumbleAll(0.7,260);if(def.survive)b.survive=def.survive;/* erste Kampagne auf Normal: Bosse treffen etwas sanfter, Demogorgon muss man kürzer überleben */if(NORM()&&G.mode==='kampagne'){b.dmg*=0.8;if(b.survive)b.survive=Math.round(b.survive*0.8)}if(b.survive)b.survive0=b.survive;
  if(def.adds)for(const id of def.adds){const a=ADDS[id];spawnEnemy(a,p.x+60,p.y+40,{add:1})}
  toast(`<span style="color:#ff8a7a">${def.say||def.n+' erscheint!'}</span>`);G.shake+=6;ring(p.x,p.y,120,'#ff5a4a',0.8,8);bossIntroFx(b,def)}
-function killEnemy(e,o){if(e.dead)return;e.dead=true;addCorpse(e,o);comboKill();if(G.mp){P.stKills=(P.stKills||0)+1;teamGain(1/150)}G.kills++;if(!e.boss&&!e.guard)G.stageKills++;try{skKill(e)}catch(er){}
+function killEnemy(e,o){if(e.dead)return;e.dead=true;addCorpse(e,o);comboKill();if(G.mp){P.stKills=(P.stKills||0)+1;teamGain(1/150)}G.kills++;/*arzahl*/if(!e.boss&&!e.guard&&!e.arA)G.stageKills++;try{skKill(e)}catch(er){}
  G.score+=Math.round((e.boss?400+40*SL():e.guard?120+10*SL():e.rare?60:e.elite?25:e.summon?1:2+0.2*SL()));
  affixDeath(e);legendKill(e);bestKill(e);setOnKill(e);hookRun('kill',e,o);curseKill();noteKill();if(e.mimic)mimicLoot(e);rareKill(e);if(e.def.k==='thief')thiefLoot(e);if(e.rare)say('elite',0,0.5);
  if(dmod('explosiv')&&!e.boss&&!e.guard&&!e.summon&&Math.random()<0.3){const x=e.x,y=e.y;tele({k:'circle',x,y,r:60,delay:0.7,dmg:e.dmg*0.9,c:'#ffb040'})}
