@@ -6582,20 +6582,20 @@ function padMove(p){let x=0,y=0;for(const s of padsOf(p)){let[a,b]=dz(s.lx,s.ly,
 function padActions(p){const L=padsOf(p);if(!L.length)return;let sprAny=0,aimA=null;for(const s of L){const pr=s.pr;if(!G.mp&&(Math.hypot(s.lx,s.ly)>0.3||s.b[12]||s.b[13]||s.b[14]||s.b[15]))(PADS.used1=PADS.used1||{})[s.i]=1;
  for(let i=0;i<6;i++)if(padHit(s,'s'+(i+1)))useSkill(tlIdx(i));
  if(padHit(s,'pot'))usePotion();
- if(padSpr(s))sprAny=1;if(padHit(s,'spr')){const now=performance.now();if(now-(p.sprTap||0)<300)withP(p,()=>rollTry(p.lix||0,p.liy||0));p.sprTap=now}{const[rx,ry]=dz(s.rx,s.ry,0.4);if((rx||ry)&&aimA===null)aimA=Math.atan2(ry,rx)}
+ if(padSpr(s))sprAny=1;if(padHit(s,'roll'))withP(p,()=>rollTry(p.lix||0,p.liy||0));if(padHit(s,'spr')){const now=performance.now();if(now-(p.sprTap||0)<300)withP(p,()=>rollTry(p.lix||0,p.liy||0));p.sprTap=now}{const[rx,ry]=dz(s.rx,s.ry,0.4);if((rx||ry)&&aimA===null)aimA=Math.atan2(ry,rx)}
  const pi=Math.max(0,PL.indexOf(p));if(padHit(s,'pause')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('pause',pi);return}if(padHit(s,'inv')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('inv',pi);return}}
  if(sprAny){if(P.stam>(P.puste?35:5)&&!P.padSpr)P.sprint=true;P.padSpr=1}else if(P.padSpr){P.sprint=false;P.padSpr=0}
  if(aimA!==null){P.padAim=aimA;P.padAimT=G.time;P.padHeld=1}else{P.padHeld=0;if(P.padAim!=null&&G.time-(P.padAimT||0)>PAD_STICKY)P.padAim=null}}
 const PAD_STICKY=3;
 /* ---------- Controller-Belegung (eine für alle Controller, in SAVE.padMap) ---------- */
 const PADBN=['A','B','X','Y','LB','RB','LT','RT','View','Menu','LS','RS','Steuerkreuz ↑','Steuerkreuz ↓','Steuerkreuz ←','Steuerkreuz →'];
-const PADACT=[['s1','Fähigkeit 1'],['s2','Fähigkeit 2'],['s3','Fähigkeit 3'],['s4','Fähigkeit 4'],['s5','Fähigkeit 5'],['s6','Fähigkeit 6'],['pot','Heiltrank'],['spr','Sprinten'],['ult','Imres Segen'],['inv','Beutel'],['pause','Pause']];
+const PADACT=[['s1','Fähigkeit 1'],['s2','Fähigkeit 2'],['s3','Fähigkeit 3'],['s4','Fähigkeit 4'],['s5','Fähigkeit 5'],['s6','Fähigkeit 6'],['pot','Heiltrank'],['spr','Sprinten'],['roll','Ausweichrolle'],['ult','Imres Segen'],['inv','Beutel'],['pause','Pause']];
 /* ult -1 = LS und RS zusammen drücken */
-const PADDEF={s1:0,s2:1,s3:2,s4:3,s5:4,s6:5,pot:7,spr:6,ult:-1,inv:8,pause:9};
+const PADDEF={s1:0,s2:1,s3:2,s4:3,s5:4,s6:5,pot:7,spr:6,roll:10,ult:-1,inv:8,pause:9};
 let PADCAP=null,PMC=null;
 function padMapOk(m){if(!m||typeof m!=='object'||Array.isArray(m)||Object.keys(m).length!==PADACT.length)return false;const seen=new Set();
  for(const[k]of PADACT){if(!(k in m))return false;const v=m[k];if(v===null)continue;if(!Number.isInteger(v)||v<(k==='ult'?-1:0)||v>15)return false;if(v>=0){if(seen.has(v))return false;seen.add(v)}}return true}
-function padMap(){if(PMC&&PMC===SAVE.padMap)return PMC;if(!padMapOk(SAVE.padMap))SAVE.padMap=Object.assign({},PADDEF);return PMC=SAVE.padMap}
+function padMap(){if(SAVE.padMap&&typeof SAVE.padMap==='object'&&!Array.isArray(SAVE.padMap)&&!('roll' in SAVE.padMap)){SAVE.padMap.roll=Object.values(SAVE.padMap).includes(10)?null:10;PMC=null}if(PMC&&PMC===SAVE.padMap)return PMC;if(!padMapOk(SAVE.padMap))SAVE.padMap=Object.assign({},PADDEF);return PMC=SAVE.padMap}
 const pbn=v=>v===-1?'LS + RS':v==null||v===undefined?'–':PADBN[v]||'?';
 function padHit(s,k){const v=padMap()[k];if(v==null)return false;if(v===-1)return k==='ult'&&!!(s.b[10]&&s.b[11]&&(s.pr[10]||s.pr[11]));return!!s.pr[v]}
 /* Sprinten: gehaltene Taste; LS sprintet zusätzlich, solange LS nicht anders belegt ist */
@@ -7145,7 +7145,7 @@ function netSample(){let ix=0,iy=0,spr=!!(keys.ShiftLeft||keys.ShiftRight)||NET.
  if(!G.overlay){if(keys.ArrowLeft||keys.KeyA)ix--;if(keys.ArrowRight||keys.KeyD)ix++;if(keys.ArrowUp||keys.KeyW)iy--;if(keys.ArrowDown||keys.KeyS)iy++;
   if(joy&&joy.on){const dx=joy.x-joy.ox,dy=joy.y-joy.oy,dd=Math.hypot(dx,dy);if(dd>6){const m=Math.min(1,dd/50);ix=dx/dd*m;iy=dy/dd*m}}
   for(const s of Object.values(PADS.st)){let[a,b]=dz(s.lx,s.ly,0.22);if(s.b[14])a=-1;if(s.b[15])a=1;if(s.b[12])b=-1;if(s.b[13])b=1;if(Math.abs(a)+Math.abs(b)>Math.abs(ix)+Math.abs(iy)){ix=a;iy=b;NET.localDev='pad:'+s.i}
-   if(padSpr(s))spr=true;if(padHit(s,'spr')){const now=performance.now();if(now-(NET.sprTap||0)<300)netAct('roll');NET.sprTap=now}const[rx,ry]=dz(s.rx,s.ry,0.4);if(rx||ry)aim=Math.atan2(ry,rx);
+   if(padSpr(s))spr=true;if(padHit(s,'roll'))netAct('roll');if(padHit(s,'spr')){const now=performance.now();if(now-(NET.sprTap||0)<300)netAct('roll');NET.sprTap=now}const[rx,ry]=dz(s.rx,s.ry,0.4);if(rx||ry)aim=Math.atan2(ry,rx);
    for(let i=0;i<6;i++)if(padHit(s,'s'+(i+1)))useSkill(tlIdx(i));if(padHit(s,'pot'))netAct('pot');if(padHit(s,'ult'))netAct('ult');if(padHit(s,'pause')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('pause')}else if(padHit(s,'inv')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('inv')}}}
  if(NET.mine)NET.mine.padAim=aim;
  const il=Math.hypot(ix,iy);if(il>1){ix/=il;iy/=il}if(ix||iy)NET.localDev=NET.localDev||'kb';
