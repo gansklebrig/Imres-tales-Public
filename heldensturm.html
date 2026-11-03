@@ -3528,7 +3528,7 @@ function spawnTick(dt){
  const cap=Math.round((50+Math.min(SL(),24)*2+G.diff*8+(HARD()?10:0)+20*(mpN()-1))*(surv0?0.6:1)*(0.6+0.4*AN.lv)*(0.8+0.2*AN.st)*(SL()>=8?1.12:1));if(G.enemies.length>=cap)return;
  const f=pickFoe(prog),pt=viewEdgePoint(50);
  const packC=(SL()<2?0.03:0.06)+0.03*EB()+0.005*Math.min(SL(),27)+0.03*G.diff;
- if(!bossy&&f.k!=='still'&&Math.random()<packC*(dmod('elitenflut')?3:1)*(G.gefahr?2.2:1)*wxPack()){spawnPack(f,pt.x,pt.y);return}
+ if(!bossy&&f.k!=='still'&&Math.random()<packC*(dmod('elitenflut')?3:1)*(G.gefahr?2.2:1)*wxPack()*b2PackF()){spawnPack(f,pt.x,pt.y);return}
  const n=(EB()>0.4?1:0)+ri(3+Math.min(3,Math.floor(SL()/8)),4+Math.min(6,Math.floor(SL()/4))+Math.floor(prog*3));const nn=Math.max(1,Math.round(n*(0.65+0.35*AN.st)*(0.8+0.2*AN.lv)));
  for(let i=0;i<nn;i++)spawnEnemy(f,pt.x+rnd(-60,60),pt.y+rnd(-60,60))}
 function edgePoint(dist){let x=P.x,y=P.y;for(let tr=0;tr<10;tr++){const a=rnd(TAU);x=P.x+Math.cos(a)*dist;y=P.y+Math.sin(a)*dist;if(x>80&&y>80&&x<WORLD-80&&y<WORLD-80)break}return{x:clamp(x,60,WORLD-60),y:clamp(y,60,WORLD-60)}}
@@ -3734,7 +3734,7 @@ function killEnemy(e,o){if(e.dead)return;e.dead=true;addCorpse(e,o);comboKill();
  if(e.vineT>G.time){const bl=rank('b_bloom');if(bl){heal(P.st.maxHp*0.006*bl);for(const q of teamNear(P,auraR(P)))withP(q,()=>heal(P.st.maxHp*0.006*bl));if(Math.random()<0.1*bl)zone({x:e.x,y:e.y,r:70*P.st.area,dur:3,dps:sk(0.7),root:1,kind:'vines',vine:1})}}
  if(P.form==='bear'){const pr=rank('e_primal');if(pr){P.formT+=0.5;heal(P.st.maxHp*0.01*pr)}}
  const rexKill=o&&o.rex;
- if(!e.summon&&P.pots<P.potMax){P.potKills=(P.potKills||0)+1;if(P.potKills>=30){P.potKills=0;P.pots++;toast('Heiltrank aufgefüllt','#ff8a9a')}}
+ if(!e.summon&&P.pots<P.potMax){P.potKills=(P.potKills||0)+1;if(P.potKills>=(b2Hard()?B2.hardPotKills:30)){P.potKills=0;P.pots++;toast('Heiltrank aufgefüllt','#ff8a9a')}}
  const sc=dMult();deathFx(e);
  if(e.pylonOf){const b=e.pylonOf;if(b.pylons&&b.pylons.every(p=>p.dead||p===e)){b.dr=0;toast('Der Wächter ist ungeschützt!','#6ad0ff')}}
  const xp=1.5*(e.def.xp||(e.boss?30:e.guard?12:1))*(1+0.08*effStage())*sc.xp*(e.elite?5:1)*(e.summon?0.5:1)*(e.guard?1:1)*(e.rz&&G.rareE&&G.rareE.k==='riesen'?2:1);orb(e.x,e.y,'xp',xp);
@@ -3857,7 +3857,7 @@ function updPlayer(dt){
   L.taken=1;delete L.it.for;setFound(L.it);const sl=L.it.slot==='ring'?(!P.eq.ring1?'ring1':!P.eq.ring2?'ring2':null):(P.eq[L.it.slot]?null:L.it.slot);if(sl){P.eq[sl]=L.it;recalc();toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span> angelegt`,null,{minor:1});sfx('equip');updateInvBadge();continue}
   P.bag.push(L.it);const dl=itemDelta(L.it);if(L.it.rar>=2||dl>0.01)toast(`<span class="${L.it.hs?'c5h':'c'+L.it.rar}">${esc(L.it.name)}</span>${dl>0.01?' <span class="good">▲ besser</span>':''}`,null,{minor:1,drop:L.it.rar<3&&dl<=0.01});sfx(L.it.rar>=3?'legend':'item');updateInvBadge();if(G.bot)botEquip()}}
  G.loot=G.loot.filter(L=>!L.taken);
- if(G.portal2&&G.state==='play'&&d2(G.portal2,P)<46*46){G.gefahrNext=1;G.portal2=null;enterPortal()}else if(G.portal&&d2(G.portal,P)<(G.portal.boat?60:46)**2)enterPortal();
+ if(G.portal2&&G.state==='play'&&d2(G.portal2,P)<46*46){G.gefahrNext=1;G.b2P2=G.portal2;G.portal2=null;enterPortal()}else if(G.portal&&d2(G.portal,P)<(G.portal.boat?60:46)**2)enterPortal();
 }
 
 /* ---------- Testpilot (nur intern) ---------- */
@@ -5138,9 +5138,9 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');i
   case'stage-go':hideScreen();hud.hidden=false;G.state='play';G.paused=false;last=performance.now();stageBanner();if(G.stage===0&&G.kills===0)toast('Laufen – angreifen geht von allein!');break;
   case'next-stage':if(maybeEvent())break;doNextStage();break;
    /* Aus Versehen ins Portal gelaufen: zurück in die Stufe, das Portal bleibt offen */
-   case'stay-stage':{if(G.state!=='between')break;G.state='play';G.paused=false;G.fireOn=0;G.overlay=null;hideScreen();hud.hidden=false;last=performance.now();const pt=G.portal;
+   case'stay-stage':{if(G.state!=='between')break;G.state='play';G.paused=false;G.fireOn=0;G.overlay=null;hideScreen();hud.hidden=false;last=performance.now();b2Bleiben();const pt=G.portal;
     if(pt)for(const q of mpL()){if(!q)continue;const d=Math.sqrt(d2(q,pt));if(d<150){const a=d>1?Math.atan2(q.y-pt.y,q.x-pt.x):Math.PI/2;q.x=clamp(pt.x+Math.cos(a)*150,20,WORLD-20);q.y=clamp(pt.y+Math.sin(a)*150,20,WORLD-20)}}
-    if(P&&!G.bot){saveRun();persist()}sfx('ui');toast('Das Portal bleibt offen – geh hinein, wenn du so weit bist.','#bfe6ff');break}
+    b2BleibenNach();if(P&&!G.bot){saveRun();persist()}sfx('ui');toast('Das Portal bleibt offen – geh hinein, wenn du so weit bist.','#bfe6ff');break}
   case'between-inv':if(NET.cf&&NET.role==='host'){const g=NET.guests.find(x=>x.p===PL[NET.cf]);if(g){vmOpen(g,'inv');break}}G.invSel=null;G.menuP=NET.cf||0;if(G.mp&&PL[G.menuP])P=PL[G.menuP];G.overlay='inv';renderInv();break;
   case'between-tree':if(NET.cf&&NET.role==='host'){const g=NET.guests.find(x=>x.p===PL[NET.cf]);if(g){vmOpen(g,'tree');break}}G.menuP=NET.cf||0;if(G.mp&&PL[G.menuP])P=PL[G.menuP];G.overlay='tree';renderTree();break;
   case'mtab':if(G.state==='camp'){campOpen(b.dataset.m,1);break}if(NET.role==='host'&&!NET.vm&&NET.cf){const g=NET.guests.find(x=>x.p===PL[NET.cf]);if(g){if(/^(inv|tree)$/.test(b.dataset.m))vmOpen(g,b.dataset.m);break}}if(G.state==='between'&&b.dataset.m!=='pause'){if(!G.overlay){G.menuP=NET.cf||0;if(G.mp&&PL[G.menuP])P=PL[G.menuP]}G.overlay=b.dataset.m;if(b.dataset.m==='inv'){G.invSel=null;renderInv()}else if(b.dataset.m==='truhe'){G.trSel=null;renderTruhe()}else renderTree()}else if(G.state==='play')switchOverlay(b.dataset.m);break;
@@ -7308,7 +7308,7 @@ function legAct(b){const id=b.dataset.h,L=legS(id);if(legFree(L)<=0)return;L.pts
 
 /* ---------- Qualstufen ---------- */
 const ROMQ=n=>{const R=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];let s='';for(const[v,c]of R)while(n>=v){s+=c;n-=v}return s};
-function diffChips(){const out=[],top=Math.min(Math.max(SAVE.maxDiff,1),4);for(let d=0;d<=top;d++){if(d===1&&G.selMode==='kampagne')out.push(`<button class="chip ${G.seldiff===0&&SAVE.hard?'on':''}" data-act="diff" data-d="0" data-h="1" title="Die Kampagne ohne Schonung: zähere und härtere Gegner, stärkere Wächter, mehr Gold und bessere Beute">Schwer</button>`);out.push(`<button class="chip ${d===G.seldiff&&!(d===0&&SAVE.hard&&G.selMode==='kampagne')?'on':''}" data-act="diff" data-d="${d}" ${d>SAVE.maxDiff?'disabled title="Besiegt den Demogorgon, um das freizuschalten"':''}>${esc(diffName(d))}</button>`)}
+function diffChips(){const out=[],top=Math.min(Math.max(SAVE.maxDiff,1),4);for(let d=0;d<=top;d++){if(d===1&&G.selMode==='kampagne')out.push(`<button class="chip ${G.seldiff===0&&SAVE.hard?'on':''}" data-act="diff" data-d="0" data-h="1" title="Die Kampagne ohne Schonung: zähere, härtere und angriffslustigere Gegner, mehr Elite, stärkere Wächter, weniger Heilung – dafür mehr Gold und bessere Beute">Schwer</button>`);out.push(`<button class="chip ${d===G.seldiff&&!(d===0&&SAVE.hard&&G.selMode==='kampagne')?'on':''}" data-act="diff" data-d="${d}" ${d>SAVE.maxDiff?'disabled title="Besiegt den Demogorgon, um das freizuschalten"':''}>${esc(diffName(d))}</button>`)}
  if(SAVE.maxDiff>=5){const q=G.seldiff>=5?G.seldiff:SAVE.maxDiff;out.push(`<span class="qualsel"><button class="chip" data-act="diff" data-d="${Math.max(5,q-1)}" ${q<=5?'disabled':''} aria-label="Qual senken">−</button><button class="chip qual ${G.seldiff>=5?'on':''}" data-act="diff" data-d="${q}">${esc(diffName(q))}</button><button class="chip" data-act="diff" data-d="${q+1}" ${q>=SAVE.maxDiff?'disabled':''} aria-label="Qual erhöhen">+</button></span>`)}
  return out}
 const qualN=()=>Math.max(0,G.diff-4);
@@ -13385,7 +13385,7 @@ function wlBevoelkern(S){const W=G.wl,C=WORLD/2,N0=G.need||60,O=G.obj;
   for(let i=0;i<n;i++){const p=platz(x,y,k==='lager'?95:70);if(!p)continue;const e=spawnEnemy(i%3===2?f2:f,p.x,p.y,{});if(!e)continue;e.born=-9;e.wlG=g.id;e.wlZz=k==='schlaf'?1:2;e.faceX=e.x+rnd(-1,1);g.m.push(e);placed++}
   G.stageKills=kS0;if(g.m.length){W.gr.push(g);zent.push([x,y])}return g};
  /* Elite-Nester (nach Packchance wie bei den alten Wellen) */
- const packC=(SL()<2?0.03:0.06)+0.03*EB()+0.005*Math.min(SL(),27)+0.03*G.diff;const nG=M/((lo+hi)/2);let nN=nG*packC*(dmod('elitenflut')?3:1)*(G.gefahr?2.2:1)*wxPack()*1.1;nN=Math.floor(nN)+(Math.random()<nN%1?1:0);nN=Math.min(nN,G.stage===0&&G.diff===0?0:5);
+ const packC=(SL()<2?0.03:0.06)+0.03*EB()+0.005*Math.min(SL(),27)+0.03*G.diff;const nG=M/((lo+hi)/2);let nN=nG*packC*(dmod('elitenflut')?3:1)*(G.gefahr?2.2:1)*wxPack()*b2PackF()*1.1;nN=Math.floor(nN)+(Math.random()<nN%1?1:0);nN=Math.min(nN,G.stage===0&&G.diff===0?0:5);
  const pf0=packFx;packFx=()=>{};try{for(let i=0;i<nN;i++){const pl=null;const p=ort(420,(x,y)=>W.platz.every(q=>Math.hypot(q.x-x,q.y-y)>q.r+200));if(!p)break;const g={id:W.gr.length,k:'nest',x:p.x,y:p.y,R:380,m:[],wach:0};const pr=prog(p.x,p.y);G.stageKills=Math.round(G.need*pr);const n0=G.enemies.length;spawnPack(pickFoe(Math.max(0.3,pr)),p.x,p.y);G.stageKills=kS0;
    for(const e of G.enemies.slice(n0)){const q=platz(p.x,p.y,90);if(q){e.x=q.x;e.y=q.y}e.born=-9;e.wlG=g.id;e.wlZz=2;g.m.push(e);placed++}if(g.m.length){W.gr.push(g);zent.push([p.x,p.y]);if(Math.random()<0.6)G.props.push({k:'chest',prop:1,x:p.x+rnd(-40,40),y:p.y+rnd(30,60),r:16,mimic:false})}}}finally{packFx=pf0}
  /* Gefangenen-Wachen am Käfig: schon gespawnte Gegner (zielProps) werden zu ruhenden Wachen */
@@ -14183,6 +14183,192 @@ document.addEventListener('pointercancel',ev=>{if(AV.on&&AV.src==='p')AV.ptr=fal
 document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="inv-alles"]');if(!b)return;ev.preventDefault();ev.stopImmediatePropagation();
  if(AV.on)return;if(ev.detail===0)avStart(b,(AV.keys.has('Enter')||AV.keys.has('Space')||AV.keys.has('NumpadEnter'))?'k':'g')},true);
 window.__hsKL={AV};
+
+/* ================= Paket „bal2“: Schwer wirklich schwer, starke Mimics, seltenere Legendäre/Sets, ruhigeres Leveltempo, Beute/Portale nie in der Wand =================
+   Präfix b2. Alles hier umhüllt vorhandene Funktionen (rollRarity, randomItem, dropItem, orb, openChest, mimicLoot, thiefLoot, killEnemy, gainXp, usePotion,
+   updEnemy, drawEnemy, ccIst, scale, spawnEnemy, guardDefeated, bossDefeated, portal2, clearPortalLoot, leaveSecret, setupStage).
+   Stellschrauben: B2 (unten). Testzugang: window.__bal2. */
+const B2={
+ /* Beute */
+ legW:0.42,legL:0.65,legLmax:2.5,          /* Legendär-Gewicht: legW·(1+min(L,legLmax)·legL) – vorher 0.6·(1+L·1.3) */
+ gefL:0.35,hardL:0.15,                     /* Glück-Bonus Gefährlicher Weg / Schwer (nur für Selten/Episch, nicht für Legendär) */
+ setKeep:{truhe:0.35,mimic:0.4,boss:0.4,guard:0.4,dieb:0.4,elite:0.4},   /* Anteil der bisherigen Set-Würfe, die bleiben */
+ raumLeg:0.35,nestLeg:0.6,                 /* garantierte Legendäre in Geheimräumen → Episch, mit dieser Chance doch Legendär */
+ bossLeg:0.05,                             /* zusätzliche Chance auf ein Legendäres beim Boss (dazu die normalen Würfe) */
+ pity:150,                                 /* Pech-Schutz: spätestens nach so vielen Würfen ohne Legendäres (vorher 100) */
+ /* Erfahrung */
+ xpLo:0.9,xpHi:0.78,                       /* Faktor auf gewonnene Erfahrung: Heldenstufe 1 → ab Stufe 20 (früh kaum langsamer, später spürbar) */
+ /* Schwer / Gefährlicher Weg */
+ hardHp:1.1,hardDmg:1.05,                   /* zusätzlich zu den alten ×1,35 Leben/×1,2 Schaden – nur normale Gegner (Wächter/Bosse wie bisher) */
+ hardSp:1.05,hardAtk:0.9,                   /* Tempo und Angriffsabstand der Gegner auf Schwer: Druck durch mehr Angriffe statt riesiger Einzeltreffer */
+ gefDmg:1.1,gefSp:1.05,gefAtk:0.92,                     /* Gefährlicher Weg zusätzlich zu ×1,3 Leben/×1,25 Schaden */
+ hardPotKills:40,hardLvHeal:0.1,hardPot:0.9,  /* weniger Heilung im Fluss */
+ hardEliteF:1.25,                           /* mehr Elite-Packs auf Schwer */
+ mimDmgPc:0.06,mimNest:0.75                 /* Mimic: Grundtreffer ≈ 6 % Heldenleben (nach Rüstung grob 4–8 %), Nest-Mimics je 75 % des Einzel-Mindestlebens */
+};
+const b2Hard=()=>typeof HARD==='function'&&HARD();
+const b2Gef=()=>!!(G&&G.gefahr);
+
+/* ---------------- 1. Beute-Seltenheit ---------------- */
+rollRarity=function(bonus){const lk=(P?P.st.luck:0)+bonus+0.25*qualN();const L=lk+(G.gefahr?B2.gefL:0)+(b2Hard()?B2.hardL:0);
+ const w=[16,42,27*(1+L),7*(1+L*1.1),B2.legW*(1+Math.min(Math.max(0,lk),B2.legLmax)*B2.legL)*RLDROP()*legDaempf()];
+ let s=w.reduce((a,b)=>a+b,0)*Math.random();for(let i=0;i<5;i++){s-=w[i];if(s<=0)return i}return 0};
+{const ri0=randomItem;randomItem=function(il,bonus,minR){
+  /* garantierte Legendäre in Geheimräumen: Episch sicher, Legendär nur mit Chance */
+  if(minR>=4&&G&&G.room&&!G.b2LegOk){const S=G.room,p=S&&S.type==='mimicnest'&&S.wake===2?B2.nestLeg:B2.raumLeg;if(Math.random()>=p)minR=3}
+  /* Pech-Schutz etwas später als vorher (100): der Zähler im Original löst bei 100 aus – wir halten ihn bis B2.pity zurück */
+  if(G&&!G.bot&&(G.pityN||0)>=99&&(G.b2Pity=(G.b2Pity||0)+1)<B2.pity-99){G.pityN=98}else if(G&&(G.pityN||0)<99)G.b2Pity=0;
+  return ri0.call(this,il,bonus,minR)}}
+/* Set-Würfe seltener: Set-Gegenstände aus Zufallsquellen fallen nur noch mit B2.setKeep */
+{const di0=dropItem;dropItem=function(x,y,it){if(it&&it.set&&G.b2Q&&!it.b2ok){const k=B2.setKeep[G.b2Q];if(k!==undefined&&Math.random()>=k)return}
+  const q=b2Boden(x,y,22);return di0.call(this,q.x,q.y,it)}}
+function b2Q(q,fn){const o=G.b2Q;G.b2Q=q;try{return fn()}finally{G.b2Q=o}}
+{const oc0=openChest;openChest=function(p){if(p&&p.mimic)return oc0.apply(this,arguments);const o=G.b2Org;G.b2Org={x:p.x,y:p.y};try{return b2Q('truhe',()=>oc0.apply(this,arguments))}finally{G.b2Org=o}}}
+{const ml0=mimicLoot;mimicLoot=function(e){return b2Q('mimic',()=>ml0.apply(this,arguments))}}
+{const tl0=thiefLoot;thiefLoot=function(e){return b2Q('dieb',()=>tl0.apply(this,arguments))}}
+{const ke0=killEnemy;killEnemy=function(e,o){if(!e||e.dead)return ke0.apply(this,arguments);const q=e.boss?'boss':e.guard?'guard':e.rare||e.elite?'elite':null;const or=G.b2Org;G.b2Org={x:e.x,y:e.y,r:e.r||12};
+  try{const r=b2Q(q,()=>ke0.apply(this,arguments));if(e.boss&&!e.roomBoss&&!G.bot&&Math.random()<B2.bossLeg*(b2Hard()||G.gefahr?1.3:1)){const a=rnd(TAU);G.b2LegOk=1;try{dropItem(e.x+Math.cos(a)*120,e.y+Math.sin(a)*120,randomItem(e.il+3,1.5,4))}finally{G.b2LegOk=0}}return r}
+  finally{G.b2Org=or}}}
+/* Truhe: der „Legendär“-Klang nur noch, wenn wirklich mindestens Episches drin ist (vorher klang jede Truhe legendär) */
+{const sf0=sfx;let stumm=0;sfx=function(n){if(stumm&&n==='legend'){stumm=0;return}return sf0.apply(this,arguments)};
+ const oc1=openChest;openChest=function(p){if(!p||p.mimic)return oc1.apply(this,arguments);stumm=1;try{return oc1.apply(this,arguments)}finally{stumm=0}}}
+
+/* ---------------- 2. Leveltempo ---------------- */
+function b2XpF(){if(G.mode==='taeglich')return 1;const l=P?P.level:1;return B2.xpLo+(B2.xpHi-B2.xpLo)*Math.min(1,Math.max(0,(l-1)/19))}
+{const gx0=gainXp;gainXp=function(v){const f=b2XpF(),hp0=P.hp,l0=P.level;const r0=ruhmXp;ruhmXp=x=>r0(x/f);
+  try{gx0.call(this,v*f)}finally{ruhmXp=r0}
+  if(P.level>l0&&b2Hard()){P.hp=Math.min(P.hp,hp0+P.st.maxHp*B2.hardLvHeal*(P.level-l0))}}}
+
+/* ---------------- 3. Schwer / Gefährlicher Weg ---------------- */
+{const se0=spawnEnemy;spawnEnemy=function(def,x,y,o){const e=se0.apply(this,arguments);if(!e)return e;const big=o&&(o.boss||o.guard);
+  if(b2Hard()&&!big&&!(o&&o.add)){e.hp*=B2.hardHp;e.maxHp=e.hp;e.dmg*=B2.hardDmg;e.sp*=B2.hardSp;e.atkCd*=B2.hardAtk}
+  if(G.gefahr&&!(o&&o.boss)){e.dmg*=B2.gefDmg;if(!big)e.sp*=B2.gefSp}
+  return e}}
+/* Schwer/Gefährlicher Weg: Gegner greifen öfter an (Abklingzeiten nach jedem Angriff kürzer) */
+{const ue1=updEnemy;updEnemy=function(e,dt){const h=b2Hard(),g=G.gefahr;if(!h&&!g||!e||e.boss||e.guard||e.add)return ue1.apply(this,arguments);const a0=e.atkCd,h0=e.hitCd;const r=ue1.apply(this,arguments);
+  const f=(h?B2.hardAtk:1)*(g?B2.gefAtk:1);if(e.atkCd>a0+0.05)e.atkCd=a0+(e.atkCd-a0)*f;if(e.hitCd>h0+0.05)e.hitCd=h0+(e.hitCd-h0)*f;return r}}
+{const up0=usePotion;usePotion=function(){const hp0=P?P.hp:0,n0=P?P.pots:0;const r=up0.apply(this,arguments);if(P&&b2Hard()&&P.pots<n0&&P.hp>hp0)P.hp=hp0+(P.hp-hp0)*B2.hardPot;return r}}
+
+/* ---------------- 4. Mimics ---------------- */
+Object.assign(MIMIC,{hp:12,dmg:2,sp:124,xp:42,size:1.9});
+NETW.enemies.push('mmS','mmH','mmR','mmA');
+{const ci0=ccIst;ccIst=function(e){return ci0(e)||!!(e&&e.mimic)}}
+function b2DiffK(){return(b2Hard()?1.25:NORM()?0.9:1)*(G.gefahr?1.12:1)*(G.diff>0?1.15:1)}
+/* Mindestleben wie bei Wächtern: einige Sekunden Heldenschaden – gute Ausrüstung macht Mimics nicht zu Pappkartons */
+function b2MimHp(e){let s=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const d=dpsOf(q.st);s+=Math.max(d.m,d.r)*(GUARD_HK[q.id]||1.5)}
+ const nest=G.room&&G.room.type==='mimicnest';const T=(3.2+Math.min(2.8,SL()*0.14))*b2DiffK()*(nest?B2.mimNest:1);const f=s*T;if(f>e.maxHp){e.hp=e.maxHp=f}}
+function b2MimDmg(e,k){return e.dmg*({snap:1.75,zunge:0.45,sprung:1.5}[k]||1)}
+/* Mindestschaden wie das Mindestleben: ein Teil des Heldenlebens – Rüstung hilft, aber nur etwa zur Hälfte */
+function b2MimDmgFloor(e){let s=0,n=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const ar=typeof armorRed==='function'?armorRed(q.st.armor):0;s+=q.st.maxHp*B2.mimDmgPc/Math.pow(Math.max(0.15,1-ar),0.75);n++}if(n){const f=s/n*b2DiffK();if(f>e.dmg)e.dmg=f}}
+{const oc2=openChest;openChest=function(p){const m=p&&p.mimic&&!p.open;const n0=G.enemies.length;const r=oc2.apply(this,arguments);
+  if(m)for(const e of G.enemies.slice(n0))if(e.mimic&&!e.b2){e.b2=1;e.hp*=b2DiffK();e.maxHp=e.hp;b2MimHp(e);b2MimDmgFloor(e);e.mmCd=rnd(0.9,1.6)}return r}}
+function b2MimBusy(){let n=0;for(const m of G.enemies)if(m.mimic&&!m.dead&&m.mmS)n++;return n}
+function b2MimTick(e,dt){
+ if(!e.mmR&&e.hp<e.maxHp*0.4){e.mmR=1;e.sp*=1.45;e.dmg*=1.15;word(e.x,e.y-e.r-24,'Raserei!','#ff4a3a');sfxAt('e_wucht',e.x,e.y);G.shake+=3;burst(e.x,e.y,'#ff4a3a',14,220);ring(e.x,e.y,90,'#ff4a3a',0.6,5)}
+ if(e.stun>0||e.fearT>0||e.heldT>0){if(e.mmS&&e.mmS!=='sprung'){e.mmS=0;e.mmH=0;e.mmCd=Math.max(e.mmCd||0,0.8)}if(e.mmS!=='sprung')return false}
+ const tg=nearestP(e.x,e.y);if(!tg||tg.down)return false;const d=Math.hypot(tg.x-e.x,tg.y-e.y);
+ if(!e.mmS){e.mmCd=(e.mmCd===undefined?1.2:e.mmCd)-dt*(e.mmR?1.6:1);if(e.mmCd>0||d>680)return false;
+  const lim=(G.room&&G.room.type==='mimicnest'?2:3);if(b2MimBusy()>=lim){e.mmCd=0.4;return false}
+  let k=null;if(d<190)k='snap';else if(d<430&&(typeof losFrei!=='function'||losFrei(e,tg))&&Math.random()<0.6)k='zunge';else if(d>=200&&e.root<=0)k='sprung';else if(d<240)k='snap';
+  if(!k){e.mmCd=0.35;return false}b2MimStart(e,k,tg,d);return true}
+ e.mmT+=dt;const W=e.mmW;
+ if(e.mmS==='snap'){if(e.mmT<W){e.faceX=tg.x;return true}if(!e.mmL){e.mmL=1;sfxAt('e_wucht',e.x,e.y)}const u=Math.min(1,(e.mmT-W)/0.16),sp=1250*(e.mmR?1.1:1);if(u<1){const nx=e.x+Math.cos(e.mmA)*sp*dt,ny=e.y+Math.sin(e.mmA)*sp*dt;if(!(typeof blkPunkt==='function'&&blkPunkt(nx,ny,e.r*0.6))){e.x=nx;e.y=ny}return true}if(!e.mmD&&Math.random()<(e.mmR?0.6:0.4)){e.mmD=1;e.mmS=0;e.mmL=0;b2MimStart(e,'snap',nearestP(e.x,e.y),60,0.3);return true}e.mmD=0;b2MimEnd(e,1.5);return true}
+ if(e.mmS==='zunge'){if(e.mmT<W)return true;if(!e.mmL){e.mmL=1;sfxAt('e_wurf',e.x,e.y);if(fxOk())G.fxs.push({k:'b2zunge',x:e.x,y:e.y-6,x2:e.x+Math.cos(e.mmA)*e.mmLen,y2:e.y-6+Math.sin(e.mmA)*e.mmLen,t:0,life:0.42})}if(e.mmT<W+0.3)return true;
+  if(e.mmZug){e.mmS=0;e.mmH=0;e.mmL=0;e.mmZug=0;e.mmCd=0;b2MimStart(e,'snap',nearestP(e.x,e.y),60,0.32);return true}b2MimEnd(e,1.4);return true}
+ if(e.mmS==='sprung'){if(e.mmT<W){e.mmH=Math.sin(Math.min(1,e.mmT/W)*Math.PI)*6;return true}const J=e.mmJ,u=Math.min(1,(e.mmT-W)/0.6);if(!e.mmFl){e.mmFl=1;e.mmF0=e.flying;e.flying=true}e.x=J.x0+(J.x1-J.x0)*u;e.y=J.y0+(J.y1-J.y0)*u;e.mmH=Math.sin(u*Math.PI)*95;
+  if(u>=1){e.mmH=0;e.flying=e.mmF0||false;e.mmFl=0;G.shake+=3;chunks(e.x,e.y,'#7a4a24',6,160);b2MimEnd(e,1.8)}return true}
+ return false}
+function b2MimStart(e,k,tg,d,wind){e.mmS=k;e.mmT=0;e.mmL=0;e.mmA=ang(e,tg);e.atkA=G.time;const fr=e.mmR?0.78:1;
+ if(k==='snap'){e.mmW=(wind||0.42)*fr;tele({k:'line',x:e.x,y:e.y,a:e.mmA,len:205,w:66,delay:e.mmW+0.12,dmg:b2MimDmg(e,'snap'),c:'#ff5a3a',follow:null})}
+ else if(k==='zunge'){e.mmW=0.55*fr;e.mmLen=Math.min(d+40,460);const me=e;tele({k:'line',x:e.x,y:e.y,a:e.mmA,len:e.mmLen,w:38,delay:e.mmW+0.12,dmg:b2MimDmg(e,'zunge'),c:'#ff6a9a',onHit:()=>{if(me.dead)return;const a=ang(P,me),dd=Math.max(0,Math.hypot(me.x-P.x,me.y-P.y)-me.r-34);P.kx=Math.cos(a)*dd*8.2;P.ky=Math.sin(a)*dd*8.2;P.dash=null;word(P.x,P.y-40,'Gepackt!','#ff6a9a');me.mmZug=1}})}
+ else if(k==='sprung'){e.mmW=0.38*fr;let x1=tg.x+(tg.vx||0)*0.2,y1=tg.y+(tg.vy||0)*0.2;const q=b2Boden(x1,y1,e.r*0.7,{x:tg.x,y:tg.y});x1=q.x;y1=q.y;e.mmJ={x0:e.x,y0:e.y,x1,y1};
+  tele({k:'circle',x:x1,y:y1,r:92,delay:e.mmW+0.6,dmg:b2MimDmg(e,'sprung'),c:'#ff7a3a'})}}
+function b2MimEnd(e,cd){if(e.mmFl){e.flying=e.mmF0||false;e.mmFl=0}e.mmS=0;e.mmH=0;e.mmL=0;e.mmZug=0;e.mmCd=cd*(e.mmR?0.6:1)*rnd(0.85,1.2)}
+{const ue0=updEnemy;updEnemy=function(e,dt){if(e&&e.mimic&&!e.dead&&!e.boss){
+   if(e.mmS){/* während eines Angriffs: Zeiten/Status trotzdem weiterzählen, aber keine normale KI */
+    if(b2MimTick(e,dt)){if(e.stun>0)e.stun-=dt;if(e.flash>0)e.flash-=dt;if(e.root>0)e.root-=dt;if(e.slowT>0)e.slowT-=dt;if(e.vulnT>0)e.vulnT-=dt;if(e.hitCd>0)e.hitCd-=dt;try{tickStatus(e,dt)}catch(er){}return}}
+   else if(b2MimTick(e,dt))return}
+  return ue0.apply(this,arguments)}}
+Object.assign(HFX,{b2zunge(f,k,c,t){const u=k<0.45?k/0.45:1-(k-0.45)/0.55,x=f.x+(f.x2-f.x)*u,y=f.y+(f.y2-f.y)*u,mx=(f.x+x)/2+Math.sin(t*30)*6,my=(f.y+y)/2-14*u;
+  c.globalAlpha=1;c.lineCap='round';c.strokeStyle='#5a0a14';c.lineWidth=9;c.beginPath();c.moveTo(f.x,f.y);c.quadraticCurveTo(mx,my,x,y);c.stroke();c.strokeStyle='#ff6a8a';c.lineWidth=6;c.stroke();
+  c.strokeStyle='rgba(255,200,210,.7)';c.lineWidth=2;c.beginPath();c.moveTo(f.x,f.y-1);c.quadraticCurveTo(mx,my-2,x,y-1);c.stroke();c.fillStyle='#ff5a7a';c.beginPath();c.arc(x,y,7,0,TAU);c.fill();c.lineCap='butt'}});
+{const de0=drawEnemy;drawEnemy=function(e,t){const mim=e&&e.def&&e.def.shape==='mimic'&&!e.dead;if(!mim)return de0.apply(this,arguments);const h=e.mmH||0;const c=cx;
+  if(e.mmR){glow(e.x,e.y-6,e.r*2.6,'#ff3a2a',0.35+0.15*Math.sin(t*12),true)}
+  if(h>4){c.globalAlpha=0.35;c.fillStyle='#000';c.beginPath();c.ellipse(e.x,e.y+e.r*0.6,e.r*(1.1-h/300),e.r*0.45,0,0,TAU);c.fill();c.globalAlpha=1}
+  if(e.mmS&&e.mmS!=='sprung'||e.mmS==='sprung'&&h<8){const a=0.45+0.35*Math.sin(t*26);glow(e.x,e.y-8,e.r*1.9,e.mmS==='zunge'?'#ff6a9a':'#ffb03a',a,true)}
+  const y0=e.y,fl0=e.flying;e.y-=h;if(e.mmFl)e.flying=false;try{de0.apply(this,arguments)}finally{e.y=y0;e.flying=fl0}
+  if(e.mmS==='zunge'&&!(e.mmL)){const k=e.r/12,ox=e.x+6*k,oy=e.y-h-2*k;c.strokeStyle='#ff6a8a';c.lineWidth=4;c.lineCap='round';c.beginPath();c.moveTo(ox,oy);c.quadraticCurveTo(ox+10*k,oy-14*k+Math.sin(t*20)*3,ox+4*k,oy-20*k);c.stroke();c.lineCap='butt'}
+  if(e.mmR){const k=e.r/12;circ(c,e.x-4*k,e.y-h-6*k,1.6*k,'#ff3a2a');circ(c,e.x+4*k,e.y-h-6*k,1.6*k,'#ff3a2a')}}}
+
+/* ---------------- 5. Beute, Gold, Portale nie in der Wand ---------------- */
+/* Wegnetz (40-px-Raster) der Stufe: aus der Welt (G.wl.nav) oder selbst gebaut; Distanzfeld von den Helden aus */
+let B2NAV=null;
+function b2Nav(){if(G.room||!G.blkG)return null;const W=G.wl;let N=W&&W.an&&W.nav&&W.nav.v===(G.blkV||0)?W.nav:null;
+ if(!N){if(B2NAV&&B2NAV.N.v===(G.blkV||0)&&B2NAV.st===G.stage&&B2NAV.lo===G.wlLoG)N=B2NAV.N;else{N=wlNavBau();B2NAV={N,st:G.stage,lo:G.wlLoG,fl:null,t:-9}}}
+ if(!B2NAV||B2NAV.N!==N)B2NAV={N,st:G.stage,lo:G.wlLoG,fl:null,t:-9};
+ const src=[];for(const q of mpL())if(q&&!q.down&&!q.netGone)src.push(wlZelle(N,q.x,q.y));if(!src.length)src.push(wlZelle(N,P.x,P.y));
+ if(!B2NAV.fl||Math.abs(G.time-B2NAV.t)>0.25||src.join()!==(B2NAV.src||[]).join()){B2NAV.fl=wlBfs(N,src,B2NAV.fl);B2NAV.t=G.time;B2NAV.src=src}
+ return B2NAV}
+const b2Frei=(x,y,r)=>x>60&&y>60&&x<WORLD-60&&y<WORLD-60&&!blkPunkt(x,y,r)&&!(typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,r));
+/* Umweg einer Zelle gegenüber der Luftlinie zum nächsten Helden (in Zellen): groß = hinter einer Wand */
+function b2Umweg(B,c){const N=B.N,n=N.n,i=c%n,j=(c/n)|0;let m=1e9;for(const s of B.src){const d=Math.max(Math.abs(s%n-i),Math.abs(((s/n)|0)-j));if(d<m)m=d}return B.fl[c]-m}
+/* Anker: freie, erreichbare Stelle nahe (x,y) auf der Seite der Helden */
+function b2Seg(a,b,r){const d=Math.hypot(b.x-a.x,b.y-a.y),n=Math.ceil(d/20);for(let i=1;i<n;i++){const u=i/n,x=a.x+(b.x-a.x)*u,y=a.y+(b.y-a.y)*u;if(blkPunkt(x,y,r)||typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,r))return false}return true}
+const b2Weg=(x,y,m)=>!m||mpL().every(q=>!q||q.down||q.netGone||Math.hypot(q.x-x,q.y-y)>=m);
+function b2Anker(x,y,r,away){const B=b2Nav();if(!B)return{x,y};const N=B.N,n=N.n,c0=wlZelle(N,x,y),i0=c0%n,j0=(c0/n)|0;let best=null,bs=1e9;
+ if(B.fl[c0]!==65535&&b2Frei(x,y,r)&&b2Umweg(B,c0)<=3&&b2Weg(x,y,away))return{x,y};
+ for(let R=0;R<=9;R++)for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++){if(Math.max(Math.abs(a),Math.abs(b))!==R)continue;const i=i0+a,j=j0+b;if(i<1||j<1||i>=n-1||j>=n-1)continue;const c=j*n+i;if(!N.pass[c]||B.fl[c]===65535)continue;
+  const px=(i+0.5)*N.Z,py=(j+0.5)*N.Z;if(!b2Frei(px,py,r))continue;const s=Math.hypot(px-x,py-y)/N.Z+2*Math.max(0,b2Umweg(B,c))+(b2Weg(px,py,away)?0:40);if(s<bs){bs=s;best={x:px,y:py}}}
+ if(best)return best;const q=nearestP(x,y)||P;return{x:q.x,y:q.y}}
+/* Zielpunkt für Beute: frei, erreichbar und ohne Wand zwischen Anker und Punkt */
+function b2Boden(x,y,r,org){if(G.room||!G.blkG||!(typeof wlNavBau==='function'))return{x,y};r=r||22;const o=org||G.b2Org||{x,y};
+ let A=o.b2A&&o.b2At===G.time?o.b2A:null;if(!A){A=b2Anker(o.x,o.y,r);if(o!==G.b2Org||G.b2Org){o.b2A=A;o.b2At=G.time}}
+ const B=b2Nav();const ok=(px,py)=>{if(!b2Frei(px,py,r))return false;if(B){const c=wlZelle(B.N,px,py);if(B.fl[c]===65535||b2Umweg(B,c)>b2Umweg(B,wlZelle(B.N,A.x,A.y))+3)return false}return wlWegFrei(A,{x:px,y:py})};
+ if(ok(x,y))return{x,y};const dx=x-A.x,dy=y-A.y;for(const s of [0.7,0.45,0.25]){const px=A.x+dx*s,py=A.y+dy*s;if(ok(px,py))return{x:px,y:py}}
+ for(let t=0;t<14;t++){const a=rnd(TAU),d=rnd(30,100),px=A.x+Math.cos(a)*d,py=A.y+Math.sin(a)*d;if(ok(px,py))return{x:px,y:py}}return{x:A.x,y:A.y}}
+{const ob0=orb;orb=function(x,y,k,v){if(!G.room&&G.blkG&&(k==='gold'||k==='gem'||k==='xp')&&(G.b2Org||!b2Frei(x,y,8))){const q=b2Boden(x,y,10);x=q.x;y=q.y}return ob0.call(this,x,y,k,v)}}
+/* Portale: nach dem Sieg über Wächter/Boss auf freien, erreichbaren Boden auf der Seite der Helden – das Gefahrenportal ebenso */
+function b2PortalFix(){const p=G.portal;if(!p||p.boat||G.room||!G.blkG)return;const A=b2Anker(p.x,p.y,40,120);p.wlOk=1;if(A.x!==p.x||A.y!==p.y){p.x=clamp(A.x,120,WORLD-120);p.y=clamp(A.y,120,WORLD-120);if(G.portal2)portal2();}else b2Portal2Fix()}
+function b2Portal2Fix(){const q=G.portal2,p=G.portal;if(!q||!p||G.room||!G.blkG)return;const B=b2Nav();
+ const ok=(x,y,lv)=>{if(x<120||y<120||x>WORLD-120||y>WORLD-120||!b2Frei(x,y,46)||!b2Weg(x,y,110)||Math.hypot(x-p.x,y-p.y)<150)return false;if(B){const c=wlZelle(B.N,x,y);if(B.fl[c]===65535||b2Umweg(B,c)>(lv?8:3))return false}return lv>1||b2Seg(p,{x,y},lv?8:22)};
+ if(ok(q.x,q.y,0))return;for(let lv=0;lv<3;lv++)for(const R of [230,190,280,160,330,400])for(let i=0;i<16;i++){const a=i/16*TAU+0.3,x=p.x+Math.cos(a)*R,y=p.y+Math.sin(a)*R;if(ok(x,y,lv)){q.x=x;q.y=y;return}}
+ const A=b2Anker(p.x+230,p.y,46,110);if(Math.hypot(A.x-p.x,A.y-p.y)>110){q.x=A.x;q.y=A.y}}
+function b2LootFix(org){if(G.room||!G.blkG)return;const o={x:org.x,y:org.y};for(const L of G.loot){if(L.taken||L.born!==undefined&&G.time-L.born>0.5)continue;const q=b2Boden(L.x,L.y,22,o);L.x=q.x;L.y=q.y}}
+{const gd0=guardDefeated;guardDefeated=function(e){const had=G.portal;const r=gd0.apply(this,arguments);if(G.portal&&G.portal!==had){b2PortalFix();clearPortalLoot()}b2LootFix(e);return r}}
+{const bd0=bossDefeated;bossDefeated=function(e){const had=G.portal;const r=bd0.apply(this,arguments);if(G.portal&&G.portal!==had){b2PortalFix();clearPortalLoot()}b2LootFix(e);return r}}
+{const p20=portal2;portal2=function(){const r=p20.apply(this,arguments);const p=G.portal;if(!G.portal2&&p&&!p.boat&&!G.bot&&!G.room&&G.blkG&&(G.mode==='kampagne'||G.mode==='abstieg')&&G.stage<STAGES.length-1)G.portal2={x:p.x+230,y:p.y,t:0,gefahr:1};b2Portal2Fix();return r}}
+{const cp0=clearPortalLoot;clearPortalLoot=function(){const p=G.portal;const r=cp0.apply(this,arguments);if(p&&!G.room&&G.blkG){const o={x:p.x,y:p.y};for(const L of G.loot){if(L.taken)continue;const dd=Math.hypot(L.x-p.x,L.y-p.y);if(dd>=100&&dd<=160&&!b2Frei(L.x,L.y,22)||dd<100){const q=b2Boden(L.x,L.y,22,o);if(Math.hypot(q.x-p.x,q.y-p.y)<100){const a=ang(p,q)||rnd(TAU);const q2=b2Boden(p.x+Math.cos(a)*125,p.y+Math.sin(a)*125,22,o);L.x=q2.x;L.y=q2.y}else{L.x=q.x;L.y=q.y}}}}return r}}
+/* Rückkehr aus dem Geheimraum: Held und mitgenommene Beute auf freien Boden */
+{const ls0=leaveSecret;leaveSecret=function(){const r=ls0.apply(this,arguments);if(!G.room&&G.blkG&&P){if(!b2Frei(P.x,P.y,14)){const A=b2Anker(P.x,P.y,16);P.x=A.x;P.y=A.y;for(const a of G.allies)if(a.kind==='rex'||a.kind==='pet'){a.x=P.x-30;a.y=P.y+10}}for(const q of PL)if(q!==P&&!q.netGone&&!b2Frei(q.x,q.y,14)){const A=b2Anker(q.x,q.y,16);q.x=A.x;q.y=A.y}B2NAV&&(B2NAV.t=-9);const o={x:P.x,y:P.y};for(const L of G.loot){if(L.taken)continue;if(Math.hypot(L.x-P.x,L.y-P.y)<100){const q=b2Boden(L.x,L.y,22,o);L.x=q.x;L.y=q.y}}}return r}}
+/* Stufenbeginn: Schreine, Truhen, Fässer, Geheimgänge auf erreichbaren freien Boden */
+const B2PROPS=new Set(['shrine','chest','goldpile','barrel','secret','grove','altar','goldnest','kstueck','rolle','merchant','anvil']);
+function b2PackF(){return b2Hard()?B2.hardEliteF:1}
+function b2PropsFix(){if(G.room||!G.blkG||!(typeof wlNavBau==='function'))return;let N=null,d0=null;
+ for(const p of G.props){if(p.dead||!p.prop||p.k==='blk'||p.k==='exit'||!B2PROPS.has(p.k))continue;
+  if(!N){const W=G.wl;if(W&&W.an&&W.nav&&W.d0){N=W.nav;d0=W.d0}else{N=wlNavBau();d0=wlBfs(N,[wlZelle(N,WORLD/2,WORLD/2)])}}
+  const c=wlZelle(N,p.x,p.y);if(d0[c]!==65535&&b2Frei(p.x,p.y,Math.min(26,(p.r||16)+6)))continue;
+  const n=N.n,i0=c%n,j0=(c/n)|0;let done=false;for(let R=1;R<=10&&!done;R++)for(let a=-R;a<=R&&!done;a++)for(let b=-R;b<=R&&!done;b++){if(Math.max(Math.abs(a),Math.abs(b))!==R)continue;const i=i0+a,j=j0+b;if(i<2||j<2||i>=n-2||j>=n-2)continue;const k=j*n+i;if(d0[k]===65535)continue;const x=(i+0.5)*N.Z,y=(j+0.5)*N.Z;if(!b2Frei(x,y,26))continue;p.x=x;p.y=y;done=true}}}
+/* „Noch bleiben“ nach dem Betreten eines Portals: der Gefährliche Weg bleibt offen, kein Gefahr-Vormerk, Helden stehen frei neben (nicht in) den Portalen */
+function b2Bleiben(){G.gefahrNext=0;if(G.b2P2&&!G.portal2&&G.portal){G.portal2=G.b2P2;G.portal2.t=0}G.b2P2=null}
+function b2BleibenNach(){const ps=[G.portal,G.portal2].filter(Boolean);if(!ps.length)return;
+ for(const q of mpL()){if(!q)continue;if(ps.every(p=>Math.hypot(q.x-p.x,q.y-p.y)>=110)&&(G.room||!G.blkG||b2Frei(q.x,q.y,14)))continue;let best=null;
+  for(const R of [150,190,240,300])for(let i=0;i<16&&!best;i++){const p0=ps[0],a=i/16*TAU+Math.PI/2,x=p0.x+Math.cos(a)*R,y=p0.y+Math.sin(a)*R;if(x<40||y<40||x>WORLD-40||y>WORLD-40)continue;if(!ps.every(p=>Math.hypot(x-p.x,y-p.y)>=110))continue;if(!G.room&&G.blkG&&(!b2Frei(x,y,16)||!b2Seg(p0,{x,y},10)))continue;best={x,y}}
+  if(best){q.x=best.x;q.y=best.y;q.dash=null}}}
+{const ss0=setupStage;setupStage=function(i){B2NAV=null;G.b2P2=null;const r=ss0.apply(this,arguments);try{b2PropsFix()}catch(er){}return r}}
+
+/* Testzugang */
+window.__bal2={B2,b2Boden,b2Anker,b2Nav,b2PortalFix,b2Portal2Fix,b2PropsFix,b2MimHp,b2MimDmg,b2XpF,b2Frei,b2Umweg,rollRarity:b=>rollRarity(b),randomItem:(a,b,c)=>randomItem(a,b,c),MIMIC,blkPunkt:(x,y,r)=>blkPunkt(x,y,r),killEnemy:(e)=>killEnemy(e,{}),guardDefeated:e=>guardDefeated(e),bossDefeated:e=>bossDefeated(e),portal2:()=>portal2(),xpNeed:l=>xpNeed(l),spawnEnemy:(d,x,y,o)=>spawnEnemy(d,x,y,o),openChest:p=>openChest(p),wlWegFrei:(a,b)=>wlWegFrei(a,b)};
+
+/* ---------- Sieg deutlich zeigen: großes „Sieg!“ nach Boss/Wächter, Portal erst nach kurzer Pause und nicht, solange man schon draufsteht ---------- */
+function siegZeig(e,art){try{G.bossKT=G.time;const n=e&&e.def&&e.def.n||'';const gross=art!=='waechter';
+ later(0.45,()=>{try{banner(gross?'Sieg!':'Wächter bezwungen!',gross?`${n} ist besiegt`:`${n} liegt am Boden – das Portal ist offen`,'#ffd04a',{dur:gross?3.8:3,size:gross?104:72,force:1});if(gross)musAk('sieg');sflash('#fff2c0',0.35,0.4)}catch(er){}})}catch(er){}}
+{const f=bossDefeated;bossDefeated=function(e){const r=f.apply(this,arguments);siegZeig(e,'boss');return r}}
+{const f=guardDefeated;guardDefeated=function(e){const r=f.apply(this,arguments);siegZeig(e,'waechter');return r}}
+{const f=gansBesiegt;gansBesiegt=function(e){const r=f.apply(this,arguments);siegZeig(e,'boss');return r}}
+{const f=enterPortal;enterPortal=function(){try{const t=G.time,cont=t-(G._ptLast||-99)<0.3;G._ptLast=t;
+  if(t-(G.bossKT==null?-99:G.bossKT)<3){G._ptBlock=1;return}
+  if(G._ptBlock){if(cont)return;G._ptBlock=0}}catch(er){}return f.apply(this,arguments)}}
+window.__hsSIEG=1;
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
