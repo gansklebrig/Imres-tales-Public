@@ -14127,6 +14127,14 @@ window.__hsTX={txtHz,TXO,txtOvOn};
  WLMM.box={x:W-S-10,y:Math.max(8,Math.min(top,H-S-90)),S,hm:1};return WLMM.box}}
 window.__hsHM=1;
 
+/* ---------- Rücklink zur Website: am PC ganz oben links, nur im Titel/Lager (nie im Spiel – kein versehentliches Klicken) ---------- */
+(()=>{try{const st=document.createElement('style');st.textContent=`#imresBack{position:fixed;top:6px;left:10px;z-index:8000;display:none;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font:800 12px/1.2 var(--fb,system-ui);letter-spacing:.08em;text-transform:uppercase;color:#d8c8a8;background:rgba(20,14,22,.72);border:1px solid rgba(229,180,84,.35);text-decoration:none;opacity:.8;transition:opacity .15s,border-color .15s}
+#imresBack:hover,#imresBack:focus-visible{opacity:1;border-color:#e5b454;color:#ffe2a0}
+@media (pointer:fine) and (min-width:900px){body.imresTitel #imresBack{display:inline-flex}body.imresTitel .camp-top .back{display:none!important}}`;document.head.appendChild(st);
+ const a=document.createElement('a');a.id='imresBack';a.href='https://imrestales.de/#taverne';a.target='_top';a.textContent='← imrestales.de';a.title='Zurück zur Website Imres Tales';a.tabIndex=-1;document.body.appendChild(a);
+ const upd=()=>{try{const on=G.state==='title'&&!scr.hidden&&!NET.role;document.body.classList.toggle('imresTitel',!!on)}catch(e){}};setInterval(upd,250);upd()}catch(e){}})();
+window.__hsBL=1;
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
