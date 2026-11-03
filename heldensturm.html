@@ -14370,6 +14370,600 @@ function siegZeig(e,art){try{G.bossKT=G.time;const n=e&&e.def&&e.def.n||'';const
   if(G._ptBlock){if(cont)return;G._ptBlock=0}}catch(er){}return f.apply(this,arguments)}}
 window.__hsSIEG=1;
 
+/* ================= Besondere Areale und Fallen (Paket „areal“) =================
+   Je Karte 2–4 thematische Areale mit Mini-Ereignis (Gehöft unter Belagerung, Lager des Anführers, Schatzkammer hinter Fallengang,
+   verlassener Schrein mit Prüfung, Hinterhalt-Lichtung, Wächterhalle, Gefangenentransport, Runenplatten, Blutaltar, Ritualkreis,
+   Spinnennest, Goblin-Hort, Friedhof, überfallener Händler, Rastplatz). Fallen an besonderen Orten (Wege zur Beute, Eingänge, Türen):
+   Pfeil-Druckplatte, Stachelgrube, Klingenpendel, Feuerdüse, Giftgasventil, Bärenfalle, Netz, Fluchrune, Frostrune, Fallsteine,
+   Fass-Draht, Alarmglocke. Fallen treffen Helden UND Gegner, lassen sich umgehen, überrollen, zerstören, per Hebel abschalten oder
+   durch Gegner/Fässer auslösen. Nachwirkungen (Schwäche, Gift im Blut, Frostbiss …) laufen als P.mods mit st=1–2 Ebenen (HUD-Symbole).
+   Präfix ar. Daten: G.ar (nur Gastgeber), G.arN (gespiegelt: Areale für Karte/Boden/Anzeige), Fallen als G.props {k:'falle',type,act,fz,fa,fv}. */
+NETGBL.add('ar');NETGBL.add('arHist');
+for(const k of ['fz','fa','fv','ai','act'])if(!NETW.props.includes(k))NETW.props.push(k);
+MODN.heil=v=>`−${Math.round(v*100)}% Heilung`;
+const AR_STIL=()=>WL_STIL[G.themeKey]||'land';
+const arAn=()=>!!(G.ar&&G.ar.an&&G.wl&&G.wl.an&&!G.room);
+const arHart=()=>Math.min(G.diff||0,8);
+const arSc=()=>scale().dmg*(1+0.12*arHart())*(HARD()?1.1:1);
+const AR_C=WORLD/2;
+
+/* ---------- Nachwirkungen (über Ebenen) ---------- */
+const ARFX={
+ schwaeche:{n:'Schwäche',k:'dmg',v:-0.15,ic:'☠',c:'#b884e8',d:'Fluchrune: −15% Schaden'},
+ verwundbar:{n:'Verwundbar',k:'edmg',v:0.15,ic:'✖',c:'#e8705a',d:'Bannrune: Gegner treffen dich 15% härter'},
+ blei:{n:'Bleierne Glieder',k:'speed',v:-0.12,ic:'⛓',c:'#b8b49a',d:'Rune der Schwere: −12% Tempo'},
+ gift:{n:'Gift im Blut',k:'heil',v:0.3,ic:'☣',c:'#9ad85a',d:'Giftgas: −30% Heilung'},
+ frost:{n:'Frostbiss',k:'speed',v:-0.1,ic:'❄',c:'#e4f0ec',d:'Frostrune: −10% Tempo'},
+ blutfluch:{n:'Blutschuld',k:'hp',v:-0.15,ic:'♰',c:'#e0505e',d:'Blutaltar: −15% Leben'},
+ segen_dmg:{n:'Segen der Stärke',k:'dmg',v:0.15,good:1,ic:'✦',c:'#ffd36a',d:'+15% Schaden'},
+ segen_crit:{n:'Segen der Schärfe',k:'crit',v:0.06,good:1,ic:'✧',c:'#ffd36a',d:'+6% kritische Trefferchance'},
+ segen_tempo:{n:'Segen des Windes',k:'speed',v:0.1,good:1,ic:'➶',c:'#bfe8a0',d:'+10% Tempo'},
+ segen_gold:{n:'Segen des Glücks',k:'gold',v:0.4,good:1,ic:'❂',c:'#ffd04a',d:'+40% Gold'},
+ segen_leben:{n:'Segen des Lebens',k:'hp',v:0.15,good:1,ic:'❤',c:'#ff9a8a',d:'+15% Leben'},
+ blutsegen:{n:'Blutsegen',k:'dmg',v:0.22,good:1,ic:'♦',c:'#ff6a5a',d:'Blutaltar: +22% Schaden'}};
+const AR_SEGEN=['segen_dmg','segen_crit','segen_tempo','segen_gold','segen_leben'];
+function arModName(m){const F=ARFX[m.id]||{n:'?',d:''};const e=(m.st|0)+1;return `${F.ic} ${F.n}: ${F.d.replace(/^[^:]*: /,'')} (noch ${e} Ebene${e>1?'n':''})`}
+function arFx(q,id,st){const F=ARFX[id];if(!F||!q)return;withP(q,()=>{P.mods=P.mods||[];let m=P.mods.find(m=>m.ar&&m.id===id);if(m)m.st=Math.max(m.st|0,st);else P.mods.push(m={k:F.k,v:F.v,good:F.good?1:0,ar:1,id,ic:F.ic,st});m.n=arModName(m);recalc();
+  if(!G.bot){word(P.x,P.y-56,F.ic+' '+F.n,F.c);if(!F.good&&!SAVE.arFxTip){SAVE.arFxTip=1;toast(`<b>${F.n}</b> wirkt nach – auch auf der nächsten Ebene. Das Symbol unter der Karte zeigt, wie lange noch. Schreine, Rastplätze und Lagerfeuer reinigen.`,'#e8c06a')}}})}
+function arReinigen(q,still){withP(q,()=>{const n0=(P.mods||[]).length;P.mods=(P.mods||[]).filter(m=>!(m.ar&&!m.good));P.arDot=[];if(P.mods.length!==n0){recalc();if(!still&&!G.bot)word(P.x,P.y-60,'Gereinigt','#cfe8a0')}})}
+function arDot(q,k,dps,t){withP(q,()=>{const L=P.arDot||(P.arDot=[]);let d=L.find(x=>x.k===k);if(!d)L.push(d={k,dps:0,t:0});d.dps=Math.max(d.dps,dps);d.t=Math.max(d.t,t)})}
+hook('tick',dt=>{const L=P.arDot;if(!L||!L.length)return;for(const d of L){d.t-=dt;if(d.t>0)hurtDot(d.dps*dt)}if(L.some(d=>d.t<=0))P.arDot=L.filter(d=>d.t>0)});
+hook('stage',()=>{for(const m of P.mods||[])if(m.ar)m.n=arModName(m)});
+{const h0=heal;heal=function(v){const r=modSum('heil');return h0.call(this,r>0?v*Math.max(0.2,1-r):v)}}
+{const up0=usePotion;usePotion=function(){const p0=P&&P.pots;const r=up0.apply(this,arguments);if(P&&P.pots<p0&&P.arDot&&P.arDot.length){P.arDot=[];word(P.x,P.y-50,'Entgiftet','#cfe8a0')}return r}}
+{const us0=useShrine;useShrine=function(p){const r=us0.apply(this,arguments);try{for(const q of mpL())arReinigen(q)}catch(er){}return r}}
+{const sc0=showCampfire;showCampfire=function(){try{for(const q of mpL())arReinigen(q,1)}catch(er){}return sc0.apply(this,arguments)}}
+
+/* ---------- Hilfen ---------- */
+const arPf=()=>2.4+0.035*Math.min(20,SL()||0)+0.08*Math.min(G.diff||0,6);
+const arD=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function arSegD(px,py,x0,y0,x1,y1){const dx=x1-x0,dy=y1-y0,L=dx*dx+dy*dy||1,t=clamp(((px-x0)*dx+(py-y0)*dy)/L,0,1);return Math.hypot(px-(x0+dx*t),py-(y0+dy*t))}
+function arSpieler(){return mpL().filter(q=>q&&!q.down&&!q.netGone)}
+function arFeinde(A){return G.enemies.filter(e=>!e.dead&&e.arA===A.id)}
+function arHitE(e,frac,o){if(!e||e.dead||e.flying&&e.flyHigh>0.4)return;o=o||{};const m=e.boss?0.12:e.guard?0.25:e.rare?0.4:e.elite?0.55:1;const amt=e.maxHp*frac*m;e.hp-=amt;e.flash=0.1;if(!o.quiet)num(e.x+rnd(-6,6),e.y-e.r-4,amt,false,false);
+ if(o.root&&!e.boss&&!e.ccImmune)e.root=Math.max(e.root||0,o.root);if(o.stun)stunE(e,o.stun);if(o.slow){e.slowT=Math.max(e.slowT||0,o.slowT||2);e.slowA=Math.max(e.slowA||0,o.slow)}
+ if(e.hp<=0){e.hp=0;killEnemy(e,{dmK:'falle'})}}
+function arFeind(A,def,x,y,o){o=o||{};const q=wlNahFrei(x,y,6)||{x,y};const kS=G.stageKills;if(o.pr!=null)G.stageKills=Math.round((G.need||60)*o.pr);let e=null;try{e=spawnEnemy(def,q.x,q.y,{})}finally{G.stageKills=kS}
+ if(!e)return null;e.arA=A.id;if(o.ruhe){e.born=-9}if(o.elite){e.elite=false;makeElite(e,rollAffixes(o.elite===2?(SL()>12||G.diff>0?3:2):1),o.elite===2)}return e}
+function arGruppe(A,L,k,R){const WL=G.wl;if(!WL||!L.length)return null;if(arHart()>0&&L.length>1){const f=L[0].def;for(let i=0;i<Math.floor(arHart()/2);i++){const e=arFeind(A,f,L[0].x+rnd(-50,50),L[0].y+rnd(-40,40),{pr:0.6});if(e)L.push(e)}if(arHart()>=3){const e=L.find(x=>!x.elite&&!x.boss);if(e){e.elite=false;makeElite(e,rollAffixes(1),false)}}}let sx=0,sy=0;for(const e of L){sx+=e.x;sy+=e.y}const g={id:WL.gr.length,k:k||'lager',x:sx/L.length,y:sy/L.length,R:R||360,m:L.slice(),wach:0,ar:A.id};WL.gr.push(g);for(const e of L){e.wlG=g.id;e.wlZz=k==='schlaf'?1:2;e.born=-9;e.faceX=e.x+rnd(-1,1)}return g}
+function arTruhe(A,x,y,rich){const q=wlNahFrei(x,y,6)||{x,y};const p={k:'chest',prop:1,x:q.x,y:q.y,r:16,mimic:false,rich:rich||0,ai:A?A.id:-1,arT:1};G.props.push(p);if(!G.bot){sparks(q.x,q.y,'#ffd04a',14,300,1);light(q.x,q.y,220,'#ffd04a',0.8,1)}return p}
+function arGold(x,y,n,f){for(let i=0;i<n;i++)orb(x+rnd(-36,36),y+rnd(-24,30),'gold',Math.max(1,Math.round(ri(2,4)*P.st.gold*dMult().gold*(1+0.05*SL())*(f||1))))}
+function arXp(x,y,f){const v=1.5*6*(1+0.08*effStage())*(f||1);orb(x,y,'xp',v);orb(x+8,y+4,'xp',v)}
+function arLob(x,y,txt,f){if(G.ar)G.ar.stat.entsch++;if(!G.bot){word(x,y-34,txt||'Entschärft!','#ffd36a');sfxAt('xp',x,y);sparks(x,y,'#ffd36a',8,200,1)}arXp(x,y,f||1);arGold(x,y,2,0.6)}
+function arBanner(A,small){G.fxs.push({k:'ar_entdeckt',x:A.x,y:A.y,r:A.r,c:A.c,t:0,life:1.4});if(!G.bot)banner(A.n,small||A.sub,A.c,{dur:2.4,size:32,y:H*0.24});sfx('geheim')}
+function arPlatz(x,y,r){for(let t=0;t<16;t++){const a=rnd(TAU),d=t?rnd(10,r):0,px=x+Math.cos(a)*d,py=y+Math.sin(a)*d;if(wlFrei(px,py,15)&&G.wl.d0&&G.wl.d0[wlZelle(G.wl.nav,px,py)]!==65535)return{x:px,y:py}}return wlNahFrei(x,y,8)||{x,y}}
+function arStandfest(p,dt,rate,r){let Q=null;for(const q of arSpieler()){if(d2(q,p)<((r||p.r)+q.r)*((r||p.r)+q.r)){Q=q;break}}if(Q)p.prog=Math.min(1,(p.prog||0)+dt*rate);else p.prog=Math.max(0,(p.prog||0)-dt*0.8);return p.prog>=1?Q:null}
+
+/* ================= Fallen ================= */
+const AR_FT={
+ pfeile:{n:'Pfeilfalle',tritt:1,hit:'los',warn:0.5,rearm:4.5,r:17},
+ stacheln:{n:'Stachelgrube',tritt:1,warn:0.32,rearm:3.2,r:30,rect:1},
+ pendel:{n:'Klingenpendel',zyk:1,r:24},
+ feuer:{n:'Feuerdüse',zyk:1,hp:3,r:14},
+ gift:{n:'Giftgasventil',tritt:1,hit:'los',warn:0.35,rearm:9,uses:2,r:16},
+ baer:{n:'Bärenfalle',tritt:1,hit:'zu',warn:0,r:16},
+ netz:{n:'Netzfalle',tritt:1,hit:'zu',warn:0.3,r:18},
+ fluch:{n:'Fluchrune',tritt:1,hp:2,warn:0,r:20},
+ frost:{n:'Frostrune',tritt:1,hp:2,warn:0,r:20},
+ steine:{n:'Fallsteine',tritt:1,hit:'los',warn:0.75,r:18},
+ fass:{n:'Fass-Draht',draht:1,warn:0.6,r:8},
+ alarm:{n:'Alarmglocke',draht:1,hp:1,warn:0,r:8}};
+function arFalle(type,x,y,o){o=o||{};const T=AR_FT[type];if(!T)return null;const p={k:'falle',prop:1,type,x,y,r:o.r||T.r,act:0,fz:o.fz||0,fa:o.a||0,fv:o.v||0,w:o.w||0,h:o.h||0,seed:Math.random(),ai:o.ai==null?-1:o.ai,hp:T.hp||0,n:0};
+ if(type==='stacheln'){p.w=o.w||64;p.h=o.h||56}if(type==='pendel'&&!p.w)p.w=110;if(type==='pfeile'&&!p.w)p.w=150;if(type==='steine'&&!p.w)p.w=80;if((type==='fass'||type==='alarm')&&!p.w)p.w=110;if(type==='feuer'){p.fz=rnd(0,3.5);p.w=p.w||150}
+ G.props.push(p);if(G.ar)G.ar.stat.fallen++;
+ for(let i=G.deco.length-1;i>=0;i--){const d=G.deco[i];if(!d.ar&&!d.wl&&Math.abs(d.x-x)<50&&Math.abs(d.y-y)<44)G.deco.splice(i,1)}
+ if(type==='fass'){p.fb=[];const ca=Math.cos(p.fa),sa=Math.sin(p.fa);for(let i=0;i<2+(Math.random()<0.5?1:0);i++){const s=i%2?1:-1,u=(i>>1)*28;const bx=x+ca*(p.w/2+18+u)*s-sa*rnd(-14,14),by=y+sa*(p.w/2+18+u)*s+ca*rnd(16,30);const b={k:'barrel',prop:1,x:bx,y:by,r:13,boom:true,vx:0,vy:0,arF:1};G.props.push(b);p.fb.push(b)}}
+ return p}
+const arDraht=p=>{const ca=Math.cos(p.fa)*p.w/2,sa=Math.sin(p.fa)*p.w/2;return[p.x-ca,p.y-sa,p.x+ca,p.y+sa]};
+const arPfeilL=p=>{const ca=Math.cos(p.fa),sa=Math.sin(p.fa);return{x:p.x-ca*p.w,y:p.y-sa*p.w,len:p.w*2+40}};
+const arGlocke=p=>{const[x0,y0,x1,y1]=arDraht(p);return{x:x1,y:y1}};
+/* wer steht drauf? Spieler (nicht während Rolle/Sprung), Gegner (nicht fliegend/schlafend), rollende Fässer */
+function arAusloeser(p){const T=AR_FT[p.type];let D=null;if(T.draht)D=arDraht(p);
+ const nah=(o,rr)=>D?arSegD(o.x,o.y,D[0],D[1],D[2],D[3])<9+rr*0.4:T.rect?Math.abs(o.x-p.x)<p.w/2+rr*0.3&&Math.abs(o.y-p.y)<p.h/2+rr*0.3:d2(o,p)<(p.r+rr*0.35)*(p.r+rr*0.35);
+ for(const q of arSpieler()){if(q.dash||q.inv>0.05&&q.roll&&G.time-q.roll<0.35)continue;if(nah(q,q.r||16))return{w:'p',o:q}}
+ let f=null;const R=D?p.w/2+30:Math.max(p.w,p.h,p.r)+30;query(p.x,p.y,R,e=>{if(f||e.dead||e.wlZz||e.flying||e.def.k==='still')return;if(nah(e,e.r))f=e});if(f)return{w:'e',o:f};
+ for(const b of G.props)if(b.k==='barrel'&&!b.dead&&(Math.abs(b.vx||0)+Math.abs(b.vy||0))>30&&nah(b,b.r))return{w:'f',o:b};
+ return null}
+function arTreffeSpieler(fn){for(const q of arSpieler())withP(q,()=>fn(q))}
+/* Wirkung je Falle */
+const AR_WIRK={
+ pfeile(p){const L=arPfeilL(p);tele({k:'line',x:L.x,y:L.y,a:p.fa,len:L.len,w:34,delay:0.01,dmg:arSc()*1.5,c:'#ff9a4a'});G.fxs.push({k:'ar_pfeile',x:L.x,y:L.y,a:p.fa,len:L.len,t:0,life:0.35});sfxAt('bow',L.x,L.y);sfxAt('g_bow',p.x,p.y);
+  const ca=Math.cos(p.fa),sa=Math.sin(p.fa);query(p.x,p.y,L.len,e=>{if(arSegD(e.x,e.y,L.x,L.y,L.x+ca*L.len,L.y+sa*L.len)<17+e.r*0.5)arHitE(e,0.35)})},
+ stacheln(p){sfxAt('stab',p.x,p.y);if(!G.bot){chunks(p.x,p.y,'#8a8a92',6,140);G.shake+=1.5}const inR=o=>Math.abs(o.x-p.x)<p.w/2+8&&Math.abs(o.y-p.y)<p.h/2+8;
+  arTreffeSpieler(q=>{if(!inR(q)||q.inv>0)return;hurt(arSc()*1.6);arDot(q,'blut',arSc()*0.18,3)});query(p.x,p.y,p.w,e=>{if(inR(e))arHitE(e,0.4,{slow:0.3,slowT:2})})},
+ gift(p){sfxAt('b_gift',p.x,p.y);p.act=2;p.fz=6;p.n++;if(!G.bot)puffs(p.x,p.y,'#7aa04a',10,90,22)},
+ baer(p,by){sfxAt('g_chain',p.x,p.y);if(!G.bot)sparks(p.x,p.y,'#c8c8d0',10,200);if(by&&by.w==='p'){withP(by.o,()=>{hurt(arSc()*0.9);P.rootT=Math.max(P.rootT||0,1.7);arDot(P,'blut',arSc()*0.12,3);if(!G.bot)toast('Bärenfalle! Gleich wieder frei …','#e8a070',{minor:1})})}else if(by&&by.w==='e')arHitE(by.o,0.25,{root:2.6})},
+ netz(p){G.fxs.push({k:'ar_netz',x:p.x,y:p.y,r:62,t:0,life:0.45});sfxAt('g_web',p.x,p.y);later(0.3,()=>{arTreffeSpieler(q=>{if(d2(q,p)<70*70){P.rootT=Math.max(P.rootT||0,1.2);P.slowT=Math.max(P.slowT||0,3.2);P.slowA=Math.max(P.slowA||0,0.5)}});query(p.x,p.y,80,e=>{if(d2(e,p)<70*70)arHitE(e,0.04,{root:2.8,slow:0.5,slowT:4,quiet:1})})})},
+ fluch(p,by){const id=['schwaeche','verwundbar','blei'][p.fv%3];sfxAt('fluch',p.x,p.y);G.fxs.push({k:'shock',x:p.x,y:p.y,r:90,c:'#9a4ad8',t:0,life:0.5});if(!G.bot)wisps(p.x,p.y,'#b070e0',8);
+  if(by&&by.w==='p'){withP(by.o,()=>{hurt(arSc()*0.5)});arFx(by.o,id,(SL()>=10&&p.fv%3===0)||arHart()>=2?2:1)}else if(by&&by.w==='e'){weaken(by.o,0.3,8);by.o.vulnT=Math.max(by.o.vulnT||0,6);by.o.vuln=Math.max(by.o.vuln||0,0.25);arHitE(by.o,0.05,{quiet:1})}},
+ frost(p,by){sfxAt('ice',p.x,p.y);G.fxs.push({k:'shock',x:p.x,y:p.y,r:100,c:'#e4f0ec',t:0,life:0.5});if(!G.bot)sparks(p.x,p.y,'#f0f8f4',16,260);
+  arTreffeSpieler(q=>{if(d2(q,p)<95*95){hurt(arSc()*0.9);P.slowT=Math.max(P.slowT||0,3);P.slowA=Math.max(P.slowA||0,0.45);if(by&&by.o===q)arFx(q,'frost',1)}});query(p.x,p.y,110,e=>{if(d2(e,p)<95*95){chill(e,3.5);arHitE(e,0.15)}})},
+ steine(p){sfxAt('g_rock',p.x,p.y);const n=4+(Math.random()<0.5?1:0);for(let i=0;i<n;i++){const a=i/n*TAU+rnd(-0.3,0.3),d=i?rnd(30,p.w):0,x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
+   G.fxs.push({k:'ar_fels',x,y,t:0,life:0.7+i*0.08,s:rnd(0.8,1.2)});tele({k:'circle',x,y,r:46,delay:0.7+i*0.08,dmg:arSc()*1.3,c:'#c8a070',onHit:()=>{P.stunT=Math.max(P.stunT||0,0.5)},after:()=>{query(x,y,80,e=>{if(d2(e,{x,y})<(46+e.r)*(46+e.r))arHitE(e,0.4,{stun:0.8})});if(!G.bot){chunks(x,y,'#7a6a5a',6,160);G.deco.push({x:x+rnd(-8,8),y:y+rnd(-6,6),k:'rubble',s:rnd(0.7,1),v:Math.random(),ar:1})}}})}},
+ fass(p){sfxAt('thunk',p.x,p.y);for(const b of p.fb||[]){if(b.dead)continue;const bx=b.x,by=b.y;later(0.05,()=>{if(!b.dead)breakProp(b,'chain')});later(0.1,()=>arTreffeSpieler(q=>{if(d2(q,{x:bx,y:by})<120*120)hurt(arSc()*1.8)}))}},
+ alarm(p){const B=arGlocke(p);sfxAt('g_horn',B.x,B.y);sfxAt('bell',B.x,B.y);if(!G.bot){word(B.x,B.y-40,'Alarm!','#ff7a4a');G.shake+=2}p.act=2;p.fz=2.5;
+  const WL=G.wl;if(WL)for(const g of WL.gr){if(g.wach)continue;const a=g.m.find(x=>!x.dead);if(a&&Math.hypot(a.x-p.x,a.y-p.y)<1000)wlWeck(g,a,1)}
+  if(typeof wlTrupp==='function'&&!(G.boss||G.guardE))wlTrupp(p.x,p.y,ri(3,4)+Math.min(2,Math.floor(SL()/10)),null,380,560);const A=G.ar&&G.ar.L[p.ai];if(A&&A.k==='goblinschatz')arGoblinAlarm(A)}};
+function arAusloesen(p,by){const T=AR_FT[p.type];if(p.act!==0)return;if(G.ar)G.ar.stat.ausg++;p.by=by?by.w:'h';p.lob=by&&by.w!=='p';
+ if(by&&by.w==='p'&&!G.bot&&!SAVE.arFalleTip){SAVE.arFalleTip=1;later(1.2,()=>toast('<b>Eine Falle!</b> Achte auf Fugen, Glitzern, Knochen und Brandspuren. Umgehe sie, rolle darüber, zerstöre sie aus der Ferne – oder lock Gegner hinein.','#ffd36a'))}
+ if(by&&by.w==='e'&&!G.bot)word(p.x,p.y-30,pick(['Reingelegt!','In die Falle getappt!','Hereingefallen!']),'#ffd36a');
+ if(T.warn>0){p.act=1;p.fz=T.warn;p.byO=by||null;sfxAt(p.type==='steine'?'g_rock':'thunk',p.x,p.y);if(p.type==='fass'&&!G.bot)for(const b of p.fb||[])if(!b.dead)sparks(b.x,b.y-16,'#ffb050',6,120,1);return}
+ arFeuern(p,by)}
+function arFeuern(p,by){const T=AR_FT[p.type];const f=AR_WIRK[p.type];try{arFxBeim(p)}catch(er){}try{if(f)f(p,by)}catch(er){console.error(er)}
+ if(p.type==='gift'||p.type==='alarm')return;if(p.lob)arLob(p.x,p.y,p.by==='e'?'Reingelegt!':'Sicher ausgelöst!',0.7);
+ if(T.rearm){p.act=2;p.fz=T.rearm}else{p.act=3;p.fz=0}}
+function arEntschaerfen(p,txt,f){if(p.act===4)return;const war=p.act;p.act=4;p.fz=0;if(war!==3)arLob(p.x,p.y,txt,f)}
+/* Treffer durch Fähigkeiten/Geschosse: zerstörbare Fallen, Obelisken, Eier */
+function arTrefferBei(x,y,R,fern){if(!arAn())return false;let hit=false;
+ for(const p of G.props){if(p.dead)continue;const m=R+p.r+(p.k==='falle'&&AR_FT[p.type]&&AR_FT[p.type].draht?0:6);
+  if(p.k==='falle'){const T=AR_FT[p.type];if(!T)continue;let dd;if(T.draht){const B=p.type==='alarm'?arGlocke(p):p;dd=Math.hypot(B.x-x,B.y-y);if(p.type==='fass')continue}else dd=Math.hypot(p.x-x,p.y-y);
+   if(dd>m)continue;if(p.act===4||p.act===3&&!T.rearm)continue;
+   if(T.hp){if(p.act!==0&&!T.zyk)continue;p.hp--;if(!G.bot)sparks(p.x,p.y-6,p.type==='frost'?'#e4f0ec':p.type==='feuer'?'#ffb050':'#c08cff',5,160);if(p.hp<=0){arEntschaerfen(p,p.type==='feuer'?'Düse zerstört!':p.type==='alarm'?'Glocke zerschlagen!':'Rune gebrochen!',1);if(!G.bot)chunks(p.x,p.y,'#6a6070',6,160)}hit=true}
+   else if(T.hit==='zu'&&p.act===0){p.act=3;if(p.type==='netz')G.fxs.push({k:'ar_netz',x:p.x,y:p.y,r:62,t:0,life:0.45});sfxAt(p.type==='baer'?'g_chain':'g_web',p.x,p.y);arLob(p.x,p.y,p.type==='baer'?'Falle zugeschnappt!':'Netz ausgelöst!',0.8);hit=true}
+   else if(T.hit==='los'&&p.act===0){arAusloesen(p,{w:'h'});p.lob=1;hit=true}}
+  else if(p.k==='ar_obelisk'&&!p.used){if(Math.hypot(p.x-x,p.y-y)>m)continue;p.hp--;p.fz=0.25;if(!G.bot)chunks(p.x,p.y-30,'#4a3a4a',4,150);if(p.hp<=0)arObeliskWeg(p);hit=true}
+  else if(p.k==='ar_ei'&&!p.used){if(Math.hypot(p.x-x,p.y-y)>m)continue;arEiWeg(p);hit=true}}
+ return hit}
+{const hp0=hitProps;hitProps=function(x,y,R){const r=hp0.apply(this,arguments);try{arTrefferBei(x,y,R)}catch(er){console.error(er)}return r}}
+{const hc0=hitPropsCone;hitPropsCone=function(x,y,a,arc,R){const r=hc0.apply(this,arguments);try{if(arAn())for(const p of G.props){if(p.dead||!(p.k==='falle'||p.k==='ar_obelisk'||p.k==='ar_ei'))continue;const dx=p.x-x,dy=p.y-y,dd=Math.hypot(dx,dy);if(dd>R+p.r)continue;let da=Math.atan2(dy,dx)-a;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)<arc/2+0.3||dd<30)arTrefferBei(p.x,p.y,4)}}catch(er){console.error(er)}return r}}
+{const pj0=projHitsProp;projHitsProp=function(pj){const r=pj0.apply(this,arguments);if(r)return r;try{if(arAn()&&pj.team!=='e'){for(const p of G.props){if(p.dead||!(p.k==='falle'&&AR_FT[p.type]&&(AR_FT[p.type].hp||AR_FT[p.type].hit)||p.k==='ar_obelisk'||p.k==='ar_ei'))continue;const B=p.k==='falle'&&p.type==='alarm'?arGlocke(p):p;const m=pj.r+p.r;if((B.x-pj.x)**2+(B.y-pj.y)**2<m*m&&(p.act===0||p.act==null||p.k!=='falle'||AR_FT[p.type].zyk)){arTrefferBei(B.x,B.y,2);return p.k!=='falle'||p.type==='alarm'||p.type==='feuer'}}}}catch(er){console.error(er)}return r}}
+
+/* Fallen-Takt (Gastgeber) */
+function arFallenTick(dt){const SP=arSpieler();
+ for(const p of G.props){if(p.k!=='falle'||p.dead)continue;const T=AR_FT[p.type];if(!T)continue;
+  if(p.type==='pendel'){if(p.act===4)continue;const s=Math.sin(G.time*arPf()+p.seed*6),ca=Math.cos(p.fa),sa=Math.sin(p.fa),bx=p.x+ca*s*p.w/2,by=p.y+sa*s*p.w/2;
+   if(Math.sign(s)!==Math.sign(p.ls||0)&&SP.some(q=>d2(q,p)<300*300))sfxAt('g_blade',bx,by);p.ls=s;
+   for(const q of SP){if(q.inv>0||(q.arPd||0)>G.time)continue;if((q.x-bx)**2+(q.y-by)**2<(20+q.r*0.5)**2){q.arPd=G.time+0.9;withP(q,()=>{hurt(arSc()*1.25);P.kx+=ca*Math.sign(Math.cos(G.time*arPf()+p.seed*6))*260;P.ky+=sa*Math.sign(Math.cos(G.time*arPf()+p.seed*6))*260;arDot(P,'blut',arSc()*0.1,2)})}}
+   query(bx,by,60,e=>{if((e.arPd||0)>G.time||e.flying)return;if((e.x-bx)**2+(e.y-by)**2<(20+e.r*0.5)**2){e.arPd=G.time+0.9;arHitE(e,0.3);if(!e.dead&&!G.bot)sparks(e.x,e.y,'#e0e0e8',4,180)}});continue}
+  if(p.type==='feuer'){if(p.act===4)continue;p.fz-=dt;if(p.act===0&&p.fz<=0){p.act=1;p.fz=0.8;if(SP.some(q=>d2(q,p)<340*340))sfxAt('g_wind',p.x,p.y)}
+   else if(p.act===1&&p.fz<=0){p.act=2;p.fz=1.4;if(SP.some(q=>d2(q,p)<340*340))sfxAt('fire',p.x,p.y)}else if(p.act===2&&p.fz<=0){p.act=0;p.fz=2.6}
+   if(p.act===2){const ca=Math.cos(p.fa),sa=Math.sin(p.fa),x1=p.x+ca*p.w,y1=p.y+sa*p.w;for(const q of SP){if((q.arFd||0)>G.time||q.inv>0)continue;if(arSegD(q.x,q.y,p.x,p.y,x1,y1)<24+q.r*0.4){q.arFd=G.time+0.3;withP(q,()=>{hurt(arSc()*0.42);arDot(P,'brand',arSc()*0.25,2)})}}
+    query((p.x+x1)/2,(p.y+y1)/2,p.w/2+40,e=>{if((e.arFd||0)>G.time)return;if(arSegD(e.x,e.y,p.x,p.y,x1,y1)<24+e.r*0.4){e.arFd=G.time+0.3;arHitE(e,0.1,{quiet:1});if(!e.dead)dot(e,'burn',e.maxHp*0.03,2)}})}continue}
+  if(p.act===0){if(T.tritt||T.draht){if(p.type==='fass'&&(p.fb||[]).length&&p.fb.every(b=>b.dead)){arEntschaerfen(p,'Fässer entschärft!',1);continue}const by=arAusloeser(p);if(by)arAusloesen(p,by)}continue}
+  if(p.act===1){p.fz-=dt;if(p.fz<=0)arFeuern(p,p.byO);continue}
+  if(p.act===2){p.fz-=dt;if(p.type==='gift'){const R=Math.min(95,30+(6-p.fz)*90);p.h=R;for(const q of SP){if(d2(q,p)<R*R){arDot(q,'gift',arSc()*0.28,1.6);q.arGiftE=(q.arGiftE||0)+dt;if(q.arGiftE>1.3){q.arGiftE=-6;arFx(q,'gift',1)}}}
+     query(p.x,p.y,R+20,e=>{if(d2(e,p)<R*R)arHitE(e,0.07*dt,{quiet:1})});if(!G.bot&&Math.random()<dt*6)puffs(p.x+rnd(-R*0.6,R*0.6),p.y+rnd(-R*0.4,R*0.4),'#6a9a3a',1,40,R*0.4);
+     if(p.fz<=0){p.h=0;if(p.n>=(T.uses||1)){p.act=3}else{p.act=3;p.fz=T.rearm;p.re=1}}continue}
+   if(p.fz<=0){p.act=T.rearm?0:3}continue}
+  if(p.act===3&&p.re){p.fz-=dt;if(p.fz<=0){p.re=0;p.act=0}}}}
+
+/* ================= Areale ================= */
+const AR_N=(A,o)=>typeof o==='string'?o:(o[A.stil]||o.x);
+const AR_K={
+ weiler:{n:{x:'Belagertes Gehöft',wald:'Waldhof unter Belagerung'},sub:'Rettet die Bewohner!',c:'#e8b060',ic:'haus',R:270,w:{land:3,wald:1.5,dorf:1.2},boden:'erde'},
+ elitelager:{n:{x:'Lager des Anführers',hoehle:'Räuberhöhle',burg:'Kaserne des Hauptmanns'},sub:'Ein mächtiger Anführer hält hier Hof',c:'#ff8a5a',ic:'flagge',R:250,w:{land:2,wald:2,hoehle:2,dorf:1,burg:1},boden:'erde'},
+ schatzkammer:{n:{x:'Verschüttete Schatzkammer',burg:'Schatzkammer',gruft:'Grabkammer',hoehle:'Verborgener Hort'},sub:'Der Weg zur Beute ist voller Fallen',c:'#ffd04a',ic:'kiste',R:270,w:{burg:3,gruft:3,hoehle:2,dorf:1.5,land:1,wald:1}},
+ pruefung:{n:'Verlassener Schrein',sub:'Wer die Prüfung besteht, wird gesegnet',c:'#f2d24c',ic:'schrein',R:220,w:{land:2,wald:2,dorf:1,burg:1,gruft:1,hoehle:1},boden:'kreis'},
+ hinterhalt:{n:{x:'Stille Lichtung',hoehle:'Stille Grotte',dorf:'Dunkle Gasse',gruft:'Stille Halle',burg:'Stiller Hof'},sub:'Zu still hier …',c:'#c8d870',ic:'auge',R:240,w:{land:3,wald:3,hoehle:1,dorf:1},boden:'lichtung'},
+ waechter:{n:'Halle der Wächter',sub:'Steinerne Augen folgen euch',c:'#d8c8a8',ic:'statue',R:230,w:{burg:3,gruft:2,wald:1,hoehle:0.8},boden:'fliesen'},
+ gefangene:{n:'Gefangenentransport',sub:'Befreit die Gefangenen!',c:'#a8e08a',ic:'wagen',R:230,w:{land:2,dorf:2,burg:2,wald:1},boden:'erde'},
+ platten:{n:{x:'Runenhalle',land:'Steinkreis der Runen',wald:'Steinkreis der Runen'},sub:'Folgt den Runen am Sockel',c:'#e0b0ff',ic:'stern',R:230,w:{burg:2,gruft:2,hoehle:1,land:1,dorf:1},boden:'fliesen'},
+ opferaltar:{n:'Blutaltar',sub:'Blut für Macht – wagt ihr es?',c:'#ff5a6a',ic:'tropfen',R:200,w:{gruft:2,hoehle:1,wald:1,land:1,burg:1,dorf:1},boden:'blut'},
+ ritual:{n:'Ritualkreis',sub:'Unterbrecht das Ritual!',c:'#d070ff',ic:'ritual',R:240,w:{wald:2,dorf:2,burg:2,gruft:2,hoehle:1,land:1},boden:'ritual'},
+ spinnennest:{n:'Spinnennest',sub:'Etwas regt sich in den Fäden',c:'#d8d0e0',ic:'netz',R:240,w:{hoehle:3,wald:2,gruft:1,land:0.5},boden:'seide'},
+ goblinschatz:{n:'Goblin-Hort',sub:'Leise – sie schlafen …',c:'#e8d060',ic:'muenze',R:230,w:{land:2,wald:2,hoehle:2},boden:'erde',nur:()=>arGoblinDefs().length>0},
+ friedhof:{n:'Alter Friedhof',sub:'Hier ruht man nicht in Frieden',c:'#b8c8b0',ic:'schaedel',R:260,w:{dorf:2,gruft:2,land:1,wald:1,burg:1},boden:'friedhof'},
+ haendler:{n:'Überfallener Händler',sub:'Rettet den Händler!',c:'#5ad8c8',ic:'wagen',R:220,w:{land:2,dorf:2.5,wald:1},boden:'erde'},
+ lagerfeuer:{n:'Rastplatz',sub:'Ein warmes Feuer – kurz durchatmen',c:'#ffb060',ic:'flamme',R:170,w:{land:1,wald:1,hoehle:1,dorf:0.6,burg:0.4,gruft:0.4},boden:'asche'}};
+function arGoblinDefs(){const S=STAGES[G.stage];return Object.keys((S&&S.foes)||{}).filter(k=>/goblin/i.test(k)&&FOES[k]).map(k=>FOES[k])}
+
+/* ---------- Bauen (läuft im Stufenaufbau, vor den Welt-Bauten; Platz wird reserviert) ---------- */
+function arPlanen(S){const st=AR_STIL(),O=G.obj,L=[];const hist=G.arHist||[];const nW=S.boss?ri(1,2):(G.stage===0&&G.diff===0?2:ri(2,3)+(Math.random()<0.3?1:0));
+ const pool=Object.keys(AR_K).filter(k=>{const K=AR_K[k];return (K.w[st]||0)>0&&(!K.nur||K.nur())});
+ const used=new Set();const wahl=()=>{let s=0;const ws=pool.map(k=>{let w=AR_K[k].w[st]||0;if(used.has(k))w=0;if(hist.slice(-2).some(h=>h.includes(k)))w*=0.25;if(k==='lagerfeuer'&&G.stage<2)w=0;if(k==='opferaltar'&&G.stage<1)w*=0.3;s+=w;return w});if(s<=0)return null;let r=Math.random()*s;for(let i=0;i<pool.length;i++){r-=ws[i];if(r<=0)return pool[i]}return pool[pool.length-1]};
+ const segs=[];if(O&&O.k==='eskorte')segs.push([O.sx,O.sy,O.tx,O.ty]);const pts=[];if(O&&O.k==='flucht')pts.push([O.gx,O.gy]);if(O&&O.k==='eskorte')pts.push([O.tx,O.ty]);if(O&&O.k==='halten'&&O.hx!=null)pts.push([O.hx,O.hy]);
+ for(let i=0;i<nW;i++){const k=wahl();if(!k)break;const K=AR_K[k],R=K.R;let site=null;
+  for(let t=0;t<140&&!site;t++){const a=rnd(TAU),d=rnd(640,1120),x=AR_C+Math.cos(a)*d,y=AR_C+Math.sin(a)*d;if(x<R+130||y<R+130||x>WORLD-R-130||y>WORLD-R-130)continue;
+   if(L.some(A=>Math.hypot(A.x-x,A.y-y)<A.r+R+170))continue;if(segs.some(s=>arSegD(x,y,s[0],s[1],s[2],s[3])<R+170))continue;if(pts.some(p=>Math.hypot(p[0]-x,p[1]-y)<R+260))continue;
+   if(G.blk.some(b=>b.t==='c'?Math.hypot(b.x-x,b.y-y)<b.r+R:b.x<x+R&&b.x+b.w>x-R&&b.y<y+R&&b.y+b.h>y-R))continue;
+   const rn=G.road&&G.road.some(p=>Math.hypot(p[0]-x,p[1]-y)<R+70);if(rn&&k!=='haendler')continue;if(k==='haendler'&&G.road&&!G.road.some(p=>Math.hypot(p[0]-x,p[1]-y)<R+260)&&t<90)continue;site={x,y}}
+  if(!site)continue;used.add(k);const A={id:L.length,k,x:site.x,y:site.y,r:R,stil:st,s:0,e:0,tx:'',c:K.c,sub:K.sub,ea:Math.atan2(AR_C-site.y,AR_C-site.x),bl:[]};A.n=AR_N(A,K.n);L.push(A)}
+ return L}
+function arR(A,x,y,w,h,k,o){const b=Object.assign({t:'r',x,y,w,h,k,v:Math.random(),wl:1,ai:A.id},o||{});G.blk.push(b);return b}
+function arCc(A,x,y,r,k,o){const b=Object.assign({t:'c',x,y,r,k,v:Math.random(),wl:1,ai:A.id},o||{});G.blk.push(b);return b}
+function arWand(A,x,y,len,hor,d,k,o){if(len<8)return;const n=Math.max(1,Math.ceil(len/160)),s=len/n;for(let i=0;i<n;i++){if(hor)arR(A,x+i*s,y,s,d,k,o);else arR(A,x,y+i*s,d,s,k,o)}}
+function arDk(A,x,y,k,s){G.deco.push({x,y,k,s:s||rnd(0.85,1.15),v:Math.random(),ar:1,wl:1})}
+/* Haus mit einer Tür (Seite s), optional Dach – erscheint auch in G.wl.haus (Boden, Dach, Karte) */
+function arHaus(A,x,y,w,h,m,dach,tS,o){o=o||{};const d=o.d||18,D=o.tuer||84,wk=o.wk||'wand',ko={m,ai:A.id};const WL=G.wl;
+ const seg=s=>{const hor=s==='s'||s==='n';const sx=hor?x:(s==='w'?x:x+w-d),sy=hor?(s==='n'?y:y+h-d):y+d,len=hor?w:h-2*d;if(s!==tS){arWand(A,sx,sy,len,hor,d,wk,ko);return null}
+  const a=(len-D)/2;arWand(A,sx,sy,a,hor,d,wk,ko);arWand(A,sx+(hor?a+D:0),sy+(hor?0:a+D),len-a-D,hor,d,wk,ko);return{s,x:hor?sx+a+D/2:sx+d/2,y:hor?sy+d/2:sy+a+D/2}};
+ const tu=[];for(const s of ['n','s','w','o']){const t=seg(s);if(t)tu.push(t)}
+ const HS={x,y,w,h,m,dach:dach||0,ruin:0,d,tueren:tu,a:1,id:WL.haus.length,boden:o.boden||m,kammer:wk==='felswand'?1:0,belegt:1,ar:1};WL.haus.push(HS);return HS}
+const AR_DIR=a=>{const c=Math.cos(a),s=Math.sin(a);return Math.abs(c)>Math.abs(s)?(c>0?{s:'o',x:1,y:0}:{s:'w',x:-1,y:0}):(s>0?{s:'s',x:0,y:1}:{s:'n',x:0,y:-1})};
+const AR_BAU={
+ weiler(A){const st=A.stil,m=st==='dorf'?'lehm':'holz';arHaus(A,A.x-170,A.y-150,150,112,m,'stroh','s');arHaus(A,A.x+10,A.y-170,160,118,m,st==='dorf'?'ziegel':'stroh','s');
+  const fy=A.y+A.r-70;arWand(A,A.x-A.r+50,fy,A.r-110,true,12,'zaun');arWand(A,A.x+60,fy,A.r-110,true,12,'zaun');arWand(A,A.x-A.r+44,A.y-60,170,false,12,'zaun');arWand(A,A.x+A.r-56,A.y-40,150,false,12,'zaun');
+  arCc(A,A.x+150,A.y+40,20,'brunnen');for(const [dx,dy,k] of [[-60,-20,'ar_heu'],[120,-30,'ar_heu'],[-150,-20,'barrel'],[-130,-12,'crate'],[95,10,'crate']])arDk(A,A.x+dx,A.y+dy,k);A.bw=[[A.x-80,A.y+30],[A.x+20,A.y+10],[A.x+90,A.y+60]]},
+ elitelager(A){const R=185,g0=A.ea,g1=A.ea+Math.PI,n=Math.round(TAU*R/27);for(let i=0;i<n;i++){const a=i/n*TAU,da=v=>Math.abs(Math.atan2(Math.sin(a-v),Math.cos(a-v)));if(da(g0)<0.34||da(g1)<0.3)continue;arCc(A,A.x+Math.cos(a)*R,A.y+Math.sin(a)*R*0.86,11,'pfahl')}
+  for(let i=0;i<3;i++){const a=A.ea+Math.PI*0.5+i/3*TAU,d=R*0.58;arCc(A,A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.8,24,'zelt')}G.deco.push({x:A.x,y:A.y+10,k:'wl_feuer',s:1.1,v:Math.random(),wl:1,ar:1});arDk(A,A.x+40,A.y-40,'ar_banner',1);arDk(A,A.x-50,A.y+40,'crate');arDk(A,A.x-36,A.y+50,'barrel')},
+ schatzkammer(A){const D=AR_DIR(A.ea),hor=D.x!==0,wk=A.stil==='hoehle'?'felswand':'wand',d=22;const vw=hor?200:230,vh=hor?230:200;const vx=A.x-D.x*95-vw/2,vy=A.y-D.y*95-vh/2;
+  const HS=arHaus(A,vx,vy,vw,vh,'stein',0,D.s,{d,tuer:96,wk,boden:A.stil==='hoehle'?'fels':'stein'});const T=HS.tueren[0];A.tuer={x:T.x,y:T.y};
+  const Lc=230,cw=104;for(const sg of [-1,1]){if(hor){const yy=T.y+sg*(cw/2)+(sg>0?0:-d);arWand(A,D.x>0?T.x+d/2:T.x-d/2-Lc,yy,Lc,true,d,wk,{m:'stein'})}else{const xx=T.x+sg*(cw/2)+(sg>0?0:-d);arWand(A,xx,D.y>0?T.y+d/2:T.y-d/2-Lc,Lc,false,d,wk,{m:'stein'})}}
+  A.gang=[];for(let i=0;i<3;i++){const u=60+i*72;A.gang.push({x:T.x+D.x*u,y:T.y+D.y*u})}A.mund={x:T.x+D.x*(Lc+30),y:T.y+D.y*(Lc+30)};A.perp=hor?Math.PI/2:0;
+  const sd=Math.random()<0.5?1:-1;A.hebel={x:T.x+D.x*(Lc-30)+(hor?0:sd*(cw/2+60)),y:T.y+D.y*(Lc-30)+(hor?sd*(cw/2+60):0)};arWand(A,hor?A.hebel.x-40:A.hebel.x+(sd>0?18:-40),hor?A.hebel.y+(sd>0?18:-40):A.hebel.y-40,80,!hor,16,wk,{m:'stein'});
+  A.innen={x:vx+vw/2,y:vy+vh/2};arDk(A,A.innen.x-50,A.innen.y-40,'goldhaufen',0.9);arDk(A,A.innen.x+55,A.innen.y-36,'goldhaufen',0.8);arDk(A,vx+30,vy+40,'torch');arDk(A,vx+vw-30,vy+40,'torch')},
+ pruefung(A){const n=7;for(let i=0;i<n;i++){const a=A.ea+Math.PI/n+i/n*TAU;if(i===n-1)continue;arCc(A,A.x+Math.cos(a)*150,A.y+Math.sin(a)*150*0.85,17,'saeule')}arDk(A,A.x-60,A.y-70,'brazier');arDk(A,A.x+60,A.y-70,'brazier')},
+ hinterhalt(A){const bus=A.stil==='land'||A.stil==='wald';for(let i=0;i<16;i++){const a=i/16*TAU+rnd(-0.1,0.1),d=rnd(170,215);if(Math.abs(Math.atan2(Math.sin(a-A.ea),Math.cos(a-A.ea)))<0.4)continue;arDk(A,A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.85,bus?'bush':pick(['rock','rubble']),rnd(1.2,1.6))}
+  for(let i=0;i<4;i++){const a=A.ea+0.8+i*1.25,d=rnd(185,205);if(bus)arCc(A,A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.85,17,'baum',{s:rnd(1.2,1.6),art:A.stil==='wald'?'tanne':'laub'});else arCc(A,A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.85,rnd(24,34),'fels')}
+  arDk(A,A.x-26,A.y+18,'bones');arDk(A,A.x+30,A.y+26,'bones',0.8);A.ring=[];for(let i=0;i<10;i++){const a=i/10*TAU;A.ring.push([A.x+Math.cos(a)*175,A.y+Math.sin(a)*150])}},
+ waechter(A){A.st=[];const n=SL()<6?3:4,P4=[[-115,-70],[115,-70],[-115,85],[115,85]];for(let i=0;i<n;i++){const x=A.x+P4[i][0],y=A.y+P4[i][1];arCc(A,x,y,19,'ar_sockel',{si:i});A.st.push([x,y])}arDk(A,A.x-170,A.y,'brazier');arDk(A,A.x+170,A.y,'brazier')},
+ gefangene(A){arR(A,A.x-110,A.y-20,70,36,'karren');arCc(A,A.x+110,A.y-80,24,'zelt');G.deco.push({x:A.x+20,y:A.y+80,k:'wl_feuer',s:0.8,v:Math.random(),wl:1,ar:1});arDk(A,A.x-150,A.y+60,'crate');arDk(A,A.x-130,A.y+70,'barrel')},
+ platten(A){for(const [dx,dy] of [[-160,-125],[160,-125],[-160,125],[160,125]])arCc(A,A.x+dx,A.y+dy,16,'saeule');arDk(A,A.x,A.y-150,'torch');arDk(A,A.x,A.y+150,'torch')},
+ opferaltar(A){arDk(A,A.x-70,A.y-30,'brazier');arDk(A,A.x+70,A.y-30,'brazier');for(let i=0;i<4;i++)arDk(A,A.x+rnd(-120,120),A.y+rnd(40,110),'bones',rnd(0.7,1));arCc(A,A.x-120,A.y-90,16,'saeule');arCc(A,A.x+120,A.y-90,16,'saeule')},
+ ritual(A){for(let i=0;i<10;i++){const a=i/10*TAU;arDk(A,A.x+Math.cos(a)*165,A.y+Math.sin(a)*140,'ar_kerze',1)}},
+ spinnennest(A){for(let i=0;i<11;i++){const a=rnd(TAU),d=rnd(30,210);arDk(A,A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.85,'web',rnd(1.3,2.1))}for(let i=0;i<4;i++)arDk(A,A.x+rnd(-150,150),A.y+rnd(-110,110),'bones',rnd(0.7,1.1));
+  if(A.stil==='hoehle')for(let i=0;i<3;i++){const a=A.ea+1+i*1.6;arCc(A,A.x+Math.cos(a)*200,A.y+Math.sin(a)*170,rnd(14,18),'stalag')}},
+ goblinschatz(A){arCc(A,A.x-110,A.y-70,24,'zelt');arCc(A,A.x+120,A.y-60,22,'zelt');for(const [dx,dy] of [[-40,-20],[30,-30],[0,30]])arDk(A,A.x+dx,A.y+dy,'goldhaufen',rnd(0.9,1.2));G.deco.push({x:A.x-20,y:A.y+90,k:'wl_feuer',s:0.8,v:Math.random(),wl:1,ar:1})},
+ friedhof(A){const w=430,h=330,x0=A.x-w/2,y0=A.y-h/2+20,D=AR_DIR(A.ea);for(const s of ['n','s','w','o']){const hor=s==='n'||s==='s',len=hor?w:h,sx=s==='o'?x0+w:x0,sy=s==='s'?y0+h:y0;const gap=s===D.s||s===AR_DIR(A.ea+Math.PI).s;
+   if(!gap){arWand(A,sx,sy,len,hor,12,'zaun')}else{const a=(len-110)/2;arWand(A,sx,sy,a,hor,12,'zaun');arWand(A,sx+(hor?a+110:0),sy+(hor?0:a+110),a,hor,12,'zaun')}}
+  arHaus(A,A.x-70,y0-118,140,104,'stein','schiefer','s',{d:18,tuer:70});A.gruft={x:A.x,y:y0-66};A.gr=[];for(let r=0;r<3;r++)for(let c=0;c<4;c++){const x=A.x-150+c*100+rnd(-8,8),y=y0+60+r*90+rnd(-6,6);if(Math.abs(x-A.x)<45&&r===1)continue;arDk(A,x,y,'grave',rnd(0.9,1.1));A.gr.push([x,y+16])}
+  arDk(A,A.x+D.x*(w/2+18)-30,A.y+D.y*(h/2+18),'lantern');arDk(A,A.x+D.x*(w/2+18)+30,A.y+D.y*(h/2+18),'lantern')},
+ haendler(A){arR(A,A.x-80,A.y-30,70,36,'karren');arR(A,A.x+20,A.y-40,84,34,'stand');arR(A,A.x-150,A.y+40,50,34,'kisten');arDk(A,A.x+120,A.y+30,'barrel');arDk(A,A.x+136,A.y+40,'crate')},
+ lagerfeuer(A){arR(A,A.x-70,A.y-60,70,20,'stamm');arR(A,A.x+10,A.y+48,70,20,'stamm');arDk(A,A.x-80,A.y+20,'ar_bett');arDk(A,A.x+78,A.y-20,'ar_bett')}};
+function arBauen(S,L){for(const A of L){try{AR_BAU[A.k](A)}catch(er){console.error(er)}}
+ const WL=G.wl;WL.platz=WL.platz.filter(p=>L.every(A=>Math.hypot(A.x-p.x,A.y-p.y)>A.r+260));
+ G.deco=G.deco.filter(d=>d.ar||d.edge||L.every(A=>Math.hypot(d.x-A.x,(d.y-A.y)*1.1)>A.r*0.8));G.deco.sort((p,q)=>p.y-q.y);blkRaster();wlLoRaster();G.blkV=(G.blkV||0)+1}
+{const wb0=wlBau;wlBau=function(S){G.ar={an:0,L:[],stat:{fallen:0,ausg:0,entsch:0,geloest:0}};G.arN=[];const r0=G.blk.length;let L=[];
+ if(!wlAn(S)||S.noProps)return wb0.apply(this,arguments);try{L=arPlanen(S);for(const A of L)G.blk.push({t:'r',x:A.x-A.r,y:A.y-A.r,w:A.r*2,h:A.r*2,k:'ar_geist',arGeist:1})}catch(er){console.error(er);L=[]}
+ let r;try{r=wb0.apply(this,arguments)}finally{G.blk=G.blk.filter(b=>!b.arGeist)}
+ try{if(G.wl&&G.wl.an&&L.length){arBauen(S,L);G.ar.an=1;G.ar.L=L;G.arHist=(G.arHist||[]).concat([L.map(A=>A.k)]).slice(-3)}else{blkRaster()}}catch(er){console.error(er);G.ar.an=0}return r}}
+
+/* ---------- Füllen (nach dem Welt-Aufbau: Wegnetz steht) ---------- */
+const AR_FILL={
+ weiler(A){A.bew=A.bw.map((b,i)=>{const q=arPlatz(b[0],b[1],30);const p={k:'ar_bewohner',prop:1,x:q.x,y:q.y,r:12,hp:100,fv:i,seed:Math.random(),ai:A.id};G.props.push(p);return p});
+  const L=[];const f=pickFoe(0.5);for(let i=0;i<ri(3,4)+Math.min(2,SL()>>3);i++){const b=A.bew[i%A.bew.length],a=rnd(TAU);const e=arFeind(A,i%3===2?pickFoe(0.5):f,b.x+Math.cos(a)*rnd(40,70),b.y+Math.sin(a)*rnd(30,50),{pr:0.5});if(e)L.push(e)}arGruppe(A,L,'lager',360)},
+ elitelager(A){const f=pickFoe(0.8);const L=[];const B=arFeind(A,f,A.x+rnd(-30,30),A.y-20,{pr:0.7,elite:2});if(B){L.push(B);A.boss=B}const f2=pickFoe(0.6);for(let i=0;i<ri(3,4)+Math.min(2,SL()>>3);i++){const a=rnd(TAU),d=rnd(60,120);const e=arFeind(A,i%2?f2:f,A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.8,{pr:0.6});if(e)L.push(e)}arGruppe(A,L,Math.random()<0.3?'schlaf':'lager',360);
+  const ga=A.ea,gx=A.x+Math.cos(ga)*225,gy=A.y+Math.sin(ga)*195;if(Math.random()<0.6)arFalle('alarm',gx,gy,{a:ga+Math.PI/2,w:100,ai:A.id});else arFalle('baer',gx,gy,{ai:A.id});if(SL()>=3)arFalle('baer',A.x+Math.cos(ga+Math.PI)*215,A.y+Math.sin(ga+Math.PI)*185,{ai:A.id})},
+ schatzkammer(A){const n=SL()<3?2:3;const typen=A.stil==='burg'||A.stil==='gruft'?['pendel','pfeile','stacheln','feuer','fluch']:A.stil==='hoehle'?['steine','stacheln','netz','feuer','pendel']:['pfeile','stacheln','baer','steine'];const ty=typen.slice().sort(()=>Math.random()-0.5);
+  for(let i=0;i<n;i++){const g=A.gang[i],t=ty[i];const o={ai:A.id};if(t==='pendel'){o.a=A.perp;o.w=96}else if(t==='pfeile'){o.a=A.perp;o.w=150}else if(t==='feuer'){const D=AR_DIR(A.ea),hor=D.x!==0;o.a=A.perp+(Math.random()<0.5?Math.PI:0);o.w=104;const s=Math.cos(o.a)*1+Math.sin(o.a)*1;arFalle('feuer',g.x-Math.cos(o.a)*52,g.y-Math.sin(o.a)*52,o);continue}else if(t==='stacheln'){const D=AR_DIR(A.ea);o.w=D.x?56:96;o.h=D.x?96:56}else if(t==='fluch')o.v=ri(0,2);arFalle(t,g.x,g.y,o)}
+  const hq=wlNahFrei(A.hebel.x,A.hebel.y,6)||A.hebel;A.hebelP={k:'ar_hebel',prop:1,x:hq.x,y:hq.y,r:14,used:0,ai:A.id};G.props.push(A.hebelP);
+  A.truhe=arTruhe(A,A.innen.x,A.innen.y+10,SL()>=6&&Math.random()<0.35?2:1);G.props.push({k:'goldpile',prop:1,x:A.innen.x-50,y:A.innen.y+30,r:16},{k:'goldpile',prop:1,x:A.innen.x+50,y:A.innen.y+34,r:16});
+  if(SL()>=4&&Math.random()<0.5){const L=[];for(let i=0;i<2;i++){const e=arFeind(A,pickFoe(0.7),A.innen.x+(i?40:-40),A.innen.y-30,{pr:0.6});if(e)L.push(e)}arGruppe(A,L,'schlaf',150)}},
+ pruefung(A){A.altar={k:'ar_altar',prop:1,x:A.x,y:A.y,r:22,fv:0,prog:0,ai:A.id};G.props.push(A.altar)},
+ hinterhalt(A){const n=ri(5,6)+Math.min(3,SL()>>2);A.hn=n;G.props.push({k:'goldpile',prop:1,x:A.x+10,y:A.y,r:16});arTruhe(A,A.x-20,A.y-26,0);for(let i=0;i<(SL()<2?1:2);i++){const a=A.ea+(i?-0.7:0.7),d=70;arFalle('netz',A.x+Math.cos(a)*d,A.y+Math.sin(a)*d,{ai:A.id})}},
+ waechter(A){A.rel={k:'ar_reliquiar',prop:1,x:A.x,y:A.y+6,r:20,ai:A.id};G.props.push(A.rel);A.sw=0;if(SL()>=2)arFalle('fluch',A.x+Math.cos(A.ea)*150,A.y+Math.sin(A.ea)*130,{ai:A.id,v:ri(0,2)})},
+ gefangene(A){const q=wlNahFrei(A.x-10,A.y-16,6)||A;A.kaefig={k:'ar_kaefig',prop:1,x:q.x+60,y:q.y,r:22,used:0,ai:A.id};G.props.push(A.kaefig);const L=[];const f=pickFoe(0.6);for(let i=0;i<ri(4,5)+Math.min(2,SL()>>3);i++){const a=rnd(TAU),d=rnd(60,130);const e=arFeind(A,f,A.x+Math.cos(a)*d,A.y+Math.sin(a)*d,{pr:0.6,elite:i===0?1:0});if(e)L.push(e)}arGruppe(A,L,'lager',340);
+  arFalle('baer',A.x+Math.cos(A.ea)*170,A.y+Math.sin(A.ea)*150,{ai:A.id})},
+ platten(A){const n=SL()<5?3:4;const idx=[0,1,2,3].sort(()=>Math.random()-0.5);A.seqA=idx.slice(0,n);A.seq=A.seqA.join('');A.got=0;A.fails=0;const P4=[[-95,-70],[95,-70],[95,75],[-95,75]];A.pl=[];
+  for(let i=0;i<4;i++){const p={k:'ar_platte',prop:1,x:A.x+P4[i][0],y:A.y+P4[i][1],r:24,fv:i,act:0,fz:0,ai:A.id};G.props.push(p);A.pl.push(p)}A.sockel={k:'ar_runensockel',prop:1,x:A.x,y:A.y,r:18,ai:A.id};G.props.push(A.sockel)},
+ opferaltar(A){A.altar={k:'ar_altar',prop:1,x:A.x,y:A.y,r:22,fv:1,prog:0,ai:A.id};G.props.push(A.altar);arFalle('fluch',A.x+Math.cos(A.ea)*135,A.y+Math.sin(A.ea)*120,{ai:A.id,v:ri(0,2)})},
+ ritual(A){A.ob=[];for(let i=0;i<3;i++){const a=A.ea+Math.PI/3+i/3*TAU;const q=wlNahFrei(A.x+Math.cos(a)*120,A.y+Math.sin(a)*100,4)||{x:A.x+Math.cos(a)*120,y:A.y+Math.sin(a)*100};const p={k:'ar_obelisk',prop:1,x:q.x,y:q.y,r:16,hp:3+Math.min(3,SL()>>3),prog:0,used:0,ai:A.id};G.props.push(p);A.ob.push(p)}
+  const S=STAGES[G.stage],ids=Object.keys(S.foes||{}).filter(k=>FOES[k]&&(FOES[k].k==='ranged'||FOES[k].k==='caster'));const f=ids.length?FOES[pick(ids)]:pickFoe(0.6);const L=[];for(let i=0;i<3;i++){const a=A.ea+i/3*TAU;const e=arFeind(A,f,A.x+Math.cos(a)*55,A.y+Math.sin(a)*45,{pr:0.6});if(e)L.push(e)}arGruppe(A,L,'lager',230);A.t=40+Math.min(15,SL())},
+ spinnennest(A){A.eier=[];const n=ri(4,5)+(SL()>6?1:0);for(let i=0;i<n;i++){const a=i/n*TAU+rnd(-0.3,0.3),d=rnd(80,170);const q=arPlatz(A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.85,30);const p={k:'ar_ei',prop:1,x:q.x,y:q.y,r:13,act:0,fz:0,used:0,seed:Math.random(),ai:A.id};G.props.push(p);A.eier.push(p)}
+  A.kokon={k:'ar_kokon',prop:1,x:A.x+20,y:A.y-10,r:18,used:0,ai:A.id};G.props.push(A.kokon);const L=[];const Q=arFeind(A,FOES.brutspinne||pickFoe(0.8),A.x-30,A.y+20,{pr:0.7,elite:2});if(Q){L.push(Q);A.boss=Q}for(let i=0;i<2;i++){const e=arFeind(A,FOES.netzspinne||pickFoe(0.5),A.x+rnd(-90,90),A.y+rnd(-60,60),{pr:0.5});if(e)L.push(e)}arGruppe(A,L,'schlaf',230);
+  for(let i=0;i<2;i++){const a=A.ea+(i?-0.5:0.5);arFalle('netz',A.x+Math.cos(a)*175,A.y+Math.sin(a)*150,{ai:A.id})}},
+ goblinschatz(A){const D=arGoblinDefs();const L=[];for(let i=0;i<ri(5,6)+Math.min(2,SL()>>3);i++){const a=rnd(TAU),d=rnd(50,120);const e=arFeind(A,pick(D),A.x+Math.cos(a)*d,A.y+Math.sin(a)*d*0.8,{pr:0.5});if(e)L.push(e)}arGruppe(A,L,'schlaf',190);
+  A.hort={k:'ar_hort',prop:1,x:A.x,y:A.y,r:24,used:0,ai:A.id};G.props.push(A.hort);const ga=A.ea;arFalle('alarm',A.x+Math.cos(ga)*200,A.y+Math.sin(ga)*170,{a:ga+Math.PI/2,w:110,ai:A.id});arFalle('baer',A.x+Math.cos(ga+1.4)*190,A.y+Math.sin(ga+1.4)*160,{ai:A.id})},
+ friedhof(A){if(SL()>=2)arFalle(Math.random()<0.5?'frost':'fluch',A.x+rnd(-60,60),A.y+rnd(0,60),{ai:A.id,v:ri(0,2)})},
+ haendler(A){const q=wlNahFrei(A.x+60,A.y+20,6)||A;A.mann={k:'merchant',prop:1,x:q.x,y:q.y,r:22,hp:100,ai:A.id,arH:1};G.props.push(A.mann);const L=[];const f=pickFoe(0.55);for(let i=0;i<ri(4,5)+Math.min(2,SL()>>3);i++){const a=rnd(TAU),d=rnd(70,130);const e=arFeind(A,i%3===2?pickFoe(0.55):f,A.mann.x+Math.cos(a)*d,A.mann.y+Math.sin(a)*d,{pr:0.55});if(e)L.push(e)}arGruppe(A,L,'lager',360)},
+ lagerfeuer(A){A.feuer={k:'ar_feuer',prop:1,x:A.x,y:A.y,r:26,prog:0,used:0,ai:A.id};G.props.push(A.feuer)}};
+/* Fallen außerhalb der Areale: Türen von Gebäuden, Wege zu Truhen */
+function arStreufallen(){const st=AR_STIL(),WL=G.wl;let n=((st==='burg'||st==='gruft'||st==='hoehle')?ri(1,3)+(SL()>8?1:0):ri(0,2))+Math.floor(arHart()/2)+(HARD()?1:0);if(G.stage===0&&G.diff===0)n=0;if(STAGES[G.stage].boss)n=Math.min(n,1);
+ const alle=()=>G.props.filter(p=>p.k==='falle');const ok=(x,y)=>Math.hypot(x-AR_C,y-AR_C)>560&&alle().every(p=>Math.hypot(p.x-x,p.y-y)>170)&&G.ar.L.every(A=>Math.hypot(A.x-x,A.y-y)>A.r+40)&&wlFrei(x,y,14)&&WL.d0[wlZelle(WL.nav,x,y)]!==65535;
+ const O=G.obj;const weg=(x,y)=>O&&O.k==='eskorte'&&arSegD(x,y,O.sx,O.sy,O.tx,O.ty)<190;
+ const kand=[];for(const HS of WL.haus){if(HS.ar)continue;for(const t of HS.tueren||[]){const ix=t.s==='o'?-30:t.s==='w'?30:0,iy=t.s==='n'?30:t.s==='s'?-34:0;kand.push({x:t.x+ix,y:t.y+iy,a:t.s==='n'||t.s==='s'?0:Math.PI/2,tuer:1})}}
+ for(const p of G.props)if(p.k==='chest'&&!p.arT){const a=Math.atan2(AR_C-p.y,AR_C-p.x);kand.push({x:p.x+Math.cos(a)*62,y:p.y+Math.sin(a)*62,a:a+Math.PI/2})}
+ kand.sort(()=>Math.random()-0.5);const typ=st==='burg'||st==='gruft'?['stacheln','pfeile','fluch','gift','steine','frost','feuer']:st==='hoehle'?['steine','netz','stacheln','gift','baer','frost']:['baer','netz','stacheln','pfeile','gift','fluch'];
+ for(const k of kand){if(n<=0)break;if(!ok(k.x,k.y)||weg(k.x,k.y))continue;const t=pick(typ);const o={a:k.a,v:ri(0,2)};if(t==='stacheln'){o.w=k.a?56:84;o.h=k.a?84:56}if(t==='pfeile')o.w=120;if(t==='feuer'){o.w=120;arFalle('feuer',k.x-Math.cos(k.a)*60,k.y-Math.sin(k.a)*60,o);n--;continue}arFalle(t,k.x,k.y,o);n--}}
+function arFuellen(){const AR=G.ar,WL=G.wl;if(!AR||!AR.an||!WL||!WL.nav)return;
+ /* zufällige Weltgruppen aus den Arealen nehmen, Objekte aus dem Kern schieben */
+ for(const A of AR.L){const inA=(x,y,f)=>Math.hypot(x-A.x,y-A.y)<A.r*(f||0.9);
+  for(const g of WL.gr){if(g.ar!=null)continue;const a=g.m.find(e=>!e.dead);if(a&&inA(a.x,a.y)){for(const e of g.m)e.dead=true,e.noLoot=true;g.m=[];g.wach=1}}
+  for(const h of WL.hin)if(!h.done&&inA(h.x,h.y))h.done=1;
+  for(const p of G.props){if(p.ai!=null||p.k==='blk'||p.k==='falle'||p.dead)continue;if(inA(p.x,p.y,0.8)){const a=Math.atan2(p.y-A.y,p.x-A.x)||rnd(TAU);const q=wlNahFrei(A.x+Math.cos(a)*(A.r+50),A.y+Math.sin(a)*(A.r+50),8);if(q){p.x=q.x;p.y=q.y}}}}
+ G.enemies=G.enemies.filter(e=>!(e.dead&&e.noLoot&&e.wlG!=null));
+ for(const A of AR.L){try{AR_FILL[A.k](A)}catch(er){console.error(er)}}
+ try{arStreufallen()}catch(er){console.error(er)}arSync(1)}
+{const ss0=setupStage;setupStage=function(i){const r=ss0.apply(this,arguments);try{if(G.ar&&G.ar.an&&G.wl&&G.wl.an)arFuellen()}catch(er){console.error(er)}return r}}
+
+/* ---------- Spiegelung ---------- */
+function arSync(force){const AR=G.ar;if(!AR)return;AR.syT=(AR.syT||0);if(!force&&AR.syT>0)return;AR.syT=0.25;
+ G.arN=AR.an?AR.L.map(A=>{const o={k:A.k,n:A.n,x:Math.round(A.x),y:Math.round(A.y),r:A.r,s:A.s,e:A.e?1:0,tx:A.tx||'',c:A.c,ic:AR_K[A.k].ic,b:AR_K[A.k].boden||''};if(A.k==='waechter')o.sw=A.sw||0;if(A.k==='platten'){o.seq=A.seq;o.got=A.got}if(A.k==='ritual'||A.k==='pruefung')o.t=Math.max(0,Math.round(A.t||0));return o}):[]}
+
+/* ---------- Ereignisse je Areal (Gastgeber) ---------- */
+function arSieg(A,txt,small){if(A.s===2)return;A.s=2;G.fxs.push({k:'ar_sieg',x:A.x,y:A.y,r:A.r,c:A.c,t:0,life:1.6});A.tx=txt||'Geschafft!';G.ar.stat.geloest++;if(!G.bot){toast(`<b>${A.n}:</b> ${txt||'geschafft!'}`,A.c);sfx('legend')}arSync(1)}
+function arWelle(A,n,defs,ring,o){o=o||{};const L=[];for(let i=0;i<n;i++){let x,y;if(o.pts){const p=pick(o.pts);x=p[0]+rnd(-14,14);y=p[1]+rnd(-10,10)}else{const a=rnd(TAU),d=ring||A.r*0.85;x=A.x+Math.cos(a)*d;y=A.y+Math.sin(a)*d*0.85}
+  const def=Array.isArray(defs)?pick(defs):defs||pickFoe(0.6);const e=arFeind(A,def,x,y,{});if(!e)continue;e.atkCd=rnd(0.4,0.9);L.push(e);if(!G.bot&&fxQ()>0)puffs(e.x,e.y+6,o.c||'#5a4a3a',6,70,12)}return L}
+const AR_TICK={
+ weiler(A,dt){if(A.s!==1)return;A.t=(A.t||0)+dt;A.wv=A.wv||0;const lebend=A.bew.filter(p=>p.hp>0);
+  for(const p of lebend){let n=0;for(const e of G.enemies)if(!e.dead&&!e.wlZz&&e.arA===A.id&&d2(e,p)<95*95)n++;if(n){p.hp-=n*6*dt;p.fz=0.3;if(p.hp<=0){p.hp=0;p.used=1;if(!G.bot)word(p.x,p.y-30,'Nein …!','#ff8a7a')}}}
+  if(A.wv===0&&A.t>4){A.wv=1;arWelle(A,ri(3,4)+Math.min(2,SL()>>3),null,A.r*0.9);if(!G.bot)word(A.x,A.y-60,'Mehr Angreifer!','#ff9a5a')}
+  if(A.wv===1&&A.t>15&&SL()>=4){A.wv=2;arWelle(A,ri(2,3),null,A.r*0.9)}
+  const n=A.bew.filter(p=>p.hp>0).length;A.tx=`Bewohner ${n}/${A.bew.length} · Angreifer ${arFeinde(A).length}`;
+  if(!n){A.s=3;A.tx='Die Bewohner sind verloren';arSync(1);return}
+  if(A.wv>=1&&A.t>6&&!arFeinde(A).length){for(const p of A.bew)if(p.hp>0)p.used=2;arGold(A.x,A.y,4+n*3);arTruhe(A,A.x-10,A.y+60,n>=2?1:0);for(const q of arSpieler())withP(q,()=>{heal(P.st.maxHp*0.3);if(n>=3&&P.pots<P.potMax+1)P.pots++});if(!G.bot)word(A.bew[0].x,A.bew[0].y-36,'Danke, Helden!','#ffe9a0');arSieg(A,`${n} Bewohner gerettet!`)}},
+ elitelager(A){if(A.s!==1)return;const B=A.boss;A.tx=B&&!B.dead?`Anführer: ${B.def.n}`:'';if(!B||B.dead){arTruhe(A,A.x+10,A.y-10,1);arGold(A.x,A.y,8);arSieg(A,'Der Anführer ist gefallen – seine Kriegskiste gehört euch!')}},
+ schatzkammer(A){if(A.s!==1)return;const scharf=G.props.filter(p=>p.k==='falle'&&p.ai===A.id&&p.act!==4&&p.act!==3).length;A.tx=scharf?`Fallen im Gang: ${scharf}`:'Der Gang ist sicher';if(A.truhe&&A.truhe.open)arSieg(A,'Schatz geborgen!')},
+ pruefung(A,dt){const p=A.altar;if(A.s===0||A.s===1&&!A.lauf){const Q=arStandfest(p,dt,1/1.2);A.tx='Stellt euch auf den Altar';if(Q){p.prog=0;A.lauf=1;A.s=1;A.t=26+Math.min(10,SL()>>1);A.wT=0.5;A.down=0;if(!G.bot)banner('Die Prüfung beginnt','Übersteht die Wellen!',A.c,{dur:2,size:32,y:H*0.24});sfx('boss');G.fxs.push({k:'shock',x:A.x,y:A.y,r:220,c:A.c,t:0,life:0.6})}return}
+  if(A.s!==1)return;A.t-=dt;A.wT-=dt;if(arSpieler().length<mpL().filter(q=>!q.netGone).length)A.down=1;A.tx=`Prüfung: noch ${Math.ceil(Math.max(0,A.t))} s`;
+  if(A.t>0&&A.wT<=0){A.wT=5.5;const n=Math.round((2+Math.min(3,SL()/6))*Math.min(1.6,mpSpawn()));arWelle(A,n,null,200,{c:'#8a7a4a'});sfxAt('magic',A.x,A.y)}
+  if(A.t<=0){for(const e of arFeinde(A)){smoke(e.x,e.y);e.dead=true;e.noLoot=true}const s=pick(AR_SEGEN);for(const q of arSpieler()){arReinigen(q,1);arFx(q,s,1)}arTruhe(A,A.x,A.y+50,A.down?0:1);G.fxs.push({k:'pillar',x:A.x,y:A.y+10,w:80,h:340,c:A.c,t:0,life:1.1});arSieg(A,`Prüfung bestanden – ${ARFX[s].n} für diese und die nächste Ebene!`)}},
+ hinterhalt(A){if(A.s===0){if(arSpieler().some(q=>d2(q,A)<130*130)){A.s=1;A.e=1;const L=arWelle(A,A.hn,null,0,{pts:A.ring,c:A.stil==='wald'||A.stil==='land'?'#3a5a2a':'#5a4a3a'});for(const e of L)e.atkCd=rnd(0.6,1.1);if(!G.bot){word(A.x,A.y-60,'Hinterhalt!','#ff9a5a');G.shake+=3;banner(A.n,'Ein Hinterhalt!',A.c,{dur:1.8,size:30,y:H*0.24})}sfxAt('thunk',A.x,A.y);sfxAt('roar',A.x,A.y)}return}
+  if(A.s!==1)return;const n=arFeinde(A).length;A.tx=`Wegelagerer: ${n}`;if(!n){dropItem(A.x,A.y+40,randomItem(scale().il+1,0.8,2));arGold(A.x,A.y,8);arSieg(A,'Die Wegelagerer sind besiegt – ihre Beute gehört euch!')}},
+ waechter(A,dt){if(A.s===0){if(arSpieler().some(q=>d2(q,A)<125*125)){A.s=1;A.e=1;A.wi=0;A.wT=0.2;A.st.forEach(()=>0);if(!G.bot){banner(A.n,'Die Wächter erwachen!',A.c,{dur:2,size:30,y:H*0.24});G.shake+=3}arErklaere('waechter');sfxAt('g_rock',A.x,A.y)}return}
+  if(A.s!==1)return;if(A.wi<A.st.length){A.wT-=dt;if(A.wT<=0){A.wT=0.65;const i=A.wi++;const[x,y]=A.st[i];A.sw|=1<<i;const def=A.stil==='hoehle'?(FOES.brocken||pickFoe(0.8)):A.stil==='burg'||A.stil==='gruft'?(FOES.ruestung||pickFoe(0.8)):(FOES.runenwaechter||FOES.ruestung);
+    const a=Math.atan2(A.y-y,A.x-x);const e=arFeind(A,def,x+Math.cos(a)*44,y+Math.sin(a)*40,{pr:0.7,elite:i<2?1:0});if(e){e.atkCd=0.8;e.stun=0.5}G.fxs.push({k:'ar_erwachen',x,y,t:0,life:0.9});if(!G.bot){chunks(x,y-30,'#8a8478',10,200);puffs(x,y,'#6a6458',6,80,16);G.shake+=2}sfxAt('d_stone',x,y);arSync(1)}A.tx='Die Wächter erwachen …';return}
+  const n=arFeinde(A).length;A.tx=`Wächter: ${n}`;if(!n){const p=A.rel;p.k='chest';p.rich=1;p.open=false;p.r=16;p.arT=1;G.fxs.push({k:'pillar',x:p.x,y:p.y+8,w:60,h:260,c:'#ffd04a',t:0,life:0.9});arSieg(A,'Das Siegel des Reliquiars ist gebrochen!')}},
+ gefangene(A,dt){if(A.s!==1)return;const n=arFeinde(A).length;const p=A.kaefig;if(n){A.tx=`Wachen: ${n}`;p.prog=0;return}A.tx='Öffnet den Käfig!';const Q=arStandfest(p,dt,1/0.8,p.r+8);if(Q){p.used=1;sfxAt('g_chain',p.x,p.y);if(!G.bot){word(p.x,p.y-50,'Danke, Fremde!','#cfe8a0');sparks(p.x,p.y,'#cfe8a0',16,280,1)}withP(Q,()=>{dropItem(p.x,p.y+40,randomItem(scale().il+1,0.8,2));dropGem(p.x-20,p.y+30);dropGem(p.x+20,p.y+30);arGold(p.x,p.y,6)});arSieg(A,'Die Gefangenen sind frei und teilen ihr Versteck mit euch!')}},
+ platten(A,dt){if(A.s===3||A.s===2)return;if(A.s===0)return;A.tx=`Runen: ${A.got}/${A.seqA.length}${A.fails?` · Fehler ${A.fails}/3`:''}`;
+  for(const p of A.pl){if(p.fz>0)p.fz-=dt;const auf=arSpieler().find(q=>!q.dash&&d2(q,p)<(p.r+4)*(p.r+4));const war=p.prs;p.prs=auf?1:0;if(!auf||war||p.act)continue;
+   if(p.fv===A.seqA[A.got]){p.act=1;A.got++;sfxAt('b_rune',p.x,p.y);if(!G.bot)sparks(p.x,p.y,'#e0b0ff',12,220,1);light(p.x,p.y,160,'#e0b0ff',0.6,1);
+    if(A.got>=A.seqA.length){arTruhe(A,A.x,A.y+40,1);G.fxs.push({k:'pillar',x:A.x,y:A.y+10,w:70,h:300,c:'#e0b0ff',t:0,life:1});if(A.fails===0)G.props.push({k:'goldpile',prop:1,x:A.x+40,y:A.y-30,r:16});arSieg(A,'Die Runenfolge ist gelöst!')}}
+   else{A.fails++;A.got=0;for(const q of A.pl){q.act=0;q.fz=0.7}withP(auf,()=>{hurt(arSc()*0.6)});G.fxs.push({k:'shock',x:p.x,y:p.y,r:90,c:'#c040a0',t:0,life:0.4});sfxAt('fluch',p.x,p.y);arWelle(A,2,null,150,{c:'#5a3a6a'});
+    if(A.fails>=3){A.s=3;A.tx='Die Runen sind erloschen';G.props.push({k:'goldpile',prop:1,x:A.x,y:A.y+40,r:16});if(!G.bot)toast(`<b>${A.n}:</b> Die Runen erlöschen …`,'#c8a0d8')}else if(!G.bot)word(p.x,p.y-30,'Falsche Rune!','#ff7aa0')}arSync(1)}},
+ opferaltar(A,dt){const p=A.altar;if(A.s===0||A.s===1&&!A.geopfert){A.tx='Opfert Blut am Altar …';if((p.cd||0)>0){p.cd-=dt;p.prog=0;return}const Q=arStandfest(p,dt,1/1.5);if(!Q)return;p.prog=0;
+   if(Q.hp<Q.st.maxHp*0.35){p.cd=2;if(!G.bot)word(p.x,p.y-50,'Zu schwach für das Opfer …','#ff8a7a');return}
+   A.geopfert=1;A.s=1;withP(Q,()=>{P.hp=Math.max(1,P.hp-P.st.maxHp*0.25);num(P.x,P.y-26,P.st.maxHp*0.25,false,true)});if(!G.bot){spray(p.x,p.y-20,-Math.PI/2,'#a01a2a',14,220,1);G.shake+=3}sfxAt('b_seele',p.x,p.y);
+   if(Math.random()<0.6+0.04*Math.min(5,(Q.st.luck||0))){arFx(Q,'blutsegen',1);withP(Q,()=>dropItem(p.x,p.y+50,randomItem(scale().il+2,1,3)));arGold(p.x,p.y,6);G.fxs.push({k:'pillar',x:p.x,y:p.y+10,w:70,h:320,c:'#ff5a6a',t:0,life:1});arSieg(A,'Der Altar nimmt das Opfer an: Blutsegen und ein seltener Fund!')}
+   else{arFx(Q,'blutfluch',2);A.fl=1;const f=pickFoe(0.9),n0=G.enemies.length;spawnPack(f,A.x+Math.cos(A.ea)*150,A.y+Math.sin(A.ea)*120);for(const e of G.enemies.slice(n0))e.arA=A.id;if(!G.bot)banner('Der Altar fordert mehr!','Besiegt seine Diener – dann gehört der Schatz euch',A.c,{dur:2.2,size:30,y:H*0.24});sfx('boss')}arSync(1);return}
+  if(A.s===1&&A.fl){const n=arFeinde(A).length;A.tx=`Diener des Altars: ${n}`;if(!n){arTruhe(A,A.x,A.y+50,2);arSieg(A,'Die Diener sind besiegt – der Blutschatz gehört euch!')}}},
+ ritual(A,dt){if(A.s!==1)return;if(A.besch){const n=arFeinde(A).filter(e=>e.arBesch).length;A.tx='Bannt die Beschwörung!';if(!n){arTruhe(A,A.x,A.y,0);dropGem(A.x,A.y+20);arSieg(A,'Die Beschwörung ist gebannt!')}return}
+  A.t-=dt;for(const p of A.ob){if(p.used)continue;if(p.fz>0)p.fz-=dt;if(arStandfest(p,dt,1/1.1,p.r+14))arObeliskWeg(p)}const rest=A.ob.filter(p=>!p.used).length;A.tx=`Ritual: ${Math.ceil(Math.max(0,A.t))} s · Obelisken ${A.ob.length-rest}/${A.ob.length}`;
+  if(!rest){arTruhe(A,A.x,A.y,1);arGold(A.x,A.y,6);arSieg(A,'Das Ritual ist gebrochen!');return}
+  if(A.t<=0){A.besch=1;for(const p of A.ob)if(!p.used){p.used=1;if(!G.bot)chunks(p.x,p.y-30,'#4a3a4a',8,200)}const e=arFeind(A,pickFoe(1),A.x,A.y,{pr:0.9,elite:2});if(e){e.arBesch=1;e.r*=1.15}explodeFx(A.x,A.y,110,'#d070ff',{shake:5});sfx('boss');if(!G.bot)banner('Das Ritual ist vollendet!','Etwas Schreckliches ist erschienen …',A.c,{dur:2.2,size:30,y:H*0.24});arSync(1)}},
+ spinnennest(A,dt){for(const p of A.eier){if(p.used)continue;if(p.act===0&&arSpieler().some(q=>d2(q,p)<115*115)){p.act=1;p.fz=1.5;sfxAt('gv_spin',p.x,p.y)}
+   if(arSpieler().some(q=>!q.dash&&d2(q,p)<(p.r+q.r+2)*(p.r+q.r+2))){arEiWeg(p);continue}if(p.act===1){p.fz-=dt;if(p.fz<=0){p.used=1;p.act=2;arWelle(A,3,FOES.spinnchen||pickFoe(0.3),0,{pts:[[p.x,p.y]],c:'#c8c0b0'});if(!G.bot)chunks(p.x,p.y,'#d8d0c0',8,160)}}}
+  if(A.s!==1)return;const k=A.kokon;if(!k.used&&arSpieler().some(q=>d2(q,k)<(k.r+q.r+4)*(k.r+q.r+4))){k.used=1;sfxAt('tuch',k.x,k.y);dropItem(k.x,k.y+40,randomItem(scale().il+1,0.8,Math.random()<0.35?3:2));arGold(k.x,k.y,5);if(!G.bot)word(k.x,k.y-40,'Ein eingesponnener Abenteurer … nur seine Ausrüstung blieb','#d8d0e0')}
+  const Bq=A.boss;A.tx=Bq&&!Bq.dead?'Die Brutmutter lauert':k.used?'':'Der Kokon …';if((!Bq||Bq.dead)&&k.used)arSieg(A,'Das Nest ist ausgeräuchert!')},
+ goblinschatz(A){if(A.s===0)return;const h=A.hort;A.tx=A.alarm?'Alarm! Schnappt euch den Hort!':'Leise … der Hort liegt in der Mitte';if(!h.used&&arSpieler().some(q=>d2(q,h)<(h.r+q.r+4)*(h.r+q.r+4))){h.used=1;sfxAt('g_coins',h.x,h.y);sfx('coin');arGold(h.x,h.y,A.alarm?10:22,1.2);arTruhe(A,h.x,h.y+50,A.alarm?0:1);if(!A.alarm&&!G.bot)word(h.x,h.y-50,'Leise geplündert!','#ffd04a');arSieg(A,A.alarm?'Der Hort ist eurer!':'Unbemerkt geplündert – reiche Beute!')}},
+ friedhof(A,dt){if(A.s===0){if(arSpieler().some(q=>Math.abs(q.x-A.x)<190&&q.y>A.y-120&&q.y<A.y+170)){A.s=1;A.e=1;A.wv=0;A.wT=0.6;if(!G.bot){banner('Die Toten erwachen!','Haltet stand!',A.c,{dur:2,size:32,y:H*0.24});G.shake+=2}sfx('boss')}return}
+  if(A.s!==1)return;const WN=3;if(A.wv<WN){A.wT-=dt;if(A.wT<=0){A.wT=6.5;A.wv++;const n=Math.round((2+A.wv+Math.min(3,SL()>>2))*Math.min(1.6,mpSpawn()));const D=[FOES.zombie,FOES.skelett,FOES.skelett,FOES.skelBogen].filter(Boolean);arWelle(A,n,D.length?D:null,0,{pts:A.gr,c:'#4a3a2a'});sfxAt('d_bone',A.x,A.y)}A.tx=`Welle ${A.wv}/${WN}`;return}
+  const n=arFeinde(A).length;A.tx=`Untote: ${n}`;if(!n){arTruhe(A,A.gruft.x,A.gruft.y,1);const q=wlNahFrei(A.x,A.y+20,6)||A;G.props.push({k:'ar_schrein',prop:1,x:q.x,y:q.y,r:20,used:0,ai:A.id});arSieg(A,'Die Toten ruhen wieder – die Gruft ist offen!')}},
+ haendler(A,dt){if(A.s!==1)return;const m=A.mann;let n=0;for(const e of G.enemies)if(!e.dead&&!e.wlZz&&e.arA===A.id&&d2(e,m)<115*115)n++;if(n){m.hp-=n*4.5*dt;if(m.hp<=0){m.hp=0;m.dead=true;if(!G.bot){chunks(m.x,m.y,'#3a6a64',8,160);word(m.x,m.y-40,'Der Händler ist gefallen …','#ff8a7a')}for(let i=0;i<2;i++)dropItem(m.x+rnd(-40,40),m.y+rnd(20,50),randomItem(scale().il,0.4,1));A.s=3;A.tx='Der Händler ist gefallen';arSync(1);return}}
+  const k=arFeinde(A).length;A.tx=`Händler ${Math.ceil(m.hp)}% · Angreifer ${k}`;if(!k){const il=scale().il,base=Math.round((80+il*14)*(1+0.5*Math.min(G.diff,8))*0.5);[[1,2],[1.9,3]].forEach(([f,minR],i)=>G.props.push({k:'ware',prop:1,x:m.x+(i?70:-70),y:m.y+60,r:22,price:Math.round(base*f),minR,prog:0,ai:A.id}));dropItem(m.x,m.y+110,randomItem(il+1,0.6,2));for(const q of arSpieler())q.pots=Math.max(q.pots,q.potMax);if(!G.bot)word(m.x,m.y-50,'Ihr habt mich gerettet! Nehmt, zum halben Preis!','#5ad8c8');arSieg(A,'Händler gerettet – Tränke aufgefüllt, Waren zum Dankespreis!')}},
+ lagerfeuer(A,dt){if(A.s===2)return;const p=A.feuer;A.tx='Am Feuer ausruhen';const Q=arStandfest(p,dt,1/1.0,p.r+18);if(!Q)return;p.used=1;for(const q of arSpieler())if(d2(q,p)<320*320){arReinigen(q);withP(q,()=>{P.hp=P.st.maxHp;if(P.pots<P.potMax+1)P.pots++})}sfx('segen');G.fxs.push({k:'shock',x:p.x,y:p.y,r:160,c:'#ffb060',t:0,life:0.6});arSieg(A,'Ausgeruht: volle Gesundheit, ein Trank mehr, Flüche gelöst')}};
+function arObeliskWeg(p){if(p.used)return;p.used=1;p.hp=0;sfxAt('d_stone',p.x,p.y);if(!G.bot){chunks(p.x,p.y-30,'#4a3a4a',10,220);G.fxs.push({k:'shock',x:p.x,y:p.y,r:80,c:'#d070ff',t:0,life:0.4})}arLob(p.x,p.y,'Obelisk gestürzt!',0.6)}
+function arEiWeg(p){if(p.used)return;p.used=1;p.act=3;sfxAt('d_slime',p.x,p.y);if(!G.bot){chunks(p.x,p.y,'#c8c0a0',6,140);puffs(p.x,p.y,'#a8a088',4,50,10)}arXp(p.x,p.y,0.4)}
+function arGoblinAlarm(A){if(A.alarm)return;A.alarm=1;A.s=Math.max(A.s,1);const h=A.hort;if(h&&!h.used&&typeof spawnThief==='function'){const e=spawnThief(h.x+20,h.y);if(e)e.arA=A.id}arSync(1)}
+/* Gemeinsame Bausteine: Hebel, Schrein der Ruhe, Händler-Lebensbalken */
+function arPropsTick(dt){for(const p of G.props){if(p.dead||p.used)continue;
+ if(p.k==='ar_hebel'){if(arSpieler().some(q=>d2(q,p)<(p.r+q.r+6)**2)){p.used=1;sfxAt('g_chain',p.x,p.y);let n=0;for(const t of G.props)if(t.k==='falle'&&t.ai===p.ai&&t.act!==4&&t.act!==3){t.act=4;n++}if(!G.bot)word(p.x,p.y-40,n?`Hebel umgelegt – ${n} Fallen abgeschaltet!`:'Hebel umgelegt','#ffd36a');if(n)arLob(p.x,p.y,'Fallen abgeschaltet!',1+0.3*n)}}
+ else if(p.k==='ar_schrein'){if(arSpieler().some(q=>d2(q,p)<(p.r+q.r+6)**2)){p.used=1;for(const q of arSpieler()){arReinigen(q);withP(q,()=>heal(P.st.maxHp*0.5))}sfx('segen');G.fxs.push({k:'pillar',x:p.x,y:p.y+10,w:70,h:300,c:'#cfe8a0',t:0,life:1});if(!G.bot)banner('Schrein der Ruhe','Flüche gelöst, Wunden geheilt','#cfe8a0',{dur:2,size:30,y:H*0.24})}}}}
+/* Haupttakt */
+function arTick(dt){const AR=G.ar;if(!AR||!AR.an||G.room||G.state!=='play')return;AR.syT-=dt;
+ try{arFallenTick(dt)}catch(er){console.error(er)}try{arPropsTick(dt)}catch(er){console.error(er)}
+ const SP=arSpieler();for(const A of AR.L){
+  if(!A.e&&SP.some(q=>Math.hypot(q.x-A.x,q.y-A.y)<A.r*0.85)){A.e=1;if(A.k!=='hinterhalt'&&A.k!=='waechter'&&A.k!=='friedhof'&&A.k!=='goblinschatz'){if(A.s===0&&A.k!=='pruefung'&&A.k!=='opferaltar'&&A.k!=='lagerfeuer'&&A.k!=='platten')A.s=1;if(A.k==='platten')A.s=1;arBanner(A)}else if(A.k==='goblinschatz'){A.s=1;arBanner(A)}
+   if(!G.bot&&!SAVE.arTip){SAVE.arTip=1;later(2.6,()=>toast('<b>Ein besonderer Ort!</b> Areale bergen Ereignisse, Fallen und gute Beute. Sie sind freiwillig – aber meist lohnend. Auf der Karte erscheint ihr Symbol.','#ffd36a'))}arSync(1)}
+  try{const f=AR_TICK[A.k];if(f)f(A,dt)}catch(er){console.error(er)}}
+ arSync(0)}
+{const wt0=wlTick;wlTick=function(dt){const r=wt0.apply(this,arguments);try{arTick(dt)}catch(er){console.error(er)}return r}}
+
+/* ================= Bot: Interaktionen und Fallen meiden ================= */
+function arBotZiel(){const AR=G.ar;if(!AR||!AR.an)return null;let best=null,bd=900*900;const nimm=o=>{if(!o||(o.arSkip||0)>G.time)return;const dd=d2(o,P);if(dd<bd){bd=dd;best=o}};
+ for(const A of AR.L){if(A.s>=2)continue;if(d2(A,P)>1100*1100)continue;
+  if(A.k==='pruefung'&&!A.lauf&&P.hp>P.st.maxHp*0.6)nimm(A.altar);else if(A.k==='opferaltar'&&!A.geopfert&&P.hp>P.st.maxHp*0.8)nimm(A.altar);
+  else if(A.k==='platten'&&A.s===1){const id=A.seqA[A.got];nimm(A.pl.find(p=>p.fv===id))}else if(A.k==='platten'&&A.s===0)nimm(A);
+  else if(A.k==='gefangene'&&A.s===1&&!arFeinde(A).length)nimm(A.kaefig);else if(A.k==='waechter'&&A.s===0)nimm(A);else if(A.k==='hinterhalt'&&A.s===0)nimm(A);else if(A.k==='friedhof'&&A.s===0)nimm(A);
+  else if(A.k==='lagerfeuer'&&(P.hp<P.st.maxHp*0.85||(P.mods||[]).some(m=>m.ar&&!m.good)))nimm(A.feuer);else if(A.k==='ritual'&&A.s===1&&!A.besch)nimm(A.ob.find(p=>!p.used));
+  else if(A.k==='goblinschatz'&&A.hort&&!A.hort.used&&(A.s>=1||d2(A,P)<400*400))nimm(A.hort);else if(A.k==='spinnennest'&&A.kokon&&!A.kokon.used&&d2(A,P)<500*500)nimm(A.kokon);
+  else if(A.k==='schatzkammer'&&A.hebelP&&!A.hebelP.used&&d2(A,P)<700*700)nimm(A.hebelP)}
+ for(const p of G.props)if(p.k==='chest'&&p.arT&&!p.open&&!p.dead)nimm(p);
+ return best}
+function arBotMeide(v){let vx=v[0],vy=v[1];for(const p of G.props){if(p.k!=='falle'||p.dead||p.act===4)continue;const T=AR_FT[p.type];if(!T)continue;if(p.act===3&&!T.rearm&&p.type!=='gift')continue;if(p.seed>0.88&&!T.zyk)continue;
+  let cx_=p.x,cy_=p.y,R=60;if(T.draht){const D=arDraht(p);const t=clamp(((P.x-D[0])*(D[2]-D[0])+(P.y-D[1])*(D[3]-D[1]))/((D[2]-D[0])**2+(D[3]-D[1])**2||1),0,1);cx_=D[0]+(D[2]-D[0])*t;cy_=D[1]+(D[3]-D[1])*t;R=40}else if(p.type==='pendel'){R=p.w/2+30}else if(p.type==='feuer'){if(p.act===0&&p.fz>1.2)continue;cx_=p.x+Math.cos(p.fa)*p.w/2;cy_=p.y+Math.sin(p.fa)*p.w/2;R=p.w/2+20}else if(p.type==='gift'&&p.act===2)R=(p.h||60)+20;else if(T.rect)R=Math.max(p.w,p.h)/2+26;
+  const dx=P.x-cx_,dy=P.y-cy_,dd=Math.hypot(dx,dy);if(dd>R+50)continue;if((vx*-dx+vy*-dy)<=0&&dd>R)continue;const w=Math.min(3,(R+50-dd)/40);const n=dd||1;vx+=dx/n*w;vy+=dy/n*w}
+ const l=Math.hypot(vx,vy)||1;return[vx/l,vy/l]}
+{const bm0=botMove;botMove=function(){let r=bm0.apply(this,arguments);if(!arAn()||!G.wl.nav)return r;try{
+ let wach=false;for(const e of G.enemies)if(!e.dead&&!e.wlZz&&d2(e,P)<340*340){wach=true;break}
+ if(!wach&&!G.portal){const tg=arBotZiel();if(tg){const B=G.ar.bz||(G.ar.bz={o:null,t:0,d:1e9});const dn=Math.sqrt(d2(tg,P));if(B.o!==tg){B.o=tg;B.t=G.time;B.d=dn}else if(dn<B.d-30){B.d=dn;B.t=G.time}else if(G.time-B.t>8){tg.arSkip=G.time+30;B.o=null}
+   if(dn<110&&wlWegFrei(P,tg)){const a=ang(P,tg);r=dn<6?[0,0]:[Math.cos(a),Math.sin(a)]}else{const f=wlBotWeg(tg);if(f)r=[f.x,f.y]}}}
+ if(r[0]||r[1])r=arBotMeide(r)}catch(er){console.error(er)}return r}}
+
+/* ================= Zeichnen ================= */
+const arZuschauer=()=>(typeof fovZuschauer==='function'?fovZuschauer():[P]).filter(Boolean);
+function arSicht(p){const L=arZuschauer();let s=0;for(const q of L){const fr=q.id==='friedrich'||q.id==='ezekiel';const R=fr?260:160,d=Math.hypot(q.x-p.x,q.y-p.y);s=Math.max(s,clamp(1-(d-40)/R,0,1)*(fr?1:0.85)+(fr?0.12:0))}return s}
+/* Boden der Areale */
+function arBodenAreal(a,t){const c=cx,x=a.x,y=a.y,r=a.r,base=(G.theme&&G.theme.base)||'#333';c.save();
+ if(a.b==='erde'){c.globalAlpha=0.32;ell(c,x,y+10,r*0.78,r*0.6,'#4a3a26');c.globalAlpha=0.18;for(let i=0;i<7;i++){const u=i*1.7+x*0.01;ell(c,x+Math.cos(u)*r*0.5,y+Math.sin(u*1.3)*r*0.35,22,8,'#2a2016')}}
+ else if(a.b==='kreis'){c.globalAlpha=0.35;ell(c,x,y,r*0.62,r*0.52,bT(base,0.25));const act=a.s===1;c.globalAlpha=act?0.55+0.25*Math.sin(t*4):a.s===2?0.2:0.32;c.strokeStyle=a.c;c.lineWidth=3;c.beginPath();c.ellipse(x,y,r*0.5,r*0.42,0,0,TAU);c.stroke();c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,r*0.36,r*0.3,0,0,TAU);c.stroke();
+  c.font='bold 14px Georgia,serif';c.textAlign='center';c.fillStyle=a.c;for(let i=0;i<10;i++){const u=i/10*TAU+(act?t*0.3:0);c.fillText('ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾ'[i],x+Math.cos(u)*r*0.43,y+Math.sin(u)*r*0.36+5)}}
+ else if(a.b==='lichtung'){c.globalAlpha=0.22;ell(c,x,y,r*0.66,r*0.55,'#8aa060');c.globalAlpha=0.15;ell(c,x,y,r*0.4,r*0.32,'#a8b878')}
+ else if(a.b==='fliesen'){const w=r*1.3,h=r*1.05;c.globalAlpha=0.5;c.fillStyle=bT(base,0.22);c.fillRect(x-w/2,y-h/2,w,h);c.globalAlpha=0.35;c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=1.2;c.beginPath();for(let xx=x-w/2;xx<=x+w/2;xx+=36){c.moveTo(xx,y-h/2);c.lineTo(xx,y+h/2)}for(let yy=y-h/2;yy<=y+h/2;yy+=30){c.moveTo(x-w/2,yy);c.lineTo(x+w/2,yy)}c.stroke();
+  c.globalAlpha=0.6;c.strokeStyle=bT(base,0.5);c.lineWidth=3;c.strokeRect(x-w/2,y-h/2,w,h);if(a.k==='platten'){c.globalAlpha=0.3;c.strokeStyle='#e0b0ff';c.lineWidth=2;c.beginPath();c.moveTo(x-95,y-70);c.lineTo(x+95,y-70);c.lineTo(x+95,y+75);c.lineTo(x-95,y+75);c.closePath();c.moveTo(x-95,y-70);c.lineTo(x+95,y+75);c.moveTo(x+95,y-70);c.lineTo(x-95,y+75);c.stroke()}}
+ else if(a.b==='blut'){c.globalAlpha=0.45;ell(c,x,y,r*0.62,r*0.5,'#1c1012');c.globalAlpha=0.5;for(let i=0;i<6;i++){const u=i*1.9+x*0.003;ell(c,x+Math.cos(u)*r*0.32,y+Math.sin(u)*r*0.22+8,14+i%3*6,6+i%2*3,'#5a0e16')}c.globalAlpha=0.4+0.1*Math.sin(t*2);c.strokeStyle='#a01a2a';c.lineWidth=2;c.beginPath();c.ellipse(x,y,r*0.46,r*0.36,0,0,TAU);c.stroke()}
+ else if(a.b==='ritual'){const act=a.s===1,k=act?0.55+0.3*Math.sin(t*5):0.25;c.globalAlpha=0.4;ell(c,x,y,r*0.7,r*0.58,'#160a18');c.globalAlpha=k;c.strokeStyle=a.s===2?'#8a7a8a':'#d070ff';c.lineWidth=3;c.beginPath();c.ellipse(x,y,r*0.62,r*0.52,0,0,TAU);c.stroke();c.lineWidth=2;c.beginPath();for(let i=0;i<=5;i++){const u=-Math.PI/2+i*2*TAU/5+(act?t*0.15:0);const px=x+Math.cos(u)*r*0.58,py=y+Math.sin(u)*r*0.48;i?c.lineTo(px,py):c.moveTo(px,py)}c.stroke()}
+ else if(a.b==='seide'){c.globalAlpha=0.22;ell(c,x,y,r*0.7,r*0.58,'#d8d4cc');c.globalAlpha=0.3;c.strokeStyle='#e8e4dc';c.lineWidth=1;c.beginPath();for(let i=0;i<12;i++){const u=i/12*TAU;c.moveTo(x,y);c.lineTo(x+Math.cos(u)*r*0.7,y+Math.sin(u)*r*0.58)}for(let k2=1;k2<5;k2++){for(let i=0;i<=12;i++){const u=i/12*TAU,rr=k2/5;const px=x+Math.cos(u)*r*0.7*rr,py=y+Math.sin(u)*r*0.58*rr;i?c.lineTo(px,py):c.moveTo(px,py)}}c.stroke()}
+ else if(a.b==='friedhof'){c.globalAlpha=0.3;c.fillStyle='#2a2418';c.fillRect(x-215,y-145,430,330);c.globalAlpha=0.25;c.fillStyle='#4a3e2a';c.fillRect(x-30,y-150,60,330)}
+ else if(a.b==='asche'){c.globalAlpha=0.4;ell(c,x,y+6,64,26,'#2a2420');c.globalAlpha=0.25;ell(c,x,y+6,110,52,'#3a3026')}
+ c.restore()}
+/* Fallen am Boden */
+function arFalleBoden(p,t){const c=cx,s=arSicht(p),T=AR_FT[p.type],base=(G.theme&&G.theme.base)||'#333';if(!T)return;const tot=p.act===4,sp=p.act===3;c.save();
+ if(p.type==='pfeile'||p.type==='gift'||p.type==='steine'){const a0=tot?0.5:0.22+0.45*s;c.globalAlpha=a0;c.fillStyle=bT(base,0.12);c.fillRect(p.x-15,p.y-13,30,26);c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=1.4;c.strokeRect(p.x-15,p.y-13,30,26);if(p.act===1||p.act===2&&p.type!=='gift'){c.fillStyle='rgba(0,0,0,.35)';c.fillRect(p.x-13,p.y-11,26,22)}
+  if(p.type==='steine'){c.globalAlpha=0.35+0.3*s;for(let i=0;i<5;i++){const u=i*1.3+p.seed*9;ln(c,'rgba(30,20,14,.7)',1.2,p.x+Math.cos(u)*20,p.y+Math.sin(u)*14,p.x+Math.cos(u)*(50+i*8),p.y+Math.sin(u)*(34+i*5))}for(let i=0;i<4;i++)circ(c,p.x+Math.cos(i*2+p.seed*7)*44,p.y+Math.sin(i*2+p.seed*7)*30,3,'#6a5e50')}
+  if(p.type==='gift'){c.globalAlpha=0.25+0.35*s;ell(c,p.x+24,p.y+4,26,12,'#4a5226');const vx=p.x+Math.cos(p.fa)*34,vy=p.y+Math.sin(p.fa)*24;c.globalAlpha=0.8;ln(c,'#4a5a3a',5,p.x,p.y,vx,vy);circ(c,vx,vy,6,'#5a6a3a');circ(c,vx,vy,2.5,'#2a3018')}
+  if(p.type==='pfeile'){const L=arPfeilL(p);c.globalAlpha=0.22+0.3*s;ln(c,'rgba(20,14,10,.6)',1,L.x,L.y,L.x+Math.cos(p.fa)*L.len,L.y+Math.sin(p.fa)*L.len);c.globalAlpha=1;c.save();c.translate(L.x,L.y);c.rotate(p.fa);c.fillStyle=bT(base,0.35);c.fillRect(-14,-14,16,28);c.fillStyle='#1a1410';for(let i=-1;i<=1;i++)c.fillRect(-1,i*8-1.5,3,3);c.strokeStyle='rgba(0,0,0,.7)';c.strokeRect(-14,-14,16,28);c.restore()}}
+ else if(p.type==='stacheln'){const x0=p.x-p.w/2,y0=p.y-p.h/2;c.globalAlpha=0.28+0.4*s;c.fillStyle='rgba(20,16,14,.55)';c.fillRect(x0,y0,p.w,p.h);c.globalAlpha=0.5+0.4*s;for(let xx=x0+8;xx<x0+p.w;xx+=12)for(let yy=y0+8;yy<y0+p.h;yy+=12)circ(c,xx,yy,1.8,'#0a0806');
+  if(p.act===2&&p.fz>p.fz0-0.95||p.act===2&&p.fz>2.25){c.globalAlpha=1;for(let xx=x0+8;xx<x0+p.w;xx+=12)for(let yy=y0+8;yy<y0+p.h;yy+=12){poly(c,'#b8b8c0',xx-2.5,yy,xx+2.5,yy,xx,yy-12);ln(c,'rgba(255,255,255,.5)',0.8,xx-0.5,yy-1,xx,yy-10)}}
+  if(s>0.35){c.globalAlpha=0.4*s;circ(c,x0-6,y0+p.h*0.7,3,'#d8d0c0');ln(c,'#d8d0c0',2,x0-14,y0+p.h*0.75,x0-2,y0+p.h*0.65)}}
+ else if(p.type==='pendel'){const ca=Math.cos(p.fa),sa=Math.sin(p.fa);c.globalAlpha=0.35;ln(c,'rgba(10,8,6,.7)',4,p.x-ca*p.w/2,p.y-sa*p.w/2,p.x+ca*p.w/2,p.y+sa*p.w/2);c.globalAlpha=0.25;for(let i=-3;i<=3;i++)ln(c,'rgba(200,200,210,.5)',1,p.x+ca*i*14-sa*6,p.y+sa*i*14+ca*6,p.x+ca*i*14+sa*6,p.y+sa*i*14-ca*6)}
+ else if(p.type==='feuer'){const ca=Math.cos(p.fa),sa=Math.sin(p.fa);c.globalAlpha=0.3+0.2*s;for(let i=0;i<5;i++){const u=(i+1)/6;ell(c,p.x+ca*p.w*u,p.y+sa*p.w*u,10+u*14,5+u*6,'rgba(20,12,8,.55)')}c.globalAlpha=1;hE(c,p.x,p.y,12,8,tot?'#2a2420':'#3a3430','#0a0806',1.5);for(let i=-1;i<=1;i++)ln(c,'#1a1410',1.5,p.x+i*5,p.y-6,p.x+i*5,p.y+6);if(!tot&&p.act>=1){c.globalAlpha=p.act===1?0.6:1;circ(c,p.x,p.y,5,'#ff8a2a')}}
+ else if(p.type==='baer'){const op=p.act===0;c.globalAlpha=op?0.32+0.55*s:0.9;ell(c,p.x,p.y+2,18,8,'rgba(0,0,0,.3)');c.strokeStyle='#5a5a62';c.lineWidth=2.5;c.beginPath();c.ellipse(p.x,p.y,op?16:9,op?7:4,0,0,TAU);c.stroke();for(let i=-3;i<=3;i++){ln(c,'#9a9aa2',1.4,p.x+i*4,p.y-(op?7:3),p.x+i*4+1,p.y-(op?1:7))}if(op){c.globalAlpha=0.7;for(let i=0;i<5;i++){const u=p.seed*20+i*1.4;ln(c,'#4a6a2a',1.4,p.x+Math.cos(u)*12,p.y+3,p.x+Math.cos(u)*14+1,p.y-6)}}if(tot){c.globalAlpha=0.8;ln(c,'#3a2a1a',2,p.x-10,p.y+3,p.x+10,p.y-3)}}
+ else if(p.type==='netz'){if(p.act===0){c.globalAlpha=0.12+0.4*s;ln(c,'#e8e4dc',0.8,p.x-26,p.y+2,p.x+26,p.y-2);for(let i=0;i<4;i++){const u=p.seed*9+i*1.6;ell(c,p.x+Math.cos(u)*22,p.y+Math.sin(u)*12,5,2.5,'#5a6a2a')}}else{c.globalAlpha=0.55;c.strokeStyle='#d8d4c8';c.lineWidth=1;c.beginPath();for(let i=-3;i<=3;i++){c.moveTo(p.x+i*12-30,p.y-26);c.lineTo(p.x+i*12+30,p.y+26);c.moveTo(p.x+i*12+30,p.y-26);c.lineTo(p.x+i*12-30,p.y+26)}c.stroke()}}
+ else if(p.type==='fluch'||p.type==='frost'){const col=p.type==='frost'?'#e4f0ec':['#b070e0','#e0604a','#b8b49a'][p.fv%3];if(sp||tot){c.globalAlpha=0.35;c.strokeStyle='#3a3438';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,16,0,TAU);c.stroke();if(tot){ln(c,'#3a3438',2,p.x-12,p.y-10,p.x+10,p.y+12)}}
+  else{const pu=0.5+0.5*Math.sin(t*2.2+p.seed*9);c.globalAlpha=0.08+0.1*pu+0.55*s;c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.ellipse(p.x,p.y,20,12,0,0,TAU);c.stroke();c.lineWidth=1.6;c.beginPath();for(let i=0;i<5;i++){const u=-Math.PI/2+i*2*TAU/5;const px=p.x+Math.cos(u)*16,py=p.y+Math.sin(u)*9.5;i?c.lineTo(px,py):c.moveTo(px,py)}c.closePath();c.stroke();if(p.hp<(AR_FT[p.type].hp||2)){ln(c,'#1a1418',1.5,p.x-8,p.y-6,p.x+6,p.y+7)}}}
+ else if(p.type==='fass'||p.type==='alarm'){const D=arDraht(p);const pf=(x,y)=>{c.globalAlpha=1;c.fillStyle='#4a3420';c.fillRect(x-2.5,y-14,5,15);c.fillStyle='#6a4e30';c.fillRect(x-2.5,y-14,5,2)};pf(D[0],D[1]);if(p.type==='fass')pf(D[2],D[3]);
+  if(p.act!==4&&!(sp&&p.type==='fass')){c.globalAlpha=0.18+0.5*s+(Math.sin(t*3+p.seed*9)>0.96?0.4:0);ln(c,'#d8d0b8',0.9,D[0],D[1]-8,D[2],D[3]-8)}else{c.globalAlpha=0.6;ln(c,'#8a8070',0.9,D[0],D[1]-8,D[0]+(D[2]-D[0])*0.3,D[1]+(D[3]-D[1])*0.3+4);ln(c,'#8a8070',0.9,D[2],D[3]-8,D[2]-(D[2]-D[0])*0.3,D[3]-(D[3]-D[1])*0.3+4)}}
+ c.restore()}
+function arBoden(t){if(G.room||!G.arN||!G.arN.length&&!G.props.length)return;const V=wlSicht();const inV=(x,y,m)=>x>V.x0-m&&x<V.x1+m&&y>V.y0-m&&y<V.y1+m;
+ for(const a of G.arN||[])if(inV(a.x,a.y,a.r))arBodenAreal(a,t);for(const p of G.props)if(p.k==='falle'&&!p.dead&&inV(p.x,p.y,180))arFalleBoden(p,t);
+ for(const p of G.props)if(p.k==='ar_platte'&&inV(p.x,p.y,40))arPlatteDraw(p,t)}
+{const rw0=drawRoomWalls;drawRoomWalls=function(){const r=rw0.apply(this,arguments);try{arBoden(G.time)}catch(er){}return r}}
+const AR_RUNE='ᚠᚱᚷᛉ';
+function arPlatteDraw(p,t){const c=cx,a=(G.arN||[])[p.ai];c.save();c.globalAlpha=0.95;hE(c,p.x,p.y,24,15,p.act?'#5a4a6a':'#4a4448','#1a1418',2);c.globalAlpha=0.5;hE(c,p.x,p.y-2,20,12,null,'rgba(255,255,255,.15)',1);
+ c.font='bold 18px Georgia,serif';c.textAlign='center';c.globalAlpha=p.act?1:0.7;c.fillStyle=p.fz>0?'#ff5a8a':p.act?'#f0d8ff':'#a890b8';c.fillText(AR_RUNE[p.fv],p.x,p.y+6);c.restore()}
+/* Aufrechte Teile (Pendel, Flamme, Glocke, Gaswolke) + Areal-Objekte */
+function arFalleOben(p,t){const c=cx;if(p.type==='pendel'){const ca=Math.cos(p.fa),sa=Math.sin(p.fa),stop=p.act===4,s=stop?0:Math.sin(G.time*arPf()+p.seed*6),bx=p.x+ca*s*p.w/2,by=p.y+sa*s*p.w/2;
+  ell(c,bx,by+4,16,6,'rgba(0,0,0,.35)');ln(c,'#3a3438',3,p.x,p.y-74,bx,by-26);circ(c,p.x,p.y-74,5,'#2a2428');c.save();c.translate(bx,by-18);c.rotate(Math.atan2(sa,ca)+Math.PI/2+s*0.25);hP(c,'#b8b8c4','#3a3a44',1.4,[-20,-4,20,-4,15,8,0,13,-15,8]);ln(c,'rgba(255,255,255,.6)',1.2,-16,5,0,10);c.restore();
+  if(!stop&&Math.abs(Math.cos(G.time*arPf()+p.seed*6))>0.8&&fxQ()>1){c.globalAlpha=0.25;ln(c,'#e8e8f0',8,bx-ca*16*Math.sign(Math.cos(G.time*arPf()+p.seed*6)),by-18-sa*16,bx,by-18);c.globalAlpha=1}return}
+ if(p.type==='feuer'&&p.act===2){const ca=Math.cos(p.fa),sa=Math.sin(p.fa);c.save();c.globalCompositeOperation='lighter';for(let i=0;i<9;i++){const u=(i+1)/10,fl=Math.sin(t*30+i*2.3)*4;const x=p.x+ca*p.w*u-sa*fl,y=p.y+sa*p.w*u+ca*fl-6;c.globalAlpha=0.55*(1-u*0.6);circ(c,x,y,8+u*16,i%2?'#ff7a2a':'#ffb040')}c.globalAlpha=0.9;for(let i=0;i<4;i++){const u=(i+1)/6;circ(c,p.x+ca*p.w*u,p.y+sa*p.w*u-6,5+u*6,'#fff0a0')}c.restore();return}
+ if(p.type==='feuer'&&p.act===1){if(Math.random()<0.4&&fxQ()>0)puffs(p.x,p.y-4,'#5a5048',1,30,8);return}
+ if(p.type==='gift'&&p.act===2){const R=p.h||60;c.save();for(let i=0;i<7;i++){const u=i/7*TAU+t*0.4+p.seed,rr=R*(0.35+0.4*((i*37)%10)/10);c.globalAlpha=0.22;circ(c,p.x+Math.cos(u)*rr,p.y+Math.sin(u)*rr*0.6-10,R*0.45,i%2?'#6a8a2a':'#8aaa3a')}c.globalAlpha=0.16;ell(c,p.x,p.y-6,R,R*0.62,'#a8c84a');c.restore();return}
+ if(p.type==='alarm'){const B=arGlocke(p),sw=p.act===2?Math.sin(t*22)*0.5:0;c.fillStyle='#4a3420';c.fillRect(B.x-3,B.y-46,6,47);c.fillRect(B.x-3,B.y-46,16,4);c.save();c.translate(B.x+12,B.y-42);c.rotate(sw);if(p.act===4){c.rotate(1.2)}hP(c,'#b89a4a','#3a2a10',1.2,[-6,2,6,2,8,14,-8,14]);circ(c,0,15,2.4,'#5a4a2a');c.restore();return}}
+function arFigur(c,x,y,o){const sk='#d8b890',tu=o.tu||'#6a7a4a',h=o.hoch||0,f=o.flip||1;ell(c,x,y+10,10,4,'rgba(0,0,0,.3)');if(o.liegt){ell(c,x,y+4,14,6,tu);circ(c,x+12,y+2,5,sk);return}
+ c.fillStyle=tu;c.fillRect(x-6,y-14+h,12,16);ln(c,'#3a2a1a',3,x-3,y+2,x-3,y+9);ln(c,'#3a2a1a',3,x+3,y+2,x+3,y+9);circ(c,x,y-19+h,5.5,sk);c.fillStyle=o.haar||'#5a3a1a';c.fillRect(x-5.5,y-25+h,11,4);if(o.arme==='hoch'){ln(c,tu,3,x-6,y-11,x-10,y-24);ln(c,tu,3,x+6,y-11,x+10,y-24)}else if(o.arme==='schutz'){ln(c,tu,3,x-6,y-10,x-1*f,y-19);ln(c,tu,3,x+6,y-10,x+2*f,y-18)}else{ln(c,tu,3,x-6,y-10,x-8,y-1);ln(c,tu,3,x+6,y-10,x+8,y-1)}}
+const AR_PDRAW={
+ falle(p,t){arFalleOben(p,t)},
+ ar_bewohner(p,t){const c=cx,tot=p.hp<=0;const tu=['#6a7a4a','#8a5a3a','#7a6a8a'][p.fv%3];if(tot){arFigur(c,p.x,p.y,{liegt:1,tu:'#4a4440'});return}
+  const pan=p.used!==2,zit=pan?Math.sin(t*30+p.seed*9)*1.2:0;arFigur(c,p.x+zit,p.y,{tu,arme:p.used===2?'hoch':'schutz',hoch:p.used===2?-Math.abs(Math.sin(t*8+p.seed*5))*4:2,haar:['#5a3a1a','#d8c080','#2a2018'][p.fv%3]});
+  if(p.hp<100&&p.used!==2){c.fillStyle='rgba(0,0,0,.6)';c.fillRect(p.x-12,p.y-36,24,3);c.fillStyle=p.hp>40?'#8fd36a':'#ff6a4a';c.fillRect(p.x-12,p.y-36,24*p.hp/100,3)}if(p.fz>0&&Math.sin(t*20)>0){c.globalAlpha=0.6;circ(c,p.x,p.y-12,14,'#ff4a3a');c.globalAlpha=1}},
+ ar_altar(p,t){const c=cx,op=p.fv===1,base=(G.theme&&G.theme.base)||'#333';ell(c,p.x,p.y+10,30,10,'rgba(0,0,0,.35)');c.fillStyle=op?'#2a1a1c':bT(base,0.35);c.fillRect(p.x-26,p.y-14,52,24);c.fillStyle=op?'#3a2226':bT(base,0.5);c.fillRect(p.x-28,p.y-20,56,8);c.strokeStyle='rgba(0,0,0,.7)';c.lineWidth=1.4;c.strokeRect(p.x-26,p.y-14,52,24);
+  if(op){ell(c,p.x,p.y-20,12,4,'#5a0a14');ell(c,p.x,p.y-20,8,2.5,'#a01a2a');for(let i=0;i<3;i++)ln(c,'#7a0e1a',2,p.x-14+i*14,p.y-12,p.x-14+i*14,p.y-4+((i*5)%4))}
+  else{const a=(G.arN||[])[p.ai],act=a&&a.s===1;circ(c,p.x,p.y-30,7,act?'#ffe9a0':'#f2d24c');c.globalAlpha=0.6+0.3*Math.sin(t*3);circ(c,p.x,p.y-30,3,'#fff8d0');c.globalAlpha=1}
+  if(p.prog>0){c.strokeStyle=op?'#ff5a6a':'#ffd36a';c.lineWidth=4;c.beginPath();c.arc(p.x,p.y-4,34,-Math.PI/2,-Math.PI/2+TAU*p.prog);c.stroke()}},
+ ar_reliquiar(p,t){const c=cx;ell(c,p.x,p.y+12,26,9,'rgba(0,0,0,.35)');c.fillStyle='#5a4a3a';c.fillRect(p.x-24,p.y-6,48,18);c.fillStyle='#7a6a4a';c.fillRect(p.x-20,p.y-22,40,18);c.strokeStyle='#e5b454';c.lineWidth=2;c.strokeRect(p.x-20,p.y-22,40,18);circ(c,p.x,p.y-13,5,'#e5b454');c.globalAlpha=0.35+0.2*Math.sin(t*3);c.strokeStyle='#ffe9a0';c.lineWidth=1.5;c.beginPath();c.ellipse(p.x,p.y-12,30,20,0,0,TAU);c.stroke();c.globalAlpha=1},
+ ar_kaefig(p,t){const c=cx,x=p.x,y=p.y;ell(c,x,y+14,30,9,'rgba(0,0,0,.35)');c.fillStyle='#4a3420';c.fillRect(x-28,y+2,56,10);circ(c,x-18,y+14,7,'#2a1a10');circ(c,x+18,y+14,7,'#2a1a10');
+  if(!p.used){arFigur(c,x-8,y-2,{tu:'#8a7a6a',arme:'schutz'});arFigur(c,x+9,y,{tu:'#6a5a4a',haar:'#2a2018'})}c.strokeStyle='#3a3a40';c.lineWidth=2.5;c.strokeRect(x-26,y-34,52,36);if(!p.used){for(let i=-2;i<=2;i++)ln(c,'#5a5a62',2,x+i*10,y-34,x+i*10,y+2)}else{ln(c,'#5a5a62',2,x-26,y-34,x-40,y-10)}
+  if(p.prog>0&&!p.used){c.strokeStyle='#a8e08a';c.lineWidth=3;c.beginPath();c.arc(x,y-14,34,-Math.PI/2,-Math.PI/2+TAU*p.prog);c.stroke()}},
+ ar_runensockel(p,t){const c=cx,a=(G.arN||[])[p.ai];ell(c,p.x,p.y+8,20,7,'rgba(0,0,0,.35)');c.fillStyle='#4a4448';c.fillRect(p.x-12,p.y-28,24,36);c.fillStyle='#5e585e';c.fillRect(p.x-16,p.y-32,32,7);c.strokeStyle='rgba(0,0,0,.7)';c.lineWidth=1.2;c.strokeRect(p.x-12,p.y-28,24,36);if(!a||!a.seq)return;
+  const n=a.seq.length,per=0.75,cyc=n*per+1.6,ph=(t%cyc)/per,cur=Math.floor(ph);c.font='bold 15px Georgia,serif';c.textAlign='center';for(let i=0;i<n;i++){const x=p.x+(i-(n-1)/2)*20,y=p.y-46;const lit=a.s===2||i<a.got||i===cur&&a.s===1;c.globalAlpha=lit?1:0.35;c.fillStyle=i<a.got||a.s===2?'#f0d8ff':lit?'#ffd36a':'#a890b8';c.fillText(AR_RUNE[+a.seq[i]],x,y)}c.globalAlpha=1},
+ ar_obelisk(p,t){const c=cx,x=p.x,y=p.y;ell(c,x,y+8,18,6,'rgba(0,0,0,.35)');if(p.used){c.fillStyle='#2a222a';c.fillRect(x-10,y-12,20,18);for(let i=0;i<3;i++)circ(c,x+rnd(-14,14)*0+(i-1)*12,y+6,4,'#3a303a');return}
+  const sh=p.fz>0?rnd(-2,2):0;c.fillStyle='#2a222c';c.beginPath();c.moveTo(x-11+sh,y+4);c.lineTo(x-7+sh,y-58);c.lineTo(x+sh,y-68);c.lineTo(x+7+sh,y-58);c.lineTo(x+11+sh,y+4);c.closePath();c.fill();c.strokeStyle='rgba(0,0,0,.8)';c.lineWidth=1.2;c.stroke();
+  c.globalAlpha=0.6+0.3*Math.sin(t*4+x);c.font='bold 11px Georgia,serif';c.textAlign='center';c.fillStyle='#d070ff';for(let i=0;i<3;i++)c.fillText('ᛟᛞᛝ'[i],x+sh,y-44+i*14);c.globalAlpha=1;
+  if(p.prog>0){c.strokeStyle='#d070ff';c.lineWidth=3;c.beginPath();c.arc(x,y-20,26,-Math.PI/2,-Math.PI/2+TAU*p.prog);c.stroke()}
+  const a=(G.arN||[])[p.ai];if(a&&a.s===1&&fxQ()>0){c.save();c.globalCompositeOperation='lighter';c.globalAlpha=0.3+0.2*Math.sin(t*8+x);ln(c,'#c060ff',3,x,y-62,a.x,a.y-10);c.restore()}},
+ ar_ei(p,t){const c=cx;if(p.used){ell(c,p.x,p.y+4,12,5,'#c8c0a0');return}const wb=p.act===1?Math.sin(t*25)*2:Math.sin(t*1.5+p.seed*9)*0.6;ell(c,p.x,p.y+6,14,5,'rgba(0,0,0,.3)');c.save();c.translate(p.x+wb,p.y);hE(c,0,-6,11,13,'#e0d8c8','#8a8070',1.2);ln(c,'rgba(140,120,100,.5)',1,-5,-14,-2,0);ln(c,'rgba(140,120,100,.5)',1,4,-15,6,-2);c.restore();if(p.act===1){c.globalAlpha=0.5;circ(c,p.x+wb,p.y-6,4,'#5a3a4a');c.globalAlpha=1}},
+ ar_kokon(p,t){const c=cx;if(p.used){ell(c,p.x,p.y+4,18,6,'#c8c4b8');return}ell(c,p.x,p.y+8,20,6,'rgba(0,0,0,.3)');hE(c,p.x,p.y-10,12,22,'#e8e4da','#9a9488',1.2,0.3);c.strokeStyle='rgba(150,140,120,.6)';c.lineWidth=1;c.beginPath();for(let i=0;i<6;i++){c.moveTo(p.x-11,p.y-26+i*7);c.lineTo(p.x+11,p.y-22+i*7)}c.stroke();ln(c,'rgba(230,226,218,.6)',0.8,p.x,p.y-32,p.x+6,p.y-80)},
+ ar_hort(p,t){const c=cx;if(p.used){ell(c,p.x,p.y+4,26,8,'#6a5a2a');return}ell(c,p.x,p.y+8,36,11,'rgba(0,0,0,.35)');hE(c,p.x,p.y-4,34,16,'#c8a030','#6a5010',1.2);hE(c,p.x-4,p.y-12,22,11,'#e0b840',null);for(let i=0;i<9;i++){const u=i*1.7;circ(c,p.x+Math.cos(u)*22,p.y-6+Math.sin(u)*8,3,'#ffe070')}ln(c,'#a8a8b0',3,p.x+10,p.y-10,p.x+26,p.y-30);c.fillStyle='#8a3a2a';c.fillRect(p.x-20,p.y-20,10,8)},
+ ar_feuer(p,t){const c=cx;drawDeco({x:p.x,y:p.y,k:'wl_feuer',s:1.2,v:0.3},t);if(p.prog>0&&!p.used){c.strokeStyle='#ffb060';c.lineWidth=3;c.beginPath();c.arc(p.x,p.y-6,36,-Math.PI/2,-Math.PI/2+TAU*p.prog);c.stroke()}},
+ ar_schrein(p,t){const c=cx,col=p.used?'#6a7a6a':'#cfe8a0';ell(c,p.x,p.y+8,22,7,'rgba(0,0,0,.35)');c.fillStyle='#5a5e58';c.fillRect(p.x-12,p.y-30,24,38);hP(c,'#6a6e68',null,0,[p.x-16,p.y-30,p.x,p.y-44,p.x+16,p.y-30]);circ(c,p.x,p.y-18,6,col);if(!p.used){c.globalAlpha=0.5+0.3*Math.sin(t*3);circ(c,p.x,p.y-18,3,'#ffffff');c.globalAlpha=1}},
+ ar_hebel(p,t){const c=cx,base=(G.theme&&G.theme.base)||'#333',on=p.used;ell(c,p.x,p.y+6,16,6,'rgba(0,0,0,.35)');c.fillStyle=bT(base,0.3);c.fillRect(p.x-10,p.y-6,20,12);c.strokeStyle='rgba(0,0,0,.7)';c.lineWidth=1.2;c.strokeRect(p.x-10,p.y-6,20,12);const a=on?0.7:-0.7;ln(c,'#5a4a3a',3,p.x,p.y-2,p.x+Math.sin(a)*22,p.y-2-Math.cos(a)*22);circ(c,p.x+Math.sin(a)*22,p.y-2-Math.cos(a)*22,4,on?'#8fd36a':'#c8402a');
+  if(!on&&arSicht(p)>0.3){c.globalAlpha=0.5+0.4*Math.sin(t*5);c.font='800 10px "Alegreya Sans",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.85)';c.strokeText('Hebel',p.x,p.y-30);c.fillStyle='#ffd36a';c.fillText('Hebel',p.x,p.y-30);c.globalAlpha=1}}};
+{const dp3=drawProp3;drawProp3=function(p,t){if(p&&p.k){if(p.k==='merchant'&&p.arH){const r=dp3.apply(this,arguments);if(p.hp<100&&!p.dead){const c=cx;c.fillStyle='rgba(0,0,0,.6)';c.fillRect(p.x-18,p.y-74,36,4);c.fillStyle=p.hp>40?'#8fd36a':'#ff6a4a';c.fillRect(p.x-18,p.y-74,36*p.hp/100,4)}return r}
+ const f=AR_PDRAW[p.k];if(f){try{f(p,t)}catch(er){}return true}}return dp3.apply(this,arguments)}}
+/* Sockel der Wächter-Statuen */
+{const db0=drawBlk;drawBlk=function(p,t){const b=p&&p.b;if(b&&b.k==='ar_sockel'){const c=cx,base=(G.theme&&G.theme.base)||'#333',a=(G.arN||[])[b.ai],wach=a&&((a.sw||0)>>b.si&1);ell(c,b.x+3,b.y+b.r*0.4,b.r*1.3,b.r*0.45,'rgba(0,0,0,.35)');c.fillStyle=bT(base,0.25);c.fillRect(b.x-b.r,b.y-b.r*0.7,b.r*2,b.r*1.1);c.fillStyle=bT(base,0.4);c.fillRect(b.x-b.r,b.y-b.r*0.7,b.r*2,b.r*0.3);
+  if(!wach){const r=b.r,s=bT(base,0.6);hP(c,s,'rgba(10,8,12,.8)',1.2,[b.x-r*0.7,b.y-r*0.7,b.x-r*0.8,b.y-r*2.4,b.x-r*0.4,b.y-r*3.1,b.x+r*0.4,b.y-r*3.1,b.x+r*0.8,b.y-r*2.4,b.x+r*0.7,b.y-r*0.7]);circ(c,b.x,b.y-r*3.4,r*0.45,s);ln(c,'rgba(10,8,12,.5)',2,b.x-r*0.9,b.y-r*2.2,b.x-r*1.2,b.y-r*1.1);ln(c,'rgba(10,8,12,.5)',2,b.x+r*0.9,b.y-r*2.2,b.x+r*1.3,b.y-r*1.4);
+   if(a&&a.s===0&&arSicht(b)>0.4){c.globalAlpha=0.5+0.4*Math.sin(t*3+b.si);circ(c,b.x-3,b.y-r*3.45,1.6,'#ff6a3a');circ(c,b.x+3,b.y-r*3.45,1.6,'#ff6a3a');c.globalAlpha=1}}else{for(let i=0;i<3;i++)circ(c,b.x+(i-1)*9,b.y-b.r*0.8,4,bT(base,0.45))}return}return db0.apply(this,arguments)}}
+/* Deko */
+{const dd0=drawDeco;drawDeco=function(d,t){const k=d.k;if(k==='ar_heu'){const c=cx,s=d.s||1;ell(c,d.x,d.y+6,22*s,7*s,'rgba(0,0,0,.3)');hE(c,d.x,d.y-6*s,20*s,14*s,'#c8a050','#6a5020',1.2);c.strokeStyle='rgba(120,90,30,.6)';c.lineWidth=1;c.beginPath();for(let i=-3;i<=3;i++){c.moveTo(d.x+i*5*s,d.y-16*s);c.lineTo(d.x+i*6*s,d.y+4*s)}c.stroke();return}
+ if(k==='ar_banner'){const c=cx;ln(c,'#3a2818',3,d.x,d.y+4,d.x,d.y-60);const w=Math.sin(t*3+d.v*9)*3;hP(c,'#a82a1a','#4a120a',1,[d.x,d.y-58,d.x+26+w,d.y-54,d.x+22+w,d.y-44,d.x+26+w*0.6,d.y-34,d.x,d.y-36]);circ(c,d.x+12+w*0.5,d.y-46,4,'#e5b454');return}
+ if(k==='ar_bett'){const c=cx;ell(c,d.x,d.y+4,24,8,'rgba(0,0,0,.25)');c.fillStyle='#6a4a3a';c.fillRect(d.x-22,d.y-6,44,14);c.fillStyle='#8a6a4a';c.fillRect(d.x-22,d.y-6,12,14);return}
+ if(k==='ar_kerze'){const c=cx;c.fillStyle='#d8ccb0';c.fillRect(d.x-2.5,d.y-12,5,12);const f=Math.sin(t*12+d.v*9);poly(c,'#ffb040',d.x-2.5,d.y-12,d.x+f,d.y-20,d.x+2.5,d.y-12);c.save();c.globalCompositeOperation='lighter';glow(d.x,d.y-15,14,'#ffa040',0.4,true);c.restore();return}
+ return dd0.apply(this,arguments)}}
+Object.assign(LIGHTS,{ar_kerze:[90,'255,170,80']});
+/* Leuchten/Glitzern (nach der Dunkelheit) */
+{const pg0=drawPropGlow;drawPropGlow=function(inView,t){const r=pg0.apply(this,arguments);try{if(G.room)return r;for(const p of G.props){if(p.dead||!inView(p.x,p.y,120))continue;
+  if(p.k==='falle'){const s=arSicht(p);if(p.act===0&&s>0.25&&Math.sin(t*2.6+p.seed*20)>0.9-0.3*s)glow(p.x+Math.cos(p.seed*30)*8,p.y-4,10+6*s,'#fff2c8',0.35+0.4*s,true);
+   if((p.type==='fluch'||p.type==='frost')&&p.act===0)glow(p.x,p.y,34,p.type==='frost'?'#e4f0ec':['#b070e0','#e0604a','#b8b49a'][p.fv%3],0.06+0.12*s+0.05*Math.sin(t*2+p.seed*9),true);
+   if(p.type==='feuer'&&p.act===2)glow(p.x+Math.cos(p.fa)*p.w/2,p.y+Math.sin(p.fa)*p.w/2,p.w*0.8,'#ff8a2a',0.5,true);if(p.type==='feuer'&&p.act===1)glow(p.x,p.y,24,'#ff6a1a',0.4+0.3*Math.sin(t*20),true);if(p.type==='gift'&&p.act===2)glow(p.x,p.y,(p.h||60)*1.2,'#9ac84a',0.18,true)}
+  else if(p.k==='ar_altar')glow(p.x,p.y-20,46,p.fv?'#ff3a4a':'#f2d24c',0.3,true);else if(p.k==='ar_obelisk'&&!p.used)glow(p.x,p.y-40,40,'#d070ff',0.3+0.1*Math.sin(t*4),true);else if(p.k==='ar_platte'&&p.act)glow(p.x,p.y,40,'#e0b0ff',0.35,true);
+  else if(p.k==='ar_feuer'&&!p.used)glow(p.x,p.y-10,80,'#ffb060',0.4,true);else if(p.k==='ar_schrein'&&!p.used)glow(p.x,p.y-18,40,'#cfe8a0',0.45,true);else if(p.k==='ar_reliquiar')glow(p.x,p.y-12,40,'#ffe9a0',0.3,true);else if(p.k==='ar_hort'&&!p.used)glow(p.x,p.y-6,50,'#ffd04a',0.3,true)}}catch(er){}return r}}
+/* Effekte */
+Object.assign(HFX,{
+ ar_pfeile(f,k,c,t){const ca=Math.cos(f.a),sa=Math.sin(f.a);for(let i=0;i<5;i++){const u=Math.min(1,k*1.6-i*0.08);if(u<=0)continue;const o=(i-2)*7,x=f.x+ca*f.len*u-sa*o,y=f.y+sa*f.len*u+ca*o-8;c.globalAlpha=1-k*0.6;ln(c,'#5a4028',2,x-ca*16,y-sa*16,x,y);poly(c,'#c8c8d0',x,y,x-ca*6-sa*3,y-sa*6+ca*3,x-ca*6+sa*3,y-sa*6-ca*3)}},
+ ar_netz(f,k,c,t){const s=k<0.6?1.6-k:1,a=1-Math.max(0,(k-0.7)/0.3);c.globalAlpha=a;c.strokeStyle='#d8d4c8';c.lineWidth=1.4;c.beginPath();const R=f.r*s,yo=-(1-Math.min(1,k/0.6))*60;for(let i=-3;i<=3;i++){c.moveTo(f.x+i*R/3.5-R*0.5,f.y+yo-R*0.4);c.lineTo(f.x+i*R/3.5+R*0.5,f.y+yo+R*0.4);c.moveTo(f.x+i*R/3.5+R*0.5,f.y+yo-R*0.4);c.lineTo(f.x+i*R/3.5-R*0.5,f.y+yo+R*0.4)}c.stroke()}});
+/* Gift/Blut/Brand am Helden (auch Gast) */
+hook('draw',(t,c)=>{const L=P.arDot;if(!L||!L.length||P.down)return;for(const d of L){if(!(d.t>0))continue;const col=d.k==='gift'?'#9ad85a':d.k==='brand'?'#ff8a3a':'#c8303a';for(let i=0;i<3;i++){const ph=(t*1.2+i/3)%1;c.globalAlpha=(1-ph)*0.8;circ(c,P.x+Math.sin(i*2.1+t*2)*10,P.y-10-ph*26,d.k==='blut'?2:3,col)}c.globalAlpha=1}});
+
+/* ================= Karte, Anzeige ================= */
+function arIcon(c,ic,x,y,s,col,done){c.save();c.translate(x,y);c.fillStyle='rgba(12,9,8,.85)';c.beginPath();c.arc(0,0,s+2,0,TAU);c.fill();c.strokeStyle=done?'#7a7268':col;c.lineWidth=1.4;c.stroke();c.fillStyle=done?'#8a8278':col;c.strokeStyle=c.fillStyle;c.lineWidth=1.2;const k=s/6;c.scale(k,k);c.beginPath();
+ switch(ic){case'haus':c.moveTo(-4,0);c.lineTo(0,-4);c.lineTo(4,0);c.lineTo(4,4);c.lineTo(-4,4);c.closePath();c.fill();break;case'flagge':c.moveTo(-3,4);c.lineTo(-3,-4);c.stroke();c.beginPath();c.moveTo(-3,-4);c.lineTo(4,-2);c.lineTo(-3,0);c.fill();break;
+  case'kiste':c.fillRect(-4,-2,8,6);c.fillRect(-4,-4,8,2);break;case'schrein':c.moveTo(0,-5);c.lineTo(3,4);c.lineTo(-3,4);c.closePath();c.fill();break;case'auge':c.ellipse(0,0,4.5,2.5,0,0,TAU);c.stroke();c.beginPath();c.arc(0,0,1.4,0,TAU);c.fill();break;
+  case'statue':c.arc(0,-3,1.8,0,TAU);c.fill();c.fillRect(-2,-1,4,5);break;case'wagen':c.fillRect(-4,-3,8,4);c.beginPath();c.arc(-2,2.5,1.5,0,TAU);c.arc(2,2.5,1.5,0,TAU);c.fill();break;
+  case'stern':for(let i=0;i<5;i++){const u=-Math.PI/2+i*2*TAU/5;i?c.lineTo(Math.cos(u)*4.5,Math.sin(u)*4.5):c.moveTo(Math.cos(u)*4.5,Math.sin(u)*4.5)}c.closePath();c.stroke();break;case'tropfen':c.moveTo(0,-5);c.quadraticCurveTo(4,1,0,4);c.quadraticCurveTo(-4,1,0,-5);c.fill();break;
+  case'ritual':c.arc(0,0,4,0,TAU);c.stroke();c.beginPath();c.arc(0,0,1.5,0,TAU);c.fill();break;case'netz':for(let i=0;i<4;i++){c.moveTo(0,0);c.lineTo(Math.cos(i*Math.PI/4*2+0.4)*5,Math.sin(i*Math.PI/4*2+0.4)*5)}c.stroke();c.beginPath();c.arc(0,0,2.6,0,TAU);c.stroke();break;
+  case'muenze':c.arc(0,0,3.6,0,TAU);c.fill();c.fillStyle='rgba(0,0,0,.5)';c.fillRect(-0.6,-2,1.2,4);break;case'schaedel':c.arc(0,-1,3.4,0,TAU);c.fill();c.fillRect(-2,1,4,3);c.fillStyle='#000';c.fillRect(-2,-2,1.4,1.4);c.fillRect(0.6,-2,1.4,1.4);break;
+  case'flamme':c.moveTo(0,-5);c.quadraticCurveTo(4,0,0,4);c.quadraticCurveTo(-4,0,0,-5);c.fill();break;default:c.arc(0,0,3,0,TAU);c.fill()}
+ c.restore();if(done){c.save();c.strokeStyle='#8fd36a';c.lineWidth=1.6;c.beginPath();c.moveTo(x+s-3,y+s-4);c.lineTo(x+s-1,y+s-1);c.lineTo(x+s+4,y+s-7);c.stroke();c.restore()}}
+function arMini(){const L=G.arN;if(!L||!L.length||!G.wl||!G.wl.an||G.room||G.state!=='play'||hud.hidden||SAVE.wlMini===false||!WLMM.box)return;const B=WLMM.box,k=B.S/WORLD,c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);
+ const rv=(px,py)=>{const n=52,i=clamp(Math.floor(px/WORLD*n),0,n-1),j=clamp(Math.floor(py/WORLD*n),0,n-1);return WLMM.rev&&WLMM.rev[j*n+i]};const tt=performance.now()/1000;
+ for(const a of L){if(!a.e&&!rv(a.x,a.y))continue;const s=B.S<120?4.2:5.2;if(a.s===1&&!a.done){c.globalAlpha=0.5+0.4*Math.sin(tt*5);c.strokeStyle=a.c;c.lineWidth=1.2;c.beginPath();c.arc(B.x+a.x*k,B.y+a.y*k,s+4,0,TAU);c.stroke();c.globalAlpha=1}arIcon(c,a.ic,B.x+a.x*k,B.y+a.y*k,s,a.c,a.s>=2)}
+ c.restore()}
+/* Nachwirkungs-Symbole unter der Karte (mit Tooltip) */
+const ARMS={x:-1,y:-1,rects:[],tap:null};addEventListener('mousemove',ev=>{ARMS.x=ev.clientX;ARMS.y=ev.clientY},{passive:true});
+addEventListener('touchstart',ev=>{try{const tt=ev.touches&&ev.touches[0];if(!tt)return;for(const r of ARMS.rects)if(tt.clientX>r.x-4&&tt.clientX<r.x+r.w+4&&tt.clientY>r.y-4&&tt.clientY<r.y+r.h+4){const F=ARFX[r.m.id];if(F)toast(`<b>${F.ic} ${F.n}</b> – ${F.d}. Noch ${(r.m.st|0)+1} Ebene${r.m.st?'n':''}.${F.good?'':' Reinigen: Schrein, Rastplatz, Lagerfeuer.'}`,F.c);break}}catch(er){}},{passive:true});
+function arBadges(){ARMS.rects=[];if(G.state!=='play'||hud.hidden||G.room&&false)return;const viewers=NET.role==='guest'?[NET.mine||P]:(G.mp?mpLocal():[P]);const rows=viewers.filter(q=>q&&(q.mods||[]).some(m=>m.ar));if(!rows.length)return;
+ let B=WLMM.box;try{if(!B)B=wlMiniOrt()}catch(er){return}if(!B)return;const mob=W<700,sz=mob?20:24,gap=5,c=cx;let y=B.y+(SAVE.wlMini===false||G.room||!G.wl||!G.wl.an?0:B.S+12);c.save();c.setTransform(DPR,0,0,DPR,0,0);let tip=null;
+ for(const q of rows){const L=q.mods.filter(m=>m.ar);let x=B.x+B.S-sz;if(rows.length>1){circ(c,x+sz+8,y+sz/2,4,HCOL[q.id]||'#e5b454')}for(const m of L){const F=ARFX[m.id]||{c:'#ccc',ic:'?'};c.globalAlpha=0.92;c.fillStyle='rgba(12,9,14,.85)';c.beginPath();c.arc(x+sz/2,y+sz/2,sz/2,0,TAU);c.fill();c.strokeStyle=m.good?'#8aff6a':'#ff7a6a';c.lineWidth=1.6;c.stroke();c.globalAlpha=1;
+   c.font=`${Math.round(sz*0.55)}px "Segoe UI Symbol","Noto Sans Symbols","DejaVu Sans",sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillStyle=F.c;c.fillText(F.ic,x+sz/2,y+sz/2+1);
+   const n=(m.st|0)+1;c.fillStyle=m.good?'#2a5a1a':'#6a1a14';c.beginPath();c.arc(x+sz-3,y+sz-3,7,0,TAU);c.fill();c.font='800 10px "Alegreya Sans",sans-serif';c.fillStyle='#fff';c.fillText(String(n),x+sz-3,y+sz-2.5);
+   const R={x,y,w:sz,h:sz,m};ARMS.rects.push(R);if(ARMS.x>=x&&ARMS.x<=x+sz&&ARMS.y>=y&&ARMS.y<=y+sz)tip=R;x-=sz+gap}y+=sz+gap}
+ if(tip){const F=ARFX[tip.m.id],n=(tip.m.st|0)+1,l1=`${F.ic} ${F.n}`,l2=F.d,l3=`noch ${n} Ebene${n>1?'n':''} (diese${n>1?' + '+(n-1)+' weitere':''})`,l4=F.good?'':'Reinigen: Schrein, Rastplatz, Lagerfeuer';c.font='800 12px "Alegreya Sans",sans-serif';const w=Math.max(...[l1,l2,l3,l4].map(s=>c.measureText(s).width))+18,h=l4?70:54;let tx=Math.min(W-w-6,tip.x+tip.w-w),ty=tip.y+tip.h+6;
+  c.globalAlpha=0.94;c.fillStyle='rgba(14,10,12,.95)';c.fillRect(tx,ty,w,h);c.strokeStyle=F.c;c.lineWidth=1;c.strokeRect(tx+0.5,ty+0.5,w-1,h-1);c.globalAlpha=1;c.textAlign='left';c.textBaseline='top';c.fillStyle=F.c;c.fillText(l1,tx+9,ty+6);c.font='600 11px "Alegreya Sans",sans-serif';c.fillStyle='#e8e0d0';c.fillText(l2,tx+9,ty+22);c.fillStyle='#c8bca8';c.fillText(l3,tx+9,ty+37);if(l4){c.fillStyle='#a8c890';c.fillText(l4,tx+9,ty+52)}}
+ c.textBaseline='alphabetic';c.restore()}
+{const rd0=render;render=function(dt){const r=rd0.apply(this,arguments);try{arMini();arBadges()}catch(er){}return r}}
+/* Statuszeile des aktiven Areals; eigene Nachwirkungen nicht doppelt als Pille */
+{const wp0=wxPills;wxPills=function(L){try{const q=NET.role==='guest'?(NET.mine||P):P;if(q&&!G.room&&G.arN)for(const a of G.arN){if(a.s!==1||!a.tx)continue;if(Math.hypot(q.x-a.x,q.y-a.y)>a.r+420)continue;L.push({t:'⚑ '+a.n+' · '+a.tx,c:a.c})}}catch(er){}return wp0.apply(this,arguments)}}
+{const dpl0=drawPills;drawPills=function(){if(!P||!P.mods||!P.mods.some(m=>m.ar))return dpl0.apply(this,arguments);const M=P.mods;P.mods=M.filter(m=>!m.ar);try{return dpl0.apply(this,arguments)}finally{P.mods=M}}}
+
+/* ---------- Epische Auslöse-Effekte ---------- */
+function arFxBeim(p){const x=p.x,y=p.y;if(p.type==='fluch'||p.type==='frost'){const col=p.type==='frost'?'#e4f0ec':['#b070e0','#e0604a','#b8b49a'][p.fv%3];G.fxs.push({k:'ar_runenbruch',x,y,c:col,t:0,life:1});light(x,y,240,col,0.8,1)}
+ else if(p.type==='stacheln')G.fxs.push({k:'ar_stachel',x,y,w:p.w,h:p.h,t:0,life:0.6});
+ else if(p.type==='baer')G.fxs.push({k:'ar_schnapp',x,y,t:0,life:0.35});
+ else if(p.type==='alarm'){const B=arGlocke(p);for(let i=0;i<3;i++)G.fxs.push({k:'ring',x:B.x+12,y:B.y-36,r:120+i*90,c:'#ffb060',t:-i*0.18,life:0.7,w:3})}
+ else if(p.type==='gift')G.fxs.push({k:'ar_zisch',x,y,t:0,life:0.8});
+ else if(p.type==='pfeile'){const L=arPfeilL(p);G.fxs.push({k:'flash',x:L.x,y:L.y,r:40,c:'#ffb070',t:0,life:0.2})}}
+Object.assign(HFX,{
+ ar_runenbruch(f,k,c,t){const e=1-Math.pow(1-k,3);c.globalCompositeOperation='lighter';c.globalAlpha=(1-k)*0.9;c.strokeStyle=f.c;c.lineWidth=4*(1-k)+1;c.beginPath();c.ellipse(f.x,f.y,20+e*110,(20+e*110)*0.6,0,0,TAU);c.stroke();
+  c.globalAlpha=(1-k)*0.6;const g=c.createLinearGradient(f.x,f.y-220*e,f.x,f.y);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,f.c);c.fillStyle=g;c.fillRect(f.x-14*(1-k)-4,f.y-220*e,28*(1-k)+8,220*e);
+  c.font='bold 16px Georgia,serif';c.textAlign='center';c.fillStyle=f.c;for(let i=0;i<6;i++){const u=i/6*TAU+k*2;c.globalAlpha=(1-k);c.fillText('ᚠᚦᚱᚷᛉᛟ'[i],f.x+Math.cos(u)*(26+e*60),f.y+Math.sin(u)*(16+e*36)-e*70)}},
+ ar_stachel(f,k,c,t){const up=k<0.25?k/0.25:1-(k-0.25)/0.75*0.4;c.globalAlpha=1-Math.max(0,k-0.6)/0.4;for(let xx=f.x-f.w/2+8;xx<f.x+f.w/2;xx+=12)for(let yy=f.y-f.h/2+8;yy<f.y+f.h/2;yy+=12){const hh=18*up*(0.8+0.4*((xx*7+yy*3)%5)/5);poly(c,'#c8c8d4',xx-3,yy,xx+3,yy,xx,yy-hh);ln(c,'rgba(255,255,255,.7)',0.8,xx-0.6,yy-1,xx,yy-hh+2)}
+  c.globalCompositeOperation='lighter';c.globalAlpha=(1-k)*0.5;c.strokeStyle='#fff2d8';c.lineWidth=2;c.strokeRect(f.x-f.w/2-k*20,f.y-f.h/2-k*14,f.w+k*40,f.h+k*28)},
+ ar_schnapp(f,k,c,t){const a=(1-k);c.globalAlpha=a;c.strokeStyle='#e8e8f0';c.lineWidth=3;for(const s of [-1,1]){c.beginPath();c.arc(f.x,f.y+s*10*(1-k),18,s>0?Math.PI*1.1:0.1,s>0?Math.PI*1.9:Math.PI-0.1);c.stroke()}c.globalCompositeOperation='lighter';glow(f.x,f.y,40*a+10,'#fff0c8',a*0.7,true)},
+ ar_zisch(f,k,c,t){for(let i=0;i<8;i++){const u=i/8*TAU+f.x,d=k*80;c.globalAlpha=(1-k)*0.5;circ(c,f.x+Math.cos(u)*d,f.y+Math.sin(u)*d*0.6-k*20,10+k*22,i%2?'#7aa03a':'#a8c84a')}},
+ ar_fels(f,k,c,t){const s=f.s||1;c.globalAlpha=0.25+0.5*k;ell(c,f.x,f.y+4,(10+30*k)*s,(4+12*k)*s,'rgba(0,0,0,.7)');const y=f.y-(1-k*k)*420;c.globalAlpha=1;c.save();c.translate(f.x,y);c.rotate(k*4*s);hP(c,'#7a6e62','#2a2420',1.4,[-16*s,-6*s,-6*s,-16*s,12*s,-12*s,17*s,4*s,6*s,15*s,-12*s,10*s]);hP(c,'#9a8e80',null,0,[-10*s,-6*s,-4*s,-12*s,8*s,-8*s,2*s,0]);c.restore()},
+ ar_erwachen(f,k,c,t){c.globalCompositeOperation='lighter';c.globalAlpha=(1-k);for(let i=0;i<6;i++){const u=i/6*TAU+0.3;ln(c,'#ff8a3a',2.5*(1-k)+0.5,f.x,f.y-40,f.x+Math.cos(u)*(10+k*40),f.y-40+Math.sin(u)*(10+k*50))}glow(f.x,f.y-40,30+60*k,'#ff7a3a',(1-k)*0.8,true)},
+ ar_entdeckt(f,k,c,t){const e=1-Math.pow(1-k,2);c.globalAlpha=(1-k)*0.7;c.strokeStyle=f.c;c.lineWidth=6*(1-k)+1;c.setLineDash([18,12]);c.lineDashOffset=-k*120;c.beginPath();c.ellipse(f.x,f.y,f.r*(0.3+0.7*e),f.r*(0.3+0.7*e)*0.8,0,0,TAU);c.stroke();c.setLineDash([])},
+ ar_sieg(f,k,c,t){c.globalCompositeOperation='lighter';const e=1-Math.pow(1-k,3);for(let i=0;i<12;i++){const u=i/12*TAU+k;c.globalAlpha=(1-k)*0.5;ln(c,f.c,6*(1-k)+1,f.x+Math.cos(u)*f.r*0.2*e,f.y+Math.sin(u)*f.r*0.16*e,f.x+Math.cos(u)*f.r*e,f.y+Math.sin(u)*f.r*0.8*e)}glow(f.x,f.y,f.r*0.6*(1-k)+20,'#fff2c0',(1-k)*0.6,true)}});
+/* Flammenfunken und Pendelschimmer (nur Gastgeber erzeugt Partikel, sie werden übertragen) */
+{const ft0=arFallenTick;arFallenTick=function(dt){ft0(dt);if(G.bot||fxQ()<1)return;for(const p of G.props){if(p.k!=='falle'||p.dead)continue;if(p.type==='feuer'&&p.act===2&&Math.random()<dt*14){const u=rnd(0.3,1);embers(p.x+Math.cos(p.fa)*p.w*u,p.y+Math.sin(p.fa)*p.w*u-8,'#ffb040',1,10)}}}}
+
+/* ---------- Bestiarium: „Fallen & Gefahren“ (freigeschaltet erst nach eigenem Erleben, SAVE.arSeen) ---------- */
+const AR_TIPP={
+ pfeile:['Druckplatte mit Pfeilsalve','Eine Platte mit feinen Fugen; seitlich ein Steinblock mit Schlitzen.','Tritt daneben, lass Gegner oder ein rollendes Fass drauf, oder schieß die Platte aus der Ferne an. Der Hebel schaltet sie ab.'],
+ stacheln:['Stachelgrube','Ein dunkles Feld voller kleiner Löcher, oft mit Knochen am Rand.','Umgehen oder mit der Ausweichrolle darüber hinweg. Gegner hineinlocken!'],
+ pendel:['Klingenpendel','Eine schwingende Klinge quer über den Gang, Kratzspuren am Boden.','Im richtigen Moment durchlaufen oder rollen. Der Hebel hält es an.'],
+ feuer:['Feuerdüse','Ein Gitter mit Brandspuren davor; vor dem Feuerstoß zischt und glüht es.','Zwischen zwei Stößen durch – oder die Düse mit drei Treffern zerstören.'],
+ gift:['Giftgasventil','Verfärbter Boden, ein rostiges Rohr neben einer Platte.','Nicht drauftreten oder aus der Ferne auslösen. Heiltrank entgiftet, Schreine reinigen.'],
+ baer:['Bärenfalle','Eiserne Zähne, halb im Gras versteckt – ein kurzes Glitzern.','Drumherum, darüber rollen oder mit einem Angriff zuschnappen lassen.'],
+ netz:['Netzfalle','Ein feiner Faden über dem Boden, ein paar Blätter.','Treffer auf die Stelle lösen das Netz harmlos aus.'],
+ fluch:['Fluchrune','Ein schwach leuchtendes Zeichen im Boden.','Mit zwei Treffern brechen. Wer drauftritt, trägt Schwäche, Verwundbarkeit oder Schwere über die Ebene hinaus.'],
+ frost:['Frostrune','Ein blasses, kaltes Zeichen im Boden.','Mit zwei Treffern brechen. Sonst: Frostbiss über die Ebene hinaus.'],
+ steine:['Fallsteine','Risse, Geröll und rieselnder Staub.','Wenn es grollt: sofort aus den Schattenkreisen laufen. Gegner darunter werden betäubt.'],
+ fass:['Fass-Draht','Ein glitzernder Draht zwischen zwei Pflöcken, Pulverfässer daneben.','Fässer aus der Ferne sprengen oder über den Draht rollen.'],
+ alarm:['Alarmglocke','Ein Draht zu einer Glocke am Pfahl.','Glocke mit einem Treffer zerschlagen – sonst wacht die Umgebung auf.']};
+function arBestHtml(){const S=SAVE.arSeen||{};let h=`<div class="eyebrow" style="margin-top:6px">Fallen &amp; Gefahren</div><div class="bestg">`;
+ for(const k in AR_TIPP){const T=AR_TIPP[k],kn=!!S[k];h+=`<details class="beste ${kn?'':'unk'}"><summary><canvas data-arb="f:${k}" width="64" height="64" aria-hidden="true"></canvas><span class="bn">${kn?esc(T[0]):'???'}</span></summary><div class="bl">${kn?`<b>Erkennen:</b> ${esc(T[1])}<br><b>Entschärfen:</b> ${esc(T[2])}`:'<span class="muted">Noch nicht erlebt.</span>'}</div></details>`}
+ h+=`</div><div class="eyebrow" style="margin-top:6px">Nachwirkungen</div><div class="bestg">`;for(const id in ARFX){const F=ARFX[id],kn=!!S['fx:'+id];if(F.good)continue;h+=`<details class="beste ${kn?'':'unk'}"><summary><canvas data-arb="x:${id}" width="64" height="64" aria-hidden="true"></canvas><span class="bn">${kn?esc(F.n):'???'}</span></summary><div class="bl">${kn?`${esc(F.d)} – hält bis zu zwei Ebenen nach.<br><b>Lösen:</b> Schrein, Rastplatz, Schrein der Ruhe, Lagerfeuer zwischen den Kapiteln.`:'<span class="muted">Noch nicht erlitten.</span>'}</div></details>`}
+ h+=`</div><div class="eyebrow" style="margin-top:6px">Besondere Orte</div><div class="bestg">`;for(const k in AR_K){const K=AR_K[k],kn=!!S['a:'+k];h+=`<details class="beste ${kn?'':'unk'}"><summary><canvas data-arb="a:${k}" width="64" height="64" aria-hidden="true"></canvas><span class="bn">${kn?esc(typeof K.n==='string'?K.n:K.n.x):'???'}</span></summary><div class="bl">${kn?esc(AR_LVI[k]?AR_LVI[k].d:K.sub):'<span class="muted">Noch nicht entdeckt.</span>'}</div></details>`}
+ return h+'</div>'}
+{const rb0=renderBestiary;renderBestiary=function(){const h=rb0.apply(this,arguments);if(G.bestSub)return h;try{return h+arBestHtml()}catch(er){return h}}}
+const AR_VOLL={on:0};
+{const as0=arSicht;arSicht=function(p){return AR_VOLL.on?1:as0(p)}}
+function arBestIcon(cv){const id=cv.dataset.arb,g=cv.getContext('2d'),[art,k]=id.split(':');g.clearRect(0,0,64,64);const S=SAVE.arSeen||{};const kn=art==='f'?S[k]:art==='x'?S['fx:'+k]:S['a:'+k];const old=cx;
+ try{if(art==='f'){cx=g;AR_VOLL.on=1;const T=AR_FT[k];const p={k:'falle',type:k,x:32,y:40,r:T.r,act:k==='pendel'||k==='feuer'?(k==='feuer'?2:0):0,fz:0,fa:0,fv:0,w:k==='stacheln'?40:k==='pfeile'?22:k==='feuer'?30:k==='pendel'?30:k==='fass'||k==='alarm'?36:26,h:36,seed:0.3,hp:2};g.setTransform(1,0,0,1,0,0);
+   if(k==='fass'||k==='alarm')g.translate(k==='alarm'?-8:0,6);arFalleBoden(p,1.3);arFalleOben(p,1.3)}
+  else if(art==='x'){const F=ARFX[k];g.fillStyle='rgba(12,9,14,.9)';g.beginPath();g.arc(32,32,24,0,TAU);g.fill();g.strokeStyle=F.c;g.lineWidth=2;g.stroke();g.font='26px "Segoe UI Symbol","Noto Sans Symbols","DejaVu Sans",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle=F.c;g.fillText(F.ic,32,34)}
+  else{const K=AR_K[k];arIcon(g,K.ic,32,32,18,K.c,false)}}catch(er){}finally{cx=old;AR_VOLL.on=0;g.setTransform(1,0,0,1,0,0)}
+ if(!kn){g.globalCompositeOperation='source-atop';g.fillStyle='#1a1418';g.fillRect(0,0,64,64);g.globalCompositeOperation='source-over'}}
+{const bi0=drawBestIcons;drawBestIcons=function(){const r=bi0.apply(this,arguments);try{scr.querySelectorAll('canvas[data-arb]').forEach(arBestIcon)}catch(er){}return r}}
+/* Erlebt? (jeder Rechner für sich, auch Gast) */
+function arGesehen(){if(G.bot||G.room||G.state!=='play')return;const S=SAVE.arSeen||(SAVE.arSeen={});const V=arZuschauer();if(!V.length)return;const nah=(x,y,r)=>V.some(q=>Math.hypot(q.x-x,q.y-y)<r);
+ for(const p of G.props){if(p.k!=='falle'||p.dead||S[p.type])continue;if(p.act!==0&&p.act!==4&&nah(p.x,p.y,420))S[p.type]=1}
+ for(const q of V)for(const m of q.mods||[])if(m.ar&&!S['fx:'+m.id])S['fx:'+m.id]=1;
+ for(const a of G.arN||[])if(a.e&&!S['a:'+a.k]&&nah(a.x,a.y,a.r+80))S['a:'+a.k]=1}
+{let arGT=0;const rd1=render;render=function(dt){const r=rd1.apply(this,arguments);arGT+=dt||0;if(arGT>0.5){arGT=0;try{arGesehen()}catch(er){}}return r}}
+
+/* ---------- Erklärung beim ersten Mal (gleiches Fenster wie neue Stufenarten) ---------- */
+const AR_LVI={
+ fallen:{c:'#ffd36a',n:'Fallen',d:'An besonderen Orten lauern Fallen. Feine Hinweise verraten sie: Fugen, Glitzern, Knochen, Brandspuren, leuchtende Runen. Umgeht sie, rollt darüber, zerstört Runen, Düsen und Glocken aus der Ferne, legt Hebel um – oder lockt Gegner hinein, Fallen treffen auch sie. Manche Flüche wirken bis zu zwei Ebenen nach (Symbol unter der Karte).'},
+ weiler:{c:'#e8b060',n:'Belagertes Gehöft',d:'Die Angreifer setzen den Bewohnern zu, solange sie bei ihnen stehen. Räumt das Gehöft schnell – je mehr Bewohner überleben, desto reicher der Dank.'},
+ pruefung:{c:'#f2d24c',n:'Verlassener Schrein',d:'Stellt euch kurz auf den Altar, um die Prüfung zu beginnen: Übersteht die Wellen bis zum Ende. Der Lohn ist ein Segen für diese und die nächste Ebene – und eine Truhe, die reicher ist, wenn niemand fällt.'},
+ platten:{c:'#e0b0ff',n:'Runenhalle',d:'Der Sockel in der Mitte zeigt eine Runenfolge. Tretet in genau dieser Reihenfolge auf die Platten. Ein Fehltritt straft mit einem Fluchblitz und ruft Wächter – nach drei Fehlern erlöschen die Runen.'},
+ opferaltar:{c:'#ff5a6a',n:'Blutaltar',d:'Bleibt auf dem Altar stehen, um ein Viertel eures Lebens zu opfern. Meist schenkt er Blutsegen und einen seltenen Fund – manchmal verlangt er mehr: dann folgen Fluch und Diener, aber auch ein großer Schatz.'},
+ ritual:{c:'#d070ff',n:'Ritualkreis',d:'Die Zeit läuft. Stürzt die drei Obelisken – mit Angriffen oder indem ihr euch kurz dagegenstemmt – bevor das Ritual vollendet ist. Sonst erscheint ein beschworener Schrecken.'},
+ schatzkammer:{c:'#ffd04a',n:'Schatzkammer',d:'Der Gang zur Beute ist voller Fallen. Irgendwo nahe dem Eingang steckt ein Hebel, der sie alle abschaltet – wer ihn findet, kommt sicher durch.'},
+ waechter:{c:'#d8c8a8',n:'Halle der Wächter',d:'Nähert ihr euch dem Reliquiar, erwachen die Statuen. Erst wenn alle Wächter fallen, bricht das Siegel.'},
+ goblinschatz:{c:'#e8d060',n:'Goblin-Hort',d:'Die Goblins schlafen. Schleicht euch an der Alarmglocke vorbei (oder zerschlagt sie) und plündert den Hort leise – Alarm weckt das Lager und ein Schatzgoblin flieht mit der Beute.'}};
+for(const k in AR_LVI)LVI['ar_'+k]=AR_LVI[k];
+function arErklaere(k){if(G.bot||NET.role==='guest'||!AR_LVI[k])return false;if(navigator.webdriver&&!window.__hiTest)return false;SAVE.hIntro=SAVE.hIntro||{};if(SAVE.hIntro['z:ar_'+k])return false;try{if(typeof HI!=='undefined'&&HI.on)return false;later(0.8,()=>{try{if(G.state==='play'&&!G.overlay)hiOpen(['z:ar_'+k])}catch(er){}});return true}catch(er){return false}}
+{const ab0=arBanner;arBanner=function(A,small){const r=ab0.apply(this,arguments);arErklaere(A.k);return r}}
+{const aa0=arAusloesen;arAusloesen=function(p,by){if(p.act===0&&by&&by.w==='p'&&!SAVE.arFalleTip&&arErklaere('fallen'))SAVE.arFalleTip=1;return aa0.apply(this,arguments)}}
+
+/* Testzugang */
+window.__hsAr={AR_K,AR_FT,ARFX,arFalle,arFx,arReinigen,arAusloesen,arTrefferBei,arPlanen,arFuellen,arTick,arSync,arBotZiel,AR_TICK,G:()=>G.ar,hitProps:(...a)=>hitProps(...a),renderBestiary:()=>renderBestiary(),arBestHtml:()=>arBestHtml(),LVI:AR_LVI,X:{arBoden:t=>arBoden(t),drawProp3:(p,t)=>drawProp3(p,t),arMini:()=>arMini(),arBadges:()=>arBadges(),arTick:d=>arTick(d),arSicht:p=>arSicht(p)}};
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
