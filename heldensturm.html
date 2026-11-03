@@ -3905,25 +3905,25 @@ function update(dt){
    if(p.boom){p.dead=1;if(!p.boomed){p.boomed=1;projBoom(p)}return}
    if(p.exec&&!e.boss&&!e.guard&&e.hp<e.maxHp*p.exec){word(e.x,e.y-e.r-14,'Ein Pfeil!','#ffe9a0');dealDmg(e,e.hp+1,{noCrit:1});}else dealDmg(e,p.dmg,{knock:p.knock,fx:p.x-p.vx,fy:p.y-p.vy,onHit:p.hit,basic:p.basic,arrow:p.arrow,bounces:p.bounces,bounced:p.bounces===0,crit:p.crit,pet:p.pet,noLs:p.pet,rex:0});
    if(p.pierce--<=0)p.dead=1;burst(p.x,p.y,p.c,2,80)}})}
-  else{if(G.mp){const q=PL.find(q=>!q.down&&q.inv<=0&&d2(p,q)<(p.r+q.r-2)*(p.r+q.r-2));if(q)P=q}if(d2(p,P)<(p.r+P.r-2)*(p.r+P.r-2)&&P.inv<=0&&!P.down){p.dead=1;if(p.grp&&P.grpHit===p.grp)continue;if(p.grp)P.grpHit=p.grp;G.hArt='g';hurt(p.dmg);G.hArt=null;if(p.slow){P.slowT=Math.max(P.slowT,1.6);P.slowA=Math.max(P.slowT>0?P.slowA:0,p.slow)}if(p.root){P.rootT=Math.max(P.rootT,p.root);toast('Im Netz gefangen!','#ececf4')}}if(p.x<-50||p.y<-50||p.x>WORLD+50||p.y>WORLD+50)p.dead=1}}
+  else{if(G.mp){const q=PL.find(q=>!q.down&&q.inv<=0&&d2(p,q)<(p.r+q.r-2)*(p.r+q.r-2));if(q)P=q}if(d2(p,P)<(p.r+P.r-2)*(p.r+P.r-2)&&P.inv<=0&&!P.down){p.dead=1;if(p.grp&&P.grpHit===p.grp)continue;if(p.grp)P.grpHit=p.grp;G.hArt='g';hurt(p.dmg,p);G.hArt=null;if(p.slow){P.slowT=Math.max(P.slowT,1.6);P.slowA=Math.max(P.slowT>0?P.slowA:0,p.slow)}if(p.root){P.rootT=Math.max(P.rootT,p.root);toast('Im Netz gefangen!','#ececf4')}}if(p.x<-50||p.y<-50||p.x>WORLD+50||p.y>WORLD+50)p.dead=1}}
  DMS=null;P=P0p;G.projs=G.projs.filter(p=>!p.dead);updProjTrails();
  for(const z of G.zones){DMS=z.src||null;if(G.mp)P=z.own&&PL.includes(z.own)?z.own:P0p;z.t+=dt;z.tick-=dt;{const ZA=ZONEART[z.kind];if(ZA&&ZA.upd)ZA.upd(z,dt)}if(z.follow){const e=nearest(z.x,z.y,520);if(e){const a=ang(z,e),dd=Math.sqrt(d2(z,e));const s=Math.min(dd,z.follow*dt);z.x+=Math.cos(a)*s;z.y+=Math.sin(a)*s}}
   if(z.tick<=0){z.tick=0.25;const og=rank('b_overgrowth');query(z.x,z.y,z.r+50,e=>{const m=z.r+e.r*0.5;if(d2(z,e)>m*m)return;if(z.blind){blind(e,0.4);return}if(z.vine){e.vineT=G.time+0.4;if(og){e.vineStack=Math.min(0.25*og,(e.vineStack||0)+0.0125);e.vuln=Math.max(e.vulnT>0?e.vuln:0,e.vineStack);e.vulnT=0.5}}if(z.poison)dot(e,'poison',z.dps*0.5,2);if(z.root&&!e.boss)e.root=Math.max(e.root,ccZaeh(e,0.35*((e.elite||e.guard)?0.7:1),e.root));if(!z.dps)return;if(z.vuln){e.vuln=Math.max(e.vulnT>0?e.vuln:0,z.vuln);e.vulnT=0.4}dealDmg(e,z.dps*0.25,{slow:z.slow,slowT:0.4,noLs:false})})}}
  DMS=null;P=P0p;G.zones=G.zones.filter(z=>z.t<z.dur);
  updTraps(dt);DMS=null;
  for(const z of G.ezones){z.t+=dt;if(z.follow){if(z.follow.dead)z.t=z.dur;else{z.x=z.follow.x;z.y=z.follow.y}}if(z.drift){const a=ang(z,G.mp?nearestP(z.x,z.y):P);z.x+=Math.cos(a)*z.drift*dt;z.y+=Math.sin(a)*z.drift*dt}
-  for(const q of mpL()){if(q.down)continue;P=q;if(d2(z,P)<z.r*z.r){if(z.dps)hurtDot(z.dps*dt);if(z.slow){P.slowT=Math.max(P.slowT,0.3);P.slowA=Math.max(P.slowA,z.slow)}if(z.silence)P.silT=Math.max(P.silT,0.3)}}P=P0p}
+  for(const q of mpL()){if(q.down)continue;P=q;if(d2(z,P)<z.r*z.r){if(z.dps)hurtDot(z.dps*dt,z);if(z.slow){P.slowT=Math.max(P.slowT,0.3);P.slowA=Math.max(P.slowA,z.slow)}if(z.silence)P.silT=Math.max(P.silT,0.3)}}P=P0p}
  G.ezones=G.ezones.filter(z=>z.t<z.dur);
  for(const k of G.tele){k.t+=dt;if(k.follow&&!k.follow.dead&&k.k!=='wave'){k.x=k.follow.x;k.y=k.follow.y}
-  if(k.k==='beam'){if(k.t>=k.delay){k.a+=k.av*dt;for(const q of mpL()){if(q.down)continue;P=q;if(segHit(k.x,k.y,k.a,k.len,k.w/2+P.r*0.6))hurtDot(k.dps*dt)}P=P0p}continue}
+  if(k.k==='beam'){if(k.t>=k.delay){k.a+=k.av*dt;for(const q of mpL()){if(q.down)continue;P=q;if(segHit(k.x,k.y,k.a,k.len,k.w/2+P.r*0.6))hurtDot(k.dps*dt,k)}P=P0p}continue}
   if(k.k==='wave'){k.r+=k.spd*dt;for(const q of mpL()){if(q.down)continue;P=q;const hs=k.hitS||(k.hitS=new Set());if(!hs.has(q)){const dd=Math.sqrt(d2(k,P));if(Math.abs(dd-k.r)<16+P.r*0.5){let safe=false;if(k.gap!==undefined){let da=Math.atan2(P.y-k.y,P.x-k.x)-k.gap;da=Math.atan2(Math.sin(da),Math.cos(da));safe=Math.abs(da)<k.gapW/2}
-    if(!safe){hs.add(q);k.hit=1;hurt(k.dmg);if(k.push){const a=ang(k,P);P.kx+=Math.cos(a)*k.push;P.ky+=Math.sin(a)*k.push}}}}}P=P0p;continue}
+    if(!safe){hs.add(q);k.hit=1;hurt(k.dmg,k);if(k.push){const a=ang(k,P);P.kx+=Math.cos(a)*k.push;P.ky+=Math.sin(a)*k.push}}}}}P=P0p;continue}
   if(k.t>=k.delay&&!k.done){k.done=1;let hit=false;
    if(k.k==='circle'){hit=k.screen||d2(k,P)<(k.r+P.r*0.5)*(k.r+P.r*0.5);if(!k.screen){ring(k.x,k.y,k.r,k.c||'#ff5a4a',0.35,6);burst(k.x,k.y,k.c||'#ff5a4a',10,180);if(k.dmg){puffs(k.x,k.y,'#4a4038',5,k.r,k.r*0.35);decal(k.x,k.y,'crack',null,k.r*0.8);light(k.x,k.y,k.r*2,k.c||'#ff5a4a',0.25,0.8)}}if(k.dmg){sfxAt('boom',k.x,k.y);G.shake+=2}}
    else if(k.k==='line'){hit=segHit(k.x,k.y,k.a,k.len,k.w/2+P.r*0.5);if(k.dmg){G.fxs.push({k:k.bolt?'ray':'smash',x:k.x,y:k.y,a:k.a,len:k.len,w:k.w,c:k.c,t:0,life:0.3});sfx(k.bolt?'thunder':'boom')}}
    else if(k.k==='cone'){const dd=Math.sqrt(d2(k,P));let da=Math.atan2(P.y-k.y,P.x-k.x)-k.a;da=Math.atan2(Math.sin(da),Math.cos(da));hit=dd<k.len+P.r&&Math.abs(da)<k.arc/2;slash(k.x,k.y,k.a,k.arc,k.len,k.c,0.3,1)}
-   if(hit&&k.dmg&&P.inv<=0&&!P.down){hurt(k.dmg);if(k.onHit)k.onHit()}
-   if(G.mp&&k.dmg)for(const q of PL){if(q===P||q.down||q.inv>0||!teleHits(k,q))continue;withP(q,()=>{hurt(k.dmg);if(k.onHit)k.onHit()})}if(k.dmg)try{illTele(k)}catch(e){}
+   if(hit&&k.dmg&&P.inv<=0&&!P.down){hurt(k.dmg,k);if(k.onHit)k.onHit()}
+   if(G.mp&&k.dmg)for(const q of PL){if(q===P||q.down||q.inv>0||!teleHits(k,q))continue;withP(q,()=>{hurt(k.dmg,k);if(k.onHit)k.onHit()})}if(k.dmg)try{illTele(k)}catch(e){}
    if(k.after)k.after()}}
  G.tele=G.tele.filter(k=>k.k==='beam'?k.t<k.delay+k.dur:k.k==='wave'?k.r<k.max:k.t<k.delay+0.05);
  for(const o of G.orbs){o.t+=dt;o.x+=o.vx*dt;o.y+=o.vy*dt;o.vx*=0.9;o.vy*=0.9;const OQ=G.mp?nearestP(o.x,o.y):P;const dd=d2(o,OQ);const mag=o.k==='gold'?170:180;
@@ -4097,7 +4097,7 @@ function drawBanner(dt){try{heroScreen(dt);taktHud();tutTick(dt)}catch(e){}const
  const inA=Math.min(1,b.t/0.35),a=Math.min(inA,Math.min(1,(b.dur-b.t)/0.5));
  if(b.bars){const bh=Math.min(H*0.11,90)*Math.min(1,b.t/0.3,(b.dur-b.t)/0.4);cx.globalAlpha=1;cx.fillStyle='#000';cx.fillRect(0,0,W,bh);cx.fillRect(0,H-bh,W,bh)}
  const y=b.y||H*(b.bars?0.32:0.26),fs=Math.min(b.size||56,W*0.105),sc=1+0.3*(1-inA)*(1-inA);
- cx.save();cx.translate(W/2,y);cx.scale(sc,sc);cx.textAlign='center';cx.textBaseline='middle';
+ cx.save();cx.translate(W/2,y);cx.scale(sc,sc);cx.textAlign='center';{cx.font=`${Math.round(fs)}px 'IM Fell English SC','Palatino Linotype',Georgia,serif`;const mw=cx.measureText(b.big).width;if(mw>W*0.92){const k=W*0.92/mw;cx.scale(k,k)}}cx.textBaseline='middle';
  const gr=cx.createLinearGradient(-W/2,0,W/2,0);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(0.5,'rgba(0,0,0,.6)');gr.addColorStop(1,'rgba(0,0,0,0)');cx.globalAlpha=a;cx.fillStyle=gr;cx.fillRect(-W/2,-fs*0.8,W,fs*(b.small?2.15:1.6));
  cx.globalCompositeOperation='lighter';glow(0,0,fs*2.4,b.col,0.32*a,true);cx.globalCompositeOperation='source-over';
  cx.globalAlpha=a;cx.font=`${Math.round(fs)}px 'IM Fell English SC','Palatino Linotype',Georgia,serif`;cx.lineWidth=5;cx.strokeStyle='rgba(0,0,0,.85)';cx.strokeText(b.big,0,0);cx.fillStyle=b.col;cx.fillText(b.big,0,0);
@@ -4934,7 +4934,7 @@ function showTitle(keep){unseedRng();if(CLOUD.pend&&!$('cloudAsk'))setTimeout(()
  const ups=META.map(m=>{const r=hs.up[m.id]||0,max=r>=m.max,cost=metaCost(m,r);return`<div class="up"><div><div class="t">${m.name}<small>${r} / ${m.max}</small></div><div class="d">${r?m.d(r):'noch nicht gelernt'}${max?'':` → <span style="color:var(--text)">${m.d(r+1)}</span>`}</div></div><button class="btn ${!max&&SAVE.gold>=cost?'gold':''}" data-act="meta" data-id="${m.id}" ${max||SAVE.gold<cost?'disabled':''}>${max?'Maximal':fmt(cost)+' Gold'}</button></div>`}).join('');
  const chips=diffChips();
  const body=tab==='rang'?lbHtml():tab==='best'?renderBestiary():tab==='lager'?`<div class="muted" style="font-size:13px">Dauerhaft für ${H.name}. Gold teilen sich alle Helden.</div><div class="ups">${ups}</div>${ruhmHtml()}${legHtml(sel)}${setsHtml(sel)}`
-  :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Im Roguelite behält jeder Held Stufe, Talente und Ausrüstung, und jeder besiegte Ort-Boss öffnet ein Portal als neuen Startpunkt. Im Hardcore beginnt jeder Lauf von vorn – dafür zählt er für die Bestenliste. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Die Orgel nahm Simon Dalzell (Ivy Audio) auf. Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div><div class="card ups"><div class="eyebrow">Einstellungen</div>${gfxRow()}${volRows()}</div><div class="card ups"><div class="eyebrow">Controller &amp; Mehrspieler</div><div class="ctlBox" style="display:flex;flex-direction:column;gap:8px">${ctlRows()}</div></div><p class="muted" style="font-size:12px;text-align:center;margin:4px 0 0">Spielversion ${HS_VERSION}</p>`
+  :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Leertaste = Ausweichrolle, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, M = Karte, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Im Roguelite behält jeder Held Stufe, Talente und Ausrüstung, und jeder besiegte Ort-Boss öffnet ein Portal als neuen Startpunkt. Im Hardcore beginnt jeder Lauf von vorn – dafür zählt er für die Bestenliste. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Die Orgel nahm Simon Dalzell (Ivy Audio) auf. Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div><div class="card ups"><div class="eyebrow">Einstellungen</div>${gfxRow()}${volRows()}</div><div class="card ups"><div class="eyebrow">Controller &amp; Mehrspieler</div><div class="ctlBox" style="display:flex;flex-direction:column;gap:8px">${ctlRows()}</div></div><p class="muted" style="font-size:12px;text-align:center;margin:4px 0 0">Spielversion ${HS_VERSION}</p>`
   :`${modeCard()}${astWahlHtml(sel)}<p class="lead">${H.blurb}</p><div class="facts"><div><span>Kampfstil</span>${ATKSTYLE[sel]}</div><div><span>Bester Lauf</span>${best}</div></div>`;
  showScreen(`<div class="camp" style="--hc:${HCOL[sel]}">
   <header class="camp-top"><div><a class="back" href="./#taverne">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
@@ -5431,7 +5431,7 @@ function zielTick(dt){const O=G.obj;if(!O||O.done||G.room||G.state!=='play')retu
   const tot=1050+650,gone=Math.abs((O.ax==='x'?O.gx:O.gy)-O.f);O.fr=clamp(1-gone/tot,0,1);O.txt=`${O.n}! Lauft zum Ausgang`;
   if(L.some(q=>Math.hypot(q.x-O.gx,q.y-O.gy)<120)){O.f=O.dir>0?-9999:9999;zielGeschafft(O.gx,O.gy)}}
  else if(O.k==='halten'){const inC=L.some(q=>Math.hypot(q.x-O.hx,q.y-O.hy)<150);O.hold=Math.max(0,O.hold+(inC?dt:-dt*0.4));O.fr=O.hold/O.need;O.txt=inC?`Haltet die Stellung · ${Math.ceil(O.need-O.hold)} s`:'Zurück in den Kreis!';
-  if(Math.random()<dt*0.5&&G.enemies.length<70){const a=rnd(TAU);const f=pickFoe(0.7);for(let i=0;i<3;i++)spawnEnemy(f,O.hx+Math.cos(a)*420+rnd(-40,40),O.hy+Math.sin(a)*420+rnd(-40,40),{})}
+  /*halten-sanft*/if(Math.random()<dt*0.22&&G.enemies.filter(e=>!e.dead&&!e.wlZz).length<(G.diff>=2?22:26)){const a=rnd(TAU);const f=pickFoe(0.6);for(let i=0;i<2;i++)spawnEnemy(f,O.hx+Math.cos(a)*420+rnd(-40,40),O.hy+Math.sin(a)*420+rnd(-40,40),{})}
   if(O.hold>=O.need)zielGeschafft(O.hx,O.hy-60)}}
 /* Gefangene: kurz am Käfig stehen */
 function kaefigTouch(p,touch){if(p.freed)return;const dtw=Math.min(0.05,Math.max(0,G.time-(p.lt===undefined?G.time:p.lt)));p.lt=G.time;
@@ -6140,7 +6140,7 @@ function showLager(sel){G.lagerOn=1;const L=lagerS(),npcs=lagerNpcs(),neu=lagerN
  if(cur&&cur.gift&&L.gift!==todayKey()){const g=Math.round(20+15*lagerOrte().size);SAVE.gold+=g;L.gift=todayKey();persist();line+=` – Gundren steckt dir ${g} Gold zu. „Für unterwegs.“`;sfx('coin')}
  G.lagerLine=cur?cur.id+'|'+line:'';
  showScreen(`<div class="wrap narrow lager-wrap">
-  <div class="inv-head"><h2>Das Lager<small>${npcs.length-1} Freunde der Gruppe</small></h2><div class="row"><button class="btn gold" data-act="close">Zurück</button></div></div>
+  <div class="inv-head"><h2>Das Lager<small>${npcs.length>1?(npcs.length-1)+(npcs.length===2?' Freund':' Freunde')+' der Gruppe':'noch keine weiteren Freunde'}</small></h2><div class="row"><button class="btn gold" data-act="close">Zurück</button></div></div>
   <canvas class="lager-cv" data-lager="${id}|${npcs.map(n=>n.id).join(',')}|${cur?cur.id:''}" aria-hidden="true"></canvas>
   <p class="lager-say" aria-live="polite">${cur?`<b>${esc(cur.n)}:</b> `:''}${esc(line)}</p>
   <div class="chips lager-chips">${npcs.map(n=>`<button class="chip ${cur&&cur.id===n.id?'on':''}" data-act="lager-npc" data-k="${n.id}">${esc(n.n)}</button>`).join('')}</div>
@@ -13469,7 +13469,7 @@ function wlTick(dt){const W=G.wl;if(!W||!W.an||G.room)return;W.t+=dt;
  {const bb=G.boss&&!G.boss.dead?G.boss:G.guardE&&!G.guardE.dead?G.guardE:null;if(bb){const q=nearestP(bb.x,bb.y);if(q&&d2(bb,q)>760*760)W.fernT=(W.fernT||0)+dt;else W.fernT=0;if(W.fernT>12){W.fernT=0;const p=wlAusserSicht(q.x,q.y,300,420)||wlNahFrei(q.x+200,q.y,8);if(p){smoke(bb.x,bb.y);bb.x=p.x;bb.y=p.y;smoke(p.x,p.y)}}}else W.fernT=0}
  const b=G.boss&&!G.boss.dead?G.boss:G.guardE&&!G.guardE.dead?G.guardE:null;G.wlZiel=b?{x:Math.round(b.x),y:Math.round(b.y),k:'boss'}:G.portal?{x:Math.round(G.portal.x),y:Math.round(G.portal.y),k:'portal'}:null}
 {const st0=spawnTick;spawnTick=function(dt){if(!G.wl||!G.wl.an||G.room)return st0(dt);wlTick(dt);
- const O=G.obj,bossy=G.boss||G.guardE,orig=bossy||(O&&!O.done&&(O.k==='steine'||O.k==='halten'));if(!orig)return;
+ const O=G.obj,bossy=G.boss||G.guardE,orig=bossy||(O&&!O.done&&O.k==='steine');if(!orig)return;
  if(G.spawnT-dt>0){G.spawnT-=dt;return}const all=G.enemies;if(!all.some(e=>e.wlZz))return st0(dt);const zz=all.filter(e=>e.wlZz);G.enemies=all.filter(e=>!e.wlZz);try{st0(dt)}finally{G.enemies=G.enemies.concat(zz)}}}
 /* erste Welle: Begrüßung/Ziel bleiben, die Gegnergruppen am Start entfallen (die Welt ist schon bevölkert) */
 {const fw0=firstWave;firstWave=function(){if(!G.wl||!G.wl.an||G.room)return fw0.apply(this,arguments);const n0=G.enemies.length;const r=fw0.apply(this,arguments);
@@ -15208,6 +15208,595 @@ txEventDeko.m=new WeakMap();
 @media (max-height:460px){.tx-zw{gap:6px}.tx-zw .tx-ziel{display:none}.tx-intro .bookcv{height:96px}.tx-zw .fire-cv{height:110px}.tx-zw .tx-kern,.tx-done .tx-kern{font-size:28px}.tx-zw .tx-story{font-size:13px;padding:8px 14px}.tx-bar{height:16px}.tx-bar span{font-size:10px;line-height:16px}.tx-zw .tx-weiter{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:2px 8px}.tx-zw .tx-weiter i{display:none}.tx-zw .tx-weiter b{font-size:14px}.tx-zw .tx-outro{font-size:14px;line-height:1.35}.tx-zw .btn-main{padding-block:6px}}
 @media (prefers-reduced-motion:reduce){.tx-zw .tx-kern,.tx-bar i,.tx-chips,.tx-zw .tx-quip,.tx-zw .tx-tease{animation:none}}`;document.head.appendChild(st)}catch(e){}})();
 window.__hsTEXTE={txStageIntro,txChapterDone,txFireDeko,txEventDeko,txQuip,txTease,txStory,txProg,TX_TEASE,TX_Q,TX_STORY,showCampfire:()=>showCampfire()};
+
+/* qa_ui: Fehlbedienung/Anzeige – Tastatur in Zwischenmenüs, M nur im Spiel, kleine Anzeigefehler */
+(function(){
+ const st=document.createElement('style');
+ /* Sternbild-Kasten im Titel: .facts div ist ein Grid – jeder Astname landete in eigener Zeile, die Punkte dazwischen allein */
+ st.textContent='.stfacts div{display:block}.stfacts span{display:block;margin-bottom:3px}';document.head.appendChild(st);
+ /* M (Karte) nur im laufenden Spiel ohne offenes Menü – sonst Toast/Umschalten hinter dem Menü */
+ addEventListener('keydown',ev=>{if(ev.code==='KeyM'&&G&&G.state==='play'&&(G.overlay||!scr.hidden))ev.stopImmediatePropagation()},true);
+ /* Esc/I/T außerhalb des laufenden Spiels (Zwischenbildschirm, Lager, Schmied, Ende, Titel-Unterseiten):
+    bisher nur per Controller (padBack) bedienbar – Tastatur tat nichts */
+ const vis=sel=>[...scr.querySelectorAll(sel)].find(e=>!e.disabled&&e.offsetParent);
+ addEventListener('keydown',ev=>{const c=ev.code;if(ev.repeat||ev.defaultPrevented||!/^(Escape|KeyI|KeyT)$/.test(c))return;
+  if(!G||G.state==='play'||scr.hidden||typeof PADCAP!=='undefined'&&PADCAP)return;if(typeof HI!=='undefined'&&HI.on)return;
+  if(typeof lmOn==='function'&&lmOn()&&G.overlay&&G.lmOwn)return;
+  const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;
+  if(document.getElementById('cloudAsk'))return;
+  if(c==='Escape'){padBack();return}
+  if(!(G.state==='between'||G.state==='camp'))return;
+  const m=c==='KeyI'?'inv':'tree';const tab=vis(`.mtabs [data-act="mtab"][data-m="${m}"]`);
+  if(tab){if(tab.getAttribute('aria-selected')==='true'){const x=vis('[data-act="close"]');if(x)x.click()}else tab.click();return}
+  if(G.overlay)return;const o=vis(`[data-act="between-${m}"],[data-act="camp-${m}"]`);if(o)o.click()});
+})();
+/* qa_ui: Controller – wer beim Tod/Portal noch A (Fähigkeit 1) oder Start hämmert, übersprang sofort den End-/„Stufe geschafft“-Bildschirm.
+   Kurz nach dem Wechsel aus dem Kampf werden A/Start in Menüs ignoriert. */
+const QAG={t:0,f:99};
+{const er=endRun;endRun=function(){if(G&&G.state==='play'){QAG.t=performance.now();QAG.f=0}return er.apply(this,arguments)}}
+{const ep=enterPortal;enterPortal=function(){QAG.t=performance.now();QAG.f=0;return ep.apply(this,arguments)}}
+{const pm=padMenu;padMenu=function(){QAG.f++;if(performance.now()-QAG.t<1200||QAG.f<20){let M=null;try{M=padMap()}catch(e){}for(const s of Object.values(PADS.st)){if(!s||!s.pr)continue;s.pr[0]=false;if(M&&M.pause>=0)s.pr[M.pause]=false}}return pm.apply(this,arguments)}}
+/* qa_ui: Stufen-Banner („Schloss Crackmore / Die Halle der Zecher“) wurde von 2+ Toasts überdeckt – solange es läuft, rutschen die Toasts darunter */
+{const st=document.createElement('style');st.textContent='#toast.qa-ban{top:calc(26vh + 70px)!important}#toast.qa-banb{top:calc(32vh + 84px)!important}';document.head.appendChild(st);
+ const db=drawBanner;let on0='';drawBanner=function(){const r=db.apply(this,arguments);const b=G.banner,on=b&&!b.y&&(b.small||b.bars)&&G.state==='play'&&innerHeight>=560?(b.bars?'qa-banb':'qa-ban'):'';if(on!==on0&&toastEl){on0=on;toastEl.classList.remove('qa-ban','qa-banb');if(on)toastEl.classList.add(on)}return r};
+ const ch=clearHudFx;clearHudFx=function(){on0='';if(toastEl)toastEl.classList.remove('qa-ban','qa-banb');return ch.apply(this,arguments)}}
+/* qa_ui: Handy hoch – Einführungs-Hinweis lag über der Ziel-Leiste („0/51 · dann Wächter“); Minikarte deckte das Stufen-Banner ab */
+{const st=document.createElement('style');st.textContent='@media (max-width:560px) and (orientation:portrait){.tutk{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 190px)}}';document.head.appendChild(st)}
+{const wm=wlMini;wlMini=function(){const b=G&&G.banner;if(b&&b.small&&!b.bars&&!b.y&&innerWidth<900&&G.state==='play')return;return wm.apply(this,arguments)}}
+/* qa_ui: Doppelklick auf „Aufgeben“/„Abenteuer beginnen“/„Verwerfen“/„Alles verschrotten“ traf mit dem zweiten Klick die
+   Bestätigung an derselben Stelle – Lauf weg bzw. Spielstand überschrieben. Bestätigungen zählen erst 450 ms nach der Frage. */
+{const QAC={t:0},TRIG=/^(giveup|start|run-drop|inv-alles|mpr-drop)$/,CONF=/^(giveup-yes|start-yes|run-drop-yes|inv-alles-ja|mpr-drop-yes)$/;
+ addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,now=performance.now();
+  if(CONF.test(a)&&now-QAC.t<450){ev.stopImmediatePropagation();ev.preventDefault();return}if(TRIG.test(a))QAC.t=now},true)}
+/* qa_ui: Erklärfenster (Held/Stufenart) blieb über End-/Titelbildschirm stehen, wenn der Lauf währenddessen endete (z. B. online ohne Pause) */
+{const hk=()=>{try{if(typeof HI!=='undefined'&&HI.on)hiClose()}catch(e){}};
+ const er=endRun;endRun=function(){hk();return er.apply(this,arguments)};
+ const sti=showTitle;showTitle=function(){hk();return sti.apply(this,arguments)}}
+
+/* ================= Gegner-Ausbau (Paket „gegner“) =================
+   Mehr Fähigkeiten je Gegnerart (D&D-nah), Todes-Effekte, Boden-Gefahren, Schadensarten & Resistenzen,
+   Bosskämpfe mit Spezialgegnern statt Dauerflut, Bestiarium-Wissen (bestWissen/bestErlebt).
+   Alles am Anker angehängt; vorhandene Funktionen werden nur umhüllt. Präfix gn*. */
+
+/* ---------- Schadensarten ---------- */
+const GN_EL={phys:{n:'Physisch',c:'#d8d0c0',ic:'⚔'},feuer:{n:'Feuer',c:'#ff7a2a',ic:'♨'},frost:{n:'Frost',c:'#d4f0f2',ic:'❄'},gift:{n:'Gift & Säure',c:'#9ad04a',ic:'☣'},
+ blitz:{n:'Blitz',c:'#ffe066',ic:'ϟ'},heilig:{n:'Heilig',c:'#ffe9a0',ic:'☀'},nekro:{n:'Nekrotisch',c:'#b07ad8',ic:'☠'},psych:{n:'Psychisch',c:'#ff9ad8',ic:'◉'},arkan:{n:'Arkan',c:'#e0b0ff',ic:'✦'}};
+/* Heldenfähigkeiten → Schadensart (alles andere physisch) */
+const GN_SKEL={b_juggle:'feuer',e_fireball:'feuer',f_explode:'feuer',f_f_spreng:'feuer',e_icefan:'frost',
+ e_call:'blitz',e_chain:'blitz',e_storm:'blitz',e_tempest:'blitz',e_wave:'blitz',
+ z_poison:'gift',e_swarm:'gift',e_p_befall:'gift',e_p_frucht:'gift',e_p_kranz:'gift',e_p_platz:'gift',e_p_ring:'gift',e_p_sym:'gift',e_p_wurf:'gift',
+ z_dawn:'heilig',e_moon:'heilig',z_p_ernte:'nekro',z_p_gang:'nekro',z_p_klage:'nekro',z_p_schrei:'nekro',z_p_troph:'nekro',z_p_wache:'nekro',z_p_wehklag:'nekro',
+ b_dissonant:'psych',b_mock:'psych',b_pattern:'psych',b_fear:'psych',b_laugh:'psych',b_hold:'psych',b_phantom:'psych',b_hall:'psych',b_mirror:'psych',b_flute:'psych',
+ b_g_darb:'psych',b_g_glanz:'psych',b_g_knie:'psych',b_g_krone:'psych',b_g_kuss:'psych',b_g_mantel:'psych',b_g_unzer:'psych',b_door:'arkan',
+ e_s_bolt:'arkan',e_s_fessel:'arkan',e_s_form:'arkan',e_s_funkel:'arkan',e_s_karte:'arkan',e_s_nacht:'arkan',e_s_omen:'arkan'};
+function gnElHero(o){if(!o)return'phys';if(o.el)return o.el;if(o.dot){const d=String(o.dot);if(d==='burn')return'feuer';if(d==='poison'||d.indexOf('venom')===0)return'gift';if(d==='bleed')return'phys'}
+ if(o.lightning)return'blitz';if(o.holy)return'heilig';let s=null;try{s=o.dmK||DMS||null}catch(er){}if(s){const m=/[befz]_[a-z0-9_]+/.exec(String(s));if(m&&GN_SKEL[m[0]])return GN_SKEL[m[0]]}return'phys'}
+/* Farbe eines Gegnerangriffs → Schadensart (für Telegrafen/Geschosse ohne eigene Angabe) */
+const GN_COLEL={'#ff7a2a':'feuer','#ff5a14':'feuer','#ff3a1a':'feuer','#ff8a3a':'feuer','#ff6a2a':'feuer','#ff8a2a':'feuer','#ffb040x':'feuer','#ff7a1a':'feuer',
+ '#bfefff':'frost','#bfe6ff':'frost','#cfe8ff':'frost','#d4f0f2':'frost','#9fe6ff':'blitz','#9fb8ff':'blitz','#ffe066':'blitz',
+ '#8ad04a':'gift','#a8d040':'gift','#a8e050':'gift','#9ad040':'gift','#b8d060':'gift','#9ad04a':'gift','#b8e04a':'gift','#c0a050':'gift'};
+const GN_ZEL={feuer:'feuer',lava:'feuer',gift:'gift',sporen:'gift',saeure:'gift',frost:'frost',sporenv:'gift'};
+/* Spieler-Widerstände: Feuer (resF), Frost (resK), Gift & Säure (resG) */
+const GN_RESK={feuer:'resF',frost:'resK',gift:'resG'};
+const gnPRes=(q,el)=>{const k=GN_RESK[el];return k&&q&&q.st?Math.min(0.75,q.st[k]||0):0};
+
+/* ---------- Bestiarium-Wissen (modular; auch für Fallen anderer Pakete) ----------
+   bestWissen(key,{n,d,tip,ic,c,foe:'goblin'|['a','b'],grp:'Fallen',typ}) registriert einen Eintrag,
+   bestErlebt(key) schaltet ihn frei (gespeichert in SAVE.bw), sobald man ihn im Spiel erlebt hat. */
+const BW={};
+function bestWissen(key,o){BW[key]=Object.assign({key},o||{});return BW[key]}
+let GN_BWQ=[],GN_BWT=0;
+function bestErlebt(key){if(!G||G.bot||!BW[key])return false;SAVE.bw=SAVE.bw||{};if(SAVE.bw[key])return false;SAVE.bw[key]=1;GN_BWQ.push(BW[key]);gnBwToast();return true}
+function gnBwToast(){if(!GN_BWQ.length||!G||G.time<GN_BWT)return;const L=GN_BWQ.splice(0,3);GN_BWT=G.time+3.5;const fo=e=>{const f=Array.isArray(e.foe)?e.foe[0]:e.foe;const d=f&&(FOES[f]||GUARDS[f]||BOSSES[f]);return d?d.n+': ':''};
+ toast(`📖 Bestiarium: ${L.map(e=>`<b>${esc(fo(e)+e.n)}</b>`).join(', ')}${GN_BWQ.length?` (+${GN_BWQ.length})`:''}`,'#c8bca8');if(GN_BWQ.length>6)GN_BWQ.length=0}
+try{if(Array.isArray(window.__bwQ))for(const a of window.__bwQ)bestWissen(a[0],a[1])}catch(er){}
+/* Bestiarium-Zählung reparieren: Gegnerdefinitionen bekamen nie ihre id – „Besiegt“ blieb bei 0 */
+for(const k in FOES)if(!FOES[k].id)FOES[k].id=k;for(const k in GUARDS)if(!GUARDS[k].id)GUARDS[k].id='w_'+k;for(const k in BOSSES)if(!BOSSES[k].id)BOSSES[k].id='b_'+k;
+
+/* ---------- Spezialgegner (nur in Bosskämpfen, D&D-Klassiker, gezeichnet mit vorhandenen Formen) ---------- */
+const GN_SPEZ={
+ ork:{n:'Ork-Kriegshäuptling',k:'melee',shape:'human',c:'#4a3a2e',t:'#8a2a24',skin:'#7c8a58',helm:1,hp:2.2,sp:96,dmg:1.35,xp:6,size:1.55,spez:1},
+ hobMagier:{n:'Hobgoblin-Kampfmagier',k:'caster',shape:'goblin',c:'#8a3a2a',t:'#e5b454',staff:1,hp:1.6,sp:76,dmg:1.25,xp:6,size:1.4,pc:'#ff8a3a',spez:1},
+ oger:{n:'Oger',k:'tank',shape:'giant',c:'#6a5a40',t:'#4a3a2a',skin:'#b0966a',hp:3.2,sp:66,dmg:1.6,xp:8,size:2.1,spez:1},
+ ghul:{n:'Ghul',k:'fast',shape:'zombie',c:'#3e4a3e',t:'#2a2a24',skin:'#9aa890',hp:1.5,sp:150,dmg:1.15,xp:5,size:1.25,spez:1},
+ banshee:{n:'Banshee',k:'ranged',shape:'wraith',c:'#c8d4d0',t:'#f4fff8',hp:1.5,sp:96,dmg:1.15,xp:6,size:1.45,pc:'#e8f4f0',spez:1},
+ gespenst:{n:'Gespenst',k:'fast',shape:'wraith',c:'#4a4a5a',t:'#d8d8e8',hp:1.4,sp:135,dmg:1.1,xp:5,size:1.3,spez:1},
+ troll:{n:'Troll',k:'tank',shape:'giant',c:'#3a5a32',t:'#2a3a22',skin:'#6e8e4e',hp:3,sp:92,dmg:1.45,xp:8,size:2,spez:1},
+ vettel:{n:'Grüne Vettel',k:'caster',shape:'human',c:'#2e4a26',t:'#6a3a8a',skin:'#7a9a5a',hair:'#3a3a2a',hat:1,staff:1,hp:1.7,sp:84,dmg:1.2,xp:6,size:1.35,pc:'#7ad04a',spez:1},
+ myconid:{n:'Myconid-Fürst',k:'tank',shape:'blob',c:'#a8865a',t:'#e8cfa0',hp:2.6,sp:62,dmg:1.2,xp:6,size:1.75,spez:1},
+ schinder:{n:'Gedankenschinder',k:'caster',shape:'human',c:'#3a2440',t:'#b080ff',skin:'#9a7aaa',hat:1,hp:1.8,sp:82,dmg:1.25,xp:7,size:1.4,pc:'#d080ff',spez:1},
+ basilisk:{n:'Basilisk',k:'melee',shape:'dragon',c:'#5a6a3a',t:'#c8d070',hp:2.6,sp:88,dmg:1.35,xp:7,size:1.35,spez:1},
+ wuerfel:{n:'Gallertwürfel',k:'tank',shape:'blob',c:'#8acaa8',t:'#d8f0e0',hp:3.4,sp:58,dmg:1.3,xp:8,size:2.2,spez:1},
+ rost:{n:'Rostmonster',k:'fast',shape:'beetle',c:'#8a4a22',t:'#d8862e',hp:2,sp:128,dmg:1.15,xp:6,size:1.7,spez:1},
+ magmaMephit:{n:'Magma-Mephit',k:'fast',shape:'bat',c:'#a8401a',t:'#ffb040',hp:1.2,sp:132,dmg:1.15,xp:4,size:1.2,spez:1},
+ eisMephit:{n:'Eis-Mephit',k:'fast',shape:'bat',c:'#a8bcc0',t:'#f2fbfb',hp:1.2,sp:132,dmg:1.1,xp:4,size:1.2,spez:1}
+};
+for(const k in GN_SPEZ){if(!FOES[k]){GN_SPEZ[k].id=k;FOES[k]=GN_SPEZ[k]}}
+Object.assign(LORE,{ork:'Ein Kriegshäuptling der Orks. Sieht er Feinde, stürmt er los – und brüllt seine Bande hinterher.',hobMagier:'Hobgoblins sind diszipliniert. Ihre Kampfmagier schützen sich mit Schilden und verschwinden im Nebel.',
+ oger:'Groß, hungrig und nicht besonders klug. Wirft mit allem, was er hochheben kann – meistens Felsen.',ghul:'Ein Leichenfresser mit lähmenden Klauen. Wer erstarrt, wird gefressen.',banshee:'Der Geist einer Elfe voller Kummer. Ihr Klagen lässt Herzen stocken.',
+ gespenst:'Ein Gespenst aus Kälte und Hass. Seine Berührung saugt die Lebenskraft aus – Heilung wirkt kaum noch.',troll:'Ein Troll heilt jede Wunde in Sekunden. Nur Feuer und Säure halten das auf.',
+ vettel:'Eine Grüne Vettel: Hexe, Illusionistin und Meisterin der Flüche.',myconid:'Ein Pilzfürst aus dem Unterreich. Seine Sporen verwirren die Sinne.',schinder:'Ein Gedankenschinder. Sein psionischer Stoß lähmt den Geist.',
+ basilisk:'Wer dem Basilisken zu lange in die Augen schaut, wird zu Stein.',wuerfel:'Ein durchsichtiger Würfel aus Säure, der alles verschlingt, was ihm im Weg steht.',rost:'Das Rostmonster frisst Metall. Deine Rüstung ist für es ein Festessen.',
+ magmaMephit:'Ein kleiner Elementargeist aus Lava. Stirbt er, explodiert er in einer Glutwolke.',eisMephit:'Ein frostiger Mephit. Sein Tod hinterlässt eine Eisfläche.'});
+
+/* ---------- Gegnerfähigkeiten ---------- */
+/* Hilfen */
+const gnBot=()=>!!(G&&G.bot);
+function gnCd(e,k,t){const c=e.gnC||(e.gnC={});if((c[k]||0)>G.time)return false;c[k]=G.time+t*(e.boss?1.6:e.guard?1.35:1)*(e.gnSp?0.85:1);return true}
+function gnCdSet(e,k,t){const c=e.gnC||(e.gnC={});c[k]=G.time+t}
+function gnAnim(e,k,d){e.gnAk=k;e.gnAt=d;e.gnAd=d}
+function gnSicht(e){for(const q of mpL()){if(!q||q.down||q.netGone)continue;if(Math.abs(q.x-e.x)<820&&Math.abs(q.y-e.y)<520)return true}return false}
+function gnErl(e,k){if(!e||!e.def||!e.def.id)return;e.gnLk=k;e.gnLkT=1.5;if(gnBot())return;if(gnSicht(e))bestErlebt(e.def.id+':'+k)}
+function gnFrei(e){return !(e.stun>0)&&!(e.fearT>0)&&!e.dead&&!(typeof graceOn==='function'&&graceOn()&&!e.boss)&&P&&!P.down&&!(P.stealthT>0)&&G.state==='play'&&!(e.gnAtt>0)}
+function gnD(e){return Math.sqrt(d2(e,P))}
+/* Spieler-Zustände */
+function gnFear(q,t){q.gnFearT=Math.max(q.gnFearT||0,t);gnTip('furcht','Verängstigt: Du richtest weniger Schaden an und bist langsamer.','#c48cff')}
+function gnGift(q,dps,t){const r=gnPRes(q,'gift');t*=1-0.6*r;if(t<=0.1)return;q.gnGiftT=Math.max(q.gnGiftT||0,t);q.gnGiftD=Math.max(q.gnGiftT>0?(q.gnGiftD||0):0,dps);gnTip('gift','Vergiftet: Gift wirkt über Zeit. Giftwiderstand auf Gegenständen hilft.','#9ad04a')}
+function gnBrand(q,dps,t){const r=gnPRes(q,'feuer');t*=1-0.6*r;if(t<=0.1)return;q.gnBrandT=Math.max(q.gnBrandT||0,t);q.gnBrandD=Math.max(q.gnBrandT>0?(q.gnBrandD||0):0,dps);gnTip('brand','Du brennst! Ausweichen oder Feuerwiderstand verkürzen das.','#ff7a2a')}
+function gnSlow(q,a,t,el){if(el){const r=gnPRes(q,el);t*=1-0.6*r}if(t<=0.05)return;q.slowT=Math.max(q.slowT||0,t);q.slowA=Math.max(q.slowA||0,a)}
+function gnVuln(q,a,t){q.gnVulnT=Math.max(q.gnVulnT||0,t);q.gnVulnA=Math.max(q.gnVulnT>0?(q.gnVulnA||0):0,a);gnTip('vuln','Verwundbar: Du erleidest mehr Schaden, bis der Fluch verfliegt.','#d27cff')}
+function gnRost(q,t){q.buffs.gnRost=Math.max(q.buffs.gnRost||0,t);recalc();gnTip('rost','Rüstung zerfressen: −35% Rüstung für kurze Zeit.','#d8862e')}
+function gnTip(k,txt,c){if(gnBot())return;SAVE.gnTip=SAVE.gnTip||{};if(SAVE.gnTip[k])return;SAVE.gnTip[k]=1;toast(txt,c)}
+function gnStein(q){q.gnSteinN=(q.gnSteinN||0)+1;q.gnSteinT=5;if(q.gnSteinN>=3){q.gnSteinN=0;q.stunT=Math.max(q.stunT||0,1.3);q.gnSteinX=1.3;word(q.x,q.y-44,'Versteinert!','#c8d070');sfx('d_stone')}else{gnSlow(q,0.25*q.gnSteinN,2.5);word(q.x,q.y-40,'Erstarrt …','#c8d070')}gnTip('stein','Versteinerung: Drei Blicke des Basilisken lassen dich erstarren – aus seinem Blickstrahl laufen!','#c8d070')}
+
+/* Fähigkeiten-Tabelle: n Name, d Wirkung, tip Ratschlag, dd D&D-Bezug, ic Symbol, c Farbe, el Schadensart
+   tick(e,dt) aktive Fähigkeit (Gastgeber), melee(e) beim Nahkampftreffer, hit(e,o) wenn der Gegner getroffen wird, draw(e,c,t,p) Animation */
+const GNF={
+ flucht:{n:'Flinke Flucht',dd:'Nimble Escape',ic:'»',c:'#c9e07a',d:'Springt nach einem Treffer flink zurück und rennt kurz davon.',tip:'Fernangriffe, Fesseln oder Betäubung fangen Flüchtende ab.',
+  hit(e,o){if(o.dot||e.dead||e.stun>0||e.root>0||e.boss||e.guard||Math.random()>0.3||!gnCd(e,'flucht',5))return;const a=Math.atan2(e.y-P.y,e.x-P.x);e.kx+=Math.cos(a)*420;e.ky+=Math.sin(a)*420;e.fleeT=1;gnAnim(e,'flucht',0.45);puffs(e.x,e.y+e.r*0.6,'#b8a888',5,50,8);gnErl(e,'flucht')},
+  draw(e,c,t,p){c.globalAlpha=0.6*(1-p);for(let i=0;i<3;i++)ln(c,'#e8e0c8',2,e.x-e.r-6-i*7,e.y-6+i*6,e.x-e.r-16-i*7,e.y-6+i*6)}},
+ rudel:{n:'Rudeltaktik',dd:'Pack Tactics',ic:'⁂',c:'#ff8a5a',d:'Steht ein Rudelmitglied neben seinem Ziel, beißt er 15% härter zu.',tip:'Rudel auseinanderziehen und Einzelne zuerst erledigen.',
+  tick(e,dt){e.gnRT=(e.gnRT||0)-dt;if(e.gnRT>0)return;e.gnRT=0.4;if(d2(e,P)>220*220)return;let n=0;query(P.x,P.y,150,o=>{if(o!==e&&!o.dead&&o.def.shape===e.def.shape&&d2(o,P)<150*150)n++});if(n){e.gnRud=0.6;if(gnCd(e,'rudelSeen',6))gnErl(e,'rudel')}},
+  draw(e,c,t){}},
+ aggressiv:{n:'Aggressiv',dd:'Aggressive',ic:'➶',c:'#ff6a3a',d:'Stürmt mit einem gewaltigen Satz auf sein Ziel zu.',tip:'Seitlich ausweichen – der Sprung geht nur geradeaus.',
+  tick(e){if(e.boss||e.guard)return;const d=gnD(e);if(d<150||d>380||!gnFrei(e)||!gnCd(e,'aggressiv',7))return;const a=ang(e,P),L=Math.min(440,d+70);gnAnim(e,'aggressiv',0.55);e.stun=Math.max(e.stun,0.55);
+   tele({k:'line',x:e.x,y:e.y,a,len:L,w:e.r*1.7,delay:0.55,c:'#ff6a3a',el:'phys'});sfxAt('e_wucht',e.x,e.y);gnErl(e,'aggressiv');
+   later(0.55,()=>{if(e.dead||e.stun>0.05)return;e.dashT=0.3;e.cvx=Math.cos(a)*L/0.3;e.cvy=Math.sin(a)*L/0.3;e.hitCd=0;sfxAt('roar',e.x,e.y);puffs(e.x,e.y+e.r*0.6,'#a89a7a',6,70,10)})},
+  draw(e,c,t,p){c.globalAlpha=0.7*p;glow(e.x,e.y,e.r*2.2,'#ff6a3a',0.5*p,true);c.globalAlpha=0.8;for(let i=0;i<4;i++){const y=e.y-e.r*0.6+i*e.r*0.4,x=e.x-e.r*(1.2+0.5*((t*4+i*0.3)%1));ln(c,'#ffd0a0',2,x,y,x-12*p,y)}}},
+ stampfen:{n:'Stampfen',ic:'✺',c:'#c8a070',d:'Stampft auf den Boden: Eine Druckwelle stößt Helden zurück und bremst sie.',tip:'Nach dem Ausholen aus dem Kreis rollen.',
+  tick(e){const d=gnD(e);if(d>e.r+150||!gnFrei(e)||!gnCd(e,'stampfen',7.5))return;gnAnim(e,'stampfen',0.85);const R=e.r+110;sfxAt('g_wind',e.x,e.y);gnErl(e,'stampfen');
+   tele({k:'circle',x:e.x,y:e.y,r:R,delay:0.85,dmg:e.dmg*1.15,c:'#c8a070',follow:e,el:'phys',gs:'gnStampf',onHit:()=>{const a=ang(e,P);P.kx+=Math.cos(a)*520;P.ky+=Math.sin(a)*520;gnSlow(P,0.4,1)},after:()=>{if(e.dead)return;G.shake+=3;chunks(e.x,e.y,'#6a5a4a',8,220);puffs(e.x,e.y,'#a89a7a',10,R,18);sfxAt('d_stone',e.x,e.y)}})},
+  draw(e,c,t,p){c.globalAlpha=0.5+0.4*p;c.strokeStyle='#e8c890';c.lineWidth=2.5;for(let i=0;i<5;i++){const a=i*1.256+e.seed,r0=e.r*0.8,r1=e.r*(1+1.4*p);ln(c,'#7a6040',2,e.x+Math.cos(a)*r0,e.y+e.r*0.5+Math.sin(a)*r0*0.4,e.x+Math.cos(a+0.2)*r1,e.y+e.r*0.5+Math.sin(a+0.2)*r1*0.4)}glow(e.x,e.y+e.r*0.4,e.r*1.6,'#c8a070',0.35*p,true)}},
+ salve:{n:'Salve',ic:'⫸',c:'#e8d8b0',d:'Zielt kurz und feuert dann drei Geschosse rasch hintereinander.',tip:'Sobald die Ziellinie erscheint: quer zur Schussrichtung laufen.',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!onScr(e)||!losFrei(e,P)||!gnCd(e,'salve',6.5))return;const a=ang(e,P);gnAnim(e,'salve',0.55);e.atkCd=Math.max(e.atkCd,1.6);gnErl(e,'salve');
+   tele({k:'line',x:e.x,y:e.y,a,len:460,w:16,delay:0.5,c:e.def.pc||'#e8d8b0'});for(let i=0;i<3;i++)later(0.5+i*0.13,()=>{if(e.dead||e.stun>0)return;enemyShoot(e,ang(e,P)+rnd(-0.05,0.05),320,0.7)})},
+  draw(e,c,t,p){glow(e.x+(e.faceX>e.x?1:-1)*e.r,e.y-4,10+8*p,'#fff6d0',0.8*p,true)}},
+ heulen:{n:'Schauerliches Heulen',ic:'◌',c:'#b48cff',d:'Ein Heulen, das durch Mark und Bein geht: Helden in der Nähe werden verängstigt (weniger Schaden, langsamer).',tip:'Abstand halten, solange er den Kopf hebt.',
+  tick(e){const d=gnD(e);if(d>330||!gnFrei(e)||!gnCd(e,'heulen',13))return;gnAnim(e,'heulen',0.75);sfxAt('gv_wolf',e.x,e.y);gnErl(e,'heulen');
+   tele({k:'circle',x:e.x,y:e.y,r:270,delay:0.75,c:'#b48cff',follow:e,gs:'gnHeul',onHit:()=>gnFear(P,3),dmg:e.dmg*0.3,after:()=>{if(!e.dead){ring(e.x,e.y,270,'#b48cff',0.6,5);sfxAt('roar',e.x,e.y)}}})},
+  draw(e,c,t,p){c.strokeStyle='#d8c0ff';for(let i=0;i<3;i++){const r=e.r+((t*60+i*18)%54);c.globalAlpha=0.6*(1-((t*60+i*18)%54)/54);c.lineWidth=2;c.beginPath();c.arc(e.x,e.y-e.r*0.6,r,-2.4,-0.7);c.stroke()}}},
+ kampfschrei:{n:'Kampfschrei',dd:'Battle Cry',ic:'❗',c:'#ff5a3a',d:'Ein Schrei, der alle Verbündeten ringsum anstachelt: schneller und stärker.',tip:'Zuerst den Rufer ausschalten – oder die Gruppe auseinanderziehen.',
+  tick(e){if(d2(e,P)>520*520||!gnFrei(e)||!gnCd(e,'kampfschrei',15))return;gnAnim(e,'kampfschrei',0.8);gnErl(e,'kampfschrei');sfxAt('g_horn',e.x,e.y);let n=0;
+   query(e.x,e.y,330,o=>{if(!o.dead&&!o.boss&&d2(o,e)<330*330){o.drumT=G.time+6;n++;if(fxQ()>1)burst(o.x,o.y,'#ff5a3a',3,60)}});ring(e.x,e.y,330,'#ff5a3a',0.6,5);word(e.x,e.y-e.r-18,'Waaagh!','#ff7a5a')},
+  draw(e,c,t,p){c.globalAlpha=0.8*p;c.strokeStyle='#ff7a5a';c.lineWidth=3;c.beginPath();c.arc(e.x,e.y-e.r*0.8,e.r*(0.8+1.6*(1-p)),-2.6,-0.5);c.stroke()}},
+ feenfeuer:{n:'Feenfeuer',dd:'Faerie Fire',ic:'✧',c:'#d27cff',d:'Violette Flammen umhüllen dich: Du leuchtest und erleidest 20% mehr Schaden.',tip:'Aus dem Kreis rollen, bevor er sich schließt.',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!onScr(e)||!gnCd(e,'feenfeuer',13))return;gnAnim(e,'cast',0.85);e.gnCc='#d27cff';gnErl(e,'feenfeuer');sfxAt('magic',e.x,e.y);
+   tele({k:'circle',x:P.x,y:P.y,r:72,delay:0.85,c:'#d27cff',gs:'gnFee',onHit:()=>{gnVuln(P,0.2,5);word(P.x,P.y-40,'Feenfeuer!','#e0a0ff')},after:function(){sparks(this.x,this.y,'#e0a0ff',12,200,1)}})},
+  draw(e,c,t,p){}},
+ dunkel:{n:'Dunkelheit',dd:'Darkness',ic:'●',c:'#5a3a7a',d:'Beschwört eine Kugel magischer Dunkelheit: Man sieht kaum, was darin lauert, und kommt schwer voran.',tip:'Die Kugel verlassen – drinnen ist man langsam.',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!onScr(e)||!gnCd(e,'dunkel',17))return;gnAnim(e,'cast',0.7);e.gnCc='#8a6aba';gnErl(e,'dunkel');const x=P.x,y=P.y;sfxAt('magic',e.x,e.y);
+   tele({k:'circle',x,y,r:110,delay:0.8,c:'#5a3a7a',after:()=>eZone({x,y,r:115,dur:5,dps:e.dmg*0.12,slow:0.3,kind:'dunkel',gk:e.def.id+':dunkel'})})},
+  draw(e,c,t,p){}},
+ runenschild:{n:'Runenschild',ic:'⬡',c:'#ffd27a',d:'Ein Runenschild fängt die nächsten drei Treffer vollständig ab.',tip:'Mit schnellen, schwachen Treffern zuerst den Schild brechen.',
+  tick(e){if(e.shield>0||d2(e,P)>520*520||!gnFrei(e)||!gnCd(e,'runenschild',15))return;e.shield=3;gnAnim(e,'schild',0.9);gnErl(e,'runenschild');sfxAt('b_rune',e.x,e.y);ring(e.x,e.y,e.r+16,'#ffd27a',0.6,4)},
+  draw(e,c,t,p){}},
+ magierschild:{n:'Schildzauber',dd:'Shield',ic:'⬡',c:'#ffb070',d:'Ein schimmernder Schild hält die nächsten beiden Treffer ab.',tip:'Zwei schnelle Treffer brechen den Schild.',
+  tick(e){if(e.shield>0||d2(e,P)>460*460||!gnFrei(e)||!gnCd(e,'magierschild',11))return;e.shield=2;gnAnim(e,'schild',0.8);gnErl(e,'magierschild');sfxAt('magic',e.x,e.y)},draw(){}},
+ felswurf:{n:'Felswurf',ic:'●',c:'#c8a070',d:'Hebt einen Felsbrocken und schleudert ihn auf dich.',tip:'Der Schatten zeigt, wo er landet – einfach weitergehen.',
+  tick(e){const d=gnD(e);if(d<170||d>480||!gnFrei(e)||!onScr(e)||!gnCd(e,'felswurf',7))return;gnAnim(e,'wurf',0.6);gnErl(e,'felswurf');sfxAt('g_wind',e.x,e.y);const x=P.x,y=P.y;
+   later(0.35,()=>{if(e.dead)return;sfxAt('g_rock',e.x,e.y);tele({k:'circle',x,y,r:80,delay:1.05,dmg:e.dmg*1.6,c:'#c8a070',rock:{x:e.x,y:e.y-e.r*1.6},el:'phys',after:()=>{chunks(x,y,'#6a5a4a',8,200)}})})},
+  draw(e,c,t,p){const y=e.y-e.r*1.5-10*p;circ(c,e.x,y,e.r*0.45,'#6a5a4a');circ(c,e.x-e.r*0.12,y-e.r*0.12,e.r*0.18,'#8a7a6a')}},
+ kreischen:{n:'Kreischen',ic:'♒',c:'#c8a0ff',d:'Ein schriller Schrei: Wer zu nah steht, verstummt und kann kurz keine Fähigkeiten wirken.',tip:'Bei Vorwarnung Abstand nehmen – Grundangriffe gehen weiter.',
+  tick(e){const d=gnD(e);if(d>270||!gnFrei(e)||!gnCd(e,'kreischen',12))return;gnAnim(e,'kreischen',0.8);gnErl(e,'kreischen');sfxAt('b_seele',e.x,e.y);
+   tele({k:'circle',x:e.x,y:e.y,r:220,delay:0.8,dmg:e.dmg*0.35,c:'#c8a0ff',follow:e,el:'psych',gs:'gnSchall',onHit:()=>{P.silT=Math.max(P.silT||0,1.8);word(P.x,P.y-40,'Verstummt!','#c8a0ff')}})},
+  draw(e,c,t,p){c.strokeStyle='#e0c8ff';for(let i=0;i<3;i++){const q=((t*3+i/3)%1);c.globalAlpha=0.7*(1-q);c.lineWidth=2;c.beginPath();c.arc(e.x,e.y-e.r*0.4,e.r+q*50,0,TAU);c.stroke()}}},
+ schweigen:{n:'Zone der Stille',dd:'Silence',ic:'⊘',c:'#b9a2d8',d:'Erschafft eine Zone der Stille: Wer darin steht, kann keine Fähigkeiten wirken.',tip:'Die Zone meiden – Fähigkeiten erst wieder außerhalb.',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!onScr(e)||!gnCd(e,'schweigen',15))return;gnAnim(e,'cast',0.8);e.gnCc='#b9a2d8';gnErl(e,'schweigen');const x=P.x+rnd(-20,20),y=P.y+rnd(-20,20);sfxAt('magic',e.x,e.y);
+   tele({k:'circle',x,y,r:100,delay:0.9,c:'#b9a2d8',gs:'gnStille',after:()=>eZone({x,y,r:105,dur:5,dps:0,silence:1,kind:'stille',gk:e.def.id+':schweigen'})})},draw(){}},
+ feuerschild:{n:'Feuerschild',dd:'Fire Shield',ic:'♨',c:'#ff7a2a',d:'Eine Flammenhülle verbrennt jeden, der ihn im Nahkampf trifft.',tip:'Solange er lodert: aus der Distanz angreifen.',el:'feuer',
+  tick(e){if(e.gnFs>0||d2(e,P)>420*420||!gnFrei(e)||!gnCd(e,'feuerschild',14))return;e.gnFs=6;gnAnim(e,'cast',0.6);e.gnCc='#ff7a2a';sfxAt('fire',e.x,e.y);gnErl(e,'feuerschild')},
+  hit(e,o){if(!(e.gnFs>0)||!o.melee||o.dot||!gnCd(e,'fsHit',0.5))return;hurt(e.dmg*0.4,{el:'feuer'});gnBrand(P,e.dmg*0.12,2);gnErl(e,'feuerschild');sparks(P.x,P.y,'#ffb040',6,160,1)},draw(){}},
+ bannblick:{n:'Bannblick',dd:'Antimagic Cone',ic:'◎',c:'#e8d8a8',d:'Ein Blick, der Magie bannt: Wer im Kegel steht, verstummt für 2 Sekunden.',tip:'Hinter ihn oder seitlich aus dem Kegel laufen.',
+  tick(e){const d=gnD(e);if(d>400||!gnFrei(e)||!onScr(e)||!gnCd(e,'bannblick',12))return;gnAnim(e,'blick',0.9);gnErl(e,'bannblick');sfxAt('b_seele',e.x,e.y);
+   tele({k:'cone',x:e.x,y:e.y,a:ang(e,P),arc:0.6,len:400,delay:0.9,dmg:e.dmg*0.3,c:'#e8d8a8',follow:e,el:'arkan',onHit:()=>{P.silT=Math.max(P.silT||0,2);word(P.x,P.y-40,'Gebannt!','#e8d8a8')}})},
+  draw(e,c,t,p){glow(e.x,e.y-e.r*0.3,e.r*(1+p),'#fff2c0',0.7*p,true)}},
+ rankenzug:{n:'Rankengriff',ic:'∿',c:'#7aa04a',d:'Schleudert eine Ranke und reißt dich zu sich heran.',tip:'Seitlich aus der Linie gehen, solange sie aufleuchtet.',
+  tick(e){gnZug(e,'rankenzug','#7aa04a','gnRanke')},draw(){}},
+ harpune:{n:'Harpune',ic:'⥅',c:'#c8d8d0',d:'Wirft eine Harpune an einer Leine und zieht dich heran.',tip:'Aus der Leinenbahn treten – oder nah rangehen, dann ist sie nutzlos.',
+  tick(e){gnZug(e,'harpune','#c8d8d0','chain')},draw(){}},
+ netzfalle:{n:'Netzfalle',ic:'#',c:'#ececf4',d:'Legt klebrige Netze rund um dich aus. Wer hineintritt, hängt fest.',tip:'Erst die Netze abwarten, dann durch die Lücken laufen.',
+  tick(e){const d=gnD(e);if(d>420||!gnFrei(e)||!gnCd(e,'netzfalle',11))return;gnAnim(e,'cast',0.5);e.gnCc='#ececf4';gnErl(e,'netzfalle');sfxAt('g_web',e.x,e.y);
+   for(let i=0;i<3;i++){const x=P.x+(i?rnd(-120,120):0),y=P.y+(i?rnd(-120,120):0);tele({k:'circle',x,y,r:58,delay:0.95,dmg:e.dmg*0.3,c:'#ececf4',gs:'web',onHit:()=>{P.rootT=Math.max(P.rootT||0,0.8)},after:()=>eZone({x,y,r:60,dur:4,dps:0,slow:0.6,kind:'netz',gk:e.def.id+':netzfalle'})})}},draw(){}},
+ versteinern:{n:'Versteinernder Blick',dd:'Petrifying Gaze',ic:'◉',c:'#c8d070',d:'Sein Blickstrahl lässt dich erstarren: erst langsamer, beim dritten Treffer kurz versteinert.',tip:'Nicht in der Strahlbahn stehen bleiben – die Stapel verfliegen nach 5 s.',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!onScr(e)||!gnCd(e,'versteinern',6.5))return;gnAnim(e,'blick',0.8);gnErl(e,'versteinern');sfxAt('b_seele',e.x,e.y);
+   tele({k:'line',x:e.x,y:e.y,a:ang(e,P),len:460,w:30,delay:0.8,dmg:e.dmg*0.4,c:'#c8d070',follow:e,gs:'gnBlick',el:'phys',onHit:()=>gnStein(P)})},
+  draw(e,c,t,p){glow(e.x+(e.faceX>e.x?1:-1)*e.r*0.7,e.y-e.r*0.2,8+10*p,'#e8f070',0.9*p,true)}},
+ gedankenstoss:{n:'Gedankenstoß',dd:'Mind Blast',ic:'✴',c:'#d080ff',d:'Ein psionischer Kegel: Wer darin steht, ist kurz betäubt.',tip:'Hinter ihn laufen – der Kegel zeigt nur nach vorn.',el:'psych',
+  tick(e){const d=gnD(e);if(d>340||!gnFrei(e)||!gnCd(e,'gedankenstoss',10))return;gnAnim(e,'psi',1);gnErl(e,'gedankenstoss');sfxAt('b_tentakel',e.x,e.y);
+   tele({k:'cone',x:e.x,y:e.y,a:ang(e,P),arc:1.1,len:340,delay:1,dmg:e.dmg*0.8,c:'#d080ff',follow:e,el:'psych',onHit:()=>{P.stunT=Math.max(P.stunT||0,1);word(P.x,P.y-40,'Gedankenstoß!','#e0a8ff')}})},
+  draw(e,c,t,p){c.strokeStyle='#e0a8ff';c.lineWidth=2;for(let i=0;i<4;i++){const a=i*1.57+t*2;c.globalAlpha=0.6*p;c.beginPath();c.moveTo(e.x,e.y-e.r*0.2);c.quadraticCurveTo(e.x+Math.cos(a)*e.r*1.6,e.y+Math.sin(a)*e.r,e.x+Math.cos(a+0.6)*e.r*(1.3+p),e.y+e.r*0.4+Math.sin(a+0.6)*e.r*0.6);c.stroke()}glow(e.x,e.y-e.r*0.6,e.r*1.5*p,'#d080ff',0.5*p,true)}},
+ klagen:{n:'Klagelied',dd:'Wail',ic:'♪',c:'#e8f4f0',d:'Ein Wehklagen ringsum: Schaden und Furcht für alle in der Nähe.',tip:'Während sie Luft holt, aus dem Kreis laufen.',el:'nekro',
+  tick(e){const d=gnD(e);if(d>310||!gnFrei(e)||!gnCd(e,'klagen',12))return;gnAnim(e,'klagen',1.2);gnErl(e,'klagen');sfxAt('d_ghost2',e.x,e.y);
+   tele({k:'circle',x:e.x,y:e.y,r:290,delay:1.2,dmg:e.dmg*1,c:'#e8f4f0',follow:e,el:'nekro',gs:'gnSchall',onHit:()=>gnFear(P,2.5),after:()=>{if(!e.dead)sfxAt('b_seele',e.x,e.y)}})},
+  draw(e,c,t,p){c.strokeStyle='#ffffff';for(let i=0;i<4;i++){const q=((t*2+i/4)%1);c.globalAlpha=0.5*(1-q)*p;c.lineWidth=2;c.beginPath();c.ellipse(e.x,e.y-e.r*0.5,e.r*(1+q*3),e.r*(0.6+q*1.6),0,0,TAU);c.stroke()}}},
+ fluch:{n:'Fluch',dd:'Hex',ic:'⛧',c:'#7ad04a',d:'Verflucht dich: 25% mehr erlittener Schaden für 6 Sekunden.',tip:'Aus dem grünen Kreis rollen – der Fluch braucht einen Moment.',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!onScr(e)||!gnCd(e,'fluch',12))return;gnAnim(e,'cast',0.8);e.gnCc='#7ad04a';gnErl(e,'fluch');sfxAt('fluch',e.x,e.y);
+   tele({k:'circle',x:P.x,y:P.y,r:70,delay:0.85,c:'#7ad04a',gs:'gnFluch',onHit:()=>{gnVuln(P,0.25,6);word(P.x,P.y-40,'Verflucht!','#9ae06a')}})},draw(){}},
+ sporen:{n:'Verwirrende Sporen',ic:'⁘',c:'#d8a0c0',d:'Sporenwolken lassen dich taumeln – die Bewegung ist schwer zu kontrollieren.',tip:'Wolken umgehen; drin kurze, kontrollierte Schritte machen.',
+  tick(e){const d=gnD(e);if(d>420||!gnFrei(e)||!gnCd(e,'sporen',10))return;gnAnim(e,'sporen',0.7);gnErl(e,'sporen');const x=P.x,y=P.y;sfxAt('b_gift',e.x,e.y);
+   tele({k:'circle',x,y,r:85,delay:0.9,c:'#d8a0c0',vial:{x:e.x,y:e.y-e.r},after:()=>eZone({x,y,r:90,dur:5,dps:e.dmg*0.12,kind:'sporenv',gk:e.def.id+':sporen'})})},
+  draw(e,c,t,p){c.globalAlpha=0.6*p;for(let i=0;i<6;i++){const a=i+t*2;circ(c,e.x+Math.cos(a)*e.r*(0.5+p),e.y-e.r*0.6+Math.sin(a)*e.r*0.5-p*10,3,'#e8c0d8')}}},
+ nebel:{n:'Nebelwolke',dd:'Fog Cloud',ic:'≋',c:'#b0c0a0',d:'Hüllt dich in zähen Nebel, der bremst und leicht schadet.',tip:'Den Nebel zügig verlassen.',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!gnCd(e,'nebel',14))return;gnAnim(e,'cast',0.6);e.gnCc='#b0c0a0';gnErl(e,'nebel');eZone({x:P.x+rnd(-30,30),y:P.y+rnd(-30,30),r:95,dur:6,dps:e.dmg*0.2,slow:0.3,kind:'nebel',drift:30,gk:e.def.id+':nebel'});sfxAt('vine',e.x,e.y)},draw(){}},
+ brandherd:{n:'Brandherd',ic:'♨',c:'#ff7a2a',d:'Setzt den Boden um dich in Brand – die Flammen lodern einige Sekunden.',tip:'Die markierten Flächen sofort verlassen.',el:'feuer',
+  tick(e){const d=gnD(e);if(d>440||!gnFrei(e)||!onScr(e)||!gnCd(e,'brandherd',12))return;gnAnim(e,'cast',0.8);e.gnCc='#ff7a2a';gnErl(e,'brandherd');sfxAt('fire',e.x,e.y);
+   for(let i=0;i<3;i++){const x=P.x+(i?rnd(-140,140):0),y=P.y+(i?rnd(-140,140):0);tele({k:'circle',x,y,r:70,delay:1+i*0.12,dmg:e.dmg*0.7,c:'#ff7a2a',el:'feuer',after:()=>{eZone({x,y,r:72,dur:4,dps:e.dmg*0.35,kind:'feuer',gk:e.def.id+':brandherd'});embers(x,y,'#ffb040',8,40)}})}},draw(){}},
+ sog:{n:'Sog',ic:'@',c:'#9a7ac8',d:'Ein wirbelnder Sog zieht dich unaufhaltsam zu ihm hin.',tip:'Dagegen anlaufen oder rollen – und nicht in seine Reichweite treiben lassen.',
+  tick(e){const d=gnD(e);if(d>330||d<e.r+40||!gnFrei(e)||!gnCd(e,'sog',13))return;gnAnim(e,'sog',0.9);gnErl(e,'sog');sfxAt('b_welle',e.x,e.y);
+   tele({k:'circle',x:e.x,y:e.y,r:250,delay:0.9,c:'#9a7ac8',follow:e,gs:'gnSog',after:()=>{if(!e.dead)eZone({x:e.x,y:e.y,r:250,dur:3,dps:0,kind:'sog',follow:e,gk:e.def.id+':sog'})}})},
+  draw(e,c,t,p){c.strokeStyle='#c8a8f0';c.lineWidth=2;for(let i=0;i<3;i++){c.globalAlpha=0.6*p;c.beginPath();for(let s=0;s<20;s++){const a=s*0.35-t*5+i*2.1,r=e.r*(2.6-s*0.1);c.lineTo(e.x+Math.cos(a)*r,e.y+Math.sin(a)*r*0.6)}c.stroke()}}},
+ regeneration:{n:'Regeneration',dd:'Regeneration',ic:'✚',c:'#7ae07a',d:'Heilt sich ständig (2% Leben pro Sekunde) – außer Feuer oder Gift/Säure hat ihn eben getroffen.',tip:'Mit Feuer- oder Giftfähigkeiten treffen, dann bleibt die Wunde offen.',
+  tick(e,dt){if(e.dead||e.hp>=e.maxHp){e.gnReg=0;return}if(G.time<(e.gnNoReg||0)){e.gnReg=0;return}e.hp=Math.min(e.maxHp,e.hp+e.maxHp*0.02*dt);e.gnReg=1;if(e.hp<e.maxHp*0.9&&fxQ()>1&&Math.random()<dt*4)wisps(e.x+rnd(-e.r,e.r),e.y,'#7ae07a',1)},
+  hit(e,o){const el=e.gnLastEl;if(el==='feuer'||el==='gift'){const was=e.gnNoReg>G.time;e.gnNoReg=G.time+4;if(!was){word(e.x,e.y-e.r-16,'Regeneration gestoppt!','#ffb070');gnErl(e,'regeneration')}}else if(e.hp<e.maxHp*0.85&&gnCd(e,'regSeen',4))gnErl(e,'regeneration')},draw(){}},
+ vergroessern:{n:'Vergrößern',dd:'Enlarge',ic:'⇱',c:'#ff8a5a',d:'Bei halbem Leben wächst er: größer, stärker, wütender.',tip:'Schnell Schaden machen, bevor er wächst – oder danach Abstand halten.',
+  tick(e){if(e.gnBig||e.hp>e.maxHp*0.6||e.dead)return;e.gnBig=1;e.r*=1.3;e.dmg*=1.35;if(e.dmg0)e.dmg0*=1.35;gnAnim(e,'wachsen',0.9);ring(e.x,e.y,e.r+30,'#ff8a5a',0.6,6);sfxAt('g_enrage',e.x,e.y);word(e.x,e.y-e.r-18,'Vergrößert!','#ff8a5a');gnErl(e,'vergroessern')},
+  draw(e,c,t,p){glow(e.x,e.y,e.r*(1.6+p),'#ff8a5a',0.5*p,true)}},
+ unsichtbar:{n:'Unsichtbarkeit',dd:'Invisibility',ic:'◌',c:'#c8c8d8',d:'Verschwindet nach einem Angriff für kurze Zeit – nur ein Flimmern verrät ihn. Unsichtbar erleidet er nur halben Schaden.',tip:'Auf das Flimmern achten und Flächenangriffe nutzen.',
+  tick(e){if(e.gnInv>0||!e.atkA||G.time-e.atkA>0.4||d2(e,P)>520*520||e.boss||!gnCd(e,'unsichtbar',10))return;e.gnInv=2.6;puffs(e.x,e.y,'#8a8a9a',6,60,12);sfxAt('blink',e.x,e.y);gnErl(e,'unsichtbar')},draw(){}},
+ blutsaugen:{n:'Blutsaugen',dd:'Blood Drain',ic:'♥',c:'#d83a3a',d:'Saugt sich an dir fest und trinkt Blut, bis du sie triffst oder dich wegrollst.',tip:'Ausweichrolle oder ein Treffer reißt sie ab.',
+  melee(e){if(e.gnAtt>0||e.boss||e.guard||!gnCd(e,'blutsaugen',5))return;e.gnAtt=4;e.gnAttP=P;e.gnAttR=P.roll||0;e.gnOX=rnd(-10,10);e.gnOY=rnd(-16,-4);gnErl(e,'blutsaugen');word(P.x,P.y-40,'Festgesaugt!','#ff6a6a')},
+  hit(e,o){if(e.gnAtt>0&&!o.dot&&!e.dead)gnLos(e)},draw(){}},
+ laehmklaue:{n:'Lähmende Klauen',dd:'Paralyzing Claws',ic:'≠',c:'#a8b890',d:'Klauentreffer lähmen: Du kannst dich kurz nicht bewegen.',tip:'Nicht in Klauenreichweite stehen bleiben – Fernkampf ist sicherer.',
+  melee(e){if(!gnCd(e,'laehm',6))return;P.rootT=Math.max(P.rootT||0,0.9);P.gnLaehmT=0.9;word(P.x,P.y-40,'Gelähmt!','#c8d8b0');gnErl(e,'laehmklaue');sfxAt('e_klaue',e.x,e.y)},draw(){}},
+ umreissen:{n:'Umreißen',dd:'Knock Prone',ic:'↯',c:'#e8c890',d:'Ein Treffer reißt dich kurz zu Boden.',tip:'Abstand halten oder die Rolle im richtigen Moment nutzen.',
+  melee(e){if(Math.random()>0.3||!gnCd(e,'umreissen',5))return;P.stunT=Math.max(P.stunT||0,0.45);word(P.x,P.y-40,'Umgerissen!','#e8c890');gnErl(e,'umreissen')},draw(){}},
+ seuchenbiss:{n:'Seuchenbiss',ic:'☣',c:'#9ad04a',d:'Bisse übertragen eine Seuche: Gift über einige Sekunden.',tip:'Giftwiderstand verkürzt und schwächt die Wirkung.',el:'gift',
+  melee(e){gnGift(P,e.dmg*0.16,3.5);gnErl(e,'seuchenbiss')},draw(){}},
+ giftbiss:{n:'Giftbiss',ic:'☣',c:'#9ad04a',d:'Der Biss ist giftig: Gift über Zeit und kurz langsamer.',tip:'Giftwiderstand hilft – oder aus der Distanz kämpfen.',el:'gift',
+  melee(e){gnGift(P,e.dmg*0.2,4);gnSlow(P,0.25,1.2,'gift');gnErl(e,'giftbiss')},draw(){}},
+ giftpfeil:{n:'Drow-Gift',dd:'Drow Poison',ic:'➹',c:'#9ad04a',d:'Bolzen und Pfeile sind vergiftet: Gift über Zeit, du wirst benommen und langsamer.',tip:'Giftwiderstand verkürzt die Benommenheit.',el:'gift',proj:1,
+  onProj(p){gnGift(P,p.gnD||p.dmg*0.2,3.5);gnSlow(P,0.3,1.4,'gift')},draw(){}},
+ giftklinge:{n:'Vergiftete Messer',ic:'➹',c:'#9ad04a',d:'Die Wurfmesser sind vergiftet.',tip:'Giftwiderstand hilft.',el:'gift',proj:1,onProj(p){gnGift(P,p.gnD||p.dmg*0.2,3)},draw(){}},
+ kraftentzug:{n:'Stärkeentzug',dd:'Strength Drain',ic:'↓',c:'#8a6aba',d:'Jede Berührung entzieht Kraft: −8% Schaden je Stapel (bis 4), 8 Sekunden.',tip:'Schatten nicht an dich heranlassen – Flächenangriffe treffen sie gut.',el:'nekro',
+  melee(e){P.gnWeakN=Math.min(4,(P.gnWeakN||0)+1);P.gnWeakT=8;word(P.x,P.y-40,'Kraft entzogen','#b08ae0');gnErl(e,'kraftentzug');gnTip('weak','Stärkeentzug: Du richtest weniger Schaden an, bis die Stapel verfliegen.','#b08ae0')},draw(){}},
+ lebensentzug:{n:'Lebensentzug',dd:'Life Drain',ic:'♡',c:'#b07ad8',d:'Die eisige Berührung schwächt deine Lebenskraft: Heilung wirkt 5 Sekunden lang nur halb.',tip:'Nicht auf Lebensraub verlassen – ausweichen statt durchprügeln.',el:'nekro',
+  melee(e){P.gnHbT=Math.max(P.gnHbT||0,5);gnErl(e,'lebensentzug');gnTip('hb','Lebensentzug: Heilung und Lebensraub wirken kurz nur halb.','#b07ad8')},draw(){}},
+ rostfrass:{n:'Rostfraß',dd:'Rust Metal',ic:'⚙',c:'#d8862e',d:'Seine Fühler zerfressen Metall: −35% Rüstung für 6 Sekunden.',tip:'Nicht von vorn angreifen lassen – die Fühler reichen nicht weit.',
+  melee(e){gnRost(P,6);word(P.x,P.y-40,'Rüstung rostet!','#e8a060');gnErl(e,'rostfrass')},draw(){}},
+ klebschild:{n:'Klebschild',dd:'Sticky Shield',ic:'◍',c:'#a8c8a0',d:'Wer ihn im Nahkampf trifft, bleibt am klebrigen Schild hängen und wird langsamer.',tip:'Aus der Distanz angreifen oder kurz loslassen.',
+  hit(e,o){if(!o.melee||o.dot||!gnCd(e,'kleb',1.5))return;gnSlow(P,0.5,1.2);gnAnim(e,'kleb',0.4);word(P.x,P.y-40,'Klebt!','#c8e0c0');gnErl(e,'klebschild')},
+  draw(e,c,t,p){c.globalAlpha=0.6*p;for(let i=0;i<5;i++)ln(c,'#d8f0d0',1.5,e.x,e.y,e.x+Math.cos(i*1.2)*e.r*1.6*p,e.y+Math.sin(i*1.2)*e.r*p)}},
+ parade:{n:'Parade',dd:'Parry',ic:'⚔',c:'#e8e8f0',d:'Wehrt alle paar Sekunden einen Treffer mit der Waffe ab – nur halber Schaden.',tip:'Schnelle Treffer verbrauchen die Parade; danach voll zuschlagen.',draw(e,c,t,p){c.globalAlpha=p;ln(c,'#ffffff',3,e.x-e.r,e.y-e.r,e.x+e.r,e.y+e.r*0.2);glow(e.x,e.y-e.r*0.4,e.r*1.2,'#ffffff',0.6*p,true)}},
+ zaeh:{n:'Untote Zähigkeit',dd:'Undead Fortitude',ic:'☗',c:'#a8b890',d:'Ein tödlicher Treffer lässt ihn manchmal mit letzter Kraft weiterkämpfen – außer bei Feuer, heiligem Schaden oder kritischen Treffern.',tip:'Mit Feuer, Licht oder Volltreffern erledigen.',draw(e,c,t,p){glow(e.x,e.y,e.r*2,'#c8d8b0',0.6*p,true)}},
+ verschlingen:{n:'Verschlingen',dd:'Engulf',ic:'■',c:'#8acaa8',d:'Rollt über dich und verschlingt dich: Du steckst fest und die Säure brennt – 1,5 Sekunden lang.',tip:'Nie direkt vor ihm stehen bleiben; Säurewiderstand (Gift) mildert den Schaden.',el:'gift',
+  tick(e){if(d2(e,P)>(e.r+P.r+6)**2||P.inv>0||!gnFrei(e)||!gnCd(e,'verschlingen',9))return;P.gnEngT=1.5;P.gnEngD=e.dmg*0.55;P.gnEngX=e.x;P.gnEngY=e.y;P.rootT=Math.max(P.rootT||0,1.5);gnAnim(e,'kleb',0.6);word(P.x,P.y-44,'Verschlungen!','#b8f0c8');sfxAt('g_web',e.x,e.y);gnErl(e,'verschlingen')},draw(){}},
+ saeurespur:{n:'Säurespur',ic:'∴',c:'#b8e04a',d:'Hinterlässt eine Spur aus Säure, die Rüstung angreift.',tip:'Nicht auf seiner Spur laufen.',el:'gift',
+  tick(e){if(!e.mv||!gnCd(e,'spur',0.9)||G.ezones.length>40)return;eZone({x:e.x,y:e.y+e.r*0.3,r:e.r*0.9,dur:3.5,dps:e.dmg*0.25,kind:'saeure',gk:e.def.id+':saeurespur'})},draw(){}},
+ feueratem:{n:'Feueratem',ic:'♨',c:'#ff7a2a',d:'Speit einen kurzen Flammenkegel – wer getroffen wird, brennt.',tip:'Seitlich ausweichen; Feuerwiderstand verkürzt das Brennen.',el:'feuer',
+  tick(e){const d=gnD(e);if(d>230||!gnFrei(e)||!gnCd(e,'feueratem',6))return;gnAnim(e,'atem',0.6);gnErl(e,'feueratem');sfxAt('fire',e.x,e.y);
+   tele({k:'cone',x:e.x,y:e.y,a:ang(e,P),arc:0.8,len:230,delay:0.6,dmg:e.dmg*1.05,c:'#ff7a2a',follow:e,el:'feuer',onHit:()=>gnBrand(P,e.dmg*0.18,2.5)})},
+  draw(e,c,t,p){glow(e.x+(e.faceX>e.x?1:-1)*e.r*0.6,e.y-e.r*0.3,e.r*(0.6+p),'#ffb040',0.8*p,true)}},
+ frostatem:{n:'Frostatem',ic:'❄',c:'#d4f0f2',d:'Haucht einen eisigen Kegel – wer getroffen wird, ist stark verlangsamt.',tip:'Seitlich ausweichen; Frostwiderstand verkürzt die Kälte.',el:'frost',
+  tick(e){const d=gnD(e);if(d>230||!gnFrei(e)||!gnCd(e,'frostatem',6))return;gnAnim(e,'atem',0.6);gnErl(e,'frostatem');sfxAt('ice',e.x,e.y);
+   tele({k:'cone',x:e.x,y:e.y,a:ang(e,P),arc:0.8,len:230,delay:0.6,dmg:e.dmg*0.95,c:'#d4f0f2',follow:e,el:'frost',onHit:()=>gnSlow(P,0.5,2.2,'frost')})},
+  draw(e,c,t,p){glow(e.x+(e.faceX>e.x?1:-1)*e.r*0.6,e.y-e.r*0.3,e.r*(0.6+p),'#f0ffff',0.7*p,true)}}
+};
+function gnZug(e,k,col,gs){const d=gnD(e);if(d<150||d>400||!gnFrei(e)||!onScr(e)||!gnCd(e,k,9))return;gnAnim(e,'cast',0.75);e.gnCc=col;gnErl(e,k);const a=ang(e,P);sfxAt(k==='harpune'?'thunk':'vine',e.x,e.y);
+ tele({k:'line',x:e.x,y:e.y,a,len:Math.min(430,d+50),w:26,delay:0.75,dmg:e.dmg*0.6,c:col,follow:e,gs,onHit:()=>{const dd=Math.sqrt(d2(e,P));if(dd>60){P.kx+=(e.x-P.x)/dd*Math.min(950,dd*3.2);P.ky+=(e.y-P.y)/dd*Math.min(950,dd*3.2)}P.rootT=Math.max(P.rootT||0,0.3);word(P.x,P.y-40,k==='harpune'?'Harpuniert!':'Gepackt!',col)}});
+ later(0.75,()=>{if(!e.dead)sfxAt(k==='harpune'?'g_chain':'vine',e.x,e.y)})}
+function gnLos(e){e.gnAtt=0;const q=e.gnAttP;e.gnAttP=null;if(q){const a=rnd(TAU);e.kx+=Math.cos(a)*300;e.ky+=Math.sin(a)*300}e.hitCd=1.2;burst(e.x,e.y,'#d83a3a',5,90)}
+
+/* Todes-Effekte */
+const GNT={
+ saeure:{n:'Säurepfütze',ic:'∴',c:'#b8e04a',d:'Zerplatzt in eine Säurepfütze, die Schaden macht und Rüstung zerfrisst.',tip:'Nicht hineintreten – kurz warten, sie trocknet nach ein paar Sekunden.',
+  run(e){eZone({x:e.x,y:e.y,r:75*Math.min(1.6,e.def.size||1),dur:4.5,dps:e.dmg*0.3,kind:'saeure',gk:e.def.id+':saeure'})}},
+ giftlache:{n:'Giftlache',ic:'☣',c:'#9ad04a',d:'Hinterlässt eine Lache aus Gift.',tip:'Lache umgehen – Giftwiderstand mildert den Schaden.',run(e){eZone({x:e.x,y:e.y,r:85,dur:4.5,dps:e.dmg*0.38,kind:'gift',gk:e.def.id+':giftlache'})}},
+ glutfeld:{n:'Glutausbruch',dd:'Death Burst',ic:'♨',c:'#ff7a2a',d:'Bricht im Tod in einer Glutwolke auf – der Boden brennt danach kurz.',tip:'Nach dem Todesstoß einen Schritt zurück.',
+  run(e){const x=e.x,y=e.y;tele({k:'circle',x,y,r:70,delay:0.6,dmg:e.dmg*0.7,c:'#ff7a2a',el:'feuer',gs:'gnBoom',after:()=>{eZone({x,y,r:66,dur:3.2,dps:e.dmg*0.3,kind:'feuer',gk:e.def.id+':glutfeld'});embers(x,y,'#ffb040',10,40)}})}},
+ netzboden:{n:'Netzreste',ic:'#',c:'#ececf4',d:'Hinterlässt klebrige Netze am Boden, die stark verlangsamen.',tip:'Um die Netze herumlaufen.',run(e){eZone({x:e.x,y:e.y,r:72,dur:5,dps:0,slow:0.55,kind:'netz',gk:e.def.id+':netzboden'})}},
+ knochen:{n:'Knochen fügen sich',ic:'☗',c:'#e8e2d0',d:'Manchmal setzen sich die Knochen wieder zusammen – außer man vernichtet sie mit Feuer oder heiligem Licht.',tip:'Den zuckenden Knochenhaufen zerschlagen, bevor er aufsteht.',
+  run(e){if(e.summon||e.gnRe||Math.random()>0.25)return;const el=e.gnLastEl;if(el==='feuer'||el==='heilig')return;const x=e.x,y=e.y,def=e.def;
+   tele({k:'circle',x,y,r:32,delay:2.4,dmg:0,c:'#e8e2d0',gs:'gnKnochen',after:()=>{if(G.state!=='play'||G.enemies.length>110)return;const n=spawnEnemy(def,x,y,{summon:1});n.hp=n.maxHp*0.45;n.gnRe=1;n.gnF=(n.gnF||[]).filter(k=>k!=='knochen');burst(x,y,'#e8e2d0',10,140);sfxAt('d_bone',x,y)}})}},
+ wiederkehr:{n:'Geisterhafte Wiederkehr',ic:'☁',c:'#e8f4f0',d:'Der Geist kehrt nach dem Tod kurz zurück, bevor er endgültig verblasst.',tip:'Nicht zu früh abwenden – er verschwindet nach wenigen Sekunden von selbst.',
+  run(e){if(e.summon||e.gnRe||Math.random()>0.4)return;const x=e.x,y=e.y,def=e.def;later(1.1,()=>{if(G.state!=='play'||G.enemies.length>110)return;const n=spawnEnemy(def,x,y,{summon:1});n.hp=n.maxHp*0.35;n.gnRe=1;n.gnSpuk=5;puffs(x,y,'#e8f4f0',8,60,14);sfxAt('d_ghost2',x,y)})}},
+ funkenschlag:{n:'Funkenschlag',ic:'ϟ',c:'#ffe066',d:'Entlädt sich im Tod in einem kleinen Blitzschlag.',tip:'Nach dem Treffer kurz ausweichen.',
+  run(e){const x=e.x,y=e.y;tele({k:'circle',x,y,r:62,delay:0.55,dmg:e.dmg*0.7,c:'#ffe066',el:'blitz',after:function(){bolt(this.x,this.y)}})}},
+ bierlache:{n:'Bierlache',ic:'~',c:'#e8c070',d:'Lässt eine rutschige Bierlache zurück. Wer hineinläuft, schlittert.',tip:'Langsam drüber – oder außen herum.',run(e){eZone({x:e.x,y:e.y,r:70,dur:6,dps:0,kind:'glaette',bier:1,c:'#e8c070',gk:e.def.id+':bierlache'})}},
+ splitter:{n:'Splitterregen',ic:'✦',c:'#c8a0ff',d:'Zerspringt in scharfe Splitter, die in alle Richtungen fliegen.',tip:'Nicht direkt danebenstehen, wenn er zerbricht.',run(e){const n=7,a0=rnd(TAU);for(let i=0;i<n;i++)eShot(e.x,e.y,a0+i*TAU/n,230,e.dmg*0.45,{kind:'eshard',c:'#c8a0ff'})}},
+ explosionF:{n:'Todesexplosion',ic:'✹',c:'#ff5a14',d:'Explodiert kurz nach dem Tod in einem Feuerball – danach brennt der Boden.',tip:'Sobald er fällt: weg vom pulsierenden Kreis!',el:'feuer',
+  run(e){const x=e.x,y=e.y;tele({k:'circle',x,y,r:100,delay:0.85,dmg:e.dmg*1.4,c:'#ff5a14',el:'feuer',gs:'gnBoom',onHit:()=>gnBrand(P,e.dmg*0.15,2),after:()=>{eZone({x,y,r:80,dur:3.5,dps:e.dmg*0.35,kind:'feuer',gk:e.def.id+':explosionF'});G.shake+=3;sfxAt('boom',x,y)}})}},
+ explosionK:{n:'Frostexplosion',ic:'❄',c:'#d4f0f2',d:'Zerspringt in einer Frostwolke und hinterlässt glattes Eis.',tip:'Eisflächen meiden – dort rutscht man.',el:'frost',
+  run(e){const x=e.x,y=e.y;tele({k:'circle',x,y,r:100,delay:0.85,dmg:e.dmg*1.2,c:'#d4f0f2',el:'frost',gs:'gnBoom',onHit:()=>gnSlow(P,0.45,2,'frost'),after:()=>{eZone({x,y,r:90,dur:4.5,dps:e.dmg*0.15,slow:0.25,kind:'frost',gk:e.def.id+':explosionK'});sfxAt('ice',x,y)}})}},
+ sporenwolke:{n:'Sporenwolke',ic:'⁘',c:'#d8a0c0',d:'Platzt im Tod zu einer Wolke verwirrender Sporen.',tip:'Die Wolke umgehen.',run(e){eZone({x:e.x,y:e.y,r:95,dur:5,dps:e.dmg*0.12,kind:'sporenv',gk:e.def.id+':sporenwolke'})}}
+};
+
+/* Auren der Spezialgegner auf hohen Schwierigkeiten */
+const GNA={
+ frost:{n:'Frostaura',ic:'❄',c:'#d4f0f2',r:220,d:'Eisige Kälte ringsum: Helden in der Nähe sind langsamer und frieren.',tip:'Abstand halten oder Frostwiderstand tragen.',
+  tick(e,q,dt){gnSlow(q,0.25,0.4,'frost');hurtDot(e.dmg*0.12*dt,{el:'frost'})}},
+ wut:{n:'Kriegsaura',ic:'⚑',c:'#ff5a3a',r:300,d:'Verbündete in seiner Nähe sind schneller und stärker.',tip:'Ihn von seinen Verbündeten weglocken.',ally:1,tick(e,o){o.drumT=G.time+0.6}},
+ fluch:{n:'Fluchaura',ic:'⛧',c:'#9ad04a',r:240,d:'Wer ihm nahe ist, erleidet mehr Schaden und wird schlechter geheilt.',tip:'Nur kurz in die Aura treten, dann wieder hinaus.',
+  tick(e,q){q.gnVulnT=Math.max(q.gnVulnT||0,0.4);q.gnVulnA=Math.max(q.gnVulnA||0,0.12);q.gnHbT=Math.max(q.gnHbT||0,0.4)}},
+ glut:{n:'Glutaura',ic:'♨',c:'#ff7a2a',r:170,d:'Sengende Hitze ringsum verbrennt jeden in seiner Nähe.',tip:'Nicht dauerhaft neben ihm kämpfen; Feuerwiderstand hilft.',tick(e,q,dt){hurtDot(e.dmg*0.18*dt,{el:'feuer'})}}
+};
+
+/* Zuordnung je Gegnerart: sig = Normalgegner (0–1), ext = zusätzlich für Champions/Elite, tod = Todes-Effekt, res = Resistenzen (+) / Schwächen (−), el = eigene Schadensart */
+const GN_FOE={
+ goblin:{sig:'flucht',ext:['aggressiv']},goblinBogen:{ext:['salve','flucht']},goblinSchlaeger:{ext:['stampfen','aggressiv']},
+ wolf:{sig:'rudel',ext:['heulen','umreissen']},ratte:{ext:['seuchenbiss']},fuchs:{sig:'rudel',ext:['flucht']},
+ robe:{ext:['aggressiv','kampfschrei']},robeArmbrust:{ext:['salve']},robeSchlaeger:{sig:'aggressiv',ext:['stampfen']},robeTrunk:{tod:'bierlache',ext:['umreissen']},
+ adept:{el:'feuer',res:{feuer:0.3},ext:['feuerschild','schweigen','brandherd']},phiole:{tod:'saeure',res:{gift:0.5},el:'gift'},auge:{ext:['bannblick']},
+ skelett:{tod:'knochen',res:{gift:0.75,nekro:0.5},ext:['parade']},skelBogen:{sig:'salve',tod:'knochen',res:{gift:0.75,nekro:0.5}},stirge:{sig:'blutsaugen'},
+ soeldner:{ext:['parade','aggressiv']},drowSchuetze:{sig:'giftpfeil',ext:['feenfeuer','dunkel']},drowWache:{ext:['feenfeuer','dunkel','parade']},
+ ruestung:{res:{gift:0.75,psych:0.75},ext:['parade','runenschild']},runenwaechter:{res:{gift:0.75,psych:0.75,blitz:0.3},ext:['runenschild','stampfen']},runenfunke:{el:'blitz',tod:'funkenschlag',res:{blitz:0.6,gift:0.5}},
+ zombie:{sig:'zaeh',res:{gift:0.75},ext:['laehmklaue']},zombieBlaeh:{tod:'giftlache',res:{gift:0.75},el:'gift'},
+ zweigBlight:{res:{feuer:-0.35}},nadelBlight:{res:{feuer:-0.35},el:'gift'},rankenBlight:{sig:'rankenzug',res:{feuer:-0.35}},
+ riesenspinne:{sig:'giftbiss',res:{gift:0.3}},netzspinne:{tod:'netzboden',res:{gift:0.3},ext:['netzfalle']},ettercap:{sig:'netzfalle',res:{gift:0.3},ext:['giftbiss']},
+ mane:{res:{feuer:0.3,frost:0.3,gift:0.3},ext:['aggressiv']},
+ schatten:{sig:'kraftentzug',res:{gift:0.75,frost:0.3,nekro:0.5},ext:['unsichtbar']},schemen:{el:'frost',sig:'lebensentzug',tod:'wiederkehr',res:{gift:0.75,nekro:0.5,frost:0.3}},
+ kuotoa:{sig:'klebschild',res:{blitz:-0.3,frost:0.2}},kuoHarpune:{sig:'harpune',res:{blitz:-0.3,frost:0.2}},kuoPeitsche:{res:{blitz:-0.3,frost:0.2},ext:['aggressiv']},
+ duergar:{sig:'vergroessern',res:{gift:0.5,psych:0.3},ext:['unsichtbar']},duergarArmbrust:{sig:'unsichtbar',res:{gift:0.5,psych:0.3},ext:['salve']},
+ russgeist:{el:'feuer',tod:'glutfeld',res:{feuer:0.75,frost:-0.3}},steinbrecher:{sig:'stampfen',res:{gift:0.5}},
+ goblinSchamane:{ext:['schweigen','nebel']},wolfsreiter:{ext:['rudel','umreissen']},robeHeiler:{ext:['magierschild']},drowPriesterin:{ext:['feenfeuer','dunkel']},
+ brutspinne:{res:{gift:0.3},ext:['giftbiss']},spinnchen:{res:{gift:0.3}},kuoPriester:{res:{blitz:-0.3,frost:0.2},ext:['klebschild','sog']},duergarRammer:{res:{gift:0.5},ext:['vergroessern']},
+ pylon:{res:{gift:0.9,psych:0.9}},steinkriecher:{res:{gift:0.75}},brocken:{sig:'felswurf',res:{gift:0.75}},steinsplitter:{sig:'kreischen',tod:'splitter',res:{gift:0.75}},
+ magmin:{el:'feuer',tod:'glutfeld',res:{feuer:0.9,frost:-0.35}},feuerkaefer:{el:'feuer',res:{feuer:0.75,frost:-0.3},ext:['feueratem']},eiferer:{el:'feuer',res:{feuer:0.5},ext:['feuerschild','brandherd','schweigen']},
+ grauerGeist:{sig:'flucht',ext:['unsichtbar']},geistMesser:{sig:'giftklinge',ext:['unsichtbar','salve']},
+ gans:{ext:['aggressiv']},kampfgans:{ext:['stampfen','kampfschrei']},spuckgans:{ext:['salve']},
+ /* Spezialgegner */
+ ork:{fab:['aggressiv','kampfschrei','stampfen'],res:{gift:0.2}},hobMagier:{fab:['magierschild','nebel','brandherd'],el:'feuer',res:{feuer:0.3}},oger:{fab:['felswurf','stampfen','aggressiv']},
+ ghul:{fab:['laehmklaue','rudel'],res:{gift:0.75,nekro:0.5}},banshee:{fab:['klagen','lebensentzug'],tod:'wiederkehr',el:'nekro',res:{gift:0.75,nekro:0.75,phys:0.3,frost:0.3}},
+ gespenst:{fab:['lebensentzug','unsichtbar'],tod:'wiederkehr',el:'nekro',res:{gift:0.75,nekro:0.75,phys:0.3}},troll:{fab:['regeneration','aggressiv','umreissen'],res:{feuer:-0.25,gift:-0.15}},
+ vettel:{fab:['fluch','nebel','unsichtbar'],el:'gift',res:{feuer:0.3,frost:0.3}},myconid:{fab:['sporen','regeneration'],tod:'sporenwolke',el:'gift',res:{gift:0.5,feuer:-0.25,psych:0.3}},
+ schinder:{fab:['gedankenstoss','bannblick'],el:'psych',res:{psych:0.6}},basilisk:{fab:['versteinern','giftbiss'],res:{gift:0.3}},
+ wuerfel:{fab:['verschlingen','sog','saeurespur'],tod:'saeure',el:'gift',res:{gift:0.75,psych:0.75,blitz:-0.2}},rost:{fab:['rostfrass','aggressiv'],res:{gift:0.3}},
+ magmaMephit:{fab:['feueratem','brandherd'],tod:'explosionF',el:'feuer',res:{feuer:0.9,frost:-0.3}},eisMephit:{fab:['frostatem'],tod:'explosionK',el:'frost',res:{frost:0.9,feuer:-0.3}}
+};
+/* Wächter (Minibosse): zusätzliche Fähigkeiten und Resistenzen */
+const GN_GUARD={goblinHauptmann:{fab:['kampfschrei']},leitwolf:{fab:['heulen','rudel']},hoehlenwache:{fab:['stampfen']},eintreiber:{fab:['kampfschrei']},kerkerwache:{fab:['umreissen','laehmklaue']},
+ wuerfelmeister:{fab:['fluch']},turmwache:{fab:['salve']},skelHauptmann:{fab:['parade','zaeh'],res:{gift:0.75,nekro:0.5}},nezna:{fab:['feenfeuer','lebensentzug'],res:{nekro:0.5}},
+ blaehzombie:{tod:'giftlache',res:{gift:0.75}},riesenspinneW:{fab:['giftbiss','netzfalle'],res:{gift:0.3}},chasme:{fab:['blutsaugen'],res:{feuer:0.3,frost:0.3,gift:0.5}},
+ brutmutter:{fab:['giftbiss'],res:{gift:0.3}},fadenmeister:{fab:['netzfalle','giftbiss'],res:{gift:0.3}},spinnenstatue:{fab:['versteinern'],res:{gift:0.9,psych:0.9}},
+ peitschenmeister:{fab:['klebschild','sog'],res:{blitz:-0.2}},duergarHuene:{fab:['unsichtbar'],res:{gift:0.5}},schreifels:{fab:['kreischen'],res:{gift:0.75}},
+ stadtvogt:{fab:['kampfschrei','parade'],res:{gift:0.5}},feuerschlucker:{fab:['feuerschild','brandherd'],res:{feuer:0.5}},steinriese:{fab:['stampfen'],res:{gift:0.3}},salamander:{fab:['feuerschild'],res:{feuer:0.75,frost:-0.25}}};
+const GN_BOSS={venomfang:{res:{gift:0.5}},themberchaud:{res:{feuer:0.5,frost:-0.2}},wraith:{res:{gift:0.75,nekro:0.75}},schmiedewaechter:{res:{gift:0.75,psych:0.75}},demogorgon:{res:{gift:0.5,feuer:0.3,frost:0.3}},
+ vrock:{res:{gift:0.5,feuer:0.3,frost:0.3}},erzpriesterin:{res:{blitz:-0.2}},riese:{res:{gift:0.2}},ilvara:{res:{gift:0.2}}};
+/* Schadensarten und Resistenzen an die Definitionen hängen */
+for(const id in GN_FOE){const d=FOES[id],a=GN_FOE[id];if(!d)continue;if(a.res)d.res=a.res;if(a.el)d.el=a.el}
+for(const id in GN_GUARD){const d=GUARDS[id];if(d&&GN_GUARD[id].res)d.res=GN_GUARD[id].res}
+for(const id in GN_BOSS){const d=BOSSES[id];if(d&&GN_BOSS[id].res)d.res=GN_BOSS[id].res}
+if(GUARDS.salamander)GUARDS.salamander.el='feuer';if(GUARDS.feuerschlucker)GUARDS.feuerschlucker.el='feuer';
+Object.assign(ZCOL,{saeure:'#b8e04a',stille:'#b9a2d8',sog:'#9a7ac8',glaette:'#dff4f4',frost:'#d4f0f2',sporenv:'#d8a0c0'});
+
+/* Bestiarium-Einträge registrieren */
+{const RES_TIP={feuer:'Feuer',frost:'Frost',gift:'Gift',blitz:'Blitz',heilig:'heiligem Licht',nekro:'nekrotischer Kraft',psych:'psychischen Angriffen',phys:'Waffen',arkan:'arkaner Magie'};
+ const reg=(id,a)=>{if(!a)return;const fab=[...(a.fab||[]),...(a.sig?[a.sig]:[]),...(a.ext||[])];for(const k of new Set(fab)){const F=GNF[k];if(F)bestWissen(id+':'+k,{n:F.n,d:F.d,tip:F.tip,dd:F.dd,ic:F.ic,c:F.c,foe:id,typ:'fab'})}
+  if(a.tod&&GNT[a.tod]){const T=GNT[a.tod];bestWissen(id+':'+a.tod,{n:T.n,d:T.d,tip:T.tip,dd:T.dd,ic:T.ic,c:T.c,foe:id,typ:'tod'})}
+  for(const el in (a.res||{})){const v=a.res[el],E=GN_EL[el];if(!E)continue;bestWissen(id+':res_'+el,{n:(v>0?(v>=0.9?'Fast immun gegen ':'Widerstand gegen '):'Schwach gegen ')+E.n,d:v>0?`Erleidet ${Math.round(v*100)}% weniger Schaden durch ${RES_TIP[el]}.`:`Erleidet ${Math.round(-v*100)}% mehr Schaden durch ${RES_TIP[el]}.`,tip:v>0?'Andere Schadensarten wählen.':`Fähigkeiten mit ${RES_TIP[el]} sind hier besonders wirksam.`,ic:E.ic,c:E.c,foe:id,typ:'res',neg:v<0}) }};
+ for(const id in GN_FOE)reg(id,GN_FOE[id]);for(const id in GN_GUARD)reg('w_'+id,GN_GUARD[id]);for(const id in GN_BOSS)reg('b_'+id,GN_BOSS[id]);
+ for(const k in GNA)bestWissen('aura:'+k,{n:GNA[k].n,d:GNA[k].d,tip:GNA[k].tip,ic:GNA[k].ic,c:GNA[k].c,grp:'Auren der Spezialgegner',typ:'aura'});
+ bestWissen('gefahr:spezial',{n:'Spezialgegner',d:'Im Bosskampf greifen statt endloser Gegnerwellen immer wieder besonders starke Spezialgegner ein – je höher der Schwierigkeitsgrad, desto mehr Eigenschaften und Auren.',tip:'Spezialgegner zuerst ausschalten oder vom Boss weglocken.',ic:'★',c:'#f2d24c',grp:'Bosskämpfe',typ:'info'})}
+const gnFoeKey=e=>e&&e.def&&(e.guard?e.def.id:e.boss?e.def.id:e.def.id);
+const gnTab=e=>{if(!e||!e.def)return null;const id=e.def.id||'';return id.startsWith('w_')?GN_GUARD[id.slice(2)]:id.startsWith('b_')?GN_BOSS[id.slice(2)]:GN_FOE[id]};
+const gnRes=e=>(e&&e.def&&e.def.res)||null;
+
+/* ---------- Schwierigkeit der Spezialgegner ---------- */
+function gnStufe(){return G.diff>0?G.diff+1:(HARD()?1:0)}
+
+/* ---------- Fähigkeiten verteilen ---------- */
+function gnGib(e){if(!e||!e.def)return;const a=gnTab(e);if(!a){e.gnF=e.gnF||[];return}const L=[];
+ if(e.boss){}else if(e.guard){for(const k of (a.fab||[]))L.push(k)}else if(a.fab){for(const k of a.fab)L.push(k)}else if(a.sig)L.push(a.sig);
+ if(a.tod)L.push(a.tod);e.gnF=L}
+{const se0=spawnEnemy;spawnEnemy=function(def,x,y,o){const e=se0.apply(this,arguments);try{if(e&&!(o&&o.boss))gnGib(e)}catch(er){console.error(er)}return e}}
+const GN_PACK=new WeakMap();
+{const me0=makeElite;makeElite=function(e,affix,rare){const r=me0.apply(this,arguments);try{const a=gnTab(e);if(a&&a.ext&&!e.gnSp){const pool=a.ext.filter(k=>!(e.gnF||[]).includes(k));const n=rare?2:1;e.gnF=e.gnF||[];const neu=[];let fest=!rare&&affix&&typeof affix==='object'?GN_PACK.get(affix):null;if(!rare&&affix&&typeof affix==='object'&&!fest){fest=pool[Math.floor(Math.random()*pool.length)];GN_PACK.set(affix,fest)}for(let i=0;i<n&&pool.length;i++){const k=fest&&pool.includes(fest)?pool.splice(pool.indexOf(fest),1)[0]:pool.splice(Math.floor(Math.random()*pool.length),1)[0];e.gnF.push(k);neu.push(GNF[k]?GNF[k].n:k)}if(neu.length)e.affixNames=[e.affixNames,...neu].filter(Boolean).join(' · ')}}catch(er){console.error(er)}return r}}
+
+/* ---------- Gegner-Takt: Kontext für Nahkampftreffer, Fähigkeiten, Zustände ---------- */
+let GNE=null;
+{const ue0=updEnemy;updEnemy=function(e,dt){
+ if(e.gnAt>0)e.gnAt-=dt;if(e.gnLkT>0)e.gnLkT-=dt;if(e.gnInv>0)e.gnInv-=dt;if(e.gnFs>0)e.gnFs-=dt;if(e.gnRud>0)e.gnRud-=dt;
+ if(e.gnSpuk>0){e.gnSpuk-=dt;if(e.gnSpuk<=0){e.dead=true;e.noLoot=true;puffs(e.x,e.y,'#e8f4f0',8,60,14);return}}
+ if(e.gnAtt>0){const q=e.gnAttP;e.gnAtt-=dt;if(!q||q.down||!PL.concat([P]).includes(q)||(q.roll||0)>(e.gnAttR||0)||e.gnAtt<=0||e.stun>0){gnLos(e)}else{e.x=q.x+(e.gnOX||0);e.y=q.y+(e.gnOY||0);const dd=e.dmg*0.42*dt;const P0=P;P=q;try{hurtDot(dd,{el:'phys'})}finally{P=P0}e.hp=Math.min(e.maxHp,e.hp+dd*1.5);if(fxQ()>1&&Math.random()<dt*5)burst(q.x,q.y-6,'#d83a3a',1,40);tickStatus(e,dt);return}}
+ const prev=GNE;GNE=e;try{ue0(e,dt)}finally{GNE=prev}
+ if(e.dead){if(e.def.k==='exploder'&&!e.gnTd){e.gnTd=1;gnTod(e)}return}
+ if(e.gnF&&e.gnF.length&&G.state==='play'){const P0=P;try{for(const k of e.gnF){const F=GNF[k];if(F&&F.tick){GNE=e;F.tick(e,dt);GNE=prev;if(e.dead)break}}}catch(er){console.error('gnTick',er)}finally{GNE=prev;P=P0}}
+ if(e.gnAura)gnAuraTick(e,dt)}}
+function gnTod(e){if(!e.gnF)return;for(const k of e.gnF){const T=GNT[k];if(T){try{T.run(e);gnErl(e,k)}catch(er){console.error(er)}}}}
+/* Treffer auf Gegner (Spieler-Seite): Resistenzen, Schwächen, Parade, Unsichtbarkeit */
+hook('dmgMul',(e,o)=>{if(!e||!e.def)return 1;const el=gnElHero(o);e.gnLastEl=el;let m=1;const R=gnRes(e);
+ if(R&&R[el]){const v=R[el];m*=1-v;if(!o.quiet&&!o.dot&&(e.gnRW||0)<G.time){e.gnRW=G.time+2.5;word(e.x+rnd(-8,8),e.y-e.r-24,v>0?'resistent':'verwundbar!',v>0?'#b8b0a0':GN_EL[el].c)}
+  if(!gnBot()&&P&&!netIs(P.dev||'')&&(!o.dot||Math.random()<0.2))bestErlebt(e.def.id+':res_'+el)}
+ if(e.gnInv>0)m*=0.5;
+ if(e.gnF&&e.gnF.includes('parade')&&!o.dot&&!o.pet&&(o.melee||o.basic||o.arrow)&&gnCd(e,'parade',3.5)){m*=0.5;gnAnim(e,'parade',0.35);word(e.x,e.y-e.r-16,'Pariert!','#e8e8f0');sfxAt('g_shield',e.x,e.y);gnErl(e,'parade')}
+ return m});
+hook('hit',(e,o,amt,crit)=>{if(!e||!e.def)return;e.gnLastCrit=!!crit;if(!e.gnF)return;for(const k of e.gnF){const F=GNF[k];if(F&&F.hit)try{F.hit(e,o||{})}catch(er){console.error(er)}}});
+hook('kill',(e,o)=>{if(!e||e.gnTd)return;e.gnTd=1;gnTod(e)});
+/* Untote Zähigkeit: tödlicher Treffer → mit 1 Leben weiter (nicht bei Feuer/heilig/kritisch) */
+{const ke0=killEnemy;killEnemy=function(e,o){if(e&&!e.dead&&e.gnF&&e.gnF.includes('zaeh')&&!e.gnZaeh&&!e.gnLastCrit&&e.gnLastEl!=='feuer'&&e.gnLastEl!=='heilig'&&!(o&&(o.kombo||o.lp2))&&Math.random()<(e.guard?1:0.35)){
+  e.gnZaeh=1;e.hp=e.guard?e.maxHp*0.12:1;gnAnim(e,'zaeh',0.9);word(e.x,e.y-e.r-18,'Steht wieder auf!','#c8d8b0');sfxAt('d_bone',e.x,e.y);gnErl(e,'zaeh');return}
+ return ke0.apply(this,arguments)}}
+
+/* ---------- Schaden an Helden: Schadensart, Widerstände, Verwundbarkeit, Nahkampf-Effekte ---------- */
+function gnFoeEl(e){return e&&e.def&&!e.boss&&!e.guard?e.def.el||null:null}
+function gnInMul(q,el){let m=1;if(el){const r=gnPRes(q,el);m*=1-r}if(q.gnVulnT>0)m*=1+(q.gnVulnA||0);return m}
+{const h0=hurt;hurt=function(raw,src){let el=null;const e=GNE;if(src&&typeof src==='object'){el=src.el||(src.c?GN_COLEL[src.c]:null)||null}else if(e)el=gnFoeEl(e);
+ if(!src&&e&&e.gnRud>0)raw*=1.15;const hp0=P.hp,q=P;h0(raw*gnInMul(P,el));if(!(q.hp<hp0))return;
+ try{if(src&&typeof src==='object'){if(src.gnOn&&GNF[src.gnOn]&&GNF[src.gnOn].onProj)GNF[src.gnOn].onProj(src)}
+  else if(e&&e.gnF&&!e.dead){for(const k of e.gnF){const F=GNF[k];if(F&&F.melee)F.melee(e)}}}catch(er){console.error(er)}}}
+{const hd0=hurtDot;hurtDot=function(a,src){let el=null;if(src&&typeof src==='object')el=src.el||GN_ZEL[src.kind]||null;return hd0(a*gnInMul(P,el))}}
+/* Heilung bei Lebensentzug/Fluchaura halbiert */
+{const he0=heal;heal=function(v){if(P&&P.gnHbT>0)v*=0.5;return he0(v)}}
+/* Geschosse/Telegrafen aus dem Gegnertakt erben die Schadensart und Gift-Fähigkeiten */
+{const es0=eShot;eShot=function(x,y,a,spd,dmg,o){es0.apply(this,arguments);const p=G.projs[G.projs.length-1];if(!p||p.team!=='e')return;const e=GNE;
+  if(!p.el)p.el=(o&&o.el)||GN_COLEL[p.c]||gnFoeEl(e)||null;
+  if(e&&e.gnF){const k=e.gnF.includes('giftpfeil')?'giftpfeil':e.gnF.includes('giftklinge')?'giftklinge':null;if(k){p.gnOn=k;p.el='gift';p.gnD=e.dmg*0.18;p.c='#9ad04a'}}}}
+{const te0=tele;tele=function(o){if(o&&!o.el){o.el=GN_COLEL[o.c]||(GNE&&!GNE.boss&&!GNE.guard&&o.dmg?gnFoeEl(GNE):null)||undefined;if(!o.el)delete o.el}return te0(o)}}
+/* Projektile/Telegrafen/Zonen reichen sich selbst als Quelle an hurt/hurtDot weiter (siehe Patch-Ersetzungen) */
+
+/* ---------- Spieler-Zustände je Frame (Gastgeber) ---------- */
+TBUFFS.push('gnRost');
+hook('stats',s=>{if(P&&P.buffs&&P.buffs.gnRost>0)s.armor*=0.65});
+hook('dmgMul',(e,o)=>{let m=1;if(!P)return 1;if(P.gnWeakN>0&&P.gnWeakT>0)m*=1-0.08*P.gnWeakN;if(P.gnFearT>0)m*=0.8;return m});
+hook('roll',()=>{if(P.gnEngT>0){P.gnEngT=Math.min(P.gnEngT,0.25)}for(const e of G.enemies)if(e.gnAtt>0&&e.gnAttP===P)gnLos(e)});
+hook('tick',dt=>{const q=P;if(!q||q.down)return;
+ if(q.gnFearT>0){q.gnFearT-=dt;q.slowT=Math.max(q.slowT||0,0.1);q.slowA=Math.max(q.slowA||0,0.2)}
+ if(q.gnVulnT>0){q.gnVulnT-=dt;if(q.gnVulnT<=0)q.gnVulnA=0}
+ if(q.gnWeakT>0){q.gnWeakT-=dt;if(q.gnWeakT<=0)q.gnWeakN=0}
+ if(q.gnHbT>0)q.gnHbT-=dt;if(q.gnLaehmT>0)q.gnLaehmT-=dt;if(q.gnSteinX>0)q.gnSteinX-=dt;
+ if(q.gnSteinT>0){q.gnSteinT-=dt;if(q.gnSteinT<=0)q.gnSteinN=0}
+ if(q.gnGiftT>0){q.gnGiftT-=dt;hurtDot((q.gnGiftD||0)*dt,{el:'gift'});if(q.gnGiftT<=0)q.gnGiftD=0}
+ if(q.gnBrandT>0){q.gnBrandT-=dt;hurtDot((q.gnBrandD||0)*dt,{el:'feuer'});if(q.gnBrandT<=0)q.gnBrandD=0;if(fxQ()>1&&Math.random()<dt*10)embers(q.x,q.y,'#ffb040',1,10)}
+ if(q.gnEngT>0){q.gnEngT-=dt;hurtDot((q.gnEngD||0)*dt,{el:'gift'});q.rootT=Math.max(q.rootT||0,Math.min(0.1,q.gnEngT))}
+ if(q.gnConfT>0){q.gnConfT-=dt;q.gnConfA=(q.gnConfA||0)+dt*rnd(2,5);const s=(q.st.speed||160)*0.55*9*dt;q.kx+=Math.cos(q.gnConfA)*s;q.ky+=Math.sin(q.gnConfA)*s}
+ /* Boden-Gefahren mit Sonderwirkung */
+ let glatt=0;for(const z of G.ezones){if(d2(z,q)>z.r*z.r)continue;const k=z.kind;
+  if(k==='saeure'){if(!(q.buffs.gnRost>0.5))gnRost(q,1.5);else q.buffs.gnRost=Math.max(q.buffs.gnRost,1.5)}
+  else if(k==='sog'){const dd=Math.sqrt(d2(z,q))||1;if(dd>20){const v=120*9*dt;q.kx+=(z.x-q.x)/dd*v;q.ky+=(z.y-q.y)/dd*v}}
+  else if(k==='glaette'||k==='frost')glatt=1;
+  else if(k==='sporenv'){q.gnConfT=Math.max(q.gnConfT||0,0.5)}
+  if(z.gk&&!gnBot()&&!netIs(q.dev||''))bestErlebt(z.gk)}
+ if(glatt){q.gnGlatt=0.3;const s=(q.st.speed||160)*2.4*dt;if(q.moving){q.kx+=Math.cos(q.mvA||0)*s;q.ky+=Math.sin(q.mvA||0)*s}}else if(q.gnGlatt>0)q.gnGlatt-=dt;
+ gnBwToast()});
+
+/* ---------- Auren ---------- */
+function gnAuraTick(e,dt){const A=GNA[e.gnAura];if(!A||e.dead)return;e.gnAuT=(e.gnAuT||0)-dt;if(A.ally){if(e.gnAuT<=0){e.gnAuT=0.3;query(e.x,e.y,A.r,o=>{if(o!==e&&!o.dead&&d2(o,e)<A.r*A.r)A.tick(e,o,dt)})}return}
+ const P0=P;try{for(const q of mpL()){if(!q||q.down||q.netGone)continue;if(d2(e,q)<A.r*A.r){P=q;A.tick(e,q,dt);if(!gnBot()&&!netIs(q.dev||''))bestErlebt('aura:'+e.gnAura)}}}finally{P=P0}}
+
+/* ---------- Bosskampf: keine Dauerflut mehr, vereinzelte Gruppen und Spezialgegner ---------- */
+const GN_THEMA={goblinboss:['hobMagier','oger','ork'],glasstab:['hobMagier','magmaMephit','eisMephit'],bugbear:['ork','oger','hobMagier'],schmiedewaechter:['rost','wuerfel','eisMephit'],
+ venomfang:['troll','vettel','myconid'],ilvara:['vettel','myconid','schinder'],vrock:['troll','ghul','vettel'],wraith:['ghul','banshee','gespenst'],erzpriesterin:['schinder','wuerfel','ghul'],
+ demogorgon:['schinder','ghul','banshee'],riese:['oger','basilisk','troll'],themberchaud:['magmaMephit','basilisk','rost'],almightygoose:['ork','oger','magmaMephit'],drokey:['gespenst','schinder','vettel']};
+const gnBossAn=()=>!!(G&&G.boss&&!G.boss.dead&&!G.room&&G.state==='play');
+function gnBossDir(dt){const B=G.gnB||(G.gnB={t:0,grp:rnd(7,10),spz:rnd(8,11),n:0});B.t+=dt;const L=gnStufe(),S=STAGES[G.stage];if(!S)return;
+ const lebend=G.enemies.filter(e=>!e.dead&&!e.boss&&!e.add&&e.def.k!=='still');const surv=G.boss.survive>0;
+ B.grp-=dt;if(B.grp<=0){B.grp=rnd(12,16)*(1-0.05*Math.min(L,4))/(surv?0.75:1);const cap=8+2*L+3*(mpN()-1);
+  if(lebend.length<cap){const f=pickFoe(1),pt=viewEdgePoint(50);const n=ri(4,5)+(L>=2?1:0)+(mpN()>1?1:0);for(let i=0;i<n;i++)spawnEnemy(f,pt.x+rnd(-50,50),pt.y+rnd(-50,50))}}
+ B.spz-=dt;if(B.spz<=0){const spz=lebend.filter(e=>e.gnSp).length,maxS=surv?1:(L>=2?2:1);B.spz=rnd(20,26)*(1-0.06*Math.min(L,4));if(spz<maxS){gnSpezRuf(L);if(L>=3&&!surv&&spz+1<maxS&&Math.random()<0.4)later(1.4,()=>{if(gnBossAn())gnSpezRuf(L)})}else B.spz=6}}
+function gnSpezRuf(L){const B=G.boss;const th=GN_THEMA[(B&&B.def.id||'').replace(/^b_/,'')]||null;let id=th?pick(th):null;
+ if(!id){const own=Object.keys(STAGES[G.stage].foes||{}).filter(k=>FOES[k]&&FOES[k].k!=='still'&&GN_FOE[k]&&(GN_FOE[k].ext||GN_FOE[k].sig));id=own.length?pick(own):'ork'}
+ const q=G.mp?nearestP(B.x,B.y):P;let x=0,y=0;for(let tr=0;tr<8;tr++){const a=rnd(TAU),d=rnd(260,380);x=clamp(q.x+Math.cos(a)*d,60,WORLD-60);y=clamp(q.y+Math.sin(a)*d,60,WORLD-60);if(typeof wlFrei!=='function'||!G.wl||!G.wl.an||wlFrei(x,y,40))break}
+ const def=FOES[id];G.fxs.push({k:'gn_ruf',x,y,t:0,life:1.4,c:def.spez?'#f2d24c':'#ff8a5a',r:60});sfxAt('elite',x,y);
+ tele({k:'circle',x,y,r:62,delay:1.3,dmg:0,c:'#f2d24c',gs:'gnRuf',after:()=>{if(!gnBossAn())return;gnSpezial(def,x,y,L)}})}
+function gnSpezial(def,x,y,L){const e=spawnEnemy(def,x,y,{});e.elite=false;
+ const nA=L<=0?1:L===1?2:L>=4?4:3;const af=rollAffixes(nA);delete af.beschwoerer;makeElite(e,af,true);
+ const k=(def.spez?1:1.4)*(1+0.15*L);e.hp*=k;e.maxHp=e.hp;e.dmg*=1.3+0.08*L;e.gnSp=1;e.r=Math.max(e.r,12*(def.size||1)*1.3);
+ const a=GN_FOE[def.id]||{};const F=new Set(a.fab||[]);if(!def.spez){if(a.sig)F.add(a.sig);for(const x of (a.ext||[]))F.add(x)}if(a.tod)F.add(a.tod);
+ if(L>=3){const extra=['feenfeuer','schweigen','brandherd','sog','fluch','kampfschrei'].filter(x=>!F.has(x));F.add(pick(extra))}
+ e.gnF=[...F];if(L>=2){const auren=Object.keys(GNA);e.gnAura=def.el==='frost'?'frost':def.el==='feuer'?'glut':pick(auren)}
+ e.affixNames=[...(e.gnAura?[GNA[e.gnAura].n]:[]),e.affixNames].filter(Boolean).join(' · ');
+ G.fxs.push({k:'pillar',x,y:y+10,w:80,h:340,c:'#f2d24c',t:0,life:1});G.fxs.push({k:'shock',x,y,r:150,c:'#f2d24c',t:0,life:0.6});light(x,y,300,'#f2d24c',1,1);G.shake+=4;sfxAt('roar',x,y);
+ banner(def.n,'Spezialgegner'+(e.gnAura?' · '+GNA[e.gnAura].n:''),'#f2d24c',{dur:2,size:34,y:H*0.28});if(!gnBot()){bestErlebt('gefahr:spezial');if(e.gnAura)later(1.5,()=>{})}
+ return e}
+{const st0=spawnTick;spawnTick=function(dt){if(gnBossAn()&&G.mode!=='bossrausch'){G.spawnT=Math.max(G.spawnT||0,1);const r=st0(dt);try{gnBossDir(dt)}catch(er){console.error(er)}return r}if(G.gnB&&!(G.boss&&!G.boss.dead))G.gnB=null;return st0(dt)}}
+/* Beschwörungen der Bosse während des Kampfes etwa halbieren */
+for(const mv of ['summon','howl','t_diener']){const f0=BM[mv];if(!f0)continue;BM[mv]=function(e){const n0=G.enemies.length;const r=f0.apply(this,arguments);if(e&&e.boss&&G.enemies.length>n0+1){const neu=G.enemies.slice(n0);const weg=new Set(neu.filter((x,i)=>i%2===1));G.enemies=G.enemies.filter(x=>!weg.has(x))}return r}}
+
+/* ---------- Spieler-Widerstände als Gegenstands-Eigenschaften ---------- */
+Object.assign(AFF,{resF:{f:v=>`+${v}% Feuerwiderstand`,roll:il=>Math.min(30,Math.round(rnd(6,12)+il*0.12))},resK:{f:v=>`+${v}% Frostwiderstand`,roll:il=>Math.min(30,Math.round(rnd(6,12)+il*0.12))},resG:{f:v=>`+${v}% Gift- & Säurewiderstand`,roll:il=>Math.min(30,Math.round(rnd(6,12)+il*0.12))}});
+/* nicht in die Pools (würde andere Eigenschaften seltener machen): magische und bessere Helme, Rüstungen, Handschuhe und Ringe tragen manchmal zusätzlich einen Widerstand */
+{const mi0=makeItem;makeItem=function(slot,il,rar,heroId){const it=mi0.apply(this,arguments);try{if(it&&rar>=1&&rar<5&&['helm','armor','gloves','ring'].includes(slot)&&Math.random()<(slot==='ring'?0.18:0.24)&&!it.aff.some(a=>a&&/^res[FKG]$/.test(a.k))){const k=pick(['resF','resK','resG']);it.aff.push({k,v:Math.round(AFF[k].roll(il)*[1,1,1.05,1.15,1.3][rar])})}}catch(er){}return it}}
+if(typeof STLBL==='object')Object.assign(STLBL,{resF:['Feuerwiderstand',v=>'+'+v+'%'],resK:['Frostwiderstand',v=>'+'+v+'%'],resG:['Gift- & Säurewiderstand',v=>'+'+v+'%']});
+{const cs0=computeStats;computeStats=function(eq){const st=cs0.apply(this,arguments);let F=0,K=0,Gi=0;try{for(const k of SLOTS){const it=eq&&eq[k];if(!it)continue;for(const a of affOf(it)){if(a.k==='resF')F+=a.v;else if(a.k==='resK')K+=a.v;else if(a.k==='resG')Gi+=a.v}}}catch(er){}
+ st.resF=Math.min(0.75,F/100);st.resK=Math.min(0.75,K/100);st.resG=Math.min(0.75,Gi/100);return st}}
+{const sl0=stilLines;stilLines=function(st){const L=sl0.apply(this,arguments);if(st){if(st.resF>0)L.push(['Feuerwiderstand',Math.round(st.resF*100)+'%']);if(st.resK>0)L.push(['Frostwiderstand',Math.round(st.resK*100)+'%']);if(st.resG>0)L.push(['Gift- & Säurewiderstand',Math.round(st.resG*100)+'%'])}return L}}
+
+/* ---------- Zeichnen ---------- */
+/* Boden-Gefahren */
+const GN_EZ={
+ saeure(z,c,t,a){c.globalAlpha=0.55*a;hE(c,z.x,z.y,z.r,z.r*0.72,'#3a4a10');c.globalAlpha=0.5*a;hE(c,z.x,z.y,z.r*0.86,z.r*0.6,'#8ab020');c.globalAlpha=0.35*a;hE(c,z.x+Math.sin(t+z.x)*z.r*0.15,z.y,z.r*0.5,z.r*0.3,'#d8f060');
+  glow(z.x,z.y,z.r*1.2,'#b8e04a',0.3*a,true);for(let i=0;i<5;i++){const q=(t*0.8+i*0.21+z.x*0.001)%1,an=i*1.7+z.y;c.globalAlpha=a*(1-q);hC(c,z.x+Math.cos(an)*z.r*0.55,z.y+Math.sin(an)*z.r*0.38,1.5+3*q,null,'#e8ff90',1.2)}c.globalAlpha=1},
+ stille(z,c,t,a){c.globalAlpha=0.2*a;circ(c,z.x,z.y,z.r,'#2a2034');c.globalAlpha=0.6*a;c.strokeStyle='#b9a2d8';c.lineWidth=2;c.setLineDash([3,7]);c.beginPath();c.arc(z.x,z.y,z.r,-t*0.6,-t*0.6+TAU);c.stroke();c.setLineDash([]);
+  for(let i=0;i<3;i++){const q=(t*0.5+i/3)%1;c.globalAlpha=0.5*a*(1-q);c.beginPath();c.arc(z.x,z.y,z.r*q,0,TAU);c.stroke()}
+  c.globalAlpha=0.8*a;c.lineWidth=3;c.beginPath();c.arc(z.x,z.y,14,0,TAU);c.moveTo(z.x-10,z.y+10);c.lineTo(z.x+10,z.y-10);c.stroke();c.globalAlpha=1},
+ sog(z,c,t,a){glow(z.x,z.y,z.r*0.7,'#4a2a6a',0.4*a,true);c.strokeStyle='#c8a8f0';c.lineWidth=2;for(let i=0;i<4;i++){c.globalAlpha=0.45*a;c.beginPath();for(let s=0;s<26;s++){const an=s*0.3-t*3.2+i*TAU/4,r=z.r*(1-s/28);c.lineTo(z.x+Math.cos(an)*r,z.y+Math.sin(an)*r*0.7)}c.stroke()}c.globalAlpha=1},
+ glaette(z,c,t,a){const col=z.bier?'#d8a840':'#e8f8f8';c.globalAlpha=0.35*a;hE(c,z.x,z.y,z.r,z.r*0.7,col);c.globalAlpha=0.5*a;c.strokeStyle='#ffffff';c.lineWidth=1.5;for(let i=0;i<3;i++){const q=(t*0.4+i/3)%1;c.beginPath();c.moveTo(z.x-z.r*0.6+q*z.r*0.4,z.y-z.r*0.2+i*8);c.lineTo(z.x-z.r*0.2+q*z.r*0.4,z.y-z.r*0.32+i*8);c.stroke()}c.globalAlpha=1},
+ frost(z,c,t,a){c.globalAlpha=0.32*a;hE(c,z.x,z.y,z.r,z.r*0.72,'#cfe8ec');c.globalAlpha=0.55*a;c.strokeStyle='#f4ffff';c.lineWidth=1.4;for(let i=0;i<6;i++){const an=i*TAU/6+0.3;c.beginPath();c.moveTo(z.x,z.y);c.lineTo(z.x+Math.cos(an)*z.r*0.85,z.y+Math.sin(an)*z.r*0.6);c.stroke()}
+  glow(z.x,z.y,z.r,'#e8ffff',0.2*a,true);if(fxQ()>1&&Math.random()<0.1){c.globalAlpha=a;circ(c,z.x+rnd(-z.r*0.7,z.r*0.7),z.y+rnd(-z.r*0.5,z.r*0.5),1.6,'#ffffff')}c.globalAlpha=1},
+ sporenv(z,c,t,a){glow(z.x,z.y,z.r*1.1,'#d8a0c0',0.45*a,true);for(let i=0;i<7;i++){const an=i*0.9+t*0.6,rr=z.r*(0.25+0.1*i);glow(z.x+Math.cos(an)*rr,z.y+Math.sin(an)*rr*0.7,z.r*0.35,'#e8c0d8',0.3*a,true)}
+  c.globalAlpha=0.7*a;for(let i=0;i<8;i++){const an=i*0.8+t*1.3;circ(c,z.x+Math.cos(an)*z.r*0.6,z.y+Math.sin(an*1.3)*z.r*0.4-Math.sin(t*2+i)*6,2,'#f8e0f0')}c.globalAlpha=1}};
+{const dz0=drawEZone;drawEZone=function(z,t){const f=GN_EZ[z.kind];if(!f){dz0(z,t);if(z.gk&&NET.role==='guest')gnSehZ(z);return}const a=Math.min(1,z.t*3,(z.dur-z.t)*2);try{f(z,cx,t,a)}catch(er){}cx.globalAlpha=1;if(z.gk&&NET.role==='guest')gnSehZ(z)}}
+function gnSehZ(z){if(gnBot()||!P||d2(z,P)>z.r*z.r)return;bestErlebt(z.gk)}
+/* Eigene Telegrafen-Stile */
+{const dt0=drawTeleFx;drawTeleFx=function(k,t){dt0(k,t);if(!k.gs||k.gs.indexOf('gn')!==0)return;const c=cx,p=k.delay?Math.min(1,k.t/k.delay):1,pend=k.t<k.delay;if(!pend)return;c.save();try{
+ if(k.gs==='gnStampf'){c.strokeStyle='#e8c890';c.lineWidth=2;for(let i=0;i<8;i++){const a=i*TAU/8+0.2;c.globalAlpha=0.5*p;ln(c,'#e8c890',2,k.x+Math.cos(a)*k.r*0.3,k.y+Math.sin(a)*k.r*0.3,k.x+Math.cos(a+0.15)*k.r*(0.3+0.65*p),k.y+Math.sin(a+0.15)*k.r*(0.3+0.65*p))}}
+ else if(k.gs==='gnHeul'||k.gs==='gnSchall'){c.strokeStyle=k.c;c.lineWidth=2;for(let i=0;i<3;i++){const q=(t*1.5+i/3)%1;c.globalAlpha=0.5*(1-q)*p;c.beginPath();c.arc(k.x,k.y,k.r*q,0,TAU);c.stroke()}}
+ else if(k.gs==='gnFee'){for(let i=0;i<10;i++){const a=i*TAU/10+t*2,r=k.r*(1-0.6*p)+Math.sin(t*6+i)*4;c.globalAlpha=0.8;glow(k.x+Math.cos(a)*r,k.y+Math.sin(a)*r*0.8,9,'#e0a0ff',0.8,true)}}
+ else if(k.gs==='gnFluch'){c.strokeStyle='#9ae06a';c.lineWidth=2;c.globalAlpha=0.7*p;c.beginPath();for(let i=0;i<=5;i++){const a=-Math.PI/2+i*TAU*2/5+t*0.8;c.lineTo(k.x+Math.cos(a)*k.r*0.8,k.y+Math.sin(a)*k.r*0.8)}c.stroke()}
+ else if(k.gs==='gnStille'){c.strokeStyle='#e0d0f8';c.lineWidth=3;c.globalAlpha=0.6*p;c.beginPath();c.arc(k.x,k.y,12,0,TAU);c.moveTo(k.x-9,k.y+9);c.lineTo(k.x+9,k.y-9);c.stroke()}
+ else if(k.gs==='gnSog'){c.strokeStyle='#c8a8f0';c.lineWidth=2;for(let i=0;i<3;i++){c.globalAlpha=0.5*p;c.beginPath();for(let s=0;s<22;s++){const a=s*0.32-t*4+i*2.1,r=k.r*(1-s/24);c.lineTo(k.x+Math.cos(a)*r,k.y+Math.sin(a)*r)}c.stroke()}}
+ else if(k.gs==='gnBlick'){c.translate(k.x,k.y);c.rotate(k.a);const L=k.len*p;c.globalAlpha=0.5;c.fillStyle='#e8f070';c.fillRect(0,-3,L,6);glow(L,0,14,'#f0ff90',0.9,true)}
+ else if(k.gs==='gnRanke'){c.translate(k.x,k.y);c.rotate(k.a);c.globalAlpha=0.9;c.strokeStyle='#5a8a2a';c.lineWidth=4;c.beginPath();c.moveTo(0,0);const L=k.len*p;for(let d=0;d<=L;d+=12)c.lineTo(d,Math.sin(d*0.08+t*6)*6);c.stroke();c.fillStyle='#8ac04a';for(let d=20;d<L;d+=34){c.beginPath();c.ellipse(d,Math.sin(d*0.08+t*6)*6-4,5,2.5,0.6,0,TAU);c.fill()}}
+ else if(k.gs==='gnBoom'){const pul=0.5+0.5*Math.sin(t*(10+20*p));c.globalAlpha=0.35+0.4*pul;glow(k.x,k.y,k.r*(0.5+0.6*p),k.c,0.8,true);c.globalAlpha=0.9;c.strokeStyle='#ffffff';c.lineWidth=2;c.beginPath();c.arc(k.x,k.y,k.r*(1-p)+4,0,TAU);c.stroke()}
+ else if(k.gs==='gnKnochen'){for(let i=0;i<6;i++){const a=i*1.1+e0(i),j=Math.sin(t*(8+6*p)+i)*2*p;c.globalAlpha=0.9;c.save();c.translate(k.x+Math.cos(a)*14*(1-p)+j,k.y+Math.sin(a)*8*(1-p)-p*6);c.rotate(a+t*p*2);c.fillStyle='#e8e2d0';c.fillRect(-6,-1.5,12,3);circ(c,-6,0,2.2,'#e8e2d0');circ(c,6,0,2.2,'#e8e2d0');c.restore()}c.globalAlpha=0.5*p;glow(k.x,k.y,30,'#c8ffb0',0.6*p,true)}
+ else if(k.gs==='gnRuf'){c.strokeStyle='#f2d24c';c.lineWidth=2.5;c.globalAlpha=0.9;for(let i=0;i<2;i++){c.beginPath();c.arc(k.x,k.y,k.r*(0.6+0.4*i),t*(i?-2:2),t*(i?-2:2)+TAU*0.8);c.stroke()}c.globalAlpha=0.8;c.beginPath();for(let i=0;i<=6;i++){const a=-Math.PI/2+i*TAU*3/6+t;c.lineTo(k.x+Math.cos(a)*k.r*0.55,k.y+Math.sin(a)*k.r*0.55)}c.stroke();glow(k.x,k.y,k.r*1.5,'#f2d24c',0.5*p,true);
+  c.globalAlpha=p;c.fillStyle='#fff6c0';c.fillRect(k.x-2,k.y-k.r*3*p,4,k.r*3*p)}}catch(er){}c.restore();c.globalAlpha=1}}
+const e0=i=>((i*9301+49297)%233280)/233280*2;
+Object.assign(HFX,{gn_ruf(f,k,c,t){c.globalAlpha=(1-k)*0.8;c.strokeStyle=f.c;c.lineWidth=3;c.beginPath();c.arc(f.x,f.y,f.r*(0.4+k*1.5),0,TAU);c.stroke();glow(f.x,f.y,f.r*2*(1-k*0.5),f.c,0.4*(1-k),true)}});
+/* Gegner: Animationen, Zustände, Resistenz-Symbole */
+function gnSehE(e){if(gnBot()||!P||NET.role!=='guest')return;if(e.gnLk&&e.gnLkT>0&&Math.abs(e.x-P.x)<820&&Math.abs(e.y-P.y)<520)bestErlebt(e.def.id+':'+e.gnLk)}
+{const de0=drawEnemy;drawEnemy=function(e,t){if(e.gnInv>0&&!e.boss){const c=cx;try{if(typeof FOV!=='undefined'&&FOV.on&&fovVersteckt(e))return de0(e,t);c.globalAlpha=0.25;hE(c,e.x,e.y+e.r*0.7,e.r*0.9,e.r*0.3,'#000000');glow(e.x,e.y-e.r*0.3,e.r*1.3,'#d8d8e8',0.18,true);c.globalAlpha=0.5;c.strokeStyle='#e8e8f0';c.lineWidth=1.2;for(let i=0;i<3;i++){c.beginPath();c.arc(e.x+Math.sin(t*7+i)*2,e.y-e.r*0.3,e.r*(0.7+0.2*i),t*3+i,t*3+i+2);c.stroke()}c.globalAlpha=1}catch(er){}return}
+ const r=de0(e,t);if(!e.def||e.hp===1&&e.maxHp===1&&e.born===-99)return r;try{if(typeof FOV!=='undefined'&&FOV.on&&fovVersteckt(e))return r;gnZeichne(e,t)}catch(er){}cx.globalAlpha=1;return r}}
+function gnZeichne(e,t){const c=cx;
+ if(e.gnAura&&GNA[e.gnAura]){const A=GNA[e.gnAura],pu=0.5+0.5*Math.sin(t*2.5+e.seed);c.globalAlpha=0.12+0.06*pu;circ(c,e.x,e.y,A.r,A.c);c.globalAlpha=0.45;c.strokeStyle=A.c;c.lineWidth=2;c.setLineDash([12,10]);c.beginPath();c.arc(e.x,e.y,A.r,t*0.5,t*0.5+TAU);c.stroke();c.setLineDash([]);c.globalAlpha=1}
+ if(e.gnSp){const pu=0.5+0.5*Math.sin(t*4+e.seed);c.globalAlpha=0.5+0.3*pu;c.strokeStyle='#f2d24c';c.lineWidth=2.5;c.beginPath();c.ellipse(e.x,e.y+e.r*0.7,e.r*1.25,e.r*0.45,0,0,TAU);c.stroke();glow(e.x,e.y+e.r*0.6,e.r*1.6,'#f2d24c',0.25,true);c.globalAlpha=1;
+  c.font='900 12px "Alegreya Sans",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.85)';const ty=e.y-e.r-28;c.strokeText('★ '+e.def.n,e.x,ty);c.fillStyle='#ffe27a';c.fillText('★ '+e.def.n,e.x,ty)}
+ if(e.gnAk&&e.gnAt>0&&e.gnAd){const F=GNF[e.gnAk],p=1-e.gnAt/e.gnAd;if(e.gnAk==='cast'){const col=e.gnCc||'#e0c8ff';glow(e.x,e.y-e.r*0.5,e.r*(1.2+p),col,0.55*(1-p*0.4),true);c.globalAlpha=0.8;for(let i=0;i<5;i++){const a=t*5+i*TAU/5;circ(c,e.x+Math.cos(a)*e.r*1.2,e.y-e.r*0.6+Math.sin(a)*e.r*0.5,2.2,col)}}
+  else if(e.gnAk==='schild'){c.globalAlpha=0.7*(1-p);c.strokeStyle='#ffe08a';c.lineWidth=3;c.beginPath();for(let i=0;i<=6;i++){const a=i*TAU/6;c.lineTo(e.x+Math.cos(a)*e.r*(1.4+0.4*p),e.y+Math.sin(a)*e.r*(1.4+0.4*p))}c.stroke()}
+  else if(e.gnAk==='wurf'){const y=e.y-e.r*1.6-8*p;circ(c,e.x,y,e.r*0.5,'#6a5a4a');circ(c,e.x-e.r*0.14,y-e.r*0.14,e.r*0.2,'#8a7a6a')}
+  else if(e.gnAk==='blick'||e.gnAk==='atem'){glow(e.x+(e.faceX>e.x?1:-1)*e.r*0.6,e.y-e.r*0.3,e.r*(0.5+p),e.gnAk==='atem'?'#ffb040':'#f0f090',0.9*p,true)}
+  else if(e.gnAk==='wachsen'){c.globalAlpha=0.6*(1-p);c.strokeStyle='#ff8a5a';c.lineWidth=3;c.beginPath();c.arc(e.x,e.y,e.r*(1+p),0,TAU);c.stroke()}
+  else if(F&&F.draw)F.draw(e,c,t,p);c.globalAlpha=1}
+ if(e.shield>0&&e.gnF&&(e.gnF.includes('runenschild')||e.gnF.includes('magierschild'))){c.globalAlpha=0.35+0.15*Math.sin(t*5);c.strokeStyle=e.gnF.includes('runenschild')?'#ffd27a':'#ffb070';c.lineWidth=2;c.beginPath();for(let i=0;i<=6;i++){const a=i*TAU/6+t*0.5;c.lineTo(e.x+Math.cos(a)*(e.r+10),e.y+Math.sin(a)*(e.r+10))}c.stroke();glow(e.x,e.y,e.r*1.6,'#ffd27a',0.15,true);c.globalAlpha=1}
+ if(e.gnFs>0){for(let i=0;i<6;i++){const a=t*4+i*TAU/6,fl=Math.sin(t*12+i)*3;c.globalAlpha=0.7;glow(e.x+Math.cos(a)*(e.r+6),e.y+Math.sin(a)*(e.r+4)-fl,8,'#ff9a3a',0.8,true)}glow(e.x,e.y,e.r*1.8,'#ff7a2a',0.3,true);c.globalAlpha=1}
+ if(e.gnRud>0){c.globalAlpha=0.8;circ(c,e.x+(e.faceX>e.x?1:-1)*e.r*0.55,e.y-e.r*0.35,2.2,'#ff5a3a');glow(e.x,e.y-e.r*0.3,e.r*0.9,'#ff5a3a',0.35,true);c.globalAlpha=1}
+ if(e.gnReg&&e.hp<e.maxHp){c.globalAlpha=0.6;c.fillStyle='#8af08a';c.font='bold 11px sans-serif';c.textAlign='center';c.fillText('✚',e.x+e.r*0.9,e.y-e.r*0.6+Math.sin(t*4)*2);c.globalAlpha=1}
+ if(e.gnAtt>0){c.globalAlpha=0.8;ln(c,'#d83a3a',2,e.x,e.y,e.x-(e.gnOX||0),e.y-(e.gnOY||0));c.globalAlpha=1}
+ if(e.gnSpuk>0){c.globalAlpha=0.35+0.2*Math.sin(t*6);glow(e.x,e.y,e.r*1.8,'#e8f4f0',0.6,true);c.globalAlpha=1}
+ /* Resistenz-/Schwäche-Symbole unter Elite, Wächtern, Bossen und Spezialgegnern */
+ const R=gnRes(e);if(R&&(e.elite||e.guard||e.boss||e.gnSp)){const L=Object.keys(R).filter(k=>GN_EL[k]);if(L.length){c.font='800 10px sans-serif';c.textAlign='center';const y=e.y+e.r+(e.boss?22:14);let x=e.x-(L.length-1)*8;for(const el of L){const v=R[el];c.globalAlpha=0.9;circ(c,x,y,6.5,v>0?'rgba(20,16,20,.8)':'rgba(70,16,10,.85)');c.strokeStyle=v>0?GN_EL[el].c:'#ff6a4a';c.lineWidth=1.2;c.beginPath();c.arc(x,y,6.5,0,TAU);c.stroke();c.fillStyle=GN_EL[el].c;c.fillText(GN_EL[el].ic,x,y+3.5);x+=16}c.globalAlpha=1}}
+ gnSehE(e)}
+/* Zustände am Helden (läuft auch beim Online-Gast) */
+hook('draw',(t,c)=>{const q=P;if(!q)return;const x=q.x,y=q.y;let ic=[];
+ if(q.gnGiftT>0){ic.push(['☣','#9ad04a']);if(fxQ()>1){c.globalAlpha=0.6;for(let i=0;i<3;i++){const s=(t*1.4+i/3)%1;circ(c,x+Math.sin(i*2.3+t)*10,y-6-s*26,2.6*(1-s)+0.6,'#9ad04a')}}}
+ if(q.gnBrandT>0){ic.push(['♨','#ff8a3a']);for(let i=0;i<3;i++){const a=t*7+i*2.1;glow(x+Math.cos(a)*9,y-10+Math.sin(a*1.3)*6,10,'#ff8a3a',0.55,true)}}
+ if(q.gnFearT>0){ic.push(['!','#c48cff']);c.globalAlpha=0.5;c.strokeStyle='#c48cff';c.lineWidth=1.5;for(let i=0;i<2;i++){c.beginPath();c.arc(x,y-14,16+i*5+Math.sin(t*14)*1.5,-2.5,-0.6);c.stroke()}}
+ if(q.gnVulnT>0){ic.push(['✧','#e0a0ff']);c.globalAlpha=0.35+0.15*Math.sin(t*6);c.strokeStyle='#d27cff';c.lineWidth=2;c.beginPath();c.arc(x,y-8,22,0,TAU);c.stroke();glow(x,y-8,30,'#d27cff',0.25,true)}
+ if(q.gnWeakN>0&&q.gnWeakT>0)ic.push(['↓'+q.gnWeakN,'#b08ae0']);
+ if(q.gnHbT>0)ic.push(['♡','#b07ad8']);
+ if(q.buffs&&q.buffs.gnRost>0)ic.push(['⚙','#d8862e']);
+ if(q.gnSteinN>0)ic.push(['◉'+q.gnSteinN,'#c8d070']);
+ if(q.gnSteinX>0){c.globalAlpha=0.55;hE(c,x,y-8,16,22,'#8a8a7a');c.globalAlpha=0.8;c.strokeStyle='#5a5a4a';c.lineWidth=1;c.beginPath();c.moveTo(x-6,y-24);c.lineTo(x+2,y-10);c.lineTo(x-4,y+2);c.stroke()}
+ if(q.gnConfT>0){ic.push(['?','#e8c0d8']);for(let i=0;i<3;i++){const a=t*4+i*TAU/3;circ(c,x+Math.cos(a)*14,y-36+Math.sin(a)*4,2.4,'#f0c8e0')}}
+ if(q.gnEngT>0){c.globalAlpha=0.4;c.fillStyle='#9ad8b0';c.fillRect(x-22,y-40,44,52);c.globalAlpha=0.7;c.strokeStyle='#d8f8e0';c.lineWidth=2;c.strokeRect(x-22,y-40,44,52);for(let i=0;i<4;i++){const s=(t+i/4)%1;circ(c,x-14+i*9,y+8-s*44,2,'#e8fff0')}}
+ if(q.gnLaehmT>0){c.globalAlpha=0.7;c.strokeStyle='#a8b890';c.lineWidth=2.5;c.beginPath();c.ellipse(x,y+10,14,5,0,0,TAU);c.stroke()}
+ c.globalAlpha=1;if(ic.length){c.font='800 12px sans-serif';c.textAlign='center';let ix=x-(ic.length-1)*9;for(const [s,col] of ic){c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.75)';c.strokeText(s,ix,y-50);c.fillStyle=col;c.fillText(s,ix,y-50);ix+=18}}});
+
+/* ---------- Bestiarium: Wissen je Gegner und eigene Gruppen ---------- */
+function gnWissenFuer(id){const L=[];for(const k in BW){const w=BW[k];if(!w.foe)continue;if(Array.isArray(w.foe)?w.foe.includes(id):w.foe===id)L.push(w)}return L}
+function gnWissenHtml(L){const S=SAVE.bw||{};const kn=L.filter(w=>S[w.key]),un=L.length-kn.length;if(!L.length)return'';
+ return`<div class="gnw">${kn.map(w=>`<div class="gnwe ${w.typ||''}${w.neg?' neg':''}" style="--wc:${w.c||'#c8bca8'}"><span class="gnwi">${esc(w.ic||'•')}</span><div><b>${esc(w.n)}</b>${w.dd&&w.dd!==w.n?` <span class="gnwdd">D&amp;D: ${esc(w.dd)}</span>`:''}<br>${esc(w.d||'')}${w.tip?`<br><span class="gnwt">➜ ${esc(w.tip)}</span>`:''}</div></div>`).join('')}${un?`<div class="gnwu">${un} ${un===1?'Eigenschaft':'Eigenschaften'} noch nicht erlebt …</div>`:''}</div>`}
+{const rb0=renderBestiary;renderBestiary=function(){let h=rb0.apply(this,arguments);if(G&&G.bestSub)return h;try{
+  h=h.replace(/(<details class="beste[^"]*"><summary><canvas data-foe="([^"]+)"[\s\S]*?<div class="bl">)([\s\S]*?)(<\/div><\/details>)/g,(m,a,id,body,end)=>{const L=gnWissenFuer(id);if(!L.length)return m;const S=SAVE.bw||{},n=L.filter(w=>S[w.key]).length;
+   return a+body+gnWissenHtml(L)+end});
+  const grp={};for(const k in BW){const w=BW[k];if(w.foe)continue;const g=w.grp||'Gefahren';(grp[g]=grp[g]||[]).push(w)}
+  for(const g in grp)h+=`<div class="eyebrow" style="margin-top:6px">${esc(g)}</div>${gnWissenHtml(grp[g])}`}catch(er){console.error(er)}return h}}
+/* Wissen in der Liste andeuten: Punkte zeigen, wie viele Eigenschaften schon erlebt sind */
+{const bl0=bestList;bestList=function(){const L=bl0.apply(this,arguments);for(const x of L)if(x.def&&x.def.spez)x.g='spec';return L}}
+{const st=document.createElement('style');st.textContent=`.gnw{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;margin-top:8px}
+.gnwe{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.22);border:1px solid var(--line);border-left:3px solid var(--wc);font-size:13px;line-height:1.35}
+.gnwe.neg{background:rgba(120,30,20,.18)}.gnwi{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:var(--wc);background:rgba(0,0,0,.35);font-size:13px}
+.gnwdd{font-size:11px;color:var(--mute);font-style:italic}.gnwt{color:var(--gold);font-size:12px}.gnwu{grid-column:1/-1;font-size:12px;color:var(--mute);font-style:italic}`;document.head.appendChild(st)}
+
+/* ---------- Online: Felder spiegeln ---------- */
+for(const k of ['gnF','gnAk','gnAt','gnAd','gnCc','gnInv','gnFs','gnRud','gnReg','gnAtt','gnOX','gnOY','gnSp','gnAura','gnSpuk','gnLk','gnLkT'])if(!NETW.enemies.includes(k))NETW.enemies.push(k);
+for(const k of ['gk','bier'])if(!NETW.ezones.includes(k))NETW.ezones.push(k);
+for(const k of ['gs','src','roll'])if(!NETW.tele.includes(k))NETW.tele.push(k);
+NETPBL.add('gnEngX');NETPBL.add('gnEngY');
+
+/* ---------- Schadensart im Fähigkeitentext ---------- */
+for(const id in HEROES)for(const n of (HEROES[id].tree||[])){const el=GN_SKEL[n.id];if(!el||typeof n.d!=='function'||n.gnEl)continue;const d0=n.d;n.gnEl=el;n.d=function(r){return d0.apply(this,arguments)+` Schadensart: ${GN_EL[el].n}.`}}
+/* ---------- Testzugang ---------- */
+window.__hsG={GNF,GNT,GNA,GN_FOE,GN_GUARD,GN_SPEZ,BW,bestWissen,bestErlebt,gnSpezial,gnSpezRuf,gnStufe,gnGib,gnElHero,gnPRes,gnBossDir,gnWissenFuer,get GNE(){return GNE}};
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
