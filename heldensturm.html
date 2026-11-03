@@ -4753,7 +4753,7 @@ function hudUpdate(){if(G.state==='title'||G.state==='camp'||!P)return;
  {const pb=G.boss||G.guardE;
  if(pb){let fr=pb.hp/pb.maxHp,txt=pb.def.n;if(pb.survive>0){fr=pb.survive/(pb.survive0||pb.def.survive);txt=`Überlebe noch ${Math.ceil(pb.survive)} s!`}else if(pb.def.survive&&G.portal)txt='Zum Boot – schnell!';setW('progFill',fr);setT('progTxt',txt+(pb.ccI>0?' · Unbeugsam!':''));ccBossBar(pb);if(!HC.bossbar){HC.bossbar=1;hEl.progBar.classList.add('boss')}}
  else{if(HC.bossbar){HC.bossbar=0;hEl.progBar.classList.remove('boss');ccBossBar(null)}if(G.portal){setW('progFill',1);setT('progTxt',G.portal.boat?'Zum Boot!':'Weiter zum Portal')}else if(G.obj&&!G.obj.done){const S=STAGES[G.stage]||{};setW('progFill',clamp(G.obj.fr||0,0,1));setT('progTxt',`${G.obj.txt} · dann ${S.boss?'Boss':'Wächter'}`)}else{const S=STAGES[G.stage]||{name:''};setW('progFill',(G.need?G.stageKills/G.need:1));setT('progTxt',`${Math.min(G.stageKills,G.need)} / ${G.need} · dann ${S.boss?'Boss':'Wächter'}`)}}}
- if(G.room&&G.room.txt){setW('progFill',G.room.fr!==undefined?clamp(G.room.fr,0,1):1);setT('progTxt',G.room.txt)}setW('stFill',P.stam/P.stamMax);{const low=P.stam<25;if(HC.stlow!==low){HC.stlow=low;hEl.stFill.parentNode.classList.toggle('low',low)}}
+ if(G.room&&G.room.txt&&!(G.boss&&!G.boss.dead&&G.boss.hp>0)){setW('progFill',G.room.fr!==undefined?clamp(G.room.fr,0,1):1);setT('progTxt',G.room.txt)}setW('stFill',P.stam/P.stamMax);{const low=P.stam<25;if(HC.stlow!==low){HC.stlow=low;hEl.stFill.parentNode.classList.toggle('low',low)}}
  setT('potN',String(P.pots));{const on=!!P.sprint;if(HC.spon!==on){HC.spon=on;hEl.btnSprint.classList.toggle('on',on)}const po=P.pots<=0;if(HC.potoff!==po){HC.potoff=po;hEl.btnPot.classList.toggle('off',po)}}
  setT('goldTxt',fmt(SAVE.gold)+' Gold');setT('spBadge',P.sp>0?String(P.sp):'');
  const gl=P.sp>0;if(HC.glow!==gl){HC.glow=gl;hEl.btnTree.classList.toggle('glow',gl)}
@@ -14134,6 +14134,55 @@ window.__hsHM=1;
  const a=document.createElement('a');a.id='imresBack';a.href='https://imrestales.de/#taverne';a.target='_top';a.textContent='← imrestales.de';a.title='Zurück zur Website Imres Tales';a.tabIndex=-1;document.body.appendChild(a);
  const upd=()=>{try{const on=G.state==='title'&&!scr.hidden&&!NET.role;document.body.classList.toggle('imresTitel',!!on)}catch(e){}};setInterval(upd,250);upd()}catch(e){}})();
 window.__hsBL=1;
+
+/* ---------- Sternbild: kein Springen der Seite beim Durchgehen der Sterne ----------
+   Vorschau-Feld immer gleich groß (Platzhalter ohne Video), Zoom bleibt fest, solange das Fenster offen ist (nur kleiner, nie wieder größer) */
+{const vh0=vorschauHtml;vorschauHtml=function(n){const r=vh0.apply(this,arguments);if(r||!n||SAVE.vorschau===false||location.protocol==='file:')return r;return'<div class="tdvid tdvid0"><span>✦</span></div>'}}
+(()=>{try{const st=document.createElement('style');st.textContent=`.tdvid.tdvid0{display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(70,40,70,.55),rgba(10,6,12,.95));color:rgba(246,215,124,.35);font-size:42px}`;document.head.appendChild(st)}catch(e){}})();
+{const mf0=mfFit;mfFit=function(h){const r=mf0.apply(this,arguments);try{const w=h&&h.querySelector(':scope > .wrap'),map=w&&w.querySelector('.stmap');
+ if(!map){if(h)h._stz=null;return r}
+ const key=h.clientWidth+'x'+h.clientHeight+'|'+(G.overlay||'')+'|'+(h.className.includes('mfstrow')?1:0),z=parseFloat(w.style.zoom)||1,vids=[...w.querySelectorAll('.stdet .tdvid')];
+ const vmax=vids.length?vids[0].getBoundingClientRect().height/z:0;
+ if(h._stz&&h._stz.k===key){if(z>h._stz.z+1e-3){w.style.zoom=h._stz.z}else h._stz.z=z;
+  if(vids.length&&h._stz.v){if(vmax>h._stz.v+1)vids.forEach(v=>v.style.maxHeight=h._stz.v+'px');else h._stz.v=vmax}
+  try{stLayoutIn(h)}catch(e){}}
+ else{const z0=z>1.06?Math.max(1,z*0.93):z;if(z0<z){w.style.zoom=z0;try{stLayoutIn(h)}catch(e){}}h._stz={k:key,z:z0,v:vmax}}}catch(e){}return r}}
+window.__hsSTF=1;
+
+/* ---------- Kleinigkeiten: größeres Erklärfenster, Vollbild-Hinweis, „Alles verschrotten“ durch 1 s Halten ---------- */
+(()=>{try{const st=document.createElement('style');st.textContent=`
+#hiBox .hiw{max-width:min(1700px,94vw)!important;gap:clamp(12px,1.8vh,30px)!important}
+#hiBox .hic{padding:clamp(16px,2.4vh,40px) clamp(18px,2.2vw,46px)!important;border-radius:clamp(14px,1.6vh,26px)!important}
+#hiBox .hic .eyebrow{font-size:clamp(11px,1.45vh,22px)!important;letter-spacing:.12em}
+#hiBox .hic h2{font-size:clamp(26px,4vh,64px)!important;margin:2px 0 clamp(8px,1.2vh,18px)!important}
+#hiBox .hic p{font-size:clamp(16px,2.35vh,34px)!important;line-height:1.5!important}
+#hiBox .hih{font-size:clamp(16px,2.6vh,38px)!important;gap:clamp(12px,1.4vw,26px)!important;margin-top:clamp(4px,1vh,16px)!important;font-weight:700}
+#hiBox .hir{width:clamp(46px,7.5vh,110px)!important;height:clamp(46px,7.5vh,110px)!important}
+[data-act="inv-alles"]{position:relative;overflow:hidden}
+[data-act="inv-alles"].avhold::before{content:'';position:absolute;inset:0;width:calc(var(--av,0)*100%);background:linear-gradient(90deg,rgba(255,120,80,.35),rgba(255,190,90,.55));pointer-events:none}
+[data-act="inv-alles"] .avtx{position:relative}`;document.head.appendChild(st)}catch(e){}})();
+/* F: Vollbild – wo der Browser es nicht erlaubt (z. B. eingebettet), sagen warum */
+addEventListener('keydown',ev=>{if(ev.code!=='KeyF'||ev.repeat||ev.ctrlKey||ev.metaKey)return;if(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))return;
+ try{if(!fsOk()){const n=performance.now();if(n-(window.__fsT||0)>4000){window.__fsT=n;toast('Vollbild ist hier nicht erlaubt – öffne das Spiel direkt auf imrestales.de, dann klappt es mit F.','#e5b454')}}}catch(e){}},true);
+/* Alles verschrotten: 1 s gedrückt halten (Maus, Touch, Tastatur, Controller) – keine Rückfrage, Fokus bleibt auf dem Knopf */
+const AV={on:0,keys:new Set()};
+addEventListener('keydown',ev=>{AV.keys.add(ev.code)},true);addEventListener('keyup',ev=>{AV.keys.delete(ev.code)},true);addEventListener('blur',()=>AV.keys.clear());
+function avPad(){try{for(const g of navigator.getGamepads?navigator.getGamepads():[]){if(g&&g.buttons.some(b=>b&&(b.pressed||b.value>0.5)))return true}}catch(e){}return false}
+function avHeld(){if(AV.src==='p')return AV.ptr;if(AV.src==='k')return AV.keys.has('Enter')||AV.keys.has('Space')||AV.keys.has('NumpadEnter');return avPad()}
+function avStart(btn,src){if(AV.on)return;AV.on=1;AV.btn=btn;AV.src=src;AV.ptr=src==='p';AV.t0=performance.now();btn.classList.add('avhold');btn.style.setProperty('--av','0');requestAnimationFrame(avTick)}
+function avEnd(){const b=AV.btn;AV.on=0;AV.btn=null;if(b){b.classList.remove('avhold');b.style.removeProperty('--av')}}
+function avTick(){if(!AV.on)return;const b=AV.btn;if(!b||!b.isConnected){avEnd();return}const k=Math.min(1,(performance.now()-AV.t0)/1000);b.style.setProperty('--av',k.toFixed(3));
+ if(!avHeld()){avEnd();if(k<0.9)try{toast('Zum Verschrotten 1 Sekunde gedrückt halten','#e5b454')}catch(e){}return}
+ if(k>=1){const par=b.parentNode,lm=b.closest('[data-lm]');avEnd();try{sfx('gold')}catch(e){}const t=document.createElement('button');t.dataset.act='inv-alles-ja';t.style.display='none';par.appendChild(t);t.click();t.remove();
+  /* Fokus zurück auf denselben Knopf (Controller/Tastatur), nicht wegspringen */
+  setTimeout(()=>{try{const root=lm||scr;const nb=root.querySelector('[data-act="inv-alles"]');if(nb){if(window.PADNAV&&PADNAV.on&&typeof padMark==='function')padMark(nb,true);else if(document.activeElement&&document.activeElement!==document.body)nb.focus({preventScroll:true})}}catch(e){}},30);return}
+ requestAnimationFrame(avTick)}
+document.addEventListener('pointerdown',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="inv-alles"]');if(!b||b.disabled)return;ev.preventDefault();avStart(b,'p');AV.pid=ev.pointerId},true);
+document.addEventListener('pointerup',ev=>{if(AV.on&&AV.src==='p'&&ev.pointerId===AV.pid)AV.ptr=false},true);
+document.addEventListener('pointercancel',ev=>{if(AV.on&&AV.src==='p')AV.ptr=false},true);
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="inv-alles"]');if(!b)return;ev.preventDefault();ev.stopImmediatePropagation();
+ if(AV.on)return;if(ev.detail===0)avStart(b,(AV.keys.has('Enter')||AV.keys.has('Space')||AV.keys.has('NumpadEnter'))?'k':'g')},true);
+window.__hsKL={AV};
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
