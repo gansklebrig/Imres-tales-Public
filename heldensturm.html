@@ -16537,6 +16537,407 @@ stLayout=function(m){try{if(!m||!m.isConnected)return _tlLay.apply(this,argument
 /* Online-Gast: Platzwechsel ohne Änderung der Reihenfolge kommen nur über P.slotOf an – eigene Leiste dann neu aufbauen */
 hook('draw',()=>{try{if(NET.role!=='guest'||!P||!P.skBtns||!P.skBtns.length)return;const s=JSON.stringify(P.slotOf||0);if(s!==P._tlSo){P._tlSo=s;buildSkillBar()}}catch(e){}},null);
 
+/* ================= Spielstände: Hauptmenü, 10 Speicherplätze, Build zurücksetzen (Paket „slots“) =================
+   Speicherform: EIN localStorage-Schlüssel wie bisher (SKEY, Sicherungskopie, Cloud bleiben unverändert).
+   SAVE oben = kontoweite Daten + Daten des AKTIVEN Platzes (so arbeitet der übrige Code unverändert weiter).
+   SAVE.slot = aktiver Platz (1–10, 0 = keiner), SAVE.slots = {'1':{m:{Kopf},d:{Daten}}} – d nur bei inaktiven Plätzen.
+   Pro Platz (SLK): Gold, Heldendaten (Stufen, Roguelite-Stand, Lager-Verbesserungen, Builds), Truhe, Läufe, Modus, Ruhm, Lager.
+   Kontoweit: alles andere (Optionen, Tasten, Controller, Bestiarium, Erfolge, Rollen, Erklärfenster, Cloud-Code …).
+   Cloud und Sicherungskopie enthalten automatisch ALLE Plätze.
+   Funktionen: slFix (Migration/Prüfung), slStash/slLoad/slCreate/slDelete/slRename, slSum (Kartendaten), slRender (Menüs),
+   slRespec/slBuildSave/slBuildLoad (Talente zurücksetzen, gespeicherte Builds), slRsCost/slRsFree. Zustand: SPL. */
+const SL_N=10;
+const SLK=['gold','maxDiff','heroes','truhe','run','mpRun','hc','hard','ruhm','lager','deepest'];
+const SPL={view:'main',in:false,sel:0,ask:null,nw:null,src:{},wt:'best',boot:1,from:'main',back:null,nm:0};
+const SL_NAMEN=['Der Pfad der Sterne','Phandalins Hoffnung','Die Gundren-Expedition','Ins Unterreich','Imres Chronik','Die lange Nacht','Klingen und Lieder','Rex’ großer Tag','Das Ei von Themberchaud','Sturm über Phandalin','Die Schmiede der Zauber','Lichter im Dunkel'];
+const SL_GEN={barradin:'Barradins',echo:'Echos',friedrich:'Friedrichs',ezekiel:'Ezekiels'};
+function slDefName(h){return(SL_GEN[h]||'Ein')+' Abenteuer'}
+function slMetaFix(m){m=isObj(m)?m:{};const o={n:sTxt(m.n,28).trim(),mode:m.mode==='hard'||m.mode==='mix'?m.mode:'soft',h:okHero(m.h)?m.h:'barradin',d:nInt(m.d,0,DMAX,0),hd:m.hd?1:0,c:nNum(m.c,0,1e14,Date.now()),t:nNum(m.t,0,1e14,0),pt:nNum(m.pt,0,1e10,0)};if(!o.n)o.n=slDefName(o.h);return o}
+function slHas(S){return(+S.gold||0)>0||(isObj(S.heroes)&&Object.keys(S.heroes).length>0)||!!S.run||!!S.mpRun||(Array.isArray(S.truhe)&&S.truhe.length>0)||(+S.maxDiff||0)>0}
+function slGuessHero(S){if(S.run&&okHero(S.run.id))return S.run.id;let b='barradin',n=-1;for(const id of HERO_IDS){const x=S.heroes&&S.heroes[id];const r=x?(+x.runs||0)+(x.rl?(+x.rl.level||0):0):-1;if(r>n){n=r;b=id}}return b}
+/* Migration + Prüfung. Alter Stand ohne Plätze → Platz 1 (Modus „frei“: Roguelite und Hardcore wie bisher umschaltbar) */
+function slFix(S){if(!S||typeof S!=='object')return S;
+ if(!isObj(S.slots)){S.slots={};if(slHas(S)){const h=slGuessHero(S);S.slots['1']={m:slMetaFix({n:'Mein Abenteuer',mode:'mix',h,d:S.run?S.run.diff:0,hd:S.hard?1:0,c:Date.now(),t:Date.now()})};S.slot=1;S.slMig=1}else S.slot=0}
+ for(const k of Object.keys(S.slots)){const e=S.slots[k];if(!/^([1-9]|10)$/.test(k)||!isObj(e)){delete S.slots[k];continue}e.m=slMetaFix(e.m);if(e.d!==undefined&&!isObj(e.d))delete e.d;for(const x of Object.keys(e))if(x!=='m'&&x!=='d')delete e[x]}
+ S.slot=nInt(S.slot,0,SL_N,0);if(S.slot&&!S.slots[S.slot])S.slots[S.slot]={m:slMetaFix({h:slGuessHero(S),mode:'mix',t:Date.now()})};
+ if(S.slot&&S.slots[S.slot].d){/* aktiver Platz darf keine abgelegten Daten haben: Daten oben gelten, fehlende aus d ergänzen */const d=S.slots[S.slot].d;for(const k of SLK)if(S[k]===undefined&&d[k]!==undefined)S[k]=d[k];delete S.slots[S.slot].d}
+ return S}
+const slM=()=>SAVE.slot&&SAVE.slots&&SAVE.slots[SAVE.slot]?SAVE.slots[SAVE.slot].m:null;
+const slList=()=>Object.keys(SAVE.slots||{}).map(Number).filter(n=>n>=1&&n<=SL_N).sort((a,b)=>a-b);
+function slLatest(){let b=0,t=-1;for(const n of slList()){const m=SAVE.slots[n].m;const v=(n===SAVE.slot?1e15:0)+(m.t||m.c||0);if(v>t){t=v;b=n}}return b}
+function slAccMax(){let m=+SAVE.maxDiff||0;for(const n of slList()){const d=SAVE.slots[n].d;if(d)m=Math.max(m,+d.maxDiff||0)}return nInt(m,0,DMAX,0)}
+function slMetaUpd(){const m=slM();if(!m)return;if(SPL.in&&okHero(G.sel))m.h=G.sel;if(SPL.in&&G.state==='title'){m.d=nInt(G.seldiff,0,DMAX,0);m.hd=SAVE.hard?1:0}if(m.mode==='hard')SAVE.hc=true;else if(m.mode==='soft')SAVE.hc=false}
+function slStash(){const n=SAVE.slot;if(!n)return;slMetaUpd();const e=SAVE.slots[n]||(SAVE.slots[n]={m:slMetaFix({})}),d={};for(const k of SLK){if(SAVE[k]!==undefined)d[k]=SAVE[k];delete SAVE[k]}e.d=d;SAVE.slot=0;saveFix(SAVE)}
+function slEnterState(){const m=slM();if(!m)return;G.sel=m.h;G.seldiff=Math.min(m.d,SAVE.maxDiff);G.rlStart=undefined;G.confirmNew=false;G.confirmDrop=false;G.campTab='held';G.selMode='kampagne';if(m.mode==='hard')SAVE.hc=true;else if(m.mode==='soft')SAVE.hc=false}
+function slLoad(n){n=+n;const e=SAVE.slots[n];if(!e)return false;if(SAVE.slot!==n){slStash();const d=e.d||{};for(const k of SLK)if(d[k]!==undefined)SAVE[k]=JSON.parse(JSON.stringify(d[k]));delete e.d;SAVE.slot=n;saveFix(SAVE);runFix(SAVE);try{BESTB=null}catch(x){}}
+ e.m.t=Date.now();slEnterState();persist();return true}
+function slCreate(n,o){n=+n;o=o||{};const acc=slAccMax();slStash();delete SAVE.slots[n];for(const k of SLK)delete SAVE[k];
+ const h=okHero(o.h)?o.h:'barradin',mode=o.mode==='hard'?'hard':'soft',d=nInt(o.d,0,acc,0);
+ SAVE.slots[n]={m:slMetaFix({n:sTxt(o.n||'',28).trim()||slDefName(h),mode,h,d,hd:o.hd&&d===0?1:0,c:Date.now(),t:Date.now(),pt:0})};SAVE.slot=n;saveFix(SAVE);
+ SAVE.maxDiff=acc;SAVE.hc=mode==='hard';SAVE.hard=!!(o.hd&&d===0);runFix(SAVE);slEnterState();persist();return true}
+function slDelete(n){n=+n;if(!SAVE.slots[n])return false;if(SAVE.slot===n){for(const k of SLK)delete SAVE[k];SAVE.slot=0;saveFix(SAVE);SPL.in=false}delete SAVE.slots[n];if(SPL.sel===n)SPL.sel=0;persist();return true}
+function slRename(n,name){const e=SAVE.slots[+n];if(!e)return false;e.m.n=sTxt(name,28).trim()||slDefName(e.m.h);persist();return true}
+/* Kartendaten eines Platzes */
+function slSum(n){const e=SAVE.slots[n];if(!e)return null;const m=e.m,D=n===SAVE.slot?SAVE:(e.d||{}),H=isObj(D.heroes)?D.heroes:{},h=m.h;
+ let lv=1,ort=0;const x=H[h];if(x&&isObj(x.rl))lv=Math.max(lv,nInt(x.rl.level,1,LEG_CAP,1));
+ for(const id in H){const y=H[id];if(!isObj(y))continue;if(isObj(y.rl)&&isObj(y.rl.cp))for(const v of Object.values(y.rl.cp))ort=Math.max(ort,nInt(v,0,ORTE.length-1,0));
+  if(y.best2>0){const r=y.best2>=100?CAMP_STAGES.length-1:Math.max(0,(y.best2%100)-1);const S=CAMP_STAGES[Math.min(r,CAMP_STAGES.length-1)];if(S)ort=Math.max(ort,S.ort||0)}}
+ const R=isObj(D.run)&&okHero(D.run.id)?D.run:null;let runTxt='';if(R){if(R.id===h)lv=Math.max(lv,nInt(R.level,1,LEG_CAP,1));const S=Array.isArray(R.stages)?R.stages[R.stage]:CAMP_STAGES[R.stage];if(S&&(!R.mode||R.mode==='kampagne')&&ORTE[S.ort])ort=Math.max(ort,S.ort);runTxt=`Lauf offen: ${HEROES[R.id].name}, Stufe ${nInt(R.stage,0,999,0)+1}`}
+ const O=ORTE[ort]||ORTE[0];return{n,m,h,lv,ort,ortN:O.name,kap:'Kapitel '+ROM[O.kap||0],gold:+D.gold||0,run:runTxt,diff:diffName(m.d)+(m.d===0&&m.hd?' · Schwer':''),hard:m.mode==='hard',mix:m.mode==='mix'}}
+const slZeit=s=>{s=Math.floor(s||0);const h=Math.floor(s/3600),m=Math.floor(s/60)%60;return h?`${h} h ${String(m).padStart(2,'0')} min`:`${m} min`};
+const slDatum=t=>{if(!t)return'–';try{const d=new Date(t),n=new Date();const same=d.toDateString()===n.toDateString();return same?'heute, '+d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}catch(e){return'–'}};
+const slModeTxt=s=>s.hard?'☠ Hardcore':s.mix?'Roguelite & Hardcore':'✦ Roguelite';
+
+/* ---------- Speichern: Kopf aktualisieren, mehrere Tabs mit verschiedenen Plätzen ---------- */
+{const _sf=saveFix;saveFix=function(S){const r=_sf.apply(this,arguments);try{slFix(r)}catch(e){console.error('slFix',e)}return r}}
+const slAccK=S=>Object.keys(S).filter(k=>!SLK.includes(k)&&k!=='slot'&&k!=='slots'&&k!=='savedAt'&&k!=='cloudRev');
+function slForeign(t){/* anderer Tab spielt gerade einen anderen Platz: dessen Daten als abgelegten Stand übernehmen, eigene behalten, Kontodaten zusammenführen */
+ const X=+t.slot||0,Y=+SAVE.slot||0;let b={};try{b=JSON.parse(SBASE)}catch(e){}if(!isObj(b))b={};
+ for(const k of new Set(slAccK(t).concat(slAccK(SAVE)))){const v=mrg3(b[k],SAVE[k],t[k],k);if(v===undefined)delete SAVE[k];else SAVE[k]=v}
+ const TS=isObj(t.slots)?t.slots:{};const ns={};for(const k of Object.keys(TS)){if(+k===Y)continue;const e=TS[k];if(!isObj(e))continue;ns[k]={m:slMetaFix(e.m)};if(+k===X){const d={};for(const q of SLK)if(t[q]!==undefined)d[q]=t[q];ns[k].d=d}else if(isObj(e.d))ns[k].d=e.d}
+ if(Y&&SAVE.slots[Y])ns[Y]=SAVE.slots[Y];SAVE.slots=ns}
+{const _ps=persist;persist=function(){try{slMetaUpd();let raw=null;try{raw=localStorage.getItem(SKEY)}catch(e){}
+  if(raw&&raw!==STRAW){let t=null;try{t=JSON.parse(raw)}catch(e){}if(isObj(t)&&(+t.slot||0)!==(+SAVE.slot||0)&&SAVE.slot){slForeign(t);STRAW=raw;SBASE=JSON.stringify(SAVE);SAVE.savedAt=Date.now()}}}catch(e){console.error('slPersist',e)}
+ return _ps.apply(this,arguments)}}
+/* andere Speicherstände für Mitspieler (lokal): Held → Platz */
+{const _hs=hsave;hsave=function(id){const n=SPL.src&&SPL.src[id];if(n&&n!==SAVE.slot){const e=SAVE.slots&&SAVE.slots[n];if(e&&e.d){const H=isObj(e.d.heroes)?e.d.heroes:(e.d.heroes={});return H[id]||(H[id]={up:{},best:-1,runs:0,clears:0})}}return _hs.apply(this,arguments)}}
+{const _sr=startRun;startRun=function(id,diff,mode,opt){SPL.src={};try{if(opt&&Array.isArray(opt.mp))for(const s of opt.mp.slice(1)){const n=s&&+s.sl;if(n&&n!==SAVE.slot&&!netIs(s.dev)&&SAVE.slots[n]&&SAVE.slots[n].d){const D=SAVE.slots[n].d;if(!isObj(D.heroes))D.heroes={};if(D.heroes[s.hero]){const f=heroFix(D.heroes[s.hero],s.hero);if(f)D.heroes[s.hero]=f;else delete D.heroes[s.hero]}SPL.src[s.hero]=n}}}catch(e){console.error('slSrc',e)}return _sr.apply(this,arguments)}}
+{const _ca=cloudAdopt;cloudAdopt=function(d,code){const r=_ca.apply(this,arguments);if(r){try{slFix(SAVE);SPL.view=SAVE.slot?SPL.view:'main';if(!SAVE.slot)SPL.in=false;else slEnterState()}catch(e){}}return r}}
+
+/* ---------- Spielzeit ---------- */
+setInterval(()=>{try{if(document.hidden||G.bot||!SAVE.slot||!SPL.in)return;const m=slM();if(m&&(G.state==='play'&&!G.paused||G.state==='between'||G.state==='camp'||G.state==='title'&&SPL.view==='camp'))m.pt=(m.pt||0)+5}catch(e){}},5000);
+
+/* ---------- Oberfläche ---------- */
+(()=>{try{const st=document.createElement('style');st.textContent=`
+.screen.slscr{overflow:hidden!important;padding:0!important;background:#0c090e}
+.slm,.slm *{box-sizing:border-box}
+.slm{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;--hc:#e5b454;font-size:clamp(14px,1.55vh,24px);
+ background:radial-gradient(120% 90% at 72% 62%,color-mix(in srgb,var(--hc) 20%,transparent),transparent 60%),radial-gradient(90% 70% at 10% 0%,rgba(194,59,63,.14),transparent 60%),linear-gradient(#120d15,#0a070c)}
+.slm::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(115deg,rgba(255,255,255,.012) 0 2px,transparent 2px 7px);mix-blend-mode:screen}
+.slm-bgc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.9}
+.slm-in{position:relative;flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:2.4vh 4vw;padding:calc(env(safe-area-inset-top,0px) + 5.5vh) max(5vw,16px) 2vh;align-items:stretch}
+.slm-l{display:flex;flex-direction:column;justify-content:center;gap:2.6vh;min-height:0;min-width:0}
+.slm-head .eye{font:800 .78em/1 var(--fb);letter-spacing:.32em;text-transform:uppercase;color:#d8b06a;opacity:.9}
+.slm-head h1{margin:.12em 0 0;font:400 clamp(40px,8.6vh,150px)/.95 var(--fd);color:#f6d58a;letter-spacing:.02em;text-shadow:0 0 .35em rgba(229,180,84,.45),0 .06em 0 #6a4416,0 .12em .3em rgba(0,0,0,.8);animation:slGlow 4s ease-in-out infinite}
+.slm-head .sub{margin-top:.5em;color:var(--mute);font-size:1em;font-style:italic}
+@keyframes slGlow{50%{text-shadow:0 0 .55em rgba(255,200,110,.6),0 .06em 0 #6a4416,0 .12em .3em rgba(0,0,0,.8)}}
+.slnav{display:flex;flex-direction:column;gap:.55em;max-width:30em}
+.slb{position:relative;display:flex;align-items:center;gap:.8em;width:100%;text-align:left;padding:.62em 1.1em .62em 1.25em;border-radius:.7em;border:1px solid rgba(229,180,84,.22);background:linear-gradient(90deg,rgba(37,29,41,.92),rgba(27,21,30,.72));color:var(--text);font:700 1.12em/1.15 var(--fb);letter-spacing:.01em;transition:transform .14s,border-color .14s,background .14s,box-shadow .14s;overflow:hidden}
+.slb::before{content:'';position:absolute;left:0;top:18%;bottom:18%;width:3px;border-radius:2px;background:var(--gold);opacity:.35;transition:opacity .14s,top .14s,bottom .14s}
+.slb .ic{flex:none;width:1.5em;text-align:center;font-size:1.05em;color:#e9c27a;filter:drop-shadow(0 0 4px rgba(229,180,84,.35))}
+.slb small{display:block;font:600 .74em/1.2 var(--fb);color:var(--mute);margin-top:.15em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slb .tx{min-width:0;flex:1 1 auto}
+.slb:hover:not([disabled]),.slb:focus-visible,.slb.padf{transform:translateX(.35em);border-color:rgba(229,180,84,.75);background:linear-gradient(90deg,rgba(74,52,30,.95),rgba(36,27,36,.85));box-shadow:0 0 1.2em rgba(229,180,84,.18),inset 0 0 0 1px rgba(255,220,150,.08);outline:none}
+.slb:hover:not([disabled])::before,.slb:focus-visible::before,.slb.padf::before{opacity:1;top:8%;bottom:8%;box-shadow:0 0 8px var(--gold)}
+.slb.main{border-color:rgba(229,180,84,.6);background:linear-gradient(90deg,rgba(110,72,24,.92),rgba(52,36,22,.8));font-size:1.28em}
+.slb.main .ic{color:#ffe2a0}
+.slb[disabled]{opacity:.42;cursor:default}
+.slm-r{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;gap:1vh}
+.slm-r #heroStage,.slp>#heroStage{flex:1 1 0;min-height:0;width:100%;-webkit-mask-image:radial-gradient(closest-side,#000 70%,transparent);mask-image:radial-gradient(closest-side,#000 70%,transparent)}
+.slcard{position:relative;display:flex;gap:.9em;align-items:center;padding:.8em 1em;border-radius:.9em;border:1px solid color-mix(in srgb,var(--hc) 55%,#3d3140);background:linear-gradient(160deg,rgba(30,23,33,.94),rgba(16,12,18,.9));box-shadow:0 .6em 1.6em rgba(0,0,0,.45);text-align:left;color:var(--text);font:inherit;width:100%}
+.slcard .tx{display:flex;flex-direction:column;gap:.18em;min-width:0;flex:1 1 auto}.slcard .no{font:800 .74em/1 var(--fb);color:#d8b06a;letter-spacing:.06em}
+.slcard canvas{flex:none;width:4.6em;height:4.6em;border-radius:.6em;background:radial-gradient(circle at 50% 60%,color-mix(in srgb,var(--hc) 30%,transparent),transparent 70%)}
+.slcard .nm{font:400 1.25em/1.1 var(--fd);color:#f6d58a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slcard .ln{font-size:.86em;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slcard .ln b{color:var(--text);font-weight:700}
+.slcard .tag{display:inline-block;padding:.05em .55em;border-radius:99px;font:800 .72em/1.5 var(--fb);letter-spacing:.04em;border:1px solid rgba(229,180,84,.5);color:#f1d08a;margin-right:.35em;vertical-align:.08em}
+.slcard .tag.hc{border-color:#ff5a4e;color:#ffb0a6;background:rgba(150,24,30,.35)}
+.slcard.hard{border-color:#b3262c;box-shadow:0 0 0 1px rgba(194,59,63,.35),0 .6em 1.6em rgba(0,0,0,.45),inset 0 0 1.4em rgba(194,59,63,.14)}
+.slm-cur{position:relative;z-index:1;max-width:30em;margin-left:auto;width:100%}
+.slm-cur .eyebrow{margin:0 0 .35em .2em}
+.slm-foot{position:relative;display:flex;justify-content:space-between;gap:1em;padding:.8vh max(5vw,16px) calc(env(safe-area-inset-bottom,0px) + 1.4vh);color:#7d6f66;font-size:.78em}
+.slm-foot .k b{display:inline-block;min-width:1.5em;padding:0 .35em;border-radius:.35em;border:1px solid #4a3b4e;color:#d8c8a8;text-align:center;margin:0 .2em}
+@media (pointer:coarse){.slm-foot .k{display:none}}
+/* Unterseiten */
+.slp{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:1.6vh;padding:calc(env(safe-area-inset-top,0px) + 4.5vh + 22px) max(4vw,16px) 1.2vh;max-width:1700px;width:100%;margin:0 auto}
+.slp-h{display:flex;align-items:flex-end;justify-content:space-between;gap:1em;flex-wrap:wrap}
+.slp-h h2{margin:0;font:400 clamp(26px,4.6vh,72px)/1 var(--fd);color:#f6d58a;text-shadow:0 0 .4em rgba(229,180,84,.3)}
+.slp-h .eye{font:800 .76em/1 var(--fb);letter-spacing:.28em;text-transform:uppercase;color:#d8b06a;margin-bottom:.45em}
+.slp-h p{margin:.35em 0 0;color:var(--mute);font-size:.92em}
+.slgrid{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:1.4vh 1.2vw}
+.slgrid .slcard{flex-direction:column;align-items:stretch;gap:.4em;padding:.7em .85em;min-height:0;overflow:hidden;transition:transform .14s,border-color .14s,box-shadow .14s}
+.slgrid .slcard canvas{flex:1 1 0;width:100%;height:auto;min-height:2.5em;align-self:center}
+.slgrid .slcard .tx{flex:none;margin-top:auto}
+.slgrid .slcard.empty>.no{position:absolute;top:.6em;left:.85em;font:800 .74em/1 var(--fb);color:#d8b06a;opacity:.85}
+.slgrid .slcard.empty{border-style:dashed;border-color:#4a3b4e;background:rgba(20,15,22,.6);align-items:center;justify-content:center;color:var(--mute)}
+.slgrid .slcard.empty .plus{font:400 2.4em/1 var(--fd);color:#8a7466}
+.slgrid .slcard:hover:not([disabled]),.slgrid .slcard:focus-visible,.slgrid .slcard.padf{transform:translateY(-.2em);border-color:var(--gold);box-shadow:0 0 1.4em rgba(229,180,84,.25),0 .6em 1.6em rgba(0,0,0,.45);outline:none}
+.slgrid .slcard.on{border-color:#ffd27a;box-shadow:0 0 0 2px rgba(255,210,122,.7),0 0 1.8em rgba(229,180,84,.35)}
+.slgrid .slcard.cur::after{content:'aktiv';position:absolute;top:.45em;right:.6em;font:800 .7em/1.4 var(--fb);padding:0 .5em;border-radius:99px;background:rgba(229,180,84,.18);color:#ffe2a0;border:1px solid rgba(229,180,84,.5)}
+.slgrid .slcard.hard.on{border-color:#ff6a5a;box-shadow:0 0 0 2px rgba(255,90,78,.65),0 0 1.8em rgba(194,59,63,.45)}
+.slgrid .slcard[disabled]{opacity:.5}
+.slbar{display:flex;align-items:center;justify-content:flex-end;gap:.7em;flex-wrap:wrap;min-height:3em}
+.slbar .msg{flex:1 1 14em;color:var(--mute);font-size:.95em}.slbar .msg b{color:var(--text)}.slbar .msg.bad b{color:#ff9a8a}
+.slbtn{padding:.6em 1.2em;border-radius:.6em;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:700 1em/1.1 var(--fb);transition:border-color .12s,background .12s,transform .12s}
+.slbtn:hover:not([disabled]),.slbtn:focus-visible,.slbtn.padf{border-color:var(--gold);background:#33263a;outline:none}
+.slbtn.gold{border-color:rgba(229,180,84,.8);background:linear-gradient(#8a5a1e,#5a3a14);color:#fff1cf}
+.slbtn.gold:hover:not([disabled]),.slbtn.gold.padf,.slbtn.gold:focus-visible{background:linear-gradient(#a8701f,#6e4716);box-shadow:0 0 1em rgba(229,180,84,.35)}
+.slbtn.red{border-color:#c23b3f;background:linear-gradient(#7a1c22,#4a1015);color:#ffe0dc}
+.slbtn[disabled]{opacity:.4}
+.slin{flex:1 1 12em;max-width:22em;padding:.55em .8em;border-radius:.55em;border:1px solid #5a4a5e;background:#140f17;color:var(--text);font:700 1em var(--fb);user-select:text;-webkit-user-select:text;touch-action:auto}
+.slin:focus{outline:2px solid var(--gold);outline-offset:1px}
+.slheroes{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.2vw}
+.slhero{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:.35em;padding:1em .8em;border-radius:1em;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);background:radial-gradient(120% 70% at 50% 30%,color-mix(in srgb,var(--hc) 22%,transparent),transparent 70%),linear-gradient(#1e1721,#120e15);color:var(--text);font:inherit;min-height:0;overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s}
+.slhero canvas{width:100%;max-width:12em;height:auto;aspect-ratio:1/1;min-height:0;flex:0 1 auto}
+.slhero .nm{font:400 1.6em/1 var(--fd);color:var(--hc)}
+.slhero .cl{font:800 .74em/1.2 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:#d8c8a8}
+.slhero .rl{font-size:.88em;color:var(--mute);text-align:center}
+.slhero:hover,.slhero:focus-visible,.slhero.padf{transform:translateY(-.3em);border-color:var(--hc);box-shadow:0 0 2em color-mix(in srgb,var(--hc) 35%,transparent);outline:none}
+.slmodes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2vw;flex:0 1 auto;min-height:0}
+.slmode{display:flex;flex-direction:column;gap:.4em;text-align:left;padding:1.1em 1.3em;border-radius:1em;border:1px solid #4a3b4e;background:linear-gradient(160deg,#1f1823,#141017);color:var(--text);font:inherit;transition:border-color .14s,box-shadow .14s,transform .14s}
+.slmode .t{font:400 1.7em/1 var(--fd);color:#f6d58a}.slmode p{margin:0;color:var(--mute);font-size:.92em}
+.slmode.on{border-color:var(--gold);box-shadow:0 0 0 2px rgba(229,180,84,.55),0 0 2em rgba(229,180,84,.2)}
+.slmode.hc .t{color:#ff8a7a}.slmode.hc.on{border-color:#ff5a4e;box-shadow:0 0 0 2px rgba(255,90,78,.55),0 0 2em rgba(194,59,63,.35)}
+.slmode:hover,.slmode:focus-visible,.slmode.padf{transform:translateY(-.15em);outline:none;border-color:#c9a25e}
+.slrow{display:flex;flex-wrap:wrap;align-items:center;gap:.6em}.slrow .lbl{font:800 .76em/1 var(--fb);letter-spacing:.2em;text-transform:uppercase;color:#d8b06a;min-width:9em}
+.slchip{padding:.45em .95em;border-radius:99px;border:1px solid #4a3b4e;background:#1d1620;color:var(--text);font:700 .95em/1 var(--fb)}
+.slchip.on{border-color:var(--gold);background:rgba(229,180,84,.18);color:#ffe2a0}.slchip:hover:not([disabled]),.slchip.padf,.slchip:focus-visible{border-color:#e5b454;outline:none}.slchip[disabled]{opacity:.35}
+.slmp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.2vw;flex:0 1 auto}
+.slmp .slmode .t{font-size:1.45em}
+.slnote{color:var(--mute);font-size:.9em;margin:0}
+.camp-top .slhead{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 auto;margin-left:auto;margin-right:10px}
+.camp-top .slhead .slbtn{padding:6px 12px;font-size:14px;white-space:nowrap}
+.camp-top .slhead .sln{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:22ch}.camp-top .slhead .sln b{color:#f1d08a;font-weight:700}
+.camp-top .slhead .sln .hc{color:#ff8a7a;font-weight:800}
+@media (max-width:640px){.camp-top .slhead .sln{display:none}}
+.chip.slmodechip{cursor:default}.chip.slmodechip.hard{border-color:#ff5a4e;color:#ffb0a6;background:rgba(150,24,30,.35)}
+.slmpb{white-space:nowrap}
+@media (pointer:fine) and (min-width:900px){.screen.slsub{padding-top:calc(env(safe-area-inset-top,0px) + 40px)!important}}
+/* Talentfenster: Build */
+.slbp{display:flex;flex-direction:column;gap:9px;padding:10px 12px;border-radius:12px;border:1px solid rgba(229,180,84,.35);background:linear-gradient(160deg,rgba(36,27,40,.95),rgba(20,15,22,.95))}
+.slbp .eyebrow{margin:0}
+.slbp .rs{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.slbp .rs p{margin:0;flex:1 1 180px;font-size:13px;color:var(--mute)}.slbp .rs p b{color:var(--text)}
+.slbp .bl{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px 8px;align-items:center;font-size:13.5px}
+.slbp .bl .n{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slbp .bl .n small{color:var(--mute);margin-left:6px}
+.slbp .bl .n.leer{color:#7d6f66;font-style:italic}
+.slbp .btn{padding:5px 10px;font-size:13px;min-height:0}
+.slbp .warn{color:#ffb070;font-size:12.5px;margin:0}
+.slbp input{width:100%;box-sizing:border-box}
+.slbp .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* schmal / Handy hochkant */
+@media (max-aspect-ratio:1/1){
+ .slm-in{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:1.2vh;padding-top:calc(env(safe-area-inset-top,0px) + 4vh)}
+ .slm-l{display:contents}.slm-head{order:0;text-align:center}.slm-r{order:1;min-height:14vh}.slnav{order:2;max-width:none}.slm-cur{max-width:none}
+ .slm-head h1{font-size:clamp(38px,7vh,90px)}
+ .slb{padding:.5em 1em;font-size:1.05em}.slb.main{font-size:1.15em}
+ .slgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .slgrid .slcard{flex-direction:row;align-items:center;gap:.5em;padding:.45em .55em;font-size:.86em}
+ .slgrid .slcard canvas{flex:none;width:3.4em;height:3.4em;min-height:0}
+ .slgrid .slcard .tx{flex:1 1 auto}.slgrid .slcard .ln:nth-of-type(5){display:none}
+ .slheroes{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .slhero{padding:.6em}.slhero canvas{max-width:7em}
+ .slmodes,.slmp{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-height:500px) and (min-aspect-ratio:1/1){
+ .slm-in{padding-top:calc(env(safe-area-inset-top,0px) + 3vh)}.slm-l{gap:1.5vh}.slnav{gap:.3em}.slb{padding:.38em 1em;font-size:.98em}.slb small{display:none}.slm-head .sub{display:none}
+ .slgrid .slcard canvas{max-height:3.5em}.slheroes .slhero canvas{max-width:5em}.slhero .rl{display:none}
+ .slp{padding-top:calc(env(safe-area-inset-top,0px) + 2.5vh);gap:1vh}
+}
+`;document.head.appendChild(st)}catch(e){}})();
+
+const slIco={weiter:'▶',neu:'✦',laden:'❖',mp:'⚔',opt:'⚙',wissen:'❧',credits:'✎',zur:'‹'};
+function slCardHtml(n,o){o=o||{};const s=slSum(n);if(!s)return`<button class="slcard empty" data-act="${o.act||'sl-pick'}" data-n="${n}" ${o.dis?'disabled':''}><span class="no">Platz ${n}</span><span class="plus">＋</span><span>${o.emptyTxt||'Freier Platz'}</span></button>`;
+ const col=HCOL[s.h]||'#e5b454';
+ return`<button class="slcard ${s.hard?'hard':''} ${o.on?'on':''} ${n===SAVE.slot&&o.cur!==false?'cur':''}" style="--hc:${col}" data-act="${o.act||'sl-pick'}" data-n="${n}" ${o.dis?'disabled':''}>
+  <canvas data-hero="${s.h}" width="96" height="96"></canvas><span class="tx"><span class="no">Platz ${n}</span>
+  <span class="nm">${esc(s.m.n)}</span>
+  <span class="ln"><span class="tag ${s.hard?'hc':''}">${slModeTxt(s)}</span>${esc(s.diff)}</span>
+  <span class="ln"><b>${esc(HEROES[s.h].name)}</b> · Stufe ${s.lv} · ${esc(s.kap)}</span>
+  <span class="ln">${esc(s.ortN)}</span>
+  <span class="ln">${esc(slZeit(s.m.pt))} · ${esc(slDatum(s.m.t||s.m.c))}</span></span></button>`}
+function slFoot(){return`<footer class="slm-foot"><span>Spielversion ${esc(HS_VERSION)}</span><span class="k"><b>A</b>/<b>⏎</b> wählen <b>B</b>/<b>Esc</b> zurück</span></footer>`}
+function slHead(eye,t,p){return`<div class="slp-h"><div><div class="eye">${eye}</div><h2>${t}</h2>${p?`<p>${p}</p>`:''}</div></div>`}
+
+function slMainHtml(){const last=SAVE.slot||slLatest(),s=last?slSum(last):null,n=slList().length;
+ const col=s?HCOL[s.h]:'#e5b454';if(s)G.sel=s.h;
+ const cont=s?`<button class="slb main" data-act="sl-weiter" data-sl-def="1"><span class="ic">${slIco.weiter}</span><span class="tx">Fortsetzen<small>${esc(s.m.n)} · ${esc(HEROES[s.h].name)}, Stufe ${s.lv}</small></span></button>`:'';
+ return`<div class="slm" style="--hc:${col}"><div class="slm-in">
+  <div class="slm-l">
+   <header class="slm-head"><div class="eye">Imres Tales</div><h1>Heldensturm</h1><div class="sub">Vier Helden. Eine Chronik. Unzählige Gegner.</div></header>
+   <nav class="slnav" aria-label="Hauptmenü">${cont}
+    <button class="slb ${s?'':'main'}" data-act="sl-go" data-v="new" ${s?'':'data-sl-def="1"'}><span class="ic">${slIco.neu}</span><span class="tx">Neues Spiel<small>${n<SL_N?`${SL_N-n} freie Plätze`:'alle Plätze belegt – einen überschreiben'}</small></span></button>
+    <button class="slb" data-act="sl-go" data-v="load" ${n?'':'disabled'}><span class="ic">${slIco.laden}</span><span class="tx">Spiel laden<small>${n} von ${SL_N} Plätzen belegt</small></span></button>
+    <button class="slb" data-act="sl-go" data-v="mp"><span class="ic">${slIco.mp}</span><span class="tx">Mehrspieler<small>An einem Gerät oder online</small></span></button>
+    <button class="slb" data-act="sl-go" data-v="opt"><span class="ic">${slIco.opt}</span><span class="tx">Optionen</span></button>
+    <button class="slb" data-act="sl-go" data-v="wissen"><span class="ic">${slIco.wissen}</span><span class="tx">Bestiarium · Erfolge · Bestenliste</span></button>
+    <button class="slb" data-act="sl-go" data-v="credits"><span class="ic">${slIco.credits}</span><span class="tx">Credits</span></button>
+   </nav>
+  </div>
+  <div class="slm-r"><canvas id="heroStage" aria-hidden="true"></canvas>
+   ${s?`<div class="slm-cur"><div class="eyebrow">Zuletzt gespielt</div>${slCardHtml(last,{act:'sl-weiter',cur:false})}</div>`:''}</div>
+ </div>${slFoot()}</div>`}
+
+function slGridHtml(mode){const L=[];for(let n=1;n<=SL_N;n++)L.push(slCardHtml(n,{act:mode==='new'?'sl-npick':'sl-pick',on:SPL.sel===n,emptyTxt:mode==='new'?'Hier beginnen':'Freier Platz – neues Spiel'}));return`<div class="slgrid">${L.join('')}</div>`}
+function slBarHtml(mode){const a=SPL.ask,n=SPL.sel,s=n?slSum(n):null;
+ if(a&&a.k==='over'){const o=slSum(a.n);return`<div class="slbar"><div class="msg bad"><b>Platz ${a.n} „${esc(o?o.m.n:'')}“ überschreiben?</b> Der alte Spielstand geht dabei verloren.</div><button class="slbtn" data-act="sl-ask-no" data-sl-def="1">Abbrechen</button><button class="slbtn red" data-act="sl-over-yes">Überschreiben</button></div>`}
+ if(a&&a.k==='del'){const o=slSum(a.n);return`<div class="slbar"><div class="msg bad"><b>Platz ${a.n} „${esc(o?o.m.n:'')}“ wirklich löschen?</b> ${o&&o.hard?'Hardcore-Stand – ':''}Das lässt sich nicht rückgängig machen.</div><button class="slbtn" data-act="sl-ask-no" data-sl-def="1">Nein</button><button class="slbtn red" data-act="sl-del-yes">Ja, löschen</button></div>`}
+ if(a&&a.k==='ren'){const o=slSum(a.n);return`<div class="slbar"><div class="msg">Neuer Name für Platz ${a.n}:</div><input class="slin" id="slName" maxlength="28" value="${esc(a.v!=null?a.v:(o?o.m.n:''))}" aria-label="Name des Spielstands"><button class="slbtn" data-act="sl-dice" title="Namensvorschlag">🎲</button><button class="slbtn" data-act="sl-ask-no">Abbrechen</button><button class="slbtn gold" data-act="sl-ren-yes" data-sl-def="1">Übernehmen</button></div>`}
+ if(mode==='new')return`<div class="slbar"><div class="msg">Wähle einen Platz für das neue Abenteuer. Belegte Plätze werden nach Rückfrage überschrieben.</div><button class="slbtn" data-act="sl-back">‹ Zurück</button></div>`;
+ return`<div class="slbar"><div class="msg">${s?`<b>${esc(s.m.n)}</b> – ${esc(HEROES[s.h].name)}, Stufe ${s.lv}${s.run?' · '+esc(s.run):''} · ${fmt(s.gold)} Gold`:'Wähle einen Spielstand.'}</div>
+  <button class="slbtn" data-act="sl-back">‹ Zurück</button>${s?`<button class="slbtn" data-act="sl-ren">Umbenennen</button><button class="slbtn red" data-act="sl-del">Löschen</button><button class="slbtn gold" data-act="sl-load" data-sl-def="1">Laden</button>`:''}</div>`}
+function slNewHtml(){return`<div class="slm"><div class="slp">${slHead('Neues Spiel · Schritt 1 von 3','Platz wählen','')}${slGridHtml('new')}${slBarHtml('new')}</div>${slFoot()}</div>`}
+function slLoadHtml(){return`<div class="slm"><div class="slp">${slHead('Spiel laden',`Spielstände <span style="font-size:.5em;color:var(--mute);font-family:var(--fb)">${slList().length} / ${SL_N}</span>`,'')}${slGridHtml('load')}${slBarHtml('load')}</div>${slFoot()}</div>`}
+function slHeroHtml(){const W=SPL.nw||{};return`<div class="slm"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · Schritt 2 von 3`,'Held wählen','Mit wem ziehst du los? Im Lager kannst du später jederzeit auch die anderen Helden spielen.')}
+ <div class="slheroes">${HERO_IDS.map(id=>`<button class="slhero" style="--hc:${HCOL[id]}" data-act="sl-nhero" data-id="${id}" ${W.h===id?'data-sl-def="1"':''}><canvas data-hero="${id}" width="160" height="160"></canvas><span class="nm">${esc(HEROES[id].name)}</span><span class="cl">${esc(HEROES[id].cls)}</span><span class="rl">${esc(HEROES[id].role)}</span></button>`).join('')}</div>
+ <div class="slbar"><button class="slbtn" data-act="sl-back">‹ Zurück</button></div></div>${slFoot()}</div>`}
+function slModeHtml(){const W=SPL.nw||{},acc=slAccMax(),hc=W.mode==='hard';if(okHero(W.h))G.sel=W.h;const ch=[];
+ const c=(d,hd,t,dis)=>`<button class="slchip ${W.d===d&&!!W.hd===!!hd?'on':''}" data-act="sl-ndiff" data-d="${d}" ${hd?'data-h="1"':''} ${dis?'disabled':''}>${t}</button>`;
+ ch.push(c(0,0,'Normal'));ch.push(c(0,1,'Schwer'));for(let d=1;d<=Math.min(Math.max(acc,1),4);d++)ch.push(c(d,0,esc(diffName(d)),d>acc));
+ return`<div class="slm" style="--hc:${HCOL[W.h]||'#e5b454'}"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · ${esc(HEROES[W.h]?HEROES[W.h].name:'')} · Schritt 3 von 3`,'Wie willst du spielen?','')}
+ <div class="slmodes">
+  <button class="slmode ${hc?'':'on'}" data-act="sl-nmode" data-v="soft" ${hc?'':'data-sl-def="1"'}><span class="t">✦ Softcore · Roguelite</span><p>Heldenstufe, Talente und Ausrüstung bleiben von Lauf zu Lauf. Jeder besiegte Ort-Boss öffnet ein Portal als neuen Startpunkt.</p></button>
+  <button class="slmode hc ${hc?'on':''}" data-act="sl-nmode" data-v="hard"><span class="t">☠ Hardcore</span><p>Jeder Lauf beginnt von vorn – stirbt der Held, sind Stufe, Talente und Ausrüstung verloren. Nur Gold und Lager-Verbesserungen bleiben. Dafür zählt jeder Lauf für die Bestenliste.</p></button>
+ </div>
+ <div class="slrow"><span class="lbl">Schwierigkeit</span>${ch.join('')}</div>
+ ${acc<1?'<p class="slnote">Weitere Schwierigkeiten schaltet ihr frei, indem ihr die Kampagne auf irgendeinem Platz bezwingt.</p>':''}
+ <div class="slrow"><span class="lbl">Name</span><input class="slin" id="slName" maxlength="28" value="${esc(W.name!=null?W.name:slDefName(W.h))}" aria-label="Name des Spielstands"><button class="slbtn" data-act="sl-dice" title="Namensvorschlag">🎲</button></div>
+ <canvas id="heroStage" aria-hidden="true" style="flex:1 1 0;min-height:0;width:100%"></canvas>
+ <div class="slbar"><button class="slbtn" data-act="sl-back">‹ Zurück</button><button class="slbtn gold" data-act="sl-nstart" style="font-size:1.15em;padding:.7em 1.6em">Abenteuer beginnen</button></div></div>${slFoot()}</div>`}
+function slMpHtml(){const s=SAVE.slot?slSum(SAVE.slot):null;const dis=s?'':'disabled';
+ return`<div class="slm"><div class="slp">${slHead('Mehrspieler','Gemeinsam in den Sturm','Alle spielen mit ihren eigenen Spielständen: Lokal wählen Spieler 2–4 im Lager einen Platz oder spielen als Gast-Held, online bringt jeder Gast seinen geladenen Platz mit.')}
+ <div class="slrow"><span class="lbl">Dein Spielstand</span>${s?`<div style="flex:1 1 20em;max-width:32em">${slCardHtml(SAVE.slot,{act:'sl-go',cur:false})}</div>`:'<span class="slnote">Noch kein Spielstand geladen.</span>'}<button class="slbtn" data-act="sl-go" data-v="load" ${slList().length?'':'disabled'}>Platz wechseln</button>${s?'':'<button class="slbtn gold" data-act="sl-go" data-v="new">Neues Spiel</button>'}</div>
+ <div class="slmp">
+  <button class="slmode" data-act="sl-mp" data-v="lokal" ${dis} ${s?'data-sl-def="1"':''}><span class="t">An diesem Gerät</span><p>2–4 Spieler mit Controllern oder Tastatur – geteilter Bildschirm oder gemeinsame Sicht.</p></button>
+  <button class="slmode" data-act="sl-mp" data-v="host" ${dis}><span class="t">Online-Raum eröffnen</span><p>Freunde treten über einen Einladungslink von ihrem eigenen Gerät bei.</p></button>
+  <button class="slmode" data-act="sl-mp" data-v="join" ${dis}><span class="t">Online beitreten</span><p>Mit dem Raumcode eines Freundes mitspielen – mit deinem geladenen Spielstand.</p></button>
+ </div>${s?'':'<p class="slnote">Lade zuerst einen Spielstand oder beginne ein neues Spiel.</p>'}
+ <div style="flex:1 1 auto"></div><div class="slbar"><button class="slbtn" data-act="sl-back">‹ Zurück</button></div></div>${slFoot()}</div>`}
+function slOptHtml(){return`<div class="wrap narrow slw"><div class="spread mfspan"><h2 style="margin:0">Optionen</h2><button class="btn" data-act="sl-back">‹ Zurück</button></div>
+ <div class="card ups"><div class="eyebrow">Bild &amp; Ton</div>${gfxRow()}${volRows()}</div>
+ <div class="card ups"><div class="eyebrow">Steuerung</div><div class="up"><div><div class="t">Mit der Maus zielen</div><div class="d">Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div></div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div class="ctlBox" style="display:flex;flex-direction:column;gap:8px">${ctlRows()}</div></div>
+ <div class="card"><div class="eyebrow">Cloud-Spielstand · alle ${SL_N} Plätze</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div>
+ <p class="muted" style="font-size:12px;text-align:center;margin:4px 0 0">Optionen, Tastenbelegung, Controller, Bestiarium und Erfolge gelten für alle Spielstände. Spielversion ${esc(HS_VERSION)}</p></div>`}
+function slWissenHtml(){const t=SPL.wt,tab=(k,n)=>`<button role="tab" aria-selected="${t===k}" data-act="sl-wtab" data-t="${k}">${n}</button>`;
+ const body=t==='erf'?(typeof erfHtml==='function'?erfHtml():''):t==='rang'?lbHtml():renderBestiary();
+ return`<div class="wrap slw slwis"><div class="spread mfspan"><h2 style="margin:0">${t==='erf'?'Erfolge':t==='rang'?'Bestenliste':'Bestiarium'}</h2><button class="btn" data-act="sl-back">‹ Zurück</button></div>
+ <div class="seg mfspan" role="tablist">${tab('best','Bestiarium')}${tab('erf','Erfolge')}${tab('rang','Bestenliste')}</div><div class="tabbody ${t==='erf'?'erf-body':''}">${body}</div></div>`}
+function slCreditsHtml(){return`<div class="wrap narrow center slw"><div class="eyebrow">Imres Tales</div><h1 style="font-size:clamp(34px,7vh,72px);margin:0">Heldensturm</h1>
+ <div class="facts" style="text-align:left"><div><span>Welt und Geschichte</span>Imre – nach der gemeinsamen D&amp;D-Kampagne „Imres Tales“ mit Barradin, Echo, Friedrich &amp; Rex und Ezekiel.</div>
+ <div><span>Musik und Klänge</span>Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Die Orgel nahm Simon Dalzell (Ivy Audio) auf.</div>
+ <div><span>Schriften</span>IM Fell English SC und Alegreya Sans (SIL Open Font License).</div></div>
+ <p class="muted" style="margin:0;font-size:13px">Spielversion ${esc(HS_VERSION)}</p><button class="btn gold" data-act="sl-back" data-sl-def="1">‹ Zurück</button></div>`}
+
+/* Ein Menü zeichnen (G.state bleibt 'title', damit Cloud, Tabs und Rücklink wie bisher funktionieren) */
+function slRender(keep){unseedRng();bookCv=null;G.state='title';G.paused=false;hud.hidden=true;stageCv=null;
+ if(CLOUD.pend&&!$('cloudAsk'))setTimeout(()=>{if(CLOUD.pend&&G.state==='title')cloudAsk(CLOUD.pend)},60);
+ const v=SPL.view;const nm=v==='main'?slMainHtml():v==='new'?slNewHtml():v==='load'?slLoadHtml():v==='nhero'?slHeroHtml():v==='nmode'?slModeHtml():v==='mp'?slMpHtml():null;
+ if(nm!=null){showScreen(nm,'slscr',false);stageCv=$('heroStage');if(!keep)stageT0=performance.now();heroPicks(1);slFit()}
+ else{showScreen(v==='opt'?slOptHtml():v==='wissen'?slWissenHtml():slCreditsHtml(),'slsub',keep);if(v==='wissen'&&SPL.wt==='best')try{drawBestIcons()}catch(e){}}
+ PADNAV.dirty=true}
+function slFit(){const r=scr.querySelector('.slm');if(!r)return;r.style.fontSize='';const f0=parseFloat(getComputedStyle(r).fontSize)||16;for(let i=0;i<5;i++){const over=Math.max(r.scrollHeight/Math.max(1,r.clientHeight),r.scrollWidth/Math.max(1,r.clientWidth),
+  ...[...r.querySelectorAll('.slp,.slm-in,.slgrid,.slheroes')].map(x=>x.scrollHeight/Math.max(1,x.clientHeight)));if(over<=1.01)break;const f=parseFloat(r.style.fontSize)||f0;r.style.fontSize=Math.max(9,f/Math.min(1.25,over)*0.97)+'px'}}
+addEventListener('resize',()=>{try{if(G.state==='title'&&scr.querySelector('.slm'))slFit()}catch(e){}});
+function slInView(){return SPL.view!=='camp'&&!G.netJoin&&!NET.role}
+function slEnterCamp(){SPL.view='camp';SPL.in=true;SPL.ask=null;slEnterState();showTitle()}
+function slBoot(){const direkt=!!window.__slDirekt||/(^|[#&])weiter($|&)/.test(location.hash||'');
+ if(G.netJoin){if(!SAVE.slot){const n=slLatest();if(n)slLoad(n);else{let k=1;while(SAVE.slots[k]&&k<SL_N)k++;slCreate(k,{h:'barradin',mode:'soft',n:'Online-Abenteuer'})}}SPL.view='camp';SPL.in=true;slEnterState();return}
+ if(direkt){if(!SAVE.slot){const n=slLatest();if(n)slLoad(n);else{SAVE.slots['1']={m:slMetaFix({mode:'mix',h:G.sel||'barradin',n:'Mein Abenteuer'})};SAVE.slot=1}}SPL.view='camp';SPL.in=true;slEnterState()}}
+{const _st=showTitle;showTitle=function(keep){try{if(SPL.boot){SPL.boot=0;slBoot()}}catch(e){console.error('slBoot',e)}
+  if(slInView()&&!G.bot){try{slRender(keep)}catch(e){console.error('slRender',e);SPL.view='camp';return _st.apply(this,arguments)}return}
+  SPL.src={};try{const m=slM();if(m&&m.mode==='hard')SAVE.hc=true;else if(m&&m.mode==='soft')SAVE.hc=false}catch(e){}
+  const r=_st.apply(this,arguments);try{slCampDeco()}catch(e){console.error('slCamp',e)}return r}}
+/* Lager: Menü-Knopf, Name des Platzes, Modus fest, Platzwahl für lokale Mitspieler */
+function slCampDeco(){if(G.state!=='title'||scr.hidden)return;const top=scr.querySelector('.camp-top');const m=slM();
+ if(top&&!NET.role&&!top.querySelector('.slhead')){const d=document.createElement('div');d.className='slhead';d.innerHTML=`<button class="slbtn" data-act="sl-menu" title="Zurück ins Hauptmenü (Esc)">☰ Menü</button>${m?`<span class="sln">Platz ${SAVE.slot} · <b>${esc(m.n)}</b>${m.mode==='hard'?' · <span class="hc">☠ Hardcore</span>':''}</span>`:''}`;const gp=top.querySelector('.gold-pill');if(gp)top.insertBefore(d,gp);else top.appendChild(d)}
+ if(!G.lobby||!G.lobby.length)return;scr.querySelectorAll('.mprow').forEach(row=>{const kick=row.querySelector('[data-act="mp-kick"]');if(!kick||!row.querySelector('[data-act="mp-hero"]')||row.querySelector('.slmpb'))return;const k=+kick.dataset.k,s=G.lobby[k-1];if(!s)return;
+  if(s.sl&&(!SAVE.slots[s.sl]||s.sl===SAVE.slot))s.sl=0;const e=s.sl?SAVE.slots[s.sl]:null;const b=document.createElement('button');b.className='btn small slmpb';b.dataset.act='sl-mpslot';b.dataset.k=k;
+  b.title='Mit welchem Spielstand spielt dieser Spieler? „Gast-Held“ nutzt die Helden dieses Platzes.';b.textContent=e?`💾 Platz ${s.sl} · ${e.m.n}`:'💾 Gast-Held';kick.before(b)})}
+{const f=rlModeHtml;rlModeHtml=function(){const m=slM();if(!m||m.mode==='mix'||G.selMode!=='kampagne')return f.apply(this,arguments);
+ return`<div class="chips hcchips"><span class="chip on slmodechip ${m.mode}" title="Der Modus gehört zum Spielstand">${m.mode==='hard'?'☠ Hardcore':'✦ Roguelite'}</span></div>`}}
+
+/* ---------- Klicks ---------- */
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act;
+ if(a==='hc'){const m=slM();if(m&&m.mode!=='mix'){ev.stopImmediatePropagation();ev.preventDefault()}}},true);
+function slNameIn(){const i=$('slName');return i?i.value:null}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act^="sl-"]');if(!b||b.disabled)return;const a=b.dataset.act;if(/^sl-(rs|bd|bs|bl|bn|build)/.test(a))return;
+ const go=v=>{SPL.view=v;SPL.ask=null;showTitle()};
+ switch(a){
+  case'sl-go':{const v=b.dataset.v||'load';if(v==='new'){SPL.nw={};SPL.sel=0}if(v==='load'){SPL.sel=SAVE.slot||slLatest()}if(v==='wissen')SPL.wt=SPL.wt||'best';SPL.from=SPL.view;go(v);break}
+  case'sl-weiter':{const n=SAVE.slot||slLatest();if(!n)break;slLoad(n);SPL.view='camp';SPL.in=true;if(SAVE.run&&okHero(SAVE.run.id)){showTitle();continueRun()}else showTitle();break}
+  case'sl-menu':{slMetaUpd();persist();SPL.view='main';SPL.in=false;showTitle();break}
+  case'sl-back':{const v=SPL.view;SPL.ask=null;go(v==='nmode'?'nhero':v==='nhero'?(SPL.from==='load'?'load':'new'):v==='load'&&SPL.from==='mp'?'mp':'main');break}
+  case'sl-pick':{const n=+b.dataset.n;if(!SAVE.slots[n]){SPL.nw={n};SPL.from='load';go('nhero');break}if(SPL.sel===n&&!SPL.ask){slLoad(n);slEnterCamp();break}SPL.sel=n;SPL.ask=null;showTitle(true);try{const c=scr.querySelector(`.slcard[data-n="${n}"]`);if(c&&PADNAV.on)padMark(c,true)}catch(e){}break}
+  case'sl-load':{const n=SPL.sel;if(n&&SAVE.slots[n]){slLoad(n);if(SPL.from==='mp'){SPL.view='mp';showTitle()}else slEnterCamp()}break}
+  case'sl-del':SPL.ask={k:'del',n:SPL.sel};showTitle(true);break;
+  case'sl-del-yes':{const n=SPL.ask&&SPL.ask.n;SPL.ask=null;if(n){slDelete(n);sfx('scrap');toast(`Platz ${n} gelöscht.`,'#ff9a8a',{minor:1})}SPL.sel=slList()[0]||0;if(!slList().length)SPL.view='main';showTitle(true);break}
+  case'sl-ren':SPL.ask={k:'ren',n:SPL.sel};showTitle(true);setTimeout(()=>{const i=$('slName');if(i&&!PADNAV.on){i.focus();i.select()}},30);break;
+  case'sl-ren-yes':{const n=SPL.ask&&SPL.ask.n,v=slNameIn();SPL.ask=null;if(n)slRename(n,v);showTitle(true);break}
+  case'sl-ask-no':SPL.ask=null;showTitle(true);break;
+  case'sl-dice':{const v=SL_NAMEN[(SPL.nm++)%SL_NAMEN.length];const i=$('slName');if(i)i.value=v;if(SPL.ask&&SPL.ask.k==='ren')SPL.ask.v=v;if(SPL.nw)SPL.nw.name=v;break}
+  case'sl-npick':{const n=+b.dataset.n;if(SAVE.slots[n]&&!(SPL.ask&&SPL.ask.k==='over'&&SPL.ask.n===n)){SPL.ask={k:'over',n};showTitle(true);break}SPL.nw={n,h:(SPL.nw&&SPL.nw.h)||G.sel||'barradin'};go('nhero');break}
+  case'sl-over-yes':{const n=SPL.ask&&SPL.ask.n;SPL.ask=null;SPL.nw={n,h:G.sel||'barradin'};go('nhero');break}
+  case'sl-nhero':{const id=b.dataset.id;if(!okHero(id))break;SPL.nw=Object.assign(SPL.nw||{},{h:id,mode:(SPL.nw&&SPL.nw.mode)||'soft',d:(SPL.nw&&SPL.nw.d)||0,hd:(SPL.nw&&SPL.nw.hd)||0});G.sel=id;go('nmode');break}
+  case'sl-nmode':SPL.nw.name=slNameIn();SPL.nw.mode=b.dataset.v==='hard'?'hard':'soft';showTitle(true);break;
+  case'sl-ndiff':SPL.nw.name=slNameIn();SPL.nw.d=+b.dataset.d||0;SPL.nw.hd=b.dataset.h?1:0;showTitle(true);break;
+  case'sl-nstart':{const W=SPL.nw||{};if(!W.n)break;W.name=slNameIn();slCreate(W.n,{h:W.h,mode:W.mode,d:W.d,hd:W.hd,n:W.name});SPL.view='camp';SPL.in=true;SPL.nw=null;sfx('portal');
+   startRun(W.h,G.seldiff,'kampagne',{rl:W.mode!=='hard'});break}
+  case'sl-mp':{if(!SAVE.slot)break;const v=b.dataset.v;if(v==='join'){SPL.view='mp';NET.msg='';netJoinScreen();break}SAVE.mpOn=true;persist();slEnterCamp();if(v==='host')setTimeout(()=>{try{netHost()}catch(e){console.error(e)}},50);break}
+  case'sl-wtab':SPL.wt=b.dataset.t;try{MF.cache={}}catch(e){}showTitle();break;
+  case'sl-mpslot':{const k=+b.dataset.k,s=G.lobby&&G.lobby[k-1];if(!s)break;const opts=[0].concat(slList().filter(n=>n!==SAVE.slot&&!(G.lobby||[]).some((o,j)=>j!==k-1&&o.sl===n)));const i=opts.indexOf(s.sl||0);s.sl=opts[(i+1)%opts.length];showTitle(true);break}
+ }});
+/* Esc / Controller B = zurück */
+addEventListener('keydown',ev=>{if(ev.key!=='Escape'||G.state!=='title'||scr.hidden)return;if(ev.target&&ev.target.tagName==='INPUT'&&ev.target.id!=='slName')return;const q=x=>scr.querySelector(x);
+ const el=SPL.ask?q('[data-act="sl-ask-no"]'):slInView()?q('[data-act="sl-back"]'):null;if(el){ev.preventDefault();ev.stopImmediatePropagation();el.click()}},true);
+addEventListener('keydown',ev=>{if(ev.key!=='Enter'||!ev.target||ev.target.id!=='slName')return;ev.preventDefault();const b=scr.querySelector('[data-act="sl-ren-yes"],[data-act="sl-nstart"]');if(b)b.click()});
+const SL_CAMPNO='[data-act="run-drop-no"],[data-act="start-no"],[data-act="giveup-no"],[data-act="close"],[data-act="smith-close"],[data-act="net-close"],[data-act="net-back"],[data-act="bar-cancel"],[data-act="mpr-no"]';
+function slCampBack(){if(G.state!=='title'||scr.hidden||SPL.view!=='camp'||NET.role||G.netJoin||G.overlay||$('cloudAsk'))return false;if(!scr.querySelector('.camp'))return false;
+ if([...scr.querySelectorAll(SL_CAMPNO)].some(e=>e.offsetParent&&!e.disabled))return false;const m=scr.querySelector('[data-act="sl-menu"]');if(!m)return false;m.click();return true}
+{const f=padBack;padBack=function(){try{if(G.state==='title'&&!scr.hidden&&slInView()){const el=scr.querySelector(SPL.ask?'[data-act="sl-ask-no"]':'[data-act="sl-back"]');if(el){el.click();return}}if(slCampBack())return}catch(e){}return f.apply(this,arguments)}}
+addEventListener('keydown',ev=>{if(ev.key!=='Escape'||ev.defaultPrevented)return;if(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))return;try{if(slCampBack()){ev.preventDefault();ev.stopImmediatePropagation()}}catch(e){}});
+{const f=padDefault;padDefault=function(L){try{if(G.state==='title'&&slInView()){const d=L.find(e=>e.dataset&&e.dataset.slDef);if(d)return d;const c=L.find(e=>e.classList.contains('slcard')&&e.classList.contains('on'));if(c)return c}}catch(e){}return f.apply(this,arguments)}}
+
+/* ================= Build zurücksetzen & gespeicherte Builds ================= */
+try{VMK.push('slBuild','slAsk')}catch(e){}
+function slRsFree(q){q=q||P;if(G.state==='camp'||G.state==='between'||G.fireOn)return true;if(G.state==='play'&&G.portal)return true;return false}
+function slRsOk(q){q=q||P;if(slRsFree(q))return true;return G.state==='play'&&!netIs(q.dev)&&!G.daily}
+function slRsCost(q){q=q||P;if(slRsFree(q))return 0;const n=G.slRsN||0;return Math.max(50,Math.round(30*Math.pow(q.level||1,1.25)*Math.pow(2,n)/10)*10)}
+function slRsPts(q){q=q||P;let n=0;for(const k in q.ranks||{})n+=q.ranks[k]||0;return Math.max(0,n-((q.ranks||{})[q.sf]?1:0))}
+function slRespec(q,opt){q=q||P;opt=opt||{};if(!q||!q.hero)return false;const sf=tlNd(q.sf,q)?q.sf:(q.hero.sig||q.learn[0]);const pts=slRsPts(q);
+ const n=tlNd(sf,q);q.sp=(q.sp||0)+pts;q.ranks=n?{[sf]:1}:{};q.sf=sf;q.learn=n&&n.a?[sf]:[];q.bar=q.learn.slice();q.slotOf=n&&n.a?{[sf]:0}:{};if(q.use)for(const k of Object.keys(q.use))if(k!==sf)delete q.use[k];
+ for(const k of Object.keys(q.cds||{}))if(!q.learn.includes(k))delete q.cds[k];G.barPick=null;G.treeRec=null;
+ withP(q,()=>{try{recalc()}catch(e){}try{buildSkillBar()}catch(e){}});if(!opt.quiet){try{sfx('magic');ring(q.x,q.y,70,stCol(q.id,(n||{}).b||0),0.6,5)}catch(e){}}return true}
+function slAutoName(q){const H=q.hero,pts=H.branches.map((x,b)=>[b,astPunkte(b,q)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);if(!pts.length)return'Leerer Build';return pts.slice(0,2).map(x=>H.branches[x[0]]).join(' + ')}
+const slBuildsOf=q=>{const hs=hsave(q.id);if(!Array.isArray(hs.builds))hs.builds=[];hs.builds=hs.builds.filter(x=>isObj(x)).slice(0,3);return hs.builds};
+function slBuildSave(i,name,q){q=q||P;const L=slBuildsOf(q);L[i]={n:sTxt(name||'',24).trim()||slAutoName(q),sf:q.sf,ranks:JSON.parse(JSON.stringify(q.ranks||{})),bar:(q.bar||[]).slice(),so:Object.assign({},q.slotOf||{}),lv:q.level,pts:slRsPts(q),t:Date.now()};for(let k=0;k<3;k++)if(L[k]===undefined)L[k]=null;persist();return true}
+function slBuildLoad(i,q){q=q||P;const B=slBuildsOf(q)[i];if(!B||!slRsFree(q))return false;slRespec(q,{quiet:1});
+ const old=sfx;let got=0;try{sfx=()=>{};withP(q,()=>{if(B.sf&&B.sf!==q.sf&&tlNd(B.sf,q)){try{tlSfSet(B.sf,q,true)}catch(e){}}
+  const T=q.hero.tree,want=Object.keys(B.ranks||{}).map(id=>T.find(n=>n.id===id)).filter(Boolean).sort((a,b)=>(a.row||0)-(b.row||0));
+  for(let pass=0;pass<60&&q.sp>0;pass++){let prog=false;for(const n of want){const goal=Math.min(n.max,+B.ranks[n.id]||0);if(rank(n.id)<goal&&canLearn(n)){learn(n);got++;prog=true;if(q.sp<=0)break}}if(!prog)break}
+  q.slotOf=Object.assign({},B.so||{});q.bar=(B.bar||[]).filter(id=>q.learn.includes(id));try{tlNorm(q)}catch(e){}G.barPick=null;recalc();buildSkillBar()})}finally{sfx=old}
+ try{sfx('lernen');sfx('magic')}catch(e){}return got}
+function slTreeDeco(){if(G.overlay!=='tree'&&G.state!=='camp'&&G.state!=='between')return;if(!P||!P.hero)return;const side=scr.querySelector('.stside');const head=side&&side.querySelector('.sthead .row');if(!head)return;
+ const own=(()=>{try{return netMayEdit(P)}catch(e){return true}})();if(!own)return;
+ if(!head.querySelector('[data-act="sl-build"]')){head.insertAdjacentHTML('afterbegin',`<button class="btn ${G.slBuild?'gold':''}" data-act="sl-build" title="Talente zurücksetzen und Builds speichern">↺ Build</button>`)}
+ if(!G.slBuild)return;const det=side.querySelector('.stdet:not(.slbp)');if(det)det.style.display='none';
+ const free=slRsFree(P),ok=slRsOk(P),cost=slRsCost(P),pts=slRsPts(P),gast=netIs(P.dev),ask=G.slAsk||'';
+ const rsBtn=ask==='rs'?`<button class="btn" data-act="sl-rs-no">Abbrechen</button><button class="btn" style="border-color:var(--blood)" data-act="sl-rs-yes">Ja, zurücksetzen</button>`
+  :`<button class="btn ${free?'gold':''}" data-act="sl-rs" ${!ok||!pts||cost>SAVE.gold?'disabled':''}>↺ Zurücksetzen${free?' · kostenlos':` · ${fmt(cost)} Gold`}</button>`;
+ const B=gast?[]:slBuildsOf(P);const rows=gast?'':[0,1,2].map(i=>{const x=B[i];return`<div class="n ${x?'':'leer'}">${x?`${esc(x.n)}<small>${x.pts} P · St. ${x.lv}</small>`:`Platz ${i+1} – leer`}</div>
+   ${ask==='ld'+i?`<button class="btn" style="border-color:var(--blood)" data-act="sl-bl" data-i="${i}">Ja, laden</button>`:`<button class="btn" data-act="sl-bl" data-i="${i}" ${x&&free?'':'disabled'}>Laden</button>`}<button class="btn" data-act="sl-bs" data-i="${i}" ${pts?'':'disabled'}>${x?'Überschreiben':'Speichern'}</button>`}).join('');
+ const p=document.createElement('div');p.className='slbp stdet';
+ p.innerHTML=`<div class="spread"><div class="eyebrow">Build</div><button class="btn" data-act="sl-build">Schließen</button></div>
+  <div class="rs"><p>${ask==='rs'?`<b>Alle ${pts} Punkte zurückholen?</b> Die Leiste wird geleert, der Startstern ist wieder frei wählbar.`:`<b>${pts}</b> Punkt${pts===1?'':'e'} verteilt. Zurücksetzen gibt alle zurück – Startstern und Leiste inklusive.`}</p>${rsBtn}</div>
+  ${!free&&ok?`<p class="warn">Mitten in der Stufe kostet es Gold (jedes Mal mehr). Im Lager, zwischen den Stufen und am Lagerfeuer ist es kostenlos.</p>`:''}${!ok?`<p class="warn">${gast?'Als Online-Gast nur zwischen den Stufen.':'Hier nicht möglich.'}</p>`:''}
+  ${gast?'':`<div class="eyebrow" style="margin-top:2px">Gespeicherte Builds · ${esc(P.hero.name)}</div><div class="row"><input class="slin" id="slBn" maxlength="24" placeholder="${esc(slAutoName(P))}" aria-label="Name für den Build"></div><div class="bl">${rows}</div>${free?'':'<p class="warn">Builds laden geht nur, wo Zurücksetzen kostenlos ist.</p>'}`}`;
+ const br=side.querySelector('.barrow');if(br)side.insertBefore(p,br);else side.appendChild(p)}
+{const _rt=renderTree;renderTree=function(keep){const r=_rt.apply(this,arguments);try{slTreeDeco()}catch(e){console.error('slTree',e)}return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act^="sl-"]');if(!b||b.disabled)return;const a=b.dataset.act;if(!/^sl-(rs|bl|bs|build)/.test(a))return;
+ if(!P||!P.hero)return;let own=true;try{own=netMayEdit(P)}catch(e){}if(!own)return;
+ if(a==='sl-build'){G.slBuild=!G.slBuild;G.slAsk=null;renderTree(true);return}
+ if(a==='sl-rs'){G.slAsk='rs';renderTree(true);return}
+ if(a==='sl-rs-no'){G.slAsk=null;renderTree(true);return}
+ if(a==='sl-rs-yes'){G.slAsk=null;if(!slRsOk(P))return;const c=slRsCost(P);if(c>SAVE.gold){toast('Nicht genug Gold.','#ff8a7a');renderTree(true);return}if(c){SAVE.gold-=c;G.slRsN=(G.slRsN||0)+1;try{G.goldRun=Math.max(0,(G.goldRun||0))}catch(e){}}
+  const pts=slRsPts(P);slRespec(P);try{tlPrefSave(P)}catch(e){}if(G.state==='camp')try{rlSync()}catch(e){}persist();toast(`Talente zurückgesetzt – ${pts} Punkt${pts===1?'':'e'} frei${c?` (−${fmt(c)} Gold)`:''}.`,'#ffd27a',{minor:1});renderTree(true);return}
+ if(a==='sl-bs'){const i=+b.dataset.i,inp=scr.querySelector('#slBn');slBuildSave(i,inp?inp.value:'',P);sfx('equip');toast('Build gespeichert.','#ffd27a',{minor:1});renderTree(true);return}
+ if(a==='sl-bl'){const i=+b.dataset.i;if(G.slAsk!=='ld'+i&&slRsPts(P)>0){G.slAsk='ld'+i;renderTree(true);return}G.slAsk=null;const n=slBuildLoad(i,P);if(n!==false){if(G.state==='camp')try{rlSync()}catch(e){}persist();const B=slBuildsOf(P)[i];toast(`Build „${esc(B?B.n:'')}“ geladen.`,'#ffd27a',{minor:1})}renderTree(true);return}});
+/* Talentfenster schließen: Build-Ansicht zurücksetzen */
+{const f=closeOverlay;closeOverlay=function(){G.slBuild=false;G.slAsk=null;return f.apply(this,arguments)}}
+
+/* ---------- Start: Migration ---------- */
+try{const had=!!SAVE.slots;slFix(SAVE);if(!had&&SAVE.slot){SAVE.slMig=1;persist()}if(SAVE.slot)slEnterState()}catch(e){console.error('slStart',e)}
+window.__hsSL={SPL,SL:SPL,SLK,slFix,slStash,slLoad,slCreate,slDelete,slRename,slSum,slList,slLatest,slAccMax,slRespec,slRsPts,slRsCost,slRsFree,slBuildSave,slBuildLoad,slBuildsOf,
+ t:{get P(){return P},learnN(k,q){q=q||P;let n=0;withP(q,()=>{for(let i=0;i<k;i++){const c=q.hero.tree.filter(x=>canLearn(x)&&!x.ult);if(!c.length)break;learn(c[(i*7)%c.length]);n++}});return n},tlSfFrei:q=>tlSfFrei(q||P),mpSlots:()=>mpSlots(),hsave:id=>hsave(id),persist:()=>persist(),closeOverlay:()=>closeOverlay()},
+ show(v){SPL.view=v;SPL.ask=null;showTitle()},menu(){SPL.view='main';SPL.in=false;showTitle()}};
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
