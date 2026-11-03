@@ -101,18 +101,18 @@
       '<span class="k-l k-rose" style="--d:1.6">✦</span><span class="k-l k-siegel" style="--d:2">I</span>',
     /* alle fünf als Gruppenbild am Feuer */
     gefaehrten: () => '<span class="k-l k-feuerglut" style="--d:0"></span>' +
-      kImg("echo-frei.webp", "k-held k-g-echo", 1.2) + kImg("friedrich-frei.webp", "k-held k-g-friedrich", 1.6) +
-      kImg("barradin-frei.webp", "k-held k-g-barradin", 2.2) + kImg("ezekiel-frei.webp", "k-held k-g-ezekiel", 1.4) + kImg("rex-frei.webp", "k-held k-g-rex", 2.8) + '<span class="k-l k-funken" style="--d:3"></span>',
+      kImg("echo-frei.webp", "k-held k-g k-g-echo", 1.2) + kImg("ezekiel-frei.webp", "k-held k-g k-g-ezekiel", 1.4) + kImg("friedrich-frei.webp", "k-held k-g k-g-friedrich", 1.6) +
+      kImg("rex-frei.webp", "k-held k-g k-g-rex", 2.8) + kImg("barradin-frei.webp", "k-held k-g k-g-barradin", 2.2) + '<span class="k-l k-funken" style="--d:3"></span>',
     /* Steckbriefe und Porträts an der Wand, davor wer gerade schimpft */
     nsc: () => '<span class="k-l k-wand" style="--d:0"></span>' + kFoto("portrait-koenig.jpg", "k-n1", 1) + kFoto("ploopploopeen.jpg", "k-n2", 1.3) + kFoto("portrait-riese.jpg", "k-n3", 1.1) +
-      kImg("gundren-frei.webp", "k-held k-n-gundren", 2) + kImg("buergermeister-frei.webp", "k-held k-n-buerger", 2.6),
+      kImg("buergermeister-frei.webp", "k-held k-n-buerger", .8) + kImg("gundren-frei.webp", "k-held k-n-gundren", 2.4),
     /* Skizzenbuch: Tuschezeichnungen auf Pergament, eine Kreatur bricht heraus, Krallenspuren */
     bestiarium: () => '<span class="k-best-buehne"><img class="k-bl k-bl-grund" src="bestiarium-grund.webp?v=5" alt="" loading="lazy" style="--d:0">' +
       BEST_EBENEN.map(([n, x, y, w, r, d, f]) => '<img class="k-bl" src="bestiarium-' + n + '.webp?v=5" alt="" loading="lazy" decoding="async" style="--d:' + d + ";left:" + x + "%;top:" + y + "%;width:" + w + "%;rotate:" + r + "deg;filter:" + (f || "none") + '">').join("") +
       '</span><span class="k-l k-nebel k-nebel2" style="--d:1.4"></span>',
     /* die Spiele als aufgefächertes Blatt Karten */
     taverne: b => kImg(b.indexOf("vorschau/") === 0 ? b : kKlein(b), "k-grund k-dunkel", 0) +
-      ["heldensturm", "jagd", "hort", "nacht", "kehle"].map((n, i) => kImg("vorschau/plakat-" + n + ".webp", "k-plakat", 1 + i * .35, "--n:" + (i - 2))).join(""),
+      [["heldensturm", "38% 45%"], ["jagd", "50% 18%"], ["hort", "50% 22%"], ["nacht", "50% 14%"], ["kehle", "72% 20%"]].map(([n, fokus], i) => kImg("vorschau/plakat-" + n + ".webp", "k-plakat", 1 + i * .35, "--n:" + (i - 2) + ";object-position:" + fokus)).join(""),
     /* Bühne: Vorhang, Lichtkegel, eine leuchtende Laute und Noten */
     buehne: () => '<span class="k-l k-vorhang" style="--d:0"></span><span class="k-l k-licht" style="--d:.5"></span>' +
       kImg("skizze-laute.webp", "k-laute", 2) + '<span class="k-l k-noten" style="--d:2.6"><i>♪</i><i>♫</i><i>♩</i><i>♬</i></span>'
@@ -556,17 +556,24 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .k-siegel { left: 64%; top: 8%; width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 35%, #c0392b, #7a1410 70%); color: #f3c9a0; font-family: var(--display); font-size: 1.1rem; box-shadow: 0 3px 8px rgba(0,0,0,.6), inset 0 0 0 3px rgba(0,0,0,.18); --t: rotate(-12deg); }
 /* Gefährten */
 .k-feuerglut { inset: 0; background: radial-gradient(ellipse 70% 55% at 50% 105%, rgba(224,120,40,.55), rgba(120,50,20,.25) 45%, transparent 70%), linear-gradient(#141019, #1d1420); }
-.kachel .k-collage .k-g-echo { left: -18%; bottom: -10%; height: 98%; filter: brightness(.6) drop-shadow(0 8px 12px rgba(0,0,0,.7)); }
-.kachel .k-collage .k-g-ezekiel { right: -30%; bottom: -16%; height: 98%; filter: brightness(.8) drop-shadow(0 8px 12px rgba(0,0,0,.7)); }
-.kachel .k-collage .k-g-friedrich { left: 2%; bottom: -20%; height: 108%; }
-.kachel .k-collage .k-g-barradin { left: 22%; bottom: -24%; height: 112%; }
-.kachel .k-collage .k-g-rex { right: -6%; bottom: -8%; height: 56%; }
+/* Gruppenbild: Größen hängen an der Kachelhöhe (cqh), die Gesichter verteilen sich über die Breite (cqw) –
+   so bleibt jeder Kopf sichtbar, egal wie breit die Kachel auf dem Bildschirm gerade ist. --x = Gesicht in % der Breite,
+   --fx = wo im Bild das Gesicht liegt, --r = Seitenverhältnis des Bilds */
+.k-collage:has(.k-g-echo), .k-collage:has(.k-n-gundren), .k-collage:has(.k-plakat) { container-type: size; }
+.kachel .k-collage .k-g { left: calc(var(--x) * 1cqw - var(--fx) * var(--r) * var(--h) * 1cqh); top: calc(var(--y) * 1cqh); height: calc(var(--h) * 1cqh); }
+.kachel .k-collage .k-g-echo { --x: 13; --fx: .46; --r: 1.002; --h: 100; --y: -18; filter: brightness(.72) drop-shadow(0 8px 12px rgba(0,0,0,.7)); }
+.kachel .k-collage .k-g-ezekiel { --x: 77; --fx: .5; --r: .745; --h: 102; --y: -2; filter: brightness(.9) drop-shadow(0 0 1px rgba(255,120,90,.5)) drop-shadow(0 8px 12px rgba(0,0,0,.7)); }
+.kachel .k-collage .k-g-friedrich { --x: 33; --fx: .47; --r: 1.029; --h: 108; --y: 4; }
+.kachel .k-collage .k-g-rex { --x: 92; --fx: .4; --r: .95; --h: 60; --y: 22; }
+.kachel .k-collage .k-g-barradin { --x: 55; --fx: .5; --r: .866; --h: 112; --y: 12; }
 .k-funken { inset: 0; background: radial-gradient(1.5px 1.5px at 20% 70%, #ffcf80, transparent), radial-gradient(1.5px 1.5px at 60% 50%, #ffcf80, transparent), radial-gradient(1px 1px at 80% 65%, #ffcf80, transparent), radial-gradient(1px 1px at 40% 35%, #ffcf80, transparent); opacity: .7; }
 /* Bekanntschaften */
 .k-wand { inset: 0; background: repeating-linear-gradient(90deg, #2a2024 0 34px, #261d21 34px 36px), #2a2024; }
 .k-n1 { left: 5%; top: 8%; width: 28%; height: 44%; --t: rotate(-6deg); } .k-n2 { left: 36%; top: 4%; width: 26%; height: 40%; --t: rotate(4deg); } .k-n3 { left: 64%; top: 10%; width: 27%; height: 42%; --t: rotate(-3deg); }
-.kachel .k-collage .k-n-gundren { left: -2%; bottom: -4%; height: 66%; }
-.kachel .k-collage .k-n-buerger { right: -6%; bottom: -2%; height: 74%; }
+/* Gundren groß vorne rechts, der Stadthalter klein, gespiegelt und abgedunkelt im Hintergrund links */
+.kachel .k-collage .k-n-gundren { right: calc(4cqw - 4cqh); bottom: -5cqh; height: 96cqh; }
+.kachel .k-collage .k-n-buerger { left: calc(66cqw - 30cqh); top: 12cqh; height: 32cqh; scale: -1 1; filter: brightness(.55) saturate(.8) blur(.4px) drop-shadow(0 6px 10px rgba(0,0,0,.7)); }
+.kachel:hover .k-collage .k-n-buerger { filter: brightness(.7) saturate(.9) drop-shadow(0 6px 10px rgba(0,0,0,.7)); }
 /* Bestiarium: eine Horde greift an – vorne die Kleinen, hinten immer größer und epischer, im Dunst */
 .k-hoehle { inset: 0; background: radial-gradient(ellipse 80% 60% at 60% 20%, rgba(150,40,30,.45), transparent 70%), radial-gradient(ellipse 70% 50% at 20% 35%, rgba(90,40,120,.35), transparent 70%), linear-gradient(#120c14, #1d1218 60%, #120d12); }
 .k-nebel { left: -10%; right: -10%; height: 36%; top: 34%; background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(120,80,110,.35), transparent 70%); filter: blur(6px); }
@@ -582,8 +589,9 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 .kachel .k-collage .k-m-blight { right: -10%; top: 40%; height: 30%; filter: brightness(1.2) drop-shadow(0 8px 12px rgba(0,0,0,.85)); }
 .kachel:hover .k-collage .k-m-drache { filter: brightness(.6) saturate(.9) drop-shadow(0 0 24px rgba(230,60,20,.7)); }
 /* Taverne: Spiele als aufgefächerte Karten */
-.kachel .k-collage .k-plakat { left: calc(58% + var(--n) * 7%); bottom: -18%; height: 92%; aspect-ratio: 2 / 3; object-fit: cover; border: 3px solid #e8dcc0; border-radius: 4px; box-shadow: 0 8px 20px rgba(0,0,0,.7); transform-origin: 50% 120%; --t: rotate(calc(var(--n) * 11deg)); }
-.kachel:hover .k-plakat { --t: rotate(calc(var(--n) * 15deg)) translateY(-6%); }
+/* Abstand wächst mit der Kachelbreite, damit sich die Karten auf breiten Bildschirmen nicht über die Gesichter schieben */
+.kachel .k-collage .k-plakat { --s: min(9.5cqw, 36cqh); left: calc(100cqw - 2 * var(--s) - 60cqh + var(--n) * var(--s) - 29cqh); bottom: -10%; height: 87%; aspect-ratio: 2 / 3; object-fit: cover; border: 3px solid #e8dcc0; border-radius: 4px; box-shadow: 0 8px 20px rgba(0,0,0,.7); transform-origin: 50% 120%; --t: rotate(calc(var(--n) * 9deg)); }
+.kachel:hover .k-plakat { --t: rotate(calc(var(--n) * 12deg)) translateY(-6%); }
 /* Bühne */
 .k-vorhang { inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.55)), repeating-linear-gradient(90deg, #5a1420 0 18px, #7a1d2a 18px 30px, #4a0f19 30px 40px); }
 .k-licht { inset: -10% -10% 0; background: conic-gradient(from 160deg at 30% -5%, transparent 0deg, rgba(255,220,150,.22) 12deg, transparent 26deg), conic-gradient(from 175deg at 72% -5%, transparent 0deg, rgba(160,220,255,.18) 12deg, transparent 26deg); }
