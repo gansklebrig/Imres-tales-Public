@@ -6636,7 +6636,7 @@ function padStep(L,cur,dx,dy){if(!cur)return padDefault(L);const r=cur.getBoundi
   const sc=Math.max(0,gap)+Math.abs(dx?vy:vx)*(ov>0?0.3:2)+(ov>0?0:60);if(sc<bs){bs=sc;best=e}}
  return best}
 /* Wer darf das Menü gerade bedienen? undefined = jeder Controller, Zahl = nur dieser, -99 = keiner */
-function padMenuOwner(){if(G.state==='title'&&mpActive()){const d=G.p1dev||'kb';return d.indexOf('pad:')===0?+d.slice(4):undefined}
+function padMenuOwner(){if(G.state==='title')return undefined;
  if(!G.mp||!G.overlay||NET.role==='guest')return undefined;const q=PL[G.menuP||0];if(!q)return undefined;
  if(q.dev&&q.dev.indexOf('pad:')===0)return padIdx(q.dev);if(q.pad2!==undefined&&(!q.dev||q.dev==='kb'))return q.pad2;return-99}
 function padTab(d){const tl=scr.querySelector('.mtabs')||[...scr.querySelectorAll('[role=tablist]')].find(t=>t.offsetParent);if(!tl)return false;
@@ -18850,6 +18850,211 @@ function tdZoom(el){let z=1;for(let e=el;e&&e.nodeType===1;e=e.parentElement){co
 /* Nach dem Zeichnen hängen andere Pakete noch Zeilen ins Detailfeld – danach den Text noch einmal einpassen */
 {const _rt=renderTree;renderTree=function(){const r=_rt.apply(this,arguments);try{const tx=scr&&scr.querySelector('.stfx .stdet>.sttx');if(tx&&tx.firstChild&&tx.querySelector('.tdsx'))stFxText(tx,tx.firstChild,0.74,'stnowo')}catch(e){}return r}}
 window.__hsTDET={TDK,tdComp,tdKurz,tdLang,tdHtml,tdSplit,tdPlain,TD_NUM,tdTransform,rank:id=>rank(id),refit:h=>mfFit(h||scr),fx:(b,i)=>stFxText(b,i,0.74,"stnowo")};
+
+/* ================= Paket „lagerui“: Controller im Hauptmenü, Kategorie-Seiten mit Scrollen im Lager (Lager, Bestien, Erfolge, Mehr) =================
+   1) Titel/Hauptmenü/Spielstände: jeder Controller bedient das Menü (padMenuOwner im Titel = alle). Beitreten per A nur im Lager-Bildschirm
+      (nicht in den Spielstand-Menüs); beigetretene Mitspieler (P2–P4) dürfen mit A Schaltflächen drücken, B bricht Rückfragen ab.
+   2) Lager-Reiter „Lager“, „Bestien“, „Erfolge“, „Mehr“: je Kategorie eine Seite, die in sich scrollt (Ausnahme vom No-Scroll-Prinzip),
+      unten eine Leiste mit allen Seitennamen (aktuelle hervorgehoben), Wechsel mit ‹ ›, Q/E, LT/RT, Wischen; Steuerkreuz bewegt den
+      Fokus und scrollt mit, rechter Stick scrollt, Steuerkreuz ohne weiteres Ziel scrollt weiter.
+   Neue Namen: cp* (CP, cpBuild, cpGo, cpBox, cpTabs …), luLobbyOk */
+const CP={idx:{},st:{},rs:{},tabs:{lager:1,best:1,erfolge:1,hilfe:1,pause:1,opt:1}};
+(()=>{try{const st=document.createElement('style');st.textContent=`
+.screen.cpwis>.wrap.slwis,.screen.cpwis>.wrap.cpw{display:flex!important;flex-direction:column;min-height:0!important;gap:10px}.screen.cpwis>.wrap.slwis>.tabbody,.screen.cpwis>.wrap.cpw>.tabbody{flex:1 1 auto;min-height:0}.screen.cpwis>.wrap.cpw>*{flex:none}.screen.cpwis>.wrap.cpw>.tabbody{flex:1 1 auto}
+.tabbody.cpon.cpside{display:grid!important;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);grid-template-rows:auto minmax(0,1fr) auto;column-gap:12px;row-gap:8px}
+.tabbody.cpon.cpside>.erf-kopf{grid-column:1;grid-row:1;margin:0}.tabbody.cpon.cpside>.erf-det{grid-column:1;grid-row:2;align-self:start;margin:0}
+.tabbody.cpon.cpside>.cpbox{grid-column:2;grid-row:1/3}
+.tabbody.cpon.cpside .erf-rs{display:none}.tabbody.cpon.cpside .erf-ring{width:38px;height:38px}.tabbody.cpon.cpside .erf-kopf{padding:6px 8px;gap:6px 10px}
+.tabbody.cpon.cpside.erf-body>.erf-det.cppin{height:62px;padding:5px 9px;grid-template-columns:42px minmax(0,1fr);gap:8px}.tabbody.cpon.cpside>.erf-det .erf-di svg{width:42px;height:42px}.tabbody.cpon.cpside>.erf-det .erf-d{-webkit-line-clamp:1}.tabbody.cpon.cpside>.cpnav{grid-column:1/-1;grid-row:3}
+.tabbody.cpon{display:flex!important;flex-direction:column;gap:8px;overflow:hidden!important;min-height:0}
+.tabbody.cpon>.cppin{flex:none;margin:0}
+.tabbody.cpon>.cpbox{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px 8px 6px 2px;margin-right:-4px;scroll-behavior:auto;
+ scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--hc,#e5b454) 55%,#6b5a3a) transparent;
+ -webkit-mask-image:linear-gradient(#000,#000);mask-image:linear-gradient(#000,#000)}
+.tabbody.cpon>.cpbox.cpt{-webkit-mask-image:linear-gradient(transparent 0,#000 22px,#000 100%);mask-image:linear-gradient(transparent 0,#000 22px,#000 100%)}
+.tabbody.cpon>.cpbox.cpb{-webkit-mask-image:linear-gradient(#000 0,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(#000 0,#000 calc(100% - 28px),transparent 100%)}
+.tabbody.cpon>.cpbox.cpt.cpb{-webkit-mask-image:linear-gradient(transparent 0,#000 22px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(transparent 0,#000 22px,#000 calc(100% - 28px),transparent 100%)}
+.cpbox::-webkit-scrollbar{width:6px}.cpbox::-webkit-scrollbar-track{background:transparent}
+.cpbox::-webkit-scrollbar-thumb{border-radius:6px;background:linear-gradient(180deg,color-mix(in srgb,var(--hc,#e5b454) 70%,#e5b454),color-mix(in srgb,var(--hc,#e5b454) 35%,#3a2c22))}
+.cpbox>.cpsec{display:flex;flex-direction:column;gap:10px}
+.cpbox>.cpsec[hidden]{display:none!important}
+.cpbox>.cpsec.cpin{animation:cpIn .26s cubic-bezier(.2,.8,.2,1)}
+.cpbox>.cpsec.cpin.cpl{animation-name:cpInL}
+@keyframes cpIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+@keyframes cpInL{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
+.cpbox>.cpsec>.cpsec-h{display:none}
+.cpnav{flex:none;display:flex;align-items:center;gap:6px;padding:4px;border-radius:999px;border:1px solid rgba(229,180,84,.4);background:rgba(18,13,20,.92);box-shadow:0 4px 18px rgba(0,0,0,.45);min-width:0}
+.cpnav>button.cpd{flex:none;min-width:40px;min-height:36px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-weight:800;font-size:18px;line-height:1;padding:0 10px}
+.cpnav>button.cpd[disabled]{opacity:.3}
+.cpstrip{flex:1 1 auto;min-width:0;display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-behavior:smooth;padding:1px;
+ -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
+.cpstrip::-webkit-scrollbar{display:none}
+.cpstrip>button.cpc{flex:none;min-height:34px;border-radius:999px;border:1px solid transparent;background:transparent;color:var(--mute);font-weight:700;font-size:13.5px;padding:0 12px;white-space:nowrap;transition:color .15s,background .15s,border-color .15s}
+.cpstrip>button.cpc:first-child{margin-left:10px}.cpstrip>button.cpc:last-child{margin-right:10px}
+.cpstrip>button.cpc:hover{color:var(--text)}
+.cpstrip>button.cpc.on{color:#1a1208;background:linear-gradient(180deg,#f1cd7a,var(--gold,#e5b454));border-color:#f6dca0;box-shadow:0 0 12px rgba(229,180,84,.45);font-weight:800}
+.cpstrip>button.cpc small{opacity:.75;font-weight:700;margin-left:5px;font-variant-numeric:tabular-nums}
+.cpnav .cpk{flex:none;font-size:12px;color:var(--mute);font-weight:700;white-space:nowrap;padding-right:8px}
+@media (pointer:coarse){.cpnav .cpk{display:none}}
+@media (max-width:700px){.cpstrip>button.cpc{font-size:12.5px;padding:0 10px;min-height:32px}.cpnav>button.cpd{min-width:36px;min-height:32px}}
+@media (min-height:1300px) and (min-width:2200px){.cpstrip>button.cpc{font-size:15px;min-height:38px}.cpnav>button.cpd{min-height:40px}}
+.tabbody.cpon.erf-body .erf-kz{display:none!important}
+.tabbody.cpon.erf-body>.cppin.erf-det{height:86px}
+.tabbody.cpon.erf-body>.cpbox .erf-grid{padding:2px}
+@media (max-width:700px){.tabbody.cpon.erf-body>.cppin.erf-det{height:72px}}
+.tabbody.cpon.erf-body.cplow>.cppin.erf-det{height:58px;padding:4px 10px;grid-template-columns:44px minmax(0,1fr)}
+.tabbody.cpon.erf-body.cplow>.cppin.erf-det .erf-di svg{width:44px;height:44px}
+.tabbody.cpon.erf-body.cplow>.cppin.erf-det .erf-d{-webkit-line-clamp:1}
+.tabbody.cpon.erf-body.cplow>.cpbox .erf-kopf{margin-bottom:6px}
+`;document.head.appendChild(st)}catch(e){}})();
+
+/* ---------- 1) Controller im Hauptmenü ---------- */
+function luInCamp(){try{return typeof SPL==='undefined'||SPL.view==='camp'}catch(e){return true}}
+{const _pl=padLobby;padLobby=function(){
+  if(PADCAP||G.state!=='title'||!scr||scr.hidden)return _pl.apply(this,arguments);
+  /* Spielstand-Menüs (Hauptmenü, Laden, Neues Spiel …): kein Beitreten, jeder Controller bedient das Menü */
+  if(!luInCamp()||!scr.querySelector('.camp'))return;
+  if(!mpActive())return _pl.apply(this,arguments);
+  const keep=[];let S=null;try{S=mpSlots()}catch(e){}
+  if(S)for(const s of Object.values(PADS.st)){const k=S.findIndex(x=>x.dev==='pad:'+s.i);if(k<=0)continue;const pr=s.pr;
+   /* A eines Mitspielers: Schaltfläche drücken (ohne Fokus erst nur den Fokus zeigen, damit ein doppeltes A nicht sofort startet) */
+   if(pr[0]){pr[0]=false;if(PADNAV.on&&PADNAV.el&&PADNAV.el.isConnected)keep.push([s,0]);else{PADNAV.on=true;PADNAV.dirty=true}}
+   /* B eines Mitspielers: offene Rückfrage abbrechen statt die Runde zu verlassen */
+   if(pr[1]&&[...scr.querySelectorAll('[data-act="run-drop-no"],[data-act="start-no"],[data-act="mpr-no"],[data-act="close"],[data-act="bar-cancel"]')].some(e=>e.offsetParent&&!e.disabled)){pr[1]=false;keep.push([s,1])}}
+  const r=_pl.apply(this,arguments);
+  for(const [s,j] of keep){if(s.pr)s.pr[j]=true}return r}}
+
+/* ---------- 2) Kategorie-Seiten mit Scrollen ---------- */
+function cpTab(h){if(!scr||scr.hidden)return'';{const w=(h||scr).querySelector(':scope>.wrap.cpw');if(w)return w.dataset.cpt||''}if(G.state!=='title')return'';if((h||scr).querySelector(':scope>.wrap.slwis')){try{return{erf:'erfolge',best:'best'}[SPL.wt]||''}catch(e){return''}}return G.campTab||'held'}
+function cpTb(h){return(h||scr).querySelector(':scope>.camp .tabbody,:scope>.wrap.slwis>.tabbody,:scope>.wrap.cpw>.tabbody.cpwb')}
+function cpName(el){const h=el.matches('.eyebrow')?el:el.querySelector(':scope>.eyebrow,:scope>h3,:scope>.spread .eyebrow,:scope>.row .eyebrow,:scope>summary');if(!h)return'';
+ let t=h.textContent.replace(/\s+/g,' ').trim();t=t.split(' · ')[0].trim();return t.length>28?t.slice(0,26)+'…':t}
+const CP_FIRST={lager:'Heldenwerte',hilfe:'Steuerung & Tipps',best:'Übersicht',pause:'Einstellungen',opt:'Einstellungen'};
+/* Gruppen bilden: [{n, els}] und angeheftete Elemente (oben, scrollen nicht mit) */
+function cpGroups(tab,tb){const C=[...tb.children].filter(c=>!c.classList.contains('mfbar'));const pin=[],G2=[];let cur=null;
+ if(tab==='erfolge'){for(const c of C){if(c.matches('.erf-kopf,.erf-det'))pin.push(c);else{if(!cur)G2.push(cur={n:'',els:[]});cur.els.push(c)}}return{pin,groups:G2}}
+ let i=0;if(tab==='best')while(i<C.length&&C[i].matches('.chips,.muted')&&!C.slice(0,i).some(x=>x.matches('.eyebrow'))){pin.push(C[i]);i++}
+ for(;i<C.length;i++){const c=C[i];const nm=c.matches('.ctlBox')&&!cpName(c)?'Controller':cpName(c);const head=c.matches('.eyebrow')||c.matches('.card,details')&&!!nm;
+  if(head){G2.push(cur={n:nm||'Weiteres',els:[c]});continue}
+  if(!cur)G2.push(cur={n:CP_FIRST[tab]||'Übersicht',els:[]});cur.els.push(c)}
+ /* Pause: Mitspieler und Online-Einladung als erste Seite (kurz, wichtig), danach Einstellungen und Controller */
+ if(tab==='pause'){const M=G2.filter(g=>g.els.some(e=>e.matches('.netcard')||/^Mitspieler/.test(g.n)));if(M.length){const R=G2.filter(g=>!M.includes(g));const m={n:M.length>1?'Mitspieler & Online':M[0].n,els:[].concat(...M.map(g=>g.els))};G2.length=0;G2.push(m,...R)}}
+ return{pin,groups:G2.filter(g=>g.els.length)}}
+function cpKey(tab){return tab+'|'+(tab==='erfolge'?(typeof ERF!=='undefined'?ERF.kat:''):(CP.idx[tab]||0))}
+function cpNavHtml(names,cur,erf){const pads=PADS&&Object.keys(PADS.st||{}).length;
+ return`<button type="button" class="cpd" data-cpd="-1" aria-label="Vorige Seite" ${cur<=0?'disabled':''}>‹</button><div class="cpstrip" role="tablist" aria-label="Seiten">${names.map((n,i)=>`<button type="button" role="tab" class="cpc ${i===cur?'on':''}" aria-selected="${i===cur}" ${erf?`data-act="erf-k" data-v="${erf[i]}"`:`data-cpi="${i}"`}>${esc(n)}</button>`).join('')}</div><button type="button" class="cpd" data-cpd="1" aria-label="Nächste Seite" ${cur>=names.length-1?'disabled':''}>›</button><span class="cpk">${pads?'LT / RT':'Q / E'}</span>`}
+function cpBuild(h){const tab=cpTab(h);const tb=cpTb(h);if(!tb)return false;
+ if(!CP.tabs[tab]){if(tb.classList.contains('cpon'))cpUnbuild(tb);return false}
+ if(tb.classList.contains('cpon')&&tb._cpTab===tab&&[...tb.children].every(c=>c.matches('.cppin,.cpbox,.cpnav'))){if(tb.classList.contains('cplow')){/* neu einpassen: Kopfzeilen wieder oben */const box=tb.querySelector(':scope>.cpbox');for(const p of [...box.querySelectorAll(':scope>.cpmv')]){p.classList.remove('cpmv');p.classList.add('cppin');tb.insertBefore(p,box)}tb.classList.remove('cplow')}tb.classList.remove('cpside');return true}
+ if(tb.classList.contains('cpon'))cpUnbuild(tb);
+ const {pin,groups}=cpGroups(tab,tb);if(!groups.length)return false;
+ let names,cur,erf=null;
+ if(tab==='erfolge'){erf=['alle'].concat(Object.keys(ERF_KAT));names=['Alle'].concat(erf.slice(1).map(k=>ERF_KAT[k]));cur=Math.max(0,erf.indexOf(ERF.kat))}
+ else{names=groups.map(g=>g.n);cur=Math.max(0,Math.min(groups.length-1,CP.idx[tab]||0));CP.idx[tab]=cur}
+ tb.classList.add('cpon');tb._cpTab=tab;
+ for(const p of pin)p.classList.add('cppin');
+ const box=document.createElement('div');box.className='cpbox';box.tabIndex=-1;
+ groups.forEach((g,i)=>{const s=document.createElement('section');s.className='cpsec';s.dataset.cpn=g.n;if(!erf&&i!==cur)s.hidden=true;for(const e of g.els)s.appendChild(e);box.appendChild(s)});
+ tb.appendChild(box);
+ if(names.length>1){const nav=document.createElement('div');nav.className='cpnav';nav.setAttribute('role','navigation');nav.innerHTML=cpNavHtml(names,cur,erf);tb.appendChild(nav)}
+ box.addEventListener('scroll',()=>{CP.st[cpKey(tab)]=box.scrollTop;cpFade(box)},{passive:true});
+ return true}
+function cpUnbuild(tb){const box=tb.querySelector(':scope>.cpbox');if(box){for(const s of [...box.children])while(s.firstChild)tb.insertBefore(s.firstChild,box);box.remove()}
+ tb.querySelectorAll(':scope>.cpnav').forEach(n=>n.remove());tb.querySelectorAll('.cppin').forEach(p=>p.classList.remove('cppin'));tb.classList.remove('cpon','cplow');tb._cpTab=null}
+function cpBox(){const tb=scr&&!scr.hidden&&scr.querySelector('.tabbody.cpon');return tb?tb.querySelector(':scope>.cpbox'):null}
+function cpFade(box){if(!box)return;box.classList.toggle('cpt',box.scrollTop>4);box.classList.toggle('cpb',box.scrollTop+box.clientHeight<box.scrollHeight-4)}
+function cpCenter(tb,smooth){const st=tb.querySelector('.cpstrip'),on=st&&st.querySelector('.cpc.on');if(!on)return;const sr=st.getBoundingClientRect(),r=on.getBoundingClientRect();const x=st.scrollLeft+(r.left-sr.left)-(sr.width-r.width)/2;if(smooth)st.scrollTo({left:x,behavior:'smooth'});else{st.style.scrollBehavior='auto';st.scrollLeft=x;st.style.scrollBehavior=''}}
+/* Seite wechseln: d = ±1 oder Index (abs) */
+function cpGo(d,abs,focus){const tb=scr.querySelector('.tabbody.cpon');if(!tb)return false;const tab=tb._cpTab;const chips=[...tb.querySelectorAll('.cpstrip .cpc')];if(chips.length<2)return false;
+ const cur=chips.findIndex(c=>c.classList.contains('on'));const n=abs?Math.max(0,Math.min(chips.length-1,d)):Math.max(0,Math.min(chips.length-1,cur+d));if(n===cur)return false;
+ try{sfx('ui')}catch(e){}
+ if(tab==='erfolge'){CP.foc=focus?1:0;chips[n].click();return true}
+ CP.idx[tab]=n;const box=tb.querySelector(':scope>.cpbox');const secs=[...box.children];secs.forEach((s,i)=>{s.hidden=i!==n;s.classList.remove('cpin','cpl')});
+ const s=secs[n];if(s){void s.offsetWidth;s.classList.add('cpin');if(n<cur)s.classList.add('cpl')}
+ chips.forEach((c,i)=>{c.classList.toggle('on',i===n);c.setAttribute('aria-selected',i===n)});
+ tb.querySelector('[data-cpd="-1"]').disabled=n<=0;tb.querySelector('[data-cpd="1"]').disabled=n>=chips.length-1;
+ box.scrollTop=CP.st[cpKey(tab)]||0;cpFade(box);cpCenter(tb,true);
+ try{PADNAV.dirty=true}catch(e){}
+ if(focus)cpFocus(tb);return true}
+/* Controller: Fokus auf das erste Element der neuen Seite (sonst auf den Seitennamen) */
+function cpFocus(tb){try{if(!PADNAV.on)return;const box=tb.querySelector(':scope>.cpbox');const L=padEls();const t=L.find(e=>box.contains(e))||tb.querySelector('.cpc.on');if(t){padMark(t,true);if(box.contains(t)&&t.getBoundingClientRect().top>box.getBoundingClientRect().bottom)t.scrollIntoView({block:'nearest'})}}catch(e){}}
+
+/* campFit: zuerst Seiten bauen, dann wie bisher einpassen (der Reiterinhalt läuft nicht mehr über, also keine „Seite 1/8“) */
+{const _cf=campFit;campFit=function(h){let on=false;try{on=cpBuild(h)}catch(e){console.error('cpBuild',e)}
+  const r=_cf.apply(this,arguments);if(!on)return r;
+  cpAfter(h,()=>{mfReset(h);_cf.apply(this,arguments)});return r}}
+function cpAfter(h,refit){
+  try{const tb=h.querySelector(':scope>.camp .tabbody.cpon,:scope>.wrap.slwis>.tabbody.cpon,:scope>.wrap.cpw>.tabbody.cpon');const box=tb&&tb.querySelector(':scope>.cpbox');if(!box)return;
+   /* zu flach: Kopfzeilen scrollen mit (nur die Detailzeile der Erfolge bleibt stehen) */
+   const low=box.clientHeight<Math.max(150,tb.clientHeight*0.42);
+   /* Erfolge, breit und flach (Handy quer, Hauptmenü): Kopf und Detailzeile links, Kacheln rechts */
+   if(low&&tb.classList.contains('erf-body')&&!tb.classList.contains('cpside')&&tb.clientWidth>=640&&tb.clientWidth>tb.clientHeight*2){tb.classList.add('cpside');refit()}
+   else if(low&&!tb.classList.contains('cplow')&&!tb.classList.contains('cpside')){const pin=[...tb.querySelectorAll(':scope>.cppin')].filter(p=>!p.matches('.erf-det'));
+    if(pin.length||tb.classList.contains('erf-body')){tb.classList.add('cplow');for(const p of pin.reverse()){p.classList.remove('cppin');p.classList.add('cpmv');box.insertBefore(p,box.firstChild)}
+     refit()}}
+   /* sehr flach (Handy quer): auch die Detailzeile scrollt mit, damit die Kacheln Platz haben */
+   if(tb.classList.contains('cplow')&&box.clientHeight<100){const det=tb.querySelector(':scope>.cppin');if(det){det.classList.remove('cppin');det.classList.add('cpmv');const k=box.querySelector(':scope>.cpmv');box.insertBefore(det,k?k.nextSibling:box.firstChild);refit()}}
+   box.scrollTop=CP.st[cpKey(tb._cpTab)]||0;cpFade(box);cpCenter(tb,false);
+   if(CP.foc){CP.foc=0;setTimeout(()=>{const t=scr.querySelector('.tabbody.cpon');if(t)cpFocus(t)},0)}}catch(e){console.error('cpFit',e)}}
+/* Hauptmenü → „Bestiarium · Erfolge · Bestenliste“: gleiche Seiten mit Scrollen, Fenster füllt die Höhe */
+/* Pause (Einstellungen, Mitspieler, Online, Controller) und Hauptmenü → Optionen: wenn das Fenster blättern müsste, stattdessen benannte Abschnitte mit Scrollen */
+function cpWrapMode(h){if(h!==scr||scr.hidden)return'';try{if(NET.role==='guest'||G.overlay==='remote'||NET.vm||LM.cur)return''}catch(e){}const w=h.querySelector(':scope>.wrap');if(!w)return'';
+ if(G.overlay==='pause'&&G.state==='play')return'pause';try{if(G.state==='title'&&!G.overlay&&SPL.view==='opt'&&w.classList.contains('slw'))return'opt'}catch(e){}return''}
+function cpWrapPrep(w,mode){if(w.classList.contains('cpw'))return;const K=[...w.children].filter(c=>!c.classList.contains('mfbar'));const first=K.findIndex(c=>c.matches('.card'));if(first<0)return;
+ let last=K.length-1;while(last>first&&!K[last].matches('.card,p.muted,.muted'))last--;
+ const tb=document.createElement('div');tb.className='tabbody cpwb';w.insertBefore(tb,K[first]);for(let i=first;i<=last;i++)tb.appendChild(K[i]);
+ w.classList.add('cpw');w.dataset.cpt=mode}
+{const _mf=mfFit;mfFit=function(h){const wm=cpWrapMode(h);
+  if(wm){const w=h.querySelector(':scope>.wrap');
+   if(!w.classList.contains('cpw')){h.classList.remove('cpwis');_mf.apply(this,arguments);if(!h._mf)return;/* passt ohne Blättern: so lassen */}
+   const fit=()=>{mfReset(h);h.classList.remove('mfd','mfgrid','mfcamp','mflow','mfvlow','mfnarrow');h.classList.add('mfhost','cpwis');w.classList.remove('mfcolw','mfside','mfdet');w.style.removeProperty('--mfc');w.style.maxWidth='';
+    const mz=Math.max(mfZMin(),Math.min(mfBaseZ(h),1.6)),P=mfPad(h);w.style.zoom=mz;w.style.setProperty('--ez',mz);w.style.marginTop='';w.style.height=Math.max(200,(h.clientHeight-P.t-P.b)/mz)+'px';h.scrollTop=0};
+   try{if(typeof w._mfUndo==='function')w._mfUndo()}catch(e){}cpWrapPrep(w,wm);if(!w.classList.contains('cpw'))return _mf.apply(this,arguments);
+   fit();try{cpBuild(h)}catch(e){console.error('cpBuild',e)}cpAfter(h,fit);
+   /* flach: doppelter „Weiter“-Knopf unten entfällt (oben gibt es ihn auch) */
+   try{const box=w.querySelector('.cpbox'),fw=w.querySelector(':scope>.fussweiter');if(box&&fw&&box.clientHeight<160&&w.querySelector(':scope>.spread [data-act="close"],:scope>.spread .btn')){fw.style.display='none';const st=box.scrollTop;fit();box.scrollTop=st;cpFade(box)}}catch(e){}
+   h.scrollTop=0;return}
+  const w=h===scr&&h.querySelector(':scope>.wrap.slwis');let tab='';try{tab=w?cpTab(h):''}catch(e){}
+  if(!w||!CP.tabs[tab]){h.classList.remove('cpwis');return _mf.apply(this,arguments)}
+  const fit=()=>{mfReset(h);h.classList.remove('mfd','mfgrid','mfcamp','mflow','mfvlow','mfnarrow');h.classList.add('mfhost','cpwis');const mz=mfBaseZ(h),P=mfPad(h);
+   w.style.zoom=mz;w.style.setProperty('--ez',mz);w.style.height=Math.max(200,(h.clientHeight-P.t-P.b)/mz)+'px';w.style.maxWidth='';h.scrollTop=0};
+  fit();try{cpBuild(h)}catch(e){console.error('cpBuild',e)}cpAfter(h,fit);h.scrollTop=0}}
+/* Neuaufbau im Flachmodus: verschobene Kopfzeilen gehören wieder nach oben (cpUnbuild) – erledigt showTitle durch neues HTML */
+
+/* Bedienung: Knöpfe, Tastatur, Wischen */
+document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.target.closest('[data-cpd],[data-cpi]');if(!t||!scr.contains(t))return;e.stopImmediatePropagation();e.preventDefault();
+ if(t.dataset.cpd)cpGo(+t.dataset.cpd,false,0);else cpGo(+t.dataset.cpi,true,0);
+ try{if(PADNAV.on){const tb=scr.querySelector('.tabbody.cpon');const n=t.dataset.cpd?t:tb&&tb.querySelector('.cpc.on');if(n&&n.isConnected&&!n.disabled)padMark(n,true);else if(tb)cpFocus(tb)}}catch(x){}},true);
+/* Erfolge: Wechsel per Leiste – Fokus danach auf die Leiste bzw. (LT/RT) auf die erste Kachel; Bereich-Knopf bleibt im Code für alte Wege */
+addEventListener('keydown',ev=>{if(ev.ctrlKey||ev.metaKey||ev.altKey)return;if(!cpBox())return;if(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)&&ev.target.type!=='range')return;
+ const d=ev.code==='KeyE'||ev.code==='PageDown'?1:ev.code==='KeyQ'||ev.code==='PageUp'?-1:0;if(!d)return;ev.preventDefault();ev.stopPropagation();cpGo(d,false,PADNAV.on?1:0)},true);
+addEventListener('touchstart',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('.cpbox');if(!b||ev.touches.length!==1){CP.sw=null;return}const t=ev.touches[0];CP.sw={x:t.clientX,y:t.clientY,t:performance.now()}},{passive:true});
+addEventListener('touchend',ev=>{const s=CP.sw;CP.sw=null;if(!s)return;const t=ev.changedTouches[0];const dx=t.clientX-s.x,dy=t.clientY-s.y;if(performance.now()-s.t>600)return;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.8)cpGo(dx<0?1:-1)},{passive:true});
+/* Controller: LT/RT wechseln die Seite, rechter Stick scrollt die Seite */
+{const _pm=padMenu;padMenu=function(){try{const box=!PADCAP&&cpBox();if(box){const own=padMenuOwner();
+   for(const s of Object.values(PADS.st)){if(own!==undefined&&own!==s.i)continue;const pr=s.pr;
+    if(pr[6]||pr[7]){PADNAV.on=true;cpGo(pr[7]?1:-1,false,1);pr[6]=pr[7]=false}
+    if(Math.abs(s.ry)>0.25){box.scrollTop+=Math.sign(s.ry)*Math.pow(Math.abs(s.ry),1.6)*22;s.ry=0}}}}catch(e){console.error('cpPad',e)}return _pm.apply(this,arguments)}}
+/* Steuerkreuz ohne weiteres Ziel in dieser Richtung: Seite weiterscrollen (Texte ohne Schaltflächen bleiben erreichbar) */
+{const _ps=padStep;padStep=function(L,cur,dx,dy){const box=cpBox();
+  /* von außerhalb der Seite: nur sichtbare Elemente der Seite ansteuern (verdeckte liegen sonst scheinbar unter der Startleiste) */
+  if(box&&cur&&!box.contains(cur)){const br=box.getBoundingClientRect();arguments[0]=L=L.filter(e=>{if(!box.contains(e))return true;const q=e.getBoundingClientRect();return q.bottom>br.top+6&&q.top<br.bottom-6})}
+  if(box&&cur&&dy&&!box.contains(cur)){const br=box.getBoundingClientRect(),cr=cur.getBoundingClientRect();
+   /* von der Seitenleiste nach oben bzw. von den Reitern nach unten: in die Seite hinein (nächstes sichtbares Element) */
+   if(dy<0&&cur.closest('.cpnav')||dy>0&&cr.bottom<=br.top+2&&cur.closest('.camp-panel,.slwis,.cpw')){const V=L.filter(e=>box.contains(e));if(V.length){const cx=cr.left+cr.width/2;let best=null,bs=1e9;
+     for(const e of V){const q=e.getBoundingClientRect();const sc=(dy<0?br.bottom-q.bottom:q.top-br.top)*3+Math.abs(q.left+q.width/2-cx)*0.5;if(sc<bs){bs=sc;best=e}}if(best)return best}}}
+  if(box&&cur&&dy){const br=box.getBoundingClientRect();
+   /* nächstes Ziel weit außerhalb der Sicht: erst ein Stück scrollen (Zwischentext lesen), dann springen */
+   const r=_ps.apply(this,arguments);
+   if(!r){if(box.contains(cur)&&(dy>0?box.scrollTop+box.clientHeight<box.scrollHeight-2:box.scrollTop>0)){box.scrollTop+=dy*Math.max(80,box.clientHeight*0.6);cpFade(box);return cur}return r}
+   if(box.contains(r)){const q=r.getBoundingClientRect();if(dy>0&&q.top>br.bottom+box.clientHeight*0.5||dy<0&&q.bottom<br.top-box.clientHeight*0.5){box.scrollTop+=dy*box.clientHeight*0.6;cpFade(box);return cur}}
+   else if(box.contains(cur)&&dy<0&&box.scrollTop>2){box.scrollTop-=Math.max(80,box.clientHeight*0.6);cpFade(box);return cur}
+   else if(box.contains(cur)&&dy>0&&box.scrollTop+box.clientHeight<box.scrollHeight-2){/* unten verlassen, aber noch Inhalt: erst zu Ende scrollen */box.scrollTop+=Math.max(80,box.clientHeight*0.6);cpFade(box);return cur}
+   return r}return _ps.apply(this,arguments)}}
+/* Fokus im verdeckten Teil der Seite: sanft hineinscrollen (Maus-Tab, Controller) */
+document.addEventListener('focusin',e=>{const t=e.target,box=t&&t.closest&&t.closest('.cpbox');if(!box)return;const r=t.getBoundingClientRect(),b=box.getBoundingClientRect();if(r.top<b.top+4)box.scrollTop-=b.top+4-r.top+8;else if(r.bottom>b.bottom-4)box.scrollTop+=r.bottom-(b.bottom-4)+8;cpFade(box)});
+try{window.__hsLU={CP,cpGo,cpBox,cpBuild,state:()=>{const tb=scr.querySelector('.tabbody.cpon');if(!tb)return null;const box=tb.querySelector(':scope>.cpbox');const ch=[...tb.querySelectorAll('.cpstrip .cpc')];
+ return{tab:tb._cpTab,names:ch.map(c=>c.textContent),cur:ch.findIndex(c=>c.classList.contains('on')),sh:box.scrollHeight,ch:box.clientHeight,st:box.scrollTop,low:tb.classList.contains('cplow'),pager:!!scr._mf}}}}catch(e){}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
