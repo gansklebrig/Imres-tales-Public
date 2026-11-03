@@ -18574,6 +18574,283 @@ function ivTop(){try{if(scr&&scr.querySelector(':scope>.wrap.ivg'))scr.scrollTop
 try{if(window.__hsMN){__hsMN.renderInv=renderInv;__hsMN.renderTruhe=renderTruhe;__hsMN.renderSmith=renderSmith}}catch(e){}
 window.__hsIV={IVD,ivFit};
 
+/* ---------- Sternbild-Detailfeld: Kurztexte, dezente Hervorhebung, grüne Vorschau beim Zeigen auf „Verbessern“ (Paket „tdet“) ----------
+   - Kurztext (unaufgeklappt) aus TDK (Zahlen werden aus n.d(r) übernommen), sonst Langtext ohne Schadensart-Satz.
+   - Schadensart und [Haltung] als kleine Marken, Zahlen/Dauern/Schlüsselwörter warm hervorgehoben.
+   - „Nächster Rang“ entfällt: beim Zeigen auf „Verbessern“ (Maus, Tastatur, Controller, Touch gedrückt halten) stehen neben
+     jedem Wert, der sich ändert, grün die neuen Werte. Beide Fassungen liegen übereinander (Platz reserviert, kein Springen).
+   - Einpassung: Kurztext nie unter ~12 px; reicht der Platz nicht, fallen zuerst Hinweis, Ort-Zeile und Vorschauvideo weg.
+   Neue Namen: TDK, tdKurz, tdLang, tdHtml, tdTransform, tdZoom, __hsTDET */
+/* Kurztexte fürs Sternbild-Detailfeld (Paket „tdet“). Zahlen mit den Werten von Rang 1 schreiben – sie werden zur Laufzeit
+   aus n.d(r) übernommen (gleicher Wert → gleiche Stelle, Reihenfolge wie im Langtext). {i} = i-te Zahl im Langtext.
+   Schadensart und [Haltung] hängt der Code selbst als Marke an. */
+const TDK={
+/* ---- Barradin ---- */
+b_mirror:'Erschafft Trugbilder (1), die Gegner 8 s ablenken und dann für 180% Schaden zerplatzen.',
+b_hold:'Hält den stärksten Gegner in der Nähe 3,3 s fest (Bosse kürzer): 260% Schaden, danach erleidet er 9,3 s lang +32% Schaden.',
+b_laugh:'Auslöser: jede 3. Fähigkeit (80% Stärke) – betäubt alle Gegner im Zielgebiet 1,4 s, 175% Schaden.',
+b_pattern:'Auslöser: mind. 3 Gegner um Barradin (höchstens alle 23,8 s, 80% Stärke) – betäubt alle Gegner ringsum 2,9 s, 260% Schaden.',
+b_mock:'3 Gegner: 195% Schaden, danach richten sie 6 s lang 24% weniger Schaden an.',
+b_tongue:'Kritische Treffer normaler Angriffe verspotten: Das Ziel richtet 4 s lang 18% weniger Schaden an. +3% Kritische Trefferchance.',
+b_dissonant:'Stärkster Gegner: 570% Schaden und 2,5 s Flucht. Stirbt er daran, fliehen alle Gegner im weiten Umkreis und erleiden 130% Schaden.',
+b_ballad:'10 s lang für Barradin und Verbündete: +45% Schaden, +30% Angriffstempo, 2% Leben pro Sekunde. Kreisende Noten treffen Gegner.',
+b_song:'+6% Schaden, +5% Angriffstempo, 0,4% Leben pro Sekunde. Normale Angriffe betäuben mit 5% Chance. Mitspieler in der Nähe: die Hälfte.',
+b_wall:'Dornenwand quer vor Barradin (6 s): Gegner darin −60% Tempo und 175% Schaden pro Sekunde.',
+b_bloom:'Stirbt ein Gegner in Ranken oder Dornen: Barradin und Mitspieler in der Nähe heilen 0,6% Leben, 10% Chance auf neue Ranken.',
+b_overgrowth:'Rankenfessel, Dornenwall und Würgeranken halten 50% länger. Gegner in Ranken erleiden je Sekunde +5% Schaden (bis +25%).',
+b_fear:'Auslöser: Barradin wird getroffen (höchstens alle 21,6 s, 80% Stärke) – alle Gegner im Umkreis fliehen 3,3 s, 250% Schaden.',
+b_flute:'Beschwört 7 s lang einen kleinen Demogorgon: Tentakelschläge mit je 235% Schaden.',
+b_juggle:'Auslöser: Gegner in der Nähe (höchstens alle 18,2 s, 80% Stärke) – 3 Fackeln kreisen 7 s um Barradin (110% Schaden + Brand), Trugbilder werfen jede Sekunde eine (100%). Finale: je 200%.',
+b_door:'Sprung zum Zielort (ohne Maus: weg von den Gegnern). Ein Trugbild am Start zerplatzt nach 1 s: 250% Schaden.',
+b_hall:'Alle 10 s erscheint ein Trugbild an Barradins Seite. Alle Trugbilder +25% Schaden und stärkeres Zerplatzen.',
+b_k_schnitt:'Gleitet vor und schneidet zwei Halbmonde durch alles vor ihm: Vorhand 162%, Rückhand 88% Schaden.',
+b_k_fuss:'+3% Lauftempo, Rapierstiche +16% Reichweite und +6% Schaden. Nach Ausweichrolle oder Gleitendem Schwung: nächster Treffer innerhalb 3 s +72% (Riposte).',
+b_k_abwehr:'Auslöser: Barradin wird getroffen (höchstens alle 15,6 s, 80% Stärke) – Klingenwirbel stößt Gegner zurück (125%), dann pariert er 3,4 s lang bis zu 1 Treffer und kontert je mit 150%.',
+b_k_fleche:'Ausfallschritt 270 Schritt weit: 250% Schaden an allen auf dem Weg; vier Nachbilder schlagen danach je 62% nach.',
+b_k_inspir:'+3% Schaden. Jeder Klingentanz-Schwung gibt Barradin und Mitspielern in der Nähe einen Schild aus 1,5% Leben (bis 4%).',
+b_k_stern:'Tanzt einen Stern um das Ziel (fünfmal je 100%), dann 270% Schaden, 0,5 s Betäubung, 2 s geblendet. Dabei unverwundbar.',
+b_k_ballett:'12 s lang stoßen drei Geisterrapiere fünfmal pro Sekunde auf Gegner in der Nähe (je 90%). +30% Angriffstempo; jede Ausweichrolle zieht einen Schneidenden Schwung.',
+b_g_kuss:'Schmetterlinge: 195% Schaden, zwei Falter springen weiter (je 125%). Das Ziel wird 3,4 s Bewunderer und kämpft für Barradin (Elite halb so lang; Bosse/Wächter: −20% Schaden). Höchstens 2 Bewunderer.',
+b_g_mantel:'Auslöser: unter 50% Leben (höchstens alle 18,2 s, 80% Stärke) – er und Mitspieler in der Nähe: Schild aus 12% Leben, 3 s +30% Lauftempo; Blütenstoß 225% Schaden; Bewunderer +2 s.',
+b_g_glanz:'+3% Schaden. Bis zu 3 Bewunderer zugleich, die 12% härter zuschlagen; endet ein Bann, zerstieben Blüten (100% ringsum).',
+b_g_knie:'„Knie nieder!“ Gegner vor Barradin knien 1,5 s (Bosse/Wächter kürzer, verlangsamt): 320% Schaden, danach 5 s lang +18% erlittener Schaden. Bewunderer +2 s.',
+b_g_unzer:'Alle 9 s wird ein Treffer auf Barradin abgewehrt: Der Angreifer erleidet 190% Schaden und wird 3 s lang Bewunderer (Bosse erstarren kurz). +4% Leben.',
+b_g_darb:'Bis zu 3 Gegner ringsum werden 5,6 s lang Bewunderer (auch über die Obergrenze). Alle im Kreis: 225% Schaden; wer nicht verfällt, −20% Schaden.',
+b_g_krone:'12 s Krone: Glanzwelle 400% Schaden, Barradin erleidet 20% weniger Schaden, jede Sekunde ein neuer Bewunderer (bis 4), Bewunderer +50% Schaden.',
+b_st_rosentanz:'Jede Ausweichrolle lässt am Startpunkt Dornen sprießen (höchstens alle 2 s): Gegner darin 2 s gefesselt, 75% Schaden pro Sekunde.',
+b_st_spiegtanz:'Klingentanz-Fähigkeiten lassen mit 25% Chance ein Trugbild am Startpunkt zurück (zerplatzt wie das Spiegelbild).',
+b_t_takt:'Taktfenster 10% breiter, Fähigkeiten +3% Schaden.',
+b_t_wurzel:'+4% Leben, +3 Rüstung, Fesselungen durch Barradin halten 5% länger.',
+b_t_ensemble:'Trugbilder und Begleiter +6% Schaden, Barradin +2% Lauftempo.',
+b_t_fecht:'+2% Kritische Trefferchance, +8% Kritischer Schaden, +3% Angriffstempo.',
+b_t_star:'+3% Schaden; Bezauberungen, Betäubungen und Fesselungen halten 6% länger.',
+/* ---- Echo ---- */
+e_storm:'Jede Fähigkeit lädt Echo auf (bis 4 Ladungen); bei 4 Ladungen: Kettenblitz auf 4 Gegner (je 150%), alle Abklingzeiten −0,3 s. +4% Fertigkeitsschaden.',
+e_fireball:'Explodiert am Ziel: 370% Schaden im Umkreis, danach 3 s brennender Boden (75% pro Sekunde).',
+e_icefan:'Auslöser: Ausweichrolle (höchstens alle 5 s, 80% Stärke) – Eisfächer nach vorn: 220% Schaden, 3 s Unterkühlung (−50% Tempo); Unterkühlte erleiden +5% Blitzschaden.',
+e_chain:'Auslöser: Gegner in Reichweite (höchstens alle 6,4 s, 80% Stärke) – Blitz springt zwischen bis zu 5 Gegnern: je 195% Schaden.',
+e_tempest:'8 s Sturm um Echo: viermal pro Sekunde ein Blitz auf einen Gegner in der Nähe (180%), Wind stößt Gegner zurück.',
+e_bear:'12 s Höhlenbär: +38% Schaden, +25 Rüstung, +30% Leben, Prankenhiebe treffen alles vor ihm, heilt 20% Leben. Eigene Leiste: Brüllen, Prankenwirbel, Ansturm.',
+e_beast:'+6% Leben. Als Bär ist jeder 4. Prankenhieb ein Wuchtschlag: 190% im Umkreis, 0,6 s Betäubung, heilt 2% Leben. Prankenwirbel dreht sich dreimal.',
+e_rat:'5,6 s Ratte: winzig, +60% Tempo, die ersten 3,5 s unsichtbar; eigene Leiste (Huschen, Schnüffeln, Beißen). Zurückverwandeln: Rattenschwarm 250% ringsum.',
+e_roar:'Auslöser: unter 60% Leben (höchstens alle 18,2 s, 80% Stärke) – Gegner ringsum fliehen 2 s und richten 6 s lang 25% weniger Schaden an; Echo und Mitspieler erleiden 6 s lang 15% weniger. Als Bär: Brüllen der Bärenleiste.',
+e_greed:'+15% Gold, +8% bessere Beute. Gold aufheben: 4% Chance auf Goldrausch – 5 s +24% Angriffstempo, +15% Lauftempo, auch für Mitspieler in der Nähe.',
+e_treant:'Ein Baumhirte kämpft 17 s an Echos Seite (oder bei einem verwundeten Mitspieler), zieht Gegner auf sich und trifft mit 67% von Echos Schaden.',
+e_s_bolt:'Lichtbolzen: 385% Schaden, Splitter 154% ringsum. Sternenmal 4 s: Der nächste Treffer darauf (von jedem) +48% Schaden.',
+e_s_form:'12 s Sternengestalt (hält 10% Schaden ab); erneut wirken wechselt das Sternbild: Bogenschütze – Lichtpfeil pro Sekunde (155%), Fernangriffe durchbohren · Kelch – Fähigkeiten heilen Echo und den verletztesten Mitspieler um 2,5% · Drache – −12% erlittener Schaden, keine Betäubung, +6% Fertigkeitsschaden.',
+e_s_karte:'+3% Fertigkeitsschaden. Jede 3. Fähigkeit (in Sternengestalt jede 2.) feuert gratis einen Leitbolzen mit 60% Stärke.',
+e_s_omen:'Auslöser: jede 4. Fähigkeit (80% Stärke) – W20: 270% Schaden. Gerade: Echo und Mitspieler 6 s +15% Schaden, −10% erlittener. Ungerade: Getroffene 6 s +15% erlittener, −20% Schaden. Bei 20 beides, bei 1 doppeltes Pech.',
+e_s_funkel:'Sternbilder wirken 12% stärker. Jeder Sternbildwechsel: Sternenregen (6 Splitter, je 88%). Drache: +4% Lauftempo.',
+e_s_fessel:'Bis zu 5 Gegner werden zum Sternbild verbunden: je 245% Schaden (+10% je weiterem Stern), 1,5 s gefesselt und zur Mitte gezogen.',
+e_s_nacht:'9 s Nachthimmel: Sternengestalt mit allen drei Sternbildern zugleich; zweieinhalbmal pro Sekunde eine Sternschnuppe (80% im Umkreis).',
+e_p_wurf:'Bovist platzt am Ziel: 200% Schaden, dann 4 s Sporenwolke (125% pro Sekunde). Getroffene sind befallen.',
+e_p_kranz:'Sporenkranz: jede Sekunde 75% Schaden an bis zu 6 Gegnern in der Nähe, die befallen werden. +3% Leben.',
+e_p_sym:'Auslöser: unter 50% Leben (höchstens alle 26 s, 80% Stärke) – 10 s Schutzleben aus 19% Leben + 0,3% je Naturvorrat (bis 50); Sporenkranz doppelt, Nahkampf +62%. Am Ende 150% ringsum.',
+e_p_befall:'Sterbende befallene Gegner stehen mit 40% Chance als Pilzdiener auf (bis 3, je 12 s): Sie treffen mit 100% von Echos Schaden, ziehen Gegner auf sich und platzen am Ende in Sporen.',
+e_p_ring:'Pilzring am Ziel, 5,5 s: Gegner darin gefesselt (Bosse/Wächter verlangsamt), befallen, 112% Schaden pro Sekunde.',
+e_p_platz:'Alle Pilzdiener platzen (je 285% im Umkreis + Sporenwolke), befallene Gegner in der Nähe stoßen Sporen aus (125%). Sonst platzt der Sporenkranz (200%).',
+e_p_frucht:'9 s Myzelnetz weit um Echo: Gegner verlangsamt, befallen, +20% erlittener Schaden; zweimal pro Sekunde ein Riesenpilz (212%); wer stirbt, wird Pilzdiener.',
+e_st_sturm:'Kettenblitze springen einen Gegner weiter. Blitztreffer: 6% Chance auf einen Sternsplitter (80% im kleinen Umkreis).',
+e_st_frucht:'Kill in Bärengestalt: Ein Bovist platzt (höchstens 1× pro Sekunde) – 120% ringsum, Getroffene befallen.',
+e_st_goldblitz:'Gold aufheben: 4% Chance auf einen Blitz auf einen Gegner in der Nähe – 180% Schaden, kurze Betäubung.',
+e_t_gewitter:'Fähigkeiten +3% Schaden, +4% Wirkungsbereich; Naturvorrat füllt sich 5% schneller.',
+e_t_wald:'+3% Lauftempo, +5% Gold, Naturvorrat füllt sich 4% schneller.',
+e_t_glanz:'+2% Kritische Trefferchance, +6% Kritischer Schaden, 2% kürzere Abklingzeiten.',
+e_t_myzel:'Befallene Gegner erleiden 4% mehr Schaden von Echo. +3% Leben.',
+/* ---- Friedrich ---- */
+f_explode:'Auslöser: jeder 4. normale Pfeil (höchstens alle 4 s, 100% Stärke) – Explosion: 350% im Umkreis, 3 s Brand (69% pro Sekunde).',
+f_onearrow:'0,8 s spannen, dann 2500% Schaden. Gegner (keine Bosse) unter 25% Leben sterben sofort.',
+f_sniper:'+2% Kritische Trefferchance; im Stand jede halbe Sekunde weitere +2% (bis +3%), sinkt beim Laufen. Mitspieler in der Nähe: die Hälfte. +10% Kritischer Schaden, +20 Reichweite.',
+f_trap:'Legt 2 Bärenfallen: 310% Schaden und 2,5 s gefesselt. Wird ein Mitspieler bedrängt, schnappen zwei weitere bei ihm zu.',
+f_loyal:'Rex +35% Leben, +35% Schaden. Wird Friedrich oder ein Mitspieler nahe Rex getroffen, springt Rex den Angreifer an (alle 5,4 s): 150% Schaden, 0,8 s Betäubung. Friedrich +4% Leben.',
+f_bigrex:'Rex wird größer: +50% Leben, Bisse treffen alle Gegner um ihn, Gegner in der Nähe greifen bevorzugt ihn an.',
+f_s_hetz:'Der Schwarm verfolgt das Ziel 3,2 s: 61% Schaden pro Sekunde an allem darin, blendet beim ersten Kontakt 1 s, −25% Tempo. Rex folgt.',
+f_s_stich:'Pfeil- und Fähigkeitstreffer: Der Schwarm sticht nach (45%, je Gegner höchstens einmal pro Sekunde), jeder dritte Stich stößt weg. +2% Angriffstempo.',
+f_s_flug:'Der Schwarm trägt Friedrich 295 Schritt weit, unverwundbar und über Gegner hinweg; Gegner im Weg: 135% Schaden und weggestoßen. Richtung: Laufrichtung, sonst Ziel.',
+f_s_schleier:'Auslöser: Friedrich wird getroffen (höchstens alle 18,2 s, 80% Stärke) – 4,4 s Schwarmhülle: Die nächsten 2 Treffer gehen ins Leere, der Angreifer erleidet 100% und ist 1,5 s geblendet.',
+f_s_rex:'Rex’ Bisse lassen Glühwürmchen nachstechen (45%) und blenden 1,2 s. Rex +8% Schaden und greift sofort das Ziel der Schwarmhetze an.',
+f_s_woge:'Schwarmwoge: 250% Schaden, Gegner ringsum weit weggestoßen. Danach 2,3 s Schwarmwall, der Gegner zurückwirft (50% je Stoß).',
+f_s_macht:'12 s Riesenschwarm mit Krähen: Friedrich erleidet 20% weniger Schaden, jeder Treffer sticht nach (30% Chance umzuwerfen), alle 0,5 s stößt eine Krähe herab (310%).',
+f_f_draht:'Stolperdraht (230 Schritt) quer zur Zielrichtung, hält 25 s: bringt bis zu 3 Gegner zu Fall – je 200% Schaden, 1,3 s am Boden. Höchstens 3 Drähte.',
+f_f_kunde:'Fallen +5% Schaden. Wer in eine Falle gerät, bleibt 4 s gefangen und erleidet von Friedrich und Rex +8% Schaden. Ausgelöste Fallen spannen den Bogen halb für einen Volltreffer.',
+f_f_koeder:'Köder lockt Gegner bis 310 Schritt 3 s lang an, dann fällt ein Netz: 2,2 s gefangen (Bosse verlangsamt), 175% Schaden.',
+f_f_schlinge:'Auslöser: Gegner in der Nähe (höchstens alle 11,7 s, 80% Stärke) – Schlinge (30 s, höchstens 4): reißt Gegner 2,2 s kopfüber hoch (+30% erlittener Schaden), dann 300% beim Aufschlag. Bosse nur verlangsamt.',
+f_f_hinterhalt:'Alle 4,6 s treibt Rex einen Gegner nahe einer scharfen Falle hinein. Rex beißt Gefangene 15% härter.',
+f_f_spreng:'Pulvertopf (30 s, höchstens 2): Kommt ein Gegner nahe, 330% im Umkreis, Gegner fliegen weg; andere Sprengfallen gehen mit hoch.',
+f_f_revier:'Jagdrevier mit 6 Fallen, 18 s: Gegner darin −20% Tempo und +20% erlittener Schaden von Friedrich und Rex; Rex treibt alle 2 s einen Gegner in die Fallen.',
+f_sword:'Nahkampfhiebe +32% Schaden in weiterem Bogen. +3% Leben.',
+f_wolves:'2 Wölfe kämpfen 13 s mit, je 55% Schaden pro Biss.',
+f_t_adler:'Bogen spannt 10% schneller, Pfeile +4% Schaden, +2% Kritische Trefferchance.',
+f_t_faehrte:'+3% Lauftempo, Nahkampf +5% Schaden, +3% Leben.',
+/* ---- Ezekiel ---- */
+z_fan:'9 Dolche im Fächer, hin und zurück: je 110% Schaden pro Weg.',
+z_cleave:'Gefächerter Hieb vor Ezekiel: 265% Schaden und Rückstoß.',
+z_frenzy:'Auslöser: Kill (höchstens alle 23,4 s, 80% Stärke) – 6 s lang +48% Angriffstempo, +15% Lauftempo, +8% Lebensraub; Mitspieler in der Nähe +8% Lebensraub.',
+z_pact:'Unter 50% Leben (oder Mitspieler in der Nähe unter 30%): +3% Lebensraub, +6% Schaden, Treffer heilen den Mitspieler um 1,5% des Schadens. Einmal pro Stufe überlebt er einen tödlichen Treffer: 14% Leben, 1,5 s unverwundbar.',
+z_destroyer:'Kill: Zerstörer-Stapel (8 s, bis 10) je +0,8% Schaden, +1% Kritischer Schaden. Bei 10 Stapeln reißt der nächste Nahkampftreffer den Boden auf: 375% im weiten Umkreis.',
+z_smoke:'Rauchwolke (5 s): Ezekiel und Mitspieler darin unsichtbar, Gegner im Rauch treffen kaum. Erster Angriff aus dem Rauch +75% Schaden.',
+z_mark:'Auslöser: Gegner in Reichweite (höchstens alle 20,8 s, 80% Stärke) – stärkster Gegner erleidet +15% Schaden; nach 3 s explodiert das Mal: 38% des erlittenen Schadens + 460%.',
+z_assassin:'Nach einem Schattenschritt: nächster Treffer +50% Schaden. Tötet ein Schattenschritt, ist er nach 1 s wieder bereit.',
+z_d_griff:'Huscht 208 Schritt durch Gegner: 200% Schaden an allen auf dem Weg. Champions verlieren eine Eigenschaft (Ezekiel trägt sie kurz selbst), andere manchmal eine Münze.',
+z_d_finger:'+3% Angriffstempo. Normale Angriffe stehlen mit 4% Chance; eine Ausweichrolle an Gegnern vorbei bestiehlt bis zu zwei. Gestohlene Kräfte halten 8,6 s.',
+z_d_oel:'Auslöser: Gegner in Reichweite (höchstens alle 11,2 s, 80% Stärke) – Öllache −45% Tempo, dann 5 s Brand (insgesamt 370%, Gegner bleiben verlangsamt).',
+z_d_kraehe:'Rücksprung (kurz unverwundbar), Krähenfüße 5 s: −50% Tempo, insgesamt 310% Schaden.',
+z_d_hehler:'Bis zu 3 gestohlene Kräfte zugleich (statt 2), 10% stärker. Jede gestohlene Kraft lädt einen halben Darkin-Blutstropfen.',
+z_d_raub:'Enterhaken zieht den stärksten Gegner heran: 310% Schaden, 0,8 s Betäubung. Raubt Champions ALLE Eigenschaften, Bossen/Wächtern den Riesenzorn, anderen den Mumm. Jeder Darkin-Blutstropfen: +1 s Kraftdauer.',
+z_d_coup:'Huscht zu bis zu 7 Gegnern (je 440%, jeder bestohlen), dann 750% ringsum; gestohlene Kräfte +6 s. Dabei unverwundbar.',
+z_p_klage:'Geisterschädel: 250% Schaden, Heulen mit halber Stärke ringsum, springt weiter (60%). Mit Seele: springt auf drei Gegner über (verbraucht sie).',
+z_p_troph:'Stirbt ein Gegner nahe Ezekiel: 35% Chance auf seine Seele (Champions, Wächter, Bosse: immer). Bis 5 Seelen, je +1,4% Schaden.',
+z_p_gang:'3,3 s körperlos: +35% Lauftempo, 50% weniger erlittener Schaden; durchquerte Gegner erleiden 150% und sind 1 s verlangsamt.',
+z_p_wache:'Alle 3,6 s fängt eine Seele ein feindliches Geschoss ab und schleudert es auf den nächsten Gegner (125%). Die Seele bleibt.',
+z_p_ernte:'Alle Seelen (mindestens zwei Geister) stürzen sich auf Gegner: je 200% Schaden, heilen je 2% Leben. Abschluss: verbraucht Darkin-Blut.',
+z_p_schrei:'1500% Schaden ringsum, Gegner fliehen 2 s. Danach 10 s lang: Jeder Kill fängt eine Seele, bis zu 3 Seelen mehr, Treffer hallen nach (mindestens 30%).',
+z_t_scharf:'+3% Kritische Trefferchance, +5% Angriffstempo, normale Angriffe +4% Schaden.',
+z_t_lang:'+6% Gold, +2% Angriffstempo, +2% Lauftempo.',
+z_t_kaelte:'Fliehende Gegner erleiden 6% mehr Schaden von Ezekiel. +3% Leben.',
+z_t_meuchel:'+12% Rückenstich-Schaden, +2% Lauftempo.'
+};
+
+const TD_NUM=/\d+(?:[.,]\d+)?/g;
+function tdPlain(s){return String(s==null?'':s).replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim()}
+function tdEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function tdSplit(s){const c=[];s=s.replace(/\s*Schadensart:\s*([^.]+)\.?/g,(m,a)=>{c.push(a.trim());return''}).replace(/\s*\[([^\]]+)\]/g,(m,a)=>{c.push(a.trim());return''});return{t:s.trim(),c}}
+const TDC={};
+function tdComp(n){if(Object.prototype.hasOwnProperty.call(TDC,n.id))return TDC[n.id];let out=null;const tpl=TDK[n.id];
+ if(tpl){try{const N=tdSplit(tdPlain(n.d(1))).t.match(TD_NUM)||[],used=new Set(),parts=[];
+  tpl.split(/(\{\d+\}|\d+(?:[.,]\d+)?)/).forEach((x,i)=>{if(i%2===0){if(x)parts.push(x);return}
+   if(x[0]==='{'){const k=+x.slice(1,-1);used.add(k);parts.push({k});return}
+   let k=N.findIndex((v,j)=>v===x&&!used.has(j));if(k<0)k=N.indexOf(x);if(k<0){parts.push(x);return}used.add(k);parts.push({k})});
+  out={parts,cnt:N.length}}catch(e){out=null}}
+ return TDC[n.id]=out}
+/* Langtext zu lang und keine Vorlage: ganze Sätze bis ~170 Zeichen */
+function tdKuerze(t){if(t.length<=175)return t;let o='';for(const s of t.match(/[^.!?]+[.!?]+(\s|$)/g)||[t]){if((o+s).length>170&&o)break;o+=s}return o.trim()+(o.trim().length<t.length?' …':'')}
+function tdKurz(n,r){const sp=tdSplit(tdPlain(n.d(r))),C=tdComp(n);
+ if(C){const N=sp.t.match(TD_NUM)||[];if(N.length===C.cnt)return{t:C.parts.map(p=>typeof p==='string'?p:N[p.k]).join(''),c:sp.c}}
+ return{t:tdKuerze(sp.t),c:sp.c}}
+function tdLang(n,r){return tdSplit(tdPlain(n.d(r)))}
+/* dezente Hervorhebung: Zahlen (mit Vorzeichen und Einheit), Ressourcen/Zustände, Ziele */
+const TD_UNIT=/^(%|\s(?:s|Schritt|Rüstung|Reichweite)(?![\wäöüß]))/;
+const TD_KW=new RegExp('(?<![\\wäöüÄÖÜß-])('+['Kritische[rn]? Trefferchance','Kritische[rn]? Schaden','Fertigkeitsschaden','Rückenstich-Schaden','Blitzschaden','Schadens?','Schutzleben','Lebensraub','Lebens','Leben','Schild','Lauftempo','Angriffstempo','Bewegungstempo','Tempo','Abklingzeiten','Abklingzeit','Rüstung','Wirkungsbereich','Reichweite','Naturvorrat','Darkin-Blut(?:stropfen)?','Seelen?','Gold','Beute',
+ 'betäub(?:t|en)','Betäubung(?:en)?','gefesselt','Fesselung(?:en)?','fesseln','verlangsamt','fliehen','Flucht','geblendet','blendet','blenden','unverwundbar','unsichtbar','körperlos','befallen','Brand','Bewunderer[ns]?','Trugbild(?:er)?','heil(?:t|en)','Heilung'].join('|')+')(?![\\wäöüß])','g');
+const TD_ZIEL=/(?<![\wäöüÄÖÜß-])([Ee]r und (?:seine )?(?:Verbündete|Mitspieler)n?(?: in der Nähe)?|(?:Barradin|Echo|Friedrich|Ezekiel|Rex)(?: und (?:seine )?(?:Verbündete|Mitspieler)n?)?|Mitspieler(?:n)?(?: in der Nähe)?|Verbündete(?:n)?|(?:den |der )?stärkste[n]? Gegner|alle Gegner(?: ringsum| im Umkreis| in der Nähe)?)(?![\wäöüß])/g;
+const TD_AUS=/^(Auslöser:)/;
+function tdTxt(s){let h=tdEsc(s);h=h.replace(TD_AUS,'<span class="tdau">$1</span>');
+ /* Ziele zuerst markieren, dann Schlüsselwörter außerhalb von Markierungen */
+ h=h.replace(TD_ZIEL,'\u0001$1\u0002');
+ h=h.split(/(\u0001[^\u0002]*\u0002|<[^>]*>[^<]*<\/span>)/).map((x,i)=>i%2?x:x.replace(TD_KW,'<span class="tdk">$1</span>')).join('');
+ return h.replace(/\u0001([^\u0002]*)\u0002/g,'<span class="tdt">$1</span>')}
+/* a = Text, b = Text des nächsten Rangs (optional). Gleicher Aufbau → neue Zahlen grün dahinter; sonst null */
+function tdHtml(a,b){const A=a.split(/(\d+(?:[.,]\d+)?)/),B=b!=null?b.split(/(\d+(?:[.,]\d+)?)/):null;
+ if(B&&(A.length!==B.length||A.some((x,i)=>i%2===0&&x!==B[i])))return null;
+ let o='',pre=A[0],j=1;
+ const flush=(t)=>{o+=tdTxt(t)};
+ for(;j<A.length;j+=2){let sg='';const m=pre.match(/(^|[\s(])([+−-])$/);if(m){sg=m[2];pre=pre.slice(0,-1)}flush(pre);
+  let nx=A[j+1]||'';const u=nx.match(TD_UNIT),un=u?u[1].replace(' ','\u00a0'):'';if(u)nx=nx.slice(u[1].length);
+  const ch=B&&B[j]!==A[j];
+  o+=`<b class="tdz${ch?' tdch1':''}">${tdEsc(sg+A[j]+un)}</b>`+(ch?`<span class="tdup"> → ${tdEsc(B[j]+un)}</span>`:'');pre=nx}
+ flush(pre);return o}
+function tdChips(c){return c.length?' '+c.map(x=>`<span class="tdchip">${tdEsc(x)}</span>`).join(' '):''}
+/* Stapel aus jetzigem Text (A) und Vorschau (B) in derselben Zelle */
+function tdStack(f,n,r,cls){const lo=Math.max(1,r),a=f(n,lo),max=n.max||1;
+ const A=tdHtml(a.t)+tdChips(a.c);
+ if(!(r>0&&r<max))return`<div class="tdstk ${cls}"><div class="tdA">${A}</div></div>`;
+ const b=f(n,r+1);let B=tdHtml(a.t,b.t);
+ if(B==null){/* Aufbau weicht ab: kompakte Zeile nur mit den geänderten Zahlen */
+  const na=a.t.match(TD_NUM)||[],nb=b.t.match(TD_NUM)||[];let d='';
+  if(na.length===nb.length){d=na.map((x,i)=>x!==nb[i]?`${tdEsc(x)} → ${tdEsc(nb[i])}`:null).filter(Boolean).join(', ')}
+  B=tdHtml(a.t)+`<span class="tdnx"><b>Nächster Rang:</b> ${d||tdTxt(b.t)}</span>`}
+ B+=tdChips(b.c);
+ return`<div class="tdstk ${cls}"><div class="tdA">${A}</div><div class="tdB" aria-hidden="true">${B}</div></div>`}
+function tdHint(n,r){const max=n.max||1;if(r>=max)return'';
+ if(!r)return max>1?`<div class="tdxhint">Werte für Rang 1 · steigerbar bis Rang ${max}</div>`:'';
+ return`<div class="tdxhint">Rang ${r}/${max} · Werte für Rang ${r+1}: <span class="tdh-z">auf „Verbessern“ zeigen</span><span class="tdh-t">„Verbessern“ gedrückt halten</span></div>`}
+function tdTransform(root){const det=root.querySelector('.stdet');if(!det||!P||!P.hero)return false;const id=G.treeSel,n=id&&P.hero.tree.find(x=>x.id===id);if(!n)return false;
+ const r=rank(n.id);
+ const tds=det.querySelector('.tds');if(tds){tds.innerHTML=tdStack(tdKurz,n,r,'tdk0')+tdHint(n,r);tds.classList.add('tdsx')}
+ const more=det.querySelector('.tdmore');if(more){more.innerHTML=tdStack(tdLang,n,r,'tdl0')+tdHint(n,r);more.classList.add('tdsx')}
+ /* Abklingzeit im Kopf: ebenfalls gestapelt */
+ const eb=det.querySelector('.tdh .eyebrow');if(eb&&eb.querySelector('.v1')||eb&&n.a){try{const cd=k=>f1(n.cd(Math.max(1,k)));const a=cd(r);
+   const st=r>0&&r<n.max&&n.cd(r+1)!==n.cd(r)?`<span class="tdstk inl"><span class="tdA">${a} s</span><span class="tdB" aria-hidden="true">${a}<span class="tdup"> → ${cd(r+1)}</span> s</span></span>`:`${a} s`;
+   eb.innerHTML=`${tdEsc(stKind(n))} · ${n.a?st+' · ':''}Rang ${r}/${n.max}`}catch(e){}}
+ const lb=det.querySelector('[data-act="tree-learn"]');if(lb&&/ · 1 Punkt$/.test(lb.textContent)&&!lb.children.length)lb.innerHTML=tdEsc(lb.textContent.replace(/ · 1 Punkt$/,''))+'<span class="tdpk"> · 1 Punkt</span>';
+ const me=det.querySelector('.stme');if(me){const bb=me.querySelector('b');const rest=tdPlain(me.textContent.slice(bb?bb.textContent.length:0));if(bb&&rest)me.innerHTML=`${bb.outerHTML} <span class="tdmt">${tdTxt(rest)}</span>`}
+ /* Sterne: Kurztext auch im Tooltip */
+ root.querySelectorAll('.stmap .stn[data-id]').forEach(e=>{const x=P.hero.tree.find(y=>y.id===e.dataset.id);if(x)try{const k=tdKurz(x,Math.max(1,rank(x.id)));e.dataset.t=(k.t+(k.c.length?' ('+k.c.join(', ')+')':'')).slice(0,290)}catch(er){}});
+ return true}
+(()=>{try{const st=document.createElement('style');st.textContent=`
+.tdsx{color:#e6dccd}
+.tdstk{display:grid}.tdstk>*{grid-area:1/1;min-width:0}
+.tdstk.inl{display:inline-grid;vertical-align:top}.tdstk.inl>*{white-space:nowrap}
+.tdstk>.tdB{visibility:hidden}
+@media (hover:hover){.stdet:has([data-act="tree-learn"]:hover) .tdstk>.tdB{visibility:visible}.stdet:has([data-act="tree-learn"]:hover) .tdstk>.tdA{visibility:hidden}}
+.stdet:is(:has([data-act="tree-learn"]:focus-visible),:has([data-act="tree-learn"].padf),.tdupon) .tdstk>.tdB{visibility:visible}
+.stdet:is(:has([data-act="tree-learn"]:focus-visible),:has([data-act="tree-learn"].padf),.tdupon) .tdstk>.tdA{visibility:hidden}
+.tdz{color:#f6d68c;font-weight:700}
+.tdB .tdz.tdch1{color:#cfe9b8}
+.tdup{color:#7fe07a;font-weight:800;white-space:nowrap}
+.tdk{color:#f4e6cf;font-weight:600}
+.tdt{color:#f3b99c;font-weight:600}
+.tdau{color:#e8b56a;font-weight:700;font-variant:small-caps;letter-spacing:.02em}
+.tdchip{display:inline-block;font-size:.86em;line-height:1.25;padding:0 .45em;border-radius:.6em;border:1px solid color-mix(in srgb,var(--c,#e5b454) 45%,#5a4636);color:color-mix(in srgb,var(--c,#e5b454) 50%,#f1e2c8);background:color-mix(in srgb,var(--c,#e5b454) 12%,transparent);white-space:nowrap;vertical-align:.05em}
+.tdnx{display:block;margin-top:2px;color:#7fe07a}.tdnx b{color:#9fe69a}
+.tdxhint{margin-top:4px;font-size:13px;line-height:1.3;color:#a99a8b}
+.tdxhint .tdh-t{display:none}
+@media (hover:none){.tdxhint .tdh-z{display:none}.tdxhint .tdh-t{display:inline}}
+.tdmore.tdsx{font-size:14px;line-height:1.4}
+.stme{font-size:13px}.stme .tdmt{color:#cbbda9}
+.stdet [data-act="tree-learn"]{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.stfx.tdph .stside .sthead h2{display:none}
+.stfx.tdlow .stgrid{position:relative}.stfx.tdlow .stgrid>.stside{position:static!important}
+.stfx.tdlow .stside>.barrow{position:absolute!important;left:8px;bottom:8px;z-index:4;flex-direction:row!important;align-items:center!important;padding:4px 8px;border-radius:12px;background:rgba(20,14,22,.82);box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.stfx.tdlow .stside>.barrow>.eyebrow{display:none!important}
+.stfx.tdlow .stdet{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr);column-gap:8px;row-gap:4px}
+.stfx.tdlow .stdet>.tdh{grid-area:1/1;min-width:0}.stfx.tdlow .stdet>.row{grid-area:1/2;margin-top:0!important;align-self:center}.stfx.tdlow .stdet>.sttx{grid-area:2/1/3/3}.stfx.tdlow .stdet>.tdvid{display:none!important}
+.stfx.tdlow .stdet .tdpk{display:none}.stfx.tdlow .stdet .tdh{gap:6px}.stfx.tdlow .stdet .tdh .tdi{transform:scale(.62);margin:-7px}.stfx.tdlow .stdet .tdn{display:flex;align-items:baseline;gap:8px;min-width:0}
+.stfx.tdlow .stdet .tdn h3{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:min(100%,9em);flex:0 1 auto;margin:0}.stfx.tdlow .stdet .tdn .eyebrow{white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.stfx .stdet>.sttx.tdnohint .tdxhint,.stfx .stdet>.sttx.tdnohint .sthint{display:none}
+.stfx .stdet>.sttx.tdnome .stme .tdmt{display:none}.stfx .stdet>.sttx.tdnome .stme b::after{content:' · Wirkung unter „Details“';font-weight:400;color:#a99a8b}
+`;document.head.appendChild(st)}catch(e){}})();
+{const _ss=showScreen;showScreen=function(html){try{if(typeof html==='string'&&html.indexOf('stdet')>=0&&P&&P.hero&&G.overlay==='tree'){const t=document.createElement('template');t.innerHTML=html;if(tdTransform(t.content)){arguments[0]=t.innerHTML}}}catch(e){console.error('tdet',e)}return _ss.apply(this,arguments)}}
+/* Touch: „Verbessern“ gedrückt halten zeigt die Werte des nächsten Rangs (kurzes Antippen lernt wie bisher) */
+(()=>{let hold=null;const off=()=>{if(hold){clearTimeout(hold.t);hold.det&&hold.det.classList.remove('tdupon')}};
+ addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;const b=e.target&&e.target.closest&&e.target.closest('.stdet [data-act="tree-learn"]');if(!b)return;off();
+  const det=b.closest('.stdet');hold={b,det,held:false,t:setTimeout(()=>{if(hold&&hold.b===b){hold.held=true;det.classList.add('tdupon')}},280)}},true);
+ const up=e=>{if(!hold)return;const h=hold;off();if(h.held){hold={sup:Date.now()}}else hold=null};
+ addEventListener('pointerup',up,true);addEventListener('pointercancel',up,true);
+ addEventListener('click',e=>{if(hold&&hold.sup&&Date.now()-hold.sup<600&&e.target&&e.target.closest&&e.target.closest('[data-act="tree-learn"]')){e.stopPropagation();e.preventDefault();hold=null}},true);
+ addEventListener('contextmenu',e=>{if(e.target&&e.target.closest&&e.target.closest('.stdet [data-act="tree-learn"]'))e.preventDefault()},true)})();
+/* Einpassung: Kurztext nie kleiner als ~12 px; vorher fallen Hinweis, Ort-Zeile und Vorschau weg */
+function tdZoom(el){let z=1;for(let e=el;e&&e.nodeType===1;e=e.parentElement){const v=parseFloat(getComputedStyle(e).zoom);if(v>0)z*=v}return z}
+{const _f=stFxText;stFxText=function(box,inner,lo,alt){if(!inner.querySelector('.tdsx'))return _f.apply(this,arguments);
+  box.classList.remove('tdnohint','tdnome');const ez=tdZoom(box);
+  /* sehr kleine Fensterzoom-Stufe (z. B. vier Spalten): Grundschrift so anheben, dass sie effektiv ≥ 12 px bleibt */
+  inner.querySelectorAll('.tdsx').forEach(e=>{e.style.fontSize=14*ez<12.2?(12.2/ez).toFixed(2)+'px':''});
+  inner.querySelectorAll('.stme').forEach(e=>{e.style.fontSize=13*ez<12.2?(12.2/ez).toFixed(2)+'px':''});
+  let fs=parseFloat(getComputedStyle(inner.querySelector('.tdsx')).fontSize)||14;const mq=inner.querySelector('.stme');if(mq)fs=Math.min(fs,parseFloat(getComputedStyle(mq).fontSize)||fs);
+  const lo2=Math.min(1,Math.max(lo,12.2/(fs*ez)));let s=_f.call(this,box,inner,lo2,alt);
+  if(box.classList.contains('stclip')){box.classList.add('tdnohint');s=_f.call(this,box,inner,lo2,alt)}
+  if(box.classList.contains('stclip')){const h=box.closest('.stfx');if(h&&!h.classList.contains('stfnov')){h.classList.add('stfnov');s=_f.call(this,box,inner,lo2,alt)}}
+  /* Meisterschaft-Zeile: nur noch die Marke, Text unter „Details“ */
+  if(box.classList.contains('stclip')&&inner.querySelector('.stme .tdmt')){box.classList.add('tdnome');s=_f.call(this,box,inner,lo2,alt)}
+  if(box.classList.contains('stclip'))s=_f.call(this,box,inner,lo,alt);
+  return s}}
+
+/* Platz fürs Detailfeld auf kleinen Bildschirmen (nur von der Fenstergröße abhängig, nie vom Stern):
+   hochkant – Karte etwas flacher und ohne große Überschrift; flach quer – Seitenleiste breiter, Fähigkeitsleiste unten auf der Karte */
+{const _fit=stFxFit;stFxFit=function(h,w){h.classList.remove('tdlow','tdph');const st=w.style,sp=st.setProperty;
+ st.setProperty=function(k,v,pr){try{
+  if(k==='--stsw'){const H=parseFloat(st.height)||999,W=parseFloat(st.maxWidth)||999;if(h.classList.contains('stfrow')&&H<480){h.classList.add('tdlow');v=Math.round(W*0.5)+'px'}}
+  else if(k==='--stmh'){const W=parseFloat(st.maxWidth)||999,g=w.querySelector('.stgrid'),z=parseFloat(st.zoom)||1,gh=g?g.getBoundingClientRect().height/z:0;
+   if(W<620&&gh){h.classList.add('tdph');v=Math.round(Math.max(150,Math.min(parseFloat(v)||999,gh-465)))+'px'}}}catch(e){}
+  return sp.call(this,k,v,pr)};
+ try{return _fit.apply(this,arguments)}finally{delete st.setProperty;
+  /* zweiter Durchgang: die Aufteilung steht jetzt fest */
+  try{const tx=w.querySelector('.stdet>.sttx');if(tx&&tx.firstChild&&tx.querySelector('.tdsx'))stFxText(tx,tx.firstChild,0.74,'stnowo')}catch(e){}}}}
+
+/* Nach dem Zeichnen hängen andere Pakete noch Zeilen ins Detailfeld – danach den Text noch einmal einpassen */
+{const _rt=renderTree;renderTree=function(){const r=_rt.apply(this,arguments);try{const tx=scr&&scr.querySelector('.stfx .stdet>.sttx');if(tx&&tx.firstChild&&tx.querySelector('.tdsx'))stFxText(tx,tx.firstChild,0.74,'stnowo')}catch(e){}return r}}
+window.__hsTDET={TDK,tdComp,tdKurz,tdLang,tdHtml,tdSplit,tdPlain,TD_NUM,tdTransform,rank:id=>rank(id),refit:h=>mfFit(h||scr),fx:(b,i)=>stFxText(b,i,0.74,"stnowo")};
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
