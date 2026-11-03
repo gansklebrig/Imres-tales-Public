@@ -5198,7 +5198,7 @@ window.addEventListener('keydown',ev=>{if(ev.repeat&&!/^(Arrow|Key[WASD])/.test(
  if(G.state==='play'&&!G.overlay&&/^Shift/.test(ev.code)){keys[ev.code]=true;const now=performance.now();if(now-(G.shT||0)<280&&!G.paused)rollKey();G.shT=now}
  if(G.state==='play'&&!G.overlay&&!G.paused&&ev.code==='Space'&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(ev.target.tagName))){rollKey();ev.preventDefault()}
  if(G.state==='play'&&!G.overlay&&G.paused&&G.resumeT>0&&/^(Escape|KeyP|KeyI|KeyT)$/.test(ev.code)){G.paused=false;G.resumeT=0}
- if(G.state==='play'&&!G.paused){keys[ev.code]=true;const kq=G.mp&&NET.role!=='guest'?PL.find(q=>!q.dev||q.dev==='kb'):null,ki=kq?Math.max(0,PL.indexOf(kq)):0,kr=f=>kq&&kq!==P?withP(kq,f):f();if(/^Digit[1-6]$/.test(ev.code)){kr(()=>useSkill(+ev.code.slice(5)-1))}else if(ev.code==='KeyQ')kr(()=>usePotion());else if(ev.code==='KeyG')kr(()=>teamUlt());else if(ev.code==='KeyI')openOverlay('inv',ki);else if(ev.code==='KeyT')openOverlay('tree',ki);else if(ev.code==='Escape'||ev.code==='KeyP')openOverlay('pause',ki);
+ if(G.state==='play'&&!G.paused){keys[ev.code]=true;const kq=G.mp&&NET.role!=='guest'?PL.find(q=>!q.dev||q.dev==='kb'):null,ki=kq?Math.max(0,PL.indexOf(kq)):0,kr=f=>kq&&kq!==P?withP(kq,f):f();if(/^Digit[1-6]$/.test(ev.code)){kr(()=>useSkill(tlIdx(+ev.code.slice(5)-1)))}else if(ev.code==='KeyQ')kr(()=>usePotion());else if(ev.code==='KeyG')kr(()=>teamUlt());else if(ev.code==='KeyI')openOverlay('inv',ki);else if(ev.code==='KeyT')openOverlay('tree',ki);else if(ev.code==='Escape'||ev.code==='KeyP')openOverlay('pause',ki);
   if(/^Arrow/.test(ev.code))ev.preventDefault()}
  else if(G.paused&&G.overlay==='inv'&&G.invSel&&ev.code==='Escape'){G.invSel=null;renderInv(true)}
  else if(G.overlay&&G.state==='play'){if(ev.code==='Escape'||(ev.code==='KeyI'&&G.overlay==='inv')||(ev.code==='KeyT'&&G.overlay==='tree'))closeOverlay();else if(ev.code==='KeyI')switchOverlay('inv');else if(ev.code==='KeyT')switchOverlay('tree')}});
@@ -6580,7 +6580,7 @@ function padsOf(p){if(p.dev&&p.dev.indexOf('pad:')===0){const s=PADS.st[padIdx(p
 const dz=(x,y,d)=>{const m=Math.hypot(x,y);if(m<d)return[0,0];const k=Math.min(1,(m-d)/(1-d))/m;return[x*k,y*k]};
 function padMove(p){let x=0,y=0;for(const s of padsOf(p)){let[a,b]=dz(s.lx,s.ly,0.22);if(s.b[14])a=-1;if(s.b[15])a=1;if(s.b[12])b=-1;if(s.b[13])b=1;if(Math.abs(a)+Math.abs(b)>Math.abs(x)+Math.abs(y)){x=a;y=b}}return[x,y]}
 function padActions(p){const L=padsOf(p);if(!L.length)return;let sprAny=0,aimA=null;for(const s of L){const pr=s.pr;if(!G.mp&&(Math.hypot(s.lx,s.ly)>0.3||s.b[12]||s.b[13]||s.b[14]||s.b[15]))(PADS.used1=PADS.used1||{})[s.i]=1;
- for(let i=0;i<6;i++)if(padHit(s,'s'+(i+1)))useSkill(i);
+ for(let i=0;i<6;i++)if(padHit(s,'s'+(i+1)))useSkill(tlIdx(i));
  if(padHit(s,'pot'))usePotion();
  if(padSpr(s))sprAny=1;if(padHit(s,'spr')){const now=performance.now();if(now-(p.sprTap||0)<300)withP(p,()=>rollTry(p.lix||0,p.liy||0));p.sprTap=now}{const[rx,ry]=dz(s.rx,s.ry,0.4);if((rx||ry)&&aimA===null)aimA=Math.atan2(ry,rx)}
  const pi=Math.max(0,PL.indexOf(p));if(padHit(s,'pause')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('pause',pi);return}if(padHit(s,'inv')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('inv',pi);return}}
@@ -7146,7 +7146,7 @@ function netSample(){let ix=0,iy=0,spr=!!(keys.ShiftLeft||keys.ShiftRight)||NET.
   if(joy&&joy.on){const dx=joy.x-joy.ox,dy=joy.y-joy.oy,dd=Math.hypot(dx,dy);if(dd>6){const m=Math.min(1,dd/50);ix=dx/dd*m;iy=dy/dd*m}}
   for(const s of Object.values(PADS.st)){let[a,b]=dz(s.lx,s.ly,0.22);if(s.b[14])a=-1;if(s.b[15])a=1;if(s.b[12])b=-1;if(s.b[13])b=1;if(Math.abs(a)+Math.abs(b)>Math.abs(ix)+Math.abs(iy)){ix=a;iy=b;NET.localDev='pad:'+s.i}
    if(padSpr(s))spr=true;if(padHit(s,'spr')){const now=performance.now();if(now-(NET.sprTap||0)<300)netAct('roll');NET.sprTap=now}const[rx,ry]=dz(s.rx,s.ry,0.4);if(rx||ry)aim=Math.atan2(ry,rx);
-   for(let i=0;i<6;i++)if(padHit(s,'s'+(i+1)))useSkill(i);if(padHit(s,'pot'))netAct('pot');if(padHit(s,'ult'))netAct('ult');if(padHit(s,'pause')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('pause')}else if(padHit(s,'inv')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('inv')}}}
+   for(let i=0;i<6;i++)if(padHit(s,'s'+(i+1)))useSkill(tlIdx(i));if(padHit(s,'pot'))netAct('pot');if(padHit(s,'ult'))netAct('ult');if(padHit(s,'pause')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('pause')}else if(padHit(s,'inv')){s.pr=s.pr.map(()=>false);PADNAV.on=true;openOverlay('inv')}}}
  if(NET.mine)NET.mine.padAim=aim;
  const il=Math.hypot(ix,iy);if(il>1){ix/=il;iy/=il}if(ix||iy)NET.localDev=NET.localDev||'kb';
  if(SAVE.aim&&MOUSE.has&&(MOUSE.t||0)>=(PADS.t||0)&&aim===null&&NET.mine){const c=cursorW();cur=[Math.round(c.x),Math.round(c.y),MOUSE.down?1:0]}
@@ -15797,6 +15797,745 @@ NETPBL.add('gnEngX');NETPBL.add('gnEngY');
 for(const id in HEROES)for(const n of (HEROES[id].tree||[])){const el=GN_SKEL[n.id];if(!el||typeof n.d!=='function'||n.gnEl)continue;const d0=n.d;n.gnEl=el;n.d=function(r){return d0.apply(this,arguments)+` Schadensart: ${GN_EL[el].n}.`}}
 /* ---------- Testzugang ---------- */
 window.__hsG={GNF,GNT,GNA,GN_FOE,GN_GUARD,GN_SPEZ,BW,bestWissen,bestErlebt,gnSpezial,gnSpezRuf,gnStufe,gnGib,gnElHero,gnPRes,gnBossDir,gnWissenFuer,get GNE(){return GNE}};
+
+/* ================= Erfolge wie bei Steam (Paket „erfolge“) =================
+   Katalog ERF_DEFS (Bosse, Kampf, Beute, Wege & Schwierigkeiten, Hardcore, Gemeinsam, Erkundung, Helden, Kurioses),
+   Seltenheit Bronze/Silber/Gold/Platin, Zähl-Erfolge mit Fortschritt, geheime Erfolge („???“ bis freigeschaltet).
+   Spielstand: SAVE.erf = {u:{id:Unix-Sekunden}, z:{zähler:Zahl}, m:{liste:[schlüssel…]}} – kontoweit, nicht pro Lauf.
+   Erkennung nur über Haken/Hüllen (kill-Haken, hurt/hurtDot, spawnEnemy, bossDefeated/guardDefeated/gansBesiegt, enterPortal,
+   endRun, setFound, openChest, useShrine, enterSecret, chooseEvent, comboHit/teamKombo, setForm, bmZugabe, zmSetH, rareStart, sfx('scrap'))
+   und eine Prüfung je Sekunde (Stufe, Meisterschaft, Brückentalente, Ausrüstung, Wiederbelebungen, Gold). Nie im Bot-Modus.
+   Mehrspieler: lokale Spieler teilen den Spielstand. Online: der Gastgeber erkennt, Erfolge/Zähler eines Gast-Helden gehen
+   gebündelt als ['erf',…] an genau diesen Gast (NETFXF.erf), der sie in seinem eigenen Spielstand freischaltet.
+   Schnittstelle für andere Pakete:
+     erfolgMelde(id[,spieler])        – Erfolg sofort freischalten (Spieler = handelnder Held, Standard P; Gast → wird weitergeleitet)
+     erfolgZaehl(schluessel,n[,spieler]) – Zähler erhöhen (Zähl-Erfolge mit z:schluessel schalten bei ziel frei)
+     erfolgMax(schluessel,wert[,spieler]) / erfolgListe(schluessel,eintrag[,spieler]) – Bestwert / Sammlung
+     erfolgNeu({id,k,r,n,d,ic,z?,m?,ziel?,geheim?}) – eigenen Erfolg in den Katalog eintragen (vor dem ersten Melden)
+   Anzeige: Einblendung unten rechts (Handy: oben mittig), verzögert während eines Bosskampfs; Reiter „Erfolge“ im Titel/Lager.
+   Neue Namen: ERF, ERF_DEFS, ERF_RAR, ERF_KAT, ERF_GL, erf*, erfolg* · Testzugang window.__hsE */
+const ERF_RAR={b:{n:'Bronze',c:'#e0a070',c2:'#6e3a1c',g:'#ffcf9e'},s:{n:'Silber',c:'#e9e5df',c2:'#6f6a64',g:'#ffffff'},g:{n:'Gold',c:'#ffd45a',c2:'#8a5c10',g:'#fff1b0'},p:{n:'Platin',c:'#f3cfff',c2:'#7c3e9c',g:'#fff0ff'}};
+const ERF_KAT={boss:'Bosse',kampf:'Kampf',beute:'Beute',wege:'Wege',hc:'Hardcore',mp:'Gemeinsam',welt:'Erkundung',held:'Helden',kurios:'Kurioses'};
+const ERF={q:[],cur:null,curT:0,next:0,saveT:0,gold:null,seen:0,iv:0,f:'alle',kat:'alle'};
+const ERF_DEFS=[];const ERF_ID={};const ERF_BYZ={};const ERF_BYM={};
+function erfolgNeu(d){if(!d||!d.id||ERF_ID[d.id])return null;d.r=ERF_RAR[d.r]?d.r:'b';d.k=ERF_KAT[d.k]?d.k:'kurios';ERF_DEFS.push(d);ERF_ID[d.id]=d;
+ if(d.z)(ERF_BYZ[d.z]||(ERF_BYZ[d.z]=[])).push(d);if(d.m)(ERF_BYM[d.m]||(ERF_BYM[d.m]=[])).push(d);return d}
+(()=>{const A=(k,r,id,n,d,ic,x)=>erfolgNeu(Object.assign({k,r,id,n,d,ic},x||{}));
+ const nB=()=>new Set(CAMP_STAGES.filter(s=>s.boss).map(s=>s.boss)).size;
+ /* ---- Bosse & Wächter ---- */
+ A('boss','b','boss_goblinboss','Nestbeschmutzer','Den Goblin-Anführer in seinem eigenen Nest besiegt.','krone');
+ A('boss','b','boss_glasstab','Scherben bringen Glück','Glasstab besiegt. Das Labor braucht jetzt dringend einen Besen.','flasche');
+ A('boss','b','boss_bugbear','Fell über die Ohren','Den Bugbear hinter der Zugbrücke besiegt.','pranke');
+ A('boss','s','boss_schmiedewaechter','Ausgeschmiedet','Den Wächter der Schmiede besiegt.','amboss');
+ A('boss','s','boss_venomfang','Giftzahn gezogen','Venomfang besiegt – der Drache ist kleinlaut geworden.','tropfen');
+ A('boss','s','boss_ilvara','Keine Fesseln mehr','Ilvara besiegt.','spinne');
+ A('boss','s','boss_vrock','Federn gelassen','Den Vrock im Hof des Chaos besiegt.','feder');
+ A('boss','s','boss_wraith','Faden gerissen','Den Wraith besiegt.','geist');
+ A('boss','s','boss_erzpriesterin','Falsches Spiel','Die falsche Erzpriesterin entlarvt und besiegt.','auge');
+ A('boss','g','boss_demogorgon','Zwei Köpfe, kein Plan','Demogorgon überstanden – ob mit dem Boot oder mit den Fäusten.','hoerner');
+ A('boss','g','boss_riese','Größer ist nicht besser','Den rasenden Riesen zu Fall gebracht.','berg');
+ A('boss','g','boss_drokey','Geister ohne Anführer','Drokey in den Slums der Grauen Geister besiegt.','maske');
+ A('boss','g','boss_themberchaud','Drachentöter von Gracklstugh','Themberchaud in seinem Hort besiegt.','flamme');
+ A('boss','p','boss_almightygoose','HONK.','TheAlmightyGoose am Goldenen Teich besiegt. Sie hat es mit Würde getragen.','gans',{geheim:1});
+ A('boss','p','gott','Einen Gott geboxt','Demogorgon nicht nur überlebt, sondern tatsächlich besiegt.','faust',{geheim:1});
+ A('boss','p','alle_bosse','Bezwinger der Tiefe','Jeden Boss der Kampagne mindestens einmal besiegt.','totenkopf',{m:'bosse',ziel:nB});
+ A('boss','g','alle_waechter','Wächterschreck','Jeden Wächter der Kampagne mindestens einmal besiegt.','schwerter',{m:'waechter',ziel:()=>Object.keys(GUARDS).length});
+ A('boss','s','nodmg_boss','Unberührbar','Einen Boss besiegt, ohne seit seinem Erscheinen Schaden zu nehmen.','schildstern');
+ A('boss','p','nodmg_themb','Nicht mal angesengt','Themberchaud besiegt, ohne Schaden zu nehmen.','schildstern');
+ A('boss','p','nodmg_gans','Keine einzige Feder','TheAlmightyGoose besiegt, ohne Schaden zu nehmen.','schildstern',{geheim:1});
+ /* ---- Kampf ---- */
+ A('kampf','b','kills100','Aufgewärmt','100 Gegner besiegt.','schwert',{z:'kills',ziel:100});
+ A('kampf','s','kills1k','Alltag eines Helden','1.000 Gegner besiegt.','schwerter',{z:'kills',ziel:1000});
+ A('kampf','g','kills10k','Legende der Schänke','10.000 Gegner besiegt.','schwerter',{z:'kills',ziel:10000});
+ A('kampf','p','kills50k','Man singt Lieder über dich','50.000 Gegner besiegt. Barradin hat schon drei Strophen.','note',{z:'kills',ziel:50000});
+ A('kampf','b','k_goblin','Goblinplage','250 Goblins besiegt – Rädelsführer und Wolfsreiter inklusive.','totenkopf',{z:'k_goblin',ziel:250});
+ A('kampf','s','k_untot','Ruhe in Frieden','250 Skelette, Zombies und Schatten zurück in ihre Gräber geschickt.','geist',{z:'k_untot',ziel:250});
+ A('kampf','s','k_spinne','Kein Netz mehr','250 Spinnen und Ettercaps besiegt.','spinne',{z:'k_spinne',ziel:250});
+ A('kampf','b','k_gans','Gänsehaut','100 Gänse und Enten besiegt. Sie haben angefangen.','gans',{z:'k_gans',ziel:100});
+ A('kampf','b','streak25','Gemetzel!','25 Gegner in Folge besiegt.','blitz',{z:'streak',ziel:25,max:1});
+ A('kampf','s','streak100','Unaufhaltsam!','100 Gegner in Folge besiegt.','blitz',{z:'streak',ziel:100,max:1});
+ A('kampf','g','streak200','Legendär!','200 Gegner in Folge besiegt.','blitz',{z:'streak',ziel:200,max:1});
+ /* ---- Beute ---- */
+ A('beute','b','leg1','Orangefarbenes Leuchten','Den ersten legendären Gegenstand aufgehoben.','edelstein',{z:'leg',ziel:1});
+ A('beute','s','uralt','Älter als die Zwerge','Einen uralten Gegenstand gefunden.','edelstein');
+ A('beute','g','mythisch','Mythos zum Anfassen','Einen mythischen Gegenstand gefunden.','edelstein');
+ A('beute','g','hset','Garderobe komplett','Alle Teile eines Heldensets gesammelt – egal von welchem Helden.','ruestung');
+ A('beute','g','montur','Von Kopf bis Fuß','Ein vollständiges Set gleichzeitig getragen.','ruestung');
+ A('beute','p','sets_alle','Setsammler','Jedes Set der Sammlung vollständig gefunden.','ruestung',{z:'sets_voll',ziel:()=>Object.keys(SETS).length,max:1});
+ A('beute','g','schmied10','Meisterstück','Einen Gegenstand beim Schmied auf +10 gebracht.','amboss');
+ A('beute','b','schrott100','Schrotthändler','100-mal Gegenstände verschrottet.','muenze',{z:'schrott',ziel:100});
+ A('beute','b','gold5k','Klingende Taschen','5.000 Gold verdient.','muenze',{z:'gold',ziel:5000});
+ A('beute','g','gold1m','Drachenhort','1.000.000 Gold verdient.','muenze',{z:'gold',ziel:1000000});
+ /* ---- Wege & Schwierigkeiten ---- */
+ A('wege','b','stufe1','Der erste Schritt','Die erste Stufe geschafft.','portal');
+ A('wege','s','diff0','Imres Tales, Kapitel eins','Die Kampagne auf Normal beendet.','pokal');
+ A('wege','s','diff1','Aus dem Albtraum erwacht','Die Kampagne auf Albtraum beendet.','pokal');
+ A('wege','g','diff2','Durch die Hölle','Die Kampagne auf Hölle beendet.','pokal');
+ A('wege','g','diff3','Blick in den Abgrund','Die Kampagne auf Abgrund beendet.','pokal');
+ A('wege','p','diff4','Götterdämmerung','Die Kampagne auf Götterdämmerung beendet.','pokal');
+ A('wege','p','qual','Freiwillige Qual','Die Kampagne auf einer Qualstufe beendet.','flamme',{geheim:1});
+ A('wege','b','gefahr1','Lieber der steile Weg','Eine Stufe über den gefährlichen Weg geschafft.','portal',{z:'gefahr',ziel:1});
+ A('wege','s','gefahr10','Gefahr ist mein zweiter Vorname','10 gefährliche Wege geschafft.','portal',{z:'gefahr',ziel:10});
+ A('wege','s','tiefe10','Tiefer als der Brunnen','Im Endlosen Abstieg Ebene 10 geschafft.','treppe',{z:'tiefe',ziel:10,max:1});
+ A('wege','g','tiefe20','Im Bauch des Unterreichs','Im Endlosen Abstieg Ebene 20 geschafft.','treppe',{z:'tiefe',ziel:20,max:1});
+ A('wege','p','tiefe35','Kein Boden in Sicht','Im Endlosen Abstieg Ebene 35 geschafft.','treppe',{z:'tiefe',ziel:35,max:1});
+ A('wege','b','daily1','Heute schon gestürmt?','Eine Tägliche Herausforderung gespielt.','sonne');
+ A('wege','s','daily7','Gewohnheitstier','An 7 verschiedenen Tagen die Tägliche Herausforderung gespielt.','sonne',{z:'daily_tage',ziel:7,max:1});
+ A('wege','g','bossrausch','Rausch der Bosse','Den Boss-Rausch vollständig geschafft.','totenkopf');
+ /* ---- Hardcore ---- */
+ A('hc','b','hc_tod','Lehrgeld','Im Hardcore gefallen. Jeder große Held fängt einmal von vorne an.','herzbruch');
+ A('hc','s','hc10','Ohne Netz','10 Stufen im Hardcore überstanden.','flamme',{z:'hc_stufen',ziel:10});
+ A('hc','g','hc50','Doppelter Boden? Nie gehört','50 Stufen im Hardcore überstanden.','flamme',{z:'hc_stufen',ziel:50});
+ A('hc','s','hc_boss','Alles auf eine Karte','Einen Boss im Hardcore besiegt.','totenkopf');
+ A('hc','p','hc_sieg','Eisenhart','Die Kampagne im Hardcore in einem Lauf beendet.','pokal');
+ A('hc','s','nodmg_stufe','Keinen Kratzer','Eine ganze Stufe ohne Schaden geschafft.','schildstern');
+ A('hc','g','nodmg_ort','Wie aus dem Ei gepellt','Einen ganzen Ort der Kampagne ohne Schaden durchquert.','schildstern');
+ A('hc','p','nodmg_lauf','Der Unantastbare','Die ganze Kampagne in einem Lauf ohne einen einzigen Treffer beendet. Imre ist sprachlos.','schildstern');
+ /* ---- Gemeinsam ---- */
+ A('mp','b','mp_stufe','Gemeinsam stark','Im lokalen Mehrspieler eine Stufe geschafft.','gruppe');
+ A('mp','b','net_stufe','Über alle Berge','Online mit Freunden eine Stufe geschafft.','gruppe');
+ A('mp','s','mp_boss','Zusammen gegen den Boss','Gemeinsam einen Boss besiegt.','totenkopf');
+ A('mp','s','mp4','Volle Tafelrunde','Mit vier Helden gleichzeitig eine Stufe geschafft.','gruppe');
+ A('mp','b','kombo1','Eingespielt','Die erste Heldenkombo ausgelöst.','blitz',{z:'kombo',ziel:1});
+ A('mp','g','kombo_alle','Jeder mit jedem','Jede Heldenpaarung hat eine Kombo ausgelöst.','blitz',{m:'kombos',ziel:6});
+ A('mp','b','rev1','Steh auf!','Einen gefallenen Gefährten wieder auf die Beine gebracht.','herz',{z:'rev',ziel:1});
+ /* ---- Erkundung ---- */
+ A('welt','b','geheim1','Hinter der Wand','Den ersten Geheimraum betreten.','karte');
+ A('welt','g','geheim_alle','Kenner aller Kammern','Jede Art von Geheimraum betreten.','karte',{m:'raeume',ziel:()=>Object.keys(ROOMS).length});
+ A('welt','s','wuerfel25','Die Würfel sind gefallen','25 Würfelereignisse entschieden.','wuerfel',{z:'wuerfel',ziel:25});
+ A('welt','s','schreine','Pilger','Jede Art von Schrein benutzt.','schrein',{m:'schreine',ziel:()=>Object.keys(SHRINES).length});
+ A('welt','b','truhen25','Was ist da drin?','25 Truhen geöffnet.','truhe',{z:'truhen',ziel:25});
+ A('welt','b','mimic1','Das war keine Truhe','Von einem Mimic überrascht worden.','mimic',{geheim:1});
+ A('welt','s','karte80','Kartograph','Eine Stufe geschafft und dabei 80 % der Karte aufgedeckt.','karte',{z:'karte',ziel:80,max:1});
+ A('welt','g','selten_alle','Was war das denn?','Jedes seltene Ereignis erlebt (Goldregen, Riesen, Winzlinge, Gänsemarsch, Tanzfieber).','sonne',{m:'selten',ziel:()=>Object.keys(RARE).length});
+ /* ---- Helden ---- */
+ A('held','s','held_barradin','Zugabe für Barradin','Mit Barradin die Kampagne beendet.','note');
+ A('held','s','held_echo','Ruf der Wildnis','Mit Echo die Kampagne beendet.','baer');
+ A('held','s','held_friedrich','Friedrich und Rex','Mit Friedrich die Kampagne beendet.','pfote');
+ A('held','s','held_ezekiel','Aus den Schatten','Mit Ezekiel die Kampagne beendet.','dolch');
+ A('held','p','held_alle','Die ganze Gruppe','Mit allen vier Helden die Kampagne beendet.','gruppe',{m:'helden',ziel:4});
+ A('held','b','zugabe1','Zugabe!','Barradin hat das Publikum zur ersten Zugabe gebracht.','note',{z:'zugabe',ziel:1});
+ A('held','g','zugabe100','Stehende Ovationen','100 Zugaben mit Barradin.','note',{z:'zugabe',ziel:100});
+ A('held','b','baer25','Bärenstark','Echo hat sich 25-mal in einen Bären verwandelt.','baer',{z:'baer',ziel:25});
+ A('held','b','ratte','Klein, aber oho','Echo hat sich in eine Ratte verwandelt.','ratte');
+ A('held','b','rex25','Guter Junge!','Rex hat 25 Gegner erledigt.','pfote',{z:'rex',ziel:25});
+ A('held','g','rex1000','Der beste Hund von Faerûn','Rex hat 1.000 Gegner erledigt.','pfote',{z:'rex',ziel:1000});
+ A('held','s','haltung50','Haltungsfrage','Ezekiel hat 50-mal zwischen Darkin und Schatten gewechselt.','dolch',{z:'haltung',ziel:50});
+ A('held','g','lv150','Legende','Einen Helden auf Stufe 150 gebracht.','stern');
+ A('held','b','bruecke','Brückenbauer','Das erste Brückentalent im Sternbild gelernt.','bruecke');
+ A('held','s','meist','Meisterschaft','In einem Ast die Meisterschaft erreicht.','stern');
+ /* ---- Kurioses ---- */
+ A('kurios','b','goldgans','Die Gans, die goldene Eier legt','Eine Goldene Gans erwischt.','gans',{geheim:1});
+ A('kurios','b','tanz','Tanzfieber','Einmal mitten im Kampf das Tanzbein geschwungen.','note',{geheim:1});
+ A('kurios','b','fluch','Selbst schuld','Einen verfluchten Gegenstand angelegt.','herzbruch');
+ A('kurios','b','wagen','Vom Wagen gefallen','Gleich auf der ersten Stufe gefallen. Kann passieren.','herzbruch',{geheim:1});
+ A('kurios','g','erf60','Ruhmeshalle','60 Erfolge freigeschaltet.','pokal',{z:'erf_n',ziel:60,max:1});
+ A('kurios','p','erf_alle','Imres liebster Held','Alle anderen Erfolge freigeschaltet.','krone',{z:'erf_n',ziel:()=>ERF_DEFS.length-1,max:1});
+})();
+
+/* ---------- Spielstand ---------- */
+function erfFix(S){try{let E=S.erf;if(!isObj(E))E=S.erf={u:{},z:{},m:{}};for(const k of['u','z','m'])if(!isObj(E[k]))E[k]={};
+ for(const k in E.u){if(!/^[a-z0-9_]{1,40}$/.test(k))delete E.u[k];else E.u[k]=nInt(E.u[k],0,1e10,0)}
+ for(const k in E.z){if(!/^[a-z0-9_]{1,40}$/.test(k))delete E.z[k];else E.z[k]=nNum(E.z[k],0,1e12,0)}
+ for(const k in E.m){const L=E.m[k];if(!/^[a-z0-9_]{1,40}$/.test(k)||!Array.isArray(L))delete E.m[k];else E.m[k]=[...new Set(L.filter(x=>typeof x==='string'&&/^[A-Za-z0-9_:+-]{1,40}$/.test(x)))].slice(0,200)}}catch(e){S.erf={u:{},z:{},m:{}}}return S}
+{const f=saveFix;saveFix=function(S){const r=f.apply(this,arguments);return erfFix(r||S)}}
+erfFix(SAVE);
+function erfS(){if(!isObj(SAVE.erf))erfFix(SAVE);return SAVE.erf}
+function erfZiel(d){const z=typeof d.ziel==='function'?d.ziel():d.ziel;return Math.max(1,z||1)}
+function erfWert(d){const E=erfS();if(d.z)return E.z[d.z]||0;if(d.m)return(E.m[d.m]||[]).length;return E.u[d.id]?1:0}
+function erfAn(id){return!!erfS().u[id]}
+
+/* ---------- Melden (Gastgeber/Allein) und Weiterleiten an Online-Gäste ---------- */
+function erfGast(q){try{if(typeof NET==='undefined'||NET.role!=='host'||!q||!q.dev||!netIs(q.dev))return null;return NET.guests.find(g=>g.p===q&&!g.gone)||null}catch(e){return null}}
+function erfStumm(){return!G||G.bot}
+function erfGQ(g,a){(g.erfQ||(g.erfQ=[])).push(a);if(g.erfQ.length>60)erfFlush()}
+function erfolgMelde(id,q){if(erfStumm())return;if(q===undefined)q=P;const g=erfGast(q);if(g){erfGQ(g,['u',id]);return}erfFrei(id)}
+function erfolgZaehl(key,n,q){if(erfStumm()||!key)return;n=+n||1;if(q===undefined)q=P;const g=erfGast(q);if(g){const Z=g.erfZ||(g.erfZ={});Z[key]=(Z[key]||0)+n;return}
+ const E=erfS();E.z[key]=(E.z[key]||0)+n;erfPruefZ(key)}
+function erfolgMax(key,v,q){if(erfStumm()||!key||!(v>0))return;if(q===undefined)q=P;const g=erfGast(q);if(g){erfGQ(g,['x',key,Math.round(v)]);return}
+ const E=erfS();if(v>(E.z[key]||0)){E.z[key]=v;erfPruefZ(key)}}
+function erfolgListe(key,val,q){if(erfStumm()||!key||!val)return;if(q===undefined)q=P;const g=erfGast(q);if(g){erfGQ(g,['m',key,String(val)]);return}
+ const E=erfS(),L=E.m[key]||(E.m[key]=[]);val=String(val).slice(0,40);if(!L.includes(val)){L.push(val);for(const d of ERF_BYM[key]||[])if(L.length>=erfZiel(d))erfFrei(d.id)}}
+function erfPruefZ(key){const v=erfS().z[key]||0;for(const d of ERF_BYZ[key]||[])if(v>=erfZiel(d))erfFrei(d.id)}
+function erfFrei(id){const d=ERF_ID[id];if(!d)return false;const E=erfS();if(E.u[id])return false;E.u[id]=Math.floor(Date.now()/1000);
+ ERF.q.push(id);ERF.neu=(ERF.neu||0)+1;clearTimeout(ERF.saveT);ERF.saveT=setTimeout(()=>{try{if(!G.bot)persist()}catch(e){}},1500);
+ const n=Object.keys(E.u).length;if(n>(E.z.erf_n||0)){E.z.erf_n=n;erfPruefZ('erf_n')}erfPump();return true}
+/* Gastgeber: gesammelte Meldungen an die jeweiligen Gäste (gebündelt, zuverlässig) */
+function erfFlush(){try{if(typeof NET==='undefined'||NET.role!=='host')return;for(const g of NET.guests||[]){if(g.gone){g.erfQ=null;g.erfZ=null;continue}
+ const L=(g.erfQ||[]).map(a=>['erf'].concat(a));for(const k in g.erfZ||{})L.push(['erf','z',k,Math.round(g.erfZ[k]*100)/100]);g.erfQ=null;g.erfZ=null;if(L.length)netSendR(g.conn,{t:'r',L})}}catch(e){}}
+/* Gast: Meldung vom Gastgeber – nur bekannte Kennungen, Zahlen begrenzt */
+NETFXF.erf=function(k,a,b){if(G.bot)return;a=String(a||'');if(!/^[A-Za-z0-9_:+-]{1,40}$/.test(a))return;
+ if(k==='u'){if(ERF_ID[a])erfFrei(a);return}
+ if(k==='z'){if(!ERF_BYZ[a])return;const n=nNum(b,0,1e6,0);if(n>0){const E=erfS();E.z[a]=(E.z[a]||0)+n;erfPruefZ(a);ERF.gDirty=1}return}
+ if(k==='x'){if(!ERF_BYZ[a])return;const v=nNum(b,0,1e6,0);const E=erfS();if(v>(E.z[a]||0)){E.z[a]=v;erfPruefZ(a);ERF.gDirty=1}return}
+ if(k==='m'){const key=a,val=String(b||'');if(!ERF_BYM[key]||!/^[A-Za-z0-9_:+-]{1,40}$/.test(val))return;erfolgListe(key,val,null);ERF.gDirty=1}};
+
+/* ---------- Erkennung ---------- */
+const ERF_FAM=[['goblin',/^(goblin|wolfsreiter)/],['robe',/^(robe|adept|phiole)/],['untot',/^(skel|zombie|schatten|schemen)/],['spinne',/(spinne|^ettercap|^spinnchen)/],['kuo',/^kuo/],['duergar',/^(duergar|steinbrecher)/],['gans',/(gans|ente)$/]];
+function erfFam(id){if(!id)return null;const D=ERF.famC||(ERF.famC={});if(id in D)return D[id];let r=null;for(const[k,re]of ERF_FAM)if(re.test(id)){r=k;break}return D[id]=r}
+function erfFoeId(d){if(d.id)return d.id;if(!ERF.foeM){ERF.foeM=new Map();for(const k in FOES)ERF.foeM.set(FOES[k],k)}return ERF.foeM.get(d)||''}
+function erfHC(){return G.mode==='kampagne'&&!G.rl}
+function erfDefKey(e){const d=e&&e.def;if(!d)return'';if(d._erfK!==undefined)return d._erfK;let k='';try{k=Object.keys(BOSSES).find(x=>BOSSES[x]===d)||Object.keys(GUARDS).find(x=>GUARDS[x]===d)||''}catch(er){}
+ try{Object.defineProperty(d,'_erfK',{value:k,enumerable:false,writable:true})}catch(er){}return k}
+function erfAlle(){try{return mpL().filter(Boolean)}catch(e){return P?[P]:[]}}
+hook('kill',(e,o)=>{if(erfStumm()||G.netGuestRun||!e||!e.def)return;erfolgZaehl('kills',1);if(!e.boss&&!e.guard){const f=erfFam(erfFoeId(e.def));if(f)erfolgZaehl('k_'+f,1)}
+ if(e.champ)erfolgZaehl('champ',1);if(e.rare)erfolgZaehl('rare',1);if(e.goldGans||erfFoeId(e.def)==='goldgans')erfolgMelde('goldgans');if(e.def.k==='thief')erfolgMelde('dieb');
+ if(e.mimic)erfolgZaehl('mimic',1);if(erfFoeId(e.def)==='quietscheente')erfolgZaehl('ente',1);if(o&&o.rex&&P&&P.id==='friedrich')erfolgZaehl('rex',1);
+ if(P&&P.id==='ezekiel'&&P.st&&P.hp>0&&P.hp<P.st.maxHp*0.25)erfolgZaehl('zblut',1);if(G.cb>=25)erfolgMax('streak',G.cb)});
+hook('stage',i=>{if(!P)return;P.erfSH0=P.erfHitN||0;const S=STAGES[i];if(S&&P.erfOrt!==S.ort){P.erfOrt=S.ort;P.erfOH0=P.erfHitN||0}});
+/* Treffer zählen: nur wenn wirklich Leben verloren ging (Schilde, Ausweichen, Unverwundbarkeit zählen nicht) */
+{const f=hurt;hurt=function(){const q=P,h0=q?q.hp:0;const r=f.apply(this,arguments);if(q&&q.hp<h0-1e-6)q.erfHitN=(q.erfHitN||0)+1;return r}}
+{const f=hurtDot;hurtDot=function(){const q=P,h0=q?q.hp:0;const r=f.apply(this,arguments);if(q&&q.hp<h0-1e-6)q.erfHitN=(q.erfHitN||0)+1;return r}}
+{const f=spawnEnemy;spawnEnemy=function(def,x,y,o){const e=f.apply(this,arguments);try{if(e&&o&&(o.boss||o.guard)){const L=erfAlle();Object.defineProperty(e,'erfH0',{value:{pl:L,h:L.map(q=>q.erfHitN||0)},enumerable:false,writable:true})}}catch(er){}return e}}
+function erfBoss(e,art){if(erfStumm()||G.netGuestRun||!e)return;const key=erfDefKey(e),H=e.erfH0,L=erfAlle();
+ for(const q of L){const i=H?H.pl.indexOf(q):-1,clean=i>=0&&(q.erfHitN||0)===H.h[i]&&!q.down;
+  if(art==='guard'){erfolgMelde('guard1',q);if(key)erfolgListe('waechter',key,q);if(clean)erfolgZaehl('nodmg_guard',1,q);continue}
+  if(key&&ERF_ID['boss_'+key])erfolgMelde('boss_'+key,q);if(key)erfolgListe('bosse',key,q);if(key==='demogorgon')erfolgMelde('gott',q);
+  if(clean){erfolgMelde('nodmg_boss',q);if(key==='themberchaud')erfolgMelde('nodmg_themb',q);if(key==='almightygoose')erfolgMelde('nodmg_gans',q)}
+  if(erfHC())erfolgMelde('hc_boss',q);if(G.diff>=4)erfolgMelde('boss_gd',q);if(G.mp&&PL.length>=2)erfolgMelde('mp_boss',q)}erfFlush()}
+{const f=bossDefeated;bossDefeated=function(e){const r=f.apply(this,arguments);try{erfBoss(e,'boss')}catch(er){console.error('erf',er)}return r}}
+{const f=guardDefeated;guardDefeated=function(e){const r=f.apply(this,arguments);try{erfBoss(e,'guard')}catch(er){console.error('erf',er)}return r}}
+if(typeof gansBesiegt==='function'){const f=gansBesiegt;gansBesiegt=function(e){const r=f.apply(this,arguments);try{erfBoss(e,'boss')}catch(er){console.error('erf',er)}return r}}
+function erfKarte(){try{if(typeof WLMM==='undefined'||!WLMM.rev||!G.wl||!G.wl.an)return 0;const R=WLMM.rev;let n=0;for(let i=0;i<R.length;i++)n+=R[i];return Math.round(n/R.length*100)}catch(e){return 0}}
+function erfStufe(){if(erfStumm()||G.netGuestRun||G.state!=='play')return;const tag=(G.runId||'')+'|'+G.stage;if(G.erfStTag===tag)return;G.erfStTag=tag;
+ const S=STAGES[G.stage]||{},nx=STAGES[G.stage+1],ortEnde=G.mode==='kampagne'&&(!nx||nx.ort!==S.ort),kp=erfKarte(),L=erfAlle(),net=typeof NET!=='undefined'&&NET.role==='host'&&G.net;
+ for(const q of L){erfolgMelde('stufe1',q);const h=q.erfHitN||0;
+  if(h===(q.erfSH0||0)&&!q.down){erfolgMelde('nodmg_stufe',q);erfolgZaehl('nodmg_stufen',1,q)}
+  if(ortEnde&&q.erfOrt===S.ort&&h===(q.erfOH0||0)&&q.erfOH0!==undefined&&!G.erfCont)erfolgMelde('nodmg_ort',q);
+  if(G.gefahr)erfolgZaehl('gefahr',1,q);if(erfHC())erfolgZaehl('hc_stufen',1,q);
+  if(G.mode==='abstieg')erfolgMax('tiefe',S.depth||G.depth||0,q);
+  if(S.boss==='demogorgon'&&G.mode==='kampagne'){erfolgMelde('boss_demogorgon',q);erfolgListe('bosse','demogorgon',q)}
+  if(kp)erfolgMax('karte',kp,q);
+  if(G.mp&&PL.length>=2){if(net)erfolgMelde('net_stufe',q);else erfolgMelde('mp_stufe',q);if(PL.length>=4)erfolgMelde('mp4',q)}}
+ erfFlush()}
+{const f=enterPortal;enterPortal=function(){try{erfStufe()}catch(er){console.error('erf',er)}return f.apply(this,arguments)}}
+{const f=continueRun;continueRun=function(){const r=f.apply(this,arguments);try{if(G)G.erfCont=1}catch(e){}return r}}
+function erfEnde(win){if(erfStumm()||G.netGuestRun||G.state==='end')return;const L=erfAlle(),camp=G.mode==='kampagne';
+ for(const q of L){
+  if(win&&camp){erfolgMelde(G.diff>=5?'qual':'diff'+Math.max(0,Math.min(4,G.diff|0)),q);if(ERF_ID['held_'+q.id])erfolgMelde('held_'+q.id,q);erfolgListe('helden',q.id,q);
+   if(erfHC())erfolgMelde('hc_sieg',q);else erfolgMelde('rl_sieg',q);if(!G.erfCont&&!(q.erfHitN>0))erfolgMelde('nodmg_lauf',q)}
+  if(win&&G.mode==='bossrausch')erfolgMelde('bossrausch',q);
+  if(G.mode==='taeglich'){erfolgMelde('daily1',q);if(win)erfolgMelde('daily_sieg',q)}
+  if(!win){const tot=q.hp<=0||G.mp&&PL.every(x=>x.down||x.hp<=0);if(tot&&camp){if(erfHC())erfolgMelde('hc_tod',q);if(G.stage===0)erfolgMelde('wagen',q)}}}}
+{const f=endRun;endRun=function(win){try{erfEnde(win)}catch(er){console.error('erf',er)}const r=f.apply(this,arguments);
+ try{if(!erfStumm()&&!G.netGuestRun&&G.mode==='taeglich'&&isObj(SAVE.daily))erfolgMax('daily_tage',Object.keys(SAVE.daily).length,null);erfFlush()}catch(er){}return r}}
+{const f=setFound;setFound=function(it){const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun&&it){const q=P;
+ if(it.rar===4)erfolgZaehl('leg',1,q);if(it.anc===1)erfolgMelde('uralt',q);if(it.anc>=2){erfolgMelde('mythisch',q);erfolgMelde('uralt',q)}
+ if(it.set&&SETS[it.set]){erfolgMelde('set1',q);if(!erfGast(q))erfSets()}}}catch(er){console.error('erf',er)}return r}}
+function erfSets(){const F=SAVE.setsFound||{};let n=0;for(const id in SETS){const f=F[id]||[];if(f.length>=setSize(id)){n++;const h=SETS[id].hero;if(h)erfolgMelde('hset',null)}}erfolgMax('sets_voll',n,null)}
+{const f=openChest;openChest=function(p){const mim=p&&p.mimic&&!p.open;const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun){if(mim)erfolgMelde('mimic1');else if(p)erfolgZaehl('truhen',1)}}catch(er){}return r}}
+{const f=useShrine;useShrine=function(p){const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun&&p&&p.type)erfolgListe('schreine',p.type)}catch(er){}return r}}
+{const f=enterSecret;enterSecret=function(p){const r0=G.room;const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun&&G.room&&G.room!==r0){erfolgMelde('geheim1');if(G.room.type)erfolgListe('raeume',G.room.type)}}catch(er){}return r}}
+{const f=chooseEvent;chooseEvent=function(i){const E=G.ev;const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun&&E&&!E.erfC&&(E.res||G.ev!==E)){E.erfC=1;erfolgZaehl('wuerfel',1)}}catch(er){}return r}}
+{const f=comboHit;comboHit=function(e){const L0=e&&e.skHit,me=P,c0=me&&me.stCombo||0,c1=L0&&L0.p&&L0.p.stCombo||0;const r=f.apply(this,arguments);
+ try{if(!erfStumm()&&!G.netGuestRun&&me&&(me.stCombo||0)>c0&&L0&&L0.p){const k=comboKey(L0.p.id,me.id).replace(/[^a-z+]/g,'');for(const q of[me,L0.p]){erfolgZaehl('kombo',1,q);erfolgListe('kombos',k,q)}}}catch(er){}return r}}
+{const f=teamKombo;teamKombo=function(e,o){const k0=e&&e.kh,me=P,t0=G.kcd&&G.kcd.$;const r=f.apply(this,arguments);
+ try{if(!erfStumm()&&!G.netGuestRun&&G.kcd&&G.kcd.$!==t0&&k0&&k0.p&&me&&k0.p!==me){const k=comboKey(k0.p.id,me.id).replace(/[^a-z+]/g,'');for(const q of[me,k0.p]){erfolgZaehl('kombo',1,q);erfolgListe('kombos',k,q)}}}catch(er){}return r}}
+if(typeof setForm==='function'){const f=setForm;setForm=function(fm){const q=P,alt=q&&q.form;const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun&&q&&q.form!==alt){if(q.form==='bear')erfolgZaehl('baer',1,q);else if(q.form==='rat')erfolgMelde('ratte',q)}}catch(er){}return r}}
+if(typeof bmZugabe==='function'){const f=bmZugabe;bmZugabe=function(){const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun)erfolgZaehl('zugabe',1)}catch(er){}return r}}
+if(typeof zmSetH==='function'){const f=zmSetH;zmSetH=function(h){const alt=P&&P.zmH;const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun&&alt&&h&&alt!==h)erfolgZaehl('haltung',1)}catch(er){}return r}}
+if(typeof rareStart==='function'){const f=rareStart;rareStart=function(k){const r=f.apply(this,arguments);try{if(!erfStumm()&&!G.netGuestRun&&k){erfolgListe('selten',k,null);if(k==='tanz')erfolgMelde('tanz',null)}}catch(er){}return r}}
+{const f=sfx;sfx=function(n){if(n==='scrap'&&G&&!G.bot&&!G.netGuestRun)try{erfolgZaehl('schrott',1)}catch(er){}return f.apply(this,arguments)}}
+/* einmal je Sekunde: Zustände, die sich langsam ändern (keine Arbeit pro Bild) */
+function erfPeriodisch(){if(erfStumm()||G.netGuestRun)return;
+ if(ERF.gold==null)ERF.gold=SAVE.gold;else{const d=SAVE.gold-ERF.gold;ERF.gold=SAVE.gold;if(d>0&&d<1e9)erfolgZaehl('gold',d,null)}
+ if(G.state!=='play'&&G.state!=='between'&&G.state!=='camp')return;
+ for(const q of erfAlle()){if(!q.hero)continue;
+  if(q.level>=30)erfolgMelde('lv30',q);if(q.level>=150)erfolgMelde('lv150',q);
+  try{const B=q.hero.branches||[];for(let b=0;b<B.length;b++)if(astPunkte(b,q)>=MEIST_N){erfolgMelde('meist',q);erfolgListe('meist',(q.id+':'+b),q)}}catch(e){}
+  if(q.ranks)for(const k in q.ranks)if(k.indexOf('_st_')>0&&q.ranks[k]>0){erfolgMelde('bruecke',q);break}
+  const cnt={};for(const s in q.eq||{}){const it=q.eq[s];if(!it)continue;if(it.set&&SETS[it.set])cnt[it.set]=(cnt[it.set]||0)+1;if((it.up||0)>=10)erfolgMelde('schmied10',q);if(it.curse)erfolgMelde('fluch',q);
+   if(it.anc===1)erfolgMelde('uralt',q);if(it.anc>=2)erfolgMelde('mythisch',q)}
+  for(const s in cnt)if(cnt[s]>=setSize(s)){erfolgMelde('montur',q);break}
+  const rv=q.stRev||0,rv0=q.erfRev||0;if(rv>rv0){q.erfRev=rv;erfolgZaehl('rev',rv-rv0,q)}}
+ erfFlush()}
+hook('tick',()=>{const t=performance.now();if(t<ERF.next)return;ERF.next=t+1000;try{erfPeriodisch()}catch(e){console.error('erf',e)}});
+ERF.iv=setInterval(()=>{try{if(G.state!=='play'){ERF.gold=ERF.gold==null?SAVE.gold:ERF.gold;erfPeriodisch()}
+ if(ERF.gDirty&&!G.bot){ERF.gDirty=0;clearTimeout(ERF.saveT);ERF.saveT=setTimeout(()=>{try{persist()}catch(e){}},4000)}erfPump()}catch(e){}},1000);
+
+/* ---------- Symbole (SVG im Spielstil: Medaille je Seltenheit, Glyphe in der Mitte) ---------- */
+const ERF_D='#1a1218';
+const ERF_GL={
+ totenkopf:`<path d="M32 16c-8.3 0-13.5 5.6-13.5 12.8 0 4.1 1.9 7 4.6 8.7V43h4.2v-3h2.9v3h3.6v-3h2.9v3h4.2v-5.5c2.7-1.7 4.6-4.6 4.6-8.7C45.5 21.6 40.3 16 32 16z"/><circle cx="26.6" cy="29.6" r="3.4" fill="${ERF_D}"/><circle cx="37.4" cy="29.6" r="3.4" fill="${ERF_D}"/><path d="M32 32.6l-2.2 4h4.4z" fill="${ERF_D}"/>`,
+ krone:`<path d="M17 40l-2.5-18 9.5 7.5L32 18l8 11.5 9.5-7.5L47 40z"/><rect x="17" y="42" width="30" height="4.5" rx="1.5"/><circle cx="32" cy="33" r="2.6" fill="${ERF_D}"/>`,
+ schwert:`<path d="M32 11l3.4 4.5V34h-6.8V15.5z"/><rect x="23.5" y="34" width="17" height="3.6" rx="1.6"/><rect x="30.3" y="37.6" width="3.4" height="7.4"/><circle cx="32" cy="47.4" r="2.8"/>`,
+ schwerter:`<g transform="rotate(38 32 32)"><path d="M32 11l3 4V34h-6V15z"/><rect x="25" y="34" width="14" height="3.2" rx="1.4"/><rect x="30.5" y="37.2" width="3" height="7"/><circle cx="32" cy="46.6" r="2.5"/></g><g transform="rotate(-38 32 32)"><path d="M32 11l3 4V34h-6V15z"/><rect x="25" y="34" width="14" height="3.2" rx="1.4"/><rect x="30.5" y="37.2" width="3" height="7"/><circle cx="32" cy="46.6" r="2.5"/></g>`,
+ herz:`<path d="M32 47S16.5 37.6 16.5 27.6C16.5 22.4 20.4 19 25 19c3.1 0 5.6 1.6 7 4.1 1.4-2.5 3.9-4.1 7-4.1 4.6 0 8.5 3.4 8.5 8.6C47.5 37.6 32 47 32 47z"/>`,
+ herzbruch:`<path d="M32 47S16.5 37.6 16.5 27.6C16.5 22.4 20.4 19 25 19c3.1 0 5.6 1.6 7 4.1 1.4-2.5 3.9-4.1 7-4.1 4.6 0 8.5 3.4 8.5 8.6C47.5 37.6 32 47 32 47z"/><path fill="none" stroke="${ERF_D}" stroke-width="2.6" stroke-linejoin="round" d="M32 23.5l-3 6 5 4-4 5 2 7"/>`,
+ schildstern:`<path d="M32 14l14 5.4v9.4c0 9.6-6 16.4-14 20.2-8-3.8-14-10.6-14-20.2v-9.4z"/><path fill="${ERF_D}" d="M32 22.5l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z"/>`,
+ edelstein:`<path d="M22 19h20l7 9-17 20-17-20z"/><path fill="${ERF_D}" opacity=".38" d="M15 28h34L32 48z"/><path fill="#fff" opacity=".45" d="M24 21h7l-3 7h-7z"/>`,
+ ruestung:`<path d="M24 16l8 3 8-3 7 4-3 8-3-1v19H23V27l-3 1-3-8z"/><path fill="${ERF_D}" opacity=".4" d="M29 22h6v22h-6z"/>`,
+ truhe:`<path d="M16.5 29a7 7 0 017-7h17a7 7 0 017 7v1.5h-31z"/><rect x="16.5" y="32" width="31" height="14" rx="2.2"/><rect x="29.3" y="28" width="5.4" height="8" rx="1.2" fill="${ERF_D}"/>`,
+ mimic:`<path d="M16.5 28.5a8 8 0 018-8h15a8 8 0 018 8z"/><path d="M16.5 33.5h31v10a3 3 0 01-3 3h-25a3 3 0 01-3-3z"/><path fill="#fff" d="M18 28.6h28l-2.4 4.6-2.4-3.8-2.4 3.8-2.4-3.8-2.4 3.8-2.4-3.8-2.4 3.8-2.4-3.8-2.4 3.8-2.4-3.8z"/><circle cx="26" cy="24.6" r="1.8" fill="${ERF_D}"/><circle cx="38" cy="24.6" r="1.8" fill="${ERF_D}"/>`,
+ karte:`<path d="M15 21l10.5-3.2 13 3.2L49 17.8v25.4L38.5 46.4l-13-3.2L15 46.4z"/><path fill="none" stroke="${ERF_D}" stroke-width="1.9" stroke-dasharray="2.6 2.6" stroke-linecap="round" d="M20 39c4-6 9 1 13-5s7-4 8.5-8"/><path stroke="${ERF_D}" stroke-width="2.4" stroke-linecap="round" d="M39.5 22.5l5 5m0-5l-5 5"/>`,
+ portal:`<ellipse cx="32" cy="32" rx="11.5" ry="16" fill="none" stroke="currentColor" stroke-width="4.2"/><ellipse cx="32" cy="32" rx="5.2" ry="8.6"/>`,
+ flamme:`<path d="M32 13c2 7.5 11 10.5 11 21.2a11 11 0 01-22 0c0-5.4 3-8.6 5.4-10.6 0 3.2 1.1 5.4 3.2 6.4-1.1-6.4 0-11.6 2.4-17z"/><path fill="${ERF_D}" opacity=".35" d="M32 31c1 3.5 5 5 5 9a5 5 0 01-10 0c0-3 2.6-5 5-9z"/>`,
+ treppe:`<path d="M15 47v-6.5h7.4v-6.5h7.4v-6.5h7.4V21h7.4v-6.5H49V47z"/>`,
+ sonne:`<circle cx="32" cy="32" r="7.6"/><path stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M32 14v5.4M32 44.6V50M14 32h5.4M44.6 32H50M19.3 19.3l3.8 3.8M40.9 40.9l3.8 3.8M44.7 19.3l-3.8 3.8M23.1 40.9l-3.8 3.8"/>`,
+ muenze:`<circle cx="32" cy="32" r="14"/><circle cx="32" cy="32" r="10" fill="none" stroke="${ERF_D}" stroke-width="1.7" opacity=".45"/><path fill="${ERF_D}" opacity=".5" d="M32 24.5l2 5.5 5.5 2-5.5 2-2 5.5-2-5.5-5.5-2 5.5-2z"/>`,
+ gans:`<path d="M26 47c0-8.5 2.2-12.6 2.2-17.8 0-6.5 2.4-10.7 7.6-10.7 3.2 0 5.4 2.1 6 4.3l7 2.1-7 2.7c-1.1 2.2-3.2 3.3-5.4 3.8-1.1 4.3-1.1 9.7 0 15.6z"/><circle cx="37.3" cy="23.2" r="1.7" fill="${ERF_D}"/>`,
+ wuerfel:`<g transform="rotate(10 32 32)"><rect x="18.5" y="18.5" width="27" height="27" rx="5.5"/><g fill="${ERF_D}"><circle cx="25" cy="25" r="2.6"/><circle cx="39" cy="25" r="2.6"/><circle cx="32" cy="32" r="2.6"/><circle cx="25" cy="39" r="2.6"/><circle cx="39" cy="39" r="2.6"/></g></g>`,
+ schrein:`<path d="M21 47h22v-3.4H21zM23.5 43.6h3.4V25.5h-3.4zM30.3 43.6h3.4V25.5h-3.4zM37.1 43.6h3.4V25.5h-3.4zM20 24.5h24L32 15.5z"/>`,
+ stern:`<path d="M32 14l5.1 10.8 11.8 1.5-8.7 8.2 2.3 11.7L32 40.4l-10.5 5.8 2.3-11.7-8.7-8.2 11.8-1.5z"/>`,
+ bruecke:`<path d="M14 40.5h36V45H14z"/><path d="M16.5 40.5C16.5 31 23.5 24.5 32 24.5S47.5 31 47.5 40.5h-5.3C42.2 34.4 37.6 30 32 30s-10.2 4.4-10.2 10.5z"/><path d="M22 17.5l1.2 2.8 2.8 1.2-2.8 1.2L22 25.5l-1.2-2.8-2.8-1.2 2.8-1.2zM42 15.5l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1z"/>`,
+ pfote:`<ellipse cx="32" cy="38.5" rx="8.4" ry="7.4"/><ellipse cx="21.8" cy="29" rx="3.4" ry="4.5"/><ellipse cx="27.6" cy="22" rx="3.4" ry="4.5"/><ellipse cx="36.4" cy="22" rx="3.4" ry="4.5"/><ellipse cx="42.2" cy="29" rx="3.4" ry="4.5"/>`,
+ pranke:`<path d="M18 46c2-10 6-16 14-18 8 2 12 8 14 18z"/><path d="M20 30l-3-12 6 9zM27 26l-1-12 5 11zM37 25l1-12 4 12zM44 30l3-12-6 9z"/>`,
+ baer:`<circle cx="21.5" cy="20.5" r="5.4"/><circle cx="42.5" cy="20.5" r="5.4"/><ellipse cx="32" cy="32.5" rx="13.5" ry="12.5"/><ellipse cx="32" cy="38" rx="5.8" ry="4.3" fill="${ERF_D}" opacity=".45"/><circle cx="26.8" cy="29.5" r="1.8" fill="${ERF_D}"/><circle cx="37.2" cy="29.5" r="1.8" fill="${ERF_D}"/><ellipse cx="32" cy="35.6" rx="2.4" ry="1.6" fill="${ERF_D}"/>`,
+ ratte:`<path d="M15.5 40c0-7.5 6.4-12.5 14.5-12.5 3 0 5-3.2 8.4-3.2 4.2 0 7.4 3.1 7.4 6.2 0 1.6-.8 2.8-2.2 3.6l3 1.4-4 .9c-2 3.2-6.2 5.1-11.4 5.1H18.4c-1.8 0-2.9-.6-2.9-1.5z"/><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M16 40c-3 1-4 4-1.5 6"/><circle cx="40" cy="29.2" r="1.6" fill="${ERF_D}"/><circle cx="37.5" cy="25" r="2.6" fill="${ERF_D}" opacity=".35"/>`,
+ note:`<ellipse cx="23.5" cy="42.5" rx="5.4" ry="4.2" transform="rotate(-18 23.5 42.5)"/><ellipse cx="40.5" cy="38.5" rx="5.4" ry="4.2" transform="rotate(-18 40.5 38.5)"/><path d="M27.4 42V19.2l17-4.2V38h-3V20.2l-11 2.7V42z"/>`,
+ dolch:`<path d="M32 11l3.6 6.2V34h-7.2V17.2z"/><path d="M22.5 34h19v3.3h-19z"/><path d="M30 37.3h4v7h-4z"/><path d="M28.8 44.3h6.4L32 49.5z"/>`,
+ gruppe:`<circle cx="24.5" cy="23.5" r="5.4"/><circle cx="39.5" cy="23.5" r="5.4"/><path d="M14 45c0-7.6 4.8-11.8 10.5-11.8S35 37.4 35 45z"/><path d="M29 45c0-7.6 4.8-11.8 10.5-11.8S50 37.4 50 45z"/>`,
+ blitz:`<path d="M36 12L19.5 35.5h10.8L27 52l18-25.5H34.4z"/>`,
+ flasche:`<path d="M27.5 14h9v3.4h-1.4v8.4l9.4 15.4a4.4 4.4 0 01-3.8 6.6H23.3a4.4 4.4 0 01-3.8-6.6l9.4-15.4v-8.4h-1.4z"/><path fill="${ERF_D}" opacity=".4" d="M24 37h16l3 5a2 2 0 01-1.8 2.8H22.8A2 2 0 0121 42z"/>`,
+ amboss:`<path d="M16 25.5h25c0 4.4 3.3 6.6 8.5 6.6v3.4H38.2l2.2 6.6H23.6l2.2-6.6h-4.6c-2.6-3.3-5.2-6.6-5.2-10z"/><path d="M21 44.6h22V48H21z"/>`,
+ tropfen:`<path d="M32 13c5.5 8.6 12 15 12 22.6a12 12 0 01-24 0C20 28 26.5 21.6 32 13z"/><path fill="#fff" opacity=".4" d="M26 34a6 6 0 004 6.5c-4 .5-6.5-2.5-4-6.5z"/>`,
+ spinne:`<ellipse cx="32" cy="35.5" rx="6.6" ry="7.8"/><circle cx="32" cy="24.5" r="4.4"/><path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M27 30l-7.5-5.4-3 3.4M26.4 34.5h-9.4l-2 4.4M27 39l-7.5 4.4-1 4.6M37 30l7.5-5.4 3 3.4M37.6 34.5h9.4l2 4.4M37 39l7.5 4.4 1 4.6"/>`,
+ feder:`<path d="M46 14C31 16.5 21.5 27 20 45.5l3.2-1.2c2-6.4 6.4-9.6 11.6-11.8-3.2 0-6.4 0-8.6 1.2 3.2-3.2 7.4-5.4 11.8-6.4-3.2 0-6.4 0-8.6 1C34.8 24 40.4 19.5 46 14z"/>`,
+ geist:`<path d="M19.5 47V29a12.5 12.5 0 0125 0v18l-4.2-3.2-4.1 3.2-4.2-3.2-4.2 3.2-4.1-3.2z"/><circle cx="27.4" cy="30" r="2.6" fill="${ERF_D}"/><circle cx="36.6" cy="30" r="2.6" fill="${ERF_D}"/>`,
+ auge:`<path d="M13 32c5.3-8.5 11.7-12.8 19-12.8S45.7 23.5 51 32c-5.3 8.5-11.7 12.8-19 12.8S18.3 40.5 13 32z"/><circle cx="32" cy="32" r="6.6" fill="${ERF_D}"/><circle cx="34.2" cy="29.8" r="2.1"/>`,
+ berg:`<path d="M12 47l13.5-21 6.5 8.6 6.4-12.6L52 47z"/><path fill="#fff" opacity=".45" d="M38.4 22l3.4 6.6-3.4-1.6-2.2 2.6z"/>`,
+ maske:`<path d="M15.5 23.5c5.4-3.2 11.2-4.3 16.5-4.3s11.1 1.1 16.5 4.3c0 10.6-6.4 19-16.5 21.3-10.1-2.3-16.5-10.7-16.5-21.3z"/><path fill="${ERF_D}" d="M20.5 29c2.2-2.4 6.4-2.4 8.6 0-2.2 2.4-6.4 2.4-8.6 0zM34.9 29c2.2-2.4 6.4-2.4 8.6 0-2.2 2.4-6.4 2.4-8.6 0zM27 38.5c3.2 1.6 6.8 1.6 10 0-1 2.4-3 3.4-5 3.4s-4-1-5-3.4z"/>`,
+ hoerner:`<path d="M16.5 14.5c0 8.6 4.3 12.9 9.7 14l-1.1 4.2c-5.4-1.1-9.7-5.4-10.8-10.7zM47.5 14.5c0 8.6-4.3 12.9-9.7 14l1.1 4.2c5.4-1.1 9.7-5.4 10.8-10.7z"/><ellipse cx="32" cy="36" rx="10.8" ry="11.8"/><path fill="${ERF_D}" d="M25.5 33l5 2-5 2zM38.5 33l-5 2 5 2zM28 42c2.6 1.3 5.4 1.3 8 0l-1 2.4h-6z"/>`,
+ faust:`<path d="M19 30.5c0-2.4 1.8-4 4-4h2V24c0-2.2 1.8-4 4-4s4 1.8 4 4v.5c.7-.6 1.6-1 2.6-1 2.2 0 4 1.8 4 4v.6c.7-.4 1.4-.6 2.2-.6 2.2 0 3.8 1.8 3.8 4V38c0 6-4.5 10-11 10h-4c-6.6 0-11.6-4.4-11.6-11z"/><path fill="none" stroke="${ERF_D}" stroke-width="1.6" opacity=".55" d="M25 26.5v6M33 24.5v8M39.6 28v5"/>`,
+ pokal:`<path d="M21.5 15h21v8.6a10.5 10.5 0 01-21 0z"/><path fill="none" stroke="currentColor" stroke-width="3" d="M21.5 18.5h-4.3c0 5 2.4 8 5.6 8.4M42.5 18.5h4.3c0 5-2.4 8-5.6 8.4"/><path d="M29 33.5h6v6.2h4.4V44H24.6v-4.3H29z"/><rect x="22" y="44.5" width="20" height="3.6" rx="1.2"/>`,
+ frage:`<path fill="none" stroke="currentColor" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" d="M25.4 24.6a6.6 6.6 0 1113.2 0c0 4.6-6.6 5.4-6.6 10.6v1.6"/><circle cx="32" cy="44.6" r="3"/>`};
+ERF.svgN=0;
+function erfIcon(d,an,cls){const R=ERF_RAR[d.r],u=++ERF.svgN,gid='erg'+u,geheim=d.geheim&&!an;const gl=ERF_GL[geheim?'frage':d.ic]||ERF_GL.stern;
+ const rim=d.r==='p'?(()=>{let s='';for(let i=0;i<16;i++){const a=i/16*Math.PI*2,a1=a+Math.PI/16,r1=31.5,r0=26;s+=(i?'L':'M')+(32+Math.cos(a)*r1).toFixed(1)+' '+(32+Math.sin(a)*r1).toFixed(1)+'L'+(32+Math.cos(a1)*r0).toFixed(1)+' '+(32+Math.sin(a1)*r0).toFixed(1)}return`<path d="${s}Z" fill="url(#${gid}a)"/>`})()
+  :d.r==='g'?`<path d="M32 2.5l25.5 14.7v29.6L32 61.5 6.5 46.8V17.2z" fill="url(#${gid}a)"/>`
+  :d.r==='s'?`<circle cx="32" cy="32" r="29" fill="url(#${gid}a)"/><circle cx="32" cy="32" r="27" fill="none" stroke="${R.c2}" stroke-width="2.2" stroke-dasharray="3 3.1" opacity=".7"/>`
+  :`<circle cx="32" cy="32" r="28.5" fill="url(#${gid}a)"/>`;
+ return`<svg class="${cls||''}" viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="${gid}a" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="${R.g}"/><stop offset=".45" stop-color="${R.c}"/><stop offset="1" stop-color="${R.c2}"/></radialGradient>
+<radialGradient id="${gid}b" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="#3a2833"/><stop offset="1" stop-color="#140d12"/></radialGradient></defs>
+${rim}<circle cx="32" cy="32" r="${d.r==='p'?22.5:21.5}" fill="url(#${gid}b)" stroke="${R.c2}" stroke-width="1.6"/><circle cx="32" cy="32" r="${d.r==='p'?20.6:19.6}" fill="none" stroke="${R.c}" stroke-width=".9" opacity=".55"/>
+<g transform="translate(32 32) scale(.74) translate(-32 -33)"><g transform="translate(0 1.6)" fill="#000" opacity=".55">${gl.replace(/fill="[^"]*"/g,'').replace(/stroke="currentColor"/g,'stroke="#000"')}</g><g fill="${R.g}" stroke="none" color="${R.g}">${gl}</g></g>
+<path d="M14 20a20 20 0 0136-4" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".28"/></svg>`}
+
+/* ---------- Einblendung (Steam-artig) ---------- */
+(()=>{try{const st=document.createElement('style');st.textContent=`
+#erfPop{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(18px,calc(env(safe-area-inset-bottom,0px) + 18px));z-index:9500;pointer-events:none;
+ width:clamp(280px,31vh,600px);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:clamp(10px,1.2vh,20px);padding:clamp(10px,1.2vh,20px) clamp(14px,1.5vh,26px) clamp(10px,1.2vh,20px) clamp(10px,1.2vh,18px);
+ border-radius:clamp(12px,1.3vh,20px);background:linear-gradient(115deg,rgba(38,26,34,.97),rgba(18,12,17,.97) 60%);border:1px solid var(--ec,#e5b454);
+ box-shadow:0 0 0 1px rgba(0,0,0,.6),0 10px 40px rgba(0,0,0,.65),0 0 34px -6px var(--ec,#e5b454),inset 0 1px 0 rgba(255,255,255,.08);overflow:hidden;color:var(--text);font-family:var(--fb)}
+#erfPop.in{animation:erfIn .7s cubic-bezier(.2,1.4,.4,1) both}#erfPop.out{animation:erfOut .55s ease-in both}
+@keyframes erfIn{0%{transform:translateX(115%) scale(.92);opacity:0}100%{transform:none;opacity:1}}
+@keyframes erfOut{to{transform:translateY(30%) scale(.94);opacity:0}}
+#erfPop .erf-pi{width:clamp(56px,7.6vh,124px);height:clamp(56px,7.6vh,124px);position:relative}
+#erfPop .erf-pi svg{width:100%;height:100%;filter:drop-shadow(0 0 12px var(--ec));animation:erfIc 1.1s cubic-bezier(.2,1.6,.4,1) .15s both}
+@keyframes erfIc{0%{transform:scale(.2) rotate(-40deg);opacity:0}100%{transform:none;opacity:1}}
+#erfPop .erf-pi::after{content:'';position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,var(--ec) 0,transparent 62%);opacity:0;animation:erfBurst 1s ease-out .2s both;mix-blend-mode:screen}
+@keyframes erfBurst{0%{opacity:.85;transform:scale(.3)}100%{opacity:0;transform:scale(1.25)}}
+#erfPop .erf-pe{font-size:clamp(11px,1.15vh,19px);font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ec);opacity:.95}
+#erfPop .erf-pn{font-family:var(--fd);font-size:clamp(19px,2.25vh,38px);line-height:1.1;margin:2px 0 3px;color:#fff6e4;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+#erfPop .erf-pd{font-size:clamp(12.5px,1.4vh,22px);line-height:1.3;color:var(--mute)}
+#erfPop .erf-ps{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.16) 48%,transparent 60%);transform:translateX(-100%);animation:erfSh 1.4s ease-out .45s both}
+@keyframes erfSh{to{transform:translateX(100%)}}
+#erfPop .erf-pb{position:absolute;left:0;bottom:0;height:3px;background:var(--ec);opacity:.8;animation:erfT var(--edur,5s) linear both}
+@keyframes erfT{from{width:100%}to{width:0}}
+#erfPop.r-p{background:linear-gradient(115deg,rgba(48,28,52,.97),rgba(20,12,22,.97) 60%)}
+#erfPop.erf-r.in{animation-name:erfIn}
+@media (pointer:coarse),(max-width:700px){#erfPop{right:auto;left:50%;bottom:auto;top:max(10px,env(safe-area-inset-top,0px));width:min(92vw,400px);margin-left:calc(min(92vw,400px) / -2)}
+ @keyframes erfIn{0%{transform:translateY(-130%);opacity:0}100%{transform:none;opacity:1}}}
+@media (prefers-reduced-motion:reduce){#erfPop.in,#erfPop .erf-pi svg{animation:none}}
+/* ---- Reiter „Erfolge“ ---- */
+.erf-kopf{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 10px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(120deg,#22181f,#150f14);margin-bottom:8px}
+.erf-sum{display:flex;align-items:center;gap:10px;flex:1 1 260px;min-width:0}
+.erf-ring{width:54px;height:54px;position:relative;flex:none}.erf-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.erf-ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--fd);font-size:16px;color:var(--gold)}
+.erf-kt{font-family:var(--fd);font-size:19px;line-height:1.1}
+.erf-rs{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:4px}
+.erf-rs span{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--mute);font-variant-numeric:tabular-nums}.erf-rs i{width:9px;height:9px;border-radius:50%;background:var(--ec);box-shadow:0 0 6px var(--ec)}
+.erf-fil{display:flex;flex-wrap:wrap;gap:5px;align-items:center;flex:0 1 auto}
+.erf-fil .chip{padding:5px 10px;font-size:12.5px}
+.erf-fil .erf-kz{min-width:150px;text-align:left}
+.erf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px}
+.erf-c{all:unset;box-sizing:border-box;position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:12px;border:1px solid var(--line);background:radial-gradient(circle at 50% 40%,#2a1f28,#151015);cursor:pointer;min-width:0}
+.erf-c:focus-visible,.erf-c.padf,.erf-c.sel{outline:2px solid var(--gold);outline-offset:1px}
+.erf-c.on{border-color:color-mix(in srgb,var(--ec) 60%,var(--line));background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--ec) 22%,#2a1f28),#151015 75%);box-shadow:0 0 14px -6px var(--ec)}
+.erf-c svg{width:82%;height:82%;display:block}
+.erf-c.off svg{filter:grayscale(1) brightness(.48) contrast(.9);opacity:.8}
+.erf-c .erf-mb{position:absolute;left:12%;right:12%;bottom:6%;height:5px;border-radius:9px;background:#0d090c;border:1px solid #3a2d36;overflow:hidden}.erf-c .erf-mb i{display:block;height:100%;background:var(--ec)}
+.erf-c.neu::after{content:'';position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.erf-det{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;align-items:center;padding:8px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--ec,#e5b454) 45%,var(--line));background:linear-gradient(120deg,color-mix(in srgb,var(--ec,#e5b454) 10%,#1e161c),#141015 70%);margin-bottom:8px;height:86px;overflow:hidden}
+.erf-det .erf-di svg{width:58px;height:58px;display:block}.erf-det .erf-di.off svg{filter:grayscale(1) brightness(.5)}
+.erf-det .erf-n{font-weight:800;font-size:16px;line-height:1.15;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.erf-det .erf-d{font-size:13px;line-height:1.3;color:var(--mute);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.erf-det .erf-m{display:flex;align-items:center;gap:8px;margin-top:3px;font-size:12px;font-weight:700;color:var(--mute);font-variant-numeric:tabular-nums}
+.erf-det .erf-m em{font-style:normal;color:var(--ec);letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.erf-bar{flex:0 1 180px;height:7px;border-radius:9px;background:#0d090c;border:1px solid #3a2d36;overflow:hidden;min-width:40px}.erf-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ec),#fff3d0);border-radius:9px}
+.erf-leer{padding:20px;text-align:center;color:var(--mute)}
+@media (max-width:700px){.erf-grid{grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}.erf-kopf{padding:6px 8px;gap:6px 10px;margin-bottom:6px}.erf-ring{width:42px;height:42px}.erf-ring b{font-size:13px}.erf-kt{font-size:16px}
+ .erf-rs span{font-size:11px}.erf-fil .chip{padding:4px 8px;font-size:12px}.erf-fil .erf-kz{min-width:0}.erf-det{height:72px;grid-template-columns:46px minmax(0,1fr);gap:9px;padding:6px 9px;margin-bottom:6px}.erf-det .erf-di svg{width:46px;height:46px}.erf-det .erf-n{font-size:14.5px}.erf-det .erf-d{font-size:12px;-webkit-line-clamp:2}.erf-det .erf-m{font-size:11px}}
+@media (min-width:2200px) and (min-height:1100px){.erf-grid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}}
+`;document.head.appendChild(st)}catch(e){}})();
+SND.erfolg=()=>{const ok=['harfe_79','harfe_83','harfe_86','harfe_91'].map((n,i)=>smp(n,0.22,{d:i*0.07,len:1.2}))[0];smp('glock_96',0.16,{d:0.22,len:1.4});smp('glock_103',0.1,{d:0.3,len:1.2});
+ if(!ok)[659,784,988,1319].forEach((f,i)=>tone(f,0.3,'triangle',0.035,null,i*0.07));try{pad([392,493.9,587.3,784],1.6,0.025,0.04,2400)}catch(e){}};
+SND.erfolg_p=()=>{SND.erfolg();try{smp('glock_108',0.14,{d:0.5,len:1.6});smp('schelle1',0.14,{d:0.42,len:1})}catch(e){}};
+function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)return true}catch(e){}return false}
+function erfPump(){if(ERF.cur||!ERF.q.length)return;if(G&&G.bot){ERF.q.length=0;return}
+ const now=performance.now();if(erfWarten()){if(!ERF.waitT)ERF.waitT=now;if(now-ERF.waitT<40000){clearTimeout(ERF.pt);ERF.pt=setTimeout(erfPump,700);return}}ERF.waitT=0;
+ const id=ERF.q.shift(),d=ERF_ID[id];if(!d){erfPump();return}erfZeig(d)}
+function erfZeig(d,dur){const R=ERF_RAR[d.r];let el=document.getElementById('erfPop');if(el)el.remove();el=document.createElement('div');el.id='erfPop';el.className='r-'+d.r;el.setAttribute('role','status');el.setAttribute('aria-live','polite');
+ dur=dur||(d.r==='p'?6500:5200);el.style.setProperty('--ec',R.c);el.style.setProperty('--edur',dur/1000+'s');
+ el.innerHTML=`<div class="erf-pi">${erfIcon(d,true)}</div><div><div class="erf-pe">Erfolg freigeschaltet · ${R.n}</div><div class="erf-pn">${esc(d.n)}</div><div class="erf-pd">${esc(d.d)}</div></div><i class="erf-ps"></i><i class="erf-pb"></i>`;
+ try{if(G.state==='play'&&typeof hud!=='undefined'&&!hud.hidden){const mob=matchMedia('(pointer:coarse)').matches||innerWidth<=700;
+  if(mob)el.style.top='calc(env(safe-area-inset-top,0px) + 62px)';else{let t=Math.round(innerHeight*0.2);try{const bx=typeof wlMiniOrt==='function'&&G.wl&&G.wl.an&&SAVE.wlMini!==false?wlMiniOrt():null;if(bx)t=Math.round(bx.y+bx.S+14)}catch(e){}el.style.top=t+'px';el.style.bottom='auto';el.classList.add('erf-r')}}}catch(e){}
+ document.body.appendChild(el);void el.offsetWidth;el.classList.add('in');ERF.cur=el;try{sfx(d.r==='p'||d.r==='g'?'erfolg_p':'erfolg')}catch(e){}
+ setTimeout(()=>{el.classList.remove('in');el.classList.add('out');setTimeout(()=>{el.remove();if(ERF.cur===el)ERF.cur=null;setTimeout(erfPump,250)},560)},dur)}
+
+/* ---------- Reiter „Erfolge“ im Titel/Lager ---------- */
+function erfDatum(s){try{return new Date(s*1000).toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'numeric'})}catch(e){return''}}
+function erfHtml(){const E=erfS(),f=ERF.f,kat=ERF.kat,tot=ERF_DEFS.length,an=ERF_DEFS.filter(d=>E.u[d.id]).length,pc=Math.round(an/tot*100);
+ const rs=Object.keys(ERF_RAR).map(r=>{const L=ERF_DEFS.filter(d=>d.r===r);return`<span style="--ec:${ERF_RAR[r].c}"><i></i>${ERF_RAR[r].n} ${L.filter(d=>E.u[d.id]).length}/${L.length}</span>`}).join('');
+ const C=2*Math.PI*31;const ring=`<div class="erf-ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="31" fill="none" stroke="#2a1f27" stroke-width="7"/><circle cx="37" cy="37" r="31" fill="none" stroke="var(--gold)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C*an/tot).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${pc}%</b></div>`;
+ const chip=(v,t,cur,act)=>`<button class="chip ${cur===v?'on':''}" data-act="${act}" data-v="${v}" aria-pressed="${cur===v}">${t}</button>`;
+ const kats=Object.keys(ERF_KAT);const kn=kat==='alle'?'Alle Bereiche':ERF_KAT[kat];
+ const fil=`<div class="erf-fil">${chip('alle','Alle',f,'erf-f')}${chip('frei','Freigeschaltet',f,'erf-f')}${chip('offen','Offen',f,'erf-f')}<button class="chip erf-kz ${kat==='alle'?'':'on'}" data-act="erf-kz" title="Bereich wechseln">▸ ${esc(kn)}</button></div>`;
+ let L=ERF_DEFS.filter(d=>(kat==='alle'||d.k===kat)&&(f==='alle'||(f==='frei')===!!E.u[d.id]));
+ if(f!=='offen')L=L.slice().sort((a,b)=>(E.u[b.id]?1:0)-(E.u[a.id]?1:0)||(f==='frei'?(E.u[b.id]||0)-(E.u[a.id]||0):0));
+ const neuT=ERF.mark||0;
+ const cells=L.map(d=>{const on=!!E.u[d.id],sec=d.geheim&&!on,R=ERF_RAR[d.r],zl=erfZiel(d),v=Math.min(zl,erfWert(d)),prog=!on&&!sec&&zl>1&&v>0;
+  return`<button type="button" data-act="erf-c" data-id="${d.id}" class="erf-c ${on?'on':'off'}${on&&E.u[d.id]>neuT&&neuT?' neu':''}${ERF.sel===d.id?' sel':''}" style="--ec:${R.c}" aria-label="${esc(sec?'Geheimer Erfolg':d.n+(on?' – freigeschaltet':''))}">${erfIcon(d,on)}${prog?`<span class="erf-mb"><i style="width:${(v/zl*100).toFixed(1)}%"></i></span>`:''}</button>`}).join('');
+ if(!ERF_ID[ERF.sel]||!L.includes(ERF_ID[ERF.sel]))ERF.sel=(L.find(d=>E.u[d.id]&&E.u[d.id]>neuT&&neuT)||L[0]||{}).id;
+ return`<div class="erf-kopf mfpin"><div class="erf-sum">${ring}<div><div class="erf-kt">${an} von ${tot} Erfolgen</div><div class="erf-rs">${rs}</div></div></div>${fil}</div><div class="erf-det mfpin" style="--ec:${ERF_ID[ERF.sel]?ERF_RAR[ERF_ID[ERF.sel].r].c:'#e5b454'}">${erfDetHtml(ERF.sel)}</div><div class="erf-grid">${cells||'<div class="erf-leer">Hier ist noch nichts – auf ins Abenteuer!</div>'}</div>`}
+function erfDetHtml(id){const d=ERF_ID[id];if(!d)return'';const E=erfS(),on=!!E.u[d.id],sec=d.geheim&&!on,R=ERF_RAR[d.r],zl=erfZiel(d),v=Math.min(zl,erfWert(d)),prog=!on&&!sec&&zl>1;
+ return`<div class="erf-di ${on?'on':'off'}">${erfIcon(d,on)}</div><div style="min-width:0"><div class="erf-n">${sec?'???':esc(d.n)}</div><div class="erf-d">${sec?'Geheimer Erfolg – spiel weiter, um ihn zu entdecken.':esc(d.d)}</div>
+<div class="erf-m"><em>${R.n} · ${ERF_KAT[d.k]}</em>${on?`<span>freigeschaltet am ${erfDatum(E.u[d.id])}</span>`:prog?`<span class="erf-bar"><i style="width:${(v/zl*100).toFixed(1)}%"></i></span><span>${fmt(Math.floor(v))} / ${fmt(zl)}</span>`:`<span>${sec?'verborgen':'noch offen'}</span>`}</div></div>`}
+/* Auswahl ohne Neuaufbau: nur die Detailzeile tauschen (Höhe fest, Seiten bleiben) */
+function erfDet(id){const el=scr.querySelector('.erf-det');if(!el||!ERF_ID[id]||ERF.sel===id&&el.firstChild)return;ERF.sel=id;el.style.setProperty('--ec',ERF_RAR[ERF_ID[id].r].c);el.innerHTML=erfDetHtml(id);
+ scr.querySelectorAll('.erf-c.sel').forEach(x=>x.classList.remove('sel'));const c=scr.querySelector(`.erf-c[data-id="${id}"]`);if(c)c.classList.add('sel');try{if(MF.mo)MF.mo.takeRecords()}catch(e){}}
+document.addEventListener('mouseover',e=>{const b=e.target&&e.target.closest&&e.target.closest('.erf-c');if(b)erfDet(b.dataset.id)});
+document.addEventListener('focusin',e=>{const b=e.target&&e.target.closest&&e.target.closest('.erf-c');if(b)erfDet(b.dataset.id)});
+if(typeof padMark==='function'){const f=padMark;padMark=function(el){const r=f.apply(this,arguments);try{if(el&&el.classList&&el.classList.contains('erf-c'))erfDet(el.dataset.id)}catch(e){}return r}}
+function erfDivEnd(s,i){const re=/<\/?div\b/g;re.lastIndex=i;let d=0,m;while((m=re.exec(s))){if(m[0]==='<div')d++;else{d--;if(d===0){const e=s.indexOf('>',m.index);return e+1}}}return -1}
+function erfTitelHtml(h){try{if(typeof h!=='string')return h;const i=h.indexOf('data-act="tab" data-t="hilfe"');if(i<0)return h;const b=h.lastIndexOf('<button',i);if(b<0)return h;
+ const on=G.campTab==='erfolge';if(on&&ERF.lastTab!=='erfolge')ERF.mark=ERF.seen;ERF.lastTab=G.campTab;const E=erfS(),nNeu=Object.values(E.u).filter(t=>t>(ERF.seen||0)).length;
+ h=h.slice(0,b)+`<button role="tab" aria-selected="${on}" data-act="tab" data-t="erfolge">Erfolge${ERF.seen&&nNeu&&!on?'<b aria-label="Neue Erfolge"></b>':''}</button>`+h.slice(b);
+ if(on){const t=h.indexOf('<div class="tabbody">');const e=t<0?-1:erfDivEnd(h,t);if(e>0)h=h.slice(0,t)+`<div class="tabbody erf-body">${erfHtml()}</div>`+h.slice(e)}return h}catch(er){console.error('erf',er);return h}}
+{const f=showScreen;showScreen=function(html,cls){if(cls==='camp-scr'&&G&&G.state==='title'&&typeof html==='string'){html=erfTitelHtml(html);const r=f.apply(this,[html].concat([].slice.call(arguments,1)));
+  if(G.campTab==='erfolge'){const E=erfS();ERF.seenAlt=ERF.seen;ERF.seen=Math.max(ERF.seen||0,...Object.values(E.u),1)}return r}return f.apply(this,arguments)}}
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-act^="erf-"]');if(!b)return;e.stopImmediatePropagation();e.preventDefault();const a=b.dataset.act;
+ if(a==='erf-f')ERF.f=b.dataset.v;else if(a==='erf-k')ERF.kat=b.dataset.v;else if(a==='erf-c'){const d=ERF_ID[b.dataset.id];erfDet(b.dataset.id);if(d&&erfAn(d.id)&&!ERF.cur)erfZeig(d,3200);else try{sfx('ui')}catch(x){}return}else if(a==='erf-kz'){const K=['alle'].concat(Object.keys(ERF_KAT));ERF.kat=K[(K.indexOf(ERF.kat)+1)%K.length]}
+ try{sfx('ui')}catch(x){}try{MF.cache={}}catch(x){}const sig=typeof padSig==='function'?padSig(b):null;showTitle(true);
+ try{const n=sig&&[...scr.querySelectorAll('[data-act^="erf-"]')].find(x=>padSig(x)===sig);if(n){if(typeof PADNAV!=='undefined'&&PADNAV.on)padMark(n,true);else n.focus({preventScroll:true})}}catch(x){}},true);
+/* Spielstand-Start: ab jetzt neue Erfolge im Reiter markieren */
+ERF.seen=Math.max(1,...Object.values(erfS().u));
+window.erfolgMelde=erfolgMelde;window.erfolgZaehl=erfolgZaehl;
+window.__hsE={ERF,ERF_DEFS,ERF_ID,ERF_GL,melde:erfolgMelde,zaehl:erfolgZaehl,max:erfolgMax,liste:erfolgListe,frei:id=>erfFrei(id),zeig:(id,dur)=>erfZeig(ERF_ID[id],dur),
+ state:()=>JSON.parse(JSON.stringify(erfS())),reset:()=>{SAVE.erf={u:{},z:{},m:{}};ERF.q.length=0;ERF.seen=1},periodisch:erfPeriodisch,flush:erfFlush,icon:(id,an)=>erfIcon(ERF_ID[id],an),html:erfHtml,karte:erfKarte,
+ boss:(k,guard)=>{const D=guard?GUARDS[k]:BOSSES[k];const e=spawnEnemy(D,P.x+260,P.y,guard?{guard:1}:{boss:1});if(guard)G.guardE=e;else G.boss=e;return e},hurt:v=>hurt(v),hurtDot:v=>hurtDot(v)};
+
+/* ================= Talentbaum-Feinschliff (Paket „talent“) =================
+   1. Spitzentalente: Reihe 5 (ab Stufe 17) braucht 5, die Ulti (Reihe 6) 10 Punkte im eigenen Ast (ohne den Stern selbst).
+      Über Brücken kommt man so nur an die Zwischen-Sterne eines Nachbarasts.  tlNeed/tlHave/tlGateOk, prereq umhüllt.
+   2. Freier Startstern: Solange im Ast des Startsterns nichts weiter gelernt ist, lässt sich der kostenlose Startstern gegen
+      den Einstiegsstern jedes anderen Asts tauschen (tlSfFrei/tlSfOk/tlSfSet). Die Wahl gilt auch für die nächsten Läufe (hsave(id).sfWahl).
+   3. Leiste bearbeitbar: Fähigkeiten liegen auf festen Plätzen (P.slotOf = {id: Platz 0–5}); Plätze dürfen leer bleiben.
+      Legen, tauschen, entfernen per Klick (Platz wählen), Ziehen (Maus), Taste 1–6 bzw. Controller-Taste des Platzes.
+      tlNorm (Plätze ordnen), tlIdx (Taste/Platz → Fähigkeit), tlPut, tlRm. Vorliebe je Held: hsave(id).leiste.
+   4. Mehr Passive, weniger Aktive (Inhalte weiter unten, TLP / TLC). */
+const TL_GATE={4:5,5:10};
+function tlNd(id,q){q=q||P;return q&&q.hero?q.hero.tree.find(n=>n.id===id):null}
+function tlNeed(n){if(!n||n.br||!(n.b>=0))return 0;return TL_GATE[n.row]||0}
+function tlHave(n,q){q=q||P;return astPunkte(n.b,q)-((q.ranks&&q.ranks[n.id])||0)}
+function tlGateOk(n,q){const t=tlNeed(n);return !t||tlHave(n,q||P)>=t}
+{const _pr=prereq;prereq=function(n){if(!_pr.apply(this,arguments))return false;try{return tlGateOk(n)}catch(e){return true}}}
+
+/* ---------- Startstern ---------- */
+function tlSlotsN(q){return SLOTLV.filter(l=>q.level>=l).length}
+function tlSfFrei(q){q=q||P;if(!q||!q.hero||!q.ranks)return false;const n=tlNd(q.sf,q);if(!n||!(n.b>=0)||n.row!==0)return false;if((q.ranks[n.id]||0)!==1)return false;return astPunkte(n.b,q)===1}
+function tlSfOk(w,q){q=q||P;if(!tlSfFrei(q))return false;const n=tlNd(w,q),o=tlNd(q.sf,q);if(!n||!(n.b>=0)||n.row!==0||w===q.sf||(q.ranks[w]||0)>0)return false;
+ if(n.a&&!(o&&o.a)){const an=q.hero.tree.filter(x=>x.a&&(q.ranks[x.id]||0)>0).length;if(an+1>tlSlotsN(q))return false}return true}
+function tlSfSet(w,q,quiet){q=q||P;if(!tlSfOk(w,q))return false;const old=q.sf,n=tlNd(w,q),sl=q.slotOf&&q.slotOf[old];
+ delete q.ranks[old];q.ranks[w]=1;q.sf=w;q.learn=(q.learn||[]).filter(x=>x!==old);q.bar=(q.bar||[]).filter(x=>x!==old);if(q.slotOf)delete q.slotOf[old];if(q.use)delete q.use[old];
+ if(n.a){q.learn.unshift(w);if(q.bar.length<6){q.bar.push(w);if(Number.isInteger(sl)){q.slotOf=q.slotOf||{};q.slotOf[w]=sl}}}
+ if(!quiet){try{if(!netIs(q.dev)&&NET.role!=='guest'&&!G.bot){hsave(q.id).sfWahl=w;persist()}}catch(e){}withP(q,()=>{recalc();buildSkillBar()})}return true}
+{const _nh=newHero;newHero=function(id,diff){const r=_nh.apply(this,arguments);try{const w=hsave(id).sfWahl;if(typeof w==='string'&&P&&P.id===id&&w!==P.sf)tlSfSet(w,P,1)}catch(e){}return r}}
+
+/* ---------- Leiste: feste Plätze ---------- */
+function tlPref(q){try{if(!q||netIs(q.dev)||NET.role==='guest')return null;const L=hsave(q.id).leiste;return isObj(L)?L:null}catch(e){return null}}
+function tlPrefSave(q){try{if(!q||netIs(q.dev)||NET.role==='guest'||G.bot)return;hsave(q.id).leiste=Object.assign({},q.slotOf||{});persist()}catch(e){}}
+/* ordnet q.bar nach Plätzen (Reihenfolge = Platzreihenfolge) und vergibt fehlende Plätze (Vorliebe, sonst erster freier) */
+function tlNorm(q){q=q||P;if(!q||!q.hero)return null;const T=q.hero.tree,L=q.learn||[],isA=id=>{const n=T.find(x=>x.id===id);return!!n&&!!n.a&&!!n.cast};
+ const bar=(q.bar||[]).filter((id,i,a)=>typeof id==='string'&&a.indexOf(id)===i&&isA(id)&&L.includes(id)).slice(0,6);
+ const so=isObj(q.slotOf)?q.slotOf:{},pref=tlPref(q),used=[null,null,null,null,null,null],rest=[];
+ for(const id of bar){const s=so[id];if(Number.isInteger(s)&&s>=0&&s<6&&!used[s])used[s]=id;else rest.push(id)}
+ for(const id of rest){const p=pref&&pref[id];const s=Number.isInteger(p)&&p>=0&&p<6&&!used[p]?p:used.indexOf(null);if(s>=0)used[s]=id}
+ const o={};used.forEach((id,s)=>{if(id)o[id]=s});q.slotOf=o;q.bar=used.filter(Boolean);return used}
+function tlSlots(q){q=q||P;const u=[null,null,null,null,null,null];if(!q)return u;const so=isObj(q.slotOf)?q.slotOf:null;
+ (q.bar||[]).forEach((id,k)=>{const s=so&&Number.isInteger(so[id])?so[id]:k;if(s>=0&&s<6&&!u[s])u[s]=id});return u}
+const tlForm=q=>{try{return typeof emFormBar==='function'&&!!emFormBar(q)}catch(e){return false}};
+/* Taste/Controller-Platz j → Index in q.actives (−1 = Platz leer) */
+function tlIdx(j,q){q=q||P;try{if(!q||!isObj(q.slotOf)||!Array.isArray(q.actives)||tlForm(q))return j;for(let k=0;k<q.actives.length;k++){const n=q.actives[k];if(n&&q.slotOf[n.id]===j)return k}return-1}catch(e){return j}}
+function tlPut(id,j,q){q=q||P;const n=tlNd(id,q);if(!n||!n.a||!(q.ranks[id]>0)||!(j>=0&&j<6))return false;if(!q.learn.includes(id))q.learn.push(id);tlNorm(q);const so=q.slotOf,cur=so[id],occ=Object.keys(so).find(k=>so[k]===j);
+ if(occ===id)return false;
+ if(cur!=null){if(occ)so[occ]=cur;so[id]=j}
+ else{if(occ){q.bar=q.bar.filter(x=>x!==occ);delete so[occ]}if(q.bar.length>=6)return false;q.bar.push(id);so[id]=j}
+ tlNorm(q);tlPrefSave(q);withP(q,()=>buildSkillBar());return true}
+function tlRm(id,q){q=q||P;if(!(q.bar||[]).includes(id))return false;q.bar=q.bar.filter(x=>x!==id);if(q.slotOf)delete q.slotOf[id];tlNorm(q);tlPrefSave(q);withP(q,()=>buildSkillBar());return true}
+{const _b=buildSkillBar;buildSkillBar=function(){try{if(P&&P.hero&&NET.role!=='guest')tlNorm(P)}catch(e){}const r=_b.apply(this,arguments);
+ try{if(P&&P.skBtns&&P.skBtns.length&&!tlForm(P)){P.skBtns.forEach((b,k)=>{const n=P.actives[k],s=n&&isObj(P.slotOf)&&Number.isInteger(P.slotOf[n.id])?P.slotOf[n.id]:k;b.el.dataset.sl=s;const ky=b.el.querySelector('.key');if(ky)ky.textContent=skKey(s)});tbApply()}}catch(e){console.error('tl',e)}return r}}
+{const _tb=tbApply;tbApply=function(){const r=_tb.apply(this,arguments);try{const sk=$('skills');if(!sk)return r;const T=tbS(),L=!!T.left,side=L?'left':'right',pos=T.arc?SKARC:SKPOS;
+ sk.querySelectorAll('.sk[data-sl]').forEach(el=>{const p=pos[+el.dataset.sl]||[0,0];el.style[side]=p[0]+'px';el.style.bottom=p[1]+'px'})}catch(e){}return r}}
+/* Spielstände: Plätze mitspeichern (Einzellauf, Gruppenlauf) und Vorlieben im Heldenstand prüfen */
+{const _sr=saveRun;saveRun=function(){const r=_sr.apply(this,arguments);try{if(SAVE.run&&P&&SAVE.run.id===P.id&&isObj(P.slotOf)){const o=Object.assign({},P.slotOf);if(JSON.stringify(SAVE.run.slotOf)!==JSON.stringify(o)){SAVE.run.slotOf=o;persist()}}}catch(e){}return r}}
+{const _me=mprEntry;mprEntry=function(q){const e=_me.apply(this,arguments);try{if(e&&q&&isObj(q.slotOf))e.slotOf=Object.assign({},q.slotOf)}catch(x){}return e}}
+function tlSoFix(o,id){if(!isObj(o))return null;const T=HEROES[id]&&HEROES[id].tree;if(!T)return null;const r={},u=new Set();for(const k in o){const v=o[k];const n=T.find(x=>x.id===k);if(n&&n.a&&Number.isInteger(v)&&v>=0&&v<6&&!u.has(v)){r[k]=v;u.add(v)}}return r}
+{const _hf=heroFix;heroFix=function(x,id){const h=_hf.apply(this,arguments);try{if(h&&isObj(x)){const L=tlSoFix(x.leiste,id);if(L)h.leiste=L;const w=x.sfWahl,n=typeof w==='string'&&HEROES[id].tree.find(t=>t.id===w);if(n&&n.b>=0&&n.row===0)h.sfWahl=w}}catch(e){}return h}}
+{const _cr=continueRun;continueRun=function(){const so=SAVE.run&&SAVE.run.slotOf;const r=_cr.apply(this,arguments);try{if(P&&so&&SAVE.run&&SAVE.run.id===P.id){const o=tlSoFix(so,P.id);if(o){P.slotOf=o;buildSkillBar()}}}catch(e){}return r}}
+{const _ma=mprApply;mprApply=function(r,pre){const res=_ma.apply(this,arguments);try{const o=r&&tlSoFix(r.slotOf,P.id);if(o)P.slotOf=o}catch(e){}return res}}
+
+/* ---------- Spielstände bereinigen: umgewandelte Aktive, gesperrte Spitzentalente (Punkte zurück) ---------- */
+function tlBereinigen(q){q=q||P;if(!q||!q.hero||!q.ranks)return 0;const T=q.hero.tree;let back=0,names=[];
+ q.learn=(q.learn||[]).filter(id=>{const n=T.find(x=>x.id===id);return n&&n.a&&n.cast&&(q.ranks[id]||0)>0});q.bar=(q.bar||[]).filter(id=>q.learn.includes(id));
+ for(let guard=0;guard<12;guard++){const bad=T.find(n=>(q.ranks[n.id]||0)>0&&!tlGateOk(n,q)&&n.id!==q.sf);if(!bad)break;const v=q.ranks[bad.id];back+=v;names.push(bad.name);delete q.ranks[bad.id];
+  q.learn=q.learn.filter(x=>x!==bad.id);q.bar=q.bar.filter(x=>x!==bad.id);if(q.slotOf)delete q.slotOf[bad.id]}
+ if(back){q.sp=(q.sp||0)+back;if(!G.bot)setTimeout(()=>{try{toast(`${esc(q.hero.name)}: ${back} Talentpunkt${back>1?'e':''} zurück – ${esc(names.join(' und '))} ${names.length>1?'brauchen':'braucht'} jetzt mehr Punkte im eigenen Ast. Neu verteilen!`,HCOL[q.id]||'#e5b454')}catch(e){}},1400)}
+ return back}
+/* Brückensterne (b:-1) gehören zu keinem Ast – die alte Astbereinigung hielt sie für „abgelegt“ und erstattete sie bei jedem Laden. */
+let TL_AB=0;{const _ae=aeste;aeste=function(q){const a=_ae.apply(this,arguments);return TL_AB&&Array.isArray(a)&&!a.includes(-1)?a.concat([-1]):a}}
+{const _ab=astBereinigen;astBereinigen=function(q){let r;TL_AB=1;try{r=_ab.apply(this,arguments)}finally{TL_AB=0}let b=0;try{b=tlBereinigen(q||P)}catch(e){console.error('tl',e)}return(r||0)+b}}
+
+/* ---------- Bot: Startstern passend zum Build ---------- */
+{const _bl=botLearn;botLearn=function(){try{if(G.bot&&P&&!P.tlBotSf){P.tlBotSf=1;const mode=String(window.__stb||P.stBot||'mix'),O=(ST_ORD[P.id]||[0,1,2,3,4]);let b=null;
+  if(window.__tlSf!=null)b=+window.__tlSf;else if(/^ast:\d$/.test(mode))b=+mode.slice(4);else if(mode==='rand'&&Math.random()<0.6)b=O[Math.floor(Math.random()*O.length)];
+  if(b!=null){const w=P.hero.tree.find(n=>n.b===b&&n.row===0);if(w&&w.id!==P.sf)tlSfSet(w.id,P,1),withP(P,()=>{recalc();buildSkillBar()})}}}catch(e){console.error('tl',e)}return _bl.apply(this,arguments)}}
+
+/* Heldenauswahl/Lager: gewählten Startstern nennen */
+{const _aw=astWahlHtml;astWahlHtml=function(id,ctx){const h=_aw.apply(this,arguments);try{if(!h)return h;const H=HEROES[id];let w=null;try{w=hsave(id).sfWahl}catch(e){}const n=H.tree.find(t=>t.id===(w||H.sig))||H.tree.find(t=>t.id===H.sig);if(!n)return h;
+ return h.replace(/<\/div><\/div>$/,` Startstern: <b style="color:${stCol(id,n.b)}">${esc(n.name)}</b> – im Sternbild frei wählbar, solange in seinem Ast nichts weiter gelernt ist.</div></div>`)}catch(e){return h}}}
+/* ---------- Online: neue Klicks ändern nur die eigenen Sachen ---------- */
+const TL_ED=/^(bar-put|bar-rm|bar-pick|tl-start)$/;
+{const _et=netEditTgt;netEditTgt=function(a,b){if(TL_ED.test(a))return P;return _et.apply(this,arguments)}}
+
+/* ---------- Talentfenster: Sperren, Startstern, Leiste (Nachbearbeitung der Sternbild-Ansicht) ---------- */
+function tlOwn(){try{return netMayEdit(P)}catch(e){return true}}
+function tlSelA(){const n=tlNd(G.treeSel);return n&&n.a&&n.cast&&rank(n.id)>0&&!tlForm(P)?n:null}
+function tlDeco(){const m=scr&&scr.querySelector('.stmap');if(!m||!P||!P.hero)return;const H=P.hero,own=tlOwn(),sel=tlNd(G.treeSel);
+ /* Sterne: gesperrte Spitzentalente, Startstern */
+ const frei=own&&tlSfFrei(P);
+ for(const el of m.querySelectorAll('.stn[data-id]')){const n=tlNd(el.dataset.id);if(!n)continue;const t=tlNeed(n),r=rank(n.id);
+  if(t&&!r&&!tlGateOk(n)){el.classList.add('tlgate');el.classList.remove('can');el.insertAdjacentHTML('beforeend',`<span class="tllk" title="Spitzentalent"><i></i>${Math.max(0,tlHave(n))}/${t}</span>`)}
+  if(frei&&n.id===P.sf){el.classList.add('tlsf');el.insertAdjacentHTML('beforeend','<span class="tlsfb">Start</span>')}
+  else if(frei&&tlSfOk(n.id,P))el.classList.add('tlsfc')}
+ /* Detail */
+ const det=scr.querySelector('.stdet');if(det&&sel){const row=det.querySelector(':scope > .row');let add='';
+  const t=tlNeed(sel);if(t){const hv=Math.max(0,tlHave(sel)),ok=hv>=t;add+=`<div class="tlgl ${ok?'ok':'bad'}" title="Spitzentalent: braucht genug Punkte im eigenen Ast"><b>${ok?'✓':'🔒'}</b> Benötigt ${t} Punkte in <b style="color:${stCol(P.id,sel.b)}">${esc(H.branches[sel.b])}</b> – ${hv}/${t}</div>`}
+  if(own&&sel.id===P.sf&&frei)add+=`<div class="tlsfl" title="Solange du in seinem Ast nichts weiter lernst, kannst du ihn gegen den Einstiegsstern eines anderen Asts tauschen."><b>Kostenloser Startstern</b> – noch frei tauschbar</div>`;
+  else if(own&&tlSfOk(sel.id,P))add+=`<div class="tlsfl" title="Tauscht ${esc((tlNd(P.sf)||{}).name||'')} kostenlos gegen ${esc(sel.name)}.">Als <b>Startstern</b> frei wählbar (statt ${esc((tlNd(P.sf)||{}).name||'')})</div>`;
+  if(add){const d=document.createElement('div');d.className='tlinfo';d.innerHTML=add;if(row)det.insertBefore(d,row);else det.appendChild(d)}
+  /* alte Leisten-Hinweise ersetzen */
+  for(const x of det.querySelectorAll(':scope > div.muted'))if(/^Platz \d/.test(x.textContent.trim()))x.remove();
+  const bp=det.querySelector('.barpick');if(bp)bp.remove();
+  const selA=tlSelA(),pick=own&&G.barPick&&tlNd(G.barPick);
+  if(row&&own&&tlSfOk(sel.id,P))row.insertAdjacentHTML('afterbegin',`<button class="btn gold" data-act="tl-start">Als Startstern wählen</button>`);
+  if(row&&own&&selA&&!pick){const inB=P.bar.includes(selA.id),tb=row.querySelector('[data-act="tree-bar"]')||row.querySelector('[data-act="tree-learn"]');tb.insertAdjacentHTML('afterend',`<button class="btn small tlbb" data-act="bar-pick" title="Platz in der Leiste ändern – danach Platz antippen oder seine Taste drücken (Controller: X)">⇄ Platz</button>${inB?'<button class="btn small tlbb" data-act="bar-rm" title="Aus der Leiste nehmen">✕ Leiste</button>':''}`)}
+  if(pick){det.classList.add('tlpk');const n=pick,full=!P.bar.includes(n.id)&&P.bar.length>=6;const p=document.createElement('div');p.className='barpick tlpickp';
+   p.innerHTML=`<div style="font-weight:800">${full?`Die Leiste ist voll – welchen Platz soll ${esc(n.name)} bekommen?`:`Neuer Platz für ${esc(n.name)}`}</div><div class="muted" style="font-size:12.5px">Platz in der Leiste antippen oder seine Taste drücken (${tlKeysTxt()}).${full?' Die Fähigkeit dort verlässt die Leiste.':''}</div><div class="row">${P.bar.includes(n.id)?'<button class="btn small" data-act="bar-rm">Aus der Leiste</button>':''}<button class="btn small" data-act="bar-cancel">${full?'Nicht in die Leiste':'Abbrechen'}</button></div>`;
+   if(row)det.insertBefore(p,row.nextSibling);else det.appendChild(p)}}
+ /* Leiste: feste Plätze, leere Plätze, Ziel-Modus */
+ const br=scr.querySelector('.barrow'),bs=br&&br.querySelector('.bslots');if(bs){const u=tlSlots(P),selA=own?tlSelA():null,pick=own&&G.barPick?tlNd(G.barPick):null,tgt=pick||selA;
+  bs.innerHTML=u.map((id,j)=>{const n=id&&tlNd(id),cur=tgt&&id===tgt.id;const act=tgt?(cur&&!pick?'':'bar-put'):n?'tree-sel':'';
+   return`<button class="bslot ${n?'':'empty'}${act==='bar-put'?' tltgt':''}${cur?' tlcur':''}${pick&&n?' pick':''}" data-sl="${j}" ${act?`data-act="${act}"`:''} ${n&&act==='tree-sel'?`data-id="${n.id}"`:''} ${!act?'disabled':''} title="${n?esc(n.name):'frei'} · Taste ${esc(skKey(j))}"><span>${n?skIco(n,'slot'):''}</span><i>${esc(skKey(j))}</i></button>`}).join('');
+  br.classList.toggle('tlpick',!!pick);br.classList.toggle('tlsel',!!tgt);const ey=br.querySelector('.eyebrow');
+  if(ey)ey.innerHTML=tgt?`Leiste · <span class="tlbh">${pick?'Platz wählen':`Platz antippen oder Taste: <b>${esc(tgt.name)}</b> dorthin`}</span>`:'Leiste'}
+ /* Hinweis im Kopf */
+ const hd=scr.querySelector('.sthead .sp');if(hd&&frei&&!hd.querySelector('.tlsfh'))hd.insertAdjacentHTML('beforeend',' <span class="tlsfh">· Startstern frei wählbar</span>')}
+function tlKeysTxt(){return[0,1,2,3,4,5].map(j=>skKey(j)).join(' ')}
+{const _rt=renderTree;renderTree=function(keep){const r=_rt.apply(this,arguments);try{if(G.barPick&&!tlNd(G.barPick))G.barPick=null;tlDeco()}catch(e){console.error('tl',e)}return r}}
+
+/* Klicks (Gastgeber, eigene Spalte im lokalen Mehrspieler, Online-Gast über den Gastgeber) */
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act;if(!TL_ED.test(a))return;if(!P||!P.hero||!tlOwn())return;
+ if(a==='tl-start'){const n=tlNd(G.treeSel);if(n&&tlSfSet(n.id,P)){sfx('lernen');sfx('magic');try{ring(P.x,P.y,60,stCol(P.id,n.b),0.5,4)}catch(e){}toast(`Startstern: ${esc(n.name)}`,stCol(P.id,n.b),{minor:1})}renderTree(true);return}
+ if(a==='bar-pick'){const n=tlSelA();if(n){G.barPick=n.id;sfx('ui');try{PADNAV.el=null;PADNAV.sig='';PADNAV.dirty=true}catch(e){}}renderTree(true);return}
+ if(a==='bar-rm'){const id=G.barPick||G.treeSel;G.barPick=null;if(tlRm(id,P)){sfx('scrap');G.treeSel=id}renderTree(true);return}
+ if(a==='bar-put'){const id=G.barPick||(tlSelA()||{}).id,j=+b.dataset.sl;G.barPick=null;if(id&&tlPut(id,j,P)){sfx('equip');G.treeSel=id;G.tlFx={j,t:performance.now()}}renderTree(true);return}});
+/* Tastatur: im Talentfenster legt 1–6 die gewählte Fähigkeit auf diesen Platz */
+addEventListener('keydown',ev=>{if(ev.ctrlKey||ev.metaKey||ev.altKey||!/^(Digit|Numpad)[1-6]$/.test(ev.code))return;if(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))return;let C=null;try{C=stKbCont()}catch(e){}if(!C)return;
+ const j=+ev.code.slice(-1)-1,el=C.querySelector(`.bslot[data-sl="${j}"][data-act="bar-put"]`);if(!el)return;ev.preventDefault();ev.stopPropagation();el.click()},true);
+/* Controller: im Platz-Modus wählt die Fähigkeits-Taste den Platz (A auf einer markierten Schaltfläche drückt diese) */
+{const _po=padMenuOwner;padMenuOwner=function(){const own=_po.apply(this,arguments);try{if(scr&&!scr.hidden){
+  /* X auf einer gelernten Fähigkeit: Platz-Modus öffnen */
+  const bp=!scr.querySelector('.barrow.tlpick')&&scr.querySelector('.stmap')&&scr.querySelector('.stdet [data-act="bar-pick"]');
+  if(bp)for(const s of Object.values(PADS.st)){if(own!==undefined&&own!==s.i)continue;if(s.pr[2]&&!s.b[3]){s.pr=s.pr.map(()=>false);PADNAV.on=true;bp.click();break}}
+  const br=scr.querySelector('.barrow.tlpick');if(br){const M=padMap();
+  for(const s of Object.values(PADS.st)){if(own!==undefined&&own!==s.i)continue;for(let j=0;j<6;j++){const v=M['s'+(j+1)];if(v==null||v<0||!s.pr[v])continue;
+   if(v===0&&PADNAV.el&&PADNAV.el.isConnected&&(PADNAV.el.closest('.tlpickp')||PADNAV.el.classList.contains('bslot')))continue;
+   const el=scr.querySelector(`.bslot[data-sl="${j}"][data-act="bar-put"]`);if(el){s.pr=s.pr.map(()=>false);PADNAV.on=true;el.click();break}}}}}}catch(e){console.error('tl',e)}return own}}
+/* Maus: Platz auf einen anderen Platz ziehen = tauschen, aus der Leiste ziehen = entfernen */
+let TLDR=null,TLDR_NC=0;
+document.addEventListener('pointerdown',ev=>{const sl=ev.target.closest&&ev.target.closest('.bslot[data-sl]');if(!sl||!P||!P.hero||!tlOwn()||NET.role==='guest')return;if(sl.closest('[data-lm]'))return;const id=tlSlots(P)[+sl.dataset.sl];if(!id)return;
+ TLDR={j:+sl.dataset.sl,id,x:ev.clientX,y:ev.clientY,el:sl,on:false,ghost:null,pid:ev.pointerId}});
+document.addEventListener('pointermove',ev=>{const D=TLDR;if(!D||ev.pointerId!==D.pid)return;if(!D.on){if(Math.hypot(ev.clientX-D.x,ev.clientY-D.y)<8)return;D.on=true;D.ghost=D.el.cloneNode(true);D.ghost.classList.add('bghost');D.ghost.removeAttribute('data-act');document.body.appendChild(D.ghost);D.el.classList.add('bsrc')}
+ ev.preventDefault();D.ghost.style.left=(ev.clientX-24)+'px';D.ghost.style.top=(ev.clientY-24)+'px';const t=document.elementFromPoint(ev.clientX,ev.clientY),ts=t&&t.closest&&t.closest('.bslot[data-sl]');
+ for(const x of scr.querySelectorAll('.bslot.over'))x.classList.remove('over');if(ts&&ts!==D.el)ts.classList.add('over');
+ const row=scr.querySelector('.barrow');if(row){const r=row.getBoundingClientRect();D.out=ev.clientY<r.top-40||ev.clientY>r.bottom+40;D.ghost.classList.toggle('rm',D.out)}},{passive:false});
+function tlDragEnd(ev){const D=TLDR;if(!D||ev.pointerId!==D.pid)return;TLDR=null;if(!D.on)return;TLDR_NC=performance.now();D.ghost.remove();
+ const t=document.elementFromPoint(ev.clientX,ev.clientY),ts=t&&t.closest&&t.closest('.bslot[data-sl]');
+ if(ts&&ts!==D.el){if(tlPut(D.id,+ts.dataset.sl,P))sfx('equip')}
+ else if(D.out){if(tlRm(D.id,P)){sfx('scrap');toast(`${esc((tlNd(D.id)||{}).name||'')} aus der Leiste genommen`,'#c8bca8',{minor:1})}}
+ if(G.overlay==='tree'||G.state==='camp'||G.state==='between')try{renderTree(true)}catch(e){}else for(const x of scr.querySelectorAll('.bsrc'))x.classList.remove('bsrc')}
+document.addEventListener('pointerup',tlDragEnd);document.addEventListener('pointercancel',tlDragEnd);
+document.addEventListener('click',ev=>{if(performance.now()-TLDR_NC<350&&ev.target.closest&&ev.target.closest('.bslot')){ev.stopPropagation();ev.preventDefault()}},true);
+
+try{HINW.tree=HINW.tree.concat(['Den <b>Startstern</b> wählst du frei: Solange in seinem Ast nichts weiter gelernt ist, lässt er sich gegen den Einstiegsstern jedes anderen Asts tauschen.','<b>Spitzentalente</b> (die beiden äußersten Sterne eines Asts) brauchen genug Punkte im eigenen Ast – über Brücken erreichst du nur die Zwischen-Sterne.','<b>Leiste</b>: Fähigkeit wählen, dann einen Platz antippen oder die Taste drücken (1–6, am Controller „Platz ändern“). Ziehen tauscht, aus der Leiste ziehen entfernt.'])}catch(e){}
+(function(){try{const st=document.createElement('style');st.textContent=`
+.stn.tlgate .sto{border-color:rgba(255,255,255,.16)!important;filter:saturate(.35) brightness(.8)}.stn.tlgate .stp{display:none}
+.stn .tllk{position:absolute;left:50%;top:0;transform:translate(-50%,-62%);z-index:4;display:flex;align-items:center;gap:3px;height:calc(var(--ss,1)*15px);padding:0 calc(var(--ss,1)*5px) 0 calc(var(--ss,1)*4px);border-radius:999px;background:#140d16;border:1px solid color-mix(in srgb,var(--c) 55%,#3d3140);color:#e8dcc8;font:800 calc(var(--ss,1)*9.5px)/1 var(--fb);white-space:nowrap;pointer-events:none;box-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums}
+.stn .tllk i{position:relative;width:calc(var(--ss,1)*7px);height:calc(var(--ss,1)*6px);border-radius:1.5px;background:var(--c);margin-top:calc(var(--ss,1)*3px)}
+.stn .tllk i::before{content:'';position:absolute;left:50%;bottom:90%;width:calc(var(--ss,1)*5px);height:calc(var(--ss,1)*4.5px);transform:translateX(-50%);border:1.5px solid var(--c);border-bottom:0;border-radius:4px 4px 0 0;box-sizing:border-box}
+.stn.tlsfc .sto{outline:2px dashed color-mix(in srgb,var(--c) 70%,transparent);outline-offset:5px}
+.stn.tlsfc.sel .sto{outline:2px solid #fff3c8}
+.stn .tlsfb{position:absolute;left:50%;top:0;transform:translate(-50%,-70%);z-index:4;padding:1px calc(var(--ss,1)*6px);border-radius:999px;background:linear-gradient(180deg,#fff3c8,var(--c));color:#1a1010;font:900 calc(var(--ss,1)*8.5px)/1.3 var(--fb);letter-spacing:.06em;text-transform:uppercase;pointer-events:none;box-shadow:0 0 8px color-mix(in srgb,var(--c) 70%,transparent)}
+.tlinfo{display:flex;flex-direction:column;gap:4px}
+.tlgl{font-size:12.5px;line-height:1.3;padding:3px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:8px;border-left:3px solid}.tlgl b{font-weight:800}
+.tlgl.bad{color:#ffb0a0;background:rgba(255,90,70,.08);border-color:#ff7a5a}.tlgl.ok{color:#cfe8b0;background:rgba(150,210,110,.07);border-color:#9fd27a}
+.tlsfl{font-size:12.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#f4e6c4;padding:4px 8px;border-radius:8px;background:rgba(255,208,74,.08);border-left:3px solid #ffd04a}
+.tlsfh{color:#ffd04a;font-size:12px;font-weight:700}
+.barrow .tlbh{text-transform:none;letter-spacing:0;color:#ffd04a;font-weight:700}.barrow .tlbh b{color:#fff3c8}
+.bslot.tltgt{cursor:copy;box-shadow:0 0 0 2px rgba(255,208,74,.25),0 0 10px rgba(255,208,74,.35)}.bslot.tltgt.empty{border-color:#ffd04a;border-style:dashed}
+.barrow.tlpick .bslot.tltgt{animation:tlSlot 1.4s ease-in-out infinite}
+@keyframes tlSlot{0%,100%{box-shadow:0 0 0 2px rgba(255,208,74,.2),0 0 6px rgba(255,208,74,.25)}50%{box-shadow:0 0 0 3px rgba(255,208,74,.55),0 0 16px rgba(255,208,74,.6)}}
+.bslot.tlcur{border-color:#fff3c8;box-shadow:0 0 0 2px #fff3c8,0 0 14px rgba(255,243,200,.6)}
+.bslot[disabled]{cursor:default}
+.tlpickp{border-color:#ffd04a}
+.stdet.tlpk .tdvid,.stdet.tlpk .tds,.stdet.tlpk .stme,.stdet.tlpk .tdmore{display:none}.stdet .tlbb{align-self:center}
+@media (prefers-reduced-motion:reduce){.barrow.tlpick .bslot.tltgt{animation:none}}`;document.head.appendChild(st)}catch(e){}})();
+window.__hsT={TL_GATE,tlNeed,tlHave,tlGateOk,tlSfFrei,tlSfOk,tlSfSet,tlNorm,tlSlots,tlIdx,tlPut,tlRm,tlBereinigen,buildSkillBar:()=>buildSkillBar(),hurt:v=>hurt(v),roll:(x,y)=>rollTry(x,y),renderTree:k=>renderTree(k),canLearn:n=>canLearn(n),learn:n=>learn(n),astBereinigen:q=>astBereinigen(q),fire:id=>tlFire(id),ico:(n,m)=>skIco(n,m),get TLC(){return TLC},get TLP(){return TLP}};
+
+/* ================= Mehr Passive, weniger Aktive =================
+   TLP: je Ast ein neues Passiv (Reihe 3 = ab Stufe 8, neben dem bisherigen Stern, max. 3 Ränge).
+   TLC: die schwächsten bzw. am seltensten genutzten Aktiven werden zu Passiven, die ihre Wirkung von selbst auslösen
+        (eigener Auslöser, etwas seltener als von Hand und mit 80% Schaden) – sie brauchen keinen Platz in der Leiste mehr.
+   Danach hat jeder Ast höchstens 3 Aktive (ohne Ulti). */
+const TLP={
+ barradin:[
+  {b:0,id:'b_t_takt',ic:'♩',name:'Taktgefühl',d:r=>`Barradins Ohr für den Rhythmus: Das Taktfenster ist ${10*r}% breiter, und Fähigkeiten verursachen +${3*r}% Schaden.`,mod:(s,r)=>{s.taktP+=0.1*r;s.skill+=0.03*r}},
+  {b:1,id:'b_t_wurzel',ic:'❦',name:'Wurzelwerk',d:r=>`Fest verwurzelt wie eine alte Eiche: +${4*r}% Leben, +${3*r} Rüstung, und Fesselungen durch Barradin halten ${5*r}% länger.`,mod:(s,r)=>{s.hpP+=0.04*r;s.armor+=3*r;s.ctrlP+=0.05*r}},
+  {b:2,id:'b_t_ensemble',ic:'☍',name:'Ensemble',d:r=>`Die ganze Truppe spielt mit: Trugbilder und Begleiter treffen ${6*r}% härter, und Barradin läuft ${2*r}% schneller.`,mod:(s,r)=>{s.petP+=0.06*r;s.speedP+=0.02*r}},
+  {b:3,id:'b_t_fecht',ic:'⚔',name:'Fechtmeister',d:r=>`Jahre im Kolleg der Schwerter: +${2*r}% Kritische Trefferchance, +${8*r}% Kritischer Schaden und +${3*r}% Angriffstempo.`,mod:(s,r)=>{s.crit+=0.02*r;s.critd+=0.08*r;s.rateP+=0.03*r}},
+  {b:4,id:'b_t_star',ic:'✶',name:'Starallüren',d:r=>`Barradin weiß, dass alle Augen auf ihm ruhen: +${3*r}% Schaden, und Bezauberungen, Betäubungen und Fesselungen halten ${6*r}% länger.`,mod:(s,r)=>{s.dmgP+=0.03*r;s.ctrlP+=0.06*r}}],
+ echo:[
+  {b:0,id:'e_t_gewitter',ic:'☁',name:'Gewitterseele',d:r=>`Der Sturm wohnt in Echo: Fähigkeiten +${3*r}% Schaden, +${4*r}% Wirkungsbereich, und der Naturvorrat füllt sich ${5*r}% schneller.`,mod:(s,r)=>{s.skill+=0.03*r;s.area+=0.04*r;s.nvP+=0.05*r}},
+  {b:1,id:'e_t_fell',ic:'✺',name:'Dickes Fell',d:r=>`+${5*r}% Leben, und Bären-, Ratten- und Sternengestalt halten ${8*r}% länger.`,mod:(s,r)=>{s.hpP+=0.05*r;s.formP+=0.08*r}},
+  {b:2,id:'e_t_wald',ic:'❧',name:'Waldläufer',d:r=>`Echo kennt jeden Pfad: +${3*r}% Lauftempo, +${5*r}% Gold, und der Naturvorrat füllt sich ${4*r}% schneller.`,mod:(s,r)=>{s.speedP+=0.03*r;s.gold+=0.05*r;s.nvP+=0.04*r}},
+  {b:3,id:'e_t_glanz',ic:'✧',name:'Sternenglanz',d:r=>`Die Sterne stehen günstig: +${2*r}% Kritische Trefferchance, +${6*r}% Kritischer Schaden und ${2*r}% kürzere Abklingzeiten.`,mod:(s,r)=>{s.crit+=0.02*r;s.critd+=0.06*r;s.cdr+=0.02*r}},
+  {b:4,id:'e_t_myzel',ic:'♧',name:'Zähes Myzel',d:r=>`Befallene Gegner erleiden ${4*r}% mehr Schaden von Echo, und das Myzel unter seiner Haut schenkt +${3*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.03*r}}],
+ friedrich:[
+  {b:0,id:'f_t_adler',ic:'◉',name:'Adlerauge',d:r=>`Die ruhige Hand spannt ${10*r}% schneller, Pfeile treffen ${4*r}% härter, und Friedrich hat +${2*r}% Kritische Trefferchance.`,mod:(s,r)=>{s.ruheP+=0.1*r;s.crit+=0.02*r;s.rangedP+=0.04*r}},
+  {b:1,id:'f_t_faehrte',ic:'⁘',name:'Fährtenleser',d:r=>`Friedrich liest jede Spur: +${3*r}% Lauftempo, Nahkampfhiebe +${5*r}% Schaden und +${3*r}% Leben.`,mod:(s,r)=>{s.speedP+=0.03*r;s.meleeP+=0.05*r;s.hpP+=0.03*r}},
+  {b:2,id:'f_t_rudel',ic:'❂',name:'Rudelbande',d:r=>`Rex und alle Begleiter treffen ${6*r}% härter, und Friedrich hat +${3*r}% Leben.`,mod:(s,r)=>{s.petP+=0.06*r;s.hpP+=0.03*r}},
+  {b:3,id:'f_t_nacht',ic:'☾',name:'Glühende Nächte',d:r=>`Schwarm-Fähigkeiten verursachen ${6*r}% mehr Schaden, und Friedrich läuft ${2*r}% schneller.`,mod:(s,r)=>{s.speedP+=0.02*r}},
+  {b:4,id:'f_t_bauer',ic:'⚒',name:'Fallenbauer',d:r=>`Fallen verursachen ${6*r}% mehr Schaden, und Fesselungen durch Friedrich halten ${5*r}% länger.`,mod:(s,r)=>{s.ctrlP+=0.05*r}}],
+ ezekiel:[
+  {b:0,id:'z_t_scharf',ic:'⟋',name:'Messerscharf',d:r=>`Jede Klinge frisch geschliffen: +${3*r}% Kritische Trefferchance, +${5*r}% Angriffstempo und normale Angriffe +${4*r}% Schaden.`,mod:(s,r)=>{s.crit+=0.03*r;s.rateP+=0.05*r;s.meleeP+=0.04*r}},
+  {b:1,id:'z_t_durst',ic:'❥',name:'Blutdurst',d:r=>`Darkin-Blut sammelt sich ${8*r}% schneller, und Ezekiel hat +${r}% Lebensraub.`,mod:(s,r)=>{s.blutP+=0.08*r;s.ls+=0.01*r}},
+  {b:2,id:'z_t_meuchel',ic:'◐',name:'Meuchelkunst',d:r=>`Rückenstiche treffen noch härter (+${12*r}% Rückenstich-Schaden), und Ezekiel läuft ${2*r}% schneller.`,mod:(s,r)=>{s.rueckP+=0.12*r;s.speedP+=0.02*r}},
+  {b:3,id:'z_t_lang',ic:'⛀',name:'Langfinger',d:r=>`+${6*r}% Gold, +${2*r}% Angriffstempo und +${2*r}% Lauftempo – wer stiehlt, muss schnell sein.`,mod:(s,r)=>{s.gold+=0.06*r;s.rateP+=0.02*r;s.speedP+=0.02*r}},
+  {b:4,id:'z_t_kaelte',ic:'☠',name:'Grabeskälte',d:r=>`Fliehende Gegner erleiden ${6*r}% mehr Schaden von Ezekiel, und die Kälte des Grabes schenkt +${3*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.03*r}}]};
+for(const hid in TLP){const H=HEROES[hid];if(!H)continue;for(const d of TLP[hid]){if(H.tree.some(n=>n.id===d.id))continue;
+ const n={id:d.id,b:d.b,row:2,c:1,max:3,ic:d.ic,name:d.name,d:d.d,tl:1};if(d.mod)n.mod=d.mod;for(const m of H.tree)if(m.b===d.b&&m.row===2&&m.c===undefined)m.c=0;H.tree.push(n)}}
+/* bedingte Wirkungen der neuen Passive */
+hook('dmgMul',(e,o)=>{const r=rank('e_t_myzel');return r&&!o.dot&&e.epBef>G.time?1+0.04*r:1},'echo');
+hook('dmgMul',(e,o)=>{let f=1;const k=String(o.dmK||DMS||'');const r1=rank('f_t_nacht');if(r1&&/^f_s_/.test(k))f*=1+0.06*r1;const r2=rank('f_t_bauer');if(r2&&(/^f_f_/.test(k)||k==='f_trap'))f*=1+0.06*r2;return f},'friedrich');
+hook('dmgMul',(e,o)=>{const r=rank('z_t_kaelte');return r&&e.fearT>0?1+0.06*r:1},'ezekiel');
+
+/* ---------- Aktive → Passive mit eigenem Auslöser ---------- */
+const TLC={
+ barradin:[{id:'b_laugh',trig:'cast',n:3,t:'Jede 3. Fähigkeit lässt die Weise von selbst erklingen'},{id:'b_pattern',trig:'cd',f:1.4,need:3,R:260,t:'Sind mindestens 3 Gegner um Barradin, entfaltet sich das Muster von selbst'},
+  {id:'b_fear',trig:'hurt',f:1.2,t:'Wird Barradin getroffen, erscheint das Schreckensbild von selbst'},{id:'b_juggle',trig:'cd',f:1.3,R:240,t:'Sind Gegner in der Nähe, jongliert Barradin von selbst'},
+  {id:'b_k_abwehr',trig:'hurt',f:1.3,t:'Wird Barradin getroffen, wirbelt er von selbst den Abwehrschwung'},{id:'b_g_mantel',trig:'hurt',low:0.5,f:1.3,t:'Fällt Barradin unter 50% Leben, wirbelt der Mantel von selbst'}],
+ echo:[{id:'e_icefan',trig:'roll',f:1,t:'Nach einer Ausweichrolle fächert das Eis von selbst in Richtung der Gegner'},{id:'e_chain',trig:'cd',f:1.6,R:420,t:'Sind Gegner in Reichweite, springt der Kettenblitz von selbst'},
+  {id:'e_roar',trig:'hurt',low:0.6,f:1.3,t:'Fällt Echo unter 60% Leben, brüllt er von selbst'},{id:'e_s_omen',trig:'cast',n:4,t:'Jede 4. Fähigkeit wirft den leuchtenden W20 von selbst'},
+  {id:'e_p_sym',trig:'hurt',low:0.5,f:1.3,t:'Fällt Echo unter 50% Leben, überwuchert ihn das Myzel von selbst'}],
+ friedrich:[{id:'f_explode',trig:'basic',n:4,f:0.8,mul:1,t:'Jeder 4. normale Pfeil ist von selbst ein Sprengpfeil'},{id:'f_s_schleier',trig:'hurt',f:1.3,t:'Wird Friedrich getroffen, hüllt ihn der Schwarm von selbst ein'},
+  {id:'f_f_schlinge',trig:'cd',f:1.3,R:380,t:'Sind Gegner in der Nähe, legt Friedrich die Schlinge von selbst'}],
+ ezekiel:[{id:'z_frenzy',trig:'kill',f:1.3,t:'Ein Kill weckt den Blutrausch von selbst'},{id:'z_mark',trig:'cd',f:1.3,R:480,t:'Sind Gegner in Reichweite, markiert Ezekiel den stärksten von selbst'},
+  {id:'z_d_oel',trig:'cd',f:1.4,R:400,t:'Sind Gegner in Reichweite, wirft Ezekiel die Ölflasche von selbst'}]};
+const TL_MUL=0.8,TLCI={};
+for(const hid in TLC){const H=HEROES[hid];if(!H)continue;for(const c of TLC[hid]){const n=H.tree.find(x=>x.id===c.id);if(!n||!n.a||!n.cast)continue;
+ n.tlCast=n.cast;n.tlD=n.d;n.tlA=c;delete n.cast;n.a=0;delete n.a;TLCI[c.id]=c;const cdT=r=>Math.max(1,(n.cd?n.cd(r):10)*(c.f||1));c.cdT=cdT;
+ n.d=r=>{const z=c.trig==='cast'||c.trig==='basic'?(c.f?` (höchstens alle ${f1(cdT(r))} s)`:''):` (höchstens alle ${f1(cdT(r))} s)`;return`<b>Passiv:</b> ${c.t}${z}, mit ${pc(c.mul||TL_MUL)} Schaden – ${n.tlD(r)}`}}}
+function tlFire(id){const n=tlNd(id),c=TLCI[id];if(!n||!c||!n.tlCast)return false;const r=rank(id);if(!r)return false;const R=(c.R||AR[id]||400)*(AR[id]&&AR[id]<300?P.st.area:1);
+ let t=null;if(c.trig==='cd'&&c.need){let k=0;for(const e of G.enemies)if(targetable(e)&&d2(e,P)<R*R&&++k>=c.need)break;if(k<c.need)return false;t=nearest(P.x,P.y,R)}
+ else{t=(c.trig==='cd'&&id==='z_mark'?strongest(P.x,P.y,R):null)||nearest(P.x,P.y,R)}
+ if(!t&&c.trig!=='hurt')return false;
+ const sa=P.padAim,sm=P.skMul,sh=P.padHeld;let ok;P.padAim=t?ang(P,t):(sa!=null?sa:P.face);P.skMul=c.mul||TL_MUL;G.auCast=1;
+ try{ok=dmRun(id,()=>n.tlCast.call(n,r))}catch(e){console.error('tl',id,e);ok=false}finally{G.auCast=0;P.skMul=sm==null?1:sm;P.padAim=sa;P.padHeld=sh}
+ if(ok===false)return false;const U=P.use||(P.use={});U[id]=(U[id]||0)+1;if(U[id]<=2&&!G.bot)word(P.x,P.y-56,n.name,stCol(P.id,n.b));return true}
+function tlArm(id){const A=P.tlA||(P.tlA={});if((A[id]||0)<=0)(P.tlQ||(P.tlQ=new Set())).add(id)}
+hook('tick',dt=>{const L=TLC[P.id];if(!L||G.state!=='play')return;const A=P.tlA||(P.tlA={});for(const c of L){if(A[c.id]>0)A[c.id]-=dt;const r=rank(c.id);if(!r)continue;
+  if(c.trig==='cd'&&!((A[c.id]||0)>0)){if(tlFire(c.id))A[c.id]=c.cdT(r);else A[c.id]=0.4}}
+ const Q=P.tlQ;if(Q&&Q.size){for(const id of[...Q]){Q.delete(id);const c=TLCI[id],r=rank(id);if(!c||!r||(A[id]||0)>0)continue;if(tlFire(id))A[id]=c.f?c.cdT(r):0}}},null);
+hook('cast',n=>{const L=TLC[P.id];if(!L)return;for(const c of L){if(c.trig!=='cast'||!rank(c.id))continue;const C=P.tlCn||(P.tlCn={});C[c.id]=(C[c.id]||0)+1;if(C[c.id]>=c.n){C[c.id]=0;tlArm(c.id)}}},null);
+hook('basic',k=>{const L=TLC[P.id];if(!L)return;for(const c of L){if(c.trig!=='basic'||!rank(c.id))continue;const C=P.tlCn||(P.tlCn={});C[c.id]=(C[c.id]||0)+1;if(C[c.id]>=c.n){C[c.id]=0;tlArm(c.id)}}},null);
+hook('hurtMul',raw=>{const L=TLC[P.id];if(!L)return 1;for(const c of L){if(c.trig!=='hurt'||!rank(c.id))continue;if(c.low&&P.hp-raw*0.5>P.st.maxHp*c.low)continue;tlArm(c.id)}return 1},null);
+hook('roll',()=>{const L=TLC[P.id];if(!L)return;for(const c of L)if(c.trig==='roll'&&rank(c.id))tlArm(c.id)},null);
+hook('kill',()=>{const L=TLC[P.id];if(!L)return;for(const c of L)if(c.trig==='kill'&&rank(c.id))tlArm(c.id)},null);
+hook('stage',()=>{P.tlA={};P.tlQ=new Set();P.tlCn={}},null);
+try{NETPBL.push('tlQ','tlA','tlCn')}catch(e){}
+try{ST.g={}}catch(e){}
+
+/* ---------- Symbole der neuen Passive (Stil der vorhandenen Talent-Symbole, Farben der Äste) ---------- */
+(function(){const A=typeof KSY!=='undefined'&&KSY.ART;if(!A||typeof ASY==='undefined')return;const {F,FL,S,GL,c_,e_,p_,l_,a_,star,xf,rapier}=ASY;
+ const W='#ffffff',sp=(x,y,s)=>FL(W,g=>star(g,x,y,4,s||9,(s||9)*0.22),{no:1});
+ const col=(h,b)=>stCol(h,b);
+ A.b_t_takt=()=>{const c=col('barradin',0);return[GL(c,50,52,46,.5),F('#3a2a4a',g=>p_(g,32,84,68,84,58,20,42,20),{ol:1}),F(c,g=>p_(g,36,80,64,80,56,26,44,26),{ol:1}),S('#fff3c8',4,g=>l_(g,50,74,70,24)),FL('#fff3c8',g=>c_(g,64,38,6),{ol:1}),S(c,2.5,g=>{for(const y of[40,52,64])l_(g,44,y,56,y)},{no:1,a:.6}),sp(22,24,10)]};
+ A.b_t_wurzel=()=>{const c=col('barradin',1);return[GL(c,50,58,46,.5),F('#7a4e28',g=>{g.moveTo(42,14);g.lineTo(58,14);g.lineTo(56,52);g.lineTo(44,52);g.closePath()},{ol:1}),
+  S('#9a6a3a',6,g=>{g.moveTo(50,50);g.bezierCurveTo(40,62,24,64,14,84);g.moveTo(50,50);g.bezierCurveTo(60,64,76,64,86,84);g.moveTo(50,52);g.lineTo(50,88)}),S(c,3,g=>{g.moveTo(50,50);g.bezierCurveTo(40,62,24,64,14,84);g.moveTo(50,50);g.bezierCurveTo(60,64,76,64,86,84)},{no:1,a:.8}),
+  FL(c,g=>{e_(g,30,22,12,7,-0.5);e_(g,70,22,12,7,0.5);e_(g,50,10,9,6,0)},{ol:1}),sp(82,34,8)]};
+ A.b_t_ensemble=()=>{const c=col('barradin',2),m=(x,y,a,cc)=>F(cc,xf(x,y,a,1,g=>{g.moveTo(-18,-14);g.quadraticCurveTo(0,-22,18,-14);g.quadraticCurveTo(18,12,0,20);g.quadraticCurveTo(-18,12,-18,-14);g.closePath()}),{ol:1}),
+  ey=(x,y,a)=>FL('#160d18',xf(x,y,a,1,g=>{e_(g,-7,-4,4.5,2.6,0.25);e_(g,7,-4,4.5,2.6,-0.25);g.moveTo(-6,8);g.quadraticCurveTo(0,13,6,8);g.quadraticCurveTo(0,10,-6,8)}),{no:1});
+  return[GL(c,50,50,46,.5),m(36,54,-0.25,'#b48ad8'),ey(36,54,-0.25),m(62,46,0.25,c),ey(62,46,0.25),sp(84,20,9)]};
+ A.b_t_fecht=()=>{const c=col('barradin',3);return[GL(c,50,46,48,.55),...rapier(16,84,-0.8,1.35,{len:66}),...rapier(84,84,-2.34,1.35,{len:66}),GL('#fff3c8',50,40,16,.8),FL(c,g=>star(g,50,40,5,13,5.5),{ol:1}),sp(50,40,7)]};
+ A.b_t_star=()=>{const c=col('barradin',4);return[GL(c,50,50,46,.55),F(c,g=>star(g,50,52,5,34,14),{ol:1}),FL('#fff3c8',g=>star(g,50,52,5,16,7),{no:1,a:.9}),S('#fff3c8',2.5,g=>{l_(g,14,18,24,28);l_(g,86,18,76,28);l_(g,50,6,50,14)},{no:1,a:.8}),sp(82,82,8)]};
+ A.e_t_gewitter=()=>{const c=col('echo',0);return[GL(c,50,46,46,.5),F('#6a5a8a',g=>{e_(g,34,40,18,13);e_(g,56,32,20,16);e_(g,70,44,16,12);e_(g,50,48,26,12)},{ol:1}),F(c,g=>p_(g,52,46,64,46,54,62,66,62,40,92,48,70,38,70),{ol:1}),FL('#fff3c8',g=>p_(g,54,52,58,52,52,62,56,62,48,72),{no:1,a:.8}),sp(18,20,8)]};
+ A.e_t_fell=()=>{const c=col('echo',1);return[GL(c,50,50,46,.5),F('#6a4a2a',g=>{g.moveTo(50,12);g.quadraticCurveTo(84,18,82,46);g.quadraticCurveTo(78,78,50,90);g.quadraticCurveTo(22,78,18,46);g.quadraticCurveTo(16,18,50,12);g.closePath()},{ol:1}),
+  S(c,6,g=>{for(const x of[36,50,64]){g.moveTo(x-6,30);g.quadraticCurveTo(x+4,52,x-2,74)}}),S('#fff3c8',2,g=>{for(const x of[36,50,64]){g.moveTo(x-6,30);g.quadraticCurveTo(x+4,52,x-2,74)}},{no:1,a:.6}),sp(82,16,8)]};
+ A.e_t_wald=()=>{const c=col('echo',2);return[GL('#9fd27a',50,50,46,.5),F('#6ab04a',g=>{g.moveTo(20,80);g.bezierCurveTo(14,40,46,14,80,16);g.bezierCurveTo(80,52,56,80,20,80);g.closePath()},{ol:1}),S('#2a4a1a',3,g=>{g.moveTo(22,78);g.quadraticCurveTo(44,50,74,22)},{no:1,a:.7}),
+  F(c,g=>c_(g,72,72,14),{ol:1}),S('#fff3c8',2,g=>c_(g,72,72,8),{no:1,a:.7}),sp(20,22,8)]};
+ A.e_t_glanz=()=>{const c=col('echo',3);return[GL(c,50,50,48,.6),F(c,g=>star(g,50,50,4,40,9),{ol:1}),FL('#fff3c8',g=>star(g,50,50,4,20,5),{no:1}),F('#e8d0a0',g=>star(g,78,22,4,12,3),{ol:1}),F('#e8d0a0',g=>star(g,22,78,4,10,2.5),{ol:1})]};
+ A.e_t_myzel=()=>{const c=col('echo',4);return[GL(c,50,56,46,.5),F('#e8dcc0',g=>{g.moveTo(42,58);g.lineTo(58,58);g.lineTo(56,88);g.lineTo(44,88);g.closePath()},{ol:1}),
+  F(c,g=>{g.moveTo(14,60);g.quadraticCurveTo(14,18,50,16);g.quadraticCurveTo(86,18,86,60);g.closePath()},{ol:1}),FL('#fff3c8',g=>{c_(g,34,40,5);c_(g,56,30,4);c_(g,68,46,4.5);c_(g,46,50,3)},{no:1,a:.8}),S(c,2.5,g=>{g.moveTo(44,88);g.quadraticCurveTo(30,92,18,86);g.moveTo(56,88);g.quadraticCurveTo(72,94,84,86)},{no:1,a:.7})]};
+ A.f_t_adler=()=>{const c=col('friedrich',0);return[GL(c,50,50,46,.5),F(c,g=>{g.moveTo(10,50);g.quadraticCurveTo(50,14,90,50);g.quadraticCurveTo(50,86,10,50);g.closePath()},{ol:1}),F('#c8902c',g=>c_(g,50,50,16),{ol:1}),FL('#160d18',g=>c_(g,50,50,7),{no:1}),FL(W,g=>c_(g,45,45,3.5),{no:1}),
+  S('#7a4e28',3,g=>{l_(g,72,88,92,68)},{no:1}),FL(c,g=>p_(g,92,68,84,70,90,62),{ol:1})]};
+ A.f_t_faehrte=()=>{const c=col('friedrich',1),pw=(x,y,a)=>FL(c,xf(x,y,a,1,g=>{e_(g,0,5,8,6.5);e_(g,-9,-4,3.4,4.2,-0.3);e_(g,-3,-10,3.4,4.2,-0.1);e_(g,4,-10,3.4,4.2,0.1);e_(g,10,-4,3.4,4.2,0.3)}),{ol:1});
+  return[GL(c,50,50,46,.45),pw(28,78,-0.5),pw(48,54,-0.4),pw(68,30,-0.5),S('#e8dcc0',2.5,g=>{g.moveTo(14,90);g.bezierCurveTo(40,70,50,40,88,10)},{no:1,a:.45,dash:[4,6]}),sp(84,74,8)]};
+ A.f_t_rudel=()=>{const c=col('friedrich',2),pw=(x,y,s,cc)=>FL(cc,xf(x,y,0,s,g=>{e_(g,0,6,10,8);e_(g,-12,-5,4.4,5.4,-0.3);e_(g,-4,-13,4.4,5.4,-0.1);e_(g,5,-13,4.4,5.4,0.1);e_(g,13,-5,4.4,5.4,0.3)}),{ol:1});
+  return[GL(c,50,50,46,.5),pw(34,62,1.2,'#c87838'),pw(64,40,1.25,c),S('#fff3c8',2,g=>a_(g,50,50,40,2.6,4.2),{no:1,a:.5}),sp(80,78,8)]};
+ A.f_t_nacht=()=>{const c=col('friedrich',3);return[GL(c,60,40,44,.5),F('#e8d890',g=>{g.moveTo(58,10);g.arc(50,46,36,-1.35,1.8,false);g.arc(64,40,30,1.6,-1.2,true);g.closePath()},{ol:1}),
+  GL(c,24,70,12,.9),GL(c,44,84,9,.9),GL(c,74,78,10,.9),FL('#fffbd0',g=>{c_(g,24,70,3);c_(g,44,84,2.4);c_(g,74,78,2.6)},{no:1})]};
+ A.f_t_bauer=()=>{const c=col('friedrich',4),jaw=(sg)=>F('#cfcfcf',g=>{g.moveTo(14,60);g.quadraticCurveTo(50,60+sg*40,86,60);g.lineTo(80,60);g.quadraticCurveTo(50,60+sg*30,20,60);g.closePath()},{ol:1}),teeth=(sg)=>FL('#f4f4f4',g=>{for(let i=0;i<6;i++){const x=24+i*10.4;p_(g,x,60+sg*(Math.sin((x-14)/72*Math.PI)*28),x+4,60+sg*(Math.sin((x-14)/72*Math.PI)*28)-sg*12,x+8,60+sg*(Math.sin((x-14)/72*Math.PI)*28))}},{ol:1});
+  return[GL(c,50,58,48,.55),F('#5a3a22',g=>p_(g,10,64,90,64,90,72,10,72),{ol:1}),jaw(-1),teeth(-1),jaw(1),teeth(1),F(c,g=>c_(g,50,66,7),{ol:1}),S('#5a5a5a',3,g=>{g.moveTo(86,68);g.quadraticCurveTo(96,84,80,92)},{no:1}),sp(18,18,9)]};
+ A.z_t_scharf=()=>{const c=col('ezekiel',0);return[GL(c,50,50,46,.5),F(c,g=>p_(g,50,8,60,44,54,70,46,70,40,44),{ol:1}),S(W,1.5,g=>l_(g,50,14,50,64),{no:1,a:.7}),F('#7a4e28',g=>p_(g,30,70,70,70,70,76,30,76),{ol:1}),F('#4a2a1a',g=>p_(g,46,76,54,76,54,94,46,94),{ol:1}),sp(70,22,11),sp(28,40,6)]};
+ A.z_t_durst=()=>{const c=col('ezekiel',1);return[GL(c,50,56,46,.55),F(c,g=>{g.moveTo(50,10);g.bezierCurveTo(60,30,78,46,78,62);g.arc(50,62,28,0,Math.PI);g.bezierCurveTo(22,46,40,30,50,10);g.closePath()},{ol:1}),FL(W,g=>e_(g,40,56,6,10,0.3),{no:1,a:.5}),S('#ffb0b8',2.5,g=>a_(g,50,62,18,0.3,1.4),{no:1,a:.6})]};
+ A.z_t_meuchel=()=>{const c=col('ezekiel',2);return[GL(c,50,50,46,.5),FL('#2a1a3a',g=>{c_(g,42,30,13);g.moveTo(22,90);g.quadraticCurveTo(22,46,42,46);g.quadraticCurveTo(62,46,62,90);g.closePath()},{ol:1}),
+  F('#e6dcf0',xf(72,52,-0.9,1,g=>p_(g,0,-30,5,-6,2,6,-2,6,-5,-6)),{ol:1}),F(c,xf(72,52,-0.9,1,g=>p_(g,-9,6,9,6,9,10,-9,10)),{ol:1}),GL(c,72,52,12,.8),sp(84,18,8)]};
+ A.z_t_lang=()=>{const c=col('ezekiel',3);return[GL(c,50,56,46,.5),F('#8a5a2a',g=>{g.moveTo(30,40);g.quadraticCurveTo(14,88,50,88);g.quadraticCurveTo(86,88,70,40);g.closePath()},{ol:1}),S('#c8902c',4,g=>{g.moveTo(32,40);g.quadraticCurveTo(50,48,68,40)}),
+  F(c,g=>c_(g,40,30,9),{ol:1}),F(c,g=>c_(g,58,26,9),{ol:1}),F(c,g=>c_(g,50,16,8),{ol:1}),FL('#fff3c8',g=>{star(g,40,30,4,4,1.2);star(g,58,26,4,4,1.2)},{no:1}),sp(82,74,8)]};
+ A.z_t_kaelte=()=>{const c=col('ezekiel',4);return[GL(c,50,50,46,.5),F('#e8f0d8',g=>{g.moveTo(26,52);g.arc(50,44,24,Math.PI*0.9,Math.PI*0.1);g.lineTo(64,70);g.lineTo(36,70);g.closePath()},{ol:1}),FL('#160d18',g=>{c_(g,40,46,6);c_(g,60,46,6);p_(g,50,54,46,62,54,62)},{no:1}),
+  S(c,3,g=>{g.moveTo(14,82);g.quadraticCurveTo(30,74,46,84);g.quadraticCurveTo(62,94,86,80)},{no:1,a:.8}),S(c,2,g=>{g.moveTo(20,92);g.quadraticCurveTo(40,86,60,92)},{no:1,a:.5}),GL(c,40,46,6,.9),GL(c,60,46,6,.9)]};
+})();
+
+/* ---------- Sternkarte: kein Springen beim Durchgehen mit Controller/Tastatur ----------
+   Passt die ganze Karte in die Ansicht, wird gar nicht geschwenkt. Sonst nur so weit, dass der gewählte Stern
+   gerade wieder im Rand liegt, und weich über einige Bilder (kein Überschuss). Kein scrollIntoView mehr. */
+const TLV={};
+function tlPanTo(m,k){const v=stView(m),A=TLV[k];if(!A||A.raf)return;const step=()=>{A.raf=0;if(!m.isConnected)return;const dx=A.tx-v.cx,dy=A.ty-v.cy;
+ if(Math.abs(dx)<0.5&&Math.abs(dy)<0.5){v.cx=A.tx;v.cy=A.ty;_tlLay(m);return}const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,sc=stScale(m).s,d=Math.hypot(dx,dy),mx=26/Math.max(0.05,sc),st=rm?d:Math.min(d*0.2,mx),q=d>0?st/d:1;v.cx+=dx*q;v.cy+=dy*q;_tlLay(m);A.raf=requestAnimationFrame(step)};A.raf=requestAnimationFrame(step)}
+const _tlLay=stLayout;
+stLayout=function(m){try{if(!m||!m.isConnected)return _tlLay.apply(this,arguments);const k=stKey(m),sid=m.dataset.sel;
+ if(sid&&ST.lastSel[k]!==sid){const first=ST.lastSel[k]===undefined;ST.lastSel[k]=sid;const W=m.clientWidth,H=m.clientHeight;
+  if(!first&&W>=40&&H>=40){const L=stScale(m),s=L.s,v=L.v,el=m.querySelector(`.stn[data-id="${CSS.escape(sid)}"]`);
+   const ext=(ST_R[5]+30)*s,fits=ext*2<=W&&ext*2<=H;
+   if(el&&!fits){const x=+el.dataset.x,y=+el.dataset.y,mg=Math.min(70,W*0.18,H*0.18),A=TLV[k]||(TLV[k]={});const bx=A.raf?A.tx:v.cx,by=A.raf?A.ty:v.cy;
+    const X=W/2+(x-bx)*s,Y=H/2+(y-by)*s;let tx=bx,ty=by;
+    if(X<mg)tx=bx+(X-mg)/s;else if(X>W-mg)tx=bx+(X-(W-mg))/s;if(Y<mg)ty=by+(Y-mg)/s;else if(Y>H-mg)ty=by+(Y-(H-mg))/s;
+    const lim=ST_FIT*0.95;tx=clamp(tx,-lim,lim);ty=clamp(ty,-lim,lim);if(tx!==bx||ty!==by){A.tx=tx;A.ty=ty;tlPanTo(m,k)}}}}}catch(e){console.error('tl',e)}
+ return _tlLay.apply(this,arguments)};
+{const _pm=padMark;padMark=function(el){if(el&&el.classList&&el.classList.contains('stn')){const o=Element.prototype.scrollIntoView;Element.prototype.scrollIntoView=function(){};try{return _pm.apply(this,arguments)}finally{Element.prototype.scrollIntoView=o}}return _pm.apply(this,arguments)}}
+/* Online-Gast: Platzwechsel ohne Änderung der Reihenfolge kommen nur über P.slotOf an – eigene Leiste dann neu aufbauen */
+hook('draw',()=>{try{if(NET.role!=='guest'||!P||!P.skBtns||!P.skBtns.length)return;const s=JSON.stringify(P.slotOf||0);if(s!==P._tlSo){P._tlSo=s;buildSkillBar()}}catch(e){}},null);
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
