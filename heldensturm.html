@@ -4611,7 +4611,7 @@ function renderWorld(dt){
  const ents=[];for(const e of G.enemies)if(inView(e.x,e.y,e.r+30))ents.push(e);for(const a of G.allies)if(!a.dead)ents.push(a);for(const q of (G.mp?PL:[P]))ents.push(q);for(const p of G.props)if(inView(p.x,p.y,70))ents.push(p);ents.sort((a,b)=>a.y-b.y);
  for(const tr of G.traps){if(!inView(tr.x,tr.y,40))continue;const sh=tr.done?1:0;ell(cx,tr.x,tr.y+2,16,6,'rgba(0,0,0,.3)');cx.strokeStyle='#8a8a92';cx.lineWidth=3;cx.beginPath();cx.ellipse(tr.x,tr.y,15,6,0,0,TAU);cx.stroke();for(let i=-3;i<=3;i++){ln(cx,'#c8c8d0',1.6,tr.x+i*4,tr.y-(sh?2:6),tr.x+i*4+1,tr.y-(sh?6:1))}if(tr.arm<=0&&!tr.done){cx.globalAlpha=0.3+0.2*Math.sin(t*5);circ(cx,tr.x,tr.y,3,'#ffd04a');cx.globalAlpha=1}}
  drawCorpses(inView,t);drawLinks(t);
- for(const e of ents){if(e===P||(G.mp&&PL.includes(e)))withP(e,()=>{if(P.down)drawDown(t);else{drawPlayer(t);drawPadAim()}if(G.mp){drawMpTag();drawAuraTag(t)}});else if(e.prop)drawProp(e,t);else if(e.kind==='obj')drawZielAlly(e,t);else if(e.kind==='pet')drawPet(e,t);else if(e.kind==='rex'){const br=rank('f_bigrex');if(br){cx.save();cx.translate(e.x,e.y);cx.scale(1+0.18*br,1+0.18*br);drawRex(cx,0,0,e.flip,t,e.moving);cx.restore()}else drawRex(cx,e.x,e.y,e.flip,t,e.moving)}else if(e.kind==='ill'){drawHero(cx,'barradin',e.x,e.y,1,{t:t+e.t,flip:e.flip,ghost:1});cx.globalAlpha=0.6;cx.strokeStyle='#9fd8ff';cx.lineWidth=1.5;cx.beginPath();cx.arc(e.x,e.y,18+Math.sin(t*6)*2,0,TAU);cx.stroke();cx.globalAlpha=1}else drawEnemy(e,t)}
+ for(const e of ents){if(e===P||(G.mp&&PL.includes(e)))withP(e,()=>{if(P.down)drawDown(t);else{drawPlayer(t);drawPadAim()}if(G.mp){drawMpTag();drawAuraTag(t)}});else if(e.prop)drawProp(e,t);else if(e.kind==='obj')drawZielAlly(e,t);else if(e.kind==='pet')drawPet(e,t);else if(e.kind==='rex'){const br=rank('f_bigrex');if(br){cx.save();cx.translate(e.x,e.y);cx.scale(1+0.18*br,1+0.18*br);drawRex(cx,0,0,e.flip,t,e.moving);cx.restore()}else drawRex(cx,e.x,e.y,e.flip,t,e.moving)}else if(e.kind==='ill'){drawHero(cx,'barradin',e.x,e.y,1,{t:t+e.t,flip:e.flip,ghost:1});cx.globalAlpha=0.6;cx.strokeStyle='#f0b0ff';cx.lineWidth=1.5;cx.beginPath();cx.arc(e.x,e.y,18+Math.sin(t*6)*2,0,TAU);cx.stroke();cx.globalAlpha=1}else drawEnemy(e,t)}
  cx.globalAlpha=1;
  for(const e of G.enemies)if(e.flying&&e.flyHigh>0.6&&inView(e.x,e.y,200)){cx.save();cx.globalAlpha=0.9;const y=e.y-e.flyHigh*90;cx.translate(e.x,y);cx.scale(e.r/12,e.r/12);poly(cx,e.def.c,0,-2,-30,-14,-12,6);poly(cx,e.def.c,0,-2,30,-14,12,6);ell(cx,0,0,8,12,e.def.c);cx.restore()}
  const rex=G.allies.find(a=>a.kind==='rex'&&!a.dead);if(rex&&rex.hp<rex.maxHp){cx.fillStyle='rgba(0,0,0,.6)';cx.fillRect(rex.x-12,rex.y-18,24,3);cx.fillStyle='#7fd36a';cx.fillRect(rex.x-12,rex.y-18,24*rex.hp/rex.maxHp,3)}
@@ -17954,6 +17954,373 @@ function stFxFit(h,w){mfReset(h);h.classList.remove('mfhost','mfd','mfgrid','mfc
   if(h){h.classList.remove('stfx','stfrow','stfcol','stfnov','stflow');h._sthH=null;if(w&&w._stfx){w._stfx=0;w.style.removeProperty('height');w.style.maxWidth=''}}}catch(e){console.error('stsprung',e)}return _mf.apply(this,arguments)}}
 window.__hsSTS=1;
 
+/* ================= Barradin · Effekt-Feinschliff (Paket „vfx_barradin“) =================
+   Ziel: jede Fähigkeit von Barradin „cool bis episch“. Keine Spielwerte geändert – nur Bilder (G.fxs mit flachen Daten,
+   damit der Online-Gast alles sieht), Zonenzeichnung (ZONEART), Zeichen-Haken und ein paar dosierte Wackler/Trefferstopps.
+   Bildsprache: Verzauberung = Gold + Violett (Notenlinien, Hypnose), Ranken = Moosgrün + Rosenrot (Dornen, Blüten),
+   Illusion = irisierend Violett-Rosé-Gold + Perlweiß (kein Blau – Nutzerwunsch) (Scherben, Türen, Trugbilder). Alles respektiert fxOk() („Effekte reduziert“) und camL().
+   Neue Namen: vbN, vbWrap, vbFx, vbR, vbNote, vbDiz, vbShard, vbIllScan, HFX vb_*, ZONEART.vines (nur vine:1) / ZONEART.thorns. */
+const VBC={G:'#f6d77c',G2:'#ffe9a0',V:'#c48cff',V2:'#8a4ad8',GR:'#86d46e',GR2:'#3e7a2a',GR3:'#26491a',RO:'#e0284a',B:'#f0b0ff',B2:'#fff0f8',PK:'#ff6ab0'};
+const vbN=id=>HEROES.barradin.tree.find(n=>n.id===id);
+const vbOk=()=>typeof fxOk==='function'&&fxOk();
+let vbAu=0;/* 1 = von selbst ausgelöste Passive (umgewandelte Aktive): etwas kürzer und zurückhaltender */
+function vbFx(o){if(!vbOk())return null;o.t=o.t||0;if(vbAu&&!o.au){o.au=1;o.life*=0.8}G.fxs.push(o);return o}
+/* fester Zufall (Gast zeichnet dasselbe) */
+const vbR=(s,i)=>{const v=Math.sin(s*12.9898+i*78.233)*43758.5453;return v-Math.floor(v)};
+/* Fähigkeit zur Laufzeit umhüllen: pre(r) merkt sich Ziele VOR dem Zauber, post(r,ctx) zeichnet danach */
+function vbWrap(id,pre,post){const n=vbN(id);if(!n||n.vbW)return;const key=n.cast?'cast':n.tlCast?'tlCast':null;if(!key)return;n.vbW=1;const c0=n[key];
+ n[key]=function(r){let ctx=null;const me=P&&P.id==='barradin';if(me&&pre)try{ctx=pre(r)}catch(e){}const nf=G.fxs.length;if(key==='tlCast')vbAu=1;let res;try{res=c0.apply(this,arguments)}finally{vbAu=0}
+  if(res!==false&&me&&post)try{vbAu=key==='tlCast'?1:0;post(r,ctx||{},nf)}catch(e){console.error(e)}finally{vbAu=0}return res}}
+/* kleine Zeichenhelfer */
+function vbNote(c,x,y,s,col,g){const F=`700 ${Math.round(18*s)}px Georgia,serif`;if(c.vbF!==F||c.font!==c.vbFN){c.font=F;c.vbF=F;c.vbFN=c.font}c.textAlign='center';c.textBaseline='middle';c.fillStyle=col;c.fillText(g||'♪',x,y)}
+function vbSpark4(c,x,y,s){c.beginPath();c.moveTo(x-s,y);c.lineTo(x,y-s*0.22);c.lineTo(x+s,y);c.lineTo(x,y+s*0.22);c.closePath();c.fill();c.beginPath();c.moveTo(x,y-s);c.lineTo(x+s*0.22,y);c.lineTo(x,y+s);c.lineTo(x-s*0.22,y);c.closePath();c.fill()}
+function vbShard(c,x,y,a,s){c.beginPath();c.moveTo(x+Math.cos(a)*s,y+Math.sin(a)*s);c.lineTo(x+Math.cos(a+2.5)*s*0.45,y+Math.sin(a+2.5)*s*0.45);c.lineTo(x+Math.cos(a-2.3)*s*0.55,y+Math.sin(a-2.3)*s*0.55);c.closePath();c.fill()}
+/* Schwindel-/Angst-Zeichen über Gegnern (begrenzt) */
+function vbDiz(L,dur,g,col){if(!vbOk()||fxQ()<2)return;let have=0;for(const f of G.fxs)if(f.k==='vb_diz')have++;const life=Math.min(2.2,Math.max(0.6,dur));for(const e of L){if(!e||e.dead||have>=12)continue;if((e.vbDzT||0)>G.time)continue;e.vbDzT=G.time+life*0.8;have++;vbFx({k:'vb_diz',x:e.x,y:e.y-e.r-10,r:e.r,g:g||'',c:col||VBC.G,life,s:vbR(e.x,e.y)*6})}}
+const vbIn=(x,y,R)=>{const L=[];query(x,y,R+40,e=>{if(!e.dead&&L.length<12&&d2(e,{x,y})<(R+e.r)*(R+e.r))L.push(e)});return L};
+const vbEase=k=>1-(1-k)*(1-k);
+
+Object.assign(HFX,{
+ /* Notenlinien-Band: fünf (oder drei) goldene Linien schießen von Barradin zum Ziel */
+ vb_staff(f,k,c,t){const dx=f.x2-f.x,dy=f.y2-f.y,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,head=Math.min(1,f.t/(f.sp||0.16)),tail=Math.max(0,(f.t-(f.sp||0.16))/Math.max(0.05,f.life-(f.sp||0.16))),
+   n=f.n||5,sp=f.w||4.5,col=f.c||VBC.G,a=1-tail;if(a<=0)return;c.globalCompositeOperation='lighter';c.lineCap='round';
+  for(let j=0;j<n;j++){const off=(j-(n-1)/2)*sp;c.beginPath();for(let i=0;i<=10;i++){const q=tail+(head-tail)*i/10,w=Math.sin(q*9-f.t*24+j*0.6)*(f.wob||3.5)*Math.sin(q*Math.PI),x=f.x+dx*q+nx*(off+w),y=f.y+dy*q+ny*(off+w);i?c.lineTo(x,y):c.moveTo(x,y)}
+   c.globalAlpha=0.35*a;c.strokeStyle=col;c.lineWidth=4;c.stroke();c.globalAlpha=0.9*a;c.strokeStyle=f.c2||'#fff6d8';c.lineWidth=1.2;c.stroke()}
+  const hx=f.x+dx*head,hy=f.y+dy*head;glow(hx,hy,26*a,col,0.9*a);if(head<1||f.t<(f.sp||0.16)+0.1){c.globalAlpha=a;vbNote(c,hx+nx*10,hy+ny*10-6,1,f.c2||'#fff6d8',f.g||'♫')}},
+ /* Person festhalten: Noten kreisen ein, zwei goldene Fesselbänder rotieren um das Ziel, solange es festgehalten wird */
+ vb_fessel(f,k,c,t){const tt=f.t,inq=Math.min(1,tt/0.28),fa=Math.min(1,(f.life-tt)/0.45),r=f.r,x=f.x,y=f.y;c.globalCompositeOperation='lighter';
+  if(inq<1){for(let i=0;i<6;i++){const a=i*TAU/6+tt*5,R=r*(3-1.8*vbEase(inq));c.globalAlpha=inq;vbNote(c,x+Math.cos(a)*R,y-r*0.3+Math.sin(a)*R*0.6,1.1,i%2?VBC.G2:VBC.V)}}
+  else if(tt<0.5){const q=(tt-0.28)/0.22;glow(x,y-r*0.3,r*2.2*(1-q)+8,VBC.G,(1-q)*0.6);c.globalAlpha=1-q;c.strokeStyle='#fff6d8';c.lineWidth=3*(1-q)+1;c.beginPath();c.arc(x,y-r*0.3,r*(1.3+1.6*q),0,TAU);c.stroke()}
+  const pul=0.75+0.25*Math.sin(tt*7);c.lineCap='round';
+  for(let b=0;b<2;b++){c.save();c.translate(x,y-r*0.35);c.rotate((b?0.55:-0.55)+Math.sin(tt*1.7+b)*0.08);const rx=r*1.75*(0.6+0.4*inq),ry=r*0.5;
+   c.globalAlpha=0.2*fa*inq;c.strokeStyle=VBC.G;c.lineWidth=5;c.beginPath();c.ellipse(0,0,rx,ry,0,0,TAU);c.stroke();
+   c.globalAlpha=0.75*fa*inq*pul;c.strokeStyle=b?VBC.G2:'#fff1c2';c.lineWidth=1.6;c.stroke();
+   for(let i=0;i<2;i++){const a=tt*(b?2.2:-2.2)+i*Math.PI;c.globalAlpha=fa*inq;c.fillStyle='#fff6d8';vbSpark4(c,Math.cos(a)*rx,Math.sin(a)*ry,3.2)}c.restore()}
+  glow(x,y+r*0.4,r*1.4,VBC.G,0.12*fa*pul,true)},
+ /* Verwirrende Weise: violett-goldener Doppelwirbel */
+ vb_wirbel(f,k,c,t){const g=vbEase(Math.min(1,f.t/0.18)),a=(k<0.6?1:1-(k-0.6)/0.4)*(f.au?0.75:1),R=f.r*g;c.globalCompositeOperation='lighter';c.lineCap='round';
+  glow(f.x,f.y,R*1.1,VBC.V,0.35*a,true);
+  for(let arm=0;arm<3;arm++){c.beginPath();for(let i=0;i<=26;i++){const s=i/26,an=arm*TAU/3+s*4.4+f.t*7,rr=R*s;const x=f.x+Math.cos(an)*rr,y=f.y+Math.sin(an)*rr*0.8;i?c.lineTo(x,y):c.moveTo(x,y)}
+   c.globalAlpha=0.45*a;c.strokeStyle=arm===1?VBC.G:VBC.V;c.lineWidth=9;c.stroke();c.globalAlpha=0.95*a;c.strokeStyle=arm===1?'#fff6d8':'#f0dcff';c.lineWidth=2;c.stroke()}
+  for(let i=0;i<6;i++){const an=-f.t*5+i*TAU/6,rr=R*0.78;c.globalAlpha=a;vbNote(c,f.x+Math.cos(an)*rr,f.y+Math.sin(an)*rr*0.8,0.9,i%2?VBC.G2:'#f0dcff',i%3?'♪':'♫')}},
+ /* Schwindel / Angst über dem Kopf */
+ vb_diz(f,k,c,t){const fa=Math.min(1,f.t/0.15,(f.life-f.t)/0.3);if(fa<=0)return;const tt=f.t+f.s;
+  if(f.g){const b=Math.abs(Math.sin(tt*9))*3;c.globalAlpha=fa;c.font='900 17px Georgia,serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle='rgba(30,0,40,.8)';c.fillText(f.g,f.x+1.5,f.y-b+1.5);c.fillStyle=f.c;c.fillText(f.g,f.x,f.y-b);return}
+  c.globalCompositeOperation='lighter';glow(f.x,f.y,Math.max(14,f.r*0.9),f.c,0.35*fa);for(let i=0;i<3;i++){const a=tt*5+i*TAU/3,x=f.x+Math.cos(a)*Math.max(10,f.r*0.8),y=f.y+Math.sin(a)*4;c.globalAlpha=fa*(0.6+0.4*Math.sin(a));c.fillStyle=i===1?'#f0dcff':f.c;vbSpark4(c,x,y,4)}},
+ /* Hypnotisches Muster: Kaleidoskop aus drehenden Sternen und nach innen laufenden Ringen */
+ vb_muster(f,k,c,t){const g=vbEase(Math.min(1,f.t/0.22)),a=(k<0.4?1:1-(k-0.4)/0.6)*(f.au?0.6:1),R=f.r*g*(f.au?0.85:1);if(a<=0)return;c.save();c.translate(f.x,f.y);c.scale(1,0.82);c.globalCompositeOperation='lighter';
+  glow(0,0,R*1.05,VBC.V2,0.28*a,true);
+  for(let i=0;i<4;i++){const ph=(f.t*1.4+i/4)%1,rr=R*(1-ph);c.globalAlpha=a*ph*0.7;c.strokeStyle=i%2?VBC.G:VBC.V;c.lineWidth=3;c.beginPath();c.arc(0,0,rr,0,TAU);c.stroke()}
+  for(let L=0;L<3;L++){const rot=f.t*(L%2?-1.6:1.2)+L*0.4,ro=R*(1-L*0.27),ri=ro*0.55,n=8;c.save();c.rotate(rot);c.beginPath();for(let i=0;i<=n*2;i++){const an=i*Math.PI/n,rr=i%2?ri:ro;const x=Math.cos(an)*rr,y=Math.sin(an)*rr;i?c.lineTo(x,y):c.moveTo(x,y)}
+   c.globalAlpha=0.25*a;c.strokeStyle=L===1?VBC.G:VBC.V;c.lineWidth=6;c.stroke();c.globalAlpha=0.75*a;c.strokeStyle=L===1?'#fff6d8':'#f0dcff';c.lineWidth=1.6;c.stroke();c.restore()}
+  c.beginPath();for(let i=0;i<=40;i++){const s=i/40,an=s*7+f.t*-5,rr=R*0.5*s;const x=Math.cos(an)*rr,y=Math.sin(an)*rr;i?c.lineTo(x,y):c.moveTo(x,y)}c.globalAlpha=0.8*a;c.strokeStyle='#ffe9ff';c.lineWidth=2;c.stroke();
+  glow(0,0,40,'#ffffff',0.6*a*(1-k));c.restore()},
+ /* Bösartiger Spott: Comic-Zacke am Ziel */
+ vb_spott(f,k,c,t){const pop=k<0.2?0.4+0.9*(k/0.2):1.3-0.3*Math.min(1,(k-0.2)/0.2),a=k<0.6?1:1-(k-0.6)/0.4,s=f.r*pop;c.save();c.translate(f.x,f.y);c.rotate(f.s);
+  c.beginPath();for(let i=0;i<=20;i++){const an=i*Math.PI/10,rr=i%2?s*0.55:s;const x=Math.cos(an)*rr,y=Math.sin(an)*rr*0.8;i?c.lineTo(x,y):c.moveTo(x,y)}c.closePath();
+  c.globalAlpha=0.55*a;c.fillStyle='#ffd0e6';c.fill();c.globalAlpha=a;c.strokeStyle='#ff4f9a';c.lineWidth=2.4;c.stroke();
+  c.globalCompositeOperation='lighter';glow(0,0,s*1.2,VBC.PK,0.5*a);c.globalAlpha=a;c.strokeStyle='#ffffff';c.lineWidth=2.2;c.lineCap='round';
+  for(let i=0;i<4;i++){const an=i*Math.PI/2+0.4;c.beginPath();c.moveTo(Math.cos(an)*s*0.18,Math.sin(an)*s*0.18);c.lineTo(Math.cos(an)*s*0.42,Math.sin(an)*s*0.42);c.stroke()}c.restore()},
+ /* Dissonantes Flüstern: Einschnürung am Ziel; bei Tod eine zackige Angstwelle */
+ vb_implode(f,k,c,t){const q=vbEase(Math.min(1,k/0.6)),R=f.r*(2.4-2.1*q),a=k<0.7?1:1-(k-0.7)/0.3;c.globalCompositeOperation='lighter';
+  c.beginPath();for(let i=0;i<=24;i++){const an=i*TAU/24,rr=R*(i%2?0.78:1)*(1+0.06*Math.sin(f.t*30+i));const x=f.x+Math.cos(an)*rr,y=f.y+Math.sin(an)*rr*0.8;i?c.lineTo(x,y):c.moveTo(x,y)}
+  c.globalAlpha=0.5*a;c.strokeStyle=VBC.V2;c.lineWidth=7;c.stroke();c.globalAlpha=a;c.strokeStyle='#f0dcff';c.lineWidth=1.8;c.stroke();glow(f.x,f.y,f.r*(1+q),'#b06cff',0.7*a*q)},
+ vb_angst(f,k,c,t){const e=vbEase(k),R=f.r*(0.12+0.88*e),a=1-k;c.globalCompositeOperation='lighter';c.beginPath();for(let i=0;i<=36;i++){const an=i*TAU/36,rr=R*(i%2?0.86:1+0.08*vbR(f.s,i));const x=f.x+Math.cos(an)*rr,y=f.y+Math.sin(an)*rr*0.85;i?c.lineTo(x,y):c.moveTo(x,y)}
+  c.globalAlpha=0.55*a;c.strokeStyle='#8a2ad8';c.lineWidth=16*(1-k)+3;c.stroke();c.globalAlpha=0.95*a;c.strokeStyle='#f6e6ff';c.lineWidth=2;c.stroke();
+  for(let i=0;i<10;i++){const an=i*TAU/10+vbR(f.s,i),r0=R*0.55,r1=R*(0.9+0.15*vbR(f.s,i+9));c.globalAlpha=0.6*a;c.strokeStyle='#c48cff';c.lineWidth=2;c.beginPath();c.moveTo(f.x+Math.cos(an)*r0,f.y+Math.sin(an)*r0*0.85);c.lineTo(f.x+Math.cos(an)*r1,f.y+Math.sin(an)*r1*0.85);c.stroke()}},
+ /* Ballade der Helden: riesiger Notenlinien-Kreis mit reitenden Noten, goldene Strahlen */
+ vb_ballade(f,k,c,t){const g=vbEase(Math.min(1,k/0.45)),a=k<0.5?1:1-(k-0.5)/0.5,R=40+(f.r-40)*g;c.save();c.translate(f.x,f.y);c.globalCompositeOperation='lighter';c.lineCap='round';
+  glow(0,0,R*1.15,VBC.G,0.25*a,true);
+  for(let j=0;j<5;j++){const rr=R+(j-2)*6;c.globalAlpha=0.3*a;c.strokeStyle=VBC.G;c.lineWidth=4;c.beginPath();c.ellipse(0,0,rr,rr*0.62,0,0,TAU);c.stroke();c.globalAlpha=0.85*a;c.strokeStyle='#fff3c8';c.lineWidth=1.1;c.stroke()}
+  for(let i=0;i<10;i++){const an=f.t*1.8+i*TAU/10,line=(i%5-2)*6,rr=R+line;c.globalAlpha=a;vbNote(c,Math.cos(an)*rr,Math.sin(an)*rr*0.62-6,1.25,i%2?'#fff6d8':VBC.G2,['♪','♫','♩','♬'][i%4])}
+  c.globalAlpha=0.9*a;c.font='700 46px Georgia,serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle=VBC.G2;const cl=Math.sin(Math.min(1,k*3)*Math.PI);if(cl>0.01){c.globalAlpha=cl*0.9;c.fillText('𝄞',-R*0.72,-R*0.45)}
+  c.restore()},
+ /* Ballade: aufsteigende goldene Noten-Fontäne (kurzer Vorlauf) */
+ vb_auftakt(f,k,c,t){const a=1-k;c.globalCompositeOperation='lighter';glow(f.x,f.y-90*Math.min(1,f.t*1.6),70,VBC.G,0.4*a);for(let i=0;i<6;i++){const q=Math.min(1,f.t*1.6+vbR(f.s,i)*0.25),an=-Math.PI/2+(vbR(f.s,i+3)-0.5)*1.6,rr=30+140*q;
+   const x=f.x+Math.cos(an)*rr*0.7,y=f.y-20+Math.sin(an)*rr;c.globalAlpha=a;vbNote(c,x,y,1.2,i%2?'#fff6d8':VBC.G2,['♪','♫','♬'][i%3])}},
+ /* Ranken brechen aus dem Boden */
+ vb_spross(f,k,c,t){const n=f.n||9,R=f.r,up=Math.min(1,f.t/0.22),down=k>0.6?(k-0.6)/0.4:0,a=1-down;if(a<=0)return;c.lineCap='round';c.lineJoin='round';
+  c.globalAlpha=0.5*a;glow(f.x,f.y,R*1.1,'#1c3010',0.6*a,true);
+  for(let i=0;i<n;i++){const an=vbR(f.s,i)*TAU,d=R*(0.25+0.7*vbR(f.s,i+20)),bx=f.x+Math.cos(an)*d,by=f.y+Math.sin(an)*d*0.7,h=(26+34*vbR(f.s,i+40))*(f.h||1),lean=(vbR(f.s,i+60)-0.5)*1.4,
+    gq=Math.min(1,Math.max(0,(f.t-vbR(f.s,i+80)*0.12)/0.2))*(1-down*0.8),sw=Math.sin(f.t*5+i)*4;if(gq<=0)continue;
+   const tx=bx+lean*h*0.6*gq+sw*gq,ty=by-h*gq,cxp=bx+lean*h*0.1-sw,cyp=by-h*0.55*gq;
+   c.globalAlpha=a;c.strokeStyle=VBC.GR3;c.lineWidth=6;c.beginPath();c.moveTo(bx,by);c.quadraticCurveTo(cxp,cyp,tx,ty);c.stroke();c.strokeStyle=VBC.GR;c.lineWidth=2.4;c.stroke();
+   c.fillStyle='#cfe8a0';for(let j=1;j<3;j++){const q=j/3,x=bx+(tx-bx)*q+(cxp-bx)*0.3*(1-q),y=by+(ty-by)*q,sd=j%2?1:-1;c.beginPath();c.moveTo(x,y);c.lineTo(x+sd*6,y-2);c.lineTo(x+sd*1,y-4);c.closePath();c.fill()}
+   if(f.rose&&i%3===0&&gq>0.8){bmRose(c,tx,ty,i,1,a)}else{c.fillStyle='#6fb048';c.beginPath();c.ellipse(tx,ty,4,2,lean,0,TAU);c.fill()}}
+  if(up<1){c.globalCompositeOperation='lighter';glow(f.x,f.y,R*0.9,VBC.GR,(1-up)*0.6,true)}},
+ /* Riss im Boden (Dornenwall) */
+ vb_riss(f,k,c,t){const g=Math.min(1,f.t/0.2),a=k<0.5?1:1-(k-0.5)/0.5,dx=f.x2-f.x,dy=f.y2-f.y,mx=(f.x+f.x2)/2,my=(f.y+f.y2)/2;c.lineCap='round';c.globalCompositeOperation='lighter';
+  for(const sd of [-1,1]){c.beginPath();c.moveTo(mx,my);for(let i=1;i<=8;i++){const q=i/8*g,x=mx+dx*0.5*q*sd,y=my+dy*0.5*q*sd+Math.sin(i*2.7+f.s)*4;c.lineTo(x,y)}c.globalAlpha=0.45*a;c.strokeStyle=VBC.GR;c.lineWidth=9;c.stroke();c.globalAlpha=0.95*a;c.strokeStyle='#e6ffc8';c.lineWidth=2;c.stroke()}},
+ /* Würgeranken: dicke Dornenranken schnellen zu den Gegnern und reißen sie zur Mitte, dann ein Rankenknoten */
+ vb_wuerg(f,k,c,t){const P_=f.pts||[],N=P_.length/2,T=f.t,out=Math.min(1,T/0.12),pull=T<0.14?0:Math.min(1,(T-0.14)/0.16),a=k<0.7?1:1-(k-0.7)/0.3;c.lineCap='round';
+  for(let i=0;i<N;i++){const ex=P_[i*2],ey=P_[i*2+1],q=out*(1-0.72*pull),tx=f.x+(ex-f.x)*q,ty=f.y+(ey-f.y)*q,mx=(f.x+tx)/2+(ey-f.y)*0.18,my=(f.y+ty)/2-(ex-f.x)*0.18-16;
+   c.globalAlpha=a;c.strokeStyle=VBC.GR3;c.lineWidth=8;c.beginPath();c.moveTo(f.x,f.y);c.quadraticCurveTo(mx,my,tx,ty);c.stroke();c.strokeStyle=VBC.GR;c.lineWidth=3;c.stroke();
+   c.fillStyle='#d8f0b0';for(let j=1;j<5;j++){const s=j/5,x=(1-s)*(1-s)*f.x+2*(1-s)*s*mx+s*s*tx,y=(1-s)*(1-s)*f.y+2*(1-s)*s*my+s*s*ty;c.beginPath();c.moveTo(x-3,y);c.lineTo(x,y-7);c.lineTo(x+3,y);c.closePath();c.fill()}
+   if(pull>0&&pull<1){c.save();c.globalCompositeOperation='lighter';glow(tx,ty,22,VBC.GR,0.8*(1-pull));c.restore()}}
+  if(pull>0){const kn=Math.min(1,pull*1.4);c.save();c.translate(f.x,f.y);for(let i=0;i<3;i++){c.save();c.rotate(T*3+i*TAU/3);c.globalAlpha=a*kn;c.strokeStyle=VBC.GR3;c.lineWidth=7;c.beginPath();c.ellipse(0,0,46*kn,16*kn,0,0,TAU);c.stroke();c.strokeStyle=i===1?VBC.RO:VBC.GR;c.lineWidth=2.5;c.stroke();c.restore()}
+   c.globalCompositeOperation='lighter';glow(0,0,70,VBC.GR,0.45*a*kn,true);c.restore()}},
+ /* Blüte (Blühende Heilung): kurzes Aufblühen */
+ vb_bluete(f,k,c,t){const g=vbEase(Math.min(1,k/0.35)),a=k<0.6?1:1-(k-0.6)/0.4;c.save();c.translate(f.x,f.y);c.rotate(f.t*1.5);c.globalAlpha=a;for(let i=0;i<5;i++){c.rotate(TAU/5);c.fillStyle=i%2?'#ff8fb0':'#ffc0d4';c.beginPath();c.ellipse(9*g,0,8*g,5*g,0,0,TAU);c.fill()}
+  c.fillStyle='#ffe08a';c.beginPath();c.arc(0,0,4*g,0,TAU);c.fill();c.globalCompositeOperation='lighter';glow(0,0,26*g,'#ff9ab8',0.6*a);c.restore()},
+ /* Spiegelbild: ein Spiegel erscheint und zerspringt – Scherben fliegen zu den Trugbildern */
+ vb_spiegel(f,k,c,t){const T=f.t,P_=f.pts||[],N=P_.length/2,pop=Math.min(1,T/0.12),brk=T>0.16;c.save();
+  if(!brk){c.translate(f.x,f.y-30);c.scale(pop,pop);const g=c.createLinearGradient(-18,-26,18,26);g.addColorStop(0,'#fff4fb');g.addColorStop(0.5,'#e8a0ff');g.addColorStop(1,'#c8a8ff');c.fillStyle=g;c.globalAlpha=0.9;c.beginPath();c.ellipse(0,0,18,26,0,0,TAU);c.fill();
+   c.strokeStyle=VBC.G;c.lineWidth=3;c.stroke();c.globalCompositeOperation='lighter';glow(0,0,46,VBC.B,0.8);c.strokeStyle='#ffffff';c.lineWidth=2;c.beginPath();c.moveTo(-8,-12);c.quadraticCurveTo(-6,-20,2,-21);c.stroke();c.restore();return}
+  const q=Math.min(1,(T-0.16)/0.3),a=k<0.8?1:1-(k-0.8)/0.2;c.globalCompositeOperation='lighter';
+  if(q<0.5){glow(f.x,f.y-30,70*(1-q),'#ffffff',(0.5-q)*1.8)}
+  for(let i=0;i<N;i++){const ex=P_[i*2],ey=P_[i*2+1]-20;for(let j=0;j<5;j++){const s=vbR(f.s,i*7+j),qq=Math.min(1,q*(1+s*0.4)),x=f.x+(ex-f.x)*qq+Math.sin(j*2.1+i)*14*(1-qq),y=f.y-30+(ey-f.y+30)*qq-Math.sin(qq*Math.PI)*(30+30*s);
+    c.globalAlpha=a*(qq<1?1:0.4);c.fillStyle=j%2?'#fff4fb':VBC.B;vbShard(c,x,y,T*12+j+i,7);glow(x,y,12,VBC.B,0.5*a)}
+   if(q>=1){const qa=Math.max(0,1-(T-0.46)/0.25);if(qa>0){glow(ex,ey,50,VBC.B,qa*0.9);c.globalAlpha=qa;c.strokeStyle='#ffffff';c.lineWidth=2;c.beginPath();c.arc(ex,ey+14,22+30*(1-qa),0,TAU);c.stroke()}}}
+  c.restore()},
+ /* Ein Trugbild erscheint: Lichtsäule + zusammenlaufende Scherben */
+ vb_trug(f,k,c,t){if(f.t<0)return;const a=1-k,q=vbEase(Math.min(1,k/0.5));c.globalCompositeOperation='lighter';pillar(f.x,f.y+12,34*(1-k*0.5),130,VBC.B,0.7*a);
+  for(let i=0;i<6;i++){const an=i*TAU/6+f.s,rr=48*(1-q);c.globalAlpha=a;c.fillStyle=i%2?'#ffffff':VBC.B;vbShard(c,f.x+Math.cos(an)*rr,f.y-14+Math.sin(an)*rr*0.7,an+Math.PI,6)}
+  glow(f.x,f.y-14,30+20*q,VBC.B,0.6*a)},
+ /* Ein Trugbild zerplatzt: Spiegelscherben fliegen auseinander */
+ vb_scherben(f,k,c,t){const e=vbEase(k),a=1-k;c.globalCompositeOperation='lighter';glow(f.x,f.y-12,f.r*(0.5+0.6*e),VBC.B,0.8*a*(1-e*0.5));
+  c.globalAlpha=a*0.9;c.strokeStyle='#fff4fb';c.lineWidth=3*(1-k)+0.5;c.beginPath();c.ellipse(f.x,f.y,f.r*(0.2+0.85*e),f.r*(0.2+0.85*e)*0.75,0,0,TAU);c.stroke();
+  for(let i=0;i<10;i++){const an=i*TAU/10+vbR(f.s,i),rr=f.r*(0.15+0.9*e)*(0.7+0.4*vbR(f.s,i+11)),x=f.x+Math.cos(an)*rr,y=f.y-12+Math.sin(an)*rr*0.75-Math.sin(k*Math.PI)*16;
+   c.globalAlpha=a;c.fillStyle=i%3?'#fff4fb':VBC.V;vbShard(c,x,y,an+f.t*10,7*(1-k*0.5))}},
+ /* Phantasmagorie: ein riesiges Schreckensgesicht steigt hinter Barradin auf */
+ vb_schreck(f,k,c,t){const rise=vbEase(Math.min(1,k/0.3)),a=k<0.65?Math.min(1,k/0.12):1-(k-0.65)/0.35,s=0.55+0.75*rise,x=f.x,y=f.y-40-50*rise*(f.small?0.5:1),mo=Math.min(1,Math.max(0,(k-0.12)/0.2));if(a<=0)return;
+  c.save();c.translate(x,y);c.scale(s*(f.small?0.55:1),s*(f.small?0.55:1));
+  c.globalCompositeOperation='lighter';glow(0,10,150,'#7a2ad8',0.45*a,true);c.globalCompositeOperation='source-over';
+  c.globalAlpha=0.55*a;const g=c.createRadialGradient(0,-10,10,0,0,110);g.addColorStop(0,'#5a2a7a');g.addColorStop(1,'rgba(30,8,44,0)');c.fillStyle=g;
+  c.beginPath();c.moveTo(-80,60);c.bezierCurveTo(-110,-40,-60,-110,0,-110);c.bezierCurveTo(60,-110,110,-40,80,60);for(let i=0;i<6;i++){const xx=80-i*32;c.lineTo(xx-16,40+Math.sin(f.t*9+i)*10);c.lineTo(xx-32,62)}c.closePath();c.fill();
+  c.globalAlpha=0.9*a;c.fillStyle='#12041c';c.beginPath();c.ellipse(-30,-34,18,24,0.35,0,TAU);c.ellipse(30,-34,18,24,-0.35,0,TAU);c.fill();
+  c.beginPath();c.moveTo(-34,12);for(let i=0;i<=8;i++){const xx=-34+i*8.5;c.lineTo(xx,12+(i%2?10:0)+mo*6)}c.lineTo(34,12+mo*40);c.quadraticCurveTo(0,20+mo*70,-34,12+mo*40);c.closePath();c.fill();
+  c.globalCompositeOperation='lighter';const fl=0.75+0.25*Math.sin(f.t*30);for(const sd of [-1,1]){glow(sd*30,-32,26,'#ff3af0',a*fl);glow(sd*30,-32,9,'#ffffff',a*fl)}c.restore()},
+ /* Flöte: Riss in eine andere Welt, Tentakel winden sich heraus */
+ vb_riss2(f,k,c,t){const o=k<0.25?vbEase(k/0.25):k>0.75?1-(k-0.75)/0.25:1,R=f.r*o;if(R<=1)return;c.save();c.translate(f.x,f.y);c.globalCompositeOperation='lighter';glow(0,0,R*1.8,VBC.PK,0.5*o,true);
+  c.globalCompositeOperation='source-over';c.globalAlpha=0.92*o;const g=c.createRadialGradient(0,0,2,0,0,R);g.addColorStop(0,'#05020a');g.addColorStop(0.7,'#2a0a3a');g.addColorStop(1,'#ff6ab0');c.fillStyle=g;c.beginPath();c.ellipse(0,0,R,R*0.42,0,0,TAU);c.fill();
+  c.globalCompositeOperation='lighter';c.strokeStyle='#ffb0e0';c.lineWidth=2.5;c.globalAlpha=o;c.beginPath();c.ellipse(0,0,R,R*0.42,0,0,TAU);c.stroke();
+  for(let i=0;i<8;i++){const an=f.t*1.5+i*TAU/8;c.fillStyle=i%2?'#ffb0e0':'#c48cff';c.globalAlpha=0.9*o;c.font='700 12px Georgia,serif';c.textAlign='center';c.textBaseline='middle';c.fillText('ᚱᚦᛟᛉ'[i%4],Math.cos(an)*(R+12),Math.sin(an)*(R*0.42+8))}
+  c.globalCompositeOperation='source-over';c.lineCap='round';for(let i=0;i<3;i++){const bx=(i-1)*R*0.45,h=60*o*(0.7+0.3*Math.sin(f.t*4+i)),w=Math.sin(f.t*6+i*2)*18;c.globalAlpha=0.95*o;c.strokeStyle='#ff6ab0';c.lineWidth=8;c.beginPath();c.moveTo(bx,0);c.quadraticCurveTo(bx+w,-h*0.5,bx-w*0.6,-h);c.stroke();c.strokeStyle='#6a2a5a';c.lineWidth=3;c.stroke()}
+  c.restore()},
+ /* Tentakel des Demogorgon (ersetzt die alte Linie): dick, mit Saugnäpfen und Aufschlag */
+ tentacle(f,k,c,t){const w=Math.sin(Math.min(1,k*1.4)*Math.PI),a=1-k*k,mx=(f.x+f.x2)/2+40*w,my=(f.y+f.y2)/2-70*w;c.lineCap='round';c.globalAlpha=a;
+  for(let L=0;L<3;L++){c.strokeStyle=['#5a1a4a','#ff6ab0','#ffc0e0'][L];c.lineWidth=[13,8,2.5][L]*(1-k*0.4);c.beginPath();c.moveTo(f.x,f.y);c.quadraticCurveTo(mx,my,f.x2,f.y2);c.stroke()}
+  c.fillStyle='#ffe0f0';for(let j=1;j<6;j++){const s=j/6,x=(1-s)*(1-s)*f.x+2*(1-s)*s*mx+s*s*f.x2,y=(1-s)*(1-s)*f.y+2*(1-s)*s*my+s*s*f.y2+4;c.beginPath();c.arc(x,y,2.2*(1-s*0.4),0,TAU);c.fill()}
+  if(k>0.45){const q=(k-0.45)/0.55;c.globalCompositeOperation='lighter';glow(f.x2,f.y2,30+40*q,VBC.PK,(1-q)*0.9);c.globalAlpha=1-q;c.strokeStyle='#ffd0ec';c.lineWidth=3*(1-q)+0.5;c.beginPath();c.ellipse(f.x2,f.y2,10+60*q,(10+60*q)*0.55,0,0,TAU);c.stroke()}},
+ /* Feuerjonglage: Fackeln fliegen in hohem Bogen aus den Händen */
+ vb_wurf(f,k,c,t){const n=f.n||3;c.globalCompositeOperation='lighter';for(let i=0;i<n;i++){const q=Math.min(1,k*1.2),an=i*TAU/n,ex=f.x+Math.cos(an)*72,ey=f.y-8+Math.sin(an)*44,x=f.x+(ex-f.x)*q,y=f.y-20+(ey-f.y+20)*q-Math.sin(q*Math.PI)*90;
+   glow(x,y,26,'#ff8a2a',0.8*(1-k*0.5));glow(x,y,10,'#fff2c0',1-k*0.5);for(let j=1;j<3;j++){const qq=Math.max(0,q-j*0.06),xx=f.x+(ex-f.x)*qq,yy=f.y-20+(ey-f.y+20)*qq-Math.sin(qq*Math.PI)*90;glow(xx,yy,16-j*3,'#ff6a1a',0.5*(1-j/4)*(1-k))}}
+  const r=60+60*vbEase(k);c.globalAlpha=(1-k)*0.8;c.strokeStyle='#ffb04a';c.lineWidth=5*(1-k)+1;c.beginPath();c.ellipse(f.x,f.y,r,r*0.6,0,0,TAU);c.stroke()},
+ /* Finale der Jonglage */
+ vb_finale(f,k,c,t){const e=vbEase(k),a=1-k;c.globalCompositeOperation='lighter';glow(f.x,f.y-20,90*(1-k*0.5),'#ff9a3a',0.7*a,true);
+  for(let i=0;i<12;i++){const an=i*TAU/12+f.s,r0=30+120*e,r1=r0+26*(1-k);c.globalAlpha=a;c.strokeStyle=i%2?'#ffe08a':'#ff6a1a';c.lineWidth=3;c.beginPath();c.moveTo(f.x+Math.cos(an)*r0,f.y-20+Math.sin(an)*r0*0.7);c.lineTo(f.x+Math.cos(an)*r1,f.y-20+Math.sin(an)*r1*0.7);c.stroke()}},
+ /* Dimensionstür: eine violette Bogentür schwingt auf (Abreise) bzw. öffnet sich mit Lichtfall (Ankunft) */
+ vb_tuer(f,k,c,t){const op=k<0.35?vbEase(k/0.35):k>0.7?1-(k-0.7)/0.3:1,a=k<0.85?1:1-(k-0.85)/0.15,x=f.x,y=f.y+12,Wd=24,Hd=58;if(a<=0)return;c.save();c.globalAlpha=a;
+  c.globalCompositeOperation='lighter';glow(x,y-Hd*0.5,70,f.arr?'#ffe6a0':VBC.V,0.5*op,true);c.globalCompositeOperation='source-over';c.globalAlpha=a;
+  const arch=()=>{c.beginPath();c.moveTo(x-Wd,y);c.lineTo(x-Wd,y-Hd+Wd);c.arc(x,y-Hd+Wd,Wd,Math.PI,0);c.lineTo(x+Wd,y);c.closePath()};
+  arch();const g=c.createLinearGradient(x,y-Hd,x,y);g.addColorStop(0,f.arr?'#fff6d8':'#e6d0ff');g.addColorStop(1,f.arr?'#ffd27a':'#7a3ad8');c.fillStyle=g;c.globalAlpha=a*op;c.fill();
+  c.globalAlpha=a;c.strokeStyle='#e3b456';c.lineWidth=4;arch();c.stroke();c.strokeStyle='#6a3a18';c.lineWidth=1.5;c.stroke();
+  const sw=op*0.92;c.fillStyle='#5a2a7a';c.beginPath();c.moveTo(x-Wd,y);c.lineTo(x-Wd,y-Hd+Wd*0.4);c.lineTo(x-Wd+2*Wd*(1-sw),y-Hd+Wd*0.4-6*sw);c.lineTo(x-Wd+2*Wd*(1-sw),y+4*sw);c.closePath();c.fill();
+  c.fillStyle='#ffd27a';c.beginPath();c.arc(x-Wd+2*Wd*(1-sw)-4,y-Hd*0.4,2.2,0,TAU);c.fill();
+  if(op>0.3){c.globalCompositeOperation='lighter';c.globalAlpha=(op-0.3)*a;const L=f.arr?60:40;const gg=c.createLinearGradient(x,y,x,y+L);gg.addColorStop(0,f.arr?'rgba(255,230,160,.6)':'rgba(196,140,255,.55)');gg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gg;c.beginPath();c.moveTo(x-Wd,y);c.lineTo(x+Wd,y);c.lineTo(x+Wd*2,y+L);c.lineTo(x-Wd*2,y+L);c.closePath();c.fill();
+   c.fillStyle='#fff6d8';for(let i=0;i<5;i++){const an=f.t*4+i*1.3;vbSpark4(c,x+Math.cos(an)*Wd*0.6,y-Hd*0.45+Math.sin(an*1.3)*Hd*0.3,3)}}
+  c.restore()},
+ /* Takt: kleiner goldener Metronom-Schlag unter den Füßen; beim Refrain größer mit Notenkranz */
+ vb_takt(f,k,c,t){const e=vbEase(k),a=1-k,R=(f.big?70:40)*(0.4+0.8*e);c.globalCompositeOperation='lighter';c.globalAlpha=a*0.9;c.strokeStyle=VBC.G2;c.lineWidth=f.big?4:2.5;c.beginPath();c.ellipse(f.x,f.y+10,R,R*0.42,0,0,TAU);c.stroke();
+  c.globalAlpha=a*0.5;c.lineWidth=f.big?10:6;c.strokeStyle=VBC.G;c.stroke();if(f.big)for(let i=0;i<8;i++){const an=i*TAU/8+f.t*2;c.globalAlpha=a;vbNote(c,f.x+Math.cos(an)*R,f.y+10+Math.sin(an)*R*0.42-8,0.9,'#fff6d8',i%2?'♪':'♫')}},
+ /* Ehrfurcht: goldener Schimmer, wenn ein Treffer abgeschwächt wird */
+ vb_ehr(f,k,c,t){const a=1-k;c.globalCompositeOperation='lighter';c.globalAlpha=a*0.8;c.strokeStyle=VBC.G2;c.lineWidth=2;c.beginPath();c.ellipse(f.x,f.y-14,26+8*k,34+8*k,0,0,TAU);c.stroke();glow(f.x,f.y-14,40,VBC.G,0.35*a,true);
+  c.fillStyle='#fff6d8';for(let i=0;i<3;i++){const an=-Math.PI/2+(i-1)*0.5;vbSpark4(c,f.x+Math.cos(an)*30,f.y-14+Math.sin(an)*38-k*10,3*a)}}
+});
+
+/* ---------- Zonen: Ranken (nur Barradins, vine:1) und Dornen ---------- */
+if(!NETW.zones.includes('vine'))NETW.zones.push('vine');
+ZONEART.vines={draw(z,t,c){const al=c.globalAlpha;
+ if(!z.vine){/* Echo (Rankenfalle) – unverändert wie bisher */c.globalAlpha=al*0.22;circ(c,z.x,z.y,z.r,'#4a9a3a');c.globalAlpha=al*0.9;c.strokeStyle='#3e7a2a';c.lineWidth=3;
+  for(const s of z.seeds){const r0=s[1]*z.r*0.85,a0=s[0];c.beginPath();for(let i=0;i<=10;i++){const q=i/10,rr=r0*(1-q*0.6),aa=a0+q*2.6+Math.sin(t*2+s[2])*0.15;const x=z.x+Math.cos(aa)*rr,y=z.y+Math.sin(aa)*rr*0.7;i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()}
+  c.strokeStyle='#7ac85a';c.lineWidth=1.5;c.beginPath();c.ellipse(z.x,z.y,z.r,z.r*0.75,0,0,TAU);c.stroke();c.globalAlpha=al;return}
+ const g=Math.min(1,z.t/0.3),w=z.d&&z.d.w,R=z.r;c.globalAlpha=al*0.55;glow(z.x,z.y,R*1.05,'#1c3410',1,true);c.globalAlpha=al*0.28;circ(c,z.x,z.y,R*g,'#3c7a2a');
+ c.lineCap='round';
+ const SP=[];c.beginPath();for(let k=0;k<z.seeds.length;k++){const s=z.seeds[k],r0=s[1]*R*0.9*g,a0=s[0];const pts=[];for(let i=0;i<=10;i++){const q=i/10,rr=r0*(1-q*0.65),aa=a0+q*2.6+Math.sin(t*2+s[2])*0.18;const x=z.x+Math.cos(aa)*rr,y=z.y+Math.sin(aa)*rr*0.72;pts.push(x,y);i?c.lineTo(x,y):c.moveTo(x,y)}SP.push(pts)}
+ c.globalAlpha=al;c.strokeStyle='#26491a';c.lineWidth=5;c.stroke();c.strokeStyle='#76b84e';c.lineWidth=2;c.stroke();
+ c.fillStyle='#d8f0b0';c.beginPath();for(const pts of SP)for(let i=2;i<10;i+=3){c.moveTo(pts[i*2]-2,pts[i*2+1]);c.lineTo(pts[i*2]+1,pts[i*2+1]-6);c.lineTo(pts[i*2]+3,pts[i*2+1]);c.closePath()}c.fill();
+ c.fillStyle='#8fd060';c.beginPath();for(let k=0;k<SP.length;k+=2){if(w&&k%3===0)continue;const pts=SP[k];c.moveTo(pts[20]+4,pts[21]);c.ellipse(pts[20],pts[21],4,2,z.seeds[k][0],0,TAU)}c.fill();
+ if(w)for(let k=0;k<SP.length;k+=3)bmRose(c,SP[k][20],SP[k][21],z.seeds[k][2],0.9,al);
+ const pul=0.5+0.5*Math.sin(t*3+z.x);c.globalAlpha=al*(0.55+0.3*pul);c.strokeStyle=w?'#ffb0c8':'#9fe07a';c.lineWidth=1.6;c.setLineDash([10,6]);c.lineDashOffset=-t*12;c.beginPath();c.ellipse(z.x,z.y,R*g,R*g*0.72,0,0,TAU);c.stroke();c.setLineDash([]);
+ if(fxQ()>1){c.globalCompositeOperation='lighter';for(let i=0;i<(w?5:3);i++){const s=z.seeds[i],q=(t*0.4+s[2])%1,x=z.x+Math.cos(s[0]+t*0.3)*s[1]*R*0.7,y=z.y+Math.sin(s[0]+t*0.3)*s[1]*R*0.5-q*30;glow(x,y,6,w?'#ffb0d0':'#c8f08a',al*(1-q)*0.8)}c.globalCompositeOperation='source-over'}
+ c.globalAlpha=al}};
+ZONEART.thorns={draw(z,t,c){const al=c.globalAlpha,dl=(z.d&&z.d.dl)||0,q=Math.max(0,Math.min(1,(z.t-dl)/0.16)),pop=q<1?q*1.2:1;if(q<=0)return;const w=z.d&&z.d.w;
+ c.globalAlpha=al*0.4;circ(c,z.x,z.y+4,z.r*0.95,'#1e3214');c.lineCap='round';
+ const TP=[];for(let i=0;i<7;i++){const s=z.seeds[i],x=z.x+Math.cos(s[0])*s[1]*z.r*0.8,y=z.y+Math.sin(s[0])*s[1]*z.r*0.45,h=(20+16*s[2]/TAU)*Math.min(1.12,pop),sw=Math.sin(t*2.4+s[2])*2;TP.push(x,y,h,sw)}
+ c.globalAlpha=al;c.fillStyle='#22381a';c.beginPath();for(let i=0;i<28;i+=4){const x=TP[i],y=TP[i+1],h=TP[i+2],sw=TP[i+3];c.moveTo(x-7,y+5);c.quadraticCurveTo(x-2,y-h*0.5,x+sw,y-h);c.quadraticCurveTo(x+2,y-h*0.5,x+7,y+5);c.closePath()}c.fill();
+ c.fillStyle='#4f8a34';c.beginPath();for(let i=0;i<28;i+=4){const x=TP[i],y=TP[i+1],h=TP[i+2],sw=TP[i+3];c.moveTo(x-3,y+3);c.quadraticCurveTo(x-1,y-h*0.5,x+sw,y-h+3);c.quadraticCurveTo(x+1,y-h*0.4,x+2,y+3);c.closePath()}c.fill();
+ c.strokeStyle='#d8f0b0';c.lineWidth=1.2;c.beginPath();for(let i=0;i<28;i+=4){const x=TP[i],y=TP[i+1],h=TP[i+2];c.moveTo(x-4,y-h*0.4);c.lineTo(x-9,y-h*0.5);c.moveTo(x+4,y-h*0.6);c.lineTo(x+9,y-h*0.7)}c.stroke();
+ c.fillStyle=w?'#ff7aa0':'#c0283c';c.beginPath();for(let i=0;i<28;i+=12){const x=TP[i],y=TP[i+1],h=TP[i+2],sw=TP[i+3];c.moveTo(x+sw*0.6+5.2,y-h*0.55);c.arc(x+sw*0.6+3,y-h*0.55,2.2,0,TAU)}c.fill();
+ if(q<1){c.globalCompositeOperation='lighter';glow(z.x,z.y,z.r*1.2,VBC.GR,(1-q)*0.8,true);c.globalCompositeOperation='source-over'}
+ c.globalAlpha=al}};
+
+/* ---------- Fähigkeiten umhüllen ---------- */
+/* Verzauberung */
+vbWrap('b_hold',()=>({t:aimTarget(520,true)}),(r,o)=>{const t=o.t;if(!t)return;const d=Math.min(4.5,Math.max(1,t.heldT||t.stun||3));
+ vbFx({k:'vb_staff',x:P.x+(P.flip||1)*10,y:P.y-24,x2:t.x,y2:t.y-t.r*0.4,c:VBC.G,life:0.45,sp:0.13});
+ vbFx({k:'vb_fessel',x:t.x,y:t.y,r:Math.max(14,t.r),life:d});light(t.x,t.y,160,VBC.G,0.5,0.9);sparks(t.x,t.y-t.r*0.4,VBC.G2,10,240);G.shake=Math.min(14,G.shake+2);if(t.boss||t.guard||t.elite)bigHit()});
+vbWrap('b_laugh',()=>({p:aimPoint(440)}),(r,o)=>{const p=o.p;if(!p)return;const R=(90+10*r)*P.st.area;
+ vbFx({k:'vb_staff',x:P.x,y:P.y-24,x2:p.x,y2:p.y,c:VBC.V,c2:'#f6e6ff',n:3,w:6,wob:7,life:0.4,sp:0.12,g:'♬'});
+ vbFx({k:'vb_wirbel',x:p.x,y:p.y,r:R,life:0.8});light(p.x,p.y,R*2,VBC.V,0.5,0.8);vbDiz(vbIn(p.x,p.y,R),1.2+0.2*r,'',VBC.G);sparks(p.x,p.y,'#f0dcff',10,260)});
+vbWrap('b_pattern',null,(r)=>{const R=280*P.st.area,au=vbAu;vbFx({k:'vb_muster',x:P.x,y:P.y,r:R,life:1.0});if(vbOk())G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:VBC.V,t:0,life:au?0.35:0.5});light(P.x,P.y,R*(au?1:1.6),VBC.V,au?0.4:0.7,0.9);
+ if(!au){sflash('#b06cff',0.12,0.25);bigHit()}vbDiz(vbIn(P.x,P.y,R),2.5+0.4*r,'',VBC.G)});
+vbWrap('b_mock',null,(r)=>{const L=targetsNear(420,3+(r>>1));L.forEach((e,i)=>later(i*0.08,()=>{if(!vbOk())return;
+ vbFx({k:'vb_staff',x:P.x+(P.flip||1)*8,y:P.y-26,x2:e.x,y2:e.y-e.r*0.5,c:VBC.PK,c2:'#ffe0f0',n:2,w:5,wob:5,life:0.28,sp:0.08,g:'!'});
+ vbFx({k:'vb_spott',x:e.x+rnd(-6,6),y:e.y-e.r-6,r:16+e.r*0.4,s:rnd(-0.5,0.5),life:0.55})}))});
+vbWrap('b_dissonant',()=>({t:aimTarget(480,true)}),(r,o,nf)=>{const t=o.t;if(!t)return;const x=t.x,y=t.y;
+ vbFx({k:'vb_staff',x:P.x,y:P.y-26,x2:x,y2:y-t.r*0.4,c:'#8a2ad8',c2:'#e6ccff',n:3,w:7,wob:9,life:0.5,sp:0.18,g:'…'});
+ vbFx({k:'vb_implode',x,y:y-t.r*0.3,r:Math.max(16,t.r),life:0.55});
+ if(t.dead){const R=240*P.st.area;vbFx({k:'vb_angst',x,y,r:R,s:rnd(99),life:0.7});vbFx({k:'vb_schreck',x,y:y+20,life:0.9,small:1});
+  for(let i=nf;i<G.fxs.length;i++)if(G.fxs[i].k==='phantom'){G.fxs.splice(i,1);break}
+  vbDiz(vbIn(x,y,R),2.5,'!','#d9a8ff');sflash('#6a1ab0',0.12,0.25);G.shake=Math.min(14,G.shake+4);bigHit()}
+ else vbDiz([t],2.5,'!','#d9a8ff')});
+vbWrap('b_ballad',null,(r)=>{const x=P.x,y=P.y;vbFx({k:'vb_ballade',x,y,r:260,life:1.7});vbFx({k:'vb_auftakt',x,y,s:rnd(99),life:1.2});
+ if(vbOk())G.fxs.push({k:'rays',x,y:y-10,r:260,c:VBC.G,a:rnd(TAU),t:0,life:1.4});sflash('#ffd27a',0.16,0.35);
+ if(G.mp)for(const q of PL)if(q!==P&&!q.down&&d2(q,P)<(typeof auraR==='function'?auraR(P):600)**2){vbFx({k:'pillar',x:q.x,y:q.y+14,w:50,h:200,c:VBC.G,life:0.7});vbFx({k:'vb_takt',x:q.x,y:q.y,big:1,life:0.6})}});
+/* Ranken */
+function vbWuchern(n0){const w=rank('b_overgrowth');if(!w)return;for(let i=n0;i<G.zones.length;i++){const z=G.zones[i];if(z.vine)z.d=Object.assign(z.d||{},{w:1})}}
+vbWrap('b_vine',()=>({p:aimPoint(440),z0:G.zones.length}),(r,o)=>{const p=o.p;if(!p)return;const R=(100+10*r)*P.st.area;vbWuchern(o.z0);
+ vbFx({k:'vb_spross',x:p.x,y:p.y,r:R,n:11,s:rnd(99),rose:rank('b_overgrowth')?1:0,life:1.0});chunks(p.x,p.y,'#4a3420',6,160);if(typeof leafFx==='function')for(let i=0;i<6;i++)leafFx(p.x+rnd(-R*0.5,R*0.5),p.y-10,1);
+ light(p.x,p.y,R*1.6,VBC.GR,0.4,0.6);G.shake=Math.min(14,G.shake+2);vbDiz(vbIn(p.x,p.y,R).slice(0,6),0.8,'✿','#b8f08a')});
+vbWrap('b_wall',()=>({a:aimAng(380),z0:G.zones.length}),(r,o)=>{const a=o.a,cx_=P.x+Math.cos(a)*130,cy_=P.y+Math.sin(a)*130,px=-Math.sin(a),py=Math.cos(a),L=(150+15*r)*P.st.area;
+ const w=rank('b_overgrowth');for(let i=o.z0,j=0;i<G.zones.length;i++){const z=G.zones[i];if(z.kind!=='thorns')continue;const idx=Math.round(Math.abs((z.x-cx_)*px+(z.y-cy_)*py)/(L/3));z.d=Object.assign(z.d||{},{dl:idx*0.05},w?{w:1}:{})}
+ vbFx({k:'vb_riss',x:cx_-px*L,y:cy_-py*L,x2:cx_+px*L,y2:cy_+py*L,s:rnd(9),life:0.7});
+ for(let i=-3;i<=3;i+=2)later(Math.abs(i)*0.05,()=>{chunks(cx_+px*L*i/3,cy_+py*L*i/3,'#4a3420',3,140)});G.shake=Math.min(14,G.shake+3)});
+vbWrap('b_strangle',()=>{const p=aimPoint(460),L=[];query(p.x,p.y,260,e=>{if(L.length<5+rank('b_strangle')&&d2(e,p)<260*260)L.push(e)});return{p,pts:L.reduce((a,e)=>(a.push(Math.round(e.x),Math.round(e.y)),a),[])}},(r,o,nf)=>{const p=o.p;if(!p||!o.pts.length)return;
+ for(let i=G.fxs.length-1;i>=nf;i--)if(G.fxs[i].k==='vineline')G.fxs.splice(i,1);
+ vbFx({k:'vb_wuerg',x:p.x,y:p.y,pts:o.pts.slice(0,16),life:0.95});later(0.16,()=>{if(!vbOk())return;G.fxs.push({k:'shock',x:p.x,y:p.y,r:120,c:VBC.GR,t:0,life:0.4});chunks(p.x,p.y,'#4a3420',8,200);light(p.x,p.y,220,VBC.GR,0.4,0.7);G.shake=Math.min(14,G.shake+4);bigHit()})});
+/* Illusion */
+vbWrap('b_mirror',()=>({n0:G.allies.length}),(r,o)=>{const pts=[];for(let i=o.n0;i<G.allies.length;i++){const a=G.allies[i];if(a.kind==='ill')pts.push(Math.round(a.x),Math.round(a.y))}
+ vbFx({k:'vb_spiegel',x:P.x,y:P.y,pts,s:rnd(99),life:0.85});sparks(P.x,P.y-30,VBC.B2,10,260)});
+vbWrap('b_fear',null,(r,o,nf)=>{for(let i=G.fxs.length-1;i>=nf;i--)if(G.fxs[i].k==='phantom'){G.fxs.splice(i,1);break}const R=260*P.st.area;
+ vbFx({k:'vb_schreck',x:P.x,y:P.y,life:vbAu?1.2:1.5,small:vbAu?1:0});vbFx({k:'vb_angst',x:P.x,y:P.y,r:R,s:rnd(99),life:0.75});light(P.x,P.y,R*1.5,'#8a2ad8',0.6,0.8);if(!vbAu)sflash('#4a0a7a',0.18,0.3);
+ if(typeof wisps==='function'&&fxQ()>1)wisps(P.x,P.y-40,'#c48cff',8);vbDiz(vbIn(P.x,P.y,R),3+0.3*r,'!','#d9a8ff');G.shake=Math.min(14,G.shake+(vbAu?2:5));if(!vbAu)bigHit()});
+vbWrap('b_flute',()=>({p:aimPoint(260)}),(r,o)=>{const p=o.p;if(!p)return;vbFx({k:'vb_riss2',x:p.x,y:p.y+10,r:48,life:1.1});light(p.x,p.y,220,VBC.PK,0.6,0.9);sparks(p.x,p.y,'#ffb0e0',12,240);G.shake=Math.min(14,G.shake+2)});
+vbWrap('b_juggle',null,(r)=>{vbFx({k:'vb_wurf',x:P.x,y:P.y,n:3+(r>>1),life:0.55});P.vbJug=1});
+vbWrap('b_door',()=>({x:P.x,y:P.y}),(r,o)=>{vbFx({k:'vb_tuer',x:o.x,y:o.y,life:0.75});vbFx({k:'vb_tuer',x:P.x,y:P.y,arr:1,life:0.8});
+ if(vbOk())G.fxs.push({k:'bm_glitz',x:o.x,y:o.y-24,x2:P.x,y2:P.y-24,t:0,life:0.55});light(P.x,P.y,180,'#ffe6a0',0.5,0.8)});
+
+/* ---------- Trugbilder: Erscheinen und Zerplatzen (alle Quellen: Spiegelbild, Kabinett, Tür, Brückentalente) ---------- */
+{const _il=illusion;illusion=function(x,y,r,o){const n0=G.allies.length;const res=_il.apply(this,arguments);try{if(vbOk())for(let i=n0;i<G.allies.length;i++){const a=G.allies[i];if(a.kind==='ill')G.fxs.push({k:'vb_trug',x:a.x,y:a.y,s:rnd(9),t:-0.12,life:0.55})}}catch(e){}return res}}
+const vbIll=new Map();let vbIllG=null;
+function vbIllScan(){if(vbIllG!==G){vbIll.clear();vbIllG=G}if(G.vbIlT===G.time)return;G.vbIlT=G.time;const seen=new Set();
+ for(const a of G.allies){if(a.kind!=='ill')continue;seen.add(a);if(a.life>0&&!a.dead){vbIll.set(a,[a.x,a.y])}else if(!a.vbB){a.vbB=1;vbIllBoom(a.x,a.y);vbIll.delete(a)}}
+ for(const [a,p] of vbIll)if(!seen.has(a)){vbIll.delete(a);if(!a.vbB){a.vbB=1;vbIllBoom(p[0],p[1])}}}
+function vbIllBoom(x,y){if(!vbOk())return;G.fxs.push({k:'vb_scherben',x,y,r:95*((P&&P.st&&P.st.area)||1),s:rnd(99),t:0,life:0.55});light(x,y,200,VBC.B,0.45,0.7)}
+
+/* ---------- Haken: Takt, Jonglage-Finale, Ballade-Aura, Brückentalente, Blühende Heilung ---------- */
+hook('cast',(n,ctx)=>{if(!ctx||!ctx.beat||!vbOk())return;const big=(P.str||0)>=REFN();vbFx({k:'vb_takt',x:P.x,y:P.y,big:big?1:0,life:big?0.7:0.4});if(big)light(P.x,P.y,200,VBC.G,0.5,0.8)},'barradin');
+hook('tick',dt=>{try{vbIllScan()}catch(e){}
+ if(P.vbJug&&!P.jug){P.vbJug=0;if(vbOk()){vbFx({k:'vb_finale',x:P.x,y:P.y,s:rnd(9),life:0.55});light(P.x,P.y,240,'#ff9a3a',0.5,0.8);G.shake=Math.min(14,G.shake+2)}}},'barradin');
+hook('draw',(t,c)=>{if(!fxQ())return;
+ if(P.buffs&&P.buffs.ballad>0){const pul=0.6+0.4*Math.sin(t*6);c.save();c.globalCompositeOperation='lighter';glow(P.x,P.y+8,70,VBC.G,0.22*pul,true);
+  if(P.balladOwn!==0&&fxQ()>1)for(let i=0;i<4;i++)for(let j=0;j<2;j++){const a=t*2.4+i*TAU/4-j*0.16,x=P.x+Math.cos(a)*95,y=P.y+Math.sin(a)*95;glow(x,y,(18-j*6),VBC.G,0.55*(1-j/2))}
+  c.restore()}
+ const J=P.jug;if(J&&J.n&&typeof jugPos==='function'){c.save();c.globalCompositeOperation='lighter';for(let i=0;i<J.n;i++){const q=jugPos(J,i);glow(q.x,q.y-8,22,'#ff8a2a',0.55);const q2=jugPos({a:J.a-0.14,n:J.n},i);glow(q2.x,q2.y-8,12,'#ff6a1a',0.3)}c.restore()}},'barradin');
+hook('hit',(e,o,amt,crit)=>{if(!o||o.dot||!vbOk()||(P.vbHitT||0)>G.time)return;
+ if((o.basic||o.kt)){const r1=stR('b_st_spiegel');if(r1&&G.allies.some(a=>a.kind==='ill'&&!a.dead&&a.life>0&&d2(a,e)<130*130)){P.vbHitT=G.time+0.35;G.fxs.push({k:'star',x:e.x,y:e.y-e.r*0.4,r:e.r+12,c:VBC.B,t:0,life:0.22,a:rnd(TAU)});return}
+  const r2=stR('b_st_dornklinge');if(r2&&(e.root>0||e.slowT>0)){P.vbHitT=G.time+0.35;sparks(e.x,e.y-e.r*0.3,VBC.GR,5,200);G.fxs.push({k:'star',x:e.x,y:e.y-e.r*0.3,r:e.r+8,c:VBC.GR,t:0,life:0.2,a:rnd(TAU)});return}}
+ const r3=stR('b_st_dornweise');if(r3&&(e.stun>0||e.root>0)&&amt>0){P.vbHitT=G.time+0.5;noteFx(e.x,e.y-e.r-6)}},'barradin');
+hook('hurtMul',raw=>{const r=stR('b_st_ehrfurcht');if(r&&vbOk()&&(P.vbEhrT||0)<G.time&&P.inv<=0){for(const e of G.enemies){if(e.dead)continue;if((e.gmB>0||e.stun>0)&&d2(e,P)<260*260){P.vbEhrT=G.time+1.2;vbFx({k:'vb_ehr',x:P.x,y:P.y,life:0.5});break}}}return 1},'barradin');
+hook('roll',a=>{if(stR('b_st_rosentanz')&&(P.stRoseT||0)>G.time+1.9)vbFx({k:'vb_spross',x:P.x,y:P.y,r:70,n:6,h:0.7,s:rnd(99),life:0.8})},'barradin');
+hook('kill',(e,o)=>{if(!vbOk()||!(e.vineT>G.time)||!rank('b_bloom')||(P.vbBlT||0)>G.time)return;P.vbBlT=G.time+0.25;vbFx({k:'vb_bluete',x:e.x,y:e.y-6,life:0.7})},'barradin');
+
+/* ---------- Kein Blau bei Barradin (Nutzerwunsch): glamouröse Farben statt Spiegelblau ----------
+   Ältere Barradin-Effekte (Trugbilder, Klingentanz, Applaus) benutzten Hellblau. Hier zur Laufzeit umgefärbt:
+   (a) Partikel/Ringe/Licht nur, solange P Barradin ist (Echo/Friedrich behalten ihre Farben),
+   (b) Barradin-eigene Zeichenfunktionen (HFX kt_*, bm_*, gm_*, PETART.bm_double) werden mit ersetzten Farbwerten neu erzeugt. */
+const VBMAP={'#9fd8ff':'#f0b0ff','#8fd8ff':'#f0b0ff','#bfe6ff':'#ffe0f4','#cfe6ff':'#fff0e0','#9fd0ff':'#ffc0e6','#bfe0ff':'#ffe4f2','#bfd8ff':'#ffe4f2',
+ '#9fc8ff':'#e8b0ff','#9fe6ff':'#f0b0ff','#e6efff':'#fff3e6','#9fb2cc':'#c8a8c0','#cfefff':'#ffe8f6','#6ab8ff':'#d890ff','#bfefff':'#ffe0f4','#62a8ff':'#e090ff'};
+const vbCol=c=>(typeof c==='string'&&VBMAP[c.toLowerCase()])||c;
+const vbIsB=()=>P&&P.id==='barradin';
+for(const fn of ['ring','burst','sparks','light','embers','wisps','word']){try{const f0=eval(fn);if(typeof f0!=='function')continue;
+ const w={ring:function(x,y,r,c,l,wd){return f0.call(this,x,y,r,vbIsB()?vbCol(c):c,l,wd)},burst:function(x,y,c,n,s){return f0.call(this,x,y,vbIsB()?vbCol(c):c,n,s)},
+  sparks:function(x,y,c,n,s,u){return f0.call(this,x,y,vbIsB()?vbCol(c):c,n,s,u)},light:function(x,y,r,c,l,a){return f0.call(this,x,y,r,vbIsB()?vbCol(c):c,l,a)},
+  embers:function(x,y,c,n,R){return f0.call(this,x,y,vbIsB()?vbCol(c):c,n,R)},word:function(x,y,s,c){return f0.call(this,x,y,s,vbIsB()?vbCol(c):c)},wisps:function(x,y,c,n){return f0.call(this,x,y,vbIsB()?vbCol(c):c,n)}}[fn];
+ if(fn==='ring')ring=w;else if(fn==='burst')burst=w;else if(fn==='sparks')sparks=w;else if(fn==='light')light=w;else if(fn==='embers')embers=w;else if(fn==='word')word=w;else wisps=w}catch(e){}}
+{const _sh=shoot;shoot=function(o){if(o&&vbIsB()&&o.c)o.c=vbCol(o.c);return _sh.apply(this,arguments)}}
+function vbRecolor(obj,keys){for(const k of keys){const f=obj[k];if(typeof f!=='function')continue;let src=Function.prototype.toString.call(f),ch=false;
+  src=src.replace(/'#[0-9a-fA-F]{6}'/g,m=>{const n=VBMAP[m.slice(1,-1).toLowerCase()];if(n){ch=true;return "'"+n+"'"}return m});if(!ch)continue;
+  if(!/^(function|\()/.test(src))src='function '+src;try{const g=(0,eval)('('+src+')');if(typeof g==='function')obj[k]=function(){try{return g.apply(this,arguments)}catch(e){if(e instanceof ReferenceError){obj[k]=f;return f.apply(this,arguments)}throw e}}}catch(e){}}}
+try{vbRecolor(HFX,Object.keys(HFX).filter(k=>/^(kt_|bm_|gm_)/.test(k)));if(PETART.bm_double)vbRecolor(PETART.bm_double,['draw','upd'])}catch(e){}
+
+/* ================= Durchgang 2 (3. Nov): Klingenballett, Schmetterlingskuss, Ausweichrolle, Auslöse-Funken der Passiven ================= */
+function vbRap(c,x,y,a,L,al,gold){c.save();c.translate(x,y);c.rotate(a);c.globalAlpha=al;c.lineCap='round';
+ c.globalCompositeOperation='lighter';glow(L*0.45,0,L*0.6,gold?VBC.G:VBC.PK,0.35*al,true);c.globalCompositeOperation='source-over';
+ c.strokeStyle='#5a3a18';c.lineWidth=4;c.beginPath();c.moveTo(-L*0.22,0);c.lineTo(0,0);c.stroke();
+ c.strokeStyle='#fff6e6';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(L,0);c.stroke();c.strokeStyle=gold?VBC.G:'#ffc0e6';c.lineWidth=1.2;c.beginPath();c.moveTo(2,-1);c.lineTo(L-4,-0.5);c.stroke();
+ c.strokeStyle=VBC.G;c.lineWidth=2.2;c.beginPath();c.arc(-2,0,L*0.09,-1.4,1.4);c.stroke();c.fillStyle=VBC.RO;c.beginPath();c.arc(-L*0.24,0,2.6,0,TAU);c.fill();c.restore()}
+function vbHeart(c,x,y,s){c.beginPath();c.moveTo(x,y+s*0.9);c.bezierCurveTo(x-s*1.6,y-s*0.1,x-s*0.9,y-s*1.3,x,y-s*0.45);c.bezierCurveTo(x+s*0.9,y-s*1.3,x+s*1.6,y-s*0.1,x,y+s*0.9);c.closePath()}
+function vbFalter(c,x,y,s,ph,col){const w=0.35+0.65*Math.abs(Math.sin(ph));c.fillStyle=col;c.beginPath();c.ellipse(x-s*0.55*w,y,s*0.6*w,s*0.45,-0.4,0,TAU);c.ellipse(x+s*0.55*w,y,s*0.6*w,s*0.45,0.4,0,TAU);c.fill()}
+Object.assign(HFX,{
+ /* Klingenballett: drei riesige Geisterrapiere stürzen vom Himmel, schlagen im Kreis ein und steigen in den Reigen auf */
+ vb_ballett(f,k,c,t){const T=f.t,fall=Math.min(1,T/0.3),imp=T>=0.3,q=imp?Math.min(1,(T-0.3)/(f.life-0.3)):0,a=imp?1-Math.max(0,(q-0.55)/0.45):1;if(a<=0)return;c.lineCap='round';
+  for(let i=0;i<3;i++){const an=f.s+i*TAU/3,ox=Math.cos(an)*72,oy=Math.sin(an)*44,gx=f.x+ox,gy=f.y+oy;
+   if(!imp){const e=fall*fall,y=gy-300*(1-e);c.globalCompositeOperation='lighter';const g=c.createLinearGradient(gx,y-140,gx,y);g.addColorStop(0,'rgba(255,214,122,0)');g.addColorStop(1,'rgba(255,233,160,.75)');c.strokeStyle=g;c.lineWidth=7;c.globalAlpha=0.8;c.beginPath();c.moveTo(gx,y-150);c.lineTo(gx,y-40);c.stroke();
+    c.globalCompositeOperation='source-over';vbRap(c,gx,y-58,Math.PI/2,84,1,i!==1);glow(gx,gy+4,26*e,VBC.G,0.5*e,true)}
+   else{const rise=Math.max(0,(q-0.35)/0.65),orb=an+rise*2.4,rx=72-14*rise,ry=44-6*rise,x=f.x+Math.cos(orb)*rx,y=f.y+Math.sin(orb)*ry-58*(1-rise)-12*rise,ang=Math.PI/2*(1-rise)+(orb+Math.PI/2)*rise;
+    vbRap(c,x,y,ang,84-44*rise,a,i!==1);
+    if(q<0.4){const qq=q/0.4;c.globalCompositeOperation='lighter';c.globalAlpha=1-qq;c.strokeStyle=i===1?VBC.PK:VBC.G2;c.lineWidth=3*(1-qq)+1;c.beginPath();c.ellipse(gx,gy+4,14+50*qq,(14+50*qq)*0.45,0,0,TAU);c.stroke();glow(gx,gy,40*(1-qq),'#ffffff',0.8*(1-qq));
+     c.fillStyle='#fff6d8';for(let j=0;j<4;j++){const aa=an+j*1.6+vbR(f.s,j+i*5)*0.8,rr=12+60*vbEase(qq);vbSpark4(c,gx+Math.cos(aa)*rr,gy+Math.sin(aa)*rr*0.6-20*qq,4*(1-qq))}c.globalCompositeOperation='source-over'}}}
+  if(imp&&q<0.5){const qq=q/0.5;c.globalCompositeOperation='lighter';c.globalAlpha=(1-qq)*0.9;c.strokeStyle=VBC.G2;c.lineWidth=5*(1-qq)+1;c.beginPath();c.ellipse(f.x,f.y+6,40+170*vbEase(qq),(40+170*vbEase(qq))*0.5,0,0,TAU);c.stroke();
+   c.strokeStyle=VBC.PK;c.lineWidth=2;c.globalAlpha=(1-qq)*0.7;c.beginPath();c.ellipse(f.x,f.y+6,30+120*vbEase(qq),(30+120*vbEase(qq))*0.5,0,0,TAU);c.stroke();glow(f.x,f.y-10,120*(1-qq*0.5),VBC.G,0.45*(1-qq),true)}},
+ /* Schmetterlingskuss: Handkuss mit Herzfunkeln am Mund */
+ vb_kusshand(f,k,c,t){const a=1-k,e=vbEase(Math.min(1,k/0.4));c.globalCompositeOperation='lighter';glow(f.x,f.y,30*(0.5+e),VBC.PK,0.6*a);c.globalAlpha=a;c.fillStyle='#ff8fc0';vbHeart(c,f.x+Math.cos(f.a)*20*e,f.y-14*e,6+4*e);c.fill();
+  c.fillStyle='#fff0f8';for(let i=0;i<5;i++){const an=f.a+(i-2)*0.45,rr=8+30*e;vbSpark4(c,f.x+Math.cos(an)*rr,f.y+Math.sin(an)*rr*0.7-6*e,3.2*a)}},
+ /* Schmetterlingskuss: Treffer – großes Herz springt auf, Falter stieben auseinander */
+ vb_herz(f,k,c,t){const pop=k<0.18?vbEase(k/0.18)*1.25:1.25-0.25*Math.min(1,(k-0.18)/0.2),a=k<0.55?1:1-(k-0.55)/0.45,s=(9+f.r*0.35)*pop,x=f.x,y=f.y-10-k*14;if(a<=0)return;
+  c.globalCompositeOperation='lighter';glow(x,y,s*3.2,VBC.PK,0.55*a,true);c.globalAlpha=a*(1-k);c.strokeStyle='#ffd0ec';c.lineWidth=2.5;c.beginPath();c.ellipse(x,y+10,s*(1+3*k),s*(1+3*k)*0.55,0,0,TAU);c.stroke();
+  c.globalCompositeOperation='source-over';c.globalAlpha=a;vbHeart(c,x,y,s);const g=c.createLinearGradient(x,y-s,x,y+s);g.addColorStop(0,'#ffb0d8');g.addColorStop(1,'#e0286a');c.fillStyle=g;c.fill();c.strokeStyle=VBC.G;c.lineWidth=2;c.stroke();
+  c.fillStyle='#fff6fb';c.beginPath();c.ellipse(x-s*0.45,y-s*0.35,s*0.22,s*0.13,-0.6,0,TAU);c.fill();
+  c.globalCompositeOperation='lighter';for(let i=0;i<6;i++){const an=f.s+i*TAU/6,rr=s*0.8+70*vbEase(k),fx=x+Math.cos(an)*rr,fy=y+Math.sin(an)*rr*0.7-20*k;c.globalAlpha=a;vbFalter(c,fx,fy,5.5,t*14+i,i%2?'#ff8fc0':'#7fe0c8')}},
+ /* Ausweichrolle: schillerndes Glanzband mit Funkeln */
+ vb_rolle(f,k,c,t){const a=1-k,ca=Math.cos(f.a),sa=Math.sin(f.a),L=f.L*Math.min(1,f.t/0.22),nx=-sa,ny=ca;if(L<2)return;c.globalCompositeOperation='lighter';c.lineCap='round';
+  const x1=f.x+ca*L,y1=f.y+sa*L,g=c.createLinearGradient(f.x,f.y,x1,y1);g.addColorStop(0,'rgba(196,140,255,0)');g.addColorStop(0.6,'rgba(255,143,192,.55)');g.addColorStop(1,'rgba(255,233,160,.9)');
+  c.globalAlpha=a;c.strokeStyle=g;c.lineWidth=14*a+2;c.beginPath();c.moveTo(f.x,f.y);c.lineTo(x1,y1);c.stroke();c.strokeStyle='rgba(255,246,232,.8)';c.lineWidth=2;c.beginPath();c.moveTo(f.x+ca*L*0.3,f.y+sa*L*0.3);c.lineTo(x1,y1);c.stroke();
+  c.fillStyle='#fff6d8';for(let i=0;i<6;i++){const q=vbR(f.s,i),w=(vbR(f.s,i+9)-0.5)*22,x=f.x+ca*L*q+nx*w,y=f.y+sa*L*q+ny*w-k*16*vbR(f.s,i+3);vbSpark4(c,x,y,(2.5+3*vbR(f.s,i+5))*a)}},
+ /* kleiner Auslöse-Funke einer Passive: Zeichen springt kurz auf */
+ vb_pop(f,k,c,t){const a=k<0.6?1:1-(k-0.6)/0.4,pop=k<0.15?k/0.15*1.2:1.2-0.2*Math.min(1,(k-0.15)/0.15),y=f.y-k*18;c.globalCompositeOperation='lighter';glow(f.x,y,16*pop,f.c,0.5*a);
+  c.globalAlpha=a*(1-k);c.strokeStyle=f.c;c.lineWidth=1.5;c.beginPath();c.arc(f.x,y,6+18*vbEase(k),0,TAU);c.stroke();c.globalCompositeOperation='source-over';
+  c.globalAlpha=a;c.font=`900 ${Math.round(14*pop)}px Georgia,serif`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=3;c.strokeStyle='rgba(30,10,40,.75)';c.strokeText(f.g,f.x,y);c.fillStyle=f.c;c.fillText(f.g,f.x,y)}
+});
+vbWrap('b_k_ballett',null,(r)=>{const x=P.x,y=P.y;vbFx({k:'vb_ballett',x,y,s:rnd(TAU),life:1.25});sflash('#ffd27a',0.1,0.2);
+ later(0.3,()=>{if(!vbOk())return;G.fxs.push({k:'shock',x,y,r:220,c:VBC.G,t:0,life:0.45});light(x,y,320,VBC.G,0.6,0.9);sparks(x,y-20,VBC.G2,14,320);G.shake=Math.min(14,G.shake+5);bigHit()})});
+vbWrap('b_g_kuss',()=>({t:typeof gmKussZiel==='function'?gmKussZiel():null}),(r,o)=>{const t=o.t,a=t?ang(P,t):(P.flip<0?Math.PI:0);vbFx({k:'vb_kusshand',x:P.x+(P.flip||1)*8,y:P.y-26,a,life:0.55})});
+{const _gb=gmBez;gmBez=function(e,t,k){const res=_gb.apply(this,arguments);try{if(res!==false&&k==='b_g_kuss'&&e&&!e.dead&&vbOk()){vbFx({k:'vb_herz',x:e.x,y:e.y-e.r*0.5,r:e.r,s:rnd(TAU),life:0.8});light(e.x,e.y,140,VBC.PK,0.4,0.7)}}catch(_){}return res}}
+hook('roll',a=>{if(fxQ()>1)vbFx({k:'vb_rolle',x:P.x,y:P.y+4,a,L:155,s:rnd(99),life:0.45})},'barradin');
+/* Klingenballett: goldenes Siegel unter den Füßen, solange die Rapiere tanzen */
+hook('draw',(t,c)=>{if(!(P.buffs&&P.buffs.kballett>0)||!fxQ())return;const fin=Math.min(1,P.buffs.kballett/0.6),pul=0.7+0.3*Math.sin(t*5);c.save();c.globalCompositeOperation='lighter';
+ c.globalAlpha=0.4*fin*pul;c.strokeStyle=VBC.G;c.lineWidth=1.6;c.setLineDash([12,7]);c.lineDashOffset=-t*30;c.beginPath();c.ellipse(P.x,P.y+8,78,32,0,0,TAU);c.stroke();c.setLineDash([]);
+ c.globalAlpha=0.25*fin;c.lineWidth=5;c.strokeStyle=VBC.PK;c.beginPath();c.ellipse(P.x,P.y+8,62,25,0,0,TAU);c.stroke();
+ c.globalAlpha=0.8*fin;c.fillStyle='#fff6d8';for(let i=0;i<6;i++){const an=-t*1.4+i*TAU/6;vbSpark4(c,P.x+Math.cos(an)*78,P.y+8+Math.sin(an)*32,3)}c.restore()},'barradin');
+/* Auslöse-Funken der neuen/stillen Passiven (Talentbaum-Umbau, Brückentalente) – je Art gedrosselt */
+function vbPop(e,g,col,key,cd){if(!vbOk()||fxQ()<2||!e)return;const K='vbP'+key;if((P[K]||0)>G.time)return;P[K]=G.time+cd;vbFx({k:'vb_pop',x:e.x,y:e.y-(e.r||14)-16,g,c:col,life:0.6})}
+hook('hit',(e,o,amt,crit)=>{if(!o||o.dot||e.dead&&!crit)return;
+ if(crit&&(o.basic||o.kt)&&rank('b_t_fecht'))vbPop(e,'⚔',VBC.G2,'fe',0.7);
+ if(o.pet&&rank('b_t_ensemble'))vbPop(e,'☍','#e0b0ff','en',1.1);
+ if((o.root||e.root>0&&e.vineT>G.time)&&(rank('b_t_wurzel')||stR('b_st_verse')))vbPop(e,'❦','#b8f08a','wu',0.9)},'barradin');
+{const _st=stunE;stunE=function(e,t){const s0=e&&e.stun;const res=_st.apply(this,arguments);try{if(vbIsB()&&e&&e.stun>s0+0.05&&(rank('b_t_star')||stR('b_st_verse')))vbPop(e,'✶',VBC.G,'st',0.9)}catch(_){}return res}}
+hook('cast',(n,ctx)=>{if(ctx&&ctx.beat&&rank('b_t_takt'))vbPop({x:P.x,y:P.y-30,r:14},'♩',VBC.G2,'tk',0.3)},'barradin');
+/* Barradin-eigene Zeichen-Haken (Parade, Riposte, Ballett-Rapiere) und ktRapier ohne Blau */
+{const o={ktRapier};vbRecolor(o,['ktRapier']);ktRapier=o.ktRapier}
+let vbDB=0;{const g0=glow;glow=function(x,y,r,c,a,s){return g0(x,y,r,vbDB&&VBMAP[c]||c,a,s)};const l0=ln;ln=function(c,s){if(vbDB&&VBMAP[s])arguments[1]=VBMAP[s];return l0.apply(this,arguments)}}
+(HOOK.draw||(HOOK.draw=[])).unshift(function(){vbDB=P&&P.id==='barradin'?1:0});HOOK.draw.push(function(){vbDB=0});
+/* Spiegelkabinett (passive Ulti): ein goldgerahmter Spiegel erscheint, das Trugbild tritt heraus. Wucherwald (passive Ulti): Rosen erblühen im Kreis. */
+Object.assign(HFX,{
+ vb_rahmen(f,k,c,t){if(f.t<0)return;const pop=vbEase(Math.min(1,k/0.2)),a=k<0.6?1:1-(k-0.6)/0.4,x=f.x,y=f.y-26,w=20*pop,h=32*pop;if(a<=0)return;c.save();
+  c.globalCompositeOperation='lighter';glow(x,y,70,VBC.B,0.5*a,true);c.globalCompositeOperation='source-over';c.globalAlpha=a*0.85;const g=c.createLinearGradient(x-w,y-h,x+w,y+h);g.addColorStop(0,'#fff4fb');g.addColorStop(0.5,'#e8b8ff');g.addColorStop(1,'#ffd8a8');
+  c.fillStyle=g;c.beginPath();c.ellipse(x,y,w,h,0,0,TAU);c.fill();c.globalAlpha=a;c.strokeStyle=VBC.G;c.lineWidth=4;c.stroke();c.strokeStyle='#8a5a1a';c.lineWidth=1.2;c.stroke();
+  c.fillStyle=VBC.G;c.beginPath();c.arc(x,y-h-3,4*pop,0,TAU);c.fill();c.globalCompositeOperation='lighter';c.strokeStyle='#ffffff';c.lineWidth=2;c.globalAlpha=a*(1-k);c.beginPath();c.moveTo(x-w*0.5,y-h*0.5);c.lineTo(x-w*0.1,y-h*0.75);c.stroke();
+  c.fillStyle='#fff6d8';for(let i=0;i<6;i++){const an=f.s+i*TAU/6+k*2,rr=w*1.3+18*k;c.globalAlpha=a;vbSpark4(c,x+Math.cos(an)*rr,y+Math.sin(an)*rr*1.3,3.2*(1-k*0.5))}c.restore()},
+ vb_rosen(f,k,c,t){const a=k<0.6?1:1-(k-0.6)/0.4,n=f.n||8;for(let i=0;i<n;i++){const an=f.s+i*TAU/n,rr=f.r*(0.55+0.4*vbR(f.s,i)),q=Math.min(1,Math.max(0,(f.t-i*0.03)/0.25)),x=f.x+Math.cos(an)*rr,y=f.y+Math.sin(an)*rr*0.72-q*6;
+   if(q<=0)continue;bmRose(c,x,y,i+f.s,0.6+0.7*vbEase(q),a);if(q<1){c.save();c.globalCompositeOperation='lighter';glow(x,y,18,'#ff7aa0',(1-q)*0.7);c.restore()}}}
+});
+let vbMir=0;
+{const w=vbN('b_mirror');if(w){const key=w.cast?'cast':'tlCast',c0=w[key];if(c0)w[key]=function(){vbMir=1;try{return c0.apply(this,arguments)}finally{vbMir=0}}}}
+{const _il2=illusion;illusion=function(){const n0=G.allies.length;const res=_il2.apply(this,arguments);try{if(!vbMir&&vbIsB()&&rank('b_hall')&&vbOk())for(let i=n0;i<G.allies.length;i++){const a=G.allies[i];if(a.kind==='ill')G.fxs.push({k:'vb_rahmen',x:a.x,y:a.y,s:rnd(9),t:0,life:0.8})}}catch(e){}return res}}
+function vbRosen(x,y,R){if(rank('b_overgrowth'))vbFx({k:'vb_rosen',x,y,r:R,n:Math.min(12,6+(R/40|0)),s:rnd(99),life:1.1})}
+hook('cast',(n)=>{if(!n||!rank('b_overgrowth'))return;if(n.id==='b_vine'||n.id==='b_strangle'){let z=null;for(let i=G.zones.length-1;i>=0&&i>=G.zones.length-3;i--)if(G.zones[i].vine){z=G.zones[i];break}if(z)vbRosen(z.x,z.y,z.r);else if(n.id==='b_strangle'){const p=aimPoint(460);vbRosen(p.x,p.y,140)}}
+ else if(n.id==='b_wall'){const L=G.zones.filter(z=>z.kind==='thorns').slice(-7);if(L.length){const m=L[L.length>>1];vbRosen(m.x,m.y,90)}}},'barradin');
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
