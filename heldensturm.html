@@ -19490,6 +19490,346 @@ function rgErfCap(){let ch=0;const vm=Math.min(innerWidth,innerHeight),max=Math.
 {const _iv2=ivFit;ivFit=function(h,w,k){const r=_iv2.apply(this,arguments);try{if(k==='smith'){const g=w.querySelector('.iv-bag>.bag');if(g&&g.scrollHeight>g.clientHeight+2){const tiles=g.querySelectorAll(':scope>.it').length,W=g.clientWidth-4,H=g.clientHeight-4,gap=parseFloat(getComputedStyle(g).columnGap)||8;
  for(let s=(parseFloat(g.style.getPropertyValue('--ivs'))||50)-2;s>=36;s-=2){const cols=Math.max(1,Math.floor((W+gap)/(s+gap)));if(Math.ceil(tiles/cols)*(s+gap)-gap<=H){g.style.setProperty('--ivs',s+'px');g.style.setProperty('--ivcols',cols);g.classList.add('ivmini');break}}}}}catch(e){console.error('rgSm',e)}return r}}
 
+/* ================= Würfel-Ereignisse 2.0 (Paket „events“) =================
+   Jede Lage bietet gestaffelte Wahl: vorsichtig (SG ~6) · mutig (SG ~11) · tollkühn (SG ~15) – dazu Heldenoptionen mit Vorteil (2W20, der bessere zählt).
+   Chips zeigen Risiko, Lohn, Chance und was bei Erfolg/Fehlschlag passiert. Wirkungen tragen über 1–3 Ebenen (P.mods mit ar:1 → HUD-Symbole):
+   Segen, Flüche, Hinterhalt (1–2 Elite-Rudel), Elite-Verfolger (trägt Beute), Wunde (Start mit 35% Leben), Schatzkarte (Schatzkammer), Begleiter.
+   Talentsplitter (3 = 1 Talentpunkt), Kettenereignisse (Entscheidung jetzt → Folge später), seltene Jackpots. Tägliche Herausforderung: eigener Seed.
+   Mehrspieler: wie bisher würfelt die ganze Gruppe (Mehrheit entscheidet), Wirkungen gelten für jeden, Gold einmal. Präfix ev2/ex. */
+Object.assign(ARFX,{
+ ev_segen:{n:'Segen',k:'dmg',v:0.2,good:1,ic:'✦',c:'#ffd36a',d:'+20% Schaden'},
+ ev_segen_gross:{n:'Großer Segen',k:'dmg',v:0.35,good:1,ic:'✹',c:'#ffd36a',d:'+35% Schaden'},
+ ev_schaerfe:{n:'Geschärfte Sinne',k:'crit',v:0.1,good:1,ic:'✧',c:'#ffe08a',d:'+10% kritische Trefferchance'},
+ ev_wind:{n:'Rückenwind',k:'speed',v:0.15,good:1,ic:'➶',c:'#bfe8a0',d:'+15% Tempo'},
+ ev_gold:{n:'Goldsegen',k:'gold',v:0.6,good:1,ic:'❂',c:'#ffd04a',d:'+60% Gold'},
+ ev_leben:{n:'Lebenssegen',k:'hp',v:0.2,good:1,ic:'❤',c:'#ff9a8a',d:'+20% Leben'},
+ ev_gefeiert:{n:'Gefeiert',k:'dmg',v:0.3,good:1,ic:'♫',c:'#ffb0d8',d:'+30% Schaden'},
+ ev_pakt:{n:'Pakt der Stimme',k:'dmg',v:0.4,good:1,ic:'♦',c:'#ff6a5a',d:'+40% Schaden'},
+ ev_paktpreis:{n:'Preis des Pakts',k:'edmg',v:0.3,ic:'✖',c:'#e8705a',d:'Gegner treffen 30% härter'},
+ ev_schwaeche:{n:'Schwäche',k:'dmg',v:-0.2,ic:'☠',c:'#b884e8',d:'−20% Schaden'},
+ ev_verwundbar:{n:'Verwundbar',k:'edmg',v:0.25,ic:'✖',c:'#e8705a',d:'Gegner treffen 25% härter'},
+ ev_lahm:{n:'Lahm',k:'speed',v:-0.15,ic:'⛓',c:'#b8b49a',d:'−15% Tempo'},
+ ev_gift:{n:'Gift im Blut',k:'heil',v:0.4,ic:'☣',c:'#9ad85a',d:'−40% Heilung'},
+ ev_blut:{n:'Blutzoll',k:'hp',v:-0.2,ic:'♰',c:'#e0505e',d:'−20% Leben'},
+ ev_pech:{n:'Pech',k:'edmg',v:0.1,ic:'⚀',c:'#d88a6a',d:'Gegner treffen 10% härter'},
+ ev_trocken:{n:'Leere Flaschen',k:'nopot',v:1,ic:'⚱',c:'#c8a070',d:'keine Heiltränke'},
+ ev_hinterhalt:{n:'Hinterhalt',k:'ambush',v:1,ic:'⚔',c:'#ff8a5a',d:'ein Elite-Rudel lauert'},
+ ev_hinterhalt2:{n:'Großer Hinterhalt',k:'ambush',v:2,ic:'⚔',c:'#ff5a3a',d:'zwei Elite-Rudel lauern'},
+ ev_jaeger:{n:'Elite-Verfolger',k:'evjagd',v:1,ic:'◉',c:'#ff6a4a',d:'ein seltener Elite jagt euch – mit Beute'},
+ ev_wunde:{n:'Wunde',k:'evwunde',v:0.35,ic:'†',c:'#e0505e',d:'Start mit 35% Leben'},
+ ev_karte:{n:'Schatzkarte',k:'evkarte',v:1,good:1,ic:'✉',c:'#e8c88a',d:'eine Schatzkammer ist eingezeichnet'},
+ ev_begl:{n:'Begleiterin',k:'evbegl',v:1,good:1,ic:'❦',c:'#9fe08a',d:'kämpft an eurer Seite'},
+ ev_kueken:{n:'Feuerküken',k:'evbegl',v:1,good:1,ic:'❦',c:'#ffa04a',d:'kämpft an eurer Seite'}});
+MODN.ambush=v=>v>1?'Großer Hinterhalt':'Hinterhalt';
+const EV2RN=['Kein Risiko','Risiko gering','Risiko mittel','Risiko hoch'],EV2LN={keiner:'kein Lohn',klein:'Lohn: klein',gut:'Lohn: gut','groß':'Lohn: groß',episch:'Lohn: episch'};
+const ev2HC=()=>!G.rl;
+const ev2Bon=(o,q)=>(o.bonus&&o.bonus[q.id])||0;
+const ev2In=id=>mpL().some(q=>q&&q.id===id);
+function ev2Seed(s){if(G.mode==='taeglich'&&G.daily)seedRng(((G.daily.seed|0)*977+(G.stage|0)*131+(s|0)*7919)|0)}
+const ev2R=()=>{const F=window.__evForce;if(typeof F==='number')return Math.max(1,Math.min(20,F|0));if(Array.isArray(F)&&F.length)return F.shift();return ri(1,20)};
+
+/* ---------- Wirkungen: jede legt einen Chip für das Ergebnis ab ---------- */
+const EVFX={on:0,L:[]};
+function exChip(t,g){if(EVFX.on)EVFX.L.push({t,g:g?1:0});return t}
+function exGold(n){const v=evGold(n);giveGold(v);return exChip(`❂ +${fmt(v)} Gold`,1)}
+function exGoldLos(n){const v=Math.min(SAVE.gold,evGold(n));SAVE.gold-=v;if(v>0)sfx('scrap');return exChip(`❂ −${fmt(v)} Gold`,0)}
+function exItem(minR,b){const s=giveItem(minR,b);return exChip(s,1)}
+function exGems(n){return exChip('◆ '+giveGems(n),1)}
+function exSP(n){giveSP(n);return exChip(`★ +${n} Talentpunkt${n>1?'e':''}`,1)}
+function exSplit(n){P.mods=P.mods||[];let m=P.mods.find(m=>m.k==='split');if(!m)P.mods.push(m={k:'split',v:0,good:1,st:99});m.v+=n;let sp=0;while(m.v>=3){m.v-=3;P.sp++;sp++}m.st=99;m.n=`◇ Talentsplitter ${m.v}/3`;
+ if(!m.v)P.mods=P.mods.filter(x=>x!==m);if(sp){sfx('level');return exChip(`★ 3 Splitter = +${sp} Talentpunkt`,1)}sfx('magic');return exChip(`◇ Talentsplitter +${n} (${m.v}/3)`,1)}
+function exFx(id,st,sub){const F=ARFX[id];if(!F)return'';arFx(P,id,st);const m=(P.mods||[]).find(m=>m.ar&&m.id===id);if(m){m.n=`${F.ic} ${F.n}: ${F.d} (${m.st} Ebene${m.st>1?'n':''})`;if(sub)m.sub=sub}
+ if(!G.bot&&(!G.modSndT||G.time-G.modSndT>0.4||G.state!=='play')){G.modSndT=G.time;sfx(F.good?'segen':'fluch')}
+ return exChip(`${F.ic} ${F.n} · ${st} Ebene${st>1?'n':''}`,F.good)}
+function exPot(n){P.potMax=Math.max(1,(P.potMax||1)+n);P.pots=Math.max(0,Math.min(P.potMax,(P.pots||0)+n));sfx(n>0?'segen':'fluch');return exChip(n>0?`⚗ +${n} Heiltrank (ganzer Lauf)`:`⚗ −${-n} Heiltrank (ganzer Lauf)`,n>0)}
+function exXp(f){gainXp(Math.round(xpNeed(P.level)*f));return exChip(`✦ +${Math.round(f*100)}% einer Stufe Erfahrung`,1)}
+function exUp(L){let n=0;for(const s of L){const it=P.eq&&P.eq[s];if(it&&upgradeItem(it,true))n++}if(!n)return exGold(120);recalc();sfx('equip');return exChip(`⚒ ${n} Aufwertung${n>1?'en':''} gratis`,1)}
+function exKette(id,nach){P.mods=P.mods||[];if(!P.mods.some(m=>m.k==='kette'&&m.id===id)){const E=EV2[id];P.mods.push({k:'kette',id,ab:(G.stage|0)+1+(nach|0),v:0,good:1,st:99,n:`📜 Fortsetzung folgt: ${E?E.t:id}`})}return exChip('📜 Fortsetzung folgt …',1)}
+
+/* ---------- Die Ereignisse ---------- */
+const EVW='Weiterziehen';
+const EV2L=[
+ {id:'schrein',t:'Der Schrein am Wegesrand',txt:'Ein uralter Schrein zwischen moosigen Steinen. Die Opferschale ist leer. Das Steinbild guckt fordernd.',opts:[
+  {l:'Kurz verneigen',r:1,lohn:'klein',skill:'Weisheit',dc:6,bonus:{echo:2},win:'Segen',lose:'nichts',ok(){exFx('ev_segen',1);return 'Ein warmes Kribbeln. Das Steinbild nickt fast unmerklich.'},fail(){return 'Das Steinbild guckt weiter. Ihr auch. Peinlich.'}},
+  {l:'Blut in die Schale',r:2,lohn:'groß',skill:'Weisheit',dc:11,bonus:{echo:3},win:'Großer Segen · 2 Ebenen',lose:'−20% Leben',ok(){exFx('ev_segen_gross',2);return 'Die Schale glüht rot, dann golden. Ihr fühlt euch unangenehm mächtig.'},fail(){exFx('ev_blut',1);return 'Die Schale trinkt. Und trinkt. Und gibt nichts zurück.'}},
+  {l:'Den Schrein plündern',r:3,lohn:'episch',skill:'Fingerfertigkeit',dc:14,bonus:{ezekiel:4},win:'Episches Item + Splitter',lose:'Verwundbar 2 Ebenen + Verfolger',ok(){exItem(3);exSplit(1);return 'Unter dem Steinbild: ein Hohlraum voller Opfergaben. Niemand hat’s gesehen. Hoffentlich.'},fail(){exFx('ev_verwundbar',2);exFx('ev_jaeger',1);return 'Ein Wächtergeist schreckt hoch. Er folgt euch. Und er ist nachtragend.'},crit(){exItem(4);exSplit(1);return 'Der Schrein gehörte einem Gott des Leichtsinns. Er ist beeindruckt.'}},
+  {l:EVW}]},
+ {id:'fremder',t:'Die verletzte Fremde',txt:'Eine Wanderin liegt am Weg, einen Pfeil im Bein. Echte Not – oder richtig gutes Schauspiel?',opts:[
+  {l:'Verband reichen',r:1,lohn:'klein',skill:'Heilkunde',dc:6,bonus:{echo:3},win:'Gold',lose:'nichts',ok(){exGold(70);return 'Sie drückt euch ein paar Münzen in die Hand und humpelt davon.'},fail(){return 'Ihr wickelt den Verband falsch herum. Sie macht es lieber selbst.'}},
+  {l:'Den Pfeil ziehen',r:2,lohn:'gut',skill:'Heilkunde',dc:11,bonus:{echo:3,friedrich:2},win:'Seltenes Item + Fortsetzung',lose:'Taschendiebin: −Gold',ok(){exItem(2);exKette('fremder2',1);return '„Ich schulde euch was“, sagt sie – und meint es offenbar ernst.'},fail(){exGoldLos(90);return 'Kaum ist der Pfeil draußen, ist auch euer Geldbeutel draußen. Und sie weg.'}},
+  {l:'Ihre Taschen durchsuchen',r:3,lohn:'groß',skill:'Fingerfertigkeit',dc:14,bonus:{ezekiel:4},win:'Viel Gold + 2 Edelsteine',lose:'Großer Hinterhalt',ok(){exGold(300);exGems(2);return 'Für eine Verletzte hat sie erstaunlich viel Beute dabei. Jetzt nicht mehr.'},fail(){exFx('ev_hinterhalt2',1);return 'Sie pfeift. Aus dem Gebüsch antworten zwölf Pfiffe. Das war eine Bande.'}},
+  {l:EVW}]},
+ {id:'fremder2',chain:1,t:'Ein bekanntes Gesicht',txt:'Die Wanderin von neulich – Bein verheilt, Schwert geschärft. „Ich hab noch eine Schuld offen.“',opts:[
+  {l:'Sie mitnehmen',r:0,lohn:'gut',win:'Begleiterin · 2 Ebenen',ok(){exFx('ev_begl',2,'befreit');return 'Sie reiht sich ein. Endlich jemand, der Barradins Lieder noch nicht kennt.'}},
+  {l:'Lieber Gold',r:0,lohn:'klein',win:'Gold',ok(){exGold(170);return 'Sie zahlt in bar. Ehrlich bis zur letzten Münze.'}},
+  {l:'Mit ihr trainieren',r:2,lohn:'groß',skill:'Athletik',dc:11,bonus:{barradin:2,ezekiel:3},win:'Geschärfte Sinne + Splitter',lose:'Lahm',ok(){exFx('ev_schaerfe',2);exSplit(1);return 'Sie zeigt euch einen Trick, der Kniekehlen sehr unglücklich macht.'},fail(){exFx('ev_lahm',1);return 'Muskelkater an Stellen, von denen ihr nichts wusstet.'}}]},
+ {id:'wuerfel',t:'Die Würfelrunde',txt:'In einer Schenke würfeln drei Zwerge um hohe Einsätze. „Na, Spitzohr? Traut ihr euch?“',opts:[
+  {l:'Kleiner Einsatz',r:1,lohn:'klein',cost:()=>evGold(40),skill:'Glück',dc:8,win:'Einsatz ×2,5',lose:'Einsatz weg',ok(){exGold(100);return 'Die Zwerge brummen anerkennend.'},fail(){return 'Weg ist der Einsatz. Die Zwerge prosten euch zu.'}},
+  {l:'Doppelt oder nichts',r:2,lohn:'gut',cost:()=>evGold(120),skill:'Glück',dc:11,win:'Einsatz ×3',lose:'Einsatz weg',ok(){exGold(360);return 'Die Zwerge fluchen ausgiebig – auf Zwergisch, also sehr lange.'},fail(){return 'Pech gehabt. Der Einsatz wechselt in einen Zwergenbart.'}},
+  {l:'Alles auf die Zwölf',r:3,lohn:'episch',cost:()=>evGold(300),skill:'Glück',dc:16,win:'Einsatz ×6',lose:'Einsatz weg + Pech',ok(){exGold(1800);return 'Zwölf! Der älteste Zwerg fällt vom Stuhl.'},fail(){exFx('ev_pech',1);return 'Eine Eins. Natürlich eine Eins. Die Zwerge singen ein Spottlied.'}},
+  {l:'Gezinkte Würfel',hero:'ezekiel',r:2,lohn:'groß',skill:'Fingerfertigkeit',dc:12,bonus:{ezekiel:3},win:'Viel Gold',lose:'−Gold + Hinterhalt',ok(){exGold(500);return 'Eure Würfel kennen nur die Sechs. Die Zwerge kennen das noch nicht.'},fail(){exGoldLos(150);exFx('ev_hinterhalt',1);return '„BETRUG!“ Drei Zwerge, drei Äxte, ein Abend, der eskaliert.'}},
+  {l:'Ein Trinklied anstimmen',hero:'barradin',r:1,lohn:'gut',skill:'Auftreten',dc:11,bonus:{barradin:3},win:'Gold + Geschärfte Sinne',lose:'nichts',ok(){exGold(160);exFx('ev_schaerfe',1);return 'Die Zwerge vergessen das Spiel und schunkeln. Ihr sammelt die Einsätze ein.'},fail(){return 'Die Zwerge singen mit. Lauter. Und schiefer.'}},
+  {l:'Nur zusehen'}]},
+ {id:'haendler',t:'Der Händler mit Kapuze',txt:'Ein Händler öffnet seinen Mantel. Innen funkelt allerlei – ganz sicher nichts Gestohlenes.',opts:[
+  {l:'Ehrlich kaufen',r:0,lohn:'gut',cost:()=>evGold(140),win:'Seltenes Item',ok(){exItem(2,1);return 'Handschlag. Die Ware ist sogar echt.'}},
+  {l:'Feilschen',r:2,lohn:'gut',skill:'Überzeugen',dc:11,bonus:{barradin:4},win:'Seltenes Item für wenig Gold',lose:'er zieht weiter',ok(){exGoldLos(40);exItem(2,1);return 'Er seufzt, als hättet ihr ihm das Herz gebrochen. Dabei nur den Preis.'},fail(){return 'Beleidigt schließt er den Mantel. Mit Würde.'}},
+  {l:'Die verhüllte Kiste',r:3,lohn:'episch',cost:()=>evGold(220),skill:'Glück',dc:14,win:'Episches Item + Schatzkarte',lose:'Kiste voller Steine',ok(){exItem(3,1);exFx('ev_karte',1);return 'Darin: ein Prachtstück – und eine Karte mit dickem rotem Kreuz.'},fail(){return 'Steine. Sehr hübsche Steine. Aber Steine.'},crit(){exItem(4,1);exFx('ev_karte',1);return 'Die Kiste ist doppelt so tief wie sie aussieht. Und doppelt so voll.'}},
+  {l:'Ihm die Taschen leeren',hero:'ezekiel',r:3,lohn:'groß',skill:'Fingerfertigkeit',dc:13,bonus:{ezekiel:3},win:'Episches Item gratis',lose:'Elite-Verfolger',ok(){exItem(3);return 'Was gestohlen war, wird jetzt eben weitergestohlen.'},fail(){exFx('ev_jaeger',1);return 'Er hat Leibwächter. Einer ist sehr groß und hat euch gesehen.'}},
+  {l:EVW}]},
+ {id:'truhe',t:'Die Truhe im Gebüsch',txt:'Unter Farn: eine eisenbeschlagene Truhe. Am Schloss ein frischer Kratzer. Atmet die gerade?',opts:[
+  {l:'Mit dem Stock antippen',r:1,lohn:'klein',skill:'Wahrnehmung',dc:6,bonus:{friedrich:3},win:'Gold',lose:'nichts',ok(){exGold(80);return 'Nichts beißt. Darin: ein Säckchen Münzen.'},fail(){return 'Sie zuckt. Ihr zuckt. Ihr lasst sie lieber stehen.'}},
+  {l:'Das Schloss knacken',r:2,lohn:'gut',skill:'Fingerfertigkeit',dc:11,bonus:{ezekiel:4},win:'Seltenes Item + Edelstein',lose:'Gift im Blut',ok(){exItem(2);exGems(1);return 'Klick. Die Falle ist entschärft, die Truhe offen.'},fail(){exFx('ev_gift',1);return 'Eine Giftnadel. Ein Klassiker – leider auch heute.'}},
+  {l:'Einfach aufreißen',r:3,lohn:'episch',skill:'Athletik',dc:14,tod:1,win:'Episches Item + 2 Edelsteine',lose:'Mimic! Wunde + Hinterhalt',ok(){exItem(3);exGems(2);return 'Mit einem Ruck fliegt der Deckel auf. Die Falle schnappt ins Leere.'},fail(){exFx('ev_wunde',1);exFx('ev_hinterhalt',1);return 'Die Truhe hat Zähne. Viele. Und Freunde.'}},
+  {l:'Rex schnüffeln lassen',hero:'friedrich',r:1,lohn:'gut',skill:'Wahrnehmung',dc:10,bonus:{friedrich:3},win:'Seltenes Item + 2 Edelsteine',lose:'nichts',ok(){exItem(2);exGems(2);return 'Rex knurrt die Falle an, Friedrich entschärft sie. Teamwork.'},fail(){return 'Rex niest. Mehr kommt dabei nicht raus.'}},
+  {l:'Liegen lassen'}]},
+ {id:'lager',t:'Das schlafende Goblinlager',txt:'Ein Dutzend Goblins schnarcht um ein erloschenes Feuer. Daneben ein Berg Diebesgut. Einer murmelt: „Meins.“',opts:[
+  {l:'Am Rand stibitzen',r:1,lohn:'klein',skill:'Heimlichkeit',dc:6,bonus:{ezekiel:3},win:'Gold',lose:'nichts',ok(){exGold(90);return 'Ein paar Münzen, ein Löffel, ein Goblinzahn. Die Münzen behaltet ihr.'},fail(){return 'Ein Goblin dreht sich um. Ihr erstarrt eine halbe Ewigkeit – und geht.'}},
+  {l:'Den Beutehaufen holen',r:2,lohn:'gut',skill:'Heimlichkeit',dc:11,bonus:{ezekiel:4},win:'Gold + Seltenes Item',lose:'Hinterhalt',ok(){exGold(200);exItem(2);return 'Lautlos wie Schatten. Nur Rex hätte fast geniest.'},fail(){exFx('ev_hinterhalt',1);return 'Ein Topf scheppert. Zwölf Augenpaare. Sie werden euch folgen.'}},
+  {l:'Dem Häuptling die Krone klauen',r:3,lohn:'episch',skill:'Heimlichkeit',dc:15,bonus:{ezekiel:4},win:'Gold + Episches Item + Splitter',lose:'Großer Hinterhalt + Verfolger',ok(){exGold(400);exItem(3);exSplit(1);return 'Die Krone ist aus Blech, aber darunter versteckt er sein Bestes.'},fail(){exFx('ev_hinterhalt2',1);exFx('ev_jaeger',1);return 'Die Krone war am Ohr festgebunden. Jetzt ist er wach. Und sehr wütend.'}},
+  {l:'Ein Wiegenlied singen',hero:'barradin',r:2,lohn:'groß',skill:'Auftreten',dc:12,bonus:{barradin:3},win:'Gold + Seltenes Item, alles',lose:'Hinterhalt',ok(){exGold(300);exItem(2);return 'Die Goblins schlafen so tief, dass ihr sogar die Decken mitnehmen könntet.'},fail(){exFx('ev_hinterhalt',1);return 'Ein Goblin wacht auf und applaudiert. Dann holt er seine Freunde.'}},
+  {l:'Umgehen'}]},
+ {id:'druidin',t:'Die alte Druidin',txt:'Auf einer Lichtung sitzt eine alte Frau zwischen Krähen. „Ihr sucht Rat? Die Natur verlangt einen Preis.“',opts:[
+  {l:'Kräutertee annehmen',r:1,lohn:'klein',skill:'Naturkunde',dc:6,bonus:{echo:3},win:'Lebenssegen',lose:'nichts',ok(){exFx('ev_leben',1);return 'Bitter, aber es wärmt bis in die Zehen.'},fail(){return 'Bitter. So bitter. Mehr passiert nicht.'}},
+  {l:'Um Rat fragen',r:2,lohn:'gut',skill:'Naturkunde',dc:11,bonus:{echo:4},win:'+1 Heiltrank für den Lauf',lose:'Lahm',ok(){exPot(1);return 'Sie füllt euch ein Fläschchen mit Waldtau. Es hört nie ganz auf zu glitzern.'},fail(){exFx('ev_lahm',1);return 'Sie verwandelt eure Stiefel kurz in Moos. „Kurz“ ist relativ.'}},
+  {l:'Um ihre Macht bitten',r:3,lohn:'episch',skill:'Willenskraft',dc:14,bonus:{echo:3},win:'2 Splitter + Großer Segen',lose:'Krähenfluch: Verwundbar 2 Ebenen',ok(){exSplit(2);exFx('ev_segen_gross',1);return 'Die Krähen verneigen sich. Die Alte lächelt zum ersten Mal.'},fail(){exFx('ev_verwundbar',2);return 'Die Krähen merken sich eure Gesichter. Krähen vergessen nie.'}},
+  {l:'Mit den Krähen sprechen',hero:'echo',r:1,lohn:'groß',skill:'Tierkunde',dc:11,bonus:{echo:3},win:'Schatzkarte + 2 Edelsteine',lose:'nichts',ok(){exFx('ev_karte',1);exGems(2);return 'Die Krähen verraten, wo es glitzert. Echo grinst sehr gierig.'},fail(){return 'Die Krähen finden Echo unhöflich. Echo findet die Krähen unhöflich. Patt.'}},
+  {l:EVW}]},
+ {id:'spur',t:'Frische Spuren',txt:'Tiefe Krallenspuren im Schlamm. Etwas Großes war hier – und hat etwas Glitzerndes verloren.',opts:[
+  {l:'Ein Stück folgen',r:1,lohn:'klein',skill:'Überleben',dc:6,bonus:{friedrich:3},win:'Edelstein',lose:'nichts',ok(){exGems(1);return 'Am Wegrand funkelt es. Gefunden!'},fail(){return 'Die Spur endet an einem Bach. Wie unhöflich.'}},
+  {l:'Bis zum Nest',r:2,lohn:'gut',skill:'Überleben',dc:11,bonus:{friedrich:4},win:'3 Edelsteine',lose:'Verirrt: Verwundbar',ok(){exGems(3);return 'Ein Nest voller Funkelsteine. Der Besitzer ist gerade nicht da.'},fail(){exFx('ev_verwundbar',1);return 'Ihr verirrt euch und kommt erschöpft an.'}},
+  {l:'Das Biest stellen',r:3,lohn:'episch',skill:'Athletik',dc:14,bonus:{friedrich:3,barradin:1},tod:1,win:'Episches Item + Gold',lose:'Wunde + Verfolger',ok(){exItem(3);exGold(200);return 'Ein Eulenbär! War einer. Sein Hort gehört jetzt euch.'},fail(){exFx('ev_wunde',1);exFx('ev_jaeger',1);return 'Ein Eulenbär. Er gewinnt Runde eins – und will Runde zwei.'}},
+  {l:'„Rex, such!“',hero:'friedrich',r:1,lohn:'groß',skill:'Überleben',dc:11,bonus:{friedrich:4},win:'Schatzkarte + 2 Edelsteine',lose:'nichts',ok(){exFx('ev_karte',1);exGems(2);return 'Rex buddelt eine alte Karte aus – mit Sabber, aber lesbar.'},fail(){return 'Rex findet einen Stock. Den besten Stock. Er ist sehr stolz.'}},
+  {l:EVW}]},
+ {id:'auftritt',t:'Ein Auftritt im Dorf',txt:'Auf dem Dorfplatz steht eine kleine Bühne. Die Leute schauen erwartungsvoll – Barradin juckt es in den Fingern.',opts:[
+  {l:'Ein Volkslied',r:1,lohn:'klein',skill:'Auftreten',dc:6,bonus:{barradin:5},win:'Gold',lose:'nichts',ok(){exGold(90);return 'Trinkgeld und ein Kuchen. Der Kuchen ist schon weg.'},fail(){return 'Höflicher Applaus. Sehr höflich. Zu höflich.'}},
+  {l:'Die große Ballade',r:2,lohn:'gut',skill:'Auftreten',dc:12,bonus:{barradin:5},win:'Gold + Geschärfte Sinne · 2 Ebenen',lose:'Bühnenmiete: −Gold',ok(){exGold(200);exFx('ev_schaerfe',2);return 'Beim dritten Refrain singt das ganze Dorf mit.'},fail(){exGoldLos(60);return 'Faule Tomaten – und der Wirt will trotzdem Bühnenmiete.'}},
+  {l:'Reim-Duell mit dem Dorfbarden',r:3,lohn:'episch',skill:'Auftreten',dc:15,bonus:{barradin:5},win:'Gefeiert 2 Ebenen + viel Gold',lose:'Schwäche 2 Ebenen',ok(){exFx('ev_gefeiert',2);exGold(350);return 'Der Dorfbarde weint. Das Dorf jubelt. Barradin verbeugt sich dreimal.'},fail(){exFx('ev_schwaeche',2);return 'Er kontert mit einem Reim auf „Spitzohr“. Das sitzt. Tief.'}},
+  {l:EVW}]},
+ {id:'brunnen',t:'Der Brunnen der Wünsche',txt:'Ein alter Brunnen, am Grund glitzern unzählige Münzen. Die Inschrift: „Wirf und wünsch dir was.“',opts:[
+  {l:'Kupfermünze werfen',r:1,lohn:'gut',cost:()=>evGold(20),skill:'Glück',dc:9,win:'Seltenes Item',lose:'Plopp',ok(){exItem(2,1);return 'Der Brunnen leuchtet kurz auf.'},fail(){return 'Plopp. Nichts passiert.'}},
+  {l:'Goldmünze werfen',r:2,lohn:'groß',cost:()=>evGold(110),skill:'Glück',dc:11,win:'Episches Item',lose:'Plopp (teuer)',ok(){exItem(3,1);return 'Eine Fontäne aus Licht – und etwas Schweres plumpst euch vor die Füße.'},fail(){return 'Plopp. Ein teures Plopp.'}},
+  {l:'Hinabklettern',r:3,lohn:'episch',skill:'Athletik',dc:15,win:'Massig Gold',lose:'Nasse Tränke + Lahm',ok(){exGold(550);return 'Ihr kommt mit vollen Taschen wieder hoch. Der Brunnen wirkt beleidigt.'},fail(){exFx('ev_trocken',1);exFx('ev_lahm',1);return 'Ihr steckt fest. Stundenlang. Die Tränke sind hinüber.'},crit(){exGold(550);exItem(4,1);return 'Ganz unten liegt der Wunsch, den keiner abgeholt hat.'}},
+  {l:'Nach Gold tauchen',hero:'echo',r:2,lohn:'groß',skill:'Athletik',dc:11,bonus:{echo:3},win:'Viel Gold + Edelstein',lose:'Schnupfen: Lahm',ok(){exGold(380);exGems(1);return 'Echo taucht auf, die Backen voller Münzen. Er teilt. Widerwillig.'},fail(){exFx('ev_lahm',1);return 'Echo taucht auf. Ohne Gold, mit Schnupfen. Sehr schlechte Laune.'}},
+  {l:EVW}]},
+ {id:'fluestern',t:'Das Flüstern',txt:'Eine Stimme flüstert aus der Dunkelheit: „Gib mir ein wenig von dir … und ich gebe dir Macht.“ Ezekiels Klinge zuckt.',opts:[
+  {l:'Kurz hinhören',r:1,lohn:'gut',skill:'Willenskraft',dc:6,bonus:{ezekiel:2},win:'Talentsplitter',lose:'Blutzoll',ok(){exSplit(1);return 'Ein Geheimnis, ganz leise. Ihr wisst jetzt etwas, das ihr nicht wissen solltet.'},fail(){exFx('ev_blut',1);return 'Die Stimme nimmt einen Schluck von euch. Nur einen kleinen.'}},
+  {l:'Einen kleinen Pakt',r:2,lohn:'groß',win:'+40% Schaden · 2 Ebenen',lose:'Preis: Gegner +30% · 2 Ebenen',ok(){exFx('ev_pakt',2);exFx('ev_paktpreis',2);return 'Ein Kribbeln, ein Brennen. Der Preis steht im Kleingedruckten.'}},
+  {l:'Die Stimme herausfordern',r:3,lohn:'episch',skill:'Willenskraft',dc:14,bonus:{ezekiel:4},win:'Talentpunkt + Splitter',lose:'−1 Heiltrank (Lauf) + Schwäche',ok(){exSP(1);exSplit(1);return 'Die Stimme verstummt. Ihre Macht bleibt – bei euch.'},fail(){exPot(-1);exFx('ev_schwaeche',1);return 'Sie nimmt sich ihren Teil. Und noch ein bisschen.'}},
+  {l:'Die Darkin-Klinge antworten lassen',hero:'ezekiel',r:2,lohn:'groß',skill:'Willenskraft',dc:12,bonus:{ezekiel:3},win:'Pakt ohne Preis + Splitter',lose:'Verwundbar 2 Ebenen',ok(){exFx('ev_pakt',2);exSplit(1);return 'Die Klinge lacht. Die Stimme verstummt. Wer hier wen frisst, ist geklärt.'},fail(){exFx('ev_verwundbar',2);return 'Die Klinge und die Stimme verstehen sich prächtig. Leider gegen euch.'}},
+  {l:'Weghören'}]},
+ {id:'geist',t:'Der Geisterritter',txt:'Ein durchscheinender Ritter versperrt den Weg. „Beweist mir, dass ihr würdig seid.“',opts:[
+  {l:'Ehrerbietung',r:1,lohn:'klein',skill:'Religion',dc:6,win:'Erfahrung',lose:'nichts',ok(){exXp(0.35);return 'Er salutiert knapp.'},fail(){return 'Er schaut durch euch hindurch. Wörtlich.'}},
+  {l:'Seine Geschichte anhören',r:2,lohn:'gut',skill:'Religion',dc:11,win:'Viel Erfahrung + Seltenes Item',lose:'Leere Flaschen',ok(){exXp(0.8);exItem(2);return 'Er erzählt drei Stunden. Ihr lernt eine Menge – und erbt sein Schwert.'},fail(){exFx('ev_trocken',1);return 'Er verflucht eure Vorräte. Die Tränke werden zu Staub.'}},
+  {l:'Zum Duell fordern',r:3,lohn:'episch',skill:'Athletik',dc:15,bonus:{barradin:2,ezekiel:2},tod:1,win:'Riesige Erfahrung + Episches Item',lose:'Wunde + Verwundbar',ok(){exXp(1.5);exItem(3);return 'Ein Ritterschlag – diesmal für euch.'},fail(){exFx('ev_wunde',1);exFx('ev_verwundbar',1);return 'Geisterklingen schneiden echt. Wer hätte das gedacht.'}},
+  {l:'Ein Heldenlied auf ihn',hero:'barradin',r:1,lohn:'groß',skill:'Auftreten',dc:11,bonus:{barradin:4},win:'Erfahrung + Lebenssegen 2 Ebenen',lose:'nichts',ok(){exXp(0.8);exFx('ev_leben',2);return 'Der Geist weint durchsichtige Tränen und schwört, über euch zu wachen.'},fail(){return 'Er hört höflich zu. Geister haben Zeit.'}},
+  {l:'Einen Umweg gehen'}]},
+ {id:'schmied',t:'Der wandernde Schmied',txt:'Ein Zwerg mit tragbarer Esse. „Schärfen kostet nur ein Lächeln – und einen guten Wurf.“',opts:[
+  {l:'Waffe polieren',r:1,lohn:'gut',skill:'Handwerk',dc:6,win:'Waffe +1',lose:'nichts',ok(){exUp(['weapon']);return 'Eure Waffe glänzt wie neu.'},fail(){return 'Er haut sich auf den Daumen und flucht auf Zwergisch.'}},
+  {l:'Waffe und Rüstung',r:2,lohn:'groß',skill:'Handwerk',dc:11,win:'Waffe + Rüstung +1',lose:'stumpf: Schwäche',ok(){exUp(['weapon','armor']);return 'Zwei Funkenregen, zwei Aufwertungen.'},fail(){exFx('ev_schwaeche',1);return 'Der Hammer rutscht ab. Eure Klinge ist stumpf wie ein Löffel – für eine Weile.'}},
+  {l:'Im Zwergenfeuer härten',r:3,lohn:'episch',skill:'Handwerk',dc:14,win:'Waffe +2, Rüstung/Helm/Handschuhe +1',lose:'Schwäche 2 Ebenen + −Gold',ok(){exUp(['weapon','weapon','armor','helm','gloves']);return 'Das Zwergenfeuer brüllt. Eure Ausrüstung brüllt zurück.'},fail(){exFx('ev_schwaeche',2);exGoldLos(100);return 'Zu heiß. Viel zu heiß. Und die Rechnung kommt trotzdem.'}},
+  {l:EVW}]},
+ {id:'kuotoa',w:0.7,t:'Ein Pilger aus Sloobludop',txt:'Ein Kuo-Toa in Pilgerkutte winkt freundlich. „Grüße von Ploopploopeen! Er betet für euch.“ Barradin strahlt: „Blublupin!“',opts:[
+  {l:'Fisch teilen',r:0,lohn:'klein',win:'Lebenssegen',ok(){exFx('ev_leben',1);return 'Ihr teilt Fisch und Geschichten. Er segnet euch zum Abschied.'}},
+  {l:'Gemeinsam beten',r:1,lohn:'gut',skill:'Religion',dc:7,bonus:{barradin:3},win:'Goldsegen · 2 Ebenen',lose:'nichts',ok(){exFx('ev_gold',2);return 'Sein Gebet klingt wie Wellen. Eure Taschen fühlen sich schwerer an.'},fail(){return 'Ihr verhaspelt euch im Gebet. Er lacht freundlich und betet einfach für euch mit.'}},
+  {l:'Nach dem Tempelschatz fragen',r:3,lohn:'episch',skill:'Überzeugen',dc:15,bonus:{barradin:3},win:'Episches Item + Splitter',lose:'Leviathan-Fanatiker: Hinterhalt',ok(){exItem(3);exSplit(1);return 'Er vertraut euch eine Reliquie an. „Ploopploopeen würde es so wollen.“'},fail(){exFx('ev_hinterhalt',1);return 'Die Frage hat jemand Falsches gehört: Leviathan-Fanatiker heften sich an eure Fersen.'}},
+  {l:EVW}]},
+ {id:'ei',w:0.8,t:'Das Ei im Aschenest',txt:'In einem Nest aus warmer Asche liegt ein Ei, groß wie Barradins Laute. Es glüht. Es klopft.',opts:[
+  {l:'Schalenreste aufsammeln',r:1,lohn:'klein',skill:'Wahrnehmung',dc:6,win:'Edelstein',lose:'nichts',ok(){exGems(1);return 'Alte Schalen, hart wie Edelstein. Weil sie einer sind.'},fail(){return 'Ihr findet nur Asche. Und jetzt habt ihr Asche an den Fingern.'}},
+  {l:'Das Ei mitnehmen',r:2,lohn:'groß',skill:'Heimlichkeit',dc:11,bonus:{ezekiel:3,echo:2},win:'Fortsetzung: ein Begleiter?',lose:'Die Mutter verfolgt euch',ok(){exKette('ei2',1);return 'Das Ei ist warm im Rucksack. Es klopft weiter. Gemütlich.'},fail(){exFx('ev_jaeger',1);return 'Ein Schrei vom Himmel. Mama ist da – und ihr seid jetzt Beute.'}},
+  {l:'Das Nest ausräumen',r:3,lohn:'episch',skill:'Heimlichkeit',dc:14,bonus:{ezekiel:4},tod:1,win:'Gold + 3 Edelsteine + Item',lose:'Wunde + Verfolger',ok(){exGold(300);exGems(3);exItem(2);return 'Unter der Asche: der Hort einer Feuervogel-Familie.'},fail(){exFx('ev_wunde',1);exFx('ev_jaeger',1);return 'Feuervögel sind heiß. Sehr heiß. Und schnell.'}},
+  {l:'Mit der Mutter verhandeln',hero:'echo',r:1,lohn:'groß',skill:'Tierkunde',dc:11,bonus:{echo:3},win:'Rückenwind 2 Ebenen + 2 Edelsteine',lose:'nichts',ok(){exFx('ev_wind',2);exGems(2);return 'Die Feuermutter schenkt Echo eine Feder. Echo schenkt ihr ein Knurren. Respekt.'},fail(){return 'Die Mutter faucht. Echo faucht zurück. Ihr geht lieber.'}},
+  {l:EVW}]},
+ {id:'ei2',chain:1,t:'Es knackt im Rucksack',txt:'Ein Knacken, ein Piepsen, ein Rauchwölkchen: Ein Feuerküken schaut euch an und hält euch für Mama.',opts:[
+  {l:'Es füttern',r:0,lohn:'gut',win:'Feuerküken · 2 Ebenen',ok(){exFx('ev_kueken',2,'ev_kueken');return 'Es frisst einen Käfer, einen Funken und Barradins Notenblatt. Glücklich.'}},
+  {l:'Es abrichten',r:2,lohn:'episch',skill:'Tierkunde',dc:11,bonus:{echo:4,friedrich:3},win:'Küken 3 Ebenen + Geschärfte Sinne',lose:'es brennt durch: −Gold',ok(){exFx('ev_kueken',3,'ev_kueken');exFx('ev_schaerfe',2);return '„Sitz!“ Es sitzt. „Feuer!“ Es feuert. Rex ist ein bisschen eifersüchtig.'},fail(){exGoldLos(60);return 'Es brennt durch – mit eurem Proviant und einem Loch in Barradins Umhang.'}},
+  {l:'Auf dem Markt verkaufen',r:0,lohn:'groß',win:'Viel Gold',ok(){exGold(450);return 'Viel Gold. Echo grummelt trotzdem: Gold ist gut, Küken war besser.'}}]},
+ {id:'karte',w:0.8,t:'Die halbe Schatzkarte',txt:'Ein alter Seemann – sehr weit weg vom Meer – hält eine zerrissene Karte hoch. „Die andere Hälfte? Lange Geschichte.“',opts:[
+  {l:'Einen Blick erhaschen',r:1,lohn:'gut',skill:'Wahrnehmung',dc:7,bonus:{friedrich:2},win:'Schatzkammer nächste Ebene',lose:'nichts',ok(){exFx('ev_karte',1);return 'Ihr merkt euch das Kreuz. Und die Möwe daneben.'},fail(){return 'Er rollt die Karte zu schnell ein. Ihr habt nur Möwen gesehen.'}},
+  {l:'Die Karte kaufen',r:0,lohn:'groß',cost:()=>evGold(150),win:'Schatzkammer + Fortsetzung',ok(){exFx('ev_karte',1);exKette('karte2',2);return '„Viel Glück“, sagt er. Und lacht ein bisschen zu lange.'}},
+  {l:'Ihm die Karte abluchsen',r:3,lohn:'episch',skill:'Fingerfertigkeit',dc:15,bonus:{ezekiel:4},win:'Karte 2 Ebenen + Gold + Fortsetzung',lose:'−Gold + Verfolger',ok(){exFx('ev_karte',2);exGold(150);exKette('karte2',2);return 'Karte weg, Geldbeutel weg. Der Seemann hat heute keinen guten Tag.'},fail(){exGoldLos(120);exFx('ev_jaeger',1);return 'Der Seemann hat einen Enterhaken. Und Freunde mit Enterhaken.'}},
+  {l:EVW}]},
+ {id:'karte2',chain:1,t:'Die zweite Hälfte',txt:'Ein Skelett lehnt an einem Felsen, die Knochenhand um ein Pergament: die andere Hälfte eurer Karte!',opts:[
+  {l:'Karte zusammensetzen',r:1,lohn:'groß',skill:'Weisheit',dc:7,win:'Episches Item + Schatzkammer',lose:'nur die Schatzkammer',ok(){exItem(3);exFx('ev_karte',1);return 'Die Hälften passen. Das Kreuz leuchtet.'},fail(){exFx('ev_karte',1);return 'Ihr haltet sie falsch herum. Immerhin führt sie noch zu einer Kammer.'}},
+  {l:'Dem roten Kreuz folgen',r:3,lohn:'episch',skill:'Überleben',dc:14,bonus:{friedrich:4},tod:1,win:'Legendäres Item + Gold',lose:'Falle: Wunde',ok(){exItem(4);exGold(300);return 'Unter dem Kreuz: genau das, was ein Kreuz verspricht.'},fail(){exFx('ev_wunde',1);return 'Das Kreuz markierte nicht den Schatz. Es markierte die Falle.'}},
+  {l:EVW}]},
+ {id:'rotroben',w:0.9,t:'Rotroben-Wegzoll',txt:'Drei Rotroben versperren die Brücke. „Wegzoll! Oder ihr schwimmt.“ Der Fluss sieht kalt aus.',opts:[
+  {l:'Zahlen',r:0,lohn:'keiner',cost:()=>evGold(80),win:'ihr kommt vorbei',ok(){return 'Sie zählen nach. Zweimal. Ihr dürft passieren.'}},
+  {l:'Einschüchtern',r:2,lohn:'gut',skill:'Einschüchtern',dc:11,bonus:{barradin:3,ezekiel:3},win:'ihre Zollkasse',lose:'Hinterhalt',ok(){exGold(180);return 'Sie lassen die Kasse fallen und rennen. Einer verliert einen Schuh.'},fail(){exFx('ev_hinterhalt',1);return 'Sie lachen. Dann pfeifen sie nach Verstärkung.'}},
+  {l:'Die Zollkasse rauben',r:3,lohn:'episch',skill:'Heimlichkeit',dc:14,bonus:{ezekiel:4},win:'Viel Gold + Item + Splitter',lose:'Großer Hinterhalt + Verfolger',ok(){exGold(420);exItem(2);exSplit(1);return 'Die Kasse ist schwer. Die Rotroben merken es erst am Abend.'},fail(){exFx('ev_hinterhalt2',1);exFx('ev_jaeger',1);return 'Die Kasse hatte eine Glocke. Natürlich hatte sie eine Glocke.'}},
+  {l:'Sie gnadenlos beleidigen',hero:'barradin',r:2,lohn:'groß',skill:'Auftreten',dc:12,bonus:{barradin:4},win:'Gold + Gefeiert',lose:'Hinterhalt',ok(){exGold(150);exFx('ev_gefeiert',1);return 'Barradin findet Worte über ihre Mütter, Roben und Frisuren. Zwei weinen. Alle fliehen.'},fail(){exFx('ev_hinterhalt',1);return 'Die Beleidigung war gut. Zu gut. Jetzt ist es persönlich.'}},
+  {l:'Durch den Fluss',r:0,lohn:'keiner',win:'kostenlos',lose:'Lahm',ok(){exFx('ev_lahm',1);return 'Kalt. Nass. Aber kostenlos.'}}]},
+ {id:'pilz',w:0.9,t:'Der singende Pilzkreis',txt:'Im Dunkeln leuchtet ein Kreis aus Pilzen – und summt. Leise. Ziemlich schief.',opts:[
+  {l:'Einen Pilz probieren',r:1,lohn:'klein',skill:'Naturkunde',dc:6,bonus:{echo:3},win:'Lebenssegen',lose:'Gift im Blut',ok(){exFx('ev_leben',1);return 'Schmeckt nach Wald und ein bisschen nach Zukunft.'},fail(){exFx('ev_gift',1);return 'Schmeckt nach Wald. Und nach Reue.'}},
+  {l:'Mitsingen',r:2,lohn:'groß',skill:'Auftreten',dc:11,bonus:{barradin:4},win:'Rückenwind + Geschärfte Sinne · 2 Ebenen',lose:'Tanzwut: Lahm',ok(){exFx('ev_wind',2);exFx('ev_schaerfe',2);return 'Der Kreis summt jetzt richtig. Die Pilze wippen im Takt.'},fail(){exFx('ev_lahm',1);return 'Ihr tanzt bis zur Erschöpfung. Freiwillig war das nicht.'}},
+  {l:'Den Riesenpilz ernten',r:3,lohn:'episch',skill:'Naturkunde',dc:14,bonus:{echo:4},win:'2 Splitter + Gold',lose:'Sporen: Schwäche 2 Ebenen + Gift',ok(){exSplit(2);exGold(200);return 'Der Riesenpilz seufzt und schenkt euch seine Sporenkrone.'},fail(){exFx('ev_schwaeche',2);exFx('ev_gift',1);return 'Puff. Eine Sporenwolke. Ihr hustet noch zwei Ebenen lang.'}},
+  {l:EVW}]},
+ {id:'rex',w:0.9,when:()=>ev2In('friedrich'),t:'Rex hat etwas gefunden',txt:'Rex bellt an einem hohlen Baum, der Schwanz auf Höchstgeschwindigkeit. Da drin ist was. Definitiv.',opts:[
+  {l:'„Brav, Rex!“',r:0,lohn:'klein',win:'Edelstein + Goldsegen',ok(){exGems(1);exFx('ev_gold',1);return 'Rex bringt euch einen Funkelstein. Und erwartet ein Leckerli. Zu Recht.'}},
+  {l:'Graben lassen',r:2,lohn:'gut',skill:'Überleben',dc:10,bonus:{friedrich:4},win:'Seltenes Item + Gold',lose:'Wespennest: Lahm',ok(){exItem(2);exGold(120);return 'Rex gräbt eine Kiste aus. Und einen Knochen. Den Knochen behält er.'},fail(){exFx('ev_lahm',1);return 'Es war ein Wespennest. Rex findet das immer noch toll.'}},
+  {l:'Hineinkriechen',r:3,lohn:'episch',skill:'Athletik',dc:15,bonus:{friedrich:2},tod:1,win:'Schatzkarte + Episches Item',lose:'Wunde',ok(){exFx('ev_karte',1);exItem(3);return 'Im Baum: das Versteck eines Räubers. Mit Karte!'},fail(){exFx('ev_wunde',1);return 'Drinnen wohnt ein Dachs. Der Dachs gewinnt.'}},
+  {l:EVW}]},
+ /* ---------- Jackpots (selten) ---------- */
+ {id:'tymora',jp:1,t:'Tymoras Münze',txt:'Mitten in der Luft dreht sich eine Goldmünze. Sie fällt nicht. Sie wartet. Auf euch.',opts:[
+  {l:'Nur bewundern',r:0,lohn:'gut',win:'Goldsegen · 2 Ebenen',ok(){exFx('ev_gold',2);return 'Die Münze zwinkert. Münzen können das, wenn sie wollen.'}},
+  {l:'„Kopf!“',r:2,lohn:'episch',skill:'Glück',dc:11,win:'Legendäres Item + Gold',lose:'Schwäche 2 Ebenen + −Gold',ok(){exItem(4);exGold(300);return 'Kopf! Die Göttin des Glücks lächelt.'},fail(){exFx('ev_schwaeche',2);exGoldLos(150);return 'Zahl. Die Münze lacht klimpernd.'}},
+  {l:'„Auf der Kante!“',r:3,lohn:'episch',skill:'Glück',dc:17,win:'Legendär + 2 Talentpunkte + 1000 Gold',lose:'Schwäche 2 Ebenen + Verwundbar, −Gold',ok(){exItem(4);exSP(2);exGold(1000);return 'Die Münze landet auf der Kante. Und bleibt stehen. Tymora klatscht.'},fail(){exFx('ev_schwaeche',2);exFx('ev_verwundbar',1);exGoldLos(200);return 'Sie fällt. Natürlich fällt sie. Und das Glück fällt mit.'}},
+  {l:EVW}]},
+ {id:'drache',jp:1,t:'Ein schlafender Drache',txt:'Hinter einem Felsspalt: ein Drache, tief schlafend, auf einem Berg aus Gold. Er schnarcht Funken.',opts:[
+  {l:'Eine Handvoll Münzen',r:1,lohn:'groß',skill:'Heimlichkeit',dc:7,bonus:{ezekiel:3},win:'Viel Gold',lose:'Elite-Verfolger',ok(){exGold(350);return 'Eine Handvoll Drachengold ist mehr als ein ganzer Lauf Goblingold.'},fail(){exFx('ev_jaeger',1);return 'Ein Auge öffnet sich. Nur eins. Das reicht.'}},
+  {l:'Einen ganzen Sack',r:2,lohn:'episch',skill:'Heimlichkeit',dc:12,bonus:{ezekiel:4},tod:1,win:'Massig Gold + Episches Item',lose:'Wunde + Verfolger',ok(){exGold(800);exItem(3);return 'Der Sack klimpert. Der Drache schnarcht. Alles bestens.'},fail(){exFx('ev_wunde',1);exFx('ev_jaeger',1);return 'Der Sack klimpert. Der Drache schnarcht nicht mehr.'}},
+  {l:'Das Schwert aus dem Hort',r:3,lohn:'episch',skill:'Heimlichkeit',dc:16,bonus:{ezekiel:4},tod:1,win:'Legendäres Item + Gold + 2 Splitter',lose:'Wunde + Großer Hinterhalt + Verfolger',ok(){exItem(4);exGold(500);exSplit(2);return 'Ihr zieht das Schwert. Der Berg rutscht. Der Drache dreht sich nur um.'},fail(){exFx('ev_wunde',1);exFx('ev_hinterhalt2',1);exFx('ev_jaeger',1);return 'Das Schwert steckte in seinem Schwanz. Es war kein Schwert. Es war ein Stachel.'}},
+  {l:'Gold-Ranken wachsen lassen',hero:'echo',r:2,lohn:'episch',skill:'Naturkunde',dc:12,bonus:{echo:3},win:'Massig Gold + 2 Edelsteine',lose:'Elite-Verfolger',ok(){exGold(700);exGems(2);return 'Echos Ranken schlängeln sich in den Hort und kommen glänzend zurück. Echo summt. Echo summt nie.'},fail(){exFx('ev_jaeger',1);return 'Eine Ranke kitzelt den Drachen an der Nase.'}},
+  {l:'Ganz leise weg'}]},
+ {id:'mimickoenig',jp:1,t:'Der Mimic-König',txt:'Eine Truhe so groß wie ein Haus, mit Krone. Sie tut so, als schliefe sie. Sehr schlecht.',opts:[
+  {l:'Ein Lied für den König',r:1,lohn:'groß',skill:'Auftreten',dc:8,bonus:{barradin:4},win:'Episches Item',lose:'Hinterhalt',ok(){exItem(3);return 'Der König rülpst ein Geschenk aus. Danke?'},fail(){exFx('ev_hinterhalt',1);return 'Der König mag keine Musik. Seine kleinen Mimics auch nicht.'}},
+  {l:'Einen Goldzahn ziehen',r:2,lohn:'episch',skill:'Athletik',dc:12,tod:1,win:'Legendäres Item',lose:'Wunde',ok(){exItem(4);return 'Ein Ruck, ein Brüllen – und ein Zahn aus purem Glück.'},fail(){exFx('ev_wunde',1);return 'Der Zahn sitzt fest. Ihr nicht.'}},
+  {l:'Hineinklettern',r:3,lohn:'episch',skill:'Athletik',dc:15,tod:1,win:'Legendär + Episch + Gold',lose:'Wunde + Großer Hinterhalt',ok(){exItem(4);exItem(3);exGold(400);return 'Drinnen: der Schatz aller Truhen, die er je gefressen hat.'},fail(){exFx('ev_wunde',1);exFx('ev_hinterhalt2',1);return 'Er schluckt. Ihr seid schneller wieder draußen als gedacht – mit Gefolge.'}},
+  {l:EVW}]}];
+const EV2={};for(const e of EV2L){e.v2=1;EV2[e.id]=e}
+EVENTS.length=0;for(const e of EV2L)EVENTS.push(e);
+
+/* ---------- Auswahl: Kette fällig? Jackpot? Sonst gewichtet ---------- */
+function ev2Due(){const nx=(G.stage|0)+1;for(const q of mpL())for(const m of q&&q.mods||[])if(m.k==='kette'&&m.ab<=nx&&EV2[m.id])return m.id;return null}
+function ev2Pick(){const seen=G.evSeen||[];const ok=e=>!e.chain&&(!e.when||e.when());
+ if((G.stage|0)>=1&&Math.random()<0.08){const J=EV2L.filter(e=>e.jp&&ok(e)&&!seen.includes(e.id));if(J.length)return pick(J)}
+ let L=EV2L.filter(e=>!e.jp&&ok(e)&&!seen.includes(e.id));if(!L.length)L=EV2L.filter(e=>!e.jp&&ok(e));
+ let s=L.reduce((a,e)=>a+(e.w||1),0)*Math.random();for(const e of L){s-=(e.w||1);if(s<=0)return e}return L[0]}
+function ev2Start(ev){G.evSeen=G.evSeen||[];G.evSeen.push(ev.id);for(const q of mpL())if(q&&q.mods)q.mods=q.mods.filter(m=>!(m.k==='kette'&&m.id===ev.id));G.ev={ev,res:null};renderEvent();try{sfx(ev.jp?'legend':'ui')}catch(e){}return true}
+maybeEvent=function(){if(G.bot||!(G.mode==='kampagne'||G.mode==='abstieg'||G.mode==='taeglich'))return false;ev2Seed(0);
+ const due=ev2Due();if(due)return ev2Start(EV2[due]);if(Math.random()>0.6)return false;return ev2Start(ev2Pick())};
+
+/* ---------- Anzeige ---------- */
+function ev2Chance(o){const grp=G.mp&&PL.length>1;const L=grp?PL:[P];const ps=L.map(q=>{const b=ev2Bon(o,q);let n=0;for(let r=1;r<=20;r++)if(r===20||(r!==1&&r+b>=o.dc))n++;const p=n/20;return o.hero===q.id?1-(1-p)*(1-p):p});
+ if(!grp)return ps[0];let d=[1];for(const p of ps){const nd=new Array(d.length+1).fill(0);d.forEach((v,k)=>{nd[k]+=v*(1-p);nd[k+1]+=v*p});d=nd}let s=0;d.forEach((v,k)=>{if(k*2>=ps.length)s+=v});return s}
+function ev2Vis(ev){let h=0;return ev.opts.map((o,i)=>i).filter(i=>{const o=ev.opts[i];if(!o.hero)return true;if(!ev2In(o.hero)||h>=2)return false;h++;return true})}
+function ev2OptHtml(o,i,E){const leave=!o.ok;if(leave)return`<button class="btn evopt evleave" data-act="ev-opt" data-i="${i}"><b>${esc(o.l)}</b></button>`;
+ const cost=o.cost?o.cost():0,poor=cost>SAVE.gold,r=o.r|0,hc=o.tod&&ev2HC(),arm=E.arm===i;
+ const hq=o.hero&&HEROES[o.hero],hc0=hq?HCOL[o.hero]||'#e5b454':'';
+ const bons=(G.mp&&PL.length>1?PL:[P]).map(q=>ev2Bon(o,q)?`${q.hero.name} +${ev2Bon(o,q)}`:'').filter(Boolean);
+ const ch=o.skill?Math.round(ev2Chance(o)*100):100;
+ const chips=`${hq?`<i class="evc evh" style="--hc:${hc0}">${esc(hq.name)} · Vorteil</i>`:''}<i class="evc r${r}">${EV2RN[r]}${o.tod?' ☠':''}</i><i class="evc l-${o.lohn==='groß'?'gross':o.lohn||'gut'}">${EV2LN[o.lohn]||EV2LN.gut}</i>${o.skill?`<i class="evc ch">${ch}%</i>`:''}`;
+ const det=o.skill?`${esc(o.skill)} · SG ${o.dc}${bons.length?' · '+bons.map(esc).join(' · '):''}`:(cost?'':'ohne Wurf');
+ const wl=`<span class="w">✓ ${esc(o.win||'')}</span>${o.lose?` <span class="x">✗ ${esc(o.lose)}</span>`:''}`;
+ return`<button class="btn ${o.skill?'gold':''} evopt evr${r}${hq?' evhero':''}${arm?' armed':''}" data-act="ev-opt" data-i="${i}" ${poor?'disabled':''} style="${hq?`--hc:${hc0}`:''}">
+  <span class="evo-h"><b>${arm?'☠ Wirklich? Nochmal drücken!':esc(o.l)}</b><span class="evo-c">${chips}</span></span>
+  <small class="evo-d">${det}${cost?`${det?' · ':''}${fmt(cost)} Gold${poor?' – zu wenig':''}`:''}</small>
+  <small class="evo-wl">${wl}</small>${hc?`<small class="evwarn">☠ Hardcore: Ein Fehlschlag kann den Lauf kosten</small>`:''}</button>`}
+function ev2FxHtml(L){return L&&L.length?`<div class="evfx">${L.map(f=>`<span class="evc ${f.g?'fg':'fb'}">${f.t}</span>`).join('')}</div>`:''}
+function ev2Render(){const E=G.ev,ev=E.ev;hud.hidden=true;try{clearHudFx()}catch(e){}
+ const tier=ev.jp?'<span class="evtier jp">★ Jackpot</span>':ev.chain?'<span class="evtier ch">📜 Fortsetzung</span>':ev.w&&ev.w<1?'<span class="evtier rar">✦ Selten</span>':'';
+ let body;
+ if(!E.res){body=`<div class="evopts evx-o">${ev2Vis(ev).map(i=>ev2OptHtml(ev.opts[i],i,E)).join('')}</div>`;
+  const sp=(P.mods||[]).find(m=>m.k==='split');if(sp)body+=`<p class="evsp">◇ Talentsplitter ${sp.v}/3 – drei ergeben einen Talentpunkt</p>`}
+ else{const R=E.res,rl=R.rolling,hid=rl?'style="opacity:0"':'';
+  const opt=`<div class="evwahl">${esc(R.ol||'')}${R.need?` · <b>brauchst ${R.need}+</b>`:''}</div>`;
+  if(R.group)body=`${opt}<div class="evres evx-r ${rl?'rolling':R.cls}" style="flex-direction:column">${groupDiceHtml(R.group,rl)}<div class="evrt" ${hid}><div class="evroll">${R.line}</div><div class="evtxt">${R.txt}</div>${ev2FxHtml(R.fx)}</div></div>`;
+  else body=`${opt}<div class="evres evx-r ${rl?'rolling':R.cls}"><div class="evdie"><div class="d20${rl?'':' land'}"><span id="d20n">${rl?'?':R.roll}</span></div>${R.adv?`<div class="d20 d20b${rl?'':' land'}${!rl&&R.adv[1]<R.adv[0]?' drop':''}"><span id="d20b">${rl?'?':R.adv[1]}</span></div>`:''}</div><div class="evrt" ${hid}><div class="evroll">${R.line}</div><div class="evtxt">${R.txt}</div>${ev2FxHtml(R.fx)}</div></div>`;
+  body+=(rl?'':evPendHtml())+`<button class="btn-main${rl?' evwait':''}" data-act="ev-done">Weiterziehen</button>`}
+ showScreen(`<div class="wrap narrow center ev evx${ev.jp?' evjp':''}" style="min-height:70vh;justify-content:center">
+  <div class="eyebrow">Unterwegs · ${G.mp?'die ganze Gruppe würfelt':esc(P.hero.name)}${tier?' · '+tier:''}</div><h2>${esc(ev.t)}</h2><p class="lead">${esc(ev.txt)}</p>${body}</div>`)}
+{const re0=renderEvent;renderEvent=function(){const E=G.ev;if(!E||!E.ev||!E.ev.v2)return re0.apply(this,arguments);ev2Render();try{if(typeof txEventDeko==='function')txEventDeko()}catch(e){}}}
+
+/* ---------- Wurf und Auflösung ---------- */
+function ev2Group(o){const rolls=PL.map((q,i)=>{const bon=ev2Bon(o,q),a=ev2R(),b=o.hero===q.id?ev2R():0,r=Math.max(a,b),tot=r+bon;return{i,r,bon,tot,ok:r===20||(r!==1&&tot>=o.dc)}});
+ const okN=rolls.filter(x=>x.ok).length,ok=okN*2>=rolls.length,n20=ok&&rolls.some(x=>x.r===20),n1=!ok&&rolls.some(x=>x.r===1);return{rolls,ok,n20,n1,okN}}
+function ev2Run(fn,o,kind){/* kind: crit|ok|fail|botch */let txt='';const run=()=>{let t=fn?fn():'';if(kind==='crit'&&!o.crit){t+=' Natürliche 20 – ein Talentsplitter obendrauf!';exSplit(1)}if(kind==='botch'){exFx('ev_pech',1)}return t};
+ EVFX.on=1;EVFX.L=[];try{txt=run()}finally{EVFX.on=0}
+ if(G.mp&&PL.length>1)for(const q of PL)if(q!==P){const g0=SAVE.gold,r0=G.goldRun;withP(q,()=>{try{run()}catch(e){console.error(e)}});SAVE.gold=g0;G.goldRun=r0}
+ return txt}
+function ev2Choose(i){const E=G.ev,o=E.ev.opts[i];if(!o||E.res)return;
+ if(!o.ok){finishEvent();return}
+ if(o.tod&&ev2HC()&&o.skill&&E.arm!==i){E.arm=i;renderEvent();sfx('fluch');return}
+ const cost=o.cost?o.cost():0;if(cost>SAVE.gold)return;SAVE.gold-=cost;ev2Seed(i+1);
+ const ol=o.l+(cost?` (−${fmt(cost)} Gold)`:'');
+ if(!o.skill){const txt=ev2Run(o.ok,o,'ok');E.res={roll:'✓',cls:'ok',line:'Abgemacht.',txt,fx:EVFX.L.slice(),ol};renderEvent();persist();sfx('item');return}
+ if(G.mp&&PL.length>1){const R=ev2Group(o),ok=R.ok,kind=R.n20?'crit':ok?'ok':R.n1?'botch':'fail';const fn=kind==='crit'?(o.crit||o.ok):ok?o.ok:o.fail;
+  const txt=ev2Run(fn,o,kind)||'Nichts geschieht.';
+  E.res={group:R,roll:'',cls:R.n20?'crit':ok?'ok':'fail',ol,line:`Gruppenprobe: ${R.okN} von ${R.rolls.length} geschafft (SG ${o.dc}) – ${ok?'Erfolg':'Fehlschlag'}${R.n20?' · Natürliche 20!':R.n1?' · Natürliche 1!':''}`,txt,fx:EVFX.L.slice(),rolling:true};renderEvent();persist();sfx('ui');
+  groupDiceAnim(R,()=>{if(!G.ev||!G.ev.res)return;G.ev.res.rolling=false;renderEvent();ev2LandFx(G.ev.res.cls,R.n20,R.n1)});return}
+ const bon=ev2Bon(o,P),adv=o.hero===P.id,a=ev2R(),b=adv?ev2R():0,r=Math.max(a,b),tot=r+bon,n20=r===20,n1=r===1,ok=n20||(!n1&&tot>=o.dc);
+ const kind=n20?'crit':ok?'ok':n1?'botch':'fail',fn=kind==='crit'?(o.crit||o.ok):ok?o.ok:o.fail;
+ const txt=ev2Run(fn,o,kind)||'Nichts geschieht.';const knapp=!ok&&o.dc-tot<=2;
+ E.res={roll:r,adv:adv?[r,Math.min(a,b)]:null,cls:n20?'crit':ok?'ok':'fail',n20,n1,ol,need:Math.max(2,o.dc-bon),
+  line:n20?'Natürliche 20! Kritischer Erfolg!':n1?'Natürliche 1 – Patzer!':`Wurf ${r}${adv?` (Vorteil: ${a} / ${b})`:''}${bon?' + '+bon+' = '+tot:''} gegen SG ${o.dc}: ${ok?'Erfolg':knapp?'knapp daneben!':'Fehlschlag'}`,txt,fx:EVFX.L.slice(),rolling:true};
+ renderEvent();persist();sfx('ui');ev2Anim(E.res)}
+function ev2LandFx(cls,n20,n1){try{sfx(n20?'legend':n1?'hurt':cls==='ok'?'item':'d_flesh');if(n20)sfx('level');if(n20||n1)rumble(P,n20?0.5:0.4,n20?160:120)}catch(e){}}
+function ev2Anim(R){const el=$('d20n');if(!el)return;const box=el.parentNode,eb=$('d20b'),bb=eb&&eb.parentNode;const rr=()=>1+Math.floor(MATHRND()*20);
+ box.classList.add('roll');if(bb)bb.classList.add('roll');sfx('wuerfel');
+ const seq=[45,45,50,50,55,60,70,80,95,115,140,175,220];let k=0;
+ const land=()=>{el.textContent=R.roll;box.classList.remove('roll');box.classList.add('land');if(bb){eb.textContent=R.adv[1];bb.classList.remove('roll');bb.classList.add('land');if(R.adv[1]<R.adv[0])bb.classList.add('drop')}
+  const res=box.closest('.evres');if(res){res.classList.remove('rolling');res.classList.add(R.cls)}const rt=res&&res.querySelector('.evrt');if(rt){rt.style.opacity=1;rt.classList.add('evin')}
+  const bm=scr.querySelector('.btn-main.evwait');if(bm)bm.classList.remove('evwait');
+  if(G.ev&&G.ev.res===R){R.rolling=false;if(mpL().some(q=>q.evPend&&q.evPend.length))setTimeout(()=>{if(G.ev&&G.ev.res===R)renderEvent()},900)}ev2LandFx(R.cls,R.n20,R.n1)};
+ const tick=()=>{if(!document.body.contains(el)){if(G.ev&&G.ev.res===R)R.rolling=false;return}if(k>=seq.length){land();return}el.textContent=rr();if(eb)eb.textContent=rr();if(k%3===0)sfx('hit');setTimeout(tick,seq[k++])};tick()}
+{const ce0=chooseEvent;chooseEvent=function(i){const E=G.ev;if(!E||!E.ev||!E.ev.v2)return ce0.apply(this,arguments);const r=ev2Choose(i);
+ try{if(typeof erfolgZaehl==='function'&&!erfStumm()&&!G.netGuestRun&&!E.erfC&&(E.res||G.ev!==E)){E.erfC=1;erfolgZaehl('wuerfel',1)}}catch(er){}return r}}
+
+/* ---------- Nachwirkungen in der Stufe ---------- */
+{const kg0=kartenGang;kartenGang=function(){const r=kg0.apply(this,arguments);if(r)return r;
+ if(mpL().some(q=>q&&(q.mods||[]).some(m=>m.k==='evkarte'))){if(!G.bot)later(2.4,()=>{if(G.state==='play'&&!G.room)toast('✉ Die Schatzkarte stimmt: Hier ist eine Schatzkammer eingezeichnet – sie leuchtet golden.','#e8c88a')});return 'schatz'}return null}}
+{const ss0=setupStage;setupStage=function(i){const r=ss0.apply(this,arguments);try{const S=STAGES[G.stage]||{};
+ for(const q of mpL()){if(!q)continue;const M=q.mods||[];if((S.noSecret||S.noProps)){for(const m of M)if(m.k==='evkarte')m.st++}
+  const w=M.find(m=>m.k==='evwunde');if(w&&q.st){q.hp=Math.max(1,q.st.maxHp*(w.v||0.35));if(!G.bot)withP(q,()=>word(q.x,q.y-50,'† Wunde','#e0505e'))}}}catch(e){console.error(e)}return r}}
+function ev2Jaeger(){if(G.state!=='play'||G.room||!G.enemies)return;const pt=edgePoint(430),f=pickFoe(0.8);const e=spawnEnemy(f,pt.x,pt.y,{});if(!e)return;
+ makeElite(e,rollAffixes(2+(SL()>8||G.diff>0?1:0)),true);e.hp*=1.3;e.maxHp=e.hp;e.evJaeger=1;try{packFx(pt.x,pt.y,true)}catch(x){}
+ banner('◉ Der Verfolger','Er hat eure Spur – und trägt fette Beute bei sich','#ff6a4a',{dur:2.6,size:40,y:H*0.3});sfx('fluch')}
+{const fw0=firstWave;firstWave=function(){const r=fw0.apply(this,arguments);try{if(G.mode==='bossrausch')return r;
+ const L=mpL().filter(Boolean),amb=Math.max(0,...L.map(q=>withP(q,()=>modSum('ambush'))));
+ if(amb>0){const n=(modHas('ambush')?amb-1:amb);for(let k=0;k<n;k++){const pt=edgePoint(420+k*60);spawnPack(pickFoe(0.5),pt.x,pt.y)}if(!G.bot)banner('⚔ Hinterhalt!',amb>1?'Zwei Elite-Rudel haben euch eingeholt':'Ein Elite-Rudel hat euch eingeholt','#ff6a4a',{dur:2.4,size:40,y:H*0.3})}
+ if(L.some(q=>(q.mods||[]).some(m=>m.k==='evjagd')))later(7,ev2Jaeger);
+ for(const q of L){const m=(q.mods||[]).find(m=>m.k==='evbegl');if(!m)continue;withP(q,()=>{const a=spawnPet(m.sub||'befreit',P.x+40,P.y+24,{hp:P.st.maxHp*0.9,life:300,dmg:()=>P.st.dmg*0.6,every:0.8,speed:180});a.v=MATHRND();a.evB=1;a.own=P;if(!G.bot)word(a.x,a.y-30,'❦ '+(m.sub==='ev_kueken'?'Feuerküken':'Begleiterin'),'#9fe08a')})}}catch(e){console.error(e)}return r}}
+hook('kill',e=>{if(!e||!e.evJaeger||e.evJD)return;e.evJD=1;if(G.bot)return;try{dropItem(e.x,e.y,randomItem(scale().il+2,1,3));const v=evGold(150);giveGold(v);word(e.x,e.y-40,`+${fmt(v)} Gold`,'#ffd04a');banner('Verfolger erlegt','Seine Beute gehört euch','#ffd04a',{dur:2.2,size:36,y:H*0.3});sfx('legend')}catch(x){console.error(x)}});
+/* Feuerküken: kleiner glühender Vogel */
+PETART.ev_kueken={draw(a,t,c,fade){const fl=Math.sin(t*14+a.v*9)*0.5+0.5,y=a.y-10-Math.abs(Math.sin(t*5+a.v))*6;c.globalCompositeOperation='lighter';try{glow(a.x,y,22,'#ff9a3a',0.5*fade)}catch(e){}c.globalCompositeOperation='source-over';
+ ell(c,a.x,a.y+10,10,4,'rgba(0,0,0,.3)');circ(c,a.x,y,9,'#ff8a2a');circ(c,a.x+(a.flip||1)*6,y-7,6,'#ffb04a');circ(c,a.x+(a.flip||1)*8,y-8,1.6,'#2a1408');
+ c.fillStyle='#ffd06a';c.beginPath();c.moveTo(a.x+(a.flip||1)*12,y-7);c.lineTo(a.x+(a.flip||1)*16,y-5);c.lineTo(a.x+(a.flip||1)*12,y-4);c.fill();
+ c.fillStyle='#ff6a1a';for(const s of [-1,1]){c.beginPath();c.ellipse(a.x+s*7,y+1,7,3+fl*3,s*(0.5+fl*0.6),0,TAU);c.fill()}
+ for(let k=0;k<3;k++){c.globalAlpha=fade*(0.6-k*0.18);circ(c,a.x-(a.flip||1)*(8+k*5),y+2+Math.sin(t*9+k)*2,3-k*0.7,'#ffd06a')}c.globalAlpha=1}};
+/* Splitter und Ketten nicht als Pillen im Kampf-HUD */
+{const dp0=drawPills;drawPills=function(){if(!P||!P.mods||!P.mods.some(m=>m.k==='split'||m.k==='kette'))return dp0.apply(this,arguments);const M=P.mods;P.mods=M.filter(m=>m.k!=='split'&&m.k!=='kette');try{return dp0.apply(this,arguments)}finally{P.mods=M}}}
+
+/* ---------- Aussehen ---------- */
+(()=>{try{const st=document.createElement('style');st.textContent=`
+.evx .evopts{max-width:660px;gap:8px}
+.evx .evopt{gap:3px;padding:9px 14px;position:relative;border-left-width:4px}
+.evx .evopt.evr0{border-left-color:#b8c8a8}.evx .evopt.evr1{border-left-color:#8fd07a}.evx .evopt.evr2{border-left-color:#e8b84a}.evx .evopt.evr3{border-left-color:#ff6a4a}
+.evx .evopt.evhero{box-shadow:inset 0 0 0 1px var(--hc),0 0 16px color-mix(in srgb,var(--hc) 30%,transparent)}
+.evx .evopt.evleave{padding:8px 14px;opacity:.85}
+.evx .evo-h{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;justify-content:center}
+.evx .evo-c{display:inline-flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.evc{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.02em;padding:1px 7px;border-radius:999px;border:1px solid currentColor;background:rgba(0,0,0,.3);white-space:nowrap;line-height:1.5}
+.evc.r0{color:#c8d4b8}.evc.r1{color:#9fe08a}.evc.r2{color:#f0c050}.evc.r3{color:#ff7a5a}
+.evc.l-keiner{color:#a89c88}.evc.l-klein{color:#d8c8a8}.evc.l-gut{color:#e8d08a}.evc.l-gross{color:#ffc860}.evc.l-episch{color:#ffd04a;box-shadow:0 0 10px rgba(255,208,74,.5);background:rgba(80,50,0,.45)}
+.evc.ch{color:#f6ecd6;border-color:rgba(246,236,214,.45)}.evc.evh{color:var(--hc)}
+.evx .evopt small,.evx .evopt b{white-space:normal;max-width:100%}.evx .evo-wl .w,.evx .evo-wl .x{display:inline-block}.evx .evo-d{opacity:.78}.evx .evo-wl{font-size:12px;opacity:1;font-weight:700}.evx .evo-wl .w{color:#9fe08a}.evx .evo-wl .x{color:#ff9a8a;margin-left:8px}
+.evx .evwarn{color:#ff8a6a;font-size:11.5px;font-weight:800}
+.evx .evopt.armed{border-color:#ff5a3a;animation:evArm .45s ease-in-out infinite alternate}
+@keyframes evArm{from{box-shadow:0 0 0 rgba(255,90,58,0)}to{box-shadow:0 0 22px rgba(255,90,58,.7)}}
+.evtier{font-weight:900}.evtier.jp{color:#ffd04a;text-shadow:0 0 10px rgba(255,208,74,.7)}.evtier.ch{color:#e8c88a}.evtier.rar{color:#e0a8ff}
+.evjp h2{background:linear-gradient(100deg,#ffe9a0 10%,#ffd04a 30%,#fff6d0 45%,#e5a83a 60%,#ffd04a 90%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:evShim 3.2s linear infinite}
+@keyframes evShim{from{background-position:120% 0}to{background-position:-100% 0}}
+.evx .evsp{margin:2px 0 0;font-size:13px;color:#e0c8ff;opacity:.9}
+.evx .evwahl{font-size:14px;color:#e8d8b8;opacity:.9}.evx .evwahl b{color:var(--gold)}
+.evx .evres{max-width:640px}
+.evx .evdie{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.evx .d20{width:92px;height:92px;font-size:38px;transition:filter .3s}
+.evx .d20b{width:58px;height:58px;font-size:24px}
+.evx .d20.drop{opacity:.4;filter:grayscale(.7)}
+.evx .evres.crit .d20.land:not(.drop){animation:evCrit 1s ease-out;filter:drop-shadow(0 0 14px #ffd04a)}
+.evx .evres.fail .d20.land:not(.drop){animation:evFail .5s ease-out}
+.evx .evres.ok .d20.land:not(.drop){animation:d20l .45s ease-out;filter:drop-shadow(0 0 8px #8ff08a)}
+.evx .evres.crit{border-color:#ffd04a;box-shadow:0 0 40px rgba(255,208,74,.3)}.evx .evres.fail{border-color:rgba(255,106,74,.55)}.evx .evres.ok{border-color:rgba(143,240,138,.5)}
+@keyframes evCrit{0%{transform:scale(1.6) rotate(-30deg)}40%{transform:scale(.9) rotate(8deg)}70%{transform:scale(1.12)}100%{transform:none}}
+@keyframes evFail{0%{transform:translateX(0)}20%{transform:translateX(-8px) rotate(-6deg)}40%{transform:translateX(7px) rotate(5deg)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}100%{transform:none}}
+.evx .evrt{transition:opacity .35s}.evx .evrt.evin .evtxt{animation:zwEin .5s ease both .1s}.evx .evrt.evin .evfx{animation:zwEin .5s ease both .35s}
+.evx .evfx{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.evx .evfx .evc{font-size:12.5px;white-space:normal}.evx .evfx .fg{color:#9fe08a}.evx .evfx .fb{color:#ff9a8a}
+.evx .btn-main.evwait{opacity:.35}
+@media (min-width:900px) and (hover:hover){.evx .evopt{font-size:18px;padding:11px 18px}.evc{font-size:13px}.evx .evo-d{font-size:14px}.evx .evo-wl{font-size:14px}.evx .evwarn{font-size:13px}.evx .evfx .evc{font-size:15px}.evx .evwahl{font-size:16px}}
+@media (max-width:560px){.evx .evopt{padding:7px 10px}.evc{font-size:10.5px;padding:0 6px}.evx .evo-wl{font-size:11.5px}.evx .d20{width:72px;height:72px;font-size:30px}.evx .d20b{width:46px;height:46px;font-size:19px}}
+@media (prefers-reduced-motion:reduce){.evjp h2,.evx .evopt.armed,.evx .d20.land{animation:none!important}}`;document.head.appendChild(st)}catch(e){}})();
+window.__hsEv={EV2,EV2L,ev2Start,ev2Chance,ev2Pick,fin:()=>finishEvent(),go:()=>{hideScreen();hud.hidden=false;G.state="play";G.paused=false}};
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
