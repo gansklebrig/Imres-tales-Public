@@ -292,7 +292,17 @@
     if (!akt || akt === document.body || !raum.contains(akt) || !document.documentElement.classList.contains("pad-nav")) { fokus(ersterIn(raum)); return; }
     const a = mitte(akt.getBoundingClientRect());
     let best = null, bw = Infinity;
-    kandidaten(raum).forEach(el => {
+    /* feste Leisten (Kopfzeile, Handyleiste) nur ansteuern, wenn im Inhalt in dieser Richtung nichts mehr kommt – sonst landet jeder zweite Druck in der Leiste */
+    const leiste = el => !!el.closest(".top, .handyleiste");
+    const ausLeiste = leiste(akt), alle = kandidaten(raum);
+    let liste = alle.filter(el => !leiste(el));
+    const ende = dy > 0 ? innerHeight + scrollY >= document.documentElement.scrollHeight - 4 : dy < 0 ? scrollY <= 4 : true;
+    if (ausLeiste && dy < 0) { /* aus der Leiste nach oben: zum untersten sichtbaren Inhalt */
+      const sichtbar2 = liste.filter(el => { const r = el.getBoundingClientRect(); return r.bottom > 60 && r.top < innerHeight - 40; });
+      if (sichtbar2.length) { fokus(sichtbar2.sort((p, q) => q.getBoundingClientRect().bottom - p.getBoundingClientRect().bottom)[0]); return; }
+    }
+    if (ausLeiste && dy > 0) liste = [];
+    (ausLeiste && !dy ? alle.filter(leiste) : liste).forEach(el => {
       if (el === akt) return;
       const m = mitte(el.getBoundingClientRect()), vx = m.x - a.x, vy = m.y - a.y;
       const entlang = vx * dx + vy * dy, quer = Math.abs(vx * dy - vy * dx);
@@ -300,6 +310,11 @@
       if (quer > entlang * 2.2) return; /* nur ungefähr in der Richtung */
       const w = entlang + quer * 2.2;
       if (w < bw) { bw = w; best = el; }
+    });
+    if (!best && !ausLeiste && dy && ende) alle.forEach(el => { /* Seitenende: jetzt darf es in die Leiste gehen */
+      if (el === akt || !leiste(el)) return;
+      const m = mitte(el.getBoundingClientRect()), vx = m.x - a.x, vy = m.y - a.y, entlang = vx * dx + vy * dy, quer = Math.abs(vx * dy - vy * dx);
+      if (entlang <= 4) return; const w = entlang + quer * 2.2; if (w < bw) { bw = w; best = el; }
     });
     if (best) fokus(best);
     else if (dy) window.scrollBy({ top: dy * innerHeight * .35, behavior: "smooth" });
