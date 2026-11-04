@@ -3323,7 +3323,7 @@ function drawEnemy(e,t){if(FOV.on&&fovVersteckt(e)){FOV.aug.push(e);return}const
 let GRID=new Map();const CELL=64;
 function buildGrid(){GRID=new Map();for(const e of G.enemies){if(e.dead)continue;const k=((e.x/CELL|0)+64)*4096+((e.y/CELL|0)+64);let a=GRID.get(k);if(!a){a=[];GRID.set(k,a)}a.push(e)}}
 function query(x,y,r,fn){const x0=Math.floor((x-r)/CELL),x1=Math.floor((x+r)/CELL),y0=Math.floor((y-r)/CELL),y1=Math.floor((y+r)/CELL);for(let i=x0;i<=x1;i++)for(let j=y0;j<=y1;j++){const a=GRID.get((i+64)*4096+(j+64));if(a)for(const e of a)if(!e.dead)fn(e)}}
-const targetable=e=>!e.dead&&!(e.flying&&e.flyHigh>0.4)&&!(e.gmB>0);
+const targetable=e=>!e.dead&&!(e.flying&&e.flyHigh>0.4)&&!(e.gmB>0)/*sichtziel*/&&!(G.bot?false:(typeof fovVersteckt==='function'&&fovVersteckt(e)));
 function nearest(x,y,R){let b=null,bd=R*R;for(const e of G.enemies){if(!targetable(e))continue;const dx=e.x-x,dy=e.y-y,dd=dx*dx+dy*dy-e.r*e.r;if(dd<bd){bd=dd;b=e}}return b}
 function nearestTo(p,R){return nearest(p.x,p.y,R)}
 function strongest(x,y,R){let b=null,bv=-1;for(const e of G.enemies){if(!targetable(e))continue;if(d2(e,{x,y})>R*R)continue;const v=e.hp+(e.boss?1e9:0)+(e.guard?1e8:0)+(e.elite?1e6:0);if(v>bv){bv=v;b=e}}return b}
@@ -5431,7 +5431,7 @@ function zielTick(dt){const O=G.obj;if(!O||O.done||G.room||G.state!=='play')retu
   const tot=1050+650,gone=Math.abs((O.ax==='x'?O.gx:O.gy)-O.f);O.fr=clamp(1-gone/tot,0,1);O.txt=`${O.n}! Lauft zum Ausgang`;
   if(L.some(q=>Math.hypot(q.x-O.gx,q.y-O.gy)<120)){O.f=O.dir>0?-9999:9999;zielGeschafft(O.gx,O.gy)}}
  else if(O.k==='halten'){const inC=L.some(q=>Math.hypot(q.x-O.hx,q.y-O.hy)<150);O.hold=Math.max(0,O.hold+(inC?dt:-dt*0.4));O.fr=O.hold/O.need;O.txt=inC?`Haltet die Stellung · ${Math.ceil(O.need-O.hold)} s`:'Zurück in den Kreis!';
-  /*halten-sanft*/if(Math.random()<dt*0.22&&G.enemies.filter(e=>!e.dead&&!e.wlZz).length<(G.diff>=2?22:26)){const a=rnd(TAU);const f=pickFoe(0.6);for(let i=0;i<2;i++)spawnEnemy(f,O.hx+Math.cos(a)*420+rnd(-40,40),O.hy+Math.sin(a)*420+rnd(-40,40),{})}
+  /*halten-sanft*/if(Math.random()<dt*0.38&&G.enemies.filter(e=>!e.dead&&!e.wlZz).length<(G.diff>=2?34:38)){const a=rnd(TAU);const f=pickFoe(0.7);for(let i=0;i<3;i++)spawnEnemy(f,O.hx+Math.cos(a)*420+rnd(-40,40),O.hy+Math.sin(a)*420+rnd(-40,40),{})}
   if(O.hold>=O.need)zielGeschafft(O.hx,O.hy-60)}}
 /* Gefangene: kurz am Käfig stehen */
 function kaefigTouch(p,touch){if(p.freed)return;const dtw=Math.min(0.05,Math.max(0,G.time-(p.lt===undefined?G.time:p.lt)));p.lt=G.time;
