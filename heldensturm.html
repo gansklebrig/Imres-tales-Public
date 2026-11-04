@@ -3476,7 +3476,7 @@ function updPet(a,dt){a.life-=dt;a.t+=dt;if(a.hit>0)a.hit-=dt;if(a.hp<=0)a.life=
 function startChan(o){o.tick=0;if(!o.src)o.src=DMS;P.chan=o}
 function updChan(dt){const c=P.chan;if(!c)return;c.t-=dt;c.tick-=dt;if(c.fn&&c.tick<=0){c.tick+=c.every;if(c.src)dmRun(c.src,c.fn);else c.fn()}if(c.t<=0){P.chan=null;if(c.end){if(c.src)dmRun(c.src,c.end);else c.end()}}}
 /* Kettenblitz */
-function chainLightning(t,n,dmg,jr){const hit=new Set();let cur=t,px=P.x,py=P.y-8;for(let i=0;i<n&&cur;i++){hit.add(cur);G.fxs.push({k:'zap',x:px,y:py,x2:cur.x,y2:cur.y,t:0,life:0.25});dealDmg(cur,dmg*(1-0.05*i),{lightning:1,stun:0.15});px=cur.x;py=cur.y;let b=null,bd=jr*jr;for(const e of G.enemies){if(hit.has(e)||!targetable(e))continue;const dd=(e.x-px)**2+(e.y-py)**2;if(dd<bd){bd=dd;b=e}}cur=b}}
+function chainLightning(t,n,dmg,jr){const hit=new Set();let cur=t,px=P.x,py=P.y-8;for(let i=0;i<n&&cur;i++){hit.add(cur);G.fxs.push({k:'zap',x:px,y:py,x2:cur.x,y2:cur.y,t:0,life:0.25});dealDmg(cur,dmg*(1-0.05*i),{lightning:1,stun:0.15});px=cur.x;py=cur.y;let b=null,bd=jr*jr;for(const e of G.enemies){if(hit.has(e)||!targetable(e))continue;const dd=(e.x-px)**2+(e.y-py)**2;if(dd<bd&&(!dwAn()||dwFreiS({x:px,y:py},e))){bd=dd;b=e}}cur=b}}
 /* Schwebender Text (Spott, Hinterhalt, 20!) */
 function word(x,y,txt,c){if(G.fxs.length>160)return;G.fxs.push({k:'word',x,y,txt,c,t:0,life:1.1})}
 /* Fallen */
@@ -3897,7 +3897,7 @@ function update(dt){
  if(G.blkG&&!G.room){for(const e of G.enemies){if(e.dead||e.flying||e.boss||e.guard)continue;const h=solidPush(e,Math.min(22,e.r*0.75));if(h){blkAusweichen(e,h);wandKlatscher(e)}}if(G.portal&&!G.portal.bf){G.portal.bf=1;solidPush(G.portal,44)}}
  {const P0=P;for(const a of G.allies){if(G.mp&&a.own&&PL.includes(a.own))P=a.own;dmRun(a.dmK||(a.dmK=dmPetK(a)),()=>updAlly(a,dt));if(G.mp){tagOwn(P);P=P0}}}G.allies=G.allies.filter(a=>a.kind==='rex'||a.life>0);if(G.blkG&&!G.room)for(const a of G.allies)if(!a.dead)solidPush(a,10);
  const P0p=P,blkOn=!G.room&&!!G.blkG;for(const p of G.projs){DMS=p.src||(p.basic?'basic':null);if(G.mp)P=p.team==='p'&&p.own&&PL.includes(p.own)?p.own:P0p;{const PA=PROJART[p.kind];if(PA&&PA.upd)PA.upd(p,dt)}p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;
-  if(blkOn&&!p.back&&!p.durch&&blkPunkt(p.x,p.y,(p.r||6)*0.4)){p.dead=1;if(p.team==='p'){const bb=blkFind(p.x,p.y,(p.r||6)*0.4);if(bb)saeuleTreffer(bb,Math.atan2(p.vy,p.vx))}if(p.boom&&!p.boomed){p.boomed=1;projBoom(p)}else if(fxQ()>0)sparks(p.x,p.y,'#c8bca8',4,140,1);continue}
+  if(blkOn&&!p.back&&!p.durch&&(/*dungwand*/dwSweep(p,dt)||blkPunkt(p.x,p.y,(p.r||6)*0.4))){p.dead=1;if(p.team==='p'){const bb=blkFind(p.x,p.y,(p.r||6)*0.4);if(bb)saeuleTreffer(bb,Math.atan2(p.vy,p.vx))}if(p.boom&&!p.boomed){p.boomed=1;projBoom(p)}else if(fxQ()>0)sparks(p.x,p.y,'#c8bca8',4,140,1);continue}
   if(p.ret&&!p.back&&p.life<p.life0-p.ret){p.back=1;p.hits=[];p.life=1.2}
   if(p.back){const a=ang(p,P);p.vx=Math.cos(a)*p.spd*1.1;p.vy=Math.sin(a)*p.spd*1.1;p.a=a;if(d2(p,P)<24*24){p.dead=1;continue}}
   if(p.life<=0){p.dead=1;if(p.boom&&!p.boomed){p.boomed=1;projBoom(p)}continue}
@@ -19367,6 +19367,58 @@ addEventListener('pagehide',fsEingabenLeer);
 {const f=showScreen;showScreen=function(){try{if(G.state==='play'&&joy){if(joy.spr===1&&P)P.sprint=false;joy=null}}catch(e){}return f.apply(this,arguments)}}
 window.__fsT={HI:()=>(typeof HI!=='undefined'?HI:null),padFrame:()=>padFrame(),PADS:()=>PADS,padMove:q=>padMove(q),keys:()=>keys,PADNAV:()=>PADNAV,padPress:c=>padPress(c),padBack:()=>padBack(),smith:()=>{G.overlay="smith";G.smithSel=null;renderSmith()}};
 window.__hsFS=1;
+
+/* ================= Wände blockieren Sicht und Angriffe (dungwand) =================
+   Vorher: Sichtlinien wurden in 40-px-Schritten (draußen 24 px) abgetastet – Dungeon-Wände sind nur 24–26 px dick,
+   dadurch sah und traf man oft durch Wände; schnelle Geschosse sprangen in einem Bild über die Wand.
+   Jetzt: zwei 8-px-Raster (alle Hindernisse / blickdichte Hindernisse), exakte Rasterdurchquerung (DDA), gecacht je Hindernis-Stand. */
+const DW={C:8,n:0,s:null,o:null,ref:null,len:-1,v:-1,bv:0,e:null};
+function dwBau(){const B=G.blk||[];if(DW.s&&DW.ref===B&&DW.len===B.length&&DW.v===DW.bv)return;const C=DW.C,n=Math.ceil(WORLD/C);DW.n=n;
+ if(!DW.s||DW.s.length!==n*n){DW.s=new Uint8Array(n*n);DW.o=new Uint8Array(n*n)}else{DW.s.fill(0);DW.o.fill(0)}
+ const S=DW.s,O=DW.o,cl=v=>v<0?0:v>=n?n-1:v;
+ for(const b of B){const op=typeof fsOpak==='function'?fsOpak(b):true;
+  if(b.t==='c'){const r=b.r+1,r2=r*r,i0=cl(Math.floor((b.x-r)/C)),i1=cl(Math.floor((b.x+r)/C)),j0=cl(Math.floor((b.y-r)/C)),j1=cl(Math.floor((b.y+r)/C));
+   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const dx=(i+0.5)*C-b.x,dy=(j+0.5)*C-b.y;if(dx*dx+dy*dy<r2){S[j*n+i]=1;if(op)O[j*n+i]=1}}}
+  else{const i0=cl(Math.floor((b.x-1)/C+0.5)),i1=cl(Math.ceil((b.x+b.w+1)/C-0.5)-1),j0=cl(Math.floor((b.y-1)/C+0.5)),j1=cl(Math.ceil((b.y+b.h+1)/C-0.5)-1);
+   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){S[j*n+i]=1;if(op)O[j*n+i]=1}}}
+ DW.ref=B;DW.len=B.length;DW.v=DW.bv}
+/* erste blockierte Zelle auf der Strecke a→b (Start- und Zielzelle ausgenommen); liefert -1 wenn frei, sonst Streckenanteil 0..1 beim Eintritt */
+function dwStrahl(ax,ay,bx,by,R){const C=DW.C,n=DW.n;let i=Math.floor(ax/C),j=Math.floor(ay/C);const ie=Math.floor(bx/C),je=Math.floor(by/C);if(i===ie&&j===je)return -1;
+ const dx=bx-ax,dy=by-ay,si=dx>0?1:-1,sj=dy>0?1:-1,tdx=dx?Math.abs(C/dx):1e9,tdy=dy?Math.abs(C/dy):1e9;
+ let tx=dx?((si>0?(i+1)*C-ax:ax-i*C)/Math.abs(dx)):1e9,ty=dy?((sj>0?(j+1)*C-ay:ay-j*C)/Math.abs(dy)):1e9;
+ for(let k=0;k<1200;k++){let t;if(tx<ty){i+=si;t=tx;tx+=tdx}else{j+=sj;t=ty;ty+=tdy}if(t>1)return -1;if(i===ie&&j===je)return -1;
+  if(i<0||j<0||i>=n||j>=n)return -1;if(R[j*n+i])return t}return -1}
+function dwAn(){return!!G.blkG&&!G.room&&!!(G.blk&&G.blk.length)}
+function dwFreiS(a,b){if(!dwAn())return true;dwBau();return dwStrahl(a.x,a.y,b.x,b.y,DW.s)<0}
+function dwFreiO(a,b){if(!dwAn())return true;dwBau();return dwStrahl(a.x,a.y,b.x,b.y,DW.o)<0}
+{const f=blkRaster;blkRaster=function(){const r=f.apply(this,arguments);DW.bv++;return r}}
+
+/* 1) Sichtlinie für Angriffe (aoe, cone, Gegner-KI …): exakt statt 40-px-Schritte */
+losFrei=function(a,b){return dwFreiS(a,b)};
+/* Sicht draußen (Sichtschatten) ebenfalls exakt über das Raster der blickdichten Hindernisse */
+if(typeof fsFrei==='function')fsFrei=function(a,b){return dwFreiO(a,b)};
+/* Sicht in Dungeons: Sichtweite der Dunkelheit + blickdichte Wände (wie der gezeichnete Schatten) */
+{const f=fovVersteckt;fovVersteckt=function(e){if(!(typeof FSV!=='undefined'&&FSV.on&&FSV.dun))return f.apply(this,arguments);if(e.boss||e.guard||e.dead)return false;
+ if(!G.vp&&(e.fovT||0)>G.time)return !e.fovV;const R2=FOV.sicht*FOV.sicht;let v=false;for(const q of fsSeher())if(d2(e,q)<R2&&dwFreiO(q,e)){v=true;break}
+ if(!G.vp){e.fovT=G.time+0.12+Math.random()*0.06;e.fovV=v}return !v}}
+
+/* 2) Geschosse: Wegstrecke je Bild prüfen – kein Durchtunneln dünner Wände mehr (beide Seiten) */
+function dwSweep(p,dt){if(!DW.s)dwBau();const sx=p.vx*dt,sy=p.vy*dt;if(sx*sx+sy*sy<36)return false;const r=(p.r||6)*0.4;if(blkPunkt(p.x,p.y,r))return false;
+ dwBau();const ax=p.x-sx,ay=p.y-sy,t=dwStrahl(ax,ay,p.x,p.y,DW.s);if(t<0)return false;const u=Math.max(0,t-2/Math.hypot(sx,sy));p.x=ax+sx*u;p.y=ay+sy*u;
+ if(fxQ()>0){ring(p.x,p.y,9,p.c||'#c8bca8',0.18,2)}return true}
+
+/* 3) Fähigkeiten mit Fernwirkung: Kettenblitz springt nur mit freier Sicht, nearest() nur auf sichtbare Ziele vom Bezugspunkt aus */
+nearest=function(x,y,R){let b=null,bd=R*R;const w=dwAn(),o={x,y};for(const e of G.enemies){if(!targetable(e))continue;const dx=e.x-x,dy=e.y-y,dd=dx*dx+dy*dy-e.r*e.r;if(dd<bd&&(!w||dwFreiS(o,e))){bd=dd;b=e}}return b};
+
+/* 4) Gegner: Fernangriffe nur mit freier Schusslinie, sonst Stellung wechseln; Nahkampf/Explosion nicht durch Wände */
+{const f=enemyShoot;enemyShoot=function(e,a,spd,dmgM,col){if(e&&dwAn()&&!G.room){const T=P||{x:e.x,y:e.y},d=Math.min(760,Math.max(60,Math.sqrt(d2(e,T)))),pt={x:e.x+Math.cos(a)*d,y:e.y-4+Math.sin(a)*d};
+  if(!dwFreiS({x:e.x,y:e.y-4},pt)){e.atkCd=Math.max(e.atkCd||0,0.35);e.peek=G.time+1.2;e.dwNo=G.time+1.4;DW.blockS=(DW.blockS||0)+1;return}}return f.apply(this,arguments)}}
+{const f=updEnemy;updEnemy=function(e,dt){const s=DW.e,x0=e.x,y0=e.y;DW.e=e;let r;try{r=f.apply(this,arguments)}finally{DW.e=s}
+ try{if(e.dwNo>G.time&&!e.dead&&!(e.root>0)&&!(e.stun>0)&&!e.boss&&!e.guard){const W=G.wl;if(W&&W.an&&W.nav&&W.fl&&typeof wlFluss==='function'&&Math.hypot(e.x-x0,e.y-y0)<40*dt){const q=wlFluss(W.nav,W.fl,e.x,e.y);if(q){e.x+=q.x*75*dt;e.y+=q.y*75*dt}}}}catch(_){}
+ return r}}
+{const f=hurt;hurt=function(raw){const e=DW.e;if(e&&P&&dwAn()&&d2(e,P)>(e.r+(P.r||12)*0.6)**2&&!dwFreiO(e,P)){DW.blockH=(DW.blockH||0)+1;return}return f.apply(this,arguments)}}
+try{window.__dw={DW,losS:(a,b)=>dwFreiS(a,b),losO:(a,b)=>dwFreiO(a,b),shoot:o=>shoot(o),eShot:(x,y,a,s,d,o)=>eShot(x,y,a,s,d,o),enemyShoot:(e,a,s,m)=>enemyShoot(e,a,s,m),
+ fovV:e=>fovVersteckt(e),tgt:e=>targetable(e),nearest:(x,y,R)=>nearest(x,y,R),chain:(t,n,d,j)=>chainLightning(t,n,d,j),aoe:(x,y,R,a)=>aoe(x,y,R,a),cone:(x,y,a,arc,R,amt)=>cone(x,y,a,arc,R,amt),FSV:()=>FSV,FOV:()=>FOV}}catch(e){}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
