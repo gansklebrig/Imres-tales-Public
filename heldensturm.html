@@ -16915,7 +16915,7 @@ function slTreeDeco(){if(G.overlay!=='tree'&&G.state!=='camp'&&G.state!=='betwee
    ${ask==='ld'+i?`<button class="btn" style="border-color:var(--blood)" data-act="sl-bl" data-i="${i}">Ja, laden</button>`:`<button class="btn" data-act="sl-bl" data-i="${i}" ${x&&free?'':'disabled'}>Laden</button>`}<button class="btn" data-act="sl-bs" data-i="${i}" ${pts?'':'disabled'}>${x?'Überschreiben':'Speichern'}</button>`}).join('');
  const p=document.createElement('div');p.className='slbp stdet';
  p.innerHTML=`<div class="spread"><div class="eyebrow">Build</div><button class="btn" data-act="sl-build">Schließen</button></div>
-  <div class="rs"><p>${ask==='rs'?`<b>Alle ${pts} Punkte zurückholen?</b> Die Leiste wird geleert, der Startstern ist wieder frei wählbar.`:`<b>${pts}</b> Punkt${pts===1?'':'e'} verteilt. Zurücksetzen gibt alle zurück – Startstern und Leiste inklusive.`}</p>${rsBtn}</div>
+  <div class="rs"><p>${ask==='rs'?`<b>Alle ${pts} Punkte zurückholen?</b> Alle Sterne und die Leiste werden geleert – danach setzt du jeden Punkt frei.`:`<b>${pts}</b> Punkt${pts===1?'':'e'} verteilt. Zurücksetzen gibt alle zurück – Leiste inklusive.`}</p>${rsBtn}</div>
   ${!free&&ok?`<p class="warn">Mitten in der Stufe kostet es Gold (jedes Mal mehr). Im Lager, zwischen den Stufen und am Lagerfeuer ist es kostenlos.</p>`:''}${!ok?`<p class="warn">${gast?'Als Online-Gast nur zwischen den Stufen.':'Hier nicht möglich.'}</p>`:''}
   ${gast?'':`<div class="eyebrow" style="margin-top:2px">Gespeicherte Builds · ${esc(P.hero.name)}</div><div class="row"><input class="slin" id="slBn" maxlength="24" placeholder="${esc(slAutoName(P))}" aria-label="Name für den Build"></div><div class="bl">${rows}</div>${free?'':'<p class="warn">Builds laden geht nur, wo Zurücksetzen kostenlos ist.</p>'}`}`;
  const br=side.querySelector('.barrow');if(br)side.insertBefore(p,br);else side.appendChild(p)}
@@ -19055,6 +19055,171 @@ addEventListener('touchend',ev=>{const s=CP.sw;CP.sw=null;if(!s)return;const t=e
 document.addEventListener('focusin',e=>{const t=e.target,box=t&&t.closest&&t.closest('.cpbox');if(!box)return;const r=t.getBoundingClientRect(),b=box.getBoundingClientRect();if(r.top<b.top+4)box.scrollTop-=b.top+4-r.top+8;else if(r.bottom>b.bottom-4)box.scrollTop+=r.bottom-(b.bottom-4)+8;cpFade(box)});
 try{window.__hsLU={CP,cpGo,cpBox,cpBuild,state:()=>{const tb=scr.querySelector('.tabbody.cpon');if(!tb)return null;const box=tb.querySelector(':scope>.cpbox');const ch=[...tb.querySelectorAll('.cpstrip .cpc')];
  return{tab:tb._cpTab,names:ch.map(c=>c.textContent),cur:ch.findIndex(c=>c.classList.contains('on')),sh:box.scrollHeight,ch:box.clientHeight,st:box.scrollTop,low:tb.classList.contains('cplow'),pager:!!scr._mf}}}}catch(e){}
+/* ================= Freier Startpunkt (Paket „startpkt“) =================
+   1. Neuer Lauf (alle Modi, alle Helden, lokal/online): kein Stern vorgelernt, Leiste leer. Statt des Gratis-Startsterns gibt es
+      SPK_PLUS (1) freien Talentpunkt dazu – die Gesamtzahl der Punkte bleibt wie bisher. Die fünf Einstiegssterne am Kern sind lernbar.
+      Kennzeichen neuer Läufe: q.sf==='' (kein Gratisrang). Alte Läufe behalten ihren gelernten Startstern (q.sf = dessen id).
+   2. Startstern-Tausch (talent: tlSfFrei/tlSfOk/tlSfSet, Abzeichen „Start“, Knopf, Hinweise, Vorliebe sfWahl) abgeschaltet.
+   3. ↺ Build: alle Ränge zurück (auch ein alter Gratis-Startstern), q.sf='' – danach 0 gelernt, alle Punkte frei.
+   4. Erster Stern: Talentfenster öffnet sich einmal von selbst, wenn eine Stufe mit leerer Leiste und freien Punkten läuft;
+      im Sternbild ein Hinweis „Wähle deinen ersten Stern“, Einstiegssterne leuchten. Die erste Fähigkeit kommt auf Platz 1.
+   5. Controller im Sternbild: Steuerkreuz wählt Sterne (Vorschau), A springt ins Detailfeld auf den Hauptknopf, A lernt,
+      B zurück zur Karte (zweites B schließt). */
+const SPK_PLUS=1;
+let SPK_SF0=0;
+function spkNeu(q){return!!q&&q.sf===''}
+function spkLeer(q){if(!q||!q.ranks)return false;for(const k in q.ranks)if((q.ranks[k]||0)>0)return false;return true}
+
+/* ---------- 1. Neuer Held: leer starten ---------- */
+{const _nh=newHero;newHero=function(id,diff){const r=_nh.apply(this,arguments);try{if(P&&P.id===id){P.sp=(P.sp||0)+SPK_PLUS;P.ranks={};P.learn=[];P.bar=[];P.slotOf={};P.sf='';if(P.use)P.use={}}}catch(e){console.error('spk',e)}return r}}
+/* Roguelite-Fortschritt: '' (neuer Lauf ohne Gratisrang) beim Laden erhalten */
+{const _rf=rlFix;rlFix=function(R,id){const r=_rf.apply(this,arguments);try{if(r&&isObj(R)&&R.sf==='')r.sf=''}catch(e){}return r}}
+{const _ra=rlApply;rlApply=function(){let z=0;try{const r=rlS(P.id);z=r&&r.sf===''?1:0}catch(e){}SPK_SF0=z;let res;try{res=_ra.apply(this,arguments)}finally{SPK_SF0=0}try{if(z&&P)P.sf=''}catch(e){}return res}}
+/* Astbereinigung: in neuen Läufen nie einen Gratis-Startstern vergeben (Platzhalter statt sigVon, danach wieder weg) */
+{const _ab=astBereinigen;astBereinigen=function(q){q=q||P;if(!q||!(q.sf===''||SPK_SF0))return _ab.apply(this,arguments);q.sf='';const sv=sigVon;let r;
+ sigVon=function(){return'__spk0'};try{r=_ab.call(this,q)}finally{sigVon=sv}
+ try{if(q.ranks)delete q.ranks.__spk0;q.sf='';q.learn=(q.learn||[]).filter(x=>x!=='__spk0');q.bar=(q.bar||[]).filter(x=>x!=='__spk0')}catch(e){}return r}}
+
+/* ---------- 2. Startstern-Tausch aus ---------- */
+tlSfFrei=function(){return false};tlSfOk=function(){return false};
+{const _aw=astWahlHtml;astWahlHtml=function(id,ctx){let h=_aw.apply(this,arguments);try{if(!h)return h;
+ h=h.replace(/ Startstern: <b[^>]*>[\s\S]*?<\/b> – im Sternbild frei wählbar, solange in seinem Ast nichts weiter gelernt ist\./,' Kein Stern vorgegeben: Deinen ersten Talentpunkt setzt du frei auf einen der fünf Einstiegssterne am Kern.')}catch(e){}return h}}
+try{HINW.tree=HINW.tree.filter(x=>!/Startstern/.test(x));HINW.tree.splice(1,0,'Kein Stern ist vorgegeben: Dein <b>erster Talentpunkt</b> geht an einen der fünf Einstiegssterne direkt am Kern – jeder Spielstil ist von Anfang an offen.')}catch(e){}
+
+/* ---------- 3. Build zurücksetzen: 0 gelernt ---------- */
+slRsPts=function(q){q=q||P;let n=0;for(const k in q.ranks||{})n+=q.ranks[k]||0;return Math.max(0,n)};
+slRespec=function(q,opt){q=q||P;opt=opt||{};if(!q||!q.hero)return false;const pts=slRsPts(q),b0=(()=>{let m=null,v=-1;for(let b=0;b<q.hero.branches.length;b++){const p=astPunkte(b,q);if(p>v){v=p;m=b}}return m||0})();
+ q.sp=(q.sp||0)+pts;q.ranks={};q.sf='';q.learn=[];q.bar=[];q.slotOf={};if(q.use)q.use={};
+ for(const k of Object.keys(q.cds||{}))delete q.cds[k];G.barPick=null;G.treeRec=null;
+ withP(q,()=>{try{recalc()}catch(e){}try{buildSkillBar()}catch(e){}});if(!opt.quiet){try{sfx('magic');ring(q.x,q.y,70,stCol(q.id,b0),0.6,5)}catch(e){}}return true};
+
+/* ---------- 4. Erste Fähigkeit auf Platz 1 ---------- */
+{const _l=learn;learn=function(n){const q=P,leer=!!q&&!(q.bar||[]).length;const r=_l.apply(this,arguments);
+ try{if(leer&&n&&n.a&&q.bar&&q.bar.includes(n.id)){q.slotOf={[n.id]:0};withP(q,()=>buildSkillBar())}if(n&&q&&q.spkWahl&&!spkLeer(q))q.spkWahl=0}catch(e){console.error('spk',e)}return r}}
+
+/* ---------- Bot: wählt den ersten Stern selbst (Ast nach Build-Plan; __tlSf wie früher) ---------- */
+{const _bp=stBotPick;stBotPick=function(opts){try{if(P&&spkLeer(P)){const mode=String(window.__stb||P.stBot||'mix');let b=null;
+  if(window.__tlSf!=null)b=+window.__tlSf;else if(/^ast:\d$/.test(mode))b=+mode.slice(4);
+  if(b!=null){const w=opts.find(n=>n.b===b&&n.row===0&&n.a)||opts.find(n=>n.b===b&&n.row===0);if(w)return w}
+  if(mode==='mix'){const s=opts.find(n=>n.id===P.hero.sig);if(s)return s}}}catch(e){console.error('spk',e)}return _bp.apply(this,arguments)}}
+
+/* ---------- Hinweis „Wähle deinen ersten Stern“ ---------- */
+function spkAuto(){if(G.bot||G.state!=='play'||G.overlay||G.portal||NET.role==='guest')return;try{if(typeof HI!=='undefined'&&HI.on)return}catch(e){}
+ if(navigator.webdriver&&!window.__spkTest)return;
+ const L=[];PL.forEach((q,i)=>{if(q&&!q.spkAuto&&!q.down&&spkLeer(q)&&q.sp>0&&(q.spkT||0)>1.4)L.push(i)});if(!L.length)return;
+ for(const i of L){PL[i].spkAuto=1;PL[i].spkWahl=1}
+ setTimeout(()=>{try{if(G.state!=='play'||G.overlay&&G.overlay!=='tree')return;let first=true;
+  for(const i of L){const q=PL[i];if(!q||!spkLeer(q))continue;
+   if(netIs(q.dev)){const g=NET.guests&&NET.guests.find(x=>x.p===q);if(g)try{vmOpen(g,'tree')}catch(e){}continue}
+   if(first&&!G.overlay){openOverlay('tree',i);first=false}else if(G.overlay)openOverlay('tree',i)}
+  sfx('magic')}catch(e){console.error('spk',e)}},0)}
+hook('tick',dt=>{try{if(!P||G.bot)return;P.spkT=(P.spkT||0)+dt;if(P===PL[PL.length-1]||!G.mp)spkAuto()}catch(e){}});
+/* Fenster ohne Wahl geschlossen: einmal leise erinnern */
+{const _co=closeOverlay;closeOverlay=function(){const ws=PL.filter(q=>q&&q.spkWahl&&spkLeer(q)&&q.sp>0&&!netIs(q.dev));const r=_co.apply(this,arguments);
+ try{if(!G.overlay&&ws.length){for(const q of ws)q.spkWahl=0;toast(`Noch kein Stern gewählt – ${ws.length>1?'eure Talentpunkte warten':'dein Talentpunkt wartet'} im Sternbild (Talente).`,'#e5b454',{minor:1})}}catch(e){}return r}}
+/* Sternbild: Hinweis oben auf der Karte, Einstiegssterne stärker leuchten */
+function spkDeco(){const m=scr&&scr.querySelector('.stmap');if(!m||!P||!P.hero)return;let own=true;try{own=netMayEdit(P)}catch(e){}
+ const on=own&&spkLeer(P)&&P.sp>0;m.classList.toggle('spk1',on);const old=m.querySelector('.spkhint');if(old)old.remove();if(!on)return;
+ const d=document.createElement('div');d.className='spkhint';d.style.setProperty('--c',HCOL[P.id]||'#e5b454');
+ d.innerHTML=`<b>Wähle deinen ersten Stern</b><span>Die fünf Einstiegssterne am Kern sind offen – ${P.sp>1?`${P.sp} Punkte`:'1 Punkt'} frei.</span>`;m.appendChild(d)}
+{const _rt=renderTree;renderTree=function(){const r=_rt.apply(this,arguments);try{spkDeco()}catch(e){console.error('spk',e)}return r}}
+(function(){try{const st=document.createElement('style');st.textContent=`
+.stmap .spkhint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 16px 8px;border-radius:12px;max-width:calc(100% - 90px);text-align:center;
+ background:linear-gradient(180deg,rgba(40,28,24,.94),rgba(20,13,16,.94));border:1px solid color-mix(in srgb,var(--c) 70%,#3d3140);box-shadow:0 0 0 1px rgba(0,0,0,.45),0 0 22px color-mix(in srgb,var(--c) 40%,transparent);animation:spkIn .5s cubic-bezier(.2,.9,.3,1.25) both}
+.stmap .spkhint b{font-variant:small-caps;letter-spacing:.05em;font-size:calc(var(--ss,1)*17px);color:var(--c);text-shadow:0 0 10px color-mix(in srgb,var(--c) 60%,transparent)}
+.stmap .spkhint span{font-size:calc(var(--ss,1)*12.5px);color:#e8dcc8;line-height:1.3}
+@keyframes spkIn{from{opacity:0;transform:translate(-50%,-8px) scale(.96)}to{opacity:1;transform:translateX(-50%)}}
+.stmap.spk1 .stn.can .sto::after{animation-duration:1.1s;box-shadow:0 0 18px 6px color-mix(in srgb,var(--c) 85%,transparent)}
+.stmap.spk1 .stn.can .sto{border-width:3px}
+.stmap.spk1 .stcore{animation:spkCore 1.6s ease-in-out infinite}
+@keyframes spkCore{0%,100%{filter:none}50%{filter:drop-shadow(0 0 10px var(--hc,#e5b454)) brightness(1.15)}}
+.stdet.spkd [data-act="tree-learn"]:not([disabled]){box-shadow:0 0 0 2px #ffd04a,0 0 16px rgba(255,208,74,.45)}`;document.head.appendChild(st)}catch(e){}})();
+
+/* ---------- 5. Controller im Sternbild: Karte ⇄ Detailfeld ----------
+   PADNAV.stD = 1: Fokus im Detailfeld (Knöpfe dort und die Leisten-Ziele im Platz-Modus); PADNAV.stRet = Stern, zu dem B zurückkehrt. */
+const spkMap=()=>NET.role!=='guest'&&!!(scr&&scr.querySelector('.stmap'));
+const spkDetEl=e=>!!e&&!!e.closest&&!!(e.closest('.stdet')||e.closest('.tlpickp')||(e.classList.contains('bslot')&&e.dataset.act==='bar-put'));
+function spkDetList(L){return(L||padEls()).filter(spkDetEl)}
+function spkMain(L){L=spkDetList(L);return L.find(e=>e.dataset.act==='bar-put'&&scr.querySelector('.barrow.tlpick'))||L.find(e=>e.dataset.act==='tree-learn'&&e.closest('.stdet'))||L.find(e=>e.closest('.stdet .row'))||L[0]||null}
+function spkStar(){const id=PADNAV.stRet||G.treeSel;return(id&&scr.querySelector(`.stn[data-id="${CSS.escape(id)}"]`))||scr.querySelector('.stn.sel')}
+function spkToMap(){PADNAV.stD=0;PADNAV.det=0;const s=spkStar();try{const d=scr.querySelector('.stdet');if(d)d.classList.remove('spkd')}catch(e){}if(s){PADNAV.el=null;PADNAV.sig=padSig(s);padMark(s)}}
+function spkToDet(){const L=padEls(),b=spkMain(L);if(!b)return false;PADNAV.stD=1;PADNAV.det=0;try{const d=scr.querySelector('.stdet');if(d)d.classList.add('spkd')}catch(e){}padMark(b);return true}
+function spkSel(id){if(!id||!P||!P.hero)return;if(G.barPick&&G.barPick!==id)G.barPick=null;G.treeSel=id;G.treeOpen=false;const n=P.hero.tree.find(x=>x.id===id);if(n)G.treeBr=n.b;renderTree(true)}
+/* Stern anfahren = nur zeigen (nicht scharf schalten) */
+{const _pm=padMark;padMark=function(el,noScroll){try{if(el&&el.classList&&el.classList.contains('stn')&&spkMap()){PADNAV.stD=0;PADNAV.stRet=el.dataset.id;
+  /* veraltetes Element (Liste von vor dem Neuzeichnen, z. B. Fokus-Auffrischung): Auswahl NICHT ändern, den aktuell gewählten Stern markieren */if(!el.isConnected){const n0=scr.querySelector('.stn.sel')||scr.querySelector(`.stn[data-id="${CSS.escape(el.dataset.id)}"]`);if(n0)el=n0;PADNAV.stRet=el.dataset.id}
+  if(!el.classList.contains('sel')){spkSel(el.dataset.id);const n=scr.querySelector(`.stn[data-id="${CSS.escape(el.dataset.id)}"]`);if(n)el=n}}}catch(e){console.error('spk',e)}return _pm.call(this,el,noScroll)}}
+{const _pc=padCur;padCur=function(L){if(!spkMap()){PADNAV.stD=0;return _pc.apply(this,arguments)}
+ if(PADNAV.stD){const D=spkDetList(L),el=PADNAV.el;if(el&&el.isConnected&&D.includes(el))return el;if(PADNAV.sig){const f=D.find(e=>padSig(e)===PADNAV.sig);if(f){PADNAV.el=f;f.classList.add('padf');return f}}
+  const m=spkMain(L);if(m){padMark(m,true);return m}PADNAV.stD=0;return spkStar()}
+ return _pc.apply(this,arguments)}}
+{const _ps=padStep;padStep=function(L,cur,dx,dy){if(spkMap()&&PADNAV.stD){const D=spkDetList(L);if(!cur||!D.includes(cur))return spkMain(L);const nx=_ps.call(this,D,cur,dx,dy);return nx||cur}return _ps.apply(this,arguments)}}
+{const _dd=padDefault;padDefault=function(L){if(spkMap()&&PADNAV.stD){const m=spkMain(L);if(m)return m}return _dd.apply(this,arguments)}}
+{const _pp=padPress;padPress=function(cur){try{/* erstes A ohne Fokus im Sternbild: nicht „Weiter“ auslösen (schloss früher das Fenster), sondern den gewählten Stern ins Detailfeld nehmen */if(!cur&&spkMap()){const st=spkStar();if(st){PADNAV.stRet=st.dataset.id;padMark(st);if(spkToDet())sfx('ui');return}}
+ if(spkMap()&&cur&&cur.classList&&cur.classList.contains('stn')){PADNAV.stRet=cur.dataset.id;if(!cur.classList.contains('sel')||G.treeOpen)spkSel(cur.dataset.id);
+   if(spkToDet()){sfx('ui');return}return}
+  if(spkMap()&&PADNAV.stD&&cur&&cur.dataset&&cur.dataset.act==='tree-learn'){const id=G.treeSel;cur.click();PADNAV.stRet=id;
+   /* nach dem Lernen: auf „Verbessern“ bleiben, sonst nächster Knopf im Detailfeld, sonst zurück zum Stern */
+   const L=padEls(),D=spkDetList(L),b=D.find(e=>e.dataset.act==='tree-learn'&&e.closest('.stdet'));if(b){padMark(b,true);return}const m=spkMain(L);if(m){padMark(m,true);return}spkToMap();return}}catch(e){console.error('spk',e)}
+ return _pp.apply(this,arguments)}}
+{const _pb=padBack;padBack=function(){try{if(spkMap()&&PADNAV.stD&&!scr.querySelector('[data-act="bar-cancel"]')){spkToMap();sfx('ui');return}}catch(e){console.error('spk',e)}return _pb.apply(this,arguments)}}
+addEventListener('pointerdown',()=>{PADNAV.stD=0},true);
+
+/* ---------- 6. Controller: jeder Stern schnell erreichbar ----------
+   Steuerkreuz folgt den Verbindungslinien (Nachbar in Richtung, über den Kern zu den anderen Einstiegssternen), sonst nächster
+   Stern in Richtung (Winkeltoleranz). LB/RB: voriger/nächster Ast (zuletzt gewählter Stern dort, sonst Einstiegsstern).
+   Linker Stick: freier Cursor, der Stern darunter rastet ein. Rechter Stick: Karte schwenken, RS-Klick: Zoom. LT/RT: Reiter. */
+const SPKB={},SPKC={};
+function spkAdj(id){const g=P&&P.hero&&stG(P.id);const m=g&&g.N[id];if(!m)return new Set();const a=new Set(m.adj.filter(x=>x!=='core'));
+ if(m.adj.includes('core'))for(const k in g.N)if(k!==id&&g.N[k].adj.includes('core'))a.add(k);return a}
+stNb=function(cont,cur,dx,dy){const L=[...cont.querySelectorAll('.stn')];if(!cur)return L.find(e=>e.classList.contains('sel'))||L[0]||null;const x0=+cur.dataset.x,y0=+cur.dataset.y,adj=spkAdj(cur.dataset.id);
+ let best=null,bs=-1;for(const e of L){if(e===cur||!adj.has(e.dataset.id))continue;const vx=+e.dataset.x-x0,vy=+e.dataset.y-y0,d=Math.hypot(vx,vy);if(d<1)continue;const c=(vx*dx+vy*dy)/d;if(c<0.6)continue;const sc=c-d*0.0004;if(sc>bs){bs=sc;best=e}}
+ if(best)return best;bs=1e9;for(const e of L){if(e===cur)continue;const vx=+e.dataset.x-x0,vy=+e.dataset.y-y0,d=Math.hypot(vx,vy);if(d<1)continue;const c=(vx*dx+vy*dy)/d;if(c<0.42)continue;
+  const sc=d*(1+(1-c)*2.2);if(sc<bs){bs=sc;best=e}}return best};
+function spkAstVon(id){const g=P&&P.hero&&stG(P.id),m=g&&g.N[id];if(!m)return null;return m.b>=0?m.b:m.br[0]}
+function spkAstZiel(cur,d){const g=stG(P.id),O=g.O,b=spkAstVon(cur);const k=Math.max(0,O.indexOf(b)),nb=O[(k+d+O.length)%O.length];const T=P.hero.tree;
+ const w=SPKB[P.id]&&SPKB[P.id][nb];const n=(w&&T.find(x=>x.id===w&&g.N[x.id]))||T.find(x=>x.b===nb&&x.row===0&&g.N[x.id]);return n?n.id:null}
+function spkGo(id){if(!id)return;const el=scr.querySelector(`.stn[data-id="${CSS.escape(id)}"]`);if(!el)return;PADNAV.on=true;if(NET.role==='guest'){el.click();return}padMark(el);sfx('ui')}
+{const _pm=padMark;padMark=function(el){try{if(el&&el.classList&&el.classList.contains('stn')&&P&&P.hero){const b=spkAstVon(el.dataset.id);if(b!=null&&(stG(P.id).N[el.dataset.id]||{}).b>=0)(SPKB[P.id]||(SPKB[P.id]={}))[b]=el.dataset.id}}catch(e){}return _pm.apply(this,arguments)}}
+function spkCurEl(m,on){let c=m.querySelector(':scope > .spkcur');if(!on){if(c)c.remove();return null}if(!c){c=document.createElement('i');c.className='spkcur';m.appendChild(c)}return c}
+function spkCurPos(m,C){const L=stScale(m),W=L.W,H=L.H,v=L.v,s=L.s;return{X:W/2+(C.x-v.cx)*s,Y:H/2+(C.y-v.cy)*s,s,W,H,v}}
+function spkHelp(m){let h=m.querySelector(':scope > .spkpad');const on=PADNAV.on&&m.clientHeight>300;if(!on){if(h)h.remove();return}
+ const t=PADNAV.stD?'<b>A</b> drücken · <b>✥</b> Knöpfe · <b>B</b> zurück zur Karte':'<b>✥</b> Stern · <b>LB/RB</b> Ast · <b>Stick</b> frei · <b>A</b> auswählen · <b>B</b> zurück';
+ if(!h){h=document.createElement('div');h.className='spkpad';m.appendChild(h)}if(h.innerHTML!==t)h.innerHTML=t}
+{const _po=padMenuOwner;padMenuOwner=function(){const own=_po.apply(this,arguments);try{spkPadFrame(own)}catch(e){console.error('spk',e)}return own}}
+function spkPadFrame(own){if(PADCAP||!scr||scr.hidden)return;const m=scr.querySelector('.stmap');if(!m||!P||!P.hero)return;const now=performance.now(),dt=Math.min(0.05,Math.max(0,(now-(m._spkT||now))/1000));m._spkT=now;
+ const k=stKey(m),M=padMap();let C=SPKC[k];spkHelp(m);
+ for(const s of Object.values(PADS.st)){if(own!==undefined&&own!==s.i)continue;const pr=s.pr,det=!!PADNAV.stD,dp=s.b[12]||s.b[13]||s.b[14]||s.b[15];
+  /* LT/RT: Reiter wechseln */
+  for(const [bi,d] of [[6,-1],[7,1]])if(pr[bi]&&!scr._mf&&!(typeof cpBox==='function'&&cpBox())&&M.inv!==bi&&M.pause!==bi){pr[bi]=false;PADNAV.on=true;padTab(d);return}
+  if(det)continue;
+  const cur=scr.querySelector('.stn.sel');
+  if((pr[4]||pr[5])&&cur){const d=pr[5]?1:-1;pr[4]=pr[5]=false;spkGo(spkAstZiel(cur.dataset.id,d));C=SPKC[k]=null;spkCurEl(m,false);continue}
+  if(pr[11]){pr[11]=false;const v=stView(m);if(v.z>=2.2)stZoomBy(m,1/v.z);else stZoomBy(m,1.5);PADNAV.on=true}
+  const [rx,ry]=dz(s.rx,s.ry,0.3);if(rx||ry){const L=stScale(m),v=L.v;v.cx+=rx*760*dt/L.s;v.cy+=ry*760*dt/L.s;v.user=1;stLayout(m);s.rx=s.ry=0;PADNAV.on=true}
+  const [lx,ly]=dz(s.lx,s.ly,0.25);
+  if((lx||ly)&&!dp&&NET.role!=='guest'){PADNAV.on=true;if(!C&&cur)C=SPKC[k]={x:+cur.dataset.x,y:+cur.dataset.y};if(!C)continue;
+   const L=stScale(m),mag=Math.min(1,Math.hypot(lx,ly)),sp=(260+520*mag*mag)*dt/L.s;C.x+=lx/Math.max(1e-3,Math.hypot(lx,ly))*mag*sp*1;C.y+=ly/Math.max(1e-3,Math.hypot(lx,ly))*mag*sp;C.t=now;
+   const lim=ST_FIT*1.05;C.x=clamp(C.x,-lim,lim);C.y=clamp(C.y,-lim,lim);
+   /* Karte schwenkt mit, wenn der Cursor an den Rand kommt */
+   let p=spkCurPos(m,C);const mg=Math.min(60,p.W*0.15,p.H*0.15);let mv=0;if(p.X<mg){p.v.cx-=(mg-p.X)/p.s;mv=1}else if(p.X>p.W-mg){p.v.cx+=(p.X-(p.W-mg))/p.s;mv=1}
+   if(p.Y<mg){p.v.cy-=(mg-p.Y)/p.s;mv=1}else if(p.Y>p.H-mg){p.v.cy+=(p.Y-(p.H-mg))/p.s;mv=1}if(mv){p.v.user=1;stLayout(m);p=spkCurPos(m,C)}
+   /* nächster Stern unter dem Cursor */
+   let best=null,bd=(34*(parseFloat(m.style.getPropertyValue('--ss'))||1))/p.s;for(const e of m.querySelectorAll('.stn')){const d=Math.hypot(+e.dataset.x-C.x,+e.dataset.y-C.y);if(d<bd){bd=d;best=e}}
+   if(best&&!best.classList.contains('sel')){const keepC={x:C.x,y:C.y,t:C.t};padMark(best);SPKC[k]=C=keepC;}
+   const m2=scr.querySelector('.stmap')||m;const el=spkCurEl(m2,true);const q=spkCurPos(m2,C);el.style.transform=`translate(${q.X.toFixed(1)}px,${q.Y.toFixed(1)}px) translate(-50%,-50%)`;el.classList.add('on');
+   s.lx=s.ly=0;continue}
+  /* Stick losgelassen: Cursor rastet auf dem gewählten Stern ein und blendet aus */
+  if(C&&cur&&now-(C.t||0)>180){const el=spkCurEl(m,true);C.x=+cur.dataset.x;C.y=+cur.dataset.y;const q=spkCurPos(m,C);el.style.transform=`translate(${q.X.toFixed(1)}px,${q.Y.toFixed(1)}px) translate(-50%,-50%)`;
+   if(now-(C.t||0)>900){el.classList.remove('on');if(now-(C.t||0)>1300){spkCurEl(m,false);SPKC[k]=null}}}}}
+(function(){try{const st=document.createElement('style');st.textContent=`
+.stmap > .spkcur{position:absolute;left:0;top:0;z-index:7;width:calc(var(--ss,1)*58px);height:calc(var(--ss,1)*58px);border-radius:50%;pointer-events:none;opacity:0;transition:opacity .25s;
+ border:2px solid rgba(255,208,74,.9);box-shadow:0 0 14px rgba(255,208,74,.55),inset 0 0 10px rgba(255,208,74,.35)}
+.stmap > .spkcur.on{opacity:1}.stmap > .spkcur::before,.stmap > .spkcur::after{content:'';position:absolute;left:50%;top:50%;background:#ffd04a;border-radius:2px;transform:translate(-50%,-50%)}
+.stmap > .spkcur::before{width:2px;height:10px}.stmap > .spkcur::after{width:10px;height:2px}
+.stmap > .spkpad{position:absolute;left:10px;bottom:10px;z-index:6;pointer-events:none;max-width:calc(100% - 80px);padding:5px 10px;border-radius:9px;background:rgba(14,9,16,.86);border:1px solid #3d3140;color:#d9ccb6;font-size:12.5px;line-height:1.35}
+.stmap > .spkpad b{color:#ffd04a;font-weight:800}`;document.head.appendChild(st)}catch(e){}})();
+window.__hsSPK={via:(sid,f)=>{const q=PL.find(x=>x.hero&&x.hero.tree.some(n=>n.id===sid));return q?withP(q,f):f()},nb:(c,cur,dx,dy)=>stNb(c,cur,dx,dy),astZiel:(id,d)=>spkAstZiel(id,d),spkLeer,spkNeu,spkDeco,spkAuto,SPK_PLUS,wahl:(id,c)=>astWahlHtml(id,c),respec:(q,o)=>slRespec(q,o),pts:q=>slRsPts(q)};
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
