@@ -4053,7 +4053,7 @@ function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransfo
 const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner.</div>
  <div class="row" style="margin:6px 0 2px;align-items:center;flex-wrap:wrap"><span class="muted" style="font-size:13px">Auflösung:</span>${[null].concat(RES_STUFEN).map(v=>`<button class="btn small ${resFest()===v?'gold':''}" data-act="res" data-v="${v==null?'auto':v}" title="${v==null?'Senkt die Auflösung nur, wenn es ruckelt':v===1?'Immer volle Schärfe':'Feste, kleinere Auflösung – mehr Bilder pro Sekunde, etwas weicher'}">${v==null?'Auto':Math.round(v*100)+' %'}</button>`).join('')}<span class="muted" style="font-size:12px">${cv.width}×${cv.height}</span></div>
  <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
- <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button><button class="btn small ${SAVE.fov!==false?'gold':''}" data-act="fov" title="In Höhlen, Kerkern und im Unterreich siehst du nur, was dein Held sieht">${SAVE.fov!==false?'Dunkle Dungeons: an':'Dunkle Dungeons: aus'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
+ <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button><button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button><button class="btn small ${SAVE.fov!==false?'gold':''}" data-act="fov" title="Hinter Mauern, Felsen und Hauswänden liegt Schatten – du siehst nur, was dein Held sieht">${SAVE.fov!==false?'Sichtschatten: an':'Sichtschatten: aus'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
 const fsOk=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function fsToggle(){try{if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const e=document.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast('Vollbild wird hier nicht unterstützt.','#ff8a7a'))}}catch(e){toast('Vollbild wird hier nicht unterstützt.','#ff8a7a')}}
 document.addEventListener('fullscreenchange',()=>{setTimeout(resize,60);const b=$('fsBtn');if(b)b.textContent=fsOn()?'Vollbild beenden':'Vollbild'});document.addEventListener('webkitfullscreenchange',()=>setTimeout(resize,60));
@@ -13370,7 +13370,7 @@ function wlNachSetup(S){const W=G.wl;if(!W||!W.an)return;wlErreichbar();wlOeffne
 /* ---------- Gegner verteilen ---------- */
 const WL_TYP={lager:{R:420,w:0.33},patr:{R:380,w:0.22},schlaf:{R:220,w:0.15},hinter:{R:0,w:0.2}};
 function wlBevoelkern(S){const W=G.wl,C=WORLD/2,N0=G.need||60,O=G.obj;
- let N=Math.max(8,Math.round(N0*(0.64-0.08*Math.min(1,SL()/20))));if(O)N=N0;let M=Math.min(150,Math.round(N/0.7));if(!O)N=Math.min(N,Math.round(M*0.72));if(O)M=Math.round(M*(O.k==='steine'||O.k==='halten'?0.35:0.55));
+ let N=Math.max(10,Math.round(N0*(0.84-0.1*Math.min(1,SL()/20))));/*fs-kills*/if(O)N=N0;let M=Math.min(170,Math.round(N/0.76));if(!O)N=Math.min(N,Math.round(M*0.8));if(O)M=Math.round(M*(O.k==='steine'||O.k==='halten'?0.35:0.55));
  if(!O)G.need=N;W.N=N;W.M=M;
  const lo=3+Math.min(3,Math.floor(SL()/8)),hi=5+Math.min(6,Math.floor(SL()/4));const gs=()=>Math.max(3,ri(lo,hi));
  /* Kandidaten-Zellen: erreichbar, weit genug vom Start */
@@ -19237,6 +19237,137 @@ requestAnimationFrame(hwTick);
 window.__hsHW=1;
 
 {const hR=hurt;hurt=function(){try{if(G.state==='play'&&P&&!(P.inv>0)&&!P.down&&(P.smokeIn||0)>G.time&&Math.random()<0.4){if(!P.smWT||G.time-P.smWT>0.5){P.smWT=G.time;word(P.x,P.y-34,'verfehlt','#d8c8e8')}return}}catch(e){}return hR.apply(this,arguments)}}
+/* ================= Feinschliff (Paket „feinschliff“) =================
+   1) Schweres Portal verschwindet nicht mehr, wenn das Betreten gesperrt ist (Sieg-Sperre nach Boss/Wächter)
+   2) Level-up: kräftige Fanfare (gedrosselt), goldener Lichteffekt; Talente-Knopf leuchtet deutlich, solange Punkte frei sind
+   3) Flucht-Ziel: am Ausgang ist die Stufe geschafft – das Portal öffnet sich dort, kein Wächter
+   4) Verlassener Schrein: Prüfung mit 3–4 angekündigten Wellen, Elite ab Welle 2, Hüter in der letzten Welle
+   5) Kill-Ziel bis zum Wächter/Boss höher (welt), Erfahrung/Gold je normalem Gegner etwas geringer */
+const FS={lvT:-99,xpF:0.8,goldF:0.82};
+/* ---------- 1) Schweres Portal ---------- */
+{const f=enterPortal;enterPortal=function(){const r=f.apply(this,arguments);try{if(G.state==='play'&&G.b2P2&&!G.portal2&&G.portal&&!G.room){G.portal2=G.b2P2;G.gefahrNext=0;G.b2P2=null}}catch(e){}return r}}
+/* ---------- 2) Level-up ---------- */
+SND.lvup=()=>{const h=smp('horn_50',0.34,{len:0.42});smp('horn_50',0.34,{d:0.13,r:Math.pow(2,7/12),len:0.42});smp('horn_50',0.4,{d:0.26,r:2,len:1.5});smp('horn_43',0.26,{d:0.26,r:Math.pow(2,7/12),len:1.5});smp('blech_58',0.18,{d:0.26,r:Math.pow(2,4/12),len:1.3});
+ smp('timp1',0.34,{len:1.2});smp('timp1',0.3,{d:0.26,len:1.6});
+ ['harfe_65','harfe_72','harfe_76','harfe_79','harfe_83','harfe_86','harfe_89','harfe_93'].forEach((n,i)=>smp(n,0.2,{d:0.3+i*0.045,len:1.6}));smp('glock_96',0.17,{d:0.62,len:1.8});smp('glock_103',0.11,{d:0.78,len:1.6});
+ if(!h){[392,523.3,659.3,784].forEach((f,i)=>tone(f,0.3,'triangle',0.05,null,i*0.12))}};
+try{SPRIO.add('lvup')}catch(e){}
+function fsLvFx(q){const x=q.x,y=q.y;G.fxs.push({k:'pillar',x,y:y+14,w:80,h:420,c:'#ffd04a',t:0,life:1.2});G.fxs.push({k:'shock',x,y,r:190,c:'#ffd04a',t:0,life:0.7});G.fxs.push({k:'shock',x,y,r:110,c:'#fff1b8',t:0,life:0.45});
+ ring(x,y,90,'#ffe07a',0.9,6);embers(x,y,'#ffe9a8',18,34);sparks(x,y,'#ffd04a',26,520,1);light(x,y,380,'#ffd04a',1.1,1.2);word(x,y-64,'Stufe '+q.level+'!','#ffd04a')}
+levelFx=function(){if((G.lvFxT||-9)>G.time-0.4){if(msgL()===0)banner('Stufe '+P.level,P.sp>0?'Neuer Talentpunkt – „Talente“ oben':'Stärker geworden','#ffd04a',{dur:1.8,size:42,y:H*0.3});return}G.lvFxT=G.time;fsLvFx(P);if(msgL()===0)banner('Stufe '+P.level,P.sp>0?'Neuer Talentpunkt – „Talente“ oben':'Stärker geworden','#ffd04a',{dur:1.8,size:42,y:H*0.3})};
+{const f=gainXp;gainXp=function(){const q=P,l0=q?q.level:0;const r=f.apply(this,arguments);try{if(q&&q.level>l0&&!G.bot){const now=G.time;if(now-FS.lvT>2.6){FS.lvT=now;sfx('lvup')}const b=document.getElementById('btnTree');if(b){b.classList.remove('fsPop');void b.offsetWidth;b.classList.add('fsPop')}}}catch(e){}return r}}
+(()=>{try{const st=document.createElement('style');st.textContent=`
+#btnTree.glow{border:2px solid #ffd04a;color:#fff3c8;background:linear-gradient(180deg,rgba(110,72,18,.96),rgba(52,32,8,.96));animation:fsPuls 1.5s ease-in-out infinite;text-shadow:0 0 6px rgba(255,208,74,.8);overflow:visible}
+#btnTree.glow::after{content:'';position:absolute;inset:-2px;border-radius:9px;background:linear-gradient(110deg,transparent 30%,rgba(255,240,190,.55) 48%,transparent 62%);background-size:260% 100%;animation:fsGlanz 2.4s linear infinite;pointer-events:none}
+#btnTree.glow #spBadge{min-width:26px;height:26px;line-height:24px;font-size:16px;font-weight:900;top:-12px;right:-12px;border-radius:13px;background:radial-gradient(circle at 40% 35%,#fff2b0,#ffc22e 55%,#c27a08);color:#2a1600;border:2px solid #fff3c8;box-shadow:0 0 12px 2px rgba(255,194,46,.9);animation:fsHop 1.5s ease-in-out infinite;z-index:2}
+#btnTree.fsPop{animation:fsPop .7s ease-out,fsPuls 1.5s ease-in-out .7s infinite}
+@keyframes fsPuls{0%,100%{box-shadow:0 0 8px 1px rgba(255,200,70,.55),inset 0 0 6px rgba(255,210,90,.25)}50%{box-shadow:0 0 24px 6px rgba(255,200,70,.95),inset 0 0 14px rgba(255,225,130,.5)}}
+@keyframes fsGlanz{0%{background-position:130% 0}60%,100%{background-position:-130% 0}}
+@keyframes fsHop{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
+@keyframes fsPop{0%{transform:scale(1)}35%{transform:scale(1.28)}100%{transform:scale(1)}}
+@media (min-width:2200px){#btnTree.glow #spBadge{min-width:32px;height:32px;line-height:30px;font-size:20px;border-radius:16px;top:-14px;right:-14px}}
+@media (prefers-reduced-motion:reduce){#btnTree.glow,#btnTree.glow #spBadge,#btnTree.glow::after{animation:none}}`;document.head.appendChild(st)}catch(e){}})();
+/* ---------- 3) Flucht: der Ausgang ist das Ziel ---------- */
+{const f=zielGeschafft;zielGeschafft=function(x,y){const O=G.obj;const fl=O&&!O.done&&O.k==='flucht';const r=f.apply(this,arguments);if(!fl||G.portal)return r;
+ try{const S=STAGES[G.stage]||{};if(S.boss)return r;G.guardDone=true;const ax=O.ax,d=O.dir;let px=O.gx+(ax==='x'?d*150:0),py=O.gy+(ax==='y'?d*150:0);px=clamp(px,140,WORLD-140);py=clamp(py,140,WORLD-140);
+  const q=(typeof wlNahFrei==='function'&&G.wl&&G.wl.an&&wlNahFrei(px,py,10))||{x:px,y:py};G.portal={x:q.x,y:q.y,t:0};portal2();try{b2PortalFix()}catch(e){}try{clearPortalLoot()}catch(e){}
+  for(const q2 of mpL())if(q2&&!q2.down)withP(q2,()=>heal(P.st.maxHp*0.25));
+  const w=O.wn==='Feuer'?'Das Feuer bleibt hinter euch zurück':O.wn==='Lava'?'Die Lava erstarrt hinter euch':O.wn==='Wasser'?'Die Flut bricht sich hinter euch':'Das Geröll kommt hinter euch zum Stehen';
+  later(0.5,()=>{if(G.state==='play')banner('Entkommen!',w+' – das Portal ist offen','#ffd04a',{dur:2.8,size:46,y:H*0.3})});G.fxs.push({k:'shock',x:q.x,y:q.y,r:200,c:'#c890ff',t:0,life:0.7});sfx('portal');G.score+=150+20*SL();saveRun()}catch(e){console.error('fs flucht',e)}return r}}
+ZIELE.flucht.d='Lauft zum Ausgang, bevor euch die Gefahr einholt – dort öffnet sich das Portal.';
+try{if(LVI.flucht)LVI.flucht.d='Etwas Gewaltiges rollt von hinten heran. Lauft zum Ausgang, bevor es euch einholt – kämpft nur, wenn euch jemand den Weg versperrt. Am Ausgang öffnet sich sofort das Portal: kein Wächter, dafür eine Truhe als Lohn.'}catch(e){}
+{const f=txChips;txChips=function(S){let h=f.apply(this,arguments);try{if(G.obj&&G.obj.k==='flucht'&&!(S&&S.boss)&&typeof h==='string')h=h.replace('☠ <b>Dann: ein Wächter</b>','🌀 <b>Dann: Portal am Ausgang</b>').replace('--cc:#ff9a6a">🌀','--cc:#c890ff">🌀')}catch(e){}return h}}
+/* ---------- 4) Verlassener Schrein: Prüfung in Wellen ---------- */
+function fsPrWellen(){return 3+(G.diff>=2||SL()>=10?1:0)}
+function fsPrWelle(A){const k=A.wv,W=A.wn,last=k===W,h=1+0.1*Math.min(5,G.diff|0)+0.06*(typeof arHart==='function'?arHart():0),mp=Math.min(1.8,mpSpawn());
+ const n=Math.round((3+1.6*k+Math.min(3,SL()/6))*h*mp),pts=A.wp||[[A.x,A.y-200]];const L=arWelle(A,n,null,0,{pts,c:'#8a7a4a'});const def=pickFoe(Math.min(1,0.45+0.15*k));
+ const nE=k>=2?Math.round((k-1)*Math.min(1.5,mp)):0;for(let i=0;i<nE;i++){const p=pick(pts);const e=arFeind(A,def,p[0]+rnd(-20,20),p[1]+rnd(-16,16),{pr:0.7,elite:k>=3&&i===0?2:1});if(e){e.atkCd=rnd(0.6,1);L.push(e)}}
+ if(last){const p=pts[0];const e=arFeind(A,pickFoe(1),p[0],p[1],{pr:0.95,elite:2});if(e){e.r*=1.2;e.hp*=1.35+0.1*(G.diff|0);e.maxHp=e.hp;e.atkCd=1;e.fsHueter=1;if(!G.bot)word(e.x,e.y-50,'Hüter der Prüfung','#f2d24c');explodeFx(e.x,e.y,90,'#f2d24c',{shake:4});L.push(e)}}
+ for(const e of L)e.fsPw=k;sfxAt(last?'boss':'elite',A.x,A.y);arSync(1);return L}
+AR_TICK.pruefung=function(A,dt){const p=A.altar;
+ if(A.s===0||A.s===1&&!A.lauf){const Q=arStandfest(p,dt,1/1.2);A.tx='Stellt euch auf den Altar';if(Q){p.prog=0;A.lauf=1;A.s=1;A.wn=fsPrWellen();A.wv=0;A.ph='pause';A.wT=1.6;A.down=0;A.t=0;
+   if(!G.bot)banner('Die Prüfung beginnt',`${A.wn} Wellen – haltet stand!`,A.c,{dur:2,size:32,y:H*0.24});sfx('boss');G.fxs.push({k:'shock',x:A.x,y:A.y,r:220,c:A.c,t:0,life:0.6})}return}
+ if(A.s!==1)return;if(arSpieler().length<mpL().filter(q=>!q.netGone).length)A.down=1;A.wT-=dt;const fe=arFeinde(A);
+ if(A.ph==='pause'){A.t=Math.max(0,Math.ceil(A.wT+1.8));A.tx=A.wv?`Welle ${A.wv}/${A.wn} geschafft · nächste in ${Math.ceil(Math.max(0,A.wT)+1.8)} s`:`Gleich: Welle 1/${A.wn}`;
+  if(A.wT<=0){A.wv++;A.ph='warn';A.wT=1.8;const a0=rnd(TAU),np=A.wv>=3?4:3;A.wp=[];for(let i=0;i<np;i++){const a=a0+i*TAU/np,x=A.x+Math.cos(a)*230,y=A.y+Math.sin(a)*230*0.85;const q=(typeof wlNahFrei==='function'&&wlNahFrei(x,y,6))||{x,y};A.wp.push([q.x,q.y]);G.fxs.push({k:'shock',x:q.x,y:q.y,r:70,c:'#f2d24c',t:0,life:1.8})}
+   const last=A.wv===A.wn;if(!G.bot)banner(`Welle ${A.wv} von ${A.wn}`,last?'Der Hüter der Prüfung erscheint!':A.wv>=2?'Elite-Gegner nahen!':'Sie kommen!',last?'#ff9a5a':A.c,{dur:1.8,size:34,y:H*0.24});sfxAt('magic',A.x,A.y)}return}
+ if(A.ph==='warn'){A.tx=`Welle ${A.wv}/${A.wn} – sie kommen …`;if(Math.random()<dt*10&&A.wp)for(const w of A.wp)puffs(w[0],w[1],'#c8a84a',2,60,10);if(A.wT<=0){fsPrWelle(A);A.ph='kampf';A.wT=40}return}
+ if(A.ph==='kampf'){A.tx=`Welle ${A.wv}/${A.wn} · Gegner ${fe.length}`;A.t=fe.length;
+  if(!fe.length||A.wT<=0){if(A.wv>=A.wn&&!fe.length){const s=pick(AR_SEGEN);for(const q of arSpieler()){arReinigen(q,1);arFx(q,s,1);withP(q,()=>heal(P.st.maxHp*0.4))}arTruhe(A,A.x,A.y+50,A.down?1:2);arGold(A.x,A.y,8+A.wn*2);if(!A.down)dropItem(A.x+40,A.y+70,randomItem(scale().il+2,0.9,3));
+     G.fxs.push({k:'pillar',x:A.x,y:A.y+10,w:80,h:340,c:A.c,t:0,life:1.1});arSieg(A,`Prüfung bestanden – ${ARFX[s].n} für diese und die nächste Ebene!`);return}
+   if(A.wv<A.wn){A.ph='pause';A.wT=fe.length?0.6:2.4;if(!fe.length){for(const q of arSpieler())withP(q,()=>heal(P.st.maxHp*0.12));if(!G.bot)word(A.x,A.y-60,`Welle ${A.wv} geschafft!`,'#f2d24c')}}else A.wT=8}}};
+try{AR_LVI.pruefung.d='Stellt euch kurz auf den Altar, um die Prüfung zu beginnen: 3–4 angekündigte Wellen, ab der zweiten mit Elite-Gegnern, zuletzt erscheint der Hüter der Prüfung. Zwischen den Wellen bleibt kurz Zeit zum Atemholen. Der Lohn: ein Segen für diese und die nächste Ebene, Gold und eine reiche Truhe – noch reicher, wenn niemand fällt.'}catch(e){}
+/* ---------- 5) Erfahrung/Gold je normalem Gegner auf Erkundungsstufen etwas geringer (das Kill-Ziel ist höher) ---------- */
+{const f=killEnemy;killEnemy=function(e,o){const on=e&&!e.dead&&!e.boss&&!e.guard&&!e.arA&&G.wl&&G.wl.an&&!G.room;const sv=G._fsKF;if(on)G._fsKF=1;try{return f.apply(this,arguments)}finally{G._fsKF=sv}}}
+{const f=orb;orb=function(x,y,k,v){if(G._fsKF&&typeof v==='number'){if(k==='xp')v*=FS.xpF;else if(k==='gold')v=Math.max(1,Math.round(v*FS.goldF))}return f.call(this,x,y,k,v)}}
+
+/* ---------- 6) Sichtfeld-Schatten (Line of Sight) statt langer schwarzer Schattenbänder ----------
+   Blickdichte Hindernisse (Mauern, Hauswände, Felswände, große Felsen, Säulen, Statuen, Zelte – keine Bäume, Zäune, Hecken, Wasser)
+   werfen vom Helden aus einen weichen, ~60 % dunklen Schatten. Gezeichnet einmal pro Ausschnitt auf eine Ebene mit niedriger Auflösung.
+   Gegner im Schatten bleiben verborgen, bis sie heraustreten. Split-Screen: je Ausschnitt eigener Blickpunkt; gemeinsame Kamera: vereinte Sicht. */
+const FSV={c:null,g:null,c2:null,g2:null,sv:new Map(),on:false,dun:false,a:0.6};
+const FS_OPAK=new Set(['mauer','wand','felswand','stalag','statue','zelt','saeule']);
+function fsOpak(b){return FS_OPAK.has(b.k)||b.k==='fels'&&(b.t!=='c'||b.r>=20)}
+function fsAktiv(){return SAVE.fov!==false&&G.state==='play'&&!G.room&&!!G.blkG&&!!(G.blk&&G.blk.length)&&!G.bot}
+function fsSeher(){if(G.vp&&P)return[P];let L=[];try{L=fovZuschauer()}catch(e){}return L.length?L:[P].filter(Boolean)}
+function fsFrei(a,b){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),n=Math.ceil(d/24);for(let i=1;i<n;i++){const u=i/n,x=a.x+dx*u,y=a.y+dy*u,L=blkBei(x,y);if(!L)continue;
+  for(const o of L){if(!fsOpak(o))continue;if(o.t==='c'){const ex=x-o.x,ey=y-o.y;if(ex*ex+ey*ey<o.r*o.r)return false}else if(x>o.x&&x<o.x+o.w&&y>o.y&&y<o.y+o.h)return false}}return true}
+function fsSieht(V,b){let q=FSV.sv.get(b);if(!q||q.t<G.time||q.v!==V){let s=true;try{s=kwSieht(V,b)}catch(e){}q={t:G.time+0.2+Math.random()*0.1,s,v:V};FSV.sv.set(b,q)}return q.s}
+function fsKeile(g,V,camX,camY,m,vw,vh,lite){const F=Math.max(vw,vh)*2.2,X=x=>(x-camX)*m,Y=y=>(y-camY)*m,x0=camX-160,y0=camY-160,x1=camX+vw+160,y1=camY+vh+160;const vis=[];
+ g.beginPath();
+ for(const b of G.blk){if(!fsOpak(b))continue;const bx0=b.t==='c'?b.x-b.r:b.x,by0=b.t==='c'?b.y-b.r:b.y,bx1=b.t==='c'?b.x+b.r:b.x+b.w,by1=b.t==='c'?b.y+b.r:b.y+b.h;if(bx1<x0||bx0>x1||by1<y0||by0>y1)continue;
+  const cx0=(bx0+bx1)/2,cy0=(by0+by1)/2,dx=cx0-V.x,dy=cy0-V.y,dd=Math.hypot(dx,dy);let p1,p2;
+  if(b.t==='c'){if(dd<=b.r+4)continue;const a=Math.atan2(dy,dx),h=Math.asin(Math.min(1,b.r/dd)),l=Math.sqrt(Math.max(0,dd*dd-b.r*b.r));p1=[V.x+Math.cos(a-h)*l,V.y+Math.sin(a-h)*l];p2=[V.x+Math.cos(a+h)*l,V.y+Math.sin(a+h)*l]}
+  else{if(V.x>b.x-6&&V.x<b.x+b.w+6&&V.y>b.y-6&&V.y<b.y+b.h+6)continue;const a0=Math.atan2(dy,dx);let mi=1e9,ma=-1e9;for(const q of [[b.x,b.y],[b.x+b.w,b.y],[b.x,b.y+b.h],[b.x+b.w,b.y+b.h]]){let d=Math.atan2(q[1]-V.y,q[0]-V.x)-a0;d=Math.atan2(Math.sin(d),Math.cos(d));if(d<mi){mi=d;p1=q}if(d>ma){ma=d;p2=q}}}
+  const e1=Math.atan2(p1[1]-V.y,p1[0]-V.x),e2=Math.atan2(p2[1]-V.y,p2[0]-V.x);
+  g.moveTo(X(p1[0]),Y(p1[1]));g.lineTo(X(p2[0]),Y(p2[1]));g.lineTo(X(p2[0]+Math.cos(e2)*F),Y(p2[1]+Math.sin(e2)*F));g.lineTo(X(p1[0]+Math.cos(e1)*F),Y(p1[1]+Math.sin(e1)*F));g.closePath();
+  if(!lite&&b.x>camX-40&&b.x<camX+vw+40&&(b.t==='c'?b.y:b.y+b.h)>camY-20&&(b.t==='c'?b.y:b.y)<camY+vh+260)vis.push(b)}
+ g.fill();
+ /* sichtbare Hindernisse selbst (samt hochgezogener Kulisse) nicht abdunkeln */
+ if(vis.length&&typeof kwUmriss==='function'){g.save();g.globalCompositeOperation='destination-out';g.fillStyle='#000';for(const b of vis){if(!fsSieht(V,b))continue;g.beginPath();kwUmriss(g,b,X,Y,m);g.fill()}g.restore()}}
+function fsZeichne(camX,camY){const L=fsSeher();if(!L.length)return;const lite=!!GF().lite,s=lite?0.2:0.3,lw=Math.max(2,Math.ceil(W*s)),lh=Math.max(2,Math.ceil(H*s)),m=ZOOM*s,vw=W/ZOOM,vh=H/ZOOM;
+ if(!FSV.c){FSV.c=document.createElement('canvas');FSV.g=FSV.c.getContext('2d');FSV.c2=document.createElement('canvas');FSV.g2=FSV.c2.getContext('2d')}
+ const C=FSV.c,g=FSV.g;if(C.width!==lw||C.height!==lh){C.width=lw;C.height=lh}g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,lw,lh);
+ const col=`rgba(6,4,12,${FSV.dun?0.5:FSV.a})`;g.fillStyle=col;fsKeile(g,L[0],camX,camY,m,vw,vh,lite);
+ if(L.length>1){const C2=FSV.c2,g2=FSV.g2;if(C2.width!==lw||C2.height!==lh){C2.width=lw;C2.height=lh}for(let i=1;i<L.length;i++){g2.setTransform(1,0,0,1,0,0);g2.globalCompositeOperation='source-over';g2.clearRect(0,0,lw,lh);g2.fillStyle='#000';fsKeile(g2,L[i],camX,camY,m,vw,vh,lite);g.globalCompositeOperation='destination-in';g.drawImage(C2,0,0);g.globalCompositeOperation='source-over'}}
+ const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.imageSmoothingEnabled=true;try{c.imageSmoothingQuality='low'}catch(e){}c.drawImage(C,0,0,lw,lh,0,0,W,H);c.restore()}
+fovSchatten=function(){};
+{const f=drawLighting;drawLighting=function(camX,camY,t){const r=f.apply(this,arguments);try{FSV.dun=!!FOV.on;FSV.on=fsAktiv();if(FSV.on)fsZeichne(camX,camY);if(FSV.on)FOV.on=true}catch(e){if(!FSV.err){FSV.err=1;console.warn('Sichtschatten',e)}}return r}}
+{const f=fovVersteckt;fovVersteckt=function(e){if(!FSV.on||FSV.dun)return f.apply(this,arguments);if(e.boss||e.guard||e.dead)return false;
+ if(!G.vp&&(e.fovT||0)>G.time)return !e.fovV;let v=false;for(const q of fsSeher())if(fsFrei(q,e)){v=true;break}if(!G.vp){e.fovT=G.time+0.12+Math.random()*0.06;e.fovV=v}return !v}}
+{const f=fovRahmen;fovRahmen=function(){const r=f.apply(this,arguments);try{FOV.sicht=FOV.on?580:2400}catch(e){}return r}}
+
+/* ---------- 7) Schmied: A auf Gegenstand springt zu „Aufwerten“, B zurück; Edelsteine zeigen ihre Wirkung im Sockel ---------- */
+{const f=padPress;padPress=function(cur){try{if(cur&&cur.dataset&&cur.dataset.act==='smith-sel'&&scr.querySelector('.smdet')){PADNAV.ret=padSig(cur);const k=cur.dataset.k;if(G.smithSel!==k)cur.click();
+   const d=scr.querySelector('.smdet [data-act="smith-up"]:not([disabled])')||scr.querySelector('.smdet button:not([disabled])');if(d){PADNAV.det=2;PADNAV.detSel='.smdet [data-act="smith-up"]';padMark(d)}else{const t=scr.querySelector(`[data-act="smith-sel"][data-k="${k}"]`);if(t)padMark(t,true)}return}}catch(e){}return f.apply(this,arguments)}}
+{const f=padBack;padBack=function(){try{const el=PADNAV.el;if(el&&el.isConnected&&el.closest('.smdet')){const t=scr.querySelector('[data-act="smith-sel"].sel');if(t){PADNAV.det=0;padMark(t);try{sfx('ui')}catch(e){}return}}}catch(e){}return f.apply(this,arguments)}}
+function fsGemLabels(){try{for(const b of scr.querySelectorAll('.smdet .gemb')){if(b.querySelector('.fsGv'))continue;const t=b.getAttribute('title')||'',i=t.indexOf(': ');const sp=document.createElement('span');sp.className='fsGv';sp.innerHTML=i>0?`<b>${esc(t.slice(0,i))}</b> ${esc(t.slice(i+2))}`:esc(t);b.appendChild(sp);b.classList.add('fsGl')}}catch(e){}}
+{const f=renderSmith;renderSmith=function(){const r=f.apply(this,arguments);fsGemLabels();return r}}
+try{if(window.__hsMN)__hsMN.renderSmith=renderSmith}catch(e){}
+(()=>{try{const st=document.createElement('style');st.textContent=`
+.smdet .gemsel{flex-direction:column;align-items:flex-end;gap:4px}
+.smdet .gemb.fsGl{width:auto;min-width:34px;height:auto;min-height:30px;display:inline-flex;align-items:center;gap:7px;padding:3px 10px 3px 9px;font-size:12.5px;line-height:1.2;color:#f2e6d0;text-align:left;white-space:nowrap}
+.smdet .gemb.fsGl b{color:var(--gc);font-weight:800}
+.smdet .gemb.fsGl:hover,.smdet .gemb.fsGl:focus-visible,.smdet .gemb.fsGl.padf{background:rgba(255,255,255,.08);box-shadow:0 0 0 1px var(--gc),0 0 10px var(--gc)}
+@media (max-width:720px){.smdet .gemb.fsGl{font-size:11.5px;padding:2px 8px}}`;document.head.appendChild(st)}catch(e){}})();
+
+/* ---------- 8) Held läuft von allein weiter (v. a. nach Einblendungen): hängende Eingaben ----------
+   Ursache: Solange ein Erklärfenster offen ist bzw. danach auf das Loslassen gewartet wird (HI.padWait), lief padFrame nicht –
+   PADS.st behielt den letzten Stick-Ausschlag. Ruhende Trigger-Achsen (−1) zählten als „gedrückt“, das Warten endete dann nie.
+   Jetzt: beim Überspringen werden die Controller-Zustände geleert, das Warten zählt nur Knöpfe; zusätzlich alles zurücksetzen bei
+   Fokus-/Sichtwechsel, Vollbildwechsel und wenn ein Fenster über dem Spiel erscheint. */
+function fsPadLeer(){try{for(const k in PADS.st){const q=PADS.st[k];if(!q)continue;q.lx=q.ly=q.rx=q.ry=0;if(q.b)q.b=q.b.map(()=>false);if(q.pr)q.pr=q.pr.map(()=>false)}}catch(e){}}
+function fsKnopf(){try{for(const g of navigator.getGamepads?navigator.getGamepads():[])if(g&&g.connected!==false&&g.buttons.some(b=>b&&(b.pressed||b.value>0.5)))return true}catch(e){}return false}
+{const f=padFrame;padFrame=function(){try{if(typeof HI!=='undefined'&&HI.padWait&&!(HI.on&&HI.pause)&&!fsKnopf())HI.padWait=false}catch(e){}const r=f.apply(this,arguments);
+ try{if(typeof HI!=='undefined'&&(HI.on&&HI.pause||HI.padWait))fsPadLeer()}catch(e){}return r}}
+function fsEingabenLeer(){try{for(const k in keys)keys[k]=false;MOUSE.down=false;if(joy){if(joy.spr===1&&P)P.sprint=false;else if(joy.spr===2)NET.sprT=false;joy=null}fsPadLeer();PADS.prev={}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)fsEingabenLeer()});
+document.addEventListener('fullscreenchange',()=>{for(const k in keys)keys[k]=false});
+addEventListener('pagehide',fsEingabenLeer);
+{const f=showScreen;showScreen=function(){try{if(G.state==='play'&&joy){if(joy.spr===1&&P)P.sprint=false;joy=null}}catch(e){}return f.apply(this,arguments)}}
+window.__fsT={HI:()=>(typeof HI!=='undefined'?HI:null),padFrame:()=>padFrame(),PADS:()=>PADS,padMove:q=>padMove(q),keys:()=>keys,PADNAV:()=>PADNAV,padPress:c=>padPress(c),padBack:()=>padBack(),smith:()=>{G.overlay="smith";G.smithSel=null;renderSmith()}};
+window.__hsFS=1;
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
