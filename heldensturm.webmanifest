@@ -1,0 +1,28 @@
+{
+ "name": "Heldensturm – Imres Tales",
+ "short_name": "Heldensturm",
+ "description": "Das Roguelike zu Imres Tales – auch offline spielbar.",
+ "lang": "de",
+ "start_url": "heldensturm.html",
+ "scope": "./heldensturm",
+ "display": "fullscreen",
+ "display_override": [
+  "fullscreen",
+  "standalone"
+ ],
+ "background_color": "#100c12",
+ "theme_color": "#100c12",
+ "icons": [
+  {
+   "src": "heldensturm-icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "heldensturm-icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
+}
