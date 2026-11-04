@@ -2075,7 +2075,7 @@ const HEROES={
      const R=100*P.st.area,k0=G.kills;aoe(P.x,P.y,R,sk(0.9+0.2*r),{knock:220,fx:P.x,fy:P.y});smoke(P.x,P.y);ring(P.x,P.y,R,'#8a2a8a',0.35,4);sfx('blink');if(as&&G.kills>k0)later(0.01,()=>{P.cds.z_step=Math.min(P.cds.z_step||0,1)})}},
    {id:'z_murder',b:2,row:4,ic:'☓',name:'Mordlust',d:r=>`Jeder Kill verkürzt alle Abklingzeiten um ${f1(0.05*r)} s – höchstens um 1 s pro Sekunde.`},
    {id:'z_destroyer',b:2,row:2,ic:'✠',name:'Der Zerstörer',d:r=>`Jeder Kill nährt die Klinge: Ein Zerstörer-Stapel (8 s, bis 10) gibt +${f1(0.8*r)}% Schaden und +${r}% Kritischen Schaden. Bei 10 Stapeln reißt der nächste Nahkampftreffer den Boden auf: ${pc(3+0.75*r)} Schaden im weiten Umkreis – danach beginnt die Jagd von vorn.`},
-   {id:'z_smoke',b:2,row:3,c:0,a:1,ic:'☁',name:'Rauchbombe',cd:()=>14,d:r=>`Eine Rauchwolke (5 s): Darin sind Ezekiel und Mitspieler unsichtbar, und Gegner im Rauch treffen kaum noch. Der erste Angriff aus dem Rauch verursacht +${60+15*r}% Schaden.`,
+   {id:'z_smoke',b:2,row:3,c:0,a:1,ic:'☁',name:'Rauchbombe',cd:()=>14,d:r=>`Eine Rauchwolke (5 s): Darin sind Ezekiel und Mitspieler schwer zu treffen (40 % der Treffer gehen daneben), und Gegner im Rauch treffen kaum noch. Der erste Angriff aus dem Rauch verursacht +${60+15*r}% Schaden.`,
     cast(r){zone({x:P.x,y:P.y,r:150*P.st.area,dur:5,dps:0,kind:'smoke',blind:1});P.ambush=Math.max(P.ambush||0,0.6+0.15*r);smoke(P.x,P.y);smoke(P.x+30,P.y);sfx('blink')}},
    {id:'z_clone',b:2,row:3,c:1,a:1,ic:'⧉',name:'Schattenklon',cd:()=>20,d:r=>`Ein Klon aus Schatten kämpft ${8+r} s lang und wiederholt Ezekiels Angriffe mit ${50+12*r}% Schaden.`,
     cast(r){spawnPet('clone',P.x-30,P.y,{life:8+r,dmg:()=>P.st.dmg*(0.5+0.12*r),hp:P.st.maxHp*0.6,every:1/Math.max(0.8,P.st.rate),r:14});smoke(P.x-30,P.y);sfx('blink')}},
@@ -3843,7 +3843,7 @@ function updPlayer(dt){
  if(P.stealthT>0){P.stealthT-=dt;if(P.stealthT<=0)recalc()}
  if(P.batT>0)P.batT-=dt;
  if(P.buffs.ascend>0){P.rootT=0;P.stunT=0;P.slowT=0}
- let inSmoke=false;for(const z of G.zones)if(z.kind==='smoke'&&d2(z,P)<z.r*z.r)inSmoke=true;if(inSmoke&&P.stealthT<0.2){P.stealthT=0.2;recalc()}
+ let inSmoke=false;for(const z of G.zones)if(z.kind==='smoke'&&d2(z,P)<z.r*z.r)inSmoke=true;/*rauch-sicht*/if(inSmoke)P.smokeIn=G.time+0.2;
  if(P.hoardT>0){P.hoardT-=dt;if(P.hoardT<=0){P.hoard=0;recalc()}}
  updChan(dt);legendTick(dt);heroTick(dt);
  if(P.potCd>0)P.potCd-=dt;
@@ -18688,7 +18688,7 @@ z_cleave:'Gefächerter Hieb vor Ezekiel: 265% Schaden und Rückstoß.',
 z_frenzy:'Auslöser: Kill (höchstens alle 23,4 s, 80% Stärke) – 6 s lang +48% Angriffstempo, +15% Lauftempo, +8% Lebensraub; Mitspieler in der Nähe +8% Lebensraub.',
 z_pact:'Unter 50% Leben (oder Mitspieler in der Nähe unter 30%): +3% Lebensraub, +6% Schaden, Treffer heilen den Mitspieler um 1,5% des Schadens. Einmal pro Stufe überlebt er einen tödlichen Treffer: 14% Leben, 1,5 s unverwundbar.',
 z_destroyer:'Kill: Zerstörer-Stapel (8 s, bis 10) je +0,8% Schaden, +1% Kritischer Schaden. Bei 10 Stapeln reißt der nächste Nahkampftreffer den Boden auf: 375% im weiten Umkreis.',
-z_smoke:'Rauchwolke (5 s): Ezekiel und Mitspieler darin unsichtbar, Gegner im Rauch treffen kaum. Erster Angriff aus dem Rauch +75% Schaden.',
+z_smoke:'Rauchwolke (5 s): Ezekiel und Mitspieler darin schwer zu treffen (40 % daneben), Gegner im Rauch treffen kaum. Erster Angriff aus dem Rauch +75% Schaden.',
 z_mark:'Auslöser: Gegner in Reichweite (höchstens alle 20,8 s, 80% Stärke) – stärkster Gegner erleidet +15% Schaden; nach 3 s explodiert das Mal: 38% des erlittenen Schadens + 460%.',
 z_assassin:'Nach einem Schattenschritt: nächster Treffer +50% Schaden. Tötet ein Schattenschritt, ist er nach 1 s wieder bereit.',
 z_d_griff:'Huscht 208 Schritt durch Gegner: 200% Schaden an allen auf dem Weg. Champions verlieren eine Eigenschaft (Ezekiel trägt sie kurz selbst), andere manchmal eine Münze.',
@@ -19236,6 +19236,7 @@ requestAnimationFrame(hwTick);
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{for(const t of [80,300,700])setTimeout(()=>{try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;if(scr)scr.scrollTop=0;dispatchEvent(new Event('resize'));if(typeof menuFit==='function'&&!scr.hidden)menuFit(scr)}catch(e){}},t)}));
 window.__hsHW=1;
 
+{const hR=hurt;hurt=function(){try{if(G.state==='play'&&P&&!(P.inv>0)&&!P.down&&(P.smokeIn||0)>G.time&&Math.random()<0.4){if(!P.smWT||G.time-P.smWT>0.5){P.smWT=G.time;word(P.x,P.y-34,'verfehlt','#d8c8e8')}return}}catch(e){}return hR.apply(this,arguments)}}
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
