@@ -1,0 +1,11 @@
+[Unit]
+Description=Beim Einschalten die Imres-Bühne starten, falls so eingestellt
+After=zynthian.service
+Wants=zynthian.service
+
+[Service]
+Type=oneshot
+ExecStart=/zynthian/zynthian-my-data/imres/seite/zynthian/imres-modus boot
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+#!/bin/bash
+# imres-modus imres|zynthian|neustart|aus|aktualisieren|start-imres|start-zynthian|boot
+HIER="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+DATEN="$(dirname "$(dirname "$HIER")")"   # /zynthian/zynthian-my-data/imres
+case "$1" in
+  imres)     systemctl stop zynthian; systemctl start imres-buehne ;;
+  zynthian)  systemctl stop imres-buehne; systemctl start zynthian ;;
+  neustart)  systemctl reboot ;;
+  aus)       systemctl poweroff ;;
+  aktualisieren)
+    git -C "$DATEN/seite" pull --ff-only --depth 1 && \
+      curl -s -X POST -H 'Content-Type: application/json' -d '{"aktion":"seite-neu"}' http://127.0.0.1:8790/zyn/system >/dev/null
+    ;;
+  # Was beim Einschalten startet
+  start-imres)    echo imres > "$DATEN/start-modus"; echo "Beim Einschalten startet jetzt die Imres-Bühne." ;;
+  start-zynthian) echo zynthian > "$DATEN/start-modus"; echo "Beim Einschalten startet jetzt der normale Zynthian." ;;
+  boot)
+    [ "$(cat "$DATEN/start-modus" 2>/dev/null)" = "imres" ] && { systemctl stop zynthian; systemctl start imres-buehne; }
+    ;;
+  *) echo "Benutzung: imres-modus imres|zynthian|neustart|aus|aktualisieren|start-imres|start-zynthian"; exit 1 ;;
+esac

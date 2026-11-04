@@ -1,0 +1,11 @@
+[Unit]
+Description=Imres-Brücke (Webserver, Tasten-Weiterleitung, Fernbedienung)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /zynthian/zynthian-my-data/imres/seite/zynthian/imres-bruecke.py --port 8790 --seite /zynthian/zynthian-my-data/imres/seite
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -13103,4 +13103,13 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
       status(t().geladen);
     }, 400);
   }
+  /* Schnittstelle für die Zynthian-Steuerung (zynthian/zyn.js): nur lesen, plus Tempo setzen */
+  window.ImresPult = {
+    get zustand() {
+      return { laeuft, stimmung: stilKey(), kulisse: S.kulisse, kulLaeuft: kulisseLaeuft(), master: S.master, kulisseVol: S.kulisseVol, intensitaet: S.intensitaet,
+        tempo: S.tempo, hall: S.hall, fxVol: S.fxVol, echoHall: S.echoHall, spannung: leben.spannung, neuBesetzen: !!neuBesetzen,
+        stimmungen: STIMMUNGEN.filter(k => STIL[k]), kulissen: KUL_ZEIGEN.slice() };
+    },
+    tempo(b) { b = Math.max(50, Math.min(180, Math.round(+b) || S.tempo)); if (b === S.tempo) return; S.tempo = b; root.querySelectorAll(".lw-bpm").forEach(x => { x.textContent = b; }); root.querySelectorAll('[data-feld="tempo"]').forEach(r => { r.value = b; }); merken(); }
+  };
 })();

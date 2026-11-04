@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Imres Bühne</title>
+<style>html,body{margin:0;height:100%;background:#120e18;color:#ebe2cc;font:600 20px system-ui,sans-serif;display:flex;align-items:center;justify-content:center}</style></head>
+<body><div>🎻 Imres Tales …</div>
+<script>
+/* Startseite des Kiosks: einmalig sinnvolle Grundeinstellungen, dann zum zuletzt benutzten Modus */
+(() => {
+  const setz = (k, v) => { try { if (localStorage.getItem(k) == null) localStorage.setItem(k, v); } catch (_) {} };
+  setz("imres-lw-intro", "1");        /* keine Einführung */
+  setz("imres-lw-rundgang", "1");
+  setz("imres-lw-modus", "einfach");  /* einfache Ansicht der Bühne */
+  setz("imres-lang", "de");
+  try { sessionStorage.setItem("imres-zyn", "1"); } catch (_) {}
+  let m = "buehne"; try { m = localStorage.getItem("imres-zyn-modus") || "buehne"; } catch (_) {}
+  location.replace(m === "welten" ? "/ambient.html?zyn=1" : "/index.html?zyn=1#buehne");
+})();
+</script></body></html>

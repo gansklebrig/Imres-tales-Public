@@ -1,0 +1,12 @@
+[Unit]
+Description=Imres-Bühne im Vollbild (statt der Zynthian-Oberfläche)
+Conflicts=zynthian.service
+After=jack2.service imres-bruecke.service
+Wants=jack2.service imres-bruecke.service
+
+[Service]
+Environment=HOME=/root
+WorkingDirectory=/zynthian/zynthian-my-data/imres
+ExecStart=/usr/bin/startx /zynthian/zynthian-my-data/imres/seite/zynthian/kiosk.sh -- -nocursor -s 0
+Restart=on-failure
+RestartSec=3

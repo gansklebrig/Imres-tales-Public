@@ -861,7 +861,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     setTimeout(() => { try { alt.disconnect(); } catch (_) {} }, (alt.buffer.duration + 1) * 1000);
   }
   const irVorrat = new Map();
-  const quelle = n => /^(a|e|l|g)_/.test(n) ? "amb/" + n + ".mp3" : "klang/" + n + ".mp3";
+  const quelle = n => /^(a|e|l|g|n)_/.test(n) ? "amb/" + n + ".mp3" : "klang/" + n + ".mp3";
   function laden(n) {
     if (puffer.has(n)) return Promise.resolve(puffer.get(n));
     if (laedt.has(n)) return laedt.get(n);
