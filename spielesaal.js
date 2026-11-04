@@ -839,6 +839,57 @@ html.saal-dialog-offen { overflow: hidden; }
   .sd-band { height: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .saal-kachel, .saal-dialog[open], .sk-kopf-bild, .sk-kopf-licht, .sk-kopf-titel, .sk-heute, .sk-heute-los, .sk-neu.neu { animation: none !important; } .sk-funken { display: none; } .saal-kachel, .saal-kachel img { transition: none; } }
+/* Handheld / Handy quer (flache Querformate, z. B. Anbernic RG353V ~427×320): Kopf und „Heute“ kompakt, damit die Spielkacheln gleich darunter sichtbar sind */
+@media (max-height: 500px) and (orientation: landscape) {
+  #taverne section.part, section.part#taverne { padding-block: .8rem 1.5rem; }
+  #taverne .bereich-zurueck { margin-bottom: .5rem; }
+  .saal-kopf { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); min-height: 0; padding: .7rem; gap: .7rem; margin-bottom: .8rem; align-items: center; }
+  .sk-kopf-text { gap: .35rem; }
+  .sk-kopf-label { font-size: .62rem; letter-spacing: .18em; }
+  .sk-kopf-titel { font-size: clamp(1.6rem, 6.5vh, 2.3rem); }
+  .sk-kopf-satz { display: none; }
+  .sk-kopf-chips { gap: .3rem; margin: 0; }
+  .sk-kopf-chips span, .sk-ton { padding: .15rem .5rem; font-size: .7rem; }
+  .sk-heute { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: .3rem .55rem; padding: .5rem; transform: none; animation: none; align-items: center; }
+  .sk-heute-label { grid-column: 1 / -1; font-size: .6rem; letter-spacing: .16em; }
+  .sk-heute-bild { grid-row: span 2; aspect-ratio: 4 / 3; }
+  .sk-heute-held { width: 1.8rem; height: 1.8rem; left: .3rem; bottom: .3rem; }
+  .sk-heute-text b { font-size: 1.05rem; }
+  .sk-heute-text i { font-size: .74rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .sk-heute-text .sk-stand { font-size: .68rem; }
+  .sk-heute-knoepfe { gap: .2rem .4rem; }
+  .sk-heute-los { padding: .4rem .7rem; font-size: .78rem; white-space: nowrap; }
+  .sk-heute-text i { -webkit-line-clamp: 2; }
+  .sk-heute-mehr { font-size: .74rem; padding: .25rem; white-space: nowrap; }
+  .saal { gap: .6rem; }
+  .saal-kachel, .saal-kachel.gross { min-height: clamp(150px, calc(100vh - 110px), 230px); }
+  .sk-text { padding: .55rem .6rem .6rem; gap: .18rem; }
+  .sk-text b, .saal-kachel.gross .sk-text b { font-size: 1.08rem; }
+  .sk-spruch, .saal-kachel.gross .sk-spruch { font-size: .72rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .sk-stand { font-size: .66rem; }
+  .sk-los { padding: .32rem .65rem; font-size: .78rem; }
+  .sk-mehr { display: none; }
+  /* Einzelansicht: Leiste einzeilig, Spiel gleich im Bild */
+  .saal-leiste { flex-wrap: nowrap; gap: .5rem; margin-bottom: .5rem; padding-bottom: .4rem; }
+  .saal-alle { padding: .3rem .6rem; font-size: .8rem; }
+  .saal-wahl { flex: 1 1 auto; }
+  .saal-wahl a { font-size: .74rem; padding: .15rem .55rem .15rem .15rem; }
+  .saal-wahl img { width: 1.2rem; height: 1.2rem; }
+  #taverne.saal-einzeln { --sh: calc(100vh - 7rem); }
+  /* Vorschau-Fenster: Spielen-Knopf immer im Bild */
+  .saal-dialog { height: calc(100vh - .5rem) !important; max-height: calc(100vh - .5rem) !important; }
+  .sd-text { padding: .55rem .8rem 0 !important; gap: .3rem !important; }
+  .sd-genre { font-size: .58rem !important; }
+  .sd-text h3 { font-size: 1.15rem !important; gap: .4rem; }
+  .sd-held { width: 1.6rem !important; height: 1.6rem !important; }
+  .sd-reiter button { font-size: .62rem; padding: .25rem .2rem .35rem; }
+  .sd-seite { font-size: .8em; }
+  .sd-seite p { line-height: 1.4; }
+  .sd-aktionen { padding: .35rem .8rem calc(.35rem + env(safe-area-inset-bottom, 0px)) !important; margin: 0 -.8rem !important; flex-wrap: nowrap; }
+  .sd-los { padding: .4rem 1rem !important; font-size: .9rem; }
+  .sd-leise { font-size: .78rem; padding: .3rem; }
+  .sd-zu { width: 2rem; height: 2rem; font-size: 1.2rem; }
+}
 `;
   document.head.appendChild(css);
 

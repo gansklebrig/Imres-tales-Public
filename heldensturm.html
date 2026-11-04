@@ -19420,6 +19420,76 @@ nearest=function(x,y,R){let b=null,bd=R*R;const w=dwAn(),o={x,y};for(const e of 
 try{window.__dw={DW,losS:(a,b)=>dwFreiS(a,b),losO:(a,b)=>dwFreiO(a,b),shoot:o=>shoot(o),eShot:(x,y,a,s,d,o)=>eShot(x,y,a,s,d,o),enemyShoot:(e,a,s,m)=>enemyShoot(e,a,s,m),
  fovV:e=>fovVersteckt(e),tgt:e=>targetable(e),nearest:(x,y,R)=>nearest(x,y,R),chain:(t,n,d,j)=>chainLightning(t,n,d,j),aoe:(x,y,R,a)=>aoe(x,y,R,a),cone:(x,y,a,arc,R,amt)=>cone(x,y,a,arc,R,amt),FSV:()=>FSV,FOV:()=>FOV}}catch(e){}
 
+/* ===== rg353: Handheld-/Flach-Querformat (z. B. Anbernic RG353V, 640×480 bei Dichte 1,5 → ~427×320 CSS-px) =====
+   Auf sehr flachen Touch-Querformaten rechnet die Seite mit einem etwas größeren Layout-Fenster (Höhe RGZ.ziel),
+   der Browser verkleinert das Ganze passend aufs Display. So passen alle Menüs, die für Handy quer (~390 px) gebaut sind,
+   ohne Abschneiden. Canvas rechnet trotzdem nur mit den echten Bildpunkten (devicePixelRatio angepasst).
+   Dazu: schwache Handhelds starten mit niedriger Grafikstufe (die Automatik regelt danach selbst). */
+const RGZ={ziel:window.__rgZiel||400,an:0,w:0,scale:1,dpr0:window.devicePixelRatio||1};
+(function(){
+ const touch=/Android|Mobile|iPhone|iPad/i.test(navigator.userAgent)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+ if(!touch||window.__rgAus)return;
+ let meta=document.querySelector('meta[name="viewport"]');
+ if(!meta){meta=document.createElement('meta');meta.name='viewport';meta.content='width=device-width, initial-scale=1, viewport-fit=cover';document.head.appendChild(meta)}
+ const BASIS=meta.content;
+ /* echte Gerätegröße (CSS-px ohne unsere Skalierung) */
+ const geraet=()=>{const vv=window.visualViewport,s=RGZ.an&&vv&&vv.scale>0&&vv.scale<1?vv.scale:RGZ.an?RGZ.scale:1;return{w:innerWidth*s,h:innerHeight*s}};
+ try{Object.defineProperty(window,'devicePixelRatio',{configurable:true,get:()=>RGZ.dpr0*(RGZ.an?RGZ.scale:1)})}catch(e){}
+ let busy=0;
+ function rgPruef(){if(busy)return;const g=geraet();const quer=g.w>g.h*1.05;
+  if(quer&&g.h<375){const sc=g.h/RGZ.ziel,w=Math.round(g.w/sc);
+   if(!RGZ.an||Math.abs(w-RGZ.w)>3){busy=1;RGZ.an=1;RGZ.w=w;RGZ.scale=g.w/w;meta.content='width='+w+', viewport-fit=cover, user-scalable=no';document.documentElement.classList.add('rgklein');setTimeout(()=>{busy=0;RGZ.scale=(window.visualViewport&&visualViewport.scale>0&&visualViewport.scale<1)?visualViewport.scale:g.w/innerWidth;try{dispatchEvent(new Event('resize'))}catch(e){}},120)}}
+  else if(RGZ.an){busy=1;RGZ.an=0;RGZ.w=0;RGZ.scale=1;meta.content=BASIS;document.documentElement.classList.remove('rgklein');setTimeout(()=>{busy=0;try{dispatchEvent(new Event('resize'))}catch(e){}},120)}}
+ RGZ.pruef=rgPruef;rgPruef();
+ addEventListener('resize',()=>{clearTimeout(RGZ.t);RGZ.t=setTimeout(rgPruef,150)});
+ addEventListener('orientationchange',()=>setTimeout(rgPruef,300));
+ /* schwaches Handheld (kleines Display, wenig Kerne/Speicher): sparsam starten */
+ try{const g=geraet(),klein=Math.min(g.w,g.h)<400,schwach=(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=3;
+  if(klein&&schwach&&(SAVE.gfx===undefined||SAVE.gfx==='auto')){GAUTO=Math.min(GAUTO,1);if(!resFest())RSC=Math.min(RSC,0.85);try{resize()}catch(e){}}}catch(e){}
+})();
+/* Beutel/Truhe/Schmied: auf flachen Handheld-Querformaten immer Raster und Detailfeld nebeneinander (Modus SB, knapp) statt untereinander */
+{const _iv=ivFit;ivFit=function(h,w,k){const r=_iv.apply(this,arguments);try{if(RGZ.an&&w.classList.contains('ivm-N')&&innerWidth>innerHeight*1.1){let n=0;for(const key in IVD.cfg){const C=IVD.cfg[key];if(key.indexOf(k+'|')===0&&C&&C.m==='N'){C.m='SB';C.t=1;n++}}if(n)return _iv.apply(this,arguments)}}catch(e){console.error('rgIv',e)}return r}}
+/* Kompakt-Stil für flache Handheld-Querformate (nur mit html.rgklein) */
+{const st=document.createElement('style');st.id='rg353css';st.textContent=`
+html.rgklein .wrap.ivg .stilbox{display:none!important}
+html.rgklein .mtabs button{min-height:26px;padding-top:3px;padding-bottom:3px}
+html.rgklein .stwrap>.fussweiter{display:none!important}
+html.rgklein .camp-scr>.camp{display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);column-gap:8px;row-gap:6px;align-items:center}
+html.rgklein .camp-scr>.camp>.camp-top{grid-column:1;grid-row:1;gap:6px;margin:0!important}
+html.rgklein .camp-scr>.camp>.camp-top h1{font-size:20px!important}
+html.rgklein .camp-scr>.camp>.picker{grid-column:2;grid-row:1;margin:0!important;gap:4px!important;justify-content:flex-end}
+html.rgklein .camp-scr>.camp>.picker .pk{min-height:34px!important;padding:2px 6px!important;flex:0 0 auto!important}
+html.rgklein .camp-scr>.camp>.picker .pk span{display:none}
+html.rgklein .camp-scr>.camp>.camp-main{grid-column:1/-1;grid-row:2;align-self:stretch}
+html.rgklein .camp-scr .camp-panel>.seg button{min-height:28px!important;padding-top:3px!important;padding-bottom:3px!important}
+html.rgklein .camp-scr .startbar .btn-main{min-height:32px!important;padding-top:4px!important;padding-bottom:4px!important;font-size:16px!important}
+html.rgklein .camp-scr .startbar .chip{min-height:32px!important;padding-top:3px!important;padding-bottom:3px!important}
+html.rgklein .camp-scr .startbar{padding-top:4px!important;padding-bottom:4px!important}
+html.rgklein .tx-intro .bookcv,html.rgklein .tx-zw .bookcv{max-height:70px!important}
+html.rgklein .tx-intro .ortdots{margin-top:2px!important;margin-bottom:2px!important}
+html.rgklein .tx-intro .tx-tease,html.rgklein .tx-intro .tx-quip{display:none!important}
+html.rgklein .tx-intro .tx-story{margin-top:4px!important;margin-bottom:4px!important}
+html.rgklein .spkhint{max-width:110px;padding:4px 6px!important}
+html.rgklein .spkhint b{font-size:11px!important}
+html.rgklein .spkhint span{font-size:10px!important;line-height:1.25!important}
+html.rgklein .wrap.ivg .inv-head .btn{padding:3px 8px;min-height:26px;font-size:12px}
+html.rgklein .wrap.ivg .equip.ivmini .it:not(.empty) .sl{display:none}
+html.rgklein .wrap.ivg .equip.ivmini .it.empty .sl{font-size:10px}
+html.rgklein .wrap.ivg .equip.ivmini .it.empty::after{display:none}
+`;document.head.appendChild(st)}
+/* Test-Haken (nur lesen/öffnen, keine Spiellogik) */
+try{window.__rgT={hiOpen,hiClose,erfZeig,erfFrei,ids:()=>Object.keys(ERF_ID)}}catch(e){}
+/* Erfolge: Medaillen und Einblendung nach min(Breite,Höhe) begrenzen – auf großen Bildschirmen wuchsen die Kacheln (1fr × Menü-Zoom) auf ~180 px */
+{const st=document.createElement('style');st.textContent=`#erfPop .erf-pi{width:clamp(40px,min(7.6vh,11vmin),110px)!important;height:clamp(40px,min(7.6vh,11vmin),110px)!important}`;document.head.appendChild(st)}
+function rgErfCap(){let ch=0;const vm=Math.min(innerWidth,innerHeight),max=Math.max(46,vm*0.085);
+ document.querySelectorAll('.erf-grid').forEach(g=>{const c=g.querySelector('.erf-c');if(!c||!g.getClientRects().length)return;const old=g.style.gridTemplateColumns;g.style.gridTemplateColumns='';
+  const r=c.getBoundingClientRect(),gw=g.getBoundingClientRect().width;let v='';if(r.height>max*1.06){const z=r.width/Math.max(1,c.offsetWidth)||1;const gap=(parseFloat(getComputedStyle(g).columnGap)||8)*z;v='repeat('+Math.max(1,Math.ceil((gw+gap)/(max+gap)))+',minmax(0,1fr))'}
+  g.style.gridTemplateColumns=v;if(v!==old)ch=1});return ch}
+{const _mf=menuFit;let inCap=0;menuFit=function(h){const r=_mf.apply(this,arguments);if(!inCap)try{inCap=1;const hh=h||scr;if(hh&&hh.querySelector&&hh.querySelector('.erf-grid')&&rgErfCap())_mf.apply(this,arguments),rgErfCap()}catch(e){console.error('rgErf',e)}finally{inCap=0}return r}}
+/* Schmied ohne Seitenknöpfe: passt das Raster nicht, Kacheln bis 36 px verkleinern, statt unten abzuschneiden */
+{const _iv2=ivFit;ivFit=function(h,w,k){const r=_iv2.apply(this,arguments);try{if(k==='smith'){const g=w.querySelector('.iv-bag>.bag');if(g&&g.scrollHeight>g.clientHeight+2){const tiles=g.querySelectorAll(':scope>.it').length,W=g.clientWidth-4,H=g.clientHeight-4,gap=parseFloat(getComputedStyle(g).columnGap)||8;
+ for(let s=(parseFloat(g.style.getPropertyValue('--ivs'))||50)-2;s>=36;s-=2){const cols=Math.max(1,Math.floor((W+gap)/(s+gap)));if(Math.ceil(tiles/cols)*(s+gap)-gap<=H){g.style.setProperty('--ivs',s+'px');g.style.setProperty('--ivcols',cols);g.classList.add('ivmini');break}}}}}catch(e){console.error('rgSm',e)}return r}}
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */

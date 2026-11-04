@@ -173,6 +173,20 @@
   .hl-raster a { padding: .75rem .8rem; border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--vellum); text-decoration: none; font-size: .95rem; }
   .hl-kapitel { display: grid; gap: .3rem; }
   .hl-kapitel a { padding: .5rem .2rem; border-bottom: 1px dashed var(--line); color: var(--vellum); text-decoration: none; font-size: .92rem; }
+  /* flache Querformate (Handheld, Handy quer): schmale Leiste, Symbol und Wort nebeneinander, Kopfzeile flacher */
+  @media (max-height: 500px) and (orientation: landscape) {
+    body { padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px)); }
+    .handyleiste { padding: 1px 4px env(safe-area-inset-bottom, 0px); }
+    .handyleiste a, .handyleiste button { display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 34px; padding: 3px 2px; font-size: .68rem; }
+    .handyleiste svg { width: 18px; height: 18px; flex: none; }
+    .kerze { bottom: calc(42px + env(safe-area-inset-bottom, 0px)) !important; }
+    .ex-toast { bottom: calc(46px + env(safe-area-inset-bottom, 0px)) !important; }
+    .mond-buch { bottom: calc(44px + env(safe-area-inset-bottom, 0px)) !important; }
+    .rex-guckt.unten { bottom: calc(34px + env(safe-area-inset-bottom, 0px)) !important; }
+    .top .wrap { padding-block: .3rem; }
+    .brand { font-size: 1.1rem; }
+    .hl-blatt:not([hidden]) { max-height: 92vh; padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px)); }
+  }
   .hl-fuss { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; margin-top: .4rem; }
   .hl-fuss button { border: 1px solid var(--line); background: none; color: var(--vellum); font: inherit; font-size: .88rem; padding: .5rem .8rem; cursor: pointer; }
   .hl-sprache { display: inline-flex; }
