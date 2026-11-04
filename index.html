@@ -1148,7 +1148,7 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
   const abschnittId = (nr, titel) => "kapitel-" + slug(nr) + "-" + slug(titel);
 
   /* ---------- Sprache wählen ---------- */
-  /* Reihenfolge: ?lang=en / #en im Link (gilt nur für diesen Besuch), dann die gemerkte Wahl, dann die Browsersprache */
+  /* Reihenfolge: ?lang=en / #en im Link (gilt nur für diesen Besuch), dann die gemerkte Wahl, sonst Deutsch */
   function startSprache() {
     try {
       const q = new URLSearchParams(location.search).get("lang");
@@ -1157,8 +1157,7 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
       if (h === "#en" || h === "#de") { history.replaceState(history.state, "", location.pathname + location.search); return h.slice(1); }
     } catch (_) {}
     try { const s = localStorage.getItem("imres-lang"); if (s === "de" || s === "en") return s; } catch (_) {}
-    const n = (navigator.languages && navigator.languages[0]) || navigator.language || "de";
-    return /^de\b/i.test(n) ? "de" : "en";
+    return "de"; /* Standard immer Deutsch – Englisch nur per Umschalter oder ?lang=en */
   }
   let lang = startSprache();
   let D = QUELLEN[lang], T = UI[lang];

@@ -70,7 +70,7 @@ footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; color: var
   var lang = null;
   try { var q = (location.search.match(/[?&]lang=(de|en)\b/) || [])[1]; if (q) lang = q; } catch (e) {}
   if (!lang) try { var g = localStorage.getItem("imres-lang"); if (g === "de" || g === "en") lang = g; } catch (e) {}
-  if (!lang) { var n = (navigator.languages && navigator.languages[0]) || navigator.language || "de"; lang = /^de\b/i.test(n) ? "de" : "en"; }
+  if (!lang) lang = "de";
   var SEITEN = {
     de: [
       ["Die Einladung", "Gundrens Brief, die magische Schmiede, Phandalin, die Roten Roben und Glasstab."],
