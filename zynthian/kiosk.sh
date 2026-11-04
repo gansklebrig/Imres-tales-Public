@@ -26,7 +26,7 @@ sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]*"/"
 
 while true; do
   "$BROWSER" --no-sandbox --kiosk --user-data-dir="$PROFIL" \
-    --autoplay-policy=no-user-gesture-required --noerrdialogs --disable-infobars --no-first-run \
+    --autoplay-policy=no-user-gesture-required --use-fake-ui-for-media-stream --noerrdialogs --disable-infobars --no-first-run \
     --disable-session-crashed-bubble --disable-translate --disable-features=Translate,MediaRouter \
     --overscroll-history-navigation=0 --disable-pinch --check-for-update-interval=31536000 \
     --window-size=800,480 --window-position=0,0 \

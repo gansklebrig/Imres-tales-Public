@@ -10,12 +10,12 @@ echo "== Imres Tales für den Zynthian =="
 echo "-- Pakete (Chromium, ALSA→JACK) …"
 apt-get update -q
 apt-get install -y -q chromium || apt-get install -y -q chromium-browser
-apt-get install -y -q libasound2-plugins alsa-utils git curl unclutter || true
+apt-get install -y -q libasound2-plugins alsa-utils git curl unclutter xvfb jack-capture coreutils || true
 
 echo "-- Seite herunterladen (ca. 250 MB, dauert etwas) …"
 mkdir -p "$ORT"
 if [ -d "$ORT/seite/.git" ]; then git -C "$ORT/seite" pull --ff-only --depth 1; else git clone --depth 1 "$REPO" "$ORT/seite"; fi
-chmod +x "$ORT/seite/zynthian/kiosk.sh" "$ORT/seite/zynthian/imres-modus"
+chmod +x "$ORT/seite/zynthian/kiosk.sh" "$ORT/seite/zynthian/hintergrund.sh" "$ORT/seite/zynthian/imres-modus"
 ln -sf "$ORT/seite/zynthian/imres-modus" /usr/local/bin/imres-modus
 
 echo "-- Ton: Chromium spielt über JACK …"
@@ -39,7 +39,7 @@ export IMRES_LED_HELL=0.6
 EINST
 
 echo "-- Dienste …"
-cp "$ORT/seite/zynthian/dienste/imres-bruecke.service" "$ORT/seite/zynthian/dienste/imres-buehne.service" "$ORT/seite/zynthian/dienste/imres-start.service" /etc/systemd/system/
+cp "$ORT/seite/zynthian/dienste/"imres-*.service /etc/systemd/system/
 mkdir -p /etc/systemd/system/zynthian.service.d
 cp "$ORT/seite/zynthian/dienste/zynthian-conflicts.conf" /etc/systemd/system/zynthian.service.d/imres.conf
 systemctl daemon-reload
@@ -52,5 +52,6 @@ echo
 echo "Fertig!"
 echo "  Imres-Bühne starten:      imres-modus imres"
 echo "  Zurück zum Zynthian:      imres-modus zynthian   (oder MENU lang drücken → System)"
+echo "  Zusammen mit Zynthian:    imres-modus hintergrund"
 echo "  Immer mit Imres starten:  imres-modus start-imres"
 echo "  Fernbedienung am Handy:   http://${IP:-zynthian.local}:8790/zyn/fern"

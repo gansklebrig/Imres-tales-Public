@@ -792,6 +792,14 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   /* ---------- Audio ---------- */
   let endKnoten = null, aufnahme = null;
   let ctx = null, gesamt, trocken, hallEin, hall, hallNass, aktiv = null, timer = 0, stumm = null;
+  /* Zynthian-Steuerung (zynthian/zyn.js): Pumpen auf einen Kick von außen, leiser werden, wenn die Band spielt */
+  let zynKnoten = null, zynFaktor = 1;
+  const zynAn = () => { if (!ctx || !endKnoten) return null; if (!zynKnoten) { zynKnoten = ctx.createGain(); try { endKnoten.disconnect(ctx.destination); } catch (_) {} endKnoten.connect(zynKnoten); zynKnoten.connect(ctx.destination); } return zynKnoten; };
+  window.ImresWelten = {
+    ducken(tiefe) { const n = zynAn(); if (!n) return; const j = ctx.currentTime, g = n.gain, d = Math.max(0, Math.min(.9, tiefe || .5)); g.cancelScheduledValues(j); g.setValueAtTime(g.value, j); g.linearRampToValueAtTime(zynFaktor * (1 - d), j + .012); g.setTargetAtTime(zynFaktor, j + .06, .09); },
+    faktor(f) { zynFaktor = Math.max(.05, Math.min(1, f)); const n = zynAn(); if (n) n.gain.setTargetAtTime(zynFaktor, ctx.currentTime, .35); },
+    get laeuft() { return !!aktiv; }
+  };
   /* entpackte Aufnahmen: höchstens PUFFER_MAX Bytes; was am längsten nicht gebraucht wurde, fliegt raus
      (nie Schichten, die gerade laufen, und nichts, was in den letzten 3 Minuten erklungen ist) */
   const PUFFER_MAX = (mobil ? 150 : 300) * 1048576, pGr = b => b.length * b.numberOfChannels * 4, pZeit = new Map();

@@ -22,6 +22,13 @@ button small{display:block;font-weight:400;font-size:11px;color:var(--mute);marg
 h2{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:18px 0 6px}
 .system{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .alt.an{background:#4a1a4a;border-color:#c040c0}
+.rec.an{background:#5a0a0a;border-color:#ff4040}
+.opt{display:flex;flex-direction:column;gap:6px}
+.opt label{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px}
+.opt label small{display:block;color:var(--mute);font-size:11px}
+.opt select{background:#120e18;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px;font-size:14px;max-width:55%}
+.opt input[type=checkbox]{width:22px;height:22px;accent-color:var(--gold)}
+.opt .ein{margin-left:14px}
 </style></head>
 <body><main>
 <h1>🎻 Imres · Fernbedienung</h1>
@@ -57,10 +64,20 @@ h2{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
   <div>4<button data-d="3" data-w="1">＋</button><button data-d="3" data-w="-1">－</button></div>
 </div>
 
+<h2>Aufnahme</h2>
+<div class="system"><button class="rec" id="rec">⏺ Aufnahme starten<small>alles, was rauskommt</small></button><button data-t="MENU" data-art="kurz">☰ Modus am Gerät<small>Klangwelten · Bühne · Kulisse · Musik</small></button></div>
+
+<h2>Optionen</h2>
+<div class="opt" id="opt">…</div>
+
 <h2>System</h2>
 <div class="system">
-  <button data-s="imres">🎻 Imres-Bühne starten</button>
-  <button data-s="zynthian">🎛 Zurück zum Zynthian</button>
+  <button data-s="imres">🎻 Imres-Bühne starten<small>Vollbild, Tasten des Zynthian</small></button>
+  <button data-s="hintergrund">🎛+🎻 Zusammen mit Zynthian<small>Imres spielt im Hintergrund</small></button>
+  <button data-s="zynthian">🎛 Nur Zynthian</button>
+  <button data-s="start-imres">🔌 Einschalten → Imres</button>
+  <button data-s="start-hintergrund">🔌 Einschalten → zusammen</button>
+  <button data-s="start-zynthian">🔌 Einschalten → Zynthian</button>
   <button data-s="seite-neu">🔄 Seite neu laden</button>
   <button data-s="aktualisieren">⬇ Imres aktualisieren<small>braucht Internet</small></button>
   <button data-s="neustart">↻ Neu starten</button>
@@ -78,7 +95,7 @@ document.addEventListener("click", e => {
   if (d) { post("/zyn/dreh", { nr: +d.dataset.d, d: +d.dataset.w }); return; }
   const s = e.target.closest("[data-s]");
   if (s) {
-    const frage = { aus: "Wirklich ausschalten?", neustart: "Wirklich neu starten?", zynthian: "Zur Zynthian-Oberfläche wechseln?" }[s.dataset.s];
+    const frage = { aus: "Wirklich ausschalten?", neustart: "Wirklich neu starten?", zynthian: "Imres beenden und nur den Zynthian zeigen?" }[s.dataset.s];
     if (frage && !confirm(frage)) return;
     post("/zyn/system", { aktion: s.dataset.s }).then(() => status());
   }
@@ -86,10 +103,50 @@ document.addEventListener("click", e => {
 async function status() {
   try {
     const r = await fetch("/zyn/status", { cache: "no-store" }); const j = await r.json();
-    const m = j.modus === "imres" ? "🎻 Imres-Bühne läuft" : j.modus === "zynthian" ? "🎛 Zynthian-Oberfläche läuft" : "?";
-    document.getElementById("status").textContent = m + (j.modus === "imres" && j.text ? " · " + j.text : "");
+    const m = j.modus === "imres" ? "🎻 Imres-Bühne läuft" : j.modus === "hintergrund" ? "🎛+🎻 Zynthian, Imres im Hintergrund" : j.modus === "zynthian" ? "🎛 Zynthian-Oberfläche läuft" : "?";
+    document.getElementById("status").textContent = m + (j.modus !== "zynthian" && j.text ? " · " + j.text : "") + (j.aufnahme ? " · ⏺ REC" : "");
+    aufnahme = !!j.aufnahme; const rk = document.getElementById("rec"); rk.classList.toggle("an", aufnahme); rk.firstChild.textContent = aufnahme ? "⏹ Aufnahme beenden" : "⏺ Aufnahme starten";
+    if (j.optionen && !optOffen) optZeichnen(j.optionen);
   } catch (_) { document.getElementById("status").textContent = "keine Verbindung"; }
 }
+let aufnahme = false, optOffen = false;
+document.getElementById("rec").addEventListener("click", () => post("/zyn/aufnahme", { an: !aufnahme }).then(() => setTimeout(status, 600)));
+const NOTEN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "H"];
+const kanaele = (mitAlle) => (mitAlle ? [[0, "alle"]] : []).concat(Array.from({ length: 16 }, (_, i) => [i + 1, "Kanal " + (i + 1)]));
+const OPTS = [
+  ["takt", "⏱ MIDI-Takt", [["aus", "aus"], ["slave", "Slave – folgt der Clock"], ["master", "Master – gibt Clock aus"]], "Slave: Band und Kulisse folgen der TR-8S"],
+  ["kulisseImTakt", "🎯 Kulisse im Takt", null, "Einzelgeräusche auf den Schlag"],
+  ["versatzMs", "⌛ Versatz", [0, 5, 10, 15, 20, 30, 40, 60, 80].map(v => [v, v + " ms"])],
+  ["tonartAn", "🎼 Tonart der Handpan", null, "alle Stimmungen in dieser Tonart"],
+  ["grund", "Grundton", NOTEN.map((n, i) => [i, n]), null, 1],
+  ["skala", "Skala", [["kurd", "Kurd (Moll)"], ["celtic", "Celtic Minor"], ["integral", "Integral"], ["amara", "Amara"], ["pygmy", "Pygmy"], ["hijaz", "Hijaz"], ["sabye", "Sabye (Dur)"], ["mixo", "Mixolydisch"], ["grundton", "nur Grundton"]], null, 1],
+  ["mikro", "🎤 Mikrofon-Eingang", null, "der Zynthian hört der Band zu"],
+  ["mikroSpannung", "Spannung folgt Lautstärke", null, null, 1], ["mikroAusweichen", "Kulisse weicht aus", null, "leiser, solange ihr spielt", 1],
+  ["mikroEmpf", "Empfindlichkeit", [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(v => [v, v + " %"]), null, 1],
+  ["kickDucken", "🥁 Pumpen auf die Bassdrum", null, "MIDI-Note der Drum-Machine"],
+  ["kickKanal", "Kick-Kanal", kanaele(false), null, 1], ["kickNote", "Kick-Note", [35, 36].map(v => [v, "Note " + v]), null, 1],
+  ["duckTiefe", "Pump-Tiefe", [20, 30, 40, 50, 60, 70, 80].map(v => [v, v + " %"]), null, 1],
+  ["steuerKanal", "🎛 Steuer-Kanal", kanaele(true), "Noten 36–43, CC 20–23, CC 119"],
+  ["noten", "Noten → F1–F4", null, null, 1], ["regler", "CC 20–23 → Drehregler", null, null, 1],
+  ["programmWechsel", "🔢 Program Change → Stimmung", null],
+  ["umschaltCC", "🔀 Umschalten per CC 119", null, "0–42 Zynthian · 43–85 zusammen · 86–127 Imres"]
+];
+function optZeichnen(o) {
+  const el = document.getElementById("opt");
+  el.innerHTML = OPTS.map(([k, t, l, u, ein]) => '<label class="' + (ein ? "ein" : "") + '"><span>' + t + (u ? "<small>" + u + "</small>" : "") + "</span>" +
+    (l ? '<select data-o="' + k + '">' + l.map(([v, n]) => '<option value="' + v + '"' + (String(o[k]) === String(v) ? " selected" : "") + ">" + n + "</option>").join("") + "</select>"
+       : '<input type="checkbox" data-o="' + k + '"' + (o[k] ? " checked" : "") + ">") + "</label>").join("") +
+    '<button id="erkennen">👂 Tonart erkennen<small>am Gerät 8 s die Handpan anspielen</small></button>';
+}
+document.getElementById("opt").addEventListener("focusin", () => { optOffen = true; });
+document.getElementById("opt").addEventListener("focusout", () => { optOffen = false; });
+document.getElementById("opt").addEventListener("change", e => {
+  const k = e.target.dataset.o; if (!k) return;
+  const v = e.target.type === "checkbox" ? e.target.checked : /^-?\d+$/.test(e.target.value) ? +e.target.value : e.target.value;
+  const neu = { [k]: v }; if (k === "grund" || k === "skala") neu.tonartAn = true;
+  post("/zyn/optionen", neu).then(() => { optOffen = false; status(); });
+});
+document.addEventListener("click", e => { if (e.target.closest("#erkennen")) post("/zyn/taste", { name: "ERKENNEN", art: "kurz" }); });
 status(); setInterval(status, 3000);
 </script>
 </body></html>

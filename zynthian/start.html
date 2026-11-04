@@ -12,6 +12,7 @@
   setz("imres-lang", "de");
   try { sessionStorage.setItem("imres-zyn", "1"); } catch (_) {}
   let m = "buehne"; try { m = localStorage.getItem("imres-zyn-modus") || "buehne"; } catch (_) {}
-  location.replace(m === "welten" ? "/ambient.html?zyn=1" : "/index.html?zyn=1#buehne");
+  const h = /[?&]hinter/.test(location.search) ? "&hinter=1" : "";
+  location.replace(m === "welten" ? "/ambient.html?zyn=1" + h : "/index.html?zyn=1" + h + "#buehne");
 })();
 </script></body></html>

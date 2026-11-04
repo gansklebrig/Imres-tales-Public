@@ -12,6 +12,11 @@ Kleiner Webserver (nur Python-Standardbibliothek), der immer läuft – auch im 
 * nimmt die gewünschten LED-Farben der Seite entgegen (/zyn/leds) und gibt sie an imres-tasten.py weiter,
 * schaltet zwischen Imres-Bühne und Zynthian um (/zyn/system),
 * bietet eine Fernbedienung fürs Handy: http://zynthian.local:8790/zyn/fern
+* hört alle MIDI-Eingänge mit (Clock → Tempo und Schläge, Start/Stop, Noten, Regler, Programmwechsel) –
+  auch im Zynthian-Modus, damit ein MIDI-Befehl zur Imres-Bühne umschalten kann,
+* ist MIDI-Master, wenn gewünscht: sendet Clock, Start und Stop im Takt der Bühne,
+* nimmt auf Wunsch alles auf, was aus den Ausgängen kommt (jack_capture),
+* merkt sich die Optionen (optionen.json), die Seite, Fernbedienung und Gerät teilen.
 
 Aufruf: imres-bruecke.py [--port 8790] [--seite /pfad/zur/seite] [--zyn /pfad/zu/diesem/ordner]
 """
@@ -21,6 +26,8 @@ import os
 import queue
 import subprocess
 import threading
+import signal
+import sys
 import time
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, unquote
@@ -32,11 +39,77 @@ ap.add_argument("--port", type=int, default=int(os.environ.get("IMRES_PORT", "87
 ap.add_argument("--seite", default=os.environ.get("IMRES_SEITE", os.path.join(os.path.dirname(HIER), "seite")))
 ap.add_argument("--zyn", default=HIER)
 ap.add_argument("--test", action="store_true", help="ohne Systembefehle (zum Ausprobieren am Rechner)")
+ap.add_argument("--optionen", default=os.environ.get("IMRES_OPTIONEN", ""))
+ap.add_argument("--aufnahmen", default=os.environ.get("IMRES_AUFNAHMEN", "/zynthian/zynthian-my-data/capture"))
+ap.add_argument("--kein-midi", action="store_true")
 ARGS = ap.parse_args()
 
 SEITE = os.path.abspath(ARGS.seite)
 ZYN = os.path.abspath(ARGS.zyn)
 MODUS_BEFEHL = os.path.join(ZYN, "imres-modus")
+OPT_DATEI = ARGS.optionen or os.path.join(os.path.dirname(SEITE), "optionen.json")
+
+# ---------- Optionen (gemeinsam für Gerät, Hintergrund und Fernbedienung) ----------
+OPT_STANDARD = {
+    "takt": "slave",          # aus | slave (folgt der MIDI-Clock) | master (sendet Clock)
+    "kulisseImTakt": True,    # Einzelgeräusche der Kulisse auf den Schlag legen
+    "versatzMs": 15,          # Ausgleich der Verzögerung (Slave) bzw. Vorlauf (Master)
+    "tonartAn": False, "grund": 2, "skala": "kurd",   # Tonart der Handpan (2 = D)
+    "mikro": False, "mikroSpannung": True, "mikroAusweichen": True, "mikroEmpf": 50,
+    "kickDucken": False, "kickKanal": 10, "kickNote": 36, "duckTiefe": 40,
+    "steuerKanal": 16,        # Kanal für Noten/Regler/Umschalten (0 = alle)
+    "programmWechsel": True,  # Program Change wählt Stimmung bzw. Klangwelt
+    "umschaltCC": True,       # CC 119: 0–42 Zynthian · 43–85 Imres im Hintergrund · 86–127 Imres-Bühne
+    "noten": True, "regler": True,
+}
+OPT_ERLAUBT = {
+    "takt": ("aus", "slave", "master"),
+    "skala": ("kurd", "celtic", "integral", "amara", "pygmy", "hijaz", "sabye", "mixo", "grundton"),
+}
+opt_lock = threading.Lock()
+
+
+def opt_laden():
+    o = dict(OPT_STANDARD)
+    try:
+        with open(OPT_DATEI, encoding="utf-8") as f:
+            d = json.load(f)
+        if isinstance(d, dict):
+            o.update({k: v for k, v in d.items() if k in OPT_STANDARD})
+    except Exception:
+        pass
+    return o
+
+
+OPT = opt_laden()
+
+
+def opt_setzen(neu):
+    with opt_lock:
+        for k, v in (neu or {}).items():
+            if k not in OPT_STANDARD:
+                continue
+            std = OPT_STANDARD[k]
+            if isinstance(std, bool):
+                v = bool(v)
+            elif isinstance(std, int):
+                try:
+                    v = int(v)
+                except (TypeError, ValueError):
+                    continue
+            else:
+                v = str(v)
+                if k in OPT_ERLAUBT and v not in OPT_ERLAUBT[k]:
+                    continue
+            OPT[k] = v
+        try:
+            tmp = OPT_DATEI + ".neu"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(OPT, f, ensure_ascii=False, indent=1)
+            os.replace(tmp, OPT_DATEI)
+        except OSError:
+            pass
+        return dict(OPT)
 
 # ---------- Ereignisse an alle verbundenen Seiten ----------
 hoerer = set()
@@ -53,6 +126,82 @@ def senden(ereignis):
                 pass
 
 
+# ---------- MIDI ----------
+sys.path.insert(0, HIER)
+try:
+    import imres_midi
+except Exception as e:  # pragma: no cover
+    print("MIDI-Modul fehlt:", e)
+    imres_midi = None
+takt = None
+umschalt_zuletzt = {"wert": None, "zeit": 0.0}
+
+
+def midi_ereignis(e):
+    senden(e)
+    # MIDI-Befehl zum Umschalten (wirkt auch, wenn gerade der normale Zynthian läuft)
+    if e.get("art") == "cc" and e.get("cc") == 119 and OPT.get("umschaltCC"):
+        k = OPT.get("steuerKanal", 16)
+        if k and e.get("kanal") != k:
+            return
+        w = e.get("wert", 0)
+        ziel = "zynthian" if w < 43 else "hintergrund" if w < 86 else "imres"
+        jetzt = time.monotonic()
+        if ziel != umschalt_zuletzt["wert"] or jetzt - umschalt_zuletzt["zeit"] > 10:
+            umschalt_zuletzt.update(wert=ziel, zeit=jetzt)
+            if ziel != modus_jetzt():
+                system_befehl(ziel)
+
+
+def system_befehl(aktion):
+    if ARGS.test:
+        print("(Test) Systembefehl:", aktion)
+        return
+    # losgelöst starten: der Befehl beendet unter Umständen gerade den Dienst, der ihn ausgelöst hat
+    subprocess.Popen(["setsid", MODUS_BEFEHL, aktion], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+
+
+# ---------- Aufnahme (alles, was aus den Ausgängen kommt) ----------
+aufnahme = {"proc": None, "datei": None, "seit": 0}
+
+
+def aufnahme_schalten(an):
+    p = aufnahme["proc"]
+    if not an:
+        if p and p.poll() is None:
+            try:
+                p.send_signal(signal.SIGINT)
+                p.wait(timeout=5)
+            except Exception:
+                p.kill()
+        aufnahme.update(proc=None, seit=0)
+        return {"an": False, "datei": aufnahme["datei"]}
+    if p and p.poll() is None:
+        return {"an": True, "datei": aufnahme["datei"]}
+    os.makedirs(ARGS.aufnahmen, exist_ok=True)
+    datei = os.path.join(ARGS.aufnahmen, time.strftime("imres-%Y-%m-%d_%H-%M-%S.wav"))
+    if ARGS.test:
+        aufnahme.update(proc=None, datei=datei, seit=time.time())
+        return {"an": True, "datei": datei, "test": True}
+    befehle = [["jack_capture", "--no-stdin", "-f", "wav", "-b", "24", "-c", "2", "-p", "system:playback_1", "-p", "system:playback_2", datei],
+               ["jack_capture", "-c", "2", "-p", "system:playback_1", "-p", "system:playback_2", datei]]
+    for b in befehle:
+        try:
+            proc = subprocess.Popen(b, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(0.4)
+            if proc.poll() is None:
+                aufnahme.update(proc=proc, datei=datei, seit=time.time())
+                return {"an": True, "datei": datei}
+        except FileNotFoundError:
+            break
+    return {"an": False, "fehler": "jack_capture fehlt oder JACK läuft nicht"}
+
+
+def aufnahme_laeuft():
+    p = aufnahme["proc"]
+    return bool((p and p.poll() is None) or (ARGS.test and aufnahme["seit"]))
+
+
 # ---------- LED-Zustand (die Seite schreibt, imres-tasten.py liest) ----------
 leds = {"nr": 0, "farben": {}}
 leds_lock = threading.Condition()
@@ -66,8 +215,9 @@ def modus_jetzt():
     if ARGS.test:
         return "imres"
     try:
-        r = subprocess.run(["systemctl", "is-active", "imres-buehne"], capture_output=True, text=True, timeout=3)
-        return "imres" if r.stdout.strip() == "active" else "zynthian"
+        r = subprocess.run(["systemctl", "is-active", "imres-buehne", "imres-hintergrund"], capture_output=True, text=True, timeout=3)
+        z = r.stdout.split()
+        return "imres" if z[:1] == ["active"] else "hintergrund" if z[1:2] == ["active"] else "zynthian"
     except Exception:
         return "unbekannt"
 
@@ -131,8 +281,13 @@ class Handler(SimpleHTTPRequestHandler):
         if p in ("/zyn/start", "/zyn/start.html"):
             return self.datei_antwort(os.path.join(ZYN, "start.html"), "text/html; charset=utf-8")
         if p == "/zyn/status":
-            return self.json_antwort({"modus": modus_jetzt(), "seite": zustand["seite"], "seitenModus": zustand["modus"],
+            return self.json_antwort({"modus": modus_jetzt(), "seite": zustand["seite"], "seitenModus": zustand["modus"], "aufnahme": aufnahme_laeuft(),
+                                      "master": bool(takt and takt.seq), "optionen": dict(OPT),
                                       "text": zustand["text"], "vor": round(time.time() - zustand["zeit"], 1) if zustand["zeit"] else None})
+        if p == "/zyn/optionen":
+            return self.json_antwort(dict(OPT))
+        if p in ("/zyn/imres_midi.py", "/zyn/imres-bruecke.py"):
+            return self.send_error(404)
         if p == "/zyn/leds":
             # imres-tasten.py fragt hier nach – lange Abfrage: antwortet, sobald sich etwas ändert (spätestens nach 2 s)
             seit = -1
@@ -231,24 +386,49 @@ class Handler(SimpleHTTPRequestHandler):
             # die Seite meldet, was gerade läuft – für die Fernbedienung
             zustand.update({"seite": str(d.get("seite", ""))[:20], "modus": str(d.get("modus", ""))[:20], "text": str(d.get("text", ""))[:200], "zeit": time.time()})
             return self.json_antwort({"ok": True})
+        if p == "/zyn/optionen":
+            neu = opt_setzen(d if isinstance(d, dict) else {})
+            if takt:
+                takt.an = neu.get("takt") == "master"
+            senden({"typ": "optionen", "optionen": neu})
+            return self.json_antwort(neu)
+        if p == "/zyn/takt":
+            # die Bühne meldet als MIDI-Master Tempo und Schlag
+            if takt:
+                try:
+                    b = d.get("bisSchlag")
+                    takt.abgleich(float(d.get("bpm") or 0), bool(d.get("laeuft")), float(b) if b is not None else None, float(OPT.get("versatzMs", 0)))
+                except (TypeError, ValueError):
+                    pass
+            return self.json_antwort({"ok": True})
+        if p == "/zyn/aufnahme":
+            an = d.get("an")
+            if an is None:
+                an = not aufnahme_laeuft()
+            erg = aufnahme_schalten(bool(an))
+            senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or "")})
+            return self.json_antwort(erg)
         if p == "/zyn/system":
             aktion = str(d.get("aktion", ""))
-            if aktion not in ("imres", "zynthian", "neustart", "aus", "seite-neu", "aktualisieren"):
+            if aktion not in ("imres", "zynthian", "hintergrund", "neustart", "aus", "seite-neu", "aktualisieren", "start-imres", "start-zynthian", "start-hintergrund"):
                 return self.json_antwort({"ok": False, "fehler": "unbekannte Aktion"}, 400)
             if aktion == "seite-neu":
                 senden({"typ": "neu-laden"})
                 return self.json_antwort({"ok": True})
-            if ARGS.test:
-                return self.json_antwort({"ok": True, "test": aktion})
-            # losgelöst starten: der Befehl beendet unter Umständen gerade den Dienst, der ihn ausgelöst hat
-            subprocess.Popen(["setsid", MODUS_BEFEHL, aktion], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-            return self.json_antwort({"ok": True})
+            system_befehl(aktion)
+            return self.json_antwort({"ok": True, "test": ARGS.test})
         self.send_error(404)
 
 
 def main():
     if not os.path.isdir(SEITE):
         print("Seite nicht gefunden:", SEITE)
+    global takt
+    if imres_midi and not ARGS.kein_midi:
+        imres_midi.MidiEin(midi_ereignis).start()
+        takt = imres_midi.MidiTakt()
+        takt.an = OPT.get("takt") == "master"
+        takt.start()
     srv = ThreadingHTTPServer(("0.0.0.0", ARGS.port), Handler)
     srv.daemon_threads = True
     print("Imres-Brücke auf Port", ARGS.port, "– Seite:", SEITE)

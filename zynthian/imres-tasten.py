@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Imres-Tasten: liest im Imres-Modus die 20 Tasten, die 4 Drehregler (mit Druck) und angeschlossenes MIDI
+Imres-Tasten: liest im Imres-Modus die 20 Tasten und die 4 Drehregler (mit Druck)
 und schickt alles an die Imres-Brücke. Setzt außerdem die RGB-LEDs der Tasten so, wie die Seite es wünscht.
 
 Läuft nur, solange der Imres-Modus aktiv ist (wird von kiosk.sh gestartet) – im Zynthian-Modus gehören
@@ -13,7 +13,6 @@ import ctypes
 import json
 import os
 import re
-import subprocess
 import sys
 import threading
 import time
@@ -132,93 +131,8 @@ def leds():
             time.sleep(1)
 
 
-# ---------------------------------------------------------------------------------------------------------
-# MIDI: alle Eingänge mit aseqdump mithören – Takt (Clock), Start/Stop, Noten und Regler
-# ---------------------------------------------------------------------------------------------------------
-def midi_ports():
-    try:
-        r = subprocess.run(["aseqdump", "-l"], capture_output=True, text=True, timeout=5)
-    except Exception:
-        return []
-    ports = []
-    for zeile in r.stdout.splitlines()[1:]:
-        m = re.match(r"\s*(\d+):(\d+)\s+(.*?)\s{2,}(.*)$", zeile)
-        if not m:
-            continue
-        client, port, cname, pname = int(m.group(1)), int(m.group(2)), m.group(3), m.group(4)
-        if client in (0, 14) or re.search(r"through|imres|zynmidi|zynthian|jack|pipewire|a2j", cname + " " + pname, re.I):
-            continue
-        ports.append("%d:%d" % (client, port))
-    return ports
-
-
-def midi():
-    try:
-        subprocess.run(["aseqdump", "-l"], capture_output=True, timeout=5)
-    except Exception:
-        print("aseqdump fehlt – kein MIDI")
-        return
-    while True:
-        ports = midi_ports()
-        if not ports:
-            time.sleep(5)
-            continue
-        print("MIDI-Eingänge:", ", ".join(ports))
-        try:
-            p = subprocess.Popen(["aseqdump", "-p", ",".join(ports)], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1)
-        except Exception:
-            time.sleep(5)
-            continue
-        takte = []
-        letzte_bpm = 0
-        letzte_meldung = 0
-        letzte_sendung = 0
-        start = time.monotonic()
-        for zeile in p.stdout:
-            z = zeile.strip()
-            if " Clock" in z or z.endswith("Clock"):
-                t = time.monotonic()
-                takte.append(t)
-                if len(takte) > 97:
-                    takte.pop(0)
-                if len(takte) >= 25 and t - letzte_meldung > 0.5:
-                    dauer = (takte[-1] - takte[0]) / (len(takte) - 1)
-                    if dauer > 0:
-                        bpm = 60 / (dauer * 24)
-                        # bei Änderung sofort, sonst alle 2 s zur Erinnerung (falls die Bühne das Tempo selbst verstellt hat)
-                        if 30 <= bpm <= 300 and (abs(bpm - letzte_bpm) >= 0.5 or t - letzte_sendung > 2):
-                            letzte_bpm = bpm
-                            letzte_sendung = t
-                            schicken({"typ": "midi", "art": "tempo", "bpm": round(bpm, 1)})
-                    letzte_meldung = t
-                continue
-            if " Start" in z or " Continue" in z:
-                takte.clear()
-                schicken({"typ": "midi", "art": "start"})
-            elif " Stop" in z:
-                takte.clear()
-                schicken({"typ": "midi", "art": "stop"})
-            else:
-                m = re.search(r"Note on\s+(\d+), note (\d+), velocity (\d+)", z)
-                if m and int(m.group(3)) > 0:
-                    schicken({"typ": "midi", "art": "note", "kanal": int(m.group(1)), "note": int(m.group(2)), "wert": int(m.group(3))})
-                    continue
-                m = re.search(r"Control change\s+(\d+), controller (\d+), value (\d+)", z)
-                if m:
-                    schicken({"typ": "midi", "art": "cc", "kanal": int(m.group(1)), "cc": int(m.group(2)), "wert": int(m.group(3))})
-                    continue
-                m = re.search(r"Program change\s+(\d+), program (\d+)", z)
-                if m:
-                    schicken({"typ": "midi", "art": "programm", "kanal": int(m.group(1)), "programm": int(m.group(2))})
-            # neue Geräte: nach einer Weile die Liste erneut prüfen
-            if time.monotonic() - start > 30 and set(midi_ports()) != set(ports):
-                p.kill()
-                break
-        time.sleep(1)
-
-
 if __name__ == "__main__":
-    teile = [threading.Thread(target=f, daemon=True) for f in (hardware, leds, midi)]
+    teile = [threading.Thread(target=f, daemon=True) for f in (hardware, leds)]
     for t in teile:
         t.start()
     try:

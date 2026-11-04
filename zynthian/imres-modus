@@ -1,10 +1,11 @@
 #!/bin/bash
-# imres-modus imres|zynthian|neustart|aus|aktualisieren|start-imres|start-zynthian|boot
+# imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|start-imres|start-zynthian|start-hintergrund|boot
 HIER="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 DATEN="$(dirname "$(dirname "$HIER")")"   # /zynthian/zynthian-my-data/imres
 case "$1" in
-  imres)     systemctl stop zynthian; systemctl start imres-buehne ;;
-  zynthian)  systemctl stop imres-buehne; systemctl start zynthian ;;
+  imres)       systemctl stop imres-hintergrund zynthian; systemctl start imres-buehne ;;
+  zynthian)    systemctl stop imres-buehne imres-hintergrund; systemctl start zynthian ;;
+  hintergrund) systemctl stop imres-buehne; systemctl start zynthian; sleep 4; systemctl start imres-hintergrund ;;
   neustart)  systemctl reboot ;;
   aus)       systemctl poweroff ;;
   aktualisieren)
@@ -14,8 +15,12 @@ case "$1" in
   # Was beim Einschalten startet
   start-imres)    echo imres > "$DATEN/start-modus"; echo "Beim Einschalten startet jetzt die Imres-Bühne." ;;
   start-zynthian) echo zynthian > "$DATEN/start-modus"; echo "Beim Einschalten startet jetzt der normale Zynthian." ;;
+  start-hintergrund) echo hintergrund > "$DATEN/start-modus"; echo "Beim Einschalten startet der Zynthian, Imres läuft im Hintergrund mit." ;;
   boot)
-    [ "$(cat "$DATEN/start-modus" 2>/dev/null)" = "imres" ] && { systemctl stop zynthian; systemctl start imres-buehne; }
+    case "$(cat "$DATEN/start-modus" 2>/dev/null)" in
+      imres) systemctl stop zynthian; systemctl start imres-buehne ;;
+      hintergrund) sleep 6; systemctl start imres-hintergrund ;;
+    esac
     ;;
-  *) echo "Benutzung: imres-modus imres|zynthian|neustart|aus|aktualisieren|start-imres|start-zynthian"; exit 1 ;;
+  *) echo "Benutzung: imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|start-imres|start-zynthian|start-hintergrund"; exit 1 ;;
 esac

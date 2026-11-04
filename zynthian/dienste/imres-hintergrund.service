@@ -1,0 +1,13 @@
+[Unit]
+Description=Imres im Hintergrund (unsichtbar, neben der Zynthian-Oberfläche)
+Conflicts=imres-buehne.service
+After=jack2.service imres-bruecke.service zynthian.service
+Wants=imres-bruecke.service
+
+[Service]
+Environment=HOME=/root
+WorkingDirectory=/zynthian/zynthian-my-data/imres
+ExecStart=/zynthian/zynthian-my-data/imres/seite/zynthian/hintergrund.sh
+Restart=on-failure
+RestartSec=3
+KillMode=control-group
