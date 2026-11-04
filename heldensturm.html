@@ -19221,6 +19221,21 @@ function spkPadFrame(own){if(PADCAP||!scr||scr.hidden)return;const m=scr.querySe
 .stmap > .spkpad b{color:#ffd04a;font-weight:800}`;document.head.appendChild(st)}catch(e){}})();
 window.__hsSPK={via:(sid,f)=>{const q=PL.find(x=>x.hero&&x.hero.tree.some(n=>n.id===sid));return q?withP(q,f):f()},nb:(c,cur,dx,dy)=>stNb(c,cur,dx,dy),astZiel:(id,d)=>spkAstZiel(id,d),spkLeer,spkNeu,spkDeco,spkAuto,SPK_PLUS,wahl:(id,c)=>astWahlHtml(id,c),respec:(q,o)=>slRespec(q,o),pts:q=>slRsPts(q)};
 
+/* ---------- Erst-Hinweise („Verstanden“) mit Controller: standardmäßig gewählt, A 1 s halten schließt; Vollbild-Wechsel sauber neu einpassen ---------- */
+(()=>{try{const st=document.createElement('style');st.textContent=`.hinw [data-act="hinw-ok"]{position:relative;overflow:hidden}.hinw [data-act="hinw-ok"]::before{content:'';position:absolute;inset:0;width:calc(var(--hw,0)*100%);background:rgba(255,210,120,.35);pointer-events:none}.hinw .hwpad{display:none;font-size:.8em;opacity:.8;margin-left:6px}body.hwPad .hinw .hwpad{display:inline}`;document.head.appendChild(st)}catch(e){}})();
+const HW={t0:0,on:0};
+function hwBtn(){try{if(scr.hidden)return null;const b=[...scr.querySelectorAll('.hinw [data-act="hinw-ok"]')].find(e=>e.offsetParent);return b||null}catch(e){return null}}
+{const pd=padDefault;padDefault=function(L){const b=hwBtn();if(b&&L&&L.includes&&L.includes(b))return b;return pd.apply(this,arguments)}}
+function hwTick(){requestAnimationFrame(hwTick);const b=hwBtn();let a=false,pad=false;try{for(const g of navigator.getGamepads?navigator.getGamepads():[]){if(!g)continue;pad=true;if(g.buttons[0]&&g.buttons[0].pressed)a=true}}catch(e){}
+ document.body.classList.toggle('hwPad',!!(pad&&(PADS.t||0)>=(MOUSE.t||0)));
+ if(b&&!b.querySelector('.hwpad'))b.insertAdjacentHTML('beforeend','<span class="hwpad">(A 1 s halten)</span>');
+ if(!b||!a){HW.on=0;if(b)b.style.setProperty('--hw','0');return}
+ const n=performance.now();if(!HW.on){HW.on=1;HW.t0=n}const k=Math.min(1,(n-HW.t0)/1000);b.style.setProperty('--hw',k.toFixed(3));if(k>=1){HW.on=0;HW.t0=n+1e9;b.click();try{sfx('ui')}catch(e){}}}
+requestAnimationFrame(hwTick);
+/* Vollbild an/aus: nach dem Wechsel Layout neu einpassen und Verschiebung zurücksetzen */
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{for(const t of [80,300,700])setTimeout(()=>{try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;if(scr)scr.scrollTop=0;dispatchEvent(new Event('resize'));if(typeof menuFit==='function'&&!scr.hidden)menuFit(scr)}catch(e){}},t)}));
+window.__hsHW=1;
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
