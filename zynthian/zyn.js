@@ -1561,6 +1561,15 @@ html.zyn-ruhe .zp-ruhe { display: block; }
   }
   verbinden();
 
+  /* Beat-Builder (Komplettansicht): der Knopf „🧭 Einfach“ führt zurück ins Pult */
+  if (!PULT && SEITE === "buehne") document.addEventListener("click", e => {
+    const b = e.target && e.target.closest && e.target.closest('#lautenwerk [data-aktion="modus"]'); if (!b) return;
+    if (lies("imres-lw-modus", "einfach") !== "alles") return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    schreib("imres-zyn-pult", "1"); schreib("imres-lw-modus", "einfach"); schreib("imres-zyn-modus", "buehne");
+    zeige("🎻 " + W("Bühnen-Pult", "Stage console"), null, W("wird geladen …", "loading …")); setTimeout(() => location.reload(), 120);
+  }, true);
+
   /* zum Ausprobieren am Rechner: Tastatur wie die Tasten (F1–F4, Pfeile, Enter = SEL, Backspace = BACK, M = MENU, X = MIXER, Leertaste = PLAY) */
   addEventListener("keydown", e => {
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) && e.target.type !== "range") return;
