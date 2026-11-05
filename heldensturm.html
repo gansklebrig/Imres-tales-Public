@@ -4260,7 +4260,7 @@ function vignette(){if(!VIG||VW!==W||VH!==H){VW=W;VH=H;VIG=document.createElemen
 /* Zeit, Kamera, Bildschirm */
 const CAMN=['Aus','Sanft','Voll'],CAMD=['Kein Wackeln, keine Zeitlupe, gedämpfte Blitze.','Leichtes Wackeln und weiche Zeitlupe bei Bossen – ohne Ruckler.','Volle Wucht: starkes Wackeln, Trefferstopps und lange Zeitlupe.'];
 const camL=()=>REDUCED?0:(SAVE.camfx===undefined?1:SAVE.camfx);
-function hitstop(s){if(G.bot||camL()<2||(G.hsCd||0)>performance.now())return;G.hsCd=performance.now()+500;G.hsT=Math.max(G.hsT||0,Math.min(s,0.05))}
+function hitstop(s){return;/* Bild-Einfrieren auf Wunsch aus */if(G.bot||camL()<2||(G.hsCd||0)>performance.now())return;G.hsCd=performance.now()+500;G.hsT=Math.max(G.hsT||0,Math.min(s,0.05))}
 function slowmo(s,v){if(G.bot)return;const L=camL();if(!L)return;if(L===1){s=Math.min(s*0.6,0.9);v=Math.max(v,0.5)}G.smT=Math.max(G.smT||0,s);G.smD=G.smT;G.smV=v}
 function zpunch(v){if(G.bot)return;const L=camL();if(!L)return;G.zp=Math.max(G.zp||0,v*(L===1?0.5:1))}
 function sflash(c,a,d){if(G.bot)return;a*=[0.3,0.6,1][camL()];G.sf={c,a,a0:a,d:d||0.3}}
