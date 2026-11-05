@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Imres-Knopf: ein kleiner Knopf „♫“ in einer Ecke der normalen Zynthian-Oberfläche.
-1 Sekunde gedrückt halten → die Imres-Bühne startet (wie „imres-modus imres“).
+kurz halten (0,8 s) oder doppelt tippen → die Imres-Bühne startet (wie „imres-modus imres“).
 
 Läuft nur, solange die Zynthian-Oberfläche läuft (imres-knopf.service, PartOf=zynthian.service).
 Ecke einstellen in /zynthian/zynthian-my-data/imres/einstellungen.sh:
@@ -17,7 +17,7 @@ import urllib.request
 
 EINST = "/zynthian/zynthian-my-data/imres/einstellungen.sh"
 BRUECKE = os.environ.get("IMRES_BRUECKE", "http://127.0.0.1:8790")
-HALTEN_MS = 1000
+HALTEN_MS = 800
 GROESSE = 44
 
 
@@ -75,27 +75,41 @@ def main():
     rand = c.create_rectangle(1, 1, GROESSE - 2, GROESSE - 2, outline="#e0a046", width=2)
     fuell = c.create_rectangle(2, GROESSE - 2, GROESSE - 2, GROESSE - 2, outline="", fill="#7a5418")
     c.create_text(GROESSE // 2, GROESSE // 2 - 1, text="♫", font=("DejaVu Sans", 20, "bold"), fill="#e0a046")
-    zustand = {"seit": None, "ausgeloest": False}
+    zustand = {"seit": None, "ausgeloest": False, "letzter_tipp": 0}
+
+    def ausloesen(wie):
+        if zustand["ausgeloest"]:
+            return
+        zustand["ausgeloest"] = True
+        print("Imres-Knopf ausgelöst (%s)" % wie, flush=True)
+        c.itemconfigure(rand, outline="#50ff70")
+        c.coords(fuell, 2, 2, GROESSE - 2, GROESSE - 2)
+        root.update_idletasks()
+        imres_starten()
 
     def ticken():
         if zustand["seit"] is not None and not zustand["ausgeloest"]:
             anteil = min(1.0, (time.monotonic() - zustand["seit"]) * 1000 / HALTEN_MS)
             c.coords(fuell, 2, GROESSE - 2 - (GROESSE - 4) * anteil, GROESSE - 2, GROESSE - 2)
             if anteil >= 1.0:
-                zustand["ausgeloest"] = True
-                c.itemconfigure(rand, outline="#50ff70")
-                root.update_idletasks()
-                imres_starten()
+                ausloesen("gehalten")
         root.after(40, ticken)
 
     def druck(_e):
-        zustand["seit"] = time.monotonic()
-        zustand["ausgeloest"] = False
+        jetzt = time.monotonic()
+        print("Imres-Knopf berührt", flush=True)
+        c.itemconfigure(rand, outline="#fff0c0")
+        if jetzt - zustand["letzter_tipp"] < 0.6:   # Doppeltipp geht auch
+            ausloesen("Doppeltipp")
+            return
+        zustand["letzter_tipp"] = jetzt
+        zustand["seit"] = jetzt
 
     def los(_e):
         zustand["seit"] = None
-        c.coords(fuell, 2, GROESSE - 2, GROESSE - 2, GROESSE - 2)
-        c.itemconfigure(rand, outline="#e0a046")
+        if not zustand["ausgeloest"]:
+            c.coords(fuell, 2, GROESSE - 2, GROESSE - 2, GROESSE - 2)
+            c.itemconfigure(rand, outline="#e0a046")
 
     def obenhalten():
         try:
@@ -105,8 +119,9 @@ def main():
             pass
         root.after(1500, obenhalten)
 
-    c.bind("<ButtonPress-1>", druck)
-    c.bind("<ButtonRelease-1>", los)
+    for w in (c, root):
+        w.bind("<ButtonPress-1>", druck)
+        w.bind("<ButtonRelease-1>", los)
     ticken()
     obenhalten()
     root.mainloop()
