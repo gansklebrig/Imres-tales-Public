@@ -28,7 +28,7 @@
   const MODI = {
     welten: { sym: "🌿", name: W("Klangwelten", "Soundscapes"), sub: W("Reine Geräuschkulissen – ohne Musik", "Pure ambience – no music"), seite: "welten", farbe: "#3fbf6a" },
     buehne: { sym: "🎻", name: W("Bühne", "Stage"), sub: W("Musik und Kulisse zusammen", "Music and backdrop together"), seite: "buehne", farbe: "#e0a046" },
-    klang: { sym: "🌲", name: W("Bühne: nur Kulisse", "Stage: backdrop only"), sub: W("Orte, Geräusche, Momente – keine Musik", "Places, sounds, moments – no music"), seite: "buehne", farbe: "#3fb0b0" },
+    klang: { sym: "🌲", name: W("Bühne: nur Kulisse", "Stage: backdrop only"), sub: W("Orte, Geräusche, Momente – keine Musik", "Places, sounds, moments – no music"), seite: "buehne", farbe: "#3fbf6a" },
     musik: { sym: "🎵", name: W("Bühne: nur Musik", "Stage: music only"), sub: W("Stimmungen und Band – keine Kulisse", "Moods and band – no backdrop"), seite: "buehne", farbe: "#d05a8a" }
   };
   const MODUS_REIHE = ["welten", "buehne", "klang", "musik"];
@@ -623,20 +623,20 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function ledsMelden() {
     const f = {}, aus = "#000000", schwach = "#2a1a06", gold = "#c88a20", hell = "#ffcf50";
     ["MENU", "MIXER", "CTRL", "ZS3", "ALT", "TEMPO", "PAD", "F1", "F2", "F3", "F4", "REC", "STOP", "PLAY", "BACK", "SEL", "UP", "DOWN", "LEFT", "RIGHT"].forEach(n => { f[n] = aus; });
-    f.MENU = MODI[modus].farbe; f.MIXER = bank ? "#8a40c0" : "#2050c0"; f.ALT = alt ? "#c040c0" : "#301030";
+    f.MENU = MODI[modus].farbe; f.MIXER = bank ? "#f0dca0" : "#c88a20"; f.ALT = alt ? "#c040c0" : "#301030";
     ["UP", "DOWN", "LEFT", "RIGHT", "SEL", "BACK"].forEach(n => { f[n] = "#303030"; });
     const z = pz();
     if ($(".zyn-menue")) { ["F1", "F2", "F3", "F4"].forEach((n, i) => { f[n] = MODI[MODUS_REIHE[i]].farbe; }); f.BACK = "#a04030"; f.SEL = "#40a040"; }
     else if (SEITE === "welten") {
       const l = $$("[data-welt]"); ["F1", "F2", "F3", "F4"].forEach((n, i) => { const el = alt ? $$("[data-aus]")[i] : l[i]; f[n] = el ? (el.classList.contains("an") ? hell : alt ? "#6a2a10" : schwach) : aus; });
-      const spielt = !!$(".welt.an"); f.PLAY = spielt ? "#30d050" : "#0c3010"; f.STOP = "#501010"; f.PAD = "#603010"; f.REC = "#301040"; f.ZS3 = schwach; f.CTRL = schwach; f.TEMPO = "#204040";
+      const spielt = !!$(".welt.an"); f.PLAY = spielt ? "#30d050" : "#0c3010"; f.STOP = "#501010"; f.PAD = "#603010"; f.REC = "#504030"; f.ZS3 = schwach; f.CTRL = schwach; f.TEMPO = "#403010";
     } else {
       ["F1", "F2", "F3", "F4"].forEach((n, i) => {
         let k, an = false;
-        if (modus === "klang" || (alt && modus === "buehne")) { k = modus === "klang" && alt ? null : platz("kulisse", i); an = !!(k && z && (z.kulisse === k || (k === "wald" && z.kulisse === "waldnacht"))); f[n] = k ? (an ? "#40e0c0" : "#0a3030") : (modus === "klang" && alt ? "#402010" : aus); }
+        if (modus === "klang" || (alt && modus === "buehne")) { k = modus === "klang" && alt ? null : platz("kulisse", i); an = !!(k && z && (z.kulisse === k || (k === "wald" && z.kulisse === "waldnacht"))); f[n] = k ? (an ? "#30ff70" : "#0a3014") : (modus === "klang" && alt ? "#402010" : aus); }
         else { k = platz("stimmung", modus === "musik" && alt ? i + 4 : i); an = !!(k && z && z.stimmung === k); f[n] = k ? (an ? hell : schwach) : aus; }
       });
-      f.PLAY = z && (modus === "klang" ? z.kulLaeuft : z.laeuft) ? "#30d050" : "#0c3010"; f.STOP = "#501010"; f.PAD = "#c06010"; f.REC = "#303060"; f.TEMPO = z && z.neuBesetzen ? hell : gold; f.ZS3 = gold; f.CTRL = "#107070";
+      f.PLAY = z && (modus === "klang" ? z.kulLaeuft : z.laeuft) ? "#30d050" : "#0c3010"; f.STOP = "#501010"; f.PAD = "#c06010"; f.REC = "#504030"; f.TEMPO = z && z.neuBesetzen ? hell : gold; f.ZS3 = gold; f.CTRL = "#106030";
     }
     if (PULT && !$(".zyn-menue")) zpLeds(f);
     if (aufnahmeAn) f.REC = "#ff2020";
@@ -661,9 +661,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const PULT = !HINTER && lies("imres-zyn-pult", "1") !== "0";
   const ZP_SEITEN = [
     { id: "stimmung", sym: "🎵", name: W("Stimmung", "Mood"), seite: "buehne", farbe: "#e0a046", led: "#ffcf50" },
-    { id: "ort", sym: "🌲", name: W("Ort", "Place"), seite: "buehne", farbe: "#3fb0a0", led: "#40e0c0" },
-    { id: "momente", sym: "⚡", name: W("Momente", "Moments"), seite: "buehne", farbe: "#e07040", led: "#ff8a30" },
-    { id: "welt", sym: "🌿", name: W("Klangwelt", "Soundscape"), seite: "welten", farbe: "#5fc070", led: "#50ff70" }
+    { id: "ort", sym: "🌲", name: W("Ort", "Place"), seite: "buehne", farbe: "#3fbf6a", led: "#30ff70" },
+    { id: "momente", sym: "⚡", name: W("Momente", "Moments"), seite: "buehne", farbe: "#e0703a", led: "#ff6a10" },
+    { id: "welt", sym: "🌿", name: W("Klangwelt", "Soundscape"), seite: "welten", farbe: "#e8a49a", led: "#ff9a80" }
   ];
   const zpDef = id => ZP_SEITEN.find(x => x.id === id) || ZP_SEITEN[0];
   let zpSeite = lies("imres-zp-seite", SEITE === "welten" ? "welt" : "stimmung");
@@ -761,7 +761,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     nichts: { name: "–", lo: 0, hi: 1, schritt: 0, lies: () => 0, setz: () => {}, druck: "", text: () => "" }
   };
   const BANKEN = ["A", "B", "FX", "GLITCH", "MOD"];
-  const BANK_FARBE = { A: "#3070e0", B: "#a050e0", FX: "#f07020", GLITCH: "#e030a0", MOD: "#20c0d0" };
+  const BANK_FARBE = { A: "#ffc830", B: "#f0dca0", FX: "#ff7a20", GLITCH: "#ff2a5a", MOD: "#fff8ec" };
   const ZP_AKT = {
     play: [W("▶ Musik an/aus", "▶ Music on/off"), W("Musik", "music")], stop: [W("■ Alles aus", "■ All off"), W("aus", "off")],
     passiert: [W("⚡ Etwas passiert", "⚡ Something happens"), "⚡"], stille: [W("🤫 Stille", "🤫 Silence"), "🤫"], neubesetzen: [W("🎲 Neu besetzen", "🎲 Re-cast"), "🎲"],
@@ -1024,7 +1024,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (id === "seite_vor") return ZP_SEITEN[(i + 1) % ZP_SEITEN.length].led;
     if (id === "seite_zurueck") return ZP_SEITEN[(i + ZP_SEITEN.length - 1) % ZP_SEITEN.length].led;
     if (id === "bank") return BANK_FARBE[BANKEN[(bank + 1) % BANKEN.length]];
-    return { play: "#30e050", stop: "#ff2020", passiert: "#ff8a30", stille: "#5070ff", neubesetzen: "#ffcf50", sprechen: "#40c0ff", aufnahme: "#ff2020", takt: "#d0d0d0", hg: "#40e0c0", fx_aus: "#ffffff",
+    return { play: "#30ff70", stop: "#ff1a30", passiert: "#ff6a10", stille: "#fff4e0", neubesetzen: "#ffc830", sprechen: "#f0dca0", aufnahme: "#ff1a30", takt: "#d8d0c0", hg: "#80ffb0", fx_aus: "#fff8ec",
       filterzu: BANK_FARBE.FX, filterhoch: BANK_FARBE.FX, echowurf: BANK_FARBE.FX, stotter: BANK_FARBE.GLITCH, rueckwaerts: BANK_FARBE.GLITCH, bandstop: BANK_FARBE.GLITCH, crushhalt: BANK_FARBE.GLITCH }[id] || "#000000";
   }
   function aktAktiv(id) {
@@ -1040,7 +1040,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const d = zpDef(zpSeite), b = zpBlattJetzt(), blink = Math.floor(Date.now() / 450) % 2 === 0, i = ZP_SEITEN.findIndex(x => x.id === zpSeite);
     ["F1", "F2", "F3", "F4"].forEach((nm, k) => { const it = b[(alt ? 4 : 0) + k]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : it.fav ? dimm(d.led, .45) : dimm(d.led, .14); });
     ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL"].forEach(k => { const id = ZB.tasten[(alt ? "ALT+" : "") + k]; if (!id || id === "nichts") { f[k] = "#000000"; return; } const c = aktFarbe(id); f[k] = aktAktiv(id) ? c : dimm(c, .22); });
-    f.MIXER = BANK_FARBE[bankName()] || "#3070e0"; f.ALT = alt ? ALT_FARBE : dimm(ALT_FARBE, .18); f.MENU = dimm("#ffcf50", .35); f.BACK = dimm("#ff4020", .3);
+    f.MIXER = BANK_FARBE[bankName()] || "#ffc830"; f.ALT = alt ? ALT_FARBE : dimm(ALT_FARBE, .18); f.MENU = dimm("#ffcf50", .35); f.BACK = dimm("#ff4020", .3);
     f.SEL = zpCursor >= 0 ? "#f4c45a" : dimm("#f4c45a", .15);
     if (alt) { f.LEFT = dimm(ZP_SEITEN[(i + ZP_SEITEN.length - 1) % ZP_SEITEN.length].led, .6); f.RIGHT = dimm(ZP_SEITEN[(i + 1) % ZP_SEITEN.length].led, .6); f.UP = f.DOWN = zpGruppen.length > 1 ? dimm("#ffffff", .3) : "#000000"; }
     else { f.LEFT = f.RIGHT = zpListe.length > 1 ? dimm("#ffffff", .3) : dimm("#ffffff", .08); f.UP = f.DOWN = dimm("#ffffff", .12); }
@@ -1057,7 +1057,7 @@ html.zyn-pult .zyn-leiste { display: none !important; }
 .zp-kopf { grid-column: 1 / 3; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: #1c1624; border-bottom: 1px solid #3a2f48; min-width: 0; }
 .zp-tab { padding: 8px 13px !important; border-radius: 9px; color: #b8a998 !important; white-space: nowrap; font-size: 17px !important; border: 2px solid color-mix(in srgb, var(--f) 45%, transparent) !important; }
 .zp-tab .zp-sym { font-size: 18px; }
-.zp-tab.an { background: var(--f) !important; color: #140e06 !important; }
+.zp-tab.an { background: linear-gradient(160deg, color-mix(in srgb, var(--f) 70%, #fff8e0) 0%, var(--f) 45%, color-mix(in srgb, var(--f) 75%, #000) 100%) !important; color: #140e06 !important; box-shadow: 0 0 10px color-mix(in srgb, var(--f) 45%, transparent); }
 .zp-status { margin-left: auto; font-size: 13px; color: #c8bba6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-left: 8px; }
 .zp-status b { color: #f2cf6a; } .zp-status .rec { color: #ff5050; } .zp-status .alt { color: #e080e0; }
 .zp-mitte { display: grid; grid-template-rows: 30px minmax(0, 1fr); padding: 4px 8px 8px; min-width: 0; min-height: 0; }
@@ -1082,9 +1082,9 @@ html.zyn-pult .zyn-leiste { display: none !important; }
 .zp-k:active { transform: scale(.97); }
 @keyframes zpblink { 50% { border-color: #3a2f48 !important; } }
 .zp-regler { border-left: 4px solid var(--b); display: grid; grid-template-rows: 22px repeat(4, minmax(0, 1fr)); background: #16111d; min-height: 0; }
-.zp-bank { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: #140e06; background: var(--b); padding: 3px 10px; }
+.zp-bank { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: #140e06; background: linear-gradient(160deg, color-mix(in srgb, var(--b) 65%, #fff) 0%, var(--b) 50%, color-mix(in srgb, var(--b) 75%, #000) 100%); padding: 3px 10px; }
 .zp-r { padding: 6px 10px; border-bottom: 1px solid #2a2234; display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; }
-.zp-rn { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .zp-rn small { color: #a070d0; }
+.zp-rn { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .zp-rn small { color: #f0dca0; }
 .zp-r i { display: block; height: 9px; border-radius: 4px; background: #2c2436; overflow: hidden; } .zp-r i b { display: block; height: 100%; background: var(--b); }
 .zp-rv { display: flex; justify-content: space-between; gap: 4px; font-size: 13.5px; color: #d8cbb6; } .zp-rv small { font-size: 9.5px; color: #807666; align-self: end; white-space: nowrap; }
 .zp-fuss { grid-column: 1 / 3; display: flex; gap: 4px; align-items: center; padding: 0 8px; background: #1c1624; border-top: 1px solid #3a2f48; overflow: hidden; }
