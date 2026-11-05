@@ -24,29 +24,34 @@ case "$1" in
     [ -d "$DATEN/seite/.git" ] || { echo "Imres-Ordner nicht gefunden ($DATEN/seite)."; exit 1; }
     exec 9>"$DATEN/.update.lock"; flock -n 9 || { echo "Es läuft schon ein Update."; exit 0; }
     G="$DATEN/seite"
-    echo "Prüfe Internet …"
-    git -C "$G" fetch --depth 1 origin main || { echo "Kein Update möglich (Internet?). Imres bleibt, wie es ist."; exit 1; }
+    echo "SCHRITT 1/6 Lade die neue Version herunter …"
+    git -C "$G" fetch --progress --depth 1 origin main 2>&1 || { echo "Kein Update möglich (Internet?). Imres bleibt, wie es ist."; exit 1; }
     ALT=$(git -C "$G" rev-parse HEAD 2>/dev/null); NEU=$(git -C "$G" rev-parse FETCH_HEAD 2>/dev/null)
     if [ -n "$NEU" ] && [ "$ALT" = "$NEU" ] && [ -z "$(git -C "$G" status --porcelain 2>/dev/null | grep -v '^??')" ]; then
       echo "Imres ist schon auf dem neuesten Stand ($(echo "$NEU" | cut -c1-7))."
       "$S/imres-modus" einrichten >/dev/null 2>&1; exit 0
     fi
+    echo "SCHRITT 2/6 Prüfe den Platz auf der SD-Karte …"
     # Platz prüfen (die neue Version entsteht daneben)
     FREI=$(df -Pk "$DATEN" | awk 'NR==2{print $4}'); GROSS=$(du -sk --exclude=.git "$G" 2>/dev/null | cut -f1)
     if [ -n "$FREI" ] && [ -n "$GROSS" ] && [ "$FREI" -lt $((GROSS + 51200)) ]; then echo "Zu wenig Platz auf der SD-Karte für das Update."; exit 1; fi
     # alte, abgebrochene Reste weg
     rm -rf "$DATEN/seite.neu"
+    echo "SCHRITT 3/6 Packe die neue Version aus …"
     # die neue Version entsteht in seite.neu – die laufende bleibt unberührt, bis alles fertig ist
     mkdir -p "$DATEN/seite.neu" && git -C "$G" archive FETCH_HEAD | tar -x -C "$DATEN/seite.neu" || { rm -rf "$DATEN/seite.neu"; echo "Update konnte nicht entpackt werden – Imres bleibt, wie es ist."; exit 1; }
     [ -f "$DATEN/seite.neu/zynthian/imres-modus" ] && [ -f "$DATEN/seite.neu/lautenwerk.js" ] || { rm -rf "$DATEN/seite.neu"; echo "Update unvollständig – Imres bleibt, wie es ist."; exit 1; }
+    echo "SCHRITT 4/6 Tausche alte gegen neue Version …"
     # Tausch: Git-Verwaltung wandert mit, die alte Version wird als seite.alt-DATUM aufgehoben
     mv "$G/.git" "$DATEN/seite.neu/.git" && git -C "$DATEN/seite.neu" reset -q FETCH_HEAD
     STEMPEL=$(date +%Y%m%d-%H%M%S)
     mv "$G" "$DATEN/seite.alt-$STEMPEL" && mv "$DATEN/seite.neu" "$G"; sync
+    echo "SCHRITT 5/6 Räume alte Versionen auf …"
     # Aufräumen: die letzten 5 alten Versionen behalten, ältere und Reste löschen
     ls -d "$DATEN"/seite.alt-* 2>/dev/null | sort | head -n -5 | while read -r X; do rm -rf "$X"; done
     find "$G" -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null
     echo "Neue Version $(echo "$NEU" | cut -c1-7) ist installiert (vorher $(echo "$ALT" | cut -c1-7))."
+    echo "SCHRITT 6/6 Richte ein und starte neu …"
     "$S/imres-modus" einrichten
     ;;
   zurueck)

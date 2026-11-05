@@ -175,13 +175,37 @@ def diagnose():
 
 
 def update_stand():
+    """Fortschritt des Updates für den Balken im Pult: Schritt, Prozent (beim Herunterladen genau), letzte Meldung"""
     try:
-        with open(UPDATE_LOG, encoding="utf-8") as f:
-            zeilen = [z.rstrip() for z in f if z.strip()]
+        with open(UPDATE_LOG, encoding="utf-8", errors="replace") as f:
+            text = f.read()
         st = os.stat(UPDATE_LOG)
-        return {"ok": True, "zeilen": zeilen[-8:], "alter": round(time.time() - st.st_mtime)}
     except OSError:
         return {"ok": False, "zeilen": []}
+    zeilen = [z.strip() for z in re.split(r"[\r\n]+", text) if z.strip()]
+    schritt, von, titel, nach = 0, 6, "", []
+    for i, z in enumerate(zeilen):
+        m = re.match(r"SCHRITT (\d+)/(\d+) (.*)", z)
+        if m:
+            schritt, von, titel, nach = int(m.group(1)), int(m.group(2)), m.group(3), zeilen[i + 1:]
+    teil = 0.0
+    if schritt == 1:
+        for z in nach:
+            m = re.search(r"(Receiving objects|Empfange Objekte|Resolving deltas|Löse Unterschiede auf):\s+(\d+)%", z)
+            if m:
+                p = int(m.group(2)) / 100
+                teil = p * .7 if m.group(1).startswith(("Receiving", "Empfange")) else .7 + p * .3
+    # Herunterladen dauert am längsten – die Schritte sind darum unterschiedlich breit
+    breite = [.55, .05, .15, .05, .05, .15] if von == 6 else [1 / max(1, von)] * von
+    prozent = round((sum(breite[:max(0, schritt - 1)]) + breite[min(len(breite), max(1, schritt)) - 1] * min(1, teil)) * 100) if schritt else 0
+    meldungen = [z for z in zeilen if not z.startswith("SCHRITT") and not re.search(r"objects|Objekte|deltas|Unterschiede|remote:|From |->|branch", z) and not z.startswith("Start:")]
+    ende = ""
+    for z in meldungen[::-1]:
+        if re.search(r"neuesten Stand|Kein Update|Zu wenig|unvollständig|nicht entpackt|läuft schon|läuft gerade|nicht gefunden|Keine ältere|wiederhergestellt", z):
+            ende = z
+            break
+    return {"ok": True, "zeilen": zeilen[-8:], "alter": round(time.time() - st.st_mtime), "schritt": schritt, "von": von, "titel": titel,
+            "prozent": 100 if ende and "neuesten" in ende else prozent, "ende": ende, "meldung": meldungen[-1] if meldungen else ""}
 
 
 def system_befehl(aktion):

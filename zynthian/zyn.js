@@ -314,15 +314,28 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menueArt = "modus";
   }
   let menueArt = null;
-  /* Fortschritt des Updates anzeigen (die Brücke schreibt mit) – bei „schon aktuell“ oder Fehlern bleibt die Meldung stehen */
+  /* Fortschritt des Updates: eigenes Feld mit Balken, Schritt und Zeit – bleibt stehen, bis Imres neu startet oder eine Meldung kommt */
   function updateVerfolgen() {
-    let n = 0, letzte = "";
+    $$(".zyn-update").forEach(x => x.remove());
+    if (!document.getElementById("zyn-update-css")) { const st = document.createElement("style"); st.id = "zyn-update-css"; st.textContent = '.zyn-update { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2147483000; width: 520px; max-width: 92vw; padding: 18px 22px 14px; border-radius: 16px; background: #1b1422; border: 2px solid #ffc830; box-shadow: 0 10px 40px #000c; color: #f4e6cc; font-family: system-ui, sans-serif; text-align: center; visibility: visible !important; } .zyn-update * { visibility: visible !important; }\n.zyn-update h3 { margin: 0 0 12px; font-size: 20px; color: #ffc830; }\n.zu-balken { height: 18px; border-radius: 9px; background: #2c2436; overflow: hidden; }\n.zu-balken b { display: block; height: 100%; width: 2%; border-radius: 9px; background: linear-gradient(90deg, #c08020, #ffc830, #fff0c0, #ffc830); background-size: 200% 100%; animation: zuLauf 1.2s linear infinite; transition: width .2s; }\n@keyframes zuLauf { from { background-position: 200% 0; } to { background-position: 0 0; } }\n.zu-text { margin: 12px 0 2px; font-size: 16px; } .zu-klein { margin: 0; font-size: 12px; opacity: .6; }\n.zyn-update.fehler { border-color: #ff6a3a; } .zyn-update.fehler .zu-balken b { background: #ff6a3a; animation: none; }'; document.head.appendChild(st); }
+    const el = document.createElement("div"); el.className = "zyn-update";
+    el.innerHTML = '<h3>⬇ ' + W("Imres wird aktualisiert", "Updating Imres") + '</h3><div class="zu-balken"><b></b></div><p class="zu-text">' + W("Starte …", "Starting …") + '</p><p class="zu-klein"></p>';
+    document.body.appendChild(el);
+    const balken = el.querySelector("b"), text = el.querySelector(".zu-text"), klein = el.querySelector(".zu-klein"), t0 = performance.now();
+    let weg = 0, fertig = false, ziel = 2, jetzt = 2;
+    const schliessen = (ms) => setTimeout(() => el.remove(), ms);
+    const zeichnen = () => { jetzt += (ziel - jetzt) * .25; balken.style.width = Math.max(2, Math.min(100, jetzt)) + "%"; klein.textContent = Math.round((performance.now() - t0) / 1000) + " s"; };
+    const anim = setInterval(zeichnen, 120);
     const t = setInterval(() => {
-      if (++n > 90) { clearInterval(t); return; }
-      fetch("/zyn/update").then(r => r.json()).then(j => { const z = (j.zeilen || []).filter(x => !/^Start:/.test(x)); const l = z[z.length - 1] || ""; if (!l || l === letzte) return; letzte = l;
-        zeige((/neuesten Stand/.test(l) ? "✅ " : /nicht|Kein|Zu wenig|unvollständig|läuft schon/.test(l) ? "⚠ " : "⬇ ") + l);
-        if (/neuesten Stand|Kein Update|Zu wenig|unvollständig|läuft schon|Keine ältere/.test(l)) clearInterval(t); }).catch(() => {});
-    }, 2000);
+      if (fertig) return;
+      if (performance.now() - t0 > 240000) { clearInterval(t); clearInterval(anim); text.textContent = "⚠ " + W("Das Update dauert ungewöhnlich lange – Internet prüfen und später noch einmal versuchen.", "The update takes unusually long."); schliessen(15000); return; }
+      fetch("/zyn/update", { cache: "no-store" }).then(r => r.json()).then(j => {
+        weg = 0;
+        if (j.ende) { fertig = true; clearInterval(t); ziel = /neuesten|wiederhergestellt/.test(j.ende) ? 100 : jetzt; text.textContent = (/neuesten|wiederhergestellt/.test(j.ende) ? "✅ " : "⚠ ") + j.ende; el.classList.toggle("fehler", !/neuesten|wiederhergestellt/.test(j.ende)); setTimeout(() => clearInterval(anim), 1500); schliessen(9000); return; }
+        if (j.schritt) { ziel = Math.max(ziel, j.prozent || 0, 3); text.textContent = W("Schritt ", "Step ") + j.schritt + "/" + j.von + ": " + j.titel; }
+        if (j.schritt === j.von) text.textContent = "🔄 " + W("Fast fertig – Imres startet gleich neu …", "Almost done – Imres restarts …");
+      }).catch(() => { /* Brücke startet neu: das gehört am Ende dazu */ if (++weg > 1) { ziel = Math.max(ziel, 92); text.textContent = "🔄 " + W("Imres startet neu …", "Imres is restarting …"); } });
+    }, 1000);
   }
   function systemMenue() {
     const post = aktion => fetch("/zyn/system", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion }) }).catch(() => {});
@@ -2219,7 +2232,7 @@ html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
 /* Rechenzeit sparen: alles, was unter dem Pult liegt, bewegt sich nicht und wird nicht gemalt */
 html.zyn-pult body *:not(.lw-buehne, .lw-buehne *, .zp, .zp *, .zp-ruhe, .zp-ruhe *, .zyn-osd, .zyn-osd *, .zyn-menue, .zyn-menue *) { animation: none !important; transition: none !important; }
 html.zyn-pult body canvas:not(.lw-buehne canvas), html.zyn-pult body video { display: none !important; }
-html.zyn-pult body > *:not(.zp, .zp-ruhe, .zyn-osd, .zyn-menue, script, style) { content-visibility: hidden; }
+html.zyn-pult body > *:not(.zp, .zp-ruhe, .zyn-osd, .zyn-menue, .zyn-update, script, style) { content-visibility: hidden; }
 html.zyn-pult.zyn-bb body > *:has(.lw-buehne), html.zyn-pult.zyn-ruhe body > *:has(.lw-buehne) { content-visibility: visible; }
 html.zyn-pult .zyn-leiste { display: none !important; }
 /* Bühnenbild: hinter dem Pult (gedimmt) und als Ruhebild */
