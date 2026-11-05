@@ -6,8 +6,25 @@ HIER="$(cd "$(dirname "$0")" && pwd)"
 [ -f "$HIER/../../einstellungen.sh" ] && source "$HIER/../../einstellungen.sh"
 
 xset s off -dpms s noblank 2>/dev/null
-# Bildschirm drehen, falls nötig (IMRES_DREHEN=inverted|left|right in einstellungen.sh)
-[ -n "$IMRES_DREHEN" ] && xrandr -o "$IMRES_DREHEN" 2>/dev/null
+# Bildschirm drehen. Beim V5 ist das Display kopfüber eingebaut → automatisch "inverted".
+# Überschreiben in einstellungen.sh: IMRES_DREHEN=normal|inverted|left|right
+# Touch separat: IMRES_TOUCH_DREHEN=normal|inverted (Standard: wie der Bildschirm)
+if [ -z "$IMRES_DREHEN" ]; then
+  case "${ZYNTHIAN_KIT_VERSION:-}" in V5*) IMRES_DREHEN=inverted ;; *) IMRES_DREHEN=normal ;; esac
+fi
+IMRES_TOUCH_DREHEN="${IMRES_TOUCH_DREHEN:-$IMRES_DREHEN}"
+for i in $(seq 1 10); do xrandr >/dev/null 2>&1 && break; sleep 0.5; done
+AUSGANG=$(xrandr 2>/dev/null | awk '/ connected/{print $1; exit}')
+if [ -n "$AUSGANG" ]; then xrandr --output "$AUSGANG" --rotate "$IMRES_DREHEN" 2>/dev/null
+else xrandr -o "$IMRES_DREHEN" 2>/dev/null; fi
+case "$IMRES_TOUCH_DREHEN" in
+  inverted) MATRIX="-1 0 1 0 -1 1 0 0 1" ;; left) MATRIX="0 -1 1 1 0 0 0 0 1" ;;
+  right) MATRIX="0 1 0 -1 0 1 0 0 1" ;; *) MATRIX="1 0 0 0 1 0 0 0 1" ;;
+esac
+xinput list --name-only 2>/dev/null | grep -i -E "touch|ft5|goodix|ili|edt" | while read -r GERAET; do
+  xinput set-prop "$GERAET" "Coordinate Transformation Matrix" $MATRIX 2>/dev/null
+done
+echo "Imres: Bildschirm $AUSGANG → $IMRES_DREHEN, Touch → $IMRES_TOUCH_DREHEN"
 # Mauszeiger verstecken
 command -v unclutter >/dev/null && unclutter -idle 1 -root &
 

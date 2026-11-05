@@ -28,7 +28,7 @@ Du brauchst: den Zynthian im Netzwerk (LAN-Kabel oder WLAN) und einen Rechner im
    ```
    Nach ein paar Sekunden erscheint die Bühne auf dem Bildschirm.
 
-> Steht das Bild auf dem Kopf? In der Datei `/zynthian/zynthian-my-data/imres/einstellungen.sh` vor `IMRES_DREHEN=inverted` das `#` entfernen (z. B. mit `nano`) und neu starten.
+> Beim V5 wird das Bild automatisch richtig gedreht. Steht es trotzdem falsch oder trifft der Touch daneben: in `/zynthian/zynthian-my-data/imres/einstellungen.sh` eine Zeile `IMRES_DREHEN=normal` (oder `inverted`) bzw. `IMRES_TOUCH_DREHEN=normal` (oder `inverted`) eintragen und `imres-modus imres` neu ausführen.
 
 ---
 

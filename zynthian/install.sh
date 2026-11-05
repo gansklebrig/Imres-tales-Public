@@ -10,7 +10,7 @@ echo "== Imres Tales für den Zynthian =="
 echo "-- Pakete (Chromium, ALSA→JACK) …"
 apt-get update -q
 apt-get install -y -q chromium || apt-get install -y -q chromium-browser
-apt-get install -y -q libasound2-plugins alsa-utils git curl unclutter xvfb jack-capture coreutils || true
+apt-get install -y -q libasound2-plugins alsa-utils git curl unclutter xvfb jack-capture coreutils xinput x11-xserver-utils || true
 
 echo "-- Seite herunterladen (ca. 250 MB, dauert etwas) …"
 mkdir -p "$ORT"
