@@ -25138,6 +25138,138 @@ FK.fn={FK_DEF,FKD,FK_VB,FKV,fkHat,fkVb,fkSchuld,fkZiehen,fkNimm,fkAuf,fkAngebot,
 (()=>{try{const st=document.createElement('style');st.textContent='html.rghh #hud .top .stage{justify-self:start!important;width:auto!important;min-width:0!important;max-width:150px!important;padding:3px 6px 4px!important;opacity:.85}html.rghh #hud .top .stage .sn{display:none!important}html.rghh #hud .top .stage .bar.prog{height:6px!important;min-height:0!important;width:136px!important;margin:0!important}html.rghh #hud .top .stage #progTxt{display:none!important}@media (max-height:520px),(max-width:760px){#hud .top .stage{justify-self:start!important;width:auto!important;min-width:0!important;max-width:150px!important;padding:3px 6px 4px!important;opacity:.85}#hud .top .stage .sn{display:none!important}#hud .top .stage .bar.prog{height:6px!important;min-height:0!important;width:136px!important;margin:0!important}#hud .top .stage #progTxt{display:none!important}}';document.head.appendChild(st)}catch(e){}})();
 window.__hsVOLLBILD=1;
 
+/* ================= Paket „online“: Online-Mehrspieler – Fehlersuche und Feinschliff für die erste Runde =================
+   Behobene Fehler (alles über Laufzeit-Hüllen, keine String-Ersetzungen im Spiel):
+   1) Minikarte beim Gast leer: der Gast bekam G.ka ohne „lo“ (Wasser/Lava je Zelle) → wlMiniBau warf, die Karte blieb schwarz.
+      Gastgeber schickt lo mit; Gast-Minikarte baut notfalls ohne lo und versucht es erneut, statt dauerhaft leer zu bleiben.
+   2) Beitritt mit schon vergebenem Helden: Die Auswahl zeigte weiter den gewünschten (gesperrten) Helden, ohne Hinweis.
+      Jetzt wird der tatsächlich zugeteilte Held markiert und ein Hinweis erklärt den Wechsel.
+   3) „Spielweise“-Hinweise je Held gingen beim Start an alle (Gastgeber sah drei Textwände, Gäste die der anderen):
+      jeder bekommt nur den Hinweis zu seinem eigenen Helden.
+   4) „X ist gefallen!“ erreichte nur den Gefallenen und den Gastgeber – andere Gäste wussten nicht, dass sie helfen sollen.
+      Jetzt sehen es alle, der Gefallene selbst bekommt „Du bist gefallen …“.
+   5) Bestiarium-Meldungen des Gastgebers („📖 Bestiarium: …“) gingen an Gäste, betreffen aber nur den Spielstand des Gastgebers.
+   6) Stufen-Bild (Buch-Szene) im Zwischenbildschirm blieb beim Gast schwarz – wird jetzt beim Gast selbst gezeichnet.
+   7) Endbildschirm/Zwischenbildschirm beim Gast zeigten Werte des Gastgebers (Held im Titel, Heldenstufe, Talentpunkte,
+      „Als Nächstes“ mit Erfolgen des Gastgebers). Gast sieht seinen eigenen Helden/Stufe/Punkte; Ausblick des Gastgebers verborgen.
+      Wichtig: Elemente werden nie hinzugefügt oder entfernt (nur Text/„display:none“) – die Klick-Nummern bleiben gleich.
+   8) Würfel-Ereignisse im Mehrspieler: Jeder Held bekommt seinen eigenen Fund, der Ergebnistext nannte aber nur den Gegenstand
+      des Gastgebers („… im Beutel“) – Gäste hielten ihn für ihren. Jetzt mit Namen und Hinweis „Jeder Held bekommt seinen eigenen Fund“.
+   9) Kleine Querformat-Fenster (z. B. 640×480): die Mitspieler-Karten lagen mitten im Bild über dem eigenen Helden
+      (Hochformat-Platz H-250). Jetzt kompakt links unter der oberen Leiste. Einführungs-Hinweis rutscht unter die obere Leiste.
+  10) Erste-Mal-Erlebnis: Beitrittsseite erklärt Neulingen, dass sie mit Stufe 1 starten und mitgezogen werden, zeigt die Rolle des
+      gewählten Helden; verständlichere Fehlermeldungen (Code falsch, keine Antwort/Netz blockiert, Gastgeber weg).
+  11) Nach automatischem Wiederverbinden blieb „Verbindung unterbrochen – verbinde neu …“ als Meldung stehen.
+  12) Gastgeber weg (Tab zu, Absturz): Gäste versuchten ≈75 s lang neu zu verbinden und landeten dann bei „Kein Raum mit diesem
+      Code gefunden“. Jetzt nach ≈20 s erfolglosem Wiederverbinden klare Meldung „Der Gastgeber ist nicht mehr erreichbar …“.
+  14) Gast steigt auf Gruppenstufe ein (z. B. 14 freie Punkte) ohne eine einzige Fähigkeit: einmaliger Hinweis auf Talente/„Vorschlag?“.
+  13) Chromium 77 (RG353V): PeerJS ließ sich nicht laden (siehe unten) – Online-Beitritt war auf dem Handheld unmöglich.
+   Neue Namen: Präfix ol/OL. */
+window.__hsONLINE={v:1};
+const OL={st:{}};
+const olGast=()=>NET.role==='guest'&&!!G.netGuestRun;
+const olHost=()=>NET.role==='host'&&!!G.net;
+const olRe=s=>String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+
+/* ---------- 1) Minikarte beim Gast ---------- */
+{const sp0=netStagePkt;netStagePkt=function(){const m=sp0.apply(this,arguments);try{const K=G.ka;if(m&&m.ka&&K&&K.lo&&K.lo.length===K.n*K.n)m.ka.lo=kaRLE(Array.from(K.lo,v=>v?1:0))}catch(e){}return m}}
+{const ns0=netStage;netStage=function(m){const r=ns0.apply(this,arguments);try{if(G.netGuestRun&&G.ka&&G.ka.gast){const K=G.ka,N=K.n*K.n;K.lo=m&&m.ka&&typeof m.ka.lo==='string'?kaUnRLE(m.ka.lo,N):(K.lo&&K.lo.length===N?K.lo:new Uint8Array(N))}if(typeof WLMM!=='undefined'&&WLMM.key)WLMM.key+='~'}catch(e){}return r}}
+{const mb=wlMiniBau;wlMiniBau=function(){try{return mb.apply(this,arguments)}catch(e){const K=G.ka;if(K&&!K.lo&&K.n){K.lo=new Uint8Array(K.n*K.n);try{return mb.apply(this,arguments)}catch(e2){}}const cv=document.createElement('canvas');cv.width=cv.height=260;return cv}}}
+{const wm=wlMini;wlMini=function(){const r=wm.apply(this,arguments);try{if(typeof WLMM!=='undefined'&&WLMM.key&&!WLMM.st)WLMM.key+='~'}catch(e){}return r}}
+
+/* ---------- 2) Held schon vergeben: Auswahl und Hinweis ---------- */
+{const gm=netGuestMsg0;netGuestMsg0=function(m){let want=null;const lob=isObj(m)&&m.t==='lobby';if(lob)want=NET.form.hero||NET.pick||null;
+ const r=gm.apply(this,arguments);
+ try{if(lob&&NET.lobby&&okHero(NET.lobby.hero)){const h=NET.lobby.hero;if(NET.form.hero!==h){if(okHero(want)&&want!==h)OL.note=`${HEROES[want].name} spielt schon jemand – du bist ${HEROES[h].name}. Oben kannst du einen anderen freien Helden wählen.`;NET.form.hero=h;NET.pick=h;G.astW=null;if(G.netJoin&&!G.netGuestRun&&G.state==='title')netJoinScreen()}}
+  if(isObj(m)&&(m.t==='start'||m.t==='lobby')){OL.puT=0;if(/Verbindung unterbrochen/.test(NET.msg||''))NET.msg=''}}catch(e){}
+ return r}}
+{const na=netAction;netAction=function(a,b){if(a==='net-pick'||a==='net-back'||a==='net-leave')OL.note='';return na.apply(this,arguments)}}
+
+/* ---------- 10) Beitrittsseite für Neulinge ---------- */
+function olNeuling(){try{for(const id of HERO_IDS){const h=SAVE.heroes&&SAVE.heroes[id];if(h&&((+h.runs||0)>0||h.rl&&(+h.rl.level||0)>1))return false}}catch(e){}return true}
+{const jh=netJoinHtml;netJoinHtml=function(){let h=jh.apply(this,arguments);try{const pick=NET.form.hero||NET.pick||G.sel||'barradin',H=HEROES[pick];
+ const alt='Du spielst mit deinem eigenen Fortschritt: Stufe, Ausrüstung und Talente aus deinem Speicherstand.';
+ const neu=olNeuling()?'Neu hier? Kein Problem: Du startest mit Stufe 1. Liegt die Gruppe weit vorn, kämpfst du automatisch auf ihrer Höhe mit. Dein Fortschritt bleibt auf diesem Gerät gespeichert.':alt;
+ h=h.replace(alt,`${esc(neu)}${H?`<br><b style="color:${HCOL[pick]||'#e5b454'}">${esc(H.name)}</b> · ${esc(H.role||H.cls||'')}`:''}`);
+ if(OL.note&&NET.role==='guest'&&NET.st==='lobby'){const i=h.indexOf('<div class="card mpl">');const p=`<p class="olNote" style="margin:0 0 10px;padding:8px 12px;border-radius:10px;border:1px solid rgba(229,180,84,.5);background:rgba(229,180,84,.1);color:#ffd77a;font-weight:700">${esc(OL.note)}</p>`;if(i>=0)h=h.slice(0,i)+p+h.slice(i)}
+ if(!G.netGuestRun&&NET.role!=='guest'&&!(NET.form.name||SAVE.netName))h=h.replace('placeholder="Name"','placeholder="z. B. Mara"')}catch(e){}return h}}
+const OL_FEHL=[[/^Kein Raum mit diesem Code gefunden\.$/,'Kein Raum mit diesem Code gefunden. Bitte den Code prüfen (4 Zeichen, z. B. „K7QX“) – und der Gastgeber muss seinen Online-Raum gerade offen haben.'],
+ [/^Keine Antwort vom Gastgeber\.$/,'Keine Antwort vom Gastgeber. Vielleicht blockiert das Netzwerk die direkte Verbindung (Schul-/Firmen-WLAN, VPN, strenge Firewall) – probiert ein anderes WLAN oder mobile Daten. Oder der Raum wurde gerade geschlossen.'],
+ [/^Verbindung fehlgeschlagen\.$/,'Verbindung fehlgeschlagen – vermutlich blockiert das Netzwerk die direkte Verbindung. Probiert ein anderes WLAN oder mobile Daten.'],
+ [/^Vermittlungsdienst nicht erreichbar/,'Vermittlungsdienst nicht erreichbar – bitte die Internetverbindung prüfen und gleich noch einmal versuchen.']];
+const olFehl=t=>{for(const [re,n] of OL_FEHL)if(re.test(String(t||'')))return n;return t};
+const OL_WEG='Der Gastgeber ist nicht mehr erreichbar – vermutlich wurde das Spiel bei ihm geschlossen oder seine Internetverbindung ist weg. Dein Fortschritt bis hierher ist gespeichert.';
+{const nf=netFail;netFail=function(msg){const raum=/Kein Raum/.test(String(msg||''));
+ /* Beim Wiederverbinden mitten in der Runde heißt „Kein Raum“: der Gastgeber ist weg. Nach 20 s nicht weiter warten (vorher 60 s + Versuche ≈ 75 s). */
+ if(NET.st==='lost'&&raum){const now=performance.now();OL.puT=OL.puT||now;if(now-OL.puT>20000){OL.puT=0;NET.st='weg';return nf.call(this,OL_WEG)}}else if(NET.st!=='lost')OL.puT=0;
+ if(raum&&G.netGuestRun)msg=OL_WEG;return nf.call(this,olFehl(msg))}}
+{const ne=netErr;netErr=function(e){return olFehl(ne.apply(this,arguments))}}
+{const ev=netEndView;netEndView=function(msg){const r=ev.apply(this,arguments);try{if(/Gastgeber|geschlossen|beendet|Verbindung/.test(String(msg||''))){const p=scr.querySelector('.card p');if(p&&!/neu beitreten/.test(p.textContent))p.insertAdjacentHTML('beforeend','<br><small class="muted">Sobald der Gastgeber wieder einen Raum öffnet, kannst du mit dem neuen Code erneut beitreten.</small>')}}catch(e){}return r}}
+
+/* ---------- 3) 4) 5) Meldungen richtig verteilen (Gastgeber) ---------- */
+function olHeldMeldung(msg){if(typeof msg!=='string'||msg.indexOf('Spielweise')<0||typeof HMECH==='undefined')return null;for(const id in HMECH){const t=HMECH[id];if(t&&msg.indexOf(esc(t))>=0)return id}return null}
+function olNachInit(){
+ const t0=toast;toast=function(msg,col){
+  if(NET.role==='host'&&G.net&&G.state!=='title'){
+   const lokal=()=>{const sv=P;if(P&&netIs(P.dev))P=PL[0]||P;NET.pctx++;try{return t0.apply(this,[msg,col])}finally{NET.pctx--;P=sv}};
+   const id=olHeldMeldung(msg);
+   if(id){const q=PL.find(p=>p.id===id);if(q&&netIs(q.dev)){const g=NET.guests.find(x=>x.p===q);if(g&&!g.gone)netSendR(g.conn,{t:'r',L:[['toast',msg,col]]});return}return lokal()}
+   if(typeof msg==='string'&&/Bestiarium/.test(msg))return lokal();
+   if(OL.alle&&OL.alle.p){const q=OL.alle.p,du=OL.alle.du;for(const g of NET.guests)if(!g.gone&&g.p&&PL.includes(g.p))netSendR(g.conn,{t:'r',L:[['toast',g.p===q?du:msg,col]]});const m0=msg;msg=q===PL[0]?du:m0;try{return lokal()}finally{msg=m0}}}
+  return t0.apply(this,arguments)}}
+{const ni=netInit;netInit=function(){const r=ni.apply(this,arguments);try{olNachInit()}catch(e){console.error(e)}return r}}
+{const md=mpDown;mpDown=function(){const o=OL.alle;try{if(P&&P.hero)OL.alle={p:P,du:'Du bist gefallen! Ein Mitspieler muss sich kurz neben dich stellen, um dich wiederzubeleben.'}}catch(e){}try{return md.apply(this,arguments)}finally{OL.alle=o}}}
+
+/* ---------- 6) 7) gespiegelte Bildschirme beim Gast ---------- */
+function olGastHtml(h){if(typeof h!=='string'||NET.role!=='guest')return h;const me=NET.mine;if(!me||!me.hero)return h;const host=PL[0];
+ try{if(h.indexOf('big-sum')>=0){if(host&&host.hero&&host!==me)h=h.replace(new RegExp('(<div class="eyebrow">)'+olRe(esc(host.hero.name))+'( · )'),'$1'+esc(me.hero.name)+'$2');
+   h=h.replace(/(<span>Heldenstufe<\/span><b[^>]*>)([^<]*)(<\/b>)/,(m,a,b,c)=>a+(+me.level||b)+c);h=h.replace(/<div class="swn">/,'<div class="swn" style="display:none">')}
+  const sp=Math.max(0,+me.sp||0);
+  h=h.replace(/<p class="tx-sp">★ <b>\d+<\/b> Talentpunkte? frei/g,()=>sp>0?`<p class="tx-sp">★ <b>${sp}</b> Talentpunkt${sp>1?'e':''} frei`:`<p class="tx-sp" style="display:none">★ <b>0</b> Talentpunkte frei`);
+  h=h.replace(/★ <b>\d+<\/b> Talentpunkte? frei(?=<\/)/g,()=>sp>0?`★ <b>${sp}</b> Talentpunkt${sp>1?'e':''} frei`:`★ <b>0</b> Talentpunkte frei`);
+  h=h.replace(/<p class="sp" style="margin:0">Du hast \d+ freien? Talentpunkte?/g,()=>sp>0?`<p class="sp" style="margin:0">Du hast ${sp} freie${sp>1?'':'n'} Talentpunkt${sp>1?'e':''}`:`<p class="sp" style="margin:0;display:none">Du hast 0 freie Talentpunkte`)}catch(e){}
+ return h}
+{const sr=netShowRemote;netShowRemote=function(){const m=NET.rs;try{if(m&&m.v==='scr'&&typeof m.html==='string'&&!m.olFix){m.html=olGastHtml(m.html);m.olFix=1}}catch(e){}
+ const r=sr.apply(this,arguments);
+ try{if(olGast()&&G.overlay==='remote'){const c=document.getElementById('bookCv');if(c&&bookCv!==c){bookCv=c;bookT0=performance.now()}}}catch(e){}return r}}
+{const gm=netGuestMsg0;netGuestMsg0=function(m){if(isObj(m)&&m.t==='scr')OL.scrT=performance.now();return gm.apply(this,arguments)}}
+
+/* ---------- 8) Würfel-Ereignisse: wem gehört der Fund? ---------- */
+/* Jeder Held bekommt seine eigene Belohnung (ev2Run läuft je Held), der Text nannte aber nur den Fund des Gastgebers ohne Namen. */
+{const er=ev2Run;ev2Run=function(fn,o,kind){const t=er.apply(this,arguments);try{if(G.mp&&PL.length>1&&P&&P.hero&&Array.isArray(EVFX.L)){let n=0;const i=Math.max(0,PL.indexOf(P)),nm=`<b style="color:${PCOL[i]||'#e5b454'}">${esc(pName(P))}</b>`;
+ for(const x of EVFX.L)if(x&&typeof x.t==='string'&&x.t.indexOf(' im Beutel')>=0&&x.t.indexOf(' im Beutel von ')<0){x.t=x.t.replace(' im Beutel',' im Beutel von '+nm);n++}
+ if(n)EVFX.L.push({t:'Jeder Held bekommt seinen eigenen Fund',g:1})}}catch(e){}return t}}
+
+/* ---------- 9) Mitspieler-Karten in kleinen Querformat-Fenstern ---------- */
+function olKlein(){return W<700&&H<W*0.95&&!splitOn()}
+{const mh=drawMpHud;drawMpHud=function(){if(!G.mp||PL.length<2||!olKlein())return mh.apply(this,arguments);
+ const c=cx;c.save();try{c.setTransform(DPR,0,0,DPR,0,0);const L=PL.filter(p=>p!==mainP()),w=160,h=42;let y0=150;
+  try{const el=document.querySelector('#hud .top');if(el){const r=el.getBoundingClientRect();if(r.height>0)y0=Math.round(r.bottom+26)}}catch(e){}
+  y0=Math.min(y0,H-L.length*(h+5)-30);const x=8;
+  {const tb=G.team||0,rdy=tb>=1,by=y0-16;c.fillStyle='rgba(12,9,14,.8)';c.fillRect(x-1,by-1,w+2,12);c.fillStyle=rdy?`rgba(255,226,122,${0.75+0.25*Math.sin(G.time*8)})`:'#c8a050';c.fillRect(x,by,w*Math.min(1,tb),10);
+   c.font='800 9px "Alegreya Sans",sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle=rdy?'#1a1010':'#f0e6d4';c.fillText(rdy?'Imres Segen bereit!':'Imres Segen '+Math.floor(tb*100)+'%',x+w/2,by+5);c.textBaseline='alphabetic';G.segR=rdy?{x,y:by,w}:null}
+  L.forEach((p,k)=>{const i=PL.indexOf(p),y=y0+k*(h+5),col=PCOL[i]||'#e5b454';c.globalAlpha=0.9;c.fillStyle='rgba(14,10,16,.84)';c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,8);else c.rect(x,y,w,h);c.fill();c.strokeStyle=col;c.lineWidth=1.2;c.stroke();c.globalAlpha=1;
+   c.font='800 12px "Alegreya Sans",sans-serif';c.textAlign='left';let nm=`P${i+1} ${pName(p)}`;const rt=`St. ${p.level}${p.sp>0?' ●':''}`;const rw=c.measureText(rt).width;while(nm.length>3&&c.measureText(nm+'…').width>w-20-rw)nm=nm.slice(0,-1);if(nm!==`P${i+1} ${pName(p)}`)nm+='…';
+   c.fillStyle=col;c.fillText(nm,x+7,y+14);c.textAlign='right';c.fillStyle='#f0e6d4';c.fillText(rt,x+w-7,y+14);
+   const bw=w-14,f=p.down||!p.st?0:Math.max(0,Math.min(1,p.hp/p.st.maxHp));c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x+7,y+19,bw,8);c.fillStyle=p.down?'#555':'#c8303e';c.fillRect(x+7,y+19,bw*f,8);
+   c.textAlign='left';c.font='700 10px "Alegreya Sans",sans-serif';c.fillStyle='#f0e6d4';c.fillText(p.netGone||p.gone?'Verbindung weg …':p.down?'gefallen – hinlaufen!':`${fmt(Math.max(0,p.hp))} / ${fmt(p.st?p.st.maxHp:0)}`,x+7,y+38);
+   c.textAlign='right';c.fillStyle='#ff8a9a';c.fillText(`⚱ ${p.pots||0}`+(p.ping?`  ${p.ping} ms`:''),x+w-7,y+38)})}catch(e){}finally{c.restore()}}}
+(()=>{try{const st=document.createElement('style');st.textContent='@media (max-width:699px) and (orientation:landscape){.tutk{top:148px;font-size:14px;padding:8px 12px 6px;max-width:min(420px,70vw)}}';document.head.appendChild(st)}catch(e){}})();
+
+/* ---------- 14) Neu dazugekommen mit vielen freien Talentpunkten und ohne Fähigkeit (Einstieg auf Gruppenstufe): einmal erklären ---------- */
+{const gf=netGuestFrame;netGuestFrame=function(dt){const r=gf.apply(this,arguments);try{const me=NET.mine;if(me&&G.state==='play'&&!G.overlay&&!OL.spHin){OL.spT=(OL.spT||0)+dt;
+ if(OL.spT>6&&(+me.sp||0)>=2&&!(me.actives||[]).length){OL.spHin=1;toast(`Du hast <b>${me.sp} Talentpunkte</b> und noch keine Fähigkeit: Öffne oben <b>Talente</b> (Taste T) – „Vorschlag?“ zeigt dir einen guten ersten Stern. Solange du dort bist, pausiert das Spiel für alle.`,'#ffd04a')}}}catch(e){}return r}}
+
+/* ---------- 13) Chromium 77 (z. B. RG353V): PeerJS 1.5.4 enthält „e?.flush“ (optional chaining) → Syntaxfehler, Online-Spiel
+   war dort gar nicht möglich („Online-Baustein konnte nicht geladen werden“). Ältere Browser laden den Baustein jetzt als Text und
+   schreiben die zwei Stellen in gleichwertiges „(e&&e.flush)“ um. ---------- */
+function olAltJs(){try{new Function('var a;return a?.b');return false}catch(e){return true}}
+{const nl=netLib;const src=(/s\.src='([^']+)'/.exec(String(nl))||[])[1]||'vendor/peerjs.min.js';
+ netLib=function(){if(typeof window.Peer==='function'||!olAltJs())return nl.apply(this,arguments);
+  return fetch(src,{mode:'cors',credentials:'omit'}).then(r=>{if(!r.ok)throw new Error('lib');return r.text()}).then(t=>{
+   t=t.replace(/([A-Za-z_$][\w$]*)\?\.([A-Za-z_$][\w$]*)/g,'($1&&$1.$2)');const s=document.createElement('script');s.textContent=t;document.head.appendChild(s);
+   if(typeof window.Peer!=='function')throw new Error('lib')})}}
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
