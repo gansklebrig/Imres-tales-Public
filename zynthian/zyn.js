@@ -884,13 +884,28 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   /* Spur-Fenster (ZS3): jede Spur der jetzigen Stimmung einzeln, dazu Kulisse und Begleit-Schichten */
   function spurFenster(an) {
     if (SEITE !== "buehne" || !(window.ImresPult && window.ImresPult.spurMix)) { zeige(W("Spuren gibt es im Bühnen-Pult", "Tracks are in the stage console")); return; }
-    spurAn = an == null ? !spurAn : an; if (spurAn) { mischAn = false; spurSeite = 0; zeige("🎛 " + W("Spuren", "Tracks"), null, W("Regler 1–4 · mit ALT die zweite Reihe · ◀ ▶ weitere · drücken: stumm", "knobs 1–4 · ALT: second row · ◀ ▶ more · push: mute")); }
+    spurAn = an == null ? !spurAn : an; if (spurAn) { mischAn = false; spurSeite = 0; zeige("🎛 " + (ortFenster() ? W("Spuren des Ortes", "Place layers") : W("Spuren der Stimmung", "Mood tracks")), null, W("Regler 1–4 · mit ALT die zweite Reihe · ◀ ▶ weitere · drücken: stumm", "knobs 1–4 · ALT: second row · ◀ ▶ more · push: mute")); }
     zpZeichnen(true); ledsMelden();
   }
   const SPUR_SYM = { klopf: "✊", schelle: "🔔", bass: "🎸", melodie: "🎵", trommel: "🥁", floete: "🪈", ketten: "⛓", rex: "🐕", orch: "🎻", kap: "🎺", gast: "🎭" };
   const spurMerk = () => { try { return JSON.parse(lies("imres-zp-spurmix", "{}")) || {}; } catch (_) { return {}; } };
   function spurMerken(k, v, stumm) { const P = window.ImresPult, st = (P && P.spurMix().stimmung) || "_"; const m = spurMerk(); m[st] = m[st] || {}; m[st][k] = { v, s: !!stumm }; schreib("imres-zp-spurmix", JSON.stringify(m)); }
+  const ortFenster = () => zpSeite === "ort";
+  const ortMerk = {};
+  function ortKanaele() {
+    const P = window.ImresPult; if (!P || !P.ortMix) return [];
+    const m = P.ortMix(), l = [Object.assign({}, ZP_PARAM.hg, { name: "🌲 " + W("Kulisse gesamt", "Backdrop total") })];
+    const prozent = v => Math.round(v * 100) + " %";
+    m.schichten.forEach(x => l.push({ name: (x.i === "ev" ? "✨ " : "🌿 ") + x.name, lo: 0, hi: 20, schritt: 1,
+      lies: () => Math.round(P.ortSpur(x.i) * 10), setz: v => P.ortSpur(x.i, v / 10), text: v => v ? prozent(v / 10) : W("🔇 aus", "🔇 off"),
+      aktion: () => { const k = "s" + x.i, v = P.ortSpur(x.i); if (v > 0) { ortMerk[k] = v; P.ortSpur(x.i, 0); zeige("🔇 " + x.name); } else { P.ortSpur(x.i, ortMerk[k] || 1); zeige("🔊 " + x.name); } }, drucktext: W("drücken: aus/an", "push: off/on") }));
+    m.zus.forEach(x => l.push({ name: "🌦 " + x.name, lo: 0, hi: 20, schritt: 1,
+      lies: () => Math.round(P.zusVol(x.id) * 10), setz: v => P.zusVol(x.id, v / 10), text: v => v ? prozent(v / 10) : W("🔇 aus", "🔇 off"),
+      aktion: () => { const k = "z" + x.id, v = P.zusVol(x.id); if (v > 0) { ortMerk[k] = v; P.zusVol(x.id, 0); } else P.zusVol(x.id, ortMerk[k] || 1); }, drucktext: W("drücken: aus/an", "push: off/on") }));
+    return l;
+  }
   function spurKanaele() {
+    if (ortFenster()) return ortKanaele();
     const P = window.ImresPult; if (!P || !P.spurMix) return [];
     const m = P.spurMix(), l = [Object.assign({}, ZP_PARAM.hg, { name: "🌲 " + W("Kulisse", "Backdrop") })];
     m.spuren.forEach(x => l.push({ name: (SPUR_SYM[x.id] || "") + " " + x.name, lo: 0, hi: 9, schritt: 1,
@@ -1742,8 +1757,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
   function mischHTML() {
     const rs = panelListe(), farben = ["#ffc830", "#80ffb0", "#ff9a80", "#ff7a20"], reihe = panelReihe(), sp = spurAktiv();
-    const titel = sp ? "🎛 " + W("Spuren", "Tracks") + (spurSeiten() > 1 ? " " + (spurSeite + 1) + "/" + spurSeiten() : "") : "🎚 " + W("Mischpult", "Mixer");
-    const tipp = sp ? W("Regler 1–4 · ALT + drehen: untere Reihe · ◀ ▶ weitere Spuren · drücken: stumm · ZS3/BACK: zu", "knobs 1–4 · ALT + turn: lower row · ◀ ▶ more · push: mute · ZS3/BACK: close")
+    const om = sp && ortFenster() && window.ImresPult.ortMix ? window.ImresPult.ortMix() : null;
+    const titel = sp ? "🎛 " + (om ? W("Ort: ", "Place: ") + teil(om.name || "", "")[1] + (om.schichten.length ? "" : W(" – kein Ort gewählt", " – no place")) : W("Stimmung", "Mood")) + (spurSeiten() > 1 ? " " + (spurSeite + 1) + "/" + spurSeiten() : "") : "🎚 " + W("Mischpult", "Mixer");
+    const tipp = sp ? W("ALT + drehen: untere Reihe · ◀ ▶ mehr · drücken: stumm · ZS3: zu", "ALT + turn: lower row · ◀ ▶ more · push: mute · ZS3: close")
       : W("Regler 1–4 · ALT + drehen: untere Reihe · drücken+drehen: andere Spur · CTRL/BACK: zu", "knobs 1–4 · ALT + turn: lower row · push+turn: other channel · CTRL/BACK: close");
     return '<div class="zp-gruppe"><span>' + titel + ' <small>▸ ' + tipp + '</small></span></div><div class="zp-mfs zwei">' +
       rs.map((r, i) => { const w = zpWert(r), leer = r === ZP_PARAM.nichts; return '<div class="zp-mf' + ((i >> 2) === reihe ? " aktiv" : "") + (leer ? " leer" : "") + '" data-zp-mf="' + i + '" style="--m:' + farben[i % 4] + '"><span>' + (i > 3 ? "ALT " : "") + (i % 4 + 1) + "</span><i><b style=\"height:" + (leer ? 0 : Math.round(w.anteil * 100)) + '%"></b></i><strong>' + esc2(leer ? "–" : r.name) + "</strong><em>" + esc2(leer ? "" : w.text) + "</em></div>"; }).join("") + "</div>";

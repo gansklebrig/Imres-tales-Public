@@ -210,7 +210,9 @@ Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zur
 
 **CTRL** öffnet das Mischpult: acht Regler in zwei Reihen (obere Reihe direkt, untere mit ALT), zuerst für **Musik, Hintergrund, Instrument (IN1), Effekte**. Drücken = stumm/neutral, **drücken+drehen** legt eine andere Spur auf den Regler (z. B. IN2, Hall, Gain). Auf einen Regler lassen sich auch die Lautstärken der Soundkarte legen: **🔈 Gesamt** und **🎧 Kopfhörer** – dieselben, die der Zynthian unter Admin → Audio-Pegel hat. CTRL oder BACK schließt es. (Nächste Seite geht weiter mit ALT + ▶.)
 
-### 🎛 Spuren der Stimmung (ZS3)
+### 🎛 Spuren (ZS3)
+
+Auf der Seite **Ort** zeigt ZS3 die Spuren des Ortes: Kulisse gesamt, jede Geräusch-Schicht einzeln (Vögel, Wind, Bach …), die Einzelgeräusche und laufende Zusätze wie Regen. Das merkt sich Imres je Ort. Auf allen anderen Seiten zeigt ZS3 die Spuren der Stimmung:
 
 **ZS3** öffnet die Spuren der gerade laufenden Stimmung: Kulisse, jedes Instrument einzeln (Laute, Trommel, Flöte …) und auf der zweiten Seite Orchester, Kapelle, Gäste. Regler 1–4 = obere Reihe, **ALT gedrückt halten + drehen** = untere Reihe, **◀ ▶** = weitere Spuren, Regler drücken = stumm. Die Einstellung merkt sich Imres je Stimmung. ZS3 oder BACK schließt. (Vorige Seite: ALT + ◀.)
 

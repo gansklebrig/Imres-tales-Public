@@ -13407,6 +13407,22 @@ registerProcessor("imres-glitch", ImresGlitch);`;
         naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "" };
     },
     /* Zynthian-Pult: feste Listen (ohne Umsortieren nach Nutzung) und Namen */
+    /* Spuren des Ortes fürs Pult: jede Schicht der Kulisse, die Einzelgeräusche und laufende Zusätze (Wetter …) – 1 = 100 % */
+    ortMix() {
+      const w = KUL_WELT[S.kulisse], T = t(), namen = KUL_SPUR_NAME[sprache()] || KUL_SPUR_NAME.de;
+      const schichten = w ? w.betten.slice(0, spar ? 2 : 9).map(([n], i) => ({ i, name: namen[n] || n.replace(/^a_/, ""), v: kulMixWert(S.kulisse, i) })) : [];
+      if (w && w.ev.length) schichten.push({ i: "ev", name: T.kulEinzel || "Einzelgeräusche", v: kulMixWert(S.kulisse, "ev") });
+      const zus = Object.keys(zusWahl).filter(id => ZUSATZ[id]).map(id => ({ id, name: ZUSATZ[id][sprache()] || ZUSATZ[id].de || id, v: zusWert(id) }));
+      return { kulisse: S.kulisse, name: (T.kulissen && T.kulissen[S.kulisse]) || S.kulisse, laeuft: !!(kul && kul.art === S.kulisse), schichten, zus };
+    },
+    ortSpur(i, v) {
+      const art = S.kulisse; if (!KUL_WELT[art]) return null; i = i === "ev" ? "ev" : +i;
+      if (v != null) { v = Math.max(0, Math.min(2, +v)); const m = kulMix[art] = kulMix[art] || { b: [] }; if (i === "ev") m.ev = v; else m.b[i] = v;
+        try { localStorage.setItem("imres-lw-kulmix", JSON.stringify(kulMix)); } catch (_) {}
+        if (kul && kul.art === art && i !== "ev" && kul.betten && kul.betten[i]) { const x = kul.betten[i]; x.regler = v; x.out.gain.setTargetAtTime(bettZiel(x), ctx.currentTime, .08); } }
+      return kulMixWert(art, i);
+    },
+    zusVol(id, v) { if (!zusIst(id)) return null; if (v != null) { zusWahl[id] = Math.max(0, Math.min(2, +v)); zusMerken(); zusPegelSetzen(); } return zusWert(id); },
     /* Wie ähnlich sind sich zwei Stimmungen? (für den Autopilot) – Thema, Tempo, Helligkeit der Tonart, Dramatik */
     aehnlich(a, b) {
       const basis = k => (eigeneStimmungen[k] && eigeneStimmungen[k].basis) || k;
