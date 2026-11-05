@@ -5,6 +5,7 @@ HIER="$(cd "$(dirname "$0")" && pwd)"
 [ -f /zynthian/config/zynthian_envars.sh ] && source /zynthian/config/zynthian_envars.sh
 [ -f "$HIER/../../einstellungen.sh" ] && source "$HIER/../../einstellungen.sh"
 
+source "$HIER/ton.sh"; imres_ton_einrichten
 xset s off -dpms s noblank 2>/dev/null
 # Bildschirm drehen. Beim V5 ist das Display kopfüber eingebaut → automatisch "inverted".
 # Überschreiben in einstellungen.sh: IMRES_DREHEN=normal|inverted|left|right
@@ -43,7 +44,7 @@ sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]*"/"
 
 while true; do
   "$BROWSER" --no-sandbox --kiosk --user-data-dir="$PROFIL" \
-    --autoplay-policy=no-user-gesture-required --use-fake-ui-for-media-stream --noerrdialogs --disable-infobars --no-first-run \
+    --autoplay-policy=no-user-gesture-required --alsa-output-device=imres --use-fake-ui-for-media-stream --noerrdialogs --disable-infobars --no-first-run \
     --disable-session-crashed-bubble --disable-translate --disable-features=Translate,MediaRouter \
     --overscroll-history-navigation=0 --disable-pinch --check-for-update-interval=31536000 \
     --window-size=800,480 --window-position=0,0 \

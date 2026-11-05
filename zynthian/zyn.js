@@ -36,7 +36,7 @@
   if (!MODI[modus]) modus = SEITE === "welten" ? "welten" : "buehne";
   const ADRESSE = { welten: "/ambient.html?zyn=1", buehne: "/index.html?zyn=1#buehne" };
   if (MODI[modus].seite !== SEITE) { location.replace(ADRESSE[MODI[modus].seite]); return; }
-  document.documentElement.classList.add("zyn", "zyn-" + SEITE, "zyn-m-" + modus); if (HINTER) document.documentElement.classList.add("zyn-hinter");
+  document.documentElement.classList.add("zyn", "zyn-" + SEITE, "zyn-m-" + modus); if (lies("imres-zyn-band", "0") === "1") document.documentElement.classList.add("zyn-band"); if (HINTER) document.documentElement.classList.add("zyn-hinter");
 
   /* ---------- Aussehen: nur das Pult, passend für 800 × 480 ---------- */
   const css = document.createElement("style");
@@ -52,6 +52,10 @@ html.zyn-buehne #buehne > .wrap { max-width: none !important; padding: 0 6px !im
 html.zyn-buehne #buehne .taverne, html.zyn-buehne #lautenwerk { margin: 0 !important; padding: 4px 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; }
 html.zyn-buehne main { padding: 0 !important; margin: 0 !important; }
 html.zyn-buehne canvas.funken, html.zyn-buehne .funken { display: none !important; }
+/* Bühnenbild mit der Band ausblenden → ganze Breite fürs Pult (wieder an: localStorage imres-zyn-band = 1) */
+html.zyn-buehne:not(.zyn-band) #lautenwerk.lw-pultmodus { grid-template-columns: minmax(0, 1fr) !important; }
+html.zyn-buehne:not(.zyn-band) #lautenwerk.lw-pultmodus > .lw-buehne { display: none !important; }
+html.zyn-buehne:not(.zyn-band) #lautenwerk.lw-pultmodus > * { grid-column: 1 !important; }
 /* nur Kulisse / nur Musik: den anderen Teil ausblenden */
 html.zyn-m-klang [data-etab="musik"], html.zyn-m-klang .lw-emusik, html.zyn-m-klang .lw-play, html.zyn-m-klang .lw-kleinregler:has([data-feld="master"]),
 html.zyn-m-klang .lw-neubesetzen { display: none !important; }

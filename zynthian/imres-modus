@@ -18,7 +18,10 @@ case "$1" in
     echo "== Touch =="; xinput list --name-only 2>&1 | grep -i -E "touch|ft5|goodix|ili|edt"
     echo "== Dienste =="; for d in jack2 zynthian imres-buehne imres-bruecke; do echo "$d: $(systemctl is-active $d)"; done
     echo "== JACK =="; jack_lsp 2>&1 | head -12
-    echo "== Testton (gut hinhoeren!) =="; timeout 6 speaker-test -D default -c 2 -t sine -l 1 2>&1 | tail -2
+    source "$HIER/ton.sh"; imres_ton_einrichten
+    echo "== Ton-Einrichtung =="; echo "HOME=$HOME"; ls /usr/lib/*/alsa-lib/libasound_module_pcm_jack.so 2>&1; ls -l "$IMRES_ALSA_CONF" 2>&1
+    echo "== Testton 1: imres (gut hinhoeren!) =="; timeout 6 speaker-test -D imres -c 2 -t sine -l 1 2>&1 | tail -2
+    echo "== Testton 2: default =="; timeout 6 speaker-test -D default -c 2 -t sine -l 1 2>&1 | tail -2
     echo "== Log =="; journalctl -u imres-buehne -n 60 --no-pager 2>&1 | grep -i -E "alsa|audio|jack|pulse|error|Imres:" | tail -10
     ;;
   # Was beim Einschalten startet
