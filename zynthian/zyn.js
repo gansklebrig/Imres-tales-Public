@@ -846,7 +846,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     rueckwaerts: [W("⏪ Rückwärts – solange gedrückt", "⏪ Reverse – while held"), W("Rückwärts", "reverse")],
     bandstop: [W("⏏ Tape-Stop – solange gedrückt", "⏏ Tape stop – while held"), W("Tape-Stop", "tape stop")],
     crushhalt: [W("👾 Bitcrush voll – solange gedrückt", "👾 Full crush – while held"), W("Crush", "crush")],
-    tap: [W("⏱ Tap-Tempo", "⏱ Tap tempo"), "Tap"], mischer: [W("🎚 Mischpult ein/aus", "🎚 Mixer on/off"), W("Mischer", "mixer")], autopilot: [W("🤖 Autopilot umschalten", "🤖 Toggle autopilot"), "🤖"],
+    tap: [W("⏱ Tap-Tempo", "⏱ Tap tempo"), "Tap"], mischer: [W("🎚 Mischpult ein/aus", "🎚 Mixer on/off"), W("Mischer", "mixer")], beats: [W("🥁 Drumpad (Beats) auf/zu", "🥁 Drum pad (beats) open/close"), W("Drums", "drums")], autopilot: [W("🤖 Autopilot umschalten", "🤖 Toggle autopilot"), "🤖"],
     set_weiter: [W("🎬 nächster Song im Set", "🎬 next song in set"), W("Song ▶", "song ▶")], set_zurueck: [W("🎬 voriger Song im Set", "🎬 previous song in set"), W("◀ Song", "◀ song")],
     nichts: ["– " + W("nichts", "nothing") + " –", ""]
   };
@@ -856,13 +856,15 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     regler: { "A:stimmung": ["musik", "spannung", "hg", "los"], "A:ort": ["hg", "los", "spannung", "hall"], "A:momente": ["fxlaut", "spannung", "hall", "tempo"],
       B: ["tempo", "hall", "fxlaut", "echohall"], FX: ["filter", "delay", "crush", "gate"] },
     tasten: { PLAY: "play", STOP: "stop", PAD: "passiert", REC: "stille", TEMPO: "tap", ZS3: "seite_zurueck", CTRL: "mischer",
-      "ALT+PLAY": "fx_aus", "ALT+STOP": "filterzu", "ALT+PAD": "sprechen", "ALT+REC": "aufnahme", "ALT+TEMPO": "neubesetzen", "ALT+ZS3": "echowurf", "ALT+CTRL": "stotter" }
+      "ALT+PLAY": "fx_aus", "ALT+STOP": "filterzu", "ALT+PAD": "beats", "ALT+REC": "aufnahme", "ALT+TEMPO": "neubesetzen", "ALT+ZS3": "echowurf", "ALT+CTRL": "stotter" }
   };
   let ZB = JSON.parse(JSON.stringify(ZP_STANDARD));
   try { const g = JSON.parse(lies("imres-zyn-beleg", "null")); if (g && g.regler && g.tasten) { Object.assign(ZB.regler, g.regler); Object.assign(ZB.tasten, g.tasten); } } catch (_) {}
   const belegMerken = () => schreib("imres-zyn-beleg", JSON.stringify(ZB));
   /* einmalig: CTRL wird zum Mischpult-Knopf (vorher: nächste Seite – geht auch mit ALT + ▶) */
   if (lies("imres-zyn-misch1", "") !== "1") { if (ZB.tasten.CTRL === "seite_vor") ZB.tasten.CTRL = "mischer"; schreib("imres-zyn-misch1", "1"); belegMerken(); }
+  if (lies("imres-zyn-beats1", "") !== "1") { if (ZB.tasten["ALT+PAD"] === "sprechen") ZB.tasten["ALT+PAD"] = "beats"; schreib("imres-zyn-beats1", "1"); belegMerken(); }
+  let vorBeats = "stimmung";
   const bankName = () => BANKEN[bank] || "A";
   /* Mischpult (CTRL): vier Regler für die Lautstärken – drücken+drehen legt etwas anderes auf den Regler */
   let mischAn = false;
@@ -977,6 +979,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       case "seite_zurueck": zpSeiteSchritt(-1); return true;
       case "bank": bankWeiter(); return true;
       case "mischer": mischer(); return true;
+      case "beats": if (SEITE !== "buehne") return false; mischAn = false; if (zpSeite === "beats") zpSeiteSetzen(vorBeats); else { vorBeats = zpSeite; zpSeiteSetzen("beats"); zeige("🥁 Drumpad", null, W("◀▶ Schritt · ▲▼ Spur · SEL/F1–F4 setzen · PAD spielt · ALT+PAD: zurück", "◀▶ step · ▲▼ track · SEL/F1–F4 set · PAD plays · ALT+PAD: back")); } return true;
       case "hg": if (SEITE === "welten") return false; pultKlick("data-aktion", "kulumschalt"); zeige("🌲 " + W("Hintergrund an / aus", "Backdrop on / off")); return true;
       case "fx_aus": if (SEITE === "welten") return false; ["filter", "echo", "drive", "crush", "rate", "ring", "flanger", "gate", "wobble"].forEach(k => fxSetz(k, 0)); zeige("✨ " + W("Effekte zurückgesetzt", "Effects reset")); zpZeichnen(true); return true;
       case "tap": if (SEITE === "welten") return false; tapTempo(); return true;
@@ -1063,7 +1066,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   /* Drücken / Loslassen für „solange gedrückt“-Aktionen */
   const gehalten = {}, favTimer = {}, favVerbraucht = {};
   function zpDruckLos(name, art) {
-    if (zpSeite === "beats" && name === "PAD") { if (art === "druck") beatPad(); return; }
+    if (zpSeite === "beats" && name === "PAD" && !alt) { if (art === "druck") beatPad(); return; }
     if (zpSeite === "beats" && (name === "CTRL" || name === "ZS3")) { if (art === "druck") { BC.mod = name; BC.modBenutzt = false; } else BC.mod = null; ledsMelden(); return; }
     if (zpSeite === "beats" && /^F[1-4]$/.test(name)) return; /* keine Favoriten auf der Beats-Seite */
     const dm = /^DREH([1-4])$/.exec(name);
@@ -1091,12 +1094,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       k("F4", "⚙ " + W("System", "System"), W("Aktualisieren, Zynthian, Aufnahme, Aus", "Update, Zynthian, record, off"), "system") +
       zz("auto", "🤖 Autopilot: <b>" + AUTO_NAME[autoModus] + "</b>", W("wechselt selbst Stimmungen und setzt Momente", "changes moods and triggers moments by itself")) +
       (SEITE === "buehne" ? zz("begl", "🎹 " + W("Synth-Begleitung: ", "Synth accompaniment: ") + "<b>" + (BEGL.an ? W("an", "on") : W("aus", "off")) + "</b>", W("Akkorde als MIDI an Zynthian-Synths", "chords as MIDI to Zynthian synths")) : "") +
+      (SEITE === "buehne" ? zz("beats", "🥁 " + W("Drumpad / Beats", "Drum pad / beats"), W("Step-Sequencer wie eine kleine TR-8S · auch: ALT + PAD oder oben der Reiter „Beats“", "step sequencer · also ALT + PAD or the Beats tab")) : "") +
       (SEITE === "buehne" ? zz("eingang", "🎤 " + W("Eingänge (Handpan, Didgeridoo …)", "Inputs (handpan, didgeridoo …)"), W("Instrumente anstecken, Gain, Lautstärke, eigene Effekte", "plug in instruments, gain, level, own effects")) : "") +
       zz("audio", "🎚 " + W("Audio: Ausgänge & Pegel", "Audio: outputs & levels"), W("welche Buchsen, Lautstärke der Soundkarte", "which jacks, sound-card levels")) +
       zz("einst", "🛠 " + W("Einstellungen", "Settings"), W("Leistung, Licht, Bühnenbild, Belegung …", "performance, light, stage view, mapping …")) +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile/Drehregler + SEL · BACK schließt", "F1–F4 pick · arrows/knob + SEL · BACK closes") + "</p>",
-      { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), system: systemMenue, zu: menueZu, einst: () => zpEinstellungen(), begl: () => beglMenue(), eingang: () => eingangMenue(), audio: () => audioMenue(),
+      { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), system: systemMenue, zu: menueZu, einst: () => zpEinstellungen(), begl: () => beglMenue(), eingang: () => eingangMenue(), audio: () => audioMenue(), beats: () => { menueZu(); zpAktion("beats"); },
         auto: () => { autoSetzen(AUTO_STUFEN[(AUTO_STUFEN.indexOf(autoModus) + 1) % AUTO_STUFEN.length]); zpMenue(); const b = $('.zyn-menue [data-zm="auto"]'); if (b) fokusSetzen(b); } });
     menueArt = "zp";
   }
@@ -1145,7 +1149,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const z = (kk, t) => "<div><b>" + kk + "</b><span>" + t + "</span></div>";
     const l = [["F1–F4", W("obere Kachelreihe", "top row of tiles")], ["ALT + F1–F4", W("untere Kachelreihe", "bottom row")], ["◀ ▶", W("Kachel wählen, am Rand weiterblättern", "move, page at the edge")],
       ["ALT + ◀ ▶", W("vorige / nächste Seite", "previous / next page")], ["ALT + ▲ ▼", W("andere Gruppe (Favoriten, Wetter, Effekte …)", "other group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")], ["F 1,5 s halten", W("★ Favorit an/aus – Favoriten stehen vorne", "★ favourite on/off")],
-      ["CTRL", W("🎚 Mischpult: 4 Regler für Musik, Hintergrund, Instrument, Effekte (drücken+drehen: andere Spur)", "🎚 Mixer: 4 knobs for music, backdrop, instrument, effects")], ["MIXER", W("Reglerbank A → B → FX (→ IN1/IN2)", "Knob bank A → B → FX (→ IN1/IN2)")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")], ["🎤 " + W("Eingänge", "Inputs"), W("MENU → Eingänge: Eingang 1/2 an, Gain, Lautstärke · dann MIXER → Bank IN1/IN2: Lautstärke, Filter, Delay, Hall (drücken+drehen: Gain, Rückkopplung, Drive, Panorama)", "MENU → inputs · then MIXER → bank IN1/IN2")], ["🥁 Beats", W("◀▶ Schritt · ▲▼ Spur · SEL/F1–F4 setzen · Regler 3 Tonhöhe · PAD live spielen · REC live aufnehmen · ALT+◀▶ verschieben · ALT+▲/▼ Spur kopieren/einfügen · ALT+SEL leeren · ALT+F1–F4 Variation 1–4 · CTRL halten+F1–F4 Pattern in Variation kopieren · ZS3 halten+F1–F4 nur die Spur kopieren", "◀▶ step · ▲▼ track · SEL/F1–F4 set · knob 3 pitch · PAD play live · REC live record · ALT+◀▶ shift · ALT+▲/▼ copy/paste · ALT+SEL clear")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
+      ["ALT + PAD", W("🥁 Drumpad (Beats) auf/zu – oder oben der Reiter „Beats“", "🥁 drum pad open/close")], ["CTRL", W("🎚 Mischpult: 4 Regler für Musik, Hintergrund, Instrument, Effekte (drücken+drehen: andere Spur)", "🎚 Mixer: 4 knobs for music, backdrop, instrument, effects")], ["MIXER", W("Reglerbank A → B → FX (→ IN1/IN2)", "Knob bank A → B → FX (→ IN1/IN2)")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")], ["🎤 " + W("Eingänge", "Inputs"), W("MENU → Eingänge: Eingang 1/2 an, Gain, Lautstärke · dann MIXER → Bank IN1/IN2: Lautstärke, Filter, Delay, Hall (drücken+drehen: Gain, Rückkopplung, Drive, Panorama)", "MENU → inputs · then MIXER → bank IN1/IN2")], ["🥁 Beats", W("◀▶ Schritt · ▲▼ Spur · SEL/F1–F4 setzen · Regler 3 Tonhöhe · PAD live spielen · REC live aufnehmen · ALT+◀▶ verschieben · ALT+▲/▼ Spur kopieren/einfügen · ALT+SEL leeren · ALT+F1–F4 Variation 1–4 · CTRL halten+F1–F4 Pattern in Variation kopieren · ZS3 halten+F1–F4 nur die Spur kopieren", "◀▶ step · ▲▼ track · SEL/F1–F4 set · knob 3 pitch · PAD play live · REC live record · ALT+◀▶ shift · ALT+▲/▼ copy/paste · ALT+SEL clear")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
       .concat(ZP_TASTEN.map(t => [t.replace("ALT+", "ALT + "), (ZP_AKT[ZB.tasten[t]] || ZP_AKT.nichts)[0]]));
     menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([x, y]) => z(x, y)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="beleg">🎛 ' + W("Ändern", "Change") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, beleg: () => belegMenue() });
     menueArt = "hilfe";
@@ -1348,6 +1352,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         a["r:" + i] = () => { if (g.an != null || g.aufnahme != null) audioPost({ aktion: "regler", name: g.name, art: g.an == null ? "c" : "p", schalten: true }).then(x => audioMenue("r:" + i, x)); };
         a["r:" + i + ":stufe"] = s => { const art = g.p != null ? "p" : "c", v = (art === "p" ? g.p : g.c) + s * 5; audioPost({ aktion: "regler", name: g.name, art, wert: v }).then(x => audioMenue("r:" + i, x)); };
       });
+      [["l", -1, W("links (1)", "left (1)")], ["r", 1, W("rechts (2)", "right (2)")]].forEach(([id, pan, nm]) => {
+        h += '<button type="button" data-zm="t:' + id + '"><span>🔊 ' + W("Testton ", "Test tone ") + nm + "</span><small>" + W("2 s Piepton nur auf dieser Seite", "2 s beep on this side only") + "</small></button>";
+        a["t:" + id] = () => testton(pan);
+      });
       h += '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
         '<p class="hinweis">' + W("Kommt aus den großen Buchsen nichts: hier den Pegel der Soundkarte prüfen (z. B. „Digital“, „Line“, „Master“) und Stummschaltung lösen.", "Nothing from the line outs? Check the card levels here and unmute.") + "</p>";
       const m = menue("<h3>🎚 " + W("Audio: Ausgänge & Pegel", "Audio: outputs & levels") + "</h3>" + h, a); menueArt = "audio"; audioAktionen = a;
@@ -1356,6 +1364,12 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (daten) weiter(daten); else { menue('<h3>🎚 Audio</h3><p class="hinweis">⏳ ' + W("Lese die Soundkarte …", "Reading the sound card …") + "</p>", { zu: menueZu }); audioPost({ aktion: "info" }).then(weiter); }
   }
   let audioAktionen = null;
+  function testton(pan) {
+    try { const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(), g = c.createGain(), p = c.createStereoPanner();
+      o.frequency.value = pan < 0 ? 440 : 660; g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(.3, c.currentTime + .05); g.gain.setValueAtTime(.3, c.currentTime + 1.9); g.gain.linearRampToValueAtTime(0, c.currentTime + 2);
+      p.pan.value = pan; o.connect(g); g.connect(p); p.connect(c.destination); o.start(); o.stop(c.currentTime + 2.05); setTimeout(() => c.close(), 2600);
+      zeige("🔊 " + W("Testton ", "Test tone ") + (pan < 0 ? W("links", "left") : W("rechts", "right"))); } catch (e) { zeige("⚠ " + e.message); }
+  }
   /* Eingänge 1 und 2 */
   const kanalHol = i => { const P = window.ImresPult; return P && P.kanal ? P.kanal(i) : null; };
   const kanalSetz = (i, w) => { const P = window.ImresPult; return Promise.resolve(P && P.kanal ? P.kanal(i, w) : null); };
@@ -1554,7 +1568,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         }
         BC.r = (BC.r + (name === "UP" ? -1 : 1) + BEAT_REIHE.length) % BEAT_REIHE.length; zpZeichnen(true); ledsMelden(); return true;
       case "SEL": if (alt) beatSpurAendern(d => d.map(() => -1), W("geleert", "cleared")); else beatUmschalten(BC.s); return true;
-      case "PAD": return true; /* läuft über „Drücken“ – ohne Verzögerung */
+      case "PAD": return !alt; /* läuft über „Drücken“ – ohne Verzögerung; ALT+PAD: zurück */
       case "REC": BC.liveRec = !BC.liveRec; zeige(BC.liveRec ? "⏺ " + W("Live-Aufnahme an", "Live record on") : "⏹ " + W("Live-Aufnahme aus", "Live record off"), null, BC.liveRec ? W("PAD spielt die Spur und setzt den Schritt", "PAD plays the track and sets the step") : ""); zpZeichnen(true); ledsMelden(); return true;
     }
     return false;
@@ -1662,6 +1676,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (id === "seite_zurueck") return ZP_SEITEN[(i + ZP_SEITEN.length - 1) % ZP_SEITEN.length].led;
     if (id === "bank") return BANK_FARBE[BANKEN[(bank + 1) % BANKEN.length]];
     if (id === "mischer") return BANK_FARBE.MIX;
+    if (id === "beats") return "#ff9a40";
     return { play: "#30ff70", stop: "#ff1a30", passiert: "#ff6a10", stille: "#fff4e0", neubesetzen: "#ffc830", sprechen: "#f0dca0", aufnahme: "#ff1a30", takt: "#d8d0c0", hg: "#80ffb0", fx_aus: "#fff8ec",
       filterzu: BANK_FARBE.FX, filterhoch: BANK_FARBE.FX, echowurf: BANK_FARBE.FX, stotter: BANK_FARBE.GLITCH, rueckwaerts: BANK_FARBE.GLITCH, bandstop: BANK_FARBE.GLITCH, crushhalt: BANK_FARBE.GLITCH, tap: "#ffc830", autopilot: "#c040ff", set_weiter: "#ffe0a0", set_zurueck: "#ffe0a0" }[id] || "#000000";
   }
@@ -1670,6 +1685,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (id === "play") return SEITE === "welten" ? !!$(".welt.an") : !!z.laeuft;
     if (id === "aufnahme") return aufnahmeAn;
     if (id === "mischer") return mischAktiv();
+    if (id === "beats") return zpSeite === "beats";
     if (id === "neubesetzen") return !!z.neuBesetzen;
     if (id === "hg") return !!z.kulLaeuft;
     if (id === "autopilot") return autoModus !== "aus";
@@ -1873,7 +1889,8 @@ html.zyn-ruhe .zp-ruhe { display: block; }
       const k = e.target.closest("[data-zp-k]"); if (k) { zpCursor = -1; zpAusloesen(+k.dataset.zpK); return; }
       if (e.target.closest("[data-zp-gruppe]")) { zpGruppeSchritt(1); return; }
       const bl = e.target.closest("[data-zp-blatt]"); if (bl) { zpBlaettern(+bl.dataset.zpBlatt); return; }
-      const ta = e.target.closest("[data-zp-taste]"); if (ta) { taste(ta.dataset.zpTaste, "kurz"); ledsMelden(); return; }
+      const ta = e.target.closest("[data-zp-taste]"); if (ta && ta.dataset.zpTaste === "PAD" && zpSeite === "beats" && !alt) { beatPad(); return; }
+      if (ta) { taste(ta.dataset.zpTaste, "kurz"); ledsMelden(); return; }
       const r = e.target.closest("[data-zp-r]"); if (r) { zpDruck(+r.dataset.zpR); }
     });
     if (SEITE === "buehne") { let versuche = 0; const einfachSicher = () => {

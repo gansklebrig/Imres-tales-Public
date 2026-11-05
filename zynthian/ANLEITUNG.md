@@ -200,13 +200,17 @@ Sobald ein Eingang an ist, gibt es mit **MIXER** zusätzlich die Reglerbänke **
 
 Der Ton läuft durch den Browser und kommt dadurch etwas verzögert (einige Hundertstel). Für die Anlage passt das, zum direkten Abhören am Instrument eher nicht.
 
+### 🥁 Drumpad (Beats)
+
+Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zurück) oder **MENU → 🥁 Drumpad / Beats**. Dort spielt PAD (auch unten auf dem Bildschirm) die gewählte Spur live.
+
 ### 🎚 Mischpult (CTRL)
 
 **CTRL** öffnet das Mischpult: vier große Regler für **Musik, Hintergrund, Instrument (IN1), Effekte**. Drücken = stumm/neutral, **drücken+drehen** legt eine andere Spur auf den Regler (z. B. IN2, Hall, Gain). Auf einen Regler lassen sich auch die Lautstärken der Soundkarte legen: **🔈 Gesamt** und **🎧 Kopfhörer** – dieselben, die der Zynthian unter Admin → Audio-Pegel hat. CTRL oder BACK schließt es. (Nächste Seite geht weiter mit ALT + ▶.)
 
 ### Ausgänge & Pegel
 
-**MENU → 🎚 Audio: Ausgänge & Pegel**: welche Ausgangspaare Imres bespielt (1/2, 3/4 …, wenn die Soundkarte mehr hat) und alle Lautstärke-Regler der Soundkarte (◀ ▶ leiser/lauter, SEL schaltet stumm/an). Kommt aus den großen Buchsen nichts, ist dort meist ein Regler zu leise oder stumm.
+**MENU → 🎚 Audio: Ausgänge & Pegel**: welche Ausgangspaare Imres bespielt (1/2, 3/4 …, wenn die Soundkarte mehr hat) und alle Lautstärke-Regler der Soundkarte (◀ ▶ leiser/lauter, SEL schaltet stumm/an). Kommt aus den großen Buchsen nichts, ist dort meist ein Regler zu leise oder stumm. Mit **🔊 Testton links / rechts** lässt sich jede Seite einzeln prüfen.
 
 ---
 
