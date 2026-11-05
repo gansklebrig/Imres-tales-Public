@@ -21745,6 +21745,10 @@ function rgDkPrep(){const D=G.deco;const key=(G.runId||0)+'|'+G.stage+'|'+D.leng
 /* Schadenszahlen im Sparbetrieb ohne Umriss (halbiert die Textzeichnungen) */
 {const _dn=drawNums;drawNums=function(){if(!RG2.spar)return _dn.apply(this,arguments);const c=cx,st=c.strokeText;c.strokeText=function(){};try{return _dn.apply(this,arguments)}finally{c.strokeText=st}}}
 
+/* ---------- Kleine Bildschirme / Handhelds: Barradins Takt-Blinken an den Fähigkeiten aus (nervt dort); auf großen Bildschirmen bleibt es ---------- */
+(()=>{try{const st=document.createElement('style');st.textContent=`html.rghh #skills.takt .sk{outline:none!important;box-shadow:none!important}@media (max-height:500px),(max-width:700px){#skills.takt .sk{outline:none!important;box-shadow:none!important}}`;document.head.appendChild(st)}catch(e){}})();
+window.__hsTAKTBL=1;
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
