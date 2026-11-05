@@ -204,6 +204,8 @@ Der Ton läuft durch den Browser und kommt dadurch etwas verzögert (einige Hund
 
 Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zurück) oder **MENU → 🥁 Drumpad / Beats**. Dort spielt PAD (auch unten auf dem Bildschirm) die gewählte Spur live.
 
+**Pads:** Oben rechts schaltet **🥁 Pads / ▦ Raster** die Ansicht um. In der Pad-Ansicht gibt es 8 große Pads – antippen spielt das Instrument sofort (F1–F4 spielen die oberen vier). Mit **⏺ Aufnahme** (oder REC) wird bei laufendem Beat alles, was du spielst, auf den nächsten Schritt gesetzt. Darunter das kleine Raster: dort siehst du, wann welches Instrument spielt (die Pads blitzen mit), und ein Tipp auf ein Feld nimmt den Schlag wieder raus.
+
 ### 🎚 Mischpult (CTRL)
 
 **CTRL** öffnet das Mischpult: vier große Regler für **Musik, Hintergrund, Instrument (IN1), Effekte**. Drücken = stumm/neutral, **drücken+drehen** legt eine andere Spur auf den Regler (z. B. IN2, Hall, Gain). Auf einen Regler lassen sich auch die Lautstärken der Soundkarte legen: **🔈 Gesamt** und **🎧 Kopfhörer** – dieselben, die der Zynthian unter Admin → Audio-Pegel hat. CTRL oder BACK schließt es. (Nächste Seite geht weiter mit ALT + ▶.)

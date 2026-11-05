@@ -1068,7 +1068,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function zpDruckLos(name, art) {
     if (zpSeite === "beats" && name === "PAD" && !alt) { if (art === "druck") beatPad(); return; }
     if (zpSeite === "beats" && (name === "CTRL" || name === "ZS3")) { if (art === "druck") { BC.mod = name; BC.modBenutzt = false; } else BC.mod = null; ledsMelden(); return; }
-    if (zpSeite === "beats" && /^F[1-4]$/.test(name)) return; /* keine Favoriten auf der Beats-Seite */
+    if (zpSeite === "beats" && /^F[1-4]$/.test(name)) { if (BC.pads && art === "druck" && !BC.mod && !alt) beatPad(+name[1] - 1); return; } /* keine Favoriten auf der Beats-Seite */
     const dm = /^DREH([1-4])$/.exec(name);
     if (dm) { const nr = +dm[1] - 1; if (art === "druck") { drehGedrueckt[nr] = true; drehGedreht[nr] = false; } else { drehGedrueckt[nr] = false; setTimeout(() => { drehGedreht[nr] = false; }, 400); } return; }
     if (/^F[1-4]$/.test(name)) {
@@ -1542,15 +1542,28 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     (nurSpur ? [sp.id] : Object.keys(d)).forEach(k => P.beatsSpur(nach, k, d[k]));
     zeige("📋 " + (nurSpur ? BEAT_SYM[sp.id] + " " + BEAT_NAME[sp.id] : W("Ganzes Pattern", "Whole pattern")) + " → Variation " + (n + 1), null, W("von Teil ", "from part ") + von + W(" nach ", " to ") + nach); zpZeichnen(true); ledsMelden();
   }
-  function beatPad() {
-    const P = BP(), info = beatsInfo(); if (!P || !info) return; const sp = beatSpur(info), wert = sp.art === "an" ? 0 : (BC.ton[sp.id] || 0);
-    const hit = P.beatsAnschlag(sp.id, wert);
-    if (BC.liveRec && hit && info.laeuft) { const d = P.beatsDaten(hit.teil); if (d && d[sp.id] && d[sp.id][hit.schritt] < 0) P.beatsSetzen(hit.teil, sp.id, hit.schritt, wert); }
+  function beatPad(r) {
+    const P = BP(), info = beatsInfo(); if (!P || !info) return; if (r != null) BC.r = r;
+    const sp = r != null ? (info.spuren.find(x => x.id === BEAT_REIHE[r]) || beatSpur(info)) : beatSpur(info), wert = sp.art === "an" ? 0 : (BC.ton[sp.id] || 0);
+    const hit = P.beatsAnschlag(sp.id, wert); padBlitz(BEAT_REIHE.indexOf(sp.id));
+    if (BC.liveRec && hit && info.laeuft) { const d = P.beatsDaten(hit.teil); if (d && d[sp.id] && d[sp.id][hit.schritt] < 0) { P.beatsSetzen(hit.teil, sp.id, hit.schritt, wert); if (BC.pads) setTimeout(() => zpZeichnen(true), 30); } }
+  }
+  /* Pad-Ansicht: 8 Pads zum Einspielen, darunter das Raster klein – was wann spielt, antippen nimmt es raus */
+  BC.pads = lies("imres-zb-pads", "1") === "1";
+  const PAD_FARBE = { trommel: "#ffc830", ketten: "#f0dca0", klopf: "#ff7a20", schelle: "#fff8ec", bass: "#ff2a5a", melodie: "#30ff70", floete: "#ff9a80", rex: "#c040ff" };
+  function padBlitz(r) { const el = zpEl && zpEl.querySelector('[data-zb-pad="' + r + '"]'); if (!el) return; el.classList.remove("blitz"); void el.offsetWidth; el.classList.add("blitz"); }
+  function padsUmschalten() { BC.pads = !BC.pads; schreib("imres-zb-pads", BC.pads ? "1" : "0"); zpZeichnen(true); ledsMelden(); }
+  function beatsPadsHTML() {
+    const info = beatsInfo(); if (!info) return "";
+    const pads = BEAT_REIHE.map((id, r) => { const sp = info.spuren.find(x => x.id === id); if (!sp) return "";
+      return '<div class="zb-pad' + (r === BC.r ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-pad="' + r + '" style="--p:' + PAD_FARBE[id] + '"><span>' + BEAT_SYM[id] + "</span><b>" + BEAT_NAME[id] + "</b><small>" + (r < 4 ? "F" + (r + 1) : "") + "</small></div>"; }).join("");
+    return '<div class="zb-padsbox"><div class="zb-pads">' + pads + "</div>" + beatsHTML(true) + "</div>";
   }
   /* Tasten auf der Beats-Seite (true = erledigt) */
   function beatsTaste(name) {
     if (zpSeite !== "beats") return false;
     const info = beatsInfo(); if (!info) return false; const n = info.takt;
+    if (/^F[1-4]$/.test(name) && BC.pads && !BC.mod && !alt) return true; /* Pads: läuft über „Drücken“ */
     if (/^F[1-4]$/.test(name)) { const f = +name[1] - 1;
       if (BC.mod) { BC.modBenutzt = true; varKopieren(f, BC.mod === "ZS3"); }
       else if (alt) varWechseln(f); else beatUmschalten(Math.floor(BC.s / 4) * 4 + f);
@@ -1595,7 +1608,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const t = beatsTeil(info);
     const vars = VAR.map((p, i) => '<button type="button" class="zb-var' + (p === t ? " an" : "") + (info.naechsterLoop === p ? " vor" : "") + (info.belegt && info.belegt[p] ? " voll" : "") + '" data-zb-var="' + i + '">' + (i + 1) + "</button>").join("");
     return '<div class="zp-gruppe"><span>🥁 ' + W("Teil ", "Part ") + t + (info.loop ? " 🔁" : BC.folgen ? " · " + W("folgt", "follows") : "") + (info.stimmung ? " · " + W("Stimmung", "mood") : "") + '</span><span class="zb-vars">Var ' + vars + "</span>" +
-      (BC.liveRec ? '<span style="color:#ff4a3a">⏺ LIVE</span>' : "") + "</div>";
+      '<span class="zb-knoepfe"><button type="button" data-zb-rec="1" class="' + (BC.liveRec ? "an" : "") + '">⏺ ' + W("Aufnahme", "Record") + '</button><button type="button" data-zb-ansicht="1">' + (BC.pads ? "▦ " + W("Raster", "Grid") : "🥁 Pads") + "</button></span></div>";
   }
   /* Bank B auf der Beats-Seite: Hüllkurve und Lautstärke der gewählten Spur */
   function beatsHuelleRegler() {
@@ -1609,17 +1622,18 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       { name: W("🎲 Variation", "🎲 Variation"), lo: 0, hi: 10, schritt: 1, lies: () => P.beatsVariation() || 0, setz: v => P.beatsVariation(v), text: v => v ? v * 10 + " %" : W("genau", "exact"), aktion: () => P.beatsVariation(0), drucktext: W("drücken: genau", "push: exact") }
     ];
   }
-  function beatsHTML() {
+  function beatsHTML(klein) {
     const P = BP(), info = beatsInfo(); if (!P || !info) return '<div class="zb-leer">⏳ ' + W("Bühne lädt …", "Stage loading …") + "</div>";
+    if (BC.pads && !klein) return beatsPadsHTML();
     const t = beatsTeil(info), dat = P.beatsDaten(t) || {}, n = info.takt;
-    let h = '<div class="zb" style="--n:' + n + '">';
+    let h = '<div class="zb' + (klein ? " klein" : "") + '" style="--n:' + n + '">';
     BEAT_REIHE.forEach((id, r) => {
       const sp = info.spuren.find(x => x.id === id); if (!sp) return; const d = dat[id] || [];
       const hk = (P.huelle && P.huelle()[id]) || {};
-      h += '<button type="button" class="zb-name' + (r === BC.r ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '">' + BEAT_SYM[id] + " " + BEAT_NAME[id] + (hk.a || hk.d ? '<i class="zb-h">◢</i>' : "") + "</button>";
+      h += '<button type="button" class="zb-name' + (r === BC.r ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '">' + BEAT_SYM[id] + (klein ? "" : " " + BEAT_NAME[id]) + (hk.a || hk.d ? '<i class="zb-h">◢</i>' : "") + "</button>";
       for (let i = 0; i < n; i++) {
         const v = d[i], an = v >= 0, txt = an && sp.art !== "an" ? v + 1 : "";
-        h += '<button type="button" class="zb-z' + (an ? " an" : "") + (i % 4 === 0 ? " eins" : "") + (r === BC.r && i === BC.s ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '" data-zb-s="' + i + '" style="' + (an && sp.art !== "an" ? "--h:" + (.35 + .65 * v / Math.max(1, sp.zeilen - 1)) : "") + '">' + txt + "</button>";
+        h += '<button type="button" class="zb-z' + (an ? " an" : "") + (i % 4 === 0 ? " eins" : "") + (r === BC.r && i === BC.s ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '" data-zb-s="' + i + '" style="' + (klein ? "--f:" + PAD_FARBE[id] + ";" : "") + (an && sp.art !== "an" ? "--h:" + (.35 + .65 * v / Math.max(1, sp.zeilen - 1)) : "") + '">' + txt + "</button>";
       }
     });
     h += "</div>";
@@ -1630,7 +1644,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (zpSeite !== "beats" || zpRuhe || !zpEl) return; const info = beatsInfo(); if (!info) return;
     const s = info.laeuft && beatsTeil(info) === info.teil ? info.schritt : -1;
     $$(".zb-z", zpEl).forEach(z => z.classList.toggle("kopf", +z.dataset.zbS === s));
-  }, 90);
+    if (BC.pads && s >= 0 && s !== BC.letzterS) { const dat = BP().beatsDaten(info.teil) || {}; BEAT_REIHE.forEach((id, r) => { const d = dat[id]; const sp = info.spuren.find(x => x.id === id); if (d && d[s] >= 0 && sp && !sp.stumm) padBlitz(r); }); }
+    BC.letzterS = s;
+  }, 30);
   /* ----- Zeichnen ----- */
   function zpZeichnen(sofort) {
     if (!zpEl) return;
@@ -1818,6 +1834,19 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zb-z.an { background: color-mix(in srgb, var(--f) calc(var(--h, 1) * 100%), #3a2a1a) !important; border-color: var(--f) !important; }
 .zb-z.stumm.an { opacity: .45; }
 .zb-z.kopf { box-shadow: inset 0 0 0 2px #fff4e0; }
+.zb-vars { margin-left: 10px; } .zb-knoepfe { display: flex; gap: 6px; margin-left: auto; } .zb-knoepfe button { font-size: 12px !important; padding: 2px 9px !important; border-radius: 7px; border: 1px solid #5a4a3a !important; background: #241c2c !important; color: #f0dca0 !important; }
+.zb-knoepfe button.an { background: #ff1a30 !important; color: #fff !important; border-color: #ff6a70 !important; animation: zpblink 1s steps(2) infinite; }
+.zb-padsbox { display: grid; grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr); gap: 6px; min-height: 0; }
+.zb-pads { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 6px; min-height: 0; }
+.zb-pad { touch-action: none; user-select: none; border-radius: 12px; border: 2px solid color-mix(in srgb, var(--p) 55%, #2a2234); background: linear-gradient(160deg, color-mix(in srgb, var(--p) 22%, #1d1726), #17111e); display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr auto; align-items: center; padding: 4px 8px; gap: 0 6px; min-height: 0; overflow: hidden; }
+.zb-pad span { font-size: 26px; grid-row: 1 / 3; } .zb-pad b { font-size: 15px; color: #f4e6cc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .zb-pad small { font-size: 10px; color: var(--p); font-weight: 700; }
+.zb-pad.cur { border-color: var(--p); box-shadow: 0 0 0 2px color-mix(in srgb, var(--p) 40%, transparent); }
+.zb-pad.stumm { opacity: .4; }
+.zb-pad.blitz { animation: zbblitz .22s ease-out; }
+@keyframes zbblitz { 0% { background: var(--p); box-shadow: 0 0 22px var(--p); } 100% { } }
+.zb.klein { grid-template-columns: 26px repeat(var(--n), minmax(0, 1fr)); gap: 2px; }
+.zb.klein .zb-name { font-size: 12px !important; padding: 0 !important; text-align: center !important; }
+.zb.klein .zb-z { font-size: 0 !important; border-radius: 3px; }
 .zb-z.cur { outline: 2px solid #f4c45a; outline-offset: 1px; }
 .zyn-menue.zyn-tastatur { width: 96vw !important; max-width: 780px !important; }
 .zyn-tast { display: flex; flex-direction: column; gap: 5px; width: 100%; }
@@ -1876,6 +1905,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
     setInterval(() => { const s = ruheSek(); if (!zpRuhe && s && Date.now() - zpLetzte > s * 1000 && !$(".zyn-menue")) zpRuheAn(); if (zpRuhe) zpRuheZeichnen(); }, 1000);
     setInterval(() => { if (zpRuhe) { try { ledsMelden(); } catch (_) {} } }, 110);
     let favT = 0, favUnterdrueck = false;
+    zpEl.addEventListener("pointerdown", e => { const pd = e.target.closest("[data-zb-pad]"); if (pd) { e.preventDefault(); beatPad(+pd.dataset.zbPad); $$(".zb-pad.cur", zpEl).forEach(x => x.classList.remove("cur")); pd.classList.add("cur"); } });
     zpEl.addEventListener("pointerdown", e => { zpLetzte = Date.now(); zpZeiger = true; const k = e.target.closest("[data-zp-k]"); if (!k) return; const i = +k.dataset.zpK; clearTimeout(favT); favT = setTimeout(() => { favUnterdrueck = true; zpFavUmschalten(i); }, 1500); });
     const zeigerLos = () => { zpZeiger = false; clearTimeout(favT); };
     zpEl.addEventListener("pointerup", zeigerLos); zpEl.addEventListener("pointercancel", zeigerLos); zpEl.addEventListener("pointerleave", zeigerLos);
@@ -1883,6 +1913,9 @@ html.zyn-ruhe .zp-ruhe { display: block; }
     zpEl.addEventListener("click", e => {
       if (favUnterdrueck) { favUnterdrueck = false; return; }
       const tb = e.target.closest("[data-zp-tab]"); if (tb) { zpSeiteSetzen(tb.dataset.zpTab); return; }
+      if (e.target.closest("[data-zb-pad]")) return;
+      if (e.target.closest("[data-zb-ansicht]")) { padsUmschalten(); return; }
+      if (e.target.closest("[data-zb-rec]")) { taste("REC", "kurz"); return; }
       const zv = e.target.closest("[data-zb-var]"); if (zv) { varWechseln(+zv.dataset.zbVar); return; }
       const zb = e.target.closest("[data-zb-r]");
       if (zb) { BC.r = +zb.dataset.zbR; if (zb.dataset.zbS != null) { BC.s = +zb.dataset.zbS; beatUmschalten(BC.s); } else { const info = beatsInfo(), sp = info && beatSpur(info); if (sp) BP().beatsAnschlag(sp.id, sp.art === "an" ? 0 : (BC.ton[sp.id] || 0)); zpZeichnen(true); } return; }
