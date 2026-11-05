@@ -20827,9 +20827,9 @@ function kaKachelnZeichnen(){if(KA.noTile)return;const K=G.ka;if(!K||!K.an&&!K.g
  for(let ty=Math.max(0,Math.floor(y0/TS));ty<=Math.floor(y1/TS);ty++)for(let tx=Math.max(0,Math.floor(x0/TS));tx<=Math.floor(x1/TS);tx++){if(tx*TS>WORLD||ty*TS>WORLD)continue;const k=tx+','+ty;let e=KAT.m.get(k);
   if(!e){e={cv:kaKachel(tx,ty,KAT.sc),u:0};KAT.m.set(k,e);neu++}e.u=performance.now();cx.drawImage(e.cv,tx*TS,ty*TS,TS,TS)}
  cx.imageSmoothingEnabled=ism;
- {const lim=Math.max(8,Math.min(GF().lite?16:28,Math.floor(6e7/((TS*KAT.sc)**2*4))));if(KAT.m.size>lim){const L=[...KAT.m.entries()].sort((a,b)=>a[1].u-b[1].u);for(let q=0;q<L.length-lim+2;q++)KAT.m.delete(L[q][0])}}
+ {const lim=Math.max(8,Math.min((window.__hsPERF3&&__hsPERF3.kl&&__hsPERF3.kl())||(GF().lite?16:28),Math.floor(6e7/((TS*KAT.sc)**2*4))));if(KAT.m.size>lim){const L=[...KAT.m.entries()].sort((a,b)=>a[1].u-b[1].u);for(let q=0;q<L.length-lim+2;q++)KAT.m.delete(L[q][0])}}
  /* nächste Kacheln in Laufrichtung vorbereiten (eine je Bild) */
- if(!neu&&P){const lx=P.x+(P.vx||0)*1.2,ly=P.y+(P.vy||0)*1.2;for(const[dx,dy]of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const tx=Math.floor((lx+dx*vw*0.6)/TS),ty=Math.floor((ly+dy*vh*0.6)/TS);if(tx<0||ty<0||tx*TS>WORLD||ty*TS>WORLD)continue;const k=tx+','+ty;if(!KAT.m.has(k)){KAT.m.set(k,{cv:kaKachel(tx,ty,KAT.sc),u:performance.now()});break}}}}
+ if(!neu&&P&&!(window.__hsPERF3&&__hsPERF3.noLook)){const lx=P.x+(P.vx||0)*1.2,ly=P.y+(P.vy||0)*1.2;for(const[dx,dy]of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const tx=Math.floor((lx+dx*vw*0.6)/TS),ty=Math.floor((ly+dy*vh*0.6)/TS);if(tx<0||ty<0||tx*TS>WORLD||ty*TS>WORLD)continue;const k=tx+','+ty;if(!KAT.m.has(k)){KAT.m.set(k,{cv:kaKachel(tx,ty,KAT.sc),u:performance.now()});break}}}}
 {const rw0=drawRoomWalls;drawRoomWalls=function(){const r=rw0.apply(this,arguments);try{kaKachelnZeichnen();kaBruecken(G.time);kaArenaRand()}catch(er){if(!KA.derr){KA.derr=1;console.error('kaZeichnen',er)}}return r}}
 
 /* ---------- Brücken, Flöße (über dem Wasser, unter den Figuren) ---------- */
@@ -25359,6 +25359,408 @@ P2.stat=p2Stat;
 {const _dt=rgDiagText;rgDiagText=function(){let s=_dt.apply(this,arguments);try{const S=p2Stat(),M=P2M.ms,f=v=>v.toFixed(1);
   if(S)s+=`\nBild ms p50 ${f(S.p50)} · p95 ${f(S.p95)} · p99 ${f(S.p99)} · max ${S.max.toFixed(0)} · Ruckler ${S.sp}/min (Spiel ${S.spJs}, außen ${S.spAus})${p2Heap()}`;
   s+=`\nje Bild: Logik ${f(M.u)} ms · Zeichnen ${f(M.r)} ms · HUD ${f(M.h)} ms · perf2 ${P2.on()?'Ultra':'aus'} · Layout-Cache ${P2R.hit}/${P2R.hit+P2R.miss}`}catch(e){}return s}}
+
+/* ================= Paket „karte2“: lesbarere, geradlinigere Abschnittskarten =================
+   Wunsch: klarer Hauptweg mit erkennbarer Richtung, weniger halbgare Sackgassen um Lichtungen herum, Spinnennetz bleibt, aber leichter.
+   - Makropfad über das Abschnittsraster läuft in eine Grundrichtung (Rand → gegenüberliegende Seite, wenig Zickzack, kaum Rückläufe)
+   - Lichtungen/Kammern einer Stufe reihen sich entlang der Achse Eingang → Ausgang statt im Kreis um die Mitte
+   - Durchgänge fluchten: geradeaus liegt der Ausgang gegenüber dem Eingang, an Kurven näher an der Eingangsseite
+   - Startabschnitt: der Bereich hinter dem Startpunkt wird gestutzt (man blickt und läuft nach vorn); braucht das erste Tor Platz
+     (Schlüssel-Wächter, Lager), rückt der Start ans hintere Ende des Startabschnitts (ka2Start)
+   - Seitenräume: eine runde Lichtung/Halle, oft mit zweitem Durchgang (Rundweg zurück in denselben Abschnitt)
+   - Sackgassen-Pflege nach dem Grundriss: Skelett der Fläche → leere Stummel, Uferstreifen, Ausbuchtungen werden zu Masse;
+     nur wenige längere „Nischen“ bleiben, und in jede kommt sicher etwas (Truhe/Goldhaufen), ebenso in jeden leeren Seitenraum
+   - Leitlinien: Pfad/Straße im Freien entlang des Hauptwegs, Fackeln/Laternen/Glutbecken in Laufrichtung in Höhlen, Hallen, Gassen,
+     Hauptweg mit Richtungspfeilen auf der Minikarte (unter dem Erkundungsnebel)
+   Nur Laufzeit-Hüllen um die Generator-Funktionen aus „karte“; Zeichnung/HUD bleiben unberührt. Präfix ka2. */
+window.__hsKARTE2=1;
+const KA2={aus:0,pfad:1,form:1,start:0,pflege:1,inhalt:1,leit:1,weg:1,licht:1,mini:1,schleife:0.55,dichte:1.2,
+ st:{n:0,fuell:0,nische:0,zurueck:0,inh:0}};
+const ka2An=()=>!KA2.aus&&!window.__ka2Aus;
+
+/* ---------- 1. Makropfad: Grundrichtung statt Schlangenlinie ---------- */
+function ka2Pfad(GN,L){const N4=[[1,0],[-1,0],[0,1],[0,-1]];let best=null,bs=1e9;
+ for(let tr=0;tr<28;tr++){let sx,sy;
+  if(L>=GN+1||Math.random()<0.55){sx=Math.random()<0.5?0:GN-1;sy=Math.random()<0.5?0:GN-1}
+  else{const a=ri(0,GN-1),e=Math.random()<0.5?0:GN-1;if(Math.random()<0.5){sx=a;sy=e}else{sx=e;sy=a}}
+  const dx=sx===0?1:sx===GN-1?-1:(Math.random()<0.5?1:-1),dy=sy===0?1:sy===GN-1?-1:(Math.random()<0.5?1:-1);const maj=Math.random()<0.5?0:1;
+  const used=new Set([sx+','+sy]),p=[[sx,sy]];let budget=4000;
+  const w=(d,last)=>{let v=0.25;if(d[0]&&d[0]===dx)v=maj===0?3:2;if(d[1]&&d[1]===dy)v=maj===1?3:2;if(last&&last[0]===d[0]&&last[1]===d[1])v*=1.15;return v};
+  const dfs=last=>{if(p.length>=L)return true;if(--budget<0)return false;const c=p[p.length-1];
+   const nb=N4.map(d=>({d,q:[c[0]+d[0],c[1]+d[1]]})).filter(o=>o.q[0]>=0&&o.q[1]>=0&&o.q[0]<GN&&o.q[1]<GN&&!used.has(o.q[0]+','+o.q[1]))
+    .map(o=>(o.k=Math.pow(Math.random(),1/w(o.d,last)),o)).sort((a,b)=>b.k-a.k);
+   for(const o of nb){used.add(o.q[0]+','+o.q[1]);p.push(o.q);if(dfs(o.d))return true;p.pop();used.delete(o.q[0]+','+o.q[1])}return false};
+  if(!dfs(null))continue;
+  let turns=0,back=0;for(let k=1;k<p.length;k++){const d=[p[k][0]-p[k-1][0],p[k][1]-p[k-1][1]];if((d[0]&&d[0]!==dx)||(d[1]&&d[1]!==dy))back++;if(k>1){const e=[p[k-1][0]-p[k-2][0],p[k-1][1]-p[k-2][1]];if(e[0]!==d[0]||e[1]!==d[1])turns++}}
+  const e=p[p.length-1],def=(L-1)-(Math.abs(e[0]-sx)+Math.abs(e[1]-sy));
+  const sc=def*2.2+back*1.6-Math.min(turns,3)*0.25+rnd(0,1.6);if(sc<bs){bs=sc;best=p.map(q=>[q[0],q[1]])}}
+ return best}
+{const kp0=kaPfad;kaPfad=function(GN,L,linear){if(!ka2An()||!KA2.pfad||linear)return kp0.apply(this,arguments);try{const p=ka2Pfad(GN,L);if(p&&p.length===L)return p}catch(er){console.error('ka2Pfad',er)}return kp0.apply(this,arguments)}}
+
+/* Hauptdurchgänge ausrichten: geradeaus → Ausgang etwa gegenüber dem Eingang; an Kurven näher an der Eingangsseite (kürzer, klarer) */
+{const kpo0=kaPort;kaPort=function(K,a,b,C,o){if(!ka2An()||!KA2.pfad||!K||!K.tore||!K.sec||(o&&o.off!=null))return kpo0.apply(this,arguments);try{
+  const last=K.tore.length?K.tore[K.tore.length-1]:null,hor=a[1]===b[1];if(last&&last.main&&K.tore.every(t=>t.main)){const L=last.P;o=Object.assign({},o||{});
+   if(L.hor===hor)o.off=clamp(L.t-L.base+ri(-4,4),9,C-10);
+   else{/* Kurve: Eingang liegt auf der Grenze L.bnd; wo liegt sie relativ zur Zelle a entlang der neuen Achse? */const base=(hor?a[1]:a[0])*C,lowSide=L.bnd<=base+C/2;o.off=lowSide?ri(9,Math.floor(C*0.42)):ri(Math.ceil(C*0.58),C-10)}
+   return kpo0.call(this,K,a,b,C,o)}}catch(er){console.error('ka2Port',er)}return kpo0.apply(this,arguments)}}
+/* ---------- 2. Ausformen entlang der Achse Eingang → Ausgang ---------- */
+/* Eingang/Ausgang eines Abschnitts (Hauptwege); fehlt einer, wird der andere an der Mitte gespiegelt */
+function ka2Achse(K,s,B){const tin=K.tore.find(t=>t.main&&t.b===s),tout=K.tore.find(t=>t.main&&t.a===s);let A=tin?tin.pb:null,E=tout?tout.pa:null;
+ const cx0=(B[0]+B[2])/2,cy0=(B[1]+B[3])/2,cl=(p,m)=>({i:clamp(p.i,B[0]+m,B[2]-m),j:clamp(p.j,B[1]+m,B[3]-m)});
+ if(!A&&!E)return null;if(!A)A={i:2*cx0-E.i,j:2*cy0-E.j};if(!E)E={i:2*cx0-A.i,j:2*cy0-A.j};return{A:cl(A,4),E:cl(E,4)}}
+function ka2Organisch(K,s,B,ports,o){const sec=K.sec[s],W_=B[2]-B[0],H_=B[3]-B[1],cx0=(B[0]+B[2])/2,cy0=(B[1]+B[3])/2,var_=o.v||0,scl=clamp(W_/29,1,1.6);const blobs=[];
+ const cB=(b)=>{b[0]=clamp(b[0],B[0]+b[2]*0.8,B[2]-b[2]*0.8);b[1]=clamp(b[1],B[1]+b[3]*0.8,B[3]-b[3]*0.8);return b};
+ if(sec&&sec.seite){/* Seitenraum: eine runde Lichtung/Grotte */blobs.push(cB([cx0+rnd(-1.5,1.5),cy0+rnd(-1.5,1.5),W_*rnd(0.32,0.4),H_*rnd(0.3,0.38)]));if(Math.random()<0.4){const a=rnd(TAU);blobs.push(cB([cx0+Math.cos(a)*W_*0.22,cy0+Math.sin(a)*H_*0.22,W_*0.2,H_*0.18]))}}
+ else{const ax=ka2Achse(K,s,B);if(!ax)return null;const A=ax.A,E=ax.E,L=Math.hypot(E.i-A.i,E.j-A.j)||1,nx=-(E.j-A.j)/L,ny=(E.i-A.i)/L;
+  const nb=var_===1?2:var_===2?ri(4,5):ri(3,4),pj=Math.min(W_,H_)*(var_===2?0.15:0.1);
+  if(var_===1){/* große Lichtung/Halle in der Mitte der Achse */const t=rnd(0.4,0.6);blobs.push(cB([A.i+(E.i-A.i)*t+nx*rnd(-2,2),A.j+(E.j-A.j)*t+ny*rnd(-2,2),W_*rnd(0.34,0.42),H_*rnd(0.3,0.4)]))}
+  for(let q=0;q<nb;q++){const t=(q+0.5)/nb,off=rnd(-1,1)*pj,rx=(var_===2?rnd(4,6.2):rnd(5.5,9.5))*scl,ry=rx*rnd(0.7,1.15);blobs.push(cB([A.i+(E.i-A.i)*t+nx*off,A.j+(E.j-A.j)*t+ny*off,rx,ry]))}
+  blobs.sort((a,b)=>((a[0]-A.i)*(E.i-A.i)+(a[1]-A.j)*(E.j-A.j))-((b[0]-A.i)*(E.i-A.i)+(b[1]-A.j)*(E.j-A.j)))}
+ for(const b of blobs)kaEll(K,b[0],b[1],b[2],b[3],s,B);
+ const gw=var_===2?3:ri(3,5);for(let q=1;q<blobs.length;q++)kaLinie(K,blobs[q-1][0],blobs[q-1][1],blobs[q][0],blobs[q][1],gw,s,B,0.12);
+ const near=p=>{let best=blobs[0],bd=1e9;for(const b of blobs){const d=Math.hypot(b[0]-p.i,b[1]-p.j);if(d<bd){bd=d;best=b}}return best};
+ for(const p of ports){const b=near(p);kaLinie(K,p.i,p.j,b[0],b[1],4,s,null,0.1);kaEll(K,p.i,p.j,2.2,2.2,s)}
+ kaGlatt(K,B,s,null,2);
+ for(const p of ports){const b=near(p);kaLinie(K,p.i,p.j,b[0],b[1],3,s,null,0.04)}
+ for(let q=1;q<blobs.length;q++)kaLinie(K,blobs[q-1][0],blobs[q-1][1],blobs[q][0],blobs[q][1],2,s,B,0.04);
+ return blobs}
+/* Hallen „Gänge und Kammern“: Kammern der Reihe nach entlang der Achse */
+function ka2HallenKammern(K,s,B,ports){const ax=ka2Achse(K,s,B);if(!ax)return null;const A=ax.A,E=ax.E,W_=B[2]-B[0],H_=B[3]-B[1],L=Math.hypot(E.i-A.i,E.j-A.j)||1,nx=-(E.j-A.j)/L,ny=(E.i-A.i)/L;
+ const rooms=[],cs=[];const k=ri(3,4);for(let q=0;q<k;q++){const t=(q+0.5)/k,off=rnd(-1,1)*Math.min(W_,H_)*0.12,w=ri(7,11),hh=ri(6,10);
+  const ci=clamp(A.i+(E.i-A.i)*t+nx*off,B[0]+w/2+1,B[2]-w/2-1),cj=clamp(A.j+(E.j-A.j)*t+ny*off,B[1]+hh/2+1,B[3]-hh/2-1);const r=[Math.round(ci-w/2),Math.round(cj-hh/2),Math.round(ci+w/2),Math.round(cj+hh/2)];kaRect(K,r[0],r[1],r[2],r[3],s);rooms.push(r);cs.push([(r[0]+r[2])/2,(r[1]+r[3])/2])}
+ for(let q=1;q<cs.length;q++)kaGang(K,cs[q-1][0],cs[q-1][1],cs[q][0],cs[q][1],3+(Math.random()<0.4?1:0),s);
+ for(const p of ports){let best=cs[0],bd=1e9;for(const c of cs){const d=Math.hypot(c[0]-p.i,c[1]-p.j);if(d<bd){bd=d;best=c}}kaGang(K,p.i,p.j,best[0],best[1],4,s);kaRect(K,p.i-1,p.j-1,p.i+1,p.j+1,s)}
+ return rooms}
+/* Seitenraum mit zweitem Durchgang in denselben Abschnitt: kleiner Rundweg statt Sackgasse */
+function ka2Schleife(K,s){const sec=K.sec[s];if(!sec||!sec.seite||sec.ka2S)return;sec.ka2S=1;if(Math.random()>KA2.schleife)return;const par=K.sec[sec.parent];if(!par)return;const C=K.C;
+ const t1=K.tore.find(t=>t.typ==='seite'&&t.b===s);if(!t1)return;const o1=t1.P.t-t1.P.base;const opts=[];for(let off=10;off<=C-11;off++)if(Math.abs(off-o1)>=12)opts.push(off);if(!opts.length)return;
+ const P_=kaPort(K,par.cell,sec.cell,C,{w:3,m:3,off:pick(opts)});
+ /* Anschluss an den (schon ausgeformten) Elternabschnitt: nächste Bodenzelle suchen */
+ const n=K.n;let best=-1,bd=1e9;for(let c=0;c<n*n;c++){if(K.M[c]||K.sid[c]!==par.k)continue;const d=Math.hypot(c%n-P_.pa.i,((c/n)|0)-P_.pa.j);if(d<bd){bd=d;best=c}}if(best<0||bd>16)return;
+ kaDurchgang(K,P_,par.k,s);kaLinie(K,P_.pa.i,P_.pa.j,best%n,(best/n)|0,3,par.k,null,0.06);
+ const tor={g:K.tore.length,a:par.k,b:s,P:P_,typ:'seite',los:'offen',main:0,fl:null,pa:P_.pa,pb:P_.pb,ka2:1};K.tore.push(tor);par.ports.push(P_.pa);sec.ports.push(P_.pb);KA2.st.schleife=(KA2.st.schleife||0)+1}
+{const fo0=kaFormOrganisch;kaFormOrganisch=function(K,s,B,ports,o){if(!ka2An()||!KA2.form||!K||!K.sec)return fo0.apply(this,arguments);try{if(K.sec[s]&&K.sec[s].seite)ka2Schleife(K,s);const r=ka2Organisch(K,s,B,ports,o||{});if(r)return r}catch(er){console.error('ka2Organisch',er)}return fo0.apply(this,arguments)}}
+{const fh0=kaFormHallen;kaFormHallen=function(K,s,B,ports,o){if(!ka2An()||!KA2.form||!K||!K.sec)return fh0.apply(this,arguments);try{const sec=K.sec[s];if(sec&&sec.seite)ka2Schleife(K,s);
+  if(sec&&!sec.seite&&o&&o.v===2){const r=ka2HallenKammern(K,s,B,ports);if(r)return r}}catch(er){console.error('ka2Hallen',er)}return fh0.apply(this,arguments)}}
+
+/* ---------- 3. Skelett und Sackgassen ---------- */
+function ka2Abstand(F,n){const N=n*n,D=new Int16Array(N).fill(-1),q=new Int32Array(N);let h=0,t=0;for(let c=0;c<N;c++)if(!F[c]){D[c]=0;q[t++]=c}
+ while(h<t){const c=q[h++],i=c%n,j=(c/n)|0;for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){const ii=i+a,jj=j+b;if(ii<0||jj<0||ii>=n||jj>=n)continue;const k=jj*n+ii;if(D[k]<0){D[k]=D[c]+1;q[t++]=k}}}return D}
+function ka2Skelett(F,n){const S=F.slice(),at=(i,j)=>S[j*n+i];let act=[];for(let j=1;j<n-1;j++)for(let i=1;i<n-1;i++)if(S[j*n+i])act.push(j*n+i);
+ for(let it=0;it<40;it++){let ch=0;for(const step of [0,1]){const del=[];for(const c of act){if(!S[c])continue;const i=c%n,j=(c/n)|0;
+   const p2=at(i,j-1),p3=at(i+1,j-1),p4=at(i+1,j),p5=at(i+1,j+1),p6=at(i,j+1),p7=at(i-1,j+1),p8=at(i-1,j),p9=at(i-1,j-1),B=p2+p3+p4+p5+p6+p7+p8+p9;if(B<2||B>6)continue;
+   let A=(!p2&&p3)+(!p3&&p4)+(!p4&&p5)+(!p5&&p6)+(!p6&&p7)+(!p7&&p8)+(!p8&&p9)+(!p9&&p2);if(A!==1)continue;
+   if(step===0){if(p2*p4*p6||p4*p6*p8)continue}else{if(p2*p4*p8||p2*p6*p8)continue}del.push(c)}for(const k of del)S[k]=0;ch+=del.length}if(!ch)break;act=act.filter(c=>S[c])}return S}
+/* Äste: von jedem Endpunkt bis zur nächsten Kreuzung; kurze Sporne (Form der Lichtung) zuvor entfernen */
+function ka2Aeste(F,n,D,skip){const S=ka2Skelett(F,n),N=n*n;
+ const nb8=c=>{const i=c%n,j=(c/n)|0,L=[];for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){if(!a&&!b)continue;const ii=i+a,jj=j+b;if(ii<0||jj<0||ii>=n||jj>=n)continue;const k=jj*n+ii;if(S[k])L.push(k)}return L};
+ const deg=c=>nb8(c).length;
+ const trace=e=>{const path=[e],seen=new Set([e]);let cur=e;for(let s=0;s<3000;s++){const L=nb8(cur).filter(k=>!seen.has(k));if(!L.length)return null;cur=L[0];seen.add(cur);path.push(cur);if(deg(cur)>=3)break}
+  let len=0;for(let k=1;k<path.length;k++){const a=path[k-1],b=path[k];len+=(a%n!==b%n&&((a/n)|0)!==((b/n)|0))?1.414:1}return{path,jn:cur,len}};
+ for(let r=0;r<4;r++){let rm=0;for(let c=0;c<N;c++){if(!S[c]||deg(c)!==1||skip(c))continue;const tr=trace(c);if(!tr)continue;if(tr.len<=D[tr.jn]+1.5){for(let k=0;k<tr.path.length-1;k++)S[tr.path[k]]=0;rm++}}if(!rm)break}
+ const br=[];for(let c=0;c<N;c++){if(!S[c]||deg(c)!==1||skip(c))continue;const tr=trace(c);if(!tr)continue;const depth=tr.len-D[tr.jn];if(depth<1.5)continue;br.push({id:br.length,end:c,jn:tr.jn,path:tr.path,depth})}
+ /* Gebiet je Ast: Bodenzellen, deren nächster Skelettpunkt auf dem Ast jenseits des Kreuzungsradius liegt */
+ const lab=new Int32Array(N).fill(-2),q=[];for(let c=0;c<N;c++)if(S[c]){lab[c]=-1;q.push(c)}
+ for(const B of br){const jx=B.jn%n,jy=(B.jn/n)|0,jr=D[B.jn];for(const c of B.path)if(Math.hypot(c%n-jx,((c/n)|0)-jy)>jr+0.5&&lab[c]===-1)lab[c]=B.id}
+ for(let h=0;h<q.length;h++){const c=q[h],i=c%n,j=(c/n)|0;for(const[a,b]of [[1,0],[-1,0],[0,1],[0,-1]]){const ii=i+a,jj=j+b;if(ii<0||jj<0||ii>=n||jj>=n)continue;const k=jj*n+ii;if(!F[k]||lab[k]!==-2)continue;lab[k]=lab[c];q.push(k)}}
+ for(const B of br)B.cells=[];for(let c=0;c<N;c++)if(lab[c]>=0)br[lab[c]].cells.push(c);return br}
+
+/* Start an das hintere Ende des Startabschnitts (Blick und Weg zeigen nach vorn) */
+function ka2Start(K){const s0=K.sec[0];if(!s0||!s0.ports.length||K.esc)return;const n=K.n,d=kaFlut(K,s0.ports.map(p=>p.j*n+p.i),K.lo);let dm=0;
+ for(let c=0;c<n*n;c++)if(K.sid[c]===0&&d[c]>dm&&!K.lo[c])dm=d[c];const want=Math.max(8,Math.round(dm*0.7));let best=null,bv=-1e9;
+ for(let c=0;c<n*n;c++){if(K.M[c]||K.sid[c]!==0||K.lo[c]||d[c]<0)continue;const i=c%n,j=(c/n)|0;let op=0;for(let b=-3;b<=3;b++)for(let a=-3;a<=3;a++){const k=(j+b)*n+i+a;if(k>=0&&k<n*n&&!K.M[k]&&!K.lo[k])op++}
+  const v=op*3-Math.abs(d[c]-want)*1.6+rnd(0,4);if(v>bv){bv=v;best={i,j}}}if(best)K.start=best}
+
+/* Sackgassen pflegen: leere Stummel → Masse; einige längere bleiben als Nischen (bekommen sicher Inhalt) */
+function ka2Pflege(K){const n=K.n,N=n*n,prot=new Uint8Array(N);K.kaNi=[];K.ka2fz0=K.sec.map(()=>0);for(let c=0;c<N;c++){const s=K.sid[c];if(s!==255&&!K.M[c]&&!K.lo[c]&&K.ka2fz0[s]!=null)K.ka2fz0[s]++}
+ const mark=(ci,cj,r)=>{for(let j=Math.floor(cj-r);j<=Math.ceil(cj+r);j++)for(let i=Math.floor(ci-r);i<=Math.ceil(ci+r);i++){if(i<0||j<0||i>=n||j>=n)continue;if((i-ci)**2+(j-cj)**2<=r*r)prot[j*n+i]=1}};
+ for(const t of K.tore){const P_=t.P,gi=P_.hor?P_.bnd:P_.t,gj=P_.hor?P_.t:P_.bnd;mark(t.pa.i,t.pa.j,2.5);mark(t.pb.i,t.pb.j,2.5);
+  if(!t.fl)mark(gi,gj,4.5);else{/* Brücke/Fähre: nur der Durchgang selbst, Uferstreifen daneben dürfen weg */const h=Math.floor(P_.w/2)+1,h2=P_.w-Math.floor(P_.w/2);for(let u=P_.t-h;u<=P_.t+h2;u++)for(let v=P_.bnd-P_.m-3;v<=P_.bnd+P_.m+2;v++){const i=P_.hor?v:u,j=P_.hor?u:v;if(i>=0&&j>=0&&i<n&&j<n)prot[j*n+i]=1}}
+  if(t.los==='faehre'&&t.fl){/* Standplatz des Fährmanns (wie in kaBau: vor dem Ufer, seitlich des Durchgangs) */const L=Math.hypot(t.pa.i-gi,t.pa.j-gj)||1,ux=(t.pa.i-gi)/L,uy=(t.pa.j-gj)/L,off=(t.fl.rw*K.Z/2+46)/K.Z,sd=(P_.w*K.Z/2+40)/K.Z;
+   mark(gi+ux*off+(P_.hor?0:sd),gj+uy*off+(P_.hor?sd:0),3.2)}}
+ mark(K.start.i,K.start.j,6);if(K.kampf)mark(K.kampf.i,K.kampf.j,7.5);
+ for(let c=0;c<N;c++){const s=K.sid[c];if(s!==255&&K.sec[s]&&K.sec[s].art==='arena')prot[c]=1}
+ const need=[K.start.j*n+K.start.i];for(const t of K.tore){need.push(t.pa.j*n+t.pa.i,t.pb.j*n+t.pb.i)}if(K.kampf)need.push(K.kampf.j*n+K.kampf.i);
+ const ok=()=>{const d=kaFlut(K,[need[0]],K.lo);return need.every(c=>d[c]>=0||K.M[c])};
+ const nKeep=K.esc||K.flucht?0:1+(K.nMain>=6?1:0)+(Math.random()<0.25?1:0);const seiteKeep=new Set();const keepEnd=[];
+ for(let round=0;round<3;round++){const F=new Uint8Array(N);for(let c=0;c<N;c++)F[c]=!K.M[c]&&!K.lo[c]?1:0;const D=ka2Abstand(F,n);
+  const br=ka2Aeste(F,n,D,c=>prot[c]===1);let fill=0;const done=[];
+  br.sort((a,b)=>b.depth-a.depth);
+  for(const B of br){const s=K.sid[B.end],sec=s!==255?K.sec[s]:null;const ei=B.end%n,ej=(B.end/n)|0;
+   if(keepEnd.some(p=>Math.hypot(p[0]-ei,p[1]-ej)<5))continue;
+   if(sec&&sec.seite){/* der Seitenraum selbst bleibt; nur Nebenkammern/Stummel darin werden zu Masse */if(!sec.ka2F){let f=0;for(let c=0;c<N;c++)if(K.sid[c]===s&&!K.M[c]&&!K.lo[c])f++;sec.ka2F=f}
+    if(!seiteKeep.has(s)&&B.cells.length>=sec.ka2F*0.5){seiteKeep.add(s);keepEnd.push([ei,ej]);continue}}
+   if(sec&&!sec.seite&&(sec.art==='mitte'||sec.art==='vorhof')&&B.depth>=4&&B.cells.length>=14&&K.kaNi.length<nKeep&&Math.random()<0.75){K.kaNi.push({i:ei,j:ej,sec:s,cells:B.cells.slice(),depth:B.depth});keepEnd.push([ei,ej]);KA2.st.nische++;continue}
+   let L=B.cells.filter(c=>!prot[c]&&!K.M[c]);if(!L.length)continue;
+   if(L.length<B.cells.length){/* Gebiet enthält Start/Kampfplatz/Tor-Umfeld: nur, was vom Ast-Anfang aus dahinter liegt */const dj=kaFlut(K,[B.jn],K.lo);let m=0;for(const c of B.cells)if(prot[c]&&dj[c]>m)m=dj[c];L=L.filter(c=>dj[c]>m+3);if(L.length<4)continue}const sv=L.map(c=>K.sid[c]);for(const c of L){K.M[c]=1;K.sid[c]=255}done.push([L,sv]);fill++;KA2.st.fuell++}
+  if(done.length&&!ok()){/* selten: einzeln zurücknehmen, bis alles wieder verbunden ist */for(let q=done.length-1;q>=0;q--){const[L,sv]=done[q];L.forEach((c,k)=>{K.M[c]=0;K.sid[c]=sv[k]});fill--;KA2.st.fuell--;KA2.st.zurueck++;done.splice(q,1);if(ok())break}}
+  if(!fill)break}
+ /* Nischen-Zellen, die beim Füllen anderer Äste verloren gingen, entfernen */
+ for(const o of K.kaNi)o.cells=o.cells.filter(c=>!K.M[c])}
+{const kl0=kaLayout;kaLayout=function(S){const K=kl0.apply(this,arguments);if(!ka2An()||!K)return K;KA2.st.n++;
+ try{const t0=K.tore.find(t=>t.main&&t.a===0);if(KA2.start||t0&&(t0.los==='schluessel'||t0.los==='lager'))ka2Start(K)}catch(er){console.error('ka2Start',er)}
+ const t0=performance.now();try{if(KA2.pflege)ka2Pflege(K)}catch(er){console.error('ka2Pflege',er)}KA2.st.msP=(KA2.st.msP||0)+performance.now()-t0;return K}}
+
+/* Gegnerzahl je Abschnitt nach der Fläche vor der Pflege (Leveltempo bleibt), höchstens KA2.dichte-fach dichter (1 = Gegner nach neuer Fläche, ca. 7 % weniger) */
+{const kbv0=kaBevoelkern;kaBevoelkern=function(S){const K=G.ka;if(!ka2An()||!K||!K.ka2fz0)return kbv0.apply(this,arguments);const sv=K.sec.map(s=>s.fz);
+ try{K.sec.forEach((s,k)=>{const f0=K.ka2fz0[k];if(f0>s.fz)s.fz=Math.round(Math.min(f0,s.fz*KA2.dichte))});return kbv0.apply(this,arguments)}finally{K.sec.forEach((s,k)=>{s.fz=sv[k]})}}}
+/* ---------- 4. Hauptweg (mittig durch die Fläche, Abkürzungen zu), Straße/Pfad im Freien ---------- */
+function ka2Weg(K){const n=K.n,N=n*n,Z=K.Z,F=new Uint8Array(N);for(let c=0;c<N;c++)F[c]=!K.M[c]&&!K.lo[c]?1:0;
+ for(const t of K.tore){if(t.typ==='abk'){const P_=t.P;const gi=P_.hor?P_.bnd:P_.t,gj=P_.hor?P_.t:P_.bnd;for(let b=-3;b<=3;b++)for(let a=-3;a<=3;a++){const i=gi+a,j=gj+b;if(i>=0&&j>=0&&i<n&&j<n)F[j*n+i]=0}}}
+ const D=ka2Abstand(F,n);const cz=(x,y)=>clamp(Math.floor(y/Z),0,n-1)*n+clamp(Math.floor(x/Z),0,n-1);
+ const A=K.sec.find(s=>s.art==='arena');const g=K.exitP||(G.obj&&G.obj.k==='flucht'&&G.obj.gx!=null?{x:G.obj.gx,y:G.obj.gy}:null)||K.kampfP||(A?{x:A.cx,y:A.cy}:{x:K.sec[K.nMain-1].cx,y:K.sec[K.nMain-1].cy});
+ const s0=cz(K.start.x,K.start.y),g0=cz(g.x,g.y);
+ /* Dijkstra mit Abstand zur Wand als Vorliebe (Weg in der Mitte der Gänge) */
+ const dist=new Float64Array(N).fill(1e9),par=new Int32Array(N).fill(-1),HK=new Float64Array(N*4),HV=new Int32Array(N*4);let hn=0;
+ const push=(c,v)=>{if(hn>=HK.length)return;let i=hn++;HK[i]=v;HV[i]=c;while(i>0){const p=(i-1)>>1;if(HK[p]<=HK[i])break;const tk=HK[p],tv=HV[p];HK[p]=HK[i];HV[p]=HV[i];HK[i]=tk;HV[i]=tv;i=p}};
+ const pop=()=>{const v=HK[0],c=HV[0];hn--;if(hn>0){HK[0]=HK[hn];HV[0]=HV[hn];let i=0;for(;;){const a=2*i+1,b=a+1;let m=i;if(a<hn&&HK[a]<HK[m])m=a;if(b<hn&&HK[b]<HK[m])m=b;if(m===i)break;const tk=HK[m],tv=HV[m];HK[m]=HK[i];HV[m]=HV[i];HK[i]=tk;HV[i]=tv;i=m}}PV=v;return c};let PV=0;
+ const pass=c=>F[c]||(K.sid[c]!==255&&K.sec[K.sid[c]]&&K.sec[K.sid[c]].art==='arena'&&!K.M[c]);
+ dist[s0]=0;push(s0,0);while(hn>0){const c=pop(),v=PV;if(v>dist[c])continue;if(c===g0)break;const i=c%n,j=(c/n)|0;
+  for(const[a,b,l]of [[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.414],[1,-1,1.414],[-1,1,1.414],[-1,-1,1.414]]){const ii=i+a,jj=j+b;if(ii<0||jj<0||ii>=n||jj>=n)continue;const k=jj*n+ii;if(!pass(k))continue;if(a&&b&&(!pass(j*n+ii)||!pass(jj*n+i)))continue;
+   const w=l*(1+2.2/(1+Math.min(6,D[k]))),nv=v+w;if(nv<dist[k]){dist[k]=nv;par[k]=c;push(k,nv)}}}
+ if(par[g0]<0&&g0!==s0)return null;const P=[];let c=g0;while(c>=0){P.push([(c%n+0.5)*Z,(((c/n)|0)+0.5)*Z]);c=par[c]}P.reverse();
+ const R=[P[0]];for(let k=9;k<P.length-4;k+=9)R.push(P[k]);R.push(P[P.length-1]);return kaGlattPfad(R)}
+{const kb0=kaBau;kaBau=function(S){const K=kb0.apply(this,arguments);if(!ka2An()||!K)return K;try{if(KA2.leit){const t0=performance.now();const W=ka2Weg(K);KA2.st.msW=(KA2.st.msW||0)+performance.now()-t0;K.ka2W=W;
+  const T=K.T,draussen=(T.lay==='offen'||T.mas==='wald')&&!T.ruin;if(KA2.weg&&W&&W.length>2&&(draussen||G.road))G.road=W}}catch(er){console.error('ka2Weg',er)}return K}}
+
+/* ---------- 5. Leitlichter in Laufrichtung (Höhle, Hallen, Gassen) ---------- */
+const KA2_WEGFREI=new Set(['baum','fels','stamm','kristall','stalag','pilz','saeule','statue','kisten','stand','brunnen','lore','wand','sarg']);
+{const kd0=kaDeko;kaDeko=function(S){const r=kd0.apply(this,arguments);try{const K=G.ka;
+ if(ka2An()&&KA2.leit&&K&&K.ka2W&&G.road===K.ka2W){/* Pfad/Straße frei halten: Bäume, Felsen, Tümpel nicht mitten auf den Weg */const W=K.ka2W,nah=(x,y,r)=>{for(const p of W)if((p[0]-x)**2+(p[1]-y)**2<r*r)return true;return false};
+  G.blk=G.blk.filter(b=>!(b.wl===1&&!b.kaPf&&b.kaTor==null&&!b.kaM&&KA2_WEGFREI.has(b.k)&&(b.t==='c'?nah(b.x,b.y,(b.r||20)+62):nah(b.x+b.w/2,b.y+b.h/2,Math.max(b.w,b.h)/2+56))));
+  if(G.wl&&G.wl.lo)G.wl.lo=G.wl.lo.filter(o=>!(o.wl===1&&o.t==='c'&&!o.kaGap&&nah(o.x,o.y,(o.r||40)+64)))}
+ if(ka2An()&&KA2.leit&&KA2.licht&&K&&K.ka2W&&!G.road){const W=K.ka2W,T=K.T;const k=T.lay==='gassen'?'lantern':T.glut?'brazier':'torch';
+  let acc=0,side=1,m=0;const frei=(x,y)=>!blkPunkt(x,y,14)&&!wlLoPunkt(x,y,20);
+  for(let q=1;q<W.length;q++){const a=W[q-1],b=W[q],l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;acc+=l;if(acc<560||q>W.length-3)continue;
+   const ux=(b[0]-a[0])/l,uy=(b[1]-a[1])/l;let put=false;for(const o of [86,64,110]){const x=b[0]-uy*o*side,y=b[1]+ux*o*side;if(K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<180))break;if(frei(x,y)){G.deco.push({x,y,k,s:1,v:Math.random(),wl:1,ka2:1});put=true;break}}
+   if(put){acc=0;side=-side;m++}}K.ka2Lichter=m}}catch(er){console.error('ka2Leit',er)}return r}}
+
+/* ---------- 6. Inhalt: jede Nische und jeder Seitenraum hat etwas ---------- */
+const KA2_INH=/^(chest|shrine|secret|goldpile|rolle|merchant|okaefig|leuchter|sp_|np_|ar_|ka_hebel|ka_siegel|ka_fass|ka_faehrmann)/;
+function ka2InhaltPunkte(){const L=[];const add=(x,y)=>{if(x!=null&&isFinite(x)&&isFinite(y))L.push([x,y])};
+ for(const p of G.props)if(!p.dead&&KA2_INH.test(p.k))add(p.x,p.y);if(G.sp&&G.sp.L)for(const o of G.sp.L)add(o.x,o.y);if(G.np&&G.np.L)for(const o of G.np.L){const p=o.pr||o;add(p.x,p.y)}
+ if(G.ar&&G.ar.L)for(const A of G.ar.L)add(A.x,A.y);const W=G.wl;if(W&&W.gr)for(const g of W.gr)if(g.k==='lager'&&g.m&&g.m.some(e=>e&&e.elite))add(g.x,g.y);return L}
+function ka2Lohn(x,y){const K=G.ka;const q=wlNahFrei(x,y,5);if(!q||!wlFrei(q.x,q.y,15))return false;if(G.props.some(p=>!p.dead&&Math.hypot(p.x-q.x,p.y-q.y)<40))return false;
+ const r=Math.random();if(r<0.55)G.props.push({k:'chest',prop:1,x:q.x,y:q.y,r:16,mimic:Math.random()<0.12,ka2:1});
+ else{G.props.push({k:'goldpile',prop:1,x:q.x,y:q.y,r:16,ka2:1});for(let k=0;k<2;k++){const z=wlNahFrei(q.x+rnd(-60,60),q.y+rnd(-40,40),3);if(z&&wlFrei(z.x,z.y,14))G.props.push({k:'urn',prop:1,x:z.x,y:z.y,r:14,ka2:1})}}
+ KA2.st.inh++;return true}
+function ka2Inhalt(){const K=G.ka;if(!K||!K.an||G.room||K.esc)return;const n=K.n,Z=K.Z,L=ka2InhaltPunkte();const inZ=set=>L.some(p=>set.has(Math.floor(p[1]/Z)*n+Math.floor(p[0]/Z)));
+ for(const o of K.kaNi||[]){if(!o.cells.length)continue;const set=new Set(o.cells);const ex=kaW(o.i),ey=kaW(o.j);o.inh=inZ(set)||L.some(p=>Math.hypot(p[0]-ex,p[1]-ey)<130);o.x=ex;o.y=ey;if(!o.inh){
+   /* möglichst tief in der Nische */const C=o.cells.filter(c=>!K.lo[c]).sort((a,b)=>Math.hypot(a%n-o.i,((a/n)|0)-o.j)-Math.hypot(b%n-o.i,((b/n)|0)-o.j));for(let k=0;k<C.length&&k<30&&!o.inh;k+=2)o.inh=ka2Lohn(kaW(C[k]%n),kaW((C[k]/n)|0));if(o.inh)o.neu=1}}
+ const SZ={};for(const s of K.sec)if(s.seite)SZ[s.k]=new Set();for(let c=0;c<n*n;c++){const z=SZ[K.sid[c]];if(z&&!K.M[c])z.add(c)}
+ for(const s of K.sec){if(!s.seite)continue;const set=SZ[s.k];if(!set.size||inZ(set))continue;
+  /* fernster Punkt vom Durchgang */const p=s.ports[0];let best=null,bv=-1;for(const c of set){if(K.lo[c])continue;const i=c%n,j=(c/n)|0,d=p?Math.hypot(i-p.i,j-p.j):0;let op=0;for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++)if(!K.M[(j+b)*n+i+a])op++;const v=d+op*2+rnd(0,2);if(op>=8&&v>bv){bv=v;best=[kaW(i),kaW(j)]}}
+  if(best&&!ka2Lohn(best[0],best[1])){const L=[...set].filter(c=>!K.lo[c]);for(let k=0;k<20;k++){const c=pick(L);if(ka2Lohn(kaW(c%n),kaW((c/n)|0)))break}}}}
+{const ss=setupStage;setupStage=function(i){const r=ss.apply(this,arguments);const t0=performance.now();try{if(ka2An()&&KA2.inhalt&&!G.netGuestRun&&G.ka&&G.ka.an)ka2Inhalt()}catch(er){console.error('ka2Inhalt',er)}KA2.st.msI=(KA2.st.msI||0)+performance.now()-t0;return r}}
+
+/* ---------- 7. Minikarte: Hauptweg mit Richtungspfeilen (unter dem Erkundungsnebel, nur Grundkarte) ---------- */
+{const mb0=wlMiniBau;wlMiniBau=function(){const cv=mb0.apply(this,arguments);try{const K=G.ka;if(ka2An()&&KA2.mini&&K&&K.ka2W&&cv&&!G.room){const g=cv.getContext('2d'),k=cv.width/WORLD,W=K.ka2W;
+  g.save();g.strokeStyle='rgba(255,208,74,.42)';g.lineWidth=1.3;g.setLineDash&&g.setLineDash([3,3]);g.beginPath();W.forEach((p,q)=>q?g.lineTo(p[0]*k,p[1]*k):g.moveTo(p[0]*k,p[1]*k));g.stroke();g.setLineDash&&g.setLineDash([]);
+  g.fillStyle='rgba(255,208,74,.7)';let acc=0;for(let q=1;q<W.length;q++){const a=W[q-1],b=W[q],l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;acc+=l;if(acc<900)continue;acc=0;const ux=(b[0]-a[0])/l,uy=(b[1]-a[1])/l,x=b[0]*k,y=b[1]*k,s=3.2;
+   g.beginPath();g.moveTo(x+ux*s,y+uy*s);g.lineTo(x-ux*s-uy*s*0.8,y-uy*s+ux*s*0.8);g.lineTo(x-ux*s+uy*s*0.8,y-uy*s-ux*s*0.8);g.closePath();g.fill()}g.restore()}}catch(er){}return cv}}
+
+/* Testzugang */
+window.__hsKA2={KA2,ka2Pfad,ka2Pflege,ka2Aeste,ka2Weg,ka2Inhalt,mini:()=>wlMiniBau()};
+
+/* ===== perf3: RG353V – dritte Runde (Messdaten vom Gerät), scharfe Sprechblasen, kein Start-Fenster, Knöpfe ohne Blau – window.__hsPERF3 =====
+   Gerät (Video, ?diag, Ultra 320×240, Wald S0): Bild p50 35–37 ms, p95 78–90, Ruckler 40–90/min; „Browser/Rest“ 16–45 ms; Hintergrund-Neubau bis 122 ms.
+   Befund (Chromium 77, 640×480, CPU-Drossel ×6, Trace/Profil/LayerTree):
+   · „Browser/Rest“ war Bildabstand minus eigenes JS – darin steckt auch das Warten auf den nächsten Bildschirm-Takt (bei 30 Bildern/s und
+     ~15 ms JS sind das ~18 ms reines Warten). Echte Browser-Arbeit: Canvas flush/Snapshot, Stil/Layout/Paint der HUD-Ebenen
+     (HUD als eigene 640×480-Ebene über der Spiel-Canvas, Text-Schatten, Verlaufs-Hintergründe der Knöpfe, Toast-Animationen,
+     Tutorial-Karte mit Schatten + Einblend-Animation, Diagnose-Anzeige 2×/s).
+   · Hintergrund-Neubau (52–101 ms gedrosselt, Gerät bis 122 ms) = fast nur Kartenkacheln, die erst beim Neubau synchron gebaut wurden
+     (640×640-Welt-Kachel 17–45 ms je Stück).
+   · Spiel-Ruckler beim Zeichnen: Sprite-Vorrendern von Objekten (ulBake mit getImageData, bis 25–110 ms in einem Bild, weil bis zu
+     6 Sprites je Bild gebaut wurden), Kacheln im Vorbau (bis 17 ms je Kachel), Gegenstands-Symbole beim ersten Erscheinen.
+     Ruckler in der Logik (Tod/Beute, Welt-Ticks) bleiben unangetastet (Rechengleichheit).
+   Maßnahmen (nur Ultra, Rechnung unverändert):
+   1) DOM über der Canvas: keine Text-/Kastenschatten, keine Animationen/Übergänge, undurchsichtige Flächen, flache Knöpfe;
+      Touch-Leiste (Trank/Sprint) ausgeblendet, solange mit Controller gespielt wird; Diagnose-Anzeige 1×/s und undurchsichtig.
+   2) Kartenkacheln 320 statt 640 Welt-Einheiten (¼ Arbeit je Stück), mehr davon im Speicher; Vorbau in der Restzeit bis zum Takt
+      (30 ms − eigenes JS − gemessene Browser-Arbeit) für den Bereich des nächsten Hintergrunds; der Hintergrund wird vorausschauend
+      neu zusammengesetzt, solange der alte noch reicht. Test-Schalter: ?p3novb ?p3ts640 ?p3altbake.
+   3) Sprite-Vorrendern: Zuschnitt über ein halb so großes Bild (¼ Rücklesen), Notbremse ab ~12 ms je Bild.
+   4) ?diag: Takt-Aufschlüsselung (Bildabstand in Takten, eigenes JS, Verspätung/Browser nach dem Zeichnen, Leertakte), DOM-Ebenen,
+      Kosten der Diagnose selbst.
+   Außerdem: Texte (Sprechblasen, Rufe, Schilder, Ansagen) im Ultra-Modus auf der scharfen Textebene in voller Auflösung (≥ 12 Gerätepixel),
+   Sprechblasen als dunkle Kästen mit hellem Text, Zeilenumbruch, ohne Überlappung, nie am Rand abgeschnitten (alle Modi mit Ultra).
+   Start: das Fenster „Neu im Sturm / Neue Stufenart“ (1 s halten) entfällt – dieselbe Info kommt als nicht blockierender Hinweis.
+   Touch-Knöpfe (Trank/Sprint): dunkles Braun-Violett statt Blaugrau (alle Modi). */
+window.__hsPERF3={v:1};
+const P3=window.__hsPERF3;
+P3.on=()=>!!(window.__hsULTRA&&__hsULTRA.on);
+/* ---------- 0) Touch-Knöpfe ohne Blau (alle Modi) ---------- */
+(()=>{try{const st=document.createElement('style');st.id='p3css';st.textContent=`
+.ub{border-color:#b08a6a;background:radial-gradient(circle at 40% 35%,#46303c,#170e13 70%)}
+.ub .ic{color:#f4e6d0}
+html.ultra .ub{background:#2c1d25}
+html.ultra .sk{background:#2a1b26}
+html.ultra #hud *,html.ultra #skills *,html.ultra #util *,html.ultra #toast *,html.ultra #feed *,html.ultra .tutk,html.ultra .tutk *{text-shadow:none!important;box-shadow:none!important;animation:none!important;transition:none!important}
+html.ultra #skills .sk,html.ultra #util .ub,html.ultra .tutk{box-shadow:none!important;animation:none!important}
+html.ultra #hud .panel{background:#140e16}
+html.ultra .tm{background:#150f13!important}
+html.ultra .fm{background:#150f13}
+html.ultra .tutk{background:#1a120c}
+html.ultra #rgdiag{background:#0a070c}
+html.ultra.p3pad #util{display:none!important}
+`;document.head.appendChild(st)}catch(e){}})();
+/* Controller aktiv (angeschlossen und zuletzt benutzt): Touch-Leiste weg */
+{let tt=0;try{addEventListener('touchstart',()=>{tt=performance.now()},{capture:true,passive:true})}catch(e){}
+ setInterval(()=>{try{const pad=P3.on()&&Object.keys(PADS.st||{}).length>0&&(PADS.t||0)>=tt;document.documentElement.classList.toggle('p3pad',pad)}catch(e){}},400)}
+
+/* ---------- 1) Messung: Takt-Aufschlüsselung für ?diag ---------- */
+const P3M={rn:0,last:null,per:16.67,dl:[],n:0,tick:{2:0,3:0,4:0},js:[],late:[],brw:[],skip:0,skipN:0,dms:0,dmsT:0};
+{const _r=render;render=function(){P3M.rn++;return _r.apply(this,arguments)}}
+{const _fr=frame;frame=function(now){const t0=performance.now(),r0=P3M.rn;
+  try{return _fr.apply(this,arguments)}finally{try{const t1=performance.now(),L=P3M.last,drew=P3M.rn!==r0&&G.state==='play'&&!G.paused;
+   if(L&&now>L.now){const d=now-L.now;if(d>8&&d<20){P3M.dl.push(d);if(P3M.dl.length>60)P3M.dl.shift()}
+    if(L.drew){/* erster Takt nach einem gezeichneten Bild: wie lange danach war der Browser noch beschäftigt? */
+     const per=P3M.per,nb=L.now+Math.ceil((L.t1-L.now)/per+1e-6)*per,late=Math.max(0,t0-now),br=(now>nb+per*0.5?now-L.t1:0)+late;
+     P3M.late.push(late);P3M.brw.push(br);if(P3M.late.length>120){P3M.late.shift();P3M.brw.shift()}}}
+   if(drew){if(P3M.lastDraw){const k=Math.round((now-P3M.lastDraw)/P3M.per);P3M.tick[k<=2?2:k===3?3:4]++;P3M.n++}P3M.lastDraw=now;P3M.js.push(t1-t0);if(P3M.js.length>120)P3M.js.shift()}
+   else if(G.state==='play'){P3M.skip+=t1-t0;P3M.skipN++}
+   P3M.last={now,t1,drew}}catch(e){}}}}
+setInterval(()=>{try{const D=P3M.dl;if(D.length>10){const s=D.slice().sort((a,b)=>a-b);P3M.per=s[s.length>>1]}}catch(e){}},2000);
+function p3Q(A,p){if(!A.length)return 0;const s=A.slice().sort((a,b)=>a-b);return s[Math.min(s.length-1,Math.floor(s.length*p))]}
+function p3Avg(A){return A.length?A.reduce((a,b)=>a+b,0)/A.length:0}
+/* DOM über dem Spielbild (sichtbar, mit Effekten) – höchstens alle 2 s zählen, nur mit ?diag */
+const P3D={t:0,s:''};
+function p3Dom(){const n=performance.now();if(n-P3D.t<2000&&n>=P3D.t)return P3D.s;P3D.t=n;let v=0,an=0,sh=0;
+ try{for(const id of['hud','skills','util','toast','feed','txtov']){const r=document.getElementById(id);if(!r||r.hidden||!r.offsetParent&&getComputedStyle(r).position!=='fixed')continue;
+   const L=[r,...r.querySelectorAll('*')];for(const e of L){if(!e.offsetWidth)continue;const s=getComputedStyle(e);if(s.visibility==='hidden')continue;const bg=s.backgroundColor!=='rgba(0, 0, 0, 0)'||s.backgroundImage!=='none'||e.tagName==='CANVAS';if(!bg)continue;v++;
+    if(s.animationName!=='none')an++;if(s.boxShadow!=='none'||s.textShadow!=='none')sh++}}
+  for(const e of document.querySelectorAll('.tutk,#hiBox'))if(e.offsetWidth){v++;if(getComputedStyle(e).animationName!=='none')an++}}catch(e){}
+ const tx=(()=>{try{return TXO.cv&&!TXO.cv.hidden}catch(e){return false}})();
+ P3D.s=`DOM über Spielbild ${v} Flächen (Animation ${an}, Schatten ${sh}) · Textebene ${tx?'an':'aus'}`;return P3D.s}
+{const _dt=rgDiagText;rgDiagText=function(){const t0=performance.now();let s=_dt.apply(this,arguments);try{const T=P3M.tick,n=Math.max(1,T[2]+T[3]+T[4]),pc=v=>Math.round(v*100/n),f=v=>v.toFixed(1);
+  s+=`\nTakt ${f(P3M.per)} ms: Bildabstand 2 Takte ${pc(T[2])}% · 3 Takte ${pc(T[3])}% · ≥4 ${pc(T[4])}% · eigenes JS je Bild ${f(p3Avg(P3M.js))} (p90 ${f(p3Q(P3M.js,0.9))}) · Leertakt ${f(P3M.skip/Math.max(1,P3M.skipN))} ms`;
+  s+=`\nBrowser nach dem Zeichnen ≈ ${f(p3Avg(P3M.brw))} ms (p90 ${f(p3Q(P3M.brw,0.9))}) · Takt-Verspätung ${f(p3Avg(P3M.late))} ms · ${p3Dom()} · diag ${f(P3M.dms)} ms/s · perf3 ${P3.on()?'an':'aus'}`;
+  if(P3.on())s+=`\nperf3: Hintergrund vorausschauend ${P3B.n}× (zuletzt ${f(P3B.ms)}, max ${f(P3B.max)} ms) · im Bild erzwungen ${P3B.zw}× (max ${f(P3B.zwMs)} ms) · Kacheln vorgebaut ${P3B.k} (max ${f(P3B.kMs)} ms) · Sprite-Budget ${P3K.cut}× · Blasen ${P3T.n}`;
+  const T2=P3M.tick;if(P3M.n>2000){T2[2]=T2[3]=T2[4]=0;P3M.n=0}}catch(e){}P3M.dmsA=(P3M.dmsA||0)+performance.now()-t0;return s}}
+setInterval(()=>{P3M.dms=P3M.dmsA||0;P3M.dmsA=0},1000);
+/* Diagnose-Anzeige 1×/s statt 2×/s (jede Aktualisierung = Layout + Neuzeichnen der Ebene) */
+{const _rd=rgDiag;rgDiag=function(){const r=_rd.apply(this,arguments);try{if(RG2.dt&&RG2.dt!==P3M.dtId){clearInterval(RG2.dt);RG2.dt=P3M.dtId=setInterval(()=>{const e=document.getElementById('rgdiag');if(e)e.textContent=rgDiagText()},1000)}}catch(e){}return r}}
+try{if(RG2.diag&&RG2.dt){clearInterval(RG2.dt);RG2.dt=P3M.dtId=setInterval(()=>{const e=document.getElementById('rgdiag');if(e)e.textContent=rgDiagText()},1000)}}catch(e){}
+
+/* Uhr für Zeitbudgets (Testumgebungen mit eingefrorener Uhr stellen __pn bereit) */
+const p3T=()=>window.__pn?__pn():performance.now();
+/* ---------- 2) Hintergrund ohne großen Ruckler ----------
+   Vorher: der Hintergrund (2× Sicht) wurde erst beim Verlassen in EINEM Bild neu gebaut – und dabei fehlende Kartenkacheln synchron
+   (640×640-Welt-Kachel je 17–45 ms gedrosselt; Gerät bis 122 ms je Neubau). Jetzt:
+   · Kartenkacheln 320 statt 640 Einheiten (max. ¼ Arbeit je Stück), mehr davon im Speicher.
+   · Nach jedem Bild wird in der Restzeit bis zum nächsten Takt vorausgebaut, was der NÄCHSTE Hintergrund (in Laufrichtung) braucht:
+     Kartenkacheln und Deko-Kacheln, je ein kleiner Schritt.
+   · Der Hintergrund wird vorausschauend neu zusammengesetzt, sobald die Sicht sich dem Rand nähert (der alte reicht dann noch) –
+     dann nur noch Zusammensetzen aus fertigen Kacheln, ohne Kachelbau. Ein Notfall-Neubau beim Verlassen bleibt als Rückfall. */
+const P3B={aus:/[?&]p3novb\b/.test(location.search||''),n:0,ms:0,max:0,zw:0,zwMs:0,k:0,kMs:0,kEst:6,bEst:10,ctx:null};
+P3.kl=()=>P3.on()?44:null;/* Kachel-Grenze im Speicher (kleine Kacheln, Hintergrund 2× Sicht braucht ~20) */
+P3.noLook=0;
+function p3TS(){const ts=P3.on()&&!/[?&]p3ts640\b/.test(location.search||'')?320:640;if(KAT.TS!==ts){KAT.TS=ts;KAT.m.clear();KAT.key=''}}
+/* ulBg: Lage merken; Neubauten im Bild (Notfall, Sicht schon außerhalb) zählen */
+{const _ub=ulBg;ulBg=function(camX,camY,vw,vh){p3TS();const n0=ULB.n,t0=p3T();const r=_ub.apply(this,arguments);
+  try{P3B.ctx={camX,camY,vw,vh,s:cx.getTransform().a,f:P3M.rn};if(ULB.n!==n0){P3B.zw++;const d=p3T()-t0;P3B.zwMs=Math.max(P3B.zwMs,d)}}catch(e){}return r}}
+/* beim Zusammensetzen keine zusätzliche Kachel „in Laufrichtung“ nebenbei bauen (macht der Vorbau mit Zeitbudget) */
+{const _bb=ulBgBau;ulBgBau=function(){P3.noLook=1;try{return _bb.apply(this,arguments)}finally{P3.noLook=0}}}
+/* fehlende Karten-/Deko-Kachel für einen Bereich bauen (eine); true = alles da */
+function p3Vor(R,s){const K=G.ka;
+ if(K&&(K.an||K.gast)&&K.md&&!KA.noTile&&KAT.key){const TS=KAT.TS,m=40;for(let ty=Math.max(0,Math.floor((R.by-m)/TS));ty<=Math.floor((R.by+R.bh+m)/TS);ty++)for(let tx=Math.max(0,Math.floor((R.bx-m)/TS));tx<=Math.floor((R.bx+R.bw+m)/TS);tx++){
+   if(tx*TS>WORLD||ty*TS>WORLD)continue;const k=tx+','+ty;const e=KAT.m.get(k);if(e){e.u=performance.now();continue}const t0=p3T();KAT.m.set(k,{cv:kaKachel(tx,ty,KAT.sc),u:performance.now()});const d=p3T()-t0;P3B.k++;P3B.kMs=Math.max(P3B.kMs,d);P3B.kEst=P3B.kEst*0.7+d*0.3;return false}}
+ try{rgDkPrep();const sc=Math.round(s*20)/20;for(const ch of RGDK.m.values()){if(ch.x+RGDK_CS+RGDK_PAD<R.bx||ch.x-RGDK_PAD>R.bx+R.bw||ch.y+RGDK_CS+RGDK_PAD<R.by||ch.y-RGDK_PAD>R.by+R.bh)continue;
+   if(!ch.cv||Math.abs(ch.sc/sc-1)>0.12){const t0=p3T();rgDkBau(ch,sc);ch.lu=++RGDK.fc;const d=p3T()-t0;P3B.k++;P3B.kMs=Math.max(P3B.kMs,d);P3B.kEst=P3B.kEst*0.7+d*0.3;return false}}}catch(e){}
+ return true}
+function p3Vorbau(jsBild){const c=P3B.ctx;if(P3B.aus||!P3.on()||!c||c.f!==P3M.rn||!ULB.cv||G.room||G.vp||G.state!=='play'||G.paused||!P)return;
+ const lim=0.2,dx=clamp((P.vx||0)*0.9,-c.vw*lim,c.vw*lim),dy=clamp((P.vy||0)*0.9,-c.vh*lim,c.vh*lim);
+ const R={bx:c.camX+dx-c.vw*0.5,by:c.camY+dy-c.vh*0.5,bw:c.vw*2,bh:c.vh*2};
+ const rand=Math.min(c.camX-ULB.x,c.camY-ULB.y,ULB.x+ULB.w-(c.camX+c.vw),ULB.y+ULB.h-(c.camY+c.vh));
+ const eng=rand<Math.min(c.vw,c.vh)*0.25;/* bald nötig – der neue Hintergrund lässt hinten noch ≥ 0,3 Sicht Rand */
+ /* Restzeit bis zum nächsten Takt: 30 ms minus eigenes JS minus gemessene Browser-Arbeit nach dem Zeichnen */
+ const budget=Math.max(0,30-jsBild-Math.min(20,p3Avg(P3M.brw)));let t=0,fertig=false;
+ for(let i=0;i<4;i++){if(t+P3B.kEst>budget&&(t>0||!eng))break;const t0=p3T();fertig=p3Vor(R,c.s);t+=p3T()-t0;if(fertig)break}
+ if(fertig&&eng&&(t+P3B.bEst<=budget||t===0)){const t0=p3T();try{ulBgBau(c.camX+dx,c.camY+dy,c.vw,c.vh,c.s);ULB.key=ulBgKey(c.s)}catch(e){RG2.err.push('p3bg '+e.message)}
+  const d=p3T()-t0;P3B.n++;P3B.ms=d;P3B.max=Math.max(P3B.max,d);P3B.bEst=P3B.bEst*0.7+d*0.3}}
+{const _rw=renderWorld;renderWorld=function(dt){const t0=p3T();P3K.ms=0;try{return _rw.apply(this,arguments)}finally{try{if(P3.on())p3Vorbau(p3T()-t0+(P3M.uMs||0))}catch(e){RG2.err.push('p3vb '+e.message)}}}}
+{const _u=update;update=function(){const t0=p3T();try{return _u.apply(this,arguments)}finally{P3M.uMs=p3T()-t0}}}
+
+/* ---------- 3) Sprite-Vorrendern: billigerer Zuschnitt, Notbremse je Bild ----------
+   ulBake suchte den belegten Bereich mit getImageData über das ganze Arbeitsbild (Rücklesen + Schleife über jeden Bildpunkt; bei
+   Gebäuden ~300×250 Punkte). Jetzt wird das Arbeitsbild erst auf halbe Größe verkleinert (2×2 Punkte → 1, deckt jeden Punkt ab) und
+   nur dieses Viertel gelesen; der Zuschnitt ist auf 2 Punkte genau (höchstens 1 durchsichtiger Rand). Gleiches Bild.
+   Notbremse: mehr als ~12 ms Vorrendern in einem Bild → Rest im nächsten Bild (vorher bis 6 Sprites ohne Zeitgrenze). */
+var P3K;P3K={ms:0,cut:0,h:null,aus:/[?&]p3altbake\b/.test(location.search||'')};
+function p3Halb(w,h){let H=P3K.h;if(!H){const C=document.createElement('canvas');H=P3K.h=C.getContext('2d')}const C=H.canvas;if(C.width<w||C.height<h){C.width=Math.max(C.width,w);C.height=Math.max(C.height,h)}
+ H.setTransform(1,0,0,1,0,0);H.globalAlpha=1;H.globalCompositeOperation='copy';H.imageSmoothingEnabled=true;return H}
+{const _bk=ulBake;ulBake=function(s,x0,y0,x1,y1,fn){const t0=p3T();try{if(!P3.on()||P3K.aus)return _bk.apply(this,arguments);
+  const pw=Math.ceil((x1-x0)*s)+2,ph=Math.ceil((y1-y0)*s)+2;if(pw>2048||ph>2048||pw<1||ph<1)return null;const hw=Math.ceil(pw/2),hh=Math.ceil(ph/2);
+  const g=ulScratch(hw*2,hh*2),bx=Math.floor(x0*s),by=Math.floor(y0*s);g.setTransform(s,0,0,s,-bx,-by);const m=cx;cx=g;
+  try{fn(g)}finally{cx=m;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over'}
+  const H=p3Halb(hw,hh);H.drawImage(ULW.cv,0,0,hw*2,hh*2,0,0,hw,hh);H.globalCompositeOperation='source-over';let D;try{D=H.getImageData(0,0,hw,hh).data}catch(e){return null}
+  let l=hw,r=-1,tp=hh,bt=-1;for(let y=0;y<hh;y++){const o=y*hw*4;for(let x=0;x<hw;x++)if(D[o+x*4+3]>0){if(x<l)l=x;if(x>r)r=x;if(y<tp)tp=y;if(y>bt)bt=y}}
+  if(r<0)return{cv:null,x:0,y:0,w:0,h:0,s};
+  l=l*2;tp=tp*2;r=Math.min(pw-1,r*2+1);bt=Math.min(ph-1,bt*2+1);
+  const w=r-l+1,h=bt-tp+1,C=document.createElement('canvas');C.width=w;C.height=h;C.getContext('2d').drawImage(ULW.cv,l,tp,w,h,0,0,w,h);
+  return{cv:C,x:(bx+l)/s,y:(by+tp)/s,w:w/s,h:h/s,s,px:bx+l,py:by+tp}}
+ finally{P3K.ms+=p3T()-t0;if(P3.on()&&P3K.ms>12&&UL.bud>0){UL.bud=0;P3K.cut++}}}}
+
+/* ---------- 4) Scharfe Texte im Ultra-Modus ---------- */
+/* Textebene (txtov) auch im Ultra-Modus auf Handhelds benutzen – sie zeigt sich nur, wenn Text darauf steht */
+{const _on=txtOvOn;txtOvOn=function(){try{if(P3.on()&&SAVE.txtScharf!==false&&G.state==='play'&&!(typeof splitOn==='function'&&splitOn()))return true}catch(e){}return _on.apply(this,arguments)}}
+/* Mindestgröße 12 Gerätepixel für alles, was auf der Textebene landet */
+function p3MinFont(g){if(!g||g._p3)return;g._p3=1;for(const fn of['fillText','strokeText']){const o=g[fn];g[fn]=function(t,x,y,mw){if(P3.on()){const m=g.getTransform(),s=Math.sqrt(Math.abs(m.a*m.d-m.b*m.c)),px=parseFloat((/(\d+(?:\.\d+)?)px/.exec(g.font)||[])[1]||0),dev=px*s,min=12*(P3T.od||1);
+   if(dev>0.5&&dev<min){const f=min/dev;g.save();g.translate(x,y);g.scale(f,f);try{return mw!==undefined?o.call(g,t,0,0,mw/f):o.call(g,t,0,0)}finally{g.restore()}}}return o.apply(g,arguments)}}}
+/* Sprechblasen: im Ultra-Modus sammeln und danach in Bildschirm-Pixeln setzen (dunkler Kasten, heller Text, Umbruch, ohne Überlappung) */
+const P3T={col:0,L:[],n:0,od:1,lay:new Map()};
+{const _ba=bubbleAt;bubbleAt=function(x,y,txt,k,small){if(P3T.col&&P3.on()&&TXO.on&&cx===TXO.g){try{const m=cx.getTransform();P3T.L.push({sx:m.a*x+m.c*y+m.e,sy:m.b*x+m.d*y+m.f,txt:String(txt==null?'':txt),k:+k||0,small:!!small});RG2.bub++;return}catch(e){}}return _ba.apply(this,arguments)}}
+function p3Lay(g,txt,small,od){const key=txt+'|'+(small?1:0)+'|'+od;let o=P3T.lay.get(key);if(o)return o;const fs=Math.round((small?13:14)*od),mw=Math.round((small?150:230)*od);
+ g.font=rgFont(`700 ${fs}px "Alegreya Sans",sans-serif`);const words=txt.split(/\s+/),L=[];let cur='';
+ for(const w of words){const t=cur?cur+' '+w:w;if(g.measureText(t).width>mw&&cur){L.push(cur);cur=w}else cur=t}if(cur)L.push(cur);
+ let w=0;for(const l of L)w=Math.max(w,g.measureText(l).width);o={L,w:Math.ceil(w),fs,lh:Math.round(fs*1.22)};P3T.lay.set(key,o);if(P3T.lay.size>150)P3T.lay.delete(P3T.lay.keys().next().value);return o}
+function p3Blasen(){const L=P3T.L;P3T.L=[];if(!L.length)return;const g=TXO.g,C=TXO.cv;if(!g||!C)return;const od=Math.max(1,C.width/Math.max(1,innerWidth));P3T.od=od;const CW=C.width,CH=C.height,M=Math.round(4*od);
+ g.save();g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.shadowBlur=0;g.shadowColor='rgba(0,0,0,0)';
+ const B=[];for(const b of L){const o=p3Lay(g,b.txt,b.small,od),pad=Math.round(7*od),w=o.w+2*pad,h=o.L.length*o.lh+Math.round(10*od);
+  let bx=Math.round(b.sx-w/2),by=Math.round(b.sy-h-8*od);bx=Math.max(M,Math.min(CW-M-w,bx));B.push({b,o,w,h,bx,by,pad})}
+ /* von unten nach oben setzen, Überlappungen nach oben schieben; oben angekommen nach unten ausweichen */
+ B.sort((p,q)=>q.b.sy-p.b.sy);const D=[];const hit=(p)=>D.find(q=>p.bx<q.bx+q.w+3&&p.bx+p.w+3>q.bx&&p.by<q.by+q.h+3&&p.by+p.h+3>q.by);
+ for(const p of B){for(let i=0;i<8;i++){const q=hit(p);if(!q)break;p.by=q.by-p.h-4}if(p.by<M){p.by=M;for(let i=0;i<8;i++){const q=hit(p);if(!q)break;p.by=q.by+q.h+4}}p.by=Math.min(CH-M-p.h,p.by);D.push(p)}
+ for(const p of D){const b=p.b,a=Math.max(0,Math.min(1,b.k*8,(1-b.k)*5));if(a<=0.01)continue;g.globalAlpha=a;
+  g.fillStyle='rgba(20,13,11,.93)';g.strokeStyle='#c9a24a';g.lineWidth=Math.max(1,1.5*od);g.beginPath();if(g.roundRect)g.roundRect(p.bx,p.by,p.w,p.h,6*od);else g.rect(p.bx,p.by,p.w,p.h);g.fill();g.stroke();
+  /* Zipfel zur Figur, wenn der Kasten über ihr steht */
+  const tx=Math.max(p.bx+8*od,Math.min(p.bx+p.w-8*od,b.sx));if(p.by+p.h<b.sy-2){g.beginPath();g.moveTo(tx-5*od,p.by+p.h-0.5);g.lineTo(tx,Math.min(b.sy,p.by+p.h+7*od));g.lineTo(tx+5*od,p.by+p.h-0.5);g.closePath();g.fill()}
+  g.fillStyle='#f6ecd6';g.font=rgFont(`700 ${p.o.fs}px "Alegreya Sans",sans-serif`);g.textAlign='center';g.textBaseline='middle';
+  p.o.L.forEach((l,i)=>g.fillText(l,p.bx+p.w/2,p.by+Math.round(5*od)+i*p.o.lh+p.o.lh/2));P3T.n++}
+ g.textBaseline='alphabetic';g.globalAlpha=1;g.restore();TXO.n++}
+{const _db=drawBubbles;drawBubbles=function(){if(!P3.on())return _db.apply(this,arguments);P3T.col=1;P3T.L=[];try{return _db.apply(this,arguments)}finally{P3T.col=0;try{if(TXO.on)p3Blasen();else P3T.L=[]}catch(e){P3T.L=[]}}}}
+/* Die Textebene kostet als zweite bildschirmgroße Ebene Zusammensetz-Zeit, sobald sie sichtbar ist. Darum im Ultra-Modus nur die
+   Texte darauf, die man lesen muss (Sprechblasen, Rufe wie „Die Lunte brennt – weg da!“, Gebietsname); alles andere (Kombo-Zähler,
+   „Zz“, Stufen-Plaketten …) bleibt im Spielbild, wird dort aber mindestens 12 Gerätepixel groß gezeichnet. */
+function p3Scharf(fn,self,args){const r0=TXO.rend;TXO.rend=1;try{return fn.apply(self,args)}finally{TXO.rend=r0}}
+{const _db=drawBubbles;drawBubbles=function(){if(!P3.on())return _db.apply(this,arguments);return p3Scharf(_db,this,arguments)}}
+{const _df=drawFx;drawFx=function(f){if(P3.on()&&f&&f.k==='word')return p3Scharf(_df,this,arguments);return _df.apply(this,arguments)}}
+{const _kn=kaNameZeigen;kaNameZeigen=function(){if(P3.on())return p3Scharf(_kn,this,arguments);return _kn.apply(this,arguments)}}
+{const _rw=renderWorld;renderWorld=function(){if(!P3.on())return _rw.apply(this,arguments);const r0=TXO.rend;TXO.rend=0;try{return _rw.apply(this,arguments)}finally{TXO.rend=r0}}}
+/* Mindestgröße im Spielbild (intern 320×240, hochskaliert): 12 Gerätepixel */
+function p3MinMain(c){if(!c||c._p3m)return;c._p3m=1;for(const fn of['fillText','strokeText']){const o=c[fn];c[fn]=function(t,x,y,mw){if(P3.on()&&cx===c&&!(TXO.on&&TXO.rend)){const m=c.getTransform(),s=Math.sqrt(Math.abs(m.a*m.d-m.b*m.c)),px=parseFloat((/(\d+(?:\.\d+)?)px/.exec(c.font)||[])[1]||0),dev=px*s*(P3T.kd||2);
+   if(dev>0.5&&dev<12){const f=12/dev;c.save();c.translate(x,y);c.scale(f,f);try{return mw!==undefined?o.call(c,t,0,0,mw/f):o.call(c,t,0,0)}finally{c.restore()}}}return o.apply(c,arguments)}}}
+{const _r=render;render=function(){try{if(TXO.g)p3MinFont(TXO.g);if(TXO.cv)P3T.od=Math.max(1,TXO.cv.width/Math.max(1,innerWidth));if(P3.on()){p3MinMain(cx);P3T.kd=(innerWidth*Math.min(2,window.devicePixelRatio||1))/Math.max(1,cv.width)}}catch(e){}return _r.apply(this,arguments)}}
+
+/* ---------- 5) Start: kein Fenster „Neu im Sturm / Neue Stufenart“ mehr ----------
+   Es erschien beim ersten Lauf je Held, je Stufenart und je Arena-Art (also immer wieder, auf jedem Gerät/Spielstand neu), hielt das Spiel an
+   und musste 1 s gehalten werden. Die Spielweise des Helden kommt ohnehin als Hinweis (jetzt immer), Stufenart und Arena-Erklärung
+   kommen als nicht blockierender Hinweis. */
+hiNeu=function(){return[]};
+hiOpen=function(ids){try{SAVE.hIntro=SAVE.hIntro||{};ids=(ids||[]).filter(id=>!SAVE.hIntro[id]);if(!ids.length)return;
+ for(const id of ids){SAVE.hIntro[id]=1;let h='',c='#e5b454';
+  if(id.startsWith('z:ar_')){const A=(typeof AR_LVI!=='undefined')&&AR_LVI[id.slice(5)];if(A){h=`<b>${esc(A.n)}</b> – ${esc(A.d)}`;c=A.c||c}}
+  else if(id.startsWith('z:')){const A=LVI[id.slice(2)];if(A){h=`Neue Stufenart: <b>${esc(A.n)}</b> – ${esc(A.d)}`;c=A.c||c}}
+  else if(HEROES[id]&&HMECH[id]){h=`<b>${esc(HEROES[id].name)}</b> – ${esc(HMECH[id])}`;c=HCOL[id]||c}
+  if(h)toast(h,c)}
+ persist()}catch(e){console.error('p3hi',e)}};
+try{window.__hsHI.hiOpen=hiOpen;window.__hsHI.hiNeu=hiNeu}catch(e){}
+
+/* Paket „nebel“: Im Ultra-Modus wird die Minikarte mit vorübergehend ausgeblendeten Helden gebaut (netGone) – dadurch deckte der Erkundungsnebel nie auf.
+   Nebel deshalb vor jedem Minikarten-Bau selbst aufdecken (4×/s), unabhängig vom Zeichenweg. */
+(()=>{try{const _w=wlMini;wlMini=function(){try{if(G&&G.wl&&G.wl.an&&!G.room&&G.state==='play'&&WLMM.fog&&P){const n=performance.now();if(!(n-(WLMM.nt||0)<250&&n>=(WLMM.nt||0))){WLMM.nt=n;wlMiniNebel(false)}}}catch(e){}return _w.apply(this,arguments)}}catch(e){console.warn('nebel',e)}})();
+window.__hsNEBEL=1;
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
