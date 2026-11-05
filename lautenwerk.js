@@ -36,6 +36,8 @@
     (() => { try { return localStorage.getItem("imres-lw-leicht") === "1"; } catch (_) { return false; } })(); /* „leicht“ auch auf Wunsch (z. B. Zynthian) */
   /* einmal beim Start der Tonberechnung festgelegt – ein Umschalten des Sparmodus gilt erst nach dem Neuladen */
   let leichtFest = null;
+  /* „mittel“ (Zynthian): voller Klangaufbau mit beiden Faltungshallen, aber 32 kHz statt 44,1/48 kHz */
+  const mittel = !spar && !mobil && (() => { try { return localStorage.getItem("imres-lw-mittel") === "1"; } catch (_) { return false; } })();
   const leicht = () => leichtFest !== null ? leichtFest : (spar || mobil);
   try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, verbunden: false, zuletzt: null }; } catch (_) {}
 
@@ -4827,7 +4829,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       /* Sparmodus: mit halber Abtastrate rechnen (24 kHz) – halbiert die gesamte Rechenlast, Höhen bis 12 kHz bleiben */
       leichtFest = spar || mobil;
       /* Handy: etwas größerer Puffer (Bluetooth-Kopfhörer kommen mit, kein Knistern) und 32 kHz – Höhen bis 16 kHz, gut ein Drittel weniger Rechenlast */
-      try { ctx = spar ? new AC({ latencyHint: .25, sampleRate: 24000 }) : mobil ? new AC({ latencyHint: .2, sampleRate: 32000 }) : new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
+      try { ctx = spar ? new AC({ latencyHint: .25, sampleRate: 24000 }) : mobil ? new AC({ latencyHint: .2, sampleRate: 32000 }) : mittel ? new AC({ latencyHint: "playback", sampleRate: 32000 }) : new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor(); kompRef = komp;

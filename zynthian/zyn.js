@@ -650,8 +650,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   /* ---------- LEDs ---------- */
   let ledMerk = "";
   const LED_STUFEN = [.15, .3, .5, .75, 1];
-  const leistung = () => lies("imres-lw-spar", "0") === "1" ? "spar" : lies("imres-lw-leicht", "0") === "1" ? "leicht" : "voll";
-  const LEISTUNG_NAME = { voll: W("voll (beste Klangqualität)", "full (best sound)"), leicht: W("leicht (ein Hall, 32 kHz)", "light (one reverb, 32 kHz)"), spar: W("sparsam (24 kHz, weniger Ebenen)", "saver (24 kHz, fewer layers)") };
+  const leistung = () => lies("imres-lw-spar", "0") === "1" ? "spar" : lies("imres-lw-leicht", "0") === "1" ? "leicht" : lies("imres-lw-mittel", "0") === "1" ? "mittel" : "voll";
+  const LEISTUNG_NAME = { voll: W("voll (beste Klangqualität)", "full (best sound)"), mittel: W("mittel (voller Klang, 32 kHz – gut die Hälfte der Last)", "medium (full sound, 32 kHz)"), leicht: W("leicht (ein Hall, 32 kHz)", "light (one reverb, 32 kHz)"), spar: W("sparsam (24 kHz, weniger Ebenen)", "saver (24 kHz, fewer layers)") };
   const ledHell = () => { const v = +lies("imres-zp-hell", "1"); return LED_STUFEN.includes(v) ? v : 1; };
   const dimmHex = (h, fk) => { const n = parseInt(String(h).slice(1, 7), 16) || 0, c = x => Math.round(x * fk).toString(16).padStart(2, "0"); return "#" + c((n >> 16) & 255) + c((n >> 8) & 255) + c(n & 255); };
   function ledsMelden() {
@@ -1546,7 +1546,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const zz = (id, t, w, u) => '<button type="button" data-zm="' + id + '">' + t + (w != null ? "<b>" + w + "</b>" : "") + (u ? "<small>" + u + "</small>" : "") + "</button>";
     const neu = id => () => { zpEinstellungen(id); };
     const a = { zu: menueZu, hilfe: zpHilfe, beleg: () => belegMenue(), wlan: () => wlanMenue(true), bt: () => btMenue(false),
-      leistung: () => { const l = ["voll", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % 3]; schreib("imres-lw-leicht", n === "voll" ? "0" : "1"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
+      leistung: () => { const l = ["voll", "mittel", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % l.length]; schreib("imres-lw-mittel", n === "mittel" ? "1" : "0"); schreib("imres-lw-leicht", n === "leicht" || n === "spar" ? "1" : "0"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
       hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); neu("hell")(); },
       looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); neu("looplen")(); },
       ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); neu("ruhe")(); },

@@ -11,7 +11,7 @@
   setz("imres-lw-modus", "einfach");  /* einfache Ansicht der Bühne */
   setz("imres-lang", "de");
   /* Leistung wählt der Nutzer selbst (MENU → Leistung); bis dahin volle Qualität */
-  try { if (!localStorage.getItem("imres-zp-leistung-gewaehlt")) { localStorage.setItem("imres-lw-leicht", "0"); localStorage.setItem("imres-lw-spar", "0"); } } catch (_) {}
+  try { if (!localStorage.getItem("imres-zp-leistung-gewaehlt")) { localStorage.setItem("imres-lw-leicht", "0"); localStorage.setItem("imres-lw-spar", "0"); localStorage.setItem("imres-lw-mittel", "0"); } } catch (_) {}
   try { sessionStorage.setItem("imres-zyn", "1"); } catch (_) {}
   let m = "buehne"; try { m = localStorage.getItem("imres-zyn-modus") || "buehne"; } catch (_) {}
   const h = /[?&]hinter/.test(location.search) ? "&hinter=1" : "";
