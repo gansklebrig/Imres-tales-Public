@@ -154,11 +154,34 @@ def midi_ereignis(e):
                 system_befehl(ziel)
 
 
+UPDATE_LOG = os.path.normpath(os.path.join(ZYN, "..", "..", "update.log"))
+
+
+def update_stand():
+    try:
+        with open(UPDATE_LOG, encoding="utf-8") as f:
+            zeilen = [z.rstrip() for z in f if z.strip()]
+        st = os.stat(UPDATE_LOG)
+        return {"ok": True, "zeilen": zeilen[-8:], "alter": round(time.time() - st.st_mtime)}
+    except OSError:
+        return {"ok": False, "zeilen": []}
+
+
 def system_befehl(aktion):
     if ARGS.test:
         print("(Test) Systembefehl:", aktion)
         return
     # losgelöst starten: der Befehl beendet unter Umständen gerade den Dienst, der ihn ausgelöst hat
+    if aktion in ("aktualisieren", "zurueck"):
+        # Ausgabe in eine Datei – das Pult zeigt sie an („schon aktuell“, „kein Internet“ …)
+        try:
+            with open(UPDATE_LOG, "w", encoding="utf-8") as f:
+                f.write("Start: %s\n" % time.strftime("%H:%M:%S"))
+            log = open(UPDATE_LOG, "a", encoding="utf-8")
+        except OSError:
+            log = subprocess.DEVNULL
+        subprocess.Popen(["setsid", MODUS_BEFEHL, aktion], stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        return
     subprocess.Popen(["setsid", MODUS_BEFEHL, aktion], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
 
 
@@ -289,6 +312,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort(dict(OPT))
         if p == "/zyn/last":
             return self.json_antwort(last_messen())
+        if p == "/zyn/update":
+            return self.json_antwort(update_stand())
         if p in ("/zyn/imres_midi.py", "/zyn/imres-bruecke.py"):
             return self.send_error(404)
         if p == "/zyn/leds":
@@ -427,7 +452,7 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort(erg)
         if p == "/zyn/system":
             aktion = str(d.get("aktion", ""))
-            if aktion not in ("imres", "zynthian", "hintergrund", "neustart", "aus", "seite-neu", "aktualisieren", "start-imres", "start-zynthian", "start-hintergrund"):
+            if aktion not in ("imres", "zynthian", "hintergrund", "neustart", "aus", "seite-neu", "aktualisieren", "zurueck", "start-imres", "start-zynthian", "start-hintergrund"):
                 return self.json_antwort({"ok": False, "fehler": "unbekannte Aktion"}, 400)
             if aktion == "seite-neu":
                 senden({"typ": "neu-laden"})

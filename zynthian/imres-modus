@@ -1,7 +1,14 @@
 #!/bin/bash
 # imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund|boot
 HIER="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
-DATEN="$(dirname "$(dirname "$HIER")")"   # /zynthian/zynthian-my-data/imres
+# Datenordner: neben der Seite – oder fest, wenn dieses Skript als Kopie in /usr/local/bin liegt
+case "$HIER" in */seite/zynthian) DATEN="$(dirname "$(dirname "$HIER")")" ;; *) DATEN="${IMRES_DATEN:-/zynthian/zynthian-my-data/imres}" ;; esac
+S="$DATEN/seite/zynthian"
+# Selbstheilung: ist ein Update mitten im Tausch unterbrochen worden (Strom weg), fehlt „seite“ – die neue oder die letzte Version zurückholen
+if [ ! -d "$DATEN/seite" ]; then
+  if [ -d "$DATEN/seite.neu" ] && [ -f "$DATEN/seite.neu/zynthian/imres-modus" ]; then mv "$DATEN/seite.neu" "$DATEN/seite"
+  else ALT=$(ls -d "$DATEN"/seite.alt-* 2>/dev/null | sort | tail -1); [ -n "$ALT" ] && mv "$ALT" "$DATEN/seite"; fi
+fi
 case "$1" in
   imres)       systemctl stop imres-hintergrund zynthian; systemctl start imres-buehne ;;
   zynthian)    systemctl stop imres-buehne imres-hintergrund; systemctl start zynthian ;;
@@ -10,17 +17,54 @@ case "$1" in
   aus)       systemctl poweroff ;;
   aktualisieren)
     # losgelöst ausführen: das Update startet am Ende die Brücke neu, die es vielleicht ausgelöst hat
-    if [ -z "$IMRES_LOSGELOEST" ] && command -v systemd-run >/dev/null 2>&1; then
-      exec systemd-run --quiet --collect --wait --pipe --setenv=IMRES_LOSGELOEST=1 "$HIER/imres-modus" aktualisieren
+    if [ -z "$IMRES_LOSGELOEST" ] && [ -d /run/systemd/system ] && command -v systemd-run >/dev/null 2>&1; then
+      exec systemd-run --quiet --collect --wait --pipe --unit=imres-update-$$ --setenv=IMRES_LOSGELOEST=1 --setenv=IMRES_DATEN="$DATEN" /bin/bash "$S/imres-modus" aktualisieren
     fi
-    git -C "$DATEN/seite" fetch --depth 1 origin main && git -C "$DATEN/seite" reset --hard origin/main && \
-      "$HIER/imres-modus" einrichten
+    # Schutz: läuft schon ein Update, kein zweites; Strom-/Netz-Abbruch lässt die alte Version unangetastet
+    [ -d "$DATEN/seite/.git" ] || { echo "Imres-Ordner nicht gefunden ($DATEN/seite)."; exit 1; }
+    exec 9>"$DATEN/.update.lock"; flock -n 9 || { echo "Es läuft schon ein Update."; exit 0; }
+    G="$DATEN/seite"
+    echo "Prüfe Internet …"
+    git -C "$G" fetch --depth 1 origin main || { echo "Kein Update möglich (Internet?). Imres bleibt, wie es ist."; exit 1; }
+    ALT=$(git -C "$G" rev-parse HEAD 2>/dev/null); NEU=$(git -C "$G" rev-parse FETCH_HEAD 2>/dev/null)
+    if [ -n "$NEU" ] && [ "$ALT" = "$NEU" ] && [ -z "$(git -C "$G" status --porcelain 2>/dev/null | grep -v '^??')" ]; then
+      echo "Imres ist schon auf dem neuesten Stand ($(echo "$NEU" | cut -c1-7))."
+      "$S/imres-modus" einrichten >/dev/null 2>&1; exit 0
+    fi
+    # Platz prüfen (die neue Version entsteht daneben)
+    FREI=$(df -Pk "$DATEN" | awk 'NR==2{print $4}'); GROSS=$(du -sk --exclude=.git "$G" 2>/dev/null | cut -f1)
+    if [ -n "$FREI" ] && [ -n "$GROSS" ] && [ "$FREI" -lt $((GROSS + 51200)) ]; then echo "Zu wenig Platz auf der SD-Karte für das Update."; exit 1; fi
+    # alte, abgebrochene Reste weg
+    rm -rf "$DATEN/seite.neu"
+    # die neue Version entsteht in seite.neu – die laufende bleibt unberührt, bis alles fertig ist
+    mkdir -p "$DATEN/seite.neu" && git -C "$G" archive FETCH_HEAD | tar -x -C "$DATEN/seite.neu" || { rm -rf "$DATEN/seite.neu"; echo "Update konnte nicht entpackt werden – Imres bleibt, wie es ist."; exit 1; }
+    [ -f "$DATEN/seite.neu/zynthian/imres-modus" ] && [ -f "$DATEN/seite.neu/lautenwerk.js" ] || { rm -rf "$DATEN/seite.neu"; echo "Update unvollständig – Imres bleibt, wie es ist."; exit 1; }
+    # Tausch: Git-Verwaltung wandert mit, die alte Version wird als seite.alt-DATUM aufgehoben
+    mv "$G/.git" "$DATEN/seite.neu/.git" && git -C "$DATEN/seite.neu" reset -q FETCH_HEAD
+    STEMPEL=$(date +%Y%m%d-%H%M%S)
+    mv "$G" "$DATEN/seite.alt-$STEMPEL" && mv "$DATEN/seite.neu" "$G"; sync
+    # Aufräumen: die letzten 5 alten Versionen behalten, ältere und Reste löschen
+    ls -d "$DATEN"/seite.alt-* 2>/dev/null | sort | head -n -5 | while read -r X; do rm -rf "$X"; done
+    find "$G" -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null
+    echo "Neue Version $(echo "$NEU" | cut -c1-7) ist installiert (vorher $(echo "$ALT" | cut -c1-7))."
+    "$S/imres-modus" einrichten
+    ;;
+  zurueck)
+    # letzte Version wiederherstellen (falls ein Update etwas kaputt gemacht hat)
+    exec 9>"$DATEN/.update.lock"; flock -n 9 || { echo "Es läuft gerade ein Update."; exit 1; }
+    ALT=$(ls -d "$DATEN"/seite.alt-* 2>/dev/null | sort | tail -1); [ -n "$ALT" ] || { echo "Keine ältere Version vorhanden."; exit 1; }
+    mv "$DATEN/seite/.git" "$ALT/.git" 2>/dev/null
+    mv "$DATEN/seite" "$DATEN/seite.verworfen-$(date +%Y%m%d-%H%M%S)" && mv "$ALT" "$DATEN/seite"; sync
+    ls -d "$DATEN"/seite.verworfen-* 2>/dev/null | sort | head -n -2 | while read -r X; do rm -rf "$X"; done
+    echo "Vorige Version wiederhergestellt: $(basename "$ALT")"
+    "$S/imres-modus" einrichten
     ;;
   einrichten)
+    [ -n "$IMRES_TEST" ] && { echo "(Test) einrichten"; exit 0; }
     # Dienste und Rechte nach einem Update auf den neuesten Stand bringen
-    S="$DATEN/seite/zynthian"
     chmod +x "$S/kiosk.sh" "$S/hintergrund.sh" "$S/imres-modus" "$S/ton.sh" 2>/dev/null
-    ln -sf "$S/imres-modus" /usr/local/bin/imres-modus
+    # als Kopie (nicht als Verweis) – so funktioniert der Befehl auch, wenn „seite“ gerade getauscht wird
+    rm -f /usr/local/bin/imres-modus; install -m 755 "$S/imres-modus" /usr/local/bin/imres-modus
     cp "$S/dienste/"imres-*.service /etc/systemd/system/
     mkdir -p /etc/systemd/system/zynthian.service.d
     cp "$S/dienste/zynthian-conflicts.conf" /etc/systemd/system/zynthian.service.d/imres.conf
@@ -62,5 +106,5 @@ case "$1" in
       hintergrund) sleep 6; systemctl start imres-hintergrund ;;
     esac
     ;;
-  *) echo "Benutzung: imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund"; exit 1 ;;
+  *) echo "Benutzung: imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|zurueck|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund"; exit 1 ;;
 esac

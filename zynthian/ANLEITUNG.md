@@ -269,7 +269,12 @@ Dort gibt es alle Tasten, die Drehregler (+/−), **alle Optionen** (Master/Slav
 
 ## 12. Aktualisieren
 
-Mit Internet: Fernbedienung → „Imres aktualisieren“ · oder per SSH `imres-modus aktualisieren`. Danach lädt die Seite von selbst neu.
+Mit Internet: **MENU → F4 System → ⬇ Imres aktualisieren** (oder Fernbedienung, oder per SSH `imres-modus aktualisieren`). Danach lädt die Seite von selbst neu.
+
+- **Sicher:** Die neue Version entsteht zuerst daneben; erst wenn sie vollständig da ist, wird in einem Schritt getauscht. Bricht das Internet oder der Strom vorher ab, bleibt die alte Version unverändert – und ein halber Tausch wird beim nächsten Start von selbst repariert. Zwei Updates gleichzeitig gehen nicht.
+- **Schon aktuell?** Dann meldet das Pult „Imres ist schon auf dem neuesten Stand“ und lädt nichts.
+- **Alte Versionen:** Die letzten 5 werden aufgehoben, ältere und Reste abgebrochener Updates werden gelöscht. **↺ Vorige Version zurückholen** (im System-Menü, oder `imres-modus zurueck`) holt die letzte zurück, falls nach einem Update etwas nicht stimmt.
+- **Einstellungen** (Belegung, Favoriten, Sets, Mischungen) liegen außerdem alle 2 Minuten als Sicherung auf der SD-Karte (Einstellungen → 💾 Sicherung).
 
 ---
 

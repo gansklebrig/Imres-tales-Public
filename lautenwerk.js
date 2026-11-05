@@ -13398,9 +13398,9 @@ registerProcessor("imres-glitch", ImresGlitch);`;
   }
   /* ---------- Eingänge des Zynthian (Handpan, Didgeridoo …) mit eigener Effektkette ----------
      Chromium nimmt beide Eingänge als ein Stereo-Signal auf (links = Eingang 1, rechts = Eingang 2). */
-  const KANAL_STD = { an: false, pegel: 100, laut: 80, filter: 0, echo: 0, rueck: 35, hall: 0, drive: 0, pan: 0, duck: 0 };
+  const KANAL_STD = { an: true, pegel: 100, laut: 80, filter: 0, echo: 0, rueck: 35, hall: 0, drive: 0, pan: 0, duck: 0 };
   const KANAL = [Object.assign({}, KANAL_STD), Object.assign({}, KANAL_STD)];
-  try { const g = JSON.parse(localStorage.getItem("imres-lw-kanaele") || "null"); if (Array.isArray(g)) g.forEach((x, i) => { if (KANAL[i]) Object.assign(KANAL[i], x, { an: false }); }); } catch (_) {}
+  try { const g = JSON.parse(localStorage.getItem("imres-lw-kanaele") || "null"); if (Array.isArray(g)) g.forEach((x, i) => { if (KANAL[i]) Object.assign(KANAL[i], x); }); /* an/aus wird gemerkt */ } catch (_) {}
   const EIN = { strom: null, quelle: null, split: null, k: [null, null], hall: null, laedt: null, fehler: "" };
   /* Ausweichen: spielt das Instrument, wird die Musik (samt Kulisse) um „duck“ % leiser – schnell runter, langsam wieder hoch */
   let duckJetzt = 1;

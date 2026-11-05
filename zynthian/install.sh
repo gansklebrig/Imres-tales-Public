@@ -16,7 +16,7 @@ echo "-- Seite herunterladen (ca. 250 MB, dauert etwas) …"
 mkdir -p "$ORT"
 if [ -d "$ORT/seite/.git" ]; then git -C "$ORT/seite" fetch --depth 1 origin main && git -C "$ORT/seite" reset --hard origin/main; else git clone --depth 1 "$REPO" "$ORT/seite"; fi
 chmod +x "$ORT/seite/zynthian/kiosk.sh" "$ORT/seite/zynthian/hintergrund.sh" "$ORT/seite/zynthian/imres-modus"
-ln -sf "$ORT/seite/zynthian/imres-modus" /usr/local/bin/imres-modus
+rm -f /usr/local/bin/imres-modus; install -m 755 "$ORT/seite/zynthian/imres-modus" /usr/local/bin/imres-modus
 
 echo "-- Ton: Chromium spielt über JACK …"
 if [ -f /root/.asoundrc ] && ! grep -q "Imres" /root/.asoundrc; then cp /root/.asoundrc /root/.asoundrc.vor-imres; fi

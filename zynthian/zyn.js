@@ -307,6 +307,16 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menueArt = "modus";
   }
   let menueArt = null;
+  /* Fortschritt des Updates anzeigen (die Brücke schreibt mit) – bei „schon aktuell“ oder Fehlern bleibt die Meldung stehen */
+  function updateVerfolgen() {
+    let n = 0, letzte = "";
+    const t = setInterval(() => {
+      if (++n > 90) { clearInterval(t); return; }
+      fetch("/zyn/update").then(r => r.json()).then(j => { const z = (j.zeilen || []).filter(x => !/^Start:/.test(x)); const l = z[z.length - 1] || ""; if (!l || l === letzte) return; letzte = l;
+        zeige((/neuesten Stand/.test(l) ? "✅ " : /nicht|Kein|Zu wenig|unvollständig|läuft schon/.test(l) ? "⚠ " : "⬇ ") + l);
+        if (/neuesten Stand|Kein Update|Zu wenig|unvollständig|läuft schon|Keine ältere/.test(l)) clearInterval(t); }).catch(() => {});
+    }, 2000);
+  }
   function systemMenue() {
     const post = aktion => fetch("/zyn/system", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion }) }).catch(() => {});
     menue("<h3>⚙ " + W("System", "System") + '</h3><div class="reihe">' +
@@ -317,11 +327,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Imres-Bühne", "Imres stage") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
       '<button type="button" data-zm="startz">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>Zynthian</b></button>" +
       '<button type="button" data-zm="neu">🔄 ' + W("Seite neu laden", "Reload page") + "</button>" +
+      '<button type="button" data-zm="zurueck">↺ ' + W("Vorige Version zurückholen", "Restore previous version") + "<small>" + W("falls nach einem Update etwas nicht stimmt (die letzten 5 werden aufgehoben)", "if an update broke something (last 5 are kept)") + "</small></button>" +
       '<button type="button" data-zm="neustart">↻ ' + W("Zynthian neu starten", "Restart Zynthian") + "</button>" +
       '<button type="button" data-zm="aus">⏻ ' + W("Ausschalten", "Shut down") + "<small>" + W("Danach den Strom trennen", "Then unplug power") + "</small></button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", {
       zyn: () => { zeige("🎛 " + W("Zynthian startet …", "Zynthian is starting …")); post("zynthian"); },
-      upd: () => { menueZu(); zeige("⬇ " + W("Imres wird aktualisiert …", "Updating Imres …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); },
+      upd: () => { menueZu(); zeige("⬇ " + W("Imres wird aktualisiert …", "Updating Imres …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); updateVerfolgen(); },
+      zurueck: () => { menueZu(); zeige("↺ " + W("Vorige Version wird geholt …", "Restoring previous version …")); post("zurueck"); updateVerfolgen(); },
       hinter: () => { zeige("🎛 " + W("Zynthian startet, Imres läuft weiter …", "Zynthian starts, Imres keeps playing …")); post("hintergrund"); },
       auf: () => { menueZu(); aufnahme(); },
       start: () => { post("start-imres"); zeige("🔌 " + W("Startet künftig mit der Imres-Bühne", "Will start with the Imres stage")); menueZu(); },
@@ -1675,7 +1687,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 
   /* 🎻 Mitspieler: Töne des angesteckten Instruments erkennen und von Bühneninstrumenten (und auf Wunsch per MIDI) mitspielen lassen */
   const MS = Object.assign({ an: false, quelle: 0, midi: false, kanal: 0 }, (() => { try { return JSON.parse(lies("imres-zp-mit", "{}")) || {}; } catch (_) { return {}; } })());
-  MS.an = false; /* nach dem Start aus – wie die Eingänge */
+  /* Mitspieler und Eingänge: wie beim letzten Mal (Eingänge standardmäßig an) – nach dem Laden der Bühne wieder öffnen */
+  (function eingaengeWieder(n) {
+    const P = window.ImresPult; if (SEITE !== "buehne") return;
+    if (!P || !P.kanal || !P.listen) { if (n < 60) setTimeout(() => eingaengeWieder(n + 1), 500); return; }
+    const an = [0, 1].filter(i => (P.kanal(i) || {}).an); if (!an.length) { if (MS.an) { MS.an = false; msMerken(); } return; }
+    Promise.all(an.map(i => P.kanal(i, { an: true }))).then(() => { bankenNeu(); if (MS.an) { MS.an = false; msSchalten(true); } });
+  })(0);
   const msMerken = () => schreib("imres-zp-mit", JSON.stringify(MS));
   let msT = 0, msLetzt = 0, msWartet = false; const msZustand = {};
   const msPuf = new Float32Array(2048), msTon = new Float32Array(8192);
