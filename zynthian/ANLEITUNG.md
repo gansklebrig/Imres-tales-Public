@@ -194,6 +194,9 @@ Gesteuert wird über den **Steuer-Kanal** (Standard: Kanal 16, einstellbar, auch
 
 ### Instrumente anstecken (Handpan, Didgeridoo …)
 
+**Klingt es verzerrt?** Zeigt die Anzeige „⚠ übersteuert schon an der Buchse“, ist das Signal vor Imres zu laut: im selben Menü den Eingangspegel der Soundkarte (🎚) senken. Der Gain in Imres kann Verzerrung von der Buchse nicht mehr wegmachen.
+
+
 **MENU → 🎤 Eingänge**: Eingang 1 und 2 getrennt einschalten, je mit **Gain** (Eingangspegel) und **Lautstärke** in der Mischung. Die Pegelanzeige wird gelb bei kräftigem, rot bei zu lautem Signal – dann Gain runter.
 
 Sobald ein Eingang an ist, gibt es mit **MIXER** zusätzlich die Reglerbänke **IN1** / **IN2**: Lautstärke, Filter, Delay (im Tempo), Hall – mit drücken+drehen auch Gain, Rückkopplung, Drive, Panorama.
@@ -205,6 +208,15 @@ Der Ton läuft durch den Browser und kommt dadurch etwas verzögert (einige Hund
 Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zurück) oder **MENU → 🥁 Drumpad / Beats**. Dort spielt PAD (auch unten auf dem Bildschirm) die gewählte Spur live.
 
 **Pads:** Oben rechts schaltet **🥁 Pads / ▦ Raster** die Ansicht um. In der Pad-Ansicht gibt es 8 große Pads – antippen spielt das Instrument sofort (F1–F4 spielen die oberen vier). Mit **⏺ Aufnahme** (oder REC) wird bei laufendem Beat alles, was du spielst, auf den nächsten Schritt gesetzt. Darunter das kleine Raster: dort siehst du, wann welches Instrument spielt (die Pads blitzen mit), und ein Tipp auf ein Feld nimmt den Schlag wieder raus.
+
+### 🎻 Mitspieler (wie der Ensemble-Regler am Streichfett)
+
+**MENU → 🎤 Eingänge → 🎻 Mitspieler**: Imres hört auf deine Handpan (Eingang 1 oder 2), erkennt jeden angeschlagenen Ton und lässt Bühneninstrumente denselben Ton mitspielen – passend in die eingestellte Tonart eingerastet. **MIXER → Bank MIT**:
+- **Ensemble** 0 … 8: je höher, desto mehr spielen mit – Harfe → Gitarre → Streicher → Celli → Chor → Flöte → Glockenspiel → Kontrabass
+- **Lautstärke**, **Empfindlichkeit** (niedrig = nur deutliche Anschläge, hoch = auch leise Töne, dafür mehr Fehlgriffe), **Oktave** (drücken+drehen: Hall)
+- Auf Wunsch gehen die Töne zusätzlich **als MIDI an den Zynthian** (Kanal wählbar) – so spielen auch deine Synths mit.
+
+Gut zu wissen: schnelle Läufe, während viele Töne lange nachklingen, erkennt es noch nicht immer sicher. Ein Mikrofon nah an der Anlage kann die Mitspieler selbst „hören“ – Tonabnehmer oder nahes Mikro sind besser.
 
 ### 🎚 Mischpult (CTRL)
 

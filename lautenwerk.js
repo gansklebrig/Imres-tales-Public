@@ -1780,6 +1780,21 @@
   let ctx = null, master = null, rauschen = null, illusionEcho = null;
   const spurGain = {}, hallSend = {};
   const naechsterWechsel = {};
+  /* Ensemble der Mitspieler: je höher der Regler, desto mehr Instrumente kommen dazu – [Klang, Oktave, Pegel, Hülle, Name] */
+  const MIT_LAGEN = [["harfe", 0, .55, { dauer: 2.6, aus: .4 }, "Harfe"], ["gitarre", 0, .42, { dauer: 2.2, aus: .4 }, "Gitarre"], ["vln", 0, .26, { ein: .12, dauer: 2.4, aus: .8 }, "Streicher"],
+    ["vc", -12, .3, { ein: .15, dauer: 2.6, aus: .9 }, "Celli"], ["ooh", 0, .22, { ein: .25, dauer: 2.8, aus: 1 }, "Chor"], ["fl", 12, .2, { ein: .08, dauer: 1.8, aus: .6 }, "Flöte"],
+    ["glock", 12, .22, { dauer: 1.6, aus: .4 }, "Glockenspiel"], ["kb", -24, .34, { ein: .05, dauer: 2.2, aus: .6 }, "Kontrabass"]];
+  const MIT = { stufe: 3, laut: 70, hall: 35, oktave: 0 };
+  try { Object.assign(MIT, JSON.parse(localStorage.getItem("imres-lw-mit") || "{}")); } catch (_) {}
+  let mitBus = null, mitHall = null;
+  function mitVorladen() { if (!ctx) return; MIT_LAGEN.slice(0, MIT.stufe).forEach(x => { try { probenLaden(x[0]); } catch (_) {} }); }
+  function mitspielen(midi, staerke) {
+    if (!ctx || rendert || !MIT.stufe) return false;
+    if (!mitBus) { mitBus = ctx.createGain(); mitBus.gain.value = Math.pow(MIT.laut / 100, 1.5); mitBus.connect(ausgang); mitHall = ctx.createGain(); mitHall.gain.value = MIT.hall / 100 * .8; mitBus.connect(mitHall); if (hallHP) mitHall.connect(hallHP); }
+    const j = ctx.currentTime + .01, st = Math.max(.15, Math.min(1, staerke == null ? .8 : staerke)), m0 = Math.round(midi) + 12 * (MIT.oktave || 0);
+    let ok = false; MIT_LAGEN.slice(0, MIT.stufe).forEach(([g, okt, laut, o]) => { try { if (probe(g, m0 + okt, j, mitBus, laut * st, o)) ok = true; } catch (_) {} });
+    return ok;
+  }
   let PAD_LAUT = 1.6; try { const v = +localStorage.getItem("imres-lw-padlaut"); if (v >= .3 && v <= 3) PAD_LAUT = v; } catch (_) {}
   let einDuck = null; /* Musik weicht einem angesteckten Instrument aus (Eingang 1/2) */
   let ausgang = null, hallEin = null, hallNass = null, hallNode = null, hallFilter = null;
@@ -13537,6 +13552,10 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     beatsVariation(v) { if (v != null) { S.variation = Math.max(0, Math.min(10, Math.round(+v))); merken(); } return S.variation; },
     beatsStumm(spur, an) { if (!(spur in S.mute)) return; S.mute[spur] = an == null ? !S.mute[spur] : !!an; merken(); mixAnwenden(); },
     /* sofort spielen (Pad) – und für das Live-Einspielen: der Schritt, der dem Anschlag am nächsten liegt */
+    /* 🎻 Mitspieler: Bühneninstrumente spielen die Töne eines angesteckten Instruments nach (wie der Ensemble-Regler am Streichfett) */
+    mitspieler(werte) { if (werte) { Object.assign(MIT, werte); MIT.stufe = Math.max(0, Math.min(MIT_LAGEN.length, Math.round(MIT.stufe))); try { localStorage.setItem("imres-lw-mit", JSON.stringify(MIT)); } catch (_) {} mitVorladen(); if (mitBus && ctx) { mitBus.gain.setTargetAtTime(Math.pow(MIT.laut / 100, 1.5), ctx.currentTime, .05); mitHall.gain.setTargetAtTime(MIT.hall / 100 * .8, ctx.currentTime, .05); } }
+      return Object.assign({ lagen: MIT_LAGEN.map(x => x[4]) }, MIT); },
+    mitspielen(midi, staerke) { return mitspielen(midi, staerke); },
     padLaut(v) { if (v != null) { PAD_LAUT = Math.max(.3, Math.min(3, +v || 1)); try { localStorage.setItem("imres-lw-padlaut", String(PAD_LAUT)); } catch (_) {} } return PAD_LAUT; },
     beatsAnschlag(spur, wert) {
       /* steht die Musik, ist der Musikweg stummgeschaltet – fürs Einspielen wieder öffnen */

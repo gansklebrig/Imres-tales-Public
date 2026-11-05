@@ -976,7 +976,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const drehGedrueckt = {}, drehGedreht = {};
   function zpParamZyklus(nr, d) {
     if (SEITE === "welten" || spurAktiv()) return;
-    const slot = mischAktiv() ? "MIX" : bank ? bankName() : "A:" + (zpSeite === "set" ? "stimmung" : zpSeite), bn = bankName(), liste = mischAktiv() ? MIX_LISTE : /^IN[12]$/.test(bn) ? KANAL_FELDER.map(x => bn.toLowerCase() + "_" + x[0]) : bn === "FX" ? FX_PARAMS : NORMAL_PARAMS.concat(FX_PARAMS);
+    const slot = mischAktiv() ? "MIX" : bank ? bankName() : "A:" + (zpSeite === "set" ? "stimmung" : zpSeite), bn = bankName(), liste = mischAktiv() ? MIX_LISTE : bn === "MIT" ? ["mit_stufe", "mit_laut", "mit_hall", "mit_empf", "mit_okt"] : /^IN[12]$/.test(bn) ? KANAL_FELDER.map(x => bn.toLowerCase() + "_" + x[0]) : bn === "FX" ? FX_PARAMS : NORMAL_PARAMS.concat(FX_PARAMS);
     const l = (ZB.regler[slot] || (slot === "MIX" ? MIX_STD : ["nichts", "nichts", "nichts", "nichts"])).slice();
     if (slot === "MIX") { for (let x = 0; x < 8; x++) if (!l[x]) l[x] = MIX_STD[x]; nr += panelReihe() * 4; }
     const jetzt = l[nr], i = liste.indexOf(jetzt);
@@ -1255,7 +1255,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const z = (kk, t) => "<div><b>" + kk + "</b><span>" + t + "</span></div>";
     const l = [["F1–F4", W("obere Kachelreihe", "top row of tiles")], ["ALT + F1–F4", W("untere Kachelreihe", "bottom row")], ["◀ ▶", W("Kachel wählen, am Rand weiterblättern", "move, page at the edge")],
       ["ALT + ◀ ▶", W("vorige / nächste Seite", "previous / next page")], ["ALT + ▲ ▼", W("andere Gruppe (Favoriten, Wetter, Effekte …)", "other group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")], ["F 1,5 s halten", W("★ Favorit an/aus – Favoriten stehen vorne", "★ favourite on/off")],
-      ["ALT + PAD", W("🥁 Drumpad (Beats) auf/zu – oder oben der Reiter „Beats“", "🥁 drum pad open/close")], ["ZS3", W("🎛 Spuren der Stimmung: jedes Instrument einzeln, Kulisse, Orchester/Kapelle/Gäste · ALT + drehen: untere Reihe · ◀ ▶ weitere · wird je Stimmung gemerkt", "🎛 tracks of the mood")], ["STOP " + W("lang", "hold"), W("🚨 Panik: Musik, Kulisse, alle Effekte, Loops, Autopilot und MIDI-Noten aus", "🚨 panic: everything off")], ["CTRL", W("🎚 Mischpult: 4 Regler für Musik, Hintergrund, Instrument, Effekte (drücken+drehen: andere Spur)", "🎚 Mixer: 4 knobs for music, backdrop, instrument, effects")], ["MIXER", W("Reglerbank A → B → FX (→ IN1/IN2)", "Knob bank A → B → FX (→ IN1/IN2)")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")], ["🎤 " + W("Eingänge", "Inputs"), W("MENU → Eingänge: Eingang 1/2 an, Gain, Lautstärke · dann MIXER → Bank IN1/IN2: Lautstärke, Filter, Delay, Hall (drücken+drehen: Gain, Rückkopplung, Drive, Panorama)", "MENU → inputs · then MIXER → bank IN1/IN2")], ["🥁 Beats", W("◀▶ Schritt · ▲▼ Spur · SEL/F1–F4 setzen · Regler 3 Tonhöhe · PAD live spielen · REC live aufnehmen · ALT+◀▶ verschieben · ALT+▲/▼ Spur kopieren/einfügen · ALT+SEL leeren · ALT+F1–F4 Variation 1–4 · CTRL halten+F1–F4 Pattern in Variation kopieren · ZS3 halten+F1–F4 nur die Spur kopieren", "◀▶ step · ▲▼ track · SEL/F1–F4 set · knob 3 pitch · PAD play live · REC live record · ALT+◀▶ shift · ALT+▲/▼ copy/paste · ALT+SEL clear")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
+      ["ALT + PAD", W("🥁 Drumpad (Beats) auf/zu – oder oben der Reiter „Beats“", "🥁 drum pad open/close")], ["🎻 " + W("Mitspieler", "Ensemble"), W("MENU → Eingänge → Mitspieler: Bühneninstrumente spielen die Töne deiner Handpan mit · MIXER → Bank MIT: Ensemble (0 = niemand … 8 = Harfe, Gitarre, Streicher, Celli, Chor, Flöte, Glockenspiel, Kontrabass), Lautstärke, Hall, Oktave", "MENU → inputs → ensemble")], ["ZS3", W("🎛 Spuren der Stimmung: jedes Instrument einzeln, Kulisse, Orchester/Kapelle/Gäste · ALT + drehen: untere Reihe · ◀ ▶ weitere · wird je Stimmung gemerkt", "🎛 tracks of the mood")], ["STOP " + W("lang", "hold"), W("🚨 Panik: Musik, Kulisse, alle Effekte, Loops, Autopilot und MIDI-Noten aus", "🚨 panic: everything off")], ["CTRL", W("🎚 Mischpult: 4 Regler für Musik, Hintergrund, Instrument, Effekte (drücken+drehen: andere Spur)", "🎚 Mixer: 4 knobs for music, backdrop, instrument, effects")], ["MIXER", W("Reglerbank A → B → FX (→ IN1/IN2)", "Knob bank A → B → FX (→ IN1/IN2)")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")], ["🎤 " + W("Eingänge", "Inputs"), W("MENU → Eingänge: Eingang 1/2 an, Gain, Lautstärke · dann MIXER → Bank IN1/IN2: Lautstärke, Filter, Delay, Hall (drücken+drehen: Gain, Rückkopplung, Drive, Panorama)", "MENU → inputs · then MIXER → bank IN1/IN2")], ["🥁 Beats", W("◀▶ Schritt · ▲▼ Spur · SEL/F1–F4 setzen · Regler 3 Tonhöhe · PAD live spielen · REC live aufnehmen · ALT+◀▶ verschieben · ALT+▲/▼ Spur kopieren/einfügen · ALT+SEL leeren · ALT+F1–F4 Variation 1–4 · CTRL halten+F1–F4 Pattern in Variation kopieren · ZS3 halten+F1–F4 nur die Spur kopieren", "◀▶ step · ▲▼ track · SEL/F1–F4 set · knob 3 pitch · PAD play live · REC live record · ALT+◀▶ shift · ALT+▲/▼ copy/paste · ALT+SEL clear")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
       .concat(ZP_TASTEN.map(t => [t.replace("ALT+", "ALT + "), (ZP_AKT[ZB.tasten[t]] || ZP_AKT.nichts)[0]]));
     menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([x, y]) => z(x, y)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="beleg">🎛 ' + W("Ändern", "Change") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, beleg: () => belegMenue() });
     menueArt = "hilfe";
@@ -1628,6 +1628,14 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       h += '<button type="button" data-zm="kc:' + gi + '"><span>🎚 ' + W("Soundkarte ", "Sound card ") + esc2(g.name) + ": <b>" + g.c + " %</b></span><small>" + W("Eingangspegel vor Imres · ◀ ▶", "input level before Imres · ◀ ▶") + "</small></button>";
       a["kc:" + gi + ":stufe"] = st => audioPost({ aktion: "regler", name: g.name, art: "c", wert: g.c + st * 5 }).then(r => { if (r && r.ok) eingangMenue.karte = (r.regler || []).filter(x => x.c != null); eingangMenue("kc:" + gi); });
     });
+    h += '<button type="button" data-zm="mit"><span>' + (MS.an ? "✅ " : "⬜ ") + "🎻 " + W("Mitspieler", "Ensemble follows") + (MS.an ? " – " + W("folgt Eingang ", "follows input ") + (MS.quelle + 1) : "") + "</span><small>" + W("Bühneninstrumente spielen deine Töne mit · Regler: MIXER → Bank MIT (Ensemble wie beim Streichfett)", "stage instruments play your notes · knobs: MIXER → bank MIT") + "</small></button>";
+    a.mit = () => { if (!MS.an) { const an = [0, 1].filter(x => (kanalHol(x) || {}).an); if (!an.length) { zeige(W("Erst einen Eingang einschalten", "Switch an input on first")); return; } if (!an.includes(MS.quelle)) MS.quelle = an[0]; } msSchalten(); eingangMenue("mit"); };
+    if (MS.an) { const anE = [0, 1].filter(x => (kanalHol(x) || {}).an);
+      h += '<button type="button" data-zm="mitq"><span>· ' + W("hört auf Eingang ", "listens to input ") + (MS.quelle + 1) + "</span><small>" + W("antippen: anderer Eingang", "tap: other input") + "</small></button>";
+      a.mitq = () => { if (anE.length > 1) { MS.quelle = anE[(anE.indexOf(MS.quelle) + 1) % anE.length]; msMerken(); } eingangMenue("mitq"); };
+      h += '<button type="button" data-zm="mitmidi"><span>· ' + W("auch als MIDI an den Zynthian: ", "also as MIDI to Zynthian: ") + "<b>" + (MS.midi ? W("an, Kanal ", "on, channel ") + (MS.kanal + 1) : W("aus", "off")) + "</b></span><small>" + W("SEL: an/aus · ◀ ▶ Kanal", "SEL: on/off · ◀ ▶ channel") + "</small></button>";
+      a.mitmidi = () => { MS.midi = !MS.midi; msMerken(); eingangMenue("mitmidi"); };
+      a["mitmidi:stufe"] = st => { MS.kanal = (MS.kanal + st + 16) % 16; msMerken(); eingangMenue("mitmidi"); }; }
     h += '<button type="button" data-zm="stimm"><span>🎯 ' + W("Stimmgerät", "Tuner") + "</span><small>" + W("Ton, Abweichung in Cent, passt er zur Tonart?", "note, cents, fits the key?") + "</small></button>";
     h += '<button type="button" data-zm="tonart"><span>🎼 ' + W("Tonart aus dem Instrument erkennen", "Detect key from the instrument") + "</span><small>" + W("8 s quer über die Töne spielen – Imres spielt danach in dieser Tonart", "play across the notes for 8 s – Imres follows that key") + "</small></button>";
     a.stimm = () => { clearInterval(pegelT); stimmgeraet(); }; a.tonart = () => { clearInterval(pegelT); menueZu(); tonartErkennen(); };
@@ -1664,12 +1672,115 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       text: v => { const g = karteRegler(kh); return g ? v + " % · " + g.name : W("– (keiner)", "– (none)"); } };
   });
   ZP_PARAM.boost = { name: W("📢 Boost", "📢 Boost"), lo: 0, hi: 12, schritt: 1, neutral: 0, druck: "null", lies: () => { const P = window.ImresPult; return P && P.boost ? P.boost() : 0; }, setz: v => { const P = window.ImresPult; if (P && P.boost) P.boost(v); }, text: v => "+" + v + " dB" };
+
+  /* 🎻 Mitspieler: Töne des angesteckten Instruments erkennen und von Bühneninstrumenten (und auf Wunsch per MIDI) mitspielen lassen */
+  const MS = Object.assign({ an: false, quelle: 0, midi: false, kanal: 0 }, (() => { try { return JSON.parse(lies("imres-zp-mit", "{}")) || {}; } catch (_) { return {}; } })());
+  MS.an = false; /* nach dem Start aus – wie die Eingänge */
+  const msMerken = () => schreib("imres-zp-mit", JSON.stringify(MS));
+  let msT = 0, msLetzt = 0, msWartet = false; const msZustand = {};
+  const msPuf = new Float32Array(2048), msTon = new Float32Array(8192);
+  function msZiel(midi) {
+    /* in die Tonart einrasten (falls eine gewählt ist) – ein schräger Ton wird zum nächsten passenden */
+    const sk = OPT.tonartAn && SKALEN[OPT.skala] && SKALEN[OPT.skala][2]; let n = Math.round(midi);
+    if (sk) { let best = n, bd = 99; for (let d = -2; d <= 2; d++) { const c = n + d; if (sk.includes(((c - OPT.grund) % 12 + 12) % 12) && Math.abs(c - midi) < bd) { bd = Math.abs(c - midi); best = c; } } n = best; }
+    return n;
+  }
+  function msSchalten(an) {
+    const P = window.ImresPult; MS.an = an == null ? !MS.an : !!an; msMerken(); clearInterval(msT); msT = 0;
+    if (!MS.an || !P || !P.mitspieler) { bankenNeu(); return; }
+    P.mitspieler({}); /* Klänge vorladen */
+    msT = setInterval(() => {
+      const ana = P.kanalAnalyse(MS.quelle, 2048); if (!ana || msWartet) return;
+      ana.getFloatTimeDomainData(msPuf); const sr = P.abtastrate() || 44100, jetzt = performance.now();
+      msZustand.schwelle = 2.9 - (MS.empf == null ? 50 : MS.empf) / 100 * 1.2; /* Empfindlichkeit 0 … 100 → Schwelle 2,9 … 1,7 */
+      const an = anschlagSuchen(msPuf, sr, msZustand); const wann = an ? jetzt - an.abstand / sr * 1000 : -1, db = an ? an.db : -99;
+      if (wann < 0 || wann - msLetzt < 90) return;
+      msLetzt = wann; msWartet = true;
+      /* kurz warten, bis der neue Ton klar steht, dann die Tonhöhe bestimmen */
+      setTimeout(() => {
+        msWartet = false; const a2 = P.kanalAnalyse(MS.quelle, 8192); if (!a2) return; a2.getFloatTimeDomainData(msTon);
+        const sr2 = P.abtastrate(), idx = Math.round(msTon.length - (performance.now() - wann) / 1000 * sr2);
+        const hz = neuerTon(msTon, idx, sr2); if (!hz) return;
+        const n = msZiel(69 + 12 * Math.log2(hz / 440)), st = Math.max(.3, Math.min(1, (db + 48) / 40));
+        P.mitspielen(n, st); msZuletzt = n;
+        if (MS.midi) { const t = performance.now(), v = Math.round(40 + st * 80); beglSenden([{ k: MS.kanal, n, v, t }, { k: MS.kanal, n, v: 0, t: t + 1600 }]); }
+      }, 75);
+    }, 12);
+    bankenNeu();
+  }
+  let msZuletzt = null;
+  /* @@MIT-ANFANG Anschlag erkennen über „spektralen Zuwachs“: wie viel NEUER Klang (neue Frequenzen) im jüngsten Stück
+     gegenüber dem davor auftaucht – so fällt ein neuer Ton auch dann auf, wenn die vorigen noch laut nachklingen.
+     zustand merkt sich den gleitenden Durchschnitt; Rückgabe { abstand: Werte vom Pufferende bis zum Anschlag, db } oder null */
+  function anschlagSuchen(buf, sr, zustand) {
+    const n = buf.length, F = 1024, N = 1024; if (n < 2 * F) return null;
+    const mag = start => { const re = new Float64Array(N), im = new Float64Array(N); for (let i = 0; i < F; i++) re[i] = buf[start + i] * (.5 - .5 * Math.cos(2 * Math.PI * i / (F - 1))); fft(re, im, false);
+      const m = new Float64Array(N / 2); for (let i = 0; i < N / 2; i++) m[i] = Math.log(1 + 10 * Math.hypot(re[i], im[i])); return m; };
+    const A = mag(n - 2 * F), B = mag(n - F), lo = Math.floor(60 / (sr / N)), hi = Math.min(N / 2, Math.ceil(5000 / (sr / N)));
+    /* nur was deutlich über dem Grundrauschen liegt, zählt */
+    const sortiert = Array.from(B.subarray(lo, hi)).sort((x, y) => x - y), boden = sortiert[sortiert.length >> 1] + .7;
+    let flux = 0; for (let i = lo; i < hi; i++) { if (B[i] < boden) continue; const d = B[i] - Math.max(A[i], boden - .7); if (d > 0) flux += d; }
+    let q = 0; for (let i = n - F; i < n; i++) q += buf[i] * buf[i]; const db = 10 * Math.log10(q / F + 1e-12);
+    const z = zustand || {}; const mittel = z.mittel == null ? flux : z.mittel; z.mittel = mittel * .9 + flux * .1;
+    if (db < -50 || flux < Math.max(4, mittel * (z.schwelle || 2.2))) return null;
+    /* wo genau? der erste 64er-Block, dessen „Kanten“-Energie (Anschläge sind breitbandig) deutlich über den 8 Blöcken davor liegt */
+    const B64 = 64, e = [], ab = n - F - 8 * B64;
+    for (let s0 = ab; s0 + B64 <= n; s0 += B64) { let x = 0; for (let i = Math.max(1, s0); i < s0 + B64; i++) { const d = buf[i] - buf[i - 1]; x += d * d; } e.push(x); }
+    let best = n - F, staerkste = 0;
+    for (let k = 8; k < e.length; k++) { const vor = e.slice(k - 8, k).sort((x, y) => x - y)[4] + 1e-12, r = e[k] / vor; if (r > 4) { best = ab + k * B64; break; } if (r > staerkste) { staerkste = r; best = ab + k * B64; } }
+    return { abstand: n - best, db };
+  }
+  /* Welcher Ton ist NEU dazugekommen? Spektrum nach dem Anschlag minus Spektrum davor – so stört der noch klingende vorige Ton nicht.
+     Dann den Grundton dieses neuen Teils suchen und mit der genauen Tonhöhen-Messung in einem engen Bereich nachschärfen. */
+  function neuerTon(buf, idx, sr) {
+    const L = 2048, N = 16384; if (idx - L < 0 || idx + 64 + L > buf.length) return null;
+    const spek = start => { const re = new Float64Array(N), im = new Float64Array(N); for (let i = 0; i < L; i++) re[i] = buf[start + i] * (.5 - .5 * Math.cos(2 * Math.PI * i / (L - 1))); fft(re, im, false); const m = new Float64Array(N / 2); for (let i = 0; i < N / 2; i++) m[i] = Math.hypot(re[i], im[i]); return m; };
+    const vor = spek(idx - L), nach = spek(idx + 64), bin = sr / N, diff = new Float64Array(N / 2);
+    for (let i = 0; i < N / 2; i++) diff[i] = Math.max(0, nach[i] - vor[i] * 1.15);
+    const lo = Math.floor(65 / bin), hi = Math.min(N / 2 - 2, Math.ceil(1700 / bin)); let pk = lo, pmax = 0;
+    for (let i = lo; i <= hi; i++) if (diff[i] > pmax) { pmax = diff[i]; pk = i; }
+    if (pmax <= 0) return null;
+    /* kaum Neues im Spektrum: derselbe Ton wurde noch einmal angeschlagen – dann zählt der lauteste Ton danach */
+    let nmax = 0, npk = lo; for (let i = lo; i <= hi; i++) if (nach[i] > nmax) { nmax = nach[i]; npk = i; }
+    if (pmax < nmax * .1) { const f0 = npk * bin, r = tonhoehe(buf.subarray(idx + 64, Math.min(buf.length, idx + 64 + 4096)), sr, f0 * .95, f0 * 1.05); return r ? r.hz : f0; }
+    const wert = f => { const x = f / bin, i = Math.round(x); let m = 0; for (let k = i - 2; k <= i + 2; k++) if (k > 0 && k < diff.length) m = Math.max(m, diff[k]); return m; };
+    /* genaue Lage einer Spitze: Parabel durch die Nachbarn (logarithmisch) */
+    const genau = i => { let k = i; for (let j = i - 2; j <= i + 2; j++) if (j > 0 && j < diff.length - 1 && diff[j] > diff[k]) k = j; const a = Math.log(diff[k - 1] + 1e-9), b = Math.log(diff[k] + 1e-9), c = Math.log(diff[k + 1] + 1e-9), nn = a + c - 2 * b; return (nn < 0 ? k + (a - c) / (2 * nn) : k) * bin; };
+    let f = genau(pk);
+    /* liegt unter der stärksten Spitze ein Grundton (1/2, 1/3), der selbst deutlich da ist, ist das der eigentliche Ton */
+    /* … auch wenn er von einem noch klingenden Ton (dessen Oberton) teilweise verdeckt ist: dann ist er dort wenigstens deutlich lauter geworden */
+    const spitzeIn = (arr, fq) => { const i = Math.round(fq / bin); let m = 0; for (let k = i - 2; k <= i + 2; k++) if (k > 0 && k < arr.length) m = Math.max(m, arr[k]); return m; };
+    let nmax2 = 0; for (let i = lo; i <= hi; i++) if (nach[i] > nmax2) nmax2 = nach[i];
+    for (const t of [3, 2]) { const g = f / t; if (g < 65) continue; const zu = spitzeIn(nach, g) / (spitzeIn(vor, g) + 1e-9);
+      if (wert(g) > pmax * .2 || (zu > 1.35 && spitzeIn(nach, g) > nmax2 * .2)) { const i = Math.round(g / bin); f = wert(g) > 0 ? genau(i) : g; break; } }
+    /* nachschärfen über die Obertöne: bei 2f und 3f liegen die Nachbartöne weiter auseinander – gewichteter Mittelwert */
+    let sw = wert(f), sf = f * sw;
+    for (const h of [2, 3]) { const fh = h * f; if (fh / bin >= diff.length - 3) break; const w = wert(fh); if (w > pmax * .15) { const g = genau(Math.round(fh / bin)) / h; if (Math.abs(1200 * Math.log2(g / f)) < 60) { sf += g * w * h; sw += w * h; } } }
+    return sf / sw;
+  }
+  /* @@MIT-ENDE */
+  const MS_NAMEN = () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().lagen : []; };
+  ZP_PARAM.mit_stufe = { name: W("🎻 Mitspieler-Ensemble", "🎻 Ensemble"), lo: 0, hi: 8, schritt: 1, neutral: 3, druck: "null",
+    lies: () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().stufe : 0; }, setz: v => { const P = window.ImresPult; if (P && P.mitspieler) P.mitspieler({ stufe: v }); },
+    text: v => v ? v + " · " + (v === 1 ? "" : W("bis ", "up to ")) + (MS_NAMEN()[v - 1] || "") : W("niemand", "nobody") };
+  ZP_PARAM.mit_laut = { name: W("🎻 Mitspieler laut", "🎻 Ensemble level"), lo: 0, hi: 100, schritt: 4, neutral: 70, druck: "stumm",
+    lies: () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().laut : 0; }, setz: v => { const P = window.ImresPult; if (P && P.mitspieler) P.mitspieler({ laut: v }); } };
+  ZP_PARAM.mit_hall = { name: W("🎻 Mitspieler Hall", "🎻 Ensemble reverb"), lo: 0, hi: 100, schritt: 5, neutral: 35, druck: "null",
+    lies: () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().hall : 0; }, setz: v => { const P = window.ImresPult; if (P && P.mitspieler) P.mitspieler({ hall: v }); } };
+  ZP_PARAM.mit_empf = { name: W("🎻 Mitspieler Empfindlichkeit", "🎻 Ensemble sensitivity"), lo: 0, hi: 100, schritt: 5, neutral: 50, druck: "null",
+    lies: () => MS.empf == null ? 50 : MS.empf, setz: v => { MS.empf = v; msMerken(); }, text: v => v + " % – " + (v < 35 ? W("nur deutliche Anschläge", "only clear strokes") : v > 70 ? W("auch leise Töne (mehr Fehlgriffe)", "soft notes too (more errors)") : W("ausgewogen", "balanced")) };
+  ZP_PARAM.mit_okt = { name: W("🎻 Mitspieler Oktave", "🎻 Ensemble octave"), lo: -2, hi: 2, schritt: 1, neutral: 0, druck: "null",
+    lies: () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().oktave || 0 : 0; }, setz: v => { const P = window.ImresPult; if (P && P.mitspieler) P.mitspieler({ oktave: v }); },
+    text: v => v ? (v > 0 ? "+" : "") + v + W(" Oktave", " octave") : W("wie gespielt", "as played") };
+  BANK_FARBE.MIT = "#ffd890";
+  ZB.regler.MIT = ZB.regler.MIT || ["mit_stufe", "mit_laut", "mit_empf", "mit_okt"];
+  MIX_LISTE.push("mit_stufe", "mit_laut");
   NORMAL_PARAMS.push("karte_haupt", "karte_kh", "boost"); MIX_LISTE.splice(5, 0, "boost");
   BANK_FARBE.IN1 = "#ff9a80"; BANK_FARBE.IN2 = "#d090ff";
   ZB.regler.IN1 = ZB.regler.IN1 || ["in1_laut", "in1_filter", "in1_echo", "in1_hall"];
   ZB.regler.IN2 = ZB.regler.IN2 || ["in2_laut", "in2_filter", "in2_echo", "in2_hall"];
   function bankenNeu() {
-    const l = ["A", "B", "FX"]; [0, 1].forEach(i => { if ((kanalHol(i) || {}).an) l.push("IN" + (i + 1)); });
+    const l = ["A", "B", "FX"]; [0, 1].forEach(i => { if ((kanalHol(i) || {}).an) l.push("IN" + (i + 1)); }); if (MS.an) l.push("MIT");
     BANKEN.length = 0; l.forEach(x => BANKEN.push(x)); if (bank >= BANKEN.length) bank = 0; zpZeichnen(true);
   }
   /* ===================== 💾 Sicherung der Einstellungen auf der SD-Karte ===================== */
