@@ -1221,7 +1221,14 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
 html.zyn-pult .zyn-leiste { display: none !important; }
 /* Bühnenbild: hinter dem Pult (gedimmt) und als Ruhebild */
-html.zyn-pult.zyn-bb #lautenwerk.lw-pultmodus > .lw-buehne, html.zyn-pult.zyn-ruhe #lautenwerk.lw-pultmodus > .lw-buehne {
+/* alles andere der Webseite unsichtbar machen – nur die Bühne (und Pult/Ruhebild) malen */
+html.zyn-pult.zyn-bb body *, html.zyn-pult.zyn-ruhe body * { visibility: hidden !important; }
+html.zyn-pult.zyn-pult body .lw-buehne, html.zyn-pult.zyn-pult body .lw-buehne *,
+html.zyn-pult.zyn-pult body .zp, html.zyn-pult.zyn-pult body .zp *, html.zyn-pult.zyn-pult body .zp-ruhe, html.zyn-pult.zyn-pult body .zp-ruhe *,
+html.zyn-pult.zyn-pult body .zyn-osd, html.zyn-pult.zyn-pult body .zyn-osd *, html.zyn-pult.zyn-pult body .zyn-menue, html.zyn-pult.zyn-pult body .zyn-menue * { visibility: visible !important; }
+html.zyn-pult.zyn-bb body::before, html.zyn-pult.zyn-bb body::after, html.zyn-pult.zyn-ruhe body::before, html.zyn-pult.zyn-ruhe body::after { display: none !important; }
+html.zyn-pult.zyn-ruhe body, html.zyn-pult.zyn-bb body { background: #0d0a10 !important; }
+html.zyn-pult.zyn-pult.zyn-bb #lautenwerk .lw-buehne.lw-buehne, html.zyn-pult.zyn-pult.zyn-ruhe #lautenwerk .lw-buehne.lw-buehne {
   display: block !important; position: fixed !important; left: 0 !important; top: 0 !important; right: 0 !important; bottom: 0 !important; width: auto !important; height: auto !important;
   z-index: 2147480000 !important; margin: 0 !important; border-radius: 0 !important; border: 0 !important; grid-column: auto !important; }
 html.zyn-pult.zyn-bb .zp { background: rgba(14, 10, 18, .74); }
@@ -1302,7 +1309,10 @@ html.zyn-ruhe .zp-ruhe { display: block; }
       const ta = e.target.closest("[data-zp-taste]"); if (ta) { taste(ta.dataset.zpTaste, "kurz"); ledsMelden(); return; }
       const r = e.target.closest("[data-zp-r]"); if (r) { zpDruck(+r.dataset.zpR); }
     });
-    if (SEITE === "buehne") setTimeout(() => { const b = $('#lautenwerk [data-etab="ort"]'); if (b) klick(b); }, 1300); /* Zusätze (Wetter) sind nur im Reiter „Ort“ im Pult */
+    if (SEITE === "buehne") setTimeout(() => {
+      if (!$('#lautenwerk [data-etab]')) { schreib("imres-lw-modus", "einfach"); pultKlick("data-aktion", "modus"); }
+      setTimeout(() => { const b = $('#lautenwerk [data-etab="ort"]'); if (b) klick(b); }, 400);
+    }, 1100); /* Zusätze (Wetter) sind nur im Reiter „Ort“ im Pult */
     zpZeichnen(true); setInterval(() => { try { zpZeichnen(); } catch (e) { console.warn("zp", e); } }, 400);
     /* Musik weiter vorausplanen, damit kurze Ruckler der Oberfläche nicht hörbar werden */
     const vorlaufSetzen = () => { if (window.ImresPult && window.ImresPult.vorlauf) window.ImresPult.vorlauf(.7); else setTimeout(vorlaufSetzen, 500); }; if (SEITE === "buehne") vorlaufSetzen();
