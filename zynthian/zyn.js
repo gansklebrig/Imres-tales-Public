@@ -1142,8 +1142,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   let taps = [];
   function tapTempo() {
     const j = performance.now(); if (taps.length && j - taps[taps.length - 1] > 2000) taps = [];
-    taps.push(j); if (taps.length > 5) taps.shift();
-    if (taps.length < 2) { zeige("⏱ Tap …", null, W("weiter im Takt tippen", "keep tapping")); return; }
+    taps.push(j); if (taps.length > 8) taps.shift();
+    if (taps.length < 4) { zeige("⏱ Tap " + taps.length + " / 4", null, W("weiter im Takt tippen", "keep tapping")); return; }
     const iv = taps.slice(1).map((t, i) => t - taps[i]), bpm = Math.round(60000 / (iv.reduce((a, b) => a + b, 0) / iv.length));
     if (bpm < 40 || bpm > 220) return;
     if (OPT.takt === "slave" && tempoMidi) { zeige("⏱ " + W("Das Tempo kommt von der TR-8S", "Tempo comes from the clock"), null, W("MIDI-Takt auf „aus“ stellen, um selbst zu tippen", "set MIDI clock to off to tap")); return; }
