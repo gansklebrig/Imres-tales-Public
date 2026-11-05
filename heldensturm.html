@@ -20019,7 +20019,7 @@ try{
    else if(d.art==='stand'){OFF.st=d.stand}
    offUpd()});
   navigator.serviceWorker.register('heldensturm-sw.js',{scope:'./heldensturm'}).then(r=>{OFF.reg=r;OFF.ok=true;
-   const frag=()=>offSend('stand');navigator.serviceWorker.ready.then(()=>setTimeout(frag,300));offUpd()}).catch(()=>{});
+   const frag=()=>offSend('stand');navigator.serviceWorker.ready.then(()=>setTimeout(frag,300));offUpd()}).catch(e=>{OFF.err=String(e&&e.message||e);offUpd()});
  }
 }catch(e){}
 
@@ -20068,7 +20068,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
  const bar=(p,t)=>`<div class="offbar"><i style="width:${Math.max(2,Math.min(100,p))}%"></i></div><div class="offst">${t}</div>`;
  let app;
  if(OFF.datei)app=`<p>Du spielst gerade die <b>heruntergeladene Fassung</b> von deinem Rechner. Neue Versionen gibt es auf imrestales.de.</p>`;
- else if(!OFF.ok)app=`<p>Offline-Speichern geht nur auf <b>imrestales.de</b> in einem aktuellen Browser (Chrome, Edge, Firefox, Safari).</p>`;
+ else if(!OFF.ok)app=`<p>Hier kann das Spiel nicht gespeichert werden. Öffne <b>imrestales.de/heldensturm.html</b> direkt im Browser (Chrome, Firefox, Edge, Safari – nicht in einer Vorschau oder App-Ansicht). Dort steht an dieser Stelle der Knopf <b>„Für offline speichern“</b>.</p>${OFF.err?`<p class="offbad">Der Browser meldet: ${esc(OFF.err)}</p>`:''}`;
  else{const knopf=f?'':bereit?`<button class="slbtn" data-act="off-laden">Erneut prüfen</button>`:`<button class="slbtn gold" data-act="off-laden" data-sl-def="1">Für offline speichern${ges?` (${offMB(ges)})`:''}</button>`;
   const inst=OFF.inst?`<p class="offok">✓ Läuft als installierte App.</p>`:OFF.bip?`<button class="slbtn gold" data-act="off-inst" ${bereit?'data-sl-def="1"':''}>App installieren</button>`:
    `<p class="offh">Danach im Browser-Menü <b>⋮</b> „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen (iPhone: Teilen → „Zum Home-Bildschirm“). Heldensturm startet dann mit eigenem Symbol – auch ohne Internet.</p>`;
@@ -20092,8 +20092,8 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
 .offpg .slbtn.klein{font-size:.78em;align-self:flex-start;opacity:.8}`;document.head.appendChild(st)})();
 /* Hauptmenü: Knopf „Offline spielen“ (nur wenn es hier etwas zu tun gibt) */
 slIco.offline='⇩';
-{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(!(OFF.ok||OFF.datei))return h;
- const st=OFF.st,sub=OFF.datei?'Heruntergeladene Fassung':OFF.fort?'Wird gespeichert …':st&&st.n>=st.total?'✓ Offline bereit':'App installieren oder ZIP für den PC';
+{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);
+ const st=OFF.st,sub=OFF.datei?'Heruntergeladene Fassung':!OFF.ok?'So geht’s: Spiel auf imrestales.de speichern':OFF.fort?'Wird gespeichert …':st&&st.n>=st.total?'✓ Offline bereit':'App installieren oder ZIP für den PC';
  const b=`<button class="slb" data-act="sl-go" data-v="offline"><span class="ic">${slIco.offline}</span><span class="tx">Offline spielen<small>${sub}</small></span></button>`;
  const a='<button class="slb" data-act="sl-go" data-v="credits">';return h.includes(a)?h.replace(a,b+a):h}}
 /* Die Offline-Seite nutzt das Seitenlayout des Hauptmenüs (Schrift passt sich an) */
