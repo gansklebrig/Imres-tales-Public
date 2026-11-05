@@ -49,6 +49,7 @@ case "$1" in
     echo "== Testton 2: default =="; timeout 6 speaker-test -D default -c 2 -t sine -l 1 2>&1 | tail -2
     echo "== Log =="; journalctl -u imres-buehne -n 60 --no-pager 2>&1 | grep -i -E "alsa|audio|jack|pulse|error|Imres:" | tail -10
     echo "== Tasten & LEDs =="; journalctl -u imres-buehne -n 400 --no-pager 2>&1 | grep -i -E "LED|zyncore|zyncontrol|Tasten" | tail -6
+    for k in /zynthian/venv/bin/python3 /usr/bin/python3; do [ -x "$k" ] && echo "$k: $("$k" -c 'import board, neopixel_spi; print("LED-Bibliotheken ok")' 2>&1 | tail -1)"; done
     ;;
   # Was beim Einschalten startet
   start-imres)    echo imres > "$DATEN/start-modus"; echo "Beim Einschalten startet jetzt die Imres-Bühne." ;;

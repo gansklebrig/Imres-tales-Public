@@ -29,7 +29,13 @@ echo "Imres: Bildschirm $AUSGANG → $IMRES_DREHEN, Touch → $IMRES_TOUCH_DREHE
 # Mauszeiger verstecken
 command -v unclutter >/dev/null && unclutter -idle 1 -root &
 
-python3 "$HIER/imres-tasten.py" &
+# Python mit den LED-Bibliotheken des Zynthian (board, neopixel_spi) – die liegen meist in dessen venv
+PY=python3
+for k in /zynthian/venv/bin/python3 /zynthian/venv/bin/python /usr/local/bin/python3 /usr/bin/python3; do
+  [ -x "$k" ] && "$k" -c "import board, neopixel_spi" 2>/dev/null && { PY="$k"; break; }
+done
+echo "Imres: Tasten/LEDs mit $PY"
+"$PY" "$HIER/imres-tasten.py" &
 TASTEN=$!
 trap 'kill $TASTEN 2>/dev/null' EXIT
 
