@@ -1600,7 +1600,188 @@ function gefahr(z){if(!filt||z===gefahrS)return;gefahrS=z;const n=AC.currentTime
 function stopp(){if(AC)geplantKappen(AC.currentTime+0.02);HLOG.length=0;cur=null;ueb=null;nachKl=null;ein_=null;zurF=null;lautF=1;melF=1;spAkt=0;if(uhr){clearInterval(uhr);uhr=null}}
 function schalten(on){an_=on;if(!on){stopp();if(bus)bus.gain.value=0}else{if(bus)bus.gain.value=vol*0.55;setzen(want.mood,want.int)}}
 function lautstaerke(v){vol=v;if(bus)bus.gain.value=an_?vol*0.55:0}
-return{ruhe:x=>{if(!ruG||!AC)return;x=Math.round(x*10)/10;if(x===ruW)return;ruW=x;const n=AC.currentTime,tc=x>0?0.4:1.4;parZiel(ruG.gain,1-0.42*x,n,tc);parZiel(ruF.frequency,x>0?20000-17500*x:20000,n,tc)},schlag:()=>{if(!AC||!cur||AC.state!=='running')return null;const sp=spAkt||60/cur.tempo/4,now=AC.currentTime-(AC.outputLatency||AC.baseLatency||0),sn=schritt-(naechste-now)/sp,q=Math.round(sn/4)*4;return{d:(sn-q)*sp,beat:sp*4,phase:(((sn/4)%1)+1)%1}},korr:(g,m)=>(STIMM_KORR[g]&&STIMM_KORR[g][m])||0,setzen,stopp,schalten,lautstaerke,akzent,gefahr,harmonie,hat:m=>!!STIL[m],getuemmel:x=>{lay=lay+(Math.max(0,Math.min(1,x))-lay)*0.35},gruppen:()=>Object.keys(KARTE),planer:()=>Object.assign({},MUS_VOR,{akt:MUS_AKT}),aktuell:()=>cur&&{mood:cur.mood,int:cur.int,tempo:cur.tempo,inst:cur.instrument,var:cur.var,modus:cur.modus,tr:cur.transpose,band:cur.band,gaeste:gaeste.map(g=>g.id),solist:solist&&solist.id},
+/* ================= Musik-Abwechslung (Paket „musik“) =================
+   Nutzerwunsch: „nach einer Weile ging die Musik auf die Nerven – hin und wieder neue Instrumente auswürfeln bei gleicher Stimmung,
+   falls man lange an einem Ort ist, AFK steht oder im Menü ist.“
+   Vorher: innerhalb einer Stimmung blieben Melodie-Instrument, Tonart, Kapelle und (bei Kampf, Boss, Spannung, Reiter, Sieg, Marktplatz)
+   sogar dieselben Noten für immer gleich – nur alle drei Durchläufe wechselte eine Band-Stimme. Menü/Pause dämpfte dieselbe Schleife bloß.
+   Jetzt (Einstellung „Musik-Abwechslung“: Viel / Normal / Aus, SAVE.musVar 2/1/0):
+   1) Neu auswürfeln: alle 2½–4 Minuten (Viel: 1¼–2), spätestens beim Ortswechsel, am Ende eines Durchlaufs: Melodie-Instrument,
+      Band (Trommel, Echo-Stimme, Rhythmus), Kapelle und ggf. das zweite Lied derselben Stimmung – alles aus dem Kreis dieser Stimmung,
+      gleiche Tonart, gleiches Tempo. Übergang: letzter Takt blendet aus, das neue Stück blendet über zwei Takte ein, ein leiser Grundakkord trägt.
+   2) Phrasen variieren: ab dem zweiten Durchlauf werden einzelne Teile umgekehrt, mit Nachbartönen derselben Tonleiter umspielt,
+      rhythmisch verschoben, eine Oktave versetzt oder als Ruf und Antwort zwischen Melodie und Echo-Stimme verteilt (Bass/Harmonie bleiben).
+   3) Ruhig werden: lange am selben Ort, keine Eingabe > 45 s oder im Menü → sanft in ausgedünnte Fassungen (nur betonte Töne, Pausen,
+      andere Lage, Ruf/Antwort), Drone-Phasen (Grundton + Streicher-/Holzteppich) und gelegentlich 10–30 s fast Stille. Im Kampf nie.
+      Beim Erkunden baut sich das Arrangement ab und zu ab und wieder auf („leicht“: ohne Schlagwerk/Kapelle).
+   Leistung: es klingen nie mehr Stimmen als vorher (Ausdünnen spart sogar), auf schwachen Geräten bevorzugt der Würfel schon geladene Aufnahmen. */
+const MV={ctx:{menu:0,afk:0,ort:'',kampf:0,boss:0,feuer:0},log:null,ref:null,mood:null,inst:null,seit:0,faellig:1e9,neu:null,aus:0,ruhig:0,rT:-1,
+ modus:'voll',modusN:0,vk:0,okt:0,einbl:0,stilleLetzt:-1e9,menuSeit:-1,ortSeit:0,ort:'',ortWechsel:0,hist:{},wechsel:0,sim:0,erzw:null};
+const mvStufe=()=>{if(MV.erzw!=null)return MV.erzw;try{const v=SAVE.musVar;return v===0||v===2?v:1}catch(e){return 1}};
+const mvJetzt=()=>AC?AC.currentTime:0;
+const mvSchwach=()=>{try{return!!MOBIL||gfxL()<=1||(typeof rgSparAn==='function'&&rgSparAn())}catch(e){return!!MOBIL}};
+const mvR=l=>l[Math.floor(Math.random()*l.length)];
+function mvAbstand(){const v=mvStufe()===2,[a,b]=v?[75,130]:[150,240];return(a+Math.random()*(b-a))*(1-(v?.35:.2)*MV.ruhig)}
+function mvGeladen(g){if(!KARTE[g])return buf.has(g);for(const k of buf.keys())if(k.indexOf(g+'_')===0)return true;return false}
+/* ---- Ruhe-Grad 0..1: Menü, AFK, langes Verweilen, Lagerfeuer; im Kampf 0 ---- */
+function mvRuhigZiel(){const c=MV.ctx,st=mvStufe(),n=mvJetzt();if(!st||c.kampf||c.boss){if(!c.menu)MV.menuSeit=-1;return 0}
+ const v=st===2;let z=0;
+ if(c.menu){if(MV.menuSeit<0)MV.menuSeit=n;z=Math.max(z,Math.min(1,(v?.55:.45)+(n-MV.menuSeit)/(v?40:70)))}else MV.menuSeit=-1;
+ if(c.afk>45)z=Math.max(z,Math.min(1,.5+(c.afk-45)/(v?40:60)));
+ /* lange am selben Ort: stärker, wenn man dabei nichts tut; wer aktiv spielt, bekommt nur sanfte Abwechslung */
+ const o=n-MV.ortSeit,lang=v?120:200,aktiv=!c.menu&&c.afk<20;if(o>lang)z=Math.max(z,Math.min(aktiv?(v?.38:.28):(v?.7:.55),(o-lang)/(v?150:240)));
+ if(c.feuer)z=Math.max(z,v?.45:.35);
+ return z}
+function mvRuhigTick(){const n=mvJetzt(),dt=MV.rT<0?0:Math.max(0,Math.min(5,n-MV.rT));MV.rT=n;const z=mvRuhigZiel();
+ MV.ruhig=z>MV.ruhig?Math.min(z,MV.ruhig+dt/18):Math.max(z,MV.ruhig-dt/2.5)}
+function mvKontext(c){if(MV.sim&&!c._sim)return;const n=mvJetzt();for(const k in c)if(k!=='_sim')MV.ctx[k]=c[k];
+ if(c.ort!=null&&c.ort!==MV.ort){const war=MV.ort;MV.ort=c.ort;MV.ortSeit=n;if(war)MV.ortWechsel=1}}
+/* ---- Neu auswürfeln (gleiche Stimmung, gleiche Tonart) ---- */
+function mvVorbereiten(){const alt=cur;if(!alt)return null;const mood=alt.mood,int=want.mood===mood?want.int:alt.int;let neu,st;
+ try{st=stilVariante(mitIntensitaet(STIL[mood]||STIL.reise,int),mood,false);neu=komponieren(mood,int,false,alt)}catch(e){return null}
+ const pool=(st.instrument||[]).filter(x=>MEL_LADEN[x]),h=MV.hist[mood]||(MV.hist[mood]=[]);
+ let kand=pool.filter(x=>x!==alt.instrument&&!h.slice(-2).includes(x));if(!kand.length)kand=pool.filter(x=>x!==alt.instrument);
+ if(mvSchwach()&&kand.length>1&&Math.random()<.7){const g=kand.filter(x=>(MEL_LADEN[x]||[]).every(mvGeladen));if(g.length)kand=g}
+ if(kand.length)neu.instrument=mvR(kand);
+ const bd=st.band||{};for(const k of ['trommel','floete','ketten']){const l=(bd[k]||[]).filter(x=>x!==alt.band[k]);
+  if(l.length&&Math.random()<.65)neu.band[k]=mvR(l);else if((bd[k]||[]).includes(alt.band[k]))neu.band[k]=alt.band[k]}
+ if(neu.liedNr==null){neu.transpose=alt.transpose;if(neu.modus!==alt.modus&&(st.modus||[]).includes(alt.modus)){neu.modus=alt.modus;try{neu.teile=stimmungTeile(st,alt.modus)}catch(e){}}}
+ else if(neu.modus===alt.modus)neu.transpose=alt.transpose;
+ neu.tempo=alt.tempo;if(alt.phase2){neu.phase2=1;neu.kick=alt.kick;if(!neu.gegen&&alt.gegen)neu.gegen=alt.gegen}
+ if(neu.var)Object.assign(neu.var,{inst:neu.instrument,band:Object.assign({},neu.band),tr:neu.transpose,modus:neu.modus,tempo:neu.tempo});
+ neu.mvFrisch=1;try{vorladen(neu)}catch(e){}return neu}
+function mvWechseln(zeit){const neu=MV.neu;MV.neu=null;MV.aus=0;cur=neu;teil=0;padAkk=-1;cur.durch=0;ein_={n:0,dr:0};zurF=null;
+ const n=mvJetzt();MV.seit=n;MV.faellig=n+mvAbstand();MV.ref=cur;MV.inst=cur.instrument;MV.wechsel++;(MV.hist[cur.mood]=MV.hist[cur.mood]||[]).push(cur.instrument);
+ if(!mvSchwach()&&MV.modus!=='still'){const pr=ORCH[cur.mood];if(pr&&pr.pad)try{aufloesung(cur,zeit,null,.42,PAD_FARBE[pr.farbe]||['vc','vln'],false)}catch(e){}}}
+/* ---- Phrasen variieren (ab dem 2. Durchlauf; Bass und Harmonie bleiben) ---- */
+function mvVariante(t,art){const m=t.melodie,b=t.bass;if(!m||!b)return t;const idx=[];for(let i=0;i<SCHRITTE;i++)if(m[i]>=0)idx.push(i);if(idx.length<3)return t;
+ const n=Object.assign({},t),M=m.slice(),lo=Math.min(...idx.map(i=>m[i])),hi=Math.max(...idx.map(i=>m[i])),last=idx[idx.length-1];
+ const akkOk=(v,i)=>akkordToene(klingt(b,i)).includes(((v%7)+7)%7),snap=(v,i)=>{if(i%4||akkOk(v,i))return v;for(const d of [1,-1])if(akkOk(v+d,i))return v+d;return v};
+ if(art==='umkehr'){idx.forEach(i=>{if(i!==last)M[i]=snap(lo+hi-m[i],i)})}
+ else if(art==='nachbar'){let vor=-9;idx.forEach(i=>{if(i%4&&i!==last&&Math.random()<.55){const d=Math.random()<.5?1:-1;let v=m[i]+d;if(v===vor)v=m[i]-d;M[i]=Math.max(lo-1,Math.min(hi+1,v))}vor=M[i]})}
+ else if(art==='rhythmus'){const ops=['synkope','luft','wdh'].sort(()=>Math.random()-.5).slice(0,1+(Math.random()<.4?1:0));
+  if(ops.includes('synkope'))for(const i of idx)if(i%4===2&&i+1<SCHRITTE&&M[i+1]<0&&i!==last&&Math.random()<.6){M[i+1]=M[i];M[i]=-1}
+  if(ops.includes('luft'))for(const i of idx)if(i%2===1&&i!==last&&Math.random()<.6)M[i]=-1;
+  if(ops.includes('wdh')&&!mvSchwach())for(let i=0;i+2<SCHRITTE;i++)if(M[i]>=0&&M[i+1]<0&&M[i+2]>=0&&i%2===0&&Math.random()<.35)M[i+1]=M[i]}
+ else if(art==='antwort'){const F=(t.floete||leer()).slice();for(let i=0;i<SCHRITTE;i++){if(i<8){if(F[i]>=0&&i%8)F[i]=-1}else{F[i]=M[i];M[i]=-1}}n.floete=F}
+ else if(art==='oktave'){const d=hi+7<=14?7:lo-7>=-7?-7:0;if(!d)return t;idx.forEach(i=>{M[i]=m[i]+d})}
+ n.melodie=M;n.mvArt=art;return n}
+function mvPhrasen(s){const st=mvStufe();if(!s._mvOrig)s._mvOrig=s.teile;const O=s._mvOrig;s._mvD=s.durch;
+ if(!st||!(s.durch>=1)){s.teile=O;return}
+ const p=st===2?.5:.3,T={},arten=['umkehr','nachbar','rhythmus','antwort','oktave'];
+ for(const k in O){const t=O[k],rl=s.rollen?s.rollen[TEILE.indexOf(k)]:null;let q=p;if(rl==='i'){T[k]=t;continue}if(rl==='r'||rl==='h')q*=.6;
+  T[k]=Math.random()<q?mvVariante(t,mvR(arten)):t}
+ s.teile=T}
+/* ---- Ruhige Fassungen: leicht / dünn / Drone / Stille ---- */
+const MV_CACHE=new WeakMap();
+function mvOrch(mood){const k='_r_'+mood;if(!ORCH[k]){const pr=ORCH[mood]||{},volk=!!pr.volk||!pr.pad;
+  ORCH[k]={pad:Math.max(.35,pr.pad||0)*.85,farbe:pr.farbe||(volk?'holz':undefined),tief:pr.tief,hoch:pr.hoch,volk:volk?1:undefined};try{(PAD_FARBE[ORCH[k].farbe]||['vc','vln']).forEach(gruppeLaden)}catch(e){}}return k}
+function mvDuenn(t,modus,ab){let c=MV_CACHE.get(t);if(!c)MV_CACHE.set(t,c={});const key=modus+'|'+MV.vk+'|'+(ab%2);if(c[key])return c[key];
+ const n=Object.assign({},t),m=t.melodie||leer(),b=t.bass||leer(),fl=t.floete||leer(),okt=MV.okt;
+ n.klopf=leer();n.schelle=leer();
+ if(modus==='leicht'){n.ketten=(t.ketten||leer()).map((v,i)=>i%8===0?v:-1);n.trommel=(t.trommel||leer()).map((v,i)=>i===0?v:-1)}
+ else{n.ketten=leer();n.trommel=leer();
+  if(modus==='duenn'){const M=leer(),F=leer(),pause=ab%2===1;
+   for(let i=0;i<SCHRITTE;i++)if(m[i]>=0&&(i%4===0||Math.random()<.4))M[i]=m[i]+okt;
+   if(pause){for(let i=8;i<SCHRITTE;i++)M[i]=-1;for(let i=0;i<8;i++)if(M[i]>=0)F[i+8]=M[i]-okt}/* Ruf (Melodie) und Antwort (Echo-Stimme) */
+   else[0,8].forEach(i=>{if(fl[i]>=0)F[i]=fl[i]});
+   n.melodie=M;n.floete=F;n.bass=b.map((v,i)=>i%8===0?klingt(b,i):-1)}
+  else if(modus==='drone'){const M=leer(),F=leer(),z0=klingt(b,0);n.bass=leer();n.bass[0]=z0;if(klingt(b,8)!==z0)n.bass[8]=klingt(b,8);
+   if(Math.random()<.6){let v=-1;for(let i=0;i<SCHRITTE&&v<0;i++)v=m[i];M[0]=(v>=0?v:BASS_STUFEN[z0]%7)+okt}
+   if(Math.random()<.35){const at=akkordToene(klingt(b,8));F[8]=at[Math.floor(Math.random()*at.length)]}
+   n.melodie=M;n.floete=F}
+  else{/* Stille: höchstens ein einzelner leiser Ton */const M=leer();if(Math.random()<.3){let v=-1;for(let i=0;i<SCHRITTE&&v<0;i++)v=m[i];if(v>=0)M[0]=v+(okt>0?okt:0)}
+   n.melodie=M;n.floete=leer();n.bass=leer()}}
+ n.mvModus=modus;return c[key]=n}
+function mvModusWaehlen(sp){if(!mvStufe()){MV.modus='voll';MV.modusN=0;MV.einbl=0;return}
+ /* Kampf oder wieder aktiv: ruhige Fassung sofort beenden (der nächste Takt blendet ein) */
+ if(MV.modus!=='voll'&&(MV.ctx.kampf||MV.ctx.boss||MV.modus!=='leicht'&&MV.ruhig<.12))MV.modusN=0;
+ if(MV.modusN>0){MV.modusN--;MV.einbl=0;return}
+ const st=mvStufe(),r=MV.ruhig,n=mvJetzt(),alt=MV.modus,v=st===2;let w;
+ if(!st)w={voll:1};
+ else if(r<.08)w={voll:1,leicht:!MV.ctx.kampf&&!MV.ctx.boss&&!MV.ctx.menu?(v?.3:.18):0};
+ else w={voll:Math.max(0,1-1.5*r),leicht:r<.6?.3:.12,duenn:.15+.55*r,drone:r>.35?(r-.25)*(v?1.1:.8):0,still:r>.55&&n-MV.stilleLetzt>(v?55:85)?(r-.45)*(v?.9:.6):0};
+ let sum=0;for(const k in w)sum+=w[k];let x=Math.random()*sum,neu='voll';for(const k in w){x-=w[k];if(x<0){neu=k;break}}
+ const bar=SCHRITTE*sp,zwischen=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+ let N=neu==='voll'?4:neu==='leicht'?zwischen(4,8):neu==='duenn'?zwischen(3,6):neu==='drone'?zwischen(4,8):Math.max(2,Math.ceil((10+Math.random()*20)/bar));
+ if(neu==='still')MV.stilleLetzt=n+N*bar;
+ if(neu!==alt){MV.vk++;MV.okt=neu==='duenn'||neu==='drone'?mvR([0,0,7,-7]):0;if(neu==='duenn'||neu==='drone')try{mvOrch(cur.mood)}catch(e){}}
+ MV.einbl=(alt==='still'||alt==='drone'||alt==='duenn')&&(neu==='voll'||neu==='leicht')?1:0;
+ MV.modus=neu;MV.modusN=N-1}
+function mvSig(s,p){let h=7;const add=x=>{x=String(x);for(let i=0;i<x.length;i++)h=(h*31+x.charCodeAt(i))|0};
+ add((p.melodie||[]).join(','));add('|'+(p.floete||[]).join(','));add('|'+s.instrument+'|'+s.band.floete+'|'+s.transpose+'|'+s.modus);
+ try{add('|'+kapSpieler(s).map(q=>q.inst).join(','))}catch(e){}return(h>>>0).toString(36)}
+/* ---- Planer-Hülle: Phrasen, Auswürfeln, ruhige Fassungen ---- */
+const mvPlanen0=planen;
+planen=function(s,i,zeit,sp){const st=mvStufe();
+ if(!st&&MV.modus==='voll'&&!MV.neu&&!MV.log){if(s._mvOrig&&s.teile!==s._mvOrig)s.teile=s._mvOrig;return mvPlanen0(s,i,zeit,sp)}
+ if(s!==cur)return mvPlanen0(s,i,zeit,sp);
+ const n=mvJetzt();
+ if(i===0){
+  if(cur!==MV.ref){if(!MV.ref||cur.mood!==MV.mood){MV.seit=n;MV.faellig=n+mvAbstand();MV.neu=null;MV.aus=0;MV.mood=cur.mood;(MV.hist[cur.mood]=MV.hist[cur.mood]||[]).push(cur.instrument)}MV.ref=cur;MV.inst=cur.instrument}
+  mvRuhigTick();
+  if(MV.neu&&(MV.neu.mood!==cur.mood||ueb)){MV.neu=null;MV.aus=0}
+  if(MV.aus&&MV.neu&&!ueb&&want.mood===cur.mood&&st){mvWechseln(zeit);s=cur;MV.ein0=1}
+  else{MV.aus=0;
+   if(st&&!ueb&&!nachKl&&want.mood===cur.mood&&wechsel===0){
+    if(MV.ortWechsel){MV.ortWechsel=0;MV.faellig=Math.min(MV.faellig,n+1.5)}
+    if(!MV.neu&&n>=MV.faellig-8)MV.neu=mvVorbereiten();
+    if(MV.neu&&n>=MV.faellig){const L=cur.ablauf.length,ueber=n-MV.faellig;
+     if(teil===L-1||ueber>45||ueber>20&&teil%2===1||MV.ruhig>.5||MV.modus==='still'||MV.modus==='drone')MV.aus=1}}
+   else if(!st){MV.neu=null}}
+  if(teil===0){MV.pass=(MV.pass||0)+1;if(s._mvD!==s.durch)mvPhrasen(s)}
+  mvModusWaehlen(sp)}
+ let s2=s,f=1;const mo=MV.modus;
+ if(mo!=='voll'){const L=s.ablauf.length,ab=((teil%L)+L)%L,k=s.ablauf[ab],p=s.teile[k]||s.teile.A;
+  s2=Object.create(s);s2.teile=Object.assign({},s.teile,{[k]:mvDuenn(p,mo,ab),A:k==='A'?mvDuenn(p,mo,ab):s.teile.A});
+  if(mo==='leicht')s2.int=Math.max(1,s.int-2);
+  else if(mo==='still'){s2.mood='_still_';s2.int=1;f=.45}
+  else{s2.mood=mvOrch(s.mood);s2.int=Math.min(s.int,mo==='drone'?2:3)}}
+ if(MV.aus)f*=1-.55*(i/SCHRITTE);
+ if(MV.einbl)f*=.55+.45*(i/SCHRITTE);
+ if(MV.ein0){if(i===0)f*=.5;else MV.ein0=0}
+ if(MV.log&&i===0){const L=s.ablauf.length,p=s2.teile[s2.ablauf[((teil%L)+L)%L]]||s2.teile.A;MV.log.push({t:+zeit.toFixed(2),pass:MV.pass||0,mood:s.mood,modus:mo,inst:s.instrument,fl:s.band.floete,tr:s.band.trommel,lied:s.liedNr,teil,art:p.mvArt||'',ruhig:+MV.ruhig.toFixed(2),sig:mvSig(s,p)})}
+ const lay0=lay,lf0=lautF;if(mo==='duenn'||mo==='drone'||mo==='still')lay=Math.min(lay,.15);lautF=lf0*f;
+ try{return mvPlanen0(s2,i,zeit,sp)}finally{lay=lay0;lautF=lf0}};
+/* ---- Test: Zeitraffer-Simulation (ohne Ton) und Aufnahme (OfflineAudioContext) ---- */
+function mvName(g,midi){if(g.indexOf(':')>0){const q=g.split(':');g=q[0];midi=+q[1]}if(!KARTE[g])return g;const k=KARTE[g],ab=x=>k.reduce((b,v)=>Math.min(b,Math.abs(v-x)),99);let d=ab(midi);
+ if(d>3)[midi-12,midi+12,midi-24,midi+24].forEach(v=>{const dv=ab(v);if(dv<d-.5){midi=v;d=dv}});const m=k.reduce((b,x)=>b==null||Math.abs(x-midi)<Math.abs(b-midi)?x:b,null);return g+'_'+m}
+function mvZufall(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+function mvReset(stufe){stopp();MV.ref=null;MV.mood=null;MV.neu=null;MV.aus=0;MV.ruhig=0;MV.rT=-1;MV.modus='voll';MV.modusN=0;MV.einbl=0;MV.stilleLetzt=-1e9;MV.menuSeit=-1;MV.ortSeit=0;MV.ort='';MV.ortWechsel=0;MV.hist={};MV.wechsel=0;MV.faellig=1e9;MV.erzw=stufe;
+ MUS_VOR.v=MUS_VOR.min;MUS_VOR.pn=0;gaeste=[];solist=null;padAkk=-1;windZ=-9;want.mood=null}
+/* Ablauf: seg=[{von,mood,int,lay,menu,afk(bool),kampf,boss,feuer,ort,ruhe}] – Zeiten in Sekunden Musikzeit */
+function mvLauf(o,uhrF,proZeit){const seg=o.seg.slice().sort((a,b)=>a.von-b.von),dt=o.dt||.05;let si=-1,mt=0,neu=o.neuBei;
+ for(let t=0;t<o.dauer;t+=dt){uhrF.t=t;if(neu!=null&&t>=neu&&cur){MV.faellig=t;neu=null}while(si+1<seg.length&&seg[si+1].von<=t){si++;const g=seg[si];lay=g.lay==null?.4:g.lay;if(proZeit)proZeit(g,t)}
+  const g=seg[si];if(!g)continue;mt-=dt;if(mt<=0){mt=.5;mvKontext({_sim:1,menu:g.menu?1:0,afk:g.afk?t-g.von+(g.afk0||0):0,ort:g.ort||g.mood,kampf:g.kampf?1:0,boss:g.boss?1:0,feuer:g.feuer?1:0});setzen(g.mood,g.int)}
+  takt()}}
+async function mvSim(o){const sAC=AC,sBus=bus,sSp=spiel,sLd=laden,sLay=lay;let zahl=0;const F={state:'running',sampleRate:44100,outputLatency:0,baseLatency:0,get currentTime(){return F.t},t:0};
+ MV.sim=1;mvReset(o.stufe);const R0=Math.random;if(o.seed)Math.random=mvZufall(o.seed);
+ try{AC=F;bus={gain:{value:0}};spiel=function(){zahl++;return true};laden=function(){};MV.log=[];
+  mvLauf(o,F);stopp();return{log:MV.log,noten:zahl,wechsel:MV.wechsel}}
+ finally{Math.random=R0;stopp();if(uhr){clearInterval(uhr);uhr=null}AC=sAC;bus=sBus;spiel=sSp;laden=sLd;lay=sLay;MV.log=null;MV.sim=0;MV.erzw=null;mvReset(null)}}
+async function mvAufnahme(o){if(!AC)try{audioInit()}catch(e){}const sr=o.sr||44100,sAC=AC,sSp=spiel,sLd=laden,sLay=lay,keep={bus,hallIn,filt,duck,ruG,ruF,OUTN,BASSF},pk=Object.assign({},pans);
+ const R0=Math.random,namen=new Set();MV.sim=1;
+ try{/* 1) trocken: welche Aufnahmen werden gebraucht? */
+  mvReset(o.stufe);Math.random=mvZufall(o.seed||1);const F={state:'running',sampleRate:sr,outputLatency:0,baseLatency:0,get currentTime(){return F.t},t:0};
+  AC=F;bus={gain:{value:0}};spiel=function(g,m){try{namen.add(mvName(g,m))}catch(e){}return true};laden=function(){};
+  mvLauf(o,F);stopp();Math.random=R0;AC=sAC;bus=keep.bus;spiel=sSp;laden=sLd;
+  for(const n of namen)laden(n);for(let k=0;k<300&&[...namen].some(n=>!buf.has(n)&&laedt.has(n));k++)await new Promise(r=>setTimeout(r,100));
+  /* 2) Aufnahme mit demselben Zufall */
+  mvReset(o.stufe);Math.random=mvZufall(o.seed||1);const oc=new OfflineAudioContext(2,Math.ceil(sr*o.dauer),sr),U={t:0};
+  const P=new Proxy(oc,{get(t,p){if(p==='currentTime')return U.t;if(p==='state')return'running';const v=t[p];return typeof v==='function'?v.bind(t):v}});
+  AC=P;OUTN=null;BASSF=null;bus=null;hallIn=null;filt=duck=ruG=ruF=null;for(const k in pans)delete pans[k];busBauen();bus.gain.value=vol*0.55;MV.log=[];
+  mvLauf(o,U,(g,t)=>{if(ruG&&ruF){const x=g.ruhe||0;ruG.gain.setValueAtTime(1-.42*x,t);ruF.frequency.setValueAtTime(x>0?20000-17500*x:20000,t)}});
+  const log=MV.log;Math.random=R0;stopp();const r=await oc.startRendering();
+  const L=r.getChannelData(0),Rr=r.getChannelData(1),N=L.length,b=new DataView(new ArrayBuffer(44+N*4));let pkv=0,ss=0;
+  const ws=(o2,s)=>{for(let i=0;i<s.length;i++)b.setUint8(o2+i,s.charCodeAt(i))};ws(0,'RIFF');b.setUint32(4,36+N*4,true);ws(8,'WAVEfmt ');b.setUint32(16,16,true);b.setUint16(20,1,true);b.setUint16(22,2,true);b.setUint32(24,sr,true);b.setUint32(28,sr*4,true);b.setUint16(32,4,true);b.setUint16(34,16,true);ws(36,'data');b.setUint32(40,N*4,true);
+  for(let i=0;i<N;i++){const a=Math.max(-1,Math.min(1,L[i])),c=Math.max(-1,Math.min(1,Rr[i]));pkv=Math.max(pkv,Math.abs(a),Math.abs(c));ss+=a*a;b.setInt16(44+i*4,a*32767,true);b.setInt16(46+i*4,c*32767,true)}
+  const u8=new Uint8Array(b.buffer);let bin='';for(let i=0;i<u8.length;i+=0x8000)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+  return{wav:btoa(bin),log,pk:+pkv.toFixed(3),rms:+Math.sqrt(ss/N).toFixed(4),fehlend:[...namen].filter(n=>!buf.has(n)),namen:namen.size}}
+ finally{Math.random=R0;stopp();if(uhr){clearInterval(uhr);uhr=null}AC=sAC;spiel=sSp;laden=sLd;lay=sLay;bus=keep.bus;hallIn=keep.hallIn;filt=keep.filt;duck=keep.duck;ruG=keep.ruG;ruF=keep.ruF;OUTN=keep.OUTN;BASSF=keep.BASSF;
+  for(const k in pans)delete pans[k];Object.assign(pans,pk);MV.log=null;MV.sim=0;MV.erzw=null;mvReset(null)}}
+const mvApi={kontext:mvKontext,zustand:()=>({stufe:mvStufe(),ruhig:+MV.ruhig.toFixed(2),modus:MV.modus,bisNeu:cur?Math.round(MV.faellig-mvJetzt()):null,inst:cur&&cur.instrument,band:cur&&Object.assign({},cur.band),wechsel:MV.wechsel,ctx:Object.assign({},MV.ctx)}),
+ jetztNeu:()=>{MV.faellig=mvJetzt()},sim:mvSim,aufnahme:mvAufnahme};
+return{abw:mvApi,ruhe:x=>{if(!ruG||!AC)return;x=Math.round(x*10)/10;if(x===ruW)return;ruW=x;const n=AC.currentTime,tc=x>0?0.4:1.4;parZiel(ruG.gain,1-0.42*x,n,tc);parZiel(ruF.frequency,x>0?20000-17500*x:20000,n,tc)},schlag:()=>{if(!AC||!cur||AC.state!=='running')return null;const sp=spAkt||60/cur.tempo/4,now=AC.currentTime-(AC.outputLatency||AC.baseLatency||0),sn=schritt-(naechste-now)/sp,q=Math.round(sn/4)*4;return{d:(sn-q)*sp,beat:sp*4,phase:(((sn/4)%1)+1)%1}},korr:(g,m)=>(STIMM_KORR[g]&&STIMM_KORR[g][m])||0,setzen,stopp,schalten,lautstaerke,akzent,gefahr,harmonie,hat:m=>!!STIL[m],getuemmel:x=>{lay=lay+(Math.max(0,Math.min(1,x))-lay)*0.35},gruppen:()=>Object.keys(KARTE),planer:()=>Object.assign({},MUS_VOR,{akt:MUS_AKT}),aktuell:()=>cur&&{mood:cur.mood,int:cur.int,tempo:cur.tempo,inst:cur.instrument,var:cur.var,modus:cur.modus,tr:cur.transpose,band:cur.band,gaeste:gaeste.map(g=>g.id),solist:solist&&solist.id},
  _test:{async render(mood,int,sec){stopp();const c0=komponieren(mood,int,false);vorladen(c0);for(let k=0;k<80&&[...laedt].some(n=>!buf.has(n));k++)await new Promise(r=>setTimeout(r,100));
   stopp();const real=AC,rb=bus,rh=hallIn,rp=Object.assign({},pans);for(const k in pans)delete pans[k];
   const oc=new OfflineAudioContext(2,44100*sec,44100);AC=oc;bus=null;hallIn=null;let n=0;const orig=spiel;
@@ -8162,7 +8343,7 @@ document.addEventListener('click',ev=>{if(performance.now()-BDRAG_NOCLICK<350&&e
 function volApply(){if(SFXB)SFXB.gain.value=SAVE.volSfx;MUSIK.lautstaerke(SAVE.volMus);SAVE.sound=SAVE.volSfx>0;const on=SAVE.volMus>0;if(on!==SAVE.music){SAVE.music=on;MUSIK.schalten(on)}}
 const volRow=(k,t,d)=>`<div class="up vol"><div><div class="t">${t}<small id="vl_${k}">${Math.round(SAVE[k]*100)}%</small></div><div class="d">${d}</div><input type="range" min="0" max="100" step="5" value="${Math.round(SAVE[k]*100)}" data-vol="${k}" aria-label="${t}"></div></div>`;
 const volRows=()=>volRow('volMus','Musik','Barradins Band – 0% schaltet sie aus.')+volRow('volSfx','Geräusche','Kampf, Zauber, Beute – 0% schaltet sie aus.')+`<div class="row" id="sndOpts" style="margin:4px 0 2px">${sndOpts()}</div>`;
-const sndOpts=()=>`<span class="muted" style="font-size:13px;align-self:center">Big Band:</span>${['Aus','Ein paar','Volle Big Band'].map((n,i)=>`<button class="btn small ${(SAVE.band===undefined?(MOBIL?0:2):SAVE.band)===i?'gold':''}" data-act="band" data-v="${i}" title="Weitere Musiker aus Barradins Lautenwerk: Akkordeon, Hackbrett, Bläser, Chor, Taiko …">${n}</button>`).join('')}<span style="flex-basis:100%;height:0"></span><button class="btn small ${SAVE.amb!==false?'gold':''}" data-act="amb-t" title="Regen, Wind, Vögel, Höhlentropfen …">${SAVE.amb!==false?'Klangkulisse: an':'Klangkulisse: aus'}</button><button class="btn small ${bassOn()?'gold':''}" data-act="bass-t" title="Nimmt tiefen Bass weg, bei dem Handy-Lautsprecher schnarren – mit Kopfhörern oder Box ausschalten">${bassOn()?'Lautsprecher-Schutz: an':'Lautsprecher-Schutz: aus'}</button>`;
+const sndOpts=()=>`<span class="muted" style="font-size:13px;align-self:center">Big Band:</span>${['Aus','Ein paar','Volle Big Band'].map((n,i)=>`<button class="btn small ${(SAVE.band===undefined?(MOBIL?0:2):SAVE.band)===i?'gold':''}" data-act="band" data-v="${i}" title="Weitere Musiker aus Barradins Lautenwerk: Akkordeon, Hackbrett, Bläser, Chor, Taiko …">${n}</button>`).join('')}<span style="flex-basis:100%;height:0"></span>${typeof mvOpts==='function'?mvOpts():''}<span style="flex-basis:100%;height:0"></span><button class="btn small ${SAVE.amb!==false?'gold':''}" data-act="amb-t" title="Regen, Wind, Vögel, Höhlentropfen …">${SAVE.amb!==false?'Klangkulisse: an':'Klangkulisse: aus'}</button><button class="btn small ${bassOn()?'gold':''}" data-act="bass-t" title="Nimmt tiefen Bass weg, bei dem Handy-Lautsprecher schnarren – mit Kopfhörern oder Box ausschalten">${bassOn()?'Lautsprecher-Schutz: an':'Lautsprecher-Schutz: aus'}</button>`;
 document.addEventListener('change',ev=>{const s=ev.target.closest('[data-rlstart]');if(s)G.rlStart=+s.value});
 document.addEventListener('input',ev=>{const g=ev.target.closest('[data-gfx]');if(g)gfxSet(+g.value,1);const t=ev.target.closest('[data-tb]');if(t){tbS()[t.dataset.tb]=clamp((+t.value||100)/100,0.35,1.35);persist();tbApply()}});
 let volT=0;document.addEventListener('input',ev=>{const el=ev.target.closest('[data-vol]');if(!el)return;audioInit();const k=el.dataset.vol;if(k!=='volMus'&&k!=='volSfx')return;SAVE[k]=clamp((+el.value||0)/100,0,1);const l=$('vl_'+k);if(l)l.textContent=el.value+'%';volApply();persist();
@@ -21935,6 +22116,21 @@ setInterval(()=>{if(RG2.diag)pfFenster()},250);
   const f=v=>v.toFixed(1),js=PFM.u+PFM.r+PFM.h;
   s+=`\nms/Bild ${f(PFM.f)} = Logik ${f(PFM.u)} + Welt zeichnen ${f(PFM.r)} + HUD-DOM ${f(PFM.h)} + Browser/Rest ${f(Math.max(0,PFM.f-js))} · Perf ${PF.on()?'an':'aus'}${PFM.skip?' · Menü-Pause '+PFM.skip:''}`}catch(e){}return s}}
 try{pfKlasse()}catch(e){}
+
+/* ================= Musik-Abwechslung (Paket „musik“): Eingaben, Ort, Menü → MUSIK.abw; Einstellung im Ton-Bereich ================= */
+const MVA={t:performance.now(),pad:'',pT:0,rid:new WeakMap(),rn:0};window.__hsMUSIK={eingabe:MVA};
+['keydown','pointerdown','wheel','touchstart'].forEach(e=>addEventListener(e,()=>{MVA.t=performance.now()},{passive:true,capture:true}));
+addEventListener('pointermove',e=>{if(Math.abs(e.movementX||0)+Math.abs(e.movementY||0)>2)MVA.t=performance.now()},{passive:true,capture:true});
+function mvaPad(){try{let s='';for(const g of navigator.getGamepads?navigator.getGamepads():[]){if(!g)continue;g.buttons.forEach((b,i)=>{if(b&&(b.pressed||b.value>.4))s+=i+','});g.axes.forEach((a,i)=>{if(Math.abs(a)>.35)s+='a'+i+(a>0?'+':'-')})}
+ if(s)MVA.t=performance.now();MVA.pad=s}catch(e){}}
+function mvaOrt(){if(G.state==='play'){let r='';if(G.room){let id=MVA.rid.get(G.room);if(!id){id=++MVA.rn;MVA.rid.set(G.room,id)}r='|r'+id}return's'+G.stage+r}return G.state==='between'?'z'+G.stage:String(G.state)}
+{const _mt=musikTick;musikTick=function(dt){const r=_mt.apply(this,arguments);try{MVA.pT-=dt;if(MVA.pT>0)return r;MVA.pT=.5;mvaPad();if(!MUSIK.abw)return r;
+  const menu=G.state==='title'||G.state==='end'||G.state==='play'&&(!!G.paused||!!G.overlay),kampf=G.state==='play'&&!G.paused&&((G.kampfA||0)>.2||!!G.guardE||!!G.boss);
+  MUSIK.abw.kontext({menu:menu?1:0,afk:G.bot?0:(performance.now()-MVA.t)/1000,ort:mvaOrt(),kampf:kampf?1:0,boss:G.boss&&G.state==='play'?1:0,feuer:G.state==='between'&&G.fireOn?1:0})}catch(e){}return r}}
+function mvOpts(){const v=SAVE.musVar===0||SAVE.musVar===2?SAVE.musVar:1;
+ return`<span class="muted" style="font-size:13px;align-self:center">Musik-Abwechslung:</span>${[[2,'Viel'],[1,'Normal'],[0,'Aus']].map(([k,n])=>`<button class="btn small ${v===k?'gold':''}" data-act="musvar" data-v="${k}" title="Neue Instrumente und Melodie-Varianten bei gleicher Stimmung; ruhiger, wenn du lange an einem Ort bist, nichts drückst oder im Menü bist">${n}</button>`).join('')}`}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-act="musvar"]');if(!b||b.disabled)return;SAVE.musVar=+b.dataset.v;try{persist()}catch(e){}
+ document.querySelectorAll('#sndOpts').forEach(el=>{el.innerHTML=sndOpts()});try{PADNAV.dirty=true}catch(e){}});
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
