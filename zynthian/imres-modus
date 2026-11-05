@@ -1,5 +1,5 @@
 #!/bin/bash
-# imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|start-imres|start-zynthian|start-hintergrund|boot
+# imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|pruefen|start-imres|start-zynthian|start-hintergrund|boot
 HIER="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 DATEN="$(dirname "$(dirname "$HIER")")"   # /zynthian/zynthian-my-data/imres
 case "$1" in
@@ -11,6 +11,15 @@ case "$1" in
   aktualisieren)
     git -C "$DATEN/seite" pull --ff-only --depth 1 && \
       curl -s -X POST -H 'Content-Type: application/json' -d '{"aktion":"seite-neu"}' http://127.0.0.1:8790/zyn/system >/dev/null
+    ;;
+  pruefen)
+    export DISPLAY=:0
+    echo "== Bildschirm =="; xrandr 2>&1 | grep " connected"
+    echo "== Touch =="; xinput list --name-only 2>&1 | grep -i -E "touch|ft5|goodix|ili|edt"
+    echo "== Dienste =="; for d in jack2 zynthian imres-buehne imres-bruecke; do echo "$d: $(systemctl is-active $d)"; done
+    echo "== JACK =="; jack_lsp 2>&1 | head -12
+    echo "== Testton (gut hinhoeren!) =="; timeout 6 speaker-test -D default -c 2 -t sine -l 1 2>&1 | tail -2
+    echo "== Log =="; journalctl -u imres-buehne -n 60 --no-pager 2>&1 | grep -i -E "alsa|audio|jack|pulse|error|Imres:" | tail -10
     ;;
   # Was beim Einschalten startet
   start-imres)    echo imres > "$DATEN/start-modus"; echo "Beim Einschalten startet jetzt die Imres-Bühne." ;;
