@@ -14,7 +14,7 @@ apt-get install -y -q libasound2-plugins alsa-utils git curl unclutter xvfb jack
 
 echo "-- Seite herunterladen (ca. 250 MB, dauert etwas) …"
 mkdir -p "$ORT"
-if [ -d "$ORT/seite/.git" ]; then git -C "$ORT/seite" pull --ff-only --depth 1; else git clone --depth 1 "$REPO" "$ORT/seite"; fi
+if [ -d "$ORT/seite/.git" ]; then git -C "$ORT/seite" fetch --depth 1 origin main && git -C "$ORT/seite" reset --hard origin/main; else git clone --depth 1 "$REPO" "$ORT/seite"; fi
 chmod +x "$ORT/seite/zynthian/kiosk.sh" "$ORT/seite/zynthian/hintergrund.sh" "$ORT/seite/zynthian/imres-modus"
 ln -sf "$ORT/seite/zynthian/imres-modus" /usr/local/bin/imres-modus
 

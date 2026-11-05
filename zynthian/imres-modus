@@ -9,7 +9,7 @@ case "$1" in
   neustart)  systemctl reboot ;;
   aus)       systemctl poweroff ;;
   aktualisieren)
-    git -C "$DATEN/seite" pull --ff-only --depth 1 && \
+    git -C "$DATEN/seite" fetch --depth 1 origin main && git -C "$DATEN/seite" reset --hard origin/main && \
       curl -s -X POST -H 'Content-Type: application/json' -d '{"aktion":"seite-neu"}' http://127.0.0.1:8790/zyn/system >/dev/null
     ;;
   pruefen)
