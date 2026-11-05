@@ -25100,6 +25100,44 @@ if(typeof swSumHtml==='function'){const ssh=swSumHtml;swSumHtml=function(win){co
 FK.t={hook:(k,a,b,c,d)=>hookRun(k,a,b,c,d),die:()=>die(),pot:()=>usePotion(),saveRun:()=>saveRun(),continueRun:()=>continueRun(),mprSave:()=>mprSave(),mprGo:()=>mprGo(),persist:()=>persist(),runFix:S=>runFix(S),mprFix:S=>mprFix(S),rlS:id=>rlS(id),hsave:id=>hsave(id),mpAddPlayer:(d,h)=>mpAddPlayer(d,h),renderInv:()=>renderInv(),showCampfire:()=>showCampfire(),endRun:w=>endRun(w)};
 FK.fn={FK_DEF,FKD,FK_VB,FKV,fkHat,fkVb,fkSchuld,fkZiehen,fkNimm,fkAuf,fkAngebot,fkKlick,fkHtml,fkTick,fkSterne,fkSchatten,fkAusweich,fkZone,fkSumZeile,fkPauseHtml,fkRowHtml,KARTEN_ALLE};
 
+/* Paket „vollbild“: Auf Handhelds und kleinen Touch-Geräten automatisch ins Vollbild (beim ersten Tippen/Taste/Controller-Knopf),
+   nach App-Wechsel erneut; nur der eigene Vollbild-Knopf schaltet es dauerhaft ab. Dazu „Offline speichern“ auch im Pausenmenü. */
+(()=>{try{
+ const VB={knopf:0,letzt:0,hinw:false};
+ const klein=()=>{try{const s=Math.min(screen.width||9999,screen.height||9999);return s<=520&&(matchMedia('(pointer:coarse)').matches||'ontouchstart' in window)}catch(e){return false}};
+ const ziel=()=>(window.RG2&&RG2.hh)||klein();
+ rgFsWunsch=function(){return ziel()&&fsOk()&&!fsOn()&&!rgStandalone()&&!RG2.fsVersucht&&!RG2.fsAusUser&&SAVE.rgFs!==false};
+ /* nur der Vollbild-Knopf zählt als „bewusst beendet“ */
+ document.addEventListener('click',ev=>{try{if(ev.target&&ev.target.closest&&ev.target.closest('[data-act="fs"]'))VB.knopf=performance.now()}catch(e){}},true);
+ const korr=()=>{try{if(!fsOn()){RG2.fsAusUser=performance.now()-VB.knopf<2500;RG2.fsVersucht=false}}catch(e){}};
+ document.addEventListener('fullscreenchange',korr);document.addEventListener('webkitfullscreenchange',korr);
+ document.addEventListener('visibilitychange',()=>{try{if(!document.hidden&&!fsOn())RG2.fsVersucht=false}catch(e){}});
+ /* Controller: Knöpfe gelten in manchen Browsern als Nutzeraktion – versuchen, höchstens alle 2 s; sonst einmal Hinweis */
+ const pad=()=>{try{if(rgFsWunsch()){const gp=navigator.getGamepads?navigator.getGamepads():[];let gedr=false;for(const g of gp)if(g&&g.buttons)for(const b of g.buttons)if(b&&b.pressed){gedr=true;break}
+   if(gedr&&performance.now()-VB.letzt>2000){VB.letzt=performance.now();const e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;let r;try{r=f&&f.call(e,{navigationUI:'hide'})}catch(_){}
+    const nein=()=>{if(!VB.hinw&&!fsOn()){VB.hinw=true;try{toast('Für Vollbild kurz auf den Bildschirm tippen','#e5b454')}catch(_){}}};
+    if(r&&r.then)r.then(()=>{RG2.fs0=true;try{rgNeu()}catch(_){}}).catch(nein);else setTimeout(nein,300)}}}catch(e){}setTimeout(pad,120)};
+ setTimeout(pad,800);
+ /* Pausenmenü: Offline speichern */
+ const _rp=renderPause;renderPause=function(){const r=_rp.apply(this,arguments);try{if(typeof OFF!=='undefined'&&!OFF.datei&&!scr.querySelector('.vboff')){const c=[...scr.querySelectorAll('.wrap > .spread [data-act="close"]')][0];
+   if(c){const st=OFF.st,bereit=st&&st.n>=st.total;const b=document.createElement('button');b.className='btn vboff';b.dataset.act='vb-off';b.textContent=bereit?'⇩ Offline ✓':'⇩ Offline speichern';b.title='Spiel für ohne Internet speichern';c.parentNode.insertBefore(b,c);if(!MF.busy&&!scr.hidden)menuFit(scr)}}}catch(e){}return r};
+ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="vb-off"]');if(!b)return;ev.preventDefault();ev.stopPropagation();try{
+   if(!OFF.ok){toast('Offline speichern geht nur direkt auf imrestales.de/heldensturm.html im Browser.','#ff8a7a');return}
+   const st=OFF.st;if(st&&st.n>=st.total){toast('Heldensturm ist schon offline spielbar ✓','#8ff08a');return}
+   OFF.fort={b:0,ges:(st&&st.ges)||1};offSend('laden');toast('Wird gespeichert … (läuft im Hintergrund weiter, ca. 97 MB)','#e5b454');
+   const warte=()=>{if(OFF.fort){setTimeout(warte,1500);return}const s=OFF.st;toast(s&&s.n>=s.total?'Heldensturm ist jetzt offline spielbar ✓':'Offline speichern: nicht alles geladen – später erneut versuchen.',s&&s.n>=s.total?'#8ff08a':'#ff8a7a')};setTimeout(warte,3000)}catch(e){}},true);
+}catch(e){console.warn('vollbild',e)}})();
+/* Fähigkeiten-Name in der Detailansicht: goldener Rahmen auf dunklem Grund (lesbar auch bei Rosa auf Rosa) */
+(()=>{try{const st=document.createElement('style');st.textContent='.tdet .tdn h3{display:inline-block;max-width:100%;box-sizing:border-box;border:1.5px solid #e5b454;border-radius:8px;padding:.12em .55em;background:rgba(16,12,18,.88);box-shadow:0 0 0 1px rgba(0,0,0,.35),inset 0 0 6px rgba(229,180,84,.18);line-height:1.25}';document.head.appendChild(st)}catch(e){}})();
+/* Talentbaum: Standardansicht zeigt nur Gelerntes + direkt Lernbares (Anfang: nur die Startsterne) – wer selbst zoomt, behält seine Ansicht */
+(()=>{try{const _sc=stScale;stScale=function(m){const L=_sc.apply(this,arguments);try{const v=L.v;if(v.user)return L;let R=0;
+  for(const el of m.querySelectorAll('.stn.lit,.stn.can')){const d=Math.hypot(+el.dataset.x||0,+el.dataset.y||0);if(d>R)R=d}
+  if(!R)return L;R=Math.max(R,90);const zmax=3.2/L.fit>4?4:Math.max(1.2,3.2/L.fit);const mn=Math.min(L.W,L.H),want=(mn/2-34)/(R*(mn<420?1.9:1.4));
+  const z=clamp(want/L.fit,1,zmax);if(z>v.z){v.z=z;v.cx=0;v.cy=0;return{W:L.W,H:L.H,s:L.fit*z,fit:L.fit,v}}}catch(e){}return L}}catch(e){}})();
+(()=>{try{const st=document.createElement('style');st.textContent='@media (max-width:760px),(max-height:520px){.stmap .spkhint{top:4px!important;padding:3px 10px 4px!important;max-width:calc(100% - 70px)!important;font-size:12px!important;line-height:1.2}.stmap .spkhint span{display:none!important}.stmap .spkhint b{font-size:12px!important}}';document.head.appendChild(st)}catch(e){}})();
+(()=>{try{const st=document.createElement('style');st.textContent='html.rghh #hud .top .stage{justify-self:start!important;width:auto!important;min-width:0!important;max-width:150px!important;padding:3px 6px 4px!important;opacity:.85}html.rghh #hud .top .stage .sn{display:none!important}html.rghh #hud .top .stage .bar.prog{height:6px!important;min-height:0!important;width:136px!important;margin:0!important}html.rghh #hud .top .stage #progTxt{display:none!important}@media (max-height:520px),(max-width:760px){#hud .top .stage{justify-self:start!important;width:auto!important;min-width:0!important;max-width:150px!important;padding:3px 6px 4px!important;opacity:.85}#hud .top .stage .sn{display:none!important}#hud .top .stage .bar.prog{height:6px!important;min-height:0!important;width:136px!important;margin:0!important}#hud .top .stage #progTxt{display:none!important}}';document.head.appendChild(st)}catch(e){}})();
+window.__hsVOLLBILD=1;
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
