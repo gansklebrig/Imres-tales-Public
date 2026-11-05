@@ -32,7 +32,8 @@
   try { const v = localStorage.getItem("imres-lw-spar"); if (v === "1" || v === "0") spar = v === "1"; } catch (_) {}
   /* Auf Handys und Tablets immer die leichte Bauweise für Hall und Raumklang – auch ohne Sparmodus:
      ein gemeinsames Hall-Netz statt zwei Faltungshallen, keine Stereo-Verteilung, etwas schlankeres Orchester */
-  const mobil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
+  const mobil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || "")) ||
+    (() => { try { return localStorage.getItem("imres-lw-leicht") === "1"; } catch (_) { return false; } })(); /* „leicht“ auch auf Wunsch (z. B. Zynthian) */
   /* einmal beim Start der Tonberechnung festgelegt – ein Umschalten des Sparmodus gilt erst nach dem Neuladen */
   let leichtFest = null;
   const leicht = () => leichtFest !== null ? leichtFest : (spar || mobil);

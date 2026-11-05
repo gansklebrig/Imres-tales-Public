@@ -10,6 +10,7 @@
   setz("imres-lw-rundgang", "1");
   setz("imres-lw-modus", "einfach");  /* einfache Ansicht der Bühne */
   setz("imres-lang", "de");
+  setz("imres-lw-leicht", "1");       /* Zynthian: leichte Bauweise (ein Hall-Netz, 32 kHz) – spart Rechenzeit */
   try { sessionStorage.setItem("imres-zyn", "1"); } catch (_) {}
   let m = "buehne"; try { m = localStorage.getItem("imres-zyn-modus") || "buehne"; } catch (_) {}
   const h = /[?&]hinter/.test(location.search) ? "&hinter=1" : "";

@@ -643,6 +643,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   /* ---------- LEDs ---------- */
   let ledMerk = "";
   const LED_STUFEN = [.15, .3, .5, .75, 1];
+  const leistung = () => lies("imres-lw-spar", "0") === "1" ? "spar" : lies("imres-lw-leicht", "0") === "1" ? "leicht" : "voll";
+  const LEISTUNG_NAME = { voll: W("voll (beste Klangqualität)", "full (best sound)"), leicht: W("leicht (ein Hall, 32 kHz)", "light (one reverb, 32 kHz)"), spar: W("sparsam (24 kHz, weniger Ebenen)", "saver (24 kHz, fewer layers)") };
   const ledHell = () => { const v = +lies("imres-zp-hell", "1"); return LED_STUFEN.includes(v) ? v : 1; };
   const dimmHex = (h, fk) => { const n = parseInt(String(h).slice(1, 7), 16) || 0, c = x => Math.round(x * fk).toString(16).padStart(2, "0"); return "#" + c((n >> 16) & 255) + c((n >> 8) & 255) + c(n & 255); };
   function ledsMelden() {
@@ -728,7 +730,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       const gruppiert = (sel, sym, attr, standard) => { const m = new Map();
         $$(sel).forEach(el => { const gr = el.closest(".gruppe, .weltgruppe, section, details"); const h = gr && gr.querySelector("h3, h2, summary"); let t = standard; if (h) { const hh = h.cloneNode(true); hh.querySelectorAll("small, button, .knopf").forEach(x => x.remove()); t = hh.textContent.trim().replace(/\s+/g, " ") || standard; }
           let sy, nm; const s1 = el.querySelector(".sym"), n1 = el.querySelector(".nm");
-          if (s1 && n1) { sy = s1.textContent.trim(); nm = n1.textContent.trim(); } else [sy, nm] = teil((el.innerText || el.title || "").split("⏳")[0].replace(/\s+/g, " "), sym);
+          if (s1 && n1) { sy = s1.textContent.trim(); nm = n1.textContent.trim(); } else [sy, nm] = teil((el.innerText || el.textContent || el.title || "").split("⏳")[0].replace(/\s+/g, " "), sym);
           if (!m.has(t)) m.set(t, []);
           m.get(t).push({ key: attr + ":" + el.getAttribute("data-" + attr), sym: sy, name: nm, an: el.getAttribute("aria-pressed") === "true" || el.classList.contains("an"), los: () => { klick(el); zeige(sy + " " + nm); } }); });
         [...m.entries()].forEach(([titel, l]) => g.push({ titel, l })); };
@@ -1043,11 +1045,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="looplen">⟳ ' + W("Regler-Loop: ", "Knob loop: ") + "<b>" + loopTakte() + W(" Takte", " bars") + "</b><small>" + W("ALT + Regler drücken: aufnehmen / Loop aus", "ALT + push knob: record / loop off") + "</small></button>" +
       '<button type="button" data-zm="ruhe">💤 ' + W("Bühnenbild nach: ", "Stage view after: ") + "<b>" + (ruheSek() ? ruheSek() + " s" : W("nie", "never")) + "</b><small>" + W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen") + "</small></button>" +
       '<button type="button" data-zm="bild">🖼 ' + W("Bühnenbild hinter dem Pult: ", "Stage behind the console: ") + "<b>" + (bildHinten() ? W("an", "on") : W("aus", "off")) + "</b><small>" + W("bei Knistern im Ton ausschalten", "turn off if the sound crackles") + "</small></button>" +
+      '<button type="button" data-zm="leistung">⚡ ' + W("Leistung: ", "Performance: ") + "<b>" + LEISTUNG_NAME[leistung()] + "</b><small>" + W("bei Rucklern sparsamer stellen – lädt neu", "go lighter if it stutters – reloads") + "</small></button>" +
       '<button type="button" data-zm="hell">💡 ' + W("Tastenlicht: ", "Button light: ") + "<b>" + Math.round(ledHell() * 100) + " %</b><small>" + W("Helligkeit der Tasten-LEDs", "brightness of the button LEDs") + "</small></button>" +
       '<button type="button" data-zm="beleg">🎛 ' + W("Belegung ändern", "Change mapping") + "<small>" + W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons") + "</small></button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile + SEL · BACK schließt", "F1–F4 pick · arrows + SEL · BACK closes") + "</p>",
       { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu, beleg: () => belegMenue(),
+        leistung: () => { const l = ["voll", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % 3]; schreib("imres-lw-leicht", n === "voll" ? "0" : "1"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
         hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); zpMenue(); const b = $('.zyn-menue [data-zm="hell"]'); if (b) fokusSetzen(b); },
         looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="looplen"]'); if (b) fokusSetzen(b); },
         ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="ruhe"]'); if (b) fokusSetzen(b); },
@@ -1173,7 +1177,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (SEITE === "welten") {
       const a = $(".welt.an"); titel = a ? kurzName(a.querySelector(".nm") || a) : W("Stille", "Silence"); const sy = a && a.querySelector(".sym");
       unter = (sy ? sy.textContent : "🌿") + " " + W("Klangwelt", "Soundscape");
-      quellen = $$("[data-szene][aria-pressed=true], [data-ger].an").slice(0, 8).map(el => '<span class="q"><b>' + esc2(teil((el.innerText || "").split("⏳")[0].replace(/\s+/g, " "), "")[0] || "✦") + "</b>" + esc2(teil((el.innerText || "").split("⏳")[0].replace(/\s+/g, " "), "")[1]) + "</span>").join("");
+      quellen = $$("[data-szene][aria-pressed=true], [data-ger].an").slice(0, 8).map(el => '<span class="q"><b>' + esc2(teil((el.innerText || el.textContent || "").split("⏳")[0].replace(/\s+/g, " "), "")[0] || "✦") + "</b>" + esc2(teil((el.innerText || el.textContent || "").split("⏳")[0].replace(/\s+/g, " "), "")[1]) + "</span>").join("");
     } else {
       titel = z.laeuft && L ? teil(L.namen.st[z.stimmung] || "", "")[1] : W("Die Bühne wartet", "The stage is waiting");
       unter = z.kulLaeuft && L && z.kulisse && z.kulisse !== "keine" ? L.namen.kul[z.kulisse] || "" : W("kein Hintergrund", "no backdrop");
@@ -1219,6 +1223,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const st = document.createElement("style");
     st.textContent = `
 html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
+/* Rechenzeit sparen: alles, was unter dem Pult liegt, bewegt sich nicht und wird nicht gemalt */
+html.zyn-pult body *:not(.lw-buehne, .lw-buehne *, .zp, .zp *, .zp-ruhe, .zp-ruhe *, .zyn-osd, .zyn-osd *, .zyn-menue, .zyn-menue *) { animation: none !important; transition: none !important; }
+html.zyn-pult body canvas:not(.lw-buehne canvas), html.zyn-pult body video { display: none !important; }
+html.zyn-pult body > *:not(.zp, .zp-ruhe, .zyn-osd, .zyn-menue, script, style) { content-visibility: hidden; }
+html.zyn-pult.zyn-bb body > *:has(.lw-buehne), html.zyn-pult.zyn-ruhe body > *:has(.lw-buehne) { content-visibility: visible; }
 html.zyn-pult .zyn-leiste { display: none !important; }
 /* Bühnenbild: hinter dem Pult (gedimmt) und als Ruhebild */
 /* alles andere der Webseite unsichtbar machen – nur die Bühne (und Pult/Ruhebild) malen */
@@ -1294,7 +1303,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
     zpRuheEl.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); zpAktiv(); });
     document.documentElement.classList.toggle("zyn-bb", bildHinten() && SEITE === "buehne");
     setInterval(() => { const s = ruheSek(); if (!zpRuhe && s && Date.now() - zpLetzte > s * 1000 && !$(".zyn-menue")) zpRuheAn(); if (zpRuhe) zpRuheZeichnen(); }, 1000);
-    setInterval(() => { if (zpRuhe) { try { ledsMelden(); } catch (_) {} } }, 80);
+    setInterval(() => { if (zpRuhe) { try { ledsMelden(); } catch (_) {} } }, 110);
     let favT = 0, favUnterdrueck = false;
     zpEl.addEventListener("pointerdown", e => { zpLetzte = Date.now(); zpZeiger = true; const k = e.target.closest("[data-zp-k]"); if (!k) return; const i = +k.dataset.zpK; clearTimeout(favT); favT = setTimeout(() => { favUnterdrueck = true; zpFavUmschalten(i); }, 1500); });
     const zeigerLos = () => { zpZeiger = false; clearTimeout(favT); };
@@ -1313,7 +1322,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
       if (!$('#lautenwerk [data-etab]')) { schreib("imres-lw-modus", "einfach"); pultKlick("data-aktion", "modus"); }
       setTimeout(() => { const b = $('#lautenwerk [data-etab="ort"]'); if (b) klick(b); }, 400);
     }, 1100); /* Zusätze (Wetter) sind nur im Reiter „Ort“ im Pult */
-    zpZeichnen(true); setInterval(() => { try { zpZeichnen(); } catch (e) { console.warn("zp", e); } }, 400);
+    zpZeichnen(true); setInterval(() => { if (zpRuhe || document.hidden) return; try { zpZeichnen(); } catch (e) { console.warn("zp", e); } }, 700);
     /* Musik weiter vorausplanen, damit kurze Ruckler der Oberfläche nicht hörbar werden */
     const vorlaufSetzen = () => { if (window.ImresPult && window.ImresPult.vorlauf) window.ImresPult.vorlauf(.7); else setTimeout(vorlaufSetzen, 500); }; if (SEITE === "buehne") vorlaufSetzen();
   }
