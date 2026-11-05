@@ -372,6 +372,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     grundton: [W("nur Grundton", "root only"), null, null]
   };
   const NOTEN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "H"];
+  /* „D Kurd“ und die Töne der Skala ab dem Grundton, z. B. „D · E · F · G · A · B♭ · C“ */
+  const tonartName = () => { const sk = SKALEN[OPT.skala] || SKALEN.kurd; return OPT.skala === "grundton" ? NOTEN[OPT.grund] + " (" + W("nur Grundton", "root only") + ")" : NOTEN[OPT.grund] + " " + String(sk[0]).replace(/\s*\(.*\)$/, ""); };
+  const skalaToene = () => { const sk = SKALEN[OPT.skala] || SKALEN.kurd; return sk[2] ? W("Töne: ", "Notes: ") + sk[2].map(i => NOTEN[(OPT.grund + i) % 12]).join(" · ") : W("nur der Grundton ", "root only ") + NOTEN[OPT.grund]; };
   let OPT = { takt: "slave", kulisseImTakt: true, versatzMs: 15, tonartAn: false, grund: 2, skala: "kurd", mikro: false, mikroSpannung: true, mikroAusweichen: true, mikroEmpf: 50,
     kickDucken: false, kickKanal: 10, kickNote: 36, duckTiefe: 40, steuerKanal: 16, programmWechsel: true, umschaltCC: true, noten: true, regler: true };
   try { Object.assign(OPT, JSON.parse(sessionStorage.getItem("imres-zyn-opt") || "{}")); } catch (_) {}
@@ -401,8 +404,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       zeile("takt", "⏱ MIDI-Takt", TAKT_NAME[OPT.takt], W("Slave: Band und Kulisse folgen der TR-8S · Master: die Bühne gibt Clock aus · ALT+TEMPO schaltet um", "Slave: band and backdrop follow the clock · Master: the stage sends clock")) +
       zeile("kulisseImTakt", "🎯 " + W("Kulisse im Takt", "Backdrop on the beat"), an(OPT.kulisseImTakt), W("Einzelgeräusche fallen auf den Schlag", "Single sounds land on the beat")) +
       zeile("versatzMs", "⌛ " + W("Versatz", "Offset"), OPT.versatzMs + " ms", W("Ausgleich, falls Band und Drum-Machine leicht auseinander liegen", "Compensates small timing gaps")) +
-      zeile("tonartAn", "🎼 " + W("Tonart der Handpan", "Handpan key"), an(OPT.tonartAn), W("Alle Stimmungen spielen in dieser Tonart", "Every mood plays in this key")) +
-      zeile("grund", "· " + W("Grundton", "Root"), NOTEN[OPT.grund]) + zeile("skala", "· " + W("Skala", "Scale"), sk[0]) +
+      zeile("tonartAn", "🎼 " + W("Tonart der Handpan", "Handpan key"), an(OPT.tonartAn) + " – " + tonartName(), W("Alle Stimmungen spielen in dieser Tonart", "Every mood plays in this key")) +
+      zeile("grund", "· " + W("Grundton", "Root"), NOTEN[OPT.grund], W("von hier aus läuft die Skala", "the scale starts here")) +
+      zeile("skala", "· " + W("Skala", "Scale"), NOTEN[OPT.grund] + " " + sk[0], skalaToene()) +
       zeile("erkennen", "👂 " + W("Tonart erkennen", "Detect key"), W("8 s zuhören", "listen 8 s"), W("Handpan anspielen – braucht das Mikrofon", "Play the handpan – needs the microphone")) +
       zeile("mikro", "🎤 " + W("Mikrofon-Eingang", "Microphone input"), an(OPT.mikro), W("Eingang des Zynthian hört der Band zu", "Zynthian input listens to the band")) +
       zeile("mikroSpannung", "· " + W("Spannung folgt Lautstärke", "Tension follows loudness"), an(OPT.mikroSpannung)) +
@@ -493,7 +497,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       for (let g = 0; g < 12; g++) { let drin = 0; st.forEach(i => { drin += chroma[(g + i) % 12]; }); const wert = drin / summe - (summe - drin) / summe * 1.5 + chroma[g] / summe * .6 - st.length * .005;
         if (!best || wert > best.wert) best = { k, g, wert }; } });
     optSetzen({ tonartAn: true, grund: best.g, skala: best.k });
-    zeige("🎼 " + NOTEN[best.g] + " " + SKALEN[best.k][0], null, W("Alle Stimmungen spielen jetzt in dieser Tonart", "All moods now play in this key"));
+    zeige("🎼 " + tonartName(), null, skalaToene());
   }
 
   /* ---------- Aufnahme (in der Brücke: alles, was aus den Ausgängen kommt) ---------- */
@@ -1121,7 +1125,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (SEITE === "welten") { const a = $(".welt.an"); status = (a ? "▶ <b>" + esc2(kurzName(a.querySelector(".nm") || a)) + "</b>" : "■ " + W("still", "silent")); }
     else { const sn = z.stimmung && L ? teil(L.namen.st[z.stimmung] || z.stimmung, "")[1] : "–", kn = z.kulLaeuft && L && z.kulisse !== "keine" ? teil(L.namen.kul[z.kulisse] || z.kulisse, "")[1] : W("kein Hintergrund", "no backdrop");
       status = (z.laeuft ? "▶ <b>" + esc2(sn) + "</b>" : "■ " + esc2(sn)) + " · 🌲 " + esc2(kn) + " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) + (OPT.takt === "slave" && tempoMidi ? " ⇄" : OPT.takt === "master" ? " ⇉" : ""); }
-    status += (OPT.tonartAn ? " · 🎼 " + NOTEN[OPT.grund] : "") + (aufnahmeAn ? ' · <span class="rec">⏺ REC</span>' : "") + (alt ? ' · <span class="alt">ALT</span>' : "");
+    status += (OPT.tonartAn ? " · 🎼 " + esc2(tonartName()) : "") + (aufnahmeAn ? ' · <span class="rec">⏺ REC</span>' : "") + (alt ? ' · <span class="alt">ALT</span>' : "");
     const tabs = ZP_SEITEN.map(s => '<button type="button" class="zp-tab' + (s.id === zpSeite ? " an" : "") + '" data-zp-tab="' + s.id + '" style="--f:' + s.farbe + '"><span class="zp-sym">' + s.sym + "</span> " + s.name + "</button>").join("");
     const kach = Array.from({ length: 8 }, (_, i) => { const it = blatt[i];
       const f = '<span class="zp-f' + (i < 4 ? "" : " alt") + '">' + (i < 4 ? "" : "ALT ") + "F" + (i % 4 + 1) + "</span>";
