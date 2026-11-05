@@ -6106,6 +6106,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         const p = Math.max(0, Math.min(1, (Math.max(0, morph.takt) * taktL() + schritt) / (morph.N * taktL())));
         tempoJetzt = morph.tempoA + ((wechsel ? morph.tempoB : S.tempo) - morph.tempoA) * glatt(p);
       } else tempoJetzt = tempoJetzt ? tempoJetzt + (zielTempo - tempoJetzt) * (ausduennen || einblend ? .05 : .1) : S.tempo;
+      if (schritt === 0 && zynLoopNaechst) { if (!zynLoopVorher) zynLoopVorher = S.ablauf.slice(); S.ablauf = [zynLoopNaechst]; abschnitt = 0; zynLoopNaechst = null; merken(); } /* Variation wechselt sauber auf der Eins */
       const teilName = S.ablauf[abschnitt % S.ablauf.length] || "A", daten = S.teile[teilName];
       const v = S.variation / 10, letzterTakt = abschnitt % S.ablauf.length === S.ablauf.length - 1;
       const versatz = S.swing && schritt % 2 === 1 ? schrittDauer() * .33 : 0;
@@ -13175,7 +13176,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
     }, 400);
   }
   /* Schnittstelle für die Zynthian-Steuerung (zynthian/zyn.js) */
-  const zynSchritte = []; let zynLoopVorher = null; /* zuletzt geplante Schritte (für Lauflicht und Live-Einspielen im Zynthian-Pult) */
+  const zynSchritte = []; let zynLoopVorher = null, zynLoopNaechst = null; /* zuletzt geplante Schritte (für Lauflicht und Live-Einspielen im Zynthian-Pult) */
   let zynDuck = null, zynVorlauf = 0, zynMidiHoerer = null, zynMidiZeile = -1, zynMidiAb = -1;
   /* ---------- Effekte für den Zynthian: DJ-Filter, Drive, Delay – hinter allem (Musik, Kulisse, Effekte), vor dem Limiter ---------- */
   let fxKette = null, fxSumme = null;
@@ -13340,10 +13341,12 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       for (const e of zynSchritte) { if (e.zeit <= jetzt + .005) ak = e; else break; }
       return { laeuft, teil: ak ? ak.teil : (S.ablauf[0] || "A"), schritt: ak && laeuft ? ak.schritt : -1, ablauf: S.ablauf.slice(), takt: taktL(), stimmung: S.stimmung || null,
         spuren: SPUREN.map(sp => ({ id: sp.id, art: sp.art, zeilen: sp.zeilen || 1, sym: sp.sym || "", stumm: !!S.mute[sp.id] })),
-        instrument: S.instrument, band: Object.assign({}, S.band), loop: zynLoopVorher ? S.ablauf[0] : null };
+        instrument: S.instrument, band: Object.assign({}, S.band), loop: zynLoopVorher ? S.ablauf[0] : null, naechsterLoop: zynLoopNaechst,
+        belegt: Object.fromEntries(TEILE.slice(0, 4).map(p => [p, IDS.some(k => S.teile[p][k].some(x => x >= 0))])) };
     },
     /* einen Teil endlos wiederholen (wie ein Pattern auf der TR-8S) – null stellt den Ablauf wieder her */
-    beatsLoop(teil) {
+    beatsLoop(teil, aufDerEins) {
+      if (teil && S.teile[teil] && aufDerEins && laeuft) { if (S.stimmung) stimmungLoesen(); zynLoopNaechst = teil; return; }
       if (teil && S.teile[teil]) { if (S.stimmung) stimmungLoesen(); if (!zynLoopVorher) zynLoopVorher = S.ablauf.slice(); S.ablauf = [teil]; }
       else if (zynLoopVorher) { S.ablauf = zynLoopVorher; zynLoopVorher = null; }
       merken();
