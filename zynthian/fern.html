@@ -2,75 +2,137 @@
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Imres Fernbedienung</title>
 <meta name="theme-color" content="#120e18">
 <style>
-:root{--bg:#120e18;--panel:#1d1726;--line:#3a2f45;--ink:#ebe2cc;--mute:#a89f8f;--gold:#e0a046}
+:root{--bg:#120e18;--panel:#1d1726;--panel2:#261d31;--line:#3a2f45;--ink:#ebe2cc;--mute:#a89f8f;--gold:#e0a046;--gold2:#ffd98a;--rot:#e0445e;--gruen:#34c78a;--lila:#a855c9}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.3 system-ui,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
-main{max-width:520px;margin:0 auto;padding:12px 14px 30px}
-h1{font-size:19px;margin:4px 0 2px;color:var(--gold)}
-#status{font-size:14px;color:var(--mute);min-height:2.6em}
-.gitter{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+main{max-width:620px;margin:0 auto;padding:10px 14px 40px}
+.kopf{display:flex;align-items:center;gap:8px;margin:4px 0 2px}
+h1{font-size:18px;margin:0;color:var(--gold);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#last{font-size:12px;font-variant-numeric:tabular-nums;padding:4px 8px;border-radius:8px;border:1px solid var(--line);color:var(--gruen);white-space:nowrap}
+#last.warn{color:var(--gold2);border-color:#6a4a18}#last.bad{color:#fff;background:var(--rot);border-color:var(--rot)}
+#mischer{font:700 13px system-ui;color:var(--gold);border:1px solid #6a4a18;border-radius:10px;padding:7px 10px;text-decoration:none;white-space:nowrap}
+#status{font-size:14px;color:var(--mute);min-height:1.4em;margin-bottom:6px}
+h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+h2 span{flex:1}
 button{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:12px 4px;font:600 14px/1.15 system-ui,sans-serif;touch-action:manipulation}
 button:active{background:#3a2a14;border-color:var(--gold)}
-button small{display:block;font-weight:400;font-size:11px;color:var(--mute);margin-top:2px}
+button small{display:block;font-weight:400;font-size:11px;color:var(--mute);margin-top:3px}
+button:disabled{opacity:.35}
+.gitter{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .gross{font-size:18px}
-.f{border-color:#6a4a18}
+.an{background:var(--gold)!important;border-color:var(--gold)!important;color:#140c04!important}.an small{color:#3a2a10!important}
+.rot{border-color:#5a2430;color:#ffb3bf}
+#seiten{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+#seiten button{flex:none;padding:9px 12px;border-radius:999px;font-size:13px}
+#kacheln{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+#kacheln button{min-height:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 4px;background:radial-gradient(120% 90% at 50% 18%,#2a2134,#1a1422 70%)}
+#kacheln button b{font-size:30px;line-height:1;font-weight:400}
+#kacheln button span{font-size:12px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#kacheln button.leer{visibility:hidden}
+#kacheln button em{font-style:normal;font-size:10px;color:var(--gold2)}
+.blatt{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:8px;color:var(--mute);font-size:13px}
+.blatt button{padding:8px 18px}
+.halten button{background:var(--panel2)}
+.halten button.gedrueckt{background:var(--lila);border-color:var(--lila);color:#fff}
+.regel{display:grid;grid-template-columns:minmax(90px,38%) 1fr 64px;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #2a2233}
+.regel span{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.regel output{font-size:13px;color:var(--gold2);text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--gold);height:34px}
+.dreh{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dreh div{display:flex;flex-direction:column;gap:6px;text-align:center;font-size:12px;color:var(--mute);min-width:0}
+.dreh div b{color:var(--ink);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dreh div i{font-style:normal;color:var(--gold2);font-size:12px}
+.dreh button{padding:10px 0;font-size:18px}
+details{margin-top:10px}summary{cursor:pointer;color:var(--mute);font-size:13px;padding:8px 0}
 .pfeile{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:270px;margin:10px auto}
 .pfeile button{padding:16px 0;font-size:20px}
-.dreh{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
-.dreh div{display:flex;flex-direction:column;gap:6px;align-items:stretch;text-align:center;font-size:12px;color:var(--mute)}
-.dreh button{padding:10px 0;font-size:18px}
-h2{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:18px 0 6px}
 .system{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.alt.an{background:#4a1a4a;border-color:#c040c0}
-.rec.an{background:#5a0a0a;border-color:#ff4040}
+.alt.an{background:#4a1a4a!important;border-color:#c040c0!important;color:var(--ink)!important}
+.rec.an{background:#5a0a0a!important;border-color:#ff4040!important;color:var(--ink)!important}
 .opt{display:flex;flex-direction:column;gap:6px}
 .opt label{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px}
 .opt label small{display:block;color:var(--mute);font-size:11px}
 .opt select{background:#120e18;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px;font-size:14px;max-width:55%}
 .opt input[type=checkbox]{width:22px;height:22px;accent-color:var(--gold)}
 .opt .ein{margin-left:14px}
+.hinweis{font-size:12px;color:var(--mute);margin:6px 0 0}
+@media (max-width:380px){#kacheln button b{font-size:24px}.gitter{gap:6px}button{font-size:13px}}
 </style></head>
 <body><main>
-<h1>🎻 Imres · Fernbedienung</h1>
+<div class="kopf"><h1>🎻 Imres</h1><span id="last" title="Auslastung des Zynthian">…</span><a id="mischer" href="#" target="_top">🎚 Mischer</a></div>
 <div id="status">…</div>
 
+<h2><span>Seite</span></h2>
+<div id="seiten"></div>
+<div id="kacheln"></div>
+<div class="blatt" id="blatt" hidden><button data-blatt="-1">◀</button><span id="blatt-t"></span><button data-blatt="1">▶</button></div>
+
+<h2><span>Live</span><em id="tempo" style="font-style:normal;color:var(--gold2)"></em></h2>
 <div class="gitter">
-  <button class="gross" data-t="PLAY">▶■<small>Spielen</small></button>
-  <button class="gross" data-t="STOP">✕<small>Alles aus</small></button>
-  <button data-t="PAD">⚡<small>Passiert</small></button>
-  <button data-t="REC">🤫<small>Stille</small></button>
-  <button class="f" data-t="F1">F1</button><button class="f" data-t="F2">F2</button><button class="f" data-t="F3">F3</button><button class="f" data-t="F4">F4</button>
-  <button data-t="ZS3">⏭<small>Stimmung</small></button>
-  <button data-t="CTRL">🌲⏭<small>Ort</small></button>
-  <button data-t="TEMPO">🎲<small>Neu besetzen</small></button>
-  <button class="alt" id="alt">ALT<small>2. Belegung</small></button>
-  <button data-t="MENU">☰<small>Modus</small></button>
-  <button data-t="MENU" data-art="lang">⚙<small>System</small></button>
-  <button data-t="MIXER">⟲<small>Reglerbank</small></button>
-  <button data-t="BACK">↩<small>Zurück</small></button>
+  <button class="gross" data-a="play" id="a-play">▶<small>Musik an/aus</small></button>
+  <button class="gross rot" data-a="stop">■<small>Alles aus</small></button>
+  <button data-a="passiert">⚡<small>Etwas passiert</small></button>
+  <button data-a="stille">🤫<small>Stille</small></button>
+  <button data-a="stimmung_zurueck">◀ 🎵<small>Stimmung</small></button>
+  <button data-a="stimmung_vor">🎵 ▶<small>Stimmung</small></button>
+  <button data-a="ort_zurueck">◀ 🌲<small>Ort</small></button>
+  <button data-a="ort_vor">🌲 ▶<small>Ort</small></button>
+  <button data-a="tap" id="a-tap">⏱ Tap<small>im Takt tippen</small></button>
+  <button data-a="neubesetzen">🎲<small>Neu besetzen</small></button>
+  <button data-a="hg" id="a-hg">🌲<small>Hintergrund</small></button>
+  <button data-a="autopilot" id="a-auto">🤖<small>Autopilot</small></button>
+  <button data-a="fx_aus">✨<small>Effekte zurück</small></button>
+  <button data-a="beats">🥁<small>Drumpad</small></button>
+  <button data-a="set_zurueck" class="set">◀ 🎬<small>Song</small></button>
+  <button data-a="set_weiter" class="set">🎬 ▶<small>Song</small></button>
+</div>
+<h2><span>Effekte – gedrückt halten</span></h2>
+<div class="gitter halten">
+  <button data-h="echowurf">🔁<small>Echo-Wurf</small></button>
+  <button data-h="filterzu">🎛<small>Filter zu</small></button>
+  <button data-h="filterhoch">🎛<small>Hochpass</small></button>
+  <button data-h="stotter">🔂<small>Stotter</small></button>
+  <button data-h="rueckwaerts">⏪<small>Rückwärts</small></button>
+  <button data-h="bandstop">⏏<small>Tape-Stop</small></button>
+  <button data-h="crushhalt">👾<small>Crush</small></button>
 </div>
 
+<h2><span>Mischpult</span></h2>
+<div id="mix"><p class="hinweis">Die Werte kommen, sobald die Bühne läuft.</p></div>
+
+<h2><span>Drehregler am Gerät</span></h2>
+<div class="dreh" id="dreh"></div>
+
+<details id="tasten-box"><summary>Tasten am Gerät (wie am Zynthian)</summary>
+<div class="gitter" id="tasten">
+  <button class="gross" data-t="PLAY">PLAY<small></small></button>
+  <button class="gross" data-t="STOP">STOP<small></small></button>
+  <button data-t="PAD">PAD<small></small></button>
+  <button data-t="REC">REC<small></small></button>
+  <button data-t="F1">F1</button><button data-t="F2">F2</button><button data-t="F3">F3</button><button data-t="F4">F4</button>
+  <button data-t="ZS3">ZS3<small></small></button>
+  <button data-t="CTRL">CTRL<small></small></button>
+  <button data-t="TEMPO">TEMPO<small></small></button>
+  <button class="alt" id="alt">ALT<small>2. Belegung</small></button>
+  <button data-t="MENU">☰<small>Menü</small></button>
+  <button data-t="MENU" data-art="lang">⚙<small>System</small></button>
+  <button data-t="MIXER">MIXER<small>Reglerbank · lang: zurück</small></button>
+  <button data-t="BACK">↩<small>Zurück</small></button>
+</div>
 <div class="pfeile">
   <span></span><button data-t="UP">▲</button><span></span>
   <button data-t="LEFT">◀</button><button data-t="SEL">●</button><button data-t="RIGHT">▶</button>
   <span></span><button data-t="DOWN">▼</button><span></span>
 </div>
+</details>
 
-<h2>Drehregler</h2>
-<div class="dreh">
-  <div>1<button data-d="0" data-w="1">＋</button><button data-d="0" data-w="-1">－</button></div>
-  <div>2<button data-d="1" data-w="1">＋</button><button data-d="1" data-w="-1">－</button></div>
-  <div>3<button data-d="2" data-w="1">＋</button><button data-d="2" data-w="-1">－</button></div>
-  <div>4<button data-d="3" data-w="1">＋</button><button data-d="3" data-w="-1">－</button></div>
-</div>
-
-<h2>Aufnahme</h2>
+<h2><span>Aufnahme</span></h2>
 <div class="system"><button class="rec" id="rec">⏺ Aufnahme starten<small>alles, was rauskommt</small></button><button data-t="MENU" data-art="kurz">☰ Modus am Gerät<small>Klangwelten · Bühne · Kulisse · Musik</small></button></div>
 
-<h2>Optionen</h2>
+<h2><span>Optionen</span></h2>
 <div class="opt" id="opt">…</div>
 
-<h2>System</h2>
+<h2><span>System</span></h2>
 <div class="system">
   <button data-s="imres">🎻 Imres-Bühne starten<small>Vollbild, Tasten des Zynthian</small></button>
   <button data-s="hintergrund">🎛+🎻 Zusammen mit Zynthian<small>Imres spielt im Hintergrund</small></button>
@@ -86,13 +148,30 @@ h2{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 </main>
 <script>
 const post = (u, d) => fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) }).catch(() => {});
+const fern = d => post("/zyn/fern", d).then(() => setTimeout(status, 350));
+const $ = id => document.getElementById(id);
+const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const brumm = () => { if (navigator.vibrate) navigator.vibrate(12); };
 let alt = false;
+
+/* Link zum einfachen Mischer (ZynSimple) – im eingebetteten Fenster nicht nötig */
+if (window.top !== window) $("mischer").style.display = "none";
+else $("mischer").href = location.protocol + "//" + location.hostname + ":8090/";
+
 document.addEventListener("click", e => {
+  const a = e.target.closest("[data-a]");
+  if (a) { brumm(); fern({ typ: "aktion", id: a.dataset.a }); if (a.dataset.a === "tap") { a.classList.add("an"); setTimeout(() => a.classList.remove("an"), 110); } return; }
+  const k = e.target.closest("[data-k]");
+  if (k) { brumm(); fern({ typ: "kachel", i: +k.dataset.k }); return; }
+  const sb = e.target.closest("[data-seite]");
+  if (sb) { brumm(); fern({ typ: "seite", id: sb.dataset.seite }); return; }
+  const bl = e.target.closest("[data-blatt]");
+  if (bl) { fern({ typ: "blatt", i: +bl.dataset.blatt }); return; }
   const t = e.target.closest("[data-t]");
-  if (t) { post("/zyn/taste", { name: t.dataset.t, art: t.dataset.art || "kurz" }); if (navigator.vibrate) navigator.vibrate(15); return; }
-  if (e.target.closest("#alt")) { alt = !alt; e.target.closest("#alt").classList.toggle("an", alt); post("/zyn/taste", { name: "ALT", art: alt ? "druck" : "los" }); return; }
+  if (t) { post("/zyn/taste", { name: t.dataset.t, art: t.dataset.art || "kurz" }).then(() => setTimeout(status, 350)); brumm(); return; }
+  if (e.target.closest("#alt")) { alt = !alt; e.target.closest("#alt").classList.toggle("an", alt); post("/zyn/taste", { name: "ALT", art: alt ? "druck" : "los" }); tastenZeigen(); return; }
   const d = e.target.closest("[data-d]");
-  if (d) { post("/zyn/dreh", { nr: +d.dataset.d, d: +d.dataset.w }); return; }
+  if (d) { post("/zyn/dreh", { nr: +d.dataset.d, d: +d.dataset.w }).then(() => setTimeout(status, 250)); return; }
   const s = e.target.closest("[data-s]");
   if (s) {
     const frage = { aus: "Wirklich ausschalten?", neustart: "Wirklich neu starten?", zynthian: "Imres beenden und nur den Zynthian zeigen?" }[s.dataset.s];
@@ -100,17 +179,96 @@ document.addEventListener("click", e => {
     post("/zyn/system", { aktion: s.dataset.s }).then(() => status());
   }
 });
+
+/* Halte-Effekte: wirken, solange der Finger drauf ist */
+document.querySelectorAll("[data-h]").forEach(b => {
+  const an = e => { e.preventDefault(); if (b.setPointerCapture) try { b.setPointerCapture(e.pointerId); } catch (_) {} b.classList.add("gedrueckt"); brumm(); post("/zyn/fern", { typ: "aktion", id: b.dataset.h, art: "druck" }); };
+  const los = () => { if (!b.classList.contains("gedrueckt")) return; b.classList.remove("gedrueckt"); post("/zyn/fern", { typ: "aktion", id: b.dataset.h, art: "los" }); };
+  b.addEventListener("pointerdown", an); b.addEventListener("pointerup", los); b.addEventListener("pointercancel", los); b.addEventListener("pointerleave", los);
+  b.addEventListener("contextmenu", e => e.preventDefault());
+});
+
+/* Drehregler */
+$("dreh").innerHTML = [0, 1, 2, 3].map(i => '<div><b id="rn' + i + '">' + (i + 1) + '</b><i id="rv' + i + '">&nbsp;</i><button data-d="' + i + '" data-w="1">＋</button><button data-d="' + i + '" data-w="-1">－</button></div>').join("");
+
+/* Mischpult: Schieberegler */
+let mixSig = "", zieht = {};
+const sendeWert = (() => { const t = {}; return (k, v) => { clearTimeout(t[k]); t[k] = setTimeout(() => post("/zyn/fern", { typ: "wert", k, v }), 60); }; })();
+function mixZeigen(liste) {
+  const el = $("mix");
+  if (!liste || !liste.length) return;
+  const sig = liste.map(m => m.k + m.lo + m.hi + m.schritt).join("|");
+  if (sig !== mixSig) {
+    mixSig = sig;
+    el.innerHTML = liste.map(m => '<label class="regel"><span>' + esc(m.name) + '</span><input type="range" data-m="' + m.k + '" min="' + m.lo + '" max="' + m.hi + '" step="' + m.schritt + '"><output id="mo-' + m.k + '"></output></label>').join("");
+    el.querySelectorAll("input[data-m]").forEach(r => {
+      const k = r.dataset.m;
+      r.addEventListener("input", () => { zieht[k] = Date.now(); sendeWert(k, +r.value); });
+      r.addEventListener("change", () => { zieht[k] = Date.now(); });
+    });
+  }
+  liste.forEach(m => {
+    const r = el.querySelector('input[data-m="' + m.k + '"]'); if (!r) return;
+    const frisch = zieht[m.k] && Date.now() - zieht[m.k] < 2500;
+    if (!frisch) r.value = m.v;
+    const o = $("mo-" + m.k); if (o) o.textContent = frisch ? "…" : m.text;
+  });
+}
+
+/* Tasten-Beschriftung so, wie sie am Gerät gerade belegt ist */
+let tastenInfo = null;
+function tastenZeigen() {
+  if (!tastenInfo) return;
+  document.querySelectorAll("#tasten [data-t]").forEach(b => {
+    const k = b.dataset.t, x = tastenInfo[(alt ? "ALT+" : "") + k], sm = b.querySelector("small");
+    if (sm && x !== undefined) sm.textContent = x ? x.name.replace(/^\S+\s/, "") : "–";
+  });
+}
+
+function seitenZeigen(f) {
+  if (f.seiten) $("seiten").innerHTML = f.seiten.map(s => '<button data-seite="' + esc(s.id) + '"' + (s.id === f.seite ? ' class="an"' : "") + ">" + esc(s.sym) + " " + esc(s.name) + "</button>").join("");
+  if (f.kacheln) {
+    const k = f.kacheln.slice(0, 8); while (k.length < 8) k.push(null);
+    $("kacheln").innerHTML = k.map((it, i) => it ? '<button data-k="' + i + '"' + (it.an ? ' class="an"' : "") + "><b>" + esc(it.sym) + "</b><span>" + esc(it.name) + "</span>" + (it.vor ? "<em>am Taktende</em>" : "") + "</button>" : '<button class="leer"></button>').join("");
+  }
+  const b = f.blatt;
+  $("blatt").hidden = !(b && b.n > 1);
+  if (b && b.n > 1) $("blatt-t").textContent = (b.i + 1) + " / " + b.n;
+}
+
+function lastZeigen(l) {
+  const el = $("last");
+  if (!l) { el.textContent = ""; return; }
+  const p = []; if (l.cpu != null) p.push("CPU " + l.cpu + "%"); if (l.temp != null) p.push(l.temp + "°");
+  el.textContent = p.join(" · ") || "–";
+  const bad = (l.kern != null && l.kern >= 95) || (l.temp != null && l.temp >= 75), warn = (l.cpu != null && l.cpu >= 60) || (l.temp != null && l.temp >= 65);
+  el.className = bad ? "bad" : warn ? "warn" : "";
+  el.title = "Auslastung · stärkster Kern " + (l.kern != null ? l.kern + " %" : "?");
+}
+
 async function status() {
   try {
     const r = await fetch("/zyn/status", { cache: "no-store" }); const j = await r.json();
-    const m = j.modus === "imres" ? "🎻 Imres-Bühne läuft" : j.modus === "hintergrund" ? "🎛+🎻 Zynthian, Imres im Hintergrund" : j.modus === "zynthian" ? "🎛 Zynthian-Oberfläche läuft" : "?";
-    document.getElementById("status").textContent = m + (j.modus !== "zynthian" && j.text ? " · " + j.text : "") + (j.aufnahme ? " · ⏺ REC" : "");
-    aufnahme = !!j.aufnahme; const rk = document.getElementById("rec"); rk.classList.toggle("an", aufnahme); rk.firstChild.textContent = aufnahme ? "⏹ Aufnahme beenden" : "⏺ Aufnahme starten";
+    const m = j.modus === "imres" ? "🎻 Imres-Bühne" : j.modus === "hintergrund" ? "🎛+🎻 zusammen" : j.modus === "zynthian" ? "🎛 nur Zynthian" : "?";
+    $("status").textContent = m + (j.modus !== "zynthian" && j.text ? " · " + j.text : "") + (j.aufnahme ? " · ⏺ REC" : "");
+    aufnahme = !!j.aufnahme; const rk = $("rec"); rk.classList.toggle("an", aufnahme); rk.firstChild.textContent = aufnahme ? "⏹ Aufnahme beenden" : "⏺ Aufnahme starten";
     if (j.optionen && !optOffen) optZeichnen(j.optionen);
-  } catch (_) { document.getElementById("status").textContent = "keine Verbindung"; }
+    lastZeigen(j.last);
+    const f = (j.vor != null && j.vor < 10) ? (j.fern || {}) : {};
+    seitenZeigen(f);
+    mixZeigen(f.mix);
+    $("tempo").textContent = f.tempo ? "♩ " + f.tempo : "";
+    $("a-play").classList.toggle("an", !!f.laeuft);
+    $("a-hg").classList.toggle("an", !!f.hg);
+    const au = f.auto; $("a-auto").classList.toggle("an", !!(au && au.id !== "aus"));
+    if (au) $("a-auto").querySelector("small").textContent = "Autopilot: " + au.name.split(" (")[0];
+    const set = f.set || { n: 0 }; document.querySelectorAll(".set").forEach(b => { b.disabled = !set.n; });
+    (f.regler || []).forEach((rg, i) => { if ($("rn" + i)) { $("rn" + i).textContent = rg.name; $("rv" + i).textContent = rg.text; } });
+    if (f.tasten) { tastenInfo = f.tasten; tastenZeigen(); }
+  } catch (_) { $("status").textContent = "keine Verbindung"; }
 }
 let aufnahme = false, optOffen = false;
-document.getElementById("rec").addEventListener("click", () => post("/zyn/aufnahme", { an: !aufnahme }).then(() => setTimeout(status, 600)));
+$("rec").addEventListener("click", () => post("/zyn/aufnahme", { an: !aufnahme }).then(() => setTimeout(status, 600)));
 const NOTEN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "H"];
 const kanaele = (mitAlle) => (mitAlle ? [[0, "alle"]] : []).concat(Array.from({ length: 16 }, (_, i) => [i + 1, "Kanal " + (i + 1)]));
 const OPTS = [
@@ -132,21 +290,21 @@ const OPTS = [
   ["umschaltCC", "🔀 Umschalten per CC 119", null, "0–42 Zynthian · 43–85 zusammen · 86–127 Imres"]
 ];
 function optZeichnen(o) {
-  const el = document.getElementById("opt");
+  const el = $("opt");
   el.innerHTML = OPTS.map(([k, t, l, u, ein]) => '<label class="' + (ein ? "ein" : "") + '"><span>' + t + (u ? "<small>" + u + "</small>" : "") + "</span>" +
     (l ? '<select data-o="' + k + '">' + l.map(([v, n]) => '<option value="' + v + '"' + (String(o[k]) === String(v) ? " selected" : "") + ">" + n + "</option>").join("") + "</select>"
        : '<input type="checkbox" data-o="' + k + '"' + (o[k] ? " checked" : "") + ">") + "</label>").join("") +
     '<button id="erkennen">👂 Tonart erkennen<small>am Gerät 8 s die Handpan anspielen</small></button>';
 }
-document.getElementById("opt").addEventListener("focusin", () => { optOffen = true; });
-document.getElementById("opt").addEventListener("focusout", () => { optOffen = false; });
-document.getElementById("opt").addEventListener("change", e => {
+$("opt").addEventListener("focusin", () => { optOffen = true; });
+$("opt").addEventListener("focusout", () => { optOffen = false; });
+$("opt").addEventListener("change", e => {
   const k = e.target.dataset.o; if (!k) return;
   const v = e.target.type === "checkbox" ? e.target.checked : /^-?\d+$/.test(e.target.value) ? +e.target.value : e.target.value;
   const neu = { [k]: v }; if (k === "grund" || k === "skala") neu.tonartAn = true;
   post("/zyn/optionen", neu).then(() => { optOffen = false; status(); });
 });
 document.addEventListener("click", e => { if (e.target.closest("#erkennen")) post("/zyn/taste", { name: "ERKENNEN", art: "kurz" }); });
-status(); setInterval(status, 3000);
+status(); setInterval(() => { if (!document.hidden) status(); }, 1500);
 </script>
 </body></html>

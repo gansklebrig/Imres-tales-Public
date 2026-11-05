@@ -272,7 +272,7 @@ leds = {"nr": 0, "farben": {}}
 leds_lock = threading.Condition()
 
 # ---------- Zustand für die Fernbedienung ----------
-zustand = {"seite": None, "modus": None, "text": "", "zeit": 0}
+zustand = {"seite": None, "modus": None, "text": "", "zeit": 0, "fern": None}
 
 
 def modus_jetzt():
@@ -348,7 +348,8 @@ class Handler(SimpleHTTPRequestHandler):
         if p == "/zyn/status":
             return self.json_antwort({"modus": modus_jetzt(), "seite": zustand["seite"], "seitenModus": zustand["modus"], "aufnahme": aufnahme_laeuft(),
                                       "master": bool(takt and takt.seq), "optionen": dict(OPT),
-                                      "text": zustand["text"], "vor": round(time.time() - zustand["zeit"], 1) if zustand["zeit"] else None})
+                                      "text": zustand["text"], "vor": round(time.time() - zustand["zeit"], 1) if zustand["zeit"] else None,
+                                      "fern": zustand.get("fern"), "last": last_messen()})
         if p == "/zyn/optionen":
             return self.json_antwort(dict(OPT))
         if p == "/zyn/last":
@@ -458,6 +459,22 @@ class Handler(SimpleHTTPRequestHandler):
         if p == "/zyn/zustand":
             # die Seite meldet, was gerade läuft – für die Fernbedienung
             zustand.update({"seite": str(d.get("seite", ""))[:20], "modus": str(d.get("modus", ""))[:20], "text": str(d.get("text", ""))[:200], "zeit": time.time()})
+            if isinstance(d.get("fern"), dict):
+                zustand["fern"] = d["fern"]
+            return self.json_antwort({"ok": True})
+        if p == "/zyn/fern":
+            # Fernbedienung: Regler setzen, Aktionen, Kacheln, Seiten
+            typ = str(d.get("typ", ""))
+            if typ == "wert":
+                senden({"typ": "wert", "k": str(d.get("k", ""))[:30], "v": float(d.get("v", 0)), "fern": True})
+            elif typ == "aktion":
+                senden({"typ": "aktion", "id": str(d.get("id", ""))[:30], "art": str(d.get("art", "kurz"))[:10], "fern": True})
+            elif typ in ("kachel", "blatt"):
+                senden({"typ": typ, "i": int(d.get("i", 0)), "fern": True})
+            elif typ == "seite":
+                senden({"typ": "seite", "id": str(d.get("id", ""))[:30], "fern": True})
+            else:
+                return self.json_antwort({"fehler": "unbekannt"})
             return self.json_antwort({"ok": True})
         if p == "/zyn/optionen":
             neu = opt_setzen(d if isinstance(d, dict) else {})

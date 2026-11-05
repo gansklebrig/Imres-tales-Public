@@ -767,13 +767,52 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     fetch("/zyn/leds", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ farben: f }) }).catch(() => {});
   }
   setInterval(() => { try { ledsMelden(); } catch (_) {} }, 700);
-  /* was gerade läuft – für die Fernbedienung am Handy */
-  setInterval(() => {
+  /* was gerade läuft – für die Fernbedienung am Handy (mit allen Reglern, Kacheln und Tasten) */
+  function fernBericht() {
+    const f = {};
+    const nimm = (k, fn) => { try { f[k] = fn(); } catch (_) {} };
+    const z = pz() || {};
+    nimm("tempo", () => Math.round(z.tempoJetzt || z.tempo || 0) || null);
+    nimm("laeuft", () => SEITE === "welten" ? !!$(".welt.an") : !!z.laeuft);
+    nimm("hg", () => !!z.kulLaeuft);
+    nimm("auto", () => ({ id: autoModus, name: AUTO_NAME[autoModus] }));
+    nimm("set", () => ({ n: SET.length, i: setIndex }));
+    nimm("mix", () => [...new Set(MIX_LISTE.concat(["boost"]))].filter(k => ZP_PARAM[k] && ZP_PARAM[k].schritt).map(k => { const d = ZP_PARAM[k], v = d.lies();
+      return { k, name: d.name, lo: d.lo, hi: d.hi, schritt: d.schritt, v, text: d.text ? d.text(v) : d.wort ? d.wort(v) : Math.round(proz(v, d.lo, d.hi) * 100) + " %" }; }));
+    if (PULT) {
+      nimm("seiten", () => ZP_SEITEN.map(x => ({ id: x.id, sym: x.sym, name: x.name })));
+      nimm("seite", () => zpSeite);
+      nimm("blatt", () => ({ i: zpBlatt[zpSeite] || 0, n: zpListe.length }));
+      nimm("kacheln", () => { const d = zpDef(zpSeite); return zpBlattJetzt().slice(0, 8).map(it => it ? { name: String(it.name || ""), sym: String(it.sym || d.sym || ""), an: !!it.an, vor: !!it.vor } : null); });
+      nimm("regler", () => zpRegler().map(r => { const w = zpWert(r); return { name: r.name, text: w.text, anteil: Math.round(w.anteil * 100) / 100 }; }));
+      nimm("tasten", () => { const o = {}; ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL"].forEach(k => { [k, "ALT+" + k].forEach(kk => { const id = ZB.tasten[kk]; o[kk] = id && id !== "nichts" ? { id, name: (ZP_AKT[id] || ZP_AKT.nichts)[0] } : null; }); }); return o; });
+    }
+    return f;
+  }
+  function fernMelden() {
     const z = pz(); let text = "";
     if (SEITE === "welten") { const a = $(".welt.an"); text = a ? "🌿 " + kurzName(a) : W("still", "silent"); }
     else if (z) text = (z.laeuft ? "🎵 " + stimmName(z.stimmung) : "🎵 –") + " · " + (z.kulLaeuft ? "🌲 " + kulName(z.kulisse) : "🌲 –");
-    fetch("/zyn/zustand", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seite: SEITE, modus, text }) }).catch(() => {});
-  }, 3000);
+    let fern = null; try { fern = fernBericht(); } catch (_) {}
+    fetch("/zyn/zustand", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seite: SEITE, modus, text, fern }) }).catch(() => {});
+  }
+  setInterval(fernMelden, 1500);
+  /* Befehle der Fernbedienung */
+  function fernBefehl(e) {
+    if (e.typ === "wert") { const d = ZP_PARAM[e.k]; if (!d || !d.schritt) return; d.setz(rasten(+e.v, d)); }
+    else if (e.typ === "aktion") {
+      const id = e.id;
+      if (HALTEN[id]) { if (SEITE === "buehne") zpHalten(id, e.art !== "los"); }
+      else if (id === "stimmung_vor" || id === "stimmung_zurueck") weiter("stimmung", id === "stimmung_vor" ? 1 : -1);
+      else if (id === "ort_vor" || id === "ort_zurueck") weiter("kulisse", id === "ort_vor" ? 1 : -1);
+      else zpAktion(id);
+    }
+    else if (e.typ === "kachel") { if (PULT) zpAusloesen(+e.i); }
+    else if (e.typ === "blatt") { if (PULT) zpBlaettern(+e.i); }
+    else if (e.typ === "seite") { if (PULT) zpSeiteSetzen(e.id); }
+    try { zpZeichnen(true); ledsMelden(); } catch (_) {}
+    setTimeout(fernMelden, 250);
+  }
 
   /* =====================================================================
      Imres-Pult: eigene Oberfläche für 800 × 480 – nichts scrollt, alles liegt auf Tasten und Reglern.
@@ -2422,6 +2461,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
         else if (e.typ === "neu-laden") location.reload();
         else if (e.typ === "optionen") optSetzen(e.optionen || {}, true);
         else if (e.typ === "aufnahme") { aufnahmeAn = !!e.an; leisteZeichnen(); }
+        else if (e.typ === "wert" || e.typ === "aktion" || e.typ === "kachel" || e.typ === "blatt" || e.typ === "seite") fernBefehl(e);
       } catch (err) { console.warn("zyn", err); }
       if (e.typ !== "dreh") ledsMelden();
     };
