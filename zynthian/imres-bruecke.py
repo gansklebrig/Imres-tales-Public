@@ -646,12 +646,12 @@ def ausgaenge_verbinden():
     ziele = [p for p in alle if p.startswith("system:playback_")]
     if not quellen:
         return
-    _, verb = _lauf(["jack_lsp", "-c"] + quellen, 5)
+    _, verb = _lauf(["jack_lsp", "-c"], 5)   # jack_lsp nimmt nur einen Filter – darum alle Verbindungen lesen
     besteht, q = set(), None
     for z in verb.splitlines():
-        if not z.startswith(" "):
+        if not z[:1].isspace():
             q = z.strip()
-        else:
+        elif q in quellen:
             besteht.add((q, z.strip()))
     for qu in quellen:
         kanal = int(qu[-1])  # 0 = links, 1 = rechts

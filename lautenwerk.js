@@ -4830,6 +4830,15 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       leichtFest = spar || mobil;
       /* Handy: etwas größerer Puffer (Bluetooth-Kopfhörer kommen mit, kein Knistern) und 32 kHz – Höhen bis 16 kHz, gut ein Drittel weniger Rechenlast */
       try { ctx = spar ? new AC({ latencyHint: .25, sampleRate: 24000 }) : mobil ? new AC({ latencyHint: .2, sampleRate: 32000 }) : mittel ? new AC({ latencyHint: "playback", sampleRate: 32000 }) : new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC({ latencyHint: "playback" }); } catch (__) { ctx = new AC(); } } /* größerer Puffer = keine Aussetzer auf dem Handy */
+      /* Bei 32/24 kHz liegen manche Filter-Werte (18–20 kHz) über der Nyquist-Grenze: der Browser kappt sie ohnehin,
+         schreibt aber jedes Mal eine Warnung – hier gleich passend begrenzen (klingt identisch, spart die Meldungen) */
+      if (ctx.sampleRate < 44100 && ctx.createBiquadFilter) {
+        const nyq = ctx.sampleRate / 2 - 1, orig = ctx.createBiquadFilter.bind(ctx), kap = v => (typeof v === "number" && v > nyq ? nyq : v);
+        ctx.createBiquadFilter = () => { const f = orig(), fr = f.frequency;
+          ["setValueAtTime", "linearRampToValueAtTime", "exponentialRampToValueAtTime", "setTargetAtTime"].forEach(m => { const o = fr[m].bind(fr); fr[m] = (v, ...r) => o(kap(v), ...r); });
+          const d = Object.getOwnPropertyDescriptor(AudioParam.prototype, "value"); Object.defineProperty(fr, "value", { get() { return d.get.call(fr); }, set(v) { d.set.call(fr, kap(v)); } });
+          return f; };
+      }
       /* Signalkette: Spuren → Master → sanfter Kompressor → Ausgangspegel → Limiter.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor(); kompRef = komp;
