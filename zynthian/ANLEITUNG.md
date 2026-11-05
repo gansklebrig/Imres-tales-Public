@@ -32,6 +32,22 @@ Du brauchst: den Zynthian im Netzwerk (LAN-Kabel oder WLAN) und einen Rechner im
 
 ---
 
+## 1b. Das Pult auf dem Gerät (neu)
+
+Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles liegt auf Tasten und Reglern:
+
+- **Oben:** die Seiten 🎵 Stimmung · 🌲 Ort · ⚡ Momente · 🌿 Klangwelt (wechseln mit **CTRL**, zurück mit **ZS3**, oder antippen) und was gerade läuft.
+- **Mitte:** 8 Kacheln – **F1–F4** obere Reihe, **ALT + F1–F4** untere Reihe. Orange = läuft, gestrichelt/blinkend = kommt am Taktende. **◀ ▶** blättert weiter, **ALT + ◀ ▶** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen, Geräusche).
+- **Rechts:** was die vier Drehregler gerade tun – direkt neben dem echten Knopf. Drücken: siehe kleine Schrift. **MIXER** schaltet auf Reglerbank B (Tempo, Hall, Effekte, Echos Hall).
+- **Unten:** PLAY Musik · STOP alles aus · PAD ⚡ Etwas passiert · REC 🤫 Stille · TEMPO 🎲 Neu besetzen.
+- **MENU:** Spielabend, Optionen, Tastenbelegung, System (dort auch **⬇ Imres aktualisieren** – ohne Terminal).
+- **BACK 2 Sekunden halten:** zurück zur normalen Zynthian-Oberfläche.
+- **Vom Zynthian zu Imres:** in der Zynthian-Oberfläche oben rechts den kleinen **♫**-Knopf 1 Sekunde halten. Andere Ecke oder aus: in `einstellungen.sh` `IMRES_KNOPF=lo` (links oben), `ru`, `lu` oder `aus`.
+
+Die alte Ansicht (die Webseite) gibt es weiter: MENU → „Alte Ansicht“, zurück mit MENU → „Neues Pult“.
+
+> Die Tabellen weiter unten beschreiben die alte Ansicht.
+
 ## 2. Die vier Modi
 
 **MENU** kurz drücken → auswählen mit **F1–F4**:

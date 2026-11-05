@@ -45,6 +45,8 @@ cp "$ORT/seite/zynthian/dienste/zynthian-conflicts.conf" /etc/systemd/system/zyn
 systemctl daemon-reload
 systemctl enable --now imres-bruecke.service
 systemctl enable imres-start.service
+systemctl enable imres-knopf.service
+systemctl is-active -q zynthian && systemctl restart imres-knopf.service || true
 [ -f "$ORT/start-modus" ] || echo zynthian > "$ORT/start-modus"
 
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')

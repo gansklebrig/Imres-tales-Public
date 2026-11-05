@@ -1,0 +1,14 @@
+[Unit]
+Description=Imres-Knopf in der Zynthian-Oberfläche (1 s halten → Imres-Bühne)
+After=zynthian.service imres-bruecke.service
+PartOf=zynthian.service
+
+[Service]
+Environment=DISPLAY=:0 HOME=/root
+ExecStartPre=/bin/sleep 6
+ExecStart=/usr/bin/python3 /zynthian/zynthian-my-data/imres/seite/zynthian/imres-knopf.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=zynthian.service

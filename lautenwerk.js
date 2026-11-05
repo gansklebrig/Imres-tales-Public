@@ -13132,8 +13132,20 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
       return { laeuft, stimmung: stilKey(), kulisse: S.kulisse, kulLaeuft: kulisseLaeuft(), master: S.master, kulisseVol: S.kulisseVol, intensitaet: S.intensitaet,
         tempo: S.tempo, tempoJetzt: laeuft ? (tempoJetzt || S.tempo) : S.tempo, hall: S.hall, fxVol: S.fxVol, echoHall: S.echoHall, spannung: leben.spannung, neuBesetzen: !!neuBesetzen,
         transpose: S.transpose, modus: S.modus, stimmungen: STIMMUNGEN.filter(k => STIL[k]), kulissen: KUL_ZEIGEN.slice(),
-        setStimmungen: abendSet && ABEND_SETS[abendSet] ? ABEND_SETS[abendSet].st.slice() : null };
+        setStimmungen: abendSet && ABEND_SETS[abendSet] ? ABEND_SETS[abendSet].st.slice() : null,
+        naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "" };
     },
+    /* Zynthian-Pult: feste Listen (ohne Umsortieren nach Nutzung) und Namen */
+    listen() {
+      const T = t(), set = abendSet && ABEND_SETS[abendSet];
+      const st = [...new Set((set ? set.st : KERN_ST).concat(STIMMUNGEN))].filter(k => STIL[k]);
+      const kul = [...new Set(KERN_KUL.concat(KUL_ZEIGEN))].filter(k => k !== "keine" && T.kulissen[k]);
+      const fx = [...new Set((set ? set.fx : KERN_FX).concat(EFFEKTE, KAMPF_FX))].filter(f => T.sfx[f]);
+      return { st, kul, fx, namen: { st: T.vorlagen || {}, kul: T.kulissen || {}, fx: T.sfx || {} } };
+    },
+    momente() { try { const en = sprache() === "en"; return momenteVon(S.kulisse).map((x, i) => ({ i, sym: x[0], name: en ? x[2] : x[1] })); } catch (_) { return []; } },
+    abendSets() { const E = t().einf || {}, N = E.abendNamen || {}; return Object.keys(ABEND_SETS).map(k => ({ k, sym: ABEND_SETS[k].sym, name: N[k] || k })); },
+    abend(k) { abendSet = k && ABEND_SETS[k] ? k : ""; try { localStorage.setItem("imres-lw-abendset", abendSet); } catch (_) {} try { if (einfach) einfachNeu(); } catch (_) {} },
     tempo(b) { b = Math.max(50, Math.min(180, Math.round(+b) || S.tempo)); if (zynTempo) zynTempo = b; if (wechsel) wechsel.tempo = b; if (b === S.tempo) return; S.tempo = b; root.querySelectorAll(".lw-bpm").forEach(x => { x.textContent = b; }); root.querySelectorAll('[data-feld="tempo"]').forEach(r => { r.value = b; }); merken(); },
     /* MIDI-Slave: Tempo fest an die Clock binden (0 = frei) */
     taktFest(b) { zynTempo = b ? Math.max(50, Math.min(180, Math.round(b))) : 0; if (zynTempo) this.tempo(zynTempo); },

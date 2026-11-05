@@ -275,9 +275,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function modusMenue() {
     const knopf = (k, i) => '<button type="button" data-zm="' + k + '" class="' + (k === modus ? "an" : "") + '" style="--f:' + MODI[k].farbe + '"><span><span class="kbd">F' + (i + 1) + "</span>" + MODI[k].sym + " " + MODI[k].name + "</span><small>" + MODI[k].sub + "</small></button>";
     const a = {}; MODUS_REIHE.forEach(k => { a[k] = () => modusSetzen(k); });
-    a.system = systemMenue; a.hilfe = hilfe; a.optionen = () => optionenMenue();
+    a.system = systemMenue; a.hilfe = hilfe; a.optionen = () => optionenMenue(); a.pult = () => { schreib("imres-zyn-pult", "1"); location.reload(); };
     menue("<h3>" + W("Was soll klingen?", "What should play?") + '</h3><div class="reihe">' + MODUS_REIHE.map(knopf).join("") + "</div>" +
-      '<div class="reihe drei"><button type="button" data-zm="optionen">🎚 ' + W("Optionen", "Options") + "<small>" + W("MIDI-Takt, Tonart, Mikrofon …", "MIDI clock, key, mic …") + '</small></button><button type="button" data-zm="hilfe">❔ ' + W("Tastenbelegung", "Button map") + '</button><button type="button" data-zm="system">⚙ ' + W("System", "System") + "<small>" + W("Zynthian, Neustart, Aus", "Zynthian, restart, off") + '</small></button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
+      '<div class="reihe drei"><button type="button" data-zm="optionen">🎚 ' + W("Optionen", "Options") + "<small>" + W("MIDI-Takt, Tonart, Mikrofon …", "MIDI clock, key, mic …") + '</small></button><button type="button" data-zm="hilfe">❔ ' + W("Tastenbelegung", "Button map") + '</button><button type="button" data-zm="system">⚙ ' + W("System", "System") + "<small>" + W("Zynthian, Neustart, Aus", "Zynthian, restart, off") + '</small></button><button type="button" data-zm="pult">🧭 ' + W("Neues Pult", "New console") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen direkt · Pfeile + SEL · BACK schließt · MENU lang: System", "F1–F4 pick directly · arrows + SEL · BACK closes · hold MENU: system") + "</p>", Object.assign(a, { zu: menueZu }));
     menueArt = "modus";
   }
@@ -286,6 +286,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const post = aktion => fetch("/zyn/system", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion }) }).catch(() => {});
     menue("<h3>⚙ " + W("System", "System") + '</h3><div class="reihe">' +
       '<button type="button" data-zm="zyn">🎛 ' + W("Zurück zum Zynthian", "Back to Zynthian") + "<small>" + W("Die normale Zynthian-Oberfläche startet", "Starts the normal Zynthian interface") + "</small></button>" +
+      '<button type="button" data-zm="upd">⬇ ' + W("Imres aktualisieren", "Update Imres") + "<small>" + W("holt die neueste Version (Internet nötig) und startet neu", "fetches the latest version (needs internet) and restarts") + "</small></button>" +
       '<button type="button" data-zm="hinter">🎛+🎻 ' + W("Zusammen mit Zynthian", "Together with Zynthian") + "<small>" + W("Zynthian-Oberfläche, Imres spielt im Hintergrund weiter (Handy/MIDI)", "Zynthian UI, Imres keeps playing in the background") + "</small></button>" +
       '<button type="button" data-zm="auf">' + (aufnahmeAn ? "⏹ " + W("Aufnahme beenden", "Stop recording") : "⏺ " + W("Aufnahme starten", "Start recording")) + "<small>" + W("alles, was rauskommt – im Zynthian-Ordner „capture“", "everything you hear – Zynthian capture folder") + "</small></button>" +
       '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Imres-Bühne", "Imres stage") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
@@ -295,6 +296,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="aus">⏻ ' + W("Ausschalten", "Shut down") + "<small>" + W("Danach den Strom trennen", "Then unplug power") + "</small></button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", {
       zyn: () => { zeige("🎛 " + W("Zynthian startet …", "Zynthian is starting …")); post("zynthian"); },
+      upd: () => { menueZu(); zeige("⬇ " + W("Imres wird aktualisiert …", "Updating Imres …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); },
       hinter: () => { zeige("🎛 " + W("Zynthian startet, Imres läuft weiter …", "Zynthian starts, Imres keeps playing …")); post("hintergrund"); },
       auf: () => { menueZu(); aufnahme(); },
       start: () => { post("start-imres"); zeige("🔌 " + W("Startet künftig mit der Imres-Bühne", "Will start with the Imres stage")); menueZu(); },
@@ -514,6 +516,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (m) {
       if (name === "BACK" || (name === "MENU" && !lang)) { menueZu(); return; }
       if (/^F[1-4]$/.test(name) && menueArt === "modus") { modusSetzen(MODUS_REIHE[+name[1] - 1]); return; }
+      if (/^F[1-4]$/.test(name) && menueArt === "zp") { const b = m.querySelector('[data-zm="' + ZP_MENUE_F[+name[1] - 1] + '"]'); if (b) klick(b); return; }
       if (["UP", "DOWN", "LEFT", "RIGHT"].includes(name)) { bewegen(name); return; }
       if (name === "SEL") { auswaehlen(); return; }
       if (name !== "MENU" && name !== "MIXER") return;
@@ -522,6 +525,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (alt && name === "TEMPO") { const l = ["aus", "slave", "master"], n = l[(l.indexOf(OPT.takt) + 1) % 3]; optSetzen({ takt: n }); zeige("⏱ MIDI-Takt: " + TAKT_NAME[n]); return; }
     if (alt && name === "MENU") { optionenMenue(); return; }
     if (alt && name === "PAD" && SEITE === "buehne") { pultKlick("data-aktion", "sprechen"); zeige("🎙 " + W("Sprich jetzt …", "Speak now …")); return; }
+    if (PULT && zpTaste(name, lang)) { ledsMelden(); return; }
     switch (name) {
       case "MENU": lang ? systemMenue() : modusMenue(); return;
       case "MIXER": bankWechsel(); return;
@@ -573,6 +577,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       zeige(kurzName(el.closest("label") || el) + " · " + el.value, proz(+el.value, lo, hi)); return;
     }
     if ($(".zyn-menue")) { bewegen(d > 0 ? "DOWN" : "UP"); return; }
+    if (PULT) { zpDreh(nr, d); return; }
     const r = REGLER()[nr]; if (r) stellRegler(r, d);
   }
 
@@ -632,6 +637,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       });
       f.PLAY = z && (modus === "klang" ? z.kulLaeuft : z.laeuft) ? "#30d050" : "#0c3010"; f.STOP = "#501010"; f.PAD = "#c06010"; f.REC = "#303060"; f.TEMPO = z && z.neuBesetzen ? hell : gold; f.ZS3 = gold; f.CTRL = "#107070";
     }
+    if (PULT && !$(".zyn-menue")) zpLeds(f);
     if (aufnahmeAn) f.REC = "#ff2020";
     if (HINTER) return;
     const s = JSON.stringify(f); if (s === ledMerk) return; ledMerk = s;
@@ -645,6 +651,284 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     else if (z) text = (z.laeuft ? "🎵 " + stimmName(z.stimmung) : "🎵 –") + " · " + (z.kulLaeuft ? "🌲 " + kulName(z.kulisse) : "🌲 –");
     fetch("/zyn/zustand", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seite: SEITE, modus, text }) }).catch(() => {});
   }, 3000);
+
+  /* =====================================================================
+     Imres-Pult: eigene Oberfläche für 800 × 480 – nichts scrollt, alles liegt auf Tasten und Reglern.
+     Seiten: 🎵 Stimmung · 🌲 Ort · ⚡ Momente · 🌿 Klangwelt. Je Seite 8 Kacheln (F1–F4, ALT + F1–F4),
+     rechts die vier Drehregler mit ihrer aktuellen Belegung. Alte Ansicht: Menü → „Alte Ansicht“.
+     ===================================================================== */
+  const PULT = !HINTER && lies("imres-zyn-pult", "1") !== "0";
+  const ZP_SEITEN = [
+    { id: "stimmung", sym: "🎵", name: W("Stimmung", "Mood"), seite: "buehne", farbe: "#e0a046", led: "#ffcf50" },
+    { id: "ort", sym: "🌲", name: W("Ort", "Place"), seite: "buehne", farbe: "#3fb0a0", led: "#40e0c0" },
+    { id: "momente", sym: "⚡", name: W("Momente", "Moments"), seite: "buehne", farbe: "#e07040", led: "#ff8a30" },
+    { id: "welt", sym: "🌿", name: W("Klangwelt", "Soundscape"), seite: "welten", farbe: "#5fc070", led: "#50ff70" }
+  ];
+  const zpDef = id => ZP_SEITEN.find(x => x.id === id) || ZP_SEITEN[0];
+  let zpSeite = lies("imres-zp-seite", SEITE === "welten" ? "welt" : "stimmung");
+  if (zpDef(zpSeite).seite !== SEITE) zpSeite = SEITE === "welten" ? "welt" : "stimmung";
+  const zpBlatt = {}; let zpCursor = -1, zpListe = [], zpGruppen = [], zpMerk = "", zpWeltWarn = 0;
+  const zpEl = PULT ? document.createElement("div") : null;
+  const EMO = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:[️‍⃣]|\p{Extended_Pictographic}|\p{Emoji_Modifier})*)\s*(.*)$/u;
+  const teil = (txt, sym) => { txt = String(txt || "").trim(); const m = EMO.exec(txt); return m ? [m[1], m[2] || txt] : [sym, txt]; };
+  const esc2 = x => String(x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  /* ----- was auf einer Seite liegt: Gruppen, jede beginnt auf einem neuen Blatt (8 Kacheln) ----- */
+  function zpInhalt() {
+    const g = [], P = window.ImresPult, z = pz() || {};
+    if (zpSeite === "welt") {
+      const wl = $$("[data-welt]").map(el => { const s = el.querySelector(".sym"), n = el.querySelector(".nm");
+        const [sy, nm] = s && n ? [s.textContent.trim(), n.textContent.trim()] : teil((el.innerText || "").split("\n")[0], "🌿");
+        return { sym: sy, name: nm, an: el.classList.contains("an"), los: () => { klick(el); zeige("🌿 " + nm); } }; });
+      const chips = (sel, sym, titel) => ({ titel, l: $$(sel).map(el => { const [sy, nm] = teil((el.innerText || el.title || "").split("⏳")[0].replace(/\s+/g, " "), sym);
+        return { sym: sy, name: nm, an: el.getAttribute("aria-pressed") === "true" || el.classList.contains("an"), los: () => { klick(el); zeige(sy + " " + nm); } }; }) });
+      g.push({ titel: W("Klangwelten", "Soundscapes"), l: wl });
+      g.push(chips("[data-szene]", "⏳", W("Szenen", "Scenes")));
+      g.push(chips("[data-aus]", "💥", W("Einschläge", "Impacts")));
+      g.push(chips("[data-ger]", "🎭", W("Geräusche", "Sounds")));
+      return g.filter(x => x.l.length);
+    }
+    if (!P || !P.listen) return g;
+    const L = P.listen();
+    if (zpSeite === "stimmung") {
+      g.push({ titel: z.abendSet ? W("Spielabend", "Game night") + ": " + ((P.abendSets().find(s => s.k === z.abendSet) || {}).name || "") : W("Stimmungen", "Moods"), l: L.st.map(k => {
+        const [sy, nm] = teil(L.namen.st[k] || k, "🎵");
+        return { sym: sy, name: nm, an: !!(z.laeuft && z.stimmung === k), vor: !!(z.naechste === k && z.stimmung !== k), los: () => { pultKlick("data-vorlage", k); zeige("🎵 " + nm, null, z.laeuft ? W("wechselt am Taktende", "changes at the bar end") : ""); } };
+      }) });
+    } else if (zpSeite === "ort") {
+      g.push({ titel: W("Orte", "Places"), l: L.kul.map(k => {
+        const [sy, nm] = teil(L.namen.kul[k] || k, "🌲");
+        const an = !!(z.kulLaeuft && (z.kulisse === k || (k === "wald" && z.kulisse === "waldnacht")));
+        return { sym: sy, name: nm, an, los: () => { if (an) { pultKlick("data-kulisse", "keine"); zeige("🔇 " + W("Hintergrund aus", "Backdrop off")); } else { pultKlick("data-kulisse", k); zeige("🌲 " + nm); } } };
+      }) });
+      const zus = [], gesehen = new Set();
+      ["regen", "starkregen", "gewitter", "sturm", "wind", "schnee", "feuer", "voegel", "grillen", "eule", "wolf", "bach", "wellen", "glocke", "uhr", "katze"].forEach(id => {
+        const el = $('#lautenwerk [data-zusatz="' + id + '"]'); if (!el || gesehen.has(id)) return; gesehen.add(id);
+        const nm = (el.getAttribute("title") || el.getAttribute("aria-label") || id).split(" – ")[0].trim();
+        const [sy, n2] = teil(nm, { regen: "🌧", starkregen: "⛈", gewitter: "🌩", sturm: "🌪", wind: "💨", schnee: "❄", feuer: "🔥", voegel: "🐦", grillen: "🦗", eule: "🦉", wolf: "🐺", bach: "🏞", wellen: "🌊", glocke: "🔔", uhr: "🕰", katze: "🐈" }[id] || "✨");
+        zus.push({ sym: sy, name: n2, an: el.getAttribute("aria-pressed") === "true" || el.classList.contains("an"), los: () => { const e2 = $('#lautenwerk [data-zusatz="' + id + '"]'); if (e2) klick(e2); else pultKlick("data-zusatz", id); } });
+      });
+      if (zus.length) g.push({ titel: W("Wetter & Zusätze", "Weather & extras"), l: zus });
+    } else {
+      const mo = P.momente();
+      if (mo.length) g.push({ titel: W("Momente", "Moments") + (z.kulisse && z.kulisse !== "keine" ? " · " + teil(L.namen.kul[z.kulisse] || "", "")[1] : ""), l: mo.map(m => ({ sym: m.sym, name: m.name, los: () => { pultKlick("data-moment", m.i); zeige(m.sym + " " + m.name); } })) });
+      g.push({ titel: W("Effekte", "Effects"), l: L.fx.map(f => { const [sy, nm] = teil(L.namen.fx[f] || f, "💥"); return { sym: sy, name: nm, los: () => { pultKlick("data-sfx", f); zeige(sy + " " + nm); } }; }) });
+    }
+    return g.filter(x => x.l.length);
+  }
+  /* Gruppen zu Blättern à 8 */
+  function zpAufbauen() {
+    zpGruppen = zpInhalt(); zpListe = [];
+    zpGruppen.forEach(gr => { gr.ab = zpListe.length; for (let i = 0; i < gr.l.length; i += 8) zpListe.push(gr.l.slice(i, i + 8).map(x => Object.assign({ gruppe: gr.titel }, x))); });
+    const n = Math.max(1, zpListe.length); zpBlatt[zpSeite] = Math.max(0, Math.min(n - 1, zpBlatt[zpSeite] || 0));
+    return zpListe[zpBlatt[zpSeite]] || [];
+  }
+  const zpBlattJetzt = () => zpListe[zpBlatt[zpSeite] || 0] || [];
+
+  /* ----- Drehregler je Seite ----- */
+  const B0 = B_REGLER[0], B1 = B_REGLER[1];
+  const ZR = { musik: B0[0], hg: B0[1], los: B0[2], spannung: B0[3], tempo: B1[0], hall: B1[1], fx: B1[2], echo: B1[3] };
+  const SP_TEXT = v => v < 15 ? W("friedlich", "peaceful") : v < 40 ? W("ruhig", "calm") : v < 70 ? W("angespannt", "tense") : W("bedrohlich", "menacing");
+  const LOS_TEXT = v => v <= 2 ? W("kaum etwas", "barely") : v <= 4 ? W("ruhig", "calm") : v <= 6 ? W("normal", "normal") : v <= 8 ? W("lebhaft", "lively") : W("wild", "wild");
+  function zpRegler() {
+    if (SEITE === "welten") return W_REGLER[bank].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
+    if (bank) return [Object.assign({ druck: "mitte" }, ZR.tempo), Object.assign({ druck: "mitte" }, ZR.hall), Object.assign({ druck: "mitte" }, ZR.fx), Object.assign({ druck: "mitte" }, ZR.echo)];
+    const m = Object.assign({ druck: "stumm" }, ZR.musik), h = Object.assign({ druck: "hg" }, ZR.hg), sp = Object.assign({ druck: "friedlich", wort: SP_TEXT }, ZR.spannung), lo = Object.assign({ druck: "mitte", wort: LOS_TEXT }, ZR.los);
+    if (zpSeite === "ort") return [h, lo, sp, Object.assign({ druck: "mitte" }, ZR.hall)];
+    if (zpSeite === "momente") return [Object.assign({ druck: "stumm" }, ZR.fx), sp, Object.assign({ druck: "mitte" }, ZR.hall), Object.assign({ druck: "mitte" }, ZR.tempo)];
+    return [m, sp, h, lo];
+  }
+  const DRUCK_TEXT = { stumm: W("drücken: stumm", "push: mute"), hg: W("drücken: an/aus", "push: on/off"), friedlich: W("drücken: friedlich", "push: peaceful"), mitte: W("drücken: Mitte", "push: centre") };
+  function zpWert(r) { const v = r.lies(); return { v, anteil: Math.max(0, Math.min(1, proz(v, r.lo, r.hi))), text: r.text ? r.text(v) : r.wort ? r.wort(v) : Math.round(proz(v, r.lo, r.hi) * 100) + " %" }; }
+  function zpDreh(nr, d) { const r = zpRegler()[nr]; if (!r) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); zpZeichnen(true); }
+  function zpDruck(nr) {
+    const r = zpRegler()[nr]; if (!r) return; const k = bank + "-" + zpSeite + "-" + nr;
+    if (r.druck === "stumm") { const v = r.lies(); if (v > r.lo) { merkStumm[k] = v; r.setz(r.lo); zeige("🔇 " + r.name); } else { r.setz(merkStumm[k] != null ? merkStumm[k] : Math.round((r.lo + r.hi) * .7)); zeige("🔊 " + r.name); } }
+    else if (r.druck === "hg") { pultKlick("data-aktion", "kulumschalt"); zeige("🌲 " + W("Hintergrund an / aus", "Backdrop on / off")); }
+    else if (r.druck === "friedlich") r.setz(r.lo);
+    else r.setz(Math.round(((r.lo + r.hi) / 2) / r.schritt) * r.schritt);
+    zpZeichnen(true);
+  }
+
+  /* ----- Seiten wechseln ----- */
+  function zpSeiteSetzen(id) {
+    const d = zpDef(id);
+    if (d.seite !== SEITE) {
+      const z = pz();
+      if (SEITE === "buehne" && z && (z.laeuft || z.kulLaeuft) && Date.now() - zpWeltWarn > 3000) { zpWeltWarn = Date.now(); zeige("🌿 " + W("Klangwelt beendet die Bühne", "Soundscape stops the stage"), null, W("zum Wechseln nochmal drücken", "press again to switch")); return; }
+      schreib("imres-zp-seite", id); schreib("imres-zyn-modus", d.seite === "welten" ? "welten" : "buehne");
+      zeige(d.sym + " " + d.name, null, W("wird geladen …", "loading …")); setTimeout(() => location.replace(ADRESSE[d.seite]), 120); return;
+    }
+    zpSeite = id; schreib("imres-zp-seite", id); zpCursor = -1; zpZeichnen(true); ledsMelden();
+  }
+  function zpSeiteSchritt(s) { const i = ZP_SEITEN.findIndex(x => x.id === zpSeite); zpSeiteSetzen(ZP_SEITEN[(i + s + ZP_SEITEN.length) % ZP_SEITEN.length].id); }
+  function zpBlaettern(s) { const n = zpListe.length; if (n < 2) return false; zpBlatt[zpSeite] = ((zpBlatt[zpSeite] || 0) + s + n) % n; zpZeichnen(true); const b = zpBlattJetzt(); zeige((b[0] && b[0].gruppe) || "", null, (zpBlatt[zpSeite] + 1) + " / " + n); return true; }
+  function zpGruppeSchritt(s) {
+    if (zpGruppen.length < 2) return; const bi = zpBlatt[zpSeite] || 0;
+    let gi = 0; zpGruppen.forEach((g, i) => { if (g.ab <= bi) gi = i; });
+    const ziel = zpGruppen[(gi + s + zpGruppen.length) % zpGruppen.length]; zpBlatt[zpSeite] = ziel.ab; zpCursor = -1; zpZeichnen(true); zeige(ziel.titel);
+  }
+  function zpAusloesen(i) { const it = zpBlattJetzt()[i]; if (!it) return; try { it.los(); } catch (e) { console.warn(e); } setTimeout(() => { zpZeichnen(true); ledsMelden(); }, 120); }
+  function zpCursorBewegen(r) {
+    if (zpCursor < 0) { zpCursor = 0; zpZeichnen(true); return; }
+    let c = zpCursor % 4, z = zpCursor >= 4 ? 1 : 0;
+    if (r === "UP" || r === "DOWN") z = 1 - z;
+    else if (r === "LEFT") { if (c > 0) c--; else if (zpBlaettern(-1)) c = 3; }
+    else if (r === "RIGHT") { if (c < 3) c++; else if (zpBlaettern(1)) c = 0; }
+    zpCursor = z * 4 + c; zpZeichnen(true);
+  }
+
+  /* ----- Tasten im Pult (true = erledigt) ----- */
+  function zpTaste(name, lang) {
+    if (/^F[1-4]$/.test(name)) { zpAusloesen((alt ? 4 : 0) + +name[1] - 1); return true; }
+    const dm = /^DREH([1-4])$/.exec(name); if (dm) { zpDruck(+dm[1] - 1); return true; }
+    switch (name) {
+      case "MENU": lang ? systemMenue() : zpMenue(); return true;
+      case "MIXER": bank = bank ? 0 : 1; weltenMischBereit(); zeige("⟲ " + W("Reglerbank ", "Knob bank ") + (bank ? "B" : "A")); zpZeichnen(true); return true;
+      case "LEFT": case "RIGHT": if (alt) { zpGruppeSchritt(name === "LEFT" ? -1 : 1); return true; } zpCursorBewegen(name); return true;
+      case "UP": case "DOWN": zpCursorBewegen(name); return true;
+      case "SEL": if (zpCursor < 0) zpCursorBewegen("RIGHT"); else zpAusloesen(zpCursor); return true;
+      case "BACK":
+        if (lang) { zeige("🎛 " + W("Zynthian startet …", "Zynthian is starting …")); fetch("/zyn/system", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "zynthian" }) }).catch(() => {}); return true; }
+        if (zpCursor >= 0) { zpCursor = -1; zpZeichnen(true); } else if (zpBlatt[zpSeite]) { zpBlatt[zpSeite] = 0; zpZeichnen(true); } else zeige("↩ " + W("BACK 2 s halten: zurück zum Zynthian", "Hold BACK 2 s: back to Zynthian"));
+        return true;
+      case "CTRL": zpSeiteSchritt(alt ? -1 : 1); return true;
+      case "ZS3": zpSeiteSchritt(-1); return true;
+    }
+    if (SEITE === "welten") return false; /* PLAY, STOP, PAD, REC, TEMPO wie bisher */
+    if (name === "PLAY") { musikSpielen(); setTimeout(() => zpZeichnen(true), 150); return true; }
+    return false;
+  }
+
+  /* ----- Menü ----- */
+  function zpMenue() {
+    const P = window.ImresPult, z = pz() || {};
+    const sets = SEITE === "buehne" && P && P.abendSets ? P.abendSets() : [];
+    const akt = sets.find(s => s.k === z.abendSet);
+    const k = (f, t, u, id) => '<button type="button" data-zm="' + id + '"><span><span class="kbd">' + f + "</span>" + t + "</span>" + (u ? "<small>" + u + "</small>" : "") + "</button>";
+    menue("<h3>☰ " + W("Menü", "Menu") + '</h3><div class="reihe">' +
+      (sets.length ? k("F1", "🌙 " + W("Spielabend", "Game night"), akt ? akt.sym + " " + akt.name : W("keiner – alle Stimmungen", "none – all moods"), "abend") : "") +
+      k("F2", "🎚 " + W("Optionen", "Options"), W("MIDI-Takt, Handpan-Tonart, Mikrofon …", "MIDI clock, key, mic …"), "optionen") +
+      k("F3", "❔ " + W("Tastenbelegung", "Button map"), "", "hilfe") +
+      k("F4", "⚙ " + W("System", "System"), W("Aktualisieren, Zynthian, Aufnahme, Aus", "Update, Zynthian, record, off"), "system") +
+      '<button type="button" data-zm="alt">🧭 ' + W("Alte Ansicht (Webseite)", "Old view (web page)") + "<small>" + W("zurück geht’s im selben Menü", "switch back in the same menu") + "</small></button>" +
+      '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
+      '<p class="hinweis">' + W("F1–F4 wählen · Pfeile + SEL · BACK schließt", "F1–F4 pick · arrows + SEL · BACK closes") + "</p>",
+      { abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu,
+        alt: () => { schreib("imres-zyn-pult", "0"); location.reload(); } });
+    menueArt = "zp";
+  }
+  const ZP_MENUE_F = ["abend", "optionen", "hilfe", "system"];
+  function zpAbendMenue() {
+    const P = window.ImresPult; if (!P || !P.abendSets) return;
+    const z = pz() || {}, sets = P.abendSets(), a = { zu: menueZu };
+    const b = (id, t, an) => '<button type="button" data-zm="s:' + id + '" class="' + (an ? "an" : "") + '">' + t + "</button>";
+    a["s:"] = () => { P.abend(""); menueZu(); zpBlatt.stimmung = 0; zpSeiteSetzen("stimmung"); zeige("🌙 " + W("Kein Spielabend", "No game night")); };
+    sets.forEach(s => { a["s:" + s.k] = () => { P.abend(s.k); menueZu(); zpBlatt.stimmung = 0; zpSeiteSetzen("stimmung"); zeige("🌙 " + s.sym + " " + s.name, null, W("passende Stimmungen und Effekte stehen vorne", "matching moods and effects come first")); }; });
+    menue("<h3>🌙 " + W("Spielabend", "Game night") + '</h3><div class="reihe drei">' + b("", "— " + W("ohne", "none"), !z.abendSet) + sets.map(s => b(s.k, s.sym + " " + s.name, z.abendSet === s.k)).join("") + "</div>" +
+      '<p class="hinweis">' + W("Stimmungen und Effekte des Abends liegen dann auf F1–F4 und ALT + F1–F4", "The night's moods and effects then sit on F1–F4 and ALT + F1–F4") + "</p>", a);
+    menueArt = "abend";
+  }
+  function zpHilfe() {
+    const z = (kk, t) => "<div><b>" + kk + "</b><span>" + t + "</span></div>";
+    const l = [["F1–F4", W("obere Kachelreihe", "top row of tiles")], ["ALT + F1–F4", W("untere Kachelreihe", "bottom row")], ["◀ ▶", W("Kachel wählen, am Rand weiterblättern", "move, page at the edge")], ["ALT + ◀ ▶", W("nächste / vorige Gruppe (z. B. Wetter, Effekte, Szenen)", "next / previous group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")],
+      ["CTRL / ZS3", W("nächste / vorige Seite", "next / previous page")], ["MIXER", W("Reglerbank A ↔ B", "Knob bank A ↔ B")], ["Regler 1–4", W("wie rechts angezeigt · drücken: siehe Anzeige", "as shown on the right · push: see label")],
+      ["PLAY", W("Musik ▶ / ■ (Klangwelt: Abspielen/Pause)", "Music ▶ / ■")], ["STOP", W("alles aus", "everything off")], ["PAD", W("⚡ Etwas passiert", "⚡ Something happens")], ["REC", W("🤫 Stille", "🤫 Silence")], ["TEMPO", W("🎲 Neu besetzen", "🎲 Re-cast")],
+      ["ALT + PAD", W("🎙 Sprechen", "🎙 Speak")], ["ALT + REC", W("⏺ Aufnahme", "⏺ Record")], ["ALT + TEMPO", W("MIDI-Takt aus/Slave/Master", "MIDI clock off/slave/master")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")],
+      ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")]];
+    menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([a, b]) => z(a, b)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu });
+    menueArt = "hilfe";
+  }
+
+  /* ----- Zeichnen ----- */
+  function zpZeichnen(sofort) {
+    if (!zpEl) return;
+    const blatt = zpAufbauen(), z = pz() || {}, d = zpDef(zpSeite), n = zpListe.length, bi = zpBlatt[zpSeite] || 0;
+    const L = window.ImresPult && window.ImresPult.listen ? window.ImresPult.listen() : null;
+    let status;
+    if (SEITE === "welten") { const a = $(".welt.an"); status = (a ? "▶ <b>" + esc2(kurzName(a.querySelector(".nm") || a)) + "</b>" : "■ " + W("still", "silent")); }
+    else { const sn = z.stimmung && L ? teil(L.namen.st[z.stimmung] || z.stimmung, "")[1] : "–", kn = z.kulLaeuft && L ? teil(L.namen.kul[z.kulisse] || z.kulisse, "")[1] : W("kein Hintergrund", "no backdrop");
+      status = (z.laeuft ? "▶ <b>" + esc2(sn) + "</b>" : "■ " + esc2(sn)) + " · 🌲 " + esc2(kn) + " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) + (OPT.takt === "slave" && tempoMidi ? " ⇄" : OPT.takt === "master" ? " ⇉" : ""); }
+    status += (OPT.tonartAn ? " · 🎼 " + NOTEN[OPT.grund] : "") + (aufnahmeAn ? ' · <span class="rec">⏺ REC</span>' : "") + (alt ? ' · <span class="alt">ALT</span>' : "");
+    const tabs = ZP_SEITEN.map(s => '<button type="button" class="zp-tab' + (s.id === zpSeite ? " an" : "") + '" data-zp-tab="' + s.id + '" style="--f:' + s.farbe + '">' + s.sym + " " + s.name + "</button>").join("");
+    const kach = Array.from({ length: 8 }, (_, i) => { const it = blatt[i];
+      const f = '<span class="zp-f">' + (i < 4 ? "" : "ALT ") + "F" + (i % 4 + 1) + "</span>";
+      if (!it) return '<div class="zp-k leer">' + f + "</div>";
+      return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (i === zpCursor ? " cur" : "") + '" data-zp-k="' + i + '">' + f + '<span class="zp-s">' + esc2(it.sym || d.sym) + '</span><span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + "</button>"; }).join("");
+    const gr = blatt[0] ? blatt[0].gruppe : "";
+    const kopf = '<div class="zp-gruppe"><span data-zp-gruppe="1">' + esc2(gr || d.name) + (zpGruppen.length > 1 ? ' <small>▸ ' + W("ALT + ◀ ▶: nächste Gruppe", "ALT + ◀ ▶: next group") + "</small>" : "") + "</span>" + (n > 1 ? '<span class="zp-blatt"><button type="button" data-zp-blatt="-1">◀</button>' + (n <= 9 ? Array.from({ length: n }, (_, i) => "<i" + (i === bi ? ' class="an"' : "") + "></i>").join("") : "<em>" + (bi + 1) + " / " + n + "</em>") + '<button type="button" data-zp-blatt="1">▶</button></span>' : "") + "</div>";
+    const regler = zpRegler().map((r, i) => { const w = zpWert(r);
+      return '<div class="zp-r" data-zp-r="' + i + '"><span class="zp-rn">' + esc2(r.name) + (bank ? ' <small>B</small>' : "") + '</span><i><b style="width:' + Math.round(w.anteil * 100) + '%"></b></i><span class="zp-rv"><span>' + esc2(w.text) + "</span><small>" + (DRUCK_TEXT[r.druck] || "") + "</small></span></div>"; }).join("");
+    const t = (k, txt) => '<button type="button" data-zp-taste="' + k + '"><b>' + k + "</b> " + txt + "</button>";
+    const fuss = SEITE === "welten"
+      ? t("PLAY", "▶/❚❚") + t("STOP", W("aus", "off")) + t("PAD", "🎭") + t("REC", "⏳") + t("CTRL", W("Seite", "page")) + t("MENU", "☰")
+      : t("PLAY", W("Musik", "music")) + t("STOP", W("alles aus", "all off")) + t("PAD", "⚡") + t("REC", "🤫") + t("TEMPO", "🎲") + t("CTRL", W("Seite", "page")) + t("MENU", "☰");
+    const html = '<div class="zp-kopf">' + tabs + '<span class="zp-status">' + status + "</span></div>" +
+      '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>" +
+      '<div class="zp-regler">' + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
+    if (html === zpMerk && !sofort) return; if (html === zpMerk) return;
+    zpMerk = html; zpEl.innerHTML = html;
+  }
+  function zpLeds(f) {
+    const d = zpDef(zpSeite), b = zpBlattJetzt(), blink = Math.floor(Date.now() / 450) % 2 === 0;
+    ["F1", "F2", "F3", "F4"].forEach((nm, i) => { const it = b[(alt ? 4 : 0) + i]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : "#2a1a06"; });
+    f.CTRL = d.farbe; f.ZS3 = "#302010"; f.MIXER = bank ? "#8a40c0" : "#2050c0"; f.MENU = "#c88a20"; f.BACK = "#402018";
+    f.LEFT = f.RIGHT = zpListe.length > 1 ? "#604010" : "#202020";
+  }
+  if (PULT) {
+    if (modus === "klang" || modus === "musik") { document.documentElement.classList.remove("zyn-m-" + modus); modus = "buehne"; schreib("imres-zyn-modus", "buehne"); document.documentElement.classList.add("zyn-m-buehne"); }
+    document.documentElement.classList.add("zyn-pult");
+    const st = document.createElement("style");
+    st.textContent = `
+html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
+html.zyn-pult .zyn-leiste { display: none !important; }
+.zp { position: fixed; inset: 0; z-index: 2147481000; background: #120e18; color: #ebe2cc; font: 600 15px/1.2 system-ui, sans-serif; display: grid; grid-template-columns: minmax(0, 1fr) 172px; grid-template-rows: 42px minmax(0, 1fr) 38px; user-select: none; -webkit-tap-highlight-color: transparent; }
+.zp button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.zp-kopf { grid-column: 1 / 3; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: #1c1624; border-bottom: 1px solid #3a2f48; min-width: 0; }
+.zp-tab { padding: 6px 10px !important; border-radius: 8px; color: #a99a8a !important; white-space: nowrap; }
+.zp-tab.an { background: var(--f) !important; color: #140e06 !important; }
+.zp-status { margin-left: auto; font-size: 12.5px; color: #c8bba6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-left: 8px; }
+.zp-status b { color: #f2cf6a; } .zp-status .rec { color: #ff5050; } .zp-status .alt { color: #e080e0; }
+.zp-mitte { display: grid; grid-template-rows: 26px minmax(0, 1fr); padding: 4px 8px 8px; min-width: 0; min-height: 0; }
+.zp-gruppe { display: flex; align-items: center; justify-content: space-between; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--f); }
+.zp-blatt { display: flex; align-items: center; gap: 5px; } .zp-blatt button { padding: 0 8px !important; font-size: 14px; color: #c8bba6 !important; }
+.zp-blatt em { font-style: normal; font-size: 12px; color: #c8bba6; min-width: 46px; text-align: center; }
+.zp-gruppe small { text-transform: none; letter-spacing: 0; color: #776d60; font-size: 10.5px; margin-left: 6px; }
+.zp-blatt i { width: 7px; height: 7px; border-radius: 50%; background: #3a2f48; } .zp-blatt i.an { background: var(--f); }
+.zp-kacheln { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 7px; min-height: 0; }
+.zp-k { position: relative; display: flex !important; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 2px; padding: 8px 9px !important; border-radius: 12px; border: 2px solid #3a2f48 !important; background: #1d1726 !important; text-align: left; min-width: 0; overflow: hidden; }
+.zp-k.leer { border-style: dashed !important; opacity: .35; }
+.zp-k .zp-f { position: absolute; top: 5px; right: 7px; font-size: 10px; color: #8f8576; border: 1px solid #4a4050; border-radius: 4px; padding: 1px 4px; }
+.zp-k .zp-s { font-size: 30px; line-height: 1; margin-bottom: auto; padding-top: 2px; }
+.zp-k .zp-n { font-size: 15px; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.zp-k .zp-v { font-size: 10px; color: var(--f); }
+.zp-k.an { border-color: var(--f) !important; background: color-mix(in srgb, var(--f) 22%, #1d1726) !important; box-shadow: 0 0 14px color-mix(in srgb, var(--f) 40%, transparent); }
+.zp-k.vor { border-style: dashed !important; border-color: var(--f) !important; animation: zpblink 1s steps(2) infinite; }
+.zp-k.cur { outline: 3px solid #f4c45a; outline-offset: 1px; }
+.zp-k:active { transform: scale(.97); }
+@keyframes zpblink { 50% { border-color: #3a2f48 !important; } }
+.zp-regler { border-left: 1px solid #3a2f48; display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)); background: #16111d; min-height: 0; }
+.zp-r { padding: 6px 10px; border-bottom: 1px solid #2a2234; display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; }
+.zp-rn { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .zp-rn small { color: #a070d0; }
+.zp-r i { display: block; height: 8px; border-radius: 4px; background: #2c2436; overflow: hidden; } .zp-r i b { display: block; height: 100%; background: linear-gradient(90deg, #a8701e, #f2cf6a); }
+.zp-rv { display: flex; justify-content: space-between; gap: 4px; font-size: 12.5px; color: #d8cbb6; } .zp-rv small { font-size: 9.5px; color: #807666; align-self: end; white-space: nowrap; }
+.zp-fuss { grid-column: 1 / 3; display: flex; gap: 5px; align-items: center; padding: 0 8px; background: #1c1624; border-top: 1px solid #3a2f48; overflow: hidden; }
+.zp-fuss button { padding: 4px 8px !important; border: 1px solid #4a3f58 !important; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+.zp-fuss button b { color: #e0a046; }
+`;
+    document.head.appendChild(st);
+    zpEl.className = "zp"; document.body.appendChild(zpEl);
+    zpEl.addEventListener("click", e => {
+      const tb = e.target.closest("[data-zp-tab]"); if (tb) { zpSeiteSetzen(tb.dataset.zpTab); return; }
+      const k = e.target.closest("[data-zp-k]"); if (k) { zpCursor = -1; zpAusloesen(+k.dataset.zpK); return; }
+      if (e.target.closest("[data-zp-gruppe]")) { zpGruppeSchritt(1); return; }
+      const bl = e.target.closest("[data-zp-blatt]"); if (bl) { zpBlaettern(+bl.dataset.zpBlatt); return; }
+      const ta = e.target.closest("[data-zp-taste]"); if (ta) { taste(ta.dataset.zpTaste, "kurz"); ledsMelden(); return; }
+      const r = e.target.closest("[data-zp-r]"); if (r) { zpDruck(+r.dataset.zpR); }
+    });
+    if (SEITE === "buehne") setTimeout(() => { const b = $('#lautenwerk [data-etab="ort"]'); if (b) klick(b); }, 1300); /* Zusätze (Wetter) sind nur im Reiter „Ort“ im Pult */
+    zpZeichnen(true); setInterval(() => { try { zpZeichnen(); } catch (e) { console.warn("zp", e); } }, 400);
+  }
 
   /* ---------- Verbindung zur Brücke ---------- */
   function verbinden() {

@@ -1,5 +1,5 @@
 #!/bin/bash
-# imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|pruefen|start-imres|start-zynthian|start-hintergrund|boot
+# imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund|boot
 HIER="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 DATEN="$(dirname "$(dirname "$HIER")")"   # /zynthian/zynthian-my-data/imres
 case "$1" in
@@ -9,8 +9,28 @@ case "$1" in
   neustart)  systemctl reboot ;;
   aus)       systemctl poweroff ;;
   aktualisieren)
+    # losgelöst ausführen: das Update startet am Ende die Brücke neu, die es vielleicht ausgelöst hat
+    if [ -z "$IMRES_LOSGELOEST" ] && command -v systemd-run >/dev/null 2>&1; then
+      exec systemd-run --quiet --collect --wait --pipe --setenv=IMRES_LOSGELOEST=1 "$HIER/imres-modus" aktualisieren
+    fi
     git -C "$DATEN/seite" fetch --depth 1 origin main && git -C "$DATEN/seite" reset --hard origin/main && \
-      curl -s -X POST -H 'Content-Type: application/json' -d '{"aktion":"seite-neu"}' http://127.0.0.1:8790/zyn/system >/dev/null
+      "$HIER/imres-modus" einrichten
+    ;;
+  einrichten)
+    # Dienste und Rechte nach einem Update auf den neuesten Stand bringen
+    S="$DATEN/seite/zynthian"
+    chmod +x "$S/kiosk.sh" "$S/hintergrund.sh" "$S/imres-modus" "$S/ton.sh" 2>/dev/null
+    ln -sf "$S/imres-modus" /usr/local/bin/imres-modus
+    cp "$S/dienste/"imres-*.service /etc/systemd/system/
+    mkdir -p /etc/systemd/system/zynthian.service.d
+    cp "$S/dienste/zynthian-conflicts.conf" /etc/systemd/system/zynthian.service.d/imres.conf
+    systemctl daemon-reload
+    systemctl enable imres-bruecke.service imres-start.service imres-knopf.service >/dev/null 2>&1
+    systemctl is-active -q zynthian && systemctl restart imres-knopf.service
+    systemctl is-active -q imres-buehne && systemctl restart imres-buehne.service
+    systemctl is-active -q imres-hintergrund && systemctl restart imres-hintergrund.service
+    echo "Imres ist eingerichtet und auf dem neuesten Stand."
+    systemctl restart imres-bruecke.service
     ;;
   pruefen)
     export DISPLAY=:0
@@ -34,5 +54,5 @@ case "$1" in
       hintergrund) sleep 6; systemctl start imres-hintergrund ;;
     esac
     ;;
-  *) echo "Benutzung: imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|start-imres|start-zynthian|start-hintergrund"; exit 1 ;;
+  *) echo "Benutzung: imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund"; exit 1 ;;
 esac
