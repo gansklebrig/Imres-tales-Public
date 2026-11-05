@@ -1338,7 +1338,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       const f = '<span class="zp-f' + (i < 4 ? "" : " alt") + '">' + (i < 4 ? "" : "ALT ") + "F" + (i % 4 + 1) + "</span>";
       if (!it) return '<div class="zp-k leer">' + f + "</div>";
       return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + '" data-zp-k="' + i + '">' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + (it.still ? '<span class="zp-still" title="' + W("mit Stille", "brings a hush") + '">🤫</span>' : "") + '<span class="zp-s">' + esc2(it.sym || d.sym) + '</span><span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + "</button>"; }).join("");
-    const gr = blatt[0] ? blatt[0].gruppe : "";
+    const gr = blatt[0] ? blatt[0].gruppe : (SEITE === "buehne" && !(window.ImresPult && window.ImresPult.listen) ? "⏳ " + W("Bühne lädt …", "Stage loading …") + " " + Math.round(performance.now() / 1000) + " s" : "");
     const kopf = '<div class="zp-gruppe"><span data-zp-gruppe="1">' + esc2(gr || d.name) + (zpGruppen.length > 1 ? ' <small>▸ ' + W("ALT + ▲ ▼: andere Gruppe", "ALT + ▲ ▼: other group") + "</small>" : "") + "</span>" + (n > 1 ? '<span class="zp-blatt"><button type="button" data-zp-blatt="-1">◀</button>' + (n <= 9 ? Array.from({ length: n }, (_, i) => "<i" + (i === bi ? ' class="an"' : "") + "></i>").join("") : "<em>" + (bi + 1) + " / " + n + "</em>") + '<button type="button" data-zp-blatt="1">▶</button></span>' : "") + "</div>";
     const bk = SEITE === "welten" ? (bank ? "B" : "A") : bankName(), bf = BANK_FARBE[bk] || BANK_FARBE.A;
     const regler = zpRegler().map((r, i) => { const w = zpWert(r);
@@ -1533,11 +1533,17 @@ html.zyn-ruhe .zp-ruhe { display: block; }
       const ta = e.target.closest("[data-zp-taste]"); if (ta) { taste(ta.dataset.zpTaste, "kurz"); ledsMelden(); return; }
       const r = e.target.closest("[data-zp-r]"); if (r) { zpDruck(+r.dataset.zpR); }
     });
-    if (SEITE === "buehne") setTimeout(() => {
-      if (!$('#lautenwerk [data-etab]')) { schreib("imres-lw-modus", "einfach"); pultKlick("data-aktion", "modus"); }
+    if (SEITE === "buehne") { let versuche = 0; const einfachSicher = () => {
+      const fertig = window.ImresPult && $("#lautenwerk .lw-pult"); if (!fertig) { if (versuche++ < 60) setTimeout(einfachSicher, 500); return; }
+      if (!$('#lautenwerk [data-etab]') && lies("imres-lw-modus", "einfach") === "alles") { schreib("imres-lw-modus", "einfach"); pultKlick("data-aktion", "modus"); }
+      else if (!$('#lautenwerk [data-etab]')) { schreib("imres-lw-modus", "einfach"); if (versuche++ < 60) { setTimeout(einfachSicher, 500); return; } }
       setTimeout(() => { const b = $('#lautenwerk [data-etab="ort"]'); if (b) klick(b); }, 400);
-    }, 1100); /* Zusätze (Wetter) sind nur im Reiter „Ort“ im Pult */
-    zpZeichnen(true); setInterval(() => { if (zpRuhe || document.hidden) return; try { zpZeichnen(); } catch (e) { console.warn("zp", e); } }, 700);
+    }; setTimeout(einfachSicher, 800); } /* Zusätze (Wetter) sind nur im Reiter „Ort“ im Pult */
+    let zpFehlerEl = null;
+    const zpFehler = e => { if (!zpFehlerEl) { zpFehlerEl = document.createElement("div"); zpFehlerEl.style.cssText = "position:fixed;left:8px;bottom:46px;z-index:2147482600;max-width:784px;padding:4px 8px;border-radius:6px;background:#5a0a10;color:#fff;font:12px system-ui;visibility:visible"; document.body.appendChild(zpFehlerEl); }
+      zpFehlerEl.textContent = "⚠ " + (e && e.message ? e.message : e) + (e && e.stack ? " · " + String(e.stack).split("\n")[1] : ""); };
+    try { zpZeichnen(true); } catch (e) { zpFehler(e); }
+    setInterval(() => { if (zpRuhe || document.hidden) return; try { zpZeichnen(); if (zpFehlerEl) { zpFehlerEl.remove(); zpFehlerEl = null; } } catch (e) { console.warn("zp", e); zpFehler(e); } }, 700);
     /* Musik weiter vorausplanen, damit kurze Ruckler der Oberfläche nicht hörbar werden */
     const vorlaufSetzen = () => { if (window.ImresPult && window.ImresPult.vorlauf) window.ImresPult.vorlauf(.7); else setTimeout(vorlaufSetzen, 500); }; if (SEITE === "buehne") vorlaufSetzen();
   }
