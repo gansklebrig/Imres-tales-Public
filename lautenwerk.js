@@ -13456,7 +13456,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     z(k.lp.frequency, f < 0 ? 20000 * Math.pow(.004, -f) : 20000); z(k.hp.frequency, f > 0 ? 20 * Math.pow(250, f) : 20);
     const d = w.drive / 100; if (Math.round(d * 20) !== k.kurve) { k.kurve = Math.round(d * 20); if (d > 0) { const n = 1024, cv = new Float32Array(n), kk = 1 + k.kurve * 1.2; for (let x = 0; x < n; x++) { const t = x / (n - 1) * 2 - 1; cv[x] = Math.tanh(kk * t) / Math.tanh(kk); } k.sh.curve = cv; } else k.sh.curve = null; }
     const bpm = (laeuft ? (tempoJetzt || S.tempo) : S.tempo) || 100; z(k.dl.delayTime, Math.min(2.4, 60 / bpm * .75));
-    z(k.wet.gain, w.echo / 100 * .7); z(k.fb.gain, Math.min(.9, w.rueck / 100)); z(k.pan.pan, Math.max(-1, Math.min(1, w.pan / 100)));
+    z(k.wet.gain, w.echo / 100 * .7); z(k.fb.gain, w.echo > 0 ? Math.min(.9, w.rueck / 100) : 0); /* Echo aus = auch die Wiederholungen im Inneren sofort leeren */ z(k.pan.pan, Math.max(-1, Math.min(1, w.pan / 100)));
     if (w.hall > 0) { const h = kanalHall(); if (!k.hallDran) { k.hs.connect(h); k.hallDran = true; } z(k.hs.gain, w.hall / 100); } else if (k.hallDran) { z(k.hs.gain, 0); }
   }
   /* Effekte, die schon vor dem ersten Ton eingestellt wurden, greifen, sobald der Ton startet */
