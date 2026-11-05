@@ -14,6 +14,12 @@ pcm.imres { type plug; slave.pcm '"$ziel"'; }
 pcm.imres_jack {
   type jack
   playback_ports { 0 system:playback_1 1 system:playback_2 }
+}
+# Eingänge 1 und 2 des Zynthian für Chromium (Handpan, Didgeridoo …)
+pcm.imresin { type plug; slave.pcm "imresin_jack"; }
+pcm.imresin_jack {
+  type jack
+  capture_ports { 0 system:capture_1 1 system:capture_2 }
 }'
   [ "$(cat "$IMRES_ALSA_CONF" 2>/dev/null)" = "$neu" ] || printf '%s\n' "$neu" > "$IMRES_ALSA_CONF"
   # Ohne das JACK-Modul für ALSA geht nichts – einmalig nachinstallieren, falls es fehlt

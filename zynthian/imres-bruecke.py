@@ -403,6 +403,8 @@ class Handler(SimpleHTTPRequestHandler):
                 if isinstance(liste, list):
                     noten.planen([x for x in liste if isinstance(x, dict)])
             return self.json_antwort({"ok": bool(noten and noten.seq)})
+        if p == "/zyn/audio":
+            return self.json_antwort(audio(d if isinstance(d, dict) else {}))
         if p == "/zyn/netz":
             return self.json_antwort(netz(d if isinstance(d, dict) else {}))
         if p == "/zyn/takt":
@@ -581,6 +583,118 @@ def netz(d):
     return {"ok": False, "fehler": "unbekannt"}
 
 
+# ---------- Audio: Ausgänge (welche Buchsen) und Pegel der Soundkarte ----------
+AUSGAENGE_DATEI = os.path.normpath(os.path.join(ZYN, "..", "..", "ausgaenge"))  # z. B. "1,2 3,4"
+
+
+def _karte():
+    """die Soundkarte des Zynthian (nicht HDMI)"""
+    c, t = _lauf(["aplay", "-l"], 5)
+    for z in t.splitlines():
+        m = re.match(r"card (\d+): (\S+) \[(.*?)\]", z)
+        if m and "hdmi" not in z.lower():
+            return m.group(1), m.group(3)
+    return "0", "?"
+
+
+def _regler_lesen(karte):
+    c, t = _lauf(["amixer", "-c", karte, "scontents"], 8)
+    regler, akt = [], None
+    for z in t.splitlines():
+        m = re.match(r"Simple mixer control '(.*)',(\d+)", z)
+        if m:
+            akt = {"name": m.group(1), "idx": int(m.group(2)), "caps": "", "p": None, "c": None, "an": None, "aufnahme": None}
+            regler.append(akt)
+            continue
+        if not akt:
+            continue
+        z = z.strip()
+        if z.startswith("Capabilities:"):
+            akt["caps"] = z[13:].strip()
+        elif ":" in z and "[" in z:
+            pct = re.search(r"\[(\d+)%\]", z)
+            if " Playback " in " " + z and pct and akt["p"] is None:
+                akt["p"] = int(pct.group(1))
+            if " Capture " in " " + z and pct and akt["c"] is None:
+                akt["c"] = int(pct.group(1))
+            if "[on]" in z or "[off]" in z:
+                if "Capture" in z:
+                    akt["aufnahme"] = "[on]" in z
+                else:
+                    akt["an"] = "[on]" in z
+    return [r for r in regler if r["p"] is not None or r["c"] is not None or r["an"] is not None or r["aufnahme"] is not None]
+
+
+def ausgaenge_lesen():
+    try:
+        with open(AUSGAENGE_DATEI) as f:
+            paare = f.read().split()
+        return [x for x in paare if re.match(r"^\d+,\d+$", x)] or ["1,2"]
+    except OSError:
+        return ["1,2"]
+
+
+def ausgaenge_verbinden():
+    """verbindet den Ton von Imres (ALSA-JACK-Brücke) mit den gewählten Ausgangsbuchsen"""
+    paare = ausgaenge_lesen()
+    c, t = _lauf(["jack_lsp"], 5)
+    if c != 0:
+        return
+    alle = t.splitlines()
+    quellen = sorted(p for p in alle if re.match(r"alsa-jack\.jackP\.\d+\.\d+:out_00[01]$", p))
+    ziele = [p for p in alle if p.startswith("system:playback_")]
+    if not quellen:
+        return
+    _, verb = _lauf(["jack_lsp", "-c"] + quellen, 5)
+    besteht, q = set(), None
+    for z in verb.splitlines():
+        if not z.startswith(" "):
+            q = z.strip()
+        else:
+            besteht.add((q, z.strip()))
+    for qu in quellen:
+        kanal = int(qu[-1])  # 0 = links, 1 = rechts
+        soll = set("system:playback_%s" % p.split(",")[kanal] for p in paare)
+        for ziel in ziele:
+            if ziel in soll and (qu, ziel) not in besteht:
+                _lauf(["jack_connect", qu, ziel], 5)
+            elif ziel not in soll and (qu, ziel) in besteht:
+                _lauf(["jack_disconnect", qu, ziel], 5)
+
+
+def _ausgang_schleife():
+    while True:
+        try:
+            ausgaenge_verbinden()
+        except Exception:
+            pass
+        time.sleep(3)
+
+
+def audio(d):
+    if ARGS.test:
+        return {"ok": False, "fehler": "Testmodus"}
+    karte, name = _karte()
+    a = str(d.get("aktion", "info"))
+    if a == "ausgaenge":
+        paare = [x for x in (d.get("paare") or []) if re.match(r"^\d+,\d+$", str(x))] or ["1,2"]
+        with open(AUSGAENGE_DATEI, "w") as f:
+            f.write(" ".join(paare))
+        ausgaenge_verbinden()
+    elif a == "regler":
+        nm = str(d.get("name", ""))[:60]
+        art = "capture" if d.get("art") == "c" else "playback"
+        if "wert" in d:
+            _lauf(["amixer", "-c", karte, "sset", nm, art, "%d%%" % max(0, min(100, int(d.get("wert", 0))))], 5)
+        if d.get("schalten"):
+            _lauf(["amixer", "-c", karte, "sset", nm, art if art == "capture" else "playback", "toggle"], 5)
+        _lauf(["alsactl", "store"], 10)
+    c, t = _lauf(["jack_lsp"], 5)
+    ports = [p for p in t.splitlines() if p.startswith("system:playback_")]
+    eing = [p for p in t.splitlines() if p.startswith("system:capture_")]
+    return {"ok": True, "karte": name, "ausgaenge": len(ports), "eingaenge": len(eing), "paare": ausgaenge_lesen(), "regler": _regler_lesen(karte)}
+
+
 def main():
     if not os.path.isdir(SEITE):
         print("Seite nicht gefunden:", SEITE)
@@ -596,6 +710,8 @@ def main():
             noten.start()
         except Exception as e:
             print("Begleitung nicht verfügbar:", e)
+    if not ARGS.test:
+        threading.Thread(target=_ausgang_schleife, daemon=True).start()
     srv = ThreadingHTTPServer(("0.0.0.0", ARGS.port), Handler)
     srv.daemon_threads = True
     print("Imres-Brücke auf Port", ARGS.port, "– Seite:", SEITE)

@@ -192,6 +192,22 @@ Gesteuert wird über den **Steuer-Kanal** (Standard: Kanal 16, einstellbar, auch
 - **Kulisse weicht aus** – die Kulisse wird leiser, solange ihr spielt, und kommt in den Pausen zurück.
 - **Empfindlichkeit** – höher, wenn das Mikrofon weiter weg ist.
 
+### Instrumente anstecken (Handpan, Didgeridoo …)
+
+**MENU → 🎤 Eingänge**: Eingang 1 und 2 getrennt einschalten, je mit **Gain** (Eingangspegel) und **Lautstärke** in der Mischung. Die Pegelanzeige wird gelb bei kräftigem, rot bei zu lautem Signal – dann Gain runter.
+
+Sobald ein Eingang an ist, gibt es mit **MIXER** zusätzlich die Reglerbänke **IN1** / **IN2**: Lautstärke, Filter, Delay (im Tempo), Hall – mit drücken+drehen auch Gain, Rückkopplung, Drive, Panorama.
+
+Der Ton läuft durch den Browser und kommt dadurch etwas verzögert (einige Hundertstel). Für die Anlage passt das, zum direkten Abhören am Instrument eher nicht.
+
+### 🎚 Mischpult (CTRL)
+
+**CTRL** öffnet das Mischpult: vier große Regler für **Musik, Hintergrund, Instrument (IN1), Effekte**. Drücken = stumm/neutral, **drücken+drehen** legt eine andere Spur auf den Regler (z. B. IN2, Hall, Gain). CTRL oder BACK schließt es. (Nächste Seite geht weiter mit ALT + ▶.)
+
+### Ausgänge & Pegel
+
+**MENU → 🎚 Audio: Ausgänge & Pegel**: welche Ausgangspaare Imres bespielt (1/2, 3/4 …, wenn die Soundkarte mehr hat) und alle Lautstärke-Regler der Soundkarte (◀ ▶ leiser/lauter, SEL schaltet stumm/an). Kommt aus den großen Buchsen nichts, ist dort meist ein Regler zu leise oder stumm.
+
 ---
 
 ## 8. Zusammen mit dem Zynthian

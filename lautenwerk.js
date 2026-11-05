@@ -13326,6 +13326,48 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     if (Math.abs(k.wobOsz.frequency.value - bpm / 30) > .01) k.wobOsz.frequency.setValueAtTime(bpm / 30, j);
     if (k.glitch) { const a = k.glitch.parameters.get("bpm"); if (a && Math.abs(a.value - bpm) > .5) a.setValueAtTime(bpm, j); }
   }
+  /* ---------- Eingänge des Zynthian (Handpan, Didgeridoo …) mit eigener Effektkette ----------
+     Chromium nimmt beide Eingänge als ein Stereo-Signal auf (links = Eingang 1, rechts = Eingang 2). */
+  const KANAL_STD = { an: false, pegel: 100, laut: 80, filter: 0, echo: 0, rueck: 35, hall: 0, drive: 0, pan: 0 };
+  const KANAL = [Object.assign({}, KANAL_STD), Object.assign({}, KANAL_STD)];
+  try { const g = JSON.parse(localStorage.getItem("imres-lw-kanaele") || "null"); if (Array.isArray(g)) g.forEach((x, i) => { if (KANAL[i]) Object.assign(KANAL[i], x, { an: false }); }); } catch (_) {}
+  const EIN = { strom: null, quelle: null, split: null, k: [null, null], hall: null, laedt: null, fehler: "" };
+  function kanaeleMerken() { try { localStorage.setItem("imres-lw-kanaele", JSON.stringify(KANAL)); } catch (_) {} }
+  function eingangOeffnen() {
+    if (EIN.quelle) return Promise.resolve(true);
+    if (EIN.laedt) return EIN.laedt;
+    EIN.laedt = navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } } }).then(st => {
+      audioStart(); EIN.strom = st; EIN.quelle = ctx.createMediaStreamSource(st); EIN.split = ctx.createChannelSplitter(2); EIN.quelle.connect(EIN.split); EIN.fehler = ""; return true;
+    }).catch(e => { EIN.fehler = String(e && e.message || e); EIN.laedt = null; return false; });
+    return EIN.laedt;
+  }
+  function kanalHall() {
+    if (EIN.hall) return EIN.hall;
+    const sr = ctx.sampleRate, n = Math.round(sr * 2), b = ctx.createBuffer(2, n, sr);
+    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6) * (i < sr * .012 ? i / (sr * .012) : 1); }
+    const cv = ctx.createConvolver(); cv.buffer = b; const g = ctx.createGain(); g.gain.value = .55; cv.connect(g); g.connect(ausgang); EIN.hall = cv; return cv;
+  }
+  function kanalBauen(i) {
+    const c = ctx, k = { pre: c.createGain(), hp: c.createBiquadFilter(), lp: c.createBiquadFilter(), sh: c.createWaveShaper(), dry: c.createGain(), dl: c.createDelay(2.5), fb: c.createGain(), dlf: c.createBiquadFilter(), wet: c.createGain(), hs: c.createGain(), pan: c.createStereoPanner(), out: c.createGain(), mess: c.createAnalyser() };
+    k.hp.type = "highpass"; k.hp.frequency.value = 20; k.lp.type = "lowpass"; k.lp.frequency.value = 20000; k.dlf.type = "lowpass"; k.dlf.frequency.value = 3800;
+    k.mess.fftSize = 512; EIN.split.connect(k.pre, i);
+    k.pre.connect(k.mess); k.pre.connect(k.hp); k.hp.connect(k.lp); k.lp.connect(k.sh); k.sh.connect(k.dry); k.dry.connect(k.pan);
+    k.sh.connect(k.dl); k.dl.connect(k.dlf); k.dlf.connect(k.fb); k.fb.connect(k.dl); k.dlf.connect(k.wet); k.wet.connect(k.pan);
+    k.pan.connect(k.out); k.out.connect(ausgang); k.pan.connect(k.hs);
+    EIN.k[i] = k; return k;
+  }
+  function kanalAnwenden(i) {
+    const w = KANAL[i]; if (!ctx || !EIN.split) return;
+    if (!w.an) { const k = EIN.k[i]; if (k) { try { EIN.split.disconnect(k.pre, i); } catch (_) {} try { k.out.disconnect(); k.hs.disconnect(); } catch (_) {} EIN.k[i] = null; } return; }
+    const k = EIN.k[i] || kanalBauen(i), j = ctx.currentTime, z = (p, v) => { p.cancelScheduledValues(j); p.setValueAtTime(p.value, j); p.linearRampToValueAtTime(v, j + .03); };
+    z(k.pre.gain, w.pegel / 100); z(k.out.gain, Math.pow(w.laut / 100, 1.6));
+    const f = Math.max(-1, Math.min(1, w.filter / 100));
+    z(k.lp.frequency, f < 0 ? 20000 * Math.pow(.004, -f) : 20000); z(k.hp.frequency, f > 0 ? 20 * Math.pow(250, f) : 20);
+    const d = w.drive / 100; if (Math.round(d * 20) !== k.kurve) { k.kurve = Math.round(d * 20); if (d > 0) { const n = 1024, cv = new Float32Array(n), kk = 1 + k.kurve * 1.2; for (let x = 0; x < n; x++) { const t = x / (n - 1) * 2 - 1; cv[x] = Math.tanh(kk * t) / Math.tanh(kk); } k.sh.curve = cv; } else k.sh.curve = null; }
+    const bpm = (laeuft ? (tempoJetzt || S.tempo) : S.tempo) || 100; z(k.dl.delayTime, Math.min(2.4, 60 / bpm * .75));
+    z(k.wet.gain, w.echo / 100 * .7); z(k.fb.gain, Math.min(.9, w.rueck / 100)); z(k.pan.pan, Math.max(-1, Math.min(1, w.pan / 100)));
+    if (w.hall > 0) { const h = kanalHall(); if (!k.hallDran) { k.hs.connect(h); k.hallDran = true; } z(k.hs.gain, w.hall / 100); } else if (k.hallDran) { z(k.hs.gain, 0); }
+  }
   /* Effekte, die schon vor dem ersten Ton eingestellt wurden, greifen, sobald der Ton startet */
   setInterval(() => { if (!fxKette && ctx && (FXW.filter || FXW.echo || FXW.drive || FXW.crush || FXW.rate || FXW.ring || FXW.flanger || FXW.gate || FXW.wobble)) fxBauen(); }, 1000);
   const zynHoerZeit = p => { /* Audiozeit, die zum Zeitpunkt p (performance.now) gerade aus den Lautsprechern kommt */
@@ -13386,6 +13428,12 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       return best && best.d < schrittDauer() ? best : null;
     },
     midiHoerer(fn) { zynMidiHoerer = typeof fn === "function" ? fn : null; zynMidiZeile = -1; zynMidiAb = -1; },
+    kanal(i, werte) {
+      if (!KANAL[i]) return null;
+      if (werte) { Object.assign(KANAL[i], werte); kanaeleMerken(); if (KANAL[i].an) return eingangOeffnen().then(ok => { if (ok) kanalAnwenden(i); return Object.assign({ fehler: EIN.fehler }, KANAL[i]); }); kanalAnwenden(i); }
+      return Object.assign({ fehler: EIN.fehler }, KANAL[i]);
+    },
+    kanalPegel(i) { const k = EIN.k[i]; if (!k) return 0; const d = new Float32Array(k.mess.fftSize); k.mess.getFloatTimeDomainData(d); let m = 0; for (let x = 0; x < d.length; x++) m = Math.max(m, Math.abs(d[x])); return m; },
     vorlauf(sek) { zynVorlauf = Math.max(0, Math.min(2, +sek || 0)); },
     fx(k, v) { if (!(k in FXW) || !isFinite(+v)) return; FXW[k] = +v; if (fxBauen()) fxAnwenden(); },
     fxWerte() { return Object.assign({ zeiten: FX_ZEITEN.map(x => x[1]) }, FXW); },
