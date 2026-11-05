@@ -111,7 +111,7 @@ def leds():
         import neopixel_spi as neopixel
         pix = neopixel.NeoPixel_SPI(board.SPI(), 20, pixel_order=neopixel.GRB, auto_write=False, frequency=6400000)
     except Exception as e:
-        print("LEDs nicht verfügbar:", e)
+        print("LEDs nicht verfügbar:", e, flush=True)
         return
     nr = -1
     hell = float(os.environ.get("IMRES_LED_HELL", "0.6"))
@@ -127,7 +127,13 @@ def leds():
                 r_, g_, b_ = (v >> 16) & 255, (v >> 8) & 255, v & 255
                 pix[i] = (int(r_ * hell), int(g_ * hell), int(b_ * hell))
             pix.show()
-        except Exception:
+            if not getattr(leds, "gemeldet", False):
+                leds.gemeldet = True
+                print("LEDs laufen (erste Farben gesetzt)", flush=True)
+        except Exception as e:
+            if getattr(leds, "letzter_fehler", "") != str(e):
+                leds.letzter_fehler = str(e)
+                print("LED-Fehler:", e, flush=True)
             time.sleep(1)
 
 

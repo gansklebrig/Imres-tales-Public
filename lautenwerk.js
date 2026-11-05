@@ -13209,19 +13209,23 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     ein.connect(hp); hp.connect(lp); lp.connect(wobTrocken); wob.connect(wobNass); wobTrocken.connect(wobSumme); wobNass.connect(wobSumme);
     wobSumme.connect(trocken); sh.connect(shNass); trocken.connect(summe); shNass.connect(summe); fxSumme = wobSumme;
     summe.connect(endKnoten); summe.connect(dl); dl.connect(dlFilt); dlFilt.connect(rueck); rueck.connect(dl); dlFilt.connect(nass); nass.connect(endKnoten);
-    fxKette = { ein, hp, lp, sh, shNass, trocken, dl, rueck, nass, kurve: -1, wob, wobTiefe, wobOsz, wobNass, wobTrocken, wobAn: false, driveAn: false, glitch: null };
+    fxKette = { ein, hp, lp, sh, shNass, trocken, dl, rueck, nass, kurve: -1, wob, wobTiefe, wobOsz, wobNass, wobTrocken, wobAn: false, driveAn: false, glitch: null, glitchDrin: false, drin: true, ruhigSeit: 0 };
+    /* alle Sekunde: ist alles neutral und das Delay ausgeklungen, läuft der Ton an der Kette vorbei – spart Rechenzeit ohne Klangverlust */
+    setInterval(fxUmgehen, 1000);
     /* Glitch-Werk nachladen und vorne einhängen: ein → Glitch → Hochpass … */
     try {
       const url = URL.createObjectURL(new Blob([GLITCH_CODE], { type: "application/javascript" }));
       c.audioWorklet.addModule(url).then(() => {
         const g = new AudioWorkletNode(c, "imres-glitch", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2] });
-        try { ein.disconnect(hp); } catch (_) {} ein.connect(g); g.connect(hp); fxKette.glitch = g; fxAnwenden();
+        g.connect(hp); fxKette.glitch = g; fxKette.glitchDrin = false; fxAnwenden();
       }).catch(e => console.warn("Glitch-Werk", e));
     } catch (e) { console.warn("Glitch-Werk", e); }
     setInterval(fxZeit, 400); fxAnwenden(); return fxKette;
   }
   function fxAnwenden() {
     const k = fxKette; if (!k || !ctx) return; const j = ctx.currentTime;
+    if (!fxNeutral()) { k.ruhigSeit = 0; if (!k.drin) fxEinhaengen(); }
+    glitchSchalten();
     const z = (p, v) => { if (Math.abs(p.value - v) < 1e-4 * Math.max(1, Math.abs(v))) return; p.cancelScheduledValues(j); p.setValueAtTime(p.value, j); p.linearRampToValueAtTime(v, j + .03); };
     const f = Math.max(-1, Math.min(1, FXW.filter / 100)), q = .7 + FXW.reso / 100 * 11;
     z(k.lp.frequency, f < 0 ? 20000 * Math.pow(.004, -f) : 20000); z(k.lp.Q, f < 0 ? q : .7);
@@ -13238,8 +13242,31 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     z(k.wobNass.gain, wb); z(k.wobTrocken.gain, 1 - wb * .85);
     if (k.glitch) { const P = k.glitch.parameters, s01 = x => Math.max(0, Math.min(1, x / 100));
       ["crush", "rate", "ring", "flanger", "gate"].forEach(n => { const a = P.get(n), v = s01(FXW[n]); if (a && a.value !== v) a.setValueAtTime(v, j); });
-      ["stotter", "rueckwaerts", "bandstop"].forEach(n => { const a = P.get(n), v = FXW[n] ? 1 : 0; if (a && a.value !== v) a.setValueAtTime(v, j); }); }
+      const ab = Math.max(j, (k.glitchSeit || 0) + .15);
+      ["stotter", "rueckwaerts", "bandstop"].forEach(n => { const a = P.get(n), v = FXW[n] ? 1 : 0; if (a) { a.cancelScheduledValues(j); a.setValueAtTime(v, v ? ab : j); } }); }
     fxZeit();
+  }
+  const glitchNoetig = () => FXW.crush || FXW.rate || FXW.ring || FXW.flanger || FXW.gate || FXW.stotter || FXW.rueckwaerts || FXW.bandstop;
+  const fxNeutral = () => !FXW.filter && !FXW.echo && !FXW.drive && !FXW.wobble && !glitchNoetig();
+  function glitchSchalten() {
+    const k = fxKette; if (!k || !k.glitch) return;
+    const soll = !!glitchNoetig();
+    if (soll && !k.glitchDrin) { try { k.ein.disconnect(k.hp); } catch (_) {} k.ein.connect(k.glitch); k.glitchDrin = true; k.glitchSeit = ctx.currentTime; }
+    else if (!soll && k.glitchDrin) { try { k.ein.disconnect(k.glitch); } catch (_) {} k.ein.connect(k.hp); k.glitchDrin = false; }
+  }
+  function fxUmgehen() {
+    const k = fxKette; if (!k || !ctx) return;
+    if (!fxNeutral()) { k.ruhigSeit = 0; if (!k.drin) fxEinhaengen(); return; }
+    if (!k.ruhigSeit) { k.ruhigSeit = ctx.currentTime; return; }
+    if (k.drin && ctx.currentTime - k.ruhigSeit > 8) { /* 8 s neutral: Delay-Fahne sicher vorbei */
+      try { ausgang.disconnect(k.ein); ausgang.connect(endKnoten); if (kulAusRef) { kulAusRef.disconnect(k.ein); kulAusRef.connect(endKnoten); } } catch (_) {}
+      k.drin = false;
+    }
+  }
+  function fxEinhaengen() {
+    const k = fxKette; if (!k || k.drin) return;
+    try { ausgang.disconnect(endKnoten); ausgang.connect(k.ein); if (kulAusRef) { kulAusRef.disconnect(endKnoten); kulAusRef.connect(k.ein); } } catch (_) {}
+    k.drin = true; k.ruhigSeit = 0;
   }
   function fxZeit() {
     const k = fxKette; if (!k || !ctx) return;

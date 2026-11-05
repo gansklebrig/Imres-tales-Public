@@ -51,6 +51,8 @@
   let modus = lies("imres-zyn-modus", SEITE === "welten" ? "welten" : "buehne");
   if (!MODI[modus]) modus = SEITE === "welten" ? "welten" : "buehne";
   const ADRESSE = { welten: "/ambient.html?zyn=1", buehne: "/index.html?zyn=1#buehne" };
+  /* gleiche Seite: wirklich neu laden (nur den Anker zu ändern lädt nichts) */
+  const seiteLaden = ziel => { if (ziel === (/ambient\.html$/.test(location.pathname) ? "welten" : "buehne")) location.reload(); else location.replace(ADRESSE[ziel]); };
   if (MODI[modus].seite !== SEITE) { location.replace(ADRESSE[MODI[modus].seite]); return; }
   document.documentElement.classList.add("zyn", "zyn-" + SEITE, "zyn-m-" + modus); if (lies("imres-zyn-band", "0") === "1") document.documentElement.classList.add("zyn-band"); if (HINTER) document.documentElement.classList.add("zyn-hinter");
 
@@ -291,7 +293,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function modusMenue() {
     const knopf = (k, i) => '<button type="button" data-zm="' + k + '" class="' + (k === modus ? "an" : "") + '" style="--f:' + MODI[k].farbe + '"><span><span class="kbd">F' + (i + 1) + "</span>" + MODI[k].sym + " " + MODI[k].name + "</span><small>" + MODI[k].sub + "</small></button>";
     const a = {}; MODUS_REIHE.forEach(k => { a[k] = () => modusSetzen(k); });
-    a.system = systemMenue; a.hilfe = hilfe; a.optionen = () => optionenMenue(); a.pult = () => { schreib("imres-zyn-pult", "1"); schreib("imres-lw-modus", "einfach"); schreib("imres-zyn-modus", "buehne"); location.replace(ADRESSE.buehne); };
+    a.system = systemMenue; a.hilfe = hilfe; a.optionen = () => optionenMenue(); a.pult = () => { schreib("imres-zyn-pult", "1"); schreib("imres-lw-modus", "einfach"); schreib("imres-zyn-modus", "buehne"); seiteLaden("buehne"); };
     menue("<h3>" + W("Was soll klingen?", "What should play?") + '</h3><div class="reihe">' + MODUS_REIHE.map(knopf).join("") + "</div>" +
       '<div class="reihe drei"><button type="button" data-zm="optionen">🎚 ' + W("Optionen", "Options") + "<small>" + W("MIDI-Takt, Tonart, Mikrofon …", "MIDI clock, key, mic …") + '</small></button><button type="button" data-zm="hilfe">❔ ' + W("Tastenbelegung", "Button map") + '</button><button type="button" data-zm="system">⚙ ' + W("System", "System") + "<small>" + W("Zynthian, Neustart, Aus", "Zynthian, restart, off") + '</small></button><button type="button" data-zm="pult">🎻 ' + W("Zurück zum Pult", "Back to console") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen direkt · Pfeile + SEL · BACK schließt · MENU lang: System", "F1–F4 pick directly · arrows + SEL · BACK closes · hold MENU: system") + "</p>", Object.assign(a, { zu: menueZu }));
@@ -955,11 +957,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   /* Modus wechseln: Bühnen-Pult · Klangwelten · Beat-Builder (alle Regler der Webseite) */
   function zpModus(m) {
     menueZu();
-    if (m === "beat") { schreib("imres-zyn-pult", "0"); schreib("imres-lw-modus", "alles"); schreib("imres-zyn-modus", "buehne"); zeige("🥁 Beat-Builder", null, W("wird geladen …", "loading …")); setTimeout(() => location.replace(ADRESSE.buehne), 120); return; }
+    if (m === "beat") { schreib("imres-zyn-pult", "0"); schreib("imres-lw-modus", "alles"); schreib("imres-zyn-modus", "buehne"); zeige("🥁 Beat-Builder", null, W("wird geladen …", "loading …")); setTimeout(() => seiteLaden("buehne"), 120); return; }
     schreib("imres-zyn-pult", "1"); schreib("imres-lw-modus", "einfach");
     const ziel = m === "welten" ? "welten" : "buehne"; schreib("imres-zyn-modus", ziel);
     if (ziel === SEITE) return;
-    zeige(ziel === "welten" ? "🌿 " + W("Klangwelten", "Soundscapes") : "🎻 " + W("Bühnen-Pult", "Stage console"), null, W("wird geladen …", "loading …")); setTimeout(() => location.replace(ADRESSE[ziel]), 120);
+    zeige(ziel === "welten" ? "🌿 " + W("Klangwelten", "Soundscapes") : "🎻 " + W("Bühnen-Pult", "Stage console"), null, W("wird geladen …", "loading …")); setTimeout(() => seiteLaden(ziel), 120);
   }
   function zpModusMenue() {
     const k = (f, t, u, id, an) => '<button type="button" data-zm="' + id + '" class="' + (an ? "an" : "") + '"><span><span class="kbd">' + f + "</span>" + t + "</span><small>" + u + "</small></button>";
@@ -1051,7 +1053,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile + SEL · BACK schließt", "F1–F4 pick · arrows + SEL · BACK closes") + "</p>",
       { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu, beleg: () => belegMenue(),
-        leistung: () => { const l = ["voll", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % 3]; schreib("imres-lw-leicht", n === "voll" ? "0" : "1"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
+        leistung: () => { const l = ["voll", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % 3]; schreib("imres-lw-leicht", n === "voll" ? "0" : "1"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
         hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); zpMenue(); const b = $('.zyn-menue [data-zm="hell"]'); if (b) fokusSetzen(b); },
         looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="looplen"]'); if (b) fokusSetzen(b); },
         ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="ruhe"]'); if (b) fokusSetzen(b); },
@@ -1210,9 +1212,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function zpLeds(f) {
     if (zpRuhe) { const b = zpBalken(); SPALTEN.forEach((sp, c) => sp.forEach((k, h) => { f[k] = flammeFarbe(h, b[c]); })); return; }
     const d = zpDef(zpSeite), b = zpBlattJetzt(), blink = Math.floor(Date.now() / 450) % 2 === 0, i = ZP_SEITEN.findIndex(x => x.id === zpSeite);
-    ["F1", "F2", "F3", "F4"].forEach((nm, k) => { const it = b[(alt ? 4 : 0) + k]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : it.fav ? dimm(d.led, .45) : dimm(d.led, .14); });
-    ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL"].forEach(k => { const id = ZB.tasten[(alt ? "ALT+" : "") + k]; if (!id || id === "nichts") { f[k] = "#000000"; return; } const c = aktFarbe(id); f[k] = aktAktiv(id) ? c : dimm(c, .22); });
-    f.MIXER = BANK_FARBE[bankName()] || "#ffc830"; f.ALT = alt ? ALT_FARBE : dimm(ALT_FARBE, .18); f.MENU = dimm("#ffcf50", .35); f.BACK = dimm("#ff4020", .3);
+    ["F1", "F2", "F3", "F4"].forEach((nm, k) => { const it = b[(alt ? 4 : 0) + k]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : it.fav ? dimm(d.led, .6) : dimm(d.led, .3); });
+    ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL"].forEach(k => { const id = ZB.tasten[(alt ? "ALT+" : "") + k]; if (!id || id === "nichts") { f[k] = "#000000"; return; } const c = aktFarbe(id); f[k] = aktAktiv(id) ? c : dimm(c, .38); });
+    f.MIXER = BANK_FARBE[bankName()] || "#ffc830"; f.ALT = alt ? ALT_FARBE : dimm(ALT_FARBE, .18); f.MENU = dimm("#ffcf50", .5); f.BACK = dimm("#ff4020", .45);
     f.SEL = zpCursor >= 0 ? "#f4c45a" : dimm("#f4c45a", .15);
     if (alt) { f.LEFT = dimm(ZP_SEITEN[(i + ZP_SEITEN.length - 1) % ZP_SEITEN.length].led, .6); f.RIGHT = dimm(ZP_SEITEN[(i + 1) % ZP_SEITEN.length].led, .6); f.UP = f.DOWN = zpGruppen.length > 1 ? dimm("#ffffff", .3) : "#000000"; }
     else { f.LEFT = f.RIGHT = zpListe.length > 1 ? dimm("#ffffff", .3) : dimm("#ffffff", .08); f.UP = f.DOWN = dimm("#ffffff", .12); }
