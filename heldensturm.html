@@ -19432,7 +19432,7 @@ try{window.__dw={DW,losS:(a,b)=>dwFreiS(a,b),losO:(a,b)=>dwFreiO(a,b),shoot:o=>s
 const RGZ={ziel:window.__rgZiel||400,an:0,w:0,scale:1,dpr0:window.devicePixelRatio||1};
 (function(){
  const touch=/Android|Mobile|iPhone|iPad/i.test(navigator.userAgent)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
- if(!touch||window.__rgAus)return;
+ if(!touch||window.__rgAus||!window.__rgAltSkal)return;
  let meta=document.querySelector('meta[name="viewport"]');
  if(!meta){meta=document.createElement('meta');meta.name='viewport';meta.content='width=device-width, initial-scale=1, viewport-fit=cover';document.head.appendChild(meta)}
  const BASIS=meta.content;
@@ -21495,6 +21495,255 @@ function dtWuerfelDraw(c,inV,t){const w=DT.wf;if(!w||!inV(w.x,w.y,30))return;con
 /* ---------- Einbindung Teil 2 ---------- */
 {const u0=updAmb;updAmb=function(dt,camX,camY,vw,vh){const r=u0.apply(this,arguments);try{if(DT.uf2!==DT.f&&!G.bot){DT.uf2=DT.f;dtRexTor();dtGegnerUpd(Math.min(0.05,dt||0));dtSzUpd();dtWuerfelUpd()}}catch(e){if(!DT.err4){DT.err4=1;console.error(e)}}return r}}
 {const d0=drawAmb;drawAmb=function(add,t){const r=d0.apply(this,arguments);if(G.bot)return r;try{if(!add){dtSzDraw(cx,dtInV,t);dtWuerfelDraw(cx,dtInV,t)}else{dtGegnerGlow(t);dtStimmung(t)}}catch(e){if(!DT.err5){DT.err5=1;console.error(e)}}return r}}
+
+/* ===== rg2: RG353V & alte Browser-Engines (Android-WebView/Chromium < 88) =====
+   Befund am echten Gerät (Fotos): Menüs nur im oberen Drittel, darunter läuft das Spiel, Reiterleiste halb breit,
+   leere Sprechblase. Ursache: die Browser-Engine des Geräts ist alt – ohne „inset“ (Chrome 87) hat .screen keine Höhe
+   mehr (nur so hoch wie der Inhalt), ohne clamp()/min()/max() (Chrome 79) fallen hunderte Größenangaben weg.
+   Nachgestellt mit echtem Chromium 77 und 79 (headless) – gleiches Bild wie auf den Fotos.
+   Hier: 1) CSS-Übersetzer für alte Engines (Stylesheets, style-Attribute, nicht unterstützte Selektoren, Flex-gap),
+   2) robuste Handheld-Erkennung + Layout für flache Querformate (ersetzt das Herunterskalieren über meta viewport),
+   3) Vollbild, 4) Spargrafik auf schwachen Geräten, 5) Diagnose (?diag oder 5× Select). */
+const RG2={v:1,err:[],q:location.search||'',hh:false,flach:false,weak:false,spar:false,alt:false,fs0:false,diag:false,bub:0,fps:0,ft:[]};window.__hsRG2=RG2;
+try{addEventListener('error',e=>{try{RG2.err.push(String(e.message||e).slice(0,120)+(e.lineno?' @'+e.lineno:''));if(RG2.err.length>8)RG2.err.shift()}catch(x){}})}catch(e){}
+
+/* ---------- 1) CSS für alte Engines ---------- */
+(function(){
+ const zwang=/[?&]altcss=1/.test(RG2.q);
+ const kann=(p,v)=>{try{return !!(window.CSS&&CSS.supports&&CSS.supports(p,v))}catch(e){return false}};
+ const selOk=s=>{try{document.querySelector(s);return true}catch(e){return false}};
+ const F={clamp:kann('width','clamp(1px, 1vw, 2px)'),minmax:kann('width','min(1px, 2px)'),inset:kann('inset','0'),mix:kann('color','color-mix(in srgb, red 50%, blue)'),
+  is:selOk(':is(body)'),where:selOk(':where(body)'),fv:selOk(':focus-visible'),has:selOk(':has(body)'),dvh:kann('height','1dvh'),ar:kann('aspect-ratio','1'),
+  fgap:(()=>{try{const d=document.createElement('div');d.style.cssText='display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden';d.appendChild(document.createElement('div'));d.appendChild(document.createElement('div'));document.documentElement.appendChild(d);const ok=d.scrollHeight===1;d.remove();return ok}catch(e){return true}})()};
+ RG2.F=F;
+ const alt=zwang||!F.clamp||!F.minmax||!F.inset||!F.mix||!F.is;RG2.alt=alt;RG2.altZwang=zwang;
+ if(!alt)return;
+ document.documentElement.classList.add('rgalt');
+ const NF=zwang?{clamp:false,minmax:false,inset:false,mix:false,is:false,where:false,dvh:false}:F;
+ /* passende schließende Klammer */
+ const zu=(s,i)=>{let t=0;for(let j=i;j<s.length;j++){const c=s[j];if(c==='(')t++;else if(c===')'){t--;if(!t)return j}}return -1};
+ const teile=(s,sep)=>{const a=[];let t=0,b=0,q=0;for(let j=0;j<s.length;j++){const c=s[j];if(c==='"'||c==="'"){q=q===c?0:q||c}else if(q){}else if(c==='('||c==='[')t++;else if(c===')'||c===']')t--;else if(c===sep&&!t){a.push(s.slice(b,j).trim());b=j+1}}a.push(s.slice(b).trim());return a};
+ /* Ausdrücke mit px/vw/vh/vmin/vmax/rem ausrechnen (für die aktuelle Fenstergröße); sonst null */
+ let VW=innerWidth,VH=innerHeight,REM=16,vpUsed=false;
+ const U={px:1,vw:()=>VW/100,vh:()=>VH/100,vmin:()=>Math.min(VW,VH)/100,vmax:()=>Math.max(VW,VH)/100,rem:()=>REM};
+ function rechne(src){let i=0;const s=src;let vp=false;
+  const ws=()=>{while(i<s.length&&/\s/.test(s[i]))i++};
+  function prim(){ws();if(s[i]==='('){i++;const v=add();ws();if(s[i]!==')')throw 0;i++;return v}
+   const m=/^(calc|min|max|clamp)\(/.exec(s.slice(i));if(m){const a=i+m[1].length,e=zu(s,a);if(e<0)throw 0;const args=teile(s.slice(a+1,e),',').map(x=>{const r=rechne(x);if(!r)throw 0;if(r.vp)vp=true;return r});i=e+1;
+    if(args.some(x=>x.u!==args[0].u))throw 0;const vs=args.map(x=>x.v);let v;
+    if(m[1]==='calc')v=vs[0];else if(m[1]==='min')v=Math.min(...vs);else if(m[1]==='max')v=Math.max(...vs);else{if(vs.length!==3)throw 0;v=Math.max(vs[0],Math.min(vs[1],vs[2]))}return{v,u:args[0].u}}
+   const n=/^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)([a-z%]*)/i.exec(s.slice(i));if(!n)throw 0;i+=n[0].length;const u=n[2].toLowerCase();
+   if(!u)return{v:+n[1],u:''};const f=U[u];if(!f)throw 0;if(typeof f==='function')vp=true;return{v:+n[1]*(typeof f==='function'?f():f),u:'px'}}
+  function mul(){let a=prim();for(;;){ws();const c=s[i];if(c!=='*'&&c!=='/')return a;i++;const b=prim();
+    if(c==='*'){if(a.u&&b.u)throw 0;a={v:a.v*b.v,u:a.u||b.u}}else{if(b.u)throw 0;a={v:a.v/b.v,u:a.u}}}}
+  function add(){let a=mul();for(;;){ws();const c=s[i];if(c!=='+'&&c!=='-')return a;i++;const b=mul();if(a.u!==b.u)throw 0;a={v:c==='+'?a.v+b.v:a.v-b.v,u:a.u}}}
+  try{const r=add();ws();if(i!==s.length)return null;r.vp=vp;return r}catch(e){return null}}
+ const brauchbar=v=>!/var\(|env\(|cq[whib]|dvh|svh|lvh|attr\(/.test(v);
+ const fmt=r=>(Math.round(r.v*100)/100)+(r.u||'');
+ function ersetzeFn(s,name,fn){const re=new RegExp('(^|[^a-zA-Z0-9_-])'+name+'\\(','g');let m,aus='',pos=0;
+  while((m=re.exec(s))){const start=m.index+m[1].length,auf=start+name.length,ende=zu(s,auf);if(ende<0)break;const innen=s.slice(auf+1,ende);aus+=s.slice(pos,start)+fn(innen,s.slice(start,ende+1));pos=ende+1;re.lastIndex=pos}
+  return aus+s.slice(pos)}
+ /* innerste zuerst: mehrfach durchlaufen */
+ function fnWeg(css){for(let k=0;k<6;k++){const vor=css;
+   css=ersetzeFn(css,'clamp',(i,ganz)=>{if(/(^|[^a-z-])(clamp|min|max)\(/.test(i))return ganz;const r=rechne(ganz);if(r){if(r.vp)vpUsed=true;return fmt(r)}const a=teile(i,',');if(a.length!==3)return a[0]||'0';return brauchbar(a[1])?'calc('+a[1]+')':brauchbar(a[0])?a[0]:a[1]});
+   css=ersetzeFn(css,'min',(i,ganz)=>{if(/(^|[^a-z-])(clamp|min|max)\(/.test(i))return ganz;const a=teile(i,',');if(a.length<2)return ganz;const r=rechne(ganz);if(r){if(r.vp)vpUsed=true;return fmt(r)}
+     /* nicht ausrechenbar (%, var): feste Obergrenze in px bevorzugen, wenn die andere Seite relativ ist – sonst die erste brauchbare */
+     const px=a.filter(x=>brauchbar(x)&&rechne(x));const rel=a.filter(x=>brauchbar(x)&&/%/.test(x));if(rel.length)return 'calc('+rel[0]+')';if(px.length)return fmt(rechne(px[0]));return a.find(brauchbar)?'calc('+a.find(brauchbar)+')':a[0]});
+   css=ersetzeFn(css,'max',(i,ganz)=>{if(/(^|[^a-z-])(clamp|min|max)\(/.test(i))return ganz;const a=teile(i,',');if(a.length<2)return ganz;const r=rechne(ganz);if(r){if(r.vp)vpUsed=true;return fmt(r)}
+     const rel=a.filter(x=>brauchbar(x)&&/%/.test(x));if(rel.length)return 'calc('+rel[0]+')';const b=a.find(brauchbar);return b?'calc('+b+')':a[0]});
+   if(css===vor)break}
+  return css}
+ function umschreiben(css){vpUsed=false;css=css.replace(/\/\*[\s\S]*?\*\//g,'');
+  if(!NF.dvh)css=css.replace(/(\d*\.?\d+)(dvh|svh|lvh)\b/g,'$1vh');
+  if(!NF.clamp||!NF.minmax)css=fnWeg(css);
+  if(!NF.mix)css=ersetzeFn(css,'color-mix',i=>{const a=teile(i,',');return (a[1]||'currentColor').replace(/\s+\d+(\.\d+)?%\s*$/,'')});
+  if(!NF.inset)css=css.replace(/(^|[;{\s])inset\s*:\s*([^;}!]+)(!important)?/g,(m,vor,w,imp)=>{const v=w.trim().split(/\s+/);const t=v[0],r=v[1]||t,b=v[2]||t,l=v[3]||r;imp=imp||'';return vor+'top:'+t+imp+';right:'+r+imp+';bottom:'+b+imp+';left:'+l+imp});
+  return regeln(css)}
+ /* Selektorlisten: :is()/:where() ausklappen, Teile mit unbekannten Pseudoklassen (z. B. :focus-visible, :has) einzeln weglassen
+    – sonst verwirft die alte Engine die ganze Regel (auch die gültigen Teile wie .sel / :focus) */
+ const SELC=new Map();const PSE=/::?(-webkit-[a-z-]+|before|after|placeholder|selection|marker|backdrop|first-line|first-letter)(\([^)]*\))?/g;
+ const teilOk=s=>{let r=SELC.get(s);if(r===undefined){r=zwang&&/:(has|focus-visible|where|is)\b/.test(s)?false:selOk(s.replace(PSE,'')||'*');SELC.set(s,r)}return r};
+ function ausklappen(s){const m=/:(is|where)\(/.exec(s);if(!m)return[s];const auf=m.index+m[0].length-1,ende=zu(s,auf);if(ende<0)return[s];const vor=s.slice(0,m.index),nach=s.slice(ende+1);let r=[];for(const a of teile(s.slice(auf+1,ende),','))r=r.concat(ausklappen(vor+a+nach));return r}
+ function blockEnde(s,k){let t=0,q=0;for(let j=k;j<s.length;j++){const c=s[j];if(c==='"'||c==="'"){q=q===c?0:q||c}else if(q){}else if(c==='{')t++;else if(c==='}'){t--;if(!t)return j}}return s.length-1}
+ function regeln(css){let aus='',i=0;
+  while(i<css.length){const k=css.indexOf('{',i);if(k<0){aus+=css.slice(i);break}const sel=css.slice(i,k),ende=blockEnde(css,k),kopf=sel.trim();
+   if(kopf.charAt(0)==='@'){if(/^@(media|supports|document)/.test(kopf))aus+=sel+'{'+regeln(css.slice(k+1,ende))+'}';else aus+=css.slice(i,ende+1)}
+   else{const vorspann=sel.match(/^\s*/)[0];let L=[];for(const p of teile(kopf,','))L=L.concat(ausklappen(p));const ok=L.filter(teilOk);
+    if(ok.length===L.length&&!/:(is|where)\(/.test(kopf))aus+=css.slice(i,ende+1);else if(ok.length)aus+=vorspann+ok.join(',')+css.slice(k,ende+1)}
+   i=ende+1}
+  return aus}
+ RG2.umschreiben=umschreiben;
+ let nSt=0,nAt=0;const VPST=new Set();
+ function bearbeite(el){if(!el||el.tagName!=='STYLE'||el.__rg2===el.textContent)return;const t=el.__rg2o&&el.__rg2===el.textContent?el.__rg2o:el.textContent;if(!t)return;
+  try{const n=umschreiben(t);el.__rg2o=t;if(vpUsed)VPST.add(el);if(n!==t){el.textContent=n;nSt++}el.__rg2=el.textContent}catch(e){RG2.err.push('altcss '+e.message)}}
+ const ATTR=/clamp\(|(^|[^a-z-])(min|max)\(|inset\s*:|color-mix|[0-9](dvh|svh)/;
+ function attr(el){const s=el.getAttribute&&el.getAttribute('style');if(!s||!ATTR.test(s)||el.__rg2a===s)return;try{const n=umschreiben('x{'+s+'}').replace(/^x\{|\}$/g,'');el.__rg2a=n;el.__rg2ao=s;if(n!==s){el.setAttribute('style',n);nAt++}}catch(e){}}
+ function alle(){for(const s of document.getElementsByTagName('style'))bearbeite(s);for(const e of document.querySelectorAll('[style]'))attr(e)}
+ alle();
+ try{new MutationObserver(ms=>{for(const m of ms){if(m.type==='childList'){if(m.target.tagName==='STYLE'){bearbeite(m.target);continue}
+   for(const n of m.addedNodes){if(n.nodeType!==1)continue;if(n.tagName==='STYLE'){bearbeite(n);continue}attr(n);if(n.firstElementChild){const L=n.querySelectorAll('[style]');for(let i=0;i<L.length;i++)attr(L[i])}}}
+   else if(m.type==='characterData'){const p=m.target.parentNode;if(p&&p.tagName==='STYLE')bearbeite(p)}}}).observe(document.documentElement,{childList:true,subtree:true,characterData:true})}catch(e){}
+ /* vw/vh-abhängige Ersatzwerte bei Größenänderung neu ausrechnen */
+ let rt=0;const neu=()=>{if(innerWidth===VW&&innerHeight===VH)return;VW=innerWidth;VH=innerHeight;for(const el of VPST){if(!el.isConnected){VPST.delete(el);continue}el.__rg2=null;const o=el.__rg2o;if(o){el.textContent=o;bearbeite(el)}}
+  for(const e of document.querySelectorAll('[style]'))if(e.__rg2ao&&e.getAttribute('style')===e.__rg2a){e.__rg2a=null;e.setAttribute('style',e.__rg2ao);attr(e)}};
+ addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(neu,120)});
+ RG2.altStat=()=>({st:nSt,at:nAt,vp:VPST.size});
+ /* Flex-Abstände (gap) gibt es erst ab Chrome 84: Abstände als Ränder nachbauen */
+ if(!F.fgap){const px=v=>parseFloat(v)||0;
+  RG2.gapFix=function(root){if(!root||!root.querySelectorAll)return 0;const L=root.querySelectorAll('*'),todo=[];let sp=0;
+    /* erst alles lesen, dann schreiben (sonst rechnet der Browser bei jedem Element neu) */
+    for(let i=0;i<L.length;i++){const el=L[i];if(el.tagName==='CANVAS'||el.tagName==='svg')continue;const cs=getComputedStyle(el);if(cs.display!=='flex'&&cs.display!=='inline-flex')continue;
+     const rg=px(cs.rowGap),cg=px(cs.columnGap);if(!rg&&!cg)continue;
+     /* Text direkt im Flex-Behälter (z. B. „🗺 <b>4 Abschnitte</b> erkunden“) bekommt eine Hülle, damit der Abstand greift */
+     for(const n of [...el.childNodes])if(n.nodeType===3&&n.textContent.trim()){const h=document.createElement('span');h.className='rggt';n.parentNode.insertBefore(h,n);h.appendChild(n);sp++}const col=/column/.test(cs.flexDirection),wrap=cs.flexWrap!=='nowrap',rev=/reverse/.test(cs.flexDirection);let j=0;
+     for(const c of el.children){const s=getComputedStyle(c);if(s.display==='none'||s.position==='absolute'||s.position==='fixed')continue;const W={};
+      if(col){if(j>0&&rg)W[rev?'marginBottom':'marginTop']=rg}else{if(j>0&&cg)W[rev?'marginRight':'marginLeft']=cg;if(wrap&&rg)W.marginBottom=rg}
+      const o=c.__rgGap||{};for(const p in W){if(o[p]===W[p]||s[p]==='auto'||px(s[p])!==0&&o[p]===undefined)delete W[p]}todo.push([c,W]);j++}}
+    let n=0;for(const [c,W] of todo){const o=c.__rgGap||(c.__rgGap={});for(const p in W){c.style[p]=W[p]+'px';o[p]=W[p];n++}}return n+sp};
+  let gt=0;const lauf=()=>{gt=0;let n=0;try{for(const r of document.querySelectorAll('.screen:not([hidden]),#hud,.ov:not([hidden]),.tutk'))n+=RG2.gapFix(r)}catch(e){}
+   /* Abstände geändert: Menü neu einpassen (sonst ragt die Seitenleiste ein Stück aus dem Bild) */
+   if(n)requestAnimationFrame(()=>{try{if(!scr.hidden&&!MF.busy){zwFit();menuFit(scr)}for(const g of LM.panes)if(g.vm&&g.vm.el&&!g.vm.el.hidden)menuFit(g.vm.el)}catch(e){}})};
+  try{new MutationObserver(()=>{if(!gt)gt=setTimeout(lauf,30)}).observe(document.body,{childList:true,subtree:true})}catch(e){}
+  setTimeout(lauf,0)}
+})();
+
+/* ---------- 2) Handheld-Erkennung und Layout flacher Querformate ---------- */
+RG2.T={menuFit:h=>menuFit(h||scr),zwFit:()=>zwFit(),fsOn:()=>fsOn(),gfxL:()=>gfxL()};
+if(RG2.gapFix){const _mf=menuFit;menuFit=function(h){try{RG2.gapFix(h||scr)}catch(e){}return _mf.apply(this,arguments)};
+ const _zw=zwFit;zwFit=function(){try{RG2.gapFix(scr)}catch(e){}return _zw.apply(this,arguments)}}
+function rgStandalone(){try{const api=!!(document.fullscreenElement||document.webkitFullscreenElement);return !api&&matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}}
+function rgPad(){try{return Object.keys(PADS.st||{}).length>0}catch(e){return false}}
+function rgHHPruef(){const w=innerWidth,h=innerHeight,quer=w>h*1.15;let fein=false;try{fein=matchMedia('(hover:hover) and (pointer:fine)').matches}catch(e){}
+ const android=/Android/i.test(navigator.userAgent),touch=MOBIL||'ontouchstart' in window;
+ const hh=quer&&h<=430&&(touch||android||rgPad()&&!fein),flach=hh&&h<300;const ch=hh!==RG2.hh||flach!==RG2.flach||(hh&&h<=360)!==!!RG2.klein;
+ RG2.hh=hh;if(hh)RG2.hhJe=true;RG2.flach=flach;RG2.klein=hh&&h<=360;const H=document.documentElement.classList;H.toggle('rghh',hh);H.toggle('rgflach',flach);H.toggle('rgklein',RG2.klein);
+ try{RGZ.an=hh&&h<375?1:0;RGZ.scale=1}catch(e){}
+ return ch}
+rgHHPruef();
+/* sehr flach (z. B. 427×250 bei Dichte 1,5): Menüs etwas verkleinern (wie ~320 px Höhe), statt 400 px Layout auf 62 % zu stauchen */
+{const _mz=menuZoom;menuZoom=function(){const r=_mz.apply(this,arguments);try{if(RG2.flach){const z=Math.max(0.8,Math.min(1,innerHeight/320));document.documentElement.style.setProperty('--mz',z.toFixed(3))}}catch(e){}return r}}
+{const _zm=mfZMin;mfZMin=function(){if(RG2.flach)return Math.max(0.8,Math.min(1,innerHeight/320));return _zm.apply(this,arguments)}}
+try{menuZoom()}catch(e){}
+let rgRT=0;function rgNeu(){clearTimeout(rgRT);rgRT=setTimeout(()=>{const ch=rgHHPruef();try{menuZoom()}catch(e){}try{resize()}catch(e){}if(ch)try{if(!scr.hidden){zwFit();menuFit(scr)}}catch(e){}},90)}
+addEventListener('resize',rgNeu);addEventListener('orientationchange',()=>setTimeout(rgNeu,250));
+document.addEventListener('fullscreenchange',rgNeu);document.addEventListener('webkitfullscreenchange',rgNeu);
+try{if(window.visualViewport)visualViewport.addEventListener('resize',rgNeu)}catch(e){}
+/* Kompaktstil für Handhelds (Ergänzung zu rg353css): kleinste Schriften auf lesbare Größe */
+{const st=document.createElement('style');st.id='rg2css';st.textContent=`
+html.rghh .wrap.ivg .equip .it .sl,html.rghh .wrap.ivg .equip.ivmini .it.empty .sl{font-size:10.5px!important}
+html.rghh .rgfs small{font-size:11px}
+#rgdiag{position:fixed;left:4px;top:4px;z-index:2147483000;max-width:calc(100% - 8px);margin:0;padding:4px 6px;background:rgba(10,7,12,.86);color:#ffd37a;border:1px solid rgba(229,180,84,.45);border-radius:6px;font:10px/1.25 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;pointer-events:none}
+#rgdiag.gross{top:4px;bottom:auto;right:4px}
+`;document.head.appendChild(st)}
+
+/* ---------- 3) Vollbild ---------- */
+RG2.fsVersucht=false;RG2.fsAusUser=false;
+function rgFsWunsch(){return RG2.hh&&fsOk()&&!fsOn()&&!rgStandalone()&&!RG2.fsVersucht&&!RG2.fsAusUser&&SAVE.rgFs!==false}
+function rgFsReq(){RG2.fsVersucht=true;try{const e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(!f)return;const r=f.call(e,{navigationUI:'hide'});if(r&&r.then)r.then(()=>{RG2.fs0=true;rgNeu()}).catch(()=>{RG2.fsVersucht=false})}catch(e){RG2.fsVersucht=false}}
+{const erst=ev=>{if(!rgFsWunsch())return;if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-act="fs"]'))return;rgFsReq()};
+ for(const k of['pointerup','touchend','keydown','click'])addEventListener(k,erst,true)}
+document.addEventListener('fullscreenchange',()=>{if(!fsOn()&&RG2.fs0)RG2.fsAusUser=true;if(fsOn())RG2.fs0=true});
+/* Knopf „Vollbild“ im Hauptmenü und in der Pause (nur wo es Vollbild gibt und das Spiel nicht schon als App läuft) */
+/* nur auf Handhelds (flaches Querformat) – Handy hochkant bleibt unverändert; im Vollbild bleibt der Knopf zum Beenden */
+function rgFsZeigen(){return fsOk()&&!rgStandalone()&&(RG2.hh||RG2.hhJe&&fsOn())}
+{const _mh=slMainHtml;slMainHtml=function(){let h=_mh.apply(this,arguments);try{if(rgFsZeigen()){const an=fsOn(),tip=/Android/i.test(navigator.userAgent)?'Tipp: Browser-Menü ⋮ → „Zum Startbildschirm hinzufügen“ – startet dann immer ohne Leisten':'Blendet Adress- und Statusleiste aus';
+  const b=`<button class="slb rgfs" data-act="fs"><span class="ic">⛶</span><span class="tx">${an?'Vollbild beenden':'Vollbild'}<small>${tip}</small></span></button>`;const i=h.indexOf('<button class="slb" data-act="sl-go" data-v="opt"');if(i>0)h=h.slice(0,i)+b+h.slice(i)}}catch(e){}return h}}
+{const _rp=renderPause;renderPause=function(){const r=_rp.apply(this,arguments);try{if(rgFsZeigen()&&!scr.querySelector('.rgfsp')){const c=[...scr.querySelectorAll('.wrap > .spread [data-act="close"]')][0];if(c){const b=document.createElement('button');b.className='btn rgfsp';b.dataset.act='fs';b.textContent=fsOn()?'⛶ Vollbild aus':'⛶ Vollbild';b.title='Adress- und Statusleiste ausblenden';c.parentNode.insertBefore(b,c);if(!MF.busy&&!scr.hidden)menuFit(scr)}}}catch(e){}return r}}
+document.addEventListener('fullscreenchange',()=>{try{document.querySelectorAll('.rgfsp').forEach(b=>b.textContent=fsOn()?'⛶ Vollbild aus':'⛶ Vollbild');document.querySelectorAll('.rgfs .tx').forEach(t=>{if(t.firstChild&&t.firstChild.nodeType===3)t.firstChild.textContent=fsOn()?'Vollbild beenden':'Vollbild'})}catch(e){}});
+
+/* ---------- 4) Sprechblase: Text immer sichtbar ----------
+   Kasten ohne Text auf dem Gerät: der Text nutzt „Alegreya Sans“ 700, die anderen Bildtexte 800. Ist der Schnitt (noch) nicht geladen,
+   zeichnen manche Engines gar nichts. Darum: Schnitte vorladen und bis dahin mit Systemschrift schreiben; Zeichenzustand vorher zurücksetzen. */
+const RGFONT={ok:{}};
+function rgFont(f){try{if(!document.fonts||!document.fonts.check)return f;let v=RGFONT.ok[f];if(v===undefined||v===0&&performance.now()-(RGFONT['t'+f]||0)>1500){RGFONT['t'+f]=performance.now();v=RGFONT.ok[f]=document.fonts.check(f)?1:0;if(!v)try{document.fonts.load(f)}catch(e){}}return v?f:f.replace(/"Alegreya Sans",?/,'')}catch(e){return f}}
+try{if(document.fonts&&document.fonts.load)for(const w of[700,800])document.fonts.load(w+' 12px "Alegreya Sans"').catch(()=>{})}catch(e){}
+bubbleAt=function(x,y,txt,k,small){const c=cx;RG2.bub++;c.globalCompositeOperation='source-over';c.shadowBlur=0;c.shadowColor='rgba(0,0,0,0)';try{if('filter' in c)c.filter='none'}catch(e){}
+ c.font=rgFont(`700 ${small?11:12}px "Alegreya Sans",sans-serif`);txt=String(txt==null?'':txt);const L=wrapText(txt,small?90:170),lh=small?13:15;let w=0;for(const l of L)w=Math.max(w,c.measureText(l).width);w+=16;const h=L.length*lh+10;const bx=x-w/2,by=y-h-8;
+ const a=Math.max(0,Math.min(1,k*8,(1-k)*5));c.globalAlpha=a;c.fillStyle='#f6ecd6';c.strokeStyle='#3a2a1a';c.lineWidth=1.5;c.beginPath();if(c.roundRect)c.roundRect(bx,by,w,h,8);else c.rect(bx,by,w,h);c.fill();c.stroke();
+ c.beginPath();c.moveTo(x-6,by+h-0.5);c.lineTo(x,by+h+7);c.lineTo(x+6,by+h-0.5);c.closePath();c.fill();c.beginPath();c.moveTo(x-6,by+h);c.lineTo(x,by+h+7);c.lineTo(x+6,by+h);c.stroke();
+ c.fillStyle='#2a1a10';c.textAlign='center';c.textBaseline='middle';L.forEach((l,i)=>c.fillText(l,x,by+5+i*lh+lh/2));c.textBaseline='alphabetic';c.globalAlpha=1};
+
+/* ---------- 5) Diagnose: ?diag oder 5× Select (View) – Werte zum Ablesen am Gerät ---------- */
+RG2.diag=/[?&]diag\b/.test(RG2.q);
+{const IV=[];let last=0,sel=[],prevB=false;
+ const loop=t=>{requestAnimationFrame(loop);if(last){const d=t-last;IV.push(d);if(IV.length>90)IV.shift()}last=t;
+  /* Select fünfmal binnen 3 s: Diagnose an/aus */
+  try{const g=navigator.getGamepads?navigator.getGamepads():[];let b=false;for(const p of g)if(p&&p.buttons&&p.buttons[8]&&p.buttons[8].pressed)b=true;
+   if(b&&!prevB){const n=performance.now();sel=sel.filter(x=>n-x<3000);sel.push(n);if(sel.length>=5){sel=[];RG2.diag=!RG2.diag;rgDiag()}}prevB=b}catch(e){}};
+ requestAnimationFrame(loop);
+ RG2.fpsMess=()=>{if(!IV.length)return{fps:0,p90:0};const s=IV.slice().sort((a,b)=>a-b),avg=IV.reduce((a,b)=>a+b,0)/IV.length;return{fps:Math.round(1000/avg),p90:Math.round(s[Math.floor(s.length*0.9)])}}}
+function rgDiagText(){const f=RG2.fpsMess(),vv=window.visualViewport,F=RG2.F||{},L=(()=>{try{return gfxL()}catch(e){return-1}})(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;
+ let pads='';try{pads=(navigator.getGamepads?[...navigator.getGamepads()].filter(Boolean).map(p=>p.id.slice(0,24)+'/'+p.mapping):[]).join(', ')}catch(e){}
+ const yn=v=>v?'ja':'NEIN',st=RG2.altStat?RG2.altStat():null;
+ const fehlt=Object.keys(F).filter(k=>F[k]===false),ua=navigator.userAgent,cr=(ua.match(/Chrome\/([\d.]+)/)||[])[1],an=(ua.match(/Android [\d.]+/)||[])[0];
+ return [`${innerWidth}×${innerHeight} dpr ${(window.devicePixelRatio||1).toFixed(2)}${vv?` vv ${Math.round(vv.width)}×${Math.round(vv.height)}`:''} · ${f.fps} fps (p90 ${f.p90}ms) · ${L>=0?GFX[L].n:'?'}${auto?' Auto':''} · ${cv.width}×${cv.height}${RG2.spar?' · Spar':''}${RG2.weak?' · schwach':''}`,
+  `HH ${yn(RG2.hh)}${RG2.flach?' flach':''} · Vollbild ${yn(fsOn())} · App ${yn(rgStandalone())} · ${navigator.hardwareConcurrency||'?'} Kerne · ${navigator.deviceMemory||'?'} GB · Pad ${pads||'–'}`,
+  `${cr?'Chrome '+cr:ua.slice(0,60)}${an?' · '+an:''} · CSS fehlt: ${fehlt.length?fehlt.join(' '):'nichts'}${RG2.alt?` → Übersetzer an${st?` (${st.st}/${st.at})`:''}`:''} · Blasen ${RG2.bub}`].concat(RG2.err.length?['Fehler: '+RG2.err.slice(-3).join(' | ')]:[]).join('\n')}
+function rgDiag(){let d=document.getElementById('rgdiag');if(!RG2.diag){if(d)d.remove();clearInterval(RG2.dt);RG2.dt=0;return}
+ if(!d){d=document.createElement('pre');d.id='rgdiag';document.body.appendChild(d)}d.textContent=rgDiagText();if(!RG2.dt)RG2.dt=setInterval(()=>{const e=document.getElementById('rgdiag');if(e)e.textContent=rgDiagText()},500)}
+if(RG2.diag)setTimeout(rgDiag,300);
+/* Testzugang (nur ?rgtest / ?rgprof) */
+if(/[?&]rg(prof|test)\b/.test(RG2.q))RG2.ev=src=>eval(src);
+/* Profil (nur Test: ?rgprof): Zeit und Canvas-Aufrufe je Zeichenfunktion */
+if(/[?&]rgprof\b/.test(RG2.q)){const P=RG2.prof={},S=[];let calls=0;
+ const C=cx;for(const k of['fill','stroke','fillRect','strokeRect','drawImage','fillText','strokeText','arc','ellipse','lineTo','moveTo','beginPath','save','restore','translate','scale','rotate','setTransform','createRadialGradient','createLinearGradient','bezierCurveTo','quadraticCurveTo','closePath','rect','clip']){const f=C[k];if(typeof f!=='function')continue;C[k]=function(){calls++;return f.apply(this,arguments)}}
+ const wrap=(n,get,set)=>{const f=get();if(typeof f!=='function')return;set(function(){const t0=performance.now(),c0=calls;S.push(n);try{return f.apply(this,arguments)}finally{S.pop();const q=P[n]||(P[n]={t:0,n:0,c:0});q.t+=performance.now()-t0;q.n++;q.c+=calls-c0}})};
+ wrap('render',()=>render,f=>render=f);wrap('update',()=>update,f=>update=f);wrap('drawEnemy',()=>drawEnemy,f=>drawEnemy=f);wrap('drawDeco',()=>drawDeco,f=>drawDeco=f);wrap('drawDecals',()=>drawDecals,f=>drawDecals=f);
+ wrap('drawRoomWalls',()=>drawRoomWalls,f=>drawRoomWalls=f);wrap('drawLighting',()=>drawLighting,f=>drawLighting=f);wrap('drawWeather',()=>drawWeather,f=>drawWeather=f);wrap('drawPlayer',()=>drawPlayer,f=>drawPlayer=f);
+ wrap('drawProp',()=>drawProp,f=>drawProp=f);wrap('drawPartsNormal',()=>drawPartsNormal,f=>drawPartsNormal=f);wrap('drawPartsAdd',()=>drawPartsAdd,f=>drawPartsAdd=f);wrap('drawAmb',()=>drawAmb,f=>drawAmb=f);wrap('drawFx',()=>drawFx,f=>drawFx=f);
+ wrap('drawNums',()=>drawNums,f=>drawNums=f);wrap('drawPills',()=>drawPills,f=>drawPills=f);wrap('drawCorpses',()=>drawCorpses,f=>drawCorpses=f);wrap('drawProj',()=>drawProj,f=>drawProj=f);wrap('drawLootIcons',()=>drawLootIcons,f=>drawLootIcons=f);
+ wrap('drawLootBeams',()=>drawLootBeams,f=>drawLootBeams=f);wrap('drawProjGlow',()=>drawProjGlow,f=>drawProjGlow=f);wrap('drawPropGlow',()=>drawPropGlow,f=>drawPropGlow=f);wrap('drawGhosts',()=>drawGhosts,f=>drawGhosts=f);wrap('drawZielBoden',()=>drawZielBoden,f=>drawZielBoden=f);
+ wrap('drawZone',()=>drawZone,f=>drawZone=f);wrap('drawEZone',()=>drawEZone,f=>drawEZone=f);wrap('drawRunes',()=>drawRunes,f=>drawRunes=f);wrap('drawBanner',()=>drawBanner,f=>drawBanner=f);wrap('vignette',()=>vignette,f=>vignette=f);wrap('bloom',()=>bloom,f=>bloom=f);
+ wrap('kaKachelnZeichnen',()=>kaKachelnZeichnen,f=>kaKachelnZeichnen=f);wrap('wlMini',()=>wlMini,f=>wlMini=f);wrap('hudUpdate',()=>hudUpdate,f=>hudUpdate=f);wrap('drawMpHud',()=>drawMpHud,f=>drawMpHud=f);wrap('drawCombo',()=>drawCombo,f=>drawCombo=f);
+ wrap('drawLinks',()=>drawLinks,f=>drawLinks=f);wrap('drawBubbles',()=>drawBubbles,f=>drawBubbles=f);wrap('glow',()=>glow,f=>glow=f);wrap('fovRahmen',()=>fovRahmen,f=>fovRahmen=f);wrap('drawTele',()=>drawTele,f=>drawTele=f);wrap('drawPortal2',()=>drawPortal2,f=>drawPortal2=f);
+ RG2.profReset=()=>{for(const k in P)delete P[k]};RG2.profCalls=()=>calls}
+
+/* ---------- 6) Spargrafik für schwache Geräte (RK3566 & Co.) ----------
+   Erkennung: Android/Touch + wenige Kerne/wenig Speicher + kleine Bildschirmfläche, sonst gemessene Bildzeit der ersten Sekunden.
+   „Auto“ startet dort mit „Minimal“ + Spar-Extras; die Option in den Einstellungen bleibt (feste Stufe = keine Automatik).
+   Spar-Extras (nur bei Minimal/Niedrig auf schwachen Geräten oder Option „rgSpar“): Bild intern ~0,5–0,6 × Auflösung, ohne Glättung,
+   statische Kartendeko in vorgerenderten Kacheln (statt ~800 Zeichenbefehle je Bild), Gliedmaßen der Gegner in einem Strich,
+   weniger Partikel/Leichen, Detail-Effekte (details_code) gedrosselt. */
+{const nav=navigator,hc=nav.hardwareConcurrency||8,dm=nav.deviceMemory||8,dpr=window.devicePixelRatio||1,sp=Math.max(screen.width||0,screen.height||0)*dpr,
+  mob=MOBIL||/Android/i.test(nav.userAgent);
+ RG2.weak=!!(mob&&(hc<=4||dm<=3)&&sp<=1400)||/[?&]rgweak\b/.test(RG2.q);RG2.weakGrund=RG2.weak?`Kerne ${hc}, RAM ${dm}, Bild ${Math.round(sp)}px`:''}
+const RGSP={p0:GFX.map(g=>g.parts),c0:GFX.map(g=>g.corpse),on:-1};
+function rgSparAn(){const L=gfxL();return SAVE.rgSpar===true||SAVE.rgSpar!==false&&RG2.weak&&L<=1}
+function rgSparSet(){const on=rgSparAn();RG2.spar=on;if(on===RGSP.on)return;RGSP.on=on;GFX.forEach((g,i)=>{g.parts=on?Math.min(RGSP.p0[i],i?90:60):RGSP.p0[i];g.corpse=on?Math.min(RGSP.c0[i],i?3:0):RGSP.c0[i]});RGDK.clear()}
+function rgAutoStart(){if(!RG2.weak||!(SAVE.gfx===undefined||SAVE.gfx==='auto'))return;GAUTO=0;GCEIL=1;if(!resFest())RSC=Math.min(RSC,0.6)}
+rgAutoStart();
+/* gemessene Bildzeit: ist das Gerät in den ersten Sekunden im Spiel langsam (< 40 fps), nachträglich als schwach einstufen */
+{let n=0,acc=0,t0=0,done=false;const _fw=fpsWatch;fpsWatch=function(dt,raw,js){if(!done&&!RG2.weak&&G.state==='play'&&!G.paused&&!document.hidden&&MOBIL&&/Android/i.test(navigator.userAgent)){const now=performance.now();if(!t0)t0=now;
+   /* die ersten 2 s (Laden, Vorrendern) nicht mitzählen */if(now-t0>2000){acc+=raw;n++}
+   if(now-t0>6000){done=true;const fps=1000/(acc/Math.max(1,n));RG2.gemessen=Math.round(fps);if(fps<36){RG2.weak=true;RG2.weakGrund='gemessen '+Math.round(fps)+' fps';rgAutoStart();rgSparSet();try{resize()}catch(e){}}}}
+  return _fw.apply(this,arguments)}}
+{const _rs=resize;resize=function(){rgSparSet();const r=_rs.apply(this,arguments);try{if(RG2.spar){const d=window.devicePixelRatio||1,lim=Math.max(0.5,Math.min(0.6,560/Math.max(1,innerWidth)))*d;
+   if(DPR>lim+0.01&&!resFest()){DPR=lim;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px'}cx.imageSmoothingEnabled=false;cv.style.imageRendering=''}}catch(e){}return r}}
+try{resize()}catch(e){}
+/* Gliedmaßen in einem Pfad (ein Strich statt einer je Teilstück) */
+{const _kl=kgLimbs;kgLimbs=function(c,col,w,L,W){if(!RG2.spar)return _kl.apply(this,arguments);c.lineCap='round';c.strokeStyle=W||col;c.lineWidth=w;c.beginPath();for(const p of L){c.moveTo(p[0],p[1]);for(let i=2;i<p.length;i+=2)c.lineTo(p[i],p[i+1])}c.stroke()}}
+/* Detail-Effekte (details_code) im Sparbetrieb auf „aus“ */
+try{if(typeof dtL==='function'){const _dl=dtL;dtL=function(){return RG2.spar?0:_dl.apply(this,arguments)}}}catch(e){}
+/* statische Kartendeko als vorgerenderte Kacheln: je 512×512 Welt-Einheiten, gezeichnet in der aktuellen Auflösung */
+const RGDK={m:new Map(),key:'',dyn:{},sc:0,bud:1,bau:0,fc:0,clear(){this.m.clear();this.key=''}};
+function rgDkStatisch(d){const k=d.k;let v=RGDK.dyn[k];if(v!==undefined)return v;
+ /* einmal je Art prüfen: gleiches Bild bei zwei Zeitpunkten → statisch */
+ try{const C=document.createElement('canvas');C.width=C.height=160;const g=C.getContext('2d'),m=cx;RGDK.bau++;const one=t=>{g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,160,160);g.setTransform(1,0,0,1,80-d.x,100-d.y);cx=g;try{drawDeco(d,t)}finally{cx=m}return g.getImageData(0,0,160,160).data};
+  const a=one(0.11),b=one(1.73);v=true;for(let i=3;i<a.length;i+=16)if(Math.abs(a[i]-b[i])>2||Math.abs(a[i-3]-b[i-3])>2){v=false;break}}catch(e){v=false}finally{RGDK.bau--}
+ RGDK.dyn[k]=v;return v}
+const RGDK_CS=512,RGDK_PAD=128;
+function rgDkBau(ch,sc){const S=Math.ceil((RGDK_CS+2*RGDK_PAD)*sc),C=document.createElement('canvas');C.width=C.height=S;const g=C.getContext('2d'),m=cx;
+ g.setTransform(sc,0,0,sc,-(ch.x-RGDK_PAD)*sc,-(ch.y-RGDK_PAD)*sc);cx=g;RGDK.bau++;try{for(const d of ch.L)try{drawDeco(d,0)}catch(e){}}finally{cx=m;RGDK.bau--}ch.cv=C;ch.sc=sc;
+ /* höchstens 10 Kacheln im Speicher (je ~0,5–1 MB): am längsten ungenutzte zuerst freigeben */
+ const B=[...RGDK.m.values()].filter(c=>c.cv);if(B.length>10){B.sort((a,b)=>a.lu-b.lu);for(const c of B.slice(0,B.length-10)){c.cv=null;c.ok=0}}}
+function rgDkPrep(){const D=G.deco;const key=(G.runId||0)+'|'+G.stage+'|'+D.length+'|'+(D[0]?D[0].x:0)+'|'+(D.length?D[D.length-1].y:0);
+ if(key!==RGDK.key){RGDK.m.clear();RGDK.key=key;for(const d of D){if(d.wl&&/^wl_/.test(d.k)||!rgDkStatisch(d)){d._rgc=null;continue}const cxk=Math.floor(d.x/RGDK_CS),cyk=Math.floor(d.y/RGDK_CS),id=cxk+','+cyk;let ch=RGDK.m.get(id);if(!ch){ch={x:cxk*RGDK_CS,y:cyk*RGDK_CS,L:[],cv:null,sc:0};RGDK.m.set(id,ch)}ch.L.push(d);d._rgc=ch}}}
+{const _dc=drawDecals;drawDecals=function(inView){const r=_dc.apply(this,arguments);if(!RG2.spar||G.room)return r;try{rgDkPrep();const sc=Math.round(DPR*ZOOM*20)/20;RGDK.bud=1;const m=cx.getTransform();
+  for(const ch of RGDK.m.values()){if(!inView(ch.x+RGDK_CS/2,ch.y+RGDK_CS/2,RGDK_CS/2+RGDK_PAD))continue;if(!ch.cv||Math.abs(ch.sc/sc-1)>0.12){if(RGDK.bud>0||!ch.cv){if(RGDK.bud-->0)rgDkBau(ch,sc);else continue}}
+   ch.ok=1;ch.lu=++RGDK.fc;cx.drawImage(ch.cv,ch.x-RGDK_PAD,ch.y-RGDK_PAD,RGDK_CS+2*RGDK_PAD,RGDK_CS+2*RGDK_PAD)}cx.setTransform(m)}catch(e){RG2.err.push('dk '+e.message)}return r}}
+{const _dd=drawDeco;drawDeco=function(d,t){if(RG2.spar&&!RGDK.bau&&d._rgc&&d._rgc.cv&&d._rgc.ok&&!G.room)return;return _dd.apply(this,arguments)}}
+/* Schadenszahlen im Sparbetrieb ohne Umriss (halbiert die Textzeichnungen) */
+{const _dn=drawNums;drawNums=function(){if(!RG2.spar)return _dn.apply(this,arguments);const c=cx,st=c.strokeText;c.strokeText=function(){};try{return _dn.apply(this,arguments)}finally{c.strokeText=st}}}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
