@@ -718,7 +718,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     { id: "stimmung", sym: "🎵", name: W("Stimmung", "Mood"), seite: "buehne", farbe: "#e0a046", led: "#ffcf50" },
     { id: "ort", sym: "🌲", name: W("Ort", "Place"), seite: "buehne", farbe: "#3fbf6a", led: "#30ff70" },
     { id: "momente", sym: "⚡", name: W("Momente", "Moments"), seite: "buehne", farbe: "#e0703a", led: "#ff6a10" },
-    { id: "set", sym: "🎬", name: "Set", seite: "buehne", farbe: "#d8c088", led: "#ffe0a0" }
+    { id: "set", sym: "🎬", name: "Set", seite: "buehne", farbe: "#d8c088", led: "#ffe0a0" },
+    { id: "beats", sym: "🥁", name: "Beats", seite: "buehne", farbe: "#e0884a", led: "#ff9a40" }
   ];
   const zpDef = id => ZP_SEITEN.find(x => x.id === id) || ZP_SEITEN[0];
   let zpSeite = lies("imres-zp-seite-" + SEITE, ZP_SEITEN[0].id);
@@ -747,6 +748,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       else gruppiert("[data-aus]", "💥", "aus", W("Einschläge", "Impacts"));
       return g.filter(x => x.l.length);
     }
+    if (zpSeite === "beats") return g;
     if (zpSeite === "set") {
       g.push({ titel: W("Set – deine Songs", "Set – your songs"), l: SET.map((sn, i) => ({ key: "set:" + i, sym: sn.sym || "🎬", name: (i + 1) + ". " + sn.name, an: i === setIndex, los: () => setLaden(i) }))
         .concat([{ sym: "➕", name: W("Jetzt speichern", "Save current"), los: setSpeichern }]) });
@@ -861,6 +863,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const bankName = () => BANKEN[bank] || "A";
   function zpRegler() {
     if (SEITE === "welten") return W_REGLER[bank % 2].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
+    if (zpSeite === "beats" && !bank) return beatsRegler();
     const l = bank ? ZB.regler[bankName()] : ZB.regler["A:" + (zpSeite === "set" ? "stimmung" : zpSeite)];
     return (l || []).slice(0, 4).map(k => ZP_PARAM[k] || ZP_PARAM.nichts);
   }
@@ -899,8 +902,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       if (v !== L.letzt) { L.letzt = v; try { L.r.setz(v); } catch (_) {} } });
   }, 25);
   function zpDreh(nr, d) {
-    if (drehGedrueckt[nr]) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
-    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); loopMitschreiben(r, v); zpReglerAnzeige();
+    if (drehGedrueckt[nr] && !(zpSeite === "beats" && !bank)) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
+    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); loopMitschreiben(r, v);
+    if (zpSeite === "beats" && !bank) zpZeichnen(true); else zpReglerAnzeige();
   }
   let reglerRaf = 0;
   function zpReglerAnzeige() {
@@ -909,7 +913,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       $$(".zp-r", zpEl).forEach((el, i) => { const r = rs[i]; if (!r) return; const w = zpWert(r), b = el.querySelector("i b"), t = el.querySelector(".zp-rv > span"); if (b) b.style.width = Math.round(w.anteil * 100) + "%"; if (t) t.textContent = w.text; }); });
   }
   function zpDruck(nr) {
-    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const k = bank + "-" + zpSeite + "-" + nr;
+    const r = zpRegler()[nr]; if (r && r.aktion) { r.aktion(); zpZeichnen(true); return; } if (!r || !r.schritt) return; const k = bank + "-" + zpSeite + "-" + nr;
     if (r.druck === "stumm") { const v = r.lies(); if (v > r.lo) { merkStumm[k] = v; r.setz(r.lo); zeige("🔇 " + r.name); } else { r.setz(merkStumm[k] != null ? merkStumm[k] : Math.round((r.lo + r.hi) * .7)); zeige("🔊 " + r.name); } }
     else if (r.druck === "hg") { pultKlick("data-aktion", "kulumschalt"); zeige("🌲 " + W("Hintergrund an / aus", "Backdrop on / off")); }
     else if (r.druck === "friedlich") r.setz(r.lo);
@@ -1016,6 +1020,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 
   /* ----- Tasten im Pult (true = erledigt) ----- */
   function zpTaste(name, lang) {
+    if (beatsTaste(name)) return true;
     if (/^F[1-4]$/.test(name)) { if (favVerbraucht[name]) { delete favVerbraucht[name]; return true; } zpAusloesen((alt ? 4 : 0) + +name[1] - 1); return true; }
     const dm = /^DREH([1-4])$/.exec(name);
     if (dm) { const nr = +dm[1] - 1; if (drehGedreht[nr]) { drehGedreht[nr] = false; return true; } if (alt) loopUmschalten(nr); else zpDruck(nr); return true; }
@@ -1038,6 +1043,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   /* Drücken / Loslassen für „solange gedrückt“-Aktionen */
   const gehalten = {}, favTimer = {}, favVerbraucht = {};
   function zpDruckLos(name, art) {
+    if (zpSeite === "beats" && name === "PAD") { if (art === "druck") beatPad(); return; }
+    if (zpSeite === "beats" && /^F[1-4]$/.test(name)) return; /* keine Favoriten auf der Beats-Seite */
     const dm = /^DREH([1-4])$/.exec(name);
     if (dm) { const nr = +dm[1] - 1; if (art === "druck") { drehGedrueckt[nr] = true; drehGedreht[nr] = false; } else { drehGedrueckt[nr] = false; setTimeout(() => { drehGedreht[nr] = false; }, 400); } return; }
     if (/^F[1-4]$/.test(name)) {
@@ -1115,7 +1122,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const z = (kk, t) => "<div><b>" + kk + "</b><span>" + t + "</span></div>";
     const l = [["F1–F4", W("obere Kachelreihe", "top row of tiles")], ["ALT + F1–F4", W("untere Kachelreihe", "bottom row")], ["◀ ▶", W("Kachel wählen, am Rand weiterblättern", "move, page at the edge")],
       ["ALT + ◀ ▶", W("vorige / nächste Seite", "previous / next page")], ["ALT + ▲ ▼", W("andere Gruppe (Favoriten, Wetter, Effekte …)", "other group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")], ["F 1,5 s halten", W("★ Favorit an/aus – Favoriten stehen vorne", "★ favourite on/off")],
-      ["MIXER", W("Reglerbank A → B → FX", "Knob bank A → B → FX")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
+      ["MIXER", W("Reglerbank A → B → FX", "Knob bank A → B → FX")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")], ["🥁 Beats", W("◀▶ Schritt · ▲▼ Spur · SEL/F1–F4 setzen · Regler 3 Tonhöhe · PAD live spielen · REC live aufnehmen · ALT+◀▶ verschieben · ALT+▲/▼ kopieren/einfügen · ALT+SEL leeren · ALT+F1–F4 Vierergruppe", "◀▶ step · ▲▼ track · SEL/F1–F4 set · knob 3 pitch · PAD play live · REC live record · ALT+◀▶ shift · ALT+▲/▼ copy/paste · ALT+SEL clear")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
       .concat(ZP_TASTEN.map(t => [t.replace("ALT+", "ALT + "), (ZP_AKT[ZB.tasten[t]] || ZP_AKT.nichts)[0]]));
     menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([x, y]) => z(x, y)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="beleg">🎛 ' + W("Ändern", "Change") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, beleg: () => belegMenue() });
     menueArt = "hilfe";
@@ -1322,6 +1329,104 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menueArt = "einst"; if (fokusK) { const b = m.querySelector('[data-zm="' + fokusK + '"]'); if (b) fokusSetzen(b); }
   }
 
+  /* ===================== 🥁 Beats: Step-Sequencer der Bühne (Mini-TR-8S) ===================== */
+  const BEAT_REIHE = ["trommel", "ketten", "klopf", "schelle", "bass", "melodie", "floete", "rex"];
+  const BEAT_NAME = { trommel: W("Trommel", "Drum"), ketten: W("Ketten", "Chains"), klopf: W("Klopfen", "Knock"), schelle: W("Schelle", "Bell"), bass: "Bass", melodie: W("Melodie", "Melody"), floete: W("Flöte", "Flute"), rex: "Rex" };
+  const BEAT_SYM = { trommel: "🥁", ketten: "⛓", klopf: "✊", schelle: "🔔", bass: "🎸", melodie: "🎵", floete: "🪈", rex: "🐕" };
+  const BC = { s: 0, r: 0, folgen: true, teil: "A", ton: { bass: 0, melodie: 4, floete: 3, rex: 0 }, ablage: null, liveRec: false, padSchritt: null };
+  const BP = () => window.ImresPult && window.ImresPult.beatsInfo ? window.ImresPult : null;
+  function beatsInfo() { const P = BP(); return P ? P.beatsInfo() : null; }
+  function beatsTeil(info) { info = info || beatsInfo(); if (!info) return "A"; if (BC.folgen) BC.teil = info.teil; if (!info.ablauf.includes(BC.teil) && !BC.folgen) BC.teil = info.ablauf[0] || "A"; return BC.teil; }
+  function beatsFesthalten(info) {
+    if (!BC.folgen) return; BC.folgen = false; BC.teil = info.teil; const P = BP();
+    if (P.beatsLoop && !info.loop) { P.beatsLoop(BC.teil); zeige("🔁 " + W("Teil ", "Part ") + BC.teil + W(" läuft jetzt als Loop", " now loops"), null, W("Regler 4 drücken: Loop aus", "push knob 4: loop off")); }
+  }
+  const beatSpur = info => (info.spuren.find(x => x.id === BEAT_REIHE[BC.r]) || info.spuren[0]);
+  function beatUmschalten(i, spurId) {
+    const P = BP(), info = beatsInfo(); if (!P || !info) return; beatsFesthalten(info); const t = beatsTeil(info), sp = info.spuren.find(x => x.id === (spurId || BEAT_REIHE[BC.r])), d = P.beatsDaten(t); if (!sp || !d) return;
+    const alt = d[sp.id][i], neu = alt >= 0 ? -1 : (sp.art === "an" ? 0 : Math.min(sp.zeilen - 1, BC.ton[sp.id] || 0));
+    P.beatsSetzen(t, sp.id, i, neu); if (neu >= 0 && !info.laeuft) P.beatsAnschlag(sp.id, neu); zpZeichnen(true); ledsMelden();
+  }
+  function beatTon(d) {
+    const P = BP(), info = beatsInfo(); if (!P || !info) return; const sp = beatSpur(info); if (sp.art === "an") return; beatsFesthalten(info);
+    const t = beatsTeil(info), dat = P.beatsDaten(t), alt = dat[sp.id][BC.s], basis = alt >= 0 ? alt : (BC.ton[sp.id] || 0), neu = Math.max(0, Math.min(sp.zeilen - 1, basis + d));
+    BC.ton[sp.id] = neu; P.beatsSetzen(t, sp.id, BC.s, neu); if (!info.laeuft) P.beatsAnschlag(sp.id, neu); zpZeichnen(true);
+  }
+  function beatSpurAendern(fn, meldung) {
+    const P = BP(), info = beatsInfo(); if (!P || !info) return; beatsFesthalten(info); const t = beatsTeil(info), sp = beatSpur(info), d = P.beatsDaten(t)[sp.id];
+    const neu = fn(d.slice(), sp); if (neu) { P.beatsSpur(t, sp.id, neu); zeige(BEAT_SYM[sp.id] + " " + BEAT_NAME[sp.id], null, meldung); zpZeichnen(true); ledsMelden(); }
+  }
+  function beatPad() {
+    const P = BP(), info = beatsInfo(); if (!P || !info) return; const sp = beatSpur(info), wert = sp.art === "an" ? 0 : (BC.ton[sp.id] || 0);
+    const hit = P.beatsAnschlag(sp.id, wert);
+    if (BC.liveRec && hit && info.laeuft) { const d = P.beatsDaten(hit.teil); if (d && d[sp.id] && d[sp.id][hit.schritt] < 0) P.beatsSetzen(hit.teil, sp.id, hit.schritt, wert); }
+  }
+  /* Tasten auf der Beats-Seite (true = erledigt) */
+  function beatsTaste(name) {
+    if (zpSeite !== "beats") return false;
+    const info = beatsInfo(); if (!info) return false; const n = info.takt;
+    if (/^F[1-4]$/.test(name)) { const f = +name[1] - 1; if (alt) { BC.s = f * 4 % n; zpZeichnen(true); } else beatUmschalten(Math.floor(BC.s / 4) * 4 + f); return true; }
+    switch (name) {
+      case "LEFT": case "RIGHT":
+        if (alt) { const r = name === "LEFT" ? -1 : 1; beatSpurAendern(d => d.map((_, i) => d[(i - r + d.length) % d.length]), r < 0 ? W("nach links verschoben", "shifted left") : W("nach rechts verschoben", "shifted right")); return true; }
+        BC.s = (BC.s + (name === "LEFT" ? -1 : 1) + n) % n; zpZeichnen(true); ledsMelden(); return true;
+      case "UP": case "DOWN":
+        if (alt) {
+          if (name === "UP") { const P = BP(), t = beatsTeil(info), sp = beatSpur(info); BC.ablage = P.beatsDaten(t)[sp.id].slice(); zeige("📋 " + BEAT_NAME[sp.id], null, W("kopiert – ALT + ▼ fügt ein", "copied – ALT + ▼ pastes")); }
+          else if (BC.ablage) beatSpurAendern(d => d.map((_, i) => { const v = BC.ablage[i]; return v == null ? -1 : v; }), W("eingefügt", "pasted"));
+          return true;
+        }
+        BC.r = (BC.r + (name === "UP" ? -1 : 1) + BEAT_REIHE.length) % BEAT_REIHE.length; zpZeichnen(true); ledsMelden(); return true;
+      case "SEL": if (alt) beatSpurAendern(d => d.map(() => -1), W("geleert", "cleared")); else beatUmschalten(BC.s); return true;
+      case "PAD": return true; /* läuft über „Drücken“ – ohne Verzögerung */
+      case "REC": BC.liveRec = !BC.liveRec; zeige(BC.liveRec ? "⏺ " + W("Live-Aufnahme an", "Live record on") : "⏹ " + W("Live-Aufnahme aus", "Live record off"), null, BC.liveRec ? W("PAD spielt die Spur und setzt den Schritt", "PAD plays the track and sets the step") : ""); zpZeichnen(true); ledsMelden(); return true;
+    }
+    return false;
+  }
+  /* Regler auf der Beats-Seite (Bank A) */
+  function beatsRegler() {
+    const info = beatsInfo(); if (!info) return [];
+    const sp = beatSpur(info), t = beatsTeil(info), ab = [...new Set(info.ablauf)], dat = BP().beatsDaten(t) || {};
+    const wert = (dat[sp.id] || [])[BC.s];
+    return [
+      { name: W("↔ Schritt", "↔ Step"), lo: 0, hi: info.takt - 1, schritt: 1, lies: () => BC.s, setz: v => { BC.s = v; ledsMelden(); }, text: v => (v + 1) + " / " + info.takt, druck: "", aktion: () => beatUmschalten(BC.s), drucktext: W("drücken: setzen", "push: set") },
+      { name: W("↕ Spur", "↕ Track"), lo: 0, hi: BEAT_REIHE.length - 1, schritt: 1, lies: () => BC.r, setz: v => { BC.r = v; ledsMelden(); }, text: v => BEAT_SYM[BEAT_REIHE[v]] + " " + BEAT_NAME[BEAT_REIHE[v]], aktion: () => { BP().beatsStumm(BEAT_REIHE[BC.r]); zpZeichnen(true); }, drucktext: W("drücken: stumm", "push: mute") },
+      sp.art === "an" ? { name: W("🎵 Tonhöhe", "🎵 Pitch"), lo: 0, hi: 1, schritt: 0, lies: () => 0, setz: () => {}, text: () => "–", drucktext: "" }
+        : { name: W("🎵 Tonhöhe", "🎵 Pitch"), lo: 0, hi: sp.zeilen - 1, schritt: 1, lies: () => wert >= 0 ? wert : (BC.ton[sp.id] || 0), setz: v => beatTon(v - (wert >= 0 ? wert : (BC.ton[sp.id] || 0))), text: v => (wert >= 0 ? "" : "(") + W("Stufe ", "step ") + (v + 1) + (wert >= 0 ? "" : ")"), aktion: () => { BP().beatsSetzen(t, sp.id, BC.s, -1); zpZeichnen(true); }, drucktext: W("drücken: löschen", "push: clear") },
+      { name: W("📄 Teil", "📄 Part"), lo: 0, hi: ab.length, schritt: 1, lies: () => BC.folgen ? 0 : Math.max(0, ab.indexOf(BC.teil)) + 1,
+        setz: v => { if (v === 0) BC.folgen = true; else { BC.folgen = false; BC.teil = ab[v - 1]; if (info.loop) BP().beatsLoop(BC.teil); } },
+        text: v => v === 0 ? W("folgt (", "follows (") + t + ")" : W("Teil ", "part ") + ab[v - 1] + (info.loop ? " 🔁" : ""),
+        aktion: () => { const P = BP(); if (info.loop) { P.beatsLoop(null); BC.folgen = true; zeige("▶ " + W("Ablauf wie vorher", "Original order")); } else { BC.folgen = false; BC.teil = t; P.beatsLoop(t); zeige("🔁 " + W("Teil ", "Part ") + t + " Loop"); } zpZeichnen(true); },
+        drucktext: info.loop ? W("drücken: Loop aus", "push: loop off") : W("drücken: als Loop", "push: loop it") }
+    ];
+  }
+  function beatsKopf() {
+    const info = beatsInfo(); if (!info) return '<div class="zp-gruppe"><span>🥁 Beats</span></div>';
+    const t = beatsTeil(info);
+    return '<div class="zp-gruppe"><span>🥁 ' + W("Teil ", "Part ") + t + (info.loop ? " 🔁 Loop" : BC.folgen ? " · " + W("folgt", "follows") : "") + " · " + (info.stimmung ? W("Stimmung – Ändern = eigenes Stück", "mood – editing = own song") : W("eigenes Stück", "own song")) + "</span>" +
+      (BC.liveRec ? '<span style="color:#ff4a3a">⏺ LIVE</span>' : "") + "</div>";
+  }
+  function beatsHTML() {
+    const P = BP(), info = beatsInfo(); if (!P || !info) return '<div class="zb-leer">⏳ ' + W("Bühne lädt …", "Stage loading …") + "</div>";
+    const t = beatsTeil(info), dat = P.beatsDaten(t) || {}, n = info.takt;
+    let h = '<div class="zb" style="--n:' + n + '">';
+    BEAT_REIHE.forEach((id, r) => {
+      const sp = info.spuren.find(x => x.id === id); if (!sp) return; const d = dat[id] || [];
+      h += '<button type="button" class="zb-name' + (r === BC.r ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '">' + BEAT_SYM[id] + " " + BEAT_NAME[id] + "</button>";
+      for (let i = 0; i < n; i++) {
+        const v = d[i], an = v >= 0, txt = an && sp.art !== "an" ? v + 1 : "";
+        h += '<button type="button" class="zb-z' + (an ? " an" : "") + (i % 4 === 0 ? " eins" : "") + (r === BC.r && i === BC.s ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '" data-zb-s="' + i + '" style="' + (an && sp.art !== "an" ? "--h:" + (.35 + .65 * v / Math.max(1, sp.zeilen - 1)) : "") + '">' + txt + "</button>";
+      }
+    });
+    h += "</div>";
+    return h;
+  }
+  /* Lauflicht ohne alles neu zu zeichnen */
+  setInterval(() => {
+    if (zpSeite !== "beats" || zpRuhe || !zpEl) return; const info = beatsInfo(); if (!info) return;
+    const s = info.laeuft && beatsTeil(info) === info.teil ? info.schritt : -1;
+    $$(".zb-z", zpEl).forEach(z => z.classList.toggle("kopf", +z.dataset.zbS === s));
+  }, 90);
   /* ----- Zeichnen ----- */
   function zpZeichnen(sofort) {
     if (!zpEl) return;
@@ -1343,13 +1448,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const bk = SEITE === "welten" ? (bank ? "B" : "A") : bankName(), bf = BANK_FARBE[bk] || BANK_FARBE.A;
     const regler = zpRegler().map((r, i) => { const w = zpWert(r);
       const L = LOOPS[loopSchluessel(r)], lz = L ? (L.phase === "spielt" ? ' <em class="lp">⟳</em>' : ' <em class="rec">●</em>') : "";
-      return '<div class="zp-r" data-zp-r="' + i + '"><span class="zp-rn">' + esc2(r.name) + lz + '</span><i><b style="width:' + Math.round(w.anteil * 100) + '%"></b></i><span class="zp-rv"><span>' + esc2(w.text) + "</span><small>" + (DRUCK_TEXT[r.druck] || "") + "</small></span></div>"; }).join("");
+      return '<div class="zp-r" data-zp-r="' + i + '"><span class="zp-rn">' + esc2(r.name) + lz + '</span><i><b style="width:' + Math.round(w.anteil * 100) + '%"></b></i><span class="zp-rv"><span>' + esc2(w.text) + "</span><small>" + (r.drucktext || DRUCK_TEXT[r.druck] || "") + "</small></span></div>"; }).join("");
     const t = (k, txt, farbe) => '<button type="button" data-zp-taste="' + k + '" style="--c:' + (farbe || "#e0a046") + '"><i></i><b>' + k + "</b> " + txt + "</button>";
     const kurz = k => { const id = ZB.tasten[k]; if (!id || id === "nichts") return ""; if (SEITE === "welten" && { play: "▶/❚❚", passiert: "🎭", stille: "⏳" }[id]) return t(k, { play: "▶/❚❚", passiert: "🎭", stille: "⏳" }[id], aktFarbe(id)); return t(k, (ZP_AKT[id] || ZP_AKT.nichts)[1], aktFarbe(id)); };
-    const fuss = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "CTRL"].map(kurz).join("") + t("MIXER", bk, bf) + t("MENU", "☰", "#ffcf50");
+    const fuss = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "CTRL"].map(k => zpSeite === "beats" && k === "PAD" ? t("PAD", W("live spielen", "play live"), "#ff9a40") : zpSeite === "beats" && k === "REC" ? t("REC", BC.liveRec ? "⏺ LIVE" : W("live aufnehmen", "live rec"), "#ff1a30") : kurz(k)).join("") + t("MIXER", bk, bf) + t("MENU", "☰", "#ffcf50");
     const html = '<div class="zp-kopf">' + tabs + '<span class="zp-status">' + status + "</span></div>" +
-      '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>" +
-      '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
+      (zpSeite === "beats" ? '<div class="zp-mitte" style="--f:' + d.farbe + '">' + beatsKopf() + beatsHTML() + "</div>" : '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>") +
+      '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" && !(zpSeite === "beats" && !bank) ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
     if (html === zpMerk || (zpZeiger && !sofort)) return;
     zpMerk = html; zpEl.innerHTML = html;
   }
@@ -1422,6 +1527,14 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     return h === 0 ? "#200800" : "#000000";
   }
   function zpLeds(f) {
+    if (zpSeite === "beats" && !zpRuhe) {
+      const P = BP(), info = beatsInfo(), d0 = zpDef("beats");
+      if (P && info) { const dat = P.beatsDaten(beatsTeil(info)) || {}, sp = beatSpur(info), g = Math.floor(BC.s / 4) * 4, kopf = info.laeuft ? info.schritt : -1;
+        ["F1", "F2", "F3", "F4"].forEach((nm, k) => { const i = g + k, an = (dat[sp.id] || [])[i] >= 0; f[nm] = i === kopf ? "#fff4e0" : an ? d0.led : (i === BC.s ? dimm("#f4c45a", .5) : dimm(d0.led, .12)); }); }
+      ["PLAY", "STOP", "TEMPO", "ZS3", "CTRL"].forEach(k => { const id = ZB.tasten[(alt ? "ALT+" : "") + k]; const c = aktFarbe(id); f[k] = aktAktiv(id) ? c : dimm(c, .38); });
+      f.PAD = "#ff9a40"; f.REC = BC.liveRec ? "#ff1a30" : dimm("#ff1a30", .3); f.SEL = "#f4c45a"; f.LEFT = f.RIGHT = f.UP = f.DOWN = dimm("#fff0c0", .35);
+      f.MIXER = BANK_FARBE[bankName()] || "#ffc830"; f.ALT = alt ? ALT_FARBE : dimm(ALT_FARBE, .18); f.MENU = dimm("#ffcf50", .5); f.BACK = dimm("#ff4020", .45); return;
+    }
     if (zpRuhe) { const b = zpBalken(); SPALTEN.forEach((sp, c) => sp.forEach((k, h) => { f[k] = flammeFarbe(h, b[c]); })); return; }
     const d = zpDef(zpSeite), b = zpBlattJetzt(), blink = Math.floor(Date.now() / 450) % 2 === 0, i = ZP_SEITEN.findIndex(x => x.id === zpSeite);
     ["F1", "F2", "F3", "F4"].forEach((nm, k) => { const it = b[(alt ? 4 : 0) + k]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : it.fav ? dimm(d.led, .6) : dimm(d.led, .3); });
@@ -1472,7 +1585,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp { position: fixed; inset: 0; z-index: 2147481000; background: #120e18; color: #ebe2cc; font: 600 15px/1.2 system-ui, sans-serif; display: grid; grid-template-columns: minmax(0, 1fr) 176px; grid-template-rows: 50px minmax(0, 1fr) 42px; user-select: none; -webkit-tap-highlight-color: transparent; }
 .zp button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .zp-kopf { grid-column: 1 / 3; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: #1c1624; border-bottom: 1px solid #3a2f48; min-width: 0; }
-.zp-tab { padding: 8px 13px !important; border-radius: 9px; color: #b8a998 !important; white-space: nowrap; font-size: 17px !important; border: 2px solid color-mix(in srgb, var(--f) 45%, transparent) !important; }
+.zp-tab { padding: 8px 9px !important; border-radius: 9px; color: #b8a998 !important; white-space: nowrap; font-size: 15.5px !important; border: 2px solid color-mix(in srgb, var(--f) 45%, transparent) !important; }
 .zp-tab .zp-sym { font-size: 18px; }
 .zp-tab.an { background: linear-gradient(160deg, color-mix(in srgb, var(--f) 70%, #fff8e0) 0%, var(--f) 45%, color-mix(in srgb, var(--f) 75%, #000) 100%) !important; color: #140e06 !important; box-shadow: 0 0 10px color-mix(in srgb, var(--f) 45%, transparent); }
 .zp-status { margin-left: auto; font-size: 13px; color: #c8bba6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-left: 8px; }
@@ -1480,6 +1593,16 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-mitte { display: grid; grid-template-rows: 30px minmax(0, 1fr); padding: 4px 8px 8px; min-width: 0; min-height: 0; }
 .zp-gruppe { display: flex; align-items: center; justify-content: space-between; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--f); }
 .zp-blatt { display: flex; align-items: center; gap: 6px; } .zp-blatt button { padding: 0 12px !important; font-size: 20px; color: #e0d3be !important; }
+.zb { display: grid; grid-template-columns: 92px repeat(var(--n), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 3px; min-height: 0; }
+.zb-name { font-size: 12.5px !important; text-align: left !important; padding: 0 4px !important; border-radius: 6px; color: #d8cbb6 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent !important; }
+.zb-name.cur { border-color: #f4c45a !important; color: #fff0c0 !important; } .zb-name.stumm { opacity: .4; text-decoration: line-through; }
+.zb-z { border-radius: 5px; background: #221b2c !important; border: 1px solid #3a2f48 !important; font-size: 10px !important; color: #140e06 !important; font-weight: 800; padding: 0 !important; }
+.zb-z.eins { background: #2c2338 !important; }
+.zb-z.an { background: color-mix(in srgb, var(--f) calc(var(--h, 1) * 100%), #3a2a1a) !important; border-color: var(--f) !important; }
+.zb-z.stumm.an { opacity: .45; }
+.zb-z.kopf { box-shadow: inset 0 0 0 2px #fff4e0; }
+.zb-z.cur { outline: 2px solid #f4c45a; outline-offset: 1px; }
+.zb-leer { display: flex; align-items: center; justify-content: center; color: #c8bba6; }
 .zp-blatt em { font-style: normal; font-size: 12px; color: #c8bba6; min-width: 46px; text-align: center; }
 .zp-gruppe small { text-transform: none; letter-spacing: 0; color: #776d60; font-size: 10.5px; margin-left: 6px; }
 .zp-blatt i { width: 7px; height: 7px; border-radius: 50%; background: #3a2f48; } .zp-blatt i.an { background: var(--f); }
@@ -1527,6 +1650,8 @@ html.zyn-ruhe .zp-ruhe { display: block; }
     zpEl.addEventListener("click", e => {
       if (favUnterdrueck) { favUnterdrueck = false; return; }
       const tb = e.target.closest("[data-zp-tab]"); if (tb) { zpSeiteSetzen(tb.dataset.zpTab); return; }
+      const zb = e.target.closest("[data-zb-r]");
+      if (zb) { BC.r = +zb.dataset.zbR; if (zb.dataset.zbS != null) { BC.s = +zb.dataset.zbS; beatUmschalten(BC.s); } else { const info = beatsInfo(), sp = info && beatSpur(info); if (sp) BP().beatsAnschlag(sp.id, sp.art === "an" ? 0 : (BC.ton[sp.id] || 0)); zpZeichnen(true); } return; }
       const k = e.target.closest("[data-zp-k]"); if (k) { zpCursor = -1; zpAusloesen(+k.dataset.zpK); return; }
       if (e.target.closest("[data-zp-gruppe]")) { zpGruppeSchritt(1); return; }
       const bl = e.target.closest("[data-zp-blatt]"); if (bl) { zpBlaettern(+bl.dataset.zpBlatt); return; }
