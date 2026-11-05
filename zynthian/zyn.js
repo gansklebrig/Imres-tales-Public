@@ -1133,6 +1133,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       k("F3", "🎚 " + W("Optionen", "Options"), W("MIDI-Takt, Handpan-Tonart, Mikrofon …", "MIDI clock, key, mic …"), "optionen") +
       k("F4", "⚙ " + W("System", "System"), W("Aktualisieren, Zynthian, Aufnahme, Aus", "Update, Zynthian, record, off"), "system") +
       zz("auto", "🤖 Autopilot: <b>" + AUTO_NAME[autoModus] + "</b>", W("wechselt selbst Stimmungen und setzt Momente", "changes moods and triggers moments by itself")) +
+      zz("autowahl", "🤖 " + W("Autopilot wählt: ", "Autopilot picks: ") + "<b>" + AUTO_WAHL_NAME[autoWahl()] + "</b>", W("ähnlich: ruhig bleibt ruhig, dunkel bleibt dunkel", "similar: calm stays calm, dark stays dark")) +
       (SEITE === "buehne" ? zz("begl", "🎹 " + W("Synth-Begleitung: ", "Synth accompaniment: ") + "<b>" + (BEGL.an ? W("an", "on") : W("aus", "off")) + "</b>", W("Akkorde als MIDI an Zynthian-Synths", "chords as MIDI to Zynthian synths")) : "") +
       (SEITE === "buehne" ? zz("beats", "🥁 " + W("Drumpad / Beats", "Drum pad / beats"), W("Step-Sequencer wie eine kleine TR-8S · auch: ALT + PAD oder oben der Reiter „Beats“", "step sequencer · also ALT + PAD or the Beats tab")) : "") +
       (SEITE === "buehne" ? zz("eingang", "🎤 " + W("Eingänge (Handpan, Didgeridoo …)", "Inputs (handpan, didgeridoo …)"), W("Instrumente anstecken, Gain, Lautstärke, eigene Effekte", "plug in instruments, gain, level, own effects")) : "") +
@@ -1141,6 +1142,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile/Drehregler + SEL · BACK schließt", "F1–F4 pick · arrows/knob + SEL · BACK closes") + "</p>",
       { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), system: systemMenue, zu: menueZu, einst: () => zpEinstellungen(), begl: () => beglMenue(), eingang: () => eingangMenue(), audio: () => audioMenue(), beats: () => { menueZu(); zpAktion("beats"); },
+        autowahl: () => { schreib("imres-zp-autowahl", AUTO_WAHL[(AUTO_WAHL.indexOf(autoWahl()) + 1) % AUTO_WAHL.length]); zpMenue(); const b = $('.zyn-menue [data-zm="autowahl"]'); if (b) fokusSetzen(b); },
         auto: () => { autoSetzen(AUTO_STUFEN[(AUTO_STUFEN.indexOf(autoModus) + 1) % AUTO_STUFEN.length]); zpMenue(); const b = $('.zyn-menue [data-zm="auto"]'); if (b) fokusSetzen(b); } });
     menueArt = "zp";
   }
@@ -1234,14 +1236,26 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const z = AUTO_ZEIT[autoModus]; if (!z) return; const r = ([a, b]) => (a + Math.random() * (b - a)) * 1000, j = Date.now();
     if (!art || art === "st") autoSt = j + r(z.st); if (!art || art === "mom") autoMom = j + r(z.mom); if (!art || art === "sp") autoSp = j + 30000;
   }
+  /* Welche Stimmung als Nächstes? „ähnlich“: eine, die thematisch, im Tempo und in der Farbe zur jetzigen passt */
+  const AUTO_WAHL = ["aehnlich", "fav", "frei"];
+  const AUTO_WAHL_NAME = { aehnlich: W("ähnliche Stimmungen", "similar moods"), fav: W("nur Favoriten (★), passend sortiert", "favourites only (★), best match first"), frei: W("alle, zufällig", "all, random") };
+  const autoWahl = () => AUTO_WAHL.includes(lies("imres-zp-autowahl", "aehnlich")) ? lies("imres-zp-autowahl", "aehnlich") : "aehnlich";
+  const autoZuletzt = [];
+  function autoNaechste(jetzt, P) {
+    const L = P.listen(), wahl = autoWahl(), fav = (FAV.stimmung || []).map(k => k.replace(/^st:/, "")).filter(k => L.st.includes(k));
+    let pool = (wahl === "fav" && fav.length >= 2 ? fav : L.st).filter(k => k !== jetzt);
+    if (wahl === "frei" || !jetzt || !P.aehnlich) return pool[Math.floor(Math.random() * pool.length)];
+    const frisch = pool.filter(k => !autoZuletzt.includes(k)); if (frisch.length >= 2) pool = frisch;
+    const sortiert = pool.map(k => [k, P.aehnlich(jetzt, k) + Math.random() * .8]).sort((a, b) => b[1] - a[1]);
+    const top = sortiert.slice(0, wahl === "fav" ? 2 : 3); return (top[Math.floor(Math.random() * top.length)] || [])[0];
+  }
   function autoSetzen(m) { autoModus = m; schreib("imres-zp-auto", m); autoSt = 0; if (m !== "aus") autoPlanen(); zeige("🤖 Autopilot: " + AUTO_NAME[m]); zpZeichnen(true); }
   setInterval(() => {
     if (autoModus === "aus") return; const j = Date.now(); if (!autoSt) autoPlanen();
     if (SEITE === "buehne") {
       const z = pz() || {}, P = window.ImresPult; if (!z.laeuft || !P || !P.listen) return;
-      if (j >= autoSt) { autoPlanen("st"); const L = P.listen(); const fav = (FAV.stimmung || []).map(k => k.replace(/^st:/, "")).filter(k => L.st.includes(k));
-        const pool = (fav.length >= 2 ? fav : L.st.slice(0, 8)).filter(k => k !== z.stimmung), k = pool[Math.floor(Math.random() * pool.length)];
-        if (k) { pultKlick("data-vorlage", k); zeige("🤖 " + teil(L.namen.st[k] || k, "")[1], null, "Autopilot"); } }
+      if (j >= autoSt) { autoPlanen("st"); const k = autoNaechste(z.stimmung, P);
+        if (k) { autoZuletzt.unshift(k); autoZuletzt.length = Math.min(autoZuletzt.length, 3); pultKlick("data-vorlage", k); zeige("🤖 " + teil(P.listen().namen.st[k] || k, "")[1], null, "Autopilot"); } }
       if (j >= autoMom && z.kulLaeuft) { autoPlanen("mom"); pultKlick("data-aktion", "passiert"); zeige("🤖 ⚡ " + W("Etwas passiert", "Something happens"), null, "Autopilot"); }
       if (j >= autoSp) { autoPlanen("sp"); const r = ZP_PARAM.spannung, v = r.lies(); r.setz(Math.max(0, Math.min(65, Math.round((v + (Math.random() - .5) * 20) / 5) * 5))); }
     } else if ($(".welt.an")) {

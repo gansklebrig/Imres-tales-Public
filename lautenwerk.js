@@ -13405,6 +13405,20 @@ registerProcessor("imres-glitch", ImresGlitch);`;
         naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "" };
     },
     /* Zynthian-Pult: feste Listen (ohne Umsortieren nach Nutzung) und Namen */
+    /* Wie ähnlich sind sich zwei Stimmungen? (für den Autopilot) – Thema, Tempo, Helligkeit der Tonart, Dramatik */
+    aehnlich(a, b) {
+      const basis = k => (eigeneStimmungen[k] && eigeneStimmungen[k].basis) || k;
+      const A = basis(a), B = basis(b), sa = STIL[A], sb = STIL[B]; if (!sa || !sb) return 0;
+      const HELL = { lydisch: 3, ionisch: 2, mixolydisch: 1.5, dorisch: 0, aeolisch: -1, phrygisch: -2 };
+      const hell = st => { const m = st.modus || []; return m.length ? m.reduce((x, y) => x + (HELL[y] || 0), 0) / m.length : 0; };
+      const tempo = st => st.tempo ? (st.tempo[0] + st.tempo[1]) / 2 : 100;
+      const FAM = { natur: ["elben", "fey", "auenland", "pilger", "rast", "kamin", "reise"], ruhig: ["rast", "kamin", "pilger", "klage", "elben", "ruinen"],
+        dunkel: ["unterreich", "grusel", "spannung", "ruinen", "klage", "boss"], kampf: ["kampf", "boss", "verfolgung", "reiter"],
+        fest: ["dorffest", "trinklied", "marktplatz", "shanty", "sieg", "auenland"], episch: ["heldenlied", "hof", "sieg", "reise", "zwerge", "reiter"],
+        reise: ["reise", "reiter", "shanty", "pilger", "zwerge"], heim: ["kamin", "rast", "trinklied", "auenland"] };
+      let gemeinsam = 0; Object.values(FAM).forEach(l => { if (l.includes(A) && l.includes(B)) gemeinsam++; });
+      return Math.min(2, gemeinsam) * 3 - Math.abs(tempo(sa) - tempo(sb)) / 18 - Math.abs(hell(sa) - hell(sb)) * .8 - Math.abs((DRAMA[A] || 0) - (DRAMA[B] || 0)) * 1.2;
+    },
     listen() {
       const T = t(), set = abendSet && ABEND_SETS[abendSet];
       const st = [...new Set((set ? set.st : KERN_ST).concat(STIMMUNGEN))].filter(k => STIL[k]);
