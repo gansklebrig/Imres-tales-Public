@@ -9540,10 +9540,10 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     leiste.innerHTML = '<button type="button" class="ll-play"></button><button type="button" class="ll-kulk"></button><button type="button" class="ll-aus" title="">🎼</button><button type="button" class="ll-rec" hidden></button>' +
       '<span class="ll-titel"><span class="ll-name"></span><span class="ll-naechste"></span><i class="lw-wechselbalken"></i></span>' +
       '<span class="ll-int"><button type="button" class="ll-minus" aria-label="−">−</button><b class="ll-wert"></b><button type="button" class="ll-plus" aria-label="+">+</button></span>' +
-      '<label class="ll-vol"><span aria-hidden="true">🔊</span><input type="range" min="0" max="10" step="1" data-ll="master"></label>' +
+      '<label class="ll-vol"><span aria-hidden="true">🔊</span><input type="range" min="0" max="10" step="0.2" data-ll="master"></label>' +
       '<button type="button" class="ll-einst" aria-expanded="false">⚙</button>' +
       '<div class="ll-panel" hidden>' +
-        '<label class="lw-kleinregler"><span class="ll-pk"></span><input type="range" min="0" max="10" step="1" data-ll="kulvol"><b class="ll-pkw"></b></label>' +
+        '<label class="lw-kleinregler"><span class="ll-pk"></span><input type="range" min="0" max="10" step="0.2" data-ll="kulvol"><b class="ll-pkw"></b></label>' +
         '<div class="ll-knoepfe"><button type="button" class="lw-schalter ll-kul"></button><button type="button" class="lw-schalter ll-schlaf"></button><button type="button" class="lw-schalter ll-hin"></button></div>' +
       "</div>";
     document.body.appendChild(leiste);
@@ -9566,8 +9566,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     leiste.addEventListener("input", e => {
       const f = e.target.dataset && e.target.dataset.ll; if (!f) return;
       const v = +e.target.value;
-      if (f === "master") { S.master = v; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = v * 10 + " %"); }
-      else { S.kulisseVol = v; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = v * 10 + " %"); }
+      if (f === "master") { S.master = v; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = Math.round(v * 10) + " %"); }
+      else { S.kulisseVol = v; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = Math.round(v * 10) + " %"); }
       root.querySelectorAll('[data-feld="' + f + '"]').forEach(r => { r.value = v; });
       merken(); effekteAnwenden(); leisteAktualisieren();
     });
@@ -9598,12 +9598,12 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const pn = leiste.querySelector(".ll-panel"), eb = leiste.querySelector(".ll-einst");
     pn.hidden = !leisteAuf; eb.setAttribute("aria-expanded", leisteAuf); eb.title = eb.ariaLabel = T.einstKurz;
     { const m = leiste.querySelector('[data-ll="master"]'); if (document.activeElement !== m) m.value = S.master;
-      m.setAttribute("aria-label", T.master + " " + S.master * 10 + " %"); m.title = T.master + ": " + S.master * 10 + " %"; }
+      m.setAttribute("aria-label", T.master + " " + Math.round(S.master * 10) + " %"); m.title = T.master + ": " + Math.round(S.master * 10) + " %"; }
     if (leisteAuf) {
       leiste.querySelector(".ll-pk").textContent = "🌫 " + T.kulisseLaut;
       const k = leiste.querySelector('[data-ll="kulvol"]');
       if (document.activeElement !== k) k.value = S.kulisseVol;
-      leiste.querySelector(".ll-pkw").textContent = S.kulisseVol * 10 + " %";
+      leiste.querySelector(".ll-pkw").textContent = Math.round(S.kulisseVol * 10) + " %";
       const kb = leiste.querySelector(".ll-kul"); kb.textContent = kul ? T.kulisseAn : T.kulisseAus; kb.setAttribute("aria-pressed", !!kul);
       kb.hidden = !kul && S.kulisse === "keine" && !kulMerk;
       leiste.querySelector(".ll-hin").textContent = T.zumLautenwerk;
@@ -9848,15 +9848,15 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     '<button type="button" class="lw-schalter" data-aktion="kulisse" aria-pressed="' + !!kul + '">' + (kul ? T.kulisseAn : T.kulisseAus) + "</button>";
   const sparKnopf = T => '<button type="button" class="lw-schalter lw-spar" data-aktion="spar" aria-pressed="' + spar + '" title="' + esc(T.sparTipp) + '">' + T.spar + "</button>";
   const mixRegler = (T, ohneMusik) =>
-    (ohneMusik ? "" : '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>') +
+    (ohneMusik ? "" : '<label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.master + ' <b class="lw-mval">' + Math.round(S.master * 10) + ' %</b></span><input type="range" min="0" max="10" step="0.2" value="' + S.master + '" data-feld="master"></label>') +
     '<label class="lw-feld lw-regler lw-hallregler"><span>🏛 ' + T.hall + ' <b class="lw-hval">' + S.hall * 10 + ' %</b> ' + info("hall") + '</span><input type="range" min="0" max="10" step="1" value="' + S.hall + '" data-feld="hall"></label>' +
     '<label class="lw-feld lw-regler lw-echohall"><span>🌫 ' + T.echoHall + ' <b class="lw-eval">' + S.echoHall * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.echoHall + '" data-feld="echohall"></label>' +
     raumWahl(T) + '<button type="button" class="lw-schalter lw-kick" data-aktion="kick" aria-pressed="' + (S.kick !== 0) + '" title="' + esc(T.kickTipp) + '">🥁 ' + T.kick + ": " + T.kickStufe[S.kick] + "</button>" + sparKnopf(T);
-  const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + S.fxVol * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.fxVol + '" data-feld="fxvol"></label>';
+  const fxRegler = T => '<label class="lw-feld lw-regler lw-fxregler"><span>💥 ' + T.fxLaut + ' <b class="lw-fval">' + Math.round(S.fxVol * 10) + ' %</b></span><input type="range" min="0" max="10" step="0.2" value="' + S.fxVol + '" data-feld="fxvol"></label>';
   const uebRegler = T => '<label class="lw-feld lw-regler lw-uebergang"><span>🌊 ' + T.uebergang + ' <b class="lw-uval">' + T.uebStufe(uebergang) + '</b> ' + info("uebergang") + '</span><input type="range" min="1" max="8" step="1" value="' + uebergang + '" data-feld="uebergang"></label>';
   const intRegler = T => '<label class="lw-feld lw-regler lw-intensitaet"><span>🔥 ' + T.intensitaet + ' <b class="lw-ival">' + T.intStufen[S.intensitaet] + '</b> ' + info("intensitaet") + '</span><input type="range" min="0" max="10" step="1" value="' + S.intensitaet + '" data-feld="intensitaet"></label>';
   /* schmaler Regler direkt über seinen Kacheln – für das, was am Tisch oft nachgeregelt wird */
-  const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler" title="' + esc(text) + '"><span><i class="lw-ik">' + sym + '</i><span class="lw-lbl"> ' + text + '</span></span><input type="range" min="0" max="10" step="1" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + wert * 10 + " %</b></label>";
+  const kleinRegler = (sym, text, feld, wert, klasse) => '<label class="lw-kleinregler" title="' + esc(text) + '"><span><i class="lw-ik">' + sym + '</i><span class="lw-lbl"> ' + text + '</span></span><input type="range" min="0" max="10" step="' + (/^(master|kulvol|fxvol)$/.test(feld) ? "0.2" : "1") + '" value="' + wert + '" data-feld="' + feld + '"><b class="' + klasse + '">' + Math.round(wert * 10) + " %</b></label>";
   Object.assign(TX.de, { kulisseKurz: "Hintergrund", effekteKurz: "Effekte", einstKurz: "Lautstärke und Kulisse", zumLautenwerk: "↑ Zum Lautenwerk" });
   Object.assign(TX.en, { kulisseKurz: "Background", effekteKurz: "Effects", einstKurz: "Volume and backdrop", zumLautenwerk: "↑ To the Lautenwerk" });
   /* selten gebrauchte Regler: eingeklappt, bis man sie braucht */
@@ -11217,7 +11217,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       '<div class="lw-pult"><div class="lw-pult-kopf"><button type="button" class="lw-play-gross lw-hoeren' + (hoerer.an ? " an" : "") + '" data-aktion="hoeren">' + (hoerer.an ? T.hAus : T.hZuhoeren) + "</button>" +
         '<span class="lw-pult-titel">' + esc(z && z.titel ? z.titel : "") + "</span></div>" +
         '<p class="lw-funk-status">' + esc(stat) + "</p>" + '<p class="lw-diagnose"></p>' +
-        '<section class="lw-pult-mix"><label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.hLaut + ' <b class="lw-mval">' + S.master * 10 + ' %</b></span><input type="range" min="0" max="10" step="1" value="' + S.master + '" data-feld="master"></label>' + fxRegler(T) + '</section>' +
+        '<section class="lw-pult-mix"><label class="lw-feld lw-regler lw-master"><span>🔊 ' + T.hLaut + ' <b class="lw-mval">' + Math.round(S.master * 10) + ' %</b></span><input type="range" min="0" max="10" step="0.2" value="' + S.master + '" data-feld="master"></label>' + fxRegler(T) + '</section>' +
         '<p class="lw-tipp">' + T.hIphone + "</p>" +
         '<p class="lw-tipp"><a href="' + esc(location.pathname) + '#lautenwerk">' + T.hSelbst + "</a></p>" +
       "</div>" + '<div class="lw-fuss"><span class="lw-status" aria-live="polite"></span></div>';
@@ -11275,7 +11275,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (!neu) neu = dekodieren(d.lied);
     if (!neu) { zeichnen(); knoepfe(); return; }
     Object.assign(neu, { titel: String(d.titel || "").slice(0, 80), stimmung: STIL[d.stimmung] ? d.stimmung : null, intensitaet: zahl(d.intensitaet, 0, 10, 5),
-      kulisse: KUL_WEG[d.kulisse] ? kulWeg(d.kulisse) : (KULISSEN.includes(d.kulisse) ? d.kulisse : "keine"), kulisseVol: zahl(d.kulisseVol, 0, 10, 5), hall: zahl(d.hall, 0, 10, 0),
+      kulisse: KUL_WEG[d.kulisse] ? kulWeg(d.kulisse) : (KULISSEN.includes(d.kulisse) ? d.kulisse : "keine"), kulisseVol: (n => isNaN(n) ? 5 : Math.max(0, Math.min(10, n)))(parseFloat(d.kulisseVol)), hall: zahl(d.hall, 0, 10, 0),
       raum: RAEUME[d.raum] ? d.raum : "taverne", echoHall: zahl(d.echoHall, 0, 10, 3), orchester: d.orchester === 0 ? 0 : 1, kapStufe: d.kapStufe === 1 ? 1 : 2, gaeste: Object.assign(Object.fromEntries(GAESTE.map(g => [g.id, d.gaeste && [0, 1, 2].includes(d.gaeste[g.id]) ? d.gaeste[g.id] : 1])), { _aus: d.gaeste && d.gaeste._aus ? 1 : 0 }), hallAus: Object.assign({}, S.hallAus, d.hallAus || {}), master: S.master, pult: false });
     const kern = x => [x.transpose, x.modus, x.instrument, x.band.trommel, x.band.floete, x.band.ketten, x.swing, x.bordun, x.takt].join();
     const titelNeu = !alt || alt.titel !== d.titel || (alt.laeuft !== d.laeuft);
@@ -11945,10 +11945,10 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (d.vol) { S.vol[d.vol] = +e.target.value; merken(); mixAnwenden(); return; }
     if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
-    if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = S.master * 10 + " %"); root.querySelectorAll('[data-feld="master"]').forEach(r => { if (r !== e.target) r.value = S.master; }); merken(); effekteAnwenden(); try { leisteAktualisieren(); } catch (_) {} }
-    if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = S.kulisseVol * 10 + " %"); root.querySelectorAll('[data-feld="kulvol"]').forEach(r => { if (r !== e.target) r.value = S.kulisseVol; }); merken(); effekteAnwenden(); }
+    if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = Math.round(S.master * 10) + " %"); root.querySelectorAll('[data-feld="master"]').forEach(r => { if (r !== e.target) r.value = S.master; }); merken(); effekteAnwenden(); try { leisteAktualisieren(); } catch (_) {} }
+    if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = Math.round(S.kulisseVol * 10) + " %"); root.querySelectorAll('[data-feld="kulvol"]').forEach(r => { if (r !== e.target) r.value = S.kulisseVol; }); merken(); effekteAnwenden(); }
     if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
-    if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = S.fxVol * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = Math.round(S.fxVol * 10) + " %"); merken(); effekteAnwenden(); }
     if (d.allespur) { alleSpurenZiehen(e.target, false); return; }
     if (d.zusvol) {
       const id = d.zusvol, v = (+e.target.value) / 100; if (!zusIst(id)) return;

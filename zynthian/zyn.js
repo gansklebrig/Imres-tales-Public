@@ -175,22 +175,33 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 
   /* ---------- Drehregler: zwei Bänke je Seite ---------- */
   const proz = (v, lo, hi) => (v - lo) / (hi - lo);
+  const DREH_T = {};
+  function drehFaktor(key, d, fein) {
+    const jetzt = performance.now(), l = DREH_T[key] || { t: 0, n: 0, d: 0 };
+    l.n = (jetzt - l.t < 120 && Math.sign(d) === Math.sign(l.d)) ? Math.min(l.n + 1, 40) : 0; l.t = jetzt; l.d = d; DREH_T[key] = l;
+    if (!fein || !d) return 1;
+    let f = l.n < 3 ? 1 : l.n < 7 ? 2 : l.n < 12 ? 4 : l.n < 20 ? 6 : 8;
+    if (d < 0 && f > 1) f = Math.round(f * 1.5);
+    return f;
+  }
+  const rasten = (v, def) => { const x = def.lo + Math.round((v - def.lo) / def.schritt) * def.schritt; return Math.max(def.lo, Math.min(def.hi, Math.round(x * 1000) / 1000)); };
   function stellRegler(def, d) {
-    const v0 = def.lies(), v = Math.max(def.lo, Math.min(def.hi, v0 + d * def.schritt));
+    const f = drehFaktor(def.name, d, def.schritt && (def.hi - def.lo) / def.schritt >= 40);
+    const v0 = def.lies(), v = d ? rasten(v0 + d * def.schritt * f, def) : Math.max(def.lo, Math.min(def.hi, v0));
     if (v !== v0) def.setz(v);
     zeige(def.name + " · " + (def.text ? def.text(v) : Math.round(proz(v, def.lo, def.hi) * 100) + " %"), proz(v, def.lo, def.hi), def.unter);
   }
   const zahl = (x, d) => (typeof x === "number" && isFinite(x) ? x : d);
   /* Bühne */
   const B_REGLER = [[
-    { name: W("🎵 Musik", "🎵 Music"), lo: 0, hi: 10, schritt: 1, lies: () => zahl(pz() && pz().master, 8), setz: v => pultRegler("data-feld", "master", v) },
-    { name: W("🌲 Hintergrund", "🌲 Backdrop"), lo: 0, hi: 10, schritt: 1, lies: () => zahl(pz() && pz().kulisseVol, 5), setz: v => pultRegler("data-feld", "kulvol", v) },
+    { name: W("🎵 Musik", "🎵 Music"), lo: 0, hi: 10, schritt: 0.2, lies: () => zahl(pz() && pz().master, 8), setz: v => pultRegler("data-feld", "master", v) },
+    { name: W("🌲 Hintergrund", "🌲 Backdrop"), lo: 0, hi: 10, schritt: 0.2, lies: () => zahl(pz() && pz().kulisseVol, 5), setz: v => pultRegler("data-feld", "kulvol", v) },
     { name: W("🔥 Wie viel los", "🔥 How busy"), lo: 0, hi: 10, schritt: 1, lies: () => zahl(pz() && pz().intensitaet, 5), setz: v => pultRegler("data-feld", "intensitaet", v) },
     { name: W("😨 Spannung", "😨 Tension"), lo: 0, hi: 100, schritt: 5, lies: () => Math.round(zahl(pz() && pz().spannung, 0) * 100), setz: v => pultRegler("data-leben", "spannung", v) }
   ], [
     { name: W("⏱ Tempo", "⏱ Tempo"), lo: 50, hi: 180, schritt: 2, lies: () => zahl(pz() && pz().tempo, 100), setz: v => { if (window.ImresPult && window.ImresPult.tempo) window.ImresPult.tempo(v); else pultRegler("data-feld", "tempo", v); }, text: v => v + " BPM" },
     { name: W("🏛 Hall", "🏛 Reverb"), lo: 0, hi: 10, schritt: 1, lies: () => zahl(pz() && pz().hall, 5), setz: v => pultRegler("data-feld", "hall", v) },
-    { name: W("💥 Effekte", "💥 Effects"), lo: 0, hi: 10, schritt: 1, lies: () => zahl(pz() && pz().fxVol, 7), setz: v => pultRegler("data-feld", "fxvol", v) },
+    { name: W("💥 Effekte", "💥 Effects"), lo: 0, hi: 10, schritt: 0.2, lies: () => zahl(pz() && pz().fxVol, 7), setz: v => pultRegler("data-feld", "fxvol", v) },
     { name: W("🎐 Echos Hall", "🎐 Echo reverb"), lo: 0, hi: 10, schritt: 1, lies: () => zahl(pz() && pz().echoHall, 5), setz: v => pultRegler("data-feld", "echohall", v) }
   ]];
   /* Klangwelten */
@@ -200,13 +211,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const W_REGLER = [[
     wRegler("#gesamt", W("🔊 Lautstärke", "🔊 Volume"), 0, 100, 2),
     wRegler('[data-regler="spannung"]', W("😨 Spannung", "😨 Tension"), 0, 100, 5),
-    wRegler("#ger-laut", W("🎭 Geräusche", "🎭 Sounds"), 0, 150, 5),
-    wRegler("#sz-laut", W("⏳ Szenen", "⏳ Scenes"), 0, 150, 5)
+    wRegler("#ger-laut", W("🎭 Geräusche", "🎭 Sounds"), 0, 150, 2),
+    wRegler("#sz-laut", W("⏳ Szenen", "⏳ Scenes"), 0, 150, 2)
   ], [
     wRegler('[data-regler="leben"]', W("🐾 Lebendigkeit", "🐾 Liveliness"), 0, 200, 5),
     wRegler('[data-regler="raum"], [data-regler="ehall"]', W("🏛 Raumhall", "🏛 Room echo"), 0, 100, 5),
-    wRegler('[data-regler="wlaut"]', W("🌦 Wetter", "🌦 Weather"), 0, 150, 5),
-    wRegler('[data-regler="b0"]', W("🎚 Grundschicht", "🎚 Base layer"), 0, 150, 5)
+    wRegler('[data-regler="wlaut"]', W("🌦 Wetter", "🌦 Weather"), 0, 150, 2),
+    wRegler('[data-regler="b0"]', W("🎚 Grundschicht", "🎚 Base layer"), 0, 150, 2)
   ]];
   /* die Schieberegler im Mischpult der Klangwelten gibt es erst, wenn es offen war – einmal kurz öffnen */
   function weltenMischBereit() {
@@ -1045,7 +1056,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function zpDreh(nr, d) {
     const beatsRg = zpSeite === "beats" && bank < 2 && !panelAktiv();
     if (drehGedrueckt[nr] && !beatsRg) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
-    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); loopMitschreiben(r, v);
+    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const f = drehFaktor("zp" + nr + ":" + r.name, d, (r.hi - r.lo) / r.schritt >= 40);
+    const v0 = r.lies(), v = rasten(v0 + d * r.schritt * f, r); if (v !== v0) r.setz(v); loopMitschreiben(r, v);
     if (beatsRg) zpZeichnen(true); else zpReglerAnzeige();
   }
   let reglerRaf = 0;
@@ -1693,7 +1705,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     }, 150);
   }
   /* Reglerbänke für die Eingänge */
-  const KANAL_FELDER = [["laut", W("🔊 Lautstärke", "🔊 Level"), 0, 100, 4, 80], ["pegel", W("🎤 Gain", "🎤 Gain"), 0, 1600, 20, 100], ["filter", W("🎛 Filter", "🎛 Filter"), -100, 100, 4, 0], ["echo", W("🔁 Delay", "🔁 Delay"), 0, 100, 4, 0],
+  const KANAL_FELDER = [["laut", W("🔊 Lautstärke", "🔊 Level"), 0, 100, 2, 80], ["pegel", W("🎤 Gain", "🎤 Gain"), 0, 1600, 20, 100], ["filter", W("🎛 Filter", "🎛 Filter"), -100, 100, 4, 0], ["echo", W("🔁 Delay", "🔁 Delay"), 0, 100, 4, 0],
     ["rueck", W("↻ Rückkopplung", "↻ Feedback"), 0, 90, 5, 35], ["hall", W("🏛 Hall", "🏛 Reverb"), 0, 100, 4, 0], ["drive", W("🔥 Drive", "🔥 Drive"), 0, 100, 4, 0], ["pan", W("↔ Panorama", "↔ Pan"), -100, 100, 5, 0], ["duck", W("⤵ Musik weicht aus", "⤵ Music ducks"), 0, 80, 5, 0]];
   [0, 1].forEach(i => KANAL_FELDER.forEach(([f, nm, lo, hi, st, neutral]) => {
     ZP_PARAM["in" + (i + 1) + "_" + f] = { name: "IN" + (i + 1) + " " + nm, lo, hi, schritt: st, neutral, druck: "null", lies: () => (kanalHol(i) || {})[f] || 0, setz: v => { kanalSetz(i, { [f]: v }); },
@@ -1809,7 +1821,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   ZP_PARAM.mit_stufe = { name: W("🎻 Mitspieler-Ensemble", "🎻 Ensemble"), lo: 0, hi: 8, schritt: 1, neutral: 3, druck: "null",
     lies: () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().stufe : 0; }, setz: v => { const P = window.ImresPult; if (P && P.mitspieler) P.mitspieler({ stufe: v }); },
     text: v => v ? v + " · " + (v === 1 ? "" : W("bis ", "up to ")) + (MS_NAMEN()[v - 1] || "") : W("niemand", "nobody") };
-  ZP_PARAM.mit_laut = { name: W("🎻 Mitspieler laut", "🎻 Ensemble level"), lo: 0, hi: 100, schritt: 4, neutral: 70, druck: "stumm",
+  ZP_PARAM.mit_laut = { name: W("🎻 Mitspieler laut", "🎻 Ensemble level"), lo: 0, hi: 100, schritt: 2, neutral: 70, druck: "stumm",
     lies: () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().laut : 0; }, setz: v => { const P = window.ImresPult; if (P && P.mitspieler) P.mitspieler({ laut: v }); } };
   ZP_PARAM.mit_hall = { name: W("🎻 Mitspieler Hall", "🎻 Ensemble reverb"), lo: 0, hi: 100, schritt: 5, neutral: 35, druck: "null",
     lies: () => { const P = window.ImresPult; return P && P.mitspieler ? P.mitspieler().hall : 0; }, setz: v => { const P = window.ImresPult; if (P && P.mitspieler) P.mitspieler({ hall: v }); } };
