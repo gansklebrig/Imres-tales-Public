@@ -1,21 +1,7 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Heldensturm – das Roguelike zu Imres Tales: Barradin, Echo, Friedrich und Ezekiel kämpfen sich durch die ganze Kampagne.">
-<meta name="theme-color" content="#100c12">
-<link rel="manifest" href="heldensturm.webmanifest">
-<link rel="apple-touch-icon" href="heldensturm-icon-192.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta property="og:title" content="Heldensturm">
-<meta property="og:description" content="Das Roguelike zu Imres Tales: 15 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
-<meta property="og:image" content="https://imrestales.de/vorschau.jpg">
-<style>[hidden]{display:none!important}body{margin:0}</style>
 <title>Heldensturm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="schriften/schriften.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
 <style>
 /* Layout: Vollbild-Canvas als Spielwelt, darüber ein schlankes HUD und Pergament-dunkle Menüs. Eine einzige, bewusst dunkle Welt. */
 :root{
@@ -354,8 +340,6 @@ details.stats .stat{padding:0 12px 12px}
 .fire-wrap{min-height:70vh;justify-content:center;gap:8px}.fire-cv,.lager-cv{width:100%;max-width:640px;height:230px;border-radius:14px;border:1px solid rgba(229,180,84,.25);box-shadow:0 0 40px rgba(255,140,50,.12) inset;display:block;margin:6px auto;background:#0b0d1c}.lager-cv{height:260px;cursor:pointer}.fire-stats{margin:4px 0 0;font-size:14px;color:var(--muted,#b8a99a)}.fire-stats b{color:var(--text,#f4e9d8)}.fire-mvp{margin:0;font-size:14px}.fire-imre{margin:6px 0 0;font-style:italic;line-height:1.45;max-width:560px}.fire-imre span{font-style:normal;font-weight:800;color:#e5b454;letter-spacing:.04em}.fire-neu{margin:0;color:#ffd04a;font-size:14px}.npc-row{display:block;width:100%;max-width:520px;height:96px;margin:2px auto -4px}.fire-next{margin:0;font-size:13.5px}.lager-say{min-height:2.8em;margin:4px 0 6px;line-height:1.45}.lager-chips{justify-content:center}@media (max-width:520px){.fire-cv{height:190px}.lager-cv{height:220px}}
 </style>
 
-</head>
-<body>
 <canvas id="cv" aria-label="Spielfeld"></canvas>
 <div id="hud" hidden>
   <div class="top">
@@ -5126,7 +5110,7 @@ function showTitle(keep){unseedRng();if(CLOUD.pend&&!$('cloudAsk'))setTimeout(()
   :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Leertaste = Ausweichrolle, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, M = Karte, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Im Roguelite behält jeder Held Stufe, Talente und Ausrüstung, und jeder besiegte Ort-Boss öffnet ein Portal als neuen Startpunkt. Im Hardcore beginnt jeder Lauf von vorn – dafür zählt er für die Bestenliste. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Die Orgel nahm Simon Dalzell (Ivy Audio) auf. Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div><div class="card ups"><div class="eyebrow">Einstellungen</div>${gfxRow()}${volRows()}</div><div class="card ups"><div class="eyebrow">Controller &amp; Mehrspieler</div><div class="ctlBox" style="display:flex;flex-direction:column;gap:8px">${ctlRows()}</div></div><p class="muted" style="font-size:12px;text-align:center;margin:4px 0 0">Spielversion ${HS_VERSION}</p>`
   :`${modeCard()}${astWahlHtml(sel)}<p class="lead">${H.blurb}</p><div class="facts"><div><span>Kampfstil</span>${ATKSTYLE[sel]}</div><div><span>Bester Lauf</span>${best}</div></div>`;
  showScreen(`<div class="camp" style="--hc:${HCOL[sel]}">
-  <header class="camp-top"><div><a class="back" href="./#taverne">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
+  <header class="camp-top"><div><a class="back" href="https://imrestales.de/#taverne" target="_top">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
   ${runBanner}
   <nav class="picker" aria-label="Held wählen">${picks}</nav>
   <div class="camp-main">
@@ -7083,7 +7067,7 @@ function nDec(v,res){if(typeof v==='string'){if(v[0]==='$')return netReg().get(v
 const nSame=(a,b)=>a===b||(a&&b&&typeof a==='object'&&typeof b==='object'&&JSON.stringify(a)===JSON.stringify(b));
 
 /* ---------- Transport ---------- */
-function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
+function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
 function netCfg(){return Object.assign({debug:0,config:{iceServers:[{urls:'stun:stun.cloudflare.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]}},window.__netcfg||{})}
 /* Eigener Kanal ohne Neuversand: verlorene Pakete stören nicht, das nächste ersetzt sie ohnehin */
 function netU(conn,onMsg){try{const pc=conn.peerConnection;if(!pc)return null;const u=pc.createDataChannel('hsu',{negotiated:true,id:77,ordered:false,maxRetransmits:0});u.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(er){return}onMsg(m)};return u}catch(e){return null}}
@@ -22997,6 +22981,696 @@ window.__hsINHALT.fn={SITZUNGEN,SZ,szNeuListe,echoStartAn,ECHO_START,ES,szItem:i
 /* Brücke: Leveldesign-Deko (spLeicht) folgt dem Ultra-leicht-Modus */
 {const alt=window.__hsLeicht;window.__hsLeicht=function(){try{if(typeof grUltra==='function'&&grUltra())return true}catch(e){}try{return typeof alt==='function'?!!alt():false}catch(e){return false}}}
 window.__hsBRUECKE=1;
+
+/* ================= Paket „npc“: Figuren mit Persönlichkeit, kleine Aufträge, neutrale Wesen, benutzbare Dinge =================
+   Baut auf hs/spass_code.js (Überraschungen, Händler, spOrt/spNah/spLeicht/spMsg/spRew, Wiederholungsschutz spPrev)
+   und hs/karte_code.js (Abschnitte, Fährmann, Gefangene) auf – nur anhängen/umhüllen, nichts davon wird ersetzt.
+   1) Wiederkehrende Figuren aus der Chronik (Gundren, Elmar Barton, Zilda, Nundro, Dolgrimson, Fagas, Ploopploopeen, Kardal,
+      Hgraam, Mosk der fahrende Händler) mit Sprüchen, die sich erinnern: im Lauf (G.npL) und laufübergreifend (SAVE.npc).
+   2) Kleine Aufträge je Stufe: Geleit, drei Dinge suchen, Geisel befreien, Nachricht überbringen, Karren/Leute schützen –
+      mit Belohnung, Mini-Geschichte und Folgen in späteren Stufen (geholfen → Rabatt/Verstärkung/Geschenk; abgelehnt → verärgert).
+   3) Händler-Überraschung (spass) aufgewertet: feilschen, echte Gerüchte über die nächste Stufe, Ware je Kapitel, manchmal ein
+      zu gutes Angebot. Fährmann und Gefangene (karte) reden jetzt und erinnern sich; der Riese mit dem Erzwagen (inhalt) kehrt wieder.
+   4) Neutrale Wesen: Tiere (fliehen oder lassen sich anfreunden – kurzer Begleiter-Effekt), schlafendes Ungeheuer (vorbeischleichen
+      oder wecken), reizbare Wesen; dazu Wegweiser, Lagerfeuer anderer Reisender, Brunnen/Quelle, Opferschrein.
+   5) Gespräche: Sprechblase in der Welt + Feld mit 2–3 Knöpfen (A/B/Steuerkreuz, 1–3/Esc, Maus/Touch), Welt läuft weiter,
+      Gespräch nur, wenn keine Gegner nahe sind. Online wählt, wer zuerst da ist; Gäste sehen Figuren, Blasen und Ergebnis.
+   Nicht-feindlich = Requisite (G.props) oder Schutzziel (G.allies, kind 'obj'): keine Zielautomatik, kein Flächenschaden der Helden,
+   kein roter Balken; Namen in Gold (Figuren) bzw. Grün (Wesen/Schutzziele). Spargrafik über spLeicht()/grUltra().
+   Erweitern: NP_FIG / NP_AUF / NP_WESEN / NP_DING unten (Kommentarblock), Anleitung in test/SITZUNG_EINTRAGEN.md („Figuren und Aufträge“). */
+window.__hsNPC={v:1};
+NETGBL.add('np');NETGBL.add('npL');
+for(const k of ['npI','npS','npF','npM','npT','npN','npC','npA'])if(!NETW.props.includes(k))NETW.props.push(k);
+try{if(typeof ULKEYS!=='undefined')for(const k of ['npS','npF','npT','npA'])if(!ULKEYS.prop.includes(k))ULKEYS.prop.push(k)}catch(e){}
+const NP={aus:0,nein:0.15,mi:-1,ui:null,force:null};
+window.__hsNPC.NP=NP;
+const npGold='#e8c070',npGruen='#9fe08a';
+
+/* ======================================================================================================
+   FIGUREN – wiederkehrende Leute aus der Chronik (inhalt.js)
+   {n:'Name', titel:'kurzer Zusatz', art:'NPC_ART-Kennung' oder {shape:'human',c,t,skin,hat} (drawEnemy-Mensch) oder {riese:1},
+    orte:[von,bis] (ORTE-Index der Kampagne), auf:['Auftrags-ids'],
+    gruss:[…] erstes Treffen überhaupt · wieder:[…] aus früheren Läufen ({n} = wie oft) · lauf:[…] heute schon gesehen,
+    dank:[…] nach Erfolg · aerger:[…] nach Ablehnen · fehl:[…] wenn es schiefging,
+    folgeGut:{t,lohn} / folgeAerger:{t} – späterer Auftritt im selben Lauf, q:{held:'Antwortsatz des Helden'}}
+   Platzhalter: {n} Anzahl Treffen, {held} Name des sprechenden Helden. Sätze kurz halten (Sprechblase, kein Scrollen).
+   ====================================================================================================== */
+const NP_FIG={
+ elmar:{n:'Elmar Barton',titel:'verirrter Bauer',art:{shape:'human',c:'#7a6a3a',t:'#4a5a2a',skin:'#e8c09c',hat:1},orte:[0,2],auf:['geleit_elmar','suche_elmar'],
+  gruss:['Ihr seid Gundrens Leute? Dann sucht ihr mich! Elmar Barton.'],wieder:['Ihr schon wieder! Ich verlaufe mich zum {n}. Mal – und immer findet ihr mich.'],lauf:['Ihr nochmal! Diesmal hab ich mich nur ein bisschen verlaufen.'],
+  dank:['Gundren hatte recht: eine Extraportion Gold für euch!'],aerger:['Schon gut. Ich find den Weg allein. Irgendwann.'],fehl:['Das war knapp … beim nächsten Mal klappt es.'],
+  folgeGut:{t:'Da seid ihr ja! Ein paar Freunde aus Phandalin wollen euch helfen.',lohn:'verstaerkung',wer:'Elmars Freundin'},folgeAerger:{t:'Ach, ihr. Ich hab den Weg auch ohne euch gefunden. Fast.'},
+  q:{echo:'Extraportion Gold, sagst du?',barradin:'Ein Lied über einen verirrten Bauern? Kommt!'}},
+ gundren:{n:'Gundren Felssucher',titel:'Händler aus Neverwinter',art:'gundren',orte:[0,5],auf:['karren_gundren','bote_gundren'],
+  gruss:['Meine Helden! Gundren Felssucher – der Mann mit den Briefen.'],wieder:['Meine besten Leute! Schon das {n}. Mal hier. Auf gute Geschäfte!'],lauf:['Ihr schon wieder? Gut so – ich hab noch was.'],
+  dank:['Auf gute Geschäfte! Ihr seid jeden Kupferling wert.'],aerger:['Hm. Geschäft ist Geschäft. Ich merk mir das.'],fehl:['Der Karren ist hin. Die Lords werden toben.'],
+  folgeGut:{t:'Für meine besten Leute: ein kleiner Vorschuss!',lohn:'kiste'},folgeAerger:{t:'Ach, ihr. Mein Karren hat es trotzdem geschafft. Knapp.'},
+  q:{echo:'Gold? Wo?',friedrich:'Rex, bewach den Karren.'}},
+ zilda:{n:'Zilda',titel:'Söldnerin',art:{shape:'human',c:'#4a4a52',t:'#7a2a2a',skin:'#c89a78'},orte:[5,7],auf:['geisel_zilda','karren_zilda'],
+  gruss:['Zilda. Söldnerin. Ihr habt mich aus dem Wachturm geholt – das vergess ich nicht.'],wieder:['Ihr wieder. Das {n}. Mal. Ich zähle mit, Söldner tun das.'],lauf:['Noch was zu tun, bevor ihr weiterzieht.'],
+  dank:['Saubere Arbeit. Ihr könntet als Söldner reich werden.'],aerger:['Dann eben nicht. Ich hab Schlimmeres allein gemacht.'],fehl:['Zu spät. Das geht auf meine Rechnung.'],
+  folgeGut:{t:'Ich schulde euch was. Ich kämpfe ein Stück mit.',lohn:'verstaerkung',wer:'Zilda'},folgeAerger:{t:'Ich hab ihn selbst rausgeholt. Ohne euch.'},
+  q:{ezekiel:'…',barradin:'Söldnerin? Ich nehme Lieder als Bezahlung.'}},
+ nundro:{n:'Nundro',titel:'Gundrens Zwillingsbruder',art:'nundro',orte:[5,7],auf:['suche_nundro','bote_nundro'],
+  gruss:['Nundro. Nicht Nando! Gundrens Bruder. Ja, der Zwilling.'],wieder:['Nundro! Nicht Nando. Das sag ich jetzt zum {n}. Mal.'],lauf:['Ihr schon wieder? Gut, ich brauch noch Hilfe.'],
+  dank:['Gundren wird stolz sein. Auf euch – und auf mich, weil ich gefragt hab.'],aerger:['Mein Bruder hätte euch überredet. Ich bin halt nicht Gundren.'],fehl:['Na ja. Zwei von drei ist auch was.'],
+  folgeGut:{t:'Mein Bruder schickt euch das hier. Er umarmt euch später.',lohn:'kiste'},folgeAerger:{t:'Ah. Ihr. Ich hab die Werkzeuge selbst gefunden. Zwei davon.'},
+  q:{barradin:'Nando, richtig?',echo:'Und wo ist das Gold?'}},
+ dolgrimson:{n:'Captain Dolgrimson',titel:'Allianz der Lords',art:'dolgrimson',orte:[6,7],auf:['schutz_dolg','bote_dolg'],
+  gruss:['Captain Dolgrimson, Allianz der Lords. Angemeldet habt ihr euch wieder nicht.'],wieder:['Ihr. Das {n}. Mal ohne Anmeldung. Ich gebe auf.'],lauf:['Noch ein Auftrag der Allianz, wenn ihr erlaubt.'],
+  dank:['Die Allianz dankt euch. Formell. Und ich auch, informell.'],aerger:['Notiert. In dreifacher Ausfertigung.'],fehl:['Das wird ein schwerer Bericht.'],
+  folgeGut:{t:'Die Allianz schickt Verstärkung. Meldet euch bitte bei ihr an.',lohn:'verstaerkung',wer:'Soldatin der Allianz'},folgeAerger:{t:'Ich habe einen Bericht geschrieben. Über euch.'},
+  q:{friedrich:'Wir melden uns an. Nächstes Mal.',barradin:'Ein Formular? Ich singe es aus!'}},
+ fagas:{n:'Fagas',titel:'Gnom und Kartenleser',art:'fagas',orte:[9,10],auf:['geleit_fagas','suche_fagas'],
+  gruss:['Fagas! Gnom, Kartenleser, ehemals Kokon. Danke fürs Rausschneiden!'],wieder:['Ihr! Das {n}. Treffen – und noch keine Spinne dabei. Bisher.'],lauf:['Ich kenne die Wege hier unten. Fast alle.'],
+  dank:['Khaem wäre stolz. Oder sie würde uns verfluchen. Eins von beiden.'],aerger:['Na gut. Ich frag die Spinnen. Nein, doch nicht.'],fehl:['Ich hab mich versteckt. Wieder in einem Kokon.'],
+  folgeGut:{t:'Ich hab eine Abkürzung gefunden – und Beute!',lohn:'kiste'},folgeAerger:{t:'Ich bin allein durch die Netze gekommen. Ich zittere immer noch.'},
+  q:{echo:'Ein Grab? Mit Schätzen?',friedrich:'Halt dich an Rex fest.'}},
+ ploop:{n:'Erzpriester Ploopploopeen',titel:'Kuo-Toa vom See',art:'ploop',orte:[11,11],auf:['schutz_ploop','bote_ploop'],nie:'flucht',
+  gruss:['Ploopploopeen grüßt euch, Freunde der Kuo-Toa. Das Wasser hat euch hergeführt.'],wieder:['Das Wasser führt euch zum {n}. Mal zu mir. Ploopploopeen ist dankbar.'],lauf:['Ihr kehrt zurück. Das ist ein gutes Zeichen.'],
+  dank:['Mein Volk wird eure Namen in seine Lieder flechten.'],aerger:['Jeder trägt seine eigene Last. Ploopploopeen versteht.'],fehl:['Ihr habt gekämpft. Das Wasser sieht es.'],
+  folgeGut:{t:'Meine Getreuen segnen euren Weg.',lohn:'segen'},folgeAerger:{t:'Das Wasser vergisst nicht, aber es vergibt.'},
+  q:{barradin:'Für dich schreibe ich ein Lied, Erzpriester.',friedrich:'Wir stehen zu dir.'}},
+ kardal:{n:'Kardal',titel:'nur ein Späher',art:'kardal',orte:[12,14],auf:['geisel_kardal','bote_kardal'],
+  gruss:['Kardal. Nur ein Späher. Ein ganz normaler Späher.'],wieder:['Ihr schon wieder. Das {n}. Mal. Und ich bin immer noch … nur ein Späher.'],lauf:['Ein Späher hat immer einen Auftrag.'],
+  dank:['Mein Va… mein Vorgesetzter wird davon hören.'],aerger:['Dann frag ich jemand anderen. Ich kenne viele Leute. Als Späher.'],fehl:['Die Wachen übernehmen. Sie salutieren übrigens vor mir. Zufall.'],
+  folgeGut:{t:'Ein paar Wachen schulden mir einen Gefallen. Sie kämpfen mit euch.',lohn:'verstaerkung',wer:'Wache aus Gracklstugh'},folgeAerger:{t:'Die Wachen haben es übernommen. Sie salutieren vor mir. Zufall.'},
+  q:{echo:'Prinz … äh, Späher Kardal.',barradin:'Natürlich. Nur ein Späher.'}},
+ hgraam:{n:'Hgraam',titel:'Steinsprecher der Riesen',art:{riese:1,c:'#8a8478',t:'#5a5248'},orte:[13,14],auf:['karren_riese','suche_hgraam'],
+  gruss:['Ich bin Hgraam. Der Stein spricht. Heute spricht er von euch.'],wieder:['Der Stein kennt euch. {n} Mal kamt ihr. Der Stein zählt nicht. Ich schon.'],lauf:['Der Stein schreit noch immer.'],
+  dank:['Der Stein ist zufrieden. Für einen Moment.'],aerger:['Der Stein vergisst nicht. Er ist ein Stein.'],fehl:['Der Stein schweigt. Das ist kein gutes Schweigen.'],
+  folgeGut:{t:'Für euch: ein Kristall, der summt.',lohn:'edelstein'},folgeAerger:{t:'Der Stein schweigt zu euch.'},
+  q:{echo:'Kennst du zufällig Gundren?',barradin:'Ich hab da eine Flöte …'}},
+ mosk:{n:'Mosk Feilschmund',titel:'fahrender Händler',art:{shape:'human',c:'#6a4a2a',t:'#3a5a2a',skin:'#d8b090',hat:1},orte:[0,14],auf:['karren_mosk'],selten:1,
+  gruss:['Mosk Feilschmund, fahrender Händler! Waren aus allen Ecken – Gerüchte gratis.'],wieder:['Meine Lieblingskunden! Zum {n}. Mal – da wird der Preis gleich freundlicher.'],lauf:['Ihr schon wieder? Das Glück ist mit dem Händler!'],
+  dank:['Mein Karren lebt! Für euch ab jetzt Freundschaftspreise.'],aerger:['Kein Händler vergisst einen Kunden, der ihn hängen lässt.'],fehl:['Mein schöner Karren … Na, der nächste wird schöner.'],
+  folgeGut:{t:'Meine Retter! Für euch heute ein Drittel weniger.',lohn:'rabatt'},folgeAerger:{t:'Ach, ihr. Für euch gilt heute der … Sonderpreis.',preis:1.3},
+  q:{barradin:'Und keine Flöte in deinem Laden, versprochen.',echo:'Rabatt?'}},
+ befreit:{n:'Ein Geretteter',titel:'aus dem Käfig befreit',art:'phandalin',orte:[0,14],auf:[],intern:1,
+  gruss:['Ihr habt mich aus dem Käfig geholt! Ich hab etwas für euch.'],wieder:['Ihr! Ihr habt mich aus dem Käfig geholt!'],lauf:['Ihr habt mich aus dem Käfig geholt!'],dank:['Danke, Helden!'],aerger:[''],fehl:[''],
+  folgeGut:{t:'Mehr hab ich nicht – aber es kommt von Herzen.',lohn:'trank'},folgeAerger:{t:''}}};
+/* Empfänger von Nachrichten (keine eigenen Aufträge) */
+const NP_EMPF={
+ kundschafterin:{n:'Kundschafterin der Allianz',art:{shape:'human',c:'#5a6a3a',t:'#3a3a2a',skin:'#e0b890'}},
+ gundren:{n:'Gundren Felssucher',art:'gundren'},
+ spaeher:{n:'Späher der Allianz',art:{shape:'human',c:'#6a5a3a',t:'#2f3a2a',skin:'#d8b090'}},
+ getreue:{n:'Eine Getreue Ploopploopeens',art:{kuotoa:1}},
+ wache:{n:'Stadtwache von Gracklstugh',art:{duergar:1}}};
+
+/* ======================================================================================================
+   AUFTRÄGE – typ: geleit | suche | geisel | bote | karren | schutz
+   {fig, typ, titel (HUD), bitte (Frage der Figur), ja/nein (Knöpfe), los (beim Annehmen), gut (Erfolg), lohn:'gold'|'item'|'segen'|'trank'|'kiste'|'edelstein',
+    dinge:[3 Namen] (suche), empf:'NP_EMPF-id', empfGut:'Satz des Empfängers' (bote), geisel:'Name' (geisel), leute:['Name','Name'] (schutz), karren:'Name' (karren)}
+   ====================================================================================================== */
+const NP_AUF={
+ geleit_elmar:{fig:'elmar',typ:'geleit',titel:'Elmar zum Ausgang bringen',bitte:'Bringt ihr mich bis zum Ausgang? Allein trau ich mich nicht an den Goblins vorbei.',ja:'Bleib dicht hinter uns',nein:'Keine Zeit, Elmar',los:'Ich bin direkt hinter euch!',gut:'Phandalin! Ich kann es fast riechen. Danke!',lohn:'gold'},
+ suche_elmar:{fig:'elmar',typ:'suche',titel:'Elmars Sachen',bitte:'Auf der Flucht hab ich Hut, Laterne und Geldbeutel verloren. Findet ihr sie?',ja:'Wir halten die Augen offen',nein:'Such sie selbst',los:'Der Beutel ist der wichtigste. Und der Hut. Und die Laterne.',gut:'Mein Hut! Und der Beutel – voll! Der Inhalt gehört euch.',lohn:'gold',dinge:['Elmars Hut','Elmars Laterne','Elmars Geldbeutel']},
+ karren_gundren:{fig:'gundren',typ:'karren',titel:'Gundrens Karren schützen',bitte:'Goblins haben meinen Vorratskarren gewittert! Haltet sie mir vom Leib?',ja:'Wir verteidigen ihn',nein:'Ein andermal',los:'Da kommen sie schon!',gut:'Kein Kratzer! Na ja, kaum einer.',lohn:'item',karren:'Gundrens Karren'},
+ bote_gundren:{fig:'gundren',typ:'bote',titel:'Brief an die Kundschafterin',bitte:'Bringt diesen Brief zu meiner Kundschafterin weiter vorn. Und nicht lesen!',ja:'Versiegelt und sicher',nein:'Wir sind keine Boten',los:'Und wehe, Barradin liest ihn!',gut:'Hier, für eure Mühe.',lohn:'gold',empf:'kundschafterin',empfGut:'Ein Brief von Gundren? Endlich! Das ist für euch.'},
+ geisel_zilda:{fig:'zilda',typ:'geisel',titel:'Bergmann Hulm befreien',bitte:'Banditen halten einen Bergmann fest. Räumt ihr Lager – aber trefft ihn nicht!',ja:'Wir holen ihn raus',nein:'Nicht unser Problem',los:'Präzise. Keine Feuerbälle auf die Geisel.',gut:'Er lebt und ist heil. Sauber.',lohn:'item',geisel:'Bergmann Hulm'},
+ karren_zilda:{fig:'zilda',typ:'karren',titel:'Zildas Vorräte schützen',bitte:'Meine Vorräte für die Mine. Gleich kommt Gesindel. Helft ihr mir?',ja:'Wir halten die Stellung',nein:'Schaffst du allein',los:'Rücken an Rücken!',gut:'Gute Arbeit. Ich teile mit euch.',lohn:'trank',karren:'Zildas Vorratswagen'},
+ suche_nundro:{fig:'nundro',typ:'suche',titel:'Werkzeuge der Schmiede',bitte:'Die Werkzeuge für die Schmiede liegen verstreut! Hammer, Zange, Kompass – helft ihr?',ja:'Wir suchen sie',nein:'Später vielleicht',los:'Der Kompass zeigt übrigens nicht nach Norden. Sondern zu Gundren.',gut:'Alle drei! Die Schmiede kann kommen.',lohn:'item',dinge:['Schmiedehammer','Runenzange','Gundrens Kompass']},
+ bote_nundro:{fig:'nundro',typ:'bote',titel:'Nachricht an Gundren',bitte:'Bringt Gundren diese Nachricht: Ich lebe, und ich hab Hunger.',ja:'Wird gemacht',nein:'Sag es ihm selbst',los:'Er wartet weiter vorn. Ihr erkennt ihn – er sieht aus wie ich.',gut:'Danke!',lohn:'kiste',empf:'gundren',empfGut:'Er lebt! Und hat Hunger – typisch. Danke euch!'},
+ schutz_dolg:{fig:'dolgrimson',typ:'schutz',titel:'Leute aus Donnerbaum schützen',bitte:'Zwei Leute aus Donnerbaum verstecken sich hier. Untote kommen. Schützt sie!',ja:'Wir stellen uns davor',nein:'Das schafft die Allianz',los:'Haltet stand, bis es vorbei ist!',gut:'Alle am Leben. So steht es auch im Bericht.',lohn:'segen',leute:['Bäuerin Mera','Knecht Tobi']},
+ bote_dolg:{fig:'dolgrimson',typ:'bote',titel:'Depesche an den Späher',bitte:'Eine Depesche an unseren Späher weiter vorn. Siegel nicht brechen!',ja:'Siegel bleibt heil',nein:'Wir sind beschäftigt',los:'Und meldet euch bei ihm an.',gut:'Die Allianz dankt.',lohn:'gold',empf:'spaeher',empfGut:'Vom Captain? Ihr habt euch sogar angemeldet. Fast.'},
+ geleit_fagas:{fig:'fagas',typ:'geleit',titel:'Fagas zum Ausgang bringen',bitte:'Bringt ihr mich zum Ausgang? Hier hängen zu viele Netze für einen kleinen Gnom.',ja:'Halt dich fest',nein:'Du kennst doch die Wege',los:'Ich bin direkt hinter euch. Ganz direkt.',gut:'Geschafft! Und kein einziger Kokon.',lohn:'item'},
+ suche_fagas:{fig:'fagas',typ:'suche',titel:'Fagas’ Kartenseiten',bitte:'Meine Karte zu Khaems Grab ist zerrissen! Drei Seiten liegen hier verstreut.',ja:'Wir finden sie',nein:'Merk dir den Weg',los:'Die mit dem Totenkopf ist die wichtigste.',gut:'Die Karte ist ganz! Ein Teil des Schatzes gehört euch.',lohn:'gold',dinge:['Kartenseite: Eingang','Kartenseite: Gänge','Kartenseite: Grab']},
+ schutz_ploop:{fig:'ploop',typ:'schutz',titel:'Ploopploopeens Getreue schützen',bitte:'Anhänger des falschen Gottes jagen meine Getreuen. Schützt sie, bitte.',ja:'Wir stehen ihnen bei',nein:'Wir können nicht',los:'Habt Dank. Das Wasser sei mit euch.',gut:'Sie leben. Ploopploopeen wird das nie vergessen.',lohn:'segen',leute:['Ein Getreuer','Eine Getreue']},
+ bote_ploop:{fig:'ploop',typ:'bote',titel:'Segen für die Getreuen',bitte:'Bringt meinen Segen zu einer Getreuen am Ufer. Sie hat Angst.',ja:'Wir bringen ihn',nein:'Nicht jetzt',los:'Sagt ihr: Das Wasser trägt uns.',gut:'Das Wasser trägt uns.',lohn:'trank',empf:'getreue',empfGut:'Der Segen des Erzpriesters … ich habe keine Angst mehr.'},
+ geisel_kardal:{fig:'kardal',typ:'geisel',titel:'Händlerin Brask befreien',bitte:'Graue Geister halten eine Händlerin fest. Räumt das Lager – und trefft sie nicht!',ja:'Wir holen sie raus',nein:'Frag die Wachen',los:'Späherrat: erst die Wachen, dann die Fesseln.',gut:'Sie ist frei und unverletzt. Gute Arbeit.',lohn:'item',geisel:'Händlerin Brask'},
+ bote_kardal:{fig:'kardal',typ:'bote',titel:'Befehl an die Stadtwache',bitte:'Bringt diesen Befehl zur Stadtwache. Woher ich Befehle habe? Späherkram.',ja:'Kein Wort darüber',nein:'Frag einen Prinzen',los:'Und kein Wort zu niemandem.',gut:'Gut gemacht.',lohn:'gold',empf:'wache',empfGut:'Ein Befehl von Prinz Kar… vom Späher. Jawohl!'},
+ karren_riese:{fig:'hgraam',typ:'karren',titel:'Den Erzwagen schützen',bitte:'Der Erzwagen eines Riesen steckt fest. Etwas Hungriges kommt. Wacht über ihn.',ja:'Wir wachen',nein:'Der Riese schafft das',los:'Der Stein schreit. Sie kommen.',gut:'Der Riese nickt. Sehr langsam. Sehr tief.',lohn:'edelstein',karren:'Erzwagen des Riesen',erz:1},
+ suche_hgraam:{fig:'hgraam',typ:'suche',titel:'Drei verstummte Steine',bitte:'Drei Steine haben aufgehört zu sprechen. Findet sie, damit sie wieder schreien.',ja:'Wir finden sie',nein:'Steine reden nicht',los:'Ihr hört sie, wenn ihr nah seid. Leise.',gut:'Sie schreien wieder. Das ist gut. Glaube ich.',lohn:'edelstein',dinge:['Schreiender Stein','Flüsternder Stein','Summender Stein']},
+ karren_mosk:{fig:'mosk',typ:'karren',titel:'Mosks Karren verteidigen',bitte:'Räuber! Mein Karren! Helft mir – und ihr kauft bei mir für immer billiger!',ja:'Wir helfen',nein:'Kein Interesse',los:'Mein Karren! Meine Töpfe! Meine Gewinnspanne!',gut:'Gerettet! Ab jetzt Freundschaftspreise.',lohn:'rabatt',karren:'Mosks Karren'}};
+
+/* ======================================================================================================
+   NEUTRALE WESEN – Tiere (art:'tier'), schlafendes Ungeheuer (art:'schlaf'), reizbare Wesen (art:'reiz')
+   Tiere: {n, th:[Themen], form:'FOES-Form'|'rex', s:Größe, freund:{k:'gold'|'speed'|'luck'|'crit'|'dmg'|'rate', v, d}, nurFlucht:1}
+   ====================================================================================================== */
+const NP_WESEN={
+ ente:{art:'tier',n:'Eine Ente',th:['strasse','wald','dorf','see','pilze','wurzeldorf','nacht'],form:'ente',s:0.8,freund:{k:'gold',v:0.25,d:'+25% Gold'},
+  t:'Eine Ente beäugt euch. Sehr misstrauisch.',ok:'Die Ente watschelt hinter euch her. Glück bringt sie auch.',flieh:'Quaak! Die Ente ist weg.'},
+ wolf:{art:'tier',ab:1,n:'Ein Wolf mit Seilresten',th:['wald','hoehle','nacht','strasse'],form:'beast',s:0.95,c:'#8a8a86',freund:{k:'speed',v:0.15,d:'+15% Tempo'},
+  t:'Ein Wolf, ein Seilrest am Hals. Er kennt euch – oder euren Geruch.',ok:'Der Wolf läuft neben euch her, als wäre es nie anders gewesen.',flieh:'Der Wolf verschwindet im Dunkel.'},
+ ratte:{art:'tier',n:'Eine Ratte',th:['tunnel','schloss','kerker','slums','labor','hof','gracklstugh'],form:'rat',s:0.75,freund:{k:'luck',v:0.2,d:'+20% Fundglück'},
+  t:'Eine Ratte mit sehr klugen Augen. Echo würde sie verstehen.',ok:'Die Ratte flitzt voraus und schnuppert nach Schätzen.',flieh:'Fiep – und weg.'},
+ kaefer:{art:'tier',n:'Ein Leuchtkäfer',th:['pilze','spinnweben','ruine','grab','minenetz','mine'],form:'beetle',s:0.7,c:'#6aa04a',freund:{k:'crit',v:0.06,d:'+6% kritische Treffer'},
+  t:'Ein Käfer, dessen Panzer sanft leuchtet.',ok:'Der Käfer summt um euch herum und leuchtet euch den Weg.',flieh:'Der Käfer schwirrt davon.'},
+ salamander:{art:'tier',n:'Ein kleiner Salamander',th:['glutgang','schmiede','hort','gracklstugh','markt','steinbruch'],form:'salamander',s:0.55,freund:{k:'dmg',v:0.12,d:'+12% Schaden'},
+  t:'Ein kleiner Salamander, warm wie ein Ofen.',ok:'Der Salamander klettert euch hinterher und glüht vor Freude.',flieh:'Zisch – in eine Glutritze.'},
+ streuner:{art:'tier',n:'Ein Streuner',th:['dorf','gracklstugh','markt','slums','geisterdorf','kuostadt','wachhaus'],form:'rex',s:1,freund:{k:'rate',v:0.1,d:'+10% Angriffstempo'},
+  t:'Ein struppiger Hund. Er wedelt vorsichtig.',ok:'Der Streuner trottet mit. Rex hat jetzt einen Kumpel.',flieh:'Der Hund huscht in eine Gasse.'},
+ fledermaus:{art:'tier',n:'Fledermäuse',th:['mine','minenetz','hoehle','grab','turm','spinnweben'],form:'bat',s:0.75,nurFlucht:1,
+  t:'',ok:'',flieh:'Die Fledermäuse flattern los – Richtung Ausgang!'},
+ schlaf:{art:'schlaf',n:'Ein schlafendes Ungeheuer',th:null,t:'Es schläft. Und schnarcht wie Barradin nach der Siegesfeier.'},
+ baer:{art:'reiz',n:'Ein grollender Bär',th:['wald','hoehle','nacht','strasse','mine'],form:'beast',s:1.6,c:'#6a4a2a',t2:'#3a2a1a'},
+ kroete:{art:'reiz',n:'Eine Riesenkröte',th:['see','pilze','spinnweben','kuostadt','wurzeldorf','grab'],form:'blob',s:1.5,c:'#5a7a3a',t2:'#3a4a22'}};
+/* ======================================================================================================
+   BENUTZBARE DINGE – {n, th:[Themen] oder null (überall), ...}
+   ====================================================================================================== */
+const NP_DING={
+ wegweiser:{n:'Ein Wegweiser',th:['strasse','wald','nacht','dorf','gracklstugh','markt','slums','steinbruch','mine','geisterdorf','see','pilze']},
+ feuer:{n:'Lagerfeuer von Reisenden',th:['strasse','wald','nacht','hoehle','mine','pilze','see','spinnweben','ruine','steinbruch','wurzeldorf','turm']},
+ brunnen:{n:'Ein alter Brunnen',th:['dorf','hof','geisterdorf','gracklstugh','markt','slums','schloss','wurzeldorf','kuostadt','wachhaus']},
+ quelle:{n:'Eine klare Quelle',th:['hoehle','mine','tunnel','pilze','spinnweben','see','grab','kerker']},
+ schrein:{n:'Ein Opferschrein',th:null}};
+const NP_SCHILD={0:'← Phandalin · Goblinpfad →',1:'Phandalin ↓',2:'Schloss Crackmore →',3:'Neverwinter ← · → Wachturm',4:'Alte Mine →',5:'Donnerbaum ↗',6:'Donnerbaum',7:'Hinab ↓',8:'Ausgang? Welcher Ausgang?',9:'Pilzhaine →',10:'Grab ↓',11:'Zum See →',12:'Gracklstugh · Markt →',13:'Riesendorf ↗',14:'Zum Hort ↓'};
+/* Ware je Kapitel (fahrender Händler): fx = ARFX-Kennung (2 Ebenen) oder 'item' | 'gem' | 'trank' */
+const NP_WARE=[
+ {bis:7,L:[{n:'Wetzstein aus Phandalin',fx:'ev_segen'},{n:'Elfenstiefel, kaum getragen',fx:'ev_wind'},{n:'Glücksbringer aus Neverwinter',fx:'ev_gold'},{n:'Kettenhemd von der Straße',fx:'item'}]},
+ {bis:11,L:[{n:'Spinnenseide-Verband',fx:'ev_leben'},{n:'Muschelamulett',fx:'ev_schaerfe'},{n:'Drow-Klingenöl',fx:'ev_segen'},{n:'Leuchtpilz-Tinktur',fx:'trank'}]},
+ {bis:99,L:[{n:'Duergar-Stahl',fx:'item'},{n:'Feuerschwamm',fx:'ev_segen'},{n:'Betäubungstrank',fx:'ev_betaeub'},{n:'Kiesel aus dem Riesendorf',fx:'gem'}]}];
+
+/* ================= Gedächtnis: laufübergreifend (SAVE.npc) und im Lauf (G.npL) ================= */
+function npMem(){let M=SAVE.npc;if(!isObj(M))M=SAVE.npc={};if(!isObj(M.f))M.f={};for(const k in M.f){const v=M.f[k];if(!isObj(v)||!NP_FIG[k]){delete M.f[k];continue}for(const j of['n','g','a'])v[j]=nInt(v[j],0,1e5,0);v.l=v.l==='gut'||v.l==='nein'||v.l==='fehl'?v.l:''}
+ M.fm=nInt(M.fm,0,1e5,0);M.k=nInt(M.k,0,1e5,0);M.erz=M.erz==='gut'||M.erz==='fehl'?M.erz:'';return M}
+function npMemF(id){const M=npMem();return M.f[id]||(M.f[id]={n:0,g:0,a:0,l:''})}
+function npLauf(){return G.npL||(G.npL={h:{},seen:{},rab:0,auf:0,folgeQ:[],gerettet:0,nTask:0})}
+function npSave(){if(G.bot)return;try{persist()}catch(e){}}
+const npHeld=q=>{try{return(q&&q.hero&&q.hero.name)||(q&&HEROES[q.id]&&HEROES[q.id].name)||'Held'}catch(e){return'Held'}};
+const npTx=(s,o)=>String(s||'').replace(/\{(\w+)\}/g,(m,k)=>o&&o[k]!=null?o[k]:'');
+const npPick=a=>Array.isArray(a)?a[Math.floor(Math.random()*a.length)]:a||'';
+/* Begrüßung je nach Gedächtnis */
+function npGruss(id,q){const F=NP_FIG[id];if(!F)return'';const L=npLauf(),m=npMemF(id);let t;
+ if(L.seen[id])t=npPick(F.lauf);else if(m.n>0){t=npTx(npPick(F.wieder),{n:m.n+1});if(m.l==='gut')t+=' Letztes Mal habt ihr mir geholfen!';else if(m.l==='nein')t+=' Letztes Mal habt ihr mich stehen lassen.'}else t=npPick(F.gruss);
+ return npTx(t,{held:npHeld(q)})}
+function npGesehen(id){const L=npLauf();if(L.seen[id])return;L.seen[id]=1;const m=npMemF(id);m.n++;npSave()}
+function npErgebnis(id,r){const L=npLauf(),m=npMemF(id);m.l=r;if(r==='gut')m.g++;if(r==='nein')m.a++;L.h[id]={r,st:G.stage,folge:0};npSave()}
+
+/* ================= Hilfen ================= */
+function npTiefe(s){const K=G.ka;if(!s)return 0;if(s.art==='seite'){const p=K.sec[s.parent];return p?p.k+0.5:s.k}return s.k}
+function npSecs(f){const K=G.ka;return K.sec.filter(s=>s&&s.art!=='arena'&&s.art!=='start'&&f(s))}
+function npBesetzt(s){return(G.np&&G.np.L||[]).some(o=>o.sec===s.k)}
+function npKap(){const S=STAGES[G.stage];return S&&isFinite(S.ort)?S.ort:Math.min(14,Math.floor(G.stage/2.5))}
+function npTh(){return G.themeKey||''}
+function npLeicht(){try{return spLeicht()||(typeof grUltra==='function'&&grUltra())}catch(e){return false}}
+function npOrt(s,minStart,r){return spOrt(s,minStart||380,180,r||26)}
+/* freie Stelle neben einem Punkt */
+function npNeben(x,y,d,r){for(let k=0;k<14;k++){const a=rnd(TAU),dd=d*rnd(0.8,1.25);const q=wlNahFrei(x+Math.cos(a)*dd,y+Math.sin(a)*dd*0.8,4);if(q&&wlFrei(q.x,q.y,r||16)&&kaSecAt(q.x,q.y)===kaSecAt(x,y))return q}return wlNahFrei(x+d,y,6)}
+function npWach(x,y,r){for(const e of G.enemies)if(!e.dead&&!e.wlZz&&!e.npRuhe&&(e.x-x)**2+(e.y-y)**2<r*r)return true;return false}
+function npFoeDef(shape){for(const id in FOES){const d=FOES[id];if(d&&d.shape===shape)return d}return null}
+function npM(){return window.__npM||(window.__npM={auf:[],ev:[],plan:[],end:[]})}
+function npLog(o,st){try{const M=npM();if(st==='an'){o.mi=M.auf.length;M.auf.push({st:G.stage,id:o.auf,typ:o.A.typ,t0:+G.time.toFixed(1),r:'an'})}else if(o.mi!=null){const a=M.auf[o.mi];if(a&&a.r==='an'){a.r=st;a.t1=+G.time.toFixed(1);a.dt=+(G.time-a.t0).toFixed(1)}}}catch(e){}}
+
+/* ================= Planung je Stufe ================= */
+function npPrev(){const r=G.runId||0;if(!NP.prev||NP.prev.r!==r)NP.prev={r,st:-1,A:'',B:'',fig:'',typ:''};return NP.prev}
+function npPlan(S,i){const K=G.ka;G.np={key:G.runId+'|'+i,L:[],dlg:null,trail:[],tt:0,fm:{}};G.npN={b:[],m:[],q:'',v:0};G.npD=null;
+ G.allies=G.allies.filter(a=>!(a.sub&&String(a.sub).startsWith('np|')));
+ if(!K||K.esc||K.flucht||S.escape||G.mode==='bossrausch'||NP.aus)return;
+ const pv=npPrev(),prev=pv.st===i-1?pv:{A:'',B:'',fig:'',typ:''};const sp=(G.sp&&G.sp.L||[]).map(o=>o.typ);const L=npLauf();
+ const boss=!!(S.boss||K.boss),kap=npKap(),th=npTh(),O=G.obj;
+ const plan=[];const F=NP.force;NP.force=null;
+ if(F&&F.length){for(const f of F)plan.push(f)}
+ else{
+  /* Platz A: Händler (spass) zählt als Begegnung; sonst Folge oder Figur mit Auftrag */
+  const hatH=sp.includes('haendler');
+  if(!hatH){const r=Math.random();
+   const folge=L.folgeQ.filter(f=>f.st<i&&!f.done);const fq=folge.length&&r<0.6?folge[0]:null;
+   if(fq){fq.done=1;plan.push({t:'folge',fig:fq.fig,r:fq.r})}
+   else if(r<(i===0&&G.mode==='kampagne'?1:0.85)){const c=npFigWahl(kap,prev,sp,O);if(c)plan.push({t:'fig',fig:c.fig,auf:c.auf})}}
+  /* Platz B: Wesen oder Ding (andere Kategorie als in der Stufe davor), nicht immer */
+  const nB=plan.length||hatH?(boss?0.25:0.6):1;/* mindestens eine Begegnung je Stufe */
+  if(Math.random()<nB){const b=npWesenWahl(th,prev,sp,i);if(b)plan.push(b)}}
+ pv.st=i;pv.A=plan[0]&&(plan[0].t==='fig'||plan[0].t==='folge')?plan[0].t:(sp.includes('haendler')?'haendler':'');pv.fig=(plan.find(p=>p.fig)||{}).fig||'';pv.typ=(plan.find(p=>p.auf)||{}).auf?NP_AUF[(plan.find(p=>p.auf)).auf].typ:'';pv.B=(plan.find(p=>p.t==='wesen'||p.t==='ding')||{}).kat||'';
+ /* gemeinsamer Wiederholungsschutz mit spass: Karren-Händler zählt als „haendler“ */
+ try{const sv=spPrev();if(sv&&plan.some(p=>p.auf==='karren_mosk'))sv.L.push('haendler')}catch(e){}
+ for(const p of plan){try{const o=npBau(p,S,i);if(o){o.id='n'+G.np.L.length;G.np.L.push(o);if(o.pr)o.pr.npI=o.id}}catch(er){console.error('npBau',p,er)}}
+ try{npM().plan.push({st:i,L:G.np.L.map(o=>o.typ+(o.fig?':'+o.fig:'')+(o.auf?':'+o.auf:'')+(o.w?':'+o.w:''))})}catch(e){}
+ npSync()}
+function npFigWahl(kap,prev,sp,O){const L=npLauf();const C=[];
+ for(const id in NP_FIG){const F=NP_FIG[id];if(F.intern)continue;if(kap<F.orte[0]||kap>F.orte[1])continue;if(id===prev.fig)continue;if(L.h[id])continue;
+  for(const a of F.auf){const A=NP_AUF[a];if(!A)continue;if(A.typ===prev.typ)continue;
+   if(O&&!O.done&&((O.k==='eskorte'&&(A.typ==='geleit'||A.typ==='karren'))||(O.k==='gefangene'&&A.typ==='geisel')||(O.k==='flucht')))continue;
+   if(sp.includes('hinterhalt')&&(A.typ==='karren'||A.typ==='schutz'))continue;if(sp.includes('kopfgeld')&&A.typ==='geisel')continue;
+   if(A.erz&&!(G.ka.sec.some(s=>s.f==='erzwagen')))continue;
+   C.push({fig:id,auf:a,w:F.selten?0.25:A.erz?2.5:1})}}
+ if(!C.length)return null;let s=C.reduce((a,c)=>a+c.w,0)*Math.random();for(const c of C){s-=c.w;if(s<=0)return c}return C[0]}
+function npWesenWahl(th,prev,sp,i){const C=[];const add=(t,id,kat,w)=>{if(kat===prev.B)w*=0.15;if(w>0)C.push({t,w:id,kat,ww:w})};
+ for(const id in NP_WESEN){const W_=NP_WESEN[id];if(W_.th&&!W_.th.includes(th))continue;if(W_.ab&&npKap()<W_.ab)continue;if(W_.art==='tier')add('wesen',id,'tier',W_.nurFlucht?0.5:1);else if(W_.art==='schlaf')add('wesen',id,'schlaf',sp.includes('kopfgeld')?0.3:0.9);else if(W_.art==='reiz')add('wesen',id,'reiz',0.6)}
+ for(const id in NP_DING){const D=NP_DING[id];if(D.th&&!D.th.includes(th))continue;if(id==='brunnen'&&!G.blk.some(b=>b.k==='brunnen'))continue;add('ding',id,'ding:'+id,id==='schrein'?0.5:0.8)}
+ /* eine Kategorie „ding“ insgesamt nicht zweimal hintereinander */
+ for(const c of C)if(c.kat.startsWith('ding')&&String(prev.B).startsWith('ding'))c.ww*=0.3;
+ if(!C.length)return null;let s=C.reduce((a,c)=>a+c.ww,0)*Math.random();for(const c of C){s-=c.ww;if(s<=0)return{t:c.t,w:c.w,kat:c.kat}}return{t:C[0].t,w:C[0].w,kat:C[0].kat}}
+/* Abschnitt nach Tiefe wählen */
+function npSecWahl(min,max,arts,nicht){const K=G.ka;let L=npSecs(s=>arts.includes(s.art)&&npTiefe(s)>=min&&npTiefe(s)<=max&&!npBesetzt(s)&&s!==nicht);if(!L.length)L=npSecs(s=>arts.includes(s.art)&&s!==nicht);if(!L.length)L=npSecs(s=>s.art==='mitte');return L.length?pick(L):null}
+function npFigProp(id,x,y,art,nm,col){const p={k:'np_fig',prop:1,x,y,r:14,prog:0,used:0,npA:id,npN:nm,npC:col||npGold,npT:'!',npS:0,npF:Math.random()<0.5?-1:1,seed:Math.floor(Math.random()*1e4),type:'fig'};G.props.push(p);return p}
+function npBau(p,S,i){const K=G.ka;const nM=K.nMain;
+ if(p.t==='fig'||p.t==='folge'){const F=NP_FIG[p.fig];const A=p.auf?NP_AUF[p.auf]:null;let s=null;
+  if(A&&(A.typ==='geleit'||A.typ==='bote'||A.typ==='suche'||A.typ==='geisel'))s=npSecWahl(1,Math.max(1,Math.min(2,nM-3)),['mitte']);
+  else if(A&&A.erz)s=K.sec.find(q=>q.f==='erzwagen'&&q.art!=='arena')||npSecWahl(1,nM-2,['mitte']);
+  else s=npSecWahl(1,Math.max(1,nM-2),['mitte','seite']);
+  if(!s)return null;let q=npOrt(s,i===0?320:380,30);if(!q)return null;
+  if(A&&(A.typ==='karren'||A.typ==='schutz')){/* Platz für Karren/Leute daneben */const z=npNeben(q.x,q.y,70,30);if(!z)q=npOrt(s,380,40)||q}
+  const pr=npFigProp(p.fig,q.x,q.y,F.art,F.n,npGold);const o={typ:p.t,fig:p.fig,auf:p.auf||null,A,sec:s.k,x:q.x,y:q.y,pr,st:0,r:p.r||null,t0:G.time};
+  if(p.t==='folge')pr.npT=p.r==='gut'?'♥':'…';
+  if(A&&(A.typ==='karren')){const z=npNeben(q.x,q.y,64,26)||{x:q.x+60,y:q.y};o.kp={k:'np_karren',prop:1,x:z.x,y:z.y,r:22,prog:0,used:0,npA:A.erz?'erz':'karren',npN:A.karren,npS:0,type:'karren'};G.props.push(o.kp)}
+  if(A&&(A.typ==='schutz')){o.lp=[];for(let j=0;j<2;j++){const z=npNeben(q.x,q.y,58+j*20,18)||{x:q.x+40*(j?1:-1),y:q.y+30};const lp={k:'np_leute',prop:1,x:z.x,y:z.y,r:12,prog:0,used:0,npA:p.fig==='ploop'?'kuotoa':'dorf',npN:A.leute[j],npS:0,npF:j?-1:1,seed:j*7+3,type:'leute'};G.props.push(lp);o.lp.push(lp)}}
+  if(A&&A.typ==='suche'){o.dinge=[]}
+  return o}
+ if(p.t==='wesen'){const W_=NP_WESEN[p.w];if(!W_)return null;
+  const s=W_.art==='schlaf'?npSecWahl(1,nM-2,['mitte','seite']):npSecWahl(1,nM-1,['mitte','seite']);if(!s)return null;const q=npOrt(s,380,W_.art==='schlaf'?40:24);if(!q)return null;
+  if(W_.art==='tier'){const pr={k:'np_tier',prop:1,x:q.x,y:q.y,r:10,prog:0,used:0,npA:p.w,npN:W_.n,npC:npGruen,npS:0,npF:1,seed:Math.floor(Math.random()*1e4),type:'tier'};G.props.push(pr);return{typ:'tier',w:p.w,W:W_,sec:s.k,x:q.x,y:q.y,hx:q.x,hy:q.y,pr,st:0,t0:G.time}}
+  if(W_.art==='schlaf'){const did=npSchlafDef();const def=did&&FOES[did];if(!def)return null;const pr={k:'np_schlaf',prop:1,x:q.x,y:q.y,r:20,prog:0,used:0,npA:did,npN:'Schlafend: '+def.n,npC:'#c8e0a8',npS:0,npM:0,seed:Math.floor(Math.random()*1e4),type:'schlaf'};G.props.push(pr);return{typ:'schlaf',w:p.w,W:W_,def,sec:s.k,x:q.x,y:q.y,pr,st:0,m:0,t0:G.time}}
+  if(W_.art==='reiz'){const d0=npFoeDef(W_.form);if(!d0)return null;const pr={k:'np_reiz',prop:1,x:q.x,y:q.y,r:16,prog:0,used:0,npA:p.w,npN:W_.n,npC:npGruen,npS:0,npM:0,npF:1,seed:Math.floor(Math.random()*1e4),type:'reiz'};G.props.push(pr);return{typ:'reiz',w:p.w,W:W_,d0,sec:s.k,x:q.x,y:q.y,hx:q.x,hy:q.y,pr,st:0,m:0,t0:G.time}}
+  return null}
+ if(p.t==='ding'){const D=NP_DING[p.w];if(!D)return null;let s,q;
+  if(p.w==='brunnen'){const B=G.blk.filter(b=>b.k==='brunnen');let b=null;for(const c of B.sort(()=>Math.random()-0.5)){const x=b0x(c),y=b0y(c);const si=kaSecAt(x,y);const S_=K.sec[si];if(S_&&S_.art!=='arena'&&S_.art!=='start'){b={x,y,s:S_};break}}if(!b)return null;s=b.s;q=npNeben(b.x,b.y,(B[0].r||22)+26,16)||{x:b.x,y:b.y+40};q.ax=b.x;q.ay=b.y}
+  else if(p.w==='wegweiser'){s=npSecWahl(1,Math.max(1,nM-2),['mitte']);if(!s)return null;const tor=K.tore.find(t=>t.main&&t.b===s.k);q=tor?npNeben(tor.bx,tor.by,140,20):null;if(!q)q=npOrt(s,380,20)}
+  else{s=npSecWahl(1,nM-1,['mitte','seite']);if(!s)return null;q=npOrt(s,380,p.w==='feuer'?50:26)}
+  if(!q)return null;const pr={k:'np_ding',prop:1,x:q.x,y:q.y,r:14,prog:0,used:0,npA:p.w,npN:D.n,npC:npGruen,npS:0,seed:Math.floor(Math.random()*1e4),type:p.w,ax:q.ax,ay:q.ay};G.props.push(pr);
+  if(p.w==='wegweiser')pr.lab=NP_SCHILD[npKap()]||'Weiter →';
+  return{typ:'ding',w:p.w,D,sec:s.k,x:q.x,y:q.y,pr,st:0,t0:G.time}}
+ return null}
+const b0x=b=>b.t==='c'?b.x:b.x+(b.w||0)/2,b0y=b=>b.t==='c'?b.y:b.y+(b.h||0)/2;
+/* schlafendes Ungeheuer: kräftigste Bodenart der Stufe (keine Diebe, keine Flieger, keine Mimics) */
+function npSchlafDef(){const S=STAGES[G.stage];if(!S||!S.foes)return null;let best=null,bv=-1;/* liefert die FOES-Kennung */for(const id in S.foes){const d=FOES[id];if(!d||d.flying||d.shape==='mimic'||d.shape==='gans'||d.thief||d.k==='ranged'||d.k==='caster')continue;const v=(d.hp||1)*(d.size||1)*(d.k==='tank'?1.6:1)+Math.random()*0.3;if(v>bv){bv=v;best=id}}
+ return best}
+/* gespiegelte Übersicht für HUD, Karte und Gäste */
+function npSync(){const N=G.npN,D=G.np;if(!N||!D)return;const m=[];let q='';
+ for(const o of D.L){if(o.st>=2&&!(o.typ==='fig'&&o.st===2&&o.A&&o.akt))continue;
+  if(o.typ==='fig'||o.typ==='folge'){if(o.st===0&&o.zeig)m.push(Math.round(o.pr.x),Math.round(o.pr.y),1)}
+  if(o.akt){const A=o.A;if(A.typ==='suche'){const n=o.dinge.filter(d=>d.used).length;q=`🔍 ${A.titel} ${n}/3`;for(const d of o.dinge)if(!d.used)m.push(Math.round(d.x),Math.round(d.y),2)}
+   else if(A.typ==='bote'){q=`✉ ${A.titel}`;if(o.ep&&!o.ep.used)m.push(Math.round(o.ep.x),Math.round(o.ep.y),2)}
+   else if(A.typ==='geleit'){q=`➜ ${A.titel}`+(o.duck?' · wartet':'')}
+   else if(A.typ==='geisel'){q=`⛓ ${A.titel}`+(o.camp?` · ${o.camp.filter(e=>!e.dead).length} Wachen`:'');if(o.gs)m.push(Math.round(o.gs.x),Math.round(o.gs.y),2)}
+   else if(A.typ==='karren'||A.typ==='schutz'){q=`⛨ ${A.titel}`+(o.welle?` · Welle ${o.welle}/2`:'')}}}
+ N.m=m;N.q=q}
+{const ss=setupStage;setupStage=function(i){/* offene Aufträge der letzten Stufe gelten als verpasst */try{if(G.np&&!G.netGuestRun){for(const o of G.np.L)if(o.akt&&o.st<2){npLog(o,'verpasst');o.akt=0}npM().end.push({st:G.stage,L:G.np.L.map(o=>o.typ+':'+(o.fig||o.w||'')+':'+o.st)})}}catch(e){}
+ const r=ss.apply(this,arguments);try{if(!G.netGuestRun){G.np=null;if(spAn()&&!NP.aus)npPlan(STAGES[i],i);else{G.npN=null;G.npD=null}}}catch(er){console.error('npPlan',er)}return r}}
+
+/* ================= Ablauf je Bild (Gastgeber) ================= */
+function npNah(x,y,r){let b=null,bd=r*r;for(const q of spLeben()){const d=(q.x-x)**2+(q.y-y)**2;if(d<bd){bd=d;b=q}}return b}
+function npTick(dt){const D=G.np;if(!D||!spAn()||G.netGuestRun||G.state!=='play')return;D.tt+=dt;NP.dt=dt;let ch=0;
+ npTrail();
+ for(const o of D.L){if(o.st>=3)continue;const fn=NP_TICK[o.typ];if(!fn)continue;const s0=o.st+'|'+(o.akt?1:0);try{fn(o,dt)}catch(er){console.error('npTick',o.typ,er);o.st=3}if(s0!==o.st+'|'+(o.akt?1:0))ch=1}
+ try{npKarteTick(dt)}catch(er){}
+ if(D.dlg)npDlgTick(dt);
+ D.syncT=(D.syncT||0)-dt;if(ch||D.syncT<=0){D.syncT=0.5;npSync()}
+ const N=G.npN;if(N&&N.b.length&&npBubs().some(b=>G.time-b[4]>b[5]+0.5))N.b=N.b.filter(x=>{const b=npBubP(x);return G.time-b[4]<=b[5]+0.5})}
+/* Spur des führenden Helden (Geleit, Begleiter): Punkte, die sicher begehbar sind */
+function npTrail(){const D=G.np,T=D.trail;const L=spLeben();if(!L.length)return;const q=D.lead&&L.includes(D.lead)?D.lead:L[0];const l=T[T.length-1];if(!l||Math.hypot(q.x-l.x,q.y-l.y)>34){T.push({x:q.x,y:q.y});if(T.length>420){T.splice(0,60);for(const o of D.L)if(o.ti!=null)o.ti=Math.max(0,o.ti-60)}}}
+function npFolge(o,p,dt,sp,abst){const T=G.np.trail;if(!T.length)return false;const L=spLeben();const lead=L.reduce((a,q)=>!a||Math.hypot(q.x-p.x,q.y-p.y)<Math.hypot(a.x-p.x,a.y-p.y)?q:a,null);if(!lead)return false;
+ const dl=Math.hypot(lead.x-p.x,lead.y-p.y);if(o.ti==null||o.ti>=T.length){let bi=0,bd=1e12;for(let i=0;i<T.length;i++){const d=(T[i].x-p.x)**2+(T[i].y-p.y)**2;if(d<bd){bd=d;bi=i}}o.ti=bi}
+ /* weit zurück und nicht im Bild: aufholen */
+ if(dl>720&&!npImBild(p.x,p.y)){const j=Math.max(0,T.length-8);const z=T[j];if(z&&!npImBild(z.x,z.y)){p.x=z.x;p.y=z.y;o.ti=j;return true}}
+ if(dl<(abst||70))return false;const z=T[Math.min(o.ti,T.length-1)];const dx=z.x-p.x,dy=z.y-p.y,d=Math.hypot(dx,dy);
+ if(d<10){if(o.ti<T.length-1)o.ti++;return true}const v=Math.min(d,sp*dt*(dl>320?1.5:1));p.x+=dx/d*v;p.y+=dy/d*v;if(Math.abs(dx)>1)p.npF=dx<0?-1:1;return true}
+function npImBild(x,y){for(const q of spLeben()){const vw=(q.vw||W||1280)/((typeof ZOOM==='number'&&ZOOM>0)?ZOOM:1)*0.6,vh=(q.vh||H||720)/((typeof ZOOM==='number'&&ZOOM>0)?ZOOM:1)*0.6;if(Math.abs(q.x-x)<vw&&Math.abs(q.y-y)<vh)return true}return false}
+/* Sprechblase an einer Requisite (oder Stelle); d=1: Gesprächstext (bei offenem Gesprächsfeld nicht doppelt) */
+/* Blasen als flache Zeichenketten (Kennung, x, y, Startzeit, Dauer, Gesprächsflag, Text) – die Netz-Spiegelung kodiert nur zwei Ebenen */
+const NPBP=new Map();function npBubP(x){let b=NPBP.get(x);if(!b){const a=String(x).split('\u001f');b=[a[0]||'',+a[1]||0,+a[2]||0,a.slice(6).join(' '),+a[3]||0,+a[4]||3,a[5]==='1'?1:0];if(NPBP.size>200)NPBP.clear();NPBP.set(x,b)}return b}
+function npBubs(){const N=G.npN;return N&&Array.isArray(N.b)?N.b.map(npBubP):[]}
+function npSag(pr,txt,dur,d){const N=G.npN;if(!N||!txt||G.bot)return;const id=pr&&pr.npI||'';if(id)N.b=N.b.filter(x=>npBubP(x)[0]!==id);N.b.push([id,Math.round(pr.x),Math.round(pr.y),(+G.time).toFixed(2),dur||3.4,d?1:0,String(txt).slice(0,160).replace(/\u001f/g,' ')].join('\u001f'));if(N.b.length>6)N.b.shift();N.v++}
+/* Ring füllen, wenn ein Held dicht dabei steht; danach erst wieder nach Weggehen */
+function npRing(o,p,r,t){if(o.kuehl){if(!npNah(p.x,p.y,r+60))o.kuehl=0;p.prog=Math.max(0,p.prog-0.05);return null}
+ if(G.np.dlg)return null;const q=npNah(p.x,p.y,r);if(q&&!npWach(p.x,p.y,330)){p.prog=Math.min(1,p.prog+(NP.dt||1/60)/(t||0.7));if(p.prog>=1){p.prog=0;o.kuehl=1;return q}}else p.prog=Math.max(0,p.prog-0.03);return null}
+const NP_TICK={
+ fig(o,dt){const p=o.pr;if(!kaFrei(o.sec))return;if(!o.zeig&&npNah(p.x,p.y,560)){o.zeig=1;npSync()}
+  /* Begrüßung als Blase beim Näherkommen */
+  if(!o.hallo&&o.st===0){const q=npNah(p.x,p.y,260);if(q){o.hallo=1;npSag(p,npGruss(o.fig,q));if(!G.bot&&!o.zeig2){o.zeig2=1}}}
+  if(o.akt)npAufTick(o,dt);
+  if(o.st===0||o.st===1&&o.akt&&o.A.typ!=='geleit'){const q=npRing(o,p,60,0.7);if(q)npDlgFig(o,q)}},
+ folge(o,dt){const p=o.pr;if(!kaFrei(o.sec)||o.st>=2)return;if(!o.zeig&&npNah(p.x,p.y,560)){o.zeig=1;npSync()}const q=npRing(o,p,60,0.6);if(q)npDlgFolge(o,q)},
+ tier(o,dt){npTierTick(o,dt)},schlaf(o,dt){npSchlafTick(o,dt)},reiz(o,dt){npReizTick(o,dt)},
+ ding(o,dt){const p=o.pr;if(!kaFrei(o.sec)||o.st>=2)return;if(o.w==='wegweiser'){const q=npRing(o,p,58,0.6);if(q)npWegweiser(o,q);return}const q=npRing(o,p,64,0.7);if(q)npDlgDing(o,q)}};
+
+/* ---------- Aufträge ---------- */
+function npAnnehmen(o,q){const A=o.A;o.akt=1;o.st=1;o.q=q;o.tA=G.time;o.pr.npT='?';npLauf().nTask++;npGesehen(o.fig);npLog(o,'an');npSag(o.pr,A.los,3);spRew('evt');
+ if(A.typ==='suche'){if(!o.dinge)o.dinge=[];npSucheBau(o)}if(A.typ==='bote')npBoteBau(o);if(A.typ==='geisel')npGeiselBau(o);if(A.typ==='karren'||A.typ==='schutz')npWellenStart(o);if(A.typ==='geleit'){o.ti=null;G.np.lead=q;o.pr.npS=1}
+ if(!G.bot)spMsg(`<b>Auftrag:</b> ${esc(A.titel)}`,npGold);npSync()}
+function npAblehnen(o,q){o.st=3;o.pr.npT='';npGesehen(o.fig);npErgebnis(o.fig,'nein');const F=NP_FIG[o.fig];npSag(o.pr,npPick(F.aerger),3);
+ const L=npLauf();if(F.folgeAerger&&F.folgeAerger.t)L.folgeQ.push({fig:o.fig,r:'nein',st:G.stage});try{npM().ev.push({st:G.stage,k:'nein',fig:o.fig})}catch(e){}npSync()}
+function npFertig(o,gut,txt){const A=o.A,F=NP_FIG[o.fig];o.akt=0;o.st=2;o.pr.npT=gut?'✓':'';npLog(o,gut?'gut':'fehl');npErgebnis(o.fig,gut?'gut':'fehl');
+ const L=npLauf();if(gut&&F.folgeGut&&F.folgeGut.t)L.folgeQ.push({fig:o.fig,r:'gut',st:G.stage});if(!gut&&F.folgeAerger&&F.folgeAerger.t&&Math.random()<0.5)L.folgeQ.push({fig:o.fig,r:'nein',st:G.stage});
+ const t=txt||(gut?A.gut:npPick(F.fehl));npSag(o.pr,t,3.6);if(!G.bot)spMsg(gut?`<b>${esc(F.n)}:</b> „${esc(t)}“`:`<b>Auftrag gescheitert:</b> ${esc(A.titel)}`,gut?npGold:'#ff9a7a');
+ if(gut){const x=o.lx!=null?o.lx:o.pr.x,y=o.ly!=null?o.ly:o.pr.y;npLohn(A.lohn,x,y,o.lohnF||1,o.q);if(o.bonus)npLohn('gold',x,y,0.6,o.q);if(!G.bot)banner('Auftrag erfüllt!',esc(A.titel),npGold,{dur:2,size:38,y:H*0.3});sfx('legend')}
+ /* kurzer Satz des Helden */
+ if(gut&&!G.bot){const qh=o.q||spLeben()[0];const z=F.q&&qh&&F.q[qh.id];if(z)later(1.4,()=>{try{word(qh.x,qh.y-54,z,'#f0e6d4')}catch(e){}})}
+ spRew('evt');npSync()}
+function npAufTick(o,dt){const A=o.A;
+ if(A.typ==='geleit'){const p=o.pr;const duck=npWach(p.x,p.y,230);o.duck=duck;if(duck){o.dk=(o.dk||0)+dt;if(o.dk>25){o.dk=0;const T=G.np.trail;const z=T[Math.max(0,T.length-6)];if(z&&!npImBild(p.x,p.y)){p.x=z.x;p.y=z.y;o.ti=Math.max(0,T.length-6)}}if(!o.hilfeT||G.time-o.hilfeT>6){o.hilfeT=G.time;npSag(p,pick(['Hilfe! Die sind überall!','Ich duck mich mal …','Wartet! Ich trau mich nicht vorbei!']),2.2)}p.npS=2}
+  else{o.dk=0;p.npS=1;npFolge(o,p,dt,150,64)}
+  const si=kaSecAt(p.x,p.y),S_=G.ka.sec[si];if(S_&&(S_.art==='vorhof'||S_.art==='arena'||G.portal&&Math.hypot(G.portal.x-p.x,G.portal.y-p.y)<220)){o.lx=p.x;o.ly=p.y;p.npS=0;npFertig(o,true)}return}
+ if(A.typ==='suche'){for(const d of o.dinge){if(d.used)continue;const q=npNah(d.x,d.y,44);if(q){d.used=1;sfx('item');if(!G.bot){word(d.x,d.y-30,'🔍 '+d.npN,npGold);if(!npLeicht())sparks(d.x,d.y-10,'#ffe0a0',10,180,1)}spRew('evt');npSync()}}
+  if(o.dinge.every(d=>d.used)){const q=spLeben()[0];o.lx=q?q.x:o.pr.x;o.ly=q?q.y:o.pr.y;npFertig(o,true)}return}
+ if(A.typ==='bote'){const e=o.ep;if(!e)return;if(!e.used&&kaFrei(kaSecAt(e.x,e.y))){const q=npNah(e.x,e.y,66);if(q){e.used=1;e.npT='✓';npSag(e,A.empfGut,3.6);o.lx=e.x;o.ly=e.y;later(0.8,()=>{try{npFertig(o,true,A.gut)}catch(er){}})}}return}
+ if(A.typ==='geisel'){npGeiselTick(o,dt);return}
+ if(A.typ==='karren'||A.typ==='schutz'){npWellenTick(o,dt);return}}
+function npSucheBau(o){const K=G.ka,s0=K.sec[o.sec],t0=npTiefe(s0);const S=npSecs(s=>(s.art==='mitte'||s.art==='seite'||s.art==='vorhof')&&npTiefe(s)>=t0).sort(()=>Math.random()-0.5);const used=new Set();
+ for(let j=0;j<3;j++){let q=null,s=null;for(const c of S.concat(S)){if(used.has(c.k)&&used.size<Math.min(3,S.length))continue;q=npOrt(c,300,20);if(q){s=c;break}}if(!q){q=npOrt(s0,200,20)||npNeben(o.pr.x,o.pr.y,160,16);s=s0}if(!q)continue;used.add(s.k);
+  const d={k:'np_such',prop:1,x:q.x,y:q.y,r:10,prog:0,used:0,npA:o.fig,npN:o.A.dinge[j],npS:j,seed:j*31+7,type:'such'};G.props.push(d);o.dinge.push(d)}
+ if(o.dinge.length<3){/* zur Not alles in den Abschnitt der Figur */while(o.dinge.length<3){const q=npNeben(o.pr.x,o.pr.y,140+o.dinge.length*40,14)||{x:o.pr.x+40,y:o.pr.y+40};const d={k:'np_such',prop:1,x:q.x,y:q.y,r:10,prog:0,used:0,npA:o.fig,npN:o.A.dinge[o.dinge.length],npS:o.dinge.length,seed:3,type:'such'};G.props.push(d);o.dinge.push(d)}}}
+function npBoteBau(o){const K=G.ka,t0=npTiefe(K.sec[o.sec]);const E=NP_EMPF[o.A.empf]||NP_EMPF.spaeher;let s=npSecWahl(t0+1,K.nMain-1,['mitte','vorhof']);if(!s||npTiefe(s)<=t0)s=K.sec.find(x=>x.art==='vorhof')||s;let q=s?spOrt(s,300,150,24):null;if(!q&&s)q=npOrt(s,200,20);if(!q)q=npNeben(o.pr.x,o.pr.y,300,20);if(!q)return;
+ o.ep={k:'np_fig',prop:1,x:q.x,y:q.y,r:14,prog:0,used:0,npA:'empf:'+o.A.empf,npN:E.n,npC:npGold,npT:'✉',npS:0,npF:-1,seed:Math.floor(Math.random()*1e4),type:'empf'};G.props.push(o.ep)}
+/* Geisel: Lager mit ruhenden Wachen und gefesselter Geisel (Schutzziel mit fairer Lebensleiste) */
+function npGeiselBau(o){const K=G.ka,t0=npTiefe(K.sec[o.sec]);let s=npSecWahl(t0+1,K.nMain-2,['mitte'],K.sec[o.sec]);if(!s||npTiefe(s)<t0)s=npSecWahl(t0,K.nMain-2,['mitte','seite'],K.sec[o.sec]);if(!s)s=K.sec[o.sec];let q=spOrt(s,420,200,40)||npOrt(s,300,30);if(!q)q=npNeben(o.pr.x,o.pr.y,320,30);if(!q){o.akt=0;o.st=3;return}
+ const sc=scale();const g={kind:'obj',sub:'np|geisel|'+o.A.geisel,x:q.x,y:q.y,r:13,hp:sc.dmg*17,maxHp:sc.dmg*17,life:1e9,dead:false,flip:1,t:0,npG:1};G.allies.push(g);o.gs=g;o.treffer=0;
+ const pr=Math.max(0.35,spPrS(s)+0.05);const W=G.wl;const grp={id:W.gr.length,k:'lager',x:q.x,y:q.y,R:300,m:[],wach:0,wp:null,wi:0,kaS:s.k};o.camp=[];
+ spMitPr(pr,()=>{const n=Math.min(6,3+Math.floor(SL()/10)+(G.mp?1:0));for(let j=0;j<n;j++){const a=j/n*TAU+rnd(-0.3,0.3),z=wlNahFrei(q.x+Math.cos(a)*rnd(60,110),q.y+Math.sin(a)*rnd(50,90),4);if(!z)continue;const e=spawnEnemy(pickFoe(pr),z.x,z.y,{});if(e){e.born=-9;e.wlG=grp.id;e.wlZz=2;e.npCamp=o.id;grp.m.push(e);o.camp.push(e)}}
+  if(o.camp[0]){const e=o.camp[0];e.spKopf=1;e.spName='Geiselnehmer';e.npNehmer=1;e.hp*=1.5;e.maxHp=e.hp}});
+ W.gr.push(grp);G.deco.push({x:q.x+40,y:q.y+36,k:'wl_feuer',s:0.75,v:Math.random(),wl:1});o.gsx=q.x;o.gsy=q.y}
+function npGeiselTick(o,dt){const g=o.gs;if(!g)return;
+ if(g.hp<=0){g.life=0;g.dead=true;if(!npLeicht())puffs(g.x,g.y,'#6a5a48',8,90,14);npFertig(o,false,'Sie haben '+o.A.geisel+' verschleppt …');return}
+ /* der Geiselnehmer geht auf die Geisel los, sobald das Lager wach ist */
+ const wach=o.camp.some(e=>!e.dead&&!e.wlZz);if(wach&&!o.alarm){o.alarm=1;if(!G.bot){word(g.x,g.y-40,'Hilfe!',npGruen);npSag({npI:'',x:g.x,y:g.y},'Hilfe! Schnell!',2.2)}}
+ if(wach){const b=o.camp[0];if(b&&!b.dead){b.tgt=g;b.tx=g.x;b.ty=g.y}}
+ if(o.camp.length&&o.camp.every(e=>e.dead)){o.lx=g.x;o.ly=g.y;g.life=0;g.dead=true;o.bonus=o.treffer===0;
+  const t=o.treffer===0?o.A.gut:`${o.A.geisel} lebt. Ein bisschen angesengt, aber er lebt.`.replace('er lebt',/Händlerin|Getreue|Bäuerin/.test(o.A.geisel)?'sie lebt':'er lebt');
+  if(!G.bot)word(g.x,g.y-40,o.treffer===0?'Frei – und kein Kratzer!':'Frei!',npGruen);G.props.push({k:'np_fig',prop:1,x:g.x,y:g.y,r:12,prog:0,used:1,npA:'geisel',npN:o.A.geisel,npC:npGruen,npT:'✓',npS:0,npF:1,seed:5,type:'geisel'});npFertig(o,true,t)}}
+/* Karren/Leute: zwei Wellen greifen das Schutzziel an */
+function npWellenStart(o){const A=o.A,sc=scale();o.ziele=[];
+ if(A.typ==='karren'){const k=o.kp;k.used=1;k.dead=true;const a={kind:'obj',sub:'np|'+(A.erz?'erz':'karren')+'|'+A.karren,x:k.x,y:k.y,r:22,hp:sc.dmg*34*(G.mp?1.3:1),maxHp:sc.dmg*34*(G.mp?1.3:1),life:1e9,dead:false,flip:1,t:0};G.allies.push(a);o.ziele.push(a)}
+ else{for(const lp of o.lp){lp.used=1;lp.dead=true;const a={kind:'obj',sub:'np|'+lp.npA+'|'+lp.npN,x:lp.x,y:lp.y,r:12,hp:sc.dmg*16*(G.mp?1.3:1),maxHp:sc.dmg*16*(G.mp?1.3:1),life:1e9,dead:false,flip:lp.npF,t:0};G.allies.push(a);o.ziele.push(a)}}
+ o.welle=0;o.wT=2.2;o.wm=[]}
+function npWellenTick(o,dt){const Z=o.ziele.filter(a=>a.hp>0&&!a.dead);for(const a of o.ziele)if(a.hp<=0&&!a.dead){a.dead=true;a.life=0;if(!npLeicht())chunks(a.x,a.y,'#7a5230',10,200);if(!G.bot)word(a.x,a.y-30,o.A.typ==='karren'?'Zerstört!':'Gefallen …','#ff9a7a')}
+ if(!Z.length){npFertig(o,false);return}
+ const lebt=o.wm.filter(e=>!e.dead);o.wT-=dt;
+ if(o.welle<2&&(o.wT<=0&&(o.welle===0||!lebt.length||o.wT<-9))){o.welle++;o.wT=1;const c=Z[0];const n=Math.min(8,2+o.welle+Math.floor(SL()/8)+(G.mp?1:0));let erst=o.welle===2;const K=G.ka,s=K.sec[o.sec];const pr=Math.max(0.3,spPrS(s));
+  spMitPr(pr,()=>{for(let j=0;j<n;j++){let z=null;for(let k=0;k<8&&!z;k++){const a=rnd(TAU),d=rnd(300,430);const w=wlNahFrei(c.x+Math.cos(a)*d,c.y+Math.sin(a)*d,5);if(w&&kaSecAt(w.x,w.y)!==255&&kaFrei(kaSecAt(w.x,w.y))&&!G.ka.sec[kaSecAt(w.x,w.y)].art.startsWith('arena'))z=w}if(!z){const a=rnd(TAU);z=wlNahFrei(c.x+Math.cos(a)*220,c.y+Math.sin(a)*220,6);if(!z||kaSecAt(z.x,z.y)!==kaSecAt(c.x,c.y))continue}const e=spawnEnemy(pickFoe(pr),z.x,z.y,{});if(e){e.tx=c.x;e.ty=c.y;e.npW=o.id;o.wm.push(e);smoke(z.x,z.y);if(erst){erst=false;makeElite(e,rollAffixes(1),true);e.spKopf=1;e.spName=o.A.typ==='karren'?'Anführer der Räuber':'Anführer';}}}});
+  if(!G.bot){word(c.x,c.y-50,o.welle===1?'Sie kommen!':'Noch eine Welle!','#ffb060');if(o.welle===1)sfx('roar')}npSync();return}
+ /* Angreifer halten aufs Ziel zu, solange kein Held sie aufhält */
+ for(const e of lebt){if(e.wlZz)continue;const c=Z[0];if(!e.tgt||e.tgt===c||Math.random()<0.01){e.tx=c.x;e.ty=c.y}}
+ /* Leute ducken sich, Karren qualmt */
+ if(o.welle>=2&&!lebt.length){o.lx=Z[0].x;o.ly=Z[0].y;o.lohnF=Z.length/o.ziele.length<1?0.6:1;for(const a of o.ziele){a.life=0;a.dead=true}
+  if(o.A.typ==='schutz'){for(const a of Z){G.props.push({k:'np_leute',prop:1,x:a.x,y:a.y,r:12,prog:0,used:0,npA:String(a.sub).split('|')[1],npN:String(a.sub).split('|')[2],npS:2,npF:a.flip,seed:3,type:'leute'})}}
+  else{G.props.push(Object.assign({},o.kp,{used:0,dead:false,npS:1}))}
+  npFertig(o,true,Z.length<o.ziele.length?npPick(NP_FIG[o.fig].dank)+' Nicht alle haben es geschafft.':null)}}
+/* Flächenschaden der Helden in der Nähe der Geisel: kein Schaden, aber der Bonus „ohne die Geisel zu treffen“ ist weg */
+{const ao=aoe;aoe=function(x,y,R){try{const D=G.np;if(D&&!G.netGuestRun)for(const o of D.L){if(!o.akt||!o.gs||o.gs.dead)continue;const g=o.gs;if((g.x-x)**2+(g.y-y)**2<(R+g.r)**2){o.treffer++;if(!G.bot&&(!o.trT||G.time-o.trT>1.6)){o.trT=G.time;word(g.x,g.y-34,'Vorsicht, die Geisel!','#ffb060')}}}}catch(e){}return ao.apply(this,arguments)}}
+
+{const pt=pickTarget;pickTarget=function(e){const r=pt.apply(this,arguments);try{if(r&&r.npG&&!e.npNehmer){const h=r.hp;r.hp=0;try{return pt.apply(this,arguments)}finally{r.hp=h}}}catch(er){}return r}}
+/* ---------- Folgen in späteren Stufen ---------- */
+function npDlgFolge(o,q){const F=NP_FIG[o.fig];npGesehen(o.fig);
+ if(o.r==='gut'){const f=F.folgeGut;npDlgOpen(o,q,{n:F.n,c:npGold,t:npTx(f.t,{held:npHeld(q)}),o:[{l:'Danke!',f:()=>npFolgeGut(o,q)},{l:'Gern geschehen',f:()=>npFolgeGut(o,q)}]});return}
+ const f=F.folgeAerger;const A2=F.auf.map(a=>NP_AUF[a]).find(A=>A&&A.typ!=='geleit'&&A.typ!=='karren'&&A.typ!=='schutz');
+ const opts=[{l:'Weiterziehen',f:()=>{o.st=3;o.pr.npT='';npSag(o.pr,'Hmpf.',2)}}];
+ if(f.preis){npLauf().aufschlag=f.preis;opts.unshift({l:'Tut uns leid',f:()=>{o.st=3;o.pr.npT='';npLauf().aufschlag=f.preis;npSag(o.pr,'Entschuldigung angenommen. Preise bleiben trotzdem.',3)}})}
+ else if(A2){opts.unshift({l:'Wiedergutmachung anbieten',f:()=>{o.typ='fig';o.auf=F.auf.find(a=>NP_AUF[a]===A2);o.A=A2;o.lohnF=0.7;npSag(o.pr,'Na schön. Eine Chance.',2.4);npAnnehmen(o,q)}})}
+ npDlgOpen(o,q,{n:F.n,c:npGold,t:npTx(f.t,{held:npHeld(q)}),o:opts})}
+function npFolgeGut(o,q){const F=NP_FIG[o.fig],f=F.folgeGut;o.st=2;o.pr.npT='♥';const x=o.pr.x,y=o.pr.y;
+ if(f.lohn==='verstaerkung'){withP(q,()=>{const a=spawnPet('befreit',x+30,y+20,{hp:P.st.maxHp*0.9,life:100,dmg:()=>P.st.dmg*0.6,every:0.8,speed:180});a.own=P;a.evB=1;a.npName=f.wer||F.n;if(!G.bot)word(a.x,a.y-30,'❦ '+(f.wer||F.n),npGruen)})}
+ else if(f.lohn==='rabatt'){npLauf().rab=Math.max(npLauf().rab,0.33);if(!G.bot)word(x,y-60,'Rabatt: −33 % für diesen Lauf',npGold)}
+ else npLohn(f.lohn||'kiste',x,y,1,q);
+ try{npM().ev.push({st:G.stage,k:'folge',r:'gut',fig:o.fig})}catch(e){}spRew('evt');npSync()}
+
+/* ---------- Belohnungen ---------- */
+function npLohn(k,x,y,f,q){f=f||1;const L=spLeben();q=q&&L.includes(q)?q:L[0];if(!q)return;sfx('magic');if(!npLeicht()){ring(x,y,80,npGold,0.6,4);sparks(x,y-20,'#ffe0a0',14,220,1)}
+ const it=()=>withP(q,()=>dropItem(x+30,y+20,randomItem(P.level+2,1,2)));
+ if(k==='gold')spGold(x,y,Math.round(16*f),1.1);
+ else if(k==='item'){it();spGold(x,y,Math.round(6*f))}
+ else if(k==='kiste'){const g=wlNahFrei(x+rnd(-40,40),y+rnd(30,60),5)||{x,y:y+40};roomChest(g.x,g.y,f>=1?2:1)}
+ else if(k==='segen'){const s=pick(AR_SEGEN);for(const z of L)arFx(z,s,2);if(!G.bot)word(x,y-70,'Segen für 2 Stufen','#c8a0ff');spGold(x,y,Math.round(6*f))}
+ else if(k==='trank'){for(const z of L)withP(z,()=>{P.pots=Math.min(P.potMax,(P.pots||0)+2)});if(!G.bot)word(x,y-70,'+2 Heiltränke','#ff9a8a');spGold(x,y,Math.round(6*f))}
+ else if(k==='edelstein'){withP(q,()=>{const g=giveGems(f>=1?2:1);if(!G.bot)word(x,y-70,'◆ '+g,'#c8a0ff')});spGold(x,y,Math.round(6*f))}
+ else if(k==='rabatt'){npLauf().rab=Math.max(npLauf().rab,0.33);if(!G.bot)word(x,y-70,'Rabatt beim Händler: −33 %',npGold);spGold(x,y,Math.round(8*f))}
+ else if(k==='xp'){withP(q,()=>gainXp(xpNeed(P.level)*0.3*f));if(!G.bot)word(x,y-70,'+ Erfahrung','#8fe7ff')}
+ else spGold(x,y,Math.round(10*f))}
+
+/* ================= Tiere ================= */
+TBUFFS.push('npTier');
+hook('stats',s=>{if(!(P.buffs&&P.buffs.npTier>0))return;const k=P.npTierK,v=+P.npTierV||0;if(k==='gold')s.gold+=v;else if(k==='speed')s.speedP+=v;else if(k==='luck')s.luck+=v;else if(k==='crit')s.crit+=v;else if(k==='dmg')s.dmgP+=v;else if(k==='rate')s.rateP+=v});
+function npTierTick(o,dt){const p=o.pr,W_=o.W;if(o.st>=2)return;
+ if(p.npS===2){/* flieht: weg vom Auslöser, dann verschwinden */o.fT-=dt;const a=o.fA;const nx=p.x+Math.cos(a)*230*dt,ny=p.y+Math.sin(a)*230*dt;if(wlFrei(nx,ny,8)){p.x=nx;p.y=ny}else o.fA+=rnd(-1.2,1.2);p.npF=Math.cos(o.fA)<0?-1:1;if(o.fT<=0){p.used=1;p.dead=true;o.st=2;npSync()}return}
+ if(p.npS===1){/* Begleiter */o.bT-=dt;npFolge(o,p,dt,200,58);if(o.bT<=0){p.npS=2;o.fT=1.8;o.fA=rnd(TAU);npSag(p,W_.n.replace(/^(Ein|Eine) /,'Die ').replace(/^Die Wolf/,'Der Wolf').replace(/^Die Streuner/,'Der Streuner').replace(/^Die Salamander/,'Der Salamander').replace(/^Die kleiner/,'Der')+' zieht weiter. Danke für die Begleitung!',2.6)}return}
+ if(!kaFrei(o.sec))return;if(!o.zeig&&npNah(p.x,p.y,520)){o.zeig=1}
+ /* Herumtrotten */
+ o.wT=(o.wT||0)-dt;if(o.wT<=0){o.wT=rnd(1.5,3.5);o.wA=Math.random()<0.4?null:rnd(TAU)}if(o.wA!=null){const nx=p.x+Math.cos(o.wA)*26*dt,ny=p.y+Math.sin(o.wA)*26*dt;if(Math.hypot(nx-o.hx,ny-o.hy)<90&&wlFrei(nx,ny,8)){p.x=nx;p.y=ny;p.npF=Math.cos(o.wA)<0?-1:1}else o.wA=null}
+ /* Schreck: rennende Helden, Kampf in der Nähe */
+ const L=spLeben();let schreck=null;for(const q of L){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d>220)continue;if(npRennt(q)&&d<200||W_.nurFlucht&&d<190){schreck=q;break}}
+ if(!schreck&&npWach(p.x,p.y,240))schreck={x:p.x+1,y:p.y};
+ if(schreck){p.npS=2;o.fT=W_.nurFlucht?2.4:1.6;o.fA=Math.atan2(p.y-schreck.y,p.x-schreck.x)+rnd(-0.4,0.4);
+  if(W_.nurFlucht){/* Fledermäuse zeigen den Weg: sie fliegen zum Ausgang */const z=G.ka.zp;if(z)o.fA=Math.atan2(z.y-p.y,z.x-p.x);spKarte();if(!G.bot){word(p.x,p.y-40,'Sie zeigen euch den Weg!',npGruen);spMsg('<b>Fledermäuse</b> flattern Richtung Ausgang – die Karte liegt offen.',npGruen)}spRew('evt');try{npM().ev.push({st:G.stage,k:'tier_weg',w:o.w})}catch(e){}}
+  else{npSag(p,W_.flieh,2);try{npM().ev.push({st:G.stage,k:'tier_flieht',w:o.w})}catch(e){}}sfx('blink');return}
+ if(W_.nurFlucht)return;const q=npRing(o,p,64,0.9);if(q)npDlgTier(o,q)}
+function npDlgTier(o,q){const W_=o.W,p=o.pr;const ch=0.6+(mpL().some(z=>z&&z.id==='friedrich')?0.35:0)+(mpL().some(z=>z&&z.id==='echo')?0.15:0);const pots=q.pots||0;
+ const ok=(lang)=>{o.st=1;p.npS=1;o.bT=lang?90:60;o.ti=null;for(const z of spLeben())withP(z,()=>{P.buffs.npTier=o.bT;P.npTierK=W_.freund.k;P.npTierV=W_.freund.v;recalc()});npSag(p,W_.ok,3);if(!G.bot)spMsg(`<b>${esc(W_.n)}</b> begleitet euch: ${esc(W_.freund.d)} für ${o.bT} s.`,npGruen);spRew('evt');sfx('segen');try{npM().ev.push({st:G.stage,k:'tier_freund',w:o.w})}catch(e){}npSync()};
+ const weg=()=>{p.npS=2;o.fT=1.6;o.fA=rnd(TAU);npSag(p,W_.flieh,2);try{npM().ev.push({st:G.stage,k:'tier_flieht',w:o.w})}catch(e){}};
+ const t=W_.t+(q.id==='echo'&&o.w==='ratte'?' Echo piepst. Die Ratte piepst zurück.':q.id==='friedrich'&&o.w==='streuner'?' Rex knurrt eifersüchtig.':'');
+ npDlgOpen(o,q,{n:W_.n,c:npGruen,t,o:[{l:`Leise locken (${Math.round(Math.min(1,ch)*100)} %)`,f:()=>{if(Math.random()<ch)ok(false);else weg()}},
+  {l:pots>0?'Füttern (1 Heiltrank)':'Füttern (kein Trank)',dis:pots<=0,f:()=>{if(pots>0){withP(q,()=>{P.pots=Math.max(0,P.pots-1)});ok(true)}}},
+  {l:'In Ruhe lassen',f:()=>{p.prog=0;o.kuehl=1}}]})}
+
+/* ================= Schlafendes Ungeheuer ================= */
+function npSchlafTick(o,dt){const p=o.pr;if(o.st>=2)return;
+ if(o.st===1){const e=o.e;if(!e||e.dead){o.st=2;p.used=1;p.dead=true;if(e&&e.dead){const g=wlNahFrei(e.x,e.y,6)||e;roomChest(g.x,g.y,2);spGold(e.x,e.y,o.absicht?22:14,1.3);if(!G.bot)banner('Das Ungeheuer ist besiegt!',o.absicht?'Wer weckt, der erntet':'Ausgeschlafen','#c8e0a8',{dur:2,size:38,y:H*0.3});try{npM().ev.push({st:G.stage,k:'schlaf_sieg',a:o.absicht?1:0})}catch(er){}}npSync()}return}
+ if(!kaFrei(o.sec))return;if(!o.zeig&&npNah(p.x,p.y,520))o.zeig=1;
+ const L=spLeben();let rate=0,nah=false;for(const q of L){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<330)o.war=1;if(d>270)continue;nah=true;let r=0.05*(1-d/270)+0.02;if(npRennt(q))r*=3.2;if(q.stealthT>0||q.fmTarn)r*=0.35;if(o.leise>G.time)r*=0.3;rate+=r}
+ if(npWach(p.x,p.y,260))rate+=0.06;
+ o.m=clamp(o.m+(nah||rate>0?rate*dt:-0.03*dt)+(o.laerm||0),0,1);o.laerm=0;p.npM=Math.round(o.m*20)/20;
+ if(o.m>=1){npWecken(o,false);return}
+ /* vorbeigeschlichen: man war nah dran, ist jetzt weit weg und weiter vorn */
+ if(o.war&&!nah&&L.every(q=>Math.hypot(q.x-p.x,q.y-p.y)>700)){const K=G.ka;if(L.every(q=>{const s=K.sec[kaSecAt(q.x,q.y)];return s&&npTiefe(s)>npTiefe(K.sec[o.sec])})){o.st=2;p.npS=3;p.npN='Schläft weiter';if(!G.bot){spMsg('<b>Leise wie ein Schatten:</b> Das Ungeheuer schläft weiter.','#c8e0a8')}withP(L[0],()=>gainXp(xpNeed(P.level)*0.2));spRew('evt');try{npM().ev.push({st:G.stage,k:'schlaf_leise'})}catch(e){}npSync();return}}
+ const q=npRing(o,p,66,0.8);if(q){npDlgOpen(o,q,{n:p.npN,c:'#c8e0a8',t:o.W.t,o:[{l:'Wecken! (Kampf · große Beute)',f:()=>npWecken(o,true)},{l:'Leise vorbeischleichen',f:()=>{o.leise=G.time+30;npSag(p,'Chrrrr … pfff …',2)}}]})}}
+function npWecken(o,absicht){const p=o.pr,d=o.def;o.st=1;o.absicht=absicht;p.used=1;p.dead=true;G.shake+=6;sfx('roar');
+ const pr=Math.max(0.5,spPrS(G.ka.sec[o.sec])+0.2);let e=null;spMitPr(pr,()=>{e=spawnEnemy(d,p.x,p.y,{})});if(!e){o.st=2;return}
+ makeElite(e,rollAffixes(SL()>8?2:1),true);e.hp*=2.3;e.maxHp=e.hp;e.r*=1.3;e.born=-9;e.spKopf=1;e.spName=d.n+', '+pick(['der Langschläfer','die Schnarchnase','der Grummelige','die Morgenmuffelin']);e.npSchlaf=o.id;o.e=e;
+ if(!G.bot)banner(absicht?'Geweckt!':'Aufgewacht!',absicht?'Ihr habt es so gewollt':'Zu laut gewesen …','#ff9a7a',{dur:1.8,size:42,y:H*0.28});try{npM().ev.push({st:G.stage,k:'schlaf_wach',a:absicht?1:0})}catch(er){}npSync()}
+/* Kampflärm weckt Schläfer, reizt Reizbare */
+{const ke=killEnemy;killEnemy=function(e,o){const a=e&&!e.dead;const r=ke.apply(this,arguments);try{if(a&&e.dead&&G.np&&!G.netGuestRun)for(const n of G.np.L){if(n.st!==0||!n.pr)continue;const d=Math.hypot(e.x-n.pr.x,e.y-n.pr.y);if(n.typ==='schlaf'&&d<300)n.laerm=(n.laerm||0)+0.1*(1-d/300)+0.02;if(n.typ==='reiz'&&d<160)n.m=Math.min(1,(n.m||0)+0.15)}}catch(er){}return r}}
+
+/* ================= Reizbare Wesen ================= */
+function npReizTick(o,dt){const p=o.pr;if(o.st>=2)return;
+ if(o.st===1){const e=o.e;if(!e||e.dead){o.st=2;if(e&&e.dead){spGold(e.x,e.y,12,1.2);if(Math.random()<0.6)dropItem(e.x+20,e.y+20,randomItem(P.level+1,1,1));try{npM().ev.push({st:G.stage,k:'reiz_sieg'})}catch(er){}}npSync()}return}
+ if(!kaFrei(o.sec))return;
+ o.wT=(o.wT||0)-dt;if(o.wT<=0){o.wT=rnd(2,4);o.wA=Math.random()<0.5?null:rnd(TAU)}if(o.wA!=null){const nx=p.x+Math.cos(o.wA)*18*dt,ny=p.y+Math.sin(o.wA)*18*dt;if(Math.hypot(nx-o.hx,ny-o.hy)<70&&wlFrei(nx,ny,14)){p.x=nx;p.y=ny;p.npF=Math.cos(o.wA)<0?-1:1}else o.wA=null}
+ let nah=false;for(const q of spLeben()){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<74){nah=true;o.m+=0.32*dt}}
+ if(!nah)o.m=Math.max(0,o.m-0.07*dt);o.m=Math.min(1,o.m);p.npM=Math.round(o.m*20)/20;p.npS=o.m>0.45?1:0;
+ if(o.m>0.45&&!o.warn){o.warn=1;npSag(p,'Grrrr …',1.6)}if(o.m<0.2)o.warn=0;
+ if(o.m>=1){o.st=1;p.used=1;p.dead=true;sfx('roar');G.shake+=4;const nm=o.W.n.replace(/^(Ein|Eine) /,'');const d=Object.assign({},o.d0,{n:nm.charAt(0).toUpperCase()+nm.slice(1),c:o.W.c||o.d0.c,t:o.W.t2||o.d0.t,size:(o.d0.size||1)*o.W.s});let e=null;spMitPr(Math.max(0.5,spPrS(G.ka.sec[o.sec])+0.15),()=>{e=spawnEnemy(d,p.x,p.y,{})});
+  if(e){makeElite(e,rollAffixes(1),true);e.hp*=1.8;e.maxHp=e.hp;e.born=-9;e.spKopf=1;e.spName=d.n+' (gereizt)';o.e=e}else o.st=2;if(!G.bot)word(p.x,p.y-60,'Jetzt reicht’s!','#ff9a7a');try{npM().ev.push({st:G.stage,k:'reiz_wach'})}catch(er){}npSync()}}
+{const ao=aoe;aoe=function(x,y,R){try{const D=G.np;if(D&&!G.netGuestRun)for(const o of D.L){if(o.typ!=='reiz'||o.st!==0)continue;const p=o.pr;if((p.x-x)**2+(p.y-y)**2<(R+p.r)**2){o.m=Math.min(1,(o.m||0)+0.22)}}}catch(e){}return ao.apply(this,arguments)}}
+
+/* ================= Benutzbare Dinge ================= */
+function npWegweiser(o,q){const p=o.pr,K=G.ka;o.st=2;p.used=1;for(const s of K.sec)if(s.art!=='arena'&&s.art!=='seite')s.seen=1;try{if(G.wl&&G.wl.seen)for(let i=0;i<G.wl.seen.length;i++)G.wl.seen[i]=1}catch(e){}
+ npSag(p,p.lab||'Weiter →',3.4);withP(q,()=>gainXp(xpNeed(P.level)*0.08));if(!G.bot)spMsg(`<b>Wegweiser:</b> ${esc(p.lab||'')} – die Abschnitte vor euch sind eingezeichnet.`,npGruen);sfx('ui');spRew('evt');try{npM().ev.push({st:G.stage,k:'wegweiser'})}catch(e){}npSync()}
+function npPreis(f){const L=npLauf();const m=npMem();const stamm=Math.min(0.15,0.05*Math.floor(m.k/3));return Math.max(5,Math.round((30+SL()*14)*(f||1)*(1-Math.max(L.rab||0,stamm))*(L.aufschlag||1)/5)*5)}
+function npDlgDing(o,q){const p=o.pr,w=o.w;const fertig=t=>{o.st=2;p.used=1;p.npT='';if(t)npSag(p,t,3);spRew('evt');try{npM().ev.push({st:G.stage,k:'ding_'+w})}catch(e){}npSync()};
+ if(w==='feuer'){npDlgOpen(o,q,{n:'Reisende am Lagerfeuer',c:npGruen,t:pick(['„Setzt euch, Fremde. Das Feuer reicht für alle.“','„Helden? Dann erzählt was. Oder hört zu.“','„Hier unten ist jedes Feuer ein Freund.“']),o:[
+  {l:'Am Feuer rasten',f:()=>{for(const z of spLeben())withP(z,()=>{heal(P.st.maxHp*0.6);P.pots=Math.min(P.potMax,(P.pots||0)+1)});if(!G.bot)word(p.x,p.y-60,'Ausgeruht · +1 Heiltrank','#8ff08a');fertig('Gute Reise, Helden!')}},
+  {l:'Nach Neuigkeiten fragen',f:()=>{const g=npGeruecht();withP(q,()=>gainXp(xpNeed(P.level)*0.12));fertig(g);if(!G.bot)spMsg('<b>Am Lagerfeuer:</b> „'+esc(g)+'“',npGruen)}},
+  {l:'Weiterziehen'}]});return}
+ if(w==='brunnen'||w==='quelle'){const pr=Math.max(5,Math.round((8+SL()*3)/5)*5);npDlgOpen(o,q,{n:p.npN,c:npGruen,t:w==='brunnen'?'Auf dem Grund glitzern Münzen. „Wirf und wünsch dir was.“':'Klares, kaltes Wasser zwischen den Steinen.',o:[
+  {l:'Trinken',f:()=>{for(const z of spLeben())withP(z,()=>heal(P.st.maxHp*0.45));if(!G.bot)word(p.x,p.y-60,'Erfrischt','#8ff08a');fertig('')}},
+  {l:`Münze werfen (${pr} Gold)`,dis:SAVE.gold<pr,f:()=>{if(SAVE.gold<pr)return;SAVE.gold-=pr;sfx('coin');const r=Math.random();if(r<0.5){const s=pick(AR_SEGEN);for(const z of spLeben())arFx(z,s,2);fertig('Ein warmes Glitzern – euer Wunsch wird erhört.')}else if(r<0.8){spGold(p.x,p.y,10,1.2);fertig('Der Brunnen spuckt Münzen zurück!')}else fertig('Plopp. Sonst nichts.')}},
+  {l:'Weiter'}]});return}
+ if(w==='schrein'){const pr=npPreis(0.6);npDlgOpen(o,q,{n:p.npN,c:npGruen,t:'Ein kleiner Schrein am Weg. Reisende lassen hier Münzen und Wünsche.',o:[
+  {l:`Gold opfern (${pr})`,dis:SAVE.gold<pr,f:()=>{if(SAVE.gold<pr)return;SAVE.gold-=pr;sfx('segen');const s=pick(AR_SEGEN);for(const z of spLeben())arFx(z,s,2);if(!G.bot)word(p.x,p.y-60,'Segen für 2 Stufen','#c8a0ff');fertig('')}},
+  {l:'Kurz beten',f:()=>{for(const z of spLeben())withP(z,()=>heal(P.st.maxHp*0.3));fertig('Irgendwo lächelt Imre.')}},
+  {l:'Weiter'}]});return}}
+/* Gerücht: echte Vorschau auf die nächste Stufe */
+function npGeruecht(){const S2=STAGES[G.stage+1];if(!S2)return'Weiter unten? Da war noch keiner. Jedenfalls keiner, der zurückkam.';const nm=String(S2.name||'').replace(/^Tiefe \d+ · /,'');const L=[];
+ try{if(S2.escape)L.push(`Nach „${nm}“ heißt es rennen. Fragt nicht, wovor.`);if(S2.boss&&BOSSES[S2.boss])L.push(`In „${nm}“ wartet ${BOSSES[S2.boss].n}. Nehmt Heiltränke mit.`);if(S2.guard&&GUARDS[S2.guard])L.push(`In „${nm}“ wacht ${GUARDS[S2.guard].n}. Zäh, sagt man.`);
+  const F=Object.entries(S2.foes||{}).sort((a,b)=>b[1]-a[1]).map(x=>FOES[x[0]]).filter(Boolean);if(F[0])L.push(`In „${nm}“ hab ich ${F[0].n}${F[1]?' und '+F[1].n:''} gesehen. Viele.`);
+  const ch=spChronik(S2);if(ch)L.push(`In „${nm}“ soll „${ch.n}“ zu finden sein …`)}catch(e){}
+ return L.length?pick(L):`Als Nächstes: „${nm}“. Mehr weiß keiner.`}
+
+/* ================= Fahrender Händler (spass) aufgewertet ================= */
+function npWare(){const k=npKap();const g=NP_WARE.find(w=>k<=w.bis)||NP_WARE[NP_WARE.length-1];return g.L}
+const spH0=SP_TICK.haendler;SP_TICK.haendler=function(o,dt){const p=o.pr;if(!G.np)return spH0(o,dt);p.npI=p.npI||('h'+o.id);if(!kaFrei(o.sec))return;if(!o.zeig&&spNah(p,520)){o.zeig=1;spSync();const q=spNah(p,520);if(q&&!G.bot)npSag({npI:'',x:p.x,y:p.y},npGrussH(q),3.4)}
+ if(p.used){return}const q=npRing(o,p,64,0.8);if(q)npDlgHaendler(o,q)};
+function npGrussH(q){const m=npMem();const L=npLauf();const F=NP_FIG.mosk;if(L.seen.mosk)return npPick(F.lauf);if(m.f.mosk&&m.f.mosk.n>0)return npTx(npPick(F.wieder),{n:m.f.mosk.n+1});return npPick(F.gruss)}
+function npDlgHaendler(o,q,step){const p=o.pr;const W_=o.npW||(o.npW=pick(npWare()));const pr0=npPreis(o.npF||1);o.preis=pr0;p.price=pr0;npGesehen('mosk');
+ const kauf=(preis)=>{if(SAVE.gold<preis){withP(q,()=>{P.pots=Math.min(P.potMax,P.pots+1)});p.used=1;spFertig(o,'„Für Helden der Allianz: ein Trank aufs Haus.“',npGold);npSag(p,'Beehrt mich wieder!',2.4);return}
+  SAVE.gold-=preis;sfx('buy');npMem().k++;withP(q,()=>{P.pots=P.potMax});const fx=W_.fx,x=p.x,y=p.y;
+  if(fx==='item')withP(q,()=>dropItem(x+30,y+30,randomItem(P.level+2,1,2)));else if(fx==='gem')withP(q,()=>giveGems(1));else if(fx==='trank')withP(q,()=>{P.potMax=(P.potMax||1)+1;P.pots=P.potMax});else if(ARFX[fx])for(const z of spLeben())arFx(z,fx,2);else withP(q,()=>dropItem(x+30,y+30,randomItem(P.level+2,1,2)));
+  p.used=1;spFertig(o,`<b>Gehandelt:</b> ${esc(W_.n)} für ${preis} Gold – und die Tränke sind voll.`,npGold);npSag(p,pick(['Beehrt mich wieder!','Ein Vergnügen!','Erzählt es weiter!']),2.6);try{npM().ev.push({st:G.stage,k:'kauf',preis})}catch(e){}npSave()};
+ const lassen=()=>{npSag(p,'Dann eben nicht. Ich bin noch eine Weile hier.',2.6);o.kuehl=1};
+ if(step==='feilsch'){const bon=(mpL().some(z=>z&&z.id==='barradin')?4:0)+(mpL().some(z=>z&&z.id==='echo')?2:0);const w=1+Math.floor(Math.random()*20);const s=w+bon;let f,t;
+  if(w===20){f=0.5;t='Natürliche 20! „Ihr ruiniert mich! Halber Preis, und jetzt geht.“'}else if(s>=12){f=0.7;t=`Wurf ${w}${bon?'+'+bon:''}: „Na gut, na gut. Weil ihr es seid.“`}else{f=1.15;t=`Wurf ${w}${bon?'+'+bon:''}: „Jetzt erst recht teurer!“`}
+  o.npF=f;const pr=npPreis(f);if(mpL().some(z=>z&&z.id==='barradin')&&Math.random()<0.5)t+=' Und spielt hier keine Flöte!';
+  npDlgOpen(o,q,{n:'Mosk Feilschmund',c:npGold,t,o:[{l:`Kaufen (${pr} Gold)`,f:()=>kauf(pr)},{l:'Lassen',f:lassen}]});return}
+ if(step==='geruecht'){const g=npGeruecht();npDlgOpen(o,q,{n:'Mosk Feilschmund',c:npGold,t:'„'+g+'“',o:[{l:`${W_.n} kaufen (${pr0} Gold)`,f:()=>kauf(pr0)},{l:'Lassen',f:lassen}]});try{npM().ev.push({st:G.stage,k:'geruecht'})}catch(e){}return}
+ if(step==='angebot'){const pr=Math.max(5,Math.round(pr0*0.4/5)*5);npDlgOpen(o,q,{n:'Mosk Feilschmund',c:npGold,t:`„Ein Amulett, garantiert legendär! Nur heute: ${pr} Gold.“ Mosk schaut sich nervös um.`,o:[
+  {l:`Zuschlagen (${pr} Gold)`,dis:SAVE.gold<pr,f:()=>{if(SAVE.gold<pr)return;SAVE.gold-=pr;sfx('coin');const r=Math.random();const x=p.x,y=p.y;p.used=1;
+   if(r<0.45){withP(q,()=>dropItem(x+30,y+30,randomItem(P.level+3,1,3)));spFertig(o,'<b>Sonderangebot:</b> Es ist wirklich echt!',npGold);npSag(p,'Siehst du? Echt! … Wirklich?',2.6)}
+   else if(r<0.8){spFertig(o,'<b>Sonderangebot:</b> Das Amulett zerbröselt. Mosk ist schon weg.','#ff9a7a');p.dead=true;if(!npLeicht())puffs(x,y,'#8a7a5a',8,80,14)}
+   else{for(const z of spLeben())arFx(z,'ev_pech',1);spFertig(o,'<b>Sonderangebot:</b> Das Amulett ist verflucht. Pech für eine Stufe.','#ff9a7a');npSag(p,'Keine Rückgabe!',2)}
+   try{npM().ev.push({st:G.stage,k:'angebot',r:+r.toFixed(2)})}catch(e){}}},
+  {l:'Zu schön, um wahr zu sein',f:lassen}]});return}
+ const t=pick(['Heute im Angebot: ','Frisch eingetroffen: ','Nur für euch: '])+W_.n+'. Dazu volle Heiltränke.'+(npLauf().rab?' Mit Rabatt!':npLauf().aufschlag?' Zum … Sonderpreis.':'');
+ const o3=Math.random()<0.22&&!o.angebot?{l:'Sonderangebot?!',f:()=>{o.angebot=1;npDlgHaendler(o,q,'angebot')}}:{l:'Gerücht hören',f:()=>npDlgHaendler(o,q,'geruecht')};
+ npDlgOpen(o,q,{n:'Mosk Feilschmund',c:npGold,t,o:[{l:`Kaufen (${pr0} Gold)`,f:()=>kauf(pr0)},{l:o.npF?'Nochmal feilschen? Nein.':'Feilschen',dis:!!o.npF,f:()=>npDlgHaendler(o,q,'feilsch')},o3]})}
+
+/* ================= Fährmann, Gefangene, Riese mit dem Erzwagen (vorhandenes aufgewertet) ================= */
+const NP_FM={erst:['Fährmann Olgrim. Rüber kommt ihr nur mit mir.','Olgrim, Fährmann. Kein Zoll, nur gute Laune.'],wieder:['Ihr schon wieder! Das {n}. Mal auf meinem Floß.','Wieder ihr? Ich sollte Treuepunkte einführen. {n} Fahrten!','Meine Stammgäste! Fahrt Nummer {n}.'],hilfe:['Hilfe! Die wollen mein Floß!','Schnell, bevor sie das Floß versenken!']};
+function npKarteTick(dt){const K=G.ka,D=G.np;if(!K||!D)return;
+ /* Fährmann redet */
+ for(const t of K.tore){if(t.los!=='faehre'||!t.fmP)continue;const p=t.fmP;const f=D.fm[t.g]||(D.fm[t.g]={});if(p.used||f.done)continue;const q=npNah(p.x,p.y,240);if(!q)continue;
+  if(p.locked&&!f.h){f.h=1;npSag({npI:'',x:p.x,y:p.y},pick(NP_FM.hilfe),2.4);continue}if(!p.locked&&!f.g){f.g=1;const M=npMem();M.fm++;npSave();npSag({npI:'',x:p.x,y:p.y},M.fm<=1?pick(NP_FM.erst):npTx(pick(NP_FM.wieder),{n:M.fm}),3.4)}}
+ /* Gefangene bedanken sich; alle frei → ein Geretteter bringt später ein Geschenk */
+ for(const p of G.props){if(p.k!=='okaefig'||!p.freed||p.npDank)continue;p.npDank=1;npSag({npI:'',x:p.x,y:p.y-6},pick(['Danke! Danke!','Frei! Endlich!','Ich dachte, ihr kommt nie.','Die Wachen schlafen? Gut so.']),2.4)}
+ const O=G.obj;if(O&&O.k==='gefangene'&&O.done&&!D.gef){D.gef=1;const L=npLauf();L.gerettet++;L.folgeQ.push({fig:'befreit',r:'gut',st:G.stage})}}
+/* Ergebnis des Würfel-Ereignisses „Der Riese mit dem Erzwagen“ merken (inhalt) – Hgraams Erzwagen-Auftrag spielt darauf an */
+try{const E=EV2&&EV2.sz_erzwagen;if(E&&E.opts)for(const op of E.opts){if(op.ok){const f=op.ok;op.ok=function(){try{npMem().erz='gut';npSave()}catch(e){}return f.apply(this,arguments)}}if(op.fail){const f=op.fail;op.fail=function(){try{npMem().erz='fehl';npSave()}catch(e){}return f.apply(this,arguments)}}}}catch(e){}
+
+/* ================= Gespräche ================= */
+function npDlgFig(o,q){const F=NP_FIG[o.fig],A=o.A,p=o.pr;npGesehen(o.fig);
+ if(o.akt){const t=A.typ==='suche'?`Noch ${o.dinge.filter(d=>!d.used).length} von 3 – ${o.dinge.filter(d=>!d.used).map(d=>d.npN).join(', ')}.`:A.typ==='bote'?`${NP_EMPF[A.empf]?NP_EMPF[A.empf].n:'Der Empfänger'} wartet weiter vorn.`:A.typ==='geisel'?'Das Lager ist weiter vorn. Vorsicht mit Flächenzaubern!':'Wir zählen auf euch!';
+  npDlgOpen(o,q,{n:F.n,c:npGold,t,o:[{l:'Wir sind dran',f:()=>{}},{l:'Auftrag aufgeben',f:()=>{for(const d of o.dinge||[]){d.used=1;d.dead=true}if(o.ep){o.ep.used=1;o.ep.dead=true}npFertig(o,false,npPick(F.aerger))}}]});return}
+ if(!A){npDlgOpen(o,q,{n:F.n,c:npGold,t:npGruss(o.fig,q),o:[{l:'Lebwohl!'}]});return}
+ let bitte=A.bitte;if(A.erz){const m=npMem().erz;if(m==='gut')bitte='Der Riese, dem ihr das Rad gerichtet habt, steckt wieder fest. Etwas Hungriges kommt. Wacht über ihn.';else if(m==='fehl')bitte='Der Riese mit dem Erzwagen. Ja, der mit dem Fuß. Etwas Hungriges kommt. Wacht über ihn.'}
+ const wer={l:'Wer bist du?',f:()=>{npDlgOpen(o,q,{n:F.n,c:npGold,t:npTx(npPick(F.gruss),{held:npHeld(q)})+' ('+F.titel+')',o:[{l:A.ja,f:()=>npAnnehmen(o,q)},{l:A.nein,f:()=>npAblehnen(o,q)}]})}};
+ npDlgOpen(o,q,{n:F.n,c:npGold,sub:F.titel,t:bitte,o:[{l:A.ja,f:()=>npAnnehmen(o,q)},{l:A.nein,f:()=>npAblehnen(o,q)},wer]})}
+/* Gespräch öffnen: d={n,c,t,sub,o:[{l,f,dis}]} */
+function npDlgOpen(o,q,d){const D=G.np;if(!D)return;D.sq=(D.sq||0)+1;const dl={o,q,d,sq:D.sq,t:0,sel:Math.max(0,d.o.findIndex(x=>!x.dis))};D.dlg=dl;
+ G.npD={ow:nid(q),sq:dl.sq,n:String(d.n||''),c:d.c||npGold,s:String(d.sub||''),t:String(d.t||''),o:d.o.map(x=>String(x.l).replace(/\u001f/g,' ')).join('\u001f'),x:d.o.map(x=>x.dis?1:0).join(''),sel:dl.sel};
+ if(o&&o.pr)npSag(o.pr,d.t,6,1);sfx('ui');
+ if(G.bot){/* Bot entscheidet sofort: meist annehmen, manchmal ablehnen (für Folgen) */const i=npBotWahl(o,d);later(0.35,()=>{try{if(G.np&&G.np.dlg===dl)npDlgWahl(i,dl.sq)}catch(e){}})}}
+function npBotWahl(o,d){const n=d.o.length;if(o&&o.typ==='fig'&&!o.akt&&o.A&&d.o.length>=2&&Math.random()<(window.__npNein!=null?window.__npNein:NP.nein))return 1;
+ if(o&&o.typ==='schlaf')return Math.random()<0.5?0:1;if(o&&o.akt)return 0;let i=0;while(i<n&&d.o[i].dis)i++;return Math.min(i,n-1)}
+function npDlgWahl(i,sq){const D=G.np;const dl=D&&D.dlg;if(!dl||sq!=null&&sq!==dl.sq)return;const op=dl.d.o[i];if(!op||op.dis)return;D.dlg=null;G.npD=null;sfx('ui');
+ npBubWeg(dl);
+ try{if(op.f)op.f()}catch(er){console.error('npDlg',er)}if(dl.o&&!G.np.dlg)dl.o.kuehl=1;npSync()}
+function npDlgZu(grund){const D=G.np;const dl=D&&D.dlg;if(!dl)return;D.dlg=null;G.npD=null;if(dl.o){dl.o.kuehl=1;if(dl.o.pr&&grund)npSag(dl.o.pr,grund,2)}npBubWeg(dl)}
+function npBubWeg(dl){if(G.npN&&dl.o&&dl.o.pr){const id=dl.o.pr.npI;G.npN.b=G.npN.b.filter(x=>{const b=npBubP(x);return!(b[6]&&b[0]===id)})}}
+function npDlgTick(dt){const dl=G.np.dlg;dl.t+=dt;const q=dl.q,p=dl.o&&dl.o.pr;if(!q||q.down||q.netGone||!spLeben().includes(q)){npDlgZu('');return}
+ if(p&&Math.hypot(q.x-p.x,q.y-p.y)>170){npDlgZu('Na gut, ein andermal.');return}if(p&&npWach(p.x,p.y,280)){npDlgZu('Später – Gefahr!');return}if(dl.t>40)npDlgZu('…');
+ }
+/* Eingaben: wer das Gespräch führt, bedient es */
+function npDOpts(d){const L=String(d.o||'').split('\u001f'),X=String(d.x||'');return L.map((l,i)=>[l,X[i]==='1'?1:0])}
+function npDlgMein(){const d=G.npD;if(!d||G.state!=='play')return null;if(NET.role==='guest'&&G.netGuestRun)return d.ow===NET.me?d:null;const dl=G.np&&G.np.dlg;return dl&&mpLocal().includes(dl.q)?d:null}
+function npWahl(i){const d=npDlgMein();if(!d)return;const op=npDOpts(d)[i];if(!op||op[1])return;if(NET.role==='guest'&&G.netGuestRun){netAct('npc',[d.sq,i]);G.npD=null;npUi(true);return}npDlgWahl(i,d.sq);npUi(true)}
+function npCurSel(d){return NP.lsel&&NP.lsel.sq===d.sq?NP.lsel.s:(d.sel|0)}
+function npSel(dv){const d=npDlgMein();if(!d)return;const O=npDOpts(d),n=O.length;let s=npCurSel(d);for(let k=0;k<n;k++){s=(s+dv+n)%n;if(!O[s][1])break}NP.lsel={sq:d.sq,s};npUi(true)}
+function npZu(){const d=npDlgMein();if(!d)return;if(NET.role==='guest'&&G.netGuestRun){netAct('npc',[d.sq,-1]);G.npD=null;npUi(true);return}npDlgZu('Überlegt es euch.');npUi(true)}
+{const nh=netHostAct;netHostAct=function(g,k,v){if(k==='npc'){try{const dl=G.np&&G.np.dlg;if(!dl||!Array.isArray(v)||dl.q!==g.p||+v[0]!==dl.sq)return;const i=+v[1];if(i===-1)npDlgZu('Überlegt es euch.');else if(Number.isInteger(i)&&i>=0&&i<4)npDlgWahl(i,dl.sq)}catch(e){}return}return nh.apply(this,arguments)}}
+/* Steuerkreuz/A/B gehören während des Gesprächs dem Gespräch (keine Fähigkeit, keine Bewegung über das Steuerkreuz) */
+function npPadNav(L){for(const s of L){const pr=s.pr;if(!pr)continue;if(pr[12]||pr[14])npSel(-1);else if(pr[13]||pr[15])npSel(1);else if(pr[0]){const d=npDlgMein();if(d)npWahl(npCurSel(d))}else if(pr[1])npZu();
+  for(const i of[0,1,12,13,14,15])pr[i]=false;/* Kopie: s.b ist zugleich PADS.prev (Flanken!) */if(s.b){s.b=s.b.slice();for(const i of[12,13,14,15])s.b[i]=false}}}
+{const pm=padMove;padMove=function(p){try{const dl=G.np&&G.np.dlg;if(dl&&dl.q===p&&npDlgMein())npPadNav(padsOf(p))}catch(e){}return pm.apply(this,arguments)}}
+{const ns=netSample;netSample=function(){try{if(npDlgMein())npPadNav(Object.values(PADS.st))}catch(e){}return ns.apply(this,arguments)}}
+{const us=useSkill;useSkill=function(i){try{const d=npDlgMein();if(d&&NP.kbOwn)return}catch(e){}return us.apply(this,arguments)}}
+addEventListener('keydown',ev=>{try{const d=npDlgMein();if(!d||G.paused||G.overlay)return;if(ev.ctrlKey||ev.metaKey||ev.altKey)return;if(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))return;
+ const dl=G.np&&G.np.dlg;if(dl&&G.mp&&dl.q.dev&&dl.q.dev!=='kb')return;/* Controller-Spieler führt das Gespräch – Tastatur gehört dem anderen */
+ const c=ev.code;let used=true;if(/^Digit[1-4]$/.test(c)||/^Numpad[1-4]$/.test(c))npWahl(+c.slice(-1)-1);else if(c==='Enter'||c==='KeyE'||c==='NumpadEnter')npWahl(npCurSel(d));else if(c==='Escape'||c==='Backspace')npZu();else if(c==='Tab'){npSel(ev.shiftKey?-1:1)}else used=false;
+ if(used){ev.preventDefault();ev.stopImmediatePropagation()}}catch(e){}},true);
+
+/* ---------- Gesprächsfeld (DOM): Name, ein, zwei Sätze, 2–3 Knöpfe; passt bis 640×394 ohne Scrollen ---------- */
+function npUiEl(){if(NP.ui&&document.body.contains(NP.ui))return NP.ui;const css=document.createElement('style');css.textContent=`
+#npDlg{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);width:min(560px,calc(100vw - 20px));z-index:14;pointer-events:auto;
+ background:linear-gradient(180deg,rgba(26,19,14,.95),rgba(14,10,8,.95));border:1px solid rgba(200,160,96,.55);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.6);padding:10px 14px 8px;color:#f0e6d4;font:500 14px/1.35 "Alegreya Sans",sans-serif;box-sizing:border-box}
+#npDlg[hidden]{display:none}#npDlg .nk{display:flex;align-items:baseline;margin:0 0 3px}#npDlg .ns{margin-left:8px}#npDlg .nn{font:800 15px "Alegreya SC","Alegreya Sans",serif;letter-spacing:.02em}#npDlg .ns{font-size:12px;color:#c8b490;opacity:.9}
+#npDlg .nt{margin:0 0 8px;font-style:italic;color:#f4ead8}#npDlg .no{display:flex;flex-wrap:wrap;margin:-3px}
+#npDlg .no button{flex:1 1 150px;margin:3px;min-height:34px;padding:5px 9px;border-radius:8px;border:1px solid rgba(200,160,96,.45);background:rgba(60,44,30,.85);color:#f0e6d4;font:700 13px "Alegreya Sans",sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center}
+#npDlg .no button b{margin-right:7px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:5px;background:rgba(232,192,112,.18);color:#e8c070;font-size:11px}
+#npDlg .no button.on{border-color:#ffd04a;background:rgba(110,80,40,.95);box-shadow:0 0 0 2px rgba(255,208,74,.35) inset}#npDlg .no button:disabled{opacity:.45;cursor:default}
+#npDlg .nh{margin-top:5px;font-size:10.5px;color:#b8a888;opacity:.85;text-align:right}
+@media (max-height:460px),(max-width:700px){#npDlg{padding:7px 10px 6px;font-size:12.5px;bottom:6px}#npDlg .nn{font-size:13.5px}#npDlg .nt{margin-bottom:6px}#npDlg .no button{min-height:30px;font-size:12px;flex-basis:130px;padding:4px 7px}#npDlg .nh{display:none}}`;
+ document.head.appendChild(css);const el=document.createElement('div');el.id='npDlg';el.hidden=true;el.setAttribute('role','dialog');el.setAttribute('aria-live','polite');document.body.appendChild(el);
+ el.addEventListener('pointerdown',ev=>{ev.stopPropagation();const b=ev.target.closest&&ev.target.closest('button[data-npi]');if(b&&ev.pointerType!=='mouse'){ev.preventDefault();npWahl(+b.dataset.npi)}});
+ el.addEventListener('click',ev=>{ev.stopPropagation();const b=ev.target.closest&&ev.target.closest('button[data-npi]');if(b){ev.preventDefault();npWahl(+b.dataset.npi)}});
+ el.addEventListener('pointerover',ev=>{const b=ev.target.closest&&ev.target.closest('button[data-npi]');if(b&&ev.pointerType==='mouse'){const d=npDlgMein();if(d&&npCurSel(d)!==+b.dataset.npi){NP.lsel={sq:d.sq,s:+b.dataset.npi};npUi(true)}}});
+ NP.ui=el;return el}
+function npHint(){const pad=(PADS&&PADS.t||0)>(typeof MOUSE!=='undefined'&&MOUSE.t||0)&&Object.keys(PADS.st||{}).length;return pad?'Ⓐ wählen · Ⓑ später · Steuerkreuz blättert':'Taste 1–3 oder klicken · Esc: später'}
+function npUi(force){let d=null;try{d=npDlgMein()}catch(e){}const el=npUiEl();const vis=!!(d&&!G.paused&&!G.overlay&&G.state==='play'&&!(hud&&hud.hidden));
+ if(!vis){if(!el.hidden){el.hidden=true;el.innerHTML='';NP.uiK=''}return}
+ const key=d.sq+'|'+d.t+'|'+d.o+'|'+d.x;if(key!==NP.uiK){NP.uiK=key;const O=npDOpts(d);
+  const col=/^#[0-9a-f]{3,8}$/i.test(d.c)?d.c:npGold;el.innerHTML=`<div class="nk"><span class="nn" style="color:${col}">${esc(d.n)}</span>${d.s?`<span class="ns">${esc(d.s)}</span>`:''}</div><p class="nt">${esc(d.t)}</p><div class="no">${O.map((x,i)=>`<button type="button" data-npi="${i}"${x[1]?' disabled':''}><b>${i+1}</b>${esc(x[0])}</button>`).join('')}</div><div class="nh">${npHint()}</div>`;
+  el.hidden=false}
+ const cs=npCurSel(d);const bs=el.querySelectorAll('button[data-npi]');bs.forEach((b,i)=>{const on=i===cs;if(b.classList.contains('on')!==on)b.classList.toggle('on',on)})}
+function npUiLoop(){try{npUi(false)}catch(e){}requestAnimationFrame(npUiLoop)}requestAnimationFrame(npUiLoop);
+/* Tastatur-Spieler führt das Gespräch? (Fähigkeiten 1–3 sperren) */
+{const up=update;update=function(dt){let L=null;try{const dl=G.np&&G.np.dlg;NP.kbOwn=!!(dl&&(!G.mp||!dl.q.dev||dl.q.dev==='kb'));if(G.np&&!G.netGuestRun){L=spLeben();for(const q of L){q.npX0=q.x;q.npY0=q.y}}}catch(e){}const r=up.apply(this,arguments);
+ try{if(L&&dt>0)for(const q of L){const d=Math.hypot(q.x-q.npX0,q.y-q.npY0);q.npV=d>30?0:d/dt}}/* Sprünge (Teleport, Wegschieben) zählen nicht als Rennen */catch(e){}try{if(!G.paused)npTick(dt)}catch(er){if(!NP.err){NP.err=1;console.error('npTick',er)}}return r}}
+const npRennt=q=>!!(q&&(q.dash||(q.npV||0)>((q.st&&q.st.speed)||200)*1.3));
+
+/* ================= Sprechblasen (alle sehen sie, auch Gäste) ================= */
+const NPB={pos:[]};
+{const bh=banHeroP;banHeroP=function(id){if(typeof id==='string'&&id.startsWith('np:')){return NPB.pos[+id.slice(3)]||null}return bh.apply(this,arguments)}}
+function npBubPos(b){if(b[0]){for(const p of G.props)if(p.npI===b[0]&&!p.dead)return{x:p.x,y:p.y-(p.k==='np_schlaf'?18:4)}}return{x:b[1],y:b[2]}}
+{const db=drawBubbles;drawBubbles=function(){const N=G.npN;if(!N||!N.b||!N.b.length||SAVE.dtBub===2||G.state!=='play')return db.apply(this,arguments);
+ const B0=G.bubs;const L=[];NPB.pos=[];const dlgVis=!!(NP.ui&&!NP.ui.hidden);
+ for(const b of npBubs()){const t=G.time-b[4];if(t<0||t>=b[5])continue;if(b[6]&&dlgVis)continue;NPB.pos.push(npBubPos(b));L.push({who:'np:'+(NPB.pos.length-1),txt:b[3],t,dur:b[5]})}
+ if(!L.length)return db.apply(this,arguments);G.bubs=(B0||[]).concat(L);try{return db.apply(this,arguments)}finally{G.bubs=B0}}}
+
+/* ================= Zeichnen ================= */
+const NPC_NPCS=(()=>{try{return NPCS}catch(e){return[]}})();
+function npArt(c,art,x,y,t,s,flip,seed){
+ if(typeof art==='string'){if(art==='rex'){drawRex(c,x,y,flip||1,t,false);return}const n=NPC_NPCS.find(q=>q.id===art);if(n){drawNpc(c,n,x,y+14*s,t,s);return}}
+ if(art&&art.riese){const d=npFoeDef('giant')||npFoeDef('stone');if(d){drawEnemy({def:Object.assign({},d,{c:art.c||d.c,t:art.t||d.t}),x,y,r:21*s,flash:0,seed:seed||1,hp:1,maxHp:1,boss:true,faceX:x+(flip||1)},t);return}}
+ if(art&&(art.kuotoa||art.duergar)){const d=npFoeDef(art.kuotoa?'kuotoa':'duergar');if(d){drawEnemy({def:d,x,y,r:13*s,flash:0,seed:seed||1,hp:1,maxHp:1,boss:true,faceX:x+(flip||1)},t);return}}
+ const a=art&&art.shape?art:{shape:'human',c:'#6a5a4a',t:'#3a3a2a',skin:'#d8b090'};drawEnemy({def:a,x,y,r:13*s,flash:0,seed:seed||1,hp:1,maxHp:1,boss:true,faceX:x+(flip||1)},t)}
+const NPDEF=new Map();function npDefV(form,c,t2){const k=form+'|'+(c||'')+'|'+(t2||'');let d=NPDEF.get(k);if(d===undefined){const d0=npFoeDef(form);d=d0?(c||t2?Object.assign({},d0,{c:c||d0.c,t:t2||d0.t}):d0):null;NPDEF.set(k,d)}return d}
+function npFigArt(id){if(String(id).startsWith('empf:')){const E=NP_EMPF[id.slice(5)];return E?E.art:null}if(id==='geisel')return{shape:'human',c:'#8a7a5a',t:'#5a4a3a',skin:'#e8c09c'};const F=NP_FIG[id];return F?F.art:null}
+function npMarke(c,x,y,m,t,col){if(!m)return;const b=Math.sin(t*3)*2;c.font='900 15px "Alegreya Sans",sans-serif';c.textAlign='center';c.lineWidth=3.5;c.strokeStyle='rgba(0,0,0,.85)';c.strokeText(m,x,y+b);c.fillStyle=col||'#ffd04a';c.fillText(m,x,y+b)}
+function npPropDraw(p,t){const c=cx,k=p.k,leicht=npLeicht();if(p.dead)return true;
+ if(k==='np_fig'){const art=npFigArt(p.npA);const big=art&&art.riese;npArt(c,art,p.x,p.y,t,1,p.npF,p.seed);
+  if(p.npS===2&&!leicht){c.globalAlpha=0.5+0.3*Math.sin(t*6);npMarke(c,p.x+14,p.y-(big?70:40),'!',t,'#ffb060');c.globalAlpha=1}
+  kaRing(c,p.x,p.y-14,30,p.prog,npGold);kaLabel(c,p.x,p.y-(big?78:46),p.npN||'',p.npC||npGold);if(p.npT)npMarke(c,p.x,p.y-(big?96:62),p.npT,t,p.npT==='✓'?npGruen:p.npT==='♥'?'#ff9ab0':'#ffd04a');return true}
+ if(k==='np_karren'){c.save();c.translate(p.x,p.y);const erz=p.npA==='erz';ell(c,0,18,36,9,'rgba(0,0,0,.35)');for(const x0 of[-18,18]){circ(c,x0,12,10,'#4a3420');c.strokeStyle='#2a1a10';c.lineWidth=2;c.beginPath();c.arc(x0,12,10,0,TAU);c.stroke()}
+  c.fillStyle=erz?'#5a5048':'#7a5230';c.fillRect(-30,-14,60,24);c.strokeStyle='#3a2414';c.lineWidth=2;c.strokeRect(-30,-14,60,24);if(erz){for(let i=0;i<5;i++)circ(c,-20+i*10,-18-(i%2)*4,7,i%2?'#8a7a6a':'#6a6a72')}else{for(let i=0;i<4;i++)ell(c,-18+i*12,-18,7,6,i%2?'#c8a868':'#a8885a')}c.restore();
+  if(erz&&!p.npS){npArt(c,{riese:1},p.x+52,p.y-2,t,1.05,-1,7)}if(!p.used)kaLabel(c,p.x,p.y-(erz?64:38),p.npN||'',npGruen);return true}
+ if(k==='np_leute'){npArt(c,p.npA==='kuotoa'?{kuotoa:1}:{shape:'human',c:p.seed%2?'#7a5a3a':'#5a6a3a',t:'#4a3a2a',skin:'#e8c09c'},p.x,p.y+(p.npS===2?0:4),t,0.92,p.npF,p.seed);if(p.npS!==2&&!leicht){c.globalAlpha=0.7;npMarke(c,p.x,p.y-38,'…',t,npGruen);c.globalAlpha=1}kaLabel(c,p.x,p.y-48,p.npN||'',npGruen);return true}
+ if(k==='np_such'){if(p.used)return true;const b=Math.sin(t*2.6+p.seed)*2;ell(c,p.x+2,p.y+6,10,4,'rgba(0,0,0,.3)');if(!leicht){c.globalCompositeOperation='lighter';glow(p.x,p.y-8,26,'#ffe0a0',0.25+0.12*Math.sin(t*3+p.seed),true);c.globalCompositeOperation='source-over';c.globalAlpha=1}
+  npSuchArt(c,p,b);kaLabel(c,p.x,p.y-30+b*0.5,'🔍 '+(p.npN||''),npGold);return true}
+ if(k==='np_tier'){const W_=NP_WESEN[p.npA];if(!W_)return true;const fl=p.npF||1;const s=W_.s||1;const mv=p.npS===1||p.npS===2;
+  if(W_.form==='rex')drawRex(c,p.x,p.y,fl,t,mv);else{const d=npDefV(W_.form,W_.c)||{shape:'beast',c:'#8a7a6a',t:'#5a4a3a'};drawEnemy({def:d,x:p.x,y:p.y,r:12*s,flash:0,seed:p.seed||1,hp:1,maxHp:1,boss:true,faceX:p.x+fl,mv:mv?1:0},t)}
+  if(p.npS===0){kaRing(c,p.x,p.y-10,24,p.prog,npGruen);kaLabel(c,p.x,p.y-12-20*s-10,W_.n,npGruen)}else if(p.npS===1&&!leicht){c.globalAlpha=0.8;npMarke(c,p.x,p.y-12-20*s-6,'♥',t,'#ff9ab0');c.globalAlpha=1}return true}
+ if(k==='np_schlaf'){const d=FOES[p.npA];if(!d)return true;c.save();c.globalAlpha=0.92;drawEnemy({def:d,x:p.x,y:p.y,r:13*(d.size||1)*1.35,flash:0,seed:p.seed||1,hp:1,maxHp:1,boss:true,faceX:p.x+1},0);c.restore();c.globalAlpha=1;
+  const R=13*(d.size||1)*1.35;if(!leicht)for(let i=0;i<3;i++){const ph=(t*0.5+i/3)%1;c.globalAlpha=(1-ph)*0.9;c.font=`800 ${10+ph*8}px "Alegreya Sans",sans-serif`;c.fillStyle='#e8f0d8';c.fillText('z',p.x+R*0.6+ph*18,p.y-R*1.6-ph*30)}else{c.font='800 13px "Alegreya Sans",sans-serif';c.fillStyle='#e8f0d8';c.fillText('Zz',p.x+R*0.7,p.y-R*1.8)}c.globalAlpha=1;
+  if((p.npM||0)>0){c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=5;c.beginPath();c.arc(p.x,p.y-R,R+18,0,TAU);c.stroke();c.strokeStyle=p.npM>0.7?'#ff7a4a':'#ffc060';c.lineWidth=3;c.beginPath();c.arc(p.x,p.y-R,R+18,-Math.PI/2,-Math.PI/2+TAU*p.npM);c.stroke()}
+  kaRing(c,p.x,p.y-R,R+10,p.prog,'#c8e0a8');kaLabel(c,p.x,p.y-R*2.6-12,(p.npN||'')+((p.npM||0)>0.6?' · wird unruhig!':''),(p.npM||0)>0.6?'#ffc060':'#c8e0a8');return true}
+ if(k==='np_reiz'){const W_=NP_WESEN[p.npA];const d=W_&&npDefV(W_.form,W_.c,W_.t2);if(!d)return true;const r=12*(W_.s||1);drawEnemy({def:d,x:p.x,y:p.y,r,flash:0,seed:p.seed||1,hp:1,maxHp:1,boss:true,faceX:p.x+(p.npF||1),mv:0},t);
+  const m=p.npM||0;if(m>0){c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=5;c.beginPath();c.arc(p.x,p.y-r,r+14,0,TAU);c.stroke();c.strokeStyle=m>0.6?'#ff7a4a':'#ffc060';c.lineWidth=3;c.beginPath();c.arc(p.x,p.y-r,r+14,-Math.PI/2,-Math.PI/2+TAU*m);c.stroke()}
+  kaLabel(c,p.x,p.y-r*2.4-14,W_.n+(p.npS?' · Grrr …':' · reizbar'),p.npS?'#ffc060':npGruen);return true}
+ if(k==='np_ding'){npDingArt(c,p,t,leicht);if(!p.used){kaRing(c,p.x,p.y-14,28,p.prog,npGruen);kaLabel(c,p.x,p.y-(p.type==='feuer'?58:48),p.npN||'',npGruen)}return true}
+ return false}
+function npSuchArt(c,p,b){const y=p.y-8+b,x=p.x,n=String(p.npN||'');
+ if(/Hut/.test(n)){ell(c,x,y+4,11,4,'#5a4a2a');c.fillStyle='#6a5a32';c.fillRect(x-6,y-6,12,10)}
+ else if(/Laterne/.test(n)){c.fillStyle='#3a3020';c.fillRect(x-5,y-8,10,12);circ(c,x,y-2,3,'#ffd060');ln(c,'#3a3020',1.5,x-4,y-10,x+4,y-10)}
+ else if(/Beutel|Geld/.test(n)){circ(c,x,y,7,'#7a5a2a');circ(c,x-2,y-7,2,'#ffd04a')}
+ else if(/Hammer/.test(n)){ln(c,'#6a4424',2.5,x-6,y+5,x+5,y-6);c.fillStyle='#8a8a92';c.fillRect(x+1,y-10,9,6)}
+ else if(/Zange/.test(n)){ln(c,'#8a8a92',2,x-6,y+6,x+4,y-6);ln(c,'#8a8a92',2,x+6,y+6,x-4,y-6)}
+ else if(/Kompass/.test(n)){circ(c,x,y,7,'#c8a040');circ(c,x,y,5,'#e8e0c8');ln(c,'#a82a2a',1.6,x,y,x+3,y-4)}
+ else if(/Karte/.test(n)){c.fillStyle='#d8c8a0';c.fillRect(x-8,y-6,16,12);ln(c,'#8a4a2a',1,x-5,y,x+4,y-3)}
+ else if(/Stein/.test(n)){poly(c,'#7a7480',x-8,y+5,x+8,y+5,x+4,y-7,x-5,y-6);circ(c,x,y-1,1.6,'#c8a0ff')}
+ else circ(c,x,y,6,'#e8c070')}
+function npDingArt(c,p,t,leicht){const x=p.x,y=p.y,w=p.type;
+ if(w==='wegweiser'){ell(c,x+2,y+4,10,4,'rgba(0,0,0,.3)');c.fillStyle='#5a3a20';c.fillRect(x-2,y-40,4,42);c.fillStyle='#8a6a3a';c.beginPath();c.moveTo(x-18,y-38);c.lineTo(x+14,y-38);c.lineTo(x+20,y-33);c.lineTo(x+14,y-28);c.lineTo(x-18,y-28);c.closePath();c.fill();
+  c.beginPath();c.moveTo(x+16,y-24);c.lineTo(x-14,y-24);c.lineTo(x-20,y-19);c.lineTo(x-14,y-14);c.lineTo(x+16,y-14);c.closePath();c.fill();ln(c,'#3a2414',1,x-14,y-33,x+10,y-33);ln(c,'#3a2414',1,x-10,y-19,x+12,y-19)}
+ else if(w==='feuer'){ell(c,x,y+6,26,8,'rgba(0,0,0,.3)');for(let i=0;i<6;i++){const a=i/6*TAU;circ(c,x+Math.cos(a)*13,y+2+Math.sin(a)*5,4,'#5a5450')}ln(c,'#5a3a20',3,x-10,y+3,x+10,y-1);ln(c,'#5a3a20',3,x-10,y-1,x+10,y+3);
+  const fl=leicht?0:Math.sin(t*9+p.seed)*2;poly(c,'#ff8a2a',x-8,y+1,x+8,y+1,x+fl,y-18);poly(c,'#ffd060',x-4,y+1,x+4,y+1,x+fl*0.6,y-10);if(!leicht){c.globalCompositeOperation='lighter';glow(x,y-6,50,'#ff9a3a',0.3+0.08*Math.sin(t*7),true);c.globalCompositeOperation='source-over';c.globalAlpha=1}
+  npArt(c,{shape:'human',c:'#6a5a3a',t:'#3a3a2a',skin:'#d8b090',hat:1},x-36,y-2,t,0.85,1,11);npArt(c,{shape:'human',c:'#5a4a6a',t:'#2a2a3a',skin:'#e8c09c'},x+36,y-4,t,0.85,-1,23)}
+ else if(w==='brunnen'){if(p.ax==null){circ(c,x,y,12,'#55504a');circ(c,x,y,8,'#0e0e12')}}
+ else if(w==='quelle'){ell(c,x,y+2,18,8,'#5a5a62');ell(c,x,y,14,6,leicht?'#5a8a9a':'#6a9aa8');if(!leicht){c.globalAlpha=0.4+0.2*Math.sin(t*3);ell(c,x-3,y-1,4,1.6,'#e8f4f0');c.globalAlpha=1}for(let i=0;i<4;i++)circ(c,x-16+i*10,y-6+(i%2)*10,4,'#6a6a72')}
+ else if(w==='schrein'){ell(c,x+2,y+4,14,5,'rgba(0,0,0,.3)');c.fillStyle='#6a6470';c.fillRect(x-10,y-24,20,26);c.fillStyle='#7a7480';c.fillRect(x-13,y-28,26,6);circ(c,x,y-14,4,p.used?'#6a6a6a':'#ffd060');if(!leicht&&!p.used){c.globalCompositeOperation='lighter';glow(x,y-14,26,'#ffd060',0.25,true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}}
+{const d3=drawProp3;drawProp3=function(p,t){if(p&&p.k&&p.k.charCodeAt(0)===110&&p.k.startsWith('np_')){try{if(npPropDraw(p,t))return true}catch(er){if(!NP.derr){NP.derr=1;console.error('npDraw',er)}}return true}
+ if(p&&p.k==='sp_haendler'){try{npHaendlerDraw(p,t);return true}catch(er){}}return d3.apply(this,arguments)}}
+function npHaendlerDraw(p,t){const c=cx;/* Karren mit Plane, Mosk davor */c.save();c.translate(p.x+34,p.y);ell(c,0,14,30,8,'rgba(0,0,0,.3)');for(const x0 of[-14,14]){circ(c,x0,8,8,'#4a3420')}c.fillStyle='#7a5230';c.fillRect(-24,-14,48,20);c.fillStyle='#c8b080';c.beginPath();c.moveTo(-26,-14);c.quadraticCurveTo(0,-40,26,-14);c.closePath();c.fill();
+ for(let i=0;i<3;i++){c.fillStyle=['#c84a4a','#8ad04a','#e8c070'][i];c.fillRect(-14+i*10,-10,6,8)}c.restore();
+ npArt(c,NP_FIG.mosk.art,p.x,p.y,t,1,1,p.seed);if(!p.used){kaRing(c,p.x,p.y-14,32,p.prog,npGold);kaLabel(c,p.x,p.y-50,'⚖ Mosk · fahrender Händler',npGold)}return true}
+/* Schutzziele (Geisel, Karren, Leute): eigene Zeichnung, grüne Lebensleiste, grüner Name */
+{const dz=drawZielAlly;drawZielAlly=function(a,t){if(!a||!a.sub||!String(a.sub).startsWith('np|'))return dz.apply(this,arguments);try{const c=cx,sp=String(a.sub).split('|'),art=sp[1],nm=sp[2]||'';let top=46;
+ if(art==='karren'||art==='erz'){npPropDraw({k:'np_karren',x:a.x,y:a.y,npA:art,npN:'',used:1,npS:0,prog:0},t);top=art==='erz'?66:42}
+ else if(art==='geisel'||art.startsWith('np_geisel')){npArt(c,{shape:'human',c:'#8a7a5a',t:'#5a4a3a',skin:'#e8c09c'},a.x,a.y,t,0.95,1,9);c.strokeStyle='#c8a868';c.lineWidth=2;c.beginPath();c.arc(a.x,a.y-10,10,0.3,Math.PI-0.3);c.stroke();ln(c,'#5a3a20',3,a.x,a.y+10,a.x,a.y-30)}
+ else npArt(c,art==='kuotoa'?{kuotoa:1}:{shape:'human',c:'#7a5a3a',t:'#4a3a2a',skin:'#e8c09c'},a.x,a.y,t,0.92,a.flip||1,5);
+ const w=48,f=clamp(a.hp/a.maxHp,0,1);c.fillStyle='rgba(0,0,0,.65)';c.fillRect(a.x-w/2-1,a.y-top-1,w+2,7);c.fillStyle=f>0.4?'#8ff08a':'#e8d060';c.fillRect(a.x-w/2,a.y-top,w*f,5);kaLabel(c,a.x,a.y-top-6,'⛨ '+nm,npGruen)}catch(er){}}}
+/* Minimap: Figuren (gold) und Auftragsziele (grün) */
+{const wm=wlMini;wlMini=function(){const r=wm.apply(this,arguments);try{const N=G.npN;if(!N||!N.m||!N.m.length||G.room||!WLMM.box||SAVE.wlMini===false||hud.hidden||G.state!=='play')return r;const B=WLMM.box,k=B.S/WORLD,c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);
+  const M=N.m;for(let i=0;i+2<M.length;i+=3){const x=B.x+M[i]*k,y=B.y+M[i+1]*k,f=M[i+2]===1;c.fillStyle=f?'#ffd04a':'#9fe08a';c.strokeStyle='rgba(0,0,0,.7)';c.lineWidth=1;c.beginPath();c.arc(x,y,f?3:2.6,0,TAU);c.fill();c.stroke()}c.restore()}catch(er){}return r}}
+/* HUD: laufender Auftrag als kleine Zeile */
+function npAufEl(){let el=document.getElementById('npAuf');if(!el){const st=document.querySelector('#hud .top .stage');if(!st)return null;el=document.createElement('span');el.id='npAuf';st.appendChild(el);
+  const css=document.createElement('style');css.textContent='#npAuf{position:absolute;right:8px;bottom:3px;max-width:42%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:700 10.5px "Alegreya Sans",sans-serif;color:#e8c070;pointer-events:none;text-shadow:0 1px 2px #000}#npAuf[hidden]{display:none}@media (max-width:720px){#npAuf{font-size:9.5px;bottom:1px;right:5px}}';document.head.appendChild(css)}return el}
+{const hu=hudUpdate;hudUpdate=function(){const r=hu.apply(this,arguments);try{const N=G.npN,t=N&&N.q&&G.ka&&!G.room&&G.state==='play'?N.q:'';const el=npAufEl();if(el){if(!t){if(!el.hidden)el.hidden=true}else{if(el.textContent!==t)el.textContent=t;if(el.hidden)el.hidden=false}}}catch(er){}return r}}
+/* Stufen-Chip in der Vorschau: wer wartet */
+{const tc=txChips;txChips=function(S){let h=tc.apply(this,arguments);try{const D=G.np;if(D&&D.L.length&&h.indexOf('npChip')<0){const f=D.L.find(o=>o.typ==='fig'||o.typ==='folge');if(f){const c=`<span class="tx-chip npChip" style="--cc:${npGold}" title="${esc(NP_FIG[f.fig].titel)}">💬 <b>${esc(NP_FIG[f.fig].n)}</b></span>`;const k=h.lastIndexOf('</div>');h=k>=0?h.slice(0,k)+c+h.slice(k):h+c}}}catch(er){}return h}}
+
+/* ================= Bot: Figuren besuchen, Aufträge erledigen (Messläufe/Sims) ================= */
+{const wk=wlWecker;wlWecker=function(){const L=wk.apply(this,arguments);try{if(G.allies.some(a=>a.sub&&String(a.sub).startsWith('np|')))return L.filter(w=>!G.allies.some(a=>a.sub&&String(a.sub).startsWith('np|')&&a.x===w.x&&a.y===w.y))}catch(e){}return L}}
+{const bm=botMove;botMove=function(){const r=bm.apply(this,arguments);try{const D=G.np,K=G.ka;if(!D||!K||!K.an||G.room||G.boss||G.guardE)return r;if(D.dlg)return[0,0];const portal=!!G.portal;const O=G.obj;if(O&&!O.done&&O.k==='flucht')return r;
+ let tg=null,bd=1e12,ziel=0;const nahE=G.enemies.some(e=>!e.dead&&!e.wlZz&&d2(e,P)<380*380&&!e.spJagd);
+ const add=(t,o,w,dist)=>{if(!t||!kaFrei(kaSecAt(t.x,t.y)))return;const dd=d2(t,P);if(dist&&dd>dist*dist)return;if((o.botT||0)>(w?40:25))return;const v=dd/(w||1);if(v<bd){bd=v;tg=t;tg.__o=o;ziel=w}};
+ for(const o of D.L){if(o.st>=2&&!o.akt)continue;if(portal&&!o.akt)continue;
+  if(o.akt){const A=o.A;if(A.typ==='suche')for(const d of o.dinge){if(!d.used)add(d,o,3)}else if(A.typ==='bote'&&o.ep&&!o.ep.used)add(o.ep,o,3);else if(A.typ==='geisel'&&o.gs&&!o.gs.dead){if(d2(o.gs,P)>200*200)add(o.gs,o,4)}else if((A.typ==='karren'||A.typ==='schutz')&&o.ziele){const z=o.ziele.find(a=>a.hp>0&&!a.dead);if(z&&d2(z,P)>170*170)add(z,o,6)}continue}
+  if(o.st!==0&&!(o.typ==='schlaf'&&o.st===0))continue;if(o.kuehl)continue;
+  if(o.typ==='fig'||o.typ==='folge')add(o.pr,o,2,o.zeig?0:1700);else if(o.typ==='ding'||o.typ==='tier'&&!o.W.nurFlucht||o.typ==='schlaf')add(o.pr,o,1,1200)}
+ if(!tg)return r;if(nahE&&ziel<4)return r;const o=tg.__o;o.botT=(o.botT||0)+1/60;
+ if(d2(tg,P)<26*26)return[0,0];if(d2(tg,P)<120*120&&wlWegFrei(P,tg)){const a=Math.atan2(tg.y-P.y,tg.x-P.x);return[Math.cos(a)*0.55,Math.sin(a)*0.55]}const f=kaBotWeg(tg);return f?[f.x,f.y]:r}catch(er){return r}}}
+
+/* ================= Schnittstelle für Tests ================= */
+Object.assign(window.__hsNPC,{NP_FIG,NP_AUF,NP_WESEN,NP_DING,NP_EMPF,npMem,npLauf,npGeruecht,npDlgWahl:(i)=>{const d=G.np&&G.np.dlg;if(d)npDlgWahl(i,d.sq)},npWahl,npSel,npZu,dlg:()=>G.np&&G.np.dlg?{t:Object.assign({},G.npD,{o:npDOpts(G.npD)}),typ:G.np.dlg.o&&G.np.dlg.o.typ}:null,
+ erzwinge(L){NP.force=L},L:()=>G.np?G.np.L:null,npPlan:()=>{const i=G.stage;npPlan(STAGES[i],i)}});
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
@@ -23004,6 +23678,3 @@ window.__hs={get G(){return G},stil(){return{makeItem,makeSetItem,itemDelta,meis
  step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},net(){return NET},netFns(){return{netHost,netJoin,netJoinScreen,netAction,netGuestReset,netCloseRoom,netWorld,netDiff,mpSlots}},fn(){return{dmSum,ccZaeh,CCZ,dmEndHtml,dmPauseHtml,LPOW,mouseAim,dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal,gainXp,withP,rareStart,saeuleTreffer,teamKombo,zielTest:(k)=>{const S=STAGES[G.stage];G.allies=G.allies.filter(a=>a.kind==="rex");G.props=G.props.filter(p=>p.k!=="okaefig");const r=Math.random;Math.random=()=>0.01;try{zielWahl(S,Math.max(1,G.stage))}finally{Math.random=r}if(G.obj&&k&&G.obj.k!==k){const Z=ZIELE[k];G.obj={k,n:Z.n,d:Z.d,c:Z.c,done:0,fail:0,fr:0,txt:Z.n,t:0};if(k==="flucht"||k==="eskorte"){Math.random=()=>0.01;G.obj=null;let tries=0;while((!G.obj||G.obj.k!==k)&&tries++<60){Math.random=r;zielWahl(S,Math.max(1,G.stage));if(G.obj&&G.obj.k!==k)G.obj=null;Math.random=()=>0.01}Math.random=r}}zielProps();zielStart();return G.obj},portal2,leuchterSetzen,legS,makeAnc,ancRoll,dropItem,mpRemove,mpAddPlayer,groupRoll,musAk:a=>musAk(a),aktivSperre,ambiW:()=>ambiWunsch(),addMod,ambi:()=>JSON.stringify(Object.fromEntries(Object.entries(AMBI.el).map(([k,a])=>[k,{p:a.paused,bad:!!a._bad,g:a._g?+a._g.gain.value.toFixed(3):null}]))),lootBlocked,teleHits:typeof teleHits!=='undefined'?teleHits:null}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawNpc:(c,n,x,y,t,s)=>drawNpc(c,n,x,y,t,s),NPCS,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
 </script>
-
-</body>
-</html>
