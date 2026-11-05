@@ -202,7 +202,7 @@ Der Ton läuft durch den Browser und kommt dadurch etwas verzögert (einige Hund
 
 ### 🎚 Mischpult (CTRL)
 
-**CTRL** öffnet das Mischpult: vier große Regler für **Musik, Hintergrund, Instrument (IN1), Effekte**. Drücken = stumm/neutral, **drücken+drehen** legt eine andere Spur auf den Regler (z. B. IN2, Hall, Gain). CTRL oder BACK schließt es. (Nächste Seite geht weiter mit ALT + ▶.)
+**CTRL** öffnet das Mischpult: vier große Regler für **Musik, Hintergrund, Instrument (IN1), Effekte**. Drücken = stumm/neutral, **drücken+drehen** legt eine andere Spur auf den Regler (z. B. IN2, Hall, Gain). Auf einen Regler lassen sich auch die Lautstärken der Soundkarte legen: **🔈 Gesamt** und **🎧 Kopfhörer** – dieselben, die der Zynthian unter Admin → Audio-Pegel hat. CTRL oder BACK schließt es. (Nächste Seite geht weiter mit ALT + ▶.)
 
 ### Ausgänge & Pegel
 

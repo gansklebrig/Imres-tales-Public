@@ -867,11 +867,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   /* Mischpult (CTRL): vier Regler für die Lautstärken – drücken+drehen legt etwas anderes auf den Regler */
   let mischAn = false;
   const MIX_STD = ["musik", "hg", "in1_laut", "fxlaut"];
-  const MIX_LISTE = ["musik", "hg", "fxlaut", "in1_laut", "in2_laut", "in1_pegel", "in2_pegel", "hall", "echohall", "in1_hall", "in2_hall", "in1_pan", "in2_pan"];
+  const MIX_LISTE = ["musik", "hg", "fxlaut", "karte_haupt", "karte_kh", "in1_laut", "in2_laut", "in1_pegel", "in2_pegel", "hall", "echohall", "in1_hall", "in2_hall", "in1_pan", "in2_pan"];
   const mischAktiv = () => mischAn && SEITE === "buehne";
   function mischer(an) {
     if (SEITE !== "buehne") { zeige(W("Mischpult gibt es im Bühnen-Pult", "Mixer is in the stage console")); return; }
-    mischAn = an == null ? !mischAn : an;
+    mischAn = an == null ? !mischAn : an; if (mischAn && typeof karteLaden === "function") karteLaden(true);
     if (mischAn) zeige("🎚 " + W("Mischpult", "Mixer"), null, W("4 Regler = 4 Spuren · drücken+drehen: anderes legen · CTRL/BACK: zu", "4 knobs = 4 channels · push+turn: swap · CTRL/BACK: close"));
     zpZeichnen(true); ledsMelden();
   }
@@ -1390,6 +1390,19 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     ZP_PARAM["in" + (i + 1) + "_" + f] = { name: "IN" + (i + 1) + " " + nm, lo, hi, schritt: st, neutral, druck: "null", lies: () => (kanalHol(i) || {})[f] || 0, setz: v => { kanalSetz(i, { [f]: v }); },
       text: f === "laut" || f === "pegel" ? (v => (kanalHol(i) || {}).an ? v + " %" : W("aus (MENU)", "off (MENU)")) : f === "filter" ? (v => v === 0 ? W("offen", "open") : v < 0 ? W("Tiefpass ", "Low-pass ") + (-v) + " %" : W("Hochpass ", "High-pass ") + v + " %") : f === "pan" ? (v => v === 0 ? W("Mitte", "centre") : v < 0 ? W("links ", "left ") + (-v) : W("rechts ", "right ") + v) : null };
   }));
+  /* Lautstärke-Regler der Soundkarte (dieselben wie im Zynthian unter Admin → Audio-Pegel) als Drehregler */
+  const KARTE = { regler: [], geladen: 0 };
+  function karteLaden(neu) { if (!neu && Date.now() - KARTE.geladen < 20000) return; KARTE.geladen = Date.now(); audioPost({ aktion: "info" }).then(r => { if (r && r.ok) { KARTE.regler = r.regler || []; zpReglerAnzeige(); } }); }
+  const KH = /head|hp|kopf|phone/i;
+  const karteRegler = kh => { const l = KARTE.regler.filter(g => g.p != null); return kh ? l.find(g => KH.test(g.name)) : (l.find(g => !KH.test(g.name) && /master|digital|dac|pcm|line|out|main/i.test(g.name)) || l.find(g => !KH.test(g.name)) || l[0]); };
+  [["karte_haupt", false, W("🔈 Gesamt", "🔈 Master")], ["karte_kh", true, W("🎧 Kopfhörer", "🎧 Headphones")]].forEach(([id, kh, nm]) => {
+    let t = 0, wart = null;
+    ZP_PARAM[id] = { name: nm, lo: 0, hi: 100, schritt: 2, neutral: 70, druck: "", lies: () => { karteLaden(); const g = karteRegler(kh); return wart != null ? wart : g ? g.p : 0; },
+      setz: v => { const g = karteRegler(kh); if (!g) { zeige(nm, null, W("Regler nicht gefunden – MENU → Audio", "control not found – MENU → audio")); return; } wart = v; g.p = v;
+        if (!t) t = setTimeout(() => { t = 0; const x = wart; audioPost({ aktion: "regler", name: g.name, art: "p", wert: x }).then(() => { if (wart === x) wart = null; }); }, 120); },
+      text: v => { const g = karteRegler(kh); return g ? v + " % · " + g.name : W("– (keiner)", "– (none)"); } };
+  });
+  NORMAL_PARAMS.push("karte_haupt", "karte_kh");
   BANK_FARBE.IN1 = "#ff9a80"; BANK_FARBE.IN2 = "#d090ff";
   ZB.regler.IN1 = ZB.regler.IN1 || ["in1_laut", "in1_filter", "in1_echo", "in1_hall"];
   ZB.regler.IN2 = ZB.regler.IN2 || ["in2_laut", "in2_filter", "in2_echo", "in2_hall"];
