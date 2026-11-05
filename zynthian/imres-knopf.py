@@ -18,7 +18,7 @@ import urllib.request
 EINST = "/zynthian/zynthian-my-data/imres/einstellungen.sh"
 BRUECKE = os.environ.get("IMRES_BRUECKE", "http://127.0.0.1:8790")
 HALTEN_MS = 800
-GROESSE = 44
+GROESSE = 60
 
 
 def einstellung(name, standard):
@@ -69,12 +69,13 @@ def main():
     x = 0 if ecke.startswith("l") else sw - GROESSE
     y = sh - GROESSE if ecke.endswith("u") else 0
     root.geometry("%dx%d+%d+%d" % (GROESSE, GROESSE, x, y))
+    print("Imres-Knopf bereit: Ecke %s, Bildschirm %dx%d, Position %d,%d" % (ecke, sw, sh, x, y), flush=True)
     root.configure(bg="#120e18")
     c = tk.Canvas(root, width=GROESSE, height=GROESSE, bg="#120e18", highlightthickness=0, bd=0)
     c.pack()
     rand = c.create_rectangle(1, 1, GROESSE - 2, GROESSE - 2, outline="#e0a046", width=2)
     fuell = c.create_rectangle(2, GROESSE - 2, GROESSE - 2, GROESSE - 2, outline="", fill="#7a5418")
-    c.create_text(GROESSE // 2, GROESSE // 2 - 1, text="♫", font=("DejaVu Sans", 20, "bold"), fill="#e0a046")
+    c.create_text(GROESSE // 2, GROESSE // 2 - 1, text="♫", font=("DejaVu Sans", 28, "bold"), fill="#e0a046")
     zustand = {"seit": None, "ausgeloest": False, "letzter_tipp": 0}
 
     def ausloesen(wie):

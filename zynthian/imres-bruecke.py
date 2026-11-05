@@ -157,6 +157,23 @@ def midi_ereignis(e):
 UPDATE_LOG = os.path.normpath(os.path.join(ZYN, "..", "..", "update.log"))
 
 
+def diagnose():
+    """kurze Prüfung für das Pult: ♫-Knopf, Touch, Dienste, Ton – ohne Testtöne"""
+    if ARGS.test:
+        return {"ok": True, "text": "(Testmodus)"}
+    teile = []
+    def lauf(titel, befehl, n=8):
+        c, t = _lauf(["bash", "-c", befehl], 10)
+        zeilen = [z for z in t.splitlines() if z.strip()][-n:]
+        teile.append("== " + titel + "\n" + ("\n".join(zeilen) or "–"))
+    lauf("♫-Knopf", "echo \"Dienst: $(systemctl is-active imres-knopf) / $(systemctl is-enabled imres-knopf 2>&1)\"; journalctl -u imres-knopf -n 40 --no-pager 2>&1 | grep -v '^--' | tail -6")
+    lauf("Touch", "export DISPLAY=:0; xinput list --name-only 2>&1 | grep -i -E 'touch|ft5|goodix|ili|edt'; for g in $(xinput list --id-only 2>/dev/null); do xinput list-props $g 2>/dev/null | grep -q 'Coordinate Transformation' && echo \"$(xinput list --name-only $g 2>/dev/null): $(xinput list-props $g | grep 'Coordinate Transformation' | cut -d: -f2)\"; done; xrandr 2>/dev/null | grep ' connected'", 6)
+    lauf("Dienste", "for d in jack2 zynthian imres-buehne imres-bruecke imres-knopf; do echo \"$d: $(systemctl is-active $d)\"; done")
+    lauf("Ton", "jack_lsp 2>&1 | grep -E 'system:(capture|playback)' | tr '\\n' ' '; echo; amixer scontents 2>/dev/null | grep -E \"Simple mixer|Capture.*\\[|Playback.*\\[\" | head -12", 14)
+    lauf("Update", "tail -4 %s 2>/dev/null; ls -d %s/seite.alt-* 2>/dev/null | wc -l | sed 's/^/alte Versionen: /'" % (UPDATE_LOG, os.path.dirname(UPDATE_LOG)))
+    return {"ok": True, "text": "\n\n".join(teile)}
+
+
 def update_stand():
     try:
         with open(UPDATE_LOG, encoding="utf-8") as f:
@@ -314,6 +331,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort(last_messen())
         if p == "/zyn/update":
             return self.json_antwort(update_stand())
+        if p == "/zyn/diagnose":
+            return self.json_antwort(diagnose())
         if p in ("/zyn/imres_midi.py", "/zyn/imres-bruecke.py"):
             return self.send_error(404)
         if p == "/zyn/leds":
