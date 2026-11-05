@@ -1309,17 +1309,74 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menueArt = "hilfe";
   }
 
+  /* ===================== WLAN & Bluetooth ===================== */
+  const netzPost = d => fetch("/zyn/netz", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) }).then(r => r.json()).catch(() => ({ ok: false, fehler: W("Brücke nicht erreichbar", "bridge unreachable") }));
+  const warteMenue = (titel, text) => { menue("<h3>" + titel + '</h3><p class="hinweis" style="font-size:16px">⏳ ' + text + '</p><div class="reihe drei"><button type="button" data-zm="zu">✕ ' + W("Abbrechen", "Cancel") + "</button></div>", { zu: menueZu }); menueArt = "warte"; };
+  function wlanMenue(suchen) {
+    warteMenue("📶 WLAN", suchen ? W("Suche Netze … (bis 20 s)", "Scanning … (up to 20 s)") : W("Lese Status …", "Reading status …"));
+    Promise.all([netzPost({ aktion: "wlan_status" }), netzPost({ aktion: "wlan_liste" })]).then(([st, li]) => {
+      if (!$(".zyn-menue")) return;
+      const a = { zu: menueZu, neu: () => wlanMenue(true) };
+      const wl = (st.wlan || [])[0], kopf = wl ? (wl.status === "connected" ? "✅ " + W("verbunden mit ", "connected to ") + "<b>" + esc2(wl.netz) + "</b>" : "⬜ " + W("nicht verbunden", "not connected")) : W("kein WLAN-Gerät gefunden", "no Wi-Fi device found");
+      let h = '<p class="hinweis" style="font-size:14px">' + kopf + (st.ip ? " · IP " + esc2(st.ip) : "") + '</p><div class="reihe zyn-opt">';
+      (li.netze || []).forEach((n, i) => {
+        const balken = n.signal > 70 ? "▂▄▆█" : n.signal > 45 ? "▂▄▆_" : n.signal > 20 ? "▂▄__" : "▂___";
+        h += '<button type="button" data-zm="n:' + i + '"><span>' + (n.an ? "✅ " : "") + esc2(n.ssid) + " " + balken + "</span><small>" + (n.schutz ? "🔒 " + esc2(n.schutz) : W("offen", "open")) + "</small></button>";
+        a["n:" + i] = () => { if (n.an) return; if (n.schutz) tastatur("🔒 " + n.ssid, "", pw => wlanVerbinden(n.ssid, pw), true); else wlanVerbinden(n.ssid, ""); };
+      });
+      if (!(li.netze || []).length) h += '<p class="hinweis">' + esc2(li.fehler || W("keine Netze gefunden", "no networks found")) + "</p>";
+      h += '<button type="button" data-zm="neu">🔄 ' + W("Neu suchen", "Scan again") + '</button><button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>";
+      menue("<h3>📶 WLAN</h3>" + h, a); menueArt = "wlan";
+    });
+  }
+  function wlanVerbinden(ssid, pw) {
+    warteMenue("📶 " + esc2(ssid), W("Verbinde … (bis 45 s)", "Connecting … (up to 45 s)"));
+    netzPost({ aktion: "wlan_verbinden", ssid, pw }).then(r => { zeige(r.ok ? "📶 " + W("Verbunden: ", "Connected: ") + ssid : "⚠ " + W("WLAN: ", "Wi-Fi: ") + (r.meldung || r.fehler || W("hat nicht geklappt", "failed")), null, r.ok ? "" : W("Passwort prüfen", "check password")); if ($(".zyn-menue")) wlanMenue(false); });
+  }
+  function btMenue(suchen) {
+    warteMenue("🔊 Bluetooth", suchen ? W("Suche Geräte … (10 s) – Lautsprecher in den Kopplungsmodus schalten", "Scanning (10 s) – put the speaker in pairing mode") : W("Lese Geräte …", "Reading devices …"));
+    netzPost({ aktion: "bt_liste", suchen: !!suchen }).then(r => {
+      if (!$(".zyn-menue")) return;
+      const a = { zu: menueZu, suchen: () => btMenue(true), aus: () => { warteMenue("🔊 Bluetooth", W("Schalte zurück …", "Switching back …")); netzPost({ aktion: "bt_trennen" }).then(x => { zeige("🔊 " + (x.meldung || "")); menueZu(); }); } };
+      const bt = String(r.ausgang || "").startsWith("bt:");
+      let h = '<p class="hinweis" style="font-size:14px">' + W("Ton kommt jetzt aus: ", "Sound now plays through: ") + "<b>" + (bt ? "🔊 Bluetooth" : "🎛 " + W("Zynthian-Ausgänge", "Zynthian outputs")) + "</b>" + (r.install && r.install.meldung ? " · " + esc2(r.install.meldung) : "") + '</p><div class="reihe zyn-opt">';
+      (r.geraete || []).forEach((g, i) => {
+        h += '<button type="button" data-zm="g:' + i + '"><span>' + (g.verbunden ? "✅ " : g.audio ? "🔊 " : "📱 ") + esc2(g.name) + "</span><small>" + (g.verbunden ? W("verbunden", "connected") : g.gekoppelt ? W("gekoppelt – antippen zum Verbinden", "paired – tap to connect") : W("antippen zum Koppeln", "tap to pair")) + "</small></button>";
+        a["g:" + i] = () => { warteMenue("🔊 " + esc2(g.name), W("Koppeln und verbinden … (bis 60 s)", "Pairing and connecting … (up to 60 s)")); netzPost({ aktion: "bt_verbinden", mac: g.mac }).then(x => { zeige((x.ok ? "🔊 " : "⚠ ") + (x.meldung || ""), null, x.ok ? W("die Seite lädt kurz neu", "the page reloads briefly") : ""); if (!x.ok && $(".zyn-menue")) btMenue(false); }); };
+      });
+      if (!(r.geraete || []).length) h += '<p class="hinweis">' + esc2(r.fehler || W("noch keine Geräte – „Suchen“ drücken", "no devices yet – press “Scan”")) + "</p>";
+      h += '<button type="button" data-zm="suchen">🔍 ' + W("Geräte suchen", "Scan for devices") + "</button>" + (bt ? '<button type="button" data-zm="aus">🎛 ' + W("Zurück zu den Zynthian-Ausgängen", "Back to Zynthian outputs") + "</button>" : "") + '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
+        '<p class="hinweis">' + W("Über Bluetooth kommt der Ton etwa 0,2 s später – für den Takt mit der TR-8S lieber die Kabel-Ausgänge nehmen.", "Bluetooth adds ~0.2 s delay – use the cable outputs to stay in time with the TR-8S.") + "</p>";
+      menue("<h3>🔊 " + W("Bluetooth-Lautsprecher", "Bluetooth speaker") + "</h3>" + h, a); menueArt = "bt";
+    });
+  }
+  /* Bildschirm-Tastatur (Pfeile/Drehregler + SEL oder Finger) */
+  function tastatur(titel, start, fertig, geheim) {
+    let txt = start || "", gross = false, sicht = !geheim;
+    const REIHEN = ["1234567890", "qwertzuiop", "asdfghjklü", "yxcvbnmöä", "-_.@!?#&*+"];
+    const zeichnen = fokusId => {
+      const a = { zu: menueZu, ok: () => { menueZu(); fertig(txt); }, del: () => { txt = txt.slice(0, -1); zeichnen("del"); }, gr: () => { gross = !gross; zeichnen("gr"); }, sp: () => { txt += " "; zeichnen("sp"); }, eye: () => { sicht = !sicht; zeichnen("eye"); } };
+      let h = '<h3>' + esc2(titel) + '</h3><div style="text-align:center;font:600 20px monospace;margin:4px 0 8px;padding:6px;border:1px solid #6a5030;border-radius:8px;min-height:30px">' + esc2(sicht ? txt : "•".repeat(txt.length)) + '<span style="opacity:.5">▏</span></div><div class="zyn-tast">';
+      REIHEN.forEach((r, ri) => { h += '<div class="zt-reihe">'; [...r].forEach((c, ci) => { const z = gross ? c.toUpperCase() : c, id = "t" + ri + "_" + ci; h += '<button type="button" data-zm="' + id + '">' + esc2(z) + "</button>"; a[id] = () => { txt += z; zeichnen(id); }; }); h += "</div>"; });
+      h += '<div class="zt-reihe"><button type="button" data-zm="gr">⇧</button><button type="button" data-zm="sp" class="zt-breit">␣</button><button type="button" data-zm="del">⌫</button>' + (geheim ? '<button type="button" data-zm="eye">👁</button>' : "") + '<button type="button" data-zm="ok" class="zt-ok">OK</button><button type="button" data-zm="zu">✕</button></div></div>';
+      const m = menue(h, a); menueArt = "tastatur"; m.classList.add("zyn-tastatur"); m.style.width = "96vw"; m.style.maxWidth = "780px";
+      const b = fokusId && m.querySelector('[data-zm="' + fokusId + '"]'); if (b) fokusSetzen(b);
+    };
+    zeichnen("t1_0");
+  }
   /* Einstellungen (selten gebraucht) */
   function zpEinstellungen(fokusK) {
     const zz = (id, t, w, u) => '<button type="button" data-zm="' + id + '">' + t + (w != null ? "<b>" + w + "</b>" : "") + (u ? "<small>" + u + "</small>" : "") + "</button>";
     const neu = id => () => { zpEinstellungen(id); };
-    const a = { zu: menueZu, hilfe: zpHilfe, beleg: () => belegMenue(),
+    const a = { zu: menueZu, hilfe: zpHilfe, beleg: () => belegMenue(), wlan: () => wlanMenue(true), bt: () => btMenue(false),
       leistung: () => { const l = ["voll", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % 3]; schreib("imres-lw-leicht", n === "voll" ? "0" : "1"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
       hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); neu("hell")(); },
       looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); neu("looplen")(); },
       ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); neu("ruhe")(); },
       bild: () => { schreib("imres-zp-bild", bildHinten() ? "0" : "1"); document.documentElement.classList.toggle("zyn-bb", bildHinten() && SEITE === "buehne"); neu("bild")(); } };
     const m = menue("<h3>🛠 " + W("Einstellungen", "Settings") + '</h3><div class="reihe zyn-opt">' +
+      zz("bt", "🔊 " + W("Bluetooth-Lautsprecher", "Bluetooth speaker"), null, W("Ton an eine Anlage per Bluetooth schicken", "send the sound to a speaker")) +
+      zz("wlan", "📶 WLAN", null, W("Netz wählen und verbinden (für Updates und die Handy-Fernbedienung)", "pick and join a network (updates, phone remote)")) +
       zz("leistung", "⚡ " + W("Leistung: ", "Performance: "), LEISTUNG_NAME[leistung()], W("bei Rucklern sparsamer stellen – lädt neu", "go lighter if it stutters – reloads")) +
       zz("hell", "💡 " + W("Tastenlicht: ", "Button light: "), Math.round(ledHell() * 100) + " %") +
       zz("ruhe", "💤 " + W("Bühnenbild nach: ", "Stage view after: "), ruheSek() ? ruheSek() + " s" : W("nie", "never"), W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen")) +
@@ -1638,6 +1695,11 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zb-z.stumm.an { opacity: .45; }
 .zb-z.kopf { box-shadow: inset 0 0 0 2px #fff4e0; }
 .zb-z.cur { outline: 2px solid #f4c45a; outline-offset: 1px; }
+.zyn-menue.zyn-tastatur { width: 96vw !important; max-width: 780px !important; }
+.zyn-tast { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+.zt-reihe { display: flex; gap: 5px; justify-content: center; width: 100%; }
+.zyn-menue .zt-reihe button { min-width: 0 !important; width: auto !important; flex: 1 1 0 !important; height: 42px; padding: 0 !important; font-size: 19px !important; text-align: center !important; justify-content: center !important; display: flex !important; align-items: center; }
+.zyn-menue .zt-reihe .zt-breit { flex: 4 1 0 !important; } .zyn-menue .zt-reihe .zt-ok { flex: 2 1 0 !important; background: #3a5a20 !important; }
 .zb-vars { display: flex; align-items: center; gap: 4px; color: #a99d8c; font-size: 11px; }
 .zb-var { width: 26px; height: 22px; border-radius: 5px; border: 1px solid #5a4a6a !important; color: #c8bba6 !important; font-size: 13px !important; }
 .zb-var.voll { border-color: #c040ff !important; } .zb-var.an { background: #c040ff !important; color: #140e06 !important; } .zb-var.vor { animation: zpblink .6s steps(2) infinite; }

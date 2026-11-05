@@ -24,6 +24,7 @@ import argparse
 import json
 import os
 import queue
+import re
 import subprocess
 import threading
 import signal
@@ -402,6 +403,8 @@ class Handler(SimpleHTTPRequestHandler):
                 if isinstance(liste, list):
                     noten.planen([x for x in liste if isinstance(x, dict)])
             return self.json_antwort({"ok": bool(noten and noten.seq)})
+        if p == "/zyn/netz":
+            return self.json_antwort(netz(d if isinstance(d, dict) else {}))
         if p == "/zyn/takt":
             # die Bühne meldet als MIDI-Master Tempo und Schlag
             if takt:
@@ -464,6 +467,118 @@ def last_messen():
 
 
 noten = None
+
+
+# ---------- WLAN und Bluetooth (für das Menü im Pult) ----------
+AUSGANG_DATEI = os.path.normpath(os.path.join(ZYN, "..", "..", "ausgang"))  # …/imres/seite/zynthian → …/imres/ausgang
+bt_install = {"laeuft": False, "meldung": ""}
+
+
+def _lauf(befehl, zeit=15, eingabe=None):
+    try:
+        r = subprocess.run(befehl, capture_output=True, text=True, timeout=zeit, input=eingabe)
+        return r.returncode, (r.stdout or "") + (r.stderr or "")
+    except FileNotFoundError:
+        return 127, "fehlt: " + befehl[0]
+    except subprocess.TimeoutExpired:
+        return 124, "Zeitüberschreitung"
+
+
+def _ton_neu():
+    """ALSA-Weg für Chromium neu schreiben (Zynthian/JACK oder Bluetooth) und den Browser neu starten"""
+    _lauf(["bash", "-c", "source '%s/ton.sh' && imres_ton_einrichten" % ZYN], 60)
+    _lauf(["pkill", "-f", "imres/profil"], 5)   # kiosk.sh startet Chromium von selbst neu
+
+
+def netz(d):
+    if ARGS.test:
+        return {"ok": False, "fehler": "Testmodus"}
+    a = str(d.get("aktion", ""))
+    if a == "wlan_status":
+        c, t = _lauf(["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "dev"], 8)
+        wlan = [z.split(":") for z in t.splitlines() if ":wifi:" in z]
+        _, ip = _lauf(["hostname", "-I"], 5)
+        return {"ok": c == 0, "wlan": [{"dev": w[0], "status": w[2], "netz": w[3]} for w in wlan if len(w) >= 4], "ip": ip.strip(), "fehler": "" if c == 0 else t.strip()[:200]}
+    if a == "wlan_liste":
+        c, t = _lauf(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list", "--rescan", "yes"], 25)
+        netze, gesehen = [], set()
+        for z in t.splitlines():
+            teile = re.split(r"(?<!\\):", z)
+            if len(teile) < 4 or not teile[1] or teile[1] in gesehen:
+                continue
+            gesehen.add(teile[1])
+            netze.append({"an": teile[0] == "*", "ssid": teile[1].replace("\\:", ":"), "signal": int(teile[2] or 0), "schutz": teile[3]})
+        netze.sort(key=lambda x: (-x["an"], -x["signal"]))
+        return {"ok": c == 0, "netze": netze[:24], "fehler": "" if c == 0 else t.strip()[:200]}
+    if a == "wlan_verbinden":
+        ssid, pw = str(d.get("ssid", ""))[:64], str(d.get("pw", ""))[:64]
+        befehl = ["nmcli", "dev", "wifi", "connect", ssid] + (["password", pw] if pw else [])
+        c, t = _lauf(befehl, 45)
+        return {"ok": c == 0, "meldung": t.strip()[:240]}
+    if a == "bt_liste":
+        _lauf(["bluetoothctl", "power", "on"], 8)
+        if d.get("suchen"):
+            _lauf(["bluetoothctl", "--timeout", "10", "scan", "on"], 16)
+        c, t = _lauf(["bluetoothctl", "devices"], 8)
+        geraete = []
+        for z in t.splitlines():
+            m = re.match(r"Device ([0-9A-F:]{17}) (.*)", z.strip())
+            if not m:
+                continue
+            _, info = _lauf(["bluetoothctl", "info", m.group(1)], 6)
+            icon = (re.search(r"Icon: (\S+)", info) or [None, ""])[1]
+            geraete.append({"mac": m.group(1), "name": m.group(2), "verbunden": "Connected: yes" in info, "gekoppelt": "Paired: yes" in info,
+                            "audio": icon.startswith("audio") or "Audio Sink" in info or "0000110b" in info.lower()})
+        geraete.sort(key=lambda x: (-x["verbunden"], -x["audio"], -x["gekoppelt"], x["name"]))
+        aus = ""
+        try:
+            with open(AUSGANG_DATEI) as f:
+                aus = f.read().strip()
+        except OSError:
+            pass
+        return {"ok": c == 0, "geraete": geraete[:20], "ausgang": aus or "zynthian", "install": dict(bt_install), "fehler": "" if c == 0 else t.strip()[:200]}
+    if a == "bt_verbinden":
+        mac = str(d.get("mac", ""))
+        if not re.match(r"^[0-9A-F:]{17}$", mac):
+            return {"ok": False, "meldung": "ungültige Adresse"}
+        if not os.path.exists("/usr/bin/bluealsa") and not os.path.exists("/usr/bin/bluealsad"):
+            if not bt_install["laeuft"]:
+                def inst():
+                    bt_install.update(laeuft=True, meldung="Bluetooth-Audio wird installiert …")
+                    c2, t2 = _lauf(["apt-get", "install", "-y", "-q", "bluez-alsa-utils"], 600)
+                    if c2 != 0:
+                        _lauf(["apt-get", "update", "-q"], 300)
+                        c2, t2 = _lauf(["apt-get", "install", "-y", "-q", "bluez-alsa-utils"], 600)
+                    _lauf(["systemctl", "enable", "--now", "bluealsa"], 30)
+                    bt_install.update(laeuft=False, meldung="fertig – jetzt noch einmal verbinden" if c2 == 0 else "Installation fehlgeschlagen (Internet?)")
+                threading.Thread(target=inst, daemon=True).start()
+            return {"ok": False, "meldung": "Bluetooth-Audio wird erst installiert (einmalig, braucht Internet) – gleich noch einmal versuchen"}
+        log = []
+        for schritt in (["pair", mac], ["trust", mac], ["connect", mac]):
+            c, t = _lauf(["bluetoothctl"] + schritt, 25)
+            log.append(t.strip().splitlines()[-1] if t.strip() else "")
+        _, info = _lauf(["bluetoothctl", "info", mac], 6)
+        if "Connected: yes" not in info:
+            return {"ok": False, "meldung": "Verbindung klappt nicht: " + " / ".join(x for x in log if x)[:200]}
+        with open(AUSGANG_DATEI, "w") as f:
+            f.write("bt:" + mac)
+        _ton_neu()
+        return {"ok": True, "meldung": "verbunden – der Ton läuft jetzt über Bluetooth"}
+    if a == "bt_trennen":
+        try:
+            with open(AUSGANG_DATEI) as f:
+                aus = f.read().strip()
+        except OSError:
+            aus = ""
+        if aus.startswith("bt:"):
+            _lauf(["bluetoothctl", "disconnect", aus[3:]], 15)
+        try:
+            os.remove(AUSGANG_DATEI)
+        except OSError:
+            pass
+        _ton_neu()
+        return {"ok": True, "meldung": "Ton wieder über die Zynthian-Ausgänge"}
+    return {"ok": False, "fehler": "unbekannt"}
 
 
 def main():

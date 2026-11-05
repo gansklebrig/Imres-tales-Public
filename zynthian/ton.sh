@@ -4,9 +4,13 @@
 IMRES_ALSA_CONF=/etc/alsa/conf.d/99-imres.conf
 imres_ton_einrichten() {
   mkdir -p /etc/alsa/conf.d
-  local neu
-  neu='# Imres Tales: Chromium spielt über das Gerät "imres" in JACK
-pcm.imres { type plug; slave.pcm "imres_jack"; }
+  local neu ziel aus
+  aus=$(cat "$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")/ausgang" 2>/dev/null)
+  ziel='"imres_jack"'
+  # Bluetooth-Lautsprecher (im Pult unter Einstellungen verbunden): direkt über bluealsa statt über JACK
+  case "$aus" in bt:*) [ -x /usr/bin/bluealsa ] || [ -x /usr/bin/bluealsad ] && ziel="{ type bluealsa; device \"${aus#bt:}\"; profile \"a2dp\" }" ;; esac
+  neu='# Imres Tales: Chromium spielt über das Gerät "imres" in JACK (oder Bluetooth)
+pcm.imres { type plug; slave.pcm '"$ziel"'; }
 pcm.imres_jack {
   type jack
   playback_ports { 0 system:playback_1 1 system:playback_2 }
