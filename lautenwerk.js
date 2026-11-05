@@ -6043,7 +6043,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   function planenVoraus(sek) { if (!laeuft || !ctx || imPlanen) return; planVorlauf = sek || 1.2; try { planen(); } catch (_) {} planVorlauf = 0; }
   function planen() { imPlanen = true; try { planenInnen(); } finally { imPlanen = false; } }
   function planenInnen() {
-    const vorlauf = planVorlauf || (document.hidden ? 1 : .3); /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
+    const vorlauf = planVorlauf || (document.hidden ? 1 : zynVorlauf || .3); /* im Hintergrund weit vorausplanen, damit die Musik weiterläuft */
     if (ausklingt) return;
     if (musikPauseAb && naechste >= musikPauseAb) { if (naechste < ctx.currentTime) naechste = ctx.currentTime; return; }
     if (morph && wechsel) morph.tempoB = wechsel.tempo;
@@ -13139,9 +13139,9 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
     }, 400);
   }
   /* Schnittstelle für die Zynthian-Steuerung (zynthian/zyn.js) */
-  let zynDuck = null;
+  let zynDuck = null, zynVorlauf = 0;
   /* ---------- Effekte für den Zynthian: DJ-Filter, Drive, Delay – hinter allem (Musik, Kulisse, Effekte), vor dem Limiter ---------- */
-  let fxKette = null;
+  let fxKette = null, fxSumme = null;
   const FXW = { filter: 0, reso: 15, echo: 0, rueck: 35, zeit: 2, drive: 0, crush: 0, rate: 0, ring: 0, flanger: 0, gate: 0, wobble: 0, stotter: 0, rueckwaerts: 0, bandstop: 0 };
   /* Glitch-Werk (AudioWorklet): Bitcrusher, Sample-Rate, Ringmodulator, Flanger, Trance-Gate, Stotter, Rückwärts, Tape-Stop */
   const GLITCH_CODE = `
@@ -13203,12 +13203,12 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     if (kulAusRef) { try { kulAusRef.disconnect(endKnoten); } catch (_) {} kulAusRef.connect(ein); }
     /* Wobble: eigener Tiefpass, im Tempo moduliert */
     const wob = c.createBiquadFilter(), wobOsz = c.createOscillator(), wobTiefe = c.createGain(), wobNass = c.createGain(), wobTrocken = c.createGain(), wobSumme = c.createGain();
-    wob.type = "lowpass"; wob.frequency.value = 900; wob.Q.value = 6; wobOsz.frequency.value = 2; wobTiefe.gain.value = 2400; wobOsz.connect(wobTiefe); wobTiefe.connect(wob.detune); wobOsz.start();
+    wob.type = "lowpass"; wob.frequency.value = 900; wob.Q.value = 6; wobOsz.frequency.value = 2; wobTiefe.gain.value = 2400; wobOsz.connect(wobTiefe); wobOsz.start();
     wobNass.gain.value = 0; wobTrocken.gain.value = 1;
-    ein.connect(hp); hp.connect(lp); lp.connect(wobTrocken); lp.connect(wob); wob.connect(wobNass); wobTrocken.connect(wobSumme); wobNass.connect(wobSumme);
-    wobSumme.connect(trocken); wobSumme.connect(sh); sh.connect(shNass); trocken.connect(summe); shNass.connect(summe);
+    ein.connect(hp); hp.connect(lp); lp.connect(wobTrocken); wob.connect(wobNass); wobTrocken.connect(wobSumme); wobNass.connect(wobSumme);
+    wobSumme.connect(trocken); sh.connect(shNass); trocken.connect(summe); shNass.connect(summe); fxSumme = wobSumme;
     summe.connect(endKnoten); summe.connect(dl); dl.connect(dlFilt); dlFilt.connect(rueck); rueck.connect(dl); dlFilt.connect(nass); nass.connect(endKnoten);
-    fxKette = { ein, hp, lp, sh, shNass, trocken, dl, rueck, nass, kurve: -1, wobOsz, wobNass, wobTrocken, glitch: null };
+    fxKette = { ein, hp, lp, sh, shNass, trocken, dl, rueck, nass, kurve: -1, wob, wobTiefe, wobOsz, wobNass, wobTrocken, wobAn: false, driveAn: false, glitch: null };
     /* Glitch-Werk nachladen und vorne einhängen: ein → Glitch → Hochpass … */
     try {
       const url = URL.createObjectURL(new Blob([GLITCH_CODE], { type: "application/javascript" }));
@@ -13220,26 +13220,33 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     setInterval(fxZeit, 400); fxAnwenden(); return fxKette;
   }
   function fxAnwenden() {
-    const k = fxKette; if (!k || !ctx) return; const j = ctx.currentTime, z = (p, v) => p.setTargetAtTime(v, j, .03);
+    const k = fxKette; if (!k || !ctx) return; const j = ctx.currentTime;
+    const z = (p, v) => { if (Math.abs(p.value - v) < 1e-4 * Math.max(1, Math.abs(v))) return; p.cancelScheduledValues(j); p.setValueAtTime(p.value, j); p.linearRampToValueAtTime(v, j + .03); };
     const f = Math.max(-1, Math.min(1, FXW.filter / 100)), q = .7 + FXW.reso / 100 * 11;
     z(k.lp.frequency, f < 0 ? 20000 * Math.pow(.004, -f) : 20000); z(k.lp.Q, f < 0 ? q : .7);
     z(k.hp.frequency, f > 0 ? 10 * Math.pow(500, f) : 10); z(k.hp.Q, f > 0 ? q : .7);
     const d = Math.max(0, Math.min(1, FXW.drive / 100)), stufe = Math.round(d * 20);
     if (stufe !== k.kurve) { k.kurve = stufe; const n = 1024, cv = new Float32Array(n), kk = 1 + stufe * 1.2; for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; cv[i] = Math.tanh(kk * x) / Math.tanh(kk); } k.sh.curve = cv; }
+    if (d > 0 && !k.driveAn) { fxSumme.connect(k.sh); k.driveAn = true; }
+    if (d === 0 && k.driveAn) { setTimeout(() => { if (FXW.drive === 0 && k.driveAn) { try { fxSumme.disconnect(k.sh); } catch (_) {} k.driveAn = false; } }, 120); }
     z(k.shNass.gain, d * .9); z(k.trocken.gain, 1 - d * .75);
     z(k.nass.gain, Math.max(0, Math.min(1, FXW.echo / 100)) * .7); z(k.rueck.gain, Math.max(0, Math.min(.9, FXW.rueck / 100)));
-    const wb = Math.max(0, Math.min(1, FXW.wobble / 100)); z(k.wobNass.gain, wb); z(k.wobTrocken.gain, 1 - wb * .85);
+    const wb = Math.max(0, Math.min(1, FXW.wobble / 100));
+    if (wb > 0 && !k.wobAn) { k.lp.connect(k.wob); k.wobTiefe.connect(k.wob.detune); k.wobAn = true; }
+    if (wb === 0 && k.wobAn) { setTimeout(() => { if (FXW.wobble === 0 && k.wobAn) { try { k.lp.disconnect(k.wob); k.wobTiefe.disconnect(k.wob.detune); } catch (_) {} k.wobAn = false; } }, 120); }
+    z(k.wobNass.gain, wb); z(k.wobTrocken.gain, 1 - wb * .85);
     if (k.glitch) { const P = k.glitch.parameters, s01 = x => Math.max(0, Math.min(1, x / 100));
-      ["crush", "rate", "ring", "flanger", "gate"].forEach(n => { const a = P.get(n); if (a) a.setValueAtTime(s01(FXW[n]), j); });
-      ["stotter", "rueckwaerts", "bandstop"].forEach(n => { const a = P.get(n); if (a) a.setValueAtTime(FXW[n] ? 1 : 0, j); }); }
+      ["crush", "rate", "ring", "flanger", "gate"].forEach(n => { const a = P.get(n), v = s01(FXW[n]); if (a && a.value !== v) a.setValueAtTime(v, j); });
+      ["stotter", "rueckwaerts", "bandstop"].forEach(n => { const a = P.get(n), v = FXW[n] ? 1 : 0; if (a && a.value !== v) a.setValueAtTime(v, j); }); }
     fxZeit();
   }
   function fxZeit() {
     const k = fxKette; if (!k || !ctx) return;
     const bpm = (laeuft ? (tempoJetzt || S.tempo) : S.tempo) || 100, t = Math.min(2.4, 60 / bpm * FX_ZEITEN[Math.max(0, Math.min(FX_ZEITEN.length - 1, FXW.zeit | 0))][0]);
-    if (Math.abs(k.dl.delayTime.value - t) > .002) k.dl.delayTime.setTargetAtTime(t, ctx.currentTime, .05);
-    k.wobOsz.frequency.setTargetAtTime(bpm / 60 * 2, ctx.currentTime, .1);
-    if (k.glitch) { const a = k.glitch.parameters.get("bpm"); if (a) a.setValueAtTime(bpm, ctx.currentTime); }
+    const j = ctx.currentTime;
+    if (Math.abs(k.dl.delayTime.value - t) > .002) { k.dl.delayTime.cancelScheduledValues(j); k.dl.delayTime.setValueAtTime(k.dl.delayTime.value, j); k.dl.delayTime.linearRampToValueAtTime(t, j + .08); }
+    if (Math.abs(k.wobOsz.frequency.value - bpm / 30) > .01) k.wobOsz.frequency.setValueAtTime(bpm / 30, j);
+    if (k.glitch) { const a = k.glitch.parameters.get("bpm"); if (a && Math.abs(a.value - bpm) > .5) a.setValueAtTime(bpm, j); }
   }
   /* Effekte, die schon vor dem ersten Ton eingestellt wurden, greifen, sobald der Ton startet */
   setInterval(() => { if (!fxKette && ctx && (FXW.filter || FXW.echo || FXW.drive || FXW.crush || FXW.rate || FXW.ring || FXW.flanger || FXW.gate || FXW.wobble)) fxBauen(); }, 1000);
@@ -13263,6 +13270,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const fx = [...new Set((set ? set.fx : KERN_FX).concat(EFFEKTE, KAMPF_FX))].filter(f => T.sfx[f]);
       return { st, kul, fx, namen: { st: T.vorlagen || {}, kul: T.kulissen || {}, fx: T.sfx || {} } };
     },
+    vorlauf(sek) { zynVorlauf = Math.max(0, Math.min(2, +sek || 0)); },
     fx(k, v) { if (!(k in FXW) || !isFinite(+v)) return; FXW[k] = +v; if (fxBauen()) fxAnwenden(); },
     fxWerte() { return Object.assign({ zeiten: FX_ZEITEN.map(x => x[1]) }, FXW); },
     momente() { try { const en = sprache() === "en"; return momenteVon(S.kulisse).map((x, i) => ({ i, sym: x[0], name: en ? x[2] : x[1] })); } catch (_) { return []; } },

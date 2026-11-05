@@ -15,6 +15,22 @@
   let aktiv = false; try { aktiv = sessionStorage.getItem("imres-zyn") === "1"; } catch (_) {}
   if (!aktiv && !Q.has("zyn")) return;
   if (window.__imresZyn) return; window.__imresZyn = true;
+  const MESSER = [];
+  try {
+    const orig = AudioNode.prototype.connect, schon = new WeakMap();
+    AudioNode.prototype.connect = function (ziel, ...rest) {
+      const r = orig.call(this, ziel, ...rest);
+      try {
+        if (typeof AudioDestinationNode !== "undefined" && ziel instanceof AudioDestinationNode && !(typeof OfflineAudioContext !== "undefined" && this.context instanceof OfflineAudioContext)) {
+          let a = schon.get(this.context);
+          if (!a) { a = this.context.createAnalyser(); a.fftSize = 1024; a.smoothingTimeConstant = .55; schon.set(this.context, a); MESSER.push(a);
+            const still = this.context.createGain(); still.gain.value = 0; orig.call(a, still); orig.call(still, this.context.destination); }
+          orig.call(this, a);
+        }
+      } catch (_) {}
+      return r;
+    };
+  } catch (_) {}
 
   const EN = (() => { try { return localStorage.getItem("imres-lang") === "en"; } catch (_) { return false; } })();
   const W = (de, en) => EN ? en : de;
@@ -626,13 +642,29 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 
   /* ---------- LEDs ---------- */
   let ledMerk = "";
+  const LED_STUFEN = [.15, .3, .5, .75, 1];
+  const ledHell = () => { const v = +lies("imres-zp-hell", "1"); return LED_STUFEN.includes(v) ? v : 1; };
+  const dimmHex = (h, fk) => { const n = parseInt(String(h).slice(1, 7), 16) || 0, c = x => Math.round(x * fk).toString(16).padStart(2, "0"); return "#" + c((n >> 16) & 255) + c((n >> 8) & 255) + c(n & 255); };
   function ledsMelden() {
+    if (PULT && zpRuhe && !HINTER) { /* Ruhebild: nur die Flammen-Balken, schnell */
+      const f = {}; zpLeds(f); const hl = ledHell(); if (hl < .999) Object.keys(f).forEach(k => { f[k] = dimmHex(f[k], hl); });
+      const s = JSON.stringify(f); if (s === ledMerk) return; ledMerk = s;
+      fetch("/zyn/leds", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ farben: f }) }).catch(() => {}); return;
+    }
     const f = {}, aus = "#000000", schwach = "#2a1a06", gold = "#c88a20", hell = "#ffcf50";
     ["MENU", "MIXER", "CTRL", "ZS3", "ALT", "TEMPO", "PAD", "F1", "F2", "F3", "F4", "REC", "STOP", "PLAY", "BACK", "SEL", "UP", "DOWN", "LEFT", "RIGHT"].forEach(n => { f[n] = aus; });
     f.MENU = MODI[modus].farbe; f.MIXER = bank ? "#f0dca0" : "#c88a20"; f.ALT = alt ? "#c040c0" : "#301030";
     ["UP", "DOWN", "LEFT", "RIGHT", "SEL", "BACK"].forEach(n => { f[n] = "#303030"; });
     const z = pz();
-    if ($(".zyn-menue")) { ["F1", "F2", "F3", "F4"].forEach((n, i) => { f[n] = MODI[MODUS_REIHE[i]].farbe; }); f.BACK = "#a04030"; f.SEL = "#40a040"; }
+    if ($(".zyn-menue")) {
+      /* Menü: Gold für die Wahltasten, Kupfer für zurück, warmes Weiß für die Pfeile, Glut für den Rest */
+      const m = $(".zyn-menue"), fs = new Set($$(".kbd", m).map(e => e.textContent.trim()));
+      ["F1", "F2", "F3", "F4"].forEach(n => { f[n] = fs.has(n) || menueArt === "modus" ? "#ffc830" : "#2a1606"; });
+      f.SEL = "#fff0c0"; f.BACK = "#ff5a18"; f.MENU = "#c88a20"; ["UP", "DOWN", "LEFT", "RIGHT"].forEach(n => { f[n] = "#6a5030"; });
+      if (menueArt === "beleg") { f.LEFT = f.RIGHT = "#ffc830"; }
+      ["MIXER", "CTRL", "ZS3", "ALT", "TEMPO", "PAD", "REC", "STOP", "PLAY"].forEach(n => { f[n] = "#1e0f04"; });
+    }
+    else if (PULT) { /* Pult: zpLeds setzt alles */ }
     else if (SEITE === "welten") {
       const l = $$("[data-welt]"); ["F1", "F2", "F3", "F4"].forEach((n, i) => { const el = alt ? $$("[data-aus]")[i] : l[i]; f[n] = el ? (el.classList.contains("an") ? hell : alt ? "#6a2a10" : schwach) : aus; });
       const spielt = !!$(".welt.an"); f.PLAY = spielt ? "#30d050" : "#0c3010"; f.STOP = "#501010"; f.PAD = "#603010"; f.REC = "#504030"; f.ZS3 = schwach; f.CTRL = schwach; f.TEMPO = "#403010";
@@ -645,7 +677,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       f.PLAY = z && (modus === "klang" ? z.kulLaeuft : z.laeuft) ? "#30d050" : "#0c3010"; f.STOP = "#501010"; f.PAD = "#c06010"; f.REC = "#504030"; f.TEMPO = z && z.neuBesetzen ? hell : gold; f.ZS3 = gold; f.CTRL = "#106030";
     }
     if (PULT && !$(".zyn-menue")) zpLeds(f);
-    if (aufnahmeAn) f.REC = "#ff2020";
+    if (aufnahmeAn && !(PULT && zpRuhe)) f.REC = "#ff2020";
+    /* nichts bleibt ganz dunkel (außer leeren Kacheln im Pult und den Balken im Ruhebild): warme Glut */
+    if (!(PULT && !$(".zyn-menue"))) Object.keys(f).forEach(k => { if (f[k] === "#000000") f[k] = "#1a0c03"; });
+    const hl = ledHell(); if (hl < .999) Object.keys(f).forEach(k => { f[k] = dimmHex(f[k], hl); });
     if (HINTER) return;
     const s = JSON.stringify(f); if (s === ledMerk) return; ledMerk = s;
     fetch("/zyn/leds", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ farben: f }) }).catch(() => {});
@@ -756,10 +791,12 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const fxDef = (k, name, lo, hi, schritt, neutral, text) => ({ name, lo, hi, schritt, neutral, text,
     lies: () => { const w = PFX(); return w && typeof w[k] === "number" ? w[k] : neutral; },
     setz: v => { if (window.ImresPult && window.ImresPult.fx) window.ImresPult.fx(k, v); } });
+  /* Bühnen-Regler gedrosselt: höchstens alle paar Hundertstel ein Wert – die Bühne plant bei manchen Reglern neu */
+  const gedrosselt = (def, ms) => { let wart = null, t = 0; return Object.assign({}, def, { lies: () => wart != null ? wart : def.lies(), setz: v => { wart = v; if (!t) t = setTimeout(() => { t = 0; const x = wart; wart = null; if (x != null) def.setz(x); }, ms); } }); };
   const ZP_PARAM = {
-    musik: Object.assign({ druck: "stumm" }, B0[0]), hg: Object.assign({ druck: "hg" }, B0[1]), los: Object.assign({ druck: "mitte", wort: LOS_TEXT }, B0[2]),
-    spannung: Object.assign({ druck: "friedlich", wort: SP_TEXT }, B0[3]), tempo: Object.assign({ druck: "mitte" }, B1[0]), hall: Object.assign({ druck: "mitte" }, B1[1]),
-    fxlaut: Object.assign({ druck: "stumm" }, B1[2], { name: W("💥 Effekt-Lautstärke", "💥 Effect volume") }), echohall: Object.assign({ druck: "mitte" }, B1[3]),
+    musik: Object.assign({ druck: "stumm" }, gedrosselt(B0[0], 90)), hg: Object.assign({ druck: "hg" }, gedrosselt(B0[1], 90)), los: Object.assign({ druck: "mitte", wort: LOS_TEXT }, gedrosselt(B0[2], 350)),
+    spannung: Object.assign({ druck: "friedlich", wort: SP_TEXT }, gedrosselt(B0[3], 150)), tempo: Object.assign({ druck: "mitte" }, gedrosselt(B1[0], 250)), hall: Object.assign({ druck: "mitte" }, gedrosselt(B1[1], 150)),
+    fxlaut: Object.assign({ druck: "stumm" }, gedrosselt(B1[2], 90), { name: W("💥 Effekt-Lautstärke", "💥 Effect volume") }), echohall: Object.assign({ druck: "mitte" }, gedrosselt(B1[3], 150)),
     filter: Object.assign({ druck: "null" }, fxDef("filter", W("🎛 Filter", "🎛 Filter"), -100, 100, 4, 0, v => v === 0 ? W("offen", "open") : v < 0 ? W("Tiefpass ", "Low-pass ") + (-v) + " %" : W("Hochpass ", "High-pass ") + v + " %")),
     reso: Object.assign({ druck: "null" }, fxDef("reso", W("〰 Resonanz", "〰 Resonance"), 0, 100, 5, 15)),
     delay: Object.assign({ druck: "null" }, fxDef("echo", W("🔁 Delay", "🔁 Delay"), 0, 100, 4, 0)),
@@ -847,7 +884,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }, 25);
   function zpDreh(nr, d) {
     if (drehGedrueckt[nr]) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
-    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); loopMitschreiben(r, v); zpZeichnen(true);
+    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); loopMitschreiben(r, v); zpReglerAnzeige();
+  }
+  let reglerRaf = 0;
+  function zpReglerAnzeige() {
+    if (reglerRaf) return;
+    reglerRaf = requestAnimationFrame(() => { reglerRaf = 0; const rs = zpRegler();
+      $$(".zp-r", zpEl).forEach((el, i) => { const r = rs[i]; if (!r) return; const w = zpWert(r), b = el.querySelector("i b"), t = el.querySelector(".zp-rv > span"); if (b) b.style.width = Math.round(w.anteil * 100) + "%"; if (t) t.textContent = w.text; }); });
   }
   function zpDruck(nr) {
     const r = zpRegler()[nr]; if (!r || !r.schritt) return; const k = bank + "-" + zpSeite + "-" + nr;
@@ -1000,10 +1043,12 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="looplen">⟳ ' + W("Regler-Loop: ", "Knob loop: ") + "<b>" + loopTakte() + W(" Takte", " bars") + "</b><small>" + W("ALT + Regler drücken: aufnehmen / Loop aus", "ALT + push knob: record / loop off") + "</small></button>" +
       '<button type="button" data-zm="ruhe">💤 ' + W("Bühnenbild nach: ", "Stage view after: ") + "<b>" + (ruheSek() ? ruheSek() + " s" : W("nie", "never")) + "</b><small>" + W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen") + "</small></button>" +
       '<button type="button" data-zm="bild">🖼 ' + W("Bühnenbild hinter dem Pult: ", "Stage behind the console: ") + "<b>" + (bildHinten() ? W("an", "on") : W("aus", "off")) + "</b><small>" + W("bei Knistern im Ton ausschalten", "turn off if the sound crackles") + "</small></button>" +
+      '<button type="button" data-zm="hell">💡 ' + W("Tastenlicht: ", "Button light: ") + "<b>" + Math.round(ledHell() * 100) + " %</b><small>" + W("Helligkeit der Tasten-LEDs", "brightness of the button LEDs") + "</small></button>" +
       '<button type="button" data-zm="beleg">🎛 ' + W("Belegung ändern", "Change mapping") + "<small>" + W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons") + "</small></button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile + SEL · BACK schließt", "F1–F4 pick · arrows + SEL · BACK closes") + "</p>",
       { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu, beleg: () => belegMenue(),
+        hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); zpMenue(); const b = $('.zyn-menue [data-zm="hell"]'); if (b) fokusSetzen(b); },
         looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="looplen"]'); if (b) fokusSetzen(b); },
         ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="ruhe"]'); if (b) fokusSetzen(b); },
         bild: () => { schreib("imres-zp-bild", bildHinten() ? "0" : "1"); document.documentElement.classList.toggle("zyn-bb", bildHinten() && SEITE === "buehne"); zpMenue(); const b = $('.zyn-menue [data-zm="bild"]'); if (b) fokusSetzen(b); },
@@ -1115,7 +1160,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   let zpLetzte = Date.now(), zpRuhe = false, zpRuheEl = null, zpWeck = null;
   const RUHE_STUFEN = [10, 30, 60, 0];
   const ruheSek = () => { const v = +lies("imres-zp-ruhe", "10"); return RUHE_STUFEN.includes(v) ? v : 10; };
-  const bildHinten = () => lies("imres-zp-bild", "1") === "1";
+  const bildHinten = () => lies("imres-zp-bild", "0") === "1";
   function zpAktiv() { zpLetzte = Date.now(); if (zpRuhe) { zpRuheAus(); return true; } return false; }
   function zpRuheAn() {
     if (zpRuhe || $(".zyn-menue")) return; zpRuhe = true; document.documentElement.classList.add("zyn-ruhe"); zpRuheZeichnen(); ledsMelden();
@@ -1138,8 +1183,28 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     zpRuheEl.innerHTML = '<div class="zr-kopf"><div class="zr-titel">' + esc2(titel) + '</div><div class="zr-unter">' + esc2(unter) + (z.laeuft ? " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) : "") + "</div></div>" +
       (quellen ? '<div class="zr-quellen">' + quellen + "</div>" : "") + '<div class="zr-tipp">' + W("Taste, Regler oder Bildschirm – weiter geht’s", "Any button, knob or touch to continue") + "</div>";
   }
+  /* Tasten als 4 Spalten à 5 (unten → oben), so wie sie auf dem V5 liegen */
+  const SPALTEN = [["LEFT", "BACK", "REC", "ALT", "MENU"], ["DOWN", "UP", "STOP", "TEMPO", "MIXER"], ["RIGHT", "SEL", "PLAY", "PAD", "CTRL"], ["F4", "F3", "F2", "F1", "ZS3"]];
+  const FLAMME = ["#ff2a00", "#ff5a00", "#ff9000", "#ffc830", "#fff0c0"];
+  const balkenSpitze = [0, 0, 0, 0], balkenWert = [0, 0, 0, 0], balkenMax = [.3, .3, .3, .3];
+  let balkenDaten = null;
+  function zpBalken() {
+    const a = MESSER.filter(x => x.context.state === "running").pop(), t = Date.now() / 1000;
+    if (!a) return [0, 1, 2, 3].map(i => .12 + .1 * Math.sin(t * 1.3 + i));
+    if (!balkenDaten || balkenDaten.length !== a.frequencyBinCount) balkenDaten = new Uint8Array(a.frequencyBinCount);
+    a.getByteFrequencyData(balkenDaten);
+    const hz = a.context.sampleRate / a.fftSize, mittel = (lo, hi) => { let s = 0, n = 0; for (let i = Math.max(1, Math.floor(lo / hz)); i <= Math.min(balkenDaten.length - 1, Math.ceil(hi / hz)); i++) { s += balkenDaten[i]; n++; } return n ? s / n / 255 : 0; };
+    const roh = [mittel(30, 160), mittel(160, 700), mittel(700, 3000), mittel(3000, 11000)];
+    return roh.map((v, i) => { balkenMax[i] = Math.max(v, balkenMax[i] * .997, .08); const x = Math.max(0, Math.min(1, Math.pow(v / balkenMax[i], 1.6) * 1.05)); balkenWert[i] = x > balkenWert[i] ? x : balkenWert[i] * .82 + x * .18; balkenSpitze[i] = Math.max(balkenWert[i], balkenSpitze[i] - .035); return balkenWert[i]; });
+  }
+  function flammeFarbe(h, w) {
+    const stufe = w * 5 - h; /* > 1: ganz an, 0..1: anglühen */
+    if (stufe >= 1) return FLAMME[h];
+    if (stufe > 0) return dimm(FLAMME[h], .15 + .85 * stufe);
+    return h === 0 ? "#200800" : "#000000";
+  }
   function zpLeds(f) {
-    if (zpRuhe) { const d = zpDef(zpSeite), puls = .25 + .2 * Math.sin(Date.now() / 600); Object.keys(f).forEach(k => { f[k] = "#000000"; }); ["F1", "F2", "F3", "F4"].forEach(k => { f[k] = dimm(d.led, puls); }); const z = pz() || {}; if (z.laeuft) f.PLAY = dimm("#30ff70", .5); return; }
+    if (zpRuhe) { const b = zpBalken(); SPALTEN.forEach((sp, c) => sp.forEach((k, h) => { f[k] = flammeFarbe(h, b[c]); })); return; }
     const d = zpDef(zpSeite), b = zpBlattJetzt(), blink = Math.floor(Date.now() / 450) % 2 === 0, i = ZP_SEITEN.findIndex(x => x.id === zpSeite);
     ["F1", "F2", "F3", "F4"].forEach((nm, k) => { const it = b[(alt ? 4 : 0) + k]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : it.fav ? dimm(d.led, .45) : dimm(d.led, .14); });
     ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL"].forEach(k => { const id = ZB.tasten[(alt ? "ALT+" : "") + k]; if (!id || id === "nichts") { f[k] = "#000000"; return; } const c = aktFarbe(id); f[k] = aktAktiv(id) ? c : dimm(c, .22); });
@@ -1222,6 +1287,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
     zpRuheEl.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); zpAktiv(); });
     document.documentElement.classList.toggle("zyn-bb", bildHinten() && SEITE === "buehne");
     setInterval(() => { const s = ruheSek(); if (!zpRuhe && s && Date.now() - zpLetzte > s * 1000 && !$(".zyn-menue")) zpRuheAn(); if (zpRuhe) zpRuheZeichnen(); }, 1000);
+    setInterval(() => { if (zpRuhe) { try { ledsMelden(); } catch (_) {} } }, 80);
     let favT = 0, favUnterdrueck = false;
     zpEl.addEventListener("pointerdown", e => { zpLetzte = Date.now(); zpZeiger = true; const k = e.target.closest("[data-zp-k]"); if (!k) return; const i = +k.dataset.zpK; clearTimeout(favT); favT = setTimeout(() => { favUnterdrueck = true; zpFavUmschalten(i); }, 1500); });
     const zeigerLos = () => { zpZeiger = false; clearTimeout(favT); };
@@ -1238,6 +1304,8 @@ html.zyn-ruhe .zp-ruhe { display: block; }
     });
     if (SEITE === "buehne") setTimeout(() => { const b = $('#lautenwerk [data-etab="ort"]'); if (b) klick(b); }, 1300); /* Zusätze (Wetter) sind nur im Reiter „Ort“ im Pult */
     zpZeichnen(true); setInterval(() => { try { zpZeichnen(); } catch (e) { console.warn("zp", e); } }, 400);
+    /* Musik weiter vorausplanen, damit kurze Ruckler der Oberfläche nicht hörbar werden */
+    const vorlaufSetzen = () => { if (window.ImresPult && window.ImresPult.vorlauf) window.ImresPult.vorlauf(.7); else setTimeout(vorlaufSetzen, 500); }; if (SEITE === "buehne") vorlaufSetzen();
   }
 
   /* ---------- Verbindung zur Brücke ---------- */
@@ -1253,7 +1321,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
         else if (e.typ === "optionen") optSetzen(e.optionen || {}, true);
         else if (e.typ === "aufnahme") { aufnahmeAn = !!e.an; leisteZeichnen(); }
       } catch (err) { console.warn("zyn", err); }
-      ledsMelden();
+      if (e.typ !== "dreh") ledsMelden();
     };
     es.onerror = () => { /* EventSource verbindet sich selbst neu */ };
   }
@@ -1273,5 +1341,5 @@ html.zyn-ruhe .zp-ruhe { display: block; }
   if (SEITE === "buehne") setTimeout(() => { const r = $("#lautenwerk"); if (r) r.scrollIntoView({ block: "start" }); }, 600);
   fetch("/zyn/status").then(r => r.json()).then(j => { aufnahmeAn = !!j.aufnahme; leisteZeichnen(); }).catch(() => {});
   leisteZeichnen(); ledsMelden();
-  window.ImresZyn = { taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
+  window.ImresZyn = { messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
 })();
