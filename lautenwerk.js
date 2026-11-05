@@ -4962,20 +4962,25 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   const ECHO_SPITZE = { panfloete: .24, okarina: .25, gesang: .27, horn: .27 };
   const ECHO_LAENGE = { panfloete: 3.4, okarina: 3.4, gesang: 3.6, horn: 3.4 };
   const MEL_LAENGE = { glocken: 1.6, fidel: 3.4, drehleier: 3.3, schalmei: 3.3, dudelsack: 3.3, illusion: 3.5 };
+  /* Die Klänge einzeln nacheinander vorbereiten (je ein kleiner Schritt), statt alle in einem Rutsch –
+     so hält ein Stimmungswechsel die Oberfläche nicht an. Bis ein Klang fertig ist, spielt er wie gewohnt live. */
+  let vorJobs = [], vorJobT = 0;
+  function vorJobsAbarbeiten() { vorJobT = 0; const j = vorJobs.shift(); if (!j) return; try { j(); } catch (_) {} if (vorJobs.length) vorJobT = setTimeout(vorJobsAbarbeiten, 15); }
   function klaengeVorbereiten() {
     if (!ctx) return;
-    const art = S.instrument;
+    const art = S.instrument, jobs = [];
     if (MEL_LAENGE[art]) for (let z = 0; z < 8; z++) {
       const f = midiHz(tonMidi("melodie", z, S));
-      vorrendern(art + "|" + f.toFixed(2), MEL_LAENGE[art], () => melodieSpielen(f, 0, 3, 1), MEL_SPITZE[art]);
+      jobs.push(() => vorrendern(art + "|" + f.toFixed(2), MEL_LAENGE[art], () => melodieSpielen(f, 0, 3, 1), MEL_SPITZE[art]));
     }
     const ea = S.band.floete;
     if (ECHO_LAENGE[ea]) for (let z = 0; z < 8; z++) {
       const f = midiHz(tonMidi("floete", z, S));
-      vorrendern("echo|" + ea + "|" + f.toFixed(2), ECHO_LAENGE[ea], () => echoSpielen(f, 0, 3, 1), ECHO_SPITZE[ea]);
+      jobs.push(() => vorrendern("echo|" + ea + "|" + f.toFixed(2), ECHO_LAENGE[ea], () => echoSpielen(f, 0, 3, 1), ECHO_SPITZE[ea]));
     }
-    if (S.band.ketten === "ketten") for (let v = 0; v < 4; v++) vorrendern("kette" + v, .9, () => kettenRasselnLive(0, 1), .38);
-    [.32, 1.75, .9].forEach((l, a) => vorrendern("rex" + a, l, () => rexLautLive(0, a, 1), [.42, .34, .4][a]));
+    if (S.band.ketten === "ketten") for (let v = 0; v < 4; v++) jobs.push(() => vorrendern("kette" + v, .9, () => kettenRasselnLive(0, 1), .38));
+    [.32, 1.75, .9].forEach((l, a) => jobs.push(() => vorrendern("rex" + a, l, () => rexLautLive(0, a, 1), [.42, .34, .4][a])));
+    vorJobs = jobs; clearTimeout(vorJobT); vorJobT = setTimeout(vorJobsAbarbeiten, 0);
   }
   /* Bass: gezupfte tiefe Saite mit vollem Körper – Grundton, kräftige Obertöne (hörbar auch auf kleinen
      Lautsprechern), Anschlag mit leichtem Tonhöhen-Ruck, dazu ein weicher Daumen-„Plopp". Fest auf gleiche Spitze gebracht. */
@@ -6318,22 +6323,33 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   Object.assign(STIMM_KORR, {"zit":{"49":15,"59":-5,"61":38,"63":7,"66":-12,"73":-10},"bal":{"61":10,"65":19,"89":-14},"glas":{"75":35,"78":-7,"86":12},"hglo":{"60":14,"62":12,"64":7,"66":12},"fharfe":{"36":9,"40":7,"48":-7,"76":-6},"mbira":{"46":-12,"48":-20,"50":-26,"51":-13,"53":12,"55":-9,"56":13,"62":-28,"63":-16,"65":-13,"70":-29,"72":-22,"73":-37,"74":-6,"75":10}});
   const sampleBuf = new Map(), sampleLaedt = new Map();
   const sampleBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "klang/") : "klang/"; })();
+  /* Höchstens drei Dateien gleichzeitig laden und entpacken – sonst belegen beim Stimmungswechsel
+     dutzende MP3-Entpacker alle Kerne und die laufende Musik kann stocken. Was gerade gebraucht wird, rückt vor. */
+  const ladeSchlange = []; let ladeAktiv = 0; const LADE_MAX = 3;
+  const ladePlatz = name => new Promise(r => { if (ladeAktiv < LADE_MAX) { ladeAktiv++; r(); } else ladeSchlange.push({ name, r }); });
+  const ladeFrei = () => { const n = ladeSchlange.shift(); if (n) n.r(); else ladeAktiv = Math.max(0, ladeAktiv - 1); };
   function sampleLaden(name) {
     if (sampleBuf.has(name)) return Promise.resolve(sampleBuf.get(name));
-    if (sampleLaedt.has(name)) return sampleLaedt.get(name);
+    if (sampleLaedt.has(name)) { const i = ladeSchlange.findIndex(x => x.name === name); if (i > 0) ladeSchlange.unshift(ladeSchlange.splice(i, 1)[0]); return sampleLaedt.get(name); }
     if (!ctx || rendert) return Promise.resolve(null);
     const c = ctx;
+    let frei = false; const freigeben = x => { if (!frei) { frei = true; ladeFrei(); } return x; };
     /* Einzelgeräusche der Klangwelten (e_*, g_*) liegen im Ordner amb/ */
-    const pr = fetch((/^[eg]_/.test(name) ? sampleBasis.replace(/klang\/$/, "amb/") : sampleBasis) + encodeURIComponent(name) + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+    const pr = ladePlatz(name).then(() => fetch((/^[eg]_/.test(name) ? sampleBasis.replace(/klang\/$/, "amb/") : sampleBasis) + encodeURIComponent(name) + ".mp3")).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
       .then(ab => new Promise((res, rej) => { const x = c.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); }))
-      .then(b => {
-        /* Einsatz suchen: MP3 bringt am Anfang etwas Stille mit – die überspringen wir, damit alles im Takt sitzt */
-        const d = b.getChannelData(0); let m = 0, i = 0, spitze = 0;
-        for (let k = 0; k < d.length; k++) { const a = Math.abs(d[k]); if (a > m) { m = a; spitze = k; } }
-        while (i < d.length && Math.abs(d[i]) < m * .02) i++;
+      .then(async b => { freigeben();
+        /* Einsatz suchen: MP3 bringt am Anfang etwas Stille mit – die überspringen wir, damit alles im Takt sitzt.
+           In Häppchen, damit lange Dateien die Oberfläche nicht anhalten (gleiches Ergebnis wie in einem Rutsch). */
+        const d = b.getChannelData(0), STUECK = 65536; let m = 0, i = 0, spitze = 0;
+        for (let k0 = 0; k0 < d.length; k0 += STUECK) {
+          const k1 = Math.min(d.length, k0 + STUECK);
+          for (let k = k0; k < k1; k++) { const a = d[k] < 0 ? -d[k] : d[k]; if (a > m) { m = a; spitze = k; } }
+          if (k1 < d.length) await new Promise(r => setTimeout(r, 0));
+        }
+        const schwelle = m * .02; while (i < d.length && (d[i] < 0 ? -d[i] : d[i]) < schwelle) i++;
         b._start = Math.max(0, i - b.sampleRate * .003) / b.sampleRate; b._spitze = spitze / b.sampleRate;
         sampleBuf.set(name, b); return b;
-      }).catch(() => { sampleLaedt.delete(name); return null; });
+      }).catch(() => { freigeben(); sampleLaedt.delete(name); return null; });
     sampleLaedt.set(name, pr); return pr;
   }
   /* Lautstärke der Aufnahmen aus dem FluidR3-Klangsatz, abgestimmt auf die bisherigen Klänge */

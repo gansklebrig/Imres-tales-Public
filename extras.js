@@ -625,7 +625,7 @@ html, body { overflow-x: clip; }
       if (!ruhig && laeuft) { if (verdeckt()) laeuft = false; else requestAnimationFrame(bild); }
     }
     /* Ein Spiel im Vollbild verdeckt den Hintergrund ganz – dann keine Bilder rechnen */
-    const verdeckt = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || document.documentElement.classList.contains("tav-voll-offen");
+    const verdeckt = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || document.documentElement.classList.contains("tav-voll-offen") || document.documentElement.classList.contains("zyn-pult"); /* Zynthian-Pult deckt die Seite ab */
     const weiter = () => {
       if (ruhig || laeuft || document.hidden || verdeckt()) return;
       laeuft = true; zuletzt = performance.now(); requestAnimationFrame(bild);
