@@ -1779,6 +1779,9 @@
   /* ---------- Klang ---------- */
   let ctx = null, master = null, rauschen = null, illusionEcho = null;
   const spurGain = {}, hallSend = {};
+  const naechsterWechsel = {};
+  let PAD_LAUT = 1.6; try { const v = +localStorage.getItem("imres-lw-padlaut"); if (v >= .3 && v <= 3) PAD_LAUT = v; } catch (_) {}
+  let einDuck = null; /* Musik weicht einem angesteckten Instrument aus (Eingang 1/2) */
   let ausgang = null, hallEin = null, hallNass = null, hallNode = null, hallFilter = null;
   const hallCache = {};
   function hallBild(raum) {
@@ -2763,11 +2766,15 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       });
     }, 100);
   }
+  const kulAusblend = [];
   function kulisseStop(ueberblenden) {
     if (!kul) return;
     const aus = ueberblenden ? 3.5 : 1.5; /* beim Wechsel länger, damit sich alte und neue Kulisse überlappen statt ein Loch zu lassen */
     const k = kul; kul = null; clearInterval(k.timer);
     const j = ctx.currentTime;
+    kulAusblend.splice(0).forEach(alt => { try { [alt.g, alt.gd].forEach(g => { if (g) { g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.linearRampToValueAtTime(0, j + .25); } });
+      setTimeout(() => { alt.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { alt.g.disconnect(); } catch (_) {} try { if (alt.gd) alt.gd.disconnect(); } catch (_) {} try { if (alt.lebenAus) alt.lebenAus(); } catch (_) {} }, 350); } catch (_) {} });
+    kulAusblend.push(k); setTimeout(() => { const i = kulAusblend.indexOf(k); if (i >= 0) kulAusblend.splice(i, 1); }, (ueberblenden ? 3.5 : 1.5) * 1000 + 200);
     [k.g, k.gd].forEach(g => { if (g) { g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.linearRampToValueAtTime(0, j + aus); } });
     setTimeout(() => { k.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { k.g.disconnect(); } catch (_) {} if (k.gd) { const gd = k.gd; setTimeout(() => { try { gd.disconnect(); } catch (_) {} }, 25000); } }, aus * 1000 + 200);
     try { miniAnzeigen(); } catch (_) {}
@@ -4850,7 +4857,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       ducken = ctx.createGain(); ducken.gain.value = 1;
       /* „Atem“: das kurze Luftholen vor einem Refrain (alles für einen Augenblick fast still) */
       atem = ctx.createGain(); atem.gain.value = 1;
-      master.connect(atem); atem.connect(ducken); ducken.connect(komp); komp.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination); endKnoten = limiter;
+      master.connect(atem); atem.connect(ducken); ducken.connect(komp); einDuck = ctx.createGain(); einDuck.gain.value = 1; komp.connect(einDuck); einDuck.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination); endKnoten = limiter;
       /* Pump-Bus: Teppich, Orchester, Kapelle, Gäste und Sub-Bass ducken sich bei jedem Kick kurz weg */
       pumpBus = ctx.createGain(); pumpBus.gain.value = 1; pumpBus.connect(master);
       /* Kulisse und Zusatzgeräusche: eigener Weg zum Limiter, am Musikregler vorbei – so lassen sich Musik und Hintergrund
@@ -5750,6 +5757,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   /* Übergang zwischen Stimmungen: 1 Takt = schneller Wechsel (mit Paukenwirbel bei dramatischen Zielen),
      2–8 Takte = das laufende Stück wird Takt für Takt zum neuen umgebaut (morph) */
   let uebergang = 4, morph = null, morphEin = false, einblendMax = 48;
+  /* nur für den nächsten Wechsel (Autopilot): { dr } – 2 = großer Auftritt mit Paukenwirbel, 0 = ganz unauffällig */
+  let einmalUeb = null, uebZurueck = null;
   try { const u = parseInt(localStorage.getItem("imres-lw-uebergang"), 10); if (u >= 1 && u <= 8) uebergang = u; } catch (_) {}
   /* Reihenfolge, in der das Schlagwerk auf den neuen Rhythmus umsteigt (Anteil der Takte bis zur Mitte) */
   const MORPH_FOLGE = { ketten: 0, rex: .2, schelle: .4, klopf: .6, trommel: .8 };
@@ -5821,7 +5830,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   /* Weicher Übergang: die alte Musik tritt bis zum Taktende zurück, bei dramatischen Zielen kündigt ein
      Paukenwirbel (mit anschwellendem Becken) den Wechsel an; das neue Stück blendet sich auf der Eins ein. */
   function brueckeStarten() {
-    const jetzt = ctx.currentTime, neu = wechsel, dr = neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
+    const jetzt = ctx.currentTime, neu = wechsel, dr = einmalUeb && einmalUeb.dr != null ? einmalUeb.dr : neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
+    einmalUeb = null;
     let T = taktEnde();
     /* sanfter Wechsel: mindestens ein halber Takt zum Ausklingen – das Schlagwerk hört zuerst auf, die Melodie wird leiser */
     /* lieber einen Moment länger als zu abrupt: sanft mindestens drei Viertel eines Takts zum Ausklingen, dramatisch mindestens ein halber für den Wirbel */
@@ -9552,6 +9562,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
      und überall sonst auf der Seite, sobald einmal Musik oder Kulisse lief. */
   function leisteAktualisieren() {
     if (!leiste) return;
+    /* unter dem Zynthian-Pult ist die Leiste nie zu sehen – kein teures Ausmessen der Seite */
+    if (document.documentElement.classList.contains("zyn-pult")) { if (!leiste.hidden) leiste.hidden = true; return; }
     const T = t(), vh = window.innerHeight || 800;
     let zeigen = false;
     if (!hoerer) {
@@ -11267,7 +11279,17 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (st === "fehler" && hoerer.verbunden) { hoerer.verbunden = false; zeichnen(); }
   });
 
+  /* Unter dem Zynthian-Pult ist diese Ansicht verdeckt: viele Neuzeichnungen kurz hintereinander (z. B. schnelle Ortswechsel)
+     werden zu einer zusammengefasst – das spart pro Wechsel viel Rechenzeit */
+  let zeichnenPlan = 0;
   function zeichnen() {
+    if (document.documentElement.classList.contains("zyn-pult")) {
+      if (!zeichnenPlan) zeichnenPlan = setTimeout(() => { zeichnenPlan = 0; try { zeichnenJetzt(); knoepfe(); } catch (e) { console.warn(e); } }, 200);
+      return;
+    }
+    zeichnenJetzt();
+  }
+  function zeichnenJetzt() {
     /* das Feld, das man gerade bedient hat, verliert den Fokus, bevor es ersetzt wird – sonst bleibt am Handy
        der Zustand „Tastatur offen“ hängen und die Navigationsleiste der Seite taucht später unter dem Finger auf */
     const f = document.activeElement; if (f && f !== document.body && root.contains(f) && f.blur) { try { f.blur(); } catch (_) {} }
@@ -13361,10 +13383,27 @@ registerProcessor("imres-glitch", ImresGlitch);`;
   }
   /* ---------- Eingänge des Zynthian (Handpan, Didgeridoo …) mit eigener Effektkette ----------
      Chromium nimmt beide Eingänge als ein Stereo-Signal auf (links = Eingang 1, rechts = Eingang 2). */
-  const KANAL_STD = { an: false, pegel: 100, laut: 80, filter: 0, echo: 0, rueck: 35, hall: 0, drive: 0, pan: 0 };
+  const KANAL_STD = { an: false, pegel: 100, laut: 80, filter: 0, echo: 0, rueck: 35, hall: 0, drive: 0, pan: 0, duck: 0 };
   const KANAL = [Object.assign({}, KANAL_STD), Object.assign({}, KANAL_STD)];
   try { const g = JSON.parse(localStorage.getItem("imres-lw-kanaele") || "null"); if (Array.isArray(g)) g.forEach((x, i) => { if (KANAL[i]) Object.assign(KANAL[i], x, { an: false }); }); } catch (_) {}
   const EIN = { strom: null, quelle: null, split: null, k: [null, null], hall: null, laedt: null, fehler: "" };
+  /* Ausweichen: spielt das Instrument, wird die Musik (samt Kulisse) um „duck“ % leiser – schnell runter, langsam wieder hoch */
+  let duckJetzt = 1;
+  setInterval(() => {
+    if (!einDuck || !ctx) return; let ziel = 1;
+    [0, 1].forEach(i => { const w = KANAL[i], k = EIN.k[i]; if (!w.an || !k || !(w.duck > 0)) return;
+      const d = k._duckPuf || (k._duckPuf = new Float32Array(k.mess.fftSize)); k.mess.getFloatTimeDomainData(d);
+      let q = 0; for (let x = 0; x < d.length; x++) q += d[x] * d[x]; const db = 10 * Math.log10(q / d.length + 1e-12) + 20 * Math.log10(Math.max(.01, w.pegel / 100));
+      const anteil = Math.max(0, Math.min(1, (db + 46) / 14)); ziel = Math.min(ziel, 1 - w.duck / 100 * anteil); });
+    if (Math.abs(ziel - duckJetzt) < .01) return;
+    const j = ctx.currentTime; einDuck.gain.cancelScheduledValues(j); einDuck.gain.setValueAtTime(einDuck.gain.value, j); einDuck.gain.setTargetAtTime(ziel, j, ziel < duckJetzt ? .04 : .6); duckJetzt = ziel;
+  }, 50);
+  /* Analysen für Stimmgerät und Tonart-Erkennung: ein Analyser je Eingang und Größe */
+  function kanalAnalyse(i, groesse) {
+    const k = EIN.k[i]; if (!k) return null; k._an = k._an || {};
+    if (!k._an[groesse]) { const a = ctx.createAnalyser(); a.fftSize = groesse; a.smoothingTimeConstant = 0; k.pre.connect(a); k._an[groesse] = a; }
+    return k._an[groesse];
+  }
   function kanaeleMerken() { try { localStorage.setItem("imres-lw-kanaele", JSON.stringify(KANAL)); } catch (_) {} }
   function eingangOeffnen() {
     if (EIN.quelle) return Promise.resolve(true);
@@ -13384,6 +13423,8 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     const c = ctx, k = { pre: c.createGain(), hp: c.createBiquadFilter(), lp: c.createBiquadFilter(), sh: c.createWaveShaper(), dry: c.createGain(), dl: c.createDelay(2.5), fb: c.createGain(), dlf: c.createBiquadFilter(), wet: c.createGain(), hs: c.createGain(), pan: c.createStereoPanner(), out: c.createGain(), mess: c.createAnalyser() };
     k.hp.type = "highpass"; k.hp.frequency.value = 20; k.lp.type = "lowpass"; k.lp.frequency.value = 20000; k.dlf.type = "lowpass"; k.dlf.frequency.value = 3800;
     k.mess.fftSize = 512; EIN.split.connect(k.pre, i);
+    /* Messung vor dem Gain: zeigt, ob das Signal schon an der Buchse (Soundkarte) übersteuert */
+    k.roh = c.createAnalyser(); k.roh.fftSize = 1024; EIN.split.connect(k.roh, i); k.clip = 0;
     k.pre.connect(k.mess); k.pre.connect(k.hp); k.hp.connect(k.lp); k.lp.connect(k.sh); k.sh.connect(k.dry); k.dry.connect(k.pan);
     k.sh.connect(k.dl); k.dl.connect(k.dlf); k.dlf.connect(k.fb); k.fb.connect(k.dl); k.dlf.connect(k.wet); k.wet.connect(k.pan);
     k.pan.connect(k.out); k.out.connect(ausgang); k.pan.connect(k.hs);
@@ -13496,8 +13537,11 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     beatsVariation(v) { if (v != null) { S.variation = Math.max(0, Math.min(10, Math.round(+v))); merken(); } return S.variation; },
     beatsStumm(spur, an) { if (!(spur in S.mute)) return; S.mute[spur] = an == null ? !S.mute[spur] : !!an; merken(); mixAnwenden(); },
     /* sofort spielen (Pad) – und für das Live-Einspielen: der Schritt, der dem Anschlag am nächsten liegt */
+    padLaut(v) { if (v != null) { PAD_LAUT = Math.max(.3, Math.min(3, +v || 1)); try { localStorage.setItem("imres-lw-padlaut", String(PAD_LAUT)); } catch (_) {} } return PAD_LAUT; },
     beatsAnschlag(spur, wert) {
-      try { audioStart(); spielen(spur, Math.max(0, wert | 0), ctx.currentTime + .005, 0, 1, .3); } catch (_) {}
+      /* steht die Musik, ist der Musikweg stummgeschaltet – fürs Einspielen wieder öffnen */
+      try { audioStart(); if (!laeuft && ducken && ducken.gain.value < .9) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(1, j); musikStumm = false; }
+        spielen(spur, Math.max(0, wert | 0), ctx.currentTime + .005, 0, PAD_LAUT, .3); } catch (_) {}
       if (!ctx) return null; const j = ctx.currentTime; let best = null;
       for (const e of zynSchritte) { const d = Math.abs(e.zeit - j); if (!best || d < best.d) best = { d, teil: e.teil, schritt: e.schritt }; }
       return best && best.d < schrittDauer() ? best : null;
@@ -13509,6 +13553,24 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       return Object.assign({ fehler: EIN.fehler }, KANAL[i]);
     },
     boost(db) { if (db == null) return BOOST; BOOST = Math.max(0, Math.min(12, Math.round(+db) || 0)); try { localStorage.setItem("imres-lw-boost", String(BOOST)); } catch (_) {} if (ausgang && ctx) ausgang.gain.setTargetAtTime(.6 * masterPegel() * boostF(), ctx.currentTime, .05); return BOOST; },
+    kanalAnalyse(i, groesse) { return kanalAnalyse(i, groesse || 4096); },
+    abtastrate() { return ctx ? ctx.sampleRate : 0; },
+    duckStand() { return duckJetzt; },
+    dramatik(k) { const b = (eigeneStimmungen[k] && eigeneStimmungen[k].basis) || k; return DRAMA[b] || 0; },
+    /* Übergang zwischen Stimmungen: 1 = schnell, 2–8 = Überleitung über mehrere Takte (wie der Regler im Pult) */
+    uebergang(n) { if (n != null) { uebergang = Math.max(1, Math.min(8, Math.round(+n) || 4)); try { localStorage.setItem("imres-lw-uebergang", String(uebergang)); } catch (_) {} } return uebergang; },
+    /* nur der nächste Wechsel: art "episch" (Paukenwirbel, Becken, schneller Schnitt) oder "sanft" (lange, leise Überleitung) */
+    naechsterWechsel(art) {
+      const alt = uebZurueck != null ? uebZurueck : uebergang; clearTimeout(naechsterWechsel.t);
+      if (art === "episch") { einmalUeb = { dr: 2 }; uebergang = 1; } else if (art === "sanft") { einmalUeb = { dr: 0 }; uebergang = 8; } else { einmalUeb = null; if (uebZurueck != null) { uebergang = uebZurueck; uebZurueck = null; } return; }
+      uebZurueck = alt; naechsterWechsel.t = setTimeout(() => { uebergang = uebZurueck; uebZurueck = null; einmalUeb = null; }, 30000);
+    },
+    /* nur für Tests: statt des Eingangs eine eigene Quelle in den Kanal speisen (bau(ctx) → AudioNode) */
+    _testQuelle(i, bau) { audioStart(); if (!EIN.split) EIN.split = ctx.createChannelSplitter(2); KANAL[i].an = true; kanalAnwenden(i); const k = EIN.k[i];
+      try { EIN.split.disconnect(k.pre, i); } catch (_) {} if (k._test) try { k._test.disconnect(); } catch (_) {} k._test = bau(ctx); k._test.connect(k.pre); return true; },
+    /* Spitzenpegel vor dem Gain (0 … 1) und wie oft er zuletzt an die Grenze stieß */
+    kanalRoh(i) { const k = EIN.k[i]; if (!k || !k.roh) return null; const d = k._rohPuf || (k._rohPuf = new Float32Array(k.roh.fftSize)); k.roh.getFloatTimeDomainData(d);
+      let m = 0, n = 0; for (let x = 0; x < d.length; x++) { const a = Math.abs(d[x]); if (a > m) m = a; if (a > .985) n++; } k.clip = k.clip * .9 + (n > 2 ? 1 : 0); return { spitze: m, clip: k.clip > .3 }; },
     kanalPegel(i) { const k = EIN.k[i]; if (!k) return 0; const d = new Float32Array(k.mess.fftSize); k.mess.getFloatTimeDomainData(d); let m = 0; for (let x = 0; x < d.length; x++) m = Math.max(m, Math.abs(d[x])); return m; },
     vorlauf(sek) { zynVorlauf = Math.max(0, Math.min(2, +sek || 0)); },
     fx(k, v) { if (!(k in FXW) || !isFinite(+v)) return; FXW[k] = +v; if (fxBauen()) fxAnwenden(); },

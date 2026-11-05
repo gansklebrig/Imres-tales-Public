@@ -260,9 +260,9 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b)
 
-    def koerper(self):
+    def koerper(self, grenze=65536):
         n = int(self.headers.get("Content-Length") or 0)
-        if n <= 0 or n > 65536:
+        if n <= 0 or n > grenze:
             return {}
         try:
             return json.loads(self.rfile.read(n).decode("utf-8") or "{}")
@@ -358,7 +358,9 @@ class Handler(SimpleHTTPRequestHandler):
     # ---- POST ----
     def do_POST(self):
         p = urlparse(self.path).path
-        d = self.koerper()
+        d = self.koerper(8 * 1024 * 1024 if p == "/zyn/sicherung" else 65536)
+        if p == "/zyn/sicherung":
+            return self.json_antwort(sicherung(d if isinstance(d, dict) else {}))
         if p == "/zyn/hw":
             # von imres-tasten.py: Tasten, Drehregler, MIDI
             if isinstance(d, dict):
@@ -706,6 +708,45 @@ def _mono_an():
             return f.read().strip() == "1"
     except OSError:
         return False
+
+
+SICHER_DIR = os.path.normpath(os.path.join(ZYN, "..", "..", "sicherung"))
+
+
+def sicherung(d):
+    """Pult-Einstellungen (Belegung, Favoriten, Sets, Mischungen …) als Datei auf der SD-Karte"""
+    os.makedirs(SICHER_DIR, exist_ok=True)
+    a = str(d.get("aktion", "liste"))
+    if a == "speichern":
+        daten = d.get("daten")
+        if not isinstance(daten, dict) or not daten:
+            return {"ok": False, "fehler": "leer"}
+        name = "auto.json" if d.get("auto") else time.strftime("pult-%Y%m%d-%H%M%S.json")
+        tmp = os.path.join(SICHER_DIR, name + ".neu")
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"zeit": time.time(), "daten": daten}, f, ensure_ascii=False)
+        os.replace(tmp, os.path.join(SICHER_DIR, name))
+        # von Hand gesicherte: die letzten 12 behalten
+        alt = sorted(x for x in os.listdir(SICHER_DIR) if x.startswith("pult-") and x.endswith(".json"))
+        for x in alt[:-12]:
+            try:
+                os.remove(os.path.join(SICHER_DIR, x))
+            except OSError:
+                pass
+        return {"ok": True, "name": name}
+    if a == "laden":
+        name = os.path.basename(str(d.get("name", "auto.json")))
+        try:
+            with open(os.path.join(SICHER_DIR, name), encoding="utf-8") as f:
+                return {"ok": True, "name": name, **json.load(f)}
+        except (OSError, ValueError):
+            return {"ok": False, "fehler": "nicht gefunden"}
+    liste = []
+    for x in sorted(os.listdir(SICHER_DIR), reverse=True):
+        if x.endswith(".json"):
+            st = os.stat(os.path.join(SICHER_DIR, x))
+            liste.append({"name": x, "zeit": st.st_mtime, "kb": round(st.st_size / 1024)})
+    return {"ok": True, "liste": liste}
 
 
 def main():
