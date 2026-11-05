@@ -1622,7 +1622,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   let pegelT = 0;
   function eingangMenue(fokusId) {
     const P = window.ImresPult; if (!P || !P.kanal) { zeige(W("Eingänge gibt es nur im Bühnen-Pult", "Inputs only in the stage console")); return; }
-    if (!eingangMenue.karte) { eingangMenue.karte = []; audioPost({ aktion: "info" }).then(r => { if (r && r.ok) { eingangMenue.karte = (r.regler || []).filter(x => x.c != null); if (menueArt === "eingang") eingangMenue(fokusId); } }); }
+    if (!eingangMenue.karte) { eingangMenue.karte = []; audioPost({ aktion: "info" }).then(r => { if (r && r.ok) { eingangMenue.karte = (r.regler || []).filter(x => x.c != null); eingangMenue.geladen = true; if (menueArt === "eingang") eingangMenue(fokusId); } }); }
     const a = { zu: () => { clearInterval(pegelT); menueZu(); } };
     let h = '<div class="reihe zyn-opt">';
     [0, 1].forEach(i => {
@@ -1640,6 +1640,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       h += '<button type="button" data-zm="kc:' + gi + '"><span>🎚 ' + W("Soundkarte ", "Sound card ") + esc2(g.name) + ": <b>" + g.c + " %</b></span><small>" + W("Eingangspegel vor Imres · ◀ ▶", "input level before Imres · ◀ ▶") + "</small></button>";
       a["kc:" + gi + ":stufe"] = st => audioPost({ aktion: "regler", name: g.name, art: "c", wert: g.c + st * 5 }).then(r => { if (r && r.ok) eingangMenue.karte = (r.regler || []).filter(x => x.c != null); eingangMenue("kc:" + gi); });
     });
+    if (eingangMenue.karte && !eingangMenue.karte.length && eingangMenue.geladen) h += '<p class="hinweis" style="margin:4px 0">' + W("Die Soundkarte hat keinen eigenen Eingangsregler – übersteuert es an der Buchse, muss das Signal schon am Instrument, Tonabnehmer oder Vorverstärker leiser werden (oder über eine DI-Box mit Pad, z. B. −20 dB).", "The sound card has no input level control – lower the signal at the instrument, pickup or preamp (or use a DI box pad).") + "</p>";
     h += '<button type="button" data-zm="mit"><span>' + (MS.an ? "✅ " : "⬜ ") + "🎻 " + W("Mitspieler", "Ensemble follows") + (MS.an ? " – " + W("folgt Eingang ", "follows input ") + (MS.quelle + 1) : "") + "</span><small>" + W("Bühneninstrumente spielen deine Töne mit · Regler: MIXER → Bank MIT (Ensemble wie beim Streichfett)", "stage instruments play your notes · knobs: MIXER → bank MIT") + "</small></button>";
     a.mit = () => { if (!MS.an) { const an = [0, 1].filter(x => (kanalHol(x) || {}).an); if (!an.length) { zeige(W("Erst einen Eingang einschalten", "Switch an input on first")); return; } if (!an.includes(MS.quelle)) MS.quelle = an[0]; } msSchalten(); eingangMenue("mit"); };
     if (MS.an) { const anE = [0, 1].filter(x => (kanalHol(x) || {}).an);
