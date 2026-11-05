@@ -36,13 +36,15 @@ Du brauchst: den Zynthian im Netzwerk (LAN-Kabel oder WLAN) und einen Rechner im
 
 Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles liegt auf Tasten und Reglern:
 
-- **Oben:** die Seiten 🎵 Stimmung · 🌲 Ort · ⚡ Momente · 🌿 Klangwelt (wechseln mit **CTRL**, zurück mit **ZS3**, oder antippen) und was gerade läuft.
+- **Modi (MENU → F1 Modus):** 🎻 **Bühnen-Pult** (Seiten 🎵 Stimmung · 🌲 Ort · ⚡ Momente) · 🌿 **Klangwelten** (eigene Seiten: Klangwelten · Szenen · Geräusche nach Gruppen wie „Türen & Truhen“ · Einschläge) · 🥁 **Beat-Builder** (alle Regler und Spuren der Webseite). CTRL/ZS3 blättern nur innerhalb des Modus – nichts wechselt mehr aus Versehen.
+- **Oben:** die Seiten des Modus (wechseln mit **CTRL**, zurück mit **ZS3**, oder antippen) und was gerade läuft.
 - **Mitte:** 8 Kacheln – **F1–F4** obere Reihe, **ALT + F1–F4** untere Reihe. Orange = läuft, gestrichelt/blinkend = kommt am Taktende. **◀ ▶** blättert weiter, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen, Geräusche).
 - **Rechts:** was die vier Drehregler gerade tun – direkt neben dem echten Knopf. Drücken: siehe kleine Schrift. **MIXER** schaltet auf Reglerbank B (Tempo, Hall, Effekte, Echos Hall).
 - **Unten:** PLAY Musik · STOP alles aus · PAD ⚡ Etwas passiert · REC 🤫 Stille · TEMPO 🎲 Neu besetzen.
 - **MENU:** Spielabend, Optionen, Tastenbelegung, System (dort auch **⬇ Imres aktualisieren** – ohne Terminal).
 - **Effekte (Bank FX, MIXER zweimal):** 🎛 Filter (links Tiefpass, rechts Hochpass, Mitte offen) · 〰 Resonanz · 🔁 Delay (im Tempo) · 🔥 Drive. Weitere: ↻ Rückkopplung, ⏱ Delay-Länge. Sie liegen hinter allem – Musik, Kulisse und Effekte. Regler drücken = neutral.
-- **Bänke GLITCH und MOD (MIXER weiter):** 👾 Bitcrusher · 📉 Sample-Rate · ✂ Trance-Gate (1/16 im Tempo) · 🔔 Ringmodulator · 🌀 Flanger · 〽 Wobble (im Tempo) · ↻ Rückkopplung · ⏱ Delay-Länge.
+- **Effekt wechseln:** einen Regler **gedrückt halten und drehen** legt einen anderen Effekt darauf – auf der FX-Bank alle: Filter, Resonanz, Delay, Rückkopplung, Delay-Länge, Drive, 👾 Bitcrusher, 📉 Sample-Rate, ✂ Trance-Gate, 🔔 Ringmodulator, 🌀 Flanger, 〽 Wobble. Bleibt gespeichert.
+- **⟳ Regler-Loop:** **ALT + Regler drücken**, dann drehen – die Bewegung wird 2 Takte lang (einstellbar im MENU: 1/2/4/8) aufgenommen und danach im Takt wiederholt (⟳ am Regler). Wieder drehen nimmt neu auf, nochmal ALT + Regler drücken stoppt den Loop.
 - **Zum Halten:** ALT + STOP = Filter zu · ALT + ZS3 = Echo-Wurf · ALT + CTRL = Stotter 1/16 · ALT + PLAY = alle Effekte zurück. Belegbar außerdem: ⏪ Rückwärts, ⏏ Tape-Stop, 👾 Bitcrush voll, Hochpass.
 - **💤 Bühnenbild:** Nach 10 Sekunden ohne Eingabe spielt die Band auf dem Bildschirm – mit dem Hintergrund des Ortes (Wald, Taverne …), oben Stimmung, Ort und Tempo, unten die Geräusche des Ortes mit kleinem Bild. Irgendeine Taste, ein Regler oder ein Tipper holt das Pult zurück (diese erste Eingabe löst nichts aus). Dazu läuft das Bühnenbild gedimmt hinter dem Pult. Einstellen unter MENU: „Bühnenbild nach: 10 s / 30 s / 60 s / nie“ und „Bühnenbild hinter dem Pult: an/aus“ (aus, falls der Ton knistert).
 - **★ Favoriten:** eine Kachel 1,5 Sekunden halten (Taste oder Finger) – sie steht dann auf ihrer Seite ganz vorne. Nochmal halten nimmt sie wieder raus.
