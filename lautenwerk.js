@@ -1790,13 +1790,13 @@
   function mitVorladen() { if (!ctx) return; MIT_LAGEN.slice(0, MIT.stufe).forEach(x => { try { probenLaden(x[0]); } catch (_) {} }); }
   function mitspielen(midi, staerke) {
     if (!ctx || rendert || !MIT.stufe) return false;
-    if (!mitBus) { mitBus = ctx.createGain(); mitBus.gain.value = Math.pow(MIT.laut / 100, 1.5); mitBus.connect(ausgang); mitHall = ctx.createGain(); mitHall.gain.value = MIT.hall / 100 * .8; mitBus.connect(mitHall); if (hallHP) mitHall.connect(hallHP); }
+    if (!mitBus) { mitBus = ctx.createGain(); mitBus.gain.value = Math.pow(MIT.laut / 100, 1.5); mitBus.connect(einAusgang || ausgang); mitHall = ctx.createGain(); mitHall.gain.value = MIT.hall / 100 * .8; mitBus.connect(mitHall); if (hallHP) mitHall.connect(hallHP); }
     const j = ctx.currentTime + .01, st = Math.max(.15, Math.min(1, staerke == null ? .8 : staerke)), m0 = Math.round(midi) + 12 * (MIT.oktave || 0);
     let ok = false; MIT_LAGEN.slice(0, MIT.stufe).forEach(([g, okt, laut, o]) => { try { if (probe(g, m0 + okt, j, mitBus, laut * st, o)) ok = true; } catch (_) {} });
     return ok;
   }
   let PAD_LAUT = 1.6; try { const v = +localStorage.getItem("imres-lw-padlaut"); if (v >= .3 && v <= 3) PAD_LAUT = v; } catch (_) {}
-  let einDuck = null; /* Musik weicht einem angesteckten Instrument aus (Eingang 1/2) */
+  let einDuck = null, einAusgang = null; /* Musik weicht einem angesteckten Instrument aus (Eingang 1/2) */
   let ausgang = null, hallEin = null, hallNass = null, hallNode = null, hallFilter = null;
   const hallCache = {};
   function hallBild(raum) {
@@ -4872,7 +4872,9 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       ducken = ctx.createGain(); ducken.gain.value = 1;
       /* „Atem“: das kurze Luftholen vor einem Refrain (alles für einen Augenblick fast still) */
       atem = ctx.createGain(); atem.gain.value = 1;
-      master.connect(atem); atem.connect(ducken); ducken.connect(komp); einDuck = ctx.createGain(); einDuck.gain.value = 1; komp.connect(einDuck); einDuck.connect(ausgang); ausgang.connect(limiter); limiter.connect(ctx.destination); endKnoten = limiter;
+      master.connect(atem); atem.connect(ducken); ducken.connect(komp); einDuck = ctx.createGain(); einDuck.gain.value = 1; komp.connect(einDuck); einDuck.connect(ausgang); ausgang.connect(limiter);
+      /* eigener Weg für angesteckte Instrumente und Mitspieler: unabhängig vom Musik-Regler, nur Boost und Limiter gelten mit */
+      einAusgang = ctx.createGain(); einAusgang.gain.value = .6 * boostF(); einAusgang.connect(limiter); limiter.connect(ctx.destination); endKnoten = limiter;
       /* Pump-Bus: Teppich, Orchester, Kapelle, Gäste und Sub-Bass ducken sich bei jedem Kick kurz weg */
       pumpBus = ctx.createGain(); pumpBus.gain.value = 1; pumpBus.connect(master);
       /* Kulisse und Zusatzgeräusche: eigener Weg zum Limiter, am Musikregler vorbei – so lassen sich Musik und Hintergrund
@@ -13432,7 +13434,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     if (EIN.hall) return EIN.hall;
     const sr = ctx.sampleRate, n = Math.round(sr * 2), b = ctx.createBuffer(2, n, sr);
     for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6) * (i < sr * .012 ? i / (sr * .012) : 1); }
-    const cv = ctx.createConvolver(); cv.buffer = b; const g = ctx.createGain(); g.gain.value = .55; cv.connect(g); g.connect(ausgang); EIN.hall = cv; return cv;
+    const cv = ctx.createConvolver(); cv.buffer = b; const g = ctx.createGain(); g.gain.value = .55; cv.connect(g); g.connect(einAusgang || ausgang); EIN.hall = cv; return cv;
   }
   function kanalBauen(i) {
     const c = ctx, k = { pre: c.createGain(), hp: c.createBiquadFilter(), lp: c.createBiquadFilter(), sh: c.createWaveShaper(), dry: c.createGain(), dl: c.createDelay(2.5), fb: c.createGain(), dlf: c.createBiquadFilter(), wet: c.createGain(), hs: c.createGain(), pan: c.createStereoPanner(), out: c.createGain(), mess: c.createAnalyser() };
@@ -13442,7 +13444,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     k.roh = c.createAnalyser(); k.roh.fftSize = 1024; EIN.split.connect(k.roh, i); k.clip = 0;
     k.pre.connect(k.mess); k.pre.connect(k.hp); k.hp.connect(k.lp); k.lp.connect(k.sh); k.sh.connect(k.dry); k.dry.connect(k.pan);
     k.sh.connect(k.dl); k.dl.connect(k.dlf); k.dlf.connect(k.fb); k.fb.connect(k.dl); k.dlf.connect(k.wet); k.wet.connect(k.pan);
-    k.pan.connect(k.out); k.out.connect(ausgang); k.pan.connect(k.hs);
+    k.pan.connect(k.out); k.out.connect(einAusgang || ausgang); k.pan.connect(k.hs);
     EIN.k[i] = k; return k;
   }
   function kanalAnwenden(i) {
@@ -13571,7 +13573,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       if (werte) { Object.assign(KANAL[i], werte); kanaeleMerken(); if (KANAL[i].an) return eingangOeffnen().then(ok => { if (ok) kanalAnwenden(i); return Object.assign({ fehler: EIN.fehler }, KANAL[i]); }); kanalAnwenden(i); }
       return Object.assign({ fehler: EIN.fehler }, KANAL[i]);
     },
-    boost(db) { if (db == null) return BOOST; BOOST = Math.max(0, Math.min(12, Math.round(+db) || 0)); try { localStorage.setItem("imres-lw-boost", String(BOOST)); } catch (_) {} if (ausgang && ctx) ausgang.gain.setTargetAtTime(.6 * masterPegel() * boostF(), ctx.currentTime, .05); return BOOST; },
+    boost(db) { if (db == null) return BOOST; BOOST = Math.max(0, Math.min(12, Math.round(+db) || 0)); try { localStorage.setItem("imres-lw-boost", String(BOOST)); } catch (_) {} if (ausgang && ctx) ausgang.gain.setTargetAtTime(.6 * masterPegel() * boostF(), ctx.currentTime, .05); if (einAusgang && ctx) einAusgang.gain.setTargetAtTime(.6 * boostF(), ctx.currentTime, .05); return BOOST; },
     kanalAnalyse(i, groesse) { return kanalAnalyse(i, groesse || 4096); },
     abtastrate() { return ctx ? ctx.sampleRate : 0; },
     duckStand() { return duckJetzt; },
