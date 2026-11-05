@@ -6123,6 +6123,12 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         ev.spuren[k] = wert;
       });
       try { kickSchritt(ev.zeit, abschnitt % S.ablauf.length); } catch (_) {}
+      /* Zynthian-Begleitung: Akkordwechsel und Schläge nach außen melden (mit Vorlauf in ms) */
+      if (zynMidiHoerer) try {
+        const bis = (ev.zeit - ctx.currentTime + (ctx.outputLatency || ctx.baseLatency || 0)) * 1000, zl = klingt(daten.bass, schritt);
+        if (zl !== zynMidiZeile || (schritt === 0 && abschnitt !== zynMidiAb)) { zynMidiZeile = zl; zynMidiAb = abschnitt; zynMidiHoerer({ art: "akkord", bisMs: bis, akkord: akkordMidi(zl), sd: schrittDauer(), schritt }); }
+        if (schritt % 4 === 0) zynMidiHoerer({ art: "schlag", bisMs: bis, akkord: akkordMidi(zl), sd: schrittDauer(), schritt, eins: schritt === 0 });
+      } catch (_) {}
       try { anlaufSchritt(ev.zeit, abschnitt % S.ablauf.length); if (schritt === 0) taktEchoStellen(ev.zeit); } catch (_) {}
       if (!(brk && schritt >= brkAb)) {
         try { orchesterSchritt(ev.zeit, daten, abschnitt % S.ablauf.length); } catch (_) {}
@@ -13144,7 +13150,7 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
     }, 400);
   }
   /* Schnittstelle für die Zynthian-Steuerung (zynthian/zyn.js) */
-  let zynDuck = null, zynVorlauf = 0;
+  let zynDuck = null, zynVorlauf = 0, zynMidiHoerer = null, zynMidiZeile = -1, zynMidiAb = -1;
   /* ---------- Effekte für den Zynthian: DJ-Filter, Drive, Delay – hinter allem (Musik, Kulisse, Effekte), vor dem Limiter ---------- */
   let fxKette = null, fxSumme = null;
   const FXW = { filter: 0, reso: 15, echo: 0, rueck: 35, zeit: 2, drive: 0, crush: 0, rate: 0, ring: 0, flanger: 0, gate: 0, wobble: 0, stotter: 0, rueckwaerts: 0, bandstop: 0 };
@@ -13302,6 +13308,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const fx = [...new Set((set ? set.fx : KERN_FX).concat(EFFEKTE, KAMPF_FX))].filter(f => T.sfx[f]);
       return { st, kul, fx, namen: { st: T.vorlagen || {}, kul: T.kulissen || {}, fx: T.sfx || {} } };
     },
+    midiHoerer(fn) { zynMidiHoerer = typeof fn === "function" ? fn : null; zynMidiZeile = -1; zynMidiAb = -1; },
     vorlauf(sek) { zynVorlauf = Math.max(0, Math.min(2, +sek || 0)); },
     fx(k, v) { if (!(k in FXW) || !isFinite(+v)) return; FXW[k] = +v; if (fxBauen()) fxAnwenden(); },
     fxWerte() { return Object.assign({ zeiten: FX_ZEITEN.map(x => x[1]) }, FXW); },

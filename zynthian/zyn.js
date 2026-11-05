@@ -543,7 +543,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       if (name === "BACK" || (name === "MENU" && !lang)) { menueZu(); return; }
       if (/^F[1-4]$/.test(name) && menueArt === "modus") { modusSetzen(MODUS_REIHE[+name[1] - 1]); return; }
       if (/^F[1-3]$/.test(name) && menueArt === "zpmodus") { zpModus(["buehne", "welten", "beat"][+name[1] - 1]); return; }
-      if (/^F[1-4]$/.test(name) && menueArt === "zp") { const b = m.querySelector('[data-zm="' + ZP_MENUE_F[+name[1] - 1] + '"]'); if (b) klick(b); return; }
+      if (/^F[1-4]$/.test(name) && menueArt === "zp") { if (name === "F2" && !m.querySelector('[data-zm="abend"]')) return; const b = m.querySelector('[data-zm="' + ZP_MENUE_F[+name[1] - 1] + '"]'); if (b) klick(b); return; }
       if ((name === "LEFT" || name === "RIGHT") && menueArt === "beleg" && fokus && fokus.dataset && /^b:/.test(fokus.dataset.zm || "")) { belegZyklus(fokus.dataset.zm.slice(2), name === "LEFT" ? -1 : 1); return; }
       if (["UP", "DOWN", "LEFT", "RIGHT"].includes(name)) { bewegen(name); return; }
       if (name === "SEL") { auswaehlen(); return; }
@@ -717,7 +717,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   ] : [
     { id: "stimmung", sym: "🎵", name: W("Stimmung", "Mood"), seite: "buehne", farbe: "#e0a046", led: "#ffcf50" },
     { id: "ort", sym: "🌲", name: W("Ort", "Place"), seite: "buehne", farbe: "#3fbf6a", led: "#30ff70" },
-    { id: "momente", sym: "⚡", name: W("Momente", "Moments"), seite: "buehne", farbe: "#e0703a", led: "#ff6a10" }
+    { id: "momente", sym: "⚡", name: W("Momente", "Moments"), seite: "buehne", farbe: "#e0703a", led: "#ff6a10" },
+    { id: "set", sym: "🎬", name: "Set", seite: "buehne", farbe: "#d8c088", led: "#ffe0a0" }
   ];
   const zpDef = id => ZP_SEITEN.find(x => x.id === id) || ZP_SEITEN[0];
   let zpSeite = lies("imres-zp-seite-" + SEITE, ZP_SEITEN[0].id);
@@ -745,6 +746,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       else if (zpSeite === "geraeusche") gruppiert("[data-ger]", "🎭", "ger", W("Geräusche", "Sounds"));
       else gruppiert("[data-aus]", "💥", "aus", W("Einschläge", "Impacts"));
       return g.filter(x => x.l.length);
+    }
+    if (zpSeite === "set") {
+      g.push({ titel: W("Set – deine Songs", "Set – your songs"), l: SET.map((sn, i) => ({ key: "set:" + i, sym: sn.sym || "🎬", name: (i + 1) + ". " + sn.name, an: i === setIndex, los: () => setLaden(i) }))
+        .concat([{ sym: "➕", name: W("Jetzt speichern", "Save current"), los: setSpeichern }]) });
+      return g;
     }
     if (!P || !P.listen) return g;
     const L = P.listen();
@@ -779,7 +785,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const favListe = () => FAV[zpSeite] || [];
   function zpAufbauen() {
     zpGruppen = zpInhalt(); zpListe = [];
-    const fl = favListe();
+    const fl = zpSeite === "set" ? [] : favListe();
     if (fl.length) {
       const alle = {}; zpGruppen.forEach(gr => gr.l.forEach(it => { if (it.key) alle[it.key] = it; }));
       const favs = fl.map(k => alle[k]).filter(Boolean).map(it => Object.assign({}, it, { fav: true }));
@@ -837,6 +843,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     rueckwaerts: [W("⏪ Rückwärts – solange gedrückt", "⏪ Reverse – while held"), W("Rückwärts", "reverse")],
     bandstop: [W("⏏ Tape-Stop – solange gedrückt", "⏏ Tape stop – while held"), W("Tape-Stop", "tape stop")],
     crushhalt: [W("👾 Bitcrush voll – solange gedrückt", "👾 Full crush – while held"), W("Crush", "crush")],
+    tap: [W("⏱ Tap-Tempo", "⏱ Tap tempo"), "Tap"], autopilot: [W("🤖 Autopilot umschalten", "🤖 Toggle autopilot"), "🤖"],
+    set_weiter: [W("🎬 nächster Song im Set", "🎬 next song in set"), W("Song ▶", "song ▶")], set_zurueck: [W("🎬 voriger Song im Set", "🎬 previous song in set"), W("◀ Song", "◀ song")],
     nichts: ["– " + W("nichts", "nothing") + " –", ""]
   };
   const HALTEN = { filterzu: 1, filterhoch: 1, echowurf: 1, stotter: 1, rueckwaerts: 1, bandstop: 1, crushhalt: 1 };
@@ -844,8 +852,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const ZP_STANDARD = {
     regler: { "A:stimmung": ["musik", "spannung", "hg", "los"], "A:ort": ["hg", "los", "spannung", "hall"], "A:momente": ["fxlaut", "spannung", "hall", "tempo"],
       B: ["tempo", "hall", "fxlaut", "echohall"], FX: ["filter", "delay", "crush", "gate"] },
-    tasten: { PLAY: "play", STOP: "stop", PAD: "passiert", REC: "stille", TEMPO: "neubesetzen", ZS3: "seite_zurueck", CTRL: "seite_vor",
-      "ALT+PLAY": "fx_aus", "ALT+STOP": "filterzu", "ALT+PAD": "sprechen", "ALT+REC": "aufnahme", "ALT+TEMPO": "takt", "ALT+ZS3": "echowurf", "ALT+CTRL": "stotter" }
+    tasten: { PLAY: "play", STOP: "stop", PAD: "passiert", REC: "stille", TEMPO: "tap", ZS3: "seite_zurueck", CTRL: "seite_vor",
+      "ALT+PLAY": "fx_aus", "ALT+STOP": "filterzu", "ALT+PAD": "sprechen", "ALT+REC": "aufnahme", "ALT+TEMPO": "neubesetzen", "ALT+ZS3": "echowurf", "ALT+CTRL": "stotter" }
   };
   let ZB = JSON.parse(JSON.stringify(ZP_STANDARD));
   try { const g = JSON.parse(lies("imres-zyn-beleg", "null")); if (g && g.regler && g.tasten) { Object.assign(ZB.regler, g.regler); Object.assign(ZB.tasten, g.tasten); } } catch (_) {}
@@ -853,7 +861,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const bankName = () => BANKEN[bank] || "A";
   function zpRegler() {
     if (SEITE === "welten") return W_REGLER[bank % 2].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
-    const l = bank ? ZB.regler[bankName()] : ZB.regler["A:" + zpSeite];
+    const l = bank ? ZB.regler[bankName()] : ZB.regler["A:" + (zpSeite === "set" ? "stimmung" : zpSeite)];
     return (l || []).slice(0, 4).map(k => ZP_PARAM[k] || ZP_PARAM.nichts);
   }
   const DRUCK_TEXT = { stumm: W("drücken: stumm", "push: mute"), hg: W("drücken: an/aus", "push: on/off"), friedlich: W("drücken: friedlich", "push: peaceful"), mitte: W("drücken: Mitte", "push: centre"), null: W("drücken: neutral", "push: reset") };
@@ -862,7 +870,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const drehGedrueckt = {}, drehGedreht = {};
   function zpParamZyklus(nr, d) {
     if (SEITE === "welten") return;
-    const slot = bank ? bankName() : "A:" + zpSeite, liste = bankName() === "FX" ? FX_PARAMS : NORMAL_PARAMS.concat(FX_PARAMS);
+    const slot = bank ? bankName() : "A:" + (zpSeite === "set" ? "stimmung" : zpSeite), liste = bankName() === "FX" ? FX_PARAMS : NORMAL_PARAMS.concat(FX_PARAMS);
     const l = (ZB.regler[slot] || ["nichts", "nichts", "nichts", "nichts"]).slice(), jetzt = l[nr], i = liste.indexOf(jetzt);
     l[nr] = liste[((i < 0 ? 0 : i + (d > 0 ? 1 : -1)) + liste.length) % liste.length]; ZB.regler[slot] = l; belegMerken();
     zeige("⇄ " + W("Regler ", "Knob ") + (nr + 1) + ": " + (ZP_PARAM[l[nr]] || ZP_PARAM.nichts).name, null, W("loslassen zum Behalten", "release to keep")); zpZeichnen(true);
@@ -948,6 +956,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       case "bank": bankWeiter(); return true;
       case "hg": if (SEITE === "welten") return false; pultKlick("data-aktion", "kulumschalt"); zeige("🌲 " + W("Hintergrund an / aus", "Backdrop on / off")); return true;
       case "fx_aus": if (SEITE === "welten") return false; ["filter", "echo", "drive", "crush", "rate", "ring", "flanger", "gate", "wobble"].forEach(k => fxSetz(k, 0)); zeige("✨ " + W("Effekte zurückgesetzt", "Effects reset")); zpZeichnen(true); return true;
+      case "tap": if (SEITE === "welten") return false; tapTempo(); return true;
+      case "autopilot": autoSetzen(AUTO_STUFEN[(AUTO_STUFEN.indexOf(autoModus) + 1) % AUTO_STUFEN.length]); return true;
+      case "set_weiter": if (SEITE === "welten" || !SET.length) return true; setLaden(Math.min(SET.length - 1, setIndex + 1)); return true;
+      case "set_zurueck": if (SEITE === "welten" || !SET.length) return true; setLaden(Math.max(0, setIndex - 1)); return true;
       case "nichts": return true;
     }
     return false;
@@ -987,11 +999,12 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
   function zpFavUmschalten(i) {
     const it = zpBlattJetzt()[i]; if (!it || !it.key) return;
+    if (zpSeite === "set") { const nr = +String(it.key).slice(4); if (SET[nr]) setMenue(nr); return; }
     const l = favListe().slice(), j = l.indexOf(it.key);
     if (j >= 0) { l.splice(j, 1); zeige("☆ " + it.name, null, W("kein Favorit mehr", "no longer a favourite")); } else { l.push(it.key); zeige("★ " + it.name, null, W("Favorit – steht jetzt vorne", "favourite – now shown first")); }
     FAV[zpSeite] = l; schreib("imres-zp-fav", JSON.stringify(FAV)); zpBlatt[zpSeite] = 0; zpCursor = -1; zpZeichnen(true); ledsMelden();
   }
-  function zpAusloesen(i) { const it = zpBlattJetzt()[i]; if (!it) return; try { it.los(); } catch (e) { console.warn(e); } setTimeout(() => { zpZeichnen(true); ledsMelden(); }, 120); }
+  function zpAusloesen(i) { const it = zpBlattJetzt()[i]; if (!it) return; if (autoModus !== "aus" && (zpSeite === "stimmung" || zpSeite === "set")) autoPlanen("st"); try { it.los(); } catch (e) { console.warn(e); } setTimeout(() => { zpZeichnen(true); ledsMelden(); }, 120); }
   function zpCursorBewegen(r) {
     if (zpCursor < 0) { zpCursor = 0; zpZeichnen(true); return; }
     let c = zpCursor % 4, z = zpCursor >= 4 ? 1 : 0;
@@ -1042,27 +1055,19 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const sets = SEITE === "buehne" && P && P.abendSets ? P.abendSets() : [];
     const akt = sets.find(s => s.k === z.abendSet);
     const k = (f, t, u, id) => '<button type="button" data-zm="' + id + '"><span><span class="kbd">' + f + "</span>" + t + "</span>" + (u ? "<small>" + u + "</small>" : "") + "</button>";
-    menue("<h3>☰ " + W("Menü", "Menu") + '</h3><div class="reihe">' +
+    const zz = (id, t, u) => '<button type="button" data-zm="' + id + '">' + t + (u ? "<small>" + u + "</small>" : "") + "</button>";
+    menue("<h3>☰ " + W("Menü", "Menu") + '</h3><div class="reihe zyn-opt">' +
       k("F1", "🎭 " + W("Modus", "Mode"), (SEITE === "welten" ? "🌿 " + W("Klangwelten", "Soundscapes") : "🎻 " + W("Bühnen-Pult", "Stage console")) + " · " + W("wechseln", "switch"), "modus") +
       (sets.length ? k("F2", "🌙 " + W("Spielabend", "Game night"), akt ? akt.sym + " " + akt.name : W("keiner – alle Stimmungen", "none – all moods"), "abend") : "") +
       k("F3", "🎚 " + W("Optionen", "Options"), W("MIDI-Takt, Handpan-Tonart, Mikrofon …", "MIDI clock, key, mic …"), "optionen") +
       k("F4", "⚙ " + W("System", "System"), W("Aktualisieren, Zynthian, Aufnahme, Aus", "Update, Zynthian, record, off"), "system") +
-      '<button type="button" data-zm="hilfe">❔ ' + W("Tastenbelegung", "Button map") + "</button>" +
-      '<button type="button" data-zm="looplen">⟳ ' + W("Regler-Loop: ", "Knob loop: ") + "<b>" + loopTakte() + W(" Takte", " bars") + "</b><small>" + W("ALT + Regler drücken: aufnehmen / Loop aus", "ALT + push knob: record / loop off") + "</small></button>" +
-      '<button type="button" data-zm="ruhe">💤 ' + W("Bühnenbild nach: ", "Stage view after: ") + "<b>" + (ruheSek() ? ruheSek() + " s" : W("nie", "never")) + "</b><small>" + W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen") + "</small></button>" +
-      '<button type="button" data-zm="bild">🖼 ' + W("Bühnenbild hinter dem Pult: ", "Stage behind the console: ") + "<b>" + (bildHinten() ? W("an", "on") : W("aus", "off")) + "</b><small>" + W("bei Knistern im Ton ausschalten", "turn off if the sound crackles") + "</small></button>" +
-      '<button type="button" data-zm="leistung">⚡ ' + W("Leistung: ", "Performance: ") + "<b>" + LEISTUNG_NAME[leistung()] + "</b><small>" + W("bei Rucklern sparsamer stellen – lädt neu", "go lighter if it stutters – reloads") + "</small></button>" +
-      '<button type="button" data-zm="hell">💡 ' + W("Tastenlicht: ", "Button light: ") + "<b>" + Math.round(ledHell() * 100) + " %</b><small>" + W("Helligkeit der Tasten-LEDs", "brightness of the button LEDs") + "</small></button>" +
-      '<button type="button" data-zm="beleg">🎛 ' + W("Belegung ändern", "Change mapping") + "<small>" + W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons") + "</small></button>" +
+      zz("auto", "🤖 Autopilot: <b>" + AUTO_NAME[autoModus] + "</b>", W("wechselt selbst Stimmungen und setzt Momente", "changes moods and triggers moments by itself")) +
+      (SEITE === "buehne" ? zz("begl", "🎹 " + W("Synth-Begleitung: ", "Synth accompaniment: ") + "<b>" + (BEGL.an ? W("an", "on") : W("aus", "off")) + "</b>", W("Akkorde als MIDI an Zynthian-Synths", "chords as MIDI to Zynthian synths")) : "") +
+      zz("einst", "🛠 " + W("Einstellungen", "Settings"), W("Leistung, Licht, Bühnenbild, Belegung …", "performance, light, stage view, mapping …")) +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
-      '<p class="hinweis">' + W("F1–F4 wählen · Pfeile + SEL · BACK schließt", "F1–F4 pick · arrows + SEL · BACK closes") + "</p>",
-      { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu, beleg: () => belegMenue(),
-        leistung: () => { const l = ["voll", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % 3]; schreib("imres-lw-leicht", n === "voll" ? "0" : "1"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
-        hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); zpMenue(); const b = $('.zyn-menue [data-zm="hell"]'); if (b) fokusSetzen(b); },
-        looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="looplen"]'); if (b) fokusSetzen(b); },
-        ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="ruhe"]'); if (b) fokusSetzen(b); },
-        bild: () => { schreib("imres-zp-bild", bildHinten() ? "0" : "1"); document.documentElement.classList.toggle("zyn-bb", bildHinten() && SEITE === "buehne"); zpMenue(); const b = $('.zyn-menue [data-zm="bild"]'); if (b) fokusSetzen(b); },
-        });
+      '<p class="hinweis">' + W("F1–F4 wählen · Pfeile/Drehregler + SEL · BACK schließt", "F1–F4 pick · arrows/knob + SEL · BACK closes") + "</p>",
+      { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), system: systemMenue, zu: menueZu, einst: () => zpEinstellungen(), begl: () => beglMenue(),
+        auto: () => { autoSetzen(AUTO_STUFEN[(AUTO_STUFEN.indexOf(autoModus) + 1) % AUTO_STUFEN.length]); zpMenue(); const b = $('.zyn-menue [data-zm="auto"]'); if (b) fokusSetzen(b); } });
     menueArt = "zp";
   }
   const ZP_MENUE_F = ["modus", "abend", "optionen", "system"];
@@ -1110,10 +1115,211 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const z = (kk, t) => "<div><b>" + kk + "</b><span>" + t + "</span></div>";
     const l = [["F1–F4", W("obere Kachelreihe", "top row of tiles")], ["ALT + F1–F4", W("untere Kachelreihe", "bottom row")], ["◀ ▶", W("Kachel wählen, am Rand weiterblättern", "move, page at the edge")],
       ["ALT + ◀ ▶", W("vorige / nächste Seite", "previous / next page")], ["ALT + ▲ ▼", W("andere Gruppe (Favoriten, Wetter, Effekte …)", "other group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")], ["F 1,5 s halten", W("★ Favorit an/aus – Favoriten stehen vorne", "★ favourite on/off")],
-      ["MIXER", W("Reglerbank A → B → FX", "Knob bank A → B → FX")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")]]
+      ["MIXER", W("Reglerbank A → B → FX", "Knob bank A → B → FX")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
       .concat(ZP_TASTEN.map(t => [t.replace("ALT+", "ALT + "), (ZP_AKT[ZB.tasten[t]] || ZP_AKT.nichts)[0]]));
     menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([x, y]) => z(x, y)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="beleg">🎛 ' + W("Ändern", "Change") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, beleg: () => belegMenue() });
     menueArt = "hilfe";
+  }
+
+  /* ===================== Auslastung des Pi ===================== */
+  let lastInfo = null, lagMax = 0, lagT = performance.now();
+  setInterval(() => { const j = performance.now(), d = j - lagT - 100; lagT = j; if (d > lagMax) lagMax = d; }, 100);
+  setInterval(() => {
+    if (document.hidden) return;
+    fetch("/zyn/last").then(r => r.json()).then(j => { lastInfo = Object.assign(j || {}, { lag: Math.round(lagMax) }); lagMax = 0; })
+      .catch(() => { lastInfo = { lag: Math.round(lagMax) }; lagMax = 0; });
+  }, 2000);
+  function lastAnzeige() {
+    if (!lastInfo) return "";
+    const c = lastInfo.kern != null ? Math.max(lastInfo.cpu || 0, lastInfo.kern) : null, farbe = c == null ? "#c8bba6" : c < 60 ? "#7fe08a" : c < 85 ? "#ffc830" : "#ff4a3a";
+    let h = c != null ? '<span style="color:' + farbe + '">⚙ ' + c + " %</span>" : "";
+    if (lastInfo.temp >= 70) h += ' <span style="color:' + (lastInfo.temp >= 80 ? "#ff4a3a" : "#ffc830") + '">🌡 ' + lastInfo.temp + "°</span>";
+    if (lastInfo.lag > 200) h += ' <span style="color:#ff4a3a">⚠ ' + W("Ruckler", "stutter") + "</span>";
+    return h ? h + " · " : "";
+  }
+
+  /* ===================== Tap-Tempo ===================== */
+  let taps = [];
+  function tapTempo() {
+    const j = performance.now(); if (taps.length && j - taps[taps.length - 1] > 2000) taps = [];
+    taps.push(j); if (taps.length > 5) taps.shift();
+    if (taps.length < 2) { zeige("⏱ Tap …", null, W("weiter im Takt tippen", "keep tapping")); return; }
+    const iv = taps.slice(1).map((t, i) => t - taps[i]), bpm = Math.round(60000 / (iv.reduce((a, b) => a + b, 0) / iv.length));
+    if (bpm < 40 || bpm > 220) return;
+    if (OPT.takt === "slave" && tempoMidi) { zeige("⏱ " + W("Das Tempo kommt von der TR-8S", "Tempo comes from the clock"), null, W("MIDI-Takt auf „aus“ stellen, um selbst zu tippen", "set MIDI clock to off to tap")); return; }
+    const b = Math.max(50, Math.min(180, bpm)); if (window.ImresPult && window.ImresPult.tempo) window.ImresPult.tempo(b);
+    zeige("⏱ " + b + " BPM", null, W("Tap-Tempo · ", "tap tempo · ") + taps.length + "×"); zpReglerAnzeige();
+  }
+
+  /* ===================== Autopilot ===================== */
+  const AUTO_STUFEN = ["aus", "ruhig", "lebendig"];
+  const AUTO_NAME = { aus: W("aus", "off"), ruhig: W("ruhig (Stimmung alle 4–7 min)", "calm (mood every 4–7 min)"), lebendig: W("lebendig (alle 2–4 min)", "lively (every 2–4 min)") };
+  const AUTO_ZEIT = { ruhig: { st: [240, 420], mom: [100, 200] }, lebendig: { st: [120, 240], mom: [45, 100] } };
+  let autoModus = AUTO_STUFEN.includes(lies("imres-zp-auto", "aus")) ? lies("imres-zp-auto", "aus") : "aus", autoSt = 0, autoMom = 0, autoSp = 0;
+  function autoPlanen(art) {
+    const z = AUTO_ZEIT[autoModus]; if (!z) return; const r = ([a, b]) => (a + Math.random() * (b - a)) * 1000, j = Date.now();
+    if (!art || art === "st") autoSt = j + r(z.st); if (!art || art === "mom") autoMom = j + r(z.mom); if (!art || art === "sp") autoSp = j + 30000;
+  }
+  function autoSetzen(m) { autoModus = m; schreib("imres-zp-auto", m); autoSt = 0; if (m !== "aus") autoPlanen(); zeige("🤖 Autopilot: " + AUTO_NAME[m]); zpZeichnen(true); }
+  setInterval(() => {
+    if (autoModus === "aus") return; const j = Date.now(); if (!autoSt) autoPlanen();
+    if (SEITE === "buehne") {
+      const z = pz() || {}, P = window.ImresPult; if (!z.laeuft || !P || !P.listen) return;
+      if (j >= autoSt) { autoPlanen("st"); const L = P.listen(); const fav = (FAV.stimmung || []).map(k => k.replace(/^st:/, "")).filter(k => L.st.includes(k));
+        const pool = (fav.length >= 2 ? fav : L.st.slice(0, 8)).filter(k => k !== z.stimmung), k = pool[Math.floor(Math.random() * pool.length)];
+        if (k) { pultKlick("data-vorlage", k); zeige("🤖 " + teil(L.namen.st[k] || k, "")[1], null, "Autopilot"); } }
+      if (j >= autoMom && z.kulLaeuft) { autoPlanen("mom"); pultKlick("data-aktion", "passiert"); zeige("🤖 ⚡ " + W("Etwas passiert", "Something happens"), null, "Autopilot"); }
+      if (j >= autoSp) { autoPlanen("sp"); const r = ZP_PARAM.spannung, v = r.lies(); r.setz(Math.max(0, Math.min(65, Math.round((v + (Math.random() - .5) * 20) / 5) * 5))); }
+    } else if ($(".welt.an")) {
+      if (j >= autoSt) { autoPlanen("st"); const l = $$("[data-szene]"), el = l[Math.floor(Math.random() * l.length)]; if (el) { klick(el); zeige("🤖 ⏳ " + kurzName(el), null, "Autopilot"); } }
+      if (j >= autoMom) { autoPlanen("mom"); const l = $$("[data-ger]"), el = l[Math.floor(Math.random() * l.length)]; if (el) klick(el); }
+    }
+  }, 3000);
+
+  /* ===================== Set: Schnappschüsse ===================== */
+  let SET = []; try { SET = JSON.parse(lies("imres-zp-set", "[]")) || []; } catch (_) { SET = []; }
+  let setIndex = -1;
+  const setMerken = () => schreib("imres-zp-set", JSON.stringify(SET));
+  const FX_SCHLUESSEL = ["filter", "reso", "echo", "rueck", "zeit", "drive", "crush", "rate", "ring", "flanger", "gate", "wobble"];
+  function schnappschuss() {
+    const z = pz() || {}, P = window.ImresPult, L = P && P.listen ? P.listen() : { namen: { st: {}, kul: {} } }, w = PFX() || {};
+    const werte = {}; ["musik", "hg", "los", "spannung", "tempo", "hall", "fxlaut", "echohall"].forEach(k => { try { werte[k] = ZP_PARAM[k].lies(); } catch (_) {} });
+    const fx = {}; FX_SCHLUESSEL.forEach(k => { if (typeof w[k] === "number") fx[k] = w[k]; });
+    const zus = [...new Set($$('#lautenwerk [data-zusatz][aria-pressed="true"]').map(e => e.dataset.zusatz))];
+    const [sy, nm] = teil(L.namen.st[z.stimmung] || "", "🎬"), kn = z.kulLaeuft && z.kulisse && z.kulisse !== "keine" ? teil(L.namen.kul[z.kulisse] || "", "")[1] : "";
+    return { name: (nm || W("Stille", "Silence")) + (kn ? " · " + kn : ""), sym: sy, st: z.stimmung, laeuft: !!z.laeuft, kul: z.kulLaeuft ? z.kulisse : "keine", werte, fx, zus, abend: z.abendSet || "" };
+  }
+  function setLaden(i) {
+    const s = SET[i]; if (!s) return; setIndex = i; const P = window.ImresPult, z = pz() || {};
+    if ((s.abend || "") !== (z.abendSet || "") && P && P.abend) P.abend(s.abend);
+    if (s.laeuft && s.st && (z.stimmung !== s.st || !z.laeuft)) pultKlick("data-vorlage", s.st); else if (!s.laeuft && z.laeuft) musikSpielen();
+    const ort = () => { const z2 = pz() || {}; if (s.kul === "keine") { if (z2.kulLaeuft) pultKlick("data-kulisse", "keine"); } else if (s.kul && (z2.kulisse !== s.kul || !z2.kulLaeuft)) pultKlick("data-kulisse", s.kul); };
+    setTimeout(() => {
+      ort();
+      Object.keys(s.werte || {}).forEach(k => { if (k === "tempo" && OPT.takt === "slave" && tempoMidi) return; const r = ZP_PARAM[k]; if (r && typeof s.werte[k] === "number") r.setz(s.werte[k]); });
+      Object.keys(s.fx || {}).forEach(k => fxSetz(k, s.fx[k]));
+      const soll = new Set(s.zus || []), erste = new Map(); $$("#lautenwerk [data-zusatz]").forEach(el => { if (!erste.has(el.dataset.zusatz)) erste.set(el.dataset.zusatz, el); });
+      erste.forEach((el, id) => { const an = el.getAttribute("aria-pressed") === "true"; if (an !== soll.has(id)) klick(el); });
+    }, 600);
+    setTimeout(ort, 4500); /* nach dem Stimmungswechsel am Taktende den Ort noch einmal festigen */
+    zeige("🎬 " + s.name, null, (i + 1) + " / " + SET.length); zpZeichnen(true);
+  }
+  function setSpeichern() { SET.push(schnappschuss()); setMerken(); setIndex = SET.length - 1; zeige("🎬 " + W("Gespeichert: ", "Saved: ") + SET[setIndex].name, null, W("1,5 s halten: ändern, verschieben, löschen", "hold 1.5 s: edit, move, delete")); zpZeichnen(true); }
+  function setMenue(i) {
+    const s = SET[i]; if (!s) return; const a = { zu: menueZu };
+    a.neu = () => { SET[i] = Object.assign(schnappschuss(), {}); setMerken(); menueZu(); zeige("↻ " + SET[i].name); zpZeichnen(true); };
+    a.vor = () => { if (i > 0) { [SET[i - 1], SET[i]] = [SET[i], SET[i - 1]]; setMerken(); } menueZu(); zpZeichnen(true); };
+    a.nach = () => { if (i < SET.length - 1) { [SET[i + 1], SET[i]] = [SET[i], SET[i + 1]]; setMerken(); } menueZu(); zpZeichnen(true); };
+    a.weg = () => { SET.splice(i, 1); setMerken(); if (setIndex >= SET.length) setIndex = SET.length - 1; menueZu(); zeige("✕ " + s.name, null, W("gelöscht", "deleted")); zpZeichnen(true); };
+    const b = (id, t) => '<button type="button" data-zm="' + id + '">' + t + "</button>";
+    menue("<h3>🎬 " + esc2(s.sym + " " + s.name) + '</h3><div class="reihe">' + b("neu", "↻ " + W("Mit dem jetzigen Klang überschreiben", "Overwrite with current sound")) + b("vor", "◀ " + W("Nach vorne", "Move earlier")) +
+      b("nach", "▶ " + W("Nach hinten", "Move later")) + b("weg", "✕ " + W("Löschen", "Delete")) + b("zu", W("Schließen", "Close")) + "</div>", a);
+    menueArt = "set";
+  }
+
+  /* ===================== Synth-Begleitung (MIDI an Zynthian-Ketten / externe Synths) ===================== */
+  const BEGL_STD = { an: false, pad: true, bass: true, glocken: true, drone: false, gm: false };
+  let BEGL = Object.assign({}, BEGL_STD); try { Object.assign(BEGL, JSON.parse(lies("imres-zp-begl", "{}")) || {}); } catch (_) {}
+  const beglMerken = () => schreib("imres-zp-begl", JSON.stringify(BEGL));
+  const KAN = { pad: 0, bass: 1, glocken: 2, drone: 3 };
+  /* Ensembles: zu jeder Stimmungsfamilie eine passende Besetzung (General-MIDI-Programme für FluidSynth, dazu Ideen für andere Synths) */
+  const ENSEMBLES = {
+    taverne: { name: W("🍺 Tavernen-Kapelle", "🍺 Tavern band"), st: ["trinklied", "dorffest", "marktplatz", "kamin", "shanty", "hof"],
+      pad: [21, W("Akkordeon", "Accordion")], bass: [32, W("Kontrabass gezupft", "Acoustic bass")], glocken: [15, W("Hackbrett", "Dulcimer")], drone: [109, W("Dudelsack", "Bagpipe")],
+      ideen: W("setBfree: weiche Orgel als Pad · ZynAddSubFX: gezupfter Bass · Dexed: „Clavinet“ für die Glocken-Stimme", "setBfree soft organ pad · ZynAddSubFX plucked bass · Dexed clavinet") },
+    abenteuer: { name: W("🗺 Abenteuer-Orchester", "🗺 Adventure orchestra"), st: ["reise", "reiter", "heldenlied", "sieg", "auenland", "pilger", "zwerge"],
+      pad: [48, W("Streicher-Ensemble", "String ensemble")], bass: [43, W("Kontrabass", "Contrabass")], glocken: [46, W("Harfe", "Harp")], drone: [60, W("Waldhorn", "French horn")],
+      ideen: W("Surge XT: breite Streicher-Fläche · Dexed: Harfe/Glocken · ZynAddSubFX: Horn-Pad im Grundton", "Surge XT strings · Dexed harp · ZynAddSubFX horn pad") },
+    schlacht: { name: W("⚔ Schlacht-Blech", "⚔ Battle brass"), st: ["kampf", "boss", "verfolgung"],
+      pad: [61, W("Blechbläser", "Brass section")], bass: [38, W("Synth-Bass", "Synth bass")], glocken: [14, W("Röhrenglocken", "Tubular bells")], drone: [47, W("Pauke", "Timpani")],
+      ideen: W("OB-Xd oder Surge XT: harter Synth-Brass · ZynAddSubFX: Sub-Bass · Glocken über Dexed „Tubular Bells“", "OB-Xd/Surge brass · ZynAddSubFX sub bass · Dexed bells") },
+    mystik: { name: W("👁 Mystik-Chor", "👁 Mystic choir"), st: ["spannung", "grusel", "unterreich", "ruinen"],
+      pad: [52, W("Chor „Aah“", "Choir aahs")], bass: [35, W("Bundloser Bass", "Fretless bass")], glocken: [8, W("Celesta", "Celesta")], drone: [95, W("Sweep-Fläche", "Sweep pad")],
+      ideen: W("Surge XT: dunkle, langsam atmende Fläche · ZynAddSubFX: tiefer Drone mit Rauschen · Dexed: Celesta", "Surge dark pad · ZynAddSubFX drone · Dexed celesta") },
+    lager: { name: W("🔥 Lagerfeuer & Elben", "🔥 Campfire & elves"), st: ["rast", "klage", "elben", "fey"],
+      pad: [89, W("Warme Fläche", "Warm pad")], bass: [35, W("Bundloser Bass", "Fretless bass")], glocken: [108, W("Kalimba", "Kalimba")], drone: [104, W("Sitar-Bordun", "Sitar drone")],
+      ideen: W("Surge XT: warme, weiche Fläche · Kalimba/Spieluhr aus dem Soundfont · Sitar oder Tanpura-artiger Bordun – passt zur Handpan", "Surge warm pad · kalimba · sitar drone – fits the handpan") }
+  };
+  const ensembleVon = st => Object.keys(ENSEMBLES).find(k => ENSEMBLES[k].st.includes(st)) || "abenteuer";
+  let beglPad = [], beglBass = null, beglDrone = [], beglArp = 0, beglLief = false, beglEns = "", beglPuffer = [], beglT = 0;
+  function beglSenden(liste, alleAus) {
+    beglPuffer.push(...liste);
+    if (alleAus) { fetch("/zyn/noten", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ alleAus: true }) }).catch(() => {}); }
+    if (beglT) return;
+    beglT = setTimeout(() => { beglT = 0; const j = performance.now(), l = beglPuffer.map(x => Object.assign({}, x, { in: Math.max(0, Math.round(x.t - j)) })); beglPuffer = [];
+      l.forEach(x => delete x.t); if (l.length) fetch("/zyn/noten", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ev: l }) }).catch(() => {}); }, 10);
+  }
+  const beglStaerke = () => { const sp = (pz() || {}).spannung || 0, los = (pz() || {}).intensitaet || 5; return Math.max(30, Math.min(120, Math.round(52 + sp * 38 + los * 2.5))); };
+  function beglEreignis(e) {
+    if (!BEGL.an) return; const t = performance.now() + e.bisMs, a = e.akkord, v = beglStaerke(), ev = [], z = pz() || {};
+    beglLief = true;
+    if (BEGL.gm && z.stimmung) { const en = ensembleVon(z.stimmung); if (en !== beglEns) { beglEns = en; const E = ENSEMBLES[en]; ["pad", "bass", "glocken", "drone"].forEach(r => ev.push({ k: KAN[r], pc: E[r][0], t: t - 30 })); } }
+    if (e.art === "akkord") {
+      if (BEGL.pad) { beglPad.forEach(n => ev.push({ k: KAN.pad, n, v: 0, t })); beglPad = [a.grund, a.terz, a.quinte]; beglPad.forEach(n => ev.push({ k: KAN.pad, n, v: Math.round(v * .8), t: t + 2 })); }
+      if (BEGL.bass) { if (beglBass != null) ev.push({ k: KAN.bass, n: beglBass, v: 0, t }); beglBass = a.grund - 12; ev.push({ k: KAN.bass, n: beglBass, v: Math.min(127, v + 8), t: t + 2 }); }
+      if (BEGL.drone) { const g = OPT.tonartAn ? 36 + OPT.grund : 36 + ((a.grund % 12) + 12) % 12, soll = [g, g + 7];
+        if (beglDrone[0] !== g) { beglDrone.forEach(n => ev.push({ k: KAN.drone, n, v: 0, t })); beglDrone = soll; soll.forEach(n => ev.push({ k: KAN.drone, n, v: 60, t: t + 2 })); } }
+    } else if (e.art === "schlag" && BEGL.glocken) {
+      const los = z.intensitaet || 5; if (Math.random() < .25 + los * .065) {
+        const toene = [a.quinte + 12, a.terz + 12, a.grund + 24, a.terz + 24], n = toene[beglArp++ % toene.length];
+        ev.push({ k: KAN.glocken, n, v: Math.round(v * .75), t }, { k: KAN.glocken, n, v: 0, t: t + e.sd * 3000 }); }
+    }
+    if (ev.length) beglSenden(ev);
+  }
+  function beglAus() { beglPad = []; beglBass = null; beglDrone = []; beglLief = false; beglEns = ""; beglSenden([], true); }
+  setInterval(() => {
+    const P = window.ImresPult; if (!P || !P.midiHoerer) return;
+    P.midiHoerer(BEGL.an ? beglEreignis : null);
+    const z = pz() || {}; if (beglLief && (!BEGL.an || !z.laeuft)) beglAus();
+  }, 700);
+  function beglMenue(fokusK) {
+    const an = x => x ? "✅ " + W("an", "on") : "⬜ " + W("aus", "off"), a = { zu: menueZu };
+    const z = (k, t, w, u) => '<button type="button" data-zm="b:' + k + '"><span>' + t + ": <b>" + w + "</b></span>" + (u ? "<small>" + u + "</small>" : "") + "</button>";
+    ["an", "pad", "bass", "glocken", "drone", "gm"].forEach(k => { a["b:" + k] = () => { BEGL[k] = !BEGL[k]; beglMerken(); if (k === "an" && !BEGL.an) beglAus(); if (k === "gm") beglEns = ""; beglMenue(k); }; });
+    a["b:test"] = () => { const t = performance.now() + 50; beglSenden([[60, 64, 67].map(n => ({ k: KAN.pad, n, v: 90, t })), [60, 64, 67].map(n => ({ k: KAN.pad, n, v: 0, t: t + 900 })), [{ k: KAN.bass, n: 36, v: 100, t }, { k: KAN.bass, n: 36, v: 0, t: t + 900 }], [{ k: KAN.glocken, n: 79, v: 90, t: t + 300 }, { k: KAN.glocken, n: 79, v: 0, t: t + 800 }]].flat()); zeige("🎹 " + W("Testakkord auf Kanal 1–3", "Test chord on channels 1–3")); };
+    a["b:aus"] = () => { beglAus(); zeige("🔇 " + W("Alle Noten aus", "All notes off")); };
+    a["b:ideen"] = beglIdeen;
+    const h = "<h3>🎹 " + W("Synth-Begleitung", "Synth accompaniment") + '</h3><div class="reihe zyn-opt">' +
+      z("an", "🎹 " + W("Begleitung", "Accompaniment"), an(BEGL.an), W("Imres spielt seine Akkorde als MIDI mit – in eurer Tonart, im Takt", "Imres plays its chords as MIDI – in key, in time")) +
+      z("pad", "· " + W("Fläche (Kanal 1)", "Pad (channel 1)"), an(BEGL.pad), W("gehaltene Akkorde", "held chords")) +
+      z("bass", "· " + W("Bass (Kanal 2)", "Bass (channel 2)"), an(BEGL.bass), W("Grundton eine Oktave tiefer", "root an octave down")) +
+      z("glocken", "· " + W("Glocken/Arpeggio (Kanal 3)", "Bells/arpeggio (channel 3)"), an(BEGL.glocken), W("Akkordtöne auf den Schlägen – je mehr los ist, desto mehr", "chord tones on beats – busier when busy")) +
+      z("drone", "· " + W("Bordun (Kanal 4)", "Drone (channel 4)"), an(BEGL.drone), W("Grundton + Quinte der Handpan-Tonart", "root + fifth of the handpan key")) +
+      z("gm", "🎼 " + W("Klänge je Stimmung wechseln", "Switch sounds per mood"), an(BEGL.gm), W("sendet General-MIDI-Programme (FluidSynth mit GM-Soundfont)", "sends General MIDI programs (FluidSynth GM soundfont)")) +
+      '<button type="button" data-zm="b:ideen">🎻 ' + W("Ensembles & Klangideen", "Ensembles & sound ideas") + "<small>" + W("welche Synths zu welcher Stimmung passen", "which synths fit which mood") + "</small></button>" +
+      '<button type="button" data-zm="b:test">🔔 ' + W("Testakkord senden", "Send test chord") + '</button><button type="button" data-zm="b:aus">🔇 ' + W("Alle Noten aus", "All notes off") + "</button>" +
+      '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
+      '<p class="hinweis">' + W("Im Zynthian: „Zusammen mit Zynthian“ starten, Ketten auf MIDI-Kanal 1–4 anlegen, „Imres Begleitung“ als MIDI-Eingang aktivieren. Externe Synths am USB bekommen die Noten automatisch.", "In Zynthian: start “Together with Zynthian”, create chains on MIDI ch. 1–4, enable “Imres Begleitung” as MIDI input. USB synths get the notes automatically.") + "</p>";
+    const m = menue(h, a); menueArt = "begl"; if (fokusK) { const b = m.querySelector('[data-zm="b:' + fokusK + '"]'); if (b) fokusSetzen(b); }
+  }
+  function beglIdeen() {
+    const zeile = E => "<div style=\"grid-column:1/-1\"><b style=\"min-width:0\">" + E.name + "</b></div>" +
+      [["pad", "1 " + W("Fläche", "Pad")], ["bass", "2 Bass"], ["glocken", "3 " + W("Glocken", "Bells")], ["drone", "4 " + W("Bordun", "Drone")]].map(([r, t]) => "<div><b>" + t + "</b><span>" + E[r][1] + " (GM " + (E[r][0] + 1) + ")</span></div>").join("") +
+      "<div style=\"grid-column:1/-1;color:#a89f8f\">" + E.ideen + "</div>";
+    menue("<h3>🎻 " + W("Ensembles", "Ensembles") + '</h3><div class="zyn-hilfe">' + Object.values(ENSEMBLES).map(zeile).join("") + '</div><div class="reihe drei"><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: () => beglMenue() });
+    menueArt = "hilfe";
+  }
+
+  /* Einstellungen (selten gebraucht) */
+  function zpEinstellungen(fokusK) {
+    const zz = (id, t, w, u) => '<button type="button" data-zm="' + id + '">' + t + (w != null ? "<b>" + w + "</b>" : "") + (u ? "<small>" + u + "</small>" : "") + "</button>";
+    const neu = id => () => { zpEinstellungen(id); };
+    const a = { zu: menueZu, hilfe: zpHilfe, beleg: () => belegMenue(),
+      leistung: () => { const l = ["voll", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % 3]; schreib("imres-lw-leicht", n === "voll" ? "0" : "1"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
+      hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); neu("hell")(); },
+      looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); neu("looplen")(); },
+      ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); neu("ruhe")(); },
+      bild: () => { schreib("imres-zp-bild", bildHinten() ? "0" : "1"); document.documentElement.classList.toggle("zyn-bb", bildHinten() && SEITE === "buehne"); neu("bild")(); } };
+    const m = menue("<h3>🛠 " + W("Einstellungen", "Settings") + '</h3><div class="reihe zyn-opt">' +
+      zz("leistung", "⚡ " + W("Leistung: ", "Performance: "), LEISTUNG_NAME[leistung()], W("bei Rucklern sparsamer stellen – lädt neu", "go lighter if it stutters – reloads")) +
+      zz("hell", "💡 " + W("Tastenlicht: ", "Button light: "), Math.round(ledHell() * 100) + " %") +
+      zz("ruhe", "💤 " + W("Bühnenbild nach: ", "Stage view after: "), ruheSek() ? ruheSek() + " s" : W("nie", "never"), W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen")) +
+      zz("bild", "🖼 " + W("Bühnenbild hinter dem Pult: ", "Stage behind the console: "), bildHinten() ? W("an", "on") : W("aus", "off"), W("kostet Rechenzeit", "costs processing time")) +
+      zz("looplen", "⟳ " + W("Regler-Loop: ", "Knob loop: "), loopTakte() + W(" Takte", " bars"), W("ALT + Regler drücken: aufnehmen / Loop aus", "ALT + push knob: record / loop off")) +
+      zz("beleg", "🎛 " + W("Belegung ändern", "Change mapping"), null, W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons")) +
+      zz("hilfe", "❔ " + W("Tastenbelegung", "Button map"), null) +
+      '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>", a);
+    menueArt = "einst"; if (fokusK) { const b = m.querySelector('[data-zm="' + fokusK + '"]'); if (b) fokusSetzen(b); }
   }
 
   /* ----- Zeichnen ----- */
@@ -1125,6 +1331,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (SEITE === "welten") { const a = $(".welt.an"); status = (a ? "▶ <b>" + esc2(kurzName(a.querySelector(".nm") || a)) + "</b>" : "■ " + W("still", "silent")); }
     else { const sn = z.stimmung && L ? teil(L.namen.st[z.stimmung] || z.stimmung, "")[1] : "–", kn = z.kulLaeuft && L && z.kulisse !== "keine" ? teil(L.namen.kul[z.kulisse] || z.kulisse, "")[1] : W("kein Hintergrund", "no backdrop");
       status = (z.laeuft ? "▶ <b>" + esc2(sn) + "</b>" : "■ " + esc2(sn)) + " · 🌲 " + esc2(kn) + " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) + (OPT.takt === "slave" && tempoMidi ? " ⇄" : OPT.takt === "master" ? " ⇉" : ""); }
+    status = lastAnzeige() + status + (autoModus !== "aus" ? " · 🤖" : "") + (BEGL.an && SEITE === "buehne" ? " · 🎹" : "");
     status += (OPT.tonartAn ? " · 🎼 " + esc2(tonartName()) : "") + (aufnahmeAn ? ' · <span class="rec">⏺ REC</span>' : "") + (alt ? ' · <span class="alt">ALT</span>' : "");
     const tabs = ZP_SEITEN.map(s => '<button type="button" class="zp-tab' + (s.id === zpSeite ? " an" : "") + '" data-zp-tab="' + s.id + '" style="--f:' + s.farbe + '"><span class="zp-sym">' + s.sym + "</span> " + s.name + "</button>").join("");
     const kach = Array.from({ length: 8 }, (_, i) => { const it = blatt[i];
@@ -1155,7 +1362,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (id === "seite_zurueck") return ZP_SEITEN[(i + ZP_SEITEN.length - 1) % ZP_SEITEN.length].led;
     if (id === "bank") return BANK_FARBE[BANKEN[(bank + 1) % BANKEN.length]];
     return { play: "#30ff70", stop: "#ff1a30", passiert: "#ff6a10", stille: "#fff4e0", neubesetzen: "#ffc830", sprechen: "#f0dca0", aufnahme: "#ff1a30", takt: "#d8d0c0", hg: "#80ffb0", fx_aus: "#fff8ec",
-      filterzu: BANK_FARBE.FX, filterhoch: BANK_FARBE.FX, echowurf: BANK_FARBE.FX, stotter: BANK_FARBE.GLITCH, rueckwaerts: BANK_FARBE.GLITCH, bandstop: BANK_FARBE.GLITCH, crushhalt: BANK_FARBE.GLITCH }[id] || "#000000";
+      filterzu: BANK_FARBE.FX, filterhoch: BANK_FARBE.FX, echowurf: BANK_FARBE.FX, stotter: BANK_FARBE.GLITCH, rueckwaerts: BANK_FARBE.GLITCH, bandstop: BANK_FARBE.GLITCH, crushhalt: BANK_FARBE.GLITCH, tap: "#ffc830", autopilot: "#c040ff", set_weiter: "#ffe0a0", set_zurueck: "#ffe0a0" }[id] || "#000000";
   }
   function aktAktiv(id) {
     const z = pz() || {};
@@ -1163,6 +1370,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (id === "aufnahme") return aufnahmeAn;
     if (id === "neubesetzen") return !!z.neuBesetzen;
     if (id === "hg") return !!z.kulLaeuft;
+    if (id === "autopilot") return autoModus !== "aus";
     if (HALTEN[id]) return Object.values(gehalten).includes(id);
     return false;
   }

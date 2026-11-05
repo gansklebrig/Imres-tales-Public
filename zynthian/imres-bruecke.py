@@ -286,6 +286,8 @@ class Handler(SimpleHTTPRequestHandler):
                                       "text": zustand["text"], "vor": round(time.time() - zustand["zeit"], 1) if zustand["zeit"] else None})
         if p == "/zyn/optionen":
             return self.json_antwort(dict(OPT))
+        if p == "/zyn/last":
+            return self.json_antwort(last_messen())
         if p in ("/zyn/imres_midi.py", "/zyn/imres-bruecke.py"):
             return self.send_error(404)
         if p == "/zyn/leds":
@@ -392,6 +394,14 @@ class Handler(SimpleHTTPRequestHandler):
                 takt.an = neu.get("takt") == "master"
             senden({"typ": "optionen", "optionen": neu})
             return self.json_antwort(neu)
+        if p == "/zyn/noten":
+            if noten and isinstance(d, dict):
+                if d.get("alleAus"):
+                    noten.alle_aus()
+                liste = d.get("ev")
+                if isinstance(liste, list):
+                    noten.planen([x for x in liste if isinstance(x, dict)])
+            return self.json_antwort({"ok": bool(noten and noten.seq)})
         if p == "/zyn/takt":
             # die Bühne meldet als MIDI-Master Tempo und Schlag
             if takt:
@@ -420,6 +430,42 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_error(404)
 
 
+# ---------- Auslastung des Raspberry Pi (für die Anzeige im Pult) ----------
+_last_vorher = {}
+
+
+def last_messen():
+    erg = {"cpu": None, "kern": None, "temp": None}
+    try:
+        with open("/proc/stat") as f:
+            zeilen = [z.split() for z in f if z.startswith("cpu")]
+        werte = []
+        for z in zeilen:
+            zahlen = list(map(int, z[1:9]))
+            leer, gesamt = zahlen[3] + zahlen[4], sum(zahlen)
+            alt = _last_vorher.get(z[0])
+            _last_vorher[z[0]] = (leer, gesamt)
+            if alt and gesamt > alt[1]:
+                werte.append((z[0], 100.0 * (1 - (leer - alt[0]) / (gesamt - alt[1]))))
+        for name, w in werte:
+            if name == "cpu":
+                erg["cpu"] = round(w)
+        kerne = [w for name, w in werte if name != "cpu"]
+        if kerne:
+            erg["kern"] = round(max(kerne))
+    except Exception:
+        pass
+    try:
+        with open("/sys/class/thermal/thermal_zone0/temp") as f:
+            erg["temp"] = round(int(f.read().strip()) / 1000)
+    except Exception:
+        pass
+    return erg
+
+
+noten = None
+
+
 def main():
     if not os.path.isdir(SEITE):
         print("Seite nicht gefunden:", SEITE)
@@ -429,6 +475,12 @@ def main():
         takt = imres_midi.MidiTakt()
         takt.an = OPT.get("takt") == "master"
         takt.start()
+        global noten
+        try:
+            noten = imres_midi.MidiNoten()
+            noten.start()
+        except Exception as e:
+            print("Begleitung nicht verfügbar:", e)
     srv = ThreadingHTTPServer(("0.0.0.0", ARGS.port), Handler)
     srv.daemon_threads = True
     print("Imres-Brücke auf Port", ARGS.port, "– Seite:", SEITE)

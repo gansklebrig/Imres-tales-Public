@@ -256,3 +256,134 @@ class MidiTakt(threading.Thread):
                 # weit hinterher (z. B. nach einer Pause): nicht nachholen
                 if time.monotonic() - self.naechster > 0.2:
                     self.naechster = time.monotonic()
+
+
+# ---------------------------------------------------------------------------------------------------------
+# Begleitung: Noten an Synths (Zynthian-Ketten über JACK, externe Geräte über ALSA)
+# ---------------------------------------------------------------------------------------------------------
+NOTE_AN, NOTE_AUS, REGLER, PROGRAMM = 6, 7, 10, 11
+
+
+class MidiNoten(threading.Thread):
+    """nimmt Noten mit Verzögerung entgegen und spielt sie pünktlich über einen eigenen ALSA-Port „Imres Begleitung“"""
+
+    def __init__(self):
+        super().__init__(daemon=True)
+        import heapq
+        self.heapq = heapq
+        self.plan = []
+        self.nr = 0
+        self.lock = threading.Condition()
+        self.seq = None
+        self.verbunden = set()
+        self.zuletzt = 0
+        self.aktiv_bis = 0
+        try:
+            self.lib = ctypes.CDLL("libasound.so.2")
+            seq = ctypes.c_void_p()
+            if self.lib.snd_seq_open(ctypes.byref(seq), b"default", 1, 0) < 0:
+                raise OSError("snd_seq_open")
+            self.seq = seq
+            self.lib.snd_seq_set_client_name(self.seq, b"Imres Begleitung")
+            self.port = self.lib.snd_seq_create_simple_port(self.seq, b"Begleitung", 1 | 32, 2 | (1 << 20))
+            self.client = self.lib.snd_seq_client_id(self.seq)
+        except Exception as e:
+            print("Begleitung: MIDI-Ausgang nicht verfügbar:", e, flush=True)
+            self.seq = None
+
+    def senden(self, typ, kanal, a, b=0):
+        if not self.seq:
+            return
+        e = _Ereignis()
+        e.type, e.flags, e.queue = typ, 0, 253
+        e.src_port, e.dst_client, e.dst_port = self.port, 254, 253
+        k = max(0, min(15, int(kanal)))
+        if typ in (NOTE_AN, NOTE_AUS):
+            e.data[0], e.data[1], e.data[2] = k, max(0, min(127, int(a))), max(0, min(127, int(b)))
+        else:  # snd_seq_ev_ctrl: channel, unused[3], param (uint), value (int)
+            e.data[0] = k
+            ctypes.memmove(ctypes.addressof(e.data) + 4, ctypes.byref(ctypes.c_uint(int(a))), 4)
+            ctypes.memmove(ctypes.addressof(e.data) + 8, ctypes.byref(ctypes.c_int(int(b))), 4)
+        try:
+            self.lib.snd_seq_event_output_direct(self.seq, ctypes.byref(e))
+        except Exception:
+            pass
+
+    def planen(self, liste):
+        """liste: [{"k": Kanal 0–15, "n": Note, "v": Stärke (0 = aus), "in": ms ab jetzt, "cc"/"pc": optional}]"""
+        jetzt = time.monotonic()
+        with self.lock:
+            for x in liste[:256]:
+                try:
+                    t = jetzt + max(0.0, min(5000.0, float(x.get("in", 0)))) / 1000
+                    self.nr += 1
+                    self.heapq.heappush(self.plan, (t, self.nr, x))
+                except (TypeError, ValueError):
+                    pass
+            self.aktiv_bis = jetzt + 30
+            self.lock.notify()
+
+    def alle_aus(self):
+        with self.lock:
+            self.plan = []
+        for k in range(16):
+            self.senden(REGLER, k, 123, 0)
+
+    def verbinden(self):
+        """mit externen MIDI-Geräten (ALSA) und – wenn vorhanden – dem MIDI-Eingang des Zynthian (JACK) verbinden"""
+        if not self.seq or time.monotonic() - self.zuletzt < 8:
+            return
+        self.zuletzt = time.monotonic()
+        for ziel in ports("o"):
+            if ziel in self.verbunden:
+                continue
+            try:
+                r = subprocess.run(["aconnect", "%d:%d" % (self.client, self.port), ziel], capture_output=True, timeout=3)
+                if r.returncode == 0 or b"already" in r.stderr:
+                    self.verbunden.add(ziel)
+            except Exception:
+                pass
+        try:
+            r = subprocess.run(["jack_lsp", "-t"], capture_output=True, text=True, timeout=3)
+            zeilen = r.stdout.splitlines()
+            alle = [zeilen[i].strip() for i in range(len(zeilen)) if i + 1 < len(zeilen) and "midi" in zeilen[i + 1]]
+            quelle = next((p for p in alle if "Imres Begleitung" in p and "capture" in p), None)
+            if quelle:
+                ziele = [p for p in alle if p.startswith("ZynMidiRouter:") and p.endswith("_in") and "dev" not in p]
+                bevorzugt = [p for p in ("ZynMidiRouter:main_in", "ZynMidiRouter:net_in", "ZynMidiRouter:seq_in") if p in ziele]
+                for ziel in (bevorzugt[:1] or ziele[:1]):
+                    if ("jack", ziel) not in self.verbunden:
+                        subprocess.run(["jack_connect", quelle, ziel], capture_output=True, timeout=3)
+                        self.verbunden.add(("jack", ziel))
+        except Exception:
+            pass
+
+    def run(self):
+        while True:
+            with self.lock:
+                if not self.plan:
+                    self.lock.wait(timeout=1)
+                    naechst = None
+                else:
+                    naechst = self.plan[0][0]
+            if time.monotonic() < self.aktiv_bis:
+                self.verbinden()
+            if naechst is None:
+                continue
+            warte = naechst - time.monotonic()
+            if warte > 0.002:
+                time.sleep(min(warte - 0.001, 0.01))
+                continue
+            with self.lock:
+                if not self.plan or self.plan[0][0] > time.monotonic() + 0.002:
+                    continue
+                _, _, x = self.heapq.heappop(self.plan)
+            k = x.get("k", 0)
+            if "pc" in x:
+                self.senden(PROGRAMM, k, 0, x["pc"])
+            elif "cc" in x:
+                self.senden(REGLER, k, x["cc"], x.get("w", 0))
+            elif x.get("v", 0) > 0:
+                self.senden(NOTE_AN, k, x.get("n", 60), x["v"])
+            else:
+                self.senden(NOTE_AUS, k, x.get("n", 60), 0)
