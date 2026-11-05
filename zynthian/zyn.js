@@ -508,6 +508,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     zeige("■ " + W("Alles angehalten", "Everything stopped"));
   }
   function taste(name, art) {
+    if (PULT && name !== "ALT") {
+      if (zpWeck === name) { if (art === "los") zpWeck = null; return; }   /* die Taste, die geweckt hat, bewirkt sonst nichts */
+      if (zpAktiv()) { if (art === "druck") zpWeck = name; return; }
+    }
     if (name === "ERKENNEN") { tonartErkennen(); return; }
     if (name === "ALT") { if (art === "druck") alt = true; else if (art === "los") alt = false; leisteZeichnen(); ledsMelden(); return; }
     if (art === "druck" || art === "los") { if (PULT && !$(".zyn-menue")) zpDruckLos(name, art); return; }
@@ -572,6 +576,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const mitte = Math.round(((r.lo + r.hi) / 2) / r.schritt) * r.schritt; r.setz(i === 3 && bank === 0 && SEITE === "buehne" ? r.lo : mitte); stellRegler(r, 0);
   }
   function dreh(nr, d) {
+    if (PULT && zpAktiv()) return;
     if (fokusRegler && nr === 3 && document.contains(fokusRegler)) {
       const el = fokusRegler, st = +(el.step || 1) || 1, lo = +el.min || 0, hi = +(el.max || 100);
       el.value = String(Math.max(lo, Math.min(hi, +el.value + d * st))); el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
@@ -928,11 +933,15 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       k("F2", "🎚 " + W("Optionen", "Options"), W("MIDI-Takt, Handpan-Tonart, Mikrofon …", "MIDI clock, key, mic …"), "optionen") +
       k("F3", "❔ " + W("Tastenbelegung", "Button map"), "", "hilfe") +
       k("F4", "⚙ " + W("System", "System"), W("Aktualisieren, Zynthian, Aufnahme, Aus", "Update, Zynthian, record, off"), "system") +
+      '<button type="button" data-zm="ruhe">💤 ' + W("Bühnenbild nach: ", "Stage view after: ") + "<b>" + (ruheSek() ? ruheSek() + " s" : W("nie", "never")) + "</b><small>" + W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen") + "</small></button>" +
+      '<button type="button" data-zm="bild">🖼 ' + W("Bühnenbild hinter dem Pult: ", "Stage behind the console: ") + "<b>" + (bildHinten() ? W("an", "on") : W("aus", "off")) + "</b><small>" + W("bei Knistern im Ton ausschalten", "turn off if the sound crackles") + "</small></button>" +
       '<button type="button" data-zm="beleg">🎛 ' + W("Belegung ändern", "Change mapping") + "<small>" + W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons") + "</small></button>" +
       '<button type="button" data-zm="alt">🧭 ' + W("Alte Ansicht (Webseite)", "Old view (web page)") + "<small>" + W("zurück geht’s im selben Menü", "switch back in the same menu") + "</small></button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile + SEL · BACK schließt", "F1–F4 pick · arrows + SEL · BACK closes") + "</p>",
       { abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu, beleg: () => belegMenue(),
+        ruhe: () => { const v = RUHE_STUFEN[(RUHE_STUFEN.indexOf(ruheSek()) + 1) % RUHE_STUFEN.length]; schreib("imres-zp-ruhe", String(v)); zpMenue(); const b = $('.zyn-menue [data-zm="ruhe"]'); if (b) fokusSetzen(b); },
+        bild: () => { schreib("imres-zp-bild", bildHinten() ? "0" : "1"); document.documentElement.classList.toggle("zyn-bb", bildHinten()); zpMenue(); const b = $('.zyn-menue [data-zm="bild"]'); if (b) fokusSetzen(b); },
         alt: () => { schreib("imres-zyn-pult", "0"); location.reload(); } });
     menueArt = "zp";
   }
@@ -994,7 +1003,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const L = window.ImresPult && window.ImresPult.listen ? window.ImresPult.listen() : null;
     let status;
     if (SEITE === "welten") { const a = $(".welt.an"); status = (a ? "▶ <b>" + esc2(kurzName(a.querySelector(".nm") || a)) + "</b>" : "■ " + W("still", "silent")); }
-    else { const sn = z.stimmung && L ? teil(L.namen.st[z.stimmung] || z.stimmung, "")[1] : "–", kn = z.kulLaeuft && L ? teil(L.namen.kul[z.kulisse] || z.kulisse, "")[1] : W("kein Hintergrund", "no backdrop");
+    else { const sn = z.stimmung && L ? teil(L.namen.st[z.stimmung] || z.stimmung, "")[1] : "–", kn = z.kulLaeuft && L && z.kulisse !== "keine" ? teil(L.namen.kul[z.kulisse] || z.kulisse, "")[1] : W("kein Hintergrund", "no backdrop");
       status = (z.laeuft ? "▶ <b>" + esc2(sn) + "</b>" : "■ " + esc2(sn)) + " · 🌲 " + esc2(kn) + " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) + (OPT.takt === "slave" && tempoMidi ? " ⇄" : OPT.takt === "master" ? " ⇉" : ""); }
     status += (OPT.tonartAn ? " · 🎼 " + NOTEN[OPT.grund] : "") + (aufnahmeAn ? ' · <span class="rec">⏺ REC</span>' : "") + (alt ? ' · <span class="alt">ALT</span>' : "");
     const tabs = ZP_SEITEN.map(s => '<button type="button" class="zp-tab' + (s.id === zpSeite ? " an" : "") + '" data-zp-tab="' + s.id + '" style="--f:' + s.farbe + '"><span class="zp-sym">' + s.sym + "</span> " + s.name + "</button>").join("");
@@ -1036,7 +1045,35 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (HALTEN[id]) return Object.values(gehalten).includes(id);
     return false;
   }
+  /* ----- Bühnenbild: als Hintergrund des Pults und als Ruhebild nach ein paar Sekunden ohne Eingabe ----- */
+  let zpLetzte = Date.now(), zpRuhe = false, zpRuheEl = null, zpWeck = null;
+  const RUHE_STUFEN = [10, 30, 60, 0];
+  const ruheSek = () => { const v = +lies("imres-zp-ruhe", "10"); return RUHE_STUFEN.includes(v) ? v : 10; };
+  const bildHinten = () => lies("imres-zp-bild", "1") === "1";
+  function zpAktiv() { zpLetzte = Date.now(); if (zpRuhe) { zpRuheAus(); return true; } return false; }
+  function zpRuheAn() {
+    if (zpRuhe || $(".zyn-menue")) return; zpRuhe = true; document.documentElement.classList.add("zyn-ruhe"); zpRuheZeichnen(); ledsMelden();
+  }
+  function zpRuheAus() { zpRuhe = false; document.documentElement.classList.remove("zyn-ruhe"); if (zpRuheEl) zpRuheEl.innerHTML = ""; zpZeichnen(true); ledsMelden(); }
+  function zpRuheZeichnen() {
+    if (!zpRuheEl || !zpRuhe) return;
+    const z = pz() || {}, L = window.ImresPult && window.ImresPult.listen ? window.ImresPult.listen() : null;
+    let titel = "", unter = "", quellen = "";
+    if (SEITE === "welten") {
+      const a = $(".welt.an"); titel = a ? kurzName(a.querySelector(".nm") || a) : W("Stille", "Silence"); const sy = a && a.querySelector(".sym");
+      unter = (sy ? sy.textContent : "🌿") + " " + W("Klangwelt", "Soundscape");
+      quellen = $$("[data-szene][aria-pressed=true], [data-ger].an").slice(0, 8).map(el => '<span class="q"><b>' + esc2(teil((el.innerText || "").split("⏳")[0].replace(/\s+/g, " "), "")[0] || "✦") + "</b>" + esc2(teil((el.innerText || "").split("⏳")[0].replace(/\s+/g, " "), "")[1]) + "</span>").join("");
+    } else {
+      titel = z.laeuft && L ? teil(L.namen.st[z.stimmung] || "", "")[1] : W("Die Bühne wartet", "The stage is waiting");
+      unter = z.kulLaeuft && L && z.kulisse && z.kulisse !== "keine" ? L.namen.kul[z.kulisse] || "" : W("kein Hintergrund", "no backdrop");
+      const gesehen = new Set();
+      quellen = $$("#lautenwerk .lw-karte .lw-kquelle").map(el => { const n = (el.getAttribute("title") || "").split(" – ")[0].trim(); if (!n || gesehen.has(n)) return ""; gesehen.add(n); const sv = el.querySelector("svg"); return '<span class="q">' + (sv ? sv.outerHTML : "") + esc2(n) + "</span>"; }).join("");
+    }
+    zpRuheEl.innerHTML = '<div class="zr-kopf"><div class="zr-titel">' + esc2(titel) + '</div><div class="zr-unter">' + esc2(unter) + (z.laeuft ? " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) : "") + "</div></div>" +
+      (quellen ? '<div class="zr-quellen">' + quellen + "</div>" : "") + '<div class="zr-tipp">' + W("Taste, Regler oder Bildschirm – weiter geht’s", "Any button, knob or touch to continue") + "</div>";
+  }
   function zpLeds(f) {
+    if (zpRuhe) { const d = zpDef(zpSeite), puls = .25 + .2 * Math.sin(Date.now() / 600); Object.keys(f).forEach(k => { f[k] = "#000000"; }); ["F1", "F2", "F3", "F4"].forEach(k => { f[k] = dimm(d.led, puls); }); const z = pz() || {}; if (z.laeuft) f.PLAY = dimm("#30ff70", .5); return; }
     const d = zpDef(zpSeite), b = zpBlattJetzt(), blink = Math.floor(Date.now() / 450) % 2 === 0, i = ZP_SEITEN.findIndex(x => x.id === zpSeite);
     ["F1", "F2", "F3", "F4"].forEach((nm, k) => { const it = b[(alt ? 4 : 0) + k]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : it.fav ? dimm(d.led, .45) : dimm(d.led, .14); });
     ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL"].forEach(k => { const id = ZB.tasten[(alt ? "ALT+" : "") + k]; if (!id || id === "nichts") { f[k] = "#000000"; return; } const c = aktFarbe(id); f[k] = aktAktiv(id) ? c : dimm(c, .22); });
@@ -1052,6 +1089,25 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     st.textContent = `
 html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
 html.zyn-pult .zyn-leiste { display: none !important; }
+/* Bühnenbild: hinter dem Pult (gedimmt) und als Ruhebild */
+html.zyn-pult.zyn-bb #lautenwerk.lw-pultmodus > .lw-buehne, html.zyn-pult.zyn-ruhe #lautenwerk.lw-pultmodus > .lw-buehne {
+  display: block !important; position: fixed !important; left: 0 !important; top: 0 !important; right: 0 !important; bottom: 0 !important; width: auto !important; height: auto !important;
+  z-index: 2147480000 !important; margin: 0 !important; border-radius: 0 !important; border: 0 !important; grid-column: auto !important; }
+html.zyn-pult.zyn-bb .zp { background: rgba(14, 10, 18, .74); }
+html.zyn-pult.zyn-bb .zp-kopf, html.zyn-pult.zyn-bb .zp-fuss { background: rgba(28, 22, 36, .88); }
+html.zyn-pult.zyn-bb .zp-regler { background: rgba(22, 17, 29, .86); }
+html.zyn-pult.zyn-bb .zp-k { background: rgba(29, 23, 38, .78) !important; }
+html.zyn-ruhe .zp { opacity: 0; pointer-events: none; transition: opacity .8s; }
+.zp { transition: opacity .25s; }
+.zp-ruhe { position: fixed; inset: 0; z-index: 2147482500; display: none; pointer-events: auto; color: #ebe2cc; font: 600 16px/1.2 system-ui, sans-serif; }
+html.zyn-ruhe .zp-ruhe { display: block; }
+.zp-ruhe .zr-kopf { position: absolute; left: 14px; top: 12px; padding: 8px 14px; border-radius: 12px; background: rgba(14, 10, 18, .55); border: 1px solid rgba(255, 200, 48, .35); }
+.zp-ruhe .zr-titel { font-size: 26px; color: #ffd75a; text-shadow: 0 0 12px rgba(255, 200, 48, .45); }
+.zp-ruhe .zr-unter { font-size: 15px; color: #e8dcc4; margin-top: 3px; }
+.zp-ruhe .zr-quellen { position: absolute; left: 10px; right: 10px; bottom: 34px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.zp-ruhe .q { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: rgba(14, 10, 18, .62); border: 1px solid rgba(240, 220, 160, .35); font-size: 14px; color: #f0e4c8; }
+.zp-ruhe .q svg { width: 20px; height: 20px; color: #ffd75a; flex: none; } .zp-ruhe .q b { font-size: 18px; }
+.zp-ruhe .zr-tipp { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font-size: 12px; color: rgba(235, 226, 204, .55); }
 .zp { position: fixed; inset: 0; z-index: 2147481000; background: #120e18; color: #ebe2cc; font: 600 15px/1.2 system-ui, sans-serif; display: grid; grid-template-columns: minmax(0, 1fr) 176px; grid-template-rows: 50px minmax(0, 1fr) 42px; user-select: none; -webkit-tap-highlight-color: transparent; }
 .zp button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .zp-kopf { grid-column: 1 / 3; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: #1c1624; border-bottom: 1px solid #3a2f48; min-width: 0; }
@@ -1094,8 +1150,12 @@ html.zyn-pult .zyn-leiste { display: none !important; }
 `;
     document.head.appendChild(st);
     zpEl.className = "zp"; document.body.appendChild(zpEl);
+    zpRuheEl = document.createElement("div"); zpRuheEl.className = "zp-ruhe"; document.body.appendChild(zpRuheEl);
+    zpRuheEl.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); zpAktiv(); });
+    document.documentElement.classList.toggle("zyn-bb", bildHinten());
+    setInterval(() => { const s = ruheSek(); if (!zpRuhe && s && Date.now() - zpLetzte > s * 1000 && !$(".zyn-menue")) zpRuheAn(); if (zpRuhe) zpRuheZeichnen(); }, 1000);
     let favT = 0, favUnterdrueck = false;
-    zpEl.addEventListener("pointerdown", e => { zpZeiger = true; const k = e.target.closest("[data-zp-k]"); if (!k) return; const i = +k.dataset.zpK; clearTimeout(favT); favT = setTimeout(() => { favUnterdrueck = true; zpFavUmschalten(i); }, 1500); });
+    zpEl.addEventListener("pointerdown", e => { zpLetzte = Date.now(); zpZeiger = true; const k = e.target.closest("[data-zp-k]"); if (!k) return; const i = +k.dataset.zpK; clearTimeout(favT); favT = setTimeout(() => { favUnterdrueck = true; zpFavUmschalten(i); }, 1500); });
     const zeigerLos = () => { zpZeiger = false; clearTimeout(favT); };
     zpEl.addEventListener("pointerup", zeigerLos); zpEl.addEventListener("pointercancel", zeigerLos); zpEl.addEventListener("pointerleave", zeigerLos);
     zpEl.addEventListener("contextmenu", e => e.preventDefault());
