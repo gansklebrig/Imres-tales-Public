@@ -765,7 +765,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       if (zus.length) g.push({ titel: W("Wetter & Zusätze", "Weather & extras"), l: zus });
     } else {
       const mo = P.momente();
-      if (mo.length) g.push({ titel: W("Momente", "Moments") + (z.kulisse && z.kulisse !== "keine" ? " · " + teil(L.namen.kul[z.kulisse] || "", "")[1] : ""), l: mo.map(m => ({ key: "mom:" + z.kulisse + ":" + m.i, sym: m.sym, name: m.name, los: () => { pultKlick("data-moment", m.i); zeige(m.sym + " " + m.name); } })) });
+      if (mo.length) g.push({ titel: W("Momente", "Moments") + (z.kulisse && z.kulisse !== "keine" ? " · " + teil(L.namen.kul[z.kulisse] || "", "")[1] : ""), l: mo.map(m => ({ key: "mom:" + z.kulisse + ":" + m.i, sym: m.sym, name: m.name, still: !!m.still, los: () => { pultKlick("data-moment", m.i); zeige(m.sym + " " + m.name); } })) });
       g.push({ titel: W("Effekte", "Effects"), l: L.fx.map(f => { const [sy, nm] = teil(L.namen.fx[f] || f, "💥"); return { key: "fx:" + f, sym: sy, name: nm, los: () => { pultKlick("data-sfx", f); zeige(sy + " " + nm); } }; }) });
     }
     return g.filter(x => x.l.length);
@@ -1126,7 +1126,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const kach = Array.from({ length: 8 }, (_, i) => { const it = blatt[i];
       const f = '<span class="zp-f' + (i < 4 ? "" : " alt") + '">' + (i < 4 ? "" : "ALT ") + "F" + (i % 4 + 1) + "</span>";
       if (!it) return '<div class="zp-k leer">' + f + "</div>";
-      return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + '" data-zp-k="' + i + '">' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + '<span class="zp-s">' + esc2(it.sym || d.sym) + '</span><span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + "</button>"; }).join("");
+      return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + '" data-zp-k="' + i + '">' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + (it.still ? '<span class="zp-still" title="' + W("mit Stille", "brings a hush") + '">🤫</span>' : "") + '<span class="zp-s">' + esc2(it.sym || d.sym) + '</span><span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + "</button>"; }).join("");
     const gr = blatt[0] ? blatt[0].gruppe : "";
     const kopf = '<div class="zp-gruppe"><span data-zp-gruppe="1">' + esc2(gr || d.name) + (zpGruppen.length > 1 ? ' <small>▸ ' + W("ALT + ▲ ▼: andere Gruppe", "ALT + ▲ ▼: other group") + "</small>" : "") + "</span>" + (n > 1 ? '<span class="zp-blatt"><button type="button" data-zp-blatt="-1">◀</button>' + (n <= 9 ? Array.from({ length: n }, (_, i) => "<i" + (i === bi ? ' class="an"' : "") + "></i>").join("") : "<em>" + (bi + 1) + " / " + n + "</em>") + '<button type="button" data-zp-blatt="1">▶</button></span>' : "") + "</div>";
     const bk = SEITE === "welten" ? (bank ? "B" : "A") : bankName(), bf = BANK_FARBE[bk] || BANK_FARBE.A;
@@ -1277,6 +1277,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-k .zp-f { position: absolute; top: 5px; right: 7px; font-size: 11.5px; font-weight: 700; color: #a99d8c; border: 1px solid #5a5060; border-radius: 4px; padding: 1px 5px; }
 .zp-k .zp-f.alt { color: #e0a0ff; border-color: #8040b0; }
 .zp-k .zp-stern { position: absolute; top: 3px; right: 40px; font-size: 16px; color: #ffd75a; }
+.zp-k .zp-still { position: absolute; left: 52px; top: 10px; font-size: 17px; opacity: .9; }
 .zp-k.fav { border-color: color-mix(in srgb, var(--f) 55%, #3a2f48) !important; }
 .zp-k .zp-s { font-size: 34px; line-height: 1; margin-bottom: auto; padding-top: 4px; }
 .zp-k .zp-n { font-size: 18px; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
