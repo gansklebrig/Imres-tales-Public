@@ -4066,7 +4066,7 @@ function update(dt){
  if(G.bot)for(const q of mpL())if(q.sp>0)withP(q,botLearn);
  {const P0=P;for(const e of G.enemies)if(!e.dead){if(e.shieldT>0){e.shieldT-=dt;if(e.shieldT<=0)e.shield=0}if(G.mp)P=enemyP(e);updEnemy(e,dt)}P=P0}
  if(G.state!=='play')return;
- buildGrid();for(const e of G.enemies){if(e.dead||e.flying)continue;query(e.x,e.y,e.r+30,o=>{if(o===e||o.flying)return;const dx=e.x-o.x,dy=e.y-o.y,dd=dx*dx+dy*dy,m=e.r+o.r;if(dd<m*m&&dd>0.01){const d=Math.sqrt(dd),p=(m-d)/d*0.25;const big=e.boss||e.guard,obig=o.boss||o.guard;const wo=big?0.1:obig?1.9:1;e.x+=dx*p*wo;e.y+=dy*p*wo}});e.x=clamp(e.x,8,WORLD-8);e.y=clamp(e.y,8,WORLD-8)}
+ buildGrid();for(const e of G.enemies){if(e.dead||e.flying)continue;p2Sep(e);e.x=clamp(e.x,8,WORLD-8);e.y=clamp(e.y,8,WORLD-8)}
  if(G.blkG&&!G.room){for(const e of G.enemies){if(e.dead||e.flying||e.boss||e.guard)continue;const h=solidPush(e,Math.min(22,e.r*0.75));if(h){blkAusweichen(e,h);wandKlatscher(e)}}if(G.portal&&!G.portal.bf){G.portal.bf=1;solidPush(G.portal,44)}}
  {const P0=P;for(const a of G.allies){if(G.mp&&a.own&&PL.includes(a.own))P=a.own;dmRun(a.dmK||(a.dmK=dmPetK(a)),()=>updAlly(a,dt));if(G.mp){tagOwn(P);P=P0}}}G.allies=G.allies.filter(a=>a.kind==='rex'||a.life>0);if(G.blkG&&!G.room)for(const a of G.allies)if(!a.dead)solidPush(a,10);
  const P0p=P,blkOn=!G.room&&!!G.blkG;for(const p of G.projs){DMS=p.src||(p.basic?'basic':null);if(G.mp)P=p.team==='p'&&p.own&&PL.includes(p.own)?p.own:P0p;{const PA=PROJART[p.kind];if(PA&&PA.upd)PA.upd(p,dt)}p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;
@@ -5497,7 +5497,7 @@ function blkRaster(){const M=new Map(),add=(cx,cy,o)=>{const k=cx+','+cy;let a=M
  for(const o of G.blk||[]){const x0=o.t==='c'?o.x-o.r:o.x,y0=o.t==='c'?o.y-o.r:o.y,x1=o.t==='c'?o.x+o.r:o.x+o.w,y1=o.t==='c'?o.y+o.r:o.y+o.h,m=40;
   for(let cx=Math.floor((x0-m)/BLK_ZELLE);cx<=Math.floor((x1+m)/BLK_ZELLE);cx++)for(let cy=Math.floor((y0-m)/BLK_ZELLE);cy<=Math.floor((y1+m)/BLK_ZELLE);cy++)add(cx,cy,o)}
  G.blkG=M}
-const blkBei=(x,y)=>G.blkG?G.blkG.get(Math.floor(x/BLK_ZELLE)+','+Math.floor(y/BLK_ZELLE)):null;
+const blkBei=(x,y)=>G.blkG?p2Bei(G.blkG,x,y):null;
 /* schiebt o (x,y) mit Radius r aus allen Hindernissen; gibt das letzte getroffene zurück */
 function solidPush(o,r){if(G.room){wallPush(o,r);return null}const L=blkBei(o.x,o.y);if(!L)return null;let hit=null;
  for(const b of L){if(b.t==='c'){const dx=o.x-b.x,dy=o.y-b.y,m=b.r+r,dd=dx*dx+dy*dy;if(dd<m*m){const d=Math.sqrt(dd)||0.01;o.x=b.x+dx/d*m;o.y=b.y+dy/d*m;hit=b}}
@@ -13348,7 +13348,7 @@ const wlAktiv=()=>!!(G.wl&&G.wl.an&&!G.room&&G.state==='play');
 /* ---------- niedrige Hindernisse (Wasser, Schlucht, Lava) ---------- */
 function wlLoRaster(){const M=new Map();for(const o of (G.wl&&G.wl.lo)||[]){const x0=o.t==='c'?o.x-o.r:o.x,y0=o.t==='c'?o.y-o.r:o.y,x1=o.t==='c'?o.x+o.r:o.x+o.w,y1=o.t==='c'?o.y+o.r:o.y+o.h,m=40;
   for(let a=Math.floor((x0-m)/BLK_ZELLE);a<=Math.floor((x1+m)/BLK_ZELLE);a++)for(let b=Math.floor((y0-m)/BLK_ZELLE);b<=Math.floor((y1+m)/BLK_ZELLE);b++){const k=a+','+b;let L=M.get(k);if(!L)M.set(k,L=[]);L.push(o)}}G.wlLoG=M}
-const wlLoBei=(x,y)=>G.wlLoG?G.wlLoG.get(Math.floor(x/BLK_ZELLE)+','+Math.floor(y/BLK_ZELLE)):null;
+const wlLoBei=(x,y)=>G.wlLoG?p2Bei(G.wlLoG,x,y):null;
 function wlLoPunkt(x,y,r){const L=wlLoBei(x,y);if(!L)return false;for(const b of L){if(b.t==='c'){const dx=x-b.x,dy=y-b.y,m=b.r+r;if(dx*dx+dy*dy<m*m)return true}else if(x>b.x-r&&x<b.x+b.w+r&&y>b.y-r&&y<b.y+b.h+r)return true}return false}
 function wlLoPush(o,r){const L=wlLoBei(o.x,o.y);if(!L)return null;let hit=null;
  for(const b of L){if(b.t==='c'){const dx=o.x-b.x,dy=o.y-b.y,m=b.r+r,dd=dx*dx+dy*dy;if(dd<m*m){const d=Math.sqrt(dd)||0.01;o.x=b.x+dx/d*m;o.y=b.y+dy/d*m;hit=b}}
@@ -22654,7 +22654,7 @@ const ULBN={b:null,ok:0,cv:null,x:0,y:0};
    c.drawImage(C,0,0,C.width,C.height,(F[0]-camX)*ZOOM,(F[1]-camY)*ZOOM,W,H);c.restore();return}
   if(!fsSeher().length){UL.fsC=null;return}UL.fsC=[camX,camY,W,H];return _fz.apply(this,arguments)}}
 /* Gebietsname-Einblendung fragt je Bild das Layout ab (getBoundingClientRect) – im Ultra-Modus 4×/s */
-{const _kn=kaNameZeigen;let lt=0;kaNameZeigen=function(){if(UL.on){const n=performance.now();if(n-lt<250&&n>=lt)return;lt=n}return _kn.apply(this,arguments)}}
+{const _kn=kaNameZeigen;let lt=0;kaNameZeigen=function(){if(UL.on&&!window.__hsPERF2){const n=performance.now();if(n-lt<250&&n>=lt)return;lt=n}return _kn.apply(this,arguments)}}
 /* ---------- Leuchtschein (glow) nur, wo er Gefahr/Lesbarkeit trägt ---------- */
 {const _g=glow;glow=function(){if(UL.on&&UL.noGlow)return;return _g.apply(this,arguments)}}
 {const _z=drawEZone;drawEZone=function(z,t){if(!UL.on)return _z.apply(this,arguments);const n=UL.noGlow;UL.noGlow=0;try{return _z.apply(this,arguments)}finally{UL.noGlow=n}}}
@@ -25269,6 +25269,96 @@ function olAltJs(){try{new Function('var a;return a?.b');return false}catch(e){r
   return fetch(src,{mode:'cors',credentials:'omit'}).then(r=>{if(!r.ok)throw new Error('lib');return r.text()}).then(t=>{
    t=t.replace(/([A-Za-z_$][\w$]*)\?\.([A-Za-z_$][\w$]*)/g,'($1&&$1.$2)');const s=document.createElement('script');s.textContent=t;document.head.appendChild(s);
    if(typeof window.Peer!=='function')throw new Error('lib')})}}
+
+/* ===== perf2: RG353V – zweite Leistungsrunde (Spiel-Logik, Speicher-Müll, Ruckler, Diagnose) – window.__hsPERF2 =====
+   Befund vorher (Chromium 77, 640×480, ?ultra, CPU-Drossel ×6, Anteile an der beschäftigten Hauptthread-Zeit):
+     Spiel-Logik 35–40 % (Gegner-Update mit 11 Hüllen-Schichten, Gegner-Gegner-Abstoßen, Hindernis-Schieben, Welt-Ticks),
+     Welt zeichnen 25–35 %, Browser (Rastern/Commit/Style/Layout) 22–35 %, Müllabfuhr 1–4 % + Ruckler.
+     Speicher-Müll ~0,5–1 MB je Bild (5–11 MB/s): neue Gitter-Map + Arrays je Bild (zweimal), eine Closure je Gegner beim
+     Abstoßen, Zeichenketten-Schlüssel bei jeder Hindernis-Abfrage (blkBei/wlLoBei: je Gegner, Geschoss, Sichtlinien-Schritt).
+     Erzwungenes Layout je Bild (getBoundingClientRect in Gebietsname, Übersichtskarte, Hinweis-Blase).
+     Gebietsname im Ultra-Modus: durch die 4×/s-Drossel flackernd und ~50 s lang sichtbar (Zeit lief nur bei gezeichneten Bildern).
+   Maßnahmen:
+   1) (alle Modi, rechengleich) Gegner-Gitter ohne neue Map/Arrays je Bild; Abstoßen ohne Closure je Gegner (gleiche Reihenfolge,
+      gleiche Rechnung → gleiche Ergebnisse); Hindernis-Raster mit Zahlen- statt Zeichenketten-Schlüsseln (gleiche Listen).
+   2) (Ultra) Layout-Abfragen beim Zeichnen höchstens alle 300 ms je Element (statt jedes Bild ein erzwungenes Layout).
+   3) (Ultra) Gebietsname wieder jedes Bild gezeichnet, Dauer wie am PC (3,4 s).
+   4) (Ultra) Bildschirm-Zwischenbilder (Übersichtskarte, Plaketten) ohne getImageData-Pixelsuche (Spitze jede Sekunde).
+   5) (Ultra) Halte-Knopf-Abfrage der Hinweisfenster ruht im laufenden Spiel (vorher jede 1/60 s Gamepad-Abfrage).
+   6) (Ultra) HUD-Balken ohne CSS-Übergang, per transform statt width (vorher Layout+Paint bei jedem Bildschirm-Takt).
+   7) ?diag: Bildzeit-Perzentile (p50/p95/p99), Ruckler je Minute mit Ursache (Spiel-JS oder außerhalb = Müllabfuhr/Browser),
+      Heap und Müll-Rate (falls der Browser performance.memory kennt), Logik-/Zeichen-ms je Bild. */
+window.__hsPERF2={v:1};
+const P2=window.__hsPERF2;
+P2.on=()=>!!(window.__hsULTRA&&__hsULTRA.on);
+/* ---------- 1a) Gegner-Gitter: Map und Zell-Arrays wiederverwenden ---------- */
+const P2G={m:new Map(),u:[],st:''};
+buildGrid=function(){const M=P2G.m,U=P2G.u;for(let i=0;i<U.length;i++)U[i].length=0;U.length=0;
+ const sk=(G.runId||0)+'|'+G.stage;if(P2G.st!==sk||M.size>6000){P2G.st=sk;M.clear()}
+ const L=G.enemies;for(let i=0;i<L.length;i++){const e=L[i];if(e.dead)continue;const k=((e.x/CELL|0)+64)*4096+((e.y/CELL|0)+64);let a=M.get(k);if(!a){a=[];M.set(k,a)}if(!a.length)U.push(a);a.push(e)}
+ GRID=M};
+/* ---------- 1b) Gegner-Gegner-Abstoßen ohne Closure (Ablauf wie query(e.x,e.y,e.r+30,…)) ---------- */
+function p2Sep(e){/* e.x/e.y in lokalen Variablen fortschreiben (gleiche Reihenfolge und Rechnung), nur am Ende zurückschreiben:
+   spart je Überlappung zwei neue Zahl-Objekte (Felder der Gegner sind „getaggt“, jede Zuweisung legt eine Zahl an) */
+ let ex=e.x,ey=e.y;const er=e.r,big=e.boss||e.guard,r=er+30,x0=Math.floor((ex-r)/CELL),x1=Math.floor((ex+r)/CELL),y0=Math.floor((ey-r)/CELL),y1=Math.floor((ey+r)/CELL);let ch=false;
+ for(let i=x0;i<=x1;i++)for(let j=y0;j<=y1;j++){const a=GRID.get((i+64)*4096+(j+64));if(!a)continue;
+  for(let n=0;n<a.length;n++){const o=a[n];if(o.dead)continue;if(o===e||o.flying)continue;const dx=ex-o.x,dy=ey-o.y,dd=dx*dx+dy*dy,m=er+o.r;
+   if(dd<m*m&&dd>0.01){const d=Math.sqrt(dd),p=(m-d)/d*0.25;const obig=o.boss||o.guard;const wo=big?0.1:obig?1.9:1;ex+=dx*p*wo;ey+=dy*p*wo;ch=true}}}
+ if(ch){e.x=ex;e.y=ey}}
+/* ---------- 1c) Hindernis-Raster: Zahlen-Schlüssel (gleiche Zell-Listen wie der Zeichenketten-Schlüssel 'x,y') ---------- */
+function p2Bei(M,x,y){const WM=p2Bei.w||(p2Bei.w=new WeakMap());const a=Math.floor(x/BLK_ZELLE),b=Math.floor(y/BLK_ZELLE);
+ if(!(M instanceof Map))return M.get(a+','+b);
+ let N=WM.get(M);if(!N||N.n!==M.size){N=new Map();N.n=M.size;for(const [k,v] of M){const i=k.indexOf(',');const u=+k.slice(0,i),w=+k.slice(i+1);if(Number.isInteger(u)&&Number.isInteger(w)&&Math.abs(u)<30000&&Math.abs(w)<30000)N.set((u+32768)*65536+(w+32768),v);else{N=null;break}}if(N)WM.set(M,N)}
+ if(!N||Math.abs(a)>=30000||Math.abs(b)>=30000)return M.get(a+','+b);
+ return N.get((a+32768)*65536+(b+32768))}
+/* ---------- 2) Layout-Abfragen beim Zeichnen zwischenspeichern (nur Ultra, nur innerhalb render) ---------- */
+const P2R={inR:0,m:new WeakMap(),gen:0,hit:0,miss:0};
+{const gb=Element.prototype.getBoundingClientRect;Element.prototype.getBoundingClientRect=function(){if(!P2R.inR)return gb.call(this);
+  const n=performance.now();const c=P2R.m.get(this);if(c&&c.g===P2R.gen&&n-c.t<300&&n>=c.t){P2R.hit++;return c.r}const r=gb.call(this);P2R.miss++;P2R.m.set(this,{r,t:n,g:P2R.gen});return r}}
+addEventListener('resize',()=>{P2R.gen++});
+/* ---------- 3) Gebietsname im Ultra-Modus: jedes Bild, Dauer wie bei 60 Bildern/s ---------- */
+{const _kn=kaNameZeigen;kaNameZeigen=function(){const r=_kn.apply(this,arguments);try{if(P2.on()&&KANAME.t>0&&G.state==='play')KANAME.t-=1/60}catch(e){}return r}}
+/* ---------- 3b) Ultra: Bildschirm-Zwischenbilder (Übersichtskarte 1×/s, Plaketten 1×/s, Einblendungen) ohne Pixel-Suche ----------
+   Vorher: getImageData + JS-Schleife über alle Pixel des Bereichs, um den belegten Rand zu finden (→ ~0,4–0,6 ms je Neubau am PC,
+   am Gerät eine sichtbare Spitze jede Sekunde). Jetzt wird der vorgegebene Bereich direkt kopiert (gleiches Bild, durchsichtige Ränder). */
+ulSchirmBau=function(o,fn,R){const w=cv.width,h=cv.height;const g=ulScratch(w,h);const m=cx;cx=g;
+ try{fn(g)}catch(e){RG2.err.push('uls '+e.message)}finally{cx=m;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over'}
+ const rx=R?Math.max(0,Math.floor(R[0])):0,ry=R?Math.max(0,Math.floor(R[1])):0,rw=R?Math.max(1,Math.min(w-rx,Math.ceil(R[2]))):w,rh=R?Math.max(1,Math.min(h-ry,Math.ceil(R[3]))):h;
+ if(rx>=w||ry>=h){o.ok=1;o.cv=null;return}
+ if(!o.cv)o.cv=document.createElement('canvas');const C=o.cv;if(C.width!==rw||C.height!==rh){C.width=rw;C.height=rh}else C.getContext('2d').clearRect(0,0,rw,rh);
+ C.getContext('2d').drawImage(ULW.cv,rx,ry,rw,rh,0,0,rw,rh);o.x=rx;o.y=ry;o.ok=1};
+/* ---------- 3d) Ultra: HUD-Balken ohne Breiten-Übergang und ohne Layout ----------
+   Befund (Trace): Leben/Ausdauer/Erfahrung/Fortschritt haben „transition: width .12s“. Jede Wertänderung (Ausdauer fast immer)
+   startet einen Übergang → Style + Layout + Paint der HUD-Ebenen bei JEDEM Bildschirm-Takt (~75×/s), auch in den Takten, in denen das
+   Spiel wegen der 30er-Kappe gar nicht zeichnet. Im Ultra-Modus: Balken springen (5×/s HUD-Takt) und werden über transform:scaleX
+   gesetzt (kein Layout, nur Neuzeichnen der kleinen Ebene). */
+(()=>{try{const st=document.createElement('style');st.textContent='html.ultra .bar i,html.ultra #progBar .ccS{transition:none!important}html.ultra .bar i.p2sx{width:100%!important;transform-origin:0 50%}';document.head.appendChild(st)}catch(e){}})();
+{const _sw=setW;setW=function(k,v){const el=hEl[k];if(!el)return _sw.apply(this,arguments);
+  if(P2.on()){v=Math.round(clamp(v,0,1)*400)/4;if(HC[k+'w']!==v||!el.__p2sx){HC[k+'w']=v;if(!el.__p2sx){el.__p2sx=1;el.classList.add('p2sx')}el.style.transform='scaleX('+(v/100)+')'}return}
+  if(el.__p2sx){el.__p2sx=0;el.classList.remove('p2sx');el.style.transform='';HC[k+'w']=undefined}return _sw.apply(this,arguments)}}
+/* ---------- 3e) Ultra: Halte-Knopf-Abfrage (hwTick, läuft mit jedem Bildschirm-Takt) im laufenden Spiel ruhen lassen ----------
+   Sie wird nur für Hinweis-Fenster gebraucht (scr sichtbar); im Spiel kostete sie je Takt eine Gamepad-Abfrage + classList-Zugriff. */
+{const _hw=hwTick;hwTick=function(){if(P2.on()&&G.state==='play'&&scr.hidden){requestAnimationFrame(hwTick);return}return _hw.apply(this,arguments)}}
+/* ---------- 5) Messung für ?diag ---------- */
+const P2M={iv:new Float32Array(600),n:0,i:0,last:0,u:0,r:0,h:0,fu:0,fr:0,fh:0,sp:[],hp:[],t0:0,a:{u:0,r:0,h:0,n:0},ms:{u:0,r:0,h:0}};
+function p2Frame(){/* nach jedem gezeichneten Bild: Abstand zum vorigen, JS-Anteil dieses Bildes */
+ const n=performance.now();if(P2M.last&&G.state==='play'&&!G.paused&&!document.hidden){const d=n-P2M.last;P2M.iv[P2M.i]=d;P2M.i=(P2M.i+1)%P2M.iv.length;P2M.n=Math.min(P2M.iv.length,P2M.n+1);
+  const js=P2M.fu+P2M.fr+P2M.fh,ref=Math.max(50,2*(P2M.med||33));if(d>ref){P2M.sp.push({t:n,d,js,u:P2M.fu,r:P2M.fr});if(P2M.sp.length>200)P2M.sp.shift()}}
+ P2M.last=n;P2M.a.u+=P2M.fu;P2M.a.r+=P2M.fr;P2M.a.h+=P2M.fh;P2M.a.n++;P2M.fu=P2M.fr=P2M.fh=0}
+{const _u=update;update=function(){const t0=performance.now();try{return _u.apply(this,arguments)}finally{P2M.fu+=performance.now()-t0}}}
+{const _r=render;render=function(){const t0=performance.now(),ul=P2.on()&&G.state==='play';P2R.inR=ul?1:0;try{return _r.apply(this,arguments)}finally{P2R.inR=0;P2M.fr+=performance.now()-t0}}}
+{const _h=hudUpdate;hudUpdate=function(){const t0=performance.now();try{return _h.apply(this,arguments)}finally{P2M.fh+=performance.now()-t0;if(G.state==='play')p2Frame()}}}
+function p2Stat(){const n=P2M.n;if(n<5)return null;const a=Array.from(P2M.iv.subarray(0,n)).sort((x,y)=>x-y),q=p=>a[Math.min(n-1,Math.floor(n*p))];P2M.med=q(0.5);
+ const now=performance.now(),win=60000;const sp=P2M.sp.filter(s=>now-s.t<win);const js=sp.filter(s=>s.js>s.d*0.6).length;
+ return{p50:q(0.5),p95:q(0.95),p99:q(0.99),max:a[n-1],n,sp:sp.length,spJs:js,spAus:sp.length-js,spWin:Math.min(win,now-(P2M.t0||now))}}
+setInterval(()=>{try{const now=performance.now();if(!P2M.t0)P2M.t0=now;const A=P2M.a;if(A.n){P2M.ms={u:A.u/A.n,r:A.r/A.n,h:A.h/A.n}}A.u=A.r=A.h=A.n=0;
+  const m=performance.memory;if(m&&m.usedJSHeapSize){P2M.hp.push({t:now,v:m.usedJSHeapSize});if(P2M.hp.length>120)P2M.hp.shift()}}catch(e){}},500);
+function p2Heap(){const H=P2M.hp;if(H.length<4)return'';let up=0,gc=0;for(let i=1;i<H.length;i++){const d=H[i].v-H[i-1].v;if(d>0)up+=d;else if(d<-300000)gc++}
+ const s=(H[H.length-1].t-H[0].t)/1000;if(s<=0)return'';return` · Heap ${(H[H.length-1].v/1048576).toFixed(0)} MB, +${(up/1048576/s).toFixed(1)} MB/s, Aufräumen ${(gc*60/s).toFixed(0)}/min`}
+P2.stat=p2Stat;
+{const _dt=rgDiagText;rgDiagText=function(){let s=_dt.apply(this,arguments);try{const S=p2Stat(),M=P2M.ms,f=v=>v.toFixed(1);
+  if(S)s+=`\nBild ms p50 ${f(S.p50)} · p95 ${f(S.p95)} · p99 ${f(S.p99)} · max ${S.max.toFixed(0)} · Ruckler ${S.sp}/min (Spiel ${S.spJs}, außen ${S.spAus})${p2Heap()}`;
+  s+=`\nje Bild: Logik ${f(M.u)} ms · Zeichnen ${f(M.r)} ms · HUD ${f(M.h)} ms · perf2 ${P2.on()?'Ultra':'aus'} · Layout-Cache ${P2R.hit}/${P2R.hit+P2R.miss}`}catch(e){}return s}}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
