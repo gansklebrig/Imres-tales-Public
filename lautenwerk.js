@@ -5535,7 +5535,20 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (!rendert) vorrendern(key, art === "pauke" ? .95 : .6, () => live(0, 1), null);
   }
   let windZuletzt = -9;
+  /* Hüllkurve je Spur (Attack / Decay in ms) – für den Beats-Editor am Zynthian; gilt unabhängig von Stimmung und Stück */
+  let HUELLE = {}; try { HUELLE = JSON.parse(localStorage.getItem("imres-lw-huelle") || "{}") || {}; } catch (_) { HUELLE = {}; }
   function spielen(spur, zeile, zeit, schritt, laut, dauer) {
+    const h = HUELLE[spur];
+    if (!h || (!h.a && !h.d) || !ctx || rendert || !spurGain[spur]) return spielenRoh(spur, zeile, zeit, schritt, laut, dauer);
+    const ziel = spurGain[spur], g = ctx.createGain(), t0 = Math.max(zeit, ctx.currentTime), a = (h.a || 0) / 1000, d = (h.d || 0) / 1000;
+    g.connect(ziel);
+    if (a) { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(1, t0 + a); } else g.gain.setValueAtTime(1, t0);
+    if (d) { g.gain.setValueAtTime(1, t0 + a + .001); g.gain.exponentialRampToValueAtTime(0.0005, t0 + a + d); g.gain.setValueAtTime(0, t0 + a + d + .001); }
+    spurGain[spur] = g;
+    try { spielenRoh(spur, zeile, zeit, schritt, laut, dauer); } finally { spurGain[spur] = ziel; }
+    setTimeout(() => { try { g.disconnect(); } catch (_) {} }, ((t0 - ctx.currentTime) + a + (d ? d + 3 : 12)) * 1000);
+  }
+  function spielenRoh(spur, zeile, zeit, schritt, laut, dauer) {
     const betont = schritt % 4 === 0;
     if (spur === "klopf") { if (!schlagProbe("klopf", betont, zeit, spurGain.klopf, laut)) perk("klopf", "klopf", betont, zeit, laut, (z, l) => klopfen(z, betont, l)); }
     else if (spur === "schelle") { if (!schlagProbe("schelle", Math.random() < .5, zeit, spurGain.schelle, laut)) perk("schelle", "schelle", false, zeit, laut, (z, l) => schellen(z, l)); }
@@ -13361,6 +13374,9 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const d = S.teile[teil] && S.teile[teil][spur]; if (!d || !Array.isArray(liste)) return;
       if (S.stimmung) stimmungLoesen(); for (let i = 0; i < d.length; i++) d[i] = liste[i] == null ? -1 : liste[i]; merken();
     },
+    huelle(spur, a, d) { if (spur == null) return JSON.parse(JSON.stringify(HUELLE)); const h = HUELLE[spur] || {}; if (a != null) h.a = Math.max(0, Math.min(800, +a || 0)); if (d != null) h.d = Math.max(0, Math.min(3000, +d || 0)); HUELLE[spur] = h; try { localStorage.setItem("imres-lw-huelle", JSON.stringify(HUELLE)); } catch (_) {} return Object.assign({}, h); },
+    beatsVol(spur, v) { if (!(spur in S.vol)) return null; if (v != null) { S.vol[spur] = Math.max(0, Math.min(9, Math.round(+v))); merken(); } return S.vol[spur]; },
+    beatsVariation(v) { if (v != null) { S.variation = Math.max(0, Math.min(10, Math.round(+v))); merken(); } return S.variation; },
     beatsStumm(spur, an) { if (!(spur in S.mute)) return; S.mute[spur] = an == null ? !S.mute[spur] : !!an; merken(); },
     /* sofort spielen (Pad) – und für das Live-Einspielen: der Schritt, der dem Anschlag am nächsten liegt */
     beatsAnschlag(spur, wert) {

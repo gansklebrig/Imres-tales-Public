@@ -864,6 +864,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function zpRegler() {
     if (SEITE === "welten") return W_REGLER[bank % 2].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
     if (zpSeite === "beats" && !bank) return beatsRegler();
+    if (zpSeite === "beats" && bank === 1) return beatsHuelleRegler();
     const l = bank ? ZB.regler[bankName()] : ZB.regler["A:" + (zpSeite === "set" ? "stimmung" : zpSeite)];
     return (l || []).slice(0, 4).map(k => ZP_PARAM[k] || ZP_PARAM.nichts);
   }
@@ -902,9 +903,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       if (v !== L.letzt) { L.letzt = v; try { L.r.setz(v); } catch (_) {} } });
   }, 25);
   function zpDreh(nr, d) {
-    if (drehGedrueckt[nr] && !(zpSeite === "beats" && !bank)) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
+    if (drehGedrueckt[nr] && !(zpSeite === "beats" && bank < 2)) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
     const r = zpRegler()[nr]; if (!r || !r.schritt) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); loopMitschreiben(r, v);
-    if (zpSeite === "beats" && !bank) zpZeichnen(true); else zpReglerAnzeige();
+    if (zpSeite === "beats" && bank < 2) zpZeichnen(true); else zpReglerAnzeige();
   }
   let reglerRaf = 0;
   function zpReglerAnzeige() {
@@ -1424,13 +1425,26 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     return '<div class="zp-gruppe"><span>🥁 ' + W("Teil ", "Part ") + t + (info.loop ? " 🔁" : BC.folgen ? " · " + W("folgt", "follows") : "") + (info.stimmung ? " · " + W("Stimmung", "mood") : "") + '</span><span class="zb-vars">Var ' + vars + "</span>" +
       (BC.liveRec ? '<span style="color:#ff4a3a">⏺ LIVE</span>' : "") + "</div>";
   }
+  /* Bank B auf der Beats-Seite: Hüllkurve und Lautstärke der gewählten Spur */
+  function beatsHuelleRegler() {
+    const P = BP(), info = beatsInfo(); if (!P || !info || !P.huelle) return [];
+    const sp = beatSpur(info), h = () => P.huelle()[sp.id] || {}, nm = BEAT_SYM[sp.id] + " ";
+    const ms = v => v >= 1000 ? (v / 1000).toFixed(1).replace(".", ",") + " s" : v + " ms";
+    return [
+      { name: nm + "Attack", lo: 0, hi: 800, schritt: 10, lies: () => h().a || 0, setz: v => P.huelle(sp.id, v, null), text: v => v ? ms(v) : W("sofort", "instant"), aktion: () => P.huelle(sp.id, 0, null), drucktext: W("drücken: sofort", "push: instant") },
+      { name: nm + "Decay", lo: 0, hi: 3000, schritt: 25, lies: () => h().d || 0, setz: v => P.huelle(sp.id, null, v), text: v => v ? ms(v) : W("natürlich", "natural"), aktion: () => P.huelle(sp.id, null, 0), drucktext: W("drücken: natürlich", "push: natural") },
+      { name: nm + W("Lautstärke", "Volume"), lo: 0, hi: 9, schritt: 1, lies: () => P.beatsVol(sp.id) || 0, setz: v => P.beatsVol(sp.id, v), text: v => Math.round(v / 9 * 100) + " %", aktion: () => { P.beatsStumm(sp.id); zpZeichnen(true); }, drucktext: W("drücken: stumm", "push: mute") },
+      { name: W("🎲 Variation", "🎲 Variation"), lo: 0, hi: 10, schritt: 1, lies: () => P.beatsVariation() || 0, setz: v => P.beatsVariation(v), text: v => v ? v * 10 + " %" : W("genau", "exact"), aktion: () => P.beatsVariation(0), drucktext: W("drücken: genau", "push: exact") }
+    ];
+  }
   function beatsHTML() {
     const P = BP(), info = beatsInfo(); if (!P || !info) return '<div class="zb-leer">⏳ ' + W("Bühne lädt …", "Stage loading …") + "</div>";
     const t = beatsTeil(info), dat = P.beatsDaten(t) || {}, n = info.takt;
     let h = '<div class="zb" style="--n:' + n + '">';
     BEAT_REIHE.forEach((id, r) => {
       const sp = info.spuren.find(x => x.id === id); if (!sp) return; const d = dat[id] || [];
-      h += '<button type="button" class="zb-name' + (r === BC.r ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '">' + BEAT_SYM[id] + " " + BEAT_NAME[id] + "</button>";
+      const hk = (P.huelle && P.huelle()[id]) || {};
+      h += '<button type="button" class="zb-name' + (r === BC.r ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '">' + BEAT_SYM[id] + " " + BEAT_NAME[id] + (hk.a || hk.d ? '<i class="zb-h">◢</i>' : "") + "</button>";
       for (let i = 0; i < n; i++) {
         const v = d[i], an = v >= 0, txt = an && sp.art !== "an" ? v + 1 : "";
         h += '<button type="button" class="zb-z' + (an ? " an" : "") + (i % 4 === 0 ? " eins" : "") + (r === BC.r && i === BC.s ? " cur" : "") + (sp.stumm ? " stumm" : "") + '" data-zb-r="' + r + '" data-zb-s="' + i + '" style="' + (an && sp.art !== "an" ? "--h:" + (.35 + .65 * v / Math.max(1, sp.zeilen - 1)) : "") + '">' + txt + "</button>";
@@ -1472,7 +1486,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const fuss = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "CTRL"].map(k => zpSeite === "beats" && k === "PAD" ? t("PAD", "live", "#ff9a40") : zpSeite === "beats" && k === "REC" ? t("REC", BC.liveRec ? "⏺ LIVE" : "⏺", "#ff1a30") : kurz(k)).join("") + t("MIXER", bk, bf) + t("MENU", "☰", "#ffcf50");
     const html = '<div class="zp-kopf">' + tabs + '<span class="zp-status">' + status + "</span></div>" +
       (zpSeite === "beats" ? '<div class="zp-mitte" style="--f:' + d.farbe + '">' + beatsKopf() + beatsHTML() + "</div>" : '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>") +
-      '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" && !(zpSeite === "beats" && !bank) ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
+      '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" && !(zpSeite === "beats" && bank < 2) ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
     if (html === zpMerk || (zpZeiger && !sofort)) return;
     zpMerk = html; zpEl.innerHTML = html;
   }
@@ -1616,6 +1630,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-blatt { display: flex; align-items: center; gap: 6px; } .zp-blatt button { padding: 0 12px !important; font-size: 20px; color: #e0d3be !important; }
 .zb { display: grid; grid-template-columns: 92px repeat(var(--n), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 3px; min-height: 0; }
 .zb-name { font-size: 12.5px !important; text-align: left !important; padding: 0 4px !important; border-radius: 6px; color: #d8cbb6 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent !important; }
+.zb-name .zb-h { font-style: normal; font-size: 9px; color: #ffc830; }
 .zb-name.cur { border-color: #f4c45a !important; color: #fff0c0 !important; } .zb-name.stumm { opacity: .4; text-decoration: line-through; }
 .zb-z { border-radius: 5px; background: #221b2c !important; border: 1px solid #3a2f48 !important; font-size: 10px !important; color: #140e06 !important; font-weight: 800; padding: 0 !important; }
 .zb-z.eins { background: #2c2338 !important; }
