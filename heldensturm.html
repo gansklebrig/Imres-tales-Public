@@ -21603,7 +21603,7 @@ try{addEventListener('error',e=>{try{RG2.err.push(String(e.message||e).slice(0,1
   let gt=0;const lauf=()=>{gt=0;let n=0;try{for(const r of document.querySelectorAll('.screen:not([hidden]),#hud,.ov:not([hidden]),.tutk'))n+=RG2.gapFix(r)}catch(e){}
    /* Abstände geändert: Menü neu einpassen (sonst ragt die Seitenleiste ein Stück aus dem Bild) */
    if(n)requestAnimationFrame(()=>{try{if(!scr.hidden&&!MF.busy){zwFit();menuFit(scr)}for(const g of LM.panes)if(g.vm&&g.vm.el&&!g.vm.el.hidden)menuFit(g.vm.el)}catch(e){}})};
-  try{new MutationObserver(()=>{if(!gt)gt=setTimeout(lauf,30)}).observe(document.body,{childList:true,subtree:true})}catch(e){}
+  try{new MutationObserver(ms=>{if(gt)return;for(const m of ms){for(const n of m.addedNodes)if(n.nodeType===1){gt=setTimeout(lauf,30);return}for(const n of m.removedNodes)if(n.nodeType===1){gt=setTimeout(lauf,30);return}}}).observe(document.body,{childList:true,subtree:true})}catch(e){}
   setTimeout(lauf,0)}
 })();
 
@@ -21613,9 +21613,10 @@ if(RG2.gapFix){const _mf=menuFit;menuFit=function(h){try{RG2.gapFix(h||scr)}catc
  const _zw=zwFit;zwFit=function(){try{RG2.gapFix(scr)}catch(e){}return _zw.apply(this,arguments)}}
 function rgStandalone(){try{const api=!!(document.fullscreenElement||document.webkitFullscreenElement);return !api&&matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}}
 function rgPad(){try{return Object.keys(PADS.st||{}).length>0}catch(e){return false}}
+function rgRetro(){try{for(const g of navigator.getGamepads?navigator.getGamepads():[])if(g&&/retrogame|rg353|anbernic/i.test(g.id))return true}catch(e){}return false}
 function rgHHPruef(){const w=innerWidth,h=innerHeight,quer=w>h*1.15;let fein=false;try{fein=matchMedia('(hover:hover) and (pointer:fine)').matches}catch(e){}
  const android=/Android/i.test(navigator.userAgent),touch=MOBIL||'ontouchstart' in window;
- const hh=quer&&h<=430&&(touch||android||rgPad()&&!fein),flach=hh&&h<300;const ch=hh!==RG2.hh||flach!==RG2.flach||(hh&&h<=360)!==!!RG2.klein;
+ const hh=quer&&(h<=430&&(touch||android||rgPad()&&!fein)||h<=500&&(android&&touch||rgRetro())),flach=hh&&h<300;const ch=hh!==RG2.hh||flach!==RG2.flach||(hh&&h<=360)!==!!RG2.klein;
  RG2.hh=hh;if(hh)RG2.hhJe=true;RG2.flach=flach;RG2.klein=hh&&h<=360;const H=document.documentElement.classList;H.toggle('rghh',hh);H.toggle('rgflach',flach);H.toggle('rgklein',RG2.klein);
  try{RGZ.an=hh&&h<375?1:0;RGZ.scale=1}catch(e){}
  return ch}
@@ -21625,7 +21626,7 @@ rgHHPruef();
 {const _zm=mfZMin;mfZMin=function(){if(RG2.flach)return Math.max(0.8,Math.min(1,innerHeight/320));return _zm.apply(this,arguments)}}
 try{menuZoom()}catch(e){}
 let rgRT=0;function rgNeu(){clearTimeout(rgRT);rgRT=setTimeout(()=>{const ch=rgHHPruef();try{menuZoom()}catch(e){}try{resize()}catch(e){}if(ch)try{if(!scr.hidden){zwFit();menuFit(scr)}}catch(e){}},90)}
-addEventListener('resize',rgNeu);addEventListener('orientationchange',()=>setTimeout(rgNeu,250));
+addEventListener('resize',rgNeu);addEventListener('orientationchange',()=>setTimeout(rgNeu,250));addEventListener('gamepadconnected',rgNeu);
 document.addEventListener('fullscreenchange',rgNeu);document.addEventListener('webkitfullscreenchange',rgNeu);
 try{if(window.visualViewport)visualViewport.addEventListener('resize',rgNeu)}catch(e){}
 /* Kompaktstil für Handhelds (Ergänzung zu rg353css): kleinste Schriften auf lesbare Größe */
@@ -21836,6 +21837,104 @@ function qaSchmalHH(){try{return !!(window.__hsRG2&&__hsRG2.hh)&&innerWidth<560}
 {const _f=ivFit;ivFit=function(h,w,k){const r=_f.apply(this,arguments);try{if(w)w.classList.remove('qaeq4','qaeq7');if(qaSchmalHH()&&k==='inv'&&w&&(w.classList.contains('ivm-SB')||w.classList.contains('ivm-SBF'))){const z=parseFloat(w.style.zoom)||1,P=mfPad(h),cw=(h.clientWidth-P.l-P.r)/z;
    if(cw<620){const fl=!!__hsRG2.flach;w.style.setProperty('--ivdw',Math.round(Math.max(fl?210:230,cw*(fl?0.44:0.48)))+'px');w.classList.add(fl?'qaeq7':'qaeq4');const eq=w.querySelector('.equip');if(eq)eq.classList.add('ivmini');const mob=mfMob();
     ivTiles(h,w.querySelector('.iv-bag>.bag'),typeof BAGMAX!=='undefined'?BAGMAX:30,'qa|'+Math.round(cw),mob);ivDetFit(w.querySelector(':scope>.iv-det'),mob)}}}catch(e){console.error('qa iv',e)}return r}}
+
+/* ===== perf: RG353V & Co. – Bildzeit im Sparbetrieb senken (nur RG2.spar, PC unverändert) =====
+   Befund (Chromium 77, 640×480, CPU-Drossel ×10 ≈ Gerät, Stufe 1): ~95 ms/Bild. Aufschlüsselung (Tracing):
+   JS ~45 % (Welt zeichnen ~25 ms, Logik ~10 ms, CSS-Übersetzer-Nachlauf ~4 ms, HUD ~2 ms), Canvas rastern ~20 %,
+   Paint/Composite/Commit ~15 % (dauernd laufende CSS-Animationen im HUD), Style+Layout nur ~7 %.
+   Maßnahmen (alle nur im Sparbetrieb):
+   1) endlos laufende CSS-Animationen (Puls, Glanz, Hüpfen …) abschalten – jede kostet auf alten Engines ein Neuzeichnen je Bild
+   2) Welt bei offenem Menü (Spiel pausiert) nicht 60× je s neu zeichnen – das Bild steht ohnehin
+   3) HUD-DOM höchstens 12× je s aktualisieren
+   4) matchMedia-Abfragen je Bild (mfMob) zwischenspeichern
+   5) Heldenkörper als vorgerendertes Bild je Pose
+   6) Boden+Straße vorgerendert, Kachelbilder als ImageBitmap
+   7) ?diag: ms je Bild für Logik / Welt zeichnen / HUD-DOM / Rest (Browser); „Blasen“ zählt gezeichnete Sprechblasen-Bilder (kein Leck), jetzt mit Rate
+   Dazu (in fix_perf.py): Flex-gap-Nachbau nur bei neuen/entfernten Elementen statt bei jeder Textänderung; Handheld-Erkennung bis 500 px Höhe. */
+window.__hsPERF={v:1};
+const PF=window.__hsPERF;
+PF.on=()=>!!(RG2&&RG2.spar&&!/[?&]perfaus\b/.test(RG2.q));
+/* ---------- Diagnose-Messung: Summen je ~1 s, geteilt durch die Bilder (render-Aufrufe) ---------- */
+const PFM={a:{u:0,r:0,h:0,n:0},u:0,r:0,h:0,f:0,t0:0,bub0:0,bubR:0,skip:0};
+function pfAdd(k,v){PFM.a[k]+=v}
+function pfFenster(){const n=performance.now();if(!PFM.t0){PFM.t0=n;PFM.bub0=RG2.bub;return}const d=n-PFM.t0;if(d<1000)return;const A=PFM.a,fr=Math.max(1,A.n);
+ PFM.u=A.u/fr;PFM.r=A.r/fr;PFM.h=A.h/fr;PFM.f=A.n?d/A.n:0;PFM.bubR=(RG2.bub-PFM.bub0)*1000/d;PFM.bub0=RG2.bub;PFM.t0=n;A.u=A.r=A.h=A.n=0}
+/* ---------- 1) endlos laufende CSS-Animationen ---------- */
+const PFA={done:new WeakSet(),sel:new Set(),st:null,t:0};
+function pfAnimScan(){PFA.t=0;let neu=0;const walk=L=>{for(const r of L){try{if(r.cssRules&&!r.selectorText){walk(r.cssRules);continue}
+   if(!r.style||!r.selectorText)continue;const s=r.style;const it=s.animationIterationCount||'';const an=s.animation||'';
+   if(/infinite/.test(it)||/infinite/.test(an)){for(const x of r.selectorText.split(','))if(!PFA.sel.has(x.trim())){PFA.sel.add(x.trim());neu++}}}catch(e){}}};
+ for(const sh of document.styleSheets){try{const o=sh.ownerNode;if(o&&o.id==='rgperfcss')continue;if(PFA.done.has(sh)&&o&&o.__pfT===o.textContent)continue;if(o)o.__pfT=o.textContent;PFA.done.add(sh);walk(sh.cssRules)}catch(e){}}
+ if(!neu&&PFA.st)return;if(!PFA.st){PFA.st=document.createElement('style');PFA.st.id='rgperfcss';document.head.appendChild(PFA.st)}
+ PFA.st.textContent=[...PFA.sel].map(x=>'html.rgperf '+x.replace(/^html(\.[\w-]+)*\s*/,'')).join(',\n')+'{animation:none!important}'}
+try{new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.tagName==='STYLE'&&n.id!=='rgperfcss'){if(!PFA.t)PFA.t=setTimeout(pfAnimScan,60);return}}).observe(document.head,{childList:true})}catch(e){}
+function pfKlasse(){const on=PF.on();document.documentElement.classList.toggle('rgperf',on);if(on&&!PFA.st)pfAnimScan()}
+{const _ss=rgSparSet;rgSparSet=function(){const r=_ss.apply(this,arguments);try{pfKlasse()}catch(e){}return r}}
+/* ---------- 4) mfMob: matchMedia nur alle 500 ms ---------- */
+{const _mm=mfMob;let v=null,t=0;mfMob=function(){if(!PF.on())return _mm.apply(this,arguments);const n=performance.now();if(v===null||n-t>500){t=n;v=_mm.apply(this,arguments)}return v}}
+/* ---------- 5) Heldenfigur als vorgerendertes Bild ----------
+   heroBarradin & Co. zeichnen ~520 Canvas-Befehle je Bild (über die Hälfte aller Befehle) für eine ~30 px große Figur.
+   Im Sparbetrieb wird der Körper je Pose (Schritt, Waffenhaltung, Deckkraft, Maßstab) einmal in ein kleines Bild gerendert
+   und höchstens 0,6 s wiederverwendet (kleine Zeit-Animationen wie Blinzeln laufen dadurch etwas gröber). */
+const PFH={m:new Map(),X0:-38,Y0:-52,X1:66,Y1:32,n:0,hit:0};
+PF.hero=PFH;
+{const _hb=drawHeroBody;drawHeroBody=function(c,id,t,o,PZ,WR,step,mv){
+  if(!PF.on()||c!==cx||PFH.aus||c.globalCompositeOperation!=='source-over')return _hb.apply(this,arguments);
+  let m;try{m=c.getTransform()}catch(e){return _hb.apply(this,arguments)}const s=Math.sqrt(Math.abs(m.a*m.d-m.b*m.c));if(!(s>0.05&&s<3))return _hb.apply(this,arguments);
+  const sq=Math.ceil(s*10)/10,ga=c.globalAlpha,q=(v,k)=>Math.round((+v||0)*k);o=o||{};PZ=PZ||{};
+  const key=id+'|'+sq+'|'+q(ga,20)+'|'+(o.ghost?1:0)+(o.nog?1:0)+(o.hd?1:0)+(mv?1:0)+'|'+q(step,4)+'|'+q(WR,8)+'|'+q(PZ.pull,8)+'|'+q(PZ.aura,8);
+  let e=PFH.m.get(key);
+  if(!e||t-e.t>0.6||t<e.t){
+   if(!e){e={cv:document.createElement('canvas'),t:0};PFH.m.set(key,e);if(PFH.m.size>48){const k0=PFH.m.keys().next().value;PFH.m.delete(k0)}}
+   const C=e.cv,X0=PFH.X0,Y0=PFH.Y0,w=Math.ceil((PFH.X1-X0)*sq)+2,h=Math.ceil((PFH.Y1-Y0)*sq)+2;if(C.width!==w||C.height!==h){C.width=w;C.height=h}
+   const g=C.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,w,h);g.setTransform(sq,0,0,sq,-X0*sq,-Y0*sq);g.globalAlpha=ga;g.globalCompositeOperation='source-over';
+   try{_hb.call(this,g,id,t,o,PZ,WR,step,mv)}catch(er){PFH.aus=true;RG2.err.push('pfh '+er.message);return _hb.apply(this,arguments)}
+   e.t=t;e.sq=sq;PFH.n++}else{PFH.hit++;PFH.m.delete(key);PFH.m.set(key,e)}
+  c.globalAlpha=1;c.drawImage(e.cv,PFH.X0,PFH.Y0,e.cv.width/e.sq,e.cv.height/e.sq);c.globalAlpha=ga}}
+/* ---------- 6) Boden und Straße als vorgerendertes Bild, Kartenkacheln als ImageBitmap ----------
+   Boden (Muster über das ganze Bild – im Software-Rastern teuer) und Straße (vier breite Striche über die ganze Karte) werden für den Sichtbereich plus Rand einmal gerendert und nur beim
+   Verlassen des Bereichs oder bei Zoom-/Größenwechsel neu gebaut. Statische Kachelbilder (Karte, Deko) werden zu ImageBitmaps
+   (schnellerer Zeichenweg in alten Engines). */
+const PFS={cv:null,x:0,y:0,w:0,h:0,s:0,key:'',on:0,n:0};PF.str=PFS;
+{const _rw=renderWorld;renderWorld=function(dt){if(!PF.on()||G.room||G.vp||PFS.aus||!G.ground)return _rw.apply(this,arguments);
+  const r=G.road,gr=G.ground;G.road=null;G.ground='rgba(0,0,0,0)';PFS.on=1;PFS.r=r;PFS.gr=gr;try{return _rw.apply(this,arguments)}finally{G.road=r;G.ground=gr;PFS.on=0}}}
+{const _wr=drawRoomWalls;drawRoomWalls=function(){if(PFS.on){PFS.on=0;try{const m=cx.getTransform(),sc=m.a,X=-m.e/sc,Y=-m.f/sc,vw=cv.width/sc,vh=cv.height/sc,R=PFS.r,gr=PFS.gr;
+   const key=(G.runId||0)+'|'+G.stage+'|'+(R?R.length+'|'+R[0][0]+'|'+R[0][1]:'-')+'|'+(G.themeKey||'')+'|'+WORLD,s=Math.round(sc*100)/100;
+   if(!PFS.cv||PFS.key!==key||PFS.gro!==gr||Math.abs(PFS.s/s-1)>0.01||X<PFS.x||Y<PFS.y||X+vw>PFS.x+PFS.w||Y+vh>PFS.y+PFS.h){
+    const bx=X-vw*0.5,by=Y-vh*0.5,bw=vw*2,bh=vh*2,pw=Math.ceil(bw*s),ph=Math.ceil(bh*s);if(!PFS.cv)PFS.cv=document.createElement('canvas');const C=PFS.cv;if(C.width!==pw||C.height!==ph){C.width=pw;C.height=ph}
+    const g=C.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,pw,ph);g.setTransform(s,0,0,s,-bx*s,-by*s);g.imageSmoothingEnabled=cx.imageSmoothingEnabled;
+    /* wie renderWorld: Boden, Straße, Abdunklung außerhalb der Welt */
+    g.fillStyle=gr;g.fillRect(bx-20,by-20,bw+40,bh+40);
+    if(R){g.lineJoin='round';g.lineCap='round';g.beginPath();R.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.strokeStyle='#40352a';g.lineWidth=150;g.stroke();g.strokeStyle='#5c4c38';g.lineWidth=120;g.stroke();
+     for(const o of[-24,24]){g.beginPath();R.forEach((p,i)=>i?g.lineTo(p[0],p[1]+o):g.moveTo(p[0],p[1]+o));g.strokeStyle='rgba(40,30,20,.45)';g.lineWidth=5;g.stroke()}}
+    g.fillStyle='rgba(6,4,8,.78)';if(bx<0)g.fillRect(bx-20,by-20,-bx+20,bh+40);if(by<0)g.fillRect(bx-20,by-20,bw+40,-by+20);
+    if(bx+bw>WORLD)g.fillRect(WORLD,by-20,bx+bw-WORLD+20,bh+40);if(by+bh>WORLD)g.fillRect(bx-20,WORLD,bw+40,by+bh-WORLD+20);
+    Object.assign(PFS,{x:bx,y:by,w:bw,h:bh,s,key,gro:gr});PFS.n++}
+   const ism=cx.imageSmoothingEnabled;cx.imageSmoothingEnabled=false;cx.globalAlpha=1;cx.globalCompositeOperation='source-over';cx.drawImage(PFS.cv,PFS.x,PFS.y,PFS.w,PFS.h);cx.imageSmoothingEnabled=ism}
+  catch(e){PFS.aus=true;RG2.err.push('pfs '+e.message)}}return _wr.apply(this,arguments)}}
+/* bewegte Deko (wiegende Büsche, Fahnen …) im Sparbetrieb wie statische behandeln: landet in den rg2-Deko-Kacheln statt ~30–40 Einzelzeichnungen je Bild */
+{const _st=rgDkStatisch;rgDkStatisch=function(d){if(PF.on()&&!/^(fackel|feuer|lager|kerze|leucht|brunnen|wasser|lava|portal)/i.test(d.k||''))return true;return _st.apply(this,arguments)}}
+function pfBitmaps(){if(!PF.on()||typeof createImageBitmap!=='function')return;
+ try{for(const e of KAT.m.values())if(e.cv&&e.cv.getContext&&!e.pfb){const q=e.cv;e.pfb=1;createImageBitmap(q).then(b=>{if(e.cv===q)e.cv=b;else b.close&&b.close()}).catch(()=>{})}}catch(e){}
+ try{for(const c of RGDK.m.values())if(c.cv&&c.cv.getContext&&c.pfb!==c.cv){const q=c.cv;c.pfb=q;createImageBitmap(q).then(b=>{if(c.cv===q)c.cv=b;else b.close&&b.close()}).catch(()=>{})}}catch(e){}}
+setInterval(pfBitmaps,700);
+/* ---------- 2) Menü offen: Welt nicht neu zeichnen ---------- */
+const PFR={k:'',n:0,t:0};
+{const _r=render;render=function(dt){const t0=performance.now();
+  if(PF.on()&&G.state==='play'&&G.paused&&G.overlay&&!G.mp&&!NET.role){const k=G.overlay+'|'+cv.width+'x'+cv.height;
+   if(PFR.k===k&&PFR.n>=2&&t0-PFR.t<1000){PFM.skip++;PFM.a.n++;return}if(PFR.k!==k){PFR.k=k;PFR.n=0}PFR.n++;PFR.t=t0}else PFR.k='';
+  try{return _r.apply(this,arguments)}finally{pfAdd('r',performance.now()-t0);PFM.a.n++}}}
+/* ---------- 3) HUD-DOM gedrosselt ---------- */
+{const _h=hudUpdate;let last=0;hudUpdate=function(){const t0=performance.now();if(PF.on()&&G.state==='play'&&t0-last<80&&t0>=last){return}last=t0;
+  try{return _h.apply(this,arguments)}finally{pfAdd('h',performance.now()-t0)}}}
+{const _u=update;update=function(){const t0=performance.now();try{return _u.apply(this,arguments)}finally{pfAdd('u',performance.now()-t0)}}}
+setInterval(()=>{if(RG2.diag)pfFenster()},250);
+/* ---------- 7) Diagnose-Zeile ---------- */
+{const _dt=rgDiagText;rgDiagText=function(){let s=_dt.apply(this,arguments);try{
+  s=s.replace(/ · Blasen \d+/,` · Sprechblasen gezeichnet ${RG2.bub} (${PFM.bubR.toFixed(1)}/s)`);
+  const f=v=>v.toFixed(1),js=PFM.u+PFM.r+PFM.h;
+  s+=`\nms/Bild ${f(PFM.f)} = Logik ${f(PFM.u)} + Welt zeichnen ${f(PFM.r)} + HUD-DOM ${f(PFM.h)} + Browser/Rest ${f(Math.max(0,PFM.f-js))} · Perf ${PF.on()?'an':'aus'}${PFM.skip?' · Menü-Pause '+PFM.skip:''}`}catch(e){}return s}}
+try{pfKlasse()}catch(e){}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
