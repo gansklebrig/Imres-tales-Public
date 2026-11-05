@@ -41,6 +41,9 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **Rechts:** was die vier Drehregler gerade tun – direkt neben dem echten Knopf. Drücken: siehe kleine Schrift. **MIXER** schaltet auf Reglerbank B (Tempo, Hall, Effekte, Echos Hall).
 - **Unten:** PLAY Musik · STOP alles aus · PAD ⚡ Etwas passiert · REC 🤫 Stille · TEMPO 🎲 Neu besetzen.
 - **MENU:** Spielabend, Optionen, Tastenbelegung, System (dort auch **⬇ Imres aktualisieren** – ohne Terminal).
+- **Effekte (Bank FX, MIXER zweimal):** 🎛 Filter (links Tiefpass, rechts Hochpass, Mitte offen) · 〰 Resonanz · 🔁 Delay (im Tempo) · 🔥 Drive. Weitere: ↻ Rückkopplung, ⏱ Delay-Länge. Sie liegen hinter allem – Musik, Kulisse und Effekte. Regler drücken = neutral.
+- **Zum Halten:** ALT + STOP = Filter zu, ALT + ZS3 = Echo-Wurf (solange gedrückt) · ALT + PLAY = alle Effekte zurück.
+- **🎛 Belegung ändern (MENU):** jeden Drehregler (je Seite, Bank B, Bank FX) und die Tasten PLAY, STOP, PAD, REC, TEMPO, ZS3, CTRL (auch mit ALT) frei belegen. ◀ ▶ oder SEL ändert, „Standard wiederherstellen“ setzt zurück. Die Belegung bleibt gespeichert.
 - **BACK 2 Sekunden halten:** zurück zur normalen Zynthian-Oberfläche.
 - **Vom Zynthian zu Imres:** in der Zynthian-Oberfläche oben rechts den kleinen **♫**-Knopf 1 Sekunde halten. Andere Ecke oder aus: in `einstellungen.sh` `IMRES_KNOPF=lo` (links oben), `ru`, `lu` oder `aus`.
 

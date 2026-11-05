@@ -13123,6 +13123,43 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
   }
   /* Schnittstelle für die Zynthian-Steuerung (zynthian/zyn.js) */
   let zynDuck = null;
+  /* ---------- Effekte für den Zynthian: DJ-Filter, Drive, Delay – hinter allem (Musik, Kulisse, Effekte), vor dem Limiter ---------- */
+  let fxKette = null;
+  const FXW = { filter: 0, reso: 15, echo: 0, rueck: 35, zeit: 2, drive: 0 };
+  const FX_ZEITEN = [[.5, "1/8"], [.75, "1/8·"], [1, "1/4"], [1.5, "1/4·"], [2, "1/2"]];
+  function fxBauen() {
+    if (fxKette) return fxKette;
+    if (!ctx || !ausgang || !endKnoten) return null;
+    const c = ctx, ein = c.createGain(), hp = c.createBiquadFilter(), lp = c.createBiquadFilter(), sh = c.createWaveShaper(), shNass = c.createGain(), trocken = c.createGain(),
+      summe = c.createGain(), dl = c.createDelay(2.5), rueck = c.createGain(), dlFilt = c.createBiquadFilter(), nass = c.createGain();
+    hp.type = "highpass"; hp.frequency.value = 10; hp.Q.value = .7; lp.type = "lowpass"; lp.frequency.value = 20000; lp.Q.value = .7;
+    sh.oversample = "2x"; shNass.gain.value = 0; trocken.gain.value = 1; dlFilt.type = "lowpass"; dlFilt.frequency.value = 3800; rueck.gain.value = .35; nass.gain.value = 0;
+    /* alles, was bisher direkt in den Limiter ging, läuft jetzt durch die Effekte */
+    try { ausgang.disconnect(endKnoten); } catch (_) {} ausgang.connect(ein);
+    if (kulAusRef) { try { kulAusRef.disconnect(endKnoten); } catch (_) {} kulAusRef.connect(ein); }
+    ein.connect(hp); hp.connect(lp); lp.connect(trocken); lp.connect(sh); sh.connect(shNass); trocken.connect(summe); shNass.connect(summe);
+    summe.connect(endKnoten); summe.connect(dl); dl.connect(dlFilt); dlFilt.connect(rueck); rueck.connect(dl); dlFilt.connect(nass); nass.connect(endKnoten);
+    fxKette = { hp, lp, sh, shNass, trocken, dl, rueck, nass, kurve: -1 };
+    setInterval(fxZeit, 400); fxAnwenden(); return fxKette;
+  }
+  function fxAnwenden() {
+    const k = fxKette; if (!k || !ctx) return; const j = ctx.currentTime, z = (p, v) => p.setTargetAtTime(v, j, .03);
+    const f = Math.max(-1, Math.min(1, FXW.filter / 100)), q = .7 + FXW.reso / 100 * 11;
+    z(k.lp.frequency, f < 0 ? 20000 * Math.pow(.004, -f) : 20000); z(k.lp.Q, f < 0 ? q : .7);
+    z(k.hp.frequency, f > 0 ? 10 * Math.pow(500, f) : 10); z(k.hp.Q, f > 0 ? q : .7);
+    const d = Math.max(0, Math.min(1, FXW.drive / 100)), stufe = Math.round(d * 20);
+    if (stufe !== k.kurve) { k.kurve = stufe; const n = 1024, cv = new Float32Array(n), kk = 1 + stufe * 1.2; for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; cv[i] = Math.tanh(kk * x) / Math.tanh(kk); } k.sh.curve = cv; }
+    z(k.shNass.gain, d * .9); z(k.trocken.gain, 1 - d * .75);
+    z(k.nass.gain, Math.max(0, Math.min(1, FXW.echo / 100)) * .7); z(k.rueck.gain, Math.max(0, Math.min(.9, FXW.rueck / 100)));
+    fxZeit();
+  }
+  function fxZeit() {
+    const k = fxKette; if (!k || !ctx) return;
+    const bpm = (laeuft ? (tempoJetzt || S.tempo) : S.tempo) || 100, t = Math.min(2.4, 60 / bpm * FX_ZEITEN[Math.max(0, Math.min(FX_ZEITEN.length - 1, FXW.zeit | 0))][0]);
+    if (Math.abs(k.dl.delayTime.value - t) > .002) k.dl.delayTime.setTargetAtTime(t, ctx.currentTime, .05);
+  }
+  /* Effekte, die schon vor dem ersten Ton eingestellt wurden, greifen, sobald der Ton startet */
+  setInterval(() => { if (!fxKette && ctx && (FXW.filter || FXW.echo || FXW.drive)) fxBauen(); }, 1000);
   const zynHoerZeit = p => { /* Audiozeit, die zum Zeitpunkt p (performance.now) gerade aus den Lautsprechern kommt */
     try { const ts = ctx.getOutputTimestamp(); if (ts && ts.performanceTime) return ts.contextTime + (p - ts.performanceTime) / 1000; } catch (_) {}
     return ctx.currentTime - (ctx.outputLatency || 0) - (ctx.baseLatency || 0) + (p - performance.now()) / 1000;
@@ -13143,6 +13180,8 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
       const fx = [...new Set((set ? set.fx : KERN_FX).concat(EFFEKTE, KAMPF_FX))].filter(f => T.sfx[f]);
       return { st, kul, fx, namen: { st: T.vorlagen || {}, kul: T.kulissen || {}, fx: T.sfx || {} } };
     },
+    fx(k, v) { if (!(k in FXW) || !isFinite(+v)) return; FXW[k] = +v; if (fxBauen()) fxAnwenden(); },
+    fxWerte() { return Object.assign({ zeiten: FX_ZEITEN.map(x => x[1]) }, FXW); },
     momente() { try { const en = sprache() === "en"; return momenteVon(S.kulisse).map((x, i) => ({ i, sym: x[0], name: en ? x[2] : x[1] })); } catch (_) { return []; } },
     abendSets() { const E = t().einf || {}, N = E.abendNamen || {}; return Object.keys(ABEND_SETS).map(k => ({ k, sym: ABEND_SETS[k].sym, name: N[k] || k })); },
     abend(k) { abendSet = k && ABEND_SETS[k] ? k : ""; try { localStorage.setItem("imres-lw-abendset", abendSet); } catch (_) {} try { if (einfach) einfachNeu(); } catch (_) {} },

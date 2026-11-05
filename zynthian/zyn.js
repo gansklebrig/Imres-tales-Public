@@ -189,7 +189,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const k = $("#misch-knopf"), m = $("#misch"); if (!k || !m) return;
     const war = !m.hidden; klick(k); if (!war) setTimeout(() => { if (!m.hidden) klick(k); }, 60);
   }
-  const REGLER = () => (SEITE === "welten" ? W_REGLER : B_REGLER)[bank];
+  const REGLER = () => PULT ? zpRegler() : (SEITE === "welten" ? W_REGLER : B_REGLER)[bank] || B_REGLER[0];
   function bankWechsel() { bank = bank ? 0 : 1; leisteZeichnen(); weltenMischBereit(); zeige("⟲ " + W("Reglerbank ", "Knob bank ") + (bank ? "B" : "A"), null, REGLER().map(r => r.name).join(" · ")); ledsMelden(); }
 
   /* ---------- Plätze F1–F4: was dort liegt ---------- */
@@ -510,22 +510,23 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function taste(name, art) {
     if (name === "ERKENNEN") { tonartErkennen(); return; }
     if (name === "ALT") { if (art === "druck") alt = true; else if (art === "los") alt = false; leisteZeichnen(); ledsMelden(); return; }
-    if (art === "druck" || art === "los") return;
+    if (art === "druck" || art === "los") { if (PULT && !$(".zyn-menue")) zpDruckLos(name, art); return; }
     const lang = art === "lang";
     const m = $(".zyn-menue");
     if (m) {
       if (name === "BACK" || (name === "MENU" && !lang)) { menueZu(); return; }
       if (/^F[1-4]$/.test(name) && menueArt === "modus") { modusSetzen(MODUS_REIHE[+name[1] - 1]); return; }
       if (/^F[1-4]$/.test(name) && menueArt === "zp") { const b = m.querySelector('[data-zm="' + ZP_MENUE_F[+name[1] - 1] + '"]'); if (b) klick(b); return; }
+      if ((name === "LEFT" || name === "RIGHT") && menueArt === "beleg" && fokus && fokus.dataset && /^b:/.test(fokus.dataset.zm || "")) { belegZyklus(fokus.dataset.zm.slice(2), name === "LEFT" ? -1 : 1); return; }
       if (["UP", "DOWN", "LEFT", "RIGHT"].includes(name)) { bewegen(name); return; }
       if (name === "SEL") { auswaehlen(); return; }
       if (name !== "MENU" && name !== "MIXER") return;
     }
+    if (PULT && zpTaste(name, lang)) { ledsMelden(); return; }
     if (alt && name === "REC") { aufnahme(); return; }
     if (alt && name === "TEMPO") { const l = ["aus", "slave", "master"], n = l[(l.indexOf(OPT.takt) + 1) % 3]; optSetzen({ takt: n }); zeige("⏱ MIDI-Takt: " + TAKT_NAME[n]); return; }
     if (alt && name === "MENU") { optionenMenue(); return; }
     if (alt && name === "PAD" && SEITE === "buehne") { pultKlick("data-aktion", "sprechen"); zeige("🎙 " + W("Sprich jetzt …", "Speak now …")); return; }
-    if (PULT && zpTaste(name, lang)) { ledsMelden(); return; }
     switch (name) {
       case "MENU": lang ? systemMenue() : modusMenue(); return;
       case "MIXER": bankWechsel(); return;
@@ -608,7 +609,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       return;
     }
     if (e.art === "cc") {
-      if (OPT.regler && steuerOk(e) && e.cc >= 20 && e.cc <= 23) { const r = REGLER()[e.cc - 20]; if (r) { const v = r.lo + Math.round((e.wert / 127) * (r.hi - r.lo) / r.schritt) * r.schritt; r.setz(v); stellRegler(r, 0); } }
+      if (OPT.regler && steuerOk(e) && e.cc >= 20 && e.cc <= 23) { const r = REGLER()[e.cc - 20]; if (r && r.schritt) { const v = r.lo + Math.round((e.wert / 127) * (r.hi - r.lo) / r.schritt) * r.schritt; r.setz(v); stellRegler(r, 0); } }
       return;
     }
     if (e.art === "programm" && OPT.programmWechsel) {
@@ -725,29 +726,106 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
   const zpBlattJetzt = () => zpListe[zpBlatt[zpSeite] || 0] || [];
 
-  /* ----- Drehregler je Seite ----- */
+  /* ----- Drehregler und Tasten: frei belegbar (Menü → Belegung) ----- */
   const B0 = B_REGLER[0], B1 = B_REGLER[1];
-  const ZR = { musik: B0[0], hg: B0[1], los: B0[2], spannung: B0[3], tempo: B1[0], hall: B1[1], fx: B1[2], echo: B1[3] };
   const SP_TEXT = v => v < 15 ? W("friedlich", "peaceful") : v < 40 ? W("ruhig", "calm") : v < 70 ? W("angespannt", "tense") : W("bedrohlich", "menacing");
   const LOS_TEXT = v => v <= 2 ? W("kaum etwas", "barely") : v <= 4 ? W("ruhig", "calm") : v <= 6 ? W("normal", "normal") : v <= 8 ? W("lebhaft", "lively") : W("wild", "wild");
+  const PFX = () => window.ImresPult && window.ImresPult.fxWerte ? window.ImresPult.fxWerte() : null;
+  const fxDef = (k, name, lo, hi, schritt, neutral, text) => ({ name, lo, hi, schritt, neutral, text,
+    lies: () => { const w = PFX(); return w && typeof w[k] === "number" ? w[k] : neutral; },
+    setz: v => { if (window.ImresPult && window.ImresPult.fx) window.ImresPult.fx(k, v); } });
+  const ZP_PARAM = {
+    musik: Object.assign({ druck: "stumm" }, B0[0]), hg: Object.assign({ druck: "hg" }, B0[1]), los: Object.assign({ druck: "mitte", wort: LOS_TEXT }, B0[2]),
+    spannung: Object.assign({ druck: "friedlich", wort: SP_TEXT }, B0[3]), tempo: Object.assign({ druck: "mitte" }, B1[0]), hall: Object.assign({ druck: "mitte" }, B1[1]),
+    fxlaut: Object.assign({ druck: "stumm" }, B1[2], { name: W("💥 Effekt-Lautstärke", "💥 Effect volume") }), echohall: Object.assign({ druck: "mitte" }, B1[3]),
+    filter: Object.assign({ druck: "null" }, fxDef("filter", W("🎛 Filter", "🎛 Filter"), -100, 100, 4, 0, v => v === 0 ? W("offen", "open") : v < 0 ? W("Tiefpass ", "Low-pass ") + (-v) + " %" : W("Hochpass ", "High-pass ") + v + " %")),
+    reso: Object.assign({ druck: "null" }, fxDef("reso", W("〰 Resonanz", "〰 Resonance"), 0, 100, 5, 15)),
+    delay: Object.assign({ druck: "null" }, fxDef("echo", W("🔁 Delay", "🔁 Delay"), 0, 100, 4, 0)),
+    rueck: Object.assign({ druck: "null" }, fxDef("rueck", W("↻ Rückkopplung", "↻ Feedback"), 0, 90, 5, 35)),
+    zeit: Object.assign({ druck: "null" }, fxDef("zeit", W("⏱ Delay-Länge", "⏱ Delay time"), 0, 4, 1, 2, v => ["1/8", "1/8·", "1/4", "1/4·", "1/2"][v] || "")),
+    drive: Object.assign({ druck: "null" }, fxDef("drive", W("🔥 Drive", "🔥 Drive"), 0, 100, 4, 0)),
+    nichts: { name: "–", lo: 0, hi: 1, schritt: 0, lies: () => 0, setz: () => {}, druck: "", text: () => "" }
+  };
+  const BANKEN = ["A", "B", "FX"];
+  const ZP_AKT = {
+    play: [W("▶ Musik an/aus", "▶ Music on/off"), W("Musik", "music")], stop: [W("■ Alles aus", "■ All off"), W("alles aus", "all off")],
+    passiert: [W("⚡ Etwas passiert", "⚡ Something happens"), "⚡"], stille: [W("🤫 Stille", "🤫 Silence"), "🤫"], neubesetzen: [W("🎲 Neu besetzen", "🎲 Re-cast"), "🎲"],
+    sprechen: [W("🎙 Sprechen", "🎙 Speak"), "🎙"], aufnahme: [W("⏺ Aufnahme an/aus", "⏺ Record on/off"), "⏺"], takt: [W("⏱ MIDI-Takt umschalten", "⏱ Switch MIDI clock"), "⏱"],
+    seite_vor: [W("➡ nächste Seite", "➡ next page"), W("Seite", "page")], seite_zurueck: [W("⬅ vorige Seite", "⬅ previous page"), W("◀ Seite", "◀ page")],
+    bank: [W("⟲ Reglerbank wechseln", "⟲ Next knob bank"), W("Bank", "bank")], hg: [W("🌲 Hintergrund an/aus", "🌲 Backdrop on/off"), "🌲"],
+    fx_aus: [W("✨ Effekte zurücksetzen", "✨ Reset effects"), W("FX aus", "FX off")],
+    filterzu: [W("🎛 Filter zu – solange gedrückt", "🎛 Filter close – while held"), W("Filter", "filter")],
+    filterhoch: [W("🎛 Hochpass – solange gedrückt", "🎛 High-pass – while held"), W("Hochpass", "high-pass")],
+    echowurf: [W("🔁 Echo-Wurf – solange gedrückt", "🔁 Echo throw – while held"), W("Echo-Wurf", "echo throw")],
+    nichts: ["– " + W("nichts", "nothing") + " –", ""]
+  };
+  const HALTEN = { filterzu: 1, filterhoch: 1, echowurf: 1 };
+  const ZP_TASTEN = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL", "ALT+PLAY", "ALT+STOP", "ALT+PAD", "ALT+REC", "ALT+TEMPO", "ALT+ZS3", "ALT+CTRL"];
+  const ZP_STANDARD = {
+    regler: { "A:stimmung": ["musik", "spannung", "hg", "los"], "A:ort": ["hg", "los", "spannung", "hall"], "A:momente": ["fxlaut", "spannung", "hall", "tempo"],
+      B: ["tempo", "hall", "fxlaut", "echohall"], FX: ["filter", "reso", "delay", "drive"] },
+    tasten: { PLAY: "play", STOP: "stop", PAD: "passiert", REC: "stille", TEMPO: "neubesetzen", ZS3: "seite_zurueck", CTRL: "seite_vor",
+      "ALT+PLAY": "fx_aus", "ALT+STOP": "filterzu", "ALT+PAD": "sprechen", "ALT+REC": "aufnahme", "ALT+TEMPO": "takt", "ALT+ZS3": "echowurf", "ALT+CTRL": "seite_zurueck" }
+  };
+  let ZB = JSON.parse(JSON.stringify(ZP_STANDARD));
+  try { const g = JSON.parse(lies("imres-zyn-beleg", "null")); if (g && g.regler && g.tasten) { Object.assign(ZB.regler, g.regler); Object.assign(ZB.tasten, g.tasten); } } catch (_) {}
+  const belegMerken = () => schreib("imres-zyn-beleg", JSON.stringify(ZB));
+  const bankName = () => BANKEN[bank] || "A";
   function zpRegler() {
-    if (SEITE === "welten") return W_REGLER[bank].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
-    if (bank) return [Object.assign({ druck: "mitte" }, ZR.tempo), Object.assign({ druck: "mitte" }, ZR.hall), Object.assign({ druck: "mitte" }, ZR.fx), Object.assign({ druck: "mitte" }, ZR.echo)];
-    const m = Object.assign({ druck: "stumm" }, ZR.musik), h = Object.assign({ druck: "hg" }, ZR.hg), sp = Object.assign({ druck: "friedlich", wort: SP_TEXT }, ZR.spannung), lo = Object.assign({ druck: "mitte", wort: LOS_TEXT }, ZR.los);
-    if (zpSeite === "ort") return [h, lo, sp, Object.assign({ druck: "mitte" }, ZR.hall)];
-    if (zpSeite === "momente") return [Object.assign({ druck: "stumm" }, ZR.fx), sp, Object.assign({ druck: "mitte" }, ZR.hall), Object.assign({ druck: "mitte" }, ZR.tempo)];
-    return [m, sp, h, lo];
+    if (SEITE === "welten") return W_REGLER[bank % 2].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
+    const l = bank ? ZB.regler[bankName()] : ZB.regler["A:" + zpSeite];
+    return (l || []).slice(0, 4).map(k => ZP_PARAM[k] || ZP_PARAM.nichts);
   }
-  const DRUCK_TEXT = { stumm: W("drücken: stumm", "push: mute"), hg: W("drücken: an/aus", "push: on/off"), friedlich: W("drücken: friedlich", "push: peaceful"), mitte: W("drücken: Mitte", "push: centre") };
+  const DRUCK_TEXT = { stumm: W("drücken: stumm", "push: mute"), hg: W("drücken: an/aus", "push: on/off"), friedlich: W("drücken: friedlich", "push: peaceful"), mitte: W("drücken: Mitte", "push: centre"), null: W("drücken: neutral", "push: reset") };
   function zpWert(r) { const v = r.lies(); return { v, anteil: Math.max(0, Math.min(1, proz(v, r.lo, r.hi))), text: r.text ? r.text(v) : r.wort ? r.wort(v) : Math.round(proz(v, r.lo, r.hi) * 100) + " %" }; }
-  function zpDreh(nr, d) { const r = zpRegler()[nr]; if (!r) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); zpZeichnen(true); }
+  function zpDreh(nr, d) { const r = zpRegler()[nr]; if (!r || !r.schritt) return; const v0 = r.lies(), v = Math.max(r.lo, Math.min(r.hi, v0 + d * r.schritt)); if (v !== v0) r.setz(v); zpZeichnen(true); }
   function zpDruck(nr) {
-    const r = zpRegler()[nr]; if (!r) return; const k = bank + "-" + zpSeite + "-" + nr;
+    const r = zpRegler()[nr]; if (!r || !r.schritt) return; const k = bank + "-" + zpSeite + "-" + nr;
     if (r.druck === "stumm") { const v = r.lies(); if (v > r.lo) { merkStumm[k] = v; r.setz(r.lo); zeige("🔇 " + r.name); } else { r.setz(merkStumm[k] != null ? merkStumm[k] : Math.round((r.lo + r.hi) * .7)); zeige("🔊 " + r.name); } }
     else if (r.druck === "hg") { pultKlick("data-aktion", "kulumschalt"); zeige("🌲 " + W("Hintergrund an / aus", "Backdrop on / off")); }
     else if (r.druck === "friedlich") r.setz(r.lo);
+    else if (r.druck === "null") { r.setz(r.neutral); zeige(r.name + " · " + W("neutral", "reset")); }
     else r.setz(Math.round(((r.lo + r.hi) / 2) / r.schritt) * r.schritt);
     zpZeichnen(true);
+  }
+  function bankWeiter() { const n = SEITE === "welten" ? 2 : BANKEN.length; bank = (bank + 1) % n; weltenMischBereit(); zeige("⟲ " + W("Reglerbank ", "Knob bank ") + (SEITE === "welten" ? (bank ? "B" : "A") : bankName()), null, zpRegler().map(r => r.name).join(" · ")); zpZeichnen(true); ledsMelden(); }
+  /* Aktionen auf Tasten */
+  const fxSetz = (k, v) => { if (window.ImresPult && window.ImresPult.fx) window.ImresPult.fx(k, v); };
+  const haltenMerk = {};
+  function zpHalten(id, an) {
+    const w = PFX(); if (!w) return;
+    if (an) {
+      haltenMerk[id] = { filter: w.filter, reso: w.reso, echo: w.echo, rueck: w.rueck };
+      if (id === "filterzu") { fxSetz("filter", -88); fxSetz("reso", Math.max(w.reso, 40)); }
+      if (id === "filterhoch") { fxSetz("filter", 80); fxSetz("reso", Math.max(w.reso, 35)); }
+      if (id === "echowurf") { fxSetz("echo", 90); fxSetz("rueck", 72); }
+      zeige(ZP_AKT[id][0]);
+    } else {
+      const m = haltenMerk[id]; if (!m) return; delete haltenMerk[id];
+      if (id === "echowurf") { fxSetz("echo", m.echo); setTimeout(() => fxSetz("rueck", m.rueck), 1500); }
+      else { fxSetz("filter", m.filter); fxSetz("reso", m.reso); }
+    }
+    zpZeichnen(true);
+  }
+  function zpAktion(id) {
+    const z = pz();
+    switch (id) {
+      case "play": if (SEITE === "welten") klick($("#spielen")); else musikSpielen(); setTimeout(() => zpZeichnen(true), 150); return true;
+      case "stop": allesStopp(); return true;
+      case "passiert": if (SEITE === "welten") { const l = sichtbare("[data-ger]"); const el = l[Math.floor(Math.random() * l.length)] || $$("[data-ger]")[0]; if (el) { klick(el); zeige("🎭 " + kurzName(el)); } } else { pultKlick("data-aktion", "passiert"); zeige("⚡ " + W("Etwas passiert", "Something happens")); } return true;
+      case "stille": if (SEITE === "welten") { const l = $$("[data-szene]"); const el = l[Math.floor(Math.random() * l.length)]; if (el) { klick(el); zeige("⏳ " + kurzName(el)); } } else { pultKlick("data-aktion", "stille"); zeige("🤫 " + W("Stille", "Silence")); } return true;
+      case "neubesetzen": if (SEITE === "welten") return false; pultKlick("data-aktion", "neubesetzen"); zeige("🎲 " + W("Neu besetzen – beim nächsten Teil", "Re-cast – at the next part")); return true;
+      case "sprechen": if (SEITE === "welten") return false; pultKlick("data-aktion", "sprechen"); zeige("🎙 " + W("Sprich jetzt …", "Speak now …")); return true;
+      case "aufnahme": aufnahme(); return true;
+      case "takt": { const l = ["aus", "slave", "master"], n = l[(l.indexOf(OPT.takt) + 1) % 3]; optSetzen({ takt: n }); zeige("⏱ MIDI-Takt: " + TAKT_NAME[n]); return true; }
+      case "seite_vor": zpSeiteSchritt(1); return true;
+      case "seite_zurueck": zpSeiteSchritt(-1); return true;
+      case "bank": bankWeiter(); return true;
+      case "hg": if (SEITE === "welten") return false; pultKlick("data-aktion", "kulumschalt"); zeige("🌲 " + W("Hintergrund an / aus", "Backdrop on / off")); return true;
+      case "fx_aus": if (SEITE === "welten") return false; fxSetz("filter", 0); fxSetz("echo", 0); fxSetz("drive", 0); zeige("✨ " + W("Effekte zurückgesetzt", "Effects reset")); zpZeichnen(true); return true;
+      case "nichts": return true;
+    }
+    return false;
   }
 
   /* ----- Seiten wechseln ----- */
@@ -783,8 +861,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (/^F[1-4]$/.test(name)) { zpAusloesen((alt ? 4 : 0) + +name[1] - 1); return true; }
     const dm = /^DREH([1-4])$/.exec(name); if (dm) { zpDruck(+dm[1] - 1); return true; }
     switch (name) {
-      case "MENU": lang ? systemMenue() : zpMenue(); return true;
-      case "MIXER": bank = bank ? 0 : 1; weltenMischBereit(); zeige("⟲ " + W("Reglerbank ", "Knob bank ") + (bank ? "B" : "A")); zpZeichnen(true); return true;
+      case "MENU": if (alt) return false; lang ? systemMenue() : zpMenue(); return true;
+      case "MIXER": bankWeiter(); return true;
       case "LEFT": case "RIGHT": if (alt) { zpGruppeSchritt(name === "LEFT" ? -1 : 1); return true; } zpCursorBewegen(name); return true;
       case "UP": case "DOWN": zpCursorBewegen(name); return true;
       case "SEL": if (zpCursor < 0) zpCursorBewegen("RIGHT"); else zpAusloesen(zpCursor); return true;
@@ -792,12 +870,17 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         if (lang) { zeige("🎛 " + W("Zynthian startet …", "Zynthian is starting …")); fetch("/zyn/system", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "zynthian" }) }).catch(() => {}); return true; }
         if (zpCursor >= 0) { zpCursor = -1; zpZeichnen(true); } else if (zpBlatt[zpSeite]) { zpBlatt[zpSeite] = 0; zpZeichnen(true); } else zeige("↩ " + W("BACK 2 s halten: zurück zum Zynthian", "Hold BACK 2 s: back to Zynthian"));
         return true;
-      case "CTRL": zpSeiteSchritt(alt ? -1 : 1); return true;
-      case "ZS3": zpSeiteSchritt(-1); return true;
     }
-    if (SEITE === "welten") return false; /* PLAY, STOP, PAD, REC, TEMPO wie bisher */
-    if (name === "PLAY") { musikSpielen(); setTimeout(() => zpZeichnen(true), 150); return true; }
-    return false;
+    const id = ZB.tasten[(alt ? "ALT+" : "") + name];
+    if (!id) return false;
+    if (HALTEN[id]) return true; /* läuft über Drücken/Loslassen */
+    return zpAktion(id);
+  }
+  /* Drücken / Loslassen für „solange gedrückt“-Aktionen */
+  const gehalten = {};
+  function zpDruckLos(name, art) {
+    if (art === "druck") { const id = ZB.tasten[(alt ? "ALT+" : "") + name]; if (id && HALTEN[id] && SEITE === "buehne") { gehalten[name] = id; zpHalten(id, true); } }
+    else if (gehalten[name]) { zpHalten(gehalten[name], false); delete gehalten[name]; }
   }
 
   /* ----- Menü ----- */
@@ -811,14 +894,45 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       k("F2", "🎚 " + W("Optionen", "Options"), W("MIDI-Takt, Handpan-Tonart, Mikrofon …", "MIDI clock, key, mic …"), "optionen") +
       k("F3", "❔ " + W("Tastenbelegung", "Button map"), "", "hilfe") +
       k("F4", "⚙ " + W("System", "System"), W("Aktualisieren, Zynthian, Aufnahme, Aus", "Update, Zynthian, record, off"), "system") +
+      '<button type="button" data-zm="beleg">🎛 ' + W("Belegung ändern", "Change mapping") + "<small>" + W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons") + "</small></button>" +
       '<button type="button" data-zm="alt">🧭 ' + W("Alte Ansicht (Webseite)", "Old view (web page)") + "<small>" + W("zurück geht’s im selben Menü", "switch back in the same menu") + "</small></button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile + SEL · BACK schließt", "F1–F4 pick · arrows + SEL · BACK closes") + "</p>",
-      { abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu,
+      { abend: zpAbendMenue, optionen: () => optionenMenue(), hilfe: zpHilfe, system: systemMenue, zu: menueZu, beleg: () => belegMenue(),
         alt: () => { schreib("imres-zyn-pult", "0"); location.reload(); } });
     menueArt = "zp";
   }
   const ZP_MENUE_F = ["abend", "optionen", "hilfe", "system"];
+  /* Belegung ändern: Regler und Tasten */
+  const SEITEN_NAME = { stimmung: "🎵 " + W("Stimmung", "Mood"), ort: "🌲 " + W("Ort", "Place"), momente: "⚡ " + W("Momente", "Moments") };
+  function belegSlots() {
+    const l = [];
+    ["stimmung", "ort", "momente"].forEach(sid => [0, 1, 2, 3].forEach(i => l.push({ id: "r|A:" + sid + "|" + i, titel: SEITEN_NAME[sid] + " · " + W("Regler ", "Knob ") + (i + 1), gruppe: W("Drehregler – Bank A (je Seite)", "Knobs – bank A (per page)") })));
+    ["B", "FX"].forEach(bk => [0, 1, 2, 3].forEach(i => l.push({ id: "r|" + bk + "|" + i, titel: W("Bank ", "Bank ") + bk + " · " + W("Regler ", "Knob ") + (i + 1), gruppe: W("Drehregler – Bank B und FX (MIXER schaltet um)", "Knobs – banks B and FX (MIXER switches)") })));
+    ZP_TASTEN.forEach(t => l.push({ id: "t|" + t, titel: t.replace("ALT+", "ALT + "), gruppe: W("Tasten", "Buttons") }));
+    return l;
+  }
+  function belegWert(id) { const [art, a, b] = id.split("|"); return art === "r" ? (ZB.regler[a] || [])[+b] || "nichts" : ZB.tasten[a] || "nichts"; }
+  function belegName(id) { const v = belegWert(id); return id[0] === "r" ? (ZP_PARAM[v] || ZP_PARAM.nichts).name : (ZP_AKT[v] || ZP_AKT.nichts)[0]; }
+  function belegZyklus(id, s) {
+    const [art, a, b] = id.split("|"), l = art === "r" ? Object.keys(ZP_PARAM) : Object.keys(ZP_AKT), v = belegWert(id);
+    const n = l[(l.indexOf(v) + s + l.length) % l.length];
+    if (art === "r") { ZB.regler[a] = (ZB.regler[a] || ["nichts", "nichts", "nichts", "nichts"]).slice(); ZB.regler[a][+b] = n; } else ZB.tasten[a] = n;
+    belegMerken(); belegMenue(id); zpZeichnen(true);
+  }
+  function belegMenue(fokusId) {
+    let h = "<h3>🎛 " + W("Belegung ändern", "Change mapping") + '</h3><div class="reihe zyn-opt">', gr = "";
+    const a = { zu: menueZu, std: () => { ZB = JSON.parse(JSON.stringify(ZP_STANDARD)); belegMerken(); belegMenue(); zpZeichnen(true); zeige("↺ " + W("Standard-Belegung", "Default mapping")); } };
+    belegSlots().forEach(sl => {
+      if (sl.gruppe !== gr) { gr = sl.gruppe; h += '<p class="hinweis" style="grid-column:1/-1;margin:6px 0 0;text-align:left">' + gr + "</p>"; }
+      h += '<button type="button" data-zm="b:' + sl.id + '"><span>' + sl.titel + ": <b>" + esc2(belegName(sl.id)) + "</b></span></button>";
+      a["b:" + sl.id] = () => belegZyklus(sl.id, 1);
+    });
+    h += '<button type="button" data-zm="std">↺ ' + W("Standard wiederherstellen", "Restore defaults") + '</button><button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
+      '<p class="hinweis">' + W("▲ ▼ / Drehregler: Zeile wählen · ◀ ▶ oder SEL: ändern · BACK: fertig", "▲ ▼ / knob: pick row · ◀ ▶ or SEL: change · BACK: done") + "</p>";
+    const m = menue(h, a); menueArt = "beleg";
+    if (fokusId) { const b = m.querySelector('[data-zm="b:' + fokusId + '"]'); if (b) fokusSetzen(b); }
+  }
   function zpAbendMenue() {
     const P = window.ImresPult; if (!P || !P.abendSets) return;
     const z = pz() || {}, sets = P.abendSets(), a = { zu: menueZu };
@@ -831,12 +945,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
   function zpHilfe() {
     const z = (kk, t) => "<div><b>" + kk + "</b><span>" + t + "</span></div>";
-    const l = [["F1–F4", W("obere Kachelreihe", "top row of tiles")], ["ALT + F1–F4", W("untere Kachelreihe", "bottom row")], ["◀ ▶", W("Kachel wählen, am Rand weiterblättern", "move, page at the edge")], ["ALT + ◀ ▶", W("nächste / vorige Gruppe (z. B. Wetter, Effekte, Szenen)", "next / previous group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")],
-      ["CTRL / ZS3", W("nächste / vorige Seite", "next / previous page")], ["MIXER", W("Reglerbank A ↔ B", "Knob bank A ↔ B")], ["Regler 1–4", W("wie rechts angezeigt · drücken: siehe Anzeige", "as shown on the right · push: see label")],
-      ["PLAY", W("Musik ▶ / ■ (Klangwelt: Abspielen/Pause)", "Music ▶ / ■")], ["STOP", W("alles aus", "everything off")], ["PAD", W("⚡ Etwas passiert", "⚡ Something happens")], ["REC", W("🤫 Stille", "🤫 Silence")], ["TEMPO", W("🎲 Neu besetzen", "🎲 Re-cast")],
-      ["ALT + PAD", W("🎙 Sprechen", "🎙 Speak")], ["ALT + REC", W("⏺ Aufnahme", "⏺ Record")], ["ALT + TEMPO", W("MIDI-Takt aus/Slave/Master", "MIDI clock off/slave/master")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")],
-      ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")]];
-    menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([a, b]) => z(a, b)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu });
+    const l = [["F1–F4", W("obere Kachelreihe", "top row of tiles")], ["ALT + F1–F4", W("untere Kachelreihe", "bottom row")], ["◀ ▶", W("Kachel wählen, am Rand weiterblättern", "move, page at the edge")],
+      ["ALT + ◀ ▶", W("nächste / vorige Gruppe", "next / previous group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")],
+      ["MIXER", W("Reglerbank A → B → FX", "Knob bank A → B → FX")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: zum Zynthian", "back · hold 2 s: to Zynthian")]]
+      .concat(ZP_TASTEN.map(t => [t.replace("ALT+", "ALT + "), (ZP_AKT[ZB.tasten[t]] || ZP_AKT.nichts)[0]]));
+    menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([x, y]) => z(x, y)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="beleg">🎛 ' + W("Ändern", "Change") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, beleg: () => belegMenue() });
     menueArt = "hilfe";
   }
 
@@ -858,11 +971,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const gr = blatt[0] ? blatt[0].gruppe : "";
     const kopf = '<div class="zp-gruppe"><span data-zp-gruppe="1">' + esc2(gr || d.name) + (zpGruppen.length > 1 ? ' <small>▸ ' + W("ALT + ◀ ▶: nächste Gruppe", "ALT + ◀ ▶: next group") + "</small>" : "") + "</span>" + (n > 1 ? '<span class="zp-blatt"><button type="button" data-zp-blatt="-1">◀</button>' + (n <= 9 ? Array.from({ length: n }, (_, i) => "<i" + (i === bi ? ' class="an"' : "") + "></i>").join("") : "<em>" + (bi + 1) + " / " + n + "</em>") + '<button type="button" data-zp-blatt="1">▶</button></span>' : "") + "</div>";
     const regler = zpRegler().map((r, i) => { const w = zpWert(r);
-      return '<div class="zp-r" data-zp-r="' + i + '"><span class="zp-rn">' + esc2(r.name) + (bank ? ' <small>B</small>' : "") + '</span><i><b style="width:' + Math.round(w.anteil * 100) + '%"></b></i><span class="zp-rv"><span>' + esc2(w.text) + "</span><small>" + (DRUCK_TEXT[r.druck] || "") + "</small></span></div>"; }).join("");
+      return '<div class="zp-r" data-zp-r="' + i + '"><span class="zp-rn">' + esc2(r.name) + (bank && SEITE !== "welten" ? " <small>" + bankName() + "</small>" : bank ? " <small>B</small>" : "") + '</span><i><b style="width:' + Math.round(w.anteil * 100) + '%"></b></i><span class="zp-rv"><span>' + esc2(w.text) + "</span><small>" + (DRUCK_TEXT[r.druck] || "") + "</small></span></div>"; }).join("");
     const t = (k, txt) => '<button type="button" data-zp-taste="' + k + '"><b>' + k + "</b> " + txt + "</button>";
-    const fuss = SEITE === "welten"
-      ? t("PLAY", "▶/❚❚") + t("STOP", W("aus", "off")) + t("PAD", "🎭") + t("REC", "⏳") + t("CTRL", W("Seite", "page")) + t("MENU", "☰")
-      : t("PLAY", W("Musik", "music")) + t("STOP", W("alles aus", "all off")) + t("PAD", "⚡") + t("REC", "🤫") + t("TEMPO", "🎲") + t("CTRL", W("Seite", "page")) + t("MENU", "☰");
+    const kurz = k => { const id = ZB.tasten[k]; if (!id || id === "nichts") return ""; if (SEITE === "welten" && { play: "▶/❚❚", passiert: "🎭", stille: "⏳" }[id]) return t(k, { play: "▶/❚❚", passiert: "🎭", stille: "⏳" }[id]); return t(k, (ZP_AKT[id] || ZP_AKT.nichts)[1]); };
+    const fuss = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "CTRL"].map(kurz).join("") + t("MIXER", bankName()) + t("MENU", "☰");
     const html = '<div class="zp-kopf">' + tabs + '<span class="zp-status">' + status + "</span></div>" +
       '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>" +
       '<div class="zp-regler">' + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
@@ -872,7 +984,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function zpLeds(f) {
     const d = zpDef(zpSeite), b = zpBlattJetzt(), blink = Math.floor(Date.now() / 450) % 2 === 0;
     ["F1", "F2", "F3", "F4"].forEach((nm, i) => { const it = b[(alt ? 4 : 0) + i]; f[nm] = !it ? "#000000" : it.an ? d.led : it.vor ? (blink ? d.led : "#000000") : "#2a1a06"; });
-    f.CTRL = d.farbe; f.ZS3 = "#302010"; f.MIXER = bank ? "#8a40c0" : "#2050c0"; f.MENU = "#c88a20"; f.BACK = "#402018";
+    f.CTRL = d.farbe; f.ZS3 = "#302010"; f.MIXER = ["#2050c0", "#8a40c0", "#e05010"][bank] || "#2050c0"; f.MENU = "#c88a20"; f.BACK = "#402018";
     f.LEFT = f.RIGHT = zpListe.length > 1 ? "#604010" : "#202020";
   }
   if (PULT) {
