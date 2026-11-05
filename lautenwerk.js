@@ -6430,9 +6430,12 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   }
   const orchProfil = () => S.orchester !== 0 && stilKey() && ORCH[stilKey()] ? ORCH[stilKey()] : null;
   let orchBus = null, orchPan = {}, padAkkord = -1, padEnde = 0;
+  /* Lautstärke der Begleit-Schichten (Orchester, Kapelle, Gäste) – 0 … 10, Standard 5 = wie bisher */
+  const SCHICHT = { orch: 5, kap: 5, gast: 5 }; try { Object.assign(SCHICHT, JSON.parse(localStorage.getItem("imres-lw-schicht") || "{}")); } catch (_) {}
+  const schichtF = id => { const v = SCHICHT[id]; return v == null ? 1 : Math.pow(v / 5, 1.6); };
   function orchAufbauen() {
     if (orchBus || !ctx) return;
-    orchBus = ctx.createGain(); orchBus.gain.value = 1; orchBus.connect(pumpZiel());
+    orchBus = ctx.createGain(); orchBus.gain.value = schichtF("orch"); orchBus.connect(pumpZiel());
     const hs = ctx.createGain(); hs.gain.value = .7; orchBus.connect(hs); hs.connect(hallHP || hallEin); orchHall = hs; hallProfilAnwenden();
     [["vln", -.35], ["vc", .3], ["horn", .12], ["blech", .22], ["holz", -.18], ["gross", 0]].forEach(([k, p]) => {
       let n = ctx.createGain();
@@ -8458,7 +8461,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   const gastQ = [], gastZuletzt = {};
   function gastBusBauen() {
     if (gastBus || !ctx) return;
-    gastBus = ctx.createGain(); gastBus.gain.value = 1; gastBus.connect(pumpZiel());
+    gastBus = ctx.createGain(); gastBus.gain.value = schichtF("gast"); gastBus.connect(pumpZiel());
     const hs = ctx.createGain(); hs.gain.value = .6; gastBus.connect(hs); hs.connect(hallHP || hallEin); gastHall = hs; hallProfilAnwenden();
     [["l", -.45], ["r", .45]].forEach(([k, p]) => {
       const n = ctx.createGain();
@@ -8678,7 +8681,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   let kapBus = null; const kapSeite = {};
   function kapBusBauen() {
     if (kapBus || !ctx) return;
-    kapBus = ctx.createGain(); kapBus.gain.value = 1; kapBus.connect(pumpZiel());
+    kapBus = ctx.createGain(); kapBus.gain.value = schichtF("kap"); kapBus.connect(pumpZiel());
     if (taktEchoEin) { const es = ctx.createGain(); es.gain.value = .5; kapBus.connect(es); es.connect(taktEchoEin); }
   }
   function kapZiel(pan) {
@@ -13436,9 +13439,21 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       if (S.stimmung) stimmungLoesen(); for (let i = 0; i < d.length; i++) d[i] = liste[i] == null ? -1 : liste[i]; merken();
     },
     huelle(spur, a, d) { if (spur == null) return JSON.parse(JSON.stringify(HUELLE)); const h = HUELLE[spur] || {}; if (a != null) h.a = Math.max(0, Math.min(800, +a || 0)); if (d != null) h.d = Math.max(0, Math.min(3000, +d || 0)); HUELLE[spur] = h; try { localStorage.setItem("imres-lw-huelle", JSON.stringify(HUELLE)); } catch (_) {} return Object.assign({}, h); },
-    beatsVol(spur, v) { if (!(spur in S.vol)) return null; if (v != null) { S.vol[spur] = Math.max(0, Math.min(9, Math.round(+v))); merken(); } return S.vol[spur]; },
+    beatsVol(spur, v) { if (!(spur in S.vol)) return null; if (v != null) { S.vol[spur] = Math.max(0, Math.min(9, Math.round(+v))); merken(); mixAnwenden(); } return S.vol[spur]; },
+    /* Spur-Mischer fürs Pult: Lautstärke jeder Spur der jetzigen Stimmung und der Begleit-Schichten */
+    spurMix() {
+      const T = t(), name = k => k === "melodie" ? (T.instrumente[S.instrument] || T.spuren[k]) : (T.band[k] && T.band[k][S.band[k]]) || T.spuren[k];
+      return { stimmung: S.stimmung || null,
+        spuren: SPUREN.map(x => ({ id: x.id, name: name(x.id), spur: T.spuren[x.id], vol: S.vol[x.id], stumm: !!S.mute[x.id] })),
+        schichten: [["orch", S.orchester !== 0 && !!orchProfil(), sprache() === "en" ? "Orchestra" : "Orchester"], ["kap", S.kapelle !== 0, sprache() === "en" ? "Band" : "Kapelle"], ["gast", typeof gaesteAn === "function" ? !!gaesteAn() : false, sprache() === "en" ? "Guests" : "Gäste"]]
+          .map(([id, an, nm]) => ({ id, name: nm, an, laut: SCHICHT[id] })) };
+    },
+    spurVol(k, v) { if (!(k in S.vol)) return null; if (v != null) { S.vol[k] = Math.max(0, Math.min(9, Math.round(+v))); if (S.vol[k] > 0) S.mute[k] = false; merken(); mixAnwenden(); } return S.vol[k]; },
+    spurStumm(k, an) { if (!(k in S.mute)) return null; S.mute[k] = an == null ? !S.mute[k] : !!an; merken(); mixAnwenden(); return S.mute[k]; },
+    schicht(id, v) { if (!(id in SCHICHT)) return null; if (v != null) { SCHICHT[id] = Math.max(0, Math.min(10, Math.round(+v))); try { localStorage.setItem("imres-lw-schicht", JSON.stringify(SCHICHT)); } catch (_) {}
+        const b = { orch: orchBus, kap: kapBus, gast: gastBus }[id]; if (b && ctx) b.gain.setTargetAtTime(schichtF(id), ctx.currentTime, .05); } return SCHICHT[id]; },
     beatsVariation(v) { if (v != null) { S.variation = Math.max(0, Math.min(10, Math.round(+v))); merken(); } return S.variation; },
-    beatsStumm(spur, an) { if (!(spur in S.mute)) return; S.mute[spur] = an == null ? !S.mute[spur] : !!an; merken(); },
+    beatsStumm(spur, an) { if (!(spur in S.mute)) return; S.mute[spur] = an == null ? !S.mute[spur] : !!an; merken(); mixAnwenden(); },
     /* sofort spielen (Pad) – und für das Live-Einspielen: der Schritt, der dem Anschlag am nächsten liegt */
     beatsAnschlag(spur, wert) {
       try { audioStart(); spielen(spur, Math.max(0, wert | 0), ctx.currentTime + .005, 0, 1, .3); } catch (_) {}
