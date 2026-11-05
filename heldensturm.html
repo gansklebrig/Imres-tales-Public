@@ -1894,7 +1894,7 @@ const HEROES={
    {id:'b_g_krone',b:4,row:5,a:1,ult:1,ic:'♕',name:'Krone der Majestät',cd:()=>50,d:r=>`Eine Krone aus Feenlicht und Perlmutt senkt sich ${10+2*r} s lang auf Barradin (Glanzwelle: ${pc(3.2+0.8*r)} Schaden). Er erleidet ${15+5*r}% weniger Schaden, jede Sekunde verfällt ihm der nächste Gegner als Bewunderer (bis zu ${3+r} zugleich), und alle Bewunderer schlagen um 50% härter zu.`,
     cast(r){gmKrone(r)}}
   ]},
- echo:{name:'Echo',cls:'Gehörnter Druide',role:'Zauber & Wildgestalt',dm:0.86,hp:92,dmg:10,rate:1.5,speed:162,range:350,sig:'e_wave',
+ echo:{name:'Echo',cls:'Gehörnter Druide',role:'Zauber & Wildgestalt',dm:0.86,hp:100,dmg:10,rate:1.5,speed:162,range:350,sig:'e_wave',
   blurb:'Wild, unberechenbar und ein wenig mürrisch. Ruft Donner, Blitz und Feuerbälle herab, wird zum Bären oder zur Ratte – und riecht Gold auf hundert Schritt.',
   branches:['Sturm','Wildgestalt','Natur & Gier','Sternenkreis','Sporenkreis'],
   meleeW:[{n:'Druidenstab',r:1,d:1},{n:'Sichel',r:1.2,d:0.85},{n:'Totemkeule',r:0.8,d:1.3,imp:['hp',0]}],rangedW:[{n:'Mistelzweig',r:1,d:0.92,imp:['skill',10]},{n:'Dornenzweig',r:1.15,d:0.88},{n:'Eichenrute',r:0.82,d:1.28,imp:['area',8]}],
@@ -3506,7 +3506,7 @@ const effStage=()=>SL()+diffStages(G.diff);
 const EB=()=>G&&G.diff===0?Math.max(0,1-SL()/14):0;
 /* Ab sehr hohen Stufen wachsen Gegner langsamer, damit Hölle und darüber schwer, aber schaffbar bleiben */
 const softE=(E,k)=>E<=30?E:30+(E-30)*k;
-function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?1.35:1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?1.2:1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
+function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?1.35:1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?(G.stage===0&&G.mode==='kampagne'?1.05:1.2):1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
 function spawnEnemy(def,x,y,o){o=o||{};const sc=scale();const big=o.boss||o.guard||o.add;const elite=false;
  const sz=(big?(def.size||2):(def.size||1)*(elite?1.35:1))*(dmod('riesen')&&!big?1.3:1);
  const hp=sc.hp*(def.hp||1)*(dmod('riesen')?1.5:1)*(dmod('goldrausch')?1.25:1)*wxUndead(def)*(elite?4.5:1)*(o.boss?(40+SL()*1.5):o.guard?(8+Math.min(6,SL()*0.5)):o.add?10:1);
@@ -3592,7 +3592,7 @@ function bossAI(e,dt){const def=e.def;
   if(d2(e,P)<(e.r+P.r)*(e.r+P.r)&&e.hitCd<=0){e.hitCd=0.6;hurt(e.dmg*(e.stingHit?2.4:1.6))}if(Math.random()<0.5)burst(e.x,e.y+e.r*0.6,'#8a7a6a',2,60);
   if(e.charging<=0){e.stingHit=0;if(e.rampage>0){e.rampage--;later(0.15,()=>{if(!e.dead)BM.charge(e,false,0.45)})}}return true}
  if(e.flying){e.flyT-=dt;if(e.flyT>0.9){e.flyHigh=Math.min(1,e.flyHigh+dt*2);const a=ang(e,P);e.x+=Math.cos(a)*240*dt;e.y+=Math.sin(a)*240*dt}
-  else if(!e.landing){e.landing=1;const tx=P.x,ty=P.y,pl=e.platsch;tele({k:'circle',x:tx,y:ty,r:pl?175:125,delay:pl?1.1:0.85,dmg:e.dmg*(pl?2.6:2.2),c:def.pc||'#ff4a3a',after:()=>{if(e.dead)return;e.x=tx;e.y=ty;e.flying=false;e.flyHigh=0;e.landing=0;G.shake+=pl?12:5;burst(tx,ty,'#a89a8a',20,240);if(pl){e.platsch=0;tele({k:'wave',x:tx,y:ty,r:e.r,spd:380,max:420,dmg:e.dmg*1.1,c:'#ffb040',push:420});sparks(tx,ty,'#ffd040',30,420,1);sfx('boom');if((e.ph||1)>=2)lavaPool(e,tx,ty,95,(e.ph===3?40:24))}}})}
+  else if(!e.landing){e.landing=1;const tx=P.x,ty=P.y,pl=e.platsch;tele({k:'circle',x:tx,y:ty,r:pl?160:125,delay:pl?1.3:0.85,dmg:e.dmg*(pl?2.3:2.2),c:def.pc||'#ff4a3a',after:()=>{if(e.dead)return;e.x=tx;e.y=ty;e.flying=false;e.flyHigh=0;e.landing=0;G.shake+=pl?12:5;burst(tx,ty,'#a89a8a',20,240);if(pl){e.platsch=0;tele({k:'wave',x:tx,y:ty,r:e.r,spd:380,max:420,dmg:e.dmg*0.85,c:'#ffb040',push:420});sparks(tx,ty,'#ffd040',30,420,1);sfx('boom');if((e.ph||1)>=2)lavaPool(e,tx,ty,95,(e.ph===3?40:24))}}})}
   return true}
  if(e.def.phases)themPhasen(e,dt);else if(e.def.goosePh)gansPhasen(e,dt);
  if(e.stun>0)return true;
@@ -5263,9 +5263,9 @@ function dailyInfo(tag){tag=tag||todayTag();const seed=+tag.replace(/-/g,'');con
  const idx=[pr(2,7),pr(8,13),pr(14,19),bossIdx[Math.floor(r()*bossIdx.length)]];
  return{tag,seed,hero,mods:[m1,m2],stages:idx.map((i,n)=>Object.assign({},CAMP_STAGES[i],{lvl:i,need:65,si:n,of:4}))}}
 const dmod=k=>G.mode==='taeglich'&&!!G.daily&&G.daily.mods.includes(k);
-function makeDepth(d){const T=pick(CAMP_STAGES.filter(s=>!s.escape)),bossy=d%5===0;
+function makeDepth(d){const T=pick(CAMP_STAGES.filter((s,i)=>!s.escape&&(d>2||i<9))),bossy=d%5===0;
  const st=Object.assign({},T,{lvl:Math.max(0,Math.round((d-1)*1.8)),need:Math.round(45+d*3),si:d-1,of:0,depth:d,name:`Tiefe ${d} · ${T.name}`,limit:bossy?270:Math.round(200+d*2)});
- if(bossy){st.boss=pick(Object.keys(BOSSES).filter(k=>!BOSSES[k].survive&&!BOSSES[k].geheim));delete st.guard}else{delete st.boss;st.guard=T.guard||pick(Object.keys(GUARDS))}return st}
+ if(bossy){st.boss=pick(Object.keys(BOSSES).filter(k=>!BOSSES[k].survive&&!BOSSES[k].geheim));delete st.guard}else{delete st.boss;st.guard=T.guard||pick(d>4?Object.keys(GUARDS):CAMP_STAGES.slice(0,12).map(s=>s.guard).filter(g=>g&&GUARDS[g]))}return st}
 function bossStages(){const L=CAMP_STAGES.map((s,i)=>s.boss?Object.assign({},s,{lvl:i,need:0,noProps:true,noSecret:true}):null).filter(Boolean);L.forEach((s,n)=>{s.si=n;s.of=L.length});return L}
 function stagesFor(mode,daily){return mode==='taeglich'?daily.stages:mode==='abstieg'?[makeDepth(1)]:mode==='bossrausch'?bossStages():CAMP_STAGES}
 /* Heldenaufbau je Modus */
@@ -20141,7 +20141,7 @@ function kaEngWahl(K,lay,prev,offenOk){const T=K.T;let L=(KA_ENG[lay]||KA_ENG.wa
 function kaLayout(S){const th=G.themeKey,T=kaTh(th),GN=KA.GN,Z=KA.Z,C=Math.round(KA.CS/Z),n=GN*C;
  const K=kaMaske(n);Object.assign(K,{C,GN,Z,th,T,sec:[],tore:[],flussL:[]});
  const O=G.obj,esc=!!S.escape,boss=!!S.boss&&!esc,flucht=!!(O&&O.k==='flucht')||esc;
- let nMain=flucht?4:(G.stage===0&&G.mode==='kampagne')?4:G.mode==='abstieg'?4:boss?ri(4,5):(Math.random()<0.4?6:5);
+ let nMain=flucht?(esc?5:4):(G.stage===0&&G.mode==='kampagne')?4:G.mode==='abstieg'?4:boss?ri(4,5):(Math.random()<0.4?6:5);
  if(G.mode==='taeglich')nMain=Math.min(nMain,5);
  const STY=kaStory(S);if(STY&&!flucht)nMain=clamp(STY.sec.length,3,6);K.story=STY;
  const lf=flucht||G.mode!=='kampagne'?0:(KA.lf||0),ex=Math.round(lf*2.6),ns=nMain;nMain+=ex;K.ex=ex;K.lf=lf;
@@ -20314,7 +20314,7 @@ function kaBevoelkern(S){const K=G.ka,W=G.wl,n=K.n,Nv=W.nav,O=G.obj;let placed=0
    for(let i=0;i<nn;i++){const p=platz(x,y,k==='lager'?100:75);if(!p)continue;const e=sp(i%3===2?f2:f,p.x,p.y);if(!e)continue;e.wlG=g.id;e.wlZz=k==='schlaf'?1:2;g.m.push(e);placed++}});if(g.m.length){W.gr.push(g);zent.push([x,y])}return g};
  const ort=(s,m,f)=>{for(let t=0;t<120;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(K.sid[c]!==s.k)continue;const x=kaW(c%n),y=kaW((c/n)|0);if(W.d0[wlZelle(Nv,x,y)]===65535)continue;
   if(Math.hypot(x-K.start.x,y-K.start.y)<(G.stage===0&&G.diff===0?640:520))continue;if(K.kampf&&Math.hypot(x-kaW(K.kampf.i),y-kaW(K.kampf.j))<(fr?620:420))continue;if(zent.some(z=>Math.hypot(z[0]-x,z[1]-y)<m))continue;if(f&&!f(x,y))continue;return{x,y}}return null};
- const dichte=(K.esc?0.55:1)*KA.dicht*(1+KA.dLF*(K.lf||0))*(1+0.01*Math.min(SL(),25))*mpNeed()*(dmod('riesen')?0.75:1)*(G.stage===0&&G.mode==='kampagne'?0.28:G.stage===1&&G.mode==='kampagne'?0.6:G.stage===2&&G.mode==='kampagne'?0.85:1);
+ const dichte=(K.esc?0.55:1)*KA.dicht*(1+KA.dLF*(K.lf||0))*(1+0.01*Math.min(SL(),25))*mpNeed()*(dmod('riesen')?0.75:1)*(G.stage===0&&G.mode==='kampagne'?0.28:G.stage===1&&G.mode==='kampagne'?0.6:G.stage===2&&G.mode==='kampagne'?0.85:1)*(G.mode==='abstieg'?({1:0.4,2:0.65,3:0.85})[(STAGES[G.stage]||{}).depth]||1:1);
  /* besondere Gruppen an den Engstellen */
  for(const t of K.tore){if(!t.main)continue;const s=K.sec[t.a],pr=prS(s)+0.05;const nahTor=(m0,m1)=>ort(s,140,(x,y)=>{const d=Math.hypot(x-t.x,y-t.y);return d>m0&&d<m1});
   if(t.los==='schluessel'){const p=nahTor(220,480)||ort(s,100);if(p){const g=gruppe('lager',p.x,p.y,ri(3,4),330,pr);const e=withPr(pr,()=>sp(pickFoe(Math.max(0.4,pr)),p.x,p.y));if(e){if(fr){e.maxHp*=2.2;e.hp=e.maxHp;e.r*=1.15}else makeElite(e,rollAffixes(SL()>8?2:1),true);e.wlG=g.id;e.wlZz=2;g.m.push(e);placed++;e.kaKey=t.g;t.keyE=e}if(!g.m.length)W.gr.push(g)}}
@@ -21748,6 +21748,94 @@ function rgDkPrep(){const D=G.deco;const key=(G.runId||0)+'|'+G.stage+'|'+D.leng
 /* ---------- Kleine Bildschirme / Handhelds: Barradins Takt-Blinken an den Fähigkeiten aus (nervt dort); auf großen Bildschirmen bleibt es ---------- */
 (()=>{try{const st=document.createElement('style');st.textContent=`html.rghh #skills.takt .sk{outline:none!important;box-shadow:none!important}@media (max-height:500px),(max-width:700px){#skills.takt .sk{outline:none!important;box-shadow:none!important}}`;document.head.appendChild(st)}catch(e){}})();
 window.__hsTAKTBL=1;
+
+/* ================= QA-Paket („qa“): Fehlerbehebungen und behutsames Balancing nach dem großen Test =================
+   1. Online-Gast klickt in gespiegelten Menüs: Der Gast schickt die Position des Elements in SEINEM Menü (Index aller Knoten).
+      Das Menü des Gasts kann anders angeordnet sein als die virtuelle Spalte des Gastgebers (Layout misst echte Breiten,
+      die nicht eingehängte Spalte nicht) – dann traf der Klick nichts, z. B. „✦ Markieren“ beim Gastgeber.
+      Jetzt schickt der Gast zusätzlich die data-Merkmale des Knopfs mit; passt der Index nicht, sucht der Gastgeber
+      denselben Knopf über data-act + Merkmale. Alle bisherigen Prüfungen (NETNOCLK, act-Vergleich, Rechte) bleiben. */
+window.__hsQA=Object.assign(window.__hsQA||{},{paket:'qa'});/* Kennung für den Patch – window.__hsQA gibt es schon (Test-Haken aus qa_ui/qa_mp), darum nur ergänzen */
+{const _ns=netSendR;netSendR=function(conn,m){try{if(m&&m.t==='clk'&&NET.role==='guest'&&Number.isInteger(m.i)&&m.i>=0){const el=scr.querySelectorAll('*')[m.i];const b=el&&el.closest&&el.closest('[data-act]');
+   if(b){const ds={};let n=0;for(const k in b.dataset){const v=b.dataset[k];if(typeof v==='string'&&v.length<80&&n<8){ds[k]=v;n++}}m.ds=ds}}}catch(e){}return _ns.apply(this,arguments)}}
+function qaClickFix(m){const A=scr.querySelectorAll('*');const el=A[m.i];const b=el&&el.closest&&el.closest('[data-act]');const ks=Object.keys(m.ds).slice(0,8);
+ const eq=x=>!!x&&ks.every(k=>x.dataset[k]===String(m.ds[k]));if(b&&eq(b))return;
+ let C=[];try{C=[...scr.querySelectorAll('[data-act="'+CSS.escape(String(m.act))+'"]')].filter(eq)}catch(e){return}
+ if(!C.length)return;const t=C[0];
+ const j=Array.prototype.indexOf.call(A,t);if(j>=0)m.i=j}
+{const _hc=netHostClick;netHostClick=function(g,m){try{if(m&&m.ds&&typeof m.ds==='object'&&!Array.isArray(m.ds)&&typeof m.act==='string'&&m.act&&Number.isInteger(m.i)&&m.i>=0&&g&&PL.includes(g.p)){
+   if(g.vm&&g.vm.overlay)vmWith(g,()=>qaClickFix(m));else qaClickFix(m)}}catch(e){console.error('qa clk',e)}return _hc.apply(this,arguments)}}
+/* 2. Lokaler Mehrspieler: Gehört die Hauptspalte einem Controller-Spieler (er hat sein Menü zuerst geöffnet), sperrte der
+      Maus-Schutz („nur der Tastatur-Spieler darf hier klicken“) auch die Klicks, die der Controller selbst auslöst
+      (Start/B schließen, A drücken, View) – das Menü ließ sich mit dem Controller nicht mehr schließen.
+      Klicks, die während der Controller-Abfrage entstehen, gelten jetzt als Controller-Eingabe; echte Mausklicks bleiben gesperrt. */
+let QA_PADK=0;
+{const _mo=lmMouseOk;lmMouseOk=function(q){if(QA_PADK>0)return true;return _mo.apply(this,arguments)}}
+{const _pm=padMenu;padMenu=function(){QA_PADK++;try{return _pm.apply(this,arguments)}finally{QA_PADK--}}}
+/* 3. Breitbild (Mehrspalten-Menü, z. B. Pause auf 3440×1440): „.wrap.mfcolw>*{display:block}“ machte den nur für Handy/Touch
+      gedachten zweiten „Weiter“-Knopf (.fussweiter) sichtbar – er stand verloren neben den Spalten. Jetzt nur noch dort, wo er hingehört,
+      und dann über alle Spalten. */
+{const st=document.createElement('style');st.textContent='.wrap.mfcolw>.fussweiter{column-span:all}@media (min-width:821px) and (pointer:fine){.wrap.mfcolw>.fussweiter{display:none!important}}';document.head.appendChild(st)}
+/* 4. Bot (nur G.bot, für Balancing-Simulationen): Der Bot blieb in Feuerböden stehen und wich angekündigten Linien/Kegeln
+      gar nicht und Kreisen nur schwach aus – er starb so an Stellen, die ein Mensch locker umläuft (z. B. sechs Eiferer
+      der Flamme in Stufe 29). Jetzt: raus aus Gefahrenflächen, quer aus Linien, Ausweichrolle kurz vor dem Einschlag.
+      Spielerinnen und Spieler sind davon nicht betroffen. */
+function qaBotGefahr(){let vx=0,vy=0,soon=9;const pr=(P.r||14)+16;
+ for(const t of G.tele){if(t.screen)continue;const rest=(t.delay||0)-(t.t||0);
+  if(t.k==='circle'){const dx=P.x-t.x,dy=P.y-t.y,d=Math.hypot(dx,dy)||1,R=t.r+pr;if(d<R){const w=1.2+(R-d)/R*2;vx+=dx/d*w;vy+=dy/d*w;soon=Math.min(soon,rest)}}
+  else if(t.k==='line'&&isFinite(t.a)){const ca=Math.cos(t.a),sa=Math.sin(t.a),px=P.x-t.x,py=P.y-t.y,al=px*ca+py*sa,pe=-px*sa+py*ca,hw=(t.w||30)/2+pr;
+   if(al>-pr&&al<(t.len||300)+pr&&Math.abs(pe)<hw){const s=pe>=0?1:-1;vx+=-sa*s*2.5;vy+=ca*s*2.5;soon=Math.min(soon,rest)}}
+  else if(t.k==='cone'&&isFinite(t.a)){const dx=P.x-t.x,dy=P.y-t.y,d=Math.hypot(dx,dy)||1;let da=Math.atan2(dy,dx)-t.a;da=Math.atan2(Math.sin(da),Math.cos(da));
+   if(d<(t.len||200)+pr&&Math.abs(da)<(t.arc||1)/2+0.25){const s=da>=0?1:-1,a2=t.a+s*((t.arc||1)/2+0.6);vx+=Math.cos(a2)*2.5;vy+=Math.sin(a2)*2.5;soon=Math.min(soon,rest)}}}
+ /* Druckwelle (Ring, der sich ausbreitet): Lücke suchen, sonst kurz vor dem Ring durchrollen; Strahl: quer weg */
+ for(const t of G.tele){if(t.k==='wave'){const hs=t.hitS;if(hs&&hs.has(P))continue;const dx=P.x-t.x,dy=P.y-t.y,d=Math.hypot(dx,dy)||1,gap=d-t.r;if(gap>-10&&gap<170&&t.r<(t.max||9999)){let safe=false;if(t.gap!==undefined){let da=Math.atan2(dy,dx)-t.gap;da=Math.atan2(Math.sin(da),Math.cos(da));safe=Math.abs(da)<(t.gapW||0)/2;if(!safe){const s2=da>=0?-1:1,a2=Math.atan2(dy,dx)+s2*1.57;vx+=Math.cos(a2)*1.5;vy+=Math.sin(a2)*1.5}}if(!safe){vx+=dx/d*0.8;vy+=dy/d*0.8;if(gap<38+(t.spd||380)*0.06)soon=Math.min(soon,0)}}}
+  else if(t.k==='beam'&&(t.t||0)>=(t.delay||0)-0.4&&isFinite(t.a)){/* drehender Strahl: kommt er auf uns zu, quer hindurchrollen (danach liegt man dahinter) */
+   const px=P.x-t.x,py=P.y-t.y,d=Math.hypot(px,py)||1;if(d<(t.len||400)+pr){const th=Math.atan2(py,px);let da=th-t.a;da=Math.atan2(Math.sin(da),Math.cos(da));const av=t.av||0,hw=Math.atan2((t.w||30)/2+pr,d);
+    const tx=-Math.sin(th),ty=Math.cos(th);if(Math.abs(da)<hw){const s=da>=0?1:-1;vx+=tx*s*3;vy+=ty*s*3;soon=0}
+    else if(av&&da*av>0){const tt=(Math.abs(da)-hw)/Math.abs(av);if(tt<0.35){const s=av>0?-1:1;vx+=tx*s*3;vy+=ty*s*3;soon=Math.min(soon,0)}}}}
+  else if(t.screen&&t.k==='circle'){const rest=(t.delay||0)-(t.t||0);if(rest<0.25)soon=Math.min(soon,rest)}}
+ for(const z of G.ezones){if(!(z.dps>0)||z.kind==='dunkel')continue;const dx=P.x-z.x,dy=P.y-z.y,d=Math.hypot(dx,dy)||1,R=(z.r||50)+pr-6;if(d<R){const w=1+(R-d)/R*1.5;vx+=dx/d*w;vy+=dy/d*w}}
+ return{vx,vy,soon}}
+/* Bot: Portal steht da (Boss besiegt) → auf dem Wegnetz hinlaufen; vorher lief er manchmal minutenlang daneben im Kreis (S29, S34) */
+function qaBotPortal(r){const p=G.portal;if(!p||!G.ka||!G.ka.an||G.room||!G.wl||!G.wl.nav||typeof kaBotWeg!=='function')return r;/* Portal-Sperre „erst runter, dann wieder drauf“ (siehe siegZeig): kurz zur Seite treten */
+ if(G._ptBlock&&d2(p,P)<(p.boat?60:46)**2&&G.time-(G.bossKT||-99)>3)P.qaOffT=G.time+0.6;if(P.qaOffT>G.time){const a=Math.atan2(P.y-p.y,P.x-p.x)||0;return[Math.cos(a),Math.sin(a)]}let frei=true;try{frei=typeof wlWegFrei!=='function'||wlWegFrei(P,p)}catch(e){}if(d2(p,P)<130*130&&frei){const a=Math.atan2(p.y-P.y,p.x-P.x);return[Math.cos(a),Math.sin(a)]}
+ if(G.boss&&!G.boss.dead)return r;let n=0;for(const e of G.enemies)if(!e.dead&&!e.wlZz&&d2(e,P)<260*260)n++;if(n>3&&d2(p,P)>400*400)return r;const f=kaBotWeg(p);return f?[f.x,f.y]:r}
+{const bmQ=botMove;botMove=function(){let r=bmQ.apply(this,arguments);try{if(!G.bot||!P||P.down)return r;r=qaBotPortal(r);const g=qaBotGefahr(),n=Math.hypot(g.vx,g.vy);if(n<0.05){if(g.soon<0.3&&P.stam>=ROLL_KOST&&!(P.rollCd>G.time))rollTry(r[0]||1,r[1]||0);return r}
+  let ax=g.vx/n,ay=g.vy/n;const fr=(x,y)=>{try{return typeof wlFrei!=='function'||!G.wl||wlFrei(P.x+x*40,P.y+y*40,10)}catch(e){return true}};
+  if(!fr(ax,ay)){let ok=false;for(const da of [0.7,-0.7,1.4,-1.4,2.1,-2.1]){const a=Math.atan2(ay,ax)+da,bx=Math.cos(a),by=Math.sin(a);if(fr(bx,by)){ax=bx;ay=by;ok=true;break}}if(!ok)return r}
+  if(g.soon<0.3&&P.stam>=ROLL_KOST+10&&!(P.rollCd>G.time))rollTry(ax,ay);
+  const mx=ax*0.8+(r[0]||0)*0.2,my=ay*0.8+(r[1]||0)*0.2,m=Math.hypot(mx,my)||1;return[mx/m,my/m]}catch(e){return r}}}
+/* 5. Balancing (Zahlen): Demogorgon-Flucht dauerte nur ~1,3 min – länger überleben, bis das Boot kommt (Normal: 60 statt 48 s). */
+try{if(BOSSES.demogorgon&&BOSSES.demogorgon.survive===60)BOSSES.demogorgon.survive=75}catch(e){}
+/*    Themberchaud (Endboss): Treffer von 40–50 % des Lebens im Sekundentakt – Bot-Tode in 4 von 12 Normal-Läufen genau hier. Schaden 1,15 → 1,0. */
+try{if(BOSSES.themberchaud&&BOSSES.themberchaud.dmg===1.15)BOSSES.themberchaud.dmg=1.0}catch(e){}
+/* 6. Nach dem Sieg nicht mehr sterben: Stirbt der Boss bzw. Wächter, verschwinden seine noch angekündigten Treffer,
+      Geschosse und Feuerböden; die Helden sind kurz unverwundbar. (Bot-Läufe starben im Moment, in dem Themberchaud fiel.) */
+{const _ke=killEnemy;killEnemy=function(e,o){const main=!!(e&&!e.dead&&(e===G.boss||e===G.guardE));const r=_ke.apply(this,arguments);
+  if(main&&!(G.boss&&!G.boss.dead&&G.boss!==e)){try{G.tele=G.tele.filter(k=>!(k.dmg||k.dps||k.k==='wave'||k.k==='beam'));G.projs=G.projs.filter(p=>p.team!=='e');G.ezones=G.ezones.filter(z=>!(z.dps>0));for(const q of (G.mp?PL:[P]))if(q)q.inv=Math.max(q.inv||0,1.5)}catch(er){}}return r}}
+/* 7. Controller in Kategorieseiten (Einstellungen usw.):
+      a) Rechtsbündige Knopfreihen (Wackeln & Zeitlupe, Sprechblasen, Vibration …) wurden mit dem Steuerkreuz nach unten
+         übersprungen – ein breiter Regler weiter unten „lag näher“. Jetzt geht es immer in die nächste Zeile.
+      b) Kleine Bildschirme (427×320): „erst ein Stück scrollen“ und „Fokus sichtbar halten“ hoben sich auf – unter
+         „Vollbild“ ging es nicht weiter. Kommt der Fokus nicht voran, springt er jetzt zum nächsten Element. */
+const QA_PS={c:null,st:-1};
+function qaRowPick(L,cur,dy){const r=cur.getBoundingClientRect(),C=[];for(const e of L){if(e===cur)continue;const q=e.getBoundingClientRect();if(!q.width||!q.height)continue;
+  const vy=(q.top+q.height/2)-(r.top+r.height/2);if(vy*dy<4)continue;const gap=dy>0?q.top-r.bottom:r.top-q.bottom;if(gap<-r.height*0.5)continue;C.push([e,q,Math.max(0,gap)])}
+ if(!C.length)return null;const g0=Math.min(...C.map(c=>c[2])),x0=r.left+r.width/2;const row=C.filter(c=>c[2]<=g0+14).sort((a,b)=>Math.abs(a[1].left+a[1].width/2-x0)-Math.abs(b[1].left+b[1].width/2-x0));return{e:row[0][0],gap:g0}}
+{const _ps=padStep;padStep=function(L,cur,dx,dy){const res=_ps.apply(this,arguments);try{if(!dy||dx||!cur||typeof cpBox!=='function')return res;const box=cpBox();if(!box||!box.contains(cur))return res;
+  const pk=qaRowPick(L.filter(e=>box.contains(e)),cur,dy);if(!pk)return res;
+  if(res===cur){if(QA_PS.c===cur&&Math.abs(box.scrollTop-QA_PS.st)<2){QA_PS.c=null;return pk.e}QA_PS.c=cur;QA_PS.st=box.scrollTop;return res}
+  QA_PS.c=null;if(res&&box.contains(res)){const q=res.getBoundingClientRect(),r=cur.getBoundingClientRect(),gap=dy>0?q.top-r.bottom:r.top-q.bottom;if(gap>pk.gap+30)return pk.e}return res}catch(e){return res}}}
+/* 8. Schmale Handhelds (rg2-Layout ohne Herunterskalieren, z. B. 427×320 oder 427×250 bei Dichte 1,5): Der Beutel kam im
+      Nebeneinander-Layout (vom alten rg353-Zweig erzwungen) mit 10 px breiten „Angelegt“-Feldern und einem Beutelraster von 4–13 px Höhe –
+      praktisch unbedienbar. Jetzt (bei sehr flachen Bildschirmen < 300 px Höhe ohne die zugeklappte Zeile „Heldenwerte“): Menüs dürfen dort wie früher bis 0,8 verkleinern, Ausrüstung in 2 Reihen à 4, Detailfeld etwas schmaler.
+      640×394 (RG353V mit dpr 1), Handy und PC bleiben unverändert (greift nur bei Handheld-Erkennung und < 560 px Breite). */
+function qaSchmalHH(){try{return !!(window.__hsRG2&&__hsRG2.hh)&&innerWidth<560}catch(e){return false}}
+{const _z=mfZMin;mfZMin=function(){if(qaSchmalHH())return 0.8;return _z.apply(this,arguments)}}
+{const st=document.createElement('style');st.textContent='.wrap.ivg.qaeq4 .equip{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important}.wrap.ivg.qaeq4 .equip .it{height:36px!important}.wrap.ivg.qaeq7 .equip{gap:3px!important}.wrap.ivg.qaeq7 .equip .it{height:34px!important}.wrap.ivg.qaeq7 .equip .it.empty .sl{font-size:9px!important}.wrap.ivg.qaeq7 details.stats:not([open]){display:none}';document.head.appendChild(st)}
+{const _f=ivFit;ivFit=function(h,w,k){const r=_f.apply(this,arguments);try{if(w)w.classList.remove('qaeq4','qaeq7');if(qaSchmalHH()&&k==='inv'&&w&&(w.classList.contains('ivm-SB')||w.classList.contains('ivm-SBF'))){const z=parseFloat(w.style.zoom)||1,P=mfPad(h),cw=(h.clientWidth-P.l-P.r)/z;
+   if(cw<620){const fl=!!__hsRG2.flach;w.style.setProperty('--ivdw',Math.round(Math.max(fl?210:230,cw*(fl?0.44:0.48)))+'px');w.classList.add(fl?'qaeq7':'qaeq4');const eq=w.querySelector('.equip');if(eq)eq.classList.add('ivmini');const mob=mfMob();
+    ivTiles(h,w.querySelector('.iv-bag>.bag'),typeof BAGMAX!=='undefined'?BAGMAX:30,'qa|'+Math.round(cw),mob);ivDetFit(w.querySelector(':scope>.iv-det'),mob)}}}catch(e){console.error('qa iv',e)}return r}}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
