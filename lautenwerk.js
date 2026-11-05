@@ -4498,7 +4498,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       if (sp.style.maxHeight !== h + "px") sp.style.maxHeight = h + "px";
     });
   }
-  setInterval(() => { if (document.hidden || !root.querySelector(".lw-klingtliste, .lw-espuren")) return; try { spurenHoehe(); } catch (_) {} }, 400);
+  setInterval(() => { if (document.hidden || document.documentElement.classList.contains("zyn-pult") || !root.querySelector(".lw-klingtliste, .lw-espuren")) return; try { spurenHoehe(); } catch (_) {} }, 400);
   addEventListener("resize", () => { try { spurenHoehe(); } catch (_) {} });
   /* bei „Zeit vergeht“ den Himmel alle paar Sekunden nachziehen */
   setInterval(() => { if (!S || kZug || !leben.zeitLauf || karteSicht === "oben") return; root.querySelectorAll(".lw-karte .lw-kbild").forEach(sv => { sv.innerHTML = szeneBild(kartenArt()) + karteStimmung(kartenArt()); }); }, 5000);
@@ -4984,10 +4984,20 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       if (fh > sr * .45) return;
       const a = a0 * Math.abs(Math.sin(Math.PI * h * pos)) / Math.sin(Math.PI * pos), tau = 1.5 / (1 + k * .7);
       let ph = Math.random() * .3;
-      for (let j = 0; j < n; j++) {
-        const t = j / sr, ruck = 1 + .012 * Math.exp(-t / .035);
-        ph += 2 * Math.PI * fh * ruck / sr;
-        d[j] += Math.sin(ph) * a * Math.exp(-t / tau) * Math.min(1, t / .004);
+      /* gleiche Rechnung wie früher, nur ohne exp()/sin() für jede einzelne Probe (das ließ den Pi beim Stimmungswechsel stocken):
+         Abklingen und Tonhöhen-Ruck als fortlaufende Faktoren, nach dem Ruck läuft der Sinus als Drehung weiter */
+      const w = 2 * Math.PI * fh / sr, kHuelle = Math.exp(-1 / (sr * tau)), kRuck = Math.exp(-1 / (sr * .035)), ein = Math.round(sr * .004);
+      let huelle = a, ruckRest = .012, j = 0;
+      for (; j < n && ruckRest > 1e-9; j++) {
+        ph += w * (1 + ruckRest);
+        d[j] += Math.sin(ph) * huelle * (j < ein ? j / ein : 1);
+        huelle *= kHuelle; ruckRest *= kRuck;
+      }
+      let sn = Math.sin(ph), cs = Math.cos(ph); const cw = Math.cos(w), sw = Math.sin(w);
+      for (; j < n; j++) {
+        const s2 = sn * cw + cs * sw; cs = cs * cw - sn * sw; sn = s2;
+        d[j] += sn * huelle * (j < ein ? j / ein : 1);
+        huelle *= kHuelle;
       }
     });
     /* Daumen-Anschlag */
@@ -5023,14 +5033,28 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   }
   /* Alle Saitenklänge der aktuellen Tonleiter vorab berechnen,
      damit beim Spielen nichts mehr gerechnet werden muss (verhindert Hänger) */
+  /* in kleinen Portionen rechnen statt alles auf einmal – sonst stockt bei einem Stimmungswechsel
+     die ganze Seite (auf dem Raspberry Pi über eine Sekunde). Fehlt ein Ton doch noch, rechnet saite() ihn sofort. */
+  const saitenSchlange = []; let saitenT = 0;
+  function saitenAbarbeiten() {
+    if (saitenT) return;
+    const weiter = () => {
+      saitenT = 0; const t0 = performance.now();
+      while (saitenSchlange.length && performance.now() - t0 < 12) { const [f, a] = saitenSchlange.shift(); try { saite(f, a); } catch (_) {} }
+      if (saitenSchlange.length) saitenT = setTimeout(weiter, 4);
+    };
+    saitenT = setTimeout(weiter, 0);
+  }
   function saitenVorbereiten(nurSaiten) {
     if (!ctx) return;
-    const sa = { laute: "mel", harfe: "harfe", mandoline: "mandoline" }[S.instrument];
+    const sa = { laute: "mel", harfe: "harfe", mandoline: "mandoline" }[S.instrument], l = [];
     /* auch einen Ganzton höher – für die Anhebung im Höhepunkt */
     [0, 2].forEach(h => {
-      if (sa) for (let z = 0; z < SPUR.melodie.zeilen; z++) saite(midiHz(tonMidi("melodie", z, S) - hebung + h), sa);
-      for (let z = 0; z < BASS_STUFEN.length; z++) saite(midiHz(tonMidi("bass", z, S) - hebung + h), "bass");
+      if (sa) for (let z = 0; z < SPUR.melodie.zeilen; z++) l.push([midiHz(tonMidi("melodie", z, S) - hebung + h), sa]);
+      for (let z = 0; z < BASS_STUFEN.length; z++) l.push([midiHz(tonMidi("bass", z, S) - hebung + h), "bass"]);
     });
+    l.forEach(x => { if (!saitenCache.has(x[1] + x[0].toFixed(2))) saitenSchlange.push(x); });
+    saitenAbarbeiten();
     if (!nurSaiten) klaengeVorbereiten();
   }
   function zupf(freq, zeit, art, laut) {
