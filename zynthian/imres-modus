@@ -24,6 +24,11 @@ case "$1" in
     cp "$S/dienste/"imres-*.service /etc/systemd/system/
     mkdir -p /etc/systemd/system/zynthian.service.d
     cp "$S/dienste/zynthian-conflicts.conf" /etc/systemd/system/zynthian.service.d/imres.conf
+    # Farbige Symbole (Emoji) für die Oberfläche – einmalig, braucht Internet
+    if ! fc-list 2>/dev/null | grep -qi "Noto Color Emoji"; then
+      echo "Lade Schrift für die Symbole …"
+      apt-get install -y -q fonts-noto-color-emoji >/dev/null 2>&1 || { apt-get update -q >/dev/null 2>&1; apt-get install -y -q fonts-noto-color-emoji >/dev/null 2>&1; } || echo "Symbol-Schrift ließ sich nicht installieren (Internet?)"
+    fi
     systemctl daemon-reload
     systemctl enable imres-bruecke.service imres-start.service imres-knopf.service >/dev/null 2>&1
     systemctl is-active -q zynthian && systemctl restart imres-knopf.service

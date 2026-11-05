@@ -37,12 +37,16 @@ Du brauchst: den Zynthian im Netzwerk (LAN-Kabel oder WLAN) und einen Rechner im
 Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles liegt auf Tasten und Reglern:
 
 - **Oben:** die Seiten 🎵 Stimmung · 🌲 Ort · ⚡ Momente · 🌿 Klangwelt (wechseln mit **CTRL**, zurück mit **ZS3**, oder antippen) und was gerade läuft.
-- **Mitte:** 8 Kacheln – **F1–F4** obere Reihe, **ALT + F1–F4** untere Reihe. Orange = läuft, gestrichelt/blinkend = kommt am Taktende. **◀ ▶** blättert weiter, **ALT + ◀ ▶** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen, Geräusche).
+- **Mitte:** 8 Kacheln – **F1–F4** obere Reihe, **ALT + F1–F4** untere Reihe. Orange = läuft, gestrichelt/blinkend = kommt am Taktende. **◀ ▶** blättert weiter, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen, Geräusche).
 - **Rechts:** was die vier Drehregler gerade tun – direkt neben dem echten Knopf. Drücken: siehe kleine Schrift. **MIXER** schaltet auf Reglerbank B (Tempo, Hall, Effekte, Echos Hall).
 - **Unten:** PLAY Musik · STOP alles aus · PAD ⚡ Etwas passiert · REC 🤫 Stille · TEMPO 🎲 Neu besetzen.
 - **MENU:** Spielabend, Optionen, Tastenbelegung, System (dort auch **⬇ Imres aktualisieren** – ohne Terminal).
 - **Effekte (Bank FX, MIXER zweimal):** 🎛 Filter (links Tiefpass, rechts Hochpass, Mitte offen) · 〰 Resonanz · 🔁 Delay (im Tempo) · 🔥 Drive. Weitere: ↻ Rückkopplung, ⏱ Delay-Länge. Sie liegen hinter allem – Musik, Kulisse und Effekte. Regler drücken = neutral.
-- **Zum Halten:** ALT + STOP = Filter zu, ALT + ZS3 = Echo-Wurf (solange gedrückt) · ALT + PLAY = alle Effekte zurück.
+- **Bänke GLITCH und MOD (MIXER weiter):** 👾 Bitcrusher · 📉 Sample-Rate · ✂ Trance-Gate (1/16 im Tempo) · 🔔 Ringmodulator · 🌀 Flanger · 〽 Wobble (im Tempo) · ↻ Rückkopplung · ⏱ Delay-Länge.
+- **Zum Halten:** ALT + STOP = Filter zu · ALT + ZS3 = Echo-Wurf · ALT + CTRL = Stotter 1/16 · ALT + PLAY = alle Effekte zurück. Belegbar außerdem: ⏪ Rückwärts, ⏏ Tape-Stop, 👾 Bitcrush voll, Hochpass.
+- **★ Favoriten:** eine Kachel 1,5 Sekunden halten (Taste oder Finger) – sie steht dann auf ihrer Seite ganz vorne. Nochmal halten nimmt sie wieder raus.
+- **ALT + ◀ ▶** wechselt die Seite, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen).
+- **Farben:** Jede Taste leuchtet in der Farbe dessen, was sie tut – dieselbe Farbe wie auf dem Bildschirm (Punkt in der Fußleiste, Seitenfarbe auf F1–F4, Bankfarbe auf MIXER und am Reglerfeld). CTRL leuchtet in der Farbe der nächsten Seite, ZS3 in der der vorigen. Hell = läuft gerade, gedimmt = bereit, blinkend = kommt am Taktende.
 - **🎛 Belegung ändern (MENU):** jeden Drehregler (je Seite, Bank B, Bank FX) und die Tasten PLAY, STOP, PAD, REC, TEMPO, ZS3, CTRL (auch mit ALT) frei belegen. ◀ ▶ oder SEL ändert, „Standard wiederherstellen“ setzt zurück. Die Belegung bleibt gespeichert.
 - **BACK 2 Sekunden halten:** zurück zur normalen Zynthian-Oberfläche.
 - **Vom Zynthian zu Imres:** in der Zynthian-Oberfläche oben rechts den kleinen **♫**-Knopf 1 Sekunde halten. Andere Ecke oder aus: in `einstellungen.sh` `IMRES_KNOPF=lo` (links oben), `ru`, `lu` oder `aus`.

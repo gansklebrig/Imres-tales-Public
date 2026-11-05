@@ -2862,7 +2862,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   const ML = (x, o) => Object.assign({ laut: x }, o || {});
   const KUL_MOMENTE = {
     taverne: [
-      ["🚪", "Tür fliegt auf", "Door bursts open", SZ([0, "tuerauf", ML(1.9)], [.1, "windstoss", ML(1.5)], [.2, "!stille", { d: 4 }], [1.4, "holzschritte", ML(1.5)], [3.6, "kettenhemd", ML(1.4)], [4.3, "schwertziehen", ML(1.5)], [5.2, "raunen", ML(1.4)], [6.6, "stuhl", ML(1.3, { gegen: 1 })])],
+      ["🚪", "Tür fliegt auf", "Door bursts open", SZ([0, "tuerauf", ML(1.9)], [.1, "windstoss", ML(1.5)], [1.4, "holzschritte", ML(1.5)], [3.6, "kettenhemd", ML(1.4)], [4.3, "schwertziehen", ML(1.5)], [5.2, "raunen", ML(1.4)], [6.6, "stuhl", ML(1.3, { gegen: 1 })])],
       ["🍺", "Runde für alle", "A round for all", SZ([0, "muenzen", ML(1.6)], [.4, "holzpoltern", ML(1.3)], [1, "volk", ML(1.4)], [1.6, "jubel", ML(1.6)], [3, "einschenken", ML(1.4)], [4.6, "krug", ML(1.4)], [4.9, "krug", ML(1.3, { gegen: 1 })], [5.3, "krug", ML(1.3)], [6, "trinken", ML(1.3)], [9.2, "ruelpser", ML(1.6)], [9.8, "lachen", ML(1.4, { gegen: 1 })])],
       ["🤼", "Rauferei", "A brawl", SZ([0, "zank", ML(1.5)], [1.2, "zank", ML(1.6, { gegen: 1 })], [2, "stuhl", ML(1.5)], [2.6, "faustkampf", ML(1.7)], [3.3, "kampflaut", ML(1.5)], [3.9, "aua", ML(1.4)], [4.5, "tischbruch", ML(1.7)], [4.7, "!stille", { d: 2 }], [6.6, "raunen", ML(1.4, { gegen: 1 })], [7.4, "lachen", ML(1.2)])],
       ["🎲", "Würfelglück", "Lucky roll", SZ([0, "wuerfel", ML(1.4)], [.9, "volk", ML(1.3, { gegen: 1 })], [1.8, "wuerfel", ML(1.7)], [1.9, "!stille", { d: 2.2 }], [4.2, "jubel", ML(1.7)], [4.6, "holzpoltern", ML(1.5)], [5.3, "krug", ML(1.3)], [5.7, "krug", ML(1.3, { gegen: 1 })], [6.6, "muenzen", ML(1.6)], [7.3, "lachen", ML(1.4)])],
@@ -13125,7 +13125,54 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
   let zynDuck = null;
   /* ---------- Effekte für den Zynthian: DJ-Filter, Drive, Delay – hinter allem (Musik, Kulisse, Effekte), vor dem Limiter ---------- */
   let fxKette = null;
-  const FXW = { filter: 0, reso: 15, echo: 0, rueck: 35, zeit: 2, drive: 0 };
+  const FXW = { filter: 0, reso: 15, echo: 0, rueck: 35, zeit: 2, drive: 0, crush: 0, rate: 0, ring: 0, flanger: 0, gate: 0, wobble: 0, stotter: 0, rueckwaerts: 0, bandstop: 0 };
+  /* Glitch-Werk (AudioWorklet): Bitcrusher, Sample-Rate, Ringmodulator, Flanger, Trance-Gate, Stotter, Rückwärts, Tape-Stop */
+  const GLITCH_CODE = `
+class ImresGlitch extends AudioWorkletProcessor {
+  static get parameterDescriptors() { return ["crush", "rate", "ring", "flanger", "gate", "stotter", "rueckwaerts", "bandstop"].map(name => ({ name, defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "k-rate" })).concat([{ name: "bpm", defaultValue: 100, minValue: 30, maxValue: 300, automationRate: "k-rate" }]); }
+  constructor() { super(); this.n = Math.floor(sampleRate * 4); this.h = [new Float32Array(this.n), new Float32Array(this.n)]; this.w = 0;
+    this.fl = [new Float32Array(2048), new Float32Array(2048)]; this.fw = 0; this.flp = 0; this.rp = 0; this.halt = [0, 0]; this.hz = 0; this.gp = 0; this.gg = 1;
+    this.st = null; this.rw = null; this.tp = null; }
+  lies(c, pos) { const n = this.n; let i = Math.floor(pos), f = pos - i; i = ((i % n) + n) % n; const j = (i + 1) % n, b = this.h[c]; return b[i] + (b[j] - b[i]) * f; }
+  process(ins, outs, p) {
+    const inp = ins[0], out = outs[0]; if (!out || !out.length) return true;
+    const L = out[0].length, sr = sampleRate, bpm = p.bpm[0], sech = Math.max(64, Math.round(60 / bpm / 4 * sr));
+    const crush = p.crush[0], rate = p.rate[0], ring = p.ring[0], fla = p.flanger[0], gate = p.gate[0];
+    const stA = p.stotter[0] > .5, rwA = p.rueckwaerts[0] > .5, tpA = p.bandstop[0] > .5;
+    if (stA && !this.st) this.st = { start: this.w - sech, len: sech, pos: 0 }; if (!stA && this.st) this.st = null;
+    if (rwA && !this.rw) this.rw = { start: this.w, pos: 0 }; if (!rwA && this.rw) this.rw = null;
+    if (tpA && !this.tp) this.tp = { pos: this.w, v: 1 }; if (!tpA && this.tp) this.tp = null;
+    const stufen = Math.pow(2, 16 - crush * 13), halte = 1 + Math.round(rate * rate * 40), ringF = 40 + ring * 900, gateF = bpm / 60 * 4;
+    const kanaele = Math.min(2, out.length);
+    for (let k = 0; k < L; k++) {
+      for (let c = 0; c < kanaele; c++) { const x = inp && inp[c] ? inp[c][k] : (inp && inp[0] ? inp[0][k] : 0); this.h[c][this.w] = x; }
+      this.rp += 2 * Math.PI * ringF / sr; if (this.rp > 6.2832) this.rp -= 6.2832;
+      this.flp += 2 * Math.PI * .23 / sr; if (this.flp > 6.2832) this.flp -= 6.2832;
+      this.gp += gateF / sr; if (this.gp >= 1) this.gp -= 1;
+      const gz = gate > 0 ? (this.gp < .5 ? 1 : 1 - gate) : 1; this.gg += (gz - this.gg) * .02;
+      this.hz++; const neu = this.hz >= halte; if (neu) this.hz = 0;
+      if (this.tp) { this.tp.v = Math.max(0, this.tp.v - 1 / (sr * .9)); this.tp.pos += this.tp.v; }
+      for (let c = 0; c < kanaele; c++) {
+        let y;
+        if (this.st) { const s = this.st, pos = s.pos; y = this.lies(c, s.start + pos); const r = 96; if (pos < r) y *= pos / r; else if (pos > s.len - r) y *= (s.len - pos) / r; }
+        else if (this.rw) y = this.lies(c, this.rw.start - this.rw.pos);
+        else if (this.tp) y = this.lies(c, this.tp.pos) * Math.min(1, this.tp.v * 3);
+        else y = this.h[c][this.w];
+        if (fla > 0) { const fb = this.fl[c], d = (1.5 + 3.5 * (1 + Math.sin(this.flp)) / 2) * sr / 1000; let i = this.fw - d; i = ((i % 2048) + 2048) % 2048; const i0 = Math.floor(i), f = i - i0, v = fb[i0] + (fb[(i0 + 1) % 2048] - fb[i0]) * f; fb[this.fw] = y + v * .55 * fla; y = y * (1 - fla * .5) + v * fla * .7; }
+        if (ring > 0) y = y * (1 - ring) + y * Math.sin(this.rp) * ring * 1.4;
+        y *= this.gg;
+        if (crush > 0) y = Math.round(y * stufen) / stufen;
+        if (halte > 1) { if (neu) this.halt[c] = y; y = this.halt[c]; }
+        out[c][k] = y;
+      }
+      if (this.st) { this.st.pos++; if (this.st.pos >= this.st.len) this.st.pos = 0; }
+      if (this.rw) { this.rw.pos += 1; if (this.rw.pos > this.n - 10) this.rw.pos = 0; }
+      this.fw = (this.fw + 1) % 2048; this.w = (this.w + 1) % this.n;
+    }
+    return true;
+  }
+}
+registerProcessor("imres-glitch", ImresGlitch);`;
   const FX_ZEITEN = [[.5, "1/8"], [.75, "1/8·"], [1, "1/4"], [1.5, "1/4·"], [2, "1/2"]];
   function fxBauen() {
     if (fxKette) return fxKette;
@@ -13137,9 +13184,22 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
     /* alles, was bisher direkt in den Limiter ging, läuft jetzt durch die Effekte */
     try { ausgang.disconnect(endKnoten); } catch (_) {} ausgang.connect(ein);
     if (kulAusRef) { try { kulAusRef.disconnect(endKnoten); } catch (_) {} kulAusRef.connect(ein); }
-    ein.connect(hp); hp.connect(lp); lp.connect(trocken); lp.connect(sh); sh.connect(shNass); trocken.connect(summe); shNass.connect(summe);
+    /* Wobble: eigener Tiefpass, im Tempo moduliert */
+    const wob = c.createBiquadFilter(), wobOsz = c.createOscillator(), wobTiefe = c.createGain(), wobNass = c.createGain(), wobTrocken = c.createGain(), wobSumme = c.createGain();
+    wob.type = "lowpass"; wob.frequency.value = 900; wob.Q.value = 6; wobOsz.frequency.value = 2; wobTiefe.gain.value = 2400; wobOsz.connect(wobTiefe); wobTiefe.connect(wob.detune); wobOsz.start();
+    wobNass.gain.value = 0; wobTrocken.gain.value = 1;
+    ein.connect(hp); hp.connect(lp); lp.connect(wobTrocken); lp.connect(wob); wob.connect(wobNass); wobTrocken.connect(wobSumme); wobNass.connect(wobSumme);
+    wobSumme.connect(trocken); wobSumme.connect(sh); sh.connect(shNass); trocken.connect(summe); shNass.connect(summe);
     summe.connect(endKnoten); summe.connect(dl); dl.connect(dlFilt); dlFilt.connect(rueck); rueck.connect(dl); dlFilt.connect(nass); nass.connect(endKnoten);
-    fxKette = { hp, lp, sh, shNass, trocken, dl, rueck, nass, kurve: -1 };
+    fxKette = { ein, hp, lp, sh, shNass, trocken, dl, rueck, nass, kurve: -1, wobOsz, wobNass, wobTrocken, glitch: null };
+    /* Glitch-Werk nachladen und vorne einhängen: ein → Glitch → Hochpass … */
+    try {
+      const url = URL.createObjectURL(new Blob([GLITCH_CODE], { type: "application/javascript" }));
+      c.audioWorklet.addModule(url).then(() => {
+        const g = new AudioWorkletNode(c, "imres-glitch", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2] });
+        try { ein.disconnect(hp); } catch (_) {} ein.connect(g); g.connect(hp); fxKette.glitch = g; fxAnwenden();
+      }).catch(e => console.warn("Glitch-Werk", e));
+    } catch (e) { console.warn("Glitch-Werk", e); }
     setInterval(fxZeit, 400); fxAnwenden(); return fxKette;
   }
   function fxAnwenden() {
@@ -13151,15 +13211,21 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
     if (stufe !== k.kurve) { k.kurve = stufe; const n = 1024, cv = new Float32Array(n), kk = 1 + stufe * 1.2; for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; cv[i] = Math.tanh(kk * x) / Math.tanh(kk); } k.sh.curve = cv; }
     z(k.shNass.gain, d * .9); z(k.trocken.gain, 1 - d * .75);
     z(k.nass.gain, Math.max(0, Math.min(1, FXW.echo / 100)) * .7); z(k.rueck.gain, Math.max(0, Math.min(.9, FXW.rueck / 100)));
+    const wb = Math.max(0, Math.min(1, FXW.wobble / 100)); z(k.wobNass.gain, wb); z(k.wobTrocken.gain, 1 - wb * .85);
+    if (k.glitch) { const P = k.glitch.parameters, s01 = x => Math.max(0, Math.min(1, x / 100));
+      ["crush", "rate", "ring", "flanger", "gate"].forEach(n => { const a = P.get(n); if (a) a.setValueAtTime(s01(FXW[n]), j); });
+      ["stotter", "rueckwaerts", "bandstop"].forEach(n => { const a = P.get(n); if (a) a.setValueAtTime(FXW[n] ? 1 : 0, j); }); }
     fxZeit();
   }
   function fxZeit() {
     const k = fxKette; if (!k || !ctx) return;
     const bpm = (laeuft ? (tempoJetzt || S.tempo) : S.tempo) || 100, t = Math.min(2.4, 60 / bpm * FX_ZEITEN[Math.max(0, Math.min(FX_ZEITEN.length - 1, FXW.zeit | 0))][0]);
     if (Math.abs(k.dl.delayTime.value - t) > .002) k.dl.delayTime.setTargetAtTime(t, ctx.currentTime, .05);
+    k.wobOsz.frequency.setTargetAtTime(bpm / 60 * 2, ctx.currentTime, .1);
+    if (k.glitch) { const a = k.glitch.parameters.get("bpm"); if (a) a.setValueAtTime(bpm, ctx.currentTime); }
   }
   /* Effekte, die schon vor dem ersten Ton eingestellt wurden, greifen, sobald der Ton startet */
-  setInterval(() => { if (!fxKette && ctx && (FXW.filter || FXW.echo || FXW.drive)) fxBauen(); }, 1000);
+  setInterval(() => { if (!fxKette && ctx && (FXW.filter || FXW.echo || FXW.drive || FXW.crush || FXW.rate || FXW.ring || FXW.flanger || FXW.gate || FXW.wobble)) fxBauen(); }, 1000);
   const zynHoerZeit = p => { /* Audiozeit, die zum Zeitpunkt p (performance.now) gerade aus den Lautsprechern kommt */
     try { const ts = ctx.getOutputTimestamp(); if (ts && ts.performanceTime) return ts.contextTime + (p - ts.performanceTime) / 1000; } catch (_) {}
     return ctx.currentTime - (ctx.outputLatency || 0) - (ctx.baseLatency || 0) + (p - performance.now()) / 1000;
