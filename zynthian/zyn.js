@@ -1346,6 +1346,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         h += '<button type="button" data-zm="o:' + p + '"><span>' + (an ? "✅ " : "⬜ ") + W("Ausgang ", "Output ") + i + "/" + (i + 1) + "</span><small>" + (i === 1 ? W("Hauptausgang (bei manchen Karten auch der Kopfhörer)", "main output (on some cards also headphones)") : W("weiteres Ausgangspaar", "further output pair")) + "</small></button>";
         a["o:" + p] = () => { if (an && paare.size === 1) { zeige(W("Mindestens ein Ausgang bleibt an", "At least one output stays on")); return; } if (an) paare.delete(p); else paare.add(p); audioPost({ aktion: "ausgaenge", paare: [...paare] }).then(x => audioMenue("o:" + p, x)); };
       }
+      h += '<button type="button" data-zm="mono"><span>' + (r.mono ? "✅ " : "⬜ ") + W("Mono: beide Buchsen gleich", "Mono: both jacks the same") + "</span><small>" + (r.mono ? W("an – eine Box an 1 oder 2 bekommt alles", "on – one box on 1 or 2 gets everything") : W("aus = Stereo: 1 links, 2 rechts", "off = stereo: 1 left, 2 right")) + W(" · Bild lädt kurz neu", " · screen reloads briefly") + "</small></button>";
+      a.mono = () => { zeige("⏳ " + W("Ton wird umgestellt – Imres lädt kurz neu …", "Switching sound – Imres reloads …")); audioPost({ aktion: "mono", an: !r.mono }).then(x => audioMenue("mono", x)); };
+      const P = window.ImresPult, bst = P && P.boost ? P.boost() : null;
+      if (bst != null) {
+        h += '<button type="button" data-zm="boost"><span>📢 ' + W("Ausgangs-Boost: ", "Output boost: ") + "<b>+" + bst + " dB</b></span><small>" + W("◀ ▶ lauter/leiser · ein Limiter schützt vor Übersteuern", "◀ ▶ louder/softer · a limiter prevents clipping") + "</small></button>";
+        a["boost:stufe"] = st => { P.boost(bst + st * 2); audioMenue("boost", r); };
+      }
       (r.regler || []).forEach((g, i) => {
         const teile = []; if (g.p != null) teile.push("🔊 " + g.p + " %"); if (g.c != null) teile.push("🎤 " + g.c + " %"); if (g.an != null) teile.push(g.an ? W("an", "on") : W("🔇 stumm", "🔇 muted")); if (g.aufnahme != null) teile.push(g.aufnahme ? W("Aufnahme an", "capture on") : W("Aufnahme aus", "capture off"));
         h += '<button type="button" data-zm="r:' + i + '"><span>🎚 ' + esc2(g.name) + ": <b>" + teile.join(" · ") + "</b></span><small>" + (g.p != null || g.c != null ? W("◀ ▶ leiser/lauter", "◀ ▶ down/up") : "") + (g.an != null || g.aufnahme != null ? W(" · SEL: an/aus", " · SEL: on/off") : "") + "</small></button>";
@@ -1366,7 +1373,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   let audioAktionen = null;
   function testton(pan) {
     try { const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(), g = c.createGain(), p = c.createStereoPanner();
-      o.frequency.value = pan < 0 ? 440 : 660; g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(.3, c.currentTime + .05); g.gain.setValueAtTime(.3, c.currentTime + 1.9); g.gain.linearRampToValueAtTime(0, c.currentTime + 2);
+      o.frequency.value = pan < 0 ? 440 : 660; g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(.7, c.currentTime + .05); g.gain.setValueAtTime(.7, c.currentTime + 1.9); g.gain.linearRampToValueAtTime(0, c.currentTime + 2);
       p.pan.value = pan; o.connect(g); g.connect(p); p.connect(c.destination); o.start(); o.stop(c.currentTime + 2.05); setTimeout(() => c.close(), 2600);
       zeige("🔊 " + W("Testton ", "Test tone ") + (pan < 0 ? W("links", "left") : W("rechts", "right"))); } catch (e) { zeige("⚠ " + e.message); }
   }
@@ -1416,7 +1423,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         if (!t) t = setTimeout(() => { t = 0; const x = wart; audioPost({ aktion: "regler", name: g.name, art: "p", wert: x }).then(() => { if (wart === x) wart = null; }); }, 120); },
       text: v => { const g = karteRegler(kh); return g ? v + " % · " + g.name : W("– (keiner)", "– (none)"); } };
   });
-  NORMAL_PARAMS.push("karte_haupt", "karte_kh");
+  ZP_PARAM.boost = { name: W("📢 Boost", "📢 Boost"), lo: 0, hi: 12, schritt: 1, neutral: 0, druck: "null", lies: () => { const P = window.ImresPult; return P && P.boost ? P.boost() : 0; }, setz: v => { const P = window.ImresPult; if (P && P.boost) P.boost(v); }, text: v => "+" + v + " dB" };
+  NORMAL_PARAMS.push("karte_haupt", "karte_kh", "boost"); MIX_LISTE.splice(5, 0, "boost");
   BANK_FARBE.IN1 = "#ff9a80"; BANK_FARBE.IN2 = "#d090ff";
   ZB.regler.IN1 = ZB.regler.IN1 || ["in1_laut", "in1_filter", "in1_echo", "in1_hall"];
   ZB.regler.IN2 = ZB.regler.IN2 || ["in2_laut", "in2_filter", "in2_echo", "in2_hall"];

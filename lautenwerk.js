@@ -1843,6 +1843,9 @@
     hallFilter.frequency.setTargetAtTime(RAEUME[S.raum].hell, ctx.currentTime, .05);
   }
   const masterPegel = () => Math.pow(S.master / 10, 1.5);
+  /* Ausgangs-Boost (Zynthian-Line-Ausgang): 0 … +12 dB vor dem Limiter */
+  let BOOST = 0; try { BOOST = Math.max(0, Math.min(12, +(localStorage.getItem("imres-lw-boost") || 0) || 0)); } catch (_) {}
+  const boostF = () => Math.pow(10, BOOST / 20);
   /* Kulisse läuft am Musikregler vorbei (eigener Regler im Pult); nur beim Zuhören über Funk gilt „Meine Lautstärke“ für alles */
   let zynKulFaktor = 1; /* Zynthian: Kulisse weicht aus, wenn die Band spielt (Mikrofon) */
   const kulAusPegel = () => zynKulFaktor * 1.5 * (hoerer ? masterPegel() : Math.pow(.8, 1.5)); /* gut 8 dB lauter als früher: auf 50 % deutlich hörbar, auf 100 % lauter als die Musik */
@@ -4745,7 +4748,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   function effekteAnwenden() {
     if (!ctx) return;
     const j = ctx.currentTime;
-    if (ausgang) ausgang.gain.setTargetAtTime(.6 * masterPegel(), j, .05);
+    if (ausgang) ausgang.gain.setTargetAtTime(.6 * masterPegel() * boostF(), j, .05);
     if (kulAusRef) kulAusRef.gain.setTargetAtTime(kulAusPegel(), j, .05);
     if (fxAusgang) fxAusgang.gain.setTargetAtTime(fxPegel(), j, .05);
     if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), j, .08);
@@ -4829,7 +4832,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
          Hält die Lautstärke auch auf Kopfhörern unter der Übersteuerungsgrenze. */
       const komp = ctx.createDynamicsCompressor(); kompRef = komp;
       komp.threshold.value = -20; komp.knee.value = 10; komp.ratio.value = 2; komp.attack.value = .006; komp.release.value = .25;
-      ausgang = ctx.createGain(); ausgang.gain.value = .6 * masterPegel();
+      ausgang = ctx.createGain(); ausgang.gain.value = .6 * masterPegel() * boostF();
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -4; limiter.knee.value = 2; limiter.ratio.value = 20; limiter.attack.value = .003; limiter.release.value = .25;
       master = ctx.createGain(); master.gain.value = .38;
@@ -13433,6 +13436,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       if (werte) { Object.assign(KANAL[i], werte); kanaeleMerken(); if (KANAL[i].an) return eingangOeffnen().then(ok => { if (ok) kanalAnwenden(i); return Object.assign({ fehler: EIN.fehler }, KANAL[i]); }); kanalAnwenden(i); }
       return Object.assign({ fehler: EIN.fehler }, KANAL[i]);
     },
+    boost(db) { if (db == null) return BOOST; BOOST = Math.max(0, Math.min(12, Math.round(+db) || 0)); try { localStorage.setItem("imres-lw-boost", String(BOOST)); } catch (_) {} if (ausgang && ctx) ausgang.gain.setTargetAtTime(.6 * masterPegel() * boostF(), ctx.currentTime, .05); return BOOST; },
     kanalPegel(i) { const k = EIN.k[i]; if (!k) return 0; const d = new Float32Array(k.mess.fftSize); k.mess.getFloatTimeDomainData(d); let m = 0; for (let x = 0; x < d.length; x++) m = Math.max(m, Math.abs(d[x])); return m; },
     vorlauf(sek) { zynVorlauf = Math.max(0, Math.min(2, +sek || 0)); },
     fx(k, v) { if (!(k in FXW) || !isFinite(+v)) return; FXW[k] = +v; if (fxBauen()) fxAnwenden(); },

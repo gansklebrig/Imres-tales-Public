@@ -584,6 +584,7 @@ def netz(d):
 
 
 # ---------- Audio: Ausgänge (welche Buchsen) und Pegel der Soundkarte ----------
+MONO_DATEI = os.path.normpath(os.path.join(ZYN, "..", "..", "mono"))
 AUSGAENGE_DATEI = os.path.normpath(os.path.join(ZYN, "..", "..", "ausgaenge"))  # z. B. "1,2 3,4"
 
 
@@ -681,6 +682,10 @@ def audio(d):
         with open(AUSGAENGE_DATEI, "w") as f:
             f.write(" ".join(paare))
         ausgaenge_verbinden()
+    elif a == "mono":
+        with open(MONO_DATEI, "w") as f:
+            f.write("1" if d.get("an") else "0")
+        threading.Thread(target=_ton_neu, daemon=True).start()
     elif a == "regler":
         nm = str(d.get("name", ""))[:60]
         art = "capture" if d.get("art") == "c" else "playback"
@@ -692,7 +697,15 @@ def audio(d):
     c, t = _lauf(["jack_lsp"], 5)
     ports = [p for p in t.splitlines() if p.startswith("system:playback_")]
     eing = [p for p in t.splitlines() if p.startswith("system:capture_")]
-    return {"ok": True, "karte": name, "ausgaenge": len(ports), "eingaenge": len(eing), "paare": ausgaenge_lesen(), "regler": _regler_lesen(karte)}
+    return {"ok": True, "karte": name, "ausgaenge": len(ports), "eingaenge": len(eing), "paare": ausgaenge_lesen(), "regler": _regler_lesen(karte), "mono": _mono_an()}
+
+
+def _mono_an():
+    try:
+        with open(MONO_DATEI) as f:
+            return f.read().strip() == "1"
+    except OSError:
+        return False
 
 
 def main():
