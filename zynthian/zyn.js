@@ -289,10 +289,17 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 
   /* ---------- Menüs ---------- */
   function menueZu() { $$(".zyn-menue").forEach(m => m.remove()); ledsMelden(); }
+  let menueAkt = {};
+  /* Wert der markierten Zeile ändern (◀ ▶ oder Regler 4) – true, wenn die Zeile einen einstellbaren Wert hat */
+  function menueStufe(st) { const f = fokus && fokus.dataset && fokus.dataset.zm && menueAkt[fokus.dataset.zm + ":stufe"]; if (!f) return false; f(st); return true; }
   function menue(html, aktionen) {
-    menueZu();
+    menueZu(); menueAkt = aktionen || {};
     const m = document.createElement("div"); m.className = "zyn-menue"; m.innerHTML = html; document.body.appendChild(m);
-    m.addEventListener("click", e => { const b = e.target.closest("[data-zm]"); if (!b) { if (e.target === m) menueZu(); return; } const f = aktionen[b.dataset.zm]; if (f) f(); });
+    m.addEventListener("click", e => { const b = e.target.closest("[data-zm]"); if (!b) { if (e.target === m) menueZu(); return; }
+      /* angetippt: Auswahl springt dorthin – Werte mit ◀ ▶ (oder Regler) ändern */
+      if (b.tagName === "BUTTON") fokusSetzen(b);
+      const f = aktionen[b.dataset.zm]; if (f) { f(); return; }
+      if (aktionen[b.dataset.zm + ":stufe"] || (typeof audioAktionen !== "undefined" && audioAktionen && audioAktionen[b.dataset.zm + ":stufe"])) zeige("◀ ▶ " + W("zum Ändern", "to change"), null, (b.querySelector("span") || b).textContent.trim().slice(0, 60)); });
     const erster = m.querySelector("button.an") || m.querySelector("button"); fokusSetzen(erster);
     ledsMelden();
     return m;
@@ -585,6 +592,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       if (/^F[1-3]$/.test(name) && menueArt === "zpmodus") { zpModus(["buehne", "welten", "beat"][+name[1] - 1]); return; }
       if (/^F[1-4]$/.test(name) && menueArt === "zp") { if (name === "F2" && !m.querySelector('[data-zm="abend"]')) return; const b = m.querySelector('[data-zm="' + ZP_MENUE_F[+name[1] - 1] + '"]'); if (b) klick(b); return; }
       if ((name === "LEFT" || name === "RIGHT") && menueArt === "beleg" && fokus && fokus.dataset && /^b:/.test(fokus.dataset.zm || "")) { belegZyklus(fokus.dataset.zm.slice(2), name === "LEFT" ? -1 : 1); return; }
+      if ((name === "LEFT" || name === "RIGHT") && menueStufe(name === "LEFT" ? -1 : 1)) { return; }
       if ((name === "LEFT" || name === "RIGHT") && (menueArt === "audio" || menueArt === "eingang") && fokus && fokus.dataset && audioAktionen && audioAktionen[fokus.dataset.zm + ":stufe"]) { audioAktionen[fokus.dataset.zm + ":stufe"](name === "LEFT" ? -1 : 1); return; }
       if (["UP", "DOWN", "LEFT", "RIGHT"].includes(name)) { bewegen(name); return; }
       if (name === "SEL") { auswaehlen(); return; }
@@ -646,7 +654,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       el.value = String(Math.max(lo, Math.min(hi, +el.value + d * st))); el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
       zeige(kurzName(el.closest("label") || el) + " · " + el.value, proz(+el.value, lo, hi)); return;
     }
-    if ($(".zyn-menue")) { bewegen(d > 0 ? "DOWN" : "UP"); return; }
+    if ($(".zyn-menue")) { if (nr === 3 && menueStufe(d > 0 ? 1 : -1)) return; bewegen(d > 0 ? "DOWN" : "UP"); return; }
     if (PULT) { zpDreh(nr, d); return; }
     const r = REGLER()[nr]; if (r) stellRegler(r, d);
   }
@@ -1494,13 +1502,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       const P = window.ImresPult, bst = P && P.boost ? P.boost() : null;
       if (bst != null) {
         h += '<button type="button" data-zm="boost"><span>📢 ' + W("Ausgangs-Boost: ", "Output boost: ") + "<b>+" + bst + " dB</b></span><small>" + W("◀ ▶ lauter/leiser · ein Limiter schützt vor Übersteuern", "◀ ▶ louder/softer · a limiter prevents clipping") + "</small></button>";
-        a["boost:stufe"] = st => { P.boost(bst + st * 2); audioMenue("boost", r); };
+        a["boost:stufe"] = st => { P.boost(P.boost() + st * 2); audioMenue("boost", r); };
       }
       (r.regler || []).forEach((g, i) => {
         const teile = []; if (g.p != null) teile.push("🔊 " + g.p + " %"); if (g.c != null) teile.push("🎤 " + g.c + " %"); if (g.an != null) teile.push(g.an ? W("an", "on") : W("🔇 stumm", "🔇 muted")); if (g.aufnahme != null) teile.push(g.aufnahme ? W("Aufnahme an", "capture on") : W("Aufnahme aus", "capture off"));
         h += '<button type="button" data-zm="r:' + i + '"><span>🎚 ' + esc2(g.name) + ": <b>" + teile.join(" · ") + "</b></span><small>" + (g.p != null || g.c != null ? W("◀ ▶ leiser/lauter", "◀ ▶ down/up") : "") + (g.an != null || g.aufnahme != null ? W(" · SEL: an/aus", " · SEL: on/off") : "") + "</small></button>";
         a["r:" + i] = () => { if (g.an != null || g.aufnahme != null) audioPost({ aktion: "regler", name: g.name, art: g.an == null ? "c" : "p", schalten: true }).then(x => audioMenue("r:" + i, x)); };
-        a["r:" + i + ":stufe"] = s => { const art = g.p != null ? "p" : "c", v = (art === "p" ? g.p : g.c) + s * 5; audioPost({ aktion: "regler", name: g.name, art, wert: v }).then(x => audioMenue("r:" + i, x)); };
+        a["r:" + i + ":stufe"] = s => { const art = g.p != null ? "p" : "c", v = Math.max(0, Math.min(100, (art === "p" ? g.p : g.c) + s * 5)); if (art === "p") g.p = v; else g.c = v; audioPost({ aktion: "regler", name: g.name, art, wert: v }).then(x => audioMenue("r:" + i, x)); };
       });
       [["l", -1, W("links (1)", "left (1)")], ["r", 1, W("rechts (2)", "right (2)")]].forEach(([id, pan, nm]) => {
         h += '<button type="button" data-zm="t:' + id + '"><span>🔊 ' + W("Testton ", "Test tone ") + nm + "</span><small>" + W("2 s Piepton nur auf dieser Seite", "2 s beep on this side only") + "</small></button>";
@@ -1634,14 +1642,15 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       a["e:" + i] = () => { kanalSetz(i, { an: !k.an }).then(x => { bankenNeu(); if (x && x.fehler) zeige("⚠ " + x.fehler); eingangMenue("e:" + i); }); };
       ["pegel", "laut", "duck"].forEach(f => {
         const nm = "IN" + (i + 1) + " " + (f === "pegel" ? W("Gain", "gain") : f === "duck" ? W("Musik weicht aus", "music ducks") : W("Lautstärke", "level"));
-        h += '<button type="button" data-zm="e:' + i + ":" + f + '"><span>· ' + nm + ": <b>" + (k[f] != null ? k[f] : 0) + " %</b></span><small>" + W("◀ ▶ ändern", "◀ ▶ change") + "</small></button>";
-        a["e:" + i + ":" + f + ":stufe"] = s => { const v = Math.max(0, Math.min(f === "pegel" ? 400 : f === "duck" ? 80 : 100, (k[f] || 0) + s * (f === "pegel" ? 10 : 5))); kanalSetz(i, { [f]: v }).then(() => eingangMenue("e:" + i + ":" + f)); };
+        const wv = k[f] != null ? k[f] : 0, dbT = f === "pegel" && wv > 0 ? " (" + (wv >= 100 ? "+" : "") + (20 * Math.log10(wv / 100)).toFixed(0) + " dB)" : "";
+        h += '<button type="button" data-zm="e:' + i + ":" + f + '"><span>· ' + nm + ": <b>" + wv + " %" + dbT + "</b></span><small>" + W("◀ ▶ ändern", "◀ ▶ change") + (f === "pegel" ? W(" · bis +24 dB", " · up to +24 dB") : "") + "</small></button>";
+        a["e:" + i + ":" + f + ":stufe"] = s => { const alt = ((kanalHol(i) || k)[f] || 0); const v = f === "pegel" ? (() => { let x = alt * Math.pow(10, s * 1.5 / 20); x = x >= 100 ? Math.round(x / 5) * 5 : Math.round(x); if (x === alt) x = alt + s; return Math.max(5, Math.min(1600, x)); })() : Math.max(0, Math.min(f === "duck" ? 80 : 100, alt + s * 5)); kanalSetz(i, { [f]: v }).then(() => eingangMenue("e:" + i + ":" + f)); };
       });
     });
     /* Eingangspegel der Soundkarte (vor Imres): übersteuert es schon dort, hilft der Gain in Imres nicht */
     (eingangMenue.karte || []).forEach((g, gi) => {
       h += '<button type="button" data-zm="kc:' + gi + '"><span>🎚 ' + W("Soundkarte ", "Sound card ") + esc2(g.name) + ": <b>" + g.c + " %</b></span><small>" + W("Eingangspegel vor Imres · ◀ ▶", "input level before Imres · ◀ ▶") + "</small></button>";
-      a["kc:" + gi + ":stufe"] = st => audioPost({ aktion: "regler", name: g.name, art: "c", wert: g.c + st * 5 }).then(r => { if (r && r.ok) eingangMenue.karte = (r.regler || []).filter(x => x.c != null); eingangMenue("kc:" + gi); });
+      a["kc:" + gi + ":stufe"] = st => { g.c = Math.max(0, Math.min(100, g.c + st * 5)); return audioPost({ aktion: "regler", name: g.name, art: "c", wert: g.c }).then(r => { if (r && r.ok) eingangMenue.karte = (r.regler || []).filter(x => x.c != null); eingangMenue("kc:" + gi); }); };
     });
     if (eingangMenue.karte && !eingangMenue.karte.length && eingangMenue.geladen) h += '<p class="hinweis" style="margin:4px 0">' + W("Die Soundkarte hat keinen eigenen Eingangsregler – übersteuert es an der Buchse, muss das Signal schon am Instrument, Tonabnehmer oder Vorverstärker leiser werden (oder über eine DI-Box mit Pad, z. B. −20 dB).", "The sound card has no input level control – lower the signal at the instrument, pickup or preamp (or use a DI box pad).") + "</p>";
     h += '<button type="button" data-zm="mit"><span>' + (MS.an ? "✅ " : "⬜ ") + "🎻 " + W("Mitspieler", "Ensemble follows") + (MS.an ? " – " + W("folgt Eingang ", "follows input ") + (MS.quelle + 1) : "") + "</span><small>" + W("Bühneninstrumente spielen deine Töne mit · Regler: MIXER → Bank MIT (Ensemble wie beim Streichfett)", "stage instruments play your notes · knobs: MIXER → bank MIT") + "</small></button>";
@@ -1669,11 +1678,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     }, 150);
   }
   /* Reglerbänke für die Eingänge */
-  const KANAL_FELDER = [["laut", W("🔊 Lautstärke", "🔊 Level"), 0, 100, 4, 80], ["pegel", W("🎤 Gain", "🎤 Gain"), 0, 400, 10, 100], ["filter", W("🎛 Filter", "🎛 Filter"), -100, 100, 4, 0], ["echo", W("🔁 Delay", "🔁 Delay"), 0, 100, 4, 0],
+  const KANAL_FELDER = [["laut", W("🔊 Lautstärke", "🔊 Level"), 0, 100, 4, 80], ["pegel", W("🎤 Gain", "🎤 Gain"), 0, 1600, 20, 100], ["filter", W("🎛 Filter", "🎛 Filter"), -100, 100, 4, 0], ["echo", W("🔁 Delay", "🔁 Delay"), 0, 100, 4, 0],
     ["rueck", W("↻ Rückkopplung", "↻ Feedback"), 0, 90, 5, 35], ["hall", W("🏛 Hall", "🏛 Reverb"), 0, 100, 4, 0], ["drive", W("🔥 Drive", "🔥 Drive"), 0, 100, 4, 0], ["pan", W("↔ Panorama", "↔ Pan"), -100, 100, 5, 0], ["duck", W("⤵ Musik weicht aus", "⤵ Music ducks"), 0, 80, 5, 0]];
   [0, 1].forEach(i => KANAL_FELDER.forEach(([f, nm, lo, hi, st, neutral]) => {
     ZP_PARAM["in" + (i + 1) + "_" + f] = { name: "IN" + (i + 1) + " " + nm, lo, hi, schritt: st, neutral, druck: "null", lies: () => (kanalHol(i) || {})[f] || 0, setz: v => { kanalSetz(i, { [f]: v }); },
-      text: f === "laut" || f === "pegel" ? (v => (kanalHol(i) || {}).an ? v + " %" : W("aus (MENU)", "off (MENU)")) : f === "filter" ? (v => v === 0 ? W("offen", "open") : v < 0 ? W("Tiefpass ", "Low-pass ") + (-v) + " %" : W("Hochpass ", "High-pass ") + v + " %") : f === "pan" ? (v => v === 0 ? W("Mitte", "centre") : v < 0 ? W("links ", "left ") + (-v) : W("rechts ", "right ") + v) : null };
+      text: f === "laut" || f === "pegel" ? (v => (kanalHol(i) || {}).an ? v + " %" + (f === "pegel" ? " (" + (v > 0 ? (20 * Math.log10(v / 100) >= 0 ? "+" : "") + (20 * Math.log10(v / 100)).toFixed(0) + " dB" : "−∞") + ")" : "") : W("aus (MENU)", "off (MENU)")) : f === "filter" ? (v => v === 0 ? W("offen", "open") : v < 0 ? W("Tiefpass ", "Low-pass ") + (-v) + " %" : W("Hochpass ", "High-pass ") + v + " %") : f === "pan" ? (v => v === 0 ? W("Mitte", "centre") : v < 0 ? W("links ", "left ") + (-v) : W("rechts ", "right ") + v) : null };
   }));
   /* Lautstärke-Regler der Soundkarte (dieselben wie im Zynthian unter Admin → Audio-Pegel) als Drehregler */
   const KARTE = { regler: [], geladen: 0 };
