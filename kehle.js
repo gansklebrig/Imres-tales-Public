@@ -33,6 +33,8 @@
   const heute = (d) => { d = d || new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   /* kleiner Würfelbecher mit Startwert (für das tägliche Einsingen: jeden Tag gleich) */
   function becher(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  /* Karte nicht zu sehen? (offsetParent taugt nicht: im Vollbild ist die Karte „fixed“ und hat keinen) */
+  const unsichtbar = () => !root.isConnected || !root.getClientRects().length;
   const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 
   /* =================================================================
@@ -43,7 +45,7 @@
       label: "Gesangsspiel", titel: "Barradins goldene Kehle",
       text: "Sing mit Barradin! Die Notenblöcke ziehen vorbei, dein Mikrofon hört zu – triff die Töne, und das Publikum liegt dir zu Füßen. Am besten mit Kopfhörern.",
       menueKopf: "🎙 Bühne frei, Barde!",
-      menue: { tournee: "▶ Die Tournee", duelle: "⚔ Spott-Duelle", lieder: "🎵 Liederbuch", uebungen: "🎯 Übungsraum", taeglich: "☀ Tägliches Einsingen", gabel: "🎚 Stimmgabel", buch: "📖 Stimmbuch", einst: "⚙ Einstellungen", einmessen: "🎙 Stimme einmessen" },
+      menue: { duett: "🪈 Duett mit Echo", duettInfo: "Echo spielt die zweite Stimme", tournee: "▶ Die Tournee", duelle: "⚔ Spott-Duelle", lieder: "🎵 Liederbuch", uebungen: "🎯 Übungsraum", taeglich: "☀ Tägliches Einsingen", gabel: "🎚 Stimmgabel", buch: "📖 Stimmbuch", einst: "⚙ Einstellungen", einmessen: "🎙 Stimme einmessen" },
       tourneeInfo: (s, r) => "★ " + s + "/" + (DATEN.weg.length * 3) + " · " + r,
       duellInfo: (g, n) => g + " von " + n + " besiegt",
       taeglichInfo: (s, fertig) => (fertig ? "✔ Heute erledigt" : "3 Minuten") + (s ? " · 🔥 " + s + (s === 1 ? " Tag" : " Tage") : ""),
@@ -80,18 +82,21 @@
         einsatz: "Einsatzton", einsatzInfo: "Vor jeder Zeile klingt kurz der erste Ton an – so findest du den Einstieg.", tempo: "Tempo", tempoInfo: "Unter 100 % zählt es nicht für Bestwert und Bestenliste.",
         probe: "👂 Erst anhören", probeInfo: "Hör dir das Stück einmal mit lauter Führstimme an, ohne Wertung.", los: "▶ Los!", laedt: "🎻 Instrumente werden gestimmt …",
         messen: "Erst Stimme einmessen", messenTipp: "Tipp: Miss zuerst deine Stimme ein – dann liegen die Lieder genau in deiner Lage.", deutsch: "",
-        grundton: "Grundton", leiter: "Tonleiter", dur: "Dur", moll: "Moll", gegner: "Gegner", schnoerkel: "✦ = Schnörkel-Note: Mit schönem Vibrato gibt's Bonuspunkte." },
+        grundton: "Grundton", leiter: "Tonleiter", dur: "Dur", moll: "Moll", gegner: "Gegner", schnoerkel: "✦ = Schnörkel-Note: Mit schönem Vibrato gibt's dicke Bonuspunkte. Vibrato auf jedem anderen langen Ton bringt auch ein bisschen.",
+        duett: "🪈 Duett mit Echo", duettInfo: "Echo spielt auf der Flöte eine zweite Stimme. Triffst du deinen Ton, während er seinen spielt, klingt's zusammen – und das gibt Bonus." },
       spiel: { pause: "Pause", pausiert: "Pausiert", weiter: "▶ Weiter", neu: "↻ Von vorn", aufhoeren: "Aufhören", leise: "Ich höre dich nicht – näher ans Mikrofon?",
         urteil: { perfekt: "Meisterhaft!", gut: "Gut!", knapp: "Knapp …", daneben: "Daneben!" }, serie: n => n + "× in Folge!", schnoerkel: "✦ Schnörkel!",
         insp: "Bardische Inspiration", inspWurf: (w, p) => "🎲 " + w + " – Inspiration! +" + p + " %", inspLeer: "Erst eine Zeile singen …",
-        stopp: "■ Stopp", wiedergabe: "🎧 Wiedergabe", probe: "👂 Probehören" },
+        stopp: "■ Stopp", wiedergabe: "🎧 Wiedergabe", probe: "👂 Probehören",
+        vibrato: "〰 Vibrato!", vibLive: "〰 Vibrato", zusammen: "♫ Zusammenklang!", echo: "Echo", buh: ["Buh!", "Aua!", "Gnade!", "Uff!"], jubel: ["Bravo!", "Hoch!", "Zugabe!", "Jaaa!"] },
       duell: { fassung: "Barradin", runde: n => "Runde " + n, ko: "K.O.!", einknick: "Barradin verliert die Fassung …", gegnerLeben: "Lebenspunkte",
         sieg: "Sieg!", pleite: "Niederlage", rest: (n, h) => n + " hat noch " + h + " Lebenspunkte.", deutsch: "" },
       erg: { punkte: "Punkte", getroffen: (a, b) => a + " von " + b + " Tönen getroffen", rekord: "Neuer Bestwert!", bisher: p => "Bisher bester Wert: " + p + " %",
         wurf: (w, b, s, sg) => "Auftrittswurf: W20 " + w + " + " + b + " Kehle = " + s + (sg ? " gegen SG " + sg : ""), krit: "Natürliche 20!", patzer: "Natürliche 1 …",
         nochmal: "↻ Nochmal", naechste: "▶ Nächste Bühne", tournee: "Zur Tournee", duelle: "Zu den Duellen", neuFrei: "Neue Bühne freigespielt!", zuTief: c => "Du lagst im Schnitt " + c + " Cent zu tief.",
         zuHoch: c => "Du lagst im Schnitt " + c + " Cent zu hoch.", mittig: "Im Schnitt fast genau auf dem Ton – stark!", stumm: "Ich habe kaum etwas gehört. Ist das Mikrofon an?",
-        anhoeren: "🎧 Anhören", schnoerkel: n => "✦ " + n + (n === 1 ? " Schnörkel" : " Schnörkel"), strähne: n => "🔥 " + n + (n === 1 ? " Tag" : " Tage") + " in Folge eingesungen!" },
+        anhoeren: "🎧 Anhören", schnoerkel: n => "✦ " + n + (n === 1 ? " Schnörkel" : " Schnörkel"), vibrato: n => "〰 " + n + "× Vibrato",
+        duett: p => "🪈 Zusammenklang mit Echo: " + p + " %", strähne: n => "🔥 " + n + (n === 1 ? " Tag" : " Tage") + " in Folge eingesungen!" },
       stimmen: [
         ["Das war … mutig. Rex hat sich die Ohren zugehalten. Mit beiden Pfoten.", "Ich habe Goblins sterben hören, die sauberer klangen. Und ich war dabei.", "Echo fragt, ob du Gundren kennst. Er will das Thema wechseln."],
         ["Ein paar Töne haben getroffen. Die anderen sind noch auf dem Weg.", "Das Publikum ist höflich. Sehr höflich. Verdächtig höflich.", "Friedrich sagt, es war nicht schlecht. Friedrich lügt nie. Normalerweise."],
@@ -127,13 +132,15 @@
       mikro: { titel: "Barradin braucht dein Mikrofon", text: "Damit das Spiel hört, welchen Ton du singst, fragt dein Browser gleich nach dem Mikrofon. Ausgewertet wird nur auf deinem Gerät – nichts wird hochgeladen.",
         knopf: "🎙 Mikrofon erlauben", verweigert: "Das Mikrofon ist blockiert. Erlaube es in den Seiteneinstellungen deines Browsers (Schloss-Symbol neben der Adresse) und versuch es noch einmal.",
         fehlt: "Dieser Browser kann hier leider nicht aufs Mikrofon zugreifen.", belegt: "Das Mikrofon wird gerade von einer anderen App benutzt." },
+      seite: { liste: "🏆 Bestenliste", laedt: "Bestenliste wird geholt …", leer: "Noch niemand eingetragen – sei die erste Legende!", aus: "Bestenliste gerade nicht erreichbar.", dein: p => "Dein Bestwert: " + p + " %",
+        tasten: "Tasten: Leertaste oder Esc = Pause · I = Bardische Inspiration", duett: "🪈 Echo spielt die zweite Stimme – sing mit ihm zusammen!" },
       tonNamen: ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "B", "H"]
     },
     en: {
       label: "Singing game", titel: "Barradin's Golden Throat",
       text: "Sing with Barradin! The note blocks scroll by and your microphone listens – hit the notes and the crowd is yours. Best with headphones.",
       menueKopf: "🎙 The stage is yours, bard!",
-      menue: { tournee: "▶ The Tour", duelle: "⚔ Mockery duels", lieder: "🎵 Songbook", uebungen: "🎯 Practice room", taeglich: "☀ Daily warm-up", gabel: "🎚 Tuning fork", buch: "📖 Voice book", einst: "⚙ Settings", einmessen: "🎙 Measure my voice" },
+      menue: { duett: "🪈 Duet with Echo", duettInfo: "Echo plays the second voice", tournee: "▶ The Tour", duelle: "⚔ Mockery duels", lieder: "🎵 Songbook", uebungen: "🎯 Practice room", taeglich: "☀ Daily warm-up", gabel: "🎚 Tuning fork", buch: "📖 Voice book", einst: "⚙ Settings", einmessen: "🎙 Measure my voice" },
       tourneeInfo: (s, r) => "★ " + s + "/" + (DATEN.weg.length * 3) + " · " + r,
       duellInfo: (g, n) => g + " of " + n + " defeated",
       taeglichInfo: (s, fertig) => (fertig ? "✔ Done today" : "3 minutes") + (s ? " · 🔥 " + s + (s === 1 ? " day" : " days") : ""),
@@ -170,18 +177,21 @@
         einsatz: "Cue note", einsatzInfo: "Before each line the first note sounds briefly – so you find your way in.", tempo: "Tempo", tempoInfo: "Below 100 % it doesn't count for your best and the leaderboard.",
         probe: "👂 Listen first", probeInfo: "Hear the piece once with a loud guide voice, without scoring.", los: "▶ Go!", laedt: "🎻 Tuning the instruments …",
         messen: "Measure my voice first", messenTipp: "Tip: measure your voice first – then the songs sit right in your range.", deutsch: "Lyrics in German – singing along on „la“ counts too.",
-        grundton: "Root", leiter: "Scale", dur: "Major", moll: "Minor", gegner: "Foe", schnoerkel: "✦ = flourish note: sing it with a nice vibrato for bonus points." },
+        grundton: "Root", leiter: "Scale", dur: "Major", moll: "Minor", gegner: "Foe", schnoerkel: "✦ = flourish note: sing it with a nice vibrato for big bonus points. Vibrato on any other long note earns a little, too.",
+        duett: "🪈 Duet with Echo", duettInfo: "Echo plays a second voice on his flute. Hit your note while he plays his and you sound together – that earns a bonus." },
       spiel: { pause: "Pause", pausiert: "Paused", weiter: "▶ Continue", neu: "↻ Restart", aufhoeren: "Stop", leise: "I can't hear you – closer to the mic?",
         urteil: { perfekt: "Masterful!", gut: "Good!", knapp: "Close …", daneben: "Missed!" }, serie: n => n + " in a row!", schnoerkel: "✦ Flourish!",
         insp: "Bardic Inspiration", inspWurf: (w, p) => "🎲 " + w + " – Inspiration! +" + p + " %", inspLeer: "Sing a line first …",
-        stopp: "■ Stop", wiedergabe: "🎧 Playback", probe: "👂 Listening" },
+        stopp: "■ Stop", wiedergabe: "🎧 Playback", probe: "👂 Listening",
+        vibrato: "〰 Vibrato!", vibLive: "〰 Vibrato", zusammen: "♫ In harmony!", echo: "Echo", buh: ["Boo!", "Ouch!", "Mercy!", "Ugh!"], jubel: ["Bravo!", "Huzzah!", "Encore!", "Yesss!"] },
       duell: { fassung: "Barradin", runde: n => "Round " + n, ko: "K.O.!", einknick: "Barradin loses his composure …", gegnerLeben: "Hit points",
         sieg: "Victory!", pleite: "Defeat", rest: (n, h) => n + " still has " + h + " hit points.", deutsch: "Duel lyrics are German – singing on „la“ counts too." },
       erg: { punkte: "Points", getroffen: (a, b) => a + " of " + b + " notes hit", rekord: "New best!", bisher: p => "Previous best: " + p + " %",
         wurf: (w, b, s, sg) => "Performance check: d20 " + w + " + " + b + " throat = " + s + (sg ? " vs DC " + sg : ""), krit: "Natural 20!", patzer: "Natural 1 …",
         nochmal: "↻ Again", naechste: "▶ Next stage", tournee: "To the tour", duelle: "To the duels", neuFrei: "New stage unlocked!", zuTief: c => "On average you were " + c + " cents flat.",
         zuHoch: c => "On average you were " + c + " cents sharp.", mittig: "On average almost spot on – great!", stumm: "I barely heard anything. Is the microphone on?",
-        anhoeren: "🎧 Listen back", schnoerkel: n => "✦ " + n + (n === 1 ? " flourish" : " flourishes"), strähne: n => "🔥 " + n + (n === 1 ? " day" : " days") + " of warm-ups in a row!" },
+        anhoeren: "🎧 Listen back", schnoerkel: n => "✦ " + n + (n === 1 ? " flourish" : " flourishes"), vibrato: n => "〰 " + n + "× vibrato",
+        duett: p => "🪈 Harmony with Echo: " + p + " %", strähne: n => "🔥 " + n + (n === 1 ? " day" : " days") + " of warm-ups in a row!" },
       stimmen: [
         ["That was … brave. Rex covered his ears. With both paws.", "I've heard goblins die more cleanly. And I was there.", "Echo asks if you know Gundren. He wants to change the subject."],
         ["A few notes landed. The others are still on their way.", "The audience is polite. Very polite. Suspiciously polite.", "Friedrich says it wasn't bad. Friedrich never lies. Usually."],
@@ -217,6 +227,8 @@
       mikro: { titel: "Barradin needs your microphone", text: "So the game can hear which note you sing, your browser will ask for the microphone. Everything is analysed on your device – nothing is uploaded.",
         knopf: "🎙 Allow microphone", verweigert: "The microphone is blocked. Allow it in your browser's site settings (lock icon next to the address) and try again.",
         fehlt: "This browser can't access the microphone here.", belegt: "The microphone is being used by another app." },
+      seite: { liste: "🏆 Leaderboard", laedt: "Fetching the leaderboard …", leer: "Nobody yet – be the first legend!", aus: "Leaderboard unreachable right now.", dein: p => "Your best: " + p + " %",
+        tasten: "Keys: Space or Esc = pause · I = Bardic Inspiration", duett: "🪈 Echo plays the second voice – sing together with him!" },
       tonNamen: ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"]
     }
   };
@@ -226,7 +238,7 @@
      EINSTELLUNGEN UND SPEICHER
      ================================================================= */
   const K = { einst: "imres-kehle-einst", weg: "imres-kehle-weg", rekorde: "imres-kehle-rekorde", buch: "imres-kehle-buch", duelle: "imres-kehle-duelle", liste: "imres-kehle-liste" };
-  const E = Object.assign({ grad: "mittel", kopf: true, fuehr: true, laut: .8, versatz: 0, tief: null, hoch: null, boden: null, trans: {}, aufnahme: true, publikum: true, bordunTon: null, bordunModus: "moll", fuehrLaut: .6, fuehrKlang: "chor", einsatz: true, tempo: 1 }, json(K.einst) || {});
+  const E = Object.assign({ grad: "mittel", kopf: true, fuehr: true, laut: .8, versatz: 0, tief: null, hoch: null, boden: null, trans: {}, aufnahme: true, publikum: true, bordunTon: null, bordunModus: "moll", fuehrLaut: .6, fuehrKlang: "chor", einsatz: true, tempo: 1, duett: false }, json(K.einst) || {});
   if (!E.trans || typeof E.trans !== "object") E.trans = {};
   if (!["leicht", "mittel", "schwer"].includes(E.grad)) E.grad = "mittel";
   if (![1, .85, .7].includes(E.tempo)) E.tempo = 1;
@@ -372,6 +384,43 @@
     st.min = Math.min(...st.noten.map(n => n.s)); st.max = Math.max(...st.noten.map(n => n.s));
     st.akkorde = st.stil === "bordun" ? [] : harmonisieren(st);
     return st;
+  }
+
+  /* =================================================================
+     DUETT MIT ECHO: Echos Flöte spielt eine zweite Stimme – meist eine Terz über der Melodie
+     (in der Tonleiter des Lieds), passt sie nicht zum Akkord, die Sexte darunter.
+     In längeren Pausen zwischen den Zeilen spielt er eine kleine Floskel.
+     ================================================================= */
+  const duettMoeglich = st => !!(st && (st.lied || st.buehne) && !st.schule);
+  const duettAktiv = st => !!E.duett && duettMoeglich(st);
+  function zweiteStimme(st) {
+    if (st.zweite) return st.zweite;
+    const sk = SKALA[st.modus] || SKALA.dur, out = [];
+    const stufeUm = (s, schritte) => {
+      const kl = ((s % 12) + 12) % 12, okt = s - kl, i = sk.indexOf(kl);
+      if (i < 0) return s + (schritte > 0 ? 3 : -9);
+      const j = i + schritte, o = Math.floor(j / 7);
+      return okt + sk[((j % 7) + 7) % 7] + 12 * o;
+    };
+    st.noten.forEach(n => {
+      if (n.vor) return;
+      let h = stufeUm(n.s, 2);
+      const a = st.akkorde && st.akkorde[Math.floor(n.b / st.takt)];
+      if (a) { const iv = ((h - a.r) % 12 + 12) % 12, ok = (a.q === "d" ? [0, 4, 7] : [0, 3, 7]).includes(iv) || (a.sept && iv === 10); if (!ok) { const u = stufeUm(n.s, -2) - 0; const iv2 = ((u - a.r) % 12 + 12) % 12; if ((a.q === "d" ? [0, 4, 7] : [0, 3, 7]).includes(iv2)) h = u + 12; } }
+      const x = { b: n.b, d: n.d, s: h, zu: n.i }; out.push(x); n.harm = x;
+    });
+    /* Floskeln in den Atempausen */
+    st.zeilen.forEach((z, k) => {
+      if (z.vor || !z.noten.length) return;
+      const letzte = st.noten[z.noten[z.noten.length - 1]], ende = letzte.b + letzte.d, nx = st.zeilen[k + 1];
+      const frei = (nx && nx.noten.length ? st.noten[nx.noten[0]].b : st.ende) - ende;
+      if (frei < 2.5) return;
+      const quelle = z.noten.slice(-3).map(i => st.noten[i].s);
+      [quelle[2] != null ? quelle[2] : quelle[0], quelle[1] != null ? quelle[1] : quelle[0], quelle[0]].forEach((s0, i) => out.push({ b: ende + .5 + i * .5, d: i === 2 ? 1 : .5, s: stufeUm(s0, 2) + 12, floskel: true }));
+    });
+    out.sort((a, b) => a.b - b.b);
+    st.zweite = out;
+    return out;
   }
 
   /* Akkorde je Takt: passend zur Melodie (Viterbi über die Takte) */
@@ -659,6 +708,7 @@
       const n0 = st.noten[z.noten[0]], prev = k > 0 ? st.zeilen[k - 1] : null, frei = prev ? n0.b - prev.b1 : n0.b;
       add(frei >= 1 ? n0.b - 1 : n0.b, "harfe", lage(g0 + n0.s, 55), frei >= 1 ? .32 : .18, 1.4);
     });
+    if (o.duett != null ? o.duett : (st.duett != null ? st.duett : duettAktiv(st))) zweiteStimme(st).forEach(h => add(h.b, "fl", inLage("fl", g0 + h.s), h.floskel ? .2 : .27, h.d * .95));
     st.noten.forEach(n => {
       const m = g0 + n.s;
       if (n.vor) { const g = n.instr || "fl"; add(n.b, g, inLage(g, m), g === "fl" ? .32 : .42, n.d * .95); }
@@ -772,22 +822,76 @@
   /* Wer sitzt wo im Publikum? (Tournee-Bühnen der Reihe nach) */
   const PUBLIKUM_WEG = [
     ["matrose", "matrose", "zwerg", "matrose", "mensch", "matrose"], ["goblin", "goblin", "goblin", "goblin", "goblin", "goblin", "goblin"],
-    ["robe", "robe", "robe", "robe", "robe"], ["drache_gruen"], ["drow", "drow", "drow", "drow"], ["kuotoa", "kuotoa", "kuotoa", "kuotoa", "kuotoa"],
-    ["friedrich", "echo", "rex", "ezekiel"], ["zwerg", "zwerg", "koenig", "zwerg", "zwerg"], ["zwerg", "riese", "rex", "zwerg"], ["drache_rot"]
+    ["robe", "robe", "robe", "robe", "robe"], ["drache_gruen"], ["drow", "daemon", "drow", "drow"], ["kuotoa", "kuotoa", "kuotoa", "kuotoa", "kuotoa"],
+    ["friedrich", "echo", "rex", "ezekiel"], ["wache", "zwerg", "koenig", "zwerg", "wache"], ["zwerg", "riese", "rex", "mensch", "zwerg"], ["drache_rot"]
   ];
+  /* Wer bei einem Auftritt zufällig noch dazukommt (jeder Abend ist ein bisschen anders) */
+  const PUBLIKUM_EXTRA = [["moewe", "moewe", "matrose", "mensch"], ["goblin", "goblin"], ["robe", "robe"], [], ["drow"], ["kuotoa", "kuotoa"], [], ["zwerg", "wache", "zwerg"], ["mensch", "zwerg", "riese", "goblin"], []];
   const STILL_PUBLIKUM = { 5: true }; /* beim Klagelied wird nicht geworfen */
   function publikumFuer(st) {
     if (st.uebung) return { leute: ["rex_liegt"], still: true };
     if (st.duell) return { leute: ["friedrich", "echo", "rex", "ezekiel"], still: false, gruppe: true };
-    if (station != null && PUBLIKUM_WEG[station]) return { leute: PUBLIKUM_WEG[station], still: !!STILL_PUBLIKUM[station] };
-    if (st.id === "ploop") return { leute: ["kuotoa", "kuotoa", "mensch", "kuotoa"], still: true };
-    return { leute: ["mensch", "zwerg", "mensch", "goblin", "zwerg", "mensch"], still: false };
+    let leute, still = false;
+    /* Liederbuch: Lieder einer Tournee-Bühne bekommen das Publikum dieser Bühne */
+    const idx = station != null ? station : st.lied ? DATEN.weg.findIndex(w => w.lied === st.id) : -1;
+    if (idx >= 0 && PUBLIKUM_WEG[idx]) { leute = PUBLIKUM_WEG[idx].slice(); still = !!STILL_PUBLIKUM[idx];
+      const extra = PUBLIKUM_EXTRA[idx] || [], n = Math.floor(Math.random() * Math.min(3, extra.length + 1));
+      for (let k = 0; k < n; k++) leute.splice(Math.floor(Math.random() * (leute.length + 1)), 0, zufall(extra)); }
+    else if (st.id === "ploop") { leute = ["kuotoa", "kuotoa", "mensch", "kuotoa"]; still = true; }
+    else { leute = ["mensch", "zwerg", "mensch", "goblin", "zwerg", "mensch"]; for (let k = leute.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [leute[k], leute[j]] = [leute[j], leute[k]]; } if (Math.random() < .5) leute.push(zufall(["matrose", "robe", "zwerg"])); }
+    /* Größe und Platz jedes Gasts leicht zufällig */
+    return { leute, still, mass: leute.map(() => .84 + Math.random() * .22), versatz: leute.map(() => (Math.random() - .5) * .5) };
+  }
+  /* Reaktion eines Gasts: Jubel (Arme hoch), Buh (Faust), Ohren zuhalten – leicht versetzt, damit es nicht wie ein Ballett aussieht */
+  function reaktionVon(i) {
+    if (!S || !E.publikum || S.wiedergabe) return null;
+    const R = S.reakt, jetzt = performance.now();
+    if (S.ohren) return i % 3 === 0 ? "buh" : "ohren";
+    if (R && jetzt < R.bis && jetzt > R.start + ((i * 97) % 260)) return R.art === "buh" ? (i % 2 ? "ohren" : "buh") : R.art;
+    return null;
+  }
+  function reagieren(art, dauer, klein) {
+    if (!S || S.wiedergabe) return;
+    const jetzt = performance.now(), R = S.reakt;
+    if (klein && R && jetzt < R.bis && !R.klein) return; /* eine kleine Reaktion überschreibt keine große */
+    S.reakt = { art, start: jetzt, bis: jetzt + dauer, klein: !!klein };
+  }
+  /* Schulterhöhe, halbe Schulterbreite, Kopfhöhe, Kopfgröße – je Figur (Anteile der Figurenhöhe) */
+  const ARME = { goblin: [.4, .14, .55, .95], zwerg: [.44, .2, .6, 1], koenig: [.44, .2, .6, 1], wache: [.44, .2, .6, 1], matrose: [.5, .17, .68, 1], mensch: [.5, .17, .68, 1],
+    robe: [.5, .12, .68, 1], drow: [.5, .12, .68, 1], kuotoa: [.47, .18, .63, 1.1], friedrich: [.54, .18, .7, 1], echo: [.52, .12, .68, 1], ezekiel: [.55, .14, .72, 1], riese: [.86, .28, 1.05, 1.25], daemon: [.55, .15, .74, 1] };
+  function arme(typ, x, y, h, reakt, t, i) {
+    const a = ARME[typ]; if (!a || !reakt) return;
+    const sy = y - h * a[0], sx = h * a[1], ky = y - h * a[2], kr = h * .17 * a[3];
+    let L, R;
+    if (reakt === "jubel") { const w1 = ruhig ? 0 : Math.sin(t * 9 + i) * h * .07; L = [x - sx, sy, x - sx - h * .1, sy - h * .17, x - sx - h * .06 + w1, sy - h * .36]; R = [x + sx, sy, x + sx + h * .1, sy - h * .17, x + sx + h * .06 - w1, sy - h * .36]; }
+    else if (reakt === "ohren") { L = [x - sx, sy, x - sx - h * .13, sy - h * .06, x - kr * 1.05, ky]; R = [x + sx, sy, x + sx + h * .13, sy - h * .06, x + kr * 1.05, ky]; }
+    else { const z = ruhig ? 0 : Math.sin(t * 15 + i) * h * .035; R = [x + sx, sy, x + sx + h * .17, sy - h * .08 + z, x + sx + h * .12, sy - h * .3 + z]; }
+    const linie = (P, b, f) => { if (!P) return; g.strokeStyle = f; g.lineWidth = b; g.beginPath(); g.moveTo(P[0], P[1]); for (let k = 2; k < P.length; k += 2) g.lineTo(P[k], P[k + 1]); g.stroke(); };
+    const b = Math.max(2.2, h * .075);
+    g.lineCap = "round"; g.lineJoin = "round";
+    linie(L, b + 2, RAND); linie(R, b + 2, RAND); linie(L, b, SIL); linie(R, b, SIL);
+    if (reakt === "buh") { g.fillStyle = SIL; g.strokeStyle = RAND; g.lineWidth = 1.2; g.beginPath(); g.arc(R[4], R[5], b * .8, 0, 7); g.fill(); g.stroke(); }
+    if (reakt === "ohren") { g.fillStyle = SIL; g.beginPath(); g.arc(L[4], L[5], b * .7, 0, 7); g.arc(R[4], R[5], b * .7, 0, 7); g.fill(); }
+  }
+  /* Zuruf über dem Kopf („Bravo!“, „Buh!“) – nicht jeder ruft */
+  function zuruf(reakt, x, kopfY, h, i) {
+    if (!reakt || reakt === "ohren" || i % 3 !== (reakt === "jubel" ? 1 : 0)) return;
+    const liste = reakt === "jubel" ? T().spiel.jubel : T().spiel.buh, txt = liste[(i + (S ? S.reaktZahl | 0 : 0)) % liste.length];
+    g.font = "700 " + Math.max(11, Math.round(h * .2)) + "px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "alphabetic";
+    g.fillStyle = reakt === "jubel" ? "rgba(255,210,122,.95)" : "rgba(240,120,100,.95)";
+    g.fillText(txt, x, kopfY - h * .16); g.textAlign = "left";
   }
   const SIL = "rgba(9,7,12,.94)", RAND = "rgba(224,160,70,.38)";
   function figur(typ, x, y, h, t, laune, i) {
+    const reakt = reaktionVon(i);
     const wipp = ruhig ? 0 : Math.sin(t * (2 + (i % 3) * .4) + i * 1.7) * h * .04 * (.3 + laune);
-    const hops = !ruhig && laune > .85 ? Math.max(0, Math.sin(t * 7 + i)) * h * .12 : 0;
+    const hops = !ruhig && (laune > .85 || reakt === "jubel") ? Math.max(0, Math.sin(t * 8 + i)) * h * .12 : 0;
     y -= wipp + hops;
+    if (reakt === "ohren" && !ruhig) x += Math.sin(t * 22 + i) * h * .02; /* Kopfschütteln */
+    if (ARME[typ]) { const a = ARME[typ]; figurKoerper(typ, x, y, h, t, laune, i, reakt); arme(typ, x, y, h, reakt, t, i); zuruf(reakt, x, y - h * a[2] - h * .17 * a[3], h, i); return; }
+    figurKoerper(typ, x, y, h, t, laune, i, reakt);
+  }
+  function figurKoerper(typ, x, y, h, t, laune, i, reakt) {
     g.fillStyle = SIL; g.strokeStyle = RAND; g.lineWidth = 1.2;
     const kopf = (cx, cy, r) => { g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill(); g.stroke(); };
     const koerper = (w, hh) => { rundRect(x - w / 2, y - hh, w, hh + 4, w * .35); g.fill(); g.stroke(); };
@@ -851,16 +955,49 @@
         break;
       }
       case "rex": case "rex_liegt": {
-        const liegt = typ === "rex_liegt" && laune < .8;
+        const liegt = (typ === "rex_liegt" && laune < .8 && reakt !== "jubel") || reakt === "ohren" || reakt === "buh";
         g.beginPath(); g.ellipse(x, y - h * (liegt ? .12 : .22), h * .3, h * (liegt ? .12 : .16), 0, 0, 7); g.fill(); g.stroke();
         kopf(x + h * .27, y - h * (liegt ? .18 : .42), r * .85);
         g.beginPath(); g.moveTo(x + h * .22, y - h * (liegt ? .25 : .5)); g.lineTo(x + h * .2, y - h * (liegt ? .32 : .66)); g.lineTo(x + h * .3, y - h * (liegt ? .27 : .55)); g.fill();
-        if (!liegt) { g.strokeStyle = SIL; g.lineWidth = 3; g.beginPath(); g.moveTo(x - h * .28, y - h * .25); g.lineTo(x - h * .42, y - h * (.35 + .1 * Math.sin(t * 10 * laune))); g.stroke(); }
+        if (!liegt) { g.strokeStyle = SIL; g.lineWidth = 3; g.beginPath(); g.moveTo(x - h * .28, y - h * .25); g.lineTo(x - h * .42, y - h * (.35 + .1 * Math.sin(t * (reakt === "jubel" ? 22 : 10 * laune)))); g.stroke();
+          if (reakt === "jubel") { g.font = "700 " + Math.max(11, Math.round(h * .22)) + "px Georgia, serif"; g.fillStyle = "rgba(255,210,122,.9)"; g.fillText(sprache() === "en" ? "Awoo!" : "Auuu!", x + h * .3, y - h * .7); } }
+        else if (reakt) { g.fillStyle = SIL; g.beginPath(); g.ellipse(x + h * .33, y - h * .3, h * .07, h * .05, -.6, 0, 7); g.fill(); g.stroke(); /* Pfote über dem Ohr */ }
         else { g.fillStyle = "rgba(235,226,204,.4)"; g.font = Math.round(h * .22) + "px Georgia"; g.fillText("z", x + h * .4, y - h * (.5 + .1 * Math.sin(t))); }
         break;
       }
       case "riese": {
         koerper(h * .62, h * .9); kopf(x, y - h * 1.05, r * 1.25);
+        break;
+      }
+      case "wache": {
+        g.strokeStyle = SIL; g.lineWidth = 2.5; g.beginPath(); g.moveTo(x - h * .3, y + 2); g.lineTo(x - h * .3, y - h * 1.05); g.stroke();
+        g.fillStyle = "rgba(255,210,122,.5)"; g.beginPath(); g.moveTo(x - h * .34, y - h * 1.0); g.lineTo(x - h * .3, y - h * 1.15); g.lineTo(x - h * .26, y - h * 1.0); g.fill();
+        g.fillStyle = SIL; g.strokeStyle = RAND; g.lineWidth = 1.2;
+        koerper(h * .46, h * .48); kopf(x, y - h * .6, r);
+        g.beginPath(); g.moveTo(x - r * .9, y - h * .58); g.lineTo(x, y - h * .25); g.lineTo(x + r * .9, y - h * .58); g.fill(); g.stroke();
+        g.beginPath(); g.arc(x, y - h * .63, r * 1.12, Math.PI, 0); g.fill(); g.stroke(); g.fillRect(x - 1, y - h * .63 - r * 1.5, 2, r * .5);
+        break;
+      }
+      case "moewe": {
+        /* sitzt auf einem Poller; bei Jubel flattert sie hoch */
+        g.fillRect(x - h * .07, y - h * .3, h * .14, h * .3 + 4);
+        const auf = reakt === "jubel" && !ruhig ? Math.abs(Math.sin(t * 6 + i)) * h * .3 : 0, my = y - h * .3 - auf;
+        g.beginPath(); g.ellipse(x, my - h * .1, h * .16, h * .08, 0, 0, 7); g.fill(); g.stroke();
+        g.beginPath(); g.arc(x + h * .13, my - h * .19, h * .06, 0, 7); g.fill(); g.stroke();
+        g.fillStyle = "rgba(255,200,90,.85)"; g.beginPath(); g.moveTo(x + h * .18, my - h * .2); g.lineTo(x + h * .27, my - h * .18); g.lineTo(x + h * .18, my - h * .16); g.fill();
+        if (auf) { g.strokeStyle = SIL; g.lineWidth = 2.5; const fl = Math.sin(t * 20 + i) * h * .12; g.beginPath(); g.moveTo(x - h * .02, my - h * .12); g.lineTo(x - h * .2, my - h * .2 - fl); g.moveTo(x + h * .02, my - h * .12); g.lineTo(x + h * .1, my - h * .25 - fl); g.stroke(); }
+        if (reakt === "buh" || reakt === "ohren") { g.font = "700 " + Math.max(11, Math.round(h * .17)) + "px Georgia, serif"; g.fillStyle = "rgba(240,120,100,.9)"; g.textAlign = "center"; g.fillText(sprache() === "en" ? "Squawk!" : "Kreisch!", x, my - h * .32); g.textAlign = "left"; }
+        break;
+      }
+      case "daemon": {
+        /* geflügelter Dämon (Vrock): Flügel, Geierkopf */
+        const fl = ruhig ? 0 : Math.sin(t * (reakt ? 9 : 2) + i) * h * .06;
+        g.beginPath(); g.moveTo(x - h * .12, y - h * .55); g.lineTo(x - h * .5, y - h * .95 - fl); g.lineTo(x - h * .42, y - h * .55); g.lineTo(x - h * .36, y - h * .7); g.lineTo(x - h * .28, y - h * .45); g.closePath(); g.fill(); g.stroke();
+        g.beginPath(); g.moveTo(x + h * .12, y - h * .55); g.lineTo(x + h * .5, y - h * .95 - fl); g.lineTo(x + h * .42, y - h * .55); g.lineTo(x + h * .36, y - h * .7); g.lineTo(x + h * .28, y - h * .45); g.closePath(); g.fill(); g.stroke();
+        g.fillStyle = SIL; g.strokeStyle = RAND; g.lineWidth = 1.2;
+        koerper(h * .36, h * .58); kopf(x, y - h * .74, r * .9);
+        g.beginPath(); g.moveTo(x + r * .5, y - h * .76); g.lineTo(x + r * 1.6, y - h * .7); g.lineTo(x + r * .5, y - h * .68); g.fill(); g.stroke();
+        g.fillStyle = "rgba(255,80,60,.8)"; g.fillRect(x - r * .2, y - h * .78, 2.5, 2);
         break;
       }
       case "drache_gruen": case "drache_rot": {
@@ -870,13 +1007,33 @@
         g.beginPath(); g.moveTo(cw + 20, y + 4); g.quadraticCurveTo(cw * .9, y - h * .2, kx + h * .3, ky + h * .2);
         g.lineTo(kx - h * 1.1, ky + h * .05); g.quadraticCurveTo(kx - h * 1.25, ky - h * .2, kx - h * .9, ky - h * .35); g.lineTo(kx + h * .2, ky - h * .5);
         g.lineTo(kx + h * .45, ky - h * 1.0); g.lineTo(kx + h * .55, ky - h * .45); g.quadraticCurveTo(cw * .98, ky - h * .2, cw + 20, y - h * .6); g.closePath(); g.fill(); g.stroke();
-        const glut = .35 + .55 * laune;
+        const glut = reakt === "jubel" ? 1 : reakt ? .2 : .35 + .55 * laune;
         g.fillStyle = "rgba(" + gr + "," + glut.toFixed(2) + ")"; g.shadowColor = "rgba(" + gr + ",1)"; g.shadowBlur = 10 * glut;
         g.beginPath(); g.ellipse(kx - h * .25, ky - h * .2, h * .09, h * .04, -.2, 0, 7); g.fill(); g.shadowBlur = 0;
-        if (laune < .35 && !ruhig) { g.fillStyle = "rgba(160,160,150," + (.15 + .1 * Math.sin(t * 3)) + ")"; g.beginPath(); g.arc(kx - h * 1.15, ky - h * .1 - (t * 20 % 30), h * .12, 0, 7); g.fill(); }
+        if ((laune < .35 || reakt === "buh" || reakt === "ohren") && !ruhig) { for (let q = 0; q < (reakt ? 3 : 1); q++) { const z = (t * 20 + q * 11) % 30; g.fillStyle = "rgba(160,160,150," + ((.15 + .1 * Math.sin(t * 3)) * (1 - z / 30)).toFixed(2) + ")"; g.beginPath(); g.arc(kx - h * 1.15 - q * 6, ky - h * .1 - z, h * .12 * (1 + z / 30), 0, 7); g.fill(); } }
+        if (reakt === "buh" && i === 0) { g.font = "700 " + Math.max(12, Math.round(h * .2)) + "px Georgia, serif"; g.fillStyle = "rgba(255,120,80,.9)"; g.textAlign = "center"; g.fillText("GRRRR!", kx - h * .6, ky - h * .7); g.textAlign = "left"; }
+        if (reakt === "jubel" && !ruhig) { g.fillStyle = "rgba(255,210,122,.8)"; for (let q = 0; q < 4; q++) { const z = (t * 1.4 + q * .25) % 1; g.beginPath(); g.arc(kx - h * (1.1 + z * .8), ky - h * (.05 + Math.sin(q * 2 + z * 6) * .2), 2.2 * (1 - z), 0, 7); g.fill(); } }
         break;
       }
     }
+  }
+  /* Echo im Duett: Silhouette mit Querflöte, Noten steigen auf, wenn er spielt */
+  function echoMalen(x, y, h, t, tv) {
+    const spielt = S.st.zweite && S.st.zweite.some(z2 => tv >= z2.z0 && tv < z2.z1);
+    const sw = ruhig ? 0 : Math.sin(t * 2.2) * h * .025 * (spielt ? 1.6 : .6);
+    x += sw;
+    g.fillStyle = SIL; g.strokeStyle = "rgba(95,214,184,.5)"; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(x - h * .2, y + 4); g.lineTo(x - h * .13, y - h * .55); g.lineTo(x + h * .13, y - h * .55); g.lineTo(x + h * .2, y + 4); g.closePath(); g.fill(); g.stroke();
+    const r = h * .15; g.beginPath(); g.arc(x, y - h * .68, r, 0, 7); g.fill(); g.stroke();
+    g.strokeStyle = "rgba(235,226,204,.55)"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x - r * .6, y - h * .78); g.quadraticCurveTo(x - r * 1.8, y - h * .95, x - r * 1.2, y - h * 1.08); g.stroke();
+    g.beginPath(); g.moveTo(x + r * .6, y - h * .78); g.quadraticCurveTo(x + r * 1.8, y - h * .95, x + r * 1.2, y - h * 1.08); g.stroke();
+    /* Arme und Flöte */
+    g.strokeStyle = SIL; g.lineWidth = Math.max(2, h * .06); g.lineCap = "round";
+    g.beginPath(); g.moveTo(x - h * .1, y - h * .5); g.lineTo(x + h * .05, y - h * .58); g.moveTo(x + h * .1, y - h * .5); g.lineTo(x + h * .28, y - h * .6); g.stroke();
+    g.strokeStyle = "rgba(255,210,122,.85)"; g.lineWidth = 2.2; g.beginPath(); g.moveTo(x + r * .4, y - h * .63); g.lineTo(x + h * .42, y - h * .58); g.stroke();
+    g.font = "11px system-ui, sans-serif"; g.fillStyle = "rgba(143,232,207,.8)"; g.textAlign = "center"; g.fillText(T().spiel.echo, x, y - h * 1.14); g.textAlign = "left";
+    if (spielt && !ruhig) { g.font = "700 13px Georgia, serif"; for (let q = 0; q < 3; q++) { const z = (t * .8 + q / 3) % 1; g.fillStyle = "rgba(143,232,207," + (1 - z).toFixed(2) + ")"; g.fillText(q % 2 ? "♪" : "♫", x + h * .45 + z * h * .3 + Math.sin(z * 9 + q) * 5, y - h * .6 - z * h * .7); } }
   }
   /* Was das Publikum wirft: Rosen und Münzen bei Glanzleistungen, Heringe und Tomaten bei Patzern */
   function werfen(art, anzahl) {
@@ -908,21 +1065,25 @@
     return ctx.currentTime - (ctx.outputLatency || 0) - (ctx.baseLatency || 0) - S.t0;
   }
   function vorbereitenNoten(st, schieb) {
-    st.noten.forEach(n => { n.z0 = n.b * st.spb; n.z1 = (n.b + n.d) * st.spb; n.zeit = 0; n.stimme = 0; n.treffer = 0; n.perfekt = 0; n.abw = 0; n.abwZ = 0; n.wert = null; n.m = st.grund + schieb + n.s; n.proben = n.schnoerkel ? [] : null; n.geschnoerkelt = false; });
+    st.noten.forEach(n => { n.z0 = n.b * st.spb; n.z1 = (n.b + n.d) * st.spb; n.zeit = 0; n.stimme = 0; n.treffer = 0; n.perfekt = 0; n.abw = 0; n.abwZ = 0; n.wert = null; n.m = st.grund + schieb + n.s; n.proben = n.schnoerkel || (!n.vor && n.z1 - n.z0 >= .6) ? [] : null; n.geschnoerkelt = false; n.vibZeit = 0; n.vibriert = false; n.zusammen = 0; });
+    if (st.zweite) st.zweite.forEach(h => { h.z0 = h.b * st.spb; h.z1 = (h.b + h.d) * st.spb; h.m = st.grund + schieb + h.s; });
     st.zeilen.forEach(z => { z.z0 = z.noten.length ? st.noten[z.noten[0]].z0 : z.b0 * st.spb; z.z1 = z.noten.length ? st.noten[z.noten[z.noten.length - 1]].z1 : z.z0; z.wert = null; z.schaden = 0; });
   }
   function starten(st) {
     audio();
     if (S) abbrechen(true);
+    st.duett = duettAktiv(st); if (st.duett) zweiteStimme(st); else { st.zweite = null; st.noten.forEach(n => { n.harm = null; }); }
     const schieb = verschiebung(st);
     const ev = begleitung(st, schieb);
     const bus = ctx.createGain(); bus.gain.value = E.kopf ? 1 : .55; bus.connect(ausgang);
     S = { st, schieb, ev, ei: 0, t0: ctx.currentTime + .25, pause: false, tol: TOL[E.grad], ni: 0, spur: [], spurAll: [], letzteTv: null, punkte: 0, bonus: 0, urteil: null, serie: 0, besteSerie: 0,
-      tonStatistik: {}, stumm: 0, gehoert: 0, funken: [], zeileJetzt: -1, ende: st.ende * st.spb, bus, wuerfe: [], laune: .5, insp: 1, letzteZeile: null, schnoerkel: 0, pub: publikumFuer(st) };
+      tonStatistik: {}, stumm: 0, gehoert: 0, funken: [], zeileJetzt: -1, ende: st.ende * st.spb, bus, wuerfe: [], laune: .5, insp: 1, letzteZeile: null, schnoerkel: 0, pub: publikumFuer(st),
+      deko: kulisseWuerfeln(kulisseFuer(st)), vibrato: 0, harmZeit: 0, harmMax: 0, reakt: null };
     vorbereitenNoten(st, schieb);
     if (st.duell) S.duell = { leben: 100, fassung: 100, max: 100, proZeile: 100 / (st.zeilen.filter(z => !z.vor).length * .62), runde: 0, ende: null, rundenWert: [], blitz: [] };
     const ms = st.noten.map(n => n.m);
     let lo = Math.min(...ms) - 3, hi = Math.max(...ms) + 3;
+    if (st.duett && st.zweite) hi = Math.max(hi, Math.max(...st.zweite.filter(h => !h.floskel).map(h => h.m)) + 1);
     if (hi - lo < 14) { const mit = (hi + lo) / 2; lo = mit - 7; hi = mit + 7; }
     S.lo = lo; S.hi = hi; S.mitte = (Math.min(...ms) + Math.max(...ms)) / 2;
     S.aufnahme = aufnahmeStarten();
@@ -971,7 +1132,7 @@
   function rahmen() {
     if (!S) return;
     raf = requestAnimationFrame(rahmen);
-    if (root.offsetParent === null || document.hidden) { pausieren(); return; }
+    if (unsichtbar() || document.hidden) { pausieren(); return; }
     if (S.pause) return;
     planen();
     const t = hoerZeit();
@@ -1021,12 +1182,24 @@
           if (ok) { aktiv.treffer += dt; if (Math.abs(abw) <= S.tol / 2) aktiv.perfekt += dt; }
           if (Math.abs(abw) < 300) { aktiv.abw += abw * dt; aktiv.abwZ += dt; }
           if (aktiv.proben && Math.abs(roh) < 250) aktiv.proben.push(tv, roh);
+          /* Duett: klingt Echos Flöte gerade mit, zählt jeder getroffene Moment als Zusammenklang */
+          if (ok && aktiv.harm && tv >= aktiv.harm.z0 && tv < aktiv.harm.z1) { aktiv.zusammen += dt; S.zusammenJetzt = aktiv.harm; }
         }
       }
       const p = { t: tv, m: gefaltet, ok: ok && !!aktiv && !aktiv.vor };
       S.spur.push(p); S.spurAll.push(p);
     } else { S.glatt = null; const p = { t: tv, m: null }; S.spur.push(p); S.spurAll.push(p); }
     if (aktiv && !aktiv.vor) aktiv.zeit += dt;
+    if (!(ok && aktiv && aktiv.harm)) S.zusammenJetzt = null;
+    /* Vibrato live erkennen (alle paar Bilder über die letzten 0,7 s), damit man es beim Singen sieht */
+    S.vibTakt = (S.vibTakt | 0) + 1;
+    if (aktiv && aktiv.proben && e.m != null) {
+      if (S.vibTakt % 5 === 0) { const v2 = vibratoAnalyse(aktiv.proben, Math.max(aktiv.z0 + .15, tv - .7)); S.vib = v2.ok ? v2 : null; }
+      if (S.vib) { aktiv.vibZeit += dt; S.vibSeit = tv; }
+    } else if (S.vib && tv - (S.vibSeit || 0) > .15) S.vib = null;
+    /* schief und laut: das Publikum hält sich die Ohren zu */
+    if (aktiv && !aktiv.vor && e.m != null && !ok && abw != null && Math.abs(abw) > S.tol * 1.6) S.schief = Math.min(1.2, (S.schief || 0) + dt); else if (!aktiv || e.m == null) S.schief = Math.max(0, (S.schief || 0) - dt * .5); else S.schief = Math.max(0, (S.schief || 0) - dt * 2);
+    S.ohren = S.schief > .35;
     while (S.spur.length && S.spur[0].t < tv - 3) S.spur.shift();
     S.aktiv = aktiv; S.abw = abw; S.ok = ok; S.gefaltet = gefaltet;
     if (ok && aktiv && !aktiv.vor && !ruhig && Math.abs(abw) <= S.tol / 2 && Math.random() < .35) S.funken.push({ t: tv, m: aktiv.m, vx: Math.random() * 40 - 10, vy: -Math.random() * 60 - 20, leben: .7 });
@@ -1037,11 +1210,15 @@
   /* Vibrato erkennen: Schwingung von 3,5–9 Hz und 10–120 Cent um einen stabilen Ton */
   function vibrato(n) {
     const p = n.proben; if (!p || p.length < 40) return false;
-    const ab = n.z0 + (n.z1 - n.z0) * .25;
+    return vibratoAnalyse(p, n.z0 + (n.z1 - n.z0) * .25).ok;
+  }
+  /* Proben [t, cent, t, cent …] ab Zeitpunkt „ab“ auswerten → { ok, rate (Hz), tiefe (Cent) } */
+  function vibratoAnalyse(p, ab) {
+    const nein = { ok: false };
     const ts = [], cs = [];
     for (let i = 0; i < p.length; i += 2) if (p[i] >= ab) { ts.push(p[i]); cs.push(p[i + 1]); }
-    if (ts.length < 24) return false;
-    const dauer = ts[ts.length - 1] - ts[0]; if (dauer < .45) return false;
+    if (ts.length < 24) return nein;
+    const dauer = ts[ts.length - 1] - ts[0]; if (dauer < .45) return nein;
     /* linearen Trend abziehen */
     const mt = ts.reduce((a, b) => a + b, 0) / ts.length, mc = cs.reduce((a, b) => a + b, 0) / cs.length;
     let sxy = 0, sxx = 0; ts.forEach((t, i) => { sxy += (t - mt) * (cs[i] - mc); sxx += (t - mt) * (t - mt); });
@@ -1051,7 +1228,7 @@
     r.forEach(v => { if (v > 4 && zeichen <= 0) { if (zeichen < 0) wechsel++; zeichen = 1; } else if (v < -4 && zeichen >= 0) { if (zeichen > 0) wechsel++; zeichen = -1; } });
     const rate = wechsel / 2 / dauer;
     const sort = r.slice().sort((a, b) => a - b), tiefe = (sort[Math.floor(sort.length * .9)] - sort[Math.floor(sort.length * .1)]) / 2;
-    return rate >= 3.5 && rate <= 9 && tiefe >= 10 && tiefe <= 120 && Math.abs(mc) <= S.tol * 1.2;
+    return { ok: rate >= 3.5 && rate <= 9 && tiefe >= 10 && tiefe <= 120 && Math.abs(mc) <= S.tol * 1.2, rate, tiefe };
   }
   function abschliessen(n) {
     if (n.wert != null) return;
@@ -1065,9 +1242,24 @@
     }
     if (n.schnoerkel && n.wert >= .5 && vibrato(n)) {
       n.geschnoerkelt = true; S.schnoerkel++; S.bonus += n.gewicht * .5;
-      S.urteilSchnoerkel = performance.now() + 1400;
+      S.urteilSchnoerkel = performance.now() + 1400; S.urteilSchnoerkelText = T().spiel.schnoerkel;
+      reagieren("jubel", 1300);
       if (!ruhig) for (let i = 0; i < 18; i++) S.funken.push({ t: S.letzteTv, m: n.m, vx: Math.random() * 120 - 60, vy: -Math.random() * 90 - 10, leben: 1 });
+    } else if (!n.schnoerkel && n.proben && n.wert >= .5 && (n.vibZeit >= .3 || vibrato(n))) {
+      /* Vibrato auf einem gewöhnlichen langen Ton: kleiner Bonus */
+      n.vibriert = true; S.vibrato = (S.vibrato | 0) + 1; S.bonus += n.gewicht * .2;
+      S.urteilSchnoerkel = performance.now() + 1000; S.urteilSchnoerkelText = T().spiel.vibrato;
+      reagieren("jubel", 800, true);
+      if (!ruhig) for (let i = 0; i < 8; i++) S.funken.push({ t: S.letzteTv, m: n.m, vx: Math.random() * 80 - 40, vy: -Math.random() * 70 - 10, leben: .8 });
     }
+    /* Duett: Zusammenklang mit Echo */
+    if (n.harm) {
+      const q = klemm(n.zusammen / (dauer * .78), 0, 1);
+      S.bonus += n.gewicht * .15 * q; S.harmZeit = (S.harmZeit || 0) + Math.min(n.zusammen, dauer * .78); S.harmMax = (S.harmMax || 0) + dauer * .78;
+    }
+    /* kleine Publikumsreaktion je Ton: glänzend → Jubel, daneben → Buh */
+    if (n.wert >= .9 && dauer >= .35) reagieren("jubel", 650, true);
+    else if (n.wert < .2 && n.stimme > dauer * .4) reagieren("buh", 800, true);
     n.proben = null;
     const z = S.st.zeilen[n.zeile];
     if (z && z.noten[z.noten.length - 1] === n.i && !z.vor) zeileFertig(z);
@@ -1082,6 +1274,9 @@
     S.besteSerie = Math.max(S.besteSerie, S.serie);
     S.urteil = { text: U[art] + (S.serie >= 3 ? " · " + T().spiel.serie(S.serie) : ""), art, bis: performance.now() + 1600 };
     if (art === "perfekt") werfen("gut", 3); else if (art === "gut" && Math.random() < .5) werfen("gut", 1); else if (art === "daneben") werfen("schlecht", 1 + (Math.random() < .4 ? 1 : 0));
+    S.reaktZahl = (S.reaktZahl | 0) + 1;
+    if (art === "perfekt" || art === "gut") reagieren("jubel", art === "perfekt" ? 1800 : 1100); else if (art === "daneben") reagieren("buh", 1700);
+    if (S.st.duett && z.noten.some(i => S.st.noten[i].harm)) { let zz = 0, mx = 0; z.noten.forEach(i => { const x = S.st.noten[i]; if (x.harm) { zz += x.zusammen; mx += (x.z1 - x.z0) * .78; } }); if (mx && zz / mx >= .65) S.urteil.text += " · " + T().spiel.zusammen; }
     if (S.duell) duellTreffer(z);
   }
   /* ---------- Duell ---------- */
@@ -1167,12 +1362,402 @@
     glut.addColorStop(0, "rgba(224,160,70,.10)"); glut.addColorStop(1, "rgba(224,160,70,0)");
     g.fillStyle = glut; g.fillRect(0, 0, cw, ch);
   }
+
+  /* =================================================================
+     KULISSEN: Jede Bühne der Tournee hat ihre eigene Kulisse und ihr eigenes Licht,
+     jeder Auftritt würfelt Tageszeit, Wetter und Kleinigkeiten neu aus.
+     Der feste Teil wird einmal in ein Zwischenbild gemalt (bei Größenänderung neu),
+     pro Bild kommen nur Licht, Teilchen und ein paar Flieger dazu – das schafft auch ein Handy.
+     ================================================================= */
+  const KULISSE_WEG = ["hafen", "strasse", "crackmore", "donnerbaum", "feste", "see", "boot", "horga", "markt", "flamme"];
+  function kulisseFuer(st) {
+    if (st.uebung || st.schule) return "probe";
+    if (st.duell) return { glasstab: "crackmore", venomfang: "donnerbaum", ilvara: "feste", demogorgon: "abgrund" }[st.duell.id] || "taverne";
+    if (station != null && KULISSE_WEG[station]) return KULISSE_WEG[station];
+    const i = DATEN.weg.findIndex(w => w.lied === st.id);
+    return i >= 0 && KULISSE_WEG[i] ? KULISSE_WEG[i] : "taverne";
+  }
+  /* Licht- und Teilchenfarbe je Kulisse (kein Blau – Gold, Glut, Violett, Türkis, Giftgrün) */
+  const KUL = {
+    hafen:      { licht: "255,214,150", teil: "staub",  draussen: true },
+    strasse:    { licht: "255,180,100", teil: "glut",   draussen: true },
+    crackmore:  { licht: "255,120,80",  teil: "staub" },
+    donnerbaum: { licht: "170,230,120", teil: "spore", spore: "150,220,110", draussen: true },
+    feste:      { licht: "200,140,255", teil: "spore", spore: "200,150,255" },
+    abgrund:    { licht: "255,90,70",   teil: "glut" },
+    see:        { licht: "120,235,200", teil: "spore", spore: "120,230,200" },
+    boot:       { licht: "255,190,110", teil: "glut" },
+    horga:      { licht: "255,200,120", teil: "glut" },
+    markt:      { licht: "255,200,130", teil: "staub",  draussen: true },
+    flamme:     { licht: "255,120,50",  teil: "glut" },
+    taverne:    { licht: "255,190,110", teil: "staub" },
+    probe:      { licht: "255,226,170", teil: "staub" }
+  };
+  function kulisseWuerfeln(art) {
+    const r = Math.random, w = l => l[Math.floor(r() * l.length)];
+    const WETTER = { hafen: ["klar", "nebel", "regen", "klar", "moewen"], strasse: ["klar", "gluehw", "gluehw", "regen", "nebel"], crackmore: ["klar", "fledermaus", "nebel"],
+      donnerbaum: ["gewitter", "gewitter", "nebel", "regen"], feste: ["klar", "nebel"], abgrund: ["klar"], see: ["klar", "nebel", "tropfen"], boot: ["klar", "nebel"],
+      horga: ["klar", "fest"], markt: ["klar", "laternen", "regen", "klar"], flamme: ["klar", "rauch"], taverne: ["klar", "voll", "spaet"], probe: ["sonne", "sonne", "regen"] };
+    return { art, seed: (r() * 1e9) >>> 0, zeit: w(["nacht", "nacht", "daemmerung", "morgen"]), wetter: w(WETTER[art] || ["klar"]), mond: r() < .75, mondX: .5 + r() * .4,
+      sterne: 40 + Math.floor(r() * 50), lichter: [], flieger: [], teile: [], blitz: 0, naechsterBlitz: 2 + r() * 6, cache: null, ckey: "" };
+  }
+  /* weiche Lichtkugel als Vorlage (einmal pro Farbe) */
+  const SPRITES = {};
+  function leuchte(rgb) {
+    if (SPRITES[rgb]) return SPRITES[rgb];
+    const c = document.createElement("canvas"); c.width = c.height = 64;
+    const k = c.getContext("2d"), gr = k.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, "rgba(" + rgb + ",1)"); gr.addColorStop(.25, "rgba(" + rgb + ",.45)"); gr.addColorStop(1, "rgba(" + rgb + ",0)");
+    k.fillStyle = gr; k.fillRect(0, 0, 64, 64);
+    return (SPRITES[rgb] = c);
+  }
+  /* ---------- Bausteine für den festen Teil ---------- */
+  function himmel(k, w, h, v, unten) {
+    const Z = { nacht: ["#100b18", "#1d1424"], daemmerung: ["#1d1022", "#5a2830"], morgen: ["#22182a", "#6a4636"] }[v.zeit] || ["#100b18", "#1d1424"];
+    const gr = k.createLinearGradient(0, 0, 0, h * unten); gr.addColorStop(0, Z[0]); gr.addColorStop(1, Z[1]);
+    k.fillStyle = gr; k.fillRect(0, 0, w, h);
+  }
+  function sternenhimmel(k, w, h, v, rnd, bis) {
+    if (v.zeit === "morgen") return;
+    for (let i = 0; i < v.sterne; i++) { k.fillStyle = "rgba(255,240,220," + (.15 + rnd() * .45).toFixed(2) + ")"; const s = rnd() < .1 ? 1.6 : 1; k.fillRect(rnd() * w, rnd() * h * bis, s, s); }
+    if (v.mond) {
+      const mx = w * v.mondX, my = h * .16, mr = Math.max(8, Math.min(w, h) * .05);
+      const gr = k.createRadialGradient(mx, my, mr * .6, mx, my, mr * 4); gr.addColorStop(0, "rgba(255,236,200,.18)"); gr.addColorStop(1, "rgba(255,236,200,0)");
+      k.fillStyle = gr; k.fillRect(mx - mr * 4, my - mr * 4, mr * 8, mr * 8);
+      k.fillStyle = v.zeit === "daemmerung" ? "#f3c99a" : "#efe2c4"; k.beginPath(); k.arc(mx, my, mr, 0, 7); k.fill();
+      k.fillStyle = "rgba(0,0,0,.08)"; k.beginPath(); k.arc(mx - mr * .3, my - mr * .2, mr * .25, 0, 7); k.arc(mx + mr * .35, my + mr * .3, mr * .18, 0, 7); k.fill();
+    }
+  }
+  function huegel(k, w, yb, amp, farbe, rnd, n) {
+    k.fillStyle = farbe; k.beginPath(); k.moveTo(0, yb + amp * 3);
+    const p = []; for (let i = 0; i <= n; i++) p.push(yb - rnd() * amp);
+    for (let i = 0; i <= n; i++) { const x = w * i / n, xm = w * (i - .5) / n; if (i) k.quadraticCurveTo(xm, p[i - 1], x, p[i]); else k.lineTo(0, p[0]); }
+    k.lineTo(w, yb + amp * 3 + 2000); k.lineTo(0, yb + amp * 3 + 2000); k.closePath(); k.fill();
+  }
+  function tanne(k, x, yb, hh, farbe) {
+    k.fillStyle = farbe; k.beginPath();
+    for (let s = 0; s < 3; s++) { const y0 = yb - hh * (.25 + s * .25), b = hh * (.32 - s * .07); k.moveTo(x - b, y0 + hh * .2); k.lineTo(x, y0 - hh * .22); k.lineTo(x + b, y0 + hh * .2); }
+    k.fill(); k.fillRect(x - hh * .025, yb - hh * .12, hh * .05, hh * .12);
+  }
+  function stalaktiten(k, w, h, farbe, rnd, n, laenge, oben) {
+    k.fillStyle = farbe; k.beginPath(); k.moveTo(0, 0); k.lineTo(0, oben);
+    for (let i = 0; i < n; i++) { const x0 = w * i / n, x1 = w * (i + 1) / n, xm = (x0 + x1) / 2 + (rnd() - .5) * (x1 - x0) * .5, l = oben + rnd() * laenge; k.lineTo(xm - (x1 - x0) * .12, oben + rnd() * 6); k.lineTo(xm, l); k.lineTo(xm + (x1 - x0) * .12, oben + rnd() * 6); k.lineTo(x1, oben); }
+    k.lineTo(w, 0); k.closePath(); k.fill();
+  }
+  function bogenFenster(k, x, y, b, hh) { k.beginPath(); k.moveTo(x - b / 2, y + hh); k.lineTo(x - b / 2, y + b / 2); k.arc(x, y + b / 2, b / 2, Math.PI, 0); k.lineTo(x + b / 2, y + hh); k.closePath(); }
+  function saeule(k, x, y0, yb, b, farbe) { k.fillStyle = farbe; k.fillRect(x - b / 2, y0, b, yb - y0); k.fillRect(x - b * .7, y0, b * 1.4, b * .35); k.fillRect(x - b * .7, yb - b * .35, b * 1.4, b * .35); }
+  /* ---------- die Kulissen ---------- */
+  const MALER = {
+    hafen(k, w, h, v, rnd) {
+      himmel(k, w, h, v, .6); sternenhimmel(k, w, h, v, rnd, .5);
+      /* Neverwinter am Horizont: Türme, Dächer, die Brücke */
+      k.fillStyle = "#140f18"; let x = 0;
+      while (x < w) { const b = 18 + rnd() * 40, hh = h * (.04 + rnd() * .12); k.fillRect(x, h * .58 - hh, b, hh + 2); if (rnd() < .3) { k.beginPath(); k.moveTo(x, h * .58 - hh); k.lineTo(x + b / 2, h * .58 - hh - b * .8); k.lineTo(x + b, h * .58 - hh); k.fill(); } if (rnd() < .5) v.lichter.push({ x: (x + b * rnd()) / w, y: (h * .58 - hh * rnd()) / h, r: .012, f: "255,200,120", a: .5, flacker: .3 }); x += b + rnd() * 10; }
+      /* Meer (dunkles Grüngrau, kein Blau) */
+      const m = k.createLinearGradient(0, h * .58, 0, h); m.addColorStop(0, "#1e2422"); m.addColorStop(1, "#0b0e0d"); k.fillStyle = m; k.fillRect(0, h * .58, w, h * .42);
+      /* Leuchtturm links */
+      const lx = w * (.06 + rnd() * .08); k.fillStyle = "#120d14"; k.beginPath(); k.moveTo(lx - w * .018, h * .6); k.lineTo(lx - w * .01, h * .3); k.lineTo(lx + w * .01, h * .3); k.lineTo(lx + w * .018, h * .6); k.fill(); k.fillRect(lx - w * .015, h * .27, w * .03, h * .03);
+      v.turm = { x: lx / w, y: .285 };
+      v.lichter.push({ x: lx / w, y: .285, r: .05, f: "255,226,160", a: .9, flacker: .1 });
+      /* Schiffe */
+      const n = 1 + Math.floor(rnd() * 3);
+      for (let i = 0; i < n; i++) {
+        const sx = w * (.3 + rnd() * .65), sb = w * (.08 + rnd() * .07), sy = h * (.6 + rnd() * .06);
+        k.fillStyle = "#0e0a10"; k.beginPath(); k.moveTo(sx - sb / 2, sy); k.lineTo(sx + sb / 2, sy); k.lineTo(sx + sb * .4, sy + sb * .16); k.lineTo(sx - sb * .42, sy + sb * .16); k.closePath(); k.fill();
+        const mh = sb * (.9 + rnd() * .5); k.fillRect(sx - 1.5, sy - mh, 3, mh); k.fillRect(sx - sb * .25 - 1, sy - mh * .7, 2, mh * .7);
+        k.strokeStyle = "rgba(14,10,16,.9)"; k.lineWidth = 1; k.beginPath(); k.moveTo(sx, sy - mh); k.lineTo(sx + sb * .48, sy); k.moveTo(sx, sy - mh); k.lineTo(sx - sb * .5, sy); k.moveTo(sx - sb * .3, sy - mh * .55); k.lineTo(sx + sb * .3, sy - mh * .55); k.stroke();
+        v.lichter.push({ x: (sx + sb * .38) / w, y: (sy - sb * .05) / h, r: .02, f: "255,190,110", a: .8, flacker: .5 });
+      }
+      /* Steg vorn */
+      k.fillStyle = "#0c090d"; k.fillRect(0, h * .9, w, h * .1); for (let p = rnd() * 40; p < w; p += 60 + rnd() * 60) k.fillRect(p, h * .8, 7, h * .2);
+      v.wasser = .6;
+      if (v.wetter === "moewen" || rnd() < .6) for (let i = 0; i < 3; i++) v.flieger.push({ art: "moewe", x: rnd(), y: .12 + rnd() * .3, v: .02 + rnd() * .03, ph: rnd() * 6, s: .7 + rnd() * .6 });
+    },
+    strasse(k, w, h, v, rnd) {
+      himmel(k, w, h, v, .65); sternenhimmel(k, w, h, v, rnd, .45);
+      huegel(k, w, h * .55, h * .1, "#1a1320", rnd, 6); huegel(k, w, h * .64, h * .07, "#130e17", rnd, 8);
+      /* Straße zum Horizont */
+      const sg2 = k.createLinearGradient(0, h * .63, 0, h); sg2.addColorStop(0, "rgba(60,44,36,0)"); sg2.addColorStop(1, "rgba(60,44,36,.4)");
+      k.fillStyle = sg2; k.beginPath(); k.moveTo(w * .49, h * .63); k.lineTo(w * .51, h * .63); k.lineTo(w * .7, h); k.lineTo(w * .3, h); k.closePath(); k.fill();
+      k.strokeStyle = "rgba(20,14,14,.6)"; k.lineWidth = 2; k.beginPath(); k.moveTo(w * .497, h * .64); k.lineTo(w * .4, h); k.moveTo(w * .503, h * .64); k.lineTo(w * .6, h); k.stroke();
+      for (let i = 0; i < 26; i++) { const lx = rnd() < .5 ? rnd() * w * .32 : w - rnd() * w * .3, hh = h * (.18 + rnd() * .28); tanne(k, lx, h * (.66 + rnd() * .3), hh, i % 3 ? "#0e0a10" : "#151017"); }
+      /* umgekippter Wagen */
+      const wx = w * (.58 + rnd() * .1), wy = h * .8, wb = w * .09;
+      k.fillStyle = "#0c080b"; k.save(); k.translate(wx, wy); k.rotate(-.25); k.fillRect(-wb / 2, -wb * .3, wb, wb * .3); k.restore();
+      k.strokeStyle = "#0c080b"; k.lineWidth = 3; k.beginPath(); k.arc(wx + wb * .45, wy - wb * .3, wb * .17, 0, 7); k.stroke();
+      for (let s = 0; s < 6; s++) { const a = s * Math.PI / 3; k.beginPath(); k.moveTo(wx + wb * .45, wy - wb * .3); k.lineTo(wx + wb * .45 + Math.cos(a) * wb * .17, wy - wb * .3 + Math.sin(a) * wb * .17); k.stroke(); }
+      /* Lagerfeuer der Goblins im Gebüsch */
+      const fx = w * (.12 + rnd() * .15); v.lichter.push({ x: fx / w, y: .86, r: .09, f: "255,150,70", a: .9, flacker: .8, feuer: true });
+      v.augen = []; for (let i = 0; i < 4; i++) v.augen.push({ x: rnd() < .5 ? .05 + rnd() * .3 : .7 + rnd() * .28, y: .7 + rnd() * .2, ph: rnd() * 30 });
+    },
+    crackmore(k, w, h, v, rnd) {
+      const gr = k.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#1a1214"); gr.addColorStop(1, "#0f0a0c"); k.fillStyle = gr; k.fillRect(0, 0, w, h);
+      /* Mauerwerk */
+      k.fillStyle = "rgba(255,220,200,.025)"; for (let y = 0; y < h; y += 22) for (let x = (y / 22 % 2) * 24; x < w; x += 48) k.fillRect(x, y, 46, 20);
+      /* Bogenfenster mit Mondlicht */
+      const n = 2 + Math.floor(rnd() * 2);
+      for (let i = 0; i < n; i++) {
+        const fx = w * (i + .5) / n + (rnd() - .5) * 30, fb = Math.min(w * .1, 90), fy = h * .14;
+        bogenFenster(k, fx, fy, fb, h * .38); k.fillStyle = "#2a1c26"; k.fill();
+        k.fillStyle = "rgba(255,230,200,.06)"; k.beginPath(); k.moveTo(fx - fb / 2, fy + h * .38); k.lineTo(fx + fb / 2, fy + h * .38); k.lineTo(fx + fb * 1.5, h); k.lineTo(fx - fb * .2, h); k.fill();
+        k.strokeStyle = "#140d10"; k.lineWidth = 3; k.beginPath(); k.moveTo(fx, fy); k.lineTo(fx, fy + h * .38); k.moveTo(fx - fb / 2, fy + h * .2); k.lineTo(fx + fb / 2, fy + h * .2); k.stroke();
+        /* rotes Banner der Roben zwischen den Fenstern */
+        if (i < n - 1) { const bx = w * (i + 1) / n, bb = Math.min(w * .05, 46); k.fillStyle = "#5a1a1c"; k.beginPath(); k.moveTo(bx - bb / 2, h * .1); k.lineTo(bx + bb / 2, h * .1); k.lineTo(bx + bb / 2, h * .5); k.lineTo(bx, h * .45); k.lineTo(bx - bb / 2, h * .5); k.fill(); k.fillStyle = "rgba(255,190,120,.3)"; k.beginPath(); k.arc(bx, h * .24, bb * .22, 0, 7); k.fill();
+          v.lichter.push({ x: bx / w, y: .56, r: .06, f: "255,130,70", a: .85, flacker: .9, fackel: true }); }
+      }
+      /* Regal mit Phiolen */
+      const rx = w * (.7 + rnd() * .2); k.fillStyle = "#0d080a"; k.fillRect(rx - 50, h * .62, 100, 5); k.fillRect(rx - 50, h * .72, 100, 5);
+      for (let i = 0; i < 7; i++) { const px = rx - 44 + i * 14, py = h * (i % 2 ? .62 : .72); const f = ["120,220,110", "200,120,255", "255,120,90", "255,210,120"][Math.floor(rnd() * 4)]; k.fillStyle = "rgba(" + f + ",.35)"; k.beginPath(); k.arc(px, py - 7, 5, 0, 7); k.fill(); k.fillRect(px - 1.5, py - 16, 3, 6); v.lichter.push({ x: px / w, y: (py - 7) / h, r: .012, f, a: .4, flacker: .2 }); }
+      /* Säulenstümpfe */
+      saeule(k, w * .04, h * .2, h, Math.min(w * .05, 50), "#0c0809"); saeule(k, w * .96, h * .35, h, Math.min(w * .05, 50), "#0c0809");
+      if (v.wetter === "fledermaus") for (let i = 0; i < 4; i++) v.flieger.push({ art: "fledermaus", x: rnd(), y: .1 + rnd() * .3, v: .05 + rnd() * .05, ph: rnd() * 6, s: .6 + rnd() * .5 });
+    },
+    donnerbaum(k, w, h, v, rnd) {
+      const gr = k.createLinearGradient(0, 0, 0, h * .7); gr.addColorStop(0, "#0e0d12"); gr.addColorStop(1, "#1d2018"); k.fillStyle = gr; k.fillRect(0, 0, w, h);
+      /* Wolkenbänke */
+      for (let i = 0; i < 9; i++) { k.fillStyle = "rgba(40,38,44," + (.4 + rnd() * .4).toFixed(2) + ")"; k.beginPath(); k.ellipse(rnd() * w, h * (.05 + rnd() * .2), w * (.1 + rnd() * .15), h * (.03 + rnd() * .04), 0, 0, 7); k.fill(); }
+      huegel(k, w, h * .68, h * .06, "#121410", rnd, 7);
+      /* der zerfallene Turm, von Ranken überwuchert */
+      const tx = w * (.68 + rnd() * .2), tb = Math.min(w * .1, 90);
+      k.fillStyle = "#0b0c0a"; k.beginPath(); k.moveTo(tx - tb / 2, h); k.lineTo(tx - tb * .42, h * .2); k.lineTo(tx - tb * .2, h * .16); k.lineTo(tx - tb * .05, h * .22); k.lineTo(tx + tb * .15, h * .12); k.lineTo(tx + tb * .42, h * .18); k.lineTo(tx + tb / 2, h); k.closePath(); k.fill();
+      k.fillStyle = "rgba(150,220,110,.18)"; k.fillRect(tx - tb * .1, h * .3, tb * .2, tb * .3);
+      v.lichter.push({ x: tx / w, y: .3 + tb * .15 / h, r: .05, f: "150,220,110", a: .5, flacker: .3 });
+      k.strokeStyle = "rgba(60,80,40,.6)"; k.lineWidth = 2; for (let i = 0; i < 6; i++) { k.beginPath(); let yy = h * (.2 + rnd() * .5), xx = tx + (rnd() - .5) * tb; k.moveTo(xx, yy); for (let s = 0; s < 6; s++) { xx += (rnd() - .5) * 14; yy += 14; k.lineTo(xx, yy); } k.stroke(); }
+      /* tote Bäume */
+      k.strokeStyle = "#0c0d0a"; k.lineCap = "round";
+      for (let i = 0; i < 5; i++) { const bx = rnd() * w * .55, by = h * (.72 + rnd() * .2), bh = h * (.2 + rnd() * .2); k.lineWidth = 5; k.beginPath(); k.moveTo(bx, by); k.lineTo(bx + 4, by - bh); k.stroke(); k.lineWidth = 2; for (let a = 0; a < 4; a++) { const ay = by - bh * (.4 + a * .15); k.beginPath(); k.moveTo(bx + 3, ay); k.lineTo(bx + 3 + (a % 2 ? 1 : -1) * bh * .25, ay - bh * .15); k.stroke(); } }
+      /* Giftnebel am Boden */
+      const ng = k.createLinearGradient(0, h * .75, 0, h); ng.addColorStop(0, "rgba(120,200,90,0)"); ng.addColorStop(1, "rgba(120,200,90,.14)"); k.fillStyle = ng; k.fillRect(0, h * .75, w, h * .25);
+    },
+    feste(k, w, h, v, rnd) {
+      const rot = v.art === "abgrund", fb = rot ? "255,90,70" : "200,140,255";
+      const gr = k.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, rot ? "#160a0c" : "#120c1a"); gr.addColorStop(1, "#08060a"); k.fillStyle = gr; k.fillRect(0, 0, w, h);
+      /* Festungsmauer der Drow mit leuchtenden Zeichen */
+      k.fillStyle = rot ? "#1a0d0f" : "#170f20"; k.fillRect(w * .15, h * .3, w * .7, h * .7);
+      for (let x = w * .15; x < w * .85; x += 36) k.fillRect(x, h * .26, 20, h * .05);
+      for (let i = 0; i < 6; i++) { const gx = w * (.2 + rnd() * .6), gy = h * (.38 + rnd() * .3); k.strokeStyle = "rgba(" + fb + ",.5)"; k.lineWidth = 1.5; k.beginPath(); k.moveTo(gx, gy); k.lineTo(gx + 8, gy - 10); k.lineTo(gx + 16, gy); k.moveTo(gx + 8, gy - 10); k.lineTo(gx + 8, gy + 8); k.stroke(); v.lichter.push({ x: (gx + 8) / w, y: gy / h, r: .03, f: fb, a: .55, flacker: .4 }); }
+      /* Tor mit Gittern */
+      const tx = w * .5; bogenFenster(k, tx, h * .48, Math.min(w * .14, 130), h * .52); k.fillStyle = "#060408"; k.fill();
+      k.strokeStyle = "rgba(90,80,100,.5)"; k.lineWidth = 2; for (let i = -3; i <= 3; i++) { k.beginPath(); k.moveTo(tx + i * Math.min(w * .14, 130) / 8, h * .52); k.lineTo(tx + i * Math.min(w * .14, 130) / 8, h); k.stroke(); }
+      stalaktiten(k, w, h, "#07050a", rnd, 14, h * .2, h * .04);
+      /* Spinnweben in den Ecken */
+      k.strokeStyle = "rgba(235,226,204,.12)"; k.lineWidth = 1;
+      [[0, 0, 1], [w, 0, -1]].forEach(([ex, ey, s]) => { const R = Math.min(w, h) * .3; for (let a = 0; a < 5; a++) { k.beginPath(); k.moveTo(ex, ey); k.lineTo(ex + s * R * Math.cos(a * .35), ey + R * Math.sin(a * .35 + .1)); k.stroke(); } for (let r2 = R * .25; r2 < R; r2 += R * .2) { k.beginPath(); for (let a = 0; a < 5; a++) { const px = ex + s * r2 * Math.cos(a * .35), py = ey + r2 * Math.sin(a * .35 + .1); a ? k.lineTo(px, py) : k.moveTo(px, py); } k.stroke(); } });
+      if (rot) { const ag = k.createRadialGradient(w * .5, h * 1.05, 10, w * .5, h * 1.05, h * .7); ag.addColorStop(0, "rgba(255,80,50,.35)"); ag.addColorStop(1, "rgba(255,80,50,0)"); k.fillStyle = ag; k.fillRect(0, 0, w, h); }
+    },
+    see(k, w, h, v, rnd) {
+      k.fillStyle = "#0b0a10"; k.fillRect(0, 0, w, h);
+      stalaktiten(k, w, h, "#050408", rnd, 18, h * .26, h * .05);
+      /* stilles Wasser mit Spiegelung */
+      const m = k.createLinearGradient(0, h * .62, 0, h); m.addColorStop(0, "#0f1716"); m.addColorStop(1, "#060908"); k.fillStyle = m; k.fillRect(0, h * .62, w, h * .38);
+      /* Ufer mit Leuchtpilzen */
+      huegel(k, w, h * .66, h * .05, "#08070b", rnd, 9);
+      for (let i = 0; i < 14; i++) {
+        const px = rnd() * w, py = h * (.6 + rnd() * .1), s = 4 + rnd() * 10, f = rnd() < .65 ? "120,235,200" : "170,230,120";
+        k.fillStyle = "rgba(20,24,24,1)"; k.fillRect(px - s * .12, py - s * .9, s * .24, s * .9);
+        k.fillStyle = "rgba(" + f + ",.55)"; k.beginPath(); k.ellipse(px, py - s * .9, s * .6, s * .3, 0, Math.PI, 0); k.fill();
+        v.lichter.push({ x: px / w, y: (py - s) / h, r: .015 + s * .002, f, a: .55, flacker: .15, puls: rnd() * 6 });
+        /* Spiegelbild */
+        k.fillStyle = "rgba(" + f + ",.12)"; k.beginPath(); k.ellipse(px, h * .62 + (h * .62 - py) * .4 + s, s * .5, s * .15, 0, 0, 7); k.fill();
+      }
+      /* Steinbild der Kuo-Toa */
+      const sx = w * (.75 + rnd() * .15); k.fillStyle = "#09080c"; k.beginPath(); k.moveTo(sx - 26, h * .64); k.lineTo(sx - 18, h * .38); k.quadraticCurveTo(sx, h * .28, sx + 18, h * .38); k.lineTo(sx + 26, h * .64); k.fill();
+      k.fillStyle = "rgba(120,235,200,.4)"; k.beginPath(); k.arc(sx - 7, h * .4, 2.5, 0, 7); k.arc(sx + 7, h * .4, 2.5, 0, 7); k.fill();
+      v.wasser = .62; v.tropfen = true;
+    },
+    boot(k, w, h, v, rnd) {
+      k.fillStyle = "#0a090d"; k.fillRect(0, 0, w, h);
+      stalaktiten(k, w, h, "#050407", rnd, 16, h * .14, h * .02);
+      for (let i = 0; i < 18; i++) { const f = rnd() < .5 ? "200,150,255" : "120,235,200"; v.lichter.push({ x: rnd(), y: .02 + rnd() * .12, r: .008, f, a: .5, flacker: .2, puls: rnd() * 6 }); }
+      /* die versinkende Stadt am Horizont, glühend */
+      const hx = w * (.15 + rnd() * .2), hy = h * .55;
+      const sg = k.createRadialGradient(hx, hy, 4, hx, hy, w * .35); sg.addColorStop(0, "rgba(255,130,60,.35)"); sg.addColorStop(1, "rgba(255,130,60,0)"); k.fillStyle = sg; k.fillRect(0, 0, w, h);
+      k.fillStyle = "#120a0a"; let x = hx - w * .12; while (x < hx + w * .12) { const b = 6 + rnd() * 16, hh = h * (.02 + rnd() * .08); k.save(); k.translate(x, hy); k.rotate((rnd() - .5) * .3); k.fillRect(0, -hh, b, hh + 4); k.restore(); x += b + 2; }
+      v.lichter.push({ x: hx / w, y: hy / h, r: .1, f: "255,130,60", a: .6, flacker: .6, feuer: true });
+      const m = k.createLinearGradient(0, hy, 0, h); m.addColorStop(0, "#130f10"); m.addColorStop(1, "#050506"); k.fillStyle = m; k.fillRect(0, hy, w, h - hy);
+      k.fillStyle = "rgba(255,130,60,.12)"; k.fillRect(hx - w * .1, hy + 2, w * .2, 2); k.fillRect(hx - w * .06, hy + 8, w * .12, 2);
+      v.wasser = .56; v.boot = true;
+    },
+    horga(k, w, h, v, rnd) {
+      const gr = k.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#150f0c"); gr.addColorStop(1, "#0b0807"); k.fillStyle = gr; k.fillRect(0, 0, w, h);
+      /* große Halle: Säulen mit Zwergenmustern */
+      const n = 4 + Math.floor(rnd() * 2), sb = Math.min(w * .06, 60);
+      for (let i = 0; i < n; i++) { const sx = w * (i + .5) / n; saeule(k, sx, h * .05, h, sb, "#1c1410"); k.strokeStyle = "rgba(255,200,120,.12)"; k.lineWidth = 2; for (let y = h * .15; y < h * .9; y += sb * .9) { k.beginPath(); k.moveTo(sx - sb * .35, y); k.lineTo(sx, y - sb * .3); k.lineTo(sx + sb * .35, y); k.stroke(); } }
+      /* Banner mit Hammer */
+      for (let i = 0; i < n - 1; i++) { const bx = w * (i + 1) / n, bb = Math.min(w * .05, 48); k.fillStyle = i % 2 ? "#5a2418" : "#4a2c12"; k.fillRect(bx - bb / 2, h * .08, bb, h * .32); k.beginPath(); k.moveTo(bx - bb / 2, h * .4); k.lineTo(bx, h * .46); k.lineTo(bx + bb / 2, h * .4); k.fill(); k.fillStyle = "rgba(255,210,122,.55)"; k.fillRect(bx - bb * .25, h * .18, bb * .5, bb * .16); k.fillRect(bx - bb * .05, h * .18, bb * .1, bb * .5); }
+      /* Thron in der Mitte */
+      const tx = w * .5; k.fillStyle = "#0e0a08"; k.fillRect(tx - 40, h * .48, 80, h * .5); k.beginPath(); k.moveTo(tx - 46, h * .48); k.lineTo(tx, h * .38); k.lineTo(tx + 46, h * .48); k.fill();
+      k.fillStyle = "rgba(255,210,122,.4)"; k.beginPath(); k.arc(tx, h * .45, 5, 0, 7); k.fill();
+      /* Feuerschalen */
+      [.12, .88].concat(rnd() < .5 ? [.35, .65] : []).forEach(fx => { k.fillStyle = "#0b0807"; k.fillRect(w * fx - 3, h * .62, 6, h * .38); k.beginPath(); k.moveTo(w * fx - 18, h * .6); k.lineTo(w * fx + 18, h * .6); k.lineTo(w * fx + 10, h * .65); k.lineTo(w * fx - 10, h * .65); k.fill(); v.lichter.push({ x: fx, y: .57, r: .08, f: "255,170,80", a: .9, flacker: .8, feuer: true }); });
+      if (v.wetter === "fest") for (let i = 0; i < 20; i++) v.lichter.push({ x: rnd(), y: .05 + rnd() * .1, r: .01, f: "255,210,122", a: .5, flacker: .3 });
+    },
+    markt(k, w, h, v, rnd) {
+      himmel(k, w, h, v, .6); sternenhimmel(k, w, h, v, rnd, .4);
+      /* Riesenhütten im Hintergrund */
+      for (let i = 0; i < 3; i++) { const hx = w * (.15 + i * .35 + rnd() * .1), hb = w * (.12 + rnd() * .08), hy = h * .62; k.fillStyle = "#150f14"; k.beginPath(); k.ellipse(hx, hy, hb / 2, hb * .45, 0, Math.PI, 0); k.fill(); k.fillRect(hx - hb * .45, hy, hb * .9, h * .1); k.fillStyle = "rgba(255,180,100,.35)"; k.fillRect(hx - hb * .07, hy - hb * .15, hb * .14, hb * .15 + 6); v.lichter.push({ x: hx / w, y: (hy - hb * .08) / h, r: .03, f: "255,180,100", a: .6, flacker: .5 }); }
+      k.fillStyle = "#100b0e"; k.fillRect(0, h * .7, w, h * .3);
+      /* Marktstände mit gestreiften Planen */
+      const F = [["#6a2a1e", "#3a1812"], ["#6a4a1a", "#3a2a10"], ["#2e4a2a", "#1a2a16"], ["#4a2a4a", "#2a182a"]];
+      let x = rnd() * 30;
+      while (x < w) { const b = 60 + rnd() * 50, f = F[Math.floor(rnd() * F.length)], y = h * (.68 + rnd() * .05);
+        for (let s = 0; s < 5; s++) { k.fillStyle = f[s % 2]; k.beginPath(); k.moveTo(x + b * s / 5, y); k.lineTo(x + b * (s + 1) / 5, y); k.lineTo(x + b * (s + 1.2) / 5, y + 14); k.lineTo(x + b * (s + .2) / 5, y + 14); k.fill(); }
+        k.fillStyle = "#0b080a"; k.fillRect(x + 2, y + 14, 3, h * .2); k.fillRect(x + b - 3, y + 14, 3, h * .2); k.fillRect(x, y + 34, b, h * .3);
+        x += b + 20 + rnd() * 40; }
+      /* Lichterketten */
+      const ketten = v.wetter === "laternen" ? 3 : 2;
+      for (let kk = 0; kk < ketten; kk++) { const y0 = h * (.38 + kk * .08); k.strokeStyle = "rgba(20,14,16,.9)"; k.lineWidth = 1; k.beginPath(); for (let i = 0; i <= 40; i++) { const px = w * i / 40, py = y0 + Math.sin(i / 40 * Math.PI * 3) * h * .03; i ? k.lineTo(px, py) : k.moveTo(px, py); if (i % 3 === kk % 3) v.lichter.push({ x: px / w, y: (py + 3) / h, r: .012, f: ["255,200,120", "255,150,90", "200,240,140", "255,170,200"][(i + kk) % 4], a: .75, flacker: .25, puls: i }); } k.stroke(); }
+    },
+    flamme(k, w, h, v, rnd) {
+      const gr = k.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#160a08"); gr.addColorStop(1, "#2a0e06"); k.fillStyle = gr; k.fillRect(0, 0, w, h);
+      /* Säulen und Lavarisse */
+      for (let i = 0; i < 4; i++) saeule(k, w * (.08 + i * .28 + rnd() * .04), h * .02, h * .75, Math.min(w * .05, 56), "#120806");
+      k.strokeStyle = "rgba(255,120,40,.6)"; k.lineWidth = 2;
+      for (let i = 0; i < 9; i++) { let x = rnd() * w, y = h * (.72 + rnd() * .25); k.beginPath(); k.moveTo(x, y); for (let s = 0; s < 5; s++) { x += 10 + rnd() * 30; y += (rnd() - .5) * 12; k.lineTo(x, y); } k.stroke(); }
+      /* der Goldberg */
+      const gx = w * (.55 + rnd() * .25), gb = w * .4;
+      const gg = k.createLinearGradient(0, h * .5, 0, h); gg.addColorStop(0, "#5a3a10"); gg.addColorStop(1, "#2a1606"); k.fillStyle = gg;
+      k.beginPath(); k.moveTo(gx - gb / 2, h); k.quadraticCurveTo(gx - gb * .2, h * .52, gx, h * .5); k.quadraticCurveTo(gx + gb * .2, h * .52, gx + gb / 2, h); k.fill();
+      for (let i = 0; i < 40; i++) { const px = gx + (rnd() - .5) * gb * .8, py = h * (.58 + rnd() * .4); k.fillStyle = "rgba(255,210,122," + (.2 + rnd() * .5).toFixed(2) + ")"; k.beginPath(); k.ellipse(px, py, 3, 1.5, 0, 0, 7); k.fill(); if (i % 4 === 0) v.lichter.push({ x: px / w, y: py / h, r: .008, f: "255,230,160", a: .8, flacker: 1, glitzer: rnd() * 9 }); }
+      const lg = k.createLinearGradient(0, h * .7, 0, h); lg.addColorStop(0, "rgba(255,100,30,0)"); lg.addColorStop(1, "rgba(255,100,30,.3)"); k.fillStyle = lg; k.fillRect(0, h * .7, w, h * .3);
+      [.03, .97].forEach(fx => v.lichter.push({ x: fx, y: .8, r: .14, f: "255,110,40", a: .8, flacker: .9, feuer: true }));
+    },
+    taverne(k, w, h, v, rnd) {
+      const tag = v.art === "probe" && v.wetter === "sonne";
+      const gr = k.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, tag ? "#2a1e18" : "#1a120f"); gr.addColorStop(1, "#0e0a09"); k.fillStyle = gr; k.fillRect(0, 0, w, h);
+      /* Holzwand und Balken */
+      k.fillStyle = "rgba(255,200,150,.025)"; for (let x = 0; x < w; x += 34) k.fillRect(x, 0, 2, h);
+      k.fillStyle = "#0d0807"; k.fillRect(0, h * .08, w, h * .05); for (let x = w * .1; x < w; x += w * .3) k.fillRect(x, 0, Math.min(w * .03, 26), h);
+      /* Fenster */
+      const fx = w * (.6 + rnd() * .25), fb = Math.min(w * .12, 110), fy = h * .2;
+      k.fillStyle = tag ? "#b8865a" : v.art === "probe" ? "#3a2c30" : "#1e1420"; k.fillRect(fx - fb / 2, fy, fb, fb * 1.1);
+      k.fillStyle = "#0d0807"; k.fillRect(fx - 2, fy, 4, fb * 1.1); k.fillRect(fx - fb / 2, fy + fb * .5, fb, 4);
+      if (v.wetter === "regen") { k.strokeStyle = "rgba(220,210,200,.25)"; k.lineWidth = 1; for (let i = 0; i < 18; i++) { const rx2 = fx - fb / 2 + rnd() * fb, ry2 = fy + rnd() * fb; k.beginPath(); k.moveTo(rx2, ry2); k.lineTo(rx2 - 2, ry2 + 8); k.stroke(); } }
+      if (tag) { k.fillStyle = "rgba(255,226,170,.07)"; k.beginPath(); k.moveTo(fx - fb / 2, fy); k.lineTo(fx + fb / 2, fy); k.lineTo(fx - fb * .3, h); k.lineTo(fx - fb * 2, h); k.fill(); v.sonne = { x: fx / w, b: fb / w }; }
+      /* Regal mit Krügen */
+      const rx = w * (.18 + rnd() * .15); k.fillStyle = "#0b0706"; k.fillRect(rx - 70, h * .3, 140, 5); k.fillRect(rx - 70, h * .44, 140, 5);
+      for (let i = 0; i < 9; i++) { const px = rx - 62 + i * 15, py = i % 2 ? h * .3 : h * .44; k.fillStyle = i % 3 ? "rgba(120,80,50,.6)" : "rgba(90,110,60,.5)"; k.fillRect(px - 4, py - 14, 9, 14); }
+      /* Kamin */
+      if (!tag) { const kx = w * (.04 + rnd() * .06); k.fillStyle = "#0a0606"; k.fillRect(kx - 10, h * .5, 90, h * .5); k.fillStyle = "#1a0c06"; k.fillRect(kx + 5, h * .62, 60, h * .38); v.lichter.push({ x: (kx + 35) / w, y: .82, r: .12, f: "255,150,60", a: .85, flacker: .9, feuer: true }); }
+      /* Hängelampen */
+      const n = 2 + Math.floor(rnd() * 3);
+      for (let i = 0; i < n; i++) { const lx = w * (.2 + .6 * (i + .5) / n), ly = h * (.18 + rnd() * .08); k.strokeStyle = "#0d0807"; k.lineWidth = 1.5; k.beginPath(); k.moveTo(lx, h * .13); k.lineTo(lx, ly); k.stroke(); k.fillStyle = "#120a08"; k.fillRect(lx - 6, ly, 12, 10); v.lichter.push({ x: lx / w, y: (ly + 6) / h, r: .045, f: "255,200,120", a: tag ? .3 : .8, flacker: .35 }); }
+      /* Fässer */
+      for (let i = 0; i < 2; i++) { const bx = w * (.82 + i * .08), by = h * .86; k.fillStyle = "#120a07"; k.beginPath(); k.ellipse(bx, by, 22, 30, 0, 0, 7); k.fill(); k.strokeStyle = "rgba(255,200,150,.08)"; k.beginPath(); k.moveTo(bx - 22, by - 10); k.lineTo(bx + 22, by - 10); k.moveTo(bx - 22, by + 10); k.lineTo(bx + 22, by + 10); k.stroke(); }
+    }
+  };
+  MALER.abgrund = MALER.feste; MALER.probe = MALER.taverne;
+  /* Teilchen und Flieger anlegen (Anzahl nach Fläche, bei „weniger Bewegung“ keine) */
+  function kulisseTeile(v, w, h) {
+    v.teile = [];
+    if (ruhig) return;
+    const K2 = KUL[v.art] || KUL.taverne, n = Math.round(klemm(w * h / 14000, 14, 46));
+    const art = v.wetter === "gluehw" ? "gluehw" : v.wetter === "regen" && K2.draussen ? "regen" : K2.teil;
+    for (let i = 0; i < n; i++) v.teile.push({ art, x: Math.random(), y: Math.random(), ph: Math.random() * 7, v: .5 + Math.random(), f: art === "spore" ? K2.spore : null });
+    if (v.wetter === "regen" && K2.draussen && art !== "regen") for (let i = 0; i < 30; i++) v.teile.push({ art: "regen", x: Math.random(), y: Math.random(), ph: 0, v: .8 + Math.random() * .5 });
+    if (v.art === "strasse" && v.wetter !== "gluehw") for (let i = 0; i < 10; i++) v.teile.push({ art: "gluehw", x: Math.random(), y: .5 + Math.random() * .5, ph: Math.random() * 7, v: .5 + Math.random() });
+  }
+  function kulisseMalen(t, laune) {
+    const v = S && S.deko; if (!v) { hintergrund(); return; }
+    const key = v.art + "|" + Math.round(cw) + "x" + Math.round(ch) + "|" + dpr;
+    if (v.ckey !== key) {
+      const c = v.cache || document.createElement("canvas"); c.width = Math.max(1, Math.round(cw * dpr)); c.height = Math.max(1, Math.round(ch * dpr));
+      const k = c.getContext("2d"); k.setTransform(dpr, 0, 0, dpr, 0, 0);
+      v.lichter = []; v.flieger = []; v.augen = null; v.wasser = 0; v.turm = null; v.sonne = null;
+      (MALER[v.art] || MALER.taverne)(k, cw, ch, v, becher(v.seed));
+      if (v.wetter === "nebel") { for (let i = 0; i < 6; i++) { const ng = k.createRadialGradient(cw * (i + .5) / 6, ch * .8, 4, cw * (i + .5) / 6, ch * .8, cw * .25); ng.addColorStop(0, "rgba(200,190,180,.07)"); ng.addColorStop(1, "rgba(200,190,180,0)"); k.fillStyle = ng; k.fillRect(0, 0, cw, ch); } }
+      /* ruhige Lichter gleich ins Zwischenbild, nur flackernde bleiben lebendig */
+      k.globalCompositeOperation = "lighter";
+      v.lichter.forEach(L => { L.lebt = !ruhig && (L.feuer || L.flacker >= .5 || L.glitzer != null || L.puls != null); if (L.lebt) return; const r = L.r * Math.max(cw, ch); k.globalAlpha = klemm(L.a, 0, 1) * .5; k.drawImage(leuchte(L.f), L.x * cw - r, L.y * ch - r, r * 2, r * 2); });
+      k.globalAlpha = 1; k.globalCompositeOperation = "source-over";
+      v.lebendig = v.lichter.filter(L => L.lebt);
+      /* abdunkeln, damit die Noten gut lesbar bleiben (oben und in der Mitte etwas mehr) */
+      const dk = k.createLinearGradient(0, 0, 0, ch); dk.addColorStop(0, "rgba(12,9,15,.5)"); dk.addColorStop(.5, "rgba(12,9,15,.3)"); dk.addColorStop(1, "rgba(12,9,15,.12)");
+      k.fillStyle = dk; k.fillRect(0, 0, cw, ch);
+      v.cache = c; v.ckey = key; kulisseTeile(v, cw, ch);
+    }
+    g.drawImage(v.cache, 0, 0, cw, ch);
+    const K2 = KUL[v.art] || KUL.taverne, jetzt = performance.now() / 1000, dt = Math.min(.05, v.letzte ? jetzt - v.letzte : 0); v.letzte = jetzt;
+    /* Lichter: flackern, pulsieren, glitzern */
+    g.globalCompositeOperation = "lighter";
+    v.lebendig.forEach((L, i) => {
+      let a = L.a;
+      if (!ruhig) {
+        if (L.flacker) a *= 1 - L.flacker * .35 * (.5 + .5 * Math.sin(jetzt * (L.feuer ? 11 : 3) + i * 2.3)) * (.6 + .4 * Math.sin(jetzt * 17 + i));
+        if (L.puls != null) a *= .65 + .35 * Math.sin(jetzt * 1.6 + L.puls);
+        if (L.glitzer != null) a *= Math.max(0, Math.sin(jetzt * 2.2 + L.glitzer)) ** 8;
+      }
+      const r = L.r * Math.max(cw, ch) * (L.feuer && !ruhig ? 1 + .06 * Math.sin(jetzt * 9 + i) : 1);
+      g.globalAlpha = klemm(a, 0, 1) * .45; g.drawImage(leuchte(L.f), L.x * cw - r, L.y * ch - r, r * 2, r * 2);
+    });
+    g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
+    /* Leuchtturm-Strahl */
+    if (v.turm && !ruhig) {
+      const c = Math.cos(jetzt * .8), len = cw * .8 * Math.abs(c), dir = c >= 0 ? 1 : -1, tx = v.turm.x * cw, ty = v.turm.y * ch;
+      if (len > 12) {
+        const gr2 = g.createLinearGradient(tx, ty, tx + dir * len, ty); gr2.addColorStop(0, "rgba(255,226,160,.2)"); gr2.addColorStop(1, "rgba(255,226,160,0)");
+        g.fillStyle = gr2; g.beginPath(); g.moveTo(tx, ty - 3); g.lineTo(tx + dir * len, ty - len * .07); g.lineTo(tx + dir * len, ty + len * .07); g.lineTo(tx, ty + 3); g.closePath(); g.fill();
+      }
+    }
+    /* Wasser: Glitzerstriche */
+    if (v.wasser) {
+      const y0 = v.wasser * ch;
+      for (let i = 0; i < 26; i++) { const yy = y0 + ((i * 37) % 100) / 100 * (ch - y0), x = ((i * 97.3 + (ruhig ? 0 : jetzt * (8 + i % 5 * 3))) % (cw + 60)) - 30; g.fillStyle = "rgba(" + K2.licht + "," + (.05 + .07 * (yy - y0) / (ch - y0 + 1)).toFixed(3) + ")"; g.fillRect(x, yy, 10 + (i % 4) * 8, 1); }
+    }
+    /* Goblin-Augen im Gebüsch: blinzeln, kichern */
+    if (v.augen) v.augen.forEach(A => { const z = (jetzt + A.ph) % 7; if (z < 4.5 && !(z > 2 && z < 2.15)) { g.fillStyle = "rgba(255,210,90,.75)"; g.fillRect(A.x * cw, A.y * ch, 2.5, 2); g.fillRect(A.x * cw + 6, A.y * ch, 2.5, 2); } });
+    /* Flieger: Möwen und Fledermäuse */
+    if (!ruhig) v.flieger.forEach(F => {
+      F.x += F.v * dt * (F.art === "fledermaus" ? 1.4 : 1); if (F.x > 1.1) { F.x = -.1; F.y = .08 + Math.random() * .3; }
+      const fx = F.x * cw, fy = F.y * ch + Math.sin(jetzt * 1.3 + F.ph) * 8, s = 7 * F.s * (cw > 700 ? 1.3 : 1), fl = Math.sin(jetzt * (F.art === "moewe" ? 6 : 18) + F.ph) * s * .5;
+      g.strokeStyle = F.art === "moewe" ? "rgba(235,226,204,.55)" : "rgba(10,7,10,.95)"; g.lineWidth = F.art === "moewe" ? 1.6 : 2.4; g.beginPath(); g.moveTo(fx - s, fy - fl); g.quadraticCurveTo(fx - s * .4, fy - s * .4, fx, fy); g.quadraticCurveTo(fx + s * .4, fy - s * .4, fx + s, fy - fl); g.stroke();
+    });
+    /* Gewitter über Donnerbaum */
+    if (v.wetter === "gewitter" && !ruhig) {
+      v.naechsterBlitz -= dt;
+      if (v.naechsterBlitz <= 0) { v.blitz = 1; v.naechsterBlitz = 3 + Math.random() * 7; v.blitzX = .2 + Math.random() * .6; }
+      if (v.blitz > 0) {
+        g.fillStyle = "rgba(240,255,220," + (v.blitz * .18).toFixed(3) + ")"; g.fillRect(0, 0, cw, ch);
+        if (v.blitz > .6) { g.strokeStyle = "rgba(240,255,220," + v.blitz.toFixed(2) + ")"; g.lineWidth = 2; g.beginPath(); let x = v.blitzX * cw, y = 0; g.moveTo(x, y); const r2 = becher((v.blitzX * 1e6) | 0); while (y < ch * .55) { x += (r2() - .5) * 40; y += 18 + r2() * 20; g.lineTo(x, y); } g.stroke(); }
+        v.blitz = Math.max(0, v.blitz - dt * 3.5);
+      }
+    }
+    /* Teilchen */
+    v.teile.forEach((P, i) => {
+      let x, y, a, r = 1.6, f = K2.licht;
+      if (P.art === "glut") { P.y -= dt * .06 * P.v; if (P.y < -.05) { P.y = 1.05; P.x = Math.random(); } x = (P.x + Math.sin(jetzt * .9 + P.ph) * .02) * cw; y = P.y * ch; a = .25 + .5 * P.y; f = "255,150,70"; }
+      else if (P.art === "gluehw") { x = (P.x + Math.sin(jetzt * .3 * P.v + P.ph) * .05) * cw; y = (P.y + Math.cos(jetzt * .4 * P.v + P.ph) * .04) * ch; a = Math.max(0, Math.sin(jetzt * 1.7 * P.v + P.ph)) ** 2; f = "210,240,120"; r = 2.2; }
+      else if (P.art === "spore") { P.y -= dt * .015 * P.v; if (P.y < -.05) P.y = 1.05; x = (P.x + Math.sin(jetzt * .5 + P.ph) * .03) * cw; y = P.y * ch; a = .3 + .3 * Math.sin(jetzt + P.ph); f = P.f || f; r = 1.8; }
+      else if (P.art === "regen") { P.y += dt * 1.6 * P.v; if (P.y > 1.05) { P.y = -.05; P.x = Math.random(); } const rx = P.x * cw, ry = P.y * ch; g.strokeStyle = "rgba(220,210,200,.18)"; g.lineWidth = 1; g.beginPath(); g.moveTo(rx, ry); g.lineTo(rx - 3, ry + 12); g.stroke(); return; }
+      else { x = ((P.x + jetzt * .004 * P.v) % 1) * cw; y = (P.y + Math.sin(jetzt * .3 + P.ph) * .03) * ch; a = .12 + .12 * Math.sin(jetzt * .8 + P.ph); if (v.sonne) a *= 1.8; f = "255,226,170"; r = 1.2; }
+      g.fillStyle = "rgba(" + f + "," + klemm(a, 0, 1).toFixed(2) + ")"; g.fillRect(x - r / 2, y - r / 2, r, r);
+    });
+    /* Tropfen am unterirdischen See: fallen, dann Ringe */
+    if (v.tropfen && !ruhig) {
+      const z = (jetzt * .45) % 1, tx = cw * (.3 + ((Math.floor(jetzt * .45) * 37) % 50) / 100), y0 = v.wasser * ch;
+      if (z < .4) { g.fillStyle = "rgba(120,235,200,.6)"; g.fillRect(tx, ch * .2 + (y0 - ch * .2) * (z / .4) ** 2, 1.5, 4); }
+      else { const rr = (z - .4) * 60; g.strokeStyle = "rgba(120,235,200," + (.4 * (1 - (z - .4) / .6)).toFixed(2) + ")"; g.lineWidth = 1; g.beginPath(); g.ellipse(tx, y0 + 6, rr, rr * .25, 0, 0, 7); g.stroke(); }
+    }
+    /* Bug des Bootes vorn, schaukelt sanft, mit Laterne */
+    if (v.boot) {
+      const sch = ruhig ? 0 : Math.sin(jetzt * .9) * 4, bx = cw * .97, by = ch * .78 + sch;
+      g.fillStyle = "#070506"; g.beginPath(); g.moveTo(cw + 10, ch); g.lineTo(cw * .78, ch); g.quadraticCurveTo(cw * .84, by + 10, bx - cw * .02, by - ch * .1); g.lineTo(cw + 10, by - ch * .05); g.closePath(); g.fill();
+      g.strokeStyle = "#070506"; g.lineWidth = 3; g.beginPath(); g.moveTo(bx - cw * .02, by - ch * .1); g.lineTo(bx - cw * .05, by - ch * .3); g.stroke();
+      const lx = bx - cw * .05 + (ruhig ? 0 : Math.sin(jetzt * 1.3) * 3), ly = by - ch * .27;
+      g.globalCompositeOperation = "lighter"; g.globalAlpha = .7; const r = Math.max(cw, ch) * .06; g.drawImage(leuchte("255,190,110"), lx - r, ly - r, r * 2, r * 2); g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
+      g.fillStyle = "#ffd27a"; g.fillRect(lx - 2, ly - 3, 4, 6);
+    }
+    /* Bühnenlicht: ein Kegel auf die goldene Linie, heller, wenn das Publikum jubelt */
+    const x0 = Math.round(cw * .24), hell = .05 + .07 * klemm(laune, 0, 1) + (S.reakt && S.reakt.art === "jubel" && performance.now() < S.reakt.bis ? .06 : 0);
+    if (!v.kegel || v.kegelH !== ch) { v.kegel = g.createLinearGradient(0, 0, 0, ch); v.kegel.addColorStop(0, "rgba(" + K2.licht + ",1)"); v.kegel.addColorStop(1, "rgba(" + K2.licht + ",0)"); v.kegelH = ch; }
+    g.globalAlpha = hell; g.fillStyle = v.kegel; g.beginPath(); g.moveTo(x0 - 18, 0); g.lineTo(x0 + 18, 0); g.lineTo(x0 + Math.min(cw * .14, ch * .35), ch); g.lineTo(x0 - Math.min(cw * .14, ch * .35), ch); g.closePath(); g.fill(); g.globalAlpha = 1;
+  }
   function zeichnen(t, tv) {
     if (!g) return;
     messen();
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    hintergrund();
-    const st = S.st, oben = S.duell ? 84 : 48, pubH = E.publikum && S.pub ? Math.round(klemm(ch * .13, 40, 72)) : 0, unten = 10 + pubH, x0 = Math.round(cw * .24);
+    kulisseMalen(t, S.laune);
+    const st = S.st, oben = S.duell ? 84 : 48, pubH = E.publikum && S.pub ? Math.round(klemm(ch * .13, 40, Math.max(72, ch * .11))) : 0, unten = 10 + pubH, x0 = Math.round(cw * .24);
     const pxs = (cw - x0) / 4.4;
     const X = z => x0 + (z - t) * pxs;
     const zeile = (ch - oben - unten) / (S.hi - S.lo);
@@ -1202,7 +1787,7 @@
     }
     g.textAlign = "left";
     /* Noten */
-    const h = Math.max(7, Math.min(22, zeile * .92));
+    const h = Math.max(7, Math.min(Math.max(22, ch * .028), zeile * .92));
     for (let k = Math.max(0, S.ni - 14); k < st.noten.length; k++) {
       const n = st.noten[k];
       const xa = X(n.z0), xe = X(n.z1);
@@ -1231,6 +1816,17 @@
         if (laeuft && !ruhig) { g.strokeStyle = "rgba(255,210,122,.35)"; g.lineWidth = 1.2; g.beginPath(); for (let q = 0; q <= 20; q++) { const xx = xa + w * q / 20, yy = y - 9 + Math.sin(q * 1.6 + t * 8) * 2.2; q ? g.lineTo(xx, yy) : g.moveTo(xx, yy); } g.stroke(); }
       }
     }
+    /* Echos zweite Stimme (Duett): schmale türkise Bänder mit Flötenzeichen */
+    if (st.duett && st.zweite) {
+      const hh = Math.max(4, h * .42), jetzt2 = S.zusammenJetzt;
+      for (const z2 of st.zweite) {
+        const xa = X(z2.z0), xe = X(z2.z1); if (xe < -10) continue; if (xa > cw + 10) break;
+        const y = Y(klemm(z2.m, S.lo, S.hi)) - hh / 2, w = Math.max(3, xe - xa - 2), an = tv >= z2.z0 && tv < z2.z1;
+        g.fillStyle = "rgba(95,214,184," + (an ? (jetzt2 === z2 ? .85 : .5) : z2.floskel ? .16 : .26) + ")";
+        if (jetzt2 === z2) { g.shadowColor = "#5fd6b8"; g.shadowBlur = 12; }
+        rundRect(xa, y, w, hh, hh / 2); g.fill(); g.shadowBlur = 0;
+      }
+    }
     /* Stimmspur */
     let vorher = null;
     S.spur.forEach(p => {
@@ -1238,7 +1834,7 @@
       const x = X(p.t), y = Y(klemm(p.m, S.lo, S.hi));
       if (x < -4) { vorher = { x, y, p }; return; }
       if (vorher && p.t - vorher.p.t < .1) {
-        g.strokeStyle = p.ok ? "rgba(159,224,143,.9)" : "rgba(235,226,204,.45)"; g.lineWidth = 3; g.lineCap = "round";
+        g.strokeStyle = p.ok ? (S.vib && tv - p.t < .7 ? "rgba(255,210,122,.95)" : "rgba(159,224,143,.9)") : "rgba(235,226,204,.45)"; g.lineWidth = 3; g.lineCap = "round";
         g.beginPath(); g.moveTo(vorher.x, vorher.y); g.lineTo(x, y); g.stroke();
       }
       vorher = { x, y, p };
@@ -1255,6 +1851,23 @@
       const y = Y(klemm(S.gefaltet, S.lo, S.hi));
       g.shadowColor = S.ok ? FARBE.gruen : "rgba(235,226,204,.6)"; g.shadowBlur = 14;
       g.fillStyle = S.ok ? FARBE.gruen : FARBE.pergament; g.beginPath(); g.arc(x0, y, 7, 0, 7); g.fill(); g.shadowBlur = 0;
+      /* Vibrato: ein schwingender goldener Ring und die Schwingung in Hz */
+      if (S.vib) {
+        const tz = performance.now() / 1000, amp = klemm(S.vib.tiefe / 12, 1.5, 5);
+        g.strokeStyle = "rgba(255,210,122,.9)"; g.lineWidth = 1.6; g.beginPath();
+        for (let q = 0; q <= 48; q++) { const a = q / 48 * Math.PI * 2, rr = 13 + Math.sin(a * 8 + (ruhig ? 0 : tz * S.vib.rate * Math.PI * 2)) * amp; const px = x0 + Math.cos(a) * rr, py = y + Math.sin(a) * rr; q ? g.lineTo(px, py) : g.moveTo(px, py); }
+        g.stroke();
+        g.font = "700 12px system-ui, sans-serif"; g.fillStyle = "rgba(255,210,122,.95)"; g.textBaseline = "middle";
+        g.fillText(T().spiel.vibLive + " " + S.vib.rate.toFixed(1) + " Hz", x0 + 22, y - 18); g.textBaseline = "alphabetic";
+        if (!ruhig && Math.random() < .25) S.funken.push({ t: tv, m: S.gefaltet, vx: Math.random() * 30 - 15, vy: -Math.random() * 40 - 10, leben: .5 });
+      }
+      /* Duett: goldener Bogen zwischen deiner Stimme und Echos Flötenton */
+      if (S.zusammenJetzt) {
+        const y2 = Y(klemm(S.zusammenJetzt.m, S.lo, S.hi)), tz = performance.now() / 1000;
+        g.strokeStyle = "rgba(95,214,184,.8)"; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y); g.quadraticCurveTo(x0 - 26 - (ruhig ? 0 : Math.sin(tz * 6) * 4), (y + y2) / 2, x0, y2); g.stroke();
+        g.fillStyle = "rgba(95,214,184,.95)"; g.beginPath(); g.arc(x0, y2, 4, 0, 7); g.fill();
+        g.font = "700 12px system-ui, sans-serif"; g.fillStyle = "rgba(143,232,207,.95)"; g.textAlign = "right"; g.fillText("♫", x0 - 30, (y + y2) / 2 + 4); g.textAlign = "left";
+      }
       if (S.aktiv && !S.aktiv.vor && !S.ok && S.abw != null) {
         g.fillStyle = FARBE.orange; g.beginPath();
         if (S.abw < 0) { g.moveTo(x0 + 12, y - 4); g.lineTo(x0 + 18, y - 12); g.lineTo(x0 + 24, y - 4); } else { g.moveTo(x0 + 12, y + 4); g.lineTo(x0 + 18, y + 12); g.lineTo(x0 + 24, y + 4); }
@@ -1268,7 +1881,9 @@
       g.fillStyle = pg; g.fillRect(0, ch - pubH - 16, cw, pubH + 16);
       const leute = S.pub.leute, n = leute.length, laune = klemm(S.laune, 0, 1), zeit = performance.now() / 1000;
       if (leute.length === 1 && /^drache/.test(leute[0])) figur(leute[0], 0, yb, pubH * 1.5, zeit, laune, 0);
-      else leute.forEach((typ, i) => { const fx = cw * (.06 + .88 * (i + .5) / n) + ((i * 37) % 11) - 5; figur(typ, fx, yb, pubH * (.86 + ((i * 13) % 5) * .05), zeit, laune, i); });
+      else leute.forEach((typ, i) => { const ms2 = S.pub.mass ? S.pub.mass[i] : .86 + ((i * 13) % 5) * .05, vs = S.pub.versatz ? S.pub.versatz[i] * cw * .88 / n : ((i * 37) % 11) - 5; const a0 = st.duett ? .2 : .06, fx = cw * (a0 + (.94 - a0) * (i + .5) / n) + vs * (.94 - a0) / .88; figur(typ, fx, yb, pubH * ms2, zeit, laune, i); });
+      /* Duett: Echo steht mit der Flöte links auf der Bühne */
+      if (st.duett) echoMalen(Math.max(26, x0 * .42), ch - pubH * .25 - 4, pubH * 1.25, zeit, tv);
       /* Würfe */
       const jetzt = performance.now() / 1000;
       S.wuerfe = S.wuerfe.filter(w => jetzt - w.t0 < w.dauer * 2.2);
@@ -1292,7 +1907,7 @@
     }
     /* Urteil */
     const jetztMs = performance.now();
-    const text = S.urteilSchnoerkel && jetztMs < S.urteilSchnoerkel ? { text: T().spiel.schnoerkel, art: "perfekt", bis: S.urteilSchnoerkel } : S.urteil;
+    const text = S.urteilSchnoerkel && jetztMs < S.urteilSchnoerkel ? { text: S.urteilSchnoerkelText || T().spiel.schnoerkel, art: "perfekt", bis: S.urteilSchnoerkel } : S.urteil;
     if (text && jetztMs < text.bis) {
       const a = klemm((text.bis - jetztMs) / 600, 0, 1);
       const farbe = { perfekt: "255,210,122", gut: "159,224,143", knapp: "232,162,74", daneben: "208,106,90" }[text.art];
@@ -1316,7 +1931,7 @@
       const y = ch * (.32 + ((i * 37) % 9) * .045) + Math.sin(ruheZeit + i) * 4;
       g.fillStyle = "rgba(255,210,122," + (.12 + (i % 4) * .05) + ")"; rundRect(cw - x, y, 26 + (i % 3) * 14, 8, 4); g.fill();
     }
-    if (ansicht !== "spiel" && root.offsetParent !== null && !document.hidden && !ruhig) ruheRaf = requestAnimationFrame(ruhebild);
+    if (ansicht !== "spiel" && !unsichtbar() && !document.hidden && !ruhig) ruheRaf = requestAnimationFrame(ruhebild);
   }
 
   /* ---------- Liedtext unter der Bühne ---------- */
@@ -1425,9 +2040,9 @@
       duell = { sieg, leben: D.leben, fassung: D.fassung, d: st.duell };
       if (sieg) { const ds = duellStand(); ds[st.duell.id] = Math.max(ds[st.duell.id] | 0, pct || 1); schreib(K.duelle, JSON.stringify(ds)); }
     }
-    const wiedergabe = { st, schieb: S.schieb, spurAll: S.spurAll, ende: S.ende, punkte: S.punkte, bonus: S.bonus, pub: S.pub, duell: D ? { leben: D.leben, fassung: D.fassung } : null };
+    const wiedergabe = { st, schieb: S.schieb, spurAll: S.spurAll, ende: S.ende, punkte: S.punkte, bonus: S.bonus, pub: S.pub, deko: S.deko, duell: D ? { leben: D.leben, fassung: D.fassung } : null };
     ergebnis = { st, pct, punkte: Math.round(S.punkte + S.bonus), getroffen, gesamt: sing.length, tendenz, neu, alt, wurf, frei, stumm: stummAnteil > .8, besteSerie: S.besteSerie, station, duell,
-      schnoerkel: S.schnoerkel, strähne: strähneNeu, wiedergabe, aufnahme: null, aufnahmeLaedt: !!S.aufnahme, liste: null };
+      schnoerkel: S.schnoerkel, vibrato: S.vibrato | 0, duettPct: st.duett && S.harmMax > .5 ? Math.round(100 * S.harmZeit / S.harmMax) : null, strähne: strähneNeu, wiedergabe, aufnahme: null, aufnahmeLaedt: !!S.aufnahme, liste: null };
     const aufn = S.aufnahme; S.aufnahme = null;
     if (aufn) {
       const startZ = aufn.start;
@@ -1451,10 +2066,10 @@
     try { const ab = await erg.aufnahme.blob.arrayBuffer(); buf = await new Promise((res, rej) => { const x = ctx.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); }); }
     catch (_) { return; }
     const W = erg.wiedergabe, st = W.st;
-    const ev = begleitung(st, W.schieb, { ohneFuehrung: true }).map(e => Object.assign({}, e, { laut: e.laut * .6 }));
+    const ev = begleitung(st, W.schieb, { ohneFuehrung: true, duett: !!st.duett }).map(e => Object.assign({}, e, { laut: e.laut * .6 }));
     const bus = ctx.createGain(); bus.gain.value = 1; bus.connect(ausgang);
     S = { st, schieb: W.schieb, ev, ei: 0, t0: ctx.currentTime + .3, pause: false, wiedergabe: true, spur: [], spurAll: W.spurAll, spurIdx: 0, punkte: W.punkte, bonus: W.bonus, ende: W.ende, bus,
-      funken: [], wuerfe: [], laune: .6, insp: 0, letzteZeile: null, zeileJetzt: -1, pub: W.pub, tol: TOL[E.grad], stumm: 0, gehoert: 0, ni: 0 };
+      funken: [], wuerfe: [], laune: .6, insp: 0, letzteZeile: null, zeileJetzt: -1, pub: W.pub, tol: TOL[E.grad], stumm: 0, gehoert: 0, ni: 0, deko: W.deko ? Object.assign({}, W.deko, { cache: null, ckey: "" }) : null };
     const ms = st.noten.map(n => n.m);
     let lo = Math.min(...ms) - 3, hi = Math.max(...ms) + 3;
     if (hi - lo < 14) { const mit = (hi + lo) / 2; lo = mit - 7; hi = mit + 7; }
@@ -1474,12 +2089,13 @@
   function probehoeren(st) {
     audio();
     if (S) abbrechen(true);
+    st.duett = duettAktiv(st); if (st.duett) zweiteStimme(st);
     const schieb = verschiebung(st);
     vorbereitenNoten(st, schieb);
     const ev = begleitung(st, schieb, { fuehrImmer: true });
     const bus = ctx.createGain(); bus.gain.value = 1; bus.connect(ausgang);
     S = { st, schieb, ev, ei: 0, t0: ctx.currentTime + .3, pause: false, wiedergabe: true, probe: true, spur: [], spurAll: [], spurIdx: 0, punkte: 0, bonus: 0, ende: st.ende * st.spb, bus,
-      funken: [], wuerfe: [], laune: .5, insp: 0, letzteZeile: null, zeileJetzt: -1, pub: publikumFuer(st), tol: TOL[E.grad], stumm: 0, gehoert: 0, ni: 0 };
+      funken: [], wuerfe: [], laune: .5, insp: 0, letzteZeile: null, zeileJetzt: -1, pub: publikumFuer(st), tol: TOL[E.grad], stumm: 0, gehoert: 0, ni: 0, deko: kulisseWuerfeln(kulisseFuer(st)) };
     const ms = st.noten.map(n => n.m);
     let lo = Math.min(...ms) - 3, hi = Math.max(...ms) + 3;
     if (hi - lo < 14) { const mit = (hi + lo) / 2; lo = mit - 7; hi = mit + 7; }
@@ -1544,10 +2160,10 @@
       (erg.fehler ? '<p class="kh-klein kh-hinweis">' + esc(erg.fehler) + "</p>" : "");
     return html;
   }
-  function listeNeu() { const el = panel.querySelector(".kh-liste-box"); if (el && ansicht === "ergebnis") el.innerHTML = listeHtml(); }
+  function listeNeu() { const el = root.querySelector(".kh-liste-box"); if (el && ansicht === "ergebnis") el.innerHTML = listeHtml(); }
   function eintragen() {
     const erg = ergebnis, KZ = window.ImresKuerzel; if (!erg || !erg.liste || erg.sendet || erg.eingetragen || !KZ) return;
-    const feld = panel.querySelector(".kh-name"), name = KZ.wert(feld); if (!name) { if (feld) feld.focus(); return; }
+    const feld = root.querySelector(".kh-name"), name = KZ.wert(feld); if (!name) { if (feld) feld.focus(); return; }
     const tx = T().liste, schl = erg.liste.schl;
     const e = { name, prozent: klemm(erg.pct, 0, 1000), wurf: klemm(erg.wurf ? erg.wurf.summe : 1, 1, 30), serie: klemm(erg.besteSerie, 0, 100000), erstellt: new Date().toISOString() };
     const lok = lokalListe(); lok[schl] = sauber(lok[schl]).concat([e]).sort((a, b) => b.prozent - a.prozent).slice(0, 10); schreib(K.liste, JSON.stringify(lok));
@@ -1574,7 +2190,7 @@
   function einmessRahmen() {
     if (ansicht !== "einmessen" || !einmess) return;
     raf = requestAnimationFrame(einmessRahmen);
-    if (root.offsetParent === null || document.hidden) return;
+    if (unsichtbar() || document.hidden) return;
     const e = erkennen(), jetzt = performance.now(), em = einmess;
     if (em.schritt === "still") {
       em.boden.push(e.rms);
@@ -1640,7 +2256,7 @@
   function gabelRahmen() {
     if (ansicht !== "gabel" || !gabel) return;
     raf = requestAnimationFrame(gabelRahmen);
-    if (root.offsetParent === null || document.hidden) return;
+    if (unsichtbar() || document.hidden) return;
     const e = erkennen(), tx = T().gabel;
     const el = panel.querySelector(".kh-gabel"); if (!el) return;
     if (e.m == null) { gabel.leer = (gabel.leer | 0) + 1; if (gabel.leer > 25) { el.classList.add("leer"); el.querySelector(".kh-g-ton").textContent = "–"; el.querySelector(".kh-g-info").textContent = tx.leer; el.querySelector(".kh-g-iv").textContent = ""; } return; }
@@ -1666,7 +2282,7 @@
   function atemRahmen() {
     if (ansicht !== "atem" || !atem) return;
     raf = requestAnimationFrame(atemRahmen);
-    if (root.offsetParent === null || document.hidden) return;
+    if (unsichtbar() || document.hidden) return;
     const e = erkennen(), jetzt = performance.now() / 1000, A = atem;
     const el = panel.querySelector(".kh-atem"); if (!el) return;
     if (A.zustand === "fertig") return;
@@ -1863,7 +2479,7 @@
   function schuleRahmen() {
     if (ansicht !== "schule" || !schule || schule.zustand !== "laeuft") return;
     raf = requestAnimationFrame(schuleRahmen);
-    if (root.offsetParent === null || document.hidden) return;
+    if (unsichtbar() || document.hidden) return;
     const S2 = schule, sch = SCHULE[S2.lek].schritte[S2.schritt], jetzt = performance.now();
     const dt = Math.min(.06, (jetzt - S2.letzte) / 1000); S2.letzte = jetzt;
     let e = erkennen(); if (jetzt < S2.ignorierBis) e = { m: null, rms: 0 };
@@ -1965,7 +2581,8 @@
       '<div class="kh-duell" hidden></div>' +
       '<div class="kh-panel"></div>' +
     "</div>" +
-    '<div class="kh-text" hidden><p class="kh-zeile jetzt"></p><p class="kh-zeile dann"></p></div>';
+    '<div class="kh-text" hidden><p class="kh-zeile jetzt"></p><p class="kh-zeile dann"></p></div>' +
+    '<aside class="kh-seite"></aside>';
   const $ = s => root.querySelector(s);
   const panel = $(".kh-panel"), hud = $(".kh-hud"), textBox = $(".kh-text"), textJetzt = $(".kh-zeile.jetzt"), textDann = $(".kh-zeile.dann");
   const hudPunkte = $(".kh-hud-punkte"), hudBalken = $(".kh-fort i"), hudPegel = $(".kh-pegel i");
@@ -1987,6 +2604,7 @@
     panel.hidden = spielt;
     const vorher = root.classList.contains("kh-spielt");
     root.classList.toggle("kh-spielt", spielt || ansicht === "pause");
+    root.classList.toggle("kh-gruss", ansicht === "willkommen");
     if (vorher !== root.classList.contains("kh-spielt")) {
       /* Überschrift ein-/ausgeblendet: Spielesaal soll die Bühne neu vermessen, Bühne ins Bild holen */
       requestAnimationFrame(() => {
@@ -2002,10 +2620,66 @@
     if (S) $(".kh-hud-titel").textContent = (S.probe ? tx.spiel.probe + " · " : S.wiedergabe ? tx.spiel.wiedergabe + " · " : "") + S.st.titel;
     hudKnoepfe();
     duellAnzeigen(); if (!spielt && ansicht !== "pause") $(".kh-duell").hidden = true;
-    if (!spielt) panel.innerHTML = '<div class="kh-karte">' + (ANSICHT[ansicht] || ANSICHT.menue)() + "</div>";
+    if (!spielt) {
+      panel.innerHTML = '<div class="kh-karte">' + (ANSICHT[ansicht] || ANSICHT.menue)() + "</div>";
+      /* Haupt-Knopf (oder die Zurück-Reihe einer Liste) klebt unten am Fenster – nie wegscrollen müssen */
+      const karte = panel.firstElementChild;
+      if (karte && ansicht !== "menue") {
+        let blk = karte.querySelector(".tav-knopf.haupt, .kh-riesig");
+        while (blk && blk.parentElement !== karte) blk = blk.parentElement;
+        if (!blk) { const r = karte.querySelectorAll(":scope > .kh-reihe"); blk = r[r.length - 1]; }
+        if (blk) blk.classList.add("kh-fest");
+      }
+    }
     panel.scrollTop = 0;
+    seiteAktualisieren();
     if (!S) { cancelAnimationFrame(ruheRaf); requestAnimationFrame(ruhebild); }
   }
+
+  /* ---------- Seitenleiste auf sehr breiten Bildschirmen (UWQHD): Bühne, Bestwert, Bestenliste, Tournee ---------- */
+  const BREIT_Q = "(min-width: 2200px) and (min-height: 1200px) and (min-aspect-ratio: 19/10)";
+  const breitMq = window.matchMedia ? window.matchMedia(BREIT_Q) : null;
+  const breit = () => !!(breitMq && breitMq.matches);
+  const seitenListen = {};
+  function seitenListeHtml(id) {
+    const tx = T().seite, schl = listenStufe() + "|" + id, L = seitenListen[schl];
+    if (!L || (!L.laedt && Date.now() - L.zeit > 90000)) {
+      seitenListen[schl] = { laedt: true, zeit: Date.now(), eintraege: [] };
+      server("/rest/v1/auftritt_bestenliste?select=name,prozent,wurf,serie,erstellt&stufe=eq." + encodeURIComponent(listenStufe()) + "&lied=eq." + encodeURIComponent(id) + "&order=prozent.desc,serie.desc,erstellt.asc&limit=8")
+        .then(l => { seitenListen[schl] = { zeit: Date.now(), eintraege: sauber(l) }; })
+        .catch(() => { seitenListen[schl] = { zeit: Date.now(), fehler: true, eintraege: sauber(lokalListe()[schl]).sort((a, b) => b.prozent - a.prozent).slice(0, 8) }; })
+        .then(() => seiteAktualisieren());
+      return "<h5>" + esc(tx.liste) + '</h5><p class="kh-klein">' + esc(tx.laedt) + "</p>";
+    }
+    if (L.laedt) return "<h5>" + esc(tx.liste) + '</h5><p class="kh-klein">' + esc(tx.laedt) + "</p>";
+    return "<h5>" + esc(tx.liste) + " · " + esc(T().grade[E.grad]) + "</h5>" + (L.eintraege.length ? '<table class="kh-tabelle"><thead><tr>' + T().liste.spalten.map(x => "<th>" + esc(x) + "</th>").join("") + "</tr></thead><tbody>" +
+      L.eintraege.map((e, i) => "<tr><td>" + (i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1) + "</td><td>" + esc(e.name) + "</td><td>" + e.prozent + "</td><td>" + e.wurf + "</td></tr>").join("") + "</tbody></table>"
+      : '<p class="kh-klein">' + esc(tx.leer) + "</p>") + (L.fehler ? '<p class="kh-klein">' + esc(tx.aus) + "</p>" : "");
+  }
+  function seiteAktualisieren() {
+    const el = root.querySelector(".kh-seite"); if (!el) return;
+    if (!breit()) { if (el.innerHTML) el.innerHTML = ""; return; }
+    const tx = T(), L = sprache(), w = wegLesen(), rek = rekorde();
+    const st = S ? S.st : ansicht === "ergebnis" && ergebnis ? ergebnis.st : ansicht === "vorher" && gewaehlt ? gewaehlt.st : null;
+    let html = "";
+    if (st) {
+      if (station != null && DATEN.weg[station]) { const sw = DATEN.weg[station], txt = sw[L] || sw.de;
+        html += '<section class="kh-s-buehne"><p class="label">' + esc(tx.vorher.ort) + " " + (station + 1) + "</p><h4>" + esc(txt.ort) + '</h4><p class="kh-klein"><b>' + esc(tx.vorher.publikum) + ":</b> " + esc(txt.publikum) + " · " + esc(tx.vorher.sg(sw.sg)) + "</p>" + sterneHtml(w.sterne[station] | 0) + "</section>"; }
+      html += '<section><h4 class="kh-lied">' + esc(st.titel) + "</h4>" + (rek[st.id] ? '<p class="kh-klein">' + esc(tx.seite.dein(rek[st.id])) + "</p>" : "") +
+        (st.duett || (!S && duettAktiv(st)) ? '<p class="kh-klein kh-duett-erg">' + esc(tx.seite.duett) + "</p>" : "") + "</section>";
+      if (ansicht === "ergebnis") html += '<section class="kh-liste-box">' + listeHtml() + "</section>";
+      else if (st.lied || st.duell) html += "<section>" + seitenListeHtml(st.id) + "</section>";
+    } else {
+      const summe = w.sterne.reduce((a, b) => a + b, 0);
+      html += "<section><h5>" + esc(tx.tourneeTitel) + " · " + esc(rangVon(summe)) + '</h5><ol class="kh-s-weg">' + DATEN.weg.map((sw, i) => '<li class="' + (i <= w.frei ? "" : "zu") + '"><span>' + (i + 1) + ". " + esc((sw[L] || sw.de).ort) + "</span>" + sterneHtml(w.sterne[i] | 0) + "</li>").join("") + "</ol></section>" +
+        "<section><h5>" + esc(tx.buch.umfang) + '</h5><p class="kh-klein">' + esc(umfangText()) + "</p></section>";
+    }
+    html += '<p class="kh-klein kh-tasten">' + esc(tx.seite.tasten) + "</p>";
+    /* Eingabefeld der Bestenliste nicht mitten im Tippen ersetzen */
+    const fokus = el.contains(document.activeElement) && document.activeElement.matches("input");
+    if (!fokus && el.innerHTML !== html) el.innerHTML = html;
+  }
+  if (breitMq) { const neu = () => { if (!S) zeigen(); else seiteAktualisieren(); }; if (breitMq.addEventListener) breitMq.addEventListener("change", neu); else if (breitMq.addListener) breitMq.addListener(neu); }
 
   const ANSICHT = {
     schulListe() {
@@ -2068,8 +2742,8 @@
     },
     willkommen() {
       const tx = T().willkommen;
-      return '<div class="kh-willkommen"><span class="kh-w-symbol" aria-hidden="true">🎙</span><h4 class="kh-kopf">' + esc(tx.titel) + "</h4><p>" + esc(tx.text) + "</p>" +
-        '<button type="button" class="tav-knopf haupt kh-riesig" data-tun="willkommenMessen">' + esc(tx.knopf) + " <small>(" + esc(tx.empfohlen) + ")</small></button>" +
+      return '<div class="kh-willkommen"><span class="kh-w-symbol" aria-hidden="true">🎙</span><h4 class="kh-kopf">' + esc(tx.titel) + "</h4><p>" + esc(tx.text) + "</p></div>" +
+        '<div class="kh-reihe kh-w-knoepfe"><button type="button" class="tav-knopf haupt kh-riesig" data-tun="willkommenMessen">' + esc(tx.knopf) + " <small>(" + esc(tx.empfohlen) + ")</small></button>" +
         '<button type="button" class="kh-leise" data-tun="willkommenSpaeter">' + esc(tx.spaeter) + "</button></div>";
     },
     menue() {
@@ -2083,6 +2757,7 @@
           '<button type="button" class="kh-gross gruen" data-tun="schulListe"><b>🎓 ' + esc(ST().titel) + "</b><small>" + esc(ST().menueTile(schuleStand().fertig.length, SCHULE.length)) + "</small></button>" +
           '<button type="button" class="kh-gross rot" data-tun="duelle"><b>' + esc(tx.menue.duelle) + "</b><small>" + esc(tx.duellInfo(besiegt, DUELLE.length)) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="lieder"><b>' + esc(tx.menue.lieder) + "</b><small>" + esc(tx.lieder(DATEN.lieder.length)) + "</small></button>" +
+          '<button type="button" class="kh-gross gruen" data-tun="duettMenue"><b>' + esc(tx.menue.duett) + "</b><small>" + esc(tx.menue.duettInfo) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="uebung" data-wert="taeglich"><b>' + esc(tx.menue.taeglich) + "</b><small>" + esc(tx.taeglichInfo(straehne(b), b.einsingen.includes(heute()))) + "</small></button>" +
           '<button type="button" class="kh-gross" data-tun="uebungen"><b>' + esc(tx.menue.uebungen) + "</b><small>" + esc(tx.uebText) + "</small></button>" +
           (gemessen() ? '<button type="button" class="kh-gross" data-tun="einmessen"><b>' + esc(tx.menue.einmessen) + "</b><small>" + esc(tonName(E.tief) + " – " + tonName(E.hoch)) + "</small></button>" : "") +
@@ -2113,6 +2788,7 @@
     lieder() {
       const tx = T(), rek = rekorde(), L = sprache(), bd = buehnenDaten();
       return '<h4 class="kh-kopf">' + esc(tx.liederTitel) + '</h4><p class="kh-klein">' + esc(tx.liederText) + "</p>" +
+        '<div class="kh-zeile2"><span>' + esc(tx.vorher.duett) + "</span>" + schalter("duett", E.duett) + "</div>" +
         '<ul class="kh-liste">' + DATEN.lieder.map(l => '<li><button type="button" class="kh-eintrag" data-tun="lied" data-wert="' + esc(l.id) + '">' +
           '<span class="kh-was"><b>' + esc(l.titel[L] || l.titel.de) + "</b><small>" + "♪".repeat(l.grad || 1) + (rek[l.id] ? " · " + esc(tx.bestwert(rek[l.id])) : "") + "</small></span></button></li>").join("") +
           (bd ? '<li><button type="button" class="kh-eintrag buehne" data-tun="buehnenlied"><span class="kh-was"><b>' + esc(tx.buehnenLied(bd.titel)) + "</b><small>" + esc(tx.buehnenInfo) + "</small></span></button></li>" : "") + "</ul>" +
@@ -2154,6 +2830,7 @@
             (E.fuehr ? ["chor", "floete", "harfe"].map(k => '<button type="button" role="radio" aria-checked="' + (E.fuehrKlang === k) + '" data-tun="fuehrKlang" data-wert="' + k + '">' + esc(V.klaenge[k]) + "</button>").join("") : "") + "</div></div>" +
           (E.fuehr && !E.kopf ? '<p class="kh-klein">' + esc(V.fuehrAus) + "</p>" : "") +
           '<div class="kh-zeile2"><span>' + esc(V.einsatz) + "</span>" + schalter("einsatz", E.einsatz) + "</div>") +
+        (duettMoeglich(st) ? '<div class="kh-zeile2"><span>' + esc(V.duett) + "</span>" + schalter("duett", E.duett) + "</div>" + (E.duett ? '<p class="kh-klein">' + esc(V.duettInfo) + "</p>" : "") : "") +
         (st.fest ? "" : '<div class="kh-zeile2"><span>' + esc(V.tempo) + '</span><div class="kh-wahl" role="radiogroup">' + [1, .85, .7].map(f => '<button type="button" role="radio" aria-checked="' + (E.tempo === f) + '" data-tun="tempo" data-wert="' + f + '">' + Math.round(f * 100) + " %</button>").join("") + "</div></div>" +
           (E.tempo !== 1 ? '<p class="kh-klein">' + esc(V.tempoInfo) + "</p>" : "")) +
         (st.lied || st.duell ? '<p class="kh-klein">' + esc(V.schnoerkel) + "</p>" : "") +
@@ -2175,7 +2852,8 @@
           '<div><h4 class="kh-kopf ' + (r.duell.sieg ? "sieg" : "pleite") + '">' + esc(r.duell.sieg ? tx.duell.sieg : tx.duell.pleite) + '</h4><p class="kh-klein">' + esc(d.name[L] || d.name.de) + "</p></div></div>" +
           '<p class="kh-zitat">„' + esc(r.duell.sieg ? txt.sieg : txt.pleite) + "“</p>" + (!r.duell.sieg && r.duell.leben > 0 ? '<p class="kh-klein">' + esc(tx.duell.rest(d.name[L] || d.name.de, r.duell.leben)) + "</p>" : "");
       } else html += '<h4 class="kh-lied">' + esc(r.st.titel) + "</h4>";
-      html += '<div class="kh-pct"><b>' + r.pct + "<small>%</small></b><span>" + r.punkte.toLocaleString(L === "en" ? "en-GB" : "de-DE") + " " + esc(E2.punkte) + (r.schnoerkel ? " · " + esc(E2.schnoerkel(r.schnoerkel)) : "") + "</span></div>" +
+      html += '<div class="kh-pct"><b>' + r.pct + "<small>%</small></b><span>" + r.punkte.toLocaleString(L === "en" ? "en-GB" : "de-DE") + " " + esc(E2.punkte) + (r.schnoerkel ? " · " + esc(E2.schnoerkel(r.schnoerkel)) : "") + (r.vibrato ? " · " + esc(E2.vibrato(r.vibrato)) : "") + "</span></div>" +
+        (r.duettPct != null ? '<p class="kh-klein kh-duett-erg">' + esc(E2.duett(r.duettPct)) + "</p>" : "") +
         (r.wurf && r.wurf.sterne != null ? sterneHtml(r.wurf.sterne) : "") +
         '<p class="kh-klein">' + esc(E2.getroffen(r.getroffen, r.gesamt)) + (r.besteSerie >= 2 ? " · " + esc(tx.spiel.serie(r.besteSerie)) : "") + "</p>" +
         (r.strähne ? '<p class="kh-neu">' + esc(E2.strähne(r.strähne)) + "</p>" : "") +
@@ -2191,7 +2869,7 @@
         knopf("nochmal", esc(E2.nochmal), weiter ? "" : "haupt") +
         (r.aufnahme || r.aufnahmeLaedt ? knopf("anhoeren", esc(E2.anhoeren), "kh-anhoeren", r.aufnahme ? "" : " disabled") : "") +
         (r.station != null ? knopf("tournee", esc(E2.tournee)) : r.duell ? knopf("duelle", esc(E2.duelle)) : "") + knopf("menue", esc(tx.menueKnopf)) + "</div>" +
-        '<div class="kh-liste-box">' + listeHtml() + "</div>";
+        (breit() ? "" : '<div class="kh-liste-box">' + listeHtml() + "</div>");
       return html;
     },
     einmessen() {
@@ -2319,6 +2997,8 @@
   root.addEventListener("click", ev => {
     const b = ev.target.closest("[data-tun]"); if (!b || !root.contains(b) || b.disabled) return;
     const tun = b.dataset.tun, wert = b.dataset.wert;
+    /* kleine Bildschirme: beim Start gleich ins Vollbild (braucht diesen Klick) */
+    if (["los", "nochmal", "probe", "schulPruefung", "anhoeren", "neu"].includes(tun) && window.tavVollAuto) window.tavVollAuto("kehle");
     audio();
     const wechsel = v => { nebenlaeufigeStoppen(); ansicht = v; zeigen(); };
     switch (tun) {
@@ -2376,6 +3056,8 @@
       case "willkommenMessen": schreib("imres-kehle-willkommen", "1"); einmessenStarten("menue"); break;
       case "willkommenSpaeter": schreib("imres-kehle-willkommen", "1"); ansicht = "menue"; zeigen(); break;
       case "fuehrKlang": E.fuehrKlang = wert; einstSpeichern(); if (ansicht === "vorher") { gewaehlt.bereit = false; vorbereiten(gewaehlt.st); } else zeigen(); break;
+      case "duett": E.duett = !E.duett; einstSpeichern(); if (ansicht === "vorher" && gewaehlt) { gewaehlt.bereit = false; vorbereiten(neuBauen(gewaehlt.st)); } else zeigen(); break;
+      case "duettMenue": E.duett = true; einstSpeichern(); micAus(); station = null; wechsel("lieder"); break;
       case "einsatz": E.einsatz = !E.einsatz; einstSpeichern(); if (ansicht === "vorher") neuZeichnenVorher(); else zeigen(); break;
       case "tempo": E.tempo = +wert; einstSpeichern(); if (gewaehlt && ansicht === "vorher") vorbereiten(neuBauen(gewaehlt.st)); break;
       case "probe": { const st = gewaehlt && gewaehlt.st; if (st) probehoeren(st); break; }
@@ -2399,7 +3081,7 @@
   root.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.closest && ev.target.closest(".kh-name")) { ev.preventDefault(); eintragen(); } });
   /* Tastatur: Leertaste/Esc = Pause/Weiter, I = Inspiration */
   document.addEventListener("keydown", ev => {
-    if (!S || root.offsetParent === null) return;
+    if (!S || unsichtbar()) return;
     if (ev.target && /input|textarea|select/i.test(ev.target.tagName)) return;
     if (ev.key === " " || ev.key === "Escape" || ev.key === "p" || ev.key === "P") { ev.preventDefault(); if (S.wiedergabe) wiedergabeEnde(); else if (S.pause) fortsetzen(); else pausieren(); }
     if ((ev.key === "i" || ev.key === "I") && !S.pause) { ev.preventDefault(); inspirieren(); }
@@ -2421,7 +3103,9 @@
     duell: id => { const d = DUELLE.find(x => x.id === id); return d ? duellBauen(d) : null; },
     buehne: () => buehnenLiedBauen(),
     uebung: a => uebungBauen(a),
-    starten: st => starten(st), ansicht: a => { ansicht = a; zeigen(); }, inspirieren, vibrato
+    starten: st => starten(st), ansicht: a => { ansicht = a; zeigen(); }, inspirieren, vibrato, vibratoAnalyse, mikro: () => micAn(),
+    /* Messung: wie lange braucht ein Bild (mit/ohne Kulisse)? */
+    bench(n, ohneKulisse) { if (!S) return null; const d = S.deko; if (ohneKulisse) S.deko = null; const t0 = performance.now(); for (let i = 0; i < n; i++) zeichnen(hoerZeit(), hoerZeit()); g.getImageData(0, 0, 1, 1); const ms = (performance.now() - t0) / n; S.deko = d; return Math.round(ms * 100) / 100; }
   };
 
   /* =================================================================
@@ -2468,7 +3152,57 @@
 .kh-w-symbol { font-size: 3rem; line-height: 1; filter: drop-shadow(0 0 18px rgba(255,210,122,.5)); }
 .kh-riesig { font-size: 1.1rem !important; padding: .8rem 1.6rem !important; animation: khPuls 2s ease-in-out infinite; }
 .kh-riesig small { font-size: .8em; opacity: .8; }
-.kh-leise { border: 0; background: none; color: var(--ash); font: inherit; font-size: .88rem; text-decoration: underline; cursor: pointer; }
+.kh-leise { border: 0; background: none; color: var(--ash); font: inherit; font-size: .92rem; text-decoration: underline; cursor: pointer; min-height: 44px; min-width: 88px; padding: .5rem 1.1rem; touch-action: manipulation; }
+.kh-w-knoepfe { justify-content: center; }
+@media (max-width: 760px), (max-height: 560px) { .kehle.kh-gruss > .tav-info { display: none; } }
+/* Haupt-Knopf klebt unten im Panel: Text scrollt darunter durch, der Knopf bleibt immer sichtbar */
+.kh-karte > .kh-fest { position: sticky; bottom: calc(-1 * clamp(.8rem, 3vw, 1.6rem)); z-index: 1; margin: 0 calc(-1 * clamp(.8rem, 3vw, 1.6rem)); padding: .7rem clamp(.8rem, 3vw, 1.6rem) clamp(.6rem, 2vw, 1rem);
+  background: linear-gradient(180deg, rgba(16,12,20,0), rgba(16,12,20,.96) 1.1rem, rgba(16,12,20,.98)); }
+.kh-karte > .kh-bereit.kh-fest { padding-top: 1.2rem; }
+.kh-seite { display: none; }
+.kh-duett-erg { color: #8fe8cf; }
+/* Vollbild (auch automatisch auf Handy/Handheld): Bühne füllt den Bildschirm, Liedtext darunter */
+.kehle.tav-voll, #taverne .taverne > #kehle.tav-voll { display: flex; flex-direction: column; padding: .45rem clamp(.4rem, 1.4vw, 1rem) .35rem; gap: .3rem; }
+.kehle.tav-voll > .kh-buehne { flex: 1 1 auto; height: auto !important; min-height: 220px; max-width: none; }
+.kehle.tav-voll .kh-hud { padding-right: 3.4rem; }
+.kehle.tav-voll > .kh-text { flex: none; margin-top: 0; min-height: 2.6em; }
+.kehle.tav-voll .kh-karte { max-width: 640px; }
+@media (max-height: 560px) {
+  .kehle.tav-voll .kh-zeile.jetzt { font-size: clamp(1rem, 3vw, 1.25rem); }
+  .kehle.tav-voll .kh-zeile.dann { font-size: .85rem; margin-top: 0; }
+  .kh-willkommen { gap: .5rem; padding: .2rem 0; }
+  .kh-w-symbol { font-size: 2rem; }
+  .kh-willkommen p { font-size: .92rem; line-height: 1.45; }
+  .kh-karte { gap: .5rem; }
+}
+@media (max-width: 520px) {
+  .kh-willkommen { gap: .55rem; padding: .3rem 0; }
+  .kh-w-symbol { font-size: 2.2rem; }
+  .kh-willkommen p { font-size: .95rem; line-height: 1.45; }
+  .kh-riesig { padding: .7rem 1.1rem !important; }
+}
+/* Sehr breite Bildschirme (UWQHD): Titel links, Bühne groß in der Mitte, Bestenliste und Tournee rechts */
+@media ${BREIT_Q.replace(/"/g, "")} {
+  html body #taverne.saal-einzeln #kehle:not(.tav-voll), html body .kehle.tav-voll {
+    display: grid; grid-template-columns: minmax(14rem, 22rem) minmax(0, 1fr) minmax(18rem, 27rem); column-gap: 2rem; row-gap: .6rem; align-items: start; align-content: start;
+    grid-template-areas: "lab bue sei" "tit bue sei" "inf bue sei" ". bue sei" ". txt sei"; grid-template-rows: max-content max-content max-content 1fr max-content; }
+  html body .kehle.tav-voll { padding: 1.2rem 1.6rem; height: 100%; }
+  html body #kehle > .kh-label { grid-area: lab; } html body #kehle > .kh-titel { grid-area: tit; } html body #kehle > .kh-info { grid-area: inf; max-width: none; }
+  html body #kehle.kh-spielt > .label, html body #kehle.kh-spielt > h3, html body #kehle.kh-spielt > .tav-info, html body .kehle.tav-voll > :is(.label, h3, .tav-info) { display: block; }
+  html body #kehle > .kh-buehne { grid-area: bue; max-width: none; width: 100%; height: clamp(520px, calc(var(--sh, 70vh) - 3.5rem), 1500px) !important; }
+  html body .kehle.tav-voll > .kh-buehne { height: calc(100vh - 8.5rem) !important; }
+  html body #kehle > .kh-text { grid-area: txt; max-width: none; margin-top: .3rem; }
+  html body #kehle > .kh-seite { grid-area: sei; display: grid; gap: 1rem; align-content: start; padding: 1.1rem 1.2rem; border: 1px solid var(--line); background: rgba(16,12,20,.55); max-height: calc(var(--sh, 70vh) + 6rem); overflow-y: auto; }
+  html body #kehle .kh-karte { max-width: 760px; }
+  .kh-seite section { display: grid; gap: .4rem; } .kh-seite section > * { margin: 0; }
+  .kh-seite h4 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.3rem; color: var(--vellum); }
+  .kh-seite h5 { margin: 0; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ember); font-weight: 600; }
+  .kh-s-weg { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; font-size: .9rem; }
+  .kh-s-weg li { display: flex; justify-content: space-between; gap: .6rem; padding-bottom: .2rem; border-bottom: 1px solid rgba(224,160,70,.1); color: var(--vellum); }
+  .kh-s-weg li.zu { opacity: .45; }
+  .kh-seite .kh-eintrag { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; border: 0; padding: 0; background: none; cursor: default; }
+  .kh-tasten { opacity: .8; }
+}
 .kh-bereit { display: grid; justify-items: center; gap: .7rem; text-align: center; padding: .4rem 0; }
 .kh-bereit p { margin: 0; color: var(--vellum); font-size: .95rem; line-height: 1.5; }
 .kh-gross.gruen { border-color: rgba(95,214,184,.6); background: linear-gradient(135deg, rgba(95,214,184,.16), rgba(95,214,184,.03)); }
