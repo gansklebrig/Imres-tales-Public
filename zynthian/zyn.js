@@ -2719,7 +2719,7 @@ html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
 html.zyn-pult body *:not(.lw-buehne, .lw-buehne *, .zp, .zp *, .zp-ruhe, .zp-ruhe *, .zyn-osd, .zyn-osd *, .zyn-menue, .zyn-menue *) { animation: none !important; transition: none !important; }
 html.zyn-pult body canvas:not(.lw-buehne canvas), html.zyn-pult body video { display: none !important; }
 html.zyn-pult body > *:not(.zp, .zp-ruhe, .zp-weltbild, .zyn-osd, .zyn-menue, .zyn-update, #imres-logo, script, style) { content-visibility: hidden; }
-html.zyn-pult.zyn-bb body > *:has(.lw-buehne), html.zyn-pult.zyn-ruhe body > *:has(.lw-buehne) { content-visibility: visible; }
+html.zyn-pult.zyn-bb body > *:has(.lw-buehne), html.zyn-pult.zyn-ruhe body > *:has(.lw-buehne) { content-visibility: visible !important; } /* !important: die Regel darüber ist durch #imres-logo in :not() spezifischer */
 html.zyn-pult .zyn-leiste { display: none !important; }
 /* Bühnenbild: hinter dem Pult (gedimmt) und als Ruhebild */
 /* alles andere der Webseite unsichtbar machen – nur die Bühne (und Pult/Ruhebild) malen */
