@@ -1,8 +1,8 @@
-# Imres Tales auf dem Zynthian V5 / V5.1
+# Barradins Bühne auf dem Zynthian V5 / V5.1
 
 Damit laufen die **Klangwelten** und **Barradins Bühne** (Musik + Kulisse) direkt auf dem Zynthian – ohne Laptop, ohne Internet, bedient mit den Tasten und Drehreglern des Geräts. Der Ton kommt aus den normalen Ausgängen des Zynthian.
 
-Der normale Zynthian bleibt dabei unverändert. Du schaltest einfach zwischen **Zynthian** und **Imres-Bühne** hin und her.
+Der normale Zynthian bleibt dabei unverändert. Du schaltest einfach zwischen **Zynthian** und **Barradins Bühne** hin und her.
 
 ---
 
@@ -41,7 +41,7 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **Mitte:** 8 Kacheln – **F1–F4** obere Reihe, **ALT + F1–F4** untere Reihe. Orange = läuft, gestrichelt/blinkend = kommt am Taktende. **◀ ▶** blättert weiter, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen, Geräusche).
 - **Rechts:** was die vier Drehregler gerade tun – direkt neben dem echten Knopf. Drücken: siehe kleine Schrift. **MIXER** schaltet auf Reglerbank B (Tempo, Hall, Effekte, Echos Hall).
 - **Unten:** PLAY Musik · STOP alles aus · PAD ⚡ Etwas passiert · REC 🤫 Stille · TEMPO 🎲 Neu besetzen.
-- **MENU:** Spielabend, Optionen, Tastenbelegung, System (dort auch **⬇ Imres aktualisieren** – ohne Terminal).
+- **MENU:** Spielabend, Optionen, Tastenbelegung, System (dort auch **⬇ Bühne aktualisieren** – ohne Terminal).
 - **Effekte (Bank FX, MIXER zweimal):** 🎛 Filter (links Tiefpass, rechts Hochpass, Mitte offen) · 〰 Resonanz · 🔁 Delay (im Tempo) · 🔥 Drive. Weitere: ↻ Rückkopplung, ⏱ Delay-Länge. Sie liegen hinter allem – Musik, Kulisse und Effekte. Regler drücken = neutral.
 - **Effekt wechseln:** einen Regler **gedrückt halten und drehen** legt einen anderen Effekt darauf – auf der FX-Bank alle: Filter, Resonanz, Delay, Rückkopplung, Delay-Länge, Drive, 👾 Bitcrusher, 📉 Sample-Rate, ✂ Trance-Gate, 🔔 Ringmodulator, 🌀 Flanger, 〽 Wobble. Bleibt gespeichert.
 - **⟳ Regler-Loop:** **ALT + Regler drücken**, dann drehen – die Bewegung wird 2 Takte lang (einstellbar im MENU: 1/2/4/8) aufgenommen und danach im Takt wiederholt (⟳ am Regler). Wieder drehen nimmt neu auf, nochmal ALT + Regler drücken stoppt den Loop.
@@ -55,14 +55,14 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **⏱ Tap-Tempo:** TEMPO im Takt tippen – ab dem 4. Tippen wird das Tempo gesetzt, weiteres Tippen verfeinert es. Neu besetzen liegt jetzt auf ALT + TEMPO. Läuft die TR-8S als Taktgeber (Slave), bleibt deren Tempo.
 - **🤖 Autopilot (MENU):** ruhig (Stimmung alle 4–7 min, Momente alle 2–3 min) oder lebendig (2–4 min / ~1 min); Spannung atmet leicht mit. Bevorzugt deine ★-Stimmungen. Wechselst du selbst, wartet er wieder. In den Klangwelten startet er Szenen und Geräusche.
 - **⚙ Auslastung:** vorne in der Statuszeile – grün unter 60 %, gold bis 85 %, rot darüber; 🌡 ab 70 °C, ⚠ bei Rucklern der Oberfläche.
-- **🎹 Synth-Begleitung (MENU):** Imres spielt seine Akkorde als MIDI mit – Kanal 1 Fläche, 2 Bass, 3 Glocken/Arpeggio, 4 Bordun (Grundton + Quinte der Handpan-Tonart). Mit „Klänge je Stimmung wechseln“ schaltet er General-MIDI-Programme passend zur Stimmung um (Ensembles: Tavernen-Kapelle, Abenteuer-Orchester, Schlacht-Blech, Mystik-Chor, Lagerfeuer & Elben). Im Zynthian: „Zusammen mit Zynthian“, Ketten auf Kanal 1–4 (z. B. FluidSynth mit GM-Soundfont), „Imres Begleitung“ als MIDI-Eingang aktivieren. Externe USB-Synths bekommen die Noten automatisch.
-- **🔊 Bluetooth & 📶 WLAN (MENU → 🛠 Einstellungen):** Bluetooth-Lautsprecher suchen, koppeln und verbinden – der Ton von Imres läuft dann über die Box (beim ersten Mal wird Bluetooth-Audio einmalig installiert, braucht Internet; ca. 0,2 s Verzögerung, also nicht für den Takt mit der TR-8S). „Zurück zu den Zynthian-Ausgängen“ schaltet zurück. WLAN: Netze suchen, antippen, Passwort mit der Bildschirmtastatur (Finger oder Pfeile + SEL) eingeben.
+- **🎹 Synth-Begleitung (MENU):** Die Bühne spielt ihre Akkorde als MIDI mit – Kanal 1 Fläche, 2 Bass, 3 Glocken/Arpeggio, 4 Bordun (Grundton + Quinte der Handpan-Tonart). Mit „Klänge je Stimmung wechseln“ schaltet er General-MIDI-Programme passend zur Stimmung um (Ensembles: Tavernen-Kapelle, Abenteuer-Orchester, Schlacht-Blech, Mystik-Chor, Lagerfeuer & Elben). Im Zynthian: „Zusammen mit Zynthian“, Ketten auf Kanal 1–4 (z. B. FluidSynth mit GM-Soundfont), „Barradins Bühne“ als MIDI-Eingang aktivieren. Externe USB-Synths bekommen die Noten automatisch.
+- **🔊 Bluetooth & 📶 WLAN (MENU → 🛠 Einstellungen):** Bluetooth-Lautsprecher suchen, koppeln und verbinden – der Ton der Bühne läuft dann über die Box (beim ersten Mal wird Bluetooth-Audio einmalig installiert, braucht Internet; ca. 0,2 s Verzögerung, also nicht für den Takt mit der TR-8S). „Zurück zu den Zynthian-Ausgängen“ schaltet zurück. WLAN: Netze suchen, antippen, Passwort mit der Bildschirmtastatur (Finger oder Pfeile + SEL) eingeben.
 - **★ Favoriten:** eine Kachel 1,5 Sekunden halten (Taste oder Finger) – sie steht dann auf ihrer Seite ganz vorne. Nochmal halten nimmt sie wieder raus.
 - **ALT + ◀ ▶** wechselt die Seite, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen).
 - **Farben:** Jede Taste leuchtet in der Farbe dessen, was sie tut – dieselbe Farbe wie auf dem Bildschirm (Punkt in der Fußleiste, Seitenfarbe auf F1–F4, Bankfarbe auf MIXER und am Reglerfeld). CTRL leuchtet in der Farbe der nächsten Seite, ZS3 in der der vorigen. Hell = läuft gerade, gedimmt = bereit, blinkend = kommt am Taktende.
 - **🎛 Belegung ändern (MENU):** jeden Drehregler (je Seite, Bank B, Bank FX) und die Tasten PLAY, STOP, PAD, REC, TEMPO, ZS3, CTRL (auch mit ALT) frei belegen. ◀ ▶ oder SEL ändert, „Standard wiederherstellen“ setzt zurück. Die Belegung bleibt gespeichert.
 - **BACK 2 Sekunden halten:** zurück zur normalen Zynthian-Oberfläche.
-- **Vom Zynthian zu Imres:** in der Zynthian-Oberfläche oben rechts den kleinen **♫**-Knopf 1 Sekunde halten. Andere Ecke oder aus: in `einstellungen.sh` `IMRES_KNOPF=lo` (links oben), `ru`, `lu` oder `aus`.
+- **Vom Zynthian zur Bühne:** in der Zynthian-Oberfläche oben rechts den kleinen **♫**-Knopf 1 Sekunde halten. Andere Ecke oder aus: in `einstellungen.sh` `IMRES_KNOPF=lo` (links oben), `ru`, `lu` oder `aus`.
 
 Die alte Ansicht (die Webseite) gibt es weiter: MENU → „Alte Ansicht“, zurück mit MENU → „Neues Pult“.
 
@@ -167,7 +167,7 @@ Gesteuert wird über den **Steuer-Kanal** (Standard: Kanal 16, einstellbar, auch
 
 - **Noten 36–39** → wie F1–F4 · **Noten 40–43** → wie ALT + F1–F4
 - **CC 20–23** → wie die Drehregler 1–4 der aktuellen Bank
-- **CC 119** → umschalten: 0–42 nur Zynthian · 43–85 Zynthian + Imres im Hintergrund · 86–127 Imres-Bühne. **Das klappt auch, wenn gerade der normale Zynthian läuft.**
+- **CC 119** → umschalten: 0–42 nur Zynthian · 43–85 Zynthian + die Bühne im Hintergrund · 86–127 Barradins Bühne. **Das klappt auch, wenn gerade der normale Zynthian läuft.**
 - **Program Change** (jeder Kanal) → Stimmung Nummer *n* (mit Abend-Set: dessen Stimmungen der Reihe nach) bzw. Klangwelt *n*. So kann ein Patternwechsel der TR-8S die Stimmung wechseln.
 
 **🥁 Pumpen auf die Bassdrum:** Schickt die TR-8S ihre Noten raus (Bassdrum = Kanal 10, Note 36), duckt sich alles bei jedem Kick kurz weg – der Groove kommt durch. Kanal, Note und Tiefe sind einstellbar.
@@ -194,7 +194,7 @@ Gesteuert wird über den **Steuer-Kanal** (Standard: Kanal 16, einstellbar, auch
 
 ### Instrumente anstecken (Handpan, Didgeridoo …)
 
-**Klingt es verzerrt?** Zeigt die Anzeige „⚠ übersteuert schon an der Buchse“, ist das Signal vor Imres zu laut: im selben Menü den Eingangspegel der Soundkarte (🎚) senken. Der Gain in Imres kann Verzerrung von der Buchse nicht mehr wegmachen.
+**Klingt es verzerrt?** Zeigt die Anzeige „⚠ übersteuert schon an der Buchse“, ist das Signal vor der Bühne zu laut: im selben Menü den Eingangspegel der Soundkarte (🎚) senken. Der Gain in der Bühne kann Verzerrung von der Buchse nicht mehr wegmachen.
 
 
 **MENU → 🎤 Eingänge**: Eingang 1 und 2 getrennt einschalten, je mit **Gain** (Eingangspegel) und **Lautstärke** in der Mischung. Die Pegelanzeige wird gelb bei kräftigem, rot bei zu lautem Signal – dann Gain runter.
@@ -217,7 +217,7 @@ Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zur
 
 ### 🎻 Mitspieler (wie der Ensemble-Regler am Streichfett)
 
-**MENU → 🎤 Eingänge → 🎻 Mitspieler**: Imres hört auf deine Handpan (Eingang 1 oder 2), erkennt jeden angeschlagenen Ton und lässt Bühneninstrumente denselben Ton mitspielen – passend in die eingestellte Tonart eingerastet. **MIXER → Bank MIT**:
+**MENU → 🎤 Eingänge → 🎻 Mitspieler**: die Bühne hört auf deine Handpan (Eingang 1 oder 2), erkennt jeden angeschlagenen Ton und lässt Bühneninstrumente denselben Ton mitspielen – passend in die eingestellte Tonart eingerastet. **MIXER → Bank MIT**:
 - **Ensemble** 0 … 8: je höher, desto mehr spielen mit – Harfe → Gitarre → Streicher → Celli → Chor → Flöte → Glockenspiel → Kontrabass
 - **Lautstärke**, **Empfindlichkeit** (niedrig = nur deutliche Anschläge, hoch = auch leise Töne, dafür mehr Fehlgriffe), **Oktave** (drücken+drehen: Hall)
 - Auf Wunsch gehen die Töne zusätzlich **als MIDI an den Zynthian** (Kanal wählbar) – so spielen auch deine Synths mit.
@@ -230,29 +230,29 @@ Gut zu wissen: schnelle Läufe, während viele Töne lange nachklingen, erkennt 
 
 ### 🎛 Spuren (ZS3)
 
-Auf der Seite **Ort** zeigt ZS3 die Spuren des Ortes: Kulisse gesamt, jede Geräusch-Schicht einzeln (Vögel, Wind, Bach …), die Einzelgeräusche und laufende Zusätze wie Regen. Das merkt sich Imres je Ort. Auf allen anderen Seiten zeigt ZS3 die Spuren der Stimmung:
+Auf der Seite **Ort** zeigt ZS3 die Spuren des Ortes: Kulisse gesamt, jede Geräusch-Schicht einzeln (Vögel, Wind, Bach …), die Einzelgeräusche und laufende Zusätze wie Regen. Das merkt sich die Bühne je Ort. Auf allen anderen Seiten zeigt ZS3 die Spuren der Stimmung:
 
-**ZS3** öffnet die Spuren der gerade laufenden Stimmung: Kulisse, jedes Instrument einzeln (Laute, Trommel, Flöte …) und auf der zweiten Seite Orchester, Kapelle, Gäste. Regler 1–4 = obere Reihe, **ALT gedrückt halten + drehen** = untere Reihe, **◀ ▶** = weitere Spuren, Regler drücken = stumm. Die Einstellung merkt sich Imres je Stimmung. ZS3 oder BACK schließt. (Vorige Seite: ALT + ◀.)
+**ZS3** öffnet die Spuren der gerade laufenden Stimmung: Kulisse, jedes Instrument einzeln (Laute, Trommel, Flöte …) und auf der zweiten Seite Orchester, Kapelle, Gäste. Regler 1–4 = obere Reihe, **ALT gedrückt halten + drehen** = untere Reihe, **◀ ▶** = weitere Spuren, Regler drücken = stumm. Die Einstellung merkt sich die Bühne je Stimmung. ZS3 oder BACK schließt. (Vorige Seite: ALT + ◀.)
 
 Auch im Mischpult (CTRL) gibt es so eine zweite Reihe mit ALT.
 
 ### Ausgänge & Pegel
 
-**MENU → 🎚 Audio: Ausgänge & Pegel**: welche Ausgangspaare Imres bespielt (1/2, 3/4 …, wenn die Soundkarte mehr hat) und alle Lautstärke-Regler der Soundkarte (◀ ▶ leiser/lauter, SEL schaltet stumm/an). Kommt aus den großen Buchsen nichts, ist dort meist ein Regler zu leise oder stumm. Mit **🔊 Testton links / rechts** lässt sich jede Seite einzeln prüfen.
+**MENU → 🎚 Audio: Ausgänge & Pegel**: welche Ausgangspaare die Bühne bespielt (1/2, 3/4 …, wenn die Soundkarte mehr hat) und alle Lautstärke-Regler der Soundkarte (◀ ▶ leiser/lauter, SEL schaltet stumm/an). Kommt aus den großen Buchsen nichts, ist dort meist ein Regler zu leise oder stumm. Mit **🔊 Testton links / rechts** lässt sich jede Seite einzeln prüfen.
 
 ---
 
 ## 8. Zusammen mit dem Zynthian
 
-**MENU lang → System → „Zusammen mit Zynthian“** (oder Handy, oder CC 119 = 64): Die normale Zynthian-Oberfläche kommt zurück, mit allen Synths – und Imres spielt **unsichtbar im Hintergrund weiter**. Beides klingt gemeinsam aus den Ausgängen.
+**MENU lang → System → „Zusammen mit Zynthian“** (oder Handy, oder CC 119 = 64): Die normale Zynthian-Oberfläche kommt zurück, mit allen Synths – und die Bühne spielt **unsichtbar im Hintergrund weiter**. Beides klingt gemeinsam aus den Ausgängen.
 
-Bedienen kannst du Imres dann über **MIDI** (Steuer-Kanal, siehe oben) und die **Fernbedienung am Handy** – die Tasten des Geräts gehören in dieser Zeit dem Zynthian. Die Imres-Lautstärke regelst du mit CC 20 (oder am Handy), nicht im Zynthian-Mixer.
+Bedienen kannst du die Bühne dann über **MIDI** (Steuer-Kanal, siehe oben) und die **Fernbedienung am Handy** – die Tasten des Geräts gehören in dieser Zeit dem Zynthian. Die Lautstärke der Bühne regelst du mit CC 20 (oder am Handy), nicht im Zynthian-Mixer.
 
 ---
 
 ## 9. Aufnahme
 
-**ALT + REC** (oder System-Menü, oder Handy): nimmt alles auf, was aus den Ausgängen kommt – Imres und Zynthian-Synths zusammen. Die Dateien liegen im Zynthian-Ordner **capture** (in der Zynthian-Weboberfläche unter „Audio/Captures“ herunterladbar). Die REC-Taste leuchtet rot, solange aufgenommen wird.
+**ALT + REC** (oder System-Menü, oder Handy): nimmt alles auf, was aus den Ausgängen kommt – die Bühne und Zynthian-Synths zusammen. Die Dateien liegen im Zynthian-Ordner **capture** (in der Zynthian-Weboberfläche unter „Audio/Captures“ herunterladbar). Die REC-Taste leuchtet rot, solange aufgenommen wird.
 
 ---
 
@@ -266,19 +266,19 @@ Dort gibt es alle Tasten, die Drehregler (+/−), **alle Optionen** (Master/Slav
 
 ---
 
-## 11. Zwischen Zynthian und Imres wechseln
+## 11. Zwischen Zynthian und die Bühne wechseln
 
-- **Imres-Bühne (Vollbild):** Handy → „Imres-Bühne starten“ · CC 119 ≥ 86 · per SSH `imres-modus imres`
+- **Barradins Bühne (Vollbild):** Handy → „Barradins Bühne starten“ · CC 119 ≥ 86 · per SSH `imres-modus imres`
 - **Zusammen:** System-Menü → „Zusammen mit Zynthian“ · CC 119 = 43–85 · `imres-modus hintergrund`
 - **Nur Zynthian:** MENU lang → System → „Zurück zum Zynthian“ · CC 119 ≤ 42 · `imres-modus zynthian`
 - **Was beim Einschalten startet:** System-Menü bzw. Handy → „Beim Einschalten …“ · oder `imres-modus start-imres` / `start-hintergrund` / `start-zynthian`
 
 ## 12. Aktualisieren
 
-Mit Internet: **MENU → F4 System → ⬇ Imres aktualisieren** (oder Fernbedienung, oder per SSH `imres-modus aktualisieren`). Danach lädt die Seite von selbst neu.
+Mit Internet: **MENU → F4 System → ⬇ Bühne aktualisieren** (oder Fernbedienung, oder per SSH `imres-modus aktualisieren`). Danach lädt die Seite von selbst neu.
 
 - **Sicher:** Die neue Version entsteht zuerst daneben; erst wenn sie vollständig da ist, wird in einem Schritt getauscht. Bricht das Internet oder der Strom vorher ab, bleibt die alte Version unverändert – und ein halber Tausch wird beim nächsten Start von selbst repariert. Zwei Updates gleichzeitig gehen nicht.
-- **Schon aktuell?** Dann meldet das Pult „Imres ist schon auf dem neuesten Stand“ und lädt nichts.
+- **Schon aktuell?** Dann meldet das Pult „die Bühne ist schon auf dem neuesten Stand“ und lädt nichts.
 - **Alte Versionen:** Die letzten 5 werden aufgehoben, ältere und Reste abgebrochener Updates werden gelöscht. **↺ Vorige Version zurückholen** (im System-Menü, oder `imres-modus zurueck`) holt die letzte zurück, falls nach einem Update etwas nicht stimmt.
 - **Einstellungen** (Belegung, Favoriten, Sets, Mischungen) liegen außerdem alle 2 Minuten als Sicherung auf der SD-Karte (Einstellungen → 💾 Sicherung).
 

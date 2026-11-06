@@ -2,7 +2,7 @@
 """
 MIDI für die Imres-Brücke
 * MidiEin: hört alle MIDI-Eingänge über aseqdump mit (Clock, Start/Stop, Noten, Regler, Programmwechsel)
-* MidiTakt: sendet als Master Clock/Start/Stop über den ALSA-Sequencer (eigener Port „Imres Takt“)
+* MidiTakt: sendet als Master Clock/Start/Stop über den ALSA-Sequencer (eigener Port „Barradins Bühne Takt“)
 Beides geht über den ALSA-Sequencer und stört den Zynthian nicht.
 """
 import ctypes
@@ -167,7 +167,7 @@ class MidiTakt(threading.Thread):
             if self.lib.snd_seq_open(ctypes.byref(seq), b"default", 1, 0) < 0:
                 raise OSError("snd_seq_open")
             self.seq = seq
-            self.lib.snd_seq_set_client_name(self.seq, b"Imres Takt")
+            self.lib.snd_seq_set_client_name(self.seq, "Barradins Bühne Takt".encode("utf-8"))
             self.port = self.lib.snd_seq_create_simple_port(self.seq, b"Takt", 1 | 32, 2 | (1 << 20))
             self.client = self.lib.snd_seq_client_id(self.seq)
         except Exception as e:
@@ -284,7 +284,7 @@ class MidiNoten(threading.Thread):
             if self.lib.snd_seq_open(ctypes.byref(seq), b"default", 1, 0) < 0:
                 raise OSError("snd_seq_open")
             self.seq = seq
-            self.lib.snd_seq_set_client_name(self.seq, b"Imres Begleitung")
+            self.lib.snd_seq_set_client_name(self.seq, "Barradins Bühne".encode("utf-8"))
             self.port = self.lib.snd_seq_create_simple_port(self.seq, b"Begleitung", 1 | 32, 2 | (1 << 20))
             self.client = self.lib.snd_seq_client_id(self.seq)
         except Exception as e:
@@ -347,7 +347,7 @@ class MidiNoten(threading.Thread):
             r = subprocess.run(["jack_lsp", "-t"], capture_output=True, text=True, timeout=3)
             zeilen = r.stdout.splitlines()
             alle = [zeilen[i].strip() for i in range(len(zeilen)) if i + 1 < len(zeilen) and "midi" in zeilen[i + 1]]
-            quelle = next((p for p in alle if "Imres Begleitung" in p and "capture" in p), None)
+            quelle = next((p for p in alle if ("Barradins B" in p or "Imres Begleitung" in p) and "Takt" not in p and "capture" in p), None)
             if quelle:
                 ziele = [p for p in alle if p.startswith("ZynMidiRouter:") and p.endswith("_in") and "dev" not in p]
                 bevorzugt = [p for p in ("ZynMidiRouter:main_in", "ZynMidiRouter:net_in", "ZynMidiRouter:seq_in") if p in ziele]

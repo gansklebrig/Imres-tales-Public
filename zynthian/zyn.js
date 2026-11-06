@@ -386,7 +386,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menue("<h3>⚙ " + W("System", "System") + '</h3><div class="reihe">' +
       '<button type="button" data-zm="zyn">🎛 ' + W("Zurück zum Zynthian", "Back to Zynthian") + "<small>" + W("Die normale Zynthian-Oberfläche startet", "Starts the normal Zynthian interface") + "</small></button>" +
       '<button type="button" data-zm="upd">⬇ ' + W("Bühne aktualisieren", "Update the stage") + "<small>" + W("holt die neueste Version (Internet nötig) und startet neu", "fetches the latest version (needs internet) and restarts") + "</small></button>" +
-      '<button type="button" data-zm="hinter">🎛+🎻 ' + W("Zusammen mit Zynthian", "Together with Zynthian") + "<small>" + W("Zynthian-Oberfläche, Barradins Bühne spielt im Hintergrund weiter (Handy/MIDI)", "Zynthian UI, Imres keeps playing in the background") + "</small></button>" +
+      '<button type="button" data-zm="hinter">🎛+🎻 ' + W("Zusammen mit Zynthian", "Together with Zynthian") + "<small>" + W("Zynthian-Oberfläche, Barradins Bühne spielt im Hintergrund weiter (Handy/MIDI)", "Zynthian UI, the stage keeps playing in the background") + "</small></button>" +
       '<button type="button" data-zm="auf">' + (aufnahmeAn ? "⏹ " + W("Aufnahme beenden", "Stop recording") : "⏺ " + W("Aufnahme starten", "Start recording")) + "<small>" + W("alles, was rauskommt – im Zynthian-Ordner „capture“", "everything you hear – Zynthian capture folder") + "</small></button>" +
       '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Barradins Bühne", "Barradin's Stage") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
       '<button type="button" data-zm="startz">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>Zynthian</b></button>" +
@@ -503,7 +503,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       zeile("steuerKanal", "🎛 " + W("Steuer-Kanal", "Control channel"), OPT.steuerKanal ? OPT.steuerKanal : W("alle", "all"), W("für Noten 36–43, CC 20–23 und CC 119", "for notes 36–43, CC 20–23 and CC 119")) +
       zeile("noten", "· " + W("Noten → F1–F4", "Notes → F1–F4"), an(OPT.noten)) + zeile("regler", "· " + W("CC 20–23 → Drehregler", "CC 20–23 → knobs"), an(OPT.regler)) +
       zeile("programmWechsel", "🔢 Program Change", an(OPT.programmWechsel), W("wählt Stimmung (im Abend-Set: dessen Stimmungen) bzw. Klangwelt", "picks mood / soundscape")) +
-      zeile("umschaltCC", "🔀 " + W("Umschalten per CC 119", "Switch via CC 119"), an(OPT.umschaltCC), W("0–42 Zynthian · 43–85 zusammen · 86–127 Bühne", "0–42 Zynthian · 43–85 together · 86–127 Imres")) +
+      zeile("umschaltCC", "🔀 " + W("Umschalten per CC 119", "Switch via CC 119"), an(OPT.umschaltCC), W("0–42 Zynthian · 43–85 zusammen · 86–127 Bühne", "0–42 Zynthian · 43–85 together · 86–127 the stage")) +
       '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>";
     const zyklus = (k, l) => { const i = l.indexOf(OPT[k]); return l[(i + 1) % l.length]; };
     const a = { zu: menueZu };
@@ -1576,7 +1576,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     a["b:aus"] = () => { beglAus(); zeige("🔇 " + W("Alle Noten aus", "All notes off")); };
     a["b:ideen"] = beglIdeen;
     const h = "<h3>🎹 " + W("Synth-Begleitung", "Synth accompaniment") + '</h3><div class="reihe zyn-opt">' +
-      z("an", "🎹 " + W("Begleitung", "Accompaniment"), an(BEGL.an), W("Die Bühne spielt ihre Akkorde als MIDI mit – in eurer Tonart, im Takt", "Imres plays its chords as MIDI – in key, in time")) +
+      z("an", "🎹 " + W("Begleitung", "Accompaniment"), an(BEGL.an), W("Die Bühne spielt ihre Akkorde als MIDI mit – in eurer Tonart, im Takt", "The stage plays its chords as MIDI – in key, in time")) +
       z("pad", "· " + W("Fläche (Kanal 1)", "Pad (channel 1)"), an(BEGL.pad), W("gehaltene Akkorde", "held chords")) +
       z("bass", "· " + W("Bass (Kanal 2)", "Bass (channel 2)"), an(BEGL.bass), W("Grundton eine Oktave tiefer", "root an octave down")) +
       z("glocken", "· " + W("Glocken/Arpeggio (Kanal 3)", "Bells/arpeggio (channel 3)"), an(BEGL.glocken), W("Akkordtöne auf den Schlägen – je mehr los ist, desto mehr", "chord tones on beats – busier when busy")) +
@@ -1585,7 +1585,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="b:ideen">🎻 ' + W("Ensembles & Klangideen", "Ensembles & sound ideas") + "<small>" + W("welche Synths zu welcher Stimmung passen", "which synths fit which mood") + "</small></button>" +
       '<button type="button" data-zm="b:test">🔔 ' + W("Testakkord senden", "Send test chord") + '</button><button type="button" data-zm="b:aus">🔇 ' + W("Alle Noten aus", "All notes off") + "</button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
-      '<p class="hinweis">' + W("Im Zynthian: „Zusammen mit Zynthian“ starten, Ketten auf MIDI-Kanal 1–4 anlegen, „Imres Begleitung“ als MIDI-Eingang aktivieren. Externe Synths am USB bekommen die Noten automatisch.", "In Zynthian: start “Together with Zynthian”, create chains on MIDI ch. 1–4, enable “Imres Begleitung” as MIDI input. USB synths get the notes automatically.") + "</p>";
+      '<p class="hinweis">' + W("Im Zynthian: „Zusammen mit Zynthian“ starten, Ketten auf MIDI-Kanal 1–4 anlegen, „Barradins Bühne“ als MIDI-Eingang aktivieren. Externe Synths am USB bekommen die Noten automatisch.", "In Zynthian: start “Together with Zynthian”, create chains on MIDI ch. 1–4, enable “the stage Begleitung” as MIDI input. USB synths get the notes automatically.") + "</p>";
     const m = menue(h, a); menueArt = "begl"; if (fokusK) { const b = m.querySelector('[data-zm="b:' + fokusK + '"]'); if (b) fokusSetzen(b); }
   }
   function beglIdeen() {
@@ -1609,7 +1609,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         a["o:" + p] = () => { if (an && paare.size === 1) { zeige(W("Mindestens ein Ausgang bleibt an", "At least one output stays on")); return; } if (an) paare.delete(p); else paare.add(p); audioPost({ aktion: "ausgaenge", paare: [...paare] }).then(x => audioMenue("o:" + p, x)); };
       }
       h += '<button type="button" data-zm="mono"><span>' + (r.mono ? "✅ " : "⬜ ") + W("Mono: beide Buchsen gleich", "Mono: both jacks the same") + "</span><small>" + (r.mono ? W("an – eine Box an 1 oder 2 bekommt alles", "on – one box on 1 or 2 gets everything") : W("aus = Stereo: 1 links, 2 rechts", "off = stereo: 1 left, 2 right")) + W(" · Bild lädt kurz neu", " · screen reloads briefly") + "</small></button>";
-      a.mono = () => { zeige("⏳ " + W("Ton wird umgestellt – die Bühne lädt kurz neu …", "Switching sound – Imres reloads …")); audioPost({ aktion: "mono", an: !r.mono }).then(x => audioMenue("mono", x)); };
+      a.mono = () => { zeige("⏳ " + W("Ton wird umgestellt – die Bühne lädt kurz neu …", "Switching sound – the stage reloads …")); audioPost({ aktion: "mono", an: !r.mono }).then(x => audioMenue("mono", x)); };
       const P = window.ImresPult, bst = P && P.boost ? P.boost() : null;
       if (bst != null) {
         h += '<button type="button" data-zm="boost"><span>📢 ' + W("Ausgangs-Boost: ", "Output boost: ") + "<b>+" + bst + " dB</b></span><small>" + W("◀ ▶ lauter/leiser · ein Limiter schützt vor Übersteuern", "◀ ▶ louder/softer · a limiter prevents clipping") + "</small></button>";
@@ -1760,7 +1760,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     });
     /* Eingangspegel der Soundkarte (vor Imres): übersteuert es schon dort, hilft der Gain in Imres nicht */
     (eingangMenue.karte || []).forEach((g, gi) => {
-      h += '<button type="button" data-zm="kc:' + gi + '"><span>🎚 ' + W("Soundkarte ", "Sound card ") + esc2(g.name) + ": <b>" + g.c + " %</b></span><small>" + W("Eingangspegel vor der Bühne · ◀ ▶", "input level before Imres · ◀ ▶") + "</small></button>";
+      h += '<button type="button" data-zm="kc:' + gi + '"><span>🎚 ' + W("Soundkarte ", "Sound card ") + esc2(g.name) + ": <b>" + g.c + " %</b></span><small>" + W("Eingangspegel vor der Bühne · ◀ ▶", "input level before the stage · ◀ ▶") + "</small></button>";
       a["kc:" + gi + ":stufe"] = st => { g.c = Math.max(0, Math.min(100, g.c + st * 5)); return audioPost({ aktion: "regler", name: g.name, art: "c", wert: g.c }).then(r => { if (r && r.ok) eingangMenue.karte = (r.regler || []).filter(x => x.c != null); eingangMenue("kc:" + gi); }); };
     });
     if (eingangMenue.karte && !eingangMenue.karte.length && eingangMenue.geladen) h += '<p class="hinweis" style="margin:4px 0">' + W("Die Soundkarte hat keinen eigenen Eingangsregler – übersteuert es an der Buchse, muss das Signal schon am Instrument, Tonabnehmer oder Vorverstärker leiser werden (oder über eine DI-Box mit Pad, z. B. −20 dB).", "The sound card has no input level control – lower the signal at the instrument, pickup or preamp (or use a DI box pad).") + "</p>";
@@ -1775,11 +1775,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     h += '<button type="button" data-zm="trocken"><span>🧽 ' + W("Effekte der Eingänge aus", "Inputs: effects off") + "</span><small>" + W("Hall, Echo, Filter, Drive auf 0 – trockener Klang", "reverb, echo, filter, drive to 0 – dry sound") + "</small></button>";
     a.trocken = () => { [0, 1].forEach(x => kanalSetz(x, { hall: 0, echo: 0, filter: 0, drive: 0 })); if (MS.an && window.ImresPult.mitspieler) window.ImresPult.mitspieler({ hall: 0 }); zeige("🧽 " + W("Eingänge trocken", "Inputs dry"), null, W("Hall, Echo, Filter, Drive aus" + (MS.an ? " · Mitspieler ohne Hall" : ""), "effects off")); eingangMenue("trocken"); };
     h += '<button type="button" data-zm="stimm"><span>🎯 ' + W("Stimmgerät", "Tuner") + "</span><small>" + W("Ton, Abweichung in Cent, passt er zur Tonart?", "note, cents, fits the key?") + "</small></button>";
-    h += '<button type="button" data-zm="tonart"><span>🎼 ' + W("Tonart aus dem Instrument erkennen", "Detect key from the instrument") + "</span><small>" + W("8 s quer über die Töne spielen – die Bühne spielt danach in dieser Tonart", "play across the notes for 8 s – Imres follows that key") + "</small></button>";
+    h += '<button type="button" data-zm="tonart"><span>🎼 ' + W("Tonart aus dem Instrument erkennen", "Detect key from the instrument") + "</span><small>" + W("8 s quer über die Töne spielen – die Bühne spielt danach in dieser Tonart", "play across the notes for 8 s – the stage follows that key") + "</small></button>";
     a.stimm = () => { clearInterval(pegelT); stimmgeraet(); }; a.tonart = () => { clearInterval(pegelT); menueZu(); tonartErkennen(); };
     h += '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
       '<p class="hinweis ein-tipp" style="display:none;color:#ffb070">' + W("⚠ Das Signal ist schon an der Buchse zu laut – der Gain der Bühne kann das nicht mehr retten. Den Eingangspegel der Soundkarte (oben, 🎚) deutlich senken oder am Instrument/Tonabnehmer leiser stellen.", "⚠ Clipping at the jack – lower the sound card input level above or the instrument output.") + "</p>" +
-      '<p class="hinweis">' + W("Instrument an Eingang 1 oder 2 anstecken. Der Ton läuft durch die Bühne (mit eigenen Effekten) – dadurch etwas Verzögerung; zum Hören über die Anlage gedacht, nicht über Kopfhörer am Instrument.", "Plug into input 1 or 2. The sound runs through Imres (own effects) – a little latency; meant for the PA, not for monitoring at the instrument.") + "</p>";
+      '<p class="hinweis">' + W("Instrument an Eingang 1 oder 2 anstecken. Der Ton läuft durch die Bühne (mit eigenen Effekten) – dadurch etwas Verzögerung; zum Hören über die Anlage gedacht, nicht über Kopfhörer am Instrument.", "Plug into input 1 or 2. The sound runs through the stage (own effects) – a little latency; meant for the PA, not for monitoring at the instrument.") + "</p>";
     const m = menue("<h3>🎤 " + W("Eingänge – Handpan, Didgeridoo …", "Inputs – handpan, didgeridoo …") + "</h3>" + h, a); menueArt = "eingang"; audioAktionen = a;
     if (fokusId) { const b = m.querySelector('[data-zm="' + fokusId + '"]'); if (b) fokusSetzen(b); }
     clearInterval(pegelT); pegelT = setInterval(() => {
@@ -1960,7 +1960,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       const zeit = t => new Date(t * 1000).toLocaleString(W("de-DE", "en-GB"), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
       let h = '<div class="reihe zyn-opt"><button type="button" data-zm="jetzt"><span>💾 ' + W("Jetzt sichern", "Save now") + "</span><small>" + W("Belegung, Favoriten, Sets, Mischungen, Optionen", "mapping, favourites, sets, mixes, options") + "</small></button>";
       (r.liste || []).slice(0, 9).forEach((x, i) => { h += '<button type="button" data-zm="w:' + i + '"><span>↺ ' + (x.name === "auto.json" ? W("automatisch", "automatic") : W("von Hand", "manual")) + " · " + zeit(x.zeit) + "</span><small>" + W("wiederherstellen", "restore") + " · " + x.kb + " kB</small></button>"; a["w:" + i] = () => wiederherstellen(x.name); });
-      h += '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + '</button></div><p class="hinweis">' + W("Die Bühne sichert alle 2 Minuten automatisch auf die SD-Karte. Nach einer Neuinstallation holt sie die letzte Sicherung von selbst zurück.", "Imres saves to the SD card every 2 minutes and restores it after a reinstall.") + "</p>";
+      h += '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + '</button></div><p class="hinweis">' + W("Die Bühne sichert alle 2 Minuten automatisch auf die SD-Karte. Nach einer Neuinstallation holt sie die letzte Sicherung von selbst zurück.", "The stage saves to the SD card every 2 minutes and restores it after a reinstall.") + "</p>";
       const m = menue("<h3>💾 " + W("Sicherung", "Backup") + "</h3>" + h, a); menueArt = "sicher"; if (fokusId) { const b = m.querySelector('[data-zm="' + fokusId + '"]'); if (b) fokusSetzen(b); }
     });
   }
