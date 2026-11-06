@@ -52,7 +52,7 @@
     let el = document.getElementById("imres-logo");
     if (!el) {   /* Seite ohne Vorhang (älterer Weg): Logo selbst bauen */
       el = document.createElement("div"); el.id = "imres-logo";
-      el.innerHTML = "<i></i><i></i><i></i><img src='/zyn/gans.png' alt=''><b>" + (SEITE === "welten" ? "Barradins Bühne · Klangwelten" : "Barradins Bühne") + "</b><small>TheAlmightyGoose</small>";
+      el.innerHTML = "<i></i><i></i><i></i><img src='/zyn/gans.png' alt=''><b>" + (SEITE === "welten" ? "Barden Beats · Klangwelten" : "Barden Beats") + "</b><small>TheAlmightyGoose</small>";
       (document.body || h).appendChild(el);
     }
     h.classList.add("imres-logo-frueh");
@@ -363,7 +363,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     $$(".zyn-update").forEach(x => x.remove());
     if (!document.getElementById("zyn-update-css")) { const st = document.createElement("style"); st.id = "zyn-update-css"; st.textContent = '.zyn-update { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2147483000; width: 520px; max-width: 92vw; padding: 18px 22px 14px; border-radius: 16px; background: #1b1422; border: 2px solid #ffc830; box-shadow: 0 10px 40px #000c; color: #f4e6cc; font-family: system-ui, sans-serif; text-align: center; visibility: visible !important; } .zyn-update * { visibility: visible !important; }\n.zyn-update h3 { margin: 0 0 12px; font-size: 20px; color: #ffc830; }\n.zu-balken { height: 18px; border-radius: 9px; background: #2c2436; overflow: hidden; }\n.zu-balken b { display: block; height: 100%; width: 2%; border-radius: 9px; background: linear-gradient(90deg, #c08020, #ffc830, #fff0c0, #ffc830); background-size: 200% 100%; animation: zuLauf 1.2s linear infinite; transition: width .2s; }\n@keyframes zuLauf { from { background-position: 200% 0; } to { background-position: 0 0; } }\n.zu-text { margin: 12px 0 2px; font-size: 16px; } .zu-klein { margin: 0; font-size: 12px; opacity: .6; }\n.zyn-update.fehler { border-color: #ff6a3a; } .zyn-update.fehler .zu-balken b { background: #ff6a3a; animation: none; }'; document.head.appendChild(st); }
     const el = document.createElement("div"); el.className = "zyn-update";
-    el.innerHTML = '<h3>⬇ ' + W("Barradins Bühne wird aktualisiert", "Updating Barradin's Stage") + '</h3><div class="zu-balken"><b></b></div><p class="zu-text">' + W("Starte …", "Starting …") + '</p><p class="zu-klein"></p>';
+    el.innerHTML = '<h3>⬇ ' + W("Barden Beats wird aktualisiert", "Updating Barden Beats") + '</h3><div class="zu-balken"><b></b></div><p class="zu-text">' + W("Starte …", "Starting …") + '</p><p class="zu-klein"></p>';
     document.body.appendChild(el);
     const balken = el.querySelector("b"), text = el.querySelector(".zu-text"), klein = el.querySelector(".zu-klein"), t0 = performance.now();
     let weg = 0, fertig = false, ziel = 2, jetzt = 2;
@@ -386,9 +386,9 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menue("<h3>⚙ " + W("System", "System") + '</h3><div class="reihe">' +
       '<button type="button" data-zm="zyn">🎛 ' + W("Zurück zum Zynthian", "Back to Zynthian") + "<small>" + W("Die normale Zynthian-Oberfläche startet", "Starts the normal Zynthian interface") + "</small></button>" +
       '<button type="button" data-zm="upd">⬇ ' + W("Bühne aktualisieren", "Update the stage") + "<small>" + W("holt die neueste Version (Internet nötig) und startet neu", "fetches the latest version (needs internet) and restarts") + "</small></button>" +
-      '<button type="button" data-zm="hinter">🎛+🎻 ' + W("Zusammen mit Zynthian", "Together with Zynthian") + "<small>" + W("Zynthian-Oberfläche, Barradins Bühne spielt im Hintergrund weiter (Handy/MIDI)", "Zynthian UI, the stage keeps playing in the background") + "</small></button>" +
+      '<button type="button" data-zm="hinter">🎛+🎻 ' + W("Zusammen mit Zynthian", "Together with Zynthian") + "<small>" + W("Zynthian-Oberfläche, Barden Beats spielt im Hintergrund weiter (Handy/MIDI)", "Zynthian UI, the stage keeps playing in the background") + "</small></button>" +
       '<button type="button" data-zm="auf">' + (aufnahmeAn ? "⏹ " + W("Aufnahme beenden", "Stop recording") : "⏺ " + W("Aufnahme starten", "Start recording")) + "<small>" + W("alles, was rauskommt – im Zynthian-Ordner „capture“", "everything you hear – Zynthian capture folder") + "</small></button>" +
-      '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Barradins Bühne", "Barradin's Stage") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
+      '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Barden Beats", "Barden Beats") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
       '<button type="button" data-zm="startz">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>Zynthian</b></button>" +
       '<button type="button" data-zm="neu">🔄 ' + W("Seite neu laden", "Reload page") + "</button>" +
       '<button type="button" data-zm="diag">🩺 ' + W("Diagnose anzeigen", "Show diagnostics") + "<small>" + W("♫-Knopf, Touch, Ton, Update – zum Abfotografieren", "♫ button, touch, sound, update – to take a photo") + "</small></button>" +
@@ -397,13 +397,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="aus">⏻ ' + W("Ausschalten", "Shut down") + "<small>" + W("Danach den Strom trennen", "Then unplug power") + "</small></button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", {
       zyn: () => { zeige("🎛 " + W("Zynthian startet …", "Zynthian is starting …")); post("zynthian"); },
-      upd: () => { menueZu(); zeige("⬇ " + W("Barradins Bühne wird aktualisiert …", "Updating Barradin's Stage …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); updateVerfolgen(); },
+      upd: () => { menueZu(); zeige("⬇ " + W("Barden Beats wird aktualisiert …", "Updating Barden Beats …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); updateVerfolgen(); },
       diag: () => { menue('<h3>🩺 Diagnose</h3><pre style="font-size:11px;line-height:1.25;white-space:pre-wrap;max-height:330px;overflow:auto;margin:0">⏳</pre><div class="reihe"><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu });
         fetch("/zyn/diagnose").then(r => r.json()).then(j => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = j.text || "–"; }).catch(() => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = W("Brücke nicht erreichbar", "bridge unreachable"); }); },
       zurueck: () => { menueZu(); zeige("↺ " + W("Vorige Version wird geholt …", "Restoring previous version …")); post("zurueck"); updateVerfolgen(); },
       hinter: () => { zeige("🎛 " + W("Zynthian startet, die Bühne läuft weiter …", "Zynthian starts, the stage keeps playing …")); post("hintergrund"); },
       auf: () => { menueZu(); aufnahme(); },
-      start: () => { post("start-imres"); zeige("🔌 " + W("Startet künftig mit Barradins Bühne", "Will start with Barradin's Stage")); menueZu(); },
+      start: () => { post("start-imres"); zeige("🔌 " + W("Startet künftig mit Barden Beats", "Will start with Barden Beats")); menueZu(); },
       startz: () => { post("start-zynthian"); zeige("🔌 " + W("Startet künftig mit dem Zynthian", "Will start with Zynthian")); menueZu(); },
       neu: () => location.reload(), neustart: () => post("neustart"), aus: () => { zeige("⏻ " + W("Fährt herunter …", "Shutting down …")); post("aus"); }, zu: menueZu });
     menueArt = "system";
@@ -1585,7 +1585,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="b:ideen">🎻 ' + W("Ensembles & Klangideen", "Ensembles & sound ideas") + "<small>" + W("welche Synths zu welcher Stimmung passen", "which synths fit which mood") + "</small></button>" +
       '<button type="button" data-zm="b:test">🔔 ' + W("Testakkord senden", "Send test chord") + '</button><button type="button" data-zm="b:aus">🔇 ' + W("Alle Noten aus", "All notes off") + "</button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
-      '<p class="hinweis">' + W("Im Zynthian: „Zusammen mit Zynthian“ starten, Ketten auf MIDI-Kanal 1–4 anlegen, „Barradins Bühne“ als MIDI-Eingang aktivieren. Externe Synths am USB bekommen die Noten automatisch.", "In Zynthian: start “Together with Zynthian”, create chains on MIDI ch. 1–4, enable “the stage Begleitung” as MIDI input. USB synths get the notes automatically.") + "</p>";
+      '<p class="hinweis">' + W("Im Zynthian: „Zusammen mit Zynthian“ starten, Ketten auf MIDI-Kanal 1–4 anlegen, „Barden Beats“ als MIDI-Eingang aktivieren. Externe Synths am USB bekommen die Noten automatisch.", "In Zynthian: start “Together with Zynthian”, create chains on MIDI ch. 1–4, enable “the stage Begleitung” as MIDI input. USB synths get the notes automatically.") + "</p>";
     const m = menue(h, a); menueArt = "begl"; if (fokusK) { const b = m.querySelector('[data-zm="b:' + fokusK + '"]'); if (b) fokusSetzen(b); }
   }
   function beglIdeen() {

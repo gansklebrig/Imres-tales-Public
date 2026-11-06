@@ -1,8 +1,8 @@
-# Barradins Bühne auf dem Zynthian V5 / V5.1
+# Barden Beats auf dem Zynthian V5 / V5.1
 
-Damit laufen die **Klangwelten** und **Barradins Bühne** (Musik + Kulisse) direkt auf dem Zynthian – ohne Laptop, ohne Internet, bedient mit den Tasten und Drehreglern des Geräts. Der Ton kommt aus den normalen Ausgängen des Zynthian.
+Damit laufen die **Klangwelten** und **Barden Beats** (Musik + Kulisse) direkt auf dem Zynthian – ohne Laptop, ohne Internet, bedient mit den Tasten und Drehreglern des Geräts. Der Ton kommt aus den normalen Ausgängen des Zynthian.
 
-Der normale Zynthian bleibt dabei unverändert. Du schaltest einfach zwischen **Zynthian** und **Barradins Bühne** hin und her.
+Der normale Zynthian bleibt dabei unverändert. Du schaltest einfach zwischen **Zynthian** und **Barden Beats** hin und her.
 
 ---
 
@@ -55,7 +55,7 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **⏱ Tap-Tempo:** TEMPO im Takt tippen – ab dem 4. Tippen wird das Tempo gesetzt, weiteres Tippen verfeinert es. Neu besetzen liegt jetzt auf ALT + TEMPO. Läuft die TR-8S als Taktgeber (Slave), bleibt deren Tempo.
 - **🤖 Autopilot (MENU):** ruhig (Stimmung alle 4–7 min, Momente alle 2–3 min) oder lebendig (2–4 min / ~1 min); Spannung atmet leicht mit. Bevorzugt deine ★-Stimmungen. Wechselst du selbst, wartet er wieder. In den Klangwelten startet er Szenen und Geräusche.
 - **⚙ Auslastung:** vorne in der Statuszeile – grün unter 60 %, gold bis 85 %, rot darüber; 🌡 ab 70 °C, ⚠ bei Rucklern der Oberfläche.
-- **🎹 Synth-Begleitung (MENU):** Die Bühne spielt ihre Akkorde als MIDI mit – Kanal 1 Fläche, 2 Bass, 3 Glocken/Arpeggio, 4 Bordun (Grundton + Quinte der Handpan-Tonart). Mit „Klänge je Stimmung wechseln“ schaltet er General-MIDI-Programme passend zur Stimmung um (Ensembles: Tavernen-Kapelle, Abenteuer-Orchester, Schlacht-Blech, Mystik-Chor, Lagerfeuer & Elben). Im Zynthian: „Zusammen mit Zynthian“, Ketten auf Kanal 1–4 (z. B. FluidSynth mit GM-Soundfont), „Barradins Bühne“ als MIDI-Eingang aktivieren. Externe USB-Synths bekommen die Noten automatisch.
+- **🎹 Synth-Begleitung (MENU):** Die Bühne spielt ihre Akkorde als MIDI mit – Kanal 1 Fläche, 2 Bass, 3 Glocken/Arpeggio, 4 Bordun (Grundton + Quinte der Handpan-Tonart). Mit „Klänge je Stimmung wechseln“ schaltet er General-MIDI-Programme passend zur Stimmung um (Ensembles: Tavernen-Kapelle, Abenteuer-Orchester, Schlacht-Blech, Mystik-Chor, Lagerfeuer & Elben). Im Zynthian: „Zusammen mit Zynthian“, Ketten auf Kanal 1–4 (z. B. FluidSynth mit GM-Soundfont), „Barden Beats“ als MIDI-Eingang aktivieren. Externe USB-Synths bekommen die Noten automatisch.
 - **🔊 Bluetooth & 📶 WLAN (MENU → 🛠 Einstellungen):** Bluetooth-Lautsprecher suchen, koppeln und verbinden – der Ton der Bühne läuft dann über die Box (beim ersten Mal wird Bluetooth-Audio einmalig installiert, braucht Internet; ca. 0,2 s Verzögerung, also nicht für den Takt mit der TR-8S). „Zurück zu den Zynthian-Ausgängen“ schaltet zurück. WLAN: Netze suchen, antippen, Passwort mit der Bildschirmtastatur (Finger oder Pfeile + SEL) eingeben.
 - **★ Favoriten:** eine Kachel 1,5 Sekunden halten (Taste oder Finger) – sie steht dann auf ihrer Seite ganz vorne. Nochmal halten nimmt sie wieder raus.
 - **ALT + ◀ ▶** wechselt die Seite, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen).
@@ -167,7 +167,7 @@ Gesteuert wird über den **Steuer-Kanal** (Standard: Kanal 16, einstellbar, auch
 
 - **Noten 36–39** → wie F1–F4 · **Noten 40–43** → wie ALT + F1–F4
 - **CC 20–23** → wie die Drehregler 1–4 der aktuellen Bank
-- **CC 119** → umschalten: 0–42 nur Zynthian · 43–85 Zynthian + die Bühne im Hintergrund · 86–127 Barradins Bühne. **Das klappt auch, wenn gerade der normale Zynthian läuft.**
+- **CC 119** → umschalten: 0–42 nur Zynthian · 43–85 Zynthian + die Bühne im Hintergrund · 86–127 Barden Beats. **Das klappt auch, wenn gerade der normale Zynthian läuft.**
 - **Program Change** (jeder Kanal) → Stimmung Nummer *n* (mit Abend-Set: dessen Stimmungen der Reihe nach) bzw. Klangwelt *n*. So kann ein Patternwechsel der TR-8S die Stimmung wechseln.
 
 **🥁 Pumpen auf die Bassdrum:** Schickt die TR-8S ihre Noten raus (Bassdrum = Kanal 10, Note 36), duckt sich alles bei jedem Kick kurz weg – der Groove kommt durch. Kanal, Note und Tiefe sind einstellbar.
@@ -268,7 +268,7 @@ Dort gibt es alle Tasten, die Drehregler (+/−), **alle Optionen** (Master/Slav
 
 ## 11. Zwischen Zynthian und die Bühne wechseln
 
-- **Barradins Bühne (Vollbild):** Handy → „Barradins Bühne starten“ · CC 119 ≥ 86 · per SSH `imres-modus imres`
+- **Barden Beats (Vollbild):** Handy → „Barden Beats starten“ · CC 119 ≥ 86 · per SSH `imres-modus imres`
 - **Zusammen:** System-Menü → „Zusammen mit Zynthian“ · CC 119 = 43–85 · `imres-modus hintergrund`
 - **Nur Zynthian:** MENU lang → System → „Zurück zum Zynthian“ · CC 119 ≤ 42 · `imres-modus zynthian`
 - **Was beim Einschalten startet:** System-Menü bzw. Handy → „Beim Einschalten …“ · oder `imres-modus start-imres` / `start-hintergrund` / `start-zynthian`

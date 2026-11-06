@@ -59,7 +59,7 @@
       duelleTitel: "Spott-Duelle", duelleText: "Der Gegner singt seine Drohung, du antwortest. Jede gut gesungene Zeile kostet ihn Lebenspunkte – jede Drohung kostet dich Fassung. Wer zuerst einknickt, verliert.",
       besiegt: "🏆 besiegt", offen: "noch offen",
       liederTitel: "Liederbuch", liederText: "Alle Lieder zum freien Singen. Je mehr Noten (♪), desto anspruchsvoller.",
-      buehnenLied: t => "🪕 Von der Bühne: „" + t + "“", buehnenInfo: "Die Melodie, die gerade auf Barradins Bühne eingestellt ist – zum Mitsingen auf „la“.",
+      buehnenLied: t => "🪕 Von der Bühne: „" + t + "“", buehnenInfo: "Die Melodie, die gerade in Barden Beats eingestellt ist – zum Mitsingen auf „la“.",
       bestwert: p => "Bestwert " + p + " %",
       uebTitel: "Übungsraum", uebText: "Kurze Übungen, passend zu deinem Stimmumfang.",
       ueb: {
@@ -321,7 +321,7 @@
     st.ende = b;
     return fertigBauen(st);
   }
-  /* Die Melodie, die gerade auf Barradins Bühne (Lautenwerk) eingestellt ist */
+  /* Die Melodie, die gerade in Barden Beats (Lautenwerk) eingestellt ist */
   const LW_MODI = { dorisch: [0, 2, 3, 5, 7, 9, 10], mixolydisch: [0, 2, 4, 5, 7, 9, 10], aeolisch: [0, 2, 3, 5, 7, 8, 10], phrygisch: [0, 1, 3, 5, 7, 8, 10], ionisch: [0, 2, 4, 5, 7, 9, 11], lydisch: [0, 2, 4, 6, 7, 9, 11] };
   function buehnenDaten() {
     const s = json("imres-lautenwerk2");

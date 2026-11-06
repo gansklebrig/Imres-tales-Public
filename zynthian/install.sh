@@ -4,7 +4,7 @@
 set -e
 ORT=/zynthian/zynthian-my-data/imres
 REPO=https://github.com/gansklebrig/Imres-tales-Public.git
-echo "== Barradins Bühne für den Zynthian =="
+echo "== Barden Beats für den Zynthian =="
 [ "$(id -u)" = 0 ] || { echo "Bitte als root ausführen."; exit 1; }
 
 echo "-- Pakete (Chromium, ALSA→JACK) …"
@@ -52,7 +52,7 @@ systemctl is-active -q zynthian && systemctl restart imres-knopf.service || true
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 echo
 echo "Fertig!"
-echo "  Barradins Bühne starten:  imres-modus imres"
+echo "  Barden Beats starten:  imres-modus imres"
 echo "  Zurück zum Zynthian:      imres-modus zynthian   (oder MENU lang drücken → System)"
 echo "  Zusammen mit Zynthian:    imres-modus hintergrund"
 echo "  Immer mit der Bühne starten: imres-modus start-imres"

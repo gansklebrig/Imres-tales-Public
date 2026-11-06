@@ -26,7 +26,7 @@
       zuletzt: "Zuletzt geschehen", kapitelWort: "Kapitel", weiterWort: "Weiterlesen →",
       runter: "Zur Übersicht",
       weg: "Diese Stelle gibt es nicht mehr – ", wegLink: "hier geht's zur Übersicht",
-      namen: { chronik: "Die Chronik", questtafel: "Die Questtafel", reise: "Die Reise", gefaehrten: "Die Gefährten", nsc: "Bekanntschaften", bestiarium: "Das Bestiarium", taverne: "Die Taverne", buehne: "Barradins Bühne" },
+      namen: { chronik: "Die Chronik", questtafel: "Die Questtafel", reise: "Die Reise", gefaehrten: "Die Gefährten", nsc: "Bekanntschaften", bestiarium: "Das Bestiarium", taverne: "Die Taverne", buehne: "Barden Beats" },
       texte: {
         chronik: "Das ganze Abenteuer, Kapitel für Kapitel nacherzählt.",
         questtafel: "Offene Fragen, Hinweise und rote Fäden.",
@@ -47,7 +47,7 @@
       zuletzt: "Most recently", kapitelWort: "Chapter", weiterWort: "Read on →",
       runter: "To the overview",
       weg: "This spot doesn't exist any more – ", wegLink: "here's the overview",
-      namen: { chronik: "The Chronicle", questtafel: "The Quest Board", reise: "The Journey", gefaehrten: "The Companions", nsc: "Acquaintances", bestiarium: "The Bestiary", taverne: "The Tavern", buehne: "Barradin's Stage" },
+      namen: { chronik: "The Chronicle", questtafel: "The Quest Board", reise: "The Journey", gefaehrten: "The Companions", nsc: "Acquaintances", bestiarium: "The Bestiary", taverne: "The Tavern", buehne: "Barden Beats" },
       texte: {
         chronik: "The whole adventure, retold chapter by chapter.",
         questtafel: "Open questions, clues and red threads.",

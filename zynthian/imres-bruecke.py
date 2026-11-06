@@ -147,7 +147,7 @@ def vorhang_html(pfad):
             ver = f.read().strip()
     except OSError:
         ver = "?"
-    name = "Barradins Bühne · Klangwelten" if pfad.endswith("ambient.html") else "Barradins Bühne"
+    name = "Barden Beats · Klangwelten" if pfad.endswith("ambient.html") else "Barden Beats"
     kopf = ("<style>" + VORHANG_CSS + "</style><script>" + VORHANG_JS + "</script>").encode("utf-8")
     logo = ('<div id="imres-logo"><i></i><i></i><i></i><img src="/zyn/gans.png" alt=""><b>' + name +
             "</b><small>Version " + ver + "  ·  TheAlmightyGoose</small></div>").encode("utf-8")
