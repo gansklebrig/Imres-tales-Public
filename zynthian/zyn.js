@@ -2475,10 +2475,179 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const ruheSek = () => { const v = +lies("imres-zp-ruhe", "10"); return RUHE_STUFEN.includes(v) ? v : 10; };
   const bildHinten = () => lies("imres-zp-bild", "0") === "1";
   function zpAktiv() { zpLetzte = Date.now(); if (zpRuhe) { zpRuheAus(); return true; } return false; }
-  function zpRuheAn() {
-    if (zpRuhe || $(".zyn-menue")) return; zpRuhe = true; document.documentElement.classList.add("zyn-ruhe"); zpRuheZeichnen(); ledsMelden();
+  /* ===================== 🌄 Ruhebild der Klangwelten: eine kleine lebende Landschaft je Welt =====================
+     Jede Schicht der Welt ist ein Lichtband, das mit ihrem Pegel atmet; dazu Glut, Glühwürmchen, Funken, Blasen … je nach Welt
+     und das Wetter darüber. Läuft nur, solange das Ruhebild zu sehen ist (30 Bilder/s, alles Statische vorgezeichnet). */
+  const WB_TH = {
+    innen: { h: ["#140a06", "#2a160a", "#3a2010"], land: "innen", lf: "#0b0604", licht: "#ffa040", lp: [.5, .6], teil: "staub", tf: "#ffd890" },
+    feuer: { h: ["#0c0612", "#1e0e1e", "#3a1a10"], land: "wald", lf: "#070305", licht: "#ff6a10", lp: [.5, .9], teil: "glut", tf: "#ffb040", sterne: 1 },
+    waldtag: { h: ["#3a3412", "#7a6224", "#c8923a"], land: "wald", lf: "#121c0a", licht: "#ffe080", lp: [.74, .2], teil: "pollen", tf: "#fff0b0" },
+    waldnacht: { h: ["#0a0614", "#170b20", "#22132a"], land: "wald", lf: "#05030a", licht: "#f0e0b0", lp: [.78, .2], mond: 1, sterne: 1, teil: "gluehw", tf: "#d8ff60" },
+    hoehle: { h: ["#060404", "#120c0a", "#1c130c"], land: "hoehle", lf: "#030202", licht: "#e0a050", lp: [.5, .55], teil: "tropfen", tf: "#d8e0b0" },
+    unterreich: { h: ["#08040c", "#160a1e", "#1e0e24"], land: "hoehle", lf: "#040206", licht: "#b060e0", lp: [.5, .6], teil: "sporen", tf: "#d090ff" },
+    kerker: { h: ["#080504", "#160c08", "#20120a"], land: "kerker", lf: "#040202", licht: "#ff8030", lp: [.22, .45], teil: "staub", tf: "#ffc890" },
+    wasser: { h: ["#140a1a", "#3a1a26", "#8a4a28"], land: "wasser", lf: "#0a120c", licht: "#ffb050", lp: [.5, .56], teil: "nebel", tf: "#f0dca0", sterne: 1 },
+    sumpf: { h: ["#0a0c08", "#161e0e", "#24301a"], land: "sumpf", lf: "#050704", licht: "#c8e070", lp: [.3, .3], mond: 1, teil: "gluehw", tf: "#b0ff70" },
+    tiefe: { h: ["#0e2a1c", "#06180e", "#020a06"], land: "tiefe", lf: "#020604", licht: "#e0ffb0", lp: [.5, -.05], teil: "blase", tf: "#d0ffe0" },
+    schmiede: { h: ["#120604", "#2a0e06", "#401a08"], land: "innen", lf: "#080302", licht: "#ff5010", lp: [.5, .78], teil: "funken", tf: "#ffd060" },
+    magie: { h: ["#0e0616", "#200c2e", "#2e1236"], land: "innen", lf: "#06030a", licht: "#c070ff", lp: [.5, .6], teil: "sporen", tf: "#f0c0ff" },
+    sakral: { h: ["#100a06", "#22160c", "#3a2614"], land: "boegen", lf: "#080503", licht: "#ffd070", lp: [.5, .35], teil: "staub", tf: "#ffe8b0" },
+    dorf: { h: ["#1a0c18", "#4a2020", "#a05a28"], land: "daecher", lf: "#0e0806", licht: "#ffb050", lp: [.24, .72], teil: "pollen", tf: "#ffe0a0" },
+    burg: { h: ["#0e0816", "#22122a", "#4a2620"], land: "burg", lf: "#060408", licht: "#ffe0a0", lp: [.8, .18], mond: 1, sterne: 1, teil: "staub", tf: "#f0dca0" },
+    berge: { h: ["#100a18", "#2c1a2a", "#6a3a30"], land: "berge", lf: "#0a0608", licht: "#ffc080", lp: [.66, .5], sterne: 1, teil: "nebel", tf: "#f0e4d0" },
+    kampf: { h: ["#120404", "#2a0a06", "#4a1408"], land: "huegel", lf: "#070202", licht: "#ff3010", lp: [.5, .82], teil: "glut", tf: "#ff8040" }
+  };
+  const WB_WELT = { taverne: "innen", schlaegerei: "innen", lagerfeuer: "feuer", zelt: "feuer", waldtag: "waldtag", waldnacht: "waldnacht", hoehle: "hoehle", mine: "hoehle", einsturz: "hoehle",
+    unterreich: "unterreich", kerker: "kerker", kueste: "wasser", ufer: "wasser", fluss: "wasser", hafen: "wasser", schiff: "wasser", sumpf: "sumpf", unterwasser: "tiefe", schmiede: "schmiede",
+    labor: "magie", zauber: "magie", schrei: "magie", bibliothek: "sakral", tempel: "sakral", chor: "sakral", glocke: "sakral", gong: "sakral", horn: "sakral", dorf: "dorf", markt: "dorf", strasse: "dorf",
+    burg: "burg", gebirge: "berge", kriegsschauplatz: "kampf", duell: "kampf", einschlag: "kampf", bruellen: "kampf", donner: "kampf", wirbel: "kampf" };
+  const WB_BAND = ["#ffc830", "#ff7a20", "#5ad08a", "#d090ff", "#ff9a80", "#e0b070", "#c8e070", "#f0dca0"];
+  const WB = { c: null, x: null, raf: 0, letzt: 0, bg: null, bgKey: "", teile: [], wetter: [], pegel: [], gesamt: 0, blitz: 0, naechsterBlitz: 0, bolzen: null, sprites: {} };
+  /* feste Zufallszahlen je Welt – die Landschaft sieht jedes Mal gleich aus */
+  const wbRnd = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  function wbSprite(farbe) {
+    if (WB.sprites[farbe]) return WB.sprites[farbe];
+    const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"), g = x.createRadialGradient(16, 16, 0, 16, 16, 16);
+    g.addColorStop(0, farbe); g.addColorStop(.25, farbe + "cc"); g.addColorStop(1, farbe + "00"); x.fillStyle = g; x.fillRect(0, 0, 32, 32); return (WB.sprites[farbe] = c);
   }
-  function zpRuheAus() { zpRuhe = false; document.documentElement.classList.remove("zyn-ruhe"); if (zpRuheEl) zpRuheEl.innerHTML = ""; zpZeichnen(true); ledsMelden(); }
+  function wbHintergrund(th, id, w, h) {
+    const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d"), r = wbRnd([...id].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) % 2147483646 + 1);
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, th.h[0]); g.addColorStop(.55, th.h[1]); g.addColorStop(1, th.h[2]); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    if (th.sterne) for (let i = 0; i < 90; i++) { x.fillStyle = "rgba(255,240,210," + (.15 + r() * .5).toFixed(2) + ")"; const sx = r() * w, sy = r() * h * .55, sz = r() < .1 ? 1.6 : .9; x.fillRect(sx, sy, sz, sz); }
+    if (th.mond) { const mx = th.lp[0] * w, my = th.lp[1] * h; const mg = x.createRadialGradient(mx, my, 0, mx, my, 70); mg.addColorStop(0, "rgba(255,240,200,.35)"); mg.addColorStop(1, "rgba(255,240,200,0)"); x.fillStyle = mg; x.fillRect(mx - 70, my - 70, 140, 140);
+      x.fillStyle = "#f4e6c0"; x.beginPath(); x.arc(mx, my, 15, 0, 7); x.fill(); x.fillStyle = "rgba(160,140,110,.35)"; [[-5, -3, 4], [4, 5, 3], [5, -6, 2], [-3, 7, 2]].forEach(([a, b, rr]) => { x.beginPath(); x.arc(mx + a, my + b, rr, 0, 7); x.fill(); }); }
+    const dunkler = (hex, f) => { const n = parseInt(hex.slice(1), 16); const k = v => Math.round(v * f).toString(16).padStart(2, "0"); return "#" + k(n >> 16) + k((n >> 8) & 255) + k(n & 255); };
+    const lf = th.lf, mitte = dunkler(th.h[2], .5);
+    const huegel = (y0, amp, farbe, glatt) => { x.fillStyle = farbe; x.beginPath(); x.moveTo(0, h); let y = y0; for (let px = 0; px <= w; px += 8) { y += (r() - .5) * amp; y = y0 + (y - y0) * glatt; x.lineTo(px, y); } x.lineTo(w, h); x.fill(); };
+    const baum = (bx, by, bh, farbe) => { x.fillStyle = farbe; x.beginPath(); x.moveTo(bx, by - bh); for (let k = 0; k < 4; k++) { const yy = by - bh + (k + 1) * bh / 4, br = bh * (.12 + k * .08); x.lineTo(bx + br, yy); x.lineTo(bx + br * .35, yy); } x.lineTo(bx + bh * .03, by); x.lineTo(bx - bh * .03, by); for (let k = 3; k >= 0; k--) { const yy = by - bh + (k + 1) * bh / 4, br = bh * (.12 + k * .08); x.lineTo(bx - br * .35, yy); x.lineTo(bx - br, yy); } x.closePath(); x.fill(); };
+    switch (th.land) {
+      case "wald": case "sumpf":
+        huegel(h * .72, 10, mitte, .9); for (let i = 0; i < 26; i++) baum(r() * w, h * (.74 + r() * .04), 40 + r() * 50, mitte);
+        huegel(h * .86, 8, lf, .85); for (let i = 0; i < 14; i++) baum(r() * w, h * (.9 + r() * .05), 70 + r() * 90, lf);
+        if (th.land === "sumpf") { x.strokeStyle = lf; x.lineWidth = 2; for (let i = 0; i < 40; i++) { const sx = r() * w, sh = 20 + r() * 40; x.beginPath(); x.moveTo(sx, h); x.quadraticCurveTo(sx + 4, h - sh * .6, sx + (r() - .5) * 14, h - sh); x.stroke(); } }
+        break;
+      case "berge": { const berg = (y0, hoch, farbe) => { x.fillStyle = farbe; x.beginPath(); x.moveTo(0, h); let px = 0; x.lineTo(0, y0); while (px < w) { const b = 60 + r() * 120; x.lineTo(px + b / 2, y0 - hoch * (.4 + r() * .6)); px += b; x.lineTo(px, y0 - r() * 20); } x.lineTo(w, h); x.fill(); };
+        berg(h * .7, h * .32, dunkler(th.h[2], .62)); berg(h * .82, h * .22, mitte); huegel(h * .92, 6, lf, .8); break; }
+      case "huegel": huegel(h * .74, 14, mitte, .9); huegel(h * .88, 10, lf, .85);
+        x.strokeStyle = lf; x.lineWidth = 2; for (let i = 0; i < 9; i++) { const sx = r() * w, sy = h * (.86 + r() * .06), l = 40 + r() * 40, a = -1.2 - r() * .6; x.beginPath(); x.moveTo(sx, sy); x.lineTo(sx + Math.cos(a) * l, sy + Math.sin(a) * l); x.stroke(); } break;
+      case "wasser": huegel(h * .58, 8, mitte, .9); x.fillStyle = dunkler(th.h[2], .35); x.fillRect(0, h * .62, w, h * .38);
+        if (r() < 2) { x.fillStyle = lf; x.beginPath(); x.moveTo(w * .08, h * .62); x.lineTo(w * .28, h * .62); x.lineTo(w * .25, h * .66); x.lineTo(w * .11, h * .66); x.fill(); x.fillRect(w * .175, h * .46, 2, h * .16); x.beginPath(); x.moveTo(w * .18, h * .47); x.lineTo(w * .25, h * .6); x.lineTo(w * .18, h * .6); x.fill(); } break;
+      case "tiefe": for (let i = 0; i < 7; i++) { const sx = r() * w; x.fillStyle = "rgba(230,255,200,.05)"; x.beginPath(); x.moveTo(sx, 0); x.lineTo(sx + 40 + r() * 60, 0); x.lineTo(sx - 60 + r() * 200, h); x.lineTo(sx - 120 + r() * 100, h); x.fill(); }
+        huegel(h * .86, 14, lf, .85); x.strokeStyle = lf; x.lineWidth = 3; for (let i = 0; i < 22; i++) { const sx = r() * w, sh = 40 + r() * 90; x.beginPath(); x.moveTo(sx, h); x.bezierCurveTo(sx + 14, h - sh * .3, sx - 14, h - sh * .6, sx + (r() - .5) * 20, h - sh); x.stroke(); } break;
+      case "hoehle": case "kerker":
+        x.fillStyle = lf; x.beginPath(); x.moveTo(0, 0); for (let px = 0; px <= w; px += 14) x.lineTo(px, 10 + r() * 30 + (r() < .2 ? 40 + r() * 70 : 0)); x.lineTo(w, 0); x.fill();
+        x.beginPath(); x.moveTo(0, h); for (let px = 0; px <= w; px += 16) x.lineTo(px, h - 14 - r() * 26 - (r() < .15 ? 30 + r() * 50 : 0)); x.lineTo(w, h); x.fill();
+        if (th.land === "kerker") { x.fillStyle = lf; for (let i = 0; i < 9; i++) x.fillRect(w * .58 + i * 26, h * .1, 6, h * .8); x.fillRect(w * .56, h * .1, 26 * 9 + 6, 8); x.fillRect(w * .56, h * .88, 26 * 9 + 6, 8);
+          x.fillStyle = dunkler(th.h[2], .3); x.fillRect(w * .16, h * .32, w * .12, h * .2); }
+        break;
+      case "innen": case "boegen": {
+        x.fillStyle = lf; x.fillRect(0, h * .9, w, h * .1);
+        if (th.land === "innen") { for (let i = 0; i < 4; i++) x.fillRect(w * (.04 + i * .31), 0, 16, h); x.fillRect(0, h * .08, w, 14); x.fillRect(0, h * .3, w, 8);
+          x.fillStyle = dunkler(th.h[2], .22); x.beginPath(); x.moveTo(w * .4, h * .9); x.lineTo(w * .4, h * .55); x.quadraticCurveTo(w * .5, h * .42, w * .6, h * .55); x.lineTo(w * .6, h * .9); x.fill(); }
+        else { for (let i = 0; i < 5; i++) { const bx = w * (i / 4), bw = w * .1; x.fillRect(bx - bw / 2, h * .25, bw, h * .7); }
+          x.beginPath(); x.moveTo(0, 0); x.lineTo(w, 0); x.lineTo(w, h * .3); for (let i = 4; i >= 1; i--) { const a = w * (i / 4), b = w * ((i - 1) / 4); x.lineTo(a - w * .05, h * .3); x.quadraticCurveTo((a + b) / 2, h * .02, b + w * .05, h * .3); } x.lineTo(0, h * .3); x.fill(); }
+        break; }
+      case "daecher": case "burg":
+        huegel(h * .8, 6, mitte, .9); x.fillStyle = lf;
+        if (th.land === "burg") { const bx = w * .3, by = h * .82; x.fillRect(bx, by - h * .3, w * .4, h * .3); for (let i = 0; i < 4; i++) { const tx = bx - 20 + i * (w * .4 / 3); x.fillRect(tx, by - h * .46, 40, h * .46); for (let z = 0; z < 4; z++) x.fillRect(tx + z * 11, by - h * .5, 7, 8); }
+          for (let z = 0; z < 16; z++) x.fillRect(bx + z * (w * .4 / 16), by - h * .33, 10, 8); }
+        else { let px = 0; while (px < w) { const b = 50 + r() * 70, hh = 40 + r() * 60, by = h * .9; x.fillRect(px, by - hh, b - 6, hh + 20); x.beginPath(); x.moveTo(px - 6, by - hh); x.lineTo(px + (b - 6) / 2, by - hh - 30 - r() * 20); x.lineTo(px + b, by - hh); x.fill();
+            if (r() < .6) { x.fillStyle = "rgba(255,190,90,.55)"; x.fillRect(px + b * .3, by - hh * .6, 9, 11); x.fillStyle = lf; } px += b + 8; } }
+        x.fillRect(0, h * .92, w, h * .08); break;
+    }
+    return c;
+  }
+  function wbTeilchen(th, w, h, neu) {
+    const p = neu || {}, a = th.teil, R = Math.random;
+    p.l = 0; p.max = 3 + R() * 6; p.g = 2 + R() * 3;
+    if (a === "glut") { p.x = w * (th.lp[0] + (R() - .5) * .5); p.y = h * (th.lp[1] + R() * .05); p.vx = (R() - .5) * 12; p.vy = -20 - R() * 40; }
+    else if (a === "funken") { p.x = w * th.lp[0] + (R() - .5) * 40; p.y = h * th.lp[1]; const ang = -Math.PI / 2 + (R() - .5) * 1.6, v = 80 + R() * 160; p.vx = Math.cos(ang) * v; p.vy = Math.sin(ang) * v; p.max = .8 + R() * 1.2; p.g = 1.5 + R() * 1.5; }
+    else if (a === "tropfen") { p.x = R() * w; p.y = 30 + R() * 30; p.vx = 0; p.vy = 0; p.max = 4; p.g = 1.6; }
+    else if (a === "blase") { p.x = R() * w; p.y = h + 10; p.vx = 0; p.vy = -25 - R() * 40; p.g = 2 + R() * 5; p.max = 14; }
+    else if (a === "nebel") { p.x = R() * w; p.y = h * (.55 + R() * .4); p.vx = 6 + R() * 10; p.vy = 0; p.g = 50 + R() * 70; p.max = 12 + R() * 10; }
+    else if (a === "pollen") { p.x = R() * w; p.y = R() * h; p.vx = 6 + R() * 10; p.vy = 3 + R() * 6; p.g = 1.5 + R() * 2; p.max = 6 + R() * 6; }
+    else if (a === "sporen") { p.x = R() * w; p.y = h * (.5 + R() * .5); p.vx = (R() - .5) * 6; p.vy = -6 - R() * 10; p.g = 2 + R() * 3; p.max = 6 + R() * 6; }
+    else { p.x = R() * w; p.y = R() * h; p.vx = (R() - .5) * 8; p.vy = (R() - .5) * 8; p.g = a === "gluehw" ? 2.5 + R() * 2 : 1 + R() * 1.5; p.max = 4 + R() * 6; }
+    p.ph = R() * 6.3; return p;
+  }
+  function wbStart() {
+    if (SEITE !== "welten") return;
+    if (!WB.c) { WB.c = document.createElement("canvas"); WB.c.className = "zp-weltbild"; document.body.appendChild(WB.c); WB.x = WB.c.getContext("2d"); }
+    WB.c.style.display = "block"; WB.letzt = 0; if (!WB.raf) WB.raf = requestAnimationFrame(wbBild);
+  }
+  function wbStop() { if (WB.raf) cancelAnimationFrame(WB.raf); WB.raf = 0; if (WB.c) WB.c.style.display = "none"; }
+  function wbBild(jetzt) {
+    WB.raf = 0; if (!zpRuhe || SEITE !== "welten") { wbStop(); return; }
+    WB.raf = requestAnimationFrame(wbBild);
+    if (jetzt - WB.letzt < 32) return; const dt = Math.min(.1, WB.letzt ? (jetzt - WB.letzt) / 1000 : .033); WB.letzt = jetzt;
+    const c = WB.c, x = WB.x, w = window.innerWidth, h = window.innerHeight; if (c.width !== w || c.height !== h) { c.width = w; c.height = h; WB.bgKey = ""; }
+    const m = wMix() || {}, id = m.welt ? m.welt.id : "_still", th = WB_TH[WB_WELT[id]] || (m.welt && m.welt.episch ? WB_TH.kampf : WB_TH.berge), t = jetzt / 1000;
+    if (WB.bgKey !== id + w + "x" + h) { WB.bg = wbHintergrund(th, id, w, h); WB.bgKey = id + w + "x" + h; WB.teile = []; WB.th = th; }
+    let p = null; try { const a = WA(); p = a && a.pegel ? a.pegel() : null; } catch (_) {}
+    const lv = v => Math.max(0, Math.min(1, ((v > 1e-5 ? 20 * Math.log10(v) : -90) + 54) / 48));
+    const g = p ? lv(p.gesamt) : 0; WB.gesamt += ((g > WB.gesamt ? .5 : .08)) * (g - WB.gesamt);
+    const bet = (m.betten || []), n = Math.min(8, bet.length);
+    for (let i = 0; i < n; i++) { const z = p && p.betten ? lv(p.betten[i] || 0) : 0; WB.pegel[i] = (WB.pegel[i] || 0) + (z > (WB.pegel[i] || 0) ? .35 : .06) * (z - (WB.pegel[i] || 0)); }
+    x.globalCompositeOperation = "source-over"; x.globalAlpha = 1; x.drawImage(WB.bg, 0, 0);
+    /* Lichtquelle (Feuer, Mond, Kerzen …) atmet mit dem Gesamtpegel */
+    const lx = th.lp[0] * w, ly = th.lp[1] * h, rad = Math.max(w, h) * (.28 + WB.gesamt * .22 + Math.sin(t * 1.7) * .015);
+    x.globalCompositeOperation = "lighter"; const lg = x.createRadialGradient(lx, ly, 0, lx, ly, rad);
+    lg.addColorStop(0, th.licht + "66"); lg.addColorStop(.35, th.licht + "22"); lg.addColorStop(1, th.licht + "00"); x.fillStyle = lg; x.globalAlpha = .45 + WB.gesamt * .55; x.fillRect(0, 0, w, h);
+    /* die Schichten als Lichtbänder */
+    for (let i = 0; i < n; i++) {
+      const L = WB.pegel[i] || 0, ruht = bet[i].ruht || !bet[i].v, base = h * (.3 + i * (.4 / Math.max(1, n))), A = 3 + L * 34, k1 = .006 + i * .0013, s1 = .5 + i * .17;
+      x.globalAlpha = ruht ? .06 : .1 + L * .55; x.strokeStyle = WB_BAND[i % WB_BAND.length]; x.lineWidth = 1 + L * 3.5; x.beginPath();
+      for (let px = -10; px <= w + 10; px += 14) { const y = base + Math.sin(px * k1 + t * s1 + i * 1.3) * A + Math.sin(px * k1 * 2.3 - t * .8 + i) * A * .45; px < 0 ? x.moveTo(px, y) : x.lineTo(px, y); }
+      x.stroke(); x.globalAlpha *= .35; x.lineWidth *= 4; x.stroke();
+    }
+    /* Teilchen */
+    const ziel = { glut: 60, funken: 50, staub: 50, gluehw: 26, pollen: 40, tropfen: 6, blase: 26, sporen: 40, nebel: 10 }[th.teil] || 30;
+    while (WB.teile.length < ziel) WB.teile.push(wbTeilchen(th, w, h));
+    const spr = wbSprite(th.tf), schub = 1 + WB.gesamt * 1.5;
+    for (const q of WB.teile) {
+      q.l += dt; if (q.l > q.max || q.y < -60 || q.y > h + 60 || q.x < -120 || q.x > w + 120) { wbTeilchen(th, w, h, q); continue; }
+      if (th.teil === "funken" || th.teil === "tropfen") q.vy += (th.teil === "funken" ? 120 : 260) * dt;
+      if (th.teil === "glut" || th.teil === "sporen" || th.teil === "blase") q.vx += Math.sin(t * 2 + q.ph) * 8 * dt;
+      if (th.teil === "gluehw" || th.teil === "staub") { q.vx += (Math.random() - .5) * 20 * dt; q.vy += (Math.random() - .5) * 20 * dt; q.vx *= .99; q.vy *= .99; }
+      q.x += q.vx * dt * schub; q.y += q.vy * dt * schub;
+      const leben = Math.min(1, q.l / .4, (q.max - q.l) / .8);
+      let al = leben * (th.teil === "gluehw" ? Math.max(0, Math.sin(t * 2.2 + q.ph)) : th.teil === "nebel" ? .14 : .75);
+      if (th.teil === "tropfen") { x.globalAlpha = .7 * leben; x.strokeStyle = th.tf; x.lineWidth = 1.4; x.beginPath(); x.moveTo(q.x, q.y); x.lineTo(q.x, q.y - 6 - q.vy * .03); x.stroke(); continue; }
+      if (th.teil === "blase") { x.globalAlpha = .45 * leben; x.strokeStyle = th.tf; x.lineWidth = 1; x.beginPath(); x.arc(q.x, q.y, q.g, 0, 7); x.stroke(); continue; }
+      x.globalAlpha = al; const d = q.g * 4; x.drawImage(spr, q.x - d / 2, q.y - d / 2, d, d);
+    }
+    /* Wetter */
+    const wt = m.wetter, regen = { niesel: 40, regen: 110, gewitter: 160, sturm: 140 }[wt] || 0, schnee = wt === "schnee" ? 90 : 0, wind = wt === "wind" ? 18 : wt === "sturm" ? 10 : 0;
+    const wz = regen || schnee || wind; while (WB.wetter.length < wz) WB.wetter.push({ x: Math.random() * w, y: Math.random() * h, v: .6 + Math.random() * .6 }); if (WB.wetter.length > wz) WB.wetter.length = wz;
+    if (wz) {
+      const schraeg = wt === "sturm" ? .55 : wt === "wind" ? 1 : .12; x.lineWidth = schnee ? 0 : 1;
+      x.strokeStyle = "rgba(235,225,205,1)"; x.fillStyle = "rgba(250,245,235,1)"; x.beginPath();
+      for (const q of WB.wetter) {
+        if (wind && !regen) { q.x += 420 * q.v * dt; q.y += 10 * dt; if (q.x > w + 80) { q.x = -80; q.y = Math.random() * h; } x.moveTo(q.x, q.y); x.lineTo(q.x - 60 * q.v, q.y - 2); continue; }
+        if (schnee) { q.y += 40 * q.v * dt; q.x += Math.sin(t + q.v * 9) * 14 * dt; if (q.y > h) { q.y = -4; q.x = Math.random() * w; } x.moveTo(q.x + 1.6 * q.v, q.y); x.arc(q.x, q.y, 1.6 * q.v, 0, 7); continue; }
+        q.y += 620 * q.v * dt; q.x += 620 * q.v * schraeg * dt; if (q.y > h) { q.y = -20; q.x = Math.random() * w * 1.2 - w * .2; }
+        x.moveTo(q.x, q.y); x.lineTo(q.x - 14 * schraeg, q.y - 14);
+      }
+      x.globalAlpha = schnee ? .75 : wind && !regen ? .12 : .28; schnee ? x.fill() : x.stroke();
+    }
+    /* Gewitter: ab und zu ein Blitz */
+    if (wt === "gewitter" || wt === "sturm") {
+      if (!WB.naechsterBlitz) WB.naechsterBlitz = t + 4 + Math.random() * 8;
+      if (t > WB.naechsterBlitz) { WB.blitz = 1; WB.naechsterBlitz = t + 5 + Math.random() * 10; let bx = w * (.15 + Math.random() * .7), by = 0; WB.bolzen = [[bx, by]]; while (by < h * .6) { by += 20 + Math.random() * 30; bx += (Math.random() - .5) * 50; WB.bolzen.push([bx, by]); } }
+    } else WB.naechsterBlitz = 0;
+    if (WB.blitz > .02) {
+      x.globalAlpha = WB.blitz * .35; x.fillStyle = "#f6ecff"; x.fillRect(0, 0, w, h);
+      if (WB.bolzen && WB.blitz > .5) { x.globalAlpha = WB.blitz; x.strokeStyle = "#fff8ff"; x.lineWidth = 2.5; x.beginPath(); WB.bolzen.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.stroke(); }
+      WB.blitz *= Math.pow(.02, dt);
+    }
+    x.globalAlpha = 1; x.globalCompositeOperation = "source-over";
+    /* weicher Rand unten, damit Schrift lesbar bleibt */
+    const vg = x.createLinearGradient(0, h * .7, 0, h); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)"); x.fillStyle = vg; x.fillRect(0, h * .7, w, h * .3);
+  }
+  function zpRuheAn() {
+    if (zpRuhe || $(".zyn-menue")) return; zpRuhe = true; document.documentElement.classList.add("zyn-ruhe"); zpRuheZeichnen(); ledsMelden(); if (SEITE === "welten") wbStart();
+  }
+  function zpRuheAus() { zpRuhe = false; wbStop(); document.documentElement.classList.remove("zyn-ruhe"); if (zpRuheEl) zpRuheEl.innerHTML = ""; zpZeichnen(true); ledsMelden(); }
   function zpRuheZeichnen() {
     if (!zpRuheEl || !zpRuhe) return;
     const z = pz() || {}, L = window.ImresPult && window.ImresPult.listen ? window.ImresPult.listen() : null;
@@ -2546,7 +2715,7 @@ html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
 /* Rechenzeit sparen: alles, was unter dem Pult liegt, bewegt sich nicht und wird nicht gemalt */
 html.zyn-pult body *:not(.lw-buehne, .lw-buehne *, .zp, .zp *, .zp-ruhe, .zp-ruhe *, .zyn-osd, .zyn-osd *, .zyn-menue, .zyn-menue *) { animation: none !important; transition: none !important; }
 html.zyn-pult body canvas:not(.lw-buehne canvas), html.zyn-pult body video { display: none !important; }
-html.zyn-pult body > *:not(.zp, .zp-ruhe, .zyn-osd, .zyn-menue, .zyn-update, #imres-logo, script, style) { content-visibility: hidden; }
+html.zyn-pult body > *:not(.zp, .zp-ruhe, .zp-weltbild, .zyn-osd, .zyn-menue, .zyn-update, #imres-logo, script, style) { content-visibility: hidden; }
 html.zyn-pult.zyn-bb body > *:has(.lw-buehne), html.zyn-pult.zyn-ruhe body > *:has(.lw-buehne) { content-visibility: visible; }
 html.zyn-pult .zyn-leiste { display: none !important; }
 /* Bühnenbild: hinter dem Pult (gedimmt) und als Ruhebild */
@@ -2554,7 +2723,7 @@ html.zyn-pult .zyn-leiste { display: none !important; }
 html.zyn-pult.zyn-bb body *, html.zyn-pult.zyn-ruhe body * { visibility: hidden !important; }
 html.zyn-pult.zyn-pult body .lw-buehne, html.zyn-pult.zyn-pult body .lw-buehne *,
 html.zyn-pult.zyn-pult body .zp, html.zyn-pult.zyn-pult body .zp *, html.zyn-pult.zyn-pult body .zp-ruhe, html.zyn-pult.zyn-pult body .zp-ruhe *,
-html.zyn-pult.zyn-pult body .zyn-osd, html.zyn-pult.zyn-pult body .zyn-osd *, html.zyn-pult.zyn-pult body .zyn-menue, html.zyn-pult.zyn-pult body .zyn-menue * { visibility: visible !important; }
+html.zyn-pult.zyn-pult body .zp-weltbild, html.zyn-pult.zyn-pult body .zyn-osd, html.zyn-pult.zyn-pult body .zyn-osd *, html.zyn-pult.zyn-pult body .zyn-menue, html.zyn-pult.zyn-pult body .zyn-menue * { visibility: visible !important; }
 html.zyn-pult.zyn-bb body::before, html.zyn-pult.zyn-bb body::after, html.zyn-pult.zyn-ruhe body::before, html.zyn-pult.zyn-ruhe body::after { display: none !important; }
 html.zyn-pult.zyn-ruhe body, html.zyn-pult.zyn-bb body { background: #0d0a10 !important; }
 html.zyn-pult.zyn-pult.zyn-bb #lautenwerk .lw-buehne.lw-buehne, html.zyn-pult.zyn-pult.zyn-ruhe #lautenwerk .lw-buehne.lw-buehne {
@@ -2566,6 +2735,9 @@ html.zyn-pult.zyn-bb .zp-regler { background: rgba(22, 17, 29, .86); }
 html.zyn-pult.zyn-bb .zp-k { background: rgba(29, 23, 38, .78) !important; }
 html.zyn-ruhe .zp { opacity: 0; pointer-events: none; transition: opacity .8s; }
 .zp { transition: opacity .25s; }
+.zp-weltbild { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 2147482490; display: none; pointer-events: none; }
+html:not(.zyn-ruhe) .zp-weltbild { display: none !important; }
+html.zyn-pult.zyn-ruhe.zyn-welten body canvas.zp-weltbild { display: block !important; visibility: visible !important; opacity: 1 !important; }
 .zp-ruhe { position: fixed; inset: 0; z-index: 2147482500; display: none; pointer-events: auto; color: #ebe2cc; font: 600 16px/1.2 system-ui, sans-serif; }
 html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-ruhe .zr-kopf { position: absolute; left: 14px; top: 12px; padding: 8px 14px; border-radius: 12px; background: rgba(14, 10, 18, .55); border: 1px solid rgba(255, 200, 48, .35); }
@@ -2787,5 +2959,5 @@ html.zyn-ruhe .zp-ruhe { display: block; }
   if (SEITE === "buehne") setTimeout(() => { const r = $("#lautenwerk"); if (r) r.scrollIntoView({ block: "start" }); }, 600);
   fetch("/zyn/status").then(r => r.json()).then(j => { aufnahmeAn = !!j.aufnahme; leisteZeichnen(); }).catch(() => {});
   leisteZeichnen(); ledsMelden();
-  window.ImresZyn = { _test: { tonhoehe, tonartErkennen, stimmgeraet, get opt() { return OPT; }, autoSofort(art) { if (art === "mom") autoMom = 1; else if (art === "sp") autoSp = 1; else autoSt = 1; }, autoSetzen: m => autoSetzen(m) }, messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
+  window.ImresZyn = { _test: { ruhe: () => zpRuheAn(), tonhoehe, tonartErkennen, stimmgeraet, get opt() { return OPT; }, autoSofort(art) { if (art === "mom") autoMom = 1; else if (art === "sp") autoSp = 1; else autoSt = 1; }, autoSetzen: m => autoSetzen(m) }, messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
 })();
