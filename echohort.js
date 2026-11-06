@@ -42,7 +42,7 @@
     de: {
       label: "Druiden-Probe", titel: "Echos Hort",
       text: "Echo schleudert seine Ranke in die Tiefe, verwandelt sich in Rabe, Bär oder Ratte und rafft zusammen, was glänzt. Danach kommen die Plünderer, und der Hain muss den Hort verteidigen. Neun Gebiete wie in unserer Kampagne, viele Level, noch mehr Verbesserungen.",
-      steuerung: "Raubzug: Tippe, um die Ranke zu schleudern, die Knöpfe unten verwandeln Echo. Abwehr: Tippe auf einen Pflanzplatz, um einen Wächter wachsen zu lassen, und irgendwo auf die Karte für einen Feuerball.",
+      steuerung: "Raubzug: Tippe, um die Ranke zu schleudern, die Knöpfe unten verwandeln Echo. Abwehr: Tippe auf einen Pflanzplatz, um einen Wächter wachsen zu lassen, und irgendwo auf die Karte für einen Feuerball. Tasten: F = Tempo, G = Wildgestalt.",
       neu: "▶ Neuer Raubzug", fortsetzen: (g, l) => "▶ Fortsetzen · " + g + " " + l + "/3", fortsetzenEndlos: n => "▶ Fortsetzen · Endlos, Runde " + n,
       weiter: "▶ Weiter", los: "▶ Los!", nochmal: "↻ Neuer Raubzug", beenden: "Raubzug beenden", zumHain: "▶ In den Hain", zurAbwehr: "▶ Den Hort verteidigen", nochmalLevel: "↻ Level wiederholen",
       neuWarnung: "Dein gespeicherter Raubzug geht dabei verloren.",
@@ -106,7 +106,7 @@
           blitz: (w, st) => "Springt auf " + w.ziele[st] + " Ziele, jedes Mal etwas schwächer",
           pilz: (w, st) => w.ziele[st] + " Sporenbälle · vergiften alle im Umkreis für 3 s"
         },
-        kombo: { wurzel: "Kombo: Wölfe beißen Verwurzelte doppelt.", wolf: "Kombo: beißt Verwurzelte doppelt.", eis: "Kombo: Blitze treffen Gefrorene ×1,5.", blitz: "Kombo: ×1,5 gegen Gefrorene.", pilz: "Kombo: Feuer lässt Vergiftete explodieren." } },
+        kombo: { dorn: "Kombo: Splitterdorn mit Eis, Dornenkäfig mit Wurzeln.", wurzel: "Kombo: Wurzelhatz mit Wölfen, Dornenkäfig mit Dornen.", wolf: "Kombo Wurzelhatz: beißt Verwurzelte doppelt.", eis: "Kombo: Schockfrost mit Blitz, Splitterdorn mit Dornen.", blitz: "Kombo: Schockfrost gegen Gefrorene, Pilzgewitter gegen Vergiftete.", pilz: "Kombo: Sporenbrand mit Feuer, Pilzgewitter mit Blitz." } },
       gesperrt: "Gesperrt",
       raubFertig: "Der Raubzug ist vorbei",
       raubWerte: { beute: "Beute", gier: "Gier", saat: "Saat", schaetze: "Schätze" },
@@ -194,6 +194,33 @@
       raubHinweis: "Wer Gold stiehlt, rennt damit zum Eingang zurück. Halte ihn auf, dann ist es wieder deins!",
       schnell: ["⏩ ×2", "⏩ ×3", "▶ ×1"],
       wieZuletzt: "↺ Wie zuletzt", zurueckBeutel: "↩ in den Beutel", gefahr: "Nächste Welle",
+      tempoKnopf: n => "Tempo ×" + n + " (Taste F)",
+      wegVorschau: { boden: "zu Fuß", luft: "aus der Luft", geister: "👻 Die Geister zeigen, wo die nächste Welle langläuft" },
+      kombos: {
+        schockfrost: ["Schockfrost", "Blitz trifft Gefrorene ×1,5 – und die Eissplitter springen auf Nachbarn über!"],
+        dornenkaefig: ["Dornenkäfig", "Dornen gegen Verwurzelte ×1,4 – festgenagelt blutet es sich besonders schön."],
+        wurzelhatz: ["Wurzelhatz", "Wölfe beißen Verwurzelte doppelt. Wer nicht weglaufen kann, wird zum Snack."],
+        splitterdorn: ["Splitterdorn", "Dornen zerschmettern Gefrorene ×1,5. Klirr!"],
+        pilzgewitter: ["Pilzgewitter", "Blitz entzündet Vergiftete: Die Sporen verpuffen in einer Stichflamme."],
+        sporenbrand: ["Sporenbrand", "Feuer lässt Vergiftete explodieren. Echo nennt das Gartenpflege."]
+      },
+      komboNeu: "Kombo entdeckt!",
+      gestalt: {
+        knopf: "Wildgestalt", bereit: "bereit · G", frei: "🐾 Wildgestalt im Kampf",
+        formen: {
+          wolf: ["Echo-Wolf", "Hetzt von Plünderer zu Plünderer. Sein Heulen lässt den ganzen Hain schneller zuschlagen.", "AWUUUUH!"],
+          eule: ["Echo-Eule", "Jagt Flieger, sieht Unsichtbare und schnappt sich gestohlenes Gold zurück.", "Huhu! Ich seh dich!"],
+          kroete: ["Echo-Kröte", "Zieht Plünderer mit der Zunge zurück. Kleine verschluckt sie ganz.", "Quaaak!"],
+          salamander: ["Echo-Salamander", "Flitzt über den Weg und hinterlässt eine brennende Spur.", "Heiß, heiß, MEINS!"]
+        },
+        happs: "Happs!", heulen: "Der Hain heult mit!", zurueck: "Echo ist wieder Echo."
+      },
+      stimmung: {
+        fruehling: "🌸 Frühling", sommer: "🌻 Hochsommer", herbst: "🍂 Herbst", sturm: "🌧️ Sturmherbst", winter: "❄️ Winter",
+        ewig: "🍄 Ewige Nacht", runen: "✨ Runenglühen", glut: "🔥 Gluthitze", drache: "🐉 Drachenatem",
+        morgen: "Morgengrauen", mittag: "Mittagssonne", abend: "Abendrot", nacht: "Mondnacht",
+        hell: "die Leuchtpilze strahlen", dunkel: "tiefste Finsternis", hitze: "brütende Hitze"
+      },
       zinsenText: n => "🐿 Ungenutzte Saat bringt nach der Welle +" + n + " 🌱 Zinsen", zinsen: n => "+" + n + " 🌱 Zinsen",
       erspart: n => "🐿 Ersparnis: +" + n + " 🌱 fürs nächste Level", ersparnisStart: n => "🐿 +" + n + " 🌱 Ersparnis", ersparnisWert: "Ersparnis",
       elite: "Elite", eliteArt: { panzer: "gepanzert", flink: "flink", teilung: "teilt sich", heilung: "heilt sich", schild: "mit Schild" },
@@ -275,7 +302,7 @@
     en: {
       label: "Druid check", titel: "Echo's Hoard",
       text: "Echo hurls his vine into the depths, turns into raven, bear or rat and grabs whatever glitters. Then the plunderers come, and the grove must defend the hoard. Nine regions like in our campaign, many levels, even more upgrades.",
-      steuerung: "Raid: tap to hurl the vine, the buttons below transform Echo. Defence: tap a planting spot to grow a guardian, and anywhere on the map for a fireball.",
+      steuerung: "Raid: tap to hurl the vine, the buttons below transform Echo. Defence: tap a planting spot to grow a guardian, and anywhere on the map for a fireball. Keys: F = speed, G = wild shape.",
       neu: "▶ New raid", fortsetzen: (g, l) => "▶ Continue · " + g + " " + l + "/3", fortsetzenEndlos: n => "▶ Continue · Endless, round " + n,
       weiter: "▶ Continue", los: "▶ Go!", nochmal: "↻ New raid", beenden: "End raid", zumHain: "▶ To the grove", zurAbwehr: "▶ Defend the hoard", nochmalLevel: "↻ Retry level",
       neuWarnung: "Your saved raid will be lost.",
@@ -339,7 +366,7 @@
           blitz: (w, st) => "Jumps to " + w.ziele[st] + " targets, a little weaker each time",
           pilz: (w, st) => w.ziele[st] + " spore balls · poison everyone nearby for 3 s"
         },
-        kombo: { wurzel: "Combo: wolves bite rooted foes twice as hard.", wolf: "Combo: double bite against rooted foes.", eis: "Combo: lightning hits frozen foes ×1.5.", blitz: "Combo: ×1.5 against frozen foes.", pilz: "Combo: fire makes poisoned foes explode." } },
+        kombo: { dorn: "Combo: Shard Thorn with ice, Thorn Cage with roots.", wurzel: "Combo: Root Hunt with wolves, Thorn Cage with thorns.", wolf: "Root Hunt combo: double bite against rooted foes.", eis: "Combo: Shock Frost with lightning, Shard Thorn with thorns.", blitz: "Combo: Shock Frost on frozen foes, Toadstool Storm on poisoned ones.", pilz: "Combo: Spore Blaze with fire, Toadstool Storm with lightning." } },
       gesperrt: "Locked",
       raubFertig: "The raid is over",
       raubWerte: { beute: "Loot", gier: "Greed", saat: "Seeds", schaetze: "Treasures" },
@@ -427,6 +454,33 @@
       raubHinweis: "Whoever steals gold runs back to the entrance with it. Stop them and it's yours again!",
       schnell: ["⏩ ×2", "⏩ ×3", "▶ ×1"],
       wieZuletzt: "↺ As before", zurueckBeutel: "↩ back to pouch", gefahr: "Next wave",
+      tempoKnopf: n => "Speed ×" + n + " (key F)",
+      wegVorschau: { boden: "on foot", luft: "by air", geister: "👻 The ghosts show where the next wave will walk" },
+      kombos: {
+        schockfrost: ["Shock Frost", "Lightning hits frozen foes ×1.5 – and the ice shards leap to their neighbours!"],
+        dornenkaefig: ["Thorn Cage", "Thorns vs. rooted foes ×1.4 – nailed down, they bleed beautifully."],
+        wurzelhatz: ["Root Hunt", "Wolves bite rooted foes twice as hard. Can't run? Then you're a snack."],
+        splitterdorn: ["Shard Thorn", "Thorns shatter frozen foes ×1.5. Clink!"],
+        pilzgewitter: ["Toadstool Storm", "Lightning ignites poisoned foes: the spores go up in a flash fire."],
+        sporenbrand: ["Spore Blaze", "Fire makes poisoned foes explode. Echo calls it gardening."]
+      },
+      komboNeu: "Combo discovered!",
+      gestalt: {
+        knopf: "Wild shape", bereit: "ready · G", frei: "🐾 Wild shape in battle",
+        formen: {
+          wolf: ["Echo-Wolf", "Hounds plunderer after plunderer. His howl makes the whole grove strike faster.", "AWOOOOO!"],
+          eule: ["Echo-Owl", "Hunts flyers, sees the invisible and snatches back stolen gold.", "Hoo! I see you!"],
+          kroete: ["Echo-Toad", "Yanks plunderers back with his tongue. Small ones get swallowed whole.", "Croooak!"],
+          salamander: ["Echo-Salamander", "Darts down the path, leaving a burning trail.", "Hot, hot, MINE!"]
+        },
+        happs: "Gulp!", heulen: "The grove howls along!", zurueck: "Echo is Echo again."
+      },
+      stimmung: {
+        fruehling: "🌸 Spring", sommer: "🌻 High summer", herbst: "🍂 Autumn", sturm: "🌧️ Storm season", winter: "❄️ Winter",
+        ewig: "🍄 Eternal night", runen: "✨ Rune glow", glut: "🔥 Searing heat", drache: "🐉 Dragon's breath",
+        morgen: "Daybreak", mittag: "Noon sun", abend: "Sunset", nacht: "Moonlit night",
+        hell: "the glowmushrooms shine", dunkel: "pitch dark", hitze: "brooding heat"
+      },
       zinsenText: n => "🐿 Unspent seeds earn +" + n + " 🌱 interest after the wave", zinsen: n => "+" + n + " 🌱 interest",
       erspart: n => "🐿 Savings: +" + n + " 🌱 for the next level", ersparnisStart: n => "🐿 +" + n + " 🌱 savings", ersparnisWert: "Savings",
       elite: "Elite", eliteArt: { panzer: "armoured", flink: "swift", teilung: "splits", heilung: "regenerates", schild: "shielded" },
@@ -675,6 +729,42 @@
     schild:  { sym: "🔰", farbe: "#e0a046", hp: 1.4, schild: 0.7 }
   };
   const ELITE_REIHE = Object.keys(ELITE);
+  /* ===== Kombos: zwei Wächter (oder Wächter und Zauber) greifen ineinander =====
+     paar: welche Wächter dafür zusammenarbeiten (null = Echos Feuer). Beim ersten Auslösen im Raubzug gibt es eine Einblendung. */
+  const KOMBOS = {
+    schockfrost:  { sym: "❄️⚡", farbe: "#f4efe2", paar: ["eis", "blitz"] },
+    splitterdorn: { sym: "🌿❄️", farbe: "#e6efd2", paar: ["dorn", "eis"] },
+    dornenkaefig: { sym: "🌿🌳", farbe: "#a8d060", paar: ["dorn", "wurzel"] },
+    wurzelhatz:   { sym: "🐺🌳", farbe: "#e0b070", paar: ["wolf", "wurzel"] },
+    pilzgewitter: { sym: "🍄⚡", farbe: "#f3e27a", paar: ["pilz", "blitz"] },
+    sporenbrand:  { sym: "🍄☄️", farbe: "#ff8a3a", paar: ["pilz", null] }
+  };
+  const KOMBO_PAARE = Object.keys(KOMBOS).filter(k => KOMBOS[k].paar[1]).map(k => ({ k, a: KOMBOS[k].paar[0], b: KOMBOS[k].paar[1] }));
+  /* ===== Echos Wildgestalt im Kampf: aktive Fähigkeit mit Abklingzeit, die Tierform passt zum Gebiet ===== */
+  const GESTALT = {
+    wolf:       { sym: "🐺", farbe: "#efe6d2", tempo: 250, reich: 16, takt: 0.34, schaden: 30 },
+    eule:       { sym: "🦉", farbe: "#e0b860", tempo: 230, reich: 18, takt: 0.5, schaden: 34 },
+    kroete:     { sym: "🐸", farbe: "#a8d060", tempo: 140, reich: 82, takt: 0.85, schaden: 46 },
+    salamander: { sym: "🦎", farbe: "#ff8a3a", tempo: 190, reich: 15, takt: 0.42, schaden: 24 }
+  };
+  const GESTALT_GEBIET = { wald: "wolf", phandalin: "wolf", wachturm: "eule", schmiede: "salamander", donnerbaum: "kroete", unterreich: "eule", see: "kroete", gracklstugh: "salamander", hort: "salamander" };
+  const GESTALT_AB = 1, GESTALT_DAUER = 8, GESTALT_CD = 40;
+  /* ===== Stimmung je Gebiet: Jahreszeit und (zufällig je Durchlauf) Tageszeit, Wind, Dichte der Partikel ===== */
+  const STIMMUNG = {
+    wald: { s: "fruehling", draussen: true }, phandalin: { s: "sommer", draussen: true }, wachturm: { s: "herbst", draussen: true },
+    schmiede: { s: "runen" }, donnerbaum: { s: "sturm", draussen: true }, unterreich: { s: "ewig" },
+    see: { s: "winter", draussen: true }, gracklstugh: { s: "glut" }, hort: { s: "drache" }
+  };
+  /* dunkel: Zuschlag zur Dunkelheit · ton: Farbschleier · seite: von wo das Licht kommt (-1 links, 1 rechts) */
+  const ZEITEN = {
+    morgen: { dunkel: 0.02, ton: "255,176,150", a: 0.13, seite: -1, himmel: ["#2a1c26", "#7a5050"] },
+    mittag: { dunkel: -0.12, ton: "255,240,200", a: 0.07, seite: 0, himmel: ["#30302a", "#6a6a52"] },
+    abend:  { dunkel: 0.04, ton: "255,120,60", a: 0.15, seite: 1, himmel: ["#2a1410", "#8a3a1e"] },
+    nacht:  { dunkel: 0.15, ton: "60,40,92", a: 0.2, seite: 0, himmel: ["#07060e", "#16122a"] },
+    hell:   { dunkel: -0.08, ton: "196,154,224", a: 0.08, seite: 0 },
+    dunkel: { dunkel: 0.12, ton: "10,6,14", a: 0.16, seite: 0 },
+    hitze:  { dunkel: -0.04, ton: "255,110,40", a: 0.1, seite: 0 }
+  };
   /* Vorteile und Nachteile aus Wetter und Kleinoden zusammenrechnen */
   function mod(art, k) {
     if (!S) return 1;
@@ -747,6 +837,7 @@
     FORMEN_REIHE.forEach(k => { if (FORMEN[k].ab === lv && lv > 0) n.push(FORMEN[k].sym + " " + t().formen[k][0]); });
     WACHTER_REIHE.forEach(k => { if (WACHTER[k].ab === lv && lv > 0) n.push(WACHTER[k].sym + " " + t().wachter[k][0]); });
     ZAUBER_REIHE.forEach(k => { if (ZAUBER[k].ab === lv && lv > 0) n.push(ZAUBER[k].sym + " " + t().zauber[k][0]); });
+    if (lv === GESTALT_AB) n.push(t().gestalt.frei);
     return n;
   }
 
@@ -1166,7 +1257,7 @@
     fortschrittMerken();
     /* Zweiter Tab: Hat ein anderer Tab inzwischen einen neueren Spielstand geschrieben, wird er nicht überschrieben. */
     if (!speichernErlaubt()) return;
-    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten(), laune: S.laune || null, kleinode: S.kleinode || [], angebot: S.angebot || null, erspart: S.erspart || 0, kampagne: KAMPAGNE,
+    const k = { stufe: S.stufe, lv: S.lv, leben: S.leben, punkte: S.punkte, beutel: S.beutel, goldGesamt: S.goldGesamt, erlegtGesamt: S.erlegtGesamt, schaetzeGesamt: S.schaetzeGesamt, up: S.up, zauber: S.zauber, garten: gartenDaten(), laune: S.laune || null, kleinode: S.kleinode || [], angebot: S.angebot || null, erspart: S.erspart || 0, kampagne: KAMPAGNE, kulisseSaat: S.kulisseSaat || 0,
       t: Math.max(Date.now(), (S.speicherT || 0) + 1), tab: TAB_ID };
     S.speicherT = k.t;
     schreib(SPEICHER, JSON.stringify(k));
@@ -1358,6 +1449,7 @@
   function raubUpdate(dt) {
     const R = S.R, h = R.haken;
     if (S.quipT > 0) S.quipT -= dt;
+    wetterUpdate(S.kulisse, dt, true);
     if (!R.fertig) {
       R.zeit -= dt;
       if (R.zeit <= 0) { R.zeit = 0; R.endeWunsch = true; }
@@ -2048,6 +2140,8 @@
     };
     if (S.A.demo) S.A.gesamt = gl.liste.length;
     S.A.plaetze.forEach(p => { p.u = pfadU(P, p.x, p.y); p.luftNah = inFlugschneise(P, p.x, p.y, 46); });
+    const K = kulisse(); K.teile = []; K.gefuellt = false;
+    S.A.viecher = viecherBauen(S.A, K); S.A.flammen = []; S.A.gestalt = null; S.A.gestaltCd = 0; S.A.heulT = 0;
     if (!S.einzel && S.erspart > 0) { S.A.saat += S.erspart; S.A.ersparnisStart = S.erspart; S.erspart = 0; }
     gartenVorbereiten(g, S.A.plaetze);
     /* leerer Garten (neue Welt oder neues Spiel): kein Countdown, erst losgehen, wenn Echo bereit ist */
@@ -2088,6 +2182,7 @@
     const A = S.A;
     if (S.quipT > 0) S.quipT -= dt;
     ambientUpdate(A, dt);
+    wetterUpdate(S.kulisse, dt, false); viecherUpdate(A, dt); A.vorschauT = (A.vorschauT || 0) + dt;
     A.zauber.forEach(z => { z.cd = Math.max(0, z.cd - dt); });
     zauberUpdate(dt);
     A.zorn = Math.max(0, A.zorn - dt * 1.2);
@@ -2134,6 +2229,7 @@
     // Wächter
     A.plaetze.forEach(p => { if (p.turm) turmUpdate(p, dt); });
     tiereUpdate(A, dt);
+    gestaltUpdate(dt);
     // Geschosse
     A.geschosse.forEach(g => {
       g.t += dt;
@@ -2141,7 +2237,12 @@
         const z = g.ziel;
         if (!z || z.tot) { g.weg = true; return; }
         const dx = z.x - g.x, dy = z.y - g.y, d = Math.hypot(dx, dy), sch = 340 * dt;
-        if (d <= sch + z.r) { treffen(z, g.schaden, "schuss"); if (g.gift && !z.tot) { z.gift = Math.max(z.gift, g.gift); z.giftT = 3; } g.weg = true; return; }
+        if (d <= sch + z.r) {
+          let sd = g.schaden;
+          if (z.eisT > 0) { sd *= 1.5; kombo(z, "splitterdorn"); }
+          else if (z.wurzelT > 0) { sd *= 1.4; z.gift = Math.max(z.gift, g.schaden * 0.35); z.giftT = Math.max(z.giftT, 2); kombo(z, "dornenkaefig"); }
+          treffen(z, sd, "schuss"); if (g.gift && !z.tot) { z.gift = Math.max(z.gift, g.gift); z.giftT = 3; } g.weg = true; return;
+        }
         g.x += dx / d * sch; g.y += dy / d * sch; g.w = Math.atan2(dy, dx);
       } else if (g.art === "splitter") {
         const z = g.ziel;
@@ -2178,7 +2279,7 @@
             const doppelt = z.wurzelT > 0;
             treffen(z, g.schaden * (doppelt ? 2 : 1), "biss");
             if (g.alpha && !z.tot && !z.d.boss) festhalten(z, 0.8);
-            if (doppelt) kombo(z);
+            if (doppelt) kombo(z, "wurzelhatz");
             S.blitze.push({ art: "biss", x: z.x, y: z.y, t: 0, dauer: 0.35 });
             KLANG.biss(); g.zustand = "zurueck"; return;
           }
@@ -2384,13 +2485,14 @@
   const turmSk = () => 1 + 0.03 * Math.min(S.lv, KAMPAGNE + 10);
   function turmUpdate(p, dt) {
     const T = p.turm;
-    T.wachs = Math.min(1, (T.wachs || 0) + dt * 2.5);
+    T.wachs = Math.min(1, (T.wachs || 0) + dt * 1.15);
+    if (T.schub > 0) T.schub = Math.max(0, T.schub - dt * 1.4);
     if (T.tier) { tierUpdate(p, dt); return; }
     const w = WACHTER[T.k], st = T.st, zw2 = st >= 2 ? T.zweig : null;
     T.anim = Math.max(0, (T.anim || 0) - dt);
     if (T.netz) T.netz = Math.max(0, T.netz - dt);
     if (T.ausT > 0) { T.ausT -= dt; return; }
-    T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1) * (T._tempo || 1) * mod("rate", T.k); if (T.cd > 0) return;
+    T.cd -= dt * (S.A.barradinT > 0 ? 1.7 : 1) * (S.A.heulT > 0 ? 1.3 : 1) * (T._tempo || 1) * mod("rate", T.k); if (T.cd > 0) return;
     const reich = w.reich[st] * (T._reich || 1) * mod("reich", T.k), sch = w.schaden[st] * turmSk() * mod("schaden", T.k), bremsF = mod("bremsT");
     let ziele = imKreis(p.x, p.y, reich);
     if (w.typ === "biss") ziele = ziele.filter(e => !e.flug);
@@ -2443,9 +2545,19 @@
       for (let i = 0; i < n && z; i++) {
         gehabt.add(z);
         S.blitze.push({ art: "blitz", x1: x0, y1: y0, x2: z.x, y2: z.y, t: 0, dauer: 0.3, seed: Math.random(), dick: zw2 === "b" });
-        const gefroren = z.eisT > 0;
+        const gefroren = z.eisT > 0, vergiftet = !gefroren && z.giftT > 0;
         treffen(z, s * (gefroren ? 1.5 : 1), "kette");
-        if (gefroren) kombo(z);
+        if (gefroren) {
+          /* Schockfrost: Eissplitter springen auf die Nachbarn über */
+          kombo(z, "schockfrost");
+          S.A.feinde.filter(o => o !== z && !o.tot && abst(o.x, o.y, z.x, z.y) < 44).slice(0, 3).forEach(o => { treffen(o, s * 0.3, "frost", true); S.blitze.push({ art: "splitterflug", x0: z.x, y0: z.y, x: o.x, y: o.y, t: 0, dauer: 0.25 }); });
+          funken(z.x, z.y, 8, ["#ffffff", "#f4efe2", "#e8e0ff"], 100, 1.8);
+        } else if (vergiftet) {
+          /* Pilzgewitter: der Blitz entzündet die Sporen */
+          z.giftT = 0; kombo(z, "pilzgewitter");
+          S.A.feinde.forEach(o => { if (o !== z && !o.tot && abst(o.x, o.y, z.x, z.y) < 38) treffen(o, s * 0.35, "feuer", true); });
+          S.blitze.push({ art: "stichflamme", x: z.x, y: z.y, t: 0, dauer: 0.5 });
+        }
         if (zw2 === "b" && !z.tot && !z.d.boss) festhalten(z, 0.6);
         funken(z.x, z.y, zw2 === "b" ? 12 : 4, ["#f3e27a", "#ffffff"], 60, 1.6);
         x0 = z.x; y0 = z.y; s *= abfall;
@@ -2715,10 +2827,199 @@
     if (A.zorn >= 100 && durchWurf) ausbruchAbwehr();
   }
 
-  function kombo(e, txt) {
+  /* Kombo auslösen: Effekt am Ziel, Name kurz darüber; beim ersten Mal im Raubzug eine Einblendung mit Erklärung */
+  function kombo(e, art) {
+    const K = KOMBOS[art] || KOMBOS.schockfrost, T = t(), nm = T.kombos[art] || [T.kombo, ""], jetzt = performance.now();
     S.statistik.kombos = (S.statistik.kombos || 0) + 1;
-    if ((S.komboT || 0) < performance.now()) { S.komboT = performance.now() + 600; text(e.x, e.y - 24, txt || t().kombo, "#9fd6ec", 13, 0.9); }
+    if (S.A) { const Z = S.A.komboZahl || (S.A.komboZahl = {}); Z[art] = (Z[art] || 0) + 1; }
+    if (!(e.komboFx > jetzt)) { e.komboFx = jetzt + 350; S.blitze.push({ art: "kombo", x: e.x, y: e.y, t: 0, dauer: 0.6, farbe: K.farbe, seed: Math.random() }); }
+    if ((S.komboT || 0) < jetzt) { S.komboT = jetzt + 600; text(e.x, e.y - 24, nm[0] + "!", K.farbe, 13, 0.9); }
+    S.kombosGesehen = S.kombosGesehen || [];
+    if (!S.kombosGesehen.includes(art)) {
+      S.kombosGesehen.push(art);
+      toast(K.sym, T.komboNeu + " " + nm[0], nm[1]);
+      S.blitze.push({ art: "komboGross", x: e.x, y: e.y, t: 0, dauer: 1.3, farbe: K.farbe });
+      funken(e.x, e.y, 22, [K.farbe, "#ffffff", "#ffd34d"], 120, 2.6);
+    }
     erfolgPruefen("kombo");
+  }
+
+  /* ---------- Echos Wildgestalt im Kampf ---------- */
+  const gestaltFrei = () => !!S && S.lv >= GESTALT_AB;
+  const gestaltArt = () => GESTALT_GEBIET[GEB[S.A ? S.A.g : gebietVon(S.lv)].k] || "wolf";
+  const gestaltHeim = () => ({ x: HORT.x + 40, y: HORT.y - 4 });
+  function gestaltWirken() {
+    const A = S && S.A; if (!A || A.fertig || !gestaltFrei() || A.gestalt) return false;
+    const T = t().gestalt, h = gestaltHeim();
+    if ((A.gestaltCd || 0) > 0) { text(h.x, h.y - 40, Math.ceil(A.gestaltCd) + " s", "#a89f8f", 13, 0.7); return false; }
+    if (A.vorT > 0 || A.halt) return false;
+    const k = gestaltArt(), G = GESTALT[k];
+    A.gestalt = { k, t: 0, dauer: GESTALT_DAUER * (1 + 0.1 * tal("wildnis")), x: h.x, y: h.y, ziel: null, zielT: 0, hiebT: 0.25, links: true, spurT: 0, zunge: null, zurueck: false, sprungT: 0, ph: 0 };
+    funken(h.x, h.y, 26, [G.farbe, "#ebe2cc", "#cfe6a8"], 110, 3);
+    S.blitze.push({ art: "verwandlung", x: h.x, y: h.y, t: 0, dauer: 0.8, farbe: G.farbe, seed: Math.random() });
+    text(h.x - 20, h.y - 46, T.formen[k][2], G.farbe, 18, 1.4);
+    if (k === "wolf") { A.heulT = A.gestalt.dauer; text(W / 2, 300, T.heulen, G.farbe, 14, 1.6); KLANG.bruellen(); }
+    KLANG.verwandeln(); vib([30, 40, 60]);
+    if (!S.gestaltGesehen) { S.gestaltGesehen = true; toast(G.sym, T.formen[k][0], T.formen[k][1]); }
+    return true;
+  }
+  function gestaltZiel(E) {
+    const A = S.A, k = E.k;
+    const l = A.feinde.filter(e => !e.tot && !e.d.unbesiegbar && (k === "eule" || !e.unsT) && (k === "eule" || k === "kroete" || !e.flug));
+    if (!l.length) return null;
+    const wert = e => fortschritt(e) - abst(E.x, E.y, e.x, e.y) * 0.7 + (k === "eule" && (e.flug || e.beute) ? 600 : 0) + (e.beute ? 200 : 0);
+    return l.sort((a, b) => wert(b) - wert(a))[0];
+  }
+  function gestaltUpdate(dt) {
+    const A = S.A;
+    if (A.heulT > 0) A.heulT -= dt;
+    if (A.flammen && A.flammen.length) {
+      const fs = (1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10)) * wild() * 30;
+      A.flammen.forEach(f => { f.t += dt; A.feinde.forEach(e => { if (!e.tot && !e.flug && abst(e.x, e.y, f.x, f.y) < 11 + e.r) treffen(e, fs * dt, "feuer", true); }); });
+      A.flammen = A.flammen.filter(f => f.t < f.dauer);
+    }
+    const E = A.gestalt;
+    if (!E) { if (A.gestaltCd > 0) A.gestaltCd = Math.max(0, A.gestaltCd - dt); return; }
+    const G = GESTALT[E.k], sk = (1 + 0.06 * Math.min(S.lv, KAMPAGNE + 10)) * wild(), h = gestaltHeim();
+    E.t += dt; E.hiebT -= dt; E.ph += dt; E.sprungT = Math.max(0, E.sprungT - dt);
+    if (E.zunge) { E.zunge.t += dt; if (E.zunge.t > 0.32) E.zunge = null; }
+    const gehe = (zx, zy, v) => { const dx = zx - E.x, dy = zy - E.y, d = Math.hypot(dx, dy) || 1, s2 = Math.min(d, v * dt); E.x += dx / d * s2; E.y += dy / d * s2; if (Math.abs(dx) > 1) E.links = dx < 0; if (d > 1) E.w = Math.atan2(dy, dx); return d; };
+    if (E.t >= E.dauer || A.fertig) E.zurueck = true;
+    if (E.zurueck) {
+      if (gehe(h.x, h.y, G.tempo * 1.4) <= 3) {
+        A.gestalt = null; A.heulT = 0; A.gestaltCd = GESTALT_CD * Math.pow(0.92, tal("mondsegen"));
+        funken(h.x, h.y, 18, [G.farbe, "#ebe2cc"], 90); S.blitze.push({ art: "verwandlung", x: h.x, y: h.y, t: 0, dauer: 0.6, farbe: "#ebe2cc", seed: Math.random() });
+        KLANG.puff();
+      }
+      return;
+    }
+    if (E.k === "salamander") { E.spurT -= dt; if (E.spurT <= 0) { E.spurT = 0.13; A.flammen = A.flammen || []; A.flammen.push({ x: E.x + zw(-3, 3), y: E.y + zw(-2, 4), t: 0, dauer: 2.6, ph: Math.random() * 6 }); } }
+    if (E.k === "eule") A.feinde.forEach(e => { if (!e.tot && abst(e.x, e.y, E.x, E.y) < 80) e.enthuelltT = Math.max(e.enthuelltT || 0, 0.3); });
+    E.zielT -= dt;
+    let z = E.ziel;
+    if (!z || z.tot || z.unsT && E.k !== "eule" || (z.flug && E.k !== "eule" && E.k !== "kroete") || E.zielT <= 0) { z = E.ziel = gestaltZiel(E); E.zielT = 0.7; }
+    if (!z) { gehe(h.x + Math.cos(E.ph * 1.6) * 34, h.y - 40 + Math.sin(E.ph * 1.6) * 18, G.tempo * 0.6); return; }
+    const reich = G.reich + z.r, d = abst(E.x, E.y, z.x, z.y);
+    if (d > reich) {
+      if (E.k === "wolf" && d < 70 && E.sprungT <= 0 && E.hiebT <= 0) { E.sprungT = 0.22; S.blitze.push({ art: "sprung", x0: E.x, y0: E.y, x: z.x, y: z.y, t: 0, dauer: 0.25 }); }
+      gehe(z.x, z.y, G.tempo * (E.sprungT > 0 ? 2.4 : 1));
+      if (abst(E.x, E.y, z.x, z.y) > reich) return;
+    }
+    if (E.hiebT > 0) return;
+    E.hiebT = G.takt; E.links = z.x < E.x;
+    if (E.k === "wolf") {
+      treffen(z, G.schaden * sk, "biss"); if (!z.tot && !z.d.boss) festhalten(z, 0.35);
+      S.blitze.push({ art: "biss", x: z.x, y: z.y, t: 0, dauer: 0.35 }); KLANG.biss();
+    } else if (E.k === "eule") {
+      if (z.beute) goldZurueck(z);
+      treffen(z, G.schaden * sk * (z.flug ? 2 : 1), "falke");
+      S.blitze.push({ art: "prankenhieb", x: z.x, y: z.y, t: 0, dauer: 0.3, links: E.links }); funken(z.x, z.y, 6, [G.farbe, "#ebe2cc"], 70); KLANG.biss();
+    } else if (E.k === "kroete") {
+      E.zunge = { x: z.x, y: z.y, t: 0 };
+      if (!z.d.boss && !z.elite && z.hp <= Math.max(G.schaden * sk * 1.6, z.max * 0.3)) {
+        text(z.x, z.y - 18, t().gestalt.happs, G.farbe, 15, 1);
+        treffen(z, z.hp + 1, "biss"); funken(z.x, z.y, 10, [G.farbe, "#e0cca0"], 80);
+      } else {
+        treffen(z, G.schaden * sk, "biss");
+        if (!z.tot && !z.d.boss) {
+          if (z.flug) { z.x += (E.x - z.x) * 0.35; z.y += (E.y - z.y) * 0.35; }
+          else z.s = z.flieht ? Math.min(A.P.gesamt - 2, z.s + 50) : Math.max(0, z.s - 50);
+          festhalten(z, 0.5);
+        }
+      }
+      KLANG.tier();
+    } else if (E.k === "salamander") {
+      treffen(z, G.schaden * sk, "feuer"); funken(z.x, z.y, 6, ["#ff8a3a", "#ffd27a"], 70);
+      S.blitze.push({ art: "biss", x: z.x, y: z.y, t: 0, dauer: 0.3 }); KLANG.biss();
+    }
+  }
+
+  /* ---------- Kulisse: Jahreszeit je Gebiet, Tageszeit und Kleinigkeiten zufällig je Durchlauf ---------- */
+  function kulisseFuer(lv) {
+    if (!S.kulisseSaat) S.kulisseSaat = 1 + Math.floor(Math.random() * 2e9);
+    const g = gebietVon(lv), St = STIMMUNG[GEB[g].k] || { s: "fruehling" };
+    const r = lcg((S.kulisseSaat + lv * 7919) % 2147483646 + 1); r(); r();
+    const zeiten = St.draussen ? ["morgen", "mittag", "abend", "nacht"] : St.s === "ewig" ? ["hell", "dunkel"] : ["hitze", "dunkel"];
+    return { lv, g, saison: St.s, draussen: !!St.draussen, zeit: zeiten[Math.floor(r() * zeiten.length)], saat: 1 + Math.floor(r() * 2e9), wind: r() * 2 - 1, dichte: 0.75 + r() * 0.6, teile: [], gefuellt: false, blitzT: 5 + r() * 8, blitz: 0 };
+  }
+  function kulisse() { if (!S) return null; if (!S.kulisse || S.kulisse.lv !== S.lv) S.kulisse = kulisseFuer(S.lv); return S.kulisse; }
+  /* Wetter-Partikel je Jahreszeit (im Raubzug nur über der Grasnarbe) */
+  const WETTER = { fruehling: "bluete", sommer: "pollen", herbst: "laub", sturm: "regen", winter: "schnee", ewig: "glimmer", runen: "rune", glut: "asche", drache: "glut" };
+  const WETTER_ZAHL = { bluete: 16, pollen: 14, laub: 16, regen: 44, schnee: 40, glimmer: 12, rune: 10, asche: 18, glut: 12 };
+  function wetterUpdate(K, dt, raub) {
+    if (!K || ruhig || (raub && !K.draussen)) return;
+    const art = WETTER[K.saison], unten = raub ? 100 : LEISTE, ziel = Math.round((WETTER_ZAHL[art] || 10) * K.dichte * (raub ? 0.45 : 1));
+    while (K.teile.length < ziel) {
+      const q = { x: zw(-10, W + 10), y: K.gefuellt ? -8 : zw(0, unten), ph: Math.random() * 6, gr: zw(0.7, 1.35), w: Math.random() * 6 };
+      if (art === "bluete") { q.vy = zw(12, 22); q.vx = K.wind * 14; q.f = Math.random() < 0.6 ? "255,196,214" : "255,244,236"; }
+      else if (art === "pollen") { q.vy = zw(-3, 3); q.vx = K.wind * 6 + zw(-3, 3); if (K.gefuellt) q.y = zw(0, unten); }
+      else if (art === "laub") { q.vy = zw(16, 28); q.vx = K.wind * 20; q.f = zufall(["214,120,44", "196,72,40", "226,170,60", "160,90,40"]); }
+      else if (art === "regen") { q.vy = zw(260, 340); q.vx = K.wind * 60 - 30; }
+      else if (art === "schnee") { q.vy = zw(14, 30); q.vx = K.wind * 10; }
+      else if (art === "glimmer") { q.vy = zw(-4, 4); q.vx = zw(-4, 4); q.f = Math.random() < 0.5 ? "196,154,224" : "170,230,140"; if (K.gefuellt) q.y = zw(0, unten); }
+      else if (art === "rune") { q.vy = -zw(8, 16); q.vx = zw(-3, 3); if (K.gefuellt) q.y = unten + 6; }
+      else if (art === "asche") { q.vy = zw(8, 16); q.vx = K.wind * 8; }
+      else if (art === "glut") { q.vy = -zw(18, 38); q.vx = zw(-6, 6); if (K.gefuellt) q.y = unten + 6; }
+      K.teile.push(q);
+    }
+    K.gefuellt = true;
+    const stoss = Math.sin(performance.now() / 2300) * 0.5 + 0.5;
+    K.teile.forEach(q => {
+      q.ph += dt; q.w += dt * (art === "laub" ? 2.4 : 1.2);
+      let vx = q.vx;
+      if (art === "bluete" || art === "laub" || art === "schnee" || art === "asche") vx += Math.sin(q.ph * 1.4) * (art === "schnee" ? 8 : 12) + K.wind * stoss * 10;
+      if (art === "pollen" || art === "glimmer") { vx += Math.sin(q.ph * 0.7) * 5; q.y += Math.cos(q.ph * 0.6) * 4 * dt; }
+      q.x += vx * dt; q.y += q.vy * dt;
+      if (q.y > unten + 12 || q.y < -14 || q.x < -20 || q.x > W + 20) q.weg = true;
+    });
+    K.teile = K.teile.filter(q => !q.weg);
+    if (K.saison === "sturm" && !raub) {
+      K.blitzT -= dt; K.blitz = Math.max(0, K.blitz - dt * 2.6);
+      if (K.blitzT <= 0) { K.blitzT = zw(9, 17); K.blitz = 1; knistern(1.4, 0.07, "lowpass", 160, 0.25); }
+    }
+  }
+  /* Kleine Tiere in der Kulisse: Falter, Krähen, Fledermäuse, Glühwürmchen, Schneehasen */
+  function viecherBauen(A, K) {
+    const l = [], r = lcg(K.saat % 2147483646 + 3), frei = () => { for (let i = 0; i < 30; i++) { const x = 24 + r() * (W - 48), y = 40 + r() * (LEISTE - 80); if (abstZumPfad(A.P, x, y) > 30 && A.plaetze.every(q => abst(q.x, q.y, x, y) > 26) && abst(x, y, HORT.x, HORT.y) > 60) return { x, y }; } return { x: 30, y: 60 }; };
+    const neu = (art, n) => { for (let i = 0; i < n; i++) { const p = frei(); l.push({ art, x: p.x, y: p.y, hx: p.x, hy: p.y, ph: r() * 6, t: r() * 5, zustand: "sitzt", f: r() }); } };
+    if (K.saison === "fruehling" || K.saison === "sommer") neu("falter", K.saison === "sommer" ? 4 : 3);
+    if (K.saison === "fruehling" || K.saison === "winter") neu("hase", 1);
+    if (K.saison === "herbst" || K.saison === "sturm") neu("kraehe", 2);
+    if (K.saison === "ewig" || K.zeit === "nacht") neu("fledermaus", 2);
+    if (K.zeit === "nacht" && K.draussen && GEB[A.g].stil.ambient !== "gluehwurm") neu("gluehwurm", 9);
+    return l;
+  }
+  function viecherUpdate(A, dt) {
+    if (!A.viecher || ruhig) return;
+    A.viecher.forEach(v => {
+      v.t += dt; v.ph += dt;
+      if (v.art === "falter") { v.x = v.hx + Math.sin(v.ph * 0.5 + v.f * 6) * 40 + Math.sin(v.ph * 1.7) * 8; v.y = v.hy + Math.cos(v.ph * 0.37 + v.f * 4) * 26; }
+      else if (v.art === "gluehwurm") { v.x = v.hx + Math.sin(v.ph * 0.4 + v.f * 9) * 22; v.y = v.hy + Math.cos(v.ph * 0.31 + v.f * 5) * 14; }
+      else if (v.art === "fledermaus") {
+        if (v.zustand === "sitzt") { if (v.t > 4 + v.f * 6) { v.zustand = "fliegt"; v.t = 0; v.x = v.f < 0.5 ? -20 : W + 20; v.y = 50 + Math.random() * 260; v.vx = v.x < 0 ? zw(70, 100) : -zw(70, 100); } }
+        else { v.x += v.vx * dt; v.y += Math.sin(v.ph * 7) * 30 * dt; if (v.x < -30 || v.x > W + 30) { v.zustand = "sitzt"; v.t = 0; v.f = Math.random(); } }
+      } else if (v.art === "kraehe" || v.art === "hase") {
+        const nah = S.A.feinde.some(e => !e.tot && abst(e.x, e.y, v.x, v.y) < 46) || (A.gestalt && abst(A.gestalt.x, A.gestalt.y, v.x, v.y) < 50);
+        if (v.zustand === "sitzt") {
+          v.hop = Math.max(0, (v.hop || 0) - dt);
+          if (v.t > 1.6 + v.f * 2) { v.t = 0; v.f = Math.random(); v.hop = 0.3; v.links = Math.random() < 0.5; const nx = klemm(v.x + (v.links ? -1 : 1) * zw(6, 14), 20, W - 20); if (abstZumPfad(A.P, nx, v.y) > 26) v.x = nx; }
+          if (nah) { v.zustand = "fliegt"; v.t = 0; v.vx = (v.x < W / 2 ? -1 : 1) * zw(90, 130); v.vy = -zw(40, 70); if (v.art === "kraehe" && selten("kraehe", 1500)) ton("sawtooth", 700, 500, 0.12, 0.03, 0, ["bandpass", 900, 4]); }
+        } else if (v.zustand === "fliegt") {
+          v.x += v.vx * dt; v.y += (v.art === "hase" ? 0 : v.vy) * dt;
+          if (v.art === "hase") { v.y -= Math.abs(Math.sin(v.ph * 12)) * 0; }
+          if (v.x < -30 || v.x > W + 30 || v.y < -30) { v.zustand = "weg"; v.t = 0; }
+        } else if (v.zustand === "weg" && v.t > 6) {
+          for (let i = 0; i < 20; i++) { const x = 24 + Math.random() * (W - 48), y = 40 + Math.random() * (LEISTE - 80); if (abstZumPfad(A.P, x, y) > 30 && A.plaetze.every(q => abst(q.x, q.y, x, y) > 26) && !S.A.feinde.some(e => abst(e.x, e.y, x, y) < 70)) { v.x = x; v.y = y; v.zustand = "sitzt"; v.t = 0; break; } }
+        }
+      }
+    });
+  }
+  /* Tempo der Abwehr: ×1 → ×2 → ×3 → ×1 */
+  function tempoWechseln() {
+    const A = S && S.A; if (!A || S.phase !== "abwehr") return 1;
+    A.schnell = A.schnell >= 3 ? 1 : (A.schnell || 1) + 1; schreib("imres-echohort-schnell", String(A.schnell)); KLANG.griff();
+    tempoKnopfSetzen();
+    return A.schnell;
   }
   function explosion(x, y, r, schaden) {
     let spore = false;
@@ -2728,7 +3029,7 @@
         treffen(e, schaden * 0.5, "feuer");
         S.A.feinde.forEach(o => { if (o !== e && !o.tot && abst(o.x, o.y, e.x, e.y) < 36) treffen(o, schaden * 0.35, "feuer"); });
         S.blitze.push({ art: "sporenwolke", x: e.x, y: e.y, r: 30, t: 0, dauer: 0.6 });
-        funken(e.x, e.y, 10, ["#c49ae0", "#ff8a3a"], 100); kombo(e, t().sporenExplosion);
+        funken(e.x, e.y, 10, ["#c49ae0", "#ff8a3a"], 100); kombo(e, "sporenbrand");
       }
       treffen(e, schaden, "feuer");
     });
@@ -2882,7 +3183,7 @@
     const T = p.turm, max = T.tier ? 1 : TURM_MAX; if (T.st >= max) return;
     if (!T.tier && T.st === 1 && !zweig) return;
     const c = T.tier ? tierKosten(T.k, T.st + 1) : kosten(T.k, T.st + 1); if (A.saat < c) { text(p.x, p.y - 20, t().bau.zuwenig, "#c4564a", 13); return; }
-    A.saat -= c; T.st++; T.wert += c; if (zweig) T.zweig = zweig; T.wachs = 0.4;
+    A.saat -= c; T.st++; T.wert += c; if (zweig) T.zweig = zweig; T.schub = 1;
     if (A.vorT > 0 || A.halt) T.frisch = (T.frisch || 0) + c;
     S.blitze.push({ art: "aufwertung", x: p.x, y: p.y, t: 0, dauer: 1.1 }); text(p.x, p.y - 34, t().stufeHoch(T.st + 1), "#ffd34d", 15, 1.4);
     if (T.tier && T.k === "baer") T.hp = baerMaxHp(T);
@@ -2951,7 +3252,7 @@
   let skala = 1, hgBild = null, hgSchluessel = "";
   /* Themberchaud schaut im Raubzug über den Rand seiner Halle – kein Feind, nur ein sehr großer Zuschauer */
   const DRACHE = new Image(); DRACHE.decoding = "async";
-  DRACHE.onload = () => { const g = GEB.findIndex(G => G.stil.horizont === "halle"); if (hgSchluessel === "raub" + g) { hgSchluessel = ""; hintergrundRaub(g); } };
+  DRACHE.onload = () => { const g = GEB.findIndex(G => G.stil.horizont === "halle"); if (hgSchluessel === "raub" + g || hgSchluessel.startsWith("raub" + g + ":")) { hgSchluessel = ""; hintergrundRaub(g); } };
   function dracheLaden() { if (!DRACHE.src) DRACHE.src = "themberchaud.webp"; }
   function lcg(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
   function neueLeinwand() {
@@ -2964,11 +3265,13 @@
   /* --- Hintergrund des Raubzugs: oben Echos Platz, darunter ein Querschnitt durch das Gebiet --- */
   function hintergrundRaub(g) {
     if (GEB[g].stil.horizont === "halle") dracheLaden();
-    const k = "raub" + g; if (hgSchluessel === k) return; hgSchluessel = k;
+    const K = S && S.kulisse && S.kulisse.g === g && zustand !== "start" ? S.kulisse : null;
+    const k = "raub" + g + (K ? ":" + K.saat : ""); if (hgSchluessel === k) return; hgSchluessel = k;
     const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(11 + g * 7);
     let gr = x.createLinearGradient(0, 0, 0, 100);
     gr.addColorStop(0, F.himmel[0]); gr.addColorStop(1, F.himmel[1]);
     x.fillStyle = gr; x.fillRect(0, 0, W, 100);
+    if (K && K.draussen) himmelMalen(x, K);
     // Horizont je nach Gebiet
     if (ST.horizont === "tannen") {
       for (let i = 0; i < 22; i++) { const tx = i * 19 + r() * 10, h = 30 + r() * 40; x.fillStyle = ST.tanne || "#132018"; x.beginPath(); x.moveTo(tx, 100 - h); x.lineTo(tx - h * 0.3, 100); x.lineTo(tx + h * 0.3, 100); x.fill(); }
@@ -3004,6 +3307,7 @@
     x.fillStyle = F.gras; x.fillRect(0, 96, W, 10);
     if (!F.wasser) for (let i = 0; i < 90; i++) { x.strokeStyle = F.akzent; x.globalAlpha = 0.35; x.lineWidth = 1; const gx = r() * W; x.beginPath(); x.moveTo(gx, 104); x.lineTo(gx + r() * 4 - 2, 96 - r() * 6); x.stroke(); }
     x.globalAlpha = 1;
+    if (K) grasnarbeSaison(x, K, lcg(K.saat % 2147483646 + 5));
     // Erdschichten: abwechselnd getönte Bänder mit Kieseln an den Grenzen
     for (let s = 0; s < 6; s++) {
       const y0 = 140 + s * 62, oben = [], unten = [];
@@ -3063,6 +3367,7 @@
     hgSchluessel = "abwehr" + g + ":" + S.lv;
     const G = GEB[g], F = G.f, ST = G.stil, [c, x] = neueLeinwand(), r = lcg(31 + g * 13);
     const hoehle = ST.horizont === "hoehle", plaetze = (S.A && S.A.plaetze) || [], L = [];
+    const K = kulisse(), rk = lcg(K.saat % 2147483646 + 1);
     let gr = x.createLinearGradient(0, 0, 0, H);
     gr.addColorStop(0, F.gras); gr.addColorStop(1, F.boden[1]);
     x.fillStyle = gr; x.fillRect(0, 0, W, H);
@@ -3071,6 +3376,7 @@
     for (let i = 0; i < 900; i++) { x.fillStyle = r() < 0.5 ? "rgba(0,0,0,.14)" : "rgba(235,226,204,.035)"; x.fillRect(r() * W, r() * H, 1 + r() * 2, 1 + r() * 2); }
     const frei = (px, py, rand) => abstZumPfad(P, px, py) > (rand || 24) && abst(px, py, HORT.x, HORT.y) > 48 && plaetze.every(q => abst(q.x, q.y, px, py) > 22);
     const deko = (n, fn, rand) => { for (let i = 0; i < n; i++) { const px = r() * W, py = 24 + r() * (LEISTE - 30); if (frei(px, py, rand)) fn(px, py); } };
+    bodenSaison(x, K, rk, F);
     // Gras und Blumen (nicht in Höhlen)
     if (!hoehle && !F.wasser) {
       deko(170, (px, py) => { x.strokeStyle = r() < 0.5 ? F.akzent : "rgba(111,154,58,.5)"; x.globalAlpha = 0.45 + r() * 0.3; x.lineWidth = 1; for (let k = 0; k < 4; k++) { x.beginPath(); x.moveTo(px + k * 1.5, py); x.lineTo(px + k * 1.5 + (r() - 0.5) * 4, py - 3 - r() * 5); x.stroke(); } x.globalAlpha = 1; }, 18);
@@ -3086,6 +3392,10 @@
         const tg = x.createRadialGradient(tx, ty, 4, tx, ty, Math.max(rx, ry)); tg.addColorStop(0, "rgba(40,110,130,.55)"); tg.addColorStop(0.75, "rgba(30,90,110,.35)"); tg.addColorStop(1, "rgba(20,60,80,0)");
         x.fillStyle = tg; oval(x, tx, ty, rx, ry);
         x.strokeStyle = "rgba(159,214,236,.18)"; x.lineWidth = 1.2; x.beginPath(); x.ellipse(tx, ty, rx * 0.8, ry * 0.8, 0, 0, Math.PI * 2); x.stroke();
+        if (K.saison === "winter") { // Eisrand und Schollen
+          x.strokeStyle = "rgba(246,244,238,.55)"; x.lineWidth = 3; x.beginPath(); x.ellipse(tx, ty, rx * 0.92, ry * 0.9, 0, 0, Math.PI * 2); x.stroke();
+          for (let k2 = 0; k2 < 4; k2++) { const w2 = rk() * 6.28, d2 = 0.3 + rk() * 0.45; x.fillStyle = "rgba(240,240,234,.5)"; oval(x, tx + Math.cos(w2) * rx * d2, ty + Math.sin(w2) * ry * d2, 5 + rk() * 7, 3 + rk() * 3, rk() * 3); }
+        }
         if (S.A) S.A.teiche.push({ x: tx, y: ty, rx, ry });
       });
       x.strokeStyle = "rgba(159,214,236,.2)"; x.lineWidth = 1; for (let i = 0; i < 26; i++) { const wx = r() * W, wy = r() * LEISTE; x.beginPath(); x.arc(wx, wy, 6 + r() * 6, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); }
@@ -3146,6 +3456,8 @@
       x.fillStyle = d2; kreis(x, px - h * 0.12, py - h * 0.12, h * 0.6);
       x.fillStyle = d3; kreis(x, px - h * 0.25, py - h * 0.3, h * 0.32);
       if (ST.knochen) { x.strokeStyle = "rgba(20,14,10,.6)"; x.lineWidth = 1; x.beginPath(); x.moveTo(px, py); x.lineTo(px + h * 0.6, py - h * 0.7); x.stroke(); }
+      if (K.saison === "fruehling" && rk() < 0.75) for (let b = 0; b < 7; b++) { x.fillStyle = rk() < 0.6 ? "rgba(255,196,214,.9)" : "rgba(255,246,238,.9)"; kreis(x, px + (rk() - 0.6) * h * 1.3, py + (rk() - 0.6) * h * 1.1, 1.3 + rk()); }
+      if (K.saison === "sturm" && rk() < 0.4) { x.fillStyle = "rgba(180,110,50,.55)"; for (let b = 0; b < 4; b++) oval(x, px + (rk() - 0.5) * h, py + (rk() - 0.5) * h, 2, 1.1, rk() * 3); }
     }, 30);
     if (ST.deko === "haeuser") deko(9, (px, py) => {
       x.fillStyle = "rgba(0,0,0,.35)"; x.fillRect(px - 13, py - 8, 32, 26);
@@ -3157,6 +3469,7 @@
       x.fillStyle = "rgba(255,200,110,.5)"; kreis(x, px - 9, py + 6, 1.6);
     }, 34);
     if (F.mauer || ST.deko === "steine") deko(24, (px, py) => { const rr = 4 + r() * 7; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, px + 2, py + 2, rr, rr * 0.75); x.fillStyle = F.stein; oval(x, px, py, rr, rr * 0.75, r()); x.fillStyle = "rgba(235,226,204,.12)"; oval(x, px - rr * 0.3, py - rr * 0.3, rr * 0.5, rr * 0.3); }, 22);
+    kulisseDeko(x, K, G, rk, frei, L, P);
     // Steinplatten der Bauplätze
     plaetze.forEach(q => {
       x.fillStyle = "rgba(0,0,0,.22)"; oval(x, q.x + 1.5, q.y + 6, 19, 8);
@@ -3168,6 +3481,12 @@
     const st = P.p[0];
     x.fillStyle = "rgba(0,0,0,.6)"; oval(x, st.x, st.y - 4, 26, 14);
     [-22, 22].forEach(d => { L.push({ x: st.x + d, y: st.y - 16, r: 58, f: "rgba(255,170,80,.16)", fl: 1 }); x.fillStyle = "#3a2d20"; x.fillRect(st.x + d - 1.5, st.y - 14, 3, 14); const gl = x.createRadialGradient(st.x + d, st.y - 16, 1, st.x + d, st.y - 16, 22); gl.addColorStop(0, "rgba(255,190,90,.5)"); gl.addColorStop(1, "rgba(255,190,90,0)"); x.fillStyle = gl; kreis(x, st.x + d, st.y - 16, 22); x.fillStyle = "#ffcf7a"; kreis(x, st.x + d, st.y - 16, 2.4); });
+    if (K.saison === "winter") { // Schnee an den Wegrändern
+      [-17, 17].forEach(d => versatz(d, (px, py, s0) => { if (s0 % 7 > 2.9) return; x.fillStyle = "rgba(246,244,238," + (0.35 + rk() * 0.4) + ")"; oval(x, px, py, 2.5 + rk() * 3, 1.6 + rk() * 1.5); }));
+    } else if (K.saison === "herbst" || K.saison === "sturm") {
+      for (let i = 0; i < 40; i++) { const q = pfadPunkt(P, rk() * P.gesamt); x.fillStyle = "rgba(" + zufallR(rk, ["214,120,44", "196,72,40", "226,170,60"]) + ",.7)"; oval(x, q.x + rk() * 26 - 13, q.y + rk() * 26 - 13, 2.4, 1.3, rk() * 3); }
+    }
+    tageszeitMalen(x, K);
     // warmes Licht um den Hort, Vignette
     let hl = x.createRadialGradient(HORT.x, HORT.y, 10, HORT.x, HORT.y, 120); hl.addColorStop(0, "rgba(255,200,110,.18)"); hl.addColorStop(1, "rgba(255,200,110,0)");
     x.fillStyle = hl; x.fillRect(0, 0, W, H);
@@ -3177,6 +3496,185 @@
     hgBild = c;
   }
   const zufallR = (r, l) => l[Math.floor(r() * l.length)];
+
+  /* ---------- Kulisse zeichnen ---------- */
+  /* Himmel im Raubzug je Tageszeit: Morgenröte, Mittagsblau-los, Abendrot, Mond */
+  function himmelMalen(x, K) {
+    const Z = ZEITEN[K.zeit]; if (!Z || !Z.himmel) return;
+    const r = lcg(K.saat % 2147483646 + 9);
+    let gr = x.createLinearGradient(0, 0, 0, 100); gr.addColorStop(0, Z.himmel[0]); gr.addColorStop(1, Z.himmel[1]);
+    x.save(); x.globalAlpha = 0.7; x.fillStyle = gr; x.fillRect(0, 0, W, 100); x.restore();
+    if (K.zeit === "nacht") {
+      for (let i = 0; i < 46; i++) { x.fillStyle = "rgba(255,248,230," + (0.2 + r() * 0.6) + ")"; x.fillRect(r() * W, r() * 80, 1 + (r() < 0.1 ? 1 : 0), 1); }
+      const mx = 40 + r() * 320, my = 18 + r() * 22;
+      const gl = x.createRadialGradient(mx, my, 2, mx, my, 34); gl.addColorStop(0, "rgba(255,244,214,.35)"); gl.addColorStop(1, "rgba(255,244,214,0)"); x.fillStyle = gl; kreis(x, mx, my, 34);
+      x.fillStyle = "#f4ead0"; kreis(x, mx, my, 9); x.fillStyle = Z.himmel[0]; kreis(x, mx + 4 + r() * 3, my - 2, 8);
+    } else {
+      const sx = Z.seite < 0 ? 40 + r() * 60 : Z.seite > 0 ? 300 + r() * 60 : 150 + r() * 100, sy = K.zeit === "mittag" ? 20 : 86;
+      const gl = x.createRadialGradient(sx, sy, 3, sx, sy, 90); gl.addColorStop(0, "rgba(" + Z.ton + ",.55)"); gl.addColorStop(1, "rgba(" + Z.ton + ",0)"); x.fillStyle = gl; x.fillRect(0, 0, W, 100);
+      x.fillStyle = "rgba(255,236,190,.85)"; kreis(x, sx, sy, K.zeit === "mittag" ? 7 : 10);
+      // Wolkenbänder
+      for (let i = 0; i < 4; i++) { const wx = r() * W, wy = 20 + r() * 50; x.fillStyle = "rgba(" + Z.ton + "," + (0.12 + r() * 0.12) + ")"; oval(x, wx, wy, 40 + r() * 50, 4 + r() * 3); }
+    }
+  }
+  function grasnarbeSaison(x, K, r) {
+    if (K.saison === "winter") { x.fillStyle = "rgba(246,244,238,.85)"; x.beginPath(); x.moveTo(0, 100); for (let i = 0; i <= 40; i++) x.lineTo(i * 10, 95 + Math.sin(i * 1.3) * 1.5 - r() * 2); x.lineTo(W, 101); x.lineTo(0, 101); x.fill(); }
+    else if (K.saison === "fruehling" || K.saison === "sommer") for (let i = 0; i < 40; i++) { x.fillStyle = K.saison === "sommer" ? zufallR(r, ["#ffd34d", "#f1e7cf", "#e8905a"]) : zufallR(r, ["#ffc4d6", "#fff6ee", "#e8d8a8"]); kreis(x, r() * W, 93 + r() * 6, 1.1 + r()); }
+    else if (K.saison === "herbst" || K.saison === "sturm") for (let i = 0; i < 46; i++) { x.fillStyle = "rgba(" + zufallR(r, ["214,120,44", "196,72,40", "226,170,60"]) + ",.8)"; oval(x, r() * W, 96 + r() * 7, 2.2, 1.2, r() * 3); }
+  }
+  /* Boden der Abwehr je Jahreszeit */
+  const SAISON_TON = { fruehling: "rgba(150,210,100,.07)", sommer: "rgba(230,205,100,.08)", herbst: "rgba(205,115,45,.11)", sturm: "rgba(36,40,32,.18)", winter: "rgba(236,234,228,.14)", ewig: "rgba(120,80,160,.06)", runen: "rgba(224,160,70,.05)", glut: "rgba(255,90,30,.05)", drache: "rgba(255,170,60,.06)" };
+  function bodenSaison(x, K, r, F) {
+    x.fillStyle = SAISON_TON[K.saison] || "rgba(0,0,0,0)"; x.fillRect(0, 0, W, H);
+    const S2 = K.saison;
+    if (S2 === "fruehling") {
+      for (let i = 0; i < 70; i++) { x.fillStyle = r() < 0.6 ? "rgba(255,196,214,.75)" : "rgba(255,246,238,.7)"; oval(x, r() * W, r() * LEISTE, 1.8, 1, r() * 3); }
+      for (let i = 0; i < 12; i++) { const px = r() * W, py = r() * LEISTE; for (let k = 0; k < 4; k++) { x.fillStyle = k % 2 ? "#fff6ee" : "#ffc4d6"; kreis(x, px + (r() - 0.5) * 8, py + (r() - 0.5) * 6, 1.3); } }
+    } else if (S2 === "sommer") {
+      for (let i = 0; i < 70; i++) { x.strokeStyle = "rgba(200,170,80,.4)"; x.lineWidth = 1; const px = r() * W, py = r() * LEISTE; x.beginPath(); x.moveTo(px, py); x.lineTo(px + (r() - 0.5) * 4, py - 4 - r() * 4); x.stroke(); }
+      for (let i = 0; i < 16; i++) { const px = r() * W, py = r() * LEISTE; x.fillStyle = "#ffd34d"; for (let k = 0; k < 6; k++) kreis(x, px + Math.cos(k) * 2.2, py + Math.sin(k) * 2.2, 1.2); x.fillStyle = "#6b4a2a"; kreis(x, px, py, 1.3); }
+    } else if (S2 === "herbst" || S2 === "sturm") {
+      for (let i = 0; i < (S2 === "herbst" ? 120 : 60); i++) { x.fillStyle = "rgba(" + zufallR(r, ["214,120,44", "196,72,40", "226,170,60", "150,90,40"]) + "," + (0.5 + r() * 0.4) + ")"; oval(x, r() * W, r() * LEISTE, 2.6, 1.4, r() * 3); }
+      if (S2 === "sturm") for (let i = 0; i < 9; i++) { const px = r() * W, py = r() * LEISTE, rx = 8 + r() * 12; x.fillStyle = "rgba(10,12,10,.4)"; oval(x, px, py, rx, rx * 0.45); x.strokeStyle = "rgba(220,215,200,.18)"; x.lineWidth = 1; x.beginPath(); x.ellipse(px - 1, py - 1, rx * 0.7, rx * 0.25, 0, Math.PI * 1.1, Math.PI * 1.8); x.stroke(); }
+    } else if (S2 === "winter") {
+      for (let i = 0; i < 24; i++) { const px = r() * W, py = r() * LEISTE, rr = 18 + r() * 40, g2 = x.createRadialGradient(px, py, 2, px, py, rr); g2.addColorStop(0, "rgba(246,244,238,.32)"); g2.addColorStop(1, "rgba(246,244,238,0)"); x.fillStyle = g2; x.fillRect(px - rr, py - rr, rr * 2, rr * 2); }
+      for (let i = 0; i < 380; i++) { x.fillStyle = "rgba(250,250,246," + (0.2 + r() * 0.5) + ")"; x.fillRect(r() * W, r() * LEISTE, 1.2, 1.2); }
+    } else if (S2 === "ewig") {
+      for (let i = 0; i < 40; i++) { x.fillStyle = r() < 0.5 ? "rgba(196,154,224,.45)" : "rgba(170,230,140,.35)"; kreis(x, r() * W, r() * LEISTE, 0.8 + r()); }
+    } else if (S2 === "runen") {
+      for (let i = 0; i < 5; i++) { const px = 30 + r() * 340, py = 50 + r() * 340; x.strokeStyle = "rgba(255,200,110,.16)"; x.lineWidth = 1.2; x.beginPath(); x.arc(px, py, 12, 0, 7); x.stroke(); for (let k = 0; k < 4; k++) { const w2 = k * 1.57 + r(); x.beginPath(); x.moveTo(px + Math.cos(w2) * 6, py + Math.sin(w2) * 6); x.lineTo(px + Math.cos(w2) * 11, py + Math.sin(w2) * 11); x.stroke(); } }
+    } else if (S2 === "glut") {
+      for (let i = 0; i < 18; i++) { x.strokeStyle = "rgba(255,120,40,.2)"; x.lineWidth = 1; x.beginPath(); let px = r() * W, py = r() * LEISTE; x.moveTo(px, py); for (let k = 0; k < 3; k++) { px += (r() - 0.5) * 16; py += (r() - 0.5) * 12; x.lineTo(px, py); } x.stroke(); }
+      for (let i = 0; i < 60; i++) { x.fillStyle = "rgba(140,130,120,.25)"; x.fillRect(r() * W, r() * LEISTE, 1.5, 1.5); }
+    } else if (S2 === "drache") {
+      for (let i = 0; i < 50; i++) { x.fillStyle = r() < 0.5 ? "rgba(255,211,77,.55)" : "rgba(201,138,58,.5)"; oval(x, r() * W, r() * LEISTE, 1.8, 1, r() * 3); }
+    }
+  }
+  /* Tageszeit als Farbschleier, bei Morgen und Abend schräg von der Seite */
+  function tageszeitMalen(x, K) {
+    const Z = ZEITEN[K.zeit]; if (!Z) return;
+    if (Z.seite) {
+      const g = x.createLinearGradient(Z.seite < 0 ? 0 : W, 0, Z.seite < 0 ? W : 0, LEISTE * 0.6);
+      g.addColorStop(0, "rgba(" + Z.ton + "," + Z.a * 1.7 + ")"); g.addColorStop(1, "rgba(" + Z.ton + "," + Z.a * 0.25 + ")"); x.fillStyle = g;
+    } else x.fillStyle = "rgba(" + Z.ton + "," + Z.a + ")";
+    x.fillRect(0, 0, W, H);
+  }
+  /* Zufällige Kleinigkeiten je Durchlauf: jedes Gebiet hat seinen eigenen Fundus */
+  const DEKO_GEBIET = {
+    wald: ["pilzring", "lagerfeuer", "baumstamm", "steinkreis", "pilzring"], phandalin: ["heuhaufen", "brunnen", "kisten", "vogelscheuche", "lagerfeuer"],
+    wachturm: ["ruine", "kisten", "lagerfeuer", "steinkreis", "baumstamm"], schmiede: ["lore", "kristalle", "amboss", "knochen"],
+    donnerbaum: ["grabstein", "karren", "vogelscheuche", "knochen", "baumstamm"], unterreich: ["riesenpilz", "spinnennetz", "kristalle", "knochen", "riesenpilz"],
+    see: ["boot", "schilf", "eisloch", "schilf", "lagerfeuer"], gracklstugh: ["lavapfuetze", "amboss", "knochen", "kisten"], hort: ["muenzen", "lavapfuetze", "knochen", "muenzen", "kristalle"]
+  };
+  function kulisseDeko(x, K, G, r, frei, L, P) {
+    const liste = DEKO_GEBIET[G.k] || ["steinkreis"], n = 4 + Math.floor(r() * 3), feuer = [];
+    for (let i = 0, gesetzt = 0; i < 60 && gesetzt < n; i++) {
+      const px = 26 + r() * (W - 52), py = 46 + r() * (LEISTE - 80);
+      if (!frei(px, py, 34)) continue;
+      gesetzt++;
+      const art = liste[Math.floor(r() * liste.length)];
+      x.save(); x.translate(px, py);
+      dekoMalen(x, art, r, K, G);
+      x.restore();
+      if (art === "lagerfeuer") { L.push({ x: px, y: py - 3, r: 70, f: "rgba(255,150,60,.2)", fl: 1 }); feuer.push({ x: px, y: py - 4 }); }
+      else if (art === "lavapfuetze") L.push({ x: px, y: py, r: 50, f: "rgba(255,110,40,.16)", fl: 1 });
+      else if (art === "kristalle" || art === "riesenpilz") L.push({ x: px, y: py - 6, r: 44, f: G.k === "unterreich" ? "rgba(196,154,224,.13)" : "rgba(255,170,80,.12)" });
+      else if (art === "muenzen") L.push({ x: px, y: py, r: 34, f: "rgba(255,211,77,.12)" });
+    }
+    if (S.A) S.A.feuerstellen = feuer;
+  }
+  function dekoMalen(x, art, r, K, G) {
+    const schatten = (rx, ry) => { x.fillStyle = "rgba(0,0,0,.3)"; oval(x, 2, 3, rx, ry); };
+    const schnee = K.saison === "winter";
+    if (art === "pilzring") { for (let i = 0; i < 9; i++) { const w = i / 9 * 6.28, mx = Math.cos(w) * 15, my = Math.sin(w) * 9; x.fillStyle = "#e8dcd0"; x.fillRect(mx - 0.7, my - 1, 1.4, 3); x.fillStyle = r() < 0.5 ? "#c4564a" : "#e8d8b8"; oval(x, mx, my - 1.4, 2.6, 1.6); x.fillStyle = "#fff6ee"; kreis(x, mx - 0.6, my - 1.8, 0.5); } }
+    else if (art === "lagerfeuer") { schatten(12, 6); for (let i = 0; i < 7; i++) { const w = i / 7 * 6.28; x.fillStyle = "#5d574c"; oval(x, Math.cos(w) * 9, Math.sin(w) * 5, 3, 2.2); } x.strokeStyle = "#3a2618"; x.lineWidth = 2.2; x.beginPath(); x.moveTo(-6, 3); x.lineTo(6, -3); x.moveTo(-6, -3); x.lineTo(6, 3); x.stroke(); x.fillStyle = "rgba(255,138,58,.85)"; oval(x, 0, -1, 4, 3); x.fillStyle = "#ffd27a"; oval(x, 0, -2, 2, 1.6); if (schnee) { x.fillStyle = "rgba(246,244,238,.6)"; oval(x, -12, 5, 6, 2); } }
+    else if (art === "baumstamm") { const w = r() * 3; x.rotate(w); schatten(18, 5); x.fillStyle = "#4a3220"; x.fillRect(-18, -4, 36, 8); x.fillStyle = "#6b4a30"; x.fillRect(-18, -4, 36, 2.5); x.fillStyle = "#a8835c"; oval(x, 18, 0, 2.6, 4); x.strokeStyle = "#6b4a30"; x.lineWidth = 0.6; x.beginPath(); x.ellipse(18, 0, 1.3, 2.2, 0, 0, 7); x.stroke(); x.fillStyle = K.saison === "herbst" ? "#c87a2c" : "#4d6b35"; oval(x, -8, -4, 5, 1.6); if (schnee) { x.fillStyle = "rgba(246,244,238,.8)"; x.fillRect(-18, -5, 36, 2); } }
+    else if (art === "steinkreis") { for (let i = 0; i < 7; i++) { const w = i / 7 * 6.28, mx = Math.cos(w) * 17, my = Math.sin(w) * 10; x.fillStyle = "rgba(0,0,0,.3)"; oval(x, mx + 1, my + 2, 3.4, 2); x.fillStyle = "#7a7468"; x.fillRect(mx - 2.6, my - 6, 5.2, 7); x.fillStyle = "#9a948a"; x.fillRect(mx - 2.6, my - 6, 5.2, 1.6); x.fillStyle = "#4d6b35"; x.fillRect(mx - 2.6, my - 1, 3, 1.4); } }
+    else if (art === "heuhaufen") { schatten(13, 6); x.fillStyle = "#c9a35a"; x.beginPath(); x.ellipse(0, 0, 12, 9, 0, Math.PI, 0); x.lineTo(12, 2); x.lineTo(-12, 2); x.fill(); x.strokeStyle = "#e8c878"; x.lineWidth = 0.8; for (let i = 0; i < 8; i++) { x.beginPath(); x.moveTo(-9 + i * 2.6, -5 + Math.abs(i - 4)); x.lineTo(-10 + i * 2.6, 1); x.stroke(); } }
+    else if (art === "brunnen") { schatten(12, 7); x.fillStyle = "#7a7468"; oval(x, 0, 0, 11, 7); x.fillStyle = "#1a1612"; oval(x, 0, 0, 7.5, 4.5); x.fillStyle = "rgba(235,226,204,.12)"; oval(x, -2, -1, 3, 1); x.fillStyle = "#4a3220"; x.fillRect(-10, -14, 2, 14); x.fillRect(8, -14, 2, 14); x.fillStyle = "#6b2a20"; x.beginPath(); x.moveTo(-13, -13); x.lineTo(0, -19); x.lineTo(13, -13); x.fill(); }
+    else if (art === "kisten") { schatten(12, 5); x.fillStyle = "#6b4a30"; x.fillRect(-11, -9, 10, 10); x.strokeStyle = "#3a2618"; x.lineWidth = 1; x.strokeRect(-11, -9, 10, 10); x.beginPath(); x.moveTo(-11, -9); x.lineTo(-1, 1); x.stroke(); x.fillStyle = "#5a3e22"; oval(x, 6, -3, 5, 6); x.strokeStyle = "#8a8070"; x.beginPath(); x.ellipse(6, -6, 5, 1.6, 0, 0, 7); x.ellipse(6, 0, 5, 1.6, 0, 0, 7); x.stroke(); }
+    else if (art === "vogelscheuche") { schatten(7, 3); x.strokeStyle = "#4a3220"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 2); x.lineTo(0, -18); x.moveTo(-9, -12); x.lineTo(9, -12); x.stroke(); x.fillStyle = "#8a6440"; x.fillRect(-5, -14, 10, 9); x.fillStyle = "#e0cca0"; kreis(x, 0, -19, 3.4); x.fillStyle = "#3a2618"; x.beginPath(); x.moveTo(-6, -21); x.lineTo(6, -21); x.lineTo(2, -25); x.lineTo(-2, -25); x.fill(); x.fillStyle = "#c9a35a"; x.fillRect(-11, -13, 3, 2); x.fillRect(8, -13, 3, 2); }
+    else if (art === "ruine") { schatten(18, 4); x.fillStyle = "#5a5866"; for (let i = 0; i < 5; i++) { const h = 6 + r() * 10; x.fillRect(-16 + i * 6.5, -h, 6, h); x.fillStyle = i % 2 ? "#6a6876" : "#5a5866"; } x.fillStyle = "#3d6a32"; oval(x, -6, -3, 6, 2); if (schnee) { x.fillStyle = "rgba(246,244,238,.7)"; x.fillRect(-16, -9, 32, 1.6); } }
+    else if (art === "lore") { schatten(12, 4); x.rotate(0.4); x.fillStyle = "#4a4640"; x.fillRect(-10, -7, 20, 10); x.fillStyle = "#6a655c"; x.fillRect(-10, -7, 20, 2); x.fillStyle = "#c98a3a"; for (let i = 0; i < 5; i++) kreis(x, -6 + i * 3, -7, 2); x.fillStyle = "#1a1612"; kreis(x, -6, 4, 2.6); kreis(x, 6, 4, 2.6); }
+    else if (art === "kristalle") { const f = G.k === "unterreich" ? ["#b48ad8", "#efe0ff"] : G.k === "hort" ? ["#e0602a", "#ffd27a"] : ["#e0a046", "#fff0c0"]; schatten(10, 4); [[-5, -0.4, 10], [0, 0, 15], [5, 0.45, 9], [2, 0.2, 6]].forEach(([dx, w, h]) => { x.save(); x.translate(dx, 2); x.rotate(w); x.fillStyle = f[0]; x.beginPath(); x.moveTo(-2.4, 0); x.lineTo(-2.4, -h + 2); x.lineTo(0, -h); x.lineTo(2.4, -h + 2); x.lineTo(2.4, 0); x.fill(); x.fillStyle = f[1]; x.fillRect(-0.6, -h + 2, 1.1, h - 3); x.restore(); }); }
+    else if (art === "amboss") { schatten(10, 4); x.fillStyle = "#3a3634"; x.fillRect(-4, -4, 8, 6); x.fillStyle = "#4a4644"; x.beginPath(); x.moveTo(-10, -8); x.lineTo(8, -8); x.quadraticCurveTo(13, -8, 13, -5); x.lineTo(6, -4); x.lineTo(-8, -4); x.closePath(); x.fill(); x.fillStyle = "#8a8480"; x.fillRect(-9, -8, 16, 1.2); x.fillStyle = "#6b4a2a"; x.fillRect(4, -14, 2, 6); x.fillStyle = "#5a5652"; x.fillRect(2, -16, 7, 3); }
+    else if (art === "knochen") { for (let i = 0; i < 3; i++) { x.save(); x.translate((r() - 0.5) * 16, (r() - 0.5) * 10); x.rotate(r() * 3); x.fillStyle = "rgba(235,226,204,.55)"; x.fillRect(-5, -0.8, 10, 1.6); kreis(x, -5, -1, 1.2); kreis(x, -5, 1, 1.2); kreis(x, 5, -1, 1.2); kreis(x, 5, 1, 1.2); x.restore(); } x.fillStyle = "rgba(235,226,204,.6)"; kreis(x, 4, -4, 3); x.fillStyle = "#1a1612"; kreis(x, 3, -4.5, 0.7); kreis(x, 5, -4.5, 0.7); }
+    else if (art === "grabstein") { for (let i = 0; i < 2 + Math.floor(r() * 2); i++) { const gx = -10 + i * 10, w = (r() - 0.5) * 0.3; x.save(); x.translate(gx, 0); x.rotate(w); x.fillStyle = "rgba(0,0,0,.3)"; oval(x, 1, 2, 5, 2); x.fillStyle = "#5a5866"; x.beginPath(); x.moveTo(-4, 1); x.lineTo(-4, -8); x.arc(0, -8, 4, Math.PI, 0); x.lineTo(4, 1); x.fill(); x.strokeStyle = "rgba(20,18,24,.6)"; x.lineWidth = 0.8; x.beginPath(); x.moveTo(0, -9); x.lineTo(0, -4); x.moveTo(-1.6, -7.4); x.lineTo(1.6, -7.4); x.stroke(); x.restore(); } }
+    else if (art === "karren") { schatten(14, 5); x.rotate(-0.3); x.fillStyle = "#5a3e22"; x.fillRect(-12, -6, 20, 8); x.strokeStyle = "#3a2618"; x.lineWidth = 1; x.strokeRect(-12, -6, 20, 8); x.strokeStyle = "#4a3220"; x.lineWidth = 1.6; x.beginPath(); x.arc(-6, 4, 4.5, 0, 7); x.stroke(); x.beginPath(); x.moveTo(8, -2); x.lineTo(16, -6); x.stroke(); x.beginPath(); x.arc(8, 6, 4.5, 0.4, 3.4); x.stroke(); }
+    else if (art === "riesenpilz") { schatten(12, 5); x.fillStyle = "#e8dcd0"; x.fillRect(-2.5, -14, 5, 15); const g = x.createRadialGradient(-3, -17, 1, 0, -15, 12); g.addColorStop(0, "#e8c8ff"); g.addColorStop(1, "#7a4a9a"); x.fillStyle = g; x.beginPath(); x.ellipse(0, -14, 12, 7, 0, Math.PI, 0); x.closePath(); x.fill(); x.fillStyle = "rgba(255,240,255,.8)"; kreis(x, -5, -17, 1.2); kreis(x, 3, -19, 1.4); kreis(x, 6, -15, 1); }
+    else if (art === "spinnennetz") { x.strokeStyle = "rgba(235,226,204,.22)"; x.lineWidth = 0.7; for (let a = 0; a < 8; a++) { x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(a * 0.785) * 22, Math.sin(a * 0.785) * 22); x.stroke(); } for (let rr = 6; rr < 22; rr += 5) { x.beginPath(); x.arc(0, 0, rr, 0, 7); x.stroke(); } x.fillStyle = "#1a1416"; kreis(x, 5, -4, 2); }
+    else if (art === "boot") { schatten(16, 5); x.rotate(r() * 0.8 - 0.4); x.fillStyle = "#4a3220"; x.beginPath(); x.moveTo(-16, 0); x.quadraticCurveTo(-12, 7, 0, 7); x.quadraticCurveTo(12, 7, 16, 0); x.quadraticCurveTo(0, -7, -16, 0); x.fill(); x.fillStyle = "#6b4a30"; x.beginPath(); x.moveTo(-13, 0); x.quadraticCurveTo(0, -5, 13, 0); x.quadraticCurveTo(0, 4, -13, 0); x.fill(); x.strokeStyle = "#3a2618"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(-3, -4); x.lineTo(-3, 4); x.moveTo(4, -4); x.lineTo(4, 4); x.stroke(); if (schnee) { x.fillStyle = "rgba(246,244,238,.75)"; oval(x, 0, 0, 9, 2); } }
+    else if (art === "schilf") { for (let i = 0; i < 9; i++) { const sx = (r() - 0.5) * 18, h = 10 + r() * 10; x.strokeStyle = schnee ? "#8a8470" : "#4a7a5a"; x.lineWidth = 1.2; x.beginPath(); x.moveTo(sx, 3); x.quadraticCurveTo(sx + 2, -h * 0.5, sx + (r() - 0.5) * 4, -h); x.stroke(); if (r() < 0.5) { x.fillStyle = "#5a3e22"; oval(x, sx + 0.5, -h + 3, 1.3, 3); } } if (schnee) { x.fillStyle = "rgba(246,244,238,.6)"; oval(x, 0, 3, 12, 3); } }
+    else if (art === "eisloch") { x.fillStyle = "rgba(246,244,238,.55)"; oval(x, 0, 0, 14, 8); x.fillStyle = "#1a2a2a"; oval(x, 0, 0, 7, 4); x.strokeStyle = "#5a4430"; x.lineWidth = 1; x.beginPath(); x.moveTo(8, -2); x.lineTo(15, -12); x.stroke(); x.strokeStyle = "rgba(235,226,204,.5)"; x.lineWidth = 0.5; x.beginPath(); x.moveTo(15, -12); x.lineTo(2, 0); x.stroke(); x.fillStyle = "#6b4a30"; x.fillRect(-16, -2, 5, 4); }
+    else if (art === "lavapfuetze") { const g = x.createRadialGradient(0, 0, 1, 0, 0, 13); g.addColorStop(0, "#ffd27a"); g.addColorStop(0.5, "#ff7a2a"); g.addColorStop(1, "rgba(120,30,10,.4)"); x.fillStyle = "#2a1410"; oval(x, 0, 0, 15, 8); x.fillStyle = g; oval(x, 0, 0, 12, 6); x.fillStyle = "rgba(255,240,180,.7)"; kreis(x, -3, -1, 1.2); kreis(x, 4, 1, 0.9); }
+    else if (art === "muenzen") { schatten(10, 4); for (let i = 0; i < 16; i++) { x.fillStyle = r() < 0.5 ? "#ffd34d" : "#c98a3a"; oval(x, (r() - 0.5) * 16, (r() - 0.5) * 8 - Math.max(0, 4 - Math.abs(i - 8) * 0.5), 2.4, 1.2); } x.fillStyle = "rgba(255,255,255,.7)"; kreis(x, -2, -4, 0.8); }
+  }
+  /* Wetter-Partikel zeichnen; im Raubzug nur über der Grasnarbe */
+  function wetterMalen(x, K, raub) {
+    if (!K || !K.teile.length) return;
+    const art = WETTER[K.saison];
+    x.save();
+    if (raub) { x.beginPath(); x.rect(0, 0, W, 100); x.clip(); }
+    if (art === "regen") {
+      x.strokeStyle = "rgba(225,220,205,.3)"; x.lineWidth = 1; x.beginPath();
+      K.teile.forEach(q => { x.moveTo(q.x, q.y); x.lineTo(q.x - q.vx * 0.035, q.y - q.vy * 0.035); });
+      x.stroke();
+    } else K.teile.forEach(q => {
+      const p2 = 0.5 + Math.sin(q.ph * 2.2) * 0.5;
+      if (art === "bluete") { x.fillStyle = "rgba(" + q.f + ",.85)"; oval(x, q.x, q.y, 2.2 * q.gr, 1.2 * q.gr, q.w); }
+      else if (art === "laub") { x.fillStyle = "rgba(" + q.f + ",.85)"; oval(x, q.x, q.y, 3 * q.gr, 1.5 * q.gr * Math.abs(Math.sin(q.w)) + 0.4, q.w * 0.5); }
+      else if (art === "schnee") { x.fillStyle = "rgba(250,250,246,.8)"; kreis(x, q.x, q.y, 1.25 * q.gr); }
+      else if (art === "pollen") { x.fillStyle = "rgba(255,240,190," + (0.2 + p2 * 0.45) + ")"; kreis(x, q.x, q.y, 1.1); }
+      else if (art === "glimmer") { x.fillStyle = "rgba(" + q.f + "," + (0.08 + p2 * 0.12) + ")"; kreis(x, q.x, q.y, 4); x.fillStyle = "rgba(" + q.f + "," + (0.3 + p2 * 0.5) + ")"; kreis(x, q.x, q.y, 1.2); }
+      else if (art === "rune") { x.fillStyle = "rgba(255,211,120," + (0.25 + p2 * 0.55) + ")"; x.fillRect(q.x - 2, q.y - 0.5, 4, 1); x.fillRect(q.x - 0.5, q.y - 2.5, 1, 5); }
+      else if (art === "asche") { x.fillStyle = "rgba(176,166,156,.55)"; x.fillRect(q.x, q.y, 1.8 * q.gr, 1.2); }
+      else if (art === "glut") { x.fillStyle = "rgba(255," + Math.round(130 + p2 * 80) + ",50," + (0.4 + p2 * 0.5) + ")"; kreis(x, q.x, q.y, 1.2); }
+    });
+    x.restore();
+  }
+  /* Kleine Tiere: am Boden (unter den Wächtern) oder in der Luft (über allem) */
+  const FALTER_FARBEN = ["#ffd34d", "#f1e7cf", "#e8905a", "#f0b8c8"];
+  function viecherMalen(x, A, zeit, luft) {
+    if (!A.viecher) return;
+    A.viecher.forEach(v => {
+      const fliegt = v.art === "falter" || v.art === "fledermaus" || v.art === "gluehwurm" || v.zustand === "fliegt";
+      if (fliegt !== luft || v.zustand === "weg" || (v.art === "fledermaus" && v.zustand === "sitzt")) return;
+      x.save(); x.translate(v.x, v.y);
+      if (v.art === "falter") {
+        const fl = Math.abs(Math.sin(zeit * 16 + v.f * 9)), fb = FALTER_FARBEN[Math.floor(v.f * 4) % 4];
+        x.fillStyle = "rgba(0,0,0,.18)"; oval(x, 3, 10, 3, 1.2);
+        x.fillStyle = fb; oval(x, -2.6 * fl - 0.4, -1, 2.8 * fl + 0.4, 2.4); oval(x, 2.6 * fl + 0.4, -1, 2.8 * fl + 0.4, 2.4);
+        x.fillStyle = "#2a2118"; x.fillRect(-0.5, -2.5, 1, 4.5);
+      } else if (v.art === "gluehwurm") {
+        const a = 0.35 + Math.sin(zeit * 3 + v.f * 20) * 0.35; if (a > 0) { x.fillStyle = "rgba(230,255,140," + a * 0.35 + ")"; kreis(x, 0, 0, 5); x.fillStyle = "rgba(240,255,170," + a + ")"; kreis(x, 0, 0, 1.3); }
+      } else if (v.art === "fledermaus") {
+        const fl = Math.sin(zeit * 22 + v.f * 5); if (v.vx > 0) x.scale(-1, 1);
+        x.fillStyle = "#1a1416"; x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(-5, -4 - fl * 4, -10, -1 - fl * 3); x.quadraticCurveTo(-6, 1, 0, 2); x.quadraticCurveTo(6, 1, 10, -1 - fl * 3); x.quadraticCurveTo(5, -4 - fl * 4, 0, 0); x.fill(); kreis(x, 0, 0, 2.2);
+      } else if (v.art === "kraehe") {
+        if (v.zustand === "fliegt") { const fl = Math.sin(zeit * 18 + v.f * 6); if (v.vx < 0) x.scale(-1, 1); x.fillStyle = "#14121a"; x.beginPath(); x.moveTo(-2, 0); x.quadraticCurveTo(-4, -8 - fl * 5, -10, -6 - fl * 4); x.lineTo(-3, 2); x.fill(); x.beginPath(); x.moveTo(2, 0); x.quadraticCurveTo(4, -8 - fl * 5, 10, -6 - fl * 4); x.lineTo(3, 2); x.fill(); oval(x, 0, 0, 3, 5); x.fillStyle = "#3a3440"; x.beginPath(); x.moveTo(0, -5); x.lineTo(-1, -8); x.lineTo(1, -8); x.fill(); }
+        else { const pick = Math.sin(zeit * 2 + v.f * 30) > 0.8 ? 1.6 : 0, hop = (v.hop || 0) > 0 ? Math.sin((0.3 - v.hop) / 0.3 * Math.PI) * 3 : 0; if (v.links) x.scale(-1, 1); x.fillStyle = "rgba(0,0,0,.3)"; oval(x, 0, 3, 4, 1.4); x.fillStyle = "#14121a"; oval(x, 0, -hop, 4.2, 2.8); x.beginPath(); x.moveTo(-3, -hop); x.lineTo(-7, 1 - hop); x.lineTo(-3, 1.2 - hop); x.fill(); kreis(x, 3.4, -2 - hop + pick, 2); x.fillStyle = "#3a3440"; x.beginPath(); x.moveTo(5, -2.4 - hop + pick); x.lineTo(7.6, -1.6 - hop + pick); x.lineTo(5, -1.2 - hop + pick); x.fill(); x.fillStyle = "#e0a046"; kreis(x, 3.9, -2.6 - hop + pick, 0.5); }
+      } else if (v.art === "hase") {
+        const weiss = S.kulisse && S.kulisse.saison === "winter", fell = weiss ? "#f1ece0" : "#8a6a4a", hop = v.zustand === "fliegt" ? Math.abs(Math.sin(zeit * 14)) * 4 : (v.hop || 0) > 0 ? Math.sin((0.3 - v.hop) / 0.3 * Math.PI) * 3 : 0;
+        if (v.zustand === "fliegt" ? v.vx < 0 : v.links) x.scale(-1, 1);
+        x.fillStyle = "rgba(0,0,0,.25)"; oval(x, 0, 3, 5, 1.5);
+        x.fillStyle = fell; oval(x, -1, -hop, 4.5, 3); kreis(x, 3, -2.5 - hop, 2.2);
+        oval(x, 2.4, -6 - hop, 0.9, 2.6, -0.2); oval(x, 3.8, -6 - hop, 0.9, 2.6, 0.2);
+        x.fillStyle = "#fff"; kreis(x, -5, -1 - hop, 1.3); x.fillStyle = "#1a1210"; kreis(x, 4, -2.8 - hop, 0.5);
+      }
+      x.restore();
+    });
+  }
+  /* Rauchfahnen über den Lagerfeuern der Kulisse */
+  function feuerstellenMalen(x, A, zeit) {
+    if (!A.feuerstellen) return;
+    A.feuerstellen.forEach((f, i) => {
+      const fl = Math.sin(zeit * 11 + i) * 0.6;
+      x.fillStyle = "rgba(255,150,60,.75)"; x.beginPath(); x.moveTo(f.x - 3, f.y + 1); x.quadraticCurveTo(f.x - 1, f.y - 7 - fl * 2, f.x + fl, f.y - 9 - fl * 2); x.quadraticCurveTo(f.x + 2, f.y - 5, f.x + 3, f.y + 1); x.fill();
+      x.fillStyle = "rgba(255,230,140,.85)"; oval(x, f.x, f.y - 2, 1.6, 2.6);
+      if (ruhig) return;
+      for (let k = 0; k < 3; k++) { const u = (zeit * 0.35 + k / 3 + i * 0.17) % 1, wind = S.kulisse ? S.kulisse.wind : 0; x.fillStyle = "rgba(200,196,188," + (0.16 * (1 - u)) + ")"; kreis(x, f.x + u * 22 * wind + Math.sin(u * 6 + k) * 3, f.y - 10 - u * 34, 3 + u * 7); }
+    });
+  }
 
   /* ---------- Licht: Dunkelheit mit Lichtinseln (halbe Auflösung) + farbiger Schein ---------- */
   const LF = 0.4;
@@ -3220,7 +3718,13 @@
   function lichtAbwehr(x, A, zeit) {
     const Q = (A.licht || []).slice();
     Q.push({ x: HORT.x, y: HORT.y - 10, r: 145, f: "rgba(255,190,90,.18)", fl: 1 });
-    Q.push({ x: W * 0.3, y: 120, r: 210, a: 0.35, f: "rgba(170,190,230,.04)" }); // Mondlicht
+    const K = S.kulisse, Z = K && ZEITEN[K.zeit];
+    if (K && K.draussen && K.zeit === "abend") Q.push({ x: W * 0.92, y: 70, r: 270, a: 0.45, f: "rgba(255,140,60,.11)" }); // tiefe Sonne
+    else if (K && K.draussen && K.zeit === "morgen") Q.push({ x: W * 0.08, y: 70, r: 260, a: 0.45, f: "rgba(255,186,160,.1)" });
+    else if (K && K.draussen && K.zeit === "mittag") Q.push({ x: W * 0.5, y: 150, r: 320, a: 0.55, f: "rgba(255,244,210,.06)" });
+    else Q.push({ x: W * 0.3, y: 120, r: 210, a: 0.35, f: "rgba(200,190,240,.04)" }); // Mondlicht
+    if (A.gestalt) Q.push({ x: A.gestalt.x, y: A.gestalt.y, r: 64, f: A.gestalt.k === "salamander" ? "rgba(255,140,60,.2)" : "rgba(235,226,204,.12)" });
+    (A.flammen || []).forEach((f, i) => { if (i % 3 === 0) Q.push({ x: f.x, y: f.y, r: 30, f: "rgba(255,130,50,.12)", fl: 1 }); });
     A.plaetze.forEach((p, i) => {
       const T = p.turm;
       if (!T) { if (A.wahl === i) Q.push({ x: p.x, y: p.y, r: 46, f: "rgba(224,160,70,.12)" }); return; }
@@ -3245,7 +3749,7 @@
       else if (b.art === "aufwertung") Q.push({ x: b.x, y: b.y - 10, r: 70, f: "rgba(255,211,77," + (0.25 * a) + ")" });
     });
     if (A.baer) Q.push({ x: A.baer.x, y: A.baer.y, r: 60, f: "rgba(196,86,74,.12)" });
-    lichtMalen(x, Q, DUNKEL[GEB[A.g].k] || 0.38, zeit);
+    lichtMalen(x, Q, klemm((DUNKEL[GEB[A.g].k] || 0.38) + (Z ? Z.dunkel : 0), 0.12, 0.62), zeit);
   }
   function lichtRaub(x, R, zeit) {
     const sp = hakenSpitze(R.haken), Q = [
@@ -4019,6 +4523,38 @@
     }
     x.restore();
   }
+  /* Ein frisch gepflanzter Wächter bricht erst als Spross aus der Erde, dann wächst er heraus */
+  function sprossMalen(x, wachs, T, zeit) {
+    const u = Math.min(1, wachs / 0.28), weg = wachs > 0.28 ? 1 - (wachs - 0.28) / 0.5 : 1;
+    if (weg <= 0) return;
+    x.save(); x.globalAlpha = klemm(weg, 0, 1);
+    x.fillStyle = "#3a2a1a"; oval(x, 0, 6, 9 + u * 4, 3.5 + u);
+    x.fillStyle = "#5a4430"; for (let i = 0; i < 5; i++) { const w = i / 5 * 6.28 + 0.4; oval(x, Math.cos(w) * (7 + u * 6), 6 + Math.sin(w) * 3, 1.6, 1.1); }
+    const h = 4 + u * 12, farbe = T.tier ? (TIERE[T.k] || {}).farbe || "#6f9a3a" : "#6f9a3a";
+    x.strokeStyle = "#4d6b35"; x.lineWidth = 2; x.lineCap = "round"; x.beginPath(); x.moveTo(0, 6); x.quadraticCurveTo(2, 6 - h * 0.5, Math.sin(zeit * 6) * 1.2, 6 - h); x.stroke();
+    blatt(x, 0, 6 - h, -2.4 + (1 - u) * 0.9, 4 + u * 4, 1.8 + u, "#8ab04a"); blatt(x, 0, 6 - h, -0.7 - (1 - u) * 0.9, 4 + u * 4, 1.8 + u, "#6f9a3a");
+    if (u > 0.6) { x.fillStyle = T.tier ? farbe : (WACHTER[T.k] || {}).farbe || "#cfe6a8"; kreis(x, 0, 6 - h - 1, 1.6 + (u - 0.6) * 4); }
+    x.restore();
+  }
+  /* Je Stufe mehr Schmuck am Sockel: Gras, dann Blüten/Kristalle/Pilzchen, dann (Uralt) ein Runenkreis mit schwebenden Funken */
+  const SCHMUCK = { dorn: ["#4d6b35", "#c4564a"], wurzel: ["#5f8a3e", "#e8d8a8"], wolf: ["#6a655c", "#ebe2cc"], eis: ["#8a9a7a", "#f4f0e8"], blitz: ["#3d5a2a", "#f3e27a"], pilz: ["#5f8a3e", "#c49ae0"] };
+  function stufenSchmuck(x, T, zeit) {
+    const st = T.st, f = SCHMUCK[T.k]; if (st < 1 || !f) return;
+    for (let i = 0; i < 6; i++) { const w = i / 6 * Math.PI * 2 + 0.5, bx = Math.cos(w) * 17, by = 6 + Math.sin(w) * 7.5; blatt(x, bx, by, -Math.PI / 2 + Math.cos(w) * 0.6 + Math.sin(zeit * 1.6 + i) * 0.12, 6, 1.8, f[0]); }
+    if (st >= 2) for (let i = 0; i < 7; i++) {
+      const w = i / 7 * Math.PI * 2 + 0.1, bx = Math.cos(w) * 15, by = 7 + Math.sin(w) * 6.5;
+      if (T.k === "eis") { x.fillStyle = f[1]; x.beginPath(); x.moveTo(bx, by - 4); x.lineTo(bx + 1.4, by); x.lineTo(bx, by + 1); x.lineTo(bx - 1.4, by); x.fill(); }
+      else if (T.k === "pilz" || T.k === "wurzel") { x.fillStyle = "#e8dcd0"; x.fillRect(bx - 0.5, by - 2, 1, 2.5); x.fillStyle = f[1]; oval(x, bx, by - 2.2, 1.9, 1.2); }
+      else if (T.k === "blitz") { x.fillStyle = "rgba(243,226,122," + (0.4 + Math.sin(zeit * 5 + i) * 0.4) + ")"; kreis(x, bx, by - 1, 1.2); }
+      else { x.fillStyle = f[1]; for (let k = 0; k < 4; k++) kreis(x, bx + Math.cos(k * 1.57) * 1.3, by - 1 + Math.sin(k * 1.57) * 1.3, 1); x.fillStyle = "#ffd34d"; kreis(x, bx, by - 1, 0.7); }
+    }
+    if (st >= 3) {
+      x.save(); x.strokeStyle = "rgba(255,211,77,.4)"; x.lineWidth = 1; x.setLineDash([2, 4]); x.lineDashOffset = -zeit * 8;
+      x.beginPath(); x.ellipse(0, 6, 23, 10, 0, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+      if (!ruhig) for (let i = 0; i < 4; i++) { const u = (zeit * 0.4 + i / 4) % 1, w = i * 1.7 + zeit * 0.5; x.fillStyle = "rgba(255,226,140," + (Math.sin(u * Math.PI) * 0.8) + ")"; kreis(x, Math.cos(w) * 14, 4 - u * 34, 1.2); }
+      x.restore();
+    }
+  }
   function malWachter(x, p, zeit, gewaehlt) {
     const T = p.turm, st = T.st;
     x.save(); x.translate(p.x, p.y);
@@ -4032,11 +4568,17 @@
       x.strokeStyle = "rgba(224,160,70,.6)"; x.fillStyle = "rgba(224,160,70,.08)"; x.lineWidth = 1.2; x.beginPath(); x.arc(0, 0, w.reich[st] * rf, 0, Math.PI * 2); x.fill(); x.stroke();
       if (st < 2) { x.strokeStyle = "rgba(207,230,168,.55)"; x.setLineDash([4, 4]); x.beginPath(); x.arc(0, 0, w.reich[st + 1] * rf, 0, Math.PI * 2); x.stroke(); x.setLineDash([]); }
     }
-    const wachs = T.wachs == null ? 1 : T.wachs, el = wachs >= 1 ? 1 : 1 - Math.pow(1 - wachs, 3) * Math.cos(wachs * 9);
+    const wachs = T.wachs == null ? 1 : T.wachs, u = klemm((wachs - 0.28) / 0.72, 0, 1), el = u >= 1 ? 1 : 1 - Math.pow(1 - u, 3) * Math.cos(u * 9);
     const atem = 1 + Math.sin(zeit * 1.8 + p.x * 0.07) * 0.025;
-    x.save(); x.scale(el, el * atem);
-    if (T.tier) malTierFigur(x, T.k, st, T, zeit); else malTurm(x, T.k, st, T, zeit);
-    x.restore();
+    if (wachs < 1) sprossMalen(x, wachs, T, zeit);
+    if (!T.tier && el > 0.6) stufenSchmuck(x, T, zeit);
+    if (el > 0.02) {
+      /* Wachstumsschub beim Verstärken: streckt sich in die Höhe und federt zurück */
+      const sb = T.schub || 0, hoch = sb > 0 ? Math.sin((1 - sb) * Math.PI * 3) * 0.2 * sb : 0;
+      x.save(); x.translate(0, 8); x.scale(el * (1 - hoch * 0.5), el * atem * (1 + hoch)); x.translate(0, -8);
+      if (T.tier) malTierFigur(x, T.k, st, T, zeit); else malTurm(x, T.k, st, T, zeit);
+      x.restore();
+    }
     if (T.zweig && !T.tier) {
       const zs = { dorn: { a: "🧪", b: "🌵" }, wurzel: { a: "🪢", b: "🗡️" }, wolf: { a: "🐺", b: "👑" }, eis: { a: "🧊", b: "❄️" }, blitz: { a: "⛈️", b: "💥" }, pilz: { a: "☠️", b: "🍄" } }[T.k][T.zweig];
       x.fillStyle = "rgba(9,8,15,.75)"; kreis(x, 13, -18, 7); x.strokeStyle = "#ffd34d"; x.lineWidth = 1; x.beginPath(); x.arc(13, -18, 7, 0, Math.PI * 2); x.stroke();
@@ -4268,7 +4810,8 @@
     if (anteil > 0.3) { x.fillStyle = "#c4564a"; kreis(x, -8, -h * 0.5, 2); x.fillStyle = "#4aa0b0"; kreis(x, 10, -h * 0.4, 2); }
     x.fillStyle = "rgba(255,255,255," + (0.3 + Math.sin(zeit * 3) * 0.3) + ")"; kreis(x, 6, -h * 0.7, 1.4);
     x.restore();
-    malEcho(x, HORT.x + 40, HORT.y - 4, 0.85, "ranke", A.zorn, zeit);
+    if (!A.gestalt) malEcho(x, HORT.x + 40, HORT.y - 4, 0.85, "ranke", A.zorn, zeit);
+    else { x.save(); x.globalAlpha = 0.5; for (let i = 0; i < 5; i++) { const w = zeit * 2 + i * 1.26; blatt(x, HORT.x + 40 + Math.cos(w) * 10, HORT.y - 4 + Math.sin(w) * 5, w, 6, 2.2, i % 2 ? "#6f9a3a" : "#cfe6a8"); } x.restore(); }
     // Ladung des gewählten Zaubers als Ring um Echo
     const z = A.zauber[A.aktiv]; if (!z) return;
     const u = 1 - z.cd / z.max, farbe = ZAUBER[z.k].farbe;
@@ -4347,6 +4890,27 @@
         for (let i = 0; i < 7; i++) { const w = i / 7 * Math.PI * 2 + b.t * 2, rr = b.r * (0.25 + u * 0.75); x.fillStyle = "rgba(196,154,224," + a * 0.45 + ")"; kreis(x, b.x + Math.cos(w) * rr * 0.6, b.y + Math.sin(w) * rr * 0.45, 7 + u * 5); }
       } else if (b.art === "gift") {
         x.fillStyle = "rgba(120,190,70," + a * 0.3 + ")"; kreis(x, b.x, b.y, b.r * (0.4 + u * 0.6));
+      } else if (b.art === "kombo" || b.art === "komboGross") {
+        const gross = b.art === "komboGross", rr = gross ? 10 + u * 64 : 6 + u * 18, sd = (b.seed || 0.3) * 6;
+        x.globalCompositeOperation = "lighter"; x.globalAlpha = a; x.strokeStyle = b.farbe; x.lineWidth = gross ? 3 * a + 0.5 : 2;
+        x.beginPath(); x.arc(b.x, b.y, rr, 0, Math.PI * 2); x.stroke();
+        if (gross) { x.globalAlpha = a * 0.6; x.beginPath(); x.arc(b.x, b.y, rr * 0.6, 0, Math.PI * 2); x.stroke(); }
+        const n = gross ? 12 : 6; x.lineWidth = gross ? 2 : 1.4;
+        for (let i = 0; i < n; i++) { const w = i / n * Math.PI * 2 + sd; x.beginPath(); x.moveTo(b.x + Math.cos(w) * rr * 0.55, b.y + Math.sin(w) * rr * 0.55); x.lineTo(b.x + Math.cos(w) * rr * 1.15, b.y + Math.sin(w) * rr * 1.15); x.stroke(); }
+      } else if (b.art === "verwandlung") {
+        x.globalAlpha = a;
+        for (let i = 0; i < 10; i++) { const w = i / 10 * Math.PI * 2 + u * 5 + (b.seed || 0) * 6, rr = 8 + u * 30; blatt(x, b.x + Math.cos(w) * rr, b.y + Math.sin(w) * rr * 0.7, w + 1.6, 7, 2.6, i % 2 ? b.farbe : "#8ab04a"); }
+        x.strokeStyle = b.farbe; x.lineWidth = 2; x.beginPath(); x.arc(b.x, b.y, 6 + u * 26, 0, Math.PI * 2); x.stroke();
+      } else if (b.art === "sprung") {
+        x.globalAlpha = a * 0.5; x.strokeStyle = "#efe6d2"; x.lineWidth = 5 * a + 1; x.lineCap = "round"; x.beginPath(); x.moveTo(b.x0, b.y0); x.lineTo(b.x0 + (b.x - b.x0) * Math.min(1, u * 2), b.y0 + (b.y - b.y0) * Math.min(1, u * 2)); x.stroke();
+      } else if (b.art === "splitterflug") {
+        const px = b.x0 + (b.x - b.x0) * u, py = b.y0 + (b.y - b.y0) * u;
+        x.globalAlpha = a; x.fillStyle = "#ffffff"; x.beginPath(); x.moveTo(px, py - 3.5); x.lineTo(px + 1.8, py); x.lineTo(px, py + 3.5); x.lineTo(px - 1.8, py); x.fill();
+        x.strokeStyle = "rgba(244,239,226," + a * 0.6 + ")"; x.lineWidth = 1; x.beginPath(); x.moveTo(b.x0, b.y0); x.lineTo(px, py); x.stroke();
+      } else if (b.art === "stichflamme") {
+        const rr = 8 + u * 26, g = x.createRadialGradient(b.x, b.y, 0, b.x, b.y, rr);
+        g.addColorStop(0, "rgba(255,244,180," + a + ")"); g.addColorStop(0.45, "rgba(255,138,58," + a * 0.8 + ")"); g.addColorStop(1, "rgba(196,154,224,0)");
+        x.fillStyle = g; kreis(x, b.x, b.y, rr);
       }
       x.restore();
     });
@@ -4450,6 +5014,7 @@
   function zeichneRaub(x, zeit) {
     const R = S.R, h = R.haken, T = t();
     x.drawImage(hgBild, 0, 0, W, H);
+    wetterMalen(x, S.kulisse, true);
     // Wurzelknoten am Drehpunkt
     x.fillStyle = "#3b2a1b"; oval(x, DREH.x, DREH.y - 2, 14, 7);
     x.fillStyle = "#5a4430"; oval(x, DREH.x, DREH.y - 4, 9, 4);
@@ -4505,28 +5070,202 @@
     A.gefahrCache = { w: A.welle, d };
     return d;
   }
-  const GEFAHR_SYM = { flug: "🦇", schnell: "💨", zaeh: "🛡️", unsichtbar: "👻", boss: "☠️" };
-  function malGefahr(x, A, d) {
-    if (!d) return;
-    const teile = Object.keys(GEFAHR_SYM).filter(k => d[k] > 0).map(k => GEFAHR_SYM[k] + (k === "boss" ? "" : d[k]));
-    if (!teile.length) return;
-    const st = A.P.p[0];
-    x.save(); x.font = "700 11px " + FONT_B;
-    const txt = teile.join("  "), tw = Math.max(x.measureText(txt).width, x.measureText(t().gefahr).width) + 16;
-    const bx = klemm(st.x - tw / 2, 6, W - tw - 6), by = 34;
-    x.fillStyle = "rgba(18,14,11,.82)"; x.strokeStyle = d.boss ? "#c4564a" : "rgba(224,160,70,.7)"; x.lineWidth = 1;
-    x.beginPath(); x.roundRect ? x.roundRect(bx, by, tw, 32, 6) : x.rect(bx, by, tw, 32); x.fill(); x.stroke();
-    x.textAlign = "center"; x.textBaseline = "middle";
-    x.font = "600 9px " + FONT_B; x.fillStyle = "#a89f8f"; x.fillText(t().gefahr.toUpperCase(), bx + tw / 2, by + 9);
-    x.font = "700 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(txt, bx + tw / 2, by + 22);
+  /* Vorschau der nächsten Welle: welche Plünderer in welcher Reihenfolge, zu Fuß oder aus der Luft */
+  function vorschauDaten(A) {
+    const l = A.wellen[A.welle + 1]; if (!l) return null;
+    if (A.vorschauCache && A.vorschauCache.w === A.welle) return A.vorschauCache.d;
+    const zaehl = new Map(); l.forEach(k => zaehl.set(k, (zaehl.get(k) || 0) + 1));
+    if (A.demo && A.welle + 1 === A.wellen.length - 1) zaehl.set("demogorgon", 1);
+    const folge = []; const n = Math.min(8, l.length);
+    for (let i = 0; i < n; i++) folge.push(l[Math.floor(i * l.length / n)]);
+    const boss = [...zaehl.keys()].find(k => FEINDE[k] && FEINDE[k].boss); if (boss && !folge.includes(boss)) folge.splice(Math.min(folge.length, 4), 0, boss);
+    const d = { zaehl: [...zaehl].sort((a, b) => (FEINDE[a[0]].boss ? 1 : 0) - (FEINDE[b[0]].boss ? 1 : 0) || b[1] - a[1]), folge, boden: l.some(k => !FEINDE[k].flug), luft: l.some(k => FEINDE[k].flug) };
+    A.vorschauCache = { w: A.welle, d };
+    return d;
+  }
+  /* Gezeichnete Figur eines Plünderers (ohne Lebensbalken) – für Geister und die Vorschau */
+  function malFeindBild(x, k, r, zeit, w) {
+    const d = FEINDE[k];
+    if (MEDAILLONS[k]) { x.fillStyle = d.farbe; kreis(x, 0, 0, r + 2); x.drawImage(MEDAILLONS[k], -r, -r, r * 2, r * 2); x.strokeStyle = "#e0a046"; x.lineWidth = 1.4; x.beginPath(); x.arc(0, 0, r + 0.5, 0, Math.PI * 2); x.stroke(); return; }
+    x.save(); if (w != null) x.rotate(w + Math.PI / 2); x.scale(r / d.r, r / d.r);
+    malFigur(x, k, d.r, d, zeit, null); x.restore();
+  }
+  function malWegVorschau(x, A, zeit) {
+    const V = vorschauDaten(A); if (!V) return;
+    const P = A.P, vt = A.vorschauT || 0, st = P.p[0];
+    x.save();
+    if (V.boden) {
+      // leuchtende Spur mit Pfeilen in Laufrichtung
+      x.strokeStyle = "rgba(224,160,70,.22)"; x.lineWidth = 6; x.lineJoin = "round"; x.lineCap = "round";
+      x.beginPath(); P.p.forEach((q, i) => i ? x.lineTo(q.x, q.y) : x.moveTo(q.x, q.y)); x.stroke();
+      x.strokeStyle = "rgba(255,211,120,.5)"; x.lineWidth = 1.6; x.setLineDash([5, 9]); x.lineDashOffset = -zeit * 34; x.stroke(); x.setLineDash([]);
+      x.fillStyle = "rgba(255,211,120,.55)";
+      for (let s0 = (zeit * 34) % 64; s0 < P.gesamt - 20; s0 += 64) { const q = pfadPunkt(P, s0); x.save(); x.translate(q.x, q.y); x.rotate(q.w || 0); x.beginPath(); x.moveTo(4, 0); x.lineTo(-3, -4); x.lineTo(-1, 0); x.lineTo(-3, 4); x.closePath(); x.fill(); x.restore(); }
+    }
+    // Geisterzug: die nächste Welle läuft als Schemen voraus
+    const abstand = ruhig ? Math.max(34, P.gesamt / (V.folge.length + 1)) : 34, n = V.folge.length, periode = P.gesamt + n * abstand + 60, kopf = ruhig ? P.gesamt - 10 : (vt * 48) % periode;
+    V.folge.forEach((k, i) => {
+      const d = FEINDE[k], s0 = kopf - i * abstand; if (s0 < 0 || s0 > P.gesamt) return;
+      const a = 0.42 * Math.min(1, s0 / 30, (P.gesamt - s0) / 40); if (a <= 0.02) return;
+      let px, py, w;
+      if (d.flug) { const u = s0 / P.gesamt; px = st.x + (HORT.x - st.x) * u + Math.sin(u * 9 + i) * 10; py = 20 + (HORT.y - 30) * u; w = Math.atan2(HORT.y - 30, HORT.x - st.x); }
+      else { const q = pfadPunkt(P, s0); px = q.x; py = q.y + Math.abs(Math.sin(zeit * 8 + i)) * -1.2; w = q.w; }
+      x.save(); x.translate(px, py); x.globalAlpha = a;
+      malFeindBild(x, k, Math.min(d.r, d.boss ? 14 : 10), zeit, d.boss ? null : w);
+      x.globalAlpha = a * 0.9; x.strokeStyle = "rgba(235,226,204,.8)"; x.lineWidth = 1; x.setLineDash([2, 3]); x.beginPath(); x.arc(0, 0, Math.min(d.r, 14) + 3, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+      x.restore();
+    });
     x.restore();
   }
-  function malFlugschneise(x, A, zeit) {
+  function malGefahr(x, A, d) {
+    const V = vorschauDaten(A); if (!V) return;
+    const T = t(), st = A.P.p[0], l = V.zaehl.slice(0, 6), mehr = V.zaehl.length - l.length;
+    x.save();
+    const zw2 = 40, tw = Math.max(l.length * zw2 + (mehr > 0 ? 24 : 0), 120) + 12, th = 44;
+    const bx = klemm(st.x - tw / 2, 6, W - tw - 6), by = bx + tw > W - 104 ? 52 : 32; /* rechts oben liegen Tempo- und Pause-Knopf */
+    const boss = d && d.boss > 0;
+    x.fillStyle = "rgba(18,14,11,.84)"; x.strokeStyle = boss ? "#c4564a" : "rgba(224,160,70,.7)"; x.lineWidth = 1;
+    x.beginPath(); x.roundRect ? x.roundRect(bx, by, tw, th, 6) : x.rect(bx, by, tw, th); x.fill(); x.stroke();
+    x.textAlign = "center"; x.textBaseline = "middle";
+    const kopf = T.gefahr.toUpperCase() + (V.luft ? " · 🦇 " + T.wegVorschau.luft : "");
+    x.font = "600 9px " + FONT_B; x.fillStyle = "#c8bfae"; x.fillText(kopf, bx + tw / 2, by + 9, tw - 8);
+    l.forEach(([k, n], i) => {
+      const cx = bx + 6 + i * zw2 + 13, cy = by + 28, F2 = FEINDE[k];
+      x.save(); x.translate(cx, cy); malFeindBild(x, k, F2.boss ? 9 : 7.5, 0, F2.flug ? null : -Math.PI / 2); x.restore();
+      x.font = "700 10px " + FONT_B; x.textAlign = "left"; x.fillStyle = F2.boss ? "#e07a6a" : "#ebe2cc";
+      x.fillText(F2.boss ? "☠" : "×" + n, cx + 10, cy + 2);
+    });
+    if (mehr > 0) { x.font = "700 10px " + FONT_B; x.textAlign = "left"; x.fillStyle = "#a89f8f"; x.fillText("+" + mehr, bx + 6 + l.length * zw2 + 2, by + 30); }
+    if (S.lv <= 1 && A.welle < 1) { x.font = "italic 10px " + FONT_B; x.textAlign = "center"; x.fillStyle = "rgba(235,226,204,.75)"; x.fillText(T.wegVorschau.geister, klemm(st.x, 120, W - 120), by + th + 10, W - 20); }
+    x.restore();
+  }
+  /* Bündnisse: Linien zwischen Wächtern, die zusammen eine Kombo auslösen können */
+  function buendeBerechnen(A) {
+    const l = [], T = A.plaetze.filter(p => p.turm && !p.turm.tier);
+    for (let i = 0; i < T.length; i++) for (let j = i + 1; j < T.length; j++) {
+      const a = T[i].turm, b = T[j].turm, P = KOMBO_PAARE.find(q => (q.a === a.k && q.b === b.k) || (q.a === b.k && q.b === a.k)); if (!P) continue;
+      const d = abst(T[i].x, T[i].y, T[j].x, T[j].y), ra = WACHTER[a.k].reich[a.st] * (a._reich || 1), rb = WACHTER[b.k].reich[b.st] * (b._reich || 1);
+      if (d <= Math.max(ra, rb) + 6) l.push({ p: T[i], q: T[j], k: P.k, d });
+    }
+    return l.sort((a, b) => a.d - b.d).slice(0, 16);
+  }
+  function malBuende(x, A, zeit) {
+    A.bundT = (A.bundT || 0) - 1;
+    if (!A.buende || A.bundT <= 0) { A.buende = buendeBerechnen(A); A.bundT = 20; }
+    if (!A.buende.length) return;
+    const gew = A.wahl >= 0 ? A.plaetze[A.wahl] : null;
+    x.save(); x.lineCap = "round";
+    A.buende.forEach((b, i) => {
+      if (!b.p.turm || !b.q.turm) return;
+      const K = KOMBOS[b.k], an = gew && (gew === b.p || gew === b.q), benutzt = A.komboZahl && A.komboZahl[b.k];
+      x.globalAlpha = an ? 0.75 : benutzt ? 0.32 : 0.18;
+      x.strokeStyle = K.farbe; x.lineWidth = an ? 1.8 : 1.2; x.setLineDash([3, 5]); x.lineDashOffset = -zeit * 16;
+      x.beginPath(); x.moveTo(b.p.x, b.p.y - 4); x.lineTo(b.q.x, b.q.y - 4); x.stroke(); x.setLineDash([]);
+      const u = (zeit * 0.45 + i * 0.37) % 1, mx = b.p.x + (b.q.x - b.p.x) * u, my = b.p.y - 4 + (b.q.y - b.p.y) * u;
+      x.globalAlpha = an ? 1 : 0.6; x.fillStyle = K.farbe; kreis(x, mx, my, an ? 2.2 : 1.6);
+      if (an) {
+        const nm = t().kombos[b.k][0], cx = (b.p.x + b.q.x) / 2, cy = (b.p.y + b.q.y) / 2 - 4;
+        x.font = "700 10px " + FONT_B; const bw = x.measureText(nm).width + 26;
+        x.globalAlpha = 0.92; x.fillStyle = "rgba(18,14,11,.9)"; x.beginPath(); x.roundRect ? x.roundRect(cx - bw / 2, cy - 8, bw, 16, 8) : x.rect(cx - bw / 2, cy - 8, bw, 16); x.fill();
+        x.strokeStyle = K.farbe; x.lineWidth = 1; x.stroke();
+        x.fillStyle = K.farbe; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(K.sym + " " + nm, cx, cy + 0.5, bw - 4);
+      }
+    });
+    x.restore();
+  }
+  /* brennende Spur des Salamanders */
+  function malFlammen(x, A, zeit) {
+    if (!A.flammen || !A.flammen.length) return;
+    x.save();
+    A.flammen.forEach(f => {
+      const a = 1 - f.t / f.dauer, h = 5 + Math.sin(zeit * 14 + f.ph) * 1.5;
+      x.globalAlpha = a * 0.8; x.fillStyle = "#ff7a2a"; x.beginPath(); x.moveTo(f.x - 3, f.y + 2); x.quadraticCurveTo(f.x - 1, f.y - h * 0.6, f.x + Math.sin(zeit * 9 + f.ph), f.y - h); x.quadraticCurveTo(f.x + 2, f.y - h * 0.4, f.x + 3, f.y + 2); x.fill();
+      x.fillStyle = "#ffd27a"; oval(x, f.x, f.y, 1.4, 2);
+    });
+    x.restore();
+  }
+  /* Echo in Tiergestalt – das kleine Geweih verrät ihn immer */
+  const ECHO_WOLF = { bein: "#b8b0a0", koerper: "#e8e2d6", schwanz: "#d8d0c0", kopf: "#f1ece0", ohr: "#c9c0ae", brust: "#ffffff" };
+  function geweih(x, gx, gy, gr) {
+    x.strokeStyle = "#2a2018"; x.lineWidth = 1.2 * gr; x.lineCap = "round"; x.beginPath();
+    x.moveTo(gx - 1.5 * gr, gy); x.lineTo(gx - 3.5 * gr, gy - 4 * gr); x.moveTo(gx - 2.6 * gr, gy - 2.4 * gr); x.lineTo(gx - 5 * gr, gy - 3 * gr);
+    x.moveTo(gx + 1.5 * gr, gy); x.lineTo(gx + 3.5 * gr, gy - 4 * gr); x.moveTo(gx + 2.6 * gr, gy - 2.4 * gr); x.lineTo(gx + 5 * gr, gy - 3 * gr); x.stroke();
+  }
+  function malGestalt(x, A, zeit) {
+    const E = A.gestalt; if (!E) return;
+    const G = GESTALT[E.k], rest = 1 - E.t / E.dauer;
+    x.save();
+    x.globalAlpha = 0.22 + Math.sin(zeit * 6) * 0.08; x.fillStyle = G.farbe; oval(x, E.x, E.y + 6, 18, 7); x.globalAlpha = 1;
+    if (!E.zurueck) { x.strokeStyle = G.farbe; x.lineWidth = 2; x.beginPath(); x.arc(E.x, E.y - 2, 21, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(0, rest)); x.stroke(); }
+    if (E.k === "wolf") {
+      const gr = 1.75, sp = E.sprungT > 0 ? -5 : 0;
+      malWolf(x, E.x, E.y + sp, E.links, zeit * 1.3, true, ECHO_WOLF, gr);
+      geweih(x, E.x + (E.links ? -8 : 8) * gr, E.y + sp - 6.5 * gr, 1.3);
+    } else if (E.k === "eule") {
+      const fl = Math.sin(zeit * 15), by = E.y - 10 + Math.sin(zeit * 3) * 2;
+      x.fillStyle = "rgba(0,0,0,.25)"; oval(x, E.x + 4, E.y + 10, 12, 4);
+      x.translate(E.x, by); x.scale(E.links ? 1.25 : -1.25, 1.25);
+      x.fillStyle = "#8a6a3a";
+      x.beginPath(); x.moveTo(-3, -2); x.quadraticCurveTo(-14, -12 - fl * 8, -24, -4 - fl * 6); x.quadraticCurveTo(-14, 2, -3, 4); x.fill();
+      x.beginPath(); x.moveTo(3, -2); x.quadraticCurveTo(14, -12 - fl * 8, 24, -4 - fl * 6); x.quadraticCurveTo(14, 2, 3, 4); x.fill();
+      x.fillStyle = "#e0cca0"; for (let i = 0; i < 3; i++) { oval(x, -12 - i * 3, -4 - fl * 4 + i, 2, 4, 0.6); oval(x, 12 + i * 3, -4 - fl * 4 + i, 2, 4, -0.6); }
+      x.fillStyle = "#8a6a3a"; oval(x, 0, 2, 7, 10); x.fillStyle = "#efe2c4"; oval(x, 0, 4, 4.5, 6.5);
+      kreis(x, 0, -8, 6.5); x.fillStyle = "#efe2c4"; oval(x, -2.6, -8, 3, 2.8); oval(x, 2.6, -8, 3, 2.8);
+      x.fillStyle = "#ffcf3a"; kreis(x, -2.6, -8, 1.8); kreis(x, 2.6, -8, 1.8); x.fillStyle = "#1a1210"; kreis(x, -2.6, -8, 0.9); kreis(x, 2.6, -8, 0.9);
+      x.fillStyle = "#c98a3a"; x.beginPath(); x.moveTo(-1, -6); x.lineTo(0, -3.5); x.lineTo(1, -6); x.fill();
+      geweih(x, 0, -13, 1.2);
+    } else if (E.k === "kroete") {
+      if (E.zunge) { const u = Math.sin(Math.min(1, E.zunge.t / 0.32) * Math.PI), mx = E.x + (E.links ? -9 : 9), my = E.y - 6; x.strokeStyle = "#d8606a"; x.lineWidth = 2.6; x.lineCap = "round"; x.beginPath(); x.moveTo(mx, my); x.lineTo(mx + (E.zunge.x - mx) * u, my + (E.zunge.y - my) * u); x.stroke(); x.fillStyle = "#e88a90"; kreis(x, mx + (E.zunge.x - mx) * u, my + (E.zunge.y - my) * u, 3); }
+      const hop = Math.abs(Math.sin(E.ph * 6)) * (E.zunge ? 0 : 3);
+      x.translate(E.x, E.y - hop); if (!E.links) x.scale(-1, 1);
+      x.fillStyle = "rgba(0,0,0,.3)"; oval(x, 2, 8 + hop, 15, 4);
+      x.fillStyle = "#5a7a2a"; oval(x, -10, 5, 5, 3); oval(x, 10, 5, 5, 3);
+      x.fillStyle = "#6f9a3a"; oval(x, 0, 0, 14, 10);
+      x.fillStyle = "#4d6b25"; for (let i = 0; i < 6; i++) kreis(x, -7 + i * 3, -3 + (i % 2) * 3, 1.4);
+      x.fillStyle = "#e0cca0"; oval(x, -2, 4, 9, 4);
+      x.fillStyle = "#6f9a3a"; kreis(x, -7, -7, 4); kreis(x, 1, -8, 4);
+      x.fillStyle = "#ffd34d"; kreis(x, -7, -8, 2.4); kreis(x, 1, -9, 2.4); x.fillStyle = "#1a1210"; x.fillRect(-8.5, -8.6, 3, 1.2); x.fillRect(-0.5, -9.6, 3, 1.2);
+      x.strokeStyle = "#2a3a12"; x.lineWidth = 1; x.beginPath(); x.moveTo(-12, -1); x.quadraticCurveTo(-6, 2, 0, -1); x.stroke();
+      geweih(x, -3, -11, 1.1);
+    } else if (E.k === "salamander") {
+      const w = E.w || 0, wig = Math.sin(zeit * 18) * 0.35;
+      x.translate(E.x, E.y); x.rotate(w); x.scale(1.45, 1.45);
+      x.fillStyle = "rgba(0,0,0,.3)"; oval(x, 1, 3, 15, 4);
+      x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 10;
+      x.strokeStyle = "#3a1a10"; x.lineWidth = 2; x.lineCap = "round";
+      [-4, 5].forEach(lx => { x.beginPath(); x.moveTo(lx, 0); x.lineTo(lx + 3 * Math.sin(zeit * 18 + lx), 6); x.moveTo(lx, 0); x.lineTo(lx - 3 * Math.sin(zeit * 18 + lx), -6); x.stroke(); });
+      x.fillStyle = "#e0602a"; x.beginPath(); x.moveTo(-6, -1.5); x.quadraticCurveTo(-14, -6 * wig, -22, 5 * wig); x.quadraticCurveTo(-14, 2 - 6 * wig, -6, 3); x.fill();
+      oval(x, 0, 0, 9, 4.2); kreis(x, 10, 0, 4.2); x.restore();
+      x.fillStyle = "#2a1a12"; [[-4, -1.5], [1, 1.6], [5, -1.4], [-12, 0.4], [-17, 1.2]].forEach(([fx, fy]) => kreis(x, fx, fy, 1.3));
+      x.fillStyle = "#ffd27a"; oval(x, 1, 0.6, 6, 1.2); x.fillStyle = "#1a1210"; kreis(x, 11.5, -2, 1); kreis(x, 11.5, 2, 1);
+      x.save(); x.rotate(Math.PI / 2); geweih(x, 0, -12, 0.9); x.restore();
+    }
+    x.restore();
+  }
+  /* Knopf der Wildgestalt in der Leiste: Abklingzeit, Dauer, Bereitschaft */
+  function knopfGestalt(x, bx, by, bw, bh, A, zeit) {
+    S.knoepfe.push({ id: "gestalt", x: bx, y: by, w: bw, h: bh });
+    const k = gestaltArt(), G = GESTALT[k], E = A.gestalt, cd = A.gestaltCd || 0, bereit = !E && cd <= 0, T = t().gestalt;
+    x.save();
+    x.fillStyle = E ? "rgba(224,160,70,.26)" : "rgba(235,226,204,.07)"; x.strokeStyle = bereit || E ? G.farbe : "rgba(235,226,204,.22)"; x.lineWidth = bereit || E ? 1.8 : 1;
+    x.beginPath(); x.roundRect ? x.roundRect(bx, by, bw, bh, 6) : x.rect(bx, by, bw, bh); x.fill();
+    if (E) { x.fillStyle = "rgba(224,160,70,.28)"; x.fillRect(bx + 1, by + 1, (bw - 2) * Math.max(0, 1 - E.t / E.dauer), bh - 2); }
+    else if (cd > 0) { x.fillStyle = "rgba(0,0,0,.45)"; x.fillRect(bx + 1, by + 1, (bw - 2) * (cd / GESTALT_CD), bh - 2); }
+    x.stroke();
+    if (bereit) { x.shadowColor = G.farbe; x.shadowBlur = 8 + Math.sin(zeit * 5) * 4; }
+    x.font = "20px " + FONT_B; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(G.sym, bx + 18, by + bh / 2 + 1);
+    x.shadowBlur = 0; x.textAlign = "left";
+    x.font = "700 11px " + FONT_B; x.fillStyle = "#ebe2cc"; x.fillText(T.formen[k][0], bx + 34, by + bh / 2 - 6, bw - 38);
+    x.font = "600 10px " + FONT_B; x.fillStyle = bereit ? G.farbe : "#a89f8f";
+    x.fillText(E ? "⏳ " + Math.ceil(E.dauer - E.t) + " s" : cd > 0 ? Math.ceil(cd) + " s" : T.bereit, bx + 34, by + bh / 2 + 8, bw - 38);
+    x.restore();
+  }
+    function malFlugschneise(x, A, zeit) {
     const P = A.P, o = flugSchneise(P, 20), u = flugSchneise(P, HORT.y - 10);
     x.save();
-    x.fillStyle = "rgba(159,214,236,.06)";
+    x.fillStyle = "rgba(214,190,255,.06)";
     x.beginPath(); x.moveTo(o.links, 20); x.lineTo(o.rechts, 20); x.lineTo(u.rechts, HORT.y - 10); x.lineTo(u.links, HORT.y - 10); x.closePath(); x.fill();
-    x.strokeStyle = "rgba(159,214,236,.28)"; x.setLineDash([4, 6]); x.lineDashOffset = -zeit * 20; x.lineWidth = 1;
+    x.strokeStyle = "rgba(214,190,255,.3)"; x.setLineDash([4, 6]); x.lineDashOffset = -zeit * 20; x.lineWidth = 1;
     x.beginPath(); x.moveTo(o.links, 20); x.lineTo(u.links, HORT.y - 10); x.moveTo(o.rechts, 20); x.lineTo(u.rechts, HORT.y - 10); x.stroke();
     x.restore();
   }
@@ -4534,7 +5273,9 @@
     const A = S.A, T = t();
     x.drawImage(hgBild, 0, 0, W, H);
     teicheMalen(x, A, zeit);
+    feuerstellenMalen(x, A, zeit);
     ambientMalen(x, A, zeit);
+    viecherMalen(x, A, zeit, false);
     // Pflanzplätze
     const bauZeit = (A.vorT > 0 || A.halt) && A.saat >= kosten("dorn", 0);
     const gef = A.vorT > 0 ? gefahrDaten(A) : null, fliegerKommen = gef && gef.flug > 0;
@@ -4548,15 +5289,19 @@
         return;
       }
       x.fillStyle = gew ? "rgba(224,160,70,.32)" : "rgba(170,210,120," + (0.06 + puls * 0.08) + ")"; oval(x, p.x, p.y + 4, 14, 6.5);
-      x.strokeStyle = gew ? "#e0a046" : fliegerKommen && p.luftNah ? "rgba(159,214,236," + (0.35 + puls * 0.4) + ")" : "rgba(207,230,168," + (0.18 + puls * 0.25) + ")"; x.lineWidth = gew ? 2 : fliegerKommen && p.luftNah ? 1.8 : 1.2;
+      x.strokeStyle = gew ? "#e0a046" : fliegerKommen && p.luftNah ? "rgba(214,190,255," + (0.35 + puls * 0.4) + ")" : "rgba(207,230,168," + (0.18 + puls * 0.25) + ")"; x.lineWidth = gew ? 2 : fliegerKommen && p.luftNah ? 1.8 : 1.2;
       x.beginPath(); x.ellipse(p.x, p.y + 4, 14, 6.5, 0, 0, Math.PI * 2); x.stroke();
       x.strokeStyle = "rgba(111,154,58,.85)"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(p.x, p.y + 5); x.lineTo(p.x, p.y - 1); x.stroke();
       blatt(x, p.x, p.y, -2.4, 5, 2, "#6f9a3a"); blatt(x, p.x, p.y - 1, -0.6, 5, 2, "#8ab04a");
     });
     malFallen(x, A, zeit);
+    malFlammen(x, A, zeit);
+    malBuende(x, A, zeit);
     A.plaetze.forEach((p, i) => { if (p.turm) malWachter(x, p, zeit, A.wahl === i); });
     malHort(x, A, zeit);
+    if (A.vorT > 0) malWegVorschau(x, A, zeit);
     A.feinde.slice().sort((a, b) => a.y - b.y).forEach(e => malFeind(x, e, zeit));
+    malGestalt(x, A, zeit);
     A.geschosse.forEach(g => {
       if (g.art === "dorn" || g.art === "splitter" || g.art === "spore" || g.art === "wolf") malGeschoss(x, g, zeit);
       else if (g.art === "falke") {
@@ -4578,6 +5323,9 @@
     malHelfer(x, A, zeit);
     malZauber(x, A, zeit);
     lichtAbwehr(x, A, zeit);
+    viecherMalen(x, A, zeit, true);
+    wetterMalen(x, S.kulisse, false);
+    if (S.kulisse && S.kulisse.blitz > 0 && !ruhig) { x.fillStyle = "rgba(255,250,235," + (S.kulisse.blitz * 0.2) + ")"; x.fillRect(0, 0, W, LEISTE); }
     malEffekte(x, zeit);
     malPortrait(x, A, zeit);
     if (S.quip && S.quip.t < 2) sprechblase(x, S.quip.s, HORT.x + 60, HORT.y - 54);
@@ -4648,8 +5396,12 @@
       knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [T.schnell[(A.schnell || 1) - 1]], A.schnell > 1, false, "#ebe2cc");
     } else {
       A.zauber.forEach((z, i) => knopfZauber(x, "zauber:" + i, 6 + i * 92, LEISTE + 4, 88, H - LEISTE - 8, z, A.aktiv === i, zeit));
-      x.textAlign = "center"; x.textBaseline = "middle"; x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f";
-      x.fillText(levelName(A.lv), 6 + A.zauber.length * 92 + (W - 92 - (6 + A.zauber.length * 92)) / 2, LEISTE + 26, W - 100 - A.zauber.length * 92);
+      const gx = 6 + A.zauber.length * 92, gb = W - 86 - gx - 4;
+      if (gestaltFrei() && gb >= 70) knopfGestalt(x, gx, LEISTE + 4, gb, H - LEISTE - 8, A, zeit);
+      else {
+        x.textAlign = "center"; x.textBaseline = "middle"; x.font = "600 10px " + FONT_B; x.fillStyle = "#a89f8f";
+        x.fillText(levelName(A.lv), gx + (W - 92 - gx) / 2, LEISTE + 26, W - 100 - A.zauber.length * 92);
+      }
       knopf(x, "schnell", W - 86, LEISTE + 6, 78, H - LEISTE - 12, [T.schnell[(A.schnell || 1) - 1]], A.schnell > 1, false, "#ebe2cc");
     }
   }
@@ -4703,7 +5455,7 @@
       if (st >= 2 && z.zweig) zeilen.push(["✦ " + T.zweige[k][z.zweig][0] + ": " + T.zweige[k][z.zweig][1], "#ffd34d"]);
       else zeilen.push(["✦ " + T.bau.spez[k](w, st), "#cfe6a8"]);
       if (modus === "steht" && st === 1) { zeilen.push([T.weg, "#a89f8f"]); ["a", "b"].forEach(zw2 => zeilen.push(["  " + T.zweige[k][zw2][0] + ": " + T.zweige[k][zw2][1], "#e8d8b8"])); }
-      else if (T.bau.kombo[k]) zeilen.push(["⚡ " + T.bau.kombo[k], "#9fd6ec"]);
+      else if (T.bau.kombo[k]) zeilen.push(["⚡ " + T.bau.kombo[k], "#f0d890"]);
       if (modus === "steht" && st === 2) zeilen.push(["▲ " + T.uralt, "#ffd34d"]);
     }
     const tabs = modus !== "steht";
@@ -4857,7 +5609,7 @@
   function anwerfen() { if (!rafId && sichtbar && !document.hidden) { letzte = 0; rafId = requestAnimationFrame(schleife); } }
 
   /* ================== DOM, TAFELN & HAIN ================== */
-  let buehne, schleier, tafel, fussRekord, tonKnopf, pauseKnopf, listeEl;
+  let buehne, schleier, tafel, aktionen, fussRekord, tonKnopf, pauseKnopf, tempoKnopf, listeEl;
   let tafelArt = "start";
   const rekordKey = st => "imres-echohort-rekord-" + st;
   const aktuelleStufe = () => (S && zustand !== "start" ? S.stufe : stufeWahl);
@@ -4869,7 +5621,7 @@
       '<h3 id="eh-titel">' + esc(tx.titel) + '</h3>' +
       '<p class="tav-info" id="eh-text">' + esc(tx.text) + '</p>' +
       '<p class="eh-steuerung" id="eh-steuerung">' + esc(tx.steuerung) + '</p>' +
-      '<div class="eh-buehne"><button type="button" class="eh-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><div class="eh-schleier"><div class="eh-tafel"></div></div><div class="eh-toast" role="status" aria-live="polite"></div></div>' +
+      '<div class="eh-buehne"><button type="button" class="eh-tempo"></button><button type="button" class="eh-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><div class="eh-schleier"><div class="eh-tafel"></div><div class="eh-aktionen" hidden></div></div><div class="eh-toast" role="status" aria-live="polite"></div></div>' +
       '<div class="eh-fuss"><span class="eh-rekord"></span><button type="button" class="eh-ton"></button></div>' +
       '<div class="eh-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".eh-buehne");
@@ -4877,16 +5629,20 @@
     leinwand.setAttribute("aria-label", tx.titel);
     schleier = root.querySelector(".eh-schleier");
     tafel = root.querySelector(".eh-tafel");
+    aktionen = root.querySelector(".eh-aktionen");
+    tempoKnopf = root.querySelector(".eh-tempo");
     fussRekord = root.querySelector(".eh-rekord");
     tonKnopf = root.querySelector(".eh-ton");
     pauseKnopf = root.querySelector(".eh-pause");
     listeEl = root.querySelector(".eh-liste");
     tonKnopf.addEventListener("click", () => { if (zustand === "spiel") pausieren(); einstZeigen(); });
-    tafel.addEventListener("input", einstEingabe);
-    tafel.addEventListener("change", einstEingabe);
+    schleier.addEventListener("input", einstEingabe);
+    schleier.addEventListener("change", einstEingabe);
     pauseKnopf.addEventListener("click", pausieren);
-    tafel.addEventListener("click", tafelKlick);
-    tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".eh-name")) { e.preventDefault(); if (tafelArt === "tagErgebnis") tagEintragen(); else eintragen(); } });
+    tempoKnopf.addEventListener("click", () => { if (zustand === "spiel") { audio(); tempoWechseln(); } });
+    schleier.addEventListener("click", tafelKlick);
+    tafel.addEventListener("scroll", rollHinweis, { passive: true });
+    schleier.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".eh-name")) { e.preventDefault(); if (tafelArt === "tagErgebnis") tagEintragen(); else eintragen(); } });
     fussSetzen();
   }
   function fussSetzen() {
@@ -4894,6 +5650,16 @@
     fussRekord.textContent = r ? tx.rekord(r, tx.stufen[st]) : "";
     tonKnopf.textContent = tx.einst.knopf;
     pauseKnopf.setAttribute("aria-label", tx.pauseKnopf);
+    tempoKnopfSetzen();
+  }
+  /* Tempo-Knopf oben rechts (nur in der Abwehr sichtbar) */
+  function tempoKnopfSetzen() {
+    if (!tempoKnopf) return;
+    const n = (S && S.A && S.A.schnell) || 1;
+    tempoKnopf.innerHTML = '<span aria-hidden="true">' + (n > 1 ? "⏩" : "▶") + "<b>×" + n + "</b></span>";
+    tempoKnopf.setAttribute("aria-label", t().tempoKnopf(n)); tempoKnopf.title = t().tempoKnopf(n);
+    tempoKnopf.classList.toggle("an", n > 1);
+    buehne.classList.toggle("abwehr", !!(S && S.phase === "abwehr" && S.A));
   }
   function texteSetzen() {
     const tx = t();
@@ -4908,11 +5674,19 @@
   function tafelNeu() {
     ({ start: startZeigen, druide: druideZeigen, einst: einstZeigen, schatz: schatzZeigen, levelwahl: levelwahlZeigen, intro: introZeigen, nachRaub: () => nachRaubZeigen(true), ergebnis: () => ergebnisZeigen(true), hain: hainZeigen, pause: pauseZeigen, ende: () => spielEnde(true), beute: kleinodZeigen, tag: () => tagZeigen(false), tagErgebnis: tagErgebnisZeigen })[tafelArt]();
   }
+  /* Tafeln: der Inhalt darf scrollen, die Haupt-Knöpfe (.eh-haupt, .eh-unten) stehen immer sichtbar unten */
   function schleierAuf(html, art) {
     tafelArt = art; tafel.innerHTML = html; schleier.hidden = false; buehne.classList.remove("laeuft");
-    schleier.scrollTop = 0;
+    aktionen.innerHTML = "";
+    tafel.querySelectorAll(":scope > .eh-haupt, :scope > .eh-unten").forEach(el => aktionen.appendChild(el));
+    aktionen.hidden = !aktionen.children.length;
+    tafel.scrollTop = 0; rollHinweis();
   }
-  function schleierZu() { schleier.hidden = true; buehne.classList.add("laeuft"); }
+  function rollHinweis() {
+    const rest = tafel.scrollHeight - tafel.clientHeight - tafel.scrollTop;
+    tafel.classList.toggle("rollt", tafel.scrollHeight > tafel.clientHeight + 2 && rest > 4);
+  }
+  function schleierZu() { schleier.hidden = true; buehne.classList.add("laeuft"); tempoKnopfSetzen(); }
   function levelName(lv) {
     const T = t();
     return lv < KAMPAGNE ? T.levelKurz(T.gebiete[gebietVon(lv)][0], innenVon(lv) + 1) : T.levelEndlos(endlosRunde(lv));
@@ -4935,11 +5709,12 @@
     const frei = freiLesen(stufeWahl), sterne = sterneLesen(stufeWahl), summe = Object.keys(sterne).reduce((a, k) => a + (sterne[k] || 0), 0);
     const lw = frei > 0 || summe > 0 ? '<button type="button" class="tav-knopf" data-tun="levelwahl">' + esc(tx.levelwahl) + ' <small>' + esc(tx.sterneGesamt(summe, KAMPAGNE * 3)) + '</small></button>' : "";
     schleierAuf('<h4>' + esc(tx.titel) + '</h4>' + fort + stufenHtml(tx) +
-      '<button type="button" class="tav-knopf ' + (sp ? "" : "eh-haupt") + '" data-tun="neu">' + esc(tx.neu) + '</button>' + lw +
+      '<div class="eh-menue">' + lw +
       '<button type="button" class="tav-knopf" data-tun="tag">' + esc(tx.tag.knopf) + ' <small>' + LAUNEN[tagInfo(heuteDatum()).laune].sym + '</small></button>' +
       '<button type="button" class="tav-knopf" data-tun="druide">' + esc(tx.druide.knopf) + ' <small>' + (STAT.mond || 0) + '</small></button>' +
-      '<button type="button" class="tav-knopf" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>' +
-      (sp ? '<p class="eh-klein">' + esc(tx.neuWarnung) + '</p>' : ""), "start");
+      '<button type="button" class="tav-knopf" data-tun="schatz">' + esc(tx.schatzkammer) + '</button></div>' +
+      (sp ? '<p class="eh-klein">' + esc(tx.neuWarnung) + '</p>' : "") +
+      '<button type="button" class="tav-knopf ' + (sp ? "eh-unten" : "eh-haupt") + '" data-tun="neu">' + esc(tx.neu) + '</button>', "start");
   }
 
   const reliktBilder = {};
@@ -4969,7 +5744,7 @@
     const Tl = TALENTE[k], st = tal(k); if (!Tl || st >= Tl.kosten.length) return;
     const preis = Tl.kosten[st]; if ((STAT.mond || 0) < preis) return;
     STAT.mond -= preis; STAT.talente[k] = st + 1; statSichern(); KLANG.edel();
-    const sc = schleier.scrollTop; druideZeigen(); schleier.scrollTop = sc;
+    const sc = tafel.scrollTop; druideZeigen(); tafel.scrollTop = sc;
   }
   let schatzZurueck = "start";
   function schatzZeigen() {
@@ -5003,7 +5778,7 @@
     schleierAuf('<h4>' + esc(tx.levelwahlTitel) + '</h4><p>' + esc(tx.levelwahlText) + '</p>' +
       '<p class="eh-beutel">' + esc(tx.sterneGesamt(summe, KAMPAGNE * 3)) + ' · ' + esc(tx.stufen[st]) + '</p>' +
       '<div class="eh-lw-gitter">' + zeilen + '</div>' +
-      '<button type="button" class="eh-leise" data-tun="zumStart">' + esc(tx.zurueck) + '</button>', "levelwahl");
+      '<button type="button" class="eh-leise eh-unten" data-tun="zumStart">' + esc(tx.zurueck) + '</button>', "levelwahl");
     zeichnen(performance.now());
   }
   function einzelStarten(lv) {
@@ -5031,7 +5806,8 @@
     zustand = "tafel";
     if (!S.laune || S.laune.lv !== lv) S.laune = { lv, k: lv >= 2 ? zufall(launenFuer(lv)) : null };
     S.R = null; S.A = null;
-    hintergrundRaub(g); hgSchluessel = "raub" + g;
+    const K = kulisse(); K.teile = []; K.gefuellt = false;
+    hintergrundRaub(g);
     const neu = neueFreischaltungen(lv);
     const [name, text] = lv < KAMPAGNE ? tx.gebiete[g] : [tx.endlosName, tx.endlosText(endlosRunde(lv))];
     const unter = lv < KAMPAGNE ? tx.levelKurz(tx.gebiete[g][0], innenVon(lv) + 1).split(" · ")[1] : tx.levelEndlos(endlosRunde(lv));
@@ -5039,6 +5815,7 @@
       '<p class="eh-ober">' + esc(unter) + (istBossLevel(lv) ? ' · ☠' : '') + '</p>' +
       '<h4>' + esc(name) + '</h4>' +
       '<p class="eh-erzaehl">' + esc(text) + '</p>' +
+      '<p class="eh-stimmung">' + esc(tx.stimmung[K.saison] + " · " + tx.stimmung[K.zeit]) + '</p>' +
       (innenVon(lv) === 0 ? '<p class="eh-klein">🌿 ' + esc(tx.gartenHinweis) + '</p>' : "") +
       '<p class="eh-regel"><b>' + esc(tx.besonderheit) + ' ' + esc(tx.regeln[GEB[g].regel][0]) + '.</b> ' + esc(tx.regeln[GEB[g].regel][1]) + '</p>' +
       (neu.length ? '<p class="eh-neu">' + esc(tx.neuFreigeschaltet) + ' ' + neu.map(esc).join(" · ") + '</p>' : "") +
@@ -5047,7 +5824,7 @@
       (S.einzel ? '<p class="eh-klein">' + esc(tx.einzelLabel) + ' · ' + "★".repeat(sterneLesen(S.stufe)[lv] || 0) + "☆".repeat(3 - (sterneLesen(S.stufe)[lv] || 0)) + '</p>'
         : '<p class="eh-klein">' + esc(tx.leben(S.leben)) + ' · ' + S.punkte + ' ' + esc(tx.punkte) + ' · ' + esc(tx.beutel(S.beutel)) + '</p>') +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="raub">' + esc(tx.los) + '</button>' +
-      (S.einzel ? '<button type="button" class="eh-leise" data-tun="levelwahl">' + esc(tx.zurueck) + '</button>' : ""), "intro");
+      (S.einzel ? '<button type="button" class="eh-leise eh-unten" data-tun="levelwahl">' + esc(tx.zurueck) + '</button>' : ""), "intro");
     zeichnen(performance.now());
   }
 
@@ -5084,7 +5861,7 @@
     if (w.includes(k)) { if (w.length > 1) w.splice(w.indexOf(k), 1); }
     else { if (w.length >= 2) w.shift(); w.push(k); }
     S.zauber = w; KLANG.griff();
-    const sc = schleier.scrollTop; nachRaubZeigen(true); schleier.scrollTop = sc;
+    const sc = tafel.scrollTop; nachRaubZeigen(true); tafel.scrollTop = sc;
   }
   function eigenschaften(k) {
     const d = FEINDE[k], l = [];
@@ -5169,13 +5946,13 @@
     if (E.verloren && S.einzel) {
       schleierAuf('<p class="eh-ober">' + esc(tx.einzelLabel) + '</p><h4>' + esc(tx.verloren) + '</h4>' +
         '<button type="button" class="tav-knopf eh-haupt" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>' +
-        '<button type="button" class="tav-knopf" data-tun="levelwahl">' + esc(tx.zurLevelwahl) + '</button>', "ergebnis");
+        '<button type="button" class="tav-knopf eh-unten" data-tun="levelwahl">' + esc(tx.zurLevelwahl) + '</button>', "ergebnis");
       return;
     }
     if (E.verloren) {
       schleierAuf('<h4>' + esc(tx.verloren) + '</h4><p>' + esc(tx.verlorenText(S.leben)) + '</p>' +
         '<button type="button" class="tav-knopf eh-haupt" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>' +
-        '<button type="button" class="eh-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>', "ergebnis");
+        '<button type="button" class="eh-leise eh-unten" data-tun="beenden">' + esc(tx.beenden) + '</button>', "ergebnis");
       return;
     }
     const sternHtml = '<p class="eh-sterne" aria-label="' + E.sterne + ' / 3">' + [0, 1, 2].map(i => '<span class="' + (i < E.sterne ? "an" : "") + '">★</span>').join("") + '</p>' +
@@ -5186,7 +5963,7 @@
         (E.neuBest ? '<p class="eh-neu">' + esc(tx.neuRekord) + '</p>' : "") +
         (E.mond ? '<p class="eh-mond">' + esc(tx.druide.verdient(E.mond)) + '</p>' : "") +
         '<button type="button" class="tav-knopf eh-haupt" data-tun="levelwahl">' + esc(tx.zurLevelwahl) + '</button>' +
-        '<button type="button" class="tav-knopf" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>', "ergebnis");
+        '<button type="button" class="tav-knopf eh-unten" data-tun="wiederholen">' + esc(tx.nochmalLevel) + '</button>', "ergebnis");
       return;
     }
     schleierAuf(
@@ -5236,7 +6013,7 @@
   function tagSpielBauen() {
     const datum = heuteDatum(), I = tagInfo(datum);
     neuesSpiel();
-    Object.assign(S, { stufe: "druide", leben: 1, einzel: true, tag: datum, up: {}, lv: I.lv, laune: { lv: I.lv, k: I.laune }, kleinode: I.kleinode, zauber: null });
+    Object.assign(S, { stufe: "druide", leben: 1, einzel: true, tag: datum, up: {}, lv: I.lv, laune: { lv: I.lv, k: I.laune }, kleinode: I.kleinode, zauber: null, kulisseSaat: tagSaat(datum) });
     const alt = Math.random; Math.random = lcg(tagSaat(datum) + 13);
     let gl; try { gl = gegnerListe(I.lv, 2); } finally { Math.random = alt; }
     S.tagR = { g: gebietVon(I.lv), beute: 300 + 20 * I.lv, gier: 2, saat: 0, schaetze: 0, gl, dinge: [] };
@@ -5267,9 +6044,9 @@
       launeHtml() + '<div class="eh-besitz eh-tagkl"><span class="eh-ober">' + esc(T.dabei) + '</span>' + kl + '</div>' +
       vorschauHtml(S.tagR.gl) +
       (best.datum === S.tag ? '<p class="eh-neu">' + esc(T.best(best.punkte)) + '</p>' : "") +
-      '<button type="button" class="tav-knopf eh-haupt" data-tun="tagStart">' + esc(T.start) + '</button>' +
       '<div class="eh-tagliste">' + tagListeHtml(S.tag) + '</div>' +
-      '<button type="button" class="eh-leise" data-tun="zumStart">' + esc(T.zumStart) + '</button>', "tag");
+      '<button type="button" class="tav-knopf eh-haupt" data-tun="tagStart">' + esc(T.start) + '</button>' +
+      '<button type="button" class="eh-leise eh-unten" data-tun="zumStart">' + esc(T.zumStart) + '</button>', "tag");
     tagListeLaden(S.tag);
     zeichnen(performance.now());
   }
@@ -5289,7 +6066,7 @@
       (best.datum === S.tag ? '<p class="eh-klein">' + esc(T.best(best.punkte)) + '</p>' : "") +
       eintrag + '<div class="eh-tagliste">' + tagListeHtml(S.tag) + '</div>' +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="tagNochmal">' + esc(T.nochmal) + '</button>' +
-      '<button type="button" class="eh-leise" data-tun="zumStart">' + esc(T.zumStart) + '</button>', "tagErgebnis");
+      '<button type="button" class="eh-leise eh-unten" data-tun="zumStart">' + esc(T.zumStart) + '</button>', "tagErgebnis");
   }
   function tagEintragen() {
     if (!S || !S.tag || !S.erg || S.eingetragen || S.sendet || S.endgueltig) return;
@@ -5327,7 +6104,7 @@
       '<p class="eh-beutel">💰 ' + esc(tx.beutel(S.beutel)) + '</p>' + kleinodBesitzHtml() +
       '<div class="eh-hain">' + gruppen + '</div>' +
       '<button type="button" class="tav-knopf eh-haupt" data-tun="weiterLevel">' + esc(tx.weiter) + '</button>' +
-      '<button type="button" class="eh-leise" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>', "hain");
+      '<button type="button" class="eh-leise eh-unten" data-tun="schatz">' + esc(tx.schatzkammer) + '</button>', "hain");
   }
   function kaufen(k) {
     const u = UPS[k], st = S.up[k] || 0;
@@ -5337,15 +6114,15 @@
     if (k === "heilkraut") S.leben++;
     erfolgPruefen("hain");
     KLANG.kaufen(); speichern();
-    const scroll = schleier.scrollTop;
-    hainZeigen(); schleier.scrollTop = scroll;
+    const scroll = tafel.scrollTop;
+    hainZeigen(); tafel.scrollTop = scroll; rollHinweis();
   }
 
   function pauseZeigen() {
     const tx = t();
     schleierAuf('<h4>' + esc(tx.pause) + '</h4><p>' + esc(tx.pauseText) + '</p><button type="button" class="tav-knopf eh-haupt" data-tun="weiter">' + esc(tx.weiter) + '</button>' +
-      '<button type="button" class="tav-knopf" data-tun="einst">' + esc(tx.einst.knopf) + '</button>' +
-      '<button type="button" class="eh-leise" data-tun="beenden">' + esc(tx.beenden) + '</button>', "pause");
+      '<button type="button" class="tav-knopf eh-unten" data-tun="einst">' + esc(tx.einst.knopf) + '</button>' +
+      '<button type="button" class="eh-leise eh-unten" data-tun="beenden">' + esc(tx.beenden) + '</button>', "pause");
   }
   let einstZurueck = "start";
   function einstZeigen() {
@@ -5402,7 +6179,7 @@
     fussSetzen(); listeNeu();
   }
 
-  function losSpielen() { zustand = "spiel"; schleierZu(); anwerfen(); if (MZ.k && S) musikStart(MZ.k, S.phase === "abwehr" ? (MZ.lage || 1) : 0); }
+  function losSpielen() { zustand = "spiel"; schleierZu(); anwerfen(); tempoKnopfSetzen(); if (MZ.k && S) musikStart(MZ.k, S.phase === "abwehr" ? (MZ.lage || 1) : 0); }
 
   function tafelKlick(e) {
     const st = e.target.closest("[data-stufe]");
@@ -5412,7 +6189,7 @@
       return;
     }
     const lvb = e.target.closest("[data-level]");
-    if (lvb && tafelArt === "levelwahl") { audio(); einzelStarten(parseInt(lvb.dataset.level, 10)); return; }
+    if (lvb && tafelArt === "levelwahl") { vollbildAuto(); audio(); einzelStarten(parseInt(lvb.dataset.level, 10)); return; }
     const zb = e.target.closest("[data-zauber]");
     if (zb && tafelArt === "nachRaub") { zauberUmschalten(zb.dataset.zauber); return; }
     const tb = e.target.closest("[data-talent]");
@@ -5424,6 +6201,7 @@
     if (e.target.closest(".eh-eintragen")) { eintragen(); return; }
     const b = e.target.closest("[data-tun]"); if (!b) return;
     const tun = b.dataset.tun;
+    if (VOLL_TUN.includes(tun)) vollbildAuto();
     audio();
     if (tun === "neu") { loesch(SPEICHER); neuesSpiel(); S.speicherT = Date.now(); fussSetzen(); bestenLaden(S.stufe); introZeigen(); }
     else if (tun === "fortsetzen") { const sp = gespeichert(); if (!sp) { startZeigen(); return; } laden(sp); fussSetzen(); bestenLaden(S.stufe); if (S.angebot && S.angebot.length) kleinodZeigen(); else if (S.lv > 0) hainZeigen(); else introZeigen(); }
@@ -5448,6 +6226,9 @@
     else if (tun === "nochmal") { musikStop(); zustand = "start"; S = null; hgSchluessel = ""; startZeigen(); fussSetzen(); bestenLaden(stufeWahl); anwerfen(); }
   }
 
+  /* Kleiner Bildschirm: beim Losspielen ins Vollbild (vollbild.js macht auf großen Bildschirmen nichts) */
+  const VOLL_TUN = ["neu", "fortsetzen", "tagStart", "raub", "abwehr", "weiter", "wiederholen", "weiterLevel"];
+  function vollbildAuto() { try { if (window.tavVollAuto) window.tavVollAuto("echohort"); } catch (_) {} }
   function pausieren() {
     if (zustand !== "spiel") return;
     zustand = "pause"; musikStop();
@@ -5482,7 +6263,7 @@
       knopf.replace(">", (S.sendet ? " disabled" : "") + ">") + esc(S.sendet ? T.sendet : T.eintragen) + "</button></div>" +
       (S.fehler ? '<p class="eh-fehler" role="alert">' + esc(S.fehler) + "</p>" : "");
   }
-  function tafelBehalten(zeigen) { const y = schleier.scrollTop; zeigen(); schleier.scrollTop = y; }
+  function tafelBehalten(zeigen) { const y = tafel.scrollTop; zeigen(); tafel.scrollTop = y; rollHinweis(); }
   function senden(spiel, T, body, laden, finden, zeigen, istDa) {
     spiel.fehler = ""; spiel.sendet = true; tafelBehalten(zeigen);
     server("/rest/v1/rpc/hort_eintragen", body).then(() => laden().then(() => {
@@ -5571,7 +6352,8 @@
       else if (id === "raus") ausreissen();
       else if (id === "jetzt") { if (A.welle < 0) { A.halt = false; A.vorT = 0.01; } else welleRufen(); }
       else if (id.startsWith("zauber:")) { S.A.aktiv = parseInt(id.slice(7), 10); KLANG.griff(); }
-      else if (id === "schnell") { S.A.schnell = S.A.schnell >= 3 ? 1 : (S.A.schnell || 1) + 1; schreib("imres-echohort-schnell", String(S.A.schnell)); KLANG.griff(); }
+      else if (id === "schnell") tempoWechseln();
+      else if (id === "gestalt") gestaltWirken();
       else if (id === "zuletzt") wieZuletzt();
     }
   }
@@ -5595,6 +6377,12 @@
   document.addEventListener("keydown", e => {
     if (!sichtbar) return;
     if (zustand === "spiel" && (e.key === "Escape" || e.key === "p" || e.key === "P")) { e.preventDefault(); pausieren(); return; }
+    if (zustand === "spiel" && S && S.phase === "abwehr" && !e.ctrlKey && !e.metaKey && !e.altKey && /^[fFgG]$/.test(e.key)) {
+      if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+      e.preventDefault(); audio();
+      if (e.key === "f" || e.key === "F") tempoWechseln(); else gestaltWirken();
+      return;
+    }
     if (zustand === "spiel" && S && S.phase === "raub" && (e.key === " " || e.key === "ArrowDown")) {
       if (document.activeElement && /INPUT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) return;
       e.preventDefault(); raubTippen({ x: 0, y: 0 });
@@ -5614,12 +6402,26 @@
   const css = document.createElement("style");
   css.textContent = `
 .echohort .eh-steuerung { font-size: .86rem; color: var(--ash); font-style: italic; }
-.eh-buehne { position: relative; width: 100%; max-width: min(100%, calc(76vh * .8)); justify-self: center; aspect-ratio: 4 / 5; border: 1px solid var(--line); background: #0b0a12; overflow: hidden; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; box-shadow: 0 14px 30px rgba(0,0,0,.45); }
+.eh-buehne { position: relative; width: 100%; max-width: min(100%, calc(76vh * .8)); justify-self: center; aspect-ratio: 4 / 5; border: 1px solid var(--line); background: #0b0a12; overflow: hidden; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; box-shadow: 0 14px 30px rgba(0,0,0,.45); container-type: size; container-name: ehbuehne; }
 .eh-buehne canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .eh-buehne.laeuft canvas { touch-action: none; }
-.eh-schleier { position: absolute; inset: 0; display: grid; place-items: center; padding: clamp(.7rem, 3vw, 1.4rem); background: rgba(9,8,15,.72); text-align: center; overflow-y: auto; overscroll-behavior: contain; }
+.eh-schleier { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .45rem; padding: clamp(.6rem, 3cqw, 1.4rem) clamp(.6rem, 3cqw, 1.4rem) clamp(.5rem, 2.4cqw, 1.1rem); background: rgba(9,8,15,.72); text-align: center; overflow: hidden; }
 .eh-schleier[hidden] { display: none; }
-.eh-tafel { display: grid; gap: .55rem; justify-items: center; width: 100%; max-width: 30rem; margin: auto 0; }
+.eh-tafel { display: grid; gap: .55rem; justify-items: center; align-content: start; width: 100%; max-width: 30rem; min-height: 0; flex: 0 1 auto; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(224,160,70,.45) transparent; padding: .1rem .2rem .2rem; }
+.eh-tafel.rollt { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6rem), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6rem), transparent); }
+.eh-aktionen { flex: none; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .4rem .5rem; width: 100%; max-width: 30rem; padding-top: .45rem; border-top: 1px solid rgba(224,160,70,.28); }
+.eh-aktionen[hidden] { display: none; }
+.eh-aktionen .eh-haupt { font-size: 1rem; padding: .55rem 1.3rem; background: color-mix(in srgb, var(--ember) 14%, transparent); }
+.eh-aktionen .tav-knopf small { font-size: .78em; color: #ffd34d; }
+.eh-menue { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; width: 100%; max-width: 24rem; }
+.eh-menue .tav-knopf { width: 100%; justify-self: stretch; font-size: .88rem; padding: .5rem .45rem; min-height: 2.5rem; white-space: normal; line-height: 1.15; }
+.eh-menue .tav-knopf:only-child, .eh-menue .tav-knopf:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.eh-tafel .eh-stimmung { font-family: var(--display); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: #e8c890; }
+.eh-tempo { position: absolute; top: 4px; right: calc(4px + 2.3rem + 6px); z-index: 2; display: none; min-width: 2.6rem; height: 2.3rem; padding: 0 .45rem; border: 1px solid var(--line); border-radius: 1.2rem; background: rgba(9,8,15,.6); color: var(--vellum); font: inherit; font-size: .78rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.eh-tempo b { margin-left: .15rem; font-weight: 700; }
+.eh-tempo.an { border-color: var(--ember); color: #ffd34d; background: rgba(224,160,70,.18); }
+.eh-tempo:hover, .eh-tempo:focus-visible { border-color: var(--ember); color: var(--ember); }
+.eh-buehne.laeuft.abwehr .eh-tempo { display: grid; place-items: center; }
 .eh-tafel h4 { font-family: var(--name); font-weight: 400; font-size: clamp(1.45rem, 5.5vw, 2rem); line-height: 1.05; color: var(--vellum); margin: 0; }
 .eh-tafel h5 { font-family: var(--display); font-weight: 400; font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); margin: .5rem 0 .1rem; justify-self: start; }
 .eh-tafel p { color: var(--ash); font-size: .92rem; margin: 0; }
@@ -5649,9 +6451,11 @@
 .eh-pips i.an { background: #a8701e; border-color: #a8701e; }
 .eh-kauf { border: 1px solid #8a6440; background: #2a2118; color: #ffd34d; font: inherit; font-size: .8rem; font-weight: 600; padding: .35rem .55rem; cursor: pointer; white-space: nowrap; }
 .eh-kauf:disabled { background: transparent; color: #8a7a62; cursor: default; }
+@media (pointer: coarse) { .eh-kauf { min-height: 2.3rem; min-width: 2.6rem; } .eh-lw { min-height: 2.4rem; } }
 .eh-kauf:not(:disabled):hover, .eh-kauf:not(:disabled):focus-visible { background: #4a3424; outline: none; }
-.eh-leise { background: none; border: 0; color: var(--ash); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: .2rem; }
-.eh-pause { position: absolute; top: 4px; right: 4px; z-index: 2; display: none; width: 2.1rem; height: 2.1rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.6); color: var(--vellum); font-size: .75rem; letter-spacing: -.1em; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.eh-leise { background: none; border: 0; color: var(--ash); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: .45rem .8rem; min-height: 2.4rem; min-width: 2.4rem; }
+.eh-leise:hover, .eh-leise:focus-visible { color: var(--vellum); }
+.eh-pause { position: absolute; top: 4px; right: 4px; z-index: 2; display: none; width: 2.3rem; height: 2.3rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.6); color: var(--vellum); font-size: .75rem; letter-spacing: -.1em; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .eh-pause:hover, .eh-pause:focus-visible { border-color: var(--ember); color: var(--ember); }
 .eh-buehne.laeuft .eh-pause { display: grid; place-items: center; }
 .eh-stufen { display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem; }
@@ -5747,8 +6551,50 @@
 .eh-lw:not(:disabled):hover, .eh-lw:not(:disabled):focus-visible { border-color: var(--ember); outline: none; }
 .eh-tafel .tav-knopf small { font-size: .78em; color: #ffd34d; }
 @media (max-width: 480px) { .eh-vz { font-size: .78rem; grid-template-columns: 1.8rem auto 1fr; gap: .3rem; } .eh-vz-eig { font-size: .7rem; } .eh-lw-zeile { grid-template-columns: 1fr repeat(3, 3.1rem); } .eh-lw-name { font-size: .85rem; } }
+@container ehbuehne (max-height: 520px) {
+  .eh-tafel { gap: .4rem; }
+  .eh-tafel h4 { font-size: 1.3rem; }
+  .eh-tafel p, .eh-tafel .eh-regel, .eh-tafel .eh-laune { font-size: .8rem; }
+  .eh-tafel .eh-erzaehl { font-size: 1rem; line-height: 1.12; }
+  .eh-tafel .eh-gross { font-size: 2rem; }
+  .eh-werte { font-size: .8rem; }
+  .eh-vorschau { padding: .3rem .5rem; }
+  .eh-vz { font-size: .76rem; } .eh-vz-eig { font-size: .7rem; }
+  .eh-zw { padding: .28rem .5rem; } .eh-zw small { font-size: .7rem; }
+  .eh-up { padding: .3rem .45rem; } .eh-up small { font-size: .7rem; }
+  .eh-aktionen .eh-haupt { font-size: .95rem; padding: .45rem 1.1rem; }
+  .eh-stufen button { padding: .32rem .5rem; font-size: .78rem; min-height: 2.25rem; }
+  .eh-tafel .eh-sterne { font-size: 1.6rem; }
+}
+@container ehbuehne (max-height: 400px) {
+  .eh-schleier { gap: .3rem; }
+  .eh-tafel { gap: .3rem; }
+  .eh-tafel h4 { font-size: 1.15rem; }
+  .eh-tafel .eh-erzaehl { font-size: .92rem; }
+  .eh-menue .tav-knopf { font-size: .8rem; padding: .35rem .4rem; }
+  .eh-aktionen { padding-top: .3rem; gap: .3rem .4rem; }
+  .eh-aktionen .eh-haupt { font-size: .9rem; padding: .4rem .9rem; }
+  .eh-aktionen .tav-knopf:not(.eh-haupt) { font-size: .82rem; padding: .4rem .7rem; }
+  .eh-leise { min-height: 2.25rem; }
+}
+/* Vollbild: Spielfeld so groß wie möglich; quer liegen Einstellungen und Bestenliste links und rechts daneben.
+   (Die Selektoren mit #taverne.saal-einzeln schlagen die Höhenregel der Einzelansicht im Spielesaal.) */
+.tav-karte.echohort.tav-voll, #taverne.saal-einzeln #echohort.tav-voll { --vb: min(100%, calc((100vh - 5.4rem) * .8)); }
+@supports (height: 100dvh) { .tav-karte.echohort.tav-voll, #taverne.saal-einzeln #echohort.tav-voll { --vb: min(100%, calc((100dvh - 5.4rem) * .8)); } }
+.tav-karte.echohort.tav-voll > .eh-buehne, #taverne.saal-einzeln #echohort.tav-voll > .eh-buehne,
+.tav-karte.echohort.tav-voll > .eh-fuss, #taverne.saal-einzeln #echohort.tav-voll > .eh-fuss,
+.tav-karte.echohort.tav-voll > .eh-liste, #taverne.saal-einzeln #echohort.tav-voll > .eh-liste { max-width: var(--vb); }
+@media (orientation: landscape) and (max-height: 620px) {
+  .tav-karte.echohort.tav-voll, #taverne.saal-einzeln #echohort.tav-voll { padding: .35rem .6rem; gap: .5rem 1rem; grid-template-columns: minmax(0, 1fr) var(--vb) minmax(0, 1fr); grid-template-rows: max-content 1fr; align-items: start; --vb: min(62vw, calc((100vh - .7rem) * .8)); }
+  @supports (height: 100dvh) { .tav-karte.echohort.tav-voll, #taverne.saal-einzeln #echohort.tav-voll { --vb: min(62vw, calc((100dvh - .7rem) * .8)); } }
+  .tav-karte.echohort.tav-voll > .eh-steuerung, #taverne.saal-einzeln #echohort.tav-voll > .eh-steuerung { display: none; }
+  .tav-karte.echohort.tav-voll > .eh-buehne, #taverne.saal-einzeln #echohort.tav-voll > .eh-buehne { grid-column: 2; grid-row: 1 / span 2; width: var(--vb); max-width: var(--vb); }
+  .tav-karte.echohort.tav-voll > .eh-fuss, #taverne.saal-einzeln #echohort.tav-voll > .eh-fuss { grid-column: 1; grid-row: 1; flex-direction: column; align-items: flex-end; justify-content: flex-start; text-align: right; max-width: none; width: auto; padding-top: .4rem; }
+  .tav-karte.echohort.tav-voll > .eh-liste, #taverne.saal-einzeln #echohort.tav-voll > .eh-liste { grid-column: 3; grid-row: 1 / span 2; max-width: none; padding-top: 2.8rem; font-size: .8rem; max-height: calc(100vh - 1rem); overflow-y: auto; }
+  .tav-karte.echohort.tav-voll > .eh-liste table { font-size: .78rem; }
+}
 .eh-fuss { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; font-size: .88rem; color: var(--ash); }
-.eh-ton { background: none; border: 1px solid var(--line); color: var(--ash); font: inherit; font-size: .84rem; padding: .3rem .75rem; cursor: pointer; }
+.eh-ton { background: none; border: 1px solid var(--line); color: var(--ash); font: inherit; font-size: .84rem; padding: .3rem .75rem; min-height: 2.3rem; cursor: pointer; }
 .eh-ton:hover { color: var(--vellum); border-color: var(--ember); }
 @media (max-width: 480px) {
   .eh-tafel { gap: .42rem; }
@@ -5785,7 +6631,7 @@
   let letzteSprache = sprache();
   new MutationObserver(() => { if (sprache() === letzteSprache) return; letzteSprache = sprache(); texteSetzen(); zeichnen(performance.now()); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen, tagZeigen, tagStarten, tagInfo, kleinodZeigen, wieZuletzt, mod, ergebnisZeigen: n => ergebnisZeigen(n), speichern, gespeichert, laden, spielEnde };
+  if (/eh-test/.test(location.hash + location.search)) window.__echohort = { set tempo(v) { testTempo = v; }, zeichnen, abwehrUpdate, raubUpdate, effekteUpdate, gartenSync, zauberWirken, bauen, tierBauen, verstaerken, setzlingPflanzen, kosten, tierKosten, tierAnzahl, welleRufen, get S() { return S; }, set S(v) { S = v; }, get zustand() { return zustand; }, raubzugStarten, abwehrStarten, raubzugEnde, ergebnisZeigen, helferStart, levelwahlZeigen, hainZeigen, introZeigen, neuesSpiel, KAMPAGNE, FEINDE, feindNeu, get MZ() { return MZ; }, musikLage, stueckBauen, tagZeigen, tagStarten, tagInfo, kleinodZeigen, wieZuletzt, mod, ergebnisZeigen: n => ergebnisZeigen(n), speichern, gespeichert, laden, spielEnde, gestaltWirken, tempoWechseln, kombo, pausieren, startZeigen, druideZeigen, schatzZeigen, einstZeigen, kleinodZeigen, nachRaubZeigen, kulisse };
   /* ---------- Controller (controller.js) ---------- */
   root._pad = {
     zustand: () => zustand, W, H, LEISTE, leinwand,
@@ -5793,6 +6639,9 @@
     knoepfe: () => ((S && S.knoepfe) || []).filter(b => b.id !== "nix" && b.id !== "tafel"),
     plaetze: () => (S && S.A && S.A.plaetze || []).map(q => ({ x: q.x, y: q.y })),
     druck(p) { if (zustand !== "spiel" || !S) return; audio(); leinwandDruck(p); },
-    pause: () => pausieren()
+    pause: () => pausieren(),
+    /* neu: Tempo umschalten (×1/×2/×3, gibt das neue Tempo zurück) und Echos Wildgestalt auslösen */
+    tempo: () => (zustand === "spiel" ? tempoWechseln() : (S && S.A && S.A.schnell) || 1),
+    gestalt: () => zustand === "spiel" && gestaltWirken()
   };
 })();

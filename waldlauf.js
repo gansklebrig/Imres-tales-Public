@@ -35,8 +35,8 @@
     de: {
       label: "Waldläufer-Probe", titel: "Friedrichs Jagd",
       text: "Friedrich erzählt eure Kampagne nach: vom Hinterhalt auf der Straße bis hinunter in die Slums von Gracklstugh. Spann den Bogen, halte die Gegner vom Lager fern und hör auf Rex: Er wittert sie zuerst.",
-      steuerung: "Irgendwo ins Bild tippen, zurückziehen, zielen, loslassen. Je weiter du ziehst, desto kräftiger der Schuss.",
-      steuerungKreuz: "Fadenkreuz: Einfach auf die Stelle klicken oder tippen, die der Pfeil treffen soll. Gedrückt halten schießt weiter.",
+      steuerung: "Irgendwo ins Bild tippen, zurückziehen, zielen, loslassen. Je weiter du ziehst, desto kräftiger der Schuss. Der Wind treibt die Pfeile ab. Rex antippen (oder R): Rex springt los.",
+      steuerungKreuz: "Fadenkreuz: Einfach auf die Stelle klicken oder tippen, die der Pfeil treffen soll. Gedrückt halten schießt weiter. Der Wind treibt die Pfeile ab – halte etwas dagegen. R (oder Rex antippen): Rex springt los.",
       zielTitel: "Zielen", zielArten: { ziehen: "🏹 Bogen ziehen", kreuz: "⌖ Fadenkreuz" },
       start: "▶ Auf die Jagd", weiter: "▶ Weiter", nochmal: "↻ Neue Jagd", beenden: "Jagd beenden",
       pause: "Kurze Rast", pauseText: "Die Jagd wartet auf dich.", pauseKnopf: "Pause", vollAn: "Vollbild", vollAus: "Vollbild beenden",
@@ -57,6 +57,9 @@
         { titel: "Die Grauen Geister", text: "Echo hat sogar den Drachen gefragt, ob er Gundren kennt. Themberchaud hat uns trotzdem leben lassen und uns einen Auftrag gegeben: Jemand hat ein Drachenei gestohlen. Die Spur führt in die Slums ganz unten, zu den Grauen Geistern. Die kommen aus der Dunkelheit, also schießt, solange ihr sie seht. Und trefft die Glutkäfer, wenn Diebe in der Nähe sind. Am Ende wartet Drokey, und so einer hat immer einen Fluchtweg.", wellen: ["Schatten in den Gassen", "Drokeys Versteck"] }
       ],
       endlos: { titel: "Endlose Nacht", text: "Drokey ist im Rauch verschwunden, das Ei bleibt verschollen, und hier endet unsere Chronik. Vorerst. Doch die Stimmen werden lauter, und von überall her kommen sie zurück: Goblins, Dämonen, Diebe. Wie lange hält das Lager?", unter: "Die Stimmen werden lauter" },
+      wind: "Wind", windLage: ["Kaum ein Lüftchen", "Leichter Wind", "Kräftiger Wind", "Sturmböen!"],
+      rexKnopf: "Rex, fass! (Taste R)", rexLos: ["Fass, Rex!", "Hol ihn dir!", "Rex, Attacke!"], rexNichts: "Rex schnüffelt … nichts da.", rexUm: "Umgerissen!", rexBoss: "Rex verbeißt sich!", rexTipp: "Rex antippen oder R: „Fass!“",
+      schwach: "Schwachstelle! ×3", schwachHinweis: "Der leuchtende Punkt ist seine Schwachstelle!",
       wuff: "Wuff!", grr: "Grrr!", entkommen: "Entkommen!", doppel: "Doppeltreffer!", dreifach: "Dreifachtreffer!",
       bossFaellt: { demogorgon: "Demogorgon fällt!", anfuehrer: "Der Anführer fällt!", glasstab: "Glasstab ist gestellt!", neznaBoss: "Nezna fällt!", venomfang: "Venomfang stürzt ab!", ilvara: "Ilvara ist besiegt!", wraith: "Der Wraith zerfällt!", riese: "Betäubt und gefesselt!", drokey: "Drokey ist gestellt!" },
       bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "Ein Bugbear-Anführer!", glasstab: "Glasstab!", neznaBoss: "Nezna, schon wieder!", venomfang: "Venomfang greift an!", ilvara: "Die Druidin …?", wraith: "Ein Wraith erhebt sich!", riese: "Ein rasender Riese!", drokey: "Drokey, der Graue Geist!" },
@@ -86,8 +89,8 @@
         feuer: [["Feuerpfeile", "Treffer setzen alles in der Nähe in Brand."], ["Glutpfeile", "Größere Flammen, doppelter Schaden – auch ringsum."]],
         zug: [["Schneller Zug", "Der Bogen ist schneller wieder gespannt."]],
         durchschlag: [["Durchschlag", "Pfeile fliegen durch einen Gegner hindurch."], ["Großer Durchschlag", "Pfeile durchbohren zwei Gegner."]],
-        rex: [["Rex packt zu", "Rex stürzt sich auf Gegner am Boden und hält sie fest."], ["Bissiger Rex", "Rex packt öfter und fester zu."]],
-        adler: [["Adlerauge", "Die Flugbahn ist viel weiter zu sehen."]],
+        rex: [["Rex packt zu", "Rex stürzt sich von selbst auf Gegner am Boden – und dein „Fass!“ lädt schneller."], ["Bissiger Rex", "Rex packt öfter und fester zu."]],
+        adler: [["Adlerauge", "Die Flugbahn ist viel weiter zu sehen – samt Wind."]],
         echo: [["Echos Ranken", "Wurzeln aus dem Boden bremsen alle Gegner."], ["Dichtes Dickicht", "Die Ranken bremsen noch stärker."]],
         rast: [["Rast am Feuer", "+2 Leben fürs Lager."]],
         barradin: [["Barradins Inspiration", "Ein Lied im Ohr: Der Serienbonus zählt doppelt."]],
@@ -116,8 +119,8 @@
     en: {
       label: "Ranger check", titel: "Friedrich's Hunt",
       text: "Friedrich retells your campaign: from the ambush on the road all the way down to the slums of Gracklstugh. Draw your bow, keep the enemies away from the camp and listen to Rex: he smells them first.",
-      steuerung: "Touch anywhere in the picture, pull back, aim, let go. The further you pull, the stronger the shot.",
-      steuerungKreuz: "Crosshair: just click or tap the spot the arrow should hit. Hold to keep shooting.",
+      steuerung: "Touch anywhere in the picture, pull back, aim, let go. The further you pull, the stronger the shot. The wind pushes your arrows. Tap Rex (or press R): he pounces.",
+      steuerungKreuz: "Crosshair: just click or tap the spot the arrow should hit. Hold to keep shooting. The wind pushes your arrows – aim a little against it. R (or tap Rex): Rex pounces.",
       zielTitel: "Aiming", zielArten: { ziehen: "🏹 Draw the bow", kreuz: "⌖ Crosshair" },
       start: "▶ Begin the hunt", weiter: "▶ Continue", nochmal: "↻ New hunt", beenden: "End the hunt",
       pause: "A short rest", pauseText: "The hunt is waiting for you.", pauseKnopf: "Pause", vollAn: "Fullscreen", vollAus: "Exit fullscreen",
@@ -138,6 +141,9 @@
         { titel: "The Grey Ghosts", text: "Echo even asked the dragon whether he knows Gundren. Themberchaud let us live anyway and gave us a job: someone has stolen a dragon egg. The trail leads down into the slums at the very bottom, to the Grey Ghosts. They come out of the dark, so shoot while you can see them. And hit the ember beetles when thieves are close by. At the end waits Drokey, and his kind always has a way out.", wellen: ["Shadows in the alleys", "Drokey's hideout"] }
       ],
       endlos: { titel: "Endless Night", text: "Drokey vanished in the smoke, the egg is still missing, and this is where our chronicle ends. For now. But the voices grow louder, and from everywhere they come back: goblins, demons, thieves. How long will the camp hold?", unter: "The voices grow louder" },
+      wind: "Wind", windLage: ["Barely a breeze", "Light wind", "Strong wind", "Gale gusts!"],
+      rexKnopf: "Get him, Rex! (key R)", rexLos: ["Get him, Rex!", "Fetch!", "Rex, attack!"], rexNichts: "Rex sniffs around … nothing.", rexUm: "Knocked over!", rexBoss: "Rex bites down hard!", rexTipp: "Tap Rex or press R: “Get him!”",
+      schwach: "Weak spot! ×3", schwachHinweis: "The glowing spot is its weak point!",
       wuff: "Woof!", grr: "Grrr!", entkommen: "Escaped!", doppel: "Double hit!", dreifach: "Triple hit!",
       bossFaellt: { demogorgon: "Demogorgon falls!", anfuehrer: "The leader falls!", glasstab: "Glasstaff is caught!", neznaBoss: "Nezna falls!", venomfang: "Venomfang crashes down!", ilvara: "Ilvara is defeated!", wraith: "The wraith crumbles!", riese: "Stunned and tied up!", drokey: "Drokey is caught!" },
       bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "A bugbear leader!", glasstab: "Glasstaff!", neznaBoss: "Nezna, again!", venomfang: "Venomfang attacks!", ilvara: "The druid …?", wraith: "A wraith rises!", riese: "A raging giant!", drokey: "Drokey, the Grey Ghost!" },
@@ -167,8 +173,8 @@
         feuer: [["Fire arrows", "Hits set everything nearby ablaze."], ["Ember arrows", "Bigger flames, double damage – splash included."]],
         zug: [["Quick draw", "The bow is drawn again faster."]],
         durchschlag: [["Piercing", "Arrows fly through one enemy."], ["Great piercing", "Arrows pierce two enemies."]],
-        rex: [["Rex bites", "Rex pounces on enemies on the ground and holds them."], ["Fierce Rex", "Rex bites more often and harder."]],
-        adler: [["Eagle eye", "You see much more of the flight path."]],
+        rex: [["Rex bites", "Rex pounces on ground enemies by himself – and your “Get him!” recharges faster."], ["Fierce Rex", "Rex bites more often and harder."]],
+        adler: [["Eagle eye", "You see much more of the flight path – wind included."]],
         echo: [["Echo's vines", "Roots from the ground slow all enemies."], ["Dense thicket", "The vines slow them even more."]],
         rast: [["Rest by the fire", "+2 lives for the camp."]],
         barradin: [["Barradin's inspiration", "A song in your ear: the streak bonus counts double."]],
@@ -402,6 +408,9 @@
     licht: () => [523, 784, 1046, 1568].forEach((f, i) => ton("triangle", f, f, 0.4, 0.07, i * 0.05)),
     floete: () => [784, 988, 1175, 988].forEach((f, i) => ton("sine", f, f, 0.16, 0.08, i * 0.12)),
     krit: () => [659, 988].forEach((f, i) => ton("square", f, f, 0.12, 0.05, i * 0.06)),
+    schwach: () => { [1318, 1760].forEach((f, i) => ton("triangle", f, f, 0.14, 0.09, i * 0.05)); knistern(0.12, 0.2, "bandpass", 2600); },
+    sprung: () => { ton("sawtooth", 180, 420, 0.16, 0.07, 0, ["lowpass", 900, 1]); knistern(0.15, 0.1, "bandpass", 700); },
+    zeitlupe: () => { ton("sine", 220, 55, 1.4, 0.18); ton("triangle", 330, 82, 1.4, 0.06, 0.05); },
     seite: () => [392, 523, 659].forEach((f, i) => ton("triangle", f, f, 0.5, 0.08, i * 0.15)),
     ende: () => [392, 330, 262, 196].forEach((f, i) => ton("triangle", f, f * 0.98, 0.35, 0.12, i * 0.22))
   };
@@ -422,7 +431,9 @@
       hypT: 10, lichtT: 12, licht: 0, floeteT: 12, illusion: null, wolfHinweis: false,
       rex: { zustand: "wartet", x: REX_HEIM.x, y: REX_HEIM.y, ziel: null, t: 0, cd: 4, hops: 0 },
       speere: [], netze: [], rudelId: 0,
-      salveId: 0, salvenOffen: {}, endlosThemen: mischen(WELT.namen.slice())
+      salveId: 0, salvenOffen: {}, endlosThemen: mischen(WELT.namen.slice()),
+      seed: 1 + Math.floor(Math.random() * 1e6), // Kulissen-Würfel für diesen Durchlauf
+      wind: 0, windBasis: 0, windZeit: 0, windNeu: 0, rexFassCd: 0, zeitlupe: null, schwachGezeigt: false
     };
     // Übung ab einem späteren Kapitel: zwei Gaben je übersprungenem Kapitel
     for (let i = 0; i < abKap * 2; i++) {
@@ -437,7 +448,7 @@
      schwierige Wellen beliebig oft wiederholen). Am Ende der Jagd wird der Spielstand gelöscht. */
   const LAUF_KEY = "imres-waldlauf-lauf";
   const LAUF_FELDER = ["stufe", "maxLeben", "uebung", "welle", "leben", "punkte", "combo", "besteCombo", "erlegt", "bonus", "salven", "salvenTreffer",
-    "kapFertig", "kapAktuell", "neuFrei", "kapGeschafft", "gezeigt", "gaben", "endlosThemen", "hypT", "lichtT", "floeteT", "neuMarke"];
+    "kapFertig", "kapAktuell", "neuFrei", "kapGeschafft", "gezeigt", "gaben", "endlosThemen", "hypT", "lichtT", "floeteT", "neuMarke", "seed"];
   function laufSpeichern(kampf) {
     if (!S) return;
     const d = { v: 1, kampf: !!kampf, zeit: Date.now(), angebot: kampf ? [] : angebot.slice(), s: {} };
@@ -463,11 +474,12 @@
     const g = GABEN_LEER(); Object.keys(g).forEach(k => { g[k] = Math.max(0, Math.min(GABEN[k], d.s.gaben[k] | 0)); }); S.gaben = g;
     if (!Array.isArray(S.neuFrei)) S.neuFrei = []; if (!S.gezeigt || typeof S.gezeigt !== "object") S.gezeigt = {};
     if (!Array.isArray(S.endlosThemen) || !S.endlosThemen.length) S.endlosThemen = mischen(WELT.namen.slice());
+    if (!Number.isFinite(S.seed)) S.seed = 1 + Math.floor(Math.random() * 1e6);
     if (d.kampf) {
       S.leben -= 1;
       if (S.leben <= 0) { S.leben = 0; spielEnde(); return; }
       welleStarten(S.welle);
-      S.banner = { titel: t().welle(S.welle), unter: t().fortsetzenKampf, t: 0, dauer: 3.2 };
+      S.banner = { titel: t().welle(S.welle), unter: t().fortsetzenKampf, t: 0, dauer: 3.2, wind: S.banner && S.banner.wind };
       anwerfen();
       return;
     }
@@ -519,10 +531,33 @@
     S.spawnT = 2.2; S.gebellt = false; S.welleFertigT = -1;
     S.eskorteT = 5; S.eskorte2T = 9;
     S.banner = { titel: t().welle(n), unter: w.unter, t: 0, dauer: 2.4 };
+    windWuerfeln(n);
+    if (!S.rexTipp) { S.rexTipp = true; textAuf(W - 110, 446, t().rexTipp, "#ffcf7a", 17, 4.5); }
+    S.welleImKap = n <= PLAN.length ? PLAN[n - 1].w : (n - PLAN.length - 1) % 2;
+    S.zeitlupe = null;
     zustand = "spiel";
     schleierZu();
     laufSpeichern(true);
   }
+  /* Wind: jede Welle weht er anders. Er schiebt die Pfeile seitlich (px/s²), in Böen etwas mehr oder weniger.
+     Lehrlinge bekommen nur ein laues Lüftchen, unter der Erde gibt es nur Luftzug. */
+  const WIND_STUFE = { lehrling: 0.38, waldlaeufer: 1, legende: 1.25 };
+  function windWuerfeln(n) {
+    let st = (35 + Math.random() * 105) * (WIND_STUFE[S.stufe] || 1) * (welt && welt.unten ? 0.6 : 1);
+    if (n === 1) st *= 0.35;                 // die allererste Welle: fast windstill
+    else if (Math.random() < 0.12) st *= 0.15; // ab und zu Flaute
+    S.windBasis = Math.round(st * (Math.random() < 0.5 ? -1 : 1));
+    S.windNeu = 2.2;
+    const tx = t(), a = Math.abs(S.windBasis), stufe = a < 15 ? 0 : a < 50 ? 1 : a < 95 ? 2 : 3;
+    const wt = (stufe ? (S.windBasis < 0 ? "← " : "") : "") + tx.windLage[stufe] + (stufe && S.windBasis > 0 ? " →" : "");
+    if (S.banner) S.banner.wind = wt; else textAuf(W / 2, 282, wt, "#c9b28a", 17, 2.8);
+  }
+  function windUpdate(dt) {
+    S.windZeit += dt; S.windNeu = Math.max(0, S.windNeu - dt);
+    const z = S.windBasis * (1 + 0.22 * Math.sin(S.windZeit * 0.9) + 0.12 * Math.sin(S.windZeit * 2.7 + 1));
+    S.wind += (z - S.wind) * Math.min(1, dt * 1.2);
+  }
+
   /* vor dem ersten Kampf eines Kapitels erzählt Friedrich, was passiert */
   function naechsteWelle(n) {
     const neuesKapitel = n <= PLAN.length ? PLAN[n - 1].w === 0 : n === PLAN.length + 1;
@@ -572,7 +607,10 @@
     g.maxHp = g.hp;
     if (a.art === "boss" && e.typ === "demogorgon" && S.fluchtT > 0) { g.bleibt = true; S.fluchtLaeuft = true; }
     S.gegner.push(g);
-    if (a.art === "boss") { KLANG.bruellen(); S.beben = a.mini ? 0.4 : 0.7; S.bossRufT = 4; S.eskorteT = 3; S.eskorte2T = 7; textAuf(W / 2, 200, t().bossRuft[e.typ], a.mini ? "#e0a046" : "#c4564a", 26, 1.6); }
+    if (a.art === "boss") {
+      KLANG.bruellen(); S.beben = a.mini ? 0.4 : 0.7; S.bossRufT = 4; S.eskorteT = 3; S.eskorte2T = 7; textAuf(W / 2, 200, t().bossRuft[e.typ], a.mini ? "#e0a046" : "#c4564a", 26, 1.6);
+      if (SCHWACH[key] && !S.schwachGezeigt) { S.schwachGezeigt = true; textAuf(W / 2, 236, t().schwachHinweis, "#ffcf7a", 18, 3.2); }
+    }
     if (a.art === "bonus" && e.typ !== "stimme") { textAuf(W / 2, 92, t().bonusDa[e.typ], "#ebe2cc", 19, 1.6); KLANG.glocke(); if (e.typ === "hase") S.rex.hops = 0.35; }
     if (a.schatten && !S.geistHinweis) { S.geistHinweis = true; textAuf(W / 2, 150, t().geistHinweis, "#dfe8ff", 20, 2.6); }
     if (a.art === "freund" && !S.wolfHinweis) { S.wolfHinweis = true; textAuf(W / 2, 150, t().wolfHinweis, "#ebe2cc", 22, 2.4); }
@@ -711,7 +749,7 @@
     if (e.rudel) S.gegner.forEach(o => { if (o !== e && o.rudel === e.rudel && !o.tot) o.schreck = 1.3; });
     if (e.a.teilt && e.bahn >= 0) [-16, 16].forEach(dx => spawnen({ typ: "zombieKlein", dir: e.dir, bahn: e.bahn, posX: e.x + dx }));
     if (e.a.art === "boss") {
-      S.beben = e.a.mini ? 0.6 : 1; KLANG.bruellen();
+      S.beben = e.a.mini ? 0.6 : 1; KLANG.bruellen(); zeitlupeStarten(m.x, m.y);
       textAuf(W / 2, 180, tx.bossFaellt[e.typ], "#e0a046", 30, 2.2);
       if (e.bleibt) { S.punkte += 500; textAuf(W / 2, 214, tx.geboxt + " +500", "#ffcf7a", 22, 2.4); S.fluchtT = 0; }
     }
@@ -733,22 +771,83 @@
     }
     funken(m.x, m.y, ["#e0a046", "#ffcf7a"], 10);
     if (S.rex.ziel === e) { S.rex.zustand = "zurueck"; S.rex.ziel = null; }
-    KLANG.puff(); KLANG.bruellen(); S.beben = 0.4;
+    KLANG.puff(); KLANG.bruellen(); S.beben = 0.4; zeitlupeStarten(m.x, m.y);
     textAuf(W / 2, 170, tx.rauch, "#ebe2cc", 26, 2.4);
     textAuf(W / 2, 204, tx.spur, "#e0a046", 20, 2.6);
   }
   function mitte(e) { return { x: e.x, y: e.y - e.h * (e.a.art === "boss" ? 0.55 : 0.5) }; }
+
+  /* Schwachstellen der Höhepunkte: Stellen im Bild (Anteil von links/oben, Figur schaut nach links).
+     Die Stelle wechselt alle paar Sekunden; ein Treffer dort zählt dreifach. */
+  const SCHWACH = {
+    bugbear: [[0.4, 0.14], [0.56, 0.38]],       // Anführer: Kopf, Brustplatte mit Riss
+    glasstab: [[0.17, 0.07], [0.5, 0.18]],      // der Glasstab selbst, sein Kopf
+    nezna: [[0.46, 0.18], [0.5, 0.53]],         // Gesicht, Gürtelschnalle
+    venomfang: [[0.14, 0.36], [0.44, 0.62]],    // Kopf, die fehlende Bauchschuppe
+    ilvara: [[0.52, 0.12], [0.5, 0.42]],
+    ilvara_wahr: [[0.53, 0.24], [0.5, 0.5]],
+    wraith: [[0.47, 0.2], [0.5, 0.45]],         // Gesicht, das kalte Herz
+    demogorgon: [[0.3, 0.22], [0.62, 0.36]],    // Schlund, Brust
+    drokey: [[0.15, 0.1], [0.8, 0.4]],          // Amulett, Diebessack
+    riese: [[0.9, 0.1], [0.72, 0.36]]           // Kopf, die Kette um den Hals
+  };
+  const SCHWACH_TAKT = 4.5;
+  function schwachPunkt(e) {
+    if (e.a.art !== "boss" || e.tot || e.liegt > 0 || e.tele || e.unsichtbar || e.t < 0.6) return null;
+    const l = SCHWACH[e.sp]; if (!l) return null;
+    const zeit = e.t + e.phase, i = Math.floor(zeit / SCHWACH_TAKT) % l.length, ph = zeit % SCHWACH_TAKT;
+    let u = l[i][0]; const v = l[i][1];
+    if (e.dir !== e.a.blick) u = 1 - u;
+    const wackel = e.gehalten ? Math.sin(e.t * 40) * 2 : 0;
+    return { x: e.x + wackel - e.w / 2 + u * e.w, y: e.y - e.h + v * e.h, r: Math.max(10, e.h * 0.085), a: Math.min(1, ph / 0.35, (SCHWACH_TAKT - ph) / 0.35 + 0.25) };
+  }
+  /* Würde der Pfeil auf seinem weiteren Weg (bis zur Länge l) die Schwachstelle treffen? */
+  function strahlTrifft(p, sp, l) {
+    const v = Math.hypot(p.vx, p.vy) || 1, dx = p.vx / v, dy = p.vy / v;
+    const k = Math.max(0, Math.min(l, (sp.x - p.x) * dx + (sp.y - p.y) * dy));
+    return (p.x + dx * k - sp.x) ** 2 + (p.y + dy * k - sp.y) ** 2 < sp.r * sp.r;
+  }
+  function schwachZeichnen(e) {
+    const sp = schwachPunkt(e); if (!sp) return;
+    const tt = performance.now() / 1000, puls = 0.5 + 0.5 * Math.sin(tt * 6 + e.phase), a = sp.a * (0.65 + 0.35 * puls);
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, a);
+    const g = ctx.createRadialGradient(sp.x, sp.y, 0, sp.x, sp.y, sp.r * 1.8);
+    g.addColorStop(0, "rgba(255,230,160,.55)"); g.addColorStop(1, "rgba(255,180,80,0)");
+    ctx.fillStyle = g; ctx.fillRect(sp.x - sp.r * 1.8, sp.y - sp.r * 1.8, sp.r * 3.6, sp.r * 3.6);
+    ctx.strokeStyle = "rgba(9,8,15,.55)"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r * (0.8 + 0.15 * puls), 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "#ffcf7a"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r * (0.8 + 0.15 * puls), 0, Math.PI * 2); ctx.stroke();
+    // vier kleine Zacken, die sich drehen – wie ein Zielmarker
+    for (let i = 0; i < 4; i++) {
+      const w = tt * 1.6 + i * Math.PI / 2, r0 = sp.r * 1.05, r1 = sp.r * 1.45;
+      ctx.beginPath(); ctx.moveTo(sp.x + Math.cos(w) * r0, sp.y + Math.sin(w) * r0); ctx.lineTo(sp.x + Math.cos(w) * r1, sp.y + Math.sin(w) * r1); ctx.stroke();
+    }
+    ctx.fillStyle = "#fff0b0"; ctx.beginPath(); ctx.arc(sp.x, sp.y, 2.2, 0, Math.PI * 2); ctx.fill();
+    if (e.schwachBlitz > 0) { ctx.globalAlpha = e.schwachBlitz / 0.35; ctx.strokeStyle = "#fff0b0"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r * (2.2 - e.schwachBlitz * 3), 0, Math.PI * 2); ctx.stroke(); }
+    ctx.restore();
+  }
+  /* Zeitlupe beim letzten Treffer auf einen Höhepunkt */
+  function zeitlupeStarten(x, y) { S.zeitlupe = { t: 0, dauer: ruhig ? 0.9 : 1.7, x, y }; KLANG.zeitlupe(); }
   function radius(e) {
     if (e.a.art === "bonus") return Math.min(e.w, e.h) * 0.5 + 7;
     return Math.max(Math.min(e.w, e.h) * 0.4, (e.w + e.h) * 0.15) + 3;
   }
 
   /* Pfeiltreffer mit allen Gaben */
-  function pfeilTrifft(p, e) {
+  function pfeilTrifft(p, e, schwach) {
     const salve = S.salvenOffen[p.salve], m = mitte(e), g = S.gaben;
     KLANG.treffer();
     funken(p.x, p.y, e.a.splitter, 6);
     let dmg = p.feuer > 1 ? 2 : 1;
+    if (schwach && !e.tot) {
+      dmg *= 3;
+      const sp = schwachPunkt(e) || { x: p.x, y: p.y };
+      funken(sp.x, sp.y, ["#ffcf7a", "#fff0b0", "#e0a046"], 18); glut(sp.x, sp.y, ruhig ? 4 : 12, ["#ffcf7a", "#fff0b0"]);
+      textAuf(sp.x, sp.y - 16, t().schwach, "#ffcf7a", 21, 1.1); KLANG.schwach();
+      e.schwachBlitz = 0.35;
+    }
     if (g.krit && e.a.art !== "freund" && Math.random() < 0.1 * g.krit) { dmg *= 3; textAuf(m.x, m.y - e.h * 0.5 - 8, t().krit, "#ffcf7a", 22, 1); KLANG.krit(); }
     const war = !e.tot;
     schaden(e, dmg, salve, true);
@@ -796,10 +895,38 @@
   function textAuf(x, y, text, farbe, gr, dauer) { S.texte.push({ x, y, text, farbe, gr, t: 0, dauer: dauer || 1 }); }
 
   /* ---------- Rex ---------- */
+  /* „Fass!“: auf Knopfdruck springt Rex den gefährlichsten Gegner am Boden an (oder den, auf den gerade gezielt wird)
+     und hält ihn fest – normale Gegner reißt er um, bei einem Höhepunkt verbeißt er sich kurz. Danach lädt der Befehl neu. */
+  const rexFassMax = () => [13, 10, 7.5][S.gaben.rex] || 13;
+  function rexZiel() {
+    const ok = e => angreifbar(e) && (e.bew === "boden" || e.bew === "boss") && !e.tele && e.x > 12 && e.x < W - 12 && !(e.gehalten && S.rex.ziel !== e);
+    const kandidaten = S.gegner.filter(ok);
+    if (!kandidaten.length) return null;
+    const zk = (zielArt === "kreuz" || padAn) && kreuz ? kreuz : null;
+    if (zk) {
+      const nah = kandidaten.map(e => ({ e, d: Math.hypot(mitte(e).x - zk.x, mitte(e).y - zk.y) })).filter(z => z.d < 70 + radius(z.e)).sort((a, b) => a.d - b.d)[0];
+      if (nah) return nah.e;
+    }
+    // sonst: wer am nächsten dran ist, aus dem Bild zu entkommen (Höhepunkte zählen doppelt)
+    return kandidaten.map(e => ({ e, w: (e.dir === 1 ? e.x : W - e.x) + (e.a.art === "boss" ? 120 : 0) })).sort((a, b) => b.w - a.w)[0].e;
+  }
+  function rexFass() {
+    if (zustand !== "spiel" || !S || S.rexFassCd > 0) return false;
+    const r = S.rex, tx = t(), ziel = rexZiel();
+    if (!ziel) { textAuf(REX_HEIM.x - 40, REX_HEIM.y - 48, tx.rexNichts, "#ebe2cc", 15, 1.2); S.rexFassCd = 0.8; return false; }
+    if (r.ziel && r.ziel !== ziel) { r.ziel.gehalten = false; r.ziel.umgerissen = false; }
+    r.ziel = ziel; r.zustand = "rennt"; r.aktiv = true; ziel.gehalten = true;
+    r.start = { x: r.x, y: r.y }; r.sprungK = 0;
+    S.rexFassCd = rexFassMax();
+    KLANG.bellen(); KLANG.sprung();
+    textAuf(Math.min(W - 60, r.x - 10), r.y - 52, zufall(tx.rexLos), "#e0a046", 19, 1);
+    return true;
+  }
   function rexUpdate(dt) {
     const r = S.rex;
     r.hops = Math.max(0, r.hops - dt);
     const lvl = S.gaben.rex;
+    if (r.aktiv) { rexSprung(r, dt, lvl); return; }
     if (r.zustand === "wartet") {
       r.x += (REX_HEIM.x - r.x) * Math.min(1, dt * 6); r.y += (REX_HEIM.y - r.y) * Math.min(1, dt * 6);
       if (!lvl) return;
@@ -836,6 +963,36 @@
       if (d <= v + 2) { r.zustand = "wartet"; r.cd = lvl > 1 ? 4.5 : 7.5; r.ziel = null; }
       else { r.x += (REX_HEIM.x - r.x) / d * v; r.y += (REX_HEIM.y - r.y) / d * v; }
     }
+  }
+  /* der aktive Sprung: in hohem Bogen hin, festhalten, zurücktrotten */
+  function rexSprung(r, dt, lvl) {
+    const e = r.ziel, tx = t();
+    const loslassen = () => { if (e) { e.gehalten = false; e.umgerissen = false; } r.aktiv = false; r.sprungK = 0; r.zustand = "zurueck"; r.cd = Math.max(r.cd, 2); };
+    if (!e || e.tot || e.weg || e.liegt > 0 || e.tele) { loslassen(); return; }
+    if (r.zustand === "rennt") {
+      const zx = e.x, zy = e.y - e.h * (e.a.art === "boss" ? 0.35 : 0.25);
+      const d0 = Math.hypot(zx - r.start.x, zy - r.start.y) || 1, d = Math.hypot(zx - r.x, zy - r.y), v = 640 * dt;
+      if (d <= v + 4) {
+        r.zustand = "haelt"; r.sprungK = 0; r.x = zx; r.y = zy;
+        const boss = e.a.art === "boss";
+        r.t = boss ? 1.2 + 0.3 * lvl : 2.4 + 0.4 * lvl;
+        if (!boss) e.umgerissen = true;
+        funken(zx, zy, ["#a8783e", "#ebe2cc", "#6a4a2e"], 12); KLANG.treffer(); KLANG.knurren(); S.beben = Math.max(S.beben, boss ? 0.35 : 0.15);
+        textAuf(zx, zy - e.h * 0.6, boss ? tx.rexBoss : tx.rexUm, "#e0a046", boss ? 22 : 18, 1.1);
+      } else {
+        r.x += (zx - r.x) / d * v; r.y += (zy - r.y) / d * v;
+        r.sprungK = Math.max(r.sprungK, 1 - d / d0); r.sprungH = Math.min(70, d0 * 0.3);
+      }
+    } else if (r.zustand === "haelt") {
+      r.x = e.x + Math.sin(performance.now() / 45) * 2.5; r.y = e.y - e.h * (e.a.art === "boss" ? 0.35 : 0.25);
+      r.t -= dt;
+      if (r.t <= 0) {
+        funken(mitte(e).x, mitte(e).y, e.a.splitter, 10); KLANG.treffer();
+        e.gehalten = false; e.umgerissen = false;
+        schaden(e, e.a.art === "boss" ? 2 + lvl : 1 + lvl, null, false);
+        loslassen();
+      }
+    } else loslassen();
   }
 
   /* ---------- Gaben, die von selbst wirken ---------- */
@@ -964,6 +1121,8 @@
     if (S.banner) { S.banner.t += dt; if (S.banner.t > S.banner.dauer) S.banner = null; }
     S.beben = Math.max(0, S.beben - dt);
     S.abkuehl = Math.max(0, S.abkuehl - dt);
+    windUpdate(dt);
+    if (S.rexFassCd > 0) { S.rexFassCd = Math.max(0, S.rexFassCd - dt); if (!S.rexFassCd && S.rex.zustand === "wartet") S.rex.hops = 0.35; }
     if (S.vorgemerkt && S.abkuehl <= 0) { schiessen(S.vorgemerkt); S.vorgemerkt = null; }
     if ((zielArt === "kreuz" || padAn) && kreuz && kreuz.drueckt && S.abkuehl <= 0) { const zk = kreuzVektor(); if (zk) schiessen(zk); }
 
@@ -1031,7 +1190,7 @@
     const tf = tempoFaktor();
     S.gegner.forEach(e => {
       if (e.weg) return;
-      e.t += dt; e.blitz = Math.max(0, e.blitz - dt);
+      e.t += dt; e.blitz = Math.max(0, e.blitz - dt); if (e.schwachBlitz > 0) e.schwachBlitz = Math.max(0, e.schwachBlitz - dt);
       if (e.tot) { e.tot += dt; return; }
       e.eis = Math.max(0, e.eis - dt); e.bann = Math.max(0, e.bann - dt); e.angst = Math.max(0, e.angst - dt); e.sichtbar = Math.max(0, e.sichtbar - dt);
       if (e.liegt > 0) { e.liegt -= dt; return; }
@@ -1153,14 +1312,15 @@
       const schritte = 3;
       for (let k = 0; k < schritte && !p.weg; k++) {
         const d = dt / schritte;
-        p.vy += G * d; p.x += p.vx * d; p.y += p.vy * d; p.t += d;
+        p.vy += G * d; p.vx += S.wind * d; p.x += p.vx * d; p.y += p.vy * d; p.t += d;
         if (pfeilHindernis(p)) { p.weg = true; break; }
         for (const e of S.gegner) {
           if (e.tot || e.weg || e.liegt > 0 || e.unsichtbar || p.getroffen.includes(e)) continue;
-          const m = mitte(e), r = radius(e);
-          if ((p.x - m.x) ** 2 + (p.y - m.y) ** 2 < r * r) {
+          const m = mitte(e), r = radius(e), sp = e.a.art === "boss" ? schwachPunkt(e) : null;
+          const inSchwach = sp && (p.x - sp.x) ** 2 + (p.y - sp.y) ** 2 < sp.r * sp.r;
+          if (inSchwach || (p.x - m.x) ** 2 + (p.y - m.y) ** 2 < r * r) {
             p.getroffen.push(e);
-            pfeilTrifft(p, e);
+            pfeilTrifft(p, e, inSchwach || (sp && strahlTrifft(p, sp, r * 2.2)));
             if (p.durch > 0) p.durch--; else { p.weg = true; }
             break;
           }
@@ -1208,14 +1368,27 @@
   const ctx = leinwand.getContext("2d");
   let skala = 1, welt = null, weltAlt = null, wechsel = 0, weltName = "";
   const amb = Array.from({ length: 22 }, () => ({ x: Math.random() * W, y: Math.random() * H, p: Math.random() * 6, v: 0.4 + Math.random() * 0.8 }));
+  const startSeed = 1 + Math.floor(Math.random() * 1e6); // Kulisse auf dem Startbildschirm: bei jedem Besuch ein bisschen anders
+  let ambWind = 0, letzteZeichnung = 0, testWind = 28, testWelle = 0;
+  const par = { x: 0, y: 0 };
 
   function weltSetzen(name) {
-    if (name === weltName) return;
-    weltAlt = welt; welt = WELT.bauen(name); weltName = name; wechsel = weltAlt ? 1 : 0;
+    const seed = S ? S.seed : startSeed, key = name + ":" + seed;
+    if (key === weltName) return;
+    weltAlt = welt; welt = WELT.bauen(name, seed); weltName = key; wechsel = weltAlt ? 1 : 0;
+  }
+  /* was die Kulisse über das Spiel wissen muss: Wind, Blickrichtung (Parallaxe), welche Welle im Kapitel */
+  function umgebung(s, dt, z, zk) {
+    let zx = Math.sin(s * 0.13) * 0.12, zy = 0;
+    if (zk && kreuz) { zx = -(kreuz.x - W / 2) / (W / 2); zy = -(kreuz.y - H * 0.45) / H; }
+    else if (z) { zx = -Math.cos(z.ang) * 0.9; zy = (-Math.sin(z.ang) - 0.6) * 0.8; }
+    if (ruhig) { zx = 0; zy = 0; }
+    const f = Math.min(1, dt * 2.5); par.x += (zx - par.x) * f; par.y += (zy - par.y) * f;
+    return { wind: S ? S.wind : testWind, par, welle: S ? S.welleImKap || 0 : testWelle, ruhig };
   }
 
   function ambientZeichnen(art, jetzt) {
-    const s = jetzt / 1000;
+    const s = jetzt / 1000, wv = ambWind;
     amb.forEach((f, i) => {
       let x, y, farbe, r = 1.6;
       if (art === "gluehwurm") {
@@ -1229,11 +1402,12 @@
         farbe = i % 2 ? "rgba(110,230,230,.55)" : "rgba(190,130,255,.5)"; r = 1.3 + (i % 3) * 0.4;
       } else if (art === "staub") {
         x = (f.x + s * 6 * f.v) % W; y = 60 + (f.y % 300) + Math.sin(s * f.v + f.p) * 8;
-        farbe = "rgba(170,210,255," + (0.2 + 0.25 * Math.sin(s * 2 * f.v + f.p)).toFixed(2) + ")"; r = 1.1;
+        farbe = "rgba(230,210,170," + (0.2 + 0.25 * Math.sin(s * 2 * f.v + f.p)).toFixed(2) + ")"; r = 1.1;
       } else if (art === "asche") {
         y = (f.y + s * 14 * f.v) % H; x = f.x + Math.sin(s * 0.8 * f.v + f.p) * 16;
         farbe = "rgba(168,159,143,.35)"; r = 1.3;
       } else return;
+      x = ((x + wv * f.v) % W + W) % W;
       ctx.fillStyle = farbe; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
     });
   }
@@ -1258,6 +1432,7 @@
     ctx.translate(e.x + wackel, e.y + dy);
     if (e.typ === "blatt") { ctx.translate(0, -e.h / 2); ctx.rotate(Math.sin(e.t * 2.3 + e.phase) * 0.9); ctx.translate(0, e.h / 2); }
     if (dreh) ctx.rotate(dreh);
+    if (e.umgerissen) ctx.rotate(-e.dir * 0.55);
     if (e.liegt > 0) { ctx.globalAlpha *= 0.8; ctx.rotate(e.dir * 1.35); ctx.scale(0.8, 0.8); }
     if (e.bew === "flug" || e.bew === "fledermaus") ctx.rotate(Math.sin(e.t * 3 + e.phase) * 0.06);
     if (sp) {
@@ -1275,6 +1450,7 @@
     }
     ctx.restore();
     if (e.tot || e.liegt > 0 || (e.unsichtbar && e.duck <= 0)) return;
+    if (e.a.art === "boss") schwachZeichnen(e);
     const kopf = e.y - e.h - 8;
     if (e.maxHp > 1 && e.a.art !== "freund") {
       const bw = e.a.art === "boss" ? 120 : Math.max(26, e.w * 0.55), bx = Math.max(4, Math.min(W - bw - 4, e.x - bw / 2));
@@ -1382,9 +1558,9 @@
   function flugbahnZeichnen(z) {
     const b = bogenPunkt(z.ang);
     let x = b.x, y = b.y, vx = Math.cos(z.ang) * z.v, vy = Math.sin(z.ang) * z.v;
-    const dauer = S.gaben.adler ? 0.85 : 0.3, schritt = 0.028;
+    const dauer = S.gaben.adler ? 0.85 : 0.3, schritt = 0.028, mitWind = S.gaben.adler || S.stufe === "lehrling";
     for (let tt = 0; tt < dauer; tt += schritt) {
-      vy += G * schritt; x += vx * schritt; y += vy * schritt;
+      vy += G * schritt; if (mitWind) vx += S.wind * schritt; x += vx * schritt; y += vy * schritt;
       if (y < -10 || x < -10 || x > W + 10) break;
       ctx.fillStyle = "rgba(224,160,70," + (0.75 * (1 - tt / dauer)).toFixed(3) + ")";
       ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
@@ -1393,11 +1569,33 @@
 
   function rexZeichnen() {
     const r = S ? S.rex : { x: REX_HEIM.x, y: REX_HEIM.y, hops: 0, zustand: "wartet" };
-    const gr = r.zustand === "wartet" ? 50 : 40;
+    // „Fass!“-Anzeige rund um Rex' Platz: Bogen lädt, fertig = goldener Ring mit Taste R
+    if (S && zustand === "spiel") {
+      const hx = REX_HEIM.x, hy = REX_HEIM.y - 2, k = S.rexFassCd > 0 ? 1 - S.rexFassCd / rexFassMax() : 1;
+      ctx.lineWidth = 2.4;
+      ctx.strokeStyle = "rgba(9,8,15,.55)"; ctx.beginPath(); ctx.arc(hx, hy, 29, 0, Math.PI * 2); ctx.stroke();
+      if (k < 1) { ctx.strokeStyle = "rgba(224,160,70,.6)"; ctx.beginPath(); ctx.arc(hx, hy, 29, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.stroke(); }
+      else {
+        const puls = ruhig ? 0.8 : 0.6 + 0.4 * Math.sin(performance.now() / 260);
+        ctx.strokeStyle = "rgba(255,207,122," + puls.toFixed(2) + ")"; ctx.beginPath(); ctx.arc(hx, hy, 29, 0, Math.PI * 2); ctx.stroke();
+        if (fein || padAn) { // Tastenhinweis nur, wo es eine Tastatur/einen Controller gibt
+          ctx.fillStyle = "rgba(9,8,15,.7)"; ctx.beginPath(); ctx.arc(hx - 24, hy - 20, 9, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#ffcf7a"; ctx.font = "bold 13px " + FONT_D; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(padAn ? "Y" : "R", hx - 24, hy - 19);
+        }
+      }
+    }
+    let gr = r.zustand === "wartet" ? 50 : 40, sprung = 0, dreh = 0;
     const hop = r.hops > 0 ? Math.sin(r.hops / 0.35 * Math.PI) * 10 : 0;
-    const lauf = (r.zustand === "rennt" || r.zustand === "zurueck") ? Math.abs(Math.sin(performance.now() / 70)) * 6 : 0;
-    if (rexBild) ctx.drawImage(rexBild, r.x - gr / 2, r.y - gr / 2 - hop - lauf, gr, gr);
-    else { ctx.fillStyle = "#6a4a2e"; ctx.beginPath(); ctx.arc(r.x, r.y - hop, gr / 2.4, 0, 7); ctx.fill(); }
+    const lauf = (r.zustand === "rennt" || r.zustand === "zurueck") && !r.aktiv ? Math.abs(Math.sin(performance.now() / 70)) * 6 : 0;
+    if (r.aktiv && r.zustand === "rennt") {
+      sprung = Math.sin(Math.PI * Math.min(1, r.sprungK)) * (r.sprungH || 40); gr = 46;
+      dreh = (r.ziel && r.ziel.x < r.x ? -1 : 1) * (0.5 - r.sprungK) * 0.9;
+      ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(r.x, r.y + 14, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (r.aktiv) dreh = Math.sin(performance.now() / 60) * 0.18;
+    ctx.save(); ctx.translate(r.x, r.y - hop - lauf - sprung); if (dreh) ctx.rotate(dreh);
+    if (rexBild) ctx.drawImage(rexBild, -gr / 2, -gr / 2, gr, gr);
+    else { ctx.fillStyle = "#6a4a2e"; ctx.beginPath(); ctx.arc(0, 0, gr / 2.4, 0, 7); ctx.fill(); }
+    ctx.restore();
   }
 
   function blaseZeichnen(b) {
@@ -1439,40 +1637,72 @@
       ctx.textAlign = "center"; ctx.font = "600 18px " + FONT_H; ctx.fillStyle = "#ebe2cc";
       ctx.fillText(tx.serie(S.combo), W / 2, zeile);
     }
+    windAnzeige(tx);
     const g = Object.keys(S.gaben).filter(k => k !== "rast" && S.gaben[k] > 0);
     ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.font = "12px sans-serif"; ctx.globalAlpha = 0.85;
     g.forEach((k, i) => ctx.fillText(GABE_SYM[k] + (S.gaben[k] > 1 ? S.gaben[k] : ""), 6 + (i % 6) * 23, H - 5 - Math.floor(i / 6) * 17));
     ctx.globalAlpha = 1;
   }
 
+  /* kleine Windfahne links oben: Pfeil zeigt die Richtung, Länge und Striche die Stärke */
+  function windAnzeige(tx) {
+    const w = S.wind, a = Math.abs(w), k = Math.min(1, a / 140), dir = w < 0 ? -1 : 1;
+    const x0 = 8, y0 = 40, neu = S.windNeu > 0 ? Math.min(1, S.windNeu) : 0;
+    ctx.save();
+    ctx.font = "13px " + FONT_D; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    const lw = ctx.measureText(tx.wind).width, bw = lw + 54;
+    ctx.fillStyle = "rgba(9,8,15," + (0.45 + neu * 0.25).toFixed(2) + ")"; ctx.fillRect(x0, y0, bw, 20);
+    if (neu) { ctx.strokeStyle = "rgba(224,160,70," + (neu * 0.8).toFixed(2) + ")"; ctx.lineWidth = 1; ctx.strokeRect(x0 + 0.5, y0 + 0.5, bw - 1, 19); }
+    ctx.fillStyle = "#a89f8f"; ctx.fillText(tx.wind, x0 + 6, y0 + 10.5);
+    const mx = x0 + lw + 30, L = 5 + k * 17, yy = y0 + 10;
+    ctx.strokeStyle = a < 15 ? "rgba(168,159,143,.6)" : k > 0.68 ? "#ffcf7a" : "#c9b28a"; ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = 1.8; ctx.lineCap = "round";
+    if (a < 15) { ctx.beginPath(); ctx.arc(mx, yy, 3, 0, Math.PI * 2); ctx.stroke(); }
+    else {
+      const flatter = ruhig ? 0 : Math.sin(performance.now() / (220 - k * 120)) * 1.2;
+      ctx.beginPath(); ctx.moveTo(mx - dir * L, yy + flatter * 0.5); ctx.lineTo(mx + dir * L, yy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(mx + dir * (L + 3), yy); ctx.lineTo(mx + dir * (L - 3), yy - 4); ctx.lineTo(mx + dir * (L - 3), yy + 4); ctx.closePath(); ctx.fill();
+      const striche = a < 50 ? 1 : a < 95 ? 2 : 3;
+      for (let i = 0; i < striche; i++) { const sx = mx - dir * (L - 2 - i * 5); ctx.beginPath(); ctx.moveTo(sx, yy); ctx.lineTo(sx - dir * 3, yy - 4 - flatter); ctx.stroke(); }
+    }
+    ctx.restore();
+  }
+
   function bannerZeichnen() {
     const b = S.banner; if (!b) return;
     const k = b.t / b.dauer, a = k < 0.15 ? k / 0.15 : k > 0.75 ? (1 - k) / 0.25 : 1;
     ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(9,8,15,.5)"; ctx.fillRect(0, 186, W, 74);
+    ctx.fillStyle = "rgba(9,8,15,.5)"; ctx.fillRect(0, 186, W, b.wind ? 96 : 74);
     ctx.fillStyle = "#e0a046"; ctx.font = "34px " + FONT_D; ctx.fillText(b.titel, W / 2, 212);
     ctx.fillStyle = "#ebe2cc"; ctx.font = "600 21px " + FONT_H; ctx.fillText(b.unter, W / 2, 242);
+    if (b.wind) { ctx.fillStyle = "#c9b28a"; ctx.font = "600 17px " + FONT_H; ctx.fillText("🍃 " + b.wind, W / 2, 268); }
     ctx.restore();
   }
 
   function zeichnen(jetzt) {
     if (!welt) return;
-    const s = jetzt / 1000;
+    const s = jetzt / 1000, dtB = letzteZeichnung ? Math.max(0, Math.min(0.05, s - letzteZeichnung)) : 0;
+    letzteZeichnung = s;
+    const zk = zustand === "spiel" && (zielArt === "kreuz" || padAn) ? kreuzVektor() : null;
+    const z = zustand === "spiel" ? (zk || zielVektor()) : null;
+    const u = umgebung(s, dtB, z, zk);
+    ambWind += u.wind * dtB * 0.08;
     ctx.setTransform(skala, 0, 0, skala, 0, 0);
     ctx.save();
     if (S && S.beben > 0 && !ruhig) ctx.translate((Math.random() - 0.5) * 8 * S.beben, (Math.random() - 0.5) * 8 * S.beben);
-    ctx.drawImage(welt.hg, 0, 0, W, H);
-    welt.deko(ctx, s);
+    const zl = S && S.zeitlupe ? Math.min(1, S.zeitlupe.t / S.zeitlupe.dauer) : -1;
+    if (zl >= 0 && !ruhig) { const f = 1 + 0.13 * Math.sin(zl * Math.PI), zx = S.zeitlupe.x, zy = S.zeitlupe.y; ctx.translate(zx, zy); ctx.scale(f, f); ctx.translate(-zx, -zy); }
+    welt.hinten(ctx, s, dtB, u);
     ambientZeichnen(welt.partikel, jetzt);
     const gg = S ? S.gegner : [];
     gg.forEach(e => { if (e.bahn < 0 && (e.bew === "drache" || e.bew === "schwebe")) gegnerZeichnen(e); });
     for (let i = 0; i < 3; i++) {
       gg.forEach(e => { if (e.bahn === i) gegnerZeichnen(e); });
       ctx.drawImage(welt.lagen[i], 0, 0, W, H);
+      welt.halme(ctx, i, s, u);
     }
     gg.forEach(e => { if (e.bahn < 0 && e.bew !== "drache" && e.bew !== "schwebe") gegnerZeichnen(e); });
     if (weltAlt && wechsel > 0) {
-      ctx.globalAlpha = wechsel; ctx.drawImage(weltAlt.hg, 0, 0, W, H); weltAlt.lagen.forEach(l => ctx.drawImage(l, 0, 0, W, H)); ctx.globalAlpha = 1;
+      ctx.globalAlpha = wechsel; weltAlt.standbild(ctx); ctx.globalAlpha = 1;
     }
     if (S) {
       if (S.illusion && SPRITES.illusion) {
@@ -1520,12 +1750,17 @@
       });
       ctx.globalAlpha = 1;
     }
-    const zk = zustand === "spiel" && (zielArt === "kreuz" || padAn) ? kreuzVektor() : null;
-    const z = zustand === "spiel" ? (zk || zielVektor()) : null;
     if (z && !zk) flugbahnZeichnen(z);
     if (zk) kreuzZeichnen(zk);
     friedrichZeichnen(z);
     rexZeichnen();
+    welt.vorne(ctx, s, dtB, u);
+    if (zl >= 0) {
+      // Zeitlupe: Kinobalken und ein warmer Schimmer
+      const b = Math.sin(zl * Math.PI) * 26;
+      ctx.fillStyle = "rgba(5,4,8,.85)"; ctx.fillRect(-20, -20, W + 40, b + 20); ctx.fillRect(-20, H - b, W + 40, b + 20);
+      ctx.fillStyle = "rgba(255,200,120," + (0.1 * Math.sin(zl * Math.PI)).toFixed(3) + ")"; ctx.fillRect(0, 0, W, H);
+    }
     if (S) {
       S.blasen.forEach(blaseZeichnen);
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -1551,7 +1786,13 @@
     const dt = Math.min(0.033, (jetzt - (letzte || jetzt)) / 1000);
     letzte = jetzt;
     if (wechsel > 0) { wechsel = Math.max(0, wechsel - dt / 1.2); if (!wechsel) weltAlt = null; }
-    if (zustand === "spiel" && S) update(dt);
+    let dtS = dt;
+    if (S && S.zeitlupe && zustand === "spiel") {
+      const zl = S.zeitlupe; zl.t += dt;
+      const k = zl.t / zl.dauer;
+      if (k >= 1) S.zeitlupe = null; else dtS = dt * (0.12 + 0.88 * k * k * k);
+    }
+    if (zustand === "spiel" && S) update(dtS);
     else if (S && (zustand === "wahl" || zustand === "ende" || zustand === "geschichte")) {
       S.teilchen.forEach(q => { q.leben -= dt; q.vy += 300 * q.schwer * dt; q.x += q.vx * dt; q.y += q.vy * dt; });
       S.teilchen = S.teilchen.filter(q => q.leben > 0);
@@ -1575,6 +1816,11 @@
     }
     setTimeout(vollSetzen, 60);
   }
+  /* kleine Bildschirme (Handy hoch/quer, Handhelds): beim Start gleich ins Vollbild – muss direkt im Klick passieren */
+  function vollAuto() {
+    if (vollAn() || !window.matchMedia || !window.matchMedia("(max-width: 760px), (max-height: 560px)").matches) return;
+    vollbild();
+  }
   function vollSetzen() {
     const an = vollAn(), tx = t();
     rahmen.classList.toggle("voll", an);
@@ -1583,7 +1829,7 @@
     vollKnopf.firstChild.textContent = an ? "✕" : "⛶";
     setTimeout(groesse, 50);
   }
-  let buehne, schleier, tafel, fussRekord, tonKnopf, pauseKnopf, listeEl;
+  let buehne, schleier, tafel, fussRekord, tonKnopf, pauseKnopf, listeEl, rexKnopf;
   const rekordKey = st => "imres-waldlauf-rekord-" + st;
   (function altenRekordUebernehmen() { const alt = lies("imres-waldlauf-rekord", ""); if (alt && !lies(rekordKey("waldlaeufer"), "")) schreib(rekordKey("waldlaeufer"), alt); })();
   const aktuelleStufe = () => (S && zustand !== "start" ? S.stufe : stufeWahl);
@@ -1595,7 +1841,7 @@
       '<h3 id="wl-titel">' + esc(tx.titel) + '</h3>' +
       '<p class="tav-info" id="wl-text">' + esc(tx.text) + '</p>' +
       '<p class="wl-steuerung" id="wl-steuerung">' + esc(zielArt === "kreuz" ? tx.steuerungKreuz : tx.steuerung) + '</p>' +
-      '<div class="wl-rahmen"><div class="wl-buehne"><button type="button" class="wl-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><button type="button" class="wl-voll"><span aria-hidden="true">⛶</span></button><div class="wl-schleier"><div class="wl-tafel"></div></div></div></div>' +
+      '<div class="wl-rahmen"><div class="wl-buehne"><button type="button" class="wl-pause" aria-label="Pause"><span aria-hidden="true">❚❚</span></button><button type="button" class="wl-voll"><span aria-hidden="true">⛶</span></button><button type="button" class="wl-rex"></button><div class="wl-schleier"><div class="wl-tafel"></div></div></div></div>' +
       '<div class="wl-fuss"><span class="wl-rekord"></span><button type="button" class="wl-ton"></button></div>' +
       '<div class="wl-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".wl-buehne");
@@ -1612,6 +1858,8 @@
     pauseKnopf.addEventListener("click", pausieren);
     vollKnopf = root.querySelector(".wl-voll"); rahmen = root.querySelector(".wl-rahmen");
     vollKnopf.addEventListener("click", vollbild);
+    rexKnopf = root.querySelector(".wl-rex");
+    rexKnopf.addEventListener("click", () => { audio(); rexFass(); });
     document.addEventListener("fullscreenchange", vollSetzen); document.addEventListener("webkitfullscreenchange", vollSetzen);
     tafel.addEventListener("click", tafelKlick);
     tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".wl-name")) { e.preventDefault(); eintragen(); } });
@@ -1623,6 +1871,7 @@
     tonKnopf.textContent = tonAn ? tx.ton[0] : tx.ton[1];
     tonKnopf.setAttribute("aria-pressed", String(tonAn));
     pauseKnopf.setAttribute("aria-label", tx.pauseKnopf);
+    if (rexKnopf) { rexKnopf.setAttribute("aria-label", tx.rexKnopf); rexKnopf.title = tx.rexKnopf; }
     if (vollKnopf) vollSetzen();
   }
   function texteSetzen() {
@@ -1663,7 +1912,7 @@
     const tx = t();
     weltSetzen(KAPITEL[startKap].thema);
     const lauf = laufLesen();
-    schleierAuf('<h4>' + esc(tx.titel) + '</h4>' +
+    schleierAuf('<h4 class="wl-start-titel">' + esc(tx.titel) + '</h4>' +
       (lauf ? '<div class="wl-fortsetzen"><button type="button" class="tav-knopf wl-haupt" data-tun="fortsetzen">' + esc(tx.fortsetzen) + '</button><p class="wl-stufen-text">' +
         esc(tx.fortsetzenInfo(Math.max(1, lauf.s.welle + (lauf.kampf ? 0 : 1)), lauf.s.punkte, lauf.s.leben) + ' · ' + esc(tx.stufen[lauf.s.stufe])) + '</p></div>' : "") +
       stufenHtml(tx) + kapitelHtml(tx) + zielHtml(tx) +
@@ -1680,7 +1929,7 @@
     const tx = t(), k = kapitelVon(n), endlos = k >= KAPITEL.length;
     const daten = endlos ? tx.endlos : tx.kap[k], bild = endlos ? ENDLOS_BILD : KAPITEL[k].bild;
     if (!nurNeuZeichnen) {
-      zustand = "geschichte"; S.geschichteN = n; zielen = null;
+      zustand = "geschichte"; S.geschichteN = n; zielen = null; S.welleImKap = 0; S.zeitlupe = null;
       weltSetzen(endlos ? S.endlosThemen[0] : KAPITEL[k].thema);
       KLANG.seite();
     }
@@ -1709,7 +1958,7 @@
   function gabenZeigen(nurNeuZeichnen) {
     const tx = t();
     if (!nurNeuZeichnen) {
-      zustand = "wahl"; zielen = null; S.vorgemerkt = null;
+      zustand = "wahl"; zielen = null; S.vorgemerkt = null; S.zeitlupe = null;
       S.texte = []; S.blasen = []; S.banner = null;
       S.gegner = S.gegner.filter(e => e.a.art !== "bonus" && e.a.art !== "freund");
       const moegl = gabenMoeglich();
@@ -1740,7 +1989,7 @@
   function spielEnde(nurNeuZeichnen) {
     const tx = t();
     if (!nurNeuZeichnen) {
-      zustand = "ende"; zielen = null; S.texte = []; S.blasen = [];
+      zustand = "ende"; zielen = null; S.texte = []; S.blasen = []; S.zeitlupe = null;
       KLANG.ende();
       const alt = parseInt(lies(rekordKey(S.stufe), "0"), 10);
       S.neuerRekord = !S.uebung && S.punkte > alt && S.punkte > 0;
@@ -1807,6 +2056,7 @@
     const b = e.target.closest("[data-tun]"); if (!b) return;
     const tun = b.dataset.tun;
     audio();
+    if (tun === "fortsetzen" || tun === "start") vollAuto();
     if (tun === "fortsetzen") { laufFortsetzen(); fussSetzen(); listeNeu(); }
     else if (tun === "start") { laufLoeschen(); neuesSpiel(startKap); fussSetzen(); listeNeu(); naechsteWelle(S.welle + 1); }
     else if (tun === "kampf") { welleStarten(S.geschichteN); anwerfen(); }
@@ -1823,6 +2073,7 @@
   document.addEventListener("keydown", e => {
     if (zustand !== "spiel" || !sichtbar) return;
     if (e.key === "Escape" || e.key === "p" || e.key === "P") { e.preventDefault(); pausieren(); }
+    else if ((e.key === "r" || e.key === "R") && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); audio(); rexFass(); }
   });
 
   /* ---------- Bestenliste: gemeinsam über Supabase (wie beim Auftritt), sonst auf diesem Gerät ---------- */
@@ -1968,9 +2219,16 @@
 .wl-buehne.laeuft canvas { touch-action: none; }
 .wl-buehne.kreuz.laeuft canvas { cursor: none; }
 .wl-zielart span { font-size: .8rem; color: var(--ash); margin-right: .2rem; }
-.wl-schleier { position: absolute; inset: 0; display: grid; place-items: center; padding: clamp(.7rem, 3vw, 1.4rem); background: rgba(9,8,15,.68); text-align: center; overflow-y: auto; }
+.wl-schleier { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: clamp(.7rem, 3vw, 1.4rem); background: rgba(9,8,15,.68); text-align: center; overflow-y: auto; overscroll-behavior: contain; }
 .wl-schleier[hidden] { display: none; }
-.wl-tafel { display: grid; gap: .55rem; justify-items: center; width: 100%; max-width: 30rem; }
+.wl-tafel { display: grid; gap: .55rem; justify-items: center; width: 100%; max-width: 30rem; margin: auto 0; }
+/* Der Haupt-Knopf bleibt immer sichtbar: wird es eng, klebt er unten am Rand der Tafel */
+.wl-tafel :is([data-tun=start], [data-tun=weiter], [data-tun=neu], [data-tun=kampf]).wl-haupt { position: sticky; bottom: 0; z-index: 2; }
+.wl-tafel > :is([data-tun=start], [data-tun=weiter], [data-tun=neu]).wl-haupt { background: #2b2017; box-shadow: 0 -.6rem 1rem rgba(9,8,15,.75), 0 .4rem .8rem rgba(9,8,15,.6); }
+.wl-tafel .wl-blatt [data-tun=kampf].wl-haupt { background: #e6d8b8; box-shadow: 0 -.5rem .8rem rgba(221,204,168,.95); }
+.wl-rex { position: absolute; left: 80%; top: 91%; width: 15%; height: 11.6%; min-width: 36px; min-height: 36px; z-index: 2; display: none; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.wl-buehne.laeuft .wl-rex { display: block; }
+.wl-rex:focus-visible { outline: 2px solid var(--ember); outline-offset: -4px; }
 .wl-tafel h4 { font-family: var(--name); font-weight: 400; font-size: clamp(1.45rem, 5.5vw, 2rem); line-height: 1.05; color: var(--vellum); }
 .wl-tafel p { color: var(--ash); font-size: .92rem; margin: 0; }
 .wl-tafel .tav-knopf { justify-self: center; }
@@ -2032,7 +2290,19 @@
 .wl-voll:hover, .wl-voll:focus-visible { border-color: var(--ember); color: var(--ember); }
 .wl-buehne:not(.laeuft) .wl-voll { top: 8px; }
 .wl-rahmen.voll { position: fixed; inset: 0; z-index: 9999; place-items: center; align-content: center; background: #050408; padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0); }
-.wl-rahmen.voll .wl-buehne { width: min(100vw, calc(100vh * .8), calc(100dvh * .8)); max-width: none; border: 0; box-shadow: none; }
+#waldlauf .wl-rahmen.voll .wl-buehne { width: min(100vw, calc(100vh * .8), calc(100dvh * .8)) !important; max-width: none !important; border: 0; box-shadow: none; }
+/* niedrige Fenster (Handy quer, Handheld): Startknopf gleich unter den Titel, Hinweistext kleiner */
+@media (max-height: 560px) {
+  .wl-tafel > .wl-start-titel { order: -3; font-size: 1.3rem; }
+  .wl-tafel > .wl-fortsetzen { order: -2; }
+  .wl-tafel > [data-tun=start].wl-haupt { order: -1; }
+  .waldlauf .wl-steuerung { font-size: .8rem; line-height: 1.3; }
+  .wl-tafel { gap: .35rem; }
+  .wl-tafel h4 { font-size: 1.35rem; }
+  .wl-tafel .wl-gross { font-size: 2rem; }
+  .wl-werte { font-size: .78rem; gap: 0 .6rem; grid-template-columns: auto auto auto auto; }
+  .wl-tafel .wl-spruch { font-size: 1.05rem; }
+}
 html.wl-ohne-scroll, html.wl-ohne-scroll body { overflow: hidden; }
 .wl-stufen, .wl-kapitel { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .3rem; }
 .wl-stufen button, .wl-kapitel button { border: 1px solid var(--line); background: rgba(9,8,15,.4); color: var(--vellum); font: inherit; font-size: .82rem; padding: .38rem .55rem; white-space: nowrap; cursor: pointer; }
@@ -2087,7 +2357,20 @@ html.wl-ohne-scroll, html.wl-ohne-scroll body { overflow: hidden; }
     kreuz(x, y, drueckt) { padAn = true; kreuz = { x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)), drueckt: !!drueckt, id: -1 }; },
     kreuzPos: () => kreuz ? { x: kreuz.x, y: kreuz.y } : { x: W / 2, y: H * 0.35 },
     aus() { if (padAn) { padAn = false; if (kreuz && kreuz.id === -1) kreuz = null; } },
-    pause: () => pausieren()
+    pause: () => pausieren(),
+    rex: () => rexFass(), /* Rex springt einen Gegner an („Fass!“) – true, wenn er losgesprungen ist */
+    rexBereit: () => !!(S && zustand === "spiel" && S.rexFassCd <= 0)
   };
   leinwand.addEventListener("pointermove", ev => { if (padAn && ev.pointerType === "mouse") root._pad.aus(); });
+  /* nur zum Ausprobieren der Kulissen (Konsole): root._test.kulisse("see", 42, 1, -120) */
+  root._test = {
+    kulisse(name, seed, welle, wind) {
+      if (zustand !== "start") return false;
+      welt = WELT.bauen(name, seed || 1); weltAlt = null; weltName = ""; testWelle = welle ? 1 : 0; testWind = wind === undefined ? 28 : wind;
+      schleier.hidden = true; return true;
+    },
+    themen: () => WELT.namen.slice(),
+    spiel: () => S,
+    schwach: e => schwachPunkt(e)
+  };
 })();
