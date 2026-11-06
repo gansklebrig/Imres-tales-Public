@@ -228,6 +228,15 @@ Gut zu wissen: schnelle Läufe, während viele Töne lange nachklingen, erkennt 
 
 **CTRL** öffnet das Mischpult: acht Regler in zwei Reihen (obere Reihe direkt, untere mit ALT), zuerst für **Musik, Hintergrund, Instrument (IN1), Effekte**. Drücken = stumm/neutral, **drücken+drehen** legt eine andere Spur auf den Regler (z. B. IN2, Hall, Gain). Auf einen Regler lassen sich auch die Lautstärken der Soundkarte legen: **🔈 Gesamt** und **🎧 Kopfhörer** – dieselben, die der Zynthian unter Admin → Audio-Pegel hat. CTRL oder BACK schließt es. (Nächste Seite geht weiter mit ALT + ▶.)
 
+- **Pegelbalken:** Der schmale Balken neben jedem Fader zeigt, wie laut der Kanal gerade wirklich ist. Wird der Rahmen kurz rot, übersteuert der Kanal (bei 🔈 Gesamt: der Limiter am Ende muss kräftig bremsen).
+- **Stumm:** Kanal **antippen** = sanft aus- bzw. wieder einblenden (2,5 s, einstellbar). **Regler drücken** = sofort stumm / an. Der Wert davor bleibt gemerkt.
+- **Solo:** Kanal **lange antippen** oder **Regler 1 s gedrückt halten** = nur diesen Kanal hören (Musik, Hintergrund, Effekte, IN1, IN2, Mitspieler). Nochmal halten = alles wie vorher.
+- **Ziehen:** Mit dem Finger auf einem Kanal hoch/runter ziehen stellt die Lautstärke.
+- **Mischungen A/B:** **◀ ▶** (oder die Knöpfe oben) wechselt zwischen **A · Probe** und **B · Auftritt**. Die jetzige Mischung wird dabei gemerkt, die andere blendet in 1 s herein. Auf eine Taste legbar: „🎚 Mischung A/B umschalten“.
+- **⚖ Balance** (untere Reihe, ALT + Regler 1): dreht Musik und angesteckte Instrumente gegeneinander – nach rechts mehr Instrument, nach links mehr Musik. Antippen = zurück zur Mitte.
+- **Anzeige:** Lautstärken in **dB** (0 dB = Regler ganz oben, −6 dB = halb so laut), der helle Strich am Fader ist die Normalstellung. Jeder Kanal hat seine Farbe.
+- **🔒 Obergrenzen:** Zahnrad ⚙ im Mischer (oder MENU → Einstellungen → 🎚 Mischer): je Kanal einen Höchstwert festlegen – höher lässt sich der Regler dann nicht drehen (roter Strich am Fader). „Alle Lautstärken: jetzige Stellung als Grenze“ ist der schnelle Weg vor einem Auftritt. Dort auch: dB/% und Blendzeit.
+
 ### 🎛 Spuren (ZS3)
 
 Auf der Seite **Ort** zeigt ZS3 die Spuren des Ortes: Kulisse gesamt, jede Geräusch-Schicht einzeln (Vögel, Wind, Bach …), die Einzelgeräusche und laufende Zusätze wie Regen. Das merkt sich die Bühne je Ort. Auf allen anderen Seiten zeigt ZS3 die Spuren der Stimmung:

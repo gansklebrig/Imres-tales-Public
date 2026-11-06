@@ -1787,6 +1787,7 @@
   const MIT = { stufe: 3, laut: 70, hall: 35, oktave: 0 };
   try { Object.assign(MIT, JSON.parse(localStorage.getItem("imres-lw-mit") || "{}")); } catch (_) {}
   let mitBus = null, mitHall = null;
+  const PEGEL_MX = {}; /* Messpunkte des Mischers (ImresPult.pegel) */
   function mitVorladen() { if (!ctx) return; MIT_LAGEN.slice(0, MIT.stufe).forEach(x => { try { probenLaden(x[0]); } catch (_) {} }); }
   function mitspielen(midi, staerke) {
     if (!ctx || rendert || !MIT.stufe) return false;
@@ -13613,6 +13614,15 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     /* Spitzenpegel vor dem Gain (0 … 1) und wie oft er zuletzt an die Grenze stieß */
     kanalRoh(i) { const k = EIN.k[i]; if (!k || !k.roh) return null; const d = k._rohPuf || (k._rohPuf = new Float32Array(k.roh.fftSize)); k.roh.getFloatTimeDomainData(d);
       let m = 0, n = 0; for (let x = 0; x < d.length; x++) { const a = Math.abs(d[x]); if (a > m) m = a; if (a > .985) n++; } k.clip = k.clip * .9 + (n > 2 ? 1 : 0); return { spitze: m, clip: k.clip > .3 }; },
+    /* Spitzenpegel der Mischer-Wege nach dem Regler (1 = Vollaussteuerung) – die Messpunkte entstehen erst beim ersten Abfragen.
+       begrenzt: wie viele dB der Limiter am Ende gerade wegnimmt */
+    pegel() {
+      if (!ctx) return null; const M = PEGEL_MX, q = { musik: ausgang, hg: kulAusRef, fx: fxAusgang, gesamt: endKnoten, mit: mitBus }, r = {};
+      for (const k in q) { const n = q[k]; let a = M[k]; r[k] = 0; if (!n) continue;
+        if (!a || a.n !== n) { try { a = M[k] = { n, an: ctx.createAnalyser(), d: new Float32Array(512) }; a.an.fftSize = 512; n.connect(a.an); } catch (_) { continue; } }
+        a.an.getFloatTimeDomainData(a.d); let m = 0; for (let x = 0; x < 512; x++) { const v = Math.abs(a.d[x]); if (v > m) m = v; } r[k] = m; }
+      r.in1 = this.kanalPegel(0); r.in2 = this.kanalPegel(1); r.begrenzt = endKnoten && typeof endKnoten.reduction === "number" ? -endKnoten.reduction : 0; return r;
+    },
     kanalPegel(i) { const k = EIN.k[i]; if (!k) return 0; const d = new Float32Array(k.mess.fftSize); k.mess.getFloatTimeDomainData(d); let m = 0; for (let x = 0; x < d.length; x++) m = Math.max(m, Math.abs(d[x])); return m; },
     vorlauf(sek) { zynVorlauf = Math.max(0, Math.min(2, +sek || 0)); },
     fx(k, v) { if (!(k in FXW) || !isFinite(+v)) return; FXW[k] = +v; if (fxBauen()) fxAnwenden(); },
