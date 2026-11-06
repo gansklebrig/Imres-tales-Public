@@ -237,6 +237,8 @@ Gut zu wissen: schnelle Läufe, während viele Töne lange nachklingen, erkennt 
 - **Anzeige:** Lautstärken in **dB** (0 dB = Regler ganz oben, −6 dB = halb so laut), der helle Strich am Fader ist die Normalstellung. Jeder Kanal hat seine Farbe.
 - **🔒 Obergrenzen:** Zahnrad ⚙ im Mischer (oder MENU → Einstellungen → 🎚 Mischer): je Kanal einen Höchstwert festlegen – höher lässt sich der Regler dann nicht drehen (roter Strich am Fader). „Alle Lautstärken: jetzige Stellung als Grenze“ ist der schnelle Weg vor einem Auftritt. Dort auch: dB/% und Blendzeit.
 
+**In den Klangwelten** gibt es das Mischpult genauso (CTRL), mit eigener Belegung und eigenen Mischungen A/B: **Lautstärke, Geräusche, Szenen, Wetter**, mit ALT **Spannung, Lebendigkeit, Raumhall, Gesamt** (Soundkarte). **ZS3** zeigt dort die Schichten der laufenden Klangwelt einzeln (Kaminfeuer, Stimmengewirr, Wind …) samt Pegelbalken, dazu Lebendigkeit, Raumhall, Weite und Wetter. Regler drücken = Schicht aus/an.
+
 ### 🎛 Spuren (ZS3)
 
 Auf der Seite **Ort** zeigt ZS3 die Spuren des Ortes: Kulisse gesamt, jede Geräusch-Schicht einzeln (Vögel, Wind, Bach …), die Einzelgeräusche und laufende Zusätze wie Regen. Das merkt sich die Bühne je Ort. Auf allen anderen Seiten zeigt ZS3 die Spuren der Stimmung:

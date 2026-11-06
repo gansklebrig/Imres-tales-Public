@@ -1032,26 +1032,64 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const MIX_LISTE = ["musik", "hg", "fxlaut", "karte_haupt", "karte_kh", "in1_laut", "in2_laut", "in1_pegel", "in2_pegel", "hall", "echohall", "in1_hall", "in2_hall", "in1_pan", "in2_pan", "balance"];
   /* Balance statt Boost in der zweiten Reihe (Boost bleibt wählbar) */
   if (lies("imres-zyn-misch2", "") !== "1") { if (ZB.regler.MIX && ZB.regler.MIX[4] === "boost") { ZB.regler.MIX[4] = "balance"; belegMerken(); } schreib("imres-zyn-misch2", "1"); }
-  const mixKeys = () => { const l = (ZB.regler.MIX || []).slice(); for (let i = 0; i < 8; i++) if (!l[i]) l[i] = MIX_STD[i]; return l.slice(0, 8); };
+  /* Klangwelten haben ein eigenes Mischpult (eigene Belegung) */
+  const MIXW_STD = ["w_gesamt", "w_ger", "w_sz", "w_wetter", "w_spannung", "w_leben", "w_raum", "karte_haupt"];
+  const MIXW_LISTE = ["w_gesamt", "w_ger", "w_sz", "w_wetter", "w_spannung", "w_leben", "w_raum", "w_weite", "karte_haupt", "karte_kh"];
+  const mixSlot = () => SEITE === "welten" ? "MIXW" : "MIX", mixStd = () => SEITE === "welten" ? MIXW_STD : MIX_STD, mixListe = () => SEITE === "welten" ? MIXW_LISTE : MIX_LISTE;
+  const mixKeys = () => { const l = (ZB.regler[mixSlot()] || []).slice(), st = mixStd(); for (let i = 0; i < 8; i++) if (!l[i]) l[i] = st[i]; return l.slice(0, 8); };
+  /* Regler der Klangwelten – über die Schnittstelle der Seite (window.ImresWelten) */
+  const WA = () => SEITE === "welten" && window.ImresWelten && window.ImresWelten.mix ? window.ImresWelten : null;
+  const wMix = () => { const a = WA(); try { return a ? a.mix() : null; } catch (_) { return null; } };
+  const wPar = (name, feld, k, lo, hi, schritt, neutral) => gedrosselt({ name, lo, hi, schritt, neutral, druck: "mitte", text: v => Math.round(v) + " %",
+    lies: () => { const m = wMix(); if (!m) return neutral; const f = typeof feld === "function" ? feld(m) : feld; return m[f] != null ? +m[f] : neutral; },
+    setz: v => { const a = WA(), m = wMix(); if (a) a.regler(typeof k === "function" ? k(m || {}) : k, v); } }, 80);
+  const wEpisch = m => !!(m && m.welt && m.welt.episch);
+  Object.assign(ZP_PARAM, {
+    w_gesamt: wPar(W("🔊 Lautstärke", "🔊 Volume"), "gesamt", "gesamt", 0, 100, 2, 70),
+    w_ger: wPar(W("🎭 Geräusche", "🎭 Sounds"), "ger", "ger-laut", 0, 150, 2, 100),
+    w_sz: wPar(W("⏳ Szenen", "⏳ Scenes"), "sz", "sz-laut", 0, 150, 2, 100),
+    w_wetter: wPar(W("🌦 Wetter", "🌦 Weather"), "wlaut", "wlaut", 0, 150, 2, 100),
+    w_spannung: Object.assign(wPar(W("😨 Spannung", "😨 Tension"), "spannung", "spannung", 0, 100, 5, 0), { druck: "null" }),
+    w_leben: wPar(W("🐾 Lebendigkeit", "🐾 Liveliness"), "leben", "leben", 0, 200, 5, 100),
+    w_raum: wPar(W("🏛 Raumhall", "🏛 Room reverb"), m => wEpisch(m) ? "ehall" : "raum", m => wEpisch(m) ? "ehall" : "raum", 0, 100, 5, 50),
+    w_weite: wPar(W("🌌 Weite (episch)", "🌌 Width (epic)"), "eweite", "eweite", 0, 100, 5, 45)
+  });
+  ZP_PARAM.w_wetter.text = v => { const m = wMix(); return (m && !m.wetter ? W("(kein Wetter) ", "(no weather) ") : "") + Math.round(v) + " %"; };
+  /* ZS3 in den Klangwelten: jede Schicht der Welt einzeln, dazu Lebendigkeit und Raum */
+  const weltMerk = {};
+  function weltKanaele() {
+    const a = WA(), m = wMix(); if (!a || !m || !m.welt) return [];
+    const l = m.betten.map((x, i) => ({ name: "🌿 " + (x.name || W("Schicht ", "Layer ") + (i + 1)), lo: 0, hi: 150, schritt: 5, neutral: 100, wBett: i,
+      lies: () => { const y = wMix(); return y && y.betten[i] ? y.betten[i].v : 100; }, setz: v => a.regler("b" + i, v),
+      text: v => { const y = wMix(), b = y && y.betten[i]; return (v ? Math.round(v) + " %" : W("🔇 aus", "🔇 off")) + (b && b.ruht ? W(" · ruht", " · resting") : ""); },
+      aktion: () => { const y = wMix(), v = y && y.betten[i] ? y.betten[i].v : 100, k = (m.welt.id) + ":" + i; if (v > 0) { weltMerk[k] = v; a.regler("b" + i, 0); zeige("🔇 " + x.name); } else { a.regler("b" + i, weltMerk[k] || 100); zeige("🔊 " + x.name); } },
+      drucktext: W("drücken: aus/an", "push: off/on") }));
+    l.push(Object.assign({}, ZP_PARAM.w_leben, { aktion: () => { a.regler("leben", 100); zeige("🐾 " + W("Lebendigkeit normal", "Liveliness normal")); }, drucktext: W("drücken: normal", "push: normal") }));
+    l.push(Object.assign({}, ZP_PARAM.w_raum, { aktion: () => { a.regler(wEpisch(wMix()) ? "ehall" : "raum", wEpisch(wMix()) ? 75 : 50); }, drucktext: W("drücken: normal", "push: normal") }));
+    if (m.welt.episch) l.push(Object.assign({}, ZP_PARAM.w_weite, { aktion: () => a.regler("eweite", 45), drucktext: W("drücken: normal", "push: normal") }));
+    l.push(Object.assign({}, ZP_PARAM.w_wetter, { aktion: () => { const y = wMix(); a.regler("wlaut", y && y.wlaut > 0 ? 0 : 100); }, drucktext: W("drücken: aus/an", "push: off/on") }));
+    return l;
+  }
 
   /* ===================== 🎚 Mischer: Pegel, Stumm, Solo, sanftes Blenden, Mischungen A/B, Balance, Obergrenzen ===================== */
   const MX = (() => { let m = {}; try { m = JSON.parse(lies("imres-zp-mx", "{}")) || {}; } catch (_) { m = {}; }
     return Object.assign({ bal: 0, stumm: {}, grenze: {}, ab: "A", A: null, B: null, blend: 2.5, db: true, solo: null, soloStumm: [] }, m); })();
   const mxMerken = () => schreib("imres-zp-mx", JSON.stringify(MX));
-  const MX_FARBE = { musik: "#ffc830", hg: "#5ad08a", fxlaut: "#ff7a20", in1: "#ff9a80", in2: "#d090ff", mit: "#ffd890", karte: "#f0dca0", boost: "#ff5a3a", hall: "#e0b070", echohall: "#f0c890", balance: "#fff0c8" };
+  const MX_FARBE = { w_gesamt: "#ffc830", w_ger: "#ff7a20", w_sz: "#e0b070", w_wetter: "#80d8c0", w_spannung: "#e04060", w_leben: "#5ad08a", w_raum: "#d090ff", w_weite: "#b890e0", musik: "#ffc830", hg: "#5ad08a", fxlaut: "#ff7a20", in1: "#ff9a80", in2: "#d090ff", mit: "#ffd890", karte: "#f0dca0", boost: "#ff5a3a", hall: "#e0b070", echohall: "#f0c890", balance: "#fff0c8" };
   const mxGruppe = k => /^in1_/.test(k) ? "in1" : /^in2_/.test(k) ? "in2" : /^mit_/.test(k) ? "mit" : /^karte_/.test(k) ? "karte" : k;
   const mxFarbe = k => MX_FARBE[mxGruppe(k)] || "#e0c890";
   /* welcher Messpunkt zu welchem Regler gehört (Hall hat keinen eigenen) */
-  const MX_MESS = { musik: "musik", hg: "hg", fxlaut: "fx", in1: "in1", in2: "in2", mit: "mit", karte: "gesamt", boost: "gesamt", balance: "gesamt" };
-  const MX_STUMMBAR = ["musik", "hg", "fxlaut", "in1_laut", "in2_laut", "mit_laut", "hall", "echohall", "in1_hall", "in2_hall", "karte_haupt", "karte_kh"];
-  const MX_QUELLEN = ["musik", "hg", "fxlaut", "in1_laut", "in2_laut", "mit_laut"];
-  const MX_GRENZBAR = MX_STUMMBAR.concat(["boost"]);
+  const MX_MESS = { w_gesamt: "gesamt", w_ger: "ger", w_sz: "sz", w_wetter: "wetter", w_spannung: "gesamt", w_leben: "gesamt", w_raum: "gesamt", w_weite: "gesamt", musik: "musik", hg: "hg", fxlaut: "fx", in1: "in1", in2: "in2", mit: "mit", karte: "gesamt", boost: "gesamt", balance: "gesamt" };
+  const MX_STUMMBAR = ["w_gesamt", "w_ger", "w_sz", "w_wetter", "w_raum", "w_weite", "musik", "hg", "fxlaut", "in1_laut", "in2_laut", "mit_laut", "hall", "echohall", "in1_hall", "in2_hall", "karte_haupt", "karte_kh"];
+  const MX_QUELLEN = ["w_ger", "w_sz", "w_wetter", "musik", "hg", "fxlaut", "in1_laut", "in2_laut", "mit_laut"];
+  const MX_GRENZBAR = MX_STUMMBAR.concat(["boost", "w_leben", "w_spannung"]);
   /* dB je Regler – dieselben Kurven wie in der Bühne; 0 dB = Regler ganz oben */
   const db10 = v => 30 * Math.log10(v / 10);
-  const MX_DB = { musik: db10, hg: db10, fxlaut: db10, in1_laut: v => 32 * Math.log10(v / 100), in2_laut: v => 32 * Math.log10(v / 100), mit_laut: v => 30 * Math.log10(v / 100) };
+  const db100 = (e, v) => e * 20 * Math.log10(v / 100);
+  const MX_DB = { w_gesamt: v => db100(1.6, v), w_ger: v => db100(1.3, v), w_sz: v => db100(1.3, v), w_wetter: v => db100(1.3, v), musik: db10, hg: db10, fxlaut: db10, in1_laut: v => 32 * Math.log10(v / 100), in2_laut: v => 32 * Math.log10(v / 100), mit_laut: v => 30 * Math.log10(v / 100) };
   /* „Normal“-Stellung je Regler (Strich am Fader) */
-  const MX_NORMAL = { musik: 8, hg: 5, fxlaut: 8, in1_laut: 80, in2_laut: 80, mit_laut: 70, hall: 5, echohall: 5, balance: 0, boost: 0, in1_pan: 0, in2_pan: 0, in1_pegel: 100, in2_pegel: 100 };
-  const dbText = d => !isFinite(d) ? "−∞ dB" : d >= -.05 ? "0 dB" : "−" + (d <= -10 ? Math.round(-d) : (-d).toFixed(1).replace(".", W(",", "."))) + " dB";
+  const MX_NORMAL = { w_gesamt: 70, w_ger: 100, w_sz: 100, w_wetter: 100, w_spannung: 0, w_leben: 100, w_raum: 50, w_weite: 45, musik: 8, hg: 5, fxlaut: 8, in1_laut: 80, in2_laut: 80, mit_laut: 70, hall: 5, echohall: 5, balance: 0, boost: 0, in1_pan: 0, in2_pan: 0, in1_pegel: 100, in2_pegel: 100 };
+  const dbText = d => !isFinite(d) ? "−∞\u00a0dB" : Math.abs(d) < .05 ? "0\u00a0dB" : d > 0 ? "+" + d.toFixed(1).replace(".", W(",", ".")) + "\u00a0dB" : "−" + (d <= -10 ? Math.round(-d) : (-d).toFixed(1).replace(".", W(",", "."))) + "\u00a0dB";
   let mxRev = null, mxRevN = 0;
   const mxKey = r => { const n = Object.keys(ZP_PARAM).length; if (!mxRev || mxRevN !== n) { mxRev = new Map(); mxRevN = n; Object.keys(ZP_PARAM).forEach(k => mxRev.set(ZP_PARAM[k], k)); } return mxRev.get(r); };
   const mxKlemmen = (k, v) => { const g = MX.grenze[k]; return g != null ? Math.min(v, g) : v; };
@@ -1097,37 +1135,39 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     MX.solo = null; MX.soloStumm = []; mxMerken();
   }
   function mxSolo(k) {
-    if (!MX_QUELLEN.includes(k)) { zeige("🎧 Solo", null, W("geht für Musik, Hintergrund, Effekte, IN1, IN2 und Mitspieler", "works for music, backdrop, effects, IN1, IN2 and ensemble")); return; }
+    if (!MX_QUELLEN.includes(k)) { zeige("🎧 Solo", null, SEITE === "welten" ? W("geht für Geräusche, Szenen und Wetter", "works for sounds, scenes and weather") : W("geht für Musik, Hintergrund, Effekte, IN1, IN2 und Mitspieler", "works for music, backdrop, effects, IN1, IN2 and ensemble")); return; }
     const war = MX.solo; if (war) mxSoloAus();
     if (war === k) { zeige("🎧 " + W("Solo aus", "Solo off")); zpZeichnen(true); return; }
     MX.solo = k; MX.soloStumm = [];
-    MX_QUELLEN.forEach(q => { const r = ZP_PARAM[q]; if (q === k || !r || MX.stumm[q] != null || mxEingangAus(q) || (q === "mit_laut" && !(typeof MS !== "undefined" && MS.an))) return; const v = mxZiel(q, r); if (v <= r.lo) return; MX.stumm[q] = v; MX.soloStumm.push(q); mxBlenden(q, r.lo, .3); });
+    MX_QUELLEN.forEach(q => { const r = ZP_PARAM[q]; if (q === k || !r || (SEITE === "welten") !== /^w_/.test(q) || MX.stumm[q] != null || mxEingangAus(q) || (q === "mit_laut" && !(typeof MS !== "undefined" && MS.an))) return; const v = mxZiel(q, r); if (v <= r.lo) return; MX.stumm[q] = v; MX.soloStumm.push(q); mxBlenden(q, r.lo, .3); });
     mxMerken(); if (MX.stumm[k] != null) mxStumm(k, false);
     zeige("🎧 Solo: " + ZP_PARAM[k].name, null, W("nochmal halten: Solo aus", "hold again: solo off")); zpZeichnen(true);
   }
   /* zwei Mischungen (A · Probe / B · Auftritt): die jetzige wird beim Umschalten gemerkt */
+  /* Bühne und Klangwelten haben je ihre eigenen Mischungen A/B */
+  const mxAbAkt = () => (SEITE === "welten" ? MX.wab : MX.ab) || "A", mxAbSetz = x => { if (SEITE === "welten") MX.wab = x; else MX.ab = x; }, mxAbSlot = x => (SEITE === "welten" ? "w" : "") + x;
   const MX_AB_NAME = { A: W("A · Probe", "A · rehearsal"), B: W("B · Auftritt", "B · gig") };
-  const mxAbKeys = () => [...new Set(MIX_LISTE)].filter(k => ZP_PARAM[k] && ZP_PARAM[k].schritt && !/^karte_|_pegel$/.test(k) && k !== "balance");
+  const mxAbKeys = () => [...new Set(mixListe())].filter(k => ZP_PARAM[k] && ZP_PARAM[k].schritt && !/^karte_|_pegel$/.test(k) && k !== "balance" && k !== "w_spannung");
   function mxSchnapp() { const w = {}; mxAbKeys().forEach(k => { w[k] = MX.stumm[k] != null ? MX.stumm[k] : mxZiel(k, ZP_PARAM[k]); }); return { w, stumm: Object.keys(MX.stumm).filter(k => w[k] != null), bal: MX.bal }; }
   function mxAB(ziel) {
-    ziel = ziel || (MX.ab === "A" ? "B" : "A"); if (ziel === MX.ab) { zeige("🎚 " + MX_AB_NAME[ziel], null, W("ist schon aktiv", "already active")); return; }
+    ziel = ziel || (mxAbAkt() === "A" ? "B" : "A"); if (ziel === mxAbAkt()) { zeige("🎚 " + MX_AB_NAME[ziel], null, W("ist schon aktiv", "already active")); return; }
     if (MX.solo) mxSoloAus();
-    MX[MX.ab] = mxSchnapp(); const s = MX[ziel]; MX.ab = ziel;
+    MX[mxAbSlot(mxAbAkt())] = mxSchnapp(); const s = MX[mxAbSlot(ziel)]; mxAbSetz(ziel);
     if (s && s.w) {
       Object.keys(s.w).forEach(k => { const r = ZP_PARAM[k]; if (!r) return; const st = (s.stumm || []).includes(k); if (st) MX.stumm[k] = s.w[k]; else delete MX.stumm[k]; mxBlenden(k, st ? r.lo : mxKlemmen(k, s.w[k]), 1); });
       MX.bal = s.bal || 0; zeige("🎚 " + MX_AB_NAME[ziel], null, W("Mischung geladen", "mix loaded"));
-    } else { MX[ziel] = mxSchnapp(); zeige("🎚 " + MX_AB_NAME[ziel] + W(" angelegt", " created"), null, W("übernimmt die jetzige Mischung – ab jetzt merkt sie sich deine Änderungen", "starts from the current mix – remembers your changes from now on")); }
+    } else { MX[mxAbSlot(ziel)] = mxSchnapp(); zeige("🎚 " + MX_AB_NAME[ziel] + W(" angelegt", " created"), null, W("übernimmt die jetzige Mischung – ab jetzt merkt sie sich deine Änderungen", "starts from the current mix – remembers your changes from now on")); }
     mxMerken(); zpZeichnen(true); ledsMelden();
   }
   /* Pegelanzeige im Mischer */
   const mxSpitze = {}, mxClip = {};
   setInterval(() => {
-    if (!mischAktiv() || zpRuhe || document.hidden || !zpEl) return; const P = window.ImresPult; if (!P || !P.pegel) return;
-    let p; try { p = P.pegel(); } catch (_) { return; } if (!p) return; const ks = mixKeys(), jetzt = Date.now();
-    $$(".zp-mf", zpEl).forEach((el, i) => { const k = ks[i], q = MX_MESS[mxGruppe(k)], b = el.querySelector(".pm b"); if (!b) return;
-      const s = q ? p[q] || 0 : 0, neu = Math.max(s, (mxSpitze[i] || 0) * .8); mxSpitze[i] = neu;
+    if (!panelAktiv() || zpRuhe || document.hidden || !zpEl) return; const P = SEITE === "welten" ? WA() : window.ImresPult; if (!P || !P.pegel) return;
+    let p; try { p = P.pegel(); } catch (_) { return; } if (!p) return; const mi = mischAktiv(), ks = mi ? mixKeys() : [], pl = mi ? null : panelListe(), jetzt = Date.now();
+    $$(".zp-mf", zpEl).forEach((el, i) => { const b = el.querySelector(".pm b"); if (!b) return; const k = ks[i], q = mi ? MX_MESS[mxGruppe(k)] : null, wb = pl && pl[i] ? pl[i].wBett : null;
+      const s = q ? p[q] || 0 : wb != null ? (p.betten || [])[wb] || 0 : 0, neu = Math.max(s, (mxSpitze[i] || 0) * .8); mxSpitze[i] = neu;
       const d = neu > 1e-5 ? 20 * Math.log10(neu) : -99; b.style.height = (100 - Math.max(0, Math.min(100, (d + 48) / 48 * 100))) + "%";
-      if (q && (q === "gesamt" ? p.begrenzt > 4 : s >= .99)) mxClip[i] = jetzt; el.classList.toggle("clip", jetzt - (mxClip[i] || 0) < 1200); });
+      if ((q || wb != null) && (q === "gesamt" ? p.begrenzt > 4 : s >= .99)) mxClip[i] = jetzt; el.classList.toggle("clip", jetzt - (mxClip[i] || 0) < 1200); });
   }, 60);
   /* Einstellungen des Mischers: Anzeige, Blendzeit, Mischungen, Obergrenzen */
   function mxMenue(fokusK) {
@@ -1138,13 +1178,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       db: () => { MX.db = !MX.db; mxMerken(); zpZeichnen(true); neu("db")(); },
       blend: () => { MX.blend = BL[(BL.indexOf(MX.blend) + 1) % BL.length]; mxMerken(); neu("blend")(); },
       ab: () => { mxAB(); neu("ab")(); },
-      alle: () => { MX_QUELLEN.concat(["karte_haupt", "karte_kh", "boost"]).forEach(k => { const r = ZP_PARAM[k]; if (r && !mxEingangAus(k) && !(k === "mit_laut" && !(typeof MS !== "undefined" && MS.an))) MX.grenze[k] = MX.stumm[k] != null ? MX.stumm[k] : mxZiel(k, r); }); mxMerken(); zeige("🔒 " + W("Grenzen = jetzige Stellung", "Limits = current position")); neu("alle")(); },
+      alle: () => { MX_QUELLEN.concat(["w_gesamt", "karte_haupt", "karte_kh", "boost"]).filter(k => (SEITE === "welten") === /^w_|^karte_/.test(k)).forEach(k => { const r = ZP_PARAM[k]; if (r && !mxEingangAus(k) && !(k === "mit_laut" && !(typeof MS !== "undefined" && MS.an))) MX.grenze[k] = MX.stumm[k] != null ? MX.stumm[k] : mxZiel(k, r); }); mxMerken(); zeige("🔒 " + W("Grenzen = jetzige Stellung", "Limits = current position")); neu("alle")(); },
       frei: () => { MX.grenze = {}; mxMerken(); zeige("🔓 " + W("Alle Grenzen aufgehoben", "All limits cleared")); neu("frei")(); } };
     let h = zz("db", "📏 " + W("Anzeige: ", "Display: "), MX.db ? "dB" : "%", W("dB: 0 = Regler ganz oben, −6 dB = halb so laut", "dB: 0 = knob at top, −6 dB = half as loud")) +
       zz("blend", "↘ " + W("Sanft blenden: ", "Fade time: "), String(MX.blend).replace(".", W(",", ".")) + " s", W("Tippen auf einen Kanal blendet so lange aus / ein", "tapping a channel fades out / in this long")) +
-      zz("ab", "🎚 " + W("Mischung: ", "Mix: "), MX_AB_NAME[MX.ab], W("umschalten (im Mischer auch mit ◀ ▶)", "switch (in the mixer also ◀ ▶)")) +
+      zz("ab", "🎚 " + W("Mischung: ", "Mix: "), MX_AB_NAME[mxAbAkt()], W("umschalten (im Mischer auch mit ◀ ▶)", "switch (in the mixer also ◀ ▶)")) +
       '<p class="hinweis">🔒 ' + W("Obergrenzen – höher lässt sich der Regler nicht drehen. Antippen: jetzige Stellung / frei · ◀ ▶ verschieben", "Upper limits – the knob won't go higher. Tap: current position / free · ◀ ▶ move") + "</p>";
-    MX_GRENZBAR.forEach(k => { const r = ZP_PARAM[k]; if (!r || (/^in[12]_/.test(k) && mxEingangAus(k) && MX.grenze[k] == null) || (k === "mit_laut" && !(typeof MS !== "undefined" && MS.an) && MX.grenze[k] == null)) return;
+    MX_GRENZBAR.forEach(k => { const r = ZP_PARAM[k]; if (!r || (SEITE === "welten") !== /^w_|^karte_/.test(k) || (/^in[12]_/.test(k) && mxEingangAus(k) && MX.grenze[k] == null) || (k === "mit_laut" && !(typeof MS !== "undefined" && MS.an) && MX.grenze[k] == null)) return;
       h += zz("g:" + k, r.name + ": ", gText(k));
       a["g:" + k] = () => { if (MX.grenze[k] != null) delete MX.grenze[k]; else MX.grenze[k] = MX.stumm[k] != null ? MX.stumm[k] : mxZiel(k, r); mxMerken(); neu("g:" + k)(); };
       a["g:" + k + ":stufe"] = st => { const g = MX.grenze[k] != null ? MX.grenze[k] : r.hi; const ng = rasten(g + st * Math.max(r.schritt, (r.hi - r.lo) / 20), r); MX.grenze[k] = ng;
@@ -1153,20 +1193,19 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const m = menue("<h3>🎚 " + W("Mischer", "Mixer") + '</h3><div class="reihe zyn-opt">' + h + '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>", a);
     menueArt = "mischer"; if (fokusK) { const b = m.querySelector('[data-zm="' + fokusK + '"]'); if (b) fokusSetzen(b); }
   }
-  const mischAktiv = () => mischAn && SEITE === "buehne";
-  const spurAktiv = () => spurAn && SEITE === "buehne" && !!(window.ImresPult && window.ImresPult.spurMix);
+  const mischAktiv = () => mischAn && (SEITE === "buehne" || SEITE === "welten");
+  const spurAktiv = () => spurAn && (SEITE === "buehne" ? !!(window.ImresPult && window.ImresPult.spurMix) : !!WA());
   const panelAktiv = () => mischAktiv() || spurAktiv();
   const panelReihe = () => (reiheTipp != null ? reiheTipp : alt) ? 1 : 0;
   function mischer(an) {
-    if (SEITE !== "buehne") { zeige(W("Mischpult gibt es im Bühnen-Pult", "Mixer is in the stage console")); return; }
     mischAn = an == null ? !mischAn : an; if (mischAn) spurAn = false; if (mischAn && typeof karteLaden === "function") karteLaden(true);
-    if (mischAn) zeige("🎚 " + W("Mischpult", "Mixer") + " · " + MX_AB_NAME[MX.ab], null, W("Tippen: sanft aus/an · halten: Solo · ziehen: Lautstärke · ◀ ▶: Mischung A/B", "tap: fade out/in · hold: solo · drag: level · ◀ ▶: mix A/B"));
+    if (mischAn) zeige("🎚 " + W("Mischpult", "Mixer") + " · " + MX_AB_NAME[mxAbAkt()], null, W("Tippen: sanft aus/an · halten: Solo · ziehen: Lautstärke · ◀ ▶: Mischung A/B", "tap: fade out/in · hold: solo · drag: level · ◀ ▶: mix A/B"));
     zpZeichnen(true); ledsMelden();
   }
   /* Spur-Fenster (ZS3): jede Spur der jetzigen Stimmung einzeln, dazu Kulisse und Begleit-Schichten */
   function spurFenster(an) {
-    if (SEITE !== "buehne" || !(window.ImresPult && window.ImresPult.spurMix)) { zeige(W("Spuren gibt es im Bühnen-Pult", "Tracks are in the stage console")); return; }
-    spurAn = an == null ? !spurAn : an; if (spurAn) { mischAn = false; spurSeite = 0; zeige("🎛 " + (ortFenster() ? W("Spuren des Ortes", "Place layers") : W("Spuren der Stimmung", "Mood tracks")), null, W("Regler 1–4 · mit ALT die zweite Reihe · ◀ ▶ weitere · drücken: stumm", "knobs 1–4 · ALT: second row · ◀ ▶ more · push: mute")); }
+    if (SEITE === "buehne" ? !(window.ImresPult && window.ImresPult.spurMix) : !WA()) { zeige(W("Spuren gibt es hier nicht", "No tracks here")); return; }
+    spurAn = an == null ? !spurAn : an; if (spurAn) { mischAn = false; spurSeite = 0; if (SEITE === "welten") { const m = wMix(); zeige("🎛 " + (m && m.welt ? m.welt.sym + " " + m.welt.name : W("Schichten", "Layers")), null, m && m.welt ? W("Regler 1–4 · mit ALT die zweite Reihe · ◀ ▶ weitere · drücken: aus/an", "knobs 1–4 · ALT: second row · ◀ ▶ more · push: off/on") : W("erst eine Klangwelt wählen", "choose a soundscape first")); } else zeige("🎛 " + (ortFenster() ? W("Spuren des Ortes", "Place layers") : W("Spuren der Stimmung", "Mood tracks")), null, W("Regler 1–4 · mit ALT die zweite Reihe · ◀ ▶ weitere · drücken: stumm", "knobs 1–4 · ALT: second row · ◀ ▶ more · push: mute")); }
     zpZeichnen(true); ledsMelden();
   }
   const SPUR_SYM = { klopf: "✊", schelle: "🔔", bass: "🎸", melodie: "🎵", trommel: "🥁", floete: "🪈", ketten: "⛓", rex: "🐕", orch: "🎻", kap: "🎺", gast: "🎭" };
@@ -1194,6 +1233,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     return l;
   }
   function spurKanaele() {
+    if (SEITE === "welten") return weltKanaele();
     if (ortFenster()) return ortKanaele();
     const P = window.ImresPult; if (!P || !P.spurMix) return [];
     const m = P.spurMix(), l = [Object.assign({}, ZP_PARAM.hg, { name: "🌲 " + W("Kulisse", "Backdrop") })];
@@ -1230,15 +1270,16 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const DRUCK_TEXT = { stumm: W("drücken: stumm", "push: mute"), hg: W("drücken: an/aus", "push: on/off"), friedlich: W("drücken: friedlich", "push: peaceful"), mitte: W("drücken: Mitte", "push: centre"), null: W("drücken: neutral", "push: reset") };
   function zpWert(r) { const v = r.lies(), k = mxKey(r); let text = r.text ? r.text(v) : r.wort ? r.wort(v) : Math.round(proz(v, r.lo, r.hi) * 100) + " %";
     if (k && MX.stumm[k] != null) text = "🔇 " + W("stumm", "muted");
+    else if (k === "w_wetter" && SEITE === "welten" && !(wMix() || {}).wetter) text = "☀ " + W("kein Wetter", "no weather");
     else if (k && MX.db && MX_DB[k] && !mxEingangAus(k)) text = v <= r.lo ? "−∞ dB" : dbText(MX_DB[k](v));
     return { v, anteil: Math.max(0, Math.min(1, proz(v, r.lo, r.hi))), text }; }
   /* Regler gedrückt halten und drehen: anderen Effekt (bzw. Wert) auf diesen Regler legen */
   const drehGedrueckt = {}, drehGedreht = {};
   function zpParamZyklus(nr, d) {
-    if (SEITE === "welten" || spurAktiv()) return;
-    const slot = mischAktiv() ? "MIX" : bank ? bankName() : "A:" + (zpSeite === "set" ? "stimmung" : zpSeite), bn = bankName(), liste = mischAktiv() ? MIX_LISTE : bn === "MIT" ? ["mit_stufe", "mit_laut", "mit_hall", "mit_empf", "mit_okt"] : /^IN[12]$/.test(bn) ? KANAL_FELDER.map(x => bn.toLowerCase() + "_" + x[0]) : bn === "FX" ? FX_PARAMS : NORMAL_PARAMS.concat(FX_PARAMS);
-    const l = (ZB.regler[slot] || (slot === "MIX" ? MIX_STD : ["nichts", "nichts", "nichts", "nichts"])).slice();
-    if (slot === "MIX") { for (let x = 0; x < 8; x++) if (!l[x]) l[x] = MIX_STD[x]; nr += panelReihe() * 4; }
+    if ((SEITE === "welten" && !mischAktiv()) || spurAktiv()) return;
+    const slot = mischAktiv() ? mixSlot() : bank ? bankName() : "A:" + (zpSeite === "set" ? "stimmung" : zpSeite), bn = bankName(), liste = mischAktiv() ? mixListe() : bn === "MIT" ? ["mit_stufe", "mit_laut", "mit_hall", "mit_empf", "mit_okt"] : /^IN[12]$/.test(bn) ? KANAL_FELDER.map(x => bn.toLowerCase() + "_" + x[0]) : bn === "FX" ? FX_PARAMS : NORMAL_PARAMS.concat(FX_PARAMS);
+    const l = (ZB.regler[slot] || (mischAktiv() ? mixStd() : ["nichts", "nichts", "nichts", "nichts"])).slice();
+    if (mischAktiv()) { for (let x = 0; x < 8; x++) if (!l[x]) l[x] = mixStd()[x]; nr += panelReihe() * 4; }
     const jetzt = l[nr], i = liste.indexOf(jetzt);
     l[nr] = liste[((i < 0 ? 0 : i + (d > 0 ? 1 : -1)) + liste.length) % liste.length]; ZB.regler[slot] = l; belegMerken();
     zeige("⇄ " + W("Regler ", "Knob ") + (nr % 4 + 1) + (nr > 3 ? " (ALT)" : "") + ": " + (ZP_PARAM[l[nr]] || ZP_PARAM.nichts).name, null, W("loslassen zum Behalten", "release to keep")); zpZeichnen(true);
@@ -1338,7 +1379,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       case "tap": if (SEITE === "welten") return false; tapTempo(); return true;
       case "autopilot": autoSetzen(AUTO_STUFEN[(AUTO_STUFEN.indexOf(autoModus) + 1) % AUTO_STUFEN.length]); return true;
       case "set_weiter": if (SEITE === "welten" || !SET.length) return true; setLaden(Math.min(SET.length - 1, setIndex + 1)); return true;
-      case "mixab": if (SEITE !== "buehne") return false; mxAB(); return true;
+      case "mixab": mxAB(); return true;
       case "set_zurueck": if (SEITE === "welten" || !SET.length) return true; setLaden(Math.max(0, setIndex - 1)); return true;
       case "nichts": return true;
     }
@@ -1493,7 +1534,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function belegWert(id) { const [art, a, b] = id.split("|"); return art === "r" ? (ZB.regler[a] || [])[+b] || "nichts" : ZB.tasten[a] || "nichts"; }
   function belegName(id) { const v = belegWert(id); return id[0] === "r" ? (ZP_PARAM[v] || ZP_PARAM.nichts).name : (ZP_AKT[v] || ZP_AKT.nichts)[0]; }
   function belegZyklus(id, s) {
-    const [art, a, b] = id.split("|"), l = art === "r" ? Object.keys(ZP_PARAM) : Object.keys(ZP_AKT), v = belegWert(id);
+    const [art, a, b] = id.split("|"), l = art === "r" ? Object.keys(ZP_PARAM).filter(k => !/^w_/.test(k)) : Object.keys(ZP_AKT), v = belegWert(id);
     const n = l[(l.indexOf(v) + s + l.length) % l.length];
     if (art === "r") { ZB.regler[a] = (ZB.regler[a] || ["nichts", "nichts", "nichts", "nichts"]).slice(); ZB.regler[a][+b] = n; } else ZB.tasten[a] = n;
     belegMerken(); belegMenue(id); zpZeichnen(true);
@@ -2195,7 +2236,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       zz("ruhe", "💤 " + W("Bühnenbild nach: ", "Stage view after: "), ruheSek() ? ruheSek() + " s" : W("nie", "never"), W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen")) +
       zz("bild", "🖼 " + W("Bühnenbild hinter dem Pult: ", "Stage behind the console: "), bildHinten() ? W("an", "on") : W("aus", "off"), W("kostet Rechenzeit", "costs processing time")) +
       zz("looplen", "⟳ " + W("Regler-Loop: ", "Knob loop: "), loopTakte() + W(" Takte", " bars"), W("ALT + Regler drücken: aufnehmen / Loop aus", "ALT + push knob: record / loop off")) +
-      (SEITE === "buehne" ? zz("mischer", "🎚 " + W("Mischer", "Mixer"), null, W("dB/%, Blendzeit, Mischungen A/B, Obergrenzen", "dB/%, fade time, mixes A/B, upper limits")) : "") +
+      zz("mischer", "🎚 " + W("Mischer", "Mixer"), null, W("dB/%, Blendzeit, Mischungen A/B, Obergrenzen", "dB/%, fade time, mixes A/B, upper limits")) +
       zz("beleg", "🎛 " + W("Belegung ändern", "Change mapping"), null, W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons")) +
       zz("sicher", "💾 " + W("Sicherung", "Backup"), null, W("Einstellungen auf der SD-Karte sichern / zurückholen", "save / restore settings on the SD card")) +
       zz("hilfe", "❔ " + W("Tastenbelegung", "Button map"), null) +
@@ -2365,7 +2406,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + '" data-zp-k="' + i + '">' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + (it.still ? '<span class="zp-still" title="' + W("mit Stille", "brings a hush") + '">🤫</span>' : "") + '<span class="zp-s">' + esc2(it.sym || d.sym) + '</span><span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + "</button>"; }).join("");
     const gr = blatt[0] ? blatt[0].gruppe : (SEITE === "buehne" && !(window.ImresPult && window.ImresPult.listen) ? "⏳ " + W("Bühne lädt …", "Stage loading …") + " " + Math.round(performance.now() / 1000) + " s" : "");
     const kopf = '<div class="zp-gruppe"><span data-zp-gruppe="1">' + esc2(gr || d.name) + (zpGruppen.length > 1 ? ' <small>▸ ' + W("ALT + ▲ ▼: andere Gruppe", "ALT + ▲ ▼: other group") + "</small>" : "") + "</span>" + (n > 1 ? '<span class="zp-blatt"><button type="button" data-zp-blatt="-1">◀</button>' + (n <= 9 ? Array.from({ length: n }, (_, i) => "<i" + (i === bi ? ' class="an"' : "") + "></i>").join("") : "<em>" + (bi + 1) + " / " + n + "</em>") + '<button type="button" data-zp-blatt="1">▶</button></span>' : "") + "</div>";
-    const bk = SEITE === "welten" ? (bank ? "B" : "A") : mischAktiv() ? "MIX" : spurAktiv() ? "SPUR" : bankName(), bf = BANK_FARBE[bk] || BANK_FARBE.A;
+    const bk = mischAktiv() ? "MIX" : spurAktiv() ? "SPUR" : SEITE === "welten" ? (bank ? "B" : "A") : bankName(), bf = BANK_FARBE[bk] || BANK_FARBE.A;
     const regler = zpRegler().map((r, i) => { const w = zpWert(r);
       const L = LOOPS[loopSchluessel(r)], lz = L ? (L.phase === "spielt" ? ' <em class="lp">⟳</em>' : ' <em class="rec">●</em>') : "";
       return '<div class="zp-r" data-zp-r="' + i + '"><span class="zp-rn">' + esc2(r.name) + lz + '</span><i><b style="width:' + Math.round(w.anteil * 100) + '%"></b></i><span class="zp-rv"><span>' + esc2(w.text) + "</span><small>" + mxDruckText(i, r) + "</small></span></div>"; }).join("");
@@ -2385,18 +2426,19 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function mischHTML() {
     const rs = panelListe(), farben = ["#ffc830", "#80ffb0", "#ff9a80", "#ff7a20"], reihe = panelReihe(), sp = spurAktiv(), ks = sp ? [] : mixKeys();
     const om = sp && ortFenster() && window.ImresPult.ortMix ? window.ImresPult.ortMix() : null;
-    const titel = sp ? "🎛 " + (om ? W("Ort: ", "Place: ") + teil(om.name || "", "")[1] + (om.schichten.length ? "" : W(" – kein Ort gewählt", " – no place")) : W("Stimmung", "Mood")) + (spurSeiten() > 1 ? " " + (spurSeite + 1) + "/" + spurSeiten() : "") : "🎚 " + W("Mischpult", "Mixer");
+    const wm = sp && SEITE === "welten" ? wMix() : null;
+    const titel = wm ? "🎛 " + (wm.welt ? wm.welt.sym + " " + wm.welt.name + (wm.laeuft ? "" : W(" (still)", " (silent)")) : W("Klangwelt – erst eine wählen", "Soundscape – choose one first")) + (spurSeiten() > 1 ? " " + (spurSeite + 1) + "/" + spurSeiten() : "") : sp ? "🎛 " + (om ? W("Ort: ", "Place: ") + teil(om.name || "", "")[1] + (om.schichten.length ? "" : W(" – kein Ort gewählt", " – no place")) : W("Stimmung", "Mood")) + (spurSeiten() > 1 ? " " + (spurSeite + 1) + "/" + spurSeiten() : "") : "🎚 " + W("Mischpult", "Mixer");
     const tipp = sp ? W("ALT + drehen: untere Reihe · ◀ ▶ mehr · drücken: stumm · ZS3: zu", "ALT + turn: lower row · ◀ ▶ more · push: mute · ZS3: close")
       : MX.solo && ZP_PARAM[MX.solo] ? "🎧 Solo: " + ZP_PARAM[MX.solo].name + " · " + W("halten: Solo aus", "hold: solo off")
       : W("tippen: sanft aus/an · halten: Solo · ziehen: Pegel · ◀ ▶ A/B", "tap: fade · hold: solo · drag: level · ◀ ▶ A/B");
-    const ab = sp ? "" : '<span class="zp-ab">' + ["A", "B"].map(x => '<button type="button" data-mx-ab="' + x + '"' + (MX.ab === x ? ' class="an"' : "") + ">" + MX_AB_NAME[x] + "</button>").join("") + '<button type="button" data-mx-menue="1" title="' + W("Mischer-Einstellungen", "Mixer settings") + '">⚙</button></span>';
+    const ab = sp ? "" : '<span class="zp-ab">' + ["A", "B"].map(x => '<button type="button" data-mx-ab="' + x + '"' + (mxAbAkt() === x ? ' class="an"' : "") + ">" + MX_AB_NAME[x] + "</button>").join("") + '<button type="button" data-mx-menue="1" title="' + W("Mischer-Einstellungen", "Mixer settings") + '">⚙</button></span>';
     return '<div class="zp-gruppe"><span>' + titel + ' <small>▸ ' + tipp + '</small></span>' + ab + '</div><div class="zp-mfs zwei' + (sp ? "" : " mx") + '">' +
       rs.map((r, i) => { const w = zpWert(r), leer = r === ZP_PARAM.nichts, k = ks[i], f = k ? mxFarbe(k) : farben[i % 4];
         const st = k && MX.stumm[k] != null, so = k && MX.solo === k, g = k && MX.grenze[k] != null ? MX.grenze[k] : null, nm = k && MX_NORMAL[k] != null ? MX_NORMAL[k] : null;
         const marke = (v, kl) => v == null || leer ? "" : '<' + kl + ' style="bottom:' + (Math.max(0, Math.min(1, proz(v, r.lo, r.hi))) * 100).toFixed(1) + '%"></' + kl + ">";
         const bl = k && mxBlend[k] ? (mxBlend[k].ziel > r.lies() ? " ↗" : " ↘") : "";
         return '<div class="zp-mf' + ((i >> 2) === reihe ? " aktiv" : "") + (leer ? " leer" : "") + (st ? " stumm" : "") + (so ? " solo" : "") + '" data-zp-mf="' + i + '" style="--m:' + f + '"><span>' + (i > 3 ? "ALT " : "") + (i % 4 + 1) + (so ? " 🎧" : "") + (g != null ? " 🔒" : "") + bl + "</span>" +
-          '<div class="mfb"><i class="fd"><b style="height:' + (leer ? 0 : Math.round(w.anteil * 100)) + '%"></b>' + marke(nm, "u") + marke(g, "s") + "</i>" + (sp || leer || !MX_MESS[mxGruppe(k)] ? "" : '<i class="pm"><b></b></i>') + "</div>" +
+          '<div class="mfb"><i class="fd"><b style="height:' + (leer ? 0 : Math.round(w.anteil * 100)) + '%"></b>' + marke(nm, "u") + marke(g, "s") + "</i>" + ((sp ? r.wBett == null : !MX_MESS[mxGruppe(k)]) || leer ? "" : '<i class="pm"><b></b></i>') + "</div>" +
           "<strong>" + esc2(leer ? "–" : r.name) + "</strong><em>" + esc2(leer ? "" : w.text) + "</em></div>"; }).join("") + "</div>";
   }
   const dimm = (h, f) => { const n = parseInt(String(h).slice(1, 7), 16) || 0, c = x => Math.round(x * f).toString(16).padStart(2, "0"); return "#" + c((n >> 16) & 255) + c((n >> 8) & 255) + c(n & 255); };
@@ -2408,7 +2450,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (id === "seite_zurueck") return ZP_SEITEN[(i + ZP_SEITEN.length - 1) % ZP_SEITEN.length].led;
     if (id === "bank") return BANK_FARBE[BANKEN[(bank + 1) % BANKEN.length]];
     if (id === "mischer") return BANK_FARBE.MIX;
-    if (id === "mixab") return MX.ab === "B" ? "#d090ff" : "#ffc830";
+    if (id === "mixab") return mxAbAkt() === "B" ? "#d090ff" : "#ffc830";
     if (id === "beats") return "#ff9a40";
     if (id === "spurmix") return "#ff9a80";
     return { play: "#30ff70", stop: "#ff1a30", passiert: "#ff6a10", stille: "#fff4e0", neubesetzen: "#ffc830", sprechen: "#f0dca0", aufnahme: "#ff1a30", takt: "#d8d0c0", hg: "#80ffb0", fx_aus: "#fff8ec",

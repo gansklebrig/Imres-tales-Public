@@ -798,10 +798,33 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   window.ImresWelten = {
     ducken(tiefe) { const n = zynAn(); if (!n) return; const j = ctx.currentTime, g = n.gain, d = Math.max(0, Math.min(.9, tiefe || .5)); g.cancelScheduledValues(j); g.setValueAtTime(g.value, j); g.linearRampToValueAtTime(zynFaktor * (1 - d), j + .012); g.setTargetAtTime(zynFaktor, j + .06, .09); },
     faktor(f) { zynFaktor = Math.max(.05, Math.min(1, f)); const n = zynAn(); if (n) n.gain.setTargetAtTime(zynFaktor, ctx.currentTime, .35); },
-    get laeuft() { return !!aktiv; }
+    get laeuft() { return !!aktiv; },
+    /* Mischpult am Zynthian: alle Regler der Klangwelt lesen und setzen */
+    mix() {
+      const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), m = w ? merk.mix[w.id] || {} : {};
+      return { welt: w ? { id: w.id, name: w.name, sym: w.sym, episch: !!w.episch } : null, laeuft: !!aktiv,
+        betten: w ? w.betten.map((x, i) => ({ name: x[2], v: Math.round(wert(m.b && m.b[i], 1) * 100), ruht: !!(aktiv && aktiv.welt === w && aktiv.betten[i] && aktiv.betten[i].ruht) })) : [],
+        leben: Math.round(wert(m.leben, 1) * 100), raum: wert(m.raum, 50), ehall: wert(merk.ehall, 75), eweite: wert(merk.eweite, 45),
+        gesamt: wert(merk.gesamt, 70), ger: wert(merk.gLaut, 100), sz: wert(merk.szLaut, 100), wetter: merk.wetter || null, wlaut: wert(merk.wLaut, 100), spannung: wert(merk.spannung, 0) };
+    },
+    regler(k, v) {
+      if (FERN) return; v = Math.round(v); reglerSetzen(k, v);
+      const el = document.querySelector('[data-regler="' + k + '"]') || document.getElementById(k);
+      if (el && "value" in el) { el.value = String(v); if (el.dataset.regler && el.nextElementSibling) el.nextElementSibling.textContent = v + " %"; }
+    },
+    /* Spitzenpegel (1 = Vollaussteuerung) je Weg und je Schicht der laufenden Welt */
+    pegel() {
+      if (!ctx) return null; const M = this._m || (this._m = {}), r = {};
+      const miss = (k, n) => { let a = M[k]; if (!n) return 0; if (!a || a.n !== n) { try { a = M[k] = { n, an: ctx.createAnalyser(), d: new Float32Array(512) }; a.an.fftSize = 512; n.connect(a.an); } catch (_) { return 0; } }
+        a.an.getFloatTimeDomainData(a.d); let s = 0; for (let x = 0; x < 512; x++) { const v = Math.abs(a.d[x]); if (v > s) s = v; } return s; };
+      r.gesamt = miss("gesamt", gesamt); r.ger = miss("ger", gBus); r.sz = miss("sz", E && E.szBus); r.wetter = miss("wetter", wFilter);
+      r.betten = aktiv ? aktiv.betten.map((b, i) => miss("b" + i, b.out)) : [];
+      r.begrenzt = lim0 && typeof lim0.reduction === "number" ? -lim0.reduction : 0; return r;
+    }
   };
   /* entpackte Aufnahmen: höchstens PUFFER_MAX Bytes; was am längsten nicht gebraucht wurde, fliegt raus
      (nie Schichten, die gerade laufen, und nichts, was in den letzten 3 Minuten erklungen ist) */
+  let lim0 = null;
   const PUFFER_MAX = (mobil ? 150 : 300) * 1048576, pGr = b => b.length * b.numberOfChannels * 4, pZeit = new Map();
   class PufferMap extends Map {
     get(k) { const v = super.get(k); if (v) { super.delete(k); super.set(k, v); pZeit.set(k, Date.now()); } return v; }
@@ -821,7 +844,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { ctx = new AC(); }
     /* iOS: nach Anruf/Siri („interrupted“) oder Sperre selbst wieder anlaufen */
     ctx.onstatechange = () => { if (ctx.state !== "running" && ctx.state !== "closed" && !document.hidden) { try { ctx.resume().catch(() => {}); } catch (_) {} if (stumm && stumm.paused && aktiv) stumm.play().catch(() => {}); } };
-    const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -9; lim.knee.value = 6; lim.ratio.value = 14; lim.attack.value = .0015; lim.release.value = .25;
+    const lim = ctx.createDynamicsCompressor(); lim0 = lim; lim.threshold.value = -9; lim.knee.value = 6; lim.ratio.value = 14; lim.attack.value = .0015; lim.release.value = .25;
     gesamt = ctx.createGain(); gesamt.gain.value = lautWert();
     /* Handy-Lautsprecher können tiefe Töne nicht wiedergeben – sie schnarren und kratzen dann (vor allem die epischen,
        tiefer gestimmten Welten). Der Schutz nimmt den tiefen Bass weg; mit Kopfhörern oder Box lässt er sich ausschalten. */
