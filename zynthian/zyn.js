@@ -37,6 +37,35 @@
   /* im Hintergrund (zusammen mit dem Zynthian): kein Bildschirm, keine Tasten – Steuerung über MIDI und Handy */
   const HINTER = (() => { try { return sessionStorage.getItem("imres-zyn-hinter") === "1"; } catch (_) { return false; } })();
   const SEITE = /ambient\.html$/.test(location.pathname) ? "welten" : "buehne";
+  /* Start-Logo: TheAlmightyGoose aus dem Heldensturm – einmal nach dem Einschalten, Antippen überspringt */
+  (() => {
+    /* Merker erst beim Ausblenden setzen – lädt die Seite beim Start einmal neu, kommt das Logo trotzdem */
+    try { if (HINTER || sessionStorage.getItem("imres-logo") === "1") return; } catch (_) { return; }
+    const st = document.createElement("style");
+    st.textContent = "#imres-logo{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2vh;" +
+      "background:radial-gradient(circle at 50% 42%,#3a2410 0,#1a1008 28%,#0b0908 58%);color:#e8b04a;font-family:system-ui,sans-serif;transition:opacity .5s;cursor:pointer}" +
+      "#imres-logo img{height:58vh;max-width:80vw;object-fit:contain;filter:drop-shadow(0 0 3vh #e8b04a55);animation:imresGans .8s cubic-bezier(.2,.8,.2,1) both}" +
+      "#imres-logo b{font-size:7vh;letter-spacing:.06em;font-weight:700;animation:imresText .7s .35s both}" +
+      "#imres-logo small{font-size:2.6vh;color:#f3e9d8;opacity:.8;animation:imresText .7s .7s both}" +
+      "#imres-logo i{position:absolute;left:50%;top:38%;width:40vh;height:40vh;margin:-20vh 0 0 -20vh;border:2px solid #e8b04a;border-radius:50%;opacity:0;animation:imresRing 2.4s linear infinite}" +
+      "#imres-logo i:nth-of-type(2){animation-delay:.8s}#imres-logo i:nth-of-type(3){animation-delay:1.6s}" +
+      "@keyframes imresGans{from{opacity:0;transform:translateY(4vh) scale(.96)}to{opacity:1;transform:none}}" +
+      "@keyframes imresText{from{opacity:0;transform:translateY(1vh)}to{opacity:1;transform:none}}" +
+      "@keyframes imresRing{0%{transform:scale(.6);opacity:.5}100%{transform:scale(2.2);opacity:0}}";
+    document.documentElement.appendChild(st);
+    const el = document.createElement("div"); el.id = "imres-logo";
+    el.innerHTML = "<i></i><i></i><i></i><img src='/zyn/gans.png' alt=''><b>" + (SEITE === "welten" ? "Imres · Klangwelten" : "Imres · Bühne") + "</b><small>Version …  ·  TheAlmightyGoose</small>";
+    /* direkt an <html> hängen: das Pult baut <body> beim Start neu auf */
+    const zeigen = () => { if (!el.isConnected) document.documentElement.appendChild(el); };
+    zeigen(); document.addEventListener("DOMContentLoaded", zeigen); window.addEventListener("load", zeigen);
+    fetch("/zyn/version").then(r => r.json()).then(j => { el.querySelector("small").textContent = "Version " + j.version + "  ·  TheAlmightyGoose"; }).catch(() => {});
+    let fertig = false;
+    const weg = () => { fertig = true; try { sessionStorage.setItem("imres-logo", "1"); } catch (_) {} el.style.opacity = "0"; setTimeout(() => { el.remove(); st.remove(); }, 550); };
+    const halten = setInterval(() => { if (fertig) return clearInterval(halten); zeigen(); }, 200);
+    el.addEventListener("click", weg);
+    el.addEventListener("touchstart", weg, { passive: true });
+    setTimeout(weg, 3200);
+  })();
   const lies = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (_) { return d; } };
   const schreib = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
 

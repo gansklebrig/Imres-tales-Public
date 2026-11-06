@@ -343,6 +343,15 @@ class Handler(SimpleHTTPRequestHandler):
             return self.datei_antwort(os.path.join(ZYN, "zyn.js"), "application/javascript; charset=utf-8")
         if p in ("/zyn/fern", "/zyn/fern.html"):
             return self.datei_antwort(os.path.join(ZYN, "fern.html"), "text/html; charset=utf-8")
+        if p == "/zyn/gans.png":
+            return self.datei_antwort(os.path.join(ZYN, "gans.png"), "image/png")
+        if p == "/zyn/version":
+            try:
+                with open(os.path.join(ZYN, "VERSION"), encoding="utf-8") as f:
+                    v = f.read().strip()
+            except OSError:
+                v = "?"
+            return self.json_antwort({"version": v})
         if p in ("/zyn/start", "/zyn/start.html"):
             return self.datei_antwort(os.path.join(ZYN, "start.html"), "text/html; charset=utf-8")
         if p == "/zyn/status":
