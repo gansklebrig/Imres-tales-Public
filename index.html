@@ -2257,5 +2257,16 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
 /* Sicherheitsnetz: Hat seiten.js die Ansicht nach dem Laden nicht gesetzt (Skript fehlt), alles untereinander zeigen */
 window.addEventListener("load", () => { const b = document.body.classList; if (!b.contains("ansicht-start") && !b.contains("ansicht-bereich")) b.add("ohne-ansicht"); });
 </script>
+<script>
+/* Spiele öffnen ohne Aufblitzen der Seite: sofort schwarz, dann wechseln (Handy, Handheld) */
+(function(){
+  var SPIELE={"heldensturm.html":"Heldensturm"};
+  function schwarz(titel){var d=document.createElement("div");d.id="spielwechsel";d.setAttribute("style","position:fixed;inset:0;z-index:2147483000;background:#100c12;display:flex;align-items:center;justify-content:center;color:#e5b454;font:400 clamp(26px,7vw,44px) 'IM Fell English SC',Georgia,serif");d.textContent=titel;document.body.appendChild(d);}
+  document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a||e.defaultPrevented||e.button>0||e.ctrlKey||e.metaKey||e.shiftKey||a.target==="_blank")return;
+    var h=a.getAttribute("href").split(/[?#]/)[0];if(!SPIELE[h])return;e.preventDefault();schwarz(SPIELE[h]);var ziel=a.href;requestAnimationFrame(function(){requestAnimationFrame(function(){location.href=ziel})});},true);
+  /* zurück aus dem Spiel (Seite aus dem Zwischenspeicher): Schwarz wieder weg */
+  window.addEventListener("pageshow",function(){var d=document.getElementById("spielwechsel");if(d)d.remove()});
+})();
+</script>
 </body>
 </html>

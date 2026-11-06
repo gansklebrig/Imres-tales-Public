@@ -652,6 +652,20 @@ def netz(d):
             netze.append({"an": teile[0] == "*", "ssid": teile[1].replace("\\:", ":"), "signal": int(teile[2] or 0), "schutz": teile[3]})
         netze.sort(key=lambda x: (-x["an"], -x["signal"]))
         return {"ok": c == 0, "netze": netze[:24], "fehler": "" if c == 0 else t.strip()[:200]}
+    if a == "wlan_gespeichert":
+        c, t = _lauf(["nmcli", "-t", "-f", "NAME,TYPE,TIMESTAMP-REAL", "con", "show"], 8)
+        netze = []
+        for z in t.splitlines():
+            teile = re.split(r"(?<!\\):", z)
+            if len(teile) >= 2 and "wireless" in teile[1]:
+                netze.append({"name": teile[0].replace("\\:", ":"), "zuletzt": teile[2].replace("\\:", ":") if len(teile) > 2 else ""})
+        return {"ok": c == 0, "netze": netze}
+    if a == "wlan_vergessen":
+        name = str(d.get("name", ""))[:64]
+        if not name:
+            return {"ok": False, "fehler": "kein Name"}
+        c, t = _lauf(["nmcli", "con", "delete", "id", name], 15)
+        return {"ok": c == 0, "meldung": t.strip()[-200:]}
     if a == "wlan_verbinden":
         ssid, pw = str(d.get("ssid", ""))[:64], str(d.get("pw", ""))[:64]
         befehl = ["nmcli", "dev", "wifi", "connect", ssid] + (["password", pw] if pw else [])

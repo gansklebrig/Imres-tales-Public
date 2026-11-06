@@ -1980,8 +1980,28 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         a["n:" + i] = () => { if (n.an) return; if (n.schutz) tastatur("🔒 " + n.ssid, "", pw => wlanVerbinden(n.ssid, pw), true); else wlanVerbinden(n.ssid, ""); };
       });
       if (!(li.netze || []).length) h += '<p class="hinweis">' + esc2(li.fehler || W("keine Netze gefunden", "no networks found")) + "</p>";
-      h += '<button type="button" data-zm="neu">🔄 ' + W("Neu suchen", "Scan again") + '</button><button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>";
+      h += '<button type="button" data-zm="gesp"><span>💾 ' + W("Gespeicherte Netze", "Saved networks") + "</span><small>" + W("ansehen, einzelne vergessen", "view, forget single ones") + '</small></button><button type="button" data-zm="neu">🔄 ' + W("Neu suchen", "Scan again") + '</button><button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>";
+      a.gesp = () => wlanGespeichert();
       menue("<h3>📶 WLAN</h3>" + h, a); menueArt = "wlan";
+    });
+  }
+  /* gespeicherte WLANs: der Zynthian verbindet sich mit jedem davon von selbst, sobald es in Reichweite ist */
+  function wlanGespeichert(fokusId) {
+    warteMenue("💾 WLAN", W("Lese gespeicherte Netze …", "Reading saved networks …"));
+    netzPost({ aktion: "wlan_gespeichert" }).then(r => {
+      if (!$(".zyn-menue")) return;
+      const a = { zu: menueZu, zurueck: () => wlanMenue() }; let h = '<p class="hinweis">' + W("Antippen → noch einmal antippen zum Vergessen. Mit gespeicherten Netzen verbindet sich der Zynthian von selbst.", "Tap → tap again to forget. Saved networks connect automatically.") + '</p><div class="reihe zyn-opt">';
+      let wahl = null;
+      (r.netze || []).forEach((n, i) => {
+        h += '<button type="button" data-zm="g:' + i + '"><span>📶 ' + esc2(n.name) + "</span><small>" + (n.zuletzt && !/never|nie/i.test(n.zuletzt) ? W("zuletzt: ", "last: ") + esc2(n.zuletzt) : W("gespeichert", "saved")) + "</small></button>";
+        a["g:" + i] = () => { const b = $('.zyn-menue [data-zm="g:' + i + '"] small');
+          if (wahl !== i) { wahl = i; $$(".zyn-menue [data-zm^='g:'] small").forEach((x, j) => { x.textContent = j === i ? W("⚠ nochmal antippen = vergessen", "⚠ tap again = forget") : W("gespeichert", "saved"); }); return; }
+          netzPost({ aktion: "wlan_vergessen", name: n.name }).then(x => { zeige(x.ok ? "🗑 " + W("Vergessen: ", "Forgotten: ") + n.name : "⚠ " + (x.meldung || x.fehler || "")); wlanGespeichert(); }); };
+      });
+      if (!(r.netze || []).length) h += '<p class="hinweis">' + W("Noch keine Netze gespeichert.", "No saved networks yet.") + "</p>";
+      h += '<button type="button" data-zm="zurueck">◀ ' + W("Zurück zur Suche", "Back to scan") + '</button><button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>";
+      const m = menue("<h3>💾 " + W("Gespeicherte WLANs", "Saved Wi-Fi") + "</h3>" + h, a); menueArt = "wlan";
+      if (fokusId) { const b = m.querySelector('[data-zm="' + fokusId + '"]'); if (b) fokusSetzen(b); }
     });
   }
   function wlanVerbinden(ssid, pw) {
