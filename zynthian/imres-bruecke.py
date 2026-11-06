@@ -117,6 +117,43 @@ hoerer = set()
 hoerer_lock = threading.Lock()
 
 
+VORHANG_CSS = (
+    "html.imres-vorhang,html.imres-vorhang body{background:#0b0908!important}"
+    "html.imres-vorhang body>*:not(#imres-logo){visibility:hidden!important}"
+    "#imres-logo{display:none}"
+    "html.imres-logo-frueh .zyn-osd{opacity:0!important}"
+    "html.imres-logo-frueh #imres-logo{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2vh;"
+    "background:radial-gradient(circle at 50% 42%,#3a2410 0,#1a1008 28%,#0b0908 58%);color:#e8b04a;font-family:system-ui,sans-serif;transition:opacity .5s;cursor:pointer;visibility:visible!important;content-visibility:visible!important}"
+    "#imres-logo img{height:58vh;max-width:80vw;object-fit:contain;filter:drop-shadow(0 0 3vh #e8b04a55);animation:imresGans .8s cubic-bezier(.2,.8,.2,1) both}"
+    "#imres-logo b{font-size:7vh;letter-spacing:.06em;font-weight:700;animation:imresText .7s .35s both}"
+    "#imres-logo small{font-size:2.6vh;color:#f3e9d8;opacity:.8;animation:imresText .7s .7s both}"
+    "#imres-logo i{position:absolute;left:50%;top:38%;width:40vh;height:40vh;margin:-20vh 0 0 -20vh;border:2px solid #e8b04a;border-radius:50%;opacity:0;animation:imresRing 2.4s linear infinite}"
+    "#imres-logo i:nth-of-type(2){animation-delay:.8s}#imres-logo i:nth-of-type(3){animation-delay:1.6s}"
+    "@keyframes imresGans{from{opacity:0;transform:translateY(4vh) scale(.96)}to{opacity:1;transform:none}}"
+    "@keyframes imresText{from{opacity:0;transform:translateY(1vh)}to{opacity:1;transform:none}}"
+    "@keyframes imresRing{0%{transform:scale(.6);opacity:.5}100%{transform:scale(2.2);opacity:0}}")
+VORHANG_JS = (
+    "(function(){try{var q=new URLSearchParams(location.search);"
+    "if(!q.has('zyn')||q.has('hinter')||sessionStorage.getItem('imres-zyn-hinter')==='1')return;"
+    "var h=document.documentElement;h.classList.add('imres-vorhang');"
+    "if(sessionStorage.getItem('imres-logo')!=='1')h.classList.add('imres-logo-frueh');"
+    "setTimeout(function(){h.classList.remove('imres-vorhang')},20000)}catch(e){}})();")
+
+
+def vorhang_html(pfad):
+    """Kopf-Teil (Stil + Vorhang) und Logo-Markup für die Seiten der Bühne"""
+    try:
+        with open(os.path.join(ZYN, "VERSION"), encoding="utf-8") as f:
+            ver = f.read().strip()
+    except OSError:
+        ver = "?"
+    name = "Imres · Klangwelten" if pfad.endswith("ambient.html") else "Imres · Bühne"
+    kopf = ("<style>" + VORHANG_CSS + "</style><script>" + VORHANG_JS + "</script>").encode("utf-8")
+    logo = ('<div id="imres-logo"><i></i><i></i><i></i><img src="/zyn/gans.png" alt=""><b>' + name +
+            "</b><small>Version " + ver + "  ·  TheAlmightyGoose</small></div>").encode("utf-8")
+    return kopf, logo
+
+
 def senden(ereignis):
     daten = json.dumps(ereignis, ensure_ascii=False)
     with hoerer_lock:
@@ -402,6 +439,13 @@ class Handler(SimpleHTTPRequestHandler):
         zusatz = b'<script src="/zyn/zyn.js"></script>'
         i = b.rfind(b"</body>")
         b = b[:i] + zusatz + b[i:] if i >= 0 else b + zusatz
+        # Vorhang + Start-Logo gleich am Anfang: die Startseite blitzt nicht auf, bevor die Bühne steht
+        kopf, logo = vorhang_html(p)
+        i = b.find(b"<head>")
+        b = b[:i + 6] + kopf + b[i + 6:] if i >= 0 else kopf + b
+        m = re.search(rb"<body[^>]*>", b)
+        if m:
+            b = b[:m.end()] + logo + b[m.end():]
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(b)))
