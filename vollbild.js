@@ -6,7 +6,7 @@
    bildschirmfüllend über die Seite. Beenden: Knopf ✕ oder Esc. */
 (function () {
   "use strict";
-  const KARTEN = ["auftritt", "diebesnacht", "echohort", "charme-karte", "kehle"];
+  const KARTEN = ["auftritt", "diebesnacht", "echohort", "charme-karte", "kehle", "memory-karte", "barden-probe"];
   const TEXT = {
     de: { an: "Vollbild", aus: "Vollbild beenden" },
     en: { an: "Fullscreen", aus: "Exit fullscreen" }
@@ -113,6 +113,19 @@ html.tav-voll-offen, html.tav-voll-offen body { overflow: hidden; }
     new MutationObserver(() => { if (!k.querySelector(":scope > .tav-voll-knopf")) { k.appendChild(knopf); beschriften(k); } })
       .observe(k, { childList: true });
   });
+
+  /* Kleine Bildschirme (Handy hoch/quer, Handhelds): beim Spielstart automatisch ins Vollbild.
+     Die Spiele rufen window.tavVollAuto("kartenId") direkt im Klick-/Tasten-Handler ihres Start-Knopfs auf
+     (Vollbild braucht eine Nutzeraktion). Gibt true zurück, wenn jetzt Vollbild ist. */
+  const klein = () => window.matchMedia("(max-width: 760px), (max-height: 560px)").matches;
+  window.tavVollAuto = id => {
+    const k = typeof id === "string" ? document.getElementById(id) : id;
+    if (!k || !klein()) return false;
+    if (k.classList.contains("tav-voll")) return true;
+    if (!k.querySelector(":scope > .tav-voll-knopf")) return false;
+    oeffnen(k); return true;
+  };
+  window.tavVollZu = id => { const k = typeof id === "string" ? document.getElementById(id) : id; if (k) schliessen(k); };
 
   new MutationObserver(() => KARTEN.forEach(id => { const k = document.getElementById(id); if (k) beschriften(k); }))
     .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });

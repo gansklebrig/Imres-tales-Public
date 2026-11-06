@@ -584,6 +584,7 @@
   css.textContent = `
 /* ---------- Kopf der Taverne ---------- */
 #taverne:not(.saal-einzeln) .part-head { display: none; }
+#taverne .tav-karte { scroll-margin-top: 4.5rem; }
 .saal-kopf {
   position: relative; overflow: hidden; isolation: isolate; margin-bottom: clamp(1.4rem, 4vw, 2.4rem);
   display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2.5rem); align-items: center;
@@ -899,6 +900,8 @@ html.saal-dialog-offen { overflow: hidden; }
   /* ---------- Start ---------- */
   kachelnBauen(); kopfBauen();
   ausAdresse();
+  /* Direkt per Adresse geöffnetes Spiel: der Browser springt nach dem Laden noch zum Anker (Karte unter der Navigation) – wieder nach oben */
+  if (aktiv) { const hoch = () => { if (aktiv && window.scrollY > 0) obenHin(); }; if (document.readyState === "complete") setTimeout(hoch, 60); else window.addEventListener("load", () => setTimeout(hoch, 60), { once: true }); }
   /* Kopf-Clip nur abspielen, wenn er zu sehen ist */
   if ("IntersectionObserver" in window) new IntersectionObserver(es => { const v = kopf.querySelector("video"); if (!v) return; if (es[0].isIntersecting && !kopf.hidden) { const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); } else v.pause(); }, { threshold: .2 }).observe(kopf);
   if (aktiv) obenHin();

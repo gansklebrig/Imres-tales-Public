@@ -373,31 +373,6 @@ main.beben { animation: beben .7s linear; }
 .lied.neu { animation: entrollen .55s ease-out; }
 @keyframes entrollen { from { opacity: 0; transform: translateY(10px) rotate(-.6deg) } }
 
-.memory-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .4rem 1rem; font-size: .9rem; color: var(--ash); }
-.memory-kopf strong { color: var(--vellum); font-weight: 600; }
-.memory { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
-@media (min-width: 560px) { .memory { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.mem-karte { aspect-ratio: 3 / 4; padding: 0; border: 0; background: none; cursor: pointer; perspective: 800px; -webkit-tap-highlight-color: transparent; }
-.mem-karte .innen { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3,.8,.4,1); }
-.mem-karte.offen .innen, .mem-karte.weg .innen { transform: rotateY(180deg); }
-.mem-karte .seite { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid var(--line); overflow: hidden; }
-.mem-karte .rueck {
-  display: grid; place-items: center;
-  background: repeating-linear-gradient(45deg, rgba(224,160,70,.07) 0 6px, transparent 6px 12px), var(--hall);
-}
-.mem-karte .rueck span { font-family: var(--display); color: var(--ember); font-size: clamp(1.1rem, 4vw, 1.6rem); opacity: .7; border: 1px solid var(--line); border-radius: 50%; width: 2.4em; height: 2.4em; display: grid; place-items: center; }
-.mem-karte:hover .rueck span, .mem-karte:focus-visible .rueck span { opacity: 1; }
-.mem-karte .vorne { transform: rotateY(180deg); background: var(--night); }
-.mem-karte .vorne img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mem-karte .vorne em {
-  position: absolute; left: 0; right: 0; bottom: 0; padding: 1.2rem .3rem .3rem; text-align: center; font-style: normal;
-  font-family: var(--name); font-size: clamp(.72rem, 2.6vw, .95rem); line-height: 1.1; color: var(--vellum);
-  background: linear-gradient(transparent, rgba(16,14,21,.92));
-}
-.mem-karte.weg .vorne { border-color: var(--ember); box-shadow: 0 0 0 1px var(--ember), 0 0 18px rgba(224,160,70,.35); }
-.mem-karte.falsch .vorne { border-color: var(--blood); }
-.memory-fuss { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; }
-.memory-sieg { font-family: var(--hand); font-size: 1.45rem; color: var(--ember); line-height: 1.15; }
 .tav-knopf { border-color: var(--ember); background: none; color: var(--ember); font-size: .92rem; padding: .45rem 1rem; }
 .tav-knopf:hover { background: var(--ember); color: var(--night); }
 
@@ -1200,71 +1175,234 @@ html, body { overflow-x: clip; }
     inspirationZeigen();
   }
 
-  /* --- Bestiarium-Memory --- */
-  let mem = { karten: [], offen: [], zuege: 0, paare: 0, sperre: false };
+  /* --- Bestiarium-Memory ---
+     Allein: drei Tischgrößen (4×3, 4×4, 6×4) mit getrennten Rekorden, wahlweise auf Zeit (eigene Bestzeit).
+     Jede Partie würfelt Kartenrückseite (Farbe + Siegel), Tischtuch und Kerzenlicht neu aus.
+     Die Kartengröße wird gemessen (mmMessen): Raster, Kopf und „Neu mischen“ passen immer ohne Scrollen
+     ins Fenster; im Querformat steht die Steuerung rechts neben dem Tisch (UWQHD: breitbild.css).
+     Tastatur: Pfeiltasten wandern über die Karten, Enter/Leertaste deckt auf.
+     Für controller.js: #memory-karte._memory = { karten(), spalten(), aufdecken(i), neu(), aktiv(), … } (siehe memoryStarten) */
+  Object.assign(TX.de, {
+    memStufen: { "4x3": "Lehrling – 6 Paare", "4x4": "Abenteurer – 8 Paare", "6x4": "Held – 12 Paare" },
+    memStufeGruppe: "Tischgröße",
+    memZeitKnopf: "⏱ Auf Zeit", memZeitTitel: "Die Uhr läuft ab der ersten Karte – mit eigener Bestzeit",
+    memZeit: s => "⏱ " + s, memBestzeit: s => "Bestzeit: " + s,
+    memSiegZeit: (s, n) => "Alle Kreaturen gebannt – in " + s + " (" + n + " Züge)!",
+    memWertZuege: n => "in " + n + (n === 1 ? " Zug" : " Zügen"), memWertZeit: (s, n) => s + " · " + n + (n === 1 ? " Zug" : " Züge"),
+    memSiegTitel: ["Alle Kreaturen gebannt!", "Das Bestiarium ist gezähmt!", "Kein Monster bleibt verdeckt!", "Ein Gedächtnis wie ein Drache!"],
+    memSiegSprueche: [
+      "Barradin dichtet schon die Ballade dazu. Alle elf Strophen.",
+      "Friedrich behauptet, er hätte es in der Hälfte geschafft. Mit verbundenen Augen.",
+      "Rex hat jede Karte beschnuppert. Gefressen hat er keine. Fast keine.",
+      "Ezekiel nickt anerkennend. Bei ihm ist das ein Gefühlsausbruch.",
+      "Echo hat heimlich mitgezählt – und sich gründlich verzählt.",
+      "Selbst der Demogorgon wäre beeindruckt. Mit beiden Köpfen."
+    ],
+    memRekordNeu: "Neuer Rekord!", memNochmal: "Nochmal mischen"
+  });
+  Object.assign(TX.en, {
+    memStufen: { "4x3": "Apprentice – 6 pairs", "4x4": "Adventurer – 8 pairs", "6x4": "Hero – 12 pairs" },
+    memStufeGruppe: "Table size",
+    memZeitKnopf: "⏱ Timed", memZeitTitel: "The clock starts with the first card – with its own best time",
+    memZeit: s => "⏱ " + s, memBestzeit: s => "Best time: " + s,
+    memSiegZeit: (s, n) => "Every creature banished – in " + s + " (" + n + " moves)!",
+    memWertZuege: n => "in " + n + (n === 1 ? " move" : " moves"), memWertZeit: (s, n) => s + " · " + n + (n === 1 ? " move" : " moves"),
+    memSiegTitel: ["Every creature banished!", "The bestiary is tamed!", "No monster stays hidden!", "A memory like a dragon!"],
+    memSiegSprueche: [
+      "Barradin is already writing the ballad. All eleven verses.",
+      "Friedrich claims he would have done it in half the moves. Blindfolded.",
+      "Rex sniffed every single card. He ate none of them. Almost none.",
+      "Ezekiel nods approvingly. For him, that is an emotional outburst.",
+      "Echo secretly kept count – and lost it completely.",
+      "Even the Demogorgon would be impressed. Both heads."
+    ],
+    memRekordNeu: "New record!", memNochmal: "Shuffle again"
+  });
+
+  /* Weitere Kreaturen aus Chronik und Skizzenbuch – so reicht es auch für 6×4 (12 Paare) */
+  const MEM_ZUSATZ = [
+    { bild: "ploopploopeen.jpg", de: "Ploopploopeen", en: "Ploopploopeen", pos: "50% 30%" },
+    { bild: "themberchaud.webp", de: "Themberchaud", en: "Themberchaud", pos: "50% 16%", frei: true },
+    { bild: "riese.webp", de: "Der rasende Riese", en: "The Raging Giant", pos: "50% 20%" },
+    { bild: "ilvara-wahr.webp", de: "Ilvara", en: "Ilvara", pos: "50% 5%", frei: true },
+    { bild: "skizze-ettercap.webp", de: "Ettercap", en: "Ettercap", pos: "50% 50%", skizze: true }
+  ];
+  const MEM_STUFEN = { "4x3": [4, 3], "4x4": [4, 4], "6x4": [6, 4] };
+  function memPool() {
+    const en = sprache() === "en";
+    const pool = bestien().map(b => ({ bild: b.bild, name: b.name, pos: "50% 30%", frei: /\.(webp|png)$/i.test(b.bild) }));
+    MEM_ZUSATZ.forEach(z => { if (!pool.some(p => p.bild === z.bild)) pool.push({ bild: z.bild, name: en ? z.en : z.de, pos: z.pos, frei: !!z.frei, skizze: !!z.skizze }); });
+    return pool;
+  }
+  const mischen = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  /* Rekorde: Züge je Tischgröße (4×3 behält den alten Schlüssel – den liest auch der Spielesaal), Bestzeit je Tischgröße */
+  const rekordSchluessel = (st, zeit) => zeit ? "imres-memory-zeit-" + st : st === "4x3" ? "imres-memory-rekord" : "imres-memory-rekord-" + st;
+  const rekordLesen = (st, zeit) => parseInt(lies(rekordSchluessel(st, zeit), "0"), 10) || 0;
+  function zeitText(ms) {
+    const z = Math.max(0, Math.floor(ms / 100)), min = Math.floor(z / 600), sek = Math.floor(z / 10) % 60;
+    return min + ":" + String(sek).padStart(2, "0") + (sprache() === "en" ? "." : ",") + (z % 10);
+  }
+
+  /* --- Ausstattung: jede Partie sieht ein bisschen anders aus --- */
+  const MEM_FARBEN = [
+    { a: "#4a2d10", b: "#1d1108", g: "#e0a046" },              /* Bernstein */
+    { a: "#561a22", b: "#21080b", g: "#ebb75e" },              /* Ochsenblut */
+    { a: "#1b412d", b: "#0a1912", g: "#dcb660" },              /* Smaragd */
+    { a: "#44193d", b: "#180916", g: "#e6b25f" },              /* Pflaume */
+    { a: "#2e2a22", b: "#0e0d0b", g: "#d9a441" },              /* Kohle und Gold */
+    { a: "#efe0b9", b: "#c4a872", g: "#70391a", hell: true }   /* Pergament mit Tinte */
+  ];
+  const MEM_SIEGEL = {
+    it: '<path d="M50 66V94M45 66H55M45 94H55M62 66H78M70 66V94M66 94H74"/>',
+    auge: '<path d="M40 80Q60 62 80 80Q60 98 40 80Z"/><circle cx="60" cy="80" r="6"/><path d="M60 57V61M60 99V103M45 63L47 66M75 63L73 66" stroke-width="2"/>',
+    algiz: '<path d="M60 59V101M60 80L45 63M60 80L75 63"/>',
+    w20: '<path stroke-width="2.2" d="M60 58L79 69V91L60 102L41 91V69ZM60 67L71.5 87H48.5ZM60 58V67M79 69L71.5 87M41 69L48.5 87M79 91L71.5 87M41 91L48.5 87M60 102L71.5 87M60 102L48.5 87"/>',
+    mond: '<path d="M67 61A20 20 0 1 0 67 99A15.5 15.5 0 1 1 67 61Z"/><path stroke-width="1.6" d="M74 68l1.3 2.8 3 .4-2.2 2 .6 3-2.7-1.5-2.7 1.5.6-3-2.2-2 3-.4Z"/>',
+    klaue: '<path d="M47 61Q56 80 48 100M59 59Q68 80 60 101M71 61Q80 80 72 100"/>',
+    othala: '<path d="M60 58L72 72L50 101M60 58L48 72L70 101"/>'
+  };
+  const MEM_TUECHER = ["filz", "samt", "holz", "leder", "karte"];
+  const MEM_KERZEN = [["14%", "10%"], ["86%", "8%"], ["50%", "-8%"], ["8%", "90%"], ["92%", "88%"], ["30%", "-4%"]];
+  let memLook = null;
+  function rueckSvg(f, siegel) {
+    const g = f.g, ecke = ([x, y, sx, sy]) => '<path d="M' + x + " " + (y + sy * 15) + " Q" + (x + sx * 2) + " " + (y + sy * 2) + " " + (x + sx * 15) + " " + y + '" stroke-width="1"/>' +
+      '<circle cx="' + (x + sx * 5.5) + '" cy="' + (y + sy * 5.5) + '" r="1.7" fill="' + g + '" stroke="none"/>';
+    const punkte = Array.from({ length: 8 }, (_, i) => { const w = i * Math.PI / 4 + Math.PI / 8; return '<circle cx="' + (60 + Math.cos(w) * 38.5).toFixed(1) + '" cy="' + (80 + Math.sin(w) * 38.5).toFixed(1) + '" r="1.4" fill="' + g + '" stroke="none"/>'; }).join("");
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160" preserveAspectRatio="none">' +
+      '<defs><radialGradient id="h" cx="50%" cy="42%" r="78%"><stop offset="0" stop-color="' + f.a + '"/><stop offset="1" stop-color="' + f.b + '"/></radialGradient>' +
+      '<radialGradient id="s" cx="45%" cy="38%" r="70%"><stop offset="0" stop-color="' + f.a + '"/><stop offset="1" stop-color="' + f.b + '"/></radialGradient>' +
+      '<pattern id="m" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0H10M0 0V10" stroke="' + g + '" stroke-opacity="' + (f.hell ? ".16" : ".11") + '" stroke-width=".8" fill="none"/></pattern></defs>' +
+      '<rect width="120" height="160" fill="url(#h)"/><rect width="120" height="160" fill="url(#m)"/>' +
+      '<g fill="none" stroke="' + g + '"><rect x="6" y="6" width="108" height="148" rx="4" stroke-width="1.7"/>' +
+      '<rect x="10.5" y="10.5" width="99" height="139" rx="2" stroke-width=".6" stroke-opacity=".75"/>' +
+      [[10.5, 10.5, 1, 1], [109.5, 10.5, -1, 1], [10.5, 149.5, 1, -1], [109.5, 149.5, -1, -1]].map(ecke).join("") +
+      '<path d="M60 19L64 25L60 31L56 25ZM60 129L64 135L60 141L56 135Z" fill="' + g + '" fill-opacity=".55" stroke-width=".6"/>' +
+      '<path d="M60 31V40M60 120V129" stroke-width=".8" stroke-opacity=".7"/>' +
+      '<circle cx="60" cy="80" r="33" fill="url(#s)" stroke-width="2"/><circle cx="60" cy="80" r="28" stroke-width=".7" stroke-dasharray="2 2.6"/>' + punkte +
+      '<g stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">' + MEM_SIEGEL[siegel] + "</g></g></svg>";
+    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+  }
+  /* Neue Ausstattung auswürfeln – nie genau dieselbe Farbe, dasselbe Siegel oder Tuch wie zuletzt */
+  function memLookNeu() {
+    const grid = $("memory"); if (!grid) return;
+    const anders = (liste, alt) => { const l = liste.filter(x => x !== alt); return zufall(l.length ? l : liste); };
+    const alt = memLook || {};
+    const farbe = anders(MEM_FARBEN, alt.farbe), siegel = anders(Object.keys(MEM_SIEGEL), alt.siegel);
+    let tuch = anders(MEM_TUECHER, alt.tuch); const kerze = anders(MEM_KERZEN, alt.kerze);
+    if (tuch === "filz" && farbe === MEM_FARBEN[2]) tuch = "samt"; /* grüne Karten nicht auf grünem Filz */
+    memLook = { farbe, siegel, tuch, kerze };
+    grid.dataset.tuch = tuch;
+    grid.style.setProperty("--mem-rueck", rueckSvg(farbe, siegel));
+    grid.style.setProperty("--kx", kerze[0]); grid.style.setProperty("--ky", kerze[1]);
+    grid.style.setProperty("--flacker", (2.2 + Math.random() * 1.6).toFixed(2) + "s");
+  }
+
+  function kartenHtml(bild, i) {
+    const p = memPool().find(x => x.bild === bild) || { bild, pos: "50% 30%" };
+    return '<button type="button" class="mem-karte" data-i="' + i + '" style="--i:' + i + '" aria-label="' + esc(t().memKarte) + '"><span class="innen">' +
+      '<span class="seite rueck"><i></i></span>' +
+      '<span class="seite vorne' + (p.skizze ? " skizze" : p.frei ? " frei" : "") + '"><img src="' + esc(p.bild) + '" alt="" draggable="false" decoding="async" style="object-position:' + esc(p.pos) + '"><em></em></span></span></button>';
+  }
+
+  let mem = { karten: [], offen: [], zuege: 0, paare: 0, sperre: false, gesamt: 0 };
+  let memStufe = MEM_STUFEN[lies("imres-memory-stufe", "")] ? lies("imres-memory-stufe", "4x3") : "4x3";
+  let memAufZeit = lies("imres-memory-aufzeit", "0") === "1";
+  let memUhr = 0;
   function bestien() {
     const q = sprache() === "en" ? (window.INHALT_EN || window.INHALT) : window.INHALT;
     return ((q && q.bestiarium) || []).filter(b => b.bild);
   }
   function memoryNeu() {
-    const alle = bestien().slice().sort(() => Math.random() - .5);
-    const wahl = alle.slice(0, Math.min(6, alle.length));
+    if (md) return;
+    const grid = $("memory"); if (!grid) return;
+    const [sp, zl] = MEM_STUFEN[memStufe];
+    const wahl = mischen(memPool()).slice(0, Math.floor(sp * zl / 2));
     const karten = [];
     wahl.forEach((b, i) => { karten.push({ id: i, bild: b.bild }); karten.push({ id: i, bild: b.bild }); });
-    for (let i = karten.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [karten[i], karten[j]] = [karten[j], karten[i]]; }
-    mem = { karten, offen: [], zuege: 0, paare: 0, sperre: false, gesamt: wahl.length };
-    const grid = $("memory");
-    grid.innerHTML = karten.map((k, i) =>
-      '<button type="button" class="mem-karte" data-i="' + i + '" aria-label="' + esc(t().memKarte) + '"><span class="innen">' +
-      '<span class="seite rueck"><span>IT</span></span>' +
-      '<span class="seite vorne"><img src="' + esc(k.bild) + '" alt="" loading="lazy"><em></em></span></span></button>').join("");
+    mischen(karten);
+    zeitStopp();
+    mem = { karten, offen: [], zuege: 0, paare: 0, sperre: false, gesamt: wahl.length, stufe: memStufe, aufZeit: memAufZeit, laeuft: false, start: 0, dauer: 0 };
+    wahl.forEach(b => { const im = new Image(); im.decoding = "async"; im.src = b.bild; }); /* vorladen: beim Umdrehen ist das Bild schon da */
+    memLookNeu();
+    grid.classList.remove("sieg");
+    grid.innerHTML = karten.map((k, i) => kartenHtml(k.bild, i)).join("");
+    if (!ruhig) { grid.classList.remove("austeilen"); void grid.offsetWidth; grid.classList.add("austeilen"); const s = mem; setTimeout(() => { if (mem === s) grid.classList.remove("austeilen"); }, 1300); }
     namenSetzen();
     $("memory-sieg").textContent = "";
-    memoryStatus();
+    memoryStatus(); wahlZeichnen();
+    mmMessen();
   }
   function namenSetzen() {
-    const liste = bestien();
+    const pool = memPool();
     document.querySelectorAll("#memory .mem-karte").forEach(el => {
-      const k = mem.karten[+el.dataset.i];
-      const b = liste.find(x => x.bild === k.bild);
+      const k = mem.karten[+el.dataset.i]; if (!k) return;
+      const b = pool.find(x => x.bild === k.bild);
       el.querySelector("em").textContent = b ? b.name : "";
       if (el.classList.contains("offen") || el.classList.contains("weg")) el.setAttribute("aria-label", b ? b.name : "");
       else el.setAttribute("aria-label", t().memKarte);
     });
   }
   function memoryStatus() {
-    const T = t(), rekord = parseInt(lies("imres-memory-rekord", "0"), 10);
+    const T = t(), zeit = mem.aufZeit, rekord = rekordLesen(mem.stufe || memStufe, zeit);
     $("memory-zuege").textContent = T.memZuege(mem.zuege);
     $("memory-paare").textContent = T.memPaare(mem.paare, mem.gesamt || 0);
-    $("memory-rekord").textContent = rekord ? T.memRekord(rekord) : "";
+    $("memory-rekord").textContent = rekord ? (zeit ? T.memBestzeit(zeitText(rekord)) : T.memRekord(rekord)) : "";
     $("memory-neu").textContent = T.memNeu;
+    const z = $("memory-zeit"); if (z) { z.hidden = !zeit; uhrTick(); }
   }
+
+  /* Uhr für den Zeit-Modus: läuft ab der ersten Karte, hält an, solange der Tab im Hintergrund ist */
+  const zeitJetzt = () => mem.laeuft ? performance.now() - mem.start : (mem.dauer || 0);
+  function uhrTick() { const z = $("memory-zeit"); if (z && mem.aufZeit) z.textContent = t().memZeit(zeitText(zeitJetzt())); }
+  function zeitStart() { mem.start = performance.now(); mem.laeuft = true; clearInterval(memUhr); memUhr = setInterval(uhrTick, 100); uhrTick(); }
+  function zeitStopp() { clearInterval(memUhr); memUhr = 0; if (mem.laeuft) { mem.dauer = performance.now() - mem.start; mem.laeuft = false; } }
+  let memVersteckt = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (!mem.laeuft) return;
+    if (document.hidden) memVersteckt = performance.now();
+    else if (memVersteckt) { mem.start += performance.now() - memVersteckt; memVersteckt = 0; }
+  });
+
   function memoryKlick(e) {
     if (md) { mdKlick(e); return; } /* Online-Duell: eigene Regeln, siehe unten */
-    const el = e.target.closest(".mem-karte");
-    if (!el || mem.sperre || el.classList.contains("offen") || el.classList.contains("weg")) return;
+    karteAufdecken(e.target.closest(".mem-karte"), true);
+  }
+  function karteAufdecken(el, nutzer) {
+    if (!el || mem.sperre || el.classList.contains("offen") || el.classList.contains("weg") || !mem.gesamt || mem.paare === mem.gesamt) return false;
+    /* „Start“ ist die erste Karte einer Partie: auf kleinen Bildschirmen dann ins Vollbild */
+    if (nutzer && mem.zuege === 0 && !mem.offen.length && window.tavVollAuto) window.tavVollAuto("memory-karte");
+    if (mem.aufZeit && !mem.laeuft && !mem.dauer) zeitStart();
     el.classList.add("offen");
     mem.offen.push(el);
     namenSetzen();
-    if (mem.offen.length < 2) return;
+    if (mem.offen.length < 2) return true;
     mem.zuege++;
     const [a, b] = mem.offen;
     /* Jedes Spiel ist ein eigenes mem-Objekt: Zeitgeber eines alten Spiels (nach „Neues Spiel“) tun nichts mehr */
     const spiel = mem;
     if (mem.karten[+a.dataset.i].id === mem.karten[+b.dataset.i].id) {
       mem.offen = [];
-      setTimeout(() => { if (mem !== spiel) return; a.classList.replace("offen", "weg"); b.classList.replace("offen", "weg"); namenSetzen(); }, 350);
       mem.paare++;
-      if (mem.paare === mem.gesamt) {
-        const rekord = parseInt(lies("imres-memory-rekord", "0"), 10);
-        const neu = !rekord || mem.zuege < rekord;
-        if (neu) schreib("imres-memory-rekord", String(mem.zuege));
-        setTimeout(() => {
-          if (mem !== spiel) return;
-          $("memory-sieg").textContent = t().memSieg(mem.zuege) + (neu && rekord ? t().memNeuerRekord : "");
-          const r = $("memory").getBoundingClientRect();
-          konfetti(r.left + r.width / 2, r.top + r.height / 2, ["✦", "⚔", "★", "♪"], 34);
-        }, 500);
+      const fertig = mem.paare === mem.gesamt;
+      if (fertig) zeitStopp();
+      setTimeout(() => {
+        if (mem !== spiel) return;
+        a.classList.replace("offen", "weg"); b.classList.replace("offen", "weg");
+        treffer(a); treffer(b);
+        namenSetzen();
+      }, 380);
+      if (fertig) {
+        const st = mem.stufe, rz = rekordLesen(st, false), neuZ = !rz || mem.zuege < rz;
+        if (neuZ) schreib(rekordSchluessel(st, false), String(mem.zuege));
+        let neu = !mem.aufZeit && neuZ && !!rz, alt = rz;
+        if (mem.aufZeit) {
+          const ms = Math.round(mem.dauer), rt = rekordLesen(st, true);
+          alt = rt; neu = !!rt && ms < rt;
+          if (!rt || ms < rt) schreib(rekordSchluessel(st, true), String(ms));
+        }
+        mem.neuerRekord = neu;
+        setTimeout(() => { if (mem === spiel) siegZeigen(spiel, neu || !alt); }, 820);
       }
     } else {
       mem.sperre = true;
@@ -1276,14 +1414,445 @@ html, body { overflow-x: clip; }
       }, 1100);
     }
     memoryStatus();
+    return true;
   }
+
+  /* Treffer: die Karte glüht auf und sprüht Funken (auch im Duell) */
+  function treffer(el) {
+    el.classList.remove("treffer"); void el.offsetWidth; el.classList.add("treffer");
+    setTimeout(() => el.classList.remove("treffer"), 1000);
+    funken(el, 12);
+  }
+  function funken(el, anzahl) {
+    if (ruhig) return;
+    const grid = $("memory"); if (!grid || !el.isConnected) return;
+    const gr = grid.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const cx = r.left - gr.left + r.width / 2, cy = r.top - gr.top + r.height / 2;
+    for (let i = 0; i < anzahl; i++) {
+      const s = document.createElement("span");
+      s.className = "mem-funke" + (i % 3 ? "" : " gross");
+      s.style.left = cx + "px"; s.style.top = cy + "px";
+      grid.appendChild(s);
+      const w = Math.random() * Math.PI * 2, v = r.width * (.45 + Math.random() * .7);
+      s.animate([
+        { transform: "translate(-50%,-50%) scale(1)", opacity: 1 },
+        { transform: "translate(calc(-50% + " + (Math.cos(w) * v).toFixed(1) + "px), calc(-50% + " + (Math.sin(w) * v - r.height * .15).toFixed(1) + "px)) scale(.15)", opacity: 0 }
+      ], { duration: 550 + Math.random() * 550, easing: "cubic-bezier(.15,.7,.35,1)" }).onfinish = () => s.remove();
+    }
+  }
+
+  /* Sieg: Welle über den Tisch, dann eine Pergamenttafel mit Wachssiegel */
+  function siegZeigen(spiel, rekordJubel) {
+    const grid = $("memory"), T = t(); if (!grid) return;
+    const zeit = spiel.aufZeit, s = zeitText(spiel.dauer || 0);
+    $("memory-sieg").textContent = zeit ? T.memSiegZeit(s, spiel.zuege) : T.memSieg(spiel.zuege) + (spiel.neuerRekord ? T.memNeuerRekord : "");
+    grid.classList.add("sieg");
+    const tafel = document.createElement("div");
+    tafel.className = "mem-siegtafel";
+    tafel.innerHTML = '<div class="mst-innen"><span class="mst-siegel" aria-hidden="true">IT</span>' +
+      '<p class="mst-titel">' + esc(zufall(T.memSiegTitel)) + "</p>" +
+      '<p class="mst-wert">' + esc(zeit ? T.memWertZeit(s, spiel.zuege) : T.memWertZuege(spiel.zuege)) + "</p>" +
+      (spiel.neuerRekord ? '<p class="mst-rekord">' + esc(T.memRekordNeu) + "</p>" : "") +
+      '<p class="mst-spruch">' + esc(zufall(T.memSiegSprueche)) + "</p>" +
+      '<button type="button" class="tav-knopf mst-nochmal">' + esc(T.memNochmal) + "</button></div>";
+    tafel.addEventListener("click", e => {
+      e.stopPropagation();
+      if (e.target.closest(".mst-nochmal")) { memoryNeu(); const k = grid.querySelector(".mem-karte"); if (k) k.focus({ preventScroll: true }); return; }
+      tafel.classList.add("zu"); /* antippen: Blick frei auf den Tisch */
+    });
+    grid.appendChild(tafel);
+    const fokusWar = document.activeElement && grid.contains(document.activeElement);
+    setTimeout(() => {
+      if (mem !== spiel || !tafel.isConnected) return;
+      if (fokusWar) { const b = tafel.querySelector(".mst-nochmal"); if (b) b.focus({ preventScroll: true }); }
+      const r = tafel.querySelector(".mst-innen").getBoundingClientRect();
+      konfetti(r.left + r.width / 2, r.top + r.height / 3, ["✦", "⚔", "★", "♪"], rekordJubel ? 46 : 30);
+      grid.querySelectorAll(".mem-karte").forEach((k, i) => { if (i % 3 === 0) setTimeout(() => funken(k, 5), i * 30); });
+    }, ruhig ? 0 : 650);
+  }
+
+  /* Auswahl: Tischgröße und Zeit-Modus (stehen im Fuß neben „Neu mischen“) */
+  function wahlBauen() {
+    const fuss = document.querySelector("#memory-karte .memory-fuss");
+    if (!fuss || $("memory-wahl")) return;
+    const w = document.createElement("div");
+    w.className = "memory-wahl"; w.id = "memory-wahl";
+    w.innerHTML = '<span class="mw-stufen" role="group">' + Object.keys(MEM_STUFEN).map(s => '<button type="button" data-stufe="' + s + '">' + s.replace("x", "×") + "</button>").join("") + "</span>" +
+      '<button type="button" class="mw-zeit"></button>';
+    fuss.insertBefore(w, fuss.querySelector(".memory-knoepfe") || $("memory-neu"));
+    w.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b || md) return;
+      if (b.dataset.stufe) { memStufe = b.dataset.stufe; schreib("imres-memory-stufe", memStufe); }
+      else { memAufZeit = !memAufZeit; schreib("imres-memory-aufzeit", memAufZeit ? "1" : "0"); }
+      if (window.tavVollAuto) window.tavVollAuto("memory-karte");
+      memoryNeu();
+    });
+    const kopf = document.querySelector("#memory-karte .memory-kopf");
+    if (kopf && !$("memory-zeit")) { const z = document.createElement("span"); z.id = "memory-zeit"; z.className = "memory-zeit"; z.hidden = true; kopf.appendChild(z); }
+  }
+  function wahlZeichnen() {
+    const w = $("memory-wahl"); if (!w) return;
+    const T = t();
+    w.querySelector(".mw-stufen").setAttribute("aria-label", T.memStufeGruppe);
+    w.querySelectorAll("[data-stufe]").forEach(b => { const an = b.dataset.stufe === memStufe; b.setAttribute("aria-pressed", an ? "true" : "false"); b.title = T.memStufen[b.dataset.stufe]; b.setAttribute("aria-label", T.memStufen[b.dataset.stufe]); });
+    const z = w.querySelector(".mw-zeit");
+    z.textContent = T.memZeitKnopf; z.title = T.memZeitTitel; z.setAttribute("aria-pressed", memAufZeit ? "true" : "false");
+  }
+
+  /* --- Kartengröße: alles passt ohne Scrollen ins Fenster ---
+     Gemessen werden zwei Anordnungen – „hoch“ (Kopf, Tisch, Fuß untereinander) und „quer“ (Tisch links,
+     alles andere rechts daneben) – jeweils auch mit gedrehtem Raster (z. B. 3×4 statt 4×3 auf dem Handy).
+     Gewählt wird die mit den größten Karten. Auf UWQHD ordnet breitbild.css an, hier wird nur die Größe gesetzt. */
+  const BREIT_MQ = window.matchMedia ? window.matchMedia("(min-width: 2200px) and (min-height: 1200px) and (min-aspect-ratio: 19/10)") : { matches: false };
+  let memSpalten = 4, messPlan = 0;
+  function mmPlanen() { if (messPlan) return; messPlan = requestAnimationFrame(() => { messPlan = 0; mmMessen(); }); }
+  function ordnung(n) {
+    if (n === 12) return [4, 3]; if (n === 16) return [4, 4]; if (n === 24) return [6, 4];
+    const c = Math.max(2, Math.round(Math.sqrt(n * 1.33))); return [c, Math.ceil(n / c)];
+  }
+  const memAbstand = kw => Math.min(14, Math.max(4, kw * .07));
+  const memRand = kw => Math.min(22, Math.max(6, kw * .1));
+  function kwFuer(W, H, c, r) {
+    let kw = 100;
+    for (let k = 0; k < 4; k++) {
+      const g = memAbstand(kw), rd = memRand(kw);
+      kw = Math.min((W - 2 * rd - 2 - (c - 1) * g) / c, (H - 2 * rd - 2 - (r - 1) * g) / r * .75);
+    }
+    return Math.floor(Math.max(0, kw));
+  }
+  function seitenHoehe(karte) {
+    let oben = Infinity, unten = -Infinity;
+    Array.from(karte.children).forEach(el => {
+      if (el.id === "memory" || el.classList.contains("tav-voll-knopf") || el.classList.contains("memory-sieg")) return;
+      const cs = getComputedStyle(el); if (cs.position === "absolute" || cs.position === "fixed" || !el.getClientRects().length) return;
+      const r = el.getBoundingClientRect(); oben = Math.min(oben, r.top); unten = Math.max(unten, r.bottom);
+    });
+    return unten > oben ? unten - oben : 0;
+  }
+  function mmMessen() {
+    const karte = $("memory-karte"), grid = $("memory");
+    if (!karte || !grid || karte.hidden) return;
+    const voll = karte.classList.contains("tav-voll");
+    if (!karte.getClientRects().length) return; /* gerade nicht zu sehen */
+    const n = grid.querySelectorAll(".mem-karte").length; if (!n) return;
+    const [c, r] = ordnung(n);
+    const ih = window.innerHeight, rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    let obenRes = 0, untenRes = 0;
+    if (!voll) {
+      const top = document.querySelector(".top"); if (top && top.getClientRects().length) obenRes = Math.max(0, top.getBoundingClientRect().height);
+      const hl = document.querySelector(".handyleiste");
+      if (hl) { const cs = getComputedStyle(hl), rr = hl.getBoundingClientRect(); if (cs.display !== "none" && cs.position === "fixed" && rr.height > 0 && rr.top < ih) untenRes = ih - rr.top; }
+    }
+    const breit = BREIT_MQ.matches;
+    const seite = Math.round(Math.min(21 * rem, Math.max(14 * rem, window.innerWidth * .22)));
+    karte.style.setProperty("--mem-seite", seite + "px");
+    const kandidaten = [];
+    (breit ? ["breit"] : ["hoch", "quer"]).forEach(m => {
+      karte.classList.toggle("mem-quer", m === "quer"); karte.classList.remove("mem-knapp");
+      const cs = getComputedStyle(karte), pl = parseFloat(cs.paddingLeft), pr = parseFloat(cs.paddingRight), pt = parseFloat(cs.paddingTop), pb = parseFloat(cs.paddingBottom);
+      const kr = karte.getBoundingClientRect(), kTop = voll ? Math.max(0, kr.top) : kr.top + window.scrollY;
+      const innenB = karte.clientWidth - pl - pr, unten = ih - untenRes - 4;
+      const beide = (W, H, extra) => [[c, r], [r, c]].forEach(([cc, rr]) => kandidaten.push(Object.assign({ m, c: cc, r: rr, kw: kwFuer(W, H, cc, rr) }, extra)));
+      if (m === "hoch") {
+        const gr = grid.getBoundingClientRect(), ueber = gr.top - kr.top;
+        /* unter dem Tisch: nur was wirklich folgt (im Vollbild ist die Karte höher als ihr Inhalt) */
+        let fussUnten = gr.bottom;
+        Array.from(karte.children).forEach(el => {
+          if (el === grid || el.classList.contains("tav-voll-knopf") || !el.getClientRects().length) return;
+          const ecs = getComputedStyle(el); if (ecs.position === "absolute" || ecs.position === "fixed") return;
+          fussUnten = Math.max(fussUnten, el.getBoundingClientRect().bottom);
+        });
+        const unter = fussUnten - gr.bottom + pb;
+        const H = unten - kTop - ueber - unter;
+        /* Handy hochkant, noch nicht im Vollbild: Startet die Karte weit unten, darf der Titel wegscrollen –
+           Kopf bis Fuß passen dann unter die Leiste (mit der ersten Karte geht es ohnehin ins Vollbild) */
+        const handyHoch = !voll && window.innerWidth <= 760 && ih > window.innerWidth;
+        const erstes = Array.from(karte.children).find(el => el.id !== "memory" && /memory-kopf|duell-leiste|mem-duell/.test(el.className) && el.getClientRects().length) || grid;
+        const H2 = unten - obenRes - 6 - (gr.top - erstes.getBoundingClientRect().top) - unter;
+        [[c, r], [r, c]].forEach(([cc, rr]) => {
+          const k1 = kwFuer(innenB, H, cc, rr), k2 = handyHoch ? kwFuer(innenB, H2, cc, rr) : k1;
+          kandidaten.push({ m, c: cc, r: rr, kw: k1 >= k2 * .8 ? k1 : k2 });
+        });
+      } else if (m === "quer") {
+        const W = innenB - seite - (parseFloat(cs.columnGap) || 16), H = unten - kTop - pt - pb;
+        let knapp = false;
+        if (seitenHoehe(karte) > H) { karte.classList.add("mem-knapp"); knapp = true; }
+        if (W > 100) beide(W, H, { knapp });
+      } else {
+        const H = unten - kTop - pt - pb, W = innenB - 2 * (parseFloat(cs.columnGap) || 32) - 2 * 17 * rem;
+        beide(Math.max(W, innenB * .4), H, {});
+      }
+    });
+    const best = kandidaten.reduce((a, b) => (b.kw > a.kw + .5 ? b : a), kandidaten[0]);
+    karte.classList.toggle("mem-quer", best.m === "quer");
+    karte.classList.toggle("mem-knapp", !!best.knapp);
+    const kw = Math.max(34, Math.min(330, best.kw)), g = memAbstand(kw), rd = memRand(kw);
+    grid.style.setProperty("--mem-sp", best.c);
+    grid.style.setProperty("--mem-kw", kw + "px");
+    grid.style.setProperty("--mem-gap", g.toFixed(1) + "px");
+    grid.style.setProperty("--mem-rand", rd.toFixed(1) + "px");
+    grid.style.width = Math.ceil(best.c * kw + (best.c - 1) * g + 2 * rd + 2) + "px";
+    grid.classList.toggle("mem-klein", kw < 74);
+    memSpalten = best.c;
+  }
+
+  /* Tastatur: Pfeiltasten wandern über die Karten (Enter/Leertaste deckt auf – es sind Knöpfe) */
+  function memTaste(e) {
+    const grid = $("memory"); if (!grid) return;
+    const pfeil = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -memSpalten, ArrowDown: memSpalten }[e.key];
+    if (pfeil === undefined && e.key !== "Home" && e.key !== "End") return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const karten = Array.from(grid.querySelectorAll(".mem-karte")); if (!karten.length) return;
+    const hier = e.target.closest && e.target.closest(".mem-karte");
+    let j;
+    if (!hier) {
+      /* Im Vollbild greifen die Pfeile auch, wenn noch keine Karte den Fokus hat */
+      const karte = $("memory-karte");
+      if (!karte.classList.contains("tav-voll") || (e.target.closest && e.target.closest("input, textarea, select, .memory-wahl, .memory-fuss, .mem-siegtafel"))) return;
+      j = 0;
+    } else {
+      const i = karten.indexOf(hier);
+      if (e.key === "Home") j = 0; else if (e.key === "End") j = karten.length - 1;
+      else { j = i + pfeil; if (j < 0 || j >= karten.length) return; }
+    }
+    e.preventDefault();
+    karten[j].focus({ preventScroll: false });
+  }
+
   function memoryStarten() {
     if (!$("memory")) return;
     if (!bestien().length) { const k = $("memory-karte"); if (k) k.hidden = true; return; }
-    $("memory").addEventListener("click", memoryKlick);
-    $("memory-neu").addEventListener("click", memoryNeu);
-    memoryNeu();
+    const grid = $("memory"), karte = $("memory-karte");
+    grid.addEventListener("click", memoryKlick);
+    $("memory-neu").addEventListener("click", () => { if (window.tavVollAuto) window.tavVollAuto("memory-karte"); memoryNeu(); });
+    karte.addEventListener("keydown", memTaste);
+    memCssEinbauen();
     mdKnopf();
+    wahlBauen();
+    memoryNeu();
+    /* neu messen, wenn sich Fenster, Vollbild oder Sichtbarkeit der Karte ändern */
+    window.addEventListener("resize", mmPlanen);
+    document.addEventListener("fullscreenchange", mmPlanen);
+    document.addEventListener("webkitfullscreenchange", mmPlanen);
+    if (BREIT_MQ.addEventListener) BREIT_MQ.addEventListener("change", mmPlanen);
+    if (window.ResizeObserver) {
+      let alteBreite = -1;
+      new ResizeObserver(() => { const b = karte.clientWidth; if (Math.abs(b - alteBreite) > 1) { alteBreite = b; mmPlanen(); } }).observe(karte);
+    }
+    new MutationObserver(mmPlanen).observe(karte, { attributes: true, attributeFilter: ["class"] });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(mmPlanen);
+    window.addEventListener("load", mmPlanen);
+
+    /* Schnittstelle für controller.js (Gamepad) und Tests */
+    const kartenListe = () => Array.from(grid.querySelectorAll(".mem-karte"));
+    karte._memory = {
+      karten: kartenListe,
+      spalten: () => memSpalten,
+      aufdecken(i) {
+        const el = kartenListe()[i]; if (!el) return false;
+        if (md) { mdKlick({ target: el }); return true; }
+        const ok = karteAufdecken(el, true);
+        if (ok) el.focus({ preventScroll: true });
+        return ok;
+      },
+      fokus(i) { const el = kartenListe()[i]; if (el) el.focus(); return el || null; },
+      gewaehlt() { return kartenListe().indexOf(document.activeElement); },
+      neu() { if (md) return false; memoryNeu(); return true; },
+      stufe(s) { if (md) return memStufe; if (MEM_STUFEN[s] && s !== memStufe) { memStufe = s; schreib("imres-memory-stufe", s); memoryNeu(); } return memStufe; },
+      aufZeit(an) { if (!md && typeof an === "boolean" && an !== memAufZeit) { memAufZeit = an; schreib("imres-memory-aufzeit", an ? "1" : "0"); memoryNeu(); } return memAufZeit; },
+      aktiv() {
+        if (karte.hidden || !karte.getClientRects().length || !kartenListe().length) return false;
+        const r = grid.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight;
+      },
+      imDuell: () => !!md,
+      fertig: () => !md && !!mem.gesamt && mem.paare === mem.gesamt,
+      offen: () => kartenListe().map(el => el.classList.contains("weg") ? 2 : el.classList.contains("offen") ? 1 : 0)
+    };
+  }
+  function memSprache() {
+    mdSprache();
+    if (!$("memory") || md) return;
+    wahlZeichnen();
+    if (mem.karten.length) {
+      namenSetzen(); memoryStatus();
+      if (mem.paare === mem.gesamt && mem.gesamt) $("memory-sieg").textContent = mem.aufZeit ? t().memSiegZeit(zeitText(mem.dauer || 0), mem.zuege) : t().memSieg(mem.zuege);
+    }
+    mmPlanen();
+  }
+
+  function memCssEinbauen() {
+    if ($("mem-css")) return;
+    const css = document.createElement("style"); css.id = "mem-css";
+    css.textContent = `
+#memory-karte { --mem-seite: 16rem; }
+.memory-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .3rem 1rem; font-size: .9rem; color: var(--ash); }
+.memory-kopf strong { color: var(--vellum); font-weight: 600; }
+.memory-zeit { font-variant-numeric: tabular-nums; color: var(--ember); font-weight: 600; min-width: 5.2em; }
+.memory-kopf > span:empty { display: none; }
+
+/* Der Spieltisch */
+.memory {
+  position: relative; isolation: isolate; box-sizing: border-box; justify-self: center; max-width: 100%;
+  display: grid; grid-template-columns: repeat(var(--mem-sp, 4), var(--mem-kw, 100px)); grid-auto-rows: calc(var(--mem-kw, 100px) * 4 / 3);
+  gap: var(--mem-gap, 8px); padding: var(--mem-rand, 12px); justify-content: center; align-content: center;
+  border: 1px solid rgba(224,160,70,.38); border-radius: 12px;
+  box-shadow: inset 0 0 calc(var(--mem-kw, 100px) * .55) rgba(0,0,0,.7), inset 0 0 0 1px rgba(0,0,0,.5), 0 14px 34px rgba(0,0,0,.5);
+  background: radial-gradient(ellipse at 50% 45%, #21452d, #0f2216 70%, #0a170f);
+}
+.memory[data-tuch="samt"] {
+  border-color: rgba(232,179,90,.6);
+  background: repeating-linear-gradient(100deg, rgba(255,255,255,.02) 0 3px, transparent 3px 9px), radial-gradient(ellipse at 50% 40%, #5a1824, #2a0910 70%, #1a060a);
+}
+.memory[data-tuch="holz"] {
+  border-color: rgba(120,78,40,.9);
+  background: repeating-linear-gradient(90deg, rgba(0,0,0,.38) 0 2px, transparent 2px calc(var(--mem-kw, 100px) * 1.3)),
+    repeating-linear-gradient(90deg, rgba(255,220,170,.035) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.07) 0 9px, transparent 9px 23px),
+    linear-gradient(90deg, #3a2514, #4d321b 30%, #3b2614 55%, #4a301a 80%, #3a2514);
+}
+.memory[data-tuch="leder"] {
+  background: radial-gradient(ellipse at 50% 40%, #5c3a21, #2a180c 75%);
+  outline: 1px dashed rgba(240,200,140,.4); outline-offset: calc(var(--mem-rand, 12px) * -.45);
+}
+.memory[data-tuch="karte"] { background: linear-gradient(rgba(22,14,8,.76), rgba(22,14,8,.86)), url("weltkarte.jpg") center / cover; }
+/* Kerzenlicht: warmer Schein aus wechselnder Richtung, darüber eine leichte Vignette */
+.memory::before, .memory::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+.memory::before {
+  z-index: 0; background: radial-gradient(circle at var(--kx, 15%) var(--ky, 10%), rgba(255,196,110,.32), rgba(255,160,70,.09) 38%, transparent 68%);
+  animation: memFlackern var(--flacker, 2.8s) ease-in-out infinite alternate;
+}
+.memory::after { z-index: 3; background: radial-gradient(ellipse at var(--kx, 15%) var(--ky, 10%), transparent 45%, rgba(0,0,0,.26) 100%); }
+@keyframes memFlackern { 0% { opacity: .78; } 30% { opacity: .95; } 55% { opacity: .82; } 80% { opacity: 1; } 100% { opacity: .88; } }
+
+/* Karten */
+.mem-karte {
+  position: relative; z-index: 1; width: var(--mem-kw, 100px); height: calc(var(--mem-kw, 100px) * 4 / 3); padding: 0; border: 0; background: none;
+  cursor: pointer; perspective: calc(var(--mem-kw, 100px) * 6); border-radius: calc(var(--mem-kw, 100px) * .06); -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.mem-karte:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; z-index: 2; }
+.mem-karte .innen { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3,.75,.35,1.18); }
+.mem-karte.offen .innen, .mem-karte.weg .innen { transform: rotateY(180deg); }
+@media (hover: hover) { .mem-karte:not(.offen):not(.weg):hover .innen { transform: rotateY(-9deg) translateZ(4px); } }
+.mem-karte .seite {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; border-radius: inherit;
+  box-shadow: 0 calc(var(--mem-kw, 100px) * .03) calc(var(--mem-kw, 100px) * .09) rgba(0,0,0,.6);
+}
+.mem-karte .innen, .mem-karte .seite { border-radius: calc(var(--mem-kw, 100px) * .06); }
+.mem-karte .rueck { background: var(--mem-rueck) center / 100% 100% no-repeat, #2a1a10; }
+.mem-karte .rueck i {
+  position: absolute; inset: 0; background: linear-gradient(115deg, transparent 38%, rgba(255,236,190,.24) 50%, transparent 62%);
+  background-size: 260% 100%; background-position: 115% 0; transition: background-position .8s ease;
+}
+.mem-karte:hover .rueck i, .mem-karte:focus-visible .rueck i { background-position: -15% 0; }
+.mem-karte .vorne { transform: rotateY(180deg); background: radial-gradient(ellipse at 50% 35%, #3d2c1c, #120d0a 75%); outline: 1px solid rgba(224,160,70,.45); outline-offset: -1px; }
+.mem-karte .vorne.skizze { background: radial-gradient(ellipse at 50% 40%, #f4e9cd, #d6c193); }
+.mem-karte .vorne img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; }
+.mem-karte .vorne.skizze img { object-fit: contain; padding: 6% 6% 20%; box-sizing: border-box; mix-blend-mode: multiply; }
+.mem-karte .vorne em {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 1.1em .25em .3em; text-align: center; font-style: normal;
+  font-family: var(--name); font-size: clamp(11px, calc(var(--mem-kw, 100px) * .115), 17px); line-height: 1.05; color: var(--vellum); overflow-wrap: break-word;
+  background: linear-gradient(transparent, rgba(16,14,21,.92));
+}
+.memory.mem-klein .mem-karte .vorne em { padding: .6em 2px .25em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.02em; }
+.mem-karte.weg .vorne { outline: 2px solid var(--ember); box-shadow: 0 0 calc(var(--mem-kw, 100px) * .16) rgba(224,160,70,.45); }
+.mem-karte.falsch .vorne { outline: 2px solid var(--blood); box-shadow: 0 0 12px rgba(155,58,47,.65); }
+
+/* Bewegung: Austeilen, Anheben beim Umdrehen, Treffer, Fehlgriff, Sieg */
+.memory.austeilen .mem-karte { animation: memAusteilen .5s cubic-bezier(.2,.8,.3,1.15) backwards; animation-delay: calc(var(--i, 0) * 24ms); }
+@keyframes memAusteilen { from { opacity: 0; transform: translateY(-40%) rotate(-10deg) scale(.8); } }
+.mem-karte.offen { animation: memHeben .6s ease-out; z-index: 2; }
+@keyframes memHeben { 45% { transform: translateY(-5%) scale(1.07); } }
+.mem-karte.treffer { animation: memTreffer .95s ease-out; z-index: 2; }
+.mem-karte.treffer .vorne { animation: memGluehen .95s ease-out; }
+@keyframes memTreffer { 30% { transform: scale(1.1); } 60% { transform: scale(.98); } }
+@keyframes memGluehen { 0% { box-shadow: 0 0 0 rgba(255,210,120,0); } 30% { box-shadow: 0 0 calc(var(--mem-kw, 100px) * .45) rgba(255,205,120,.95), inset 0 0 calc(var(--mem-kw, 100px) * .3) rgba(255,225,160,.6); } }
+.mem-karte.falsch { animation: memWackeln .4s ease-in-out; }
+@keyframes memWackeln { 20% { transform: translateX(-5%) rotate(-2deg); } 45% { transform: translateX(4%) rotate(1.5deg); } 70% { transform: translateX(-2%); } }
+.mem-funke {
+  position: absolute; z-index: 4; width: 5px; height: 5px; border-radius: 50%; pointer-events: none;
+  background: #fff1c9; box-shadow: 0 0 6px 2px rgba(255,190,90,.85); will-change: transform, opacity;
+}
+.mem-funke.gross { width: 7px; height: 7px; background: #ffd27a; }
+.memory.sieg .mem-karte { animation: memWelle 1.1s ease-in-out backwards; animation-delay: calc(var(--i, 0) * 45ms); }
+.memory.sieg .mem-karte .vorne { box-shadow: 0 0 calc(var(--mem-kw, 100px) * .22) rgba(255,205,120,.55); }
+@keyframes memWelle { 0%, 100% { transform: none; } 40% { transform: translateY(-9%) scale(1.06) rotate(-1.5deg); } }
+
+/* Siegestafel */
+.mem-siegtafel {
+  position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; padding: 5%; border-radius: inherit; cursor: pointer;
+  background: radial-gradient(ellipse at center, rgba(16,11,8,.45), rgba(16,11,8,.8)); animation: memTafelHinter .6s ease-out .55s backwards;
+}
+.mem-siegtafel.zu { display: none; }
+.mst-innen {
+  display: grid; justify-items: center; gap: .3em; max-width: 28em; max-height: 100%; overflow: hidden; padding: 1em 1.4em 1.1em; text-align: center; cursor: default;
+  font-size: clamp(11px, calc(var(--mem-kw, 100px) * .13), 18px);
+  background: linear-gradient(172deg, #f3e9d1, #d9c69c); color: #2a2118; transform: rotate(-1.2deg);
+  box-shadow: 0 16px 40px rgba(0,0,0,.65), 0 0 0 1px rgba(224,160,70,.65), 0 0 40px rgba(255,190,100,.25);
+  animation: memTafel .7s cubic-bezier(.2,.9,.3,1.25) .6s backwards;
+}
+@keyframes memTafelHinter { from { opacity: 0; } }
+@keyframes memTafel { from { opacity: 0; transform: translateY(18%) rotate(4deg) scale(.7); } }
+.mst-siegel {
+  display: grid; place-items: center; width: 3em; height: 3em; border-radius: 50%; margin-top: -.2em;
+  font-family: var(--display); font-size: 1.05em; color: #f3d9a0; letter-spacing: .02em;
+  background: radial-gradient(circle at 35% 30%, #cf4d3e, #7a1c16 68%, #5a120e);
+  box-shadow: 0 2px 6px rgba(0,0,0,.45), inset 0 0 0 .22em rgba(0,0,0,.16), inset 0 0 0 .36em rgba(255,200,150,.12);
+}
+.mst-titel { font-family: var(--name); font-size: 1.65em; line-height: 1.05; color: #1d1610; }
+.mst-wert { font-size: 1.05em; color: #5a4a36; font-variant-numeric: tabular-nums; }
+.mst-rekord { font-family: var(--hand); font-size: 1.6em; line-height: 1; color: #9b3a2f; animation: memRekord .9s ease-in-out infinite alternate; }
+@keyframes memRekord { to { transform: scale(1.1) rotate(-2deg); text-shadow: 0 0 10px rgba(224,160,70,.6); } }
+.mst-spruch { font-family: var(--hand); font-size: 1.3em; line-height: 1.1; color: #4a3a28; max-width: 20em; }
+.mst-nochmal { margin-top: .35em; min-height: 36px; color: #7a4a14; border-color: #7a4a14; font-size: max(11px, .95em); }
+.mst-nochmal:hover, .mst-nochmal:focus-visible { background: #7a4a14; color: #f3e9d1; }
+.memory.mem-klein .mst-spruch, .memory.mem-klein .mst-siegel { display: none; }
+
+/* Fuß: Auswahl links, Knöpfe rechts; die Siegesmeldung liest allein nur der Screenreader vor (sichtbar ist die Tafel) */
+.memory-fuss { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .6rem; }
+.memory-sieg { font-family: var(--hand); font-size: 1.45rem; color: var(--ember); line-height: 1.15; }
+.memory-sieg:empty { display: none; }
+#memory-karte:not(.mem-im-duell) .memory-sieg { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.memory-wahl { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.mw-stufen { display: inline-flex; border: 1px solid var(--line); }
+.mw-stufen button, .mw-zeit {
+  min-height: 36px; min-width: 42px; padding: .3rem .6rem; border: 0; background: none; color: var(--ash);
+  font: inherit; font-size: .88rem; font-variant-numeric: tabular-nums; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.mw-stufen button + button { border-left: 1px solid var(--line); }
+.mw-stufen button[aria-pressed="true"] { background: var(--ember); color: var(--night); }
+.mw-zeit { border: 1px solid var(--line); }
+.mw-zeit[aria-pressed="true"] { border-color: var(--ember); color: var(--ember); background: rgba(224,160,70,.13); }
+.mw-stufen button:hover:not([aria-pressed="true"]), .mw-zeit:hover { color: var(--vellum); }
+.mem-im-duell .memory-wahl, .mem-im-duell .memory-zeit { display: none; }
+
+/* Querformat: Tisch links, Titel/Kopf/Fuß rechts daneben */
+#taverne.saal-einzeln #memory-karte.mem-quer { max-width: min(100%, 92rem); }
+#memory-karte.mem-quer {
+  grid-template-columns: max-content var(--mem-seite); grid-template-rows: repeat(8, max-content) 1fr;
+  column-gap: clamp(1rem, 2.4vw, 2.2rem); row-gap: .7rem; justify-content: center; align-content: start; align-items: start;
+}
+#memory-karte.mem-quer > * { grid-column: 2; min-width: 0; }
+#memory-karte.mem-quer > .memory { grid-column: 1; grid-row: 1 / -1; justify-self: start; }
+#memory-karte.mem-quer .memory-kopf { flex-direction: column; align-items: flex-start; gap: .25rem; font-size: .95rem; }
+#memory-karte.mem-quer .memory-fuss { flex-direction: column; align-items: stretch; }
+#memory-karte.mem-quer .memory-knoepfe { justify-content: flex-start; margin-left: 0; }
+#memory-karte.mem-quer > .tav-info { font-size: .92rem; line-height: 1.45; }
+#memory-karte.mem-quer.mem-knapp > .tav-info, #memory-karte.mem-quer.mem-knapp > .label { display: none; }
+#memory-karte.mem-quer .mem-duell { grid-template-columns: 1fr; }
+#memory-karte.mem-quer .md-spieler.gegner { text-align: left; }
+#memory-karte.mem-quer .md-mitte { max-width: none; text-align: left; }
+.tav-karte.tav-voll#memory-karte { gap: .55rem; }
+.tav-karte.tav-voll#memory-karte.mem-quer { padding: .8rem 3.6rem .8rem .8rem; align-content: center; }
+.tav-karte.tav-voll#memory-karte .memory { justify-self: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mem-karte .innen { transition-duration: .01s; }
+  .mem-karte.offen, .mem-karte.treffer, .mem-karte.treffer .vorne, .mem-karte.falsch, .memory.sieg .mem-karte, .memory.austeilen .mem-karte,
+  .memory::before, .mem-siegtafel, .mst-innen, .mst-rekord { animation: none; }
+  .mem-karte .rueck i { transition: none; }
+}
+`;
+    document.head.appendChild(css);
   }
 
   /* --- Bestiarium-Memory: Online-Duell zu zweit (Verbindung und Lobby in duell.js) ---
@@ -1334,6 +1903,7 @@ html, body { overflow-x: clip; }
     if (!dk) { dk = document.createElement("div"); dk.id = "mem-duell"; dk.className = "mem-duell"; kopf.after(dk); }
     let rv = $("memory-revanche");
     if (!rv) { rv = document.createElement("button"); rv.type = "button"; rv.id = "memory-revanche"; rv.className = "tav-knopf duell-knopf"; rv.hidden = true; rv.addEventListener("click", mdRevanche); $("memory-neu").after(rv); }
+    zeitStopp(); $("memory").classList.remove("sieg", "austeilen");
     $("memory").innerHTML = ""; $("memory-sieg").textContent = "";
     s.on("stand", mdStandBekommen);
     s.on("zug", d => { if (!md || md.s !== s || !s.host || !md.st || d.nr !== md.st.nr) return; if (!mdZug(1, d.i)) mdSenden(); });
@@ -1437,16 +2007,18 @@ html, body { overflow-x: clip; }
     const grid = $("memory"); if (!grid || !md) return;
     const st = md.st;
     if (!st) { grid.innerHTML = ""; md.gebaut = 0; mdKopf(); return; }
-    if (md.gebaut !== st.nr || grid.children.length !== st.k.length) {
-      md.gebaut = st.nr;
-      grid.innerHTML = st.k.map((b, i) =>
-        '<button type="button" class="mem-karte" data-i="' + i + '" aria-label="' + esc(t().memKarte) + '"><span class="innen">' +
-        '<span class="seite rueck"><span>IT</span></span>' +
-        '<span class="seite vorne"><img src="' + esc(b) + '" alt="" loading="lazy"><em></em></span></span></button>').join("");
+    let frisch = false;
+    if (md.gebaut !== st.nr || grid.querySelectorAll(".mem-karte").length !== st.k.length) {
+      if (md.gebaut !== st.nr) memLookNeu(); /* neue Partie, neuer Tisch */
+      md.gebaut = st.nr; frisch = true;
+      grid.classList.remove("sieg");
+      grid.innerHTML = st.k.map((b, i) => kartenHtml(b, i)).join("");
+      mmPlanen();
     }
-    const liste = bestien();
+    const liste = memPool();
     grid.querySelectorAll(".mem-karte").forEach(el => {
       const i = +el.dataset.i, weg = st.w[i] >= 0, offen = !weg && st.o.includes(i), b = liste.find(x => x.bild === st.k[i]);
+      if (weg && !frisch && !el.classList.contains("weg")) treffer(el);
       el.classList.toggle("weg", weg); el.classList.toggle("offen", offen);
       el.classList.toggle("von-mir", weg && st.w[i] === md.ich); el.classList.toggle("von-gegner", weg && st.w[i] !== md.ich);
       if (!offen) el.classList.remove("falsch");
@@ -1487,6 +2059,7 @@ html, body { overflow-x: clip; }
       else if (md.rev[1 - md.ich]) sieg.textContent += " · " + T.mdRevancheWill(gegner);
       if (rv) { rv.hidden = false; rv.textContent = T.mdRevanche; rv.disabled = md.rev[md.ich] || !s.da(); rv.classList.toggle("lockt", md.rev[1 - md.ich] && !md.rev[md.ich]); }
     } else { sieg.textContent = ""; if (rv) rv.hidden = true; }
+    const siegDa = !!sieg.textContent; if (siegDa !== !!md.siegDa) { md.siegDa = siegDa; mmPlanen(); }
   }
   function mdSprache() {
     const b = $("memory-duell-knopf"); if (b) b.textContent = sprache() === "en" ? "⚔ Online duel" : "⚔ Online-Duell";
@@ -1502,12 +2075,12 @@ html, body { overflow-x: clip; }
 .md-spieler span { font-size: .8rem; color: var(--ash); }
 .md-spieler.gegner { text-align: right; }
 .md-spieler.dran { border-color: var(--ember); background: rgba(224,160,70,.13); box-shadow: 0 0 14px rgba(224,160,70,.35); }
-.md-spieler.gegner.dran { border-color: #7fb2ff; background: rgba(127,178,255,.1); box-shadow: 0 0 14px rgba(127,178,255,.35); }
+.md-spieler.gegner.dran { border-color: #5fc39a; background: rgba(95,195,154,.1); box-shadow: 0 0 14px rgba(95,195,154,.35); }
 .md-mitte { margin: 0; text-align: center; font-family: var(--hand); font-size: 1.35rem; line-height: 1.05; color: var(--ember); max-width: 10rem; }
 .mem-duell.ende .md-mitte { font-size: 1.6rem; color: #ffd27a; }
-.mem-karte.weg.von-gegner .vorne { border-color: #7fb2ff; box-shadow: 0 0 0 1px #7fb2ff, 0 0 18px rgba(127,178,255,.35); }
-.mem-karte.md-wartet .rueck span { opacity: 1; animation: mdPuls .6s ease-in-out infinite alternate; }
-@keyframes mdPuls { to { transform: scale(1.12); } }
+.mem-karte.weg.von-gegner .vorne { outline-color: #5fc39a; box-shadow: 0 0 calc(var(--mem-kw, 100px) * .16) rgba(95,195,154,.45); }
+.mem-karte.md-wartet { animation: mdPuls .6s ease-in-out infinite alternate; }
+@keyframes mdPuls { to { transform: scale(1.05); } }
 #memory-revanche.lockt { background: var(--ember); color: var(--night); animation: mdGlut .8s ease-in-out infinite alternate; }
 @keyframes mdGlut { from { box-shadow: 0 0 0 rgba(224,160,70,0); } to { box-shadow: 0 0 18px rgba(224,160,70,.75); } }
 #memory-revanche:disabled { opacity: .55; cursor: default; }
@@ -1524,8 +2097,7 @@ html, body { overflow-x: clip; }
     if ($("w20-los")) $("w20-los").textContent = letzterWurf ? t().probeNochmal : t().probeWuerfeln;
     liedZeigen(false);
     inspirationZeigen();
-    mdSprache();
-    if ($("memory") && mem.karten.length && !md) { namenSetzen(); memoryStatus(); if (mem.paare === mem.gesamt && mem.gesamt) $("memory-sieg").textContent = t().memSieg(mem.zuege); }
+    memSprache();
     const r = document.querySelector(".rex-guckt"); if (r) r.setAttribute("aria-label", t().rexLabel);
     const l = document.querySelector(".laute-knopf"); if (l) l.setAttribute("aria-label", t().lauteKnopf);
     skizzenVerstecken(); buchKnopfAktualisieren();

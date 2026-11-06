@@ -2286,6 +2286,15 @@
   }
 
   /* ---------- Zeichnen ---------- */
+  /* Startseite: das Eroberungsbuch als Porträtreihe (♥ erobert, ✗ Korb, ? noch nie getroffen) – füllt auf großen Bildschirmen die Tafel */
+  function startGalerie() {
+    const T = t();
+    const buch = buchLesen(), alle = NSC.concat(buch[BONUS.id] ? [BONUS] : []);
+    const n = alle.filter(x => buch[x.id] === "erobert").length;
+    return '<div class="ch-galerie"><p class="ch-klein">' + esc(T.buch) + " · " + n + " / " + alle.length + " ♥</p>" +
+      '<div class="ch-reihe">' + alle.map(x => { const st = buch[x.id], nm = T.nsc[x.id] ? T.nsc[x.id].name : x.id;
+        return '<span class="' + (st === "erobert" ? "ok" : st ? "korb" : "neu") + '" title="' + esc(st ? nm : "?") + '"><img src="' + esc(x.bild) + '" alt="">' + (st === "erobert" ? "♥" : st ? "✗" : "?") + "</span>"; }).join("") + "</div></div>";
+  }
   function zeichnen() {
     const T = t(), T2 = t2();
     $(".ch-label").textContent = T.label; $(".ch-titel").textContent = T.titel; $(".ch-text").textContent = T.text;
@@ -2312,7 +2321,7 @@
         '<button type="button" class="tav-knopf' + (g ? "" : " ch-haupt haupt") + '" data-tun="start">' + esc(T.start) + "</button>" +
         '<button type="button" class="tav-knopf" data-tun="buch">' + esc(T.buch) + "</button>" +
         '<button type="button" class="tav-knopf" data-tun="anleitung">' + esc(T2.anleitungKnopf) + "</button></div>" +
-        (r ? '<p class="ch-klein">' + esc(T.rekord(r)) + "</p>" : "");
+        (r ? '<p class="ch-klein">' + esc(T.rekord(r)) + "</p>" : "") + startGalerie();
       return;
     }
     const n = S.nsc, NT = T.nsc[n.id];
@@ -2581,6 +2590,11 @@
 .ch-reihe span { position: relative; width: 44px; height: 44px; border: 1px solid var(--line); background: #1b151e; display: grid; place-items: end center; font-size: .75rem; color: var(--ash); overflow: hidden; }
 .ch-reihe span.ok { border-color: #ff8aa0; color: #ff8aa0; }
 .ch-reihe img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: .8; }
+.ch-galerie { display: grid; gap: .4rem; margin-top: .6rem; }
+.ch-galerie .ch-reihe span.neu img { filter: brightness(0) drop-shadow(0 0 1px rgba(255,138,160,.6)); opacity: .55; }
+.ch-galerie .ch-reihe span.korb img { filter: grayscale(.8); opacity: .6; }
+@media (max-width: 760px), (max-height: 560px) { .ch-galerie { display: none; } }
+@media (min-width: 2200px) and (min-height: 1200px) { .ch-galerie .ch-reihe span { width: 4.2rem; height: 4.2rem; font-size: .95rem; } }
 .ch-buch-titel { margin: 0; font-family: var(--name); font-weight: 400; font-size: 1.3rem; color: var(--vellum); }
 .ch-buch { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); gap: .5rem; }
 .ch-seite { display: grid; gap: .2rem; justify-items: center; text-align: center; padding: .5rem; border: 1px solid var(--line); background: linear-gradient(180deg, #f1e6c8, #dccba0); color: #2a2016; }
