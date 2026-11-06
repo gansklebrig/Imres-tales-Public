@@ -26605,6 +26605,9 @@ try{if(window.__hsFK)window.__hsFK.bal={v:1,ziel:'+6–10 % Gruppenstärke je Ka
  staerker:['b_dorn','e_glut','e_dorn','e_wild','f_rex','f_konter','f_rudel','f_falke','z_schatten','z_blut','z_lang','a_druck','a_gold','a_elite','a_fuss','a_stern','a_schild','a_glueck'],
  legendaer:['l_glas','l_berserk','l_pakt','l_drache']}}catch(e){}
 
+(()=>{try{const _p=fkPool;fkPool=function(q){const L=_p.apply(this,arguments);try{if(q&&q.id==='echo'){const r=q.ranks||{};if(!((r.e_bear||0)+(r.e_charge||0)+(r.e_rat||0)))return L.filter(d=>d.id!=='e_wild')}}catch(e){}return L}}catch(e){console.warn('wild',e)}})();
+window.__hsWILD=1;
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
