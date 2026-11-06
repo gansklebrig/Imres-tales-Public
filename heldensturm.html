@@ -340,8 +340,6 @@ details.stats .stat{padding:0 12px 12px}
 .fire-wrap{min-height:70vh;justify-content:center;gap:8px}.fire-cv,.lager-cv{width:100%;max-width:640px;height:230px;border-radius:14px;border:1px solid rgba(229,180,84,.25);box-shadow:0 0 40px rgba(255,140,50,.12) inset;display:block;margin:6px auto;background:#0b0d1c}.lager-cv{height:260px;cursor:pointer}.fire-stats{margin:4px 0 0;font-size:14px;color:var(--muted,#b8a99a)}.fire-stats b{color:var(--text,#f4e9d8)}.fire-mvp{margin:0;font-size:14px}.fire-imre{margin:6px 0 0;font-style:italic;line-height:1.45;max-width:560px}.fire-imre span{font-style:normal;font-weight:800;color:#e5b454;letter-spacing:.04em}.fire-neu{margin:0;color:#ffd04a;font-size:14px}.npc-row{display:block;width:100%;max-width:520px;height:96px;margin:2px auto -4px}.fire-next{margin:0;font-size:13.5px}.lager-say{min-height:2.8em;margin:4px 0 6px;line-height:1.45}.lager-chips{justify-content:center}@media (max-width:520px){.fire-cv{height:190px}.lager-cv{height:220px}}
 </style>
 
-<!-- Ladebild: sofort schwarz statt kurz die alte Seite – verschwindet, sobald das Spiel bereit ist -->
-<div id="vorlade" style="position:fixed;inset:0;z-index:2147483000;background:#100c12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#e5b454;font:400 clamp(26px,7vw,44px) 'IM Fell English SC',Georgia,serif;transition:opacity .25s"><span>Heldensturm</span><i style="display:block;width:min(46vw,220px);height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#e5b454,transparent);background-size:200% 100%;animation:vorladeLauf 1.1s linear infinite"></i><style>@keyframes vorladeLauf{from{background-position:200% 0}to{background-position:-200% 0}}</style></div>
 <canvas id="cv" aria-label="Spielfeld"></canvas>
 <div id="hud" hidden>
   <div class="top">
@@ -25764,15 +25762,676 @@ try{window.__hsHI.hiOpen=hiOpen;window.__hsHI.hiNeu=hiNeu}catch(e){}
 (()=>{try{const _w=wlMini;wlMini=function(){try{if(G&&G.wl&&G.wl.an&&!G.room&&G.state==='play'&&WLMM.fog&&P){const n=performance.now();if(!(n-(WLMM.nt||0)<250&&n>=(WLMM.nt||0))){WLMM.nt=n;wlMiniNebel(false)}}}catch(e){}return _w.apply(this,arguments)}}catch(e){console.warn('nebel',e)}})();
 window.__hsNEBEL=1;
 
+
+/* ================= Paket „weg“: Weg-Momente – Lach- und Wow-Momente unterwegs (window.__hsWEG) =================
+   Baut auf karte/karte2 (Abschnitte, Hauptweg K.ka2W, Nischen K.kaNi, Rundwege), spass (spLeben/spLeicht/spGold/spRew),
+   npc (Blasen-Muster über banHeroP) und perf3 (Textebene für Blasen im Ultra-Modus) auf – nur anhängen/umhüllen.
+   - 27 Momentarten (Lachen, Staunen, kleine Dinge zum Anfassen), je Thema passend, mit mehreren Fassungen; Lauf-Gedächtnis:
+     keine Fassung zweimal pro Lauf, dieselbe Art frühestens nach drei anderen, seltene Arten ≈ 1 von 10 Stufen.
+   - Takt: ein neuer Moment, wenn seit ≥ 28–46 s nichts mehr passiert ist (Überraschungen, Figuren, Truhen, Schreine, eigene
+     Momente zählen mit) – bevorzugt vor euch auf dem Hauptweg, an Kurven. Nie zwei gleichzeitig; nicht im Boss-/Wächterkampf,
+     in der Arena, auf der Flucht, im Gespräch oder mitten im Kampf (dann warten). Feste Orte (Schild, Statue, Glocke …)
+     liegen in Flauten des Hauptwegs, Nischen und Rundwege bekommen lohnende Momente.
+   - Nichts hält an: keine Fenster, kein Stillstand, kein Hitstop. Sprechblasen über drawBubbles (Ultra: perf3-Textebene).
+   - Online: Gastgeber plant und belohnt; Szenen sind Effekte (G.fxs, wie Worte an Gäste geschickt), feste Dinge sind
+     Requisiten (G.props, gespiegelt). Klänge spielt jeder Rechner selbst aus vorhandenen Aufnahmen (amb/…, klang/…).
+   Präfix wg. Abschalten: window.__hsWEG.WG.aus=1 */
+window.__hsWEG={v:1,log:[]};
+const WG={aus:0,log:window.__hsWEG.log,mem:null,last:0,busy:0,gap:36,force:null,st:{szene:0,ort:0,versch:0},n:0};
+window.__hsWEG.WG=WG;
+const WG_WALD=['strasse','wald','nacht','teich'],WG_HOEH=['hoehle','tunnel','mine','minenetz','steinbruch'],WG_UNTER=['spinnweben','pilze','see','flucht','kuostadt'],
+ WG_GRACK=['gracklstugh','markt','slums','glutgang','hort','steinbruch'],WG_STADT=['dorf','geisterdorf','wurzeldorf','markt','slums','gracklstugh','kuostadt'],
+ WG_BURG=['schloss','wachhaus','kerker','hof','labor','turm','grab','ruine','schmiede'],WG_DRAUSSEN=['strasse','wald','nacht','teich','dorf','geisterdorf','wurzeldorf'],
+ WG_GLUT=['glutgang','hort','gracklstugh','schmiede'],WG_SPUK=['geisterdorf','wurzeldorf','grab','ruine','nacht','kerker','turm'];
+const WG_ALLE=[...new Set([...WG_WALD,...WG_HOEH,...WG_UNTER,...WG_GRACK,...WG_STADT,...WG_BURG])];
+const wgTh=()=>G.themeKey||'wald';
+const wgIn=L=>!L||L.includes(wgTh());
+const wgLeicht=()=>{try{return spLeicht()}catch(e){return false}};
+const WG_HN={barradin:'Barradin',echo:'Echo',friedrich:'Friedrich',ezekiel:'Ezekiel'};
+
+/* ---------- Klänge: vorhandene Aufnahmen (amb/…), bei Bedarf nachgeladen; sonst eingebaute Klänge ---------- */
+function wgTon(n,v,x,y){try{if(!SAVE.sound||!AC||AC.state!=='running'||!SFXB)return false;const b=kulLaden(n);if(!b)return false;let k=1;const q=NET.role==='guest'?(NET.mine||P):P;
+  if(q&&x!=null){const d=Math.hypot(x-q.x,y-q.y);k=1/(1+Math.max(0,d-160)/480)}const s=AC.createBufferSource();s.buffer=b;s.playbackRate.value=0.96+Math.random()*0.08;const g=AC.createGain();g.gain.value=v*k;s.connect(g);g.connect(SFXB);s.start();if(b.duration>4)s.stop(AC.currentTime+3.5);return true}catch(e){return false}}
+function wgVorlad(L){try{if(!AC)return;for(const n of L)if(n)kulLaden(n)}catch(e){}}
+const WG_TON=['n_niesen_3','n_niesen_7','e_huhn_2','e_huhn_5','e_glocke_1','n_drache_3','e_fernglocken_2','n_platsch_2','e_platsch_1','fx_cr_scream_01','e_kraehe_3','n_lachen_4','e_hund_2','a_wasserfall','e_stein_2'];
+
+/* ---------- Hauptweg: Länge, Projektion, Punkt bei Bogenlänge, Krümmung ---------- */
+function wgPfad(){const K=G.ka;if(!K||!K.ka2W||K.ka2W.length<2)return null;if(K.wgPf&&K.wgPf.W===K.ka2W)return K.wgPf;const W=K.ka2W,L=[0];
+ for(let i=1;i<W.length;i++)L.push(L[i-1]+Math.hypot(W[i][0]-W[i-1][0],W[i][1]-W[i-1][1]));return K.wgPf={W,L,len:L[L.length-1]}}
+function wgProj(pf,x,y){let bd=1e18,bs=0;const W=pf.W;for(let i=1;i<W.length;i++){const ax=W[i-1][0],ay=W[i-1][1],bx=W[i][0]-ax,by=W[i][1]-ay,l2=bx*bx+by*by||1;let u=((x-ax)*bx+(y-ay)*by)/l2;u=u<0?0:u>1?1:u;
+  const px=ax+bx*u,py=ay+by*u,d=(px-x)*(px-x)+(py-y)*(py-y);if(d<bd){bd=d;bs=pf.L[i-1]+u*Math.sqrt(l2)}}return{s:bs,d:Math.sqrt(bd)}}
+function wgAt(pf,s){s=clamp(s,0,pf.len);const L=pf.L,W=pf.W;let i=1;while(i<L.length-1&&L[i]<s)i++;const l=L[i]-L[i-1]||1,u=clamp((s-L[i-1])/l,0,1);
+ return{x:W[i-1][0]+(W[i][0]-W[i-1][0])*u,y:W[i-1][1]+(W[i][1]-W[i-1][1])*u,a:Math.atan2(W[i][1]-W[i-1][1],W[i][0]-W[i-1][0])}}
+function wgKurve(pf,s){const a=wgAt(pf,s-220).a,b=wgAt(pf,s+220).a;let d=Math.abs(b-a);if(d>Math.PI)d=TAU-d;return d}
+/* Inhalt in der Nähe (für Flauten): Requisiten mit Inhalt, Überraschungen, Figuren, Arenen, Lager mit Elite, Rätsel-Tore */
+const WG_INH=/^(chest|shrine|secret|goldpile|rolle|merchant|okaefig|leuchter|sp_|np_|ar_|ka_hebel|ka_siegel|ka_fass|ka_faehrmann|wg_)/;
+function wgInhalt(){const L=[];const add=(x,y)=>{if(isFinite(x)&&isFinite(y))L.push([x,y])};for(const p of G.props)if(!p.dead&&WG_INH.test(p.k))add(p.x,p.y);
+ if(G.sp&&G.sp.L)for(const o of G.sp.L)add(o.x,o.y);if(G.np&&G.np.L)for(const o of G.np.L){const p=o.pr||o;add(p.x,p.y)}if(G.ar&&G.ar.L)for(const A of G.ar.L)add(A.x,A.y);
+ const W=G.wl;if(W&&W.gr)for(const g of W.gr)if(g.k==='lager'&&g.m&&g.m.some(e=>e&&e.elite))add(g.x,g.y);const K=G.ka;if(K&&K.tore)for(const t of K.tore)if(t.main&&t.los&&t.los!=='offen')add(t.x,t.y);return L}
+const wgNahL=(L,x,y,r)=>{const r2=r*r;for(const p of L)if((p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y)<r2)return true;return false};
+/* freier Platz neben dem Weg (seitlich versetzt), erreichbar, nicht an Toren/anderen Requisiten */
+function wgPlatz(x,y,a,r,offs){const K=G.ka,W=G.wl;for(const o of offs||[90,120,70,150,0]){for(const sd of Math.random()<0.5?[1,-1]:[-1,1]){const px=x-Math.sin(a)*o*sd,py=y+Math.cos(a)*o*sd;
+   if(!wlFrei(px,py,r||22))continue;if(W.d0&&W.d0[wlZelle(W.nav,px,py)]===65535)continue;const s=kaSecAt(px,py);if(s===255||!K.sec[s]||K.sec[s].art==='arena')continue;
+   if(K.tore.some(t=>Math.hypot(t.x-px,t.y-py)<190))continue;if(G.props.some(p=>!p.dead&&Math.hypot(p.x-px,p.y-py)<80))continue;if(Math.hypot(K.start.x-px,K.start.y-py)<300)continue;return{x:px,y:py,sd}}}return null}
+
+/* ---------- Lauf-Gedächtnis ---------- */
+function wgMem(){const r=G.runId||0;if(!WG.mem||WG.mem.r!==r||WG.mem.g!==G)WG.mem={r,g:G,v:{},hist:[],selt:{},n:0};return WG.mem}
+function wgFrei(typ,n){const M=wgMem();const L=[];for(let i=0;i<n;i++)if(!M.v[typ+':'+i])L.push(i);return L}
+function wgNimm(typ,i){const M=wgMem();M.v[typ+':'+i]=1;M.hist.push(typ);if(M.hist.length>6)M.hist.shift();M.n++}
+
+/* ---------- Helden in der Nähe, Sprüche ---------- */
+function wgHelden(x,y,r){const L=spLeben().filter(q=>HERO_IDS.includes(q.id));L.sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y));const ids=[];for(const q of L)if(!ids.includes(q.id)&&(r==null||Math.hypot(q.x-x,q.y-y)<r))ids.push(q.id);return ids}
+const wgPk=(L,s)=>L[Math.abs((s|0))%L.length];
+/* Spruch des nächsten Helden: Q={barradin:[..],…,alle:[..]} */
+function wgSpruch(Q,id,s){const L=(Q&&(Q[id]||Q.alle))||null;return L&&L.length?wgPk(L,s):null}
+
+/* ---------- Szenen: Effekte in G.fxs (an Gäste gesendet), gezeichnet über HFX.wg ---------- */
+const WG_SZ={};
+function wgSzene(m,x,y,o){const f=Object.assign({k:'wg',m,x,y,t:0,life:4,a:0,seed:Math.floor(Math.random()*1e4),say:[],snd:[]},o||{});G.fxs.push(f);return f}
+/* Sprechblasen-Anker: Zahl = Darsteller der Szene (WG_SZ[m].pos), sonst Heldenkennung */
+const WGB={pos:[]};
+{const bh=banHeroP;banHeroP=function(id){if(typeof id==='string'&&id.charCodeAt(0)===119&&id.startsWith('wg:'))return WGB.pos[+id.slice(3)]||null;return bh.apply(this,arguments)}}
+{const db=drawBubbles;drawBubbles=function(){if(SAVE.dtBub===2||G.state!=='play'||!G.fxs||!G.fxs.length)return db.apply(this,arguments);let L=null;WGB.pos=[];
+ for(const f of G.fxs){if(f.k!=='wg'||!f.say||!f.say.length)continue;const Z=WG_SZ[f.m];for(const s of f.say){const tt=f.t-s[0];if(tt<0||f.t>=s[1])continue;let who=s[2];
+   if(typeof who==='number'){let p=null;try{p=Z&&Z.pos?Z.pos(f,who,f.t):null}catch(e){}if(!p)p={x:f.x,y:f.y-20};WGB.pos.push({x:p.x,y:p.y+44});who='wg:'+(WGB.pos.length-1)}
+   else if(!banHeroP(who))continue;(L||(L=[])).push({who,txt:String(s[3]||''),t:tt,dur:s[1]-s[0]})}}
+ if(!L)return db.apply(this,arguments);const B0=G.bubs;G.bubs=(B0||[]).concat(L);try{return db.apply(this,arguments)}finally{G.bubs=B0}}}
+/* Klänge der Szene: jeder Rechner spielt sie selbst ab (Zeitpunkt, Aufnahme, Lautstärke, Ersatzklang) */
+function wgFxTon(f){if(!f.snd||!f.snd.length)return;if(!f.__v){f.__v=1;wgVorlad(f.snd.map(s=>s[1]))}let m=f.__s||0;
+ for(let i=0;i<f.snd.length;i++){if(m&(1<<i))continue;const s=f.snd[i];if(f.t<s[0])continue;m|=1<<i;if(f.t-s[0]>0.6)continue;const ok=s[1]?wgTon(s[1],s[2]||0.4,f.x,f.y):false;if(!ok&&s[3])sfx(s[3],{x:f.x,y:f.y})}f.__s=m}
+HFX.wg=function(f,k,c,t){try{wgFxTon(f)}catch(e){}const Z=WG_SZ[f.m];if(Z&&Z.draw){try{Z.draw(f,c,t,wgLeicht())}catch(er){if(!WG.derr){WG.derr=1;console.error('wg draw',f.m,er)}}}};
+const wgN=f=>({nx:-Math.sin(f.a),ny:Math.cos(f.a),dx:Math.cos(f.a),dy:Math.sin(f.a)});
+const wgE=(a,b,u)=>a+(b-a)*clamp(u,0,1);
+const wgEase=u=>{u=clamp(u,0,1);return u*u*(3-2*u)};
+
+/* ---------- Figuren zeichnen ---------- */
+const WG_FIG={goblin:{shape:'goblin',c:'#6f9a3a',t:'#5a3a22'},kobold:{shape:'goblin',c:'#a8643a',t:'#5a3020'},robe:{shape:'human',c:'#9a2424',t:'#5a1414',skin:'#d9b08c'},
+ duergar:{shape:'duergar',c:'#5a5a62',t:'#3a3036',skin:'#8a8a92'},skel:{shape:'skel',c:'#e8e2d0',t:'#9a9384'},ork:{shape:'human',c:'#5a4a32',t:'#3a2a1a',skin:'#7a9a4a'},
+ haendler:{shape:'human',c:'#6a4a2a',t:'#3a5a2a',skin:'#d8b090',hat:1},zwerg:{shape:'duergar',c:'#7a5a3a',t:'#4a3222',skin:'#c8a080'}};
+function wgFig(c,def,x,y,r,t,face,rot,seed){if(!def)return;const e={def,x:0,y:0,r:r||12,flash:0,seed:seed||7,hp:1,maxHp:1,boss:true,faceX:face<0?-1:1,mv:1};
+ c.save();c.translate(x,y);if(rot)c.rotate(rot);try{drawEnemy(e,t)}catch(er){circ(c,0,-8,r||10,def.c||'#6a6a6a')}c.restore()}
+function wgHuhn(c,x,y,t,fl,s){s=s||1;c.save();c.translate(x,y);c.scale(fl*s,s);const h=Math.abs(Math.sin(t*18))*3;ell(c,0,6,8,3,'rgba(0,0,0,.3)');
+ ell(c,0,-4-h,9,7,'#f4efe2');ell(c,-7,-7-h,4,5,'#e8e0cc');circ(c,6,-11-h,4.5,'#f4efe2');poly(c,'#d8402a',5,-16-h,7,-19-h,9,-15-h);poly(c,'#f0a020',10,-11-h,14,-10-h,10,-9-h);circ(c,7,-12-h,0.9,'#1a1410');
+ ln(c,'#e0a030',1.4,-2,2-h,-3,6);ln(c,'#e0a030',1.4,2,2-h,3,6);c.restore()}
+function wgVogel(c,x,y,t,fl,col,s){s=s||1;const w=Math.sin(t*14)*6*s;c.save();c.translate(x,y);c.scale(fl,1);poly(c,col,0,0,-10*s,-6*s-w,-4*s,1);poly(c,col,0,0,10*s,-6*s-w,4*s,1);ell(c,0,0,5*s,3*s,col);circ(c,5*s,-1*s,2.4*s,col);poly(c,'#e0a030',7*s,-1*s,10*s,0,7*s,0.6*s);c.restore()}
+function wgMuenzen(c,x,y,n,u,seed){for(let i=0;i<n;i++){const a=-Math.PI/2+((i*1.7+seed)%2-1)*1.1,v=60+((i*37+seed)%40);const px=x+Math.cos(a)*v*u,py=y+Math.sin(a)*v*u+260*u*u;circ(c,px,py,2.4,i%2?'#ffd04a':'#e0aa3a')}}
+
+/* ================= Momentarten =================
+   art: 'lach' | 'wow' | 'ding' (Interaktion); th: Themenliste (null = überall); ort: 'szene' (Takt, vor euch) | 'weg' (feste Stelle am Hauptweg)
+   | 'nische' (Nische/Rundweg); w: Gewicht; selten: Wahrscheinlichkeit je Stufe, überhaupt infrage zu kommen; nv: Anzahl Fassungen */
+const WG_ART={
+ rutsch:{n:'Ausrutscher',art:'lach',ort:'szene',th:null,w:1.1,nv:4},
+ helm:{n:'Zu großer Helm',art:'lach',ort:'szene',th:[...WG_HOEH,...WG_UNTER,...WG_GRACK,...WG_BURG],w:0.9,nv:3},
+ zank:{n:'Streit unter Gegnern',art:'lach',ort:'szene',th:null,w:0.9,nv:4,kampf:1},
+ huhn:{n:'Huhn jagt Ork',art:'lach',ort:'szene',th:[...WG_WALD,'dorf','wurzeldorf','geisterdorf','hof','wachhaus','schloss','markt'],w:1,nv:3},
+ neck:{n:'Neckerei',art:'lach',ort:'szene',th:null,w:1.2,nv:40},
+ falle:{n:'Eigene Falle',art:'lach',ort:'szene',th:[...WG_WALD,...WG_HOEH,...WG_UNTER,...WG_BURG,'glutgang'],w:0.8,nv:3,kampf:1},
+ wurst:{n:'Wurstdieb',art:'lach',ort:'szene',th:[...WG_STADT,'hof','wachhaus'],w:0.8,nv:3},
+ lausch:{n:'Hinterhalt, belauscht',art:'lach',ort:'szene',th:[...WG_WALD,...WG_HOEH,...WG_UNTER,'kerker','ruine','grab'],w:0.8,nv:3,kampf:1},
+ echo:{n:'Das Echo',art:'lach',ort:'szene',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort','grab','turm','kerker'],w:0.8,nv:4},
+ elster:{n:'Die Elster',art:'wow',ort:'szene',th:[...WG_DRAUSSEN,'markt','hof','schloss','wachhaus'],w:0.7,nv:3},
+ gluehw:{n:'Glühwürmchen',art:'wow',ort:'szene',th:['wald','nacht','teich','strasse','pilze','spinnweben','see','wurzeldorf'],w:0.9,nv:3},
+ stern:{n:'Sternschnuppe',art:'wow',ort:'szene',th:WG_DRAUSSEN,w:0.8,nv:3,selten:0.14},
+ drache:{n:'Drachenschatten',art:'wow',ort:'szene',th:[...WG_DRAUSSEN,'hoehle','see','steinbruch','gracklstugh','markt','slums','glutgang','hof'],w:0.9,nv:3,selten:0.11},
+ geister:{n:'Geisterzug',art:'wow',ort:'szene',th:WG_SPUK,w:0.9,nv:3,selten:0.3},
+ aussicht:{n:'Aussichtspunkt',art:'wow',ort:'weg',th:[...WG_WALD,'hoehle','mine','steinbruch','see','pilze','turm','hof','schloss','gracklstugh','markt','glutgang','hort'],w:1,nv:4},
+ schild:{n:'Schild mit falscher Richtung',art:'lach',ort:'weg',th:null,w:1,nv:5},
+ skelett:{n:'Riesenskelett',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort','wald','nacht','grab','ruine'],w:0.8,nv:3,nische:1},
+ kristall:{n:'Kristalle, die aufleuchten',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort'],w:0.9,nv:3,nische:1},
+ fall:{n:'Wasserfall/Lavafall',art:'wow',ort:'weg',th:[...WG_WALD,...WG_HOEH,...WG_UNTER,'glutgang','hort','gracklstugh','schmiede'],w:0.8,nv:3,nische:1},
+ pilzring:{n:'Pilzring',art:'ding',ort:'weg',th:['wald','nacht','teich','pilze','spinnweben','see','wurzeldorf','hoehle'],w:0.8,nv:3,nische:1},
+ statue:{n:'Statue, die sich dreht',art:'wow',ort:'weg',th:[...WG_BURG,...WG_STADT,'hoehle','mine','spinnweben','see','glutgang','hort'],w:0.9,nv:4,nische:1},
+ bruecke:{n:'Geheimer Steg',art:'wow',ort:'nische',th:null,w:1,nv:2,nische:1},
+ mimik:{n:'Niesende Truhe',art:'lach',ort:'weg',th:[...WG_HOEH,...WG_UNTER,...WG_BURG,...WG_STADT],w:0.7,nv:3,nische:1},
+ glocke:{n:'Die Glocke',art:'ding',ort:'weg',th:[...WG_STADT,...WG_BURG],w:0.9,nv:3},
+ hebel:{n:'Der Hebel',art:'ding',ort:'weg',th:[...WG_HOEH,...WG_BURG,...WG_GRACK,'kuostadt','dorf'],w:0.9,nv:3},
+ raetsel:{n:'Drei Platten',art:'ding',ort:'weg',th:[...WG_BURG,...WG_HOEH,...WG_UNTER,'gracklstugh','glutgang','hort'],w:0.8,nv:2},
+ tier:{n:'Ein Tier folgt euch',art:'ding',ort:'weg',th:null,w:0.8,nv:3}};
+window.__hsWEG.ARTEN=WG_ART;
+
+/* ---------- Texte ---------- */
+const WG_TX={
+ rutsch_figur:{goblin:['Das war Absicht!','Niemand hat das gesehen!','Meine Münzen!','Ich wollte mich eh hinlegen.'],human:['Für die Flamme … autsch.','Das kommt nicht in den Bericht.','Wer hat hier gewischt?!','Meine Robe!'],
+  duergar:['Dieser Boden ist eine Schande!','Das war die Schwerkraft. Verrat!','Ich sehe die Steine sich drehen …','Der Boden hat zuerst geschlagen!'],skel:['Meine Knochen! … Sind noch alle da?','Klapper. Klapper. Klapper.','Das tat … nicht weh. Gar nichts tut weh.','Wo ist mein Bein?'],
+  zombie:['Uuuurgh …','Hhhrrnn. (peinlich)','Uuurgh! Meine Würde!','Gnnnh …']},
+ rutsch_held:{barradin:['Elegant. Das kommt in die Ballade.','Zehn Punkte für die Landung!','Zugabe!'],echo:['Die Natur hat ihn gerichtet. Und sein Gold mir.','Rutschig. Notiert.','Danke für die Spende.'],
+  friedrich:['Rex, nicht lachen.','Nicht hinterherrennen, Rex.','Der kommt nicht weit.'],ezekiel:['…','Würdelos.','Er ist gefallen. Ich nicht.']},
+ helm:['Wer hat das Licht ausgemacht?','Ist das hier links?','Ich seh euch! … Glaub ich.'],
+ helm2:['Mein Helm!','Gebt den zurück!','Das war Papas Helm!'],
+ helm_held:{barradin:['Passt mir auch nicht.','Ein Helm, groß wie ein Kochtopf.'],echo:['Im Helm: Münzen. Logisch.','Er hat sein Gold im Helm versteckt. Klug. Fast.'],friedrich:['Rex, lass den Helm.','Armer Kerl.'],ezekiel:['…Dong.','Laut.']},
+ zank:[['Das Gold gehört mir!','Ich hab’s zuerst gesehen!','Hast du nicht!','Hab ich wohl!'],['Du schuldest mir noch drei Kupfer!','Die waren für die Höhlenmiete!','Welche Höhlenmiete?!','Eben!'],
+  ['Ich bin hier der Anführer!','Seit wann?','Seit eben!','Wer hat abgestimmt?'],['Du hast meinen Eintopf gegessen!','Das war ein Eintopf?','Das war MEIN Eintopf!','Er war kalt!']],
+ zank_oh:['…Oh.','…Helden.','…Später weiter.'],
+ zank_held:{barradin:['Darf ich mitstreiten?','Ich habe Popcorn. Also … Nüsse.'],echo:['Ich nehme das Gold. Dann gibt es keinen Streit mehr.'],friedrich:['Rex, Schiedsrichter.'],ezekiel:['Ich schlichte. Auf meine Art.']},
+ huhn_ork:['Hilfe! Ruft es zurück!','Es ist hinter mir her!','Nicht das Huhn! Alles, nur nicht das Huhn!'],
+ huhn_held:{barradin:['Das wird ein Lied. Ein sehr kurzes.','Gegner: eins. Huhn: eins.'],echo:['Endlich mal ein vernünftiges Tier.','Das Huhn hat mehr Mut als er.'],friedrich:['Rex. Nein. Das Huhn hat Vorfahrt.','Rex bleibt hier.'],ezekiel:['Respekt. Dem Huhn.','…Ich mag das Huhn.']},
+ neck:{
+  solo:{barradin:['Wenn ich hier sterbe, singt bitte niemand das Lied.','Note an mich: neue Strophe über Staub.','Ich vermisse mein Publikum.','Ein Barde ohne Publikum ist … ein Mann mit Laute.','Noch drei Schritte bis zum Reim.','Das klingt nach Moll hier.'],
+   echo:['Ich zähle mein Gold. Dauert.','Hier wächst nichts Vernünftiges.','Noch zwei Feuerbälle, dann Pause.','Mein Hort vermisst mich bestimmt.','Wenn es brennt, war ich es nicht. Diesmal.','Ein Druide ohne Wald. Großartig.'],
+   friedrich:['Rex, bei Fuß.','Spuren. Alte Spuren.','Ich hab mal einen Gott geboxt. Hier ist es ruhiger.','Rex hat Hunger. Ich auch.','Wind von links. Merkt euch das.','Ruhig. Zu ruhig.'],
+   ezekiel:['…','Leise.','Die Schatten reden zu viel.','Ich gehe vor.','Hm.','Zu hell hier.']},
+  duo:[['barradin','echo','Echo, wie viel Gold hast du gerade?','Mehr als du. Genug gefragt.'],['echo','barradin','Barradin, sing leiser.','Ich singe gar nicht. … Noch nicht.'],
+   ['friedrich','barradin','Barradin, hör auf, Rex Lieder beizubringen.','Er hat Talent! Er heult im Takt!'],['barradin','ezekiel','Ezekiel, lächle doch mal!','…Nein.'],
+   ['echo','ezekiel','Ezekiel, du redest zu viel.','…'],['ezekiel','friedrich','Dein Hund folgt mir.','Er mag dich. Das ist selten.'],
+   ['friedrich','echo','Echo, nicht alles anzünden.','Ich zünde nur an, was es verdient.'],['barradin','friedrich','Friedrich, wie war das mit dem Gott?','Ich hab ihn geboxt. Ende der Geschichte.'],
+   ['echo','friedrich','Rex hat meinen Schuh.','Rex hat Geschmack.'],['ezekiel','barradin','Barradin. Dein Summen.','Das ist Kunst!'],['barradin','echo','Ich hab einen Reim auf „Echo“!','Wehe.'],['friedrich','ezekiel','Bleib in Sichtweite, Ezekiel.','Ich bin immer in Sichtweite. Du siehst mich nur nicht.']]},
+ falle:[['Nicht die Platte!','Wer hat die da hingelegt?!'],['Ups.','Das war meine Falle!'],['Ich hab doch gesagt, links!','Das WAR links!']],
+ falle_held:{barradin:['Danke für die Mithilfe!'],echo:['Effizient.'],friedrich:['Selbst gestellt, selbst gefangen.'],ezekiel:['Sie machen meine Arbeit.']},
+ wurst:['Haltet den Hund!','Meine Würste!','Der Hund! Die Würste!'],
+ wurst_held:{barradin:['Ein Dieb mit Stil.'],echo:['Wenigstens teilt er.'],friedrich:['Rex. Nicht. Mal. Daran. Denken.','Das war nicht Rex. Wirklich nicht.'],ezekiel:['…Guter Hund.']},
+ lausch:[['Psst! Sie kommen!','Wer?','Die Helden!','Und dann?','Wir springen raus und rufen BUH!'],['Psst! Ganz still sein!','Ich BIN still!','Du redest gerade!','Du auch!'],
+  ['Wenn sie kommen, versteckt euch!','Wo denn?','Hinter dem Stein!','Welcher Stein?','…Hinter dir!']],
+ lausch_buh:['BUH!','BUUUH!','Überraschung!'],
+ lausch_held:{barradin:['…Buh.','Furchterregend. Wirklich.'],echo:['Wir haben alles gehört.'],friedrich:['Rex hat sie schon vor einer Minute gerochen.'],ezekiel:['Zu laut. Viel zu laut.']},
+ echo_ruf:{barradin:'Hallo!',echo:'Hallo?',friedrich:'Rex? … Rex!',ezekiel:'…Hallo.'},
+ echo_quatsch:['{n} hat Angst im Dunkeln!','{n} schnarcht!','{n} singt falsch!','{n} hat die Karte verkehrt herum!'],
+ echo_held:['Das war kein Echo.','Wer hat das gesagt?!','Ich singe NICHT falsch.','Das Echo lügt.'],
+ elster:{barradin:['Eine Elster mit Geschmack!'],echo:['Das gehört jetzt in meinen Hort.','Danke, Vogel.'],friedrich:['Rex, nicht jagen.'],ezekiel:['Ein Dieb. Wie wir.']},
+ gluehw:{barradin:['Wie Kerzen auf einer Bühne …','Lichter für meinen Auftritt!'],echo:['Der Wald lebt. Schön.','Die kleinen Leuchter sind auf unserer Seite.'],friedrich:['Meine Glühwürmchen haben Verwandtschaft!','Rex, nicht schnappen.'],ezekiel:['…Schön.','Zu hell. Aber schön.']},
+ stern:{barradin:['Eine Sternschnuppe! Wünscht euch was!','Ich wünsche mir ein größeres Publikum.'],echo:['Ich wünsche mir Gold. Viel Gold.','Wünscht euch was. Ich weiß schon, was.'],friedrich:['Rex, wünsch dir was.','Gutes Zeichen.'],ezekiel:['…Ich wünsche nichts.','Hm. Einmal.']},
+ drache:[['War das …?','Weiterlaufen. Nicht hochschauen.'],['Habt ihr das gesehen?','Ich hab nichts gesehen. Du auch nicht.'],['Ein Drache?!','Er hat Hunger. Aber nicht auf uns. Hoffentlich.']],
+ drache_grack:[['Themberchaud?!','Zu klein. Hoffentlich.'],['Das war ein Drache!','Gracklstugh hat viele Schatten.'],['Der Meister der Flammen?','Weiter. Schnell.']],
+ geister:{barradin:['Nicht stören. Einfach … weitergehen.','Ein stilles Publikum.'],echo:['Sie suchen etwas. Nicht uns.','Totengeleit. Lasst sie ziehen.'],friedrich:['Rex, ruhig. Ganz ruhig.','Rex knurrt nicht. Das ist gut.'],ezekiel:['…Ich kenne einige von ihnen.','Sie grüßen mich.']},
+ aussicht:{barradin:['Was für ein Ausblick! Das wird die Ouvertüre.','Von hier sieht alles so klein aus.'],echo:['Von hier oben sieht man den ganzen Weg.','Schön. Und weit.'],friedrich:['Gute Sicht. Ich sehe den Weg.','Rex, schau – da hinten.'],ezekiel:['…Weit.','Hier könnte man bleiben. Kurz.']},
+ aussicht_n:['Ein Aussichtspunkt','Ein Felsvorsprung','Eine Lichtung mit Weitblick','Ein Balkon'],
+ schild:[['Ausgang →','Das Schild zeigt in die Wand.'],['Schatz! Wirklich!','Ein Schild, das lügt. Wie überraschend.'],['Keine Helden!','Zu spät.'],['Zur Drachenhöhle ↓','Ich glaube, das stimmt nicht.'],['Hier nicht lang','Na dann eben hier lang.']],
+ schild_held:{barradin:['Ich dreh es mal um.'],echo:['Goblin-Rechtschreibung.'],friedrich:['Rex, markier es.'],ezekiel:['…Falsch.']},
+ skelett:{barradin:['Ein Riese … was hat den erlegt?','Hoffentlich nicht das, was hier noch rumläuft.'],echo:['Alt. Sehr alt.','Die Erde holt sich alles zurück.'],friedrich:['Rex, das ist kein Knochen für dich.','Rex. NEIN.'],ezekiel:['…Groß.','Ich hätte ihn gern gekannt.']},
+ skelett_fund:['Im Schädel: ein Goldzahn!','Zwischen den Rippen glitzert es.','Ein alter Beutel, noch voll.'],
+ kristall:{barradin:['Sie klingen! Ein Kristallchor!','Das ist ja ein ganzes Orchester!'],echo:['Wunderschön. Und wertvoll.','Sie leuchten für uns.'],friedrich:['Rex, nicht anbellen.'],ezekiel:['…Hübsch.']},
+ fall:{barradin:['Ein Wasserfall! Hier unten!','Das rauscht wie Applaus.'],echo:['Erfrischend.','Klares Wasser. Selten hier.'],friedrich:['Rex, trink.'],ezekiel:['…Kalt.']},
+ lava:{barradin:['Ein Lavafall! Bitte nicht reinfallen.','Es wird warm. Wie meine Lieder.'],echo:['Feuer, das fließt. Schön.'],friedrich:['Rex, Abstand!'],ezekiel:['Ich wärme mir die Hände.']},
+ pilzring:{barradin:['Ich höre Musik … oder bin ich das?','Ein Feentanz! Ich führe!'],echo:['Ein Pilzring. Nicht drauftreten. Zu spät.','Fey-Zauber. Kurz, aber nett.'],friedrich:['Rex tanzt.','Mir ist schwindlig.'],ezekiel:['…','Ich tanze nicht.']},
+ statue:{barradin:['Sie hat sich bewegt!','Ich verneige mich vor dem Publikum.'],echo:['Alte Magie. Sie sieht uns.'],friedrich:['Rex, sitz. Sie mag das.'],ezekiel:['…Sie nickt.','Ein alter Wächter.']},
+ statue_n:['Ein steinerner Wächter','Eine uralte Königin','Ein Zwergenahn','Ein vergessener Krieger'],
+ bruecke:{barradin:['Ein Steg aus dem Nichts!','Magie, die mitdenkt.'],echo:['Die Steine helfen uns.'],friedrich:['Vorsichtig, Rex.'],ezekiel:['…Praktisch.']},
+ mimik:['Hatschi!','HATSCHI!','Hhh… hhh… HATSCHI!'],
+ mimik_held:{barradin:['Gesundheit!','Eine Truhe mit Schnupfen?'],echo:['Gesundheit. Und danke für das Gold.'],friedrich:['Rex, Abstand. Sie ist erkältet.'],ezekiel:['…Gesundheit.']},
+ glocke:{barradin:['Ich hab Rhythmus!','DONG! Das war ein Ton!'],echo:['Jetzt weiß jeder, dass wir hier sind.'],friedrich:['Rex hasst Glocken.'],ezekiel:['…Laut.']},
+ hebel:[['Nichts passiert. Aber es sah toll aus.','Das war … festlich.'],['Platsch!','Ich bin nass.'],['Klonk – eine Klappe in der Decke!','Gold regnet von oben!']],
+ hebel_held:{barradin:['Ich ziehe alle Hebel. Immer.'],echo:['Man zieht keine fremden Hebel.'],friedrich:['Rex hat geknurrt. Zu spät.'],ezekiel:['…Hm.']},
+ raetsel:['Drei Platten – fangt das Licht!','Die Platten leuchten nacheinander auf.'],
+ raetsel_ok:{barradin:['Rhythmusgefühl!'],echo:['Logisch.'],friedrich:['Schnell genug.'],ezekiel:['Zu leicht.']},
+ tier:{wald:['Ein Eichhörnchen','Fiep!','Es bringt euch eine Nuss … aus Gold.'],stadt:['Ein Ferkel','Oink!','Das Ferkel hat Trüffel gefunden!'],unter:['Ein kleiner Pilzling','…Pff!','Der Pilzling schenkt euch eine Pilzkappe.']},
+ tier_held:{barradin:['Ein Fan!','Mein neuestes Publikum.'],echo:['Es mag uns.','Ein kleiner Freund.'],friedrich:['Rex, das ist ein Freund.','Rex ist eifersüchtig.'],ezekiel:['…Geh weg. …Na gut, bleib.']}};
+window.__hsWEG.TX=WG_TX;
+
+/* ---------- Belohnungen (klein) ---------- */
+function wgSegen(k,t){for(const q of spLeben())withP(q,()=>{if(P.shrine&&P.shrine.t>0&&P.shrine.k!==k){spGold(P.x,P.y,2,0.6);return}P.shrine={k,t:Math.max(t,P.shrine&&P.shrine.k===k?P.shrine.t:0)};recalc()});if(!G.bot)sfx('segen')}
+function wgHeil(f,x,y,r){for(const q of spLeben())if(x==null||Math.hypot(q.x-x,q.y-y)<(r||400))withP(q,()=>{heal(P.st.maxHp*f)})}
+function wgTrank(n){for(const q of spLeben())withP(q,()=>{P.pots=Math.min(P.potMax,(P.pots||0)+n)})}
+function wgXp(f){for(const q of spLeben())withP(q,()=>{gainXp(xpNeed(P.level)*f)})}
+function wgGold(x,y,n){try{spGold(x,y,n,0.8)}catch(e){}}
+
+/* ---------- Protokoll, Takt ---------- */
+function wgLog(typ,v,x,y){const e={run:G.runId||0,st:G.stage,t:Math.round((G.stageTime||0)*10)/10,typ,v,x:Math.round(x||0),y:Math.round(y||0)};WG.log.push(e);if(WG.log.length>600)WG.log.splice(0,100);WG.last=G.time;WG.n++;try{if(G.wg)G.wg.n++}catch(e2){}}
+function wgBelegt(dur){WG.busy=G.time+dur;WG.last=G.time;WG.gap=rnd(28,46);try{G.banUntil=Math.max(G.banUntil||0,G.time+Math.min(dur,6));G.sayCd=Math.max(G.sayCd||0,G.time+Math.min(dur,6))}catch(e){}}
+/* Andere Momente zählen für den Takt mit */
+{const pe=window.__spEv;window.__spEv=function(k){WG.last=G.time;if(pe)try{pe.apply(this,arguments)}catch(e){}}}
+{const oc=openChest;openChest=function(p){try{WG.last=G.time}catch(e){}return oc.apply(this,arguments)}}
+{const us=useShrine;useShrine=function(p){try{WG.last=G.time}catch(e){}return us.apply(this,arguments)}}
+
+/* Ruhig genug für einen Moment? (kein Boss/Wächter, keine Arena, keine Flucht, kein Gespräch/Fenster, kein voller Kampf) */
+function wgRuhig(L){const K=G.ka;if(!K||!K.an||G.room||G.state!=='play'||G.paused||G.overlay)return(WG.rg=1,false);if(G.boss||G.guardE)return(WG.rg=2,false);if(K.esc||K.flucht)return(WG.rg=3,false);
+ const S=STAGES[G.stage];if(S&&S.escape)return(WG.rg=4,false);const O=G.obj;if(O&&!O.done&&O.k==='flucht')return(WG.rg=5,false);if(G.np&&G.np.dlg)return(WG.rg=6,false);
+ if(G.ar&&G.ar.L&&G.ar.L.some(A=>A.s===1))return(WG.rg=7,false);for(const q of L){const s=kaSecAt(q.x,q.y);if(s!==255&&K.sec[s]&&K.sec[s].art==='arena')return(WG.rg=8,false)}
+ if(G.sp&&G.sp.L&&G.sp.L.some(o=>o.st===1&&(o.typ==='hinterhalt'||o.typ==='steinschlag'||o.typ==='jagd')))return(WG.rg=9,false);
+ /* voller Kampf: ab 4 wachen Gegnern in der Nähe oder eine Elite/ein Champion dicht dran */let n=0;for(const e of G.enemies){if(e.dead||e.wlZz||e.summon)continue;for(const q of L){const d=(e.x-q.x)*(e.x-q.x)+(e.y-q.y)*(e.y-q.y);if((e.elite||e.champ)&&d<480*480)return(WG.rg=10,false);if(d<440*440){n++;break}}if(n>=4)return(WG.rg=11,false)}return true}
+
+/* ================= Planung je Stufe: feste Orte in Flauten, Nischen und Rundwegen ================= */
+function wgAn(){return!WG.aus&&!!(G.ka&&G.ka.an&&!G.room&&G.wl&&G.wl.an)&&G.mode!=='bossrausch'}
+function wgPlan(S,i){const K=G.ka;G.wg={key:(G.runId||0)+'|'+i,L:[],n:0,an:[]};WG.last=G.time;WG.busy=0;WG.gap=rnd(24,34);WG.wegS=-1;WG.lead=null;
+ if(K.esc||K.flucht||(S&&S.escape))return;wgVorlad(WG_TON.slice(0,8));const pf=wgPfad();const M=wgMem();
+ /* seltene Arten: einmal je Stufe auswürfeln */M.selt={};for(const k in WG_ART){const A=WG_ART[k];if(A.selten)M.selt[k]=Math.random()<A.selten}
+ const plaetze=[];
+ if(pf&&pf.len>1400){const inh=wgInhalt();const nMax=clamp(Math.round(pf.len/3600),2,4);const C=[];
+  for(let s=600;s<pf.len-500;s+=110){const p=wgAt(pf,s);let dm=1e9;for(const q of inh){const d=Math.hypot(q[0]-p.x,q[1]-p.y);if(d<dm)dm=d}if(dm<260)continue;C.push({s,x:p.x,y:p.y,a:p.a,v:Math.min(dm,800)/800+wgKurve(pf,s)*0.6+Math.random()*0.25})}
+  C.sort((a,b)=>b.v-a.v);for(const c of C){if(plaetze.length>=nMax)break;if(plaetze.some(q=>Math.abs(q.s-c.s)<1300))continue;plaetze.push({s:c.s,x:c.x,y:c.y,a:c.a,ort:'weg'})}}
+ /* Nischen und Rundwege */for(const o of K.kaNi||[]){if(Math.random()<0.7&&o.x!=null)plaetze.push({x:o.x,y:o.y,a:0,ort:'nische',ni:o})}
+ for(const t of K.tore)if(t.ka2&&t.typ==='seite'&&Math.random()<0.5){const s=K.sec[t.b];if(s)plaetze.push({x:s.cx,y:s.cy,a:0,ort:'nische',rund:1})}
+ for(const pl of plaetze){try{const o=wgOrtBau(pl);if(o){o.id=G.wg.L.length;G.wg.L.push(o);G.wg.an.push({x:o.x,y:o.y,typ:o.typ});WG.st.ort++}}catch(er){console.error('wgOrt',er)}}}
+{const ss=setupStage;setupStage=function(i){const r=ss.apply(this,arguments);try{if(!G.netGuestRun){G.wg=null;if(wgAn())wgPlan(STAGES[i],i)}}catch(er){console.error('wgPlan',er)}return r}}
+window.__hsWEG.anker=()=>G.wg&&G.wg.an?G.wg.an:[];
+
+/* Art für einen Ort/eine Szene wählen: Thema, Gedächtnis, nicht dieselbe Art wie in den letzten drei Momenten */
+function wgWahl(orte){const M=wgMem();const th=wgTh();const C=[];if(WG.zwang)return WG.zwang;
+ for(const k in WG_ART){const A=WG_ART[k];if(!orte.includes(A.ort)&&!(orte.includes('nische')&&A.nische))continue;if(!wgIn(A.th))continue;if(A.selten&&!M.selt[k])continue;if(M.hist.slice(-3).includes(k))continue;
+  if(G.wg&&G.wg.L.some(o=>o.typ===k))continue;if(!wgFrei(k,A.nv).length)continue;if(WG_OK[k]&&!WG_OK[k]())continue;C.push(k)}
+ if(WG.force&&C.includes(WG.force))return WG.force;if(!C.length)return null;let s=C.reduce((a,k)=>a+WG_ART[k].w,0)*Math.random();for(const k of C){s-=WG_ART[k].w;if(s<=0)return k}return C[C.length-1]}
+const WG_OK={
+ stern:()=>wgTh()==='nacht'||(typeof wxIs==='function'&&wxIs('nacht'))||Math.random()<0.25,
+ wurst:()=>true,
+ neck:()=>true};
+function wgFassung(typ){const L=wgFrei(typ,WG_ART[typ].nv);const i=L.length?pick(L):0;wgNimm(typ,i);return i}
+
+/* ---------- feste Orte bauen ---------- */
+function wgOrtBau(pl){const typ=wgWahl(pl.ort==='nische'?['nische']:['weg']);if(!typ)return null;let p;
+ if(pl.ort==='nische'){p=wlNahFrei(pl.x+rnd(-30,30),pl.y+rnd(-30,30),5);if(!p||!wlFrei(p.x,p.y,typ==='skelett'?34:20))p=wlNahFrei(pl.x,pl.y,6);if(!p)return null;if(G.props.some(q=>!q.dead&&Math.hypot(q.x-p.x,q.y-p.y)<60)){const a=rnd(TAU);const p2=wlNahFrei(p.x+Math.cos(a)*80,p.y+Math.sin(a)*60,4);if(p2)p=p2}}
+ else p=wgPlatz(pl.x,pl.y,pl.a,typ==='skelett'?40:typ==='raetsel'?46:24,typ==='pilzring'||typ==='raetsel'?[110,80,140]:null);
+ if(!p)return null;const v=wgFassung(typ);const o={typ,v,x:p.x,y:p.y,a:pl.a,ort:pl.ort,st:0};const pr={k:'wg_'+typ,prop:1,x:p.x,y:p.y,r:12,prog:0,used:0,type:String(v),seed:Math.floor(Math.random()*1e4),act:0,col:'',lab:''};
+ const T=WG_ORT[typ];if(T&&T.bau&&T.bau(o,pr,pl)===false)return null;G.props.push(pr);o.pr=pr;return o}
+
+/* ================= Ablauf je Bild (Gastgeber) ================= */
+function wgLeadP(L){const pf=wgPfad();if(!pf)return{q:L[0],s:0};let bq=L[0],bs=-1;for(const q of L){const r=wgProj(pf,q.x,q.y);if(r.d<500&&r.s>bs){bs=r.s;bq=q}}return{q:bq,s:Math.max(0,bs),pf}}
+function wgTick(dt){const D=G.wg;if(!D||G.netGuestRun||G.state!=='play'||!wgAn())return;const L=spLeben();if(!L.length)return;
+ /* Bewegung (kein Moment, wenn alle stehen) */let lauf=false;for(const q of L){const v=q.wgLx!=null?Math.hypot(q.x-q.wgLx,q.y-q.wgLy)/Math.max(dt,1e-3):0;q.wgLx=q.x;q.wgLy=q.y;q.wgV=(q.wgV||0)*0.9+v*0.1;if(q.wgV>45)lauf=true}
+ /* andere Momente: Überraschungen werden sichtbar, Figuren angesprochen */WG.pollT=(WG.pollT||0)-dt;if(WG.pollT<=0){WG.pollT=0.5;try{if(G.sp&&G.sp.L){let n=0;for(const o of G.sp.L)if(o.zeig||o.st>=1)n++;if(n!==WG.spN){if(WG.spN!=null&&n>WG.spN)WG.last=G.time;WG.spN=n}}
+   if(G.np&&G.np.dlg&&G.np.dlg!==WG.dlg){WG.dlg=G.np.dlg;WG.last=G.time}}catch(e){}}
+ const ruhig=wgRuhig(L);if(ruhig)WG.ruhT=(WG.ruhT||0)+dt;else WG.ruhT=0;
+ /* feste Orte */for(const o of D.L){if(o.st>=2)continue;const T=WG_ORT[o.typ];if(T&&T.tick){try{T.tick(o,dt,L,ruhig)}catch(er){console.error('wgOrt',o.typ,er);o.st=2}}}
+ /* laufende Szenen (Gegner-Szenen brauchen eine Nachverfolgung) */if(D.akt){const a=D.akt;try{const T=WG_LAUF[a.typ];if(!T||T(a,dt,L)===false)D.akt=null}catch(er){console.error('wgLauf',er);D.akt=null}}
+ /* Takt: lange nichts passiert → eine Szene vor euch */
+ const Y=WG.why||(WG.why={r:0,l:0,b:0,g:0,f:0});if(!ruhig||WG.ruhT<1.6){Y.r++;return}if(G.time<WG.busy||D.akt){Y.b++;return}if(!lauf){Y.l++;return}if(G.stageTime<(G.stage===0&&G.mode==='kampagne'?26:16))return;
+ if(G.time-WG.last<WG.gap&&!WG.jetzt){Y.g++;return}WG.jetzt=0;const r=wgSzeneStart(L);if(!r){Y.f++;WG.last=G.time-WG.gap+4;WG.st.versch++}}
+{const up=update;update=function(dt){const r=up.apply(this,arguments);try{if(!G.paused)wgTick(dt)}catch(er){if(!WG.err){WG.err=1;console.error('wgTick',er)}}return r}}
+
+/* Platz vor dem führenden Helden auf dem Hauptweg (bevorzugt an einer Kurve), sonst in Laufrichtung */
+function wgVorne(L,d0,d1){const ld=wgLeadP(L);const q=ld.q,pf=ld.pf;const K=G.ka;const ok=(x,y)=>{if(!wlFrei(x,y,16))return false;const s=kaSecAt(x,y);if(s===255||!K.sec[s]||K.sec[s].art==='arena'||!kaFrei(s))return false;if(Math.hypot(x-q.x,y-q.y)>d1+80)return false;return!(G.wl.fl&&G.wl.fl[wlZelle(G.wl.nav,x,y)]>=65535)};
+ if(pf&&wgProj(pf,q.x,q.y).d<420){let best=null,bv=-1e9;for(let d=d0;d<=d1;d+=40){const p=wgAt(pf,ld.s+d);if(!ok(p.x,p.y))continue;const v=wgKurve(pf,ld.s+d)*2-Math.abs(d-(d0+d1)/2)/300+Math.random()*0.2;if(v>bv){bv=v;best=p}}if(best)return best}
+ const a0=Math.atan2(q.vy||(q.wgLy!=null?0:0),q.vx||1);for(let k=0;k<12;k++){const a=(K.zp?Math.atan2(K.zp.y-q.y,K.zp.x-q.x):a0)+rnd(-0.7,0.7),d=rnd(d0,d1);const c=wlNahFrei(q.x+Math.cos(a)*d,q.y+Math.sin(a)*d,5);if(c&&ok(c.x,c.y))return{x:c.x,y:c.y,a}}return null}
+function wgSzeneStart(L){const typ=wgWahl(['szene']);if(!typ)return false;const fn=WG_SZENE[typ];if(!fn)return false;const v=wgFassung(typ);let ok=false;try{ok=fn(L,v)!==false}catch(er){console.error('wgSzene',typ,er)}
+ if(!ok){const M=wgMem();delete M.v[typ+':'+v];M.hist.pop();M.n--;return false}WG.st.szene++;return true}
+
+/* ---------- Gegner-Hilfen (Streit, belauschter Hinterhalt, eigene Falle) ---------- */
+const WG_HUM=new Set(['goblin','human','duergar','skel','zombie','bugbear']);
+function wgVolk(pr){let f=null;spMitPr(pr,()=>{for(let k=0;k<12&&!f;k++){const d=pickFoe(pr);if(d&&WG_HUM.has(d.shape)&&!d.boss)f=d}});return f}
+function wgGruppe(x,y,n,R,pr){const W=G.wl;const g={id:W.gr.length,k:'lager',x,y,R,m:[],wach:0,wp:null,wi:0,kaS:kaSecAt(x,y)};const f=wgVolk(pr)||FOES.goblin;
+ spMitPr(pr,()=>{for(let j=0;j<n;j++){const a=j/n*TAU+rnd(-0.3,0.3),q=wlNahFrei(x+Math.cos(a)*26,y+Math.sin(a)*20,4)||{x,y};const e=spawnEnemy(j===2?pickFoe(pr)||f:f,q.x,q.y,{});if(e){e.born=-9;e.wlG=g.id;e.wlZz=2;e.wgS=1;g.m.push(e)}}});
+ if(!g.m.length)return null;W.gr.push(g);return g}
+const wgPr=()=>{const K=G.ka;return clamp((K.cur||0)/Math.max(1,K.nMain-1),0,1)*0.9};
+const WG_LAUF={};
+
+/* ================= Szenen (Takt) ================= */
+const WG_SZENE={
+ rutsch(L,v){const p=wgVorne(L,220,360);if(!p)return false;const def=wgVolk(wgPr())||FOES.goblin;const sh=def.shape==='bugbear'?'goblin':def.shape;const fig=WG_FIG[sh==='human'?'robe':sh]||def;
+  const ids=wgHelden(p.x,p.y);const T=WG_TX.rutsch_figur[sh]||WG_TX.rutsch_figur.goblin;const th=wgTh();const pf=WG_GLUT.includes(th)?'asche':WG_UNTER.includes(th)||th==='pilze'?'schleim':WG_BURG.includes(th)?'wachs':'matsch';
+  const f=wgSzene('rutsch',p.x,p.y,{a:p.a,life:4.8,fig:Object.assign({},fig,{size:undefined}),pf,say:[[1.45,3.2,0,wgPk(T,v)]],snd:[[0.86,'n_platsch_2',0.45,'hit'],[0.95,null,0,'coin'],[1.5,'n_lachen_4',0.0,null]]});
+  const h=wgSpruch(WG_TX.rutsch_held,ids[0],v);if(h&&ids[0])f.say.push([3.0,4.8,ids[0],h]);later(1.0,()=>{wgGold(p.x,p.y,5)});wgBelegt(4.8);wgLog('rutsch',v,p.x,p.y)},
+ helm(L,v){const p=wgVorne(L,200,340);if(!p)return false;const ids=wgHelden(p.x,p.y);const f=wgSzene('helm',p.x,p.y,{a:p.a,life:4.6,say:[[0.2,1.5,0,wgPk(WG_TX.helm,v)],[2.4,3.6,0,wgPk(WG_TX.helm2,v)]],snd:[[1.6,'e_glocke_1',0.35,'thunk'],[2.3,null,0,'coin']]});
+  const h=wgSpruch(WG_TX.helm_held,ids[0],v);if(h&&ids[0])f.say.push([3.1,4.6,ids[0],h]);const n=wgN(f);later(2.3,()=>{wgGold(p.x+n.nx*60,p.y+n.ny*60,4)});wgBelegt(4.6);wgLog('helm',v,p.x,p.y)},
+ huhn(L,v){const p=wgVorne(L,220,360);if(!p)return false;const ids=wgHelden(p.x,p.y);const f=wgSzene('huhn',p.x,p.y,{a:p.a,life:6,say:[[0.3,2.2,0,wgPk(WG_TX.huhn_ork,v)],[2.0,3.0,1,'BOCK!']],snd:[[0.2,'e_huhn_2',0.45,'bark'],[0.5,'fx_cr_scream_01',0.22,null],[2.0,'e_huhn_5',0.5,null],[4.5,'e_huhn_2',0.3,null]]});
+  const h=wgSpruch(WG_TX.huhn_held,ids[0],v);if(h&&ids[0])f.say.push([3.4,5.4,ids[0],h]);
+  later(4.6,()=>{const q=wlNahFrei(p.x,p.y,4);if(q)G.props.push({k:'wg_ei',prop:1,x:q.x,y:q.y,r:10,used:0,prog:0,seed:1})});wgBelegt(6);wgLog('huhn',v,p.x,p.y)},
+ neck(L,v){const q=L[0];const ids=wgHelden(q.x,q.y,500);if(!ids.length)return false;const M=wgMem();const say=[];
+  if(ids.length>=2){const C=WG_TX.neck.duo.map((d,i)=>[d,i]).filter(([d,i])=>ids.includes(d[0])&&ids.includes(d[1])&&!M.v['neckd:'+i]);if(C.length){const[d,i]=pick(C);M.v['neckd:'+i]=1;say.push([0,2.6,d[0],d[2]],[2.3,4.9,d[1],d[3]])}}
+  if(!say.length){const id=ids[0];const Ls=WG_TX.neck.solo[id]||[];const C=Ls.map((x,i)=>i).filter(i=>!M.v['necks:'+id+i]);if(!C.length)return false;const i=pick(C);M.v['necks:'+id+i]=1;say.push([0,2.8,id,Ls[i]]);
+   if(id==='friedrich'&&G.allies.some(a=>a.kind==='rex'&&!a.dead))G.rexBub={txt:'Wuff!',t:-2.9}}
+  const dur=say[say.length-1][1]+0.2;wgSzene('neck',q.x,q.y,{life:dur,say});wgBelegt(Math.min(dur,4));wgLog('neck',v,q.x,q.y)},
+ falle(L,v){const p=wgVorne(L,200,280);if(!p)return false;const pf=wgPfad();const ld=wgLeadP(L);let A=null;if(pf){const a=wgAt(pf,wgProj(pf,p.x,p.y).s+200);if(wlFrei(a.x,a.y,18)&&kaFrei(kaSecAt(a.x,a.y)))A=a}
+  if(!A){const a=Math.atan2(p.y-ld.q.y,p.x-ld.q.x);const c=wlNahFrei(p.x+Math.cos(a)*200,p.y+Math.sin(a)*200,4);if(c)A=c}if(!A)return false;
+  const g=wgGruppe(A.x,A.y,G.mp?3:2+(SL()>8?1:0),300,wgPr());if(!g)return false;const th=wgTh();const art=WG_WALD.includes(th)?'netz':'stacheln';
+  const pr={k:'wg_platte',prop:1,x:p.x,y:p.y,r:10,used:0,prog:0,type:art,seed:v};G.props.push(pr);G.wg.akt={typ:'falle',v,g,pr,t:0,x:p.x,y:p.y};wgBelegt(3);wgLog('falle',v,p.x,p.y)},
+ zank(L,v){const p=wgVorne(L,400,500);if(!p)return false;const g=wgGruppe(p.x,p.y,2,165,wgPr());if(!g)return false;const T=WG_TX.zank[v%WG_TX.zank.length];const n=wgN({a:p.a});
+  const f=wgSzene('zank',p.x,p.y,{a:p.a,life:5.6,say:[[0,1.5,0,T[0]],[1.3,2.8,1,T[1]],[2.6,4.1,0,T[2]],[3.9,5.4,1,T[3]]],snd:[[0.1,'e_stein_2',0.15,null]],p0:[g.m[0].x,g.m[0].y],p1:[(g.m[1]||g.m[0]).x,(g.m[1]||g.m[0]).y]});
+  G.wg.akt={typ:'zank',v,g,f,t:0,x:p.x,y:p.y};wgBelegt(7);wgLog('zank',v,p.x,p.y)},
+ lausch(L,v){const p=wgVorne(L,480,580);if(!p)return false;const g=wgGruppe(p.x,p.y,G.mp?4:3,150,wgPr());if(!g)return false;const T=WG_TX.lausch[v%WG_TX.lausch.length];
+  const say=T.map((s,i)=>[i*1.2,i*1.2+1.35,i%2,s]);const f=wgSzene('zank',p.x,p.y,{a:p.a,life:say[say.length-1][1]+0.2,say,p0:[g.m[0].x,g.m[0].y],p1:[(g.m[1]||g.m[0]).x,(g.m[1]||g.m[0]).y],leise:1});
+  G.wg.akt={typ:'lausch',v,g,f,t:0,x:p.x,y:p.y};wgBelegt(6);wgLog('lausch',v,p.x,p.y)},
+ wurst(L,v){const p=wgVorne(L,200,340);if(!p)return false;const ids=wgHelden(p.x,p.y);const fr=ids.includes('friedrich');const f=wgSzene('wurst',p.x,p.y,{a:p.a,life:5,say:[[0,1.8,0,wgPk(WG_TX.wurst,v)]],snd:[[0.3,'e_hund_2',0.35,'bark'],[1.1,null,0,'potion']]});
+  const sp=fr?'friedrich':ids[0];const h=sp&&wgSpruch(WG_TX.wurst_held,sp,v);if(h)f.say.push([2.2,4.4,sp,h]);later(1.1,()=>{wgHeil(0.15,p.x,p.y,600);if(!G.bot)word(p.x,p.y-30,'Eine Wurst! +Leben','#ffb08a')});wgBelegt(5);wgLog('wurst',v,p.x,p.y)},
+ echo(L,v){const pf=wgPfad();const ld=wgLeadP(L);const q=ld.q;const ids=wgHelden(q.x,q.y,500);if(!ids.length)return false;const pts=[];
+  for(const d of [210,330,450]){let p=pf?wgAt(pf,ld.s+d):null;if(!p||!wlFrei(p.x,p.y,10)){const a=Math.atan2((G.ka.zp||q).y-q.y,(G.ka.zp||q).x-q.x);p={x:q.x+Math.cos(a)*d,y:q.y+Math.sin(a)*d}}pts.push([Math.round(p.x),Math.round(p.y)])}
+  const id=ids[0],ruf=WG_TX.echo_ruf[id]||'Hallo!';const ziel=ids.length>1?ids[1]:id;const quat=wgPk(WG_TX.echo_quatsch,v).replace('{n}',WG_HN[ziel]||'Jemand');const ant=ids.length>1?ids[1]:id;
+  wgSzene('echo',q.x,q.y,{life:7.6,pts,say:[[0,1.5,id,ruf],[0.9,2.1,0,'…'+ruf],[1.6,2.8,1,'…'+ruf.slice(Math.ceil(ruf.length/2))],[2.3,3.4,2,'…'+ruf.slice(-3)],[3.9,5.9,2,'…'+quat],[5.5,7.5,ant,wgPk(WG_TX.echo_held,v+ids.length)]]});wgBelegt(7.5);wgLog('echo',v,q.x,q.y)},
+ elster(L,v){const p=wgVorne(L,160,300);if(!p)return false;const ids=wgHelden(p.x,p.y);const f=wgSzene('elster',p.x,p.y,{a:p.a,life:4.2,snd:[[0.2,'e_kraehe_3',0.35,null],[1.4,null,0,'coin']]});
+  const h=wgSpruch(WG_TX.elster,ids[0],v);if(h&&ids[0])f.say.push([1.8,3.9,ids[0],h]);later(1.4,()=>{wgGold(p.x,p.y,4);if(!G.bot)word(p.x,p.y-30,'Etwas Glänzendes!','#ffd04a')});wgBelegt(4);wgLog('elster',v,p.x,p.y)},
+ gluehw(L,v){const p=wgVorne(L,120,220);if(!p)return false;const ids=wgHelden(p.x,p.y);const f=wgSzene('gluehw',p.x,p.y,{life:7.5,snd:[[0.1,null,0,'magic']]});const h=wgSpruch(WG_TX.gluehw,ids[0],v);if(h&&ids[0])f.say.push([1.2,3.6,ids[0],h]);
+  later(2,()=>{wgHeil(0.12,p.x,p.y,420)});wgBelegt(6);wgLog('gluehw',v,p.x,p.y)},
+ stern(L,v){const q=L[0];const ids=wgHelden(q.x,q.y);const f=wgSzene('stern',q.x,q.y,{life:4.4,snd:[[0.1,null,0,'blink'],[1.1,null,0,'segen']]});const h=wgSpruch(WG_TX.stern,ids[0],v);if(h&&ids[0])f.say.push([1.0,3.4,ids[0],h]);
+  if(ids[1]){const h2=wgSpruch(WG_TX.stern,ids[1],v+1);if(h2)f.say.push([2.6,4.4,ids[1],h2])}later(1.2,()=>wgSegen('glueck',15));wgBelegt(4.4);wgLog('stern',v,q.x,q.y)},
+ drache(L,v){const q=L[0];const ids=wgHelden(q.x,q.y);const gr=WG_GRACK.includes(wgTh());const T=(gr?WG_TX.drache_grack:WG_TX.drache)[v%3];
+  const f=wgSzene('drache',q.x,q.y,{a:rnd(TAU),life:4.8,say:[],snd:[[0.2,'n_drache_3',0.4,'roar'],[1.1,null,0,'dash']]});if(ids[0])f.say.push([1.7,3.5,ids[0],T[0]]);f.say.push([3.0,4.8,ids[1]||ids[0],T[1]]);later(1.3,()=>{G.shake+=3});wgBelegt(4.8);wgLog('drache',v,q.x,q.y)},
+ geister(L,v){const p=wgVorne(L,220,340);if(!p)return false;const ids=wgHelden(p.x,p.y);const sp=ids.includes('ezekiel')?'ezekiel':ids[0];const f=wgSzene('geister',p.x,p.y,{a:p.a,life:7.5,snd:[[0.2,'e_fernglocken_2',0.4,'magic']]});
+  const h=sp&&wgSpruch(WG_TX.geister,sp,v);if(h)f.say.push([2.2,4.6,sp,h]);later(3,()=>wgXp(0.06));wgBelegt(7);wgLog('geister',v,p.x,p.y)}};
+
+/* Nachverfolgung der Gegner-Szenen */
+WG_LAUF.zank=WG_LAUF.lausch=function(a,dt,L){a.t+=dt;const g=a.g;const wach=g.m.some(e=>!e.dead&&!e.wlZz);if(wach&&!a.oh){a.oh=1;if(a.f&&a.f.t<a.f.life)a.f.life=a.f.t+0.05;for(const e of g.m)if(!e.dead)e.stun=Math.max(e.stun||0,a.typ==='zank'?1.3:0.9);
+   const T=a.typ==='zank'?WG_TX.zank_oh:WG_TX.lausch_buh;const e0=g.m.find(e=>!e.dead)||a;const ids=wgHelden(a.x,a.y);const say=[[0,1.4,0,wgPk(T,a.v)]];const h=ids[0]&&wgSpruch(a.typ==='zank'?WG_TX.zank_held:WG_TX.lausch_held,ids[0],a.v);if(h)say.push([1.2,3.1,ids[0],h]);
+   wgSzene('sag',e0.x,e0.y-6,{life:3.2,say,snd:[[0,null,0,a.typ==='zank'?'thunk':'roar']]});WG.last=G.time}
+ if(g.m.every(e=>e.dead)){if(a.typ==='zank'){const p=wlNahFrei(a.x,a.y,6)||a;G.props.push({k:'goldpile',prop:1,x:p.x,y:p.y,r:16});if(!G.bot)word(p.x,p.y-30,'Der Streitwert','#ffd04a')}return false}
+ if(a.t>90)return false};
+WG_LAUF.falle=function(a,dt,L){a.t+=dt;const pr=a.pr;if(!pr.used){const E=a.g.m.filter(e=>!e.dead&&!e.wlZz);for(const e of E)if(Math.hypot(e.x-pr.x,e.y-pr.y)<46+e.r){pr.used=1;break}
+   if(pr.used){const T=WG_TX.falle[a.v%3];const net=pr.type==='netz';for(const e of a.g.m){if(e.dead||Math.hypot(e.x-pr.x,e.y-pr.y)>120)continue;e.stun=Math.max(e.stun||0,net?2.6:1.6);try{dealDmg(e,e.maxHp*(net?0.4:0.7),{quiet:0,noLs:1})}catch(er){}}
+    const ids=wgHelden(pr.x,pr.y);const say=[[0.1,1.5,0,T[0]],[1.2,2.7,0,T[1]]];const h=ids[0]&&wgSpruch(WG_TX.falle_held,ids[0],a.v);if(h)say.push([2.4,4.2,ids[0],h]);
+    wgSzene('falle',pr.x,pr.y,{life:4.3,art:pr.type,say,snd:[[0,null,0,net?'vine':'pierce'],[0.1,'e_stein_2',0.3,'thunk']]});G.shake+=2;WG.last=G.time}}
+ if(a.g.m.every(e=>e.dead))return false;if(a.t>60)return false};
+
+/* ---------- Szenen zeichnen ---------- */
+WG_SZ.sag={pos:(f)=>({x:f.x,y:f.y-30})};WG_SZ.neck={};
+WG_SZ.rutsch={pos(f,w,t){const p=wgRutschP(f,t);return{x:p.x,y:p.y-26}},draw(f,c,t,leicht){const n=wgN(f),u=f.t;const col={matsch:'#4a3a22',schleim:'#7a9a3a',asche:'#4a4440',wachs:'#e8dcb0'}[f.pf]||'#4a3a22';
+  c.globalAlpha=Math.min(1,u*3,(f.life-u)*2);ell(c,f.x,f.y+4,26,9,col);if(!leicht){c.globalAlpha*=0.5;ell(c,f.x-6,f.y+2,9,3,'rgba(255,255,240,.5)')}c.globalAlpha=1;
+  const p=wgRutschP(f,u);c.globalAlpha=Math.min(1,u*4,(f.life-0.2-u)*3);if(c.globalAlpha>0)wgFig(c,f.fig,p.x,p.y,11,t,p.fl,p.rot,f.seed);c.globalAlpha=1;
+  if(u>0.9&&u<1.8)wgMuenzen(c,f.x,f.y-10,6,(u-0.9)/0.9,f.seed%7);if(u>1.4&&u<2.6&&!leicht){c.font='bold 13px Georgia,serif';c.textAlign='center';c.fillStyle='#ffe58a';for(let i=0;i<3;i++){const a=t*4+i*2.1;c.fillText('✦',p.x+Math.cos(a)*12,p.y-24+Math.sin(a)*4)}}}};
+function wgRutschP(f,u){const n=wgN(f);let s,rot=0,lift=0;if(u<0.9)s=wgE(-190,-10,u/0.9);else if(u<1.45){const k=(u-0.9)/0.55;s=wgE(-10,30,k);lift=Math.sin(k*Math.PI)*34;rot=k*Math.PI*1.5}else if(u<2.6){s=30;rot=Math.PI*0.5}else if(u<2.9){s=30;rot=wgE(Math.PI*0.5,0,(u-2.6)/0.3)}else s=wgE(30,260,(u-2.9)/1.4);
+ const fl=n.nx>=0?1:-1;return{x:f.x+n.nx*s,y:f.y+n.ny*s-lift,rot:rot*fl,fl}}
+WG_SZ.helm={pos(f,w,t){const p=wgHelmP(f,t);return{x:p.x,y:p.y-30}},draw(f,c,t,leicht){const u=f.t,p=wgHelmP(f,u),n=wgN(f);c.globalAlpha=Math.min(1,u*4,(f.life-u)*3);
+  /* Stein, gegen den er läuft */ell(c,f.x+n.dx*24,f.y+n.dy*24+6,14,5,'rgba(0,0,0,.3)');hE(c,f.x+n.dx*24,f.y+n.dy*24-6,12,13,'#6a6460','#3a3632',1.5);
+  wgFig(c,WG_FIG.kobold,p.x,p.y,9,t,p.fl,p.rot,f.seed);const hx=u<1.6?p.x:wgE(p.x,f.x+n.nx*60,(u-1.6)/0.7),hy=u<1.6?p.y-14:(u<2.3?wgE(p.y-14,f.y+n.ny*60,(u-1.6)/0.7)-Math.sin(clamp((u-1.6)/0.7,0,1)*Math.PI)*50:f.y+n.ny*60);
+  c.save();c.translate(hx,hy);c.rotate(u>1.6?(u-1.6)*6:Math.sin(t*6)*0.15);hE(c,0,0,13,11,'#8a8a8e','#4a4a50',1.5);c.fillStyle='#6a6a70';c.fillRect(-14,2,28,3);c.restore();
+  if(u>1.55&&u<2.1&&!leicht){c.font='bold 15px Georgia,serif';c.textAlign='center';c.fillStyle='#ffe58a';c.fillText('DONG!',f.x+n.dx*24,f.y-40-(u-1.55)*30)}c.globalAlpha=1}};
+function wgHelmP(f,u){const n=wgN(f);let s,o=0,rot=0;if(u<1.6){s=wgE(-150,0,u/1.6);o=Math.sin(u*7)*14;rot=Math.sin(u*9)*0.2}else if(u<2.4){s=-8;rot=-0.4}else{s=wgE(-8,-40,(u-2.4)/0.3);o=wgE(0,-240,(u-2.6)/1.6)}
+ return{x:f.x+n.dx*s+n.nx*o,y:f.y+n.dy*s+n.ny*o,rot,fl:u<2.4?(n.dx>=0?1:-1):(n.nx>=0?-1:1)}}
+WG_SZ.huhn={pos(f,w,t){const p=wgHuhnP(f,t,w);return{x:p.x,y:p.y-(w?14:30)}},draw(f,c,t,leicht){const u=f.t;c.globalAlpha=Math.min(1,u*4,(f.life-u)*3);const o=wgHuhnP(f,u,0),h=wgHuhnP(f,u,1);
+  if(u<4.2)wgFig(c,WG_FIG.ork,o.x,o.y,13,t*1.6,o.fl,Math.sin(t*14)*0.12,f.seed);wgHuhn(c,h.x,h.y,t,h.fl,1);if(!leicht&&u<4.2&&Math.sin(t*9)>0.3){c.globalAlpha*=0.6;circ(c,h.x-h.fl*10,h.y-4,2,'#f4efe2')}c.globalAlpha=1}};
+function wgHuhnP(f,u,w){const n=wgN(f);if(w===0){const k=u/4.2,s=wgE(-260,280,k),o=Math.sin(k*TAU*1.5)*46;return{x:f.x+n.nx*s+n.dx*o,y:f.y+n.ny*s+n.dy*o,fl:n.nx>=0?1:-1}}
+ if(u<4.2){const k=clamp((u-0.35)/4.2,0,1),s=wgE(-260,280,k),o=Math.sin(k*TAU*1.5)*46;return{x:f.x+n.nx*s+n.dx*o,y:f.y+n.ny*s+n.dy*o,fl:n.nx>=0?1:-1}}
+ /* zurück zur Mitte, stolzieren */const k=clamp((u-4.2)/0.9,0,1),s=wgE(200,0,k);return{x:f.x+n.nx*s,y:f.y+n.ny*s,fl:n.nx>=0?-1:1}}
+WG_SZ.zank={pos(f,w){const q=w?f.p1:f.p0;return q?{x:q[0],y:q[1]-30}:{x:f.x,y:f.y-30}},draw(f,c,t,leicht){if(leicht||f.leise)return;const u=f.t;c.globalAlpha=Math.min(1,u*3,(f.life-u)*2)*0.9;for(let i=0;i<5;i++)circ(c,f.x-6+(i%3)*5,f.y+6-((i/3)|0)*3,2.6,i%2?'#ffd04a':'#e0aa3a');
+  if(Math.sin(t*7)>0){c.font='bold 12px Georgia,serif';c.textAlign='center';c.fillStyle='#ff9a7a';c.fillText('!',f.p0?f.p0[0]:f.x,(f.p0?f.p0[1]:f.y)-34)}c.globalAlpha=1}};
+WG_SZ.falle={draw(f,c,t,leicht){const u=f.t;const a=Math.min(1,(f.life-u)*2);c.globalAlpha=a;if(f.art==='netz'){const r=wgE(10,64,u/0.25);c.strokeStyle='rgba(220,210,180,.85)';c.lineWidth=1.4;c.beginPath();for(let i=0;i<8;i++){const an=i/8*TAU;c.moveTo(f.x,f.y-10);c.lineTo(f.x+Math.cos(an)*r,f.y-10+Math.sin(an)*r*0.7)}c.stroke();
+   for(const k of [0.4,0.75,1]){c.beginPath();c.ellipse(f.x,f.y-10,r*k,r*k*0.7,0,0,TAU);c.stroke()}}
+  else{const h=u<0.15?u/0.15*22:22;for(let i=-3;i<=3;i++){poly(c,'#b8b0a0',f.x+i*9-4,f.y+4,f.x+i*9,f.y+4-h-(i%2?4:0),f.x+i*9+4,f.y+4)}}c.globalAlpha=1}};
+WG_SZ.wurst={pos(f,w,t){const n=wgN(f);if(w===0)return{x:f.x-n.nx*260,y:f.y-n.ny*260-20};const p=wgWurstP(f,t);return{x:p.x,y:p.y-20}},draw(f,c,t,leicht){const u=f.t,p=wgWurstP(f,u);c.globalAlpha=Math.min(1,u*4,(f.life-u)*3);
+  if(u<3.4){drawRex(c,p.x,p.y,p.fl,t,true);for(let i=0;i<5;i++){const k=i+1;ell(c,p.x-p.fl*(12+k*9),p.y-2+Math.sin(t*16+k)*3,5,3,'#b0603a')}}
+  if(u>1.1){const n=wgN(f);ell(c,f.x,f.y+2,6,3.4,'#b0603a')}c.globalAlpha=1}};
+function wgWurstP(f,u){const n=wgN(f),k=clamp(u/3.2,0,1),s=wgE(-280,300,k);return{x:f.x+n.nx*s,y:f.y+n.ny*s+Math.sin(u*10)*3,fl:n.nx>=0?1:-1}}
+WG_SZ.echo={pos(f,w){const q=f.pts&&f.pts[w];return q?{x:q[0],y:q[1]}:{x:f.x,y:f.y}},draw(f,c,t,leicht){if(leicht)return;const u=f.t;for(let i=0;i<3;i++){const t0=0.9+i*0.7,k=u-t0;if(k<0||k>1.4)continue;const q=f.pts[i];c.globalAlpha=(1-k/1.4)*0.5;c.strokeStyle='#e8d8b0';c.lineWidth=1.5;c.beginPath();c.arc(q[0],q[1],10+k*40,0,TAU);c.stroke()}c.globalAlpha=1}};
+WG_SZ.elster={draw(f,c,t,leicht){const n=wgN(f),u=f.t,k=clamp(u/2.8,0,1),s=wgE(-420,420,k);const x=f.x+n.nx*s,y=f.y+n.ny*s,hgt=110+Math.sin(k*Math.PI)*30;c.globalAlpha=Math.min(1,u*3,(f.life-u)*2);
+  ell(c,x,y+4,9,3,'rgba(0,0,0,.25)');wgVogel(c,x,y-hgt,t,n.nx>=0?1:-1,'#1e1a1e',1.3);if(!leicht){circ(c,x-4,y-hgt+3,1.6,'#f4f0e0')}
+  if(u>1.1&&u<1.45){const kk=(u-1.1)/0.35;const s0=wgE(-420,420,1.1/2.8);circ(c,wgE(f.x+n.nx*s0,f.x,kk),wgE(f.y+n.ny*s0-hgt,f.y,kk),3,'#ffe27a')}c.globalAlpha=1}};
+WG_SZ.gluehw={draw(f,c,t,leicht){const u=f.t,N=leicht?12:34;const a0=Math.min(1,u*1.5,(f.life-u)*1.2);if(a0<=0)return;let sd=f.seed;
+  if(!leicht)c.globalCompositeOperation='lighter';for(let i=0;i<N;i++){sd=(sd*9301+49297)%233280;const r0=sd/233280;sd=(sd*9301+49297)%233280;const r1=sd/233280;
+   const R=60+r0*190,an=r1*TAU+u*(0.25+r0*0.4)*(i%2?1:-1),rise=Math.min(1,u*0.8+r1*0.3);const x=f.x+Math.cos(an)*R,y=f.y-6+Math.sin(an)*R*0.6-rise*30-Math.sin(u*1.6+i)*10;const fl=0.5+0.5*Math.sin(t*5+i*1.7);
+   c.globalAlpha=a0*(0.35+0.65*fl);if(leicht)circ(c,x,y,1.8,'#f0f08a');else{glow(x,y,10,'#e8f070',a0*0.6*fl,true);c.globalAlpha=a0;circ(c,x,y,1.4,'#fffcc0')}}c.globalCompositeOperation='source-over';c.globalAlpha=1}};
+WG_SZ.stern={draw(f,c,t,leicht){const u=f.t;if(u>1.6)return;c.save();c.setTransform(DPR,0,0,DPR,0,0);const k=clamp(u/1.1,0,1);const x0=W*0.12,y0=H*0.1,x1=W*0.78,y1=H*0.3;const x=wgE(x0,x1,k),y=wgE(y0,y1,k);
+  const a=Math.min(1,(1.6-u)*2);c.globalAlpha=a;const g=c.createLinearGradient(x-(x1-x0)*0.25,y-(y1-y0)*0.25,x,y);g.addColorStop(0,'rgba(255,240,200,0)');g.addColorStop(1,'rgba(255,248,220,.95)');c.strokeStyle=g;c.lineWidth=3;c.beginPath();c.moveTo(x-(x1-x0)*0.25,y-(y1-y0)*0.25);c.lineTo(x,y);c.stroke();
+  circ(c,x,y,3.4,'#fffbe8');if(!leicht&&u>1.0){const s=(u-1.0)*40;c.strokeStyle='rgba(255,230,160,'+a*0.7+')';c.lineWidth=1.5;c.beginPath();c.moveTo(x-s,y);c.lineTo(x+s,y);c.moveTo(x,y-s);c.lineTo(x,y+s);c.stroke()}c.restore()}};
+WG_SZ.drache={draw(f,c,t,leicht){const u=f.t,k=clamp(u/3.2,0,1);if(k>=1)return;const dx=Math.cos(f.a),dy=Math.sin(f.a),s=wgE(-760,760,k);const x=f.x+dx*s,y=f.y+dy*s;const a=Math.sin(k*Math.PI)*(leicht?0.4:0.5);c.globalAlpha=a;
+  c.save();c.translate(x,y);c.rotate(f.a);if(leicht){ell(c,0,0,90,40,'#000')}else{const w=Math.sin(t*3)*0.25;c.fillStyle='#000';c.beginPath();c.moveTo(110,0);c.lineTo(60,-12);c.lineTo(10,-24);c.lineTo(-30,-170-w*60);c.lineTo(-50,-60);c.lineTo(-90,-14);c.lineTo(-200,-4);c.lineTo(-200,4);c.lineTo(-90,14);c.lineTo(-50,60);c.lineTo(-30,170+w*60);c.lineTo(10,24);c.lineTo(60,12);c.closePath();c.fill()}
+  c.restore();c.globalAlpha=1}};
+WG_SZ.geister={draw(f,c,t,leicht){const n=wgN(f),u=f.t;const a0=Math.min(1,u*1.2,(f.life-u)*1.2)*0.55;for(let i=0;i<4;i++){const k=clamp((u-i*0.5)/5.5,0,1);if(k<=0||k>=1)continue;const s=wgE(-240,240,k),x=f.x+n.nx*s+n.dx*(i%2?14:-14),y=f.y+n.ny*s+n.dy*(i%2?14:-14)-Math.sin(t*2+i)*3;
+   c.globalAlpha=a0*Math.sin(k*Math.PI);if(!leicht){c.globalCompositeOperation='lighter';glow(x,y-16,30,'#d8f0c8',0.5,true);c.globalCompositeOperation='source-over'}c.globalAlpha=a0*Math.sin(k*Math.PI);
+   c.fillStyle='rgba(220,240,210,.75)';c.beginPath();c.moveTo(x-8,y+4);c.quadraticCurveTo(x-10,y-22,x,y-28);c.quadraticCurveTo(x+10,y-22,x+8,y+4);c.lineTo(x+4,y);c.lineTo(x,y+5);c.lineTo(x-4,y);c.closePath();c.fill();circ(c,x-2.5,y-20,1.2,'#2a2a22');circ(c,x+2.5,y-20,1.2,'#2a2a22');
+   if(i===0){circ(c,x+10,y-10,2.6,'#fff0b0')}}c.globalAlpha=1}};
+WG_SZ.aussicht={draw(f,c,t,leicht){if(leicht)return;const u=f.t,a=Math.min(1,u*2,(f.life-u))*0.35;if(a<=0)return;c.globalCompositeOperation='lighter';const dx=Math.cos(f.a),dy=Math.sin(f.a);
+  for(let i=0;i<4;i++){const o=(i-1.5)*40,x=f.x+dx*(90+i*20)-dy*o,y=f.y+dy*(90+i*20)+dx*o;c.globalAlpha=a*(0.5+0.5*Math.sin(t*1.3+i));glow(x,y-30,90,'#ffe0a0',0.5,true)}c.globalCompositeOperation='source-over';c.globalAlpha=1}};
+WG_SZ.kling={draw(){}};
+
+/* ---------- Kamera: kurzer Schwenk zum Ausblick (ohne Steuerverlust) ---------- */
+const WGC={x:0,y:0};
+{const cu=camUpd;camUpd=function(dt,vw,vh){if(G.cam&&(WGC.x||WGC.y)){G.cam.x-=WGC.x;G.cam.y-=WGC.y}const r=cu.apply(this,arguments);try{let tx=0,ty=0;const me=NET.role==='guest'?(NET.mine||P):P;
+  if(G.state==='play'&&me&&!G.boss&&!G.guardE)for(const f of G.fxs){if(f.k!=='wg'||f.m!=='aussicht')continue;if(Math.hypot(me.x-f.x,me.y-f.y)>320)continue;const k=Math.sin(clamp(f.t/f.life,0,1)*Math.PI);const d=Math.min(vw,vh)*0.17*k;tx=Math.cos(f.a)*d;ty=Math.sin(f.a)*d;break}
+  const kk=1-Math.exp(-Math.min(dt,0.05)*3);WGC.x+=(tx-WGC.x)*kk;WGC.y+=(ty-WGC.y)*kk;if(Math.abs(WGC.x)<0.3&&Math.abs(WGC.y)<0.3&&!tx&&!ty){WGC.x=WGC.y=0}if(G.cam){G.cam.x+=WGC.x;G.cam.y+=WGC.y}}catch(e){}return r}}
+
+/* ================= Feste Orte: Bau, Ablauf, Zeichnung ================= */
+const wgNahQ=(o,r,L)=>{for(const q of L||spLeben())if((q.x-o.x)*(q.x-o.x)+(q.y-o.y)*(q.y-o.y)<r*r)return q;return null};
+/* „Zeigen“ eines Ortes: Spruch des nächsten Helden, wenn es ruhig ist und gerade nichts anderes läuft */
+function wgZeig(o,R,L,ruhig,Q,dur){if(o.zeig||!ruhig||G.time<WG.busy)return false;const q=wgNahQ(o,R,L);if(!q)return false;o.zeig=1;const ids=wgHelden(o.x,o.y);const h=Q&&ids[0]&&wgSpruch(Q,ids[0],o.v);
+ if(h)wgSzene('sag',o.x,o.y,{life:2.6,say:[[0.2,2.6,ids[0],h]]});wgBelegt(dur||3);wgLog(o.typ,o.v,o.x,o.y);return true}
+function wgHalt(o,pr,r,dur,dt,L){const q=wgNahQ(pr,r,L);if(q){pr.prog=Math.min(1,pr.prog+dt/dur);if(pr.prog>=1)return q}else pr.prog=Math.max(0,pr.prog-dt*1.5);return null}
+const WG_ORT={
+ schild:{bau(o,pr){const pf=wgPfad();const a=o.a;pr.vx=Math.round((a+Math.PI+rnd(-0.6,0.6))*100)/100;pr.vy=Math.round(a*100)/100;pr.lab=WG_TX.schild[o.v%5][0];pr.r=10},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st===0){if(!ruhig||G.time<WG.busy)return;const q=wgNahQ(pr,150,L);if(!q)return;o.st=1;o.t=0;const ids=wgHelden(pr.x,pr.y);const T=WG_TX.schild[o.v%5];const say=[[0,2.4,ids[0],T[1]]];const h=wgSpruch(WG_TX.schild_held,ids[1]||ids[0],o.v);if(h)say.push([2.2,4.2,ids[1]||ids[0],h]);
+    wgSzene('sag',pr.x,pr.y,{life:4.3,say,snd:[[2.4,null,0,'thunk']]});wgBelegt(4.3);wgLog('schild',o.v,pr.x,pr.y);return}
+   if(o.st===1){o.t+=dt;if(o.t>2.4){pr.prog=Math.min(1,pr.prog+dt/0.6);if(pr.prog>=1){o.st=2;pr.used=1;wgGold(pr.x,pr.y,3)}}}}},
+ aussicht:{bau(o,pr,pl){/* Blick zur offenen Seite: Richtung mit der weitesten freien Sicht */let best=0,bv=-1;for(let i=0;i<12;i++){const a=i/12*TAU;let d=0;for(;d<900;d+=60){const x=pr.x+Math.cos(a)*d,y=pr.y+Math.sin(a)*d;if(x<40||y<40||x>WORLD-40||y>WORLD-40)break;if(blkPunkt(x,y,8))break}const v=d+Math.random()*40;if(v>bv){bv=v;best=a}}
+   pr.vx=Math.round(best*100)/100;pr.lab=WG_TX.aussicht_n[o.v%4];pr.r=12},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st!==0)return;if(!ruhig||G.time<WG.busy)return;const q=wgNahQ(pr,95,L);if(!q)return;o.st=2;pr.used=1;const ids=wgHelden(pr.x,pr.y);const h=wgSpruch(WG_TX.aussicht,ids[0],o.v);
+   wgSzene('aussicht',pr.x,pr.y,{a:pr.vx,life:4.6,say:h?[[0.6,3.4,ids[0],h]]:[],snd:[[0.1,null,0,'portal']]});later(1,()=>{wgXp(0.06);if(!G.bot)word(pr.x+60,pr.y-6,'Weitblick: + Erfahrung','#ffe0a0')});wgBelegt(4.6);wgLog('aussicht',o.v,pr.x,pr.y)}},
+ skelett:{bau(o,pr){pr.vx=Math.round(rnd(-0.5,0.5)*100)/100;pr.r=14},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(!o.zeig)wgZeig(o,300,L,ruhig,WG_TX.skelett,3);if(o.st===0){const q=wgHalt(o,pr,60,0.7,dt,L);if(q){o.st=2;pr.used=1;const z=wgPk(WG_TX.skelett_fund,o.v);wgGold(pr.x,pr.y,o.ort==='nische'?9:6);if(!G.bot)word(pr.x+46,pr.y-12,z,'#ffd04a');sfx('coin');if(!o.zeig){o.zeig=1;wgLog('skelett',o.v,pr.x,pr.y)}WG.last=G.time}}}},
+ kristall:{bau(o,pr){pr.r=12},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(!pr.act&&wgNahQ(pr,260,L)){pr.act=1;pr.prog=0}if(pr.act&&pr.prog<1){pr.prog=Math.min(1,pr.prog+dt/2.2)}
+   if(!o.zeig&&pr.act)wgZeig(o,260,L,ruhig,WG_TX.kristall,3);if(o.st===0&&pr.act){const q=wgNahQ(pr,56,L);if(q){o.st=2;pr.used=1;wgSegen('glueck',14);wgGold(pr.x,pr.y,3);if(!G.bot)word(pr.x+56,pr.y-6,'Kristallglanz: Glück!','#ffe0a0');if(!o.zeig){o.zeig=1;wgLog('kristall',o.v,pr.x,pr.y)}}}}},
+ fall:{bau(o,pr){const lava=WG_GLUT.includes(wgTh())||kaTh(wgTh()).glut;pr.type=lava?'lava':'wasser';pr.r=12},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(!o.zeig)wgZeig(o,320,L,ruhig,pr.type==='lava'?WG_TX.lava:WG_TX.fall,3);if(o.st===0){const q=wgHalt(o,pr,70,1.0,dt,L);if(q){o.st=2;pr.used=1;
+     if(pr.type==='lava'){wgSegen('raserei',9);if(!G.bot)word(pr.x,pr.y-60,'Glutsegen!','#ffb050')}else{wgHeil(0.2,pr.x,pr.y,300);if(!G.bot)word(pr.x,pr.y-60,'Erfrischt! + Leben','#e8f0d0')}if(!o.zeig){o.zeig=1;wgLog('fall',o.v,pr.x,pr.y)}WG.last=G.time}}}},
+ pilzring:{bau(o,pr){pr.r=10},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st!==0)return;const q=wgNahQ(pr,46,L);if(!q)return;o.st=2;pr.used=1;pr.act=1;const ids=wgHelden(pr.x,pr.y);const h=wgSpruch(WG_TX.pilzring,ids[0],o.v);
+   wgSzene('kling',pr.x,pr.y,{life:3.4,say:h?[[0.3,2.8,ids[0],h]]:[],snd:[[0,null,0,'magic'],[0.4,null,0,'note'],[0.8,null,0,'note'],[1.2,null,0,'note']]});wgSegen('eile',10);if(!G.bot)word(pr.x+60,pr.y-4,'Feentanz: Eile!','#ffd0f0');wgBelegt(3.4);wgLog('pilzring',o.v,pr.x,pr.y)}},
+ statue:{bau(o,pr){pr.lab=WG_TX.statue_n[o.v%4];pr.r=14},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(!o.zeig)wgZeig(o,240,L,ruhig,WG_TX.statue,3);if(o.st===0){const q=wgHalt(o,pr,74,0.8,dt,L);if(q){o.st=2;pr.used=1;pr.act=1;sfx('d_stone');
+     if(o.v%2){wgTrank(1);if(!G.bot)word(pr.x+50,pr.y-14,'Ein Fach öffnet sich: + Heiltrank','#ff9a8a')}else{wgGold(pr.x,pr.y,6);if(!G.bot)word(pr.x+50,pr.y-14,'Ein Fach öffnet sich!','#ffd04a')}if(!o.zeig){o.zeig=1;wgLog('statue',o.v,pr.x,pr.y)}WG.last=G.time}}}},
+ bruecke:{bau(o,pr){/* Steg aus schwebenden Steinen zu einer kleinen Truhe am Ende */const a=rnd(TAU);let end=null;for(let k=0;k<10&&!end;k++){const aa=a+k*0.6,q=wlNahFrei(pr.x+Math.cos(aa)*130,pr.y+Math.sin(aa)*100,3);if(q&&wlFrei(q.x,q.y,16)&&Math.hypot(q.x-pr.x,q.y-pr.y)>80)end=q}if(!end)return false;
+   pr.vx=Math.round(end.x-pr.x);pr.vy=Math.round(end.y-pr.y);pr.r=10;o.end=end},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st===0){if(!wgNahQ(pr,230,L))return;o.st=1;pr.act=1;sfx('magic');if(ruhig&&G.time>=WG.busy){const ids=wgHelden(pr.x,pr.y);const h=wgSpruch(WG_TX.bruecke,ids[0],o.v);if(h)wgSzene('sag',pr.x,pr.y,{life:3,say:[[0.8,3,ids[0],h]]});wgBelegt(3)}wgLog('bruecke',o.v,pr.x,pr.y);return}
+   if(o.st===1){pr.prog=Math.min(1,pr.prog+dt/1.6);if(pr.prog>=1){o.st=2;roomChest(o.end.x,o.end.y,1)}}}},
+ mimik:{bau(o,pr){pr.r=14},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st===0){if(!wgNahQ(pr,220,L)||G.time<WG.busy)return;o.st=1;pr.act=1;wgSzene('sag',pr.x,pr.y-4,{life:1.6,say:[[0,1.6,0,wgPk(WG_TX.mimik,o.v)]],snd:[[0,'n_niesen_3',0.45,'pierce']]});o.t=0;wgBelegt(2);wgLog('mimik',o.v,pr.x,pr.y);return}
+   if(o.st===1){o.t+=dt;if(o.t>3&&o.t<3.1&&!o.n2){o.n2=1;wgSzene('sag',pr.x,pr.y-4,{life:1.4,say:[[0,1.4,0,'Hhh… hatschi!']],snd:[[0,'n_niesen_7',0.4,null]]})}
+    const q=wgHalt(o,pr,56,0.5,dt,L);if(q){o.st=2;pr.used=1;wgGold(pr.x,pr.y,8);const ids=wgHelden(pr.x,pr.y);const h=wgSpruch(WG_TX.mimik_held,ids[0],o.v);wgSzene('sag',pr.x,pr.y-4,{life:3,say:[[0,1.3,0,'HATSCHI!']].concat(h?[[1.1,3,ids[0],h]]:[]),snd:[[0,'n_niesen_3',0.5,'pierce'],[0.1,null,0,'coin']]});if(!G.bot)word(pr.x+50,pr.y-6,'Die Truhe niest Gold!','#ffd04a')}}}},
+ glocke:{bau(o,pr){pr.r=12},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st!==0)return;const q=wgHalt(o,pr,60,0.5,dt,L);if(!q)return;o.st=2;pr.used=1;pr.act=1;const ids=wgHelden(pr.x,pr.y);const h=wgSpruch(WG_TX.glocke,ids[0],o.v);
+   wgSzene('kling',pr.x,pr.y,{life:3,say:h?[[0.6,2.8,ids[0],h]]:[],snd:[[0,'e_glocke_1',0.55,'big']]});let n=0;for(const e of G.enemies)if(!e.dead&&!e.boss&&!e.guard&&d2(e,pr)<620*620){e.stun=Math.max(e.stun||0,1.2);n++}
+   wgGold(pr.x,pr.y,3);if(!G.bot)word(pr.x,pr.y-70,n?'DONG! Gegner benommen':'DONG!','#ffe0a0');ring(pr.x,pr.y-30,200,'#ffe0a0',0.6,3);wgBelegt(3);wgLog('glocke',o.v,pr.x,pr.y)}},
+ hebel:{bau(o,pr){pr.r=10},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st!==0)return;const q=wgHalt(o,pr,52,0.45,dt,L);if(!q)return;o.st=2;pr.used=1;pr.act=1;const T=WG_TX.hebel[o.v%3];const ids=wgHelden(pr.x,pr.y);const h=wgSpruch(WG_TX.hebel_held,ids[1]||ids[0],o.v);
+   const say=[[0.4,2.4,ids[0],T[0]],[2.2,3.8,ids[0],T[1]]];if(h&&ids[1])say.push([3.6,5.2,ids[1],h]);wgSzene('hebel',pr.x,pr.y,{life:5.3,art:o.v%3,say,snd:[[0,null,0,'thunk'],[0.4,o.v%3===1?'e_platsch_1':null,0.5,o.v%3===0?'level':o.v%3===1?'d_slime':'coin']]});
+   later(0.5,()=>{if(o.v%3===0){if(!G.bot)sparks(pr.x,pr.y-60,'#ffd04a',20,220,1)}else if(o.v%3===1){withP(q,()=>heal(P.st.maxHp*0.12))}else wgGold(pr.x,pr.y,7)});wgBelegt(5);wgLog('hebel',o.v,pr.x,pr.y)}},
+ raetsel:{bau(o,pr){pr.r=10;pr.act=-1},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st===2)return;const P3=[-56,0,56].map(dx=>({x:pr.x+dx,y:pr.y}));
+   if(o.st===0){if(!wgNahQ(pr,200,L)||G.time<WG.busy)return;o.st=1;o.t=0;o.hit=0;o.i=-1;o.next=0.6;wgSzene('sag',pr.x,pr.y,{life:2.4,say:[[0,2.4,0,WG_TX.raetsel[o.v%2]]]});wgBelegt(2.4);wgLog('raetsel',o.v,pr.x,pr.y);return}
+   o.t+=dt;o.next-=dt;if(o.i>=0&&wgNahQ(P3[o.i],30,L)){o.hit++;sfx('note');o.next=0.35;o.i=-1;pr.act=-1+o.hit*10;if(o.hit>=3){o.st=2;pr.used=1;roomChest(pr.x,pr.y-40,1);const ids=wgHelden(pr.x,pr.y);const h=wgSpruch(WG_TX.raetsel_ok,ids[0],o.v);if(h)wgSzene('sag',pr.x,pr.y,{life:2.4,say:[[0,2.4,ids[0],h]]});sfx('legend');return}}
+   if(o.next<=0){let j=Math.floor(Math.random()*3);if(j===o.i)j=(j+1)%3;o.i=j;o.next=1.7;pr.act=o.i+o.hit*10}
+   if(o.t>16){o.t=0;o.hit=0;pr.act=-1;o.i=-1;o.next=2;if(!G.bot)word(pr.x,pr.y-40,'Zu langsam! Noch einmal …','#ffb060')}}},
+ tier:{bau(o,pr){const th=wgTh();pr.type=WG_WALD.includes(th)?'wald':WG_STADT.includes(th)||WG_BURG.includes(th)?'stadt':'unter';pr.lab=WG_TX.tier[pr.type][0];pr.r=8;o.hx=pr.x;o.hy=pr.y},
+  tick(o,dt,L,ruhig){const pr=o.pr;if(o.st===0){const q=wgNahQ(pr,200,L);if(!q||G.time<WG.busy)return;o.st=1;o.t=0;o.q=q;const ids=wgHelden(pr.x,pr.y);const T=WG_TX.tier[pr.type];const h=wgSpruch(WG_TX.tier_held,ids[0],o.v);
+     wgSzene('sag',pr.x,pr.y,{life:3.6,say:[[0,1.2,0,T[1]]].concat(h&&ruhig?[[1,3.6,ids[0],h]]:[])});wgBelegt(3.6);wgLog('tier',o.v,pr.x,pr.y);return}
+   if(o.st===1){o.t+=dt;const q=o.q&&!o.q.down&&!o.q.dead?o.q:spLeben()[0];if(!q){o.st=2;return}const a=Math.atan2(q.y-pr.y,q.x-pr.x),d=Math.hypot(q.x-pr.x,q.y-pr.y);const want=d>70?Math.min(d-60,(q.wgV||150)*1.15+60)*dt:0;
+    if(want>0){const nx=pr.x+Math.cos(a)*want,ny=pr.y+Math.sin(a)*want;if(wlFrei(nx,ny,6)){pr.x=nx;pr.y=ny}else if(d>420){const z=wlNahFrei(q.x-Math.cos(a)*50,q.y-Math.sin(a)*50,3);if(z){pr.x=z.x;pr.y=z.y}}}pr.vx=Math.cos(a)>=0?1:-1;pr.prog=want>0?1:0;
+    if(o.t>22&&ruhig||o.t>40){o.st=2;pr.used=1;const T=WG_TX.tier[pr.type];if(pr.type==='unter'){wgTrank(1)}else wgGold(pr.x,pr.y,6);if(!G.bot)word(pr.x,pr.y-30,T[2],'#ffe0a0');wgSzene('sag',pr.x,pr.y,{life:1.6,say:[[0,1.6,0,T[1]]],snd:[[0,null,0,'coin']]});o.weg=G.time}}}}};
+/* Ei vom Huhn: +1 Heiltrank */
+function wgEiTick(dt){for(const p of G.props){if(p.k!=='wg_ei'||p.dead||p.used)continue;const q=wgNahQ(p,30);if(q){p.used=1;p.dead=true;withP(q,()=>{P.pots=Math.min(P.potMax,(P.pots||0)+1)});if(!G.bot)word(p.x,p.y-30,'Ein frisches Ei: + Heiltrank','#ff9a8a');sfx('potion')}}}
+{const up=update;update=function(dt){const r=up.apply(this,arguments);try{if(!G.paused&&!G.netGuestRun&&G.state==='play')wgEiTick(dt)}catch(e){}return r}}
+/* Tier läuft nach dem Geschenk weg (Gastgeber) */
+{const up=update;update=function(dt){const r=up.apply(this,arguments);try{const D=G.wg;if(D&&!G.netGuestRun)for(const o of D.L)if(o.typ==='tier'&&o.weg&&!o.pr.dead){const pr=o.pr;pr.x+=pr.vx*-90*dt;pr.prog=1;if(G.time-o.weg>2.5)pr.dead=true}}catch(e){}return r}}
+
+/* ---------- Requisiten zeichnen ---------- */
+function wgPropDraw(p,t){const c=cx,k=p.k,L=wgLeicht();const me=NET.role==='guest'?(NET.mine||P):P;
+ switch(k){
+ case'wg_schild':{const u=p.prog||0,a=wgE(p.vx||0,p.vy||0,wgEase(u));ell(c,p.x+2,p.y+4,10,3,'rgba(0,0,0,.3)');c.fillStyle='#5a3a20';c.fillRect(p.x-2,p.y-34,4,36);
+  c.save();c.translate(p.x,p.y-30);const fl=Math.cos(a)>=0?1:-1;c.scale(fl,1);c.rotate(Math.sin(a)*0.35*fl);c.fillStyle='#a0703a';c.beginPath();c.moveTo(-18,-7);c.lineTo(14,-7);c.lineTo(22,0);c.lineTo(14,7);c.lineTo(-18,7);c.closePath();c.fill();c.strokeStyle='#5a3a20';c.lineWidth=1;c.stroke();c.restore();
+  if(!p.used&&me&&Math.hypot(me.x-p.x,me.y-p.y)<420)kaLabel(c,p.x,p.y-48,p.lab||'?','#e8d0a0');return true}
+ case'wg_aussicht':{ell(c,p.x+2,p.y+6,22,6,'rgba(0,0,0,.3)');c.fillStyle='#6a6258';c.fillRect(p.x-20,p.y-6,40,10);c.fillStyle='#8a8276';c.fillRect(p.x-22,p.y-10,44,5);for(let i=-2;i<=2;i++){c.fillStyle='#7a7266';c.fillRect(p.x+i*8-2,p.y-22,4,12)}c.fillStyle='#8a8276';c.fillRect(p.x-22,p.y-25,44,4);
+  if(!p.used&&me&&Math.hypot(me.x-p.x,me.y-p.y)<460){kaLabel(c,p.x,p.y-38,'👁 '+(p.lab||'Ausblick'),'#ffe0a0');if(!L){c.globalCompositeOperation='lighter';glow(p.x,p.y-12,36,'#ffe0a0',0.15+0.08*Math.sin(t*2),true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}return true}
+ case'wg_skelett':{wgSkelett(c,p.x,p.y,p.vx||0,L,p.used);if(!p.used){kaRing(c,p.x+52,p.y-18,18,p.prog,'#ffd04a');if(me&&Math.hypot(me.x-p.x,me.y-p.y)<200&&!L){c.globalAlpha=0.5+0.5*Math.sin(t*4);circ(c,p.x+50,p.y-14,1.8,'#ffe27a');c.globalAlpha=1}}return true}
+ case'wg_kristall':{wgKristall(c,p,t,L);return true}
+ case'wg_fall':{wgFall(c,p,t,L);return true}
+ case'wg_pilzring':{for(let i=0;i<9;i++){const a=i/9*TAU,x=p.x+Math.cos(a)*40,y=p.y+Math.sin(a)*24;const col=['#e070b0','#f0a050','#b070e0'][i%3];c.fillStyle='#e8d8b8';c.fillRect(x-1,y-6,2,6);ell(c,x,y-6,5,3,col);
+   if(!L&&!p.used){c.globalCompositeOperation='lighter';glow(x,y-6,12,col,0.25+0.15*Math.sin(t*3+i),true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}
+  if(!L){const n=p.used?3:5;for(let i=0;i<n;i++){const a=t*(p.used?3:1)+i*TAU/n;c.globalAlpha=0.6+0.4*Math.sin(t*5+i);circ(c,p.x+Math.cos(a)*24,p.y-14+Math.sin(a)*10-Math.sin(t*2+i)*6,1.6,'#fff0c8')}c.globalAlpha=1}return true}
+ case'wg_statue':{const q=me;let a=0;if(q&&!p.used&&Math.hypot(q.x-p.x,q.y-p.y)<520)a=clamp((q.x-p.x)/160,-1,1);
+  ell(c,p.x+2,p.y+6,18,6,'rgba(0,0,0,.35)');c.fillStyle='#5e5a56';c.fillRect(p.x-16,p.y-8,32,12);c.fillStyle='#7a766e';c.fillRect(p.x-11,p.y-46,22,40);c.fillStyle='#6e6a62';c.fillRect(p.x-14,p.y-40,4,26);c.fillRect(p.x+10,p.y-40,4,26);
+  c.save();c.translate(p.x,p.y-52);c.rotate(a*0.35);hE(c,a*4,0,9,10,'#8a867e','#4a4640',1.2);circ(c,a*6-3,-1,1.5,p.used?'#ffd04a':'#2a2824');circ(c,a*6+3,-1,1.5,p.used?'#ffd04a':'#2a2824');c.restore();
+  if(p.used){c.fillStyle='#2a2420';c.fillRect(p.x-6,p.y-4,12,7)}else{kaRing(c,p.x,p.y-20,30,p.prog,'#e8d8b0');if(me&&Math.hypot(me.x-p.x,me.y-p.y)<300)kaLabel(c,p.x,p.y-72,p.lab||'Statue','#e8d8b0')}return true}
+ case'wg_bruecke':{const k2=wgEase(p.prog||0),ex=p.vx||0,ey=p.vy||0,n=6;for(let i=0;i<n;i++){const u=(i+0.5)/n;const tx=p.x+ex*u,ty=p.y+ey*u;let sd=(p.seed+i*131)%997;const ox=((sd%61)-30)*3,oy=((sd%37)-18)*3-40;
+   const k=clamp(k2*1.4-i*0.08,0,1);const x=wgE(tx+ox,tx,wgEase(k)),y=wgE(ty+oy,ty,wgEase(k))-(1-k)*Math.sin(t*2+i)*6;c.globalAlpha=0.35+0.65*k;ell(c,x+2,y+3,12,4,'rgba(0,0,0,.25)');hE(c,x,y-2,12,6,'#7a7468','#4a443c',1.2);
+   if(!L&&k<1){c.globalCompositeOperation='lighter';glow(x,y-2,16,'#ffd890',0.3,true);c.globalCompositeOperation='source-over'}}c.globalAlpha=1;if(!p.act&&!L){c.globalAlpha=0.4+0.3*Math.sin(t*2);circ(c,p.x,p.y-8,2,'#ffe0a0');c.globalAlpha=1}return true}
+ case'wg_mimik':{const sn=p.act&&!p.used?Math.max(0,Math.sin(t*1.7))**8:0;const hop=sn*8;ell(c,p.x+2,p.y+6,16,5,'rgba(0,0,0,.35)');c.fillStyle='#6a4424';c.fillRect(p.x-14,p.y-14-hop,28,18);c.fillStyle='#8a5a30';c.fillRect(p.x-15,p.y-20-hop-sn*6,30,7);
+  c.fillStyle='#c8a050';c.fillRect(p.x-2,p.y-14-hop,4,5);if(p.act){for(let i=0;i<4;i++)poly(c,'#f0ead8',p.x-12+i*7,p.y-13-hop,p.x-9+i*7,p.y-9-hop-sn*3,p.x-6+i*7,p.y-13-hop);circ(c,p.x-6,p.y-17-hop-sn*6,1.4,'#1a1410');circ(c,p.x+6,p.y-17-hop-sn*6,1.4,'#1a1410')}
+  if(p.used){ell(c,p.x,p.y-24,6,2,'rgba(220,220,200,.5)')}else if(p.act)kaRing(c,p.x,p.y-8,22,p.prog,'#ffd04a');return true}
+ case'wg_glocke':{const sw=0;ell(c,p.x+2,p.y+6,14,4,'rgba(0,0,0,.3)');c.fillStyle='#5a3a20';c.fillRect(p.x-16,p.y-50,4,54);c.fillRect(p.x+12,p.y-50,4,54);c.fillRect(p.x-18,p.y-54,36,5);
+  c.save();c.translate(p.x,p.y-48);c.rotate(sw);c.fillStyle='#b88a3a';c.beginPath();c.moveTo(-8,4);c.quadraticCurveTo(-9,22,-13,26);c.lineTo(13,26);c.quadraticCurveTo(9,22,8,4);c.closePath();c.fill();circ(c,0,27,2.4,'#7a5a2a');c.restore();
+  if(!p.used)kaRing(c,p.x,p.y-30,26,p.prog,'#ffe0a0');return true}
+ case'wg_hebel':{ell(c,p.x+2,p.y+4,12,4,'rgba(0,0,0,.3)');c.fillStyle='#4a4650';c.fillRect(p.x-10,p.y-8,20,10);const a=p.used?0.7:-0.7;ln(c,'#8a6a4a',3,p.x,p.y-6,p.x+Math.sin(a)*22,p.y-6-Math.cos(a)*22);circ(c,p.x+Math.sin(a)*22,p.y-6-Math.cos(a)*22,4,'#c84a3a');
+  if(!p.used){kaRing(c,p.x,p.y-12,22,p.prog,'#e8d0a0');if(me&&Math.hypot(me.x-p.x,me.y-p.y)<260)kaLabel(c,p.x,p.y-40,'Ein Hebel','#e8d0a0')}return true}
+ case'wg_raetsel':{const act=p.act==null?-1:p.act,i=act<0?-1:act%10,hits=act<0?Math.max(0,Math.round((act+1)/10)):Math.floor(act/10);for(let j=0;j<3;j++){const x=p.x+(j-1)*56,y=p.y,on=j===i&&!p.used;ell(c,x,y+2,20,8,'rgba(0,0,0,.3)');hE(c,x,y,18,7,on?'#e8c060':'#6a6458','#3a362e',1.5);
+   c.font='bold 11px Georgia,serif';c.textAlign='center';c.fillStyle=on?'#3a2410':'#a89c84';c.fillText(['ᚱ','ᛟ','ᚦ'][j],x,y+4);if(on&&!L){c.globalCompositeOperation='lighter';glow(x,y-2,28,'#ffd070',0.5,true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}
+  if(!p.used){for(let j=0;j<3;j++)circ(c,p.x-10+j*10,p.y-24,3,j<hits?'#ffd04a':'#4a4438');if(me&&Math.hypot(me.x-p.x,me.y-p.y)<300)kaLabel(c,p.x,p.y-36,'Drei Platten','#e8d0a0')}return true}
+ case'wg_tier':{if(p.dead)return true;const fl=p.vx||1,mv=p.prog>0;const b=mv?Math.abs(Math.sin(t*14))*3:0;c.save();c.translate(p.x,p.y);c.scale(fl,1);ell(c,0,4,8,3,'rgba(0,0,0,.3)');
+  if(p.type==='wald'){ell(c,0,-3-b,7,5,'#a8582a');circ(c,6,-8-b,4,'#b8683a');poly(c,'#a8582a',5,-11-b,6,-15-b,8,-11-b);c.strokeStyle='#c87a42';c.lineWidth=5;c.beginPath();c.moveTo(-6,-4-b);c.quadraticCurveTo(-16,-12-b,-8,-18-b);c.stroke();circ(c,7.5,-8.5-b,0.9,'#1a1410')}
+  else if(p.type==='stadt'){ell(c,0,-4-b,9,6,'#f0b0b0');circ(c,8,-6-b,4.6,'#f4c0c0');ell(c,11.5,-5.5-b,2,1.6,'#e09090');poly(c,'#e8a0a0',5,-10-b,7,-13-b,8,-9-b);circ(c,8,-7.5-b,0.9,'#1a1410');ln(c,'#e8a0a0',1.2,-9,-6-b,-12,-9-b)}
+  else{c.fillStyle='#d8c8a8';c.fillRect(-2.5,-8-b,5,8);ell(c,0,-9-b,8,5,'#c86a8a');circ(c,-3,-10-b,1.2,'#f0e0e8');circ(c,3,-11-b,1,'#f0e0e8');circ(c,-1.5,-4-b,0.8,'#2a1a1a');circ(c,1.5,-4-b,0.8,'#2a1a1a');if(!L){c.globalCompositeOperation='lighter';glow(0,-9-b,14,'#e070b0',0.25,true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}
+  c.restore();return true}
+ case'wg_ei':{ell(c,p.x+1,p.y+3,6,2,'rgba(0,0,0,.3)');ell(c,p.x,p.y-3,4.5,6,'#f4eedc');if(!L){c.globalAlpha=0.5+0.5*Math.sin(t*3);circ(c,p.x-1.5,p.y-5,1.2,'#ffffff');c.globalAlpha=1}return true}
+ case'wg_platte':{if(p.used)return true;hE(c,p.x,p.y,15,6,'#5a5248','#3a342c',1.2);c.fillStyle='rgba(30,24,18,.6)';c.fillRect(p.x-6,p.y-1,12,2);return true}}
+ return false}
+function wgSkelett(c,x,y,rot,L,used){c.save();c.translate(x,y);c.rotate(rot*0.3);ell(c,0,6,100,30,'rgba(0,0,0,.2)');const B='#ddd5c0',w=L?3:4.5;c.strokeStyle=B;c.lineWidth=w;c.lineCap='round';
+ /* Wirbelsäule */ln(c,B,w,-44,0,40,-2);if(!L)for(let i=0;i<8;i++)circ(c,-40+i*10,-1,2.6,'#e8e0cc');
+ /* Rippen: Bögen beidseits, zum Becken kürzer */for(let i=0;i<5;i++){const xx=8+i*7,h=26-i*3;c.beginPath();c.ellipse(xx,-1,6,h,0,Math.PI*0.62,Math.PI*1.38);c.stroke();c.beginPath();c.ellipse(xx,-1,6,h,0,-Math.PI*0.38,Math.PI*0.38);c.stroke()}
+ /* Schultern und Arme */ln(c,B,w,40,-30,40,28);ln(c,B,w,40,-30,18,-52);ln(c,B,w,18,-52,-6,-46);ln(c,B,w,40,28,22,50);ln(c,B,w,22,50,0,58);for(const[hx,hy]of[[-6,-46],[0,58]])for(let f=0;f<3;f++)ln(c,B,w*0.5,hx,hy,hx-8,hy-5+f*5);
+ /* Becken und Beine */hE(c,-48,0,10,16,'#d8d0bc','#a8a08c',1.2);ln(c,B,w,-54,-10,-88,-26);ln(c,B,w,-88,-26,-120,-18);ln(c,B,w,-54,10,-90,22);ln(c,B,w,-90,22,-118,36);
+ /* Schädel */hE(c,60,-2,17,15,'#e6dec9','#a8a08c',1.5);circ(c,63,-8,4.2,'#2a241c');circ(c,63,6,4.2,'#2a241c');c.fillStyle='#e6dec9';c.fillRect(74,-6,6,12);ln(c,'#2a241c',1,76,-4,76,4);if(!used)circ(c,77,0,1.6,'#ffd04a');
+ c.lineCap='butt';c.restore()}
+function wgKristall(c,p,t,L){const lit=p.act?clamp(p.prog||0,0,1):0;const C=['#b080e0','#e890b0','#ffd070','#c8a0f0','#f0a0c8'];ell(c,p.x+2,p.y+6,30,7,'rgba(0,0,0,.3)');
+ for(let i=0;i<5;i++){const x=p.x-24+i*12,h=18+((p.seed+i*37)%5)*6,w=6;const on=lit*5>i;const col=C[i];c.globalAlpha=on?1:0.6;poly(c,col,x,p.y-h,x-w,p.y,x+w,p.y);poly(c,'rgba(255,255,255,.35)',x,p.y-h,x-1,p.y,x+w,p.y);c.globalAlpha=1;
+  if(on&&!L){c.globalCompositeOperation='lighter';glow(x,p.y-h*0.5,26,col,0.35+0.15*Math.sin(t*3+i),true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}
+ if(p.act&&!p.used)kaRing(c,p.x,p.y-20,30,1,'rgba(255,224,160,.0)');if(!p.used&&p.act&&!L){c.globalAlpha=0.5+0.4*Math.sin(t*4);c.font='bold 11px Georgia,serif';c.textAlign='center';c.fillStyle='#ffe0a0';c.fillText('✧',p.x,p.y-44);c.globalAlpha=1}}
+function wgFall(c,p,t,L){const lava=p.type==='lava';const w=26,h=86,x=p.x,y=p.y;const c1=lava?'#ff8a3a':'#d8e4dc',c2=lava?'#ffd070':'#ffffff';
+ c.fillStyle=lava?'#3a2420':'#4a4a44';c.fillRect(x-w/2-8,y-h-12,w+16,12);c.fillStyle=lava?'#c8501a':'#a8b8b0';c.fillRect(x-w/2,y-h,w,h);
+ if(!L){for(let i=0;i<5;i++){const o=((t*(lava?40:110)+i*h/5)%h);c.globalAlpha=0.55;c.fillStyle=c2;c.fillRect(x-w/2+3+i*4,y-h+o,2,14)}c.globalAlpha=1}
+ ell(c,x,y+2,w*1.1,8,c1);if(!L){c.globalAlpha=0.35+0.15*Math.sin(t*3);ell(c,x,y-4,w*1.3,12,lava?'rgba(255,160,80,.6)':'rgba(240,244,240,.7)');c.globalAlpha=1;if(lava){c.globalCompositeOperation='lighter';glow(x,y-h*0.5,70,'#ff8a3a',0.3,true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}
+ if(!p.used)kaRing(c,x,y-20,30,p.prog,lava?'#ffb050':'#f0f0e0')}
+{const d3=drawProp3;drawProp3=function(p,t){if(p&&p.k&&p.k.charCodeAt(0)===119&&p.k.startsWith('wg_')){try{if(wgPropDraw(p,t))return true}catch(er){if(!WG.perr){WG.perr=1;console.error('wg prop',p.k,er)}return true}}return d3.apply(this,arguments)}}
+/* Hebel-Szene: Konfetti / Eimer / Klappe */
+WG_SZ.hebel={draw(f,c,t,leicht){const u=f.t;if(u<0.4||u>2.6)return;const k=(u-0.4)/2.2;if(f.art===0){if(leicht)return;for(let i=0;i<24;i++){const a=(i*2.4+f.seed)%TAU,v=60+(i*13%50);c.globalAlpha=1-k;c.fillStyle=['#ffd04a','#e070b0','#8ad04a','#ff8a5a'][i%4];c.fillRect(f.x+Math.cos(a)*v*k*2,f.y-60+Math.sin(a)*v*k+120*k*k,3,3)}c.globalAlpha=1}
+  else if(f.art===1){const y=wgE(f.y-150,f.y-40,clamp(k*3,0,1));c.globalAlpha=1-clamp((k-0.4)*2,0,1);c.fillStyle='#7a5a3a';c.fillRect(f.x-9,y-12,18,14);if(k>0.3){c.globalAlpha=0.6*(1-k);ell(c,f.x,f.y,30*k+10,10,'#e0eae4')}c.globalAlpha=1}
+  else{c.fillStyle='#3a3028';c.fillRect(f.x-14,f.y-150,28,6);wgMuenzen(c,f.x,f.y-140,8,clamp(k*1.6,0,1),f.seed%5)}}};
+/* Pilzring/Glocke: kleine Klangwellen */
+WG_SZ.kling.draw=function(f,c,t,leicht){if(leicht)return;const u=f.t;for(let i=0;i<3;i++){const k=u-i*0.35;if(k<0||k>1.2)continue;c.globalAlpha=(1-k/1.2)*0.5;c.strokeStyle='#ffe0a0';c.lineWidth=1.5;c.beginPath();c.ellipse(f.x,f.y-30,20+k*70,10+k*30,0,0,TAU);c.stroke()}c.globalAlpha=1};
+
+/* ================= Testzugang ================= */
+Object.assign(window.__hsWEG,{WG_SZENE,WG_ORT,wgPlan,wgTick,start:(typ)=>{WG.force=typ||null;WG.jetzt=1;WG.last=-1e9;WG.busy=0;const L=spLeben();WG.ruhT=9;const r=wgSzeneStart(L);WG.force=null;return r},
+ ort:(typ,x,y)=>{WG.force=typ;const P0=spLeben()[0];const pf=wgPfad();const m=pf?wgAt(pf,pf.len*(0.3+Math.random()*0.4)):{x:P0.x+120,y:P0.y,a:0};const o=wgOrtBau({x:x!=null?x:m.x,y:y!=null?y:m.y,a:m.a||0,ort:WG_ART[typ].ort==='nische'?'nische':'weg'});WG.force=null;if(o){o.id=G.wg.L.length;G.wg.L.push(o)}return o?{x:o.x,y:o.y,typ:o.typ}:null},mem:()=>wgMem()});
+
+/* ================= Paket „fein“: Online-Feinschliff, Riese-Hänger, einheitliche Zurück-Knöpfe ================= */
+/* ---------- 1a) Online: Torwechsel u. ä. schicken nur noch die Änderungen statt des ganzen Stufenpakets ----------
+   Ursache: kaOeffne/Tor-Schließen erhöhen G.blkV → netStageKey ändert sich → der Gastgeber schickte das komplette
+   Stufenpaket (~80–100 KB, Deko, Blöcke, Karte) und der Gast baute die ganze Stufe neu (Karte, Raster, Minikarte).
+   Jetzt: Gastgeber merkt sich je Gast, was er zuletzt geschickt hat. Ist alles Statische gleich (Lauf, Stufe, Ort, Karte),
+   geht nur ein kleines Delta raus (entfernte/neue Blöcke, Deko, niedrige Hindernisse, Stufenwerte). Der Torzustand selbst
+   kommt wie bisher über G.kaN.t (kaGastTick). Ein Gast spielt das Delta ohne Neuaufbau ein. */
+const FEIN={tx:{full:0,delta:0,bytes:0}};
+const feinKb=o=>o.t+'|'+Math.round(+o.x||0)+'|'+Math.round(+o.y||0)+'|'+(o.k||'')+'|'+Math.round(+(o.r||o.w)||0)+'|'+Math.round(+o.h||0);
+const feinKd=o=>Math.round(+o.x||0)+'|'+Math.round(+o.y||0)+'|'+(o.k||'');
+function feinCnt(L,kf){const M=new Map();for(const o of L||[]){if(!o)continue;const k=kf(o);M.set(k,(M.get(k)||0)+1)}return M}
+function feinDiff(alt,L,kf){const neu=feinCnt(L,kf),rm=[],ad=[];for(const[k,n]of alt){const m=neu.get(k)||0;for(let i=m;i<n;i++)rm.push(k)}
+ const need=new Map();for(const[k,n]of neu){const a=alt.get(k)||0;if(n>a)need.set(k,n-a)}if(need.size)for(const o of L){const k=kf(o),c=need.get(k);if(c>0){ad.push(o);need.set(k,c-1)}}return{rm,ad,neu}}
+function feinBasis(m){const ka=m.ka||null;return JSON.stringify([G.runId,m.stage,m.theme,m.road,m.mode,m.room,m.n,m.W,ka,m.wl?[m.wl.haus,m.wl.platz,m.wl.br]:null])}
+function feinStufe(g,m){/* liefert Delta-Paket oder null (= ganzes Paket schicken); merkt sich den neuen Stand */
+ const b=feinBasis(m),wlo=m.wl&&Array.isArray(m.wl.lo)?m.wl.lo:[],F=g.fein;let d=null;
+ if(F&&F.b===b){const B=feinDiff(F.blk,m.blk||[],feinKb),D=feinDiff(F.deco,m.deco||[],feinKd),L=feinDiff(F.lo,wlo,feinKb);
+  if(B.rm.length+B.ad.length+D.rm.length+D.ad.length+L.rm.length+L.ad.length<=400){
+   d={t:'stage',d:1,stage:m.stage,S:m.S,diff:m.diff,rl:m.rl,depth:m.depth,n:m.n};if(B.rm.length||B.ad.length){d.rb=B.rm;d.ab=B.ad}if(D.rm.length||D.ad.length){d.rd=D.rm;d.ad=D.ad}if(L.rm.length||L.ad.length){d.rw=L.rm;d.aw=L.ad}
+   g.fein={b,blk:B.neu,deco:D.neu,lo:L.neu};return d}}
+ g.fein={b,blk:feinCnt(m.blk||[],feinKb),deco:feinCnt(m.deco||[],feinKd),lo:feinCnt(wlo,feinKb)};return null}
+{const sr0=netSendR;netSendR=function(conn,m){try{if(m&&m.t==='stage'&&!m.d&&NET.role==='host'){const g=NET.guests.find(x=>x.conn===conn);if(g){const d=feinStufe(g,m);
+   if(d){FEIN.tx.delta++;try{FEIN.tx.bytes+=JSON.stringify(d).length}catch(e){}return sr0.call(this,conn,d)}FEIN.tx.full++}}}catch(er){console.error('fein stage',er)}return sr0.apply(this,arguments)}}
+{const sg0=netStartGuest;netStartGuest=function(g){try{if(g)g.fein=null}catch(e){}return sg0.apply(this,arguments)}}
+function feinDeltaGast(m){const si=nInt(m.stage,0,499,-1);if(si<0||si!==G.stage)return;
+ let S=nDec(m.S,[]);if(isObj(S)){if(typeof S.name!=='string')S.name=(STAGES[si]&&STAGES[si].name)||'';for(const k in STAGES[si]||{})if(typeof STAGES[si][k]==='function'&&!(k in S))S[k]=STAGES[si][k];STAGES[si]=S}
+ G.diff=nInt(m.diff,0,DMAX,G.diff||0);G.rl=!!m.rl;G.depth=nInt(m.depth,1,1e5,G.depth||1);
+ const weg=(L,rm,kf,schutz)=>{if(!Array.isArray(rm)||!rm.length)return L;const M=new Map();for(const k of rm.slice(0,2000))M.set(String(k),(M.get(String(k))||0)+1);return L.filter(o=>{if(!o||schutz(o))return true;const k=kf(o),c=M.get(k);if(c>0){M.set(k,c-1);return false}return true})};
+ let bl=false;
+ if(m.rb||m.ab){G.blk=weg(G.blk||[],m.rb,feinKb,o=>o.kaM||o.kaTor!=null);for(const o of(Array.isArray(m.ab)?m.ab:[]).slice(0,2000))if(isObj(o)&&(o.t==='c'||o.t==='r')&&isFinite(o.x)&&isFinite(o.y))G.blk.push(o);blkRaster();bl=true}
+ if(m.rd||m.ad){G.deco=weg(G.deco||[],m.rd,feinKd,()=>false);for(const o of(Array.isArray(m.ad)?m.ad:[]).slice(0,2000))if(isObj(o))G.deco.push(o);G.deco.sort((p,q)=>p.y-q.y)}
+ if((m.rw||m.aw)&&G.wl&&Array.isArray(G.wl.lo)){const num=v=>isFinite(+v)?+v:0;G.wl.lo=weg(G.wl.lo,m.rw,feinKb,o=>o.kaGap!=null);
+  for(const o of(Array.isArray(m.aw)?m.aw:[]).slice(0,400))if(isObj(o))G.wl.lo.push({t:o.t==='r'?'r':'c',x:num(o.x),y:num(o.y),r:num(o.r),w:num(o.w),h:num(o.h),k:typeof o.k==='string'?o.k:'wasser',v:num(o.v)});try{wlLoRaster()}catch(e){}bl=true}
+ if(bl){try{if(G.ka&&G.ka.gast)G.ka.tzu='';if(typeof WLMM!=='undefined'&&WLMM.key)WLMM.key+='~'}catch(e){}}
+ FEIN.rx=(FEIN.rx||0)+1}
+{const ns0=netStage;netStage=function(m){if(m&&m.d===1){try{if(G.netGuestRun)feinDeltaGast(m)}catch(er){console.error('fein delta',er)}return}return ns0.apply(this,arguments)}}
+
+/* ---------- 1b) Online: Hinweise passend zum Eingabegerät des Gasts ----------
+   Ursache: segHint() setzte für Gäste immer „Tastatur“ an (NET.role==='guest' ⇒ kb) und der „Imres Segen ist bereit!“-Hinweis
+   kommt mit dem Gerät des Gastgebers an. Fenster, die der Gastgeber für den Gast baut (Talente/Beutel), beschrifteten
+   die Leistenplätze mit den Tasten des Gastgebers. Jetzt meldet der Gast sein Gerät (und seine Controller-Belegung) mit. */
+function feinDev(){try{if(Object.keys(PADS.st||{}).length&&(PADS.t||0)>=(MOUSE.t||0))return'pad';if(MOBIL||matchMedia('(pointer:coarse)').matches)return'touch'}catch(e){}return'kb'}
+{const sh0=segHint;segHint=function(){try{if(NET.role==='guest'){const d=feinDev();return d==='pad'?'beide Analogsticks drücken':d==='touch'?'hier tippen':'G drücken'}
+  if(NET.role==='host'&&P&&netIs(P.dev)&&P.netDv){const d=P.netDv;return d==='pad'?'beide Analogsticks drücken':d==='touch'?'hier tippen':'G drücken'}}catch(e){}return sh0.apply(this,arguments)}}
+{const sk0=skKey;skKey=function(i){try{if(NET.role==='host'&&P&&netIs(P.dev)&&P.netDv){if(P.netDv==='pad'&&Array.isArray(P.netKl)&&P.netKl[i])return String(P.netKl[i]).slice(0,6);return String(i+1)}}catch(e){}return sk0.apply(this,arguments)}}
+{const su0=netSendU;netSendU=function(conn,u,m){try{if(NET.role==='guest'&&m&&m.t==='i'){const now=performance.now();if(!FEIN.dvT||now>FEIN.dvT){FEIN.dvT=now+1000;m.dv=feinDev();if(m.dv==='pad')m.kl=[0,1,2,3,4,5].map(i=>{try{return sk0K(i)}catch(e){return String(i+1)}})}}}catch(e){}return su0.apply(this,arguments)}}
+function sk0K(i){/* Beschriftung mit dem eigenen Controller (lokal, ohne Gastgeber-Umleitung) */const b=padMap()['s'+(i+1)];return b!=null&&b>=0&&PADBN[b]?PADBN[b].replace('Steuerkreuz ',''):String(i+1)}
+{const hi0=netHostInput;netHostInput=function(g,m){const r=hi0.apply(this,arguments);try{const p=g&&g.p;if(p&&m&&typeof m.dv==='string'&&/^(pad|kb|touch)$/.test(m.dv)){const alt=p.netDv;p.netDv=m.dv;
+   if(Array.isArray(m.kl))p.netKl=m.kl.slice(0,6).map(x=>String(x).replace(/[<>&"]/g,'').slice(0,6));else if(m.dv!=='pad')p.netKl=null;if(alt!==p.netDv&&g.vm&&g.vm.overlay){try{vmWith(g,()=>{if(G.overlay==='tree')renderTree();else if(G.overlay==='inv')renderInv()})}catch(e){}}}}catch(e){}return r}}
+{const rf0=netRemoteFx;netRemoteFx=function(e){try{if(Array.isArray(e)&&e[0]==='toast'&&typeof e[1]==='string'&&/^Imres Segen ist bereit! \(/.test(e[1]))e=['toast',e[1].replace(/\([^)]*\)/,'('+segHint()+')'),e[2]]}catch(er){}return rf0.call(this,e)}}
+
+/* ---------- 1c) Online: Gäste füllen ihr eigenes Bestiarium ----------
+   Ursache: bestKill/bestErlebt laufen nur beim Gastgeber (dort wird gekämpft) – der Spielstand des Gasts bekam nie etwas.
+   Jetzt schickt der Gastgeber je Abschuss/Erlebnis ein kleines zuverlässiges Ereignis; der Gast zählt in SAVE.best/SAVE.bw
+   und meldet neue Stufen selbst. Der Schadensbonus des Bestiariums wird weiterhin nur beim Gastgeber gerechnet
+   (keine doppelte Belohnung, kein recalc beim Gast). */
+{const bk0=bestKill;bestKill=function(e){const r=bk0.apply(this,arguments);try{if(NET.role==='host'&&G.net&&e&&e.def&&e.def.id&&!G.bot)netFxR(['fbk',String(e.def.id)])}catch(er){}return r}}
+{const be0=bestErlebt;bestErlebt=function(key){const r=be0.apply(this,arguments);try{if(NET.role==='host'&&G.net&&!G.bot&&BW[key])netFxR(['fbw',String(key)])}catch(er){}return r}}
+function feinBestGast(id){const L=bestList();const e=L.find(x=>x.id===id);if(!e)return;SAVE.best=SAVE.best||{};const before=bestTier(id,e.g);SAVE.best[id]=(SAVE.best[id]||0)+1;const after=bestTier(id,e.g);
+ if(after>before){BESTB=null;toast(`Bestiarium: <b>${esc(e.def.n)}</b> – ${['','Gesichtet','Erforscht','Erzfeind'][after]}${after===3?' (+10% Schaden gegen sie)':''}`,'#c8bca8')}FEIN.bk=(FEIN.bk||0)+1;FEIN.svT=FEIN.svT||setTimeout(()=>{FEIN.svT=0;try{persist()}catch(e){}},4000)}
+{const rf1=netRemoteFx;netRemoteFx=function(e){try{if(Array.isArray(e)&&(e[0]==='fbk'||e[0]==='fbw')){if(NET.role==='guest'&&G.netGuestRun&&typeof e[1]==='string'&&e[1].length<60){if(e[0]==='fbk')feinBestGast(e[1]);else{const sb=G.bot;G.bot=false;try{bestErlebt(e[1])}finally{G.bot=sb}}}return}}catch(er){}return rf1.apply(this,arguments)}}
+
+/* Einführung beim Gast: Gerät bei jedem Schritt neu bestimmen (der Controller meldet sich im Browser oft erst nach dem ersten Knopfdruck) */
+{const tt0=tutText;tutText=function(i,d){try{if(NET.role==='guest'){d=tutGeraet();TUT.d=d}}catch(e){}return tt0.call(this,i,d)}}
+/* Hinweiszeile „… ist im Menü“ beim Gast: auf kleinen Bildschirmen unter die HUD-Leisten statt über die Lebensanzeige */
+{const st=document.createElement('style');st.textContent='@media (max-width:760px),(max-height:520px){.netbar{top:calc(env(safe-area-inset-top,0px) + 112px);font-size:12.5px;padding:4px 10px}}';document.head.appendChild(st)}
+
+/* ---------- 2) Riese S27/S28: Bosse rammen sich nicht mehr in Mauern, festgesteckte Gegner kommen frei ----------
+   Ursache: Der Ansturm (BM.charge, beim Riesen dreifach als „rampage“) schiebt den Boss 1050 px/s geradeaus, ohne
+   Hindernisse zu prüfen – nur der Kartenrand begrenzt. Auf den großen Karten (Gracklstugh, Steinbruch) landete der Riese so
+   in Felsmassen/Häusern oder jenseits einer Mauer in einem Nachbarabschnitt. Steckte er dort fest, kam niemand mehr an ihn
+   heran (Fernangriffe treffen die Wand) – der Kampf zog sich endlos bzw. hing.
+   Jetzt: (a) ein Ansturm endet an Mauern und Wasser/Schluchten (kurzer Aufprall), (b) Wächter: Boss, Stufenwächter und der
+   Torwächter mit dem Schlüssel werden, falls sie trotzdem auf einer unerreichbaren Stelle stehen, nach 3 s auf den nächsten
+   erreichbaren Punkt gesetzt (nur wenn der Spieler selbst auf erreichbarem Boden steht). */
+function feinWand(x,y,r){try{if(blkPunkt(x,y,r))return true;if(G.wl&&G.wl.an&&wlLoPunkt(x,y,r))return true}catch(e){}return false}
+{const ba0=bossAI;bossAI=function(e,dt){try{if(e&&e.charging>0&&!e.flying&&G.blk&&G.blk.length&&!G.room){const r=Math.max(10,(e.r||20)*0.45),nx=e.x+(e.cvx||0)*dt,ny=e.y+(e.cvy||0)*dt;
+   if(feinWand(nx,ny,r)&&!feinWand(e.x,e.y,r)){e.charging=0;e.rampage=0;e.moveT=(e.moveT||0)+0.5;G.shake+=4;try{puffs(nx,ny,'#5a5048',10,120,18);sfxAt('e_wucht',e.x,e.y)}catch(er){}FEIN.wand=(FEIN.wand||0)+1}}}catch(er){}return ba0.apply(this,arguments)}}
+function feinFrei(dt){const W=G.wl,K=G.ka;if(!W||!W.an||!W.nav||!W.d0||G.room||G.state!=='play'||G.paused)return;if(W.nav.v!==(G.blkV||0))return;
+ const N=W.nav,c=o=>wlZelle(N,o.x,o.y);const spl=(typeof mpL==='function'?mpL():[P]).filter(q=>q&&!q.down);if(!spl.length||!spl.some(q=>W.d0[c(q)]!==65535))return;
+ const L=[G.boss,G.guardE];if(K&&K.an){const tg=K.tore.find(t=>t.main&&t.a===K.cur);if(tg&&tg.zu&&tg.keyE)L.push(tg.keyE)}
+ for(const e of L){if(!e||e.dead||e.flying||e.charging>0)continue;const fest=W.d0[c(e)]===65535||blkPunkt(e.x,e.y,4);
+  if(!fest){e.feinFT=0;continue}e.feinFT=(e.feinFT||0)+dt;if(e.feinFT<3)continue;e.feinFT=0;
+  let q=wlNahFrei(e.x,e.y,14);if(!q&&K&&K.an){const A=K.sec.find(s=>s.art==='arena');if(A&&e===G.boss)q=wlNahFrei(A.cx,A.cy,24)}if(!q){const p=spl[0];q=wlNahFrei(p.x+120,p.y,10)}
+  if(q){try{smoke(e.x,e.y)}catch(er){}e.x=q.x;e.y=q.y;e.cvx=0;e.cvy=0;try{smoke(e.x,e.y)}catch(er){}FEIN.frei=(FEIN.frei||0)+1}}}
+{const up0=update;update=function(dt){const r=up0.apply(this,arguments);try{if(NET.role!=='guest'&&dt>0){FEIN.fT=(FEIN.fT||0)+dt;if(FEIN.fT>=0.5){feinFrei(FEIN.fT);FEIN.fT=0}}}catch(er){if(!FEIN.fErr){FEIN.fErr=1;console.error('fein frei',er)}}return r}}
+
+/* ---------- 3) Zurück-Knöpfe einheitlich ----------
+   Vorher saß „Zurück/Weiter/Fertig/☰ Menü“ je Fenster woanders (oben im Kasten, unten rechts, mittig unter dem Text, in der
+   Kopfzeile). Jetzt: genau ein Zurück-Knopf je Fenster, immer oben rechts am Bildschirmrand, gleiche Optik, Beschriftung
+   „‹ Zurück“ plus Tastenhinweis (B am Controller, Esc an der Tastatur). Der Knopf bleibt an seiner Stelle im DOM
+   (Online-Gäste klicken über die Elementnummer) – nur Klasse, Text und Lage ändern sich. B/Esc löst ihn überall aus,
+   falls das Fenster selbst nichts Eigenes für „zurück“ hat. */
+const FZK={sel:['[data-act="sl-back"]','[data-act="net-back"]','[data-act="net-close"]','[data-act="smith-close"]','[data-act="sl-menu"]','.fkWrap [data-act="fk-spaeter"]','[data-act="close"]'],el:null,k:''};
+{const st=document.createElement('style');st.id='fzkCss';st.textContent=`
+#scr .fzk,.fzk{position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 10px)!important;right:calc(env(safe-area-inset-right,0px) + 12px)!important;left:auto!important;bottom:auto!important;
+ z-index:70!important;margin:0!important;width:auto!important;min-width:0!important;max-width:none!important;height:42px!important;min-height:0!important;padding:0 14px 0 12px!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;transform:none!important;flex:none!important;
+ border-radius:10px!important;border:1px solid rgba(229,180,84,.7)!important;background:rgba(28,20,30,.95)!important;color:#f3e6cc!important;
+ font:800 15px/1 "Alegreya Sans",sans-serif!important;letter-spacing:.01em;text-transform:none!important;box-shadow:0 4px 14px rgba(0,0,0,.55)!important;white-space:nowrap!important;cursor:pointer}
+.fzk[data-fzk-k]:not([data-fzk-k=""])::after{content:attr(data-fzk-k);margin-left:8px;font:800 11px/1 "Alegreya Sans",sans-serif;padding:3px 6px;border-radius:5px;background:rgba(229,180,84,.18);color:#e5b454;border:1px solid rgba(229,180,84,.35)}
+.fzk:hover,.fzk:focus-visible,.fzk.pfocus,.fzk.focus{border-color:#ffd27a!important;background:rgba(58,40,40,.97)!important;color:#fff4dc!important;outline:none}
+.fzk:active{transform:translateY(1px)!important}
+@media (max-width:760px),(max-height:520px){#scr .fzk,.fzk{top:calc(env(safe-area-inset-top,0px) + 6px)!important;right:calc(env(safe-area-inset-right,0px) + 8px)!important;height:34px!important;font-size:13.5px!important;padding:0 10px 0 9px!important}
+ .fzk[data-fzk-k]:not([data-fzk-k=""])::after{font-size:10px;padding:2px 5px;margin-left:6px}}
+@media (min-width:1900px) and (min-height:900px){#scr .fzk,.fzk{height:48px!important;font-size:17px!important;padding:0 18px 0 15px!important}}
+/* Platz für den Knopf: Reiterleiste, Lager-Kopf und Kopfzeilen rücken nach links */
+#scr{--fzkw:136px}@media (max-width:760px),(max-height:520px){#scr{--fzkw:112px}}@media (min-width:1900px) and (min-height:900px){#scr{--fzkw:156px}}
+#scr.fzk-on .seg.mtabs.fzk-platz,#scr.fzk-on .fzk-platz{margin-right:var(--fzkw)!important}
+#scr.fzk-on .camp-top{padding-right:var(--fzkw)}
+#scr .fzk-dup{display:none!important}`;document.head.appendChild(st)}
+function fzkSuche(){if(!scr||scr.hidden)return null;const vis=e=>!e.disabled&&e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden';
+ if(scr.querySelector('[data-act="giveup-no"],[data-act="run-drop-no"],[data-act="start-no"],[data-act="sl-ask-no"]'))return null;/* Rückfrage offen: deren „Nein“ bleibt, wie es ist */
+ for(const s of FZK.sel){const L=[...scr.querySelectorAll(s)].filter(vis);if(!L.length)continue;if(s==='[data-act="close"]'){if(!(G.overlay||G.state==='camp'||G.state==='title'||G.state==='between'))return null;
+   const h=L.find(e=>e.closest('.inv-head,.spread,.sthead,.row'))||L[0];return h}return L[0]}return null}
+function fzkTaste(){const d=feinDev();return d==='pad'?'B':d==='touch'?'':'Esc'}
+function fzkLauf(){try{const alt=scr.querySelectorAll('.fzk');const b=fzkSuche();for(const e of scr.querySelectorAll('.fzk-dup'))if(!b||e.dataset.act!==b.dataset.act)e.classList.remove('fzk-dup');for(const e of alt)if(e!==b){e.classList.remove('fzk');if(e.dataset.fzkT!=null){if(!e.children.length)e.textContent=e.dataset.fzkT;delete e.dataset.fzkT}e.removeAttribute('data-fzk-k')}
+  scr.classList.toggle('fzk-on',!!b);FZK.el=b;if(!b)return;
+  if(!b.classList.contains('fzk')){b.classList.add('fzk');if(!b.children.length){b.dataset.fzkT=b.textContent;b.textContent='‹\u00a0Zurück'}if(!b.title)b.title=b.dataset.act==='fk-spaeter'?'Später entscheiden – die Karte wartet bei deinem Helden':'Zurück (Controller: B · Tastatur: Esc)';b.setAttribute('aria-label','Zurück')}
+  const k=fzkTaste();if(b.getAttribute('data-fzk-k')!==k)b.setAttribute('data-fzk-k',k);
+  /* gleiche Größe trotz „zoom“ der umgebenden Fenster (manche Fenster skalieren sich auf die Bildschirmgröße) */
+  {b.style.zoom='';const z=b.offsetHeight?b.getBoundingClientRect().height/b.offsetHeight:1;if(z>0&&Math.abs(z-1)>0.02){b.style.zoom=String(Math.round(1/z*1000)/1000);const q=b.getBoundingClientRect();if(q.right>innerWidth+1||q.left<0||q.top<0||q.bottom>innerHeight)b.style.zoom=''}}/* ältere Browser rechnen „zoom“ anders: dann lieber ohne Ausgleich als außerhalb des Bildschirms */
+  /* doppelte Schließen-Knöpfe (z. B. großes „Weiter“ unten auf kleinen Bildschirmen) ausblenden */
+  for(const e of scr.querySelectorAll(`[data-act="${b.dataset.act}"]`))if(e!==b&&!e.classList.contains('fzk-dup'))e.classList.add('fzk-dup');
+  /* Platz schaffen: Elemente oben, die der Knopf verdecken würde */
+  const r=b.getBoundingClientRect();if(!r.width)return;
+  for(const t of scr.querySelectorAll('.seg.mtabs')){if(t.classList.contains('fzk-platz'))continue;const q=t.getBoundingClientRect();if(q.width&&q.right>r.left-4&&q.top<r.bottom+2&&q.bottom>r.top-2)t.classList.add('fzk-platz')}}catch(er){}}
+{let pend=0;const mo=new MutationObserver(()=>{if(pend)return;pend=1;requestAnimationFrame(()=>{pend=0;fzkLauf()})});
+ const an=()=>{try{mo.observe(scr,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','disabled']})}catch(e){}};an();setInterval(()=>{try{if(FZK.el&&FZK.el.isConnected){const k=fzkTaste();if(FZK.el.getAttribute('data-fzk-k')!==k)FZK.el.setAttribute('data-fzk-k',k)}else if(!scr.hidden)fzkLauf()}catch(e){}},500);
+ addEventListener('resize',()=>{try{for(const t of scr.querySelectorAll('.fzk-platz'))t.classList.remove('fzk-platz');fzkLauf()}catch(e){}})}
+/* B (Controller) / Esc: hat das Fenster selbst nichts für „zurück“ getan, löst der einheitliche Knopf aus */
+{const pb0=padBack;padBack=function(){let n=0;const zk=()=>{n++};document.addEventListener('click',zk,true);const h0=scr.innerHTML.length,o0=G.overlay,s0=G.state,v0=typeof SPL!=='undefined'?SPL.view:0;
+  let r;try{r=pb0.apply(this,arguments)}finally{document.removeEventListener('click',zk,true)}
+  try{if(!n&&G.overlay===o0&&G.state===s0&&(typeof SPL==='undefined'||SPL.view===v0)&&scr.innerHTML.length===h0){const b=FZK.el&&FZK.el.isConnected&&!scr.hidden?FZK.el:fzkSuche();if(b&&!b.disabled){b.click();FEIN.fzkB=(FEIN.fzkB||0)+1}}}catch(e){}return r}}
+window.__hsFzk={FZK,fzkLauf,fzkSuche};
+
+window.__hsFein={FEIN,feinDev,feinStufe,feinKb};
+window.__hsFEIN=1;
+
+/* Paket „runid“: startRun setzt G.runId und ersetzt danach G durch ein neues Spielobjekt – die Lauf-Kennung ging verloren.
+   Folge: Minikarten-Nebel, Überraschungs-Gedächtnis, Kombo-/Karten-Zähler erkannten keinen neuen Lauf. Kennung nachträglich setzen. */
+(()=>{try{const _sr=startRun;startRun=function(){const r=_sr.apply(this,arguments);try{if(G&&!G.runId)G.runId=Math.random()}catch(e){}return r}}catch(e){console.warn('runid',e)}})();
+window.__hsRUNID=1;
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* interner Testzugang */
 window.__hs={get G(){return G},stil(){return{makeItem,makeSetItem,itemDelta,meist,stilProfil,stilGrund,ruheK,recalc,renderInv,SETS,AFF,LEGEND,DBMAX,REFN,KUL,kulSpec,AMBI,ambiWunsch}},rsc(v){if(v!==undefined){RSC=v;resize()}return{RSC,GAUTO,DPR,PERF}},get keys(){return keys},call(n,...a){return({useSkill,usePotion,openOverlay,closeOverlay,netAct})[n](...a)},get P(){return P},get PL(){return PL},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
  step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},net(){return NET},netFns(){return{netHost,netJoin,netJoinScreen,netAction,netGuestReset,netCloseRoom,netWorld,netDiff,mpSlots}},fn(){return{dmSum,ccZaeh,CCZ,dmEndHtml,dmPauseHtml,LPOW,mouseAim,dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal,gainXp,withP,rareStart,saeuleTreffer,teamKombo,zielTest:(k)=>{const S=STAGES[G.stage];G.allies=G.allies.filter(a=>a.kind==="rex");G.props=G.props.filter(p=>p.k!=="okaefig");const r=Math.random;Math.random=()=>0.01;try{zielWahl(S,Math.max(1,G.stage))}finally{Math.random=r}if(G.obj&&k&&G.obj.k!==k){const Z=ZIELE[k];G.obj={k,n:Z.n,d:Z.d,c:Z.c,done:0,fail:0,fr:0,txt:Z.n,t:0};if(k==="flucht"||k==="eskorte"){Math.random=()=>0.01;G.obj=null;let tries=0;while((!G.obj||G.obj.k!==k)&&tries++<60){Math.random=r;zielWahl(S,Math.max(1,G.stage));if(G.obj&&G.obj.k!==k)G.obj=null;Math.random=()=>0.01}Math.random=r}}zielProps();zielStart();return G.obj},portal2,leuchterSetzen,legS,makeAnc,ancRoll,dropItem,mpRemove,mpAddPlayer,groupRoll,musAk:a=>musAk(a),aktivSperre,ambiW:()=>ambiWunsch(),addMod,ambi:()=>JSON.stringify(Object.fromEntries(Object.entries(AMBI.el).map(([k,a])=>[k,{p:a.paused,bad:!!a._bad,g:a._g?+a._g.gain.value.toFixed(3):null}]))),lootBlocked,teleHits:typeof teleHits!=='undefined'?teleHits:null}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawNpc:(c,n,x,y,t,s)=>drawNpc(c,n,x,y,t,s),NPCS,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
-</script>
-<script>
-/* Ladebild weg, sobald das Spiel aufgebaut ist (spätestens nach 12 s) */
-(function(){var v=document.getElementById("vorlade");if(!v)return;var weg=function(){if(!v.parentNode)return;v.style.opacity="0";setTimeout(function(){if(v.parentNode)v.parentNode.removeChild(v)},280)};
-var bald=function(){requestAnimationFrame(function(){requestAnimationFrame(weg)})};if(document.readyState!=="loading")bald();else document.addEventListener("DOMContentLoaded",bald);setTimeout(weg,12000)})();
 </script>
