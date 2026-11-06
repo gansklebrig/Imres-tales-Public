@@ -2167,10 +2167,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     warteMenue("💾 WLAN", W("Lese gespeicherte Netze …", "Reading saved networks …"));
     netzPost({ aktion: "wlan_gespeichert" }).then(r => {
       if (!$(".zyn-menue")) return;
-      const a = { zu: menueZu, zurueck: () => wlanMenue() }; let h = '<p class="hinweis">' + W("Antippen → noch einmal antippen zum Vergessen. Mit gespeicherten Netzen verbindet sich der Zynthian von selbst.", "Tap → tap again to forget. Saved networks connect automatically.") + '</p><div class="reihe zyn-opt">';
+      const a = { zu: menueZu, zurueck: () => wlanMenue() }; let h = '<p class="hinweis">' + W("🔐 = Passwort zusätzlich im eigenen Speicher gesichert – geht es dem Zynthian verloren, trägt die Bühne es von selbst wieder ein und verbindet sich. Antippen → noch einmal antippen zum Vergessen.", "🔐 = password also kept in our own store – if the Zynthian loses it, it is restored and reconnected automatically. Tap → tap again to forget.") + '</p><div class="reihe zyn-opt">';
       let wahl = null;
       (r.netze || []).forEach((n, i) => {
-        h += '<button type="button" data-zm="g:' + i + '"><span>📶 ' + esc2(n.name) + "</span><small>" + (n.zuletzt && !/never|nie/i.test(n.zuletzt) ? W("zuletzt: ", "last: ") + esc2(n.zuletzt) : W("gespeichert", "saved")) + "</small></button>";
+        h += '<button type="button" data-zm="g:' + i + '"><span>' + (n.gesichert ? "🔐 " : "📶 ") + esc2(n.name) + "</span><small>" + (n.nurSpeicher ? W("wird gleich wiederhergestellt", "being restored") : n.zuletzt && !/never|nie/i.test(n.zuletzt) ? W("zuletzt: ", "last: ") + esc2(n.zuletzt) : W("gespeichert", "saved")) + "</small></button>";
         a["g:" + i] = () => { const b = $('.zyn-menue [data-zm="g:' + i + '"] small');
           if (wahl !== i) { wahl = i; $$(".zyn-menue [data-zm^='g:'] small").forEach((x, j) => { x.textContent = j === i ? W("⚠ nochmal antippen = vergessen", "⚠ tap again = forget") : W("gespeichert", "saved"); }); return; }
           netzPost({ aktion: "wlan_vergessen", name: n.name }).then(x => { zeige(x.ok ? "🗑 " + W("Vergessen: ", "Forgotten: ") + n.name : "⚠ " + (x.meldung || x.fehler || "")); wlanGespeichert(); }); };

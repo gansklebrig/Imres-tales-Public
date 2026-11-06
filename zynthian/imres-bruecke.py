@@ -207,6 +207,8 @@ def diagnose():
     lauf("Touch", "export DISPLAY=:0; xinput list --name-only 2>&1 | grep -i -E 'touch|ft5|goodix|ili|edt'; for g in $(xinput list --id-only 2>/dev/null); do xinput list-props $g 2>/dev/null | grep -q 'Coordinate Transformation' && echo \"$(xinput list --name-only $g 2>/dev/null): $(xinput list-props $g | grep 'Coordinate Transformation' | cut -d: -f2)\"; done; xrandr 2>/dev/null | grep ' connected'", 6)
     lauf("Dienste", "for d in jack2 zynthian imres-buehne imres-bruecke imres-knopf; do echo \"$d: $(systemctl is-active $d)\"; done")
     lauf("Ton", "jack_lsp 2>&1 | grep -E 'system:(capture|playback)' | tr '\\n' ' '; echo; amixer scontents 2>/dev/null | grep -E \"Simple mixer|Capture.*\\[|Playback.*\\[\" | head -12", 14)
+    lauf("WLAN", "nmcli radio wifi 2>&1 | sed 's/^/Funk: /'; nmcli -t -f DEVICE,STATE,CONNECTION dev 2>&1 | grep -i wl; tail -5 '%s' 2>/dev/null" % WLAN_LOG, 10)
+    teile[-1] += "\ngemerkt: " + (", ".join(_wlan_lesen().keys()) or "–")
     lauf("Update", "tail -4 %s 2>/dev/null; ls -d %s/seite.alt-* 2>/dev/null | wc -l | sed 's/^/alte Versionen: /'" % (UPDATE_LOG, os.path.dirname(UPDATE_LOG)))
     return {"ok": True, "text": "\n\n".join(teile)}
 
@@ -625,6 +627,148 @@ def _lauf(befehl, zeit=15, eingabe=None):
     except subprocess.TimeoutExpired:
         return 124, "Zeitüberschreitung"
 
+# ---------- eigener WLAN-Speicher ----------
+# Der Zynthian verliert manchmal seine WLAN-Profile oder die Passwörter darin. Darum merkt sich die Brücke jedes Netz, mit dem er
+# einmal verbunden war (Name + Passwort, nur für root lesbar, im Datenordner – überlebt Updates), legt verlorene Profile in
+# NetworkManager wieder an und verbindet sich selbst, wenn das WLAN an ist, aber keine Verbindung besteht.
+WLAN_DATEI = os.path.join(os.path.dirname(SEITE), "wlan.json")
+WLAN_LOG = os.path.join(os.path.dirname(SEITE), "wlan.log")
+wlan_sperre = threading.Lock()
+
+
+def _wlan_log(text):
+    try:
+        alt = []
+        if os.path.exists(WLAN_LOG):
+            with open(WLAN_LOG, encoding="utf-8", errors="replace") as f:
+                alt = f.read().splitlines()[-150:]
+        alt.append(time.strftime("%Y-%m-%d %H:%M ") + text)
+        with open(WLAN_LOG, "w", encoding="utf-8") as f:
+            f.write("\n".join(alt) + "\n")
+    except OSError:
+        pass
+
+
+def _wlan_lesen():
+    try:
+        with open(WLAN_DATEI, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def _wlan_schreiben(d):
+    try:
+        neu = WLAN_DATEI + ".neu"
+        fd = os.open(neu, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(d, f, ensure_ascii=False, indent=1)
+        os.replace(neu, WLAN_DATEI)
+        os.chmod(WLAN_DATEI, 0o600)
+    except OSError as e:
+        print("WLAN-Speicher:", e)
+
+
+def wlan_merken(ssid, pw):
+    if not ssid:
+        return
+    with wlan_sperre:
+        d = _wlan_lesen()
+        alt = d.get(ssid) or {}
+        if alt.get("pw") != pw:
+            _wlan_log("gemerkt: " + ssid)
+        d[ssid] = {"pw": pw, "zuletzt": int(time.time())}
+        _wlan_schreiben(d)
+
+
+def wlan_vergessen_speicher(ssid):
+    with wlan_sperre:
+        d = _wlan_lesen()
+        if d.pop(ssid, None) is not None:
+            _wlan_schreiben(d)
+            _wlan_log("vergessen: " + ssid)
+
+
+def _nm_wlan_profile():
+    """{Profilname: SSID} aller WLAN-Profile in NetworkManager"""
+    c, t = _lauf(["nmcli", "-t", "-f", "NAME,TYPE", "con", "show"], 10)
+    profile = {}
+    for z in t.splitlines():
+        teile = re.split(r"(?<!\\):", z)
+        if len(teile) >= 2 and "wireless" in teile[1]:
+            name = teile[0].replace("\\:", ":")
+            c2, info = _lauf(["nmcli", "-g", "802-11-wireless.ssid,802-11-wireless.mode", "con", "show", "id", name], 8)
+            zeilen = info.strip().split("\n")
+            if len(zeilen) > 1 and zeilen[1].strip() == "ap":
+                continue   # der eigene Hotspot des Zynthian – kein Netz zum Verbinden
+            profile[name] = zeilen[0].strip() or name
+    return profile
+
+
+def _wlan_pruefen():
+    """einmal: Passwörter aus NetworkManager sichern, verlorene Profile neu anlegen, bei Bedarf verbinden"""
+    profile = _nm_wlan_profile()
+    gemerkt = _wlan_lesen()
+    # 1) was NetworkManager kennt (auch über die Zynthian-Weboberfläche eingerichtet), in den eigenen Speicher übernehmen
+    for name, ssid in profile.items():
+        c, t = _lauf(["nmcli", "-s", "-g", "802-11-wireless-security.psk", "con", "show", "id", name], 8)
+        pw = t.strip() if c == 0 else ""
+        if pw and (gemerkt.get(ssid) or {}).get("pw") != pw:
+            wlan_merken(ssid, pw)
+    gemerkt = _wlan_lesen()
+    bekannte_ssids = {ssid: name for name, ssid in profile.items()}
+    # 2) fehlende Profile oder fehlende Passwörter wiederherstellen – fest im System gespeichert, verbindet von selbst
+    for ssid, info in gemerkt.items():
+        pw = (info or {}).get("pw", "")
+        name = bekannte_ssids.get(ssid)
+        if not name:
+            befehl = ["nmcli", "con", "add", "type", "wifi", "con-name", ssid, "ifname", "*", "ssid", ssid, "connection.autoconnect", "yes"]
+            if pw:
+                befehl += ["wifi-sec.key-mgmt", "wpa-psk", "wifi-sec.psk", pw, "wifi-sec.psk-flags", "0"]
+            c, t = _lauf(befehl, 15)
+            _wlan_log(("wiederhergestellt: " if c == 0 else "Wiederherstellen fehlgeschlagen: ") + ssid + ("" if c == 0 else " – " + t.strip()[:120]))
+        elif pw:
+            c, t = _lauf(["nmcli", "-s", "-g", "802-11-wireless-security.psk,connection.autoconnect", "con", "show", "id", name], 8)
+            teile = t.strip().split("\n") if c == 0 else []
+            if not teile or teile[0].strip() != pw or (len(teile) > 1 and teile[1].strip() != "yes"):
+                c, t = _lauf(["nmcli", "con", "modify", "id", name, "wifi-sec.psk-flags", "0", "wifi-sec.psk", pw, "connection.autoconnect", "yes"], 15)
+                _wlan_log(("Passwort wieder eingetragen: " if c == 0 else "Eintragen fehlgeschlagen: ") + ssid)
+    # 3) WLAN an, aber nicht verbunden → mit dem stärksten bekannten Netz in Reichweite verbinden
+    c, radio = _lauf(["nmcli", "radio", "wifi"], 5)
+    if "enabled" not in radio:
+        return
+    c, t = _lauf(["nmcli", "-t", "-f", "TYPE,STATE", "dev"], 8)
+    if any(z.startswith("wifi:connected") for z in t.splitlines()) or not any(z.startswith("wifi:") for z in t.splitlines()):
+        return
+    if not gemerkt:
+        return
+    c, t = _lauf(["nmcli", "-t", "-f", "SSID,SIGNAL", "dev", "wifi", "list", "--rescan", "yes"], 25)
+    sicht = []
+    for z in t.splitlines():
+        teile = re.split(r"(?<!\\):", z)
+        if len(teile) >= 2 and teile[0]:
+            sicht.append((int(teile[1]) if teile[1].isdigit() else 0, teile[0].replace("\\:", ":")))
+    for _, ssid in sorted(sicht, reverse=True):
+        if ssid in gemerkt:
+            name = _nm_wlan_profile()
+            name = {v: k for k, v in name.items()}.get(ssid, ssid)
+            c, t = _lauf(["nmcli", "con", "up", "id", name], 40)
+            _wlan_log(("verbunden: " if c == 0 else "Verbinden fehlgeschlagen: ") + ssid + ("" if c == 0 else " – " + t.strip()[:120]))
+            if c == 0:
+                return
+
+
+def _wlan_wache():
+    time.sleep(25)
+    while True:
+        try:
+            _wlan_pruefen()
+        except Exception as e:  # nie die Brücke stören
+            print("WLAN-Wache:", e)
+        time.sleep(60)
+
+
 
 def _ton_neu():
     """ALSA-Weg für Chromium neu schreiben (Zynthian/JACK oder Bluetooth) und den Browser neu starten"""
@@ -659,17 +803,34 @@ def netz(d):
             teile = re.split(r"(?<!\\):", z)
             if len(teile) >= 2 and "wireless" in teile[1]:
                 netze.append({"name": teile[0].replace("\\:", ":"), "zuletzt": teile[2].replace("\\:", ":") if len(teile) > 2 else ""})
+        gemerkt = _wlan_lesen()
+        drin = set()
+        for n in netze:
+            c2, ssid = _lauf(["nmcli", "-g", "802-11-wireless.ssid", "con", "show", "id", n["name"]], 8)
+            n["gesichert"] = (ssid.strip() or n["name"]) in gemerkt
+            drin.add(ssid.strip() or n["name"])
+        for ssid in gemerkt:
+            if ssid not in drin:
+                netze.append({"name": ssid, "zuletzt": "", "gesichert": True, "nurSpeicher": True})
         return {"ok": c == 0, "netze": netze}
     if a == "wlan_vergessen":
         name = str(d.get("name", ""))[:64]
         if not name:
             return {"ok": False, "fehler": "kein Name"}
+        c0, ssid = _lauf(["nmcli", "-g", "802-11-wireless.ssid", "con", "show", "id", name], 8)
         c, t = _lauf(["nmcli", "con", "delete", "id", name], 15)
+        wlan_vergessen_speicher(ssid.strip() or name)
+        wlan_vergessen_speicher(name)
         return {"ok": c == 0, "meldung": t.strip()[-200:]}
     if a == "wlan_verbinden":
         ssid, pw = str(d.get("ssid", ""))[:64], str(d.get("pw", ""))[:64]
         befehl = ["nmcli", "dev", "wifi", "connect", ssid] + (["password", pw] if pw else [])
         c, t = _lauf(befehl, 45)
+        if c == 0:
+            # Passwort fest im Profil ablegen (nicht nur für diese Sitzung) und selbst merken
+            if pw:
+                _lauf(["nmcli", "con", "modify", "id", ssid, "wifi-sec.psk-flags", "0", "wifi-sec.psk", pw, "connection.autoconnect", "yes"], 15)
+            wlan_merken(ssid, pw)
         return {"ok": c == 0, "meldung": t.strip()[:240]}
     if a == "bt_liste":
         _lauf(["bluetoothctl", "power", "on"], 8)
@@ -918,6 +1079,7 @@ def main():
             print("Begleitung nicht verfügbar:", e)
     if not ARGS.test:
         threading.Thread(target=_ausgang_schleife, daemon=True).start()
+        threading.Thread(target=_wlan_wache, daemon=True).start()
     srv = ThreadingHTTPServer(("0.0.0.0", ARGS.port), Handler)
     srv.daemon_threads = True
     print("Imres-Brücke auf Port", ARGS.port, "– Seite:", SEITE)
