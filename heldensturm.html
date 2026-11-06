@@ -2283,7 +2283,7 @@ for(const id of HERO_IDS)for(const n of HEROES[id].tree){n.max=n.ult?3:5;if(n.c=
 const SLOTS=['weapon','ranged','helm','armor','gloves','ring1','ring2'];const BAGMAX=30;
 const SLOTLBL={weapon:'Nahkampf',ranged:'Fernkampf',helm:'Helm',armor:'Rüstung',gloves:'Handschuhe',ring1:'Ring',ring2:'Ring',ring:'Ring'};
 const RARN=['Gewöhnlich','Magisch','Selten','Episch','Legendär','Set'];
-const RARCOL=['#c4bcae','#62a8ff','#f2d24c','#bf7dff','#ff8d2e','#3fdc6a'];
+const RARCOL=['#c4bcae','#ff8cc6','#f2d24c','#bf7dff','#ff8d2e','#3fdc6a'];
 const RARB=[1,1.08,1.16,1.26,1.42,1.34];
 const BASES={helm:['Lederkappe','Eisenhelm','Hörnerhelm','Kapuze','Stirnreif','Topfhelm'],armor:['Wams','Kettenhemd','Schuppenpanzer','Robe','Brigantine','Lederrüstung'],gloves:['Lederhandschuhe','Panzerhandschuhe','Fingerlinge','Armschienen','Kampfhandschuhe'],ring:['Ring','Siegelring','Band','Reif','Knochenring']};
 const SUFFIX=['des Bären','der Wölfe','des Sturms','der Schatten','des Morgenrots','der Ranken','des Hains','des Mondes','der Glut','des Wanderers','der Krähen','des Abgrunds','der Tiefe','des Liedes','der Taverne','des Zwielichts'];
@@ -3392,10 +3392,10 @@ function ulEPost(e,t,c){c.globalAlpha=1;rexMarkDraw(e,t);
  if(e.root>0&&!e.boss){c.strokeStyle='rgba(120,200,90,.8)';c.lineWidth=2;c.beginPath();c.ellipse(e.x,e.y+e.r*0.6,e.r,e.r*0.35,0,0,TAU);c.stroke()}
  if(e.fearT>0&&!e.boss){c.fillStyle='#c48cff';c.font='bold 12px sans-serif';c.textAlign='center';c.fillText('!',e.x,e.y-e.r-4)}
  if(e.vulnT>0&&e.vuln>0){c.strokeStyle='rgba(255,90,70,.75)';c.lineWidth=1.5;c.beginPath();c.arc(e.x,e.y,e.r+4,0,TAU);c.stroke()}
- if(!e.boss&&e.hp<e.maxHp){const w=e.guard?e.r*2.2:e.r*1.8;c.fillStyle='rgba(0,0,0,.6)';c.fillRect(e.x-w/2,e.y-e.r-9,w,e.guard?5:3.5);c.fillStyle=e.guard?'#ff7a4a':e.rare?'#f2d24c':e.champ?'#62a8ff':'#d84a4a';c.fillRect(e.x-w/2,e.y-e.r-9,w*Math.max(0,e.hp/e.maxHp),e.guard?5:3.5)}if(!e.boss&&(e.ccV>0||e.ccI>0))ccDraw(c,e);}
+ if(!e.boss&&e.hp<e.maxHp){const w=e.guard?e.r*2.2:e.r*1.8;c.fillStyle='rgba(0,0,0,.6)';c.fillRect(e.x-w/2,e.y-e.r-9,w,e.guard?5:3.5);c.fillStyle=e.guard?'#ff7a4a':e.rare?'#f2d24c':e.champ?'#ff8cc6':'#d84a4a';c.fillRect(e.x-w/2,e.y-e.r-9,w*Math.max(0,e.hp/e.maxHp),e.guard?5:3.5)}if(!e.boss&&(e.ccV>0||e.ccI>0))ccDraw(c,e);}
 /* Körper eines Gegners (aus drawEnemy ausgelagert für Ultra-Sprites) */
 function ulEBody(e,t,c,d,k,rise,sq){c.save();{const rk=e.recT?Math.max(0,1-(G.time-e.recT)/0.12)*(e.recK||1)*5:0;c.translate(e.x+(rk?Math.cos(e.recA)*rk:0),e.y-(e.flying?e.flyHigh*60:0)+(1-rise)*e.r*0.9+(rk?Math.sin(e.recA)*rk*0.6:0))}const fl=(e.faceX!==undefined?e.faceX:P.x)<e.x?-1:1;{const A=enemyAnim(e,t);if(A.on){c.translate(A.dx*fl,e.r*0.8+A.dy);c.rotate(A.rot*fl);c.translate(0,-e.r*0.8)}}c.scale(k*fl*(1+sq),k*(1-sq)*(0.5+0.5*rise));
- if((e.elite||e.guard&&!d.gx)&&!kgAura(c,e,t)){c.globalAlpha=0.3+0.08*Math.sin(t*4+e.seed);circ(c,0,-2,17,e.guard?'#ff7a4a':e.rare?'#f2d24c':e.champ?'#62a8ff':'#e5b454');c.globalAlpha=1}
+ if((e.elite||e.guard&&!d.gx)&&!kgAura(c,e,t)){c.globalAlpha=0.3+0.08*Math.sin(t*4+e.seed);circ(c,0,-2,17,e.guard?'#ff7a4a':e.rare?'#f2d24c':e.champ?'#ff8cc6':'#e5b454');c.globalAlpha=1}
  if(e.affix&&e.affix.gepanzert){c.strokeStyle='#c8c8d0';c.lineWidth=1.5;c.beginPath();c.arc(0,-2,15,0,TAU);c.stroke()}
  if(e.shield>0){c.globalAlpha=0.35+0.15*Math.sin(t*8);circ(c,0,-2,19,'#9fe6ff');c.globalAlpha=1}
  if(d.gx)guardArt(e,t,c,d);
@@ -4348,7 +4348,7 @@ function deathFx(e){const g=GORE[e.def.shape]||'flesh',x=e.x,y=e.y,r=e.r,c=e.def
  else if(g==='slime'){chunks(x,y,c,8,170);decal(x,y+r*0.4,'slime',c,r*1.1);sfxAt('d_slime',x,y)}
  else{const bc=g==='demon'?'#3a0a2a':g==='sap'?'#3a4a14':g==='ichor'?'#4a6a1a':g==='fish'?'#2a5a5a':'#6a0c14';chunks(x,y,bc,big?14:5,170);chunks(x,y,c,big?10:3,150);if(q>1||big||Math.random()<0.4)decal(x+rnd(-4,4),y+r*0.45,'blood',bc,r*(0.9+Math.random()*0.4));sfxAt('d_flesh',x,y)}
  burst(x,y,c,big?20:4,big?240:110);
- if(e.elite&&!big){const col=e.rare?'#f2d24c':'#62a8ff';explodeFx(x,y,e.rare?70:42,col,{shake:e.rare?5:2});if(e.rare)G.fxs.push({k:'pillar',x,y:y+r,w:60,h:260,c:col,t:0,life:0.7});sfxAt('d_elite',x,y);hitstop(e.rare?0.07:0.03)}}
+ if(e.elite&&!big){const col=e.rare?'#f2d24c':'#ff8cc6';explodeFx(x,y,e.rare?70:42,col,{shake:e.rare?5:2});if(e.rare)G.fxs.push({k:'pillar',x,y:y+r,w:60,h:260,c:col,t:0,life:0.7});sfxAt('d_elite',x,y);hitstop(e.rare?0.07:0.03)}}
 function bossDeathFx(e){bossDeathSig(e);rumbleAll(0.9,700);const x=e.x,y=e.y,c=e.def.pc||e.def.t||'#ff8a2a';slowmo(1.6,0.22);sflash('#fff8e0',0.7,0.5);zpunch(0.12);banner(e.def.n,'besiegt','#e5b454',{dur:3.2,size:52,force:1});
  for(let i=0;i<5;i++)later(i*0.11,()=>{const a=rnd(TAU),d=rnd(10,e.r*1.5);explodeFx(x+Math.cos(a)*d,y+Math.sin(a)*d,rnd(40,80),i%2?c:'#ffd04a',{shake:5})});
  G.fxs.push({k:'rays',x,y,r:520,c:'#ffe7a8',t:0,life:2.4,a:rnd(TAU),soft:1});G.fxs.push({k:'pillar',x,y:y+e.r,w:160,h:760,c:'#ffe7a8',t:0,life:2.2});light(x,y,700,'#ffe7a8',2.4,1);
@@ -4675,7 +4675,7 @@ function guardDeathFx(e){slowmo(0.6,0.35);explodeFx(e.x,e.y,90,'#e5b454',{shake:
 function bossIntroFx(b,def){later(1.2,()=>say('boss',1));const S=STAGES[G.stage];banner(def.n,ORTE[S.ort].name,'#ff6a5a',{bars:1,dur:3.2,size:60});slowmo(0.9,0.45);sfx('bossintro');musAk('boss');rumbleAll(0.5,500);
  G.fxs.push({k:'pillar',x:b.x,y:b.y+b.r,w:b.r*5,h:560,c:'#ff4a3a',t:0,life:1.3});G.fxs.push({k:'shock',x:b.x,y:b.y,r:280,c:'#ff4a3a',t:0,life:0.8});light(b.x,b.y,520,'#ff4a3a',1.5,1);chunks(b.x,b.y,'#3a2a22',12,280);decal(b.x,b.y+b.r*0.6,'crack',null,b.r*3)}
 function guardIntroFx(e,def){later(1,()=>say('guard',1,0.7));musAk('waechter');banner(def.n,'Wächter','#ff9a7a',{dur:2.3,size:44});G.fxs.push({k:'pillar',x:e.x,y:e.y+e.r,w:e.r*4,h:380,c:'#ff7a4a',t:0,life:1});G.fxs.push({k:'shock',x:e.x,y:e.y,r:180,c:'#ff7a4a',t:0,life:0.6});light(e.x,e.y,360,'#ff7a4a',1,1)}
-function packFx(x,y,rare){const col=rare?'#f2d24c':'#62a8ff';G.fxs.push({k:'pillar',x,y:y+10,w:rare?70:50,h:300,c:col,t:0,life:0.9});G.fxs.push({k:'shock',x,y,r:120,c:col,t:0,life:0.5});light(x,y,260,col,0.9,1);sfxAt('elite',x,y)}
+function packFx(x,y,rare){const col=rare?'#f2d24c':'#ff8cc6';G.fxs.push({k:'pillar',x,y:y+10,w:rare?70:50,h:300,c:col,t:0,life:0.9});G.fxs.push({k:'shock',x,y,r:120,c:col,t:0,life:0.5});light(x,y,260,col,0.9,1);sfxAt('elite',x,y)}
 function levelFx(){if((G.lvFxT||-9)>G.time-0.4){if(msgL()===0)banner('Stufe '+P.level,'Neue Talentpunkte','#8fe7ff',{dur:1.8,size:42,y:H*0.3});return}G.lvFxT=G.time;G.fxs.push({k:'pillar',x:P.x,y:P.y+14,w:70,h:360,c:'#8fe7ff',t:0,life:1.1});G.fxs.push({k:'shock',x:P.x,y:P.y,r:160,c:'#8fe7ff',t:0,life:0.6});embers(P.x,P.y,'#bff4ff',14,30);sparks(P.x,P.y,'#8fe7ff',18,460,1);light(P.x,P.y,340,'#8fe7ff',1,1);if(msgL()===0)banner('Stufe '+P.level,'Neuer Talentpunkt','#8fe7ff',{dur:1.8,size:42,y:H*0.3})}
 function ultFx(){const c=HCOL[P.id]||'#e5b454';sflash(c,0.3,0.35);zpunch(0.07);slowmo(0.25,0.35);G.fxs.push({k:'shock',x:P.x,y:P.y,r:270,c,t:0,life:0.55});G.fxs.push({k:'pillar',x:P.x,y:P.y+14,w:90,h:440,c,t:0,life:0.7});light(P.x,P.y,440,c,0.8,1);sparks(P.x,P.y,c,26,620,1);sfx('ult')}
 function hurtFx(a){sparks(P.x,P.y-6,'#ff4a4a',4,220);if(a>P.st.maxHp*0.12){sflash('#ff1a1a',0.26,0.3);hitstop(0.05);zpunch(0.03)}}
@@ -4775,7 +4775,7 @@ function renderWorld(dt){
  for(const e of G.enemies)if((e.boss||e.guard)&&!e.dead&&inView(e.x,e.y,e.r*3))drawRunes(e,t);
  cx.globalCompositeOperation='lighter';
  glow(P.x,P.y+10,50,HCOL[P.id]||'#e5b454',0.16,true);
- for(const e of G.enemies){if(e.dead||!(e.elite||e.guard||e.boss)||!inView(e.x,e.y,e.r*3))continue;const col=e.boss?'#ff3a2a':e.guard?'#ff7a4a':e.rare?'#f2d24c':'#62a8ff';glow(e.x,e.y+e.r*0.55,e.r*(e.boss?3.4:2.6),col,0.24+0.08*Math.sin(t*4+e.seed),true);
+ for(const e of G.enemies){if(e.dead||!(e.elite||e.guard||e.boss)||!inView(e.x,e.y,e.r*3))continue;const col=e.boss?'#ff3a2a':e.guard?'#ff7a4a':e.rare?'#f2d24c':'#ff8cc6';glow(e.x,e.y+e.r*0.55,e.r*(e.boss?3.4:2.6),col,0.24+0.08*Math.sin(t*4+e.seed),true);
   if(e.boss&&e.hp<e.maxHp*0.4&&Math.random()<dt*25)embers(e.x,e.y,'#ff5a3a',1,e.r)}
  cx.globalCompositeOperation='source-over';cx.globalAlpha=1;
  updGhosts(dt);drawGhosts(t);
@@ -5475,7 +5475,7 @@ const SHRINES={
  erkenntnis:{n:'Schrein der Erkenntnis',d:'−40% Abklingzeiten, +50% Erfahrung',c:'#c48cff'}
 };
 const shrineOn=k=>P&&P.shrine&&P.shrine.t>0&&P.shrine.k===k;
-const GEMS={rubin:{n:'Rubin',c:'#ff3b4a',k:'dmg'},saphir:{n:'Saphir',c:'#4a8aff',k:'cdr'},smaragd:{n:'Smaragd',c:'#3fdc6a',k:'crit'},topas:{n:'Topas',c:'#ffc23a',k:'gold'},amethyst:{n:'Amethyst',c:'#b06cff',k:'hp'},diamant:{n:'Diamant',c:'#e8f6ff',k:'armor'}};
+const GEMS={rubin:{n:'Rubin',c:'#ff3b4a',k:'dmg'},saphir:{n:'Rosenquarz',c:'#ffa6cf',k:'cdr'},smaragd:{n:'Smaragd',c:'#3fdc6a',k:'crit'},topas:{n:'Topas',c:'#ffc23a',k:'gold'},amethyst:{n:'Amethyst',c:'#b06cff',k:'hp'},diamant:{n:'Diamant',c:'#e8f6ff',k:'armor'}};
 const GEM_IDS=Object.keys(GEMS);
 function gemVal(g,il){const k=GEMS[g].k;return k==='dmg'?Math.round(5+il*0.25):k==='cdr'?4:k==='crit'?Math.round(2+il*0.04):k==='gold'?15:k==='hp'?Math.round(12+il*3.5):Math.round(5+il*1.4)}
 function affOf(it){if(!Array.isArray(it.aff))it.aff=[];it.aff=it.aff.filter(a=>a&&AFF[a.k]);if(!Array.isArray(it.sock)||!it.sock.some(Boolean))return it.aff;const L=it.aff.slice();for(const g of it.sock)if(g&&GEMS[g])L.push({k:GEMS[g].k,v:gemVal(g,it.ilvl),gem:g});return L}
@@ -10254,7 +10254,7 @@ function kgDraw(c,e,t,d,lg,wob,W_,sq,fl){if(!KG.on||e.boss||d.gx)return false;co
  if(S.post)S.post(c,e,t,L);
  return true}
 /* Aura der Elite: weiches Glimmen, Bodenring, bei Seltenen zusätzlich Funken und ein zweiter laufender Ring */
-function kgAura(c,e,t){if(e.boss||e.def.gx)return false;const col=e.rare?'#f2d24c':e.champ?'#62a8ff':'#e5b454',p=Math.sin(t*4+e.seed),q=GF().lite?0:fxQ(),ga=c.globalAlpha;
+function kgAura(c,e,t){if(e.boss||e.def.gx)return false;const col=e.rare?'#f2d24c':e.champ?'#ff8cc6':'#e5b454',p=Math.sin(t*4+e.seed),q=GF().lite?0:fxQ(),ga=c.globalAlpha;
  kgGlowAt(c,0,-3,(e.rare?24:20)+p*1.5,col,(e.rare?0.55:0.42)+0.08*p);
  c.globalAlpha=ga*(0.55+0.2*p);c.strokeStyle=col;c.lineWidth=1.3;c.beginPath();c.ellipse(0,11,16,5.5,0,0,TAU);c.stroke();
  if(e.rare&&q>=1){c.globalAlpha=ga*0.7;c.setLineDash([3,3]);c.lineDashOffset=-t*10;c.beginPath();c.ellipse(0,11,19.5,6.8,0,0,TAU);c.stroke();c.setLineDash([]);
@@ -18404,7 +18404,7 @@ hook('kill',(e,o)=>{if(!vbOk()||!(e.vineT>G.time)||!rank('b_bloom')||(P.vbBlT||0
    (a) Partikel/Ringe/Licht nur, solange P Barradin ist (Echo/Friedrich behalten ihre Farben),
    (b) Barradin-eigene Zeichenfunktionen (HFX kt_*, bm_*, gm_*, PETART.bm_double) werden mit ersetzten Farbwerten neu erzeugt. */
 const VBMAP={'#9fd8ff':'#f0b0ff','#8fd8ff':'#f0b0ff','#bfe6ff':'#ffe0f4','#cfe6ff':'#fff0e0','#9fd0ff':'#ffc0e6','#bfe0ff':'#ffe4f2','#bfd8ff':'#ffe4f2',
- '#9fc8ff':'#e8b0ff','#9fe6ff':'#f0b0ff','#e6efff':'#fff3e6','#9fb2cc':'#c8a8c0','#cfefff':'#ffe8f6','#6ab8ff':'#d890ff','#bfefff':'#ffe0f4','#62a8ff':'#e090ff'};
+ '#9fc8ff':'#e8b0ff','#9fe6ff':'#f0b0ff','#e6efff':'#fff3e6','#9fb2cc':'#c8a8c0','#cfefff':'#ffe8f6','#6ab8ff':'#d890ff','#bfefff':'#ffe0f4','#ff8cc6':'#e090ff'};
 const vbCol=c=>(typeof c==='string'&&VBMAP[c.toLowerCase()])||c;
 const vbIsB=()=>P&&P.id==='barradin';
 for(const fn of ['ring','burst','sparks','light','embers','wisps','word']){try{const f0=eval(fn);if(typeof f0!=='function')continue;
@@ -26427,6 +26427,122 @@ window.__hsFEIN=1;
    Folge: Minikarten-Nebel, Überraschungs-Gedächtnis, Kombo-/Karten-Zähler erkannten keinen neuen Lauf. Kennung nachträglich setzen. */
 (()=>{try{const _sr=startRun;startRun=function(){const r=_sr.apply(this,arguments);try{if(G&&!G.runId)G.runId=Math.random()}catch(e){}return r}}catch(e){console.warn('runid',e)}})();
 window.__hsRUNID=1;
+
+/* ================= Paket „qa2“: Qualitätsrunde nach karte2/perf3/nebel/weg/fein (window.__hsQA2) =================
+   Nur Laufzeit-Hüllen und CSS (dazu in fix_qa2.py zwei reine Farbkonstanten: Seltenheit „Magisch“/Champions und der Saphir).
+   1) Meldungen (Toasts) in Menüs/Fenstern: unten als deckende Karte über allem statt oben auf Titel/Zurück-Knopf (opmenu);
+      höchstens zwei gleichzeitig. Im Spiel: lange Meldungen (Spielweise o. Ä.) unten mittig statt über Held/Sprechblasen,
+      am Handheld (≤ 520 px hoch) alle Meldungen und die Einführung unten – die Bildmitte (Held, Sprechblasen) bleibt frei.
+   2) Einführungs-Hinweis (Tutorial) nur im laufenden Spiel sichtbar (nicht über Lagerfeuer, Pause, Zwischenbildschirm).
+   3) Statusplaketten (Zeitlimit, Schrein, Flüche, Wetter, Tageszeit, Raum) unter die Heldenleiste statt dahinter.
+   4) Talentpunkt-Plakette am „Talente“-Knopf ragt nicht mehr oben aus dem Bild.
+   5) Kein Blau: Meldungs-/Banner-/Wortfarben, Wetter-/Tageszeit-Plaketten und neue Effekte/Partikel/Lichter (Farbe .c)
+      werden von Blau nach Violett gedreht (Helligkeit/Sättigung bleiben); Seltenheit „Magisch“/Champions rosé (fix_qa2.py).
+   6) Handheld (≤ 520 px hoch): Mindestschrift 11 px für die kleinen Beschriftungen (Zähler, Kennzeichen, Reiter, Karten),
+      Ausrüstungsplatz-Namen gekürzt statt „NAH…“; große Einblendung (Stufenname) kleiner, unter der Heldenleiste und neben
+      der Minikarte, Abschnittsname erst danach (vorher halb hinter der Leiste und übereinander).
+   Desktop: die Einführung wartet, solange oben eine große Einblendung steht. */
+window.__hsQA2={v:1};
+const QA2=window.__hsQA2;
+/* ---------- Farben: Blau → Violett (gleiche Helligkeit/Sättigung) ---------- */
+const QA2_FIX={'#8fe7ff':'#e2b4ff','#9fe6ff':'#e6b8ff','#a8b8ff':'#d8b4ff','#bfd8ff':'#e0ccf4','#62a8ff':'#ff8cc6','#4a8aff':'#ffa6cf'};
+const QA2C=new Map();
+function qa2Rgb(c){if(typeof c!=='string')return null;let m=c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);if(m){let h=m[1];if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255,null]}
+ m=c.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/i);return m?[+m[1],+m[2],+m[3],m[4]!==undefined?+m[4]:null]:null}
+function qa2Farbe(c){if(typeof c!=='string'||c.length>40)return c;const k=c.toLowerCase();if(QA2_FIX[k])return QA2_FIX[k];const v=QA2C.get(c);if(v!==undefined)return v;
+ let out=c;const q=qa2Rgb(c);if(q){const r=q[0]/255,g=q[1]/255,b=q[2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+  if(d>0.08&&mx>0.12){let h=mx===r?60*(((g-b)/d)%6):mx===g?60*((b-r)/d+2):60*((r-g)/d+4);if(h<0)h+=360;
+   if(h>=185&&h<=250){const L=(mx+mn)/2,S=d/(1-Math.abs(2*L-1)||1),H=285,C=(1-Math.abs(2*L-1))*S,X=C*(1-Math.abs((H/60)%2-1)),m0=L-C/2;
+    const o=[X,0,C].map(v=>Math.max(0,Math.min(255,Math.round((v+m0)*255))));
+    out=q[3]!==null||c[0]!=='#'?`rgba(${o[0]},${o[1]},${o[2]},${q[3]!==null?q[3]:1})`:'#'+o.map(v=>v.toString(16).padStart(2,'0')).join('')}}}
+ if(QA2C.size>3000)QA2C.clear();QA2C.set(c,out);return out}
+QA2.farbe=qa2Farbe;
+{const t0=toast;toast=function(msg,col,o){if(typeof col==='string')col=qa2Farbe(col);return t0.call(this,msg,col,o)}}
+try{const b0=banner;banner=function(big,small,col,o){if(typeof col==='string')col=qa2Farbe(col);const r=b0.call(this,big,small,col,o);
+ /* Handheld: große Einblendung kleiner und unter die Heldenleiste (vorher halb hinter der Leiste) */
+ try{const b=G.banner;if(b&&!b.bars&&!b._q2&&innerHeight<=520&&!(o&&o.y)){b._q2=1;const k=H/innerHeight;const top=document.querySelector('#hud .top');const hb=top&&!document.getElementById('hud').hidden?top.getBoundingClientRect().bottom:0;
+  let fs=Math.min(b.size||56,40*k);try{cx.save();cx.font=`${Math.round(fs)}px 'IM Fell English SC','Palatino Linotype',Georgia,serif`;const mw=cx.measureText(b.big||'').width,av=W*0.64;cx.restore();if(mw>av)fs=Math.max(18*k,fs*av/mw)}catch(e){}
+  b.size=fs;b.y=Math.max(innerHeight*0.26,hb+34)*k}}catch(e){}return r}}catch(e){}
+/* Handheld: Abschnittsname erst nach der großen Einblendung (vorher übereinander) */
+try{const kn=kaNameZeigen;kaNameZeigen=function(){if(innerHeight<=520&&G.banner&&!G.banner.bars&&G.state==='play')return;return kn.apply(this,arguments)}}catch(e){}
+try{const w0=word;word=function(x,y,txt,c){if(typeof c==='string')c=qa2Farbe(c);return w0.call(this,x,y,txt,c)}}catch(e){}
+try{const wp=wxPills;wxPills=function(L){const n=L.length;const r=wp.apply(this,arguments);for(let i=n;i<L.length;i++)if(L[i]&&L[i].c)L[i].c=qa2Farbe(L[i].c);return r}}catch(e){}
+/* neue Effekte/Partikel/Lichter: Farbe (.c) einmal prüfen; wiederverwendete Objekte erkennt __q2 */
+function qa2Umf(A){if(!A)return;for(let i=0;i<A.length;i++){const o=A[i];if(!o||o.__q2===o.c)continue;const c=o.c;if(typeof c==='string'){const n=qa2Farbe(c);o.c=n;o.__q2=n}else o.__q2=c}}
+{const r0=render;render=function(){try{if(G&&G.state==='play'){qa2Umf(G.fxs);qa2Umf(G.parts);qa2Umf(G.lights)}}catch(e){}return r0.apply(this,arguments)}}
+
+/* ---------- CSS ---------- */
+(()=>{try{const st=document.createElement('style');st.id='qa2css';st.textContent=`
+/* 5) Seltenheit „Magisch“ ohne Blau (CSS-Variable) */
+:root{--r1:#ff8cc6}
+/* 1) Meldungen in Menüs: unten, deckend, über allem, höchstens zwei */
+html.opmenu #toast#toast{margin-left:auto;margin-right:auto;top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + var(--qa2sb,46px))!important;z-index:45;width:min(92vw,600px);gap:6px}
+html.opmenu #toast#toast .tm,html.opmenu #toast#toast>*{background:rgba(22,15,20,.97)!important;border:1px solid rgba(229,180,84,.55);border-radius:10px;padding:8px 16px;box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:14px;line-height:1.35;animation:qa2ein 2.6s ease both}
+html.opmenu #toast#toast>:nth-last-child(n+3){display:none}
+@keyframes qa2ein{0%{opacity:0;transform:translateY(8px)}9%{opacity:1;transform:none}86%{opacity:1}100%{opacity:0}}
+/* 1b) lange Meldungen im Spiel: unten mittig */
+#qa2lane{position:fixed;left:0;right:0;margin:0 auto;bottom:calc(env(safe-area-inset-bottom,0px) + var(--qa2lb,22px));width:min(48vw,560px);display:flex;flex-direction:column-reverse;align-items:center;gap:6px;pointer-events:none;z-index:15;zoom:var(--hz,1)}
+#qa2lane .tm{background:rgba(16,12,18,.94);font-size:14px;line-height:1.35;text-shadow:0 1px 2px #000}
+html.opmenu #qa2lane{display:none}
+@media (max-height:520px){
+ html:not(.opmenu) #toast#toast{margin-left:auto;margin-right:auto;top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + var(--qa2tb,8px))!important;width:min(94vw,600px)}
+ html:not(.opmenu) #toast#toast .tm{font-size:12px;line-height:1.3;padding:4px 10px}
+ #qa2lane{width:min(94vw,600px);bottom:calc(env(safe-area-inset-bottom,0px) + var(--qa2tb,8px))}
+ #qa2lane .tm{font-size:12px;line-height:1.3;padding:4px 10px}
+ .tutk{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 6px)!important;padding:6px 12px 5px!important;font-size:13px!important}
+ .tutk .tutf{margin-top:2px}
+}
+/* 2) Einführung nur im laufenden Spiel */
+html.opmenu .tutk{display:none!important}
+/* 4) Talentpunkt-Plakette bleibt im Bild */
+html body #btnTree #spBadge,html body #btnTree.glow #spBadge{top:-4px;right:-10px;min-width:20px;height:20px;line-height:17px;font-size:13px;border-radius:10px;padding:0 4px;border-width:1.5px}
+/* 6) Handheld: Mindestschrift 11 px */
+@media (max-height:520px){
+ #scr .eye,#scr div.eye,.slm-head .eye,.slm-foot>span,.slcard>span.no,.tx>span.no,.tx>span.ln,.ln>b,.ln>span.tag,.slrow>span.lbl,.slhero>span.cl,
+ .btn>small,.it>span.lv,.it>span.sl,.fkKopf .eyebrow,.fkTag,.fkTag>b,.tx-bar>span,#hud #kaKill,#hud #spCnt{font-size:11px!important}
+ .slb>i.szneu{font-size:10px!important;padding:1px 5px}
+ .ln>span.tag{padding:0 5px;letter-spacing:0}
+ .it>span.sl{letter-spacing:0!important}
+}
+`;document.head.appendChild(st)}catch(e){}})();
+
+/* ---------- 1) Meldungen verteilen ---------- */
+const QA2L={lane:null};
+function qa2Lane(){if(!QA2L.lane||!QA2L.lane.isConnected){QA2L.lane=document.createElement('div');QA2L.lane.id='qa2lane';document.body.appendChild(QA2L.lane)}return QA2L.lane}
+const qa2Klein=()=>innerHeight<=520;
+const qa2Menu=()=>!scr.hidden;
+{const t1=toast;toast=function(msg,col,o){const n0=toastEl.children.length,last=toastEl.lastElementChild;const r=t1.apply(this,arguments);
+ try{const d=toastEl.lastElementChild,neu=d&&d!==last&&toastEl.children.length>=Math.min(n0+1,MOBIL?2:4);if(neu)d.dataset.q2m=qa2Menu()?'1':'0';
+  if(neu&&!qa2Menu()&&!qa2Klein()){const txt=d.textContent||'';
+   if(txt.length>110){const L=qa2Lane();L.appendChild(d);while(L.children.length>2)L.firstChild.remove()}}}catch(e){}return r}}
+/* lange Spiel-Hinweise (Spielweise u. Ä.) nicht als große Karte über ein gerade geöffnetes Fenster legen */
+function qa2MenuPutz(){if(!qa2Menu())return;for(const d of [...toastEl.children])if(d.dataset&&d.dataset.q2m==='0'&&(d.textContent||'').length>110)d.remove()}
+/* Abstände: Menü-Meldungen über der Startleiste des Lagers; Handheld-Meldungen über der Einführung */
+function qa2Abst(){try{qa2MenuPutz();const de=document.documentElement;let sb=46;if(qa2Menu()){/* über Startleiste, Seitenleiste und Hauptknöpfen im unteren Bereich bleiben */let top=innerHeight;
+   for(const b of scr.querySelectorAll('.startbar,.mfbar,.btn-main,button[data-act="fire-go"],button[data-act="next-stage"],button[data-act="stage-go"]')){if(!b.getClientRects().length)continue;const r=b.getBoundingClientRect();if(r.height>0&&r.top>innerHeight*0.55&&r.top<top)top=r.top}
+   if(top<innerHeight)sb=Math.max(sb,Math.round(innerHeight-top+8));sb=Math.min(sb,Math.round(innerHeight*0.45))}
+  const v=sb+'px';if(de.style.getPropertyValue('--qa2sb')!==v)de.style.setProperty('--qa2sb',v);
+  let tb=8;const t=TUT&&TUT.el;if(t&&qa2Klein()&&t.style.display!=='none'&&t.getClientRects().length){const r=t.getBoundingClientRect();if(r.height>0)tb=Math.round(innerHeight-r.top+6)}
+  const v2=tb+'px';if(de.style.getPropertyValue('--qa2tb')!==v2)de.style.setProperty('--qa2tb',v2);
+  /* 2) Einführung: im Menü/Pause/Fenster ausblenden (tutTick läuft dort nicht immer) */
+  if(t){const spielt=G.state==='play'&&!G.paused&&!G.overlay&&!qa2Menu();if(!spielt&&t.style.display!=='none')t.style.display='none';
+   /* große Einblendung (Stufenname, Ziel) oben: Einführung solange zurückhalten (Desktop: gleiche Höhe) */
+   const ban=!qa2Klein()&&G.banner&&!G.banner.bars;const vv=ban?'hidden':'';if(t.style.visibility!==vv)t.style.visibility=vv}
+ }catch(e){}}
+setInterval(qa2Abst,250);
+try{new MutationObserver(()=>{try{qa2MenuPutz()}catch(e){}}).observe(scr,{attributes:true,attributeFilter:['hidden']})}catch(e){}
+
+/* ---------- 3) Statusplaketten unter die Heldenleiste ---------- */
+{const dp=drawPills;drawPills=function(){QA2.pf=1;try{return dp.apply(this,arguments)}finally{QA2.pf=0}}}
+(()=>{try{const pb=$('progBar'),sp=pb&&(pb.closest('.panel')||pb);if(!sp)return;const gb=Element.prototype.getBoundingClientRect;
+ sp.getBoundingClientRect=function(){const r=gb.call(this);if(!QA2.pf)return r;let bot=r.bottom;
+  try{const top=sp.closest('.top');if(top)for(const p of top.children){if(p===sp||!p.classList||!p.classList.contains('panel')||p.offsetParent===null)continue;const q=gb.call(p);if(q.left<260&&q.bottom>bot&&q.bottom<innerHeight*0.5)bot=q.bottom}}catch(e){}
+  return{top:r.top,left:r.left,right:r.right,bottom:bot,width:r.width,height:bot-r.top,x:r.left,y:r.top}}}catch(e){}})();
+
+/* ---------- 6) Handheld: Ausrüstungsplatz-Namen kürzen, wenn sie nicht passen ---------- */
+const QA2_KURZ={'Nahkampf':'Nah','Fernkampf':'Fern','Rüstung':'Rüst.','Handschuhe':'Hände','Waffe':'Waffe'};
+function qa2Kurz(){if(!qa2Klein()||scr.hidden)return;try{for(const s of scr.querySelectorAll('.it>span.sl')){const t=s.textContent.trim();if(s.dataset.q2l||!QA2_KURZ[t])continue;if(s.scrollWidth>s.clientWidth+1){s.dataset.q2l=t;s.title=t;s.textContent=QA2_KURZ[t]}}}catch(e){}}
+try{new MutationObserver(()=>{if(qa2Klein())requestAnimationFrame(qa2Kurz)}).observe(scr,{childList:true,subtree:true})}catch(e){}
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
