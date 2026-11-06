@@ -876,6 +876,13 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const esc2 = x => String(x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
   /* ----- was auf einer Seite liegt: Gruppen, jede beginnt auf einem neuen Blatt (8 Kacheln) ----- */
+  const ZUS_GR_SYM = { wetter: "🌦", wasser: "💧", haus: "🏠", wild: "🦌", hof: "🐄", menschen: "👥", handwerk: "🔨", grusel: "👻", wesen: "🐉", duester: "🌑", behaglich: "🕯", weitere: "✨" };
+  const ZUS_SYM = { regen: "🌧", starkregen: "⛈", gewitter: "🌩", sturm: "🌪", wind: "💨", laub: "🍃", schnee: "❄", bach: "🏞", wellen: "🌊", wasserfall: "💦", tropfen: "💧", blubbern: "🫧", feuer: "🔥", kessel: "🍲", uhr: "🕰", katze: "🐈", glocke: "🔔", muehle: "⚙",
+    voegel: "🐦", grillen: "🦗", eule: "🦉", frosch: "🐸", wolf: "🐺", kraehe: "🐦‍⬛", moewe: "🕊", specht: "🪵", bienen: "🐝", fledermaus: "🦇", wal: "🐋", ente: "🦆", hirsch: "🦌", keiler: "🐗", greif: "🦅", schlange: "🐍",
+    hund: "🐕", pferd: "🐎", kuh: "🐄", schaf: "🐑", huhn: "🐔", schwein: "🐖", esel: "🫏", ziege: "🐐", kinder: "🧒", stimmen: "🗣", markt: "🛒", hafen: "⚓", segel: "⛵", gesang: "🎶", schmiede: "⚒", axt: "🪓", hacke: "⛏",
+    geist: "👻", untot: "🧟", ketten: "⛓", monster: "👹", yeti: "🦍", kriegstrommeln: "🥁", hexe: "🧙", goblin: "👺", oger: "👹", drachenbruellen: "🐉", fluegelschlag: "🪽", lindwurm: "🐲", spinne: "🕷", skelett: "💀", ghul: "🧟",
+    geisterfluestern: "🌫", spuk: "🏚", geisterheulen: "👻", daemon: "😈", baer: "🐻", hyaene: "🐺", baumhirte: "🌳", golem: "🗿", feuerwesen: "🔥", seeungeheuer: "🦑", hoehlengesang: "🕳", sirene: "🧜", raubkatze: "🐆",
+    fernschrei: "😱", tuerknarren: "🚪", ritualtrommel: "🪘", fluestern: "🤫", grabesdroehnen: "⚰", geisterhauch: "🌬", herzschlag: "💓", friedhof: "🪦", ruinenwind: "🏛", geisterchor: "👥", fliegenschwarm: "🪰" };
   function zpInhalt() {
     const g = [], P = window.ImresPult, z = pz() || {};
     if (SEITE === "welten") {
@@ -912,14 +919,20 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         const an = !!(z.kulLaeuft && (z.kulisse === k || (k === "wald" && z.kulisse === "waldnacht")));
         return { key: "kul:" + k, sym: sy, name: nm, an, los: () => { if (an) { pultKlick("data-kulisse", "keine"); zeige("🔇 " + W("Hintergrund aus", "Backdrop off")); } else { ortWaehlen(k); zeige("🌲 " + nm); } } };
       }) });
-      const zus = [], gesehen = new Set();
-      ["regen", "starkregen", "gewitter", "sturm", "wind", "schnee", "feuer", "voegel", "grillen", "eule", "wolf", "bach", "wellen", "glocke", "uhr", "katze"].forEach(id => {
-        const el = $('#lautenwerk [data-zusatz="' + id + '"]'); if (!el || gesehen.has(id)) return; gesehen.add(id);
-        const nm = (el.getAttribute("title") || el.getAttribute("aria-label") || id).split(" – ")[0].trim();
-        const [sy, n2] = teil(nm, { regen: "🌧", starkregen: "⛈", gewitter: "🌩", sturm: "🌪", wind: "💨", schnee: "❄", feuer: "🔥", voegel: "🐦", grillen: "🦗", eule: "🦉", wolf: "🐺", bach: "🏞", wellen: "🌊", glocke: "🔔", uhr: "🕰", katze: "🐈" }[id] || "✨");
-        zus.push({ key: "zus:" + id, sym: sy, name: n2, an: el.getAttribute("aria-pressed") === "true" || el.classList.contains("an"), los: () => { const e2 = $('#lautenwerk [data-zusatz="' + id + '"]'); if (e2) klick(e2); else pultKlick("data-zusatz", id); } });
-      });
-      if (zus.length) g.push({ titel: W("Wetter & Zusätze", "Weather & extras"), l: zus });
+      /* Geräusche direkt über die Bühne schalten: erst was gerade läuft, dann was zum Ort passt, dann nach Art sortiert */
+      const P = window.ImresPult, K = P && P.zusKatalog ? P.zusKatalog() : null;
+      if (K) {
+        const kachel = id => ({ key: "zus:" + id, sym: ZUS_SYM[id] || "✨", name: K.namen[id] || id, an: !!K.an[id],
+          los: () => { const P2 = window.ImresPult, ist = !!P2.zusKatalog().an[id];
+            if (!P2.zusSetzen(id, ist ? 0 : 1)) zeige("⚠ " + W("Höchstens ", "At most ") + K.max + W(" Geräusche gleichzeitig – erst eines ausschalten", " sounds at once – switch one off first"));
+            else zeige((ist ? "🔇 " : (ZUS_SYM[id] || "✨") + " ") + (K.namen[id] || id), null, ist ? W("aus", "off") : W("an · Lautstärke: ZS3 auf der Ort-Seite", "on · level: ZS3 on the place page")); zpZeichnen(true); } });
+        const laufen = Object.keys(K.an).filter(id => K.namen[id]);
+        if (laufen.length) g.push({ titel: "🔊 " + W("Läuft gerade – antippen schaltet aus", "Playing – tap to switch off"), l: laufen.map(kachel) });
+        /* Kacheln bleiben an ihrem Platz (leuchten, wenn an) – so springt nichts unter dem Finger weg */
+        const pass = K.passend.slice(0, 16);
+        if (pass.length) g.push({ titel: "✨ " + W("Passt zu diesem Ort", "Fits this place"), l: pass.map(kachel) });
+        K.gruppen.forEach(([gid, nm, ids]) => { const l = ids.filter(id => !pass.includes(id)); if (l.length) g.push({ titel: (ZUS_GR_SYM[gid] || "") + " " + nm, l: l.map(kachel) }); });
+      }
     } else {
       const mo = P.momente();
       if (mo.length) g.push({ titel: W("Momente", "Moments") + (z.kulisse && z.kulisse !== "keine" ? " · " + teil(L.namen.kul[z.kulisse] || "", "")[1] : ""), l: mo.map(m => ({ key: "mom:" + z.kulisse + ":" + m.i, sym: m.sym, name: m.name, still: !!m.still, los: () => { pultKlick("data-moment", m.i); zeige(m.sym + " " + m.name); } })) });
@@ -997,7 +1010,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const HALTEN = { filterzu: 1, filterhoch: 1, echowurf: 1, stotter: 1, rueckwaerts: 1, bandstop: 1, crushhalt: 1 };
   const ZP_TASTEN = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "ZS3", "CTRL", "ALT+PLAY", "ALT+STOP", "ALT+PAD", "ALT+REC", "ALT+TEMPO", "ALT+ZS3", "ALT+CTRL"];
   const ZP_STANDARD = {
-    regler: { "A:stimmung": ["musik", "spannung", "hg", "los"], "A:ort": ["hg", "los", "spannung", "hall"], "A:momente": ["fxlaut", "spannung", "hall", "tempo"],
+    regler: { "A:stimmung": ["musik", "spannung", "hg", "los"], "A:ort": ["hg", "wetter", "los", "hall"], "A:momente": ["fxlaut", "spannung", "hall", "tempo"],
       B: ["tempo", "hall", "fxlaut", "echohall"], FX: ["filter", "delay", "crush", "gate"] },
     tasten: { PLAY: "play", STOP: "stop", PAD: "passiert", REC: "stille", TEMPO: "tap", ZS3: "spurmix", CTRL: "mischer",
       "ALT+PLAY": "fx_aus", "ALT+STOP": "filterzu", "ALT+PAD": "beats", "ALT+REC": "aufnahme", "ALT+TEMPO": "neubesetzen", "ALT+ZS3": "echowurf", "ALT+CTRL": "stotter" }
@@ -1009,6 +1022,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   if (lies("imres-zyn-misch1", "") !== "1") { if (ZB.tasten.CTRL === "seite_vor") ZB.tasten.CTRL = "mischer"; schreib("imres-zyn-misch1", "1"); belegMerken(); }
   if (lies("imres-zyn-beats1", "") !== "1") { if (ZB.tasten["ALT+PAD"] === "sprechen") ZB.tasten["ALT+PAD"] = "beats"; schreib("imres-zyn-beats1", "1"); belegMerken(); }
   if (lies("imres-zyn-spur1", "") !== "1") { if (ZB.tasten.ZS3 === "seite_zurueck") ZB.tasten.ZS3 = "spurmix"; schreib("imres-zyn-spur1", "1"); belegMerken(); }
+  if (lies("imres-zyn-wetter1", "") !== "1") { const o = ZB.regler["A:ort"]; if (!o || o.join() === "hg,los,spannung,hall") { ZB.regler["A:ort"] = ["hg", "wetter", "los", "hall"]; belegMerken(); } schreib("imres-zyn-wetter1", "1"); }
   let vorBeats = "stimmung";
   const bankName = () => BANKEN[bank] || "A";
   /* Mischpult (CTRL): vier Regler für die Lautstärken – drücken+drehen legt etwas anderes auf den Regler */
@@ -1905,6 +1919,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   BANK_FARBE.MIT = "#ffd890";
   ZB.regler.MIT = ZB.regler.MIT || ["mit_stufe", "mit_laut", "mit_empf", "mit_okt"];
   MIX_LISTE.push("mit_stufe", "mit_laut");
+  const WETTER_NAME = [W("☀ klar", "☀ clear"), W("💨 Wind", "💨 wind"), W("🌧 Regen", "🌧 rain"), W("⛈ Starkregen", "⛈ downpour"), W("🌩 Gewitter", "🌩 thunderstorm"), W("🌪 Unwetter", "🌪 tempest")];
+  ZP_PARAM.wetter = { name: W("🌦 Wetter", "🌦 Weather"), lo: 0, hi: 5, schritt: 1, neutral: 0, druck: "null",
+    lies: () => { const P = window.ImresPult; return P && P.wetter ? P.wetter() : 0; }, setz: v => { const P = window.ImresPult; if (P && P.wetter) P.wetter(v); }, text: v => WETTER_NAME[v] || "" };
+  NORMAL_PARAMS.push("wetter");
   NORMAL_PARAMS.push("karte_haupt", "karte_kh", "boost"); MIX_LISTE.splice(5, 0, "boost");
   BANK_FARBE.IN1 = "#ff9a80"; BANK_FARBE.IN2 = "#d090ff";
   ZB.regler.IN1 = ZB.regler.IN1 || ["in1_laut", "in1_filter", "in1_echo", "in1_hall"];

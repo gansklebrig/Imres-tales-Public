@@ -209,6 +209,12 @@ Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zur
 
 **Pads:** Oben rechts schaltet **🥁 Pads / ▦ Raster** die Ansicht um. In der Pad-Ansicht gibt es 8 große Pads – antippen spielt das Instrument sofort (F1–F4 spielen die oberen vier). Mit **⏺ Aufnahme** (oder REC) wird bei laufendem Beat alles, was du spielst, auf den nächsten Schritt gesetzt. Darunter das kleine Raster: dort siehst du, wann welches Instrument spielt (die Pads blitzen mit), und ein Tipp auf ein Feld nimmt den Schlag wieder raus.
 
+### 🌦 Wetter & Geräusche (Seite Ort)
+
+- **Wetter-Regler** (Regler 2 auf der Ort-Seite): ☀ klar → 💨 Wind → 🌧 Regen → ⛈ Starkregen → 🌩 Gewitter → 🌪 Unwetter – ein Dreh, und das ganze Wetter wandert mit.
+- **Geräusche als Kacheln** hinter den Orten (◀ ▶ blättern, ALT + ▲ ▼ springt von Gruppe zu Gruppe): zuerst **🔊 Läuft gerade**, dann **✨ Passt zu diesem Ort**, dann nach Art (Wasser, Feuer & Haus, Wildtiere, Hoftiere, Menschen, Unheimliches …). Antippen = an/aus, die Kachel leuchtet, solange es läuft.
+- Lautstärke einzelner Geräusche: **ZS3** auf der Ort-Seite.
+
 ### 🎻 Mitspieler (wie der Ensemble-Regler am Streichfett)
 
 **MENU → 🎤 Eingänge → 🎻 Mitspieler**: Imres hört auf deine Handpan (Eingang 1 oder 2), erkennt jeden angeschlagenen Ton und lässt Bühneninstrumente denselben Ton mitspielen – passend in die eingestellte Tonart eingerastet. **MIXER → Bank MIT**:

@@ -2614,6 +2614,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     root.querySelectorAll(".lw-tuer").forEach(b => { b.setAttribute("aria-pressed", tuerZu); b.textContent = tuerZu ? t().tuerAuf : t().tuerZu; });
   }
   let zusWahl = {}, zusLauf = {}, zusPausiert = false;
+  let WETTER_STUFE = 0; try { WETTER_STUFE = Math.max(0, Math.min(5, +localStorage.getItem("imres-lw-wetter") || 0)); } catch (_) {}
   try { zusWahl = JSON.parse(localStorage.getItem("imres-lw-zusaetze") || "{}") || {}; } catch (_) {}
   /* einmalig: Zusätze sind jetzt deutlich lauter – früher hochgedrehte Regler zurück auf 100 % */
   try { if (!localStorage.getItem("imres-lw-zus-pegel2")) { Object.keys(zusWahl).forEach(id => { if (zusWahl[id] > 1) zusWahl[id] = 1; }); localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); localStorage.setItem("imres-lw-zus-pegel2", "1"); } } catch (_) {}
@@ -13577,6 +13578,26 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     kanalAnalyse(i, groesse) { return kanalAnalyse(i, groesse || 4096); },
     abtastrate() { return ctx ? ctx.sampleRate : 0; },
     duckStand() { return duckJetzt; },
+    /* Geräusche/Wetter fürs Pult – ohne Umweg über die Seite */
+    zusKatalog() {
+      const en = sprache() === "en", G = t().einf.zusGr || {};
+      const namen = {}; Object.keys(ZUSATZ).forEach(id => { namen[id] = ZUSATZ[id][en ? "en" : "de"] || id; });
+      const gruppen = ZUS_GRUPPEN.map(([g, l]) => [g, G[g] || g, l.split(" ").filter(id => ZUSATZ[id])]);
+      return { gruppen, namen, an: Object.assign({}, zusWahl), passend: KUL_WELT[S.kulisse] ? passendeZus(S.kulisse).filter(id => ZUSATZ[id]) : [], max: zusMax(), wetter: WETTER_STUFE };
+    },
+    zusSetzen(id, v) {
+      if (!ZUSATZ[id]) return false; audioStart();
+      if (v > 0) { if (!zusIst(id) && Object.keys(zusWahl).length >= zusMax()) return false; zusWahl[id] = Math.min(2, +v); } else delete zusWahl[id];
+      zusPausiert = false; zusMerken(); zusSync(); try { zusPegelSetzen(); } catch (_) {} try { boxNeu("klang"); } catch (_) {} return true;
+    },
+    /* Wetter mit einem Regler: 0 klar · 1 Wind · 2 Regen · 3 Starkregen · 4 Gewitter · 5 Unwetter */
+    wetter(stufe) {
+      if (stufe == null) return WETTER_STUFE;
+      stufe = Math.max(0, Math.min(5, Math.round(+stufe))); WETTER_STUFE = stufe; try { localStorage.setItem("imres-lw-wetter", String(stufe)); } catch (_) {}
+      const ziel = [{}, { wind: .7 }, { regen: .9, wind: .35 }, { starkregen: 1, regen: .5, wind: .5 }, { gewitter: 1, starkregen: .8, wind: .6 }, { sturm: 1, gewitter: 1, starkregen: 1 }][stufe];
+      ["wind", "regen", "starkregen", "gewitter", "sturm"].forEach(id => { if (ziel[id]) zusWahl[id] = ziel[id]; else delete zusWahl[id]; });
+      zusPausiert = false; zusMerken(); zusSync(); try { zusPegelSetzen(); } catch (_) {} try { boxNeu("klang"); } catch (_) {} return stufe;
+    },
     dramatik(k) { const b = (eigeneStimmungen[k] && eigeneStimmungen[k].basis) || k; return DRAMA[b] || 0; },
     /* Übergang zwischen Stimmungen: 1 = schnell, 2–8 = Überleitung über mehrere Takte (wie der Regler im Pult) */
     uebergang(n) { if (n != null) { uebergang = Math.max(1, Math.min(8, Math.round(+n) || 4)); try { localStorage.setItem("imres-lw-uebergang", String(uebergang)); } catch (_) {} } return uebergang; },
