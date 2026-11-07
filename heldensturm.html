@@ -367,6 +367,7 @@ details.stats .stat{padding:0 12px 12px}
 <section class="screen see" id="scr" hidden></section>
 
 <script src="kuerzel.js?v=20261025b"></script>
+<script src="heldensturm-erzaehler.js?v=20261107"></script>
 <script>
 (function(){
 'use strict';
@@ -29151,6 +29152,26 @@ Object.assign(window.__hsWAFF,{WART,WBASE,WDEF,KF,A,DUR,artAus:wfArtAus,elem:wfE
 window.__hsNETOB=1;
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
+
+/* ================= Erzähler-Haken =================
+   Barradin erzählt und kommentiert (Logik, Warteschlange, Untertitel, Einstellungen: heldensturm-erzaehler.js).
+   Hier nur: Ereignisse melden (Hüllen um bestehende Funktionen, ganz außen) und zwei Hilfen – Spielzustand lesen,
+   Musik/Geräusche über den gemeinsamen Ausgang absenken (Ducking). Fehlt die Datei, passiert nichts. */
+(()=>{try{const ev=(k,d)=>{try{const E=window.HSErzaehler;if(E&&E.ereignis)E.ereignis(k,d||{})}catch(e){}},bid=d=>Object.keys(BOSSES).find(k=>BOSSES[k]===d)||'';
+ window.HSErzHost={zustand(){let n=0;for(const e of G.enemies||[])if(!e.dead)n++;return{st:G.state,pause:!!(G.paused||G.overlay),bot:!!G.bot,modus:G.mode,gast:NET.role==='guest'||!!G.netGuestRun,held:P&&P.id,hp:P&&P.st&&P.st.maxHp?Math.max(0,P.hp)/P.st.maxHp:1,down:!!(P&&P.down),gegner:n,eingabe:MVA.t}},
+  duck(f){try{const o=AC&&hsOut();if(!o||!o.gain)return;const n=AC.currentTime;o.gain.cancelScheduledValues(n);o.gain.setValueAtTime(o.gain.value,n);o.gain.setTargetAtTime((MOBIL?0.82:0.92)*f,n,f<1?0.18:0.45)}catch(e){}}};
+ {const f=startRun;startRun=function(id,diff,mode){ev('start',{held:id,modus:mode||'kampagne'});return f.apply(this,arguments)}}
+ {const f=showStageIntro;showStageIntro=function(){const r=f.apply(this,arguments);const S=STAGES[G.stage],N=STAGES[G.stage+1];if(S)ev('stufe',{ort:S.ort,si:S.si,modus:G.mode,boss:S.boss||'',guard:S.guard||'',next:N?{ort:N.ort,si:N.si}:null});return r}}
+ {const f=bossIntroFx;bossIntroFx=function(b,def){const r=f.apply(this,arguments);ev('boss',{id:bid(def)});return r}}
+ {const f=bossDeathFx;bossDeathFx=function(e){const r=f.apply(this,arguments);ev('bosssieg',{id:e&&bid(e.def)});return r}}
+ {const f=enterPortal;enterPortal=function(){const S=STAGES[G.stage],d=S&&S.boss&&BOSSES[S.boss];if(d&&d.survive&&G.state==='play')ev('bosssieg',{id:S.boss});return f.apply(this,arguments)}}
+ {const f=spawnGuard;spawnGuard=function(){const g0=G.guardE;const r=f.apply(this,arguments);const S=STAGES[G.stage];if(S&&S.guard&&G.guardE&&G.guardE!==g0)ev('waechter',{id:S.guard});return r}}
+ {const f=gainXp;gainXp=function(){const l0=P&&P.level;const r=f.apply(this,arguments);if(P&&P.level>l0)ev('levelup',{level:P.level,held:P.id});return r}}
+ {const f=fkNimm;fkNimm=function(q,id,still){const r=f.apply(this,arguments);if(r&&!still&&FKD[id])ev('karte',{id,r:FKD[id].r,held:q&&q.id});return r}}
+ {const f=openChest;openChest=function(p){const o=!!(p&&p.open),m=!!(p&&p.mimic);const r=f.apply(this,arguments);if(!o)ev('truhe',{mimic:m});return r}}
+ {const f=comboKill;comboKill=function(){const r=f.apply(this,arguments);const n=G.cb||0;if(n===25||n===60||n===120)ev('serie',{n});return r}}
+ {const f=endRun;endRun=function(win){if(G.state!=='end'&&!G.netGuestRun)ev('ende',{sieg:!!win,modus:G.mode,held:P&&P.id,zeit:!!G.timeUp,letzte:G.stage>=STAGES.length-1});return f.apply(this,arguments)}}
+}catch(e){console.warn('erzaehler-haken',e)}})();
 
 /* interner Testzugang */
 window.__hs={get G(){return G},stil(){return{makeItem,makeSetItem,itemDelta,meist,stilProfil,stilGrund,ruheK,recalc,renderInv,SETS,AFF,LEGEND,DBMAX,REFN,KUL,kulSpec,AMBI,ambiWunsch}},rsc(v){if(v!==undefined){RSC=v;resize()}return{RSC,GAUTO,DPR,PERF}},get keys(){return keys},call(n,...a){return({useSkill,usePotion,openOverlay,closeOverlay,netAct})[n](...a)},get P(){return P},get PL(){return PL},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
