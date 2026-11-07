@@ -19,20 +19,20 @@
 
   const sprache = () => (document.documentElement.lang === "en" ? "en" : "de");
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const B = n => "vorschau/" + n + ".webp?v=3"; /* Version erhöhen, wenn Bilder neu aufgenommen werden */
+  const B = n => "vorschau/" + n + ".webp?v=4"; /* Version erhöhen, wenn Bilder neu aufgenommen werden */
 
   /* ---------- Die Spiele ---------- */
   const SPIELE = [
     { key: "heldensturm", karte: "heldensturm", extern: "heldensturm.html", held: "barradin.jpg", bilder: [B("heldensturm-1"), B("heldensturm-2"), B("heldensturm-3")], gross: true,
       plakat: B("plakat-heldensturm"), pos: "center 45%", farbe: "#ff7a3d", clip: "vorschau/heldensturm-clip.mp4?v=4", ton: "timp1.mp3", art: "neu", stand: "2026-10-26" },
     { key: "jagd", karte: "waldlauf", held: "friedrich.jpg", bilder: [B("jagd-1"), B("jagd-2"), B("jagd-3")],
-      plakat: B("plakat-jagd"), pos: "center 22%", farbe: "#8fd36b", clip: "vorschau/jagd-clip.mp4?v=4", ton: "bogen.mp3", art: "update", stand: "2026-10-26" },
-    { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2")],
-      plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4?v=4", ton: "shake.mp3", art: "update", stand: "2026-10-26" },
+      plakat: B("plakat-jagd"), pos: "center 22%", farbe: "#8fd36b", clip: "vorschau/jagd-clip.mp4?v=5", ton: "bogen.mp3", art: "update", stand: "2026-11-07" },
+    { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2"), B("nacht-3")],
+      plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4?v=5", ton: "shake.mp3", art: "update", stand: "2026-11-07" },
     { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")],
-      plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4?v=4", ton: "harfe_76.mp3", art: "update", stand: "2026-10-26" },
+      plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4?v=5", ton: "harfe_76.mp3", art: "update", stand: "2026-11-07" },
     { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")],
-      plakat: B("plakat-auftritt"), pos: "center 20%", farbe: "#ffc24a", clip: "vorschau/auftritt-clip.mp4?v=4", ton: "gitarre_63.mp3", art: "update", stand: "2026-10-26" },
+      plakat: B("plakat-auftritt"), pos: "center 20%", farbe: "#ffc24a", clip: "vorschau/auftritt-clip.mp4?v=5", ton: "gitarre_63.mp3", art: "update", stand: "2026-11-07" },
     { key: "probe", karte: "barden-probe", held: "barradin.jpg", bilder: ["vorschau/probe-3.webp?v=1", "vorschau/probe-4.webp?v=1", "vorschau/probe-5.webp?v=1"],
       plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4?v=2", direkt: true, ton: "holz1.mp3", art: "update", stand: "2026-11-07" },
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: ["vorschau/memory-2.webp?v=1", "vorschau/memory-3.webp?v=1", "vorschau/memory-4.webp?v=1"],
