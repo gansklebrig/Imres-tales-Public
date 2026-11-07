@@ -367,7 +367,6 @@ details.stats .stat{padding:0 12px 12px}
 <section class="screen see" id="scr" hidden></section>
 
 <script src="kuerzel.js?v=20261025b"></script>
-<script src="heldensturm-erzaehler.js?v=20261107"></script>
 <script>
 (function(){
 'use strict';
@@ -28614,9 +28613,9 @@ const WPAINT={
   hP(g,'#c8c4bc',OL,0.4,[6,-1.05,7.2,-1.05,7.2,1.05,6,1.05]);ln(g,C_GOL,0.5,6.6,-1,6.6,1);hC(g,-3.2,0,2.4,'#e2dfd6',OL,0.6);hC(g,-3.7,-0.7,0.9,'#ffffff');hE(g,-3.2,0,1.3,2.4,null,'#9a968c',0.4)}},
  stab:{b:[-6,-4,30,4],f(g){hQ(g,'#5a3c22',OL,0.6,q=>{q.moveTo(-5,-1);q.quadraticCurveTo(10,-1.6,24,-0.9);q.lineTo(24,0.9);q.quadraticCurveTo(10,0.6,-5,1);q.closePath()});
   ln(g,'#6a4a2e',1.2,23,0,28,-3);ln(g,'#6a4a2e',1.2,23,0,28,3);hC(g,26,0,2.6,'#fff6d8');hC(g,26,0,1.2,'#ffffff')}},
- sichel:{b:[-6,-12,18,3],f(g){hP(g,C_WO,OL,0.5,[-5,-0.9,3,-1,3,1,-5,0.9]);ln(g,C_LE,0.8,-3.5,-1,-3.5,1);ln(g,C_LE,0.8,-1.5,-1,-1.5,1);hC(g,-5.3,0,1,C_GO,OL,0.4);
-  hQ(g,'#e8c860',OL,0.55,q=>{q.moveTo(2.6,-1);q.quadraticCurveTo(6.5,-11.5,15.2,-7);q.quadraticCurveTo(16.6,-5.8,15.4,-5);q.quadraticCurveTo(9,-8,4.4,1);q.closePath()});
-  hQ(g,null,'#fff4c0',0.45,q=>{q.moveTo(4.4,0.4);q.quadraticCurveTo(9,-7.4,15,-5.3)});ln(g,'#b8902a',0.4,4,-2,9,-8)}},
+ sichel:{b:[-6,-3,18,12],f(g){hP(g,C_WO,OL,0.5,[-5,-0.9,3,-1,3,1,-5,0.9]);ln(g,C_LE,0.8,-3.5,-1,-3.5,1);ln(g,C_LE,0.8,-1.5,-1,-1.5,1);hC(g,-5.3,0,1,C_GO,OL,0.4);
+  g.save();g.scale(1,-1);hQ(g,'#e8c860',OL,0.55,q=>{q.moveTo(2.6,-1);q.quadraticCurveTo(6.5,-11.5,15.2,-7);q.quadraticCurveTo(16.6,-5.8,15.4,-5);q.quadraticCurveTo(9,-8,4.4,1);q.closePath()});
+  hQ(g,null,'#fff4c0',0.45,q=>{q.moveTo(4.4,0.4);q.quadraticCurveTo(9,-7.4,15,-5.3)});ln(g,'#b8902a',0.4,4,-2,9,-8);g.restore()}},
  keule:{b:[-6,-8,22,10],f(g){hP(g,'#6a4a2a',OL,0.6,[-5,-1,8,-1.4,8,1.4,-5,1]);for(let i=0;i<4;i++)ln(g,C_LE,0.6,-4.2+i*1.3,-1.1,-3.6+i*1.3,1.1);
   hQ(g,'#8a6440',OL,0.7,q=>{q.moveTo(7,-2);q.quadraticCurveTo(10,-6.8,15,-6.2);q.quadraticCurveTo(20.8,-5.2,20.8,0);q.quadraticCurveTo(20.8,5.2,15,6.2);q.quadraticCurveTo(10,6.8,7,2);q.closePath()});
   hQ(g,'#9a7450',null,0,q=>{q.moveTo(9,-3.5);q.quadraticCurveTo(14,-6,19,-3.5);q.quadraticCurveTo(14,-3,9,-1.5);q.closePath()});
@@ -28666,10 +28665,12 @@ const WPAINT={
   for(const s of[-1,1]){ln(g,'#c8a060',1.6,-2.8,10.9*s,-4.4,11.6*s);hC(g,-4,14.4*s,0.6,'#e8d8b0')}hP(g,'#c8a060',OL,0.4,[0,-2,1.8,-2,1.8,2,0,2]);ln(g,'#8a6a30',0.4,0.9,-2,0.9,2)}},
  langbogen:{b:[-7,-17,4,17],tip:[-5,15.6],f(g){const A=()=>{g.beginPath();g.arc(-14,0,16.6,-1.22,1.22)};A();g.strokeStyle=OL;g.lineWidth=3.4;g.stroke();A();g.strokeStyle='#8a5a32';g.lineWidth=2.3;g.stroke();
   hP(g,C_LE,OL,0.4,[1.6,-1.8,2.8,-1.8,2.8,1.8,1.6,1.8])}},
- armbrust:{b:[-8,-10,16,5],f(g){hP(g,'#7a5230',OL,0.6,[-7,0.4,-1,-0.7,12.6,-0.9,12.6,0.9,-1,1.4,-6,2.6]);ln(g,'#9a7048',0.4,-5.6,0.6,11,-0.3);ln(g,'#a8a49c',0.7,0,-0.9,12.6,-0.9);
-  hQ(g,null,'#3a2a1a',0.8,q=>{q.moveTo(0.2,1.3);q.quadraticCurveTo(0.6,3,-0.6,3.6)});hE(g,13.6,0,1.1,1.6,null,'#6a6660',0.6);
-  hQ(g,null,OL,2.8,q=>{q.moveTo(10.6,-9);q.quadraticCurveTo(14.6,0,10.6,9)});hQ(g,null,'#5a4a3a',1.8,q=>{q.moveTo(10.6,-9);q.quadraticCurveTo(14.6,0,10.6,9)});
-  hQ(g,null,'#9a8a78',0.45,q=>{q.moveTo(11,-8);q.quadraticCurveTo(14.2,0,11,8)});hP(g,'#3a3430',OL,0.4,[3.3,-1.3,4.7,-1.3,4.7,0,3.3,0])}},
+ armbrust:{b:[-8,-9,17,9],f(g){hP(g,'#7a5230',OL,0.6,[-7.4,0.2,-2,-1.6,12.8,-1.5,12.8,1.5,-1,2.2,-6.6,3.4]);hP(g,'#5e3e22',null,0,[-1,1.1,12.6,0.6,12.6,1.4,-1,2.1]);ln(g,'#a07850',0.45,-5.8,0.2,11.6,-0.9);ln(g,'#b8b4ac',0.8,0.6,-1.5,12.8,-1.5);hP(g,'#3a3430',OL,0.4,[3.6,-2.4,5,-2.4,5,-1.4,3.6,-1.4]);hC(g,1.8,0.3,0.45,'#c8a060');hC(g,8.4,0.1,0.45,'#c8a060');
+  hQ(g,null,'#3a2a1a',0.8,q=>{q.moveTo(0.2,1.3);q.quadraticCurveTo(0.6,3,-0.6,3.6)});
+  /* Bogen (Säule) quer zum Schaft: flach gewölbt, mit Nockenkappen; Spannbügel vorn – liest sich klar als Armbrust */
+  const BG=q=>{q.moveTo(11.6,-7.6);q.quadraticCurveTo(13.4,0,11.6,7.6)};hQ(g,null,OL,2.6,BG);hQ(g,null,'#6a5844',1.6,BG);hQ(g,null,'#a8967e',0.45,q=>{q.moveTo(11.9,-6.6);q.quadraticCurveTo(13.2,0,11.9,6.6)});
+  hC(g,11.6,-7.6,0.75,'#3a3430',OL,0.3);hC(g,11.6,7.6,0.75,'#3a3430',OL,0.3);hP(g,'#5a5650',OL,0.4,[11.6,-1.4,13.6,-1.4,13.6,1.4,11.6,1.4]);
+  hE(g,15,0,1.4,1.9,null,OL,1.2);hE(g,15,0,1.4,1.9,null,'#8a8680',0.6)}},
  wmesser:{b:[-4,-9,11,9],f(g){for(const a of[-0.42,0,0.42]){g.save();g.rotate(a);knife(g,'#d8dde3',8,'#a3202c');g.restore()}}},
  sterne:{b:[-3,-6,9,7],f(g){star4(g,3.2,-1.6,4.3,1.3,0.3);g.fillStyle='#c8ccd0';g.fill();g.strokeStyle=OL;g.lineWidth=0.5;g.stroke();hC(g,3.2,-1.6,1,'#a3202c',OL,0.3);
   star4(g,0.8,2.4,3.6,1.1,0.1);g.fillStyle='#b8bcc0';g.fill();g.stroke();hC(g,0.8,2.4,0.8,'#a3202c',OL,0.3)}},
@@ -28696,7 +28697,7 @@ const KF={
  degen:{R:[0,0,0,0,0,0,0,0],W:[-0.95,-0.35,0,-1,0,-1,-0.06,-0.02],S:[1.05,0.45,0,0,0,3,0.1,0.04],F:[1.25,0.65,0,0,0,2,0.08,0.02]},
  schwert:{R:[0,0,0,0,0,0,0,0],W:[-1,-0.4,0,-1,0,-1,-0.07,-0.02],S:[1.1,0.5,0,0,0,3,0.1,0.04],F:[1.3,0.7,0,0,0,2,0.08,0.02]},
  stock:{R:[0,0,0,0,0,0,0,0],W:[-1.25,-0.15,0,-2,0,-1.5,-0.1,-0.04],S:[1.2,0.55,0,1,0,3,0.12,0.07],F:[1.4,0.7,0,1,0,2,0.1,0.04]},
- stab:{R:[0,0,0,0,0,0,0,0],W:[-4.5,0,0,0,0,-1,-0.05,-0.02],S:[1.3,0,0,0,0,3,0.08,0.04],F:[1,0,0,0,0,2,0.05,0.02]},
+ stab:{R:[0,0,0,0,0,0,0,0],W:[-2.3,0,0,0,0,-1,-0.05,-0.02],S:[1.3,0,0,0,0,3,0.08,0.04],F:[1,0,0,0,0,2,0.05,0.02]},
  sichel:{R:[0,0,0,0,0,0,0,0],W:[-0.5,-0.4,-2,-1,0,-1,-0.05,-0.02],S:[0.9,1.1,3,1,0,3,0.08,0.04],F:[1,1.5,3,1,0,2,0.06,0.02]},
  keule:{R:[0,0,0,0,0,0,0,0],W:[-1.45,0.5,-2,-4,0,-2,-0.16,-0.07],S:[1.3,0.7,3,3,0,3,0.2,0.12],F:[1.3,0.7,3,3,0,3,0.18,0.1]},
  messer:{R:[0,0,0,0,0,0,0,0],W:[-0.3,0.4,-1,0,-3,-1,-0.03,0],S:[0.45,0.3,2,1,5,2,0.05,0.03],F:[0.3,0.3,1,0,2,1,0.03,0.01]},
@@ -28711,13 +28712,13 @@ const KF={
  eiche:{R:[0,0,0,0,0,0,0,0],W:[-1.4,-0.2,-3,-4,0,-1.5,-0.1,-0.05],S:[0.8,0,3,0,0,2,0.08,0.05],F:[0.9,0.2,3,0,0,1,0.05,0.02]},
  kurzbogen:{R:[-0.1,0,0,0,0,0,0,0],W:[-0.15,-0.15,0,0,0,0,-0.02,0],S:[-0.05,0.05,0,0,0,-1.5,-0.05,0.02],F:[-0.1,0,0,0,0,-0.5,-0.02,0]},
  komposit:{R:[-0.1,0,0,0,0,0,0,0],W:[-0.18,-0.12,0,0,0,-0.5,-0.03,0],S:[0,0.08,0,0,0,-2.5,-0.07,0.03],F:[-0.1,0,0,0,0,-1,-0.03,0]},
- armbrust:{R:[0,0,0,0,0,0,0,0],W:[-0.05,-0.03,0,0,0,0,0,0],S:[-0.2,-0.3,0,0,-3,-4,-0.08,0.04],F:[-0.08,-0.06,0,1,-1,-1.5,-0.03,0.01]},
+ armbrust:{R:[-0.25,0,0,0,0,0,0,0],W:[-0.28,0,0,0,0,0,0,0],S:[-0.34,-0.11,0,0,-2.5,-2.5,-0.04,0.03],F:[-0.27,-0.03,0,0,-0.5,-0.8,-0.01,0.01]},
  wmesser:{R:[0,0,0,0,0,0,0,0],W:[-1.3,-0.4,-2,-3,0,-1,-0.1,-0.03],S:[0.9,0.2,4,1,0,2,0.08,0.03],F:[1,0.3,3,1,0,1,0.05,0.01]},
  sterne:{R:[0,0,0,0,0,0,0,0],W:[-0.4,-0.4,-5,0,0,-1,-0.06,0],S:[0.6,0.5,5,0,0,2,0.07,0.02],F:[0.7,0.7,4,0,0,1,0.04,0]},
  sdolch:{R:[0,0,0,0,0,0,0,0],W:[-0.8,0.5,-2,-1,-3,-1,-0.05,-0.02],S:[0.5,0.15,3,0,4,3,0.06,0.03],F:[0.4,0.3,2,0,2,1.5,0.04,0.01]}};
 /* Ruhewinkel der Waffe (Heldenkoordinaten, 0 = nach vorn, −π/2 = nach oben) */
-const REST={rapier:-0.55,degen:-1,stock:-1.2,stab:-1.45,sichel:-1.1,keule:-1.35,messer:-0.7,schwert:-1,axt:-1.3,dolche:-0.5,darkin:-1.2,krumm:-1,
- mistel:-1,dorn:-1,eiche:-1.1,kurzbogen:0,komposit:0,langbogen:0,armbrust:-0.08,wmesser:-0.9,sterne:-0.6,sdolch:-0.7,laute:-0.6,floete:0.45,harfe:0.1};
+const REST={armbrust:0,rapier:-0.55,degen:-1,stock:-1.2,stab:-1.45,sichel:-1.1,keule:-1.35,messer:-0.7,schwert:-1,axt:-1.3,dolche:-0.5,darkin:-1.2,krumm:-1,
+ mistel:-1,dorn:-1,eiche:-1.1,kurzbogen:0,komposit:0,langbogen:0,wmesser:-0.9,sterne:-0.6,sdolch:-0.7,laute:-0.6,floete:0.45,harfe:0.1};
 /* Dauer je Tempo: Ausholen, Schwung, Nachschwingen, Zurück */
 const DUR=[[0.1,0.06,0.1,0.14],[0.16,0.09,0.14,0.16],[0.24,0.12,0.18,0.2]];
 /* Hand/Schulter je Held (Heldenkoordinaten, Füße bei y=15, Blick +x); arm>0: sichtbarer Ärmel dreht mit WR */
@@ -28761,7 +28762,9 @@ function wfAnim(q){const t=G.time,st=wfSt(q),id=q.id;A.q=q;A.on=0;A.eigen=0;A.pu
  if(!meins){A.dx*=0.3;A.rot*=0.3;A.sq*=0.3}
  /* Bögen: Sehne; Armbrust: gespannt bis zum Schuss, danach Nachladen */
  if(art==='kurzbogen'||art==='komposit'){A.pull=meins&&since<Ds?1-eout(since/Ds):pw;A.pullSet=1}
- else if(art==='armbrust'){A.pull=!meins||since>I+0.3?1:since<Ds?0:cl01((since-Ds-Df)/Math.max(0.12,(I-Ds-Df)*0.55));A.pullSet=1}
+ else if(art==='armbrust'){A.pull=!meins||since>I+0.3?1:since<Ds?0:cl01((since-Ds-Df)/Math.max(0.12,(I-Ds-Df)*0.55));A.pullSet=1;
+  /* Nachladen: Armbrust absenken (Bogen bleibt quer sichtbar), Sehne zurückziehen, dann wieder anlegen */
+  if(meins&&since>=Ds){const p=A.pull,ab=p<0.8?cl01((since-Ds-Df*0.4)/0.07):cl01((1-p)/0.2);A.ba+=0.38*ab;A.wr+=0.32*ab;A.th+=1.2*ab;A.rot+=0.03*ab}}
  /* Wurfwaffen: nach dem Wurf kurz leere Hand, dann neue Waffe */
  if(meins&&(art==='wmesser'||art==='sterne'||art==='sdolch')){A.rel=since<Ds+Df?1:0;A.relS=cl01((since-Ds-Df)/0.12)}
  /* Dolchpaar: zweiter Stich der hinteren Hand 0,11 s später (wie im Spiel) */
@@ -28836,8 +28839,8 @@ function wfBogen(c,id,art,K,D,hx,hy){const P0=WPAINT[art],S=wfSpr(art,K);if(!S)r
  if(pl>0.25){c.globalAlpha*=cl01((pl-0.25)*3);wfHandDraw(c,id,nx,0)}c.restore();wfHandDraw(c,id,hx,hy)}
 function wfArmbrust(c,id,K,D,hx,hy){const S=wfSpr('armbrust',K);if(!S)return;const ang=REST.armbrust+A.ba,pl=cl01(A.pull);
  c.save();c.translate(hx+Math.cos(ang)*A.th,hy+Math.sin(ang)*A.th);c.rotate(ang);wfGlowDraw(c,'armbrust',K,D,1);
- const nut=11.4-pl*7.4;c.strokeStyle='rgba(230,220,200,.95)';c.lineWidth=0.6;c.beginPath();c.moveTo(10.6,-9);c.lineTo(nut,-0.9);c.lineTo(10.6,9);c.stroke();wfBlit(c,S,1);
- if(pl>0.97){const PS=wfPSpr('armbrust',K,0);if(PS){c.save();c.translate(nut+PS.L*0.5,-1.4);wfBlit(c,PS,1);c.restore()}}
+ const nut=11.8-pl*7.8;c.strokeStyle='rgba(230,220,200,.95)';c.lineWidth=0.6;c.beginPath();c.moveTo(11.6,-7.6);c.lineTo(nut,-1.5);c.lineTo(11.6,7.6);c.stroke();wfBlit(c,S,1);
+ if(pl>0.97){const PS=wfPSpr('armbrust',K,0);if(PS){c.save();c.translate(nut+PS.L*0.5,-2.1);wfBlit(c,PS,1);c.restore()}}
  /* Nachladen: Kurbelhand am Spannhebel */
  if(pl>0.02&&pl<0.97){c.globalAlpha*=0.9;wfHandDraw(c,id,nut-1.5+Math.sin(G.time*30)*0.6,-0.4)}
  c.restore();wfHandDraw(c,id,hx,hy)}
@@ -28854,7 +28857,7 @@ function wfDrawHeld(c,id,WR,layer){const D=A.D,art=A.art;if(!D||!art)return;if(l
   if(id==='ezekiel'&&art==='dolche'&&A.mode==='m'&&(A.hide&16)){const S=wfSpr('dolche',K);if(!S)return;const k=cl01(A.b2/6),bx=-8.5+k*10,by=4.5-k*2,ang=-2.5+k*2.45;
    c.save();c.translate(bx+Math.cos(ang)*Math.max(0,A.b2)*0.5,by+Math.sin(ang)*Math.max(0,A.b2)*0.5);c.rotate(ang);if(sc<1)c.scale(sc,sc);wfGlowDraw(c,'dolche',K,D,1);wfBlit(c,S,1);c.restore();hC(c,bx,by,1.8,'#2a1416',OL,0.5)}
   /* Ausholen über den Kopf: Waffe zeigt nach hinten → hinter dem Körper (Hand bleibt vorn) */
-  if((A.hide&(1|4|8|32))&&!SPEZ[art]&&!A.rel){const ang=(REST[art]||-1)+A.wr+A.ba;if(Math.cos(ang)<-0.35){const S=wfSpr(art,K);if(S){c.save();c.translate(hx+Math.cos(ang)*A.th,hy+Math.sin(ang)*A.th);c.rotate(ang);if(sc<1)c.scale(sc,sc);wfGlowDraw(c,art,K,D,1);wfBlit(c,S,1);c.restore()}}}
+  if((A.hide&(1|4|8|32))&&!SPEZ[art]&&!A.rel){const ang=(REST[art]||-1)+A.wr+A.ba;if(Math.cos(ang)<-0.2){const S=wfSpr(art,K);if(S){c.save();c.translate(hx+Math.cos(ang)*A.th,hy+Math.sin(ang)*A.th);c.rotate(ang);if(sc<1)c.scale(sc,sc);wfGlowDraw(c,art,K,D,1);wfBlit(c,S,1);c.restore()}}}
   return}
  if(!(A.hide&(1|4|8|32)))return;/* Originalwaffe wird vom Heldenbild gemalt */
  if(art==='kurzbogen'||art==='komposit'||art==='langbogen'){wfBogen(c,id,art,K,D,hx,hy);return}
@@ -28873,8 +28876,8 @@ function wfDrawHeld(c,id,WR,layer){const D=A.D,art=A.art;if(!D||!art)return;if(l
  /* Klingen, Keulen, Zweige, Wurfwaffen */
  const ang=(REST[art]||-1)+A.wr+A.ba,len=BLEN[art]||14,px=hx+Math.cos(ang)*A.th,py=hy+Math.sin(ang)*A.th;
  if(WF.s>=1&&!WF.ul&&KF[art]&&WART[art].g==='m')wfSmear(c,st,px,py,ang,len,D,STICH[art]);
- if(WF.ul&&!A.rel&&Math.cos(ang)>=-0.35&&A.relS>=1&&sc>=1){const R0=wfURot(art,K,ang,id);if(R0){c.drawImage(R0.cv,px-R0.h,py-R0.h,R0.h*2,R0.h*2);return}}
- if(!A.rel&&Math.cos(ang)>=-0.35){const S=wfSpr(art,K);if(S){c.save();c.translate(px,py);c.rotate(ang);const s2=sc*A.relS*(WURF[art]?1.35:1);if(s2!==1)c.scale(Math.max(0.3,s2),Math.max(0.3,s2));wfGlowDraw(c,art,K,D,1);wfBlit(c,S,1);c.restore()}}
+ if(WF.ul&&!A.rel&&Math.cos(ang)>=-0.2&&A.relS>=1&&sc>=1){const R0=wfURot(art,K,ang,id);if(R0){c.drawImage(R0.cv,px-R0.h,py-R0.h,R0.h*2,R0.h*2);return}}
+ if(!A.rel&&Math.cos(ang)>=-0.2){const S=wfSpr(art,K);if(S){c.save();c.translate(px,py);c.rotate(ang);const s2=sc*A.relS*(WURF[art]?1.35:1);if(s2!==1)c.scale(Math.max(0.3,s2),Math.max(0.3,s2));wfGlowDraw(c,art,K,D,1);wfBlit(c,S,1);c.restore()}}
  wfHandDraw(c,id,px,py)}
 {const _hb=drawHeroBody;drawHeroBody=function(c,id,t,o,PZ,WR,step,mv){const q=WF.q;
   if(!q||A.q!==q||!A.on||c!==cx||!o||o.ghost||o.form||o.hd||WF.aus.held)return _hb.apply(this,arguments);
@@ -29152,26 +29155,6 @@ Object.assign(window.__hsWAFF,{WART,WBASE,WDEF,KF,A,DUR,artAus:wfArtAus,elem:wfE
 window.__hsNETOB=1;
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
-
-/* ================= Erzähler-Haken =================
-   Barradin erzählt und kommentiert (Logik, Warteschlange, Untertitel, Einstellungen: heldensturm-erzaehler.js).
-   Hier nur: Ereignisse melden (Hüllen um bestehende Funktionen, ganz außen) und zwei Hilfen – Spielzustand lesen,
-   Musik/Geräusche über den gemeinsamen Ausgang absenken (Ducking). Fehlt die Datei, passiert nichts. */
-(()=>{try{const ev=(k,d)=>{try{const E=window.HSErzaehler;if(E&&E.ereignis)E.ereignis(k,d||{})}catch(e){}},bid=d=>Object.keys(BOSSES).find(k=>BOSSES[k]===d)||'';
- window.HSErzHost={zustand(){let n=0;for(const e of G.enemies||[])if(!e.dead)n++;return{st:G.state,pause:!!(G.paused||G.overlay),bot:!!G.bot,modus:G.mode,gast:NET.role==='guest'||!!G.netGuestRun,held:P&&P.id,hp:P&&P.st&&P.st.maxHp?Math.max(0,P.hp)/P.st.maxHp:1,down:!!(P&&P.down),gegner:n,eingabe:MVA.t}},
-  duck(f){try{const o=AC&&hsOut();if(!o||!o.gain)return;const n=AC.currentTime;o.gain.cancelScheduledValues(n);o.gain.setValueAtTime(o.gain.value,n);o.gain.setTargetAtTime((MOBIL?0.82:0.92)*f,n,f<1?0.18:0.45)}catch(e){}}};
- {const f=startRun;startRun=function(id,diff,mode){ev('start',{held:id,modus:mode||'kampagne'});return f.apply(this,arguments)}}
- {const f=showStageIntro;showStageIntro=function(){const r=f.apply(this,arguments);const S=STAGES[G.stage],N=STAGES[G.stage+1];if(S)ev('stufe',{ort:S.ort,si:S.si,modus:G.mode,boss:S.boss||'',guard:S.guard||'',next:N?{ort:N.ort,si:N.si}:null});return r}}
- {const f=bossIntroFx;bossIntroFx=function(b,def){const r=f.apply(this,arguments);ev('boss',{id:bid(def)});return r}}
- {const f=bossDeathFx;bossDeathFx=function(e){const r=f.apply(this,arguments);ev('bosssieg',{id:e&&bid(e.def)});return r}}
- {const f=enterPortal;enterPortal=function(){const S=STAGES[G.stage],d=S&&S.boss&&BOSSES[S.boss];if(d&&d.survive&&G.state==='play')ev('bosssieg',{id:S.boss});return f.apply(this,arguments)}}
- {const f=spawnGuard;spawnGuard=function(){const g0=G.guardE;const r=f.apply(this,arguments);const S=STAGES[G.stage];if(S&&S.guard&&G.guardE&&G.guardE!==g0)ev('waechter',{id:S.guard});return r}}
- {const f=gainXp;gainXp=function(){const l0=P&&P.level;const r=f.apply(this,arguments);if(P&&P.level>l0)ev('levelup',{level:P.level,held:P.id});return r}}
- {const f=fkNimm;fkNimm=function(q,id,still){const r=f.apply(this,arguments);if(r&&!still&&FKD[id])ev('karte',{id,r:FKD[id].r,held:q&&q.id});return r}}
- {const f=openChest;openChest=function(p){const o=!!(p&&p.open),m=!!(p&&p.mimic);const r=f.apply(this,arguments);if(!o)ev('truhe',{mimic:m});return r}}
- {const f=comboKill;comboKill=function(){const r=f.apply(this,arguments);const n=G.cb||0;if(n===25||n===60||n===120)ev('serie',{n});return r}}
- {const f=endRun;endRun=function(win){if(G.state!=='end'&&!G.netGuestRun)ev('ende',{sieg:!!win,modus:G.mode,held:P&&P.id,zeit:!!G.timeUp,letzte:G.stage>=STAGES.length-1});return f.apply(this,arguments)}}
-}catch(e){console.warn('erzaehler-haken',e)}})();
 
 /* interner Testzugang */
 window.__hs={get G(){return G},stil(){return{makeItem,makeSetItem,itemDelta,meist,stilProfil,stilGrund,ruheK,recalc,renderInv,SETS,AFF,LEGEND,DBMAX,REFN,KUL,kulSpec,AMBI,ambiWunsch}},rsc(v){if(v!==undefined){RSC=v;resize()}return{RSC,GAUTO,DPR,PERF}},get keys(){return keys},call(n,...a){return({useSkill,usePotion,openOverlay,closeOverlay,netAct})[n](...a)},get P(){return P},get PL(){return PL},start(id,d){startRun(id,d||0);hideScreen();hud.hidden=false;G.state='play';G.paused=false},bot(on){G.bot=on},
