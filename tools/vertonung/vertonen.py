@@ -131,7 +131,16 @@ VARIANTEN = [
     ("c-lebendig", "eleven_multilingual_v2", {"stability": 0.38, "similarity_boost": 0.82, "style": 0.42, "use_speaker_boost": True, "speed": 0.97}),
     ("d-v3-ausdruck", "eleven_v3", {"stability": 0.5, "similarity_boost": 0.85, "style": 0.3, "use_speaker_boost": True}),
 ]
+def stimme_finden(stimme):
+    """voice_id oder Name einer Stimme im Konto (z. B. „Helmut“) → voice_id"""
+    if re.fullmatch(r"[A-Za-z0-9]{20}", stimme): return stimme
+    for v in anfrage("/v1/voices").get("voices", []):
+        if v.get("name", "").lower().startswith(stimme.lower()):
+            print("Stimme gefunden:", v.get("name"), v["voice_id"], v.get("labels")); return v["voice_id"]
+    raise SystemExit("Stimme nicht gefunden: " + stimme)
+
 def feinschliff(sprache, stimme):
+    stimme = stimme_finden(stimme)
     D = chronik_laden(sprache)
     kap = D["kapitel"][0]["absaetze"]
     text = " ".join(sauber(a) for a in kap[1:4] if not a.startswith("#"))
@@ -142,10 +151,10 @@ def feinschliff(sprache, stimme):
             mp3 = tts(stimme, text, modell=modell, einstellung=einst)
         except SystemExit as e:
             print("Variante", name, "fehlgeschlagen:", e); continue
-        open(os.path.join(WURZEL, f"audio/proben/fein-{name}.mp3"), "wb").write(mp3); print("Variante:", name)
+        open(os.path.join(WURZEL, f"audio/proben/fein-{(os.environ.get('STIMME') or 'x').split()[0].lower()}-{name}.mp3"), "wb").write(mp3); print("Variante:", name)
     global NACHBEARBEITEN
     NACHBEARBEITEN = False
-    open(os.path.join(WURZEL, "audio/proben/fein-b-erzaehler-roh.mp3"), "wb").write(tts(stimme, text, modell=VARIANTEN[1][1], einstellung=VARIANTEN[1][2]))
+
     git_sichern("Vertonung: Feinschliff-Proben")
 
 # ---------------------------------------------------------------- Chronik
@@ -201,5 +210,6 @@ if __name__ == "__main__":
     elif modus == "chronik":
         stimme = os.environ.get("STIMME", "").strip()
         if not stimme: raise SystemExit("STIMME (voice_id) fehlt")
+        stimme = stimme_finden(stimme)
         chronik(sprache, stimme, int(os.environ.get("GRENZE") or 0))
     else: raise SystemExit("Unbekannter Modus " + modus)
