@@ -4,9 +4,9 @@
 HÖRSPIEL-WERKZEUG – baut die Hörspiel-Partitur der Chronik (chronik/hoerspiel-de.json)
 und rendert auf Wunsch einen Probe-Mitschnitt offline (so nah wie möglich an der Browser-Mischung).
 
-  python3 chronik/hoerspiel-werkzeug.py partitur              # JSON neu bauen (misst Pausen, Lautheit, Stücke)
-  python3 chronik/hoerspiel-werkzeug.py probe AUSGABE.mp3 I:0,I:1,I:7,I:8@32   # Absätze; @ = dort ausblenden
-  python3 chronik/hoerspiel-werkzeug.py probe AUSGABE.mp3 I:85,I:86 --ende      # … mit Kapitelende (Cliffhanger)
+  python3 tools/vertonung/hoerspiel-werkzeug.py partitur              # JSON neu bauen (misst Pausen, Lautheit, Stücke)
+  python3 tools/vertonung/hoerspiel-werkzeug.py probe AUSGABE.mp3 I:0,I:1,I:7,I:8@32   # Absätze; @ = dort ausblenden
+  python3 tools/vertonung/hoerspiel-werkzeug.py probe AUSGABE.mp3 I:85,I:86 --ende      # … mit Kapitelende (Cliffhanger)
 
 Die Partitur verweist nur auf Klänge, die schon auf der Seite liegen (klang/, amb/; Lizenzen: klang/LIZENZ.txt).
 Effekt-Zeitpunkte werden aus dem Text verankert: ein Stichwort im Absatz, dazu „bei“ (beim Wort), „nach“ (in der
@@ -16,7 +16,7 @@ gemessenen Sprechpausen der Aufnahme (ffmpeg silencedetect).
 import json, os, re, subprocess, sys, math, hashlib
 import numpy as np
 
-WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SR = 44100
 
 # =====================================================================
