@@ -88,7 +88,12 @@ def proben(sprache):
     kandidaten = []
     # 1) eigene/Standard-Stimmen im Konto, die nach Erzähler klingen
     eigene = anfrage("/v1/voices").get("voices", [])
-    wunsch = ["George", "Brian", "Bill", "Daniel", "Callum"]
+    nur_eigene = (os.environ.get("NUR_EIGENE") or "0") == "1"
+    # selbst hinzugefügte Stimmen (z. B. deutsche Sprecher aus der Bibliothek) zuerst
+    for v in eigene:
+        if v.get("category") == "premade": continue
+        kandidaten.append({"name": v.get("name", "?"), "id": v["voice_id"], "quelle": "Eigene", "info": (v.get("labels") or {})})
+    wunsch = [] if nur_eigene else ["George", "Brian", "Bill", "Daniel", "Callum"]
     for name in wunsch:
         v = next((x for x in eigene if x.get("name", "").split(" ")[0] == name), None)
         if v: kandidaten.append({"name": v["name"], "id": v["voice_id"], "quelle": "Standard", "info": (v.get("labels") or {})})
@@ -99,7 +104,7 @@ def proben(sprache):
     except SystemExit as e:
         print("Bibliothek nicht erreichbar:", e); biblio = []
     for v in biblio:
-        if len([k for k in kandidaten if k["quelle"] == "Bibliothek"]) >= 4: break
+        if nur_eigene or len([k for k in kandidaten if k["quelle"] == "Bibliothek"]) >= 4: break
         alter = (v.get("age") or "").lower()
         if alter == "young": continue
         try:
@@ -110,6 +115,7 @@ def proben(sprache):
         kandidaten.append({"name": v.get("name"), "id": vid, "quelle": "Bibliothek", "info": {"beschreibung": (v.get("description") or "")[:200], "akzent": v.get("accent"), "alter": v.get("age")}})
     os.makedirs(os.path.join(WURZEL, "audio/proben"), exist_ok=True)
     liste = []
+    if nur_eigene: kandidaten = [k for k in kandidaten if k["quelle"] != "Bibliothek"] or kandidaten
     for i, k in enumerate(kandidaten[:8]):
         mp3 = tts(k["id"], text)
         datei = f"audio/proben/{i+1:02d}-{re.sub(r'[^a-z0-9]+', '-', k['name'].lower()).strip('-')}.mp3"

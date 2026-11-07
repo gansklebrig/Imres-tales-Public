@@ -19,6 +19,9 @@ on:
       einstellung:
         description: "voice_settings als JSON (leer = Standard)"
         default: ""
+      nur_eigene:
+        description: "proben: nur selbst hinzugefügte Stimmen (1 = ja)"
+        default: "1"
       grenze:
         description: "höchstens so viele Zeichen in diesem Lauf (0 = alles)"
         default: "0"
@@ -45,6 +48,7 @@ jobs:
           MODELL: ${{ inputs.modell }}
           GRENZE: ${{ inputs.grenze }}
           EINSTELLUNG: ${{ inputs.einstellung }}
+          NUR_EIGENE: ${{ inputs.nur_eigene }}
         run: |
           git config user.name "Vertonung"
           git config user.email "actions@users.noreply.github.com"
