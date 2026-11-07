@@ -142,12 +142,12 @@
 
   /* ---------- Chronik: lebende Seitenränder und „Was bisher geschah“ (chronik/) ----------
      Werden erst geladen, wenn die Chronik aufgeht (oder nach dem Laden in einer ruhigen Sekunde). */
-  const CHRONIK_V = "20261107k";
+  const CHRONIK_V = "20261107m";
   let chronikGeladen = false;
   function chronikLaden() {
     if (chronikGeladen) return;
     chronikGeladen = true;
-    ["chronik/kulissen.js", "chronik/rueckblick.js"].forEach(f => {
+    ["chronik/kulissen.js", "chronik/rueckblick.js", "chronik/vorlesen.js"].forEach(f => {
       const sc = document.createElement("script");
       sc.src = f + "?v=" + CHRONIK_V; sc.async = false;
       document.body.appendChild(sc);
