@@ -22,6 +22,10 @@
       steuerung: "Tasten A · S · D (oder J · K · L, ← ↓ →) – auf dem Handy einfach auf die Spur tippen. Noten mit Schweif gedrückt halten, bis der Schweif endet.",
       publikum: "Schwierigkeitsgrad",
       stufen: { leicht: "🍺 Bauern in Phandalin", mittel: "👑 Am Hof von König Horga", schwer: "🐉 Ein Drache hört zu" },
+      stufenKurz: { leicht: "🍺 Bauern", mittel: "👑 Königshof", schwer: "🐉 Drache" },
+      vorhang: "A · S · D oder auf die Spuren tippen – Noten mit Schweif gedrückt halten!",
+      band: { echo: "🌿 Echo schwebt mit der Flöte herein!", friedrich: "🥁 Friedrich trommelt sich auf die Bühne!", ezekiel: "🗡 Ezekiel gleitet aus den Schatten …", rex: "🐕 Rex springt dazu – Wuff!" },
+      feuer: ["🔥 Barradin brennt!", "🔥 Die Fackeln fliegen!", "🔥 Die ganze Bühne steht in Flammen!"],
       spuren: ["Bass", "Laute", "Flöte"],
       start: "▶ Auftritt beginnen", nochmal: "↻ Noch ein Auftritt", abbrechen: "Abbrechen",
       urteil: { perfekt: "Meisterhaft!", gut: "Gut!", knapp: "Knapp …", daneben: "Daneben!", gehalten: "Gehalten!" },
@@ -128,6 +132,10 @@
       steuerung: "Keys A · S · D (or J · K · L, ← ↓ →) – on a phone just tap the lane. Notes with a tail: keep holding until the tail ends.",
       publikum: "Difficulty",
       stufen: { leicht: "🍺 Farmers in Phandalin", mittel: "👑 At King Horga's court", schwer: "🐉 A dragon is listening" },
+      stufenKurz: { leicht: "🍺 Farmers", mittel: "👑 Royal court", schwer: "🐉 Dragon" },
+      vorhang: "A · S · D or tap the lanes – hold the notes with tails!",
+      band: { echo: "🌿 Echo floats in with his flute!", friedrich: "🥁 Friedrich drums his way onto the stage!", ezekiel: "🗡 Ezekiel slips out of the shadows …", rex: "🐕 Rex jumps in – woof!" },
+      feuer: ["🔥 Barradin is on fire!", "🔥 The torches are flying!", "🔥 The whole stage is ablaze!"],
       spuren: ["Bass", "Lute", "Flute"],
       start: "▶ Begin performance", nochmal: "↻ Another performance", abbrechen: "Cancel",
       urteil: { perfekt: "Masterful!", gut: "Good!", knapp: "Close …", daneben: "Missed!", gehalten: "Held!" },
@@ -725,34 +733,1121 @@
   const aktuellesLied = () => liedWahl === "neu" ? (erfunden || (erfunden = liedErfinden())) : Object.assign({ key: liedWahl }, LIEDER[liedWahl]);
   const rekordLesen = () => { try { return JSON.parse(localStorage.getItem("imres-auftritt-rekord") || "{}") || {}; } catch (_) { return {}; } };
 
+  /* =====================================================================
+     DIE BÜHNE: Kulissen, Band und Publikum
+     Hinter der Notenbahn steht eine gemalte Bühne – jede der zwölf Bühnen von „Barradins Weg“ hat
+     ihre eigene Kulisse, das freie Spiel die passende zum Schwierigkeitsgrad (Bauern → „Lahmer Esel“,
+     Hof → König Horgas Feste, Drache → Themberchauds Halle). Bei jedem Auftritt wird neu ausgewürfelt:
+     Licht, Wetter vor dem Fenster, Deko, Publikum, kleine Gäste. Im Lauf des Lieds kommt die Gruppe dazu,
+     das Publikum geht mit (Krüge hoch, Rosen und Münzen – oder Tomaten), lange Serien setzen die Bühne in Flammen.
+     Alles Unbewegte wird einmal in eine eigene Leinwand gemalt; pro Bild kommt nur das Bewegte dazu.
+     Bei „Bewegung reduzieren“ bleibt die Bühne ein ruhiges Bild ohne Partikel und Würfe.
+     ===================================================================== */
+  const reduziert = () => { try { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); } catch (_) { return false; } };
+  const zufallsGen = seed => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let x = a; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; };
+  const aus = (R, l) => l[Math.floor(R() * l.length)];
+  const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; };
+  const TAU = Math.PI * 2;
+  const klemme = (x, a, b) => Math.max(a, Math.min(b, x));
+  const weich = x => { x = klemme(x, 0, 1); return x * x * (3 - 2 * x); };
+
+  /* Leuchtpunkte (Licht, Flammen) als vorgemalte Bilder – billiger als Verläufe in jedem Bild */
+  const leuchtBilder = new Map();
+  function leuchtBild(farbe) {
+    if (leuchtBilder.has(farbe)) return leuchtBilder.get(farbe);
+    const c = document.createElement("canvas"); c.width = c.height = 64;
+    const g = c.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    if (farbe === "flamme") { gr.addColorStop(0, "rgba(255,246,210,1)"); gr.addColorStop(.22, "rgba(255,196,90,.9)"); gr.addColorStop(.55, "rgba(235,96,34,.38)"); gr.addColorStop(1, "rgba(200,40,10,0)"); }
+    else if (farbe === "rauch") { gr.addColorStop(0, "rgba(60,54,52,.55)"); gr.addColorStop(1, "rgba(60,54,52,0)"); }
+    else { gr.addColorStop(0, rgba(farbe, .9)); gr.addColorStop(.35, rgba(farbe, .35)); gr.addColorStop(1, rgba(farbe, 0)); }
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64); leuchtBilder.set(farbe, c); return c;
+  }
+  const leuchten = (g, farbe, x, y, r, a) => { if (a <= 0 || r <= 0) return; const alt = g.globalAlpha; g.globalAlpha = alt * Math.min(1, a); g.drawImage(leuchtBild(farbe), x - r, y - r, 2 * r, 2 * r); g.globalAlpha = alt; };
+
+  /* ---------- Malwerkzeug für die Kulissen (alles in Geräte-Pixeln; u = Grundmaß) ---------- */
+  function werkzeug(g, w, h, s) {
+    const u = Math.min(w / 100, h / 70), wb = h * .6, y = h * .82, R = s.Rb;
+    const L = { g, w, h, u, wb, y, R, s, fb: wb + (y - wb) * .16 };
+    L.verlauf = (y0, y1, stops) => { const gr = g.createLinearGradient(0, y0, 0, y1); stops.forEach((c, i) => gr.addColorStop(i / (stops.length - 1), c)); return gr; };
+    L.wand = (...farben) => { g.fillStyle = L.verlauf(0, wb, farben); g.fillRect(0, 0, w, wb + 1); };
+    L.bretter = (farbe, breite) => {
+      g.fillStyle = farbe;
+      for (let x = R() * breite * u; x < w; x += breite * u * (.8 + R() * .4)) g.fillRect(x, 0, Math.max(1, u * .28), wb);
+      for (let i = 0; i < w / (u * 14); i++) { g.beginPath(); g.ellipse(R() * w, R() * wb, u * .45, u * .8, 0, 0, TAU); g.fill(); }
+    };
+    L.steine = (farben, fuge) => {
+      const sh = u * 4.2, sw = u * 9;
+      g.fillStyle = fuge; g.fillRect(0, 0, w, wb);
+      for (let r = 0, yy = 0; yy < wb; r++, yy += sh) for (let x = (r % 2) * -sw / 2; x < w; x += sw) {
+        g.fillStyle = aus(R, farben); g.fillRect(x + u * .35, yy + u * .35, sw - u * .7, sh - u * .7);
+        g.fillStyle = "rgba(255,240,210,.035)"; g.fillRect(x + u * .35, yy + u * .35, sw - u * .7, u * .5);
+      }
+    };
+    L.balken = (yy, dicke, farbe) => { g.fillStyle = farbe; g.fillRect(0, yy, w, dicke * u); g.fillStyle = "rgba(0,0,0,.4)"; g.fillRect(0, yy + dicke * u * .72, w, dicke * u * .28); };
+    L.pfosten = (x, breite, farbe) => { g.fillStyle = farbe; g.fillRect(x - breite * u / 2, 0, breite * u, wb); g.fillStyle = "rgba(0,0,0,.32)"; g.fillRect(x + breite * u * .15, 0, breite * u * .35, wb); };
+    L.mond = (x, yy, r) => {
+      leuchten(g, "#ffeec8", x, yy, r * 3.4, .5);
+      g.fillStyle = "#f1e4c0"; g.beginPath(); g.arc(x, yy, r, 0, TAU); g.fill();
+      g.fillStyle = "rgba(150,130,96,.22)"; [[-.3, -.2, .22], [.28, .12, .3], [-.05, .45, .14]].forEach(([a, b, c]) => { g.beginPath(); g.arc(x + a * r, yy + b * r, c * r, 0, TAU); g.fill(); });
+    };
+    L.sterne = (x0, y0, bw, bh, dichte) => {
+      const n = Math.round(bw * bh / (u * u) * (dichte || .12));
+      for (let i = 0; i < n; i++) {
+        const x = x0 + R() * bw, yy = y0 + R() * bh, a = .25 + R() * .6, sz = Math.max(1, u * (.12 + R() * .2));
+        g.fillStyle = "rgba(255,242,215," + a + ")"; g.fillRect(x, yy, sz, sz);
+        if (R() < .1 && s.funkeln.length < 26) s.funkeln.push({ x, y: yy, sz: sz * 3.2, f: R() * TAU });
+      }
+    };
+    L.daecher = (x0, y0, bw, bh) => {
+      g.fillStyle = "#0b080c";
+      for (let x = x0 - R() * u * 4; x < x0 + bw; x += u * (5 + R() * 4)) {
+        const dh = bh * (.18 + R() * .16), dw = u * (5 + R() * 3);
+        g.beginPath(); g.moveTo(x, y0 + bh); g.lineTo(x, y0 + bh - dh); g.lineTo(x + dw / 2, y0 + bh - dh - dw * .45); g.lineTo(x + dw, y0 + bh - dh); g.lineTo(x + dw, y0 + bh); g.fill();
+        if (R() < .5) { g.fillStyle = "rgba(255,190,90,.75)"; g.fillRect(x + dw * .35, y0 + bh - dh * .6, u * .7, u * .8); g.fillStyle = "#0b080c"; }
+      }
+    };
+    L.ausblick = (x, yy, bw, bh, art) => {
+      art = art || s.v.wetter;
+      const trueb = art === "regen" || art === "nebel";
+      g.fillStyle = L.verlauf(yy, yy + bh, trueb ? ["#2d2730", "#151217"] : art === "abend" ? ["#d07a48", "#6a2c40"] : ["#22152c", "#0d0912"]); g.fillRect(x, yy, bw, bh);
+      if (!trueb && art !== "abend") L.sterne(x, yy, bw, bh * (art === "meer" ? .55 : 1), .3);
+      if (art === "mond" || art === "meer") L.mond(x + bw * (.3 + R() * .4), yy + bh * (.24 + R() * .12), Math.max(u * 1.1, Math.min(bw, bh) * .14));
+      if (art === "meer") {
+        const wy = yy + bh * .58; g.fillStyle = L.verlauf(wy, yy + bh, ["#17342c", "#08130f"]); g.fillRect(x, wy, bw, yy + bh - wy);
+        g.fillStyle = "rgba(255,236,190,.35)";
+        for (let i = 0; i < 7; i++) { const ly = wy + (i + 1) * (yy + bh - wy) / 8, lx = x + bw * (.3 + R() * .4), lw = u * (1 + R() * 2.5); g.fillRect(lx - lw, ly, lw * 2, Math.max(1, u * .2)); }
+        s.wellen.push({ x, y: wy, bw, bh: yy + bh - wy });
+      }
+      if (art === "nebel") for (let i = 0; i < 6; i++) { g.fillStyle = "rgba(225,214,200,.08)"; g.beginPath(); g.ellipse(x + R() * bw, yy + bh * (.35 + R() * .55), bw * .45, bh * .12, 0, 0, TAU); g.fill(); }
+      if (art === "regen") s.regen.push({ x, y: yy, bw, bh });
+      if (s.v.daecher) L.daecher(x, yy, bw, bh);
+    };
+    L.fenster = (x, yy, bw, bh, rahmen, art) => {
+      g.save(); g.beginPath(); g.rect(x, yy, bw, bh); g.clip(); L.ausblick(x, yy, bw, bh, art); g.restore();
+      g.strokeStyle = rahmen; g.lineWidth = u * .9; g.strokeRect(x, yy, bw, bh);
+      g.lineWidth = u * .5; g.beginPath(); g.moveTo(x + bw / 2, yy); g.lineTo(x + bw / 2, yy + bh); g.moveTo(x, yy + bh / 2); g.lineTo(x + bw, yy + bh / 2); g.stroke();
+      g.fillStyle = rahmen; g.fillRect(x - u * .8, yy + bh, bw + u * 1.6, u * 1.1);
+    };
+    L.gitterfenster = (x, yy, bw, bh, rahmen, art) => {
+      g.save(); g.beginPath(); g.rect(x, yy, bw, bh); g.clip(); L.ausblick(x, yy, bw, bh, art); g.restore();
+      g.strokeStyle = rahmen; g.lineWidth = u * .8; g.strokeRect(x, yy, bw, bh);
+      g.lineWidth = u * .45; g.beginPath(); for (let k = 1; k < 4; k++) { g.moveTo(x + bw * k / 4, yy); g.lineTo(x + bw * k / 4, yy + bh); } g.stroke();
+    };
+    L.rundfenster = (x, yy, r, rahmen, art) => {
+      g.save(); g.beginPath(); g.arc(x, yy, r, 0, TAU); g.clip(); L.ausblick(x - r, yy - r, 2 * r, 2 * r, art); g.restore();
+      g.strokeStyle = rahmen; g.lineWidth = u * 1.3; g.beginPath(); g.arc(x, yy, r, 0, TAU); g.stroke();
+      g.fillStyle = "#8a6a3a"; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; g.beginPath(); g.arc(x + Math.cos(a) * r, yy + Math.sin(a) * r, u * .32, 0, TAU); g.fill(); }
+    };
+    L.bogenfenster = (x, yy, bw, bh, rahmen, art, spitz) => {
+      const pfad = () => {
+        g.beginPath(); g.moveTo(x, yy + bh); g.lineTo(x, yy + bw / 2);
+        if (spitz) { g.quadraticCurveTo(x, yy, x + bw / 2, yy - bw * .18); g.quadraticCurveTo(x + bw, yy, x + bw, yy + bw / 2); } else g.arc(x + bw / 2, yy + bw / 2, bw / 2, Math.PI, 0);
+        g.lineTo(x + bw, yy + bh); g.closePath();
+      };
+      g.save(); pfad(); g.clip(); L.ausblick(x, yy - bw * .2, bw, bh + bw * .2, art); g.restore();
+      g.strokeStyle = rahmen; g.lineWidth = u * 1.1; pfad(); g.stroke();
+      g.lineWidth = u * .45; g.beginPath(); g.moveTo(x + bw / 2, yy + (spitz ? -bw * .12 : 0)); g.lineTo(x + bw / 2, yy + bh);
+      for (let k = 1; k < 3; k++) { const ly = yy + bw / 2 + (bh - bw / 2) * k / 3; g.moveTo(x, ly); g.lineTo(x + bw, ly); }
+      g.stroke();
+    };
+    L.laterne = (x, yy, gr, farbe, schwingt) => {
+      if (schwingt) s.schwingen.push({ x, y: yy, gr, farbe, f: R() * TAU }); else laterneMalen(g, x, yy, gr, farbe, u);
+      s.lichter.push({ x, y: yy, r: gr * u * 10, farbe, f: R() * TAU, schwing: schwingt ? s.schwingen.length - 1 : -1 });
+    };
+    L.kerze = (x, yy, gr, farbe) => {
+      const b = gr * u; g.fillStyle = "#e6d9bb"; g.fillRect(x - b * .25, yy - b * 1.6, b * .5, b * 1.6);
+      g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(x + b * .05, yy - b * 1.6, b * .2, b * 1.6);
+      s.flammen.push({ x, y: yy - b * 1.6, b, f: R() * TAU });
+      if (s.lichter.length < 12) s.lichter.push({ x, y: yy - b * 2, r: b * 7, farbe: farbe || "#ffb050", f: R() * TAU, schwing: -1 });
+    };
+    L.leuchter = (x, gr) => { /* Standleuchter mit drei Kerzen */
+      const b = gr * u, fuss = L.fb + u * 2;
+      g.fillStyle = "#2a2018"; g.fillRect(x - b * .2, fuss - b * 7, b * .4, b * 7); g.fillRect(x - b * 1.2, fuss - b * .3, b * 2.4, b * .3);
+      g.strokeStyle = "#5a4628"; g.lineWidth = b * .3; g.beginPath(); g.moveTo(x - b * 2, fuss - b * 7.6); g.quadraticCurveTo(x, fuss - b * 6, x + b * 2, fuss - b * 7.6); g.stroke();
+      [-2, 0, 2].forEach(k => L.kerze(x + k * b, fuss - b * (k ? 7.6 : 7), gr * .55, "#ffc060"));
+    };
+    L.fass = (x, gr) => {
+      const b = gr * u, fuss = L.fb + u, bw = b * 5, bh = b * 6.5;
+      g.fillStyle = "#3a2414"; g.beginPath(); g.ellipse(x, fuss - bh / 2, bw / 2, bh / 2, 0, 0, TAU); g.fill();
+      g.fillStyle = "rgba(255,200,140,.06)"; g.beginPath(); g.ellipse(x - bw * .12, fuss - bh / 2, bw * .25, bh * .45, 0, 0, TAU); g.fill();
+      g.strokeStyle = "#16100a"; g.lineWidth = u * .5; [.25, .75].forEach(k => { g.beginPath(); g.moveTo(x - bw * .48, fuss - bh * k); g.lineTo(x + bw * .48, fuss - bh * k); g.stroke(); });
+      g.fillStyle = "#24160c"; g.beginPath(); g.ellipse(x, fuss - bh * .97, bw * .4, b * .6, 0, 0, TAU); g.fill();
+      return fuss - bh;
+    };
+    L.kiste = (x, gr) => { const b = gr * u, fuss = L.fb + u; g.fillStyle = "#3a2818"; g.fillRect(x - b * 3, fuss - b * 4.5, b * 6, b * 4.5); g.strokeStyle = "#1a120a"; g.lineWidth = u * .4; g.strokeRect(x - b * 3, fuss - b * 4.5, b * 6, b * 4.5); g.beginPath(); g.moveTo(x - b * 3, fuss - b * 4.5); g.lineTo(x + b * 3, fuss); g.stroke(); return fuss - b * 4.5; };
+    L.regal = (x, yy, bw) => {
+      g.fillStyle = "#24160c"; g.fillRect(x, yy, bw, u * .8); g.fillRect(x, yy + u * 7, bw, u * .8);
+      [yy, yy + u * 7].forEach(by => { for (let k = x + u; k < x + bw - u * 1.5; k += u * (1.6 + R() * 1.4)) {
+        const art = R();
+        if (art < .45) { g.fillStyle = aus(R, ["#3a5a2a", "#6a3a1a", "#5a1a1a", "#7a5a24"]); g.fillRect(k, by - u * 4, u * 1.2, u * 3); g.fillRect(k + u * .35, by - u * 5.2, u * .5, u * 1.3); }
+        else if (art < .8) { g.fillStyle = "#6a4a2a"; g.fillRect(k, by - u * 2.4, u * 1.8, u * 2.4); g.strokeStyle = "#6a4a2a"; g.lineWidth = u * .35; g.beginPath(); g.arc(k + u * 1.9, by - u * 1.2, u * .6, -1.4, 1.4); g.stroke(); k += u * .6; }
+        else { g.fillStyle = "#c8b890"; g.beginPath(); g.arc(k + u * .8, by - u * .9, u * .9, Math.PI, 0); g.fill(); }
+      } });
+    };
+    L.bild = (x, yy, bw, bh) => {
+      g.fillStyle = "#7a5a24"; g.fillRect(x - u * .8, yy - u * .8, bw + u * 1.6, bh + u * 1.6);
+      g.fillStyle = L.verlauf(yy, yy + bh, [aus(R, ["#5a4a30", "#4a3a2a", "#3a3424"]), "#1e1810"]); g.fillRect(x, yy, bw, bh);
+      if (R() < .5) { g.fillStyle = "#2a2014"; g.beginPath(); g.moveTo(x, yy + bh); for (let k = 0; k <= 6; k++) g.lineTo(x + bw * k / 6, yy + bh * (.55 + R() * .2)); g.lineTo(x + bw, yy + bh); g.fill(); }
+      else { g.fillStyle = "#1a140e"; g.beginPath(); g.arc(x + bw / 2, yy + bh * .4, bw * .16, 0, TAU); g.fill(); g.beginPath(); g.ellipse(x + bw / 2, yy + bh, bw * .32, bh * .38, 0, Math.PI, 0); g.fill(); }
+    };
+    L.saeule = (x, bw, hell, dunkel) => {
+      const gr = g.createLinearGradient(x - bw / 2, 0, x + bw / 2, 0); gr.addColorStop(0, dunkel); gr.addColorStop(.35, hell); gr.addColorStop(1, dunkel);
+      g.fillStyle = gr; g.fillRect(x - bw / 2, 0, bw, wb);
+      g.fillStyle = dunkel; g.fillRect(x - bw * .7, wb - u * 2, bw * 1.4, u * 2); g.fillRect(x - bw * .7, h * .07, bw * 1.4, u * 1.6);
+      g.fillStyle = "rgba(0,0,0,.18)"; for (let k = -1; k <= 1; k++) g.fillRect(x + k * bw * .25 - u * .15, h * .07, u * .3, wb - h * .07);
+    };
+    L.banner = (x, yy, bw, bh, farbe, zeichenFarbe) => {
+      g.fillStyle = "#3a2a14"; g.fillRect(x - bw * .62, yy - u * .6, bw * 1.24, u * .8);
+      g.fillStyle = L.verlauf(yy, yy + bh, [farbe, rgba(farbe, .75)]);
+      g.beginPath(); g.moveTo(x - bw / 2, yy); g.lineTo(x + bw / 2, yy); g.lineTo(x + bw / 2, yy + bh); g.lineTo(x, yy + bh - bw * .35); g.lineTo(x - bw / 2, yy + bh); g.closePath(); g.fill();
+      g.strokeStyle = "#c9a040"; g.lineWidth = u * .35; g.stroke();
+      g.fillStyle = zeichenFarbe || "#c9a040"; g.beginPath(); g.arc(x, yy + bh * .4, bw * .22, 0, TAU); g.fill();
+      g.fillStyle = farbe; g.beginPath(); g.arc(x, yy + bh * .4, bw * .12, 0, TAU); g.fill();
+    };
+    L.girlande = (y0, durch, farben) => {
+      const n = Math.max(8, Math.round(w / (u * 5)));
+      g.strokeStyle = "#2a2014"; g.lineWidth = u * .25; g.beginPath(); g.moveTo(0, y0); g.quadraticCurveTo(w / 2, y0 + durch * 2, w, y0); g.stroke();
+      for (let i = 0; i < n; i++) {
+        const t0 = (i + .5) / n, x = t0 * w, yy = y0 + durch * 4 * t0 * (1 - t0);
+        g.fillStyle = farben[i % farben.length]; g.beginPath(); g.moveTo(x - u * 1.5, yy); g.lineTo(x + u * 1.5, yy); g.lineTo(x, yy + u * 3); g.fill();
+      }
+    };
+    L.lichterkette = (y0, durch, farbe) => {
+      g.strokeStyle = "#1a140e"; g.lineWidth = u * .2; g.beginPath(); g.moveTo(0, y0); g.quadraticCurveTo(w / 2, y0 + durch * 2, w, y0); g.stroke();
+      const n = Math.max(6, Math.round(w / (u * 9)));
+      for (let i = 0; i < n; i++) {
+        const t0 = (i + .5) / n, x = t0 * w, yy = y0 + durch * 4 * t0 * (1 - t0);
+        g.fillStyle = farbe; g.beginPath(); g.arc(x, yy + u * .8, u * .65, 0, TAU); g.fill();
+        if (i % 2 === 0 && s.lichter.length < 12) s.lichter.push({ x, y: yy + u, r: u * 5, farbe, f: R() * TAU, schwing: -1 });
+      }
+    };
+    L.kronleuchter = (x, yy, gr) => {
+      const b = gr * u;
+      g.strokeStyle = "#2a2014"; g.lineWidth = u * .3; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, yy - b); g.stroke();
+      g.strokeStyle = "#8a6a30"; g.lineWidth = u * .6; g.beginPath(); g.ellipse(x, yy, b * 4, b * .9, 0, 0, TAU); g.stroke();
+      g.beginPath(); g.moveTo(x, yy - b); g.lineTo(x, yy + b * 1.3); g.stroke();
+      g.fillStyle = "rgba(255,240,200,.45)"; for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; g.beginPath(); g.arc(x + Math.cos(a) * b * 3.6, yy + b * (1.1 + R()), u * .28, 0, TAU); g.fill(); }
+      for (let i = 0; i < 6; i++) { const a = i / 6 * TAU, cx = x + Math.cos(a) * b * 4, cy = yy + Math.sin(a) * b * .9; g.fillStyle = "#e6d9bb"; g.fillRect(cx - b * .18, cy - b, b * .36, b); s.flammen.push({ x: cx, y: cy - b, b: b * .75, f: R() * TAU }); }
+      s.lichter.push({ x, y: yy, r: b * 15, farbe: "#ffd58a", f: R() * TAU, schwing: -1 });
+    };
+    L.huegel = (basis, hoehe, farbe) => {
+      g.fillStyle = farbe; g.beginPath(); g.moveTo(0, wb);
+      const a = R() * 6, b2 = R() * 6;
+      for (let x = 0; x <= w; x += u * 2) g.lineTo(x, basis - hoehe * (.5 + .3 * Math.sin(x / w * 5 + a) + .2 * Math.sin(x / w * 11 + b2)));
+      g.lineTo(w, wb); g.closePath(); g.fill();
+    };
+    L.baum = (x, gr, farbe, krone) => {
+      const b = gr * u, fuss = wb + u;
+      g.fillStyle = farbe; g.fillRect(x - b * .8, fuss - b * 12, b * 1.6, b * 12);
+      g.beginPath(); for (let k = 0; k < 6; k++) g.arc(x + (R() - .5) * b * 7, fuss - b * (13 + R() * 6), b * (3 + R() * 2.5), 0, TAU); g.fillStyle = krone || farbe; g.fill();
+    };
+    L.stalaktiten = farbe => { g.fillStyle = farbe; for (let x = -R() * u * 4; x < w; x += u * (3 + R() * 5)) { const l = u * (2 + R() * 7); g.beginPath(); g.moveTo(x, 0); g.lineTo(x + u * 1.6, l); g.lineTo(x + u * 3.2, 0); g.fill(); } };
+    L.netz = (x, yy, bw, bh) => {
+      g.strokeStyle = "rgba(170,150,110,.35)"; g.lineWidth = Math.max(1, u * .18);
+      for (let k = 0; k <= 8; k++) { g.beginPath(); g.moveTo(x + bw * k / 8, yy); g.quadraticCurveTo(x + bw * k / 8 + u * 2, yy + bh * .6, x + bw * k / 8 * .8, yy + bh); g.stroke(); }
+      for (let k = 1; k <= 5; k++) { g.beginPath(); g.moveTo(x, yy + bh * k / 6); g.quadraticCurveTo(x + bw / 2, yy + bh * k / 6 + u * 2.5, x + bw * .85, yy + bh * k / 6); g.stroke(); }
+    };
+    L.spinnweben = (x, yy, gr, sd) => {
+      g.strokeStyle = "rgba(220,210,190,.14)"; g.lineWidth = Math.max(1, u * .15); const b = gr * u;
+      for (let k = 0; k <= 4; k++) { const a = k / 4 * Math.PI / 2; g.beginPath(); g.moveTo(x, yy); g.lineTo(x + sd * Math.cos(a) * b, yy + Math.sin(a) * b); g.stroke(); }
+      for (let r = .3; r <= 1; r += .23) { g.beginPath(); for (let k = 0; k <= 4; k++) { const a = k / 4 * Math.PI / 2; g.lineTo(x + sd * Math.cos(a) * b * r, yy + Math.sin(a) * b * r); } g.stroke(); }
+    };
+    L.boden = (a, b, art) => {
+      g.fillStyle = L.verlauf(wb, y, [a, b]); g.fillRect(0, wb, w, y - wb + 1);
+      const fx = w / 2, fy = wb - h * .9, unten = x => fx + (x - fx) * ((y - fy) / (wb - fy));
+      if (art === "marmor") {
+        g.strokeStyle = "rgba(255,240,215,.08)"; g.lineWidth = Math.max(1, u * .2);
+        for (let i = -14; i <= 14; i++) { const xt = fx + i * w / 14; g.beginPath(); g.moveTo(xt, wb); g.lineTo(unten(xt), y); g.stroke(); }
+        for (let k = 1; k < 6; k++) { const ly = wb + (y - wb) * Math.pow(k / 6, 1.5); g.beginPath(); g.moveTo(0, ly); g.lineTo(w, ly); g.stroke(); }
+        leuchten(g, "#fff0d0", w / 2, wb + (y - wb) * .5, w * .4, .12);
+      } else if (art === "stein") {
+        g.strokeStyle = "rgba(0,0,0,.35)"; g.lineWidth = Math.max(1, u * .25);
+        for (let k = 1; k < 5; k++) { const ly = wb + (y - wb) * Math.pow(k / 5, 1.4); g.beginPath(); g.moveTo(0, ly); g.lineTo(w, ly); g.stroke();
+          for (let x = R() * u * 8; x < w; x += u * (6 + R() * 6) * (.5 + k / 5)) { g.beginPath(); g.moveTo(x, ly); g.lineTo(x, ly - (y - wb) / 5 * (k / 5 + .2)); g.stroke(); } }
+      } else if (art === "gras") {
+        g.strokeStyle = "rgba(120,150,70,.35)"; g.lineWidth = Math.max(1, u * .2);
+        for (let i = 0; i < w / u * 2; i++) { const x = R() * w, yy = wb + R() * (y - wb), l = u * (.6 + (yy - wb) / (y - wb) * 1.4); g.beginPath(); g.moveTo(x, yy); g.lineTo(x + (R() - .5) * l, yy - l); g.stroke(); }
+      } else if (art === "wolke") {
+        for (let i = 0; i < 26; i++) { leuchten(g, aus(R, ["#f0d8a0", "#e0b0a0", "#fff0d0"]), R() * w, wb + R() * (y - wb), u * (6 + R() * 10), .18); }
+      } else {
+        g.strokeStyle = "rgba(0,0,0,.38)"; g.lineWidth = Math.max(1, u * .22);
+        for (let i = -16; i <= 16; i++) { const xt = fx + i * w / 12; g.beginPath(); g.moveTo(xt, wb); g.lineTo(unten(xt), y); g.stroke(); }
+        g.fillStyle = "rgba(255,220,170,.04)"; for (let k = 0; k < 4; k++) g.fillRect(0, wb + (y - wb) * (.2 + k * .22), w, Math.max(1, u * .2));
+      }
+      g.fillStyle = L.verlauf(wb, wb + u * 3.5, ["rgba(0,0,0,.5)", "rgba(0,0,0,0)"]); g.fillRect(0, wb, w, u * 3.5);
+    };
+    L.kante = farbe => {
+      g.fillStyle = farbe; g.fillRect(0, y, w, u * 1.4);
+      g.fillStyle = L.verlauf(y + u * 1.4, h, ["#0d0a0f", "#050407"]); g.fillRect(0, y + u * 1.4, w, h - y);
+    };
+    L.pelmet = farbe => {
+      const ph = Math.max(u * 3, h * .045);
+      g.fillStyle = L.verlauf(0, ph, [farbe, rgba(farbe, .85)]);
+      g.beginPath(); g.moveTo(0, 0); g.lineTo(w, 0); g.lineTo(w, ph * .7);
+      const n = Math.max(6, Math.round(w / (u * 9)));
+      for (let i = n; i >= 0; i--) { const x = w * i / n; g.quadraticCurveTo(x + w / n / 2, ph * 1.15, x, ph * .7); }
+      g.closePath(); g.fill();
+      g.fillStyle = "#c9a040"; for (let i = 0; i <= n; i++) { g.beginPath(); g.arc(w * i / n, ph * .74, u * .45, 0, TAU); g.fill(); }
+    };
+    return L;
+  }
+  function laterneMalen(g, x, yy, gr, farbe, u) {
+    const b = gr * u;
+    g.strokeStyle = "#1a120c"; g.lineWidth = Math.max(1, u * .25); g.beginPath(); g.moveTo(x, yy - b * 2.4); g.lineTo(x, yy - b * 1); g.stroke();
+    g.fillStyle = "#1a120c"; g.beginPath(); g.moveTo(x - b * .85, yy - b * .6); g.lineTo(x, yy - b * 1.15); g.lineTo(x + b * .85, yy - b * .6); g.fill();
+    g.fillStyle = farbe; g.fillRect(x - b * .55, yy - b * .6, b * 1.1, b * 1.3);
+    g.fillStyle = "rgba(255,246,214,.75)"; g.fillRect(x - b * .25, yy - b * .35, b * .5, b * .8);
+    g.strokeStyle = "#1a120c"; g.lineWidth = Math.max(1, u * .3); g.strokeRect(x - b * .55, yy - b * .6, b * 1.1, b * 1.3);
+    g.fillStyle = "#1a120c"; g.fillRect(x - b * .7, yy + b * .7, b * 1.4, b * .3);
+  }
+
+  /* ---------- Die zwölf Bühnen ----------
+     licht/spot: Farbauswahl fürs Licht; wetter: was vor dem Fenster sein kann; leute: Hüte & Köpfe im Publikum;
+     besonders: ein besonderer Gast vorn; gefaess: was bei guter Stimmung hochgehalten wird; schlecht/gut: was geworfen wird;
+     teilchen: was in der Luft schwebt; vorhang: Farbe der Vorhänge. */
+  const KULISSEN = [
+    { /* 0 „Zum Lahmen Esel“ */ licht: ["#ffb35a", "#ffc46e", "#ff9e4a"], wetter: ["mond", "sterne", "regen", "nebel"], vorhang: "#6a2c1a",
+      leute: ["stroh", "stroh", "kappe", "haube", "glatze", "kopftuch"], besonders: "hund", gefaess: "krug", anteil: .7, schlecht: ["tomate", "tomate", "kohl"], gut: "blume", teilchen: "staub",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#40291a", "#2c1c10", "#1e140b"); L.bretter("rgba(0,0,0,.26)", 7);
+        v.daecher = true;
+        const fw = Math.min(w * .24, u * 24), fx = v.links ? w * .1 : w * .9 - fw;
+        L.fenster(fx, wb * .22, fw, fw * .72, "#1c120a"); v.daecher = false;
+        L.balken(h * .05, 3, "#22150c");
+        L.pfosten(v.links ? w * .06 : w * .94, 2.6, "#26180e");
+        L.regal(v.links ? w * .6 : w * .12, wb * .3, Math.min(w * .3, u * 26));
+        /* Wirtshausschild */
+        const sx = w * (v.links ? .44 : .5), sy = wb * .12;
+        g.fillStyle = "#3a2414"; g.fillRect(sx - u * 9, sy, u * 18, u * 5); g.strokeStyle = "#1a100a"; g.lineWidth = u * .5; g.strokeRect(sx - u * 9, sy, u * 18, u * 5);
+        g.fillStyle = "#c9a060"; g.font = "italic " + Math.round(u * 2.3) + "px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillText(sprache() === "en" ? "The Lame Donkey" : "Zum Lahmen Esel", sx, sy + u * 2.6); g.textBaseline = "alphabetic";
+        for (let i = 0; i < v.laternen; i++) L.laterne(w * (.25 + i * .5 + (R() - .5) * .1), h * .05 + u * 9, 1.6, "#ffb85a");
+        const fx1 = v.links ? w * .82 : w * .14, oben = L.fass(fx1, 1.3); L.fass(fx1 + u * 7 * (v.links ? 1 : -1), 1.1);
+        if (v.gast === "katze") katzeMalen(g, fx1, oben, u);
+        if (v.gast === "kerze") L.kerze(fx1, oben, 1.1);
+      } },
+    { boden: ["#2a2218", "#18140e"], /* 1 „Zur Ersoffenen Ratte“ */ licht: ["#d8b05a", "#c89a48", "#e0b860"], wetter: ["nebel", "regen", "nebel"], vorhang: "#3a2a1c",
+      leute: ["kopftuch", "kapuze", "glatze", "kopftuch", "dreispitz", "kapuze"], besonders: "bugbear", gefaess: "krug", anteil: .55, schlecht: ["tomate", "hering", "hering"], gut: "muenze", teilchen: "staub",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.steine(["#2f2d25", "#29271f", "#33301f", "#25231c", "#2c2a22"], "#15140f");
+        g.fillStyle = L.verlauf(0, wb, ["rgba(0,0,0,.35)", "rgba(0,0,0,0)", "rgba(0,0,0,.4)"]); g.fillRect(0, 0, w, wb);
+        L.balken(h * .1, 3.4, "#20150c");
+        /* Messer im Balken – Kritik, konstruktiv */
+        const mx = w * (.3 + R() * .4); g.fillStyle = "#cfc6b0"; g.beginPath(); g.moveTo(mx, h * .1 + u * 1.5); g.lineTo(mx + u * 4, h * .1 - u * 1.6); g.lineTo(mx + u * 4.6, h * .1 - u * .9); g.fill();
+        g.fillStyle = "#2a1a0e"; g.fillRect(mx + u * 4, h * .1 - u * 2.6, u * 1.2, u * 1.6);
+        L.netz(v.links ? 0 : w * .62, h * .1 + u * 3.4, w * .38, wb * .45);
+        L.gitterfenster(v.links ? w * .7 : w * .1, wb * .32, Math.min(w * .18, u * 16), Math.min(w * .12, u * 10), "#121008");
+        /* Steckbrief */
+        const px = w * (v.links ? .48 : .5); g.fillStyle = "#b8a87e"; g.fillRect(px, wb * .5, u * 5, u * 6.5); g.fillStyle = "#3a2a1a"; g.beginPath(); g.arc(px + u * 2.5, wb * .5 + u * 2.6, u * 1.3, 0, TAU); g.fill(); g.fillRect(px + u, wb * .5 + u * 4.6, u * 3, u * .5);
+        const k = L.kiste(w * (v.links ? .2 : .8), 1.2); L.kerze(w * (v.links ? .2 : .8), k, 1.1, "#e0b050");
+        L.fass(w * (v.links ? .88 : .1), 1.2);
+        if (v.gast === "ratte") ratteMalen(g, w * (v.links ? .3 : .7), L.fb + u * .6, u);
+        L.spinnweben(0, 0, 9, 1); L.spinnweben(w, 0, 7, -1);
+      } },
+    { boden: ["#4a2e1c", "#22150c"], /* 2 „Zum Seemannsgarn“ */ licht: ["#ffb35a", "#ffc878", "#f0a050"], wetter: ["meer"], vorhang: "#5a1e16",
+      leute: ["kappe", "kappe", "kopftuch", "dreispitz", "glatze", "kappe"], besonders: "kapitaen", gefaess: "krug", anteil: .75, schlecht: ["hering", "tomate", "hering"], gut: "muenze", teilchen: "staub",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#3c2416", "#2a180e", "#1a0f08"); L.bretter("rgba(0,0,0,.2)", 4.5);
+        /* Spanten wie in einem Schiffsrumpf */
+        g.strokeStyle = "#1c110a"; g.lineWidth = u * 2.2; for (let x = w * .05; x < w; x += w / 5) { g.beginPath(); g.moveTo(x, wb); g.quadraticCurveTo(x - u * 3, wb * .4, x + u * 4, 0); g.stroke(); }
+        const n = w > u * 80 ? 3 : 2, r = Math.min(u * 6.5, w * .08);
+        for (let i = 0; i < n; i++) L.rundfenster(w * (i + .5) / n + (R() - .5) * u * 4, wb * .42, r, "#5a4020", "meer");
+        /* Steuerrad */
+        const rx = w * (v.links ? .16 : .84), ry = wb * .16 + u * 6; g.strokeStyle = "#5a3a1c"; g.lineWidth = u * .9;
+        g.beginPath(); g.arc(rx, ry, u * 4.5, 0, TAU); g.stroke(); g.beginPath(); g.arc(rx, ry, u * 1.2, 0, TAU); g.stroke();
+        for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; g.beginPath(); g.moveTo(rx + Math.cos(a) * u * 1.2, ry + Math.sin(a) * u * 1.2); g.lineTo(rx + Math.cos(a) * u * 6, ry + Math.sin(a) * u * 6); g.stroke(); }
+        /* Anker */
+        const ax = w * (v.links ? .84 : .16), ay = wb * .2; g.strokeStyle = "#2a2420"; g.lineWidth = u * .9;
+        g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax, ay + u * 10); g.moveTo(ax - u * 3, ay + u * 2); g.lineTo(ax + u * 3, ay + u * 2); g.moveTo(ax - u * 4, ay + u * 7); g.quadraticCurveTo(ax, ay + u * 12, ax + u * 4, ay + u * 7); g.stroke(); g.beginPath(); g.arc(ax, ay - u, u, 0, TAU); g.stroke();
+        L.girlande(h * .04, u * 2, ["#7a2a20", "#c9a040", "#2a4a3a", "#e8dcc0"]);
+        for (let i = 0; i < v.laternen; i++) L.laterne(w * (.2 + i * .3 + R() * .08), h * .05 + u * 10, 1.5, "#ffb85a", true);
+        L.fass(w * (v.links ? .66 : .34), 1.1);
+        if (v.gast === "papagei") papageiMalen(g, w * (v.links ? .66 : .34), L.fb + u - 1.1 * u * 6.5, u);
+      } },
+    { boden: ["#3a2418", "#1e130c"], /* 3 „Zum Silbernen Krug“ */ licht: ["#ffd08a", "#ffc070", "#ffe0a0"], wetter: ["mond", "sterne", "regen"], vorhang: "#6a1e22",
+      leute: ["zylinder", "dutt", "haube", "zylinder", "glatze", "federhut"], besonders: "monokel", gefaess: "kelch", anteil: .45, schlecht: ["tomate", "broetchen"], gut: "rose", teilchen: "staub",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#3e2a24", "#30201a", "#24170f");
+        g.fillStyle = "rgba(120,70,50,.18)"; for (let yy = u * 3; yy < wb * .62; yy += u * 5) for (let x = (yy / u / 5 % 2) * u * 3; x < w; x += u * 6) { g.beginPath(); g.ellipse(x, yy, u * .9, u * 1.5, 0, 0, TAU); g.fill(); }
+        const ty = wb * .62; g.fillStyle = "#2a1a10"; g.fillRect(0, ty, w, wb - ty); g.fillStyle = "#3a2616"; g.fillRect(0, ty, w, u * 1.2);
+        g.strokeStyle = "rgba(0,0,0,.4)"; g.lineWidth = u * .4; for (let x = u * 3; x < w; x += u * 10) g.strokeRect(x, ty + u * 2.5, u * 7.5, wb - ty - u * 4.5);
+        const fw = Math.min(w * .18, u * 16), fx = v.links ? w * .08 : w * .92 - fw;
+        L.fenster(fx, wb * .14, fw, fw * 1.1, "#1a100a");
+        g.fillStyle = "#5a1a1e"; g.beginPath(); g.moveTo(fx - u * 3, wb * .1); g.quadraticCurveTo(fx + u, wb * .35, fx - u * 2, ty); g.lineTo(fx - u * 4, ty); g.lineTo(fx - u * 4, wb * .1); g.fill();
+        g.beginPath(); g.moveTo(fx + fw + u * 3, wb * .1); g.quadraticCurveTo(fx + fw - u, wb * .35, fx + fw + u * 2, ty); g.lineTo(fx + fw + u * 4, ty); g.lineTo(fx + fw + u * 4, wb * .1); g.fill();
+        const bx = v.links ? w * .58 : w * .26; L.bild(bx, wb * .18, u * 10, u * 8); if (w > u * 70) L.bild(bx + u * 15 * (v.links ? 1 : -1) + (v.links ? 0 : -u * 4), wb * .24, u * 7, u * 9);
+        L.kronleuchter(w * (.45 + R() * .1), h * .13, 1.4);
+        [.3, .7].forEach(k => { const x = w * k; g.fillStyle = "#7a5a24"; g.fillRect(x - u * .8, ty - u * 5, u * 1.6, u * .6); L.kerze(x, ty - u * 5, .9, "#ffc870"); });
+        if (v.gast === "maus") mausMalen(g, w * (v.links ? .2 : .8), L.fb + u * .5, u);
+      } },
+    { /* 4 Erntefest beim Bürgermeister */ licht: ["#ffc46e", "#ffb050", "#ffd890"], wetter: ["abend", "daemmerung", "nacht"], vorhang: "#7a3a14",
+      leute: ["stroh", "stroh", "haube", "zylinder", "kappe", "glatze", "blumen"], besonders: "buergermeister", gefaess: "krug", anteil: .65, schlecht: ["tomate", "tomate", "kohl"], gut: "muenze", teilchen: "blaetter",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L, zeit = v.wetter;
+        L.wand(...(zeit === "abend" ? ["#d8864a", "#a0505a", "#4a2440"] : zeit === "daemmerung" ? ["#a85a6a", "#5a2a4a", "#22122c"] : ["#1e1230", "#140b20", "#0a0710"]));
+        if (zeit === "nacht") { L.sterne(0, 0, w, wb * .7, .1); L.mond(w * (v.links ? .78 : .22), wb * .2, u * 3.4); }
+        else leuchten(g, zeit === "abend" ? "#ffd080" : "#ff9a7a", w * (v.links ? .75 : .25), wb * .95, u * 30, .7);
+        L.huegel(wb, wb * .22, zeit === "nacht" ? "#0e0a10" : "#2a1824");
+        L.huegel(wb, wb * .12, zeit === "nacht" ? "#0a070b" : "#1c1018");
+        L.baum(w * (v.links ? .08 : .92), 1.6, "#120c0e"); if (w > u * 70) L.baum(w * (v.links ? .3 : .7), 1.1, "#140e10");
+        /* Rahmen der Festbühne */
+        g.fillStyle = "#2a1a0e"; g.fillRect(u * 2, 0, u * 2.4, wb); g.fillRect(w - u * 4.4, 0, u * 2.4, wb);
+        L.girlande(h * .06, u * 3, ["#b8402a", "#d8a030", "#6a7a2a", "#e8dcc0"]);
+        L.lichterkette(h * .15, u * 4, "#ffd27a");
+        /* Erntegaben am Bühnenrand */
+        const ballen = (x, gr) => { const b = gr * u, fuss = L.fb + u; g.fillStyle = "#8a6a2a"; g.fillRect(x - b * 4, fuss - b * 3.6, b * 8, b * 3.6); g.strokeStyle = "rgba(60,40,10,.6)"; g.lineWidth = u * .3; for (let k = 1; k < 6; k++) { g.beginPath(); g.moveTo(x - b * 4, fuss - b * 3.6 * k / 6); g.lineTo(x + b * 4, fuss - b * 3.6 * k / 6); g.stroke(); } return fuss - b * 3.6; };
+        const kuerbis = (x, fuss, gr) => { const b = gr * u; g.fillStyle = "#c8641e"; g.beginPath(); g.ellipse(x, fuss - b * 1.4, b * 2, b * 1.4, 0, 0, TAU); g.fill(); g.strokeStyle = "rgba(90,30,0,.6)"; g.lineWidth = u * .25; g.beginPath(); g.ellipse(x, fuss - b * 1.4, b * .8, b * 1.4, 0, 0, TAU); g.stroke(); g.fillStyle = "#3a5a1a"; g.fillRect(x - b * .2, fuss - b * 3.1, b * .4, b * .6); };
+        const o1 = ballen(w * (v.links ? .85 : .15), 1.2); kuerbis(w * (v.links ? .85 : .15), o1, 1); kuerbis(w * (v.links ? .72 : .28), L.fb + u, 1.2);
+        if (w > u * 60) kuerbis(w * (v.links ? .76 : .24), L.fb + u, .8);
+        /* Banner des Bürgermeisters */
+        const bx = w * .5; g.fillStyle = "#6a2a14"; g.fillRect(bx - u * 11, h * .2, u * 22, u * 4.4); g.strokeStyle = "#c9a040"; g.lineWidth = u * .4; g.strokeRect(bx - u * 11, h * .2, u * 22, u * 4.4);
+        g.fillStyle = "#e8d090"; g.font = Math.round(u * 2.4) + "px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(sprache() === "en" ? "Harvest Festival" : "Erntefest", bx, h * .2 + u * 2.3); g.textBaseline = "alphabetic";
+        if (v.gast === "kraehe") kraeheMalen(g, w * (v.links ? .08 : .92) + u * 2, wb + u - 1.6 * u * 12, u);
+      } },
+    { boden: ["#3a3028", "#241c16", "marmor"], /* 5 Der Ball des Landgrafen */ licht: ["#ffe0a0", "#ffd080", "#fff0c0"], wetter: ["mond", "sterne"], vorhang: "#7a1a28",
+      leute: ["peruecke", "federhut", "dutt", "peruecke", "zylinder", "krone"], gefaess: "kelch", anteil: .5, schlecht: ["tomate", "broetchen"], gut: "rose", teilchen: "glitzer",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#4a3a2a", "#36291e", "#251c14");
+        const n = Math.max(3, Math.round(w / (u * 24))), feld = w / n;
+        for (let i = 0; i < n; i++) {
+          const x = feld * (i + .5), bw = Math.min(feld * .5, u * 12);
+          L.bogenfenster(x - bw / 2, wb * .14, bw, wb * .64, "#5a4428");
+          g.fillStyle = "#6a1a24"; g.beginPath(); g.moveTo(x - bw / 2 - u * 2, wb * .08); g.quadraticCurveTo(x, wb * .2, x + bw / 2 + u * 2, wb * .08); g.lineTo(x + bw / 2 + u * 2, wb * .05); g.lineTo(x - bw / 2 - u * 2, wb * .05); g.fill();
+        }
+        for (let i = 0; i <= n; i++) L.saeule(feld * i, u * 3.5, "#8a7658", "#3a2e20");
+        L.kronleuchter(w * .3, h * .1, 1.3); L.kronleuchter(w * .7, h * .1, 1.3);
+        for (let i = 0; i < v.paare; i++) s_paar(L, w * (.15 + .7 * (i + .5) / v.paare + (R() - .5) * .05));
+      } },
+    { boden: ["#2a1822", "#140a10", "stein"], /* 6 Schloss Nachtfels */ licht: ["#ff9a8a", "#e0a0c0", "#ffb070"], wetter: ["mond", "mond", "nebel"], vorhang: "#4a0e1a", ruhigeKerzen: true,
+      leute: ["kragen", "kragen", "peruecke", "dutt", "kapuze"], besonders: "fuerst", gefaess: "kelch", anteil: .55, schlecht: ["tomate"], gut: "rose", teilchen: "fledermaus",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.steine(["#2a1626", "#24121f", "#2e1a2a", "#221020"], "#120810");
+        g.fillStyle = L.verlauf(0, wb, ["rgba(10,4,10,.5)", "rgba(10,4,10,.1)", "rgba(10,4,10,.5)"]); g.fillRect(0, 0, w, wb);
+        const fw = Math.min(w * .3, u * 26), fx = w * .5 - fw / 2;
+        L.bogenfenster(fx, wb * .2, fw, wb * .72, "#1a0e16", v.wetter, true);
+        [[fx - u * 6, -1], [fx + fw + u * 6, 1]].forEach(([x, sd]) => { g.fillStyle = "#5a0e1e"; g.beginPath(); g.moveTo(x, 0); g.quadraticCurveTo(x + sd * u * 8, wb * .45, x - sd * u * 1, wb); g.lineTo(x - sd * u * 7, wb); g.lineTo(x - sd * u * 7, 0); g.fill(); g.fillStyle = "rgba(0,0,0,.3)"; for (let k = 1; k < 4; k++) g.fillRect(x - sd * u * k * 1.7, 0, u * .5, wb); });
+        /* Spiegel ohne Spiegelbild */
+        const sx = w * (v.links ? .13 : .87); g.fillStyle = "#6a6a62"; g.beginPath(); g.ellipse(sx, wb * .42, u * 5, u * 7.5, 0, 0, TAU); g.fill(); g.fillStyle = "#1c1a20"; g.beginPath(); g.ellipse(sx, wb * .42, u * 4, u * 6.5, 0, 0, TAU); g.fill();
+        g.fillStyle = "rgba(255,255,255,.06)"; g.beginPath(); g.ellipse(sx - u, wb * .38, u * 1.2, u * 4, .3, 0, TAU); g.fill();
+        L.bild(w * (v.links ? .8 : .14), wb * .25, u * 7, u * 9);
+        L.leuchter(w * (v.links ? .3 : .7), 1.2); if (w > u * 70) L.leuchter(w * (v.links ? .9 : .1), 1);
+        L.spinnweben(0, 0, 11, 1); L.spinnweben(w, 0, 9, -1);
+      } },
+    { boden: ["#2a2420", "#18140f", "stein"], /* 7 Die Feste von König Horga */ licht: ["#ff9a4a", "#ffb060", "#ff8a40"], wetter: ["klar"], vorhang: "#4a2a14",
+      leute: ["helm", "helm", "helm", "glatze", "kapuze", "helm"], besonders: "koenig", gefaess: "horn", anteil: .7, schlecht: ["tomate", "stein"], gut: "muenze", teilchen: "funken",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#2c241e", "#1e1814", "#130f0c");
+        for (let i = 0; i < 40; i++) { g.fillStyle = "rgba(0,0,0," + (.1 + R() * .2) + ")"; g.beginPath(); g.ellipse(R() * w, R() * wb, u * (2 + R() * 6), u * (1 + R() * 3), R() * 3, 0, TAU); g.fill(); }
+        /* Schmiede-Esse hinten */
+        const ex = w * (v.links ? .3 : .7), eb = Math.min(w * .22, u * 18);
+        g.fillStyle = "#0c0806"; g.beginPath(); g.moveTo(ex - eb / 2, wb); g.lineTo(ex - eb / 2, wb * .55); g.arc(ex, wb * .55, eb / 2, Math.PI, 0); g.lineTo(ex + eb / 2, wb); g.fill();
+        const eg = g.createRadialGradient(ex, wb, 0, ex, wb, eb * .9); eg.addColorStop(0, "rgba(255,170,70,.9)"); eg.addColorStop(.5, "rgba(220,80,20,.45)"); eg.addColorStop(1, "rgba(120,30,0,0)");
+        g.fillStyle = eg; g.beginPath(); g.moveTo(ex - eb / 2, wb); g.lineTo(ex - eb / 2, wb * .55); g.arc(ex, wb * .55, eb / 2, Math.PI, 0); g.lineTo(ex + eb / 2, wb); g.fill();
+        s_esse(L, ex, wb, eb);
+        /* Amboss */
+        const ax = w * (v.links ? .55 : .45); g.fillStyle = "#1a1614"; g.beginPath(); g.moveTo(ax - u * 5, L.fb - u * 4); g.lineTo(ax + u * 4, L.fb - u * 4); g.quadraticCurveTo(ax + u * 7, L.fb - u * 4, ax + u * 6.5, L.fb - u * 3); g.lineTo(ax + u * 2, L.fb - u * 2.6); g.lineTo(ax + u * 2, L.fb + u * .5); g.lineTo(ax - u * 3, L.fb + u * .5); g.lineTo(ax - u * 3, L.fb - u * 2.6); g.lineTo(ax - u * 5, L.fb - u * 3); g.fill();
+        /* Säulen mit Runen */
+        [.06, .94].concat(w > u * 80 ? [v.links ? .8 : .2] : []).forEach(k => { L.saeule(w * k, u * 7, "#4a4038", "#1e1a16"); for (let r = 0; r < 4; r++) s.runen.push({ x: w * k, y: wb * (.22 + r * .17), gr: u * 1.6, z: Math.floor(R() * 6), f: R() * TAU }); });
+        /* Wappen: gekreuzte Hämmer */
+        const wx = w * .5, wy = wb * .18; g.fillStyle = "#3a2c1e"; g.beginPath(); g.moveTo(wx - u * 5, wy - u * 4); g.lineTo(wx + u * 5, wy - u * 4); g.lineTo(wx + u * 5, wy + u * 2); g.quadraticCurveTo(wx, wy + u * 7, wx - u * 5, wy + u * 2); g.closePath(); g.fill(); g.strokeStyle = "#a07a30"; g.lineWidth = u * .5; g.stroke();
+        g.strokeStyle = "#c9a040"; g.lineWidth = u * .8; g.beginPath(); g.moveTo(wx - u * 3, wy + u * 3); g.lineTo(wx + u * 3, wy - u * 3); g.moveTo(wx + u * 3, wy + u * 3); g.lineTo(wx - u * 3, wy - u * 3); g.stroke();
+        g.fillStyle = "#c9a040"; g.fillRect(wx + u * 2, wy - u * 4, u * 2.4, u * 1.6); g.fillRect(wx - u * 4.4, wy - u * 4, u * 2.4, u * 1.6);
+        L.stalaktiten("#0e0b09");
+        s.lichter.push({ x: ex, y: wb * .8, r: eb * 1.6, farbe: "#ff8a3a", f: R() * TAU, schwing: -1 });
+        L.kerze(w * (v.links ? .9 : .1), L.fb, 1, "#ff9a4a");
+      } },
+    { boden: ["#6a6052", "#3a342c", "marmor"], /* 8 Der Palast von Neverwinter */ licht: ["#fff0c0", "#ffe0a0", "#ffd890"], wetter: ["sterne", "mond"], vorhang: "#8a1a1e",
+      leute: ["krone", "federhut", "helm", "peruecke", "dutt", "zylinder"], gefaess: "kelch", anteil: .45, schlecht: ["tomate"], gut: "rose", teilchen: "staub",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#5a5046", "#463e36", "#2e2924");
+        /* hohe Fenster mit Lichtbahnen */
+        const n = Math.max(2, Math.round(w / (u * 30)));
+        for (let i = 0; i < n; i++) { const x = w * (i + .5) / n, bw = u * 7; L.bogenfenster(x - bw / 2, h * .08, bw, wb * .32, "#3a3228", "sterne"); s.strahlen.push({ x, y: h * .08 + wb * .2, bw, f: R() * TAU }); }
+        const sn = Math.max(4, Math.round(w / (u * 15)));
+        for (let i = 0; i <= sn; i++) { const x = w * i / sn; L.saeule(x, u * 5, "#cfc4b0", "#6a6052"); if (i < sn) L.banner(x + w / sn / 2, wb * .5, u * 5, wb * .38, i % 2 ? "#8a1a1e" : "#6a1420"); }
+        /* Balkon mit Trompetern */
+        g.fillStyle = "#3a332c"; g.fillRect(0, wb * .44, w, u * 1.6);
+        for (let x = w * .08; x < w; x += w * (.2 + R() * .1)) { g.fillStyle = "#1a1612"; g.beginPath(); g.arc(x, wb * .44 - u * 3.4, u * 1.2, 0, TAU); g.fill(); g.fillRect(x - u * 1.2, wb * .44 - u * 2.2, u * 2.4, u * 2.2); g.strokeStyle = "#c9a040"; g.lineWidth = u * .5; g.beginPath(); g.moveTo(x + u, wb * .44 - u * 3.2); g.lineTo(x + u * 4.5, wb * .44 - u * 4.2); g.stroke(); g.fillStyle = "#c9a040"; g.beginPath(); g.moveTo(x + u * 4.5, wb * .44 - u * 4.2); g.lineTo(x + u * 5.6, wb * .44 - u * 5.4); g.lineTo(x + u * 5.8, wb * .44 - u * 3.6); g.fill(); }
+      } },
+    { boden: ["#1a2414", "#0e140a", "gras"], /* 9 Der Hof der Feenkönigin */ licht: ["#f0e0a0", "#e8c0e0", "#d0f0a0"], wetter: ["mond"], vorhang: "#2a4a22",
+      leute: ["elfe", "elfe", "blumen", "elfe", "blumen"], besonders: "feenkoenigin", gefaess: "blume", anteil: .6, schlecht: ["eichel", "pilz"], gut: "blume", teilchen: "gluehwuermchen",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#1e1428", "#161822", "#0e1410");
+        L.sterne(0, 0, w, wb * .6, .08);
+        L.mond(w * (v.links ? .72 : .28), wb * .28, u * 6);
+        for (let i = 0; i < 5; i++) L.baum(w * (i / 4) + (R() - .5) * u * 6, 1.3 + R() * .8, "#120e12", "#0e140c");
+        g.fillStyle = "#0b100a"; for (let x = -u * 4; x < w + u * 4; x += u * (4 + R() * 4)) { g.beginPath(); g.arc(x, -u * 2, u * (5 + R() * 5), 0, TAU); g.fill(); }
+        /* Ranken mit leuchtenden Blüten */
+        for (let i = 0; i < Math.round(w / (u * 12)); i++) {
+          const x = R() * w, l = wb * (.15 + R() * .35); g.strokeStyle = "#162a14"; g.lineWidth = u * .35; g.beginPath(); g.moveTo(x, 0); g.quadraticCurveTo(x + u * 3, l / 2, x, l); g.stroke();
+          const fa = aus(R, ["#f0a0d0", "#f0e090", "#c0f0b0"]); g.fillStyle = fa; g.beginPath(); g.arc(x, l, u * .7, 0, TAU); g.fill();
+          if (s.lichter.length < 10) s.lichter.push({ x, y: l, r: u * 4, farbe: fa, f: R() * TAU, schwing: -1 });
+        }
+        /* Steinkreis */
+        [.15, .32, .68, .85].forEach(k => { g.fillStyle = "#2a2a26"; g.beginPath(); g.moveTo(w * k - u * 2, wb + u); g.lineTo(w * k - u * 1.6, wb - u * 6); g.quadraticCurveTo(w * k, wb - u * 7.5, w * k + u * 1.6, wb - u * 6); g.lineTo(w * k + u * 2, wb + u); g.fill(); });
+        /* Leuchtpilze */
+        for (let i = 0; i < 6; i++) { const x = R() * w, yy = L.fb + R() * u * 4, b = u * (.8 + R() * .7), fa = aus(R, ["#e0a0f0", "#b0f0a0", "#f0d080"]);
+          g.fillStyle = "#d8d0c0"; g.fillRect(x - b * .25, yy - b * 1.4, b * .5, b * 1.4); g.fillStyle = fa; g.beginPath(); g.ellipse(x, yy - b * 1.4, b * 1.2, b * .7, 0, Math.PI, 0); g.fill();
+          if (s.lichter.length < 12) s.lichter.push({ x, y: yy - b, r: b * 5, farbe: fa, f: R() * TAU, schwing: -1 }); }
+      } },
+    { boden: ["#3a2a20", "#140c10", "wolke"], /* 10 Die Hallen des Ewigen Liedes */ licht: ["#ffe6b0", "#ffd0e0", "#fff0c8"], wetter: ["sterne"], vorhang: "#8a6a2a",
+      leute: ["halo", "halo", "halo", "krone", "halo"], gefaess: null, anteil: 0, schlecht: ["tomate"], gut: "stern", teilchen: "glitzer",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#140a1c", "#20102a", "#0c0712");
+        for (let i = 0; i < 7; i++) leuchten(g, aus(R, ["#a04080", "#c09040", "#c06a8a", "#8a3a6a"]), R() * w, R() * wb * .8, u * (14 + R() * 18), .22);
+        L.sterne(0, 0, w, wb, .22);
+        /* goldener Bogen */
+        g.strokeStyle = "rgba(230,190,110,.55)"; g.lineWidth = u * 1.4; g.beginPath(); g.arc(w / 2, wb, Math.min(w * .42, wb * .85), Math.PI, 0); g.stroke();
+        g.strokeStyle = "rgba(230,190,110,.25)"; g.lineWidth = u * .5; g.beginPath(); g.arc(w / 2, wb, Math.min(w * .42, wb * .85) - u * 2.5, Math.PI, 0); g.stroke();
+        /* schwebende Säulen */
+        [[.1, -.08], [.9, .1], [v.links ? .26 : .74, .05]].forEach(([k, kipp]) => { g.save(); g.translate(w * k, wb * .55); g.rotate(kipp); const sh = wb * .45; const gr = g.createLinearGradient(-u * 2.5, 0, u * 2.5, 0); gr.addColorStop(0, "#6a5a44"); gr.addColorStop(.4, "#e8dcc0"); gr.addColorStop(1, "#6a5a44"); g.fillStyle = gr; g.fillRect(-u * 2.5, -sh / 2, u * 5, sh); g.fillStyle = "#cfc0a0"; g.fillRect(-u * 3.4, -sh / 2 - u * 1.2, u * 6.8, u * 1.4); g.beginPath(); g.moveTo(-u * 2.5, sh / 2); g.lineTo(-u, sh / 2 + u * 2); g.lineTo(u * .5, sh / 2 + u * .6); g.lineTo(u * 2.5, sh / 2 + u * 1.8); g.lineTo(u * 2.5, sh / 2); g.fill(); g.restore(); });
+        s.strahlen.push({ x: w / 2, y: 0, bw: u * 16, f: 0, oben: true });
+      } },
+    { boden: ["#2a1008", "#140604", "stein"], /* 11 Themberchauds Halle */ licht: ["#ff7a3a", "#ff9a4a", "#ff6a2a"], wetter: ["klar"], vorhang: "#5a1208",
+      leute: ["hoerner", "hoerner", "glatze", "kapuze", "helm", "hoerner"], besonders: "gartokkar", gefaess: "horn", anteil: .5, schlecht: ["tomate"], gut: "muenze", teilchen: "asche",
+      malen(L, v) {
+        const { g, w, h, u, wb, R, s } = L;
+        L.wand("#2a0e0a", "#1a0806", "#0c0403");
+        for (let i = 0; i < 30; i++) { g.fillStyle = "rgba(0,0,0," + (.15 + R() * .25) + ")"; g.beginPath(); g.ellipse(R() * w, R() * wb, u * (3 + R() * 7), u * (1.5 + R() * 3), R() * 3, 0, TAU); g.fill(); }
+        L.stalaktiten("#0a0302");
+        /* Lavaströme */
+        [[0, w * .22], [w * .8, w * .2]].forEach(([x, bw]) => { const ly = wb - u * 2.5; g.fillStyle = L.verlauf(ly, wb, ["#ffb040", "#c03a10"]); g.beginPath(); g.moveTo(x, wb); g.quadraticCurveTo(x + bw * .5, ly - u * 2, x + bw, wb); g.fill(); s.lava.push({ x: x + bw / 2, y: wb, r: bw * .8 }); });
+        /* Der Drache auf seinem Goldberg */
+        const dx = w * (v.links ? .25 : .75), D = Math.min(wb * .72, w * .32), sd = v.links ? 1 : -1;
+        const kx = dx + sd * D * .15, ky = wb - D * 1.05;
+        leuchten(g, "#ff5a1a", dx, wb - D * .5, D * 1.3, .45);
+        /* Flügel, eingefaltet */
+        g.fillStyle = "#2a0a08"; g.beginPath(); g.moveTo(dx - sd * D * .2, wb - D * .45); g.lineTo(dx - sd * D * .75, wb - D * 1.1); g.lineTo(dx - sd * D * .7, wb - D * .8); g.lineTo(dx - sd * D * .95, wb - D * .85); g.lineTo(dx - sd * D * .8, wb - D * .55); g.lineTo(dx - sd * D, wb - D * .5); g.lineTo(dx - sd * D * .6, wb - D * .3); g.fill();
+        g.strokeStyle = "rgba(255,110,50,.4)"; g.lineWidth = Math.max(1, u * .3); g.stroke();
+        g.fillStyle = "#300c09"; g.beginPath(); g.ellipse(dx + sd * -D * .1, wb - D * .18, D * .9, D * .45, 0, Math.PI, 0); g.fill();
+        g.strokeStyle = "rgba(255,110,50,.45)"; g.lineWidth = Math.max(1, u * .35); g.stroke();
+        g.strokeStyle = "#360e0a"; g.lineWidth = D * .2; g.lineCap = "round"; g.beginPath(); g.moveTo(dx + sd * -D * .3, wb - D * .4); g.quadraticCurveTo(dx + sd * -D * .55, wb - D * 1.0, dx + sd * D * .05, wb - D * 1.05); g.stroke();
+        g.strokeStyle = "rgba(255,120,60,.35)"; g.lineWidth = Math.max(1, u * .35); g.beginPath(); g.moveTo(dx + sd * -D * .4, wb - D * .4); g.quadraticCurveTo(dx + sd * -D * .67, wb - D * 1.06, dx + sd * D * .02, wb - D * 1.16); g.stroke(); g.lineCap = "butt";
+        g.fillStyle = "#3e100c"; g.beginPath(); g.moveTo(kx - sd * D * .14, ky - D * .1); g.quadraticCurveTo(kx + sd * D * .2, ky - D * .18, kx + sd * D * .45, ky + D * .02); g.lineTo(kx + sd * D * .44, ky + D * .1); g.quadraticCurveTo(kx + sd * D * .15, ky + D * .16, kx - sd * D * .12, ky + D * .12); g.closePath(); g.fill();
+        g.strokeStyle = "rgba(255,130,70,.6)"; g.lineWidth = Math.max(1, u * .35); g.stroke();
+        g.fillStyle = "#5a3a2a"; g.beginPath(); g.moveTo(kx - sd * D * .08, ky - D * .08); g.quadraticCurveTo(kx - sd * D * .3, ky - D * .3, kx - sd * D * .35, ky - D * .36); g.quadraticCurveTo(kx - sd * D * .22, ky - D * .18, kx - sd * D * .02, ky - D * .14); g.fill();
+        g.beginPath(); g.moveTo(kx + sd * D * .02, ky - D * .12); g.quadraticCurveTo(kx - sd * D * .1, ky - D * .34, kx - sd * D * .14, ky - D * .4); g.quadraticCurveTo(kx - sd * D * .02, ky - D * .22, kx + sd * D * .08, ky - D * .14); g.fill();
+        g.strokeStyle = "rgba(255,110,50,.45)"; g.lineWidth = Math.max(1, u * .3); g.beginPath(); g.moveTo(kx - sd * D * .12, ky + D * .12); g.quadraticCurveTo(kx + sd * D * .15, ky + D * .16, kx + sd * D * .44, ky + D * .1); g.stroke();
+        s.drache = { ax: kx + sd * D * .12, ay: ky - D * .06, nx: kx + sd * D * .44, ny: ky + D * .03, D, sd };
+        /* Gold */
+        const gx = dx - sd * D * .05; g.fillStyle = L.verlauf(wb - D * .35, wb, ["#d8a840", "#7a5214"]); g.beginPath(); g.moveTo(gx - D * .95, wb + u); g.quadraticCurveTo(gx - D * .3, wb - D * .42, gx, wb - D * .38); g.quadraticCurveTo(gx + D * .4, wb - D * .4, gx + D, wb + u); g.fill();
+        for (let i = 0; i < 40; i++) { const t0 = R(), x = gx - D * .9 + t0 * D * 1.8, top = wb - D * .38 * Math.sin(t0 * Math.PI); g.fillStyle = R() < .5 ? "#ffe08a" : "#b88a2a"; g.beginPath(); g.ellipse(x, top + R() * (wb - top), u * .7, u * .4, 0, 0, TAU); g.fill(); }
+        g.fillStyle = "#c8b890"; const tx = w * (v.links ? .82 : .18); g.beginPath(); g.arc(tx, L.fb - u, u * 1.5, 0, TAU); g.fill(); g.fillStyle = "#140604"; g.fillRect(tx - u * .8, L.fb - u * 1.4, u * .5, u * .5); g.fillRect(tx + u * .3, L.fb - u * 1.4, u * .5, u * .5);
+        s.lichter.push({ x: w * .1, y: wb, r: w * .3, farbe: "#ff6a20", f: 1, schwing: -1 }); s.lichter.push({ x: w * .9, y: wb, r: w * .3, farbe: "#ff6a20", f: 2, schwing: -1 });
+      } }
+  ];
+  const KULISSE_FREI = { leicht: 0, mittel: 7, schwer: 11 };
+  /* tanzende Paare (Ball) und Funken der Esse (Horga) werden pro Bild gemalt – hier nur merken */
+  function s_paar(L, x) { L.s.paare.push({ x, y: L.wb + (L.y - L.wb) * .08, gr: L.u * 1.15, f: L.R() * TAU }); }
+  function s_esse(L, x, y, b) { L.s.esse = { x, y, b }; }
+  /* kleine Gäste */
+  function katzeMalen(g, x, y, u) { g.fillStyle = "#0c0808"; g.beginPath(); g.ellipse(x, y - u * 1.4, u * 2, u * 1.5, 0, 0, TAU); g.fill(); g.beginPath(); g.arc(x - u * 1.4, y - u * 3, u * 1.1, 0, TAU); g.fill(); g.beginPath(); g.moveTo(x - u * 2.3, y - u * 3.6); g.lineTo(x - u * 2.1, y - u * 4.6); g.lineTo(x - u * 1.6, y - u * 3.8); g.moveTo(x - u * 1.1, y - u * 3.9); g.lineTo(x - u * .7, y - u * 4.7); g.lineTo(x - u * .5, y - u * 3.6); g.fill(); g.strokeStyle = "#0c0808"; g.lineWidth = u * .5; g.beginPath(); g.moveTo(x + u * 1.8, y - u); g.quadraticCurveTo(x + u * 3.5, y - u * .5, x + u * 3, y + u * 1.5); g.stroke(); g.fillStyle = "#c8d060"; g.fillRect(x - u * 1.9, y - u * 3.2, u * .35, u * .3); g.fillRect(x - u * 1.1, y - u * 3.2, u * .35, u * .3); }
+  function ratteMalen(g, x, y, u) { g.fillStyle = "#0e0c0a"; g.beginPath(); g.ellipse(x, y - u * .6, u * 1.4, u * .7, 0, 0, TAU); g.fill(); g.beginPath(); g.moveTo(x - u * 1.2, y - u); g.lineTo(x - u * 2.4, y - u * .4); g.lineTo(x - u * 1.2, y - u * .2); g.fill(); g.strokeStyle = "#0e0c0a"; g.lineWidth = u * .2; g.beginPath(); g.moveTo(x + u * 1.3, y - u * .5); g.quadraticCurveTo(x + u * 3, y - u * .2, x + u * 3.4, y - u * 1.2); g.stroke(); g.fillStyle = "#d0a060"; g.fillRect(x - u * 1.8, y - u * .85, u * .25, u * .25); }
+  function papageiMalen(g, x, y, u) { g.fillStyle = "#a83020"; g.beginPath(); g.ellipse(x, y - u * 1.8, u * .9, u * 1.6, -.2, 0, TAU); g.fill(); g.fillStyle = "#3a7a2a"; g.beginPath(); g.ellipse(x + u * .5, y - u * 1.4, u * .5, u * 1.3, .3, 0, TAU); g.fill(); g.fillStyle = "#c9a040"; g.beginPath(); g.moveTo(x - u * .9, y - u * 3); g.lineTo(x - u * 1.6, y - u * 2.6); g.lineTo(x - u * .8, y - u * 2.5); g.fill(); g.fillStyle = "#3a8a3a"; g.fillRect(x + u * .2, y - u * .4, u * .4, u * 1.4); }
+  function mausMalen(g, x, y, u) { g.fillStyle = "#1a1612"; g.beginPath(); g.ellipse(x, y - u * .5, u * .9, u * .5, 0, 0, TAU); g.fill(); g.beginPath(); g.arc(x - u * .8, y - u * .9, u * .35, 0, TAU); g.fill(); g.strokeStyle = "#1a1612"; g.lineWidth = u * .15; g.beginPath(); g.moveTo(x + u * .9, y - u * .4); g.quadraticCurveTo(x + u * 2, y, x + u * 2.2, y - u * .8); g.stroke(); }
+  function kraeheMalen(g, x, y, u) { g.fillStyle = "#0a080a"; g.beginPath(); g.ellipse(x, y - u, u * 1.4, u * .8, -.3, 0, TAU); g.fill(); g.beginPath(); g.arc(x - u * 1.2, y - u * 1.7, u * .55, 0, TAU); g.fill(); g.beginPath(); g.moveTo(x - u * 1.6, y - u * 1.8); g.lineTo(x - u * 2.5, y - u * 1.6); g.lineTo(x - u * 1.6, y - u * 1.5); g.fill(); g.beginPath(); g.moveTo(x + u * 1.2, y - u * .8); g.lineTo(x + u * 2.6, y - u * .3); g.lineTo(x + u * 1.2, y - u * .4); g.fill(); }
+
+  /* ---------- Szene: Zustand der Bühne ---------- */
+  let szene = null;
+  const BAND = [ { wer: "echo", x: .31, p: .14, serie: 8 }, { wer: "friedrich", x: .69, p: .32, serie: 16 }, { wer: "ezekiel", x: .13, p: .52, serie: 26 }, { wer: "rex", x: .87, p: .7, serie: 36 } ];
+  const FEUER_AB = [12, 25, 40];
+  const jetztS = () => performance.now() / 1000;
+  function szeneKey() { return modus === "weg" && !duell ? wegStation : KULISSE_FREI[stufe] || 0; }
+  function szeneNeu(neu) {
+    const k = szeneKey();
+    if (szene && szene.k === k && !neu) return szene;
+    const seed = (Math.random() * 4294967296) >>> 0, R = zufallsGen(seed), K = KULISSEN[k];
+    const v = { licht: aus(R, K.licht), wetter: aus(R, K.wetter), links: R() < .5, laternen: 1 + Math.floor(R() * 2), paare: 2 + Math.floor(R() * 3),
+      gast: R() < .4 ? aus(R, { 0: ["katze", "kerze"], 1: ["ratte"], 2: ["papagei"], 3: ["maus"], 4: ["kraehe"] }[k] || [""]) : "", hell: .8 + R() * .4, spot: aus(R, ["#ffd890", "#ffc0a0", "#fff0d0", "#ffd0e0"]) };
+    szene = { k, K, seed, v, bg: null, bgSchluessel: "", leute: null, band: { barradin: { an: -9 } }, stimmung: .5, st: .5, jubel: 0, teilchen: [], wuerfe: [], flecken: [], flammenT: [], rauch: [],
+      feuer: 0, vorhang: .34, vorhangZiel: .34, meldung: null, gespielt: false, zeit: jetztS(), letzt: 0, heul: 0, drachenWut: 0 };
+    szene.teilchenTyp = k === 4 && v.wetter === "nacht" ? "gluehwuermchen" : K.teilchen;
+    BAND.forEach(b => { szene.band[b.wer] = { an: null }; });
+    return szene;
+  }
+  /* für einen neuen Auftritt: nur Barradin auf der Bühne, Stimmung in der Mitte, Vorhang auf */
+  function szeneAuftritt() {
+    if (!szene || szene.gespielt || szene.k !== szeneKey()) szeneNeu(true);
+    const s = szene; s.gespielt = true;
+    BAND.forEach(b => { s.band[b.wer].an = null; }); s.band.barradin.an = -9;
+    s.stimmung = s.st = .5; s.jubel = 0; s.wuerfe = []; s.flecken = []; s.flammenT = []; s.rauch = []; s.feuer = 0; s.meldung = null; s.vorhangZiel = 0; s.heul = 0; s.ende = null;
+  }
+  function hintergrund(w, h) {
+    const s = szene, schl = w + "x" + h + sprache();
+    if (s.bg && s.bgSchluessel === schl) return s.bg;
+    const c = s.bg || document.createElement("canvas"); c.width = w; c.height = h; s.bgSchluessel = schl; s.bg = c;
+    s.lichter = []; s.flammen = []; s.schwingen = []; s.funkeln = []; s.regen = []; s.wellen = []; s.runen = []; s.strahlen = []; s.lava = []; s.paare = []; s.drache = null; s.esse = null; s.bodenFertig = false;
+    s.Rb = zufallsGen(s.seed ^ 0x5bd1e995);
+    const g = c.getContext("2d"), L = werkzeug(g, w, h, s);
+    g.clearRect(0, 0, w, h);
+    L.boden(...(s.K.boden || ["#4a3020", "#24170e"]));
+    s.K.malen(L, s.v);
+    /* große, ruhige Lichter und den Lichtkegel gleich ins Bild malen – pro Bild flackern nur die kleinen */
+    g.globalCompositeOperation = "lighter";
+    s.lichter = s.lichter.filter(l => { if (l.r <= L.u * 20 || l.schwing >= 0) return true; leuchten(g, l.farbe, l.x, l.y, l.r, .28 * s.v.hell); return false; });
+    const bx = w / 2, sp = g.createLinearGradient(0, 0, 0, L.y); sp.addColorStop(0, rgba(s.v.spot, 0)); sp.addColorStop(1, rgba(s.v.spot, .09 * s.v.hell));
+    g.fillStyle = sp; g.beginPath(); g.moveTo(bx - L.u * 3, 0); g.lineTo(bx + L.u * 3, 0); g.lineTo(bx + L.u * 13, L.y - L.u * 2); g.lineTo(bx - L.u * 13, L.y - L.u * 2); g.fill();
+    g.globalCompositeOperation = "source-over";
+    L.pelmet(s.K.vorhang);
+    L.kante("#1e140c");
+    s.leute = leuteErzeugen(s, w, h);
+    return c;
+  }
+  function leuteErzeugen(s, w, h) {
+    const R = zufallsGen(s.seed ^ 0x2545f491), K = s.K, u = Math.min(w / 100, h / 70), y = h * .82, band = h - y;
+    const leute = [], r0 = Math.max(4, Math.min(band * .2, u * 3.3));
+    [[.36, .92, .8], [.82, .9, 1.06]].forEach(([fy, dichte, gr], reihe) => {
+      const r = r0 * gr, schritt = r * (reihe ? 2.9 : 2.5);
+      for (let x = -R() * schritt * .5; x < w + schritt * .5; x += schritt * (.8 + R() * .45)) {
+        if (R() > dichte) continue;
+        leute.push({ x, y: y + band * fy + (R() - .5) * r * .4, r: r * (.86 + R() * .28), typ: aus(R, K.leute), reihe, f: R() * TAU, schwelle: .4 + R() * .45,
+          gefaess: K.gefaess && R() < K.anteil ? K.gefaess : null, arm: 0, sd: R() < .5 ? -1 : 1, ton: R() });
+      }
+    });
+    if (K.besonders) { const vorn = leute.filter(p => p.reihe === 1); const p = vorn[Math.floor(vorn.length * (.25 + R() * .5))]; if (p) { p.typ = K.besonders; p.besonders = true; if (p.typ === "hund") p.gefaess = null; else p.r *= 1.15; } }
+    return leute;
+  }
+
+  /* ---------- Ereignisse aus dem Spiel ---------- */
+  function szeneTreffer(art, serie, spur) {
+    const s = szene; if (!s) return;
+    s.stimmung = klemme(s.stimmung + (art === "perfekt" ? .045 : art === "gut" ? .03 : .012), 0, 1);
+    if (serie && serie % 10 === 0) { s.jubel = Math.min(1.4, s.jubel + .7); const n = 2 + Math.min(4, serie / 10); for (let i = 0; i < n; i++) werfen(s.K.gut, null, i * .12); }
+  }
+  function szenePatzer(spur) {
+    const s = szene; if (!s) return;
+    s.stimmung = klemme(s.stimmung - .075, 0, 1);
+    if (s.feuer >= 1) { s.feuer = 0; rauchPuff(); if (ctx && bus) rauschen(ctx.currentTime, "highpass", 2600, .05, .45); }
+    if (Math.random() < .2 + (1 - s.stimmung) * .55) werfen(aus(Math.random, s.K.schlecht), null, 0, spur);
+    if (s.drache) s.drachenWut = s.zeit;
+  }
+  function szeneSchluss(gut) {
+    const s = szene; if (!s) return;
+    s.ende = { gut, t: s.zeit };
+    s.stimmung = gut ? 1 : .05; s.jubel = gut ? 1.5 : 0;
+    const n = gut ? 9 : 7;
+    for (let i = 0; i < n; i++) werfen(gut ? s.K.gut : aus(Math.random, s.K.schlecht), null, .15 + i * .14 + Math.random() * .1);
+    if (!gut && s.drache) s.drachenWut = s.zeit + .4;
+  }
+  /* geworfen wird in normierten Koordinaten (0–1), damit es Größenwechsel übersteht */
+  function werfen(art, von, verz, spur) {
+    const s = szene; if (!s || !s.leute || !s.leute.length || reduziert() || s.wuerfe.length > 16) return;
+    const W = s.bg ? s.bg.width : 1, Hh = s.bg ? s.bg.height : 1;
+    const p = von || s.leute[Math.floor(Math.random() * s.leute.length)];
+    const gut = art === s.K.gut;
+    const zx = spur != null ? (spur + .2 + Math.random() * .6) / 3 : .12 + Math.random() * .76;
+    const zy = gut ? .72 + Math.random() * .08 : .62 + Math.random() * .16;
+    s.wuerfe.push({ art, x0: p.x / W, y0: (p.y - p.r) / Hh, x1: zx, y1: zy, t0: s.zeit + (verz || 0), dauer: .75 + Math.random() * .35, rot: Math.random() * TAU, dreh: (Math.random() - .5) * 12, werfer: p });
+    p.wurf = s.zeit + (verz || 0);
+  }
+  function rauchPuff() {
+    const s = szene; if (!s || reduziert()) return;
+    for (let i = 0; i < 14; i++) s.rauch.push({ x: Math.random(), y: .8, vx: (Math.random() - .5) * .04, vy: -.05 - Math.random() * .08, t: 0, max: 1.2 + Math.random() * .8, r: .03 + Math.random() * .03 });
+  }
+  function meldungZeigen(text) { if (szene) szene.meldung = { text, t: szene.zeit }; }
+  /* während des Lieds: Band kommt dazu, Feuer je nach Serie */
+  function szeneFortschritt(p, serie) {
+    const s = szene; if (!s) return;
+    const frei = !s.meldung || s.zeit - s.meldung.t > 1.6;
+    for (const b of BAND) { const m = s.band[b.wer]; if (m.an == null && (p >= b.p || serie >= b.serie)) { if (!frei) break; m.an = s.zeit; meldungZeigen(t().band[b.wer]); break; } }
+    let f = 0; FEUER_AB.forEach((x, i) => { if (serie >= x) f = i + 1; });
+    if (f > s.feuer) { s.feuer = f; if (frei || f > 1) meldungZeigen(t().feuer[f - 1]); if (ctx && bus) rauschen(ctx.currentTime, "lowpass", 700, .1, .6); if (f >= 2) s.heul = s.zeit; }
+    else if (f < s.feuer) s.feuer = f;
+  }
+
+  /* ---------- Malen pro Bild ---------- */
+  function teilchenPflegen(s, dt, typ) {
+    const T = s.teilchen, ziel = { staub: 18, funken: 22, asche: 26, gluehwuermchen: 16, blaetter: 9, glitzer: 14, fledermaus: 4 }[typ] || 0;
+    const neu = () => {
+      switch (typ) {
+        case "funken": case "asche": return { x: Math.random(), y: .6 + Math.random() * .25, vx: (Math.random() - .5) * .02, vy: -.05 - Math.random() * .1, t: 0, max: 2 + Math.random() * 3 };
+        case "blaetter": return { x: Math.random(), y: -.05, vx: .01 + Math.random() * .02, vy: .04 + Math.random() * .04, t: 0, max: 30, rot: Math.random() * TAU, f: Math.random() * TAU, fa: aus(Math.random, ["#c8641e", "#a8401a", "#d89a30", "#7a3a14"]) };
+        case "fledermaus": return { x: Math.random() < .5 ? -.05 : 1.05, y: .05 + Math.random() * .3, vx: 0, vy: 0, t: 0, max: 30, f: Math.random() * TAU };
+        default: return { x: .05 + Math.random() * .9, y: .05 + Math.random() * .7, vx: (Math.random() - .5) * .01, vy: (Math.random() - .5) * .01, t: 0, max: 3 + Math.random() * 5, f: Math.random() * TAU };
+      }
+    };
+    while (T.length < ziel) { const n = neu(); n.t = Math.random() * n.max * .9; T.push(n); }
+    for (let i = 0; i < T.length; i++) {
+      const p = T[i]; p.t += dt;
+      if (typ === "fledermaus") { if (!p.vx) p.vx = (p.x < 0 ? 1 : -1) * (.08 + Math.random() * .06); p.y += Math.sin(s.zeit * 1.5 + p.f) * .0015; }
+      if (typ === "blaetter") p.vx = .015 + Math.sin(s.zeit * 1.3 + p.f) * .02;
+      if (typ === "gluehwuermchen") { p.vx += (Math.random() - .5) * .02 * dt; p.vy += (Math.random() - .5) * .02 * dt; p.vx = klemme(p.vx, -.02, .02); p.vy = klemme(p.vy, -.02, .02); }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if (p.t > p.max || p.y < -.1 || p.y > 1.05 || p.x < -.1 || p.x > 1.1) T[i] = neu();
+    }
+  }
+  function teilchenMalen(g, s, w, h, u, typ) {
+    for (const p of s.teilchen) {
+      const x = p.x * w, y = p.y * h, leben = Math.min(1, p.t / .6, (p.max - p.t) / .8);
+      switch (typ) {
+        case "staub": g.fillStyle = "rgba(255,232,190," + (.25 * leben * (.6 + .4 * Math.sin(s.zeit * 2 + p.f))) + ")"; g.fillRect(x, y, u * .3, u * .3); break;
+        case "funken": case "asche": leuchten(g, typ === "asche" ? "#ff5a20" : "#ffa040", x + Math.sin(s.zeit * 3 + p.f) * u, y, u * 1.3, .8 * leben); break;
+        case "gluehwuermchen": leuchten(g, "#d8f080", x, y, u * 2, .9 * leben * (.5 + .5 * Math.sin(s.zeit * 3 + p.f))); break;
+        case "glitzer": { const a = Math.max(0, Math.sin(s.zeit * 1.7 + p.f)) * leben, r = u * .9 * a; g.fillStyle = "rgba(255,240,200," + a + ")"; g.fillRect(x - r, y - u * .1, r * 2, u * .2); g.fillRect(x - u * .1, y - r, u * .2, r * 2); break; }
+        case "blaetter": g.save(); g.translate(x, y); g.rotate(p.rot + s.zeit * 1.5); g.fillStyle = p.fa; g.beginPath(); g.ellipse(0, 0, u * .9, u * .45, 0, 0, TAU); g.fill(); g.restore(); break;
+        case "fledermaus": { const fl = Math.sin(s.zeit * 14 + p.f), b = u * 1.6; g.fillStyle = "#0a0608"; g.beginPath(); g.moveTo(x - b, y - fl * b * .6); g.quadraticCurveTo(x - b * .4, y + b * .1, x, y); g.quadraticCurveTo(x + b * .4, y + b * .1, x + b, y - fl * b * .6); g.quadraticCurveTo(x, y + b * .5, x - b, y - fl * b * .6); g.fill(); break; }
+      }
+    }
+  }
+  /* hinter der Notenbahn: Kulisse, Lichter, Band */
+  function buehneHinten(g, w, h, dpr, schlag) {
+    const s = szene; if (!s) return;
+    const zeit = jetztS(), ruhe = reduziert();
+    s.dt = s.letzt ? klemme(zeit - s.letzt, 0, .1) : 0; s.letzt = zeit; s.zeit = zeit;
+    const bg = hintergrund(w, h);
+    if (spiel || kalib) { /* im Spiel: Hintergrund samt Spuren aus einem Stück */
+      if (!s.bgBahn || s.bgBahn.width !== w || s.bgBahn.height !== h || s.bgBahnVon !== s.bgSchluessel) {
+        const c = s.bgBahn || document.createElement("canvas"); c.width = w; c.height = h; const bg2 = c.getContext("2d");
+        bg2.drawImage(bg, 0, 0); bahnenMalen(bg2, w, h, dpr, 1); s.bgBahn = c; s.bgBahnVon = s.bgSchluessel;
+      }
+      g.drawImage(s.bgBahn, 0, 0);
+    } else g.drawImage(bg, 0, 0);
+    const u = Math.min(w / 100, h / 70), wb = h * .6, y = h * .82, dt = ruhe ? 0 : s.dt, licht = s.v.licht;
+    s.st += (s.stimmung - s.st) * Math.min(1, dt * 2.5); s.jubel *= Math.exp(-dt * 1.2);
+    s.vorhang += (s.vorhangZiel - s.vorhang) * Math.min(1, (ruhe ? 1 : dt * 2.2));
+    if (s.ende && zeit - s.ende.t > 2.2) s.vorhangZiel = .22;
+    /* tanzende Paare im Ballsaal */
+    s.paare.forEach(p => {
+      const dreh = Math.cos(zeit * 1.4 + p.f + schlag * .2), x = p.x + Math.sin(zeit * .5 + p.f) * u * 3, b = p.gr;
+      g.save(); g.translate(x, p.y); g.scale(Math.max(.25, Math.abs(dreh)), 1); g.fillStyle = "rgba(22,14,20,.8)";
+      g.beginPath(); g.moveTo(-b * 2.6, 0); g.quadraticCurveTo(-b * 1.6, -b * 5, -b * .6, -b * 6); g.lineTo(-b * .2, 0); g.fill();
+      g.beginPath(); g.arc(-b * 1.1, -b * 6.8, b * .8, 0, TAU); g.arc(b * 1.1, -b * 7.4, b * .8, 0, TAU); g.fill();
+      g.fillRect(b * .4, -b * 6.4, b * 1.4, b * 6.4); g.restore();
+    });
+    /* Runen (Horga) und Esse */
+    s.runen.forEach(r => { const a = .35 + .35 * Math.sin(zeit * 1.3 + r.f); g.strokeStyle = "rgba(255,150,60," + a + ")"; g.lineWidth = Math.max(1, u * .3); runeMalen(g, r.x, r.y, r.gr, r.z); });
+    if (s.esse && !ruhe) leuchten(g, "#ff8a3a", s.esse.x, s.esse.y, s.esse.b * (1.1 + .1 * Math.sin(zeit * 5)), .35);
+    /* Lava pulsiert */
+    s.lava.forEach(l => leuchten(g, "#ff7a2a", l.x, l.y, l.r * (1 + .08 * Math.sin(zeit * 1.7 + l.x)), .45 + .15 * Math.sin(zeit * 2.3)));
+    /* Lichtbahnen */
+    g.globalCompositeOperation = "lighter";
+    s.strahlen.forEach(st => {
+      const a = (.05 + .03 * Math.sin(zeit * .7 + st.f)) * (st.oben ? 1.6 : 1);
+      const gr = g.createLinearGradient(0, st.y, 0, y); gr.addColorStop(0, "rgba(255,240,200," + a + ")"); gr.addColorStop(1, "rgba(255,240,200,0)");
+      g.fillStyle = gr; g.beginPath(); g.moveTo(st.x - st.bw / 2, st.y); g.lineTo(st.x + st.bw / 2, st.y); g.lineTo(st.x + st.bw * (st.oben ? 1.6 : 2.2), y); g.lineTo(st.x - st.bw * (st.oben ? 1.6 : .6), y); g.fill();
+    });
+    g.globalCompositeOperation = "source-over";
+    /* Regen vor dem Fenster */
+    if (!ruhe) s.regen.forEach(f => { g.save(); g.beginPath(); g.rect(f.x, f.y, f.bw, f.bh); g.clip(); g.strokeStyle = "rgba(220,220,210,.3)"; g.lineWidth = Math.max(1, u * .15); g.beginPath(); for (let i = 0; i < 14; i++) { const x = f.x + ((i * 37.7 + zeit * 40 * u * .1) % f.bw), yy = f.y + ((i * 53.3 + zeit * 260 * u * .1) % f.bh); g.moveTo(x, yy); g.lineTo(x - u * .4, yy + u * 2); } g.stroke(); g.restore(); });
+    /* Sterne funkeln */
+    s.funkeln.forEach(st => { const a = Math.max(0, Math.sin(zeit * 1.3 + st.f)); if (a > .05) { g.fillStyle = "rgba(255,242,215," + (a * .8) + ")"; g.fillRect(st.x - st.sz / 2, st.y, st.sz, Math.max(1, st.sz / 5)); g.fillRect(st.x, st.y - st.sz / 2, Math.max(1, st.sz / 5), st.sz); } });
+    /* schwingende Laternen */
+    s.schwingen.forEach(l => { const b = l.gr * u, wink = ruhe ? 0 : Math.sin(zeit * 1.2 + l.f) * .12; g.save(); g.translate(l.x, l.y - b * 2.4); g.rotate(wink); laterneMalen(g, 0, b * 2.4, l.gr, l.farbe, u); g.restore(); l.dx = Math.sin(wink) * b * 2.4; });
+    /* Kerzenflammen */
+    s.flammen.forEach(f => {
+      const fl = s.K.ruhigeKerzen || ruhe ? 1 : 1 + .18 * Math.sin(zeit * 9 + f.f) + .1 * Math.sin(zeit * 17 + f.f * 2), fh = f.b * 1.1 * fl, fw = f.b * .32;
+      g.fillStyle = "#ffcf6a"; g.beginPath(); g.moveTo(f.x, f.y - fh); g.quadraticCurveTo(f.x + fw, f.y - fh * .3, f.x, f.y); g.quadraticCurveTo(f.x - fw, f.y - fh * .3, f.x, f.y - fh); g.fill();
+      g.fillStyle = "#fff4d0"; g.beginPath(); g.ellipse(f.x, f.y - fh * .3, fw * .35, fh * .25, 0, 0, TAU); g.fill();
+    });
+    /* Lichter (flackernd, je nach Stimmung etwas heller) */
+    const hell = s.v.hell * (.75 + .4 * s.st);
+    g.globalCompositeOperation = "lighter";
+    s.lichter.forEach(l => {
+      const fl = s.K.ruhigeKerzen || ruhe ? 1 : 1 + .14 * Math.sin(zeit * 7 + l.f) + .08 * Math.sin(zeit * 13.7 + l.f * 2);
+      const dx = l.schwing >= 0 && s.schwingen[l.schwing] ? s.schwingen[l.schwing].dx || 0 : 0;
+      leuchten(g, l.farbe, l.x + dx, l.y, l.r, .28 * fl * hell);
+    });
+    /* Spot auf Barradin */
+    const bx = w / 2, puls = 1 + .08 * Math.sin(schlag * TAU);
+    leuchten(g, s.v.spot, bx, y - u * 3, u * 16, .3 * hell * puls);
+    g.globalCompositeOperation = "source-over";
+    /* Drache: Augen glühen, ab und zu ein warnendes Rauchwölkchen */
+    if (s.drache) {
+      const d = s.drache, wut = Math.max(0, 1 - (zeit - s.drachenWut) / 2.5), blinz = (zeit % 7) < .15 ? .1 : 1;
+      leuchten(g, "#ffb030", d.ax, d.ay, d.D * (.07 + .05 * wut), (.7 + .3 * Math.sin(zeit * 2)) * blinz);
+      g.fillStyle = "rgba(255,220,120," + blinz + ")"; g.beginPath(); g.ellipse(d.ax, d.ay, d.D * .025, d.D * .012 * (1 + wut), 0, 0, TAU); g.fill();
+      if (!ruhe && (wut > .5 || Math.sin(zeit * .9) > .995)) { for (let i = 0; i < 2; i++) s.rauch.push({ x: d.nx / w, y: d.ny / h, vx: d.sd * .02 + (Math.random() - .5) * .02, vy: -.04 - Math.random() * .03, t: 0, max: 1.6, r: .015 + Math.random() * .015 }); }
+    }
+    /* Schwebeteilchen */
+    if (!ruhe) { teilchenPflegen(s, dt, s.teilchenTyp); teilchenMalen(g, s, w, h, u, s.teilchenTyp); }
+    /* Flecken auf den Bühnenbrettern */
+    s.flecken = s.flecken.filter(f => zeit - f.t < f.dauer);
+    s.flecken.forEach(f => { const a = Math.min(1, (f.dauer - (zeit - f.t)) / 1); g.globalAlpha = a; fleckMalen(g, f.art, f.x * w, f.y * h, u * 1.4, f.rot); g.globalAlpha = 1; });
+    /* Band */
+    bandMalen(g, w, h, u, schlag, zeit, ruhe);
+  }
+  function runeMalen(g, x, y, r, z) {
+    const F = [[[0, -1, 0, 1], [0, -1, .7, -.3]], [[-.6, -1, -.6, 1], [-.6, 0, .6, -1], [-.6, 0, .6, 1]], [[0, -1, 0, 1], [-.7, -.4, .7, .4]], [[-.6, 1, 0, -1], [0, -1, .6, 1], [-.3, .2, .3, .2]], [[0, -1, 0, 1], [0, -1, .6, -.5], [0, 0, .6, -.5]], [[-.6, -1, .6, 1], [.6, -1, -.6, 1]]][z % 6];
+    g.beginPath(); F.forEach(([a, b, c, d]) => { g.moveTo(x + a * r, y + b * r); g.lineTo(x + c * r, y + d * r); }); g.stroke();
+  }
+  function bandMalen(g, w, h, u, schlag, zeit, ruhe) {
+    const s = szene, fy = h * .79, H = Math.min(h * .24, w * .19, u * 26), laeuft = !!spiel;
+    const e = (laeuft ? .45 + .55 * s.st : .25) + s.jubel * .4;
+    const heul = s.feuer >= 2 || (zeit - s.heul < 2);
+    const reihe = [["ezekiel", .13], ["echo", .31], ["friedrich", .69], ["rex", .87], ["barradin", .5]];
+    reihe.forEach(([wer, fx]) => {
+      const m = s.band[wer]; if (!m || m.an == null) return;
+      const p = ruhe ? 1 : weich((zeit - m.an) / 1.1);
+      let x = w * fx, yy = fy, a = 1;
+      if (wer === "friedrich") x = w * 1.12 + (x - w * 1.12) * p;
+      else if (wer === "rex") { x = -w * .1 + (x + w * .1) * p; yy -= Math.sin(p * Math.PI) * H * .5; }
+      else if (wer === "echo") { yy -= (1 - p) * H * .8; a = p; }
+      else if (wer === "ezekiel") a = p;
+      if (wer === "ezekiel" && p < 1 && !ruhe) leuchten(g, "rauch", x, fy - H * .4, H * .9 * (1.4 - p), (1 - p) * 1.2);
+      if (wer === "echo" && p < 1 && !ruhe) for (let i = 0; i < 4; i++) { g.fillStyle = "rgba(120,160,60," + (1 - p) + ")"; g.beginPath(); g.ellipse(x + Math.sin(zeit * 3 + i) * H * .3, yy - H * (.2 + i * .2), u * .8, u * .4, i, 0, TAU); g.fill(); }
+      /* Schatten am Boden */
+      g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(x, fy + u * .3, H * .2, H * .035, 0, 0, TAU); g.fill();
+      if (wer !== "barradin") leuchten(g, s.v.licht, x, fy - H * .5, H * .7, .12 * a);
+      figur(g, wer, x, yy, wer === "rex" ? H * .62 : H, { takt: laeuft ? schlag : zeit * 1.1, e, licht: s.v.licht, alpha: a, feuer: s.feuer, heul: wer === "rex" && heul && laeuft, zeit });
+    });
+  }
+  function figur(g, wer, x, fy, H, z) {
+    g.save(); g.translate(x, fy); g.scale(H / 100, H / 100); g.globalAlpha = z.alpha;
+    const ph = z.takt * Math.PI, hops = Math.abs(Math.sin(ph)), dunkel = "#16101a", rand = rgba(z.licht, .55);
+    const fuell = (fn, farbe) => { g.beginPath(); fn(); g.fillStyle = farbe || dunkel; g.fill(); };
+    const kante = fn => { g.beginPath(); fn(); g.strokeStyle = rand; g.lineWidth = 1.5; g.stroke(); };
+    const linie = (pts, breite, farbe) => { g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.lineWidth = breite; g.strokeStyle = farbe || dunkel; g.lineCap = "round"; g.lineJoin = "round"; g.stroke(); };
+    if (wer === "barradin") {
+      const strum = Math.sin(z.takt * TAU * 2) * (.4 + z.e);
+      g.translate(0, -hops * 3 * z.e); g.rotate(Math.sin(ph) * .04 * z.e);
+      fuell(() => { g.moveTo(-13, -73); g.quadraticCurveTo(-24, -40, -22 + Math.sin(ph) * 2, -14); g.lineTo(22 + Math.sin(ph) * 2, -14); g.quadraticCurveTo(24, -40, 13, -73); }, "#3e1410");
+      linie([-6, -40, -8 - hops * 2 * z.e, -3], 6.5); linie([6, -40, 8, -3], 6.5);
+      fuell(() => { g.ellipse(-9, -2, 5.5, 2.6, 0, 0, TAU); g.ellipse(9.5, -2, 5.5, 2.6, 0, 0, TAU); }, "#120c10");
+      const rumpf = () => { g.moveTo(-13, -74); g.quadraticCurveTo(-16, -55, -14, -37); g.lineTo(14, -37); g.quadraticCurveTo(16, -55, 13, -74); g.closePath(); };
+      fuell(rumpf, "#241820"); kante(rumpf);
+      g.fillStyle = "#5a3e1a"; g.fillRect(-14, -46, 28, 3);
+      fuell(() => { g.moveTo(-6.5, -86); g.lineTo(-17, -94); g.lineTo(-7, -80); g.closePath(); g.moveTo(6.5, -86); g.lineTo(17, -94); g.lineTo(7, -80); g.closePath(); }, "#2a1e1e");
+      const kopf = () => g.arc(0, -83, 8, 0, TAU);
+      fuell(kopf, "#2a1e1e"); kante(kopf);
+      fuell(() => g.ellipse(0, -89.5, 14, 3.6, -.12, 0, TAU), "#2e1418");
+      fuell(() => { g.moveTo(-8, -90); g.quadraticCurveTo(-5, -103, 7, -100); g.lineTo(9, -90); g.closePath(); }, "#3a161c");
+      g.beginPath(); g.moveTo(5, -98); g.quadraticCurveTo(18, -110 + Math.sin(ph) * 1.5, 28, -105); g.strokeStyle = "#c4564a"; g.lineWidth = 2.6; g.lineCap = "round"; g.stroke();
+      g.save(); g.translate(6, -54); g.rotate(.62);
+      g.fillStyle = "#7a4e24"; g.beginPath(); g.ellipse(0, 0, 11, 8.5, 0, 0, TAU); g.fill(); g.strokeStyle = rgba(z.licht, .55); g.lineWidth = 1; g.stroke();
+      g.fillStyle = "#1a1008"; g.beginPath(); g.arc(-2, 0, 2.6, 0, TAU); g.fill();
+      g.fillStyle = "#4a2e14"; g.fillRect(-32, -1.6, 22, 3.2); g.save(); g.translate(-32, 0); g.rotate(.5); g.fillRect(-6, -1.8, 6, 3.6); g.restore();
+      g.restore();
+      linie([-12, -71, -17, -63, -21, -72], 5, "#241820");
+      linie([12, -71, 17, -58, 7 + strum * 2.5, -52 - strum * 1.5], 5, "#241820");
+      if (z.feuer >= 2) { /* Fackeln jonglieren */
+        for (let k = 0; k < 3; k++) {
+          const a = z.zeit * 3.2 + k * TAU / 3, tx = Math.cos(a) * 16, ty = -112 - Math.abs(Math.sin(a)) * 30;
+          g.save(); g.translate(tx, ty); g.rotate(a * 2); g.fillStyle = "#3a2410"; g.fillRect(-1.2, -2, 2.4, 12); g.restore();
+          g.globalCompositeOperation = "lighter"; leuchten(g, "flamme", tx, ty - 2, 9, .95); g.globalCompositeOperation = "source-over";
+        }
+      }
+    } else if (wer === "echo") {
+      g.translate(0, -hops * 2 * z.e); g.rotate(Math.sin(ph) * .05 * z.e);
+      const robe = () => { g.moveTo(-12, -72); g.quadraticCurveTo(-19, -32, -18, 0); g.lineTo(18, 0); g.quadraticCurveTo(19, -32, 12, -72); g.closePath(); };
+      const gr = g.createLinearGradient(0, -72, 0, 0); gr.addColorStop(0, "#b0a68e"); gr.addColorStop(1, "#4e483c");
+      fuell(robe, gr); kante(robe);
+      g.strokeStyle = "#4a5a2a"; g.lineWidth = 2; g.beginPath(); g.moveTo(-14, -44); g.quadraticCurveTo(0, -40, 14, -44); g.stroke();
+      const kopf = () => g.arc(0, -80, 7.5, 0, TAU);
+      fuell(kopf, "#2a1e1a"); kante(kopf);
+      g.strokeStyle = "#8a7048"; g.lineWidth = 2.2; g.lineCap = "round"; g.beginPath();
+      [-1, 1].forEach(sd => { g.moveTo(sd * 4, -86); g.quadraticCurveTo(sd * 9, -96, sd * 15, -104); g.moveTo(sd * 9, -95); g.lineTo(sd * 16, -94); g.moveTo(sd * 12, -100); g.lineTo(sd * 11, -109); g.moveTo(sd * 15, -104); g.lineTo(sd * 20, -107); });
+      g.stroke();
+      linie([4, -78, 28, -74], 2.4, "#b88a50");
+      linie([-11, -70, -4, -66, 8, -77], 4.5, "#8e8672"); linie([11, -70, 18, -68, 19, -75.5], 4.5, "#8e8672");
+      if (z.e > .4) { g.fillStyle = rgba("#f0dca0", .5 + .3 * Math.sin(z.zeit * 3)); g.font = "13px serif"; g.fillText("♪", 30, -82 - (z.zeit * 14) % 22); }
+    } else if (wer === "friedrich") {
+      g.translate(0, -hops * 2.2 * z.e);
+      const haut = (((z.takt % 1) + 1) % 1) < .14;
+      g.save(); g.translate(9, -76); g.rotate(.35); g.fillStyle = "#2e1e10"; g.fillRect(-3, -10, 6, 26); g.strokeStyle = "#9a8a64"; g.lineWidth = 1.3; g.beginPath(); [-2, 0, 2].forEach(k => { g.moveTo(k, -10); g.lineTo(k * 1.4, -17); }); g.stroke(); g.restore();
+      fuell(() => { g.moveTo(-13, -74); g.quadraticCurveTo(-21, -40, -18, -16); g.lineTo(18, -16); g.quadraticCurveTo(21, -40, 13, -74); }, "#222616");
+      linie([-6, -40, -7, -3], 6.5, "#1c1a14"); linie([6, -40, 7 + hops * 2 * z.e, -3], 6.5, "#1c1a14");
+      fuell(() => { g.ellipse(-8, -2, 5.5, 2.6, 0, 0, TAU); g.ellipse(9, -2, 5.5, 2.6, 0, 0, TAU); }, "#120c10");
+      const rumpf = () => { g.moveTo(-13, -74); g.quadraticCurveTo(-15, -55, -13, -38); g.lineTo(13, -38); g.quadraticCurveTo(15, -55, 13, -74); g.closePath(); };
+      fuell(rumpf, "#1e2416"); kante(rumpf);
+      fuell(() => g.ellipse(0, -74, 12, 4.5, 0, 0, TAU), "#2a2e1c");
+      const kopf = () => g.arc(0, -83, 8, 0, TAU);
+      fuell(kopf, "#2a1e1a"); kante(kopf);
+      fuell(() => g.arc(0, -85, 8.4, Math.PI * 1.05, Math.PI * 1.95), "#3a2414");
+      g.save(); g.translate(-15, -55); g.rotate(-.2); g.fillStyle = "#c0a070"; g.beginPath(); g.ellipse(0, 0, 11, 12, 0, 0, TAU); g.fill(); g.strokeStyle = "#3a2410"; g.lineWidth = 2.4; g.stroke();
+      if (haut) { g.strokeStyle = rgba("#ffe0a0", .7); g.lineWidth = 1.2; g.beginPath(); g.arc(0, 0, 15, -.7, .7); g.stroke(); } g.restore();
+      linie([-12, -71, -20, -60, -17, -50], 5, "#1e2416");
+      const hx = haut ? -9 : 2, hy = haut ? -57 : -69;
+      linie([12, -71, 15, -60, hx, hy], 5, "#1e2416"); linie([hx, hy, hx - 6, hy + (haut ? 2 : -6)], 2.2, "#d0b890");
+    } else if (wer === "ezekiel") {
+      const sw = Math.sin(z.takt * Math.PI * .5) * 5 * z.e; g.translate(sw, 0);
+      const mantel = () => { g.moveTo(-11, -76); g.quadraticCurveTo(-22, -40, -21, -6); for (let k = 0; k < 6; k++) g.lineTo(-21 + (k + .5) * 7, k % 2 ? -1 : -7); g.lineTo(21, -6); g.quadraticCurveTo(22, -40, 11, -76); g.closePath(); };
+      g.save(); g.translate(-sw * .9, 0); g.globalAlpha *= .3; fuell(mantel, "#4a1438"); g.restore();
+      fuell(mantel, "#120c14"); kante(mantel);
+      const kap = () => { g.moveTo(-10, -72); g.quadraticCurveTo(-12, -92, 0, -96); g.quadraticCurveTo(12, -92, 10, -72); g.closePath(); };
+      fuell(kap, "#18101a"); kante(kap);
+      g.fillStyle = "#4a302a"; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(sd * 6, -90); g.quadraticCurveTo(sd * 17, -94, sd * 14, -108); g.quadraticCurveTo(sd * 13, -97, sd * 4, -94); g.closePath(); g.fill(); });
+      g.fillStyle = "#ff7a3a"; g.fillRect(-4.5, -84, 3, 1.6); g.fillRect(1.5, -84, 3, 1.6);
+      g.globalCompositeOperation = "lighter"; leuchten(g, "#ff6a2a", 0, -83, 9, .5); g.globalCompositeOperation = "source-over";
+      const gl = .5 + .5 * Math.sin(z.zeit * 2.3);
+      linie([-12, -66, -16, -52], 4.5, "#120c14"); linie([12, -66, 16, -52], 4.5, "#120c14");
+      g.strokeStyle = rgba("#ece2c8", .55 + .35 * gl); g.lineWidth = 1.8; g.beginPath(); g.moveTo(-16, -52); g.quadraticCurveTo(-26, -44, -34, -26); g.moveTo(16, -52); g.quadraticCurveTo(26, -44, 34, -26); g.stroke();
+    } else if (wer === "rex") {
+      g.translate(0, -hops * 6 * z.e);
+      const wedel = Math.sin(z.zeit * 14);
+      g.strokeStyle = "#4a3220"; g.lineWidth = 6; g.lineCap = "round"; g.beginPath(); g.moveTo(10, -14); g.quadraticCurveTo(24, -18, 26 + wedel * 6, -34); g.stroke();
+      const koerper = () => g.ellipse(0, -24, 15, 22, 0, 0, TAU);
+      fuell(koerper, "#42301e"); kante(koerper);
+      fuell(() => { g.ellipse(-11, -4, 8, 5, 0, 0, TAU); g.ellipse(11, -4, 8, 5, 0, 0, TAU); }, "#42301e");
+      linie([-6, -28, -6, -3], 5, "#4e3822"); linie([6, -28, 6, -3], 5, "#4e3822");
+      fuell(() => { g.moveTo(-13, -42); g.lineTo(13, -42); g.lineTo(18, -14); g.quadraticCurveTo(0, -8, -18, -14); g.closePath(); }, "#7a2420");
+      fuell(() => g.arc(0, -42, 3, 0, TAU), "#c9a040");
+      g.save(); g.translate(0, -52); g.rotate(z.heul ? -.45 : Math.sin(z.zeit * 2) * .08);
+      const kopf = () => g.ellipse(0, 0, 11, 10, 0, 0, TAU);
+      fuell(kopf, "#4e3622"); kante(kopf);
+      fuell(() => g.ellipse(0, 5, 6.5, 5, 0, 0, TAU), "#6e4e32");
+      fuell(() => g.arc(0, 2.5, 2, 0, TAU), "#100808");
+      fuell(() => { g.ellipse(-10, -2, 3.8, 8, .35, 0, TAU); g.ellipse(10, -2, 3.8, 8, -.35, 0, TAU); }, "#30200e");
+      g.fillStyle = "#f0e0b0"; g.fillRect(-5, -3, 2, 2); g.fillRect(3, -3, 2, 2);
+      if (z.heul) { g.fillStyle = "#1a0a08"; g.beginPath(); g.ellipse(0, 8, 2.6, 2, 0, 0, TAU); g.fill(); }
+      g.restore();
+      if (z.heul) { g.fillStyle = rgba("#ffe0a0", .75); g.font = "italic 13px Georgia, serif"; g.textAlign = "center"; g.fillText(sprache() === "en" ? "Awoo!" : "Auuu!", 0, -76 - Math.sin(z.zeit * 3) * 3); }
+    }
+    g.restore();
+  }
+  /* vor der Notenbahn: Feuer, Publikum, Würfe, Vorhang, Ansage */
+  function buehneVorn(g, w, h, dpr, schlag) {
+    const s = szene; if (!s) return;
+    const zeit = s.zeit, u = Math.min(w / 100, h / 70), y = h * .82, ruhe = reduziert(), dt = ruhe ? 0 : s.dt;
+    /* Feuer an der goldenen Linie */
+    if (s.feuer > 0 && !ruhe) {
+      const rate = [0, 40, 75, 120][s.feuer];
+      let n = rate * dt; while (n > 0 && s.flammenT.length < 110) { if (n < 1 && Math.random() > n) break; n -= 1; s.flammenT.push({ x: Math.random(), y: .82, vx: (Math.random() - .5) * .02, vy: -.12 - Math.random() * .1 * s.feuer, t: 0, max: .45 + Math.random() * .4, r: .02 + Math.random() * .02 * s.feuer }); }
+    }
+    if (s.flammenT.length) {
+      g.globalCompositeOperation = "lighter";
+      s.flammenT = s.flammenT.filter(p => (p.t += dt) < p.max);
+      const fb = leuchtBild("flamme");
+      s.flammenT.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; const a = 1 - p.t / p.max, r = p.r * h * (.6 + a * .6); g.globalAlpha = a * .9; g.drawImage(fb, p.x * w - r * .6, p.y * h - r * 1.5, r * 1.2, r * 2.6); });
+      g.globalAlpha = 1;
+      g.globalCompositeOperation = "source-over";
+    }
+    if (s.feuer > 0) { g.globalCompositeOperation = "lighter"; const gr = g.createLinearGradient(0, y - u * 8 * s.feuer, 0, y); gr.addColorStop(0, "rgba(255,120,40,0)"); gr.addColorStop(1, "rgba(255,120,40," + (.12 * s.feuer) + ")"); g.fillStyle = gr; g.fillRect(0, y - u * 8 * s.feuer, w, u * 8 * s.feuer); g.globalCompositeOperation = "source-over"; }
+    /* Rauch */
+    if (s.rauch.length) { s.rauch = s.rauch.filter(p => (p.t += dt) < p.max); s.rauch.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; const a = 1 - p.t / p.max; leuchten(g, "rauch", p.x * w, p.y * h, p.r * h * (1 + p.t), a); }); }
+    /* Publikum */
+    if (s.leute) publikumMalen(g, w, h, u, schlag, zeit, ruhe);
+    /* Würfe */
+    s.wuerfe = s.wuerfe.filter(wf => {
+      const p = (zeit - wf.t0) / wf.dauer; if (p < 0) return true;
+      if (p >= 1) { s.flecken.push({ art: wf.art, x: wf.x1, y: wf.y1, t: zeit, dauer: wf.art === "tomate" ? 4 : 3, rot: wf.rot }); if (wf.art === "tomate" && ctx && bus) rauschen(ctx.currentTime, "lowpass", 500, .12, .12); return false; }
+      const x = (wf.x0 + (wf.x1 - wf.x0) * p) * w, yy = (wf.y0 + (wf.y1 - wf.y0) * p) * h - Math.sin(p * Math.PI) * h * .28;
+      dingMalen(g, wf.art, x, yy, u * 1.5, wf.rot + wf.dreh * p, zeit);
+      return true;
+    });
+    /* Vorhänge links und rechts */
+    vorhangMalen(g, w, h, u);
+    /* Ansage */
+    if (s.meldung) {
+      const a0 = (zeit - s.meldung.t) / 2.2; if (a0 > 1) s.meldung = null;
+      else {
+        const a = Math.min(1, a0 * 6, (1 - a0) * 4), fs = Math.max(12 * dpr, Math.min(17 * dpr, w / 26));
+        g.font = "600 " + fs + "px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
+        const tw = Math.min(w - 16 * dpr, g.measureText(s.meldung.text).width + 28 * dpr), my = Math.max(68 * dpr, h * .14) - (1 - Math.min(1, a0 * 5)) * 10 * dpr;
+        g.globalAlpha = a; g.fillStyle = "rgba(16,12,20,.82)"; g.strokeStyle = "rgba(224,160,70,.8)"; g.lineWidth = 1.5 * dpr;
+        g.beginPath(); g.roundRect ? g.roundRect(w / 2 - tw / 2, my - fs, tw, fs * 2, fs) : g.rect(w / 2 - tw / 2, my - fs, tw, fs * 2); g.fill(); g.stroke();
+        g.fillStyle = "#ffd27a"; g.fillText(s.meldung.text, w / 2, my + 1, tw - 16 * dpr); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
+      }
+    }
+  }
+  function vorhangMalen(g, w, h, u) {
+    const s = szene, breit = w * (.035 + .4 * s.vorhang); if (breit < 1) return;
+    if (!s.vorhangBild || s.vorhangBild.height !== h || s.vorhangFarbe !== s.K.vorhang) {
+      const c = s.vorhangBild || document.createElement("canvas"); c.width = 96; c.height = h; const vg = c.getContext("2d");
+      const gr = vg.createLinearGradient(0, 0, 96, 0); for (let i = 0; i <= 8; i++) { gr.addColorStop(i / 8, i % 2 ? rgba(s.K.vorhang, 1) : "#120608"); }
+      vg.fillStyle = gr; vg.fillRect(0, 0, 96, h);
+      const sh = vg.createLinearGradient(0, 0, 0, h); sh.addColorStop(0, "rgba(0,0,0,.35)"); sh.addColorStop(.4, "rgba(255,220,180,.05)"); sh.addColorStop(1, "rgba(0,0,0,.45)"); vg.fillStyle = sh; vg.fillRect(0, 0, 96, h);
+      s.vorhangBild = c; s.vorhangFarbe = s.K.vorhang;
+    }
+    const b = s.vorhangBild;
+    g.drawImage(b, 0, 0, breit, h); g.save(); g.translate(w, 0); g.scale(-1, 1); g.drawImage(b, 0, 0, breit, h); g.restore();
+    g.fillStyle = "#c9a040"; g.fillRect(breit - u * .35, 0, u * .35, h); g.fillRect(w - breit, 0, u * .35, h);
+    /* Kordel */
+    if (s.vorhang > .1) { g.strokeStyle = "#c9a040"; g.lineWidth = u * .5; g.beginPath(); g.moveTo(0, h * .55); g.quadraticCurveTo(breit * .6, h * .6, breit, h * .52); g.moveTo(w, h * .55); g.quadraticCurveTo(w - breit * .6, h * .6, w - breit, h * .52); g.stroke(); }
+  }
+  function publikumMalen(g, w, h, u, schlag, zeit, ruhe) {
+    const s = szene, licht = rgba(s.v.licht, .4), e = .25 + s.st * .9 + s.jubel, dt = ruhe ? 1 : s.dt;
+    const farben = ["#1c151c", "#0e0a10"];
+    for (const p of s.leute) {
+      const ziel = s.st > p.schwelle || s.jubel > .6 ? 1 : 0;
+      p.arm += (ziel - p.arm) * Math.min(1, dt * 3.5);
+      const bob = ruhe ? 0 : -Math.abs(Math.sin((schlag + p.f * .08) * Math.PI)) * p.r * .22 * e;
+      const wirft = p.wurf && zeit - p.wurf > -.25 && zeit - p.wurf < .35;
+      personMalen(g, p, bob, wirft ? 1 : p.arm, licht, farben[p.reihe], zeit, h, wirft);
+    }
+  }
+  function personMalen(g, p, bob, arm, licht, farbe, zeit, h, wirft) {
+    const r = p.r, x = p.x, yy = p.y + bob, typ = p.typ;
+    g.fillStyle = farbe;
+    if (typ === "hund") {
+      g.beginPath(); g.ellipse(x, yy + r * .9, r * 1.9, r * .85, 0, 0, TAU); g.fill();
+      g.beginPath(); g.arc(x - r * 1.4, yy + r * .25, r * .75, 0, TAU); g.fill();
+      g.beginPath(); g.ellipse(x - r * 1.95, yy + r * .35, r * .3, r * .62, .5, 0, TAU); g.ellipse(x - r * .85, yy + r * .2, r * .3, r * .62, -.5, 0, TAU); g.fill();
+      g.strokeStyle = licht; g.lineWidth = Math.max(1, r * .12); g.beginPath(); g.ellipse(x, yy + r * .9, r * 1.9, r * .85, 0, Math.PI * 1.1, Math.PI * 1.9); g.stroke();
+      if (szene.st < .75) { const k = (zeit * .6) % 1; g.fillStyle = "rgba(235,226,204," + (1 - k) * .7 + ")"; g.font = "italic " + Math.round(r * (.8 + k * .6)) + "px Georgia, serif"; g.textAlign = "center"; g.fillText("z", x - r * 1.2 + k * r, yy - r * (.3 + k * 1.4)); }
+      return;
+    }
+    const gross = typ === "bugbear" ? 1.3 : typ === "buergermeister" ? 1.15 : 1;
+    if (typ === "elfe" || typ === "feenkoenigin") { /* Flügel, schimmernd */
+      const fl = .7 + .3 * Math.sin(zeit * 9 + p.f), a = typ === "feenkoenigin" ? .35 : .22;
+      g.fillStyle = "rgba(220,240,200," + a + ")"; g.beginPath(); g.ellipse(x - r * 1.3, yy + r * .9, r * 1.2 * fl, r * .6, -.6, 0, TAU); g.ellipse(x + r * 1.3, yy + r * .9, r * 1.2 * fl, r * .6, .6, 0, TAU); g.fill();
+      g.fillStyle = farbe;
+    }
+    g.beginPath(); g.moveTo(x - r * 1.5 * gross, h); g.quadraticCurveTo(x - r * 1.6 * gross, yy + r * 1.15, x - r * .5, yy + r * .9); g.lineTo(x + r * .5, yy + r * .9); g.quadraticCurveTo(x + r * 1.6 * gross, yy + r * 1.15, x + r * 1.5 * gross, h); g.fill();
+    if (arm > .02) {
+      const sd = p.sd, sx = x + sd * r * 1.05, sy = yy + r * 1.3, hx = x + sd * r * (1.45 + (wirft ? .3 : 0)), hy = yy - r * (.2 + 1.5 * arm) + (wirft ? 0 : Math.sin(zeit * 4 + p.f) * r * .15);
+      g.strokeStyle = farbe; g.lineWidth = r * .5; g.lineCap = "round"; g.beginPath(); g.moveTo(sx, sy); g.lineTo(hx, hy); g.stroke();
+      if (!wirft) gefaessMalen(g, p.gefaess, hx, hy, r, zeit, p);
+    }
+    g.fillStyle = farbe; g.beginPath(); g.arc(x, yy, r * gross, 0, TAU); g.fill();
+    hutMalen(g, typ, x, yy, r * gross, farbe, zeit, p);
+    g.strokeStyle = licht; g.lineWidth = Math.max(1, r * .13); g.beginPath(); g.arc(x, yy, r * gross, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
+  }
+  function gefaessMalen(g, art, x, y, r, zeit, p) {
+    const b = r * .55;
+    switch (art) {
+      case "krug": g.fillStyle = "#7a5420"; g.fillRect(x - b, y - b * 1.7, b * 1.8, b * 1.9); g.strokeStyle = "#7a5420"; g.lineWidth = b * .35; g.beginPath(); g.arc(x + b * .95, y - b * .8, b * .5, -1.4, 1.4); g.stroke();
+        g.fillStyle = "#efe6d0"; g.beginPath(); g.arc(x - b * .4, y - b * 1.75, b * .5, 0, TAU); g.arc(x + b * .35, y - b * 1.8, b * .55, 0, TAU); g.fill(); break;
+      case "kelch": g.fillStyle = p.ton < .5 ? "#8a1a2a" : "#c9a040"; g.beginPath(); g.arc(x, y - b * 1.6, b * .8, 0, Math.PI); g.fill(); g.fillStyle = "#d8d0c0"; g.fillRect(x - b * .1, y - b * 1.6, b * .2, b * 1.4); g.fillRect(x - b * .5, y - b * .25, b, b * .2); break;
+      case "horn": g.fillStyle = "#c8b080"; g.beginPath(); g.moveTo(x - b * .5, y - b * .2); g.quadraticCurveTo(x - b * .8, y - b * 2, x + b * .9, y - b * 2.4); g.lineTo(x + b * .7, y - b * 1.6); g.quadraticCurveTo(x, y - b * 1.2, x + b * .3, y); g.fill(); g.fillStyle = "#efe6d0"; g.beginPath(); g.ellipse(x + b * .8, y - b * 2, b * .35, b * .45, .5, 0, TAU); g.fill(); break;
+      case "blume": g.strokeStyle = "#3a6a2a"; g.lineWidth = b * .25; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - b * 1.8); g.stroke(); dingMalen(g, "blume", x, y - b * 2, b * 1.2, zeit, zeit); break;
+      default: leuchten(g, "#ffe6a0", x, y - b * .5, b * 2.4, .45 + .2 * Math.sin(zeit * 4 + p.f)); g.fillStyle = g.strokeStyle; g.beginPath(); g.arc(x, y, b * .45, 0, TAU); g.fill();
+    }
+  }
+  function hutMalen(g, typ, x, y, r, farbe, zeit, p) {
+    const flaeche = (fa, fn) => { g.fillStyle = fa; g.beginPath(); fn(); g.fill(); };
+    switch (typ) {
+      case "stroh": flaeche("#3e3018", () => g.ellipse(x, y - r * .35, r * 1.75, r * .38, 0, 0, TAU)); flaeche("#3e3018", () => g.ellipse(x, y - r * .5, r * .85, r * .6, 0, Math.PI, 0)); break;
+      case "kappe": flaeche("#2a2622", () => { g.ellipse(x, y - r * .5, r * 1.05, r * .6, 0, Math.PI, 0); g.rect(x - r * 1.15, y - r * .55, r * 2.3, r * .22); }); break;
+      case "haube": flaeche("#3a3026", () => g.arc(x, y - r * .1, r * 1.08, Math.PI * .92, Math.PI * 2.08)); flaeche("#3a3026", () => g.arc(x, y + r * .6, r * .3, 0, TAU)); break;
+      case "kopftuch": flaeche("#4e1c16", () => { g.arc(x, y - r * .15, r * 1.04, Math.PI, 0); g.moveTo(x + r * .7, y - r * .2); g.lineTo(x + r * 1.5, y + r * .35); g.lineTo(x + r * 1.05, y + r * .5); }); break;
+      case "dreispitz": case "kapitaen": flaeche("#1e1810", () => { g.moveTo(x - r * 1.7, y - r * .35); g.quadraticCurveTo(x, y - r * 1.9, x + r * 1.7, y - r * .35); g.quadraticCurveTo(x, y - r * .75, x - r * 1.7, y - r * .35); });
+        if (typ === "kapitaen") { papageiMalen(g, x + r * 1.5, y + r * 1.15, r * .45); } break;
+      case "zylinder": case "buergermeister": flaeche("#18141a", () => { g.rect(x - r * 1.3, y - r * .75, r * 2.6, r * .25); g.rect(x - r * .78, y - r * (typ === "buergermeister" ? 2.6 : 2.2), r * 1.56, r * (typ === "buergermeister" ? 1.9 : 1.5)); });
+        flaeche(typ === "buergermeister" ? "#c9a040" : "rgba(150,40,40,.5)", () => g.rect(x - r * .78, y - r * 1.05, r * 1.56, r * .25)); break;
+      case "dutt": case "monokel": flaeche(farbe, () => g.arc(x, y - r * 1.05, r * .45, 0, TAU));
+        if (typ === "monokel") { g.strokeStyle = "#c9a040"; g.lineWidth = Math.max(1, r * .12); g.beginPath(); g.arc(x + r * 1.15, y - r * .1, r * .3, 0, TAU); g.stroke(); g.fillStyle = "rgba(255,240,200," + (.4 + .4 * Math.sin(zeit * 2)) + ")"; g.fillRect(x + r * 1.05, y - r * .2, r * .12, r * .12); } break;
+      case "peruecke": flaeche("#5a544a", () => { [[-.75, -.3], [.75, -.3], [0, -.78], [-.5, .3], [.5, .3]].forEach(([a, b]) => { g.moveTo(x + a * r + r * .62, y + b * r); g.arc(x + a * r, y + b * r, r * .62, 0, TAU); }); }); flaeche("#2a1a1a", () => g.rect(x - r * .12, y + r * .6, r * .24, r * .7)); break;
+      case "federhut": flaeche("#2a1e22", () => { g.ellipse(x, y - r * .45, r * 1.5, r * .32, 0, 0, TAU); g.ellipse(x, y - r * .62, r * .8, r * .5, 0, Math.PI, 0); });
+        g.strokeStyle = aus(() => p.ton, ["#a83a2a", "#c9a040", "#e8dcc0"]); g.lineWidth = r * .18; g.beginPath(); g.moveTo(x + r * .4, y - r * .9); g.quadraticCurveTo(x + r * 1.6, y - r * 1.9, x + r * 2, y - r * 1.2); g.stroke(); break;
+      case "kragen": case "fuerst": flaeche(typ === "fuerst" ? "#4a0e18" : "#2a0a12", () => { g.moveTo(x - r * 1.45, y + r * 1); g.lineTo(x - r * 1.15, y - r * .6); g.lineTo(x - r * .55, y + r * .75); g.moveTo(x + r * 1.45, y + r * 1); g.lineTo(x + r * 1.15, y - r * .6); g.lineTo(x + r * .55, y + r * .75); }); break;
+      case "helm": case "koenig":
+        if (typ === "koenig") { flaeche("#b08a30", () => { g.moveTo(x - r * .9, y - r * .55); for (let k = 0; k <= 4; k++) { g.lineTo(x - r * .9 + k * r * .45, y - r * (k % 2 ? 1 : 1.55)); } g.lineTo(x + r * .9, y - r * .55); }); }
+        else { flaeche("#3e3a32", () => { g.arc(x, y - r * .05, r * 1.1, Math.PI, 0); g.rect(x - r * 1.15, y - r * .12, r * 2.3, r * .25); }); flaeche("#7a6a48", () => { g.moveTo(x - r * 1, y - r * .5); g.lineTo(x - r * 1.6, y - r * 1.3); g.lineTo(x - r * .8, y - r * .8); g.moveTo(x + r * 1, y - r * .5); g.lineTo(x + r * 1.6, y - r * 1.3); g.lineTo(x + r * .8, y - r * .8); }); }
+        flaeche("#3a2a1a", () => { g.ellipse(x - r * 1, y + r * .65, r * .38, r * .65, .3, 0, TAU); g.ellipse(x + r * 1, y + r * .65, r * .38, r * .65, -.3, 0, TAU); }); break;
+      case "krone": flaeche("#b08a30", () => { g.moveTo(x - r * .8, y - r * .6); for (let k = 0; k <= 4; k++) g.lineTo(x - r * .8 + k * r * .4, y - r * (k % 2 ? .95 : 1.35)); g.lineTo(x + r * .8, y - r * .6); }); break;
+      case "elfe": case "feenkoenigin": flaeche(farbe, () => { g.moveTo(x - r * .85, y - r * .1); g.lineTo(x - r * 1.6, y - r * .95); g.lineTo(x - r * .7, y + r * .3); g.moveTo(x + r * .85, y - r * .1); g.lineTo(x + r * 1.6, y - r * .95); g.lineTo(x + r * .7, y + r * .3); });
+        if (typ === "feenkoenigin") flaeche("#5a8a3a", () => { for (let k = 0; k < 7; k++) { const a = Math.PI + k / 6 * Math.PI; g.moveTo(x + Math.cos(a) * r, y + Math.sin(a) * r); g.ellipse(x + Math.cos(a) * r * 1.05, y + Math.sin(a) * r * 1.05 - r * .3, r * .22, r * .5, a + Math.PI / 2, 0, TAU); } });
+        else break;
+        break;
+      case "blumen": for (let k = 0; k < 6; k++) { const a = Math.PI * 1.05 + k / 5 * Math.PI * .9; g.fillStyle = ["#e080a0", "#f0d070", "#f0f0e0"][k % 3]; g.beginPath(); g.arc(x + Math.cos(a) * r * .95, y + Math.sin(a) * r * .95, r * .2, 0, TAU); g.fill(); } break;
+      case "halo": g.strokeStyle = "rgba(255,215,130," + (.65 + .25 * Math.sin(zeit * 2 + p.f)) + ")"; g.lineWidth = Math.max(1, r * .18); g.beginPath(); g.ellipse(x, y - r * 1.35, r * .8, r * .24, 0, 0, TAU); g.stroke(); break;
+      case "hoerner": flaeche("#5a4436", () => { g.moveTo(x - r * .6, y - r * .7); g.quadraticCurveTo(x - r * 1.3, y - r * 1.1, x - r * 1.1, y - r * 1.7); g.quadraticCurveTo(x - r * .9, y - r * 1.1, x - r * .3, y - r * .9); g.moveTo(x + r * .6, y - r * .7); g.quadraticCurveTo(x + r * 1.3, y - r * 1.1, x + r * 1.1, y - r * 1.7); g.quadraticCurveTo(x + r * .9, y - r * 1.1, x + r * .3, y - r * .9); }); break;
+      case "kapuze": flaeche(farbe, () => { g.moveTo(x - r * 1.15, y + r * .4); g.quadraticCurveTo(x - r * 1.2, y - r * 1.2, x, y - r * 1.6); g.quadraticCurveTo(x + r * 1.2, y - r * 1.2, x + r * 1.15, y + r * .4); }); break;
+      case "gartokkar": flaeche("#3e1410", () => { g.moveTo(x - r * .8, y - r * .5); g.lineTo(x - r * .5, y - r * 2.4); g.lineTo(x, y - r * 2.9); g.lineTo(x + r * .5, y - r * 2.4); g.lineTo(x + r * .8, y - r * .5); }); flaeche("#c9a040", () => g.rect(x - r * .1, y - r * 2.6, r * .2, r * 2)); break;
+      case "bugbear": flaeche("#2a1e16", () => { g.moveTo(x - r * .7, y - r * .5); g.lineTo(x - r * 1.5, y - r * 1.5); g.lineTo(x - r * .3, y - r * .9); g.moveTo(x + r * .7, y - r * .5); g.lineTo(x + r * 1.5, y - r * 1.5); g.lineTo(x + r * .3, y - r * .9); for (let k = 0; k < 7; k++) { const a = Math.PI + k / 6 * Math.PI; g.moveTo(x, y); g.arc(x + Math.cos(a) * r * .9, y + Math.sin(a) * r * .9, r * .28, 0, TAU); } }); break;
+      case "glatze": g.fillStyle = "rgba(255,230,190,.1)"; g.beginPath(); g.arc(x - r * .3, y - r * .45, r * .3, 0, TAU); g.fill(); break;
+    }
+  }
+  function dingMalen(g, art, x, y, r, rot, zeit) {
+    g.save(); g.translate(x, y); g.rotate(rot);
+    switch (art) {
+      case "tomate": g.fillStyle = "#c8321e"; g.beginPath(); g.arc(0, 0, r, 0, TAU); g.fill(); g.fillStyle = "rgba(255,200,170,.45)"; g.beginPath(); g.arc(-r * .35, -r * .35, r * .3, 0, TAU); g.fill();
+        g.fillStyle = "#3a7a2a"; for (let k = 0; k < 5; k++) { g.beginPath(); g.ellipse(Math.cos(k * 1.26) * r * .3, -r * .9 + Math.sin(k * 1.26) * r * .2, r * .32, r * .12, k * 1.26, 0, TAU); g.fill(); } break;
+      case "kohl": g.fillStyle = "#6a9a3a"; g.beginPath(); g.arc(0, 0, r * 1.1, 0, TAU); g.fill(); g.strokeStyle = "#3a6a1a"; g.lineWidth = r * .15; g.beginPath(); g.arc(-r * .4, 0, r * .8, -1, 1); g.arc(r * .4, 0, r * .8, 2.1, 4.2); g.stroke(); break;
+      case "hering": g.fillStyle = "#a0a890"; g.beginPath(); g.ellipse(0, 0, r * 1.7, r * .55, 0, 0, TAU); g.fill(); g.beginPath(); g.moveTo(r * 1.5, 0); g.lineTo(r * 2.3, -r * .6); g.lineTo(r * 2.3, r * .6); g.fill(); g.fillStyle = "#1a1a14"; g.beginPath(); g.arc(-r * 1.1, -r * .1, r * .13, 0, TAU); g.fill(); g.fillStyle = "rgba(255,255,240,.3)"; g.fillRect(-r, -r * .3, r * 2, r * .12); break;
+      case "stein": g.fillStyle = "#6a625a"; g.beginPath(); g.moveTo(-r, -r * .3); g.lineTo(-r * .3, -r * .9); g.lineTo(r * .8, -r * .6); g.lineTo(r, r * .4); g.lineTo(0, r * .9); g.lineTo(-r * .8, r * .6); g.fill(); break;
+      case "eichel": g.fillStyle = "#8a5a2a"; g.beginPath(); g.ellipse(0, r * .2, r * .6, r * .85, 0, 0, TAU); g.fill(); g.fillStyle = "#4a3018"; g.beginPath(); g.ellipse(0, -r * .4, r * .75, r * .4, 0, Math.PI, 0); g.fill(); g.fillRect(-r * .08, -r * 1.05, r * .16, r * .3); break;
+      case "pilz": g.fillStyle = "#e8dcc8"; g.fillRect(-r * .3, -r * .1, r * .6, r); g.fillStyle = "#b8302a"; g.beginPath(); g.ellipse(0, -r * .1, r, r * .7, 0, Math.PI, 0); g.fill(); g.fillStyle = "#fff"; [[-.4, -.4], [.3, -.5], [0, -.25]].forEach(([a, b]) => { g.beginPath(); g.arc(a * r, b * r, r * .13, 0, TAU); g.fill(); }); break;
+      case "broetchen": g.fillStyle = "#c08a48"; g.beginPath(); g.ellipse(0, 0, r * 1.2, r * .8, 0, 0, TAU); g.fill(); g.strokeStyle = "#7a5020"; g.lineWidth = r * .15; g.beginPath(); g.moveTo(-r * .6, 0); g.lineTo(r * .6, 0); g.stroke(); break;
+      case "rose": g.strokeStyle = "#3a6a2a"; g.lineWidth = r * .2; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, r * 2); g.stroke(); g.fillStyle = "#b01e2e"; g.beginPath(); g.arc(0, 0, r * .75, 0, TAU); g.fill(); g.fillStyle = "#d8404a"; g.beginPath(); g.arc(r * .1, -r * .15, r * .4, 0, TAU); g.fill(); break;
+      case "blume": for (let k = 0; k < 5; k++) { g.fillStyle = "#f0a0c0"; g.beginPath(); g.ellipse(Math.cos(k * 1.26) * r * .55, Math.sin(k * 1.26) * r * .55, r * .45, r * .3, k * 1.26, 0, TAU); g.fill(); } g.fillStyle = "#f0d060"; g.beginPath(); g.arc(0, 0, r * .3, 0, TAU); g.fill(); break;
+      case "muenze": g.scale(Math.max(.18, Math.abs(Math.cos(rot * 2))), 1); g.fillStyle = "#e0b040"; g.beginPath(); g.arc(0, 0, r * .85, 0, TAU); g.fill(); g.strokeStyle = "#8a6414"; g.lineWidth = r * .14; g.stroke(); g.fillStyle = "rgba(255,250,220,.7)"; g.fillRect(-r * .3, -r * .4, r * .2, r * .5); break;
+      case "stern": g.globalCompositeOperation = "lighter"; leuchten(g, "#ffd890", 0, 0, r * 2.4, .7); g.globalCompositeOperation = "source-over"; g.fillStyle = "#fff0c0"; g.beginPath(); for (let k = 0; k < 10; k++) { const a = k / 10 * TAU - Math.PI / 2, rr = k % 2 ? r * .4 : r; g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } g.fill(); break;
+    }
+    g.restore();
+  }
+  function fleckMalen(g, art, x, y, r, rot) {
+    if (art !== "tomate") { g.save(); g.translate(x, y); g.scale(1, .55); dingMalen(g, art, 0, 0, r * 1.05, rot, 0); g.restore(); return; }
+    g.fillStyle = "#a8281a"; g.beginPath(); g.ellipse(x, y, r * 1.6, r * .55, 0, 0, TAU); g.fill();
+    for (let k = 0; k < 6; k++) { const a = rot + k * 1.05, d = r * (1.3 + (k % 3) * .35); g.beginPath(); g.ellipse(x + Math.cos(a) * d, y + Math.sin(a) * d * .35, r * .35, r * .16, a, 0, TAU); g.fill(); }
+    g.fillStyle = "#3a7a2a"; g.beginPath(); g.ellipse(x + r * .3, y - r * .1, r * .35, r * .14, .4, 0, TAU); g.fill();
+  }
+  /* Stage-Animation auch außerhalb des Lieds (Vorhang, Würfe, Kerzen) – sanft gedrosselt, nur wenn sichtbar */
+  let ruheLaeuft = false, ruheSicht = true, ruheLetzt = 0;
+  function ruheSchleife(ts) {
+    if (spiel || kalib || !szene || reduziert() || !ruheSicht || document.hidden || !root.getClientRects().length) { ruheLaeuft = false; return; }
+    const s = szene, lebhaft = s.wuerfe.length || s.flammenT.length || s.rauch.length || Math.abs(s.vorhang - s.vorhangZiel) > .003 || s.meldung || (s.ende && s.zeit - s.ende.t < 3);
+    if (lebhaft || ts - ruheLetzt > 40) { ruheLetzt = ts; malenRuhe(); }
+    requestAnimationFrame(ruheSchleife);
+  }
+  function ruheStarten() { if (ruheLaeuft || reduziert() || spiel || kalib) return; ruheLaeuft = true; requestAnimationFrame(ruheSchleife); }
+  if (window.IntersectionObserver) new IntersectionObserver(es => { ruheSicht = es.some(e => e.isIntersecting); if (ruheSicht) ruheStarten(); }).observe(root);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) ruheStarten(); });
+
   /* ---------- Oberfläche ---------- */
   function zeichnen() {
     const T = t();
     const imWeg = modus === "weg";
+    const laeuft = !!(spiel || kalib);
+    if (ergebnis && ergebnis.frisch) setTimeout(() => { if (ergebnis) ergebnis.frisch = false; }, 0);
+    root.classList.toggle("at-fokus", !!(spiel || stimmt || kalib));
     root.innerHTML =
       '<p class="label">' + T.label + "</p><h3>" + T.titel + "</h3>" +
       '<div class="at-modus" role="tablist">' + ["lieder", "weg"].map(m => '<button type="button" role="tab" data-modus="' + m + '" aria-selected="' + (m === modus) + '">' + T.modi[m] + "</button>").join("") + "</div>" +
       '<p class="tav-info">' + (imWeg ? T.weg.text : T.text) + "</p>" +
       (imWeg ? wegHtml(T) : liederHtml(T)) +
       '<div class="at-buehne"><canvas class="at-canvas" width="560" height="380" aria-label="' + esc(T.titel) + '"></canvas>' +
-        '<div class="at-ergebnis" ' + (ergebnis ? "" : "hidden") + ">" + (ergebnis ? ergebnisHtml(T) : "") + "</div>" +
+        (laeuft ? '<div class="at-leiste">' + knoepfeHtml(T) + "</div>" : "") +
+        (!laeuft && !ergebnis ? '<div class="at-vorhang">' + vorhangHtml(T) + "</div>" : "") +
+        '<div class="at-ergebnis' + (ergebnis && ergebnis.frisch && !reduziert() ? " spaet" : "") + '" ' + (ergebnis ? "" : "hidden") + ">" +
+          (ergebnis ? '<div class="at-erg-inhalt">' + ergebnisHtml(T) + '</div><div class="at-aktion">' + knoepfeHtml(T) + "</div>" : "") + "</div>" +
         '<div class="at-pause" role="button" tabindex="0" hidden></div></div>' +
       '<p class="at-steuer">' + (kalib ? T.kalib.hinweis : T.steuerung + "<br>" + T.tipp) + "</p>" +
-      '<div class="at-fuss">' + knoepfeHtml(T) + "</div>" +
+      '<div class="at-fuss">' + (duell || laeuft ? "" : duellKnopfHtml()) + "</div>" +
       '<div class="at-ton"><button type="button" class="at-stumm"></button><label><span>' + T.ton + '</span><input type="range" class="at-laut" min="0" max="100" step="5"></label></div>' +
       (spiel || stimmt ? "" : kalibHtml(T)) +
       (imWeg ? (spiel || stimmt || kalib ? "" : '<div class="at-weg-fuss"><button type="button" class="at-zurueck">' + T.weg.zuruecksetzen + "</button></div>") :
         (ergebnis && !spiel && !ergebnis.duell ? '<div class="at-eintrag-box">' + eintragHtml(T) + "</div>" : "") + '<div class="at-liste">' + listeHtml(T) + "</div>");
     tonNeu(); pauseZeigen();
     if (duell) duellZeichnen(); /* Online-Duell: Leiste, Gegner, gesperrte Wahl */
+    hoeheAnpassen();
     if (kalib) return;
-    malenRuhe();
+    malenRuhe(); ruheStarten();
     const pf = root.querySelector(".at-pfad"), akt = pf && pf.querySelector('[aria-pressed="true"]');
     if (akt) pf.scrollLeft = Math.max(0, akt.parentNode.offsetLeft - (pf.clientWidth - akt.parentNode.offsetWidth) / 2);
   }
+  /* Vorhang vor dem Auftritt: worum es geht – und der Start-Knopf direkt auf der Bühne */
+  function vorhangHtml(T) {
+    let kopf, titel, text = "", klein = "";
+    if (modus === "weg" && !duell) {
+      const W = T.weg, st = WEG[wegStation], s = W.stationen[wegStation];
+      kopf = WEG_ZEICHEN[wegStation] + " " + W.station(wegStation + 1) + " · " + W.sg(st.sg);
+      titel = esc(s.ort); text = zit(s.intro);
+      klein = esc(W.publikum) + ": " + esc(s.publikum) + " · " + esc(W.lied) + ": <em>" + esc(T.lieder[st.lied]) + "</em>";
+    } else {
+      kopf = esc(T.stufen[stufe]); titel = "♪ " + esc(liedName(aktuellesLied(), T)); text = esc(T.vorhang);
+    }
+    return '<div class="at-v-karte"><p class="at-v-kopf">' + kopf + '</p><p class="at-v-titel">' + titel + "</p>" +
+      (text ? '<p class="at-v-text">' + text + "</p>" : "") + (klein ? '<p class="at-v-klein">' + klein + "</p>" : "") + "</div>" +
+      '<div class="at-aktion">' + knoepfeHtml(T) + "</div>";
+  }
+  /* Spielfläche so hoch, wie bis zum unteren Fensterrand Platz ist (im Vollbild: bis zum Rand der Karte) */
+  function hoeheAnpassen() {
+    const c = canvas(); if (!c || !c.getClientRects().length) return;
+    const voll = root.classList.contains("tav-voll");
+    let h;
+    if (voll) { const kr = root.getBoundingClientRect(); h = root.clientHeight - (c.getBoundingClientRect().top - kr.top + root.scrollTop) - (root.classList.contains("at-fokus") ? 6 : 10); }
+    else {
+      let unten = window.innerHeight; const nav = document.querySelector(".handyleiste");
+      if (nav) { const cs = getComputedStyle(nav), nr = nav.getBoundingClientRect(); if (cs.display !== "none" && cs.visibility !== "hidden" && cs.position === "fixed" && nr.height > 0 && nr.top < unten) unten = nr.top; }
+      h = unten - (c.getBoundingClientRect().top + window.pageYOffset) - 12;
+    }
+    h = Math.round(Math.max(voll ? 200 : 250, Math.min(voll ? 4000 : 720, h)));
+    if (root.style.getPropertyValue("--at-h") !== h + "px") root.style.setProperty("--at-h", h + "px");
+  }
   function liederHtml(T) {
-    return '<div class="at-stufen"><span>' + T.publikum + ":</span>" +
-        Object.keys(STUFEN).map(k => '<button type="button" data-stufe="' + k + '" aria-pressed="' + (k === stufe) + '">' + T.stufen[k] + "</button>").join("") + "</div>" +
+    return '<div class="at-stufen at-wahl" role="group" aria-label="' + esc(T.publikum) + '"><span class="at-wahl-titel">' + T.publikum + ":</span>" +
+        Object.keys(STUFEN).map(k => '<button type="button" data-stufe="' + k + '" aria-pressed="' + (k === stufe) + '" title="' + esc(T.stufen[k]) + '"><span class="lang">' + T.stufen[k] + '</span><span class="kurz">' + T.stufenKurz[k] + "</span></button>").join("") + "</div>" +
       '<div class="at-stufen at-lieder"><label for="at-liedwahl">' + T.lied + ":</label>" +
         '<select id="at-liedwahl" class="at-liedwahl">' + Object.keys(LIEDER).filter(k => !LIEDER[k].nurWeg).map(k => '<option value="' + k + '"' + (k === liedWahl ? " selected" : "") + ">" + esc(T.lieder[k]) + "</option>").join("") +
           '<option value="neu"' + (liedWahl === "neu" ? " selected" : "") + ">" + esc(T.neuesLied) + "</option></select>" +
@@ -768,7 +1863,6 @@
       }).join("") + "</ol>" +
       (geschafft() === WEG.length ? '<p class="at-weg-ende">✨ ' + W.ende + "</p>" : "") +
       '<div class="at-station"><p class="at-ort"><span aria-hidden="true">' + WEG_ZEICHEN[wegStation] + "</span> " + W.station(wegStation + 1) + " · " + esc(s.ort) + "</p>" +
-        '<p class="at-intro">' + zit(s.intro) + "</p>" +
         '<p class="at-eckdaten"><span>' + W.publikum + ": " + esc(s.publikum) + "</span><span>" + W.lied + ": <em>" + esc(T.lieder[st.lied]) + "</em></span><span class=\"sg\">" + W.sg(st.sg) + "</span></p></div>";
   }
   function tonNeu(nurKnopf) {
@@ -787,11 +1881,11 @@
     if (duell && !kalib) return duellKnoepfe(T);
     if (kalib) return '<button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
     if (stimmt) return '<button type="button" class="tav-knopf at-start">' + T.stimmen_laden + "</button>";
-    if (spiel) return '<button type="button" class="tav-knopf at-pause-knopf">' + T.pauseKnopf + '</button><button type="button" class="tav-knopf at-start">' + T.abbrechen + "</button>";
-    if (modus !== "weg") return '<button type="button" class="tav-knopf at-start">' + (ergebnis ? T.nochmal : T.start) + "</button>" + duellKnopfHtml();
+    if (spiel) return '<button type="button" class="tav-knopf at-pause-knopf" aria-label="' + esc(T.pauseKnopf.replace(/^\W+/, "")) + '">' + T.pauseKnopf + '</button><button type="button" class="tav-knopf at-start">✕ ' + T.abbrechen + "</button>";
+    if (modus !== "weg") return '<button type="button" class="tav-knopf at-start haupt">' + (ergebnis ? T.nochmal : T.start) + "</button>";
     const W = T.weg, weiter = ergebnis && ergebnis.bestanden && wegStation < WEG.length - 1;
-    return (weiter ? '<button type="button" class="tav-knopf at-weiter">' + W.weiter + "</button>" : "") +
-      '<button type="button" class="tav-knopf at-start">' + (!ergebnis ? W.start : ergebnis.bestanden ? W.wiederholen : W.nochmal) + "</button>" + duellKnopfHtml();
+    return (weiter ? '<button type="button" class="tav-knopf at-weiter haupt">' + W.weiter + "</button>" : "") +
+      '<button type="button" class="tav-knopf at-start' + (weiter ? "" : " haupt") + '">' + (!ergebnis ? W.start : ergebnis.bestanden ? W.wiederholen : W.nochmal) + "</button>";
   }
   function ergebnisHtml(T) {
     const e = ergebnis;
@@ -815,44 +1909,55 @@
   }
   const canvas = () => root.querySelector(".at-canvas");
   function maße(c) {
-    const r = c.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    /* höchstens ~0,8 Mio. Bildpunkte – die Bühne ist auch im Vollbild auf dem Handy flüssig */
+    const r = c.getBoundingClientRect(), dpr = Math.max(Math.min(1, window.devicePixelRatio || 1), Math.min(2, window.devicePixelRatio || 1, Math.sqrt(8e5 / Math.max(1, r.width * r.height))));
     const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
     return { w, h, dpr };
   }
+  /* Taktposition in Schlägen – danach wippen Band und Publikum */
+  function taktJetzt() {
+    if (spiel && ctx) { const d = spiel.daten; return (hoerZeit() - spiel.start - d.vor) / (4 * d.schritt); }
+    return performance.now() / 1000 * 1.15;
+  }
+  /* Bühne und Notenbahn: Kulisse dahinter, Spuren halb durchsichtig darüber, dann die goldene Linie */
   function grund(g, w, h, dpr, blitz) {
     g.clearRect(0, 0, w, h);
-    const bahn = w / 3;
+    const bahn = w / 3, y = h * .82, aktiv = !!(spiel || kalib), schlag = taktJetzt();
+    szeneNeu(false);
+    buehneHinten(g, w, h, dpr, schlag);
+    if (!aktiv) bahnenMalen(g, w, h, dpr, .45);
+    for (let i = 0; i < 3; i++) if (blitz && blitz[i] > 0) { g.fillStyle = "rgba(255,210,122," + (0.25 * blitz[i]) + ")"; g.fillRect(i * bahn + 2 * dpr, 0, bahn - 4 * dpr, y); }
+    g.strokeStyle = szene && szene.feuer ? "#ff9a40" : "#e0a046"; g.lineWidth = 3 * dpr; g.shadowColor = g.strokeStyle; g.shadowBlur = 12 * dpr;
+    g.globalAlpha = aktiv ? 1 : .7; g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); g.shadowBlur = 0;
     for (let i = 0; i < 3; i++) {
-      const x = i * bahn;
-      const grad = g.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, "rgba(235,226,204,0.02)"); grad.addColorStop(1, "rgba(235,226,204,0.07)");
-      g.fillStyle = grad; g.fillRect(x + 2 * dpr, 0, bahn - 4 * dpr, h);
-      if (blitz && blitz[i] > 0) { g.fillStyle = "rgba(255,210,122," + (0.25 * blitz[i]) + ")"; g.fillRect(x + 2 * dpr, 0, bahn - 4 * dpr, h); }
-      g.fillStyle = "rgba(235,226,204,0.5)"; g.font = (12 * dpr) + "px Georgia, serif"; g.textAlign = "center";
-      g.fillText(t().spuren[i], x + bahn / 2, h - 10 * dpr);
-    }
-    const y = h * .82;
-    g.strokeStyle = "#e0a046"; g.lineWidth = 3 * dpr; g.shadowColor = "#e0a046"; g.shadowBlur = 12 * dpr;
-    g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); g.shadowBlur = 0;
-    for (let i = 0; i < 3; i++) {
-      g.strokeStyle = "rgba(224,160,70,.6)"; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 18 * dpr, 0, Math.PI * 2); g.stroke();
-      g.fillStyle = "rgba(235,226,204,.55)"; g.font = "bold " + (13 * dpr) + "px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillStyle = "rgba(16,12,20,.45)"; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 18 * dpr, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = "rgba(224,160,70,.7)"; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 18 * dpr, 0, Math.PI * 2); g.stroke();
+      g.fillStyle = "rgba(235,226,204,.75)"; g.font = "bold " + (13 * dpr) + "px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
       g.fillText(TASTEN_ANZEIGE[i], i * bahn + bahn / 2, y + 1); g.textBaseline = "alphabetic";
     }
+    g.globalAlpha = 1;
     return y;
+  }
+  function bahnenMalen(g, w, h, dpr, k) {
+    const bahn = w / 3, y = h * .82;
+    for (let i = 0; i < 3; i++) {
+      const x = i * bahn, grad = g.createLinearGradient(0, 0, 0, y);
+      grad.addColorStop(0, "rgba(10,8,14," + (.06 * k) + ")"); grad.addColorStop(1, "rgba(10,8,14," + (.4 * k) + ")");
+      g.fillStyle = grad; g.fillRect(x + 2 * dpr, 0, bahn - 4 * dpr, y);
+      g.fillStyle = "rgba(235,226,204," + (.1 * k) + ")"; if (i) g.fillRect(x - .5 * dpr, 0, 1 * dpr, y);
+    }
+  }
+  /* Spurnamen unten über dem Publikum – mit dunklem Rand, damit sie lesbar bleiben */
+  function spurNamen(g, w, h, dpr) {
+    const bahn = w / 3; g.font = (12 * dpr) + "px Georgia, serif"; g.textAlign = "center"; g.lineWidth = 3 * dpr; g.strokeStyle = "rgba(10,8,14,.85)"; g.fillStyle = "rgba(235,226,204,.8)";
+    for (let i = 0; i < 3; i++) { g.strokeText(t().spuren[i], i * bahn + bahn / 2, h - 8 * dpr); g.fillText(t().spuren[i], i * bahn + bahn / 2, h - 8 * dpr); }
   }
   function malenRuhe() {
     const c = canvas(); if (!c) return;
     const { w, h, dpr } = maße(c), g = c.getContext("2d");
-    const y = grund(g, w, h, dpr);
-    if (!spiel && !ergebnis) {
-      g.fillStyle = "rgba(235,226,204,.75)"; g.font = "italic " + (18 * dpr) + "px Georgia, serif"; g.textAlign = "center";
-      const T = t(), imWeg = modus === "weg";
-      g.fillText(imWeg ? WEG_ZEICHEN[wegStation] + "  " + T.weg.station(wegStation + 1) + " · " + T.weg.sg(WEG[wegStation].sg) : "🎻  " + T.stufen[stufe], w / 2, y / 2 - 12 * dpr);
-      g.fillStyle = "rgba(224,160,70,.85)"; g.font = (15 * dpr) + "px Georgia, serif";
-      g.fillText("♪ " + liedName(imWeg ? wegLied() : aktuellesLied(), T), w / 2, y / 2 + 16 * dpr);
-    }
+    grund(g, w, h, dpr);
+    buehneVorn(g, w, h, dpr, taktJetzt());
   }
   function malen() {
     if (!spiel) return;
@@ -862,6 +1967,7 @@
     const y = grund(g, w, h, dpr, spiel.blitz), bahn = w / 3, flug = spiel.st.flug;
     /* Taktlinien wandern mit – so sieht man den Rhythmus kommen */
     const d0 = spiel.daten, schlagDauer = 4 * d0.schritt;
+    if (!spiel.pause) szeneFortschritt(klemme(jetzt / Math.max(1, d0.ende - 1.5), 0, 1), spiel.serie);
     for (let k = Math.floor((jetzt - d0.vor) / schlagDauer); ; k++) {
       const zt = d0.vor + k * schlagDauer, dt = zt - jetzt;
       if (dt > flug) break; if (dt < -.1 || zt > d0.ende) continue;
@@ -901,17 +2007,22 @@
       g.shadowBlur = 0; g.fillStyle = "#16121a"; g.font = (15 * dpr) + "px serif"; g.textAlign = "center"; g.textBaseline = "middle";
       g.fillText(ZEICHEN[n.spur], x, ny + 1); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
       /* nicht getroffen → als daneben werten */
-      if (!n.status && !spiel.pause && n.zeit - gewertet < -FENSTER.knapp) { n.status = "daneben"; spiel.serie = 0; zeigeUrteil("daneben", n.spur); }
+      if (!n.status && !spiel.pause && n.zeit - gewertet < -FENSTER.knapp) { n.status = "daneben"; spiel.serie = 0; zeigeUrteil("daneben", n.spur); szenePatzer(n.spur); }
     });
+    buehneVorn(g, w, h, dpr, (jetzt - d0.vor) / schlagDauer);
+    spurNamen(g, w, h, dpr);
+    g.shadowColor = "rgba(0,0,0,.9)"; g.shadowBlur = 4 * dpr;
     g.fillStyle = "#ebe2cc"; g.textAlign = "left"; g.font = (14 * dpr) + "px Georgia, serif";
-    g.fillText(Math.round(spiel.punkte) + " " + t().punkte, 10 * dpr, 22 * dpr);
-    if (spiel.serie >= 5) { g.textAlign = "right"; g.fillStyle = "#e0a046"; g.fillText(t().serie(spiel.serie), w - 10 * dpr, 22 * dpr); }
+    const links = 10 * dpr + (szene ? w * (.035 + .4 * szene.vorhang) : 0);
+    g.fillText(Math.round(spiel.punkte) + " " + t().punkte, links, 22 * dpr);
+    if (spiel.serie >= 5) { g.fillStyle = szene && szene.feuer ? "#ffb060" : "#e0a046"; g.fillText((szene && szene.feuer ? "🔥 " : "") + t().serie(spiel.serie), links, 41 * dpr); }
     if (spiel.urteil && jetzt - spiel.urteil.zeit < .6) {
       const a = 1 - (jetzt - spiel.urteil.zeit) / .6;
       g.globalAlpha = a; g.textAlign = "center"; g.font = "bold " + (22 * dpr) + "px Georgia, serif";
-      g.fillStyle = spiel.urteil.art === "daneben" ? "#c4564a" : spiel.urteil.art === "perfekt" ? "#ffd27a" : "#ebe2cc";
+      g.fillStyle = spiel.urteil.art === "daneben" ? "#e0675a" : spiel.urteil.art === "perfekt" ? "#ffd27a" : "#ebe2cc";
       g.fillText(t().urteil[spiel.urteil.art], spiel.urteil.spur * bahn + bahn / 2, y - 40 * dpr - (1 - a) * 20 * dpr); g.globalAlpha = 1;
     }
+    g.shadowBlur = 0;
     if (spiel.duell) {
       duellMalen(g, w, h, dpr, jetzt); try { gegnerMalen(jetzt); } catch (_) {}
       /* auf der eigenen Bühne: kurzer Hinweis, wenn der Gegner patzt */
@@ -949,6 +2060,7 @@
     const ort = imWeg ? wegStation : null;
     const token = stimmt = {};
     kalibMeldung = "";
+    szeneAuftritt();
     zeichnen();
     buehneZeigen();
     probenFuer(daten).then(() => {
@@ -1010,6 +2122,7 @@
   /* Bühne beim Start ganz ins Bild holen (auf dem Handy liegt sie sonst halb unter der Leiste) */
   function buehneZeigen() {
     const b = root.querySelector(".at-buehne"); if (!b) return;
+    if (root.classList.contains("tav-voll")) { if (root.classList.contains("at-fokus")) root.scrollTop = 0; else b.scrollIntoView({ block: "nearest" }); return; }
     const r = b.getBoundingClientRect(); let unten = window.innerHeight;
     const nav = document.querySelector(".handyleiste");
     if (nav) { const nr = nav.getBoundingClientRect(); if (nr.height > 0 && nr.top < unten && getComputedStyle(nav).visibility !== "hidden") unten = nr.top; }
@@ -1044,11 +2157,15 @@
     const k = kalib; if (!k) return;
     const c = canvas(); if (!c) return;
     const { w, h, dpr } = maße(c), g = c.getContext("2d"), T = t();
+    if (szene) szene.vorhangZiel = .1;
     const y = grund(g, w, h, dpr), jetzt = k.bereit ? hoerZeit() - k.start : -1;
+    buehneVorn(g, w, h, dpr, taktJetzt());
     const i = Math.floor(jetzt / KALIB_TAKT), seit = jetzt - i * KALIB_TAKT;
     const gezaehlt = new Set(k.tipps.map(x => Math.round(x / KALIB_TAKT)).filter(n => n >= KALIB_VOR && n < KALIB_VOR + KALIB_MIT)).size;
-    g.textAlign = "center"; g.fillStyle = "rgba(235,226,204,.85)"; g.font = "italic " + (16 * dpr) + "px Georgia, serif";
-    g.fillText(i < KALIB_VOR ? T.kalib.vorzaehlen : T.kalib.mit(gezaehlt, KALIB_MIT), w / 2, y * .3);
+    g.textAlign = "center"; g.font = "italic " + (16 * dpr) + "px Georgia, serif";
+    const ktx = i < KALIB_VOR ? T.kalib.vorzaehlen : T.kalib.mit(gezaehlt, KALIB_MIT), kb = g.measureText(ktx).width + 24 * dpr;
+    g.fillStyle = "rgba(16,12,20,.78)"; g.fillRect(w / 2 - kb / 2, y * .3 - 22 * dpr, kb, 32 * dpr);
+    g.fillStyle = "rgba(235,226,204,.92)"; g.fillText(ktx, w / 2, y * .3);
     const an = jetzt >= 0 && i < KALIB_VOR + KALIB_MIT ? Math.max(0, 1 - seit / .25) : 0;
     g.fillStyle = i < KALIB_VOR ? "rgba(235,226,204," + (.15 + .5 * an) + ")" : "rgba(224,160,70," + (.2 + .7 * an) + ")";
     g.beginPath(); g.arc(w / 2, y * .62, (22 + 10 * an) * dpr, 0, Math.PI * 2); g.fill();
@@ -1075,7 +2192,7 @@
   }
   function abbrechen() {
     if (kalib) { kalibEnde(true); return; }
-    if (stimmt) { stimmt = null; zeichnen(); return; }
+    if (stimmt) { stimmt = null; if (szene) szene.vorhangZiel = .34; zeichnen(); return; }
     if (!spiel) return;
     if (spiel.duell) duellAufgabe();
     clearTimeout(spiel.pauseUhr);
@@ -1083,7 +2200,9 @@
     (spiel.knoten || []).forEach(n => { try { n.stop(); } catch (_) {} });
     spiel.halt = {};
     if (bus) { const b = bus; b.gain.setTargetAtTime(0, ctx.currentTime, .04); setTimeout(() => { try { b.disconnect(); } catch (_) {} }, 300); bus = null; }
-    spiel = null; zeichnen();
+    spiel = null;
+    if (szene) { szene.vorhangZiel = .34; szene.feuer = 0; }
+    zeichnen();
   }
   /* ms: Zeitstempel des Eingabe-Ereignisses – so zählt der Moment des Tippens, nicht wann der Browser dazu kam */
   function tippen(spur, ms) {
@@ -1093,9 +2212,9 @@
     spiel.blitz[spur] = 1;
     let best = null;
     spiel.daten.liste.forEach(n => { if (n.spur === spur && !n.status && Math.abs(n.zeit - jetzt) <= FENSTER.knapp && (!best || Math.abs(n.zeit - jetzt) < Math.abs(best.zeit - jetzt))) best = n; });
-    if (!best) { daneben(ctx.currentTime); spiel.serie = 0; spiel.streu++; zeigeUrteil("daneben", spur); spiel.punkte = Math.max(0, spiel.punkte - FEHLGRIFF); zugMerken(-1, 9, spur); return; }
+    if (!best) { daneben(ctx.currentTime); spiel.serie = 0; spiel.streu++; zeigeUrteil("daneben", spur); spiel.punkte = Math.max(0, spiel.punkte - FEHLGRIFF); zugMerken(-1, 9, spur); szenePatzer(spur); return; }
     const d = Math.abs(best.zeit - jetzt), art = d <= FENSTER.perfekt ? "perfekt" : d <= FENSTER.gut ? "gut" : "knapp";
-    best.status = art; spiel.serie++; spiel.besteSerie = Math.max(spiel.besteSerie, spiel.serie); zugMerken(best, ART_NR[art]);
+    best.status = art; spiel.serie++; spiel.besteSerie = Math.max(spiel.besteSerie, spiel.serie); zugMerken(best, ART_NR[art]); szeneTreffer(art, spiel.serie, spur);
     spiel.punkte += PUNKTE[art] * (1 + Math.min(spiel.serie, 20) * .025);
     /* zu früh getippt? Dann erklingt der Ton trotzdem genau im Takt */
     if (best.dauer) {
@@ -1133,7 +2252,8 @@
     const stufeText = w20 === 20 ? "krit" : w20 === 1 ? "patzer" : ges <= 11 ? "schwach" : ges <= 16 ? "maessig" : ges <= 21 ? "gut" : ges <= 25 ? "stark" : "legende";
     const rek = rekordLesen(), alt = rek[stufe] || 0, neu = ges > alt;
     if (neu) { rek[stufe] = ges; try { localStorage.setItem("imres-auftritt-rekord", JSON.stringify(rek)); } catch (_) {} }
-    ergebnis = { lied: spiel.daten.lied, w20, summe: ges, prozent, getroffen, gesamt: liste.length, serie: spiel.besteSerie, streu: spiel.streu, zitat: zufall(T.stimmen[stufeText]), neu: neu && alt > 0, rekord: Math.max(alt, ges) };
+    ergebnis = { lied: spiel.daten.lied, w20, summe: ges, prozent, getroffen, gesamt: liste.length, serie: spiel.besteSerie, streu: spiel.streu, zitat: zufall(T.stimmen[stufeText]), neu: neu && alt > 0, rekord: Math.max(alt, ges), frisch: true };
+    szeneSchluss(ges >= 17);
     spiel = null; bus = null;
     if (liedWahl === "neu") erfunden = null; /* nächster Auftritt: wieder ein neues Lied */
     publikum(ges >= 17);
@@ -1149,7 +2269,8 @@
     if (bestanden && i === weg.frei && weg.frei < WEG.length - 1) weg.frei++;
     wegSpeichern();
     ergebnis = { weg: true, station: i, sg, bestanden, sterne, w20: r.w20, summe: r.ges, prozent: r.prozent, getroffen: r.getroffen, gesamt: r.gesamt,
-      serie: spiel.besteSerie, streu: spiel.streu, neuerRang: bestanden && rangName(TX.de) !== vorher };
+      serie: spiel.besteSerie, streu: spiel.streu, neuerRang: bestanden && rangName(TX.de) !== vorher, frisch: true };
+    szeneSchluss(bestanden);
     spiel = null; bus = null;
     publikum(bestanden);
     zeichnen();
@@ -1209,7 +2330,8 @@
     if (md && !spiel && !stimmt) { if (md.dataset.modus !== modus) { modus = md.dataset.modus; ergebnis = null; try { localStorage.setItem("imres-auftritt-modus", modus); } catch (_) {} zeichnen(); if (modus === "lieder") bestenLaden(); } return; }
     const sw = e.target.closest("[data-station]");
     if (sw && !sw.disabled && !spiel && !stimmt) { stationWaehlen(+sw.dataset.station); return; }
-    if (e.target.closest(".at-weiter") && !spiel && !stimmt) { stationWaehlen(wegStation + 1); const b = root.querySelector(".at-station"); if (b && b.getBoundingClientRect().top < 70) b.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (e.target.closest(".at-weiter") && !spiel && !stimmt) { stationWaehlen(wegStation + 1); buehneZeigen(); return; }
+    const info = e.target.closest(".tav-info"); if (info && info.parentNode === root) { info.classList.toggle("offen"); return; }
     if (e.target.closest(".at-zurueck") && !spiel && !stimmt) { if (window.confirm(t().weg.sicher)) { weg = { frei: 0, sterne: [], neu: Date.now() }; wegSpeichern(true); stationWaehlen(0); } return; }
     if (e.target.closest(".at-eintragen")) { eintragen(); return; }
     if (e.target.closest(".at-pause")) { weiterspielen(); return; }
@@ -1217,7 +2339,7 @@
     if (e.target.closest(".at-stumm")) { stumm = !stumm; try { localStorage.setItem("imres-auftritt-stumm", stumm ? "1" : "0"); } catch (_) {} pegelSetzen(); tonNeu(); return; }
     if (e.target.closest(".at-kalib")) { kalib ? abbrechen() : kalibStarten(); return; }
     if (e.target.closest(".at-kalib-weg")) { kalibWert = 0; try { localStorage.removeItem("imres-auftritt-kalib"); } catch (_) {} kalibMeldung = ""; zeichnen(); return; }
-    if (e.target.closest(".at-start")) { spiel || stimmt || kalib ? abbrechen() : starten(); }
+    if (e.target.closest(".at-start")) { if (spiel || stimmt || kalib) abbrechen(); else { if (window.tavVollAuto) window.tavVollAuto("auftritt"); starten(); } }
   });
   root.addEventListener("input", e => {
     const r = e.target.closest(".at-laut"); if (!r) return;
@@ -1226,7 +2348,9 @@
     try { localStorage.setItem("imres-auftritt-laut", String(lautstaerke)); localStorage.setItem("imres-auftritt-stumm", stumm ? "1" : "0"); } catch (_) {}
     pegelSetzen(); tonNeu(true);
   });
-  window.addEventListener("resize", () => { if (!spiel) malenRuhe(); });
+  window.addEventListener("resize", () => { hoeheAnpassen(); if (!spiel && !kalib) malenRuhe(); });
+  ["fullscreenchange", "webkitfullscreenchange"].forEach(n => document.addEventListener(n, () => setTimeout(() => { hoeheAnpassen(); if (!spiel && !kalib) malenRuhe(); }, 60)));
+  if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(hoeheAnpassen)).observe(root);
   root.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".at-name")) { e.preventDefault(); eintragen(); } });
 
   /* ---------- Bestenliste: gemeinsam über Supabase, sonst auf diesem Gerät ---------- */
@@ -1330,10 +2454,13 @@
 .at-stufen button[aria-pressed="true"] { border-color: var(--ember); background: rgba(224,160,70,.18); color: var(--ember); }
 .at-buehne { position: relative; max-width: 35rem; width: 100%; margin: 0 auto; }
 .at-canvas { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(224,160,70,.14), transparent 70%), rgba(16,14,21,.7); border: 1px solid var(--line); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
-.at-ergebnis { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: .45rem; padding: 1rem; text-align: center; background: rgba(16,14,21,.88); border: 1px solid var(--ember); }
+.at-ergebnis { position: absolute; inset: 0; display: flex; flex-direction: column; gap: .5rem; padding: .8rem; text-align: center; background: rgba(16,14,21,.8); border: 1px solid var(--ember); overflow: hidden; }
 .at-ergebnis[hidden] { display: none; }
-.at-ergebnis { overflow-y: auto; }
-@media (max-width: 520px) { .at-ergebnis { gap: .3rem; padding: .7rem; } .at-ergebnis .at-zitat { font-size: .9rem; line-height: 1.35; } .at-w20 { width: 3.6rem; height: 3.6rem; font-size: 1.7rem; } }
+.at-erg-inhalt { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: grid; align-content: safe center; justify-items: center; gap: .45rem; }
+.at-ergebnis.spaet { animation: aterg .6s ease 1.6s both; }
+.at-ergebnis.spaet .at-w20 { animation-delay: 1.7s; animation-fill-mode: both; }
+@keyframes aterg { from { opacity: 0; transform: translateY(10px); } }
+@media (max-width: 520px), (max-height: 560px) { .at-ergebnis { gap: .35rem; padding: .55rem; } .at-erg-inhalt { gap: .3rem; } .at-ergebnis .at-zitat { font-size: .9rem; line-height: 1.35; } .at-w20 { width: 3.4rem; height: 3.4rem; font-size: 1.6rem; } }
 .at-w20 { width: 4.6rem; height: 4.6rem; display: grid; place-items: center; font-family: var(--display); font-size: 2.2rem; color: var(--night); background: var(--ember); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); animation: atroll .9s cubic-bezier(.3,1.4,.5,1); }
 .at-w20.krit { background: #ffd27a; box-shadow: 0 0 30px #ffd27a; }
 .at-w20.patzer { background: var(--blood); color: var(--vellum); }
@@ -1370,7 +2497,7 @@
 .at-pfad button:disabled { cursor: not-allowed; opacity: .4; }
 .at-pfad .sym { font-size: 1.2rem; line-height: 1.1; }
 .at-pfad .nr { font-size: .7rem; color: var(--ash); }
-.at-pfad .st { font-size: .62rem; letter-spacing: .02em; color: var(--ember); min-height: .8rem; }
+.at-pfad .st { font-size: .7rem; letter-spacing: .02em; color: var(--ember); min-height: .8rem; }
 .at-weg-ende { margin: 0; text-align: center; font-family: var(--hand); font-size: 1.3rem; color: var(--ember); }
 .at-station { border-left: 2px solid var(--ember); padding: .2rem 0 .2rem .9rem; display: grid; gap: .35rem; }
 .at-ort { margin: 0; font-family: var(--name); font-size: 1.2rem; color: var(--vellum); line-height: 1.2; }
@@ -1404,6 +2531,63 @@
 .at-fehler { text-align: center; color: #e08a7e; font-size: .88rem; margin: .4rem 0 0; }
 .at-eintrag input:disabled, .at-eintrag button:disabled { opacity: .6; }
 .auftritt button, .at-pause { touch-action: manipulation; }
+/* Bühne: Höhe aus hoeheAnpassen(), Vorhang mit Start-Knopf, Leiste während des Spiels */
+#taverne #auftritt .at-canvas { height: var(--at-h, clamp(300px, 52vw, 400px)); }
+.at-vorhang { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; padding: clamp(1.4rem, 7%, 2.6rem) clamp(.6rem, 9%, 3rem) 1rem; text-align: center; pointer-events: none; }
+.at-v-karte { pointer-events: auto; max-width: 30rem; min-height: 0; overflow: hidden; display: grid; gap: .3rem; padding: .75rem 1.1rem; background: linear-gradient(rgba(16,12,20,.86), rgba(16,12,20,.74)); border: 1px solid rgba(224,160,70,.5); box-shadow: 0 12px 34px rgba(0,0,0,.55); animation: atvor .5s ease both; }
+@keyframes atvor { from { opacity: 0; transform: translateY(-8px); } }
+.at-v-kopf { margin: 0; font-family: var(--display); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); }
+.at-v-titel { margin: 0; font-family: var(--name); font-size: 1.3rem; line-height: 1.15; color: var(--vellum); }
+.at-v-text { margin: 0; font-style: italic; color: var(--vellum); font-size: .93rem; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.at-v-klein { margin: 0; font-size: .8rem; color: var(--ash); }
+.at-aktion { pointer-events: auto; flex: none; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; }
+.at-aktion .tav-knopf { min-height: 42px; background: rgba(16,12,20,.82); }
+.at-aktion .tav-knopf:hover, .at-aktion .tav-knopf:focus-visible { background: var(--ember); color: var(--night); }
+.at-aktion .tav-knopf.haupt { background: var(--ember); color: var(--night); font-size: 1.05rem; padding: .6rem 1.5rem; min-height: 46px; box-shadow: 0 0 24px rgba(224,160,70,.45); }
+.at-aktion .tav-knopf.haupt:hover, .at-aktion .tav-knopf.haupt:focus-visible { background: #ffd27a; }
+.at-aktion .at-duell-text { flex-basis: 100%; text-shadow: 0 1px 4px #000; }
+.at-leiste { position: absolute; top: .4rem; right: .4rem; z-index: 2; display: flex; gap: .35rem; }
+.at-leiste .tav-knopf { min-height: 36px; min-width: 36px; padding: .25rem .7rem; font-size: .82rem; background: rgba(16,12,20,.75); }
+.tav-voll .at-leiste { right: 3.1rem; }
+.at-wahl .kurz { display: none; }
+/* Vollbild während des Auftritts: nur noch die Bühne */
+#taverne #auftritt.tav-voll.at-fokus { padding: .3rem; row-gap: .3rem; }
+#taverne #auftritt.tav-voll.at-fokus > :not(.at-buehne, .at-zwei, .at-duell-bar, .tav-voll-knopf) { display: none !important; }
+/* Kleine Bildschirme: Auswahl kompakt, Stationstext steht auf dem Vorhang */
+@media (max-width: 760px), (max-height: 560px) {
+  #taverne #auftritt { row-gap: .5rem; }
+  #auftritt .at-wahl .lang, #auftritt .at-wahl-titel, #auftritt .at-erfunden, #auftritt > .at-station { display: none; }
+  #auftritt .at-wahl .kurz { display: inline; }
+  #auftritt .at-wahl { flex-wrap: nowrap; }
+  #auftritt .at-wahl button { flex: 1 1 0; min-width: 0; min-height: 40px; padding: .3rem .35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #auftritt .at-lieder { flex-wrap: nowrap; }
+  #auftritt .at-liedwahl { flex: 1 1 auto; min-width: 0; min-height: 40px; }
+  #auftritt .at-lieder button { min-height: 40px; min-width: 40px; }
+  #auftritt:not(.tav-voll) > .tav-info { margin: 0; font-size: .88rem; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; cursor: pointer; }
+  #auftritt > .tav-info.offen { -webkit-line-clamp: unset; display: block; }
+  #auftritt .at-modus button { min-height: 38px; padding: .3rem .8rem; }
+  #auftritt .at-weg-kopf { font-size: .8rem; }
+  #auftritt .at-pfad { padding-bottom: .2rem; }
+  #auftritt .at-pfad button { padding: .2rem .15rem; }
+  #auftritt .at-pfad .sym { font-size: 1.05rem; }
+  .at-vorhang { gap: .5rem; padding: 1.6rem .6rem .6rem; }
+  .at-v-karte { padding: .55rem .8rem; gap: .2rem; }
+  .at-v-titel { font-size: 1.08rem; }
+  .at-v-text { font-size: .85rem; -webkit-line-clamp: 3; }
+  .at-v-klein { display: none; }
+  #taverne #auftritt.tav-voll.at-fokus .at-buehne { max-width: none; }
+}
+/* niedrige, breite Fenster (Handy quer, Handheld, Laptop): Auswahl links, Bühne rechts */
+@media (max-height: 560px) and (min-width: 600px), (max-height: 820px) and (min-width: 1000px) {
+  #taverne #auftritt:not(.tav-voll.at-fokus) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); column-gap: 1rem; row-gap: 0; align-items: start; align-content: start; }
+  #taverne #auftritt:not(.tav-voll.at-fokus) > * { grid-column: 1; margin-top: 0; margin-bottom: .5rem; }
+  #taverne #auftritt:not(.tav-voll.at-fokus) > :is(.at-buehne, .at-zwei) { grid-column: 2; grid-row: 1 / span 18; max-width: none; margin-bottom: 0; }
+  #auftritt .at-leiste { right: 3rem; }
+}
+@media (max-height: 820px) and (min-width: 1000px) {
+  #taverne #auftritt:not(.tav-voll.at-fokus) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); column-gap: 1.6rem; }
+  #auftritt > .at-station .at-ort { font-size: 1.05rem; }
+}
 `;
   document.head.appendChild(css);
 
@@ -1606,6 +2790,7 @@
     SK = skala(v.lied.modus); GRUND = v.lied.grund;
     bus = ctx.createGain(); bus.connect(ausg);
     ergebnis = null;
+    szeneAuftritt();
     spiel = { daten: v.daten, st: v.st, ort: null, start: hoerZeit() + msBis / 1000, punkte: 0, serie: 0, besteSerie: 0, streu: 0, blitz: [0, 0, 0], urteil: null, halt: {}, duell: true };
     spiel.knoten = begleitung(v.daten, spiel.start);
     /* für Tests: wann der Anfang des Lieds aus dem Lautsprecher kommt, in echter Uhrzeit (ohne Test-Versatz) */
@@ -1678,6 +2863,7 @@
     const [v] = vergleich(d.ichE, d.erE);
     if (window.ImresDuell) window.ImresDuell.bilanz("auftritt", v > 0 ? "sieg" : v < 0 ? "niederlage" : "remis");
     if (ctx) publikum(v >= 0);
+    szeneSchluss(v >= 0);
   }
   function duellEnde() {
     const d = duell; if (!d || !d.ichE || !d.erE) return;
@@ -1850,11 +3036,11 @@
     /* Gast: Publikum und Lied wählt der Gastgeber; Modus-Wechsel gibt es im Duell nicht */
     if ((e.target.closest("[data-stufe], [data-lied]") && (!duell.s.host || (duell.phase !== "wahl" && duell.phase !== "warten" && duell.phase !== "ende"))) || e.target.closest("[data-modus], [data-station], .at-weiter, .at-zurueck, .at-eintragen")) { e.stopPropagation(); e.preventDefault(); return; }
     if (e.target.closest("[data-stufe], [data-lied]") && duell.phase === "ende") { duell.phase = "wahl"; ergebnis = null; duell.s.senden("zurueck", { r: duell.r }); duell.ichE = null; duell.erE = null; duell.rev = [false, false]; return; }
-    if (e.target.closest(".at-duell-los")) { duellRunde(); return; }
+    if (e.target.closest(".at-duell-los")) { if (window.tavVollAuto) window.tavVollAuto("auftritt"); duellRunde(); return; }
     if (e.target.closest(".at-duell-ab")) { duellZurWahl(true); return; }
-    if (e.target.closest(".at-duell-bereit")) { audio(); duellBereit(); return; }
+    if (e.target.closest(".at-duell-bereit")) { if (window.tavVollAuto) window.tavVollAuto("auftritt"); audio(); duellBereit(); return; }
     if (e.target.closest(".at-duell-wahl")) { duellZurWahl(true); return; }
-    if (e.target.closest(".at-duell-revanche")) { if (duell.phase !== "ende" || duell.rev[0]) return; duell.rev[0] = true; duell.s.senden("revanche", { r: duell.r }); if (duell.s.host && duell.rev[1]) duellRunde(); else zeichnen(); }
+    if (e.target.closest(".at-duell-revanche")) { if (duell.phase !== "ende" || duell.rev[0]) return; if (window.tavVollAuto) window.tavVollAuto("auftritt"); duell.rev[0] = true; duell.s.senden("revanche", { r: duell.r }); if (duell.s.host && duell.rev[1]) duellRunde(); else zeichnen(); }
   }, true);
   /* Ton im Duell bei jeder Berührung freischalten (iOS) */
   root.addEventListener("pointerdown", () => { if (duell && (!ctx || ctx.state !== "running")) audio(); }, true);
@@ -1904,6 +3090,7 @@
     er: duell.er.stand, erZuege: duell.erSpur ? duell.erSpur.status.size : 0, rev: duell.rev.slice(), tippen: duell.tippen, noten: duell.vor ? duell.vor.daten.liste.map(n => [Math.round(n.zeit * 1e4), n.spur, n.ton, Math.round((n.dauer || 0) * 1e4)]) : null }; /* für automatische Tests */
 
   root._zustand = () => ({ spiel, ctx, stimmt, kalib, kalibWert, weg, proben: [...probeBuf.keys()], hoerZeit: ms => hoerZeit(ms) }); /* für automatische Tests */
+  root._szene = () => szene; /* für automatische Tests: Kulisse, Band, Publikum */
   zeichnen();
   bestenLaden();
   let letzteSprache = sprache();
