@@ -173,29 +173,26 @@ ROLLEN = {
     "fluestern": {"search": "whisper"},
     "drache": {"search": "dragon"},
     "kreatur": {"search": "creature"},
+    "de-alt": {"gender": "male", "age": "old", "language": "de"},
+    "de-mittel": {"gender": "male", "age": "middle_aged", "language": "de", "use_cases": "characters_animation"},
+    "de-jung": {"gender": "male", "age": "young", "language": "de"},
+    "de-frau": {"gender": "female", "language": "de", "use_cases": "characters_animation"},
+    "de-frau-dunkel": {"gender": "female", "language": "de", "search": "dark"},
+    "de-tief": {"gender": "male", "language": "de", "search": "tief"},
 }
 def katalog(sprache):
     aus = {"rest": rest()[0], "rollen": {}}
     for rolle, f in ROLLEN.items():
         for spr in (sprache, None):
-            q = dict(f, page_size=15, sort="usage_character_count_1y")
+            q = dict(f, page_size=25, sort="usage_character_count_1y")
             if spr: q["language"] = spr
             try: vs = anfrage("/v1/shared-voices?" + urllib.parse.urlencode(q)).get("voices", [])
             except SystemExit as e: print(rolle, e); vs = []
             if vs: break
         aus["rollen"][rolle] = [{k: v.get(k) for k in ("name", "voice_id", "public_owner_id", "description", "accent", "age", "gender", "language", "use_case", "preview_url", "cloned_by_count", "usage_character_count_1y", "category")} for v in vs]
         print(rolle, len(vs), [v.get("name") for v in vs][:6])
-    # Test: lässt sich eine Bibliotheksstimme ohne Hinzufügen direkt nutzen?
-    for vs in aus["rollen"].values():
-        if vs:
-            try:
-                mp3 = tts(vs[0]["voice_id"], "Hallo.")
-                aus["direkt_nutzbar"] = bool(mp3); print("direkt nutzbar:", vs[0]["name"])
-            except SystemExit as e:
-                aus["direkt_nutzbar"] = False; print("nicht direkt nutzbar:", e)
-            break
     os.makedirs(os.path.join(WURZEL, "audio/proben"), exist_ok=True)
-    json.dump(aus, open(os.path.join(WURZEL, "tools/vertonung/stimmen-katalog.json"), "w"), ensure_ascii=False, indent=1)
+    json.dump(aus, open(os.path.join(WURZEL, "audio/proben/stimmen-katalog.json"), "w"), ensure_ascii=False, indent=1)
     git_sichern("Vertonung: Stimmenkatalog für Rollen")
 
 def regie_laden(sprache):
