@@ -158,8 +158,31 @@ def feinschliff(sprache, stimme):
     git_sichern("Vertonung: Feinschliff-Proben")
 
 # ---------------------------------------------------------------- Chronik
+def regie_laden(sprache):
+    """Regiefassung (Audio-Tags für eleven_v3) – nur für Absätze, deren Originaltext sich nicht geändert hat"""
+    pfad = os.path.join(WURZEL, f"tools/vertonung/regie-{sprache}.json")
+    return json.load(open(pfad)) if os.path.exists(pfad) else {}
+
+def regie_fuer(R, kap, i, roh):
+    e = R.get("vorab") if kap == "vorab" else (R.get("kapitel", {}).get(str(kap), {}) or {}).get(str(i))
+    if not e or e.get("quelle") != hashlib.sha1(roh.encode()).hexdigest()[:10]: return None
+    r = e.get("regie"); return [r] if isinstance(r, str) else r
+
+def zusammenfuegen(teile):
+    if len(teile) == 1: return teile[0]
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        liste = []
+        for n, t in enumerate(teile):
+            f = os.path.join(d, f"{n}.mp3"); open(f, "wb").write(t); liste.append(f"file '{f}'")
+        open(os.path.join(d, "l.txt"), "w").write("\n".join(liste))
+        out = os.path.join(d, "out.mp3")
+        subprocess.run(["ffmpeg", "-v", "error", "-f", "concat", "-safe", "0", "-i", os.path.join(d, "l.txt"), "-c", "copy", out], check=True)
+        return open(out, "rb").read()
+
 def chronik(sprache, stimme, grenze):
     D = chronik_laden(sprache)
+    R = regie_laden(sprache); print("Regiefassung:", "ja" if R else "nein")
     basis = os.path.join(WURZEL, "audio/chronik", sprache)
     os.makedirs(basis, exist_ok=True)
     mpfad = os.path.join(basis, "manifest.json")
@@ -175,20 +198,23 @@ def chronik(sprache, stimme, grenze):
     stand, _ = rest(); print("Credits übrig:", stand)
     for n, ((kap, i, roh), text) in enumerate(zip(stuecke, texte)):
         if not text: continue
-        h = hashlib.sha1((stimme + "|" + MODELL + "|" + text).encode()).hexdigest()[:10]
+        regie = regie_fuer(R, kap, i, roh) if MODELL == "eleven_v3" else None
+        h = hashlib.sha1((stimme + "|" + MODELL + "|" + json.dumps(EINSTELLUNG, sort_keys=True) + "|" + (json.dumps(regie, ensure_ascii=False) if regie else text)).encode()).hexdigest()[:10]
         ordner = re.sub(r"[^A-Za-z0-9]+", "", str(kap)) or "x"
         datei = f"audio/chronik/{sprache}/{ordner}/{i:03d}-{h}.mp3"
         ziel = os.path.join(WURZEL, datei)
         eintrag = {"i": i, "datei": datei, "titel": roh.startswith("#")}
         manifest["kapitel"].setdefault(str(kap), []).append(eintrag)
         if os.path.exists(ziel): continue
-        if grenze and kosten + len(text) > grenze:
+        laenge = sum(len(t) for t in regie) if regie else len(text)
+        if grenze and kosten + laenge > grenze:
             print("Grenze erreicht – Rest beim nächsten Lauf."); manifest["unvollstaendig"] = True; break
         os.makedirs(os.path.dirname(ziel), exist_ok=True)
         vorher = texte[n - 1] if n else ""; nachher = texte[n + 1] if n + 1 < len(texte) else ""
-        mp3 = tts(stimme, text + (" …" if roh.startswith("#") else ""), vorher, nachher)
-        open(ziel, "wb").write(mp3); kosten += len(text); erzeugt += 1
-        print(f"{datei}  ({len(text)} Zeichen, gesamt {kosten})")
+        if regie: mp3 = zusammenfuegen([tts(stimme, t) for t in regie])
+        else: mp3 = tts(stimme, text + (" …" if roh.startswith("#") else ""), vorher, nachher)
+        open(ziel, "wb").write(mp3); kosten += laenge; erzeugt += 1
+        print(f"{datei}  ({laenge} Zeichen{' mit Regie' if regie else ''}, gesamt {kosten})")
         if erzeugt % 25 == 0:
             json.dump(manifest, open(mpfad, "w"), ensure_ascii=False, indent=1); git_sichern(f"Vertonung Chronik ({sprache}): {erzeugt} Absätze")
     # alte Dateien, die nicht mehr gebraucht werden, entfernen
