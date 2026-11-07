@@ -15,21 +15,22 @@ UA = "ImresTalesKlangImport/1.0 (https://imrestales.de; GitHub Actions) python-u
 API = "https://commons.wikimedia.org/w/api.php"
 
 
-def hole(url, versuche=4):
+def hole(url, versuche=6, daten=None):
     for i in range(versuche):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            req = urllib.request.Request(url, data=daten, headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=120) as r:
                 return r.read()
         except Exception as e:  # noqa
             print("  Fehler", e, "– neuer Versuch", file=sys.stderr)
-            time.sleep(3 * (i + 1))
+            time.sleep(5 * (i + 1) ** 2)
     raise RuntimeError("nicht ladbar: " + url)
 
 
 def api(**p):
     p.update(format="json", formatversion="2")
-    return json.loads(hole(API + "?" + urllib.parse.urlencode(p)))
+    time.sleep(0.3)
+    return json.loads(hole(API, daten=urllib.parse.urlencode(p).encode()))
 
 
 def text(s):
@@ -41,6 +42,7 @@ def info(titel):
     """imageinfo für bis zu 50 Titel"""
     aus = []
     for i in range(0, len(titel), 50):
+      try:
         d = api(action="query", titles="|".join(titel[i:i + 50]), prop="imageinfo|categories", cllimit="max",
                 iiprop="url|size|mime|mediatype|extmetadata|metadata",
                 iiextmetadatafilter="LicenseShortName|LicenseUrl|Artist|ImageDescription|Credit|UsageTerms|DateTimeOriginal")
@@ -63,6 +65,8 @@ def info(titel):
                 "beschreibung": text(em.get("ImageDescription", {}).get("value"))[:400],
                 "kategorien": [c["title"].replace("Category:", "") for c in pg.get("categories", [])][:25],
             })
+      except Exception as e:  # noqa
+        print("info", i, e, file=sys.stderr)
     return aus
 
 
