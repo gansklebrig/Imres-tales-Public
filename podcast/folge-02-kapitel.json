@@ -1,0 +1,77 @@
+{
+ "version": "1.2.0",
+ "chapters": [
+  {
+   "startTime": 0.0,
+   "title": "Der Kräuternebel"
+  },
+  {
+   "startTime": 52.5,
+   "title": "Gefangen"
+  },
+  {
+   "startTime": 147.5,
+   "title": "Der Ausbruch"
+  },
+  {
+   "startTime": 494.6,
+   "title": "Durch die Spinnweben"
+  },
+  {
+   "startTime": 597.9,
+   "title": "Das Grab der Magierin"
+  },
+  {
+   "startTime": 761.7,
+   "title": "Der unterirdische See"
+  },
+  {
+   "startTime": 835.3,
+   "title": "Demogorgon"
+  },
+  {
+   "startTime": 1005.8,
+   "title": "Gracklstugh"
+  },
+  {
+   "startTime": 1031.4,
+   "title": "Der Sohn des Königs"
+  },
+  {
+   "startTime": 1099.0,
+   "title": "Am Hof von König Horga"
+  },
+  {
+   "startTime": 1172.6,
+   "title": "Einkaufen in Gracklstugh"
+  },
+  {
+   "startTime": 1217.1,
+   "title": "Der rasende Riese"
+  },
+  {
+   "startTime": 1266.4,
+   "title": "Das Dorf der Riesen"
+  },
+  {
+   "startTime": 1332.0,
+   "title": "Der Steinsprecher"
+  },
+  {
+   "startTime": 1460.1,
+   "title": "Besuch in der Schenke"
+  },
+  {
+   "startTime": 1501.4,
+   "title": "Die Bewahrer der Flamme"
+  },
+  {
+   "startTime": 1606.0,
+   "title": "Themberchaud"
+  },
+  {
+   "startTime": 1688.9,
+   "title": "Das gestohlene Ei"
+  }
+ ]
+}

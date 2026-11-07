@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imres Tales – Die Chronik · Podcast</title>
+<meta name="description" content="Das Hörspiel zu unserer D&amp;D-Kampagne – erzählt von Barradin. Kostenlos in jeder Podcast-App: einfach den Feed abonnieren.">
+<meta property="og:title" content="Imres Tales – Die Chronik (Hörspiel-Podcast)">
+<meta property="og:description" content="Barradin erzählt die Kampagne als Hörspiel – mit Geräuschkulisse und Musik. In jeder Podcast-App abonnierbar.">
+<meta property="og:image" content="https://imrestales.de/podcast/cover-600.jpg">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="Imres Tales – Die Chronik (Podcast)" href="https://imrestales.de/podcast.xml">
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="schriften/schriften.css">
+<style>
+:root { --night: #100e15; --hall: #19161f; --vellum: #ebe2cc; --ash: #a89f8f; --ember: #e0a046; --line: rgba(224,160,70,.28);
+  --display: "IM Fell English SC", Palatino, Georgia, serif; --name: "IM Fell English", Palatino, Georgia, serif; --body: "Spectral", Georgia, serif; }
+* { box-sizing: border-box; }
+html { background: var(--night); }
+body { margin: 0; background: radial-gradient(ellipse at 50% -10%, rgba(224,160,70,.13), transparent 60%), var(--night); color: var(--vellum); font-family: var(--body); font-size: 1.05rem; line-height: 1.6; }
+a { color: var(--ember); }
+.wrap { max-width: 56rem; margin: 0 auto; padding: 1.2rem 16px 4rem; }
+.zurueck { display: inline-block; margin-bottom: 1.2rem; font-size: .9rem; text-decoration: none; color: var(--ash); }
+.zurueck:hover { color: var(--ember); }
+.kopf { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 2rem; align-items: center; }
+.kopf img { width: 100%; aspect-ratio: 1; border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(0,0,0,.6); }
+.label { font-family: var(--display); letter-spacing: .25em; color: var(--ember); font-size: .8rem; margin: 0 0 .3rem; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.05; margin: 0 0 .5rem; }
+h1 em { font-family: var(--name); font-style: italic; color: #f0d9a8; display: block; font-size: .7em; }
+.kopf p { color: var(--ash); margin: .4rem 0; }
+.abo { margin: 2.5rem 0 1rem; padding: 1.4rem; border: 1px solid var(--line); background: linear-gradient(160deg, rgba(224,160,70,.10), rgba(25,22,31,.9) 55%); }
+.abo h2, .folgen h2, .hilfe h2 { font-family: var(--display); font-weight: 400; letter-spacing: .06em; font-size: 1.5rem; margin: 0 0 .8rem; }
+.feld { display: flex; gap: .5rem; flex-wrap: wrap; align-items: stretch; }
+.feld input { flex: 1 1 16rem; min-width: 0; padding: .75rem .9rem; font: inherit; font-size: 1rem; color: var(--vellum); background: #0c0a10; border: 1px solid var(--line); }
+.knopf { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .75rem 1.2rem; border: 1px solid var(--ember); background: var(--ember); color: #1a1208; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; min-height: 2.9rem; }
+.knopf.leise { background: transparent; color: var(--vellum); border-color: var(--line); font-weight: 400; }
+.knopf.leise:hover, .knopf.leise:focus-visible { border-color: var(--ember); color: var(--ember); }
+.knopf:hover { filter: brightness(1.08); }
+.apps { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: .5rem; margin-top: 1rem; }
+.apps .knopf { justify-content: flex-start; }
+.apps small { color: var(--ash); font-weight: 400; margin-left: auto; font-size: .75rem; }
+.qr { display: flex; gap: 1.2rem; align-items: center; margin-top: 1.2rem; color: var(--ash); font-size: .92rem; }
+.qr img { width: 8.5rem; height: 8.5rem; flex: none; }
+.ok { color: #9fd18a; font-size: .9rem; min-height: 1.2em; margin: .4rem 0 0; }
+.folgen { margin-top: 2.5rem; }
+.folge { padding: 1.2rem 0; border-top: 1px solid var(--line); }
+.folge h3 { font-family: var(--name); font-weight: 400; font-size: 1.45rem; margin: 0 0 .2rem; }
+.folge .meta { color: var(--ash); font-size: .85rem; margin: 0 0 .5rem; }
+.folge p { margin: .3rem 0 .7rem; }
+.folge audio { width: 100%; }
+.hilfe { margin-top: 2.5rem; color: var(--ash); }
+.hilfe ol { padding-left: 1.2rem; } .hilfe li { margin: .3rem 0; }
+.hilfe b { color: var(--vellum); font-weight: 600; }
+.fuss { margin-top: 3rem; font-size: .8rem; color: var(--ash); line-height: 1.5; border-top: 1px solid var(--line); padding-top: 1rem; }
+@media (max-width: 640px) { .kopf { grid-template-columns: 1fr; gap: 1.2rem; } .kopf img { max-width: 15rem; margin: 0 auto; } .qr { flex-direction: column; align-items: flex-start; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="zurueck" href="./#chronik">← Zurück zu Imres Tales</a>
+  <header class="kopf">
+    <img src="podcast/cover-600.jpg" alt="Cover: Imres Tales – Die Chronik">
+    <div>
+      <p class="label">Hörspiel-Podcast</p>
+      <h1>Imres Tales <em>Die Chronik</em></h1>
+      <p>Barradin – Barde, Pfeifenraucher und bescheidenster Held aller Zeiten (sagt er) – erzählt unsere D&amp;D-Kampagne als Hörspiel: mit Geräuschkulisse, Musik und sehr viel Übertreibung.</p>
+      <p>Kostenlos, ohne Anmeldung – in jeder Podcast-App.</p>
+    </div>
+  </header>
+
+  <section class="abo" aria-labelledby="abo-titel">
+    <h2 id="abo-titel">Abonnieren</h2>
+    <div class="feld">
+      <input id="feed" type="text" readonly value="https://imrestales.de/podcast.xml" aria-label="Feed-Adresse">
+      <button class="knopf" id="kopieren" type="button">Feed-Adresse kopieren</button>
+    </div>
+    <p class="ok" id="ok" aria-live="polite"></p>
+    <div class="apps">
+      <a class="knopf leise" href="podcast://imrestales.de/podcast.xml">🎧 Podcast-App öffnen <small>iPhone, Mac</small></a>
+      <a class="knopf leise" href="https://subscribeonandroid.com/imrestales.de/podcast.xml" rel="noopener">🤖 App wählen <small>Android</small></a>
+      <a class="knopf leise" href="antennapod-subscribe://imrestales.de/podcast.xml">AntennaPod</a>
+      <a class="knopf leise" href="pktc://subscribe/imrestales.de/podcast.xml">Pocket Casts</a>
+      <a class="knopf leise" href="podcastaddict://imrestales.de/podcast.xml">Podcast Addict</a>
+      <a class="knopf leise" href="overcast://x-callback-url/add?url=https%3A%2F%2Fimrestales.de%2Fpodcast.xml">Overcast</a>
+      <a class="knopf leise" href="podcast.xml" type="application/rss+xml">RSS-Feed ansehen</a>
+    </div>
+    <div class="qr">
+      <img src="podcast/feed-qr.svg" alt="QR-Code mit der Feed-Adresse">
+      <span>Am Computer? QR-Code mit dem Handy scannen – oder die Feed-Adresse in deiner Podcast-App bei „Podcast per URL hinzufügen“ / „RSS-Feed hinzufügen“ einfügen.</span>
+    </div>
+  </section>
+
+  <section class="folgen" aria-labelledby="folgen-titel">
+    <h2 id="folgen-titel">Folgen</h2>
+    <div id="liste"></div>
+  </section>
+
+  <section class="hilfe">
+    <h2>So geht’s in deiner App</h2>
+    <ol>
+      <li><b>Feed-Adresse kopieren</b> (Knopf oben).</li>
+      <li>In der Podcast-App die Suche oder das Plus öffnen und <b>„Per URL hinzufügen“</b>, <b>„RSS-Feed“</b> oder <b>„Eigenen Feed“</b> wählen (heißt je nach App etwas anders).</li>
+      <li>Adresse einfügen – fertig. Neue Kapitel erscheinen dann automatisch.</li>
+    </ol>
+    <p>Bei Spotify, Apple Podcasts, radio.de und Co. findest du „Imres Tales – Die Chronik“ auch über die Suche, sobald der Podcast dort freigeschaltet ist.</p>
+  </section>
+
+  <p class="fuss">Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY), Blanket (CC0) – vollständige Liste in den Quellen auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.</p>
+</div>
+<script>
+(function () {
+  "use strict";
+  var feld = document.getElementById("feed"), ok = document.getElementById("ok");
+  document.getElementById("kopieren").addEventListener("click", function () {
+    var fertig = function () { ok.textContent = "Kopiert! Jetzt in deiner Podcast-App einfügen."; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(feld.value).then(fertig, function () { feld.select(); document.execCommand("copy"); fertig(); });
+    else { feld.select(); document.execCommand("copy"); fertig(); }
+  });
+  feld.addEventListener("focus", function () { feld.select(); });
+  /* Folgen direkt aus dem Feed – so bleibt die Seite automatisch aktuell */
+  fetch("podcast.xml", { cache: "no-cache" }).then(function (r) { return r.text(); }).then(function (t) {
+    var x = new DOMParser().parseFromString(t, "application/xml"), html = "";
+    var items = Array.prototype.slice.call(x.querySelectorAll("item")).sort(function (a, b) {
+      var n = function (it) { var e = it.getElementsByTagName("itunes:episode")[0]; return e ? +e.textContent : 0; }; return n(a) - n(b); });
+    items.forEach(function (it) {
+      var g = function (s) { var e = it.getElementsByTagName(s)[0]; return e ? e.textContent : ""; };
+      var enc = it.getElementsByTagName("enclosure")[0], dauer = g("itunes:duration").replace(/^0:/, "");
+      var tmp = document.createElement("div"); tmp.innerHTML = g("description").split("<br>")[0];
+      html += '<article class="folge"><h3></h3><p class="meta"></p><p class="txt"></p>' +
+        '<audio controls preload="none" src="' + (enc ? enc.getAttribute("url").replace("https://imrestales.de/", "") : "") + '"></audio></article>';
+      var d = document.createElement("div"); d.innerHTML = html; var a = d.lastElementChild;
+      a.querySelector("h3").textContent = g("title");
+      a.querySelector(".meta").textContent = "Folge " + g("itunes:episode") + " · " + dauer;
+      a.querySelector(".txt").textContent = tmp.textContent;
+      html = d.innerHTML;
+    });
+    document.getElementById("liste").innerHTML = html;
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>

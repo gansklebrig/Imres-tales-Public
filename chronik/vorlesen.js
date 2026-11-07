@@ -41,6 +41,9 @@
 .vl-knopf svg { width: 1.25rem; height: 1.25rem; color: var(--ember, #e0a046); flex: none; }
 .vl-knopf small { color: var(--ash, #b8a998); font-size: .78em; margin-left: .2rem; }
 .vl-knopf:hover, .vl-knopf:focus-visible { border-color: var(--ember, #e0a046); background: rgba(224,160,70,.14); box-shadow: 0 0 18px rgba(224,160,70,.18); }
+.vl-pod { justify-self: start; display: inline-flex; align-items: center; gap: .35rem; margin: .1rem 0 .3rem; font-size: .88rem; color: var(--ash, #b8a998); text-decoration: none; border-bottom: 1px dotted rgba(224,160,70,.5); }
+.vl-pod:hover, .vl-pod:focus-visible { color: var(--ember, #e0a046); }
+.vl-pod small { font-size: .8em; opacity: .8; }
 .vl-ab { display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem; margin-left: .5rem; padding: 0; vertical-align: middle; border: 1px solid rgba(224,160,70,.35); border-radius: 50%; background: none; color: var(--ember, #e0a046); cursor: pointer; opacity: .55; transition: opacity .2s, background .2s; }
 .vl-ab svg { width: .95rem; height: .95rem; }
 .sub:hover .vl-ab, .vl-ab:hover, .vl-ab:focus-visible { opacity: 1; background: rgba(224,160,70,.12); }
@@ -366,7 +369,7 @@
 
   /* ---------- Knöpfe in der Chronik ---------- */
   function knoepfe() {
-    document.querySelectorAll(".vl-knopf, .vl-ab").forEach(e => e.remove());
+    document.querySelectorAll(".vl-knopf, .vl-ab, .vl-pod").forEach(e => e.remove());
     if (!manifest) return;
     const T = t(), K = manifest.kapitel || {};
     document.querySelectorAll("#chapters > .chapter").forEach(art => {
@@ -376,6 +379,12 @@
       const rb = art.querySelector(".rb-kapitel, .rb-knopf");
       const h = art.querySelector("h3");
       if (rb && rb.parentNode === art) rb.insertAdjacentElement("afterend", b); else if (h) h.insertAdjacentElement("afterend", b); else art.prepend(b);
+      /* Podcast-Hinweis (nur beim ersten Kapitel, nur Deutsch) */
+      if (de() && !document.querySelector(".vl-pod")) {
+        const pod = document.createElement("a"); pod.className = "vl-pod"; pod.href = "podcast.html";
+        pod.innerHTML = "🎙 Als Podcast abonnieren <small>· in jeder App</small>";
+        b.insertAdjacentElement("afterend", pod);
+      }
       const vorhanden = new Set((K[nr] || []).map(e => e.i));
       Array.from(art.querySelectorAll(".prose > .sub")).forEach(sub => {
         const i = Array.prototype.indexOf.call(sub.parentNode.children, sub); if (!vorhanden.has(i)) return;

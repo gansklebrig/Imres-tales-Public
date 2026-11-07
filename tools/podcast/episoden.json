@@ -1,0 +1,30 @@
+{
+  "titel": "Imres Tales – Die Chronik",
+  "autor": "Barradin (Imres Tales)",
+  "email": "BardeBarradin@gmail.com",
+  "guid": "bf5bc2d6-bb1e-58b9-816b-4ed828159d19",
+  "copyright": "© Imres Tales – kostenloser Fan-Podcast",
+  "kurz": "Das Hörspiel zu unserer D&D-Kampagne: Barradin, der eitelste Barde der Schwertküste, erzählt, wie vier Abenteurer und ein Hund vom Hafen Neverwinters bis tief ins Unterreich stolpern.",
+  "beschreibung": "Das Hörspiel zu unserer Pen-&amp;-Paper-Kampagne. Barradin – Barde, Pfeifenraucher und bescheidenster Held aller Zeiten (sagt er) – erzählt, wie ein Brief von Gundren vier Abenteurer und einen Hund zusammenführt: über die Straße nach Phandalin, durch Goblinhöhlen und Drachentürme, bis in die Gefangenschaft der Drow und die Tiefen des Unterreichs. Mit Geräuschkulisse, Musik und sehr viel Übertreibung. Mehr Geschichten, Karten und Spiele auf <a href=\"https://imrestales.de\">imrestales.de</a>.",
+  "fussnote": "Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.",
+  "episoden": [
+    {
+      "nummer": 1,
+      "titel": "Kapitel I – Der Weg nach Phandalin",
+      "datei": "podcast/folge-01-der-weg-nach-phandalin.mp3",
+      "kapitelmarken": "podcast/folge-01-kapitel.json",
+      "datum": "2026-11-07T12:00:00",
+      "kurz": "Ein Brief von Gundren, ein Karren voller Waren und ein Hinterhalt: Die Reise nach Phandalin, die Goblinhöhle, die Roten Roben, ein Drache in Donnerbaum.",
+      "beschreibung": "Es beginnt mit einem Brief: Gundren lädt vier Fremde an den Hafen von Neverwinter – einen pfeiferauchenden Barden, einen Waldläufer mit Hund, einen gehörnten Druiden und einen schweigsamen Darkin in scharlachroter Rüstung. Was als Warentransport nach Phandalin beginnt, wird zu Goblinhinterhalten, den Roten Roben, Schloss Crackmore, einer magischen Schmiede und einem Drachen im Turm von Donnerbaum."
+    },
+    {
+      "nummer": 2,
+      "titel": "Kapitel II – Das Unterreich",
+      "datei": "podcast/folge-02-das-unterreich.mp3",
+      "kapitelmarken": "podcast/folge-02-kapitel.json",
+      "datum": "2026-11-07T12:05:00",
+      "kurz": "Gefangen bei den Drow, Flucht durch die Spinnweben, Demogorgon im See, König Horgas Hof und ein Drache auf seinem Gold.",
+      "beschreibung": "Ein seltsamer Kräuternebel, und die Helden erwachen in den Kerkern der Drow. Es folgen ein Ausbruch, das Grab einer Magierin, ein unterirdischer See, aus dem etwas sehr Großes steigt, die Duergar-Stadt Gracklstugh mit König Horga, ein rasender Riese, ein Steinsprecher – und Themberchaud, der Drache, der sein Gold nie aus den Augen lässt. Und dann ist da noch das gestohlene Ei."
+    }
+  ]
+}
