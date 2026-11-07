@@ -196,6 +196,19 @@ window.INHALT_EN = {
         "In the last house, at long last, waited a druid who introduced herself as Ilvara. Dressed all in green, a fox upon her shoulders and a little sparrow on her foot, she looked like a guardian of the forest. It smelled of food; we spotted a simmering pot and hoped for a warm meal. The rest of the room was filled with gathered herbs, tinctures and handwritten notes on the nature and the animals of this part of the forest bordering the village.",
         "None of us suspected anything when she invited us into her home …"
       ],
+      /* Lebende Seitenränder: eine Kulisse pro "## "-Abschnitt, in derselben Reihenfolge (alle Orte stehen in chronik/kulissen.js) */
+      kulissen: ["hafen", "waldstrasse", "goblinhoehle", "phandalin", "crackmore", "wachturm", "wiedersehen", "schmiede", "neverwinter", "allianz", "donnerbaum", "drachenturm", "geisterdorf"],
+      /* "Previously" in 60 seconds: abschnitt = heading that "Go there" jumps to */
+      rueckblick: [
+        { abschnitt: "The Invitation", bild: "gundren-treffen.jpg", titel: "A letter, a harbour, a dwarf", text: "Gundren invited us to Neverwinter harbour: me, Friedrich with Rex, grim Echo and Ezekiel, the inscrutable Darkin. The round of introductions? Bumpy. The offer: a lost magic forge and a handsome reward." },
+        { abschnitt: "Ambush on the Road", bild: "hinterhalt-sieg.jpg", titel: "Goblins by the roadside", text: "On the road to Phandalin, goblins leapt out of the woods. Some of our attacks missed with great conviction, mine included. Afterwards we stormed their cave and freed the wolves tied up at the entrance." },
+        { abschnitt: "Castle Crackmore", bild: "glasstab-besiegt.jpg", titel: "The Red Robes", text: "Phandalin was paying protection money to the Red Robes. Rex found the secret way into the castle while chasing a rabbit, we slipped into red robes, and Friedrich's arrow ended Glasstaff's escape. His last words: the Spider." },
+        { abschnitt: "The Prisoner in the Watchtower", bild: "bugbear.jpg", titel: "Bugbear, drow and a twin", text: "On a starry night we stormed a watchtower. Ezekiel's daggers felled the bugbear, the drow escaped as a bat. The prisoner? Nundro, Gundren's twin brother, and with him the mercenary Zilda." },
+        { abschnitt: "The Magic Forge", bild: "magische-schmiede.jpg", titel: "The magic forge", text: "Through the old mine, past skeletons and bat-like beasts, all the way to Nezna. This time Ezekiel's dagger found her. Then we stood before the forge, ringed with glowing runes. It is ours now!" },
+        { abschnitt: "The Lords' Alliance", bild: "aufbruch-neverwinter.jpg", titel: "A bard among lords", text: "Back in Neverwinter we marched, somewhat boldly, straight to the head of the Lords' Alliance. One night in a soft bed and a long talk later, we were members. I like the sound of that." },
+        { abschnitt: "The Dragon in the Tower", bild: "venomfang-besiegt.jpg", titel: "A dragon in Thundertree", text: "First assignment: the abandoned village of Thundertree. Atop the tower a Venomfang attacked. My hypnotic trance, Ezekiel's arrow, dragon dead. Then zombies, blights and Echo's fireball." },
+        { abschnitt: "The Abandoned Village", bild: "ilvara-druidin.webp", titel: "The friendly druid", text: "In the last house Ilvara welcomed us: dressed all in green, with a fox and a simmering pot. She asked us in. None of us suspected anything …" }
+      ],
       fortsetzung: "Continued in Chapter II …"
     },
     {
@@ -296,6 +309,20 @@ window.INHALT_EN = {
         "<em class=\"aside\">A dragon who doesn't trust his priest, a priest who suspects thieves, and us right in the middle. I feel a new song coming.</em>"
       ],
       neuAb: "The Village of the Giants", /* erster Abschnitt der neuesten Sitzung – dorthin führt „Weiterlesen“ auf der Startseite */
+      /* Lebende Seitenränder: eine Kulisse pro "## "-Abschnitt, in derselben Reihenfolge (alle Orte stehen in chronik/kulissen.js) */
+      kulissen: ["kraeuternebel", "kerker", "ausbruch", "spinnweben", "pilzgrab", "see", "demogorgon", "gracklstugh", "schenke", "thronsaal", "laden", "klingenmarkt", "riesendorf", "steinsprecher", "schenke-rotroben", "flammenhalle", "themberchaud", "drachenei"],
+      /* "Previously" in 60 seconds: abschnitt = heading that "Go there" jumps to */
+      rueckblick: [
+        { abschnitt: "Captured", bild: "gefangen-kerker.jpg", titel: "Waking up behind bars", text: "Ilvara was a drow and knocked us out with a herbal mist. We woke up bound in a dungeon. Echo, as a rat, gnawed through our bonds and fetched our gear. Simply brilliant." },
+        { abschnitt: "The Breakout", bild: "chasme.jpg", titel: "A breakout with demons", text: "I insulted the guards, they ran straight into our ambush. Then a chasme: one sting and Friedrich went down, until Ezekiel drove his dagger into its eye. Echo brought a vrock down from the sky, Ilvara leapt into the river." },
+        { abschnitt: "Through the Webs", bild: "unterreich-spinnweben.jpg", titel: "Across the webs", text: "We balanced over webs and chasms, and only Friedrich's hand kept me from falling. Inside a cocoon was Fagas, a gnome searching for the tomb of the wizard Khaem." },
+        { abschnitt: "The Wizard's Tomb", bild: "skizze-ettercap.webp", titel: "Dawnbringer", text: "Glowing mushrooms, ettercaps, a freshly painted spider statue and a secret passage. In the tomb we defeated a wraith, and Ezekiel lifted Dawnbringer from its holder: a sunrise in the middle of the Underdark." },
+        { abschnitt: "Demogorgon", bild: "kuo-toa-stadt.jpg", titel: "A god rises from the lake", text: "Ploopploopeen, archpriest of the kuo-toa, smuggled us into his town. In the chaos Fagas fell, and we freed the dwarf Kardal. Then Demogorgon rose from the lake. Friedrich shot. Effect: none. He still says he punched a god." },
+        { abschnitt: "Gracklstugh", bild: "flucht-see.jpg", titel: "Escape across the water", text: "We escaped by boat while Ploopploopeen's temple sank. I had promised him a song; it became a lament. At the far end of the lake: Gracklstugh, a fortress carved into the rock." },
+        { abschnitt: "At the Court of King Horga", bild: "audienz-horga.jpg", titel: "A prince and a king", text: "Kardal turned out to be King Horga's son. My song (or was it rescuing his son?) earned us guest rights. Echo misses the sky, and the city smells of soot and sulphur." },
+        { abschnitt: "The Stonespeaker", bild: "riese.webp", titel: "Voices in the head", text: "A giant rampaged across the market until Friedrich's freshly bought sleeping draught calmed him. Stonespeaker Hgraam gave us a crystal and spoke in riddles: something insatiable stirs, the stone is screaming." },
+        { abschnitt: "The Stolen Egg", bild: "themberchaud-halle.jpg", titel: "A song for a dragon", text: "Before Themberchaud on his mountain of gold, I sang: a natural 20, he did not eat us. His task: someone has stolen a dragon egg, and a certain Drokey of the Gray Ghosts is the suspect. I feel a new song coming." }
+      ],
       fortsetzung: "To be continued …"
     }
   ],

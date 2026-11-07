@@ -140,6 +140,24 @@
     }
   })();
 
+  /* ---------- Chronik: lebende Seitenränder und „Was bisher geschah“ (chronik/) ----------
+     Werden erst geladen, wenn die Chronik aufgeht (oder nach dem Laden in einer ruhigen Sekunde). */
+  const CHRONIK_V = "20261107k";
+  let chronikGeladen = false;
+  function chronikLaden() {
+    if (chronikGeladen) return;
+    chronikGeladen = true;
+    ["chronik/kulissen.js", "chronik/rueckblick.js"].forEach(f => {
+      const sc = document.createElement("script");
+      sc.src = f + "?v=" + CHRONIK_V; sc.async = false;
+      document.body.appendChild(sc);
+    });
+  }
+  window.addEventListener("load", () => {
+    const spaeter = window.requestIdleCallback || (f => setTimeout(f, 2500));
+    spaeter(chronikLaden, { timeout: 6000 });
+  }, { once: true });
+
   /* ---------- Ansichten ---------- */
   const sektion = id => { const s = $(id); return s && s.matches("section.part") ? s : null; };
   const vorhanden = id => { const s = sektion(id); return !!s && !s.hidden; };
@@ -167,6 +185,7 @@
       } else a.removeAttribute("aria-current");
     });
     if (neu === "start") halleStarten(); else halleAnhalten();
+    if (neu === "chronik") chronikLaden();
     /* Karten, Tafel usw. neu vermessen lassen, die vorher unsichtbar waren */
     requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
   }

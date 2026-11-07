@@ -203,6 +203,19 @@ window.INHALT = {
         "Im letzten Haus wartete schließlich eine Druidin, die sich als Ilvara vorstellte. Ganz in Grün gekleidet, einen Fuchs auf den Schultern und einen kleinen Spatz auf dem Fuß, wirkte sie wie eine Hüterin des Waldes. Es roch nach Essen, und wir entdeckten einen köchelnden Topf und hofften auf eine warme Speise. Der Rest des Raumes war gefüllt mit gesammelten Kräutern, Tinkturen und handschriftlichen Notizen über die Natur und die Tiere in diesem Teil des Waldes, der an das Dorf angrenzte.",
         "Keiner von uns ahnte etwas Böses, als sie uns in ihr Haus bat …"
       ],
+      /* Lebende Seitenränder: eine Kulisse pro "## "-Abschnitt, in derselben Reihenfolge (alle Orte stehen in chronik/kulissen.js) */
+      kulissen: ["hafen", "waldstrasse", "goblinhoehle", "phandalin", "crackmore", "wachturm", "wiedersehen", "schmiede", "neverwinter", "allianz", "donnerbaum", "drachenturm", "geisterdorf"],
+      /* „Was bisher geschah“ in 60 Sekunden: abschnitt = Überschrift, zu der „Zur Stelle“ springt */
+      rueckblick: [
+        { abschnitt: "Die Einladung", bild: "gundren-treffen.jpg", titel: "Ein Brief, ein Hafen, ein Zwerg", text: "Gundren lud uns in den Hafen von Neverwinter: mich, Friedrich samt Rex, den grimmigen Echo und Ezekiel, den undurchschaubaren Darkin. Die Vorstellungsrunde? Holprig. Das Angebot: eine verschollene magische Schmiede und eine stattliche Belohnung." },
+        { abschnitt: "Hinterhalt auf der Straße", bild: "hinterhalt-sieg.jpg", titel: "Goblins am Wegesrand", text: "Auf dem Weg nach Phandalin sprangen Goblins aus dem Wald. Einige unserer Angriffe gingen mit großer Überzeugung ins Leere, meine eingeschlossen. Danach stürmten wir ihre Höhle und befreiten die angebundenen Wölfe." },
+        { abschnitt: "Schloss Crackmore", bild: "glasstab-besiegt.jpg", titel: "Die Roten Roben", text: "Phandalin zahlte Schutzgeld an die Roten Roben. Rex fand beim Kaninchenjagen den Geheimgang ins Schloss, wir schlüpften in rote Roben, und Friedrichs Pfeil beendete Glasstabs Flucht. Seine letzten Worte: die Spinne." },
+        { abschnitt: "Der Gefangene im Wachturm", bild: "bugbear.jpg", titel: "Bugbear, Drow und ein Zwilling", text: "In einer sternklaren Nacht stürmten wir einen Wachturm. Ezekiels Dolche fällten den Bugbear, die Drow entkam als Fledermaus. Der Gefangene? Nundro, Gundrens Zwillingsbruder, und mit ihm die Söldnerin Zilda." },
+        { abschnitt: "Die magische Schmiede", bild: "magische-schmiede.jpg", titel: "Die magische Schmiede", text: "Durch die alte Mine, vorbei an Skeletten und Fledermausbiestern, bis zu Nezna. Diesmal traf sie Ezekiels Dolch. Dann standen wir vor der Schmiede voller leuchtender Runen. Sie gehört jetzt uns!" },
+        { abschnitt: "Die Allianz der Lords", bild: "aufbruch-neverwinter.jpg", titel: "Ein Barde unter Lords", text: "Zurück in Neverwinter marschierten wir etwas forsch zum Leiter der Allianz der Lords. Eine Nacht im weichen Bett und ein langes Gespräch später waren wir Mitglieder. Mir gefällt, wie das klingt." },
+        { abschnitt: "Der Drache im Turm", bild: "venomfang-besiegt.jpg", titel: "Ein Drache in Donnerbaum", text: "Erster Auftrag: das verlassene Dorf Donnerbaum. Oben auf dem Turm griff ein Venomfang an. Mein hypnotischer Bann, Ezekiels Pfeil, Drache tot. Danach Zombies, Blights und Echos Feuerball." },
+        { abschnitt: "Das verlassene Dorf", bild: "ilvara-druidin.webp", titel: "Die freundliche Druidin", text: "Im letzten Haus empfing uns Ilvara: ganz in Grün, mit Fuchs und köchelndem Topf. Sie bat uns herein. Keiner von uns ahnte etwas Böses …" }
+      ],
       fortsetzung: "Weiter in Kapitel II …"
     },
     {
@@ -303,6 +316,20 @@ window.INHALT = {
         "<em class=\"aside\">Ein Drache, der seinem Priester nicht traut, ein Priester, der Diebe verdächtigt, und wir mittendrin. Ich spüre ein neues Lied.</em>"
       ],
       neuAb: "Das Dorf der Riesen", /* erster Abschnitt der neuesten Sitzung – dorthin führt „Weiterlesen“ auf der Startseite */
+      /* Lebende Seitenränder: eine Kulisse pro "## "-Abschnitt, in derselben Reihenfolge (alle Orte stehen in chronik/kulissen.js) */
+      kulissen: ["kraeuternebel", "kerker", "ausbruch", "spinnweben", "pilzgrab", "see", "demogorgon", "gracklstugh", "schenke", "thronsaal", "laden", "klingenmarkt", "riesendorf", "steinsprecher", "schenke-rotroben", "flammenhalle", "themberchaud", "drachenei"],
+      /* „Was bisher geschah“ in 60 Sekunden: abschnitt = Überschrift, zu der „Zur Stelle“ springt */
+      rueckblick: [
+        { abschnitt: "Gefangen", bild: "gefangen-kerker.jpg", titel: "Aufgewacht hinter Gittern", text: "Ilvara war eine Drow und betäubte uns mit Kräuternebel. Wir erwachten gefesselt in einem Kerker. Echo nagte uns als Ratte die Fesseln durch und holte unsere Ausrüstung. Einfach genial." },
+        { abschnitt: "Der Ausbruch", bild: "chasme.jpg", titel: "Ausbruch mit Dämonen", text: "Ich beleidigte die Wachen, sie liefen in unseren Hinterhalt. Dann eine Chasme: ein Stich, und Friedrich ging zu Boden, bis Ezekiel ihr den Dolch ins Auge rammte. Echo holte einen Vrock vom Himmel, Ilvara sprang in den Fluss." },
+        { abschnitt: "Durch die Spinnweben", bild: "unterreich-spinnweben.jpg", titel: "Über Spinnennetze", text: "Wir balancierten über Netze und Schluchten, nur Friedrichs Hand bewahrte mich vor dem Fall. In einem Kokon steckte Fagas, ein Gnom auf der Suche nach dem Grab der Magierin Khaem." },
+        { abschnitt: "Das Grab der Magierin", bild: "skizze-ettercap.webp", titel: "Dawnbringer", text: "Leuchtende Pilze, Ettercaps, eine frisch bemalte Spinnenstatue und ein Geheimgang. Im Grab besiegten wir einen Wraith, und Ezekiel hob Dawnbringer aus der Halterung: ein Sonnenaufgang mitten im Unterreich." },
+        { abschnitt: "Demogorgon", bild: "kuo-toa-stadt.jpg", titel: "Ein Gott steigt aus dem See", text: "Ploopploopeen, Erzpriester der Kuo-Toa, schmuggelte uns in seine Stadt. Im Chaos fiel Fagas, wir befreiten den Zwerg Kardal. Dann stieg Demogorgon aus dem See. Friedrich schoss. Wirkung: keine. Geboxt hat er ihn trotzdem, sagt er." },
+        { abschnitt: "Gracklstugh", bild: "flucht-see.jpg", titel: "Flucht übers Wasser", text: "Im Boot entkamen wir, während Ploopploopeens Tempel versank. Ich hatte ihm ein Lied versprochen, es wurde ein Klagelied. Am Ende des Sees: Gracklstugh, eine Festung im Fels." },
+        { abschnitt: "Am Hof von König Horga", bild: "audienz-horga.jpg", titel: "Ein Prinz und ein König", text: "Kardal entpuppte sich als Sohn von König Horga. Mein Gesang (oder doch die Rettung seines Sohnes?) brachte uns Gastrecht. Echo vermisst den Himmel, und die Stadt riecht nach Ruß und Schwefel." },
+        { abschnitt: "Der Steinsprecher", bild: "riese.webp", titel: "Stimmen im Kopf", text: "Ein Riese raste über den Markt, bis Friedrichs frisch gekaufter Betäubungstrank ihn stillstellte. Steinsprecher Hgraam schenkte uns einen Kristall und sprach in Rätseln: Etwas Unersättliches regt sich, der Stein schreit." },
+        { abschnitt: "Das gestohlene Ei", bild: "themberchaud-halle.jpg", titel: "Ein Lied für einen Drachen", text: "Vor Themberchaud auf seinem Goldberg sang ich: eine natürliche 20, er fraß uns nicht. Sein Auftrag: Jemand hat ein Drachenei gestohlen, verdächtig ist ein gewisser Drokey von den Grauen Geistern. Ich spüre ein neues Lied." }
+      ],
       fortsetzung: "Fortsetzung folgt …"
     }
   ],
