@@ -1,0 +1,29 @@
+{
+ "version": "1.2.0",
+ "chapters": [
+  {
+   "startTime": 0.0,
+   "title": "Das Grab der Magierin"
+  },
+  {
+   "startTime": 163.8,
+   "title": "Der unterirdische See"
+  },
+  {
+   "startTime": 237.3,
+   "title": "Demogorgon"
+  },
+  {
+   "startTime": 407.8,
+   "title": "Gracklstugh"
+  },
+  {
+   "startTime": 433.5,
+   "title": "Der Sohn des Königs"
+  },
+  {
+   "startTime": 501.0,
+   "title": "Am Hof von König Horga"
+  }
+ ]
+}

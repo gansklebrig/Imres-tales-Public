@@ -18,9 +18,9 @@ for ep in reversed(E["episoden"]):
       <title>{esc(ep["titel"])}</title>
       <itunes:title>{esc(ep["titel"])}</itunes:title>
       <itunes:episode>{ep["nummer"]}</itunes:episode>
-      <itunes:season>1</itunes:season>
+      <itunes:season>{ep.get("staffel", 1)}</itunes:season>
       <itunes:episodeType>full</itunes:episodeType>
-      <guid isPermaLink="false">imrestales-chronik-de-{ep["nummer"]}</guid>
+      <guid isPermaLink="false">imrestales-chronik-de-folge-{ep["nummer"]}</guid>
       <pubDate>{datum}</pubDate>
       <description><![CDATA[{ep["beschreibung"]}<br><br>{E["fussnote"]}]]></description>
       <itunes:summary>{esc(ep["kurz"])}</itunes:summary>

@@ -1,0 +1,37 @@
+{
+ "version": "1.2.0",
+ "chapters": [
+  {
+   "startTime": 0.0,
+   "title": "Einkaufen in Gracklstugh"
+  },
+  {
+   "startTime": 44.5,
+   "title": "Der rasende Riese"
+  },
+  {
+   "startTime": 93.8,
+   "title": "Das Dorf der Riesen"
+  },
+  {
+   "startTime": 159.5,
+   "title": "Der Steinsprecher"
+  },
+  {
+   "startTime": 287.5,
+   "title": "Besuch in der Schenke"
+  },
+  {
+   "startTime": 328.9,
+   "title": "Die Bewahrer der Flamme"
+  },
+  {
+   "startTime": 433.4,
+   "title": "Themberchaud"
+  },
+  {
+   "startTime": 516.3,
+   "title": "Das gestohlene Ei"
+  }
+ ]
+}

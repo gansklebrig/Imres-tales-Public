@@ -10,21 +10,63 @@
   "episoden": [
     {
       "nummer": 1,
-      "titel": "Kapitel I – Der Weg nach Phandalin",
-      "datei": "podcast/folge-01-der-weg-nach-phandalin.mp3",
+      "staffel": 1,
+      "titel": "Folge 1 – Ein Brief von Gundren",
+      "datei": "podcast/folge-01-ein-brief-von-gundren.mp3",
       "kapitelmarken": "podcast/folge-01-kapitel.json",
       "datum": "2026-11-07T12:00:00",
-      "kurz": "Ein Brief von Gundren, ein Karren voller Waren und ein Hinterhalt: Die Reise nach Phandalin, die Goblinhöhle, die Roten Roben, ein Drache in Donnerbaum.",
-      "beschreibung": "Es beginnt mit einem Brief: Gundren lädt vier Fremde an den Hafen von Neverwinter – einen pfeiferauchenden Barden, einen Waldläufer mit Hund, einen gehörnten Druiden und einen schweigsamen Darkin in scharlachroter Rüstung. Was als Warentransport nach Phandalin beginnt, wird zu Goblinhinterhalten, den Roten Roben, Schloss Crackmore, einer magischen Schmiede und einem Drachen im Turm von Donnerbaum."
+      "kurz": "Ein Brief, ein Hafen und vier Fremde: Gundren schickt die Gruppe mit einem Karren nach Phandalin – mitten in einen Goblinhinterhalt.",
+      "beschreibung": "Es beginnt mit einem Brief: Gundren lädt vier Fremde an den Hafen von Neverwinter – einen pfeiferauchenden Barden, einen Waldläufer mit Hund, einen gehörnten Druiden und einen schweigsamen Darkin in scharlachroter Rüstung. Auf der Straße nach Phandalin warten ein Hinterhalt, die Goblinhöhle, die Roten Roben – und Schloss Crackmore."
     },
     {
       "nummer": 2,
-      "titel": "Kapitel II – Das Unterreich",
-      "datei": "podcast/folge-02-das-unterreich.mp3",
+      "staffel": 1,
+      "titel": "Folge 2 – Der Gefangene im Wachturm",
+      "datei": "podcast/folge-02-der-gefangene-im-wachturm.mp3",
       "kapitelmarken": "podcast/folge-02-kapitel.json",
+      "datum": "2026-11-07T12:01:00",
+      "kurz": "Ein Wachturm, ein Gefangener – und endlich ein Wiedersehen mit Gundrens Bruder.",
+      "beschreibung": "Die Spur führt zu einem Wachturm, in dem jemand gefangen gehalten wird. Danach kommt ein Wiedersehen, auf das die Gruppe lange gewartet hat: Gundrens Bruder."
+    },
+    {
+      "nummer": 3,
+      "staffel": 1,
+      "titel": "Folge 3 – Die magische Schmiede",
+      "datei": "podcast/folge-03-die-magische-schmiede.mp3",
+      "kapitelmarken": "podcast/folge-03-kapitel.json",
+      "datum": "2026-11-07T12:02:00",
+      "kurz": "Die magische Schmiede, die Allianz der Lords in Neverwinter und ein Drache im Turm von Donnerbaum.",
+      "beschreibung": "Endlich die magische Schmiede. Danach geht es zurück nach Neverwinter vor die Allianz der Lords – und weiter nach Donnerbaum, wo im Turm ein Drache wartet. Das Kapitel endet in einem verlassenen Dorf."
+    },
+    {
+      "nummer": 4,
+      "staffel": 2,
+      "titel": "Folge 4 – Gefangen bei den Drow",
+      "datei": "podcast/folge-04-gefangen-bei-den-drow.mp3",
+      "kapitelmarken": "podcast/folge-04-kapitel.json",
+      "datum": "2026-11-07T12:03:00",
+      "kurz": "Ein seltsamer Kräuternebel – und die Helden erwachen in den Kerkern der Drow. Zeit für einen Ausbruch.",
+      "beschreibung": "Kapitel II beginnt mit einem seltsamen Kräuternebel. Die Helden erwachen gefangen bei den Drow, wagen den Ausbruch und fliehen durch die Spinnweben ins Unterreich."
+    },
+    {
+      "nummer": 5,
+      "staffel": 2,
+      "titel": "Folge 5 – Demogorgon",
+      "datei": "podcast/folge-05-demogorgon.mp3",
+      "kapitelmarken": "podcast/folge-05-kapitel.json",
+      "datum": "2026-11-07T12:04:00",
+      "kurz": "Das Grab einer Magierin, ein unterirdischer See, aus dem etwas sehr Großes steigt – und der Hof von König Horga.",
+      "beschreibung": "Im Grab einer Magierin, an einem unterirdischen See und dann: Demogorgon. Wer das überlebt, landet in der Duergar-Stadt Gracklstugh – beim Sohn des Königs und am Hof von König Horga."
+    },
+    {
+      "nummer": 6,
+      "staffel": 2,
+      "titel": "Folge 6 – Themberchaud",
+      "datei": "podcast/folge-06-themberchaud.mp3",
+      "kapitelmarken": "podcast/folge-06-kapitel.json",
       "datum": "2026-11-07T12:05:00",
-      "kurz": "Gefangen bei den Drow, Flucht durch die Spinnweben, Demogorgon im See, König Horgas Hof und ein Drache auf seinem Gold.",
-      "beschreibung": "Ein seltsamer Kräuternebel, und die Helden erwachen in den Kerkern der Drow. Es folgen ein Ausbruch, das Grab einer Magierin, ein unterirdischer See, aus dem etwas sehr Großes steigt, die Duergar-Stadt Gracklstugh mit König Horga, ein rasender Riese, ein Steinsprecher – und Themberchaud, der Drache, der sein Gold nie aus den Augen lässt. Und dann ist da noch das gestohlene Ei."
+      "kurz": "Einkaufen in Gracklstugh, ein rasender Riese, ein Steinsprecher – und Themberchaud auf seinem Gold.",
+      "beschreibung": "Einkaufen in Gracklstugh, ein rasender Riese, das Dorf der Riesen und ein Steinsprecher. Ein Besuch in der Schenke, die Bewahrer der Flamme – und dann steht die Gruppe vor Themberchaud. Und da ist noch das gestohlene Ei."
     }
   ]
 }

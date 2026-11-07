@@ -1,0 +1,29 @@
+{
+ "version": "1.2.0",
+ "chapters": [
+  {
+   "startTime": 0.0,
+   "title": "Die magische Schmiede"
+  },
+  {
+   "startTime": 220.4,
+   "title": "Neverwinter"
+  },
+  {
+   "startTime": 311.9,
+   "title": "Die Allianz der Lords"
+  },
+  {
+   "startTime": 339.6,
+   "title": "Donnerbaum"
+  },
+  {
+   "startTime": 379.0,
+   "title": "Der Drache im Turm"
+  },
+  {
+   "startTime": 512.8,
+   "title": "Das verlassene Dorf"
+  }
+ ]
+}
