@@ -8,13 +8,16 @@
    #kapitel-<nr> .prose. Bilder werden übersprungen.
    Knöpfe: am Kapitelanfang „Kapitel vorlesen“, an jeder Zwischenüberschrift
    ein kleines ▶ („ab hier“). Unten erscheint ein kleiner Spieler.
+   Hörspiel (chronik/hoerspiel.js, Standard an): Geräuschkulisse, Effekte und
+   Zwischenspiele; der Notenknopf im Spieler öffnet das kleine Mischpult
+   (an/aus, Kulisse, Musik & Effekte, Tempo). Taste „h“ schaltet es um.
    ===================================================================== */
 (function () {
   "use strict";
   const de = () => (document.documentElement.lang || "de").slice(0, 2) !== "en";
   const TX = {
-    de: { kapitel: n => "Kapitel " + n + " vorlesen", kurz: "Vorlesen", abHier: "Ab hier vorlesen", spielen: "Weiter", pause: "Pause", zurueck: "Absatz zurück", vor: "Absatz vor", zu: "Vorlesen beenden", sprecher: "gelesen von Helmut", tempo: "Tempo", vorab: "Ein Wort vorab" },
-    en: { kapitel: n => "Listen to chapter " + n, kurz: "Listen", abHier: "Listen from here", spielen: "Play", pause: "Pause", zurueck: "Previous paragraph", vor: "Next paragraph", zu: "Stop listening", sprecher: "read by Helmut", tempo: "Speed", vorab: "A word first" }
+    de: { kapitel: n => "Kapitel " + n + " vorlesen", kurz: "Vorlesen", abHier: "Ab hier vorlesen", spielen: "Weiter", pause: "Pause", zurueck: "Absatz zurück", vor: "Absatz vor", zu: "Vorlesen beenden", sprecher: "gelesen von Helmut", tempo: "Tempo", vorab: "Ein Wort vorab", hoerspiel: "Hörspiel", hsLang: "Hörspiel: Geräusche & Musik", hsKulisse: "Kulisse", hsMusik: "Musik & Effekte", hsAn: "an", hsAus: "aus" },
+    en: { kapitel: n => "Listen to chapter " + n, kurz: "Listen", abHier: "Listen from here", spielen: "Play", pause: "Pause", zurueck: "Previous paragraph", vor: "Next paragraph", zu: "Stop listening", sprecher: "read by Helmut", tempo: "Speed", vorab: "A word first", hoerspiel: "Radio play", hsLang: "Radio play: sounds & music", hsKulisse: "Ambience", hsMusik: "Music & effects", hsAn: "on", hsAus: "off" }
   };
   const t = () => TX[de() ? "de" : "en"];
   const lies = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (_) { return d; } };
@@ -28,6 +31,7 @@
   const ZURUECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5.5v13L9.5 12z" fill="currentColor"/></svg>';
   const VOR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5.5v13L14.5 12z" fill="currentColor"/></svg>';
   const OHR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3.2" y="12.5" width="4.6" height="7" rx="1.6" fill="currentColor"/><rect x="16.2" y="12.5" width="4.6" height="7" rx="1.6" fill="currentColor"/></svg>';
+  const HS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6l10-2v11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.6" cy="17.6" r="2.5" fill="currentColor"/><circle cx="16.6" cy="15.6" r="2.5" fill="currentColor"/><path d="M2.5 9.5c1.2-1 1.2-2.6 0-3.6M4.8 11.2c2.2-2 2.2-5 0-7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   /* ---------- Aussehen ---------- */
@@ -69,7 +73,29 @@
 .vl-welle i { width: 2px; background: var(--ember, #e0a046); border-radius: 1px; height: 30%; }
 .vl-leiste.spielt .vl-welle i { animation: vlWelle 1s ease-in-out infinite; } .vl-welle i:nth-child(2) { animation-delay: -.3s !important; } .vl-welle i:nth-child(3) { animation-delay: -.6s !important; }
 @keyframes vlWelle { 50% { height: 100%; } }
-@media (max-width: 520px) { .vl-info b { max-width: 9rem; } .vl-leiste .vl-tempo { display: none; } }
+@media (max-width: 520px) { .vl-info b { max-width: 7.5rem; } .vl-leiste .vl-tempo { display: none; } .vl-leiste { gap: .15rem; } .vl-leiste button { width: 2.25rem; height: 2.25rem; } .vl-leiste .vl-haupt { width: 2.6rem; height: 2.6rem; } }
+/* Hörspiel-Schalter und kleines Mischpult */
+.vl-leiste .vl-hs { position: relative; color: var(--ash, #b8a998); }
+.vl-leiste .vl-hs[aria-pressed="true"] { color: var(--ember, #e0a046); }
+.vl-leiste .vl-hs[aria-pressed="false"]::after { content: ""; position: absolute; left: 22%; right: 22%; top: 50%; height: 1.6px; background: currentColor; transform: rotate(-38deg); border-radius: 1px; }
+.vl-pult { position: fixed; left: 50%; bottom: calc(var(--vl-unten, 16px) + env(safe-area-inset-bottom, 0px) + 4.1rem); z-index: 61; width: min(19rem, calc(100vw - 1.5rem)); transform: translateX(-50%); padding: .85rem .95rem .8rem; border: 1px solid rgba(224,160,70,.45); border-radius: 14px;
+  background: rgba(18,15,24,.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 12px 30px rgba(0,0,0,.55); color: var(--vellum, #ebe2cc); font-size: .86rem; display: grid; gap: .6rem; }
+.vl-pult[hidden] { display: none; }
+.vl-pult label { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .35rem .6rem; }
+.vl-pult .vl-schalter { display: flex; align-items: center; justify-content: space-between; gap: .8rem; cursor: pointer; }
+.vl-pult .vl-schalter b { font-family: var(--name, serif); font-weight: 400; font-size: 1rem; }
+.vl-pult .vl-hs-an { width: 2.6rem; height: 1.45rem; padding: 0; border: 0; border-radius: 999px; background: rgba(235,226,204,.18); position: relative; cursor: pointer; flex: none; transition: background .2s; }
+.vl-pult .vl-hs-an i { position: absolute; top: .17rem; left: .18rem; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: #d8cdb6; transition: transform .2s, background .2s; }
+.vl-pult .vl-hs-an[aria-checked="true"] { background: rgba(224,160,70,.75); }
+.vl-pult .vl-hs-an[aria-checked="true"] i { transform: translateX(1.12rem); background: #1a1208; }
+.vl-pult .vl-hs-an:focus-visible { outline: 2px solid var(--ember, #e0a046); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .vl-pult .vl-hs-an, .vl-pult .vl-hs-an i { transition: none; } }
+.vl-pult input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--ember, #e0a046); margin: 0; }
+.vl-pult small { color: var(--ash, #b8a998); font-size: .74rem; }
+.vl-pult .vl-reihe { display: flex; gap: .3rem; flex-wrap: wrap; align-items: center; }
+.vl-pult .vl-reihe button { padding: .25rem .6rem; border-radius: 999px; border: 1px solid rgba(224,160,70,.35); background: none; color: var(--vellum, #ebe2cc); font: inherit; font-size: .8rem; cursor: pointer; }
+.vl-pult .vl-reihe button[aria-pressed="true"] { background: rgba(224,160,70,.8); color: #1a1208; border-color: transparent; }
+.vl-pult.aus .vl-regler { opacity: .45; }
 @media (prefers-reduced-motion: reduce) { .vl-welle i, #chapters .prose > .vl-aktiv::before { animation: none !important; } }
 `;
   document.head.appendChild(css);
@@ -113,27 +139,91 @@
   let eigenesScrollen = 0;
   window.addEventListener("scroll", () => { if (Date.now() - eigenesScrollen > 1200) letztesScrollen = Date.now(); }, { passive: true });
 
-  function spielen(i) {
-    if (i < 0 || i >= liste.length) { stopp(true); return; }
+  /* ---------- Hörspiel (chronik/hoerspiel.js): Kulisse, Effekte, Zwischenspiele ---------- */
+  const HSP = () => (window.ImresHoerspiel && window.ImresHoerspiel.verfuegbar() ? window.ImresHoerspiel : null);
+  let wartUhr = 0, wartTok = 0, wartet = false;
+  function warteAbbrechen() { clearTimeout(wartUhr); wartTok++; wartet = false; }
+  /* art: "start" (Knopf in der Chronik), "weiter" (der vorige Absatz ist zu Ende), "sprung" (vor/zurück) */
+  function spielen(i, art) {
+    art = art || "sprung";
+    warteAbbrechen();
+    const H = HSP();
+    if (i < 0 || i >= liste.length) {
+      if (art === "weiter" && H && H.an() && pos >= 0) {
+        const tok = wartTok; wartet = true; zeichnen();
+        H.kapitelEnde().then(ms => { if (tok !== wartTok) return; wartUhr = setTimeout(() => { if (tok === wartTok) { wartet = false; stopp(true); } }, ms); });
+        return;
+      }
+      stopp(true); return;
+    }
+    const vor = pos >= 0 ? liste[pos] : null;
     pos = i; const x = liste[pos];
-    if (!audio) { audio = new Audio(); audio.preload = "auto"; audio.addEventListener("ended", () => spielen(pos + 1)); audio.addEventListener("timeupdate", fortschritt); audio.addEventListener("error", () => setTimeout(() => spielen(pos + 1), 300)); }
+    if (!audio) {
+      audio = new Audio(); audio.preload = "auto";
+      audio.addEventListener("ended", beiEnde);
+      audio.addEventListener("timeupdate", fortschritt);
+      audio.addEventListener("error", () => { if (pos >= 0) setTimeout(() => spielen(pos + 1, "weiter"), 300); });
+      audio.addEventListener("playing", () => { const h = HSP(); if (h && pos >= 0) h.sprache(liste[pos], audio); medienStatus(); zeichnen(); });
+      audio.addEventListener("pause", () => { const h = HSP(); if (h && !audio.ended && !wartet) h.pause(); medienStatus(); zeichnen(); });
+      audio.addEventListener("ratechange", () => { const h = HSP(); if (h && !audio.paused && pos >= 0) h.sprache(liste[pos], audio); });
+      audio.addEventListener("seeked", () => { const h = HSP(); if (h && !audio.paused && pos >= 0) h.sprache(liste[pos], audio); });
+    }
     const src = x.datei;
     if (naechstes && naechstes.dataset.src === src) { audio.src = naechstes.src; } else audio.src = src;
     audio.playbackRate = tempo;
-    const p = audio.play(); if (p && p.catch) p.catch(() => { spielt = false; zeichnen(); });
     spielt = true;
     schreib("imres-vorlesen-pos", JSON.stringify({ sp: mSprache, kap: x.kap, i: x.i }));
     markieren(); zeichnen(); medienInfo();
     /* nächsten Absatz vorladen */
     const n = liste[pos + 1];
     if (n) { naechstes = new Audio(); naechstes.preload = "auto"; naechstes.src = n.datei; naechstes.dataset.src = n.datei; }
+    if (!H || !H.an()) { los(); return; }
+    if (H.direkt() && art === "weiter") { H.ortNur(x); los(); return; }   /* Sperrbildschirm: ohne Zwischenspiel sofort weiter */
+    /* Hörspiel: erst Ortswechsel und Zwischenspiel, dann die Stimme */
+    const kapStart = liste.findIndex(y => y.kap === x.kap) === pos;
+    const tok = wartTok; wartet = true; zeichnen(); medienStatus();
+    H.uebergang(vor, x, { art, kapStart, naechster: n || null }).then(ms => {
+      if (tok !== wartTok) return;
+      if (!(ms > 0)) { wartet = false; los(); return; }
+      wartUhr = setTimeout(() => { if (tok === wartTok) { wartet = false; los(); } }, ms);
+    }, () => { if (tok === wartTok) { wartet = false; los(); } });
   }
-  function umschalten() { if (!audio || pos < 0) return; if (audio.paused) { audio.play(); spielt = true; } else { audio.pause(); spielt = false; } zeichnen(); }
+  function los() {
+    if (!audio || pos < 0) return;
+    audio.playbackRate = tempo;
+    const p = audio.play(); if (p && p.catch) p.catch(() => { spielt = false; zeichnen(); });
+    spielt = true; zeichnen();
+  }
+  function beiEnde() {
+    if (pos < 0) return;
+    const H = HSP();
+    const ms = H && H.an() ? H.absatzEnde(liste[pos]) : 0;
+    if (!(ms > 0)) { spielen(pos + 1, "weiter"); return; }
+    const tok = ++wartTok; wartet = true; zeichnen();
+    wartUhr = setTimeout(() => { if (tok === wartTok) { wartet = false; spielen(pos + 1, "weiter"); } }, ms);
+  }
+  function umschalten() {
+    if (!audio || pos < 0) return;
+    const H = HSP();
+    if (wartet) {               /* während Zwischenspiel oder Pause zwischen Absätzen */
+      warteAbbrechen(); spielt = false; if (H) H.pause(); zeichnen(); medienStatus(); return;
+    }
+    if (audio.paused) {
+      if (H) { H.ein(); H.weiter(); }
+      if (audio.ended) { spielen(pos + 1, "weiter"); return; }
+      los();
+    } else { audio.pause(); spielt = false; }
+    zeichnen();
+  }
   function stopp(fertig) {
+    warteAbbrechen();
     if (audio) audio.pause(); spielt = false;
+    const H = HSP(); if (H) H.stopp();
     document.querySelectorAll("#chapters .vl-aktiv").forEach(e => e.classList.remove("vl-aktiv"));
     if (leiste) leiste.classList.remove("da", "spielt");
+    pultZu();
     if (fertig) pos = -1;
+    medienStatus();
   }
   function fortschritt() { if (!leiste || !audio) return; const b = leiste.querySelector(".vl-balken i"); const ges = liste.length || 1; b.style.width = (((pos + (audio.duration ? audio.currentTime / audio.duration : 0)) / ges) * 100).toFixed(2) + "%"; }
 
@@ -142,18 +232,73 @@
     if (leiste) return;
     leiste = document.createElement("div"); leiste.className = "vl-leiste"; leiste.setAttribute("role", "region");
     leiste.innerHTML = '<button type="button" class="vl-zurueck">' + ZURUECK + '</button><button type="button" class="vl-haupt">' + PAUSE + '</button><button type="button" class="vl-vor">' + VOR + '</button>' +
-      '<div class="vl-info"><b></b><small></small><div class="vl-balken"><i></i></div></div><button type="button" class="vl-tempo"></button><button type="button" class="vl-zu">✕</button>';
+      '<div class="vl-info"><b></b><small></small><div class="vl-balken"><i></i></div></div><button type="button" class="vl-tempo"></button><button type="button" class="vl-hs" aria-haspopup="true" aria-expanded="false">' + HS + '</button><button type="button" class="vl-zu">✕</button>';
     document.body.appendChild(leiste);
     leiste.addEventListener("click", e => {
       const b = e.target.closest("button, .vl-info"); if (!b) return;
       if (b.classList.contains("vl-haupt")) umschalten();
-      else if (b.classList.contains("vl-vor")) spielen(pos + 1);
-      else if (b.classList.contains("vl-zurueck")) spielen(audio && audio.currentTime > 3 ? pos : Math.max(0, pos - 1));
+      else if (b.classList.contains("vl-vor")) { const h = HSP(); if (h) h.ein(); spielen(pos + 1, "sprung"); }
+      else if (b.classList.contains("vl-zurueck")) { const h = HSP(); if (h) h.ein(); spielen(audio && audio.currentTime > 3 && !wartet ? pos : Math.max(0, pos - 1), "sprung"); }
+      else if (b.classList.contains("vl-hs")) pultUmschalten();
       else if (b.classList.contains("vl-zu")) stopp(false);
-      else if (b.classList.contains("vl-tempo")) { const st = [1, 1.15, 1.3, 0.9]; tempo = st[(st.indexOf(tempo) + 1) % st.length] || 1; schreib("imres-vorlesen-tempo", String(tempo)); if (audio) audio.playbackRate = tempo; zeichnen(); }
+      else if (b.classList.contains("vl-tempo")) { const st = [1, 1.15, 1.3, 0.9]; tempoSetzen(st[(st.indexOf(tempo) + 1) % st.length] || 1); }
       else if (b.classList.contains("vl-info")) { letztesScrollen = 0; markieren(); }
     });
   }
+  function tempoSetzen(v) { tempo = v; schreib("imres-vorlesen-tempo", String(tempo)); if (audio) audio.playbackRate = tempo; zeichnen(); pultZeichnen(); }
+  /* kleines Mischpult über der Leiste: Hörspiel an/aus, Kulisse, Musik & Effekte, Tempo */
+  let pult = null;
+  function pultBauen() {
+    if (pult) return;
+    pult = document.createElement("div"); pult.className = "vl-pult"; pult.hidden = true; pult.setAttribute("role", "dialog");
+    pult.innerHTML = '<div class="vl-schalter"><b></b><button type="button" role="switch" class="vl-hs-an"><i></i></button></div>' +
+      '<label class="vl-regler"><span class="vl-l-kul"></span><small class="vl-w-kul"></small><input type="range" min="0" max="150" step="5" class="vl-kul"></label>' +
+      '<label class="vl-regler"><span class="vl-l-mus"></span><small class="vl-w-mus"></small><input type="range" min="0" max="150" step="5" class="vl-mus"></label>' +
+      '<div class="vl-reihe"><small class="vl-l-tempo"></small></div>';
+    document.body.appendChild(pult);
+    const reihe = pult.querySelector(".vl-reihe");
+    [0.9, 1, 1.15, 1.3].forEach(v => { const b = document.createElement("button"); b.type = "button"; b.dataset.tempo = v; reihe.appendChild(b); });
+    pult.addEventListener("input", e => {
+      const H = window.ImresHoerspiel; if (!H) return;
+      if (e.target.classList.contains("vl-kul")) H.kulisse(e.target.value / 100);
+      if (e.target.classList.contains("vl-mus")) H.musik(e.target.value / 100);
+      pultZeichnen();
+    });
+    pult.addEventListener("click", e => {
+      const b = e.target.closest("[data-tempo]"); if (b) tempoSetzen(+b.dataset.tempo);
+      if (e.target.closest(".vl-schalter")) hsUmschalten();
+    });
+    document.addEventListener("click", e => { if (pult && !pult.hidden && !e.target.closest(".vl-pult, .vl-hs")) pultZu(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && pult && !pult.hidden) { pultZu(); const k = leiste && leiste.querySelector(".vl-hs"); if (k) k.focus(); } });
+  }
+  /* Hörspiel an/aus – läuft gerade ein Zwischenspiel, geht es beim Ausschalten sofort mit der Stimme weiter */
+  function hsUmschalten() {
+    const H = window.ImresHoerspiel; if (!H) return;
+    H.setAn(!H.an());
+    if (!H.an() && wartet) { warteAbbrechen(); if (pos >= 0 && audio && !audio.ended) los(); else if (pos >= 0) spielen(pos + 1, "weiter"); }
+    pultZeichnen(); zeichnen();
+  }
+  function pultZeichnen() {
+    if (!pult) return;
+    const T = t(), H = window.ImresHoerspiel, an = !!(H && H.an());
+    pult.querySelector(".vl-schalter b").textContent = T.hsLang;
+    const cb = pult.querySelector(".vl-hs-an"); cb.setAttribute("aria-checked", an ? "true" : "false"); cb.setAttribute("aria-label", T.hsLang);
+    pult.classList.toggle("aus", !an);
+    const k = Math.round((H ? H.kulisse() : 1) * 100), m = Math.round((H ? H.musik() : 1) * 100);
+    pult.querySelector(".vl-l-kul").textContent = T.hsKulisse; pult.querySelector(".vl-w-kul").textContent = k + " %"; pult.querySelector(".vl-kul").value = k; pult.querySelector(".vl-kul").setAttribute("aria-label", T.hsKulisse);
+    pult.querySelector(".vl-l-mus").textContent = T.hsMusik; pult.querySelector(".vl-w-mus").textContent = m + " %"; pult.querySelector(".vl-mus").value = m; pult.querySelector(".vl-mus").setAttribute("aria-label", T.hsMusik);
+    pult.querySelectorAll(".vl-regler input").forEach(r => { r.disabled = !an; });
+    pult.querySelector(".vl-l-tempo").textContent = T.tempo + ":";
+    pult.querySelectorAll("[data-tempo]").forEach(b => { const v = +b.dataset.tempo; b.textContent = String(v).replace(".", de() ? "," : ".") + "×"; b.setAttribute("aria-pressed", v === tempo ? "true" : "false"); });
+  }
+  function pultUmschalten() {
+    pultBauen();
+    if (!pult.hidden) { pultZu(); return; }
+    pultZeichnen(); pult.hidden = false;
+    const k = leiste && leiste.querySelector(".vl-hs"); if (k) k.setAttribute("aria-expanded", "true");
+    const cb = pult.querySelector(".vl-hs-an"); if (cb) cb.focus({ preventScroll: true });
+  }
+  function pultZu() { if (!pult || pult.hidden) return; pult.hidden = true; const k = leiste && leiste.querySelector(".vl-hs"); if (k) k.setAttribute("aria-expanded", "false"); }
   function untenAbstand() {
     const nav = document.querySelector(".handyleiste");
     let u = 16;
@@ -163,12 +308,16 @@
   function zeichnen() {
     if (pos < 0) return; leisteBauen(); untenAbstand();
     const T = t(), x = liste[pos];
-    leiste.classList.add("da"); leiste.classList.toggle("spielt", spielt && audio && !audio.paused);
-    const h = leiste.querySelector(".vl-haupt"); const an = audio && !audio.paused;
+    const an = !!(spielt && audio && (!audio.paused || wartet));
+    leiste.classList.add("da"); leiste.classList.toggle("spielt", an);
+    const h = leiste.querySelector(".vl-haupt");
     h.innerHTML = an ? PAUSE : PLAY; h.setAttribute("aria-label", an ? T.pause : T.spielen);
     leiste.querySelector(".vl-zurueck").setAttribute("aria-label", T.zurueck); leiste.querySelector(".vl-vor").setAttribute("aria-label", T.vor); leiste.querySelector(".vl-zu").setAttribute("aria-label", T.zu);
     leiste.querySelector(".vl-info b").textContent = x ? (x.kap === "vorab" ? T.vorab : abschnittVon(x.kap, x.i)) : "";
     leiste.querySelector(".vl-info small").innerHTML = esc(x && x.kap !== "vorab" ? (de() ? "Kapitel " : "Chapter ") + x.kap + " · " : "") + esc(T.sprecher) + '<span class="vl-welle"><i></i><i></i><i></i></span>';
+    const H = HSP(), hk = leiste.querySelector(".vl-hs");
+    hk.hidden = !H; if (H) { hk.setAttribute("aria-pressed", H.an() ? "true" : "false"); hk.setAttribute("aria-label", T.hsLang + " – " + (H.an() ? T.hsAn : T.hsAus)); hk.title = T.hoerspiel + ": " + (H.an() ? T.hsAn : T.hsAus); }
+    if (!H) pultZu();
     const tk = leiste.querySelector(".vl-tempo"); tk.textContent = (tempo === 1 ? "1" : String(tempo).replace(".", de() ? "," : ".")) + "×"; tk.setAttribute("aria-label", T.tempo);
   }
   function medienInfo() {
@@ -177,8 +326,13 @@
     try {
       navigator.mediaSession.metadata = new MediaMetadata({ title: abschnittVon(x.kap, x.i), artist: "Barradin – " + t().sprecher, album: "Imres Tales · Chronik", artwork: [{ src: "barradin.jpg", sizes: "512x512", type: "image/jpeg" }] });
       navigator.mediaSession.setActionHandler("play", umschalten); navigator.mediaSession.setActionHandler("pause", umschalten);
-      navigator.mediaSession.setActionHandler("nexttrack", () => spielen(pos + 1)); navigator.mediaSession.setActionHandler("previoustrack", () => spielen(Math.max(0, pos - 1)));
+      navigator.mediaSession.setActionHandler("nexttrack", () => spielen(pos + 1, "sprung")); navigator.mediaSession.setActionHandler("previoustrack", () => spielen(Math.max(0, pos - 1), "sprung"));
     } catch (_) {}
+    medienStatus();
+  }
+  function medienStatus() {
+    if (!("mediaSession" in navigator)) return;
+    try { navigator.mediaSession.playbackState = pos < 0 ? "none" : (spielt && audio && (!audio.paused || wartet)) ? "playing" : "paused"; } catch (_) {}
   }
 
   /* ---------- Knöpfe in der Chronik ---------- */
@@ -205,21 +359,24 @@
   document.addEventListener("click", e => {
     const b = e.target.closest && e.target.closest("[data-vl-kap]"); if (!b) return;
     e.preventDefault(); listeBauen();
+    const H = HSP(); if (H) H.ein();   /* im Klick: Audio darf jetzt starten (iOS/Android) */
     const kap = b.dataset.vlKap, i = b.dataset.vlI != null ? +b.dataset.vlI : -1;
     let start = liste.findIndex(x => x.kap === kap && (i < 0 || x.i >= i));
     if (start < 0) start = 0;
-    letztesScrollen = 0; spielen(start);
+    letztesScrollen = 0; pos = -1; spielen(start, "start");
   });
   document.addEventListener("keydown", e => {
     if (pos < 0 || !leiste || !leiste.classList.contains("da")) return;
     if (e.target.closest && e.target.closest("input, textarea, select, [contenteditable]")) return;
     if (e.key === "k" || e.key === "K") { e.preventDefault(); umschalten(); }
+    if ((e.key === "h" || e.key === "H") && HSP()) { e.preventDefault(); hsUmschalten(); }
   });
 
   /* ---------- Start und Sprachwechsel ---------- */
   function aufbauen() {
     if (!document.querySelector("#chapters > .chapter")) return;
     manifestLaden().then(() => { knoepfe(); if (pos >= 0) { listeBauen(); zeichnen(); } });
+    const H = HSP(); if (H) (window.requestIdleCallback || (f => setTimeout(f, 1500)))(() => H.vorbereiten());
   }
   let uhr = 0;
   const beob = new MutationObserver(() => { clearTimeout(uhr); uhr = setTimeout(() => { if (!document.querySelector(".vl-knopf") || mSprache !== (de() ? "de" : "en")) { if (mSprache !== (de() ? "de" : "en")) stopp(true); aufbauen(); } }, 300); });
@@ -227,5 +384,6 @@
   new MutationObserver(() => { clearTimeout(uhr); uhr = setTimeout(aufbauen, 300); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   window.addEventListener("resize", () => { if (pos >= 0) untenAbstand(); });
   aufbauen();
-  window.ImresVorlesen = { spielen: (kap, i) => { listeBauen(); const s = liste.findIndex(x => x.kap === String(kap) && x.i >= (i || 0)); spielen(s < 0 ? 0 : s); }, stopp: () => stopp(true), zustand: () => ({ pos, laenge: liste.length, spielt: !!(audio && !audio.paused) }) };
+  window.ImresVorlesen = { spielen: (kap, i) => { listeBauen(); const H = HSP(); if (H) H.ein(); const s = liste.findIndex(x => x.kap === String(kap) && x.i >= (i || 0)); pos = -1; spielen(s < 0 ? 0 : s, "start"); }, stopp: () => stopp(true),
+    zustand: () => ({ pos, laenge: liste.length, spielt: !!(audio && !audio.paused), wartet, absatz: pos >= 0 && liste[pos] ? liste[pos].kap + ":" + liste[pos].i : null, zeit: audio ? audio.currentTime : 0 }), audio: () => audio };
 })();
