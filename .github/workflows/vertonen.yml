@@ -1,0 +1,45 @@
+name: Vertonung (ElevenLabs)
+on:
+  workflow_dispatch:
+    inputs:
+      modus:
+        description: "proben = Hörproben, chronik = Chronik vertonen"
+        default: proben
+        type: choice
+        options: [proben, chronik]
+      sprache:
+        description: "de oder en"
+        default: de
+      stimme:
+        description: "voice_id (nur für chronik)"
+        default: ""
+      modell:
+        description: "ElevenLabs-Modell"
+        default: eleven_multilingual_v2
+      grenze:
+        description: "höchstens so viele Zeichen in diesem Lauf (0 = alles)"
+        default: "0"
+permissions:
+  contents: write
+concurrency:
+  group: vertonung
+  cancel-in-progress: false
+jobs:
+  vertonen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Vertonen
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          SPRACHE: ${{ inputs.sprache }}
+          STIMME: ${{ inputs.stimme }}
+          MODELL: ${{ inputs.modell }}
+          GRENZE: ${{ inputs.grenze }}
+        run: |
+          git config user.name "Vertonung"
+          git config user.email "actions@users.noreply.github.com"
+          python3 tools/vertonung/vertonen.py ${{ inputs.modus }}
