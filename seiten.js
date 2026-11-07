@@ -115,8 +115,30 @@
       [["heldensturm", "38% 45%"], ["jagd", "50% 18%"], ["hort", "50% 22%"], ["nacht", "50% 14%"], ["kehle", "72% 20%"]].map(([n, fokus], i) => kImg("vorschau/plakat-" + n + ".webp", "k-plakat", 1 + i * .35, "--n:" + (i - 2) + ";object-position:" + fokus)).join(""),
     /* Bühne: Vorhang, Lichtkegel, eine leuchtende Laute und Noten */
     buehne: () => '<span class="k-l k-vorhang" style="--d:0"></span><span class="k-l k-licht" style="--d:.5"></span>' +
-      kImg("skizze-laute.webp", "k-laute", 2) + '<span class="k-l k-noten" style="--d:2.6"><i>♪</i><i>♫</i><i>♩</i><i>♬</i></span>'
+      kImg("skizze-laute.webp", "k-laute", 2) + '<span class="k-l k-noten" style="--d:2.6"><i>♪</i><i>♫</i><i>♩</i><i>♬</i></span>' +
+      /* das Pult von Barden Beats als kleiner Bildschirm – läuft stumm in Schleife (bei „weniger Bewegung“ nur das Standbild) */
+      '<span class="k-l k-pult" style="--d:.6"><video muted loop playsinline preload="none" poster="vorschau/pult-poster.webp?v=1"><source src="vorschau/pult-clip.webm?v=1" type="video/webm"><source src="vorschau/pult-clip.mp4?v=1" type="video/mp4"></video></span>'
   };
+
+  /* ---------- Barden-Beats-Kachel: Pult-Video beim Drüberfahren bzw. am Handy, wenn die Kachel mittig im Bild ist ---------- */
+  (function pultKachel() {
+    const ruhig = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const an = (k, ja) => {
+      const v = k && k.querySelector(".k-pult video"); if (!v) return;
+      if (ja && !ruhig()) { k.classList.add("pult-an"); const p = v.play(); if (p && p.catch) p.catch(() => k.classList.remove("pult-an")); }
+      else { k.classList.remove("pult-an"); setTimeout(() => { if (!k.classList.contains("pult-an")) v.pause(); }, 500); }
+    };
+    document.addEventListener("pointerover", e => { if (e.pointerType !== "mouse") return; const k = e.target.closest && e.target.closest(".kachel"); if (k && k.querySelector(".k-pult") && !k.classList.contains("pult-an")) an(k, true); });
+    document.addEventListener("pointerout", e => { if (e.pointerType !== "mouse") return; const k = e.target.closest && e.target.closest(".kachel"); if (k && k.classList.contains("pult-an") && !(e.relatedTarget && k.contains(e.relatedTarget))) an(k, false); });
+    document.addEventListener("focusin", e => { const k = e.target.closest && e.target.closest(".kachel"); if (k && k.querySelector(".k-pult")) an(k, true); });
+    document.addEventListener("focusout", e => { const k = e.target.closest && e.target.closest(".kachel"); if (k && k.classList.contains("pult-an")) an(k, false); });
+    /* Touch: kein Hover – das Video läuft, solange die Kachel in der Bildmitte steht */
+    if (window.matchMedia && matchMedia("(hover: none)").matches) {
+      let uhr = 0;
+      const pruefen = () => { uhr = 0; document.querySelectorAll(".kachel").forEach(k => { if (!k.querySelector(".k-pult")) return; const r = k.getBoundingClientRect(), mitte = innerHeight / 2; const drin = r.top < mitte + innerHeight * .2 && r.bottom > mitte - innerHeight * .2; if (drin !== k.classList.contains("pult-an")) an(k, drin); }); };
+      window.addEventListener("scroll", () => { if (!uhr) uhr = setTimeout(pruefen, 150); }, { passive: true });
+    }
+  })();
 
   /* ---------- Ansichten ---------- */
   const sektion = id => { const s = $(id); return s && s.matches("section.part") ? s : null; };
@@ -595,9 +617,16 @@ body.ansicht-bereich main > section.part.aktiv { border-top: 0; padding-top: cla
 /* Bühne */
 .k-vorhang { inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.55)), repeating-linear-gradient(90deg, #5a1420 0 18px, #7a1d2a 18px 30px, #4a0f19 30px 40px); }
 .k-licht { inset: -10% -10% 0; background: conic-gradient(from 160deg at 30% -5%, transparent 0deg, rgba(255,220,150,.22) 12deg, transparent 26deg), conic-gradient(from 175deg at 72% -5%, transparent 0deg, rgba(160,220,255,.18) 12deg, transparent 26deg); }
-.kachel .k-collage .k-laute { left: 20%; top: 6%; height: 74%; filter: brightness(1.4) sepia(1) saturate(3) hue-rotate(-5deg) drop-shadow(0 0 6px rgba(255,190,90,.7)); --t: rotate(-18deg); }
+.kachel .k-collage .k-laute { left: 4%; top: 6%; height: 70%; filter: brightness(1.4) sepia(1) saturate(3) hue-rotate(-5deg) drop-shadow(0 0 6px rgba(255,190,90,.7)); --t: rotate(-18deg); }
 .k-noten { inset: 0; } .k-noten i { position: absolute; font-style: normal; color: #ffd78a; text-shadow: 0 0 8px rgba(255,190,90,.8); font-size: clamp(1rem, 2.6vw, 1.6rem); }
-.k-noten i:nth-child(1) { left: 62%; top: 14%; } .k-noten i:nth-child(2) { left: 74%; top: 30%; font-size: 1.4em; } .k-noten i:nth-child(3) { left: 84%; top: 10%; } .k-noten i:nth-child(4) { left: 54%; top: 36%; }
+.k-noten i:nth-child(1) { left: 30%; top: 8%; } .k-noten i:nth-child(2) { left: 38%; top: 30%; font-size: 1.4em; } .k-noten i:nth-child(3) { left: 92%; top: 66%; } .k-noten i:nth-child(4) { left: 26%; top: 44%; }
+/* Barden Beats: beim Drüberfahren (am Handy, sobald die Kachel mittig im Bild ist) läuft das Pult als Video über die ganze Kachel */
+.k-collage:has(.k-pult) { container-type: size; }
+.k-pult { inset: 0; opacity: 0; transition: opacity .5s; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, rgba(0,0,0,.28) 70%, rgba(0,0,0,.12)); mask-image: linear-gradient(180deg, #000 30%, rgba(0,0,0,.28) 70%, rgba(0,0,0,.12)); }
+.k-pult video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; display: block; }
+.kachel.pult-an .k-pult { opacity: 1; }
+.kachel.pult-an .k-laute, .kachel.pult-an .k-noten { opacity: 0; transition: opacity .4s; }
 .kachel:hover .k-noten i { animation: kNote 2.2s ease-in-out infinite; } .kachel:hover .k-noten i:nth-child(2n) { animation-delay: -1.1s; }
 @keyframes kNote { 50% { transform: translateY(-8px) rotate(8deg); } }
 @media (prefers-reduced-motion: reduce) { .k-l { transition: none; transform: var(--t, none); } .kachel:hover .k-noten i, .kachel:hover .k-route path { animation: none; } }
