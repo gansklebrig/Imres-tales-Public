@@ -1257,3 +1257,169 @@ Der Brunnen (a_brunnen) stammt aus Allacrost/Valyria Tear und steht unter GPL 2.
   a_brunnen: Hero of Allacrost (Allacrost-Projekt) – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear – data/sounds/fountain_large.ogg
   a_brunnen: Hero of Allacrost (Allacrost-Projekt) – GPL-2.0-or-later – über github.com/ValyriaTear/ValyriaTear – data/sounds/fountain_small.ogg
 
+
+Erweiterung „Feldaufnahmen“ (November 2026): weitere Teppich-Varianten (amb/a_*_n<k>, neu a_esse, a_schilf) und
+Einzelgeräusche (amb/n_<art>_<k>) aus Wikimedia Commons – jede Lizenz über die maschinenlesbaren Angaben der Dateiseite
+geprüft; nur gemeinfrei, CC0, CC BY und CC BY-SA. Sammlungen: Wildlife Sounds der British Library (Aufnahmen u. a. von
+Lawrence Shove, Aubrey John Williams, Howard Phelps), xeno-canto-Aufnahmen (von Fæ nach Commons übertragen),
+PDsounds.org (gemeinfrei), Kirchenglocken von Litlok (Wikimedia France) und Martin Thurnherr, Heuschrecken und Grillen
+der Sammlung Baudewijn Odé, Work With Sounds (Europeana), dazu Einzelaufnahmen u. a. von Serg Childed, DrTrumpet,
+Glaneur de sons, Filo gèn', WrS.tm.pl, Shyamal, Channel R, Vianney Bajart, Juan lacruz, the_riel_thing,
+Beeld en Geluid (Niederländisches Institut für Bild und Ton) sowie Pferdewiehern aus Briefer u. a. (Scientific Reports 2015,
+CC BY 4.0); außerdem vier CC0-Aufnahmen aus der App Ambie
+(github.com/jenius-apps/ambie, Originale auf Freesound).
+Bearbeitet für Imres Tales: Ausschnitt, Mono (44,1 kHz), Hoch-/Tiefpass, Stille vorn/hinten entfernt, Ein-/Ausblendung,
+Lautheit an den Bestand angeglichen (Spitzen begrenzt), Teppiche als nahtlose Schleifen (Überblendung), MP3 (Teppiche
+96 kbit/s, Einzelgeräusche 80 kbit/s). Die Bearbeitungen stehen unter denselben Lizenzen wie die Originale (CC BY-SA
+entsprechend weitergegeben). Lizenztexte: CC0 https://creativecommons.org/publicdomain/zero/1.0/ ·
+CC BY 3.0/4.0 https://creativecommons.org/licenses/by/4.0/ · CC BY-SA 3.0/4.0 https://creativecommons.org/licenses/by-sa/4.0/
+  a_bach_n1: stephan – gemeinfrei (PDsounds.org) – „Shallow small river with stony riverbed.ogg“ – https://commons.wikimedia.org/wiki/File:Shallow_small_river_with_stony_riverbed.ogg
+  a_bach_n2: hargissssound, „Burbling Brook“ – CC0 (Original freesound.org/s/324591) – über github.com/jenius-apps/ambie
+  a_brandung_n2: Beeld en Geluid – CC BY-SA 3.0 – „De branding aan het strand - SoundCloud - Beeld en Geluid.ogg“ – https://commons.wikimedia.org/wiki/File:De_branding_aan_het_strand_-_SoundCloud_-_Beeld_en_Geluid.ogg
+  a_brunnen_n1: aldor – gemeinfrei (PDsounds.org) – „Fountain in toulouse.ogg“ – https://commons.wikimedia.org/wiki/File:Fountain_in_toulouse.ogg
+  a_brunnen_n2: aldor – gemeinfrei (PDsounds.org) – „La fontaine de la place.ogg“ – https://commons.wikimedia.org/wiki/File:La_fontaine_de_la_place.ogg
+  a_dschungel_n3: Glaneur de sons . – CC BY 3.0 – „Nature sounds ambience in a Dordogne pond.ogg“ – https://commons.wikimedia.org/wiki/File:Nature_sounds_ambience_in_a_Dordogne_pond.ogg
+  a_esse: Work With Sounds / La Fonderie – CC BY 4.0 – „WWS Fireoftheforge.ogg“ – https://commons.wikimedia.org/wiki/File:WWS_Fireoftheforge.ogg
+  a_feuer_n1: 16FThumaF, „13_Fire in fireplace“ – CC0 (Original freesound.org/s/499032) – über github.com/jenius-apps/ambie
+  a_fluss_n2: askeseverin, „River in Icelandic nature“ – CC0 (Original freesound.org/s/376202) – über github.com/jenius-apps/ambie
+  a_gewitter_n3: stephan – gemeinfrei (PDsounds.org) – „Thunderstorm after hot summer day 17 minutes 01 of 04.ogg“ – https://commons.wikimedia.org/wiki/File:Thunderstorm_after_hot_summer_day_17_minutes_01_of_04.ogg
+  a_gewitter_n4: stephan – gemeinfrei (PDsounds.org) – „Thunderstorm after hot summer day 17 minutes 03 of 04.ogg“ – https://commons.wikimedia.org/wiki/File:Thunderstorm_after_hot_summer_day_17_minutes_03_of_04.ogg
+  a_grillen_n1: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Gryllus campestris - sound.ogg“ – https://commons.wikimedia.org/wiki/File:Gryllus_campestris_-_sound.ogg
+  a_grillen_n2: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Oecanthus pellucens - sound.oga“ – https://commons.wikimedia.org/wiki/File:Oecanthus_pellucens_-_sound.oga
+  a_grillen_n3: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Tettigonia viridissima - sound.ogg“ – https://commons.wikimedia.org/wiki/File:Tettigonia_viridissima_-_sound.ogg
+  a_grillen_n4: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Metrioptera roeselii - sound.oga“ – https://commons.wikimedia.org/wiki/File:Metrioptera_roeselii_-_sound.oga
+  a_grillen_n5: Serg Childed – CC BY-SA 4.0 – „Crickets choir.ogg“ – https://commons.wikimedia.org/wiki/File:Crickets_choir.ogg
+  a_hafen_n1: British Library, Wildlife Sounds – CC BY 4.0 – „Burnham Overy harbour atmosphere (W PALEARCTIC COASTAL R4 C4).ogg“ – https://commons.wikimedia.org/wiki/File:Burnham_Overy_harbour_atmosphere_%28W_PALEARCTIC_COASTAL_R4_C4%29.ogg
+  a_halle_n1: DrTrumpet – CC BY-SA 4.0 – „2023-Mai-20 15h40min Wien im linken Seitenschiff des Stephansdoms, fast Stille.wav“ – https://commons.wikimedia.org/wiki/File:2023-Mai-20_15h40min_Wien_im_linken_Seitenschiff_des_Stephansdoms%2C_fast_Stille.wav
+  a_klippen_n1: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Kittiwake (Rissa tridactyla) (W1CDR0001389 BD30).ogg“ – https://commons.wikimedia.org/wiki/File:Kittiwake_%28Rissa_tridactyla%29_%28W1CDR0001389_BD30%29.ogg
+  a_klippen_n2: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Black-headed Gulls (Larus ridibundus) (W1CDR0001402 BD19).ogg“ – https://commons.wikimedia.org/wiki/File:Black-headed_Gulls_%28Larus_ridibundus%29_%28W1CDR0001402_BD19%29.ogg
+  a_lagerfeuer_n3: Work With Sounds / Werstas – CC BY 4.0 – „WWS Bonfireburning.ogg“ – https://commons.wikimedia.org/wiki/File:WWS_Bonfireburning.ogg
+  a_leichtregen_n4: ezwa – gemeinfrei (PDsounds.org) – „Rain (1).ogg“ – https://commons.wikimedia.org/wiki/File:Rain_%281%29.ogg
+  a_nacht_n10: Joost van Bruggen (xeno-canto XC432929) – CC BY-SA 4.0 – „Caprimulgus europaeus - European Nightjar XC432929.mp3“ – https://commons.wikimedia.org/wiki/File:Caprimulgus_europaeus_-_European_Nightjar_XC432929.mp3
+  a_nacht_n9: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Nightingale (Luscinia megarhynchos) (W1CDR0001376 BD18).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Nightingale_%28Luscinia_megarhynchos%29_%28W1CDR0001376_BD18%29.ogg
+  a_regen_n3: ezwa – gemeinfrei (PDsounds.org) – „Rain and thunder (1).ogg“ – https://commons.wikimedia.org/wiki/File:Rain_and_thunder_%281%29.ogg
+  a_schafe_n1: earthcalling – gemeinfrei (PDsounds.org) – „Corner of a sheep field in summer.ogg“ – https://commons.wikimedia.org/wiki/File:Corner_of_a_sheep_field_in_summer.ogg
+  a_schilf: Howard Phelps / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Marsh Warbler (Acrocephalus palustris) (W ACROCEPHALUS PALUSTRIS R10 C2).ogg“ – https://commons.wikimedia.org/wiki/File:Marsh_Warbler_%28Acrocephalus_palustris%29_%28W_ACROCEPHALUS_PALUSTRIS_R10_C2%29.ogg
+  a_sommerwiese_n1: Channel R – gemeinfrei – „Cicadas in Greece.ogg“ – https://commons.wikimedia.org/wiki/File:Cicadas_in_Greece.ogg
+  a_starkregen_n2: jmbphilmes, „Rain heavy 1 (rural)“ – CC0 (Original freesound.org/s/200270) – über github.com/jenius-apps/ambie
+  a_voegel_n10: Malenki – CC BY-SA 3.0 – „Singing birds, thunder and rustling leaves.oga“ – https://commons.wikimedia.org/wiki/File:Singing_birds%2C_thunder_and_rustling_leaves.oga
+  a_voegel_n11: Olivier Grimm (xeno-canto XC560950) – CC BY-SA 4.0 – „Dendrocopos major - Great Spotted Woodpecker XC560950.mp3“ – https://commons.wikimedia.org/wiki/File:Dendrocopos_major_-_Great_Spotted_Woodpecker_XC560950.mp3
+  a_voegel_n9: nille – gemeinfrei (PDsounds.org) – „20090610 0 ambience.ogg“ – https://commons.wikimedia.org/wiki/File:20090610_0_ambience.ogg
+  a_waldregen_n1: ezwa – gemeinfrei (PDsounds.org) – „Rain thunder and birds.ogg“ – https://commons.wikimedia.org/wiki/File:Rain_thunder_and_birds.ogg
+  a_wellen_n1: Lawrence Shove / British Library, Wildlife Sounds – CC BY 4.0 – „Axmouth atmosphere (W1CDR0001422 BD24).ogg“ – https://commons.wikimedia.org/wiki/File:Axmouth_atmosphere_%28W1CDR0001422_BD24%29.ogg
+  n_bienen_9: soerena – gemeinfrei (PDsounds.org) – „Hummel bee.ogg“ – https://commons.wikimedia.org/wiki/File:Hummel_bee.ogg
+  n_bienen_10: soerena – gemeinfrei (PDsounds.org) – „Hummel bee.ogg“ – https://commons.wikimedia.org/wiki/File:Hummel_bee.ogg
+  n_bienen_11: soerena – gemeinfrei (PDsounds.org) – „Hummel bee.ogg“ – https://commons.wikimedia.org/wiki/File:Hummel_bee.ogg
+  n_blasebalg_1: Work With Sounds / La Fonderie – CC BY 4.0 – „WWS Bloweroftheforge.ogg“ – https://commons.wikimedia.org/wiki/File:WWS_Bloweroftheforge.ogg
+  n_blasebalg_2: Work With Sounds / La Fonderie – CC BY 4.0 – „WWS Bloweroftheforge.ogg“ – https://commons.wikimedia.org/wiki/File:WWS_Bloweroftheforge.ogg
+  n_donner_19: stephan – gemeinfrei (PDsounds.org) – „Storm thunderbolts.ogg“ – https://commons.wikimedia.org/wiki/File:Storm_thunderbolts.ogg
+  n_donner_20: stephan – gemeinfrei (PDsounds.org) – „Storm thunderbolts.ogg“ – https://commons.wikimedia.org/wiki/File:Storm_thunderbolts.ogg
+  n_donner_21: stephan – gemeinfrei (PDsounds.org) – „Storm thunderbolts.ogg“ – https://commons.wikimedia.org/wiki/File:Storm_thunderbolts.ogg
+  n_donner_22: stephan – gemeinfrei (PDsounds.org) – „Storm thunderbolts.ogg“ – https://commons.wikimedia.org/wiki/File:Storm_thunderbolts.ogg
+  n_eule_4: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Tawny Owl (Strix aluco) (W1CDR0001427 BD9).ogg“ – https://commons.wikimedia.org/wiki/File:Tawny_Owl_%28Strix_aluco%29_%28W1CDR0001427_BD9%29.ogg
+  n_eule_5: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Tawny Owl (Strix aluco) (W1CDR0001427 BD9).ogg“ – https://commons.wikimedia.org/wiki/File:Tawny_Owl_%28Strix_aluco%29_%28W1CDR0001427_BD9%29.ogg
+  n_eule_6: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Tawny Owl (Strix aluco) (W1CDR0001427 BD9).ogg“ – https://commons.wikimedia.org/wiki/File:Tawny_Owl_%28Strix_aluco%29_%28W1CDR0001427_BD9%29.ogg
+  n_eule_7: British Library, Wildlife Sounds – CC BY 4.0 – „Barn Owl (Tyto alba) (W TYTO ALBA R1 C16).ogg“ – https://commons.wikimedia.org/wiki/File:Barn_Owl_%28Tyto_alba%29_%28W_TYTO_ALBA_R1_C16%29.ogg
+  n_eule_8: British Library, Wildlife Sounds – CC BY 4.0 – „Barn Owl (Tyto alba) (W TYTO ALBA R1 C16).ogg“ – https://commons.wikimedia.org/wiki/File:Barn_Owl_%28Tyto_alba%29_%28W_TYTO_ALBA_R1_C16%29.ogg
+  n_eule_9: Alexander Kurthy (xeno-canto XC86915) – CC BY-SA 4.0 – „Strix aluco - Tawny Owl XC86915.mp3“ – https://commons.wikimedia.org/wiki/File:Strix_aluco_-_Tawny_Owl_XC86915.mp3
+  n_eule_10: Alexander Kurthy (xeno-canto XC86915) – CC BY-SA 4.0 – „Strix aluco - Tawny Owl XC86915.mp3“ – https://commons.wikimedia.org/wiki/File:Strix_aluco_-_Tawny_Owl_XC86915.mp3
+  n_eule_11: Vianney Bajart – CC BY-SA 4.0 – „Strix aluco male.oga“ – https://commons.wikimedia.org/wiki/File:Strix_aluco_male.oga
+  n_eule_12: Vianney Bajart – CC BY-SA 4.0 – „Strix aluco male.oga“ – https://commons.wikimedia.org/wiki/File:Strix_aluco_male.oga
+  n_eule_13: Juan lacruz – CC BY-SA 4.0 – „CARABO Strix Aluco231130 0181 MIX.wav“ – https://commons.wikimedia.org/wiki/File:CARABO_Strix_Aluco231130_0181_MIX.wav
+  n_fernglocken_1: aldor – gemeinfrei (PDsounds.org) – „Les cloches de saint ex.ogg“ – https://commons.wikimedia.org/wiki/File:Les_cloches_de_saint_ex.ogg
+  n_fernglocken_2: aldor – gemeinfrei (PDsounds.org) – „Les cloches de saint ex.ogg“ – https://commons.wikimedia.org/wiki/File:Les_cloches_de_saint_ex.ogg
+  n_fernglocken_3: acclivity – gemeinfrei (PDsounds.org) – „Cathedralofthedowns.ogg“ – https://commons.wikimedia.org/wiki/File:Cathedralofthedowns.ogg
+  n_fernglocken_4: aldor – gemeinfrei (PDsounds.org) – „Saint gervais saint pro - Paris.oga“ – https://commons.wikimedia.org/wiki/File:Saint_gervais_saint_pro_-_Paris.oga
+  n_fernglocken_5: Litlok – CC BY-SA 4.0 – „Arnancourt - Église Notre-Dame-de-l'Assomption - Angélus de midi.ogg“ – https://commons.wikimedia.org/wiki/File:Arnancourt_-_%C3%89glise_Notre-Dame-de-l%27Assomption_-_Ang%C3%A9lus_de_midi.ogg
+  n_fernglocken_6: Litlok – CC BY-SA 4.0 – „Orly-sur-Morin - Cloche de l'église Saint-Pierre-et-Saint-Paul - Angélus de midi.ogg“ – https://commons.wikimedia.org/wiki/File:Orly-sur-Morin_-_Cloche_de_l%27%C3%A9glise_Saint-Pierre-et-Saint-Paul_-_Ang%C3%A9lus_de_midi.ogg
+  n_fernglocken_7: Martin Thurnherr – CC BY-SA 4.0 – „Berner Muenster Geläut 15h betglocke gekürzt.ogg“ – https://commons.wikimedia.org/wiki/File:Berner_Muenster_Gel%C3%A4ut_15h_betglocke_gek%C3%BCrzt.ogg
+  n_frosch_11: Filo gèn' – CC BY-SA 4.0 – „Chant de grenouille - Frog 2.flac“ – https://commons.wikimedia.org/wiki/File:Chant_de_grenouille_-_Frog_2.flac
+  n_frosch_12: Filo gèn' – CC BY-SA 4.0 – „Chant de grenouilles - Sound of frog.flac“ – https://commons.wikimedia.org/wiki/File:Chant_de_grenouilles_-_Sound_of_frog.flac
+  n_frosch_13: WrS.tm.pl – gemeinfrei – „Edible frogs, sounds. May. The Village of Krzemienica, Łódź Voivodeship, Poland.ogg“ – https://commons.wikimedia.org/wiki/File:Edible_frogs%2C_sounds._May._The_Village_of_Krzemienica%2C_%C5%81%C3%B3d%C5%BA_Voivodeship%2C_Poland.ogg
+  n_frosch_14: WrS.tm.pl – gemeinfrei – „Edible frogs, sounds. May. The Village of Krzemienica, Łódź Voivodeship, Poland.ogg“ – https://commons.wikimedia.org/wiki/File:Edible_frogs%2C_sounds._May._The_Village_of_Krzemienica%2C_%C5%81%C3%B3d%C5%BA_Voivodeship%2C_Poland.ogg
+  n_fuchs_1: British Library, Wildlife Sounds – CC BY-SA 4.0 – „Red Fox (Vulpes vulpes) (W1CDR0001529 BD12).ogg“ – https://commons.wikimedia.org/wiki/File:Red_Fox_%28Vulpes_vulpes%29_%28W1CDR0001529_BD12%29.ogg
+  n_fuchs_2: British Library, Wildlife Sounds – CC BY-SA 4.0 – „Red Fox (Vulpes vulpes) (W1CDR0001529 BD12).ogg“ – https://commons.wikimedia.org/wiki/File:Red_Fox_%28Vulpes_vulpes%29_%28W1CDR0001529_BD12%29.ogg
+  n_fuchs_3: British Library, Wildlife Sounds – CC BY-SA 4.0 – „Red Fox (Vulpes vulpes) (W1CDR0001529 BD12).ogg“ – https://commons.wikimedia.org/wiki/File:Red_Fox_%28Vulpes_vulpes%29_%28W1CDR0001529_BD12%29.ogg
+  n_fuchs_4: British Library, Wildlife Sounds – CC BY-SA 4.0 – „Red Fox (Vulpes vulpes) (W1CDR0001529 BD12).ogg“ – https://commons.wikimedia.org/wiki/File:Red_Fox_%28Vulpes_vulpes%29_%28W1CDR0001529_BD12%29.ogg
+  n_glocke_5: Litlok – CC BY-SA 4.0 – „Fontaine-Denis - Église Saint-Quentin - 16h.ogg“ – https://commons.wikimedia.org/wiki/File:Fontaine-Denis_-_%C3%89glise_Saint-Quentin_-_16h.ogg
+  n_glocke_6: Litlok – CC BY-SA 4.0 – „Hémévillers - Église Saint-Martin - 12h.ogg“ – https://commons.wikimedia.org/wiki/File:H%C3%A9m%C3%A9villers_-_%C3%89glise_Saint-Martin_-_12h.ogg
+  n_glocke_7: Litlok – CC BY-SA 4.0 – „Belloy - Église Saint-Jean - 10h.ogg“ – https://commons.wikimedia.org/wiki/File:Belloy_-_%C3%89glise_Saint-Jean_-_10h.ogg
+  n_glocke_8: Litlok – CC BY-SA 4.0 – „Courtieux - Église Notre-Dame - 12h.ogg“ – https://commons.wikimedia.org/wiki/File:Courtieux_-_%C3%89glise_Notre-Dame_-_12h.ogg
+  n_glocke_9: Litlok – CC BY-SA 4.0 – „Chatonrupt-Sommermont - Sommermont - Église Saint-Maurice - 10h.ogg“ – https://commons.wikimedia.org/wiki/File:Chatonrupt-Sommermont_-_Sommermont_-_%C3%89glise_Saint-Maurice_-_10h.ogg
+  n_glocke_10: Litlok – CC BY-SA 4.0 – „Chatonrupt-Sommermont - Sommermont - Église Saint-Maurice - 10h.ogg“ – https://commons.wikimedia.org/wiki/File:Chatonrupt-Sommermont_-_Sommermont_-_%C3%89glise_Saint-Maurice_-_10h.ogg
+  n_glocke_11: Martin Thurnherr – CC BY-SA 4.0 – „Klosterglocken Disentis drei Uhr.ogg“ – https://commons.wikimedia.org/wiki/File:Klosterglocken_Disentis_drei_Uhr.ogg
+  n_glocklein_1: stephan – gemeinfrei (PDsounds.org) – „Striking a bell 15cm large.ogg“ – https://commons.wikimedia.org/wiki/File:Striking_a_bell_15cm_large.ogg
+  n_glocklein_2: stephan – gemeinfrei (PDsounds.org) – „Striking a bell 15cm large.ogg“ – https://commons.wikimedia.org/wiki/File:Striking_a_bell_15cm_large.ogg
+  n_glocklein_3: stephan – gemeinfrei (PDsounds.org) – „Striking a bell 15cm large.ogg“ – https://commons.wikimedia.org/wiki/File:Striking_a_bell_15cm_large.ogg
+  n_glocklein_4: stephan – gemeinfrei (PDsounds.org) – „Striking a bell 15cm large.ogg“ – https://commons.wikimedia.org/wiki/File:Striking_a_bell_15cm_large.ogg
+  n_grillen_5: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Nemobius sylvestris - sound.oga“ – https://commons.wikimedia.org/wiki/File:Nemobius_sylvestris_-_sound.oga
+  n_grillen_6: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Nemobius sylvestris - sound.oga“ – https://commons.wikimedia.org/wiki/File:Nemobius_sylvestris_-_sound.oga
+  n_grillen_7: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Pholidoptera griseoaptera - sound.oga“ – https://commons.wikimedia.org/wiki/File:Pholidoptera_griseoaptera_-_sound.oga
+  n_grillen_8: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Decticus verrucivorus - sound.ogg“ – https://commons.wikimedia.org/wiki/File:Decticus_verrucivorus_-_sound.ogg
+  n_hufe_1: the_riel_thing – CC BY-SA 3.0 – „Paarden PrinsBernhardbrug Middenduin 130217 09 - SoundCloud - the riel thing.ogg“ – https://commons.wikimedia.org/wiki/File:Paarden_PrinsBernhardbrug_Middenduin_130217_09_-_SoundCloud_-_the_riel_thing.ogg
+  n_hufe_2: the_riel_thing – CC BY-SA 3.0 – „Paarden PrinsBernhardbrug Middenduin 130217 09 - SoundCloud - the riel thing.ogg“ – https://commons.wikimedia.org/wiki/File:Paarden_PrinsBernhardbrug_Middenduin_130217_09_-_SoundCloud_-_the_riel_thing.ogg
+  n_huhn_7: alys – gemeinfrei (PDsounds.org) – „Chickens demanding food.ogg“ – https://commons.wikimedia.org/wiki/File:Chickens_demanding_food.ogg
+  n_huhn_8: alys – gemeinfrei (PDsounds.org) – „Chickens demanding food.ogg“ – https://commons.wikimedia.org/wiki/File:Chickens_demanding_food.ogg
+  n_insekt_2: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Chorthippus brunneus - sound.oga“ – https://commons.wikimedia.org/wiki/File:Chorthippus_brunneus_-_sound.oga
+  n_insekt_3: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Chorthippus parallelus - sound.oga“ – https://commons.wikimedia.org/wiki/File:Chorthippus_parallelus_-_sound.oga
+  n_insekt_4: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Chorthippus parallelus - sound.oga“ – https://commons.wikimedia.org/wiki/File:Chorthippus_parallelus_-_sound.oga
+  n_insekt_5: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Omocestus rufipes - sound.oga“ – https://commons.wikimedia.org/wiki/File:Omocestus_rufipes_-_sound.oga
+  n_insekt_6: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Tettigonia cantans - sound.ogg“ – https://commons.wikimedia.org/wiki/File:Tettigonia_cantans_-_sound.ogg
+  n_insekt_7: Baudewijn Odé (Odé-Sammlung) – CC BY-SA 4.0 – „Tettigonia cantans - sound.ogg“ – https://commons.wikimedia.org/wiki/File:Tettigonia_cantans_-_sound.ogg
+  n_insekt_8: Shyamal – CC0 – „Cicada 20200619.wav“ – https://commons.wikimedia.org/wiki/File:Cicada_20200619.wav
+  n_insekt_9: Shyamal – CC0 – „Cicada 20200619.wav“ – https://commons.wikimedia.org/wiki/File:Cicada_20200619.wav
+  n_kraehe_3: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Raven (Corvus corax) (W1CDR0001449 BD6).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Raven_%28Corvus_corax%29_%28W1CDR0001449_BD6%29.ogg
+  n_kraehe_4: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Raven (Corvus corax) (W1CDR0001449 BD6).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Raven_%28Corvus_corax%29_%28W1CDR0001449_BD6%29.ogg
+  n_kraehe_5: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Raven (Corvus corax) (W1CDR0001449 BD6).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Raven_%28Corvus_corax%29_%28W1CDR0001449_BD6%29.ogg
+  n_kraehe_6: Jonathon Jongsma (xeno-canto XC139573) – CC BY-SA 3.0 – „Corvus corax - Northern Raven XC139573.ogg“ – https://commons.wikimedia.org/wiki/File:Corvus_corax_-_Northern_Raven_XC139573.ogg
+  n_kraehe_7: Jonathon Jongsma (xeno-canto XC139573) – CC BY-SA 3.0 – „Corvus corax - Northern Raven XC139573.ogg“ – https://commons.wikimedia.org/wiki/File:Corvus_corax_-_Northern_Raven_XC139573.ogg
+  n_kranich_1: Pálos Lőrinc (xeno-canto XC594758) – CC BY-SA 4.0 – „Grus grus - Common Crane XC594758.mp3“ – https://commons.wikimedia.org/wiki/File:Grus_grus_-_Common_Crane_XC594758.mp3
+  n_kranich_2: Pálos Lőrinc (xeno-canto XC594758) – CC BY-SA 4.0 – „Grus grus - Common Crane XC594758.mp3“ – https://commons.wikimedia.org/wiki/File:Grus_grus_-_Common_Crane_XC594758.mp3
+  n_kranich_3: Pálos Lőrinc (xeno-canto XC594758) – CC BY-SA 4.0 – „Grus grus - Common Crane XC594758.mp3“ – https://commons.wikimedia.org/wiki/File:Grus_grus_-_Common_Crane_XC594758.mp3
+  n_moewe_1: avphillips – gemeinfrei (PDsounds.org) – „Gull 1.ogg“ – https://commons.wikimedia.org/wiki/File:Gull_1.ogg
+  n_moewe_2: avphillips – gemeinfrei (PDsounds.org) – „Gull 1.ogg“ – https://commons.wikimedia.org/wiki/File:Gull_1.ogg
+  n_moewe_3: avphillips – gemeinfrei (PDsounds.org) – „Gull 1.ogg“ – https://commons.wikimedia.org/wiki/File:Gull_1.ogg
+  n_moewe_4: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Herring Gull (Larus argentatus) (W1CDR0001420 BD12).ogg“ – https://commons.wikimedia.org/wiki/File:Herring_Gull_%28Larus_argentatus%29_%28W1CDR0001420_BD12%29.ogg
+  n_riegel_1: stephan – gemeinfrei (PDsounds.org) – „Rusty metal door clasp.ogg“ – https://commons.wikimedia.org/wiki/File:Rusty_metal_door_clasp.ogg
+  n_riegel_2: stephan – gemeinfrei (PDsounds.org) – „Rusty metal door clasp.ogg“ – https://commons.wikimedia.org/wiki/File:Rusty_metal_door_clasp.ogg
+  n_riegel_3: stephan – gemeinfrei (PDsounds.org) – „Rusty metal door clasp.ogg“ – https://commons.wikimedia.org/wiki/File:Rusty_metal_door_clasp.ogg
+  n_riegel_4: stephan – gemeinfrei (PDsounds.org) – „Rusty metal door clasp 02.ogg“ – https://commons.wikimedia.org/wiki/File:Rusty_metal_door_clasp_02.ogg
+  n_riegel_5: stephan – gemeinfrei (PDsounds.org) – „Rusty metal door clasp 02.ogg“ – https://commons.wikimedia.org/wiki/File:Rusty_metal_door_clasp_02.ogg
+  n_schaf_13: earthcalling – gemeinfrei (PDsounds.org) – „Sheep bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Sheep_bleating.ogg
+  n_schaf_14: earthcalling – gemeinfrei (PDsounds.org) – „Sheep bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Sheep_bleating.ogg
+  n_specht_1: British Library, Wildlife Sounds – CC BY-SA 4.0 – „Green Woodpecker (Picus viridis) (W1CDR0001497 BD6).ogg“ – https://commons.wikimedia.org/wiki/File:Green_Woodpecker_%28Picus_viridis%29_%28W1CDR0001497_BD6%29.ogg
+  n_tuerauf_9: stephan – gemeinfrei (PDsounds.org) – „Door handle creaking.ogg“ – https://commons.wikimedia.org/wiki/File:Door_handle_creaking.ogg
+  n_vogel_7: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Blackbird (Turdus merula) (W1CDR0001425 BD22).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Blackbird_%28Turdus_merula%29_%28W1CDR0001425_BD22%29.ogg
+  n_vogel_8: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Blackbird (Turdus merula) (W1CDR0001425 BD22).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Blackbird_%28Turdus_merula%29_%28W1CDR0001425_BD22%29.ogg
+  n_vogel_9: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Blackbird (Turdus merula) (W1CDR0001425 BD22).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Blackbird_%28Turdus_merula%29_%28W1CDR0001425_BD22%29.ogg
+  n_vogel_10: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Blackbird (Turdus merula) (W1CDR0001425 BD22).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Blackbird_%28Turdus_merula%29_%28W1CDR0001425_BD22%29.ogg
+  n_vogel_11: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „European Robin (Erithacus rubecula) (W1CDR0001425 BD16).ogg“ – https://commons.wikimedia.org/wiki/File:European_Robin_%28Erithacus_rubecula%29_%28W1CDR0001425_BD16%29.ogg
+  n_vogel_12: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „European Robin (Erithacus rubecula) (W1CDR0001425 BD16).ogg“ – https://commons.wikimedia.org/wiki/File:European_Robin_%28Erithacus_rubecula%29_%28W1CDR0001425_BD16%29.ogg
+  n_vogel_13: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „European Robin (Erithacus rubecula) (W1CDR0001425 BD16).ogg“ – https://commons.wikimedia.org/wiki/File:European_Robin_%28Erithacus_rubecula%29_%28W1CDR0001425_BD16%29.ogg
+  n_vogel_14: Marie-Lan Taÿ Pamart (xeno-canto XC482887) – CC BY-SA 4.0 – „Fringilla coelebs - Common Chaffinch XC482887.mp3“ – https://commons.wikimedia.org/wiki/File:Fringilla_coelebs_-_Common_Chaffinch_XC482887.mp3
+  n_vogel_15: Marie-Lan Taÿ Pamart (xeno-canto XC482887) – CC BY-SA 4.0 – „Fringilla coelebs - Common Chaffinch XC482887.mp3“ – https://commons.wikimedia.org/wiki/File:Fringilla_coelebs_-_Common_Chaffinch_XC482887.mp3
+  n_vogel_16: Marie-Lan Taÿ Pamart (xeno-canto XC482887) – CC BY-SA 4.0 – „Fringilla coelebs - Common Chaffinch XC482887.mp3“ – https://commons.wikimedia.org/wiki/File:Fringilla_coelebs_-_Common_Chaffinch_XC482887.mp3
+  n_vogel_17: Marie-Lan Taÿ Pamart (xeno-canto XC474428) – CC BY-SA 4.0 – „Troglodytes troglodytes - Eurasian Wren XC474428.mp3“ – https://commons.wikimedia.org/wiki/File:Troglodytes_troglodytes_-_Eurasian_Wren_XC474428.mp3
+  n_vogel_18: Marie-Lan Taÿ Pamart (xeno-canto XC474428) – CC BY-SA 4.0 – „Troglodytes troglodytes - Eurasian Wren XC474428.mp3“ – https://commons.wikimedia.org/wiki/File:Troglodytes_troglodytes_-_Eurasian_Wren_XC474428.mp3
+  n_vogel_19: Marie-Lan Taÿ Pamart (xeno-canto XC474428) – CC BY-SA 4.0 – „Troglodytes troglodytes - Eurasian Wren XC474428.mp3“ – https://commons.wikimedia.org/wiki/File:Troglodytes_troglodytes_-_Eurasian_Wren_XC474428.mp3
+  n_vogel_20: Marie-Lan Taÿ Pamart (xeno-canto XC482938) – CC BY-SA 4.0 – „Erithacus rubecula - European Robin XC482938.mp3“ – https://commons.wikimedia.org/wiki/File:Erithacus_rubecula_-_European_Robin_XC482938.mp3
+  n_vogel_21: Marie-Lan Taÿ Pamart (xeno-canto XC482938) – CC BY-SA 4.0 – „Erithacus rubecula - European Robin XC482938.mp3“ – https://commons.wikimedia.org/wiki/File:Erithacus_rubecula_-_European_Robin_XC482938.mp3
+  n_vogel_22: Aubrey John Williams / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Cuckoo (Cuculus canorus) (W1CDR0001463 BD1).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Cuckoo_%28Cuculus_canorus%29_%28W1CDR0001463_BD1%29.ogg
+  n_vogel_23: Aubrey John Williams / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Common Cuckoo (Cuculus canorus) (W1CDR0001463 BD1).ogg“ – https://commons.wikimedia.org/wiki/File:Common_Cuckoo_%28Cuculus_canorus%29_%28W1CDR0001463_BD1%29.ogg
+  n_vogel_24: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Eurasian Skylark (Alauda arvensis) (W1CDR0001421 BD2).ogg“ – https://commons.wikimedia.org/wiki/File:Eurasian_Skylark_%28Alauda_arvensis%29_%28W1CDR0001421_BD2%29.ogg
+  n_vogel_25: Lawrence Shove / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Eurasian Skylark (Alauda arvensis) (W1CDR0001421 BD2).ogg“ – https://commons.wikimedia.org/wiki/File:Eurasian_Skylark_%28Alauda_arvensis%29_%28W1CDR0001421_BD2%29.ogg
+  n_vogel_26: Aubrey John Williams / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Blue Tit (Cyanistes caeruleus) (W1CDR0001535 BD30).ogg“ – https://commons.wikimedia.org/wiki/File:Blue_Tit_%28Cyanistes_caeruleus%29_%28W1CDR0001535_BD30%29.ogg
+  n_vogel_27: Aubrey John Williams / British Library, Wildlife Sounds – CC BY-SA 4.0 – „Blue Tit (Cyanistes caeruleus) (W1CDR0001535 BD30).ogg“ – https://commons.wikimedia.org/wiki/File:Blue_Tit_%28Cyanistes_caeruleus%29_%28W1CDR0001535_BD30%29.ogg
+  n_vogel_28: British Library, Wildlife Sounds – CC BY-SA 4.0 – „Willow Warbler (Phylloscopus trochilus) (W1CDR0001510 BD23).ogg“ – https://commons.wikimedia.org/wiki/File:Willow_Warbler_%28Phylloscopus_trochilus%29_%28W1CDR0001510_BD23%29.ogg
+  n_vogel_29: British Library, Wildlife Sounds – CC BY-SA 4.0 – „Willow Warbler (Phylloscopus trochilus) (W1CDR0001510 BD23).ogg“ – https://commons.wikimedia.org/wiki/File:Willow_Warbler_%28Phylloscopus_trochilus%29_%28W1CDR0001510_BD23%29.ogg
+  n_vogel_30: British Library, Wildlife Sounds – CC BY-SA 4.0 – „European Goldfinch (Carduelis carduelis) (W1CDR0001491 BD15).ogg“ – https://commons.wikimedia.org/wiki/File:European_Goldfinch_%28Carduelis_carduelis%29_%28W1CDR0001491_BD15%29.ogg
+  n_vogel_31: British Library, Wildlife Sounds – CC BY-SA 4.0 – „European Goldfinch (Carduelis carduelis) (W1CDR0001491 BD15).ogg“ – https://commons.wikimedia.org/wiki/File:European_Goldfinch_%28Carduelis_carduelis%29_%28W1CDR0001491_BD15%29.ogg
+  n_wiehern_8: Briefer E, Maigrot A, Mandel R, Freymond S, Bachmann I, Hillmann E – CC BY 4.0 – „Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s2.oga“ – https://commons.wikimedia.org/wiki/File:Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s2.oga
+  n_wiehern_9: Briefer E, Maigrot A, Mandel R, Freymond S, Bachmann I, Hillmann E – CC BY 4.0 – „Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s2.oga“ – https://commons.wikimedia.org/wiki/File:Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s2.oga
+  n_wiehern_10: Briefer E, Maigrot A, Mandel R, Freymond S, Bachmann I, Hillmann E – CC BY 4.0 – „Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s3.oga“ – https://commons.wikimedia.org/wiki/File:Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s3.oga
+  n_wiehern_11: Briefer E, Maigrot A, Mandel R, Freymond S, Bachmann I, Hillmann E – CC BY 4.0 – „Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s3.oga“ – https://commons.wikimedia.org/wiki/File:Segregation-of-information-about-emotional-arousal-and-valence-in-horse-whinnies-srep09989-s3.oga
+  n_ziege_3: stephan – gemeinfrei (PDsounds.org) – „Herd of goats bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg
+  n_ziege_4: stephan – gemeinfrei (PDsounds.org) – „Herd of goats bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg
+  n_ziege_5: stephan – gemeinfrei (PDsounds.org) – „Herd of goats bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg
+  n_ziege_6: stephan – gemeinfrei (PDsounds.org) – „Herd of goats bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg
+  n_zischen_5: natalie – gemeinfrei (PDsounds.org) – „Water vaporizing on hot stones.ogg“ – https://commons.wikimedia.org/wiki/File:Water_vaporizing_on_hot_stones.ogg
