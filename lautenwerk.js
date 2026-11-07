@@ -2384,15 +2384,15 @@
   function weltEreignis(k, [art, , staerke, fern, o]) {
     o = o || {};
     /* Lebendige Kulisse: Stille, verstummte Vögel, Tageszeit, Spannung und Wetter lassen manches ausfallen */
-    if (!o.szene && stilleBis > ctx.currentTime) return true;
+    if (!o.szene && !o.sofort && stilleBis > ctx.currentTime) return true;
     if (!o.moment && ohneGr.size && grStumm(art)) return true;
     if (!o.szene && !k.zusatz && KUL_WELT[k.art]) { const p = lebenEvP(k, art); if (p < 1 && Math.random() > p) return true; }
-    const weit = !o.dumpf && Math.random() < (fern || 0), laut = kulMixWert(k.art, "ev") * staerke * (k.wlaut || 1) * ((AMB_EV[art] && AMB_EV[art].g) || 1) * (o.dumpf ? zz(.55, .85) : weit ? zz(.3, .55) : zz(.65, 1));
-    if (KUL_FX[art]) { kulFx(KUL_FX[art], zynSchlag(ctx.currentTime + .05, o), laut * 1.3, weit || o.dumpf ? { tief: o.dumpf ? zz(450, 800) : zz(900, 2600) } : o.kf && o.kf < 16000 ? { tief: o.kf } : {}, k); return true; }
+    const weit = !o.dumpf && !o.sofort && Math.random() < (fern || 0), laut = kulMixWert(k.art, "ev") * staerke * (k.wlaut || 1) * ((AMB_EV[art] && AMB_EV[art].g) || 1) * (o.sofort ? 1 : o.dumpf ? zz(.55, .85) : weit ? zz(.3, .55) : zz(.65, 1));
+    if (KUL_FX[art]) { kulFx(KUL_FX[art], o.sofort ? ctx.currentTime + .05 : zynSchlag(ctx.currentTime + .05, o), laut * 1.3, weit || o.dumpf ? { tief: o.dumpf ? zz(450, 800) : zz(900, 2600) } : o.kf && o.kf < 16000 ? { tief: o.kf } : {}, k); return true; }
     const e = AMB_EV[art]; if (!e) return true;
     /* Aufnahme noch nicht geladen: nachladen und gleich nochmal versuchen, statt das Geräusch still zu verschlucken */
     if (!e.f.some(n => ambPuffer(n))) { e.f.forEach(ambLaden); return false; }
-    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1, j = zynSchlag(ctx.currentTime + .05, o);
+    const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1, j = o.sofort ? ctx.currentTime + .05 : zynSchlag(ctx.currentTime + .05, o);
     const dauer = e.folge ? n * (e.folge[2] + e.folge[3]) / 2 + 1.5 : 5;
     const g = ctx.createGain(); g.gain.value = laut * WELT_GRUND; let letzter = g;
     if (o.wandern) { const v = laut * WELT_GRUND; g.gain.setValueAtTime(v * .2, j); g.gain.linearRampToValueAtTime(v, j + dauer * .5); g.gain.linearRampToValueAtTime(v * .15, j + dauer); }
@@ -2704,7 +2704,15 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         /* ein angetippter Zusatz meldet sich gleich – sonst wüsste man nicht, ob er läuft */
         /* ein Zusatz erklingt sofort beim Dazulegen (weitere Arten kurz danach) – erst danach im eigenen zufälligen Takt */
         if (k.naechst[i] == null) { k.naechst[i] = jetzt + (k.zusatz ? .05 + i * 1.6 : zz(x[1][0] * .3, x[1][1] * .6)); if (!k.zusatz) return; }
-        if (jetzt >= k.naechst[i]) { let ok = true; try { ok = weltEreignis(k, x) !== false; } catch (_) {} k.naechst[i] = jetzt + (ok ? zz(x[1][0], x[1][1]) : k.zusatz ? .25 : 1); }
+        if (jetzt >= k.naechst[i]) {
+          /* der allererste Ton eines frisch angetippten Zusatzes: nah, voll, ohne Warten auf den Takt und ohne „Stille“-Ausfall –
+             man soll sofort hören, was man gewählt hat; erst danach geht es im zufälligen Takt weiter */
+          const erst = k.zusatz && !(k.erstOk && k.erstOk[i]);
+          const xx = erst ? [x[0], x[1], x[2], 0, Object.assign({}, x[4] || {}, { sofort: true })] : x;
+          let ok = true; try { ok = weltEreignis(k, xx) !== false; } catch (_) {}
+          if (erst && ok) (k.erstOk = k.erstOk || {})[i] = true;
+          k.naechst[i] = jetzt + (ok ? zz(x[1][0], x[1][1]) : k.zusatz ? .25 : 1);
+        }
       });
     }, 250);
   }
@@ -8193,7 +8201,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   /* ---------- Bühne lebt: Pegel, Geister-Orchester, Publikum, Effekte ---------- */
   let pegelMesser = null, pegelDaten = null, pegelGlatt = 0, orchGlatt = 0, blechGlatt = 0, strBis = 0, blechBis = 0, strZiel = 0, fxBis = 0, malt = false, bildZaehler = 0;
   const geistQ = [], klassikQ = [], letzterZuck = {};
-  let letzterSchlag = 0, buehneMerk = "";
+  let letzterSchlag = 0, buehneMerk = "", pegelZiele = null;
   const GEIST_ART = g => /^(vln|vc|spic|kb|vlntrem|vctrem|geigest|bra|bogen)/.test(g) ? "str" : /^(horn|trp|pos|tuba)/.test(g) ? "blech" : /^(timp|bd|crash|gong|swell)/.test(g) ? "pauke"
     : /^(fl|klar|fag|oboe)/.test(g) ? "holz" : /^(stimme|ooh)/.test(g) ? "chor" : g === "orgel" ? "orgel" : g === "amboss" ? "amboss" : g === "gloeckchen" ? "glanz" : "";
   /* weitere Geister auf der Empore: Holzbläser, Chor, Organist, Schmied und Glöckner – jeder nur, solange er spielt */
@@ -8261,9 +8269,14 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const merk = pegelGlatt.toFixed(2) + "|" + orchGlatt.toFixed(2) + "|" + blechGlatt.toFixed(2);
     if (merk !== buehneMerk) {
       buehneMerk = merk;
-      b.style.setProperty("--pegel", pegelGlatt.toFixed(2));
-      b.style.setProperty("--orch", orchGlatt.toFixed(2));
-      b.style.setProperty("--blech", blechGlatt.toFixed(2));
+      /* nur an die wenigen Elemente, die den Pegel nutzen – an der ganzen Bühne gesetzt, musste der Browser
+         bei jedem Bild alle ~2700 Bühnen-Elemente neu berechnen (am Handy ruckelte es dadurch stark) */
+      if (!pegelZiele || pegelZiele.b !== b) {
+        const l = b.querySelectorAll(".lw-kulisse-bild .licht, .lw-kulisse-bild .feuerschein, .lw-kulisse-bild .spot, .lw-geister");
+        pegelZiele = { b, l: l.length ? Array.from(l) : [b] };
+      }
+      const pv = pegelGlatt.toFixed(2), ov = orchGlatt.toFixed(2), bv = blechGlatt.toFixed(2);
+      pegelZiele.l.forEach(el => { el.style.setProperty("--pegel", pv); el.style.setProperty("--orch", ov); el.style.setProperty("--blech", bv); });
       b.classList.toggle("orch-an", orchGlatt > .15);
     }
     const pub = publikumArt();
@@ -9302,8 +9315,23 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   /* Kommen Gäste, rückt die Band zusammen und macht am Rand Platz: kleiner und zur freien Seite verschoben */
   let bandMerk = "", bandEl = null;
   const bandLage = { s: 1, x: 0 };
+  /* Bühnengröße merken statt bei jedem Takt nachzumessen – clientWidth erzwang sonst ständig ein komplettes Neu-Layout
+     der Seite (am Handy der Hauptgrund für ruckelnde Bühne) */
+  const buehnenMass = new WeakMap();
+  let massBeob = null;
+  function buehneMessen(b) {
+    let m = buehnenMass.get(b);
+    if (!m) {
+      m = { w: b.clientWidth, h: b.clientHeight }; buehnenMass.set(b, m);
+      if (window.ResizeObserver) {
+        if (!massBeob) massBeob = new ResizeObserver(es => es.forEach(e => { const r = e.contentRect, mm = buehnenMass.get(e.target); if (mm) { mm.w = e.target.clientWidth; mm.h = e.target.clientHeight; } bandMerk = ""; }));
+        massBeob.observe(b);
+      } else buehnenMass.delete(b);
+    }
+    return m;
+  }
   function bandRuecken(b, nl, nr) {
-    const W = b.clientWidth, H = b.clientHeight; if (!W || !H) return;
+    const mass = buehneMessen(b), W = mass.w, H = mass.h; if (!W || !H) { buehnenMass.delete(b); return; }
     /* Band und Gäste schrumpfen gemeinsam, bis alle nebeneinander passen – so bleiben die Größen stimmig */
     /* auf schmalen, hohen Bühnen (Handy quer) sind die Musiker nicht größer als die Band */
     const bandH = Math.min(H - 4, (W - 8) * 210 / 660), gs0 = Math.min(1, .66 * bandH / (.62 * H));
