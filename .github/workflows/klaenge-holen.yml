@@ -1,0 +1,45 @@
+name: Klänge holen (frei lizenzierte Aufnahmen)
+on:
+  workflow_dispatch:
+    inputs:
+      liste:
+        description: "Pfad zur JSON-Liste (laden: [{url, ziel, lizenz, quelle, ab?, bis?}]; suchen: {kategorien, suchen, name})"
+        required: true
+      modus:
+        description: "laden = Dateien holen, suchen = nur Wikimedia-Commons-Funde mit Lizenzen auflisten"
+        default: laden
+        type: choice
+        options: [laden, suchen]
+permissions:
+  contents: write
+concurrency:
+  group: klaenge-holen
+  cancel-in-progress: false
+jobs:
+  holen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: haupt, sparse-checkout: tools/klaenge }
+      - name: ffmpeg
+        run: which ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
+      - name: Zweig klaenge-import vorbereiten
+        run: |
+          git config --global user.name "Klang-Import"
+          git config --global user.email "actions@users.noreply.github.com"
+          if git ls-remote --exit-code "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" klaenge-import >/dev/null; then
+            git clone -q --depth 1 --branch klaenge-import "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" import
+          else
+            mkdir import && cd import && git init -q -b klaenge-import && git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+            echo "Rohdateien für den Klang-Import (nicht für die Website)." > LIESMICH.txt && git add . && git commit -q -m "Klang-Import: Zweig angelegt"
+          fi
+      - name: Holen
+        run: python3 haupt/tools/klaenge/holen.py "${{ inputs.modus }}" "haupt/${{ inputs.liste }}" import
+      - name: Sichern
+        run: |
+          cd import
+          git add -A
+          git diff --cached --quiet && echo "nichts Neues" && exit 0
+          git commit -q -m "Klang-Import (${{ inputs.modus }}): ${{ inputs.liste }}"
+          git push -q origin HEAD:klaenge-import
