@@ -857,6 +857,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const ZP_SEITEN = SEITE === "welten" ? [
     { id: "welt", sym: "🌿", name: W("Klangwelten", "Soundscapes"), seite: "welten", farbe: "#e8a49a", led: "#ff9a80" },
     { id: "szenen", sym: "⏳", name: W("Szenen", "Scenes"), seite: "welten", farbe: "#d8c088", led: "#ffe0a0" },
+    { id: "raum", sym: "🧭", name: W("Raum", "Space"), seite: "welten", farbe: "#c8a0e0", led: "#e0c0ff" },
     { id: "geraeusche", sym: "🎭", name: W("Geräusche", "Sounds"), seite: "welten", farbe: "#e0703a", led: "#ff6a10" },
     { id: "einschlaege", sym: "💥", name: W("Einschläge", "Impacts"), seite: "welten", farbe: "#e04060", led: "#ff2a5a" }
   ] : [
@@ -885,6 +886,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     fernschrei: "😱", tuerknarren: "🚪", ritualtrommel: "🪘", fluestern: "🤫", grabesdroehnen: "⚰", geisterhauch: "🌬", herzschlag: "💓", friedhof: "🪦", ruinenwind: "🏛", geisterchor: "👥", fliegenschwarm: "🪰" };
   function zpInhalt() {
     const g = [], P = window.ImresPult, z = pz() || {};
+    if (SEITE === "welten" && zpSeite === "raum") return [];
     if (SEITE === "welten") {
       /* nach den Überschriften der Seite gruppiert (z. B. „Türen & Truhen“, „Wesen & Tiere“) – jede Gruppe beginnt auf einem neuen Blatt */
       const gruppiert = (sel, sym, attr, standard) => { const m = new Map();
@@ -1264,6 +1266,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       Object.keys(m).forEach(k => { P.spurVol(k, m[k].v); P.spurStumm(k, !!m[k].s); }); }, 700); }, 1000);
   function zpRegler() {
     if (panelAktiv()) { const r = panelReihe(); return panelListe().slice(r * 4, r * 4 + 4); }
+    if (SEITE === "welten" && zpSeite === "raum") return RAUM_REGLER;
     if (SEITE === "welten") return W_REGLER[bank % 2].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
     if (zpSeite === "beats" && !bank) return beatsRegler();
     if (zpSeite === "beats" && bank === 1) return beatsHuelleRegler();
@@ -2417,7 +2420,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const kurz = k => { const id = ZB.tasten[k]; if (!id || id === "nichts") return ""; if (SEITE === "welten" && { play: "▶/❚❚", passiert: "🎭", stille: "⏳" }[id]) return t(k, { play: "▶/❚❚", passiert: "🎭", stille: "⏳" }[id], aktFarbe(id)); return t(k, (ZP_AKT[id] || ZP_AKT.nichts)[1], aktFarbe(id)); };
     const fuss = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "CTRL"].map(k => zpSeite === "beats" && k === "PAD" ? t("PAD", "live", "#ff9a40") : zpSeite === "beats" && k === "REC" ? t("REC", BC.liveRec ? "⏺ LIVE" : "⏺", "#ff1a30") : zpSeite === "beats" && k === "CTRL" ? t("CTRL", W("halten: kopieren", "hold: copy"), "#ffe0a0") : kurz(k)).join("") + t("MIXER", bk, bf) + t("MENU", "☰", "#ffcf50");
     const html = '<div class="zp-kopf">' + tabs + '<span class="zp-status">' + status + "</span></div>" +
-      (panelAktiv() ? '<div class="zp-mitte" style="--f:' + bf + '">' + mischHTML() + "</div>" : zpSeite === "beats" ? '<div class="zp-mitte" style="--f:' + d.farbe + '">' + beatsKopf() + beatsHTML() + "</div>" : '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>") +
+      (panelAktiv() ? '<div class="zp-mitte" style="--f:' + bf + '">' + mischHTML() + "</div>" : zpSeite === "beats" ? '<div class="zp-mitte" style="--f:' + d.farbe + '">' + beatsKopf() + beatsHTML() + "</div>" : zpSeite === "raum" && SEITE === "welten" ? '<div class="zp-mitte zr-m" style="--f:' + d.farbe + '">' + raumHTML() + "</div>" : '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>") +
       '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" && !spurAktiv() && (mischAktiv() || !(zpSeite === "beats" && bank < 2)) ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
     if (html === zpMerk || (zpZeiger && !sofort)) return;
     zpMerk = html; zpEl.innerHTML = html;
@@ -2478,6 +2481,107 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const ruheSek = () => { const v = +lies("imres-zp-ruhe", "10"); return RUHE_STUFEN.includes(v) ? v : 10; };
   const bildHinten = () => lies("imres-zp-bild", "0") === "1";
   function zpAktiv() { zpLetzte = Date.now(); if (zpRuhe) { zpRuheAus(); return true; } return false; }
+  /* ===================== 🧭 Raum (Klangwelten): wo steht welches Geräusch? =====================
+     Draufsicht: du in der Mitte, vorn ist oben. Jede Schicht (Teppich) und jede Geräuschart der Welt steht an ihrem Platz –
+     ziehen verschiebt sie, nah = lauter und klarer, fern = leiser, dumpfer und halliger. Erklingt ein Geräusch, zieht ein Ring. */
+  const RM = { wahl: 0, raf: 0, zieh: null, cache: null, cacheT: 0, pegel: [], letzt: 0, schreib: 0 };
+  const rmDaten = () => { const a = WA(); if (!a || !a.raum) return null; const j = performance.now(); if (j - RM.cacheT > 150) { try { RM.cache = a.raum(); } catch (_) { RM.cache = null; } RM.cacheT = j; } return RM.cache; };
+  const rmListe = d => d ? d.betten.map(b => Object.assign({ typ: "b", key: b.i, farbe: WB_BAND[b.i % WB_BAND.length] }, b)).concat(d.arten.map(e => Object.assign({ typ: "e", key: e.art, farbe: "#f0c060" }, e))) : [];
+  const rmAkt = () => { const l = rmListe(rmDaten()); if (!l.length) return null; RM.wahl = Math.max(0, Math.min(l.length - 1, RM.wahl)); return l[RM.wahl]; };
+  function rmSetzen(it, w) { const a = WA(); if (!a || !it) return; a.raumSetzen(it.typ, it.key, w); RM.cacheT = 0; }
+  const rmAz = az => { az = ((az % 360) + 360) % 360; return az > 180 ? az - 360 : az; };
+  function rmRichtung(az) {
+    const a = rmAz(az), n = Math.abs(a), seite = a < 0 ? W("links", "left") : W("rechts", "right");
+    const t = n < 15 ? W("vorn", "front") : n > 165 ? W("hinten", "behind") : n < 60 ? seite + W(" vorn", " front") : n <= 120 ? seite : seite + W(" hinten", " behind");
+    return t + " " + Math.round(Math.abs(a)) + "°";
+  }
+  const rmFerne = d => (d < .15 ? W("ganz nah", "very close") : d < .33 ? W("nah", "close") : d < .55 ? W("mittel", "medium") : d < .78 ? W("fern", "far") : W("weit weg", "far away")) + " · " + Math.round(1 + d * 29) + " m";
+  const RAUM_REGLER = [
+    { name: W("👆 Auswahl", "👆 Select"), lo: 0, get hi() { return Math.max(0, rmListe(rmDaten()).length - 1); }, schritt: 1, lies: () => RM.wahl, setz: v => { RM.wahl = Math.round(v); },
+      text: () => { const it = rmAkt(); return it ? (it.typ === "e" ? it.sym + " " : "🌿 ") + it.name : W("erst eine Welt starten", "start a soundscape"); },
+      aktion: () => { const it = rmAkt(); if (it) { rmSetzen(it, null); zeige("↺ " + it.name, null, W("Platz zurück auf Standard", "position back to default")); } }, drucktext: W("drücken: Standard", "push: default") },
+    { name: W("🧭 Richtung", "🧭 Direction"), lo: -360, hi: 360, schritt: 5, lies: () => { const it = rmAkt(); return it ? rmAz(it.az) : 0; }, setz: v => { const it = rmAkt(); if (it) rmSetzen(it, { az: v }); },
+      text: v => rmRichtung(v), aktion: () => { const it = rmAkt(), a = WA(); if (it && it.typ === "e" && a && a.raumProbe) { a.raumProbe(it.art); zeige("🔉 " + it.name, null, W("Probe von dort", "sample from there")); } else if (it) zeige("🌿 " + it.name, null, rmRichtung(it.az)); },
+      drucktext: W("drücken: Probe hören", "push: listen") },
+    { name: W("📏 Entfernung", "📏 Distance"), lo: 0, hi: 100, schritt: 2, lies: () => { const it = rmAkt(); return it ? Math.round(it.d * 100) : 40; }, setz: v => { const it = rmAkt(); if (it) rmSetzen(it, { d: v / 100 }); },
+      text: v => rmFerne(v / 100), aktion: () => { const it = rmAkt(); if (it) rmSetzen(it, { d: .4 }); }, drucktext: W("drücken: mittel", "push: medium") },
+    { get name() { const it = rmAkt(); return it && it.typ === "e" ? W("🎭 Geräusche (alle)", "🎭 Sounds (all)") : W("🔊 Lautstärke", "🔊 Volume"); }, lo: 0, hi: 150, schritt: 5,
+      lies: () => { const it = rmAkt(); return it && it.typ === "b" ? it.v : ZP_PARAM.w_ger.lies(); },
+      setz: v => { const it = rmAkt(), a = WA(); if (it && it.typ === "b" && a) { a.regler("b" + it.key, v); RM.cacheT = 0; } else ZP_PARAM.w_ger.setz(v); },
+      text: v => Math.round(v) + " %", aktion: () => { const it = rmAkt(), a = WA(); if (it && it.typ === "b" && a) { a.regler("b" + it.key, it.v > 0 ? 0 : 100); RM.cacheT = 0; } }, drucktext: W("drücken: aus/an", "push: off/on") }
+  ];
+  function raumHTML() {
+    return '<div class="zr-raum"><canvas id="zr-c"></canvas><div class="zr-info" id="zr-info"></div><div class="zr-tipp">' +
+      W("ziehen: verschieben · tippen auf ◆: Probe · ① wählen ② Richtung ③ Entfernung ④ Lautstärke", "drag: move · tap ◆: listen · ① select ② direction ③ distance ④ volume") + "</div></div>";
+  }
+  function rmGeo(c) { const w = c.width, h = c.height, R = Math.min(w, h) / 2 - 18; return { cx: w / 2, cy: h / 2 + 2, R }; }
+  const rmPunkt = (g, az, d) => { const rr = g.R * (.13 + .87 * d), a = az * Math.PI / 180; return [g.cx + Math.sin(a) * rr, g.cy - Math.cos(a) * rr]; };
+  function rmBild(jetzt) {
+    RM.raf = 0; const c = document.getElementById("zr-c");
+    if (!c || SEITE !== "welten" || zpSeite !== "raum" || zpRuhe || panelAktiv() || document.hidden) return;
+    RM.raf = requestAnimationFrame(rmBild); if (jetzt - RM.letzt < 40) return; RM.letzt = jetzt;
+    const box = c.parentElement.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), cw = Math.max(50, Math.round(box.width * dpr)), ch = Math.max(50, Math.round(box.height * dpr));
+    if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+    const x = c.getContext("2d"), g = rmGeo(c), d = rmDaten(), l = rmListe(d), akt = l[Math.max(0, Math.min(l.length - 1, RM.wahl))], t = jetzt / 1000;
+    x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, cw, ch); x.save(); x.scale(1, 1);
+    const bg = x.createRadialGradient(g.cx, g.cy, 0, g.cx, g.cy, g.R * 1.1); bg.addColorStop(0, "#2a1f30"); bg.addColorStop(1, "#120d18"); x.fillStyle = bg; x.beginPath(); x.arc(g.cx, g.cy, g.R + 8, 0, 7); x.fill();
+    /* Ringe: nah – mittel – fern */
+    x.font = Math.round(11 * dpr) + "px system-ui, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle";
+    [[.15, W("nah", "close")], [.4, W("mittel", "medium")], [.7, W("fern", "far")], [1, ""]].forEach(([dd, nm]) => { const rr = g.R * (.13 + .87 * dd); x.strokeStyle = dd === .4 ? "rgba(240,220,160,.28)" : "rgba(240,220,160,.13)"; x.setLineDash(dd === 1 ? [] : [3 * dpr, 5 * dpr]); x.lineWidth = dpr; x.beginPath(); x.arc(g.cx, g.cy, rr, 0, 7); x.stroke();
+      if (nm) { x.fillStyle = "rgba(240,220,160,.38)"; x.fillText(nm, g.cx + rr * .72, g.cy + rr * .72); } });
+    x.setLineDash([]); x.fillStyle = "rgba(240,220,160,.55)"; x.font = "600 " + Math.round(11 * dpr) + "px system-ui, sans-serif";
+    x.fillText(W("vorn", "front"), g.cx, g.cy - g.R - 2 * dpr); x.fillText(W("hinten", "back"), g.cx, g.cy + g.R + 4 * dpr);
+    x.textAlign = "left"; x.fillText(W("rechts", "right"), g.cx + g.R + 4 * dpr, g.cy); x.textAlign = "right"; x.fillText(W("links", "left"), g.cx - g.R - 4 * dpr, g.cy); x.textAlign = "center";
+    /* du in der Mitte (Blick nach vorn) */
+    x.fillStyle = "#f0dca0"; x.beginPath(); x.arc(g.cx, g.cy, 9 * dpr, 0, 7); x.fill(); x.beginPath(); x.moveTo(g.cx - 4 * dpr, g.cy - 8 * dpr); x.lineTo(g.cx, g.cy - 15 * dpr); x.lineTo(g.cx + 4 * dpr, g.cy - 8 * dpr); x.fill();
+    x.fillRect(g.cx - 11 * dpr, g.cy - 3 * dpr, 3 * dpr, 6 * dpr); x.fillRect(g.cx + 8 * dpr, g.cy - 3 * dpr, 3 * dpr, 6 * dpr);
+    if (!d) { x.fillStyle = "rgba(240,220,160,.75)"; x.font = Math.round(14 * dpr) + "px system-ui, sans-serif"; const wm0 = wMix(); x.fillText(wm0 && wm0.laeuft && wm0.welt && wm0.welt.episch ? W("Epische Welten umhüllen dich von überall – hier gibt es keine einzelnen Plätze", "Epic soundscapes surround you – no single positions here") : W("Starte eine Klangwelt – dann stehen hier ihre Geräusche", "Start a soundscape – its sounds appear here"), g.cx, g.cy + 40 * dpr); x.restore(); rmInfo(null); return; }
+    /* Pegel der Schichten */
+    let p = null; try { const a = WA(); p = a && a.pegel ? a.pegel() : null; } catch (_) {}
+    d.betten.forEach((b, i) => { const v = p && p.betten ? p.betten[i] || 0 : 0, z = Math.max(0, Math.min(1, ((v > 1e-5 ? 20 * Math.log10(v) : -90) + 54) / 48)); RM.pegel[i] = (RM.pegel[i] || 0) + (z > (RM.pegel[i] || 0) ? .4 : .08) * (z - (RM.pegel[i] || 0)); });
+    /* Linie zur Auswahl */
+    if (akt) { const [ax, ay] = rmPunkt(g, akt.az, akt.d); x.strokeStyle = "rgba(255,240,200,.35)"; x.setLineDash([4 * dpr, 4 * dpr]); x.beginPath(); x.moveTo(g.cx, g.cy); x.lineTo(ax, ay); x.stroke(); x.setLineDash([]); }
+    /* Ringe, wenn ein Geräusch erklingt */
+    (d.zuletzt || []).forEach(e => { if (e.az == null || e.alter > 3) return; const [ex, ey] = rmPunkt(g, e.az, e.d), a = 1 - e.alter / 3; x.strokeStyle = "rgba(240,192,96," + (a * .8).toFixed(2) + ")"; x.lineWidth = 2 * dpr; x.beginPath(); x.arc(ex, ey, (8 + e.alter * 26) * dpr, 0, 7); x.stroke(); });
+    x.lineWidth = dpr;
+    /* Geräuscharten (◆) */
+    l.forEach((it, i) => { if (it.typ !== "e") return; const [ex, ey] = rmPunkt(g, it.az, it.d), sel = it === akt, k = (sel ? 9 : 7) * dpr, frisch = (d.zuletzt || []).some(z => z.art === it.art && z.alter < .6);
+      x.fillStyle = frisch ? "#fff0c0" : it.gesetzt ? "#f0c060" : "rgba(240,192,96,.45)"; const kk = sel || it.gesetzt || frisch ? k : k * .75; x.beginPath(); x.moveTo(ex, ey - kk); x.lineTo(ex + kk, ey); x.lineTo(ex, ey + kk); x.lineTo(ex - kk, ey); x.closePath(); x.fill();
+      if (sel) { x.strokeStyle = "#fff4dc"; x.lineWidth = 2 * dpr; x.stroke(); x.lineWidth = dpr; }
+      if (sel || frisch || it.gesetzt) { x.font = Math.round(13 * dpr) + "px system-ui, sans-serif"; x.fillStyle = "#fff"; x.fillText(it.sym, ex, ey - k - 8 * dpr); } });
+    /* Schichten (●) – atmen mit ihrem Pegel */
+    l.forEach((it, i) => { if (it.typ !== "b") return; const [bx, by] = rmPunkt(g, it.az, it.d), L = RM.pegel[it.key] || 0, sel = it === akt, rr = (7 + L * 11 + (sel ? 2 : 0)) * dpr, aus = it.ruht || !it.v;
+      const gl = x.createRadialGradient(bx, by, 0, bx, by, rr * 2.4); gl.addColorStop(0, it.farbe + (aus ? "22" : "88")); gl.addColorStop(1, it.farbe + "00"); x.fillStyle = gl; x.beginPath(); x.arc(bx, by, rr * 2.4, 0, 7); x.fill();
+      x.fillStyle = aus ? "rgba(80,70,90,.8)" : it.farbe; x.globalAlpha = aus ? .6 : .95; x.beginPath(); x.arc(bx, by, rr, 0, 7); x.fill(); x.globalAlpha = 1;
+      if (sel) { x.strokeStyle = "#fff4dc"; x.lineWidth = 2.5 * dpr; x.beginPath(); x.arc(bx, by, rr + 4 * dpr, 0, 7); x.stroke(); x.lineWidth = dpr; }
+      x.font = (sel ? "700 " : "500 ") + Math.round(11.5 * dpr) + "px system-ui, sans-serif"; x.fillStyle = aus ? "rgba(220,205,180,.5)" : "#f4ead4"; x.fillText(it.name + (aus ? " ⏸" : ""), bx, by + rr + 10 * dpr); });
+    if (d.gehen) { x.textAlign = "left"; x.fillStyle = "rgba(240,220,160,.7)"; x.font = Math.round(11 * dpr) + "px system-ui, sans-serif"; x.fillText("🚶 " + W("Wandern an – die Schichten ziehen vorbei", "walking on – layers drift past"), 8 * dpr, ch - 10 * dpr); }
+    x.restore(); rmInfo(akt);
+  }
+  function rmInfo(it) {
+    const el = document.getElementById("zr-info"); if (!el) return;
+    const h = it ? '<b>' + esc2((it.typ === "e" ? it.sym + " " : "🌿 ") + it.name) + "</b><span>" + esc2(rmRichtung(it.az)) + "</span><span>" + esc2(rmFerne(it.d)) + "</span>" + (it.gesetzt ? "" : "<small>" + (it.typ === "e" ? W("noch frei – jedes Mal ungefähr dort", "not set – roughly there each time") : W("Standardplatz", "default position")) + "</small>") : "";
+    if (el.innerHTML !== h) el.innerHTML = h;
+  }
+  setInterval(() => { if (!RM.raf && SEITE === "welten" && zpSeite === "raum" && !zpRuhe && !panelAktiv() && document.getElementById("zr-c")) RM.raf = requestAnimationFrame(rmBild); }, 250);
+  /* ziehen und tippen */
+  function rmTreffer(e) {
+    const c = document.getElementById("zr-c"); if (!c) return null; const r = c.getBoundingClientRect(), dpr = c.width / Math.max(1, r.width), px = (e.clientX - r.left) * dpr, py = (e.clientY - r.top) * dpr, g = rmGeo(c), l = rmListe(rmDaten());
+    let best = -1, bd = 30 * dpr; l.forEach((it, i) => { const [ix, iy] = rmPunkt(g, it.az, it.d), dd = Math.hypot(ix - px, iy - py); if (dd < bd) { bd = dd; best = i; } });
+    return { i: best, px, py, g };
+  }
+  document.addEventListener("pointerdown", e => { if (!e.target || e.target.id !== "zr-c") return; const tr = rmTreffer(e); if (!tr || tr.i < 0) return;
+    RM.wahl = tr.i; RM.zieh = { i: tr.i, x: e.clientX, y: e.clientY, zieht: false }; try { e.target.setPointerCapture(e.pointerId); } catch (_) {} zpReglerAnzeige(); e.preventDefault(); }, true);
+  document.addEventListener("pointermove", e => { const z = RM.zieh; if (!z) return; if (!z.zieht && Math.hypot(e.clientX - z.x, e.clientY - z.y) < 6) return; z.zieht = true;
+    const tr = rmTreffer(e); if (!tr) return; const dx = tr.px - tr.g.cx, dy = tr.py - tr.g.cy, rr = Math.hypot(dx, dy) / tr.g.R, it = rmListe(rmDaten())[z.i]; if (!it) return;
+    const az = Math.atan2(dx, -dy) * 180 / Math.PI, dd = Math.max(0, Math.min(1, (rr - .13) / .87));
+    it.az = az; it.d = dd; if (RM.cache) { const q = it.typ === "b" ? RM.cache.betten[it.key] : RM.cache.arten.find(a => a.art === it.key); if (q) { q.az = az; q.d = dd; q.gesetzt = true; } RM.cacheT = performance.now(); }
+    const j = performance.now(); if (j - RM.schreib > 60) { RM.schreib = j; const a = WA(); if (a) a.raumSetzen(it.typ, it.key, { az, d: dd }); } }, true);
+  const rmLos = e => { const z = RM.zieh; if (!z) return; RM.zieh = null; const it = rmListe(rmDaten())[z.i], a = WA();
+    if (z.zieht && it && a) { a.raumSetzen(it.typ, it.key, { az: it.az, d: it.d }); RM.cacheT = 0; zeige((it.typ === "e" ? it.sym : "🌿") + " " + it.name, null, rmRichtung(it.az) + " · " + rmFerne(it.d)); }
+    else if (!z.zieht && it && it.typ === "e" && a && a.raumProbe) a.raumProbe(it.art);
+    zpReglerAnzeige(); };
+  document.addEventListener("pointerup", rmLos, true); document.addEventListener("pointercancel", () => { RM.zieh = null; }, true);
   /* ===================== 🌄 Ruhebild der Klangwelten: eine kleine lebende Landschaft je Welt =====================
      Jede Schicht der Welt ist ein Lichtband, das mit ihrem Pegel atmet; dazu Glut, Glühwürmchen, Funken, Blasen … je nach Welt
      und das Wetter darüber. Läuft nur, solange das Ruhebild zu sehen ist (30 Bilder/s, alles Statische vorgezeichnet). */
@@ -2718,6 +2822,7 @@ html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
 /* Rechenzeit sparen: alles, was unter dem Pult liegt, bewegt sich nicht und wird nicht gemalt */
 html.zyn-pult body *:not(.lw-buehne, .lw-buehne *, .zp, .zp *, .zp-ruhe, .zp-ruhe *, .zyn-osd, .zyn-osd *, .zyn-menue, .zyn-menue *) { animation: none !important; transition: none !important; }
 html.zyn-pult body canvas:not(.lw-buehne canvas), html.zyn-pult body video { display: none !important; }
+html.zyn-pult body .zr-raum canvas#zr-c { display: block !important; }
 html.zyn-pult body > *:not(.zp, .zp-ruhe, .zp-weltbild, .zyn-osd, .zyn-menue, .zyn-update, #imres-logo, script, style) { content-visibility: hidden; }
 html.zyn-pult.zyn-bb body > *:has(.lw-buehne), html.zyn-pult.zyn-ruhe body > *:has(.lw-buehne) { content-visibility: visible !important; } /* !important: die Regel darüber ist durch #imres-logo in :not() spezifischer */
 html.zyn-pult .zyn-leiste { display: none !important; }
@@ -2811,6 +2916,12 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-k.vor { border-style: dashed !important; border-color: var(--f) !important; animation: zpblink 1s steps(2) infinite; }
 .zp-k.cur { outline: 3px solid #f4c45a; outline-offset: 1px; }
 .zp-k.lauf { overflow: hidden; }
+.zp-mitte.zr-m { grid-template-rows: minmax(0, 1fr); }
+.zr-raum { position: relative; height: 100%; min-height: 0; border-radius: 14px; overflow: hidden; background: #0e0a14; touch-action: none; }
+.zr-raum canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.zr-info { position: absolute; left: 8px; top: 6px; display: flex; flex-direction: column; gap: 1px; max-width: 42%; pointer-events: none; font-size: 12.5px; color: #e8dcc4; background: rgba(20, 14, 26, .72); border-radius: 9px; padding: 5px 9px; }
+.zr-info:empty { display: none; } .zr-info b { font-size: 14.5px; color: #fff4dc; } .zr-info small { color: #b8a8c8; font-size: 11px; }
+.zr-tipp { position: absolute; right: 8px; bottom: 5px; max-width: 46%; text-align: right; font-size: 10.5px; color: #a898b8; pointer-events: none; line-height: 1.25; }
 .zp-k.lauf::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); background: linear-gradient(90deg, color-mix(in srgb, var(--f) 22%, transparent), color-mix(in srgb, var(--f) 48%, transparent)); border-right: 2px solid var(--f); pointer-events: none; }
 .zp-k.lauf .zp-s, .zp-k.lauf .zp-n, .zp-k.lauf .zp-v { position: relative; }
 .zp-k .zp-dauer { color: #d8ccb4; font-weight: 600; } .zp-k.an .zp-dauer { color: #fff4dc; }

@@ -237,6 +237,8 @@ Gut zu wissen: schnelle Läufe, während viele Töne lange nachklingen, erkennt 
 - **Anzeige:** Lautstärken in **dB** (0 dB = Regler ganz oben, −6 dB = halb so laut), der helle Strich am Fader ist die Normalstellung. Jeder Kanal hat seine Farbe.
 - **🔒 Obergrenzen:** Zahnrad ⚙ im Mischer (oder MENU → Einstellungen → 🎚 Mischer): je Kanal einen Höchstwert festlegen – höher lässt sich der Regler dann nicht drehen (roter Strich am Fader). „Alle Lautstärken: jetzige Stellung als Grenze“ ist der schnelle Weg vor einem Auftritt. Dort auch: dB/% und Blendzeit.
 
+**🧭 Raum (Klangwelten, Reiter oben):** Draufsicht auf die laufende Klangwelt – du stehst in der Mitte, vorn ist oben. Die farbigen Kreise sind die Schichten (Kaminfeuer, Wind …), sie atmen mit ihrer Lautstärke. Die kleinen Rauten sind die Geräusche, die ab und zu erklingen (Krüge, Hund, Tür …); erklingt eines, zieht ein Ring. **Ziehen** verschiebt etwas: nah = lauter und klarer, fern = leiser, dumpfer, mit mehr Hall; links/rechts/hinten wie gezeigt (mit 🎧 3D-Kopfhörern auch vorn/hinten hörbar). Raute **antippen** = Probe von dort. Regler: ① auswählen (drücken: Standardplatz), ② Richtung (drücken: Probe), ③ Entfernung, ④ Lautstärke der Schicht. Jede Welt merkt sich ihre Plätze. Nicht platzierte Geräusche kommen wie bisher jedes Mal ungefähr aus derselben Ecke.
+
 **In den Klangwelten** gibt es das Mischpult genauso (CTRL), mit eigener Belegung und eigenen Mischungen A/B: **Lautstärke, Geräusche, Szenen, Wetter**, mit ALT **Spannung, Lebendigkeit, Raumhall, Gesamt** (Soundkarte). **ZS3** zeigt dort die Schichten der laufenden Klangwelt einzeln (Kaminfeuer, Stimmengewirr, Wind …) samt Pegelbalken, dazu Lebendigkeit, Raumhall, Weite und Wetter. Regler drücken = Schicht aus/an.
 
 ### 🎛 Spuren (ZS3)

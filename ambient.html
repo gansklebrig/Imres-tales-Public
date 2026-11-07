@@ -781,6 +781,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   /* kaputte Speicherstände (Zahl, Text, Liste …) nicht übernehmen */
   if (!istObjekt(merk)) merk = {};
   if (!istObjekt(merk.mix)) merk.mix = {};
+  if (!istObjekt(merk.raum)) merk.raum = {};
   Object.keys(merk.mix).forEach(k => { if (!istObjekt(merk.mix[k])) delete merk.mix[k]; });
   ["gesamt", "ehall", "eweite", "ausLaut", "szLaut", "gLaut", "wLaut", "spannung"].forEach(k => { if (typeof merk[k] !== "number" || !isFinite(merk[k])) delete merk[k]; });
   delete merk.modus;
@@ -816,6 +817,23 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       const el = document.querySelector('[data-regler="' + k + '"]') || document.getElementById(k);
       if (el && "value" in el) { el.value = String(v); if (el.dataset.regler && el.nextElementSibling) el.nextElementSibling.textContent = v + " %"; }
     },
+    /* Raum-Seite am Pult: Schichten und Geräuscharten der laufenden Welt mit Richtung und Entfernung */
+    raum() {
+      if (!aktiv || !aktiv.welt || aktiv.welt.episch) return null; const w = aktiv.welt, r = raumMerk(w), jetzt = Date.now();
+      const betten = aktiv.betten.map((b, i) => { const e = r.b[i] || {}; return { i, name: b.label || b.name, az: e.az != null ? e.az : b.azStd, d: e.d != null ? e.d : RAUM_D0, gesetzt: e.az != null || e.d != null, v: Math.round((b.regler == null ? 1 : b.regler) * 100), ruht: !!b.ruht }; });
+      const arten = [...new Set((w.ereignisse || []).map(x => x[0]))].filter(a => EV[a]).map(a => { const e = r.e[a] || {}, n = evName(a), fern = ((w.ereignisse || []).find(x => x[0] === a) || [])[3] || 0;
+        return { art: a, name: n.name, sym: n.sym, az: e.az != null ? e.az : heimat(a), d: e.d != null ? e.d : (fern > .5 ? .7 : RAUM_D0), gesetzt: e.az != null || e.d != null }; });
+      return { welt: { id: w.id, name: w.name, sym: w.sym }, betten, arten, zuletzt: EVLOG.filter(x => jetzt - x.t < 5000).map(x => ({ art: x.art, az: x.az, d: x.d, alter: (jetzt - x.t) / 1000 })), gehen: !!(belebt.gehen && aktiv.gang) };
+    },
+    raumSetzen(art, key, werte) {
+      if (FERN || !aktiv || !aktiv.welt) return; const w = aktiv.welt, r = raumMerk(w), ziel = art === "b" ? r.b : r.e;
+      if (werte == null) delete ziel[key];
+      else { const e = ziel[key] || (ziel[key] = {}); if (werte.az != null) e.az = ((Math.round(werte.az) % 360) + 360) % 360; if (werte.d != null) e.d = Math.round(Math.max(0, Math.min(1, werte.d)) * 100) / 100; }
+      if (art === "b") raumBett(aktiv.betten[key], w, false);
+      speichern();
+    },
+    /* Probe: das Geräusch einmal an seinem Platz erklingen lassen */
+    raumProbe(art) { if (aktiv && aktiv.welt && EV[art]) { const x = (aktiv.welt.ereignisse || []).find(y => y[0] === art); ereignis(aktiv.welt, [art, null, x ? x[2] : .5, 0, {}]); } },
     /* Spitzenpegel (1 = Vollaussteuerung) je Weg und je Schicht der laufenden Welt */
     pegel() {
       if (!ctx) return null; const M = this._m || (this._m = {}), r = {};
@@ -971,6 +989,110 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
   function raum3dKnopf() { const k = document.getElementById("raum3d"); if (k) { k.setAttribute("aria-pressed", String(raum3d)); k.title = EN ? "3D headphones" + (raum3d ? " (on)" : "") : "3D-Kopfhörer" + (raum3d ? " (an)" : ""); } }
   setTimeout(raum3dKnopf, 0);
+  /* ---------- Raum: Richtung (Grad, 0 = vorn, 90 = rechts) und Entfernung (0 = ganz nah … 1 = weit weg) je Schicht und je Geräuschart ---------- */
+  const RAUM_D0 = .4; /* so klingt es ohne Einstellung */
+  const raumMerk = w => { const r = merk.raum[w.id] || (merk.raum[w.id] = {}); if (!istObjekt(r.b)) r.b = {}; if (!istObjekt(r.e)) r.e = {}; return r; };
+  const raumGain = d => d <= RAUM_D0 ? 1 + (RAUM_D0 - d) * 1.3 : 1 - (d - RAUM_D0) * 1.05;
+  const raumHell = d => d <= RAUM_D0 ? 20000 : 20000 * Math.pow(.1, (d - RAUM_D0) / (1 - RAUM_D0));
+  const raumHall = d => d <= RAUM_D0 ? .45 + d * 1.375 : 1 + (d - RAUM_D0) * 3;
+  function raumBett(b, welt, sofort) {
+    if (!b || !b.kopf) return; const r = (merk.raum[welt.id] || {}).b || {}, e = r[b.nr] || {}, j = ctx.currentTime, tau = sofort ? .01 : .25;
+    const az = e.az != null ? e.az : b.azStd, d = e.d != null ? e.d : RAUM_D0, hinten = Math.max(0, -Math.cos(grad(az)));
+    b.az0 = az; b.dg = raumGain(d); b.d = d;
+    b.kopf.frequency.setTargetAtTime(Math.max(600, raumHell(d) * (1 - hinten * .3)), j, tau);
+    b.hs.forEach(s => s.gain.setTargetAtTime(s.std * raumHall(d), j, tau));
+    if (b.pn) b.pn.pan.setTargetAtTime(Math.sin(grad(az)) * (e.az != null ? .85 : .45) * (1 - d * .25), j, tau);
+    if (b.p1) { pos3d(b.p1, az, b.hoch || 0, 1.2 + d * 9, j + .3, true); if (b.p2) pos3d(b.p2, az + 150, b.hoch || 0, 1.5 + d * 10, j + .3, true); }
+    if (!sofort && b.buf && ctx.currentTime > (b.bereitAb || 0)) b.out.gain.setTargetAtTime(bGain(b) * (b.atem || 1), j, tau);
+  }
+  const raumEv = (w, art) => { if (!w) return null; const r = (merk.raum[w.id] || {}).e; return r && r[art] ? r[art] : null; };
+  const EVLOG = [];
+  /* Namen der Geräuscharten für die Raum-Seite (wo die Geräusch-Knöpfe keinen liefern) */
+  const EV_EIGEN = {
+    krug: ["🍺", W("Krüge", "Mugs")],
+    stuhl: ["🪑", W("Stühle", "Chairs")],
+    holzschritte: ["👣", W("Schritte auf Holz", "Steps on wood")],
+    muenzen: ["🪙", W("Münzen", "Coins")],
+    tuer: ["🚪", W("Tür", "Door")],
+    ross: ["🐎", W("Pferd", "Horse")],
+    zank: ["😠", W("Zank", "Bickering")],
+    rauferei: ["🤼", W("Rauferei", "Scuffle")],
+    volk: ["👥", W("Leute", "People")],
+    wuerfel: ["🎲", W("Würfel", "Dice")],
+    ruelpser: ["😮‍💨", W("Rülpser", "Burp")],
+    schnarchen: ["😴", W("Schnarchen", "Snoring")],
+    schwertziehen: ["🗡", W("Schwert ziehen", "Sword drawn")],
+    knall: ["💥", W("Knall", "Bang")],
+    stoehnen: ["😩", W("Stöhnen", "Groaning")],
+    tor: ["🚪", W("Tor", "Gate")],
+    wehklagen: ["😢", W("Wehklagen", "Wailing")],
+    schrei: ["😱", W("Schrei", "Scream")],
+    atem: ["🌬", W("Atem", "Breath")],
+    schleifen: ["🗡", W("Schleifstein", "Whetstone")],
+    blasebalg: ["🔥", W("Blasebalg", "Bellows")],
+    zischen: ["💨", W("Zischen", "Hiss")],
+    metall: ["⚙", W("Metall", "Metal")],
+    zimmern: ["🪚", W("Zimmern", "Carpentry")],
+    hufe: ["🐴", W("Hufe", "Hooves")],
+    wiehern: ["🐴", W("Wiehern", "Neighing")],
+    schnauben: ["🐴", W("Schnauben", "Snorting")],
+    kutsche: ["🛞", W("Kutsche", "Carriage")],
+    saege: ["🪚", W("Säge", "Saw")],
+    blubb: ["🫧", W("Blubbern", "Bubbling")],
+    papier: ["📜", W("Papier", "Paper")],
+    glbaum: ["🎐", W("Glockenbaum", "Chime tree")],
+    grollen: ["🌩", W("Grollen", "Rumble")],
+    klangschale: ["🥣", W("Klangschale", "Singing bowl")],
+    chor: ["🎶", W("Chor", "Choir")],
+    gong: ["🔔", W("Gong", "Gong")],
+    steinschritte: ["👣", W("Schritte auf Stein", "Steps on stone")],
+    nepal: ["🔔", W("Nepal-Glocke", "Nepal bell")],
+    pfau: ["🦚", W("Pfau", "Peacock")],
+    uebung: ["🤺", W("Waffenübung", "Weapon drill")],
+    hieb: ["⚔", W("Hieb", "Strike")],
+    pfeil: ["🏹", W("Pfeil", "Arrow")],
+    belagerung: ["🏰", W("Belagerung", "Siege")],
+    faustkampf: ["👊", W("Faustkampf", "Fistfight")],
+    aua: ["🤕", W("Aua", "Ouch")],
+    tischbruch: ["🪵", W("Tisch bricht", "Table breaks")],
+    holzpoltern: ["🪵", W("Holzpoltern", "Wood clatter")],
+    jubel: ["🙌", W("Jubel", "Cheering")],
+    raunen: ["🗣", W("Raunen", "Murmur")],
+    kampfruf: ["📣", W("Kampfruf", "Battle cry")],
+    laubschritt: ["🍂", W("Schritte im Laub", "Steps in leaves")],
+    drache: ["🐉", W("Drache", "Dragon")],
+    laub: ["🍃", W("Laub", "Leaves")],
+    vogel: ["🐦", W("Vogel", "Bird")],
+    fledermaus: ["🦇", W("Fledermaus", "Bat")],
+    geheul: ["🐺", W("Geheul", "Howling")],
+    schnueffeln: ["🐽", W("Schnüffeln", "Sniffing")],
+    donner: ["⛈", W("Donner", "Thunder")],
+    tuch: ["🏳", W("Tuch flattert", "Flapping cloth")],
+    windstoss: ["💨", W("Windstoß", "Gust")],
+    insekt: ["🦗", W("Insekt", "Insect")],
+    ochse: ["🐂", W("Ochse", "Ox")],
+    sense: ["🌾", W("Sense", "Scythe")],
+    webstuhl: ["🧶", W("Webstuhl", "Loom")],
+    schellen: ["🔔", W("Schellen", "Jingle bells")],
+    stampfen: ["🦶", W("Stampfen", "Stomping")],
+    klingen: ["⚔", W("Klingen", "Blades")],
+    tod: ["💀", W("Todesschrei", "Death cry")],
+    salve: ["🏹", W("Pfeilsalve", "Volley")],
+    einschlag: ["☄", W("Einschlag", "Impact")],
+    ruder: ["🚣", W("Ruder", "Oars")],
+    rumpf: ["⛵", W("Schiffsrumpf", "Hull")],
+    riemen: ["🚣", W("Riemen", "Oarlocks")],
+    monster: ["👹", W("Ungeheuer", "Monster")],
+    hacke: ["⛏", W("Spitzhacke", "Pickaxe")],
+    einsturz: ["🪨", W("Einsturz", "Collapse")],
+    erz: ["🪨", W("Erz", "Ore")]
+  };
+  let EV_NAMEN = null;
+  function evName(art) {
+    if (EV_EIGEN[art]) return { sym: EV_EIGEN[art][0], name: EV_EIGEN[art][1] };
+    if (!EV_NAMEN) { EV_NAMEN = {}; GERAEUSCHE.forEach(g => (g.lagen || []).forEach(l => (l.f || []).forEach(f => { const m = /^[a-z]_(.+?)_\d+$/.exec(f); if (m && !EV_NAMEN[m[1]]) EV_NAMEN[m[1]] = { sym: g.sym, name: g.name }; }))); }
+    return EV_NAMEN[art] || { sym: "🔉", name: art.charAt(0).toUpperCase() + art.slice(1) };
+  }
   function bettStarten(welt, [name, staerke, label, o], i, ruht) {
     const datei = BETT_VAR[name] && !(o && (o.fest || o.ton)) ? zufall([name].concat(BETT_VAR[name])) : name;
     const b = { name, label, staerke, o: o || {}, out: ctx.createGain(), regler: 1, quellen: [], naechst: 0, drift: 0, aus: false, pos: null, ruht: !!ruht };
@@ -980,25 +1102,28 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     b.out.gain.value = 0;
     let ziel = b.out;
     const az = i >= 100 ? zz(0, 360) : [0, 125, 235, 60, 180, 300, 30, 150, 270][i % 9], hoch = /wind|orkan|sturm|regen|gewitter|voegel|baumwind|laub/.test(name) ? 20 : /tropf|rinnsal|kies|schritte/.test(name) ? -15 : 3;
-    b.az0 = az; b.hoch = hoch; b.gs = zz(.6, 1.4);
+    b.az0 = az; b.azStd = az; b.hoch = hoch; b.gs = zz(.6, 1.4); b.nr = i; b.hs = [];
     const dahin = ortBus();
+    /* Entfernung (Raum-Seite am Pult): nah = lauter und klar, fern = leiser, dumpfer, mehr Hall – ein Tiefpass gleich hinter dem Regler */
+    const kopf = ctx.createBiquadFilter(); kopf.type = "lowpass"; kopf.frequency.value = 20000; kopf.Q.value = .5; b.kopf = kopf;
     if (raum3d && ctx.createPanner) {
       /* rundum, doppelt mit leichter Verzögerung – der Teppich umhüllt statt aus einem Punkt zu kommen */
       const vor = ctx.createGain(); vor.gain.value = .72; const p1 = panner3d(az, hoch, 4), p2 = panner3d(az + 150, hoch, 5), dl = ctx.createDelay(.05); dl.delayTime.value = .011; b.p1 = p1; b.p2 = p2;
-      b.out.connect(vor); vor.connect(p1); vor.connect(dl); dl.connect(p2);
+      b.out.connect(kopf); kopf.connect(vor); vor.connect(p1); vor.connect(dl); dl.connect(p2);
       const lp = b.o.tief ? ctx.createBiquadFilter() : null; if (lp) { lp.type = "lowpass"; lp.frequency.value = b.o.tief; }
       [p1, p2].forEach(p => { const a = lp || p; if (lp) { p.connect(lp); } });
       const ende = lp || null, quelle = ende ? [ende] : [p1, p2];
-      quelle.forEach(q => { q.connect(dahin); const s = ctx.createGain(); s.gain.value = b.o.tief ? .35 : .25; q.connect(s); s.connect(hallEin); });
+      quelle.forEach(q => { q.connect(dahin); const s = ctx.createGain(); s.gain.value = b.o.tief ? .35 : .25; s.std = s.gain.value; b.hs.push(s); q.connect(s); s.connect(hallEin); });
     } else {
       /* leicht seitlich verteilt – beim Weiterziehen wandern die Schichten vorbei */
-      let von = b.out;
-      if (!mobil && ctx.createStereoPanner && welt && !/^_/.test(welt.id)) { const pn = ctx.createStereoPanner(); pn.pan.value = Math.sin(grad(az)) * .45; b.out.connect(pn); von = pn; b.pn = pn; }
-      if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(dahin); const s = ctx.createGain(); s.gain.value = .35; lp.connect(s); s.connect(hallEin); von.connect(lp); }
-      else { von.connect(dahin); const s = ctx.createGain(); s.gain.value = .25; von.connect(s); s.connect(hallEin); }
+      b.out.connect(kopf); let von = kopf;
+      if (!mobil && ctx.createStereoPanner && welt && !/^_/.test(welt.id)) { const pn = ctx.createStereoPanner(); pn.pan.value = Math.sin(grad(az)) * .45; kopf.connect(pn); von = pn; b.pn = pn; }
+      if (b.o.tief) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = b.o.tief; lp.connect(dahin); const s = ctx.createGain(); s.gain.value = .35; s.std = .35; b.hs.push(s); lp.connect(s); s.connect(hallEin); von.connect(lp); }
+      else { von.connect(dahin); const s = ctx.createGain(); s.gain.value = .25; s.std = .25; b.hs.push(s); von.connect(s); s.connect(hallEin); }
     }
     /* auf gleiche Lautheit bringen – aber nie so weit, dass knackende Spitzen (Feuer, Tropfen) übersteuern */
     b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[datei] || .05)) * (BETT_GLEICH[datei] || 1) * trimVon(welt);
+    if (welt && !/^_/.test(welt.id) && i < 100) raumBett(b, welt, true);
     if (ruht) return b;
     laden(datei).then(buf => {
       if (!buf || b.aus) return;
@@ -1056,13 +1181,16 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     const meins = welt && aktiv && welt === aktiv.welt && !welt.episch && aktiv.extra;
     if (!o.szene && stilleBis > ctx.currentTime) return;
     if (meins && !o.szene) { const p = belebtEvP(art); if (p < 1 && Math.random() > p) return; }
-    const weit = !o.dumpf && Math.random() < (fern || 0), laut = (e.g || 1) * staerke * (o.dumpf ? zz(.55, .85) : weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv && aktiv.leben > 1 ? 1 : .9) * trimVon(welt);
+    /* fest eingestellte Entfernung (Raum-Seite) statt „mal nah, mal fern“ */
+    const rp = meins && !o.ort && !o.wandern && !o.nah && !o.schritt && !o.dumpf ? raumEv(welt, art) : null, rd = rp && rp.d != null ? Math.max(0, Math.min(1, rp.d + zz(-.04, .04))) : null;
+    const weit = rd != null ? rd > .72 : !o.dumpf && Math.random() < (fern || 0), laut = (e.g || 1) * staerke * (o.dumpf ? zz(.55, .85) : rd != null ? zz(.75, 1) * raumGain(rd) * .9 : weit ? zz(.3, .55) : zz(.65, 1)) * (aktiv && aktiv.leben > 1 ? 1 : .9) * trimVon(welt);
+    if (meins && !o.nah && !o.schritt) { EVLOG.push({ art, t: Date.now(), az: o.ort && o.ort.az != null ? o.ort.az : o.wandern ? null : heimat(art), d: rd != null ? rd : o.dumpf ? .65 : weit ? .82 : .32 }); if (EVLOG.length > 30) EVLOG.shift(); }
     const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1, dauer = e.folge ? n * (e.folge[2] + e.folge[3]) / 2 + 1.5 : 5;
     let ziel;
     const g = ctx.createGain(); g.gain.value = laut;
     if (o.wandern) { g.gain.setValueAtTime(laut * .2, j); g.gain.linearRampToValueAtTime(laut, j + dauer * .5); g.gain.linearRampToValueAtTime(laut * .15, j + dauer); }
     let letzter = g;
-    if (weit || o.dumpf) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = o.dumpf ? zz(450, 800) : zz(900, 2600); g.connect(lp); letzter = lp; }
+    if (rd != null ? rd > RAUM_D0 : weit || o.dumpf) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = rd != null ? Math.max(700, raumHell(rd) * .6) : o.dumpf ? zz(450, 800) : zz(900, 2600); g.connect(lp); letzter = lp; }
     if (raum3d && ctx.createPanner) {
       const el = (HOEHE[art] || 0) + zz(-6, 6);
       let p;
@@ -1074,7 +1202,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
         const a0 = zz(50, 110) * (Math.random() < .5 ? 1 : -1); p = panner3d(a0, 0, .7);
         pos3d(p, zz(-20, 20), 10, .5, j + dauer * .4, true); pos3d(p, -a0 + zz(-20, 20), -5, 1.2, j + dauer, true);
       } else if (o.schritt) p = panner3d(zz(-40, 40), -40, 1.2);
-      else { const d = o.dumpf ? zz(6, 12) : weit ? zz(12, 30) : zz(2, 7); p = panner3d(meins ? ortAz(o.ort && o.ort.az != null ? o.ort.az : heimat(art) + zz(-25, 25)) : zz(0, 360), el, d); }
+      else { const d = rd != null ? 1.2 + rd * 26 : o.dumpf ? zz(6, 12) : weit ? zz(12, 30) : zz(2, 7); p = panner3d(meins ? ortAz(o.ort && o.ort.az != null ? o.ort.az : heimat(art) + zz(-25, 25)) : zz(0, 360), el, d); }
       letzter.connect(p); letzter = p;
     } else if (ctx.createStereoPanner) {
       const pn = ctx.createStereoPanner();
@@ -1093,7 +1221,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       if (ra && !o.antwort && EV[ra[0]] && Math.random() < ra[1]) { const az2 = (o.ort && o.ort.az != null ? o.ort.az : heimat(art)) + 180 + zz(-50, 50); setTimeout(() => { if (lebtNoch(a) && !(stilleBis > ctx.currentTime)) ereignis(welt, [ra[0], null, staerke * zz(.6, .95), Math.max(fern || 0, .5), { antwort: 1, szene: 1, ort: { az: az2 } }]); }, zz(ra[2], ra[3]) * 1000); }
       if (SCHRECK[art]) { a.verstummtBis = ctx.currentTime + zz(5, 10); belebtAnwenden(.35); }
     }
-    letzter.connect(ortBus()); const s = ctx.createGain(); s.gain.value = o.dumpf ? 1.1 : weit ? .8 : .3; letzter.connect(s); s.connect(hallEin);
+    letzter.connect(ortBus()); const s = ctx.createGain(); s.gain.value = rd != null ? .3 * raumHall(rd) : o.dumpf ? 1.1 : weit ? .8 : .3; letzter.connect(s); s.connect(hallEin);
     ziel = g;
     if (e.s) { const b = synthEreignis(e.s); if (b) spiel(b, ziel, j, zz(.94, 1.06)); return; }
     let t = j;
@@ -2304,7 +2432,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   }
   const pos3d = (p, az, el, d, t, rampe) => ort3d(p, d * Math.sin(grad(az)) * Math.cos(grad(el)), d * Math.sin(grad(el)), -d * Math.cos(grad(az)) * Math.cos(grad(el)), t, rampe);
   const ortAz = a0 => aktiv && aktiv.gang ? wanderAz(a0, aktiv.gang) : a0;
-  function heimat(art) { const o = aktiv.orte || (aktiv.orte = {}); if (o[art] == null) o[art] = zz(0, 360); return o[art]; }
+  function heimat(art) { const r = raumEv(aktiv && aktiv.welt, art); if (r && r.az != null) return r.az; const o = aktiv.orte || (aktiv.orte = {}); if (o[art] == null) o[art] = zz(0, 360); return o[art]; }
   const zeitBasis = () => belebt.zeit === "tag" ? 0 : belebt.zeit === "daemmerung" ? .5 : belebt.zeit === "nacht" ? 1 : null;
   function zeitIst() {
     const l = aLid(); if (!kulDraussen(l)) return NACHT_KUL[l] || 0;
@@ -2336,7 +2464,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (still) f *= STILL_BLEIBT.test(n) ? .5 : .03;
     return f;
   }
-  const bGain = b => b.grund * b.regler * (b.lf == null ? 1 : b.lf);
+  const bGain = b => b.grund * b.regler * (b.lf == null ? 1 : b.lf) * (b.dg == null ? 1 : b.dg);
   function belebtAnwenden(tau, immer) {
     if (!ctx) return;
     const j = ctx.currentTime;
@@ -2449,7 +2577,8 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       a.betten.concat(a.extra).forEach(b => {
         if (!b || b.az0 == null || b.ruht) return;
         const az = wanderAz(b.az0, a.gang * (b.gs || 1)), t = j + .5;
-        if (b.p1) { pos3d(b.p1, az, b.hoch || 0, 4, t, true); if (b.p2) pos3d(b.p2, az + 150, b.hoch || 0, 5, t, true); }
+        const bd = b.d == null ? .4 : b.d;
+        if (b.p1) { pos3d(b.p1, az, b.hoch || 0, 1.2 + bd * 9, t, true); if (b.p2) pos3d(b.p2, az + 150, b.hoch || 0, 1.5 + bd * 10, t, true); }
         else if (b.pn) b.pn.pan.linearRampToValueAtTime(Math.sin(grad(az)) * .8, t);
       });
     }
