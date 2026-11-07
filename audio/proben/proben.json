@@ -1,0 +1,75 @@
+{
+ "text": "Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg und Händler aus der Stadt Neverwinter und kannte wohl jeden, der etwas zu sagen hat. Treffpunkt war der Hafen der Stadt. Knarrende Stege, Fischerboote, Händler und Matrosen, und über allem der Geruch von Salz und Teer. Ich weiß noch, wie ich dort stand, die Pfeife im Mundwinkel, und spürte: Hier beginnt etwas Großes.",
+ "modell": "eleven_multilingual_v2",
+ "proben": [
+  {
+   "name": "George - Warm, Captivating Storyteller",
+   "id": "JBFqnCBsd6RMkjVDRZzb",
+   "quelle": "Standard",
+   "info": {
+    "use_case": "narrative_story",
+    "gender": "male",
+    "descriptive": "mature",
+    "language": "en",
+    "accent": "british",
+    "age": "middle_aged"
+   },
+   "datei": "audio/proben/01-george-warm-captivating-storyteller.mp3"
+  },
+  {
+   "name": "Brian - Deep, Resonant and Comforting",
+   "id": "nPczCjzI2devNBz1zQrb",
+   "quelle": "Standard",
+   "info": {
+    "use_case": "social_media",
+    "gender": "male",
+    "descriptive": "classy",
+    "language": "en",
+    "accent": "american",
+    "age": "middle_aged"
+   },
+   "datei": "audio/proben/02-brian-deep-resonant-and-comforting.mp3"
+  },
+  {
+   "name": "Bill - Wise, Mature, Balanced",
+   "id": "pqHfZKP75CvOlQylNhV4",
+   "quelle": "Standard",
+   "info": {
+    "use_case": "advertisement",
+    "gender": "male",
+    "descriptive": "crisp",
+    "language": "en",
+    "accent": "american",
+    "age": "old"
+   },
+   "datei": "audio/proben/03-bill-wise-mature-balanced.mp3"
+  },
+  {
+   "name": "Daniel - Steady Broadcaster",
+   "id": "onwK4e9ZLuTAKqWW03F9",
+   "quelle": "Standard",
+   "info": {
+    "use_case": "informative_educational",
+    "gender": "male",
+    "descriptive": "formal",
+    "language": "en",
+    "accent": "british",
+    "age": "middle_aged"
+   },
+   "datei": "audio/proben/04-daniel-steady-broadcaster.mp3"
+  },
+  {
+   "name": "Callum - Husky Trickster",
+   "id": "N2lVS1w4EtoT3dr4eOWO",
+   "quelle": "Standard",
+   "info": {
+    "use_case": "characters_animation",
+    "gender": "male",
+    "language": "en",
+    "accent": "american",
+    "age": "middle_aged"
+   },
+   "datei": "audio/proben/05-callum-husky-trickster.mp3"
+  }
+ ]
+}
