@@ -169,6 +169,7 @@ def chronik(sprache, stimme, grenze):
     if D.get("vorab"): stuecke.append(("vorab", 0, D["vorab"]))
     for k in D["kapitel"]:
         for i, a in enumerate(k["absaetze"]): stuecke.append((k["nummer"], i, a))
+    stuecke = [x for x in stuecke if not x[2].lstrip().startswith("!")]  # Bilder mit Bildunterschrift nicht vorlesen
     texte = [sauber(t) for _, _, t in stuecke]
     kosten = 0; erzeugt = 0
     stand, _ = rest(); print("Credits übrig:", stand)
@@ -206,6 +207,12 @@ if __name__ == "__main__":
     modus = sys.argv[1] if len(sys.argv) > 1 else "proben"
     sprache = os.environ.get("SPRACHE") or "de"
     if modus == "proben": proben(sprache)
+    elif modus == "text":
+        stimme = stimme_finden(os.environ.get("STIMME", "").strip())
+        os.makedirs(os.path.join(WURZEL, "audio/proben"), exist_ok=True)
+        name = re.sub(r"[^a-z0-9]+", "-", (os.environ.get("NAME") or "text").lower())
+        open(os.path.join(WURZEL, f"audio/proben/{name}.mp3"), "wb").write(tts(stimme, os.environ["TEXT"]))
+        git_sichern("Vertonung: Probe " + name)
     elif modus == "feinschliff": feinschliff(sprache, os.environ.get("STIMME", "").strip())
     elif modus == "chronik":
         stimme = os.environ.get("STIMME", "").strip()

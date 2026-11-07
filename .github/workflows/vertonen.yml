@@ -6,7 +6,7 @@ on:
         description: "proben = Hörproben, chronik = Chronik vertonen"
         default: proben
         type: choice
-        options: [proben, feinschliff, chronik]
+        options: [proben, feinschliff, text, chronik]
       sprache:
         description: "de oder en"
         default: de
@@ -22,6 +22,12 @@ on:
       nur_eigene:
         description: "proben: nur selbst hinzugefügte Stimmen (1 = ja)"
         default: "1"
+      text:
+        description: "nur für modus=text: Text (mit Regie-Tags für eleven_v3)"
+        default: ""
+      name:
+        description: "nur für modus=text: Dateiname"
+        default: "text"
       grenze:
         description: "höchstens so viele Zeichen in diesem Lauf (0 = alles)"
         default: "0"
@@ -49,6 +55,8 @@ jobs:
           GRENZE: ${{ inputs.grenze }}
           EINSTELLUNG: ${{ inputs.einstellung }}
           NUR_EIGENE: ${{ inputs.nur_eigene }}
+          TEXT: ${{ inputs.text }}
+          NAME: ${{ inputs.name }}
         run: |
           git config user.name "Vertonung"
           git config user.email "actions@users.noreply.github.com"
