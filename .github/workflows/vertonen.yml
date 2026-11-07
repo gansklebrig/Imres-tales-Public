@@ -6,7 +6,7 @@ on:
         description: "proben = Hörproben, chronik = Chronik vertonen"
         default: proben
         type: choice
-        options: [proben, chronik]
+        options: [proben, feinschliff, chronik]
       sprache:
         description: "de oder en"
         default: de
@@ -16,6 +16,9 @@ on:
       modell:
         description: "ElevenLabs-Modell"
         default: eleven_multilingual_v2
+      einstellung:
+        description: "voice_settings als JSON (leer = Standard)"
+        default: ""
       grenze:
         description: "höchstens so viele Zeichen in diesem Lauf (0 = alles)"
         default: "0"
@@ -32,6 +35,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
+      - name: ffmpeg
+        run: which ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
       - name: Vertonen
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
@@ -39,6 +44,7 @@ jobs:
           STIMME: ${{ inputs.stimme }}
           MODELL: ${{ inputs.modell }}
           GRENZE: ${{ inputs.grenze }}
+          EINSTELLUNG: ${{ inputs.einstellung }}
         run: |
           git config user.name "Vertonung"
           git config user.email "actions@users.noreply.github.com"

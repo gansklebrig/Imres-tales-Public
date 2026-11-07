@@ -12,7 +12,18 @@ API = "https://api.elevenlabs.io"
 KEY = os.environ.get("ELEVENLABS_API_KEY", "").strip()
 WURZEL = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODELL = os.environ.get("MODELL") or "eleven_multilingual_v2"
-EINSTELLUNG = {"stability": 0.48, "similarity_boost": 0.8, "style": 0.22, "use_speaker_boost": True}
+EINSTELLUNG = json.loads(os.environ.get("EINSTELLUNG") or "null") or {"stability": 0.5, "similarity_boost": 0.88, "style": 0.25, "use_speaker_boost": True, "speed": 0.93}
+NACHBEARBEITEN = (os.environ.get("NACHBEARBEITEN") or "1") == "1"
+# Klang: Rumpeln weg, etwas Wärme unten, Zischlaute zähmen, gleichmäßige Lautstärke (Hörbuch-Pegel)
+FILTER = "highpass=f=70,equalizer=f=170:t=q:w=1.1:g=2.2,equalizer=f=3200:t=q:w=1.6:g=-1.2,deesser=i=0.35,acompressor=threshold=-20dB:ratio=2.2:attack=15:release=180,loudnorm=I=-18:TP=-1.5:LRA=9"
+
+def veredeln(mp3):
+    if not NACHBEARBEITEN: return mp3
+    try:
+        r = subprocess.run(["ffmpeg", "-v", "error", "-f", "mp3", "-i", "pipe:0", "-af", FILTER, "-ar", "44100", "-b:a", "128k", "-f", "mp3", "pipe:1"], input=mp3, capture_output=True, check=True)
+        return r.stdout or mp3
+    except Exception as e:
+        print("Nachbearbeitung übersprungen:", e); return mp3
 
 def anfrage(pfad, daten=None, methode=None, roh=False):
     url = API + pfad
@@ -46,11 +57,13 @@ def sauber(t):
     t = re.sub(r"<[^>]+>", "", t)
     return re.sub(r"\s+", " ", t).strip()
 
-def tts(stimme, text, vorher="", nachher=""):
-    daten = {"text": text, "model_id": MODELL, "voice_settings": EINSTELLUNG}
-    if vorher: daten["previous_text"] = vorher[-600:]
-    if nachher: daten["next_text"] = nachher[:300]
-    return anfrage(f"/v1/text-to-speech/{stimme}?output_format=mp3_44100_128", daten, roh=True)
+def tts(stimme, text, vorher="", nachher="", modell=None, einstellung=None):
+    modell = modell or MODELL
+    daten = {"text": text, "model_id": modell, "voice_settings": einstellung or EINSTELLUNG}
+    if modell != "eleven_v3":
+        if vorher: daten["previous_text"] = vorher[-600:]
+        if nachher: daten["next_text"] = nachher[:300]
+    return veredeln(anfrage(f"/v1/text-to-speech/{stimme}?output_format=mp3_44100_128", daten, roh=True))
 
 def chronik_laden(sprache):
     out = subprocess.check_output(["node", os.path.join(WURZEL, "tools/vertonung/export.js"), sprache])
@@ -105,6 +118,30 @@ def proben(sprache):
     json.dump({"text": text, "modell": MODELL, "proben": liste}, open(os.path.join(WURZEL, "audio/proben/proben.json"), "w"), ensure_ascii=False, indent=1)
     git_sichern("Vertonung: Hörproben für die Erzählstimme")
 
+# ---------------------------------------------------------------- Feinschliff: eine Stimme, mehrere Einstellungen
+VARIANTEN = [
+    ("a-ruhig-warm", "eleven_multilingual_v2", {"stability": 0.62, "similarity_boost": 0.88, "style": 0.12, "use_speaker_boost": True, "speed": 0.94}),
+    ("b-erzaehler", "eleven_multilingual_v2", {"stability": 0.5, "similarity_boost": 0.9, "style": 0.28, "use_speaker_boost": True, "speed": 0.92}),
+    ("c-lebendig", "eleven_multilingual_v2", {"stability": 0.38, "similarity_boost": 0.82, "style": 0.42, "use_speaker_boost": True, "speed": 0.97}),
+    ("d-v3-ausdruck", "eleven_v3", {"stability": 0.5, "similarity_boost": 0.85, "style": 0.3, "use_speaker_boost": True}),
+]
+def feinschliff(sprache, stimme):
+    D = chronik_laden(sprache)
+    kap = D["kapitel"][0]["absaetze"]
+    text = " ".join(sauber(a) for a in kap[1:4] if not a.startswith("#"))
+    text = text[:520].rsplit(".", 1)[0] + "."
+    os.makedirs(os.path.join(WURZEL, "audio/proben"), exist_ok=True)
+    for name, modell, einst in VARIANTEN:
+        try:
+            mp3 = tts(stimme, text, modell=modell, einstellung=einst)
+        except SystemExit as e:
+            print("Variante", name, "fehlgeschlagen:", e); continue
+        open(os.path.join(WURZEL, f"audio/proben/fein-{name}.mp3"), "wb").write(mp3); print("Variante:", name)
+    global NACHBEARBEITEN
+    NACHBEARBEITEN = False
+    open(os.path.join(WURZEL, "audio/proben/fein-b-erzaehler-roh.mp3"), "wb").write(tts(stimme, text, modell=VARIANTEN[1][1], einstellung=VARIANTEN[1][2]))
+    git_sichern("Vertonung: Feinschliff-Proben")
+
 # ---------------------------------------------------------------- Chronik
 def chronik(sprache, stimme, grenze):
     D = chronik_laden(sprache)
@@ -154,6 +191,7 @@ if __name__ == "__main__":
     modus = sys.argv[1] if len(sys.argv) > 1 else "proben"
     sprache = os.environ.get("SPRACHE") or "de"
     if modus == "proben": proben(sprache)
+    elif modus == "feinschliff": feinschliff(sprache, os.environ.get("STIMME", "").strip())
     elif modus == "chronik":
         stimme = os.environ.get("STIMME", "").strip()
         if not stimme: raise SystemExit("STIMME (voice_id) fehlt")
