@@ -23,7 +23,7 @@
   const lies = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (_) { return d; } };
   const schreib = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
 
-  let manifest = null, mSprache = null, liste = [], pos = -1, audio = null, naechstes = null, spielt = false, tempo = parseFloat(lies("imres-vorlesen-tempo", "1")) || 1;
+  let manifest = null, mSprache = null, liste = [], pos = -1, audio = null, spielt = false, tempo = parseFloat(lies("imres-vorlesen-tempo", "1")) || 1;
   let leiste = null, letztesScrollen = 0;
 
   const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
@@ -144,6 +144,29 @@
   let wartUhr = 0, wartTok = 0, wartet = false;
   function warteAbbrechen() { clearTimeout(wartUhr); wartTok++; wartet = false; }
   /* art: "start" (Knopf in der Chronik), "weiter" (der vorige Absatz ist zu Ende), "sprung" (vor/zurück) */
+  /* Vorrat: die nächsten Absätze werden vollständig heruntergeladen (Blob), bevor sie dran sind –
+     so gibt es bei wackeligem Handy-Netz keine Hänger mitten im Satz oder zwischen den Absätzen */
+  const vorrat = new Map();   /* datei → { p: Promise<url>, url } */
+  function holen(datei) {
+    if (!datei || vorrat.has(datei)) return;
+    const e = { url: null };
+    e.p = fetch(datei).then(r => r.ok ? r.blob() : Promise.reject(r.status)).then(b => (e.url = URL.createObjectURL(b))).catch(() => (e.url = null));
+    vorrat.set(datei, e);
+  }
+  function vorratAufraeumen() {
+    const behalten = new Set([pos - 1, pos, pos + 1, pos + 2, pos + 3].map(k => liste[k] && liste[k].datei).filter(Boolean));
+    vorrat.forEach((e, d) => { if (!behalten.has(d)) { if (e.url) URL.revokeObjectURL(e.url); vorrat.delete(d); } });
+  }
+  let quelleBereit = Promise.resolve(), quelleSofort = true;
+  function quelleSetzen(src, sofort) {
+    const e = vorrat.get(src);
+    quelleSofort = true;
+    if (e && e.url) { audio.src = e.url; return Promise.resolve(); }
+    if (sofort || !e) { audio.src = src; return Promise.resolve(); }   /* erster Klick: sofort (Autoplay-Regeln), sonst Netz */
+    quelleSofort = false;
+    /* noch nicht fertig geladen: bis zu 6 s warten, dann notfalls direkt streamen */
+    return Promise.race([e.p, new Promise(r => setTimeout(r, 6000))]).then(() => { if (liste[pos] && liste[pos].datei === src) audio.src = e.url || src; });
+  }
   function spielen(i, art) {
     art = art || "sprung";
     warteAbbrechen();
@@ -169,14 +192,14 @@
       audio.addEventListener("seeked", () => { const h = HSP(); if (h && !audio.paused && pos >= 0) h.sprache(liste[pos], audio); });
     }
     const src = x.datei;
-    if (naechstes && naechstes.dataset.src === src) { audio.src = naechstes.src; } else audio.src = src;
+    quelleBereit = quelleSetzen(src, art !== "weiter");
     audio.playbackRate = tempo;
     spielt = true;
     schreib("imres-vorlesen-pos", JSON.stringify({ sp: mSprache, kap: x.kap, i: x.i }));
     markieren(); zeichnen(); medienInfo();
     /* nächsten Absatz vorladen */
     const n = liste[pos + 1];
-    if (n) { naechstes = new Audio(); naechstes.preload = "auto"; naechstes.src = n.datei; naechstes.dataset.src = n.datei; }
+    [1, 2, 3].forEach(k => liste[pos + k] && holen(liste[pos + k].datei)); vorratAufraeumen();
     if (!H || !H.an()) { los(); return; }
     if (H.direkt() && art === "weiter") { H.ortNur(x); los(); return; }   /* Sperrbildschirm: ohne Zwischenspiel sofort weiter */
     /* Hörspiel: erst Ortswechsel und Zwischenspiel, dann die Stimme */
@@ -190,9 +213,15 @@
   }
   function los() {
     if (!audio || pos < 0) return;
-    audio.playbackRate = tempo;
-    const p = audio.play(); if (p && p.catch) p.catch(() => { spielt = false; zeichnen(); });
-    spielt = true; zeichnen();
+    const jetzt = pos, tok = wartTok;
+    const spiel = () => {
+      if (pos !== jetzt || tok !== wartTok) return;
+      audio.playbackRate = tempo;
+      const p = audio.play(); if (p && p.catch) p.catch(() => { spielt = false; zeichnen(); });
+      spielt = true; zeichnen();
+    };
+    /* Quelle schon gesetzt (erster Klick oder Absatz fertig geladen) → synchron, damit die Autoplay-Erlaubnis greift */
+    if (quelleSofort) spiel(); else quelleBereit.then(spiel);
   }
   function beiEnde() {
     if (pos < 0) return;
