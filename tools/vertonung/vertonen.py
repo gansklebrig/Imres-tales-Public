@@ -228,11 +228,39 @@ def chronik(sprache, stimme, grenze):
     git_sichern(f"Vertonung Chronik ({sprache}): {erzeugt} neue Absätze, {kosten} Zeichen")
     print("Fertig:", erzeugt, "Absätze,", kosten, "Zeichen. Credits übrig:", rest()[0])
 
+# ---------------------------------------------------------------- Einzelne Zeilen (z. B. Erzähler in Heldensturm)
+def zeilen(quelle, stimme, grenze):
+    """QUELLE = JSON {"ziel": "audio/heldensturm/de", "zeilen": {"id": "Text mit Regie-Tags", …}}
+       → <ziel>/<id>-<hash>.mp3 und <ziel>/manifest.json {id: datei}. Vorhandenes wird übersprungen."""
+    Q = json.load(open(os.path.join(WURZEL, quelle)))
+    ziel = Q.get("ziel") or "audio/zeilen"
+    basis = os.path.join(WURZEL, ziel); os.makedirs(basis, exist_ok=True)
+    manifest = {}; kosten = 0; neu = 0
+    for zid, text in Q["zeilen"].items():
+        if not isinstance(text, str) or not text.strip(): continue
+        h = hashlib.sha1((stimme + "|" + MODELL + "|" + json.dumps(EINSTELLUNG, sort_keys=True) + "|" + text).encode()).hexdigest()[:8]
+        name = re.sub(r"[^a-z0-9_-]+", "-", zid.lower())
+        datei = f"{ziel}/{name}-{h}.mp3"; manifest[zid] = datei
+        if os.path.exists(os.path.join(WURZEL, datei)): continue
+        if grenze and kosten + len(text) > grenze: print("Grenze erreicht."); manifest.pop(zid); break
+        open(os.path.join(WURZEL, datei), "wb").write(tts(stimme, text)); kosten += len(text); neu += 1
+        print(f"{datei} ({len(text)} Zeichen, gesamt {kosten})")
+        if neu % 40 == 0:
+            json.dump(manifest, open(os.path.join(basis, "manifest.json"), "w"), ensure_ascii=False, indent=0); git_sichern(f"Vertonung {ziel}: {neu} Zeilen")
+    genutzt = set(manifest.values())
+    for f in os.listdir(basis):
+        if f.endswith(".mp3") and f"{ziel}/{f}" not in genutzt: os.remove(os.path.join(basis, f))
+    json.dump(manifest, open(os.path.join(basis, "manifest.json"), "w"), ensure_ascii=False, indent=0)
+    git_sichern(f"Vertonung {ziel}: {neu} neue Zeilen, {kosten} Zeichen")
+    print("Fertig:", neu, "Zeilen,", kosten, "Zeichen")
+
 if __name__ == "__main__":
     if not KEY: raise SystemExit("ELEVENLABS_API_KEY fehlt")
     modus = sys.argv[1] if len(sys.argv) > 1 else "proben"
     sprache = os.environ.get("SPRACHE") or "de"
     if modus == "proben": proben(sprache)
+    elif modus == "zeilen":
+        zeilen(os.environ.get("QUELLE") or "tools/vertonung/heldensturm-de.json", stimme_finden(os.environ.get("STIMME", "").strip()), int(os.environ.get("GRENZE") or 0))
     elif modus == "text":
         stimme = stimme_finden(os.environ.get("STIMME", "").strip())
         os.makedirs(os.path.join(WURZEL, "audio/proben"), exist_ok=True)

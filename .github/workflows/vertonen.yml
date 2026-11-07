@@ -6,7 +6,7 @@ on:
         description: "proben = Hörproben, chronik = Chronik vertonen"
         default: proben
         type: choice
-        options: [proben, feinschliff, text, chronik]
+        options: [proben, feinschliff, text, chronik, zeilen]
       sprache:
         description: "de oder en"
         default: de
@@ -19,9 +19,9 @@ on:
       einstellung:
         description: "voice_settings als JSON (leer = Standard)"
         default: ""
-      nur_eigene:
-        description: "proben: nur selbst hinzugefügte Stimmen (1 = ja)"
-        default: "1"
+      quelle:
+        description: "zeilen: JSON-Datei mit Zeilen (z. B. tools/vertonung/heldensturm-de.json); proben: nur eigene Stimmen, wenn leer"
+        default: ""
       text:
         description: "nur für modus=text: Text (mit Regie-Tags für eleven_v3)"
         default: ""
@@ -54,7 +54,8 @@ jobs:
           MODELL: ${{ inputs.modell }}
           GRENZE: ${{ inputs.grenze }}
           EINSTELLUNG: ${{ inputs.einstellung }}
-          NUR_EIGENE: ${{ inputs.nur_eigene }}
+          NUR_EIGENE: "1"
+          QUELLE: ${{ inputs.quelle }}
           TEXT: ${{ inputs.text }}
           NAME: ${{ inputs.name }}
         run: |
