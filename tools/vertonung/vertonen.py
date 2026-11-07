@@ -158,6 +158,46 @@ def feinschliff(sprache, stimme):
     git_sichern("Vertonung: Feinschliff-Proben")
 
 # ---------------------------------------------------------------- Chronik
+# ---------------------------------------------------------------- Katalog: Bibliotheksstimmen je Rolle suchen (kostet nichts)
+ROLLEN = {
+    "zwerg-gundren": {"gender": "male", "age": "old", "search": "dwarf"},
+    "zwerg-alt": {"gender": "male", "age": "old", "use_cases": "characters_animation"},
+    "mann-verschmitzt": {"gender": "male", "age": "young", "use_cases": "characters_animation"},
+    "mann-rau-tief": {"gender": "male", "age": "middle_aged", "search": "deep"},
+    "mann-kalt": {"gender": "male", "search": "dark"},
+    "monster": {"search": "monster"},
+    "goblin": {"search": "goblin"},
+    "frau-kuehl": {"gender": "female", "search": "villain"},
+    "frau-erzaehl": {"gender": "female", "use_cases": "characters_animation"},
+    "koenig": {"gender": "male", "search": "king"},
+    "fluestern": {"search": "whisper"},
+    "drache": {"search": "dragon"},
+    "kreatur": {"search": "creature"},
+}
+def katalog(sprache):
+    aus = {"rest": rest()[0], "rollen": {}}
+    for rolle, f in ROLLEN.items():
+        for spr in (sprache, None):
+            q = dict(f, page_size=15, sort="usage_character_count_1y")
+            if spr: q["language"] = spr
+            try: vs = anfrage("/v1/shared-voices?" + urllib.parse.urlencode(q)).get("voices", [])
+            except SystemExit as e: print(rolle, e); vs = []
+            if vs: break
+        aus["rollen"][rolle] = [{k: v.get(k) for k in ("name", "voice_id", "public_owner_id", "description", "accent", "age", "gender", "language", "use_case", "preview_url", "cloned_by_count", "usage_character_count_1y", "category")} for v in vs]
+        print(rolle, len(vs), [v.get("name") for v in vs][:6])
+    # Test: lässt sich eine Bibliotheksstimme ohne Hinzufügen direkt nutzen?
+    for vs in aus["rollen"].values():
+        if vs:
+            try:
+                mp3 = tts(vs[0]["voice_id"], "Hallo.")
+                aus["direkt_nutzbar"] = bool(mp3); print("direkt nutzbar:", vs[0]["name"])
+            except SystemExit as e:
+                aus["direkt_nutzbar"] = False; print("nicht direkt nutzbar:", e)
+            break
+    os.makedirs(os.path.join(WURZEL, "audio/proben"), exist_ok=True)
+    json.dump(aus, open(os.path.join(WURZEL, "tools/vertonung/stimmen-katalog.json"), "w"), ensure_ascii=False, indent=1)
+    git_sichern("Vertonung: Stimmenkatalog für Rollen")
+
 def regie_laden(sprache):
     """Regiefassung (Audio-Tags für eleven_v3) – nur für Absätze, deren Originaltext sich nicht geändert hat"""
     pfad = os.path.join(WURZEL, f"tools/vertonung/regie-{sprache}.json")
@@ -267,6 +307,7 @@ if __name__ == "__main__":
         name = re.sub(r"[^a-z0-9]+", "-", (os.environ.get("NAME") or "text").lower())
         open(os.path.join(WURZEL, f"audio/proben/{name}.mp3"), "wb").write(tts(stimme, os.environ["TEXT"]))
         git_sichern("Vertonung: Probe " + name)
+    elif modus == "katalog": katalog(sprache)
     elif modus == "feinschliff": feinschliff(sprache, os.environ.get("STIMME", "").strip())
     elif modus == "chronik":
         stimme = os.environ.get("STIMME", "").strip()

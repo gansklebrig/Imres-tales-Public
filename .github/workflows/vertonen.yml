@@ -6,7 +6,7 @@ on:
         description: "proben = Hörproben, chronik = Chronik vertonen"
         default: proben
         type: choice
-        options: [proben, feinschliff, text, chronik, zeilen]
+        options: [proben, feinschliff, text, chronik, zeilen, katalog]
       sprache:
         description: "de oder en"
         default: de
