@@ -1401,7 +1401,7 @@
   }
   /* hinter der Notenbahn: Kulisse, Lichter, Band */
   function buehneHinten(g, w, h, dpr, schlag) {
-    const s = szene; if (!s) return;
+    const s = szene; if (!s || !(w > 0) || !(h > 0)) return; /* Karte versteckt: nichts zu malen */
     const zeit = jetztS(), ruhe = reduziert();
     s.dt = s.letzt ? klemme(zeit - s.letzt, 0, .1) : 0; s.letzt = zeit; s.zeit = zeit;
     const bg = hintergrund(w, h);

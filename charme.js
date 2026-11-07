@@ -2591,6 +2591,9 @@
 .ch-reihe span.ok { border-color: #ff8aa0; color: #ff8aa0; }
 .ch-reihe img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: .8; }
 .ch-galerie { display: grid; gap: .4rem; margin-top: .6rem; }
+/* Startbildschirm: Bühne nur so hoch, dass der Start-Knopf darunter noch ins Fenster passt */
+@media (max-width: 2199px), (max-height: 1199px) { .charme:not(.ch-laeuft):not(.tav-voll) > .ch-buehne { width: min(100%, max(19rem, (100vh - 28rem) * 1.6)); justify-self: center; margin-inline: auto; } }
+@media (max-width: 760px) { .charme:not(.ch-laeuft):not(.tav-voll) > .ch-buehne { width: min(calc(100% + 1rem), max(12rem, (100vh - 32rem) * 1.075)); margin-inline: auto; } .charme:not(.ch-laeuft) > .ch-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; } }
 .ch-galerie .ch-reihe span.neu img { filter: brightness(0) drop-shadow(0 0 1px rgba(255,138,160,.6)); opacity: .55; }
 .ch-galerie .ch-reihe span.korb img { filter: grayscale(.8); opacity: .6; }
 @media (max-width: 760px), (max-height: 560px) { .ch-galerie { display: none; } }

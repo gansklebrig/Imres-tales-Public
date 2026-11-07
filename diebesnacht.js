@@ -4036,6 +4036,7 @@
   .dn-tafel .dn-haupt { padding: .4rem 1.1rem; font-size: .95rem; }
 }
 .dn-leise { background: none; border: 0; color: var(--ash); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: .2rem; }
+@media (pointer: coarse) { .dn-leise { min-height: 2.4rem; min-width: 2.4rem; padding: .4rem .7rem; } }
 .dn-knoepfe { position: absolute; right: 6px; bottom: 1.2%; z-index: 2; display: none; gap: 6px; height: max(7%, 36px); }
 .dn-buehne.rep .dn-knoepfe { display: none !important; }
 .dn-skip { position: absolute; right: 6px; bottom: 1.2%; z-index: 2; height: max(7%, 38px); padding: 0 .9rem; border: 1px solid var(--ember); border-radius: 999px; background: rgba(9,8,15,.8); color: var(--ember); font: inherit; font-size: .88rem; cursor: pointer; touch-action: manipulation; }

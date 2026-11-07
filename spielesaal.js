@@ -522,6 +522,8 @@
     leisteBauen(sp.key);
     if (merken && location.hash !== "#" + kartenId) { try { history.pushState(null, "", "#" + kartenId); } catch (_) {} }
     obenHin();
+    /* niedrige Bildschirme (Handy quer, Handhelds): das Spiel gleich bildschirmfüllend zeigen, sonst liegt der Start-Knopf unter der Kante */
+    if (window.tavVollAuto && window.matchMedia("(max-height: 560px)").matches) { try { window.tavVollAuto(kartenId); } catch (_) {} }
     requestAnimationFrame(() => { hoeheSetzen(); window.dispatchEvent(new Event("resize")); });
     if (hoeheWache) { hoeheWache.disconnect(); const k = document.getElementById(kartenId); if (k) hoeheWache.observe(k); }
   }
