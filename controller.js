@@ -22,9 +22,11 @@
       getrennt: "🎮 Controller getrennt",
       ton: "Tipp: Für Ton einmal kurz auf die Seite klicken oder tippen.",
       hilfe: {
-        waldlauf: "Stick: zielen · A / RT: schießen · ☰ Pause",
-        diebesnacht: "Linker Stick: gehen · Rechter Stick: Ziel · A: dorthin / handeln · X Münze · Y Zorn · RB Rauch · B abbrechen · ☰ Pause",
-        echohort: "Stick: Zeiger · Steuerkreuz: von Platz zu Platz · A: tippen · X: pflanzen/verstärken · LB / RB: Knöpfe unten · Y: nächste Welle · ☰ Pause",
+        waldlauf: "Stick: zielen · A / RT: schießen · Y: Fass, Rex! · ☰ Pause",
+        diebesnacht: "Linker Stick: gehen · Rechter Stick: Ziel · A: dorthin / handeln · X Münze · Y Zorn · RB Rauch · LB Verkleidung · B abbrechen · ☰ Pause",
+        echohort: "Stick: Zeiger · Steuerkreuz: von Platz zu Platz · A: tippen · X: pflanzen/verstärken · LB / RB: Knöpfe unten · Y: nächste Welle · B: Tiergestalt · LT: Tempo · ☰ Pause",
+        memory: "Steuerkreuz: Karte wählen · A: aufdecken · Y: neu mischen · LB / RB: Tischgröße · ▣ Vollbild",
+        probe: "Steuerkreuz: wählen · A: bestätigen · X: W20 werfen · B: vorspulen · Y: Versbuch · ▣ Vollbild",
         echohortRaub: "A: Echo flattert · ☰ Pause",
         auftritt: "X · A · B (oder ◀ ▼ ▶): Bass · Laute · Flöte – bei Schweif gedrückt halten · ☰ Pause",
         charme: "▲ ▼: Spruch wählen · A: würfeln · B: vorspulen · X / Y / RB: Echo · Rex · Flöte · ☰ Klang"
@@ -35,9 +37,11 @@
       getrennt: "🎮 Controller disconnected",
       ton: "Tip: click or tap the page once to enable sound.",
       hilfe: {
-        waldlauf: "Stick: aim · A / RT: shoot · ☰ pause",
-        diebesnacht: "Left stick: walk · Right stick: target · A: go there / act · X coin · Y fury · RB smoke · B cancel · ☰ pause",
-        echohort: "Stick: pointer · D-pad: spot to spot · A: tap · X: plant/upgrade · LB / RB: buttons below · Y: next wave · ☰ pause",
+        waldlauf: "Stick: aim · A / RT: shoot · Y: get him, Rex! · ☰ pause",
+        diebesnacht: "Left stick: walk · Right stick: target · A: go there / act · X coin · Y fury · RB smoke · LB disguise · B cancel · ☰ pause",
+        echohort: "Stick: pointer · D-pad: spot to spot · A: tap · X: plant/upgrade · LB / RB: buttons below · Y: next wave · B: wild shape · LT: speed · ☰ pause",
+        memory: "D-pad: pick a card · A: flip · Y: reshuffle · LB / RB: table size · ▣ fullscreen",
+        probe: "D-pad: choose · A: confirm · X: roll the d20 · B: skip · Y: songbook · ▣ fullscreen",
         echohortRaub: "A: Echo flutters · ☰ pause",
         auftritt: "X · A · B (or ◀ ▼ ▶): bass · lute · flute – hold for tails · ☰ pause",
         charme: "▲ ▼: pick a line · A: roll · B: skip · X / Y / RB: Echo · Rex · flute · ☰ sound"
@@ -98,7 +102,8 @@
 
   /* ---------- Spiele ---------- */
   const imBild = el => { if (!sichtbar(el)) return false; const r = el.getBoundingClientRect(); return r.bottom > 40 && r.top < innerHeight - 40; };
-  const pad = id => { const el = document.getElementById(id); return el && el._pad ? { el, z: el._pad } : null; };
+  const pad = (id, api) => { const el = document.getElementById(id), z = el && el[api || "_pad"]; return z ? { el, z } : null; };
+  const vollKnopf = el => { const k = el.querySelector(":scope > .tav-voll-knopf"); if (k) k.click(); };
   let hilfeGezeigt = {};
   function hilfeEinmal(key) { if (hilfeGezeigt[key]) return; hilfeGezeigt[key] = true; hinweis(t().hilfe[key], 6500); }
 
@@ -147,6 +152,7 @@
         const { z } = s;
         if (neu(KN.MENUE)) { z.pause(); return; }
         hilfeEinmal("waldlauf");
+        if (neu(KN.Y) && z.rex) z.rex();
         const a = stick(0), b = stick(1), d = steuerkreuz();
         /* sanft beschleunigen: leicht gekippt = fein zielen, voll gekippt = schnell schwenken */
         const v = 330 * dt, ka = a.m ? Math.pow(a.m, 1.7) / a.m : 0, kb = b.m ? Math.pow(b.m, 1.7) / b.m * .45 : 0;
@@ -167,7 +173,8 @@
         if (neu(KN.B)) z.abbrechen();
         if (neu(KN.X)) z.muenze();
         if (neu(KN.Y)) z.zorn();
-        if (neu(KN.RB) || neu(KN.LB)) z.rauch();
+        if (neu(KN.RB)) z.rauch();
+        if (neu(KN.LB)) { if (z.maske) z.maske(); else z.rauch(); }
         if (z.schloss()) { if (irgendeinNeu([KN.A, KN.RT])) z.knacken(); zeiger.hidden = true; return; }
         /* gehen: Feld neben Ezekiel in Stickrichtung antippen */
         const a = stick(0), d = steuerkreuz(), h = z.held();
@@ -228,17 +235,63 @@
           const k = kn[s.knopf]; s.p = { x: k.x + k.w / 2, y: k.y + k.h / 2 };
         }
         if (neu(KN.Y)) { const k = kn.find(x => x.id === "jetzt"); if (k) z.druck({ x: k.x + k.w / 2, y: k.y + k.h / 2 }); }
+        if (neu(KN.B) && z.gestalt) z.gestalt();
+        if (neu(KN.LT) && z.tempo) z.tempo();
         s.p.x = Math.max(2, Math.min(z.W - 2, s.p.x)); s.p.y = Math.max(2, Math.min(z.H - 2, s.p.y));
         if (irgendeinNeu([KN.A, KN.RT])) z.druck({ x: s.p.x, y: s.p.y });
         zeigerSetzen(z.leinwand, z.W, z.H, s.p);
       },
-      ende() { zeiger.hidden = true; } }
+      ende() { zeiger.hidden = true; } },
+    /* Bestiarium-Memory: Steuerkreuz wandert über die Karten, A deckt auf */
+    { id: "memory-karte", api: "_memory",
+      faengt: ({ z }) => z.aktiv(),
+      start({ z }) { if (z.gewaehlt() < 0) z.fokus(0); },
+      frame(s) {
+        const { z } = s, n = z.karten().length; if (!n) return;
+        hilfeEinmal("memory");
+        const sp = Math.max(1, z.spalten()), a = stick(0);
+        const sx = Math.abs(a.x) > .6 ? Math.sign(a.x) : 0, sy = Math.abs(a.y) > .6 ? Math.sign(a.y) : 0;
+        let d = 0;
+        if (neu(KN.RECHTS) || (sx > 0 && s.sx !== sx)) d = 1;
+        if (neu(KN.LINKS) || (sx < 0 && s.sx !== sx)) d = -1;
+        if (neu(KN.RUNTER) || (sy > 0 && s.sy !== sy)) d = sp;
+        if (neu(KN.HOCH) || (sy < 0 && s.sy !== sy)) d = -sp;
+        s.sx = sx; s.sy = sy;
+        if (d) { const i = z.gewaehlt(); z.fokus(i < 0 ? 0 : Math.max(0, Math.min(n - 1, i + d))); document.documentElement.classList.add("pad-nav"); }
+        if (neu(KN.A)) { const i = z.gewaehlt(); z.aufdecken(i < 0 ? 0 : i); }
+        if (neu(KN.Y)) z.neu();
+        if ((neu(KN.LB) || neu(KN.RB)) && z.stufe && !z.imDuell()) {
+          const st = ["4x3", "4x4", "6x4"], i = st.indexOf(s.stufe || "4x3"), j = (i + (neu(KN.RB) ? 1 : -1) + st.length) % st.length;
+          s.stufe = st[j]; z.stufe(st[j]);
+        }
+        if (neu(KN.ANSICHT) || (neu(KN.B) && s.el.classList.contains("tav-voll"))) vollKnopf(s.el);
+      } },
+    /* Loblied & Spott: Steuerkreuz wählt Ziel/Knopf, A bestätigt, X würfelt, B spult vor, Y Versbuch */
+    { id: "barden-probe", api: "_probe",
+      faengt: ({ z }) => z.aktiv(),
+      frame(s, dt) {
+        const { z } = s, l = z.optionen(); if (!l.length) return;
+        hilfeEinmal("probe");
+        const a = stick(0), sx = Math.abs(a.x) > .6 ? Math.sign(a.x) : 0, sy = Math.abs(a.y) > .6 ? Math.sign(a.y) : 0;
+        let d = 0;
+        if (neu(KN.RECHTS) || neu(KN.RUNTER) || (sx > 0 && s.sx !== sx) || (sy > 0 && s.sy !== sy)) d = 1;
+        if (neu(KN.LINKS) || neu(KN.HOCH) || (sx < 0 && s.sx !== sx) || (sy < 0 && s.sy !== sy)) d = -1;
+        s.sx = sx; s.sy = sy;
+        const i = l.indexOf(document.activeElement);
+        if (d) fokus(l[i < 0 ? 0 : (i + d + l.length) % l.length]);
+        if (neu(KN.A)) { if (i >= 0) l[i].click(); else z.werfen(); }
+        if (neu(KN.X)) z.werfen();
+        if (neu(KN.B)) { if (z.buchOffen()) z.buch(false); else if (z.zustand() !== "ruhe" && z.zustand() !== "fertig") z.vorspulen(); else if (s.el.classList.contains("tav-voll")) vollKnopf(s.el); }
+        if (neu(KN.Y)) z.buch();
+        const b = stick(1); if (b.m && z.buchOffen()) z.buchBlaettern(b.y * 900 * dt);
+        if (neu(KN.ANSICHT)) vollKnopf(s.el);
+      } }
   ];
   let aktiv = null, zuletztGespielt = null; /* { def, el, z, ... } */
-  const SPIEL_IDS = ["waldlauf", "diebesnacht", "echohort", "auftritt"];
+  const SPIEL_IDS = ["waldlauf", "diebesnacht", "echohort", "auftritt", "kehle"];
   function spielSuchen() {
     for (const def of SPIELE) {
-      const s = pad(def.id);
+      const s = pad(def.id, def.api);
       if (s && imBild(s.el) && def.faengt(s)) return Object.assign(s, { def });
     }
     return null;
@@ -254,7 +307,7 @@
     /* ein offenes Spielmenü (Start, Pause, Ende) im Blick hat Vorrang */
     /* das Menü (Start, Pause, Ende) des Spiels, das gerade gespielt wurde oder allein angezeigt wird, hat Vorrang */
     const spielEl = zuletztGespielt && imBild(zuletztGespielt) ? zuletztGespielt : SPIEL_IDS.includes(location.hash.slice(1)) ? document.getElementById(location.hash.slice(1)) : null;
-    const schleier = spielEl && spielEl.querySelector(".wl-schleier, .dn-schleier, .eh-schleier");
+    const schleier = spielEl && spielEl.querySelector(".wl-schleier, .dn-schleier, .eh-schleier, .kh-panel");
     if (schleier && !schleier.hidden && imBild(schleier)) return schleier;
     const blatt = document.querySelector(".hl-blatt.offen");
     if (blatt) return blatt;

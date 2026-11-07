@@ -109,6 +109,7 @@
 @keyframes kzBlink { 50% { color: rgba(255,210,122,.35); } }
 .kz-pfeil { width: 2.3rem; height: 1.25rem; padding: 0; border: 0; background: none; color: rgba(224,160,70,.75); font-size: .72rem; line-height: 1; cursor: pointer; }
 .kz-pfeil:hover { color: #ffd27a; }
+@media (pointer: coarse) { .kz-pfeil { height: 2.25rem; font-size: .9rem; } }
 @media (pointer: coarse) { .kz-pfeil { height: 1.7rem; font-size: .85rem; } .kz .kz-feld { width: 2.6rem; height: 2.9rem; } }
 @media (prefers-reduced-motion: reduce) { .kz-feld:focus { animation: none; } }
 .kz-code { font-family: ui-monospace, "Courier New", monospace !important; font-weight: 700; letter-spacing: .14em; }
