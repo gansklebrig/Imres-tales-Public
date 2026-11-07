@@ -1,0 +1,113 @@
+{
+ "ziel": "audio/proben/besetzung",
+ "zeilen": {
+  "gundren-1": {
+   "text": "[warmly] [gruff] Meine Freunde! Ich brauche jemanden, der eine Ladung nach Phandalin bringt. [chuckles] Und der nicht gleich beim ersten Goblin davonläuft.",
+   "stimme": "uVKHymY7OYMd6OailpG5"
+  },
+  "gundren-2": {
+   "text": "[warmly] [gruff] Meine Freunde! Ich brauche jemanden, der eine Ladung nach Phandalin bringt. [chuckles] Und der nicht gleich beim ersten Goblin davonläuft.",
+   "stimme": "8TMmdpPgqHKvDOGYP2lN"
+  },
+  "gundren-3": {
+   "text": "[warmly] [gruff] Meine Freunde! Ich brauche jemanden, der eine Ladung nach Phandalin bringt. [chuckles] Und der nicht gleich beim ersten Goblin davonläuft.",
+   "stimme": "pfvZahoGcT3NdpxRuNkg"
+  },
+  "friedrich-1": {
+   "text": "[mischievously] Ruhig, Rex. [whispers] Da vorne, hinter dem Busch. [amused] Drei Goblins, ein Pfeil. Wetten?",
+   "stimme": "f2yUVfK5jdm78zlpcZ8C"
+  },
+  "friedrich-2": {
+   "text": "[mischievously] Ruhig, Rex. [whispers] Da vorne, hinter dem Busch. [amused] Drei Goblins, ein Pfeil. Wetten?",
+   "stimme": "9VeBtouyYRANyE97rZR1"
+  },
+  "friedrich-3": {
+   "text": "[mischievously] Ruhig, Rex. [whispers] Da vorne, hinter dem Busch. [amused] Drei Goblins, ein Pfeil. Wetten?",
+   "stimme": "aTTiK3YzK3dXETpuDE2h"
+  },
+  "echo-1": {
+   "text": "[grumpy] Gold. [short pause] Da ist Gold drin, ich rieche es. [growls] Und wer mir im Weg steht, wird Kompost.",
+   "stimme": "czb8zR3V35utWZxvKd9a"
+  },
+  "echo-2": {
+   "text": "[grumpy] Gold. [short pause] Da ist Gold drin, ich rieche es. [growls] Und wer mir im Weg steht, wird Kompost.",
+   "stimme": "BDqe1qZiwPi7xspRxTgh"
+  },
+  "echo-3": {
+   "text": "[grumpy] Gold. [short pause] Da ist Gold drin, ich rieche es. [growls] Und wer mir im Weg steht, wird Kompost.",
+   "stimme": "2HmIg4yvRgcH2ZDgiwGz"
+  },
+  "ezekiel-1": {
+   "text": "[coldly] [quietly] Nein.",
+   "stimme": "um6p7QUWG1g5HBE5RxEo"
+  },
+  "ezekiel-2": {
+   "text": "[coldly] [quietly] Nein.",
+   "stimme": "18X2yBovneA0q06wd8E9"
+  },
+  "ezekiel-3": {
+   "text": "[coldly] [quietly] Nein.",
+   "stimme": "S3B28HJQD38WYxWyv9pR"
+  },
+  "goblin-1": {
+   "text": "[excited] [squeaky] Hihi! Glänzig! Gib her, gib her, gib her! [screams] Aaah, der mit dem Hund!",
+   "stimme": "j9qIyycr9PcZ7d4yj21f"
+  },
+  "goblin-2": {
+   "text": "[excited] [squeaky] Hihi! Glänzig! Gib her, gib her, gib her! [screams] Aaah, der mit dem Hund!",
+   "stimme": "JSV4pJFuHRMCWZTxkpoQ"
+  },
+  "drow-1": {
+   "text": "[coldly] Oberflächenwürmer. [short pause] [whispers] Ihr werdet uns gute Dienste leisten, bis ihr zerbrecht.",
+   "stimme": "2aL479c8D3QMIPExj0tw"
+  },
+  "drow-2": {
+   "text": "[coldly] Oberflächenwürmer. [short pause] [whispers] Ihr werdet uns gute Dienste leisten, bis ihr zerbrecht.",
+   "stimme": "biwlandiCGYv7Xk4PEUf"
+  },
+  "drow-3": {
+   "text": "[coldly] Oberflächenwürmer. [short pause] [whispers] Ihr werdet uns gute Dienste leisten, bis ihr zerbrecht.",
+   "stimme": "mLw8kuDeVGqVstOYjRII"
+  },
+  "drow-4": {
+   "text": "[coldly] Oberflächenwürmer. [short pause] [whispers] Ihr werdet uns gute Dienste leisten, bis ihr zerbrecht.",
+   "stimme": "UgLbI8Rx0pbkhjxOi143"
+  },
+  "horga-1": {
+   "text": "[menacing] [slowly] Ihr steht vor dem Thron von Gracklstugh. [short pause] Knien wäre jetzt eine sehr gute Idee.",
+   "stimme": "h9Fo3jDhxmIiiLrhx14A"
+  },
+  "horga-2": {
+   "text": "[menacing] [slowly] Ihr steht vor dem Thron von Gracklstugh. [short pause] Knien wäre jetzt eine sehr gute Idee.",
+   "stimme": "BDqe1qZiwPi7xspRxTgh"
+  },
+  "horga-3": {
+   "text": "[menacing] [slowly] Ihr steht vor dem Thron von Gracklstugh. [short pause] Knien wäre jetzt eine sehr gute Idee.",
+   "stimme": "XQSEqtl2af3AAUCwmX7b"
+  },
+  "gefangener-1": {
+   "text": "[whispers] [nervously] Die Spinne … [laughs nervously] die Spinne wird euch kriegen …",
+   "stimme": "tIsjSw3zL3puN5800Bxh"
+  },
+  "gefangener-2": {
+   "text": "[whispers] [nervously] Die Spinne … [laughs nervously] die Spinne wird euch kriegen …",
+   "stimme": "j9qIyycr9PcZ7d4yj21f"
+  },
+  "themberchaud-1": {
+   "text": "[slowly] [bored] Wer stört mich auf meinem Gold? [sighs] Sprecht schnell. Ich habe schon gegessen … aber ich habe immer Platz.",
+   "stimme": "GSg9QvjLdHGJoVVCDWGu"
+  },
+  "themberchaud-2": {
+   "text": "[slowly] [bored] Wer stört mich auf meinem Gold? [sighs] Sprecht schnell. Ich habe schon gegessen … aber ich habe immer Platz.",
+   "stimme": "2OcnG4mH3jIMtWz3vKus"
+  },
+  "ploop-1": {
+   "text": "[cheerfully] Blubb! Freunde! [excited] Ihr seid willkommen im Haus der Tiefe. Blubb-blubb.",
+   "stimme": "fO96OTVqTn6bBvyybd7U"
+  },
+  "ploop-2": {
+   "text": "[cheerfully] Blubb! Freunde! [excited] Ihr seid willkommen im Haus der Tiefe. Blubb-blubb.",
+   "stimme": "MZFPZypClial1ftzJU1C"
+  }
+ }
+}

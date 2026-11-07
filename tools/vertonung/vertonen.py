@@ -274,13 +274,17 @@ def zeilen(quelle, stimme, grenze):
     basis = os.path.join(WURZEL, ziel); os.makedirs(basis, exist_ok=True)
     manifest = {}; kosten = 0; neu = 0
     for zid, text in Q["zeilen"].items():
+        st, ein = stimme, EINSTELLUNG          # Zeile darf eigene Stimme haben: {"text", "stimme" (voice_id oder Rolle aus Q["stimmen"]), "einstellung"}
+        if isinstance(text, dict):
+            st = text.get("stimme") or stimme; st = (Q.get("stimmen") or {}).get(st, st)
+            ein = text.get("einstellung") or EINSTELLUNG; text = text.get("text", "")
         if not isinstance(text, str) or not text.strip(): continue
-        h = hashlib.sha1((stimme + "|" + MODELL + "|" + json.dumps(EINSTELLUNG, sort_keys=True) + "|" + text).encode()).hexdigest()[:8]
+        h = hashlib.sha1((st + "|" + MODELL + "|" + json.dumps(ein, sort_keys=True) + "|" + text).encode()).hexdigest()[:8]
         name = re.sub(r"[^a-z0-9_-]+", "-", zid.lower())
         datei = f"{ziel}/{name}-{h}.mp3"; manifest[zid] = datei
         if os.path.exists(os.path.join(WURZEL, datei)): continue
         if grenze and kosten + len(text) > grenze: print("Grenze erreicht."); manifest.pop(zid); break
-        open(os.path.join(WURZEL, datei), "wb").write(tts(stimme, text)); kosten += len(text); neu += 1
+        open(os.path.join(WURZEL, datei), "wb").write(tts(st, text, einstellung=ein)); kosten += len(text); neu += 1
         print(f"{datei} ({len(text)} Zeichen, gesamt {kosten})")
         if neu % 40 == 0:
             json.dump(manifest, open(os.path.join(basis, "manifest.json"), "w"), ensure_ascii=False, indent=0); git_sichern(f"Vertonung {ziel}: {neu} Zeilen")

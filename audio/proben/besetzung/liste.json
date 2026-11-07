@@ -1,0 +1,191 @@
+[
+ {
+  "id": "gundren-1",
+  "rolle": "gundren",
+  "titel": "Gundren (Zwerg, Auftraggeber)",
+  "voice": "uVKHymY7OYMd6OailpG5",
+  "name": "Frederick - Deep and Historical"
+ },
+ {
+  "id": "gundren-2",
+  "rolle": "gundren",
+  "titel": "Gundren (Zwerg, Auftraggeber)",
+  "voice": "8TMmdpPgqHKvDOGYP2lN",
+  "name": "Gregory Grumble - Old Lovable Bedtime Bear"
+ },
+ {
+  "id": "gundren-3",
+  "rolle": "gundren",
+  "titel": "Gundren (Zwerg, Auftraggeber)",
+  "voice": "pfvZahoGcT3NdpxRuNkg",
+  "name": "Bruno, der Bär – loving and cozy"
+ },
+ {
+  "id": "friedrich-1",
+  "rolle": "friedrich",
+  "titel": "Friedrich (Waldläufer)",
+  "voice": "f2yUVfK5jdm78zlpcZ8C",
+  "name": "Albert - Cheerful, Playful and Fun"
+ },
+ {
+  "id": "friedrich-2",
+  "rolle": "friedrich",
+  "titel": "Friedrich (Waldläufer)",
+  "voice": "9VeBtouyYRANyE97rZR1",
+  "name": "Jordi Türmer - Thug & Gangster"
+ },
+ {
+  "id": "friedrich-3",
+  "rolle": "friedrich",
+  "titel": "Friedrich (Waldläufer)",
+  "voice": "aTTiK3YzK3dXETpuDE2h",
+  "name": "Ben - Effortless and Casual"
+ },
+ {
+  "id": "echo-1",
+  "rolle": "echo",
+  "titel": "Echo (gehörnter Druide)",
+  "voice": "czb8zR3V35utWZxvKd9a",
+  "name": "Leo Liest - Dark & Smoky"
+ },
+ {
+  "id": "echo-2",
+  "rolle": "echo",
+  "titel": "Echo (gehörnter Druide)",
+  "voice": "BDqe1qZiwPi7xspRxTgh",
+  "name": "Roderich - Crude & Ruthless"
+ },
+ {
+  "id": "echo-3",
+  "rolle": "echo",
+  "titel": "Echo (gehörnter Druide)",
+  "voice": "2HmIg4yvRgcH2ZDgiwGz",
+  "name": "Elderbark – Rooted and Deep"
+ },
+ {
+  "id": "ezekiel-1",
+  "rolle": "ezekiel",
+  "titel": "Ezekiel (Darkin-Schurke)",
+  "voice": "um6p7QUWG1g5HBE5RxEo",
+  "name": "Valerian | The Nihilist Evil"
+ },
+ {
+  "id": "ezekiel-2",
+  "rolle": "ezekiel",
+  "titel": "Ezekiel (Darkin-Schurke)",
+  "voice": "18X2yBovneA0q06wd8E9",
+  "name": "Vincent Crowe - Dark & Haunting Tales"
+ },
+ {
+  "id": "ezekiel-3",
+  "rolle": "ezekiel",
+  "titel": "Ezekiel (Darkin-Schurke)",
+  "voice": "S3B28HJQD38WYxWyv9pR",
+  "name": "Saurom Blackmouth - Cinematic and Deep"
+ },
+ {
+  "id": "goblin-1",
+  "rolle": "goblin",
+  "titel": "Goblin",
+  "voice": "j9qIyycr9PcZ7d4yj21f",
+  "name": "Grimble – Twitchy & Sneaky creature"
+ },
+ {
+  "id": "goblin-2",
+  "rolle": "goblin",
+  "titel": "Goblin",
+  "voice": "JSV4pJFuHRMCWZTxkpoQ",
+  "name": "Snorre - Nervous & Eccentric"
+ },
+ {
+  "id": "drow-1",
+  "rolle": "drow",
+  "titel": "Drow-Wächterin",
+  "voice": "2aL479c8D3QMIPExj0tw",
+  "name": "Selena - Deep, Charismatic and Expressive"
+ },
+ {
+  "id": "drow-2",
+  "rolle": "drow",
+  "titel": "Drow-Wächterin",
+  "voice": "biwlandiCGYv7Xk4PEUf",
+  "name": "Moreana - Seductive, Dark, Mysterious"
+ },
+ {
+  "id": "drow-3",
+  "rolle": "drow",
+  "titel": "Drow-Wächterin",
+  "voice": "mLw8kuDeVGqVstOYjRII",
+  "name": "Lilith - Sensual and Scary"
+ },
+ {
+  "id": "drow-4",
+  "rolle": "drow",
+  "titel": "Drow-Wächterin",
+  "voice": "UgLbI8Rx0pbkhjxOi143",
+  "name": "Evelyn Frost - Fantasy & Sci-Fi"
+ },
+ {
+  "id": "horga-1",
+  "rolle": "horga",
+  "titel": "König Horga (Duergar)",
+  "voice": "h9Fo3jDhxmIiiLrhx14A",
+  "name": "Mordran Doomforge - Dark Warlord"
+ },
+ {
+  "id": "horga-2",
+  "rolle": "horga",
+  "titel": "König Horga (Duergar)",
+  "voice": "BDqe1qZiwPi7xspRxTgh",
+  "name": "Roderich - Crude & Ruthless"
+ },
+ {
+  "id": "horga-3",
+  "rolle": "horga",
+  "titel": "König Horga (Duergar)",
+  "voice": "XQSEqtl2af3AAUCwmX7b",
+  "name": "Gorak - Ork"
+ },
+ {
+  "id": "gefangener-1",
+  "rolle": "gefangener",
+  "titel": "Der Gefangene",
+  "voice": "tIsjSw3zL3puN5800Bxh",
+  "name": "Prinz - Whispering and Strange"
+ },
+ {
+  "id": "gefangener-2",
+  "rolle": "gefangener",
+  "titel": "Der Gefangene",
+  "voice": "j9qIyycr9PcZ7d4yj21f",
+  "name": "Grimble – Twitchy & Sneaky creature"
+ },
+ {
+  "id": "themberchaud-1",
+  "rolle": "themberchaud",
+  "titel": "Themberchaud (Drache)",
+  "voice": "GSg9QvjLdHGJoVVCDWGu",
+  "name": "Azrak - Menacing Monster"
+ },
+ {
+  "id": "themberchaud-2",
+  "rolle": "themberchaud",
+  "titel": "Themberchaud (Drache)",
+  "voice": "2OcnG4mH3jIMtWz3vKus",
+  "name": "Wolf Spencer - Rough and Deep"
+ },
+ {
+  "id": "ploop-1",
+  "rolle": "ploop",
+  "titel": "Ploopploopeen (Kuo-Toa-Erzpriester)",
+  "voice": "fO96OTVqTn6bBvyybd7U",
+  "name": "Kermy – Gentle & Froggy"
+ },
+ {
+  "id": "ploop-2",
+  "rolle": "ploop",
+  "titel": "Ploopploopeen (Kuo-Toa-Erzpriester)",
+  "voice": "MZFPZypClial1ftzJU1C",
+  "name": "Snippy Bamboozle - Friendly Beaver"
+ }
+]
