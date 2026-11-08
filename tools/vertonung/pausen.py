@@ -73,7 +73,7 @@ def ausrichten(text, worte):
         elif r is not None: zu[k] = max(0, zu[r] - (r - k))
     return tw, zu, sm.ratio()
 
-def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechster_anfang, trocken):
+def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechster_anfang, trocken, einwuerfe=()):
     x = lade(datei); h, n = huelle(x)
     D = len(x) / SR
     text = klartext(regie)
@@ -95,13 +95,33 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
         k = max([i for i, t in enumerate(tw) if t[1] <= e + 1], default=None)
         if k is not None: setze(k, float(m["min"]))
     einfuegen, protokoll = [], []
+    # Einwürfe anderer Figuren: Clip in die Pause nach dem Ankerwort schneiden
+    hinten_n = 0
+    for v in h[::-1]:
+        if v >= SCHWELLE: break
+        hinten_n += n
+    for ew in einwuerfe:
+        s_ = ew["nach"].strip(); p_ = text.find(s_)
+        if p_ < 0: fehlend.append("EINWURF " + s_); continue
+        k = max([i for i, t in enumerate(tw) if t[1] <= p_ + len(s_) + 1], default=None)
+        j = zu.get(k) if k is not None else None
+        if j is None: fehlend.append("EINWURF " + s_); continue
+        if j < len(worte) - 1:
+            a, b = worte[j][2], worte[j + 1][1]
+            st = stille_bei(h, n, min(a, b) - .25, max(a, b) + .25)
+            if not st: fehlend.append("EINWURF (keine Pause) " + s_); continue
+            ist, at = st; wunsch.pop(j, None)
+        else:
+            ist, at = 2 * hinten_n / SR, len(x) - hinten_n // 2
+        z = lambda d: np.zeros(int(max(0.0, d) * SR), np.float32)
+        einfuegen.append((at, np.concatenate([z(ew.get("vor", .32) - ist / 2), ew["clip"], z(ew.get("danach", .45) - ist / 2)])))
     for j, soll in sorted(wunsch.items()):
         a, b = worte[j][2], worte[j + 1][1]
         st = stille_bei(h, n, min(a, b) - .25, max(a, b) + .25)
         if not st: protokoll.append((j, soll, None)); continue
         ist, at = st
         if ist + .03 < soll:
-            einfuegen.append((at, soll - ist))
+            einfuegen.append((at, np.zeros(int((soll - ist) * SR), np.float32)))
             protokoll.append((j, soll, round(ist, 2)))
     # Ende: Reststille hinten + Stille vorne im nächsten Absatz
     hinten = 0
@@ -111,16 +131,30 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
     hinten /= SR
     ziel_ende = max(TITEL_MIN if titel else ABSATZ_MIN, ende_min or 0)
     plus_ende = max(0.0, ziel_ende - hinten - naechster_anfang)
-    if trocken: return einfuegen, plus_ende, fehlend, guete, D
+    if trocken: return [(a, len(q) / SR) for a, q in einfuegen], plus_ende, fehlend, guete, D
     teile, pos = [], 0
     F = int(.006 * SR); rampe = np.linspace(1, 0, F, dtype=np.float32)
-    for at, dauer in sorted(einfuegen):
+    for at, stueck in sorted(einfuegen, key=lambda q: q[0]):
         a = x[pos:at].copy(); a[-F:] *= rampe[-len(a[-F:]):] if len(a) else 1
-        teile.append(a); teile.append(np.zeros(int(dauer * SR), np.float32))
+        teile.append(a); teile.append(stueck)
         x[at:at + F] *= rampe[::-1][:len(x[at:at + F])]; pos = at
     teile.append(x[pos:]); teile.append(np.zeros(int(plus_ende * SR), np.float32))
     schreibe(np.concatenate(teile), datei)
-    return einfuegen, plus_ende, fehlend, guete, D
+    return [(a, len(q) / SR) for a, q in einfuegen], plus_ende, fehlend, guete, D
+
+ROLLEN_FX = {   # Klang je Figur (ffmpeg-Filter)
+    "themberchaud": "asetrate=44100*0.86,aresample=44100,atempo=1.163,aecho=0.8:0.7:70|130:0.3|0.18,lowpass=f=9000",
+    "horga": "asetrate=44100*0.95,aresample=44100,atempo=1.053,aecho=0.8:0.6:55|95:0.22|0.12",
+    "drow": "aecho=0.8:0.55:45|80:0.18|0.1",
+    "gefangener": "aecho=0.8:0.6:28|50:0.25|0.15,highpass=f=180",
+    "ploop": "vibrato=f=7:d=0.12,aecho=0.8:0.5:35:0.15",
+    "goblin": "asetrate=44100*1.04,aresample=44100,atempo=0.962",
+}
+ROLLEN_DB = {}
+def filtern(x, fx):
+    roh = subprocess.run(["ffmpeg", "-v", "error", "-f", "f32le", "-ar", str(SR), "-ac", "1", "-i", "-", "-af", fx + ",apad=pad_dur=0.4", "-f", "f32le", "-ac", "1", "-ar", str(SR), "-"],
+                         input=x.astype(np.float32).tobytes(), capture_output=True, check=True).stdout
+    return np.frombuffer(roh, dtype=np.float32).copy()
 
 def vorne_stille(datei):
     x = lade(datei); h, n = huelle(x); c = 0
@@ -135,6 +169,17 @@ def main():
     J = lambda p: json.load(open(os.path.join(WURZEL, p)))
     manifest = J("audio/chronik/de/manifest.json"); regie = J("tools/vertonung/regie-de.json")
     zeiten = J("tools/vertonung/zeitmarken-de.json"); marken = J("tools/vertonung/pausen-de.json")
+    ew_alle = {}
+    ewp = os.path.join(WURZEL, "tools/vertonung/einwuerfe-de.json"); ewm = os.path.join(WURZEL, "audio/chronik/de/stimmen/manifest.json")
+    if os.path.exists(ewp) and os.path.exists(ewm) and "--ohne-einwuerfe" not in sys.argv:
+        clips = json.load(open(ewm))
+        for ew in json.load(open(ewp))["einwuerfe"]:
+            if ew.get("aus") or ew["id"] not in clips: continue
+            c = lade(os.path.join(WURZEL, clips[ew["id"]]))
+            fx = ROLLEN_FX.get(ew["rolle"])
+            if fx: c = filtern(c, fx)
+            c = c[np.argmax(np.abs(c) > 10 ** (-45 / 20)):]; c = c[: len(c) - np.argmax(np.abs(c[::-1]) > 10 ** (-45 / 20))]
+            ew_alle.setdefault(ew["absatz"], []).append(dict(ew, clip=(c * 10 ** (ew.get("db", ROLLEN_DB.get(ew["rolle"], 0)) / 20)).astype(np.float32)))
     rk = dict(regie["kapitel"]); rk["vorab"] = {"0": regie["vorab"]}
     orig = os.environ.get("ORIGINAL") or os.path.join(os.path.dirname(WURZEL), "chronik-original-de")
     folge = [(k, e) for k in ["vorab", "I", "II"] for e in manifest["kapitel"].get(k, [])]
@@ -151,7 +196,7 @@ def main():
         na = vorne_stille(os.path.join(orig, os.path.relpath(nxt["datei"], "audio/chronik/de"))) if nxt and os.path.exists(os.path.join(orig, os.path.relpath(nxt["datei"], "audio/chronik/de"))) else (vorne_stille(os.path.join(WURZEL, nxt["datei"])) if nxt else 0)
         m = marken.get(sch, {})
         r = rk.get(kap, {}).get(str(e["i"]), {}).get("regie", "")
-        ein, plus, fehl, guete, D = bearbeiten(sch, datei, r, zeiten.get(rel, []), m.get("marken", []), m.get("ende"), e.get("titel"), na, trocken)
+        ein, plus, fehl, guete, D = bearbeiten(sch, datei, r, zeiten.get(rel, []), m.get("marken", []), m.get("ende"), e.get("titel"), na, trocken, ew_alle.get(sch, []))
         bericht["eingefuegt"] += len(ein); bericht["sekunden"] += sum(d for _, d in ein) + plus
         bericht["fehlend"] += [(sch, f) for f in fehl]
         print(f"{sch:8s} {D:6.1f}s  Übereinstimmung {guete:.2f}  +{len(ein)} Pausen (+{sum(d for _, d in ein):.1f}s)  Ende +{plus:.2f}s" + (f"  FEHLT: {fehl}" if fehl else ""))
