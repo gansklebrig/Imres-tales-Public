@@ -230,30 +230,30 @@ ARTEN = {
 #    Nach dem Vorbild der Kulissen der Bühne (lautenwerk.js, KUL_WELT) – gleiche Aufnahmen, gleiche Technik.
 # =====================================================================
 ORTE = {
-    "erzaehler":   {"betten": [["a_lagerfeuer", 0.48], ["a_feuer3", 0.3], ["a_grillen2", .25, {"tief": 5000}]], "ev": [["ast", [18, 40], .3, .5]]},
+    "erzaehler":   {"betten": [["a_lagerfeuer", 0.48, {"tief": 4200}], ["a_feuer3", 0.3, {"tief": 4200}], ["a_grillen2", .25, {"tief": 5000}]], "ev": [["ast", [18, 40], .3, .5]]},
     "hafen":       {"betten": [["a_hafen", 1], ["a_wellen3", .5], ["a_boot", .35], ["a_segel", .2]], "ev": [["moewe", [9, 22], .45, .5], ["knarren", [14, 30], .35, .4]]},
     "strasse":     {"betten": [["a_tagvoegel", .65], ["a_kiesweg", .35], ["a_baumwind", .35], ["a_wind1", .2, {"tief": 2000}]], "ev": [["vogel", [10, 24], .35, .6], ["kraehe", [40, 90], .25, .8]]},
     "wald":        {"betten": [["a_voegel1", .7], ["a_laub", .35], ["a_baumwind", .3]], "ev": [["ast", [15, 35], .3, .5], ["vogel", [8, 20], .3, .6]]},
-    "goblinhoehle": {"betten": [["a_tropfen1", 0.44], ["a_tropfstein", 0.28, {"schleife": True}], ["a_wasserfall", 0.21, {"tief": 700}], ["a_feuer3", 0.15]], "ev": [["platsch", [14, 30], 0.18, .6], ["stein", [20, 45], .3, .6], ["goblin", [35, 80], .22, 1]]},
+    "goblinhoehle": {"betten": [["a_tropfen1", 0.44], ["a_tropfstein", 0.28, {"schleife": True}], ["a_wasserfall", 0.21, {"tief": 700}], ["a_feuer3", 0.15, {"tief": 4200}]], "ev": [["platsch", [14, 30], 0.18, .6], ["stein", [20, 45], .3, .6], ["goblin", [35, 80], .22, 1]]},
     "dorf":        {"betten": [["a_hof", .8], ["a_tagvoegel", .4], ["a_huehner", .25], ["a_kinder", .18, {"tief": 3000}]], "ev": [["huhn", [12, 28], .3, .5], ["hund", [40, 90], .2, 1]]},
-    "taverne":     {"betten": [["a_gaeste", .85, {"tief": 3800}], ["a_feuer1", 0.3], ["a_lagerfeuer", 0.12]], "ev": [["einschenken", [16, 40], .3, .3], ["lachen", [25, 60], .25, .5], ["holzschritte", [30, 70], .22, .5]]},
-    "feier":       {"betten": [["a_gaeste", 1, {"tief": 4200}], ["a_feuer1", 0.27], ["a_kinder", .15, {"tief": 2500}]], "ev": [["lachen", [8, 20], .3, .4], ["einschenken", [12, 30], .3, .3], ["jubel", [40, 80], .2, .6]]},
-    "amtsstube":   {"betten": [["a_uhr", .3], ["a_feuer3", 0.24], ["a_wind3", .12, {"tief": 800}]], "ev": [["papier", [14, 30], .3, .2]]},
+    "taverne":     {"betten": [["a_gaeste", .85, {"tief": 3800}], ["a_feuer1", 0.3, {"tief": 4200}], ["a_lagerfeuer", 0.12, {"tief": 4200}]], "ev": [["einschenken", [16, 40], .3, .3], ["lachen", [25, 60], .25, .5], ["holzschritte", [30, 70], .22, .5]]},
+    "feier":       {"betten": [["a_gaeste", 1, {"tief": 4200}], ["a_feuer1", 0.27, {"tief": 4200}], ["a_kinder", .15, {"tief": 2500}]], "ev": [["lachen", [8, 20], .3, .4], ["einschenken", [12, 30], .3, .3], ["jubel", [40, 80], .2, .6]]},
+    "amtsstube":   {"betten": [["a_uhr", .3], ["a_feuer3", 0.24, {"tief": 4200}], ["a_wind3", .12, {"tief": 800}]], "ev": [["papier", [14, 30], .3, .2]]},
     "ruine":       {"betten": [["a_ruinenwind", .7], ["a_baumwind", .25], ["a_wind3", .2, {"tief": 1200}]], "ev": [["kraehe", [25, 60], .25, .8], ["ast", [20, 45], .25, .6]]},
     "gewoelbe":    {"betten": [["a_tropfen2", 0.25], ["a_wind1", .3, {"tief": 450}], ["a_tropfen1", 0.25], ["a_heulwind", .12, {"tief": 500}]], "ev": [["kette", [25, 60], .25, .7], ["ratte", [30, 70], .22, .6], ["stein", [30, 60], .22, .7]]},
-    "labor":       {"betten": [["a_blubbern", .4], ["a_kochen2", 0.24], ["a_feuer3", 0.27], ["a_wind3", .1, {"tief": 600}]], "ev": [["blubb", [8, 18], .3, .3]]},
+    "labor":       {"betten": [["a_blubbern", .4], ["a_kochen2", 0.24], ["a_feuer3", 0.27, {"tief": 4200}], ["a_wind3", .1, {"tief": 600}]], "ev": [["blubb", [8, 18], .3, .3]]},
     "nacht":       {"betten": [["a_wind2", .55, {"tief": 1500}], ["a_ruinenwind", .3, {"tief": 1800}], ["a_wind3", .2, {"tief": 900}]], "ev": [["eule", [40, 90], .2, 1]]},
-    "turm":        {"betten": [["a_feuer3", 0.33], ["a_wind3", .25, {"tief": 500}], ["a_heulwind", .12, {"tief": 400}]], "ev": []},
-    "stube":       {"betten": [["a_feuer1", 0.36], ["a_feuer3", 0.18], ["a_wind3", .1, {"tief": 700}]], "ev": []},
+    "turm":        {"betten": [["a_feuer3", 0.33, {"tief": 4200}], ["a_wind3", .25, {"tief": 500}], ["a_heulwind", .12, {"tief": 400}]], "ev": []},
+    "stube":       {"betten": [["a_feuer1", 0.36, {"tief": 4200}], ["a_feuer3", 0.18, {"tief": 4200}], ["a_wind3", .1, {"tief": 700}]], "ev": []},
     "mine":        {"betten": [["a_tropfen2", 0.22], ["a_wind1", .3, {"tief": 400}], ["a_tropfen1", 0.25], ["a_heulwind", .15, {"tief": 300}]], "ev": [["steinschlag", [35, 80], .22, .8], ["fledermaus", [30, 70], .2, .6], ["tropfen", [10, 25], .25, .5]]},
     "runen":       {"betten": [["a_halle", .45, {"tief": 2500}], ["a_tropfstein", 0.17, {"schleife": True}], ["a_klangschale", .12]], "ev": [["glockenbaum", [30, 70], .12, .5]]},
-    "lager":       {"betten": [["a_lagerfeuer", 0.48], ["a_tropfen1", 0.17], ["a_feuer3", 0.18]], "ev": [["ast", [15, 35], .25, .4]]},
+    "lager":       {"betten": [["a_lagerfeuer", 0.48, {"tief": 4200}], ["a_tropfen1", 0.17], ["a_feuer3", 0.18, {"tief": 4200}]], "ev": [["ast", [15, 35], .25, .4]]},
     "stadt":       {"betten": [["a_markt", .9], ["a_gaeste", .3, {"tief": 2500}], ["a_tagvoegel", .15], ["a_hof", .15, {"tief": 2000}]], "ev": [["moewe", [25, 60], .25, .8], ["karren", [40, 90], .2, .8], ["volk", [20, 50], .2, .7]]},
-    "halle":       {"betten": [["a_halle", .6, {"tief": 3000}], ["a_feuer3", 0.18], ["a_wind3", .15, {"tief": 700}]], "ev": [["kettenhemd", [25, 60], .22, .6], ["steinschritte", [40, 90], .2, .7]]},
+    "halle":       {"betten": [["a_halle", .6, {"tief": 3000}], ["a_feuer3", 0.18, {"tief": 4200}], ["a_wind3", .15, {"tief": 700}]], "ev": [["kettenhemd", [25, 60], .22, .6], ["steinschritte", [40, 90], .2, .7]]},
     "donnerbaum":  {"betten": [["a_ruinenwind", .8], ["a_wind3", .35], ["a_heulwind", .2, {"tief": 1200}], ["a_laub", .15]], "ev": [["kraehe", [18, 45], .3, .8], ["windstoss", [25, 60], .25, .5], ["knarren", [30, 70], .2, .8]]},
     "turmspitze":  {"betten": [["a_heulwind", .6], ["a_wind2", .55], ["a_orkan", .2, {"tief": 1500}]], "ev": [["windstoss", [12, 30], .3, .4]]},
     "geisterdorf": {"betten": [["a_ruinenwind", .55], ["a_friedhof", .45], ["a_wind3", .2], ["a_laub", .2]], "ev": [["kraehe", [25, 60], .25, .8], ["knarren", [25, 60], .22, .8]]},
-    "kraeuterhaus": {"betten": [["a_kochen2", 0.32], ["a_feuer3", 0.27], ["a_tagvoegel", .15, {"tief": 2500}]], "ev": [["spatz", [20, 45], .2, .3]]},
+    "kraeuterhaus": {"betten": [["a_kochen2", 0.32], ["a_feuer3", 0.27, {"tief": 4200}], ["a_tagvoegel", .15, {"tief": 2500}]], "ev": [["spatz", [20, 45], .2, .3]]},
     "nebel":       {"betten": [["a_kochen2", 0.21], ["a_geisterhauch", .45], ["a_fluestern", .2, {"tief": 2500}]], "ev": []},
     "kerker":      {"betten": [["a_tropfen2", 0.17], ["a_wind1", .3, {"tief": 450}], ["a_tropfen1", 0.25], ["a_strom", 0.26, {"tief": 600}]], "ev": [["kette", [14, 35], .3, .6], ["riegel", [35, 80], .25, .7]]},
     "festung":     {"betten": [["a_strom", 0.38, {"tief": 900}], ["a_tropfen1", 0.22], ["a_heulwind", .2, {"tief": 350}], ["a_wind3", .12, {"tief": 300}]], "ev": [["stein", [25, 60], .25, .8]]},
@@ -266,15 +266,15 @@ ORTE = {
     "boot":        {"betten": [["a_wellen2", .6, {"tief": 2000}], ["a_boot", .5], ["a_wind1", .2, {"tief": 600}]], "ev": [["ruder", [6, 12], .35, .2]]},
     "gracklstugh": {"betten": [["a_strom", 0.26, {"tief": 1200}], ["a_feuer1", 0.21, {"tief": 1500}], ["a_halle", .3, {"tief": 2000}], ["a_markt", .15, {"tief": 900}]], "ev": [["hammer", [10, 22], .25, .9], ["blasebalg", [30, 70], .18, .9]]},
     "duergarmarkt": {"betten": [["a_markt", .8, {"tief": 3000}], ["a_feuer1", 0.18, {"tief": 2000}], ["a_halle", .2, {"tief": 2000}]], "ev": [["hammer", [10, 24], .28, .7], ["muenzen", [20, 45], .2, .5], ["karren", [40, 90], .18, .9]]},
-    "schenke":     {"betten": [["a_gaeste", .8, {"tief": 3000}], ["a_feuer1", 0.33], ["a_halle", .12, {"tief": 1500}]], "ev": [["einschenken", [16, 40], .3, .3], ["lachen", [30, 70], .22, .6], ["hammer", [40, 90], .15, 1]]},
+    "schenke":     {"betten": [["a_gaeste", .8, {"tief": 3000}], ["a_feuer1", 0.33, {"tief": 4200}], ["a_halle", .12, {"tief": 1500}]], "ev": [["einschenken", [16, 40], .3, .3], ["lachen", [30, 70], .22, .6], ["hammer", [40, 90], .15, 1]]},
     "thron":       {"betten": [["a_halle", .7, {"tief": 3200}], ["a_feuer1", 0.18, {"tief": 2500}], ["a_wind3", .12, {"tief": 500}]], "ev": [["kettenhemd", [20, 45], .22, .6], ["hammer", [40, 90], .15, 1]]},
-    "laden":       {"betten": [["a_feuer3", 0.27], ["a_uhr", .2], ["a_markt", .2, {"tief": 1200}]], "ev": [["glocklein", [50, 110], .15, .4]]},
+    "laden":       {"betten": [["a_feuer3", 0.27, {"tief": 4200}], ["a_uhr", .2], ["a_markt", .2, {"tief": 1200}]], "ev": [["glocklein", [50, 110], .15, .4]]},
     "klingenmarkt": {"betten": [["a_markt", .85, {"tief": 3400}], ["a_feuer1", 0.21, {"tief": 2500}]], "ev": [["hammer", [8, 18], .3, .6], ["schleifen", [25, 60], .22, .5], ["klinge", [25, 60], .18, .7]]},
-    "riesendorf":  {"betten": [["a_wind3", .35, {"tief": 1500}], ["a_kiesweg", .3, {"tief": 1800}], ["a_feuer3", 0.12], ["a_halle", .2, {"tief": 1500}]], "ev": [["erz", [15, 35], .28, .8], ["steinschlag", [25, 55], .22, .9], ["riese", [30, 70], .22, 1], ["karren", [35, 80], .2, 1]]},
+    "riesendorf":  {"betten": [["a_wind3", .35, {"tief": 1500}], ["a_kiesweg", .3, {"tief": 1800}], ["a_feuer3", 0.12, {"tief": 4200}], ["a_halle", .2, {"tief": 1500}]], "ev": [["erz", [15, 35], .28, .8], ["steinschlag", [25, 55], .22, .9], ["riese", [30, 70], .22, 1], ["karren", [35, 80], .2, 1]]},
     "steinsprecher": {"betten": [["a_grabesdroehnen", .3], ["a_halle", .35, {"tief": 2000}], ["a_wind3", .2, {"tief": 600}]], "ev": [["stein", [20, 45], .22, .7]]},
-    "flammenhalle": {"betten": [["a_feuer2", 0.33], ["a_kochen", 0.24, {"tief": 1200}], ["a_blubbern", .3, {"tief": 1500}], ["a_feuer1", 0.24], ["a_grabesdroehnen", .15]], "ev": [["zischen", [12, 30], .22, .5], ["flamme", [30, 70], .15, .8]]},
-    "drachenhort": {"betten": [["a_feuer2", 0.3], ["a_kochen", 0.24, {"tief": 1000}], ["a_feuer1", 0.21], ["a_grabesdroehnen", .25]], "ev": [["atem", [14, 30], .2, .3], ["zischen", [16, 35], .2, .5], ["muenze", [40, 90], .12, .6]]},
-    "gang":        {"betten": [["a_feuer3", 0.24], ["a_halle", .3, {"tief": 1800}], ["a_wind3", .15, {"tief": 500}]], "ev": [["steinschritte", [30, 70], .18, .7]]},
+    "flammenhalle": {"betten": [["a_feuer2", 0.33, {"tief": 4200}], ["a_kochen", 0.24, {"tief": 1200}], ["a_blubbern", .3, {"tief": 1500}], ["a_feuer1", 0.24, {"tief": 4200}], ["a_grabesdroehnen", .15]], "ev": [["zischen", [12, 30], .22, .5], ["flamme", [30, 70], .15, .8]]},
+    "drachenhort": {"betten": [["a_feuer2", 0.3, {"tief": 4200}], ["a_kochen", 0.24, {"tief": 1000}], ["a_feuer1", 0.21, {"tief": 4200}], ["a_grabesdroehnen", .25]], "ev": [["atem", [14, 30], .2, .3], ["zischen", [16, 35], .2, .5], ["muenze", [40, 90], .12, .6]]},
+    "gang":        {"betten": [["a_feuer3", 0.24, {"tief": 4200}], ["a_halle", .3, {"tief": 1800}], ["a_wind3", .15, {"tief": 500}]], "ev": [["steinschritte", [30, 70], .18, .7]]},
 }
 
 # Abschnitt (Kulisse der Seitenränder, inhalt.js) → Ort und Stimmung des Zwischenspiels
@@ -458,7 +458,7 @@ A("II", 90, ("muenze", "faustgroße Goldmünze", "bei", .55))
 #    Leise unter der Stimme (meist .25–.4, Kampf bis .5), nie direkt nach Pointen (pausen-de.json).
 def E(k, i, *e): P.setdefault((k, i), {"e": [], "ort": None})["e"].extend(e)
 
-E("vorab", 0, ("knistern", "Diese Chronik", "bei", .3), ("zauber", "trotzdem verzaubern", "auf", .25))
+E("vorab", 0, ("zauber", "trotzdem verzaubern", "auf", .25))
 # ---- KAPITEL I ----
 E("I", 1, ("papier", "erhielt eine Einladung", "auf", .3), ("holzschritte", "Treffpunkt war der Hafen", "bei", .3),
   ("ruder", "Fischerboote", "auf", .3, {"fern": 1}), ("volk", "Händler und Matrosen", "auf", .3, {"fern": 1}),
@@ -472,8 +472,8 @@ E("I", 5, ("karren", "einen Karren mit Waren", "auf", .3), ("knarren", "dass die
   ("edelstein", "Oder in Edelsteine", "auf", .2), ("tor", "durch das Stadttor", "auf", .3),
   ("ochse", "zwei Ochsen vor dem Karren", "auf", .3, {"fern": 1}), ("hund", "bellte jeden Meilenstein an", "auf", .3))
 E("I", 8, ("ochse", "friedlich dahin", "auf", .3), ("knarren", "knarrte bei jedem Schlagloch", "bei", .25),
-  ("hecheln", "Rex jagte jeden Schmetterling", "bei", .25), ("knistern", "Abends am Feuer", "auf", .25),
-  ("knistern", "halb niedergebrannter Wagen", "auf", .3), ("stille", "im Wald war es mit einem Mal sehr still", "bei", 4),
+  ("hecheln", "Rex jagte jeden Schmetterling", "bei", .25), ("knistern", "Abends am Feuer", "auf", 0.15),
+  ("knistern", "halb niedergebrannter Wagen", "auf", 0.18), ("stille", "im Wald war es mit einem Mal sehr still", "bei", 4),
   ("laub", "sprang, stand", "auf", .35), ("kampfruf", "Goblins entgegen", "bei", .35), ("schild", "härter als erwartet", "auf", .4),
   ("goblin", "dennoch niederstrecken", "bei", .35))
 E("I", 11, ("ochse", "Statt einfach weiterzufahren", "bei", .25, {"fern": 1}), ("schleichen", "den Spuren in den Wald", "bei", .35),
@@ -502,7 +502,7 @@ E("I", 21, ("kraehe", "Krähen auf jedem Mauerrest", "auf", .3, {"fern": 1}),
   ("stoehnen", "Zelle voller Geiseln", "auf", .25, {"fern": 1}), ("schluessel", "die Gefangenen frei", "bei", .35))
 E("I", 22, ("tuch", "roten Roben ab", "auf", .35), ("ruestung", "scharlachroten Rüstung", "auf", .3),
   ("hecheln", "Rex schien mit der Rolle", "bei", .25), ("tropfen", "in das Gemäuer vor", "auf", .3, {"hall": .4}))
-E("I", 23, ("blubb", "In Glaskolben blubberte", "bei", .3), ("knistern", "Feuer in der Luft", "auf", .25),
+E("I", 23, ("blubb", "In Glaskolben blubberte", "bei", .3), ("knistern", "Feuer in der Luft", "auf", 0.15),
   ("schleichen", "den Raum heimlich zu erkunden", "bei", .3), ("holzschlag", "stellte sich mir ein Schrank", "bei", .45))
 E("I", 24, ("steinschritte", "vor uns stand Glasstab", "bei", .3), ("tuch", "verbeugte mich tief", "auf", .25),
   ("steinschritte", "schickte uns weg", "nach", .3))
@@ -519,7 +519,7 @@ E("I", 29, ("volk", "verbreiteten die Helden", "bei", .3), ("raunen", "wurde lan
   ("flamme", "mit brennenden Fackeln", "auf", .3))
 E("I", 31, ("kiesschritte", "Nach der Feier ging es", "bei", .3), ("muenzen", "die Belohnung abzuholen", "auf", .35),
   ("muenze", "Münze für Münze", "auf", .35))
-E("I", 33, ("knistern", "An dieser Stelle", "bei", .25), ("ausatmen", "Krauts in meiner Pfeife", "auf", .3))
+E("I", 33, ("knistern", "An dieser Stelle", "bei", 0.15), ("ausatmen", "Krauts in meiner Pfeife", "auf", .3))
 E("I", 34, ("riemen", "keine Zeit verstreichen", "auf", .3), ("grasschritte", "nächsten Auftrag auf", "auf", .3))
 E("I", 35, ("grasschritte", "Wir erreichten das Gebäude", "bei", .3), ("windstoss", "kleine Scheibe über uns", "auf", .25),
   ("ast", "die Grünfläche", "auf", .25, {"fern": 1}))
@@ -540,7 +540,7 @@ E("I", 46, ("verwandlung", "Sie verwandelte sich", "bei", .4))
 E("I", 47, ("steinschritte", "Echo wollte ihr schon nachsetzen", "bei", .3), ("elf_aua", "blutverschmierte Schulter", "auf", .25))
 E("I", 48, ("dolch_ziehen", "schnitt Friedrich", "bei", .35), ("stuhl", "sichtlich erleichtert", "bei", .3))
 E("I", 50, ("tuer_oeffnen", "kehrten wir zu Gundren zurück", "auf", .3), ("tuch", "überglücklich in die Arme", "auf", .3),
-  ("knistern", "warm ums Herz", "auf", .25))
+  ("knistern", "warm ums Herz", "auf", 0.15))
 E("I", 52, ("papier", "Gundren gab uns den Auftrag", "auf", .3), ("amboss", "magische Schmiede finden", "nach", .25, {"hall": .6, "fern": 1}))
 E("I", 53, ("steinschritte", "Der Weg führte uns", "bei", .3), ("tropfen", "durch die riesige Höhle", "auf", .3, {"hall": .5}),
   ("schleichen", "schlichen durch bröcklige", "bei", .3), ("geroell", "bröcklige", "auf", .25))
@@ -552,7 +552,7 @@ E("I", 56, ("metallhieb", "Der letzte Söldner", "bei", .4), ("kampflaut", "nur 
 E("I", 57, ("steinschritte", "Wir gingen noch tiefer", "bei", .3))
 E("I", 58, ("wucht", "räumte unsere Gruppe", "auf", .35), ("lachen", "endlich uns", "nach", .3, {"dt": 1.0}))
 E("I", 59, ("tropfen", "Es roch nach kaltem Metall", "bei", .25, {"hall": .5}))
-E("I", 60, ("feuer_an", "Wir schlugen unser Lager auf", "auf", .35), ("knistern", "weiter vorgehen wollten", "nach", .3))
+E("I", 60, ("feuer_an", "Wir schlugen unser Lager auf", "auf", .35), ("knistern", "weiter vorgehen wollten", "nach", 0.18))
 E("I", 62, ("riemen", "Dann ging es zurück", "bei", .3))
 E("I", 64, ("volk", "in der großen Stadt", "auf", .3), ("muenzen", "Gasthof gesichert", "auf", .3), ("klopfen", "um eine Audienz", "auf", .3))
 E("I", 65, ("tuer_oeffnen", "geradewegs zum Leiter", "bei", .35), ("stuhl", "nicht gerade erfreut", "auf", .3), ("lachen", "merklich", "nach", .25))
@@ -569,7 +569,7 @@ E("I", 74, ("schleichen", "Die Gefährten schlichen", "bei", .3), ("windstoss", 
 E("I", 75, ("husten", "mit voller Wucht", "auf", .4), ("drachenlaut", "letzten tosenden Aufbäumen", "bei", .45),
   ("schwung", "verfehlten ihn knapp", "bei", .4), ("husten", "Meine Lunge brannte", "auf", .35))
 E("I", 76, ("ausatmen", "durchatmen", "auf", .35), ("tuch", "Wunden versorgen", "auf", .3),
-  ("leder", "Pfeife stopfen", "auf", .25), ("knistern", "eine lange Rast", "auf", .25))
+  ("leder", "Pfeife stopfen", "auf", .25), ("knistern", "eine lange Rast", "auf", 0.15))
 E("I", 79, ("tuer_knarren", "vermeintlich leeren Häuser", "auf", .3), ("ghul", "auf uns zustolperten", "auf", .35),
   ("hieb", "hatten sie keine Chance", "auf", .4), ("aufprall", "hatten sie keine Chance", "nach", .35, {"dt": .5}))
 E("I", 80, ("kiesschritte", "Vor einem der Häuser", "bei", .25), ("windstoss", "innehielt", "auf", .25))
@@ -635,7 +635,7 @@ E("II", 72, ("stampfen", "empfing uns schon", "auf", .3), ("geroell", "regt sich
 E("II", 73, ("riese", "nickte vage", "auf", .3))
 E("II", 74, ("riese", "schenkte uns Hgraam", "bei", .25), ("flasche", "Betäubungstrank", "auf", .3))
 E("II", 76, ("geschirr", "Zurück in der Schenke", "bei", .3), ("stuhl", "an unseren Tisch traten", "auf", .3))
-E("II", 78, ("steinschritte", "Sie führten uns", "bei", .3), ("brutzeln", "wurde es wärmer", "auf", .3), ("knistern", "vor Gartokkar standen", "bei", .3))
+E("II", 78, ("steinschritte", "Sie führten uns", "bei", .3), ("brutzeln", "wurde es wärmer", "auf", .3), ("knistern", "vor Gartokkar standen", "bei", 0.18))
 E("II", 79, ("brutzeln", "Strom aus Lava", "auf", .4), ("blubb", "um alle Ecken", "auf", .3), ("edelstein", "Edelsteine", "auf", .35),
   ("muenze", "was er sich davon alles kaufen könnte", "auf", .3))
 E("II", 80, ("windstoss", "immer lauter wurde", "auf", .35))
@@ -644,7 +644,7 @@ E("II", 85, ("steinschritte", "trat Echo vor", "auf", .3))
 E("II", 86, ("drachenlaut", "befahl uns", "auf", .35), ("zischen", "unterweisen zu lassen", "nach", .3))
 E("II", 89, ("steinschritte", "Erst als wir die Halle", "bei", .3), ("tuer_schliessen", "vor dem Ausgang", "auf", .35))
 E("II", 90, ("tuch", "überreichte er uns", "auf", .3))
-E("II", 91, ("knistern", "Ein Drache, der seinem Priester", "bei", .25))
+E("II", 91, ("knistern", "Ein Drache, der seinem Priester", "bei", 0.15))
 
 # =====================================================================
 # 4. MUSIK – kleiner Sequenzer auf den Instrumenten-Samples der Bühne (klang/)
@@ -1435,7 +1435,7 @@ def partitur():
         # spricht (≈ −9,5 dBFS – Stimme + Hörspiel bleiben so unter 0 dBFS); musik: Zwischenspiele ~3 LU unter der Stimme;
         # unter*: Untermalung (Stärke, unter der Stimme, in Sprechpausen, zwischen Absätzen)
         "pegel": {"atmo": .8, "atmoSprache": .34, "atmoPause": 1.0, "fx": 1.1, "musik": .4, "hall": .22,
-                  "summe": 2.23, "grenze": -4, "grenzeSprache": -10, "unter": .6, "unterSprache": .55, "unterLuecke": .8, "unterPause": 1.0},
+                  "summe": 2.23, "grenze": -4, "grenzeSprache": -8, "unter": .6, "unterSprache": .55, "unterLuecke": .8, "unterPause": 1.0},
         "abschnitte": abschnitte,
         "orte": ORTE,
         "arten": ARTEN,

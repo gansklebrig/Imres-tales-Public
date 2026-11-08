@@ -89,13 +89,16 @@
     comp.threshold.value = -18; comp.ratio.value = 3; comp.knee.value = 6; comp.attack.value = .012; comp.release.value = .25;
     trim = ctx.createGain(); trim.gain.value = 2.23 / AUF_KOMP;
     grenz = ctx.createDynamicsCompressor();
-    grenz.threshold.value = -4; grenz.ratio.value = 20; grenz.knee.value = 0; grenz.attack.value = .001; grenz.release.value = .1;
+    grenz.threshold.value = -4; grenz.ratio.value = 20; grenz.knee.value = 0; grenz.attack.value = .003; grenz.release.value = .2;   /* 3 ms: weniger Verzerrung an Knacksern */
     nach = ctx.createGain(); nach.gain.value = 1 / aufGrenz(-4);
     master.connect(comp); comp.connect(trim); trim.connect(grenz); grenz.connect(nach); nach.connect(ctx.destination);
     atmoBus = ctx.createGain(); duck = ctx.createGain(); duck.gain.value = 1;
     atmoBus.connect(duck); duck.connect(master);
     fxBus = ctx.createGain(); fxBus.connect(master);
-    musBus = ctx.createGain(); musBus.connect(master);
+    musBus = ctx.createGain();
+    /* Tiefbass aus der Musik nehmen: kleine Bluetooth-Boxen verzerren sonst bei Pauken/Celli */
+    const musHp = ctx.createBiquadFilter(); musHp.type = "highpass"; musHp.frequency.value = 85; musHp.Q.value = .6;
+    musBus.connect(musHp); musHp.connect(master);
     /* Untermalung: eigene Ducking-Stufe, dann über musBus (Musik-Regler des Nutzers gilt mit) */
     unterDuck = ctx.createGain(); unterBus = ctx.createGain(); unterBus.gain.value = 0;
     unterDuck.connect(unterBus); unterBus.connect(musBus);
