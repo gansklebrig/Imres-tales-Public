@@ -231,7 +231,8 @@ def chronik(sprache, stimme, grenze):
         for i, a in enumerate(k["absaetze"]): stuecke.append((k["nummer"], i, a))
     stuecke = [x for x in stuecke if not x[2].lstrip().startswith("!")]  # Bilder mit Bildunterschrift nicht vorlesen
     texte = [sauber(t) for _, _, t in stuecke]
-    kosten = 0; erzeugt = 0
+    kosten = 0; erzeugt = 0; voll = False
+    altpos = {(str(k), e["i"]): e for k, l in (alt.get("kapitel") or {}).items() for e in l}
     stand, _ = rest(); print("Credits übrig:", stand)
     for n, ((kap, i, roh), text) in enumerate(zip(stuecke, texte)):
         if not text: continue
@@ -244,8 +245,14 @@ def chronik(sprache, stimme, grenze):
         manifest["kapitel"].setdefault(str(kap), []).append(eintrag)
         if os.path.exists(ziel): continue
         laenge = sum(len(t) for t in regie) if regie else len(text)
-        if grenze and kosten + laenge > grenze:
-            print("Grenze erreicht – Rest beim nächsten Lauf."); manifest["unvollstaendig"] = True; break
+        if voll or (grenze and kosten + laenge > grenze):
+            # Grenze erreicht: bis zum nächsten Lauf die alte Aufnahme dieses Absatzes weiter verwenden
+            if not voll: print("Grenze erreicht – Rest beim nächsten Lauf.")
+            voll = True; manifest["unvollstaendig"] = True
+            a_ = altpos.get((str(kap), i))
+            if a_ and os.path.exists(os.path.join(WURZEL, a_["datei"])): eintrag["datei"] = a_["datei"]; eintrag["veraltet"] = True
+            else: manifest["kapitel"][str(kap)].pop()
+            continue
         os.makedirs(os.path.dirname(ziel), exist_ok=True)
         vorher = texte[n - 1] if n else ""; nachher = texte[n + 1] if n + 1 < len(texte) else ""
         if regie: mp3 = zusammenfuegen([tts(stimme, t) for t in regie])

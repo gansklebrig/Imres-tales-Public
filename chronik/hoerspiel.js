@@ -72,20 +72,33 @@
   }
 
   /* ---------- Audio-Graph ---------- */
-  let ctx = null, master, comp, atmoBus, duck, fxBus, musBus, hallIn, hallOut;
+  let ctx = null, master, comp, trim, grenz, nach, atmoBus, duck, fxBus, musBus, unterBus, unterDuck, unterHall, hallIn, hallOut;
   const RT2 = Math.SQRT2;
+  /* Der DynamicsCompressor des Browsers hebt ALLES automatisch an (Chrome/Firefox/Safari: 0,6 × Pegelverlust bei 0 dB).
+     Beim alten Kompressor (−18 dB, 4:1) waren das +7 dB – Musikspitzen landeten bei ~0 dBFS und kratzten (v. a. am Handy,
+     wo die Stimme noch dazukommt). Jetzt: Auto-Aufholverstärkung herausrechnen, feste Summe aus der Partitur (pegel.summe),
+     dahinter ein echter Brickwall-Begrenzer (pegel.grenze, 20:1, 1 ms, harte Kennlinie) → Decke ≈ −3,5 dBFS. */
+  const AUF_KOMP = Math.pow(10, 6.13 / 20);                                            /* gemessen: −18 dB, 3:1, Knie 6 */
+  const aufGrenz = thr => Math.pow(10, .6 * Math.abs(thr) * (1 - 1 / 20) / 20);         /* harte Kennlinie: exakt */
   function graph() {
     if (ctx) return true;
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
     try { ctx = new AC({ latencyHint: "playback" }); } catch (_) { try { ctx = new AC(); } catch (__) { return false; } }
     master = ctx.createGain(); master.gain.value = 0;
     comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -18; comp.ratio.value = 4; comp.knee.value = 6; comp.attack.value = .005; comp.release.value = .25;
-    master.connect(comp); comp.connect(ctx.destination);
+    comp.threshold.value = -18; comp.ratio.value = 3; comp.knee.value = 6; comp.attack.value = .012; comp.release.value = .25;
+    trim = ctx.createGain(); trim.gain.value = 2.23 / AUF_KOMP;
+    grenz = ctx.createDynamicsCompressor();
+    grenz.threshold.value = -4; grenz.ratio.value = 20; grenz.knee.value = 0; grenz.attack.value = .001; grenz.release.value = .1;
+    nach = ctx.createGain(); nach.gain.value = 1 / aufGrenz(-4);
+    master.connect(comp); comp.connect(trim); trim.connect(grenz); grenz.connect(nach); nach.connect(ctx.destination);
     atmoBus = ctx.createGain(); duck = ctx.createGain(); duck.gain.value = 1;
     atmoBus.connect(duck); duck.connect(master);
     fxBus = ctx.createGain(); fxBus.connect(master);
     musBus = ctx.createGain(); musBus.connect(master);
+    /* Untermalung: eigene Ducking-Stufe, dann über musBus (Musik-Regler des Nutzers gilt mit) */
+    unterDuck = ctx.createGain(); unterBus = ctx.createGain(); unterBus.gain.value = 0;
+    unterDuck.connect(unterBus); unterBus.connect(musBus);
     /* kleiner Hall für Musik und hallende Effekte (synthetische Impulsantwort, 2,2 s) */
     hallIn = ctx.createGain(); hallOut = ctx.createGain();
     try {
@@ -93,6 +106,7 @@
       for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * 1.73 * Math.exp(-i / ctx.sampleRate * 3.2); }
       const conv = ctx.createConvolver(); conv.normalize = false; conv.buffer = ir;
       hallIn.connect(conv); conv.connect(hallOut); hallOut.connect(master);
+      unterHall = ctx.createGain(); unterHall.gain.value = .4; unterBus.connect(unterHall); unterHall.connect(hallIn);
     } catch (_) {}
     pegelSetzen();
     ctx.addEventListener && ctx.addEventListener("statechange", () => L("ctx", ctx.state));
@@ -106,6 +120,23 @@
     fxBus.gain.setTargetAtTime(pg.fx * musVol, j, .15);
     musBus.gain.setTargetAtTime(pg.musik * musVol, j, .15);
     hallOut.gain.setTargetAtTime(pg.hall * .08 * musVol, j, .15);
+    unterBus.gain.setTargetAtTime(pg.unter || 0, j, .15);
+    if (unterHall) unterHall.gain.setTargetAtTime(.4 * pg.musik, j, .15);   /* Hallanteil wie offline (nach Musikpegel) */
+    grenz.threshold.setValueAtTime(pg.grenze == null ? -4 : pg.grenze, j);
+    decke(deckeSprache, j);
+  }
+  /* Solange die Stimme spricht, liegt die Decke des Begrenzers tiefer (pegel.grenzeSprache): vor dem Begrenzer
+     um k anheben, dahinter um k absenken – unterhalb der Schwelle ändert sich nichts, Spitzen werden früher gekappt.
+     (Die Stimme ist ein eigenes <audio>-Element und läuft am Begrenzer vorbei; so bleibt die Summe unter 0 dBFS.) */
+  let deckeSprache = false;
+  function decke(spricht, wann) {
+    deckeSprache = !!spricht;
+    if (!ctx || !P || !trim) return;
+    const pg = P.pegel, thr = pg.grenze == null ? -4 : pg.grenze;
+    const k = spricht && pg.grenzeSprache != null ? Math.pow(10, (thr - pg.grenzeSprache) / 20) : 1;
+    const j = Math.max(wann || 0, ctx.currentTime);
+    trim.gain.setTargetAtTime((pg.summe || 2.23) / AUF_KOMP * k, j, .06);
+    nach.gain.setTargetAtTime(1 / aufGrenz(thr) / k, j, .06);
   }
   /* Muss im Klick des Nutzers laufen (Autoplay-Regeln von iOS/Android) */
   function ein() {
@@ -243,6 +274,7 @@
   function planen() {
     if (!ctx || ctx.state !== "running") return;
     [ort].concat(Object.values(zusaetze).map(b => ({ betten: [b] }))).forEach(o => o && o.betten.forEach(bettPlanen));
+    unterPlanen();
     if (ort && sprichtOderPause && ort.ev.length) {
       const j = ctx.currentTime;
       ort.ev.forEach(e => {
@@ -253,7 +285,7 @@
         artSpielen(e.art, j + .05, e.g * (fern ? zz(.4, .6) : zz(.7, 1)), { fern }, atmoBus, null);
       });
     }
-    if (!ort && !Object.keys(zusaetze).length && !altOrte.length && planUhr) { clearInterval(planUhr); planUhr = 0; }
+    if (!ort && !unter && !Object.keys(zusaetze).length && !altOrte.length && planUhr) { clearInterval(planUhr); planUhr = 0; }
   }
   let sprichtOderPause = false, letzterFx = -10, stilleBis = 0, musikBis = 0;
 
@@ -275,7 +307,7 @@
         if (o.fern) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1400; gg.gain.value *= .75; gg.connect(lp); letzt = lp; }
         if (o.pan && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = o.pan; const k2 = ctx.createGain(); k2.gain.value = RT2; letzt.connect(pn); pn.connect(k2); letzt = k2; }
         letzt.connect(ziel || fxBus);
-        if (o.hall && hallIn) { const h = ctx.createGain(); h.gain.value = o.hall; letzt.connect(h); h.connect(hallIn); }
+        if (o.hall && hallIn) { const h = ctx.createGain(); h.gain.value = o.hall * (ziel === atmoBus ? P.pegel.atmo : P.pegel.fx); letzt.connect(h); h.connect(hallIn); }
         const start = Math.max(tk, ctx.currentTime);
         if (A.aus) { /* Ausschnitt aus einer langen Aufnahme (Herzschlag) */
           const d = A.aus[1] - A.aus[0];
@@ -301,26 +333,39 @@
     st.spuren.forEach(sp => { const ins = P.instrumente[sp.i]; sp.n.forEach(n => [].concat(n[1]).forEach(m => out.add(typeof m === "string" ? m : ins.p + "_" + naechsteProbe(ins.t, m)))); });
     return Array.from(out);
   }
+  /* Fassungen eines Zwischenspiels (heiter, heiter_2, heiter_3 …): zufällig, nie zweimal dieselbe hintereinander */
+  const zuletzt = {};
+  function variante(st) {
+    const l = ((P && P.varianten && P.varianten[st]) || [st]).filter(n => P.musik[n]);
+    if (!l.length) return st;
+    const frei = l.filter(n => n !== zuletzt[st]), n = wahl(frei.length ? frei : l);
+    zuletzt[st] = n; return n;
+  }
   function instrumenteVorladen() {
     if (!P || !ctx || instrumenteVorladen.los) return; instrumenteVorladen.los = true;
-    /* zuerst Barradins Lied, dann die Zwischenspiele */
-    const reihe = ["thema", "heiter", "spannung", "duester", "geheimnis", "warm", "triumph", "kampf", "drache", "cliff", "traurig", "lied", "ballade", "klage", "floete", "licht"];
+    /* zuerst Barradins Lied, dann die Zwischenspiele (alle Fassungen) */
+    const st = ["heiter", "spannung", "duester", "geheimnis", "warm", "triumph", "kampf", "drache"];
+    const reihe = ["thema"].concat(st.map(s => (P.varianten && P.varianten[s]) || [s]).flat(), ["cliff", "traurig", "lied", "ballade", "klage", "floete", "licht"], (P.varianten && P.varianten.traurig) || []);
     reihe.reduce((p, n) => p.then(() => P.musik[n] ? Promise.all(notenNamen(P.musik[n]).map(laden)) : null), Promise.resolve());
   }
   function stueckBereit(name) {
     const st = P && P.musik[name]; if (!st || !ctx) return Promise.resolve(false);
     return Promise.all(notenNamen(st).map(laden)).then(l => l.every(Boolean));
   }
-  function stueckSpielen(name, wann, g, sammel) {
+  /* o: { ziel (Standard musBus), hall (Hallanteil, Standard .6), unter (Untermalung: blockiert keine Ortsgeräusche) } */
+  function stueckSpielen(name, wann, g, sammel, o) {
+    o = o || {};
     const st = P.musik[name]; if (!st) return 0;
-    const spb = 60 / st.bpm, ges = (st.g || 1) * g;
-    const hall = ctx.createGain(); hall.gain.value = .6; hall.connect(hallIn || musBus);
+    const spb = 60 / st.bpm, ges = (st.g || 1) * g, ausgang = o.ziel || musBus, hs = o.hall == null ? .6 : o.hall;
+    /* Hallanteil nach dem Musikpegel – wie die Offline-Mischung im Werkzeug */
+    let hall = null;
+    if (hs > 0 && hallIn) { hall = ctx.createGain(); hall.gain.value = hs * P.pegel.musik; hall.connect(hallIn); }
     st.spuren.forEach(sp => {
       const ins = P.instrumente[sp.i];
       const spur = ctx.createGain(); spur.gain.value = sp.g * ges;
       let ziel = spur;
-      if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = sp.pan || 0; const k = ctx.createGain(); k.gain.value = RT2; spur.connect(pn); pn.connect(k); k.connect(musBus); k.connect(hall); }
-      else { spur.connect(musBus); spur.connect(hall); }
+      if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = sp.pan || 0; const k = ctx.createGain(); k.gain.value = RT2; spur.connect(pn); pn.connect(k); k.connect(ausgang); if (hall) k.connect(hall); }
+      else { spur.connect(ausgang); if (hall) spur.connect(hall); }
       sp.n.forEach(n => {
         const opt = n[4] || {};
         [].concat(n[1]).forEach(m => {
@@ -330,8 +375,9 @@
           const b = puffer.get(name2); if (!b) return;
           const t = wann + n[0] * spb + (opt.strum || 0), halt = n[2] * spb;
           const ende = Math.min(b.duration / rate, halt + ins.aus), v = n[3];
+          const ein = Math.max(.004, Math.min(opt.ein || .004, Math.min(halt, ende) * .5));
           const q = ctx.createBufferSource(), e = ctx.createGain(); q.buffer = b; q.playbackRate.value = rate;
-          e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + .004);
+          e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + ein);
           e.gain.setValueAtTime(v, t + Math.min(halt, ende)); e.gain.linearRampToValueAtTime(0, t + ende);
           q.connect(e); e.connect(ziel); q.start(t); q.stop(t + ende + .02);
           q.onended = () => { try { e.disconnect(); } catch (_) {} };
@@ -339,9 +385,78 @@
         });
       });
     });
-    musikBis = Math.max(musikBis, wann + st.ende);
-    L("musik", name, { wann: +wann.toFixed(2), dauer: st.ende });
+    if (!o.unter) musikBis = Math.max(musikBis, wann + st.ende);
+    L(o.unter ? "unter" : "musik", name, { wann: +wann.toFixed(2), dauer: st.ende });
     return st.ende;
+  }
+
+  /* ---------- Untermalung: leise, lange Musik unter der Erzählung ----------
+     Die Partitur (P.untermalung.plan) sagt je Absatz, ob Untermalung liegt: { id (Spanne), st (Stimmung), aus: [t0, t1] }.
+     Eine Spanne läuft über 1–3 Absätze (auch durch die Pausen dazwischen); der Player hängt zufällig gewählte Fassungen
+     der Stimmung aneinander (nie dieselbe zweimal hintereinander), blendet 4 s ein und im letzten Absatz bei „aus“ aus.
+     Ducking: unter der Stimme pegel.unterSprache, in Sprechpausen unterLuecke, zwischen Absätzen unterPause. */
+  let unter = null;   /* { id, st, g, quellen, naechst, letzt, wahl, einAb, einBis, ausAb, ausBis } */
+  const unterVon = x => (P && x && P.untermalung && P.untermalung.plan && P.untermalung.plan[x.kap + ":" + x.i]) || null;
+  const unterNamen = st => ((P && P.untermalung && P.untermalung.stimmungen && P.untermalung.stimmungen[st]) || []).filter(n => P.musik[n]);
+  function unterVorladen(u) { if (u && ctx) unterNamen(u.st).forEach(n => notenNamen(P.musik[n]).forEach(laden)); }
+  function unterWert(U, t) {
+    let v = U.einAb == null ? 0 : Math.max(0, Math.min(1, (t - U.einAb) / Math.max(.05, U.einBis - U.einAb)));
+    if (U.ausAb != null) v = Math.min(v, Math.max(0, Math.min(1, (U.ausBis - t) / Math.max(.05, U.ausBis - U.ausAb))));
+    return v;
+  }
+  /* Hüllkurve von jetzt an vollständig neu schreiben (stückweise linear: Einblenden, Halten, Ausblenden) */
+  function unterHuelle(U) {
+    const p = U.g.gain, j = ctx.currentTime;
+    try {
+      p.cancelScheduledValues(j); p.setValueAtTime(unterWert(U, j), j);
+      [U.einAb, U.einBis, U.ausAb, U.ausBis].filter(t => t != null && t > j).sort((a, b) => a - b).forEach(t => p.linearRampToValueAtTime(unterWert(U, t), t));
+    } catch (_) {}
+  }
+  function unterStarten(u) {
+    if (unter && unter.id === u.id) return unter;
+    unterStopp(2.5);
+    const g = ctx.createGain(); g.gain.value = 0; g.connect(unterDuck);
+    unter = { id: u.id, st: u.st, g, quellen: [], naechst: 0, letzt: null, wahl: null, einAb: null, einBis: null, ausAb: null, ausBis: null };
+    unterVorladen(u); planStarten();
+    L("untermalung", u.st, { id: u.id });
+    return unter;
+  }
+  /* im Planer (jede Sekunde): das nächste Stück rechtzeitig ansetzen */
+  function unterPlanen() {
+    const U = unter; if (!U || !ctx || !P) return;
+    const j = ctx.currentTime;
+    U.quellen = U.quellen.filter(s => s.t > j - 30);
+    if (U.naechst > j + 6) return;
+    if (U.ausBis != null && Math.max(U.naechst, j) >= U.ausBis - .5) return;      /* schon ausgeblendet */
+    const namen = unterNamen(U.st); if (!namen.length) return;
+    if (!U.wahl) { const frei = namen.filter(n => n !== U.letzt); U.wahl = wahl(frei.length ? frei : namen); }
+    const st = P.musik[U.wahl], noetig = notenNamen(st);
+    if (!noetig.every(n => puffer.has(n))) { noetig.forEach(laden); return; }   /* noch nicht geladen: nächste Runde */
+    const t = Math.max(U.naechst, j + .15);
+    if (U.einAb == null) {
+      if (U.ausAb != null && t >= U.ausAb) { U.naechst = U.ausBis; return; }  /* zu spät geladen: diese Spanne auslassen */
+      U.einAb = t; U.einBis = t + 4; unterHuelle(U);
+    }
+    stueckSpielen(U.wahl, t, 1, U.quellen, { ziel: U.g, hall: 0, unter: true });
+    U.letzt = U.wahl; U.wahl = null; U.naechst = t + st.ende - st.ueber;
+  }
+  function unterStopp(dauer) {
+    const U = unter; if (!U || !ctx) return;
+    unter = null;
+    const j = ctx.currentTime, e = j + Math.max(.05, dauer);
+    if (U.ausBis == null || U.ausBis > e) { U.ausAb = j; U.ausBis = e; unterHuelle(U); }
+    setTimeout(() => { quellenStoppen(U.quellen, false); U.quellen = []; try { U.g.disconnect(); } catch (_) {} }, (e - j) * 1000 + 300);
+    L("untermalung", "aus", { id: U.id, dauer });
+  }
+  /* Ducking der Untermalung für einen Absatz ab der Stelle ct */
+  function unterDucken(a, T0, ct, rate) {
+    const pg = P.pegel, us = pg.unterSprache == null ? .55 : pg.unterSprache, ul = pg.unterLuecke == null ? .8 : pg.unterLuecke;
+    const p = unterDuck.gain; p.cancelScheduledValues(T0); p.setTargetAtTime(us, T0, .12);
+    (a && a.p || []).forEach(([ps, pe]) => {
+      if (pe - ps < 1 || ps < ct) return;
+      const s = T0 + (ps - ct) / rate, e = T0 + (pe - ct) / rate;
+      p.setTargetAtTime(ul, s + .1, .2); p.setTargetAtTime(us, e - .35, .1);
+    });
   }
 
   /* ---------- Mischung: Stimme vorn, Kulisse duckt ---------- */
@@ -376,6 +491,15 @@
     sprichtOderPause = true;
     const pg = P.pegel;
     duck.gain.cancelScheduledValues(T0); duck.gain.setTargetAtTime(pg.atmoSprache, T0, .12);
+    decke(true, T0);
+    /* Untermalung: Spanne beginnen/fortsetzen (auch nach Pause oder Sprung), sonst ausblenden */
+    const u = unterVon(x);
+    if (!u) { if (unter) unterStopp(2.5); }
+    else {
+      const U = unterStarten(u);
+      if (u.aus) { U.ausAb = T0 + (u.aus[0] - ct) / rate; U.ausBis = T0 + (u.aus[1] - ct) / rate; } else U.ausAb = U.ausBis = null;
+      unterHuelle(U); unterDucken(a, T0, ct, rate); unterPlanen();
+    }
     if (!a) return;
     /* in längeren Sprechpausen atmet die Kulisse kurz auf */
     (a.p || []).forEach(([ps, pe]) => {
@@ -419,11 +543,13 @@
   function vorladen(x) {
     if (!P || !ctx) return;
     const a = absatz(x); if (a && a.e) a.e.forEach(e => e.fx && artVorladen(e.fx));
+    unterVorladen(unterVon(vorladen.naechster));
     if (vorladen.naechster) { const n = vorladen.naechster; const an2 = absatz(n); if (an2 && an2.e) an2.e.forEach(e => e.fx && artVorladen(e.fx)); const o = ortBei(n, 0); if (o && P.orte[o]) P.orte[o].betten.slice(0, MAX_BETTEN).forEach(b => laden(b[0])); }
   }
   function pause() {
     if (!ctx) return;
     absatzAufraeumen(); quellenStoppen(musikQuellen, false); musikQuellen = [];
+    unterStopp(.3); decke(false);
     sprichtOderPause = false;
     master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0, ctx.currentTime, .12);
     clearTimeout(pause.uhr);
@@ -444,6 +570,8 @@
     if (!laeuft()) return 0;
     const a = absatz(x), j = ctx.currentTime;
     duckAuf(P.pegel.atmoPause, j + .05, .35);
+    decke(false, j + .1);
+    if (unter) { unterDuck.gain.cancelScheduledValues(j); unterDuck.gain.setTargetAtTime(P.pegel.unterPause == null ? 1 : P.pegel.unterPause, j + .05, .4); }
     let warte = .2;   /* Grundpause steckt jetzt in den Aufnahmen (tools/vertonung/pausen.py) */
     if (a && a.e) a.e.forEach(e => {
       if (e.t <= a.d - .02) return;
@@ -465,14 +593,18 @@
       if (!laeuft()) return 0;
       const ziel = ortBei(x, 0), j0 = ctx.currentTime + .08;
       sprichtOderPause = true;
+      /* Untermalung, die nicht in den nächsten Absatz weiterläuft, vor dem Zwischenspiel ausblenden */
+      const u2 = unterVon(x);
+      if (unter && (!u2 || u2.id !== unter.id)) unterStopp(info.art === "weiter" ? 2.5 : 1);
+      else if (u2) unterVorladen(u2);
       duckAuf(P.pegel.atmoPause, j0, .3);
       if (info.art === "sprung" || !x) { ortSetzen(ziel, 2.5); return 0; }
       const folge = [];
       const s = abschnitt(x);
       if (vor && vor.kap !== x.kap && info.art === "weiter" && vor.kap !== "vorab") folge.push({ n: "cliff", pause: .9 });
       if (info.kapStart && x.kap !== "vorab") folge.push({ n: "thema", ort: true });
-      else if (x.kap === "vorab") folge.push({ n: "warm", ort: true });
-      else if (x.titel && s) folge.push({ n: s.stimmung, ort: true, vor: .3 });
+      else if (x.kap === "vorab") folge.push({ n: variante("warm"), ort: true });
+      else if (x.titel && s) folge.push({ n: variante(s.stimmung), ort: true, vor: .3 });
       if (!folge.length) { ortSetzen(ziel, 3.5); return 0; }
       if (!folge.some(f => f.ort)) ortSetzen(ziel, 3.5);
       /* höchstens 2,5 s auf die Instrumente warten – sonst ohne Musik weiter */
@@ -498,6 +630,7 @@
   }
   /* letzter Absatz der Liste: Cliffhanger, dann Ruhe */
   function kapitelEnde() {
+    if (ctx) unterStopp(2);
     return wach().then(() => laeuft() ? stueckBereit("cliff") : false).then(ok => {
       if (!ok || !laeuft()) return 0;
       const t = ctx.currentTime + .4, d = stueckSpielen("cliff", t, 1, musikQuellen);
@@ -509,6 +642,7 @@
     vorladen.naechster = null;
     if (!ctx) return;
     absatzAufraeumen(); akt = null;
+    unterStopp(.5); decke(false);
     sprichtOderPause = false;
     const j = ctx.currentTime;
     master.gain.cancelScheduledValues(j); master.gain.setTargetAtTime(0, j, .2);
@@ -519,7 +653,7 @@
   }
   function setAn(v) {
     an = !!v; schreib("imres-hoerspiel", an ? "1" : "0"); L("schalter", an ? "an" : "aus");
-    if (!an) { if (ctx) { const j = ctx.currentTime; master.gain.cancelScheduledValues(j); master.gain.setTargetAtTime(0, j, .25); setTimeout(() => { if (!an) { absatzAufraeumen(); quellenStoppen(musikQuellen, false); musikQuellen = []; ortWeg(.05); try { ctx.suspend(); } catch (_) {} } }, 1200); } return; }
+    if (!an) { if (ctx) { const j = ctx.currentTime; master.gain.cancelScheduledValues(j); master.gain.setTargetAtTime(0, j, .25); setTimeout(() => { if (!an) { absatzAufraeumen(); quellenStoppen(musikQuellen, false); musikQuellen = []; unterStopp(.05); ortWeg(.05); try { ctx.suspend(); } catch (_) {} } }, 1200); } return; }
     ein();
     if (akt && akt.audio && !akt.audio.paused) partitur().then(wach).then(() => { if (akt && akt.audio && !akt.audio.paused) sprache(akt.x, akt.audio); });
   }
