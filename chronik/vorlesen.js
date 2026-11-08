@@ -16,8 +16,8 @@
   "use strict";
   const de = () => (document.documentElement.lang || "de").slice(0, 2) !== "en";
   const TX = {
-    de: { kapitel: n => "Kapitel " + n + " vorlesen", kurz: "Vorlesen", abHier: "Ab hier vorlesen", spielen: "Weiter", pause: "Pause", zurueck: "Absatz zurück", vor: "Absatz vor", zu: "Vorlesen beenden", sprecher: "gelesen von Helmut", tempo: "Tempo", vorab: "Ein Wort vorab", hoerspiel: "Hörspiel", hsLang: "Hörspiel: Geräusche & Musik", hsKulisse: "Kulisse", hsMusik: "Musik & Effekte", hsAn: "an", hsAus: "aus" },
-    en: { kapitel: n => "Listen to chapter " + n, kurz: "Listen", abHier: "Listen from here", spielen: "Play", pause: "Pause", zurueck: "Previous paragraph", vor: "Next paragraph", zu: "Stop listening", sprecher: "read by Helmut", tempo: "Speed", vorab: "A word first", hoerspiel: "Radio play", hsLang: "Radio play: sounds & music", hsKulisse: "Ambience", hsMusik: "Music & effects", hsAn: "on", hsAus: "off" }
+    de: { kapitel: n => "Kapitel " + n + " vorlesen", kurz: "Vorlesen", abHier: "Ab hier vorlesen", spielen: "Weiter", pause: "Pause", zurueck: "Absatz zurück", vor: "Absatz vor", zu: "Vorlesen beenden", sprecher: "gelesen von Helmut", tempo: "Tempo", vorab: "Ein Wort vorab", hoerspiel: "Hörspiel", hsLang: "Hörspiel: Geräusche & Musik", hsKulisse: "Kulisse", hsMusik: "Musik & Effekte", hsAn: "an", hsAus: "aus", schlaf: "Schlummer-Timer", schlafAus: "Aus", schlafAbschnitt: "Abschnittsende", schlafKapitel: "Kapitelende", schlafNoch: "noch" },
+    en: { kapitel: n => "Listen to chapter " + n, kurz: "Listen", abHier: "Listen from here", spielen: "Play", pause: "Pause", zurueck: "Previous paragraph", vor: "Next paragraph", zu: "Stop listening", sprecher: "read by Helmut", tempo: "Speed", vorab: "A word first", hoerspiel: "Radio play", hsLang: "Radio play: sounds & music", hsKulisse: "Ambience", hsMusik: "Music & effects", hsAn: "on", hsAus: "off", schlaf: "Sleep timer", schlafAus: "Off", schlafAbschnitt: "End of section", schlafKapitel: "End of chapter", schlafNoch: "" }
   };
   const t = () => TX[de() ? "de" : "en"];
   const lies = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (_) { return d; } };
@@ -77,6 +77,9 @@
 .vl-leiste.spielt .vl-welle i { animation: vlWelle 1s ease-in-out infinite; } .vl-welle i:nth-child(2) { animation-delay: -.3s !important; } .vl-welle i:nth-child(3) { animation-delay: -.6s !important; }
 @keyframes vlWelle { 50% { height: 100%; } }
 @media (max-width: 520px) { .vl-info b { max-width: 7.5rem; } .vl-leiste .vl-tempo { display: none; } .vl-leiste { gap: .15rem; } .vl-leiste button { width: 2.25rem; height: 2.25rem; } .vl-leiste .vl-haupt { width: 2.6rem; height: 2.6rem; } }
+.vl-mond { color: var(--ember, #e0a046); margin-left: .4rem; letter-spacing: 0; }
+@media (max-width: 520px) { .vl-info small:has(.vl-mond) .vl-spr { display: none; } }
+.vl-schlaf { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
 /* Hörspiel-Schalter und kleines Mischpult */
 .vl-leiste .vl-hs { position: relative; color: var(--ash, #b8a998); }
 .vl-leiste .vl-hs[aria-pressed="true"] { color: var(--ember, #e0a046); }
@@ -172,6 +175,7 @@
   }
   function spielen(i, art) {
     art = art || "sprung";
+    if (art === "weiter" && schlafGrenze(i)) { warteAbbrechen(); schlafAnhalten(); return; }
     warteAbbrechen();
     const H = HSP();
     if (i < 0 || i >= liste.length) {
@@ -286,10 +290,13 @@
     pult.innerHTML = '<div class="vl-schalter"><b></b><button type="button" role="switch" class="vl-hs-an"><i></i></button></div>' +
       '<label class="vl-regler"><span class="vl-l-kul"></span><small class="vl-w-kul"></small><input type="range" min="0" max="150" step="5" class="vl-kul"></label>' +
       '<label class="vl-regler"><span class="vl-l-mus"></span><small class="vl-w-mus"></small><input type="range" min="0" max="150" step="5" class="vl-mus"></label>' +
-      '<div class="vl-reihe"><small class="vl-l-tempo"></small></div>';
+      '<div class="vl-reihe"><small class="vl-l-tempo"></small></div>' +
+      '<div class="vl-reihe vl-schlaf"><small class="vl-l-schlaf"></small></div>';
     document.body.appendChild(pult);
     const reihe = pult.querySelector(".vl-reihe");
     [0.9, 1, 1.15, 1.3].forEach(v => { const b = document.createElement("button"); b.type = "button"; b.dataset.tempo = v; reihe.appendChild(b); });
+    const sr = pult.querySelector(".vl-schlaf");
+    ["0", "15", "30", "45", "60", "abschnitt", "kapitel"].forEach(v => { const b = document.createElement("button"); b.type = "button"; b.dataset.schlaf = v; sr.appendChild(b); });
     pult.addEventListener("input", e => {
       const H = window.ImresHoerspiel; if (!H) return;
       if (e.target.classList.contains("vl-kul")) H.kulisse(e.target.value / 100);
@@ -298,6 +305,7 @@
     });
     pult.addEventListener("click", e => {
       const b = e.target.closest("[data-tempo]"); if (b) tempoSetzen(+b.dataset.tempo);
+      const sb = e.target.closest("[data-schlaf]"); if (sb) schlafSetzen(sb.dataset.schlaf);
       if (e.target.closest(".vl-schalter")) hsUmschalten();
     });
     document.addEventListener("click", e => { if (pult && !pult.hidden && !e.target.closest(".vl-pult, .vl-hs")) pultZu(); });
@@ -322,6 +330,47 @@
     pult.querySelectorAll(".vl-regler input").forEach(r => { r.disabled = !an; });
     pult.querySelector(".vl-l-tempo").textContent = T.tempo + ":";
     pult.querySelectorAll("[data-tempo]").forEach(b => { const v = +b.dataset.tempo; b.textContent = String(v).replace(".", de() ? "," : ".") + "×"; b.setAttribute("aria-pressed", v === tempo ? "true" : "false"); });
+    pult.querySelector(".vl-l-schlaf").textContent = "☾ " + T.schlaf + ":";
+    pult.querySelectorAll("[data-schlaf]").forEach(b => {
+      const v = b.dataset.schlaf;
+      b.textContent = v === "0" ? T.schlafAus : v === "abschnitt" ? T.schlafAbschnitt : v === "kapitel" ? T.schlafKapitel : v + " min";
+      const an = v === "0" ? !schlafModus : schlafModus === v;
+      b.setAttribute("aria-pressed", an ? "true" : "false");
+    });
+  }
+  /* Schlummer-Timer: nach X Minuten sanft ausblenden und pausieren – oder am Ende des Abschnitts/Kapitels anhalten */
+  let schlafModus = "", schlafEnde = 0, schlafUhr = 0;
+  const AUSBLENDEN = 25;
+  function schlafSetzen(v) {
+    clearInterval(schlafUhr); schlafUhr = 0; schlafEnde = 0;
+    if (audio) audio.volume = 1;
+    schlafModus = v === "0" ? "" : v;
+    if (/^\d+$/.test(schlafModus)) { schlafEnde = Date.now() + (+schlafModus) * 60000; schlafUhr = setInterval(schlafTick, 1000); }
+    pultZeichnen(); zeichnen();
+  }
+  function schlafTick() {
+    const rest = (schlafEnde - Date.now()) / 1000;
+    if (audio && spielt) audio.volume = Math.max(0, Math.min(1, rest / AUSBLENDEN));
+    if (rest <= 0) { schlafAnhalten(); return; }
+    if (Math.round(rest) % 30 === 0) zeichnen();
+  }
+  function schlafAnhalten() {
+    clearInterval(schlafUhr); schlafUhr = 0; schlafEnde = 0; schlafModus = "";
+    const H = HSP();
+    if (wartet) { warteAbbrechen(); if (H) H.pause(); }
+    else if (audio && !audio.paused) audio.pause();
+    else if (H) H.pause();
+    spielt = false;
+    setTimeout(() => { if (audio) audio.volume = 1; }, 300);
+    pultZeichnen(); zeichnen(); medienStatus();
+  }
+  /* true = hier anhalten statt weiterzuspielen (Abschnitts-/Kapitelende) */
+  function schlafGrenze(i) {
+    if (!schlafModus || pos < 0) return false;
+    const n = liste[i];
+    if (schlafModus === "kapitel") return !n || n.kap !== liste[pos].kap;
+    if (schlafModus === "abschnitt") return !n || n.titel || n.kap !== liste[pos].kap;
+    return false;
   }
   function pultUmschalten() {
     pultBauen();
@@ -346,7 +395,8 @@
     h.innerHTML = an ? PAUSE : PLAY; h.setAttribute("aria-label", an ? T.pause : T.spielen);
     leiste.querySelector(".vl-zurueck").setAttribute("aria-label", T.zurueck); leiste.querySelector(".vl-vor").setAttribute("aria-label", T.vor); leiste.querySelector(".vl-zu").setAttribute("aria-label", T.zu);
     leiste.querySelector(".vl-info b").textContent = x ? (x.kap === "vorab" ? T.vorab : abschnittVon(x.kap, x.i)) : "";
-    leiste.querySelector(".vl-info small").innerHTML = esc(x && x.kap !== "vorab" ? (de() ? "Kapitel " : "Chapter ") + x.kap + " · " : "") + esc(T.sprecher) + '<span class="vl-welle"><i></i><i></i><i></i></span>';
+    leiste.querySelector(".vl-info small").innerHTML = esc(x && x.kap !== "vorab" ? (de() ? "Kapitel " : "Chapter ") + x.kap + " · " : "") + '<span class="vl-spr">' + esc(T.sprecher) + '</span><span class="vl-welle"><i></i><i></i><i></i></span>' +
+      (schlafModus ? '<span class="vl-mond" title="' + esc(T.schlaf) + '">☾ ' + esc(schlafEnde ? Math.max(1, Math.ceil((schlafEnde - Date.now()) / 60000)) + " min" : (schlafModus === "kapitel" ? T.schlafKapitel : T.schlafAbschnitt)) + '</span>' : "");
     const H = HSP(), hk = leiste.querySelector(".vl-hs");
     hk.hidden = !H; if (H) { hk.setAttribute("aria-pressed", H.an() ? "true" : "false"); hk.setAttribute("aria-label", T.hsLang + " – " + (H.an() ? T.hsAn : T.hsAus)); hk.title = T.hoerspiel + ": " + (H.an() ? T.hsAn : T.hsAus); }
     if (!H) pultZu();
