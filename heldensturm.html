@@ -33832,7 +33832,7 @@ Object.defineProperty(KL,'stufe',{get(){return KS.st},enumerable:true});
    Online: Gastgeber bestimmt. Requisiten (k/type/found/used/prog/act/tell/seed/lab/w/h) und Räume laufen über die bestehende Spiegelung;
      G.ghN (kurze Ereignisliste des Laufs) lässt jeden Gast seine eigenen Funde speichern, G.ghK zeigt allen dieselbe Fundkarte.
    Leistung: Hinweis- und Kammerbilder vorgezeichnet (Canvas), je Bild nur drawImage und wenige Bögen; Logik alle 0,1 s; keine Allokationen je Bild. */
-window.__hsGEHEIM={v:1,aus:0,err:[]};
+window.__hsGEHEIM={v:2,aus:0,err:[]};
 (()=>{try{
 const GHW=window.__hsGEHEIM;
 const GH={spr:new Map(),ms:0,mk:{},t0:0,acc:0,karte:null,kartT:0,nKarte:0,ui:null,sndT:0,gN:'',gNi:0,kSeen:'',hold:{},n:{orte:0,auf:0,kam:0,momente:0,ger:0},sel:null};
@@ -34290,6 +34290,40 @@ function ghBetreten(p){const D=ghDef(p);if(!D)return;const raum=GH_ORT[p.type]?'
     if(dd>8){const s=Math.min(dd,230*dt);a.x+=dx/dd*s;a.y+=dy/dd*s;a.moving=true;if(Math.abs(dx)>2)a.flip=dx<0?-1:1}else{a.moving=false;if(G.time>(a._ghBk||0)){a._ghBk=G.time+3.5+Math.random()*2;try{sfxAt('bark',a.x,a.y);if(fxOk())puffs(a.x+a.flip*10,a.y+6,'#8a7050',3,30,6);if(Math.random()<0.5)word(a.x,a.y-30,ghPick(['Wuff?','*schnüffel*','Wuff!','*buddel*']),'#e8c890')}catch(e){}}}
     if(dd<60&&best.k==='gh_ort'){best.b=1;best._bT=G.time+1.5}a.tgt=null;return}}catch(e){ghErr(e)}
   return ua.apply(this,arguments)}}
+/* ================= Abseits vom Weg (v2) =================
+   Wunsch des Nutzers: Geheimgänge (Master, k:'secret') und verborgene Orte (gh_ort) nie mitten auf dem Weg, sondern
+   etwas abseits – am Wegrand, im Gebüsch, an Felsen. Wege: die gezeichnete Straße G.road (Breite 150) und der
+   Hauptweg der Karte (G.ka.ka2W, auch wo er nicht gezeichnet wird). Nach dem Aufbau jeder Stufe (nur Gastgeber/allein)
+   werden betroffene Requisiten auf einen erreichbaren, freien Platz neben dem Weg versetzt. Hinweise bleiben sichtbar,
+   weil der Platz nah am Weg liegt (Band bis ~200 px neben dem Wegrand). */
+const GHAB={an:1,road:75,rand:48,band:200,st:{n:0,v:0,fail:0}};
+function ghAbWege(){const L=[];if(G.road&&G.road.length>1)L.push([G.road,GHAB.road]);const K=G.ka;if(K&&K.an&&K.ka2W&&K.ka2W.length>1&&K.ka2W!==G.road)L.push([K.ka2W,58]);return L}
+/* Abstand eines Punkts zum Wegrand (negativ = auf dem Weg) */
+function ghAbAbst(x,y,W){let best=1e9;for(let w=0;w<W.length;w++){const R=W[w][0],hw=W[w][1];for(let i=1;i<R.length;i++){const a=R[i-1],b=R[i],dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy;let t=l2?((x-a[0])*dx+(y-a[1])*dy)/l2:0;t=t<0?0:t>1?1:t;const qx=a[0]+dx*t-x,qy=a[1]+dy*t-y,d=Math.sqrt(qx*qx+qy*qy)-hw;if(d<best)best=d}}return best}
+function ghAbFrei(x,y,p){const m=170;if(x<m||y<m||x>WORLD-m||y>WORLD-m)return false;
+ try{if(G.blkG&&blkPunkt(x,y,40))return false;if(G.wlLoG&&typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,40))return false}catch(e){}
+ const K=G.ka;if(K&&K.an&&K.M&&K.Z){const n=K.n,i=Math.floor(x/K.Z),j=Math.floor(y/K.Z);if(i<1||j<1||i>=n-1||j>=n-1)return false;const c=j*n+i;if(K.M[c]||(K.lo&&K.lo[c]))return false}
+ const W=G.wl;if(W&&W.an&&W.nav&&W.d0){try{const c=wlZelle(W.nav,x,y);if(W.d0[c]===65535)return false}catch(e){}}
+ const s=(K&&K.an&&K.start)||{x:WORLD/2,y:WORLD/2};if(Math.hypot(x-s.x,y-s.y)<300)return false;
+ for(const o of G.props){if(o===p||o.dead||o.k==='blk')continue;const dx=o.x-x,dy=o.y-y;if(dx*dx+dy*dy<90*90)return false}
+ return true}
+/* Nähe zu Fels/Busch/Wand: kleiner Bonus (am Wegrand, im Gebüsch, an Felsen) */
+function ghAbDeckung(x,y){try{if(G.blkG&&blkPunkt(x,y,120))return 1;if(G.wlLoG&&typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,120))return 1;const K=G.ka;if(K&&K.an&&K.md&&K.Z){const c=Math.floor(y/K.Z)*K.n+Math.floor(x/K.Z);if(K.md[c]!=null&&K.md[c]<=2)return 1}}catch(e){}return 0}
+function ghAbPlatz(p,W,min){let best=null,bs=-1e9;
+ for(let ring=0;ring<9;ring++){const r=110+ring*70;for(let k=0;k<20;k++){const a=k/20*TAU+ring*0.37+Math.random()*0.3,x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r;
+   const d=ghAbAbst(x,y,W);if(d<min)continue;if(!ghAbFrei(x,y,p))continue;
+   const s=-r*0.35-Math.max(0,d-min-GHAB.band)*1.2+ghAbDeckung(x,y)*90+Math.random()*20;if(s>bs){bs=s;best={x,y}}}
+  if(best&&ring>=2)break}
+ return best}
+function ghAbseits(){if(!GHAB.an||G.room||G.netGuestRun||G.state==='title')return 0;const W=ghAbWege();if(!W.length)return 0;let n=0;
+ for(const p of G.props){if(p.dead||p.used)continue;const art=p.k==='secret'?1:p.k==='gh_ort'?2:0;if(!art)continue;const min=(p.r||28)+GHAB.rand;
+  if(ghAbAbst(p.x,p.y,W)>=min)continue;GHAB.st.v++;
+  let q=ghAbPlatz(p,W,min);if(!q)q=ghAbPlatz(p,W,min*0.75);if(!q){GHAB.st.fail++;continue}
+  const dx=Math.round(q.x)-p.x,dy=Math.round(q.y)-p.y;p.x+=dx;p.y+=dy;if(art===2){const D=ghDef(p);if(D&&D.auf&&D.auf.k==='schalter'){p.w+=dx;p.h+=dy}}n++;GHAB.st.n++}
+ return n}
+/* nach dem Aufbau der Stufe (äußerste Hülle, geheim ist der letzte Patch) und zur Sicherheit einmal beim ersten Bild der Stufe */
+{const ss=setupStage;setupStage=function(i){const r=ss.apply(this,arguments);try{ghAbseits();GH.abS=-1}catch(e){ghErr(e)}return r}}
+function ghAbseitsTick(){if(GH.abS===G.stage&&GH.abR===G.runId)return;if(G.room||G.netGuestRun||G.state!=='play')return;GH.abS=G.stage;GH.abR=G.runId;try{ghAbseits()}catch(e){ghErr(e)}}
 
 /* ================= Zeichnen: Hinweise und Eingänge in der Stufe =================
    Statische Teile vorgezeichnet (Canvas, doppelte Auflösung), je Bild nur drawImage plus wenige Bögen/Linien. */
@@ -35264,7 +35298,7 @@ function ghSeiteHtml(){const M=ghMem(),Z=ghZaehl(M),mo=ghMond();const nM=GH_MOM_
  h+=`</div><h4>Titel</h4>`;if(!M.tt.length)h+=`<p class="muted">Titel gibt es für geheime Gegner, das verborgene Kapitel und für Sammler.</p>`;else{const hid=G.sel||'barradin';h+=`<p class="muted" style="margin:0 0 6px">Titel für <b>${esc(ghHN(hid))}</b> (erscheint auf der Heldenkarte):</p><div class="chips ghTi"><button type="button" class="chip ${!M.t[hid]?'on':''}" data-ghti="">Kein Titel</button>${M.tt.map(t=>`<button type="button" class="chip ${M.t[hid]===t?'on':''}" data-ghti="${t}" title="${esc(GH_TITEL[t].d)}">${esc(GH_TITEL[t].n)}</button>`).join('')}</div>`}
  return h+'</div>'}
 (()=>{const st=document.createElement('style');st.textContent=`
-.ghSeite h4{font:400 17px "IM Fell English SC",Georgia,serif;color:#e8c060;margin:14px 0 6px}.ghSeite .ghKopf{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between}.ghSprung{display:flex;flex-wrap:wrap;margin:2px 0 4px}.ghSprung .chip{margin:0 6px 6px 0;padding:4px 10px;font-size:12px}.ghSeite .ghKopf>*{margin:0 12px 6px 0}
+.ghSeite h4{font:400 17px "IM Fell English SC",Georgia,serif;color:#e8c060;margin:14px 0 6px}.ghSeite .ghKopf{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between}.ghSprung{display:flex;flex-wrap:wrap;margin:2px 0 4px}.ghSprung .chip{flex:1 1 0;margin:0 6px 6px 0;padding:4px 10px;font-size:12px;text-align:center}.ghSprung .chip:last-child{margin-right:0}.ghSeite .ghKopf>*{margin:0 12px 6px 0}
 .ghSeite .ghZ{flex:1 1 260px;font-size:14px}.ghSeite .ghZ>b{font:400 26px "IM Fell English SC",Georgia,serif;color:#d8b4ff}.ghSeite .ghBar{height:7px;border-radius:4px;background:rgba(255,255,255,.08);margin:4px 0;overflow:hidden}.ghSeite .ghBar i{display:block;height:100%;background:linear-gradient(90deg,#8e3328,#e8c060,#d8b4ff)}
 .ghSeite .ghMond{display:flex;align-items:center;font-size:13px}.ghSeite .ghMond canvas{margin-right:8px}.ghSeite .ghMond canvas{width:56px;height:56px}
 .ghSeite .ghKarteCv{width:100%;height:auto;border-radius:8px;display:block}.ghSeite .ghTroph{width:100%;height:auto;display:block}
@@ -35349,7 +35383,7 @@ function ghChronik(){const R=G.gh;if(!R||R.run!==G.runId)return;const CH=window.
 {const rs=rlStartHtml;rlStartHtml=function(){let h=rs.apply(this,arguments);try{const M=SAVE.geheim;if(h&&M&&M.kap>=1&&h.indexOf('value="9"')>=0&&h.indexOf('value="109"')<0){h=h.replace('</select>',`<option value="109" ${G.rlStart===109?'selected':''}>✦ Verborgenes Kapitel · ${esc(GH_KAP.n)}</option></select>`)}}catch(e){}return h}}
 {const sr=startRun;startRun=function(id,diff,mode,opt){try{if(opt&&opt.start>=100){opt.start-=100;GHW.force='kreide';G.ghKapStart=1}}catch(e){}return sr.apply(this,arguments)}}
 /* ================= Takt: Logik beim Gastgeber, Anzeige überall ================= */
-{const up=update;update=function(dt){const r=up.apply(this,arguments);const t0=ghT0();try{if(!G.netGuestRun){if(G.room&&G.mode==='abstieg'&&ghRaumArt(G.room.type)&&G.stageTime>0)G.stageTime=Math.max(0,G.stageTime-dt);ghTick(dt);GH.hwT=(GH.hwT||0)-dt;if(GH.hwT<=0){GH.hwT=0.1;let n=0;const L=G.props;for(let i=0;i<L.length;i++){const k=L[i].k;if(k==='gh_heil'||k==='gh_ware'){n=1;break}}GH.hwDa=n}if(GH.hwDa){ghHeilTick(dt);if(!G.room)ghWareTick(dt)}}}catch(e){if(!GH.terr){GH.terr=1;ghErr(e)}}ghT1(t0,'tick');return r}}
+{const up=update;update=function(dt){const r=up.apply(this,arguments);const t0=ghT0();try{if(!G.netGuestRun){if(G.room&&G.mode==='abstieg'&&ghRaumArt(G.room.type)&&G.stageTime>0)G.stageTime=Math.max(0,G.stageTime-dt);ghAbseitsTick();ghTick(dt);GH.hwT=(GH.hwT||0)-dt;if(GH.hwT<=0){GH.hwT=0.1;let n=0;const L=G.props;for(let i=0;i<L.length;i++){const k=L[i].k;if(k==='gh_heil'||k==='gh_ware'){n=1;break}}GH.hwDa=n}if(GH.hwDa){ghHeilTick(dt);if(!G.room)ghWareTick(dt)}}}catch(e){if(!GH.terr){GH.terr=1;ghErr(e)}}ghT1(t0,'tick');return r}}
 {const rd=render;render=function(dt){const r=rd.apply(this,arguments);const t0=ghT0();try{ghKarteTakt();if(G.netGuestRun)ghGastSync();if(G.state==='play')ghHinweisTon(dt||0.016)}catch(e){if(!GH.rerr){GH.rerr=1;ghErr(e)}}ghT1(t0,'frame');return r}}
 /* Gast: Funde aus dem Lauf werden auch beim Wechsel ins Menü übernommen */
 {const gr=netGuestReset;netGuestReset=function(){try{ghGastSync()}catch(e){}return gr.apply(this,arguments)}}
@@ -35357,7 +35391,7 @@ function ghChronik(){const R=G.gh;if(!R||R.run!==G.runId)return;const CH=window.
 /* ================= Test-/Mess-Schnittstelle ================= */
 function ghTestOrt(id,dx,dy){const R=ghRun();const p=ghProp(hasK(GH_ORT,id)||hasK(GH_TOR,id)?id:'eiche',{x:P.x+(dx===undefined?0:dx),y:P.y+(dy===undefined?140:dy)});R.orte[id]=1;return p}
 Object.assign(GHW,{GH,GH_ORT,GH_TOR,GH_BOSS,GH_GER,GH_MOM,GH_U,GH_TITEL,GH_BDEF,GH_KAPTXT,GHO,ghMem,ghRun,ghMond,ghBild,ghBossBild,ghMomBild,ghEinzelIcon,ghSeiteHtml,ghSeiteMalen,ghZaehl,ghKarteInhalt,ghChronikSatz,ghArtSpr,ghBodenSpr,ghMachEinzel,
- zeig(id,dx,dy){return ghTestOrt(id,dx,dy)},
+ zeig(id,dx,dy){return ghTestOrt(id,dx,dy)},abseits(){return ghAbseits()},abPruef(x,y){let u=0;try{const W=G.wl;if(W&&W.an&&W.nav&&W.d0)u=W.d0[wlZelle(W.nav,x,y)]===65535?1:0}catch(e){}return{blk:!!(G.blkG&&blkPunkt(x,y,20)),unerr:u,rand:x<150||y<150||x>WORLD-150||y>WORLD-150}},abAbst(x,y){return ghAbAbst(x,y,ghAbWege())},GHAB,
  auf(id,dx,dy){const p=ghTestOrt(id,dx,dy);ghAuf(p,P);return p},
  kammer(id){const p=ghTestOrt(id,0,0);p.found=1;ghBetreten(p);return G.ghR},
  boss(b){const tor=b==='mond'?'mondpfad':b==='spinne'?'idol':b==='esse'?'siegel':null;if(b==='weberin'){GHW.kapitel(3);return G.ghR}const p=ghTestOrt(tor,0,0);p.found=1;ghBetreten(p);return G.ghR},
@@ -35391,7 +35425,7 @@ Object.assign(GHW,{GH,GH_ORT,GH_TOR,GH_BOSS,GH_GER,GH_MOM,GH_U,GH_TITEL,GH_BDEF,
       (alles schon gespiegelt), Klänge über sfx (vom Gastgeber weitergereicht).
    Kein Freeze-Frame/Hitstop/Zeitlupe, kein Math.random (eigener Zufall – der Tagesmodus bleibt gleich), keine Allokationen je Bild
    in Takt und Zeichnung (feste Felder, vorgezeichnete Bilder). */
-window.__hsZIELE={v:1};
+window.__hsZIELE={v:2};
 (()=>{try{
 const ZW=window.__hsZIELE;
 const ZL={err:[],ms:0,mess:0,run:null,tok:0,rid:null,st:{fund:0,auf:0,fail:0,wp:0,hud:0,toast:0,ende:0},hud:null,hudK:'',hudT:0,
@@ -36291,9 +36325,20 @@ function zlHudTakt(){const el=zlHudEl();if(!el)return;const B=G.state==='play'&&
  const n=el.querySelector('.zlHn');if(off&&!kl&&ZL.wocheHinweis>now){try{const Wk=zlWoche();n.innerHTML=`<span class="zlHnw">Woche: <b>${zEsc(WK[Wk.i].n)}</b> ${Wk.d?'✓':fmt(Wk.p)+'/'+fmt(zlWocheZiel(Wk))}</span>`;n.hidden=false}catch(e){n.hidden=true}}else n.hidden=true;
  zlHudLage(el)}
 /* Lage: unter der oberen Leiste links; weicht dem Erzähler-Untertitel aus und klappt zu, wenn die Höhe bis zum Rand-Feed nicht reicht */
-function zlHudLage(el){const now=performance.now();if(now-(ZL.lageT||0)<(ZL.lageK===ZL.hudK?1500:120))return;ZL.lageT=now;ZL.lageK=ZL.hudK;const top=document.querySelector('#hud .top');if(!top)return;const r=top.getBoundingClientRect();
- let hz=1;try{hz=parseFloat(getComputedStyle(el).zoom)||1}catch(e){}const T=Math.round(r.bottom/hz+6),Lf=Math.round(r.left/hz);if(el._zt!==T){el._zt=T;el.style.top=T+'px'}if(el._zl!==Lf){el._zl=Lf;el.style.left=Lf+'px'}
- const er=el.getBoundingClientRect();const u=document.querySelector('.erzSub.an');let weg=false;if(u&&!u.classList.contains('pz')){const ur=u.getBoundingClientRect();weg=ur.width>0&&ur.left<er.right&&ur.right>er.left&&ur.top<er.bottom&&ur.bottom>er.top}
+/* Gezeichnete Anzeigen oben links (Leinwand, kein DOM): Statuspillen (drawPills, ab PILLTOP) und Leistungsanzeige (drawPerf).
+   Die Pillen-Unterkante wird beim Zeichnen mitgeschrieben (Rechtecke während drawPills), die Leistungsanzeige aus ihren festen Maßen. */
+const ZPL={on:0,max:0,b:0,t:0};
+(()=>{try{const c=CanvasRenderingContext2D.prototype;for(const m of['roundRect','rect']){const f=c[m];if(typeof f!=='function')continue;c[m]=function(x,y,w,h){if(ZPL.on)try{const t=this.getTransform?this.getTransform():null,d=typeof DPR==='number'&&DPR>0?DPR:1;const yy=t?((y+h)*t.d+t.f)/d:y+h;if(yy>ZPL.max&&yy<innerHeight*0.9)ZPL.max=yy}catch(e){}return f.apply(this,arguments)}}}catch(e){zlErr(e)}})();
+if(typeof drawPills==='function'){const dp=drawPills;drawPills=function(){ZPL.on=1;ZPL.max=0;try{return dp.apply(this,arguments)}finally{ZPL.on=0;let k=1;try{k=txtHz()}catch(e){}const top=typeof PILLTOP==='number'?PILLTOP:0;const ob=ZPL.b;if(ZPL.max>0){ZPL.b=Math.ceil(ZPL.max);ZPL.t=performance.now();ZPL.z=0}else ZPL.z=(ZPL.z|0)+1;if(ZPL.b!==ob&&!G.bot)try{const el=document.getElementById('zlHud');if(el&&!el.hidden){ZL.lageT=0;zlHudLage(el)}}catch(e){}}}}
+function zlLinksUnten(){let b=0;try{if(ZPL.b&&(performance.now()-ZPL.t<1600||(ZPL.z|0)<4))b=ZPL.b;if(SAVE.perf&&typeof PERF!=='undefined'&&PERF){const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;b=Math.max(b,y0+(4+(typeof SWR!=='undefined'&&SWR?1:0))*15+8)}}catch(e){}return b}
+function zlHudLage(el){const now=performance.now();let lu=zlLinksUnten();let fs='';try{const F=document.getElementById('feed'),q2=document.getElementById('qa2lane');fs=(document.querySelector('.erzSub.an:not(.pz)')?1:0)+'|'+(document.querySelector('.tutk.ein')?1:0)+'|'+(F?F.children.length:0)+'|'+(q2?q2.children.length:0)+'|'+document.querySelectorAll('#toast>*').length}catch(e){}const lk=lu+'|'+fs;if(now-(ZL.lageT||0)<(ZL.lageK===ZL.hudK&&ZL.lageU===lk?(innerHeight<560?500:1500):120))return;ZL.lageT=now;ZL.lageK=ZL.hudK;ZL.lageU=lk;const top=document.querySelector('#hud .top');if(!top)return;const r=top.getBoundingClientRect();
+ let hz=1;try{hz=parseFloat(getComputedStyle(el).zoom)||1}catch(e){}const T=Math.round(Math.max(r.bottom+6,lu?lu+6:0)/hz),Lf=Math.round(r.left/hz);if(el._zt!==T){el._zt=T;el.style.top=T+'px'}if(el._zl!==Lf){el._zl=Lf;el.style.left=Lf+'px'}
+ /* Platz nach unten: Zeilen, die in den Erzähler-Untertitel, Randmeldungen oder die Einführung ragen würden, werden ausgeblendet */
+ const zs=el.querySelectorAll('.zlHz,.zlHn');for(const x of zs)if(x._zlAus){x.style.display='';x._zlAus=0}
+ let er=el.getBoundingClientRect();let lim=innerHeight-4;const hin=sel=>{for(const x of document.querySelectorAll(sel)){const r=x.getBoundingClientRect();if(!r.width||!r.height||r.right<=er.left||r.left>=er.right||r.bottom<=er.top+30)continue;const st=getComputedStyle(x);if(st.visibility==='hidden'||+st.opacity<0.05)continue;lim=Math.min(lim,r.top-4)}};
+ hin('.erzSub.an:not(.pz)');hin('#feed>*');hin('.tutk.ein');hin('#qa2lane>*');hin('#toast>*');
+ if(er.bottom>lim){for(let i=zs.length-1;i>=0;i--){const x=zs[i];if(x.style.display==='none')continue;x.style.display='none';x._zlAus=1;er=el.getBoundingClientRect();if(er.bottom<=lim)break}}
+ er=el.getBoundingClientRect();let weg=er.bottom>lim+1;
  el.classList.toggle('zlWeg',weg);let feedAn=false;if(innerHeight<560&&el.classList.contains('offen'))try{const F=document.getElementById('feed');feedAn=!!(F&&F.children.length&&getComputedStyle(F).opacity!=='0'&&getComputedStyle(F).display!=='none')}catch(e){}
  const feedTop=innerHeight*0.46;el.classList.toggle('eng',feedAn&&er.bottom>feedTop-4&&el.classList.contains('offen')&&innerHeight<560)}
 addEventListener('resize',()=>{ZL.hudK='';ZL.lageT=0});
@@ -36438,8 +36483,364 @@ Object.assign(ZW,{ZT,ZT_IDS,WPD,WP_IDS,WK,ZK:Object.keys(ZK),zlS,zlFix,zlNeuerLa
  zlWpGeben,zlWpNimm,wpAdd,zlWpCast,zlWpHit,zlWpKill,zlWpRoll,zlWpHurt,zlWpTakt,zlShoot,wpHas,wpN,zlWpIco,zlRender,zlWav,zlWoche,zlWocheZiel,zlWochePlus,zlGelegenheit,zlVorrat,zlOrtNeu,zlHudTakt,zlRanke,zlKlon,
  lauf:()=>ZL.run,ziehe:(n,tr,o)=>{const c=zKtx();const out=[];for(let i=0;i<n;i++){const g=zZiehe(c,tr|0,!!o,[]);if(g)out.push(g)}return out},
  setze:(L)=>{const R=ZL.run;if(!R)return;R.L=L.map(x=>Object.assign({n:0,st:0,v:0,x:0,y:0,o:false,g:0},x));zSync();zFlush()},
- bot:(z,w)=>{ZL.botZiele=!!z;ZL.botWp=!!w},stat:()=>Object.assign({},ZL.st),err:()=>ZL.err.slice()});
+ lage:()=>{const n=performance.now();return{b:ZPL.b,alt:Math.round(n-ZPL.t),z:ZPL.z|0,lu:zlLinksUnten(),U:ZL.lageU,seit:Math.round(n-(ZL.lageT||0)),top:(document.getElementById('zlHud')||{}).style.top}},pillen:()=>ZPL.b&&performance.now()-ZPL.t<1600?ZPL.b:0,bot:(z,w)=>{ZL.botZiele=!!z;ZL.botWp=!!w},stat:()=>Object.assign({},ZL.st),err:()=>ZL.err.slice()});
 }catch(e){console.error('ziele',e);window.__hsZIELE.err=String(e&&e.message||e)}})();
+
+/* ================= Paket „fov“: Sichtschatten nur hinter Hindernissen, die man auch sieht – window.__hsFOV =================
+   Fehlerbild: ein dunkler Sichtschatten-Keil (fsKeile) beginnt mitten im Gelände, ohne dass dort etwas gezeichnet ist.
+   Ursache: Hindernisse liegen in G.blk (werfen Schatten, blockieren), haben aber kein Zeichen-Prop {k:'blk'} in G.props.
+   blkProps() legt diese Props nur einmal je Stufe an (wlNachSetup); was danach in G.blk landet, bleibt unsichtbar:
+   Lager an Toren (kaBevoelkern, t.los==='lager') setzen neben ihr Lagerfeuer zwei Zelte (k:'zelt', blickdicht) – erst NACH
+   blkProps. Die Zelte waren unsichtbar, warfen aber Schatten und blockierten (unsichtbares Hindernis). Online-Gäste spiegeln
+   G.props (samt b) vom Gastgeber und G.blk aus dem Stufenpaket – sie sahen dieselben Keile ohne Zelt.
+   Umgekehrt (gleiche Ursache): ktStartFrei entfernt Deko-Hindernisse am Startplatz nur aus G.blk – ihr Bild blieb stehen
+   (sichtbar, aber begehbar, ohne Schatten).
+   Lösung (Gastgeber/allein): G.blk und die blk-Props werden abgeglichen, sobald sich etwas ändert (je Bild nur ein
+   Signaturvergleich): fehlende Props über blkProps() selbst ergänzen (gleiche Filter wie beim Stufenbau – Kartenmassen und
+   Tore zeichnen sich selbst), Props ohne Hindernis entfernen. Gäste bekommen die Props wie bisher vom Gastgeber.
+   Ultra: das zwischengespeicherte Schattenbild (jedes 2. Bild nur verschoben) wird verworfen, wenn sich G.blk geändert hat oder
+   im vorigen Bild kein Schatten gezeichnet wurde (kein veralteter Keil für ein Bild nach Torwechsel oder geschlossenem Menü). */
+(function(){try{window.__hsFOV={v:1};
+const FOVS={sig:[null,-1,-1,-1,-1],bs:[null,-1,-1,-1],n:0,k:0,rc:0,f:0,fz:-9};
+{const f=blkRaster;blkRaster=function(){FOVS.rc++;return f.apply(this,arguments)}}
+function fovGast(){return (typeof NET!=='undefined'&&NET.role==='guest')||!!G.netGuestRun}
+/* Signatur: G.blk (Array + Länge), Zahl der blkRaster-Aufrufe, G.blkV und die Länge von G.props.
+   Nicht die Identität von G.props – die wird jedes Bild neu gefiltert (tote Props); die Länge ändert sich nur, wenn etwas wegfällt. */
+function fovSyncNoetig(){const B=G.blk,Pp=G.props,s=FOVS.sig;
+ return !(s[0]===B&&s[1]===(B?B.length:-1)&&s[2]===FOVS.rc&&s[3]===(Pp?Pp.length:-1)&&s[4]===(G.blkV||0))}
+function fovSync(){FOVS.k++;const B=G.blk,Pp=G.props;if(!Array.isArray(B)||!Array.isArray(Pp)){FOVS.sig=[B,-1,FOVS.rc,-1,G.blkV||0];return 0}
+ const da=new Set();let weg=0;for(const p of Pp)if(p&&p.k==='blk'&&p.b)da.add(p.b);
+ const inB=new Set(B);for(const b of da)if(!inB.has(b))weg++;
+ if(weg)G.props=Pp.filter(p=>!(p&&p.k==='blk'&&p.b&&!inB.has(p.b)));
+ const fehlt=[];for(const b of B)if(b&&!da.has(b)&&!b.arGeist&&!b.kaRes)fehlt.push(b);
+ let neu=0;if(fehlt.length){const n0=G.props.length;G.blk=fehlt;try{blkProps()}finally{G.blk=B}neu=G.props.length-n0}
+ if(weg||neu)FOVS.n++;FOVS.sig=[G.blk,G.blk.length,FOVS.rc,G.props.length,G.blkV||0];return weg+neu}
+/* Ultra-Schattenbild verwerfen, sobald sich die Hindernisse ändern (auch Tore, auch beim Gast) */
+function fovBlkNeu(){const B=G.blk,s=FOVS.bs;if(s[0]===B&&s[1]===(B?B.length:-1)&&s[2]===FOVS.rc&&s[3]===(G.blkV||0))return false;FOVS.bs=[B,B?B.length:-1,FOVS.rc,G.blkV||0];return true}
+function fovPruef(){try{if(!fovGast()&&fovSyncNoetig())fovSync();if(fovBlkNeu()){try{if(typeof UL!=='undefined')UL.fsC=null}catch(e){}}}catch(e){if(!FOVS.err){FOVS.err=1;console.warn('fov sync',e)}}}
+/* je Bild vor dem Zeichnen prüfen (billig: nur Vergleich), und direkt nach dem Stufenbau */
+{const f=render;render=function(){FOVS.f++;if(G.ground&&P)fovPruef();return f.apply(this,arguments)}}
+{const f=setupStage;setupStage=function(){const r=f.apply(this,arguments);try{if(!fovGast())fovSync()}catch(e){}return r}}
+/* Ultra: altes Schattenbild nur weiterverwenden, wenn im vorigen Bild auch Schatten gezeichnet wurden (nicht nach Menü, Raum, Pause) */
+try{if(typeof fsZeichne==='function'&&typeof UL!=='undefined'){const f=fsZeichne;fsZeichne=function(){if(FOVS.fz!==FOVS.f&&FOVS.fz!==FOVS.f-1)UL.fsC=null;FOVS.fz=FOVS.f;return f.apply(this,arguments)}}}catch(e){}
+window.__fovT={sync:fovSync,st:()=>({n:FOVS.n,k:FOVS.k,rc:FOVS.rc})};
+}catch(e){console.error('fov',e);window.__hsFOV.err=String(e&&e.message||e)}})();
+
+/* ================= Paket „beute“: Legendäres und Set-Teile wieder selten – window.__hsBEUTE =================
+   Läuft als letztes Paket (vor dem Start-Anker) und umhüllt nur: rollRarity, randomItem, makeItem, dropItem, killEnemy, propTouch2, update.
+   Ursache vorher: „reiche“ Truhen (rich ≥ 2: Karten-Bonus nach 80 % der Kills, Kopfgeld, Verstecke, NPC-Aufträge, Kammern, Räume)
+   gaben über min(4,2+rich) jedes Mal ein garantiertes Legendäres – fast eins pro Stufe. Dazu Aushänge, Rache-Lohn, Pakt, Gericht usw.
+   Jetzt:
+   1. Fortschritts-Rampe: Legendär-Gewicht, kleine Chancen und Set-Teile wachsen mit der Stufe (früh sehr selten, ab Stufe 4 voll).
+   2. Jede „garantiert legendär“-Quelle wird zu „Episch, mit kleiner Chance auf Legendär“. Ausnahmen: Erzfeind-Trophäe (3. Begegnung),
+      Einzelstück geheimer Bosse und des verborgenen Kapitels, Käufe (Händler – dafür teurer), Schmied im Lager, Endspiel ab Götterdämmerung.
+   3. Set-Teile aus allen Quellen nur noch mit Rampe × setF.
+   4. Pech-Schutz deutlich später (B2.pity).
+   Gäste online würfeln nichts selbst (Beute kommt vom Gastgeber) – hier wird nur beim Gastgeber/allein gerechnet. */
+const BT={
+ ramp:[0.15,0.15,0.45,0.7,1],   /* Faktor je Fortschritt (Stufe 0,1,2,3,4+): auf Legendär-Gewicht, kleine Chancen, Set-Teile, Boss-Zusatzchance */
+ legW:0.6,                      /* Legendär-Gewicht bei voller Rampe (bal2: 0.42 ohne Rampe) */
+ klein:0.12,                    /* kleine Chance auf Legendär bei ehemals garantierten Quellen (× Rampe × Dämpfung je Stufe) */
+ setF:1,                        /* Anteil der Set-Teile, die bei voller Rampe bleiben (zusätzlich zu bal2 setKeep) */
+ bossLeg:0.05,                  /* bal2-Zusatzchance beim Boss, jetzt × Rampe */
+ pity:260,                      /* Pech-Schutz: Würfe ohne Legendäres (vorher 150) */
+ kaufF:1.6,                     /* Preisaufschlag für legendäre Waren und Einzelstücke beim Händler */
+ tagVor:2,                      /* Tagesmodus: nur vier, dafür schwere Stufen – Rampe beginnt zwei Stufen weiter */
+ endAb:4                        /* ab dieser Schwierigkeit (Götterdämmerung) gelten die alten Regeln */
+};
+const BTS={klein:0,kleinN:0,setWeg:0,setN:0,erlaubt:0,einzel:0,kauf:0};
+const btAus=()=>!G||G.netGuestRun||(G.diff|0)>=BT.endAb;
+function btProg(){if(!G)return 0;let p=G.stage|0;if(G.mode==='taeglich')p+=BT.tagVor;return Math.max(0,p)}
+function btRamp(){const R=BT.ramp;return R[Math.min(R.length-1,btProg())]}
+function btKlein(){let d=1;try{d=legDaempf()}catch(e){}return BT.klein*btRamp()*d*RLDROP()}
+function btStack(){const l=Error.stackTraceLimit;Error.stackTraceLimit=30;try{return new Error().stack||''}finally{Error.stackTraceLimit=l}}
+function btLegZaehl(){try{if(!G.bot)beuteB().leg++}catch(e){}}
+B2.pity=BT.pity;
+/* 1. Legendär-Gewicht mit Rampe (bal2 liest B2.legW bei jedem Wurf) */
+{const rr=rollRarity;rollRarity=function(){if(btAus())return rr.apply(this,arguments);const w=B2.legW;B2.legW=BT.legW*btRamp();try{return rr.apply(this,arguments)}finally{B2.legW=w}}}
+/* Zusammenhang für die Ausnahmen */
+const BTK={lf:0,kauf:0};
+{const ke=killEnemy;killEnemy=function(e){if(!e||e.dead||btAus())return ke.apply(this,arguments);const lf=BTK.lf,bl=B2.bossLeg;BTK.lf=e.lfF?1:0;B2.bossLeg=BT.bossLeg*btRamp();
+  try{return ke.apply(this,arguments)}finally{BTK.lf=lf;B2.bossLeg=bl}}}
+{const pt=propTouch2;propTouch2=function(p){const k=BTK.kauf;BTK.kauf=p&&p.k==='ware'?1:0;try{return pt.apply(this,arguments)}finally{BTK.kauf=k}}}
+function btErlaubt(st){
+ if(G.b2LegOk)return 1;                                          /* bal2-Zusatzchance beim Boss (schon eine Chance, mit Rampe) */
+ if(BTK.kauf||st.indexOf('ghWareTick')>=0)return 1;               /* Kauf beim Händler – bewusste Ausgabe */
+ if(BTK.lf&&st.indexOf('hookRun')>=0&&!/lfRacheLohn|zlLohn|openChest|ghLoese/.test(st))return 1; /* Erzfeind-Trophäe beim endgültigen Sieg */
+ return 0}
+/* 2. „Garantiert legendär“ → Episch, mit kleiner Chance auf Legendär. Gold-Aushang (Episch oder Legendär) gilt genauso. */
+{const ri=randomItem;randomItem=function(il,bonus,minR){if(btAus()||!(minR>=3))return ri.apply(this,arguments);
+  const st=minR>=4||minR===3?btStack():'';const aus=st.indexOf('zlLohn')>=0;
+  if(minR>=4||aus){if(minR>=4&&btErlaubt(st)){BTS.erlaubt++;const o=G.b2LegOk;G.b2LegOk=1;try{const it=ri.call(this,il,bonus,minR);if(it&&typeof it==='object')it.b2ok=1;return it}finally{G.b2LegOk=o}}
+   BTS.kleinN++;if(Math.random()<btKlein()){BTS.klein++;const o=G.b2LegOk;G.b2LegOk=1;try{const it=ri.call(this,il,bonus,4);if(it&&typeof it==='object')it.b2ok=1;btLegZaehl();return it}finally{G.b2LegOk=o}}
+   return ri.call(this,il,bonus,3)}
+  return ri.apply(this,arguments)}}
+/* Einzelstücke (geheim): nur geheime Bosse und das verborgene Kapitel behalten Legendär; sonst Episch mit kleiner Chance (eine Entscheidung je Fund) */
+const BTE={t:-1,v:0};
+{const mk=makeItem;makeItem=function(slot,il,rar){if(rar===4&&!btAus()){const st=btStack();
+  if(st.indexOf('ghMachEinzel')>=0&&!/ghBossBesiegt|ghKapTouch|ghWareTick/.test(st)){if(BTE.t!==G.time){BTE.t=G.time;BTE.v=Math.random()<btKlein()?1:0;BTS.einzel++;if(BTE.v)btLegZaehl()}
+   if(!BTE.v){const a=Array.prototype.slice.call(arguments);a[2]=3;return mk.apply(this,a)}}}
+  return mk.apply(this,arguments)}}
+/* 3. Set-Teile: aus jeder Quelle nur noch mit Rampe × setF */
+const BTSET=new WeakSet();
+{const di=dropItem;dropItem=function(x,y,it){if(it&&it.set&&!it.b2ok&&!btAus()&&!BTSET.has(it)){BTSET.add(it);BTS.setN++;if(Math.random()>=BT.setF*btRamp()){BTS.setWeg++;return}}
+  return di.apply(this,arguments)}}
+/* 4. Händler: legendäre Waren und Einzelstücke teurer; Pakt-Altar ehrlich beschriften */
+const BTW=new WeakSet();
+function btWaren(){if(!G||!G.props||G.netGuestRun)return;for(const p of G.props){if(!p||BTW.has(p))continue;
+  if(p.k==='ware'&&p.minR>=4&&p.price){BTW.add(p);p.price=Math.round(p.price*BT.kaufF);BTS.kauf++}
+  else if(p.k==='gh_ware'&&typeof p.lab==='string'&&(p.lab==='l'||p.lab.indexOf('u:')===0)&&p.price){BTW.add(p);p.price=Math.round(p.price*BT.kaufF);BTS.kauf++}
+  else if(p.k==='altar'&&p.pakt&&typeof p.desc==='string'){BTW.add(p);p.desc=p.desc.replace('Ein legendärer Gegenstand','Ein epischer Gegenstand, mit Glück legendär')}}}
+{const up=update;let t=0;update=function(dt){const r=up.apply(this,arguments);try{if(G&&G.state==='play'&&(G.time||0)>t){t=(G.time||0)+0.25;btWaren()}if(G&&G.time<t-1)t=0}catch(e){}return r}}
+window.__hsBEUTE={v:1,BT,BTS,ramp:btRamp,prog:btProg,klein:btKlein};
+
+/* ================= Paket „bosshp“: Boss-Leben nach der tatsächlichen Stärke der Gruppe ================= */
+window.__hsBOSSHP={v:1};
+(()=>{try{
+/* Paket bosshp: Boss-Leben nach der tatsächlichen Stärke der Gruppe =====
+   Rückmeldung (live, Echo): „Der erste Boss war zu hart – nicht vom Schaden her, sondern einfach zu viel HP und deshalb langweilig.“
+   Vorher: Grundleben (Ort) bzw. Mindestleben aus Grundschaden × 32–52 s, dann Vorlauf ×1,8 (alte Bosse) bzw. ×4 (neue Bosse) und nach 4 s
+   Kampf eine einmalige Hochrechnung aus dem gemessenen Schaden (Ziel 65–70 s, bis 7,2× bzw. 12×; „klar überlegene“ Gruppen bis 9×).
+   Die 4-s-Messung schwankt stark (Eröffnungs-Fertigkeiten, Trugbilder, Begleiter): erste Bosse dauerten mit Bots 67–124 s.
+   Jetzt: Leben = Zielzeit × geschätzter Gruppenschaden pro Sekunde × Boss-Faktor, geglättet, mit Unter- und Obergrenze.
+   - Schätzung je Held aus den Werten, mit denen das Spiel selbst rechnet (computeStats/dpsOf: Stufe, Waffe, Seltenheit/Gegenstandsstufe,
+     Affixe, Talente, Set-Boni, Legendäres, Krit), ohne kurzzeitige Stärkungen (Ballade, Raserei, Gestalten …), × Heldenfaktor × Stufe/10:
+     Fertigkeiten (sk() = Schaden × Fertigkeitsschaden) wachsen mit den Talentpunkten etwa linear mit der Stufe über den Grundangriff
+     hinaus (Bot-Regression über 69 Kämpfe: Exponent 0,99; Restfehler ×1,4).
+   - Geglättet: je Held zählt das Höchste der letzten 60 s (Ausrüstung kurz vor dem Boss ablegen bringt nichts); legt jemand im Kampf
+     wieder an, was er in den letzten 3 min trug, oder kommt ein Mitspieler dazu, wächst das Leben anteilig mit – es sinkt dadurch nie.
+     Neue, bessere Beute mitten im Kampf macht den Boss nicht zäher. Stufe und Talente
+     werden beim Auftritt eingefroren (ein Stufenaufstieg mitten im Kampf macht den Boss nicht zäher). Nach 10 s Kampf eine
+     einmalige Korrektur am gemessenen Schaden: (gemessen/geschätzt)^0,75 über die Sekunden 3–13 (ohne Eröffnungs-Fertigkeiten), nach unten höchstens 0,7×, nach oben bis 2×.
+   - Unter-/Obergrenze: 0,75× bzw. 4× derselben Rechnung mit Referenz-Ausrüstung des Ortes (gleicher Held, gleiche Stufe/Talente,
+     Gegenstandsstufe der Stufe, Selten/Magisch, fest ausgewürfelt). Wer absichtlich schlecht ausgerüstet kommt, kämpft länger, nicht kürzer.
+     Täglich/Boss-Rausch geben die Ausrüstung vor: dort 0,5×. Beute bleibt unberührt.
+   - Zielzeit wächst glatt mit der Stufe: 36 s + 1,7 s je Stufenlevel: erste Bosse ~41 s, mittlere ~48–74 s, späte/Endboss ~82–94 s (gesamt über alle Phasen);
+     Hardcore ×1,12, Albtraum ×1,1, Hölle ×1,15, darüber ×1,2. Mehrspieler: Summe der Helden × Gruppenfaktor.
+   - Schaden, Ausholen, Angriffe und Phasen-Schwellen bleiben, wie sie sind (die Schadens-Anpassungen von boss3/qa4 laufen unverändert,
+     nur deren Leben-Hochrechnung wird danach auf das neue Leben zurückgesetzt). Lebens-Anteil (Balken, Phasen) bleibt bei jeder Anpassung.
+   - Nicht betroffen: Demogorgon (Überleben auf Zeit), TheAlmightyGoose und Geheimraum-Bosse (eigene Skalierung), Erzfeinde (LFF), Wächter.
+   - Gast im Online-Spiel rechnet nichts, das Leben kommt vom Gastgeber.
+   Schalter für Vergleichsmessungen: __hsBOSSHP.aus=1 (Stand vorher). */
+const BHP={T0:36,TS:1.7,Tmin:38,Tmax:100,diff:[1,1.1,1.15,1.2,1.2],hard:1.12,
+ /* Gruppenfaktor je Anzahl Helden (Kombos/geteilte Aufmerksamkeit) */mp:[1,1,1.1,1.2,1.3],
+ /* Held: Schätzung = Grund-DPS (dpsOf: Waffe, Stufe, Affixe, Talente, Sets, Krit) × Heldenfaktor × (Stufe/10)^p – die Fertigkeiten
+    (sk() = Schaden × Fertigkeitsschaden) wachsen mit Talentpunkten deutlich schneller als der Grundangriff; kalibriert mit Bots */
+ H:{barradin:2.05,echo:3.1,friedrich:3.6,ezekiel:2.3},Hx:2.5,p:1,lvMax:60,
+ /* Boss-Faktor (Unverwundbarkeit, Flugphasen, Schilde, Helfer, Ausweichen): kalibriert */
+ U:{goblinboss:1,b3worg:0.8,glasstab:0.8,b3nothic:1.25,schmiedewaechter:0.6,ilvara:1.15,wraith:0.85,riese:1.05,drokey:0.5,b3ratte:1.15,b3duergar:1,themberchaud:0.9},
+ /* Untergrenze/Obergrenze: Anteil der Referenz (gleicher Held, übliche Ausrüstung des Ortes) */fl:0.75,flModus:0.5,cap:4,
+ /* Korrektur: (gemessen/geschätzt)^0,75 über Kampfsekunde 3–13, 0,7×–2× (nach oben weiter: zu hoch geschätzte Gruppen sollen den Boss nicht wegfegen) */mess:10,mess0:3,kE:0.75,kLo:0.7,kHi:2,hist:60,histPk:180,
+ /* Bosse, deren erste 10 s den Schaden überschätzen (Wächter der Schmiede: Pylonen-Schild kommt erst danach) – dort nur nach unten korrigieren */kHiB:{schmiedewaechter:1.5},ohne:new Set(['demogorgon','almightygoose'])};
+window.__hsBOSSHP.B=BHP;
+const bhpId=d=>String(d&&d.id||'').replace(/^b_/,'');
+function bhpOk(e){if(!e||!e.boss||e.dead||window.__hsBOSSHP.aus||G.netGuestRun)return false;const d=e.def;if(!d||d.survive||d.goosePh||e.survive>0||e.roomBoss||e.ghBoss)return false;
+ const id=bhpId(d);if(BHP.ohne.has(id)||/^gh_/.test(id))return false;return true}
+/* Zielzeit nach Stufe (glatt) und Schwierigkeit */
+function bhpT(){const sl=Math.max(0,SL());let T=clamp(BHP.T0+BHP.TS*sl,BHP.Tmin,BHP.Tmax);const d=G.diff|0;T*=BHP.diff[Math.min(d,BHP.diff.length-1)]||1;if(HARD())T*=BHP.hard;return T}
+/* Werte ohne kurzzeitige Stärkungen */
+/* fz: im Kampf eingefrorene Stufe/Talente (Stufenaufstiege mitten im Bosskampf machen den Boss nicht zäher) */
+function bhpStats(q,eq,fz){try{return withP(q,()=>{const b=P.buffs,f=P.form,s=P.stealthT,n=P.bdN,lv=P.level,mz=P.mzLv,rk=P.ranks;P.buffs={};P.form=null;P.stealthT=0;P.bdN=0;if(fz){P.level=fz.lv;P.mzLv=fz.mz;P.ranks=fz.rk}
+  try{return computeStats(eq||P.eq)}finally{P.buffs=b;P.form=f;P.stealthT=s;P.bdN=n;P.level=lv;P.mzLv=mz;P.ranks=rk}})}catch(er){return q.st}}
+function bhpSchl(q){let k=q.id+'|'+q.level+'|'+(q.sp|0);for(const s in q.eq){const it=q.eq[s];if(it)k+='|'+s+it.id+'.'+(it.up|0)+'.'+(it.sock?it.sock.join(''):'')}for(const r in q.ranks||{})k+=r+q.ranks[r];for(const u in q.up||{})k+=u+q.up[u];return k}
+function bhpHeld(q,fz){if(!q||!q.st)return 0;const k=bhpSchl(q)+(fz?'#'+fz.k:'');if(q.bhpK===k&&q.bhpV)return q.bhpV;const st=bhpStats(q,null,fz)||q.st;const d=dpsOf(st),basic=Math.max(d.m,d.r);
+ const c=BHP.H[q.id]||BHP.Hx,lv=clamp((fz?fz.lv:q.level)|0,1,BHP.lvMax);const v=basic*c*Math.pow(lv/10,BHP.p);
+ q.bhpK=k;q.bhpV=v;return v}
+function bhpFrier(q){return{lv:q.level,mz:q.mzLv,rk:Object.assign({},q.ranks||{}),k:q.level+JSON.stringify(q.ranks||{})}}
+/* Glättung: Höchstwert der letzten 60 s je Held (Ablegen der Ausrüstung kurz vor dem Kampf hilft nicht) */
+function bhpMerk(q,v,fen){const t=G.time||0,L=q.bhpL||(q.bhpL=[]);if(v>0&&(!L.length||Math.abs(L[L.length-1][1]-v)>v*0.01||t-L[L.length-1][0]>5))L.push([t,v]);while(L.length&&t-L[0][0]>BHP.histPk)L.shift();if(L.length>60)L.splice(0,L.length-60);
+ let m=v;for(const x of L)if(t-x[0]<=(fen||BHP.hist)&&x[1]>m)m=x[1];return m}
+/* Gruppe: beim Auftritt Höchstwert der letzten 60 s je Held; im Kampf (B gesetzt) mit eingefrorener Stufe/Talenten und je Held höchstens
+   bis zu seinem Höchststand der letzten 3 min – das Leben holt also nur eine kurz vorher abgelegte Ausrüstung nach; wer mitten im Kampf
+   ein neues, besseres Stück anlegt, wird dafür nicht bestraft. Neu dazugekommene Mitspieler zählen voll. */
+function bhpGruppe(B){let s=0,n=0;for(const q of mpL()){if(!q||q.netGone||!q.st)continue;let v;
+  if(B){const fz=q.bhpFz||(q.bhpFz=bhpFrier(q));v=bhpHeld(q,fz);const h=B.hq&&B.hq[q.id];if(h)v=Math.min(v,Math.max(h.s,h.pk))}
+  else{v=bhpMerk(q,bhpHeld(q))}s+=v;n++}return s*(BHP.mp[Math.min(n,BHP.mp.length-1)]||1)}
+/* Referenz für Unter-/Obergrenze: derselbe Held (Stufe, Talente) mit üblicher Ausrüstung des Ortes (Gegenstandsstufe der Stufe,
+   Seltenheit Selten/Magisch, kein Legendäres), fest ausgewürfelt – unabhängig davon, was tatsächlich getragen wird */
+const BHP_REF=new Map();
+function bhpRefEq(q,il){const k=q.id+'|'+il;let eq=BHP_REF.get(k);if(eq)return eq;const r0=Math.random,id0=ITEMID;let z=(il*7919+q.id.length*104729+13)>>>0;
+ Math.random=()=>{z=(Math.imul(z,1664525)+1013904223)>>>0;return z/4294967296};
+ try{eq={};const R={weapon:2,ranged:2,helm:1,armor:1,gloves:1,ring1:1,ring2:0};for(const sl in R){const it=makeItem(sl.startsWith('ring')?'ring':sl,il,R[sl],q.id);delete it.curse;eq[sl]=it}}finally{Math.random=r0;ITEMID=id0}
+ if(BHP_REF.size>40)BHP_REF.clear();BHP_REF.set(k,eq);return eq}
+function bhpRef(q){if(!q||!q.st)return 0;const il=Math.max(1,Math.round(1+1.1*effStage())+(HARD()?2:0));const k=q.id+'|'+q.level+'|'+il+'|'+JSON.stringify(q.ranks||{});if(q.bhpRK===k)return q.bhpRV;
+ let v=0;try{const eq=bhpRefEq(q,il);const st=withP(q,()=>{const b=P.buffs,f=P.form,s=P.stealthT,n=P.bdN;P.buffs={};P.form=null;P.stealthT=0;P.bdN=0;try{return computeStats(eq)}finally{P.buffs=b;P.form=f;P.stealthT=s;P.bdN=n}});
+  const d=dpsOf(st);v=Math.max(d.m,d.r)*(BHP.H[q.id]||BHP.Hx)*Math.pow(clamp(q.level|0,1,BHP.lvMax)/10,BHP.p)}catch(er){v=bhpHeld(q)}q.bhpRK=k;q.bhpRV=v;return v}
+function bhpRefGruppe(){let s=0,n=0;for(const q of mpL()){if(!q||q.netGone||!q.st)continue;s+=bhpRef(q);n++}return s*(BHP.mp[Math.min(n,BHP.mp.length-1)]||1)}
+/* klassisches Grundleben der Stufe (wie spawnEnemy, ohne Mindestleben/Vorlauf) – nur zur Auskunft und als letzte Untergrenze */
+function bhpKlass(def){const sc=scale();return sc.hp*(def.hp||1)*(dmod('riesen')?1.5:1)*(dmod('goldrausch')?1.25:1)*wxUndead(def)*(40+SL()*1.5)}
+function bhpZiel(e,est,ref){const d=e.def,id=bhpId(d),T=bhpT(),U=BHP.U[id]||1,kl=bhpKlass(d);ref=ref||bhpRefGruppe();const mods=(dmod('riesen')?1.5:1)*(dmod('goldrausch')?1.25:1)*wxUndead(d);
+ let hp=T*est*U;const fl=(G.mode==='taeglich'||G.mode==='bossrausch')?BHP.flModus:BHP.fl;const lo=Math.max(T*ref*U*fl,kl*0.5),hi=Math.max(lo*1.5,T*ref*U*BHP.cap);hp=clamp(hp,lo,hi)*mods;if(e.swBossAf==='zaeh')hp*=1.2;return{hp,T,U,kl,est,ref}}
+function bhpSetz(e,hp){const fr=e.maxHp>0?clamp(e.hp/e.maxHp,0,1):1;e.maxHp=hp;e.hp=Math.max(1,hp*fr)}
+function bhpStart(e){if(!bhpOk(e)||e.bhp)return;const hq={};for(const q of mpL())if(q&&q.st&&!q.netGone){q.bhpFz=bhpFrier(q);const v=bhpHeld(q);hq[q.id]={s:bhpMerk(q,v),pk:bhpMerk(q,v,BHP.histPk)}}const est=bhpGruppe();if(!(est>0))return;const Z=bhpZiel(e,est);e.bhp={est,hq,T:Z.T,U:Z.U,kl:Z.kl,ref:Z.ref,hp:Z.hp,k:1,t0:null,h0:0,n:mpL().filter(q=>q&&!q.netGone&&q.st).length};bhpSetz(e,Z.hp)}
+/* im Kampf: Stärke steigt → Leben wächst anteilig; einmalige sanfte Korrektur nach 10 s */
+function bhpTakt(e){const B=e.bhp;if(!B||e.dead||!bhpOk(e))return;
+ if(B.t0===null){if(e.hp<e.maxHp-1){B.t0=G.time+BHP.mess0;B.f0=null}}
+ else if(B.f0===null){if(G.time>=B.t0)B.f0=e.hp/e.maxHp}
+ else if(!B.korr&&G.time-B.t0>=BHP.mess){B.korr=1;const lost=Math.max(0,B.f0-e.hp/e.maxHp)*e.maxHp,m=lost/Math.max(1,G.time-B.t0),soll=B.est*B.U;
+  const hiB=BHP.kHiB[bhpId(e.def)];const k=clamp(Math.pow(Math.max(0.01,m/Math.max(1,soll)),BHP.kE),BHP.kLo,hiB!==undefined?hiB:BHP.kHi);B.km=+(m/Math.max(1,soll)).toFixed(2);if(Math.abs(k-1)>0.02){B.k=k;const Z=bhpZiel(e,B.est*k,B.ref);B.hp=Z.hp;bhpSetz(e,B.hp)}}
+ if((B.nt||0)>G.time)return;B.nt=G.time+2;const est=bhpGruppe(B);if(est>B.est*1.03){B.est=est;const n=mpL().filter(q=>q&&!q.netGone&&q.st).length;if(n!==B.n){B.n=n;B.ref=Math.max(B.ref||0,bhpRefGruppe())}const Z=bhpZiel(e,est*B.k,B.ref);if(Z.hp>B.hp){B.hp=Z.hp;bhpSetz(e,B.hp)}}}
+/* Leben-Hochrechnungen von boss3/qa4 (einmalig nach 4 s): Schaden-Anteil bleibt, Leben zurück auf den eigenen Wert */
+function bhpZurueck(e){try{if(e&&e.bhp&&!e.dead&&Math.abs(e.maxHp-e.bhp.hp)>1)bhpSetz(e,e.bhp.hp)}catch(er){}}
+try{const f=b3Skal;b3Skal=function(e){const r=f.apply(this,arguments);bhpZurueck(e);return r}}catch(e){}
+try{const f=q4Skal;q4Skal=function(e){const r=f.apply(this,arguments);bhpZurueck(e);return r}}catch(e){}
+{const sb=spawnBoss;spawnBoss=function(){const vor=G.boss;const r=sb.apply(this,arguments);try{const e=G.boss;if(e&&e!==vor)bhpStart(e)}catch(er){console.warn('bosshp',er)}return r}}
+{const ba=bossAI;bossAI=function(e,dt){const r=ba.apply(this,arguments);try{if(e&&e.bhp)bhpTakt(e)}catch(er){}return r}}
+window.__hsBOSSHP.info=e=>e&&e.bhp?{est:Math.round(e.bhp.est),T:+e.bhp.T.toFixed(1),U:e.bhp.U,kl:Math.round(e.bhp.kl),hp:Math.round(e.bhp.hp),k:e.bhp.k,km:e.bhp.km,ref:Math.round(e.bhp.ref||0)}:null;
+window.__hsBOSSHP.held=q=>bhpHeld(q||P);window.__hsBOSSHP.T=bhpT;
+/* Merkliste je Held auch vor dem Kampf füllen: bei jeder Neuberechnung der Werte (Ausrüstung, Stufe, Talente) */
+{const rc=recalc;recalc=function(){const r=rc.apply(this,arguments);try{if(!G.netGuestRun&&P&&P.st&&(G.state==='play'||G.state==='between'))bhpMerk(P,bhpHeld(P))}catch(er){}return r}}
+}catch(e){console.error('bosshp',e);window.__hsBOSSHP.err=String(e&&e.stack||e)}})();
+/* ================= Paket „ctl“: Controller-Menüs ohne Aufblitzen, flüssiger Talentbaum (window.__hsCTL) =================
+   1) Menü per Controller öffnen: im ersten Bild stand oft noch die Maus-/Desktop-Fassung – „Weiter“/„☰ Menü“ in der Kopfzeile,
+      Reiterleiste in voller Breite, keine Controller-Hilfe im Talentbaum, kein Fokusrahmen. Erst ein bis drei Bilder später kamen
+      der einheitliche Zurück-Knopf oben rechts mit „B“ (fzkLauf hing an MutationObserver → requestAnimationFrame), die
+      Controller-Hilfe der Sternkarte (spkHelp lief nur in padMenu, also im nächsten Bild), der Fokus (padMenu, nächstes Bild)
+      und ~40 ms später ein zweites Einpassen (MF.mo → setTimeout 40), weil der Zurück-Knopf die Kopfzeile verändert hatte.
+      Jetzt läuft das alles noch vor dem ersten Malen: ein eigener MutationObserver auf #scr (Mikroaufgabe, also im selben Bild)
+      ruft bei neuem Fensterinhalt fzkLauf, spkHelp, ggf. das ausstehende Nach-Einpassen und die Fokussuche auf.
+      Betrifft alle Fenster in #scr (Pause, Beutel, Talente, Truhe, Lager, Einstellungen, Karten, Händler …), auch mit der Maus.
+   2) Talentbaum (Sternbild) flüssig:
+      a) Jede Sternwahl (Steuerkreuz, Stick, Klick), jedes Lernen baute den ganzen Bildschirm neu (showScreen → ~60 Sterne,
+         ~100 Linien, Beschriftungen, Detailfeld) und passte ihn 2–3× ein (menuFit in showScreen, danach Dekorationen →
+         MF.mo → nach 40 ms noch einmal; stFxFit mit vielen erzwungenen Layouts). Jetzt: ist der Baum schon zu sehen, wird der
+         neue Inhalt in den vorhandenen DOM eingearbeitet (gleiche Knoten bleiben, nur Geändertes wird angefasst), und
+         eingepasst wird genau einmal – nach allen Dekorationen, noch im selben Bild.
+      b) Hinter dem (zu 96 % deckenden) Talentbaum wurde die pausierte Spielwelt jedes Bild neu gezeichnet und hochgeladen.
+         Jetzt höchstens 1×/s (wie es perf für Handhelds schon bei allen Menüs macht).
+      c) spkHelp las in jedem Bild clientHeight (erzwungenes Layout) und suchte die Hilfe im DOM – jetzt nur bei Änderungen.
+   Nur Laufzeit-Hüllen und CSS. Test-/Notschalter: ?ctlaus (alles aus), window.__hsCTL.aus={sofort:1,morph:1,fit:1,render:1}. */
+window.__hsCTL={v:1};
+(()=>{try{
+const CTL=window.__hsCTL;CTL.st={sofort:0,fitJetzt:0,fokus:0,morph:0,voll:0,fitEins:0,rSkip:0};CTL.err=[];CTL.aus=CTL.aus||{};
+if(/[?&]ctlaus\b/.test(location.search||''))CTL.aus={sofort:1,morph:1,fit:1,render:1,help:1};
+const cErr=e=>{try{CTL.err.push(String(e&&e.message||e).slice(0,160));if(CTL.err.length>20)CTL.err.shift()}catch(x){}};
+const SCR0=document.getElementById('scr');
+const mfQual=rs=>rs.some(r=>r.type==='childList'&&!(r.target.closest&&r.target.closest('.mfbar')));
+
+/* ---------- 0) fzkLauf (Zurück-Knopf) läuft sonst nach jeder Klassenänderung im Fenster im nächsten Bild – auch wenn sich nur der
+   Fokusrahmen oder der gewählte Stern bewegt hat – und erzwingt dabei mehrere Layouts. Jetzt: nur bei Änderungen, die den Knopf
+   betreffen können (neuer Inhalt, hidden/disabled, andere Klassen außerhalb der Sternkarte). Eigene Aufrufe laufen immer. */
+const FZK0=fzkLauf;let fzkSchmutz=1,fzkWH='';const FZIRR={padf:1,sel:1,armed:1,spkd:1,on:1,focus:1,pfocus:1,ctlnt:1};
+function fzkRel(r){if(r.type!=='attributes')return true;if(r.attributeName!=='class')return true;const t=r.target;if(t.closest&&t.closest('.stmap'))return false;
+ const a=String(r.oldValue||'').split(/\s+/).filter(Boolean),A={};for(const c of a)A[c]=1;for(const c of t.classList)if(!A[c]&&!FZIRR[c])return true;for(const c of a)if(!t.classList.contains(c)&&!FZIRR[c])return true;return false}
+let fzMO=null;try{fzMO=new MutationObserver(rs=>{if(fzkSchmutz)return;for(const r of rs)if(fzkRel(r)){fzkSchmutz=1;return}});fzMO.observe(SCR0,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','disabled'],attributeOldValue:true})}catch(e){cErr(e)}
+function fzkJetzt(){try{if(fzMO)fzMO.takeRecords()}catch(e){}fzkSchmutz=0;fzkWH=innerWidth+'x'+innerHeight;CTL.st.fzk=(CTL.st.fzk||0)+1;try{return FZK0()}finally{/* eigene Änderungen des Knopfs zählen nicht */try{if(fzMO)fzMO.takeRecords()}catch(e){}}}
+fzkLauf=function(){try{if(!CTL.aus.sofort&&!fzkSchmutz&&fzkWH===innerWidth+'x'+innerHeight&&scr===SCR0&&!SCR0.hidden&&FZK.el&&FZK.el.isConnected&&FZK.el.classList.contains('fzk')){
+   const k=fzkTaste();if(FZK.el.getAttribute('data-fzk-k')!==k)FZK.el.setAttribute('data-fzk-k',k);CTL.st.fzkSpar=(CTL.st.fzkSpar||0)+1;return}}catch(e){}return fzkJetzt()};
+
+/* ---------- 1) Erstes Bild: alles Controller-/Zurück-Spezifische sofort ---------- */
+function ctlFokus(){try{if(!PADNAV.on||scr!==SCR0||scr.hidden||PADCAP||NET.vm||G.mp||NET.role==='guest')return;if(LM&&LM.panes&&LM.panes.length)return;if(PADNAV.det===1||PADNAV.stD)return;
+  const el=PADNAV.el;if(el&&el.isConnected&&scr.contains(el)&&el.classList.contains('padf'))return;
+  /* Sternkarte: der Fokus gehört auf den gewählten Stern (so setzt ihn padMenu im nächsten Bild) */
+  if(scr.querySelector('.stmap')){if(scr.querySelector('.barrow.tlpick,.barpick'))return;const s=scr.querySelector('.stmap .stn.sel');if(s&&s!==el||s&&!s.classList.contains('padf')){PADNAV.dirty=false;padMark(s,true);CTL.st.fokus++}return}
+  /* Schicksalskarten: wie fkAuf (30 ms später) die mittlere Karte */
+  if(scr.classList.contains('fkScr')){const b=scr.querySelector('.fkCard[data-i="1"]')||scr.querySelector('.fkCard');if(b&&b!==el){padMark(b,true);CTL.st.fokus++}return}
+  const LL=padEls();if(!LL.length)return;let c=padCur(LL);if(!c)c=padDefault(LL);if(!c)return;
+  /* ein Stern darf hier keine Auswahl auslösen (padMark klickt sonst) */if(c.classList.contains('stn')&&!c.classList.contains('sel'))return;
+  PADNAV.dirty=false;padMark(c,c===PADNAV.el);CTL.st.fokus++}catch(e){cErr(e)}}
+function ctlHelp(){try{if(scr!==SCR0||scr.hidden)return;const m=scr.querySelector('.stmap');if(m&&P&&P.hero)spkHelp(m)}catch(e){cErr(e)}}
+function ctlNachFit(){/* Einpassen, das sonst 40 ms später käme (MF.mo), jetzt erledigen */
+ try{if(MF.busy||scr!==SCR0||scr.hidden)return false;let pend=false;try{if(MF.mo&&mfQual(MF.mo.takeRecords()))pend=true}catch(e){}if(MF.mt!==CTL.mt)pend=true;
+  if(!pend)return false;clearTimeout(MF.mt);CTL.mt=MF.mt;menuFit(scr);CTL.st.fitJetzt++;return true}catch(e){cErr(e);return false}}
+/* Lager-/Lagerfeuer-Szenen starten sonst erst mit dem 300-ms-Suchtakt und zeichnen ein Bild später: erstes Bild sofort */
+function ctlSzenen(){try{if(scr!==SCR0||SCR0.hidden)return;const L=SCR0.querySelectorAll('canvas[data-fire],canvas[data-lager],canvas[data-npcrow]');if(!L.length)return;
+  for(const cv of L){if(cv._on)continue;const f=cv.dataset.npcrow!=null?npcRowStart:sceneStart;let first=null;const R=window.requestAnimationFrame;
+   window.requestAnimationFrame=function(fn){if(!first){first=fn;return 0}return R.apply(window,arguments)};try{f(cv)}catch(e){cErr(e)}finally{window.requestAnimationFrame=R}
+   if(first){try{first(performance.now())}catch(e){cErr(e)}CTL.st.szene=(CTL.st.szene||0)+1}}}catch(e){cErr(e)}}
+function ctlSofort(){if(CTL.aus.sofort)return;CTL.st.sofort++;
+ ctlHelp();ctlSzenen();try{fzkJetzt()}catch(e){cErr(e)}
+ /* Handheld: gekürzte Ausrüstungsplatz-Namen (qa2Kurz lief sonst erst im nächsten Bild) */try{if(typeof qa2Kurz==='function')qa2Kurz()}catch(e){cErr(e)}
+ if(ctlNachFit()){try{fzkJetzt()}catch(e){cErr(e)}try{if(MF.mo)MF.mo.takeRecords()}catch(e){}CTL.mt=MF.mt}
+ ctlFokus()}
+CTL.sofort=ctlSofort;
+try{new MutationObserver(rs=>{try{if(CTL.aus.sofort||SCR0.hidden||scr!==SCR0||CTL.inTree)return;let need=false;
+  for(const r of rs)if(r.target===SCR0){need=true;break}
+  if(!need&&FZK.el&&!FZK.el.isConnected)need=true;
+  if(need)ctlSofort()}catch(e){cErr(e)}}).observe(SCR0,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']})}catch(e){cErr(e)}
+
+/* ---------- 2a) Talentbaum: Inhalt einarbeiten statt neu bauen, einmal einpassen ---------- */
+const IH=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML');
+function ctlSame(a,b){if(a.nodeType!==b.nodeType)return false;if(a.nodeType!==1)return true;if(a.nodeName!==b.nodeName)return false;const n=a.nodeName;
+ if(n==='CANVAS'||n==='SCRIPT'||n==='TEMPLATE'||n==='IFRAME')return false;/* Symbole werden nach dem Einfügen gezeichnet – nie wiederverwenden */
+ if((a.getAttribute('data-id')||'')!==(b.getAttribute('data-id')||''))return false;
+ if((n==='VIDEO'||n==='IMG')&&a.getAttribute('src')!==b.getAttribute('src'))return false;return true}
+const hasPadf=v=>/(^|\s)padf(\s|$)/.test(v);
+/* Inline-Stile, die Einpassen/Lage bei jedem Aufbau ohnehin neu setzen (Zoom/Höhe der Hülle, Kartenhöhe, Lage von Sternen,
+   Linien, Beschriftungen): stehen lassen, solange die Werte aus dem neuen HTML gleich sind – sonst würde alles erst entfernt und
+   gleich wieder gesetzt (alles neu berechnen, viele erzwungene Layouts). Gleiches gilt für die Lage-Klassen der Karte. */
+const KEEPST=/(^|\s)(stn|stcore|stlb|stneb|stl|stmap)(\s|$)/,MAPCLS=['stnear','spk1'],KEEPCLS=['fzk-dup','fzk-platz'];
+function ctlStilGleich(a,v){if(!v)return true;const re=/(--[\w-]+)\s*:\s*([^;]+)/g;let m,n=0;while((m=re.exec(v))){n++;if(a.style.getPropertyValue(m[1]).trim()!==m[2].trim())return false}
+ return n>0&&v.replace(re,'').replace(/[;\s]/g,'')===''}
+function ctlKeepStil(a,b){if(a.parentNode===SCR0&&a.classList.contains('wrap'))return !b.hasAttribute('style');const c=b.getAttribute('class')||'';return KEEPST.test(c)&&ctlStilGleich(a,b.getAttribute('style'))}
+function ctlAttrs(a,b){const A=a.attributes,B=b.attributes,pf=a.classList.contains('padf'),ks=a.hasAttribute('style')&&ctlKeepStil(a,b),map=a.classList.contains('stmap');let stil=false;
+ for(let i=A.length-1;i>=0;i--){const n=A[i].name;if(!b.hasAttribute(n)){if(n==='style'){if(ks)continue;stil=true}if(n==='class'&&pf){if(a.getAttribute('class')!=='padf')a.setAttribute('class','padf');continue}a.removeAttribute(n)}}
+ for(let i=0;i<B.length;i++){const n=B[i].name;let v=B[i].value;if(n==='style'&&ks)continue;
+  if(n==='class'){if(pf&&!hasPadf(v))v=v?v+' padf':'padf';for(const k of (map?MAPCLS:KEEPCLS))if(a.classList.contains(k)&&!(' '+v+' ').includes(' '+k+' '))v+=' '+k}
+  if(n==='class'&&a.getAttribute('class')!==v&&!a.classList.contains('stmap')){v+=' ctlnt';ctlNT.push(a)}
+  if(a.getAttribute(n)!==v){a.setAttribute(n,v);if(n==='style')stil=true}}
+ /* alte Browser (RG2.gapFix: Abstände in Flex-Behältern als Ränder): Merker zurücksetzen, sonst fehlen die Ränder */
+ if(stil&&a.__rgGap)a.__rgGap=null}
+function ctlKids(L,N){let a=L.firstChild,b=N.firstChild;
+ while(b){const nb=b.nextSibling;
+  if(a&&!ctlSame(a,b)){let x=a.nextSibling,k=0;while(x&&k<4&&!ctlSame(x,b)){x=x.nextSibling;k++}if(x&&ctlSame(x,b)){while(a!==x){const na=a.nextSibling;L.removeChild(a);a=na}}}
+  if(a&&ctlSame(a,b)){if(a.nodeType===1){
+    /* der einheitliche Zurück-Knopf bleibt, wie fzkLauf ihn gemacht hat (Lage, „‹ Zurück“, Tastenhinweis); nur der gemerkte Originaltext folgt */
+    if(a===FZK.el&&a.classList.contains('fzk')&&a.getAttribute('data-act')===b.getAttribute('data-act')){if(a.dataset.fzkT!=null&&!b.children.length&&a.dataset.fzkT!==b.textContent)a.dataset.fzkT=b.textContent}
+    else{ctlAttrs(a,b);ctlKids(a,b)}}else if(a.nodeValue!==b.nodeValue)a.nodeValue=b.nodeValue;a=a.nextSibling}
+  else L.insertBefore(b,a);
+  b=nb}
+ while(a){const na=a.nextSibling;L.removeChild(a);a=na}}
+/* Elemente, deren Klassen sich beim Einarbeiten ändern, ohne CSS-Übergänge umschalten (beim Neubau gab es keine) – zwei Bilder lang */
+const ctlNT=[];let ctlNTr=0;
+try{const st=document.createElement('style');st.id='ctlCss';st.textContent='.ctlnt,.ctlnt *,.ctlnt::before,.ctlnt::after,.ctlnt *::before,.ctlnt *::after{transition:none!important}';document.head.appendChild(st)}catch(e){}
+function ctlNTweg(){if(ctlNTr)return;ctlNTr=requestAnimationFrame(()=>{ctlNTr=requestAnimationFrame(()=>{ctlNTr=0;const L=ctlNT.splice(0);for(const e of L)e.classList.remove('ctlnt')})})}
+function ctlMorph(v){const t=document.createElement('template');IH.set.call(t,v);
+ /* showScreen hat eben className='screen' gesetzt: die Einpass-/Zurück-Klassen bleiben stehen (werden gleich wieder genauso gesetzt),
+    sonst wäre jeder Stil im Fenster ungültig und jedes erzwungene Layout ein komplettes */
+ if(CTL.cls0&&SCR0.className==='screen')SCR0.className=CTL.cls0;
+ ctlKids(SCR0,t.content);if(ctlNT.length)ctlNTweg()}
+try{Object.defineProperty(SCR0,'innerHTML',{configurable:true,enumerable:true,get(){return IH.get.call(this)},
+ set(v){if(CTL.mo&&!CTL.aus.morph&&typeof v==='string'&&v.indexOf('stwrap')>=0){CTL.mo=0;try{ctlMorph(v);CTL.st.morph++;return}catch(e){cErr(e)}}IH.set.call(this,v)}})}catch(e){cErr(e)}
+const treeLive=()=>scr===SCR0&&!NET.vm&&!SCR0.hidden&&!!SCR0.firstElementChild&&SCR0.firstElementChild.classList.contains('stwrap');
+{const _rt=renderTree;renderTree=function(){
+  if(scr!==SCR0||NET.vm||CTL.inTree)return _rt.apply(this,arguments);
+  CTL.mo=treeLive()?1:0;CTL.mo0=CTL.mo;if(!CTL.mo)CTL.st.voll++;CTL.cls0=CTL.mo?SCR0.className:'';
+  const fit=!CTL.aus.fit&&!MF.busy;if(fit)MF.busy=1;CTL.inTree=1;
+  try{return _rt.apply(this,arguments)}
+  finally{CTL.mo=0;CTL.inTree=0;CTL.cls0='';
+   if(fit){MF.busy=0;try{if(!SCR0.hidden&&SCR0.querySelector('.stmap')){ctlHelp();if(!CTL.mo0)try{fzkJetzt()}catch(e){cErr(e)}
+      try{if(MF.mo)MF.mo.takeRecords()}catch(e){}clearTimeout(MF.mt);CTL.mt=MF.mt;menuFit(scr);CTL.st.fitEins++;
+      /* alte Browser: Abstände für Knoten, die das Einpassen eben angelegt hat – sonst käme das 30 ms später samt neuem Einpassen */
+      try{if(typeof RG2!=='undefined'&&RG2&&RG2.gapFix){const R0=SCR0.querySelector('.stside')||SCR0,L=R0.querySelectorAll('*'),S=new Array(L.length);for(let i=0;i<L.length;i++)S[i]=L[i].style.marginTop+'|'+L[i].style.marginBottom;
+        if(RG2.gapFix(R0)){let v=false;for(let i=0;i<L.length&&!v;i++)if(L[i].style.marginTop+'|'+L[i].style.marginBottom!==S[i])v=true;
+         /* nur waagrechte Abstände (Knopfreihe) ändern die Höhen nicht – dann kein zweites Einpassen */if(v){menuFit(scr);CTL.st.fitGap=(CTL.st.fitGap||0)+1}else CTL.st.gapH=(CTL.st.gapH||0)+1}}}catch(e){cErr(e)}
+      try{fzkJetzt()}catch(e){cErr(e)}try{if(MF.mo)MF.mo.takeRecords()}catch(e){}ctlFokus()}
+     else menuFit(scr)}catch(e){cErr(e)}}
+   else ctlSofort()}}}
+
+/* alte Browser: RG2.gapFix (getComputedStyle für jedes Element) nicht in jedem Zwischenschritt des Baum-Aufbaus – einmal beim Einpassen am Ende */
+try{if(typeof RG2!=='undefined'&&RG2&&typeof RG2.gapFix==='function'){const _gf=RG2.gapFix;RG2.gapFix=function(root){if(CTL.inTree&&MF.busy&&!CTL.aus.fit){CTL.st.gapSpar=(CTL.st.gapSpar||0)+1;return 0}return _gf.apply(this,arguments)}}}catch(e){cErr(e)}
+
+/* … und die Hülle, die stFxFit fürs Detailfeld neu anlegt, gleich vor dem Messen des Textes (statt danach alles noch einmal einzupassen) */
+{const _ft=stFxText;stFxText=function(box){try{if(box&&typeof RG2!=='undefined'&&RG2&&RG2.gapFix&&!CTL.aus.fit)RG2.gapFix(box)}catch(e){}return _ft.apply(this,arguments)}}
+
+/* ---------- 2b) Spielwelt hinter dem Talentbaum nicht in jedem Bild neu zeichnen ---------- */
+{const RS={k:'',n:0,t:0};const _r=render;render=function(){try{if(!CTL.aus.render&&G&&G.state==='play'&&G.paused&&G.overlay==='tree'&&!G.mp&&!NET.role&&scr===SCR0&&!SCR0.hidden&&!(LM&&LM.panes&&LM.panes.length)){
+   const now=performance.now(),k='tree|'+cv.width+'x'+cv.height;if(RS.k===k&&RS.n>=2&&now-RS.t<1000){CTL.st.rSkip++;return}if(RS.k!==k){RS.k=k;RS.n=0}RS.n++;RS.t=now}else RS.k=''}catch(e){}
+  return _r.apply(this,arguments)}}
+
+/* ---------- 2c) Controller-Hilfe der Sternkarte nur bei Änderungen anfassen ---------- */
+{const _sc=stScale;stScale=function(m){const r=_sc.apply(this,arguments);try{if(m)m._ctlH=r.H}catch(e){}return r}}
+{const _sh=spkHelp;spkHelp=function(m){if(CTL.aus.help||!m)return _sh.apply(this,arguments);try{
+  const H=m._ctlH!=null?m._ctlH:m.clientHeight,on=!!(PADNAV.on&&H>300),sig=(on?1:0)+'|'+(PADNAV.stD?1:0),h=m._ctlHp;
+  if(m._ctlSig===sig&&(on?!!h&&h.parentNode===m:!(h&&h.parentNode===m)))return;
+  /* gemerkte Kartenhöhe statt clientHeight (das hier ein Layout erzwingen würde) */
+  let sh=false;if(m._ctlH!=null){try{Object.defineProperty(m,'clientHeight',{configurable:true,get(){return H}});sh=true}catch(e){}}
+  let r;try{r=_sh.apply(this,arguments)}finally{if(sh)delete m.clientHeight}m._ctlSig=sig;m._ctlHp=m.querySelector(':scope > .spkpad');return r}catch(e){return _sh.apply(this,arguments)}}}
+
+window.__hsCTLT={ctlSofort,ctlFokus,ctlMorph,ctlKids,treeLive};
+}catch(e){console.error('ctl',e);window.__hsCTL.err=String(e&&e.message||e)}})();
 
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
