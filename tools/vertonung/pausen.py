@@ -216,6 +216,14 @@ def main():
             c = c[np.argmax(np.abs(c) > 10 ** (-45 / 20)):]; c = c[: len(c) - np.argmax(np.abs(c[::-1]) > 10 ** (-45 / 20))]
             ew_alle.setdefault(ew["absatz"], []).append(dict(ew, clip=(c * 10 ** (ew.get("db", ROLLEN_DB.get(ew["rolle"], 0)) / 20)).astype(np.float32)))
     rk = dict(regie["kapitel"]); rk["vorab"] = {"0": regie["vorab"]}
+    # Absätze, deren neue Fassung noch nicht vertont ist ("veraltet" im Manifest): alten Text/alte Anker benutzen
+    alt_stand = os.environ.get("ALT_STAND")
+    def git_json(pfad):
+        return json.loads(subprocess.check_output(["git", "-C", WURZEL, "show", f"{alt_stand}:{pfad}"]))
+    if alt_stand:
+        ar = git_json("tools/vertonung/regie-de.json"); rk_alt = dict(ar["kapitel"]); rk_alt["vorab"] = {"0": ar["vorab"]}
+        marken_alt = git_json("tools/vertonung/pausen-de.json")
+        anker_alt = {e["id"]: e["nach"] for e in git_json("tools/vertonung/einwuerfe-de.json")["einwuerfe"]}
     orig = os.environ.get("ORIGINAL") or os.path.join(os.path.dirname(WURZEL), "chronik-original-de")
     folge = [(k, e) for k in ["vorab", "I", "II"] for e in manifest["kapitel"].get(k, [])]
     bericht = {"eingefuegt": 0, "sekunden": 0.0, "fehlend": []}
@@ -231,7 +239,11 @@ def main():
         na = vorne_stille(os.path.join(orig, os.path.relpath(nxt["datei"], "audio/chronik/de"))) if nxt and os.path.exists(os.path.join(orig, os.path.relpath(nxt["datei"], "audio/chronik/de"))) else (vorne_stille(os.path.join(WURZEL, nxt["datei"])) if nxt else 0)
         m = marken.get(sch, {})
         r = rk.get(kap, {}).get(str(e["i"]), {}).get("regie", "")
-        ein, plus, fehl, guete, D = bearbeiten(sch, quelle if trocken else datei, r, zeiten.get(rel, []), m.get("marken", []), m.get("ende"), e.get("titel"), na, trocken, ew_alle.get(sch, []))
+        ews = ew_alle.get(sch, [])
+        if e.get("veraltet") and alt_stand:
+            m = marken_alt.get(sch, {}); r = rk_alt.get(kap, {}).get(str(e["i"]), {}).get("regie", "")
+            ews = [dict(w, nach=anker_alt.get(w["id"], w["nach"])) for w in ews]
+        ein, plus, fehl, guete, D = bearbeiten(sch, quelle if trocken else datei, r, zeiten.get(rel, []), m.get("marken", []), m.get("ende"), e.get("titel"), na, trocken, ews)
         bericht["eingefuegt"] += len(ein); bericht["sekunden"] += sum(d for _, d in ein) + plus
         bericht["fehlend"] += [(sch, f) for f in fehl]
         print(f"{sch:8s} {D:6.1f}s  Übereinstimmung {guete:.2f}  +{len(ein)} Pausen (+{sum(d for _, d in ein):.1f}s)  Ende +{plus:.2f}s" + (f"  FEHLT: {fehl}" if fehl else ""))
