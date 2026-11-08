@@ -40,7 +40,7 @@
   const EIN = (() => {
     const s = ls.get(KEY, {}) || {};
     const modus = ['an', 'erz', 'aus'].includes(s.modus) ? s.modus : 'an';
-    const vol = typeof s.vol === 'number' && isFinite(s.vol) ? Math.min(1, Math.max(0, s.vol)) : 0.9;
+    const vol = typeof s.vol === 'number' && isFinite(s.vol) ? Math.min(1, Math.max(0, s.vol)) : 0.4;
     return { modus, vol };
   })();
   const einSichern = () => ls.set(KEY, EIN);
