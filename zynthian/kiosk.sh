@@ -48,14 +48,21 @@ mkdir -p "$PROFIL"
 # nach einem Stromausfall keine "Wiederherstellen?"-Frage
 sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]*"/"exit_type":"Normal"/' "$PROFIL/Default/Preferences" 2>/dev/null
 
+GRAFIK="$HIER/../../grafik.sh"; SCHNELL=0
 while true; do
+  # Test „Grafikchip zum Zeichnen“ (Pult → System): Schalter aus grafik.sh – stürzt der Browser damit zweimal gleich ab, wird er zurückgenommen
+  IMRES_CHROMIUM_GPU=""; [ -f "$GRAFIK" ] && source "$GRAFIK"
+  START=$(date +%s)
   "$BROWSER" --no-sandbox --kiosk --user-data-dir="$PROFIL" \
     --autoplay-policy=no-user-gesture-required --alsa-output-device=imres --alsa-input-device=imresin --audio-buffer-size=${IMRES_AUDIO_PUFFER:-1024} --use-fake-ui-for-media-stream --noerrdialogs --disable-infobars --no-first-run \
     --disable-session-crashed-bubble --disable-translate --disable-features=Translate,MediaRouter \
     --overscroll-history-navigation=0 --disable-pinch --check-for-update-interval=31536000 \
     --window-size=800,480 --window-position=0,0 \
-    ${IMRES_CHROMIUM_EXTRA} \
+    ${IMRES_CHROMIUM_EXTRA} ${IMRES_CHROMIUM_GPU} \
     "http://127.0.0.1:8790/zyn/start"
   # Absturz: kurz warten und neu starten (beendet wird die Sitzung über imres-modus)
+  if [ -n "$IMRES_CHROMIUM_GPU" ] && [ $(( $(date +%s) - START )) -lt 25 ]; then
+    SCHNELL=$((SCHNELL + 1)); if [ "$SCHNELL" -ge 2 ]; then mv -f "$GRAFIK" "$GRAFIK.abgestuerzt" 2>/dev/null; SCHNELL=0; fi
+  else SCHNELL=0; fi
   sleep 2
 done

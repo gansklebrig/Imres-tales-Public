@@ -94,7 +94,8 @@
       else if (/^[A-Z]{3}$/.test(n)) td.classList.add("kz-code");
     });
   }
-  new MutationObserver(() => { if (!geplant) { geplant = true; requestAnimationFrame(markieren); } }).observe(document.documentElement, { childList: true, subtree: true });
+  /* am Zynthian-Pult gibt es keine Bestenlisten – dort nicht bei jeder Änderung die ganze Seite durchsuchen (kostete im Ruhebild viel Rechenzeit) */
+  new MutationObserver(() => { if (!geplant && !document.documentElement.classList.contains("zyn-pult")) { geplant = true; requestAnimationFrame(markieren); } }).observe(document.documentElement, { childList: true, subtree: true });
   markieren();
 
   const css = document.createElement("style");

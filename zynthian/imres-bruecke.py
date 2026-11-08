@@ -404,6 +404,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort(last_messen())
         if p == "/zyn/haenger":
             return self.json_antwort(haenger_stand())
+        if p == "/zyn/grafik":
+            return self.json_antwort({"ok": True, "an": os.path.exists(GRAFIK_DATEI), "zurueckgenommen": os.path.exists(GRAFIK_DATEI + ".abgestuerzt")})
         if p == "/zyn/update":
             return self.json_antwort(update_stand())
         if p == "/zyn/diagnose":
@@ -577,6 +579,23 @@ class Handler(SimpleHTTPRequestHandler):
             erg = aufnahme_schalten(bool(an))
             senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or "")})
             return self.json_antwort(erg)
+        if p == "/zyn/grafik":
+            # Test: Chromium zeichnet mit dem Grafikchip (kiosk.sh liest grafik.sh beim Browserstart; stürzt er ab, nimmt kiosk.sh es zurück)
+            an = bool(d.get("an"))
+            try:
+                if os.path.exists(GRAFIK_DATEI + ".abgestuerzt"):
+                    os.remove(GRAFIK_DATEI + ".abgestuerzt")
+                if an:
+                    with open(GRAFIK_DATEI, "w", encoding="utf-8") as f:
+                        f.write('IMRES_CHROMIUM_GPU="--enable-gpu-rasterization --ignore-gpu-blocklist --enable-zero-copy"\n')
+                elif os.path.exists(GRAFIK_DATEI):
+                    os.remove(GRAFIK_DATEI)
+            except OSError as e:
+                return self.json_antwort({"ok": False, "fehler": str(e)})
+            haenger_merken("info", info="Grafikchip-Test " + ("an" if an else "aus") + " – Browser startet neu")
+            if not ARGS.test:
+                threading.Timer(1.0, lambda: subprocess.call(["pkill", "-f", "user-data-dir=/zynthian/zynthian-my-data/imres/profil"])).start()
+            return self.json_antwort({"ok": True, "an": an})
         if p == "/zyn/system":
             aktion = str(d.get("aktion", ""))
             if aktion not in ("imres", "zynthian", "hintergrund", "neustart", "aus", "seite-neu", "aktualisieren", "zurueck", "start-imres", "start-zynthian", "start-hintergrund"):
@@ -645,6 +664,7 @@ def _lauf(befehl, zeit=15, eingabe=None):
 # Hält mit Uhrzeit fest, wann es hakt: Audio-Aussetzer von JACK (Xruns), Aussetzer im Browser-Ton und in der Bedienung
 # (meldet das Pult), volle Prozessorkerne, Hitze und Unterspannung des Pi – dazu, was die Brücke selbst gerade im Hintergrund tat.
 HAENGER_DATEI = os.path.join(os.path.dirname(SEITE), "haenger.json")
+GRAFIK_DATEI = os.path.join(os.path.dirname(SEITE), "grafik.sh")
 haenger = []
 haenger_sperre = threading.Lock()
 _hg_sys = {"cpu": None, "kern": None, "temp": None, "drossel": ""}

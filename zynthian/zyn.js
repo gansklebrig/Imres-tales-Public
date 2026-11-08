@@ -391,6 +391,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Barden Beats", "Barden Beats") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
       '<button type="button" data-zm="startz">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>Zynthian</b></button>" +
       '<button type="button" data-zm="neu">🔄 ' + W("Seite neu laden", "Reload page") + "</button>" +
+      '<button type="button" data-zm="gpu">🖥 ' + W("Grafikchip zum Zeichnen: ", "Draw with the GPU: ") + "<b>" + (GPU.an ? W("an (Test)", "on (test)") : W("aus", "off")) + "</b><small>" + esc2(GPU.text) + "</small></button>" +
       '<button type="button" data-zm="hg">⏱ ' + W("Hänger-Protokoll", "Hang log") + "<small>" + W("wann es gehakt hat – Ton, Bedienung, Prozessor, Hitze", "when it stuttered – audio, controls, CPU, heat") + "</small></button>" +
       '<button type="button" data-zm="diag">🩺 ' + W("Diagnose anzeigen", "Show diagnostics") + "<small>" + W("♫-Knopf, Touch, Ton, Update – zum Abfotografieren", "♫ button, touch, sound, update – to take a photo") + "</small></button>" +
       '<button type="button" data-zm="zurueck">↺ ' + W("Vorige Version zurückholen", "Restore previous version") + "<small>" + W("falls nach einem Update etwas nicht stimmt (die letzten 5 werden aufgehoben)", "if an update broke something (last 5 are kept)") + "</small></button>" +
@@ -400,6 +401,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       zyn: () => { zeige("🎛 " + W("Zynthian startet …", "Zynthian is starting …")); post("zynthian"); },
       upd: () => { menueZu(); zeige("⬇ " + W("Barden Beats wird aktualisiert …", "Updating Barden Beats …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); updateVerfolgen(); },
       hg: () => haengerMenue(),
+      gpu: () => { const an = !GPU.an; fetch("/zyn/grafik", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ an }) }).catch(() => {});
+        zeige("🖥 " + (an ? W("Grafikchip an – Browser startet neu", "GPU on – browser restarts") : W("Grafikchip aus – Browser startet neu", "GPU off – browser restarts")), null, W("dauert ein paar Sekunden; falls er abstürzt, wird es von selbst zurückgenommen", "takes a few seconds; reverted automatically if it crashes")); menueZu(); },
       diag: () => { menue('<h3>🩺 Diagnose</h3><pre style="font-size:11px;line-height:1.25;white-space:pre-wrap;max-height:330px;overflow:auto;margin:0">⏳</pre><div class="reihe"><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu });
         fetch("/zyn/diagnose").then(r => r.json()).then(j => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = j.text || "–"; }).catch(() => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = W("Brücke nicht erreichbar", "bridge unreachable"); }); },
       zurueck: () => { menueZu(); zeige("↺ " + W("Vorige Version wird geholt …", "Restoring previous version …")); post("zurueck"); updateVerfolgen(); },
@@ -1591,6 +1594,12 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
      „ui“: die Bedienung stand (Browser beschäftigt) · „ton“: der Ton im Browser kam nicht hinterher (seine Uhr lief langsamer als die echte)
      – beides geht mit Uhrzeit und Lage an die Brücke, die dazu JACK-Aussetzer, Prozessorlast, Hitze und Unterspannung festhält. */
   const HG = { neu: [], uhrT: 0, uhrP: 0, ab: performance.now() + 15000 };
+  /* womit zeichnet der Browser? (Grafikchip des Pi = V3D, sonst Software auf dem Prozessor) */
+  const GPU = { an: false, text: "" };
+  (() => { let r = ""; try { const gl = document.createElement("canvas").getContext("webgl"), e = gl && gl.getExtension("WEBGL_debug_renderer_info"); r = gl ? String(e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)) : ""; } catch (_) {}
+    const sw = !r || /swiftshader|llvmpipe|software/i.test(r);
+    GPU.text = W("zeichnet gerade mit: ", "drawing with: ") + (r ? r.replace(/\(.*?\)/g, "").trim().slice(0, 40) : "?") + (sw ? W(" – Prozessor", " – CPU") : W(" – Grafikchip", " – GPU"));
+    fetch("/zyn/grafik").then(x => x.json()).then(j => { GPU.an = !!j.an; if (j.zurueckgenommen) GPU.text += W(" · letzter Test stürzte ab, zurückgenommen", " · last test crashed, reverted"); }).catch(() => {}); })();
   function hgLage() {
     try {
       if (SEITE === "welten") { const m = wMix(); return "Klangwelt " + (m && m.welt && m.laeuft ? m.welt.name : "still") + " · " + zpSeite + (zpRuhe ? " · Ruhebild" : ""); }
@@ -1618,7 +1627,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       const vor = t => { const s = Math.max(0, Math.round(jetzt - t)); return s < 60 ? s + " s" : s < 3600 ? Math.round(s / 60) + " min" : Math.round(s / 3600) + " h"; };
       const zaehl = a => L.filter(x => x.art === a && jetzt - x.t < 3600).length;
       let h = '<p class="hinweis">' + W("Jetzt: ", "Now: ") + (sy.kern != null ? "⚙ " + sy.kern + " % · " : "") + (sy.temp != null ? "🌡 " + sy.temp + " °C" : "") + (sy.drossel ? " · ⚠ " + esc2(sy.drossel) : "") +
-        "<br>" + W("Letzte Stunde: ", "Last hour: ") + "🔊 " + zaehl("xrun") + " · 🎵 " + zaehl("ton") + " · 🖐 " + zaehl("ui") + " · 🔥 " + zaehl("kern") + "</p>";
+        "<br>" + esc2(GPU.text) + "<br>" + W("Letzte Stunde: ", "Last hour: ") + "🔊 " + zaehl("xrun") + " · 🎵 " + zaehl("ton") + " · 🖐 " + zaehl("ui") + " · 🔥 " + zaehl("kern") + "</p>";
       h += L.length ? '<div class="zyn-hg-l">' + L.slice(0, 40).map(x => { const a = HG_ART[x.art] || ["?", x.art];
         return '<div class="' + (x.art === "info" ? "i" : "") + '"><b>' + vor(x.t) + "</b><span>" + a[0] + " " + esc2(a[1] + (x.ms != null && x.art !== "info" ? " " + x.ms + " ms" : "") + (a[1] && x.info ? " · " : "") + (x.info || "")) +
           (x.cpu != null && x.art !== "info" ? " <i>⚙" + x.cpu + "% 🌡" + (x.temp != null ? x.temp : "–") + (x.drossel ? " ⚠" + esc2(x.drossel) : "") + "</i>" : "") + "</span></div>"; }).join("") + "</div>"
@@ -1666,14 +1675,16 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const AUTO_WAHL = ["aehnlich", "fav", "set", "frei"];
   const AUTO_WAHL_NAME = { aehnlich: W("ähnliche Stimmungen", "similar moods"), fav: W("nur Favoriten (★), passend sortiert", "favourites only (★), best match first"), set: W("das Set der Reihe nach", "the set in order"), frei: W("alle, zufällig", "all, random") };
   /* Wie der Autopilot wechselt (gilt nur für seine Wechsel) */
-  const AUTO_UEB = ["normal", "sanft", "episch", "passend"];
-  const AUTO_UEB_NAME = { normal: W("wie eingestellt", "as set"), sanft: W("unauffällig (lange, leise Überleitung)", "subtle (long, quiet bridge)"), episch: W("episch (Paukenwirbel und Becken)", "epic (timpani roll and cymbal)"), passend: W("passend: episch, wenn es dramatischer wird", "matching: epic when it gets more dramatic") };
-  const autoUeb = () => AUTO_UEB.includes(lies("imres-zp-autoueb", "normal")) ? lies("imres-zp-autoueb", "normal") : "normal";
+  const AUTO_UEB = ["fliessend", "sanft", "episch", "passend", "normal"];
+  const AUTO_UEB_NAME = { fliessend: W("fließend (auf dem Phrasenende, lang und weich)", "flowing (on the phrase end, long and soft)"), normal: W("wie eingestellt", "as set"), sanft: W("unauffällig (lange, leise Überleitung)", "subtle (long, quiet bridge)"), episch: W("episch (Paukenwirbel und Becken)", "epic (timpani roll and cymbal)"), passend: W("passend: episch, wenn es dramatischer wird", "matching: epic when it gets more dramatic") };
+  /* einmalig: „fließend“ wird der neue Standard */
+  if (lies("imres-zp-autoueb2", "") !== "1") { const a = lies("imres-zp-autoueb", "normal"); if (a === "normal" || a === "sanft") schreib("imres-zp-autoueb", "fliessend"); schreib("imres-zp-autoueb2", "1"); }
+  const autoUeb = () => AUTO_UEB.includes(lies("imres-zp-autoueb", "fliessend")) ? lies("imres-zp-autoueb", "fliessend") : "fliessend";
   const autoWahl = () => AUTO_WAHL.includes(lies("imres-zp-autowahl", "aehnlich")) ? lies("imres-zp-autowahl", "aehnlich") : "aehnlich";
   const autoZuletzt = [];
   function autoUebergang(P, von, nach) {
     if (!P.naechsterWechsel) return; let art = autoUeb();
-    if (art === "passend") art = nach && P.aehnlich && P.dramatik ? (P.dramatik(nach) > P.dramatik(von) ? "episch" : "sanft") : "sanft";
+    if (art === "passend") art = nach && P.aehnlich && P.dramatik ? (P.dramatik(nach) > P.dramatik(von) ? "episch" : "fliessend") : "fliessend";
     P.naechsterWechsel(art === "normal" ? null : art);
   }
   function autoNaechste(jetzt, P) {
@@ -2731,7 +2742,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function wbBild(jetzt) {
     WB.raf = 0; if (!zpRuhe || SEITE !== "welten") { wbStop(); return; }
     WB.raf = requestAnimationFrame(wbBild);
-    if (jetzt - WB.letzt < 32) return; const dt = Math.min(.1, WB.letzt ? (jetzt - WB.letzt) / 1000 : .033); WB.letzt = jetzt;
+    if (jetzt - WB.letzt < 48) return; const dt = Math.min(.1, WB.letzt ? (jetzt - WB.letzt) / 1000 : .033); WB.letzt = jetzt;
     const c = WB.c, x = WB.x, w = window.innerWidth, h = window.innerHeight; if (c.width !== w || c.height !== h) { c.width = w; c.height = h; WB.bgKey = ""; }
     const m = wMix() || {}, id = m.welt ? m.welt.id : "_still", th = WB_TH[WB_WELT[id]] || (m.welt && m.welt.episch ? WB_TH.kampf : WB_TH.berge), t = jetzt / 1000;
     if (WB.bgKey !== id + w + "x" + h) { WB.bg = wbHintergrund(th, id, w, h); WB.bgKey = id + w + "x" + h; WB.teile = []; WB.th = th; }
@@ -2961,6 +2972,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-k.vor { border-style: dashed !important; border-color: var(--f) !important; animation: zpblink 1s steps(2) infinite; }
 .zp-k.cur { outline: 3px solid #f4c45a; outline-offset: 1px; }
 .zp-k.lauf { overflow: hidden; }
+.zp { touch-action: pan-y; } .zp .zp-kopf { touch-action: none; }
 .zyn-hg-l { max-height: 250px; overflow: auto; font-size: 12px; line-height: 1.3; }
 .zyn-hg-l div { display: flex; gap: 8px; padding: 3px 2px; border-bottom: 1px solid #2c2436; } .zyn-hg-l div.i { opacity: .55; }
 .zyn-hg-l b { flex: none; width: 52px; color: #ffc830; text-align: right; } .zyn-hg-l i { color: #b8a8c8; font-style: normal; font-size: 11px; }
@@ -3023,13 +3035,35 @@ html.zyn-ruhe .zp-ruhe { display: block; }
     zpRuheEl.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); zpAktiv(); });
     document.documentElement.classList.toggle("zyn-bb", bildHinten() && SEITE === "buehne");
     setInterval(() => { const s = ruheSek(); if (!zpRuhe && s && Date.now() - zpLetzte > s * 1000 && !$(".zyn-menue")) zpRuheAn(); if (zpRuhe) zpRuheZeichnen(); }, 1000);
-    setInterval(() => { if (zpRuhe) { try { ledsMelden(); } catch (_) {} } }, 110);
+    setInterval(() => { if (zpRuhe) { try { ledsMelden(); } catch (_) {} } }, 200);
     let favT = 0, favUnterdrueck = false;
     zpEl.addEventListener("pointerdown", e => { const pd = e.target.closest("[data-zb-pad]"); if (pd) { e.preventDefault(); beatPad(+pd.dataset.zbPad); $$(".zb-pad.cur", zpEl).forEach(x => x.classList.remove("cur")); pd.classList.add("cur"); } });
     zpEl.addEventListener("pointerdown", e => { zpLetzte = Date.now(); zpZeiger = true; const k = e.target.closest("[data-zp-k]"); if (!k) return; const i = +k.dataset.zpK; clearTimeout(favT); favT = setTimeout(() => { favUnterdrueck = true; zpFavUmschalten(i); }, 1500); });
     const zeigerLos = () => { zpZeiger = false; clearTimeout(favT); };
     zpEl.addEventListener("pointerup", zeigerLos); zpEl.addEventListener("pointercancel", zeigerLos); zpEl.addEventListener("pointerleave", zeigerLos);
     zpEl.addEventListener("contextmenu", e => e.preventDefault());
+    /* Wischen: ein Finger über die Kacheln = nächste/vorige Leiste (wie ◀ ▶), über die Reiter oben oder mit zwei Fingern = nächstes Fenster
+       (Stimmung → Ort → Momente …). Nach einem Wisch zählt das Loslassen nicht als Tippen. */
+    const WI = { p: new Map(), max: 0, t0: 0, ziel: null, sperreBis: 0 };
+    zpEl.addEventListener("pointerdown", e => {
+      if (!WI.p.size) { WI.max = 0; WI.t0 = performance.now(); WI.ziel = e.target; }
+      WI.p.set(e.pointerId, { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }); WI.max = Math.max(WI.max, WI.p.size);
+    }, true);
+    zpEl.addEventListener("pointermove", e => { const q = WI.p.get(e.pointerId); if (q) { q.x = e.clientX; q.y = e.clientY; } }, true);
+    const wischEnde = e => {
+      const q = WI.p.get(e.pointerId); if (!q) return; WI.p.delete(e.pointerId); if (e.type === "pointercancel") { if (!WI.p.size) WI.max = 0; return; }
+      q.x = e.clientX; q.y = e.clientY; WI.fertig = WI.fertig || []; WI.fertig.push(q); if (WI.p.size) return;
+      const l = WI.fertig; WI.fertig = []; const zwei = WI.max >= 2, dauer = performance.now() - WI.t0;
+      const dx = l.reduce((a, x) => a + (x.x - x.x0), 0) / l.length, dy = l.reduce((a, x) => a + (x.y - x.y0), 0) / l.length;
+      if (Math.abs(dx) < 55 || Math.abs(dx) < 1.6 * Math.abs(dy) || dauer > 900 || $(".zyn-menue")) return;
+      const z = WI.ziel && WI.ziel.closest ? WI.ziel : null, s = dx < 0 ? 1 : -1;
+      if (zwei || (z && z.closest(".zp-kopf"))) { WI.sperreBis = performance.now() + 400; zpSeiteSchritt(s); const d = ZP_SEITEN.find(x => x.id === zpSeite); if (d) zeige(d.sym + " " + d.name); return; }
+      if (!z || panelAktiv() || zpSeite === "beats" || z.closest(".zr-raum, .zp-r, .zp-mf") || !z.closest(".zp-mitte")) return;
+      WI.sperreBis = performance.now() + 400;
+      if (!zpBlaettern(s)) zeige("↔ " + W("nur eine Leiste", "only one row"), null, W("mit zwei Fingern: nächstes Fenster", "two fingers: next window"));
+    };
+    zpEl.addEventListener("pointerup", wischEnde, true); zpEl.addEventListener("pointercancel", wischEnde, true);
+    zpEl.addEventListener("click", e => { if (performance.now() < WI.sperreBis) { e.preventDefault(); e.stopPropagation(); } }, true);
     /* Mischer per Touch: Fader ziehen (hoch/runter), lange halten = Solo */
     let mfZug = null, mfUnterdrueck = false;
     zpEl.addEventListener("pointerdown", e => { const mf = e.target.closest("[data-zp-mf]"); if (!mf || !panelAktiv() || e.target.closest("button")) return;

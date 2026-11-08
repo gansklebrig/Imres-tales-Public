@@ -4896,7 +4896,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       ducken = ctx.createGain(); ducken.gain.value = 1;
       /* „Atem“: das kurze Luftholen vor einem Refrain (alles für einen Augenblick fast still) */
       atem = ctx.createGain(); atem.gain.value = 1;
-      master.connect(atem); atem.connect(ducken); ducken.connect(komp); einDuck = ctx.createGain(); einDuck.gain.value = 1; komp.connect(einDuck); einDuck.connect(ausgang); ausgang.connect(limiter);
+      uebLp = ctx.createBiquadFilter(); uebLp.type = "lowpass"; uebLp.frequency.value = 20000; uebLp.Q.value = .4;
+      master.connect(uebLp); uebLp.connect(atem); atem.connect(ducken); ducken.connect(komp); einDuck = ctx.createGain(); einDuck.gain.value = 1; komp.connect(einDuck); einDuck.connect(ausgang); ausgang.connect(limiter);
       /* eigener Weg für angesteckte Instrumente und Mitspieler: unabhängig vom Musik-Regler, nur Boost und Limiter gelten mit */
       einAusgang = ctx.createGain(); einAusgang.gain.value = .6 * boostF(); einAusgang.connect(limiter); limiter.connect(ctx.destination); endKnoten = limiter;
       /* Pump-Bus: Teppich, Orchester, Kapelle, Gäste und Sub-Bass ducken sich bei jedem Kick kurz weg */
@@ -5781,7 +5782,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
 
   }
   function kickSchritt(zeit, ab) {
-    if (!S.kick || S.mute.trommel || !ctx || ausduennen || (!morphEin && einblend > EINBLEND / 2)) return;
+    if (!S.kick || S.mute.trommel || !ctx || ausduennen || (!morphEin && einblend > EINBLEND / 2) || (fliessend && wechsel && flP(zeit) > FL_FOLGE.trommel)) return;
     const L = taktL(), rolle = S.rollen ? rolleAn(ab) : "r";
     let m = kickMuster(rolle, L);
     if (gefuehl === "halb") m = m.filter(x => x % 8 === 0);
@@ -5800,6 +5801,13 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   let uebergang = 4, morph = null, morphEin = false, einblendMax = 48;
   /* nur für den nächsten Wechsel (Autopilot): { dr } – 2 = großer Auftritt mit Paukenwirbel, 0 = ganz unauffällig */
   let einmalUeb = null, uebZurueck = null;
+  /* „fließend“ (Autopilot): Wechsel auf einem Phrasenende, davor mindestens 4 Takte Ausklingen – das Schlagwerk geht Instrument
+     für Instrument, die Melodie tritt zurück, der Klang wird wärmer (Tiefpass); danach öffnet sich das neue Stück langsam */
+  let fliessend = null, flWechsel = false, uebLp = null;
+  const FL_FOLGE = { trommel: .3, klopf: .45, schelle: .55, ketten: .65, rex: .75 };
+  const flP = zeit => fliessend ? Math.max(0, Math.min(1, (zeit - fliessend.ab) / Math.max(.1, fliessend.bis - fliessend.ab))) : 0;
+  const flAnteil = (k, zeit) => fliessend && wechsel && (k === "melodie" || k === "floete") ? 1 - .5 * glatt(flP(zeit)) : 1;
+  function flZurueck(j) { fliessend = null; flWechsel = false; if (uebLp) { const f = uebLp.frequency; f.cancelScheduledValues(j); f.setValueAtTime(f.value, j); f.setTargetAtTime(20000, j, .4); } }
   try { const u = parseInt(localStorage.getItem("imres-lw-uebergang"), 10); if (u >= 1 && u <= 8) uebergang = u; } catch (_) {}
   /* Reihenfolge, in der das Schlagwerk auf den neuen Rhythmus umsteigt (Anteil der Takte bis zur Mitte) */
   const MORPH_FOLGE = { ketten: 0, rex: .2, schelle: .4, klopf: .6, trommel: .8 };
@@ -5872,8 +5880,26 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
      Paukenwirbel (mit anschwellendem Becken) den Wechsel an; das neue Stück blendet sich auf der Eins ein. */
   function brueckeStarten() {
     const jetzt = ctx.currentTime, neu = wechsel, dr = einmalUeb && einmalUeb.dr != null ? einmalUeb.dr : neu.stimmung && neu.orchester !== 0 ? DRAMA[neu.stimmung] || 0 : 0;
+    const fl = !!(einmalUeb && einmalUeb.fliessend) && !rendert;
     einmalUeb = null;
     let T = taktEnde();
+    if (fl) {
+      /* bis zum nächsten Phrasenende (Anfang des Ablaufs bzw. alle 4 Takte), mindestens 3 ganze Takte nach diesem, höchstens ~35 s */
+      const L = taktL(), sd = schrittDauer(), n = S.ablauf.length || 1, P = n <= 8 ? n : 4, roh = naechste + ((L - schritt) % L) * sd;
+      let takt = abschnitt + (schritt === 0 ? 0 : 1) + Math.round((T - roh) / (L * sd)), k = 0;
+      while (k < 3 || (takt + k) % P !== 0) k++;
+      while (k - P >= 3 && k * L * sd > 35) k -= P;
+      T += k * L * sd; bruecke = { takte: 3, lang: true }; fliessend = { ab: jetzt, bis: T }; flWechsel = true;
+      wechselAb = T; wechselStart = jetzt; ausduennen = false;
+      const mg = master.gain, v0 = mg.value, N = 48, kurve = new Float32Array(N), ziel = .38 * .55;
+      for (let i = 0; i < N; i++) kurve[i] = v0 + (ziel - v0) * glatt(i / (N - 1));
+      mg.cancelScheduledValues(jetzt); mg.setValueAtTime(v0, jetzt);
+      try { mg.setValueCurveAtTime(kurve, jetzt + .05, Math.max(.5, T - jetzt - .15)); } catch (_) { mg.linearRampToValueAtTime(ziel, T - .1); }
+      if (uebLp) { const f = uebLp.frequency; f.cancelScheduledValues(jetzt); f.setValueAtTime(Math.max(2000, f.value), jetzt); f.setValueAtTime(Math.max(2000, f.value), jetzt + (T - jetzt) * .3); f.exponentialRampToValueAtTime(1600, T); }
+      { const alt = S; S = neu; try { orchVorladen(); gaesteVorladen(); kapelleVorladen(); } catch (_) {} S = alt; }
+      const pr = ORCH[neu.stimmung] || {}; ((pr.farbe && PAD_FARBE[pr.farbe]) || ["vc", "vln"]).concat(["harfe"]).forEach(probenLaden);
+      return;
+    }
     /* sanfter Wechsel: mindestens ein halber Takt zum Ausklingen – das Schlagwerk hört zuerst auf, die Melodie wird leiser */
     /* lieber einen Moment länger als zu abrupt: sanft mindestens drei Viertel eines Takts zum Ausklingen, dramatisch mindestens ein halber für den Wirbel */
     if (T - jetzt < 12 * schrittDauer()) T += taktL() * schrittDauer();
@@ -5928,7 +5954,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     }
     if (!brueckeBis && warWechsel && !gleicheStimmung(warWechsel, S) && gleicheStimmung(wechsel, S)) {
       /* doch bei der laufenden Stimmung bleiben: Wechsel abbrechen, Lautstärke und Schlagwerk zurück */
-      wechsel = null; wechselAb = 0; bruecke = null; ausduennen = false;
+      wechsel = null; wechselAb = 0; bruecke = null; ausduennen = false; flZurueck(j);
       const mg = master.gain; mg.cancelScheduledValues(j); mg.setValueAtTime(mg.value, j); mg.setTargetAtTime(.38, j, .3);
       root.querySelectorAll("[data-vorlage].wartet").forEach(b => b.classList.remove("wartet"));
       return;
@@ -5976,7 +6002,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     o = o || {};
     const neu = wechsel, alt = S, von = o.von || alt, mittel = ((tempoJetzt || alt.tempo) + neu.tempo) / 2;
     /* bei langsamen Stücken nicht zu lang werden lassen (sonst zieht sich die Überleitung über viele Sekunden) */
-    const takte = o.ohneAlt ? 1 : Math.min(bruecke ? bruecke.takte : 1, mittel < 85 ? 1 : mittel < 115 ? 2 : 3);
+    const takte = o.ohneAlt ? 1 : Math.min(bruecke ? bruecke.takte : 1, mittel < 85 ? (bruecke && bruecke.lang ? 2 : 1) : mittel < 115 ? 2 : 3);
     const z = ctx.createGain(); z.connect(brueckeZiel());
     const tA = o.tempo || tempoJetzt || alt.tempo, tB = neu.tempo, altTakt = taktL() * schrittDauer();
     const folge = brueckeAkkorde(von, neu, takte), pr = ORCH[neu.stimmung] || {}, farbe = (pr.farbe && PAD_FARBE[pr.farbe]) || ["vc", "vln"];
@@ -6040,7 +6066,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     } else {
       /* das alte Stück spielt bis zum Ende des ersten Akkords weiter und blendet dabei ganz aus */
       brueckeAltBis = T + altTakt;
-      mg.cancelScheduledValues(T); mg.setValueAtTime(.38 * .7, T); mg.linearRampToValueAtTime(.0001, T + altTakt);
+      try { mg.cancelScheduledValues(T); mg.setValueAtTime(.38 * (fliessend ? .55 : .7), T); mg.linearRampToValueAtTime(.0001, T + altTakt); }
+      catch (_) { const j = ctx.currentTime; mg.cancelScheduledValues(j); mg.setValueAtTime(mg.value, j); mg.linearRampToValueAtTime(.0001, T + altTakt); }
     }
     return t;
   }
@@ -6126,7 +6153,15 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     try { effekteAnwenden(); mixAnwenden(); if (raumAlt !== S.raum) raumAnwenden(); } catch (_) {}
     const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
     ausduennen = false; einblend = dr ? 0 : EINBLEND; einblendMax = EINBLEND; morphEin = false;
-    if (sanft) {
+    const flNeu = flWechsel && nachBruecke; fliessend = null; flWechsel = false;
+    if (flNeu && master) {
+      /* fließend: das neue Stück wächst über mehrere Takte heran – erst warm und leise, Schicht für Schicht, dann öffnet sich der Klang */
+      einblend = einblendMax = 6 * taktL();
+      const mg = master.gain; mg.cancelScheduledValues(zeit); mg.setValueAtTime(.38 * .25, zeit); mg.setTargetAtTime(.38, zeit + .2, 4.5);
+      if (uebLp) { const f = uebLp.frequency, L4 = 4 * taktL() * schrittDauer(); f.cancelScheduledValues(zeit); f.setValueAtTime(2200, zeit); f.exponentialRampToValueAtTime(20000, zeit + Math.max(4, L4)); }
+    }
+    if (flNeu) { /* schon oben eingerichtet */ }
+    else if (sanft) {
       /* Umbau: Schlagwerk spielt schon den neuen Rhythmus, die neue Melodie wächst in den restlichen Takten heran */
       einblendMax = einblend = Math.max(8, (morph ? morph.N - morph.pivot : 2) * taktL()); morphEin = true;
       /* mitten im Fluss: das neue Stück steigt nicht mit seinem leisen Intro ein, sondern im ersten richtigen Teil */
@@ -6206,6 +6241,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         if (k === "floete" && kapJetzt && kapJetzt.echo === 0) return; /* die Kapelle spielt hier Solo bzw. den Ohrwurm */ /* im Zwischenteil (alte Lieder: C-Teil) spielt der Gast Echos Stimme als Solo */
         /* weicher Übergang: vorher fällt das Schlagwerk weg, danach kommt es erst im zweiten Takt wieder dazu */
         if (SCHLAGWERK[k] && !morphEin && (ausduennen || (einblend > EINBLEND / 2))) return;
+        if (fliessend && wechsel && SCHLAGWERK[k] && flP(ev.zeit) > (FL_FOLGE[k] != null ? FL_FOLGE[k] : .5)) return;
         const umgestellt = neuTeil && SCHLAGWERK[k] && neuTeil[k] && morph.takt >= Math.floor((MORPH_FOLGE[k] || 0) * morph.pivot);
         const dk = umgestellt ? neuTeil[k] : daten[k];
         let wert = variiert(k, dk[schritt], schritt, dk, v, letzterTakt);
@@ -6225,7 +6261,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         /* Betonung wie bei echten Spielleuten: die Eins trägt, Achtel dazwischen leichter, Sechzehntel am leisesten */
         const akzent = (S.stimmung && !SCHLAGWERK[k] ? (schritt % 8 === 0 ? 1.1 : schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .88 : .78)
           : SCHLAGWERK[k] ? (schritt % 4 === 0 ? 1 : schritt % 2 === 0 ? .9 : .8) : 1) * (.94 + Math.random() * .12);
-        const laut = neuMelAnteil(ev.zeit, k) * (k === "melodie" || k === "floete" ? zurueck : 1) * (k === "floete" && kapJetzt ? kapJetzt.echo : 1) * akzent * (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : morphEin ? .62 + .38 * ein : .45 + .55 * ein) : 1) * (k === "floete" && gastJetzt.length ? .6 : 1);
+        const laut = flAnteil(k, ev.zeit) * neuMelAnteil(ev.zeit, k) * (k === "melodie" || k === "floete" ? zurueck : 1) * (k === "floete" && kapJetzt ? kapJetzt.echo : 1) * akzent * (v ? 1 - Math.random() * .25 * v : 1) * (S.stimmung ? .8 + .04 * S.intensitaet : 1) * (k === "melodie" || k === "floete" ? (ausduennen ? .6 : morphEin ? .62 + .38 * ein : .45 + .55 * ein) : 1) * (k === "floete" && gastJetzt.length ? .6 : 1);
         const haelt = k === "floete" || (k === "melodie" && (GEHALTEN[S.instrument] || S.instrument === "mandoline"));
         spielen(k, wert, ev.zeit + Math.max(0, wackel), schritt, laut, haelt ? notenLaenge(dk, schritt) * schrittDauer() * .95 : 0);
         if (k === "bass") { bordunStimmen(wert, ev.zeit); try { subBass(wert, ev.zeit + Math.max(0, wackel), notenLaenge(daten.bass, schritt) * schrittDauer()); } catch (_) {} }
@@ -6353,7 +6389,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (ducken) { const j = ctx.currentTime; ducken.gain.cancelScheduledValues(j); ducken.gain.setValueAtTime(ducken.gain.value, j); ducken.gain.setTargetAtTime(0, j, .1); duckEnde = 0; musikStumm = true; } bordunAus(); if (!(kul && kul.allein)) kulisseStop();
     /* ein gewählter, aber noch nicht begonnener Wechsel bleibt die Auswahl für das nächste Play */
     if (wechsel) { S = wechsel; merken(); setTimeout(() => { zeichnen(); knoepfe(); }, 0); }
-    ausduennen = false; einblend = 0;
+    ausduennen = false; einblend = 0; if (ctx) flZurueck(ctx.currentTime);
     wechsel = null;
     spalte(-1); teilAnzeige(null); knoepfe(); funkAenderung(); setTimeout(medienStand, 0);
   }
@@ -8280,7 +8316,9 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (jetzt > strBis) strZiel = 0; else strZiel = Math.max(strZiel, .55);
     orchGlatt += (strZiel - orchGlatt) * .04;
     blechGlatt += ((jetzt < blechBis ? 1 : 0) - blechGlatt) * .05;
-    const merk = pegelGlatt.toFixed(2) + "|" + orchGlatt.toFixed(2) + "|" + blechGlatt.toFixed(2);
+    /* am Zynthian (Ruhebild) reichen grobere Lichtstufen – jede Änderung lässt den Browser Stil und Layout neu rechnen */
+    const fein = document.documentElement.classList.contains("zyn-pult") ? 1 : 2;
+    const merk = pegelGlatt.toFixed(fein) + "|" + orchGlatt.toFixed(fein) + "|" + blechGlatt.toFixed(fein);
     if (merk !== buehneMerk) {
       buehneMerk = merk;
       /* nur an die wenigen Elemente, die den Pegel nutzen – an der ganzen Bühne gesetzt, musste der Browser
@@ -8289,7 +8327,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         const l = b.querySelectorAll(".lw-kulisse-bild .licht, .lw-kulisse-bild .feuerschein, .lw-kulisse-bild .spot, .lw-geister");
         pegelZiele = { b, l: l.length ? Array.from(l) : [b] };
       }
-      const pv = pegelGlatt.toFixed(2), ov = orchGlatt.toFixed(2), bv = blechGlatt.toFixed(2);
+      const pv = pegelGlatt.toFixed(fein), ov = orchGlatt.toFixed(fein), bv = blechGlatt.toFixed(fein);
       pegelZiele.l.forEach(el => { el.style.setProperty("--pegel", pv); el.style.setProperty("--orch", ov); el.style.setProperty("--blech", bv); });
       b.classList.toggle("orch-an", orchGlatt > .15);
     }
@@ -8335,7 +8373,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     buehneTick(b);
     try { gaesteZeigen(b); } catch (_) {}
     try { wechselAnzeige(); } catch (_) {}
-    requestAnimationFrame(malen);
+    /* am Zynthian höchstens ~24 Bilder pro Sekunde – sieht genauso lebendig aus und lässt dem Ton Luft */
+    if (document.documentElement.classList.contains("zyn-pult")) setTimeout(() => requestAnimationFrame(malen), 30); else requestAnimationFrame(malen);
   }
 
   /* ---------- Effekte auf der Bühne ---------- */
@@ -9615,8 +9654,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     leiste.addEventListener("input", e => {
       const f = e.target.dataset && e.target.dataset.ll; if (!f) return;
       const v = +e.target.value;
-      if (f === "master") { S.master = v; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = Math.round(v * 10) + " %"); }
-      else { S.kulisseVol = v; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = Math.round(v * 10) + " %"); }
+      if (f === "master") { S.master = v; if (wechsel) wechsel.master = v; /* während eines Übergangs gedreht: gilt auch für die neue Stimmung */ root.querySelectorAll(".lw-mval").forEach(x => x.textContent = Math.round(v * 10) + " %"); }
+      else { S.kulisseVol = v; if (wechsel) wechsel.kulisseVol = v; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = Math.round(v * 10) + " %"); }
       root.querySelectorAll('[data-feld="' + f + '"]').forEach(r => { r.value = v; });
       merken(); effekteAnwenden(); leisteAktualisieren();
     });
@@ -11994,10 +12033,10 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (d.vol) { S.vol[d.vol] = +e.target.value; merken(); mixAnwenden(); return; }
     if (d.feld === "tempo") { S.tempo = +e.target.value; root.querySelector(".lw-bpm").textContent = S.tempo; merken(); }
     if (d.feld === "variation") { S.variation = +e.target.value; root.querySelector(".lw-var").textContent = S.variation * 10 + " %"; merken(); }
-    if (d.feld === "master") { S.master = +e.target.value; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = Math.round(S.master * 10) + " %"); root.querySelectorAll('[data-feld="master"]').forEach(r => { if (r !== e.target) r.value = S.master; }); merken(); effekteAnwenden(); try { leisteAktualisieren(); } catch (_) {} }
-    if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = Math.round(S.kulisseVol * 10) + " %"); root.querySelectorAll('[data-feld="kulvol"]').forEach(r => { if (r !== e.target) r.value = S.kulisseVol; }); merken(); effekteAnwenden(); }
-    if (d.feld === "echohall") { S.echoHall = +e.target.value; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
-    if (d.feld === "fxvol") { S.fxVol = +e.target.value; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = Math.round(S.fxVol * 10) + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "master") { S.master = +e.target.value; if (wechsel) wechsel.master = S.master; root.querySelectorAll(".lw-mval").forEach(x => x.textContent = Math.round(S.master * 10) + " %"); root.querySelectorAll('[data-feld="master"]').forEach(r => { if (r !== e.target) r.value = S.master; }); merken(); effekteAnwenden(); try { leisteAktualisieren(); } catch (_) {} }
+    if (d.feld === "kulvol") { S.kulisseVol = +e.target.value; if (wechsel) wechsel.kulisseVol = S.kulisseVol; root.querySelectorAll(".lw-kval").forEach(x => x.textContent = Math.round(S.kulisseVol * 10) + " %"); root.querySelectorAll('[data-feld="kulvol"]').forEach(r => { if (r !== e.target) r.value = S.kulisseVol; }); merken(); effekteAnwenden(); }
+    if (d.feld === "echohall") { S.echoHall = +e.target.value; if (wechsel) wechsel.echoHall = S.echoHall; root.querySelectorAll(".lw-eval").forEach(x => x.textContent = S.echoHall * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "fxvol") { S.fxVol = +e.target.value; if (wechsel) wechsel.fxVol = S.fxVol; root.querySelectorAll(".lw-fval").forEach(x => x.textContent = Math.round(S.fxVol * 10) + " %"); merken(); effekteAnwenden(); }
     if (d.allespur) { alleSpurenZiehen(e.target, false); return; }
     if (d.zusvol) {
       const id = d.zusvol, v = (+e.target.value) / 100; if (!zusIst(id)) return;
@@ -12028,7 +12067,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       root.querySelectorAll(".lw-ival").forEach(x => x.textContent = t().intStufen[S.intensitaet]);
       merken();
     }
-    if (d.feld === "hall") { S.hall = +e.target.value; root.querySelectorAll(".lw-hval").forEach(x => x.textContent = S.hall * 10 + " %"); merken(); effekteAnwenden(); }
+    if (d.feld === "hall") { S.hall = +e.target.value; if (wechsel) wechsel.hall = S.hall; root.querySelectorAll(".lw-hval").forEach(x => x.textContent = S.hall * 10 + " %"); merken(); effekteAnwenden(); }
   });
   root.addEventListener("change", e => {
     const f = e.target.dataset && e.target.dataset.feld;
@@ -13652,7 +13691,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     /* nur der nächste Wechsel: art "episch" (Paukenwirbel, Becken, schneller Schnitt) oder "sanft" (lange, leise Überleitung) */
     naechsterWechsel(art) {
       const alt = uebZurueck != null ? uebZurueck : uebergang; clearTimeout(naechsterWechsel.t);
-      if (art === "episch") { einmalUeb = { dr: 2 }; uebergang = 1; } else if (art === "sanft") { einmalUeb = { dr: 0 }; uebergang = 8; } else { einmalUeb = null; if (uebZurueck != null) { uebergang = uebZurueck; uebZurueck = null; } return; }
+      if (art === "episch") { einmalUeb = { dr: 2 }; uebergang = 1; } else if (art === "sanft") { einmalUeb = { dr: 0 }; uebergang = 8; } else if (art === "fliessend") { einmalUeb = { dr: 0, fliessend: true }; uebergang = 8; } else { einmalUeb = null; if (uebZurueck != null) { uebergang = uebZurueck; uebZurueck = null; } return; }
       uebZurueck = alt; naechsterWechsel.t = setTimeout(() => { uebergang = uebZurueck; uebZurueck = null; einmalUeb = null; }, 30000);
     },
     /* nur für Tests: statt des Eingangs eine eigene Quelle in den Kanal speisen (bau(ctx) → AudioNode) */
@@ -13663,6 +13702,8 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       let m = 0, n = 0; for (let x = 0; x < d.length; x++) { const a = Math.abs(d[x]); if (a > m) m = a; if (a > .985) n++; } k.clip = k.clip * .9 + (n > 2 ? 1 : 0); return { spitze: m, clip: k.clip > .3 }; },
     /* Uhr des Tons (für den Hänger-Rekorder: läuft sie langsamer als die echte Zeit, hat der Ton ausgesetzt) */
     uhr() { return ctx ? { t: ctx.currentTime, an: ctx.state === "running" } : null; },
+    /* nur für Tests: wo steht ein laufender Wechsel? */
+    _wechselInfo() { return ctx ? { jetzt: ctx.currentTime, wechselAb, abschnitt, schritt, ablauf: S.ablauf.length, takt: taktL() * schrittDauer(), fl: fliessend ? Object.assign({}, fliessend) : null, brueckeBis, gain: master ? master.gain.value : null, lp: uebLp ? uebLp.frequency.value : null, wechsel: !!wechsel, stimmung: S.stimmung } : null; },
     /* Spitzenpegel der Mischer-Wege nach dem Regler (1 = Vollaussteuerung) – die Messpunkte entstehen erst beim ersten Abfragen.
        begrenzt: wie viele dB der Limiter am Ende gerade wegnimmt */
     pegel() {
