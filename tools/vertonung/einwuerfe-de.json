@@ -5,8 +5,8 @@
       "absatz": "I:1",
       "nach": "Jeder von uns erhielt eine Einladung von Gundren!",
       "rolle": "gundren",
-      "text": "[reading aloud] Bringt eure Waffen mit. Und Durst.",
-      "warum": "Gundren liest eine Zeile seines Briefs vor"
+      "text": "[reading aloud] Gute Bezahlung. Kaum Gefahr. [short pause] Ehrenwort.",
+      "warum": "Gundrens Brief als Händler-Versprechen; dramatische Ironie, zahlt auf jeden späteren Beinahe-Tod ein"
     },
     {
       "id": "I-02-a",
@@ -22,7 +22,8 @@
       "nach": "Wie genau, behielt er für sich.",
       "rolle": "gundren",
       "text": "[gruffly] Geschäftsgeheimnis, Jungs.",
-      "warum": "Gundren wimmelt ab"
+      "warum": "Gundren wimmelt ab – GESTRICHEN: sagt nur nach, was der Erzähler gerade gesagt hat ('behielt er für sich')",
+      "aus": true
     },
     {
       "id": "I-08-a",
@@ -37,8 +38,8 @@
       "absatz": "I:8",
       "nach": "Meine eingeschlossen.",
       "rolle": "friedrich",
-      "text": "[laughs] Deine besonders.",
-      "warum": "Friedrich stichelt gegen den Erzähler"
+      "text": "[dryly] Vor allem deine.",
+      "warum": "Friedrich stichelt trocken gegen den Erzähler (statt gelachtem 'Deine besonders')"
     },
     {
       "id": "I-13-a",
@@ -46,7 +47,8 @@
       "nach": "teils mit allem anderen als Zurückhaltung.",
       "rolle": "goblin",
       "text": "[panicking] Boss! Die Großen sind drin!",
-      "warum": "Panik im Goblinnest"
+      "warum": "Panik im Goblinnest – GESTRICHEN: unangenehm/cringe (Georgs Feedback)",
+      "aus": true
     },
     {
       "id": "I-13-b",
@@ -69,8 +71,8 @@
       "absatz": "I:39",
       "nach": "und er sprang komplett überrumpelt zur Seite.",
       "rolle": "goblin",
-      "text": "[squealing] Nicht hauen! Nicht hauen!",
-      "warum": "Überrumpelter Wach-Goblin"
+      "text": "[squealing] Herrin! Besuch!",
+      "warum": "Überrumpelter Wach-Goblin meldet vier Bewaffnete als 'Besuch' – Understatement, leitet zur wartenden Drow über"
     },
     {
       "id": "I-46-a",
@@ -82,20 +84,28 @@
       "warum": "Nezna spricht ihr Zitat selbst; Lachen leitet zu 'mit einem lauten Lachen' über"
     },
     {
+      "id": "I-47-a",
+      "absatz": "I:47",
+      "nach": "in Richtung der beiden Gefangenen.",
+      "rolle": "echo",
+      "text": "[grumbles] Nur ein Kratzer.",
+      "warum": "Echo mürrisch über die blutverschmierte Schulter – direkt danach muss er seine Wunden heilen"
+    },
+    {
       "id": "I-48-a",
       "absatz": "I:48",
       "nach": "tragen sogar dieselbe Kleidung.",
       "rolle": "gundren",
-      "text": "[gruffly] Und dieselbe Stimme haben wir auch.",
-      "warum": "Nundro, Gundrens Zwilling – Gag: gleiche Stimme wie Gundren"
+      "text": "[gruffly] Ich bin übrigens der Hübschere.",
+      "warum": "Nundro spricht mit Gundrens Stimme – der Gag entsteht beim Hören, ohne ihn zu erklären"
     },
     {
       "id": "I-50-a",
       "absatz": "I:50",
       "nach": "schloss seinen Bruder überglücklich in die Arme.",
       "rolle": "gundren",
-      "text": "[choked up] Bruderherz! [sniffs] Du stinkst wie ein Goblin.",
-      "warum": "Rau-warme Wiedersehensfreude"
+      "text": "[choked up] Bruderherz! [sniffs] Du stinkst nach Goblin.",
+      "warum": "Rau-warme Wiedersehensfreude (natürlicheres Deutsch)"
     },
     {
       "id": "I-52-a",
@@ -127,8 +137,8 @@
       "absatz": "I:75",
       "nach": "von einer Kralle skalpiert worden.",
       "rolle": "friedrich",
-      "text": "[offended] Die Frisur sitzt aber noch.",
-      "warum": "Friedrichs Eitelkeit nach Beinahe-Skalpierung"
+      "text": "[dryly] Neuer Scheitel. Gratis.",
+      "warum": "Friedrich trocken nach der Beinahe-Skalpierung (statt untypischer Eitelkeit – eitel ist der Erzähler)"
     },
     {
       "id": "I-76-a",
@@ -151,8 +161,8 @@
       "absatz": "I:83",
       "nach": "bis Echo einen gewaltigen Feuerball losließ,",
       "rolle": "echo",
-      "text": "[roaring] Brennt, ihr Zahnstocher!",
-      "warum": "Echo wild beim Feuerball auf die Blights"
+      "text": "[roaring] Kaminholz!",
+      "warum": "Echo beim Feuerball auf die Holz-Blights – ein Wort, mürrisch-wild"
     },
     {
       "id": "I-86-a",
@@ -192,8 +202,8 @@
       "absatz": "II:22",
       "nach": "die mich vor dem Fallen bewahrte!",
       "rolle": "friedrich",
-      "text": "[straining] Elf, du musst weniger essen!",
-      "warum": "Friedrich hält Barradin über der Schlucht"
+      "text": "[straining] Dafür will ich ein Lied. Über mich.",
+      "warum": "Friedrich hält Barradin über der Schlucht und verlangt Bezahlung in Barden-Währung (statt Gewichts-Witz)"
     },
     {
       "id": "II-31-a",
@@ -216,16 +226,16 @@
       "absatz": "II:36",
       "nach": "Ich hatte ihn eine ganze Weile Blublupin genannt.",
       "rolle": "ploop",
-      "text": "[warmly] Blublupin. Klingt hübsch. Darfst du behalten.",
-      "warum": "Ploop nimmt den Spitznamen liebevoll an – vor 'Er hat es mir nicht übelgenommen'"
+      "text": "[patiently] Ploop … ploop … een.",
+      "warum": "Ploop korrigiert geduldig – lässt Barradins 'Glaube ich' als Pointe stehen, statt sie vorwegzunehmen"
     },
     {
       "id": "II-37-a",
       "absatz": "II:37",
       "nach": "und so in die Stadt schmuggeln.",
       "rolle": "ploop",
-      "text": "[cheerfully] Nur ein bisschen gefesselt. Ganz locker, Freunde!",
-      "warum": "Ploop beruhigt beim Schein-Fesseln"
+      "text": "[cheerfully] Und jetzt alle: traurig gucken.",
+      "warum": "Ploop als freundlicher Regisseur des Schein-Gefangenentransports; nimmt den Erzählersatz über die Fesseln nicht vorweg"
     },
     {
       "id": "II-44-a",
@@ -242,6 +252,14 @@
       "rolle": "ploop",
       "text": "[defiant] Zurück in die Tiefe, falscher Gott!",
       "warum": "Ploops letztes Gebet, bevor der Tentakel fällt"
+    },
+    {
+      "id": "II-54-a",
+      "absatz": "II:54",
+      "nach": "Ich hatte es ja geahnt.",
+      "rolle": "friedrich",
+      "text": "[dryly] Hattest du nicht.",
+      "warum": "Friedrich widerspricht – motiviert Barradins kleinlautes 'Also, fast.'"
     },
     {
       "id": "II-57-a",
@@ -272,16 +290,16 @@
       "absatz": "II:76",
       "nach": "und uns zu einem Gespräch baten.",
       "rolle": "horga",
-      "text": "[low growl] Mitkommen. Sofort.",
-      "warum": "Die Bewahrer der Flamme 'bitten' zum Gespräch"
+      "text": "[low growl] Mitkommen. [short pause] Bitte.",
+      "warum": "Die 'Bitte' zum Gespräch – das nachgeschobene Bitte spiegelt 'baten'"
     },
     {
       "id": "II-79-a",
       "absatz": "II:79",
       "nach": "was er sich davon alles kaufen könnte.",
       "rolle": "echo",
-      "text": "[whispering] Dreihunderttausend … vierhunderttausend …",
-      "warum": "Echo rechnet lautlos – vor 'Man sah es an seinen Lippen'"
+      "text": "[whispering] Dreihunderttausend … vierhunderttausend … plus Hund …",
+      "warum": "Echo rechnet – Callback auf den goldenen Hund; vor 'Man sah es an seinen Lippen'"
     },
     {
       "id": "II-82-a",
@@ -313,7 +331,8 @@
       "nach": "einer Diebesgilde aus den Slums von Gracklstugh.",
       "rolle": "horga",
       "text": "[growls] Bringt das Ei. Mit Drokey macht, was ihr wollt.",
-      "warum": "Gartokkar (Duergar-Hohepriester) erteilt den Auftrag"
+      "warum": "Gartokkar (Duergar-Hohepriester) erteilt den Auftrag – GESTRICHEN: Erzähler spricht Gartokkar im selben Absatz schon selbst (andere Stimme = Bruch), Zeile ist reine Info ohne Witz und gibt Drokey frei (nicht belegt)",
+      "aus": true
     }
   ]
 }
