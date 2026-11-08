@@ -360,6 +360,11 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menueArt = "modus";
   }
   let menueArt = null;
+  /* läuft ein Update, das nicht hier gestartet wurde (Handy, anderes Fenster, Neustart mittendrin)? Dann den Balken auch zeigen – auch im Ruhebild */
+  setInterval(() => {
+    if (document.hidden || $(".zyn-update")) return;
+    fetch("/zyn/update", { cache: "no-store" }).then(r => r.json()).then(j => { if (j && j.ok && !j.ende && j.alter < 30 && (j.zeilen || []).length && !$(".zyn-update")) updateVerfolgen(); }).catch(() => {});
+  }, 4000);
   /* Fortschritt des Updates: eigenes Feld mit Balken, Schritt und Zeit – bleibt stehen, bis Imres neu startet oder eine Meldung kommt */
   function updateVerfolgen() {
     $$(".zyn-update").forEach(x => x.remove());
@@ -2889,7 +2894,7 @@ html.zyn-pult .zyn-leiste { display: none !important; }
 html.zyn-pult.zyn-bb body *, html.zyn-pult.zyn-ruhe body * { visibility: hidden !important; }
 html.zyn-pult.zyn-pult body .lw-buehne, html.zyn-pult.zyn-pult body .lw-buehne *,
 html.zyn-pult.zyn-pult body .zp, html.zyn-pult.zyn-pult body .zp *, html.zyn-pult.zyn-pult body .zp-ruhe, html.zyn-pult.zyn-pult body .zp-ruhe *,
-html.zyn-pult.zyn-pult body .zp-weltbild, html.zyn-pult.zyn-pult body .zyn-osd, html.zyn-pult.zyn-pult body .zyn-osd *, html.zyn-pult.zyn-pult body .zyn-menue, html.zyn-pult.zyn-pult body .zyn-menue * { visibility: visible !important; }
+html.zyn-pult.zyn-pult body .zp-weltbild, html.zyn-pult.zyn-pult body .zyn-osd, html.zyn-pult.zyn-pult body .zyn-osd *, html.zyn-pult.zyn-pult body .zyn-menue, html.zyn-pult.zyn-pult body .zyn-menue *, html.zyn-pult.zyn-pult body .zyn-update, html.zyn-pult.zyn-pult body .zyn-update * { visibility: visible !important; }
 html.zyn-pult.zyn-bb body::before, html.zyn-pult.zyn-bb body::after, html.zyn-pult.zyn-ruhe body::before, html.zyn-pult.zyn-ruhe body::after { display: none !important; }
 html.zyn-pult.zyn-ruhe body, html.zyn-pult.zyn-bb body { background: #0d0a10 !important; }
 html.zyn-pult.zyn-pult.zyn-bb #lautenwerk .lw-buehne.lw-buehne, html.zyn-pult.zyn-pult.zyn-ruhe #lautenwerk .lw-buehne.lw-buehne {
